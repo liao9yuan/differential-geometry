@@ -1,0 +1,12 @@
+/*
+
+# whitelist
+!/DifferentialGeometry/
+!/DifferentialGeometry.lean
+!/lakefile.toml
+!/lean-toolchain
+!/README.md
+!/.gitignore
+# end of whitelist
+
+.lake/
