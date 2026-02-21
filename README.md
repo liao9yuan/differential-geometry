@@ -11,7 +11,7 @@ Currently, we take the advantage of algebraic aspects of geometry:
 
 ## Current Capabilities
 
-The library currently supports the following core structures:
+The library currently supports the following:
 - **Algebraic Foundations:** Scalar multiplication, derivation actions, and Lie brackets.
 - **Riemannian Metrics:** Symmetric $C^\infty$-bilinear forms and metric trace operators.
 - **Affine Connections:** Covariant derivatives, torsion-free property, and metric compatibility.
