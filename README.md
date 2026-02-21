@@ -7,7 +7,7 @@ A self-contained formalization of Differential Geometry in Lean 4.
 Currently, we take the advantage of algebraic aspects of geometry:
 - **Smooth Functions ($R$):** Treated as a commutative ring.
 - **Vector Fields ($V$):** Treated as a module over $R$.
-- **Vector Fields:** reated as derivations.
+- **Vector Fields:** treated as derivations.
 
 ## Current Capabilities
 
