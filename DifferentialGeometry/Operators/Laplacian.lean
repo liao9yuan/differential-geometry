@@ -1,12 +1,13 @@
 import DifferentialGeometry.Algebra.Basic
 import DifferentialGeometry.Geometry.Metric
 import DifferentialGeometry.Operators.Hessian
+import Mathlib.Algebra.Module.Basic
+import Mathlib.Algebra.Ring.Basic
 
 set_option autoImplicit false
 
 variable {R V : Type}
-variable [Add R] [Mul R] [Sub R] [Neg R]
-variable [Add V] [Sub V] [Neg V] [ScalarMul R V]
+variable [CommRing R] [AddCommGroup V] [Module R V]
 variable [DerivationAction R V]
 
 /--

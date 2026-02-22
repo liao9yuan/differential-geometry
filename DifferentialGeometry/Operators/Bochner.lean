@@ -1,16 +1,18 @@
 import DifferentialGeometry.Algebra.Basic
 import DifferentialGeometry.Algebra.Trace
 import DifferentialGeometry.Geometry.Curvature
+import Mathlib.Algebra.Module.Basic
+import Mathlib.Algebra.Ring.Basic
 import DifferentialGeometry.Geometry.Metric
 import DifferentialGeometry.Geometry.Connection
 import DifferentialGeometry.Operators.Hessian
 import DifferentialGeometry.Operators.Laplacian
 
 set_option autoImplicit false
+set_option linter.style.longLine false
 
 variable {R V : Type}
-variable [Add R] [Mul R] [Sub R] [Neg R]
-variable [Add V] [Sub V] [Neg V] [ScalarMul R V]
+variable [CommRing R] [AddCommGroup V] [Module R V]
 variable [DerivationAction R V] [LieBracket V] [TraceOperator R V]
 
 variable (metric : MetricTensor R V) [MetricTraceOperator R V metric]

@@ -10,14 +10,23 @@ Thank you, algebra! We are treating:
 - **Vector Fields:**  as a derivations.
 
 ## Current Capabilities
+- **Algebraic Foundations:** Scalar multiplication, derivation actions, Lie brackets, trace operators.
+- **Riemannian Metrics:** Symmetric $C^\infty$-bilinear forms, metric trace operators.
+- **Affine Connections:** Covariant derivatives, Koszul formula, torsion-free property, metric compatibility.
+- **Curvature Tensors:** Riemann, Ricci, and Scalar curvature.
+- **Levi-Civita Theorem:** Existence and uniqueness of the Levi-Civita connection via the Koszul formula.
+- **Differential Operators:** Gradient, Hessian, Laplacian, Bochner operators.
+- **Geometric Flows:** Ricci Flow equations, evolution of curvature and operators.
 
-The library currently supports the following:
-- **Algebraic Foundations:** Scalar multiplication, derivation actions, and Lie brackets.
-- **Riemannian Metrics:** Symmetric $C^\infty$-bilinear forms and metric trace operators.
-- **Affine Connections:** Covariant derivatives, torsion-free property, and metric compatibility.
-- **Curvature Tensors:** Formal definition of Riemann, Ricci, and Scalar curvature.
-- **Levi-Civita Theorem:** A blackboxed existence and uniqueness(of the ODE system) proof for the Levi-Civita connection.
-
+## Proven Theorems
+- **`levi_civita_exists_unique`:** Existence and uniqueness of the Levi-Civita connection. (`DifferentialGeometry/Geometry/Connection.lean`)
+- **`hessian_symm`:** Hessian symmetry for torsion-free connections. (`Examples/HessianSymmetry.lean`)
+- **`norm_sq_deriv`:** Directional derivative of a squared vector norm. (`Examples/MetricCompatibility.lean`)
+- **`metric_neg_left`, `metric_sub_left`:** Properties of the metric tensor. (`DifferentialGeometry/Geometry/Connection.lean`)
+## Examples
+- **`EuclideanSample.lean`:** Calculation of gradient, Hessian, Laplacian, metric variation, and Ricci curvature in $\mathbb{R}^3$.
+- **`MetricCompatibility.lean`:** Proof of the metric compatibility product rule on norms.
+- **`HessianSymmetry.lean`:** Proof of Hessian symmetry using Lie derivations.
 ## Installation
 
 Ensure you have [Lean 4](https://lean-lang.org/lean4/doc/setup.html) installed.

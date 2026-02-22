@@ -4,8 +4,7 @@ import DifferentialGeometry.Geometry.Connection
 set_option autoImplicit false
 
 variable {R V : Type}
-variable [Add R] [Mul R] [Sub R] [Neg R]
-variable [Add V] [Sub V] [Neg V] [ScalarMul R V]
+variable [CommRing R] [AddCommGroup V] [Module R V]
 variable [DerivationAction R V]
 
 open DerivationAction
