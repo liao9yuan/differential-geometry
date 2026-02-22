@@ -9,9 +9,11 @@ import DifferentialGeometry.Geometry.Curvature
 
 -- 3. Operators
 import DifferentialGeometry.Operators.Hessian
--- import DifferentialGeometry.Operators.Gradient
--- import DifferentialGeometry.Operators.Laplace
--- import DifferentialGeometry.Operators.Bochner
+import DifferentialGeometry.Operators.Laplacian
+import DifferentialGeometry.Operators.Bochner
+import DifferentialGeometry.Operators.Gradient
+import DifferentialGeometry.Operators.Variation
 
--- (Future) 4. Flows
--- import DifferentialGeometry.Flows.RicciFlow
+
+-- 4. Flow
+import DifferentialGeometry.Flow.RicciFlow

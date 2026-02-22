@@ -14,5 +14,5 @@ open DerivationAction
 The Hessian of a function `u` is defined as the tensor field
 $\nabla^2 u(X, Y) = X(Y(u)) - (\nabla_X Y)(u)$.
 -/
-def hessian (conn : AffineConnection R V) (u : R) (X Y : V) : R :=
+def Hess (conn : AffineConnection R V) (u : R) (X Y : V) : R :=
   action X (action Y u) - action (conn.nabla X Y) u
