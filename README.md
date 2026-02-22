@@ -38,11 +38,11 @@ We are treating:
 
 This library trades analytical topology for algebraic elegance. By design, it inherently assumes:
 
-* **No Local Coordinates:** There are no charts, atlases, or topological spaces. All operators are coordinate-free and defined strictly on global sections.
+* **Coordinate free nature:** No need to define coordinate charts, atlases, or topological spaces. All operators are coordinate-free and defined strictly on global sections.
 * **Intrinsic Smoothness:** Smoothness and convergence are absorbed by the type system. The framework cannot model Sobolev spaces, distributions, or measure-theoretic jump functions.
 For singularities occured at time $T$, in like Ricci Flow, we would have to work on $t \in[0,T)$, before the metric degenerates.
 * **Strict Non-degeneracy:** The musical isomorphism (`InverseMetric`) enforces a strict  bijection. The framework effectively assumes finite-dimensional manifolds.
-* **Singularity as Resolution Failure:** Because the metric must remain non-degenerate, geometric singularities (such as finite-time neckpinches in Ricci Flow) are not modeled analytically; they simply manifest as typeclass resolution failures.
+
 
 ## Installation
 
