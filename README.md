@@ -9,6 +9,14 @@ We are treating:
 - **Space of Smooth Vector Fields Γ(TM):**  as a module ($V$) over $R$.
 - **Vector Fields:**  as derivations.
 
+## Philosophy
+
+This library prioritizes algebraic structure over topological construction. 
+
+* **Coordinate Insensitivity:** The framework operates entirely without local charts. However, concrete coordinate calculations can be executed seamlessly by instantiating the module with explicit spaces (see `EuclideanSample.lean`).
+* **Axiomatic Injection:** Analytical bottlenecks (e.g., PDE existence, maximum principles) can be isolated and injected as axioms. This permits strict algebraic verification of tensor evolutions (e.g., Ricci flow) without the prerequisite of building topological manifolds.
+* **Compositional Operators:** Higher-order derivatives and complex geometric flows are constructed via pure functional composition rather than hardcoded index manipulations.
+
 ## Current Capabilities
 - **Affine Connections:** Covariant derivatives, Koszul formula, torsion-free property, metric compatibility.
 - **Algebraic Foundations:** Scalar multiplication, derivation actions, Lie brackets, trace operators.
@@ -36,9 +44,7 @@ We are treating:
 
 ## Limitations
 
-This library trades analytical topology for algebraic elegance. By design, it inherently assumes:
-
-* **Coordinate free nature:** No need to define coordinate charts, atlases, or topological spaces. All operators are coordinate-free and defined strictly on global sections.
+This library inherently assumes:
 * **Intrinsic Smoothness:** Smoothness and convergence are absorbed by the type system. The framework cannot model Sobolev spaces, distributions, or measure-theoretic jump functions.
 For singularities occured at time $T$, in like Ricci Flow, we would have to work on $t \in[0,T)$, before the metric degenerates.
 * **Strict Non-degeneracy:** The musical isomorphism (`InverseMetric`) enforces a strict  bijection. The framework effectively assumes finite-dimensional manifolds.
