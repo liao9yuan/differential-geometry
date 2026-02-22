@@ -20,7 +20,7 @@ This library prioritizes algebraic structure over topological construction.
 ## Current Capabilities
 - **Affine Connections:** Covariant derivatives, Koszul formula, torsion-free property, metric compatibility.
 - **Algebraic Foundations:** Scalar multiplication, derivation actions, Lie brackets, trace operators.
-- **Curvature Tensors:** Riemann, Ricci, and Scalar curvature.
+- **Curvature Tensors:** Riemann, Ricci, and Scalar curvature, Ricci identities.
 - **Differential Operators:** Gradient, Hessian, Laplacian, Bochner operators, Second Covariant Derivative.
 - **Geometric Flows:** Ricci Flow equations, evolution of curvature and operators.
 - **Levi-Civita Theorem:** Existence and uniqueness of the Levi-Civita connection via the Koszul formula.
@@ -33,6 +33,7 @@ This library prioritizes algebraic structure over topological construction.
 - **Metric Compatibility of Covariant Derivative:** The covariant derivative of the metric tensor is exactly zero. Theorem: `metric_covDerivOp_zero` in `DifferentialGeometry/Operators/CovariantDerivative.lean`
 - **Metric Compatibility of Squared Norm:** Directional derivative of a squared vector norm. Theorem: `norm_sq_deriv` in `DifferentialGeometry/Geometry/Connection.lean`
 - **Metric Subtraction Properties:** Properties of the metric tensor under subtraction. Theorem: `metric_sub_left` in `DifferentialGeometry/Geometry/Connection.lean`
+- **Ricci Identity:** The commutator of the second covariant derivative equals the Riemann curvature tensor for a torsion-free connection. Theorem: `ricci_identity` in `DifferentialGeometry/Geometry/RicciIdentity.lean`
 - **Second Covariant Derivative Bilinearity:** $C^\infty$-linearity of the second covariant derivative operator with respect to both vector field arguments. Theorems: `secondCovDeriv_smul_X`, `secondCovDeriv_smul_Y` in `DifferentialGeometry/Operators/SecondCovariantDerivative.lean`
 - **Tensor Inner Product Properties:** Symmetry, additivity, and scalar multiplication linearity of the inner product of (0,2)-tensors. Theorems: `tensorInnerProduct_symm`, `tensorInnerProduct_add_left`, `tensorInnerProduct_smul_left` in `DifferentialGeometry/Algebra/TensorInnerProduct.lean`
 
