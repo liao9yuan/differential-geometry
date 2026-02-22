@@ -23,6 +23,7 @@ We are treating:
 - **Hessian Symmetry:** Hessian symmetry for torsion-free connections. Theorem: `hessian_symm` in `DifferentialGeometry/Operators/Hessian.lean`
 - **Metric Compatibility of Squared Norm:** Directional derivative of a squared vector norm. Theorem: `norm_sq_deriv` in `DifferentialGeometry/Geometry/Connection.lean`
 - **Metric Tensor Properties:** Properties of the metric tensor. Theorems: `metric_neg_left`, `metric_sub_left` in `DifferentialGeometry/Geometry/Connection.lean`
+
 ## Examples
 - **`EuclideanSample.lean`:** Calculation of gradient, Hessian, Laplacian, metric variation, and Ricci curvature in $\mathbb{R}^3$.
 - **`HessianSymmetry.lean`:** Proof of Hessian symmetry using Lie derivations.
