@@ -33,7 +33,7 @@ This library prioritizes algebraic structure over topological construction.
   > If $u \colon M \rightarrow \mathbb{R}$ is a smooth function, then 
   > $$\frac{1}{2}\Delta |\nabla u|^2 = g(\nabla \Delta u, \nabla u) + |\nabla^2 u|^2 + \text{Ric}(\nabla u, \nabla u)$$
   
-  `bochner_identity` in `DifferentialGeometry/Operators/Bochner.lean`
+  Theorem: `bochner_identity` in `DifferentialGeometry/Operators/Bochner.lean`
 - **[First Bianchi Identity](https://en.wikipedia.org/wiki/Riemann_curvature_tensor#Symmetries_and_identities):** The cyclic sum of the Riemann curvature tensor vanishes for a torsion-free connection. Theorem: `first_bianchi` in `DifferentialGeometry/Geometry/Bianchi.lean`
 - **[Fundamental Theorem of Riemannian Geometry](https://en.wikipedia.org/wiki/Fundamental_theorem_of_Riemannian_geometry):** Existence and uniqueness of the Levi-Civita connection. Theorem: `levi_civita_exists_unique` in `DifferentialGeometry/Geometry/Connection.lean`
 - **[Ricci Identity](https://en.wikipedia.org/wiki/Riemann_curvature_tensor#Definition):** The commutator of the second covariant derivative equals the Riemann curvature tensor for a torsion-free connection. Theorem: `ricci_identity` in `DifferentialGeometry/Geometry/RicciIdentity.lean`
