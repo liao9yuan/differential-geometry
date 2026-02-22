@@ -49,7 +49,7 @@ This library prioritizes algebraic structure over topological construction.
 ## How to use?
 ### There are examples in `Examples` folder. One illustrates calculation, one illustrates proof.
 - **`EuclideanSample.lean`:** Calculation of gradient, Hessian, Laplacian, metric variation, and Ricci curvature in $\mathbb{R}^3$.
-- **`HessianSymmetry.lean`:** Proof of Hessian symmetry using Lie derivations.
+- **`HessianSymmetry.lean`:** Proof of Hessian symmetry using Lie derivations. (This is already in the library, but it is a good example.)
 
 
 ## Limitations
@@ -57,7 +57,7 @@ This library prioritizes algebraic structure over topological construction.
 This library inherently assumes:
 * **Intrinsic Smoothness:** Smoothness and convergence are absorbed by the type system. The framework cannot model Sobolev spaces, distributions, or measure-theoretic jump functions.
 For singularities occured at time $T$, in like Ricci Flow, we would have to work on $t \in[0,T)$, before the metric degenerates.
-* **Strict Non-degeneracy:** The musical isomorphism (`InverseMetric`) enforces a strict  bijection. The framework effectively assumes finite-dimensional manifolds.
+* **Strict Non-degeneracy:** The musical isomorphism (`InverseMetric`) enforces a strict  bijection. The framework effectively assumes **finite-dimensional** manifolds.
 
 
 ## Installation
