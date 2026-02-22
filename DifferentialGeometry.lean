@@ -25,4 +25,4 @@ import DifferentialGeometry.Operators.LieDerivative
 
 
 -- 4. Flow
-import DifferentialGeometry.Flow.RicciFlow
+import DifferentialGeometry.Flows.RicciFlow
