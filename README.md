@@ -21,31 +21,42 @@ This library prioritizes algebraic structure over topological construction.
 - **Affine Connections:** Covariant derivatives, Koszul formula, torsion-free property, metric compatibility.
 - **Algebraic Foundations:** Scalar multiplication, derivation actions, Lie brackets, trace operators.
 - **Curvature Tensors:** Riemann, Ricci, and Scalar curvature, Ricci identities, First Bianchi identity.
-- **Differential Operators:** Gradient, Hessian, Laplacian, Bochner identity, Second Covariant Derivative.
+- **Differential Operators:** Divergence, Gradient, Hessian, Laplacian, Bochner identity, Second Covariant Derivative.
 - **Geometric Flows:** Ricci Flow equations, evolution of curvature and operators.
+- **Global Integration:** Abstract integral operators and the Divergence Theorem.
 - **Levi-Civita Theorem:** Existence and uniqueness of the Levi-Civita connection via the Koszul formula.
 - **Riemannian Metrics:** Symmetric $C^\infty$-bilinear forms, metric trace operators.
 - **Tensor Operations:** Smooth bilinear forms, covariant derivatives, second covariant derivatives, and inner products of $(0,2)$-tensors.
 
 ## Proven Theorems
-- **[Bochner-Weitzenböck Identity](https://en.wikipedia.org/wiki/Bochner_formula):** > If $f \colon M \rightarrow \mathbb{R}$ is a smooth function, then 
+- **[Bochner-Weitzenböck Identity](https://en.wikipedia.org/wiki/Bochner_formula):** 
+  > If $f \colon M \rightarrow \mathbb{R}$ is a smooth function, then 
   > $$\Delta |\nabla f|^2 = 2 |\nabla^2 f|^2 + 2 \text{Ric}(\nabla f, \nabla f) + 2 g(\nabla f, \nabla \Delta f)$$
   
   Theorem: `bochner_identity` in `DifferentialGeometry/Operators/Bochner.lean`
-- **[First Bianchi Identity](https://en.wikipedia.org/wiki/Riemann_curvature_tensor#Symmetries_and_identities):** > If $\nabla$ is a torsion-free connection on a manifold $M$, then for any vector fields $X, Y, Z \in \mathfrak{X}(M)$, the Riemann curvature tensor $R$ satisfies
+- **[First Bianchi Identity](https://en.wikipedia.org/wiki/Riemann_curvature_tensor#Symmetries_and_identities):** 
+  > If $\nabla$ is a torsion-free connection on a manifold $M$, then for any vector fields $X, Y, Z \in \mathfrak{X}(M)$, the Riemann curvature tensor $R$ satisfies
   > $$R(X,Y)Z + R(Y,Z)X + R(Z,X)Y = 0$$
   
   Theorem: `first_bianchi` in `DifferentialGeometry/Geometry/Bianchi.lean`
-- **[Fundamental Theorem of Riemannian Geometry](https://en.wikipedia.org/wiki/Fundamental_theorem_of_Riemannian_geometry):** > For any Riemannian manifold $(M, g)$, there exists a unique affine connection $\nabla$ (the Levi-Civita connection) such that for all vector fields $X, Y, Z \in \mathfrak{X}(M)$:
+- **[Fundamental Theorem of Riemannian Geometry](https://en.wikipedia.org/wiki/Fundamental_theorem_of_Riemannian_geometry):** 
+  > For any Riemannian manifold $(M, g)$, there exists a unique affine connection $\nabla$ (the Levi-Civita connection) such that for all vector fields $X, Y, Z \in \mathfrak{X}(M)$:
   > $$[X, Y] = \nabla_X Y - \nabla_Y X \quad \text{and} \quad X(g(Y, Z)) = g(\nabla_X Y, Z) + g(Y, \nabla_X Z)$$
   
   Theorem: `levi_civita_exists_unique` in `DifferentialGeometry/Geometry/Connection.lean`
-- **[Ricci Identity](https://en.wikipedia.org/wiki/Riemann_curvature_tensor#Definition):** > If $\nabla$ is a torsion-free connection on a manifold $M$, then for any vector fields $X, Y, Z \in \mathfrak{X}(M)$, the commutator of the second covariant derivative satisfies
+- **[Integration by Parts (Green's First Identity)](https://en.wikipedia.org/wiki/Green%27s_identities):** 
+  > Assuming the global integral of a divergence vanishes ($\int \operatorname{div}(X) = 0$), then for any vector field $X$ and scalar function $f$, Green's first identity is algebraically satisfied:
+  > $$\int f \operatorname{div}(X) + \int X(f) = 0$$
+  
+  Theorem: `integration_by_parts` in `DifferentialGeometry/Operators/Divergence.lean`
+- **[Ricci Identity](https://en.wikipedia.org/wiki/Riemann_curvature_tensor#Definition):** 
+  > If $\nabla$ is a torsion-free connection on a manifold $M$, then for any vector fields $X, Y, Z \in \mathfrak{X}(M)$, the commutator of the second covariant derivative satisfies
   > $$\nabla^2_{X,Y} Z - \nabla^2_{Y,X} Z = R(X,Y)Z$$
   
   Theorem: `ricci_identity` in `DifferentialGeometry/Geometry/RicciIdentity.lean`
 
 ## Proven Properties
+- **Divergence Product Rule:** The Leibniz rule for the divergence of a scalar-multiplied vector field. Theorem: `divergence_smul` in `DifferentialGeometry/Operators/Divergence.lean`
 - **Hessian Symmetry:** Hessian symmetry for torsion-free connections. Theorem: `hessian_symm` in `DifferentialGeometry/Operators/Hessian.lean`
 - **Metric Compatibility of Covariant Derivative:** The covariant derivative of the metric tensor is exactly zero. Theorem: `metric_covDerivOp_zero` in `DifferentialGeometry/Operators/CovariantDerivative.lean`
 - **Metric Compatibility of Squared Norm:** Directional derivative of a squared vector norm. Theorem: `norm_sq_deriv` in `DifferentialGeometry/Geometry/Connection.lean`
