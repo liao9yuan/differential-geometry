@@ -13,6 +13,9 @@ import DifferentialGeometry.Operators.Laplacian
 import DifferentialGeometry.Operators.Bochner
 import DifferentialGeometry.Operators.Gradient
 import DifferentialGeometry.Operators.Variation
+import DifferentialGeometry.Operators.CovariantDerivative
+import DifferentialGeometry.Operators.SecondCovariantDerivative
+import DifferentialGeometry.Operators.LieDerivative
 
 
 -- 4. Flow

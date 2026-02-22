@@ -21,7 +21,7 @@ This library prioritizes algebraic structure over topological construction.
 - **Affine Connections:** Covariant derivatives, Koszul formula, torsion-free property, metric compatibility.
 - **Algebraic Foundations:** Scalar multiplication, derivation actions, Lie brackets, trace operators.
 - **Curvature Tensors:** Riemann, Ricci, and Scalar curvature, Ricci identities, First Bianchi identity.
-- **Differential Operators:** Divergence, Gradient, Hessian, Laplacian, Bochner identity, Second Covariant Derivative.
+- **Differential Operators:** Bochner identity, Divergence, Gradient, Hessian, Laplacian, Lie Derivative, Second Covariant Derivative.
 - **Geometric Flows:** Ricci Flow equations, evolution of curvature and operators.
 - **Global Integration:** Abstract integral operators and the Divergence Theorem.
 - **Levi-Civita Theorem:** Existence and uniqueness of the Levi-Civita connection via the Koszul formula.
@@ -45,10 +45,15 @@ This library prioritizes algebraic structure over topological construction.
   
   Theorem: `levi_civita_exists_unique` in `DifferentialGeometry/Geometry/Connection.lean`
 - **[Integration by Parts (Green's First Identity)](https://en.wikipedia.org/wiki/Green%27s_identities):** 
-  > Assuming the global integral of a divergence vanishes ($\int \operatorname{div}(X) = 0$), then for any vector field $X$ and scalar function $f$, Green's first identity is algebraically satisfied:
-  > $$\int f \operatorname{div}(X) + \int X(f) = 0$$
+  > Assuming the global integral of a divergence vanishes ($\int \text{div}(X) = 0$), then for any vector field $X$ and scalar function $f$, Green's first identity is algebraically satisfied:
+  > $$\int f \text{div}(X) + \int X(f) = 0$$
   
   Theorem: `integration_by_parts` in `DifferentialGeometry/Operators/Divergence.lean`
+- **[Lie Derivative of Metric Tensor](https://en.wikipedia.org/wiki/Lie_derivative#The_Lie_derivative_of_a_tensor_field):** 
+  > If $\nabla$ is a torsion-free, metric-compatible connection on a manifold $M$, then for any vector fields $X, Y, Z \in \mathfrak{X}(M)$, the Lie derivative of the metric $g$ along $X$ is equivalently formulated using the symmetrized covariant derivative:
+  > $$(\mathcal{L}_X g)(Y, Z) = g(\nabla_Y X, Z) + g(Y, \nabla_Z X)$$
+  
+  Theorem: `lieDerivMetric_eq_nabla` in `DifferentialGeometry/Operators/LieDerivative.lean`
 - **[Ricci Identity](https://en.wikipedia.org/wiki/Riemann_curvature_tensor#Definition):** 
   > If $\nabla$ is a torsion-free connection on a manifold $M$, then for any vector fields $X, Y, Z \in \mathfrak{X}(M)$, the commutator of the second covariant derivative satisfies
   > $$\nabla^2_{X,Y} Z - \nabla^2_{Y,X} Z = R(X,Y)Z$$
@@ -60,6 +65,7 @@ This library prioritizes algebraic structure over topological construction.
 - **Hessian Symmetry:** Hessian symmetry for torsion-free connections. Theorem: `hessian_symm` in `DifferentialGeometry/Operators/Hessian.lean`
 - **Metric Compatibility of Covariant Derivative:** The covariant derivative of the metric tensor is exactly zero. Theorem: `metric_covDerivOp_zero` in `DifferentialGeometry/Operators/CovariantDerivative.lean`
 - **Metric Compatibility of Squared Norm:** Directional derivative of a squared vector norm. Theorem: `norm_sq_deriv` in `DifferentialGeometry/Geometry/Connection.lean`
+- **Metric Sign and Subtraction Properties:** Algebraic behavior of the metric tensor under negation and subtraction in its arguments. Lemmas: `metric_neg_left_local`, `metric_sub_left_local`, `metric_sub_right_local` in `DifferentialGeometry/Operators/LieDerivative.lean`
 - **Metric Subtraction Properties:** Properties of the metric tensor under subtraction. Theorem: `metric_sub_left` in `DifferentialGeometry/Geometry/Connection.lean`
 - **Second Covariant Derivative Bilinearity:** $C^\infty$-linearity of the second covariant derivative operator with respect to both vector field arguments. Theorems: `secondCovDeriv_smul_X`, `secondCovDeriv_smul_Y` in `DifferentialGeometry/Operators/SecondCovariantDerivative.lean`
 - **Tensor Inner Product Properties:** Symmetry, additivity, and scalar multiplication linearity of the inner product of (0,2)-tensors. Theorems: `tensorInnerProduct_symm`, `tensorInnerProduct_add_left`, `tensorInnerProduct_smul_left` in `DifferentialGeometry/Algebra/TensorInnerProduct.lean`
