@@ -1,13 +1,13 @@
 # Differential Geometry in Lean 4
 
-A self-contained formalization of Differential Geometry in Lean 4. 
+A self-contained formalization of differential geometry in Lean 4. 
 
 ## Background
 
 Thank you, algebra! We are treating:
-- **Smooth Functions ($R$):** Treated as a commutative ring.
-- **Vector Fields ($V$):** Treated as a module over $R$.
-- **Vector Fields:** treated as derivations.
+- **Smooth Functions ($R$):**  as a commutative ring.
+- **Vector Fields ($V$):**  as a module over $R$.
+- **Vector Fields:**  as a derivations.
 
 ## Current Capabilities
 
@@ -29,3 +29,13 @@ cd differential-geometry
 
 # Build the library
 lake build
+```
+
+## References
+The abstractions and formalizations in this library are heavily inspired by and built upon the following texts:
+
+- Chow, B., et al. Hamilton's Ricci Flow.
+- Colding, T. H., & Minicozzi II, W. P. A Course in Minimal Surfaces.
+- Hamilton, R., Chyba, M., & Cao, X. Differential Geometry and Applications.
+
+
