@@ -28,16 +28,21 @@ This library prioritizes algebraic structure over topological construction.
 - **Tensor Operations:** Smooth bilinear forms, covariant derivatives, second covariant derivatives, and inner products of $(0,2)$-tensors.
 
 ## Proven Theorems
-- **[Bochner-Weitzenböck Identity](https://en.wikipedia.org/wiki/Bochner_formula):** `bochner_identity` in `DifferentialGeometry/Operators/Bochner.lean`
+- **[Bochner-Weitzenböck Identity](https://en.wikipedia.org/wiki/Bochner_formula):** 
+  
+  > If $u \colon M \rightarrow \mathbb{R}$ is a smooth function, then 
+  > $$\frac{1}{2}\Delta |\nabla u|^2 = g(\nabla \Delta u, \nabla u) + |\nabla^2 u|^2 + \text{Ric}(\nabla u, \nabla u)$$
+  
+  `bochner_identity` in `DifferentialGeometry/Operators/Bochner.lean`
 - **[First Bianchi Identity](https://en.wikipedia.org/wiki/Riemann_curvature_tensor#Symmetries_and_identities):** The cyclic sum of the Riemann curvature tensor vanishes for a torsion-free connection. Theorem: `first_bianchi` in `DifferentialGeometry/Geometry/Bianchi.lean`
 - **[Fundamental Theorem of Riemannian Geometry](https://en.wikipedia.org/wiki/Fundamental_theorem_of_Riemannian_geometry):** Existence and uniqueness of the Levi-Civita connection. Theorem: `levi_civita_exists_unique` in `DifferentialGeometry/Geometry/Connection.lean`
+- **[Ricci Identity](https://en.wikipedia.org/wiki/Riemann_curvature_tensor#Definition):** The commutator of the second covariant derivative equals the Riemann curvature tensor for a torsion-free connection. Theorem: `ricci_identity` in `DifferentialGeometry/Geometry/RicciIdentity.lean`
 
 ## Proven Properties
 - **Hessian Symmetry:** Hessian symmetry for torsion-free connections. Theorem: `hessian_symm` in `DifferentialGeometry/Operators/Hessian.lean`
 - **Metric Compatibility of Covariant Derivative:** The covariant derivative of the metric tensor is exactly zero. Theorem: `metric_covDerivOp_zero` in `DifferentialGeometry/Operators/CovariantDerivative.lean`
 - **Metric Compatibility of Squared Norm:** Directional derivative of a squared vector norm. Theorem: `norm_sq_deriv` in `DifferentialGeometry/Geometry/Connection.lean`
 - **Metric Subtraction Properties:** Properties of the metric tensor under subtraction. Theorem: `metric_sub_left` in `DifferentialGeometry/Geometry/Connection.lean`
-- **Ricci Identity:** The commutator of the second covariant derivative equals the Riemann curvature tensor for a torsion-free connection. Theorem: `ricci_identity` in `DifferentialGeometry/Geometry/RicciIdentity.lean`
 - **Second Covariant Derivative Bilinearity:** $C^\infty$-linearity of the second covariant derivative operator with respect to both vector field arguments. Theorems: `secondCovDeriv_smul_X`, `secondCovDeriv_smul_Y` in `DifferentialGeometry/Operators/SecondCovariantDerivative.lean`
 - **Tensor Inner Product Properties:** Symmetry, additivity, and scalar multiplication linearity of the inner product of (0,2)-tensors. Theorems: `tensorInnerProduct_symm`, `tensorInnerProduct_add_left`, `tensorInnerProduct_smul_left` in `DifferentialGeometry/Algebra/TensorInnerProduct.lean`
 
