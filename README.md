@@ -21,15 +21,18 @@ This library prioritizes algebraic structure over topological construction.
 - **Affine Connections:** Covariant derivatives, Koszul formula, torsion-free property, metric compatibility.
 - **Algebraic Foundations:** Scalar multiplication, derivation actions, Lie brackets, trace operators.
 - **Curvature Tensors:** Riemann, Ricci, and Scalar curvature, Ricci identities, First Bianchi identity.
-- **Differential Operators:** Gradient, Hessian, Laplacian, Bochner operators, Second Covariant Derivative.
+- **Differential Operators:** Gradient, Hessian, Laplacian, Bochner identity, Second Covariant Derivative.
 - **Geometric Flows:** Ricci Flow equations, evolution of curvature and operators.
 - **Levi-Civita Theorem:** Existence and uniqueness of the Levi-Civita connection via the Koszul formula.
 - **Riemannian Metrics:** Symmetric $C^\infty$-bilinear forms, metric trace operators.
 - **Tensor Operations:** Smooth bilinear forms, covariant derivatives, second covariant derivatives, and inner products of $(0,2)$-tensors.
 
 ## Proven Theorems
+- **[Bochner-Weitzenböck Identity](https://en.wikipedia.org/wiki/Bochner_formula):** `bochner_identity` in `DifferentialGeometry/Operators/Bochner.lean`
 - **[First Bianchi Identity](https://en.wikipedia.org/wiki/Riemann_curvature_tensor#Symmetries_and_identities):** The cyclic sum of the Riemann curvature tensor vanishes for a torsion-free connection. Theorem: `first_bianchi` in `DifferentialGeometry/Geometry/Bianchi.lean`
 - **[Fundamental Theorem of Riemannian Geometry](https://en.wikipedia.org/wiki/Fundamental_theorem_of_Riemannian_geometry):** Existence and uniqueness of the Levi-Civita connection. Theorem: `levi_civita_exists_unique` in `DifferentialGeometry/Geometry/Connection.lean`
+
+## Proven Properties
 - **Hessian Symmetry:** Hessian symmetry for torsion-free connections. Theorem: `hessian_symm` in `DifferentialGeometry/Operators/Hessian.lean`
 - **Metric Compatibility of Covariant Derivative:** The covariant derivative of the metric tensor is exactly zero. Theorem: `metric_covDerivOp_zero` in `DifferentialGeometry/Operators/CovariantDerivative.lean`
 - **Metric Compatibility of Squared Norm:** Directional derivative of a squared vector norm. Theorem: `norm_sq_deriv` in `DifferentialGeometry/Geometry/Connection.lean`
