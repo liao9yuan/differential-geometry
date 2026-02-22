@@ -7,7 +7,8 @@ import DifferentialGeometry.Geometry.Metric
 import DifferentialGeometry.Geometry.Connection
 import DifferentialGeometry.Geometry.Curvature
 
--- (Future) 3. Operators
+-- 3. Operators
+import DifferentialGeometry.Operators.Hessian
 -- import DifferentialGeometry.Operators.Gradient
 -- import DifferentialGeometry.Operators.Laplace
 -- import DifferentialGeometry.Operators.Bochner
