@@ -52,7 +52,22 @@ class MetricCompatible (conn : AffineConnection R V) (metric : MetricTensor R V)
 class TorsionFree (conn : AffineConnection R V) [LieBracket V] where
   torsion_zero : ∀ X Y : V, conn.nabla X Y - conn.nabla Y X = bracket X Y
 
--- 4. The Fundamental Theorem of Riemannian Geometry
+-- 4. Inverse Metric & Koszul Formula
+class InverseMetric (R V : Type) [Add R] [Mul R] [Add V] [ScalarMul R V] (metric : MetricTensor R V) where
+  inv : (V → R) → V
+
+/-- Explicit constructor for the Levi-Civita connection using the Koszul formula. -/
+def koszul_connection [Div R] [OfNat R 2] [LieBracket V]
+  (metric : MetricTensor R V) [InverseMetric R V metric] : AffineConnection R V where
+  nabla X Y := InverseMetric.inv metric (fun Z =>
+    (action X (metric.g Y Z) + action Y (metric.g Z X) - action Z (metric.g X Y)
+      - metric.g X (bracket Y Z) + metric.g Y (bracket Z X) + metric.g Z (bracket X Y)) / 2)
+  nabla_add_left := sorry
+  nabla_add_right := sorry
+  nabla_smul_left := sorry
+  leibniz := sorry
+
+-- 5. The Fundamental Theorem of Riemannian Geometry
 theorem levi_civita_exists_unique [LieBracket V] (metric : MetricTensor R V) :
   ∃ (conn : AffineConnection R V),
     (MetricCompatible conn metric ∧ TorsionFree conn) ∧

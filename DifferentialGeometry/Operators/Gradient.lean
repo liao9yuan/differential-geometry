@@ -11,11 +11,14 @@ variable [DerivationAction R V]
 open DerivationAction
 
 /--
-The gradient operator for a metric tensor.
-Provides a vector field `grad u` for a scalar function `u` such that
-$g(\text{grad } u, X) = X(u)$ for all vector fields $X$.
+The musical isomorphism (sharp operator) mapping covector-like operations to vector fields.
 -/
-class Gradient (R V : Type) [Add R] [Mul R] [Add V] [ScalarMul R V]
-    [DerivationAction R V] (metric : MetricTensor R V) where
-  grad : R → V
-  grad_prop : ∀ u : R, ∀ X : V, metric.g (grad u) X = action X u
+class MusicalIsomorphism (R V : Type) [Add R] [Mul R] [Add V] [ScalarMul R V] (metric : MetricTensor R V) where
+  sharp : (V → R) → V
+
+/--
+The computable gradient operator for a metric tensor.
+Provides a vector field `grad u` for a scalar function `u` using the sharp operator.
+-/
+def grad (metric : MetricTensor R V) [iso : MusicalIsomorphism R V metric] (u : R) : V :=
+  iso.sharp (fun X => action X u)

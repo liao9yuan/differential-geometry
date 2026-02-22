@@ -69,8 +69,8 @@ axiom laplacian_evolution (t u : R) :
     tensor_inner (Rc conn_t) (Hess conn_t u) +
     tensor_inner (Rc conn_t) (Hess conn_t u)
 
--- To express the gradient, we use the Gradient class
-variable (Gradient_family : ∀ t, Gradient R V (metric_family t))
+-- To express the gradient, we use the MusicalIsomorphism class
+variable (MusicalIsomorphism_family : ∀ t, MusicalIsomorphism R V (metric_family t))
 
 /--
 The evolution of the gradient norm squared under Ricci flow:
@@ -81,9 +81,14 @@ time-dependent metric $g_t$.)
 -/
 axiom gradient_norm_evolution (t u : R) :
   let metric_t := metric_family t
-  let grad_t := Gradient_family t
-  partial_t (fun s => (metric_family s).g ((Gradient_family s).grad u) ((Gradient_family s).grad u)) t =
-    (metric_t.g (grad_t.grad u) (grad_t.grad (partial_t (fun _ => u) t)) +
-     metric_t.g (grad_t.grad u) (grad_t.grad (partial_t (fun _ => u) t))) +
-    (Rc (conn_family t) (grad_t.grad u) (grad_t.grad u) +
-     Rc (conn_family t) (grad_t.grad u) (grad_t.grad u))
+  let iso_t := MusicalIsomorphism_family t
+  partial_t (fun s =>
+    let metric_s := metric_family s
+    have _ : MusicalIsomorphism R V metric_s := MusicalIsomorphism_family s
+    metric_s.g (grad metric_s u) (grad metric_s u)) t =
+    (have _ : MusicalIsomorphism R V metric_t := iso_t
+     metric_t.g (grad metric_t u) (grad metric_t (partial_t (fun _ => u) t)) +
+     metric_t.g (grad metric_t u) (grad metric_t (partial_t (fun _ => u) t))) +
+    (have _ : MusicalIsomorphism R V metric_t := iso_t
+     Rc (conn_family t) (grad metric_t u) (grad metric_t u) +
+     Rc (conn_family t) (grad metric_t u) (grad metric_t u))
