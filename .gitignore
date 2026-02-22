@@ -11,3 +11,6 @@
 # end of whitelist
 
 .lake/
+
+.DS_Store
+**/.DS_Store
