@@ -76,8 +76,8 @@ lake build
 ## References
 The abstractions and formalizations in this library are heavily inspired by and built upon the following texts:
 
-- Chow, B., et al. Hamilton's Ricci Flow.
-- Colding, T. H., & Minicozzi II, W. P. A Course in Minimal Surfaces.
+- Chow, B., et al. Hamilton's Ricci Flow (ISBN 978-1-4704-7369-3).
+- Colding, T. H., & Minicozzi II, W. P. A Course in Minimal Surfaces (ISBN 978-1-4704-7640-3).
 - Differential Geometry and Applications, Richard Hamilton, Monique Chyba and Xiaodong Cao
 - Hongxi Wu, An Introduction to Riemannian Geometry. (2014). Higher Education Press. (This is not a book in English, but it can be found [here](https://www.overdrive.com/media/12444682/黎曼几何初步-preliminary-riemann-geometry). ISBN 978-7-04-040458-6)
 
