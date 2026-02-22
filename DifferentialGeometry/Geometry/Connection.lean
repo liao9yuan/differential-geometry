@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Metric
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.Abel
 import Mathlib.Algebra.Module.Basic
+import Mathlib.Algebra.Ring.Basic
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -65,6 +66,16 @@ Output: Prop -/
 class MetricCompatible (conn : AffineConnection R V) (metric : MetricTensor R V) where
   compat : ∀ X Y Z : V,
     action X (metric.g Y Z) = metric.g (conn.nabla X Y) Z + metric.g Y (conn.nabla X Z)
+
+/-- Directional derivative of squared norm under metric compatibility: `X⟨Y, Y⟩ = 2⟨∇_X Y, Y⟩`.
+Input: (V, V)
+Output: Prop -/
+theorem norm_sq_deriv (conn : AffineConnection R V) (metric : MetricTensor R V) [MetricCompatible conn metric] (X Y : V) :
+  action X (metric.g Y Y) = metric.g (conn.nabla X Y) Y + metric.g (conn.nabla X Y) Y := by
+  -- Step 1: Expand using metric compatibility: X ⟨Y, Y⟩ = ⟨∇_X Y, Y⟩ + ⟨Y, ∇_X Y⟩
+  rw [MetricCompatible.compat (conn := conn) X Y Y]
+  -- Step 2: Use the symmetry of the metric tensor: ⟨Y, ∇_X Y⟩ = ⟨∇_X Y, Y⟩
+  rw [metric.symm Y (conn.nabla X Y)]
 
 /-- Torsion-free condition: `∇_X Y - ∇_Y X = [X, Y]`.
 Input: (AffineConnection R V)

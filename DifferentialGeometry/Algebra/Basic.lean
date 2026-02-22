@@ -1,3 +1,6 @@
+import Mathlib.Algebra.Module.Basic
+import Mathlib.Algebra.Ring.Basic
+
 set_option autoImplicit false
 
 /-!
@@ -14,6 +17,7 @@ class ScalarMul (R : Type) (V : Type) where
 infixr:73 " • " => ScalarMul.smul
 
 variable (R V : Type)
+variable [CommRing R] [AddCommGroup V] [Module R V]
 
 /-- Derivation action of vector fields on functions.
 Input: (V, R)
@@ -26,3 +30,12 @@ Input: (V, V)
 Output: V -/
 class LieBracket (V : Type) where
   bracket : V → V → V
+
+class LieDerivation (R V : Type) [CommRing R] [DerivationAction R V] [LieBracket V] where
+  bracket_action : ∀ X Y : V, ∀ u : R,
+    DerivationAction.action (LieBracket.bracket X Y) u =
+    DerivationAction.action X (DerivationAction.action Y u) - DerivationAction.action Y (DerivationAction.action X u)
+
+class ActionLinear (R V : Type) [CommRing R] [AddCommGroup V] [DerivationAction R V] where
+  action_add : ∀ X Y : V, ∀ u : R,
+    DerivationAction.action (X + Y) u = DerivationAction.action X u + DerivationAction.action Y u

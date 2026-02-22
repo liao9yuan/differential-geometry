@@ -17,7 +17,13 @@ set_option autoImplicit false
 
 /-!
 # Euclidean Space Example
-Concrete 3D Euclidean space instantiation of algebraic structures and geometry.
+
+# ----------------------------------------------------------------
+# This example illustrates how to use DifferentialGeometry library to do
+# some calculations.
+# Currently, you will have to blackbox some properties using 'sorry'.
+# ----------------------------------------------------------------
+
 -/
 
 abbrev Point3D := Float × Float × Float
