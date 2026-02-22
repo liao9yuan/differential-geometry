@@ -1,6 +1,7 @@
 -- 1. Algebraic Foundations
 import DifferentialGeometry.Algebra.Basic
 import DifferentialGeometry.Algebra.BilinearForm
+import DifferentialGeometry.Algebra.OrderedTensor
 import DifferentialGeometry.Algebra.TensorInnerProduct
 import DifferentialGeometry.Algebra.Trace
 
@@ -24,5 +25,5 @@ import DifferentialGeometry.Operators.SecondCovariantDerivative
 import DifferentialGeometry.Operators.LieDerivative
 
 
--- 4. Flow
+-- 4. Flows
 import DifferentialGeometry.Flows.RicciFlow

@@ -23,8 +23,9 @@ This library prioritizes algebraic structure over topological construction.
 - **Curvature Tensors:** Riemann, Ricci, and Scalar curvature, Ricci identities, First Bianchi identity, tensoriality of Riemann curvature.
 - **Differential Operators:** Bochner identity, Divergence, Gradient, Hessian, Laplacian, Lie Derivative, Second Covariant Derivative.
 - **Geometric Flows:** Ricci Flow equations, evolution of curvature and operators.
-- **Global Integration:** Abstract integral operators and the Divergence Theorem.
+- **Integration Operations:** Global integrals and Divergence Theorem.
 - **Levi-Civita Theorem:** Existence and uniqueness of the Levi-Civita connection via the Koszul formula.
+- **Ordered Tensors:** Positivity of smooth bilinear forms, algebraic spatial maximum principles, and trace order rules.
 - **Riemannian Metrics:** Symmetric $C^\infty$-bilinear forms, metric trace operators.
 - **Tensor Operations:** Smooth bilinear forms, covariant derivatives, second covariant derivatives, and inner products of $(0,2)$-tensors.
 - **Time Derivatives:** Generic time derivatives for scalar functions and metric variation forms.
@@ -65,9 +66,11 @@ This library prioritizes algebraic structure over topological construction.
   
   Theorem: `ricci_identity` in `DifferentialGeometry/Geometry/RicciIdentity.lean`
 
+  
 ## Proven Properties
 - **Divergence Product Rule:** The Leibniz rule for the divergence of a scalar-multiplied vector field. Theorem: `divergence_smul` in `DifferentialGeometry/Operators/Divergence.lean`
 - **Hessian Symmetry:** Hessian symmetry for torsion-free connections. Theorem: `hessian_symm` in `DifferentialGeometry/Operators/Hessian.lean`
+- **Laplacian Sign at Spatial Maximum:** Verification that the metric trace of a negative semi-definite Hessian yields a non-positive Laplacian. Theorem: `laplacian_nonpos_at_max` in `DifferentialGeometry/Algebra/OrderedTensor.lean`
 - **Metric Compatibility of Covariant Derivative:** The covariant derivative of the metric tensor is exactly zero. Theorem: `metric_covDerivOp_zero` in `DifferentialGeometry/Operators/CovariantDerivative.lean`
 - **Metric Compatibility of Squared Norm:** Directional derivative of a squared vector norm. Theorem: `norm_sq_deriv` in `DifferentialGeometry/Geometry/Connection.lean`
 - **Metric Sign and Subtraction Properties:** Algebraic behavior of the metric tensor under negation and subtraction in its arguments. Lemmas: `metric_neg_left_local`, `metric_sub_left_local`, `metric_sub_right_local` in `DifferentialGeometry/Operators/LieDerivative.lean`
