@@ -19,10 +19,10 @@ Thanks to modern algebra, we are treating:
 - **Riemannian Metrics:** Symmetric $C^\infty$-bilinear forms, metric trace operators.
 
 ## Proven Theorems
-- **`hessian_symm`:** Hessian symmetry for torsion-free connections. (`DifferentialGeometry/Operators/Hessian.lean`)
-- **`levi_civita_exists_unique`:** Existence and uniqueness of the Levi-Civita connection. (`DifferentialGeometry/Geometry/Connection.lean`)
-- **`metric_neg_left`, `metric_sub_left`:** Properties of the metric tensor. (`DifferentialGeometry/Geometry/Connection.lean`)
-- **`norm_sq_deriv`:** Directional derivative of a squared vector norm. (`DifferentialGeometry/Geometry/Connection.lean`)
+- **Fundamental Theorem of Riemannian Geometry:** Existence and uniqueness of the Levi-Civita connection. Theorem: `levi_civita_exists_unique` in `DifferentialGeometry/Geometry/Connection.lean`
+- **Hessian Symmetry:** Hessian symmetry for torsion-free connections. Theorem: `hessian_symm` in `DifferentialGeometry/Operators/Hessian.lean`
+- **Metric Compatibility of Squared Norm:** Directional derivative of a squared vector norm. Theorem: `norm_sq_deriv` in `DifferentialGeometry/Geometry/Connection.lean`
+- **Metric Tensor Properties:** Properties of the metric tensor. Theorems: `metric_neg_left`, `metric_sub_left` in `DifferentialGeometry/Geometry/Connection.lean`
 ## Examples
 - **`EuclideanSample.lean`:** Calculation of gradient, Hessian, Laplacian, metric variation, and Ricci curvature in $\mathbb{R}^3$.
 - **`HessianSymmetry.lean`:** Proof of Hessian symmetry using Lie derivations.
