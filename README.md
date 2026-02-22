@@ -14,7 +14,7 @@ We are treating:
 This library prioritizes algebraic structure over topological construction. 
 
 * **Coordinate Insensitivity:** The framework operates entirely without local charts. However, on the user side, concrete coordinate calculations can be executed seamlessly by instantiating the module with explicit spaces (see `EuclideanSample.lean`).
-* **Axiomatic Injection:** Analytical bottlenecks (e.g., PDE existence, maximum principles) can be isolated and injected as axioms. This permits strict algebraic verification of tensor evolutions (e.g., Ricci flow) without the prerequisite of building topological manifolds.
+* **Axiomatic Injection:** Analytical bottlenecks (e.g., PDE existence, maximum principles) can be easily isolated and injected as axioms by the user. This permits strict algebraic verification of tensor evolutions (e.g., Ricci flow) without the prerequisite of building topological manifolds.
 * **Compositional Operators:** Higher-order derivatives and complex geometric flows are constructed via pure functional composition rather than hardcoded index manipulations.
 
 ## Current Capabilities
