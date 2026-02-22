@@ -17,7 +17,7 @@ We are treating:
 - **Geometric Flows:** Ricci Flow equations, evolution of curvature and operators.
 - **Levi-Civita Theorem:** Existence and uniqueness of the Levi-Civita connection via the Koszul formula.
 - **Riemannian Metrics:** Symmetric $C^\infty$-bilinear forms, metric trace operators.
-- **Tensor Operations:** Smooth bilinear forms and covariant derivatives of $(0,2)$-tensors.
+- **Tensor Operations:** Smooth bilinear forms, covariant derivatives, and inner products of $(0,2)$-tensors.
 
 ## Proven Theorems
 - **[Fundamental Theorem of Riemannian Geometry](https://en.wikipedia.org/wiki/Fundamental_theorem_of_Riemannian_geometry):** Existence and uniqueness of the Levi-Civita connection. Theorem: `levi_civita_exists_unique` in `DifferentialGeometry/Geometry/Connection.lean`
@@ -25,6 +25,7 @@ We are treating:
 - **Metric Compatibility of Covariant Derivative:** The covariant derivative of the metric tensor is exactly zero. Theorem: `metric_covDerivOp_zero` in `DifferentialGeometry/Operators/CovariantDerivative.lean`
 - **Metric Compatibility of Squared Norm:** Directional derivative of a squared vector norm. Theorem: `norm_sq_deriv` in `DifferentialGeometry/Geometry/Connection.lean`
 - **Metric Tensor Properties:** Properties of the metric tensor. Theorems: `metric_neg_left`, `metric_sub_left` in `DifferentialGeometry/Geometry/Connection.lean`
+- **Tensor Inner Product Properties:** Symmetry, additivity, and scalar multiplication linearity of the inner product of (0,2)-tensors. Theorems: `tensorInnerProduct_symm`, `tensorInnerProduct_add_left`, `tensorInnerProduct_smul_left` in `DifferentialGeometry/Algebra/TensorInnerProduct.lean`
 
 ## How to use?
 ### There are examples in `Examples` folder. One illustrates calculation, one illustrates proof.
