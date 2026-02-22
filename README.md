@@ -10,22 +10,21 @@ Thanks to modern algebra, we are treating:
 - **Vector Fields:**  as a derivations.
 
 ## Current Capabilities
-- **Algebraic Foundations:** Scalar multiplication, derivation actions, Lie brackets, trace operators.
-- **Riemannian Metrics:** Symmetric $C^\infty$-bilinear forms, metric trace operators.
 - **Affine Connections:** Covariant derivatives, Koszul formula, torsion-free property, metric compatibility.
+- **Algebraic Foundations:** Scalar multiplication, derivation actions, Lie brackets, trace operators.
 - **Curvature Tensors:** Riemann, Ricci, and Scalar curvature.
-- **Levi-Civita Theorem:** Existence and uniqueness of the Levi-Civita connection via the Koszul formula.
 - **Differential Operators:** Gradient, Hessian, Laplacian, Bochner operators.
 - **Geometric Flows:** Ricci Flow equations, evolution of curvature and operators.
+- **Levi-Civita Theorem:** Existence and uniqueness of the Levi-Civita connection via the Koszul formula.
+- **Riemannian Metrics:** Symmetric $C^\infty$-bilinear forms, metric trace operators.
 
 ## Proven Theorems
+- **`hessian_symm`:** Hessian symmetry for torsion-free connections. (`DifferentialGeometry/Operators/Hessian.lean`)
 - **`levi_civita_exists_unique`:** Existence and uniqueness of the Levi-Civita connection. (`DifferentialGeometry/Geometry/Connection.lean`)
-- **`hessian_symm`:** Hessian symmetry for torsion-free connections. (`Examples/HessianSymmetry.lean`)
-- **`norm_sq_deriv`:** Directional derivative of a squared vector norm. (`Examples/MetricCompatibility.lean`)
 - **`metric_neg_left`, `metric_sub_left`:** Properties of the metric tensor. (`DifferentialGeometry/Geometry/Connection.lean`)
+- **`norm_sq_deriv`:** Directional derivative of a squared vector norm. (`DifferentialGeometry/Geometry/Connection.lean`)
 ## Examples
 - **`EuclideanSample.lean`:** Calculation of gradient, Hessian, Laplacian, metric variation, and Ricci curvature in $\mathbb{R}^3$.
-- **`MetricCompatibility.lean`:** Proof of the metric compatibility product rule on norms.
 - **`HessianSymmetry.lean`:** Proof of Hessian symmetry using Lie derivations.
 ## Installation
 
@@ -45,7 +44,7 @@ The abstractions and formalizations in this library are heavily inspired by and 
 
 - Chow, B., et al. Hamilton's Ricci Flow.
 - Colding, T. H., & Minicozzi II, W. P. A Course in Minimal Surfaces.
-- Hamilton, R., Chyba, M., & Cao, X. Differential Geometry and Applications.
+- Differential Geometry and Applications, Richard Hamilton, Monique Chyba and Xiaodong Cao
 - Hongxi Wu, An Introduction to Riemannian Geometry. (2014). Higher Education Press.
 
 
