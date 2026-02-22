@@ -1,6 +1,6 @@
 # Differential Geometry in Lean 4
 
-A lightweighted, self-contained formalization of differential geometry in Lean 4. 
+A lightweight, self-contained formalization of differential geometry in Lean 4. 
 
 ## Background
 
@@ -78,8 +78,8 @@ This library prioritizes algebraic structure over topological construction.
 
 This library inherently assumes:
 * **Intrinsic Smoothness:** Smoothness and convergence are absorbed by the type system. The framework cannot model Sobolev spaces, distributions, or measure-theoretic jump functions.
-For singularities occured at time $T$, in like Ricci Flow, we would have to work on $t \in[0,T)$, before the metric degenerates.
-* **Strict Non-degeneracy:** The musical isomorphism (`InverseMetric`) enforces a strict  bijection. The framework effectively assumes **finite-dimensional** manifolds.
+For singularities occurred at time $T$, such as in Ricci Flow, we would have to work on $t \in [0,T)$, before the metric degenerates.
+* **Strict Non-degeneracy:** The musical isomorphism (`InverseMetric`) enforces a strict bijection. The framework effectively assumes **finite-dimensional** manifolds.
 
 
 ## Installation
