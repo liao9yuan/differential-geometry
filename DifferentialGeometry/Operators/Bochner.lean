@@ -24,24 +24,16 @@ variable (laplacianV : V → V)
 variable (norm_sq_V : V → R)
 variable (norm_sq_T : (V → V → R) → R)
 
-/--
-Commutator of Laplacian and Gradient:
-$\Delta \nabla u = \nabla \Delta u + \text{Rc}(\nabla u, \cdot)$
-
-We express this by taking the inner product with an arbitrary vector field `X`.
--/
+/-- Commutator of the Laplacian and gradient: `Δ(∇u) = ∇(Δu) + Rc(∇u, ·)`.
+Input: (R, V)
+Output: Prop -/
 axiom laplacian_grad_commutator (u : R) (X : V) :
   metric.g (laplacianV (grad u)) X =
   metric.g (grad (laplacian metric conn u)) X + Rc conn (grad u) X
 
-/--
-The Bochner-Weitzenböck formula:
-$\frac{1}{2} \Delta |\nabla u|^2 = |\nabla^2 u|^2 + \langle \nabla u, \nabla \Delta u \rangle + \text{Rc}(\nabla u, \nabla u)$
-
-Since we might not have a general division by 2 in our abstract algebraic structures,
-we express it as $A = B + B$:
-$\Delta |\nabla u|^2 = 2 \left( |\nabla^2 u|^2 + \langle \nabla u, \nabla \Delta u \rangle + \text{Rc}(\nabla u, \nabla u) \right)$
--/
+/-- Bochner-Weitzenböck formula: `Δ|∇u|² = 2(|∇²u|² + ⟨∇u, ∇(Δu)⟩ + Rc(∇u, ∇u))`.
+Input: (R, V)
+Output: Prop -/
 axiom bochner_weitzenbock (u : R) :
   laplacian metric conn (norm_sq_V (grad u)) =
     (norm_sq_T (Hess conn u) +

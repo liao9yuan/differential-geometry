@@ -9,9 +9,8 @@ variable [DerivationAction R V]
 
 open DerivationAction
 
-/--
-The Hessian of a function `u` is defined as the tensor field
-$\nabla^2 u(X, Y) = X(Y(u)) - (\nabla_X Y)(u)$.
--/
+/-- Hessian of a function: `∇²u(X, Y) = X(Y(u)) - (∇_X Y)(u)`.
+Input: (AffineConnection R V, R, V, V)
+Output: R -/
 def Hess (conn : AffineConnection R V) (u : R) (X Y : V) : R :=
   action X (action Y u) - action (conn.nabla X Y) u

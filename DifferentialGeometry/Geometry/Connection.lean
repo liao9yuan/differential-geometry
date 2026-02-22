@@ -9,6 +9,7 @@ set_option linter.style.longLine false
 
 /-!
 # Affine and Levi-Civita Connections
+Definitions for affine connections, torsion, metric compatibility, and the Levi-Civita theorem.
 -/
 
 variable (R V : Type)
@@ -19,7 +20,13 @@ instance : ScalarMul R V where smul := HSMul.hSMul
 open DerivationAction
 open LieBracket
 
--- 1. Affine Connection
+/-- Affine connection (covariant derivative) on a vector bundle.
+Input: (V, V)
+Output: V
+
+# Reference:
+# Hongxi Wu, An Introduction to Riemannian Geometry. (2014). Higher Education Press.
+-/
 structure AffineConnection [DerivationAction R V] where
   nabla : V → V → V
   nabla_add_left : ∀ X Y Z : V, nabla (X + Y) Z = nabla X Z + nabla Y Z
@@ -38,7 +45,10 @@ section Symbols
 
 variable {R V} {I : Type}
 
-/-- Christoffel Symbols -/
+/-- Christoffel symbols characterizing the connection in a local frame.
+Input: (AffineConnection R V, LocalFrame I R V, I, I, I)
+Output: R
+-/
 def christoffel_symbol [DerivationAction R V]
   (conn : AffineConnection R V) (frame : LocalFrame I R V) (i j k : I) : R :=
   frame.coord (conn.nabla (frame.vec i) (frame.vec j)) k
@@ -49,14 +59,26 @@ end Symbols
 variable {R V}
 variable [DerivationAction R V]
 
+/-- Metric compatibility condition: `X⟨Y, Z⟩ = ⟨∇_X Y, Z⟩ + ⟨Y, ∇_X Z⟩`.
+Input: (AffineConnection R V, MetricTensor R V)
+Output: Prop -/
 class MetricCompatible (conn : AffineConnection R V) (metric : MetricTensor R V) where
   compat : ∀ X Y Z : V,
     action X (metric.g Y Z) = metric.g (conn.nabla X Y) Z + metric.g Y (conn.nabla X Z)
 
+/-- Torsion-free condition: `∇_X Y - ∇_Y X = [X, Y]`.
+Input: (AffineConnection R V)
+Output: Prop -/
 class TorsionFree (conn : AffineConnection R V) [LieBracket V] where
   torsion_zero : ∀ X Y : V, conn.nabla X Y - conn.nabla Y X = bracket X Y
 
-/-- Theorem 3.5.1 of Differential Geometry with Applications. -/
+/-- Koszul formula deriving the unique Levi-Civita connection.
+Input: (AffineConnection R V, MetricTensor R V, V, V, V)
+Output: Prop
+
+# Reference:
+# Differential Geometry and Applications, Richard Hamilton, Monique Chyba and Xiaodong Cao
+-/
 theorem levi_civita_uniqueness [LieBracket V]
   (conn : AffineConnection R V) (metric : MetricTensor R V)
   [MetricCompatible conn metric] [TorsionFree conn] (X Y Z : V) :
@@ -94,13 +116,19 @@ theorem levi_civita_uniqueness [LieBracket V]
   rw [eq1, eq2, eq3, g1, g2, g3, s1, s2, s3]
   ring
 
--- 4. Inverse Metric & Koszul Formula
+/-- Isomorphism from 1-forms to vector fields (sharp operator).
+Input: (MetricTensor R V)
+Output: Type -/
 class InverseMetric (R V : Type) [CommRing R] [AddCommGroup V] [Module R V] (metric : MetricTensor R V) where
   inv : (V → R) → V
   inv_add : ∀ f g : V → R, inv (fun v => f v + g v) = inv f + inv g
   inv_smul : ∀ (c : R) (f : V → R), inv (fun v => c * f v) = ScalarMul.smul c (inv f)
   inv_g : ∀ Y : V, inv (fun Z => metric.g Y Z) = Y
   g_inv : ∀ (f : V → R) (Z : V), metric.g (inv f) Z = f Z
+
+/-- Leibniz rule and Jacobi identity for derivation action and Lie bracket.
+Input: (R, V)
+Output: Type -/
 class DerivationRules (R V : Type) [CommRing R] [AddCommGroup V] [Module R V] [DerivationAction R V] [LieBracket V] where
   action_add_left : ∀ X Y : V, ∀ f : R, action (X + Y) f = action X f + action Y f
   action_add_right : ∀ X : V, ∀ f g : R, action X (f + g) = action X f + action X g
@@ -135,7 +163,13 @@ lemma metric_sub_left {R V} [CommRing R] [AddCommGroup V] [Module R V] [Derivati
     _ = metric.g X Z + - metric.g Y Z := by rw [metric_neg_left]
     _ = metric.g X Z - metric.g Y Z := by rw [sub_eq_add_neg]
 
-/-- Explicit constructor for the Levi-Civita connection using the Koszul formula. -/
+/-- Explicit construction of the Levi-Civita connection using the Koszul formula.
+Input: (MetricTensor R V)
+Output: AffineConnection R V
+
+# Reference:
+# Differential Geometry and Applications, Richard Hamilton, Monique Chyba and Xiaodong Cao
+-/
 def koszul_connection [Invertible (2 : R)] [LieBracket V] [DerivationRules R V]
   (metric : MetricTensor R V) [InverseMetric R V metric] : AffineConnection R V where
   nabla X Y := InverseMetric.inv metric (fun Z =>
@@ -293,7 +327,14 @@ instance torsion_free_koszul [Invertible (2 : R)] (metric : MetricTensor R V) [I
     rw [gX, gY]
     exact congrFun eq_func Z
 
--- 5. The Fundamental Theorem of Riemannian Geometry
+/-- Fundamental Theorem of Riemannian Geometry:
+For any Riemannian manifold, there exists a unique affine connection that is symmetric (torsion-free) and compatible with the metric.
+Input: (MetricTensor R V)
+Output: Prop
+
+# Reference:
+# Differential Geometry and Applications, Richard Hamilton, Monique Chyba and Xiaodong Cao
+-/
 theorem levi_civita_exists_unique [Invertible (2 : R)] (metric : MetricTensor R V) [InverseMetric R V metric] :
   ∃ (conn : AffineConnection R V),
     (MetricCompatible conn metric ∧ TorsionFree conn) ∧

@@ -10,10 +10,9 @@ variable {R V : Type}
 variable [CommRing R] [AddCommGroup V] [Module R V]
 variable [DerivationAction R V]
 
-/--
-The Laplacian of a function `u` is the metric trace of its Hessian.
-$\Delta u = \text{tr}_g (\nabla^2 u)$
--/
+/-- Laplacian of a function defined as the metric trace of its Hessian: `Δu = tr_g(∇²u)`.
+Input: (MetricTensor R V, AffineConnection R V, R)
+Output: R -/
 def laplacian (metric : MetricTensor R V) [MetricTraceOperator R V metric]
     (conn : AffineConnection R V) (u : R) : R :=
   MetricTraceOperator.metric_trace metric (Hess conn u)

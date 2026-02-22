@@ -10,7 +10,7 @@ set_option linter.style.longLine false
 
 /-!
 # Curvature Tensors
-Riemann, Ricci, and Scalar Curvature.
+Definitions for Riemann curvature, Ricci curvature, and Scalar curvature.
 -/
 
 open DerivationAction
@@ -24,15 +24,21 @@ section Curvature
 
 variable [LieBracket V] (conn : AffineConnection R V)
 
--- Riemann Curvature Tensor Rm(X,Y)Z
+/-- Riemann curvature tensor.
+Input: (X : V, Y : V, Z : V)
+Output: V -/
 def Rm (X Y Z : V) : V :=
   conn.nabla X (conn.nabla Y Z) - conn.nabla Y (conn.nabla X Z) - conn.nabla (bracket X Y) Z
 
--- Ricci Curvature Tensor Rc(X,Y)
+/-- Ricci curvature tensor.
+Input: (X : V, Y : V)
+Output: R -/
 def Rc [TraceOperator R V] (X Y : V) : R :=
   TraceOperator.trace (fun Z => Rm conn Z X Y)
 
--- Scalar Curvature (R)
+/-- Scalar curvature.
+Input: (MetricTensor R V)
+Output: R -/
 def ScalarCurvature [TraceOperator R V] (metric : MetricTensor R V) [MetricTraceOperator R V metric] : R :=
   MetricTraceOperator.metric_trace metric (Rc conn)
 

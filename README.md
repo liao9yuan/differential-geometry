@@ -4,7 +4,7 @@ A self-contained formalization of differential geometry in Lean 4.
 
 ## Background
 
-Thank you, algebra! We are treating:
+Thanks to modern algebra, we are treating:
 - **Smooth Functions ($R$):**  as a commutative ring.
 - **Vector Fields ($V$):**  as a module over $R$.
 - **Vector Fields:**  as a derivations.
@@ -46,5 +46,6 @@ The abstractions and formalizations in this library are heavily inspired by and 
 - Chow, B., et al. Hamilton's Ricci Flow.
 - Colding, T. H., & Minicozzi II, W. P. A Course in Minimal Surfaces.
 - Hamilton, R., Chyba, M., & Cao, X. Differential Geometry and Applications.
+- Hongxi Wu, An Introduction to Riemannian Geometry. (2014). Higher Education Press.
 
 

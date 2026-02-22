@@ -10,15 +10,14 @@ variable [DerivationAction R V]
 
 open DerivationAction
 
-/--
-The musical isomorphism (sharp operator) mapping covector-like operations to vector fields.
--/
+/-- Musical isomorphism mapping covectors to vector fields (sharp operator).
+Input: (V → R)
+Output: V -/
 class MusicalIsomorphism (R V : Type) [Add R] [Mul R] [Add V] [ScalarMul R V] (metric : MetricTensor R V) where
   sharp : (V → R) → V
 
-/--
-The computable gradient operator for a metric tensor.
-Provides a vector field `grad u` for a scalar function `u` using the sharp operator.
--/
+/-- Gradient of a scalar function `u`.
+Input: (MetricTensor R V, R)
+Output: V -/
 def grad (metric : MetricTensor R V) [iso : MusicalIsomorphism R V metric] (u : R) : V :=
   iso.sharp (fun X => action X u)

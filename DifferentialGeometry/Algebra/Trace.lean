@@ -2,9 +2,11 @@ set_option autoImplicit false
 
 /-!
 # Abstract Trace Operators
-Provides algebraic hooks for tracing endomorphisms.
+Algebraic definition of trace operators on endomorphisms.
 -/
 
--- Abstract Trace Operator (For future V* ⊗ V)
+/-- Linear trace operator on vector field endomorphisms.
+Input: (V → V)
+Output: R -/
 class TraceOperator (R V : Type) where
   trace : (V → V) → R
