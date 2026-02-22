@@ -73,6 +73,11 @@ cd differential-geometry
 lake build
 ```
 
+## Contributing
+
+Contributions and suggestions are welcome. Please discuss with me via email:
+`zq + sqrt(1444) {at} cornell [dot] edu`
+
 ## References
 The abstractions and formalizations in this library are heavily inspired by and built upon the following texts:
 
