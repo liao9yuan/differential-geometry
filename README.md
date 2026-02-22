@@ -13,18 +13,19 @@ We are treating:
 - **Affine Connections:** Covariant derivatives, Koszul formula, torsion-free property, metric compatibility.
 - **Algebraic Foundations:** Scalar multiplication, derivation actions, Lie brackets, trace operators.
 - **Curvature Tensors:** Riemann, Ricci, and Scalar curvature.
-- **Differential Operators:** Gradient, Hessian, Laplacian, Bochner operators.
+- **Differential Operators:** Gradient, Hessian, Laplacian, Bochner operators, Second Covariant Derivative.
 - **Geometric Flows:** Ricci Flow equations, evolution of curvature and operators.
 - **Levi-Civita Theorem:** Existence and uniqueness of the Levi-Civita connection via the Koszul formula.
 - **Riemannian Metrics:** Symmetric $C^\infty$-bilinear forms, metric trace operators.
-- **Tensor Operations:** Smooth bilinear forms, covariant derivatives, and inner products of $(0,2)$-tensors.
+- **Tensor Operations:** Smooth bilinear forms, covariant derivatives, second covariant derivatives, and inner products of $(0,2)$-tensors.
 
 ## Proven Theorems
 - **[Fundamental Theorem of Riemannian Geometry](https://en.wikipedia.org/wiki/Fundamental_theorem_of_Riemannian_geometry):** Existence and uniqueness of the Levi-Civita connection. Theorem: `levi_civita_exists_unique` in `DifferentialGeometry/Geometry/Connection.lean`
 - **Hessian Symmetry:** Hessian symmetry for torsion-free connections. Theorem: `hessian_symm` in `DifferentialGeometry/Operators/Hessian.lean`
 - **Metric Compatibility of Covariant Derivative:** The covariant derivative of the metric tensor is exactly zero. Theorem: `metric_covDerivOp_zero` in `DifferentialGeometry/Operators/CovariantDerivative.lean`
 - **Metric Compatibility of Squared Norm:** Directional derivative of a squared vector norm. Theorem: `norm_sq_deriv` in `DifferentialGeometry/Geometry/Connection.lean`
-- **Metric Tensor Properties:** Properties of the metric tensor. Theorems: `metric_neg_left`, `metric_sub_left` in `DifferentialGeometry/Geometry/Connection.lean`
+- **Metric Subtraction Properties:** Properties of the metric tensor under subtraction. Theorem: `metric_sub_left` in `DifferentialGeometry/Geometry/Connection.lean`
+- **Second Covariant Derivative Bilinearity:** $C^\infty$-linearity of the second covariant derivative operator with respect to both vector field arguments. Theorems: `secondCovDeriv_smul_X`, `secondCovDeriv_smul_Y` in `DifferentialGeometry/Operators/SecondCovariantDerivative.lean`
 - **Tensor Inner Product Properties:** Symmetry, additivity, and scalar multiplication linearity of the inner product of (0,2)-tensors. Theorems: `tensorInnerProduct_symm`, `tensorInnerProduct_add_left`, `tensorInnerProduct_smul_left` in `DifferentialGeometry/Algebra/TensorInnerProduct.lean`
 
 ## How to use?
