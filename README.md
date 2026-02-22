@@ -29,14 +29,29 @@ This library prioritizes algebraic structure over topological construction.
 
 ## Proven Theorems
 - **[Bochner-Weitzenböck Identity](https://en.wikipedia.org/wiki/Bochner_formula):** 
-  
-  > If $u \colon M \rightarrow \mathbb{R}$ is a smooth function, then 
+
+> If $u \colon M \rightarrow \mathbb{R}$ is a smooth function, then 
   > $$\frac{1}{2}\Delta |\nabla u|^2 = g(\nabla \Delta u, \nabla u) + |\nabla^2 u|^2 + \text{Ric}(\nabla u, \nabla u)$$
   
   Theorem: `bochner_identity` in `DifferentialGeometry/Operators/Bochner.lean`
-- **[First Bianchi Identity](https://en.wikipedia.org/wiki/Riemann_curvature_tensor#Symmetries_and_identities):** The cyclic sum of the Riemann curvature tensor vanishes for a torsion-free connection. Theorem: `first_bianchi` in `DifferentialGeometry/Geometry/Bianchi.lean`
-- **[Fundamental Theorem of Riemannian Geometry](https://en.wikipedia.org/wiki/Fundamental_theorem_of_Riemannian_geometry):** Existence and uniqueness of the Levi-Civita connection. Theorem: `levi_civita_exists_unique` in `DifferentialGeometry/Geometry/Connection.lean`
-- **[Ricci Identity](https://en.wikipedia.org/wiki/Riemann_curvature_tensor#Definition):** The commutator of the second covariant derivative equals the Riemann curvature tensor for a torsion-free connection. Theorem: `ricci_identity` in `DifferentialGeometry/Geometry/RicciIdentity.lean`
+- **[First Bianchi Identity](https://en.wikipedia.org/wiki/Riemann_curvature_tensor#Symmetries_and_identities):** 
+
+> If $\nabla$ is a torsion-free connection on a manifold $M$, then for any vector fields $X, Y, Z \in \mathfrak{X}(M)$, the Riemann curvature tensor $R$ satisfies
+  > $$R(X,Y)Z + R(Y,Z)X + R(Z,X)Y = 0$$
+  
+  Theorem: `first_bianchi` in `DifferentialGeometry/Geometry/Bianchi.lean`
+- **[Fundamental Theorem of Riemannian Geometry](https://en.wikipedia.org/wiki/Fundamental_theorem_of_Riemannian_geometry):** 
+
+> For any Riemannian manifold $(M, g)$, there exists a unique affine connection $\nabla$ (the Levi-Civita connection) such that for all vector fields $X, Y, Z \in \mathfrak{X}(M)$:
+  > $$[X, Y] = \nabla_X Y - \nabla_Y X \quad \text{and} \quad X(g(Y, Z)) = g(\nabla_X Y, Z) + g(Y, \nabla_X Z)$$
+  
+  Theorem: `levi_civita_exists_unique` in `DifferentialGeometry/Geometry/Connection.lean`
+- **[Ricci Identity](https://en.wikipedia.org/wiki/Riemann_curvature_tensor#Definition):** 
+
+> If $\nabla$ is a torsion-free connection on a manifold $M$, then for any vector fields $X, Y, Z \in \mathfrak{X}(M)$, the commutator of the second covariant derivative satisfies
+  > $$\nabla^2_{X,Y} Z - \nabla^2_{Y,X} Z = R(X,Y)Z$$
+  
+  Theorem: `ricci_identity` in `DifferentialGeometry/Geometry/RicciIdentity.lean`
 
 ## Proven Properties
 - **Hessian Symmetry:** Hessian symmetry for torsion-free connections. Theorem: `hessian_symm` in `DifferentialGeometry/Operators/Hessian.lean`
