@@ -18,7 +18,7 @@ This library prioritizes algebraic structure over topological construction.
 * **Compositional Operators:** Higher-order derivatives and complex geometric flows are constructed via pure functional composition rather than hardcoded index manipulations.
 
 ## Current Capabilities
-- **Affine Connections:** Covariant derivatives, Koszul formula, torsion-free property, metric compatibility.
+- **Affine Connections:** Conformal transformations, covariant derivatives, Koszul formula, torsion-free property, metric compatibility.
 - **Algebraic Foundations:** Scalar multiplication, derivation actions, Lie brackets, trace operators.
 - **Curvature Tensors:** Riemann, Ricci, and Scalar curvature, Ricci identities, First Bianchi identity.
 - **Differential Operators:** Bochner identity, Divergence, Gradient, Hessian, Laplacian, Lie Derivative, Second Covariant Derivative.
@@ -34,6 +34,10 @@ This library prioritizes algebraic structure over topological construction.
   > $$\Delta |\nabla f|^2 = 2 |\nabla^2 f|^2 + 2 \text{Ric}(\nabla f, \nabla f) + 2 g(\nabla f, \nabla \Delta f)$$
   
   Theorem: `bochner_identity` in `DifferentialGeometry/Operators/Bochner.lean`
+- **[Conformal Modification of Connection](https://en.wikipedia.org/wiki/Conformal_map):** 
+  > If $\nabla$ is a torsion-free connection on a manifold $M$, then its conformal transformation via a scalar function $u \in C^\infty(M)$ strictly preserves the torsion-free property.
+  
+  Theorem: `conformal_torsion_free` in `DifferentialGeometry/Geometry/Conformal.lean`
 - **[First Bianchi Identity](https://en.wikipedia.org/wiki/Riemann_curvature_tensor#Symmetries_and_identities):** 
   > If $\nabla$ is a torsion-free connection on a manifold $M$, then for any vector fields $X, Y, Z \in \mathfrak{X}(M)$, the Riemann curvature tensor $R$ satisfies
   > $$R(X,Y)Z + R(Y,Z)X + R(Z,X)Y = 0$$

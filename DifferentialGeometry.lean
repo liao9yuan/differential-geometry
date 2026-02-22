@@ -6,6 +6,7 @@ import DifferentialGeometry.Algebra.Trace
 import DifferentialGeometry.Geometry.Metric
 import DifferentialGeometry.Geometry.Connection
 import DifferentialGeometry.Geometry.Curvature
+import DifferentialGeometry.Geometry.Conformal
 
 -- 3. Operators
 import DifferentialGeometry.Operators.Hessian
