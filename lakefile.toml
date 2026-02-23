@@ -1,10 +1,10 @@
 name = "DifferentialGeometry"
-version = "0.1.0"
+version = "1.0.0"
 keywords = ["math"]
 defaultTargets = ["DifferentialGeometry"]
 
 [leanOptions]
-pp.unicode.fun = true # pretty-prints `fun a ↦ b`
+pp.unicode.fun = true
 relaxedAutoImplicit = false
 weak.linter.mathlibStandardSet = true
 maxSynthPendingDepth = 3

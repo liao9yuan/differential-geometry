@@ -11,7 +11,7 @@ set_option linter.style.longLine false
 
 /-!
 # Time Derivatives and Variation
-Defines generic time derivatives, variation of metric, and Ricci bilinearity.
+Defines generic time derivatives and variation of metric.
 -/
 
 open DerivationAction
@@ -71,19 +71,3 @@ def metric_var_form {Time : Type} [TimeDerivative Time R] [TimeDerivativeRules T
       rw [h2, h3, h4]
     rw [h1]
     exact TimeDerivativeRules.t_smul V c (fun s => (g_fam s).g X Y) t
-
-variable [DerivationAction R V] [LieBracket V] [TraceOperator R V]
-
--- 4. Ricci Form Rules and Wrapping
-class RicciFormRules (conn : AffineConnection R V) where
-  add_left : ∀ X₁ X₂ Y, Rc conn (X₁ + X₂) Y = Rc conn X₁ Y + Rc conn X₂ Y
-  smul_left : ∀ a X Y, Rc conn (HSMul.hSMul a X) Y = a * Rc conn X Y
-  add_right : ∀ X Y₁ Y₂, Rc conn X (Y₁ + Y₂) = Rc conn X Y₁ + Rc conn X Y₂
-  smul_right : ∀ a X Y, Rc conn X (HSMul.hSMul a Y) = a * Rc conn X Y
-
-def ricciForm (conn : AffineConnection R V) [RicciFormRules conn] : SmoothBilinearForm R V where
-  val := fun X Y => Rc conn X Y
-  add_left := RicciFormRules.add_left
-  smul_left := RicciFormRules.smul_left
-  add_right := RicciFormRules.add_right
-  smul_right := RicciFormRules.smul_right

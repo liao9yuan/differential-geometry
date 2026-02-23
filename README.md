@@ -20,9 +20,9 @@ This library prioritizes algebraic structure over topological construction.
 ## Current Capabilities
 - **Affine Connections:** Conformal transformations, covariant derivatives, Koszul formula, torsion-free property, metric compatibility.
 - **Algebraic Foundations:** Scalar multiplication, derivation actions, Lie brackets, trace operators, Lie derivation rules.
-- **Curvature Tensors:** Riemann, Ricci, and Scalar curvature, Ricci identities, First Bianchi identity, tensoriality of Riemann curvature.
+- **Curvature Tensors:** Riemann, Ricci, and Scalar curvature, Ricci identities, First Bianchi identity, rigorous Ricci form construction, tensoriality of Riemann curvature.
 - **Differential Operators:** Bochner identity, Divergence, Gradient, Hessian, Laplacian, Lie Derivative, Second Covariant Derivative.
-- **Geometric Flows:** Ricci Flow equations, evolution of curvature and operators.
+- **Geometric Flows:** Ricci Flow equation, Levi-Civita connection property.
 - **Integration Operations:** Global integrals and Divergence Theorem.
 - **Levi-Civita Theorem:** Existence and uniqueness of the Levi-Civita connection via the Koszul formula.
 - **Ordered Tensors:** Positivity of smooth bilinear forms, algebraic spatial maximum principles, and trace order rules.
@@ -79,7 +79,7 @@ This library prioritizes algebraic structure over topological construction.
 - **Second Covariant Derivative Bilinearity:** $C^\infty$-linearity of the second covariant derivative operator with respect to both vector field arguments. Theorems: `secondCovDeriv_smul_X`, `secondCovDeriv_smul_Y` in `DifferentialGeometry/Operators/SecondCovariantDerivative.lean`
 - **Tensor Inner Product Properties:** Symmetry, additivity, and scalar multiplication linearity of the inner product of (0,2)-tensors. Theorems: `tensorInnerProduct_symm`, `tensorInnerProduct_add_left`, `tensorInnerProduct_smul_left` in `DifferentialGeometry/Algebra/TensorInnerProduct.lean`
 - **Time Derivative Bilinearity:** Formal distribution of metric time variations according to metric scalar multiplication and addition properties. Formalized within the definition of `metric_var_form` in `DifferentialGeometry/Operators/Variation.lean`
-- **Ricci Bilinearity:** Formal construction of the Ricci curvature operator as a true `SmoothBilinearForm`, mapping seamlessly onto the variation. Established via the definition of `ricciForm` in `DifferentialGeometry/Operators/Variation.lean`
+- **Ricci Bilinearity:** Rigorous construction of the Ricci curvature as a `SmoothBilinearForm`, proven via $C^\infty$-linearity of the Riemann tensor and trace linearity. Theorem: `ricciForm` in `DifferentialGeometry/Geometry/RicciTensor.lean`
 
 ## Limitations
 

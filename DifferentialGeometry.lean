@@ -9,6 +9,8 @@ import DifferentialGeometry.Algebra.Trace
 import DifferentialGeometry.Geometry.Metric
 import DifferentialGeometry.Geometry.Connection
 import DifferentialGeometry.Geometry.Curvature
+import DifferentialGeometry.Geometry.CurvatureTensor
+import DifferentialGeometry.Geometry.RicciTensor
 import DifferentialGeometry.Geometry.Bianchi
 import DifferentialGeometry.Geometry.RicciIdentity
 import DifferentialGeometry.Geometry.Conformal

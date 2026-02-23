@@ -66,6 +66,53 @@ lemma nabla_sub_left (conn : AffineConnection R V) (A B Z : V) : conn.nabla (A -
     _ = conn.nabla A Z + - conn.nabla B Z := by rw [nabla_neg_left]
     _ = conn.nabla A Z - conn.nabla B Z := by rw [sub_eq_add_neg]
 
+/-- Proves that Riemann curvature is additive in the first vector field argument. -/
+lemma Rm_add_X (conn : AffineConnection R V) [DerivationRules R V] (X₁ X₂ Y Z : V) : Rm conn (X₁ + X₂) Y Z = Rm conn X₁ Y Z + Rm conn X₂ Y Z := by
+  unfold Rm
+  rw [conn.nabla_add_left X₁ X₂ (conn.nabla Y Z)]
+  rw [conn.nabla_add_left X₁ X₂ Z]
+  rw [DerivationRules.bracket_add_left R X₁ X₂ Y]
+  rw [conn.nabla_add_left (bracket X₁ Y) (bracket X₂ Y) Z]
+  rw [conn.nabla_add_right Y (conn.nabla X₁ Z) (conn.nabla X₂ Z)]
+  abel
+
+/-- Proves that Riemann curvature is additive in the third vector field argument. -/
+lemma Rm_add_Z (conn : AffineConnection R V) (X Y Z₁ Z₂ : V) : Rm conn X Y (Z₁ + Z₂) = Rm conn X Y Z₁ + Rm conn X Y Z₂ := by
+  unfold Rm
+  rw [conn.nabla_add_right Y Z₁ Z₂]
+  rw [conn.nabla_add_right X (conn.nabla Y Z₁) (conn.nabla Y Z₂)]
+  rw [conn.nabla_add_right X Z₁ Z₂]
+  rw [conn.nabla_add_right Y (conn.nabla X Z₁) (conn.nabla X Z₂)]
+  rw [conn.nabla_add_right (bracket X Y) Z₁ Z₂]
+  abel
+
+/-- Proves that Riemann curvature is additive in the second vector field argument. -/
+lemma Rm_add_Y (conn : AffineConnection R V) [DerivationRules R V] (X Y₁ Y₂ Z : V) : Rm conn X (Y₁ + Y₂) Z = Rm conn X Y₁ Z + Rm conn X Y₂ Z := by
+  unfold Rm
+  rw [conn.nabla_add_left Y₁ Y₂ Z]
+  rw [conn.nabla_add_right X (conn.nabla Y₁ Z) (conn.nabla Y₂ Z)]
+  rw [conn.nabla_add_left Y₁ Y₂ (conn.nabla X Z)]
+  rw [DerivationRules.bracket_add_right R X Y₁ Y₂]
+  rw [conn.nabla_add_left (bracket X Y₁) (bracket X Y₂) Z]
+  abel
+
+/-- Proves that the Riemann curvature tensor is C-infinity linear with respect to its second vector field argument. -/
+theorem Rm_smul_Y (conn : AffineConnection R V) [DerivationRules R V] [LieDerivationRules R V] (f : R) (X Y Z : V) :
+  Rm conn X (ScalarMul.smul f Y) Z = ScalarMul.smul f (Rm conn X Y Z) := by
+  unfold Rm
+  rw [conn.nabla_smul_left f Y Z]
+  rw [conn.leibniz f X (conn.nabla Y Z)]
+  rw [conn.nabla_smul_left f Y (conn.nabla X Z)]
+  rw [DerivationRules.bracket_smul_right f X Y]
+  rw [conn.nabla_add_left (ScalarMul.smul f (bracket X Y)) (ScalarMul.smul (action X f) Y) Z]
+  rw [conn.nabla_smul_left f (bracket X Y) Z]
+  rw [conn.nabla_smul_left (action X f) Y Z]
+  simp only [smul_eq_hSMul]
+  rw [smul_sub, smul_sub]
+  abel
+
+
+
 /-- Proves that the Riemann curvature tensor is C-infinity linear with respect to its first vector field argument. -/
 theorem Rm_smul_X (conn : AffineConnection R V) [DerivationRules R V] [LieDerivationRules R V] (f : R) (X Y Z : V) :
   Rm conn (ScalarMul.smul f X) Y Z = ScalarMul.smul f (Rm conn X Y Z) := by
