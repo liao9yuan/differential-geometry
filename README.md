@@ -81,8 +81,8 @@ This library prioritizes algebraic structure over topological construction.
 - **Second Covariant Derivative Bilinearity:** $C^\infty$-linearity of the second covariant derivative operator with respect to both vector field arguments. Theorems: `secondCovDeriv_smul_X`, `secondCovDeriv_smul_Y` in `DifferentialGeometry/Operators/SecondCovariantDerivative.lean`
 - **Tensor Inner Product Properties:** Symmetry, additivity, and scalar multiplication linearity of the inner product of (0,2)-tensors. Theorems: `tensorInnerProduct_symm`, `tensorInnerProduct_add_left`, `tensorInnerProduct_smul_left` in `DifferentialGeometry/Algebra/TensorInnerProduct.lean`
 - **Time Derivative Bilinearity:** Formal distribution of metric time variations according to metric scalar multiplication and addition properties. Formalized within the definition of `metric_var_form` in `DifferentialGeometry/Operators/Variation.lean`
-## Limitations
 
+## Limitations
 This library inherently assumes:
 * **Intrinsic Smoothness:** Smoothness and convergence are absorbed by the type system. The framework cannot model Sobolev spaces, distributions, or measure-theoretic jump functions.
 For singularities occurred at time $T$, such as in Ricci Flow, we would have to work on $t \in [0,T)$, before the metric degenerates.
@@ -123,4 +123,34 @@ The abstractions and formalizations in this library are heavily inspired by and 
 - Differential Geometry and Applications, Richard Hamilton, Monique Chyba and Xiaodong Cao (This is not published yet.)
 - Hongxi Wu, An Introduction to Riemannian Geometry. (2014). Higher Education Press. (This is not a book in English, but it can be found [here](https://www.overdrive.com/media/12444682/黎曼几何初步-preliminary-riemann-geometry). ISBN 978-7-04-040458-6)
 
+## Axioms and Assumptions
 
+The irreducible mathematical axioms injected into the system are categorized below. These are all mathematical facts in our setting. Purely structural type definitions (e.g., the existence of a trace operator or scalar multiplication) are omitted from this list.
+
+**Algebraic & Differential Rules**
+- **`DerivationRules`** / **`ActionLinear`** — Full Leibniz and linearity rules for the derivation action: $(X+Y)f = Xf + Yf$, etc.
+- **`LieDerivation`** — The Lie bracket acts strictly as a commutator of derivations: $[X, Y]f = X(Yf) - Y(Xf)$.
+- **`TraceLinearityRules`** — The trace operators (both abstract and metric-dependent) are additive and homogeneous.
+
+**Riemannian Geometry**
+- **`InverseMetric`** — The sharp operator $\sharp$ strictly inverts the metric $g$, acting as a bijection such that $g(\sharp\omega, Z) = \omega(Z)$.
+- **`MetricCompatible`** — The connection preserves the metric: $Xg(Y, Z) = g(\nabla_X Y, Z) + g(Y, \nabla_X Z)$.
+- **`TorsionFree`** — The connection is torsion-free: $\nabla_X Y - \nabla_Y X = [X, Y]$.
+
+**Analysis & Topology (Blackboxed)**
+- **`DivergenceTheorem`** — The global integral of a divergence vanishes: $\int \text{div}(X) = 0$.
+- **`SpatialMaximum`** — At a spatial maximum of a scalar function $f$, the gradient vanishes ($\nabla f = 0$) and the Hessian is negative semi-definite ($\text{Hess}(f) \le 0$).
+- **`TraceOrderRules`** — The metric trace of a positive semi-definite bilinear form is non-negative: $T \ge 0 \implies \text{tr}_g(T) \ge 0$.
+
+**Time Evolution**
+- **`TimeDerivativeRules`** — The time derivative operator $\partial_t$ is linear.
+- **`RicciFlow`** — A one-parameter family of metrics $g(t)$ evolves by the Ricci flow equation: $\partial_t g = -2\text{Rc}$.
+
+## Future Work
+
+The following properties are currently injected as axioms but should be downgraded to formal theorems in future iterations. 
+
+- **`JacobiIdentity`** — The identity $[X, [Y, Z]] + [Y, [Z, X]] + [Z, [X, Y]] = 0$ is a direct algebraic consequence of the `LieDerivation` commutator definition and should be proved via expansion.
+- **`MusicalIsomorphismRules`** — The identity $g(\nabla f, X) = X(f)$ should be derived as a theorem from the fundamental definition of the exterior derivative $df(X) = X(f)$ and the `InverseMetric` axiom.
+- **`MetricTraceRankOneRules` & `MetricTraceCyclic`** — Identities such as $\text{tr}_g(\langle U, \cdot \rangle \langle W, \cdot \rangle) = \langle U, W \rangle$ should not be axiomatized. They should emerge as inherent properties by restricting the vector field module $V$ to be a finitely generated projective module over the ring $R$.
+- **`BochnerTraceRules`** — Specialized trace identities required for the Bochner-Weitzenböck formula (e.g., relating the trace of the second covariant derivative to Ricci curvature) should be rigorously derived by implementing a generalized tensor contraction framework, rather than being hardcoded.
