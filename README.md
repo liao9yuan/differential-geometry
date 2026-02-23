@@ -14,8 +14,8 @@ We are treating:
 This library prioritizes algebraic structure over topological construction. 
 
 * **Coordinate Insensitivity:** The framework operates entirely without local charts. However, on the user side, concrete coordinate calculations can be executed seamlessly by instantiating the module with explicit spaces (see `EuclideanSample.lean`).
-* **Axiomatic Injection:** Analytical bottlenecks (e.g., PDE existence, maximum principles) can be easily isolated and injected as axioms by the user. This permits strict algebraic verification of tensor evolutions (e.g., Ricci flow) without the prerequisite of building topological manifolds.
-* **Compositional Operators:** Higher-order derivatives and complex geometric flows are constructed via pure functional composition rather than hardcoded index manipulations.
+* **Axiom Injection:** Analytical bottlenecks (e.g., PDE existence, maximum principles) can be easily isolated and injected as axioms by the user. This permits strict algebraic verification of tensor evolutions (e.g., Ricci flow) without the prerequisite of building topological manifolds.
+* **Abstract definition:** Higher-order derivatives and complex geometric flows are constructed via pure functional composition rather than hardcoded index manipulations.
 
 ## Current Capabilities
 - **Affine Connections:** Conformal transformations, covariant derivatives, Koszul formula, torsion-free property, metric compatibility.
@@ -120,7 +120,7 @@ The abstractions and formalizations in this library are heavily inspired by and 
 
 - Chow, B., et al. Hamilton's Ricci Flow (ISBN 978-1-4704-7369-3).
 - Colding, T. H., & Minicozzi II, W. P. A Course in Minimal Surfaces (ISBN 978-1-4704-7640-3).
-- Differential Geometry and Applications, Richard Hamilton, Monique Chyba and Xiaodong Cao
+- Differential Geometry and Applications, Richard Hamilton, Monique Chyba and Xiaodong Cao (This is not published yet.)
 - Hongxi Wu, An Introduction to Riemannian Geometry. (2014). Higher Education Press. (This is not a book in English, but it can be found [here](https://www.overdrive.com/media/12444682/黎曼几何初步-preliminary-riemann-geometry). ISBN 978-7-04-040458-6)
 
 
