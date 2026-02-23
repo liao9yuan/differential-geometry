@@ -1,7 +1,7 @@
 -- 1. Algebraic Foundations
 import DifferentialGeometry.Algebra.Basic
 import DifferentialGeometry.Algebra.BilinearForm
-import DifferentialGeometry.Algebra.OrderedTensor
+import DifferentialGeometry.Analysis.MaximumPrinciple
 import DifferentialGeometry.Algebra.TensorInnerProduct
 import DifferentialGeometry.Algebra.Trace
 

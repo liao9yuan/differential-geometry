@@ -70,7 +70,7 @@ This library prioritizes algebraic structure over topological construction.
 ## Proven Properties
 - **Divergence Product Rule:** The Leibniz rule for the divergence of a scalar-multiplied vector field. Theorem: `divergence_smul` in `DifferentialGeometry/Operators/Divergence.lean`
 - **Hessian Symmetry:** Hessian symmetry for torsion-free connections. Theorem: `hessian_symm` in `DifferentialGeometry/Operators/Hessian.lean`
-- **Laplacian Sign at Spatial Maximum:** Verification that the metric trace of a negative semi-definite Hessian yields a non-positive Laplacian. Theorem: `laplacian_nonpos_at_max` in `DifferentialGeometry/Algebra/OrderedTensor.lean`
+- **Laplacian Sign at Spatial Maximum:** Verification that the metric trace of a negative semi-definite Hessian yields a non-positive Laplacian. Theorem: `laplacian_nonpos_at_max` in `DifferentialGeometry/Analysis/OrderedTensor.lean`
 - **Metric Compatibility of Covariant Derivative:** The covariant derivative of the metric tensor is exactly zero. Theorem: `metric_covDerivOp_zero` in `DifferentialGeometry/Operators/CovariantDerivative.lean`
 - **Metric Compatibility of Squared Norm:** Directional derivative of a squared vector norm. Theorem: `norm_sq_deriv` in `DifferentialGeometry/Geometry/Connection.lean`
 - **Metric Sign and Subtraction Properties:** Algebraic behavior of the metric tensor under negation and subtraction in its arguments. Lemmas: `metric_neg_left_local`, `metric_sub_left_local`, `metric_sub_right_local` in `DifferentialGeometry/Operators/LieDerivative.lean`
