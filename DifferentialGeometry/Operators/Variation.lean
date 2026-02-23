@@ -19,13 +19,25 @@ open LieBracket
 
 variable {R V : Type} [CommRing R] [AddCommGroup V] [Module R V]
 
+/-- Helper lemma equating `ScalarMul.smul` with `HSMul.hSMul`.
+Ensures that the explicitly required scalar multiplication matches the Lean built-in notation.
+Input: (R, V)
+Output: Prop -/
 lemma smul_eq_hSMul (c : R) (W : V) : ScalarMul.smul c W = HSMul.hSMul c W := rfl
 
 -- 1. Generic Time Derivative
+/-- Generic time derivative operator.
+Defines the `partial_t` operator for time-dependent functions.
+Input: (Type, Type)
+Output: Type -/
 class TimeDerivative (Time α : Type) where
   partial_t : (Time → α) → Time → α
 
 -- 2. Time Derivative Rules
+/-- Rules for the generic time derivative operator.
+Axiomatizes the additivity and scalar multiplication linearity of the time derivative.
+Input: (Type, Type, Type)
+Output: Type -/
 class TimeDerivativeRules (Time R V : Type) [CommRing R] [AddCommGroup V] [Module R V] [TimeDerivative Time R] where
   t_add : ∀ (f₁ f₂ : Time → R) (t : Time),
     TimeDerivative.partial_t (fun s => f₁ s + f₂ s) t = TimeDerivative.partial_t f₁ t + TimeDerivative.partial_t f₂ t
@@ -33,6 +45,10 @@ class TimeDerivativeRules (Time R V : Type) [CommRing R] [AddCommGroup V] [Modul
     TimeDerivative.partial_t (fun s => c * f s) t = c * TimeDerivative.partial_t f t
 
 -- 3. Metric Variation Form
+/-- Time variation of a metric tensor family.
+Constructs a smooth bilinear form representing the precise time derivative of the metric tensor.
+Input: (Time → MetricTensor R V, Time)
+Output: SmoothBilinearForm R V -/
 def metric_var_form {Time : Type} [TimeDerivative Time R] [TimeDerivativeRules Time R V]
   (g_fam : Time → MetricTensor R V) (t : Time) : SmoothBilinearForm R V where
   val := fun X Y => TimeDerivative.partial_t (fun s => (g_fam s).g X Y) t

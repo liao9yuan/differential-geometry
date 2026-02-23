@@ -3,6 +3,8 @@ import DifferentialGeometry.Algebra.Trace
 import DifferentialGeometry.Geometry.Metric
 import DifferentialGeometry.Geometry.Connection
 import DifferentialGeometry.Operators.Gradient
+import DifferentialGeometry.Algebra.TraceRankOne
+import DifferentialGeometry.Operators.Bochner
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.Abel
 
@@ -24,14 +26,8 @@ Algebraic definition of the divergence of a vector field.
 def divergence (metric : MetricTensor R V) [MetricTraceOperator R V metric] (conn : AffineConnection R V) (X : V) : R :=
   MetricTraceOperator.metric_trace metric (fun Y Z => metric.g (conn.nabla Y X) Z)
 
-/-- Axiomatic rules for trace of rank-1 operators to support divergence product rule. -/
-class DivergenceTraceRules (R V : Type) [CommRing R] [AddCommGroup V] [Module R V] [ScalarMul R V] [DerivationAction R V]
-  (metric : MetricTensor R V) [MetricTraceOperator R V metric] where
-  trace_action_smul : ∀ (X : V) (f : R),
-    MetricTraceOperator.metric_trace metric (fun Y Z => action Y f * metric.g X Z) = action X f
-
 -- Proves the Leibniz rule for the divergence of a scalar-multiplied vector field.
-lemma divergence_smul (metric : MetricTensor R V) [MetricTraceOperator R V metric] [MetricTraceRules R V metric] [DivergenceTraceRules R V metric] (conn : AffineConnection R V) (f : R) (X : V) :
+lemma divergence_smul (metric : MetricTensor R V) [MetricTraceOperator R V metric] [MetricTraceRules R V metric] [MetricTraceRankOneRules R V metric] [MusicalIsomorphism R V metric] [MusicalIsomorphismRules metric] (conn : AffineConnection R V) (f : R) (X : V) :
     divergence metric conn (ScalarMul.smul f X) = f * divergence metric conn X + action X f := by
   dsimp [divergence]
   have h1 : (fun Y Z => metric.g (conn.nabla Y (ScalarMul.smul f X)) Z) =
@@ -46,7 +42,17 @@ lemma divergence_smul (metric : MetricTensor R V) [MetricTraceOperator R V metri
   rw [h2]
   rw [MetricTraceRules.trace_add]
   rw [MetricTraceRules.trace_smul]
-  rw [DivergenceTraceRules.trace_action_smul (metric := metric)]
+  -- Isolate the rank-1 term
+  have h_rank_one : (fun Y Z => action Y f * metric.g X Z) = (fun Y Z => metric.g (grad metric f) Y * metric.g X Z) := by
+    funext Y Z
+    have h_grad := MusicalIsomorphismRules.g_grad (metric := metric) f Y
+    rw [← h_grad]
+  rw [h_rank_one]
+  -- Apply the fundamental linear algebra rule
+  rw [MetricTraceRankOneRules.trace_rank_one (metric := metric) (grad metric f) X]
+  -- Convert the gradient inner product back to the derivation action
+  have h_grad_X := MusicalIsomorphismRules.g_grad (metric := metric) f X
+  rw [h_grad_X]
   ring
 
 /-!
@@ -66,7 +72,7 @@ class DivergenceTheorem (metric : MetricTensor R V) [MetricTraceOperator R V met
 
 -- Proves Green's first identity (Integration by parts) for a vector field and a scalar function.
 theorem integration_by_parts (metric : MetricTensor R V) [MetricTraceOperator R V metric]
-    [MetricTraceRules R V metric] [DivergenceTraceRules R V metric] (conn : AffineConnection R V)
+    [MetricTraceRules R V metric] [MetricTraceRankOneRules R V metric] [MusicalIsomorphism R V metric] [MusicalIsomorphismRules metric] (conn : AffineConnection R V)
     [IntegralOperator R] [DivergenceTheorem metric conn] (f : R) (X : V) :
     IntegralOperator.integral (f * divergence metric conn X) + IntegralOperator.integral (action X f) = 0 := by
   have h_div_smul : divergence metric conn (ScalarMul.smul f X) = f * divergence metric conn X + action X f :=
