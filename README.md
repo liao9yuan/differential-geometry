@@ -148,9 +148,9 @@ The irreducible mathematical axioms injected into the system are categorized bel
 
 ## Future Work
 
-The following properties are currently injected as axioms but should be downgraded to formal theorems in future iterations. 
+The following axioms should be downgraded to formal theorems in future iterations.
 
-- **`JacobiIdentity`** — The identity $[X, [Y, Z]] + [Y, [Z, X]] + [Z, [X, Y]] = 0$ is a direct algebraic consequence of the `LieDerivation` commutator definition and should be proved via expansion.
-- **`MusicalIsomorphismRules`** — The identity $g(\nabla f, X) = X(f)$ should be derived as a theorem from the fundamental definition of the exterior derivative $df(X) = X(f)$ and the `InverseMetric` axiom.
-- **`MetricTraceRankOneRules` & `MetricTraceCyclic`** — Identities such as $\text{tr}_g(\langle U, \cdot \rangle \langle W, \cdot \rangle) = \langle U, W \rangle$ should not be axiomatized. They should emerge as inherent properties by restricting the vector field module $V$ to be a finitely generated projective module over the ring $R$.
-- **`BochnerTraceRules`** — Specialized trace identities required for the Bochner-Weitzenböck formula (e.g., relating the trace of the second covariant derivative to Ricci curvature) should be rigorously derived by implementing a generalized tensor contraction framework, rather than being hardcoded.
+- **`JacobiIdentity`** — Provable by expanding the `LieDerivation` commutator definition.
+- **`MusicalIsomorphismRules`** — Derivable from the exterior derivative $df(X) = X(f)$ and the `InverseMetric` axiom.
+- **`MetricTraceRankOneRules` & `MetricTraceCyclic`** — Should emerge from restricting $V$ to a finitely generated projective module over $R$.
+- **`BochnerTraceRules`** — Should be derived via a generalized tensor contraction framework.
