@@ -2,6 +2,7 @@ import Mathlib.Algebra.Module.Basic
 import Mathlib.Algebra.Ring.Basic
 
 set_option autoImplicit false
+set_option linter.style.longLine false
 
 /-!
 # Base Algebraic Structures

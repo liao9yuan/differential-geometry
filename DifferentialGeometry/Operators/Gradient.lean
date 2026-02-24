@@ -2,6 +2,7 @@ import DifferentialGeometry.Algebra.Basic
 import DifferentialGeometry.Geometry.Metric
 
 set_option autoImplicit false
+set_option linter.style.longLine false
 
 variable {R V : Type}
 variable [Add R] [Mul R] [Sub R] [Neg R]
