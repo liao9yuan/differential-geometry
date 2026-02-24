@@ -125,7 +125,7 @@ The abstractions and formalizations in this library are heavily inspired by and 
 
 ## Axioms and Assumptions
 
-The irreducible mathematical axioms injected into the system are categorized below. These are all mathematical facts in our setting. Purely structural type definitions (e.g., the existence of a trace operator or scalar multiplication) are omitted from this list.
+The irreducible mathematical axioms injected into the system are categorized below. Purely structural type definitions (e.g., the existence of a trace operator or scalar multiplication) are omitted from this list.
 
 **Algebraic & Differential Rules**
 - **`DerivationRules`** / **`ActionLinear`** — Full Leibniz and linearity rules for the derivation action: $(X+Y)f = Xf + Yf$, etc.
