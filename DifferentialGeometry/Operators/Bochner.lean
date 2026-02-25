@@ -1,12 +1,12 @@
 import DifferentialGeometry.Algebra.Basic
-import DifferentialGeometry.Geometry.Metric
+import DifferentialGeometry.Algebra.Metric
 import DifferentialGeometry.Geometry.Connection
 import DifferentialGeometry.Operators.Hessian
 import DifferentialGeometry.Operators.Laplacian
 import DifferentialGeometry.Geometry.Curvature
 import DifferentialGeometry.Geometry.RicciIdentity
 import DifferentialGeometry.Operators.Gradient
-import DifferentialGeometry.Algebra.TensorInnerProduct
+import DifferentialGeometry.Analysis.TensorInnerProduct
 import Mathlib.Algebra.Module.Basic
 import Mathlib.Algebra.Ring.Basic
 import Mathlib.Tactic.Ring
@@ -131,7 +131,7 @@ lemma hessian_norm_sq_grad
   rw [hsplit]
   ring
 
-class BochnerTraceRules (metric : MetricTensor R V) [iso : MusicalIsomorphism R V metric] [MetricTraceOperator R V metric] [InverseMetric R V metric]
+class BochnerTraceRules (metric : MetricTensor R V) [iso : MusicalIsomorphism R V metric] [MetricTraceOperator R V metric]
   (conn : AffineConnection R V) [TraceOperator R V] where
   trace_second_cov_deriv : ∀ f : R,
     MetricTraceOperator.metric_trace metric (fun X Y => metric.g (secondCovDeriv conn X Y (grad metric f)) (grad metric f)) =
@@ -146,7 +146,6 @@ theorem bochner_identity
   (metric : MetricTensor R V) [iso : MusicalIsomorphism R V metric]
   [MusicalIsomorphismRules metric]
   [MetricTraceOperator R V metric] [MetricTraceRules R V metric]
-  [InverseMetric R V metric] [MetricTraceCyclic metric]
   (conn : AffineConnection R V) [MetricCompatible conn metric] [TorsionFree conn]
   [bochner_rules : BochnerTraceRules metric conn]
   (f : R) :

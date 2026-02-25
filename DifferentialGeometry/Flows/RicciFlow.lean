@@ -1,7 +1,7 @@
 import DifferentialGeometry.Operators.Variation
-import DifferentialGeometry.Geometry.RicciTensor
+import DifferentialGeometry.Analysis.RicciTensor
 import DifferentialGeometry.Geometry.Connection
-import DifferentialGeometry.Geometry.Metric
+import DifferentialGeometry.Algebra.Metric
 
 set_option autoImplicit false
 set_option linter.style.longLine false

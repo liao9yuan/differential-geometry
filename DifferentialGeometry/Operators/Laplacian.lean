@@ -1,5 +1,5 @@
 import DifferentialGeometry.Algebra.Basic
-import DifferentialGeometry.Geometry.Metric
+import DifferentialGeometry.Algebra.Metric
 import DifferentialGeometry.Operators.Hessian
 import Mathlib.Algebra.Module.Basic
 import Mathlib.Algebra.Ring.Basic

@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Connection
-import DifferentialGeometry.Geometry.Metric
+import DifferentialGeometry.Algebra.Metric
 import DifferentialGeometry.Operators.Gradient
 import DifferentialGeometry.Algebra.Basic
 import Mathlib.Tactic.Abel

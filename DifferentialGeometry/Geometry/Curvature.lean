@@ -1,6 +1,6 @@
 import DifferentialGeometry.Algebra.Basic
 import DifferentialGeometry.Algebra.Trace
-import DifferentialGeometry.Geometry.Metric
+import DifferentialGeometry.Algebra.Metric
 import Mathlib.Algebra.Module.Basic
 import Mathlib.Algebra.Ring.Basic
 import DifferentialGeometry.Geometry.Connection

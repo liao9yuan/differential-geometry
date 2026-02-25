@@ -1,6 +1,6 @@
 import DifferentialGeometry.Algebra.Basic
 import DifferentialGeometry.Algebra.BilinearForm
-import DifferentialGeometry.Geometry.Metric
+import DifferentialGeometry.Algebra.Metric
 
 set_option autoImplicit false
 set_option linter.style.longLine false

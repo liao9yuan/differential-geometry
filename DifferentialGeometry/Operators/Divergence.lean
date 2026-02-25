@@ -1,9 +1,9 @@
 import DifferentialGeometry.Algebra.Basic
 import DifferentialGeometry.Algebra.Trace
-import DifferentialGeometry.Geometry.Metric
+import DifferentialGeometry.Algebra.Metric
 import DifferentialGeometry.Geometry.Connection
 import DifferentialGeometry.Operators.Gradient
-import DifferentialGeometry.Algebra.TraceRankOne
+import DifferentialGeometry.Analysis.TraceRankOne
 import DifferentialGeometry.Operators.Bochner
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.Abel

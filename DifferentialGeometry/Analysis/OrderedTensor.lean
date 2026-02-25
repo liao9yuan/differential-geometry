@@ -1,5 +1,5 @@
 import DifferentialGeometry.Algebra.BilinearForm
-import DifferentialGeometry.Geometry.Metric
+import DifferentialGeometry.Algebra.Metric
 import DifferentialGeometry.Operators.Hessian
 import DifferentialGeometry.Operators.Laplacian
 import DifferentialGeometry.Operators.Gradient

@@ -1,6 +1,6 @@
 import DifferentialGeometry.Algebra.Basic
 import DifferentialGeometry.Algebra.BilinearForm
-import DifferentialGeometry.Geometry.Metric
+import DifferentialGeometry.Algebra.Metric
 import DifferentialGeometry.Geometry.Connection
 import DifferentialGeometry.Geometry.Curvature
 import Mathlib.Tactic.Ring

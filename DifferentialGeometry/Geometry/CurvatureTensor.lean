@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Connection
 import DifferentialGeometry.Geometry.Curvature
 import DifferentialGeometry.Algebra.Basic
+import DifferentialGeometry.Algebra.Lie
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.Abel
 
@@ -17,9 +18,7 @@ open LieBracket
 
 variable {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [DerivationAction R V] [LieBracket V]
 
-/-- Axiomatizes the action of the Lie bracket on scalar functions. -/
-class LieDerivationRules (R V : Type) [CommRing R] [AddCommGroup V] [Module R V] [DerivationAction R V] [LieBracket V] where
-  action_bracket : ∀ (X Y : V) (f : R), action (bracket X Y) f = action X (action Y f) - action Y (action X f)
+variable {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [DerivationAction R V] [LieBracket V]
 
 lemma smul_eq_hSMul {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] (c : R) (W : V) : ScalarMul.smul c W = HSMul.hSMul c W := rfl
 

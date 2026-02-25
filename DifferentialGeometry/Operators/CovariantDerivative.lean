@@ -1,7 +1,7 @@
 import DifferentialGeometry.Algebra.Basic
 import DifferentialGeometry.Algebra.BilinearForm
 import DifferentialGeometry.Geometry.Connection
-import DifferentialGeometry.Geometry.Metric
+import DifferentialGeometry.Algebra.Metric
 import Mathlib.Tactic.Ring
 
 set_option autoImplicit false

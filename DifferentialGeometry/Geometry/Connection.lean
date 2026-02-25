@@ -1,5 +1,6 @@
 import DifferentialGeometry.Algebra.Basic
-import DifferentialGeometry.Geometry.Metric
+import DifferentialGeometry.Algebra.Metric
+import DifferentialGeometry.Algebra.Musical
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.Abel
 import Mathlib.Algebra.Module.Basic
@@ -127,16 +128,6 @@ theorem levi_civita_uniqueness [LieBracket V]
   rw [eq1, eq2, eq3, g1, g2, g3, s1, s2, s3]
   ring
 
-/-- Isomorphism from 1-forms to vector fields (sharp operator).
-Input: (MetricTensor R V)
-Output: Type -/
-class InverseMetric (R V : Type) [CommRing R] [AddCommGroup V] [Module R V] (metric : MetricTensor R V) where
-  inv : (V → R) → V
-  inv_add : ∀ f g : V → R, inv (fun v => f v + g v) = inv f + inv g
-  inv_smul : ∀ (c : R) (f : V → R), inv (fun v => c * f v) = ScalarMul.smul c (inv f)
-  inv_g : ∀ Y : V, inv (fun Z => metric.g Y Z) = Y
-  g_inv : ∀ (f : V → R) (Z : V), metric.g (inv f) Z = f Z
-
 /-- Leibniz rule and Jacobi identity for derivation action and Lie bracket.
 Input: (R, V)
 Output: Type -/
@@ -154,26 +145,6 @@ class DerivationRules (R V : Type) [CommRing R] [AddCommGroup V] [Module R V] [D
 variable [LieBracket V]
 variable [DerivationRules R V]
 
-lemma metric_neg_left {R V} [CommRing R] [AddCommGroup V] [Module R V] [DerivationAction R V] [LieBracket V] [DerivationRules R V] (metric : MetricTensor R V) (X Y : V) : metric.g (-X) Y = - metric.g X Y := by
-  have h1 : metric.g (X + -X) Y = metric.g X Y + metric.g (-X) Y := metric.bilinear_add_left X (-X) Y
-  have h3 : metric.g (0 + 0) Y = metric.g 0 Y + metric.g 0 Y := metric.bilinear_add_left 0 0 Y
-  have h5 : metric.g 0 Y = 0 := by
-    calc metric.g 0 Y = metric.g 0 Y + metric.g 0 Y - metric.g 0 Y := by ring
-      _ = metric.g (0 + 0) Y - metric.g 0 Y := by rw [← h3]
-      _ = metric.g 0 Y - metric.g 0 Y := by rw [add_zero]
-      _ = 0 := by ring
-  calc metric.g (-X) Y = metric.g X Y + metric.g (-X) Y - metric.g X Y := by ring
-    _ = metric.g (X + -X) Y - metric.g X Y := by rw [← h1]
-    _ = metric.g 0 Y - metric.g X Y := by rw [add_neg_cancel]
-    _ = 0 - metric.g X Y := by rw [h5]
-    _ = - metric.g X Y := by ring
-
-lemma metric_sub_left {R V} [CommRing R] [AddCommGroup V] [Module R V] [DerivationAction R V] [LieBracket V] [DerivationRules R V] (metric : MetricTensor R V) (X Y Z : V) : metric.g (X - Y) Z = metric.g X Z - metric.g Y Z := by
-  calc metric.g (X - Y) Z = metric.g (X + -Y) Z := by rw [sub_eq_add_neg]
-    _ = metric.g X Z + metric.g (-Y) Z := metric.bilinear_add_left X (-Y) Z
-    _ = metric.g X Z + - metric.g Y Z := by rw [metric_neg_left]
-    _ = metric.g X Z - metric.g Y Z := by rw [sub_eq_add_neg]
-
 /-- Explicit construction of the Levi-Civita connection using the Koszul formula.
 Input: (MetricTensor R V)
 Output: AffineConnection R V
@@ -182,8 +153,8 @@ Output: AffineConnection R V
 # Differential Geometry and Applications, Richard Hamilton, Monique Chyba and Xiaodong Cao
 -/
 def koszul_connection [Invertible (2 : R)] [LieBracket V] [DerivationRules R V]
-  (metric : MetricTensor R V) [InverseMetric R V metric] : AffineConnection R V where
-  nabla X Y := InverseMetric.inv metric (fun Z =>
+  (metric : MetricTensor R V) [MusicalIsomorphism R V metric] : AffineConnection R V where
+  nabla X Y := MusicalIsomorphism.sharp metric (fun Z =>
     (action X (metric.g Y Z) + action Y (metric.g Z X) - action Z (metric.g X Y)
       - metric.g X (bracket Y Z) + metric.g Y (bracket Z X) + metric.g Z (bracket X Y)) * ⅟2)
   nabla_add_left X1 X2 Y := by
@@ -203,7 +174,7 @@ def koszul_connection [Invertible (2 : R)] [LieBracket V] [DerivationRules R V]
       have h10 : metric.g Z (bracket (X1 + X2) Y) = metric.g Z (bracket X1 Y) + metric.g Z (bracket X2 Y) := by rw [h9, metric.symm Z _, metric.bilinear_add_left, metric.symm _ Z, metric.symm _ Z]
       rw [h1, h3, h5, h6, h8, h10]
       ring_nf
-    rw [eq_func, InverseMetric.inv_add]
+    rw [eq_func, MusicalIsomorphism.sharp_add]
   nabla_add_right X Y1 Y2 := by
     have eq_func : (fun Z : V => (action X (metric.g (Y1 + Y2) Z) + action (Y1 + Y2) (metric.g Z X) - action Z (metric.g X (Y1 + Y2)) - metric.g X (bracket (Y1 + Y2) Z) + metric.g (Y1 + Y2) (bracket Z X) + metric.g Z (bracket X (Y1 + Y2))) * ⅟2)
                    = (fun Z : V => (action X (metric.g Y1 Z) + action Y1 (metric.g Z X) - action Z (metric.g X Y1) - metric.g X (bracket Y1 Z) + metric.g Y1 (bracket Z X) + metric.g Z (bracket X Y1)) * ⅟2 +
@@ -222,7 +193,7 @@ def koszul_connection [Invertible (2 : R)] [LieBracket V] [DerivationRules R V]
       have h6a : metric.g Z (bracket X (Y1 + Y2)) = metric.g Z (bracket X Y1) + metric.g Z (bracket X Y2) := by rw [h6, metric.symm Z _, metric.bilinear_add_left, metric.symm _ Z, metric.symm _ Z]
       rw [h1a, h2, h3a, h4a, h5a, h6a]
       ring_nf
-    rw [eq_func, InverseMetric.inv_add]
+    rw [eq_func, MusicalIsomorphism.sharp_add]
   nabla_smul_left c X Y := by
     have eq_func : (fun Z : V => (action (ScalarMul.smul c X) (metric.g Y Z) + action Y (metric.g Z (ScalarMul.smul c X)) - action Z (metric.g (ScalarMul.smul c X) Y) - metric.g (ScalarMul.smul c X) (bracket Y Z) + metric.g Y (bracket Z (ScalarMul.smul c X)) + metric.g Z (bracket (ScalarMul.smul c X) Y)) * ⅟2)
                    = (fun Z : V => c * ((action X (metric.g Y Z) + action Y (metric.g Z X) - action Z (metric.g X Y) - metric.g X (bracket Y Z) + metric.g Y (bracket Z X) + metric.g Z (bracket X Y)) * ⅟2)) := by
@@ -242,7 +213,7 @@ def koszul_connection [Invertible (2 : R)] [LieBracket V] [DerivationRules R V]
       have s2 : metric.g Y X = metric.g X Y := metric.symm Y X
       rw [s1, s2]
       ring_nf
-    rw [eq_func, InverseMetric.inv_smul]
+    rw [eq_func, MusicalIsomorphism.sharp_smul]
   leibniz c X Y := by
     have eq_func : (fun Z : V => (action X (metric.g (ScalarMul.smul c Y) Z) + action (ScalarMul.smul c Y) (metric.g Z X) - action Z (metric.g X (ScalarMul.smul c Y)) - metric.g X (bracket (ScalarMul.smul c Y) Z) + metric.g (ScalarMul.smul c Y) (bracket Z X) + metric.g Z (bracket X (ScalarMul.smul c Y))) * ⅟2)
                    = (fun Z : V => action X c * metric.g Y Z * ⅟2 * 2 +
@@ -263,23 +234,23 @@ def koszul_connection [Invertible (2 : R)] [LieBracket V] [DerivationRules R V]
       have s1 : metric.g Z Y = metric.g Y Z := metric.symm Z Y
       rw [s1]
       ring_nf
-    rw [eq_func, InverseMetric.inv_add, InverseMetric.inv_smul]
-    have direct_term : InverseMetric.inv metric (fun Z => action X c * metric.g Y Z * ⅟2 * 2) = ScalarMul.smul (action X c) Y := by
+    rw [eq_func, MusicalIsomorphism.sharp_add, MusicalIsomorphism.sharp_smul]
+    have direct_term : MusicalIsomorphism.sharp metric (fun Z => action X c * metric.g Y Z * ⅟2 * 2) = ScalarMul.smul (action X c) Y := by
       have h_cancel : ∀ Z, action X c * metric.g Y Z * ⅟2 * 2 = action X c * metric.g Y Z := fun Z => by
         calc action X c * metric.g Y Z * ⅟2 * 2 = action X c * metric.g Y Z * (⅟2 * 2) := by ring
           _ = action X c * metric.g Y Z * 1 := by rw [invOf_mul_self 2]
           _ = action X c * metric.g Y Z := by ring
       have h : (fun Z => action X c * metric.g Y Z * ⅟2 * 2) = (fun Z => action X c * metric.g Y Z) := funext h_cancel
-      rw [h, InverseMetric.inv_smul, InverseMetric.inv_g]
+      rw [h, MusicalIsomorphism.sharp_smul, MusicalIsomorphism.sharp_g]
     rw [direct_term]
 
-instance metric_compat_koszul [Invertible (2 : R)] (metric : MetricTensor R V) [InverseMetric R V metric] : MetricCompatible (koszul_connection metric) metric where
+instance metric_compat_koszul [Invertible (2 : R)] (metric : MetricTensor R V) [MusicalIsomorphism R V metric] : MetricCompatible (koszul_connection metric) metric where
   compat X Y Z := by
     let nabla := (koszul_connection metric).nabla
     have h1 : metric.g (nabla X Y) Z = (action X (metric.g Y Z) + action Y (metric.g Z X) - action Z (metric.g X Y) - metric.g X (bracket Y Z) + metric.g Y (bracket Z X) + metric.g Z (bracket X Y)) * ⅟2 := by
-      exact InverseMetric.g_inv _ _
+      exact MusicalIsomorphism.g_sharp _ _
     have h2 : metric.g (nabla X Z) Y = (action X (metric.g Z Y) + action Z (metric.g Y X) - action Y (metric.g X Z) - metric.g X (bracket Z Y) + metric.g Z (bracket Y X) + metric.g Y (bracket X Z)) * ⅟2 := by
-      exact InverseMetric.g_inv _ _
+      exact MusicalIsomorphism.g_sharp _ _
     have h3 : metric.g Y (nabla X Z) = metric.g (nabla X Z) Y := metric.symm _ _
     rw [h1, h3, h2]
     have s1 : metric.g Z Y = metric.g Y Z := metric.symm Z Y
@@ -298,7 +269,7 @@ instance metric_compat_koszul [Invertible (2 : R)] (metric : MetricTensor R V) [
         _ = action X (metric.g Y Z) * (⅟2 * 2) := by rw [← invOf_mul_self 2]
         _ = action X (metric.g Y Z) * ⅟2 * 2 := by ring
 
-instance torsion_free_koszul [Invertible (2 : R)] (metric : MetricTensor R V) [InverseMetric R V metric] : TorsionFree (koszul_connection metric) where
+instance torsion_free_koszul [Invertible (2 : R)] (metric : MetricTensor R V) [MusicalIsomorphism R V metric] : TorsionFree (koszul_connection metric) where
   torsion_zero X Y := by
     let nabla := (koszul_connection metric).nabla
     have eq_func : (fun Z : V => (action X (metric.g Y Z) + action Y (metric.g Z X) - action Z (metric.g X Y) - metric.g X (bracket Y Z) + metric.g Y (bracket Z X) + metric.g Z (bracket X Y)) * ⅟2 - (action Y (metric.g X Z) + action X (metric.g Z Y) - action Z (metric.g Y X) - metric.g Y (bracket X Z) + metric.g X (bracket Z Y) + metric.g Z (bracket Y X)) * ⅟2) = (fun Z : V => metric.g (bracket X Y) Z) := by
@@ -323,8 +294,8 @@ instance torsion_free_koszul [Invertible (2 : R)] (metric : MetricTensor R V) [I
       exact metric.symm Z (bracket X Y)
     have g_inj : ∀ A B : V, (∀ Z, metric.g A Z = metric.g B Z) → A = B := by
       intro A B h
-      have hA : InverseMetric.inv metric (fun Z => metric.g A Z) = A := InverseMetric.inv_g A
-      have hB : InverseMetric.inv metric (fun Z => metric.g B Z) = B := InverseMetric.inv_g B
+      have hA : MusicalIsomorphism.sharp metric (fun Z => metric.g A Z) = A := MusicalIsomorphism.sharp_g A
+      have hB : MusicalIsomorphism.sharp metric (fun Z => metric.g B Z) = B := MusicalIsomorphism.sharp_g B
       have hF : (fun Z => metric.g A Z) = (fun Z => metric.g B Z) := funext h
       rw [← hA, ← hB, hF]
     apply g_inj
@@ -333,8 +304,8 @@ instance torsion_free_koszul [Invertible (2 : R)] (metric : MetricTensor R V) [I
       have hsub : nabla X Y - nabla Y X = nabla X Y + - nabla Y X := sub_eq_add_neg _ _
       rw [hsub, metric.bilinear_add_left, metric_neg_left (metric:=metric), ← sub_eq_add_neg]
     rw [hg]
-    have gX : metric.g (nabla X Y) Z = (action X (metric.g Y Z) + action Y (metric.g Z X) - action Z (metric.g X Y) - metric.g X (bracket Y Z) + metric.g Y (bracket Z X) + metric.g Z (bracket X Y)) * ⅟2 := InverseMetric.g_inv _ _
-    have gY : metric.g (nabla Y X) Z = (action Y (metric.g X Z) + action X (metric.g Z Y) - action Z (metric.g Y X) - metric.g Y (bracket X Z) + metric.g X (bracket Z Y) + metric.g Z (bracket Y X)) * ⅟2 := InverseMetric.g_inv _ _
+    have gX : metric.g (nabla X Y) Z = (action X (metric.g Y Z) + action Y (metric.g Z X) - action Z (metric.g X Y) - metric.g X (bracket Y Z) + metric.g Y (bracket Z X) + metric.g Z (bracket X Y)) * ⅟2 := MusicalIsomorphism.g_sharp _ _
+    have gY : metric.g (nabla Y X) Z = (action Y (metric.g X Z) + action X (metric.g Z Y) - action Z (metric.g Y X) - metric.g Y (bracket X Z) + metric.g X (bracket Z Y) + metric.g Z (bracket Y X)) * ⅟2 := MusicalIsomorphism.g_sharp _ _
     rw [gX, gY]
     exact congrFun eq_func Z
 
@@ -346,7 +317,7 @@ Output: Prop
 # Reference:
 # Differential Geometry and Applications, Richard Hamilton, Monique Chyba and Xiaodong Cao
 -/
-theorem levi_civita_exists_unique [Invertible (2 : R)] (metric : MetricTensor R V) [InverseMetric R V metric] :
+theorem levi_civita_exists_unique [Invertible (2 : R)] (metric : MetricTensor R V) [MusicalIsomorphism R V metric] :
   ∃ (conn : AffineConnection R V),
     (MetricCompatible conn metric ∧ TorsionFree conn) ∧
     (∀ (conn' : AffineConnection R V), MetricCompatible conn' metric ∧ TorsionFree conn' → conn' = conn) := by
@@ -359,14 +330,14 @@ theorem levi_civita_exists_unique [Invertible (2 : R)] (metric : MetricTensor R 
       funext X Y
       have g_inj : ∀ A B : V, (∀ Z, metric.g A Z = metric.g B Z) → A = B := by
         intro A B h_g
-        have hA : InverseMetric.inv metric (fun Z => metric.g A Z) = A := InverseMetric.inv_g A
-        have hB : InverseMetric.inv metric (fun Z => metric.g B Z) = B := InverseMetric.inv_g B
+        have hA : MusicalIsomorphism.sharp metric (fun Z => metric.g A Z) = A := MusicalIsomorphism.sharp_g A
+        have hB : MusicalIsomorphism.sharp metric (fun Z => metric.g B Z) = B := MusicalIsomorphism.sharp_g B
         have hF : (fun Z => metric.g A Z) = (fun Z => metric.g B Z) := funext h_g
         rw [← hA, ← hB, hF]
       apply g_inj
       intro Z
       have h1 : 2 * metric.g (conn'.nabla X Y) Z = action X (metric.g Y Z) + action Y (metric.g X Z) - action Z (metric.g X Y) - metric.g X (bracket Y Z) + metric.g Y (bracket Z X) + metric.g Z (bracket X Y) := levi_civita_uniqueness conn' metric X Y Z
-      have h2 : metric.g ((koszul_connection metric).nabla X Y) Z = (action X (metric.g Y Z) + action Y (metric.g Z X) - action Z (metric.g X Y) - metric.g X (bracket Y Z) + metric.g Y (bracket Z X) + metric.g Z (bracket X Y)) * ⅟2 := InverseMetric.g_inv _ _
+      have h2 : metric.g ((koszul_connection metric).nabla X Y) Z = (action X (metric.g Y Z) + action Y (metric.g Z X) - action Z (metric.g X Y) - metric.g X (bracket Y Z) + metric.g Y (bracket Z X) + metric.g Z (bracket X Y)) * ⅟2 := MusicalIsomorphism.g_sharp _ _
       have sx : metric.g X Z = metric.g Z X := metric.symm X Z
       rw [sx] at h1
       calc metric.g (conn'.nabla X Y) Z = metric.g (conn'.nabla X Y) Z * 1 := by ring

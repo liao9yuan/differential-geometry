@@ -13,6 +13,15 @@ Algebraic foundations for Lie brackets and derivations on vector fields.
 open DerivationAction
 open LieBracket
 
+class LieDerivation (R V : Type) [CommRing R] [DerivationAction R V] [LieBracket V] where
+  bracket_action : ∀ X Y : V, ∀ u : R,
+    DerivationAction.action (LieBracket.bracket X Y) u =
+    DerivationAction.action X (DerivationAction.action Y u) - DerivationAction.action Y (DerivationAction.action X u)
+
+class ActionLinear (R V : Type) [CommRing R] [AddCommGroup V] [DerivationAction R V] where
+  action_add : ∀ X Y : V, ∀ u : R,
+    DerivationAction.action (X + Y) u = DerivationAction.action X u + DerivationAction.action Y u
+
 -- Defines the foundational rule that vector fields are distinguishable by their action on functions.
 /-- Vector field non-degeneracy axiom class. -/
 class VectorFieldNonDegenerate (R V : Type) [CommRing R] [AddCommGroup V] [Module R V] [DerivationAction R V] where
