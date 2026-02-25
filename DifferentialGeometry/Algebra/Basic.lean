@@ -9,14 +9,6 @@ set_option linter.style.longLine false
 Defines the algebraic interaction between the function ring R and the vector field module V.
 -/
 
-/-- Scalar multiplication action of R on V.
-Input: (R, V)
-Output: V -/
-class ScalarMul (R : Type) (V : Type) where
-  smul : R → V → V
-
-infixr:73 " • " => ScalarMul.smul
-
 variable (R V : Type)
 variable [CommRing R] [AddCommGroup V] [Module R V]
 

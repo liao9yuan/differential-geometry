@@ -19,7 +19,7 @@ This library prioritizes algebraic structure over topological construction.
 
 ## Current Capabilities
 - **Affine Connections:** Conformal transformations, covariant derivatives, Koszul formula, torsion-free property, metric compatibility.
-- **Algebraic Foundations:** Scalar multiplication, derivation actions, Lie brackets, trace operators, Lie derivation rules, vector field non-degeneracy, Jacobi identity.
+- **Algebraic Foundations:** Standard modules over commutative rings (`Module R V`), derivation actions, Lie brackets, trace operators, Lie derivation rules, vector field non-degeneracy, Jacobi identity.
 - **Curvature Tensors:** Riemann, Ricci, and Scalar curvature, Ricci identities, First Bianchi identity, rigorous Ricci form construction, tensoriality of Riemann curvature.
 - **Differential Operators:** Bochner identity, Divergence, Gradient, Hessian, Laplacian, Lie Derivative, Second Covariant Derivative.
 - **Geometric Flows:** Ricci Flow equation, Levi-Civita connection property.
@@ -76,7 +76,7 @@ This library prioritizes algebraic structure over topological construction.
 - **Metric Compatibility of Squared Norm:** Directional derivative of a squared vector norm. Theorem: `norm_sq_deriv` in `DifferentialGeometry/Geometry/Connection.lean`
 - **Metric Sign and Subtraction Properties:** Algebraic behavior of the metric tensor under negation and subtraction in its arguments. Lemmas: `metric_neg_left_local`, `metric_sub_left_local`, `metric_sub_right_local` in `DifferentialGeometry/Operators/LieDerivative.lean`
 - **Metric Subtraction Properties:** Properties of the metric tensor under subtraction. Theorem: `metric_sub_left` in `DifferentialGeometry/Algebra/Metric.lean`
-- **Musical Endomorphism Linearity:** The lifted sharp operator preserves vector addition and scalar multiplication. Theorems: `endo_add`, `endo_smul` in `DifferentialGeometry/Algebra/Musical.lean`
+- **Musical Endomorphism Linearity:** The metric `raise` operator preserves tensor addition and scalar multiplication. Theorems: `raise_add`, `raise_smul` in `DifferentialGeometry/Algebra/Musical.lean`
 - **Rank-1 Metric Trace:** Pure linear algebra rule for evaluating the trace of rank-1 operators (e.g., outer products). Axiom: `trace_rank_one` in `DifferentialGeometry/Analysis/TraceRankOne.lean`
 - **Ricci Bilinearity:** Rigorous construction of the Ricci curvature as a `SmoothBilinearForm`, proven via $C^\infty$-linearity of the Riemann tensor and trace linearity. Theorem: `ricciForm` in `DifferentialGeometry/Analysis/RicciTensor.lean`
 - **Riemann Curvature Tensoriality:** $C^\infty$-linearity of the Riemann curvature tensor with respect to its first and third vector field arguments. Theorems: `Rm_smul_X`, `Rm_smul_Z` in `DifferentialGeometry/Geometry/CurvatureTensor.lean`
@@ -135,7 +135,7 @@ The irreducible mathematical axioms injected into the system are categorized bel
 - **`TraceLinearityRules`** — The trace operators (both abstract and metric-dependent) are additive and homogeneous.
 
 **Riemannian Geometry**
-- **`InverseMetric`** — The sharp operator $\sharp$ strictly inverts the metric $g$, acting as a bijection such that $g(\sharp\omega, Z) = \omega(Z)$.
+- **`MetricDuality`** — The metric is non-degenerate and equipped with a strictly inverting sharp operator $\sharp$, acting as a bijection such that $g(\sharp\omega, Z) = \omega(Z)$.
 - **`MetricCompatible`** — The connection preserves the metric: $Xg(Y, Z) = g(\nabla_X Y, Z) + g(Y, \nabla_X Z)$.
 - **`TorsionFree`** — The connection is torsion-free: $\nabla_X Y - \nabla_Y X = [X, Y]$.
 
@@ -153,7 +153,8 @@ The irreducible mathematical axioms injected into the system are categorized bel
 The following are completed and removed from "Future Work":
 
 - **`JacobiIdentity`** — Proven by expanding the Lie bracket commutator definitions from first principles in `DifferentialGeometry/Algebra/Lie.lean`. (2026-02-24)
-- **`MusicalIsomorphismRules`** — The linearity rules of the sharp operator (musical endomorphism) are rigorously proven algebraically from metric non-degeneracy in `DifferentialGeometry/Algebra/Musical.lean`. (2026-02-24)
+- **`MusicalIsomorphismRules`** — Replaced by `MetricDuality` integrating directly into the standard `MetricTensor` hierarchy. The linearity rules of the raising exact tensor index operator are rigorously proven algebraically from metric definitions in `DifferentialGeometry/Algebra/Musical.lean`. (2026-02-25)
+- **Standard Module Adoption** — The custom `ScalarMul` implementations and properties have been seamlessly removed, fully migrating to Mathlib's robust `Module R V` types with complete backwards compatibility. (2026-02-25)
 
 ## Future Work
 

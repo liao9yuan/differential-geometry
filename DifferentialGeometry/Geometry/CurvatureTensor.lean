@@ -20,11 +20,10 @@ variable {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [DerivationActi
 
 variable {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [DerivationAction R V] [LieBracket V]
 
-lemma smul_eq_hSMul {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] (c : R) (W : V) : ScalarMul.smul c W = HSMul.hSMul c W := rfl
 
 /-- Proves that the Riemann curvature tensor is C-infinity linear with respect to its third vector field argument. -/
 theorem Rm_smul_Z (conn : AffineConnection R V) [DerivationRules R V] [LieDerivationRules R V] (f : R) (X Y Z : V) :
-  Rm conn X Y (ScalarMul.smul f Z) = ScalarMul.smul f (Rm conn X Y Z) := by
+  Rm conn X Y (f • Z) = f • (Rm conn X Y Z) := by
   -- Proof strategy:
   -- Rm conn X Y (fZ) = nabla X (nabla Y (fZ)) - nabla Y (nabla X (fZ)) - nabla [X,Y] (fZ)
   unfold Rm
@@ -38,7 +37,6 @@ theorem Rm_smul_Z (conn : AffineConnection R V) [DerivationRules R V] [LieDeriva
   rw [conn.leibniz f X (conn.nabla Y Z)]
   rw [conn.leibniz f Y (conn.nabla X Z)]
   rw [LieDerivationRules.action_bracket X Y f]
-  simp only [smul_eq_hSMul]
   rw [sub_smul]
   rw [smul_sub, smul_sub]
   abel
@@ -97,16 +95,15 @@ lemma Rm_add_Y (conn : AffineConnection R V) [DerivationRules R V] (X Y₁ Y₂ 
 
 /-- Proves that the Riemann curvature tensor is C-infinity linear with respect to its second vector field argument. -/
 theorem Rm_smul_Y (conn : AffineConnection R V) [DerivationRules R V] [LieDerivationRules R V] (f : R) (X Y Z : V) :
-  Rm conn X (ScalarMul.smul f Y) Z = ScalarMul.smul f (Rm conn X Y Z) := by
+  Rm conn X (f • Y) Z = f • (Rm conn X Y Z) := by
   unfold Rm
   rw [conn.nabla_smul_left f Y Z]
   rw [conn.leibniz f X (conn.nabla Y Z)]
   rw [conn.nabla_smul_left f Y (conn.nabla X Z)]
   rw [DerivationRules.bracket_smul_right f X Y]
-  rw [conn.nabla_add_left (ScalarMul.smul f (bracket X Y)) (ScalarMul.smul (action X f) Y) Z]
+  rw [conn.nabla_add_left (f • (bracket X Y)) ((action X f) • Y) Z]
   rw [conn.nabla_smul_left f (bracket X Y) Z]
   rw [conn.nabla_smul_left (action X f) Y Z]
-  simp only [smul_eq_hSMul]
   rw [smul_sub, smul_sub]
   abel
 
@@ -114,7 +111,7 @@ theorem Rm_smul_Y (conn : AffineConnection R V) [DerivationRules R V] [LieDeriva
 
 /-- Proves that the Riemann curvature tensor is C-infinity linear with respect to its first vector field argument. -/
 theorem Rm_smul_X (conn : AffineConnection R V) [DerivationRules R V] [LieDerivationRules R V] (f : R) (X Y Z : V) :
-  Rm conn (ScalarMul.smul f X) Y Z = ScalarMul.smul f (Rm conn X Y Z) := by
+  Rm conn (f • X) Y Z = f • (Rm conn X Y Z) := by
   unfold Rm
   rw [conn.nabla_smul_left f X (conn.nabla Y Z)]
   rw [conn.nabla_smul_left f X Z]
@@ -123,6 +120,5 @@ theorem Rm_smul_X (conn : AffineConnection R V) [DerivationRules R V] [LieDeriva
   rw [nabla_sub_left]
   rw [conn.nabla_smul_left f (bracket X Y) Z]
   rw [conn.nabla_smul_left (action Y f) X Z]
-  simp only [smul_eq_hSMul]
   rw [smul_sub, smul_sub]
   abel

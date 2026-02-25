@@ -34,8 +34,7 @@ def ricciForm (conn : AffineConnection R V) [DerivationRules R V] [LieDerivation
     rw [TraceLinearityRules.trace_add]
   smul_left := fun c X Y => by
     unfold Rc
-    simp only [← smul_eq_hSMul]
-    have h : (fun Z => Rm conn Z (ScalarMul.smul c X) Y) = (fun Z => ScalarMul.smul c (Rm conn Z X Y)) := by
+    have h : (fun Z => Rm conn Z (c • X) Y) = (fun Z => c • (Rm conn Z X Y)) := by
       funext Z
       rw [Rm_smul_Y conn c Z X Y]
     rw [h]
@@ -51,8 +50,7 @@ def ricciForm (conn : AffineConnection R V) [DerivationRules R V] [LieDerivation
     rw [TraceLinearityRules.trace_add]
   smul_right := fun c X Y => by
     unfold Rc
-    simp only [← smul_eq_hSMul]
-    have h : (fun Z => Rm conn Z X (ScalarMul.smul c Y)) = (fun Z => ScalarMul.smul c (Rm conn Z X Y)) := by
+    have h : (fun Z => Rm conn Z X (c • Y)) = (fun Z => c • (Rm conn Z X Y)) := by
       funext Z
       rw [Rm_smul_Z conn c Z X Y]
     rw [h]

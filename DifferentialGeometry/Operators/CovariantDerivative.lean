@@ -48,20 +48,20 @@ lemma rawCovDeriv_add_left (Y₁ Y₂ Z : V) :
 Input: (R, V, V)
 Output: Prop -/
 lemma rawCovDeriv_smul_left (a : R) (Y Z : V) :
-  rawCovDeriv conn X T (ScalarMul.smul a Y) Z = a * rawCovDeriv conn X T Y Z := by
+  rawCovDeriv conn X T (a • Y) Z = a * rawCovDeriv conn X T Y Z := by
   dsimp [rawCovDeriv]
-  have h1 : T (ScalarMul.smul a Y) Z = a * T Y Z := T.smul_left a Y Z
+  have h1 : T (a • Y) Z = a * T Y Z := T.smul_left a Y Z
   rw [h1]
   have h2 : action X (a * T Y Z) = action X a * T Y Z + a * action X (T Y Z) := DerivationRules.action_smul_right X a _
   rw [h2]
-  have h3 : conn.nabla X (ScalarMul.smul a Y) = ScalarMul.smul (action X a) Y + ScalarMul.smul a (conn.nabla X Y) := conn.leibniz a X Y
+  have h3 : conn.nabla X (a • Y) = (action X a) • Y + a • (conn.nabla X Y) := conn.leibniz a X Y
   rw [h3]
-  have h4 : T (ScalarMul.smul (action X a) Y + ScalarMul.smul a (conn.nabla X Y)) Z = T (ScalarMul.smul (action X a) Y) Z + T (ScalarMul.smul a (conn.nabla X Y)) Z := T.add_left _ _ _
+  have h4 : T ((action X a) • Y + a • (conn.nabla X Y)) Z = T ((action X a) • Y) Z + T (a • (conn.nabla X Y)) Z := T.add_left _ _ _
   rw [h4]
-  have h5 : T (ScalarMul.smul (action X a) Y) Z = action X a * T Y Z := T.smul_left _ _ _
-  have h6 : T (ScalarMul.smul a (conn.nabla X Y)) Z = a * T (conn.nabla X Y) Z := T.smul_left _ _ _
+  have h5 : T ((action X a) • Y) Z = action X a * T Y Z := T.smul_left _ _ _
+  have h6 : T (a • (conn.nabla X Y)) Z = a * T (conn.nabla X Y) Z := T.smul_left _ _ _
   rw [h5, h6]
-  have h7 : T (ScalarMul.smul a Y) (conn.nabla X Z) = a * T Y (conn.nabla X Z) := T.smul_left _ _ _
+  have h7 : T (a • Y) (conn.nabla X Z) = a * T Y (conn.nabla X Z) := T.smul_left _ _ _
   rw [h7]
   ring
 
@@ -87,20 +87,20 @@ lemma rawCovDeriv_add_right (Y Z₁ Z₂ : V) :
 Input: (R, V, V)
 Output: Prop -/
 lemma rawCovDeriv_smul_right (a : R) (Y Z : V) :
-  rawCovDeriv conn X T Y (ScalarMul.smul a Z) = a * rawCovDeriv conn X T Y Z := by
+  rawCovDeriv conn X T Y (a • Z) = a * rawCovDeriv conn X T Y Z := by
   dsimp [rawCovDeriv]
-  have h1 : T Y (ScalarMul.smul a Z) = a * T Y Z := T.smul_right a Y Z
+  have h1 : T Y (a • Z) = a * T Y Z := T.smul_right a Y Z
   rw [h1]
   have h2 : action X (a * T Y Z) = action X a * T Y Z + a * action X (T Y Z) := DerivationRules.action_smul_right X a _
   rw [h2]
-  have h3 : conn.nabla X (ScalarMul.smul a Z) = ScalarMul.smul (action X a) Z + ScalarMul.smul a (conn.nabla X Z) := conn.leibniz a X Z
+  have h3 : conn.nabla X (a • Z) = (action X a) • Z + a • (conn.nabla X Z) := conn.leibniz a X Z
   rw [h3]
-  have h4 : T Y (ScalarMul.smul (action X a) Z + ScalarMul.smul a (conn.nabla X Z)) = T Y (ScalarMul.smul (action X a) Z) + T Y (ScalarMul.smul a (conn.nabla X Z)) := T.add_right _ _ _
+  have h4 : T Y ((action X a) • Z + a • (conn.nabla X Z)) = T Y ((action X a) • Z) + T Y (a • (conn.nabla X Z)) := T.add_right _ _ _
   rw [h4]
-  have h5 : T Y (ScalarMul.smul (action X a) Z) = action X a * T Y Z := T.smul_right _ _ _
-  have h6 : T Y (ScalarMul.smul a (conn.nabla X Z)) = a * T Y (conn.nabla X Z) := T.smul_right _ _ _
+  have h5 : T Y ((action X a) • Z) = action X a * T Y Z := T.smul_right _ _ _
+  have h6 : T Y (a • (conn.nabla X Z)) = a * T Y (conn.nabla X Z) := T.smul_right _ _ _
   rw [h5, h6]
-  have h7 : T (conn.nabla X Y) (ScalarMul.smul a Z) = a * T (conn.nabla X Y) Z := T.smul_right _ _ _
+  have h7 : T (conn.nabla X Y) (a • Z) = a * T (conn.nabla X Y) Z := T.smul_right _ _ _
   rw [h7]
   ring
 
@@ -128,7 +128,7 @@ def metricToForm (metric : MetricTensor R V) : SmoothBilinearForm R V where
       _ = metric.g Y₁ X + metric.g Y₂ X := metric.bilinear_add_left _ _ _
       _ = metric.g X Y₁ + metric.g X Y₂ := by rw [metric.symm Y₁ X, metric.symm Y₂ X]
   smul_right a X Y := by
-    calc metric.g X (ScalarMul.smul a Y) = metric.g (ScalarMul.smul a Y) X := metric.symm _ _
+    calc metric.g X (a • Y) = metric.g (a • Y) X := metric.symm _ _
       _ = a * metric.g Y X := metric.bilinear_smul_left _ _ _
       _ = a * metric.g X Y := by rw [metric.symm Y X]
 

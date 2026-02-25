@@ -20,7 +20,7 @@ Defines the second covariant derivative operator for vector fields.
 /-- Helper lemma to distribute scalar multiplication over subtraction.
 Input: (R, V, V)
 Output: Prop -/
-lemma h_smul_sub (a : R) (B C : V) : ScalarMul.smul a B - ScalarMul.smul a C = ScalarMul.smul a (B - C) := by
+lemma h_smul_sub (a : R) (B C : V) : a • B - a • C = a • (B - C) := by
   exact (smul_sub a B C).symm
 
 /-- Helper lemma for algebraic cancellation.
@@ -39,7 +39,7 @@ def secondCovDeriv (conn : AffineConnection R V) (X Y Z : V) : V :=
 Input: (AffineConnection R V, R, V, V, V)
 Output: Prop -/
 lemma secondCovDeriv_smul_X (conn : AffineConnection R V) (a : R) (X Y Z : V) :
-  secondCovDeriv conn (ScalarMul.smul a X) Y Z = ScalarMul.smul a (secondCovDeriv conn X Y Z) := by
+  secondCovDeriv conn (a • X) Y Z = a • (secondCovDeriv conn X Y Z) := by
   dsimp [secondCovDeriv]
   rw [conn.nabla_smul_left]
   rw [conn.nabla_smul_left]
@@ -50,12 +50,12 @@ lemma secondCovDeriv_smul_X (conn : AffineConnection R V) (a : R) (X Y Z : V) :
 Input: (AffineConnection R V, R, V, V, V)
 Output: Prop -/
 lemma secondCovDeriv_smul_Y (conn : AffineConnection R V) (a : R) (X Y Z : V) :
-  secondCovDeriv conn X (ScalarMul.smul a Y) Z = ScalarMul.smul a (secondCovDeriv conn X Y Z) := by
+  secondCovDeriv conn X (a • Y) Z = a • (secondCovDeriv conn X Y Z) := by
   dsimp [secondCovDeriv]
-  have h1 : conn.nabla (ScalarMul.smul a Y) Z = ScalarMul.smul a (conn.nabla Y Z) := conn.nabla_smul_left a Y Z
+  have h1 : conn.nabla (a • Y) Z = a • (conn.nabla Y Z) := conn.nabla_smul_left a Y Z
   rw [h1]
   rw [conn.leibniz]
-  have h2 : conn.nabla X (ScalarMul.smul a Y) = ScalarMul.smul (action X a) Y + ScalarMul.smul a (conn.nabla X Y) := conn.leibniz a X Y
+  have h2 : conn.nabla X (a • Y) = (action X a) • Y + a • (conn.nabla X Y) := conn.leibniz a X Y
   rw [h2]
   rw [conn.nabla_add_left]
   rw [conn.nabla_smul_left]

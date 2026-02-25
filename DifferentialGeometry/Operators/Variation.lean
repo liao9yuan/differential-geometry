@@ -19,11 +19,6 @@ open LieBracket
 
 variable {R V : Type} [CommRing R] [AddCommGroup V] [Module R V]
 
-/-- Helper lemma equating `ScalarMul.smul` with `HSMul.hSMul`.
-Ensures that the explicitly required scalar multiplication matches the Lean built-in notation.
-Input: (R, V)
-Output: Prop -/
-lemma smul_eq_hSMul (c : R) (W : V) : ScalarMul.smul c W = HSMul.hSMul c W := rfl
 
 -- 1. Generic Time Derivative
 /-- Generic time derivative operator.
@@ -59,8 +54,7 @@ def metric_var_form {Time : Type} [TimeDerivative Time R] [TimeDerivativeRules T
     rw [h1]
     exact TimeDerivativeRules.t_add V (fun s => (g_fam s).g X₁ Y) (fun s => (g_fam s).g X₂ Y) t
   smul_left := fun c X Y => by
-    simp only [← smul_eq_hSMul c X]
-    have h1 : (fun s => (g_fam s).g (ScalarMul.smul c X) Y) = (fun s => c * (g_fam s).g X Y) := by
+    have h1 : (fun s => (g_fam s).g (c • X) Y) = (fun s => c * (g_fam s).g X Y) := by
       funext s
       have step := (g_fam s).bilinear_smul_left c X Y
       exact step
@@ -77,12 +71,11 @@ def metric_var_form {Time : Type} [TimeDerivative Time R] [TimeDerivativeRules T
     rw [h1]
     exact TimeDerivativeRules.t_add V (fun s => (g_fam s).g X Y₁) (fun s => (g_fam s).g X Y₂) t
   smul_right := fun c X Y => by
-    simp only [← smul_eq_hSMul c Y]
-    have h1 : (fun s => (g_fam s).g X (ScalarMul.smul c Y)) = (fun s => c * (g_fam s).g X Y) := by
+    have h1 : (fun s => (g_fam s).g X (c • Y)) = (fun s => c * (g_fam s).g X Y) := by
       funext s
-      have h2 : (g_fam s).g X (ScalarMul.smul c Y) = (g_fam s).g (ScalarMul.smul c Y) X := (g_fam s).symm _ _
+      have h2 : (g_fam s).g X (c • Y) = (g_fam s).g (c • Y) X := (g_fam s).symm _ _
       have step := (g_fam s).bilinear_smul_left c Y X
-      have h3 : (g_fam s).g (ScalarMul.smul c Y) X = c * (g_fam s).g Y X := step
+      have h3 : (g_fam s).g (c • Y) X = c * (g_fam s).g Y X := step
       have h4 : (g_fam s).g Y X = (g_fam s).g X Y := (g_fam s).symm _ _
       rw [h2, h3, h4]
     rw [h1]
