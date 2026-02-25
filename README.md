@@ -19,7 +19,7 @@ This library prioritizes algebraic structure over topological construction.
 
 ## Current Capabilities
 - **Affine Connections:** Conformal transformations, covariant derivatives, Koszul formula, torsion-free property, metric compatibility.
-- **Algebraic Foundations:** Scalar multiplication, derivation actions, Lie brackets, trace operators, Lie derivation rules.
+- **Algebraic Foundations:** Scalar multiplication, derivation actions, Lie brackets, trace operators, Lie derivation rules, vector field non-degeneracy, Jacobi identity.
 - **Curvature Tensors:** Riemann, Ricci, and Scalar curvature, Ricci identities, First Bianchi identity, rigorous Ricci form construction, tensoriality of Riemann curvature.
 - **Differential Operators:** Bochner identity, Divergence, Gradient, Hessian, Laplacian, Lie Derivative, Second Covariant Derivative.
 - **Geometric Flows:** Ricci Flow equation, Levi-Civita connection property.
@@ -70,6 +70,7 @@ This library prioritizes algebraic structure over topological construction.
 ## Proven Properties
 - **Divergence Product Rule:** The Leibniz rule for the divergence of a scalar-multiplied vector field. Theorem: `divergence_smul` in `DifferentialGeometry/Operators/Divergence.lean`
 - **Hessian Symmetry:** Hessian symmetry for torsion-free connections. Theorem: `hessian_symm` in `DifferentialGeometry/Operators/Hessian.lean`
+- **Jacobi Identity:** Rigorous proof of the Jacobi identity from first principles using vector field non-degeneracy. Theorem: `jacobi_identity_proof` in `DifferentialGeometry/Algebra/Lie.lean`
 - **Laplacian Sign at Spatial Maximum:** Verification that the metric trace of a negative semi-definite Hessian yields a non-positive Laplacian. Theorem: `laplacian_nonpos_at_max` in `DifferentialGeometry/Analysis/OrderedTensor.lean`
 - **Metric Compatibility of Covariant Derivative:** The covariant derivative of the metric tensor is exactly zero. Theorem: `metric_covDerivOp_zero` in `DifferentialGeometry/Operators/CovariantDerivative.lean`
 - **Metric Compatibility of Squared Norm:** Directional derivative of a squared vector norm. Theorem: `norm_sq_deriv` in `DifferentialGeometry/Geometry/Connection.lean`
@@ -146,11 +147,16 @@ The irreducible mathematical axioms injected into the system are categorized bel
 - **`TimeDerivativeRules`** — The time derivative operator $\partial_t$ is linear.
 - **`RicciFlow`** — A one-parameter family of metrics $g(t)$ evolves by the Ricci flow equation: $\partial_t g = -2\text{Rc}$.
 
+## Completed Work
+
+The following are completed and removed from "Future Work":
+
+- **`JacobiIdentity`** — Proven by expanding the Lie bracket commutator definitions from first principles in `DifferentialGeometry/Algebra/Lie.lean`. (2026-02-24)
+
 ## Future Work
 
 The following axioms should be downgraded to formal theorems in future iterations.
 
-- **`JacobiIdentity`** — Provable by expanding the `LieDerivation` commutator definition.
 - **`MusicalIsomorphismRules`** — Derivable from the exterior derivative $df(X) = X(f)$ and the `InverseMetric` axiom.
 - **`MetricTraceRankOneRules` & `MetricTraceCyclic`** — Should emerge from restricting $V$ to a finitely generated projective module over $R$.
 - **`BochnerTraceRules`** — Should be derived via a generalized tensor contraction framework.
