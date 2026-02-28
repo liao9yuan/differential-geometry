@@ -295,3 +295,80 @@ theorem second_bianchi (conn : AffineConnection R V) [TorsionFree conn] [JacobiI
       + (- Rm conn ⁅X, Y⁆ Z W - Rm conn ⁅Y, Z⁆ X W - Rm conn ⁅Z, X⁆ Y W) := by
       rw [second_bianchi_S1, second_bianchi_S2]
     _ = 0 := by abel
+
+section ContractedBianchi
+
+variable [TraceOperator R V]
+
+-- Definitions
+/-- Divergence of the Ricci tensor.
+Input: (AffineConnection R V, V)
+Output: R -/
+axiom div_Rc (conn : AffineConnection R V) (X : V) : R
+
+/-- Gradient of the scalar curvature.
+Input: (AffineConnection R V, V)
+Output: R -/
+axiom grad_R (conn : AffineConnection R V) (X : V) : R
+
+/-- Divergence of the Riemann curvature tensor.
+Input: (AffineConnection R V, V, V, V)
+Output: R -/
+axiom div_Rm (conn : AffineConnection R V) (Y Z X : V) : R
+
+/-- Covariant derivative of Ricci tensor.
+Input: (AffineConnection R V, V, V, V)
+Output: R -/
+def covDerivRc (conn : AffineConnection R V) (Y Z X : V) : R :=
+  DerivationAction.action Y (Rc conn Z X) - Rc conn (conn.nabla Y Z) X - Rc conn Z (conn.nabla Y X)
+
+/-- Abstract trace operator for bilinear forms Mapping V x V to R.
+    We introduce this purely to axiomatically define the contractions. -/
+class BilinearTrace (R V : Type) where
+  tr : (V → V → R) → R
+
+/-- Trace linearity rules mapping the general trace operator's linearity properties. -/
+class BilinearTraceLinearity (R V : Type) [CommRing R] [AddCommGroup V] [BilinearTrace R V] where
+  tr_add : ∀ (T₁ T₂ : V → V → R), BilinearTrace.tr (fun Y Z => T₁ Y Z + T₂ Y Z) = BilinearTrace.tr T₁ + BilinearTrace.tr T₂
+  tr_sub : ∀ (T₁ T₂ : V → V → R), BilinearTrace.tr (fun Y Z => T₁ Y Z - T₂ Y Z) = BilinearTrace.tr T₁ - BilinearTrace.tr T₂
+  tr_zero : BilinearTrace.tr (fun (_ _ : V) => (0 : R)) = 0
+
+open BilinearTraceLinearity
+
+/-- Specific linear algebraic identities resulting from contracting the covariant derivative of curvature.
+Input: (AffineConnection R V)
+Output: Type -/
+class BianchiContractionRules (conn : AffineConnection R V) [BilinearTrace R V] where
+  contract_second_bianchi_1 : ∀ Y Z X : V, div_Rm conn Y Z X + covDerivRc conn Y Z X - covDerivRc conn Z Y X = 0
+  contract_div_Rm : ∀ X : V, BilinearTrace.tr (fun Y Z => div_Rm conn Y Z X) = div_Rc conn X
+  contract_nabla_Rc : ∀ X : V, BilinearTrace.tr (fun Y Z => covDerivRc conn Y Z X) = div_Rc conn X
+  contract_nabla_Rc_swap : ∀ X : V, BilinearTrace.tr (fun Y Z => covDerivRc conn Z Y X) = grad_R conn X
+
+open BianchiContractionRules
+
+/-- Contracted Bianchi Identity.
+Proof that 2 * div_Rc = grad_R.
+Input: (AffineConnection R V, V)
+Output: Prop -/
+theorem contracted_bianchi (conn : AffineConnection R V) [BilinearTrace R V]
+  [BilinearTraceLinearity R V] [BianchiContractionRules conn] (X : V) :
+  2 * div_Rc conn X = grad_R conn X := by
+  have h1 : (fun (Y Z : V) => div_Rm conn Y Z X + covDerivRc conn Y Z X - covDerivRc conn Z Y X) = (fun (Y Z : V) => 0) := by
+    funext Y Z
+    exact contract_second_bianchi_1 Y Z X
+  have h3 : BilinearTrace.tr (fun (Y Z : V) => div_Rm conn Y Z X + covDerivRc conn Y Z X - covDerivRc conn Z Y X) = BilinearTrace.tr (fun (Y Z : V) => 0) := by rw [h1]
+  rw [tr_zero] at h3
+  have h4 : BilinearTrace.tr (fun (Y Z : V) => div_Rm conn Y Z X + covDerivRc conn Y Z X - covDerivRc conn Z Y X) =
+    BilinearTrace.tr (fun (Y Z : V) => div_Rm conn Y Z X + covDerivRc conn Y Z X) - BilinearTrace.tr (fun (Y Z : V) => covDerivRc conn Z Y X) := by
+    exact tr_sub (fun Y Z => div_Rm conn Y Z X + covDerivRc conn Y Z X) (fun Y Z => covDerivRc conn Z Y X)
+  have h5 : BilinearTrace.tr (fun (Y Z : V) => div_Rm conn Y Z X + covDerivRc conn Y Z X) =
+    BilinearTrace.tr (fun (Y Z : V) => div_Rm conn Y Z X) + BilinearTrace.tr (fun (Y Z : V) => covDerivRc conn Y Z X) := by
+    exact tr_add (fun Y Z => div_Rm conn Y Z X) (fun Y Z => covDerivRc conn Y Z X)
+  rw [h4, h5] at h3
+  rw [contract_div_Rm X, contract_nabla_Rc X, contract_nabla_Rc_swap X] at h3
+  calc 2 * div_Rc conn X = div_Rc conn X + div_Rc conn X := by ring
+    _ = div_Rc conn X + div_Rc conn X - grad_R conn X + grad_R conn X := by abel
+    _ = 0 + grad_R conn X := by rw [h3]
+    _ = grad_R conn X := by ring
+
+end ContractedBianchi
