@@ -8,6 +8,7 @@ import Mathlib.Tactic.Abel
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
+set_option linter.style.emptyLine false
 
 /-!
 # First Bianchi Identity
@@ -300,7 +301,7 @@ section ContractedBianchi
 
 variable [TraceOperator R V]
 
--- Definitions
+-- Definitions of Scalar Invariants
 /-- Divergence of the Ricci tensor.
 Input: (AffineConnection R V, V)
 Output: R -/
@@ -322,53 +323,107 @@ Output: R -/
 def covDerivRc (conn : AffineConnection R V) (Y Z X : V) : R :=
   DerivationAction.action Y (Rc conn Z X) - Rc conn (conn.nabla Y Z) X - Rc conn Z (conn.nabla Y X)
 
-/-- Abstract trace operator for bilinear forms Mapping V x V to R.
-    We introduce this purely to axiomatically define the contractions. -/
+--- TENSOR CONTRACTION 1 (Trace over 1st input and target slot) ---
+
+/-- Abstract trace operator for a (1,4)-tensor mapping V^4 to V.
+    Contracts the first argument (differentiation slot) and the fourth argument (target slot). -/
+class Tensor14Trace (R V : Type) where
+  trace_1_4 : (V → V → V → V → V) → (V → V → V → R)
+
+/-- Linearity of trace_1_4. -/
+class Tensor14TraceLinearity (R V : Type) [CommRing R] [AddCommGroup V] [Tensor14Trace R V] where
+  tr_add : ∀ (T₁ T₂ : V → V → V → V → V), (Tensor14Trace.trace_1_4 (fun x y z w => T₁ x y z w + T₂ x y z w) : V → V → V → R) = fun y z w => Tensor14Trace.trace_1_4 T₁ y z w + Tensor14Trace.trace_1_4 T₂ y z w
+  tr_zero : (Tensor14Trace.trace_1_4 (fun _ _ _ _ => (0 : V)) : V → V → V → R) = fun _ _ _ => (0 : R)
+
+--- TENSOR CONTRACTION 2 (Bilinear trace over 2 inputs) ---
+
+/-- Abstract trace operator for bilinear forms Mapping V x V to R. -/
 class BilinearTrace (R V : Type) where
   tr : (V → V → R) → R
 
 /-- Trace linearity rules mapping the general trace operator's linearity properties. -/
 class BilinearTraceLinearity (R V : Type) [CommRing R] [AddCommGroup V] [BilinearTrace R V] where
-  tr_add : ∀ (T₁ T₂ : V → V → R), BilinearTrace.tr (fun Y Z => T₁ Y Z + T₂ Y Z) = BilinearTrace.tr T₁ + BilinearTrace.tr T₂
-  tr_sub : ∀ (T₁ T₂ : V → V → R), BilinearTrace.tr (fun Y Z => T₁ Y Z - T₂ Y Z) = BilinearTrace.tr T₁ - BilinearTrace.tr T₂
-  tr_zero : BilinearTrace.tr (fun (_ _ : V) => (0 : R)) = 0
+  tr_add : ∀ (T₁ T₂ : V → V → R), (BilinearTrace.tr (fun Y Z => T₁ Y Z + T₂ Y Z) : R) = BilinearTrace.tr T₁ + BilinearTrace.tr T₂
+  tr_sub : ∀ (T₁ T₂ : V → V → R), (BilinearTrace.tr (fun Y Z => T₁ Y Z - T₂ Y Z) : R) = BilinearTrace.tr T₁ - BilinearTrace.tr T₂
+  tr_zero : (BilinearTrace.tr (fun (_ _ : V) => (0 : R)) : R) = (0 : R)
 
-open BilinearTraceLinearity
+--- THEOREM CONTRACTIONS ---
 
 /-- Specific linear algebraic identities resulting from contracting the covariant derivative of curvature.
 Input: (AffineConnection R V)
 Output: Type -/
-class BianchiContractionRules (conn : AffineConnection R V) [BilinearTrace R V] where
-  contract_second_bianchi_1 : ∀ Y Z X : V, div_Rm conn Y Z X + covDerivRc conn Y Z X - covDerivRc conn Z Y X = 0
-  contract_div_Rm : ∀ X : V, BilinearTrace.tr (fun Y Z => div_Rm conn Y Z X) = div_Rc conn X
+class BianchiContractionRules (conn : AffineConnection R V) [Tensor14Trace R V] [BilinearTrace R V] where
+  -- First trace transformations on each term
+  trace_1_4_term1 : Tensor14Trace.trace_1_4 (fun x y z w => covDerivRm conn x y z w) = fun y z w => div_Rm conn y z w
+  trace_1_4_term2 : Tensor14Trace.trace_1_4 (fun x y z w => covDerivRm conn y z x w) = fun y z w => - covDerivRc conn y z w
+  trace_1_4_term3 : Tensor14Trace.trace_1_4 (fun x y z w => covDerivRm conn z x y w) = fun y z w => covDerivRc conn z y w
+  -- Second trace transformations
+  contract_div_Rm : ∀ X : V, BilinearTrace.tr (fun Y Z => div_Rm conn Y Z X) = - div_Rc conn X
   contract_nabla_Rc : ∀ X : V, BilinearTrace.tr (fun Y Z => covDerivRc conn Y Z X) = div_Rc conn X
   contract_nabla_Rc_swap : ∀ X : V, BilinearTrace.tr (fun Y Z => covDerivRc conn Z Y X) = grad_R conn X
-
-open BianchiContractionRules
 
 /-- Contracted Bianchi Identity.
 Proof that 2 * div_Rc = grad_R.
 Input: (AffineConnection R V, V)
 Output: Prop -/
-theorem contracted_bianchi (conn : AffineConnection R V) [BilinearTrace R V]
-  [BilinearTraceLinearity R V] [BianchiContractionRules conn] (X : V) :
+theorem contracted_bianchi (conn : AffineConnection R V) [TorsionFree conn] [JacobiIdentity V]
+  [Tensor14Trace R V] [Tensor14TraceLinearity R V]
+  [BilinearTrace R V] [BilinearTraceLinearity R V]
+  [BianchiContractionRules conn] (X : V) :
   2 * div_Rc conn X = grad_R conn X := by
-  have h1 : (fun (Y Z : V) => div_Rm conn Y Z X + covDerivRc conn Y Z X - covDerivRc conn Z Y X) = (fun (Y Z : V) => 0) := by
-    funext Y Z
-    exact contract_second_bianchi_1 Y Z X
-  have h3 : BilinearTrace.tr (fun (Y Z : V) => div_Rm conn Y Z X + covDerivRc conn Y Z X - covDerivRc conn Z Y X) = BilinearTrace.tr (fun (Y Z : V) => 0) := by rw [h1]
-  rw [tr_zero] at h3
-  have h4 : BilinearTrace.tr (fun (Y Z : V) => div_Rm conn Y Z X + covDerivRc conn Y Z X - covDerivRc conn Z Y X) =
-    BilinearTrace.tr (fun (Y Z : V) => div_Rm conn Y Z X + covDerivRc conn Y Z X) - BilinearTrace.tr (fun (Y Z : V) => covDerivRc conn Z Y X) := by
-    exact tr_sub (fun Y Z => div_Rm conn Y Z X + covDerivRc conn Y Z X) (fun Y Z => covDerivRc conn Z Y X)
-  have h5 : BilinearTrace.tr (fun (Y Z : V) => div_Rm conn Y Z X + covDerivRc conn Y Z X) =
-    BilinearTrace.tr (fun (Y Z : V) => div_Rm conn Y Z X) + BilinearTrace.tr (fun (Y Z : V) => covDerivRc conn Y Z X) := by
-    exact tr_add (fun Y Z => div_Rm conn Y Z X) (fun Y Z => covDerivRc conn Y Z X)
-  rw [h4, h5] at h3
-  rw [contract_div_Rm X, contract_nabla_Rc X, contract_nabla_Rc_swap X] at h3
+  -- 1. Apply trace_1_4 to the entire second Bianchi identity
+  have h_bianchi_fun : (fun x y z w => covDerivRm conn x y z w + covDerivRm conn y z x w + covDerivRm conn z x y w) = fun x y z w => 0 := by
+    funext x y z w
+    exact second_bianchi conn x y z w
+
+  have eq_zero : (Tensor14Trace.trace_1_4 (R:=R) (V:=V) (fun x y z w => covDerivRm conn x y z w + covDerivRm conn y z x w + covDerivRm conn z x y w) : V → V → V → R) = Tensor14Trace.trace_1_4 (R:=R) (V:=V) (fun (_ _ _ _ : V) => (0 : V)) := by
+    rw [h_bianchi_fun]
+
+  -- 2. Expand additivity of trace_1_4
+  rw [Tensor14TraceLinearity.tr_zero (R:=R) (V:=V)] at eq_zero
+  have eq_zero' : (Tensor14Trace.trace_1_4 (R:=R) (V:=V) (fun x y z w => covDerivRm conn x y z w + (covDerivRm conn y z x w + covDerivRm conn z x y w)) : V → V → V → R) = fun (_ _ _ : V) => (0 : R) := by
+    have h1 : (fun x y z w => covDerivRm conn x y z w + (covDerivRm conn y z x w + covDerivRm conn z x y w)) = (fun x y z w => covDerivRm conn x y z w + covDerivRm conn y z x w + covDerivRm conn z x y w) := by
+      funext x y z w
+      abel
+    rw [h1]
+    exact eq_zero
+
+  rw [Tensor14TraceLinearity.tr_add (R:=R) (V:=V) (fun x y z w => covDerivRm conn x y z w) (fun x y z w => covDerivRm conn y z x w + covDerivRm conn z x y w)] at eq_zero'
+  rw [Tensor14TraceLinearity.tr_add (R:=R) (V:=V) (fun x y z w => covDerivRm conn y z x w) (fun x y z w => covDerivRm conn z x y w)] at eq_zero'
+
+  -- 3. Substitute the component transformations
+  rw [BianchiContractionRules.trace_1_4_term1 (conn:=conn), BianchiContractionRules.trace_1_4_term2 (conn:=conn), BianchiContractionRules.trace_1_4_term3 (conn:=conn)] at eq_zero'
+
+  -- 4. Apply the second contraction over Y and Z
+  have h_eq_trace : BilinearTrace.tr (fun Y Z => div_Rm conn Y Z X - covDerivRc conn Y Z X + covDerivRc conn Z Y X) = 0 := by
+    have h_eval : (fun (Y Z : V) => div_Rm conn Y Z X - covDerivRc conn Y Z X + covDerivRc conn Z Y X) = (fun (_ _ : V) => (0 : R)) := by
+      funext Y Z
+      have hF := congr_fun (congr_fun (congr_fun eq_zero' Y) Z) X
+      dsimp at hF
+      calc div_Rm conn Y Z X - covDerivRc conn Y Z X + covDerivRc conn Z Y X
+        = div_Rm conn Y Z X + (-covDerivRc conn Y Z X + covDerivRc conn Z Y X) := by abel
+        _ = 0 := hF
+    rw [h_eval]
+    exact BilinearTraceLinearity.tr_zero (R:=R) (V:=V)
+
+  -- 5. Expand additivity of BilinearTrace
+  have h_exp : BilinearTrace.tr (fun Y Z => div_Rm conn Y Z X - covDerivRc conn Y Z X + covDerivRc conn Z Y X) =
+    BilinearTrace.tr (fun Y Z => div_Rm conn Y Z X) - BilinearTrace.tr (fun Y Z => covDerivRc conn Y Z X) + BilinearTrace.tr (fun Y Z => covDerivRc conn Z Y X) := by
+    have h1 : BilinearTrace.tr (fun Y Z => div_Rm conn Y Z X - covDerivRc conn Y Z X + covDerivRc conn Z Y X) = BilinearTrace.tr (fun Y Z => div_Rm conn Y Z X - covDerivRc conn Y Z X) + BilinearTrace.tr (fun Y Z => covDerivRc conn Z Y X) := by
+      exact BilinearTraceLinearity.tr_add (fun Y Z => div_Rm conn Y Z X - covDerivRc conn Y Z X) (fun Y Z => covDerivRc conn Z Y X)
+    rw [h1]
+    have h2 : BilinearTrace.tr (fun Y Z => div_Rm conn Y Z X - covDerivRc conn Y Z X) = BilinearTrace.tr (fun Y Z => div_Rm conn Y Z X) - BilinearTrace.tr (fun Y Z => covDerivRc conn Y Z X) := by
+      exact BilinearTraceLinearity.tr_sub (fun Y Z => div_Rm conn Y Z X) (fun Y Z => covDerivRc conn Y Z X)
+    rw [h2]
+
+  -- 6. Substitute the second component transformations
+  rw [h_exp] at h_eq_trace
+  rw [BianchiContractionRules.contract_div_Rm (conn:=conn) X, BianchiContractionRules.contract_nabla_Rc (conn:=conn) X, BianchiContractionRules.contract_nabla_Rc_swap (conn:=conn) X] at h_eq_trace
+
+  -- 7. Final algebraic simplification
   calc 2 * div_Rc conn X = div_Rc conn X + div_Rc conn X := by ring
-    _ = div_Rc conn X + div_Rc conn X - grad_R conn X + grad_R conn X := by abel
-    _ = 0 + grad_R conn X := by rw [h3]
+    _ = div_Rc conn X + div_Rc conn X + 0 := by ring
+    _ = div_Rc conn X + div_Rc conn X + (- div_Rc conn X - div_Rc conn X + grad_R conn X) := by rw [h_eq_trace]
     _ = grad_R conn X := by ring
 
 end ContractedBianchi
