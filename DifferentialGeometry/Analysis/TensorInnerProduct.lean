@@ -65,3 +65,18 @@ lemma inner_smul_left (c : R) (T S : SmoothBilinearForm R V) :
                      fun X => c • (((fun X => metric.raise T X) ∘ (fun X => metric.raise S X)) X) := rfl
   rw [h_comp_smul]
   exact TR.trace_smul
+
+-- Lemma 4: inner_add_right
+lemma inner_add_right (T S₁ S₂ : SmoothBilinearForm R V) :
+    tensorInnerProduct metric T (S₁ + S₂) = tensorInnerProduct metric T S₁ + tensorInnerProduct metric T S₂ := by
+  rw [inner_symm metric T (S₁ + S₂)]
+  rw [inner_add_left metric S₁ S₂ T]
+  rw [inner_symm metric S₁ T]
+  rw [inner_symm metric S₂ T]
+
+-- Lemma 5: inner_smul_right
+lemma inner_smul_right (c : R) (T S : SmoothBilinearForm R V) :
+    tensorInnerProduct metric T (c • S) = c * tensorInnerProduct metric T S := by
+  rw [inner_symm metric T (c • S)]
+  rw [inner_smul_left metric c S T]
+  rw [inner_symm metric S T]

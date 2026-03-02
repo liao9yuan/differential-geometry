@@ -72,6 +72,26 @@ instance : Add (SmoothBilinearForm R V) where
       ring
   }
 
+/-- Subtraction of two smooth bilinear forms.
+Input: (SmoothBilinearForm R V, SmoothBilinearForm R V)
+Output: SmoothBilinearForm R V -/
+instance : Sub (SmoothBilinearForm R V) where
+  sub T₁ T₂ := {
+    val := fun X Y => T₁ X Y - T₂ X Y
+    add_left := fun X₁ X₂ Y => by
+      simp only [T₁.add_left, T₂.add_left]
+      abel
+    smul_left := fun a X Y => by
+      simp only [T₁.smul_left, T₂.smul_left]
+      ring
+    add_right := fun X Y₁ Y₂ => by
+      simp only [T₁.add_right, T₂.add_right]
+      abel
+    smul_right := fun a X Y => by
+      simp only [T₁.smul_right, T₂.smul_right]
+      ring
+  }
+
 /-- Scalar multiplication of a smooth bilinear form by a function.
 Input: (R, SmoothBilinearForm R V)
 Output: SmoothBilinearForm R V -/
