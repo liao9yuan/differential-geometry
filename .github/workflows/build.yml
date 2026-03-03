@@ -22,4 +22,6 @@ jobs:
           echo "$HOME/.elan/bin" >> $GITHUB_PATH
 
       - name: Build with Lake
-        run: lake build
+        run: |
+          lake exe cache get
+          lake build
