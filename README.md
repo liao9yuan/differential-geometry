@@ -1,6 +1,6 @@
 # Differential Geometry in Lean 4
 
-A lightweight, self-contained formalization of differential geometry in Lean 4. 
+A lightweight, self-contained formalization of differential geometry in Lean 4. See [differential-geometry-papers](https://github.com/qinz1yang/differential-geometry-papers) for using the library to formalize papers in differential geometry.
 
 ## Background
 
