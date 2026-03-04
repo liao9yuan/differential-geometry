@@ -112,7 +112,7 @@ Ensure you have [Lean 4](https://lean-lang.org/lean4/doc/setup.html) installed.
 
 ```bash
 # Clone the repository
-git clone git@github.com:qinz1yang/differential-geometry.git
+git clone https://github.com/qinz1yang/differential-geometry
 cd differential-geometry
 
 # Build the library
