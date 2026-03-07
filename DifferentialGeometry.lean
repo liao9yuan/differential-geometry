@@ -23,5 +23,7 @@ import DifferentialGeometry.Operators.Hessian
 import DifferentialGeometry.Operators.Laplacian
 import DifferentialGeometry.Operators.LieDerivative
 import DifferentialGeometry.Operators.SecondCovariantDerivative
+import DifferentialGeometry.Operators.SpatialConstant
+import DifferentialGeometry.Operators.Time
 import DifferentialGeometry.Operators.Variation
 import DifferentialGeometry.Applications.LiYau1D
