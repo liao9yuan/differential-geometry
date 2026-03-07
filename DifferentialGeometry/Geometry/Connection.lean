@@ -144,6 +144,23 @@ class DerivationRules (R V : Type) [CommRing R] [AddCommGroup V] [Module R V] [D
 variable [LieBracket V]
 variable [DerivationRules R V]
 
+/-- $X(0) = 0$ -/
+lemma action_zero {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [DerivationAction R V] [LieBracket V] [DerivationRules R V] (X : V) : action X (0:R) = 0 := by
+  have h := DerivationRules.action_add_right X (0:R) (0:R)
+  rw [add_zero] at h
+  calc action X (0:R) = action X (0:R) + action X (0:R) - action X (0:R) := by abel
+    _ = action X (0:R) - action X (0:R) := by rw [← h]
+    _ = 0 := by abel
+
+/-- $X(-g) = -X(g)$ -/
+lemma action_neg {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [DerivationAction R V] [LieBracket V] [DerivationRules R V] (X : V) (g : R) : action X (- g) = - action X g := by
+  have h : action X (g + -g) = action X g + action X (-g) := DerivationRules.action_add_right X g (-g)
+  have hz : g + -g = 0 := by abel
+  rw [hz, action_zero X] at h
+  calc action X (-g) = action X g + action X (-g) - action X g := by abel
+    _ = 0 - action X g := by rw [← h]
+    _ = - action X g := by abel
+
 /-- Explicit construction of the Levi-Civita connection using the Koszul formula.
 Input: (MetricTensor R V)
 Output: AffineConnection R V
