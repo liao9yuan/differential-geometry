@@ -27,6 +27,7 @@ This library prioritizes algebraic structure over topological construction.
 - **Levi-Civita Theorem:** Existence and uniqueness of the Levi-Civita connection via the Koszul formula.
 - **Ordered Tensors:** Positivity of smooth bilinear forms, algebraic spatial maximum principles, and trace order rules.
 - **Riemannian Metrics:** Symmetric $C^\infty$-bilinear forms, metric trace operators, rank-1 metric trace rules, non-degenerate metrics, and musical endomorphisms.
+- **Spatial Constants:** Operator behavior for spatial constants (e.g., zero gradient, zero Laplacian) and linearity.
 - **Tensor Operations:** Smooth bilinear forms, covariant derivatives, second covariant derivatives, and inner products of $(0,2)$-tensors.
 - **Time Derivatives:** Generic time derivatives for scalar functions and metric variation forms.
 - **Applications:** 1D Li-Yau Harnack Inequality on a static, flat metric evolution where $u$ solves the heat equation.
@@ -51,6 +52,11 @@ This library prioritizes algebraic structure over topological construction.
   > $$R(X,Y)Z + R(Y,Z)X + R(Z,X)Y = 0$$
   
   Theorem: `first_bianchi` in `DifferentialGeometry/Geometry/Bianchi.lean`
+- **[Second Bianchi Identity](https://en.wikipedia.org/wiki/Riemann_curvature_tensor#Symmetries_and_identities):** 
+  > If $\nabla$ is a torsion-free connection on a manifold $M$, then for any vector fields $X, Y, Z, W \in \mathfrak{X}(M)$, the covariant derivative of the Riemann curvature tensor $R$ satisfies the differential identity:
+  > $$(\nabla_X R)(Y,Z)W + (\nabla_Y R)(Z,X)W + (\nabla_Z R)(X,Y)W = 0$$
+  
+  Theorem: `second_bianchi` in `DifferentialGeometry/Geometry/Bianchi.lean`
 - **[Fundamental Theorem of Riemannian Geometry](https://en.wikipedia.org/wiki/Fundamental_theorem_of_Riemannian_geometry):** 
   > For any Riemannian manifold $(M, g)$, there exists a unique affine connection $\nabla$ (the Levi-Civita connection) such that for all vector fields $X, Y, Z \in \mathfrak{X}(M)$:
   > $$[X, Y] = \nabla_X Y - \nabla_Y X \quad \text{and} \quad X(g(Y, Z)) = g(\nabla_X Y, Z) + g(Y, \nabla_X Z)$$
@@ -84,8 +90,11 @@ This library prioritizes algebraic structure over topological construction.
   
 ## Proven Properties
 - **Divergence Product Rule:** The Leibniz rule for the divergence of a scalar-multiplied vector field. Theorem: `divergence_smul` in `DifferentialGeometry/Operators/Divergence.lean`
+- **Gradient Linearity:** The gradient operator linearly distributes over addition and subtraction of scalar functions. Lemmas: `grad_add`, `grad_sub` in `DifferentialGeometry/Operators/Gradient.lean`
+- **Hessian and Gradient Properties:** Algebraic verification of Hessian-gradient commutators and evaluation, as well as derivations of squared norms. Lemmas: `hessian_eq_g_nabla_grad`, `grad_norm_sq_deriv` in `DifferentialGeometry/Operators/Bochner.lean`
 - **Hessian Symmetry:** Hessian symmetry for torsion-free connections. Theorem: `hessian_symm` in `DifferentialGeometry/Operators/Hessian.lean`
 - **Jacobi Identity:** Rigorous proof of the Jacobi identity from first principles using vector field non-degeneracy. Theorem: `jacobi_identity_proof` in `DifferentialGeometry/Algebra/Lie.lean`
+- **Laplacian Linearity:** The Laplacian operator linearly distributes over addition and subtraction of scalar functions. Lemmas: `laplacian_add`, `laplacian_sub` in `DifferentialGeometry/Operators/Laplacian.lean`
 - **Laplacian Sign at Spatial Maximum:** Verification that the metric trace of a negative semi-definite Hessian yields a non-positive Laplacian. Theorem: `laplacian_nonpos_at_max` in `DifferentialGeometry/Analysis/OrderedTensor.lean`
 - **Metric Compatibility of Covariant Derivative:** The covariant derivative of the metric tensor is exactly zero. Theorem: `metric_covDerivOp_zero` in `DifferentialGeometry/Operators/CovariantDerivative.lean`
 - **Metric Compatibility of Squared Norm:** Directional derivative of a squared vector norm. Theorem: `norm_sq_deriv` in `DifferentialGeometry/Geometry/Connection.lean`
@@ -96,6 +105,7 @@ This library prioritizes algebraic structure over topological construction.
 - **Ricci Bilinearity:** Rigorous construction of the Ricci curvature as a `SmoothBilinearForm`, proven via $C^\infty$-linearity of the Riemann tensor and trace linearity. Theorem: `ricciForm` in `DifferentialGeometry/Analysis/RicciTensor.lean`
 - **Riemann Curvature Tensoriality:** $C^\infty$-linearity of the Riemann curvature tensor with respect to its first and third vector field arguments. Theorems: `Rm_smul_X`, `Rm_smul_Z` in `DifferentialGeometry/Geometry/CurvatureTensor.lean`
 - **Second Covariant Derivative Bilinearity:** $C^\infty$-linearity of the second covariant derivative operator with respect to both vector field arguments. Theorems: `secondCovDeriv_smul_X`, `secondCovDeriv_smul_Y` in `DifferentialGeometry/Operators/SecondCovariantDerivative.lean`
+- **Spatial Constants:** Gradient and Laplacian of spatial constants evaluate to zero, and spatial scalars can be pulled out of these operators. Lemmas: `grad_zero`, `laplacian_zero`, `grad_smul`, `laplacian_smul` in `DifferentialGeometry/Operators/SpatialConstant.lean`
 - **Tensor Inner Product Properties:** Symmetry, additivity, and scalar multiplication linearity of the inner product of (0,2)-tensors. Theorems: `tensorInnerProduct_symm`, `tensorInnerProduct_add_left`, `tensorInnerProduct_smul_left` in `DifferentialGeometry/Analysis/TensorInnerProduct.lean`
 - **Time Derivative Bilinearity:** Formal distribution of metric time variations according to metric scalar multiplication and addition properties. Formalized within the definition of `metric_var_form` in `DifferentialGeometry/Operators/Variation.lean`
 
@@ -145,7 +155,9 @@ The abstractions and formalizations in this library are heavily inspired by and 
 The irreducible mathematical axioms injected into the system are categorized below. Purely structural type definitions (e.g., the existence of a trace operator or scalar multiplication) are omitted from this list.
 
 **Algebraic & Differential Rules**
+- **`BianchiContractionRules`** — Axiomatizes the commutation and linearity of traces with covariant derivatives required to rigorously contract the Second Bianchi Identity.
 - **`DerivationRules`** / **`ActionLinear`** — Full Leibniz and linearity rules for the derivation action: $(X+Y)f = Xf + Yf$, etc.
+- **`IsSpatialConstant`** — Axiomatizes a scalar whose spatial derivation vanishes automatically.
 - **`LieDerivation`** — The Lie bracket acts strictly as a commutator of derivations: $[X, Y]f = X(Yf) - Y(Xf)$.
 - **`TraceLinearityRules`** — The trace operators (both abstract and metric-dependent) are additive and homogeneous.
 
@@ -160,8 +172,10 @@ The irreducible mathematical axioms injected into the system are categorized bel
 - **`TraceOrderRules`** — The metric trace of a positive semi-definite bilinear form is non-negative: $T \ge 0 \implies \text{tr}_g(T) \ge 0$.
 
 **Time Evolution**
-- **`TimeDerivativeRules`** — The time derivative operator $\partial_t$ is linear.
 - **`RicciFlow`** — A one-parameter family of metrics $g(t)$ evolves by the Ricci flow equation: $\partial_t g = -2\text{Rc}$.
+- **`StaticMetricTimeRules`** — Axiomatizes that fundamental spatial operators are invariant under time derivatives when the underlying metric is static.
+- **`TimeDerivativeRules`** — The time derivative operator $\partial_t$ is linear.
+- **`TimeWeight`** — Axiomatizes properties of continuous time inverse weights (e.g., $1/t$), ensuring parameters map correctly within valid time domains.
 
 ## Completed Work
 
