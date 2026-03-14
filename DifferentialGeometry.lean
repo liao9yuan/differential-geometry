@@ -4,7 +4,8 @@ import DifferentialGeometry.Algebra.Lie
 import DifferentialGeometry.Algebra.Metric
 import DifferentialGeometry.Algebra.Musical
 import DifferentialGeometry.Algebra.Trace
-import DifferentialGeometry.Flows.RicciFlow
+import DifferentialGeometry.Flows.RicciFlow.Basic
+import DifferentialGeometry.Flows.RicciFlow.Evolution
 import DifferentialGeometry.Geometry.Bianchi
 import DifferentialGeometry.Geometry.Conformal
 import DifferentialGeometry.Geometry.Connection
