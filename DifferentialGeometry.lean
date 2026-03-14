@@ -7,6 +7,8 @@ import DifferentialGeometry.Algebra.Trace
 import DifferentialGeometry.Flows.RicciFlow.Basic
 import DifferentialGeometry.Flows.RicciFlow.Evolution.Gradient
 import DifferentialGeometry.Flows.RicciFlow.Evolution.Connection
+import DifferentialGeometry.Flows.RicciFlow.Evolution.Laplacian
+import DifferentialGeometry.Flows.RicciFlow.Evolution.ScalarCurvature
 import DifferentialGeometry.Geometry.Bianchi
 import DifferentialGeometry.Geometry.Conformal
 import DifferentialGeometry.Geometry.Connection
