@@ -5,7 +5,8 @@ import DifferentialGeometry.Algebra.Metric
 import DifferentialGeometry.Algebra.Musical
 import DifferentialGeometry.Algebra.Trace
 import DifferentialGeometry.Flows.RicciFlow.Basic
-import DifferentialGeometry.Flows.RicciFlow.Evolution
+import DifferentialGeometry.Flows.RicciFlow.Evolution.Gradient
+import DifferentialGeometry.Flows.RicciFlow.Evolution.Connection
 import DifferentialGeometry.Geometry.Bianchi
 import DifferentialGeometry.Geometry.Conformal
 import DifferentialGeometry.Geometry.Connection
@@ -28,3 +29,4 @@ import DifferentialGeometry.Operators.SpatialConstant
 import DifferentialGeometry.Operators.Time
 import DifferentialGeometry.Operators.Variation
 import DifferentialGeometry.Applications.LiYau1D
+import DifferentialGeometry.Flows.RicciFlow.Evolution.ScalarCurvature
