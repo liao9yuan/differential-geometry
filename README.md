@@ -33,55 +33,55 @@ This library prioritizes algebraic structure over topological construction.
 - **Applications:** 1D Li-Yau Harnack Inequality on a static, flat metric evolution where $u$ solves the heat equation.
 
 ## Proven Theorems
-- **[Bochner-Weitzenböck Identity](https://en.wikipedia.org/wiki/Bochner_formula):** 
+- **Bochner-Weitzenböck Identity:** 
   > If $f \colon M \rightarrow \mathbb{R}$ is a smooth function, then 
   > $$\Delta |\nabla f|^2 = 2 |\nabla^2 f|^2 + 2 \text{Ric}(\nabla f, \nabla f) + 2 g(\nabla f, \nabla \Delta f)$$
   
   Theorem: `bochner_identity` in `DifferentialGeometry/Operators/Bochner.lean`
-- **[Conformal Modification of Connection](https://en.wikipedia.org/wiki/Conformal_map):** 
+- **Conformal Modification of Connection:** 
   > If $\nabla$ is a torsion-free connection on a manifold $M$, then its conformal transformation via a scalar function $u \in C^\infty(M)$ strictly preserves the torsion-free property.
   
   Theorem: `conformal_torsion_free` in `DifferentialGeometry/Geometry/Conformal.lean`
-- **[Contracted Bianchi Identity](https://en.wikipedia.org/wiki/Contracted_Bianchi_identities):** 
+- **Contracted Bianchi Identity:** 
   > If $\nabla$ is a torsion-free connection on a manifold $M$, the divergence of the Ricci tensor is half the gradient of the scalar curvature:
   > $$\text{div}(Rc) = \frac{1}{2} \nabla R$$
   
   Theorem: `contracted_bianchi` in `DifferentialGeometry/Geometry/Bianchi.lean`
-- **[First Bianchi Identity](https://en.wikipedia.org/wiki/Riemann_curvature_tensor#Symmetries_and_identities):** 
+- **First Bianchi Identity:** 
   > If $\nabla$ is a torsion-free connection on a manifold $M$, then for any vector fields $X, Y, Z \in \mathfrak{X}(M)$, the Riemann curvature tensor $R$ satisfies
   > $$R(X,Y)Z + R(Y,Z)X + R(Z,X)Y = 0$$
   
   Theorem: `first_bianchi` in `DifferentialGeometry/Geometry/Bianchi.lean`
-- **[Second Bianchi Identity](https://en.wikipedia.org/wiki/Riemann_curvature_tensor#Symmetries_and_identities):** 
+- **Second Bianchi Identity:** 
   > If $\nabla$ is a torsion-free connection on a manifold $M$, then for any vector fields $X, Y, Z, W \in \mathfrak{X}(M)$, the covariant derivative of the Riemann curvature tensor $R$ satisfies the differential identity:
   > $$(\nabla_X R)(Y,Z)W + (\nabla_Y R)(Z,X)W + (\nabla_Z R)(X,Y)W = 0$$
   
   Theorem: `second_bianchi` in `DifferentialGeometry/Geometry/Bianchi.lean`
-- **[Fundamental Theorem of Riemannian Geometry](https://en.wikipedia.org/wiki/Fundamental_theorem_of_Riemannian_geometry):** 
+- **Fundamental Theorem of Riemannian Geometry:** 
   > For any Riemannian manifold $(M, g)$, there exists a unique affine connection $\nabla$ (the Levi-Civita connection) such that for all vector fields $X, Y, Z \in \mathfrak{X}(M)$:
   > $$[X, Y] = \nabla_X Y - \nabla_Y X \quad \text{and} \quad X(g(Y, Z)) = g(\nabla_X Y, Z) + g(Y, \nabla_X Z)$$
   
   Theorem: `levi_civita_exists_unique` in `DifferentialGeometry/Geometry/Connection.lean`
-- **[Integration by Parts (Green's First Identity)](https://en.wikipedia.org/wiki/Green%27s_identities):** 
+- **Integration by Parts (Green's First Identity):** 
   > Assuming the global integral of a divergence vanishes ($\int \text{div}(X) = 0$), then for any vector field $X$ and scalar function $f$, Green's first identity is algebraically satisfied:
   > $$\int f \text{div}(X) + \int X(f) = 0$$
   
   Theorem: `integration_by_parts` in `DifferentialGeometry/Operators/Divergence.lean`
-- **[Li-Yau Harnack Inequality (1D)](https://en.wikipedia.org/wiki/Li%E2%80%93Yau_inequality):** 
+- **Li-Yau Harnack Inequality (1D):** 
   > On a static, flat Riemannian manifold, if positive smooth function $u$ solves the heat equation $\partial_t u = \Delta u$, then for $f = \log u$, the algebraic Harnack quantity $Q = t(|\nabla f|^2 - \partial_t f) - \frac{1}{2}$ completes the 1D estimate.
   
   Theorem: `harnack_inequality` in `DifferentialGeometry/Applications/LiYau1D.lean`
-- **[Lie Derivative of Metric Tensor](https://en.wikipedia.org/wiki/Lie_derivative#The_Lie_derivative_of_a_tensor_field):** 
+- **Lie Derivative of Metric Tensor:** 
   > If $\nabla$ is a torsion-free, metric-compatible connection on a manifold $M$, then for any vector fields $X, Y, Z \in \mathfrak{X}(M)$, the Lie derivative of the metric $g$ along $X$ is equivalently formulated using the symmetrized covariant derivative:
   > $$(\mathcal{L}_X g)(Y, Z) = g(\nabla_Y X, Z) + g(Y, \nabla_Z X)$$
   
   Theorem: `lieDerivMetric_eq_nabla` in `DifferentialGeometry/Operators/LieDerivative.lean`
-- **[Palatini Identity](https://en.wikipedia.org/wiki/Palatini_identity):** 
+- **Palatini Identity:** 
   > The variation of the Levi-Civita connection under a metric variation $h = \partial_t g$ is algebraically derived via the Koszul formula equivalent:
   > $$2 g((\partial_t \nabla)_X Y, Z) = (\nabla_X h)(Y, Z) + (\nabla_Y h)(X, Z) - (\nabla_Z h)(X, Y)$$
   
   Theorem: `connection_variation` in `DifferentialGeometry/Operators/Variation.lean`
-- **[Ricci Identity](https://en.wikipedia.org/wiki/Riemann_curvature_tensor#Definition):** 
+- **Ricci Identity:** 
   > If $\nabla$ is a torsion-free connection on a manifold $M$, then for any vector fields $X, Y, Z \in \mathfrak{X}(M)$, the commutator of the second covariant derivative satisfies
   > $$\nabla^2_{X,Y} Z - \nabla^2_{Y,X} Z = R(X,Y)Z$$
   
