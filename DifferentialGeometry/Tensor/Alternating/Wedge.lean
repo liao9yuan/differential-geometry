@@ -1,0 +1,248 @@
+/-
+Copyright (c) 2024 Yury Kudryashov. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Yury Kudryashov
+Coauthors: Jack McCarthy
+-/
+import DifferentialGeometry.Tensor.Aux.Perm
+import DifferentialGeometry.Tensor.Alternating.Comp
+import DifferentialGeometry.Tensor.Alternating.Curry
+
+/-
+# Wedge Products
+-/
+
+noncomputable section
+suppress_compilation
+
+namespace ContinuousAlternatingMap
+
+section wedge
+
+variable
+  {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+  {M : Type*} [NormedAddCommGroup M] [NormedSpace 𝕜 M]
+  {M' : Type*} [NormedAddCommGroup M'] [NormedSpace 𝕜 M']
+  {M'' : Type*} [NormedAddCommGroup M''] [NormedSpace 𝕜 M'']
+  {N : Type*} [NormedAddCommGroup N] [NormedSpace 𝕜 N]
+  {N' : Type*} [NormedAddCommGroup N'] [NormedSpace 𝕜 N']
+  {N'' : Type*} [NormedAddCommGroup N''] [NormedSpace 𝕜 N'']
+  {m n p : ℕ}
+
+/-- The wedge product of two continuous alternating maps `g` an `h` with respect to a
+bilinear map `f`. -/
+def wedge_product (g : M [⋀^Fin m]→L[𝕜] N) (h : M [⋀^Fin n]→L[𝕜] N')
+    (f : N →L[𝕜] N' →L[𝕜] N'') : M [⋀^Fin (m + n)]→L[𝕜] N'' :=
+  uncurryFinAdd (f.compContinuousAlternatingMap₂ g h)
+
+-- TODO: change notation
+notation g "∧["f"]" h => wedge_product g h f
+notation g "∧["𝕜"]" h => wedge_product g h (ContinuousLinearMap.mul 𝕜 𝕜)
+
+theorem wedge_product_def {g : M [⋀^Fin m]→L[𝕜] N} {h : M [⋀^Fin n]→L[𝕜] N'}
+    {f : N →L[𝕜] N' →L[𝕜] N''} {x : Fin (m + n) → M} :
+    (g ∧[f] h) x = uncurryFinAdd (f.compContinuousAlternatingMap₂ g h) x :=
+  rfl
+
+/- The wedge product wrt multiplication -/
+theorem wedge_product_mul {g : M [⋀^Fin m]→L[𝕜] 𝕜} {h : M [⋀^Fin n]→L[𝕜] 𝕜} {x : Fin (m + n) → M} :
+    (g ∧[ContinuousLinearMap.mul 𝕜 𝕜] h) x =
+    uncurryFinAdd ((ContinuousLinearMap.mul 𝕜 𝕜).compContinuousAlternatingMap₂ g h) x :=
+  rfl
+
+/- The wedge product wrt scalar multiplication -/
+theorem wedge_product_lsmul {g : M [⋀^Fin m]→L[𝕜] 𝕜} {h : M [⋀^Fin n]→L[𝕜] N}
+    {x : Fin (m + n) → M} :
+      (g ∧[ContinuousLinearMap.lsmul 𝕜 𝕜] h) x =
+      uncurryFinAdd ((ContinuousLinearMap.lsmul 𝕜 𝕜).compContinuousAlternatingMap₂ g h) x :=
+  rfl
+
+
+/- Associativity of multiplication wedge product -/
+theorem wedge_mul_assoc (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜)
+    (l : M [⋀^Fin p]→L[𝕜] 𝕜) (v : Fin (m + n + p) → M) :
+      ContinuousAlternatingMap.domDomCongr
+        Fin.finAssoc.symm (g ∧[𝕜] h ∧[𝕜] l) v = ((g ∧[𝕜] h) ∧[𝕜] l) v := by
+  rw[wedge_product_def, uncurryFinAdd, domDomCongr_apply, domDomCongr_apply, uncurrySum_apply,
+    ContinuousMultilinearMap.sum_apply, wedge_product_def, uncurryFinAdd, domDomCongr_apply,
+    uncurrySum_apply, ContinuousMultilinearMap.sum_apply]
+  rw[wedge_product, wedge_product]
+  rw[uncurryFinAdd, uncurryFinAdd]
+  -- Want to have functionality to partially unpack
+  sorry
+
+/- Left distributivity of wedge product -/
+theorem add_wedge (g₁ g₂ : M [⋀^Fin m]→L[𝕜] N)
+    (h : M [⋀^Fin n]→L[𝕜] N') (f : N →L[𝕜] N' →L[𝕜] N'') :
+      ((g₁ + g₂) ∧[f] h) = (g₁ ∧[f] h) + (g₂ ∧[f] h) := by
+  ext x
+  rw[add_apply, wedge_product_def, uncurryFinAdd, domDomCongr_apply, uncurrySum_apply,
+    wedge_product_def, uncurryFinAdd, domDomCongr_apply, uncurrySum_apply,
+    wedge_product_def, uncurryFinAdd, domDomCongr_apply, uncurrySum_apply,
+    ContinuousMultilinearMap.sum_apply, ContinuousMultilinearMap.sum_apply,
+    ContinuousMultilinearMap.sum_apply, ← Finset.sum_add_distrib]
+  apply Finset.sum_congr rfl
+  intro σ hσ
+  rcases σ with ⟨σ₁⟩
+  repeat
+    rw[uncurrySum.summand_mk]
+    simp only [ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.domDomCongr_apply,
+      Function.comp_apply, ContinuousMultilinearMap.uncurrySum_apply,
+      ContinuousMultilinearMap.flipMultilinear_apply, coe_toContinuousMultilinearMap,
+      ContinuousMultilinearMap.flipAlternating_apply,
+      ContinuousLinearMap.compContinuousAlternatingMap₂_apply]
+  rw[← smul_add, add_apply, map_add, ContinuousLinearMap.add_apply, smul_add]
+
+/- Right distributivity of wedge product -/
+theorem wedge_add (g : M [⋀^Fin m]→L[𝕜] N)
+    (h₁ h₂ : M [⋀^Fin n]→L[𝕜] N') (f : N →L[𝕜] N' →L[𝕜] N'') :
+      (g ∧[f] (h₁ + h₂)) = (g ∧[f] h₁) + (g ∧[f] h₂) := by
+  ext x
+  rw[add_apply, wedge_product_def, uncurryFinAdd, domDomCongr_apply, uncurrySum_apply,
+    wedge_product_def, uncurryFinAdd, domDomCongr_apply, uncurrySum_apply,
+    wedge_product_def, uncurryFinAdd, domDomCongr_apply, uncurrySum_apply,
+    ContinuousMultilinearMap.sum_apply, ContinuousMultilinearMap.sum_apply,
+    ContinuousMultilinearMap.sum_apply, ← Finset.sum_add_distrib]
+  apply Finset.sum_congr rfl
+  intro σ hσ
+  rcases σ with ⟨σ₁⟩
+  repeat
+    rw[uncurrySum.summand_mk]
+    simp only [ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.domDomCongr_apply,
+      Function.comp_apply, ContinuousMultilinearMap.uncurrySum_apply,
+      ContinuousMultilinearMap.flipMultilinear_apply, coe_toContinuousMultilinearMap,
+      ContinuousMultilinearMap.flipAlternating_apply,
+      ContinuousLinearMap.compContinuousAlternatingMap₂_apply]
+  rw[add_apply, map_add, smul_add]
+
+theorem smul_wedge (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜) (c : 𝕜) :
+    c • (g ∧[𝕜] h) = (c • g) ∧[𝕜] h := by
+  ext x
+  rw[smul_apply, wedge_product_def, uncurryFinAdd, domDomCongr_apply, uncurrySum_apply,
+    ContinuousMultilinearMap.sum_apply, Finset.smul_sum]
+  rw[wedge_product_def, uncurryFinAdd, domDomCongr_apply, uncurrySum_apply,
+    ContinuousMultilinearMap.sum_apply]
+  apply Finset.sum_congr rfl
+  intro σ hσ
+  rcases σ with ⟨σ₁⟩
+  rw[uncurrySum.summand_mk]
+  simp only [ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.domDomCongr_apply,
+    Function.comp_apply, ContinuousMultilinearMap.uncurrySum_apply,
+    ContinuousMultilinearMap.flipMultilinear_apply, coe_toContinuousMultilinearMap,
+    ContinuousMultilinearMap.flipAlternating_apply,
+    ContinuousLinearMap.compContinuousAlternatingMap₂_apply,
+    ContinuousLinearMap.mul_apply', ← smul_assoc, smul_comm]
+  rw[smul_assoc, smul_eq_mul, ← mul_assoc]
+  rw[uncurrySum.summand_mk]
+  simp only [ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.domDomCongr_apply,
+    Function.comp_apply, ContinuousMultilinearMap.uncurrySum_apply,
+    ContinuousMultilinearMap.flipMultilinear_apply, coe_toContinuousMultilinearMap,
+    ContinuousMultilinearMap.flipAlternating_apply,
+    ContinuousLinearMap.compContinuousAlternatingMap₂_apply, ContinuousLinearMap.mul_apply',
+    smul_apply, smul_eq_mul]
+
+theorem wedge_smul (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜) (c : 𝕜) :
+    c • (g ∧[𝕜] h) = g ∧[𝕜] (c • h) := by
+  ext x
+  rw[smul_apply, wedge_product_def, uncurryFinAdd, domDomCongr_apply, uncurrySum_apply,
+    ContinuousMultilinearMap.sum_apply, Finset.smul_sum]
+  rw[wedge_product_def, uncurryFinAdd, domDomCongr_apply, uncurrySum_apply,
+    ContinuousMultilinearMap.sum_apply]
+  apply Finset.sum_congr rfl
+  intro σ hσ
+  rcases σ with ⟨σ₁⟩
+  rw[uncurrySum.summand_mk]
+  simp only [ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.domDomCongr_apply,
+    Function.comp_apply, ContinuousMultilinearMap.uncurrySum_apply,
+    ContinuousMultilinearMap.flipMultilinear_apply, coe_toContinuousMultilinearMap,
+    ContinuousMultilinearMap.flipAlternating_apply,
+    ContinuousLinearMap.compContinuousAlternatingMap₂_apply, ContinuousLinearMap.mul_apply',
+    ← smul_assoc, smul_comm]
+  rw[smul_assoc, smul_eq_mul, ← mul_assoc]
+  rw[uncurrySum.summand_mk]
+  simp only [ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.domDomCongr_apply,
+    Function.comp_apply, ContinuousMultilinearMap.uncurrySum_apply,
+    ContinuousMultilinearMap.flipMultilinear_apply, coe_toContinuousMultilinearMap,
+    ContinuousMultilinearMap.flipAlternating_apply,
+    ContinuousLinearMap.compContinuousAlternatingMap₂_apply, ContinuousLinearMap.mul_apply',
+    smul_apply, smul_eq_mul, ← mul_assoc, mul_comm]
+
+/- Antisymmetry of multiplication wedge product -/
+theorem wedge_antisymm (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜) :
+    (g ∧[𝕜] h) = ((-1 : 𝕜)^(m*n) • (h ∧[𝕜] g)).domDomCongr Fin.finAddCongr := by
+  ext x
+  rw[domDomCongr_apply, smul_apply, wedge_product_mul, uncurryFinAdd, domDomCongr_apply,
+    uncurrySum_apply, ContinuousMultilinearMap.sum_apply, wedge_product_mul,
+    uncurryFinAdd, domDomCongr_apply, uncurrySum_apply, ContinuousMultilinearMap.sum_apply]
+  conv_rhs => rw[← Equiv.sum_comp Equiv.Perm.finAddCongr_equiv]
+  rw[Finset.smul_sum]
+  apply Finset.sum_congr rfl
+  intro σ hσ
+  rcases σ with ⟨σ₁⟩
+  simp only [Function.comp_apply, Equiv.Perm.finAddCongr_equiv_apply]
+  rw[uncurrySum.summand_mk]
+  rw[ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.domDomCongr_apply,
+    ContinuousMultilinearMap.uncurrySum_apply, ContinuousMultilinearMap.flipMultilinear_apply,
+    coe_toContinuousMultilinearMap, ContinuousMultilinearMap.flipAlternating_apply,
+    coe_toContinuousMultilinearMap, ContinuousLinearMap.compContinuousAlternatingMap₂_apply,
+    ContinuousLinearMap.mul_apply']
+  rw[uncurrySum.summand_mk]
+  rw[ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.domDomCongr_apply,
+    ContinuousMultilinearMap.uncurrySum_apply, ContinuousMultilinearMap.flipMultilinear_apply,
+    coe_toContinuousMultilinearMap, ContinuousMultilinearMap.flipAlternating_apply,
+    coe_toContinuousMultilinearMap, ContinuousLinearMap.compContinuousAlternatingMap₂_apply,
+    ContinuousLinearMap.mul_apply']
+  simp only [Equiv.Perm.sign_sumCommPerm, Equiv.Perm.sumCommPerm_apply_apply, Function.comp_apply]
+  simp [Function.comp_def, finAddFlip]
+  simp_rw[mul_comm]
+  simp only [Equiv.Perm.sumCongrPerm, Fin.finSumCongr, Equiv.permCongr_apply, Equiv.symm_trans_apply,
+    Equiv.symm_symm, Equiv.trans_apply, Equiv.apply_symm_apply,
+    Fin.finAddCongr_finAddCongr]
+  sorry
+
+variable {M : Type*} [NormedAddCommGroup M] [NormedSpace ℝ M]
+
+open Fin
+
+-- UNUSED functionality
+lemma domDomCongr_finAddFlip_wedge_self (g : M [⋀^Fin m]→L[ℝ] ℝ) :
+    domDomCongr finAddFlip (g∧[ℝ]g) = (g∧[ℝ]g) := by
+  ext x
+  rw[wedge_product_mul, uncurryFinAdd, domDomCongr_apply, domDomCongr_apply, uncurrySum_apply,
+    ContinuousMultilinearMap.sum_apply, wedge_product_mul, uncurryFinAdd, domDomCongr_apply,
+    uncurrySum_apply, ContinuousMultilinearMap.sum_apply]
+  conv_rhs => rw[← Equiv.sum_comp Equiv.Perm.finAddFlip_equiv_eqFin]
+  apply Finset.sum_congr rfl
+  rintro σ -
+  rcases σ with ⟨σ₁⟩
+  simp only [Function.comp_apply, Equiv.Perm.finAddFlip_equiv_eqFin_apply]
+  rw[uncurrySum.summand_mk]
+  rw[uncurrySum.summand_mk]
+  rw[ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.domDomCongr_apply,
+    ContinuousMultilinearMap.uncurrySum_apply, ContinuousMultilinearMap.flipMultilinear_apply,
+    coe_toContinuousMultilinearMap, ContinuousMultilinearMap.flipAlternating_apply,
+    coe_toContinuousMultilinearMap, ContinuousLinearMap.compContinuousAlternatingMap₂_apply,
+    ContinuousLinearMap.mul_apply']
+  rw[ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.domDomCongr_apply,
+    ContinuousMultilinearMap.uncurrySum_apply, ContinuousMultilinearMap.flipMultilinear_apply,
+    coe_toContinuousMultilinearMap, ContinuousMultilinearMap.flipAlternating_apply,
+    coe_toContinuousMultilinearMap, ContinuousLinearMap.compContinuousAlternatingMap₂_apply,
+    ContinuousLinearMap.mul_apply']
+  simp [Function.comp_def, finAddFlip, mul_comm]
+
+/- Corollary of `wedge_antisymm` saying that a wedge of g with itself is
+zero if m is odd. -/
+theorem wedge_self_odd_zero (g : M [⋀^Fin m]→L[ℝ] ℝ) (m_odd : Odd m) :
+    (g ∧[ℝ] g) = 0 := by
+  let h := wedge_antisymm g g
+  rw[Odd.neg_one_pow (Odd.mul m_odd m_odd)] at h
+  suffices (g ∧[ℝ] g) = -(g ∧[ℝ] g) by
+    rw[← sub_eq_zero, sub_neg_eq_add, DFunLike.ext_iff] at this
+    ext x
+    simpa using this x
+  simp only [finAddCongr, finCongr_refl, neg_smul, one_smul, domDomCongr_refl] at h
+  exact h
+
+end wedge
+
+end ContinuousAlternatingMap
