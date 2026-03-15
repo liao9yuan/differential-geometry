@@ -22,6 +22,7 @@ def laplacian (metric : MetricTensor R V) [MetricTraceOperator R V metric]
     (conn : AffineConnection R V) (u : R) : R :=
   MetricTraceOperator.metric_trace metric (Hess conn u)
 
+/-- $\Delta(f+g) = \Delta f + \Delta g$ -/
 lemma laplacian_add (metric : MetricTensor R V) [MetricTraceOperator R V metric]
   [MetricTraceRules R V metric] (conn : AffineConnection R V) [LieBracket V] [DerivationRules R V] (f g : R) :
   laplacian metric conn (f + g) = laplacian metric conn f + laplacian metric conn g := by
@@ -39,6 +40,7 @@ lemma laplacian_add (metric : MetricTensor R V) [MetricTraceOperator R V metric]
   rw [hessian_add]
   exact MetricTraceRules.trace_add (metric := metric) (fun X Y => Hess conn f X Y) (fun X Y => Hess conn g X Y)
 
+/-- $\Delta(f-g) = \Delta f - \Delta g$ -/
 lemma laplacian_sub (metric : MetricTensor R V) [MetricTraceOperator R V metric]
   [MetricTraceRules R V metric] (conn : AffineConnection R V) [LieBracket V] [DerivationRules R V] (f g : R) :
   laplacian metric conn (f - g) = laplacian metric conn f - laplacian metric conn g := by
