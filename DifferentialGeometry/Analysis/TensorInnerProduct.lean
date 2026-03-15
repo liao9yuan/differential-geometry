@@ -80,3 +80,43 @@ lemma inner_smul_right (c : R) (T S : SmoothBilinearForm R V) :
   rw [inner_symm metric T (c • S)]
   rw [inner_smul_left metric c S T]
   rw [inner_symm metric S T]
+
+/-- $|T + aS + bW|^2$ expansion -/
+lemma expand_norm_sq_add3
+  (T S W : SmoothBilinearForm R V)
+  (a b : R) :
+  tensorNormSq metric (T + a • S + b • W) =
+  tensorNormSq metric T +
+  a^2 * tensorNormSq metric S +
+  b^2 * tensorNormSq metric W +
+  (2:R) * a * tensorInnerProduct metric T S +
+  (2:R) * b * tensorInnerProduct metric T W +
+  (2:R) * a * b * tensorInnerProduct metric S W := by
+  dsimp [tensorNormSq]
+  simp only [inner_add_left metric, inner_add_right metric,
+             inner_smul_left metric, inner_smul_right metric,
+             inner_symm metric S T, inner_symm metric W T, inner_symm metric W S]
+  ring
+
+/-- $|A - bB - cC|^2$ expansion -/
+lemma expand_norm_sq_sub3
+  (A B C : SmoothBilinearForm R V)
+  (b c : R) :
+  tensorNormSq metric (A - b • B - c • C) =
+  tensorNormSq metric A +
+  b^2 * tensorNormSq metric B +
+  c^2 * tensorNormSq metric C -
+  (2:R) * b * tensorInnerProduct metric A B -
+  (2:R) * c * tensorInnerProduct metric A C +
+  (2:R) * b * c * tensorInnerProduct metric B C := by
+  dsimp [tensorNormSq]
+  have h1 : A - b • B - c • C = A + (-b) • B + (-c) • C := by
+    ext X Y
+    change (A - b • B - c • C) X Y = (A + (-b) • B + (-c) • C) X Y
+    change A X Y - b * B X Y - c * C X Y = A X Y + (-b) * B X Y + (-c) * C X Y
+    ring
+  rw [h1]
+  simp only [inner_add_left metric, inner_add_right metric,
+             inner_smul_left metric, inner_smul_right metric,
+             inner_symm metric B A, inner_symm metric C A, inner_symm metric C B]
+  ring

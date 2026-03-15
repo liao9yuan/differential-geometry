@@ -17,6 +17,18 @@ class TimeWeight (R : Type) [CommRing R] [PartialOrder R] (Time : Type) [TimeDer
   dt_inv_t : ∀ t, TimeDerivative.partial_t inv_t t = - (inv_t t)^2
   inv_t_nonneg : ∀ t, (0:R) ≤ inv_t t
 
+/-- Single-variable calculus rules for scalar time derivatives. -/
+class ScalarTimeDerivativeRules (R : Type) [CommRing R] (Time : Type) [TimeDerivative Time R] where
+  /-- Product rule for addition: $\partial_t(f + g) = \partial_t f + \partial_t g$ -/
+  dt_add : ∀ (f g : Time → R) t, TimeDerivative.partial_t (fun s => f s + g s) t = TimeDerivative.partial_t f t + TimeDerivative.partial_t g t
+  /-- Product rule for subtraction: $\partial_t(f - g) = \partial_t f - \partial_t g$ -/
+  dt_sub : ∀ (f g : Time → R) t, TimeDerivative.partial_t (fun s => f s - g s) t = TimeDerivative.partial_t f t - TimeDerivative.partial_t g t
+  /-- Linearity for scalar multiplication: $\partial_t(cf) = c \partial_t f$ -/
+  dt_smul : ∀ (c : R) (f : Time → R) t, TimeDerivative.partial_t (fun s => c * f s) t = c * TimeDerivative.partial_t f t
+  /-- Product rule for multiplication: $\partial_t(fg) = (\partial_t f)g + f(\partial_t g)$ -/
+  dt_mul : ∀ (f g : Time → R) t, TimeDerivative.partial_t (fun s => f s * g s) t = TimeDerivative.partial_t f t * g t + f t * TimeDerivative.partial_t g t
+
+
 variable {R V : Type}
 variable [CommRing R] [AddCommGroup V] [Module R V] [DerivationAction R V]
 
