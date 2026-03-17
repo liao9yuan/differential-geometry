@@ -7,7 +7,7 @@ A lightweight, self-contained formalization of differential geometry in Lean 4. 
 ```mermaid
 flowchart BT
     subgraph AnalyticLayer [Analytic Layer]
-        DirRSB[RSBundle]
+        DirRSB[RSTensor]
         
         DirAux[Aux] --> DirAlt[Alternating]
         DirAlt --> DirDiffForm[DifferentialForm]

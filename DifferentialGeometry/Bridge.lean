@@ -1,7 +1,7 @@
 import DifferentialGeometry.Geometry.Connection
 import DifferentialGeometry.Algebra.Metric
 import DifferentialGeometry.Algebra.Basic
-import DifferentialGeometry.Tensor.RSBundle.LieDerivative
+import DifferentialGeometry.Tensor.RSTensor.LieDerivative
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -42,7 +42,7 @@ noncomputable instance bridgeModule : Module (R (𝕜 := 𝕜) (M := M)) (V (�
 
 
 /--
-Analytic side: `directionalDerivScalar` in `Tensor/RSBundle/LieDerivative.lean`.
+Analytic side: `directionalDerivScalar` in `Tensor/RSTensor/LieDerivative.lean`.
 Synthetic side: `AbstractDerivationAction` in `Algebra/Basic.lean`.
 -/
 noncomputable instance bridgeDerivAction : AbstractDerivationAction (R (𝕜 := 𝕜) (M := M)) (V (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) where
@@ -50,7 +50,7 @@ noncomputable instance bridgeDerivAction : AbstractDerivationAction (R (𝕜 := 
 
 
 /--
-Analytic side: `VectorField.mlieBracket` in `Tensor/RSBundle/LieDerivative.lean`.
+Analytic side: `VectorField.mlieBracket` in `Tensor/RSTensor/LieDerivative.lean`.
 Synthetic side: `AbstractLieBracket` in `Algebra/Basic.lean`.
 -/
 noncomputable instance bridgeLieBracket : AbstractLieBracket (V (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) where
@@ -58,7 +58,7 @@ noncomputable instance bridgeLieBracket : AbstractLieBracket (V (𝕜 := 𝕜) (
 
 
 /--
-Analytic side: `SmoothRiemannianMetric` in `Tensor/RSBundle/LieDerivative.lean`.
+Analytic side: `SmoothRiemannianMetric` in `Tensor/RSTensor/LieDerivative.lean`.
 Synthetic side: `AbstractMetricTensor` in `Algebra/Metric.lean`.
 -/
 noncomputable instance bridgeMetricTensor (analyticMetric : SmoothRiemannianMetric (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) :
@@ -70,7 +70,7 @@ noncomputable instance bridgeMetricTensor (analyticMetric : SmoothRiemannianMetr
 
 
 /--
-Analytic side: `LeviCivitaConnection` in `Tensor/RSBundle/LieDerivative.lean`.
+Analytic side: `LeviCivitaConnection` in `Tensor/RSTensor/LieDerivative.lean`.
 Synthetic side: `AbstractLeviCivitaConnection` in `Geometry/Connection.lean`.
 -/
 noncomputable instance bridgeAffineConnection (analyticNabla : LeviCivitaConnection (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) :
