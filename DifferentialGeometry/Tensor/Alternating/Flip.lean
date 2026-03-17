@@ -10,10 +10,6 @@ import Mathlib.Analysis.Normed.Module.Multilinear.Basic
 import Mathlib.Analysis.Normed.Operator.BoundedLinearMaps
 import Mathlib.Analysis.Normed.Operator.Mul
 
-/-
-# Algebra of Alternating Linear Maps
--/
-
 open ContinuousAlternatingMap
 
 noncomputable section Flip
