@@ -106,8 +106,6 @@ theorem ederiv_wedge (ω : Ω^m⟮E, F⟯) (τ : Ω^n⟮E, F'⟯) (f : F →L[�
     uncurryFin_apply] -/
   sorry
 
-#check DifferentialForm.add_apply
-
 /- The graded Leibniz rule for the interior product of the wedge product -/
 theorem iprod_wedge (ω : Ω^(m + 1)⟮E, F⟯) (τ : Ω^(n + 1)⟮E, F'⟯) (f : F →L[ℝ] F' →L[ℝ] F'')
     (v : E → E) :
@@ -132,6 +130,30 @@ theorem pullback_toFun (f : E → F) (ω : Ω^k⟮F, G⟯) :
 /- Exterior derivative commutes with pullback -/
 theorem pullback_ederiv (f : E → F) (ω : Ω^n⟮F, G⟯) {x : E} (hf : ContDiffAt ℝ 2 f x) :
     pullback f (ederiv ω) x = ederiv (pullback f ω) x := by
+  /- ext v
+  rw[pullback, ederiv, ContinuousAlternatingMap.compContinuousLinearMap_apply,
+    uncurryFin_apply, ederiv, uncurryFin_apply]
+  apply Finset.sum_congr rfl
+  intro p q
+  refine Mathlib.Tactic.LinearCombination.smul_const_eq ?H.p ((-1) ^ (p : ℕ))
+  simp only [Function.comp_apply]
+  have hω_diff : DifferentiableAt ℝ ω.toFun (f x) := ω.differentiableAt (f x)
+  rw [← ContinuousLinearMap.comp_apply, ← fderiv_comp x hω_diff (hf.differentiableAt (by simp))]
+  simp +unfoldPartialApp only [pullback]
+  rw[fderiv_apply, fderiv_apply]
+  · simp only [Function.comp_apply, compContinuousLinearMap_apply]
+    refine DFunLike.congr ?H.p.h₁ rfl
+    have : p.removeNth (⇑(fderiv ℝ f x) ∘ v) = (fderiv ℝ f x) ∘ p.removeNth v :=
+    rfl
+    rw[this]
+    apply EventuallyEq.fderiv_eq
+    refine EventuallyEq.comp₂ (Eq.eventuallyEq rfl) DFunLike.coe ?h1
+    refine EventuallyEq.comp₂ ?h2 Function.comp (Eq.eventuallyEq rfl)
+    refine EventuallyEq.comp₂ (Eq.eventuallyEq rfl) (@DFunLike.coe (E →L[ℝ] F) E fun x ↦ F) ?h2.Hg
+  -- Differentiability conditions
+    sorry
+  · sorry
+  · exact DifferentiableAt.comp x hω_diff (hf.differentiableAt (by simp)) -/
   sorry
 
 end DifferentialForm

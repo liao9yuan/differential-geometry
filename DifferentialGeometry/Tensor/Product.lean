@@ -1,8 +1,6 @@
 /-
-Author: Yuan Liao
-Coauthor: Jack McCarthy
+Authors: Yuan Liao, Jack McCarthy
 -/
-
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Geometry.Manifold.VectorBundle.MDifferentiable
@@ -27,19 +25,40 @@ import Mathlib.Geometry.Manifold.VectorField.LieBracket
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 import Mathlib.Analysis.Calculus.VectorField
+/-!
+# The Vector Bundle of Tensor Products
+
+This file constructs the tensor product of two vector bundles as a vector bundle.
+
+Given vector bundles `E₁ : B → Type*` and `E₂ : B → Type*` with finite-dimensional model
+fibers `F₁` and `F₂` over a complete nontrivially normed field `𝕜`, we define a vector bundle
+with fiber `E₁ x ⊗[𝕜] E₂ x` and model fiber `F₁ ⊗[𝕜] F₂`.
+
+## Main Definitions
+
+* `TensorProduct.mapL L₁ L₂` : the continuous linear map `F₁ ⊗ F₂ →L G₁ ⊗ G₂` induced
+  by continuous linear maps `L₁ : F₁ →L G₁` and `L₂ : F₂ →L G₂`.
+* `TensorProduct.mapLBilinear` : the bilinear map `(F₁ →L G₁) →L (F₂ →L G₂) →L (F₁⊗F₂ →L G₁⊗G₂)`.
+* `Bundle.TensorProduct.vectorPrebundle` : the `VectorPrebundle` for the tensor product bundle,
+  with atlas given by all pairs of trivializations from the atlases of `E₁` and `E₂`.
+* `Bundle.Trivialization.tensorProduct e₁ e₂` : the genuine trivialization of the tensor
+  product bundle induced by atlas trivializations `e₁` and `e₂`.
+
+## Main Results
+
+* `TensorProduct.mapL_tmul` : `mapL L₁ L₂ (v ⊗ₜ w) = L₁ v ⊗ₜ L₂ w`.
+* `continuousOn_tensorProductCoordChange` : the coordinate change map of the tensor product
+  bundle is continuous on the overlap of base sets.
+* `Bundle.TensorProduct.fiberBundle` : the tensor product of two fiber bundles is a fiber bundle.
+* `Bundle.TensorProduct.vectorBundle` : the tensor product of two vector bundles is a vector bundle.
+
+## Tags
+
+tensor product, vector bundle, fiber bundle, trivialization, differential geometry
+-/
 
 open scoped Topology
 open scoped TensorProduct
-
-/-
-# The vector bundle of tensor products
-
-We define the (topological) vector bundle of tensor products of two vector bundles
-over the same base.
-
-Given bundles `E₁ E₂ : B → Type*` and normed spaces `F₁` and `F₂`, we define a vector bundle
-with fiber `E₁ x ⊗[𝕜] E₂ x` and model fiber `F₁ ⊗[𝕜] F₂`.
--/
 
 noncomputable section
 
@@ -64,7 +83,6 @@ variable [TopologicalSpace B] (e₁ e₁' : Trivialization F₁ (π F₁ E₁))
 /-! ## Induced norm on tensor product -/
 
 section TensorNorm
-
 
 variable (𝕜 : Type*) [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
 variable (F₁ : Type*) [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁] [FiniteDimensional 𝕜 F₁]
@@ -179,10 +197,14 @@ lemma finrank_continuousLinearMap :
 
 
 
+/-- The continuous dual `cDual 𝕜 F₁` is linearly equivalent to the algebraic dual
+`Module.Dual 𝕜 F₁`, since all linear maps are continuous in finite dimensions. -/
 def cDual_eqiv_dual : cDual 𝕜 F₁ ≃ₗ[𝕜] Module.Dual 𝕜 F₁ := by
   unfold cDual Module.Dual
   exact (@LinearMap.toContinuousLinearMap 𝕜 _ F₁ _ _ _ _ _ 𝕜 _ _ _ _ _ _ _ _).symm
 
+/-- Continuous linear maps out of the continuous dual are equivalent to linear maps out of
+the algebraic dual, since `cDual ≃ₗ Module.Dual` in finite dimensions. -/
 def cDual_clm_equiv_dual_lm : (cDual 𝕜 F₁ →L[𝕜] F₂) ≃ₗ[𝕜] (Module.Dual 𝕜 F₁ →ₗ[𝕜] F₂) := by
   have e : (cDual 𝕜 F₁ →L[𝕜] F₂) ≃ₗ[𝕜] (cDual 𝕜 F₁ →ₗ[𝕜] F₂) := LinearMap.toContinuousLinearMap.symm
   have e' : (cDual 𝕜 F₁ →ₗ[𝕜] F₂) ≃ₗ[𝕜] (Module.Dual 𝕜 F₁ →ₗ[𝕜] F₂) :=
@@ -199,6 +221,8 @@ noncomputable def clmEquiv : (F₁ ⊗[𝕜] F₂) ≃ₗ[𝕜] (cDual 𝕜 F₁
   LinearEquiv.trans (tensorHomEquiv 𝕜 F₁ F₂) (cDual_clm_equiv_dual_lm 𝕜 F₁ F₂).symm
 
 
+/-- Induced normed additive commutative group structure on `F₁ ⊗[𝕜] F₂`, pulled back
+along the equivalence `clmEquiv : F₁ ⊗ F₂ ≃ₗ (cDual F₁ →L F₂)`. -/
 noncomputable instance instNormedAddCommGroup_tensor :
     NormedAddCommGroup (F₁ ⊗[𝕜] F₂) :=
 by
@@ -215,7 +239,7 @@ by
   exact e.injective
 
 
-/-- Induced normed space structure on tensor product. -/
+/-- Induced normed `𝕜`-module structure on `F₁ ⊗[𝕜] F₂`, pulled back along `clmEquiv`. -/
 noncomputable instance instNormedSpace_tensor :
     NormedSpace 𝕜 (F₁ ⊗[𝕜] F₂) :=
 by
@@ -247,27 +271,32 @@ noncomputable def TensorProduct.mapL (L₁ : F₁ →L[𝕜] G₁) (L₂ : F₂ 
   (TensorProduct.map L₁.toLinearMap L₂.toLinearMap).toContinuousLinearMap
 
 omit [FiniteDimensional 𝕜 G₂] in
+/-- `mapL` acts on pure tensors by applying each factor: `(L₁ ⊗ L₂)(v ⊗ w) = L₁ v ⊗ L₂ w`. -/
 @[simp]
 theorem TensorProduct.mapL_tmul (L₁ : F₁ →L[𝕜] G₁) (L₂ : F₂ →L[𝕜] G₂) (v : F₁) (w : F₂) :
     TensorProduct.mapL L₁ L₂ (v ⊗ₜ w) = L₁ v ⊗ₜ L₂ w := by
   simp [TensorProduct.mapL, TensorProduct.map_tmul]
 
 omit [FiniteDimensional 𝕜 G₂] in
+/-- `mapL` is additive in the left factor: `(L₁ + L₁') ⊗ L₂ = L₁ ⊗ L₂ + L₁' ⊗ L₂`. -/
 theorem TensorProduct.mapL_add_left (L₁ L₁' : F₁ →L[𝕜] G₁) (L₂ : F₂ →L[𝕜] G₂) :
     TensorProduct.mapL (L₁ + L₁') L₂ = TensorProduct.mapL L₁ L₂ + TensorProduct.mapL L₁' L₂ := by
   ext x; simp [TensorProduct.mapL, TensorProduct.map_add_left]
 
 omit [FiniteDimensional 𝕜 G₂] in
+/-- `mapL` is additive in the right factor: `L₁ ⊗ (L₂ + L₂') = L₁ ⊗ L₂ + L₁ ⊗ L₂'`. -/
 theorem TensorProduct.mapL_add_right (L₁ : F₁ →L[𝕜] G₁) (L₂ L₂' : F₂ →L[𝕜] G₂) :
     TensorProduct.mapL L₁ (L₂ + L₂') = TensorProduct.mapL L₁ L₂ + TensorProduct.mapL L₁ L₂' := by
   ext x; simp [TensorProduct.mapL, TensorProduct.map_add_right]
 
 omit [FiniteDimensional 𝕜 G₂] in
+/-- `mapL` is homogeneous in the left factor: `(c • L₁) ⊗ L₂ = c • (L₁ ⊗ L₂)`. -/
 theorem TensorProduct.mapL_smul_left (c : 𝕜) (L₁ : F₁ →L[𝕜] G₁) (L₂ : F₂ →L[𝕜] G₂) :
     TensorProduct.mapL (c • L₁) L₂ = c • TensorProduct.mapL L₁ L₂ := by
   ext x; simp [TensorProduct.mapL, TensorProduct.map_smul_left]
 
 omit [FiniteDimensional 𝕜 G₂] in
+/-- `mapL` is homogeneous in the right factor: `L₁ ⊗ (c • L₂) = c • (L₁ ⊗ L₂)`. -/
 theorem TensorProduct.mapL_smul_right (c : 𝕜) (L₁ : F₁ →L[𝕜] G₁) (L₂ : F₂ →L[𝕜] G₂) :
     TensorProduct.mapL L₁ (c • L₂) = c • TensorProduct.mapL L₁ L₂ := by
   ext x; simp [TensorProduct.mapL, TensorProduct.map_smul_right]
@@ -339,6 +368,8 @@ variable {e₁ e₁' e₂ e₂'}
 variable [∀ x, TopologicalSpace (E₁ x)] [FiberBundle F₁ E₁]
 variable [∀ x, TopologicalSpace (E₂ x)] [FiberBundle F₂ E₂]
 
+/-- The coordinate change map for the tensor product bundle varies continuously over the
+overlap of the base sets of any two pairs of trivializations. -/
 theorem continuousOn_tensorProductCoordChange
     [VectorBundle 𝕜 F₁ E₁] [VectorBundle 𝕜 F₂ E₂]
     [MemTrivializationAtlas e₁] [MemTrivializationAtlas e₁']
@@ -425,6 +456,8 @@ def tensorProduct :
   proj_toFun _ _ := rfl
 
 omit [FiniteDimensional 𝕜 F₂] in
+/-- Evaluating the tensor product pretrivialization applies the local trivializations of
+`E₁` and `E₂` factor-wise via `TensorProduct.map`. -/
 theorem tensorProduct_apply (p : TotalSpace (F₁ ⊗[𝕜] F₂) (fun x ↦ E₁ x ⊗[𝕜] E₂ x)) :
     (tensorProduct 𝕜 e₁ e₂) p =
       ⟨p.1, TensorProduct.map
@@ -432,6 +465,8 @@ theorem tensorProduct_apply (p : TotalSpace (F₁ ⊗[𝕜] F₂) (fun x ↦ E�
         (e₂.continuousLinearMapAt 𝕜 p.1).toLinearMap p.2⟩ :=
   rfl
 
+/-- The tensor product pretrivialization is linear on each fiber, since it applies
+the fiber isomorphisms of `E₁` and `E₂` linearly factor-wise. -/
 instance tensorProduct.isLinear
     [∀ x, ContinuousAdd (E₁ x)] [∀ x, ContinuousSMul 𝕜 (E₁ x)]
     [∀ x, ContinuousAdd (E₂ x)] [∀ x, ContinuousSMul 𝕜 (E₂ x)] :
@@ -450,6 +485,8 @@ instance tensorProduct.isLinear
       simp [Pretrivialization.tensorProduct_apply]
 
 omit [FiniteDimensional 𝕜 F₂] in
+/-- The inverse of the tensor product pretrivialization reconstructs fiber elements using
+the inverse local trivializations `symmL` of each factor. -/
 theorem tensorProduct_symm_apply (p : B × (F₁ ⊗[𝕜] F₂)) :
     (tensorProduct 𝕜 e₁ e₂).toPartialEquiv.symm p =
       ⟨p.1, TensorProduct.map
@@ -458,6 +495,8 @@ theorem tensorProduct_symm_apply (p : B × (F₁ ⊗[𝕜] F₂)) :
   rfl
 
 omit [FiniteDimensional 𝕜 F₂] in
+/-- Alternative form of the inverse pretrivialization: for `b` in the base set,
+`symm b t` applies `symmL` factor-wise to `t`. -/
 theorem tensorProduct_symm_apply' {b : B} (hb : b ∈ e₁.baseSet ∩ e₂.baseSet) (t : F₁ ⊗[𝕜] F₂) :
     (tensorProduct 𝕜 e₁ e₂).symm b t =
       TensorProduct.map
@@ -468,6 +507,8 @@ theorem tensorProduct_symm_apply' {b : B} (hb : b ∈ e₁.baseSet ∩ e₂.base
   · rfl
   · exact hb
 
+/-- The coordinate change for the tensor product bundle equals re-trivializing via `e₁', e₂'`
+after un-trivializing via `e₁, e₂`, confirming it is the factor-wise coordinate change. -/
 theorem tensorProductCoordChange_apply (b : B)
     (hb : b ∈ e₁.baseSet ∩ e₂.baseSet ∩ (e₁'.baseSet ∩ e₂'.baseSet)) (t : F₁ ⊗[𝕜] F₂) :
     tensorProductCoordChange (𝕜 := 𝕜) e₁ e₁' e₂ e₂' b t =
@@ -538,7 +579,8 @@ noncomputable def tensorFiberTopologicalSpace (x : B) :
       TensorProduct.map L₁.toLinearMap L₂.toLinearMap t)
     inferInstance
 
--- A fully explicit declaration avoids synthesis-order issues for an anonymous local instance.
+/-- Explicit version of `tensorFiberTopologicalSpace` with all arguments given, to avoid
+instance synthesis ordering issues. -/
 noncomputable def tensorFiberTopologicalSpaceInst
     (𝕜 : Type*) [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
     (B : Type*) [TopologicalSpace B]
@@ -554,6 +596,7 @@ noncomputable def tensorFiberTopologicalSpaceInst
   tensorFiberTopologicalSpace (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂)
     (E₁ := E₁) (E₂ := E₂) x
 
+/-- The explicit and implicit versions of the fiber topology on `E₁ x ⊗ E₂ x` agree. -/
 theorem tensorFiberTopologicalSpaceInst_eq
     (x : B) :
     tensorFiberTopologicalSpaceInst 𝕜 B F₁ F₂ E₁ E₂ x =
@@ -573,6 +616,8 @@ open Bundle Set Topology Pretrivialization
 open scoped Manifold Bundle TensorProduct
 
 
+/-- A typeclass packaging a choice of topology on each fiber `E₁ x ⊗[𝕜] E₂ x`, needed
+to avoid universe-level and instance-synthesis issues when building the tensor product bundle. -/
 class TensorFiberTopologies
     (𝕜 : Type u𝕜) [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
     (B : Type uB) [TopologicalSpace B]
@@ -595,6 +640,8 @@ variable [∀ x, TopologicalSpace (E₂ x)] [FiberBundle F₂ E₂]
     [VectorBundle 𝕜 F₂ E₂] [∀ (x : B), ContinuousAdd (E₂ x)] [∀ x, ContinuousSMul 𝕜 (E₂ x)]
 
 
+/-- Normed additive commutative group on the model fiber `F₁ ⊗[𝕜] F₂` for the bundle
+namespace, pulled back via `clmEquiv`. -/
 noncomputable instance instNormedAddCommGroup_tensor :
     NormedAddCommGroup (F₁ ⊗[𝕜] F₂) :=
 by
@@ -610,6 +657,7 @@ by
   -- injectivity of the underlying function
   exact e.injective
 
+/-- Normed `𝕜`-module structure on the model fiber `F₁ ⊗[𝕜] F₂`, pulled back via `clmEquiv`. -/
 noncomputable instance instNormedSpace_model_tensor :
     NormedSpace 𝕜 (F₁ ⊗[𝕜] F₂) :=
 by
@@ -622,7 +670,8 @@ by
     (G := (cDual 𝕜 F₁ →L[𝕜] F₂))
     e.toLinearMap
 
-
+/-- The topology on the tensor product fiber `E₁ x ⊗[𝕜] E₂ x`, induced by the local
+trivialization isomorphisms `E₁ x ≃L F₁` and `E₂ x ≃L F₂`. -/
 noncomputable def tensorFiberTopology (x : B) : TopologicalSpace (E₁ x ⊗[𝕜] E₂ x) := by
   classical
   letI : TopologicalSpace (F₁ ⊗[𝕜] F₂) := inferInstance
@@ -636,6 +685,7 @@ noncomputable def tensorFiberTopology (x : B) : TopologicalSpace (E₁ x ⊗[�
     (fun t : E₁ x ⊗[𝕜] E₂ x => TensorProduct.map L₁.toLinearMap L₂.toLinearMap t)
     inferInstance
 
+/-- Provides a `TensorFiberTopologies` instance by using `tensorFiberTopology` at each point. -/
 noncomputable instance tensorFiberTopologies
     (𝕜 : Type u𝕜) [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
     (B : Type uB) [TopologicalSpace B]
@@ -654,6 +704,8 @@ noncomputable instance tensorFiberTopologies
 --   tensorFiberTopologicalSpace (F₁ := F₁) (F₂ := F₂) E₁ E₂ x
 
 
+/-- The `VectorPrebundle` for the tensor product bundle, whose atlas consists of all
+tensor products of trivializations from the atlases of `E₁` and `E₂`. -/
 noncomputable def vectorPrebundle :
     @VectorPrebundle
       𝕜                                  -- R
@@ -756,12 +808,15 @@ noncomputable instance Bundle.TensorProduct.topologicalSpaceTotalSpace :
         (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)).totalSpaceTopology
 
 
+/-- A dependent function assigning to each base point its fiber topology on `E₁ b ⊗ E₂ b`. -/
 noncomputable def tensorFiberTop :
     (b : B) → TopologicalSpace (E₁ b ⊗[𝕜] E₂ b) :=
   fun b =>
     Bundle.TensorProduct.tensorFiberTopology
       (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂) b
 
+/-- The topology on the total space of the tensor product bundle, assembled from the
+`VectorPrebundle` via the fiber topologies from `tensorFiberTop`. -/
 noncomputable def tensorTotalSpaceTop :
     TopologicalSpace
       (TotalSpace (F₁ ⊗[𝕜] F₂) (fun x : B ↦ E₁ x ⊗[𝕜] E₂ x)) :=
@@ -837,6 +892,8 @@ noncomputable def _root_.Bundle.Trivialization.tensorProduct :
     VectorPrebundle.trivializationOfMemPretrivializationAtlas _
       ⟨e₁, e₂, he₁, he₂, rfl⟩
 
+/-- The trivialization of the tensor product bundle induced by `e₁` and `e₂` belongs to
+the trivialization atlas. -/
 noncomputable instance memTrivializationAtlas :
     letI : (x : B) → TopologicalSpace (E₁ x ⊗[𝕜] E₂ x) :=
       tensorFiberTop (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
@@ -850,11 +907,15 @@ noncomputable instance memTrivializationAtlas :
   refine ⟨?_⟩
   exact ⟨_, ⟨e₁, e₂, he₁, he₂, rfl⟩, rfl⟩
 
+/-- The base set of the tensor product trivialization is the intersection of the two
+factor base sets. -/
 @[simp]
 theorem _root_.Trivialization.baseSet_tensorProduct :
     (e₁.tensorProduct (𝕜 := 𝕜) e₂).baseSet = e₁.baseSet ∩ e₂.baseSet :=
   rfl
 
+/-- Evaluating the tensor product trivialization applies the factor trivializations
+via `TensorProduct.map`, matching the pretrivialization. -/
 theorem _root_.Trivialization.tensorProduct_apply
     (p : TotalSpace (F₁ ⊗[𝕜] F₂) (fun x ↦ E₁ x ⊗[𝕜] E₂ x)) :
     e₁.tensorProduct (𝕜 := 𝕜) e₂ p =
@@ -863,6 +924,8 @@ theorem _root_.Trivialization.tensorProduct_apply
         (e₂.continuousLinearMapAt 𝕜 p.1).toLinearMap p.2⟩ :=
   rfl
 
+/-- The canonical trivialization of the tensor product bundle at `x₀` equals the
+tensor product of the canonical trivializations of `E₁` and `E₂` at `x₀`. -/
 theorem tensorProduct_trivializationAt (x₀ : B) :
       letI : (x : B) → TopologicalSpace (E₁ x ⊗[𝕜] E₂ x) :=
       tensorFiberTop (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
@@ -872,6 +935,8 @@ theorem tensorProduct_trivializationAt (x₀ : B) :
     trivializationAt (F₁ ⊗[𝕜] F₂) (fun x ↦ E₁ x ⊗[𝕜] E₂ x) x₀ =
       (trivializationAt F₁ E₁ x₀).tensorProduct (𝕜 := 𝕜) (trivializationAt F₂ E₂ x₀) := rfl
 
+/-- The source of the canonical trivialization at `x₀` is the preimage of the intersection
+of the base sets of the factor trivializations. -/
 @[simp, mfld_simps]
 theorem tensorProduct_trivializationAt_source (x₀ : B) :
       letI : (x : B) → TopologicalSpace (E₁ x ⊗[𝕜] E₂ x) :=
@@ -884,6 +949,8 @@ theorem tensorProduct_trivializationAt_source (x₀ : B) :
         ((trivializationAt F₁ E₁ x₀).baseSet ∩ (trivializationAt F₂ E₂ x₀).baseSet) :=
   rfl
 
+/-- The target of the canonical trivialization at `x₀` is the product of the intersection
+of base sets with the full model fiber. -/
 @[simp, mfld_simps]
 theorem tensorProduct_trivializationAt_target (x₀ : B) :
       letI : (x : B) → TopologicalSpace (E₁ x ⊗[𝕜] E₂ x) :=
@@ -894,6 +961,8 @@ theorem tensorProduct_trivializationAt_target (x₀ : B) :
       ((trivializationAt F₁ E₁ x₀).baseSet ∩ (trivializationAt F₂ E₂ x₀).baseSet) ×ˢ Set.univ :=
   rfl
 
+/-- The base set of the canonical trivialization at `x₀` equals the intersection of the
+base sets of the factor trivializations. -/
 @[simp]
 theorem tensorProduct_trivializationAt_baseSet (x₀ : B) :
     letI : (x : B) → TopologicalSpace (E₁ x ⊗[𝕜] E₂ x) :=

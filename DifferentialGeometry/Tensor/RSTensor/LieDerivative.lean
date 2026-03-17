@@ -2,8 +2,8 @@
 Author: Yuan Liao
 Coauthor: Ayush Khaitan, Jack McCarthy
 -/
-
--- TODO: Check this whole file for correctness of definitions)
+-- Warning: This file is AI generated with incomplete human review.
+-- TODO: Check this whole file for correctness of definitions
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Geometry.Manifold.VectorBundle.MDifferentiable
@@ -28,7 +28,8 @@ import Mathlib.Geometry.Manifold.VectorField.LieBracket
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 import Mathlib.Analysis.Calculus.VectorField
-import DifferentialGeometry.Tensor.RSBundle.Basic
+import DifferentialGeometry.Tensor.RSTensor.Bundle
+import DifferentialGeometry.Tensor.RSTensor.Contract
 
 -- Import the tensor bundle definitions (adjust path as needed)
 -- import TensorBundle
