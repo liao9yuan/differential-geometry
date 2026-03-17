@@ -21,24 +21,24 @@ Proof that the Hessian is symmetric for any torsion-free affine connection.
 set_option autoImplicit false
 set_option linter.style.longLine false
 
-class LieDerivation_example (R V : Type) [CommRing R] [DerivationAction R V] [LieBracket V] where
+class LieDerivation_example (R V : Type) [CommRing R] [AbstractDerivationAction R V] [AbstractLieBracket V] where
   bracket_action : ∀ X Y : V, ∀ u : R,
-    DerivationAction.action (LieBracket.bracket X Y) u =
-    DerivationAction.action X (DerivationAction.action Y u) - DerivationAction.action Y (DerivationAction.action X u)
+    AbstractDerivationAction.action (AbstractLieBracket.bracket X Y) u =
+    AbstractDerivationAction.action X (AbstractDerivationAction.action Y u) - AbstractDerivationAction.action Y (AbstractDerivationAction.action X u)
 
-class ActionLinear_example (R V : Type) [CommRing R] [AddCommGroup V] [DerivationAction R V] where
+class ActionLinear_example (R V : Type) [CommRing R] [AddCommGroup V] [AbstractDerivationAction R V] where
   action_add : ∀ X Y : V, ∀ u : R,
-    DerivationAction.action (X + Y) u = DerivationAction.action X u + DerivationAction.action Y u
+    AbstractDerivationAction.action (X + Y) u = AbstractDerivationAction.action X u + AbstractDerivationAction.action Y u
 
 variable {R V : Type}
   [CommRing R] [AddCommGroup V] [Module R V]
-  [DerivationAction R V] [LieBracket V]
+  [AbstractDerivationAction R V] [AbstractLieBracket V]
   [LieDerivation_example R V] [ActionLinear_example R V]
 
-variable (conn : AffineConnection R V) [TorsionFree conn]
+variable (conn : AbstractAffineConnection R V) [TorsionFree conn]
 
-open DerivationAction
-open LieBracket
+open AbstractDerivationAction
+open AbstractLieBracket
 
 theorem hessian_symm_example (u : R) (X Y : V) : Hess conn u X Y = Hess conn u Y X := by
   have t1 : conn.nabla X Y = conn.nabla Y X + bracket X Y := by

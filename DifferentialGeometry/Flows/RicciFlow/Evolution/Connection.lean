@@ -14,10 +14,10 @@ import Mathlib.Algebra.Ring.Basic
 set_option autoImplicit false
 set_option linter.style.longLine false
 
-open DerivationAction
+open AbstractDerivationAction
 
 variable {R V : Type} [CommRing R] [AddCommGroup V] [Module R V]
-variable [DerivationAction R V] [LieBracket V]
+variable [AbstractDerivationAction R V] [AbstractLieBracket V]
 variable [DerivationRules R V]
 
 /-!
@@ -56,7 +56,7 @@ variable [Invertible (2 : R)]
 
 /-- The covariant derivative of the Ricci form at time t. -/
 def ricci_cov_deriv {Time : Type} [TimeDerivative Time R] [TimeDerivativeRules Time R V]
-  (g_fam : Time → MetricDuality R V) (conn_fam : Time → AffineConnection R V) (t : Time) (X Y Z : V) : R :=
+  (g_fam : Time → MetricDuality R V) (conn_fam : Time → AbstractAffineConnection R V) (t : Time) (X Y Z : V) : R :=
   action X ((ricciForm (conn_fam t)) Y Z)
   - (ricciForm (conn_fam t)) ((nabla_fam g_fam t).nabla X Y) Z
   - (ricciForm (conn_fam t)) Y ((nabla_fam g_fam t).nabla X Z)
@@ -69,16 +69,16 @@ lemma connection_evolution {Time : Type}
   [TimeDerivative Time R] [TimeDerivative Time V]
   [TimeDerivativeRules Time R V] [ActionTimeDerivativeRules Time R V]
   (g_fam : Time → MetricDuality R V)
-  (conn_fam : Time → AffineConnection R V)
+  (conn_fam : Time → AbstractAffineConnection R V)
   [MetricTimeDerivativeRules Time R V g_fam]
-  [RicciFlow Time (fun t => (g_fam t).toNonDegenerateMetric.toMetricTensor) conn_fam]
+  [RicciFlow Time (fun t => (g_fam t).toNonDegenerateMetric.toAbstractMetricTensor) conn_fam]
   (X Y Z : V) (t : Time) :
   (g_fam t).g (TimeDerivative.partial_t (fun s => (nabla_fam g_fam s).nabla X Y) t) Z =
   - ricci_cov_deriv g_fam conn_fam t X Y Z
   - ricci_cov_deriv g_fam conn_fam t Y X Z
   + ricci_cov_deriv g_fam conn_fam t Z X Y := by
-  have h_metric_var : (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toMetricTensor) t).val = fun A B => (- (2:R)) * (ricciForm (conn_fam t)) A B := by
-    have heq : metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toMetricTensor) t = (- (2:R)) • ricciForm (conn_fam t) := RicciFlow.evolution t
+  have h_metric_var : (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t).val = fun A B => (- (2:R)) * (ricciForm (conn_fam t)) A B := by
+    have heq : metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t = (- (2:R)) • ricciForm (conn_fam t) := RicciFlow.evolution t
     rw [heq]
     rfl
   /- Proves that the derivation action on the constant -2 is zero: $X(-2) = 0$. -/
@@ -92,7 +92,7 @@ lemma connection_evolution {Time : Type}
   have h_cov_eq : ∀ A B C : V, h_cov_deriv g_fam t A B C = (- (2:R)) * ricci_cov_deriv g_fam conn_fam t A B C := by
     intro A B C
     dsimp [h_cov_deriv, ricci_cov_deriv]
-    have hm : ∀ Y Z : V, (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toMetricTensor) t).val Y Z = (- (2:R)) * ricciForm (conn_fam t) Y Z := by
+    have hm : ∀ Y Z : V, (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t).val Y Z = (- (2:R)) * ricciForm (conn_fam t) Y Z := by
       intro Y Z
       exact congrFun (congrFun h_metric_var Y) Z
     rw [hm B C, hm ((nabla_fam g_fam t).nabla A B) C, hm B ((nabla_fam g_fam t).nabla A C)]

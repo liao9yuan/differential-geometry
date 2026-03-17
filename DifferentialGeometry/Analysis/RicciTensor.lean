@@ -13,15 +13,15 @@ set_option linter.style.longLine false
 Rigorous construction of the Ricci curvature as a smooth bilinear form.
 -/
 
-open DerivationAction
-open LieBracket
+open AbstractDerivationAction
+open AbstractLieBracket
 
 variable {R V : Type}
 variable [CommRing R] [AddCommGroup V] [Module R V]
-variable [DerivationAction R V] [LieBracket V]
+variable [AbstractDerivationAction R V] [AbstractLieBracket V]
 
 /-- Constructs the Ricci curvature as a rigorously proven SmoothBilinearForm. -/
-def ricciForm (conn : AffineConnection R V) [DerivationRules R V] [LieDerivationRules R V] [TraceOperator R V] [TraceLinearityRules R V] : SmoothBilinearForm R V where
+def ricciForm (conn : AbstractAffineConnection R V) [DerivationRules R V] [LieDerivationRules R V] [TraceOperator R V] [TraceLinearityRules R V] : SmoothBilinearForm R V where
   val := fun X Y => Rc conn X Y
   add_left := fun X₁ X₂ Y => by
     unfold Rc

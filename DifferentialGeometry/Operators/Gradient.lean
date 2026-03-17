@@ -9,12 +9,12 @@ set_option linter.style.longLine false
 
 variable {R V : Type}
 variable [CommRing R] [AddCommGroup V] [Module R V]
-variable [DerivationAction R V]
+variable [AbstractDerivationAction R V]
 
-open DerivationAction
+open AbstractDerivationAction
 
 /-- Gradient of a scalar function `u`.
-Input: (MetricTensor R V, R)
+Input: (AbstractMetricTensor R V, R)
 Output: V -/
 def grad (metric : MetricDuality R V) (u : R) : V :=
   metric.sharp (fun X => action X u)
@@ -24,18 +24,18 @@ lemma g_grad (metric : MetricDuality R V) (u : R) (X : V) :
   dsimp [grad]
   exact metric.g_sharp (fun Y => action Y u) X
 
-lemma grad_add [LieBracket V] [DerivationRules R V] (metric : MetricDuality R V) (f g : R) : grad metric (f + g) = grad metric f + grad metric g := by
+lemma grad_add [AbstractLieBracket V] [DerivationRules R V] (metric : MetricDuality R V) (f g : R) : grad metric (f + g) = grad metric f + grad metric g := by
   apply metric.toNonDegenerateMetric.eq_of_forall_g_eq
   intro X
-  have h1 : metric.g (grad metric (f + g)) X = DerivationAction.action X (f + g) := g_grad metric (f + g) X
-  have h2 : DerivationAction.action X (f + g) = DerivationAction.action X f + DerivationAction.action X g := DerivationRules.action_add_right X f g
-  have h3 : metric.g (grad metric f + grad metric g) X = metric.g (grad metric f) X + metric.g (grad metric g) X := metric.toNonDegenerateMetric.toMetricTensor.bilinear_add_left _ _ _
-  have h4 : metric.g (grad metric f) X = DerivationAction.action X f := g_grad metric f X
-  have h5 : metric.g (grad metric g) X = DerivationAction.action X g := g_grad metric g X
+  have h1 : metric.g (grad metric (f + g)) X = AbstractDerivationAction.action X (f + g) := g_grad metric (f + g) X
+  have h2 : AbstractDerivationAction.action X (f + g) = AbstractDerivationAction.action X f + AbstractDerivationAction.action X g := DerivationRules.action_add_right X f g
+  have h3 : metric.g (grad metric f + grad metric g) X = metric.g (grad metric f) X + metric.g (grad metric g) X := metric.toNonDegenerateMetric.toAbstractMetricTensor.bilinear_add_left _ _ _
+  have h4 : metric.g (grad metric f) X = AbstractDerivationAction.action X f := g_grad metric f X
+  have h5 : metric.g (grad metric g) X = AbstractDerivationAction.action X g := g_grad metric g X
   rw [h4, h5] at h3
   rw [h1, h2, ← h3]
 
-lemma grad_sub [LieBracket V] [DerivationRules R V] (metric : MetricDuality R V) (f g : R) : grad metric (f - g) = grad metric f - grad metric g := by
+lemma grad_sub [AbstractLieBracket V] [DerivationRules R V] (metric : MetricDuality R V) (f g : R) : grad metric (f - g) = grad metric f - grad metric g := by
   apply metric.toNonDegenerateMetric.eq_of_forall_g_eq
   intro X
   have h1 : metric.g (grad metric (f - g)) X = action X (f - g) := g_grad metric (f - g) X
@@ -49,10 +49,10 @@ lemma grad_sub [LieBracket V] [DerivationRules R V] (metric : MetricDuality R V)
     exact (sub_eq_add_neg (action X f) (action X g)).symm
   have h2 : metric.g (grad metric f - grad metric g) X = metric.g (grad metric f) X - metric.g (grad metric g) X := by
     have hsub : grad metric f - grad metric g = grad metric f + - grad metric g := sub_eq_add_neg _ _
-    rw [hsub, metric.toNonDegenerateMetric.toMetricTensor.bilinear_add_left]
+    rw [hsub, metric.toNonDegenerateMetric.toAbstractMetricTensor.bilinear_add_left]
     have hneg : metric.g (- grad metric g) X = - metric.g (grad metric g) X := by
       have hmm : - grad metric g = (-1:R) • grad metric g := by rw [neg_one_smul]
-      rw [hmm, metric.toNonDegenerateMetric.toMetricTensor.bilinear_smul_left]
+      rw [hmm, metric.toNonDegenerateMetric.toAbstractMetricTensor.bilinear_smul_left]
       ring
     rw [hneg, ← sub_eq_add_neg]
   have h4 : metric.g (grad metric f) X = action X f := g_grad metric f X

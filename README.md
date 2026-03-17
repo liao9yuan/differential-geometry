@@ -2,9 +2,40 @@
 
 A lightweight, self-contained formalization of differential geometry in Lean 4. See [differential-geometry-papers](https://github.com/qinz1yang/differential-geometry-papers) for using the library to formalize papers in differential geometry.
 
+
+## Project Structure
+```mermaid
+flowchart BT
+    subgraph AnalyticLayer [Analytic Layer]
+        DirRSB[RSTensor]
+        
+        DirAux[Aux] --> DirAlt[Alternating]
+        DirAlt --> DirDiffForm[DifferentialForm]
+    end
+
+    DirRSB --> Bridge[Bridge.lean]
+    DirDiffForm ~~~ DirRSB
+
+    subgraph SyntheticLayer [Synthetic Layer]
+        DirAlg[Algebra]
+        DirGeom[Geometry]
+        DirOperators[Operators]
+        DirAnalysis[Analysis]
+
+        DirAlg --> DirOperators
+        DirGeom --> DirOperators
+
+        DirAlg --> DirAnalysis
+        DirGeom --> DirAnalysis
+    end
+
+    Bridge --> DirAlg
+    Bridge --> DirGeom
+```
+
 ## Background
 
-We are treating:
+In Synthetic Layer, We are treating:
 - **Smooth Functions ($R$):**  as a commutative ring.
 - **Space of Smooth Vector Fields Γ(TM):**  as a module ($V$) over $R$.
 - **Vector Fields:**  as derivations.

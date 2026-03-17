@@ -16,7 +16,7 @@ Analytical concepts such as maximum principles, positivity, and spatial extremum
 -/
 
 variable {R V : Type} [CommRing R] [PartialOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V]
-variable [DerivationAction R V] [LieBracket V] [DerivationRules R V]
+variable [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V]
 
 /-- Positive semi-definite condition for bilinear forms. -/
 -- Defines when a smooth bilinear form is positive semi-definite (T(X,X) >= 0 for all X).
@@ -28,30 +28,30 @@ def IsPositiveDefinite (T : SmoothBilinearForm R V) : Prop := ∀ X : V, X ≠ 0
 
 /-- Algebraic condition for a spatial maximum. -/
 -- Axiomatizes the algebraic conditions of a scalar function satisfying a spatial maximum principle.
-class SpatialMaximum (metric : MetricDuality R V) (conn : AffineConnection R V) (f : R) : Prop where
+class SpatialMaximum (metric : MetricDuality R V) (conn : AbstractAffineConnection R V) (f : R) : Prop where
   grad_zero : grad metric f = 0
   hessian_neg_semi_def : IsPositiveSemiDefinite (-(1:R) • hessianForm conn f)
 
 /-- Trace property for positive semi-definite forms. -/
 -- Axiomatizes that the trace of a positive semi-definite form is non-negative.
-class TraceOrderRules (metric : MetricTensor R V) [MetricTraceOperator R V metric] where
+class TraceOrderRules (metric : AbstractMetricTensor R V) [MetricTraceOperator R V metric] where
   trace_nonneg : ∀ T : SmoothBilinearForm R V, IsPositiveSemiDefinite T → 0 ≤ MetricTraceOperator.metric_trace metric T
 
 /-- Non-positive Laplacian at a spatial maximum. -/
 -- Lemma that at a SpatialMaximum, the Laplacian is <= 0.
 lemma laplacian_nonpos_at_max
     (metric : MetricDuality R V)
-    [MetricTraceOperator R V metric.toNonDegenerateMetric.toMetricTensor] [TraceOrderRules metric.toNonDegenerateMetric.toMetricTensor]
-    (conn : AffineConnection R V) (f : R)
-    [SpatialMaximum metric conn f] [MetricTraceRules R V metric.toNonDegenerateMetric.toMetricTensor] :
-    laplacian metric.toNonDegenerateMetric.toMetricTensor conn f ≤ 0 := by
+    [MetricTraceOperator R V metric.toNonDegenerateMetric.toAbstractMetricTensor] [TraceOrderRules metric.toNonDegenerateMetric.toAbstractMetricTensor]
+    (conn : AbstractAffineConnection R V) (f : R)
+    [SpatialMaximum metric conn f] [MetricTraceRules R V metric.toNonDegenerateMetric.toAbstractMetricTensor] :
+    laplacian metric.toNonDegenerateMetric.toAbstractMetricTensor conn f ≤ 0 := by
   have h_hess := SpatialMaximum.hessian_neg_semi_def (metric := metric) (conn := conn) (f := f)
-  have h_trace := TraceOrderRules.trace_nonneg (metric := metric.toNonDegenerateMetric.toMetricTensor) (-(1:R) • hessianForm conn f) h_hess
-  have hc : MetricTraceOperator.metric_trace metric.toNonDegenerateMetric.toMetricTensor (-(1:R) • hessianForm conn f).val = MetricTraceOperator.metric_trace metric.toNonDegenerateMetric.toMetricTensor (fun X Y => -(1:R) * ((hessianForm conn f) X Y)) := rfl
-  have h_smul := MetricTraceRules.trace_smul (metric := metric.toNonDegenerateMetric.toMetricTensor) (-(1:R)) (hessianForm conn f).val
+  have h_trace := TraceOrderRules.trace_nonneg (metric := metric.toNonDegenerateMetric.toAbstractMetricTensor) (-(1:R) • hessianForm conn f) h_hess
+  have hc : MetricTraceOperator.metric_trace metric.toNonDegenerateMetric.toAbstractMetricTensor (-(1:R) • hessianForm conn f).val = MetricTraceOperator.metric_trace metric.toNonDegenerateMetric.toAbstractMetricTensor (fun X Y => -(1:R) * ((hessianForm conn f) X Y)) := rfl
+  have h_smul := MetricTraceRules.trace_smul (metric := metric.toNonDegenerateMetric.toAbstractMetricTensor) (-(1:R)) (hessianForm conn f).val
   rw [hc, h_smul] at h_trace
-  have h_lap : laplacian metric.toNonDegenerateMetric.toMetricTensor conn f = MetricTraceOperator.metric_trace metric.toNonDegenerateMetric.toMetricTensor (hessianForm conn f) := rfl
+  have h_lap : laplacian metric.toNonDegenerateMetric.toAbstractMetricTensor conn f = MetricTraceOperator.metric_trace metric.toNonDegenerateMetric.toAbstractMetricTensor (hessianForm conn f) := rfl
   rw [← h_lap] at h_trace
-  have h_neg_one : -(1:R) * laplacian metric.toNonDegenerateMetric.toMetricTensor conn f = - laplacian metric.toNonDegenerateMetric.toMetricTensor conn f := by ring
+  have h_neg_one : -(1:R) * laplacian metric.toNonDegenerateMetric.toAbstractMetricTensor conn f = - laplacian metric.toNonDegenerateMetric.toAbstractMetricTensor conn f := by ring
   rw [h_neg_one] at h_trace
   exact neg_nonneg.mp h_trace

@@ -7,21 +7,21 @@ import Mathlib.Tactic.Abel
 set_option autoImplicit false
 set_option linter.style.longLine false
 
-open DerivationAction
-open LieBracket
+open AbstractDerivationAction
+open AbstractLieBracket
 
-variable {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [DerivationAction R V]
+variable {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [AbstractDerivationAction R V]
 
 -- Defines the conformal transformation of an affine connection algebraically.
 def conformalConnection_nabla (metric : MetricDuality R V)
-  (conn : AffineConnection R V) (u : R) (X Y : V) : V :=
+  (conn : AbstractAffineConnection R V) (u : R) (X Y : V) : V :=
   conn.nabla X Y + (action X u) • Y + (action Y u) • X - (metric.g X Y) • (grad metric u)
 
 local notation "⁅" X ", " Y "⁆" => bracket X Y
 
 -- Proves that the conformally transformed connection algebraically preserves the torsion-free property of the original connection.
 theorem conformal_torsion_free (metric : MetricDuality R V)
-  (conn : AffineConnection R V) [LieBracket V] [TorsionFree conn] (u : R) (X Y : V) :
+  (conn : AbstractAffineConnection R V) [AbstractLieBracket V] [TorsionFree conn] (u : R) (X Y : V) :
   conformalConnection_nabla metric conn u X Y - conformalConnection_nabla metric conn u Y X = ⁅X, Y⁆ := by
   unfold conformalConnection_nabla
   have h1 : metric.g Y X = metric.g X Y := metric.symm Y X

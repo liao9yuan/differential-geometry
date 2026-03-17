@@ -8,9 +8,9 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
 variable {R V : Type}
-variable [CommRing R] [AddCommGroup V] [Module R V] [DerivationAction R V]
+variable [CommRing R] [AddCommGroup V] [Module R V] [AbstractDerivationAction R V]
 
-open DerivationAction
+open AbstractDerivationAction
 
 /-!
 # Second Covariant Derivative
@@ -30,15 +30,15 @@ lemma h_cancel (A B C : V) : (A + B) - (A + C) = B - C := by
   abel
 
 /-- Second covariant derivative: ∇²_{X,Y} Z = ∇_X (∇_Y Z) - ∇_{∇_X Y} Z
-Input: (AffineConnection R V, V, V, V)
+Input: (AbstractAffineConnection R V, V, V, V)
 Output: V -/
-def secondCovDeriv (conn : AffineConnection R V) (X Y Z : V) : V :=
+def secondCovDeriv (conn : AbstractAffineConnection R V) (X Y Z : V) : V :=
   conn.nabla X (conn.nabla Y Z) - conn.nabla (conn.nabla X Y) Z
 
 /-- Prove that the second covariant derivative is mathematically linear with respect to scalar multiplication on the first vector field argument X.
-Input: (AffineConnection R V, R, V, V, V)
+Input: (AbstractAffineConnection R V, R, V, V, V)
 Output: Prop -/
-lemma secondCovDeriv_smul_X (conn : AffineConnection R V) (a : R) (X Y Z : V) :
+lemma secondCovDeriv_smul_X (conn : AbstractAffineConnection R V) (a : R) (X Y Z : V) :
   secondCovDeriv conn (a • X) Y Z = a • (secondCovDeriv conn X Y Z) := by
   dsimp [secondCovDeriv]
   rw [conn.nabla_smul_left]
@@ -47,9 +47,9 @@ lemma secondCovDeriv_smul_X (conn : AffineConnection R V) (a : R) (X Y Z : V) :
   rw [h_smul_sub]
 
 /-- Prove that the second covariant derivative is mathematically linear with respect to scalar multiplication on the second vector field argument Y.
-Input: (AffineConnection R V, R, V, V, V)
+Input: (AbstractAffineConnection R V, R, V, V, V)
 Output: Prop -/
-lemma secondCovDeriv_smul_Y (conn : AffineConnection R V) (a : R) (X Y Z : V) :
+lemma secondCovDeriv_smul_Y (conn : AbstractAffineConnection R V) (a : R) (X Y Z : V) :
   secondCovDeriv conn X (a • Y) Z = a • (secondCovDeriv conn X Y Z) := by
   dsimp [secondCovDeriv]
   have h1 : conn.nabla (a • Y) Z = a • (conn.nabla Y Z) := conn.nabla_smul_left a Y Z
@@ -64,7 +64,7 @@ lemma secondCovDeriv_smul_Y (conn : AffineConnection R V) (a : R) (X Y Z : V) :
   rw [h_smul_sub]
 
 /-- Commutator of the second covariant derivative.
-Input: (AffineConnection R V, V, V, V)
+Input: (AbstractAffineConnection R V, V, V, V)
 Output: V -/
-def secondCovDerivCommutator (conn : AffineConnection R V) (X Y Z : V) : V :=
+def secondCovDerivCommutator (conn : AbstractAffineConnection R V) (X Y Z : V) : V :=
   secondCovDeriv conn X Y Z - secondCovDeriv conn Y X Z

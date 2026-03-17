@@ -7,9 +7,9 @@ import Mathlib.Tactic.Ring
 set_option autoImplicit false
 set_option linter.style.longLine false
 
-variable {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [DerivationAction R V] [LieBracket V]
+variable {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [AbstractDerivationAction R V] [AbstractLieBracket V]
 
-open DerivationAction
+open AbstractDerivationAction
 
 /-!
 # Covariant Derivative of Tensors
@@ -17,14 +17,14 @@ Defines the covariant derivative of a (0,2)-tensor along a vector field.
 -/
 
 /-- Raw evaluation of the covariant derivative of a (0,2)-tensor T along a vector field X.
-Input: (AffineConnection R V, V, SmoothBilinearForm R V, V, V)
+Input: (AbstractAffineConnection R V, V, SmoothBilinearForm R V, V, V)
 Output: R -/
-def rawCovDeriv (conn : AffineConnection R V) (X : V) (T : SmoothBilinearForm R V) (Y Z : V) : R :=
+def rawCovDeriv (conn : AbstractAffineConnection R V) (X : V) (T : SmoothBilinearForm R V) (Y Z : V) : R :=
   action X (T Y Z) - T (conn.nabla X Y) Z - T Y (conn.nabla X Z)
 
 section Linearity
 
-variable (conn : AffineConnection R V) [DerivationRules R V] (X : V) (T : SmoothBilinearForm R V)
+variable (conn : AbstractAffineConnection R V) [DerivationRules R V] (X : V) (T : SmoothBilinearForm R V)
 
 /-- Prove that the raw covariant derivative is additive with respect to the first vector field argument.
 Input: (V, V, V)
@@ -107,19 +107,19 @@ lemma rawCovDeriv_smul_right (a : R) (Y Z : V) :
 end Linearity
 
 /-- Covariant derivative of a (0,2)-tensor as an operator returning a new SmoothBilinearForm.
-Input: (AffineConnection R V, V, SmoothBilinearForm R V)
+Input: (AbstractAffineConnection R V, V, SmoothBilinearForm R V)
 Output: SmoothBilinearForm R V -/
-def covDerivOp (conn : AffineConnection R V) [DerivationRules R V] (X : V) (T : SmoothBilinearForm R V) : SmoothBilinearForm R V where
+def covDerivOp (conn : AbstractAffineConnection R V) [DerivationRules R V] (X : V) (T : SmoothBilinearForm R V) : SmoothBilinearForm R V where
   val := rawCovDeriv conn X T
   add_left := rawCovDeriv_add_left conn X T
   smul_left := rawCovDeriv_smul_left conn X T
   add_right := rawCovDeriv_add_right conn X T
   smul_right := rawCovDeriv_smul_right conn X T
 
-/-- Conversion from MetricTensor to SmoothBilinearForm.
-Input: (MetricTensor R V)
+/-- Conversion from AbstractMetricTensor to SmoothBilinearForm.
+Input: (AbstractMetricTensor R V)
 Output: SmoothBilinearForm R V -/
-def metricToForm (metric : MetricTensor R V) : SmoothBilinearForm R V where
+def metricToForm (metric : AbstractMetricTensor R V) : SmoothBilinearForm R V where
   val := metric.g
   add_left := metric.bilinear_add_left
   smul_left := metric.bilinear_smul_left
@@ -132,7 +132,7 @@ def metricToForm (metric : MetricTensor R V) : SmoothBilinearForm R V where
       _ = a * metric.g Y X := metric.bilinear_smul_left _ _ _
       _ = a * metric.g X Y := by rw [metric.symm Y X]
 
-variable (conn : AffineConnection R V) (metric : MetricTensor R V) [DerivationRules R V] [MetricCompatible conn metric]
+variable (conn : AbstractAffineConnection R V) (metric : AbstractMetricTensor R V) [DerivationRules R V] [MetricCompatible conn metric]
 
 /-- The covariant derivative of the metric tensor with respect to a compatible connection is zero.
 Prove that applying the `covDerivOp` operator to `g` mathematically yields the exact 0 bilinear form.
