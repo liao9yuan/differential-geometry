@@ -25,8 +25,8 @@ def tensorNormSq (T : SmoothBilinearForm R V) : R := tensorInnerProduct metric T
 
 -- 3. Prove Inner Product Properties
 
--- Lemma 1: inner_symm
-lemma inner_symm (T S : SmoothBilinearForm R V) :
+-- Lemma 1: tensor_inner_symm
+lemma tensor_inner_symm (T S : SmoothBilinearForm R V) :
     tensorInnerProduct metric T S = tensorInnerProduct metric S T := by
   dsimp [tensorInnerProduct]
   exact TR.trace_comm
@@ -46,8 +46,8 @@ lemma to_endo_smul (c : R) (T : SmoothBilinearForm R V) :
   funext X
   exact raise_smul metric T c X
 
--- Lemma 2: inner_add_left
-lemma inner_add_left (T₁ T₂ S : SmoothBilinearForm R V) :
+-- Lemma 2: tensor_inner_add_left
+lemma tensor_inner_add_left (T₁ T₂ S : SmoothBilinearForm R V) :
     tensorInnerProduct metric (T₁ + T₂) S = tensorInnerProduct metric T₁ S + tensorInnerProduct metric T₂ S := by
   dsimp [tensorInnerProduct]
   rw [to_endo_add metric]
@@ -56,8 +56,8 @@ lemma inner_add_left (T₁ T₂ S : SmoothBilinearForm R V) :
   rw [h_comp_dist]
   exact TR.trace_add
 
--- Lemma 3: inner_smul_left
-lemma inner_smul_left (c : R) (T S : SmoothBilinearForm R V) :
+-- Lemma 3: tensor_inner_smul_left
+lemma tensor_inner_smul_left (c : R) (T S : SmoothBilinearForm R V) :
     tensorInnerProduct metric (c • T) S = c * tensorInnerProduct metric T S := by
   dsimp [tensorInnerProduct]
   rw [to_endo_smul metric]
@@ -66,20 +66,20 @@ lemma inner_smul_left (c : R) (T S : SmoothBilinearForm R V) :
   rw [h_comp_smul]
   exact TR.trace_smul
 
--- Lemma 4: inner_add_right
-lemma inner_add_right (T S₁ S₂ : SmoothBilinearForm R V) :
+-- Lemma 4: tensor_inner_add_right
+lemma tensor_inner_add_right (T S₁ S₂ : SmoothBilinearForm R V) :
     tensorInnerProduct metric T (S₁ + S₂) = tensorInnerProduct metric T S₁ + tensorInnerProduct metric T S₂ := by
-  rw [inner_symm metric T (S₁ + S₂)]
-  rw [inner_add_left metric S₁ S₂ T]
-  rw [inner_symm metric S₁ T]
-  rw [inner_symm metric S₂ T]
+  rw [tensor_inner_symm metric T (S₁ + S₂)]
+  rw [tensor_inner_add_left metric S₁ S₂ T]
+  rw [tensor_inner_symm metric S₁ T]
+  rw [tensor_inner_symm metric S₂ T]
 
--- Lemma 5: inner_smul_right
-lemma inner_smul_right (c : R) (T S : SmoothBilinearForm R V) :
+-- Lemma 5: tensor_inner_smul_right
+lemma tensor_inner_smul_right (c : R) (T S : SmoothBilinearForm R V) :
     tensorInnerProduct metric T (c • S) = c * tensorInnerProduct metric T S := by
-  rw [inner_symm metric T (c • S)]
-  rw [inner_smul_left metric c S T]
-  rw [inner_symm metric S T]
+  rw [tensor_inner_symm metric T (c • S)]
+  rw [tensor_inner_smul_left metric c S T]
+  rw [tensor_inner_symm metric S T]
 
 /-- $|T + aS + bW|^2$ expansion -/
 lemma expand_norm_sq_add3
@@ -93,9 +93,9 @@ lemma expand_norm_sq_add3
   (2:R) * b * tensorInnerProduct metric T W +
   (2:R) * a * b * tensorInnerProduct metric S W := by
   dsimp [tensorNormSq]
-  simp only [inner_add_left metric, inner_add_right metric,
-             inner_smul_left metric, inner_smul_right metric,
-             inner_symm metric S T, inner_symm metric W T, inner_symm metric W S]
+  simp only [tensor_inner_add_left metric, tensor_inner_add_right metric,
+             tensor_inner_smul_left metric, tensor_inner_smul_right metric,
+             tensor_inner_symm metric S T, tensor_inner_symm metric W T, tensor_inner_symm metric W S]
   ring
 
 /-- $|A - bB - cC|^2$ expansion -/
@@ -116,7 +116,7 @@ lemma expand_norm_sq_sub3
     change A X Y - b * B X Y - c * C X Y = A X Y + (-b) * B X Y + (-c) * C X Y
     ring
   rw [h1]
-  simp only [inner_add_left metric, inner_add_right metric,
-             inner_smul_left metric, inner_smul_right metric,
-             inner_symm metric B A, inner_symm metric C A, inner_symm metric C B]
+  simp only [tensor_inner_add_left metric, tensor_inner_add_right metric,
+             tensor_inner_smul_left metric, tensor_inner_smul_right metric,
+             tensor_inner_symm metric B A, tensor_inner_symm metric C A, tensor_inner_symm metric C B]
   ring

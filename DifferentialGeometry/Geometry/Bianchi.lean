@@ -15,26 +15,26 @@ set_option linter.style.emptyLine false
 Algebraic formulation and proof of the First Bianchi Identity.
 -/
 
-open DerivationAction
-open LieBracket
+open AbstractDerivationAction
+open AbstractLieBracket
 
 variable {R V : Type}
 variable [CommRing R] [AddCommGroup V] [Module R V]
-variable [DerivationAction R V] [LieBracket V] [DerivationRules R V]
+variable [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V]
 
 local notation "⁅" X ", " Y "⁆" => bracket X Y
 
 /-- Jacobi identity for the Lie bracket of vector fields.
 Input: (V)
 Output: Prop -/
-class JacobiIdentity (V : Type) [AddCommGroup V] [LieBracket V] where
+class JacobiIdentity (V : Type) [AddCommGroup V] [AbstractLieBracket V] where
   jacobi : ∀ X Y Z : V, ⁅X, ⁅Y, Z⁆⁆ + ⁅Y, ⁅Z, X⁆⁆ + ⁅Z, ⁅X, Y⁆⁆ = 0
 
 /-- Negative homogeneity of the affine connection in the second argument.
 Proof that ∇_X (-Y) = - ∇_X Y.
-Input: (AffineConnection R V, V, V)
+Input: (AbstractAffineConnection R V, V, V)
 Output: Prop -/
-lemma nabla_neg_right (conn : AffineConnection R V) (X Y : V) : conn.nabla X (-Y) = - conn.nabla X Y := by
+lemma nabla_neg_right (conn : AbstractAffineConnection R V) (X Y : V) : conn.nabla X (-Y) = - conn.nabla X Y := by
   have h1 : conn.nabla X (Y + -Y) = conn.nabla X Y + conn.nabla X (-Y) := conn.nabla_add_right X Y (-Y)
   have h2 : Y + -Y = 0 := by abel
   rw [h2] at h1
@@ -53,9 +53,9 @@ lemma nabla_neg_right (conn : AffineConnection R V) (X Y : V) : conn.nabla X (-Y
 
 /-- Additive linearity of the affine connection over vector field subtraction.
 Proof that ∇_X (Y - Z) = ∇_X Y - ∇_X Z.
-Input: (AffineConnection R V, V, V, V)
+Input: (AbstractAffineConnection R V, V, V, V)
 Output: Prop -/
-lemma nabla_sub_right (conn : AffineConnection R V) (X Y Z : V) : conn.nabla X (Y - Z) = conn.nabla X Y - conn.nabla X Z := by
+lemma nabla_sub_right (conn : AbstractAffineConnection R V) (X Y Z : V) : conn.nabla X (Y - Z) = conn.nabla X Y - conn.nabla X Z := by
   calc conn.nabla X (Y - Z) = conn.nabla X (Y + -Z) := by rw [sub_eq_add_neg]
     _ = conn.nabla X Y + conn.nabla X (-Z) := conn.nabla_add_right X Y (-Z)
     _ = conn.nabla X Y + - conn.nabla X Z := by rw [nabla_neg_right conn X Z]
@@ -66,7 +66,7 @@ lemma nabla_sub_right (conn : AffineConnection R V) (X Y Z : V) : conn.nabla X (
 Proof that [X - Y, Z] = [X, Z] - [Y, Z].
 Input: (R, V, V, V, V)
 Output: Prop -/
-lemma bracket_neg_left (_conn : AffineConnection R V) (X Y : V) : ⁅-X, Y⁆ = - ⁅X, Y⁆ := by
+lemma bracket_neg_left (_conn : AbstractAffineConnection R V) (X Y : V) : ⁅-X, Y⁆ = - ⁅X, Y⁆ := by
   have h1 : ⁅X + -X, Y⁆ = ⁅X, Y⁆ + ⁅-X, Y⁆ := DerivationRules.bracket_add_left R X (-X) Y
   have h2 : X + -X = 0 := by abel
   rw [h2] at h1
@@ -83,7 +83,7 @@ lemma bracket_neg_left (_conn : AffineConnection R V) (X Y : V) : ⁅-X, Y⁆ = 
     _ = - ⁅X, Y⁆ + 0 := by rw [← h1]
     _ = - ⁅X, Y⁆ := by abel
 
-lemma bracket_sub_left (_conn : AffineConnection R V) (X Y Z : V) : ⁅X - Y, Z⁆ = ⁅X, Z⁆ - ⁅Y, Z⁆ := by
+lemma bracket_sub_left (_conn : AbstractAffineConnection R V) (X Y Z : V) : ⁅X - Y, Z⁆ = ⁅X, Z⁆ - ⁅Y, Z⁆ := by
   calc ⁅X - Y, Z⁆ = ⁅X + -Y, Z⁆ := by rw [sub_eq_add_neg]
     _ = ⁅X, Z⁆ + ⁅-Y, Z⁆ := DerivationRules.bracket_add_left R X (-Y) Z
     _ = ⁅X, Z⁆ + - ⁅Y, Z⁆ := by rw [bracket_neg_left _conn Y Z]
@@ -91,9 +91,9 @@ lemma bracket_sub_left (_conn : AffineConnection R V) (X Y Z : V) : ⁅X - Y, Z�
 
 /-- Regrouping of double covariant derivatives using the torsion-free property.
 Proof that ∇_X (∇_Y Z) - ∇_X (∇_Z Y) = ∇_X ⁅Y, Z⁆.
-Input: (AffineConnection R V, V, V, V)
+Input: (AbstractAffineConnection R V, V, V, V)
 Output: Prop -/
-lemma nabla_torsion_group (conn : AffineConnection R V) [TorsionFree conn] (X Y Z : V) :
+lemma nabla_torsion_group (conn : AbstractAffineConnection R V) [TorsionFree conn] (X Y Z : V) :
   conn.nabla X (conn.nabla Y Z) - conn.nabla X (conn.nabla Z Y) = conn.nabla X ⁅Y, Z⁆ := by
   rw [← nabla_sub_right conn X (conn.nabla Y Z) (conn.nabla Z Y)]
   have h1 : conn.nabla Y Z - conn.nabla Z Y = ⁅Y, Z⁆ := TorsionFree.torsion_zero Y Z
@@ -101,18 +101,18 @@ lemma nabla_torsion_group (conn : AffineConnection R V) [TorsionFree conn] (X Y 
 
 /-- Commutation of covariant derivatives relates to Riemann curvature.
 Proof that ∇_X (∇_Y Z) - ∇_Y (∇_X Z) = R(X,Y)Z + ∇_[X,Y] Z.
-Input: (AffineConnection R V, V, V, V)
+Input: (AbstractAffineConnection R V, V, V, V)
 Output: Prop -/
-lemma Rm_commutation (conn : AffineConnection R V) (X Y Z : V) :
+lemma Rm_commutation (conn : AbstractAffineConnection R V) (X Y Z : V) :
   conn.nabla X (conn.nabla Y Z) - conn.nabla Y (conn.nabla X Z) = Rm conn X Y Z + conn.nabla ⁅X, Y⁆ Z := by
   unfold Rm
   abel
 
 /-- Antisymmetry of the Riemann curvature tensor in the first two arguments.
 Proof that R(X,Y)Z = - R(Y,X)Z.
-Input: (AffineConnection R V, V, V, V)
+Input: (AbstractAffineConnection R V, V, V, V)
 Output: Prop -/
-lemma Rm_antisymm (conn : AffineConnection R V) (X Y Z : V) :
+lemma Rm_antisymm (conn : AbstractAffineConnection R V) (X Y Z : V) :
   Rm conn X Y Z = - Rm conn Y X Z := by
   unfold Rm
   have h1 : ⁅X, Y⁆ = - ⁅Y, X⁆ := DerivationRules.bracket_antisymm R X Y
@@ -121,9 +121,9 @@ lemma Rm_antisymm (conn : AffineConnection R V) (X Y Z : V) :
 
 /-- Linearity of Riemann tensor in the first argument over subtraction.
 Proof that R(X-Y, Z)W = R(X,Z)W - R(Y,Z)W.
-Input: (AffineConnection R V, V, V, V, V)
+Input: (AbstractAffineConnection R V, V, V, V, V)
 Output: Prop -/
-lemma Rm_sub_left (conn : AffineConnection R V) (X Y Z W : V) :
+lemma Rm_sub_left (conn : AbstractAffineConnection R V) (X Y Z W : V) :
   Rm conn (X - Y) Z W = Rm conn X Z W - Rm conn Y Z W := by
   unfold Rm
   rw [nabla_sub_left, bracket_sub_left conn, nabla_sub_left]
@@ -133,9 +133,9 @@ lemma Rm_sub_left (conn : AffineConnection R V) (X Y Z W : V) :
 
 /-- First Bianchi Identity.
 Proof that R(X,Y)Z + R(Y,Z)X + R(Z,X)Y = 0 for a torsion-free connection.
-Input: (AffineConnection R V, V, V, V)
+Input: (AbstractAffineConnection R V, V, V, V)
 Output: Prop -/
-theorem first_bianchi (conn : AffineConnection R V) [TorsionFree conn] [JacobiIdentity V] (X Y Z : V) :
+theorem first_bianchi (conn : AbstractAffineConnection R V) [TorsionFree conn] [JacobiIdentity V] (X Y Z : V) :
   Rm conn X Y Z + Rm conn Y Z X + Rm conn Z X Y = 0 := by
   unfold Rm
   have h1 : Rm conn X Y Z = conn.nabla X (conn.nabla Y Z) - conn.nabla Y (conn.nabla X Z) - conn.nabla ⁅X, Y⁆ Z := rfl
@@ -163,15 +163,15 @@ theorem first_bianchi (conn : AffineConnection R V) [TorsionFree conn] [JacobiId
     _ = 0 := JacobiIdentity.jacobi X Y Z
 
 /-- Covariant derivative of the Riemann curvature tensor.
-Input: (AffineConnection R V, V, V, V, V)
+Input: (AbstractAffineConnection R V, V, V, V, V)
 Output: V -/
-def covDerivRm (conn : AffineConnection R V) (X Y Z W : V) : V :=
+def covDerivRm (conn : AbstractAffineConnection R V) (X Y Z W : V) : V :=
   conn.nabla X (Rm conn Y Z W) - Rm conn (conn.nabla X Y) Z W - Rm conn Y (conn.nabla X Z) W - Rm conn Y Z (conn.nabla X W)
 
-lemma Rm_unfold (conn : AffineConnection R V) (X Y Z : V) :
+lemma Rm_unfold (conn : AbstractAffineConnection R V) (X Y Z : V) :
   Rm conn X Y Z = conn.nabla X (conn.nabla Y Z) - conn.nabla Y (conn.nabla X Z) - conn.nabla ⁅X, Y⁆ Z := rfl
 
-lemma second_bianchi_S1 [JacobiIdentity V] (conn : AffineConnection R V) (X Y Z W : V) :
+lemma second_bianchi_S1 [JacobiIdentity V] (conn : AbstractAffineConnection R V) (X Y Z W : V) :
   (conn.nabla X (Rm conn Y Z W) - Rm conn Y Z (conn.nabla X W))
   + (conn.nabla Y (Rm conn Z X W) - Rm conn Z X (conn.nabla Y W))
   + (conn.nabla Z (Rm conn X Y W) - Rm conn X Y (conn.nabla Z W))
@@ -250,7 +250,7 @@ lemma second_bianchi_S1 [JacobiIdentity V] (conn : AffineConnection R V) (X Y Z 
     _ = Rm conn ⁅X, Y⁆ Z W + Rm conn ⁅Y, Z⁆ X W + Rm conn ⁅Z, X⁆ Y W + 0 := by rw [h5]
     _ = Rm conn ⁅X, Y⁆ Z W + Rm conn ⁅Y, Z⁆ X W + Rm conn ⁅Z, X⁆ Y W := by abel
 
-lemma second_bianchi_S2 (conn : AffineConnection R V) [TorsionFree conn] (X Y Z W : V) :
+lemma second_bianchi_S2 (conn : AbstractAffineConnection R V) [TorsionFree conn] (X Y Z W : V) :
   - Rm conn (conn.nabla X Y) Z W - Rm conn Y (conn.nabla X Z) W
   - Rm conn (conn.nabla Y Z) X W - Rm conn Z (conn.nabla Y X) W
   - Rm conn (conn.nabla Z X) Y W - Rm conn X (conn.nabla Z Y) W
@@ -278,9 +278,9 @@ lemma second_bianchi_S2 (conn : AffineConnection R V) [TorsionFree conn] (X Y Z 
 
 /-- Second Bianchi Identity.
 Proof that (∇_X R)(Y,Z)W + (∇_Y R)(Z,X)W + (∇_Z R)(X,Y)W = 0 for a torsion-free connection.
-Input: (AffineConnection R V, V, V, V, V)
+Input: (AbstractAffineConnection R V, V, V, V, V)
 Output: Prop -/
-theorem second_bianchi (conn : AffineConnection R V) [TorsionFree conn] [JacobiIdentity V] (X Y Z W : V) :
+theorem second_bianchi (conn : AbstractAffineConnection R V) [TorsionFree conn] [JacobiIdentity V] (X Y Z W : V) :
   covDerivRm conn X Y Z W + covDerivRm conn Y Z X W + covDerivRm conn Z X Y W = 0 := by
   unfold covDerivRm
   calc conn.nabla X (Rm conn Y Z W) - Rm conn (conn.nabla X Y) Z W - Rm conn Y (conn.nabla X Z) W - Rm conn Y Z (conn.nabla X W)
@@ -303,25 +303,25 @@ variable [TraceOperator R V]
 
 -- Definitions of Scalar Invariants
 /-- Divergence of the Ricci tensor.
-Input: (AffineConnection R V, V)
+Input: (AbstractAffineConnection R V, V)
 Output: R -/
-axiom div_Rc (conn : AffineConnection R V) (X : V) : R
+axiom div_Rc (conn : AbstractAffineConnection R V) (X : V) : R
 
 /-- Gradient of the scalar curvature.
-Input: (AffineConnection R V, V)
+Input: (AbstractAffineConnection R V, V)
 Output: R -/
-axiom grad_R (conn : AffineConnection R V) (X : V) : R
+axiom grad_R (conn : AbstractAffineConnection R V) (X : V) : R
 
 /-- Divergence of the Riemann curvature tensor.
-Input: (AffineConnection R V, V, V, V)
+Input: (AbstractAffineConnection R V, V, V, V)
 Output: R -/
-axiom div_Rm (conn : AffineConnection R V) (Y Z X : V) : R
+axiom div_Rm (conn : AbstractAffineConnection R V) (Y Z X : V) : R
 
 /-- Covariant derivative of Ricci tensor.
-Input: (AffineConnection R V, V, V, V)
+Input: (AbstractAffineConnection R V, V, V, V)
 Output: R -/
-def covDerivRc (conn : AffineConnection R V) (Y Z X : V) : R :=
-  DerivationAction.action Y (Rc conn Z X) - Rc conn (conn.nabla Y Z) X - Rc conn Z (conn.nabla Y X)
+def covDerivRc (conn : AbstractAffineConnection R V) (Y Z X : V) : R :=
+  AbstractDerivationAction.action Y (Rc conn Z X) - Rc conn (conn.nabla Y Z) X - Rc conn Z (conn.nabla Y X)
 
 --- TENSOR CONTRACTION 1 (Trace over 1st input and target slot) ---
 
@@ -350,9 +350,9 @@ class BilinearTraceLinearity (R V : Type) [CommRing R] [AddCommGroup V] [Bilinea
 --- THEOREM CONTRACTIONS ---
 
 /-- Specific linear algebraic identities resulting from contracting the covariant derivative of curvature.
-Input: (AffineConnection R V)
+Input: (AbstractAffineConnection R V)
 Output: Type -/
-class BianchiContractionRules (conn : AffineConnection R V) [Tensor14Trace R V] [BilinearTrace R V] where
+class BianchiContractionRules (conn : AbstractAffineConnection R V) [Tensor14Trace R V] [BilinearTrace R V] where
   -- First trace transformations on each term
   trace_1_4_term1 : Tensor14Trace.trace_1_4 (fun x y z w => covDerivRm conn x y z w) = fun y z w => div_Rm conn y z w
   trace_1_4_term2 : Tensor14Trace.trace_1_4 (fun x y z w => covDerivRm conn y z x w) = fun y z w => - covDerivRc conn y z w
@@ -364,9 +364,9 @@ class BianchiContractionRules (conn : AffineConnection R V) [Tensor14Trace R V] 
 
 /-- Contracted Bianchi Identity.
 Proof that 2 * div_Rc = grad_R.
-Input: (AffineConnection R V, V)
+Input: (AbstractAffineConnection R V, V)
 Output: Prop -/
-theorem contracted_bianchi (conn : AffineConnection R V) [TorsionFree conn] [JacobiIdentity V]
+theorem contracted_bianchi (conn : AbstractAffineConnection R V) [TorsionFree conn] [JacobiIdentity V]
   [Tensor14Trace R V] [Tensor14TraceLinearity R V]
   [BilinearTrace R V] [BilinearTraceLinearity R V]
   [BianchiContractionRules conn] (X : V) :

@@ -15,11 +15,11 @@ variable [CommRing R] [AddCommGroup V] [Module R V]
 /-- Derivation action of vector fields on functions.
 Input: (V, R)
 Output: R -/
-class DerivationAction where
+class AbstractDerivationAction where
   action : V → R → R
 
 /-- Lie bracket of two vector fields.
 Input: (V, V)
 Output: V -/
-class LieBracket (V : Type) where
+class AbstractLieBracket (V : Type) where
   bracket : V → V → V

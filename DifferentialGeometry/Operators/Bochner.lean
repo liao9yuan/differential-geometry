@@ -15,27 +15,27 @@ import Mathlib.Tactic.Abel
 set_option autoImplicit false
 set_option linter.style.longLine false
 
-open DerivationAction
-open LieBracket
+open AbstractDerivationAction
+open AbstractLieBracket
 
 variable {R V : Type}
 variable [CommRing R] [AddCommGroup V] [Module R V]
-variable [DerivationAction R V]
+variable [AbstractDerivationAction R V]
 
 
 
 -- Proves the expansion of the directional derivative of the squared norm of the gradient.
 lemma grad_norm_sq_deriv
   (metric : MetricDuality R V)
-  (conn : AffineConnection R V) [MetricCompatible conn metric.toNonDegenerateMetric.toMetricTensor]
+  (conn : AbstractAffineConnection R V) [MetricCompatible conn metric.toNonDegenerateMetric.toAbstractMetricTensor]
   (f : R) (X : V) :
   action X (metric.g (grad metric f) (grad metric f)) =
   metric.g (conn.nabla X (grad metric f)) (grad metric f) + metric.g (conn.nabla X (grad metric f)) (grad metric f) := by
-  exact norm_sq_deriv conn metric.toNonDegenerateMetric.toMetricTensor X (grad metric f)
+  exact norm_sq_deriv conn metric.toNonDegenerateMetric.toAbstractMetricTensor X (grad metric f)
 
 -- Proves the swapping of third-order derivatives of a function by injecting the Riemann curvature tensor.
-lemma hessian_commute_ricci [LieBracket V]
-  (conn : AffineConnection R V) [TorsionFree conn]
+lemma hessian_commute_ricci [AbstractLieBracket V]
+  (conn : AbstractAffineConnection R V) [TorsionFree conn]
   (metric : MetricDuality R V)
   (f : R) (X Y : V) :
   conn.nabla X (conn.nabla Y (grad metric f)) =
@@ -49,10 +49,10 @@ lemma hessian_commute_ricci [LieBracket V]
     _ = Rm conn X Y (grad metric f) + conn.nabla (bracket X Y) (grad metric f) + conn.nabla Y (conn.nabla X (grad metric f)) := by rw [h]
     _ = conn.nabla Y (conn.nabla X (grad metric f)) + conn.nabla (bracket X Y) (grad metric f) + Rm conn X Y (grad metric f) := by abel
 
-variable [LieBracket V] [DerivationRules R V]
+variable [AbstractLieBracket V] [DerivationRules R V]
 
 -- Define the Hessian as a SmoothBilinearForm so we can take its tensor norm squared.
-def hessianForm (conn : AffineConnection R V) (f : R) : SmoothBilinearForm R V where
+def hessianForm (conn : AbstractAffineConnection R V) (f : R) : SmoothBilinearForm R V where
   val := Hess conn f
   add_left := fun X1 X2 Y => by
     dsimp [Hess]
@@ -83,10 +83,10 @@ def hessianForm (conn : AffineConnection R V) (f : R) : SmoothBilinearForm R V w
     rw [DerivationRules.action_smul_left c (conn.nabla X Y) f]
     ring
 
-omit [LieBracket V] [DerivationRules R V] in
+omit [AbstractLieBracket V] [DerivationRules R V] in
 lemma hessian_eq_g_nabla_grad
   (metric : MetricDuality R V)
-  (conn : AffineConnection R V) [MetricCompatible conn metric.toNonDegenerateMetric.toMetricTensor]
+  (conn : AbstractAffineConnection R V) [MetricCompatible conn metric.toNonDegenerateMetric.toAbstractMetricTensor]
   (f : R) (X Y : V) :
   Hess conn f X Y = metric.g (conn.nabla X (grad metric f)) Y := by
   dsimp [Hess]
@@ -103,18 +103,18 @@ lemma hessian_eq_g_nabla_grad
 
 lemma hessian_norm_sq_grad
   (metric : MetricDuality R V)
-  (conn : AffineConnection R V) [MetricCompatible conn metric.toNonDegenerateMetric.toMetricTensor]
+  (conn : AbstractAffineConnection R V) [MetricCompatible conn metric.toNonDegenerateMetric.toAbstractMetricTensor]
   (f : R) (X Y : V) :
   Hess conn (metric.g (grad metric f) (grad metric f)) X Y =
   2 * metric.g (secondCovDeriv conn X Y (grad metric f)) (grad metric f) +
   2 * metric.g (conn.nabla X (grad metric f)) (conn.nabla Y (grad metric f)) := by
   dsimp [Hess]
-  have h1 : action Y (metric.g (grad metric f) (grad metric f)) = metric.g (conn.nabla Y (grad metric f)) (grad metric f) + metric.g (conn.nabla Y (grad metric f)) (grad metric f) := norm_sq_deriv conn metric.toNonDegenerateMetric.toMetricTensor Y (grad metric f)
+  have h1 : action Y (metric.g (grad metric f) (grad metric f)) = metric.g (conn.nabla Y (grad metric f)) (grad metric f) + metric.g (conn.nabla Y (grad metric f)) (grad metric f) := norm_sq_deriv conn metric.toNonDegenerateMetric.toAbstractMetricTensor Y (grad metric f)
   rw [h1]
   rw [DerivationRules.action_add_right]
   have h2 : action X (metric.g (conn.nabla Y (grad metric f)) (grad metric f)) = metric.g (conn.nabla X (conn.nabla Y (grad metric f))) (grad metric f) + metric.g (conn.nabla Y (grad metric f)) (conn.nabla X (grad metric f)) := MetricCompatible.compat (conn:=conn) X (conn.nabla Y (grad metric f)) (grad metric f)
   rw [h2]
-  have h3 : action (conn.nabla X Y) (metric.g (grad metric f) (grad metric f)) = metric.g (conn.nabla (conn.nabla X Y) (grad metric f)) (grad metric f) + metric.g (conn.nabla (conn.nabla X Y) (grad metric f)) (grad metric f) := norm_sq_deriv conn metric.toNonDegenerateMetric.toMetricTensor (conn.nabla X Y) (grad metric f)
+  have h3 : action (conn.nabla X Y) (metric.g (grad metric f) (grad metric f)) = metric.g (conn.nabla (conn.nabla X Y) (grad metric f)) (grad metric f) + metric.g (conn.nabla (conn.nabla X Y) (grad metric f)) (grad metric f) := norm_sq_deriv conn metric.toNonDegenerateMetric.toAbstractMetricTensor (conn.nabla X Y) (grad metric f)
   rw [h3]
   have hsym : metric.g (conn.nabla Y (grad metric f)) (conn.nabla X (grad metric f)) = metric.g (conn.nabla X (grad metric f)) (conn.nabla Y (grad metric f)) := metric.symm _ _
   rw [hsym]
@@ -128,42 +128,42 @@ lemma hessian_norm_sq_grad
   rw [hsplit]
   ring
 
-class BochnerTraceRules (metric : MetricDuality R V) [MetricTraceOperator R V metric.toNonDegenerateMetric.toMetricTensor]
-  (conn : AffineConnection R V) [TraceOperator R V] where
+class BochnerTraceRules (metric : MetricDuality R V) [MetricTraceOperator R V metric.toNonDegenerateMetric.toAbstractMetricTensor]
+  (conn : AbstractAffineConnection R V) [TraceOperator R V] where
   trace_second_cov_deriv : ∀ f : R,
-    MetricTraceOperator.metric_trace metric.toNonDegenerateMetric.toMetricTensor (fun X Y => metric.g (secondCovDeriv conn X Y (grad metric f)) (grad metric f)) =
-    Rc conn (grad metric f) (grad metric f) + metric.g (grad metric f) (grad metric (laplacian metric.toNonDegenerateMetric.toMetricTensor conn f))
+    MetricTraceOperator.metric_trace metric.toNonDegenerateMetric.toAbstractMetricTensor (fun X Y => metric.g (secondCovDeriv conn X Y (grad metric f)) (grad metric f)) =
+    Rc conn (grad metric f) (grad metric f) + metric.g (grad metric f) (grad metric (laplacian metric.toNonDegenerateMetric.toAbstractMetricTensor conn f))
   trace_norm_sq : ∀ f : R,
-    MetricTraceOperator.metric_trace metric.toNonDegenerateMetric.toMetricTensor (fun X Y => metric.g (conn.nabla X (grad metric f)) (conn.nabla Y (grad metric f))) =
+    MetricTraceOperator.metric_trace metric.toNonDegenerateMetric.toAbstractMetricTensor (fun X Y => metric.g (conn.nabla X (grad metric f)) (conn.nabla Y (grad metric f))) =
     tensorNormSq metric (hessianForm conn f)
 
 -- Proves the Bochner-Weitzenbock formula relating the Laplacian of the squared gradient to the Hessian, Ricci curvature, and the gradient of the Laplacian.
 theorem bochner_identity
   [Invertible (2 : R)] [TraceOperator R V]
   (metric : MetricDuality R V)
-  [MetricTraceOperator R V metric.toNonDegenerateMetric.toMetricTensor] [MetricTraceRules R V metric.toNonDegenerateMetric.toMetricTensor]
-  (conn : AffineConnection R V) [MetricCompatible conn metric.toNonDegenerateMetric.toMetricTensor] [TorsionFree conn]
+  [MetricTraceOperator R V metric.toNonDegenerateMetric.toAbstractMetricTensor] [MetricTraceRules R V metric.toNonDegenerateMetric.toAbstractMetricTensor]
+  (conn : AbstractAffineConnection R V) [MetricCompatible conn metric.toNonDegenerateMetric.toAbstractMetricTensor] [TorsionFree conn]
   [bochner_rules : BochnerTraceRules metric conn]
   (f : R) :
-  laplacian metric.toNonDegenerateMetric.toMetricTensor conn (metric.g (grad metric f) (grad metric f)) =
+  laplacian metric.toNonDegenerateMetric.toAbstractMetricTensor conn (metric.g (grad metric f) (grad metric f)) =
   2 * tensorNormSq metric (hessianForm conn f) +
   2 * Rc conn (grad metric f) (grad metric f) +
-  2 * metric.g (grad metric f) (grad metric (laplacian metric.toNonDegenerateMetric.toMetricTensor conn f)) := by
-  have hl : laplacian metric.toNonDegenerateMetric.toMetricTensor conn (metric.g (grad metric f) (grad metric f)) = MetricTraceOperator.metric_trace metric.toNonDegenerateMetric.toMetricTensor (Hess conn (metric.g (grad metric f) (grad metric f))) := rfl
+  2 * metric.g (grad metric f) (grad metric (laplacian metric.toNonDegenerateMetric.toAbstractMetricTensor conn f)) := by
+  have hl : laplacian metric.toNonDegenerateMetric.toAbstractMetricTensor conn (metric.g (grad metric f) (grad metric f)) = MetricTraceOperator.metric_trace metric.toNonDegenerateMetric.toAbstractMetricTensor (Hess conn (metric.g (grad metric f) (grad metric f))) := rfl
   rw [hl]
-  have h1 : MetricTraceOperator.metric_trace metric.toNonDegenerateMetric.toMetricTensor (Hess conn (metric.g (grad metric f) (grad metric f))) =
-            MetricTraceOperator.metric_trace metric.toNonDegenerateMetric.toMetricTensor (fun X Y => 2 * metric.g (secondCovDeriv conn X Y (grad metric f)) (grad metric f) + 2 * metric.g (conn.nabla X (grad metric f)) (conn.nabla Y (grad metric f))) := by
+  have h1 : MetricTraceOperator.metric_trace metric.toNonDegenerateMetric.toAbstractMetricTensor (Hess conn (metric.g (grad metric f) (grad metric f))) =
+            MetricTraceOperator.metric_trace metric.toNonDegenerateMetric.toAbstractMetricTensor (fun X Y => 2 * metric.g (secondCovDeriv conn X Y (grad metric f)) (grad metric f) + 2 * metric.g (conn.nabla X (grad metric f)) (conn.nabla Y (grad metric f))) := by
     have h_hess : Hess conn (metric.g (grad metric f) (grad metric f)) = fun X Y => 2 * metric.g (secondCovDeriv conn X Y (grad metric f)) (grad metric f) + 2 * metric.g (conn.nabla X (grad metric f)) (conn.nabla Y (grad metric f)) := by
       funext X Y
       exact hessian_norm_sq_grad metric conn f X Y
     rw [h_hess]
   rw [h1]
   rw [MetricTraceRules.trace_add]
-  have h_smul1 : MetricTraceOperator.metric_trace metric.toNonDegenerateMetric.toMetricTensor (fun X Y => 2 * metric.g (secondCovDeriv conn X Y (grad metric f)) (grad metric f)) = 2 * MetricTraceOperator.metric_trace metric.toNonDegenerateMetric.toMetricTensor (fun X Y => metric.g (secondCovDeriv conn X Y (grad metric f)) (grad metric f)) := MetricTraceRules.trace_smul 2 _
-  have h_smul2 : MetricTraceOperator.metric_trace metric.toNonDegenerateMetric.toMetricTensor (fun X Y => 2 * metric.g (conn.nabla X (grad metric f)) (conn.nabla Y (grad metric f))) = 2 * MetricTraceOperator.metric_trace metric.toNonDegenerateMetric.toMetricTensor (fun X Y => metric.g (conn.nabla X (grad metric f)) (conn.nabla Y (grad metric f))) := MetricTraceRules.trace_smul 2 _
+  have h_smul1 : MetricTraceOperator.metric_trace metric.toNonDegenerateMetric.toAbstractMetricTensor (fun X Y => 2 * metric.g (secondCovDeriv conn X Y (grad metric f)) (grad metric f)) = 2 * MetricTraceOperator.metric_trace metric.toNonDegenerateMetric.toAbstractMetricTensor (fun X Y => metric.g (secondCovDeriv conn X Y (grad metric f)) (grad metric f)) := MetricTraceRules.trace_smul 2 _
+  have h_smul2 : MetricTraceOperator.metric_trace metric.toNonDegenerateMetric.toAbstractMetricTensor (fun X Y => 2 * metric.g (conn.nabla X (grad metric f)) (conn.nabla Y (grad metric f))) = 2 * MetricTraceOperator.metric_trace metric.toNonDegenerateMetric.toAbstractMetricTensor (fun X Y => metric.g (conn.nabla X (grad metric f)) (conn.nabla Y (grad metric f))) := MetricTraceRules.trace_smul 2 _
   rw [h_smul1, h_smul2]
-  have h_sq : MetricTraceOperator.metric_trace metric.toNonDegenerateMetric.toMetricTensor (fun X Y => metric.g (conn.nabla X (grad metric f)) (conn.nabla Y (grad metric f))) = tensorNormSq metric (hessianForm conn f) := bochner_rules.trace_norm_sq f
+  have h_sq : MetricTraceOperator.metric_trace metric.toNonDegenerateMetric.toAbstractMetricTensor (fun X Y => metric.g (conn.nabla X (grad metric f)) (conn.nabla Y (grad metric f))) = tensorNormSq metric (hessianForm conn f) := bochner_rules.trace_norm_sq f
   rw [h_sq]
-  have h_sec : MetricTraceOperator.metric_trace metric.toNonDegenerateMetric.toMetricTensor (fun X Y => metric.g (secondCovDeriv conn X Y (grad metric f)) (grad metric f)) = Rc conn (grad metric f) (grad metric f) + metric.g (grad metric f) (grad metric (laplacian metric.toNonDegenerateMetric.toMetricTensor conn f)) := bochner_rules.trace_second_cov_deriv f
+  have h_sec : MetricTraceOperator.metric_trace metric.toNonDegenerateMetric.toAbstractMetricTensor (fun X Y => metric.g (secondCovDeriv conn X Y (grad metric f)) (grad metric f)) = Rc conn (grad metric f) (grad metric f) + metric.g (grad metric f) (grad metric (laplacian metric.toNonDegenerateMetric.toAbstractMetricTensor conn f)) := bochner_rules.trace_second_cov_deriv f
   rw [h_sec]
   ring

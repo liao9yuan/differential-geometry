@@ -11,20 +11,20 @@ set_option linter.style.longLine false
 
 variable {R V : Type}
 variable [CommRing R] [AddCommGroup V] [Module R V]
-variable [DerivationAction R V]
+variable [AbstractDerivationAction R V]
 
-open DerivationAction
+open AbstractDerivationAction
 
 /-- Hessian of a function: `∇²u(X, Y) = X(Y(u)) - (∇_X Y)(u)`.
-Input: (AffineConnection R V, R, V, V)
+Input: (AbstractAffineConnection R V, R, V, V)
 Output: R -/
-def Hess (conn : AffineConnection R V) (u : R) (X Y : V) : R :=
+def Hess (conn : AbstractAffineConnection R V) (u : R) (X Y : V) : R :=
   action X (action Y u) - action (conn.nabla X Y) u
 
-open LieBracket
+open AbstractLieBracket
 
-theorem hessian_symm [LieBracket V] [LieDerivation R V] [ActionLinear R V]
-    (conn : AffineConnection R V) [TorsionFree conn] (u : R) (X Y : V) :
+theorem hessian_symm [AbstractLieBracket V] [LieDerivation R V] [ActionLinear R V]
+    (conn : AbstractAffineConnection R V) [TorsionFree conn] (u : R) (X Y : V) :
     Hess conn u X Y = Hess conn u Y X := by
   have t1 : conn.nabla X Y = conn.nabla Y X + bracket X Y := by
     calc conn.nabla X Y = conn.nabla X Y - conn.nabla Y X + conn.nabla Y X := by abel

@@ -30,18 +30,18 @@ class ScalarTimeDerivativeRules (R : Type) [CommRing R] (Time : Type) [TimeDeriv
 
 
 variable {R V : Type}
-variable [CommRing R] [AddCommGroup V] [Module R V] [DerivationAction R V]
+variable [CommRing R] [AddCommGroup V] [Module R V] [AbstractDerivationAction R V]
 
 class StaticMetricTimeRules
   (Time : Type)
   [TimeDerivative Time R]
   [TimeDerivative Time V]
   (metric : MetricDuality R V)
-  [MetricTraceOperator R V metric.toNonDegenerateMetric.toMetricTensor]
-  (conn : AffineConnection R V) where
+  [MetricTraceOperator R V metric.toNonDegenerateMetric.toAbstractMetricTensor]
+  (conn : AbstractAffineConnection R V) where
   dt_laplacian : ∀ (f : Time → R) t,
-    TimeDerivative.partial_t (fun s => laplacian metric.toNonDegenerateMetric.toMetricTensor conn (f s)) t =
-    laplacian metric.toNonDegenerateMetric.toMetricTensor conn (TimeDerivative.partial_t f t)
+    TimeDerivative.partial_t (fun s => laplacian metric.toNonDegenerateMetric.toAbstractMetricTensor conn (f s)) t =
+    laplacian metric.toNonDegenerateMetric.toAbstractMetricTensor conn (TimeDerivative.partial_t f t)
   dt_grad : ∀ (f : Time → R) t,
     TimeDerivative.partial_t (fun s => grad metric (f s)) t = grad metric (TimeDerivative.partial_t f t)
   dt_metric_g : ∀ (X : Time → V) t,

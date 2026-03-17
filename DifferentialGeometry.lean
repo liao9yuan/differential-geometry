@@ -32,3 +32,5 @@ import DifferentialGeometry.Operators.Time
 import DifferentialGeometry.Operators.Variation
 import DifferentialGeometry.Applications.LiYau1D
 import DifferentialGeometry.Flows.RicciFlow.Calculus
+
+import DifferentialGeometry.Bridge

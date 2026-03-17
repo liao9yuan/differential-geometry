@@ -9,22 +9,22 @@ import DifferentialGeometry.Geometry.Connection
 set_option autoImplicit false
 set_option linter.style.longLine false
 
-open DerivationAction
+open AbstractDerivationAction
 
 variable {R V : Type}
 variable [CommRing R] [AddCommGroup V] [Module R V]
-variable [DerivationAction R V]
+variable [AbstractDerivationAction R V]
 
 /-- Laplacian of a function defined as the metric trace of its Hessian: `Δu = tr_g(∇²u)`.
-Input: (MetricTensor R V, AffineConnection R V, R)
+Input: (AbstractMetricTensor R V, AbstractAffineConnection R V, R)
 Output: R -/
-def laplacian (metric : MetricTensor R V) [MetricTraceOperator R V metric]
-    (conn : AffineConnection R V) (u : R) : R :=
+def laplacian (metric : AbstractMetricTensor R V) [MetricTraceOperator R V metric]
+    (conn : AbstractAffineConnection R V) (u : R) : R :=
   MetricTraceOperator.metric_trace metric (Hess conn u)
 
 /-- $\Delta(f+g) = \Delta f + \Delta g$ -/
-lemma laplacian_add (metric : MetricTensor R V) [MetricTraceOperator R V metric]
-  [MetricTraceRules R V metric] (conn : AffineConnection R V) [LieBracket V] [DerivationRules R V] (f g : R) :
+lemma laplacian_add (metric : AbstractMetricTensor R V) [MetricTraceOperator R V metric]
+  [MetricTraceRules R V metric] (conn : AbstractAffineConnection R V) [AbstractLieBracket V] [DerivationRules R V] (f g : R) :
   laplacian metric conn (f + g) = laplacian metric conn f + laplacian metric conn g := by
   dsimp [laplacian]
   have hessian_add : Hess conn (f + g) = (fun X Y => Hess conn f X Y + Hess conn g X Y) := by
@@ -41,8 +41,8 @@ lemma laplacian_add (metric : MetricTensor R V) [MetricTraceOperator R V metric]
   exact MetricTraceRules.trace_add (metric := metric) (fun X Y => Hess conn f X Y) (fun X Y => Hess conn g X Y)
 
 /-- $\Delta(f-g) = \Delta f - \Delta g$ -/
-lemma laplacian_sub (metric : MetricTensor R V) [MetricTraceOperator R V metric]
-  [MetricTraceRules R V metric] (conn : AffineConnection R V) [LieBracket V] [DerivationRules R V] (f g : R) :
+lemma laplacian_sub (metric : AbstractMetricTensor R V) [MetricTraceOperator R V metric]
+  [MetricTraceRules R V metric] (conn : AbstractAffineConnection R V) [AbstractLieBracket V] [DerivationRules R V] (f g : R) :
   laplacian metric conn (f - g) = laplacian metric conn f - laplacian metric conn g := by
   dsimp [laplacian]
   have action_sub : ∀ (X : V) (f g : R), action X (f - g) = action X f - action X g := by

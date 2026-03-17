@@ -81,7 +81,7 @@ instance : Invertible (2 : R) where
 -- 2. Finite Difference Derivation Action
 def h : Float := 1e-4
 
-instance : DerivationAction R V where
+instance : AbstractDerivationAction R V where
   action X f p :=
     let xp := X p
     let px := (p.1 + h * xp.1, p.2.1 + h * xp.2.1, p.2.2 + h * xp.2.2)
@@ -89,14 +89,14 @@ instance : DerivationAction R V where
 
 -- 3. Lie Bracket using Commutator Formula [X, Y]f = X(Yf) - Y(Xf)
 -- We compute this component-wise.
-instance : LieBracket V where
+instance : AbstractLieBracket V where
   bracket X Y p :=
-    let dX_Y1 := DerivationAction.action X (fun q => (Y q).1) p
-    let dX_Y2 := DerivationAction.action X (fun q => (Y q).2.1) p
-    let dX_Y3 := DerivationAction.action X (fun q => (Y q).2.2) p
-    let dY_X1 := DerivationAction.action Y (fun q => (X q).1) p
-    let dY_X2 := DerivationAction.action Y (fun q => (X q).2.1) p
-    let dY_X3 := DerivationAction.action Y (fun q => (X q).2.2) p
+    let dX_Y1 := AbstractDerivationAction.action X (fun q => (Y q).1) p
+    let dX_Y2 := AbstractDerivationAction.action X (fun q => (Y q).2.1) p
+    let dX_Y3 := AbstractDerivationAction.action X (fun q => (Y q).2.2) p
+    let dY_X1 := AbstractDerivationAction.action Y (fun q => (X q).1) p
+    let dY_X2 := AbstractDerivationAction.action Y (fun q => (X q).2.1) p
+    let dY_X3 := AbstractDerivationAction.action Y (fun q => (X q).2.2) p
     (dX_Y1 - dY_X1, dX_Y2 - dY_X2, dX_Y3 - dY_X3)
 
 instance : DerivationRules R V where
@@ -112,7 +112,7 @@ instance : DerivationRules R V where
 
 -- 4. Geometric Instances
 -- Standard Euclidean Metric (dot product)
-def euclidean_metric : MetricTensor R V where
+def euclidean_metric : AbstractMetricTensor R V where
   g X Y p :=
     let xp := X p
     let yp := Y p
@@ -198,7 +198,7 @@ def test_ricci (X Y : V) : R := Rc (koszul_connection euclidean_metric) X Y
 -- 5. Metric Variation
 -- A time-dependent metric g(t) = (1+t) * Euclidean.
 -- Its time derivative is just the Euclidean metric. Evaluated at e1, e1, we expect 1.0.
-def time_metric (t : Time) : MetricTensor R V where
+def time_metric (t : Time) : AbstractMetricTensor R V where
   g X Y p := (1.0 + t) * (euclidean_metric.g X Y p)
   symm := sorry
   bilinear_add_left := sorry

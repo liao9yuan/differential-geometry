@@ -13,16 +13,16 @@ set_option linter.style.longLine false
 Definitions for Riemann curvature, Ricci curvature, and Scalar curvature.
 -/
 
-open DerivationAction
-open LieBracket
+open AbstractDerivationAction
+open AbstractLieBracket
 
 variable {R V : Type}
 variable [CommRing R] [AddCommGroup V] [Module R V]
-variable [DerivationAction R V]
+variable [AbstractDerivationAction R V]
 
 section Curvature
 
-variable [LieBracket V] (conn : AffineConnection R V)
+variable [AbstractLieBracket V] (conn : AbstractAffineConnection R V)
 
 /-- Riemann curvature tensor.
 Input: (X : V, Y : V, Z : V)
@@ -37,9 +37,9 @@ def Rc [TraceOperator R V] (X Y : V) : R :=
   TraceOperator.trace (fun Z => Rm conn Z X Y)
 
 /-- Scalar curvature.
-Input: (MetricTensor R V)
+Input: (AbstractMetricTensor R V)
 Output: R -/
-def ScalarCurvature [TraceOperator R V] (metric : MetricTensor R V) [MetricTraceOperator R V metric] : R :=
+def ScalarCurvature [TraceOperator R V] (metric : AbstractMetricTensor R V) [MetricTraceOperator R V metric] : R :=
   MetricTraceOperator.metric_trace metric (Rc conn)
 
 end Curvature

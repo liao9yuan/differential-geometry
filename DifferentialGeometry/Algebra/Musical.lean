@@ -14,9 +14,9 @@ Defines non-degenerate metrics and the metric duality (raising indices).
 
 /-- A metric tensor is non-degenerate if it implies equality of vector fields
 when their inner products with all other vector fields are equal.
-Input: (MetricTensor R V)
+Input: (AbstractMetricTensor R V)
 Output: Type -/
-class NonDegenerateMetric (R V : Type) [CommRing R] [AddCommGroup V] [Module R V] extends MetricTensor R V where
+class NonDegenerateMetric (R V : Type) [CommRing R] [AddCommGroup V] [Module R V] extends AbstractMetricTensor R V where
   eq_of_forall_g_eq : ∀ X Y : V, (∀ Z : V, g X Z = g Y Z) → X = Y
 
 /-- Metric duality provides the musical isomorphism to convert bilinear forms to endomorphisms, and 1-forms to vector fields.
