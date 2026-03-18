@@ -2,7 +2,7 @@
 Authors: Yuan Liao, Jack McCarthy
 -/
 import DifferentialGeometry.Tensor.RSTensor.Bundle
-import DifferentialGeometry.Tensor.RSTensor.Product
+import DifferentialGeometry.Tensor.RSTensor.Curry
 import DifferentialGeometry.Tensor.RSTensor.Field
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 /-!
