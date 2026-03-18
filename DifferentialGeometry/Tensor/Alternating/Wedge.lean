@@ -7,13 +7,13 @@ Coauthors: Jack McCarthy
 import DifferentialGeometry.Tensor.Aux.Perm
 import DifferentialGeometry.Tensor.Alternating.Comp
 import DifferentialGeometry.Tensor.Alternating.Curry
+import DifferentialGeometry.Tensor.Product.Defs
 
 /-
 # Wedge Products
 -/
 
 noncomputable section
-suppress_compilation
 
 namespace ContinuousAlternatingMap
 
@@ -43,6 +43,49 @@ theorem wedge_product_def {g : M [⋀^Fin m]→L[𝕜] N} {h : M [⋀^Fin n]→L
     {f : N →L[𝕜] N' →L[𝕜] N''} {x : Fin (m + n) → M} :
     (g ∧[f] h) x = uncurryFinAdd (f.compContinuousAlternatingMap₂ g h) x :=
   rfl
+
+open scoped TensorProduct
+
+/-- The wedge product satisfies `m! * n! • (g ∧ h) v = Alt(g ⊗_f h) v`, proved via
+`domCoprod_alternization_eq` from Mathlib. -/
+theorem factorial_nsmul_wedge_product_eq_alternatization
+    (g : M [⋀^Fin m]→L[𝕜] N) (h : M [⋀^Fin n]→L[𝕜] N')
+    (f : N →L[𝕜] N' →L[𝕜] N'') (v : Fin (m + n) → M) :
+    (m.factorial * n.factorial) • (g ∧[f] h) v =
+      MultilinearMap.alternatization (tensorProductMap g h f).toMultilinearMap v := by
+  -- Factor tensorProductMap.toMM through domCoprod + TensorProduct.lift
+  let φ : N ⊗[𝕜] N' →ₗ[𝕜] N'' := TensorProduct.lift
+    { toFun := fun n => (f n).toLinearMap
+      map_add' := by intro x y; ext; simp [map_add]
+      map_smul' := by intro c x; ext; simp [map_smul] }
+  have hφ : ∀ a b, φ (a ⊗ₜ[𝕜] b) = f a b := fun _ _ => rfl
+  have h_factor : (tensorProductMap g h f).toMultilinearMap =
+      (φ.compMultilinearMap (MultilinearMap.domCoprod
+        ↑g.toAlternatingMap ↑h.toAlternatingMap)).domDomCongr finSumFinEquiv := by
+    ext x; simp [tensorProductMap, MultilinearMap.domDomCongr_apply,
+      LinearMap.compMultilinearMap_apply, MultilinearMap.domCoprod_apply, hφ]; rfl
+  rw [h_factor, ContinuousAlternatingMap.alternatization_domDomCongr,
+    LinearMap.compMultilinearMap_alternatization,
+    MultilinearMap.domCoprod_alternization_eq, Fintype.card_fin, Fintype.card_fin]
+  simp only [AlternatingMap.domDomCongr_apply, LinearMap.compAlternatingMap_apply,
+    AlternatingMap.smul_apply, map_nsmul]
+  change _ = _ • φ ((g.toAlternatingMap.domCoprod h.toAlternatingMap) (v ∘ ⇑finSumFinEquiv))
+  rw [show φ ((g.toAlternatingMap.domCoprod h.toAlternatingMap) (v ∘ ⇑finSumFinEquiv)) =
+    (uncurrySum (f.compContinuousAlternatingMap₂ g h)) (v ∘ ⇑finSumFinEquiv) from
+    congr_fun (congr_arg DFunLike.coe
+      (lift_comp_domCoprod_eq_uncurrySum g h f φ hφ)) _]; rfl
+
+/-- The wedge product agrees with the standard definition:
+`g ∧ h = 1/(m! * n!) • Alt(g ⊗_f h)` where `Alt` is `MultilinearMap.alternatization`. -/
+theorem wedge_product_eq_alternatization [CharZero 𝕜]
+    (g : M [⋀^Fin m]→L[𝕜] N) (h : M [⋀^Fin n]→L[𝕜] N')
+    (f : N →L[𝕜] N' →L[𝕜] N'') (v : Fin (m + n) → M) :
+    (g ∧[f] h) v = ((↑(m.factorial * n.factorial) : 𝕜))⁻¹ •
+      MultilinearMap.alternatization (tensorProductMap g h f).toMultilinearMap v := by
+  have h_ne : (↑(m.factorial * n.factorial) : 𝕜) ≠ 0 :=
+    Nat.cast_ne_zero.mpr (Nat.mul_pos (Nat.factorial_pos m) (Nat.factorial_pos n)).ne'
+  have h_eq := factorial_nsmul_wedge_product_eq_alternatization g h f v
+  rw [← h_eq, ← Nat.cast_smul_eq_nsmul 𝕜, inv_smul_smul₀ h_ne]
 
 /- The wedge product wrt multiplication -/
 theorem wedge_product_mul {g : M [⋀^Fin m]→L[𝕜] 𝕜} {h : M [⋀^Fin n]→L[𝕜] 𝕜} {x : Fin (m + n) → M} :

@@ -1,28 +1,12 @@
 /-
 Authors: Yuan Liao, Jack McCarthy
 -/
+import DifferentialGeometry.Tensor.Product.Pretrivialization
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
-import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Geometry.Manifold.VectorBundle.MDifferentiable
 import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 import Mathlib.Geometry.Manifold.Instances.Sphere
-import Mathlib.Topology.FiberBundle.Basic
-import Mathlib.LinearAlgebra.Dual.Defs
-import Mathlib.LinearAlgebra.Dual.Lemmas
-import Mathlib.LinearAlgebra.FreeModule.Finite.Matrix
-import Mathlib.LinearAlgebra.FiniteDimensional.Defs
-import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
-import Mathlib.LinearAlgebra.Dimension.Finrank
-import Mathlib.LinearAlgebra.Dimension.Free
-import Mathlib.LinearAlgebra.Contraction
-import Mathlib.LinearAlgebra.Multilinear.FiniteDimensional
-import Mathlib.RingTheory.TensorProduct.Finite
-import Mathlib.Analysis.Normed.Operator.Banach
-import Mathlib.Topology.Algebra.Module.Equiv
-import Mathlib.Topology.Algebra.Module.LinearMap
-import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.VectorField.LieBracket
-import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 import Mathlib.Analysis.Calculus.VectorField
 /-!
@@ -36,9 +20,6 @@ with fiber `E₁ x ⊗[𝕜] E₂ x` and model fiber `F₁ ⊗[𝕜] F₂`.
 
 ## Main Definitions
 
-* `TensorProduct.mapL L₁ L₂` : the continuous linear map `F₁ ⊗ F₂ →L G₁ ⊗ G₂` induced
-  by continuous linear maps `L₁ : F₁ →L G₁` and `L₂ : F₂ →L G₂`.
-* `TensorProduct.mapLBilinear` : the bilinear map `(F₁ →L G₁) →L (F₂ →L G₂) →L (F₁⊗F₂ →L G₁⊗G₂)`.
 * `Bundle.TensorProduct.vectorPrebundle` : the `VectorPrebundle` for the tensor product bundle,
   with atlas given by all pairs of trivializations from the atlases of `E₁` and `E₂`.
 * `Bundle.Trivialization.tensorProduct e₁ e₂` : the genuine trivialization of the tensor
@@ -46,9 +27,6 @@ with fiber `E₁ x ⊗[𝕜] E₂ x` and model fiber `F₁ ⊗[𝕜] F₂`.
 
 ## Main Results
 
-* `TensorProduct.mapL_tmul` : `mapL L₁ L₂ (v ⊗ₜ w) = L₁ v ⊗ₜ L₂ w`.
-* `continuousOn_tensorProductCoordChange` : the coordinate change map of the tensor product
-  bundle is continuous on the overlap of base sets.
 * `Bundle.TensorProduct.fiberBundle` : the tensor product of two fiber bundles is a fiber bundle.
 * `Bundle.TensorProduct.vectorBundle` : the tensor product of two vector bundles is a vector bundle.
 
@@ -77,472 +55,8 @@ variable {F₂ : Type*} [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂] [Finit
   [TopologicalSpace (TotalSpace F₂ E₂)]
 
 variable {E₁ E₂}
-variable [TopologicalSpace B] (e₁ e₁' : Trivialization F₁ (π F₁ E₁))
-  (e₂ e₂' : Trivialization F₂ (π F₂ E₂))
+variable [TopologicalSpace B]
 
-/-! ## Induced norm on tensor product -/
-
-section TensorNorm
-
-variable (𝕜 : Type*) [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
-variable (F₁ : Type*) [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁] [FiniteDimensional 𝕜 F₁]
-variable (F₂ : Type*) [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂] [FiniteDimensional 𝕜 F₂]
-
-omit [FiniteDimensional 𝕜 F₂] in
-/-- In finite dimensions, finrank of continuous linear maps equals the product of finranks. -/
-lemma finrank_continuousLinearMap' :
-    Module.finrank 𝕜 (F₁ →L[𝕜] F₂) = Module.finrank 𝕜 F₁ * Module.finrank 𝕜 F₂ := by
-  have e : (F₁ →L[𝕜] F₂) ≃ₗ[𝕜] (F₁ →ₗ[𝕜] F₂) := LinearMap.toContinuousLinearMap.symm
-  rw [e.finrank_eq, Module.finrank_linearMap 𝕜 𝕜]
-
-/-- Linear equivalence between tensor product and Hom from dual, by dimension counting. -/
-noncomputable def tensorHomEquiv : (F₁ ⊗[𝕜] F₂) ≃ₗ[𝕜] ((Module.Dual 𝕜 F₁) →ₗ[𝕜] F₂) := by
-  let f : Module.Dual 𝕜 (Module.Dual 𝕜 F₁) ≃ₗ[𝕜] F₁ := (Module.evalEquiv 𝕜 F₁).symm
-  have h₀ : (Module.Dual 𝕜 (Module.Dual 𝕜 F₁)) ⊗[𝕜] F₂ ≃ₗ[𝕜] (F₁ ⊗[𝕜] F₂) :=
-    let g : (Module.Dual 𝕜 (Module.Dual 𝕜 F₁) ⊗[𝕜] F₂) →ₗ[𝕜] (F₁ ⊗[𝕜] F₂) :=
-      TensorProduct.lift ((TensorProduct.mk 𝕜 F₁ F₂) ∘ₗ f.toLinearMap)
-    let ginv : (F₁ ⊗[𝕜] F₂) →ₗ[𝕜] (Module.Dual 𝕜 (Module.Dual 𝕜 F₁) ⊗[𝕜] F₂) :=
-      TensorProduct.lift
-        ((TensorProduct.mk 𝕜 (Module.Dual 𝕜 (Module.Dual 𝕜 F₁)) F₂) ∘ₗ f.symm.toLinearMap)
-    have left_inv₀ : ginv ∘ₗ g = LinearMap.id := by
-      ext v w
-      unfold ginv g
-      simp
-    have left_inv : ∀ x, ginv (g x) = x := by
-      intro x
-      rw [←@Function.comp_apply _ _ _ ginv g x]
-      have h : (ginv ∘ₗ g : (Module.Dual 𝕜 (Module.Dual 𝕜 F₁) ⊗[𝕜] F₂) →
-        (Module.Dual 𝕜 (Module.Dual 𝕜 F₁) ⊗[𝕜] F₂)) = ginv ∘ g := by simp
-      rw [←h, left_inv₀]
-      simp
-    have right_inv₀ : g ∘ₗ ginv = LinearMap.id := by
-      ext v w
-      unfold ginv g
-      simp
-    have right_inv : ∀ x, g (ginv x) = x := by
-      intro x
-      rw [←@Function.comp_apply _ _ _ g ginv x]
-      have h : (g ∘ₗ ginv : (F₁ ⊗[𝕜] F₂) → (F₁ ⊗[𝕜] F₂)) = g ∘ ginv := by simp
-      rw [←h, right_inv₀]
-      simp
-    LinearEquiv.mk g ginv left_inv right_inv
-  have h₁ := (dualTensorHomEquiv 𝕜 (Module.Dual 𝕜 F₁) F₂)
-  exact LinearEquiv.trans (LinearEquiv.symm h₀) h₁
--- note jack's ones
-
-/-- The normed (continuous) dual of `F₁`. -/
-abbrev cDual := F₁ →L[𝕜] 𝕜
-
-/--
-Auxiliary bilinear map for the tensor–hom adjunction:
-`v : F₁`, `w : F₂` ↦ (φ ↦ φ v • w) as a *continuous* linear map `cDual →L F₂`.
-
-We build it as a linear map and use `LinearMap.toContinuousLinearMap` relying on
-finite-dimensionality of the domain.
--/
-noncomputable def toHomAux :
-    F₁ →ₗ[𝕜] F₂ →ₗ[𝕜] (cDual (𝕜:=𝕜) (F₁:=F₁) →L[𝕜] F₂) :=
-by
-  classical
-  -- First: for each `v w`, define a linear map `cDual →ₗ F₂`, then make it continuous.
-  refine
-    { toFun := fun v =>
-        { toFun := fun w =>
-            ({
-              toFun := fun φ => (φ v) • w
-              map_add' := by
-                intro φ ψ
-                simp [add_smul]
-              map_smul' := by
-                intro a φ
-                -- (a•φ) v = a*(φ v)
-                simp [mul_smul]
-            } : (cDual (𝕜:=𝕜) (F₁:=F₁) →ₗ[𝕜] F₂)).toContinuousLinearMap
-          map_add' := by
-            intro w₁ w₂
-            ext φ
-            simp [smul_add]
-          map_smul' := by
-            intro a w
-            ext φ
-            simp [smul_smul, mul_comm] }
-      map_add' := by
-        intro v₁ v₂
-        ext w φ
-        simp [add_smul]
-      map_smul' := by
-        intro a v
-        ext w φ
-        -- φ (a•v) = a*(φ v)
-        simp [mul_smul] }
-
-/--
-The induced linear map `F₁ ⊗[𝕜] F₂ →ₗ[𝕜] (cDual →L[𝕜] F₂)` by the universal property.
--/
-noncomputable def toHom :
-    (F₁ ⊗[𝕜] F₂) →ₗ[𝕜] (cDual (𝕜:=𝕜) (F₁:=F₁) →L[𝕜] F₂) :=
-_root_.TensorProduct.lift (toHomAux (𝕜:=𝕜) (F₁:=F₁) (F₂:=F₂))
-
-
-omit [FiniteDimensional 𝕜 F₂]
-/-- In finite dimensions, finrank of continuous linear maps equals the product of finranks. -/
-lemma finrank_continuousLinearMap :
-    Module.finrank 𝕜 (F₁ →L[𝕜] F₂) = Module.finrank 𝕜 F₁ * Module.finrank 𝕜 F₂ := by
-  -- In finite dimensions, E →L[𝕜] F ≃ₗ E →ₗ[𝕜] F
-  haveI : Module.Free 𝕜 F₁ := inferInstance
-  haveI : Module.Free 𝕜 F₂ := inferInstance
-  have e : (F₁ →L[𝕜] F₂) ≃ₗ[𝕜] (F₁ →ₗ[𝕜] F₂) := LinearMap.toContinuousLinearMap.symm
-  rw [e.finrank_eq]
-  rw [Module.finrank_linearMap 𝕜 𝕜]
-
-
-
-/-- The continuous dual `cDual 𝕜 F₁` is linearly equivalent to the algebraic dual
-`Module.Dual 𝕜 F₁`, since all linear maps are continuous in finite dimensions. -/
-def cDual_eqiv_dual : cDual 𝕜 F₁ ≃ₗ[𝕜] Module.Dual 𝕜 F₁ := by
-  unfold cDual Module.Dual
-  exact (@LinearMap.toContinuousLinearMap 𝕜 _ F₁ _ _ _ _ _ 𝕜 _ _ _ _ _ _ _ _).symm
-
-/-- Continuous linear maps out of the continuous dual are equivalent to linear maps out of
-the algebraic dual, since `cDual ≃ₗ Module.Dual` in finite dimensions. -/
-def cDual_clm_equiv_dual_lm : (cDual 𝕜 F₁ →L[𝕜] F₂) ≃ₗ[𝕜] (Module.Dual 𝕜 F₁ →ₗ[𝕜] F₂) := by
-  have e : (cDual 𝕜 F₁ →L[𝕜] F₂) ≃ₗ[𝕜] (cDual 𝕜 F₁ →ₗ[𝕜] F₂) := LinearMap.toContinuousLinearMap.symm
-  have e' : (cDual 𝕜 F₁ →ₗ[𝕜] F₂) ≃ₗ[𝕜] (Module.Dual 𝕜 F₁ →ₗ[𝕜] F₂) :=
-    LinearEquiv.congrLeft F₂ 𝕜 (cDual_eqiv_dual 𝕜 F₁)
-  exact LinearEquiv.trans e e'
-
-/--
-A *linear equivalence* `F₁ ⊗ F₂ ≃ₗ (cDual →L F₂)` obtained by dimension counting.
-
-This matches your "equivalence by finrank" pattern.  (It's coordinate-free: no
-`Fin n → 𝕜` coordinates.)
--/
-noncomputable def clmEquiv : (F₁ ⊗[𝕜] F₂) ≃ₗ[𝕜] (cDual 𝕜 F₁ →L[𝕜] F₂) :=
-  LinearEquiv.trans (tensorHomEquiv 𝕜 F₁ F₂) (cDual_clm_equiv_dual_lm 𝕜 F₁ F₂).symm
-
-
-/-- Induced normed additive commutative group structure on `F₁ ⊗[𝕜] F₂`, pulled back
-along the equivalence `clmEquiv : F₁ ⊗ F₂ ≃ₗ (cDual F₁ →L F₂)`. -/
-noncomputable instance instNormedAddCommGroup_tensor :
-    NormedAddCommGroup (F₁ ⊗[𝕜] F₂) :=
-by
-  classical
-  let e := clmEquiv (𝕜:=𝕜) (F₁:=F₁) (F₂:=F₂)
-  -- pick 𝓕 := AddMonoidHom
-  refine NormedAddCommGroup.induced
-    (𝓕 := (F₁ ⊗[𝕜] F₂) →+ (cDual 𝕜 F₁ →L[𝕜] F₂))
-    (E := (F₁ ⊗[𝕜] F₂))
-    (F := (cDual 𝕜 F₁ →L[𝕜] F₂))
-    (f := e.toLinearMap.toAddMonoidHom)
-    ?_
-  -- injectivity of the underlying function
-  exact e.injective
-
-
-/-- Induced normed `𝕜`-module structure on `F₁ ⊗[𝕜] F₂`, pulled back along `clmEquiv`. -/
-noncomputable instance instNormedSpace_tensor :
-    NormedSpace 𝕜 (F₁ ⊗[𝕜] F₂) :=
-by
-  classical
-  let e := clmEquiv (𝕜:=𝕜) (F₁:=F₁) (F₂:=F₂)
-  -- Choose the “linear map-like” type explicitly:
-  refine NormedSpace.induced
-    (F := (F₁ ⊗[𝕜] F₂) →ₗ[𝕜] (cDual 𝕜 F₁ →L[𝕜] F₂))
-    (𝕜 := 𝕜)
-    (E := (F₁ ⊗[𝕜] F₂))
-    (G := (cDual 𝕜 F₁ →L[𝕜] F₂))
-    e.toLinearMap
-
-
-
-end TensorNorm
-
-/-! ## TensorProduct.mapL and its properties -/
-
-section MapL
-
-variable {G₁ G₂ : Type*}
-  [NormedAddCommGroup G₁] [NormedSpace 𝕜 G₁] [FiniteDimensional 𝕜 G₁]
-  [NormedAddCommGroup G₂] [NormedSpace 𝕜 G₂] [FiniteDimensional 𝕜 G₂]
-
-/-- `TensorProduct.map` as a continuous linear map in finite dimensions. -/
-noncomputable def TensorProduct.mapL (L₁ : F₁ →L[𝕜] G₁) (L₂ : F₂ →L[𝕜] G₂) :
-    (F₁ ⊗[𝕜] F₂) →L[𝕜] (G₁ ⊗[𝕜] G₂) :=
-  (TensorProduct.map L₁.toLinearMap L₂.toLinearMap).toContinuousLinearMap
-
-omit [FiniteDimensional 𝕜 G₂] in
-/-- `mapL` acts on pure tensors by applying each factor: `(L₁ ⊗ L₂)(v ⊗ w) = L₁ v ⊗ L₂ w`. -/
-@[simp]
-theorem TensorProduct.mapL_tmul (L₁ : F₁ →L[𝕜] G₁) (L₂ : F₂ →L[𝕜] G₂) (v : F₁) (w : F₂) :
-    TensorProduct.mapL L₁ L₂ (v ⊗ₜ w) = L₁ v ⊗ₜ L₂ w := by
-  simp [TensorProduct.mapL, TensorProduct.map_tmul]
-
-omit [FiniteDimensional 𝕜 G₂] in
-/-- `mapL` is additive in the left factor: `(L₁ + L₁') ⊗ L₂ = L₁ ⊗ L₂ + L₁' ⊗ L₂`. -/
-theorem TensorProduct.mapL_add_left (L₁ L₁' : F₁ →L[𝕜] G₁) (L₂ : F₂ →L[𝕜] G₂) :
-    TensorProduct.mapL (L₁ + L₁') L₂ = TensorProduct.mapL L₁ L₂ + TensorProduct.mapL L₁' L₂ := by
-  ext x; simp [TensorProduct.mapL, TensorProduct.map_add_left]
-
-omit [FiniteDimensional 𝕜 G₂] in
-/-- `mapL` is additive in the right factor: `L₁ ⊗ (L₂ + L₂') = L₁ ⊗ L₂ + L₁ ⊗ L₂'`. -/
-theorem TensorProduct.mapL_add_right (L₁ : F₁ →L[𝕜] G₁) (L₂ L₂' : F₂ →L[𝕜] G₂) :
-    TensorProduct.mapL L₁ (L₂ + L₂') = TensorProduct.mapL L₁ L₂ + TensorProduct.mapL L₁ L₂' := by
-  ext x; simp [TensorProduct.mapL, TensorProduct.map_add_right]
-
-omit [FiniteDimensional 𝕜 G₂] in
-/-- `mapL` is homogeneous in the left factor: `(c • L₁) ⊗ L₂ = c • (L₁ ⊗ L₂)`. -/
-theorem TensorProduct.mapL_smul_left (c : 𝕜) (L₁ : F₁ →L[𝕜] G₁) (L₂ : F₂ →L[𝕜] G₂) :
-    TensorProduct.mapL (c • L₁) L₂ = c • TensorProduct.mapL L₁ L₂ := by
-  ext x; simp [TensorProduct.mapL, TensorProduct.map_smul_left]
-
-omit [FiniteDimensional 𝕜 G₂] in
-/-- `mapL` is homogeneous in the right factor: `L₁ ⊗ (c • L₂) = c • (L₁ ⊗ L₂)`. -/
-theorem TensorProduct.mapL_smul_right (c : 𝕜) (L₁ : F₁ →L[𝕜] G₁) (L₂ : F₂ →L[𝕜] G₂) :
-    TensorProduct.mapL L₁ (c • L₂) = c • TensorProduct.mapL L₁ L₂ := by
-  ext x; simp [TensorProduct.mapL, TensorProduct.map_smul_right]
-
-
-/-- The bilinear map (L₁, L₂) ↦ TensorProduct.mapL L₁ L₂. -/
-noncomputable def TensorProduct.mapLBilinear :
-    (F₁ →L[𝕜] G₁) →L[𝕜] (F₂ →L[𝕜] G₂) →L[𝕜]
-      ((F₁ ⊗[𝕜] F₂) →L[𝕜] (G₁ ⊗[𝕜] G₂)) := by
-  classical
-  -- continuity will be obtained from finite-dimensionality of the domains
-  haveI : FiniteDimensional 𝕜 (F₁ →L[𝕜] G₁) := ContinuousLinearMap.finiteDimensional
-  haveI : FiniteDimensional 𝕜 (F₂ →L[𝕜] G₂) := ContinuousLinearMap.finiteDimensional
-  haveI : FiniteDimensional 𝕜 ((F₂ →L[𝕜] G₂) →L[𝕜] F₁ ⊗[𝕜] F₂ →L[𝕜] G₁ ⊗[𝕜] G₂)
-    := ContinuousLinearMap.finiteDimensional
-  -- inner: linear in L₂
-  let innerLM (L₁ : F₁ →L[𝕜] G₁) :
-      (F₂ →L[𝕜] G₂) →ₗ[𝕜] ((F₁ ⊗[𝕜] F₂) →L[𝕜] (G₁ ⊗[𝕜] G₂)) :=
-    { toFun := fun L₂ => TensorProduct.mapL (𝕜 := 𝕜) L₁ L₂
-      map_add' := TensorProduct.mapL_add_right (𝕜 := 𝕜) (L₁ := L₁)
-      map_smul' := fun c L₂ =>
-        TensorProduct.mapL_smul_right (𝕜 := 𝕜) (L₁ := L₁) (L₂ := L₂) c }
-  let innerCLM (L₁ : F₁ →L[𝕜] G₁) :
-      (F₂ →L[𝕜] G₂) →L[𝕜] ((F₁ ⊗[𝕜] F₂) →L[𝕜] (G₁ ⊗[𝕜] G₂)) :=
-    (innerLM (L₁ := L₁)).toContinuousLinearMap
-  -- outer: linear in L₁, valued in continuous linear maps (in L₂)
-  let outerLM :
-      (F₁ →L[𝕜] G₁) →ₗ[𝕜]
-        ((F₂ →L[𝕜] G₂) →L[𝕜] ((F₁ ⊗[𝕜] F₂) →L[𝕜] (G₁ ⊗[𝕜] G₂))) :=
-    { toFun := fun L₁ => innerCLM (L₁ := L₁)
-      map_add' := by
-        intro L₁ L₁'
-        ext L₂ x
-        -- evaluate in the codomain to reduce to your previously proved lemma
-        simpa [innerCLM, innerLM] using congrArg (fun f => f x)
-          (TensorProduct.mapL_add_left (𝕜 := 𝕜) (L₂ := L₂) (L₁ := L₁) (L₁' := L₁'))
-      map_smul' := by
-        intro c L₁
-        ext L₂ x
-        simpa [innerCLM, innerLM] using congrArg (fun f => f x)
-          (TensorProduct.mapL_smul_left (𝕜 := 𝕜) (L₂ := L₂) (L₁ := L₁) c) }
-  have h : Continuous outerLM := @LinearMap.continuous_of_finiteDimensional
-    _ _ (F₁ →L[𝕜] G₁) _ _ _ _ _ ((F₂ →L[𝕜] G₂) →L[𝕜] ((F₁ ⊗[𝕜] F₂) →L[𝕜] (G₁ ⊗[𝕜] G₂)))
-    _ _ _ _ _ _ _ _ outerLM
-  let f : (F₁ →L[𝕜] G₁) →L[𝕜]
-        ((F₂ →L[𝕜] G₂) →L[𝕜] ((F₁ ⊗[𝕜] F₂) →L[𝕜] (G₁ ⊗[𝕜] G₂))) :=
-    ContinuousLinearMap.mk outerLM h
-  exact f
-
-
-end MapL
-
-
-namespace Pretrivialization
-
-/-! ## Pretrivialization for tensor product bundle -/
-
-/-- The coordinate change function for tensor product bundles.
-
-Compare with `continuousLinearMapCoordChange` for Hom bundles:
-- Hom: `L ↦ (coordChange e₂ e₂') ∘ L ∘ (coordChange e₁' e₁)` (note reversed order on first factor)
-- Tensor: `v ⊗ w ↦ (coordChange e₁ e₁' v) ⊗ (coordChange e₂ e₂' w)` (same direction)
--/
-def tensorProductCoordChange [e₁.IsLinear 𝕜] [e₁'.IsLinear 𝕜] [e₂.IsLinear 𝕜] [e₂'.IsLinear 𝕜]
-    (b : B) : (F₁ ⊗[𝕜] F₂) →L[𝕜] (F₁ ⊗[𝕜] F₂) :=
-  TensorProduct.mapL (e₁.coordChangeL 𝕜 e₁' b) (e₂.coordChangeL 𝕜 e₂' b)
-
-variable {e₁ e₁' e₂ e₂'}
-variable [∀ x, TopologicalSpace (E₁ x)] [FiberBundle F₁ E₁]
-variable [∀ x, TopologicalSpace (E₂ x)] [FiberBundle F₂ E₂]
-
-/-- The coordinate change map for the tensor product bundle varies continuously over the
-overlap of the base sets of any two pairs of trivializations. -/
-theorem continuousOn_tensorProductCoordChange
-    [VectorBundle 𝕜 F₁ E₁] [VectorBundle 𝕜 F₂ E₂]
-    [MemTrivializationAtlas e₁] [MemTrivializationAtlas e₁']
-    [MemTrivializationAtlas e₂] [MemTrivializationAtlas e₂'] :
-    ContinuousOn (tensorProductCoordChange (𝕜 := 𝕜) e₁ e₁' e₂ e₂')
-      (e₁.baseSet ∩ e₂.baseSet ∩ (e₁'.baseSet ∩ e₂'.baseSet)) := by
-  classical
-  have h₁ := continuousOn_coordChange 𝕜 e₁ e₁'
-  have h₂ := continuousOn_coordChange 𝕜 e₂ e₂'
-  let s : Set B := (e₁.baseSet ∩ e₂.baseSet) ∩ (e₁'.baseSet ∩ e₂'.baseSet)
-  have hs1 : s ⊆ (e₁.baseSet ∩ e₁'.baseSet) := fun b hb => ⟨hb.1.1, hb.2.1⟩
-  have hs2 : s ⊆ (e₂.baseSet ∩ e₂'.baseSet) := fun b hb => ⟨hb.1.2, hb.2.2⟩
-  have h₁' : ContinuousOn (fun b => (e₁.coordChangeL 𝕜 e₁' b : F₁ →L[𝕜] F₁)) s :=
-    h₁.mono hs1
-  have h₂' : ContinuousOn (fun b => (e₂.coordChangeL 𝕜 e₂' b : F₂ →L[𝕜] F₂)) s :=
-    h₂.mono hs2
-  -- The uncurried bilinear map (L₁, L₂) ↦ mapLBilinear L₁ L₂ is continuous
-  have huncurry : Continuous (fun p : (F₁ →L[𝕜] F₁) × (F₂ →L[𝕜] F₂) =>
-                              TensorProduct.mapLBilinear p.1 p.2) :=
-    (TensorProduct.mapLBilinear (𝕜 := 𝕜) (F₁ := F₁) (F₂ := F₂)
-      (G₁ := F₁) (G₂ := F₂)).continuous₂
-  have hprod : ContinuousOn (fun b =>
-        ((e₁.coordChangeL 𝕜 e₁' b : F₁ →L[𝕜] F₁),
-         (e₂.coordChangeL 𝕜 e₂' b : F₂ →L[𝕜] F₂))) s :=
-    h₁'.prodMk h₂'
-  refine (huncurry.comp_continuousOn hprod).congr ?_
-  intro b hb
-  simp only [Function.comp_apply]
-  exact rfl
-
-variable (𝕜 e₁ e₁' e₂ e₂')
-variable [e₁.IsLinear 𝕜] [e₁'.IsLinear 𝕜] [e₂.IsLinear 𝕜] [e₂'.IsLinear 𝕜]
-
-/-- Given trivializations `e₁`, `e₂` for vector bundles `E₁`, `E₂` over a base `B`,
-`Pretrivialization.tensorProduct e₁ e₂` is the induced pretrivialization for the
-tensor product `E₁ ⊗ E₂`. -/
-def tensorProduct :
-    Pretrivialization (F₁ ⊗[𝕜] F₂) (π (F₁ ⊗[𝕜] F₂) (fun x ↦ E₁ x ⊗[𝕜] E₂ x)) where
-  toFun p := ⟨p.1, TensorProduct.map
-    (e₁.continuousLinearMapAt 𝕜 p.1).toLinearMap
-    (e₂.continuousLinearMapAt 𝕜 p.1).toLinearMap p.2⟩
-  invFun p := ⟨p.1, TensorProduct.map
-    (e₁.symmL 𝕜 p.1).toLinearMap
-    (e₂.symmL 𝕜 p.1).toLinearMap p.2⟩
-  source := Bundle.TotalSpace.proj ⁻¹' (e₁.baseSet ∩ e₂.baseSet)
-  target := (e₁.baseSet ∩ e₂.baseSet) ×ˢ Set.univ
-  map_source' := fun ⟨_, _⟩ h ↦ ⟨h, Set.mem_univ _⟩
-  map_target' := fun ⟨_, _⟩ h ↦ h.1
-  left_inv' := fun ⟨x, v⟩ ⟨h₁, h₂⟩ ↦ by
-      simp only [TotalSpace.mk_inj]
-      rw [← LinearMap.comp_apply, ← TensorProduct.map_comp]
-      have eq1 : (e₁.symmL 𝕜 x).toLinearMap.comp (e₁.continuousLinearMapAt 𝕜 x).toLinearMap =
-         LinearMap.id := by
-        ext w
-        simp only [LinearMap.comp_apply, LinearMap.id_apply]
-        -- 'apply' handles the def-eq between x and (⟨x,v⟩).proj automatically
-        apply Trivialization.symmL_continuousLinearMapAt e₁ h₁
-      have eq2 : (e₂.symmL 𝕜 x).toLinearMap.comp (e₂.continuousLinearMapAt 𝕜 x).toLinearMap =
-        LinearMap.id := by
-        ext w
-        simp only [LinearMap.comp_apply, LinearMap.id_apply]
-        apply Trivialization.symmL_continuousLinearMapAt e₂ h₂
-      rw [eq1, eq2, TensorProduct.map_id, LinearMap.id_apply]
-
-  right_inv' := fun ⟨x, t⟩ ⟨⟨h₁, h₂⟩, _⟩ ↦ by
-      simp only [Prod.mk.injEq, true_and]
-      rw [← LinearMap.comp_apply, ← TensorProduct.map_comp]
-      have eq1 : (e₁.continuousLinearMapAt 𝕜 x).toLinearMap.comp (e₁.symmL 𝕜 x).toLinearMap =
-         LinearMap.id := by
-        ext w
-        simp only [LinearMap.comp_apply, LinearMap.id_apply]
-        apply Trivialization.continuousLinearMapAt_symmL e₁ h₁
-      have eq2 : (e₂.continuousLinearMapAt 𝕜 x).toLinearMap.comp (e₂.symmL 𝕜 x).toLinearMap =
-         LinearMap.id := by
-        ext w
-        simp only [LinearMap.comp_apply, LinearMap.id_apply]
-        apply Trivialization.continuousLinearMapAt_symmL e₂ h₂
-      rw [eq1, eq2, TensorProduct.map_id, LinearMap.id_apply]
-  open_target := (e₁.open_baseSet.inter e₂.open_baseSet).prod isOpen_univ
-  baseSet := e₁.baseSet ∩ e₂.baseSet
-  open_baseSet := e₁.open_baseSet.inter e₂.open_baseSet
-  source_eq := rfl
-  target_eq := rfl
-  proj_toFun _ _ := rfl
-
-omit [FiniteDimensional 𝕜 F₂] in
-/-- Evaluating the tensor product pretrivialization applies the local trivializations of
-`E₁` and `E₂` factor-wise via `TensorProduct.map`. -/
-theorem tensorProduct_apply (p : TotalSpace (F₁ ⊗[𝕜] F₂) (fun x ↦ E₁ x ⊗[𝕜] E₂ x)) :
-    (tensorProduct 𝕜 e₁ e₂) p =
-      ⟨p.1, TensorProduct.map
-        (e₁.continuousLinearMapAt 𝕜 p.1).toLinearMap
-        (e₂.continuousLinearMapAt 𝕜 p.1).toLinearMap p.2⟩ :=
-  rfl
-
-/-- The tensor product pretrivialization is linear on each fiber, since it applies
-the fiber isomorphisms of `E₁` and `E₂` linearly factor-wise. -/
-instance tensorProduct.isLinear
-    [∀ x, ContinuousAdd (E₁ x)] [∀ x, ContinuousSMul 𝕜 (E₁ x)]
-    [∀ x, ContinuousAdd (E₂ x)] [∀ x, ContinuousSMul 𝕜 (E₂ x)] :
-    (Pretrivialization.tensorProduct 𝕜 e₁ e₂).IsLinear 𝕜 where
-  linear x hx :=
-  by
-    classical
-    refine
-      { map_add := ?_
-        map_smul := ?_ }
-    · intro t t'
-      -- after unfolding, goal is about `TensorProduct.map ... (t + t')`
-      -- and `simp` can use the generic `map_add`
-      simp [Pretrivialization.tensorProduct_apply]
-    · intro c t
-      simp [Pretrivialization.tensorProduct_apply]
-
-omit [FiniteDimensional 𝕜 F₂] in
-/-- The inverse of the tensor product pretrivialization reconstructs fiber elements using
-the inverse local trivializations `symmL` of each factor. -/
-theorem tensorProduct_symm_apply (p : B × (F₁ ⊗[𝕜] F₂)) :
-    (tensorProduct 𝕜 e₁ e₂).toPartialEquiv.symm p =
-      ⟨p.1, TensorProduct.map
-        (e₁.symmL 𝕜 p.1).toLinearMap
-        (e₂.symmL 𝕜 p.1).toLinearMap p.2⟩ :=
-  rfl
-
-omit [FiniteDimensional 𝕜 F₂] in
-/-- Alternative form of the inverse pretrivialization: for `b` in the base set,
-`symm b t` applies `symmL` factor-wise to `t`. -/
-theorem tensorProduct_symm_apply' {b : B} (hb : b ∈ e₁.baseSet ∩ e₂.baseSet) (t : F₁ ⊗[𝕜] F₂) :
-    (tensorProduct 𝕜 e₁ e₂).symm b t =
-      TensorProduct.map
-        (e₁.symmL 𝕜 b).toLinearMap
-        (e₂.symmL 𝕜 b).toLinearMap t := by
-  -- This is the key: use `symm_apply` instead of unfolding `Pretrivialization.symm`.
-  rw [Pretrivialization.symm_apply]
-  · rfl
-  · exact hb
-
-/-- The coordinate change for the tensor product bundle equals re-trivializing via `e₁', e₂'`
-after un-trivializing via `e₁, e₂`, confirming it is the factor-wise coordinate change. -/
-theorem tensorProductCoordChange_apply (b : B)
-    (hb : b ∈ e₁.baseSet ∩ e₂.baseSet ∩ (e₁'.baseSet ∩ e₂'.baseSet)) (t : F₁ ⊗[𝕜] F₂) :
-    tensorProductCoordChange (𝕜 := 𝕜) e₁ e₁' e₂ e₂' b t =
-      (tensorProduct 𝕜 e₁' e₂' ⟨b, (tensorProduct 𝕜 e₁ e₂).symm b t⟩).2 := by
-  -- Step A: rewrite RHS using the helper lemma, so no `dif` / `cast` appears.
-  -- First unfold coord change and `mapL` once.
-  simp only [tensorProductCoordChange, TensorProduct.mapL]
-  -- Now expand the RHS pretrivialization using your `tensorProduct_apply`
-  -- and rewrite `.symm b t` using `tensorProduct_symm_apply'`.
-  -- This should turn RHS into a `TensorProduct.map ... (TensorProduct.map ... t)`.
-  simp only [LinearMap.coe_toContinuousLinearMap',
-    tensorProduct_symm_apply' (𝕜 := 𝕜) (e₁ := e₁) (e₂ := e₂) hb.1,
-    tensorProduct_apply]
-  rw [← LinearMap.comp_apply, ← TensorProduct.map_comp]
-  -- Step C: identify the composed linear maps with coordChange maps.
-  -- You’ll now have two component goals, one for F₁ and one for F₂.
-  congr 1 ; ext v
-  rename_i v x
-  have hb1 : b ∈ e₁.baseSet ∩ e₁'.baseSet := ⟨hb.1.1, hb.2.1⟩
-  have hb2 : b ∈ e₂.baseSet ∩ e₂'.baseSet := ⟨hb.1.2, hb.2.2⟩
-  simp only [TensorProduct.AlgebraTensorModule.curry_apply, LinearMap.restrictScalars_self,
-    TensorProduct.curry_apply, TensorProduct.map_tmul, ContinuousLinearMap.coe_coe,
-    ContinuousLinearEquiv.coe_coe, LinearMap.coe_comp, Trivialization.continuousLinearMapAt_apply,
-    Trivialization.symmL_apply, Function.comp_apply]
-  rw [Trivialization.coordChangeL_apply (R := 𝕜) (e := e₁) (e' := e₁') (b := b) hb1 (y := v)]
-  rw [Trivialization.coordChangeL_apply (R := 𝕜) (e := e₂) (e' := e₂') (b := b) hb2 (y := x)]
-  simp [TensorProduct.tmul, Trivialization.linearMapAt]
-  simp [Pretrivialization.linearMapAt]
-  have hb1' : b ∈ e₁'.toPretrivialization.baseSet := by simpa using hb.2.1
-  have hb2' : b ∈ e₂'.toPretrivialization.baseSet := by simpa using hb.2.2
-  simp [ hb1', hb2']
-  rfl
-
-end Pretrivialization
 section
 section TensorFiberTopology
 
@@ -606,6 +120,7 @@ theorem tensorFiberTopologicalSpaceInst_eq
 
 
 end TensorFiberTopology
+end
 
 section
 
@@ -614,7 +129,6 @@ namespace Bundle.TensorProduct
 
 open Bundle Set Topology Pretrivialization
 open scoped Manifold Bundle TensorProduct
-
 
 /-- A typeclass packaging a choice of topology on each fiber `E₁ x ⊗[𝕜] E₂ x`, needed
 to avoid universe-level and instance-synthesis issues when building the tensor product bundle. -/
@@ -787,7 +301,7 @@ noncomputable def vectorPrebundle :
             (Trivialization.coe_continuousLinearEquivAt_eq (R := 𝕜)
               (trivializationAt F₂ E₂ b)
               (mem_baseSet_trivializationAt F₂ E₂ b)).symm
-      -- now the two `TensorProduct.map`’s are definitionally the same
+      -- now the two `TensorProduct.map`'s are definitionally the same
       simp [hL1, hL2]
 
   }
