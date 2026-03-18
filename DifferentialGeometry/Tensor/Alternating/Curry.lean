@@ -5,6 +5,7 @@ Authors: Yury Kudryashov
 Coauthors: Jack McCarthy
 -/
 import DifferentialGeometry.Tensor.Alternating.Flip
+import DifferentialGeometry.Tensor.Alternating.Comp
 import Mathlib.Analysis.Normed.Module.Alternating.Curry
 import Mathlib.LinearAlgebra.Alternating.DomCoprod
 import Mathlib.LinearAlgebra.Alternating.Uncurry.Fin
@@ -263,6 +264,45 @@ theorem uncurrySum_apply (f : E [⋀^ι]→L[𝕜] E [⋀^ι']→L[𝕜] F) (m :
 def uncurryFinAdd (f : E [⋀^Fin m]→L[𝕜] E [⋀^Fin n]→L[𝕜] F) :
     E [⋀^Fin (m + n)]→L[𝕜] F :=
   ContinuousAlternatingMap.domDomCongr finSumFinEquiv (uncurrySum f)
+
+variable [DecidableEq ι] [DecidableEq ι']
+
+/-- Alternatization commutes with `MultilinearMap.domDomCongr` by an equivalence. -/
+theorem alternatization_domDomCongr
+    {ι₁ ι₂ : Type*} [Fintype ι₁] [Fintype ι₂] [DecidableEq ι₁] [DecidableEq ι₂]
+    (e : ι₁ ≃ ι₂) (T : MultilinearMap 𝕜 (fun _ : ι₁ => E) F) :
+    MultilinearMap.alternatization (T.domDomCongr e) =
+      (MultilinearMap.alternatization T).domDomCongr e := by
+  ext v; simp only [MultilinearMap.alternatization_apply, AlternatingMap.domDomCongr_apply,
+    MultilinearMap.domDomCongr_apply]
+  rw [← Equiv.sum_comp (Equiv.permCongr e)]; congr 1; ext σ
+  simp only [Equiv.Perm.sign_permCongr, Function.comp]
+  congr 2; funext i; simp [Equiv.permCongr_apply]
+
+open scoped TensorProduct
+
+/-- Composing `TensorProduct.lift` of a bilinear map `f` with `AlternatingMap.domCoprod`
+gives `uncurrySum` of `f.compContinuousAlternatingMap₂ g h`. -/
+theorem lift_comp_domCoprod_eq_uncurrySum
+    {N N' N'' : Type*} [NormedAddCommGroup N] [NormedSpace 𝕜 N]
+    [NormedAddCommGroup N'] [NormedSpace 𝕜 N'] [NormedAddCommGroup N''] [NormedSpace 𝕜 N'']
+    (g : E [⋀^Fin m]→L[𝕜] N) (h : E [⋀^Fin n]→L[𝕜] N')
+    (f : N →L[𝕜] N' →L[𝕜] N'')
+    (φ : N ⊗[𝕜] N' →ₗ[𝕜] N'') (hφ : ∀ a b, φ (a ⊗ₜ[𝕜] b) = f a b) :
+    φ.compAlternatingMap (g.toAlternatingMap.domCoprod h.toAlternatingMap) =
+      (uncurrySum (f.compContinuousAlternatingMap₂ g h)).toAlternatingMap := by
+  ext w; simp only [LinearMap.compAlternatingMap_apply, coe_toAlternatingMap]
+  change φ ((g.toAlternatingMap.domCoprod h.toAlternatingMap) w) =
+    (uncurrySum (f.compContinuousAlternatingMap₂ g h)) w
+  rw [uncurrySum_apply, ContinuousMultilinearMap.sum_apply,
+    AlternatingMap.domCoprod_apply, MultilinearMap.sum_apply, _root_.map_sum φ]
+  apply Finset.sum_congr rfl; intro q _
+  induction q using Quotient.inductionOn' with | h σ =>
+  simp only [AlternatingMap.domCoprod.summand_mk'', uncurrySum.summand_mk'',
+    MultilinearMap.smul_apply, MultilinearMap.domDomCongr_apply, MultilinearMap.domCoprod_apply,
+    ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.domDomCongr_apply,
+    ContinuousMultilinearMap.uncurrySum_apply, TensorProduct.smul_tmul', hφ,
+    Function.comp_def, f.map_smul_of_tower, ContinuousLinearMap.smul_apply]; rfl
 
 end curry
 end ContinuousAlternatingMap

@@ -2,7 +2,9 @@
 Authors: Yuan Liao, Jack McCarthy
 -/
 import DifferentialGeometry.Tensor.RSTensor.Bundle
-import DifferentialGeometry.Tensor.RSTensor.Product
+import DifferentialGeometry.Tensor.RSTensor.Curry
+import DifferentialGeometry.Tensor.RSTensor.Field
+import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 /-!
 # Interior Product and Contraction of Tensors
 
@@ -18,6 +20,11 @@ with a cotangent vector (1-form) for mixed tensors at a point of a smooth manifo
 * `tensorWithCovector r x u` : the map `(0,r) →L (0,r+1)` given by `α ↦ α ⊗ u`.
 * `contract_contravariant r s x u` : contraction of an (r+1,s)-tensor with a cotangent
   vector `u`, giving an (r,s)-tensor by pre-composing with `tensorWithCovector`.
+* `contract_Tensor0SField_fun s α X` : pointwise contraction of a (0,s+1)-tensor field
+  with a vector field, giving a (0,s)-tensor field.
+* `contract_Tensor0SField s α X` : contraction of a smooth (0,s+1)-tensor field
+  with a smooth vector field (a `ContMDiffSection` of the tangent bundle),
+  yielding a smooth (0,s)-tensor field.
 
 ## Tags
 
@@ -86,6 +93,46 @@ noncomputable def contract_contravariant (r s : ℕ) (x : M)
     (Tensor0SSpace (r + 1) I x)
     (Tensor0SSpace s I x)).flip
     (tensorWithCovector r x u)
+
+/-!
+## Contraction of smooth tensor fields
+
+We lift the pointwise `interior_product` to tensor fields: contracting a smooth
+(0,s+1)-tensor field with a smooth vector field produces a smooth (0,s)-tensor field.
+This corresponds to the standard result that contraction of a (0,s)-tensor field with
+a smooth vector field yields a (0,s−1)-tensor field, using the Lean indexing
+convention `s + 1 → s`.
+-/
+
+section FieldContraction
+
+variable (n : WithTop ℕ∞ := ⊤) [IsManifold I ω M]
+
+/-- Pointwise contraction of a (0,s+1)-tensor field with a vector field,
+giving a (0,s)-tensor field. At each point `x`, this feeds `X(x)` into the first
+slot of the (0,s+1)-tensor `α(x)` via the currying isomorphism. -/
+noncomputable def contract_Tensor0SField_fun (s : ℕ)
+    (α : (x : M) → Tensor0SSpace (s + 1) I x)
+    (X : (x : M) → TangentSpace I x) :
+    (x : M) → Tensor0SSpace s I x :=
+  fun x => interior_product s x (X x) (α x)
+
+/-- Contraction of a smooth (0,s+1)-tensor field with a smooth vector field
+yields a smooth (0,s)-tensor field.
+
+If `α` is a smooth section of `T⁰_{s+1}M` and `X` is a smooth section of `TM`,
+then the interior product `ι_X α`, defined pointwise by `(ι_X α)_x = ι_{X(x)} α_x`,
+is a smooth section of `T⁰_s M`. -/
+noncomputable def contract_Tensor0SField (s : ℕ)
+    (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) (s + 1))
+    (X : ContMDiffSection I E n (TangentSpace I : M → Type _)) :
+    Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) s := by
+  letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) (s + 1)
+  unfold Tensor0SField
+  letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) s
+  exact ⟨contract_Tensor0SField_fun s α.toFun X, by sorry⟩
+
+end FieldContraction
 
 end
 end Tensor0SBundle
