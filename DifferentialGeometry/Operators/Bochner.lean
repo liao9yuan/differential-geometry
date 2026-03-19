@@ -16,11 +16,10 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-open AbstractDerivationAction
-open AbstractLieBracket
+open AbstractDerivationAction AbstractLieBracket DifferentialGeometry.Bridge TensorAlgebra
 
 variable {R V : Type}
-variable [CommRing R] [AddCommGroup V] [Module R V]
+variable [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
 variable [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V]
 
 

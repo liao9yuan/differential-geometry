@@ -19,8 +19,10 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 set_option linter.style.emptyLine false
 
+open DifferentialGeometry.Bridge TensorAlgebra
+
 variable {Time R V : Type}
-variable [CommRing R] [PartialOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V]
+variable [CommRing R] [PartialOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
 variable [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V] [TraceOperator R V]
 
 /-- The drift operator L(h) = ∂_t h - Δh - 2⟨∇f, ∇h⟩ -/

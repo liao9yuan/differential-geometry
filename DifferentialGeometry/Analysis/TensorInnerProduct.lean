@@ -13,7 +13,9 @@ set_option linter.style.longLine false
 Inner product of two (0,2)-tensors using the Trace of the composition of their musical endomorphisms.
 -/
 
-variable {R V : Type} [CommRing R] [AddCommGroup V] [Module R V]
+open DifferentialGeometry.Bridge TensorAlgebra
+
+variable {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
 variable (metric : MetricDuality R V)
 variable [TraceOperator R V] [TR : TraceLinearityRules R V]
 

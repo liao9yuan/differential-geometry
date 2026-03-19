@@ -1,3 +1,4 @@
+import DifferentialGeometry.Bridge.Defs
 import DifferentialGeometry.Algebra.VectorField
 import DifferentialGeometry.Algebra.Metric
 import Mathlib.Tactic.Ring
@@ -7,6 +8,7 @@ import Mathlib.Algebra.Ring.Basic
 
 set_option autoImplicit false
 set_option linter.style.longLine false
+set_option linter.unusedSectionVars false
 
 /-!
 # Affine and Levi-Civita Connections
@@ -20,6 +22,8 @@ variable [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules 
 
 open AbstractDerivationAction
 open AbstractLieBracket
+open DifferentialGeometry.Bridge
+open TensorAlgebra
 
 /-- Affine connection (covariant derivative) on a vector bundle.
 Input: (V, V)
@@ -44,7 +48,7 @@ structure LocalFrame (I R V : Type*) where
 
 section Symbols
 
-variable {R V} {I : Type*}
+variable {R V} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] {I : Type*}
 
 /-- Christoffel symbols characterizing the connection in a local frame.
 Input: (AbstractAffineConnection R V, LocalFrame I R V, I, I, I)
@@ -57,7 +61,7 @@ def christoffel_symbol [AbstractDerivationAction R V]
 end Symbols
 
 -- 3. Metric Compatibility & Torsion-Free Conditions
-variable {R V}
+variable {R V} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
 variable [AbstractDerivationAction R V]
 
 /-- Metric compatibility condition: `X⟨Y, Z⟩ = ⟨∇_X Y, Z⟩ + ⟨Y, ∇_X Z⟩`.
@@ -159,7 +163,9 @@ def koszul_connection [Invertible (2 : R)] [AbstractLieBracket V] [DerivationRul
       have h10 : metric.g Z (bracket (X1 + X2) Y) = metric.g Z (bracket X1 Y) + metric.g Z (bracket X2 Y) := by rw [h9, metric.symm Z _, metric.bilinear_add_left, metric.symm _ Z, metric.symm _ Z]
       rw [h1, h3, h5, h6, h8, h10]
       ring_nf
-    rw [eq_func, metric.sharp_add]
+    change metric.sharp _ = metric.sharp _ + metric.sharp _
+    rw [← metric.sharp_add]
+    congr 1
   nabla_add_right X Y1 Y2 := by
     have eq_func : (fun Z : V => (action X (metric.g (Y1 + Y2) Z) + action (Y1 + Y2) (metric.g Z X) - action Z (metric.g X (Y1 + Y2)) - metric.g X (bracket (Y1 + Y2) Z) + metric.g (Y1 + Y2) (bracket Z X) + metric.g Z (bracket X (Y1 + Y2))) * ⅟2)
                    = (fun Z : V => (action X (metric.g Y1 Z) + action Y1 (metric.g Z X) - action Z (metric.g X Y1) - metric.g X (bracket Y1 Z) + metric.g Y1 (bracket Z X) + metric.g Z (bracket X Y1)) * ⅟2 +
@@ -178,7 +184,9 @@ def koszul_connection [Invertible (2 : R)] [AbstractLieBracket V] [DerivationRul
       have h6a : metric.g Z (bracket X (Y1 + Y2)) = metric.g Z (bracket X Y1) + metric.g Z (bracket X Y2) := by rw [h6, metric.symm Z _, metric.bilinear_add_left, metric.symm _ Z, metric.symm _ Z]
       rw [h1a, h2, h3a, h4a, h5a, h6a]
       ring_nf
-    rw [eq_func, metric.sharp_add]
+    change metric.sharp _ = metric.sharp _ + metric.sharp _
+    rw [← metric.sharp_add]
+    congr 1
   nabla_smul_left c X Y := by
     have eq_func : (fun Z : V => (action (c • X) (metric.g Y Z) + action Y (metric.g Z (c • X)) - action Z (metric.g (c • X) Y) - metric.g (c • X) (bracket Y Z) + metric.g Y (bracket Z (c • X)) + metric.g Z (bracket (c • X) Y)) * ⅟2)
                    = (fun Z : V => c * ((action X (metric.g Y Z) + action Y (metric.g Z X) - action Z (metric.g X Y) - metric.g X (bracket Y Z) + metric.g Y (bracket Z X) + metric.g Z (bracket X Y)) * ⅟2)) := by
@@ -198,7 +206,9 @@ def koszul_connection [Invertible (2 : R)] [AbstractLieBracket V] [DerivationRul
       have s2 : metric.g Y X = metric.g X Y := metric.symm Y X
       rw [s1, s2]
       ring_nf
-    rw [eq_func, metric.sharp_smul]
+    change metric.sharp _ = c • metric.sharp _
+    rw [← metric.sharp_smul]
+    congr 1
   leibniz c X Y := by
     have eq_func : (fun Z : V => (action X (metric.g (c • Y) Z) + action (c • Y) (metric.g Z X) - action Z (metric.g X (c • Y)) - metric.g X (bracket (c • Y) Z) + metric.g (c • Y) (bracket Z X) + metric.g Z (bracket X (c • Y))) * ⅟2)
                    = (fun Z : V => action X c * metric.g Y Z * ⅟2 * 2 +
@@ -219,7 +229,6 @@ def koszul_connection [Invertible (2 : R)] [AbstractLieBracket V] [DerivationRul
       have s1 : metric.g Z Y = metric.g Y Z := metric.symm Z Y
       rw [s1]
       ring_nf
-    rw [eq_func, metric.sharp_add, metric.sharp_smul]
     have direct_term : metric.sharp (fun Z => action X c * metric.g Y Z * ⅟2 * 2) = (action X c) • Y := by
       have h_cancel : ∀ Z, action X c * metric.g Y Z * ⅟2 * 2 = action X c * metric.g Y Z := fun Z => by
         calc action X c * metric.g Y Z * ⅟2 * 2 = action X c * metric.g Y Z * (⅟2 * 2) := by ring
@@ -227,7 +236,9 @@ def koszul_connection [Invertible (2 : R)] [AbstractLieBracket V] [DerivationRul
           _ = action X c * metric.g Y Z := by ring
       have h : (fun Z => action X c * metric.g Y Z * ⅟2 * 2) = (fun Z => action X c * metric.g Y Z) := funext h_cancel
       rw [h, metric.sharp_smul, metric.sharp_g]
-    rw [direct_term]
+    change metric.sharp _ = (action X c) • Y + c • metric.sharp _
+    rw [← direct_term, ← metric.sharp_smul, ← metric.sharp_add]
+    congr 1
 
 instance metric_compat_koszul [Invertible (2 : R)] [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V] (metric : MetricDuality R V) : MetricCompatible (koszul_connection metric) metric.toNonDegenerateMetric.toAbstractMetricTensor where
   compat X Y Z := by
@@ -331,9 +342,8 @@ theorem levi_civita_exists_unique [Invertible (2 : R)] [AbstractDerivationAction
         _ = (action X (metric.g Y Z) + action Y (metric.g Z X) - action Z (metric.g X Y) - metric.g X (bracket Y Z) + metric.g Y (bracket Z X) + metric.g Z (bracket X Y)) * ⅟2 := by rw [h1]
         _ = metric.g ((koszul_connection metric).nabla X Y) Z := by rw [← h2]
     cases conn'
-    have hk : koszul_connection metric = AbstractAffineConnection.mk (koszul_connection metric).nabla (koszul_connection metric).nabla_add_left (koszul_connection metric).nabla_add_right (koszul_connection metric).nabla_smul_left (koszul_connection metric).leibniz := rfl
-    rw [hk]
-    congr
+    subst h_nabla
+    rfl
 
 -- 5. Bundled Levi-Civita Connection
 class AbstractLeviCivitaConnection (metric : AbstractMetricTensor R V) [AbstractLieBracket V] extends AbstractAffineConnection R V where

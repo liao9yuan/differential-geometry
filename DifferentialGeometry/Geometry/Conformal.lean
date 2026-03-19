@@ -7,10 +7,9 @@ import Mathlib.Tactic.Abel
 set_option autoImplicit false
 set_option linter.style.longLine false
 
-open AbstractDerivationAction
-open AbstractLieBracket
+open AbstractDerivationAction AbstractLieBracket DifferentialGeometry.Bridge TensorAlgebra
 
-variable {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [AbstractDerivationAction R V]
+variable {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] [AbstractDerivationAction R V]
 
 -- Defines the conformal transformation of an affine connection algebraically.
 def conformalConnection_nabla (metric : MetricDuality R V)

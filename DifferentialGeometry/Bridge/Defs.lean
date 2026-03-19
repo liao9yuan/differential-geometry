@@ -6,8 +6,6 @@ import Mathlib.Geometry.Manifold.Algebra.SmoothFunctions
 import Mathlib.Geometry.Manifold.Algebra.Structures
 import Mathlib.Geometry.Manifold.VectorField.LieBracket
 import DifferentialGeometry.Algebra.VectorField
-import DifferentialGeometry.Algebra.Metric
-import DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -305,67 +303,96 @@ noncomputable instance [CompleteSpace E] :
   ## Tensor Calculus
 -/
 
-
-open AbstractDerivationAction
-
-variable [AbstractLieBracket (VectorField (I := I) (M := M))]
-
-/--
-General tensor calculus.
-`r` is contravariant rank, `s` is covariant rank.
--/
-class AbstractTensorCalculus (metric : AbstractMetricTensor (ScalarField (I := I) (M := M)) (VectorField (I := I) (M := M))) (conn : AbstractLeviCivitaConnection metric) where
+/-- Pure Tensor Algebra (Layer 1): Depends only on module structure, no geometry or calculus.
+This is implemented by the analytic backend using multidimensional arrays. -/
+class TensorAlgebra (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] where
   /-- Generic graded tensor type (r: contravariant, s: covariant) -/
   AbstractTensor : ℕ → ℕ → Type
 
   add {r s : ℕ} : AbstractTensor r s → AbstractTensor r s → AbstractTensor r s
-  smul {r s : ℕ} : ScalarField (I := I) (M := M) → AbstractTensor r s → AbstractTensor r s
+  smul {r s : ℕ} : R → AbstractTensor r s → AbstractTensor r s
   tensor_prod {r1 s1 r2 s2 : ℕ} : AbstractTensor r1 s1 → AbstractTensor r2 s2 → AbstractTensor (r1 + r2) (s1 + s2)
 
   -- Embedding
-  fromScalar : ScalarField (I := I) (M := M) → AbstractTensor 0 0
-  fromVector : VectorField (I := I) (M := M) → AbstractTensor 1 0
+  fromScalar : R → AbstractTensor 0 0
+  fromVector : V → AbstractTensor 1 0
+  fromCovector : (V →ₗ[R] R) → AbstractTensor 0 1
+  fromBilinear : (V →ₗ[R] V →ₗ[R] R) → AbstractTensor 0 2
 
-  -- Covariant Derivative
-  nabla_tensor {r s : ℕ} : VectorField (I := I) (M := M) → AbstractTensor r s → AbstractTensor r s
+  -- Identity Operator (Kronecker Delta)
+  delta_tensor : AbstractTensor 1 1
 
-  /-- Interior product (contraction with a tangent vector) -/
-  interior_product {s : ℕ} : AbstractTensor 0 (s + 1) → VectorField (I := I) (M := M) → AbstractTensor 0 s
+  -- Extraction
+  toScalar : AbstractTensor 0 0 → R
 
-  /-- Covariant contraction (feeding a vector into a mixed tensor) -/
-  contract_covariant {r s : ℕ} : AbstractTensor r (s + 1) → VectorField (I := I) (M := M) → AbstractTensor r s
+  -- Permutations (Routing Mechanism)
+  swap_contravariant {r s : ℕ} (i j : Fin r) : AbstractTensor r s → AbstractTensor r s
+  swap_covariant {r s : ℕ} (i j : Fin s) : AbstractTensor r s → AbstractTensor r s
 
   /-- General contraction between one contravariant and one covariant slot -/
   contract {r s : ℕ} : AbstractTensor (r + 1) (s + 1) → AbstractTensor r s
 
-  /-- Metric trace: contracting two covariant indices using the metric tensor -/
-  metric_contract {r s : ℕ} : AbstractTensor r (s + 2) → AbstractTensor r s
-
   --  Axioms:
-  -- 1. Linearity:
+  -- 1. Linearity of Contraction:
   contract_add {r s : ℕ} : ∀ T1 T2 : AbstractTensor (r + 1) (s + 1), contract (add T1 T2) = add (contract T1) (contract T2)
-  contract_smul {r s : ℕ} : ∀ (f : ScalarField (I := I) (M := M)) (T : AbstractTensor (r + 1) (s + 1)), contract (smul f T) = smul f (contract T)
+  contract_smul {r s : ℕ} : ∀ (f : R) (T : AbstractTensor (r + 1) (s + 1)), contract (smul f T) = smul f (contract T)
 
-  nabla_tensor_add {r s : ℕ} : ∀ X (T1 T2 : AbstractTensor r s), nabla_tensor X (add T1 T2) = add (nabla_tensor X T1) (nabla_tensor X T2)
+  -- 2. Scalar Definition:
+  toScalar_fromScalar : ∀ f : R, toScalar (fromScalar f) = f
+  toScalar_add : ∀ T1 T2 : AbstractTensor 0 0, toScalar (add T1 T2) = toScalar T1 + toScalar T2
+  toScalar_smul : ∀ (c : R) (T : AbstractTensor 0 0), toScalar (smul c T) = c * toScalar T
 
-  nabla_tensor_add_left {r s : ℕ} : ∀ X Y (T : AbstractTensor r s), nabla_tensor (X + Y) T = add (nabla_tensor X T) (nabla_tensor Y T)
-  nabla_tensor_smul_left {r s : ℕ} : ∀ (f : ScalarField (I := I) (M := M)) X (T : AbstractTensor r s), nabla_tensor (f • X) T = smul f (nabla_tensor X T)
+  -- 3. Evaluation (The bridge between dual space and tensor contraction):
+  contract_eval : ∀ (v : V) (w : V →ₗ[R] R),
+    toScalar (contract (r := 0) (s := 0) (tensor_prod (r1 := 1) (s1 := 0) (r2 := 0) (s2 := 1) (fromVector v) (fromCovector w))) = w v
 
-  -- 2. Leibniz Rule: $\nabla_X(T_1 \otimes T_2) = (\nabla_X T_1) \otimes T_2 + T_1 \otimes (\nabla_X T_2)$
-  leibniz_rule {r1 s1 r2 s2 : ℕ} : ∀ X (T1 : AbstractTensor r1 s1) (T2 : AbstractTensor r2 s2),
-    nabla_tensor X (tensor_prod T1 T2) = add (tensor_prod (nabla_tensor X T1) T2) (tensor_prod T1 (nabla_tensor X T2))
+  -- 4. Linearity of Embeddings and Products:
+  fromVector_add : ∀ X Y : V, fromVector (X + Y) = add (fromVector X) (fromVector Y)
+  fromVector_smul : ∀ (c : R) (X : V), fromVector (c • X) = smul c (fromVector X)
 
-  -- 3. Commutativity: $\text{contract}(\nabla_X T) = \nabla_X (\text{contract} T)$
-  commutativity {r s : ℕ} : ∀ X (T : AbstractTensor (r + 1) (s + 1)), contract (nabla_tensor X T) = nabla_tensor X (contract T)
+  fromCovector_add : ∀ w1 w2 : V →ₗ[R] R, fromCovector (w1 + w2) = add (fromCovector w1) (fromCovector w2)
+  fromCovector_smul : ∀ (c : R) (w : V →ₗ[R] R), fromCovector (c • w) = smul c (fromCovector w)
 
-  -- 4. Base Cases: $\nabla_X (\text{fromScalar } f)$ = directional derivative; $\nabla_X (\text{fromVector } Y)$ = native connection
-  base_scalar : ∀ X (f : ScalarField (I := I) (M := M)), nabla_tensor X (fromScalar f) = fromScalar (action X f)
-  base_vector : ∀ X Y, nabla_tensor X (fromVector Y) = fromVector (conn.nabla X Y)
+  fromBilinear_add : ∀ B1 B2 : V →ₗ[R] V →ₗ[R] R, fromBilinear (B1 + B2) = add (fromBilinear B1) (fromBilinear B2)
+  fromBilinear_smul : ∀ (c : R) (B : V →ₗ[R] V →ₗ[R] R), fromBilinear (c • B) = smul c (fromBilinear B)
 
-/-
-  The proof to the previous class can be here.
--/
+  tensor_prod_add_left : ∀ {r1 s1 r2 s2 : ℕ} (T1 T2 : AbstractTensor r1 s1) (T3 : AbstractTensor r2 s2),
+    tensor_prod (add T1 T2) T3 = add (tensor_prod T1 T3) (tensor_prod T2 T3)
+  tensor_prod_add_right : ∀ {r1 s1 r2 s2 : ℕ} (T1 : AbstractTensor r1 s1) (T2 T3 : AbstractTensor r2 s2),
+    tensor_prod T1 (add T2 T3) = add (tensor_prod T1 T2) (tensor_prod T1 T3)
+  tensor_prod_smul_left : ∀ {r1 s1 r2 s2 : ℕ} (c : R) (T1 : AbstractTensor r1 s1) (T2 : AbstractTensor r2 s2),
+    tensor_prod (smul c T1) T2 = smul c (tensor_prod T1 T2)
+  tensor_prod_smul_right : ∀ {r1 s1 r2 s2 : ℕ} (c : R) (T1 : AbstractTensor r1 s1) (T2 : AbstractTensor r2 s2),
+    tensor_prod T1 (smul c T2) = smul c (tensor_prod T1 T2)
 
-noncomputable instance mockTensorCalculus {metric : AbstractMetricTensor (ScalarField (I := I) (M := M)) (VectorField (I := I) (M := M))} {conn : AbstractLeviCivitaConnection metric} : AbstractTensorCalculus metric conn := sorry
+  -- 5. General Swap Contraction Interactions (The Adjunction Axiom for Swap)
+  -- For any tensor T of rank (r, s+2), contracting its first two covariant slots with X ⊗ Y
+  -- is equivalent to contracting the original tensor with Y ⊗ X.
+  contract_swap_covariant_eval : ∀ {r s : ℕ} (X Y : V) (T : AbstractTensor r (s + 2)),
+    contract (r:=r) (s:=s) (contract (r:=r+1) (s:=s+1) (tensor_prod (r1:=r) (s1:=s+2) (r2:=2) (s2:=0) (swap_covariant 0 1 T) (tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector X) (fromVector Y)))) =
+    contract (r:=r) (s:=s) (contract (r:=r+1) (s:=s+1) (tensor_prod (r1:=r) (s1:=s+2) (r2:=2) (s2:=0) T (tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector Y) (fromVector X))))
+
+  -- 6. Identity Contraction
+  -- Contracting a vector with the Kronecker Delta tensor recovers the vector.
+  contract_delta : ∀ X : V, contract (r:=1) (s:=0) (tensor_prod (r1:=1) (s1:=1) (r2:=1) (s2:=0) delta_tensor (fromVector X)) = fromVector X
+
+  -- 7. Bilinear Evaluation
+  contract_fromBilinear : ∀ (B : V →ₗ[R] V →ₗ[R] R) (X Y : V),
+    toScalar (contract (r := 0) (s := 0) (contract (r := 1) (s := 1) (tensor_prod (r1 := 0) (s1 := 2) (r2 := 2) (s2 := 0) (fromBilinear B) (tensor_prod (r1 := 1) (s1 := 0) (r2 := 1) (s2 := 0) (fromVector X) (fromVector Y))))) = B X Y
+
+namespace TensorAlgebra
+
+/-- Generalized Contraction.
+A generalized contraction across arbitrary indices `i` and `j` can be implemented/proven
+purely using the base `contract` operator combined with the routing permutations (`swap`).
+We route the i-th and j-th indices to the 0-th position, then annihilate them. -/
+def contract_general {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
+  {r s : ℕ} (i : Fin (r + 1)) (j : Fin (s + 1)) (T : AbstractTensor R V (r + 1) (s + 1)) : AbstractTensor R V r s :=
+  contract (swap_covariant 0 j (swap_contravariant 0 i T))
+
+end TensorAlgebra
+
+/-- The analytic tensor algebra machinery (to be implemented by the analytic team) -/
+noncomputable instance analyticTensorAlgebra : TensorAlgebra (ScalarField (I := I) (M := M)) (VectorField (I := I) (M := M)) := sorry
 
 end DifferentialGeometry.Bridge
