@@ -267,10 +267,15 @@ noncomputable def mlieDeriv_tensorRSWithin (r s : ℕ) {m : WithTop ℕ∞}
     (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) r s)
     (u : Set M) (hu : UniqueMDiffOn I u) (hmn : m + 1 ≤ n) :
     TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := m) r s :=
-  -- Introduce RS-tensor bundle instances at level m (the output smoothness)
-  letI := tensorRSBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := m) r s
-  letI := tensorRSBundle_fiber    (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := m) r s
-  letI := tensorRSBundle_vector   (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := m) r s
+  -- The output TensorRSField (n := m) needs bundle instances at level m.
+  -- These must match exactly what the TensorRSField abbrev introduces.
+  letI : TopologicalSpace (TotalSpace (TensorRSModel r s 𝕜 E)
+      (fun x : M => TensorRSSpace r s I x)) :=
+    tensorRSBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := m) r s
+  letI : FiberBundle (TensorRSModel r s 𝕜 E) (fun x : M => TensorRSSpace r s I x) :=
+    tensorRSBundle_fiber (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := m) r s
+  letI : VectorBundle 𝕜 (TensorRSModel r s 𝕜 E) (fun x : M => TensorRSSpace r s I x) :=
+    tensorRSBundle_vector (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := m) r s
   { toFun := fun x₀ => by
       haveI : FiniteDimensional 𝕜 (TangentSpace I x₀) := by
         unfold TangentSpace; infer_instance
