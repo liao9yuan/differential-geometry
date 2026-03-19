@@ -14,7 +14,7 @@ Algebraic formulation of the metric tensor and associated trace operations.
 /-- Metric tensor structure enforcing symmetry and bilinearity.
 Input: (V, V)
 Output: R -/
-structure AbstractMetricTensor (R V : Type) [CommRing R] [AddCommGroup V] [Module R V] where
+structure AbstractMetricTensor (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] where
   g : V → V → R
   symm : ∀ X Y : V, g X Y = g Y X
   bilinear_add_left : ∀ X Y Z : V, g (X + Y) Z = g X Z + g Y Z
@@ -43,13 +43,13 @@ lemma metric_sub_left {R V} [CommRing R] [AddCommGroup V] [Module R V] (metric :
 /-- Trace operator associated with a specific metric tensor.
 Input: (V → V → R)
 Output: R -/
-class MetricTraceOperator (R V : Type) [CommRing R] [AddCommGroup V] [Module R V] (metric : AbstractMetricTensor R V) where
+class MetricTraceOperator (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] (metric : AbstractMetricTensor R V) where
   metric_trace : (V → V → R) → R
 
 /-- Axiomatic rules for the metric trace operator.
 Input: (AbstractMetricTensor R V)
 Output: Type -/
-class MetricTraceRules (R V : Type) [CommRing R] [AddCommGroup V] [Module R V]
+class MetricTraceRules (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V]
   (metric : AbstractMetricTensor R V) [MetricTraceOperator R V metric] where
   trace_add : ∀ (T₁ T₂ : V → V → R),
     MetricTraceOperator.metric_trace metric (fun X Y => T₁ X Y + T₂ X Y) =

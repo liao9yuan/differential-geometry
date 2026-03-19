@@ -16,13 +16,13 @@ Defines non-degenerate metrics and the metric duality (raising indices).
 when their inner products with all other vector fields are equal.
 Input: (AbstractMetricTensor R V)
 Output: Type -/
-class NonDegenerateMetric (R V : Type) [CommRing R] [AddCommGroup V] [Module R V] extends AbstractMetricTensor R V where
+class NonDegenerateMetric (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] extends AbstractMetricTensor R V where
   eq_of_forall_g_eq : ∀ X Y : V, (∀ Z : V, g X Z = g Y Z) → X = Y
 
 /-- Metric duality provides the musical isomorphism to convert bilinear forms to endomorphisms, and 1-forms to vector fields.
 Input: (NonDegenerateMetric R V)
 Output: Type -/
-class MetricDuality (R V : Type) [CommRing R] [AddCommGroup V] [Module R V] extends NonDegenerateMetric R V where
+class MetricDuality (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] extends NonDegenerateMetric R V where
   raise : SmoothBilinearForm R V → (V → V)
   g_raise : ∀ (T : SmoothBilinearForm R V) (X Y : V), g (raise T X) Y = T X Y
   sharp : (V → R) → V
@@ -33,7 +33,7 @@ class MetricDuality (R V : Type) [CommRing R] [AddCommGroup V] [Module R V] exte
   g_sharp : ∀ (f : V → R) (Z : V), g (sharp f) Z = f Z
   flat_def : ∀ (X Y : V), flat X Y = g X Y
 
-variable {R V : Type} [CommRing R] [AddCommGroup V] [Module R V]
+variable {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V]
 variable (metric : MetricDuality R V)
 
 /-- Prove linearity of raise over addition. -/

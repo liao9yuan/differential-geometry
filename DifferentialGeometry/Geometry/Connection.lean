@@ -14,7 +14,7 @@ set_option linter.style.longLine false
 Definitions for affine connections, torsion, metric compatibility, and the Levi-Civita theorem.
 -/
 
-variable (R V : Type)
+variable (R V : Type*)
 variable [CommRing R] [AddCommGroup V] [Module R V]
 
 
@@ -38,13 +38,13 @@ structure AbstractAffineConnection [AbstractDerivationAction R V] where
 -- 2. Local Frames & Christoffel Symbols
 variable {I : Type}
 
-structure LocalFrame (I R V : Type) where
+structure LocalFrame (I R V : Type*) where
   vec : I → V
   coord : V → I → R
 
 section Symbols
 
-variable {R V} {I : Type}
+variable {R V} {I : Type*}
 
 /-- Christoffel symbols characterizing the connection in a local frame.
 Input: (AbstractAffineConnection R V, LocalFrame I R V, I, I, I)
@@ -130,7 +130,7 @@ theorem levi_civita_uniqueness [AbstractLieBracket V]
 /-- Leibniz rule and Jacobi identity for derivation action and Lie bracket.
 Input: (R, V)
 Output: Type -/
-class DerivationRules (R V : Type) [CommRing R] [AddCommGroup V] [Module R V] [AbstractDerivationAction R V] [AbstractLieBracket V] where
+class DerivationRules (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] [AbstractDerivationAction R V] [AbstractLieBracket V] where
   action_add_left : ∀ X Y : V, ∀ f : R, action (X + Y) f = action X f + action Y f
   action_add_right : ∀ X : V, ∀ f g : R, action X (f + g) = action X f + action X g
   action_smul_left : ∀ (c : R) (X : V) (f : R), action (c • X) f = c * action X f
@@ -145,7 +145,7 @@ variable [AbstractLieBracket V]
 variable [DerivationRules R V]
 
 /-- $X(0) = 0$ -/
-lemma action_zero {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V] (X : V) : action X (0:R) = 0 := by
+lemma action_zero {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V] (X : V) : action X (0:R) = 0 := by
   have h := DerivationRules.action_add_right X (0:R) (0:R)
   rw [add_zero] at h
   calc action X (0:R) = action X (0:R) + action X (0:R) - action X (0:R) := by abel
@@ -153,7 +153,7 @@ lemma action_zero {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [Abstr
     _ = 0 := by abel
 
 /-- $X(-g) = -X(g)$ -/
-lemma action_neg {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V] (X : V) (g : R) : action X (- g) = - action X g := by
+lemma action_neg {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V] (X : V) (g : R) : action X (- g) = - action X g := by
   have h : action X (g + -g) = action X g + action X (-g) := DerivationRules.action_add_right X g (-g)
   have hz : g + -g = 0 := by abel
   rw [hz, action_zero X] at h

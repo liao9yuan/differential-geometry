@@ -1,24 +1,24 @@
+import DifferentialGeometry.Bridge.Defs
+
 import DifferentialGeometry.Algebra.Basic
 import DifferentialGeometry.Algebra.BilinearForm
 import DifferentialGeometry.Algebra.Lie
 import DifferentialGeometry.Algebra.Metric
 import DifferentialGeometry.Algebra.Musical
 import DifferentialGeometry.Algebra.Trace
-import DifferentialGeometry.Flows.RicciFlow.Basic
-import DifferentialGeometry.Flows.RicciFlow.Evolution.Gradient
-import DifferentialGeometry.Flows.RicciFlow.Evolution.Connection
-import DifferentialGeometry.Flows.RicciFlow.Evolution.Laplacian
-import DifferentialGeometry.Flows.RicciFlow.Evolution.ScalarCurvature
+
 import DifferentialGeometry.Geometry.Bianchi
 import DifferentialGeometry.Geometry.Conformal
 import DifferentialGeometry.Geometry.Connection
 import DifferentialGeometry.Geometry.Curvature
 import DifferentialGeometry.Geometry.CurvatureTensor
 import DifferentialGeometry.Geometry.RicciIdentity
+
 import DifferentialGeometry.Analysis.OrderedTensor
 import DifferentialGeometry.Analysis.RicciTensor
 import DifferentialGeometry.Analysis.TensorInnerProduct
 import DifferentialGeometry.Analysis.TraceRankOne
+
 import DifferentialGeometry.Operators.Bochner
 import DifferentialGeometry.Operators.CovariantDerivative
 import DifferentialGeometry.Operators.Divergence
@@ -30,7 +30,12 @@ import DifferentialGeometry.Operators.SecondCovariantDerivative
 import DifferentialGeometry.Operators.SpatialConstant
 import DifferentialGeometry.Operators.Time
 import DifferentialGeometry.Operators.Variation
-import DifferentialGeometry.Applications.LiYau1D
+
+import DifferentialGeometry.Flows.RicciFlow.Basic
+import DifferentialGeometry.Flows.RicciFlow.Evolution.Gradient
+import DifferentialGeometry.Flows.RicciFlow.Evolution.Connection
+import DifferentialGeometry.Flows.RicciFlow.Evolution.Laplacian
+import DifferentialGeometry.Flows.RicciFlow.Evolution.ScalarCurvature
 import DifferentialGeometry.Flows.RicciFlow.Calculus
 
-import DifferentialGeometry.Bridge
+import DifferentialGeometry.Applications.LiYau1D

@@ -21,5 +21,5 @@ class AbstractDerivationAction where
 /-- Lie bracket of two vector fields.
 Input: (V, V)
 Output: V -/
-class AbstractLieBracket (V : Type) where
+class AbstractLieBracket (V : Type*) where
   bracket : V → V → V
