@@ -1,4 +1,4 @@
-import DifferentialGeometry.Algebra.Basic
+import DifferentialGeometry.Algebra.VectorField
 import DifferentialGeometry.Algebra.Metric
 import DifferentialGeometry.Operators.Hessian
 import Mathlib.Algebra.Module.Basic

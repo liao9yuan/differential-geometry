@@ -261,21 +261,15 @@ section SmoothVectorFieldRSLieDeriv
 variable [IsManifold I ω M]
 
 /-- Lie derivative of an (r,s) tensor field within a set.
-The output is `C^m` when the inputs are `C^n` with `m + 1 ≤ n` (one derivative is lost). -/
-noncomputable def mlieDeriv_tensorRSWithin (r s : ℕ) {m : WithTop ℕ∞}
+The hypothesis `hn : n + 1 ≤ n` holds when `n = ⊤` (the default smoothness level). -/
+noncomputable def mlieDeriv_tensorRSWithin (r s : ℕ)
     (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
     (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) r s)
-    (u : Set M) (hu : UniqueMDiffOn I u) (hmn : m + 1 ≤ n) :
-    TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := m) r s :=
-  -- The output TensorRSField (n := m) needs bundle instances at level m.
-  -- These must match exactly what the TensorRSField abbrev introduces.
-  letI : TopologicalSpace (TotalSpace (TensorRSModel r s 𝕜 E)
-      (fun x : M => TensorRSSpace r s I x)) :=
-    tensorRSBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := m) r s
-  letI : FiberBundle (TensorRSModel r s 𝕜 E) (fun x : M => TensorRSSpace r s I x) :=
-    tensorRSBundle_fiber (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := m) r s
-  letI : VectorBundle 𝕜 (TensorRSModel r s 𝕜 E) (fun x : M => TensorRSSpace r s I x) :=
-    tensorRSBundle_vector (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := m) r s
+    (u : Set M) (hu : UniqueMDiffOn I u) (hn : n + 1 ≤ n) :
+    TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) r s :=
+  letI := tensorRSBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) r s
+  letI := tensorRSBundle_fiber    (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) r s
+  letI := tensorRSBundle_vector   (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) r s
   { toFun := fun x₀ => by
       haveI : FiniteDimensional 𝕜 (TangentSpace I x₀) := by
         unfold TangentSpace; infer_instance
@@ -289,8 +283,7 @@ noncomputable def mlieDeriv_tensorRSWithin (r s : ℕ) {m : WithTop ℕ∞}
         ((extChartAt I x₀).symm ⁻¹' u ∩ range I)
         (extChartAt I x₀ x₀)
     contMDiff_toFun := by
-      have hm_le_n : m ≤ n := le_of_add_le_left hmn
-      haveI := tensorRSBundle_smooth (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := m) r s
+      haveI := tensorRSBundle_smooth (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) r s
       intro x₀'
       rw [contMDiffAt_section]
       -- Introduce sub-bundle instances needed for trivialization reasoning

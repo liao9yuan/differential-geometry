@@ -1,7 +1,7 @@
-import DifferentialGeometry.Algebra.Basic
+import DifferentialGeometry.Algebra.VectorField
 import DifferentialGeometry.Algebra.BilinearForm
 import DifferentialGeometry.Algebra.Metric
-import DifferentialGeometry.Algebra.Musical
+import DifferentialGeometry.Algebra.Metric
 import DifferentialGeometry.Algebra.Trace
 import DifferentialGeometry.Analysis.TensorInnerProduct
 import DifferentialGeometry.Geometry.Connection

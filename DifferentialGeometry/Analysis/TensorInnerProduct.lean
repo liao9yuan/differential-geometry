@@ -1,7 +1,7 @@
-import DifferentialGeometry.Algebra.Basic
+import DifferentialGeometry.Algebra.VectorField
 import DifferentialGeometry.Algebra.BilinearForm
 import DifferentialGeometry.Algebra.Trace
-import DifferentialGeometry.Algebra.Musical
+import DifferentialGeometry.Algebra.Metric
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.Abel
 

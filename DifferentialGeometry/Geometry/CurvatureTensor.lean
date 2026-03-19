@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Connection
 import DifferentialGeometry.Geometry.Curvature
-import DifferentialGeometry.Algebra.Basic
-import DifferentialGeometry.Algebra.Lie
+import DifferentialGeometry.Algebra.VectorField
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.Abel
 

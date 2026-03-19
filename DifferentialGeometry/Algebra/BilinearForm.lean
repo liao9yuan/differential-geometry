@@ -1,4 +1,4 @@
-import DifferentialGeometry.Algebra.Basic
+import DifferentialGeometry.Algebra.VectorField
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.Abel
 
@@ -10,7 +10,7 @@ set_option linter.style.longLine false
 Algebraic formulation of a (0,2)-tensor.
 -/
 
-variable (R V : Type) [CommRing R] [AddCommGroup V] [Module R V]
+variable (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V]
 
 /-- Smooth Bilinear Form structure enforcing bilinearity.
 Input: (V, V)
