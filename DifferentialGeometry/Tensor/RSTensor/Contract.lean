@@ -215,9 +215,11 @@ noncomputable def contract_Tensor0SField (s : ℕ)
     -- LHS = curry_equiv (α x) (X x) by definition.
     -- RHS = curry_equiv (α x) (symmL x (trivialized X x)).
     -- These are equal because symmL x (trivialized X x) = X x on the base set.
-    unfold contract_Tensor0SField_fun interior_product
-    simp only [ContinuousLinearMap.comp_apply]
-    erw [Trivialization.symm_apply_apply_mk e₀ hx]⟩
+    -- symmL has toFun = symm, so change to symm (definitional equality).
+    change contract_Tensor0SField_fun s α.toFun (⇑X) x =
+      (curry_equiv.toContinuousLinearEquiv (α.toFun x))
+        (e₀.symm x ((e₀ (TotalSpace.mk x (X x))).2))
+    rw [Trivialization.symm_apply_apply_mk e₀ hx]; rfl⟩
 
 end FieldContraction
 
