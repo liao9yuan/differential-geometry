@@ -15,9 +15,10 @@ Definitions for Riemann curvature, Ricci curvature, and Scalar curvature.
 
 open AbstractDerivationAction
 open AbstractLieBracket
+open DifferentialGeometry.Bridge TensorAlgebra
 
 variable {R V : Type}
-variable [CommRing R] [AddCommGroup V] [Module R V]
+variable [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
 variable [AbstractDerivationAction R V]
 
 section Curvature

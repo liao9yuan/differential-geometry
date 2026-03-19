@@ -9,10 +9,10 @@ import DifferentialGeometry.Geometry.Connection
 set_option autoImplicit false
 set_option linter.style.longLine false
 
-open AbstractDerivationAction
+open AbstractDerivationAction DifferentialGeometry.Bridge TensorAlgebra
 
 variable {R V : Type}
-variable [CommRing R] [AddCommGroup V] [Module R V]
+variable [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
 variable [AbstractDerivationAction R V]
 
 /-- Laplacian of a function defined as the metric trace of its Hessian: `Δu = tr_g(∇²u)`.

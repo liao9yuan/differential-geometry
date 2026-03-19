@@ -13,8 +13,10 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
+open DifferentialGeometry.Bridge TensorAlgebra
+
 variable (R V : Type)
-variable [CommRing R] [AddCommGroup V] [Module R V] [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V]
+variable [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V]
 
 class IsSpatialConstant (c : R) : Prop where
   action_zero : ∀ X : V, AbstractDerivationAction.action X c = 0

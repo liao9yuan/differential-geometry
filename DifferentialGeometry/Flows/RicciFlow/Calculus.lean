@@ -11,8 +11,10 @@ import DifferentialGeometry.Flows.RicciFlow.Evolution.Laplacian
 set_option autoImplicit false
 set_option linter.style.longLine false
 
+open DifferentialGeometry.Bridge TensorAlgebra
+
 variable {Time R V : Type}
-variable [CommRing R] [AddCommGroup V] [Module R V]
+variable [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
 variable [AbstractDerivationAction R V] [AbstractLieBracket V] [TraceOperator R V]
 variable [DerivationRules R V] [LieDerivationRules R V] [TraceLinearityRules R V]
 variable [Invertible (2 : R)]
@@ -57,7 +59,7 @@ class RicciFlowCalculus
 
 instance instRicciFlowCalculus
   {Time R V : Type}
-  [CommRing R] [AddCommGroup V] [Module R V]
+  [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
   [AbstractDerivationAction R V] [AbstractLieBracket V] [TraceOperator R V]
   [DerivationRules R V] [LieDerivationRules R V] [TraceLinearityRules R V]
   [Invertible (2 : R)]

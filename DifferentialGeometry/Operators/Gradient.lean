@@ -7,11 +7,11 @@ import Mathlib.Tactic.Abel
 set_option autoImplicit false
 set_option linter.style.longLine false
 
-variable {R V : Type}
-variable [CommRing R] [AddCommGroup V] [Module R V]
-variable [AbstractDerivationAction R V]
+open AbstractDerivationAction DifferentialGeometry.Bridge TensorAlgebra
 
-open AbstractDerivationAction
+variable {R V : Type}
+variable [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
+variable [AbstractDerivationAction R V]
 
 /-- Gradient of a scalar function `u`.
 Input: (AbstractMetricTensor R V, R)

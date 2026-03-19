@@ -15,7 +15,9 @@ set_option linter.style.longLine false
 Analytical concepts such as maximum principles, positivity, and spatial extremum principles.
 -/
 
-variable {R V : Type} [CommRing R] [PartialOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V]
+open DifferentialGeometry.Bridge TensorAlgebra
+
+variable {R V : Type} [CommRing R] [PartialOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
 variable [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V]
 
 /-- Positive semi-definite condition for bilinear forms. -/
