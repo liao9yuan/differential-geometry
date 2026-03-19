@@ -101,11 +101,19 @@ theorem wedge_product_lsmul {g : M [⋀^Fin m]→L[𝕜] 𝕜} {h : M [⋀^Fin n
       uncurryFinAdd ((ContinuousLinearMap.lsmul 𝕜 𝕜).compContinuousAlternatingMap₂ g h) x :=
   rfl
 
-theorem wedge_mul_assoc [CompleteSpace 𝕜] [CharZero 𝕜] [FiniteDimensional 𝕜 E] (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜)
+/- Associativity of multiplication wedge product -/
+theorem wedge_mul_assoc (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜)
     (l : M [⋀^Fin p]→L[𝕜] 𝕜) (v : Fin (m + n + p) → M) :
       ContinuousAlternatingMap.domDomCongr
-        Fin.finAssoc.symm (g ∧[𝕜] h ∧[𝕜] l) v = ((g ∧[𝕜] h) ∧[𝕜] l) v :=
-  (wedge_assoc_lhs_eq g h l v).trans (wedge_assoc_rhs_eq g h l v).symm
+        Fin.finAssoc.symm (g ∧[𝕜] h ∧[𝕜] l) v = ((g ∧[𝕜] h) ∧[𝕜] l) v := by
+  rw[wedge_product_def, uncurryFinAdd, domDomCongr_apply,
+    domDomCongr_apply, uncurrySum_apply,
+    ContinuousMultilinearMap.sum_apply, wedge_product_def,
+    uncurryFinAdd, domDomCongr_apply,
+    uncurrySum_apply, ContinuousMultilinearMap.sum_apply]
+  rw[wedge_product, wedge_product]
+  rw[uncurryFinAdd, uncurryFinAdd]
+  sorry
 
 /- Left distributivity of wedge product -/
 theorem add_wedge (g₁ g₂ : M [⋀^Fin m]→L[𝕜] N)
@@ -292,5 +300,29 @@ theorem wedge_self_odd_zero (g : M [⋀^Fin m]→L[ℝ] ℝ) (m_odd : Odd m) :
   exact h
 
 end wedge
+
+section elementaryCovectorWedge
+
+variable
+  {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+  {d m' p : ℕ}
+
+/-- The wedge product of two elementary covectors is the elementary
+covector of the concatenated multi-index. This is the Cauchy–Binet
+identity: the determinant of a matrix whose rows come from two
+blocks equals the shuffle-sum of products of sub-determinants.
+
+Given `g = elementaryCovector b I` and `h = elementaryCovector b J`,
+`g ∧[𝕜] h = elementaryCovector b (Fin.addCases I J)`. -/
+theorem elementaryCovector_wedge
+    (b : Module.Basis (Fin d) 𝕜 (E →L[𝕜] 𝕜))
+    (I : Fin m' → Fin d) (J : Fin p → Fin d) :
+    ((elementaryCovector b I) ∧[𝕜] (elementaryCovector b J)) =
+      (elementaryCovector b (Fin.addCases I J) :
+        E [⋀^Fin (m' + p)]→L[𝕜] 𝕜) := by
+  sorry
+
+end elementaryCovectorWedge
 
 end ContinuousAlternatingMap
