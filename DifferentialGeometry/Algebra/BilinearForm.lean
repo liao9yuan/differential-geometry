@@ -1,4 +1,4 @@
-import DifferentialGeometry.Algebra.Basic
+import DifferentialGeometry.Algebra.VectorField
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.Abel
 

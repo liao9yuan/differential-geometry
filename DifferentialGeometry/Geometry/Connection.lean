@@ -1,6 +1,6 @@
-import DifferentialGeometry.Algebra.Basic
+import DifferentialGeometry.Algebra.VectorField
 import DifferentialGeometry.Algebra.Metric
-import DifferentialGeometry.Algebra.Musical
+import DifferentialGeometry.Algebra.Metric
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.Abel
 import Mathlib.Algebra.Module.Basic
@@ -17,6 +17,7 @@ Definitions for affine connections, torsion, metric compatibility, and the Levi-
 variable (R V : Type*)
 variable [CommRing R] [AddCommGroup V] [Module R V]
 
+variable [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V]
 
 open AbstractDerivationAction
 open AbstractLieBracket
@@ -127,39 +128,6 @@ theorem levi_civita_uniqueness [AbstractLieBracket V]
   rw [eq1, eq2, eq3, g1, g2, g3, s1, s2, s3]
   ring
 
-/-- Leibniz rule and Jacobi identity for derivation action and Lie bracket.
-Input: (R, V)
-Output: Type -/
-class DerivationRules (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] [AbstractDerivationAction R V] [AbstractLieBracket V] where
-  action_add_left : ∀ X Y : V, ∀ f : R, action (X + Y) f = action X f + action Y f
-  action_add_right : ∀ X : V, ∀ f g : R, action X (f + g) = action X f + action X g
-  action_smul_left : ∀ (c : R) (X : V) (f : R), action (c • X) f = c * action X f
-  action_smul_right : ∀ X : V, ∀ (c f : R), action X (c * f) = action X c * f + c * action X f
-  bracket_add_left : ∀ X Y Z : V, bracket (X + Y) Z = bracket X Z + bracket Y Z
-  bracket_add_right : ∀ X Y Z : V, bracket X (Y + Z) = bracket X Y + bracket X Z
-  bracket_smul_left : ∀ (c : R) (X Y : V), bracket (c • X) Y = c • (bracket X Y) - (action Y c) • X
-  bracket_smul_right : ∀ (c : R) (X Y : V), bracket X (c • Y) = c • (bracket X Y) + (action X c) • Y
-  bracket_antisymm : ∀ X Y : V, bracket X Y = - bracket Y X
-
-variable [AbstractLieBracket V]
-variable [DerivationRules R V]
-
-/-- $X(0) = 0$ -/
-lemma action_zero {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V] (X : V) : action X (0:R) = 0 := by
-  have h := DerivationRules.action_add_right X (0:R) (0:R)
-  rw [add_zero] at h
-  calc action X (0:R) = action X (0:R) + action X (0:R) - action X (0:R) := by abel
-    _ = action X (0:R) - action X (0:R) := by rw [← h]
-    _ = 0 := by abel
-
-/-- $X(-g) = -X(g)$ -/
-lemma action_neg {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V] (X : V) (g : R) : action X (- g) = - action X g := by
-  have h : action X (g + -g) = action X g + action X (-g) := DerivationRules.action_add_right X g (-g)
-  have hz : g + -g = 0 := by abel
-  rw [hz, action_zero X] at h
-  calc action X (-g) = action X g + action X (-g) - action X g := by abel
-    _ = 0 - action X g := by rw [← h]
-    _ = - action X g := by abel
 
 /-- Explicit construction of the Levi-Civita connection using the Koszul formula.
 Input: (AbstractMetricTensor R V)
@@ -260,7 +228,7 @@ def koszul_connection [Invertible (2 : R)] [AbstractLieBracket V] [DerivationRul
       rw [h, metric.sharp_smul, metric.sharp_g]
     rw [direct_term]
 
-instance metric_compat_koszul [Invertible (2 : R)] (metric : MetricDuality R V) : MetricCompatible (koszul_connection metric) metric.toNonDegenerateMetric.toAbstractMetricTensor where
+instance metric_compat_koszul [Invertible (2 : R)] [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V] (metric : MetricDuality R V) : MetricCompatible (koszul_connection metric) metric.toNonDegenerateMetric.toAbstractMetricTensor where
   compat X Y Z := by
     let nabla := (koszul_connection metric).nabla
     have h1 : metric.g (nabla X Y) Z = (action X (metric.g Y Z) + action Y (metric.g Z X) - action Z (metric.g X Y) - metric.g X (bracket Y Z) + metric.g Y (bracket Z X) + metric.g Z (bracket X Y)) * ⅟2 := by
@@ -285,7 +253,7 @@ instance metric_compat_koszul [Invertible (2 : R)] (metric : MetricDuality R V) 
         _ = action X (metric.g Y Z) * (⅟2 * 2) := by rw [← invOf_mul_self 2]
         _ = action X (metric.g Y Z) * ⅟2 * 2 := by ring
 
-instance torsion_free_koszul [Invertible (2 : R)] (metric : MetricDuality R V) : TorsionFree (koszul_connection metric) where
+instance torsion_free_koszul [Invertible (2 : R)] [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V] (metric : MetricDuality R V) : TorsionFree (koszul_connection metric) where
   torsion_zero X Y := by
     let nabla := (koszul_connection metric).nabla
     have eq_func : (fun Z : V => (action X (metric.g Y Z) + action Y (metric.g Z X) - action Z (metric.g X Y) - metric.g X (bracket Y Z) + metric.g Y (bracket Z X) + metric.g Z (bracket X Y)) * ⅟2 - (action Y (metric.g X Z) + action X (metric.g Z Y) - action Z (metric.g Y X) - metric.g Y (bracket X Z) + metric.g X (bracket Z Y) + metric.g Z (bracket Y X)) * ⅟2) = (fun Z : V => metric.g (bracket X Y) Z) := by
@@ -333,7 +301,7 @@ Output: Prop
 # Reference:
 # Differential Geometry and Applications, Richard Hamilton, Monique Chyba and Xiaodong Cao
 -/
-theorem levi_civita_exists_unique [Invertible (2 : R)] (metric : MetricDuality R V) :
+theorem levi_civita_exists_unique [Invertible (2 : R)] [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V] (metric : MetricDuality R V) :
   ∃ (conn : AbstractAffineConnection R V),
     (MetricCompatible conn metric.toNonDegenerateMetric.toAbstractMetricTensor ∧ TorsionFree conn) ∧
     (∀ (conn' : AbstractAffineConnection R V), MetricCompatible conn' metric.toNonDegenerateMetric.toAbstractMetricTensor ∧ TorsionFree conn' → conn' = conn) := by

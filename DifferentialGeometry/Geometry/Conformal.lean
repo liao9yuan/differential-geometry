@@ -1,7 +1,7 @@
 import DifferentialGeometry.Geometry.Connection
 import DifferentialGeometry.Algebra.Metric
 import DifferentialGeometry.Operators.Gradient
-import DifferentialGeometry.Algebra.Basic
+import DifferentialGeometry.Algebra.VectorField
 import Mathlib.Tactic.Abel
 
 set_option autoImplicit false

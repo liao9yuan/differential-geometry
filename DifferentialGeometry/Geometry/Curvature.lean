@@ -1,4 +1,4 @@
-import DifferentialGeometry.Algebra.Basic
+import DifferentialGeometry.Algebra.VectorField
 import DifferentialGeometry.Algebra.Trace
 import DifferentialGeometry.Algebra.Metric
 import Mathlib.Algebra.Module.Basic

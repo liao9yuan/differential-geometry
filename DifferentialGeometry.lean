@@ -1,10 +1,8 @@
 import DifferentialGeometry.Bridge.Defs
 
-import DifferentialGeometry.Algebra.Basic
+import DifferentialGeometry.Algebra.VectorField
 import DifferentialGeometry.Algebra.BilinearForm
-import DifferentialGeometry.Algebra.Lie
 import DifferentialGeometry.Algebra.Metric
-import DifferentialGeometry.Algebra.Musical
 import DifferentialGeometry.Algebra.Trace
 
 import DifferentialGeometry.Geometry.Bianchi

@@ -1,4 +1,5 @@
-import DifferentialGeometry.Algebra.Basic
+import DifferentialGeometry.Algebra.VectorField
+import DifferentialGeometry.Algebra.Trace
 import DifferentialGeometry.Geometry.Connection
 import DifferentialGeometry.Geometry.Curvature
 import DifferentialGeometry.Geometry.CurvatureTensor
@@ -24,11 +25,7 @@ variable [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules 
 
 local notation "⁅" X ", " Y "⁆" => bracket X Y
 
-/-- Jacobi identity for the Lie bracket of vector fields.
-Input: (V)
-Output: Prop -/
-class JacobiIdentity (V : Type) [AddCommGroup V] [AbstractLieBracket V] where
-  jacobi : ∀ X Y Z : V, ⁅X, ⁅Y, Z⁆⁆ + ⁅Y, ⁅Z, X⁆⁆ + ⁅Z, ⁅X, Y⁆⁆ = 0
+
 
 /-- Negative homogeneity of the affine connection in the second argument.
 Proof that ∇_X (-Y) = - ∇_X Y.
@@ -323,29 +320,7 @@ Output: R -/
 def covDerivRc (conn : AbstractAffineConnection R V) (Y Z X : V) : R :=
   AbstractDerivationAction.action Y (Rc conn Z X) - Rc conn (conn.nabla Y Z) X - Rc conn Z (conn.nabla Y X)
 
---- TENSOR CONTRACTION 1 (Trace over 1st input and target slot) ---
 
-/-- Abstract trace operator for a (1,4)-tensor mapping V^4 to V.
-    Contracts the first argument (differentiation slot) and the fourth argument (target slot). -/
-class Tensor14Trace (R V : Type) where
-  trace_1_4 : (V → V → V → V → V) → (V → V → V → R)
-
-/-- Linearity of trace_1_4. -/
-class Tensor14TraceLinearity (R V : Type) [CommRing R] [AddCommGroup V] [Tensor14Trace R V] where
-  tr_add : ∀ (T₁ T₂ : V → V → V → V → V), (Tensor14Trace.trace_1_4 (fun x y z w => T₁ x y z w + T₂ x y z w) : V → V → V → R) = fun y z w => Tensor14Trace.trace_1_4 T₁ y z w + Tensor14Trace.trace_1_4 T₂ y z w
-  tr_zero : (Tensor14Trace.trace_1_4 (fun _ _ _ _ => (0 : V)) : V → V → V → R) = fun _ _ _ => (0 : R)
-
---- TENSOR CONTRACTION 2 (Bilinear trace over 2 inputs) ---
-
-/-- Abstract trace operator for bilinear forms Mapping V x V to R. -/
-class BilinearTrace (R V : Type) where
-  tr : (V → V → R) → R
-
-/-- Trace linearity rules mapping the general trace operator's linearity properties. -/
-class BilinearTraceLinearity (R V : Type) [CommRing R] [AddCommGroup V] [BilinearTrace R V] where
-  tr_add : ∀ (T₁ T₂ : V → V → R), (BilinearTrace.tr (fun Y Z => T₁ Y Z + T₂ Y Z) : R) = BilinearTrace.tr T₁ + BilinearTrace.tr T₂
-  tr_sub : ∀ (T₁ T₂ : V → V → R), (BilinearTrace.tr (fun Y Z => T₁ Y Z - T₂ Y Z) : R) = BilinearTrace.tr T₁ - BilinearTrace.tr T₂
-  tr_zero : (BilinearTrace.tr (fun (_ _ : V) => (0 : R)) : R) = (0 : R)
 
 --- THEOREM CONTRACTIONS ---
 
