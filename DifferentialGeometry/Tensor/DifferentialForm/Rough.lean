@@ -408,20 +408,7 @@ theorem iprod_wedge (ω : E → E [⋀^Fin (m + 1)]→L[ℝ] F) (τ : E → E [�
     (v : E → E) :
       iprod (domDomCongr Fin.finAddFlipAssoc (ω ∧r[f] τ)) v = ((iprod ω v) ∧r[f] τ)
         + (-1 : ℝ)^m • (domDomCongr Fin.finAddFlipAssoc (ω ∧r[f] (iprod τ v))) := by
-  ext e x
-  rw[_root_.add_apply]
-  erw[ContinuousAlternatingMap.add_apply] -- FIXME
-  simp only [Nat.add_eq, Pi.smul_apply, coe_smul]
-  rw[wedge_product_def]
-  rw[domDomCongr_apply, wedge_product_def,
-    ContinuousAlternatingMap.wedge_product_def, uncurryFinAdd,
-    ContinuousAlternatingMap.domDomCongr_apply, uncurrySum_apply,
-    ContinuousMultilinearMap.sum_apply, ContinuousAlternatingMap.wedge_product_def,
-    uncurryFinAdd, ContinuousAlternatingMap.domDomCongr_apply, uncurrySum_apply,
-    ContinuousMultilinearMap.sum_apply, iprod_apply, curryFin_apply, domDomCongr_apply,
-    wedge_product_def, ContinuousAlternatingMap.wedge_product_def, uncurryFinAdd,
-    ContinuousAlternatingMap.domDomCongr_apply, uncurrySum_apply,
-    ContinuousMultilinearMap.sum_apply]
-  sorry
+  funext e
+  exact ContinuousAlternatingMap.iprod_wedge_product (ω e) (τ e) f (v e)
 
 end RoughDifferentialForm

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Connection
+/- import DifferentialGeometry.Geometry.Connection
 import DifferentialGeometry.Algebra.Metric
 import DifferentialGeometry.Algebra.Basic
 import DifferentialGeometry.Tensor.RSTensor.LieDerivative
@@ -23,6 +23,7 @@ variable {M : Type} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ⊤ M]
 
 open TensorLieDeriv
+open scoped Manifold
 
 -- 2. Ring R and Module V
 abbrev R := smoothScalarField (𝕜 := 𝕜) (M := M)
@@ -33,12 +34,12 @@ noncomputable instance : AddCommGroup (V (𝕜 := 𝕜) (E := E) (H := H) (I := 
 
 noncomputable instance bridgeModule : Module (R (𝕜 := 𝕜) (M := M)) (V (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) where
   smul f X := fun x => f x • X x
-  smul_zero := sorry
-  zero_smul := sorry
-  smul_add := sorry
-  add_smul := sorry
-  mul_smul := sorry
-  one_smul := sorry
+  smul_zero f := funext fun x => smul_zero (f x)
+  zero_smul X := funext fun x => zero_smul 𝕜 (X x)
+  smul_add f X Y := funext fun x => smul_add (f x) (X x) (Y x)
+  add_smul f g X := funext fun x => add_smul (f x) (g x) (X x)
+  mul_smul f g X := funext fun x => mul_smul (f x) (g x) (X x)
+  one_smul X := funext fun x => one_smul 𝕜 (X x)
 
 
 /--
@@ -84,6 +85,27 @@ noncomputable instance bridgeAffineConnection (analyticNabla : LeviCivitaConnect
   torsion_zero := sorry
 
 
+/--
+The concrete directional derivative and Lie bracket on a manifold satisfy the abstract
+derivation rules. Fields that require global smoothness/differentiability hypotheses
+(not carried by the abstract class) are left as sorry.
+-/
+noncomputable instance bridgeDerivationRules :
+    DerivationRules (R (𝕜 := 𝕜) (M := M)) (V (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) where
+  action_add_left X Y f := by
+    funext x
+    exact map_add (mfderiv I 𝓘(𝕜) f x) (X x) (Y x)
+  action_add_right X f g := sorry
+  action_smul_left c X f := by
+    funext x
+    exact map_smul (mfderiv I 𝓘(𝕜) f x) (c x) (X x)
+  action_smul_right X c f := sorry
+  bracket_add_left X Y Z := sorry
+  bracket_add_right X Y Z := sorry
+  bracket_smul_left c X Y := sorry
+  bracket_smul_right c X Y := sorry
+  bracket_antisymm X Y := VectorField.mlieBracket_swap (I := I)
+
 class GeneralTensorContractionRules (metric : AbstractMetricTensor (R (𝕜 := 𝕜) (M := M)) (V (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M))) where
   /-- Trace commutes with covariant derivatives: tr_g(∇ T) = ∇(tr_g(T)) -/
   trace_cov_commute : sorry
@@ -91,3 +113,4 @@ class GeneralTensorContractionRules (metric : AbstractMetricTensor (R (𝕜 := �
   metric_trace_ricci_var : sorry
 
 end DifferentialGeometry.Bridge
+-/

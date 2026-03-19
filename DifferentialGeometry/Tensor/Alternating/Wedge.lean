@@ -8,6 +8,7 @@ import DifferentialGeometry.Tensor.Aux.Perm
 import DifferentialGeometry.Tensor.Alternating.Comp
 import DifferentialGeometry.Tensor.Alternating.Curry
 import DifferentialGeometry.Tensor.Product.Defs
+import DifferentialGeometry.Tensor.Alternating.Basis
 
 /-
 # Wedge Products
@@ -100,18 +101,11 @@ theorem wedge_product_lsmul {g : M [⋀^Fin m]→L[𝕜] 𝕜} {h : M [⋀^Fin n
       uncurryFinAdd ((ContinuousLinearMap.lsmul 𝕜 𝕜).compContinuousAlternatingMap₂ g h) x :=
   rfl
 
-/- Associativity of multiplication wedge product -/
-theorem wedge_mul_assoc (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜)
+theorem wedge_mul_assoc [CompleteSpace 𝕜] [CharZero 𝕜] [FiniteDimensional 𝕜 E] (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜)
     (l : M [⋀^Fin p]→L[𝕜] 𝕜) (v : Fin (m + n + p) → M) :
       ContinuousAlternatingMap.domDomCongr
-        Fin.finAssoc.symm (g ∧[𝕜] h ∧[𝕜] l) v = ((g ∧[𝕜] h) ∧[𝕜] l) v := by
-  rw[wedge_product_def, uncurryFinAdd, domDomCongr_apply, domDomCongr_apply, uncurrySum_apply,
-    ContinuousMultilinearMap.sum_apply, wedge_product_def, uncurryFinAdd, domDomCongr_apply,
-    uncurrySum_apply, ContinuousMultilinearMap.sum_apply]
-  rw[wedge_product, wedge_product]
-  rw[uncurryFinAdd, uncurryFinAdd]
-  -- Want to have functionality to partially unpack
-  sorry
+        Fin.finAssoc.symm (g ∧[𝕜] h ∧[𝕜] l) v = ((g ∧[𝕜] h) ∧[𝕜] l) v :=
+  (wedge_assoc_lhs_eq g h l v).trans (wedge_assoc_rhs_eq g h l v).symm
 
 /- Left distributivity of wedge product -/
 theorem add_wedge (g₁ g₂ : M [⋀^Fin m]→L[𝕜] N)
@@ -240,6 +234,18 @@ theorem wedge_antisymm (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L
   simp only [Equiv.Perm.sumCongrPerm, Fin.finSumCongr, Equiv.permCongr_apply, Equiv.symm_trans_apply,
     Equiv.symm_symm, Equiv.trans_apply, Equiv.apply_symm_apply,
     Fin.finAddCongr_finAddCongr]
+  sorry
+
+/-- The graded Leibniz rule for the interior product (curryFin) and wedge product:
+  ι_x(g ∧_f h) = (ι_x g) ∧_f h + (-1)^m • g ∧_f (ι_x h)
+  where `finAddFlipAssoc` handles the index rearrangement needed to make
+  the result well-typed. -/
+theorem iprod_wedge_product
+    (g : M [⋀^Fin (m+1)]→L[𝕜] N) (h : M [⋀^Fin (n+1)]→L[𝕜] N')
+    (f : N →L[𝕜] N' →L[𝕜] N'') (x : M) :
+    curryFin (domDomCongr Fin.finAddFlipAssoc (g ∧[f] h)) x =
+      (curryFin g x ∧[f] h) +
+      (-1 : 𝕜) ^ m • domDomCongr Fin.finAddFlipAssoc (g ∧[f] curryFin h x) := by
   sorry
 
 variable {M : Type*} [NormedAddCommGroup M] [NormedSpace ℝ M]

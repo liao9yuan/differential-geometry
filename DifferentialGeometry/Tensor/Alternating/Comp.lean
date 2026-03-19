@@ -9,6 +9,31 @@ import Mathlib.Analysis.Calculus.ContDiff.CPolynomial
 import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
 import Mathlib.LinearAlgebra.Multilinear.FiniteDimensional
 
+/-!
+# Composition operations for continuous alternating maps
+
+This file defines composition operations involving continuous alternating maps and establishes
+their continuity and smoothness properties.
+
+## Main definitions
+
+* `ContinuousLinearMap.compContinuousAlternatingMap₂`: given a continuous bilinear map
+  `f : N →L[𝕜] N' →L[𝕜] N''` and alternating maps `g : M [⋀^ι]→L[𝕜] N` and
+  `h : M' [⋀^ι']→L[𝕜] N'`, produces `(m, m') ↦ f (g m) (h m')` as an alternating map
+  `M [⋀^ι]→L[𝕜] M' [⋀^ι']→L[𝕜] N''`.
+* `LinearIsometry.compLeft`: post-composition with a semilinear isometry defines a
+  semilinear isometry on spaces of continuous semilinear maps.
+
+## Main results
+
+* `ContinuousAlternatingMap.compContinuousLinearMapCLM_cont` /
+  `ContinuousAlternatingMap.compContinuousLinearMapL_continuous`: the assignment
+  `p ↦ compContinuousLinearMapCLM p` (pre-composition with a continuous linear map) is
+  continuous.
+* `ContinuousAlternatingMap.compContinuousLinearMapCLM_contMDiff`: the same assignment is
+  `C^∞`-smooth when the fiber spaces are finite-dimensional.
+-/
+
 open ContinuousAlternatingMap
 
 noncomputable section Comp
@@ -25,6 +50,11 @@ variable
   {ι : Type*} [Fintype ι]
   {ι' : Type*} [Fintype ι']
 
+/-- Given a continuous bilinear map `f : N →L[𝕜] N' →L[𝕜] N''` and continuous alternating maps
+`g : M [⋀^ι]→L[𝕜] N` and `h : M' [⋀^ι']→L[𝕜] N'`, produce the alternating map
+`M [⋀^ι]→L[𝕜] M' [⋀^ι']→L[𝕜] N''` given fiberwise by `(m, m') ↦ f (g m) (h m')`.
+The alternating property follows from that of `g`: if two entries of `m` coincide, `g m = 0`.
+The continuity bound is `‖f‖ * ‖g‖ * ‖h‖`. -/
 def compContinuousAlternatingMap₂ (f : N →L[𝕜] N' →L[𝕜] N'')
     (g : M [⋀^ι]→L[𝕜] N) (h : M' [⋀^ι']→L[𝕜] N') : M [⋀^ι]→L[𝕜] M' [⋀^ι']→L[𝕜] N'' := by
   let F₁ : MultilinearMap 𝕜 (fun _ ↦ M) (M' [⋀^ι']→L[𝕜] N'') := MultilinearMap.mk
@@ -68,24 +98,32 @@ def compContinuousAlternatingMap₂ (f : N →L[𝕜] N' →L[𝕜] N'')
       MultilinearMap.coe_mkContinuous, MultilinearMap.coe_mk, F₂, F₁]
     have : g v = 0 := g.map_eq_zero_of_eq' v i j h₁ h₂
     rw [this, ContinuousLinearMap.map_zero]
-    ext M
+    ext v'
     rfl)
 
+/-- Evaluation formula for `compContinuousAlternatingMap₂`. -/
 theorem compContinuousAlternatingMap₂_apply (f : N →L[𝕜] N' →L[𝕜] N'')
     (g : M [⋀^ι]→L[𝕜] N) (h : M' [⋀^ι']→L[𝕜] N') (m : ι → M) (m' : ι' → M') :
     f.compContinuousAlternatingMap₂ g h m m' = f (g m) (h m') :=
   rfl
 
+/-- When `f = mul 𝕜 𝕜`, `compContinuousAlternatingMap₂` gives pointwise multiplication
+of scalar-valued alternating forms: `(m, m') ↦ g m * h m'`. -/
 theorem compContinuousAlternatingMap₂_mul_apply
     (g : M [⋀^ι]→L[𝕜] 𝕜) (h : M' [⋀^ι']→L[𝕜] 𝕜) (m : ι → M) (m' : ι' → M') :
     (ContinuousLinearMap.mul 𝕜 𝕜).compContinuousAlternatingMap₂ g h m m' = (g m) * (h m') :=
   rfl
 
+/-- When `f = lsmul 𝕜 𝕜`, `compContinuousAlternatingMap₂` gives scalar multiplication:
+`(m, m') ↦ g m • h m'`, where `g` is scalar-valued and `h` is `N`-valued. -/
 theorem compContinuousAlternatingMap₂_lsmul_apply
     (g : M [⋀^ι]→L[𝕜] 𝕜) (h : M' [⋀^ι']→L[𝕜] N) (m : ι → M) (m' : ι' → M') :
     (ContinuousLinearMap.lsmul 𝕜 𝕜).compContinuousAlternatingMap₂ g h m m' = (g m) • (h m') :=
   rfl
 
+/-- Post-composition with a semilinear isometry `f : F →ₛₗᵢ[σ₂₃] G` defines a semilinear
+isometry `(E →SL[σ₁₂] F) →ₛₗᵢ[σ₂₃] (E →SL[σ₁₃] G)`. The norm is preserved because `f` is
+norm-preserving. -/
 noncomputable def _root_.LinearIsometry.compLeft {𝕜 : Type*} {𝕜₂ : Type*}
     {𝕜₃ : Type*} (E : Type*) {F : Type*} {G : Type*} [NormedAddCommGroup E]
     [NormedAddCommGroup F] [NormedAddCommGroup G] [NontriviallyNormedField 𝕜]
@@ -97,6 +135,9 @@ noncomputable def _root_.LinearIsometry.compLeft {𝕜 : Type*} {𝕜₂ : Type*
   { ContinuousLinearMap.compSL _ _ _ _ _ f.toContinuousLinearMap with
     norm_map' := fun _ ↦ f.norm_toContinuousLinearMap_comp }
 
+/-- The map sending `p : M →L[𝕜] M'` to the operator `compContinuousLinearMapL (fun _ ↦ p)`
+(pre-composing all `ι` slots of a continuous multilinear map with the same `p`) is continuous.
+Used to prove continuity of pre-composition for alternating maps. -/
 theorem compContinuousMultilinearMapL_diag_continuous :
     Continuous (fun p : M →L[𝕜] M' ↦
       (ContinuousMultilinearMap.compContinuousLinearMapL (fun _ : ι ↦ p) :
@@ -108,6 +149,9 @@ theorem compContinuousMultilinearMapL_diag_continuous :
   change Continuous (fun p : M →L[𝕜] M' ↦ φ (fun _ : ι ↦ p))
   exact φ.cont.comp (continuous_pi (fun _ ↦ continuous_id))
 
+/-- Pre-composition with a continuous linear map `p : M →L[𝕜] M'` defines a continuous linear
+operator `(M' [⋀^ι]→L[𝕜] N) →L[𝕜] (M [⋀^ι]→L[𝕜] N)`, and the assignment `p ↦ (· ∘ p)` is
+itself continuous. The proof reduces to the multilinear case via the isometric embedding. -/
 theorem compContinuousAlternatingMapCLM_cont :
     Continuous (ContinuousAlternatingMap.compContinuousLinearMapCLM :
     (M →L[𝕜] M') → (M' [⋀^ι]→L[𝕜] N) →L[𝕜] (M [⋀^ι]→L[𝕜] N)) := by
@@ -137,20 +181,27 @@ variable
   {M' : Type*} [NormedAddCommGroup M'] [NormedSpace 𝕜 M']
   [Fintype ι] [Fintype ι']
 
+/-- Variant of `ContinuousLinearMap.compContinuousAlternatingMap₂` stated in the
+`ContinuousAlternatingMap` namespace, with `f : N →L[𝕜] N' →L[𝕜] N''` as the first argument. -/
 def compContinuousAlternatingMap₂ (f : N →L[𝕜] N' →L[𝕜] N'')
     (g : M [⋀^ι]→L[𝕜] N) (h : M' [⋀^ι']→L[𝕜] N') : M [⋀^ι]→L[𝕜] M' [⋀^ι']→L[𝕜] N'' :=
   f.compContinuousAlternatingMap₂ g h
 
+/-- Evaluation formula for `ContinuousAlternatingMap.compContinuousAlternatingMap₂`. -/
 theorem compContinuousAlternatingMap₂_apply (f : N →L[𝕜] N' →L[𝕜] N'')
     (g : M [⋀^ι]→L[𝕜] N) (h : M' [⋀^ι']→L[𝕜] N') (m : ι → M) (m' : ι' → M') :
     f.compContinuousAlternatingMap₂ g h m m' = f (g m) (h m') :=
   rfl
 
+/-- When `f = mul 𝕜 𝕜`, `compContinuousAlternatingMap₂` gives pointwise multiplication
+of scalar-valued alternating forms: `(m, m') ↦ g m * h m'`. -/
 theorem compContinuousAlternatingMap₂_mul_apply
     (g : M [⋀^ι]→L[𝕜] 𝕜) (h : M' [⋀^ι']→L[𝕜] 𝕜) (m : ι → M) (m' : ι' → M') :
     (ContinuousLinearMap.mul 𝕜 𝕜).compContinuousAlternatingMap₂ g h m m' = (g m) * (h m') :=
   rfl
 
+/-- When `f = lsmul 𝕜 𝕜`, `compContinuousAlternatingMap₂` gives scalar multiplication:
+`(m, m') ↦ g m • h m'`, where `g` is scalar-valued and `h` is `N`-valued. -/
 theorem compContinuousAlternatingMap₂_lsmul_apply
     (g : M [⋀^ι]→L[𝕜] 𝕜) (h : M' [⋀^ι']→L[𝕜] N) (m : ι → M) (m' : ι' → M') :
     (ContinuousLinearMap.lsmul 𝕜 𝕜).compContinuousAlternatingMap₂ g h m m' = (g m) • (h m') :=
@@ -166,6 +217,9 @@ variable
   (F₁ F₂ : Type*) [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁]
   [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂] [ContinuousAdd F₁]
 
+/-- The map sending `p : F₁ →L[𝕜] F₁` to the operator `compContinuousLinearMapL (fun _ ↦ p)`
+(pre-composing all `ι` slots of a multilinear map with the same `p`) is continuous.
+Used to prove `compContinuousLinearMapL_continuous` for alternating maps. -/
 theorem ContinuousMultilinearMap.compContinuousLinearMapL_diag_continuous :
   Continuous (fun p : F₁ →L[𝕜] F₁ ↦
   (ContinuousMultilinearMap.compContinuousLinearMapL (fun _ : ι ↦ p) :
@@ -181,6 +235,8 @@ theorem ContinuousMultilinearMap.compContinuousLinearMapL_diag_continuous :
     intro _
     exact continuous_id
 
+/-- The map `p ↦ compContinuousLinearMapCLM p`, sending `p : F₁ →L[𝕜] F₁` to the operator of
+pre-composing all inputs of an alternating map with `p`, is continuous. -/
 theorem ContinuousAlternatingMap.compContinuousLinearMapL_continuous :
     Continuous (fun p : F₁ →L[𝕜] F₁ ↦
     (ContinuousAlternatingMap.compContinuousLinearMapCLM p :
@@ -208,6 +264,8 @@ variable {𝕜 ι F₁ F₂} [ntnf : NontriviallyNormedField 𝕜] [CompleteSpac
 open scoped Bundle Manifold
 
 omit [CompleteSpace 𝕜] in
+/-- The map sending `p : F₁ →L[𝕜] F₁` to `compContinuousLinearMapL (fun _ ↦ p)` is `C^∞`.
+Does not require `CompleteSpace 𝕜`. Used to prove the smooth version for alternating maps. -/
 theorem ContinuousMultilinearMap.compContinuousLinearMapL_diag_contDiff :
   ContDiff 𝕜 ⊤ (fun p : F₁ →L[𝕜] F₁ ↦
   (ContinuousMultilinearMap.compContinuousLinearMapL (fun _ : ι ↦ p) :
@@ -225,6 +283,10 @@ theorem ContinuousMultilinearMap.compContinuousLinearMapL_diag_contDiff :
 
 variable [FiniteDimensional 𝕜 F₁] [FiniteDimensional 𝕜 F₂]
 
+/-- The map `p ↦ compContinuousLinearMapCLM p` is `C^∞`-smooth as a map between normed spaces,
+when `F₁` and `F₂` are finite-dimensional over `𝕜`. The proof reduces to the multilinear case via
+the isometric embedding `toContinuousMultilinearMapLI` of alternating maps into multilinear maps,
+using `LinearIsometry.comp_contDiff_iff` to transfer smoothness through the isometry. -/
 theorem ContinuousAlternatingMap.compContinuousLinearMapCLM_contMDiff :
     let F : (F₁ →L[𝕜] F₁) → (F₁ [⋀^ι]→L[𝕜] F₂) →L[𝕜] (F₁ [⋀^ι]→L[𝕜] F₂)
       := fun p ↦ ContinuousAlternatingMap.compContinuousLinearMapCLM p
