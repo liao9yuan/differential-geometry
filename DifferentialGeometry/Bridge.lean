@@ -1,3 +1,5 @@
+/- import DifferentialGeometry.Geometry.Connection
+import DifferentialGeometry.Algebra.Metric
 import DifferentialGeometry.Algebra.Basic
 import DifferentialGeometry.Algebra.Metric
 import DifferentialGeometry.Geometry.Connection
@@ -33,6 +35,8 @@ class AbstractTensorCalculus (metric : AbstractMetricTensor R V) (conn : Abstrac
   fromScalar : R → AbstractTensor 0 0
   fromVector : V → AbstractTensor 1 0
 
+open TensorLieDeriv
+open scoped Manifold
   -- Covariant Derivative
   nabla_tensor {r s : ℕ} : V → AbstractTensor r s → AbstractTensor r s
 
@@ -42,6 +46,14 @@ class AbstractTensorCalculus (metric : AbstractMetricTensor R V) (conn : Abstrac
   /-- Covariant contraction (feeding a vector into a mixed tensor) -/
   contract_covariant {r s : ℕ} : AbstractTensor r (s + 1) → V → AbstractTensor r s
 
+noncomputable instance bridgeModule : Module (R (𝕜 := 𝕜) (M := M)) (V (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) where
+  smul f X := fun x => f x • X x
+  smul_zero f := funext fun x => smul_zero (f x)
+  zero_smul X := funext fun x => zero_smul 𝕜 (X x)
+  smul_add f X Y := funext fun x => smul_add (f x) (X x) (Y x)
+  add_smul f g X := funext fun x => add_smul (f x) (g x) (X x)
+  mul_smul f g X := funext fun x => mul_smul (f x) (g x) (X x)
+  one_smul X := funext fun x => one_smul 𝕜 (X x)
   /-- General contraction between one contravariant and one covariant slot -/
   contract {r s : ℕ} : AbstractTensor (r + 1) (s + 1) → AbstractTensor r s
 
@@ -73,7 +85,45 @@ class AbstractTensorCalculus (metric : AbstractMetricTensor R V) (conn : Abstrac
 /-
   The proof to the previous class can be here.
 -/
+noncomputable instance bridgeAffineConnection (analyticNabla : LeviCivitaConnection (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) :
+    AbstractLeviCivitaConnection (bridgeMetricTensor analyticNabla.metric) where
+  nabla X Y := analyticNabla.covDeriv X Y
+  nabla_add_left := sorry
+  nabla_add_right := sorry
+  nabla_smul_left := sorry
+  leibniz := sorry
+  compat := sorry
+  torsion_zero := sorry
+
+
+/--
+The concrete directional derivative and Lie bracket on a manifold satisfy the abstract
+derivation rules. Fields that require global smoothness/differentiability hypotheses
+(not carried by the abstract class) are left as sorry.
+-/
+noncomputable instance bridgeDerivationRules :
+    DerivationRules (R (𝕜 := 𝕜) (M := M)) (V (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) where
+  action_add_left X Y f := by
+    funext x
+    exact map_add (mfderiv I 𝓘(𝕜) f x) (X x) (Y x)
+  action_add_right X f g := sorry
+  action_smul_left c X f := by
+    funext x
+    exact map_smul (mfderiv I 𝓘(𝕜) f x) (c x) (X x)
+  action_smul_right X c f := sorry
+  bracket_add_left X Y Z := sorry
+  bracket_add_right X Y Z := sorry
+  bracket_smul_left c X Y := sorry
+  bracket_smul_right c X Y := sorry
+  bracket_antisymm X Y := VectorField.mlieBracket_swap (I := I)
+
+class GeneralTensorContractionRules (metric : AbstractMetricTensor (R (𝕜 := 𝕜) (M := M)) (V (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M))) where
+  /-- Trace commutes with covariant derivatives: tr_g(∇ T) = ∇(tr_g(T)) -/
+  trace_cov_commute : sorry
+  /-- Metric trace of Ricci variation equals Laplacian of scalar curvature: tr_g(∂_t Rc) = Δ R -/
+  metric_trace_ricci_var : sorry
 
 noncomputable instance mockTensorCalculus {metric : AbstractMetricTensor R V} {conn : AbstractLeviCivitaConnection metric} : AbstractTensorCalculus R V metric conn := sorry
 
 end DifferentialGeometry.Bridge
+-/

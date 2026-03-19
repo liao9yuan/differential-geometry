@@ -8,6 +8,7 @@ import DifferentialGeometry.Tensor.Aux.Perm
 import DifferentialGeometry.Tensor.Alternating.Comp
 import DifferentialGeometry.Tensor.Alternating.Curry
 import DifferentialGeometry.Tensor.Product.Defs
+import DifferentialGeometry.Tensor.Alternating.Basis
 
 /-
 # Wedge Products
@@ -105,12 +106,13 @@ theorem wedge_mul_assoc (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→
     (l : M [⋀^Fin p]→L[𝕜] 𝕜) (v : Fin (m + n + p) → M) :
       ContinuousAlternatingMap.domDomCongr
         Fin.finAssoc.symm (g ∧[𝕜] h ∧[𝕜] l) v = ((g ∧[𝕜] h) ∧[𝕜] l) v := by
-  rw[wedge_product_def, uncurryFinAdd, domDomCongr_apply, domDomCongr_apply, uncurrySum_apply,
-    ContinuousMultilinearMap.sum_apply, wedge_product_def, uncurryFinAdd, domDomCongr_apply,
+  rw[wedge_product_def, uncurryFinAdd, domDomCongr_apply,
+    domDomCongr_apply, uncurrySum_apply,
+    ContinuousMultilinearMap.sum_apply, wedge_product_def,
+    uncurryFinAdd, domDomCongr_apply,
     uncurrySum_apply, ContinuousMultilinearMap.sum_apply]
   rw[wedge_product, wedge_product]
   rw[uncurryFinAdd, uncurryFinAdd]
-  -- Want to have functionality to partially unpack
   sorry
 
 /- Left distributivity of wedge product -/
@@ -242,6 +244,18 @@ theorem wedge_antisymm (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L
     Fin.finAddCongr_finAddCongr]
   sorry
 
+/-- The graded Leibniz rule for the interior product (curryFin) and wedge product:
+  ι_x(g ∧_f h) = (ι_x g) ∧_f h + (-1)^m • g ∧_f (ι_x h)
+  where `finAddFlipAssoc` handles the index rearrangement needed to make
+  the result well-typed. -/
+theorem iprod_wedge_product
+    (g : M [⋀^Fin (m+1)]→L[𝕜] N) (h : M [⋀^Fin (n+1)]→L[𝕜] N')
+    (f : N →L[𝕜] N' →L[𝕜] N'') (x : M) :
+    curryFin (domDomCongr Fin.finAddFlipAssoc (g ∧[f] h)) x =
+      (curryFin g x ∧[f] h) +
+      (-1 : 𝕜) ^ m • domDomCongr Fin.finAddFlipAssoc (g ∧[f] curryFin h x) := by
+  sorry
+
 variable {M : Type*} [NormedAddCommGroup M] [NormedSpace ℝ M]
 
 open Fin
@@ -286,5 +300,29 @@ theorem wedge_self_odd_zero (g : M [⋀^Fin m]→L[ℝ] ℝ) (m_odd : Odd m) :
   exact h
 
 end wedge
+
+section elementaryCovectorWedge
+
+variable
+  {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+  {d m' p : ℕ}
+
+/-- The wedge product of two elementary covectors is the elementary
+covector of the concatenated multi-index. This is the Cauchy–Binet
+identity: the determinant of a matrix whose rows come from two
+blocks equals the shuffle-sum of products of sub-determinants.
+
+Given `g = elementaryCovector b I` and `h = elementaryCovector b J`,
+`g ∧[𝕜] h = elementaryCovector b (Fin.addCases I J)`. -/
+theorem elementaryCovector_wedge
+    (b : Module.Basis (Fin d) 𝕜 (E →L[𝕜] 𝕜))
+    (I : Fin m' → Fin d) (J : Fin p → Fin d) :
+    ((elementaryCovector b I) ∧[𝕜] (elementaryCovector b J)) =
+      (elementaryCovector b (Fin.addCases I J) :
+        E [⋀^Fin (m' + p)]→L[𝕜] 𝕜) := by
+  sorry
+
+end elementaryCovectorWedge
 
 end ContinuousAlternatingMap

@@ -252,4 +252,20 @@ def tensorProductMap (g : M [⋀^Fin m]→L[𝕜] N) (h : M [⋀^Fin n]→L[𝕜
       |>.flipAlternating.toContinuousMultilinearMap.flipMultilinear))
   |>.domDomCongr finSumFinEquiv
 
+/-- Evaluation lemma for `tensorProductMap`: the tensor product of `g` and `h` with respect to
+a bilinear map `f` evaluates as `f(g(first m args))(h(last n args))`. -/
+@[simp]
+theorem tensorProductMap_apply (g : M [⋀^Fin m]→L[𝕜] N) (h : M [⋀^Fin n]→L[𝕜] N')
+    (f : N →L[𝕜] N' →L[𝕜] N'') (w : Fin (m + n) → M) :
+    tensorProductMap g h f w =
+      f (g (w ∘ Fin.castAdd n)) (h (w ∘ Fin.natAdd m)) := by
+  unfold tensorProductMap
+  simp only [ContinuousMultilinearMap.domDomCongr_apply,
+    ContinuousMultilinearMap.uncurrySum_apply,
+    ContinuousMultilinearMap.flipMultilinear_apply,
+    coe_toContinuousMultilinearMap,
+    ContinuousMultilinearMap.flipAlternating_apply,
+    ContinuousLinearMap.compContinuousAlternatingMap₂_apply]
+  rfl
+
 end ContinuousAlternatingMap

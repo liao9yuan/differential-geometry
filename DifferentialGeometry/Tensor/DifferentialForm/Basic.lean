@@ -41,11 +41,11 @@ variable {n m : ℕ} {E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     [NormedAddCommGroup F] [NormedSpace ℝ F]
 
 /-- Exterior derivative of a smooth differential form. The result is again smooth. -/
-noncomputable def ederiv (ω : Ω^n⟮E, F⟯) : Ω^(n + 1)⟮E, F⟯ where
+def ederiv (ω : Ω^n⟮E, F⟯) : Ω^(n + 1)⟮E, F⟯ where
   toFun := _root_.ederiv ω.toFun
   smooth := by
-    -- ederiv ω = uncurryFinCLM ∘ fderiv ℝ ω, and fderiv of a C∞ map is C∞
-    sorry
+    show ContDiff ℝ ⊤ (uncurryFinCLM ∘ fderiv ℝ ω.toFun)
+    exact uncurryFinCLM.contDiff.comp (ω.smooth.fderiv_right le_top)
 
 @[simp]
 theorem ederiv_toFun (ω : Ω^n⟮E, F⟯) :
@@ -70,20 +70,37 @@ theorem ederiv_ederiv (ω : Ω^n⟮E, F⟯) : ederiv (ederiv ω) = 0 :=
 end DifferentialForm
 
 /-- Interior product of smooth differential forms. -/
-noncomputable def iprod (ω : Ω^(m + 1)⟮E, F⟯) (v : E → E) : Ω^m⟮E, F⟯ where
+noncomputable def iprod (ω : Ω^(m + 1)⟮E, F⟯) (v : E → E) (hv : ContDiff ℝ ⊤ v) : Ω^m⟮E, F⟯ where
   toFun := fun e => ContinuousAlternatingMap.curryFin (ω e) (v e)
-  smooth := sorry
+  smooth := by
+    -- curryFin is a bounded linear map, so curryFin ∘ ω is smooth; then apply to v
+    have hbl : IsBoundedLinearMap ℝ (curryFin (𝕜 := ℝ) (E := E) (F := F) (n := m)) :=
+      ⟨⟨curryFin_add, fun c f => curryFin_smul c f⟩, 1, one_pos, fun g => by
+        simp only [one_mul]
+        exact ContinuousLinearMap.opNorm_le_bound _ (norm_nonneg g) fun x =>
+          ContinuousAlternatingMap.opNorm_le_bound _
+            (mul_nonneg (norm_nonneg g) (norm_nonneg x)) fun w => by
+              rw [curryFin_apply]; have h := g.le_opNorm (Fin.cons x w)
+              simp only [Fin.prod_univ_succ, Fin.cons_zero, Fin.cons_succ] at h
+              rw [← mul_assoc] at h; exact h⟩
+    exact (hbl.contDiff.comp ω.smooth).clm_apply hv
 
 @[simp]
-theorem iprod_apply (ω : Ω^(m + 1)⟮E, F⟯) (v : E → E) (e : E) :
-    iprod ω v e = ContinuousAlternatingMap.curryFin (ω e) (v e) :=
+theorem iprod_apply (ω : Ω^(m + 1)⟮E, F⟯) (v : E → E) (hv : ContDiff ℝ ⊤ v) (e : E) :
+    iprod ω v hv e = ContinuousAlternatingMap.curryFin (ω e) (v e) :=
   rfl
 
-/- The graded Leibniz rule for the exterior derivative of the wedge product -/
+/-- The wedge product of smooth differential forms. -/
 noncomputable def DifferentialForm.wedge (ω : Ω^m⟮E, F⟯) (τ : Ω^n⟮E, F'⟯) (f : F →L[ℝ] F' →L[ℝ] F'') : Ω^(m+n)⟮E, F''⟯ where
   toFun := fun x => ω.toFun x ∧[f] τ.toFun x
   smooth := by
-    -- Mathlib does not currently have ContDiff properties for ContinuousAlternatingMap wedge products
+    -- Proof strategy: (g, h) ↦ wedge_product g h f is IsBoundedBilinearMap ℝ, hence ContDiff.
+    -- Bilinearity: add_left/add_right from add_wedge/wedge_add; smul from linearity of f.
+    -- Boundedness: ‖wedge_product g h f‖ ≤ C * ‖g‖ * ‖h‖ since it factors through
+    --   compContinuousAlternatingMap₂ (bounded by ‖f‖*‖g‖*‖h‖) and uncurryFinAdd (linear).
+    -- Then: IsBoundedBilinearMap.contDiff.comp (ω.smooth.prod_mk τ.smooth)
+    -- Blocked on: smul lemmas for wedge_product with general bilinear f, and norm bound
+    -- infrastructure for uncurryFinAdd (requires bounding the ModSumCongr sum).
     sorry
 
 -- TODO: change notation
@@ -108,9 +125,9 @@ theorem ederiv_wedge (ω : Ω^m⟮E, F⟯) (τ : Ω^n⟮E, F'⟯) (f : F →L[�
 
 /- The graded Leibniz rule for the interior product of the wedge product -/
 theorem iprod_wedge (ω : Ω^(m + 1)⟮E, F⟯) (τ : Ω^(n + 1)⟮E, F'⟯) (f : F →L[ℝ] F' →L[ℝ] F'')
-    (v : E → E) :
-      iprod (DifferentialForm.domDomCongr Fin.finAddFlipAssoc (ω ∧[f] τ)) v = ((iprod ω v) ∧[f] τ)
-        + (-1 : ℝ)^m • (DifferentialForm.domDomCongr Fin.finAddFlipAssoc (ω ∧[f] (iprod τ v))) := by
+    (v : E → E) (hv : ContDiff ℝ ⊤ v) :
+      iprod (DifferentialForm.domDomCongr Fin.finAddFlipAssoc (ω ∧[f] τ)) v hv = ((iprod ω v hv) ∧[f] τ)
+        + (-1 : ℝ)^m • (DifferentialForm.domDomCongr Fin.finAddFlipAssoc (ω ∧[f] (iprod τ v hv))) := by
   ext e x
   erw[DifferentialForm.add_apply, ContinuousAlternatingMap.add_apply] -- FIXME
   simp only [Nat.add_eq, iprod_apply, DifferentialForm.domDomCongr_apply, DifferentialForm.smul_apply, coe_smul]

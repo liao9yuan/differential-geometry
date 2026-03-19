@@ -40,7 +40,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable (n : WithTop ℕ∞ := ⊤) [IsManifold I ω M]
 
 /-- A smooth (r,s)-tensor field on `M`: a smooth section of the (r,s)-tensor bundle. -/
-def TensorRSField (r s : ℕ) :=
+abbrev TensorRSField (r s : ℕ) :=
   letI := tensorRSBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) r s
   ContMDiffSection I
     (TensorRSModel r s 𝕜 E)
@@ -48,7 +48,7 @@ def TensorRSField (r s : ℕ) :=
     (fun x : M => TensorRSSpace r s I x)
 
 /-- A smooth (0,s)-tensor field on `M`: a smooth section of the (0,s)-tensor bundle. -/
-def Tensor0SField (s : ℕ) :=
+abbrev Tensor0SField (s : ℕ) :=
   letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) s
   ContMDiffSection I
     (Tensor0SModel s 𝕜 E)

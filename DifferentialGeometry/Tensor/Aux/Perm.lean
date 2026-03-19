@@ -203,5 +203,3 @@ def finAddFlip_equiv_eqFin : ModSumCongr (Fin m) (Fin m) ≃ ModSumCongr (Fin m)
     intro x
     rcases x with ⟨σ₁⟩
     simp only [Function.comp_apply, sumCommPerm_eqFin_sumCommPerm_eqFin]
-
-end Equiv.Perm
