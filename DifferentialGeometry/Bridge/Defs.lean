@@ -8,7 +8,6 @@ import Mathlib.Geometry.Manifold.VectorField.LieBracket
 import DifferentialGeometry.Algebra.VectorField
 import DifferentialGeometry.Algebra.Metric
 import DifferentialGeometry.Geometry.Connection
-import DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -131,6 +130,60 @@ noncomputable instance :
     AbstractDerivationAction (ScalarField (I := I) (M := M)) (VectorField (I := I) (M := M)) where
   action V f := V.action f
 
+/-- The Lie bracket of two smooth vector fields, defined pointwise via Mathlib's
+`VectorField.mlieBracket`. The result is again a smooth vector field. -/
+noncomputable def VectorField.lieBracket [CompleteSpace E]
+    (X Y : VectorField (I := I) (M := M)) :
+    VectorField (I := I) (M := M) where
+  toFun x := _root_.VectorField.mlieBracket I X Y x
+  contMDiff_toFun := by
+    intro x₀
+    simp_rw [← _root_.VectorField.mlieBracketWithin_univ]
+    exact (X.contMDiff x₀).contMDiffWithinAt.mlieBracketWithin_vectorField
+      (Y.contMDiff x₀).contMDiffWithinAt uniqueMDiffOn_univ (Set.mem_univ x₀) le_top
+
+/-- Smooth vector fields form a Lie algebra under the Lie bracket. -/
+noncomputable instance [CompleteSpace E] :
+    AbstractLieBracket (VectorField (I := I) (M := M)) where
+  bracket := VectorField.lieBracket
+
+/-- The concrete directional derivative and Lie bracket on a manifold satisfy the abstract
+derivation rules. -/
+noncomputable instance [CompleteSpace E] :
+    DerivationRules (ScalarField (I := I) (M := M)) (VectorField (I := I) (M := M)) where
+  action_add_left X Y f := by
+    apply DFunLike.ext; intro x
+    exact map_add (mfderiv I 𝓘(𝕜) f x) (X x) (Y x)
+  action_add_right X f g := by
+    apply DFunLike.ext; intro x
+    have hf : HasMFDerivAt I 𝓘(𝕜) ⇑f x (mfderiv I 𝓘(𝕜) ⇑f x : TangentSpace I x →L[𝕜] 𝕜) :=
+      ((f.contMDiff x).mdifferentiableAt WithTop.top_ne_zero).hasMFDerivAt
+    have hg : HasMFDerivAt I 𝓘(𝕜) ⇑g x (mfderiv I 𝓘(𝕜) ⇑g x : TangentSpace I x →L[𝕜] 𝕜) :=
+      ((g.contMDiff x).mdifferentiableAt WithTop.top_ne_zero).hasMFDerivAt
+    exact congr_arg (· (X x)) (hf.add hg).mfderiv
+  action_smul_left c X f := by
+    apply DFunLike.ext; intro x
+    exact map_smul (mfderiv I 𝓘(𝕜) f x) (c x) (X x)
+  action_smul_right X c f := by
+    change X.action (c * f) = X.action c * f + c * X.action f
+    rw [X.action_leibniz c f]; ring
+  bracket_add_left X Y Z := by
+    apply DFunLike.ext; intro x
+    exact _root_.VectorField.mlieBracket_add_left
+      ((X.contMDiff x).mdifferentiableAt WithTop.top_ne_zero)
+      ((Y.contMDiff x).mdifferentiableAt WithTop.top_ne_zero)
+  bracket_add_right X Y Z := by
+    apply DFunLike.ext; intro x
+    exact _root_.VectorField.mlieBracket_add_right
+      ((Y.contMDiff x).mdifferentiableAt WithTop.top_ne_zero)
+      ((Z.contMDiff x).mdifferentiableAt WithTop.top_ne_zero)
+  bracket_smul_left c X Y := by
+    sorry
+  bracket_smul_right c X Y := by
+    sorry
+  bracket_antisymm X Y := by
+    apply DFunLike.ext; intro x
+    exact _root_.VectorField.mlieBracket_swap_apply
 
 
 /-
@@ -199,72 +252,5 @@ class AbstractTensorCalculus (metric : AbstractMetricTensor (ScalarField (I := I
 -/
 
 noncomputable instance mockTensorCalculus {metric : AbstractMetricTensor (ScalarField (I := I) (M := M)) (VectorField (I := I) (M := M))} {conn : AbstractLeviCivitaConnection metric} : AbstractTensorCalculus metric conn := sorry
-
-/-- The Lie bracket of two smooth vector fields, defined pointwise via Mathlib's
-`VectorField.mlieBracket`. The result is again a smooth vector field. -/
-noncomputable def VectorField.lieBracket [CompleteSpace E]
-    (X Y : VectorField (I := I) (M := M)) :
-    VectorField (I := I) (M := M) where
-  toFun x := _root_.VectorField.mlieBracket I X Y x
-  contMDiff_toFun := by
-    intro x₀
-    simp_rw [← _root_.VectorField.mlieBracketWithin_univ]
-    exact (X.contMDiff x₀).contMDiffWithinAt.mlieBracketWithin_vectorField
-      (Y.contMDiff x₀).contMDiffWithinAt uniqueMDiffOn_univ (Set.mem_univ x₀) le_top
-
-/-- Smooth vector fields form a Lie algebra under the Lie bracket. -/
-noncomputable instance [CompleteSpace E] :
-    AbstractLieBracket (VectorField (I := I) (M := M)) where
-  bracket := VectorField.lieBracket
-
-/-- The concrete directional derivative and Lie bracket on a manifold satisfy the abstract
-derivation rules. -/
-noncomputable instance [CompleteSpace E] :
-    DerivationRules (ScalarField (I := I) (M := M)) (VectorField (I := I) (M := M)) where
-  action_add_left X Y f := by
-    apply DFunLike.ext; intro x
-    exact map_add (mfderiv I 𝓘(𝕜) f x) (X x) (Y x)
-  action_add_right X f g := by
-    apply DFunLike.ext; intro x
-    have hf : HasMFDerivAt I 𝓘(𝕜) ⇑f x (mfderiv I 𝓘(𝕜) ⇑f x : TangentSpace I x →L[𝕜] 𝕜) :=
-      ((f.contMDiff x).mdifferentiableAt WithTop.top_ne_zero).hasMFDerivAt
-    have hg : HasMFDerivAt I 𝓘(𝕜) ⇑g x (mfderiv I 𝓘(𝕜) ⇑g x : TangentSpace I x →L[𝕜] 𝕜) :=
-      ((g.contMDiff x).mdifferentiableAt WithTop.top_ne_zero).hasMFDerivAt
-    exact congr_arg (· (X x)) (hf.add hg).mfderiv
-  action_smul_left c X f := by
-    apply DFunLike.ext; intro x
-    exact map_smul (mfderiv I 𝓘(𝕜) f x) (c x) (X x)
-  action_smul_right X c f := by
-    change X.action (c * f) = X.action c * f + c * X.action f
-    rw [X.action_leibniz c f]; ring
-  bracket_add_left X Y Z := by
-    apply DFunLike.ext; intro x
-    exact _root_.VectorField.mlieBracket_add_left
-      ((X.contMDiff x).mdifferentiableAt WithTop.top_ne_zero)
-      ((Y.contMDiff x).mdifferentiableAt WithTop.top_ne_zero)
-  bracket_add_right X Y Z := by
-    apply DFunLike.ext; intro x
-    exact _root_.VectorField.mlieBracket_add_right
-      ((Y.contMDiff x).mdifferentiableAt WithTop.top_ne_zero)
-      ((Z.contMDiff x).mdifferentiableAt WithTop.top_ne_zero)
-  bracket_smul_left c X Y := by
-    -- [cX, Y] = c • [X,Y] - (Yc) • X
-    -- Proof strategy (Mathlib has the vector space version `lieBracketWithin_smul_left`
-    -- but not the manifold version):
-    -- 1. Unfold mlieBracket via mlieBracketWithin_apply to work in model space
-    -- 2. Pullback of (c • X) = (c ∘ φ⁻¹) • pullback(X) by map_smul of mfderiv.inverse
-    -- 3. Apply lieBracketWithin_smul_left in the model space
-    -- 4. Push forward by (mfderiv I 𝓘(𝕜,E) φ x₀).inverse using map_add/map_smul
-    -- 5. Identify: pullback/pushforward at x₀ is the identity (φ ∘ φ⁻¹ = id locally),
-    --    so V'(y₀) = X x₀, W'(y₀) = Y x₀, and
-    --    fderivWithin(c ∘ φ⁻¹) = mfderiv I 𝓘(𝕜) c x₀
-    sorry
-  bracket_smul_right c X Y := by
-    -- [X, cY] = c • [X,Y] + (Xc) • Y
-    -- Follows from bracket_smul_left + bracket_antisymm once bracket_smul_left is proved.
-    sorry
-  bracket_antisymm X Y := by
-    apply DFunLike.ext; intro x
-    exact _root_.VectorField.mlieBracket_swap_apply
 
 end DifferentialGeometry.Bridge
