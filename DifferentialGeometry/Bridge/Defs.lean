@@ -147,6 +147,105 @@ noncomputable instance [CompleteSpace E] :
     AbstractLieBracket (VectorField (I := I) (M := M)) where
   bracket := VectorField.lieBracket
 
+/-- The Lie bracket product rule for function-scalar multiplication on the left:
+`[c • X, Y](x₀) = c(x₀) • [X, Y](x₀) - (Y c)(x₀) • X(x₀)`.
+This is the manifold-level analogue of `VectorField.lieBracketWithin_smul_left`. -/
+private lemma mlieBracket_fun_smul_left [CompleteSpace E]
+    (c : ScalarField (I := I) (M := M)) (X Y : VectorField (I := I) (M := M)) (x₀ : M) :
+    _root_.VectorField.mlieBracket I (fun y ↦ c y • X y) (⇑Y) x₀ =
+      c x₀ • _root_.VectorField.mlieBracket I (⇑X) (⇑Y) x₀ -
+        (mfderiv I 𝓘(𝕜) (⇑c) x₀) (Y x₀) • X x₀ := by
+  -- Unfold to mlieBracketWithin in coordinates
+  simp only [← _root_.VectorField.mlieBracketWithin_univ,
+    _root_.VectorField.mlieBracketWithin_apply, Set.preimage_univ, Set.univ_inter]
+  -- Set up abbreviations for the coordinate representation
+  set φ := extChartAt I x₀
+  set y₀ := φ x₀
+  set D := mfderiv I 𝓘(𝕜, E) φ x₀
+  set Dψ := mfderivWithin 𝓘(𝕜, E) I φ.symm (Set.range I) y₀
+  set V' := _root_.VectorField.mpullbackWithin 𝓘(𝕜, E) I φ.symm (⇑X) (Set.range I)
+  set W' := _root_.VectorField.mpullbackWithin 𝓘(𝕜, E) I φ.symm (⇑Y) (Set.range I)
+  set g := (⇑c) ∘ φ.symm with hg_def
+  -- Step 1: Pullback of (c • X) equals g • V'
+  have hpull : _root_.VectorField.mpullbackWithin 𝓘(𝕜, E) I φ.symm
+      (fun x ↦ c x • X x) (Set.range I) = fun z ↦ g z • V' z := by
+    ext z
+    simp only [_root_.VectorField.mpullbackWithin_apply, V', g, Function.comp, map_smul]
+  rw [hpull]
+  -- Step 2: Differentiability hypotheses
+  have hx₀_src : x₀ ∈ (extChartAt I x₀).source := mem_extChartAt_source x₀
+  have hy₀_tgt : y₀ ∈ (extChartAt I x₀).target := (extChartAt I x₀).map_source hx₀_src
+  have hc_mdiff : MDifferentiableAt I 𝓘(𝕜) (⇑c) x₀ :=
+    (c.contMDiff x₀).mdifferentiableAt WithTop.top_ne_zero
+  have hV_mdiff : MDifferentiableWithinAt I I.tangent
+      (fun x ↦ (⟨x, X x⟩ : TangentBundle I M)) Set.univ x₀ :=
+    (X.contMDiff x₀).mdifferentiableAt WithTop.top_ne_zero
+  have hy₀_range : y₀ ∈ Set.range I := extChartAt_target_subset_range x₀ hy₀_tgt
+  have hud : UniqueDiffWithinAt 𝕜 (Set.range I) y₀ :=
+    I.uniqueDiffOn.uniqueDiffWithinAt hy₀_range
+  have hg_diff : DifferentiableWithinAt 𝕜 g (Set.range I) y₀ := by
+    rw [show g = (⇑c) ∘ φ.symm from rfl, ← mdifferentiableWithinAt_iff_differentiableWithinAt]
+    have hc' : MDifferentiableAt I 𝓘(𝕜) (⇑c) (φ.symm y₀) := by
+      rwa [φ.left_inv hx₀_src]
+    exact hc'.comp_mdifferentiableWithinAt y₀
+      (mdifferentiableWithinAt_extChartAt_symm hy₀_tgt)
+  have hV'_diff : DifferentiableWithinAt 𝕜 V' (Set.range I) y₀ := by
+    have := hV_mdiff.differentiableWithinAt_mpullbackWithin_vectorField
+    simpa [Set.preimage_univ] using this
+  -- Step 3: Apply the product rule (VectorField.lieBracketWithin_smul_left)
+  rw [_root_.VectorField.lieBracketWithin_smul_left hg_diff hV'_diff hud]
+  -- Step 4: Distribute D.inverse over the sum
+  simp only [map_add, map_smul]
+  -- Step 5: g y₀ = c x₀
+  have hgy : g y₀ = c x₀ := congr_arg c (φ.left_inv hx₀_src)
+  rw [hgy]
+  -- Step 6: Key coordinate identities
+  -- D and Dψ are mutual inverses (from the chart and its inverse)
+  have hDφ_inv : D.IsInvertible := isInvertible_mfderiv_extChartAt hx₀_src
+  have hDψ_inv : Dψ.IsInvertible := isInvertible_mfderivWithin_extChartAt_symm hy₀_tgt
+  have hcomp' : Dψ.comp D = ContinuousLinearMap.id 𝕜 E :=
+    mfderivWithin_extChartAt_symm_comp_mfderiv_extChartAt' (hy := hx₀_src)
+  -- Helper: recover vector from double-inverse via mutual inverse cancellation
+  -- D.inverse (Dψ.inverse v) = v, using: Dψ ∘ D = id, D ∘ D⁻¹ = id, Dψ ∘ Dψ⁻¹ = id
+  have hcancel : ∀ v, D.inverse (Dψ.inverse v) = v := by
+    intro v
+    set w := D.inverse (Dψ.inverse v)
+    have h1 : D w = Dψ.inverse v := by
+      have := ContinuousLinearMap.ext_iff.mp hDφ_inv.self_comp_inverse (Dψ.inverse v)
+      simpa [ContinuousLinearMap.comp_apply] using this
+    have h2 : Dψ (D w) = w := by
+      have := ContinuousLinearMap.ext_iff.mp hcomp' w
+      simpa [ContinuousLinearMap.comp_apply] using this
+    have h3 : Dψ (Dψ.inverse v) = v := by
+      have := ContinuousLinearMap.ext_iff.mp hDψ_inv.self_comp_inverse v
+      simpa [ContinuousLinearMap.comp_apply] using this
+    calc w = Dψ (D w) := h2.symm
+      _ = Dψ (Dψ.inverse v) := by rw [h1]
+      _ = v := h3
+  -- 6a: D.inverse (V' y₀) = X x₀
+  have hDinv_V : D.inverse (V' y₀) = X x₀ := by
+    change D.inverse (Dψ.inverse (X (φ.symm y₀))) = X x₀
+    rw [hcancel, φ.left_inv hx₀_src]
+  -- 6b: Dψ applied to W' y₀ cancels to Y (φ.symm y₀)
+  have hDψ_W : Dψ (W' y₀) = Y (φ.symm y₀) := by
+    change Dψ (Dψ.inverse (Y (φ.symm y₀))) = Y (φ.symm y₀)
+    exact hDψ_inv.self_apply_inverse (Y (φ.symm y₀))
+  -- 6c: (fderivWithin g ...)(W' y₀) = (mfderiv c x₀)(Y x₀)
+  have hfg_W : (fderivWithin 𝕜 g (Set.range I) y₀) (W' y₀) =
+      (mfderiv I 𝓘(𝕜) (⇑c) x₀) (Y x₀) := by
+    -- Chain rule: fderivWithin g = (mfderiv c x₀) ∘L Dψ
+    have hchain : fderivWithin 𝕜 g (Set.range I) y₀ =
+        (mfderiv I 𝓘(𝕜) (⇑c) x₀).comp Dψ := by
+      rw [show g = (⇑c) ∘ φ.symm from rfl, ← mfderivWithin_eq_fderivWithin]
+      exact mfderiv_comp_mfderivWithin_of_eq (I' := I) hc_mdiff
+        (mdifferentiableWithinAt_extChartAt_symm hy₀_tgt)
+        hud.uniqueMDiffWithinAt (φ.left_inv hx₀_src)
+    rw [hchain]
+    change (mfderiv I 𝓘(𝕜) (⇑c) x₀) (Dψ (W' y₀)) = (mfderiv I 𝓘(𝕜) (⇑c) x₀) (Y x₀)
+    rw [hDψ_W, φ.left_inv hx₀_src]
+  -- Step 7: Substitute and close by algebra
+  rw [hDinv_V, hfg_W, add_comm, neg_smul, ← sub_eq_add_neg]
+
 /-- The concrete directional derivative and Lie bracket on a manifold satisfy the abstract
 derivation rules. -/
 noncomputable instance [CompleteSpace E] :
@@ -178,9 +277,25 @@ noncomputable instance [CompleteSpace E] :
       ((Y.contMDiff x).mdifferentiableAt WithTop.top_ne_zero)
       ((Z.contMDiff x).mdifferentiableAt WithTop.top_ne_zero)
   bracket_smul_left c X Y := by
-    sorry
+    apply DFunLike.ext; intro x₀
+    exact mlieBracket_fun_smul_left c X Y x₀
   bracket_smul_right c X Y := by
-    sorry
+    apply DFunLike.ext; intro x₀
+    -- Use the smul-left identity for (c, Y, X) combined with antisymmetry
+    have hleft := mlieBracket_fun_smul_left c Y X x₀
+    -- hleft : mlieBracket I (c•Y) X x₀ = c x₀ • mlieBracket I Y X x₀ - (mfderiv c x₀)(X x₀) • Y x₀
+    have hswap1 := _root_.VectorField.mlieBracket_swap_apply
+      (I := I) (V := ⇑X) (W := fun y ↦ c y • Y y) (x := x₀)
+    -- hswap1 : mlieBracket I X (c•Y) x₀ = -mlieBracket I (c•Y) X x₀
+    have hswap2 := _root_.VectorField.mlieBracket_swap_apply
+      (I := I) (V := ⇑Y) (W := ⇑X) (x := x₀)
+    -- hswap2 : mlieBracket I Y X x₀ = -mlieBracket I X Y x₀
+    show _root_.VectorField.mlieBracket I (⇑X) (fun y ↦ c y • Y y) x₀ =
+      c x₀ • _root_.VectorField.mlieBracket I (⇑X) (⇑Y) x₀ +
+        (mfderiv I 𝓘(𝕜) (⇑c) x₀) (X x₀) • Y x₀
+    rw [hswap1, hleft, hswap2]
+    simp only [smul_neg, neg_sub]
+    abel
   bracket_antisymm X Y := by
     apply DFunLike.ext; intro x
     exact _root_.VectorField.mlieBracket_swap_apply

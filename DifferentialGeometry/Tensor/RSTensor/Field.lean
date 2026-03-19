@@ -41,7 +41,7 @@ variable (n : WithTop ℕ∞ := ⊤) [IsManifold I ω M]
 
 /-- A smooth (r,s)-tensor field on `M`: a smooth section of the (r,s)-tensor bundle. -/
 abbrev TensorRSField (r s : ℕ) :=
-  letI := tensorRSBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) r s
+  letI := tensorRSBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := ω) r s
   ContMDiffSection I
     (TensorRSModel r s 𝕜 E)
     n
