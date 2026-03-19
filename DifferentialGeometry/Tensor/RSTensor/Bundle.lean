@@ -117,14 +117,8 @@ noncomputable instance tensor0SBundleData : (s : ℕ) →
       vector := ?_,
       smooth := ?_
     }
-    · have h : (fun x : M => Tensor0SSpace (s+1) I x) =
-              (fun x : M => Tensor0SModel (s+1) 𝕜 E) := by
-        ext x
-        unfold Tensor0SSpace
-        unfold TangentSpace
-        rfl
-      rw [h]
-      infer_instance
+    · exact inferInstanceAs <| TopologicalSpace (TotalSpace
+        (Tensor0SModel (s+1) 𝕜 E) (fun _ : M => Tensor0SModel (s+1) 𝕜 E))
     · exact inferInstanceAs <| FiberBundle
         (Tensor0SModel (s+1) 𝕜 E)
         (fun x : M => Tensor0SModel (s+1) 𝕜 E)

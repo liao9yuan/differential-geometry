@@ -200,15 +200,10 @@ a scalar function, so the fiber is constantly `𝕜`. -/
 instance tensor0S_topologicalSpace_zero :
     TopologicalSpace (TotalSpace
       (Tensor0SModel 0 𝕜 E)
-      (fun x : M => Tensor0SSpace 0 I x)) := by
-  have h : (fun x : M => Tensor0SSpace 0 I x) =
-           (fun x : M => Tensor0SModel 0 𝕜 E) := by
-    ext x
-    unfold Tensor0SSpace
-    unfold TangentSpace
-    rfl
-  rw [h]
-  infer_instance
+      (fun x : M => Tensor0SSpace 0 I x)) :=
+  inferInstanceAs <| TopologicalSpace (TotalSpace
+    (Tensor0SModel 0 𝕜 E)
+    (fun _ : M => Tensor0SModel 0 𝕜 E))
 
 end
 end Tensor0SBundle
