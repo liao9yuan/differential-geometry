@@ -261,15 +261,41 @@ section SmoothVectorFieldRSLieDeriv
 variable [IsManifold I ω M]
 
 /-- Lie derivative of an (r,s) tensor field within a set.
-The hypothesis `hn : n + 1 ≤ n` holds when `n = ⊤` (the default smoothness level). -/
-noncomputable def mlieDeriv_tensorRSWithin (r s : ℕ)
+The output is `C^m` when the inputs are `C^n` with `m + 1 ≤ n`. -/
+noncomputable def mlieDeriv_tensorRSWithin (r s : ℕ) {m : WithTop ℕ∞}
     (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
     (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) r s)
-    (u : Set M) (hu : UniqueMDiffOn I u) (hn : n + 1 ≤ n) :
-    TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) r s :=
-  letI := tensorRSBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) r s
-  letI := tensorRSBundle_fiber    (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) r s
-  letI := tensorRSBundle_vector   (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) r s
+    (u : Set M) (hu : UniqueMDiffOn I u) (hmn : m + 1 ≤ n) :
+    TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := m) r s :=
+  letI := tensorRSBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := ω) r s
+  letI := tensorRSBundle_fiber    (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := ω) r s
+  letI := tensorRSBundle_vector   (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := ω) r s
+  -- Prove T's smoothness as a map M → TensorRSModel
+  let F := TensorRSModel r s 𝕜 E
+  let Tf : M → F := T.toFun
+  have hTf : ContMDiff I 𝓘(𝕜, F) n Tf := by
+    intro x₀''
+    haveI := tensorRSBundle_smooth (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := ω) r s
+    letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := ω) r
+    letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := ω) s
+    letI := tensor0SBundle_fiber (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := ω) r
+    letI := tensor0SBundle_fiber (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := ω) s
+    have h := (contMDiffAt_section (s := T.toFun) x₀'').mp (T.contMDiff x₀'')
+    have triv_gen : ∀ (z₀ : M) (x : M) (f : TensorRSSpace r s I x),
+        (trivializationAt (TensorRSModel r s 𝕜 E)
+          (fun x => TensorRSSpace r s I x) z₀ ⟨x, f⟩).2 = f := by
+      intro z₀ x f
+      simp only [hom_trivializationAt_apply, inCoordinates]
+      cases r <;> cases s <;>
+        simp only [trivializationAt, FiberBundle.trivializationAt',
+          tensor0SBundle_fiber, tensor0SBundleData, tensor0SBundleData_zero,
+          tensor0S_fiberBundle_zero,
+          Bundle.Trivial.symmL_trivialization,
+          Bundle.Trivial.continuousLinearMapAt_trivialization,
+          ContinuousLinearMap.comp_id] <;>
+        exact ContinuousLinearMap.id_comp _
+    simp_rw [triv_gen] at h
+    exact h
   { toFun := fun x₀ => by
       haveI : FiniteDimensional 𝕜 (TangentSpace I x₀) := by
         unfold TangentSpace; infer_instance
@@ -287,10 +313,10 @@ noncomputable def mlieDeriv_tensorRSWithin (r s : ℕ)
       intro x₀'
       rw [contMDiffAt_section]
       -- Introduce sub-bundle instances needed for trivialization reasoning
-      letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := m) r
-      letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := m) s
-      letI := tensor0SBundle_fiber (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := m) r
-      letI := tensor0SBundle_fiber (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := m) s
+      letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) r
+      letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) s
+      letI := tensor0SBundle_fiber (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) r
+      letI := tensor0SBundle_fiber (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) s
       -- For Hom bundles of trivial sub-bundles, the trivialization is the identity.
       have triv_id : ∀ (x : M) (f : TensorRSSpace r s I x),
           (trivializationAt (TensorRSModel r s 𝕜 E)
@@ -310,35 +336,12 @@ noncomputable def mlieDeriv_tensorRSWithin (r s : ℕ)
       let Tf : M → F := T.toFun
       let g₂ : M → E := fun x =>
         (trivializationAt E (TangentSpace I) x₀').continuousLinearMapAt 𝕜 x (X.toFun x)
-      -- T.toFun is C^n as a map M → F (smooth section of trivial bundle)
-      have hTf : ContMDiff I 𝓘(𝕜, F) n Tf := by
-        intro x₀''
-        haveI := tensorRSBundle_smooth (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) r s
-        letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) r
-        letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) s
-        letI := tensor0SBundle_fiber (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) r
-        letI := tensor0SBundle_fiber (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) s
-        have h := (contMDiffAt_section (s := T.toFun) x₀'').mp (T.contMDiff x₀'')
-        have triv_gen : ∀ (z₀ : M) (x : M) (f : TensorRSSpace r s I x),
-            (trivializationAt (TensorRSModel r s 𝕜 E)
-              (fun x => TensorRSSpace r s I x) z₀ ⟨x, f⟩).2 = f := by
-          intro z₀ x f
-          simp only [hom_trivializationAt_apply, inCoordinates]
-          cases r <;> cases s <;>
-            simp only [trivializationAt, FiberBundle.trivializationAt',
-              tensor0SBundle_fiber, tensor0SBundleData, tensor0SBundleData_zero,
-              tensor0S_fiberBundle_zero,
-              Bundle.Trivial.symmL_trivialization,
-              Bundle.Trivial.continuousLinearMapAt_trivialization,
-              ContinuousLinearMap.comp_id] <;>
-            exact ContinuousLinearMap.id_comp _
-        simp_rw [triv_gen] at h
-        exact h
       -- mfderiv_const: the derivative of Tf as a CLM-valued function is C^m
       have hDeriv : ContMDiffAt I 𝓘(𝕜, E →L[𝕜] F) m
           (inTangentCoordinates I 𝓘(𝕜, F) id Tf (mfderiv I 𝓘(𝕜, F) Tf) x₀') x₀' :=
         (hTf x₀').mfderiv_const hmn
       -- g₂ is C^m (trivialized smooth section of tangent bundle)
+      have hm_le_n : m ≤ n := le_self_add.trans hmn
       have hg₂ : ContMDiffAt I 𝓘(𝕜, E) m g₂ x₀' := by
         have h := ((contMDiffAt_section (s := X.toFun) x₀').mp
           (X.contMDiff x₀')).of_le hm_le_n
@@ -355,6 +358,14 @@ noncomputable def mlieDeriv_tensorRSWithin (r s : ℕ)
         hDeriv.clm_apply hg₂
       -- Show toFun =ᶠ[𝓝 x₀'] the inTangentCoordinates expression.
       -- Both sides equal mfderiv I 𝓘(𝕜,F) Tf x (X.toFun x) near x₀'.
+      -- TODO: This requires showing that the coordinate-based computation
+      -- (lieDeriv_tensorRSWithin using extChartAt I x) agrees with the
+      -- intrinsic mfderiv expression (inTangentCoordinates using trivialization
+      -- at x₀') near x₀'. The proof needs:
+      -- 1. Near x₀', extChartAt I x = extChartAt I x₀' (chart stability)
+      -- 2. Trivialization cancellation: symmL ∘ continuousLinearMapAt = id
+      -- 3. mfderivWithin = mfderiv for differentiable functions on UniqueMDiffOn sets
+      -- This is analogous to mpullback_mlieBracketWithin in the Lie bracket case.
       apply hSmooth.congr_of_eventuallyEq
       sorry }
 
