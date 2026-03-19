@@ -328,7 +328,7 @@ Therefore
 
 4. If p = (Fin.addCases) ∘ σ for some permutation σ and is injective, then this reduces to case 3. Sice the effect of σ is merely to multiply both sides of the calculation by sign σ.
 -/
-theorem elementaryCovector_wedge [FiniteDimensional 𝕜 E]
+theorem elementaryCovector_wedge [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜] [CharZero 𝕜]
     (b : Module.Basis (Fin d) 𝕜 (E →L[𝕜] 𝕜))
     (I : Fin m' → Fin d) (J : Fin p → Fin d) :
     ((elementaryCovector b I) ∧[𝕜] (elementaryCovector b J)) =

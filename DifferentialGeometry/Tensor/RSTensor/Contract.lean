@@ -108,6 +108,25 @@ section FieldContraction
 
 variable (n : WithTop ℕ∞ := ⊤) [IsManifold I ω M]
 
+/-- The inverse trivialization of the tangent bundle at `x₀`, viewed as a non-dependent
+`(E →L[𝕜] E)`-valued function (using `TangentSpace I x =ᵈ E`). -/
+noncomputable def trivializationAt_symmLFun
+    (x₀ : M) : M → (E →L[𝕜] E) :=
+  fun x => (trivializationAt E (TangentSpace I) x₀).symmL 𝕜 x
+
+/-- The inverse trivialization `symmL` of the tangent bundle at `x₀` varies C^n-smoothly
+as a CLM-valued function `M → (E →L[𝕜] E)`.
+
+By `TangentBundle.symmL_trivializationAt`, `e₀.symmL 𝕜 x` equals the manifold derivative
+`mfderivWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm (range I) (extChartAt I x₀ x)`,
+i.e.\ the derivative of the chart inverse.  Since the chart inverse is C^ω (from `IsManifold I ω M`)
+and the derivative of a C^ω map is C^n for every `n`, the result follows. -/
+theorem contMDiffAt_trivializationAt_symmL
+    {x₀ : M} :
+    ContMDiffAt I 𝓘(𝕜, E →L[𝕜] E) n
+      (trivializationAt_symmLFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) x₀) x₀ := by
+  sorry
+
 /-- Pointwise contraction of a (0,s+1)-tensor field with a vector field,
 giving a (0,s)-tensor field. At each point `x`, this feeds `X(x)` into the first
 slot of the (0,s+1)-tensor `α(x)` via the currying isomorphism. -/
@@ -187,10 +206,8 @@ noncomputable def contract_Tensor0SField (s : ℕ)
     -- By TangentBundle.symmL_trivializationAt, e₀.symmL 𝕜 x equals the manifold derivative
     -- of (extChartAt I x₀).symm evaluated at (extChartAt I x₀ x). Since the chart inverse
     -- is C^ω (from [IsManifold I ω M]), the derivative is C^n for any n.
-    have hSymmL : ContMDiffAt I 𝓘(𝕜, E →L[𝕜] E) n symmLFun x₀ := by
-      -- TODO: This requires either a new Mathlib lemma (Trivialization.contMDiffAt_symmL)
-      -- or a proof via contDiffWithinAt_fderivWithin at the chart level.
-      sorry
+    have hSymmL : ContMDiffAt I 𝓘(𝕜, E →L[𝕜] E) n symmLFun x₀ :=
+      contMDiffAt_trivializationAt_symmL n
     -- Step 4: Compose the CLM-valued maps via clm_comp.
     -- The result: x ↦ curryLeftEquiv(α x) ∘ e₀.symmL 𝕜 x is smooth.
     have hCoord : ContMDiffAt I 𝓘(𝕜, E →L[𝕜] Tensor0SModel s 𝕜 E) n
