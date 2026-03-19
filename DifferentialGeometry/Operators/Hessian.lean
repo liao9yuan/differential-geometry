@@ -1,5 +1,4 @@
-import DifferentialGeometry.Algebra.Basic
-import DifferentialGeometry.Algebra.Lie
+import DifferentialGeometry.Algebra.VectorField
 import DifferentialGeometry.Geometry.Connection
 import Mathlib.Algebra.Module.Basic
 import Mathlib.Algebra.Ring.Basic

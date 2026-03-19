@@ -1,4 +1,4 @@
-import DifferentialGeometry.Algebra.Basic
+import DifferentialGeometry.Algebra.VectorField
 import DifferentialGeometry.Algebra.BilinearForm
 import DifferentialGeometry.Geometry.Connection
 import DifferentialGeometry.Algebra.Metric

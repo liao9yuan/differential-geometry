@@ -3,7 +3,7 @@ import DifferentialGeometry.Geometry.Curvature
 import DifferentialGeometry.Geometry.CurvatureTensor
 import DifferentialGeometry.Algebra.BilinearForm
 import DifferentialGeometry.Algebra.Trace
-import DifferentialGeometry.Algebra.Basic
+import DifferentialGeometry.Algebra.VectorField
 
 set_option autoImplicit false
 set_option linter.style.longLine false

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Algebra.Basic
+import DifferentialGeometry.Algebra.VectorField
 import DifferentialGeometry.Algebra.Metric
 import DifferentialGeometry.Geometry.Connection
 import DifferentialGeometry.Operators.Hessian
@@ -14,14 +14,14 @@ import Mathlib.Tactic.Abel
 
 set_option autoImplicit false
 set_option linter.style.longLine false
+set_option linter.unusedSectionVars false
 
 open AbstractDerivationAction
 open AbstractLieBracket
 
 variable {R V : Type}
 variable [CommRing R] [AddCommGroup V] [Module R V]
-variable [AbstractDerivationAction R V]
-
+variable [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V]
 
 
 -- Proves the expansion of the directional derivative of the squared norm of the gradient.
