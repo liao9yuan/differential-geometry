@@ -1,6 +1,5 @@
 import DifferentialGeometry.Algebra.VectorField
 import DifferentialGeometry.Algebra.Metric
-import DifferentialGeometry.Algebra.Metric
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.Abel
 import Mathlib.Algebra.Module.Basic
@@ -128,6 +127,8 @@ theorem levi_civita_uniqueness [AbstractLieBracket V]
   rw [eq1, eq2, eq3, g1, g2, g3, s1, s2, s3]
   ring
 
+variable [AbstractLieBracket V]
+variable [DerivationRules R V]
 
 /-- Explicit construction of the Levi-Civita connection using the Koszul formula.
 Input: (AbstractMetricTensor R V)

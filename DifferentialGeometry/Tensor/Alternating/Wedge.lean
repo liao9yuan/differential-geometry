@@ -308,14 +308,27 @@ variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
   {d m' p : ℕ}
 
-/-- The wedge product of two elementary covectors is the elementary
-covector of the concatenated multi-index. This is the Cauchy–Binet
-identity: the determinant of a matrix whose rows come from two
-blocks equals the shuffle-sum of products of sub-determinants.
+/-- It suffices to prove that ((elementaryCovector b I) ∧[𝕜] (elementaryCovector b J)) agrees with (elementaryCovector b (Fin.addCases I J) on any basis for (Fin k \to E). So it suffices to prove that they agree on (B (p 1), …, B(p (k+l))) for any p : Fin (k + l) \to n, where n = dim E and B is the basis for E dual to E*. We split this into the following cases:
 
-Given `g = elementaryCovector b I` and `h = elementaryCovector b J`,
-`g ∧[𝕜] h = elementaryCovector b (Fin.addCases I J)`. -/
-theorem elementaryCovector_wedge
+1. If p is not injective, then both sides are zero since ((elementaryCovector b I) ∧[𝕜] (elementaryCovector b J)) and (elementaryCovector b (Fin.addCases I J) are alternating.
+2. If p contains an index that does not appear in either I or J, then both sides are zero by elementaryCovector_basis_eval_eq_zero in Basis.lean
+3. If p = Fin.addCases I J and p is injective, then we can compute via wedge_product_eq_alternatization that:
+
+`((elementaryCovector b I) ∧[𝕜] (elementaryCovector b J)) (B ∘ p) = 1/(k! l!) * Alt((elementaryCovector b I) ⨂ (elementaryCovector b J)) (B ∘ p)`
+` = 1/(k! l!) SUM_{σ ∈ S_(k+l)} (sign σ) * ((elementaryCovector b I) (B ∘ p ∘ σ(1), ..., B ∘ p ∘ σ(k))) * ((elementaryCovector b I) (B ∘ p ∘ σ(k+1), ..., B ∘ p ∘ σ(k+l)))`
+
+Since p = IJ is injective, by elementaryCovector_basis_eval_eq_zero the only terms in this sum that give nonzero values are the cases when σ permutes the first k indices and the last l indices of p seperately. That is, when σ = τμ with τ ∈ S_k and μ ∈ S_l, so that sign (σ) = sign(τ) * sign (μ)
+Therefore
+
+`((elementaryCovector b I) ∧[𝕜] (elementaryCovector b J)) (B ∘ p) = 1/(k! l!) SUM_{τ ∈ S_k, μ ∈ S_l} (sign τ) * (sign μ) * ((elementaryCovector b I) (B ∘ p ∘ τ)) * ((elementaryCovector b J) (B ∘ p ∘ μ))`
+` = (1/k! SUM_{τ ∈ S_k} (sign τ) * ((elementaryCovector b I) (B ∘ p ∘ τ))) * (1/l! SUM_{μ ∈ S_l} (sign μ) * ((elementaryCovector b I) (B ∘ p ∘ μ)))`
+` = Alt(elementaryCovector b I) (B ∘ p(1), ..., B ∘ p(k)) * Alt(elementaryCovector b J) (B ∘ p(k+1), ..., B ∘ p(k+l))`
+` = (elementaryCovector b I) (B ∘ p(1), ..., B ∘ p(k)) * (elementaryCovector b J) (B ∘ p(k+1), ..., B ∘ p(k+l))`
+` = 1 = (elementaryCovector b (Fin.addCases I J)) (B ∘ p)`
+
+4. If p = (Fin.addCases) ∘ σ for some permutation σ and is injective, then this reduces to case 3. Sice the effect of σ is merely to multiply both sides of the calculation by sign σ.
+-/
+theorem elementaryCovector_wedge [FiniteDimensional 𝕜 E]
     (b : Module.Basis (Fin d) 𝕜 (E →L[𝕜] 𝕜))
     (I : Fin m' → Fin d) (J : Fin p → Fin d) :
     ((elementaryCovector b I) ∧[𝕜] (elementaryCovector b J)) =
