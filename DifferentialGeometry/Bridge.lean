@@ -1,36 +1,50 @@
 /- import DifferentialGeometry.Geometry.Connection
 import DifferentialGeometry.Algebra.Metric
 import DifferentialGeometry.Algebra.Basic
-import DifferentialGeometry.Tensor.RSTensor.LieDerivative
+import DifferentialGeometry.Algebra.Metric
+import DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 set_option linter.style.longLine false
 
 /-!
 # Bridge: Connecting Analytic and Synthetic Geometry
-
-This file bridges the analytic layer (concrete manifolds and coordinates in `DifferentialGeometry/Tensor`) and the synthetic layer (abstract algebra and geometry in `DifferentialGeometry/Algebra` and `DifferentialGeometry/Geometry`).
-
 -/
 
 namespace DifferentialGeometry.Bridge
 
--- 1. Topology Variables
-variable {𝕜 : Type} [NontriviallyNormedField 𝕜]
-variable {E : Type} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-variable {H : Type} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
-variable {M : Type} [TopologicalSpace M] [ChartedSpace H M]
-variable [IsManifold I ⊤ M]
+open AbstractDerivationAction
+
+variable (R : Type) [CommRing R]
+variable (V : Type) [AddCommGroup V] [Module R V]
+variable [AbstractDerivationAction R V] [AbstractLieBracket V]
+
+/--
+General tensor calculus.
+`r` is contravariant rank, `s` is covariant rank.
+-/
+class AbstractTensorCalculus (metric : AbstractMetricTensor R V) (conn : AbstractLeviCivitaConnection metric) where
+  /-- Generic graded tensor type (r: contravariant, s: covariant) -/
+  AbstractTensor : ℕ → ℕ → Type
+
+  add {r s : ℕ} : AbstractTensor r s → AbstractTensor r s → AbstractTensor r s
+  smul {r s : ℕ} : R → AbstractTensor r s → AbstractTensor r s
+  tensor_prod {r1 s1 r2 s2 : ℕ} : AbstractTensor r1 s1 → AbstractTensor r2 s2 → AbstractTensor (r1 + r2) (s1 + s2)
+
+  -- Embedding
+  fromScalar : R → AbstractTensor 0 0
+  fromVector : V → AbstractTensor 1 0
 
 open TensorLieDeriv
 open scoped Manifold
+  -- Covariant Derivative
+  nabla_tensor {r s : ℕ} : V → AbstractTensor r s → AbstractTensor r s
 
--- 2. Ring R and Module V
-abbrev R := smoothScalarField (𝕜 := 𝕜) (M := M)
-abbrev V := vectorField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+  /-- Interior product (contraction with a tangent vector) -/
+  interior_product {s : ℕ} : AbstractTensor 0 (s + 1) → V → AbstractTensor 0 s
 
-noncomputable instance : CommRing (R (𝕜 := 𝕜) (M := M)) := Pi.commRing
-noncomputable instance : AddCommGroup (V (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) := Pi.addCommGroup
+  /-- Covariant contraction (feeding a vector into a mixed tensor) -/
+  contract_covariant {r s : ℕ} : AbstractTensor r (s + 1) → V → AbstractTensor r s
 
 noncomputable instance bridgeModule : Module (R (𝕜 := 𝕜) (M := M)) (V (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) where
   smul f X := fun x => f x • X x
@@ -40,39 +54,36 @@ noncomputable instance bridgeModule : Module (R (𝕜 := 𝕜) (M := M)) (V (�
   add_smul f g X := funext fun x => add_smul (f x) (g x) (X x)
   mul_smul f g X := funext fun x => mul_smul (f x) (g x) (X x)
   one_smul X := funext fun x => one_smul 𝕜 (X x)
+  /-- General contraction between one contravariant and one covariant slot -/
+  contract {r s : ℕ} : AbstractTensor (r + 1) (s + 1) → AbstractTensor r s
 
+  /-- Metric trace: contracting two covariant indices using the metric tensor -/
+  metric_contract {r s : ℕ} : AbstractTensor r (s + 2) → AbstractTensor r s
 
-/--
-Analytic side: `directionalDerivScalar` in `Tensor/RSTensor/LieDerivative.lean`.
-Synthetic side: `AbstractDerivationAction` in `Algebra/Basic.lean`.
--/
-noncomputable instance bridgeDerivAction : AbstractDerivationAction (R (𝕜 := 𝕜) (M := M)) (V (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) where
-  action X f := directionalDerivScalar f X
+  --  Axioms:
 
+  -- 1. Linearity:
+  contract_add {r s : ℕ} : ∀ T1 T2 : AbstractTensor (r + 1) (s + 1), contract (add T1 T2) = add (contract T1) (contract T2)
+  contract_smul {r s : ℕ} : ∀ (f : R) (T : AbstractTensor (r + 1) (s + 1)), contract (smul f T) = smul f (contract T)
 
-/--
-Analytic side: `VectorField.mlieBracket` in `Tensor/RSTensor/LieDerivative.lean`.
-Synthetic side: `AbstractLieBracket` in `Algebra/Basic.lean`.
--/
-noncomputable instance bridgeLieBracket : AbstractLieBracket (V (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) where
-  bracket X Y := VectorField.mlieBracket I X Y
+  nabla_tensor_add {r s : ℕ} : ∀ X (T1 T2 : AbstractTensor r s), nabla_tensor X (add T1 T2) = add (nabla_tensor X T1) (nabla_tensor X T2)
 
+  nabla_tensor_add_left {r s : ℕ} : ∀ X Y (T : AbstractTensor r s), nabla_tensor (X + Y) T = add (nabla_tensor X T) (nabla_tensor Y T)
+  nabla_tensor_smul_left {r s : ℕ} : ∀ (f : R) X (T : AbstractTensor r s), nabla_tensor (f • X) T = smul f (nabla_tensor X T)
 
-/--
-Analytic side: `SmoothRiemannianMetric` in `Tensor/RSTensor/LieDerivative.lean`.
-Synthetic side: `AbstractMetricTensor` in `Algebra/Metric.lean`.
--/
-noncomputable instance bridgeMetricTensor (analyticMetric : SmoothRiemannianMetric (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) :
-    AbstractMetricTensor (R (𝕜 := 𝕜) (M := M)) (V (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) where
-  g X Y := metricProduct analyticMetric X Y
-  symm := sorry
-  bilinear_add_left := sorry
-  bilinear_smul_left := sorry
+  -- 2. Leibniz Rule: $\nabla_X(T_1 \otimes T_2) = (\nabla_X T_1) \otimes T_2 + T_1 \otimes (\nabla_X T_2)$
+  leibniz_rule {r1 s1 r2 s2 : ℕ} : ∀ X (T1 : AbstractTensor r1 s1) (T2 : AbstractTensor r2 s2),
+    nabla_tensor X (tensor_prod T1 T2) = add (tensor_prod (nabla_tensor X T1) T2) (tensor_prod T1 (nabla_tensor X T2))
 
+  -- 3. Commutativity: $\text{contract}(\nabla_X T) = \nabla_X (\text{contract} T)$
+  commutativity {r s : ℕ} : ∀ X (T : AbstractTensor (r + 1) (s + 1)), contract (nabla_tensor X T) = nabla_tensor X (contract T)
 
-/--
-Analytic side: `LeviCivitaConnection` in `Tensor/RSTensor/LieDerivative.lean`.
-Synthetic side: `AbstractLeviCivitaConnection` in `Geometry/Connection.lean`.
+  -- 4. Base Cases: $\nabla_X (\text{fromScalar } f)$ = directional derivative; $\nabla_X (\text{fromVector } Y)$ = native connection
+  base_scalar : ∀ X (f : R), nabla_tensor X (fromScalar f) = fromScalar (action X f)
+  base_vector : ∀ X Y, nabla_tensor X (fromVector Y) = fromVector (conn.nabla X Y)
+
+/-
+  The proof to the previous class can be here.
 -/
 noncomputable instance bridgeAffineConnection (analyticNabla : LeviCivitaConnection (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) :
     AbstractLeviCivitaConnection (bridgeMetricTensor analyticNabla.metric) where
@@ -111,6 +122,8 @@ class GeneralTensorContractionRules (metric : AbstractMetricTensor (R (𝕜 := �
   trace_cov_commute : sorry
   /-- Metric trace of Ricci variation equals Laplacian of scalar curvature: tr_g(∂_t Rc) = Δ R -/
   metric_trace_ricci_var : sorry
+
+noncomputable instance mockTensorCalculus {metric : AbstractMetricTensor R V} {conn : AbstractLeviCivitaConnection metric} : AbstractTensorCalculus R V metric conn := sorry
 
 end DifferentialGeometry.Bridge
 -/
