@@ -31,29 +31,7 @@ This file establishes the evolution equation for the Levi-Civita connection
 under the Ricci flow equation.
 -/
 
-/-- Proves that the derivation action on the constant 1 is zero: $X(1) = 0$. -/
-lemma action_one (X : V) : action X (1:R) = 0 := by
-  have h1 : action X ((1:R) * (1:R)) = action X (1:R) * (1:R) + (1:R) * action X (1:R) := DerivationRules.action_smul_right X (1:R) (1:R)
-  have h2 : (1:R) * (1:R) = (1:R) := by ring
-  rw [h2] at h1
-  have h3 : action X (1:R) * (1:R) = action X (1:R) := by ring
-  have h4 : (1:R) * action X (1:R) = action X (1:R) := by ring
-  rw [h3, h4] at h1
-  calc action X (1:R) = action X (1:R) + action X (1:R) - action X (1:R) := by abel
-    _ = action X (1:R) - action X (1:R) := by rw [← h1]
-    _ = 0 := by abel
 
-/-- Proves that if the derivation action on a constant $c$ is zero, then $X(c + c) = 0$. -/
-lemma action_bit0_const (X : V) (c : R) (hc : action X c = 0) : action X (c + c) = 0 := by
-  have h : action X (c + c) = action X c + action X c := DerivationRules.action_add_right X c c
-  rw [hc, add_zero] at h
-  exact h
-
-/-- Proves that the derivation action on the constant 2 is zero: $X(2) = 0$. -/
-lemma action_two (X : V) : action X (2:R) = 0 := by
-  have h_two : (2:R) = (1:R) + (1:R) := by ring
-  rw [h_two]
-  exact action_bit0_const X (1:R) (action_one X)
 
 variable [TraceOperator R V] [LieDerivationRules R V] [TraceLinearityRules R V]
 variable [Invertible (2 : R)]
@@ -88,14 +66,6 @@ lemma connection_evolution {Time : Type}
     rw [heq_eval]
     exact eval02_smul (ricciForm (conn_fam t)) (- (2:R)) A B
 
-  /- Proves that the derivation action on the constant -2 is zero: $X(-2) = 0$. -/
-  have action_neg_two : ∀ X : V, action X (- (2:R)) = 0 := by
-    intro X
-    rw [action_neg X (2:R), action_two X, neg_zero]
-  /- Proves that the constant factor -2 commutes with the derivation action: $X(-2f) = -2 X(f)$. -/
-  have action_mul_const : ∀ (X : V) (f : R), action X ((- (2:R)) * f) = (- (2:R)) * action X f := by
-    intro X f
-    rw [DerivationRules.action_smul_right X (- (2:R)) f, action_neg_two X, zero_mul, zero_add]
   have h_cov_eq : ∀ A B C : V, h_cov_deriv g_fam t A B C = (- (2:R)) * ricci_cov_deriv g_fam conn_fam t A B C := by
     intro A B C
     dsimp [h_cov_deriv, ricci_cov_deriv]
@@ -103,7 +73,7 @@ lemma connection_evolution {Time : Type}
       intro Y Z
       exact h_metric_var Y Z
     rw [hm B C, hm ((nabla_fam g_fam t).nabla A B) C, hm B ((nabla_fam g_fam t).nabla A C)]
-    rw [action_mul_const A (eval02 (ricciForm (conn_fam t)) B C)]
+    rw [action_mul_const A (- (2:R)) (eval02 (ricciForm (conn_fam t)) B C) (action_neg_two A)]
     ring
   have h_variation := connection_variation g_fam X Y Z t
   have h_rhs : h_cov_deriv g_fam t X Y Z + h_cov_deriv g_fam t Y X Z - h_cov_deriv g_fam t Z X Y =

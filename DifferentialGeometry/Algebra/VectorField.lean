@@ -87,6 +87,38 @@ lemma action_neg {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] [Abstr
     _ = 0 - action X g := by rw [← h]
     _ = - action X g := by abel
 
+/-- Proves that the derivation action on the constant 1 is zero: $X(1) = 0$. -/
+lemma action_one {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V] (X : V) : action X (1:R) = 0 := by
+  have h1 : action X ((1:R) * (1:R)) = action X (1:R) * (1:R) + (1:R) * action X (1:R) := DerivationRules.action_smul_right X (1:R) (1:R)
+  have h2 : (1:R) * (1:R) = (1:R) := by ring
+  rw [h2] at h1
+  have h3 : action X (1:R) * (1:R) = action X (1:R) := by ring
+  have h4 : (1:R) * action X (1:R) = action X (1:R) := by ring
+  rw [h3, h4] at h1
+  calc action X (1:R) = action X (1:R) + action X (1:R) - action X (1:R) := by abel
+    _ = action X (1:R) - action X (1:R) := by rw [← h1]
+    _ = 0 := by abel
+
+/-- Proves that if the derivation action on a constant $c$ is zero, then $X(c + c) = 0$. -/
+lemma action_add_self {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V] (X : V) (c : R) (hc : action X c = 0) : action X (c + c) = 0 := by
+  have h : action X (c + c) = action X c + action X c := DerivationRules.action_add_right X c c
+  rw [hc, add_zero] at h
+  exact h
+
+/-- Proves that the derivation action on the constant 2 is zero: $X(2) = 0$. -/
+lemma action_two {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V] (X : V) : action X (2:R) = 0 := by
+  have h_two : (2:R) = (1:R) + (1:R) := by ring
+  rw [h_two]
+  exact action_add_self X (1:R) (action_one X)
+
+/-- Proves that the derivation action on the constant -2 is zero: $X(-2) = 0$. -/
+lemma action_neg_two {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V] (X : V) : action X (- (2:R)) = 0 := by
+  rw [action_neg X (2:R), action_two X, neg_zero]
+
+/-- Proves that the constant factor $c$ commutes with the derivation action: $X(c * f) = c * X(f)$. -/
+lemma action_mul_const {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V] (X : V) (c f : R) (hc : action X c = 0) : action X (c * f) = c * action X f := by
+  rw [DerivationRules.action_smul_right X c f, hc, zero_mul, zero_add]
+
 -- Proves the Jacobi Identity (The Critical Test).
 /-- Proof of the Jacobi identity over vector fields. -/
 theorem jacobi_identity_proof {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [AbstractDerivationAction R V] [AbstractLieBracket V] [VectorFieldNonDegenerate R V] [LieDerivationRules R V] (X Y Z : V) : bracket X (bracket Y Z) + bracket Y (bracket Z X) + bracket Z (bracket X Y) = 0 := by
