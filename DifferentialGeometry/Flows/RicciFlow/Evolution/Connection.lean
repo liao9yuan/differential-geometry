@@ -79,10 +79,10 @@ lemma connection_evolution {Time : Type}
   - ricci_cov_deriv g_fam conn_fam t X Y Z
   - ricci_cov_deriv g_fam conn_fam t Y X Z
   + ricci_cov_deriv g_fam conn_fam t Z X Y := by
-  have h_metric_var : ∀ A B, eval02 (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) A B = (- (2:R)) * eval02 (ricciForm (conn_fam t)) A B := by
-    have heq : MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t = (- (2:R)) • ricciForm (conn_fam t) := RicciFlow.evolution t
+  have h_metric_var : ∀ A B, eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) A B = (- (2:R)) * eval02 (ricciForm (conn_fam t)) A B := by
+    have heq : metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t = (- (2:R)) • ricciForm (conn_fam t) := RicciFlow.evolution t
     intro A B
-    have heq_eval : eval02 (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) A B = eval02 ((- (2:R)) • ricciForm (conn_fam t)) A B := by rw [heq]
+    have heq_eval : eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) A B = eval02 ((- (2:R)) • ricciForm (conn_fam t)) A B := by rw [heq]
     rw [heq_eval]
     exact eval02_smul (ricciForm (conn_fam t)) (- (2:R)) A B
 
@@ -97,7 +97,7 @@ lemma connection_evolution {Time : Type}
   have h_cov_eq : ∀ A B C : V, h_cov_deriv g_fam t A B C = (- (2:R)) * ricci_cov_deriv g_fam conn_fam t A B C := by
     intro A B C
     dsimp [h_cov_deriv, ricci_cov_deriv]
-    have hm : ∀ Y Z : V, eval02 (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) Y Z = (- (2:R)) * eval02 (ricciForm (conn_fam t)) Y Z := by
+    have hm : ∀ Y Z : V, eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) Y Z = (- (2:R)) * eval02 (ricciForm (conn_fam t)) Y Z := by
       intro Y Z
       exact h_metric_var Y Z
     rw [hm B C, hm ((nabla_fam g_fam t).nabla A B) C, hm B ((nabla_fam g_fam t).nabla A C)]

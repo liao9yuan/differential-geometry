@@ -89,13 +89,13 @@ lemma hessian_raise_variation {Time : Type}
 
   (u : R) (X Y : V) (t : Time) :
   (g_fam t).g (TimeDerivative.partial_t (fun s => (g_fam s).raise (hessianForm (g_fam s) (conn_fam s) u) X) t) Y =
-  - eval02 (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) Y
+  - eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) Y
   - eval02 (partial_conn_form g_fam conn_fam u t) X Y := by
   have raise_def : ∀ s, (g_fam s).g ((g_fam s).raise (hessianForm (g_fam s) (conn_fam s) u) X) Y = eval02 (hessianForm (g_fam s) (conn_fam s) u) X Y := fun s => (g_fam s).g_raise (hessianForm (g_fam s) (conn_fam s) u) X Y
   have t_both : TimeDerivative.partial_t (fun s => (g_fam s).g ((g_fam s).raise (hessianForm (g_fam s) (conn_fam s) u) X) Y) t = TimeDerivative.partial_t (fun s => eval02 (hessianForm (g_fam s) (conn_fam s) u) X Y) t := by
     congr 1; funext s; exact raise_def s
   have t_metric_val : TimeDerivative.partial_t (fun s => (g_fam s).g ((g_fam s).raise (hessianForm (g_fam s) (conn_fam s) u) X) Y) t =
-    eval02 (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) Y +
+    eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) Y +
     (g_fam t).g (TimeDerivative.partial_t (fun s => (g_fam s).raise (hessianForm (g_fam s) (conn_fam s) u) X) t) Y +
     (g_fam t).g ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) (TimeDerivative.partial_t (fun _ => Y) t) :=
     MetricTimeDerivativeRules.t_metric (fun s => (g_fam s).raise (hessianForm (g_fam s) (conn_fam s) u) X) (fun _ => Y) t
@@ -126,9 +126,9 @@ lemma hessian_raise_variation {Time : Type}
   have h_conn : TimeDerivative.partial_t (fun s => action ((conn_fam s).nabla X Y) u) t = eval02 (partial_conn_form g_fam conn_fam u t) X Y := by exact (partial_conn_form_eval g_fam conn_fam u X Y t).symm
   rw [h_conn] at t_both
   calc (g_fam t).g (TimeDerivative.partial_t (fun s => (g_fam s).raise (hessianForm (g_fam s) (conn_fam s) u) X) t) Y
-    _ = eval02 (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) Y + (g_fam t).g (TimeDerivative.partial_t (fun s => (g_fam s).raise (hessianForm (g_fam s) (conn_fam s) u) X) t) Y - eval02 (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) Y := by abel
-    _ = - eval02 (partial_conn_form g_fam conn_fam u t) X Y - eval02 (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) Y := by rw [t_both]
-    _ = - eval02 (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) Y - eval02 (partial_conn_form g_fam conn_fam u t) X Y := by abel
+    _ = eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) Y + (g_fam t).g (TimeDerivative.partial_t (fun s => (g_fam s).raise (hessianForm (g_fam s) (conn_fam s) u) X) t) Y - eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) Y := by abel
+    _ = - eval02 (partial_conn_form g_fam conn_fam u t) X Y - eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) Y := by rw [t_both]
+    _ = - eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) Y - eval02 (partial_conn_form g_fam conn_fam u t) X Y := by abel
 
 
 /--
@@ -152,53 +152,53 @@ lemma laplacian_evolution {Time : Type}
     MetricTimeDerivativeRules.t_trace g_fam (fun s X => (g_fam s).raise (hessianForm (g_fam s) (conn_fam s) u) X) t
   rw [product_rule]
   have partial_raise_eq : ∀ X, TimeDerivative.partial_t (fun s => (g_fam s).raise (hessianForm (g_fam s) (conn_fam s) u) X) t =
-                          - (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)
+                          - (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)
                           - (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X := by
     intro X
     apply (g_fam t).toNonDegenerateMetric.eq_of_forall_g_eq
     intro Z
     have h1 := hessian_raise_variation g_fam conn_fam u X Z t
     rw [h1]
-    have h2 : (g_fam t).g (- (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) - (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X) Z =
-              (g_fam t).g (- (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) Z +
+    have h2 : (g_fam t).g (- (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) - (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X) Z =
+              (g_fam t).g (- (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) Z +
               (g_fam t).g (- (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X) Z := by
-      have sub_eq : - (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) - (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X =
-                    - (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) + - (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X := sub_eq_add_neg _ _
+      have sub_eq : - (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) - (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X =
+                    - (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) + - (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X := sub_eq_add_neg _ _
       rw [sub_eq]
       exact (g_fam t).bilinear_add_left _ _ _
     rw [h2]
-    have h3 : (g_fam t).g (- (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) Z =
-              - (g_fam t).g ((g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) Z := metric_neg_left _ _ _
+    have h3 : (g_fam t).g (- (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) Z =
+              - (g_fam t).g ((g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) Z := metric_neg_left _ _ _
     have h4 : (g_fam t).g (- (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X) Z =
               - (g_fam t).g ((g_fam t).raise (partial_conn_form g_fam conn_fam u t) X) Z := metric_neg_left _ _ _
     rw [h3, h4]
-    have h5 : (g_fam t).g ((g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) Z =
-              eval02 (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) Z := (g_fam t).g_raise _ _ _
+    have h5 : (g_fam t).g ((g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) Z =
+              eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) Z := (g_fam t).g_raise _ _ _
     have h6 : (g_fam t).g ((g_fam t).raise (partial_conn_form g_fam conn_fam u t) X) Z =
               eval02 (partial_conn_form g_fam conn_fam u t) X Z := (g_fam t).g_raise _ _ _
     rw [h5, h6]
     exact sub_eq_add_neg _ _
   have trace_eq : (TraceOperator.trace (fun X => TimeDerivative.partial_t (fun s => (g_fam s).raise (hessianForm (g_fam s) (conn_fam s) u) X) t) : R) =
-                  TraceOperator.trace (fun X => - (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) - (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X) := by
+                  TraceOperator.trace (fun X => - (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) - (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X) := by
     congr 1
     funext X
     exact partial_raise_eq X
   rw [trace_eq]
-  have trace_sub : (TraceOperator.trace (fun X => - (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) - (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X) : R) =
-                   TraceOperator.trace (fun X => - (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) +
+  have trace_sub : (TraceOperator.trace (fun X => - (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) - (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X) : R) =
+                   TraceOperator.trace (fun X => - (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) +
                    TraceOperator.trace (fun X => - (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X) := by
-    have split_eq : (fun X => - (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) - (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X) =
-                    (fun X => - (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) +
+    have split_eq : (fun X => - (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) - (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X) =
+                    (fun X => - (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) +
                     (fun X => - (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X) := by
       funext X
       exact sub_eq_add_neg _ _
     rw [split_eq]
     exact TraceLinearityRules.trace_add
   rw [trace_sub]
-  have trace_neg1 : (TraceOperator.trace (fun X => - (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) : R) =
-                    -(1:R) * TraceOperator.trace (fun X => (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) := by
-    have smul_eq : (fun X => - (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) =
-                   (fun X => -(1:R) • (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) := by
+  have trace_neg1 : (TraceOperator.trace (fun X => - (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) : R) =
+                    -(1:R) * TraceOperator.trace (fun X => (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) := by
+    have smul_eq : (fun X => - (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) =
+                   (fun X => -(1:R) • (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) := by
       funext X
       exact (neg_one_smul R _).symm
     rw [smul_eq]
@@ -212,15 +212,15 @@ lemma laplacian_evolution {Time : Type}
     rw [smul_eq]
     exact TraceLinearityRules.trace_smul
   rw [trace_neg1, trace_neg2]
-  have h_rf : (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) = (-(2:R)) • (ricciForm (conn_fam t)) := RicciFlow.evolution t
-  have h_raise_rf : ∀ Z, (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) Z =
+  have h_rf : (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) = (-(2:R)) • (ricciForm (conn_fam t)) := RicciFlow.evolution t
+  have h_raise_rf : ∀ Z, (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) Z =
                          (-(2:R)) • (g_fam t).raise (ricciForm (conn_fam t)) Z := by
     intro Z
     rw [h_rf]
     exact raise_smul (g_fam t) (ricciForm (conn_fam t)) (-(2:R)) Z
-  have inner_prod_sub : (TraceOperator.trace (fun X => (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) : R) =
+  have inner_prod_sub : (TraceOperator.trace (fun X => (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) : R) =
                         -(2:R) * TraceOperator.trace (fun X => (g_fam t).raise (ricciForm (conn_fam t)) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) := by
-    have eq_func : (fun X => (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) =
+    have eq_func : (fun X => (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) =
                    (fun X => (-(2:R)) • (g_fam t).raise (ricciForm (conn_fam t)) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) := by
       funext X
       exact h_raise_rf ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)

@@ -72,13 +72,13 @@ lemma ricci_raise_variation {Time : Type}
 
   (X Y : V) (t : Time) :
   (g_fam t).g (TimeDerivative.partial_t (fun s => (g_fam s).raise (ricciForm (conn_fam s)) X) t) Y =
-  - eval02 (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X) Y
+  - eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X) Y
   + eval02 (partial_ricci_form conn_fam t) X Y := by
   have raise_def : ∀ s, (g_fam s).g ((g_fam s).raise (ricciForm (conn_fam s)) X) Y = eval02 (ricciForm (conn_fam s)) X Y := fun s => (g_fam s).g_raise (ricciForm (conn_fam s)) X Y
   have t_both : TimeDerivative.partial_t (fun s => (g_fam s).g ((g_fam s).raise (ricciForm (conn_fam s)) X) Y) t = TimeDerivative.partial_t (fun s => eval02 (ricciForm (conn_fam s)) X Y) t := by
     congr 1; funext s; exact raise_def s
   have t_metric_val : TimeDerivative.partial_t (fun s => (g_fam s).g ((g_fam s).raise (ricciForm (conn_fam s)) X) Y) t =
-    eval02 (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X) Y +
+    eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X) Y +
     (g_fam t).g (TimeDerivative.partial_t (fun s => (g_fam s).raise (ricciForm (conn_fam s)) X) t) Y +
     (g_fam t).g ((g_fam t).raise (ricciForm (conn_fam t)) X) (TimeDerivative.partial_t (fun _ => Y) t) :=
     MetricTimeDerivativeRules.t_metric (fun s => (g_fam s).raise (ricciForm (conn_fam s)) X) (fun _ => Y) t
@@ -90,9 +90,9 @@ lemma ricci_raise_variation {Time : Type}
   have h_ricci : TimeDerivative.partial_t (fun s => eval02 (ricciForm (conn_fam s)) X Y) t = eval02 (partial_ricci_form conn_fam t) X Y := (partial_ricci_form_eval conn_fam t X Y).symm
   rw [h_ricci] at t_both
   calc (g_fam t).g (TimeDerivative.partial_t (fun s => (g_fam s).raise (ricciForm (conn_fam s)) X) t) Y
-    _ = eval02 (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X) Y + (g_fam t).g (TimeDerivative.partial_t (fun s => (g_fam s).raise (ricciForm (conn_fam s)) X) t) Y - eval02 (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X) Y := by abel
-    _ = eval02 (partial_ricci_form conn_fam t) X Y - eval02 (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X) Y := by rw [t_both]
-    _ = - eval02 (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X) Y + eval02 (partial_ricci_form conn_fam t) X Y := by abel
+    _ = eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X) Y + (g_fam t).g (TimeDerivative.partial_t (fun s => (g_fam s).raise (ricciForm (conn_fam s)) X) t) Y - eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X) Y := by abel
+    _ = eval02 (partial_ricci_form conn_fam t) X Y - eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X) Y := by rw [t_both]
+    _ = - eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X) Y + eval02 (partial_ricci_form conn_fam t) X Y := by abel
 
 /--
 $\partial_t R = \Delta R + 2 |\text{Ric}|^2$
@@ -123,59 +123,59 @@ lemma scalar_curvature_evolution {Time : Type}
     MetricTimeDerivativeRules.t_trace g_fam (fun s X => (g_fam s).raise (ricciForm (conn_fam s)) X) t
   rw [product_rule]
   have partial_raise_eq : ∀ X, TimeDerivative.partial_t (fun s => (g_fam s).raise (ricciForm (conn_fam s)) X) t =
-                          - (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X)
+                          - (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X)
                           + (g_fam t).raise (partial_ricci_form conn_fam t) X := by
     intro X
     apply (g_fam t).toNonDegenerateMetric.eq_of_forall_g_eq
     intro Z
     have h1 := ricci_raise_variation g_fam conn_fam X Z t
     rw [h1]
-    have h2 : (g_fam t).g (- (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X) + (g_fam t).raise (partial_ricci_form conn_fam t) X) Z =
-              (g_fam t).g (- (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X)) Z +
+    have h2 : (g_fam t).g (- (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X) + (g_fam t).raise (partial_ricci_form conn_fam t) X) Z =
+              (g_fam t).g (- (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X)) Z +
               (g_fam t).g ((g_fam t).raise (partial_ricci_form conn_fam t) X) Z := by
       exact (g_fam t).bilinear_add_left _ _ _
     rw [h2]
-    have h3 : (g_fam t).g (- (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X)) Z =
-              - (g_fam t).g ((g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X)) Z := metric_neg_left _ _ _
+    have h3 : (g_fam t).g (- (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X)) Z =
+              - (g_fam t).g ((g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X)) Z := metric_neg_left _ _ _
     rw [h3]
-    have h5 : (g_fam t).g ((g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X)) Z =
-              eval02 (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X) Z := (g_fam t).g_raise _ _ _
+    have h5 : (g_fam t).g ((g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X)) Z =
+              eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X) Z := (g_fam t).g_raise _ _ _
     have h6 : (g_fam t).g ((g_fam t).raise (partial_ricci_form conn_fam t) X) Z =
               eval02 (partial_ricci_form conn_fam t) X Z := (g_fam t).g_raise _ _ _
     rw [h5, h6]
   have trace_eq : (TraceOperator.trace (fun X => TimeDerivative.partial_t (fun s => (g_fam s).raise (ricciForm (conn_fam s)) X) t) : R) =
-                  TraceOperator.trace (fun X => - (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X) + (g_fam t).raise (partial_ricci_form conn_fam t) X) := by
+                  TraceOperator.trace (fun X => - (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X) + (g_fam t).raise (partial_ricci_form conn_fam t) X) := by
     congr 1
     funext X
     exact partial_raise_eq X
   rw [trace_eq]
-  have trace_add : (TraceOperator.trace (fun X => - (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X) + (g_fam t).raise (partial_ricci_form conn_fam t) X) : R) =
-                   TraceOperator.trace (fun X => - (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X)) +
+  have trace_add : (TraceOperator.trace (fun X => - (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X) + (g_fam t).raise (partial_ricci_form conn_fam t) X) : R) =
+                   TraceOperator.trace (fun X => - (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X)) +
                    TraceOperator.trace (fun X => (g_fam t).raise (partial_ricci_form conn_fam t) X) := by
-    have split_eq : (fun X => - (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X) + (g_fam t).raise (partial_ricci_form conn_fam t) X) =
-                    (fun X => - (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X)) +
+    have split_eq : (fun X => - (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X) + (g_fam t).raise (partial_ricci_form conn_fam t) X) =
+                    (fun X => - (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X)) +
                     (fun X => (g_fam t).raise (partial_ricci_form conn_fam t) X) := rfl
     rw [split_eq]
     exact TraceLinearityRules.trace_add
   rw [trace_add]
-  have trace_neg1 : (TraceOperator.trace (fun X => - (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X)) : R) =
-                    -(1:R) * TraceOperator.trace (fun X => (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X)) := by
-    have smul_eq : (fun X => - (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X)) =
-                   (fun X => -(1:R) • (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X)) := by
+  have trace_neg1 : (TraceOperator.trace (fun X => - (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X)) : R) =
+                    -(1:R) * TraceOperator.trace (fun X => (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X)) := by
+    have smul_eq : (fun X => - (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X)) =
+                   (fun X => -(1:R) • (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X)) := by
       funext X
       exact (neg_one_smul R _).symm
     rw [smul_eq]
     exact TraceLinearityRules.trace_smul
   rw [trace_neg1]
-  have h_rf : (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) = (-(2:R)) • (ricciForm (conn_fam t)) := RicciFlow.evolution t
-  have h_raise_rf : ∀ Z, (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) Z =
+  have h_rf : (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) = (-(2:R)) • (ricciForm (conn_fam t)) := RicciFlow.evolution t
+  have h_raise_rf : ∀ Z, (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) Z =
                          (-(2:R)) • (g_fam t).raise (ricciForm (conn_fam t)) Z := by
     intro Z
     rw [h_rf]
     exact raise_smul (g_fam t) (ricciForm (conn_fam t)) (-(2:R)) Z
-  have inner_prod_sub : (TraceOperator.trace (fun X => (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X)) : R) =
+  have inner_prod_sub : (TraceOperator.trace (fun X => (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X)) : R) =
                         -(2:R) * TraceOperator.trace (fun X => (g_fam t).raise (ricciForm (conn_fam t)) ((g_fam t).raise (ricciForm (conn_fam t)) X)) := by
-    have eq_func : (fun X => (g_fam t).raise (MetricVariationOperator.metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X)) =
+    have eq_func : (fun X => (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (ricciForm (conn_fam t)) X)) =
                    (fun X => (-(2:R)) • (g_fam t).raise (ricciForm (conn_fam t)) ((g_fam t).raise (ricciForm (conn_fam t)) X)) := by
       funext X
       exact h_raise_rf ((g_fam t).raise (ricciForm (conn_fam t)) X)
