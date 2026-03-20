@@ -248,7 +248,7 @@ abbrev nabla_fam {Time : Type} (g_fam : Time → MetricDuality R V) (t : Time) :
 (∇_X h)(Y, Z) = X(h(Y, Z)) - h(∇_X Y, Z) - h(Y, ∇_X Z)
 -/
 def h_cov_deriv {Time : Type} [TimeDerivative Time R] [TimeDerivativeRules Time R V]
-  (g_fam : Time → MetricDuality R V)  (t : Time) (X Y Z : V) : R :=
+  (g_fam : Time → MetricDuality R V) (t : Time) (X Y Z : V) : R :=
   action X (eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) Y Z)
   - eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((nabla_fam g_fam t).nabla X Y) Z
   - eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) Y ((nabla_fam g_fam t).nabla X Z)
