@@ -11,6 +11,7 @@ import Mathlib.Tactic.Abel
 
 set_option autoImplicit false
 set_option linter.style.longLine false
+set_option linter.unusedSectionVars false
 set_option linter.style.emptyLine false
 
 /-!
@@ -43,46 +44,55 @@ class TimeDerivativeRules (Time R V : Type) [CommRing R] [AddCommGroup V] [Modul
     TimeDerivative.partial_t (fun s => c * f s) t = c * TimeDerivative.partial_t f t
 
 -- 3. Metric Variation Form
-/-- Time variation of a metric tensor family.
-Constructs a smooth bilinear form representing the precise time derivative of the metric tensor.
-Input: (Time → AbstractMetricTensor R V, Time)
-Output: SmoothBilinearForm R V -/
-def metric_var_form {Time : Type} [TimeDerivative Time R] [TimeDerivativeRules Time R V]
-  (g_fam : Time → AbstractMetricTensor R V) (t : Time) : SmoothBilinearForm R V where
-  val := fun X Y => TimeDerivative.partial_t (fun s => (g_fam s).g X Y) t
-  add_left := fun X₁ X₂ Y => by
-    have h1 : (fun s => (g_fam s).g (X₁ + X₂) Y) = (fun s => (g_fam s).g X₁ Y + (g_fam s).g X₂ Y) := by
-      funext s
-      exact (g_fam s).bilinear_add_left X₁ X₂ Y
-    rw [h1]
-    exact TimeDerivativeRules.t_add V (fun s => (g_fam s).g X₁ Y) (fun s => (g_fam s).g X₂ Y) t
-  smul_left := fun c X Y => by
-    have h1 : (fun s => (g_fam s).g (c • X) Y) = (fun s => c * (g_fam s).g X Y) := by
-      funext s
-      have step := (g_fam s).bilinear_smul_left c X Y
-      exact step
-    rw [h1]
-    exact TimeDerivativeRules.t_smul V c (fun s => (g_fam s).g X Y) t
-  add_right := fun X Y₁ Y₂ => by
-    have h1 : (fun s => (g_fam s).g X (Y₁ + Y₂)) = (fun s => (g_fam s).g X Y₁ + (g_fam s).g X Y₂) := by
-      funext s
-      have h2 : (g_fam s).g X (Y₁ + Y₂) = (g_fam s).g (Y₁ + Y₂) X := (g_fam s).symm _ _
-      have h3 : (g_fam s).g (Y₁ + Y₂) X = (g_fam s).g Y₁ X + (g_fam s).g Y₂ X := (g_fam s).bilinear_add_left _ _ _
-      have h4 : (g_fam s).g Y₁ X = (g_fam s).g X Y₁ := (g_fam s).symm _ _
-      have h5 : (g_fam s).g Y₂ X = (g_fam s).g X Y₂ := (g_fam s).symm _ _
-      rw [h2, h3, h4, h5]
-    rw [h1]
-    exact TimeDerivativeRules.t_add V (fun s => (g_fam s).g X Y₁) (fun s => (g_fam s).g X Y₂) t
-  smul_right := fun c X Y => by
-    have h1 : (fun s => (g_fam s).g X (c • Y)) = (fun s => c * (g_fam s).g X Y) := by
-      funext s
-      have h2 : (g_fam s).g X (c • Y) = (g_fam s).g (c • Y) X := (g_fam s).symm _ _
-      have step := (g_fam s).bilinear_smul_left c Y X
-      have h3 : (g_fam s).g (c • Y) X = c * (g_fam s).g Y X := step
-      have h4 : (g_fam s).g Y X = (g_fam s).g X Y := (g_fam s).symm _ _
-      rw [h2, h3, h4]
-    rw [h1]
-    exact TimeDerivativeRules.t_smul V c (fun s => (g_fam s).g X Y) t
+/-- Operator for metric variation.
+Constructed explicitly from bilinear function of metric derivative.
+-/
+def metric_var_form {Time R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
+  [TimeDerivative Time R] [TimeDerivativeRules Time R V]
+  (g_fam : Time → AbstractMetricTensor R V) (t : Time) : AbstractBilinearForm R V :=
+  TensorAlgebra.fromBilinear {
+    toFun := fun X => {
+      toFun := fun Y => TimeDerivative.partial_t (fun s => (g_fam s).g X Y) t
+      map_add' := fun Y₁ Y₂ => by
+        have h_add : (fun s => (g_fam s).g X (Y₁ + Y₂)) = (fun s => (g_fam s).g X Y₁) + (fun s => (g_fam s).g X Y₂) := by
+          ext s
+          exact eval02_add_right (g_fam s).g_tensor X Y₁ Y₂
+        rw [h_add]
+        exact TimeDerivativeRules.t_add V _ _ t
+      map_smul' := fun c Y => by
+        have h_smul : (fun s => (g_fam s).g X (c • Y)) = fun s => c * (g_fam s).g X Y := by
+          ext s
+          exact eval02_smul_right (g_fam s).g_tensor c X Y
+        rw [h_smul]
+        exact TimeDerivativeRules.t_smul V _ _ t
+    }
+    map_add' := fun X₁ X₂ => by
+      ext Y
+      change TimeDerivative.partial_t (fun s => (g_fam s).g (X₁ + X₂) Y) t =
+             TimeDerivative.partial_t (fun s => (g_fam s).g X₁ Y) t +
+             TimeDerivative.partial_t (fun s => (g_fam s).g X₂ Y) t
+      have h_add : (fun s => (g_fam s).g (X₁ + X₂) Y) = (fun s => (g_fam s).g X₁ Y) + (fun s => (g_fam s).g X₂ Y) := by
+        ext s
+        exact eval02_add_left (g_fam s).g_tensor X₁ X₂ Y
+      rw [h_add]
+      exact TimeDerivativeRules.t_add V _ _ t
+    map_smul' := fun c X => by
+      ext Y
+      change TimeDerivative.partial_t (fun s => (g_fam s).g (c • X) Y) t =
+             c * TimeDerivative.partial_t (fun s => (g_fam s).g X Y) t
+      have h_smul : (fun s => (g_fam s).g (c • X) Y) = fun s => c * (g_fam s).g X Y := by
+        ext s
+        exact eval02_smul_left (g_fam s).g_tensor c X Y
+      rw [h_smul]
+      exact TimeDerivativeRules.t_smul V _ _ t
+  }
+
+lemma metric_var_form_eval {Time R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
+  [TimeDerivative Time R] [TimeDerivativeRules Time R V] (g_fam : Time → AbstractMetricTensor R V) (t : Time) (X Y : V) :
+  eval02 (metric_var_form g_fam t) X Y = TimeDerivative.partial_t (fun s => (g_fam s).g X Y) t := by
+  dsimp [metric_var_form, eval02]
+  rw [TensorAlgebra.contract_fromBilinear]
+  rfl
 
 -- 4. Metric Time Derivative Calculus Axioms
 /-- Product rule and constant rules for time derivatives involving the metric. -/
@@ -97,7 +107,7 @@ class MetricTimeDerivativeRules (Time R V : Type) [CommRing R] [AddCommGroup V] 
     (@TraceOperator.trace R V TR_OP (fun X => TimeDerivative.partial_t (fun s => A s X) t) : R)
   t_metric : ∀ (X Y : Time → V) (t : Time),
     TimeDerivative.partial_t (fun s => (g_fam s).g (X s) (Y s)) t =
-    (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t).val (X t) (Y t) +
+    eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) (X t) (Y t) +
     (g_fam t).g (TimeDerivative.partial_t X t) (Y t) +
     (g_fam t).g (X t) (TimeDerivative.partial_t Y t)
 
@@ -122,43 +132,43 @@ lemma metric_zero_left {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [
 lemma raise_variation {Time R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
   [TimeDerivative Time R] [TimeDerivative Time V] [TraceOperator R V] [TimeDerivativeRules Time R V]
   (g_fam : Time → MetricDuality R V) [MetricTimeDerivativeRules Time R V g_fam]
-  (T : SmoothBilinearForm R V) (X Y : V) (t : Time) :
+  (T : AbstractBilinearForm R V) (X Y : V) (t : Time) :
   (g_fam t).g (TimeDerivative.partial_t (fun s => (g_fam s).raise T X) t) Y =
-  - (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t).val ((g_fam t).raise T X) Y := by
-  have h1 : (fun s => (g_fam s).g ((g_fam s).raise T X) Y) = fun s => T X Y := by
+  - eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise T X) Y := by
+  have h1 : (fun s => (g_fam s).g ((g_fam s).raise T X) Y) = fun s => eval02 T X Y := by
     funext s
     exact (g_fam s).g_raise T X Y
   have h2 : TimeDerivative.partial_t (fun s => (g_fam s).g ((g_fam s).raise T X) Y) t =
-            TimeDerivative.partial_t (fun s => T X Y) t := by
+            TimeDerivative.partial_t (fun s => eval02 T X Y) t := by
     rw [h1]
-  have h3 : TimeDerivative.partial_t (fun s => T X Y) t = 0 := by
-    exact MetricTimeDerivativeRules.t_const_R g_fam (T X Y) t
+  have h3 : TimeDerivative.partial_t (fun s => eval02 T X Y) t = 0 := by
+    exact MetricTimeDerivativeRules.t_const_R g_fam (eval02 T X Y) t
   have h4 : TimeDerivative.partial_t (fun s => (g_fam s).g ((g_fam s).raise T X) Y) t =
-            (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t).val ((g_fam t).raise T X) Y +
+            eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise T X) Y +
             (g_fam t).g (TimeDerivative.partial_t (fun s => (g_fam s).raise T X) t) Y +
             (g_fam t).g ((g_fam t).raise T X) (TimeDerivative.partial_t (fun s => Y) t) := by
-    exact MetricTimeDerivativeRules.t_metric (fun s => (g_fam s).raise T X) (fun s => Y) t
+    exact MetricTimeDerivativeRules.t_metric (g_fam:=g_fam) (fun s => (g_fam s).raise T X) (fun s => Y) t
   have h5 : TimeDerivative.partial_t (fun s => Y) t = 0 := MetricTimeDerivativeRules.t_const_V g_fam Y t
   have h6 : (g_fam t).g ((g_fam t).raise T X) (TimeDerivative.partial_t (fun s => Y) t) = 0 := by
     rw [h5]
     exact metric_zero_right ((g_fam t).toNonDegenerateMetric.toAbstractMetricTensor) ((g_fam t).raise T X)
-  have h7 : 0 = (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t).val ((g_fam t).raise T X) Y +
+  have h7 : 0 = eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise T X) Y +
                 (g_fam t).g (TimeDerivative.partial_t (fun s => (g_fam s).raise T X) t) Y := by
-    calc 0 = TimeDerivative.partial_t (fun s => T X Y) t := h3.symm
+    calc 0 = TimeDerivative.partial_t (fun s => eval02 T X Y) t := h3.symm
          _ = TimeDerivative.partial_t (fun s => (g_fam s).g ((g_fam s).raise T X) Y) t := h2.symm
-         _ = (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t).val ((g_fam t).raise T X) Y +
+         _ = eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise T X) Y +
              (g_fam t).g (TimeDerivative.partial_t (fun s => (g_fam s).raise T X) t) Y +
              (g_fam t).g ((g_fam t).raise T X) (TimeDerivative.partial_t (fun s => Y) t) := h4
-         _ = (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t).val ((g_fam t).raise T X) Y +
+         _ = eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise T X) Y +
              (g_fam t).g (TimeDerivative.partial_t (fun s => (g_fam s).raise T X) t) Y + 0 := by rw [h6]
-         _ = (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t).val ((g_fam t).raise T X) Y +
+         _ = eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise T X) Y +
              (g_fam t).g (TimeDerivative.partial_t (fun s => (g_fam s).raise T X) t) Y := by abel
   calc (g_fam t).g (TimeDerivative.partial_t (fun s => (g_fam s).raise T X) t) Y
-     = (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t).val ((g_fam t).raise T X) Y +
+     = eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise T X) Y +
        (g_fam t).g (TimeDerivative.partial_t (fun s => (g_fam s).raise T X) t) Y
-       - (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t).val ((g_fam t).raise T X) Y := by abel
-     _ = 0 - (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t).val ((g_fam t).raise T X) Y := by rw [← h7]
-     _ = - (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t).val ((g_fam t).raise T X) Y := by abel
+       - eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise T X) Y := by abel
+     _ = 0 - eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise T X) Y := by rw [← h7]
+     _ = - eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise T X) Y := by abel
 
 -- 6. Metric Trace Variation
 /-- Time variation of the trace of a fixed metric. -/
@@ -166,7 +176,7 @@ lemma tr_g_variation {Time R V : Type} [CommRing R] [AddCommGroup V] [Module R V
   [TimeDerivative Time R] [TimeDerivative Time V] [TR_OP : TraceOperator R V] [TR : TraceLinearityRules R V]
   [TimeDerivativeRules Time R V]
   (g_fam : Time → MetricDuality R V) [MetricTimeDerivativeRules Time R V g_fam]
-  (T : SmoothBilinearForm R V) (t : Time) :
+  (T : AbstractBilinearForm R V) (t : Time) [IR : TensorInnerProductRules R V (g_fam t)] :
   (TimeDerivative.partial_t (fun s => (@TraceOperator.trace R V TR_OP (fun X => (g_fam s).raise T X) : R)) t : R) =
   - tensorInnerProduct (g_fam t) (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) T := by
   have h1 : (TimeDerivative.partial_t (fun s => (@TraceOperator.trace R V TR_OP (fun X => (g_fam s).raise T X) : R)) t : R) =
@@ -182,7 +192,7 @@ lemma tr_g_variation {Time R V : Type} [CommRing R] [AddCommGroup V] [Module R V
                  - (g_fam t).g ((g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise T X)) Y := by
       exact metric_neg_left ((g_fam t).toNonDegenerateMetric.toAbstractMetricTensor) ((g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise T X)) Y
     have step3 : (g_fam t).g ((g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise T X)) Y =
-                 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t).val ((g_fam t).raise T X) Y := by
+                 eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise T X) Y := by
       exact (g_fam t).g_raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise T X) Y
     rw [step2, step3]
     exact step1
@@ -211,7 +221,7 @@ lemma tr_g_variation {Time R V : Type} [CommRing R] [AddCommGroup V] [Module R V
     ring
   have h6 : tensorInnerProduct (g_fam t) (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) T =
             (@TraceOperator.trace R V TR_OP (fun X => (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise T X)) : R) := by
-    rfl
+    exact IR.inner_trace (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) T
   calc (TimeDerivative.partial_t (fun s => (@TraceOperator.trace R V TR_OP (fun X => (g_fam s).raise T X) : R)) t : R)
      = (@TraceOperator.trace R V TR_OP (fun X => TimeDerivative.partial_t (fun s => (g_fam s).raise T X) t) : R) := h1
    _ = (@TraceOperator.trace R V TR_OP (fun X => - (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise T X)) : R) := h2
@@ -239,9 +249,9 @@ abbrev nabla_fam {Time : Type} (g_fam : Time → MetricDuality R V) (t : Time) :
 -/
 def h_cov_deriv {Time : Type} [TimeDerivative Time R] [TimeDerivativeRules Time R V]
   (g_fam : Time → MetricDuality R V) (t : Time) (X Y Z : V) : R :=
-  action X ((metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t).val Y Z)
-  - (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t).val ((nabla_fam g_fam t).nabla X Y) Z
-  - (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t).val Y ((nabla_fam g_fam t).nabla X Z)
+  action X (eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) Y Z)
+  - eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((nabla_fam g_fam t).nabla X Y) Z
+  - eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) Y ((nabla_fam g_fam t).nabla X Z)
 
 /-- Palatini identity for the variation of the Levi-Civita connection. -/
 lemma connection_variation {Time : Type} [TimeDerivative Time R] [TimeDerivative Time V]
@@ -251,7 +261,7 @@ lemma connection_variation {Time : Type} [TimeDerivative Time R] [TimeDerivative
   (X Y Z : V) (t : Time) :
   2 * (g_fam t).g (TimeDerivative.partial_t (fun s => (nabla_fam g_fam s).nabla X Y) t) Z =
   h_cov_deriv g_fam t X Y Z + h_cov_deriv g_fam t Y X Z - h_cov_deriv g_fam t Z X Y := by
-  let h (A B : V) := (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t).val A B
+  let h (A B : V) := eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) A B
   let n (A B : V) := (nabla_fam g_fam t).nabla A B
 
   have l_add : ∀ (f₁ f₂ : Time → R), TimeDerivative.partial_t (fun s => f₁ s + f₂ s) t = TimeDerivative.partial_t f₁ t + TimeDerivative.partial_t f₂ t := fun f₁ f₂ => TimeDerivativeRules.t_add V f₁ f₂ t
@@ -285,9 +295,24 @@ lemma connection_variation {Time : Type} [TimeDerivative Time R] [TimeDerivative
     rw [pt_term2] at pt_smul
     exact pt_smul
 
-  have pt1 : TimeDerivative.partial_t (fun s => action X ((g_fam s).g Y Z)) t = action X (h Y Z) := ActionTimeDerivativeRules.t_action X (fun s => (g_fam s).g Y Z) t
-  have pt2 : TimeDerivative.partial_t (fun s => action Y ((g_fam s).g X Z)) t = action Y (h X Z) := ActionTimeDerivativeRules.t_action Y (fun s => (g_fam s).g X Z) t
-  have pt3 : TimeDerivative.partial_t (fun s => action Z ((g_fam s).g X Y)) t = action Z (h X Y) := ActionTimeDerivativeRules.t_action Z (fun s => (g_fam s).g X Y) t
+  have pt1 : TimeDerivative.partial_t (fun s => action X ((g_fam s).g Y Z)) t = action X (h Y Z) := by
+    have pt1_base := ActionTimeDerivativeRules.t_action X (fun s => (g_fam s).g Y Z) t
+    have h_sub : TimeDerivative.partial_t (fun s => (g_fam s).g Y Z) t = h Y Z := by
+      exact (metric_var_form_eval (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t Y Z).symm
+    rw [h_sub] at pt1_base
+    exact pt1_base
+  have pt2 : TimeDerivative.partial_t (fun s => action Y ((g_fam s).g X Z)) t = action Y (h X Z) := by
+    have pt2_base := ActionTimeDerivativeRules.t_action Y (fun s => (g_fam s).g X Z) t
+    have h_sub : TimeDerivative.partial_t (fun s => (g_fam s).g X Z) t = h X Z := by
+      exact (metric_var_form_eval (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t X Z).symm
+    rw [h_sub] at pt2_base
+    exact pt2_base
+  have pt3 : TimeDerivative.partial_t (fun s => action Z ((g_fam s).g X Y)) t = action Z (h X Y) := by
+    have pt3_base := ActionTimeDerivativeRules.t_action Z (fun s => (g_fam s).g X Y) t
+    have h_sub : TimeDerivative.partial_t (fun s => (g_fam s).g X Y) t = h X Y := by
+      exact (metric_var_form_eval (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t X Y).symm
+    rw [h_sub] at pt3_base
+    exact pt3_base
 
   have pt_X : TimeDerivative.partial_t (fun s => X) t = 0 := MetricTimeDerivativeRules.t_const_V g_fam X t
   have pt_Y : TimeDerivative.partial_t (fun s => Y) t = 0 := MetricTimeDerivativeRules.t_const_V g_fam Y t
@@ -369,14 +394,15 @@ lemma connection_variation {Time : Type} [TimeDerivative Time R] [TimeDerivative
   have h_symm : ∀ A B : V, h A B = h B A := by
     intro A B
     dsimp [h]
+    rw [metric_var_form_eval (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor), metric_var_form_eval (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor)]
     have step : (fun s => (g_fam s).g A B) = (fun s => (g_fam s).g B A) := by
       funext s
       exact (g_fam s).symm A B
     change TimeDerivative.partial_t (fun s => (g_fam s).g A B) t = TimeDerivative.partial_t (fun s => (g_fam s).g B A) t
     rw [step]
 
-  have h_add_right : ∀ A B C : V, h A (B + C) = h A B + h A C := (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t).add_right
-  have h_smul_right : ∀ c A B, h A (c • B) = c * h A B := (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t).smul_right
+  have h_add_right : ∀ A B C : V, h A (B + C) = h A B + h A C := eval02_add_right _
+  have h_smul_right : ∀ c A B, h A (c • B) = c * h A B := eval02_smul_right _
 
   have h_neg_right : ∀ A B : V, h A (-B) = - h A B := by
     intro A B
@@ -417,4 +443,4 @@ lemma connection_variation {Time : Type} [TimeDerivative Time R] [TimeDerivative
      = 2 * (h (n X Y) Z + (g_fam t).g (TimeDerivative.partial_t (fun s => (nabla_fam g_fam s).nabla X Y) t) Z) - 2 * h (n X Y) Z := by ring
    _ = h_cov_deriv g_fam t X Y Z + h_cov_deriv g_fam t Y X Z - h_cov_deriv g_fam t Z X Y + 2 * h Z (n X Y) - 2 * h (n X Y) Z := by rw [h_base]
    _ = h_cov_deriv g_fam t X Y Z + h_cov_deriv g_fam t Y X Z - h_cov_deriv g_fam t Z X Y + 2 * h Z (n X Y) - 2 * h Z (n X Y) := by rw [a1]
-   _ = h_cov_deriv g_fam t X Y Z + h_cov_deriv g_fam t Y X Z - h_cov_deriv g_fam t Z X Y := by abel
+   _ = h_cov_deriv g_fam t X Y Z + h_cov_deriv g_fam t Y X Z - h_cov_deriv g_fam t Z X Y := by ring

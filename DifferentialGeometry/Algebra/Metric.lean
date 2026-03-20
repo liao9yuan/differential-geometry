@@ -5,6 +5,8 @@ import Mathlib.Tactic.Ring
 
 set_option autoImplicit false
 set_option linter.style.longLine false
+set_option linter.unusedSectionVars false
+set_option linter.style.emptyLine false
 
 open DifferentialGeometry.Bridge
 open TensorAlgebra
@@ -13,6 +15,62 @@ open TensorAlgebra
 # Riemannian Metric
 Algebraic formulation of the metric tensor and associated trace operations.
 -/
+
+variable {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
+
+/-- Evaluate a 0-2 tensor on two vector fields. -/
+def eval02 (T : AbstractTensor R V 0 2) (X Y : V) : R :=
+  toScalar (contract (r:=0) (s:=0) (contract (r:=1) (s:=1) (tensor_prod (r1:=0) (s1:=2) (r2:=2) (s2:=0) T (tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector X) (fromVector Y)))))
+
+lemma eval02_add_left (T : AbstractTensor R V 0 2) (X Y Z : V) :
+  eval02 T (X + Y) Z = eval02 T X Z + eval02 T Y Z := by
+  dsimp [eval02]
+  rw [fromVector_add]
+  rw [tensor_prod_add_left]
+  rw [tensor_prod_add_right]
+  rw [contract_add]
+  rw [contract_add]
+  rw [toScalar_add]
+
+lemma eval02_smul_left (T : AbstractTensor R V 0 2) (f : R) (X Y : V) :
+  eval02 T (f • X) Y = f * eval02 T X Y := by
+  dsimp [eval02]
+  rw [fromVector_smul]
+  rw [tensor_prod_smul_left]
+  rw [tensor_prod_smul_right]
+  rw [contract_smul]
+  rw [contract_smul]
+  rw [toScalar_smul]
+
+lemma eval02_smul (T : AbstractTensor R V 0 2) (c : R) (X Y : V) :
+  eval02 (c • T) X Y = c * eval02 T X Y := by
+  dsimp [eval02]
+  have h_smul : c • T = TensorAlgebra.smul (r:=0) (s:=2) c T := rfl
+  rw [h_smul]
+  rw [tensor_prod_smul_left]
+  rw [contract_smul]
+  rw [contract_smul]
+  rw [toScalar_smul]
+
+lemma eval02_add_right (T : AbstractTensor R V 0 2) (X Y Z : V) :
+  eval02 T X (Y + Z) = eval02 T X Y + eval02 T X Z := by
+  dsimp [eval02]
+  rw [fromVector_add]
+  rw [tensor_prod_add_right]
+  rw [tensor_prod_add_right]
+  rw [contract_add]
+  rw [contract_add]
+  rw [toScalar_add]
+
+lemma eval02_smul_right (T : AbstractTensor R V 0 2) (f : R) (X Y : V) :
+  eval02 T X (f • Y) = f * eval02 T X Y := by
+  dsimp [eval02]
+  rw [fromVector_smul]
+  rw [tensor_prod_smul_right]
+  rw [tensor_prod_smul_right]
+  rw [contract_smul]
+  rw [contract_smul]
+  rw [toScalar_smul]
 
 /-- Metric tensor
 Input: (V, V)
@@ -29,10 +87,10 @@ variable {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra
 
 /-- The classical geometric evaluation of the metric tensor on two vector fields. -/
 def g (metric : AbstractMetricTensor R V) (X Y : V) : R :=
-  toScalar (contract (r:=0) (s:=0) (contract (r:=1) (s:=1) (tensor_prod (r1:=0) (s1:=2) (r2:=2) (s2:=0) metric.g_tensor (tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector X) (fromVector Y)))))
+  eval02 metric.g_tensor X Y
 
 lemma symm (metric : AbstractMetricTensor R V) (X Y : V) : metric.g X Y = metric.g Y X := by
-  dsimp [g]
+  dsimp [g, eval02]
   have h := TensorAlgebra.contract_swap_covariant_eval X Y metric.g_tensor
   rw [metric.symm_tensor] at h
   rw [h]
@@ -40,22 +98,12 @@ lemma symm (metric : AbstractMetricTensor R V) (X Y : V) : metric.g X Y = metric
 lemma bilinear_add_left (metric : AbstractMetricTensor R V) (X Y Z : V) :
   metric.g (X + Y) Z = metric.g X Z + metric.g Y Z := by
   dsimp [g]
-  rw [fromVector_add]
-  rw [tensor_prod_add_left]
-  rw [tensor_prod_add_right]
-  rw [contract_add]
-  rw [contract_add]
-  rw [toScalar_add]
+  exact eval02_add_left metric.g_tensor X Y Z
 
 lemma bilinear_smul_left (metric : AbstractMetricTensor R V) (f : R) (X Y : V) :
   metric.g (f • X) Y = f * metric.g X Y := by
   dsimp [g]
-  rw [fromVector_smul]
-  rw [tensor_prod_smul_left]
-  rw [tensor_prod_smul_right]
-  rw [contract_smul]
-  rw [contract_smul]
-  rw [toScalar_smul]
+  exact eval02_smul_left metric.g_tensor f X Y
 
 end AbstractMetricTensor
 
@@ -108,8 +156,9 @@ class NonDegenerateMetric (R V : Type*) [CommRing R] [AddCommGroup V] [Module R 
 Input: (NonDegenerateMetric R V)
 Output: Type -/
 class MetricDuality (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] extends NonDegenerateMetric R V where
-  raise : SmoothBilinearForm R V → (V → V)
-  g_raise : ∀ (T : SmoothBilinearForm R V) (X Y : V), AbstractMetricTensor.g toAbstractMetricTensor (raise T X) Y = T X Y
+  g_inv : AbstractTensor R V 2 0
+  raise : AbstractBilinearForm R V → (V → V)
+  g_raise : ∀ (T : AbstractBilinearForm R V) (X Y : V), AbstractMetricTensor.g toAbstractMetricTensor (raise T X) Y = eval02 T X Y
   sharp : (V → R) → V
   flat : V → (V → R)
   sharp_add : ∀ f h : V → R, sharp (fun v => f v + h v) = sharp f + sharp h
@@ -118,33 +167,30 @@ class MetricDuality (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] [Te
   g_sharp : ∀ (f : V → R) (Z : V), AbstractMetricTensor.g toAbstractMetricTensor (sharp f) Z = f Z
   flat_def : ∀ (X Y : V), flat X Y = AbstractMetricTensor.g toAbstractMetricTensor X Y
 
-variable {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
 variable (metric_duality : MetricDuality R V)
 
 /-- Prove linearity of raise over addition. -/
-lemma raise_add (T₁ T₂ : SmoothBilinearForm R V) (X : V) :
+lemma raise_add (T₁ T₂ : AbstractBilinearForm R V) (X : V) :
     metric_duality.raise (T₁ + T₂) X = metric_duality.raise T₁ X + metric_duality.raise T₂ X := by
   apply metric_duality.eq_of_forall_g_eq
   intro Z
-  have h1 : AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (metric_duality.raise (T₁ + T₂) X) Z = (T₁ + T₂) X Z := metric_duality.g_raise (T₁ + T₂) X Z
-  have h2 : (T₁ + T₂) X Z = T₁ X Z + T₂ X Z := rfl
-  have h3 : T₁ X Z = AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (metric_duality.raise T₁ X) Z := by rw [metric_duality.g_raise T₁ X Z]
-  have h4 : T₂ X Z = AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (metric_duality.raise T₂ X) Z := by rw [metric_duality.g_raise T₂ X Z]
   have h5 : AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (metric_duality.raise T₁ X + metric_duality.raise T₂ X) Z = AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (metric_duality.raise T₁ X) Z + AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (metric_duality.raise T₂ X) Z := metric_duality.toAbstractMetricTensor.bilinear_add_left _ _ _
-  calc AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (metric_duality.raise (T₁ + T₂) X) Z = T₁ X Z + T₂ X Z := by { rw [h1]; rfl }
-    _ = AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (metric_duality.raise T₁ X) Z + AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (metric_duality.raise T₂ X) Z := by rw [h3, h4]
-    _ = AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (metric_duality.raise T₁ X + metric_duality.raise T₂ X) Z := by rw [h5]
+  calc AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (metric_duality.raise (T₁ + T₂) X) Z = eval02 (T₁ + T₂) X Z := metric_duality.g_raise (T₁ + T₂) X Z
+    _ = eval02 T₁ X Z + eval02 T₂ X Z := by
+      dsimp [eval02]
+      have h_add : T₁ + T₂ = TensorAlgebra.add (r:=0) (s:=2) T₁ T₂ := rfl
+      simp only [h_add, tensor_prod_add_left, contract_add, toScalar_add]
+    _ = AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (metric_duality.raise T₁ X) Z + AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (metric_duality.raise T₂ X) Z := by rw [metric_duality.g_raise T₁ X Z, metric_duality.g_raise T₂ X Z]
+    _ = AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (metric_duality.raise T₁ X + metric_duality.raise T₂ X) Z := h5.symm
 
 /-- Prove linearity of raise over scalar multiplication. -/
-lemma raise_smul (T : SmoothBilinearForm R V) (c : R) (X : V) :
+lemma raise_smul (T : AbstractBilinearForm R V) (c : R) (X : V) :
     metric_duality.raise (c • T) X = c • metric_duality.raise T X := by
   apply metric_duality.eq_of_forall_g_eq
   intro Z
-  have h1 : AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (metric_duality.raise (c • T) X) Z = (c • T) X Z := metric_duality.g_raise (c • T) X Z
-  -- (c • T) X Z = c * T X Z by definition
-  have h3 : c * T X Z = c * AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (metric_duality.raise T X) Z := by rw [metric_duality.g_raise T X Z]
   have h4 : AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (c • metric_duality.raise T X) Z = c * AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (metric_duality.raise T X) Z := metric_duality.toAbstractMetricTensor.bilinear_smul_left c _ Z
-  calc AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (metric_duality.raise (c • T) X) Z = c * T X Z := by { rw [h1]; rfl }
-    _ = c * AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (metric_duality.raise T X) Z := h3
-    _ = AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (c • metric_duality.raise T X) Z := by rw [h4]
-
+  calc AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (metric_duality.raise (c • T) X) Z = eval02 (c • T) X Z := metric_duality.g_raise (c • T) X Z
+    _ = c * eval02 T X Z := by
+      exact eval02_smul T c X Z
+    _ = c * AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (metric_duality.raise T X) Z := by rw [metric_duality.g_raise T X Z]
+    _ = AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (c • metric_duality.raise T X) Z := h4.symm

@@ -1,113 +1,50 @@
 import DifferentialGeometry.Algebra.VectorField
+import DifferentialGeometry.Bridge.Defs
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.Abel
 
 set_option autoImplicit false
 set_option linter.style.longLine false
+set_option linter.unusedSectionVars false
+set_option linter.style.emptyLine false
+
+open DifferentialGeometry.Bridge
 
 /-!
 # Smooth Bilinear Form
 Algebraic formulation of a (0,2)-tensor.
 -/
 
-variable (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V]
+variable (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
 
-/-- Smooth Bilinear Form structure enforcing bilinearity.
-Input: (V, V)
-Output: R -/
-structure SmoothBilinearForm where
-  val : V → V → R
-  add_left : ∀ X₁ X₂ Y : V, val (X₁ + X₂) Y = val X₁ Y + val X₂ Y
-  smul_left : ∀ (a : R) (X Y : V), val (a • X) Y = a * val X Y
-  add_right : ∀ X Y₁ Y₂ : V, val X (Y₁ + Y₂) = val X Y₁ + val X Y₂
-  smul_right : ∀ (a : R) (X Y : V), val X (a • Y) = a * val X Y
+/-- Smooth Bilinear Form structure alias for `AbstractTensor R V 0 2`. -/
+abbrev AbstractBilinearForm := TensorAlgebra.AbstractTensor R V 0 2
 
-/-- Coercion from `SmoothBilinearForm R V` to a function `V → V → R`, allowing function evaluation syntax `T X Y`.
-Input: (SmoothBilinearForm R V)
-Output: V → V → R -/
-instance : CoeFun (SmoothBilinearForm R V) (fun _ => V → V → R) where
-  coe T := T.val
+variable {R V}
 
-/-- Extensionality lemma for smooth bilinear forms.
-Prove that two smooth bilinear forms are identically equal if their evaluations on all vector fields match.
-Input: (SmoothBilinearForm R V, SmoothBilinearForm R V)
-Output: Prop -/
-@[ext]
-lemma ext (T₁ T₂ : SmoothBilinearForm R V) (h : ∀ X Y : V, T₁ X Y = T₂ X Y) : T₁ = T₂ := by
-  cases T₁
-  cases T₂
-  congr
-  funext X Y
-  exact h X Y
+/-- The zero tensor in `AbstractTensor R V r s`. Constructed carefully to avoid typeclass rewrites. -/
+def zero_tensor : (r s : ℕ) → TensorAlgebra.AbstractTensor R V r s
+| 0, 0 => TensorAlgebra.fromScalar (0 : R)
+| r + 1, s => TensorAlgebra.tensor_prod (r1:=r) (s1:=s) (r2:=1) (s2:=0) (zero_tensor r s) (TensorAlgebra.fromVector (0 : V))
+| 0, s + 1 => TensorAlgebra.tensor_prod (r1:=0) (s1:=s) (r2:=0) (s2:=1) (zero_tensor 0 s) (TensorAlgebra.fromCovector (0 : V →ₗ[R] R))
 
-/-- Defines the zero smooth bilinear form which returns the zero element of `R` for any vector fields.
-Input: (R, V)
-Output: Zero (SmoothBilinearForm R V) -/
-instance : Zero (SmoothBilinearForm R V) where
-  zero := {
-    val := fun _ _ => 0
-    add_left := by simp
-    smul_left := by simp
-    add_right := by simp
-    smul_right := by simp
-  }
+/-- Zero typeclass instance for generic tensors -/
+instance {r s : ℕ} : Zero (TensorAlgebra.AbstractTensor R V r s) where
+  zero := zero_tensor r s
 
-/-- Addition of two smooth bilinear forms.
-Input: (SmoothBilinearForm R V, SmoothBilinearForm R V)
-Output: SmoothBilinearForm R V -/
-instance : Add (SmoothBilinearForm R V) where
-  add T₁ T₂ := {
-    val := fun X Y => T₁ X Y + T₂ X Y
-    add_left := fun X₁ X₂ Y => by
-      simp only [T₁.add_left, T₂.add_left]
-      abel
-    smul_left := fun a X Y => by
-      simp only [T₁.smul_left, T₂.smul_left]
-      ring
-    add_right := fun X Y₁ Y₂ => by
-      simp only [T₁.add_right, T₂.add_right]
-      abel
-    smul_right := fun a X Y => by
-      simp only [T₁.smul_right, T₂.smul_right]
-      ring
-  }
+lemma zero_tensor_0_2_step : (zero_tensor 0 2 : TensorAlgebra.AbstractTensor R V 0 2) =
+  TensorAlgebra.tensor_prod (r1:=0) (s1:=1) (r2:=0) (s2:=1)
+    (zero_tensor 0 1 : TensorAlgebra.AbstractTensor R V 0 1)
+    (TensorAlgebra.fromCovector (0 : V →ₗ[R] R)) := by rw [zero_tensor]
 
-/-- Subtraction of two smooth bilinear forms.
-Input: (SmoothBilinearForm R V, SmoothBilinearForm R V)
-Output: SmoothBilinearForm R V -/
-instance : Sub (SmoothBilinearForm R V) where
-  sub T₁ T₂ := {
-    val := fun X Y => T₁ X Y - T₂ X Y
-    add_left := fun X₁ X₂ Y => by
-      simp only [T₁.add_left, T₂.add_left]
-      abel
-    smul_left := fun a X Y => by
-      simp only [T₁.smul_left, T₂.smul_left]
-      ring
-    add_right := fun X Y₁ Y₂ => by
-      simp only [T₁.add_right, T₂.add_right]
-      abel
-    smul_right := fun a X Y => by
-      simp only [T₁.smul_right, T₂.smul_right]
-      ring
-  }
+/-- Add typeclass instance for generic tensors -/
+instance {r s : ℕ} : Add (TensorAlgebra.AbstractTensor R V r s) where
+  add := TensorAlgebra.add
 
-/-- Scalar multiplication of a smooth bilinear form by a function.
-Input: (R, SmoothBilinearForm R V)
-Output: SmoothBilinearForm R V -/
-instance : SMul R (SmoothBilinearForm R V) where
-  smul a T := {
-    val := fun X Y => a * T X Y
-    add_left := fun X₁ X₂ Y => by
-      simp only [T.add_left]
-      ring
-    smul_left := fun b X Y => by
-      simp only [T.smul_left]
-      ring
-    add_right := fun X Y₁ Y₂ => by
-      simp only [T.add_right]
-      ring
-    smul_right := fun b X Y => by
-      simp only [T.smul_right]
-      ring
-  }
+/-- SMul typeclass instance for generic tensors -/
+instance {r s : ℕ} : SMul R (TensorAlgebra.AbstractTensor R V r s) where
+  smul := TensorAlgebra.smul
+
+/-- Sub typeclass instance for generic tensors -/
+instance {r s : ℕ} : Sub (TensorAlgebra.AbstractTensor R V r s) where
+  sub T₁ T₂ := TensorAlgebra.add T₁ (TensorAlgebra.smul (-1 : R) T₂)

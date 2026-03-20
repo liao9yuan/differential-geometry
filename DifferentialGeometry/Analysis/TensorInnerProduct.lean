@@ -7,6 +7,8 @@ import Mathlib.Tactic.Abel
 
 set_option autoImplicit false
 set_option linter.style.longLine false
+set_option linter.unusedSectionVars false
+set_option linter.style.emptyLine false
 
 /-!
 # Tensor Inner Product
@@ -17,59 +19,51 @@ open DifferentialGeometry.Bridge TensorAlgebra
 
 variable {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
 variable (metric : MetricDuality R V)
-variable [TraceOperator R V] [TR : TraceLinearityRules R V]
+def contract4 (T : AbstractTensor R V 4 4) : AbstractTensor R V 0 0 :=
+  contract (r:=0) (s:=0) (contract (r:=1) (s:=1) (contract (r:=2) (s:=2) (contract (r:=3) (s:=3) T)))
 
 -- 2. Define Tensor Inner Product
-def tensorInnerProduct (T S : SmoothBilinearForm R V) : R :=
-  TraceOperator.trace ((fun X => metric.raise T X) ∘ (fun X => metric.raise S X))
+def tensorInnerProduct (T S : AbstractBilinearForm R V) : R :=
+  toScalar (
+    contract4 (
+      tensor_prod (r1:=4) (s1:=0) (r2:=0) (s2:=4)
+        (tensor_prod (r1:=2) (s1:=0) (r2:=2) (s2:=0) metric.g_inv metric.g_inv)
+        (tensor_prod (r1:=0) (s1:=2) (r2:=0) (s2:=2) T S)
+    )
+  )
 
-def tensorNormSq (T : SmoothBilinearForm R V) : R := tensorInnerProduct metric T T
+class TensorInnerProductRules (R V : Type) [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] (metric : MetricDuality R V) where
+  inner_symm : ∀ (T S : AbstractBilinearForm R V), tensorInnerProduct metric T S = tensorInnerProduct metric S T
+  inner_trace : ∀ (T S : AbstractBilinearForm R V) [TR_OP : TraceOperator R V],
+    tensorInnerProduct metric T S = @TraceOperator.trace R V TR_OP (fun X => metric.raise T (metric.raise S X))
+
+variable [IR : TensorInnerProductRules R V metric]
+
+def tensorNormSq (T : AbstractBilinearForm R V) : R := tensorInnerProduct metric T T
 
 -- 3. Prove Inner Product Properties
 
 -- Lemma 1: tensor_inner_symm
-lemma tensor_inner_symm (T S : SmoothBilinearForm R V) :
+lemma tensor_inner_symm (T S : AbstractBilinearForm R V) :
     tensorInnerProduct metric T S = tensorInnerProduct metric S T := by
-  dsimp [tensorInnerProduct]
-  exact TR.trace_comm
-
--- Helper lemmas for Linearity of Musical Endomorphisms
-omit [TraceOperator R V] TR in
-lemma to_endo_add (T₁ T₂ : SmoothBilinearForm R V) :
-    (fun X => metric.raise (T₁ + T₂) X) =
-    (fun X => metric.raise T₁ X + metric.raise T₂ X) := by
-  funext X
-  exact raise_add metric T₁ T₂ X
-
-omit [TraceOperator R V] TR in
-lemma to_endo_smul (c : R) (T : SmoothBilinearForm R V) :
-    (fun X => metric.raise (c • T) X) =
-    fun X => c • metric.raise T X := by
-  funext X
-  exact raise_smul metric T c X
+  exact IR.inner_symm T S
 
 -- Lemma 2: tensor_inner_add_left
-lemma tensor_inner_add_left (T₁ T₂ S : SmoothBilinearForm R V) :
+lemma tensor_inner_add_left (T₁ T₂ S : AbstractBilinearForm R V) :
     tensorInnerProduct metric (T₁ + T₂) S = tensorInnerProduct metric T₁ S + tensorInnerProduct metric T₂ S := by
-  dsimp [tensorInnerProduct]
-  rw [to_endo_add metric]
-  have h_comp_dist : ((fun X => metric.raise T₁ X + metric.raise T₂ X) ∘ (fun X => metric.raise S X)) =
-                     ((fun X => metric.raise T₁ X) ∘ (fun X => metric.raise S X)) + ((fun X => metric.raise T₂ X) ∘ (fun X => metric.raise S X)) := rfl
-  rw [h_comp_dist]
-  exact TR.trace_add
+  dsimp [tensorInnerProduct, contract4]
+  have h_add : T₁ + T₂ = TensorAlgebra.add (r:=0) (s:=2) T₁ T₂ := rfl
+  simp only [h_add, tensor_prod_add_left, tensor_prod_add_right, contract_add, toScalar_add]
 
 -- Lemma 3: tensor_inner_smul_left
-lemma tensor_inner_smul_left (c : R) (T S : SmoothBilinearForm R V) :
+lemma tensor_inner_smul_left (c : R) (T S : AbstractBilinearForm R V) :
     tensorInnerProduct metric (c • T) S = c * tensorInnerProduct metric T S := by
-  dsimp [tensorInnerProduct]
-  rw [to_endo_smul metric]
-  have h_comp_smul : ((fun X => c • metric.raise T X) ∘ (fun X => metric.raise S X)) =
-                     fun X => c • (((fun X => metric.raise T X) ∘ (fun X => metric.raise S X)) X) := rfl
-  rw [h_comp_smul]
-  exact TR.trace_smul
+  dsimp [tensorInnerProduct, contract4]
+  have h_smul : c • T = TensorAlgebra.smul (r:=0) (s:=2) c T := rfl
+  simp only [h_smul, tensor_prod_smul_left, tensor_prod_smul_right, contract_smul, toScalar_smul]
 
 -- Lemma 4: tensor_inner_add_right
-lemma tensor_inner_add_right (T S₁ S₂ : SmoothBilinearForm R V) :
+lemma tensor_inner_add_right (T S₁ S₂ : AbstractBilinearForm R V) :
     tensorInnerProduct metric T (S₁ + S₂) = tensorInnerProduct metric T S₁ + tensorInnerProduct metric T S₂ := by
   rw [tensor_inner_symm metric T (S₁ + S₂)]
   rw [tensor_inner_add_left metric S₁ S₂ T]
@@ -77,7 +71,7 @@ lemma tensor_inner_add_right (T S₁ S₂ : SmoothBilinearForm R V) :
   rw [tensor_inner_symm metric S₂ T]
 
 -- Lemma 5: tensor_inner_smul_right
-lemma tensor_inner_smul_right (c : R) (T S : SmoothBilinearForm R V) :
+lemma tensor_inner_smul_right (c : R) (T S : AbstractBilinearForm R V) :
     tensorInnerProduct metric T (c • S) = c * tensorInnerProduct metric T S := by
   rw [tensor_inner_symm metric T (c • S)]
   rw [tensor_inner_smul_left metric c S T]
@@ -85,7 +79,7 @@ lemma tensor_inner_smul_right (c : R) (T S : SmoothBilinearForm R V) :
 
 /-- $|T + aS + bW|^2$ expansion -/
 lemma expand_norm_sq_add3
-  (T S W : SmoothBilinearForm R V)
+  (T S W : AbstractBilinearForm R V)
   (a b : R) :
   tensorNormSq metric (T + a • S + b • W) =
   tensorNormSq metric T +
@@ -100,9 +94,27 @@ lemma expand_norm_sq_add3
              tensor_inner_symm metric S T, tensor_inner_symm metric W T, tensor_inner_symm metric W S]
   ring
 
+
+
+-- Lemma 6: tensor_inner_sub_left
+lemma tensor_inner_sub_left (T₁ T₂ S : AbstractBilinearForm R V) :
+    tensorInnerProduct metric (T₁ - T₂) S = tensorInnerProduct metric T₁ S - tensorInnerProduct metric T₂ S := by
+  have h_add : T₁ - T₂ = T₁ + (-1:R) • T₂ := rfl
+  rw [h_add]
+  rw [tensor_inner_add_left, tensor_inner_smul_left]
+  ring_nf
+
+-- Lemma 7: tensor_inner_sub_right
+lemma tensor_inner_sub_right (T S₁ S₂ : AbstractBilinearForm R V) :
+    tensorInnerProduct metric T (S₁ - S₂) = tensorInnerProduct metric T S₁ - tensorInnerProduct metric T S₂ := by
+  have h_add : S₁ - S₂ = S₁ + (-1:R) • S₂ := rfl
+  rw [h_add]
+  rw [tensor_inner_add_right, tensor_inner_smul_right]
+  ring_nf
+
 /-- $|A - bB - cC|^2$ expansion -/
 lemma expand_norm_sq_sub3
-  (A B C : SmoothBilinearForm R V)
+  (A B C : AbstractBilinearForm R V)
   (b c : R) :
   tensorNormSq metric (A - b • B - c • C) =
   tensorNormSq metric A +
@@ -112,13 +124,7 @@ lemma expand_norm_sq_sub3
   (2:R) * c * tensorInnerProduct metric A C +
   (2:R) * b * c * tensorInnerProduct metric B C := by
   dsimp [tensorNormSq]
-  have h1 : A - b • B - c • C = A + (-b) • B + (-c) • C := by
-    ext X Y
-    change (A - b • B - c • C) X Y = (A + (-b) • B + (-c) • C) X Y
-    change A X Y - b * B X Y - c * C X Y = A X Y + (-b) * B X Y + (-c) * C X Y
-    ring
-  rw [h1]
-  simp only [tensor_inner_add_left metric, tensor_inner_add_right metric,
+  simp only [tensor_inner_sub_left metric, tensor_inner_sub_right metric,
              tensor_inner_smul_left metric, tensor_inner_smul_right metric,
              tensor_inner_symm metric B A, tensor_inner_symm metric C A, tensor_inner_symm metric C B]
   ring

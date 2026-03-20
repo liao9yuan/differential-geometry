@@ -1,8 +1,13 @@
 import Mathlib.Algebra.Module.Basic
 import Mathlib.Algebra.Ring.Basic
+import DifferentialGeometry.Algebra.VectorField
+import DifferentialGeometry.Algebra.BilinearForm
+import DifferentialGeometry.Algebra.Metric
 
 set_option autoImplicit false
 set_option linter.style.longLine false
+set_option linter.unusedSectionVars false
+set_option linter.style.emptyLine false
 
 /-!
 # Abstract Trace Concepts
@@ -42,3 +47,9 @@ class BilinearTraceLinearity (R V : Type) [CommRing R] [AddCommGroup V] [Bilinea
   tr_add : ∀ (T₁ T₂ : V → V → R), (BilinearTrace.tr (fun Y Z => T₁ Y Z + T₂ Y Z) : R) = BilinearTrace.tr T₁ + BilinearTrace.tr T₂
   tr_sub : ∀ (T₁ T₂ : V → V → R), (BilinearTrace.tr (fun Y Z => T₁ Y Z - T₂ Y Z) : R) = BilinearTrace.tr T₁ - BilinearTrace.tr T₂
   tr_zero : (BilinearTrace.tr (fun (_ _ : V) => (0 : R)) : R) = (0 : R)
+
+open DifferentialGeometry.Bridge TensorAlgebra
+
+-- Axiomatic rules for the trace of rank-1 operators to support divergence product rule.
+class MetricTraceRankOneRules (R V : Type) [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] (metric : AbstractMetricTensor R V) [MetricTraceOperator R V metric] where
+  trace_rank_one : ∀ U W : V, MetricTraceOperator.metric_trace metric (fun Y Z => metric.g U Y * metric.g W Z) = metric.g U W
