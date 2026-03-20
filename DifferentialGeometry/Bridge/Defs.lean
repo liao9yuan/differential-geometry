@@ -7,6 +7,7 @@ import Mathlib.Geometry.Manifold.Algebra.Structures
 import Mathlib.Geometry.Manifold.VectorField.LieBracket
 import DifferentialGeometry.Algebra.VectorField
 
+
 set_option autoImplicit false
 set_option linter.style.longLine false
 
@@ -267,17 +268,16 @@ class TensorAlgebra (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] whe
 
 namespace TensorAlgebra
 
-/-- Generalized Contraction.
-A generalized contraction across arbitrary indices `i` and `j` can be implemented/proven
-purely using the base `contract` operator combined with the routing permutations (`swap`).
-We route the i-th and j-th indices to the 0-th position, then annihilate them. -/
+/-
+Generalized Contraction.
+-/
 def contract_general {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
   {r s : ℕ} (i : Fin (r + 1)) (j : Fin (s + 1)) (T : AbstractTensor R V (r + 1) (s + 1)) : AbstractTensor R V r s :=
   contract (swap_covariant 0 j (swap_contravariant 0 i T))
 
 end TensorAlgebra
 
-/-- The analytic tensor algebra machinery (to be implemented by the analytic team) -/
+/-- The proof to the above class can go here -/
 noncomputable instance analyticTensorAlgebra : TensorAlgebra (ScalarField (I := I) (M := M)) (VectorField (I := I) (M := M)) := sorry
 
 end DifferentialGeometry.Bridge

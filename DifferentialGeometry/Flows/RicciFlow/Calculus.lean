@@ -35,18 +35,21 @@ class RicciFlowCalculus
   (conn_fam : Time → AbstractAffineConnection R V)
   [MetricTimeDerivativeRules Time R V g_fam]
   [∀ s, MetricTraceOperator R V ((g_fam s).toNonDegenerateMetric.toAbstractMetricTensor)]
-  [RicciFlow Time (fun t => (g_fam t).toNonDegenerateMetric.toAbstractMetricTensor) conn_fam] where
+  [∀ s, TensorInnerProductRules R V (g_fam s)]
+  [∀ s, RicciOperator R V (conn_fam s)]
+  [RicciFlow Time (fun t => (g_fam t).toNonDegenerateMetric.toAbstractMetricTensor) conn_fam]
+  [∀ s, MetricCompatible (conn_fam s) (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor] where
 
   -- 1. Laplacian Evolution
   dt_laplacian : ∀ (u : R) t,
-    TimeDerivative.partial_t (fun s => TraceOperator.trace (fun X => (g_fam s).raise (hessianForm (conn_fam s) u) X)) t =
-    (2:R) * tensorInnerProduct (g_fam t) (ricciForm (conn_fam t)) (hessianForm (conn_fam t) u) -
+    TimeDerivative.partial_t (fun s => TraceOperator.trace (fun X => (g_fam s).raise (hessianForm (g_fam s) (conn_fam s) u) X)) t =
+    (2:R) * tensorInnerProduct (g_fam t) (ricciForm (conn_fam t)) (hessianForm (g_fam t) (conn_fam t) u) -
     TraceOperator.trace (fun X => (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X)
 
   -- 2. Gradient Squared Evolution
   dt_grad_sq : ∀ (u : Time → R) t,
     TimeDerivative.partial_t (fun s => (g_fam s).g (grad (g_fam s) (u s)) (grad (g_fam s) (u s))) t =
-    (2:R) * ricciForm (conn_fam t) (grad (g_fam t) (u t)) (grad (g_fam t) (u t)) +
+    (2:R) * eval02 (ricciForm (conn_fam t)) (grad (g_fam t) (u t)) (grad (g_fam t) (u t)) +
     (2:R) * (g_fam t).g (grad (g_fam t) (u t)) (grad (g_fam t) (TimeDerivative.partial_t u t))
 
   -- 3. Scalar Curvature Evolution
@@ -69,7 +72,10 @@ instance instRicciFlowCalculus
   (conn_fam : Time → AbstractAffineConnection R V)
   [MetricTimeDerivativeRules Time R V g_fam]
   [∀ s, MetricTraceOperator R V ((g_fam s).toNonDegenerateMetric.toAbstractMetricTensor)]
-  [RicciFlow Time (fun t => (g_fam t).toNonDegenerateMetric.toAbstractMetricTensor) conn_fam] :
+  [∀ s, TensorInnerProductRules R V (g_fam s)]
+  [∀ s, RicciOperator R V (conn_fam s)]
+  [RicciFlow Time (fun t => (g_fam t).toNonDegenerateMetric.toAbstractMetricTensor) conn_fam]
+  [∀ s, MetricCompatible (conn_fam s) (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor] :
   RicciFlowCalculus g_fam conn_fam where
   dt_laplacian := by
     intro u t
