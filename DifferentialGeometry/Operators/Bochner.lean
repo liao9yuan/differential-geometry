@@ -52,7 +52,7 @@ lemma hessian_commute_ricci [AbstractLieBracket V]
 
 variable [AbstractLieBracket V] [DerivationRules R V]
 
--- Define the Hessian as a SmoothBilinearForm so we can take its tensor norm squared.
+-- Defines the Hessian as an AbstractBilinearForm to allow tensor norm operations.
 def hessianForm (metric : MetricDuality R V) (conn : AbstractAffineConnection R V) [MetricCompatible conn metric.toNonDegenerateMetric.toAbstractMetricTensor] (f : R) : AbstractBilinearForm R V :=
   fromBilinear
     { toFun := fun X =>

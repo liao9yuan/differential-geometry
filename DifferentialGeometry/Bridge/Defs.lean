@@ -278,7 +278,7 @@ def contract_general {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] [T
 
 end TensorAlgebra
 
-/-- The proof to the above class can go here -/
+/-- Noncomputable instance instantiating the analytic tensor algebra. -/
 noncomputable instance analyticTensorAlgebra : TensorAlgebra (ScalarField (I := I) (M := M)) (VectorField (I := I) (M := M)) := sorry
 
 end DifferentialGeometry.Bridge
