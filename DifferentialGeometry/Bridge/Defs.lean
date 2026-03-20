@@ -225,6 +225,7 @@ class TensorAlgebra (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] whe
 
   -- 2. Scalar Definition:
   toScalar_fromScalar : ∀ f : R, toScalar (fromScalar f) = f
+  fromScalar_toScalar : ∀ T : AbstractTensor 0 0, fromScalar (toScalar T) = T
   toScalar_add : ∀ T1 T2 : AbstractTensor 0 0, toScalar (add T1 T2) = toScalar T1 + toScalar T2
   toScalar_smul : ∀ (c : R) (T : AbstractTensor 0 0), toScalar (smul c T) = c * toScalar T
 
