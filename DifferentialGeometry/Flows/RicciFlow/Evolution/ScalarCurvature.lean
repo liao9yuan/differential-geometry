@@ -32,7 +32,6 @@ def partial_ricci_form {Time R V : Type}
   [TimeDerivative Time R] [TimeDerivative Time V]
   [TimeDerivativeRules Time R V]
   (conn_fam : Time → AbstractAffineConnection R V)
-  [∀ t, RicciOperator R V (conn_fam t)]
   (t : Time) : AbstractBilinearForm R V :=
   TensorAlgebra.fromBilinear
     { toFun := fun X =>
@@ -59,7 +58,7 @@ def partial_ricci_form {Time R V : Type}
         rfl }
 
 lemma partial_ricci_form_eval {Time : Type} [TimeDerivative Time R] [TimeDerivative Time V] [TimeDerivativeRules Time R V]
-  (conn_fam : Time → AbstractAffineConnection R V) [∀ t, RicciOperator R V (conn_fam t)] (t : Time) (X Y : V) :
+  (conn_fam : Time → AbstractAffineConnection R V) (t : Time) (X Y : V) :
   eval02 (partial_ricci_form conn_fam t) X Y = TimeDerivative.partial_t (fun s => eval02 (ricciForm (conn_fam s)) X Y) t := by
   dsimp [partial_ricci_form]
   exact TensorAlgebra.contract_fromBilinear _ X Y
@@ -70,7 +69,6 @@ lemma ricci_raise_variation {Time : Type}
   (g_fam : Time → MetricDuality R V)
   (conn_fam : Time → AbstractAffineConnection R V)
   [MetricTimeDerivativeRules Time R V g_fam]
-  [∀ t, RicciOperator R V (conn_fam t)]
 
   (X Y : V) (t : Time) :
   (g_fam t).g (TimeDerivative.partial_t (fun s => (g_fam s).raise (ricciForm (conn_fam s)) X) t) Y =
@@ -107,7 +105,6 @@ lemma scalar_curvature_evolution {Time : Type}
   (conn_fam : Time → AbstractAffineConnection R V)
   [MetricTimeDerivativeRules Time R V g_fam]
   [∀ s, MetricTraceOperator R V ((g_fam s).toNonDegenerateMetric.toAbstractMetricTensor)]
-  [∀ t, RicciOperator R V (conn_fam t)]
   [RicciFlow Time (fun t => (g_fam t).toNonDegenerateMetric.toAbstractMetricTensor) conn_fam]
 
   (h_trace_R : ∀ s, ScalarCurvature (conn_fam s) ((g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) =

@@ -58,7 +58,7 @@ variable [Invertible (2 : R)]
 
 /-- The covariant derivative of the Ricci form at time t. -/
 def ricci_cov_deriv {Time : Type} [TimeDerivative Time R] [TimeDerivativeRules Time R V]
-  (g_fam : Time → MetricDuality R V) (conn_fam : Time → AbstractAffineConnection R V) [∀ t, RicciOperator R V (conn_fam t)] (t : Time) (X Y Z : V) : R :=
+  (g_fam : Time → MetricDuality R V) (conn_fam : Time → AbstractAffineConnection R V) (t : Time) (X Y Z : V) : R :=
   action X (eval02 (ricciForm (conn_fam t)) Y Z)
   - eval02 (ricciForm (conn_fam t)) ((nabla_fam g_fam t).nabla X Y) Z
   - eval02 (ricciForm (conn_fam t)) Y ((nabla_fam g_fam t).nabla X Z)
@@ -73,7 +73,6 @@ lemma connection_evolution {Time : Type}
   (g_fam : Time → MetricDuality R V)
   (conn_fam : Time → AbstractAffineConnection R V)
   [MetricTimeDerivativeRules Time R V g_fam]
-  [∀ s, RicciOperator R V (conn_fam s)]
   [RicciFlow Time (fun t => (g_fam t).toNonDegenerateMetric.toAbstractMetricTensor) conn_fam]
   (X Y Z : V) (t : Time) :
   (g_fam t).g (TimeDerivative.partial_t (fun s => (nabla_fam g_fam s).nabla X Y) t) Z =

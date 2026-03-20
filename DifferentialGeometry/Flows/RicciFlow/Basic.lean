@@ -24,6 +24,6 @@ class LeviCivita (conn : AbstractAffineConnection R V) (g : AbstractMetricTensor
 
 -- 2. Ricci Flow Equation
 class RicciFlow (Time : Type) [TimeDerivative Time R] [TimeDerivativeRules Time R V]
-  (g_fam : Time → AbstractMetricTensor R V) (conn_fam : Time → AbstractAffineConnection R V) [MetricVariationOperator Time R V g_fam] [∀ t, RicciOperator R V (conn_fam t)] where
+  (g_fam : Time → AbstractMetricTensor R V) (conn_fam : Time → AbstractAffineConnection R V) [MetricVariationOperator Time R V g_fam] where
   is_levi_civita : ∀ t, LeviCivita (conn_fam t) (g_fam t)
   evolution : ∀ t, MetricVariationOperator.metric_var_form g_fam t = (- (2:R)) • ricciForm (conn_fam t)

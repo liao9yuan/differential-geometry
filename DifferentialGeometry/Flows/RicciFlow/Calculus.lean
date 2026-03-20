@@ -36,7 +36,6 @@ class RicciFlowCalculus
   [MetricTimeDerivativeRules Time R V g_fam]
   [∀ s, MetricTraceOperator R V ((g_fam s).toNonDegenerateMetric.toAbstractMetricTensor)]
   [∀ s, TensorInnerProductRules R V (g_fam s)]
-  [∀ s, RicciOperator R V (conn_fam s)]
   [RicciFlow Time (fun t => (g_fam t).toNonDegenerateMetric.toAbstractMetricTensor) conn_fam]
   [∀ s, MetricCompatible (conn_fam s) (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor] where
 
@@ -73,7 +72,6 @@ instance instRicciFlowCalculus
   [MetricTimeDerivativeRules Time R V g_fam]
   [∀ s, MetricTraceOperator R V ((g_fam s).toNonDegenerateMetric.toAbstractMetricTensor)]
   [∀ s, TensorInnerProductRules R V (g_fam s)]
-  [∀ s, RicciOperator R V (conn_fam s)]
   [RicciFlow Time (fun t => (g_fam t).toNonDegenerateMetric.toAbstractMetricTensor) conn_fam]
   [∀ s, MetricCompatible (conn_fam s) (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor] :
   RicciFlowCalculus g_fam conn_fam where

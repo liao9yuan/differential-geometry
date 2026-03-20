@@ -41,7 +41,6 @@ lemma gradient_evolution {Time : Type}
   (g_fam : Time → MetricDuality R V)
   (conn_fam : Time → AbstractAffineConnection R V)
   [MetricTimeDerivativeRules Time R V g_fam]
-  [∀ s, RicciOperator R V (conn_fam s)]
   [RicciFlow Time (fun t => (g_fam t).toNonDegenerateMetric.toAbstractMetricTensor) conn_fam]
   (u : R) (t : Time) :
   TimeDerivative.partial_t (fun s => grad (g_fam s) u) t =
@@ -111,7 +110,6 @@ lemma gradient_squared_evolution {Time : Type}
   (g_fam : Time → MetricDuality R V)
   (conn_fam : Time → AbstractAffineConnection R V)
   [MetricTimeDerivativeRules Time R V g_fam]
-  [∀ s, RicciOperator R V (conn_fam s)]
   [RicciFlow Time (fun t => (g_fam t).toNonDegenerateMetric.toAbstractMetricTensor) conn_fam]
   (u : Time → R) (t : Time) :
   TimeDerivative.partial_t (fun s => (g_fam s).g (grad (g_fam s) (u s)) (grad (g_fam s) (u s))) t =

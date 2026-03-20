@@ -141,7 +141,6 @@ lemma laplacian_evolution {Time : Type}
   (g_fam : Time → MetricDuality R V)
   (conn_fam : Time → AbstractAffineConnection R V)
   [MetricTimeDerivativeRules Time R V g_fam]
-  [∀ s, RicciOperator R V (conn_fam s)]
   [RicciFlow Time (fun t => (g_fam t).toNonDegenerateMetric.toAbstractMetricTensor) conn_fam]
   [∀ s, MetricCompatible (conn_fam s) (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor]
   (u : R) (t : Time) [IR : TensorInnerProductRules R V (g_fam t)] :
