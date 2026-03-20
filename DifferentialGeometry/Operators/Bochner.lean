@@ -17,6 +17,7 @@ import Mathlib.Tactic.Abel
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
+set_option linter.style.emptyLine false
 
 open AbstractDerivationAction AbstractLieBracket DifferentialGeometry.Bridge TensorAlgebra
 

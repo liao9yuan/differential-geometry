@@ -7,6 +7,8 @@ import Mathlib.Tactic.Ring
 
 set_option autoImplicit false
 set_option linter.style.longLine false
+set_option linter.unusedSectionVars false
+set_option linter.style.emptyLine false
 
 variable {R V : Type}
 variable [CommRing R] [AddCommGroup V] [Module R V]

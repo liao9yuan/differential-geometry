@@ -126,14 +126,14 @@ This library prioritizes algebraic structure over topological construction.
 - **Hessian Symmetry:** Hessian symmetry for torsion-free connections. Theorem: `hessian_symm` in `DifferentialGeometry/Operators/Hessian.lean`
 - **Jacobi Identity:** Rigorous proof of the Jacobi identity from first principles using vector field non-degeneracy. Theorem: `jacobi_identity_proof` in `DifferentialGeometry/Algebra/Lie.lean`
 - **Laplacian Linearity:** The Laplacian operator linearly distributes over addition and subtraction of scalar functions. Lemmas: `laplacian_add`, `laplacian_sub` in `DifferentialGeometry/Operators/Laplacian.lean`
-- **Laplacian Sign at Spatial Maximum:** Verification that the metric trace of a negative semi-definite Hessian yields a non-positive Laplacian. Theorem: `laplacian_nonpos_at_max` in `DifferentialGeometry/Analysis/OrderedTensor.lean`
+
 - **Metric Compatibility of Covariant Derivative:** The covariant derivative of the metric tensor is exactly zero. Theorem: `metric_covDerivOp_zero` in `DifferentialGeometry/Operators/CovariantDerivative.lean`
 - **Metric Compatibility of Squared Norm:** Directional derivative of a squared vector norm. Theorem: `norm_sq_deriv` in `DifferentialGeometry/Geometry/Connection.lean`
 - **Metric Sign and Subtraction Properties:** Algebraic behavior of the metric tensor under negation and subtraction in its arguments. Lemmas: `metric_neg_left_local`, `metric_sub_left_local`, `metric_sub_right_local` in `DifferentialGeometry/Operators/LieDerivative.lean`
 - **Metric Subtraction Properties:** Properties of the metric tensor under subtraction. Theorem: `metric_sub_left` in `DifferentialGeometry/Algebra/Metric.lean`
 - **Musical Endomorphism Linearity:** The metric `raise` operator preserves tensor addition and scalar multiplication. Theorems: `raise_add`, `raise_smul` in `DifferentialGeometry/Algebra/Musical.lean`
-- **Rank-1 Metric Trace:** Pure linear algebra rule for evaluating the trace of rank-1 operators (e.g., outer products). Axiom: `trace_rank_one` in `DifferentialGeometry/Analysis/TraceRankOne.lean`
-- **Ricci Bilinearity:** Rigorous construction of the Ricci curvature as a `SmoothBilinearForm`, proven via $C^\infty$-linearity of the Riemann tensor and trace linearity. Theorem: `ricciForm` in `DifferentialGeometry/Analysis/RicciTensor.lean`
+- **Rank-1 Metric Trace:** Pure linear algebra rule for evaluating the trace of rank-1 operators (e.g., outer products). Axiom: `trace_rank_one` in `DifferentialGeometry/Algebra/Trace.lean`
+- **Ricci Bilinearity:** Rigorous construction of the Ricci curvature as a `SmoothBilinearForm`, proven via $C^\infty$-linearity of the Riemann tensor and trace linearity. Theorem: `ricciForm` in `DifferentialGeometry/Geometry/RicciTensor.lean`
 - **Riemann Curvature Tensoriality:** $C^\infty$-linearity of the Riemann curvature tensor with respect to its first and third vector field arguments. Theorems: `Rm_smul_X`, `Rm_smul_Z` in `DifferentialGeometry/Geometry/CurvatureTensor.lean`
 - **Second Covariant Derivative Bilinearity:** $C^\infty$-linearity of the second covariant derivative operator with respect to both vector field arguments. Theorems: `secondCovDeriv_smul_X`, `secondCovDeriv_smul_Y` in `DifferentialGeometry/Operators/SecondCovariantDerivative.lean`
 - **Spatial Constants:** Gradient and Laplacian of spatial constants evaluate to zero, and spatial scalars can be pulled out of these operators. Lemmas: `grad_zero`, `laplacian_zero`, `grad_smul`, `laplacian_smul` in `DifferentialGeometry/Operators/SpatialConstant.lean`

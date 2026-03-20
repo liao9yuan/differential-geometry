@@ -7,6 +7,8 @@ import DifferentialGeometry.Geometry.Connection
 
 set_option autoImplicit false
 set_option linter.style.longLine false
+set_option linter.unusedSectionVars false
+set_option linter.style.emptyLine false
 
 /-!
 # Curvature Tensors

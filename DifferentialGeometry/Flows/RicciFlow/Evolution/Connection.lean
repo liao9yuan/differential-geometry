@@ -5,7 +5,7 @@ import DifferentialGeometry.Geometry.Connection
 import DifferentialGeometry.Geometry.Curvature
 import DifferentialGeometry.Operators.Variation
 import DifferentialGeometry.Flows.RicciFlow.Basic
-import DifferentialGeometry.Analysis.RicciTensor
+import DifferentialGeometry.Geometry.RicciTensor
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.Abel
 import Mathlib.Algebra.Module.Basic
@@ -13,6 +13,8 @@ import Mathlib.Algebra.Ring.Basic
 
 set_option autoImplicit false
 set_option linter.style.longLine false
+set_option linter.unusedSectionVars false
+set_option linter.style.emptyLine false
 
 open AbstractDerivationAction
 

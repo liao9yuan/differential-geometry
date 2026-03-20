@@ -3,13 +3,15 @@ import DifferentialGeometry.Algebra.Trace
 import DifferentialGeometry.Algebra.Metric
 import DifferentialGeometry.Geometry.Connection
 import DifferentialGeometry.Operators.Gradient
-import DifferentialGeometry.Analysis.TraceRankOne
+import DifferentialGeometry.Algebra.Trace
 import DifferentialGeometry.Operators.Bochner
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.Abel
 
 set_option autoImplicit false
 set_option linter.style.longLine false
+set_option linter.unusedSectionVars false
+set_option linter.style.emptyLine false
 
 open DifferentialGeometry.Bridge TensorAlgebra
 

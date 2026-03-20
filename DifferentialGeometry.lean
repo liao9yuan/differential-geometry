@@ -12,10 +12,10 @@ import DifferentialGeometry.Geometry.Curvature
 import DifferentialGeometry.Geometry.CurvatureTensor
 import DifferentialGeometry.Geometry.RicciIdentity
 
-import DifferentialGeometry.Analysis.OrderedTensor
-import DifferentialGeometry.Analysis.RicciTensor
+
+import DifferentialGeometry.Geometry.RicciTensor
 import DifferentialGeometry.Analysis.TensorInnerProduct
-import DifferentialGeometry.Analysis.TraceRankOne
+import DifferentialGeometry.Algebra.Trace
 
 import DifferentialGeometry.Operators.Bochner
 import DifferentialGeometry.Operators.CovariantDerivative
@@ -35,5 +35,3 @@ import DifferentialGeometry.Flows.RicciFlow.Evolution.Connection
 import DifferentialGeometry.Flows.RicciFlow.Evolution.Laplacian
 import DifferentialGeometry.Flows.RicciFlow.Evolution.ScalarCurvature
 import DifferentialGeometry.Flows.RicciFlow.Calculus
-
-import DifferentialGeometry.Applications.LiYau1D

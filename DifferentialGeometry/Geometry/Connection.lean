@@ -9,6 +9,7 @@ import Mathlib.Algebra.Ring.Basic
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
+set_option linter.style.emptyLine false
 
 /-!
 # Affine and Levi-Civita Connections

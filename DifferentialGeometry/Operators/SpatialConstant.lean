@@ -3,7 +3,7 @@ import DifferentialGeometry.Algebra.Metric
 import DifferentialGeometry.Geometry.Connection
 import DifferentialGeometry.Operators.Gradient
 import DifferentialGeometry.Operators.Laplacian
-import DifferentialGeometry.Analysis.TraceRankOne
+import DifferentialGeometry.Algebra.Trace
 import DifferentialGeometry.Operators.Variation
 import DifferentialGeometry.Algebra.Trace
 import Mathlib.Algebra.Module.Basic
@@ -12,6 +12,7 @@ import Mathlib.Algebra.Ring.Basic
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
+set_option linter.style.emptyLine false
 
 open DifferentialGeometry.Bridge TensorAlgebra
 
