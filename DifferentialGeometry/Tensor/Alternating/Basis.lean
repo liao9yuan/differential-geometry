@@ -2,6 +2,8 @@
 Authors: Jack McCarthy
 -/
 import DifferentialGeometry.Tensor.Aux.Fin
+import DifferentialGeometry.Tensor.Aux.MultiKroneckerDelta
+import DifferentialGeometry.Tensor.Aux.Basis
 import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
 import Mathlib.Analysis.Normed.Module.Alternating.Basic
 import Mathlib.LinearAlgebra.Dual.Basis
@@ -166,6 +168,25 @@ theorem elementaryCovector_basis_eval_eq_zero_of_not_injective_right
   rw [elementaryCovector_basis_eval B b dual,
     Fin.multiKroneckerDelta_eq_zero_of_not_injective_right hJ]
 
+/-- If `I = J ∘ σ` for a permutation `σ`, then
+`elementaryCovector b I = sign(σ) • elementaryCovector b J`.
+This follows from `multiKroneckerDelta_comp_perm_left`. -/
+theorem elementaryCovector_comp_perm
+    [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜]
+    (b : Module.Basis (Fin n) 𝕜 (E →L[𝕜] 𝕜))
+    (J : Fin k → Fin n) (σ : Equiv.Perm (Fin k)) :
+    elementaryCovector b (J ∘ ⇑σ) =
+      (Equiv.Perm.sign σ : 𝕜) • elementaryCovector b J := by
+  obtain ⟨B, dual⟩ := exists_predual_basis b
+  apply toAlternatingMap_injective
+  apply B.ext_alternating
+  intro v hv
+  change elementaryCovector b (J ∘ ⇑σ) (B ∘ v) =
+    (Equiv.Perm.sign σ : 𝕜) • elementaryCovector b J (B ∘ v)
+  rw [elementaryCovector_basis_eval B b dual,
+    elementaryCovector_basis_eval B b dual,
+    Fin.multiKroneckerDelta_comp_perm_left, smul_eq_mul]
+
 /-!
 ## Basis of elementary covectors
 -/
@@ -203,7 +224,7 @@ theorem elementaryCovector_linearIndependent
         (RelEmbedding.injective J) (Equiv.refl (Fin k))
       simpa using this
     · exact Fin.multiKroneckerDelta_eq_zero
-        (Fin.orderEmb_ne_comp_perm h)
+        (Equiv.Perm.orderEmb_ne_comp_perm h)
   simp only [hkron, smul_ite, smul_zero,
     Finset.sum_ite_eq', Finset.mem_univ,
     ite_true] at heval
@@ -265,7 +286,7 @@ theorem elementaryCovector_span
     intro ι hne
     rw [hσ, Fin.multiKroneckerDelta_symm (R := 𝕜),
       Fin.multiKroneckerDelta_eq_zero]
-    intro τ h; apply hne; apply Fin.orderEmb_eq_of_range_eq
+    intro τ h; apply hne; apply Equiv.Perm.orderEmb_eq_of_range_eq
     have := congr_arg Set.range h
     simp [Set.range_comp] at this
     exact this.symm

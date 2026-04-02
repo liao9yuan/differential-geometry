@@ -2,7 +2,7 @@
 Authors: Yuan Liao, Jack McCarthy
 -/
 import DifferentialGeometry.Tensor.Product.HomEquiv
-import DifferentialGeometry.Tensor.RSTensor.Basis
+import DifferentialGeometry.Tensor.RSTensor.Defs
 import DifferentialGeometry.Tensor.Alternating.Curry
 /-!
 # TensorProduct.mapL and its properties
@@ -137,14 +137,17 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
   [Module.Finite 𝕜 E] [FiniteDimensional 𝕜 E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
-variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ω M]
 
 /-- The pointwise tensor product of a (0,s)-tensor `α` and a (0,q)-tensor `β`,
 yielding a (0,s+q)-tensor by concatenating their inputs. -/
 noncomputable def tensor0S_product_fun (s q : ℕ)
     (x : M) (α : Tensor0SSpace s I x) (β : Tensor0SSpace q I x) :
     Tensor0SSpace (s + q) I x :=
-  (α.smulRight β).uncurrySum.domDomCongr finSumFinEquiv
+  (tensor0SSpace_continuousLinearEquiv (s + q) x).symm
+    ((((tensor0SSpace_continuousLinearEquiv s x) α).smulRight
+      ((tensor0SSpace_continuousLinearEquiv q x) β)).uncurrySum.domDomCongr finSumFinEquiv)
+
 
 /-- The tensor product of (0,s)- and (0,q)-tensors is bilinear in both factors,
 giving a bilinear map `Tensor0SSpace s ⊗ Tensor0SSpace q →ₗ Tensor0SSpace (s+q)`.
@@ -155,18 +158,20 @@ back to the concrete (0,s+q)-tensor space via `tensor0S_equiv`. -/
 noncomputable def tensor0S_product_bilinear (s q : ℕ) (x : M) :
     Tensor0SSpace s I x →ₗ[𝕜] Tensor0SSpace q I x →ₗ[𝕜] Tensor0SSpace (s + q) I x :=
   LinearMap.mk₂ 𝕜 (tensor0S_product_fun s q x)
-    (fun α₁ α₂ β => by unfold tensor0S_product_fun; ext m; simp [add_smul])
+    (fun α₁ α₂ β => by unfold tensor0S_product_fun; ext m; simp [add_smul, map_add, ContinuousLinearEquiv.apply_symm_apply])
     (fun c α β => by
       unfold tensor0S_product_fun; ext m
-      simp only [ContinuousMultilinearMap.domDomCongr_apply,
+      simp only [ContinuousLinearEquiv.apply_symm_apply, map_smul,
+                 ContinuousMultilinearMap.domDomCongr_apply,
                  ContinuousMultilinearMap.uncurrySum_apply,
                  ContinuousMultilinearMap.smulRight_apply,
                  ContinuousMultilinearMap.smul_apply, smul_eq_mul]
       ring)
-    (fun α β₁ β₂ => by unfold tensor0S_product_fun; ext m; simp [smul_add])
+    (fun α β₁ β₂ => by unfold tensor0S_product_fun; ext m; simp [smul_add, map_add, ContinuousLinearEquiv.apply_symm_apply])
     (fun c α β => by
       unfold tensor0S_product_fun; ext m
-      simp only [ContinuousMultilinearMap.domDomCongr_apply,
+      simp only [ContinuousLinearEquiv.apply_symm_apply, map_smul,
+                 ContinuousMultilinearMap.domDomCongr_apply,
                  ContinuousMultilinearMap.uncurrySum_apply,
                  ContinuousMultilinearMap.smulRight_apply,
                  ContinuousMultilinearMap.smul_apply, smul_eq_mul]

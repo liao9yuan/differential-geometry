@@ -5,6 +5,8 @@ import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 import Mathlib.Geometry.Manifold.Algebra.SmoothFunctions
 import Mathlib.Geometry.Manifold.Algebra.Structures
 import Mathlib.Geometry.Manifold.VectorField.LieBracket
+import Mathlib.Analysis.Normed.Module.Dual
+import Mathlib.Geometry.Manifold.BumpFunction
 import DifferentialGeometry.Algebra.VectorField
 
 
@@ -28,7 +30,7 @@ namespace DifferentialGeometry.Bridge
 
 open scoped Manifold
 
-variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [IsRCLikeNormedField 𝕜]
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
@@ -37,17 +39,17 @@ variable [IsManifold I ⊤ M]
 /-- A smooth vector field on `M`: a smooth section of the tangent bundle,
 i.e. a bundled map `∀ x : M, TangentSpace I x` that is `C^∞`. -/
 def VectorField :=
-  ContMDiffSection I E ⊤ (TangentSpace I : M → Type _)
+  ContMDiffSection I E (⊤ : ℕ∞) (TangentSpace I : M → Type _)
 
 instance : DFunLike (VectorField (I := I) (M := M)) M (TangentSpace I) :=
-  inferInstanceAs (DFunLike (ContMDiffSection I E ⊤ (TangentSpace I : M → Type _)) M _)
+  inferInstanceAs (DFunLike (ContMDiffSection I E (⊤ : ℕ∞) (TangentSpace I : M → Type _)) M _)
 
 /-- A smooth scalar field on `M`: a bundled `C^∞` map from `M` to `𝕜`. -/
 def ScalarField :=
-  ContMDiffMap I (modelWithCornersSelf 𝕜 𝕜) M 𝕜 ⊤
+  ContMDiffMap I (modelWithCornersSelf 𝕜 𝕜) M 𝕜 (⊤ : ℕ∞)
 
 instance : FunLike (ScalarField (I := I) (M := M)) M 𝕜 :=
-  inferInstanceAs (FunLike (ContMDiffMap I (modelWithCornersSelf 𝕜 𝕜) M 𝕜 ⊤) M 𝕜)
+  inferInstanceAs (FunLike (ContMDiffMap I (modelWithCornersSelf 𝕜 𝕜) M 𝕜 (⊤ : ℕ∞)) M 𝕜)
 
 scoped notation "C^∞(" M ")" => ScalarField (M := M)
 
@@ -61,12 +63,12 @@ noncomputable def VectorField.action
     intro x₀
     set e₀ := trivializationAt E (TangentSpace I) x₀
     -- Step 1: x ↦ mfderiv I 𝓘(𝕜) f x expressed in tangent coordinates at x₀ is smooth.
-    have hdf : ContMDiffAt I 𝓘(𝕜, E →L[𝕜] 𝕜) ⊤
+    have hdf : ContMDiffAt I 𝓘(𝕜, E →L[𝕜] 𝕜) (⊤ : ℕ∞)
         (inTangentCoordinates I 𝓘(𝕜) id f (mfderiv I 𝓘(𝕜) f) x₀) x₀ :=
-      f.contMDiff.contMDiffAt.mfderiv_const le_top
+      f.contMDiff.contMDiffAt.mfderiv_const (WithTop.coe_le_coe.mpr le_top)
     -- Step 2: the section V read through the trivialization e₀ gives a smooth E-valued map.
-    have hV : ContMDiffAt I 𝓘(𝕜, E) ⊤ (fun x => (e₀ ⟨x, V x⟩).2) x₀ :=
-      (Bundle.contMDiffAt_section x₀).mp V.contMDiff.contMDiffAt
+    have hV : ContMDiffAt I 𝓘(𝕜, E) (⊤ : ℕ∞) (fun x => (e₀ ⟨x, V x⟩).2) x₀ :=
+      (Bundle.contMDiffAt_section (n := (⊤ : ℕ∞)) x₀).mp V.contMDiff.contMDiffAt
     -- Step 3: applying the smooth CLM-valued map to the smooth E-valued map is smooth.
     -- The combined expression equals mfderiv I 𝓘(𝕜) f x (V x) on e₀.baseSet (a nhd of x₀),
     -- because the target-side coordinate change is trivial (𝓘(𝕜) model space) and
@@ -90,11 +92,11 @@ noncomputable def VectorField.action
 
 /-- Smooth scalar fields form a commutative ring under pointwise addition and multiplication. -/
 noncomputable instance : CommRing (ScalarField (I := I) (M := M)) :=
-  inferInstanceAs (CommRing (ContMDiffMap I (modelWithCornersSelf 𝕜 𝕜) M 𝕜 ⊤))
+  inferInstanceAs (CommRing (ContMDiffMap I (modelWithCornersSelf 𝕜 𝕜) M 𝕜 (⊤ : ℕ∞)))
 
 /-- Smooth vector fields form an additive commutative group under pointwise addition. -/
 noncomputable instance : AddCommGroup (VectorField (I := I) (M := M)) :=
-  inferInstanceAs (AddCommGroup (ContMDiffSection I E ⊤ (TangentSpace I : M → Type _)))
+  inferInstanceAs (AddCommGroup (ContMDiffSection I E (⊤ : ℕ∞) (TangentSpace I : M → Type _)))
 
 /-- Smooth vector fields form a module over smooth scalar fields by pointwise scaling. -/
 noncomputable instance :
@@ -118,9 +120,9 @@ theorem VectorField.action_leibniz
   -- Annotate with `𝕜` as the explicit target type so that `hf.mul hg` unifies
   -- (both mfderivslands in `TangentSpace I x →L[𝕜] 𝕜`, not at distinct base points).
   have hf : HasMFDerivAt I 𝓘(𝕜) ⇑f x (mfderiv I 𝓘(𝕜) ⇑f x : TangentSpace I x →L[𝕜] 𝕜) :=
-    ((f.contMDiff x).mdifferentiableAt WithTop.top_ne_zero).hasMFDerivAt
+    ((f.contMDiff x).mdifferentiableAt (mod_cast ENat.top_ne_zero)).hasMFDerivAt
   have hg : HasMFDerivAt I 𝓘(𝕜) ⇑g x (mfderiv I 𝓘(𝕜) ⇑g x : TangentSpace I x →L[𝕜] 𝕜) :=
-    ((g.contMDiff x).mdifferentiableAt WithTop.top_ne_zero).hasMFDerivAt
+    ((g.contMDiff x).mdifferentiableAt (mod_cast ENat.top_ne_zero)).hasMFDerivAt
   -- Product rule at V x: evaluate the CLM equality pointwise.
   have prod := congr_arg (· (V x)) (hf.mul hg).mfderiv
   exact prod
@@ -141,7 +143,8 @@ noncomputable def VectorField.lieBracket [CompleteSpace E]
     intro x₀
     simp_rw [← _root_.VectorField.mlieBracketWithin_univ]
     exact (X.contMDiff x₀).contMDiffWithinAt.mlieBracketWithin_vectorField
-      (Y.contMDiff x₀).contMDiffWithinAt uniqueMDiffOn_univ (Set.mem_univ x₀) le_top
+      (Y.contMDiff x₀).contMDiffWithinAt uniqueMDiffOn_univ (Set.mem_univ x₀)
+      (by simp [minSmoothness_of_isRCLikeNormedField])
 
 /-- Smooth vector fields form a Lie algebra under the Lie bracket. -/
 noncomputable instance [CompleteSpace E] :
@@ -177,10 +180,10 @@ private lemma mlieBracket_fun_smul_left [CompleteSpace E]
   have hx₀_src : x₀ ∈ (extChartAt I x₀).source := mem_extChartAt_source x₀
   have hy₀_tgt : y₀ ∈ (extChartAt I x₀).target := (extChartAt I x₀).map_source hx₀_src
   have hc_mdiff : MDifferentiableAt I 𝓘(𝕜) (⇑c) x₀ :=
-    (c.contMDiff x₀).mdifferentiableAt WithTop.top_ne_zero
+    (c.contMDiff x₀).mdifferentiableAt (mod_cast ENat.top_ne_zero)
   have hV_mdiff : MDifferentiableWithinAt I I.tangent
       (fun x ↦ (⟨x, X x⟩ : TangentBundle I M)) Set.univ x₀ :=
-    (X.contMDiff x₀).mdifferentiableAt WithTop.top_ne_zero
+    (X.contMDiff x₀).mdifferentiableAt (mod_cast ENat.top_ne_zero)
   have hy₀_range : y₀ ∈ Set.range I := extChartAt_target_subset_range x₀ hy₀_tgt
   have hud : UniqueDiffWithinAt 𝕜 (Set.range I) y₀ :=
     I.uniqueDiffOn.uniqueDiffWithinAt hy₀_range
@@ -257,9 +260,9 @@ noncomputable instance [CompleteSpace E] :
   action_add_right X f g := by
     apply DFunLike.ext; intro x
     have hf : HasMFDerivAt I 𝓘(𝕜) ⇑f x (mfderiv I 𝓘(𝕜) ⇑f x : TangentSpace I x →L[𝕜] 𝕜) :=
-      ((f.contMDiff x).mdifferentiableAt WithTop.top_ne_zero).hasMFDerivAt
+      ((f.contMDiff x).mdifferentiableAt (mod_cast ENat.top_ne_zero)).hasMFDerivAt
     have hg : HasMFDerivAt I 𝓘(𝕜) ⇑g x (mfderiv I 𝓘(𝕜) ⇑g x : TangentSpace I x →L[𝕜] 𝕜) :=
-      ((g.contMDiff x).mdifferentiableAt WithTop.top_ne_zero).hasMFDerivAt
+      ((g.contMDiff x).mdifferentiableAt (mod_cast ENat.top_ne_zero)).hasMFDerivAt
     exact congr_arg (· (X x)) (hf.add hg).mfderiv
   action_smul_left c X f := by
     apply DFunLike.ext; intro x
@@ -270,13 +273,13 @@ noncomputable instance [CompleteSpace E] :
   bracket_add_left X Y Z := by
     apply DFunLike.ext; intro x
     exact _root_.VectorField.mlieBracket_add_left
-      ((X.contMDiff x).mdifferentiableAt WithTop.top_ne_zero)
-      ((Y.contMDiff x).mdifferentiableAt WithTop.top_ne_zero)
+      ((X.contMDiff x).mdifferentiableAt (mod_cast ENat.top_ne_zero))
+      ((Y.contMDiff x).mdifferentiableAt (mod_cast ENat.top_ne_zero))
   bracket_add_right X Y Z := by
     apply DFunLike.ext; intro x
     exact _root_.VectorField.mlieBracket_add_right
-      ((Y.contMDiff x).mdifferentiableAt WithTop.top_ne_zero)
-      ((Z.contMDiff x).mdifferentiableAt WithTop.top_ne_zero)
+      ((Y.contMDiff x).mdifferentiableAt (mod_cast ENat.top_ne_zero))
+      ((Z.contMDiff x).mdifferentiableAt (mod_cast ENat.top_ne_zero))
   bracket_smul_left c X Y := by
     apply DFunLike.ext; intro x₀
     exact mlieBracket_fun_smul_left c X Y x₀
@@ -301,6 +304,170 @@ noncomputable instance [CompleteSpace E] :
     apply DFunLike.ext; intro x
     exact _root_.VectorField.mlieBracket_swap_apply
 
+/-- The action of smooth vector fields on smooth scalar fields is linear in the vector field. -/
+noncomputable instance [CompleteSpace E] :
+    ActionLinear (ScalarField (I := I) (M := M)) (VectorField (I := I) (M := M)) where
+  action_add X Y f := by
+    apply DFunLike.ext; intro x
+    exact map_add (mfderiv I 𝓘(𝕜) f x) (X x) (Y x)
+
+/-- Pointwise commutator identity: `[X,Y](f)(x₀) = X(Yf)(x₀) - Y(Xf)(x₀)`.
+
+The proof reduces to the vector-space identity `VectorField.fderivWithin_apply_lieBracket` via the
+chart `extChartAt I x₀`, following the same coordinate strategy as `mlieBracket_fun_smul_left`:
+1. Express the LHS `mfderiv f x₀ (mlieBracket I X Y x₀)` in coordinates as
+   `fderivWithin g (range I) y₀ (lieBracketWithin V' W' (range I) y₀)` where `g = f ∘ φ.symm`,
+   using `mlieBracketWithin_apply` and the chain rule `hchain_f` with `D ∘ D⁻¹` cancellation.
+2. Apply `fderivWithin_apply_lieBracket` to get the commutator in coordinates.
+3. Show each RHS term `(X.action (Y.action f)) x₀` equals the corresponding fderivWithin
+   expression via `hchain_at` (pointwise chain rule) and `EventuallyEq.fderivWithin_eq`. -/
+private lemma lie_deriv_pointwise [CompleteSpace E]
+    (X Y : VectorField (I := I) (M := M)) (f : ScalarField (I := I) (M := M)) (x₀ : M) :
+    (VectorField.action (VectorField.lieBracket X Y) f) x₀ =
+      (VectorField.action X (VectorField.action Y f)) x₀ -
+        (VectorField.action Y (VectorField.action X f)) x₀ := by
+  set φ := extChartAt I x₀; set y₀ := φ x₀
+  set D := mfderiv I 𝓘(𝕜, E) (↑φ) x₀
+  set Dψ := mfderivWithin 𝓘(𝕜, E) I (↑φ.symm) (Set.range I) y₀
+  set V' := _root_.VectorField.mpullbackWithin 𝓘(𝕜, E) I (↑φ.symm) (⇑X) (Set.range I)
+  set W' := _root_.VectorField.mpullbackWithin 𝓘(𝕜, E) I (↑φ.symm) (⇑Y) (Set.range I)
+  set g := (⇑f) ∘ (↑φ.symm)
+  have hx₀_src := mem_extChartAt_source (I := I) x₀
+  have hy₀_tgt := φ.map_source hx₀_src
+  have hy₀_range := extChartAt_target_subset_range x₀ hy₀_tgt
+  have hud := I.uniqueDiffOn (𝕜 := 𝕜)
+  have hD : ∀ v, D v = v := fun v ↦ by
+    simp only [D, φ]; rw [(hasMFDerivAt_extChartAt (I := I) (mem_chart_source H x₀)).mfderiv,
+      mfderiv_chartAt_eq_tangentCoordChange (I := I) (mem_chart_source H x₀)]
+    exact tangentCoordChange_self (I := I) hx₀_src (v := v)
+  have hDinv : ∀ v, D.inverse v = v := fun v ↦ (hD _).symm.trans
+    (ContinuousLinearMap.ext_iff.mp (isInvertible_mfderiv_extChartAt hx₀_src).self_comp_inverse v)
+  have hDψ : ∀ v, Dψ v = v := fun v ↦ by
+    have h := ContinuousLinearMap.ext_iff.mp
+      (mfderiv_extChartAt_comp_mfderivWithin_extChartAt_symm' (I := I) hx₀_src) v
+    simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.id_apply] at h
+    rwa [hD] at h
+  have hDψ_cancel (z) (hz : z ∈ φ.target) (v) :
+      (mfderivWithin 𝓘(𝕜, E) I (↑φ.symm) (Set.range I) z)
+        ((mfderivWithin 𝓘(𝕜, E) I (↑φ.symm) (Set.range I) z).inverse v) = v :=
+    ContinuousLinearMap.ext_iff.mp
+      (isInvertible_mfderivWithin_extChartAt_symm (I := I) hz).self_comp_inverse v
+  have hpull (Z : VectorField (I := I) (M := M)) :
+      (_root_.VectorField.mpullbackWithin 𝓘(𝕜, E) I (↑φ.symm) (⇑Z) (Set.range I)) y₀ = Z x₀ := by
+    change Dψ.inverse (Z (φ.symm y₀)) = Z x₀
+    rw [show ∀ v, Dψ.inverse v = v from fun v ↦
+      (hDψ _).symm.trans (hDψ_cancel y₀ hy₀_tgt v), φ.left_inv hx₀_src]
+  have hPd (Z : VectorField (I := I) (M := M)) : DifferentiableWithinAt 𝕜
+      (_root_.VectorField.mpullbackWithin 𝓘(𝕜, E) I (↑φ.symm) (⇑Z) (Set.range I)) (Set.range I) y₀ := by
+    have : MDifferentiableWithinAt I I.tangent
+        (fun x ↦ (⟨x, Z x⟩ : TangentBundle I M)) Set.univ x₀ :=
+      (Z.contMDiff x₀).mdifferentiableAt (mod_cast ENat.top_ne_zero)
+    simpa [Set.preimage_univ] using this.differentiableWithinAt_mpullbackWithin_vectorField
+  have hchain (z) (hz : z ∈ φ.target) : fderivWithin 𝕜 g (Set.range I) z =
+      (mfderiv I 𝓘(𝕜) (⇑f) (φ.symm z)).comp
+        (mfderivWithin 𝓘(𝕜, E) I (↑φ.symm) (Set.range I) z) := by
+    rw [show g = (⇑f) ∘ (↑φ.symm) from rfl, ← mfderivWithin_eq_fderivWithin]
+    exact mfderiv_comp_mfderivWithin_of_eq (I' := I)
+      ((f.contMDiff (φ.symm z)).mdifferentiableAt (mod_cast ENat.top_ne_zero))
+      (mdifferentiableWithinAt_extChartAt_symm hz)
+      ((hud.uniqueDiffWithinAt (extChartAt_target_subset_range x₀ hz)).uniqueMDiffWithinAt) rfl
+  have hmf_gen (h : ScalarField (I := I) (M := M)) (w) :
+      mfderiv I 𝓘(𝕜) (⇑h) x₀ w = fderivWithin 𝕜 ((⇑h) ∘ ↑φ.symm) (Set.range I) y₀ w := by
+    conv_rhs => rw [show fderivWithin 𝕜 ((⇑h) ∘ ↑φ.symm) (Set.range I) y₀ =
+        (mfderiv I 𝓘(𝕜) (⇑h) x₀).comp Dψ from by
+      rw [← mfderivWithin_eq_fderivWithin]; exact mfderiv_comp_mfderivWithin_of_eq (I' := I)
+        ((h.contMDiff x₀).mdifferentiableAt (mod_cast ENat.top_ne_zero))
+        (mdifferentiableWithinAt_extChartAt_symm hy₀_tgt)
+        (hud.uniqueDiffWithinAt hy₀_range).uniqueMDiffWithinAt (φ.left_inv hx₀_src)]
+    exact congr_arg _ (hDψ w).symm
+  have hmf (w) : mfderiv I 𝓘(𝕜) (⇑f) x₀ w = fderivWithin 𝕜 g (Set.range I) y₀ w := hmf_gen f w
+  have hcancel (Z : VectorField (I := I) (M := M)) (z) (hz : z ∈ φ.target) :
+      fderivWithin 𝕜 g (Set.range I) z
+        ((_root_.VectorField.mpullbackWithin 𝓘(𝕜, E) I (↑φ.symm) (⇑Z) (Set.range I)) z) =
+        mfderiv I 𝓘(𝕜) (⇑f) (φ.symm z) (Z (φ.symm z)) := by
+    conv_lhs => rw [hchain z hz]
+    exact congr_arg _ (hDψ_cancel z hz _)
+  have hcore := _root_.VectorField.fderivWithin_apply_lieBracket
+    (((contMDiffAt_iff (I' := 𝓘(𝕜))).mp (f.contMDiff x₀)).2 : ContDiffWithinAt 𝕜 (⊤ : ℕ∞) g _ y₀)
+    (by simp only [minSmoothness_of_isRCLikeNormedField]; exact WithTop.coe_le_coe.mpr le_top)
+    hud (I.range_subset_closure_interior hy₀_range) hy₀_range (hPd Y) (hPd X)
+  have hLHS : ((X.lieBracket Y).action f) x₀ = fderivWithin 𝕜 g (Set.range I) y₀
+      (_root_.VectorField.lieBracketWithin 𝕜 V' W' (Set.range I) y₀) := by
+    change mfderiv I 𝓘(𝕜) (⇑f) x₀ (_root_.VectorField.mlieBracket I (⇑X) (⇑Y) x₀) = _
+    rw [← _root_.VectorField.mlieBracketWithin_univ,
+      _root_.VectorField.mlieBracketWithin_apply, Set.preimage_univ, Set.univ_inter, hmf, hDinv]
+  have hRHS (Z U : VectorField (I := I) (M := M)) :
+      (U.action (Z.action f)) x₀ = fderivWithin 𝕜
+        (fun z ↦ fderivWithin 𝕜 g (Set.range I) z
+          ((_root_.VectorField.mpullbackWithin 𝓘(𝕜, E) I (↑φ.symm) (⇑Z) (Set.range I)) z))
+        (Set.range I) y₀
+        ((_root_.VectorField.mpullbackWithin 𝓘(𝕜, E) I (↑φ.symm) (⇑U) (Set.range I)) y₀) := by
+    change mfderiv I 𝓘(𝕜) (⇑(Z.action f)) x₀ (U x₀) = _
+    rw [hmf_gen (Z.action f), ← hpull U]; congr 1
+    exact Filter.EventuallyEq.fderivWithin_eq
+      (by filter_upwards [extChartAt_target_mem_nhdsWithin_of_mem hy₀_tgt] with z hz
+          exact (hcancel Z z hz).symm)
+      (hcancel Z y₀ hy₀_tgt).symm
+  rw [hLHS, hRHS Y X, hRHS X Y]; exact hcore
+
+/-- The concrete Lie bracket on a manifold satisfies the commutator property:
+`[X, Y](f) = X(Y(f)) − Y(X(f))`. -/
+noncomputable instance [CompleteSpace E] :
+    LieDerivation (ScalarField (I := I) (M := M)) (VectorField (I := I) (M := M)) where
+  bracket_action X Y f := by
+    apply DFunLike.ext; intro x₀
+    exact lie_deriv_pointwise X Y f x₀
+
+section NonDegeneracy
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ⊤ M] [T2Space M]
+
+/-- On a real smooth manifold, vector fields are non-degenerate: if two vector fields have the
+same action on every smooth scalar field, they are equal. The proof constructs, for each
+continuous linear functional `L` on `TangentSpace I x = E`, a smooth scalar field `f = χ • (L ∘ φ)`
+(using a smooth bump function `χ` and the chart `φ = extChartAt I x`) whose `mfderiv` at `x`
+equals `L`. Hahn–Banach dual separation then gives `X x = Y x`. -/
+noncomputable instance :
+    VectorFieldNonDegenerate (ScalarField (I := I) (M := M))
+      (VectorField (I := I) (M := M)) where
+  eq_of_action_eq X Y h := by
+    apply DFunLike.ext; intro x₀
+    letI : NormedAddCommGroup (TangentSpace I x₀) := inferInstanceAs (NormedAddCommGroup E)
+    letI : NormedSpace ℝ (TangentSpace I x₀) := inferInstanceAs (NormedSpace ℝ E)
+    rw [NormedSpace.eq_iff_forall_dual_eq (𝕜 := ℝ)]; intro L
+    -- Build f = χ • (L ∘ φ) where χ is a bump function, φ = extChartAt I x₀
+    set φ := extChartAt I x₀
+    obtain ⟨χ⟩ := (inferInstance : Nonempty (SmoothBumpFunction I x₀))
+    have hLφ : ContMDiffOn I 𝓘(ℝ, ℝ) (⊤ : ℕ∞) (fun x => L (φ x)) (chartAt H x₀).source :=
+      fun x hx => (L.contMDiffAt (𝕜 := ℝ)).comp_contMDiffWithinAt x
+        (contMDiffOn_extChartAt (I := I) (x := x₀) x hx)
+    -- Apply hypothesis to f
+    have key := DFunLike.ext_iff.mp
+      (h ⟨fun x => χ x • L (φ x), χ.contMDiff_smul hLφ⟩) x₀
+    -- mfderiv f x₀ = mfderiv (L ∘ φ) x₀ since χ = 1 near x₀
+    have hfnear : (fun x => χ x • L (φ x)) =ᶠ[nhds x₀] (fun x => L (φ x)) :=
+      χ.eventuallyEq_one.mono fun x hx => by simp [show χ x = 1 from hx.symm ▸ rfl]
+    change mfderiv I 𝓘(ℝ, ℝ) (fun x => χ x • L (φ x)) x₀ (X x₀) =
+      mfderiv I 𝓘(ℝ, ℝ) (fun x => χ x • L (φ x)) x₀ (Y x₀) at key
+    rw [hfnear.mfderiv_eq] at key
+    -- mfderiv (L ∘ φ) x₀ = L via chain rule + mfderiv φ x₀ = id
+    have hDid : ∀ v, mfderiv I 𝓘(ℝ, E) (⇑φ) x₀ v = v := fun v => by
+      simp only [φ]
+      rw [(hasMFDerivAt_extChartAt (I := I) (mem_chart_source H x₀)).mfderiv,
+        mfderiv_chartAt_eq_tangentCoordChange (I := I) (mem_chart_source H x₀)]
+      exact tangentCoordChange_self (I := I) (mem_extChartAt_source (I := I) x₀)
+    -- Simplify mfderiv (L ∘ φ) x₀ v = L v via chain rule + mfderiv φ x₀ = id
+    have hmfderiv_Lφ : ∀ v, mfderiv I 𝓘(ℝ, ℝ) (fun x => L (φ x)) x₀ v = L v := fun v => by
+      change (mfderiv I 𝓘(ℝ, ℝ) (⇑L ∘ ⇑φ) x₀) v = L v
+      rw [mfderiv_comp x₀ (L.mdifferentiableAt (𝕜 := ℝ))
+        (mdifferentiableAt_extChartAt (I := I) (mem_chart_source H x₀))]
+      erw [ContinuousLinearMap.comp_apply, mfderiv_eq_fderiv, ContinuousLinearMap.fderiv]
+      congr 1; exact hDid v
+    exact (hmfderiv_Lφ (X x₀)).symm ▸ (hmfderiv_Lφ (Y x₀)).symm ▸ key
+
+end NonDegeneracy
 
 /-
   ## Tensor Calculus

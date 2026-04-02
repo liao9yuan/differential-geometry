@@ -1,22 +1,23 @@
-import DifferentialGeometry.Bridge.Defs
-
-import DifferentialGeometry.Algebra.VectorField
 import DifferentialGeometry.Algebra.BilinearForm
 import DifferentialGeometry.Algebra.Metric
 import DifferentialGeometry.Algebra.Trace
-
+import DifferentialGeometry.Algebra.VectorField
+import DifferentialGeometry.Analysis.TensorCalculus
+import DifferentialGeometry.Analysis.TensorInnerProduct
+import DifferentialGeometry.Bridge.Defs
+import DifferentialGeometry.Flows.RicciFlow.Basic
+import DifferentialGeometry.Flows.RicciFlow.Calculus
+import DifferentialGeometry.Flows.RicciFlow.Evolution.Connection
+import DifferentialGeometry.Flows.RicciFlow.Evolution.Gradient
+import DifferentialGeometry.Flows.RicciFlow.Evolution.Laplacian
+import DifferentialGeometry.Flows.RicciFlow.Evolution.ScalarCurvature
 import DifferentialGeometry.Geometry.Bianchi
 import DifferentialGeometry.Geometry.Conformal
 import DifferentialGeometry.Geometry.Connection
 import DifferentialGeometry.Geometry.Curvature
 import DifferentialGeometry.Geometry.CurvatureTensor
 import DifferentialGeometry.Geometry.RicciIdentity
-
-
 import DifferentialGeometry.Geometry.RicciTensor
-import DifferentialGeometry.Analysis.TensorInnerProduct
-import DifferentialGeometry.Algebra.Trace
-
 import DifferentialGeometry.Operators.Bochner
 import DifferentialGeometry.Operators.CovariantDerivative
 import DifferentialGeometry.Operators.Divergence
@@ -28,10 +29,34 @@ import DifferentialGeometry.Operators.SecondCovariantDerivative
 import DifferentialGeometry.Operators.SpatialConstant
 import DifferentialGeometry.Operators.Time
 import DifferentialGeometry.Operators.Variation
-
-import DifferentialGeometry.Flows.RicciFlow.Basic
-import DifferentialGeometry.Flows.RicciFlow.Evolution.Gradient
-import DifferentialGeometry.Flows.RicciFlow.Evolution.Connection
-import DifferentialGeometry.Flows.RicciFlow.Evolution.Laplacian
-import DifferentialGeometry.Flows.RicciFlow.Evolution.ScalarCurvature
-import DifferentialGeometry.Flows.RicciFlow.Calculus
+import DifferentialGeometry.Tensor.Alternating.Basis
+import DifferentialGeometry.Tensor.Alternating.Bundle
+import DifferentialGeometry.Tensor.Alternating.Comp
+import DifferentialGeometry.Tensor.Alternating.Congr
+import DifferentialGeometry.Tensor.Alternating.Curry
+import DifferentialGeometry.Tensor.Alternating.FDeriv
+import DifferentialGeometry.Tensor.Alternating.Flip
+import DifferentialGeometry.Tensor.Alternating.Wedge
+import DifferentialGeometry.Tensor.Aux.Basis
+import DifferentialGeometry.Tensor.Aux.Fin
+import DifferentialGeometry.Tensor.Aux.LIContDiff
+import DifferentialGeometry.Tensor.Aux.MultiKroneckerDelta
+import DifferentialGeometry.Tensor.Aux.Perm
+import DifferentialGeometry.Tensor.DifferentialForm.Basic
+import DifferentialGeometry.Tensor.DifferentialForm.Congr
+import DifferentialGeometry.Tensor.DifferentialForm.Defs
+import DifferentialGeometry.Tensor.DifferentialForm.Rough
+import DifferentialGeometry.Tensor.Multilinear.Basis
+import DifferentialGeometry.Tensor.Multilinear.Bundle
+import DifferentialGeometry.Tensor.Multilinear.Comp
+import DifferentialGeometry.Tensor.Multilinear.Curry
+import DifferentialGeometry.Tensor.Multilinear.Flip
+import DifferentialGeometry.Tensor.Product.Bundle
+import DifferentialGeometry.Tensor.Product.Defs
+import DifferentialGeometry.Tensor.Product.HomEquiv
+import DifferentialGeometry.Tensor.Product.Pretrivialization
+import DifferentialGeometry.Tensor.RSTensor.Contract
+import DifferentialGeometry.Tensor.RSTensor.Defs
+import DifferentialGeometry.Tensor.RSTensor.Field
+import DifferentialGeometry.Tensor.RSTensor.LieDerivative
+import DifferentialGeometry.Tensor.RSTensor.Metric

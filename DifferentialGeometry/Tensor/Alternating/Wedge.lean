@@ -5,6 +5,9 @@ Authors: Yury Kudryashov
 Coauthors: Jack McCarthy
 -/
 import DifferentialGeometry.Tensor.Aux.Perm
+import DifferentialGeometry.Tensor.Aux.MultiKroneckerDelta
+import DifferentialGeometry.Tensor.Aux.Basis
+import DifferentialGeometry.Tensor.Alternating.Congr
 import DifferentialGeometry.Tensor.Alternating.Comp
 import DifferentialGeometry.Tensor.Alternating.Curry
 import DifferentialGeometry.Tensor.Product.Defs
@@ -88,6 +91,63 @@ theorem wedge_product_eq_alternatization [CharZero 𝕜]
   have h_eq := factorial_nsmul_wedge_product_eq_alternatization g h f v
   rw [← h_eq, ← Nat.cast_smul_eq_nsmul 𝕜, inv_smul_smul₀ h_ne]
 
+/- It suffices to prove that ((elementaryCovector b I) ∧[𝕜] (elementaryCovector b J)) agrees with (elementaryCovector b (Fin.addCases I J) on any basis for (Fin k \to E). So it suffices to prove that they agree on (B (p 1), …, B(p (k+l))) for any p : Fin (k + l) \to n, where n = dim E and B is the basis for E dual to E*. We split this into the following cases:
+
+1. If p is not injective, then both sides are zero since ((elementaryCovector b I) ∧[𝕜] (elementaryCovector b J)) and (elementaryCovector b (Fin.addCases I J) are alternating.
+2. If p contains an index that does not appear in either I or J, then both sides are zero by elementaryCovector_basis_eval_eq_zero in Basis.lean
+3. If p = Fin.addCases I J and p is injective, then we can compute via wedge_product_eq_alternatization that:
+
+`((elementaryCovector b I) ∧[𝕜] (elementaryCovector b J)) (B ∘ p) = 1/(k! l!) * Alt((elementaryCovector b I) ⨂ (elementaryCovector b J)) (B ∘ p)`
+` = 1/(k! l!) SUM_{σ ∈ S_(k+l)} (sign σ) * ((elementaryCovector b I) (B ∘ p ∘ σ(1), ..., B ∘ p ∘ σ(k))) * ((elementaryCovector b I) (B ∘ p ∘ σ(k+1), ..., B ∘ p ∘ σ(k+l)))`
+
+Since p = IJ is injective, by elementaryCovector_basis_eval_eq_zero the only terms in this sum that give nonzero values are the cases when σ permutes the first k indices and the last l indices of p seperately. That is, when σ = τμ with τ ∈ S_k and μ ∈ S_l, so that sign (σ) = sign(τ) * sign (μ)
+Therefore
+
+`((elementaryCovector b I) ∧[𝕜] (elementaryCovector b J)) (B ∘ p) = 1/(k! l!) SUM_{τ ∈ S_k, μ ∈ S_l} (sign τ) * (sign μ) * ((elementaryCovector b I) (B ∘ p ∘ τ)) * ((elementaryCovector b J) (B ∘ p ∘ μ))`
+` = (1/k! SUM_{τ ∈ S_k} (sign τ) * ((elementaryCovector b I) (B ∘ p ∘ τ))) * (1/l! SUM_{μ ∈ S_l} (sign μ) * ((elementaryCovector b I) (B ∘ p ∘ μ)))`
+` = Alt(elementaryCovector b I) (B ∘ p(1), ..., B ∘ p(k)) * Alt(elementaryCovector b J) (B ∘ p(k+1), ..., B ∘ p(k+l))`
+` = (elementaryCovector b I) (B ∘ p(1), ..., B ∘ p(k)) * (elementaryCovector b J) (B ∘ p(k+1), ..., B ∘ p(k+l))`
+` = 1 = (elementaryCovector b (Fin.addCases I J)) (B ∘ p)`
+
+4. If p = (Fin.addCases) ∘ σ for some permutation σ and is injective, then this reduces to case 3. Sice the effect of σ is merely to multiply both sides of the calculation by sign σ.
+-/
+
+theorem elementaryCovector_wedge [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜] [CharZero 𝕜]
+    (b : Module.Basis (Fin d) 𝕜 (M →L[𝕜] 𝕜))
+    (I : Fin m' → Fin d) (J : Fin p → Fin d) :
+    ((elementaryCovector b I) ∧[𝕜] (elementaryCovector b J)) =
+      (elementaryCovector b (Fin.addCases I J) :
+        M [⋀^Fin (m' + p)]→L[𝕜] 𝕜) := by
+  -- Step 1: Construct the predual basis B of E with b i (B j) = δ_{ij}
+  obtain ⟨B, dual⟩ := exists_predual_basis b
+  -- Step 2: Reduce to checking on basis vectors via ext_alternating.
+  -- It suffices to show both sides agree on (B (v 0), ..., B (v (m'+p-1)))
+  -- for every injective v : Fin (m' + p) → Fin d.
+  apply ContinuousAlternatingMap.toAlternatingMap_injective
+  apply B.ext_alternating
+  intro v hv
+  -- v : Fin (m' + p) → Fin d is injective
+  -- Goal: (eI ∧ eJ) (B ∘ v) = e_{IJ} (B ∘ v)
+  change ((elementaryCovector b I) ∧[𝕜] (elementaryCovector b J)) (B ∘ v) =
+    elementaryCovector b (Fin.addCases I J) (B ∘ v)
+  -- Step 3: Evaluate RHS via elementaryCovector_basis_eval
+  rw [elementaryCovector_basis_eval B b dual (Fin.addCases I J) v]
+  -- Step 4: Expand LHS via wedge_product_eq_alternatization
+  have lhs_eq := wedge_product_eq_alternatization (elementaryCovector b I)
+    (elementaryCovector b J) (ContinuousLinearMap.mul 𝕜 𝕜) (⇑B ∘ v)
+  rw [lhs_eq, MultilinearMap.alternatization_apply]
+  -- Step 5: Simplify the alternatization sum
+  simp_rw [MultilinearMap.domDomCongr_apply, ContinuousMultilinearMap.coe_coe,
+    tensorProductMap_apply, ContinuousLinearMap.mul_apply']
+  -- Step 6: Normalize compositions and rewrite elementaryCovector to multiKroneckerDelta
+  simp_rw [show ∀ (σ : Equiv.Perm (Fin (m' + p))),
+    (fun i => (⇑B ∘ v) (σ i)) ∘ Fin.castAdd p = ⇑B ∘ (v ∘ σ ∘ Fin.castAdd p) from fun _ => rfl,
+    show ∀ (σ : Equiv.Perm (Fin (m' + p))),
+    (fun i => (⇑B ∘ v) (σ i)) ∘ Fin.natAdd m' = ⇑B ∘ (v ∘ σ ∘ Fin.natAdd m') from fun _ => rfl,
+    elementaryCovector_basis_eval B b dual]
+  -- Step 7: Apply the Cauchy-Binet identity for multiKroneckerDelta
+  exact Fin.multiKroneckerDelta_cauchyBinet I J v
+
 /- The wedge product wrt multiplication -/
 theorem wedge_product_mul {g : M [⋀^Fin m]→L[𝕜] 𝕜} {h : M [⋀^Fin n]→L[𝕜] 𝕜} {x : Fin (m + n) → M} :
     (g ∧[ContinuousLinearMap.mul 𝕜 𝕜] h) x =
@@ -100,20 +160,6 @@ theorem wedge_product_lsmul {g : M [⋀^Fin m]→L[𝕜] 𝕜} {h : M [⋀^Fin n
       (g ∧[ContinuousLinearMap.lsmul 𝕜 𝕜] h) x =
       uncurryFinAdd ((ContinuousLinearMap.lsmul 𝕜 𝕜).compContinuousAlternatingMap₂ g h) x :=
   rfl
-
-/- Associativity of multiplication wedge product -/
-theorem wedge_mul_assoc (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜)
-    (l : M [⋀^Fin p]→L[𝕜] 𝕜) (v : Fin (m + n + p) → M) :
-      ContinuousAlternatingMap.domDomCongr
-        Fin.finAssoc.symm (g ∧[𝕜] h ∧[𝕜] l) v = ((g ∧[𝕜] h) ∧[𝕜] l) v := by
-  rw[wedge_product_def, uncurryFinAdd, domDomCongr_apply,
-    domDomCongr_apply, uncurrySum_apply,
-    ContinuousMultilinearMap.sum_apply, wedge_product_def,
-    uncurryFinAdd, domDomCongr_apply,
-    uncurrySum_apply, ContinuousMultilinearMap.sum_apply]
-  rw[wedge_product, wedge_product]
-  rw[uncurryFinAdd, uncurryFinAdd]
-  sorry
 
 /- Left distributivity of wedge product -/
 theorem add_wedge (g₁ g₂ : M [⋀^Fin m]→L[𝕜] N)
@@ -211,38 +257,189 @@ theorem wedge_smul (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[�
     ContinuousLinearMap.compContinuousAlternatingMap₂_apply, ContinuousLinearMap.mul_apply',
     smul_apply, smul_eq_mul, ← mul_assoc, mul_comm]
 
+private theorem zero_wedge' (h : M [⋀^Fin n]→L[𝕜] 𝕜) :
+    wedge_product (0 : M [⋀^Fin m]→L[𝕜] 𝕜) h (ContinuousLinearMap.mul 𝕜 𝕜) = 0 := by
+  have := add_wedge (0 : M [⋀^Fin m]→L[𝕜] 𝕜) 0 h (ContinuousLinearMap.mul 𝕜 𝕜)
+  simp at this; exact this
+
+private theorem wedge_zero' (g : M [⋀^Fin m]→L[𝕜] 𝕜) :
+    wedge_product g (0 : M [⋀^Fin n]→L[𝕜] 𝕜) (ContinuousLinearMap.mul 𝕜 𝕜) = 0 := by
+  have := wedge_add g (0 : M [⋀^Fin n]→L[𝕜] 𝕜) 0 (ContinuousLinearMap.mul 𝕜 𝕜)
+  simp at this; exact this
+
+private theorem sum_wedge_left {ι : Type*} (s : Finset ι)
+    (g : ι → M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜) :
+    wedge_product (∑ i ∈ s, g i) h (ContinuousLinearMap.mul 𝕜 𝕜) =
+    ∑ i ∈ s, wedge_product (g i) h (ContinuousLinearMap.mul 𝕜 𝕜) := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simp [zero_wedge']
+  | insert _ _ hni ih =>
+    rw [Finset.sum_insert hni, add_wedge, ih, Finset.sum_insert hni]
+
+private theorem sum_wedge_right {ι : Type*} (s : Finset ι)
+    (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : ι → M [⋀^Fin n]→L[𝕜] 𝕜) :
+    wedge_product g (∑ i ∈ s, h i) (ContinuousLinearMap.mul 𝕜 𝕜) =
+    ∑ i ∈ s, wedge_product g (h i) (ContinuousLinearMap.mul 𝕜 𝕜) := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simp [wedge_zero']
+  | insert _ _ hni ih =>
+    rw [Finset.sum_insert hni, wedge_add, ih, Finset.sum_insert hni]
+
+private theorem sum_smul_wedge_left {ι : Type*} (s : Finset ι)
+    (c : ι → 𝕜) (g : ι → M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜) :
+    wedge_product (∑ i ∈ s, c i • g i) h (ContinuousLinearMap.mul 𝕜 𝕜) =
+    ∑ i ∈ s, c i • wedge_product (g i) h (ContinuousLinearMap.mul 𝕜 𝕜) := by
+  rw [sum_wedge_left]; congr 1; ext i; rw [← smul_wedge]
+
+private theorem sum_smul_wedge_right {ι : Type*} (s : Finset ι)
+    (g : M [⋀^Fin m]→L[𝕜] 𝕜) (c : ι → 𝕜) (h : ι → M [⋀^Fin n]→L[𝕜] 𝕜) :
+    wedge_product g (∑ i ∈ s, c i • h i) (ContinuousLinearMap.mul 𝕜 𝕜) =
+    ∑ i ∈ s, c i • wedge_product g (h i) (ContinuousLinearMap.mul 𝕜 𝕜) := by
+  rw [sum_wedge_right]; congr 1; ext i; rw [← wedge_smul]
+
+private theorem domDomCongr_sum_smul {ι : Type*} {m' n' : ℕ}
+    (e : Fin m' ≃ Fin n') (s : Finset ι) (c : ι → 𝕜) (f : ι → M [⋀^Fin m']→L[𝕜] 𝕜) :
+    domDomCongr e (∑ i ∈ s, c i • f i) = ∑ i ∈ s, c i • domDomCongr e (f i) := by
+  rw [domDomCongr_sum]; congr 1
+
+private theorem elementaryCovector_assoc {d : ℕ} [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜]
+    [CharZero 𝕜]
+    (b : Module.Basis (Fin d) 𝕜 (M →L[𝕜] 𝕜))
+    (I : Fin m → Fin d) (J : Fin n → Fin d) (K : Fin p → Fin d) :
+    domDomCongr Fin.finAssoc.symm
+      (wedge_product (elementaryCovector b I)
+        (wedge_product (elementaryCovector b J) (elementaryCovector b K)
+          (ContinuousLinearMap.mul 𝕜 𝕜)) (ContinuousLinearMap.mul 𝕜 𝕜)) =
+    wedge_product (wedge_product (elementaryCovector b I) (elementaryCovector b J)
+        (ContinuousLinearMap.mul 𝕜 𝕜)) (elementaryCovector b K)
+      (ContinuousLinearMap.mul 𝕜 𝕜) := by
+  rw [elementaryCovector_wedge b J K, elementaryCovector_wedge b I (Fin.addCases J K),
+      elementaryCovector_wedge b I J, elementaryCovector_wedge b (Fin.addCases I J) K]
+  obtain ⟨B, dual⟩ := exists_predual_basis b
+  apply toAlternatingMap_injective; apply B.ext_alternating; intro v hv
+  show domDomCongr Fin.finAssoc.symm
+    (elementaryCovector b (Fin.addCases I (Fin.addCases J K))) (B ∘ v) =
+    elementaryCovector b (Fin.addCases (Fin.addCases I J) K) (B ∘ v)
+  rw [domDomCongr_apply,
+    show (⇑B ∘ v) ∘ ⇑Fin.finAssoc.symm = ⇑B ∘ (v ∘ ⇑Fin.finAssoc.symm) from rfl,
+    elementaryCovector_basis_eval B b dual, elementaryCovector_basis_eval B b dual]
+  exact Fin.multiKroneckerDelta_addCases_assoc I J K v
+
+/- Associativity of multiplication wedge product -/
+theorem wedge_mul_assoc [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜] [CharZero 𝕜]
+    (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜)
+    (l : M [⋀^Fin p]→L[𝕜] 𝕜) (v : Fin (m + n + p) → M) :
+      ContinuousAlternatingMap.domDomCongr
+        Fin.finAssoc.symm (g ∧[𝕜] h ∧[𝕜] l) v = ((g ∧[𝕜] h) ∧[𝕜] l) v := by
+  suffices h_eq : domDomCongr Fin.finAssoc.symm
+        (wedge_product g (wedge_product h l (ContinuousLinearMap.mul 𝕜 𝕜))
+          (ContinuousLinearMap.mul 𝕜 𝕜)) =
+      wedge_product (wedge_product g h (ContinuousLinearMap.mul 𝕜 𝕜)) l
+        (ContinuousLinearMap.mul 𝕜 𝕜) from DFunLike.congr_fun h_eq v
+  -- Construct a dual basis pair (B, b)
+  set d' := Module.finrank 𝕜 M
+  let B : Module.Basis (Fin d') 𝕜 M := Module.finBasis 𝕜 M
+  let b : Module.Basis (Fin d') 𝕜 (M →L[𝕜] 𝕜) := B.dualBasis.map LinearMap.toContinuousLinearMap
+  have dual : ∀ i j, b i (B j) = if i = j then 1 else 0 := by
+    intro i j; change B.dualBasis i (B j) = _
+    rw [Module.Basis.dualBasis_apply_self]; split_ifs with h1 h2 <;> simp_all [eq_comm]
+  -- Elementary covector bases for each degree
+  let bm := elementaryCovectorBasis B b dual (k := m)
+  let bn := elementaryCovectorBasis B b dual (k := n)
+  let bp := elementaryCovectorBasis B b dual (k := p)
+  have hbm : ∀ I : Fin m ↪o Fin d', bm I = elementaryCovector b ↑I :=
+    fun I => by simp [bm, elementaryCovectorBasis, Module.Basis.mk_apply]
+  have hbn : ∀ J : Fin n ↪o Fin d', bn J = elementaryCovector b ↑J :=
+    fun J => by simp [bn, elementaryCovectorBasis, Module.Basis.mk_apply]
+  have hbp : ∀ K : Fin p ↪o Fin d', bp K = elementaryCovector b ↑K :=
+    fun K => by simp [bp, elementaryCovectorBasis, Module.Basis.mk_apply]
+  -- Expand g = ∑ c_I • e_I and distribute
+  rw [show g = ∑ I, bm.repr g I • bm I from (bm.sum_repr g).symm]; simp only [hbm]
+  rw [sum_smul_wedge_left (m := m) (n := n + p), domDomCongr_sum_smul,
+      sum_smul_wedge_left (m := m) (n := n),
+      sum_smul_wedge_left (m := m + n) (n := p)]
+  congr 1; ext I; congr 1
+  -- Expand h = ∑ c_J • e_J and distribute
+  rw [show h = ∑ J, bn.repr h J • bn J from (bn.sum_repr h).symm]; simp only [hbn]
+  rw [sum_smul_wedge_left (m := n) (n := p),
+      sum_smul_wedge_right (m := m) (n := n + p), domDomCongr_sum_smul,
+      sum_smul_wedge_right (m := m) (n := n),
+      sum_smul_wedge_left (m := m + n) (n := p)]
+  congr 1; ext J; congr 1
+  -- Reduce to single J
+  congr 1; ext J; congr 1
+  -- Goal: ddc(e_I ∧ (e_J ∧ l)) = (e_I ∧ e_J) ∧ l
+  -- Expand l = ∑ c_K • e_K
+  rw [show l = ∑ K, bp.repr l K • bp K from (bp.sum_repr l).symm]; simp only [hbp]
+  -- Distribute over l-sum
+  rw [sum_smul_wedge_right (m := n) (n := p)]
+  rw [sum_smul_wedge_right (m := m) (n := n + p)]
+  rw [domDomCongr_sum_smul (ι := Fin p ↪o Fin d')]
+  rw [sum_smul_wedge_right (m := m + n) (n := p)]
+  -- Reduce to single K — use simp_rw to rewrite under binders
+  simp_rw [elementaryCovector_assoc b I J]
+
+/- Antisymmetry of wedge product for elementary covectors -/
+private theorem elementaryCovector_wedge_antisymm
+    [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜] [CharZero 𝕜]
+    {d : ℕ} (b : Module.Basis (Fin d) 𝕜 (M →L[𝕜] 𝕜))
+    (I : Fin m → Fin d) (J : Fin n → Fin d) :
+    ((elementaryCovector b I) ∧[𝕜] (elementaryCovector b J)) =
+      ((-1 : 𝕜)^(m*n) •
+        ((elementaryCovector b J) ∧[𝕜]
+          (elementaryCovector b I))).domDomCongr Fin.finAddCongr := by
+  rw [elementaryCovector_wedge b I J, elementaryCovector_wedge b J I]
+  obtain ⟨B, dual⟩ := exists_predual_basis b
+  apply toAlternatingMap_injective
+  apply B.ext_alternating
+  intro v hv
+  simp only [coe_toAlternatingMap, domDomCongr_apply, smul_apply]
+  change (elementaryCovector b (Fin.addCases I J)) (B ∘ v) =
+    (-1 : 𝕜)^(m*n) • (elementaryCovector b (Fin.addCases J I)) (B ∘ (v ∘ Fin.finAddCongr))
+  rw [elementaryCovector_basis_eval B b dual (Fin.addCases I J) v,
+    elementaryCovector_basis_eval B b dual (Fin.addCases J I)
+      (v ∘ Fin.finAddCongr)]
+  have h_comm := Fin.multiKroneckerDelta_addCases_comm (R := 𝕜) I J v
+  simp only [smul_eq_mul]
+  rw [h_comm, ← mul_assoc, ← pow_add, ← two_mul, pow_mul, neg_one_sq, one_pow, one_mul]
+
 /- Antisymmetry of multiplication wedge product -/
-theorem wedge_antisymm (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜) :
+theorem wedge_antisymm [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜] [CharZero 𝕜]
+    (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜) :
     (g ∧[𝕜] h) = ((-1 : 𝕜)^(m*n) • (h ∧[𝕜] g)).domDomCongr Fin.finAddCongr := by
-  ext x
-  rw[domDomCongr_apply, smul_apply, wedge_product_mul, uncurryFinAdd, domDomCongr_apply,
-    uncurrySum_apply, ContinuousMultilinearMap.sum_apply, wedge_product_mul,
-    uncurryFinAdd, domDomCongr_apply, uncurrySum_apply, ContinuousMultilinearMap.sum_apply]
-  conv_rhs => rw[← Equiv.sum_comp Equiv.Perm.finAddCongr_equiv]
-  rw[Finset.smul_sum]
+  set d' := Module.finrank 𝕜 M
+  let B : Module.Basis (Fin d') 𝕜 M := Module.finBasis 𝕜 M
+  let b : Module.Basis (Fin d') 𝕜 (M →L[𝕜] 𝕜) := B.dualBasis.map LinearMap.toContinuousLinearMap
+  have dual : ∀ i j, b i (B j) = if i = j then 1 else 0 := by
+    intro i j; change B.dualBasis i (B j) = _
+    rw [Module.Basis.dualBasis_apply_self]; split_ifs with h1 h2 <;> simp_all [eq_comm]
+  let bm := elementaryCovectorBasis B b dual (k := m)
+  let bn := elementaryCovectorBasis B b dual (k := n)
+  have hbm : ∀ I : Fin m ↪o Fin d', bm I = elementaryCovector b ↑I :=
+    fun I => by simp [bm, elementaryCovectorBasis, Module.Basis.mk_apply]
+  have hbn : ∀ J : Fin n ↪o Fin d', bn J = elementaryCovector b ↑J :=
+    fun J => by simp [bn, elementaryCovectorBasis, Module.Basis.mk_apply]
+  nth_rw 1 [show g = ∑ I, bm.repr g I • bm I from (bm.sum_repr g).symm]
+  nth_rw 2 [show g = ∑ I, bm.repr g I • bm I from (bm.sum_repr g).symm]
+  nth_rw 1 [show h = ∑ J, bn.repr h J • bn J from (bn.sum_repr h).symm]
+  nth_rw 2 [show h = ∑ J, bn.repr h J • bn J from (bn.sum_repr h).symm]
+  simp only [hbm, hbn]
+  simp_rw [sum_smul_wedge_left, sum_smul_wedge_right]
+  ext v
+  simp only [ContinuousAlternatingMap.sum_apply, ContinuousAlternatingMap.smul_apply, ContinuousAlternatingMap.domDomCongr_apply, smul_eq_mul]
+  rw [Finset.mul_sum]
+  simp_rw [Finset.mul_sum]
+  conv_lhs => rw [Finset.sum_comm]
   apply Finset.sum_congr rfl
-  intro σ hσ
-  rcases σ with ⟨σ₁⟩
-  simp only [Function.comp_apply, Equiv.Perm.finAddCongr_equiv_apply]
-  rw[uncurrySum.summand_mk]
-  rw[ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.domDomCongr_apply,
-    ContinuousMultilinearMap.uncurrySum_apply, ContinuousMultilinearMap.flipMultilinear_apply,
-    coe_toContinuousMultilinearMap, ContinuousMultilinearMap.flipAlternating_apply,
-    coe_toContinuousMultilinearMap, ContinuousLinearMap.compContinuousAlternatingMap₂_apply,
-    ContinuousLinearMap.mul_apply']
-  rw[uncurrySum.summand_mk]
-  rw[ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.domDomCongr_apply,
-    ContinuousMultilinearMap.uncurrySum_apply, ContinuousMultilinearMap.flipMultilinear_apply,
-    coe_toContinuousMultilinearMap, ContinuousMultilinearMap.flipAlternating_apply,
-    coe_toContinuousMultilinearMap, ContinuousLinearMap.compContinuousAlternatingMap₂_apply,
-    ContinuousLinearMap.mul_apply']
-  simp only [Equiv.Perm.sign_sumCommPerm, Equiv.Perm.sumCommPerm_apply_apply, Function.comp_apply]
-  simp [Function.comp_def, finAddFlip]
-  simp_rw[mul_comm]
-  simp only [Equiv.Perm.sumCongrPerm, Fin.finSumCongr, Equiv.permCongr_apply, Equiv.symm_trans_apply,
-    Equiv.symm_symm, Equiv.trans_apply, Equiv.apply_symm_apply,
-    Fin.finAddCongr_finAddCongr]
-  sorry
+  intro J _
+  apply Finset.sum_congr rfl
+  intro I _
+  have h_anti := DFunLike.congr_fun (elementaryCovector_wedge_antisymm b I J) v
+  simp only [ContinuousAlternatingMap.domDomCongr_apply, ContinuousAlternatingMap.smul_apply, smul_eq_mul] at h_anti
+  rw [h_anti]
+  ring
 
 /-- The graded Leibniz rule for the interior product (curryFin) and wedge product:
   ι_x(g ∧_f h) = (ι_x g) ∧_f h + (-1)^m • g ∧_f (ι_x h)
@@ -256,7 +453,7 @@ theorem iprod_wedge_product
       (-1 : 𝕜) ^ m • domDomCongr Fin.finAddFlipAssoc (g ∧[f] curryFin h x) := by
   sorry
 
-variable {M : Type*} [NormedAddCommGroup M] [NormedSpace ℝ M]
+variable {M : Type*} [NormedAddCommGroup M] [NormedSpace ℝ M] [FiniteDimensional ℝ M]
 
 open Fin
 
@@ -300,42 +497,5 @@ theorem wedge_self_odd_zero (g : M [⋀^Fin m]→L[ℝ] ℝ) (m_odd : Odd m) :
   exact h
 
 end wedge
-
-section elementaryCovectorWedge
-
-variable
-  {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-  {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-  {d m' p : ℕ}
-
-/-- It suffices to prove that ((elementaryCovector b I) ∧[𝕜] (elementaryCovector b J)) agrees with (elementaryCovector b (Fin.addCases I J) on any basis for (Fin k \to E). So it suffices to prove that they agree on (B (p 1), …, B(p (k+l))) for any p : Fin (k + l) \to n, where n = dim E and B is the basis for E dual to E*. We split this into the following cases:
-
-1. If p is not injective, then both sides are zero since ((elementaryCovector b I) ∧[𝕜] (elementaryCovector b J)) and (elementaryCovector b (Fin.addCases I J) are alternating.
-2. If p contains an index that does not appear in either I or J, then both sides are zero by elementaryCovector_basis_eval_eq_zero in Basis.lean
-3. If p = Fin.addCases I J and p is injective, then we can compute via wedge_product_eq_alternatization that:
-
-`((elementaryCovector b I) ∧[𝕜] (elementaryCovector b J)) (B ∘ p) = 1/(k! l!) * Alt((elementaryCovector b I) ⨂ (elementaryCovector b J)) (B ∘ p)`
-` = 1/(k! l!) SUM_{σ ∈ S_(k+l)} (sign σ) * ((elementaryCovector b I) (B ∘ p ∘ σ(1), ..., B ∘ p ∘ σ(k))) * ((elementaryCovector b I) (B ∘ p ∘ σ(k+1), ..., B ∘ p ∘ σ(k+l)))`
-
-Since p = IJ is injective, by elementaryCovector_basis_eval_eq_zero the only terms in this sum that give nonzero values are the cases when σ permutes the first k indices and the last l indices of p seperately. That is, when σ = τμ with τ ∈ S_k and μ ∈ S_l, so that sign (σ) = sign(τ) * sign (μ)
-Therefore
-
-`((elementaryCovector b I) ∧[𝕜] (elementaryCovector b J)) (B ∘ p) = 1/(k! l!) SUM_{τ ∈ S_k, μ ∈ S_l} (sign τ) * (sign μ) * ((elementaryCovector b I) (B ∘ p ∘ τ)) * ((elementaryCovector b J) (B ∘ p ∘ μ))`
-` = (1/k! SUM_{τ ∈ S_k} (sign τ) * ((elementaryCovector b I) (B ∘ p ∘ τ))) * (1/l! SUM_{μ ∈ S_l} (sign μ) * ((elementaryCovector b I) (B ∘ p ∘ μ)))`
-` = Alt(elementaryCovector b I) (B ∘ p(1), ..., B ∘ p(k)) * Alt(elementaryCovector b J) (B ∘ p(k+1), ..., B ∘ p(k+l))`
-` = (elementaryCovector b I) (B ∘ p(1), ..., B ∘ p(k)) * (elementaryCovector b J) (B ∘ p(k+1), ..., B ∘ p(k+l))`
-` = 1 = (elementaryCovector b (Fin.addCases I J)) (B ∘ p)`
-
-4. If p = (Fin.addCases) ∘ σ for some permutation σ and is injective, then this reduces to case 3. Sice the effect of σ is merely to multiply both sides of the calculation by sign σ.
--/
-theorem elementaryCovector_wedge [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜] [CharZero 𝕜]
-    (b : Module.Basis (Fin d) 𝕜 (E →L[𝕜] 𝕜))
-    (I : Fin m' → Fin d) (J : Fin p → Fin d) :
-    ((elementaryCovector b I) ∧[𝕜] (elementaryCovector b J)) =
-      (elementaryCovector b (Fin.addCases I J) :
-        E [⋀^Fin (m' + p)]→L[𝕜] 𝕜) := by
-  sorry
-
-end elementaryCovectorWedge
 
 end ContinuousAlternatingMap
