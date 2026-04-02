@@ -143,6 +143,21 @@ noncomputable def continuousMultilinearMap_basis {d : ℕ} (b : Module.Basis (Fi
         rw [Fintype.card_fun, Fintype.card_fin, Fintype.card_fin,
           finrank_continuousMultilinearMap, hd])).ge
 
+/-- The representation of a continuous multilinear map `f` in the basis
+`continuousMultilinearMap_basis b s` at index `σ` equals `f` evaluated at the basis vectors
+`(b (σ j))_j`. This follows from the Kronecker delta property of the basis elements. -/
+theorem continuousMultilinearMap_basis_repr {d : ℕ} (b : Module.Basis (Fin d) 𝕜 F)
+    (s : ℕ) (f : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜) (σ : Fin s → Fin d) :
+    (continuousMultilinearMap_basis b s).repr f σ = f (fun j => b (σ j)) := by
+  have hbasis : ∀ ρ, (continuousMultilinearMap_basis b s) ρ =
+      continuousMultilinearMap_basisElem b s ρ :=
+    fun ρ => congr_fun (Module.Basis.coe_mk
+      (continuousMultilinearMap_basisElem_linearIndependent b s) _) ρ
+  conv_rhs => rw [← (continuousMultilinearMap_basis b s).sum_repr f]
+  simp only [ContinuousMultilinearMap.sum_apply, ContinuousMultilinearMap.smul_apply,
+    smul_eq_mul, hbasis, continuousMultilinearMap_basisElem_apply,
+    mul_ite, mul_one, mul_zero, Finset.sum_ite_eq', Finset.mem_univ, ite_true]
+
 /-!
 ## Smooth section characterization via coordinates
 

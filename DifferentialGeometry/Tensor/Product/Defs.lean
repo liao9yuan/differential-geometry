@@ -144,9 +144,8 @@ yielding a (0,s+q)-tensor by concatenating their inputs. -/
 noncomputable def tensor0S_product_fun (s q : ℕ)
     (x : M) (α : Tensor0SSpace s I x) (β : Tensor0SSpace q I x) :
     Tensor0SSpace (s + q) I x :=
-  (tensor0SSpace_continuousLinearEquiv (s + q) x).symm
-    ((((tensor0SSpace_continuousLinearEquiv s x) α).smulRight
-      ((tensor0SSpace_continuousLinearEquiv q x) β)).uncurrySum.domDomCongr finSumFinEquiv)
+  Tensor0SSpace.ofModel
+    ((α.toModel.smulRight β.toModel).uncurrySum.domDomCongr finSumFinEquiv)
 
 
 /-- The tensor product of (0,s)- and (0,q)-tensors is bilinear in both factors,
@@ -158,23 +157,41 @@ back to the concrete (0,s+q)-tensor space via `tensor0S_equiv`. -/
 noncomputable def tensor0S_product_bilinear (s q : ℕ) (x : M) :
     Tensor0SSpace s I x →ₗ[𝕜] Tensor0SSpace q I x →ₗ[𝕜] Tensor0SSpace (s + q) I x :=
   LinearMap.mk₂ 𝕜 (tensor0S_product_fun s q x)
-    (fun α₁ α₂ β => by unfold tensor0S_product_fun; ext m; simp [add_smul, map_add, ContinuousLinearEquiv.apply_symm_apply])
-    (fun c α β => by
+    (fun α₁ α₂ β => by
       unfold tensor0S_product_fun; ext m
-      simp only [ContinuousLinearEquiv.apply_symm_apply, map_smul,
+      simp only [Tensor0SSpace.ofModel, map_add, ContinuousLinearEquiv.apply_symm_apply,
                  ContinuousMultilinearMap.domDomCongr_apply,
                  ContinuousMultilinearMap.uncurrySum_apply,
                  ContinuousMultilinearMap.smulRight_apply,
+                 Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply,
                  ContinuousMultilinearMap.smul_apply, smul_eq_mul]
       ring)
-    (fun α β₁ β₂ => by unfold tensor0S_product_fun; ext m; simp [smul_add, map_add, ContinuousLinearEquiv.apply_symm_apply])
     (fun c α β => by
       unfold tensor0S_product_fun; ext m
-      simp only [ContinuousLinearEquiv.apply_symm_apply, map_smul,
+      simp only [Tensor0SSpace.ofModel, map_smul, ContinuousLinearEquiv.apply_symm_apply,
                  ContinuousMultilinearMap.domDomCongr_apply,
                  ContinuousMultilinearMap.uncurrySum_apply,
                  ContinuousMultilinearMap.smulRight_apply,
+                 Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply,
+                 smul_eq_mul]
+      ring)
+    (fun α β₁ β₂ => by
+      unfold tensor0S_product_fun; ext m
+      simp only [Tensor0SSpace.ofModel, map_add, ContinuousLinearEquiv.apply_symm_apply,
+                 ContinuousMultilinearMap.domDomCongr_apply,
+                 ContinuousMultilinearMap.uncurrySum_apply,
+                 ContinuousMultilinearMap.smulRight_apply,
+                 Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply,
                  ContinuousMultilinearMap.smul_apply, smul_eq_mul]
+      ring)
+    (fun c α β => by
+      unfold tensor0S_product_fun; ext m
+      simp only [Tensor0SSpace.ofModel, map_smul, ContinuousLinearEquiv.apply_symm_apply,
+                 ContinuousMultilinearMap.domDomCongr_apply,
+                 ContinuousMultilinearMap.uncurrySum_apply,
+                 ContinuousMultilinearMap.smulRight_apply,
+                 Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply,
+                 smul_eq_mul]
       ring)
 
 /-- The tensor product map lifted to the abstract tensor product via the universal property:
@@ -230,6 +247,36 @@ noncomputable def tensorRS_product (r s r' s' : ℕ) (x : M)
     ((tensor0S_equiv (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s s' x).symm.toLinearMap ∘ₗ
      TensorProduct.map T.toLinearMap T'.toLinearMap ∘ₗ
      (tensor0S_equiv (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r r' x).toLinearMap)
+
+/-- The trivialized basis coordinate of a pointwise tensor product of (0,s)- and (0,q)-tensors
+decomposes as a product of the trivialized basis coordinates of the factors.
+
+Specifically, the `σ`-coordinate of `tensor0S_product_fun s q x α β` (trivialized at `x₀`)
+equals the `(σ ∘ Fin.castAdd q)`-coordinate of `α` times the `(σ ∘ Fin.natAdd s)`-coordinate
+of `β`.
+
+The proof requires two facts:
+1. The multilinear bundle trivialization acts by precomposing each argument with
+   `(trivializationAt E (TangentSpace I) x₀).symmL 𝕜 x`, which distributes over the
+   `smulRight`/`uncurrySum`/`domDomCongr` product construction.
+2. The basis element at `σ : Fin (s+q) → Fin d` is `∏ j, b.coord(σ j)`, which
+   splits as a product over the first `s` and last `q` indices. -/
+theorem triv_coord_tensor0S_product {s q d : ℕ}
+    (b : Module.Basis (Fin d) 𝕜 E)
+    (σ : Fin (s + q) → Fin d) (x₀ x : M)
+    (α : Tensor0SSpace s I x) (β : Tensor0SSpace q I x) :
+    (continuousMultilinearMap_basis b (s + q)).repr
+      (trivializationAt (Tensor0SModel (s + q) 𝕜 E)
+        (fun x => Tensor0SSpace (s + q) I x) x₀
+        ⟨x, tensor0S_product_fun s q x α β⟩).2 σ =
+    (continuousMultilinearMap_basis b s).repr
+      (trivializationAt (Tensor0SModel s 𝕜 E)
+        (fun x => Tensor0SSpace s I x) x₀ ⟨x, α⟩).2 (σ ∘ Fin.castAdd q) *
+    (continuousMultilinearMap_basis b q).repr
+      (trivializationAt (Tensor0SModel q 𝕜 E)
+        (fun x => Tensor0SSpace q I x) x₀ ⟨x, β⟩).2 (σ ∘ Fin.natAdd s) := by
+  simp_rw [continuousMultilinearMap_basis_repr]
+  rfl
 
 end Tensor0SBundle
 
