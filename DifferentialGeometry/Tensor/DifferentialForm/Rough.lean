@@ -324,7 +324,8 @@ theorem wedge_product_lsmul {ω₁ : E → E [⋀^Fin m]→L[ℝ] ℝ} {ω₂ : 
   rfl
 
 /- Associativity of wedge product -/
-theorem wedge_assoc (ω₁ : E → E [⋀^Fin m]→L[ℝ] ℝ) (ω₂ : E → E [⋀^Fin n]→L[ℝ] ℝ) (ω₃ : E → E [⋀^Fin k]→L[ℝ] ℝ) :
+theorem wedge_assoc [FiniteDimensional ℝ E]
+    (ω₁ : E → E [⋀^Fin m]→L[ℝ] ℝ) (ω₂ : E → E [⋀^Fin n]→L[ℝ] ℝ) (ω₃ : E → E [⋀^Fin k]→L[ℝ] ℝ) :
     domDomCongr Fin.finAssoc.symm (ω₁ ∧r ω₂ ∧r ω₃) = (ω₁ ∧r ω₂) ∧r ω₃ := by
   ext x y
   rw[wedge_product_def, wedge_product_def, domDomCongr_apply, wedge_product_def, wedge_product_def,
@@ -358,7 +359,8 @@ theorem wedge_smul (ω : E → E [⋀^Fin m]→L[ℝ] ℝ) (τ : E → E [⋀^Fi
   exact ContinuousAlternatingMap.wedge_smul (ω x) (τ x) c
 
 /- Antisymmetry of multiplication wedge product -/
-theorem wedge_antisymm (ω : E → E [⋀^Fin m]→L[ℝ] ℝ) (τ : E → E [⋀^Fin n]→L[ℝ] ℝ) :
+theorem wedge_antisymm [FiniteDimensional ℝ E]
+    (ω : E → E [⋀^Fin m]→L[ℝ] ℝ) (τ : E → E [⋀^Fin n]→L[ℝ] ℝ) :
     (ω ∧r τ) = RoughDifferentialForm.domDomCongr Fin.finAddCongr ((-1 : ℝ)^(m*n) • (τ ∧r ω)) := by
   ext x y
   rw[wedge_product_mul, domDomCongr_apply, _root_.smul_apply,
@@ -370,7 +372,8 @@ variable {M : Type*} [NormedAddCommGroup M] [NormedSpace ℝ M]
 
 /- Corollary of `wedge_antisymm` saying that a wedge of a m-form with itself is
 zero if m is odd. -/
-theorem wedge_self_odd_zero (ω : E → E [⋀^Fin m]→L[ℝ] ℝ) (m_odd : Odd m) :
+theorem wedge_self_odd_zero [FiniteDimensional ℝ E]
+    (ω : E → E [⋀^Fin m]→L[ℝ] ℝ) (m_odd : Odd m) :
     (ω ∧r ω) = 0 := by
   ext1 x
   rw[wedge_product_mul]
