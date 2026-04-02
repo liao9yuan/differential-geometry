@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yury Kudryashov
 Coauthors: Jack McCarthy
 -/
+import DifferentialGeometry.Tensor.Multilinear.Comp
 import DifferentialGeometry.Tensor.Aux.LIContDiff
 import Mathlib.Analysis.Calculus.ContDiff.CPolynomial
 import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
@@ -135,20 +136,6 @@ noncomputable def _root_.LinearIsometry.compLeft {𝕜 : Type*} {𝕜₂ : Type*
   { ContinuousLinearMap.compSL _ _ _ _ _ f.toContinuousLinearMap with
     norm_map' := fun _ ↦ f.norm_toContinuousLinearMap_comp }
 
-/-- The map sending `p : M →L[𝕜] M'` to the operator `compContinuousLinearMapL (fun _ ↦ p)`
-(pre-composing all `ι` slots of a continuous multilinear map with the same `p`) is continuous.
-Used to prove continuity of pre-composition for alternating maps. -/
-theorem compContinuousMultilinearMapL_diag_continuous :
-    Continuous (fun p : M →L[𝕜] M' ↦
-      (ContinuousMultilinearMap.compContinuousLinearMapL (fun _ : ι ↦ p) :
-        ContinuousMultilinearMap 𝕜 (fun _ ↦ M') N →L[𝕜] ContinuousMultilinearMap 𝕜 (fun _ ↦ M) N))
-  := by
-  let φ : ContinuousMultilinearMap 𝕜 (fun _ : ι ↦ M →L[𝕜] M') _ :=
-    ContinuousMultilinearMap.compContinuousLinearMapContinuousMultilinear
-    𝕜 (fun _ : ι ↦ M) (fun _ : ι ↦ M') N
-  change Continuous (fun p : M →L[𝕜] M' ↦ φ (fun _ : ι ↦ p))
-  exact φ.cont.comp (continuous_pi (fun _ ↦ continuous_id))
-
 /-- Pre-composition with a continuous linear map `p : M →L[𝕜] M'` defines a continuous linear
 operator `(M' [⋀^ι]→L[𝕜] N) →L[𝕜] (M [⋀^ι]→L[𝕜] N)`, and the assignment `p ↦ (· ∘ p)` is
 itself continuous. The proof reduces to the multilinear case via the isometric embedding. -/
@@ -217,24 +204,6 @@ variable
   (F₁ F₂ : Type*) [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁]
   [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂] [ContinuousAdd F₁]
 
-/-- The map sending `p : F₁ →L[𝕜] F₁` to the operator `compContinuousLinearMapL (fun _ ↦ p)`
-(pre-composing all `ι` slots of a multilinear map with the same `p`) is continuous.
-Used to prove `compContinuousLinearMapL_continuous` for alternating maps. -/
-theorem ContinuousMultilinearMap.compContinuousLinearMapL_diag_continuous :
-  Continuous (fun p : F₁ →L[𝕜] F₁ ↦
-  (ContinuousMultilinearMap.compContinuousLinearMapL (fun _ : ι ↦ p) :
-    ContinuousMultilinearMap 𝕜 (fun _ ↦ F₁) F₂ →L[𝕜] ContinuousMultilinearMap 𝕜 (fun _ ↦ F₁) F₂))
-  := by
-  let φ : ContinuousMultilinearMap 𝕜 (fun _ : ι ↦ F₁ →L[𝕜] F₁) _ :=
-    ContinuousMultilinearMap.compContinuousLinearMapContinuousMultilinear
-    𝕜 (fun _ : ι ↦ F₁) (fun _ : ι ↦ F₁) F₂
-  change Continuous (fun p : F₁ →L[𝕜] F₁ ↦ φ (fun _ : ι ↦ p))
-  apply Continuous.comp
-  · apply ContinuousMultilinearMap.cont
-  · apply continuous_pi
-    intro _
-    exact continuous_id
-
 /-- The map `p ↦ compContinuousLinearMapCLM p`, sending `p : F₁ →L[𝕜] F₁` to the operator of
 pre-composing all inputs of an alternating map with `p`, is continuous. -/
 theorem ContinuousAlternatingMap.compContinuousLinearMapL_continuous :
@@ -262,24 +231,6 @@ variable {𝕜 ι F₁ F₂} [ntnf : NontriviallyNormedField 𝕜] [CompleteSpac
   [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁] [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂]
 
 open scoped Bundle Manifold
-
-omit [CompleteSpace 𝕜] in
-/-- The map sending `p : F₁ →L[𝕜] F₁` to `compContinuousLinearMapL (fun _ ↦ p)` is `C^∞`.
-Does not require `CompleteSpace 𝕜`. Used to prove the smooth version for alternating maps. -/
-theorem ContinuousMultilinearMap.compContinuousLinearMapL_diag_contDiff :
-  ContDiff 𝕜 ⊤ (fun p : F₁ →L[𝕜] F₁ ↦
-  (ContinuousMultilinearMap.compContinuousLinearMapL (fun _ : ι ↦ p) :
-    ContinuousMultilinearMap 𝕜 (fun _ ↦ F₁) F₂ →L[𝕜] ContinuousMultilinearMap 𝕜 (fun _ ↦ F₁) F₂))
-  := by
-  let φ : ContinuousMultilinearMap 𝕜 (fun _ : ι ↦ F₁ →L[𝕜] F₁) _ :=
-    ContinuousMultilinearMap.compContinuousLinearMapContinuousMultilinear
-    𝕜 (fun _ : ι ↦ F₁) (fun _ : ι ↦ F₁) F₂
-  change ContDiff 𝕜 ⊤ (fun p : F₁ →L[𝕜] F₁ ↦ φ (fun _ : ι ↦ p))
-  apply ContDiff.comp
-  · apply ContinuousMultilinearMap.contDiff
-  · apply contDiff_pi.mpr
-    intro _
-    apply contDiff_id
 
 variable [FiniteDimensional 𝕜 F₁] [FiniteDimensional 𝕜 F₂]
 

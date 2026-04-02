@@ -6,6 +6,7 @@ Coauthors: Jack McCarthy
 -/
 import DifferentialGeometry.Tensor.Alternating.Flip
 import DifferentialGeometry.Tensor.Alternating.Comp
+import DifferentialGeometry.Tensor.Alternating.Congr
 import Mathlib.Analysis.Normed.Module.Alternating.Curry
 import Mathlib.LinearAlgebra.Alternating.DomCoprod
 import Mathlib.LinearAlgebra.Alternating.Uncurry.Fin
@@ -336,18 +337,6 @@ def uncurryFinAdd (f : E [⋀^Fin m]→L[𝕜] E [⋀^Fin n]→L[𝕜] F) :
   ContinuousAlternatingMap.domDomCongr finSumFinEquiv (uncurrySum f)
 
 variable [DecidableEq ι] [DecidableEq ι']
-
-/-- Alternatization commutes with `MultilinearMap.domDomCongr` by an equivalence. -/
-theorem alternatization_domDomCongr
-    {ι₁ ι₂ : Type*} [Fintype ι₁] [Fintype ι₂] [DecidableEq ι₁] [DecidableEq ι₂]
-    (e : ι₁ ≃ ι₂) (T : MultilinearMap 𝕜 (fun _ : ι₁ => E) F) :
-    MultilinearMap.alternatization (T.domDomCongr e) =
-      (MultilinearMap.alternatization T).domDomCongr e := by
-  ext v; simp only [MultilinearMap.alternatization_apply, AlternatingMap.domDomCongr_apply,
-    MultilinearMap.domDomCongr_apply]
-  rw [← Equiv.sum_comp (Equiv.permCongr e)]; congr 1; ext σ
-  simp only [Equiv.Perm.sign_permCongr, Function.comp]
-  congr 2; funext i; simp [Equiv.permCongr_apply]
 
 open scoped TensorProduct
 
