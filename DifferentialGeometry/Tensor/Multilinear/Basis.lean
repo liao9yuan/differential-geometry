@@ -170,18 +170,19 @@ section smooth
 variable {EB : Type*} [NormedAddCommGroup EB] [NormedSpace 𝕜 EB]
   {HB : Type*} [TopologicalSpace HB]
   {IB : ModelWithCorners 𝕜 EB HB}
-  {B : Type*} [TopologicalSpace B] [ChartedSpace HB B] [IsManifold IB ⊤ B]
+  {B : Type*} [TopologicalSpace B] [ChartedSpace HB B]
   (E : B → Type*) [Π x, AddCommMonoid (E x)] [Π x, Module 𝕜 (E x)]
   [TopologicalSpace (TotalSpace F E)] [Π x, TopologicalSpace (E x)]
-  [FiberBundle F E] [VectorBundle 𝕜 F E] [ContMDiffVectorBundle ⊤ F E IB]
+  [FiberBundle F E] [VectorBundle 𝕜 F E]
+  (n : WithTop ℕ∞) [ContMDiffVectorBundle n F E IB]
 
 set_option linter.unusedSectionVars false in
-/-- A section of the multilinear bundle is smooth if and only if, when read through the
-trivialization at each point, all basis coordinate functions are smooth.
+/-- A section of the multilinear bundle is `C^n` if and only if, when read through the
+trivialization at each point, all basis coordinate functions are `C^n`.
 
 More precisely, `f` is a `C^n` section iff for every `x₀ : B` and `σ : Fin s → Fin d`,
 the function `x ↦ B.repr (trivializationAt ... x₀ ⟨x, f x⟩).2 σ` is `C^n` at `x₀`. -/
-theorem contMDiff_multilinearSection_iff_coord (n : WithTop ℕ∞) {d : ℕ}
+theorem contMDiff_multilinearSection_iff_coord {d : ℕ}
     (b : Module.Basis (Fin d) 𝕜 F) {s : ℕ}
     (f : ∀ x : B, Bundle.continuousMultilinearMap 𝕜 s F E x) :
     ContMDiff IB (IB.prod 𝓘(𝕜, MLF s)) n

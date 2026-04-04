@@ -1,8 +1,7 @@
 /-
 Authors: Yuan Liao, Jack McCarthy
 -/
-import DifferentialGeometry.Tensor.Multilinear.Bundle
-import DifferentialGeometry.Tensor.Multilinear.Basis
+import DifferentialGeometry.Tensor.Multilinear.Fiber
 import DifferentialGeometry.Tensor.Multilinear.Curry
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
@@ -88,8 +87,7 @@ def TensorRSModel (r s : ℕ) (𝕜 : Type*) (E : Type*) [NontriviallyNormedFiel
 
 /-- The fiber of the (0,s) covariant tensor bundle at `x ∈ M`, defined as
 `Bundle.continuousMultilinearMap 𝕜 s E (TangentSpace I) x`. -/
-@[reducible]
-def Tensor0SSpace (s : ℕ) (I : ModelWithCorners 𝕜 E H) [IsManifold I 1 M] (x : M) :=
+abbrev Tensor0SSpace (s : ℕ) (I : ModelWithCorners 𝕜 E H) [IsManifold I 1 M] (x : M) :=
   Bundle.continuousMultilinearMap 𝕜 s E (TangentSpace I) x
 
 /-- The cotangent space at `x ∈ M`: linear functionals on the tangent space,
@@ -179,73 +177,21 @@ instance tangentSpace_moduleFree (x : M) :
   inferInstanceAs (Module.Free 𝕜 E)
 
 omit [FiniteDimensional 𝕜 E] in
-/-- The bundle and norm topologies on `Tensor0SSpace s I x` agree. The bundle topology is
-induced from the pretrivialization (a continuous linear equivalence to the model fiber),
-and this coincides with the norm topology since the composition map is a homeomorphism. -/
+/-- Alias for the general `Bundle.continuousMultilinearMap.topology_eq`, specialized to the
+tangent bundle. Used internally by `tensor0SSpace_continuousLinearEquiv`. -/
 private theorem tensor0SSpace_topology_eq (s : ℕ) (x : M) :
     (inferInstance : TopologicalSpace (Tensor0SSpace s I x)) =
-    (inferInstanceAs (TopologicalSpace (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜))) := by
-  change instTopologicalSpaceContinuousMultilinearMap 𝕜 s E (TangentSpace I) x = _
-  simp only [instTopologicalSpaceContinuousMultilinearMap]
-  -- Step 1: Factor pretriv ∘ mk' = Prod.mk x ∘ g where g is the fiber map
-  set e := trivializationAt E (TangentSpace I) x
-  set g := ContinuousMultilinearMap.compContinuousLinearMapL
-    (E₁ := fun _ : Fin s => TangentSpace I x) (E := fun _ : Fin s => E) (G := 𝕜)
-    (fun _ => e.symmL 𝕜 x) with hg_def
-  have hfactor : (↑(Pretrivialization.continuousMultilinearMap 𝕜 s e) ∘
-      TotalSpace.mk' _ x) = Prod.mk x ∘ g := by funext; rfl
-  -- Step 2: Decompose via induced_compose and isInducing_prodMkRight
-  rw [hfactor, ← induced_compose, (isInducing_prodMkRight x).eq_induced.symm]
-  -- Goal: induced g τ_norm = τ_norm
-  -- Step 3: g is a homeomorphism (continuous with continuous inverse), hence inducing
-  set g' := ContinuousMultilinearMap.compContinuousLinearMapL
-    (E₁ := fun _ : Fin s => E) (E := fun _ : Fin s => TangentSpace I x) (G := 𝕜)
-    (fun _ => e.continuousLinearMapAt 𝕜 x) with hg'_def
-  have hx : x ∈ e.baseSet := mem_baseSet_trivializationAt E (TangentSpace I) x
-  have hleft : Function.LeftInverse g' g := by
-    intro L; ext v; dsimp [g, g']
-    congr 1; funext i; exact e.symmₗ_linearMapAt hx (v i)
-  have hright : Function.RightInverse g' g := by
-    intro M; ext v; dsimp [g, g']
-    congr 1; funext i; exact e.linearMapAt_symmₗ hx (v i)
-  exact (Homeomorph.mk ⟨g, g', hleft, hright⟩ g.continuous g'.continuous).isInducing.eq_induced.symm
-
-/-- The fiber `Tensor0SSpace s I x` is a normed additive commutative group. -/
-instance tensor0SSpace_normedAddCommGroup (s : ℕ) (x : M) :
-    NormedAddCommGroup (Tensor0SSpace s I x) :=
-  inferInstanceAs (NormedAddCommGroup (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜))
-
-/-- The fiber `Tensor0SSpace s I x` is a normed `𝕜`-module. -/
-instance tensor0SSpace_normedSpace (s : ℕ) (x : M) :
-    NormedSpace 𝕜 (Tensor0SSpace s I x) :=
-  inferInstanceAs (NormedSpace 𝕜 (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜))
-
-instance tensor0SSpace_t2Space (s : ℕ) (x : M) :
-    T2Space (Tensor0SSpace s I x) := by
-  rw [show instTopologicalSpaceContinuousMultilinearMap 𝕜 s E (TangentSpace I) x =
-        ContinuousMultilinearMap.instTopologicalSpace from tensor0SSpace_topology_eq (I := I) s x]
-  infer_instance
+    (inferInstanceAs (TopologicalSpace (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜))) :=
+  Bundle.continuousMultilinearMap.topology_eq s x
 
 noncomputable instance tensor0SSpace_finiteDimensional [CompleteSpace 𝕜] (s : ℕ) (x : M) :
     FiniteDimensional 𝕜 (Tensor0SSpace s I x) :=
-  continuousMultilinearMap_finiteDimensional s
+  Bundle.continuousMultilinearMap.instFiniteDimensional s x
 
 @[simp]
 theorem finrank_tensor0SSpace [CompleteSpace 𝕜] (s : ℕ) (x : M) :
     Module.finrank 𝕜 (Tensor0SSpace s I x) = (Module.finrank 𝕜 E) ^ s :=
-  finrank_continuousMultilinearMap s
-
-/-- With the bundle topology, addition on `Tensor0SSpace` fibers is continuous. -/
-instance tensor0SSpace_isTopologicalAddGroup (s : ℕ) (x : M) :
-    @IsTopologicalAddGroup (Tensor0SSpace s I x) inferInstance _ := by
-  rw [tensor0SSpace_topology_eq (I := I) s x]
-  infer_instance
-
-/-- With the bundle topology, scalar multiplication on `Tensor0SSpace` fibers is continuous. -/
-instance tensor0SSpace_continuousSMul (s : ℕ) (x : M) :
-    @ContinuousSMul 𝕜 (Tensor0SSpace s I x) _ _ inferInstance := by
-  rw [tensor0SSpace_topology_eq (I := I) s x]
-  infer_instance
+  Bundle.continuousMultilinearMap.finrank_eq s x
 
 omit [FiniteDimensional 𝕜 E] in
 /-- `Tensor0SSpace s I x` is definitionally equal to
@@ -282,17 +228,6 @@ def tensor0SSpace_continuousLinearEquiv (s : ℕ) (x : M) :
     rw [show (instTopologicalSpaceContinuousMultilinearMap 𝕜 s E (TangentSpace I) x) =
       ContinuousMultilinearMap.instTopologicalSpace from tensor0SSpace_topology_eq (I := I) s x]
     exact @continuous_id _ ContinuousMultilinearMap.instTopologicalSpace
-
-omit [FiniteDimensional 𝕜 E] in
-@[ext]
-theorem tensor0SSpace_ext {s : ℕ} {x : M} (T₁ T₂ : Tensor0SSpace s I x)
-    (h : ∀ m, (tensor0SSpace_continuousLinearEquiv s x T₁) m =
-      (tensor0SSpace_continuousLinearEquiv s x T₂) m) :
-    T₁ = T₂ := by
-  have h1 : (tensor0SSpace_continuousLinearEquiv s x T₁) =
-      (tensor0SSpace_continuousLinearEquiv s x T₂) := by
-    ext m; exact h m
-  exact (tensor0SSpace_continuousLinearEquiv s x).injective h1
 
 /-!
 ## Coercion to Model Fiber

@@ -2,13 +2,7 @@
 Authors: Yuan Liao, Jack McCarthy
 -/
 import DifferentialGeometry.Tensor.Product.Pretrivialization
-import Mathlib.Geometry.Manifold.VectorBundle.Tangent
-import Mathlib.Geometry.Manifold.VectorBundle.MDifferentiable
-import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
-import Mathlib.Geometry.Manifold.Instances.Sphere
-import Mathlib.Geometry.Manifold.VectorField.LieBracket
-import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
-import Mathlib.Analysis.Calculus.VectorField
+import DifferentialGeometry.Tensor.Product.Fiber
 /-!
 # The Vector Bundle of Tensor Products
 
@@ -22,17 +16,20 @@ with fiber `E₁ x ⊗[𝕜] E₂ x` and model fiber `F₁ ⊗[𝕜] F₂`.
 
 * `Bundle.TensorProduct.vectorPrebundle` : the `VectorPrebundle` for the tensor product bundle,
   with atlas given by all pairs of trivializations from the atlases of `E₁` and `E₂`.
-* `Bundle.Trivialization.tensorProduct e₁ e₂` : the genuine trivialization of the tensor
+* `Bundle.Trivialization.tensorProduct e₁ e₂` : the trivialization of the tensor
   product bundle induced by atlas trivializations `e₁` and `e₂`.
 
 ## Main Results
 
 * `Bundle.TensorProduct.fiberBundle` : the tensor product of two fiber bundles is a fiber bundle.
 * `Bundle.TensorProduct.vectorBundle` : the tensor product of two vector bundles is a vector bundle.
+* `ContMDiffVectorBundle.tensorProduct`: the tensor product of two `C^n` vector bundles
+  is a `C^n` vector bundle.
 
 ## Tags
 
-tensor product, vector bundle, fiber bundle, trivialization, differential geometry
+tensor product, vector bundle, fiber bundle, trivialization, smooth, coordinate change,
+differential geometry
 -/
 
 open scoped Topology
@@ -183,21 +180,6 @@ by
     (E := (F₁ ⊗[𝕜] F₂))
     (G := (cDual 𝕜 F₁ →L[𝕜] F₂))
     e.toLinearMap
-
-/-- The topology on the tensor product fiber `E₁ x ⊗[𝕜] E₂ x`, induced by the local
-trivialization isomorphisms `E₁ x ≃L F₁` and `E₂ x ≃L F₂`. -/
-noncomputable def tensorFiberTopology (x : B) : TopologicalSpace (E₁ x ⊗[𝕜] E₂ x) := by
-  classical
-  letI : TopologicalSpace (F₁ ⊗[𝕜] F₂) := inferInstance
-  let e₁ := trivializationAt F₁ E₁ x
-  let e₂ := trivializationAt F₂ E₂ x
-  let L₁ : E₁ x ≃L[𝕜] F₁ :=
-    e₁.continuousLinearEquivAt 𝕜 x (mem_baseSet_trivializationAt F₁ E₁ x)
-  let L₂ : E₂ x ≃L[𝕜] F₂ :=
-    e₂.continuousLinearEquivAt 𝕜 x (mem_baseSet_trivializationAt F₂ E₂ x)
-  exact TopologicalSpace.induced
-    (fun t : E₁ x ⊗[𝕜] E₂ x => TensorProduct.map L₁.toLinearMap L₂.toLinearMap t)
-    inferInstance
 
 /-- Provides a `TensorFiberTopologies` instance by using `tensorFiberTopology` at each point. -/
 noncomputable instance tensorFiberTopologies
@@ -488,3 +470,80 @@ theorem tensorProduct_trivializationAt_baseSet (x₀ : B) :
   rfl
 
 end Bundle.TensorProduct
+
+end
+
+open Bundle Set
+
+open scoped Manifold Topology Bundle TensorProduct
+
+/-! ## `ContMDiffVectorBundle` instance -/
+
+section Smooth
+
+open Pretrivialization
+
+variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
+variable {EB : Type*} [NormedAddCommGroup EB] [NormedSpace 𝕜 EB]
+  {HB : Type*} [TopologicalSpace HB]
+  (IB : ModelWithCorners 𝕜 EB HB)
+variable {B : Type*} [TopologicalSpace B] [ChartedSpace HB B]
+variable {F₁ : Type*} [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁] [FiniteDimensional 𝕜 F₁]
+  {E₁ : B → Type*} [∀ x, AddCommGroup (E₁ x)] [∀ x, Module 𝕜 (E₁ x)]
+  [TopologicalSpace (TotalSpace F₁ E₁)] [∀ x, TopologicalSpace (E₁ x)]
+  [FiberBundle F₁ E₁] [VectorBundle 𝕜 F₁ E₁]
+variable {F₂ : Type*} [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂] [FiniteDimensional 𝕜 F₂]
+  {E₂ : B → Type*} [∀ x, AddCommGroup (E₂ x)] [∀ x, Module 𝕜 (E₂ x)]
+  [TopologicalSpace (TotalSpace F₂ E₂)] [∀ x, TopologicalSpace (E₂ x)]
+  [FiberBundle F₂ E₂] [VectorBundle 𝕜 F₂ E₂]
+variable (n : WithTop ℕ∞)
+variable [∀ (x : B), ContinuousAdd (E₁ x)] [∀ x, ContinuousSMul 𝕜 (E₁ x)]
+variable [∀ (x : B), ContinuousAdd (E₂ x)] [∀ x, ContinuousSMul 𝕜 (E₂ x)]
+variable [ContMDiffVectorBundle n F₁ E₁ IB] [ContMDiffVectorBundle n F₂ E₂ IB]
+
+/-- The tensor product `VectorPrebundle` is `C^n`. -/
+instance Bundle.TensorProduct.vectorPrebundle.isContMDiff :
+    letI (x : B) : TopologicalSpace (E₁ x ⊗[𝕜] E₂ x) :=
+      Bundle.TensorProduct.tensorFiberTopology 𝕜 F₁ F₂ E₁ E₂ x
+    (Bundle.TensorProduct.vectorPrebundle
+      (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)).IsContMDiff IB n := by
+  letI (x : B) : TopologicalSpace (E₁ x ⊗[𝕜] E₂ x) :=
+    Bundle.TensorProduct.tensorFiberTopology 𝕜 F₁ F₂ E₁ E₂ x
+  exact {
+    exists_contMDiffCoordChange := by
+      rintro _ ⟨e₁, e₂, he₁, he₂, rfl⟩ _ ⟨e₁', e₂', he₁', he₂', rfl⟩
+      haveI := he₁; haveI := he₂; haveI := he₁'; haveI := he₂'
+      refine ⟨tensorProductCoordChange (𝕜 := 𝕜) e₁ e₁' e₂ e₂',
+        contMDiffOn_tensorProductCoordChange IB n, ?_⟩
+      rintro b hb v
+      exact tensorProductCoordChange_apply (𝕜 := 𝕜) e₁ e₁' e₂ e₂' b hb v
+  }
+
+/-- If `E₁` and `E₂` are `C^n` vector bundles, then their tensor product bundle
+`fun x => E₁ x ⊗[𝕜] E₂ x` is also a `C^n` vector bundle. -/
+instance ContMDiffVectorBundle.tensorProduct :
+    letI (x : B) : TopologicalSpace (E₁ x ⊗[𝕜] E₂ x) :=
+      Bundle.TensorProduct.tensorFiberTopology 𝕜 F₁ F₂ E₁ E₂ x
+    letI : FiberBundle (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x) :=
+      Bundle.TensorProduct.Bundle.TensorProduct.fiberBundle
+        (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
+    letI : VectorBundle 𝕜 (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x) :=
+      Bundle.TensorProduct.Bundle.TensorProduct.vectorBundle
+        (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
+    ContMDiffVectorBundle n (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x) IB := by
+  letI (x : B) : TopologicalSpace (E₁ x ⊗[𝕜] E₂ x) :=
+    Bundle.TensorProduct.tensorFiberTopology 𝕜 F₁ F₂ E₁ E₂ x
+  letI : TopologicalSpace (TotalSpace (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x)) :=
+    Bundle.TensorProduct.tensorTotalSpaceTop
+      (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
+  letI : FiberBundle (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x) :=
+    Bundle.TensorProduct.Bundle.TensorProduct.fiberBundle
+      (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
+  letI : VectorBundle 𝕜 (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x) :=
+    Bundle.TensorProduct.Bundle.TensorProduct.vectorBundle
+      (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
+  exact (Bundle.TensorProduct.vectorPrebundle
+    (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂)
+    (E₁ := E₁) (E₂ := E₂)).contMDiffVectorBundle IB
+
+end Smooth
