@@ -51,3 +51,36 @@ class StaticMetricTimeRules
   dt_metric_g : ∀ (X : Time → V) t,
     TimeDerivative.partial_t (fun s => metric.g (X s) (X s)) t =
     (2:R) * metric.g (X t) (TimeDerivative.partial_t X t)
+
+/--
+Generic time derivative operator acting directly on abstract tensors.
+-/
+class TensorTimeCalculus (Time R V : Type) [CommRing R] [AddCommGroup V] [Module R V] 
+    [TensorAlgebra R V] [TimeDerivative Time R] [TimeDerivative Time V] where
+  partial_t_tensor (t : Time) {r s : ℕ} : (Time → AbstractTensor R V r s) → AbstractTensor R V r s
+
+  -- Basic evaluations
+  t_scalar : ∀ (f : Time → R) (t : Time),
+    partial_t_tensor t (fun x => TensorAlgebra.fromData (scalarToData (f x))) = TensorAlgebra.fromData (scalarToData (TimeDerivative.partial_t f t))
+
+  t_vector : ∀ (X : Time → V) (t : Time),
+    partial_t_tensor t (fun x => TensorAlgebra.fromData (vectorToData (X x))) = TensorAlgebra.fromData (vectorToData (TimeDerivative.partial_t X t))
+
+  -- Additivity
+  t_add : ∀ {r s : ℕ} (T1 T2 : Time → AbstractTensor R V r s) (t : Time),
+    partial_t_tensor t (fun x => TensorAlgebra.add (T1 x) (T2 x)) = TensorAlgebra.add (partial_t_tensor t T1) (partial_t_tensor t T2)
+
+  -- Extended Leibniz Rule for scalar multiplication
+  t_smul : ∀ {r s : ℕ} (c : Time → R) (T : Time → AbstractTensor R V r s) (t : Time),
+    partial_t_tensor t (fun x => TensorAlgebra.smul (c x) (T x)) = 
+      TensorAlgebra.add (TensorAlgebra.smul (TimeDerivative.partial_t c t) (T t)) (TensorAlgebra.smul (c t) (partial_t_tensor t T))
+
+  -- Leibniz Rule for Tensor Products
+  t_tensor_prod : ∀ {r1 s1 r2 s2 : ℕ} (T1 : Time → AbstractTensor R V r1 s1) (T2 : Time → AbstractTensor R V r2 s2) (t : Time),
+    partial_t_tensor t (fun x => TensorAlgebra.tensor_prod (T1 x) (T2 x)) =
+      TensorAlgebra.add (TensorAlgebra.tensor_prod (partial_t_tensor t T1) (T2 t)) (TensorAlgebra.tensor_prod (T1 t) (partial_t_tensor t T2))
+
+  -- Commutativity with contraction
+  t_contract : ∀ {r s : ℕ} (T : Time → AbstractTensor R V (r + 1) (s + 1)) (t : Time),
+    partial_t_tensor t (fun x => TensorAlgebra.contract (T x)) = TensorAlgebra.contract (partial_t_tensor t T)
+

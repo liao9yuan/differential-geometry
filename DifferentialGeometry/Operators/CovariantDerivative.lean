@@ -227,3 +227,41 @@ theorem metric_covDerivOp_zero (X : V) :
     _ = (metric.g (conn.nabla X Y) Z + metric.g Y (conn.nabla X Z)) - metric.g (conn.nabla X Y) Z - metric.g Y (conn.nabla X Z) := by rw [h]
     _ = 0 := by ring
     _ = eval02 0 Y Z := r0.symm
+
+section GenericCovDeriv
+
+/--
+Universal covariant derivative of a tensor of rank (r, s),
+mapping a vector field X and a tensor T to a tensor of the same rank.
+-/
+def genericCovDeriv {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] [AbstractDerivationAction R V]
+  (conn : AbstractAffineConnection R V) [AffineTensorCalculus conn]
+  (X : V) {r s : ℕ} (T : AbstractTensor R V r s) : AbstractTensor R V r s :=
+  AffineTensorCalculus.nabla_tensor conn X T
+
+variable {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] [AbstractDerivationAction R V]
+  {conn : AbstractAffineConnection R V} [AffineTensorCalculus conn]
+
+lemma genericCovDeriv_add (X : V) {r s : ℕ} (T1 T2 : AbstractTensor R V r s) :
+  genericCovDeriv conn X (TensorAlgebra.add T1 T2) = TensorAlgebra.add (genericCovDeriv conn X T1) (genericCovDeriv conn X T2) := by
+  dsimp [genericCovDeriv]
+  rw [AffineTensorCalculus.nabla_add X T1 T2]
+
+lemma genericCovDeriv_smul (X : V) (c : R) {r s : ℕ} (T : AbstractTensor R V r s) :
+  genericCovDeriv conn X (TensorAlgebra.smul c T) = TensorAlgebra.add (TensorAlgebra.smul (AbstractDerivationAction.action X c) T) (TensorAlgebra.smul c (genericCovDeriv conn X T)) := by
+  dsimp [genericCovDeriv]
+  rw [AffineTensorCalculus.nabla_smul X c T]
+
+lemma genericCovDeriv_tensor_prod (X : V) {r1 s1 r2 s2 : ℕ} (T1 : AbstractTensor R V r1 s1) (T2 : AbstractTensor R V r2 s2) :
+  genericCovDeriv conn X (TensorAlgebra.tensor_prod T1 T2) = 
+    TensorAlgebra.add (TensorAlgebra.tensor_prod (genericCovDeriv conn X T1) T2) (TensorAlgebra.tensor_prod T1 (genericCovDeriv conn X T2)) := by
+  dsimp [genericCovDeriv]
+  rw [AffineTensorCalculus.nabla_tensor_prod X T1 T2]
+
+lemma genericCovDeriv_contract (X : V) {r s : ℕ} (T : AbstractTensor R V (r + 1) (s + 1)) :
+  genericCovDeriv conn X (TensorAlgebra.contract T) = TensorAlgebra.contract (genericCovDeriv conn X T) := by
+  dsimp [genericCovDeriv]
+  rw [AffineTensorCalculus.nabla_contract X T]
+
+end GenericCovDeriv
+
