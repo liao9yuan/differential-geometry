@@ -131,7 +131,7 @@ theorem multiKroneckerDelta_addCases_comm
       · simp only [h1, dite_false]
         have h2 : i - n < m := by omega
         simp_all
-    rw [h_idx]
+    rw [h_idx]; rfl
   rw [h_eq, Matrix.det_permute]
   have h_sign : (↑(Equiv.Perm.sign τ) : R) = (-1 : R) ^ (m * n) := by
     rw [addCasesSwapPerm_sign]
@@ -164,6 +164,7 @@ theorem multiKroneckerDelta_addCases_assoc
 
 variable {𝕜 : Type*} [Field 𝕜]
 
+open Classical in
 /-- The Cauchy-Binet identity for multiKroneckerDelta:
 `(m! * p!)⁻¹ • ∑ σ, sign σ • δ(I, v∘σ∘castAdd) * δ(J, v∘σ∘natAdd) = δ(addCases I J, v)`.
 
@@ -188,14 +189,20 @@ theorem multiKroneckerDelta_cauchyBinet [CharZero 𝕜]
     Units.smul_def, zsmul_eq_mul, Nat.cast_smul_eq_nsmul 𝕜, nsmul_eq_mul]
   set M : Matrix (Fin (m + p)) (Fin (m + p)) 𝕜 :=
     fun a b => if Fin.addCases I J a = v b then 1 else 0 with hM_def
-  simp_rw [show ∀ (α : Equiv.Perm (Fin m)) (σ : Equiv.Perm (Fin (m + p))) (i : Fin m),
-    (if I (α i) = v (σ (Fin.castAdd p i)) then (1 : 𝕜) else 0) =
-    M (Fin.castAdd p (α i)) (σ (Fin.castAdd p i)) from
-    fun _ _ _ => by simp [hM_def, Fin.addCases_left]]
-  simp_rw [show ∀ (β : Equiv.Perm (Fin p)) (σ : Equiv.Perm (Fin (m + p))) (j : Fin p),
-    (if J (β j) = v (σ (Fin.natAdd m j)) then (1 : 𝕜) else 0) =
-    M (Fin.natAdd m (β j)) (σ (Fin.natAdd m j)) from
-    fun _ _ _ => by simp [hM_def, Fin.addCases_right]]
+  have h1 : ∀ (α : Equiv.Perm (Fin m)) (σ : Equiv.Perm (Fin (m + p))) (i : Fin m),
+      (if I (α i) = v (σ (Fin.castAdd p i)) then (1 : 𝕜) else 0) =
+      M (Fin.castAdd p (α i)) (σ (Fin.castAdd p i)) :=
+    fun _ _ _ => by simp [hM_def, Fin.addCases_left]
+  have h2 : ∀ (β : Equiv.Perm (Fin p)) (σ : Equiv.Perm (Fin (m + p))) (j : Fin p),
+      (if J (β j) = v (σ (Fin.natAdd m j)) then (1 : 𝕜) else 0) =
+      M (Fin.natAdd m (β j)) (σ (Fin.natAdd m j)) :=
+    fun _ _ _ => by simp [hM_def, Fin.addCases_right]
+  conv_lhs =>
+    arg 2; ext σ; arg 2; arg 1; arg 2; ext α; arg 2; arg 2; ext i
+    erw [h1 α σ i]
+  conv_lhs =>
+    arg 2; ext σ; arg 2; arg 2; arg 2; ext β; arg 2; arg 2; ext j
+    erw [h2 β σ j]
   have h_inner : ∀ α : Equiv.Perm (Fin m), ∀ β : Equiv.Perm (Fin p),
       ∀ σ : Equiv.Perm (Fin (m + p)),
       ↑↑(Equiv.Perm.sign σ) * (↑↑(Equiv.Perm.sign α) *

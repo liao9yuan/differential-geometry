@@ -38,6 +38,8 @@ multilinear map, tensor product, vector bundle, continuous linear equivalence
 
 noncomputable section
 
+set_option backward.isDefEq.respectTransparency false
+
 open Bundle Set
 
 open scoped Manifold Topology Bundle ContDiff BigOperators TensorProduct

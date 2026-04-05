@@ -35,6 +35,8 @@ multilinear map, vector bundle, fiber topology, continuous linear equivalence
 
 noncomputable section
 
+set_option backward.isDefEq.respectTransparency false
+
 open Bundle Set
 
 open scoped Manifold Topology Bundle ContDiff BigOperators
@@ -64,6 +66,7 @@ The bundle topology on `Bundle.continuousMultilinearMap 𝕜 s F E x` is defined
 homeomorphism to the model fiber.
 -/
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The bundle and norm topologies on a `Bundle.continuousMultilinearMap` fiber agree.
 The bundle topology is induced from the pretrivialization (a continuous linear equivalence
 to the model fiber), and this coincides with the norm topology since the composition map
@@ -76,17 +79,17 @@ theorem topology_eq (s : ℕ) (x : B) :
   simp only [instTopologicalSpaceContinuousMultilinearMap]
   -- Step 1: Factor pretriv ∘ mk' = Prod.mk x ∘ g where g is the fiber map
   set e := trivializationAt F E x
-  set g := ContinuousMultilinearMap.compContinuousLinearMapL
-    (E₁ := fun _ : Fin s => E x) (E := fun _ : Fin s => F) (G := 𝕜)
-    (fun _ => e.symmL 𝕜 x) with hg_def
+  set g : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E x) 𝕜 →L[𝕜]
+      ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜 :=
+    ContinuousMultilinearMap.compContinuousLinearMapL (fun _ => e.symmL 𝕜 x) with hg_def
   have hfactor : (↑(Pretrivialization.continuousMultilinearMap 𝕜 s e) ∘
       TotalSpace.mk' _ x) = Prod.mk x ∘ g := by funext; rfl
   -- Step 2: Decompose via induced_compose and isInducing_prodMkRight
   rw [hfactor, ← induced_compose, (isInducing_prodMkRight x).eq_induced.symm]
   -- Goal: induced g τ_norm = τ_norm
   -- Step 3: g is a homeomorphism (continuous with continuous inverse), hence inducing
-  set g' := ContinuousMultilinearMap.compContinuousLinearMapL
-    (E₁ := fun _ : Fin s => F) (E := fun _ : Fin s => E x) (G := 𝕜)
+  set g' := ContinuousMultilinearMap.compContinuousLinearMapL (F := 𝕜)
+    (E₁ := fun _ : Fin s => F) (E := fun _ : Fin s => E x)
     (fun _ => e.continuousLinearMapAt 𝕜 x) with hg'_def
   have hx : x ∈ e.baseSet := mem_baseSet_trivializationAt F E x
   have hleft : Function.LeftInverse g' g := by
@@ -105,35 +108,34 @@ theorem topology_eq (s : ℕ) (x : B) :
 /-- The fiber `Bundle.continuousMultilinearMap 𝕜 s F E x` is a normed additive commutative
 group, using the norm topology which agrees with the bundle topology. -/
 instance instNormedAddCommGroup (s : ℕ) (x : B) :
-    NormedAddCommGroup (Bundle.continuousMultilinearMap 𝕜 s F E x) :=
-  inferInstanceAs (NormedAddCommGroup
-    (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E x) 𝕜))
+    NormedAddCommGroup (Bundle.continuousMultilinearMap 𝕜 s F E x) := by
+  delta Bundle.continuousMultilinearMap; infer_instance
 
 /-- The fiber `Bundle.continuousMultilinearMap 𝕜 s F E x` is a normed `𝕜`-module. -/
 instance instNormedSpace (s : ℕ) (x : B) :
-    NormedSpace 𝕜 (Bundle.continuousMultilinearMap 𝕜 s F E x) :=
-  inferInstanceAs (NormedSpace 𝕜
-    (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E x) 𝕜))
+    NormedSpace 𝕜 (Bundle.continuousMultilinearMap 𝕜 s F E x) := by
+  delta Bundle.continuousMultilinearMap; exact ContinuousMultilinearMap.normedSpace
 
 /-!
 ## Topological instances derived from the topology equality
 -/
 
 instance instT2Space (s : ℕ) (x : B) :
-    T2Space (Bundle.continuousMultilinearMap 𝕜 s F E x) := by
-  rw [show instTopologicalSpaceContinuousMultilinearMap 𝕜 s F E x =
-        ContinuousMultilinearMap.instTopologicalSpace from topology_eq s x]
-  infer_instance
+    @T2Space (Bundle.continuousMultilinearMap 𝕜 s F E x) inferInstance :=
+  (topology_eq (𝕜 := 𝕜) (F := F) (E := E) s x).symm ▸
+    inferInstanceAs (@T2Space (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E x) 𝕜) _)
 
 instance instIsTopologicalAddGroup (s : ℕ) (x : B) :
-    @IsTopologicalAddGroup (Bundle.continuousMultilinearMap 𝕜 s F E x) inferInstance _ := by
-  rw [topology_eq s x]
-  infer_instance
+    @IsTopologicalAddGroup (Bundle.continuousMultilinearMap 𝕜 s F E x) inferInstance _ :=
+  (topology_eq (𝕜 := 𝕜) (F := F) (E := E) s x).symm ▸
+    inferInstanceAs (@IsTopologicalAddGroup
+      (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E x) 𝕜) _ _)
 
 instance instContinuousSMul (s : ℕ) (x : B) :
-    @ContinuousSMul 𝕜 (Bundle.continuousMultilinearMap 𝕜 s F E x) _ _ inferInstance := by
-  rw [topology_eq s x]
-  infer_instance
+    @ContinuousSMul 𝕜 (Bundle.continuousMultilinearMap 𝕜 s F E x) _ _ inferInstance :=
+  (topology_eq (𝕜 := 𝕜) (F := F) (E := E) s x).symm ▸
+    inferInstanceAs (@ContinuousSMul 𝕜
+      (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E x) 𝕜) _ _ _)
 
 instance instContinuousAdd (s : ℕ) (x : B) :
     @ContinuousAdd (Bundle.continuousMultilinearMap 𝕜 s F E x) inferInstance _ :=
@@ -388,6 +390,7 @@ noncomputable def fromTensor (s q : ℕ) (x : B) :
     Bundle.continuousMultilinearMap 𝕜 (s + q) F E x :=
   TensorProduct.lift (product_bilinear (F := F) (E := E) s q x)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Linear equivalence between the `(s+q)`-multilinear bundle fiber and the tensor product
 of the `s`- and `q`-multilinear bundle fibers, obtained by dimension counting. -/
 noncomputable def equiv (s q : ℕ) (x : B) :
@@ -397,8 +400,12 @@ noncomputable def equiv (s q : ℕ) (x : B) :
   haveI := instFiniteDimensional (𝕜 := 𝕜) (F := F) (E := E) s x
   haveI := instFiniteDimensional (𝕜 := 𝕜) (F := F) (E := E) q x
   haveI := instFiniteDimensional (𝕜 := 𝕜) (F := F) (E := E) (s + q) x
-  haveI : Module.Free 𝕜 (Bundle.continuousMultilinearMap 𝕜 s F E x) := inferInstance
-  haveI : Module.Free 𝕜 (Bundle.continuousMultilinearMap 𝕜 q F E x) := inferInstance
+  haveI : Module.Free 𝕜 (Bundle.continuousMultilinearMap 𝕜 s F E x) :=
+    Module.Free.of_divisionRing 𝕜 _
+  haveI : Module.Free 𝕜 (Bundle.continuousMultilinearMap 𝕜 q F E x) :=
+    Module.Free.of_divisionRing 𝕜 _
+  haveI : Module.Free 𝕜 (Bundle.continuousMultilinearMap 𝕜 (s + q) F E x) :=
+    Module.Free.of_divisionRing 𝕜 _
   haveI : FiniteDimensional 𝕜 (TensorProduct 𝕜
       (Bundle.continuousMultilinearMap 𝕜 s F E x)
       (Bundle.continuousMultilinearMap 𝕜 q F E x)) :=

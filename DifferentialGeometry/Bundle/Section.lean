@@ -216,17 +216,17 @@ theorem vectorBundle_characterization
     obtain ⟨χ, -, hχsupp⟩ := (SmoothBumpFunction.nhds_basis_tsupport (I := I) p).mem_iff.mp
       (e.open_baseSet.mem_nhds he)
     let u' : Fin (Module.finrank ℝ F₁) → C^n⟮I, M; ℝ⟯ := fun i =>
-      ⟨fun x => χ x • hframe.coeff i (⇑τ) x,
+      ⟨fun x => χ x • hframe.coeff i x (τ x),
         sorry⟩ -- smoothness of χ • coeff (needs contMDiffOn_coeff, currently a TODO)
     -- u'ᵢ(p) = χ(p) • coeff i τ p = 1 • 0 = 0 since τ(p) = 0
     have hu'_zero : ∀ i, (u' i) p = 0 := by
-      intro i; show χ p • hframe.coeff i (⇑τ) p = 0
-      rw [χ.eq_one, one_smul, hframe.coeff_apply_zero_at hτ]
+      intro i; show χ p • hframe.coeff i p (τ p) = 0
+      rw [χ.eq_one, one_smul, hτ, map_zero]
     -- Near p: τ = ∑ u'ᵢ • s'ᵢ (since χ = 1 and s'ᵢ = sᵢ near p, and τ = ∑ coeff • sᵢ)
     have hτ_eq_near : ∀ᶠ x in nhds p, τ x = ∑ i, (u' i) x • (s' i) x := by
       filter_upwards [hs', χ.eventuallyEq_one,
         e.open_baseSet.mem_nhds he] with x hs'x hχx hx
-      show τ x = ∑ i, (χ x • hframe.coeff i (⇑τ) x) • (s' i) x
+      show τ x = ∑ i, (χ x • hframe.coeff i x (τ x)) • (s' i) x
       simp only [show χ x = (1 : M → ℝ) x from hχx, Pi.one_apply, one_smul]
       conv_lhs => rw [hframe.coeff_sum_eq (⇑τ) hx]
       congr 1; ext i; rw [hs'x i]

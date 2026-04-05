@@ -361,7 +361,11 @@ theorem lift_comp_domCoprod_eq_uncurrySum
     MultilinearMap.smul_apply, MultilinearMap.domDomCongr_apply, MultilinearMap.domCoprod_apply,
     ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.domDomCongr_apply,
     ContinuousMultilinearMap.uncurrySum_apply, TensorProduct.smul_tmul', hφ,
-    Function.comp_def, f.map_smul_of_tower, ContinuousLinearMap.smul_apply]; rfl
+    Function.comp_def, f.map_smul_of_tower, ContinuousLinearMap.smul_apply]
+  simp only [ContinuousMultilinearMap.flipMultilinear_apply,
+    coe_toContinuousMultilinearMap, ContinuousMultilinearMap.flipAlternating_apply,
+    ContinuousLinearMap.compContinuousAlternatingMap₂_apply]
+  rw [LinearMap.map_smul_of_tower φ, hφ]; rfl
 
 end curry
 end ContinuousAlternatingMap

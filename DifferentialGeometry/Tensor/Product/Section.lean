@@ -27,6 +27,8 @@ tensor product, smooth section, vector bundle
 
 noncomputable section
 
+set_option backward.isDefEq.respectTransparency false
+
 open Bundle Set
 
 open scoped Manifold Topology Bundle TensorProduct

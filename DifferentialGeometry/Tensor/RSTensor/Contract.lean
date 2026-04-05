@@ -35,6 +35,8 @@ interior product, contraction, cotangent, tensor, smooth manifold
 namespace Tensor0SBundle
 noncomputable section
 
+set_option backward.isDefEq.respectTransparency false
+
 open Bundle Set IsManifold ContinuousLinearMap
 
 open scoped Manifold Topology Bundle ContDiff BigOperators

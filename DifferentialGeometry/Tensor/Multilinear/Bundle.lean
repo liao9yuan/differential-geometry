@@ -62,8 +62,8 @@ instance Bundle.continuousMultilinearMap.instAddCommMonoid (x : B) :
   dsimp [Bundle.continuousMultilinearMap]; infer_instance
 
 instance Bundle.continuousMultilinearMap.instModule (x : B) :
-    Module 𝕜 (Bundle.continuousMultilinearMap 𝕜 s F E x) := by
-  dsimp [Bundle.continuousMultilinearMap]; infer_instance
+    Module 𝕜 (Bundle.continuousMultilinearMap 𝕜 s F E x) :=
+  inferInstanceAs (Module 𝕜 (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E x) 𝕜))
 
 end defs
 
@@ -154,7 +154,7 @@ instance continuousMultilinearMap.isLinear :
     (Pretrivialization.continuousMultilinearMap 𝕜 s e).IsLinear 𝕜 where
   linear _ _ :=
   { map_add := fun _ _ ↦ rfl
-    map_smul := fun _ _ ↦ rfl }
+    map_smul := fun _ _ ↦ by ext; rfl }
 
 theorem continuousMultilinearMap_apply
     (p : TotalSpace MLF (Bundle.continuousMultilinearMap 𝕜 s F E)) :
@@ -174,7 +174,7 @@ theorem continuousMultilinearMap_symm_apply (p : B × MLF) :
 theorem continuousMultilinearMap_symm_apply' {b : B} (hb : b ∈ e.baseSet) (L : MLF) :
     (continuousMultilinearMap 𝕜 s e).symm b L =
     L.compContinuousLinearMap (fun _ => e.continuousLinearMapAt 𝕜 b) := by
-  rw [symm_apply]
+  rw [Bundle.Pretrivialization.symm_apply]
   · rfl
   exact hb
 
@@ -252,7 +252,7 @@ variable [he : MemTrivializationAtlas e] {F E}
 
 /-- Given a trivialization `e` in the atlas for vector bundle `E`, the induced trivialization
 for the continuous `s`-multilinear maps from `E` to `𝕜`. -/
-def Trivialization.continuousMultilinearMap :
+def Bundle.Trivialization.continuousMultilinearMap :
     Trivialization MLF (π MLF (Bundle.continuousMultilinearMap 𝕜 s F E)) :=
   VectorPrebundle.trivializationOfMemPretrivializationAtlas _ ⟨e, he, rfl⟩
 
@@ -261,11 +261,11 @@ instance _root_.Bundle.continuousMultilinearMap.memTrivializationAtlas :
     Trivialization MLF (π MLF (Bundle.continuousMultilinearMap 𝕜 s F E))) where
   out := ⟨_, ⟨e, inferInstance, rfl⟩, rfl⟩
 
-@[simp] theorem Trivialization.baseSet_continuousMultilinearMap :
+@[simp] theorem Bundle.Trivialization.baseSet_continuousMultilinearMap :
     (e.continuousMultilinearMap 𝕜 s).baseSet = e.baseSet :=
   rfl
 
-theorem Trivialization.continuousMultilinearMap_apply
+theorem Bundle.Trivialization.continuousMultilinearMap_apply
     (p : TotalSpace MLF (Bundle.continuousMultilinearMap 𝕜 s F E)) :
     e.continuousMultilinearMap 𝕜 s p =
     ⟨p.1, p.2.compContinuousLinearMap (fun _ => e.symmL 𝕜 p.1)⟩ :=
@@ -279,7 +279,7 @@ section smooth
 
 open scoped Bundle Manifold
 
-open Pretrivialization
+open Bundle Set Pretrivialization
 
 variable {𝕜 B F : Type*} {E : B → Type*} (s : ℕ)
   [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]

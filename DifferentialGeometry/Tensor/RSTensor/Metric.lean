@@ -24,6 +24,8 @@ from Mathlib, specialized to the tangent bundle of `M`.
 
 noncomputable section
 
+set_option backward.isDefEq.respectTransparency false
+
 open Bundle Manifold Tensor0SBundle
 
 open scoped Manifold Topology Bundle ContDiff
