@@ -123,47 +123,7 @@ def covDerivOp (X : V) (T : AbstractBilinearForm R V) : AbstractBilinearForm R V
 lemma covDeriv_eval (X : V) (T : AbstractBilinearForm R V) (Y Z : V) :
   eval02 (covDerivOp conn X T) Y Z = rawCovDeriv conn X T Y Z := by
   dsimp [covDerivOp, rawCovDeriv, eval02]
-  have h_scalar : ∀ (A : AbstractTensor R V 2 2),
-    toScalar (AffineTensorCalculus.nabla_tensor conn X (contract (r:=0) (s:=0) (contract (r:=1) (s:=1) A))) =
-    action X (toScalar (contract (r:=0) (s:=0) (contract (r:=1) (s:=1) A))) := by
-    intro A
-    have h_S : contract (r:=0) (s:=0) (contract (r:=1) (s:=1) A) = fromScalar (toScalar (contract (r:=0) (s:=0) (contract (r:=1) (s:=1) A))) :=
-      (TensorAlgebra.fromScalar_toScalar _).symm
-    nth_rw 1 [h_S]
-    rw [AffineTensorCalculus.nabla_scalar X]
-    rw [TensorAlgebra.toScalar_fromScalar]
-  have h1 : action X (toScalar (contract (r:=0) (s:=0) (contract (r:=1) (s:=1) (TensorAlgebra.tensor_prod (r1:=0) (s1:=2) (r2:=2) (s2:=0) T (TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector Y) (fromVector Z)))))) =
-    toScalar (AffineTensorCalculus.nabla_tensor conn X (contract (r:=0) (s:=0) (contract (r:=1) (s:=1) (TensorAlgebra.tensor_prod (r1:=0) (s1:=2) (r2:=2) (s2:=0) T (TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector Y) (fromVector Z)))))) :=
-    (h_scalar _).symm
-  have h2 : AffineTensorCalculus.nabla_tensor conn X (contract (r:=0) (s:=0) (contract (r:=1) (s:=1) (TensorAlgebra.tensor_prod (r1:=0) (s1:=2) (r2:=2) (s2:=0) T (TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector Y) (fromVector Z))))) =
-    contract (r:=0) (s:=0) (contract (r:=1) (s:=1) (AffineTensorCalculus.nabla_tensor conn X (TensorAlgebra.tensor_prod (r1:=0) (s1:=2) (r2:=2) (s2:=0) T (TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector Y) (fromVector Z))))) := by
-    rw [AffineTensorCalculus.nabla_contract X, AffineTensorCalculus.nabla_contract X]
-  have h3 : AffineTensorCalculus.nabla_tensor conn X (TensorAlgebra.tensor_prod (r1:=0) (s1:=2) (r2:=2) (s2:=0) T (TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector Y) (fromVector Z))) =
-    TensorAlgebra.add (TensorAlgebra.tensor_prod (r1:=0) (s1:=2) (r2:=2) (s2:=0) (AffineTensorCalculus.nabla_tensor conn X T) (TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector Y) (fromVector Z)))
-      (TensorAlgebra.tensor_prod (r1:=0) (s1:=2) (r2:=2) (s2:=0) T (AffineTensorCalculus.nabla_tensor conn X (TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector Y) (fromVector Z)))) := by
-    rw [AffineTensorCalculus.nabla_tensor_prod X]
-  have h4 : AffineTensorCalculus.nabla_tensor conn X (TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector Y) (fromVector Z)) =
-    TensorAlgebra.add (TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (AffineTensorCalculus.nabla_tensor conn X (fromVector Y)) (fromVector Z))
-      (TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector Y) (AffineTensorCalculus.nabla_tensor conn X (fromVector Z))) := by
-    rw [AffineTensorCalculus.nabla_tensor_prod X]
-  have h5 : AffineTensorCalculus.nabla_tensor conn X (fromVector Y) = fromVector (conn.nabla X Y) := AffineTensorCalculus.nabla_vector X Y
-  have h6 : AffineTensorCalculus.nabla_tensor conn X (fromVector Z) = fromVector (conn.nabla X Z) := AffineTensorCalculus.nabla_vector X Z
-  rw [h5, h6] at h4
-  rw [h4] at h3
-  rw [TensorAlgebra.tensor_prod_add_right] at h3
-  rw [h3] at h2
-  rw [TensorAlgebra.contract_add, TensorAlgebra.contract_add] at h2
-  rw [TensorAlgebra.contract_add, TensorAlgebra.contract_add] at h2
-  rw [h2] at h1
-  rw [TensorAlgebra.toScalar_add, TensorAlgebra.toScalar_add] at h1
-  have he1 : toScalar (contract (r:=0) (s:=0) (contract (r:=1) (s:=1) (TensorAlgebra.tensor_prod (r1:=0) (s1:=2) (r2:=2) (s2:=0) T (TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector Y) (fromVector Z))))) = eval02 T Y Z := rfl
-  have he2 : toScalar (contract (r:=0) (s:=0) (contract (r:=1) (s:=1) (TensorAlgebra.tensor_prod (r1:=0) (s1:=2) (r2:=2) (s2:=0) (AffineTensorCalculus.nabla_tensor conn X T) (TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector Y) (fromVector Z))))) = eval02 (AffineTensorCalculus.nabla_tensor conn X T) Y Z := rfl
-  have he3 : toScalar (contract (r:=0) (s:=0) (contract (r:=1) (s:=1) (TensorAlgebra.tensor_prod (r1:=0) (s1:=2) (r2:=2) (s2:=0) T (TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector (conn.nabla X Y)) (fromVector Z))))) = eval02 T (conn.nabla X Y) Z := rfl
-  have he4 : toScalar (contract (r:=0) (s:=0) (contract (r:=1) (s:=1) (TensorAlgebra.tensor_prod (r1:=0) (s1:=2) (r2:=2) (s2:=0) T (TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector Y) (fromVector (conn.nabla X Z)))))) = eval02 T Y (conn.nabla X Z) := rfl
-  rw [he1, he2, he3, he4] at h1
-  calc eval02 (AffineTensorCalculus.nabla_tensor conn X T) Y Z
-    _ = action X (eval02 T Y Z) - eval02 T (conn.nabla X Y) Z - eval02 T Y (conn.nabla X Z) := by
-      rw [h1]; ring
+  exact AffineTensorCalculus.nabla_eval02 X Y Z T
 
 /-- Conversion from AbstractMetricTensor to AbstractBilinearForm.
 Input: (AbstractMetricTensor R V)
@@ -190,23 +150,7 @@ theorem metric_covDerivOp_zero (X : V) :
   have heval_Y_nabla : eval02 metric.g_tensor Y (conn.nabla X Z) = metric.g Y (conn.nabla X Z) := rfl
   rw [heval_Y_Z, heval_nabla_Z, heval_Y_nabla]
   have h := MetricCompatible.compat (conn:=conn) (metric:=metric) X Y Z
-  have r0 : eval02 (0 : AbstractBilinearForm R V) Y Z = 0 := by
-    have hc : fromCovector (0 : V →ₗ[R] R) = TensorAlgebra.smul (0:R) (fromCovector (0 : V →ₗ[R] R)) := by
-      have hA : (0 : V →ₗ[R] R) = (0:R) • (0 : V →ₗ[R] R) := (zero_smul R (0 : V →ₗ[R] R)).symm
-      conv => lhs; rw [hA]
-      exact TensorAlgebra.fromCovector_smul (R:=R) (V:=V) 0 0
-    have hP : (zero_tensor 0 2 : AbstractTensor R V 0 2) = TensorAlgebra.smul (0:R) (zero_tensor 0 2 : AbstractTensor R V 0 2) := by
-      have ht : (zero_tensor 0 2 : AbstractTensor R V 0 2) = TensorAlgebra.tensor_prod (r1:=0) (s1:=1) (r2:=0) (s2:=1) (zero_tensor 0 1 : AbstractTensor R V 0 1) (fromCovector (0 : V →ₗ[R] R)) := zero_tensor_0_2_step
-      calc (zero_tensor 0 2 : AbstractTensor R V 0 2)
-         _ = TensorAlgebra.tensor_prod (r1:=0) (s1:=1) (r2:=0) (s2:=1) (zero_tensor 0 1 : AbstractTensor R V 0 1) (fromCovector (0 : V →ₗ[R] R)) := ht
-         _ = TensorAlgebra.tensor_prod (zero_tensor 0 1 : AbstractTensor R V 0 1) (TensorAlgebra.smul (0:R) (fromCovector (0 : V →ₗ[R] R))) := by congr 1
-         _ = TensorAlgebra.smul (0:R) (TensorAlgebra.tensor_prod (zero_tensor 0 1 : AbstractTensor R V 0 1) (fromCovector (0 : V →ₗ[R] R))) := TensorAlgebra.tensor_prod_smul_right (R:=R) (V:=V) 0 _ _
-         _ = TensorAlgebra.smul (0:R) (zero_tensor 0 2 : AbstractTensor R V 0 2) := by rw [← ht]
-    have hT : (0 : AbstractBilinearForm R V) = (0:R) • (0 : AbstractBilinearForm R V) := hP
-    calc eval02 (0 : AbstractBilinearForm R V) Y Z
-       _ = eval02 ((0:R) • (0 : AbstractBilinearForm R V)) Y Z := by nth_rw 1 [hT]
-       _ = (0:R) * eval02 (0:AbstractBilinearForm R V) Y Z := eval02_smul (0 : AbstractBilinearForm R V) 0 Y Z
-       _ = 0 := MulZeroClass.zero_mul _
+  have r0 : eval02 (0 : AbstractBilinearForm R V) Y Z = 0 := eval02_zero Y Z
   calc action X (metric.g Y Z) - metric.g (conn.nabla X Y) Z - metric.g Y (conn.nabla X Z)
     _ = (metric.g (conn.nabla X Y) Z + metric.g Y (conn.nabla X Z)) - metric.g (conn.nabla X Y) Z - metric.g Y (conn.nabla X Z) := by rw [h]
     _ = 0 := by ring

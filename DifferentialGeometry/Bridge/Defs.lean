@@ -8,7 +8,7 @@ import Mathlib.Geometry.Manifold.VectorField.LieBracket
 import Mathlib.Analysis.Normed.Module.Dual
 import Mathlib.Geometry.Manifold.BumpFunction
 import DifferentialGeometry.Algebra.VectorField
-
+import Mathlib.LinearAlgebra.Multilinear.Basic
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -384,6 +384,13 @@ end NonDegeneracy
 
 /-- Pure Tensor Algebra (Layer 1): Depends only on module structure, no geometry or calculus.
 This is implemented by the analytic backend using multidimensional arrays. -/
+
+abbrev TensorData (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] (r s : ℕ) :=
+  MultilinearMap R (fun _ : Fin s => V) (MultilinearMap R (fun _ : Fin r => (V →ₗ[R] R)) R)
+
+instance {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] {r s : ℕ} : Zero (TensorData R V r s) := inferInstanceAs (Zero (MultilinearMap R (fun _ : Fin s => V) (MultilinearMap R (fun _ : Fin r => (V →ₗ[R] R)) R)))
+instance {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] {r s : ℕ} : Add (TensorData R V r s) := inferInstanceAs (Add (MultilinearMap R (fun _ : Fin s => V) (MultilinearMap R (fun _ : Fin r => (V →ₗ[R] R)) R)))
+instance {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] {r s : ℕ} : SMul R (TensorData R V r s) := inferInstanceAs (SMul R (MultilinearMap R (fun _ : Fin s => V) (MultilinearMap R (fun _ : Fin r => (V →ₗ[R] R)) R)))
 class TensorAlgebra (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] where
   /-- Generic graded tensor type (r: contravariant, s: covariant) -/
   AbstractTensor : ℕ → ℕ → Type
@@ -392,11 +399,9 @@ class TensorAlgebra (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] whe
   smul {r s : ℕ} : R → AbstractTensor r s → AbstractTensor r s -- done
   tensor_prod {r1 s1 r2 s2 : ℕ} : AbstractTensor r1 s1 → AbstractTensor r2 s2 → AbstractTensor (r1 + r2) (s1 + s2) -- done
 
-  -- Embedding
-  fromScalar : R → AbstractTensor 0 0
-  fromVector : V → AbstractTensor 1 0
-  fromCovector : (V →ₗ[R] R) → AbstractTensor 0 1
-  fromBilinear : (V →ₗ[R] V →ₗ[R] R) → AbstractTensor 0 2
+  -- Embedding & Extraction
+  fromData {r s : ℕ} : TensorData R V r s → AbstractTensor r s
+  toData {r s : ℕ} : AbstractTensor r s → TensorData R V r s
 
   -- Identity Operator (Kronecker Delta)
   delta_tensor : AbstractTensor 1 1
@@ -416,25 +421,17 @@ class TensorAlgebra (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] whe
   contract_add {r s : ℕ} : ∀ T1 T2 : AbstractTensor (r + 1) (s + 1), contract (add T1 T2) = add (contract T1) (contract T2)
   contract_smul {r s : ℕ} : ∀ (f : R) (T : AbstractTensor (r + 1) (s + 1)), contract (smul f T) = smul f (contract T)
 
+  -- Evaluation Isomorphism Axioms
+  fromData_toData {r s : ℕ} : ∀ (T : AbstractTensor r s), fromData (toData T) = T
+  toData_fromData {r s : ℕ} : ∀ (D : TensorData R V r s), toData (fromData D) = D
+  toData_add {r s : ℕ} : ∀ T1 T2 : AbstractTensor r s, toData (add T1 T2) = toData T1 + toData T2
+  toData_smul {r s : ℕ} : ∀ (c : R) (T : AbstractTensor r s), toData (smul c T) = c • toData T
+  toData_swap_covariant {r s : ℕ} : ∀ (i j : Fin s) (T : AbstractTensor r s) (m : Fin s → V) (n : Fin r → (V →ₗ[R] R)),
+    toData (swap_covariant i j T) m n = toData T (m ∘ Equiv.swap i j) n
+
   -- 2. Scalar Definition:
-  toScalar_fromScalar : ∀ f : R, toScalar (fromScalar f) = f
-  fromScalar_toScalar : ∀ T : AbstractTensor 0 0, fromScalar (toScalar T) = T
   toScalar_add : ∀ T1 T2 : AbstractTensor 0 0, toScalar (add T1 T2) = toScalar T1 + toScalar T2
   toScalar_smul : ∀ (c : R) (T : AbstractTensor 0 0), toScalar (smul c T) = c * toScalar T
-
-  -- 3. Evaluation (The bridge between dual space and tensor contraction):
-  contract_eval : ∀ (v : V) (w : V →ₗ[R] R),
-    toScalar (contract (r := 0) (s := 0) (tensor_prod (r1 := 1) (s1 := 0) (r2 := 0) (s2 := 1) (fromVector v) (fromCovector w))) = w v
-
-  -- 4. Linearity of Embeddings and Products:
-  fromVector_add : ∀ X Y : V, fromVector (X + Y) = add (fromVector X) (fromVector Y)
-  fromVector_smul : ∀ (c : R) (X : V), fromVector (c • X) = smul c (fromVector X)
-
-  fromCovector_add : ∀ w1 w2 : V →ₗ[R] R, fromCovector (w1 + w2) = add (fromCovector w1) (fromCovector w2)
-  fromCovector_smul : ∀ (c : R) (w : V →ₗ[R] R), fromCovector (c • w) = smul c (fromCovector w)
-
-  fromBilinear_add : ∀ B1 B2 : V →ₗ[R] V →ₗ[R] R, fromBilinear (B1 + B2) = add (fromBilinear B1) (fromBilinear B2)
-  fromBilinear_smul : ∀ (c : R) (B : V →ₗ[R] V →ₗ[R] R), fromBilinear (c • B) = smul c (fromBilinear B)
 
   tensor_prod_add_left : ∀ {r1 s1 r2 s2 : ℕ} (T1 T2 : AbstractTensor r1 s1) (T3 : AbstractTensor r2 s2),
     tensor_prod (add T1 T2) T3 = add (tensor_prod T1 T3) (tensor_prod T2 T3)
@@ -444,21 +441,6 @@ class TensorAlgebra (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] whe
     tensor_prod (smul c T1) T2 = smul c (tensor_prod T1 T2)
   tensor_prod_smul_right : ∀ {r1 s1 r2 s2 : ℕ} (c : R) (T1 : AbstractTensor r1 s1) (T2 : AbstractTensor r2 s2),
     tensor_prod T1 (smul c T2) = smul c (tensor_prod T1 T2)
-
-  -- 5. General Swap Contraction Interactions (The Adjunction Axiom for Swap)
-  -- For any tensor T of rank (r, s+2), swapping it's first two covariant slots then contracting with X ⊗ Y
-  -- is equivalent to contracting the original tensor with Y ⊗ X.
-  contract_swap_covariant_eval : ∀ {r s : ℕ} (X Y : V) (T : AbstractTensor r (s + 2)),
-    contract (r:=r) (s:=s) (contract (r:=r+1) (s:=s+1) (tensor_prod (r1:=r) (s1:=s+2) (r2:=2) (s2:=0) (swap_covariant 0 1 T) (tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector X) (fromVector Y)))) =
-    contract (r:=r) (s:=s) (contract (r:=r+1) (s:=s+1) (tensor_prod (r1:=r) (s1:=s+2) (r2:=2) (s2:=0) T (tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector Y) (fromVector X))))
-
-  -- 6. Identity Contraction
-  -- Contracting a vector with the Kronecker Delta tensor recovers the vector.
-  contract_delta : ∀ X : V, contract (r:=1) (s:=0) (tensor_prod (r1:=1) (s1:=1) (r2:=1) (s2:=0) delta_tensor (fromVector X)) = fromVector X
-
-  -- 7. Bilinear Evaluation
-  contract_fromBilinear : ∀ (B : V →ₗ[R] V →ₗ[R] R) (X Y : V),
-    toScalar (contract (r := 0) (s := 0) (contract (r := 1) (s := 1) (tensor_prod (r1 := 0) (s1 := 2) (r2 := 2) (s2 := 0) (fromBilinear B) (tensor_prod (r1 := 1) (s1 := 0) (r2 := 1) (s2 := 0) (fromVector X) (fromVector Y))))) = B X Y
 
 namespace TensorAlgebra
 
