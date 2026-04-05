@@ -47,6 +47,8 @@ tensor, covariant tensor, smooth manifold, differential geometry, vector bundle
 namespace Tensor0SBundle
 noncomputable section
 
+set_option backward.isDefEq.respectTransparency false
+
 open Bundle Set IsManifold ContinuousLinearMap
 
 open scoped Manifold Topology Bundle ContDiff BigOperators

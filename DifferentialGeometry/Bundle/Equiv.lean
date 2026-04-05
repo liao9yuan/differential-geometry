@@ -150,7 +150,8 @@ def comp (g : VectorBundleMap 𝕜 F₂ E₂ F₃ E₃) (f : VectorBundleMap �
   continuous_toFun := g.continuous_toFun.comp f.continuous_toFun
   fiberLinearMap x := (g.fiberLinearMap (f.baseMap x)).comp (f.fiberLinearMap x)
   fiber_compat x v := by
-    simp only [Function.comp_apply, f.fiber_compat, g.fiber_compat, LinearMap.comp_apply]
+    simp only [Function.comp_apply, f.fiber_compat, g.fiber_compat]
+    congr 1
 
 end VectorBundleMap
 
@@ -292,8 +293,8 @@ def trans (e₁₂ : VectorBundleEquiv 𝕜 F₁ E₁ F₂ E₂) (e₂₃ : Vect
   toHomeomorph := e₁₂.toHomeomorph.trans e₂₃.toHomeomorph
   fiberLinearEquiv x := (e₁₂.fiberLinearEquiv x).trans (e₂₃.fiberLinearEquiv (e₁₂.baseMap x))
   fiber_compat x v := by
-    simp only [Homeomorph.trans_apply, e₁₂.fiber_compat, e₂₃.fiber_compat,
-      LinearEquiv.trans_apply, Function.comp]
+    simp only [Homeomorph.trans_apply, e₁₂.fiber_compat, e₂₃.fiber_compat, Function.comp]
+    congr 1
 
 end VectorBundleEquiv
 
@@ -635,8 +636,8 @@ def trans (e₁₂ : ContMDiffVectorBundleEquiv 𝕜 IB n F₁ E₁ F₂ E₂)
   fiberLinearEquiv x :=
     (e₁₂.fiberLinearEquiv x).trans (e₂₃.fiberLinearEquiv (e₁₂.baseMap x))
   fiber_compat x v := by
-    simp only [Diffeomorph.coe_trans, Function.comp_apply, e₁₂.fiber_compat, e₂₃.fiber_compat,
-      LinearEquiv.trans_apply]
+    simp only [Diffeomorph.coe_trans, Function.comp_apply, e₁₂.fiber_compat, e₂₃.fiber_compat]
+    congr 1
 
 end ContMDiffVectorBundleEquiv
 
@@ -773,7 +774,8 @@ def comp (g : ContMDiffVectorBundleMap 𝕜 IB n F₂ E₂ F₃ E₃)
   contMDiff_toFun := g.contMDiff_toFun.comp f.contMDiff_toFun
   fiberLinearMap x := (g.fiberLinearMap (f.baseMap x)).comp (f.fiberLinearMap x)
   fiber_compat x v := by
-    simp only [Function.comp_apply, f.fiber_compat, g.fiber_compat, LinearMap.comp_apply]
+    simp only [Function.comp_apply, f.fiber_compat, g.fiber_compat]
+    congr 1
 
 def ofEquiv (e : ContMDiffVectorBundleEquiv 𝕜 IB n F₁ E₁ F₂ E₂) :
     ContMDiffVectorBundleMap 𝕜 IB n F₁ E₁ F₂ E₂ where

@@ -38,6 +38,8 @@ namespace TensorLieDeriv
 
 noncomputable section
 
+set_option backward.isDefEq.respectTransparency false
+
 open Bundle Set IsManifold ContinuousLinearMap VectorField Filter Tensor0SBundle
 open scoped Manifold Topology Bundle ContDiff
 

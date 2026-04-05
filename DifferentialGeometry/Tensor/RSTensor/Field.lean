@@ -25,6 +25,8 @@ tensor field, smooth section, smooth manifold, vector space
 namespace Tensor0SBundle
 noncomputable section
 
+set_option backward.isDefEq.respectTransparency false
+
 open Bundle Set IsManifold ContinuousLinearMap
 
 open scoped Manifold Topology Bundle ContDiff BigOperators
@@ -294,6 +296,8 @@ end Tensor0SBundle
 
 namespace Tensor0SBundle
 noncomputable section
+
+set_option backward.isDefEq.respectTransparency false
 
 open Bundle Set IsManifold ContinuousLinearMap
 

@@ -88,7 +88,7 @@ noncomputable def VectorField.action
     congr 1
     -- Goal: V x = e₀.symmL 𝕜 x ((e₀ ⟨x, V x⟩).2).
     -- Since symmL has toFun := e.symm, symm_apply_apply_mk gives e₀.symm x (...) = V x.
-    exact (e₀.symm_apply_apply_mk hx (V x)).symm⟩
+    exact (Bundle.Trivialization.symm_apply_apply_mk e₀ hx (V x)).symm⟩
 
 /-- Smooth scalar fields form a commutative ring under pointwise addition and multiplication. -/
 noncomputable instance : CommRing (ScalarField (I := I) (M := M)) :=
@@ -153,19 +153,18 @@ noncomputable instance [CompleteSpace E] :
 
 /-- The Lie bracket product rule for function-scalar multiplication on the left:
 `[c • X, Y](x₀) = c(x₀) • [X, Y](x₀) - (Y c)(x₀) • X(x₀)`.
-This is the manifold-level analogue of `VectorField.lieBracketWithin_smul_left`. -/
+This is the manifold-level analogue of `VectorField.mlieBracket_smul_left`. -/
 private lemma mlieBracket_fun_smul_left [CompleteSpace E]
     (c : ScalarField (I := I) (M := M)) (X Y : VectorField (I := I) (M := M)) (x₀ : M) :
     _root_.VectorField.mlieBracket I (fun y ↦ c y • X y) (⇑Y) x₀ =
       c x₀ • _root_.VectorField.mlieBracket I (⇑X) (⇑Y) x₀ -
-        let d : 𝕜 := (mfderiv I 𝓘(𝕜) (⇑c) x₀) (Y x₀); d • X x₀ := by
-  have hc_diff : MDiffAt (⇑c) x₀ :=
-    (c.contMDiff x₀).mdifferentiableAt (mod_cast ENat.top_ne_zero)
-  have hX_diff : MDiffAt (fun x ↦ (⟨x, X x⟩ : TangentBundle I M)) x₀ :=
-    (X.contMDiff x₀).mdifferentiableAt (mod_cast ENat.top_ne_zero)
-  erw [_root_.VectorField.mlieBracket_smul_left (W := Y) hc_diff hX_diff]
-  rw [add_comm, neg_smul, ← sub_eq_add_neg]
-  exact rfl
+        NormedSpace.fromTangentSpace (c x₀) ((mfderiv I 𝓘(𝕜) (⇑c) x₀) (Y x₀)) • X x₀ := by
+  have h := _root_.VectorField.mlieBracket_smul_left (I := I) (f := ⇑c) (V := ⇑X) (W := ⇑Y)
+    (x := x₀)
+    ((c.contMDiff x₀).mdifferentiableAt (mod_cast ENat.top_ne_zero))
+    ((X.contMDiff x₀).mdifferentiableAt (mod_cast ENat.top_ne_zero))
+  change _root_.VectorField.mlieBracket I (⇑c • ⇑X) (⇑Y) x₀ = _
+  rw [h]; simp only [neg_smul]; abel
 
 /-- The concrete directional derivative and Lie bracket on a manifold satisfy the abstract
 derivation rules. -/
@@ -202,21 +201,14 @@ noncomputable instance [CompleteSpace E] :
     exact mlieBracket_fun_smul_left c X Y x₀
   bracket_smul_right c X Y := by
     apply DFunLike.ext; intro x₀
-    -- Use the smul-left identity for (c, Y, X) combined with antisymmetry
-    have hleft := mlieBracket_fun_smul_left c Y X x₀
-    -- hleft : mlieBracket I (c•Y) X x₀ = c x₀ • mlieBracket I Y X x₀ - (mfderiv c x₀)(X x₀) • Y x₀
-    have hswap1 := _root_.VectorField.mlieBracket_swap_apply
-      (I := I) (V := ⇑X) (W := fun y ↦ c y • Y y) (x := x₀)
-    -- hswap1 : mlieBracket I X (c•Y) x₀ = -mlieBracket I (c•Y) X x₀
-    have hswap2 := _root_.VectorField.mlieBracket_swap_apply
-      (I := I) (V := ⇑Y) (W := ⇑X) (x := x₀)
-    -- hswap2 : mlieBracket I Y X x₀ = -mlieBracket I X Y x₀
-    change _root_.VectorField.mlieBracket I (⇑X) (fun y ↦ c y • Y y) x₀ =
+    have h := _root_.VectorField.mlieBracket_smul_right (I := I) (f := ⇑c) (V := ⇑X) (W := ⇑Y)
+      (x := x₀)
+      ((c.contMDiff x₀).mdifferentiableAt (mod_cast ENat.top_ne_zero))
+      ((Y.contMDiff x₀).mdifferentiableAt (mod_cast ENat.top_ne_zero))
+    change _root_.VectorField.mlieBracket I (⇑X) (⇑c • ⇑Y) x₀ =
       c x₀ • _root_.VectorField.mlieBracket I (⇑X) (⇑Y) x₀ +
-        let d : 𝕜 := (mfderiv I 𝓘(𝕜) (⇑c) x₀) (X x₀); d • Y x₀
-    rw [hswap1, hleft, hswap2]
-    simp only [smul_neg, neg_sub]
-    abel
+        NormedSpace.fromTangentSpace (c x₀) ((mfderiv I 𝓘(𝕜) (⇑c) x₀) (X x₀)) • Y x₀
+    rw [h, add_comm]
   bracket_antisymm X Y := by
     apply DFunLike.ext; intro x
     exact _root_.VectorField.mlieBracket_swap_apply
@@ -351,8 +343,9 @@ noncomputable instance :
       (VectorField (I := I) (M := M)) where
   eq_of_action_eq X Y h := by
     apply DFunLike.ext; intro x₀
-    change (X x₀ : E) = Y x₀
-    rw [SeparatingDual.eq_iff_forall_dual_eq (R := ℝ)]; intro (L : E →L[ℝ] ℝ)
+    suffices ∀ L : E →L[ℝ] ℝ, L (X x₀) = L (Y x₀) from
+      (SeparatingDual.eq_iff_forall_dual_eq (R := ℝ) (V := E)).mpr this
+    intro L
     -- Build f = χ • (L ∘ φ) where χ is a bump function, φ = extChartAt I x₀
     set φ := extChartAt I x₀
     obtain ⟨χ⟩ := (inferInstance : Nonempty (SmoothBumpFunction I x₀))

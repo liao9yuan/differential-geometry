@@ -89,10 +89,8 @@ instance (x : B) : AddCommMonoid (⋀^ι⟮𝕜; F₁, E₁; F₂, E₂⟯ x) :=
 
 variable [∀ x, ContinuousSMul 𝕜 (E₂ x)]
 
-instance (x : B) : Module 𝕜 (⋀^ι⟮𝕜; F₁, E₁; F₂, E₂⟯ x) := by
-  -- Unfold the type synonym, then infer the instance from the fiber.
-  dsimp [Bundle.continuousAlternatingMap]
-  infer_instance
+instance (x : B) : Module 𝕜 (⋀^ι⟮𝕜; F₁, E₁; F₂, E₂⟯ x) :=
+  inferInstanceAs (Module 𝕜 ((E₁ x) [⋀^ι]→L[𝕜] (E₂ x)))
 
 end defs
 
@@ -137,7 +135,7 @@ theorem continuousOn_continuousAlternatingMapCoordChange
   let f₁ (b : B) : (F₁ [⋀^ι]→L[𝕜] F₂) →L[𝕜] (F₁ [⋀^ι]→L[𝕜] F₂)
     := ContinuousAlternatingMap.compContinuousLinearMapCLM (e₁'.coordChangeL 𝕜 e₁ b)
   let f₂ (b : B) : (F₁ [⋀^ι]→L[𝕜] F₂) →L[𝕜] (F₁ [⋀^ι]→L[𝕜] F₂)
-    := ContinuousLinearMap.compContinuousAlternatingMapCLM 𝕜 F₁ F₂ F₂ (e₂.coordChangeL 𝕜 e₂' b)
+    := ContinuousLinearMap.compContinuousAlternatingMapCLM 𝕜 F₁ F₂ F₂ ι (e₂.coordChangeL 𝕜 e₂' b)
   have h₁ : ContinuousOn f₁ (e₁.baseSet ∩ e₁'.baseSet) := by
     let l : B → (F₁ →L[𝕜] F₁) := fun b ↦ (e₁'.coordChangeL 𝕜 e₁ b)
     have : f₁ = ContinuousAlternatingMap.compContinuousLinearMapCLM ∘ l := rfl
@@ -149,10 +147,10 @@ theorem continuousOn_continuousAlternatingMapCoordChange
       exact continuousOn_coordChange 𝕜 e₁' e₁
   have h₂ : ContinuousOn f₂ (e₂.baseSet ∩ e₂'.baseSet) := by
     let l : B → (F₂ →L[𝕜] F₂) := fun b ↦ (e₂.coordChangeL 𝕜 e₂' b)
-    have : f₂ = (ContinuousLinearMap.compContinuousAlternatingMapCLM 𝕜 F₁ F₂ F₂) ∘ l := rfl
+    have : f₂ = (ContinuousLinearMap.compContinuousAlternatingMapCLM 𝕜 F₁ F₂ F₂ ι) ∘ l := rfl
     rw [this]
     apply Continuous.comp_continuousOn
-    · exact (ContinuousLinearMap.compContinuousAlternatingMapCLM 𝕜 F₁ F₂ F₂).cont
+    · exact (ContinuousLinearMap.compContinuousAlternatingMapCLM 𝕜 F₁ F₂ F₂ ι).cont
     · dsimp [l]
       exact continuousOn_coordChange 𝕜 e₂ e₂'
   have hf : continuousAlternatingMapCoordChange 𝕜 ι e₁ e₁' e₂ e₂' = fun b ↦ (f₂ b).comp (f₁ b) := by
@@ -221,17 +219,23 @@ instance continuousAlternatingMap.isLinear
     (Pretrivialization.continuousAlternatingMap 𝕜 ι e₁ e₂).IsLinear 𝕜 where
   linear x _ :=
   { map_add := fun L L' ↦ by
-      change ContinuousLinearMap.compContinuousAlternatingMapₗ 𝕜 _ _ _
-        (e₂.continuousLinearMapAt 𝕜 x)
-        (ContinuousAlternatingMap.compContinuousLinearMapₗ (e₁.symmL 𝕜 x) (L + L')) = _
-      rw [_root_.map_add, _root_.map_add]
-      rfl
+      ext v
+      show (e₂.continuousLinearMapAt 𝕜 x)
+        (((L + L').compContinuousLinearMap (e₁.symmL 𝕜 x)) v) =
+        (e₂.continuousLinearMapAt 𝕜 x) ((L.compContinuousLinearMap (e₁.symmL 𝕜 x)) v) +
+        (e₂.continuousLinearMapAt 𝕜 x) ((L'.compContinuousLinearMap (e₁.symmL 𝕜 x)) v)
+      rw [ContinuousAlternatingMap.compContinuousLinearMap_apply,
+        ContinuousAlternatingMap.compContinuousLinearMap_apply,
+        ContinuousAlternatingMap.compContinuousLinearMap_apply, ← map_add]
+      congr 1
     map_smul := fun c L ↦ by
-      change ContinuousLinearMap.compContinuousAlternatingMapₗ 𝕜 _ _ _
-        (e₂.continuousLinearMapAt 𝕜 x)
-        (ContinuousAlternatingMap.compContinuousLinearMapₗ (e₁.symmL 𝕜 x) (c • L)) = _
-      rw [map_smul, map_smul]
-      rfl }
+      ext v
+      show (e₂.continuousLinearMapAt 𝕜 x)
+        (((c • L).compContinuousLinearMap (e₁.symmL 𝕜 x)) v) =
+        c • (e₂.continuousLinearMapAt 𝕜 x) ((L.compContinuousLinearMap (e₁.symmL 𝕜 x)) v)
+      rw [ContinuousAlternatingMap.compContinuousLinearMap_apply,
+        ContinuousAlternatingMap.compContinuousLinearMap_apply, ← map_smul]
+      congr 1 }
 
 omit [Fintype ι] in
 theorem continuousAlternatingMap_apply (p : TotalSpace (F₁ [⋀^ι]→L[𝕜] F₂) (⋀^ι⟮𝕜; F₁, E₁; F₂, E₂⟯))
@@ -263,7 +267,7 @@ theorem continuousAlternatingMap_symm_apply' {b : B} (hb : b ∈ e₁.baseSet �
     (continuousAlternatingMap 𝕜 ι e₁ e₂).symm b L =
     (e₂.symmL 𝕜 b).compContinuousAlternatingMap
     (L.compContinuousLinearMap <| e₁.continuousLinearMapAt 𝕜 b) := by
-  rw [symm_apply]
+  rw [Bundle.Pretrivialization.symm_apply]
   · rfl
   exact hb
 
@@ -355,7 +359,7 @@ variable [he₁ : MemTrivializationAtlas e₁] [he₂ : MemTrivializationAtlas e
 /-- Given trivializations `e₁`, `e₂` in the atlas for vector bundles `E₁`, `E₂` over a base `B`,
 the induced trivialization for the continuous `ι`-slot alternating maps from `E₁` to `E₂`,
 whose base set is `e₁.baseSet ∩ e₂.baseSet`. -/
-def Trivialization.continuousAlternatingMap :
+def Bundle.Trivialization.continuousAlternatingMap :
     Trivialization (F₁ [⋀^ι]→L[𝕜] F₂) (π (F₁ [⋀^ι]→L[𝕜] F₂) ⋀^ι⟮𝕜; F₁, E₁; F₂, E₂⟯) :=
   VectorPrebundle.trivializationOfMemPretrivializationAtlas _ ⟨e₁, e₂, he₁, he₂, rfl⟩
 
@@ -364,11 +368,11 @@ instance _root_.Bundle.continuousAlternatingMap.memTrivializationAtlas :
     Trivialization (F₁ [⋀^ι]→L[𝕜] F₂) (π (F₁ [⋀^ι]→L[𝕜] F₂) ⋀^ι⟮𝕜; F₁, E₁; F₂, E₂⟯)) where
   out := ⟨_, ⟨e₁, e₂, inferInstance, inferInstance, rfl⟩, rfl⟩
 
-@[simp] theorem Trivialization.baseSet_continuousAlternatingMap :
+@[simp] theorem Bundle.Trivialization.baseSet_continuousAlternatingMap :
     (e₁.continuousAlternatingMap 𝕜 ι e₂).baseSet = e₁.baseSet ∩ e₂.baseSet :=
   rfl
 
-theorem Trivialization.continuousAlternatingMap_apply
+theorem Bundle.Trivialization.continuousAlternatingMap_apply
     (p : TotalSpace (F₁ [⋀^ι]→L[𝕜] F₂) ⋀^ι⟮𝕜; F₁, E₁; F₂, E₂⟯) :
     e₁.continuousAlternatingMap 𝕜 ι e₂ p =
     ⟨p.1, (e₂.continuousLinearMapAt 𝕜 p.1).compContinuousAlternatingMap <|
@@ -394,7 +398,7 @@ section smooth
 
 open scoped Bundle Manifold
 
-open Pretrivialization
+open Bundle Pretrivialization
 
 variable {𝕜 ι B F₁ F₂ M : Type*} {E₁ : B → Type*} {E₂ : B → Type*}
   [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
@@ -445,12 +449,12 @@ theorem contMDiffOn_continuousAlternatingMapCoordChange
       (s := e₂.baseSet ∩ e₂'.baseSet) (by mfld_set_tac))
   let s (q : (F₁ →L[𝕜] F₁) × (F₂ →L[𝕜] F₂)) :
       (F₁ →L[𝕜] F₁) × ((F₁ [⋀^ι]→L[𝕜] F₂) →L[𝕜] (F₁ [⋀^ι]→L[𝕜] F₂)) :=
-    (q.1, ContinuousLinearMap.compContinuousAlternatingMapCLM 𝕜 F₁ F₂ F₂ q.2)
+    (q.1, ContinuousLinearMap.compContinuousAlternatingMapCLM 𝕜 F₁ F₂ F₂ ι q.2)
   have hs : ContMDiff (𝓘(𝕜, (F₁ →L[𝕜] F₁)).prod 𝓘(𝕜, (F₂ →L[𝕜] F₂)))
       (𝓘(𝕜, (F₁ →L[𝕜] F₁)).prod 𝓘(𝕜, ((F₁ [⋀^ι]→L[𝕜] F₂) →L[𝕜] (F₁ [⋀^ι]→L[𝕜] F₂)))) ⊤ s := by
     let t (p : (F₁ →L[𝕜] F₁) × (F₂ →L[𝕜] F₂)) :
         ((F₁ [⋀^ι]→L[𝕜] F₂) →L[𝕜] (F₁ [⋀^ι]→L[𝕜] F₂)) :=
-      ContinuousLinearMap.compContinuousAlternatingMapCLM 𝕜 F₁ F₂ F₂ p.2
+      ContinuousLinearMap.compContinuousAlternatingMapCLM 𝕜 F₁ F₂ F₂ ι p.2
     have ht : ContMDiff (𝓘(𝕜, (F₁ →L[𝕜] F₁)).prod 𝓘(𝕜, (F₂ →L[𝕜] F₂)))
         𝓘(𝕜, ((F₁ [⋀^ι]→L[𝕜] F₂) →L[𝕜] (F₁ [⋀^ι]→L[𝕜] F₂))) ⊤ t := by
           refine ContMDiff.clm_apply ?hg ?hf
