@@ -88,7 +88,7 @@ noncomputable def VectorField.action
     congr 1
     -- Goal: V x = e₀.symmL 𝕜 x ((e₀ ⟨x, V x⟩).2).
     -- Since symmL has toFun := e.symm, symm_apply_apply_mk gives e₀.symm x (...) = V x.
-    exact (Trivialization.symm_apply_apply_mk e₀ hx (V x)).symm⟩
+    exact (e₀.symm_apply_apply_mk hx (V x)).symm⟩
 
 /-- Smooth scalar fields form a commutative ring under pointwise addition and multiplication. -/
 noncomputable instance : CommRing (ScalarField (I := I) (M := M)) :=
@@ -158,97 +158,14 @@ private lemma mlieBracket_fun_smul_left [CompleteSpace E]
     (c : ScalarField (I := I) (M := M)) (X Y : VectorField (I := I) (M := M)) (x₀ : M) :
     _root_.VectorField.mlieBracket I (fun y ↦ c y • X y) (⇑Y) x₀ =
       c x₀ • _root_.VectorField.mlieBracket I (⇑X) (⇑Y) x₀ -
-        (mfderiv I 𝓘(𝕜) (⇑c) x₀) (Y x₀) • X x₀ := by
-  -- Unfold to mlieBracketWithin in coordinates
-  simp only [← _root_.VectorField.mlieBracketWithin_univ,
-    _root_.VectorField.mlieBracketWithin_apply, Set.preimage_univ, Set.univ_inter]
-  -- Set up abbreviations for the coordinate representation
-  set φ := extChartAt I x₀
-  set y₀ := φ x₀
-  set D := mfderiv I 𝓘(𝕜, E) φ x₀
-  set Dψ := mfderivWithin 𝓘(𝕜, E) I φ.symm (Set.range I) y₀
-  set V' := _root_.VectorField.mpullbackWithin 𝓘(𝕜, E) I φ.symm (⇑X) (Set.range I)
-  set W' := _root_.VectorField.mpullbackWithin 𝓘(𝕜, E) I φ.symm (⇑Y) (Set.range I)
-  set g := (⇑c) ∘ φ.symm with hg_def
-  -- Step 1: Pullback of (c • X) equals g • V'
-  have hpull : _root_.VectorField.mpullbackWithin 𝓘(𝕜, E) I φ.symm
-      (fun x ↦ c x • X x) (Set.range I) = fun z ↦ g z • V' z := by
-    ext z
-    simp only [_root_.VectorField.mpullbackWithin_apply, V', g, Function.comp, map_smul]
-  rw [hpull]
-  -- Step 2: Differentiability hypotheses
-  have hx₀_src : x₀ ∈ (extChartAt I x₀).source := mem_extChartAt_source x₀
-  have hy₀_tgt : y₀ ∈ (extChartAt I x₀).target := (extChartAt I x₀).map_source hx₀_src
-  have hc_mdiff : MDifferentiableAt I 𝓘(𝕜) (⇑c) x₀ :=
+        let d : 𝕜 := (mfderiv I 𝓘(𝕜) (⇑c) x₀) (Y x₀); d • X x₀ := by
+  have hc_diff : MDiffAt (⇑c) x₀ :=
     (c.contMDiff x₀).mdifferentiableAt (mod_cast ENat.top_ne_zero)
-  have hV_mdiff : MDifferentiableWithinAt I I.tangent
-      (fun x ↦ (⟨x, X x⟩ : TangentBundle I M)) Set.univ x₀ :=
+  have hX_diff : MDiffAt (fun x ↦ (⟨x, X x⟩ : TangentBundle I M)) x₀ :=
     (X.contMDiff x₀).mdifferentiableAt (mod_cast ENat.top_ne_zero)
-  have hy₀_range : y₀ ∈ Set.range I := extChartAt_target_subset_range x₀ hy₀_tgt
-  have hud : UniqueDiffWithinAt 𝕜 (Set.range I) y₀ :=
-    I.uniqueDiffOn.uniqueDiffWithinAt hy₀_range
-  have hg_diff : DifferentiableWithinAt 𝕜 g (Set.range I) y₀ := by
-    rw [show g = (⇑c) ∘ φ.symm from rfl, ← mdifferentiableWithinAt_iff_differentiableWithinAt]
-    have hc' : MDifferentiableAt I 𝓘(𝕜) (⇑c) (φ.symm y₀) := by
-      rwa [φ.left_inv hx₀_src]
-    exact hc'.comp_mdifferentiableWithinAt y₀
-      (mdifferentiableWithinAt_extChartAt_symm hy₀_tgt)
-  have hV'_diff : DifferentiableWithinAt 𝕜 V' (Set.range I) y₀ := by
-    have := hV_mdiff.differentiableWithinAt_mpullbackWithin_vectorField
-    simpa [Set.preimage_univ] using this
-  -- Step 3: Apply the product rule (VectorField.lieBracketWithin_smul_left)
-  rw [_root_.VectorField.lieBracketWithin_smul_left hg_diff hV'_diff hud]
-  -- Step 4: Distribute D.inverse over the sum
-  simp only [map_add, map_smul]
-  -- Step 5: g y₀ = c x₀
-  have hgy : g y₀ = c x₀ := congr_arg c (φ.left_inv hx₀_src)
-  rw [hgy]
-  -- Step 6: Key coordinate identities
-  -- D and Dψ are mutual inverses (from the chart and its inverse)
-  have hDφ_inv : D.IsInvertible := isInvertible_mfderiv_extChartAt hx₀_src
-  have hDψ_inv : Dψ.IsInvertible := isInvertible_mfderivWithin_extChartAt_symm hy₀_tgt
-  have hcomp' : Dψ.comp D = ContinuousLinearMap.id 𝕜 E :=
-    mfderivWithin_extChartAt_symm_comp_mfderiv_extChartAt' (hy := hx₀_src)
-  -- Helper: recover vector from double-inverse via mutual inverse cancellation
-  -- D.inverse (Dψ.inverse v) = v, using: Dψ ∘ D = id, D ∘ D⁻¹ = id, Dψ ∘ Dψ⁻¹ = id
-  have hcancel : ∀ v, D.inverse (Dψ.inverse v) = v := by
-    intro v
-    set w := D.inverse (Dψ.inverse v)
-    have h1 : D w = Dψ.inverse v := by
-      have := ContinuousLinearMap.ext_iff.mp hDφ_inv.self_comp_inverse (Dψ.inverse v)
-      simpa [ContinuousLinearMap.comp_apply] using this
-    have h2 : Dψ (D w) = w := by
-      have := ContinuousLinearMap.ext_iff.mp hcomp' w
-      simpa [ContinuousLinearMap.comp_apply] using this
-    have h3 : Dψ (Dψ.inverse v) = v := by
-      have := ContinuousLinearMap.ext_iff.mp hDψ_inv.self_comp_inverse v
-      simpa [ContinuousLinearMap.comp_apply] using this
-    calc w = Dψ (D w) := h2.symm
-      _ = Dψ (Dψ.inverse v) := by rw [h1]
-      _ = v := h3
-  -- 6a: D.inverse (V' y₀) = X x₀
-  have hDinv_V : D.inverse (V' y₀) = X x₀ := by
-    change D.inverse (Dψ.inverse (X (φ.symm y₀))) = X x₀
-    rw [hcancel, φ.left_inv hx₀_src]
-  -- 6b: Dψ applied to W' y₀ cancels to Y (φ.symm y₀)
-  have hDψ_W : Dψ (W' y₀) = Y (φ.symm y₀) := by
-    change Dψ (Dψ.inverse (Y (φ.symm y₀))) = Y (φ.symm y₀)
-    exact hDψ_inv.self_apply_inverse (Y (φ.symm y₀))
-  -- 6c: (fderivWithin g ...)(W' y₀) = (mfderiv c x₀)(Y x₀)
-  have hfg_W : (fderivWithin 𝕜 g (Set.range I) y₀) (W' y₀) =
-      (mfderiv I 𝓘(𝕜) (⇑c) x₀) (Y x₀) := by
-    -- Chain rule: fderivWithin g = (mfderiv c x₀) ∘L Dψ
-    have hchain : fderivWithin 𝕜 g (Set.range I) y₀ =
-        (mfderiv I 𝓘(𝕜) (⇑c) x₀).comp Dψ := by
-      rw [show g = (⇑c) ∘ φ.symm from rfl, ← mfderivWithin_eq_fderivWithin]
-      exact mfderiv_comp_mfderivWithin_of_eq (I' := I) hc_mdiff
-        (mdifferentiableWithinAt_extChartAt_symm hy₀_tgt)
-        hud.uniqueMDiffWithinAt (φ.left_inv hx₀_src)
-    rw [hchain]
-    change (mfderiv I 𝓘(𝕜) (⇑c) x₀) (Dψ (W' y₀)) = (mfderiv I 𝓘(𝕜) (⇑c) x₀) (Y x₀)
-    rw [hDψ_W, φ.left_inv hx₀_src]
-  -- Step 7: Substitute and close by algebra
-  rw [hDinv_V, hfg_W, add_comm, neg_smul, ← sub_eq_add_neg]
+  erw [_root_.VectorField.mlieBracket_smul_left (W := Y) hc_diff hX_diff]
+  rw [add_comm, neg_smul, ← sub_eq_add_neg]
+  exact rfl
 
 /-- The concrete directional derivative and Lie bracket on a manifold satisfy the abstract
 derivation rules. -/
@@ -294,9 +211,9 @@ noncomputable instance [CompleteSpace E] :
     have hswap2 := _root_.VectorField.mlieBracket_swap_apply
       (I := I) (V := ⇑Y) (W := ⇑X) (x := x₀)
     -- hswap2 : mlieBracket I Y X x₀ = -mlieBracket I X Y x₀
-    show _root_.VectorField.mlieBracket I (⇑X) (fun y ↦ c y • Y y) x₀ =
+    change _root_.VectorField.mlieBracket I (⇑X) (fun y ↦ c y • Y y) x₀ =
       c x₀ • _root_.VectorField.mlieBracket I (⇑X) (⇑Y) x₀ +
-        (mfderiv I 𝓘(𝕜) (⇑c) x₀) (X x₀) • Y x₀
+        let d : 𝕜 := (mfderiv I 𝓘(𝕜) (⇑c) x₀) (X x₀); d • Y x₀
     rw [hswap1, hleft, hswap2]
     simp only [smul_neg, neg_sub]
     abel
@@ -434,9 +351,8 @@ noncomputable instance :
       (VectorField (I := I) (M := M)) where
   eq_of_action_eq X Y h := by
     apply DFunLike.ext; intro x₀
-    letI : NormedAddCommGroup (TangentSpace I x₀) := inferInstanceAs (NormedAddCommGroup E)
-    letI : NormedSpace ℝ (TangentSpace I x₀) := inferInstanceAs (NormedSpace ℝ E)
-    rw [NormedSpace.eq_iff_forall_dual_eq (𝕜 := ℝ)]; intro L
+    change (X x₀ : E) = Y x₀
+    rw [SeparatingDual.eq_iff_forall_dual_eq (R := ℝ)]; intro (L : E →L[ℝ] ℝ)
     -- Build f = χ • (L ∘ φ) where χ is a bump function, φ = extChartAt I x₀
     set φ := extChartAt I x₀
     obtain ⟨χ⟩ := (inferInstance : Nonempty (SmoothBumpFunction I x₀))
