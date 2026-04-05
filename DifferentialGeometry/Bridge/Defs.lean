@@ -479,9 +479,9 @@ class TensorAlgebra (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] whe
   /-- Generic graded tensor type (r: contravariant, s: covariant) -/
   AbstractTensor : ℕ → ℕ → Type
 
-  add {r s : ℕ} : AbstractTensor r s → AbstractTensor r s → AbstractTensor r s
-  smul {r s : ℕ} : R → AbstractTensor r s → AbstractTensor r s
-  tensor_prod {r1 s1 r2 s2 : ℕ} : AbstractTensor r1 s1 → AbstractTensor r2 s2 → AbstractTensor (r1 + r2) (s1 + s2)
+  add {r s : ℕ} : AbstractTensor r s → AbstractTensor r s → AbstractTensor r s -- done
+  smul {r s : ℕ} : R → AbstractTensor r s → AbstractTensor r s -- done
+  tensor_prod {r1 s1 r2 s2 : ℕ} : AbstractTensor r1 s1 → AbstractTensor r2 s2 → AbstractTensor (r1 + r2) (s1 + s2) -- done
 
   -- Embedding
   fromScalar : R → AbstractTensor 0 0
@@ -537,7 +537,7 @@ class TensorAlgebra (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] whe
     tensor_prod T1 (smul c T2) = smul c (tensor_prod T1 T2)
 
   -- 5. General Swap Contraction Interactions (The Adjunction Axiom for Swap)
-  -- For any tensor T of rank (r, s+2), contracting its first two covariant slots with X ⊗ Y
+  -- For any tensor T of rank (r, s+2), swapping it's first two covariant slots then contracting with X ⊗ Y
   -- is equivalent to contracting the original tensor with Y ⊗ X.
   contract_swap_covariant_eval : ∀ {r s : ℕ} (X Y : V) (T : AbstractTensor r (s + 2)),
     contract (r:=r) (s:=s) (contract (r:=r+1) (s:=s+1) (tensor_prod (r1:=r) (s1:=s+2) (r2:=2) (s2:=0) (swap_covariant 0 1 T) (tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector X) (fromVector Y)))) =

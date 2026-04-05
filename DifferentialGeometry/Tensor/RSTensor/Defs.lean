@@ -1,8 +1,7 @@
 /-
 Authors: Yuan Liao, Jack McCarthy
 -/
-import DifferentialGeometry.Tensor.Multilinear.Bundle
-import DifferentialGeometry.Tensor.Multilinear.Basis
+import DifferentialGeometry.Tensor.Multilinear.Fiber
 import DifferentialGeometry.Tensor.Multilinear.Curry
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
@@ -54,7 +53,7 @@ open scoped Manifold Topology Bundle ContDiff BigOperators
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-  [Module.Finite 𝕜 E] [FiniteDimensional 𝕜 E]
+  [FiniteDimensional 𝕜 E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M]
@@ -88,8 +87,7 @@ def TensorRSModel (r s : ℕ) (𝕜 : Type*) (E : Type*) [NontriviallyNormedFiel
 
 /-- The fiber of the (0,s) covariant tensor bundle at `x ∈ M`, defined as
 `Bundle.continuousMultilinearMap 𝕜 s E (TangentSpace I) x`. -/
-@[reducible]
-def Tensor0SSpace (s : ℕ) (I : ModelWithCorners 𝕜 E H) [IsManifold I 1 M] (x : M) :=
+abbrev Tensor0SSpace (s : ℕ) (I : ModelWithCorners 𝕜 E H) [IsManifold I 1 M] (x : M) :=
   Bundle.continuousMultilinearMap 𝕜 s E (TangentSpace I) x
 
 /-- The cotangent space at `x ∈ M`: linear functionals on the tangent space,
@@ -178,74 +176,24 @@ instance tangentSpace_moduleFree (x : M) :
     Module.Free 𝕜 (TangentSpace I x) :=
   inferInstanceAs (Module.Free 𝕜 E)
 
-/-- The bundle and norm topologies on `Tensor0SSpace s I x` agree. The bundle topology is
-induced from the pretrivialization (a continuous linear equivalence to the model fiber),
-and this coincides with the norm topology since the composition map is a homeomorphism. -/
+omit [FiniteDimensional 𝕜 E] in
+/-- Alias for the general `Bundle.continuousMultilinearMap.topology_eq`, specialized to the
+tangent bundle. Used internally by `tensor0SSpace_continuousLinearEquiv`. -/
 private theorem tensor0SSpace_topology_eq (s : ℕ) (x : M) :
     (inferInstance : TopologicalSpace (Tensor0SSpace s I x)) =
-    (inferInstanceAs (TopologicalSpace (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜))) := by
-  change instTopologicalSpaceContinuousMultilinearMap 𝕜 s E (TangentSpace I) x = _
-  simp only [instTopologicalSpaceContinuousMultilinearMap]
-  -- Step 1: Factor pretriv ∘ mk' = Prod.mk x ∘ g where g is the fiber map
-  set e := trivializationAt E (TangentSpace I) x
-  set g := ContinuousMultilinearMap.compContinuousLinearMapL
-    (E₁ := fun _ : Fin s => TangentSpace I x) (E := fun _ : Fin s => E) (G := 𝕜)
-    (fun _ => e.symmL 𝕜 x) with hg_def
-  have hfactor : (↑(Pretrivialization.continuousMultilinearMap 𝕜 s e) ∘
-      TotalSpace.mk' _ x) = Prod.mk x ∘ g := by funext; rfl
-  -- Step 2: Decompose via induced_compose and isInducing_prodMkRight
-  rw [hfactor, ← induced_compose, (isInducing_prodMkRight x).eq_induced.symm]
-  -- Goal: induced g τ_norm = τ_norm
-  -- Step 3: g is a homeomorphism (continuous with continuous inverse), hence inducing
-  set g' := ContinuousMultilinearMap.compContinuousLinearMapL
-    (E₁ := fun _ : Fin s => E) (E := fun _ : Fin s => TangentSpace I x) (G := 𝕜)
-    (fun _ => e.continuousLinearMapAt 𝕜 x) with hg'_def
-  have hx : x ∈ e.baseSet := mem_baseSet_trivializationAt E (TangentSpace I) x
-  have hleft : Function.LeftInverse g' g := by
-    intro L; ext v; dsimp [g, g']
-    congr 1; funext i; exact e.symmₗ_linearMapAt hx (v i)
-  have hright : Function.RightInverse g' g := by
-    intro M; ext v; dsimp [g, g']
-    congr 1; funext i; exact e.linearMapAt_symmₗ hx (v i)
-  exact (Homeomorph.mk ⟨g, g', hleft, hright⟩ g.continuous g'.continuous).isInducing.eq_induced.symm
-
-/-- The fiber `Tensor0SSpace s I x` is a normed additive commutative group. -/
-instance tensor0SSpace_normedAddCommGroup (s : ℕ) (x : M) :
-    NormedAddCommGroup (Tensor0SSpace s I x) :=
-  inferInstanceAs (NormedAddCommGroup (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜))
-
-/-- The fiber `Tensor0SSpace s I x` is a normed `𝕜`-module. -/
-instance tensor0SSpace_normedSpace (s : ℕ) (x : M) :
-    NormedSpace 𝕜 (Tensor0SSpace s I x) :=
-  inferInstanceAs (NormedSpace 𝕜 (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜))
-
-instance tensor0SSpace_t2Space (s : ℕ) (x : M) :
-    T2Space (Tensor0SSpace s I x) := by
-  rw [show instTopologicalSpaceContinuousMultilinearMap 𝕜 s E (TangentSpace I) x =
-        ContinuousMultilinearMap.instTopologicalSpace from tensor0SSpace_topology_eq (I := I) s x]
-  infer_instance
+    (inferInstanceAs (TopologicalSpace (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜))) :=
+  Bundle.continuousMultilinearMap.topology_eq s x
 
 noncomputable instance tensor0SSpace_finiteDimensional [CompleteSpace 𝕜] (s : ℕ) (x : M) :
     FiniteDimensional 𝕜 (Tensor0SSpace s I x) :=
-  continuousMultilinearMap_finiteDimensional s
+  Bundle.continuousMultilinearMap.instFiniteDimensional s x
 
 @[simp]
 theorem finrank_tensor0SSpace [CompleteSpace 𝕜] (s : ℕ) (x : M) :
     Module.finrank 𝕜 (Tensor0SSpace s I x) = (Module.finrank 𝕜 E) ^ s :=
-  finrank_continuousMultilinearMap s
+  Bundle.continuousMultilinearMap.finrank_eq s x
 
-/-- With the bundle topology, addition on `Tensor0SSpace` fibers is continuous. -/
-instance tensor0SSpace_isTopologicalAddGroup (s : ℕ) (x : M) :
-    @IsTopologicalAddGroup (Tensor0SSpace s I x) inferInstance _ := by
-  rw [tensor0SSpace_topology_eq (I := I) s x]
-  infer_instance
-
-/-- With the bundle topology, scalar multiplication on `Tensor0SSpace` fibers is continuous. -/
-instance tensor0SSpace_continuousSMul (s : ℕ) (x : M) :
-    @ContinuousSMul 𝕜 (Tensor0SSpace s I x) _ _ inferInstance := by
-  rw [tensor0SSpace_topology_eq (I := I) s x]
-  infer_instance
-
+omit [FiniteDimensional 𝕜 E] in
 /-- `Tensor0SSpace s I x` is definitionally equal to
 `ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜`, since `TangentSpace I x = E`. -/
 private theorem tensor0SSpace_type_eq (s : ℕ) (x : M) :
@@ -281,15 +229,100 @@ def tensor0SSpace_continuousLinearEquiv (s : ℕ) (x : M) :
       ContinuousMultilinearMap.instTopologicalSpace from tensor0SSpace_topology_eq (I := I) s x]
     exact @continuous_id _ ContinuousMultilinearMap.instTopologicalSpace
 
-@[ext]
-theorem tensor0SSpace_ext {s : ℕ} {x : M} (T₁ T₂ : Tensor0SSpace s I x)
-    (h : ∀ m, (tensor0SSpace_continuousLinearEquiv s x T₁) m =
-      (tensor0SSpace_continuousLinearEquiv s x T₂) m) :
-    T₁ = T₂ := by
-  have h1 : (tensor0SSpace_continuousLinearEquiv s x T₁) =
-      (tensor0SSpace_continuousLinearEquiv s x T₂) := by
-    ext m; exact h m
-  exact (tensor0SSpace_continuousLinearEquiv s x).injective h1
+/-!
+## Coercion to Model Fiber
+
+The continuous linear equivalence `tensor0SSpace_continuousLinearEquiv` identifies each fiber
+`Tensor0SSpace s I x` with `ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜`.  We package
+this as `Tensor0SSpace.toModel` (forward direction) and `Tensor0SSpace.ofModel`
+(its inverse), together with linearity, continuity, and invertibility lemmas.
+-/
+
+namespace Tensor0SSpace
+
+/-- Coerce a `Tensor0SSpace` fiber element to the model fiber.
+This is the forward direction of `tensor0SSpace_continuousLinearEquiv`. -/
+def toModel {s : ℕ} {x : M} (T : Tensor0SSpace s I x) :
+    ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜 :=
+  tensor0SSpace_continuousLinearEquiv s x T
+
+/-- `Tensor0SSpace.toModel` as a bundled `ContinuousLinearMap`. -/
+def toModelL (s : ℕ) (x : M) :
+    Tensor0SSpace s I x →L[𝕜] ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜 :=
+  (tensor0SSpace_continuousLinearEquiv s x).toContinuousLinearMap
+
+/-- Construct a `Tensor0SSpace` fiber element from a model fiber element.
+This is the inverse of `Tensor0SSpace.toModel`. -/
+def ofModel {s : ℕ} {x : M}
+    (f : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜) :
+    Tensor0SSpace s I x :=
+  (tensor0SSpace_continuousLinearEquiv s x).symm f
+
+set_option linter.unusedSectionVars false in
+@[simp]
+theorem toModelL_apply {s : ℕ} {x : M} (T : Tensor0SSpace s I x) :
+    toModelL s x T = toModel T := rfl
+
+omit [FiniteDimensional 𝕜 E] in
+@[simp]
+theorem toModel_add {s : ℕ} {x : M} (T₁ T₂ : Tensor0SSpace s I x) :
+    toModel (T₁ + T₂) = toModel T₁ + toModel T₂ :=
+  map_add (tensor0SSpace_continuousLinearEquiv s x) T₁ T₂
+
+@[simp]
+theorem toModel_smul {s : ℕ} {x : M} (c : 𝕜) (T : Tensor0SSpace s I x) :
+    toModel (c • T) = c • toModel T :=
+  map_smul (tensor0SSpace_continuousLinearEquiv s x) c T
+
+@[simp]
+theorem toModel_zero {s : ℕ} {x : M} :
+    toModel (0 : Tensor0SSpace s I x) = 0 :=
+  map_zero (tensor0SSpace_continuousLinearEquiv s x)
+
+@[simp]
+theorem toModel_neg {s : ℕ} {x : M} (T : Tensor0SSpace s I x) :
+    toModel (-T) = -toModel T :=
+  map_neg (tensor0SSpace_continuousLinearEquiv s x) T
+
+@[simp]
+theorem toModel_sub {s : ℕ} {x : M} (T₁ T₂ : Tensor0SSpace s I x) :
+    toModel (T₁ - T₂) = toModel T₁ - toModel T₂ :=
+  map_sub (tensor0SSpace_continuousLinearEquiv s x) T₁ T₂
+
+omit [FiniteDimensional 𝕜 E] in
+@[simp]
+theorem ofModel_toModel {s : ℕ} {x : M} (T : Tensor0SSpace s I x) :
+    ofModel (toModel T) = T :=
+  (tensor0SSpace_continuousLinearEquiv s x).symm_apply_apply T
+
+set_option linter.unusedSectionVars false in
+@[simp]
+theorem toModel_ofModel {s : ℕ} {x : M}
+    (f : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜) :
+    toModel (ofModel (I := I) (x := x) f) = f :=
+  (tensor0SSpace_continuousLinearEquiv s x).apply_symm_apply f
+
+omit [FiniteDimensional 𝕜 E] in
+theorem toModel_continuous {s : ℕ} {x : M} :
+    Continuous (fun T : Tensor0SSpace s I x => toModel T) :=
+  (tensor0SSpace_continuousLinearEquiv s x).continuous_toFun
+
+omit [FiniteDimensional 𝕜 E] in
+theorem toModel_injective {s : ℕ} {x : M} :
+    Function.Injective (fun T : Tensor0SSpace s I x => toModel T) :=
+  (tensor0SSpace_continuousLinearEquiv s x).injective
+
+omit [FiniteDimensional 𝕜 E] in
+theorem toModel_surjective {s : ℕ} {x : M} :
+    Function.Surjective (fun T : Tensor0SSpace s I x => toModel T) :=
+  (tensor0SSpace_continuousLinearEquiv s x).surjective
+
+omit [FiniteDimensional 𝕜 E] in
+theorem toModel_bijective {s : ℕ} {x : M} :
+    Function.Bijective (fun T : Tensor0SSpace s I x => toModel T) :=
+  (tensor0SSpace_continuousLinearEquiv s x).bijective
+
+end Tensor0SSpace
 
 /-- The fiber `TensorRSSpace r s I x` is continuously linearly isomorphic to
 `TensorRSModel r s 𝕜 E`: this follows from `arrowCongr` applied to the
@@ -299,6 +332,7 @@ def tensorRSSpace_continuousLinearEquiv (r s : ℕ) (x : M) :
   (tensor0SSpace_continuousLinearEquiv (I := I) r x).arrowCongr
     (tensor0SSpace_continuousLinearEquiv (I := I) s x)
 
+omit [FiniteDimensional 𝕜 E] in
 /-- The `→L[𝕜]` between `Tensor0SSpace` fibers (with the bundle topology) is the
 same type as `→L[𝕜]` between `ContinuousMultilinearMap` fibers (with the norm topology),
 since the topologies agree by `tensor0SSpace_topology_eq`. -/
@@ -329,6 +363,93 @@ instance tensorRSSpace_normedSpace (r s : ℕ) (x : M) :
 instance tensorRSSpace_continuousSMul (r s : ℕ) (x : M) :
     ContinuousSMul 𝕜 (TensorRSSpace r s I x) :=
   inferInstanceAs (ContinuousSMul 𝕜 (TensorRSSpace r s I x))
+
+/-!
+## Coercion to Model Fiber
+
+The continuous linear equivalence `tensorRSSpace_continuousLinearEquiv` identifies each fiber
+`TensorRSSpace r s I x` with the model fiber `TensorRSModel r s 𝕜 E`. We package this as
+`TensorRSSpace.toModel` (forward direction) and `TensorRSSpace.ofModel` (its inverse),
+together with linearity, continuity, and invertibility lemmas.
+-/
+
+namespace TensorRSSpace
+
+/-- Coerce a `TensorRSSpace` fiber element to the model fiber `TensorRSModel r s 𝕜 E`.
+This is the forward direction of `tensorRSSpace_continuousLinearEquiv`. -/
+def toModel {r s : ℕ} {x : M} (T : TensorRSSpace r s I x) :
+    TensorRSModel r s 𝕜 E :=
+  tensorRSSpace_continuousLinearEquiv (I := I) r s x T
+
+/-- `TensorRSSpace.toModel` as a bundled `ContinuousLinearMap`. -/
+def toModelL (r s : ℕ) (x : M) :
+    TensorRSSpace r s I x →L[𝕜] TensorRSModel r s 𝕜 E :=
+  (tensorRSSpace_continuousLinearEquiv (I := I) r s x).toContinuousLinearMap
+
+/-- Construct a `TensorRSSpace` fiber element from a model fiber element.
+This is the inverse of `TensorRSSpace.toModel`. -/
+def ofModel {r s : ℕ} {x : M} (f : TensorRSModel r s 𝕜 E) :
+    TensorRSSpace r s I x :=
+  (tensorRSSpace_continuousLinearEquiv (I := I) r s x).symm f
+
+set_option linter.unusedSectionVars false in
+@[simp]
+theorem toModelL_apply {r s : ℕ} {x : M} (T : TensorRSSpace r s I x) :
+    (toModelL (I := I) r s x).toFun T = toModel T := rfl
+
+@[simp]
+theorem toModel_add {r s : ℕ} {x : M} (T₁ T₂ : TensorRSSpace r s I x) :
+    toModel (T₁ + T₂) = toModel T₁ + toModel T₂ :=
+  map_add (tensorRSSpace_continuousLinearEquiv (I := I) r s x) T₁ T₂
+
+@[simp]
+theorem toModel_smul {r s : ℕ} {x : M} (c : 𝕜) (T : TensorRSSpace r s I x) :
+    toModel (c • T) = c • toModel T :=
+  map_smul (tensorRSSpace_continuousLinearEquiv (I := I) r s x) c T
+
+@[simp]
+theorem toModel_zero {r s : ℕ} {x : M} :
+    toModel (0 : TensorRSSpace r s I x) = 0 :=
+  (tensorRSSpace_continuousLinearEquiv (I := I) r s x).toLinearEquiv.map_zero
+
+@[simp]
+theorem toModel_neg {r s : ℕ} {x : M} (T : TensorRSSpace r s I x) :
+    toModel (-T) = -toModel T :=
+  (tensorRSSpace_continuousLinearEquiv (I := I) r s x).toLinearEquiv.map_neg T
+
+@[simp]
+theorem toModel_sub {r s : ℕ} {x : M} (T₁ T₂ : TensorRSSpace r s I x) :
+    toModel (T₁ - T₂) = toModel T₁ - toModel T₂ :=
+  (tensorRSSpace_continuousLinearEquiv (I := I) r s x).toLinearEquiv.map_sub T₁ T₂
+
+@[simp]
+theorem ofModel_toModel {r s : ℕ} {x : M} (T : TensorRSSpace r s I x) :
+    ofModel (toModel T) = T :=
+  (tensorRSSpace_continuousLinearEquiv (I := I) r s x).symm_apply_apply T
+
+set_option linter.unusedSectionVars false in
+@[simp]
+theorem toModel_ofModel {r s : ℕ} {x : M} (f : TensorRSModel r s 𝕜 E) :
+    toModel (ofModel (I := I) (x := x) f) = f :=
+  (tensorRSSpace_continuousLinearEquiv (I := I) r s x).apply_symm_apply f
+
+theorem toModel_continuous {r s : ℕ} {x : M} :
+    Continuous (fun T : TensorRSSpace r s I x => toModel T) :=
+  (tensorRSSpace_continuousLinearEquiv (I := I) r s x).continuous_toFun
+
+theorem toModel_injective {r s : ℕ} {x : M} :
+    Function.Injective (fun T : TensorRSSpace r s I x => toModel T) :=
+  (tensorRSSpace_continuousLinearEquiv (I := I) r s x).injective
+
+theorem toModel_surjective {r s : ℕ} {x : M} :
+    Function.Surjective (fun T : TensorRSSpace r s I x => toModel T) :=
+  (tensorRSSpace_continuousLinearEquiv (I := I) r s x).surjective
+
+theorem toModel_bijective {r s : ℕ} {x : M} :
+    Function.Bijective (fun T : TensorRSSpace r s I x => toModel T) :=
+  (tensorRSSpace_continuousLinearEquiv (I := I) r s x).bijective
+
+end TensorRSSpace
 
 /-!
 ## Currying

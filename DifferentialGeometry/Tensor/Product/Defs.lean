@@ -123,6 +123,16 @@ noncomputable def TensorProduct.mapLBilinear :
     ContinuousLinearMap.mk outerLM h
   exact f
 
+/-- The bilinear map `(L₁, L₂) ↦ TensorProduct.mapL L₁ L₂` is `C^∞`.
+This follows from `mapLBilinear` being a continuous bilinear map between
+finite-dimensional normed spaces. -/
+theorem TensorProduct.mapLBilinear_contDiff :
+    ContDiff 𝕜 ⊤ (fun p : (F₁ →L[𝕜] G₁) × (F₂ →L[𝕜] G₂) =>
+      TensorProduct.mapLBilinear (𝕜 := 𝕜) p.1 p.2) :=
+  ((TensorProduct.mapLBilinear (𝕜 := 𝕜) (F₁ := F₁) (G₁ := G₁)
+    (F₂ := F₂) (G₂ := G₂)).contDiff.comp contDiff_fst).clm_apply
+    (contDiff_snd)
+
 end MapL
 
 /-! ## Tensor products of (r,s)-tensors -/
@@ -139,97 +149,46 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ω M]
 
-/-- The pointwise tensor product of a (0,s)-tensor `α` and a (0,q)-tensor `β`,
-yielding a (0,s+q)-tensor by concatenating their inputs. -/
-noncomputable def tensor0S_product_fun (s q : ℕ)
-    (x : M) (α : Tensor0SSpace s I x) (β : Tensor0SSpace q I x) :
-    Tensor0SSpace (s + q) I x :=
-  (tensor0SSpace_continuousLinearEquiv (s + q) x).symm
-    ((((tensor0SSpace_continuousLinearEquiv s x) α).smulRight
-      ((tensor0SSpace_continuousLinearEquiv q x) β)).uncurrySum.domDomCongr finSumFinEquiv)
-
-
-/-- The tensor product of (0,s)- and (0,q)-tensors is bilinear in both factors,
-giving a bilinear map `Tensor0SSpace s ⊗ Tensor0SSpace q →ₗ Tensor0SSpace (s+q)`.
-
-Equivalently, this is `(tensor0S_equiv s q x).symm ∘ₗ TensorProduct.mk 𝕜 _ _`: the
-abstract bilinear map from the universal property of tensor products, transported
-back to the concrete (0,s+q)-tensor space via `tensor0S_equiv`. -/
-noncomputable def tensor0S_product_bilinear (s q : ℕ) (x : M) :
-    Tensor0SSpace s I x →ₗ[𝕜] Tensor0SSpace q I x →ₗ[𝕜] Tensor0SSpace (s + q) I x :=
-  LinearMap.mk₂ 𝕜 (tensor0S_product_fun s q x)
-    (fun α₁ α₂ β => by unfold tensor0S_product_fun; ext m; simp [add_smul, map_add, ContinuousLinearEquiv.apply_symm_apply])
-    (fun c α β => by
-      unfold tensor0S_product_fun; ext m
-      simp only [ContinuousLinearEquiv.apply_symm_apply, map_smul,
-                 ContinuousMultilinearMap.domDomCongr_apply,
-                 ContinuousMultilinearMap.uncurrySum_apply,
-                 ContinuousMultilinearMap.smulRight_apply,
-                 ContinuousMultilinearMap.smul_apply, smul_eq_mul]
-      ring)
-    (fun α β₁ β₂ => by unfold tensor0S_product_fun; ext m; simp [smul_add, map_add, ContinuousLinearEquiv.apply_symm_apply])
-    (fun c α β => by
-      unfold tensor0S_product_fun; ext m
-      simp only [ContinuousLinearEquiv.apply_symm_apply, map_smul,
-                 ContinuousMultilinearMap.domDomCongr_apply,
-                 ContinuousMultilinearMap.uncurrySum_apply,
-                 ContinuousMultilinearMap.smulRight_apply,
-                 ContinuousMultilinearMap.smul_apply, smul_eq_mul]
-      ring)
-
-/-- The tensor product map lifted to the abstract tensor product via the universal property:
-`Tensor0SSpace s ⊗[𝕜] Tensor0SSpace q →ₗ Tensor0SSpace (s+q)`. -/
-noncomputable def tensor0S_fromTensor (s q : ℕ) (x : M) :
-    TensorProduct 𝕜 (Tensor0SSpace s I x) (Tensor0SSpace q I x) →ₗ[𝕜]
-    Tensor0SSpace (s + q) I x :=
-  TensorProduct.lift (tensor0S_product_bilinear s q x)
-
-/-- Linear equivalence `Tensor0SSpace (r+r') ≃ₗ[𝕜] Tensor0SSpace r ⊗[𝕜] Tensor0SSpace r'`
-at each point, obtained by dimension counting:
-both sides have dimension `(finrank 𝕜 E)^r · (finrank 𝕜 E)^r'`. -/
-noncomputable def tensor0S_equiv (r r' : ℕ) (x : M) :
-    Tensor0SSpace (r + r') I x ≃ₗ[𝕜]
-      TensorProduct 𝕜 (Tensor0SSpace r I x) (Tensor0SSpace r' I x) := by
-  haveI : FiniteDimensional 𝕜 (Tensor0SSpace r I x) :=
-    tensor0SSpace_finiteDimensional (𝕜 := 𝕜) (E := E) (I := I) (M := M) r x
-  haveI : FiniteDimensional 𝕜 (Tensor0SSpace r' I x) :=
-    tensor0SSpace_finiteDimensional (𝕜 := 𝕜) (E := E) (I := I) (M := M) r' x
-  haveI : FiniteDimensional 𝕜 (Tensor0SSpace (r + r') I x) :=
-    tensor0SSpace_finiteDimensional (𝕜 := 𝕜) (E := E) (I := I) (M := M) (r + r') x
-  haveI : Module.Free 𝕜 (Tensor0SSpace r I x) := inferInstance
-  haveI : Module.Free 𝕜 (Tensor0SSpace r' I x) := inferInstance
-  haveI : FiniteDimensional 𝕜 (TensorProduct 𝕜 (Tensor0SSpace r I x) (Tensor0SSpace r' I x)) :=
-    Module.Finite.tensorProduct 𝕜 _ _
-  exact LinearEquiv.ofFinrankEq _ _ (by
-    rw [Module.finrank_tensorProduct,
-        finrank_tensor0SSpace (𝕜 := 𝕜) (E := E) (I := I) (M := M) r x,
-        finrank_tensor0SSpace (𝕜 := 𝕜) (E := E) (I := I) (M := M) r' x,
-        finrank_tensor0SSpace (𝕜 := 𝕜) (E := E) (I := I) (M := M) (r + r') x,
-        pow_add])
-
 /-- Given T : (r,s) and T' : (r',s'), we define T ⊗ T' : (r+r',s+s').
 
-Concretely, via `tensor0S_equiv`, the (0,r+r')-tensor space is identified with
-`(0,r) ⊗[𝕜] (0,r')`, and we transport `TensorProduct.mapL T T'` (from
-`DifferentialGeometry.Tensor.Product`) along these isomorphisms:
-
-  `tensorRS_product T T' =
-    (tensor0S_equiv s s').symm ∘ₗ TensorProduct.map T T' ∘ₗ tensor0S_equiv r r'`
-
-We use the algebraic `TensorProduct.map` with a single outer `LinearMap.toContinuousLinearMap`,
-since composing algebraic linear maps avoids synthesizing `TopologicalSpace` instances on the
-intermediate tensor products `(0,r) ⊗[𝕜] (0,r')` and `(0,s) ⊗[𝕜] (0,s')`.
--/
+Concretely, via `Bundle.continuousMultilinearMap.equiv`, the (0,r+r')-tensor space is
+identified with `(0,r) ⊗[𝕜] (0,r')`, and we transport `TensorProduct.map T T'` along
+these isomorphisms. We use the algebraic `TensorProduct.map` with a single outer
+`LinearMap.toContinuousLinearMap`, since composing algebraic linear maps avoids
+synthesizing `TopologicalSpace` instances on the intermediate tensor products. -/
 -- TODO: Add notation for tensor product of tensors using ⊗ symbol
 -- TODO: Define tensor product on sections/bundles, not just pointwise
 -- TODO: Show that the product of smooth tensor fields is again smooth
 noncomputable def tensorRS_product (r s r' s' : ℕ) (x : M)
     (T : TensorRSSpace r s I x) (T' : TensorRSSpace r' s' I x) :
     TensorRSSpace (r + r') (s + s') I x :=
+  let eq := Bundle.continuousMultilinearMap.equiv (𝕜 := 𝕜) (F := E) (E := TangentSpace I)
   LinearMap.toContinuousLinearMap
-    ((tensor0S_equiv (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s s' x).symm.toLinearMap ∘ₗ
+    ((eq s s' x).symm.toLinearMap ∘ₗ
      TensorProduct.map T.toLinearMap T'.toLinearMap ∘ₗ
-     (tensor0S_equiv (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r r' x).toLinearMap)
+     (eq r r' x).toLinearMap)
+
+/-- The trivialized basis coordinate of a pointwise tensor product of multilinear bundle
+fiber elements decomposes as a product of the trivialized basis coordinates of the factors.
+
+Specifically, the `σ`-coordinate of `product_fun α β` (trivialized at `x₀`)
+equals the `(σ ∘ Fin.castAdd q)`-coordinate of `α` times the `(σ ∘ Fin.natAdd s)`-coordinate
+of `β`. -/
+theorem triv_coord_tensor0S_product {s q d : ℕ}
+    (b : Module.Basis (Fin d) 𝕜 E)
+    (σ : Fin (s + q) → Fin d) (x₀ x : M)
+    (α : Tensor0SSpace s I x) (β : Tensor0SSpace q I x) :
+    (continuousMultilinearMap_basis b (s + q)).repr
+      (trivializationAt (Tensor0SModel (s + q) 𝕜 E)
+        (fun x => Tensor0SSpace (s + q) I x) x₀
+        ⟨x, Bundle.continuousMultilinearMap.product_fun α β⟩).2 σ =
+    (continuousMultilinearMap_basis b s).repr
+      (trivializationAt (Tensor0SModel s 𝕜 E)
+        (fun x => Tensor0SSpace s I x) x₀ ⟨x, α⟩).2 (σ ∘ Fin.castAdd q) *
+    (continuousMultilinearMap_basis b q).repr
+      (trivializationAt (Tensor0SModel q 𝕜 E)
+        (fun x => Tensor0SSpace q I x) x₀ ⟨x, β⟩).2 (σ ∘ Fin.natAdd s) := by
+  sorry
 
 end Tensor0SBundle
 
