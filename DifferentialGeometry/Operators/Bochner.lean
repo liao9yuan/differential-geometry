@@ -96,8 +96,8 @@ lemma eval02_hessianForm
   (conn : AbstractAffineConnection R V) [MetricCompatible conn metric.toNonDegenerateMetric.toAbstractMetricTensor]
   (f : R) (X Y : V) :
   eval02 (hessianForm metric conn f) X Y = Hess conn f X Y := by
-  dsimp [hessianForm, eval02]
-  rw [TensorAlgebra.contract_fromBilinear]
+  dsimp [hessianForm]
+  rw [eval02_fromBilinear]
   dsimp
   exact (hessian_eq_g_nabla_grad metric conn f X Y).symm
 

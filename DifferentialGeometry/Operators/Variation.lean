@@ -90,8 +90,8 @@ def metric_var_form {Time R V : Type} [CommRing R] [AddCommGroup V] [Module R V]
 lemma metric_var_form_eval {Time R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
   [TimeDerivative Time R] [TimeDerivativeRules Time R V] (g_fam : Time → AbstractMetricTensor R V) (t : Time) (X Y : V) :
   eval02 (metric_var_form g_fam t) X Y = TimeDerivative.partial_t (fun s => (g_fam s).g X Y) t := by
-  dsimp [metric_var_form, eval02]
-  rw [TensorAlgebra.contract_fromBilinear]
+  dsimp [metric_var_form]
+  rw [eval02_fromBilinear]
   rfl
 
 -- 4. Metric Time Derivative Calculus Axioms

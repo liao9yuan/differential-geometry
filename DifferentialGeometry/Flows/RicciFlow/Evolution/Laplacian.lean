@@ -78,7 +78,8 @@ lemma partial_conn_form_eval {Time R V : Type}
   (u : R) (X Y : V) (t : Time) :
   eval02 (partial_conn_form g_fam conn_fam u t) X Y = TimeDerivative.partial_t (fun s => action ((conn_fam s).nabla X Y) u) t := by
   dsimp [partial_conn_form]
-  exact TensorAlgebra.contract_fromBilinear _ X Y
+  rw [eval02_fromBilinear]
+  rfl
 
 lemma hessian_raise_variation {Time : Type}
   [TimeDerivative Time R] [TimeDerivative Time V]

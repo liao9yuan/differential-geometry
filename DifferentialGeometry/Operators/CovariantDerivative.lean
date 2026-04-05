@@ -122,8 +122,80 @@ def covDerivOp (X : V) (T : AbstractBilinearForm R V) : AbstractBilinearForm R V
 
 lemma covDeriv_eval (X : V) (T : AbstractBilinearForm R V) (Y Z : V) :
   eval02 (covDerivOp conn X T) Y Z = rawCovDeriv conn X T Y Z := by
-  dsimp [covDerivOp, rawCovDeriv, eval02]
-  exact AffineTensorCalculus.nabla_eval02 X Y Z T
+  dsimp [covDerivOp, rawCovDeriv]
+  have h_scalar : ∀ (A : AbstractTensor R V 2 2),
+    ((TensorAlgebra.toData (AffineTensorCalculus.nabla_tensor conn X (contract (r:=0) (s:=0) (contract (r:=1) (s:=1) A)))) ![]) ![] =
+    action X (((TensorAlgebra.toData (contract (r:=0) (s:=0) (contract (r:=1) (s:=1) A))) ![]) ![]) := by
+    intro A
+    have h_S : contract (r:=0) (s:=0) (contract (r:=1) (s:=1) A) = TensorAlgebra.fromData (scalarToData (((TensorAlgebra.toData (contract (r:=0) (s:=0) (contract (r:=1) (s:=1) A))) ![]) ![])) := by
+      have h1 : TensorAlgebra.toData (contract (r:=0) (s:=0) (contract (r:=1) (s:=1) A)) = scalarToData (((TensorAlgebra.toData (contract (r:=0) (s:=0) (contract (r:=1) (s:=1) A))) ![]) ![]) := by
+        ext m n
+        dsimp [scalarToData, MultilinearMap.constOfIsEmpty]
+        have hm : m = ![] := Subsingleton.elim _ _
+        have hn : n = ![] := Subsingleton.elim _ _
+        rw [hm, hn]
+      rw [← h1]
+      exact (TensorAlgebra.fromData_toData _).symm
+    have h_rw : AffineTensorCalculus.nabla_tensor conn X (contract (r:=0) (s:=0) (contract (r:=1) (s:=1) A)) = AffineTensorCalculus.nabla_tensor conn X (TensorAlgebra.fromData (scalarToData (((TensorAlgebra.toData (contract (r:=0) (s:=0) (contract (r:=1) (s:=1) A))) ![]) ![]))) := congr_arg (AffineTensorCalculus.nabla_tensor conn X) h_S
+    rw [h_rw]
+    rw [AffineTensorCalculus.nabla_scalar X]
+    rw [TensorAlgebra.toData_fromData]
+    rfl
+  let P_YZ := TensorAlgebra.tensor_prod (R:=R) (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector (R:=R) Y) (fromVector (R:=R) Z)
+  let P_nYZ := TensorAlgebra.tensor_prod (R:=R) (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector (R:=R) (conn.nabla X Y)) (fromVector (R:=R) Z)
+  let P_YnZ := TensorAlgebra.tensor_prod (R:=R) (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector (R:=R) Y) (fromVector (R:=R) (conn.nabla X Z))
+  let TYZ := TensorAlgebra.tensor_prod (R:=R) (r1:=0) (s1:=2) (r2:=2) (s2:=0) T P_YZ
+  let nTYZ := TensorAlgebra.tensor_prod (R:=R) (r1:=0) (s1:=2) (r2:=2) (s2:=0) (AffineTensorCalculus.nabla_tensor conn X T) P_YZ
+  let TnYZ := TensorAlgebra.tensor_prod (R:=R) (r1:=0) (s1:=2) (r2:=2) (s2:=0) T P_nYZ
+  let TYnZ := TensorAlgebra.tensor_prod (R:=R) (r1:=0) (s1:=2) (r2:=2) (s2:=0) T P_YnZ
+  let CTYZ := contract (R:=R) (r:=0) (s:=0) (contract (R:=R) (r:=1) (s:=1) TYZ)
+  let CnTYZ := contract (R:=R) (r:=0) (s:=0) (contract (R:=R) (r:=1) (s:=1) nTYZ)
+  let CTnYZ := contract (R:=R) (r:=0) (s:=0) (contract (R:=R) (r:=1) (s:=1) TnYZ)
+  let CTYnZ := contract (R:=R) (r:=0) (s:=0) (contract (R:=R) (r:=1) (s:=1) TYnZ)
+  
+  have h1 : action X (((TensorAlgebra.toData CTYZ) ![]) ![]) = ((TensorAlgebra.toData (AffineTensorCalculus.nabla_tensor conn X CTYZ)) ![]) ![] :=
+    (h_scalar _).symm
+  have h2 : AffineTensorCalculus.nabla_tensor conn X CTYZ = contract (R:=R) (r:=0) (s:=0) (contract (R:=R) (r:=1) (s:=1) (AffineTensorCalculus.nabla_tensor conn X TYZ)) := by
+    dsimp [CTYZ]
+    rw [AffineTensorCalculus.nabla_contract X, AffineTensorCalculus.nabla_contract X]
+  have h3 : AffineTensorCalculus.nabla_tensor conn X TYZ = TensorAlgebra.add (R:=R) nTYZ (TensorAlgebra.tensor_prod (R:=R) (r1:=0) (s1:=2) (r2:=2) (s2:=0) T (AffineTensorCalculus.nabla_tensor conn X P_YZ)) := by
+    dsimp [TYZ, nTYZ]
+    rw [AffineTensorCalculus.nabla_tensor_prod (R:=R) X]
+  have h4 : AffineTensorCalculus.nabla_tensor conn X P_YZ = TensorAlgebra.add (R:=R) P_nYZ P_YnZ := by
+    dsimp [P_YZ, P_nYZ, P_YnZ]
+    rw [AffineTensorCalculus.nabla_tensor_prod (R:=R) X]
+    have h5 : AffineTensorCalculus.nabla_tensor conn X (fromVector (R:=R) Y) = fromVector (R:=R) (conn.nabla X Y) := by
+      have hy : fromVector (R:=R) Y = TensorAlgebra.fromData (vectorToData Y) := rfl
+      rw [hy, AffineTensorCalculus.nabla_vector (R:=R) X Y]; rfl
+    have h6 : AffineTensorCalculus.nabla_tensor conn X (fromVector (R:=R) Z) = fromVector (R:=R) (conn.nabla X Z) := by
+      have hz : fromVector (R:=R) Z = TensorAlgebra.fromData (vectorToData Z) := rfl
+      rw [hz, AffineTensorCalculus.nabla_vector (R:=R) X Z]; rfl
+    rw [h5, h6]
+  have h7 : TensorAlgebra.tensor_prod (R:=R) (r1:=0) (s1:=2) (r2:=2) (s2:=0) T (AffineTensorCalculus.nabla_tensor conn X P_YZ) = TensorAlgebra.add (R:=R) TnYZ TYnZ := by
+    rw [h4]
+    dsimp [TnYZ, TYnZ]
+    rw [TensorAlgebra.tensor_prod_add_right (R:=R)]
+  rw [h7] at h3
+  have h8 : AffineTensorCalculus.nabla_tensor conn X CTYZ = TensorAlgebra.add (R:=R) CnTYZ (TensorAlgebra.add (R:=R) CTnYZ CTYnZ) := by
+    rw [h2, h3]
+    dsimp [CnTYZ, CTnYZ, CTYnZ]
+    rw [TensorAlgebra.contract_add (R:=R), TensorAlgebra.contract_add (R:=R)]
+    rw [TensorAlgebra.contract_add (R:=R), TensorAlgebra.contract_add (R:=R)]
+
+  have he1 : ((TensorAlgebra.toData CTYZ) ![]) ![] = eval02 T Y Z := rfl
+  have he2 : ((TensorAlgebra.toData CnTYZ) ![]) ![] = eval02 (AffineTensorCalculus.nabla_tensor conn X T) Y Z := rfl
+  have he3 : ((TensorAlgebra.toData CTnYZ) ![]) ![] = eval02 T (conn.nabla X Y) Z := rfl
+  have he4 : ((TensorAlgebra.toData CTYnZ) ![]) ![] = eval02 T Y (conn.nabla X Z) := rfl
+
+  have h_final : action X (eval02 T Y Z) = eval02 (AffineTensorCalculus.nabla_tensor conn X T) Y Z + eval02 T (conn.nabla X Y) Z + eval02 T Y (conn.nabla X Z) := by
+    rw [← he1, ← he2, ← he3, ← he4]
+    rw [h1]
+    rw [h8]
+    erw [TensorAlgebra.toData_add, TensorAlgebra.toData_add]
+    simp only [MultilinearMap.add_apply]
+    ring
+  rw [h_final]
+  ring
 
 /-- Conversion from AbstractMetricTensor to AbstractBilinearForm.
 Input: (AbstractMetricTensor R V)

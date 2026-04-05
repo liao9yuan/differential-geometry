@@ -62,7 +62,8 @@ lemma partial_ricci_form_eval {Time : Type} [TimeDerivative Time R] [TimeDerivat
   (conn_fam : Time → AbstractAffineConnection R V) (t : Time) (X Y : V) :
   eval02 (partial_ricci_form conn_fam t) X Y = TimeDerivative.partial_t (fun s => eval02 (ricciForm (conn_fam s)) X Y) t := by
   dsimp [partial_ricci_form]
-  exact TensorAlgebra.contract_fromBilinear _ X Y
+  rw [eval02_fromBilinear]
+  rfl
 
 lemma ricci_raise_variation {Time : Type}
   [TimeDerivative Time R] [TimeDerivative Time V]

@@ -2,7 +2,6 @@ import DifferentialGeometry.Bridge.Defs
 import DifferentialGeometry.Algebra.VectorField
 import DifferentialGeometry.Algebra.BilinearForm
 import Mathlib.Tactic.Ring
-import Mathlib.Tactic.FinCases
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -21,70 +20,90 @@ variable {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra
 
 /-- Evaluate a 0-2 tensor on two vector fields. -/
 def eval02 (T : AbstractTensor R V 0 2) (X Y : V) : R :=
-  (toData T) ![X, Y] ![]
+  (toData (contract (r:=0) (s:=0) (contract (r:=1) (s:=1) (tensor_prod (r1:=0) (s1:=2) (r2:=2) (s2:=0) T (tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector X) (fromVector Y)))))) ![] ![]
 
-lemma eval02_zero (X Y : V) : eval02 (0 : AbstractBilinearForm R V) X Y = 0 := by
-  have hz : (0 : AbstractBilinearForm R V) = fromData (0 : TensorData R V 0 2) := rfl
-  rw [hz]
+lemma eval02_fromBilinear
+    (B : V →ₗ[R] V →ₗ[R] R) (X Y : V) :
+    eval02 (TensorAlgebra.fromBilinear (R:=R) (V:=V) B) X Y = B X Y := by
   dsimp [eval02]
-  rw [TensorAlgebra.toData_fromData]
-  rfl
+  have h_fromX : fromVector (R:=R) X = TensorAlgebra.fromData (vectorToData X) := rfl
+  have h_fromY : fromVector (R:=R) Y = TensorAlgebra.fromData (vectorToData Y) := rfl
+  rw [h_fromX, h_fromY]
+  rw [TensorAlgebra.eval02_axiom]
+  rw [TensorAlgebra.contract_fromBilinear]
+
 
 lemma eval02_add_left (T : AbstractTensor R V 0 2) (X Y Z : V) :
   eval02 T (X + Y) Z = eval02 T X Z + eval02 T Y Z := by
   dsimp [eval02]
-  have h := MultilinearMap.map_update_add (toData T) ![X, Z] 0 X Y
-  have eq1 : Function.update ![X, Z] 0 (X + Y) = ![X + Y, Z] := by ext i; fin_cases i <;> rfl
-  have eq2 : Function.update ![X, Z] 0 X = ![X, Z] := by ext i; fin_cases i <;> rfl
-  have eq3 : Function.update ![X, Z] 0 Y = ![Y, Z] := by ext i; fin_cases i <;> rfl
-  rw [eq1, eq2, eq3] at h
-  rw [h]
+  rw [fromVector_add]
+  rw [tensor_prod_add_left]
+  rw [tensor_prod_add_right]
+  rw [contract_add]
+  rw [contract_add]
+  rw [toData_add]
   rfl
 
 lemma eval02_smul_left (T : AbstractTensor R V 0 2) (f : R) (X Y : V) :
   eval02 T (f • X) Y = f * eval02 T X Y := by
   dsimp [eval02]
-  have h := MultilinearMap.map_update_smul (toData T) ![X, Y] 0 f X
-  have eq1 : Function.update ![X, Y] 0 (f • X) = ![f • X, Y] := by ext i; fin_cases i <;> rfl
-  have eq2 : Function.update ![X, Y] 0 X = ![X, Y] := by ext i; fin_cases i <;> rfl
-  rw [eq1, eq2] at h
-  rw [h]
-  rfl
-
-lemma eval02_add_right (T : AbstractTensor R V 0 2) (X Y Z : V) :
-  eval02 T X (Y + Z) = eval02 T X Y + eval02 T X Z := by
-  dsimp [eval02]
-  have h := MultilinearMap.map_update_add (toData T) ![X, Y] 1 Y Z
-  have eq1 : Function.update ![X, Y] 1 (Y + Z) = ![X, Y + Z] := by ext i; fin_cases i <;> rfl
-  have eq2 : Function.update ![X, Y] 1 Y = ![X, Y] := by ext i; fin_cases i <;> rfl
-  have eq3 : Function.update ![X, Y] 1 Z = ![X, Z] := by ext i; fin_cases i <;> rfl
-  rw [eq1, eq2, eq3] at h
-  rw [h]
-  rfl
-
-lemma eval02_smul_right (T : AbstractTensor R V 0 2) (f : R) (X Y : V) :
-  eval02 T X (f • Y) = f * eval02 T X Y := by
-  dsimp [eval02]
-  have h := MultilinearMap.map_update_smul (toData T) ![X, Y] 1 f Y
-  have eq1 : Function.update ![X, Y] 1 (f • Y) = ![X, f • Y] := by ext i; fin_cases i <;> rfl
-  have eq2 : Function.update ![X, Y] 1 Y = ![X, Y] := by ext i; fin_cases i <;> rfl
-  rw [eq1, eq2] at h
-  rw [h]
-  rfl
-
-lemma eval02_add (T₁ T₂ : AbstractTensor R V 0 2) (X Y : V) :
-  eval02 (T₁ + T₂) X Y = eval02 T₁ X Y + eval02 T₂ X Y := by
-  dsimp [eval02]
-  have h_add : T₁ + T₂ = TensorAlgebra.add (r:=0) (s:=2) T₁ T₂ := rfl
-  rw [h_add, toData_add]
+  rw [fromVector_smul]
+  rw [tensor_prod_smul_left]
+  rw [tensor_prod_smul_right]
+  rw [contract_smul]
+  rw [contract_smul]
+  rw [toData_smul]
   rfl
 
 lemma eval02_smul (T : AbstractTensor R V 0 2) (c : R) (X Y : V) :
   eval02 (c • T) X Y = c * eval02 T X Y := by
   dsimp [eval02]
   have h_smul : c • T = TensorAlgebra.smul (r:=0) (s:=2) c T := rfl
-  rw [h_smul, toData_smul]
+  rw [h_smul]
+  rw [tensor_prod_smul_left]
+  rw [contract_smul]
+  rw [contract_smul]
+  rw [toData_smul]
   rfl
+
+lemma eval02_add_right (T : AbstractTensor R V 0 2) (X Y Z : V) :
+  eval02 T X (Y + Z) = eval02 T X Y + eval02 T X Z := by
+  dsimp [eval02]
+  rw [fromVector_add]
+  rw [tensor_prod_add_right]
+  rw [tensor_prod_add_right]
+  rw [contract_add]
+  rw [contract_add]
+  rw [toData_add]
+  rfl
+
+lemma eval02_smul_right (T : AbstractTensor R V 0 2) (f : R) (X Y : V) :
+  eval02 T X (f • Y) = f * eval02 T X Y := by
+  dsimp [eval02]
+  rw [fromVector_smul]
+  rw [tensor_prod_smul_right]
+  rw [tensor_prod_smul_right]
+  rw [contract_smul]
+  rw [contract_smul]
+  rw [toData_smul]
+  rfl
+
+lemma eval02_zero (X Y : V) : eval02 (0 : AbstractTensor R V 0 2) X Y = 0 := by
+  have h_zero : (0 : AbstractTensor R V 0 2) = (0:R) • (0 : AbstractTensor R V 0 2) := by
+    have h1 : TensorAlgebra.toData (TensorAlgebra.smul (0:R) (0 : AbstractTensor R V 0 2)) = (0:R) • TensorAlgebra.toData (0 : AbstractTensor R V 0 2) := TensorAlgebra.toData_smul 0 0
+    have h2 : (0:R) • TensorAlgebra.toData (0 : AbstractTensor R V 0 2) = 0 := zero_smul R _
+    rw [h2] at h1
+    have h3 : TensorAlgebra.toData (0 : AbstractTensor R V 0 2) = 0 := by
+      have hz : (0 : AbstractTensor R V 0 2) = TensorAlgebra.fromData (0 : TensorData R V 0 2) := rfl
+      rw [hz, TensorAlgebra.toData_fromData]
+    rw [← h3] at h1
+    have h4 : TensorAlgebra.fromData (TensorAlgebra.toData (TensorAlgebra.smul (0:R) (0 : AbstractTensor R V 0 2))) = TensorAlgebra.fromData (TensorAlgebra.toData (0 : AbstractTensor R V 0 2)) := by rw [h1]
+    rw [TensorAlgebra.fromData_toData, TensorAlgebra.fromData_toData] at h4
+    exact h4.symm
+  calc eval02 0 X Y
+    _ = eval02 ((0:R) • 0) X Y := by nth_rw 1 [h_zero]
+    _ = 0 * eval02 0 X Y := eval02_smul 0 0 X Y
+    _ = 0 := MulZeroClass.zero_mul _
 
 /-- Metric tensor
 Input: (V, V)
@@ -103,15 +122,11 @@ variable {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra
 def g (metric : AbstractMetricTensor R V) (X Y : V) : R :=
   eval02 metric.g_tensor X Y
 
-/-- The symmetry condition of the metric. -/
 lemma symm (metric : AbstractMetricTensor R V) (X Y : V) : metric.g X Y = metric.g Y X := by
-  dsimp [g]
-  have h_symm : eval02 metric.g_tensor X Y = eval02 (swap_covariant 0 1 metric.g_tensor) X Y := by rw [metric.symm_tensor]
-  rw [h_symm]
-  dsimp [eval02]
-  rw [TensorAlgebra.toData_swap_covariant]
-  have eq_swap : ![X, Y] ∘ Equiv.swap 0 1 = ![Y, X] := by ext i; fin_cases i <;> rfl
-  rw [eq_swap]
+  dsimp [g, eval02, fromVector]
+  have h := TensorAlgebra.contract_swap_covariant_eval X Y metric.g_tensor
+  rw [metric.symm_tensor] at h
+  rw [h]
 
 lemma bilinear_add_left (metric : AbstractMetricTensor R V) (X Y Z : V) :
   metric.g (X + Y) Z = metric.g X Z + metric.g Y Z := by
@@ -194,7 +209,11 @@ lemma raise_add (T₁ T₂ : AbstractBilinearForm R V) (X : V) :
   intro Z
   have h5 : AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (metric_duality.raise T₁ X + metric_duality.raise T₂ X) Z = AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (metric_duality.raise T₁ X) Z + AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (metric_duality.raise T₂ X) Z := metric_duality.toAbstractMetricTensor.bilinear_add_left _ _ _
   calc AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (metric_duality.raise (T₁ + T₂) X) Z = eval02 (T₁ + T₂) X Z := metric_duality.g_raise (T₁ + T₂) X Z
-    _ = eval02 T₁ X Z + eval02 T₂ X Z := eval02_add T₁ T₂ X Z
+    _ = eval02 T₁ X Z + eval02 T₂ X Z := by
+      dsimp [eval02]
+      have h_add : T₁ + T₂ = TensorAlgebra.add (r:=0) (s:=2) T₁ T₂ := rfl
+      simp only [h_add, tensor_prod_add_left, contract_add, toData_add]
+      rfl
     _ = AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (metric_duality.raise T₁ X) Z + AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (metric_duality.raise T₂ X) Z := by rw [metric_duality.g_raise T₁ X Z, metric_duality.g_raise T₂ X Z]
     _ = AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (metric_duality.raise T₁ X + metric_duality.raise T₂ X) Z := h5.symm
 
@@ -209,3 +228,4 @@ lemma raise_smul (T : AbstractBilinearForm R V) (c : R) (X : V) :
       exact eval02_smul T c X Z
     _ = c * AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (metric_duality.raise T X) Z := by rw [metric_duality.g_raise T X Z]
     _ = AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (c • metric_duality.raise T X) Z := h4.symm
+

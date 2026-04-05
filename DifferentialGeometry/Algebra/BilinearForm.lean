@@ -26,7 +26,7 @@ variable {R V}
 def zero_tensor {r s : ℕ} : TensorAlgebra.AbstractTensor R V r s := TensorAlgebra.fromData (0 : TensorData R V r s)
 
 /-- Create a bilinear form from a linear map over linear maps -/
-def TensorAlgebra.fromBilinear {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
+def TensorAlgebra.fromBilinear {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
   (B : V →ₗ[R] V →ₗ[R] R) : AbstractBilinearForm R V :=
   TensorAlgebra.fromData {
     toFun := fun X => MultilinearMap.constOfIsEmpty R _ (B (X 0) (X 1))
@@ -52,11 +52,12 @@ def TensorAlgebra.fromBilinear {R V : Type} [CommRing R] [AddCommGroup V] [Modul
         simp [hz]
   }
 
-lemma TensorAlgebra.contract_fromBilinear {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
+lemma TensorAlgebra.contract_fromBilinear {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
   (B : V →ₗ[R] V →ₗ[R] R) (X Y : V) :
   (TensorAlgebra.toData (TensorAlgebra.fromBilinear B)) ![X, Y] ![] = B X Y := by
   rw [TensorAlgebra.fromBilinear, TensorAlgebra.toData_fromData]
   rfl
+
 
 /-- Zero typeclass instance for generic tensors -/
 instance {r s : ℕ} : Zero (TensorAlgebra.AbstractTensor R V r s) where

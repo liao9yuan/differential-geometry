@@ -62,6 +62,6 @@ def ricciForm (conn : AbstractAffineConnection R V) [DerivationRules R V] [LieDe
 
 lemma eval02_ricciForm (conn : AbstractAffineConnection R V) [DerivationRules R V] [LieDerivationRules R V] [TraceOperator R V] [TraceLinearityRules R V] (X Y : V) :
   eval02 (ricciForm conn) X Y = Rc conn X Y := by
-  dsimp [ricciForm, eval02, Rc]
-  rw [TensorAlgebra.contract_fromBilinear]
+  dsimp [ricciForm, Rc]
+  rw [eval02_fromBilinear]
   rfl

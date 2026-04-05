@@ -14,18 +14,7 @@ open AbstractDerivationAction
 variable {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V]
 variable [TensorAlgebra R V] [AbstractDerivationAction R V]
 
-def scalarToData (f : R) : TensorData R V 0 0 :=
-  MultilinearMap.constOfIsEmpty R (fun _ : Fin 0 => V)
-    (MultilinearMap.constOfIsEmpty R (fun _ : Fin 0 => (V →ₗ[R] R)) f)
 
-def evalLinear (v : V) : (V →ₗ[R] R) →ₗ[R] R where
-  toFun w := w v
-  map_add' _ _ := rfl
-  map_smul' _ _ := rfl
-
-def vectorToData (v : V) : TensorData R V 1 0 :=
-  MultilinearMap.constOfIsEmpty R (fun _ : Fin 0 => V)
-    (MultilinearMap.ofSubsingleton R (V →ₗ[R] R) R (0 : Fin 1) (evalLinear v))
 
 /--
 Layer 2: Affine Tensor Calculus
@@ -60,10 +49,3 @@ class AffineTensorCalculus (conn : AbstractAffineConnection R V) where
   nabla_smul : ∀ (X : V) (c : R) {r s : ℕ} (T : AbstractTensor R V r s),
     nabla_tensor X (TensorAlgebra.smul c T) =
       TensorAlgebra.add (TensorAlgebra.smul (action X c) T) (TensorAlgebra.smul c (nabla_tensor X T))
-
-  /-- Axiom 7: Action on 0-2 tensors -/
-  nabla_eval02 : ∀ (X Y Z : V) (T : AbstractTensor R V 0 2),
-    (TensorAlgebra.toData (nabla_tensor X T)) ![Y, Z] ![] =
-      action X ((TensorAlgebra.toData T) ![Y, Z] ![])
-      - (TensorAlgebra.toData T) ![conn.nabla X Y, Z] ![]
-      - (TensorAlgebra.toData T) ![Y, conn.nabla X Z] ![]
