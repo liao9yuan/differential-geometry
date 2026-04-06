@@ -58,6 +58,10 @@ class TensorAlgebra (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] whe
   /-- General contraction between one contravariant and one covariant slot -/
   contract {r s : ℕ} : AbstractTensor (r + 1) (s + 1) → AbstractTensor r s
 
+  -- Multilinear Data Binding Ops
+  data_tensor_prod {r1 s1 r2 s2 : ℕ} : TensorData R V r1 s1 → TensorData R V r2 s2 → TensorData R V (r1 + r2) (s1 + s2)
+  data_contract {r s : ℕ} : TensorData R V (r + 1) (s + 1) → TensorData R V r s
+
   --  Axioms:
   -- 1. Linearity of Contraction:
   contract_add {r s : ℕ} : ∀ T1 T2 : AbstractTensor (r + 1) (s + 1), contract (add T1 T2) = add (contract T1) (contract T2)
@@ -70,17 +74,22 @@ class TensorAlgebra (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] whe
   toData_smul {r s : ℕ} : ∀ (c : R) (T : AbstractTensor r s), toData (smul c T) = c • toData T
   toData_swap_covariant {r s : ℕ} : ∀ (i j : Fin s) (T : AbstractTensor r s) (m : Fin s → V) (n : Fin r → (V →ₗ[R] R)),
     toData (swap_covariant i j T) m n = toData T (m ∘ Equiv.swap i j) n
+  toData_tensor_prod {r1 s1 r2 s2 : ℕ} : ∀ T1 : AbstractTensor r1 s1, ∀ T2 : AbstractTensor r2 s2,
+    toData (tensor_prod T1 T2) = data_tensor_prod (toData T1) (toData T2)
+  toData_contract {r s : ℕ} : ∀ T : AbstractTensor (r + 1) (s + 1),
+    toData (contract T) = data_contract (toData T)
 
-  -- For any tensor T of rank (r, s+2), swapping it's first two covariant slots then contracting with X ⊗ Y
-  -- is equivalent to contracting the original tensor with Y ⊗ X.
-  contract_swap_covariant_eval : ∀ {r s : ℕ} (X Y : V) (T : AbstractTensor r (s + 2)),
-    contract (r:=r) (s:=s) (contract (r:=r+1) (s:=s+1) (tensor_prod (r1:=r) (s1:=s+2) (r2:=2) (s2:=0) (swap_covariant 0 1 T) (tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromData (vectorToData X)) (fromData (vectorToData Y))))) =
-    contract (r:=r) (s:=s) (contract (r:=r+1) (s:=s+1) (tensor_prod (r1:=r) (s1:=s+2) (r2:=2) (s2:=0) T (tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromData (vectorToData Y)) (fromData (vectorToData X)))))
+  -- Universal Data-Layer Axioms
+  
+  -- Evaluation of double contraction of any generic D ⊗ X ⊗ Y uniformly evaluates to prepending to parameter array
+  data_eval_contract_contract : ∀ {r s : ℕ} (D : TensorData R V r (s + 2)) (X Y : V) (m : Fin s → V) (n : Fin r → (V →ₗ[R] R)),
+    (data_contract (r:=r) (s:=s) (data_contract (r:=r+1) (s:=s+1) (data_tensor_prod (r1:=r) (s1:=s+2) (r2:=2) (s2:=0) D (data_tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (vectorToData X) (vectorToData Y))))) m n =
+    D (Fin.cons X (Fin.cons Y m)) n
 
-  -- Evaluation of double contraction of T ⊗ X ⊗ Y matches data evaluation
-  eval02_axiom : ∀ (T : AbstractTensor 0 2) (X Y : V),
-    (toData (contract (r:=0) (s:=0) (contract (r:=1) (s:=1) (tensor_prod (r1:=0) (s1:=2) (r2:=2) (s2:=0) T (tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromData (vectorToData X)) (fromData (vectorToData Y))))))) ![] ![] =
-    (toData T) ![X, Y] ![]
+  -- Data-bound swap axiom parametrized generically across ∀ {r s : ℕ}
+  data_contract_swap_covariant_eval : ∀ {r s : ℕ} (X Y : V) (D : TensorData R V r (s + 2)),
+    data_contract (r:=r) (s:=s) (data_contract (r:=r+1) (s:=s+1) (data_tensor_prod (r1:=r) (s1:=s+2) (r2:=2) (s2:=0) (toData (swap_covariant 0 1 (fromData D))) (data_tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (vectorToData X) (vectorToData Y)))) =
+    data_contract (r:=r) (s:=s) (data_contract (r:=r+1) (s:=s+1) (data_tensor_prod (r1:=r) (s1:=s+2) (r2:=2) (s2:=0) D (data_tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (vectorToData Y) (vectorToData X))))
 
   -- 2. Scalar Definition:
   toScalar_add : ∀ T1 T2 : AbstractTensor 0 0, toScalar (add T1 T2) = toScalar T1 + toScalar T2
@@ -141,5 +150,37 @@ lemma fromVector_smul (c : R) (X : V) : fromVector (R:=R) (c • X) = TensorAlge
   have h_smul : TensorAlgebra.toData (TensorAlgebra.smul c (TensorAlgebra.fromData (vectorToData (R:=R) X))) = c • vectorToData (R:=R) X := by
     rw [TensorAlgebra.toData_smul, TensorAlgebra.toData_fromData]
   rw [← h_smul, TensorAlgebra.fromData_toData]
+
+lemma contract_swap_covariant_eval {r s : ℕ} (X Y : V) (T : TensorAlgebra.AbstractTensor R V r (s + 2)) :
+    TensorAlgebra.contract (r:=r) (s:=s) (TensorAlgebra.contract (r:=r+1) (s:=s+1) (TensorAlgebra.tensor_prod (r1:=r) (s1:=s+2) (r2:=2) (s2:=0) (TensorAlgebra.swap_covariant 0 1 T) (TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector X) (fromVector Y)))) =
+    TensorAlgebra.contract (r:=r) (s:=s) (TensorAlgebra.contract (r:=r+1) (s:=s+1) (TensorAlgebra.tensor_prod (r1:=r) (s1:=s+2) (r2:=2) (s2:=0) T (TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector Y) (fromVector X)))) := by
+  have hz : TensorAlgebra.toData (TensorAlgebra.contract (r:=r) (s:=s) (TensorAlgebra.contract (r:=r+1) (s:=s+1) (TensorAlgebra.tensor_prod (r1:=r) (s1:=s+2) (r2:=2) (s2:=0) (TensorAlgebra.swap_covariant 0 1 T) (TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector X) (fromVector Y))))) =
+            TensorAlgebra.toData (TensorAlgebra.contract (r:=r) (s:=s) (TensorAlgebra.contract (r:=r+1) (s:=s+1) (TensorAlgebra.tensor_prod (r1:=r) (s1:=s+2) (r2:=2) (s2:=0) T (TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector Y) (fromVector X))))) := by
+    rw [TensorAlgebra.toData_contract, TensorAlgebra.toData_contract, TensorAlgebra.toData_tensor_prod, TensorAlgebra.toData_contract, TensorAlgebra.toData_contract, TensorAlgebra.toData_tensor_prod]
+    rw [TensorAlgebra.toData_tensor_prod, TensorAlgebra.toData_tensor_prod]
+    have hx : TensorAlgebra.toData (fromVector (R:=R) X) = vectorToData X := TensorAlgebra.toData_fromData _
+    have hy : TensorAlgebra.toData (fromVector (R:=R) Y) = vectorToData Y := TensorAlgebra.toData_fromData _
+    rw [hx, hy]
+    have h_swap := TensorAlgebra.data_contract_swap_covariant_eval X Y (TensorAlgebra.toData T)
+    rw [TensorAlgebra.fromData_toData] at h_swap
+    exact h_swap
+  have h1 : TensorAlgebra.fromData (TensorAlgebra.toData (TensorAlgebra.contract (r:=r) (s:=s) (TensorAlgebra.contract (r:=r+1) (s:=s+1) (TensorAlgebra.tensor_prod (r1:=r) (s1:=s+2) (r2:=2) (s2:=0) (TensorAlgebra.swap_covariant 0 1 T) (TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector X) (fromVector Y)))))) =
+            TensorAlgebra.fromData (TensorAlgebra.toData (TensorAlgebra.contract (r:=r) (s:=s) (TensorAlgebra.contract (r:=r+1) (s:=s+1) (TensorAlgebra.tensor_prod (r1:=r) (s1:=s+2) (r2:=2) (s2:=0) T (TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector Y) (fromVector X)))))) := by
+    rw [hz]
+  rw [TensorAlgebra.fromData_toData, TensorAlgebra.fromData_toData] at h1
+  exact h1
+
+lemma eval02_isomorphism (T : TensorAlgebra.AbstractTensor R V 0 2) (X Y : V) :
+    (TensorAlgebra.toData (TensorAlgebra.contract (r:=0) (s:=0) (TensorAlgebra.contract (r:=1) (s:=1) (TensorAlgebra.tensor_prod (r1:=0) (s1:=2) (r2:=2) (s2:=0) T (TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector X) (fromVector Y)))))) ![] ![] =
+    (TensorAlgebra.toData T) ![X, Y] ![] := by
+  have hz : TensorAlgebra.toData (TensorAlgebra.contract (r:=0) (s:=0) (TensorAlgebra.contract (r:=1) (s:=1) (TensorAlgebra.tensor_prod (r1:=0) (s1:=2) (r2:=2) (s2:=0) T (TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector X) (fromVector Y))))) =
+            TensorAlgebra.data_contract (r:=0) (s:=0) (TensorAlgebra.data_contract (r:=1) (s:=1) (TensorAlgebra.data_tensor_prod (r1:=0) (s1:=2) (r2:=2) (s2:=0) (TensorAlgebra.toData T) (TensorAlgebra.data_tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (vectorToData X) (vectorToData Y)))) := by
+    rw [TensorAlgebra.toData_contract, TensorAlgebra.toData_contract, TensorAlgebra.toData_tensor_prod, TensorAlgebra.toData_tensor_prod]
+    have hx : TensorAlgebra.toData (fromVector (R:=R) X) = vectorToData X := TensorAlgebra.toData_fromData _
+    have hy : TensorAlgebra.toData (fromVector (R:=R) Y) = vectorToData Y := TensorAlgebra.toData_fromData _
+    rw [hx, hy]
+  rw [hz]
+  rw [TensorAlgebra.data_eval_contract_contract]
+  rfl
 
 end DifferentialGeometry

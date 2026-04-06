@@ -27,10 +27,7 @@ lemma eval02_fromBilinear
     (B : V →ₗ[R] V →ₗ[R] R) (X Y : V) :
     eval02 (TensorAlgebra.fromBilinear (R:=R) (V:=V) B) X Y = B X Y := by
   dsimp [eval02]
-  have h_fromX : fromVector (R:=R) X = TensorAlgebra.fromData (vectorToData X) := rfl
-  have h_fromY : fromVector (R:=R) Y = TensorAlgebra.fromData (vectorToData Y) := rfl
-  rw [h_fromX, h_fromY]
-  rw [TensorAlgebra.eval02_axiom]
+  rw [eval02_isomorphism]
   rw [TensorAlgebra.contract_fromBilinear]
 
 
@@ -124,8 +121,8 @@ def g (metric : AbstractMetricTensor R V) (X Y : V) : R :=
   eval02 metric.g_tensor X Y
 
 lemma symm (metric : AbstractMetricTensor R V) (X Y : V) : metric.g X Y = metric.g Y X := by
-  dsimp [g, eval02, fromVector]
-  have h := TensorAlgebra.contract_swap_covariant_eval X Y metric.g_tensor
+  dsimp [g, eval02]
+  have h := contract_swap_covariant_eval X Y metric.g_tensor
   rw [metric.symm_tensor] at h
   rw [h]
 
