@@ -166,3 +166,27 @@ lemma raise_smul (T : AbstractBilinearForm R V) (c : R) (X : V) :
       exact tensor_eval_smul c T ![X, Z] ![]
     _ = c * AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (metric_duality.raise T X) Z := by rw [metric_duality.g_raise T X Z]
     _ = AbstractMetricTensor.g metric_duality.toAbstractMetricTensor (c • metric_duality.raise T X) Z := h4.symm
+
+/--
+Lowers the specified contravariant index `idx` of an arbitrary rank tensor into a covariant index.
+Achieved algebraically by taking the tensor product with the metric and contracting.
+-/
+def lower_index {R V : Type*} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] (metric : AbstractMetricTensor R V) {r s : ℕ} (idx : Fin (r + 1)) (T : AbstractTensor R V (r + 1) s) : AbstractTensor R V r (s + 1) :=
+  -- contract the contravariant idx of T with the 2nd covariant slot of g_tensor
+  have h_eq : TensorAlgebra.AbstractTensor R V (0 + (r + 1)) (2 + s) = TensorAlgebra.AbstractTensor R V (r + 1) (s + 1 + 1) := by
+    congr 1
+    · omega
+    · omega
+  TensorAlgebra.contract_general (r:=r) (s:=s+1) idx (1 : Fin (s + 2)) (cast h_eq (TensorAlgebra.tensor_prod metric.g_tensor T))
+
+/--
+Raises the specified covariant index `idx` of an arbitrary rank tensor into a contravariant index.
+Achieved algebraically by taking the tensor product with the inverse metric and contracting.
+-/
+def raise_index {R V : Type*} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] (metric : MetricDuality R V) {r s : ℕ} (idx : Fin (s + 1)) (T : AbstractTensor R V r (s + 1)) : AbstractTensor R V (r + 1) s :=
+  -- contract the 2nd contravariant slot of g_inv with the covariant idx of T
+  have h_eq : TensorAlgebra.AbstractTensor R V (2 + r) (0 + (s + 1)) = TensorAlgebra.AbstractTensor R V (r + 1 + 1) (s + 1) := by
+    congr 1
+    · omega
+    · omega
+  TensorAlgebra.contract_general (r:=r+1) (s:=s) (1 : Fin (r + 2)) idx (cast h_eq (TensorAlgebra.tensor_prod metric.g_inv T))
