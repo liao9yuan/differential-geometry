@@ -13,11 +13,6 @@ import Mathlib.Tactic.Abel
 import Mathlib.Algebra.Module.Basic
 import Mathlib.Algebra.Ring.Basic
 
-set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.style.emptyLine false
-
 open AbstractDerivationAction DifferentialGeometry TensorAlgebra
 
 variable {Time R V : Type}
@@ -93,7 +88,7 @@ lemma contract_zero {r s : ℕ} : TensorAlgebra.contract (0 : AbstractTensor R V
 /-- Evaluate the generic abstract time derivative over scalar evaluation blocks using
     algebraic contractions and abstract derivation isomorphisms natively.
 -/
-lemma partial_t_eval02 (T : Time → AbstractTensor R V 0 2) (X Y : V) (t : Time)
+lemma tensor_eval_partial_t (T : Time → AbstractTensor R V 0 2) (X Y : V) (t : Time)
   (ht_X : TimeDerivative.partial_t (fun _ => X) t = 0)
   (ht_Y : TimeDerivative.partial_t (fun _ => Y) t = 0) :
   tensor_eval (TensorTimeCalculus.partial_t_tensor t T) ![X, Y] ![] =
@@ -149,7 +144,7 @@ theorem ricci_evolution_pointwise_extraction (conn_fam : Time → AbstractAffine
   (ht_Y : TimeDerivative.partial_t (fun _ => Y) t = 0) :
   tensor_eval (TensorTimeCalculus.partial_t_tensor t (fun s => ricciForm (conn_fam s))) ![X, Y] ![] =
   TimeDerivative.partial_t (fun s => TraceOperator.trace (fun Z => Rm (conn_fam s) Z X Y)) t := by
-  have pt_eval := partial_t_eval02 (fun s => ricciForm (conn_fam s)) X Y t ht_X ht_Y
+  have pt_eval := tensor_eval_partial_t (fun s => ricciForm (conn_fam s)) X Y t ht_X ht_Y
   rw [pt_eval]
   have heval : ∀ s, tensor_eval (ricciForm (conn_fam s)) ![X, Y] ![] = TraceOperator.trace (fun Z => Rm (conn_fam s) Z X Y) := by
     intro s
