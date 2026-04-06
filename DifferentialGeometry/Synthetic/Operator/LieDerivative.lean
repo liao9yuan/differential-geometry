@@ -17,7 +17,7 @@ Definition of the Lie derivative of a metric tensor.
 open AbstractDerivationAction AbstractLieBracket DifferentialGeometry TensorAlgebra
 
 variable {R V : Type}
-variable [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
+variable [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
 
 -- Extracts the negative sign from the left argument of the metric tensor.
 lemma metric_neg_left_local (metric : AbstractMetricTensor R V) (X Y : V) : metric.g (-X) Y = - metric.g X Y := by

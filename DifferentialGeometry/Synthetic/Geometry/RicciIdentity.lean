@@ -19,7 +19,7 @@ open AbstractDerivationAction
 open AbstractLieBracket
 
 variable {R V : Type}
-variable [CommRing R] [AddCommGroup V] [Module R V] [AbstractDerivationAction R V]
+variable [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [AbstractDerivationAction R V]
 
 /-- Distributes the covariant derivative over subtraction of vector fields in the first argument. -/
 lemma nabla_sub_left (conn : AbstractAffineConnection R V) (X Y Z : V) : conn.nabla (X - Y) Z = conn.nabla X Z - conn.nabla Y Z := by

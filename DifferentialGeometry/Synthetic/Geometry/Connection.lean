@@ -18,7 +18,7 @@ Definitions for affine connections, torsion, metric compatibility, and the Levi-
 -/
 
 variable (R V : Type*)
-variable [CommRing R] [AddCommGroup V] [Module R V]
+variable [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V]
 
 variable [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V]
 
@@ -50,7 +50,7 @@ structure LocalFrame (I R V : Type*) where
 
 section Symbols
 
-variable {R V} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] {I : Type*}
+variable {R V} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] {I : Type*}
 
 /-- Christoffel symbols characterizing the connection in a local frame.
 Input: (AbstractAffineConnection R V, LocalFrame I R V, I, I, I)
@@ -63,7 +63,7 @@ def christoffel_symbol [AbstractDerivationAction R V]
 end Symbols
 
 -- 3. Metric Compatibility & Torsion-Free Conditions
-variable {R V} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
+variable {R V} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
 variable [AbstractDerivationAction R V]
 
 /-- Metric compatibility condition: `X⟨Y, Z⟩ = ⟨∇_X Y, Z⟩ + ⟨Y, ∇_X Z⟩`.

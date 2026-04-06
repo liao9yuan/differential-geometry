@@ -17,7 +17,7 @@ Inner product of two (0,2)-tensors using the Trace of the composition of their m
 
 open DifferentialGeometry TensorAlgebra
 
-variable {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
+variable {R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
 variable (metric : MetricDuality R V)
 def contract4 (T : AbstractTensor R V 4 4) : AbstractTensor R V 0 0 :=
   contract (r:=0) (s:=0) (contract (r:=1) (s:=1) (contract (r:=2) (s:=2) (contract (r:=3) (s:=3) T)))
@@ -32,7 +32,7 @@ def tensorInnerProduct (T S : AbstractBilinearForm R V) : R :=
     )
   )
 
-class TensorInnerProductRules (R V : Type) [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] (metric : MetricDuality R V) where
+class TensorInnerProductRules (R V : Type) [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] (metric : MetricDuality R V) where
   inner_symm : ∀ (T S : AbstractBilinearForm R V), tensorInnerProduct metric T S = tensorInnerProduct metric S T
   inner_trace : ∀ (T S : AbstractBilinearForm R V) [TR_OP : TraceOperator R V],
     tensorInnerProduct metric T S = @TraceOperator.trace R V TR_OP (fun X => metric.raise T (metric.raise S X))

@@ -22,7 +22,7 @@ open AbstractLieBracket
 open DifferentialGeometry TensorAlgebra
 
 variable {R V : Type}
-variable [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
+variable [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
 variable [AbstractDerivationAction R V] [AbstractLieBracket V]
 
 /-- Constructs the Ricci curvature as a rigorously proven AbstractBilinearForm. -/

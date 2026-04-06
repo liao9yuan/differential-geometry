@@ -19,7 +19,7 @@ class TraceOperator (R V : Type) where
   trace : (V → V) → R
 
 /-- Trace linearity rules mapping the general trace operator's linearity properties. -/
-class TraceLinearityRules (R V : Type) [CommRing R] [AddCommGroup V] [Module R V] [TraceOperator R V] where
+class TraceLinearityRules (R V : Type) [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TraceOperator R V] where
   trace_add : ∀ {A B : V → V}, (TraceOperator.trace (A + B) : R) = TraceOperator.trace A + TraceOperator.trace B
   trace_smul : ∀ {c : R} {A : V → V}, (TraceOperator.trace (fun X => c • (A X)) : R) = c * TraceOperator.trace A
   trace_comm : ∀ {A B : V → V}, (TraceOperator.trace (A ∘ B) : R) = TraceOperator.trace (B ∘ A)
@@ -32,7 +32,7 @@ class Tensor14Trace (R V : Type) where
   trace_1_4 : (V → V → V → V → V) → (V → V → V → R)
 
 /-- Linearity of trace_1_4. -/
-class Tensor14TraceLinearity (R V : Type) [CommRing R] [AddCommGroup V] [Tensor14Trace R V] where
+class Tensor14TraceLinearity (R V : Type) [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Tensor14Trace R V] where
   tr_add : ∀ (T₁ T₂ : V → V → V → V → V), (Tensor14Trace.trace_1_4 (fun x y z w => T₁ x y z w + T₂ x y z w) : V → V → V → R) = fun y z w => Tensor14Trace.trace_1_4 T₁ y z w + Tensor14Trace.trace_1_4 T₂ y z w
   tr_zero : (Tensor14Trace.trace_1_4 (fun _ _ _ _ => (0 : V)) : V → V → V → R) = fun _ _ _ => (0 : R)
 
@@ -43,7 +43,7 @@ class BilinearTrace (R V : Type) where
   tr : (V → V → R) → R
 
 /-- Trace linearity rules mapping the general trace operator's linearity properties. -/
-class BilinearTraceLinearity (R V : Type) [CommRing R] [AddCommGroup V] [BilinearTrace R V] where
+class BilinearTraceLinearity (R V : Type) [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [BilinearTrace R V] where
   tr_add : ∀ (T₁ T₂ : V → V → R), (BilinearTrace.tr (fun Y Z => T₁ Y Z + T₂ Y Z) : R) = BilinearTrace.tr T₁ + BilinearTrace.tr T₂
   tr_sub : ∀ (T₁ T₂ : V → V → R), (BilinearTrace.tr (fun Y Z => T₁ Y Z - T₂ Y Z) : R) = BilinearTrace.tr T₁ - BilinearTrace.tr T₂
   tr_zero : (BilinearTrace.tr (fun (_ _ : V) => (0 : R)) : R) = (0 : R)
@@ -51,5 +51,5 @@ class BilinearTraceLinearity (R V : Type) [CommRing R] [AddCommGroup V] [Bilinea
 open DifferentialGeometry TensorAlgebra
 
 -- Axiomatic rules for the trace of rank-1 operators to support divergence product rule.
-class MetricTraceRankOneRules (R V : Type) [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] (metric : AbstractMetricTensor R V) [MetricTraceOperator R V metric] where
+class MetricTraceRankOneRules (R V : Type) [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] (metric : AbstractMetricTensor R V) [MetricTraceOperator R V metric] where
   trace_rank_one : ∀ U W : V, MetricTraceOperator.metric_trace metric (fun Y Z => metric.g U Y * metric.g W Z) = metric.g U W

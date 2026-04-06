@@ -12,7 +12,7 @@ open DifferentialGeometry
 open TensorAlgebra
 open AbstractDerivationAction
 
-variable {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V]
+variable {R V : Type*} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V]
 variable [TensorAlgebra R V] [AbstractDerivationAction R V]
 
 

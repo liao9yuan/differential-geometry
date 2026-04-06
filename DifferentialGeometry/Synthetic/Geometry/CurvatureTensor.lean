@@ -17,9 +17,9 @@ Proofs of the C-infinity linearity of the Riemann curvature tensor.
 open AbstractDerivationAction
 open AbstractLieBracket
 
-variable {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [AbstractDerivationAction R V] [AbstractLieBracket V]
+variable {R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [AbstractDerivationAction R V] [AbstractLieBracket V]
 
-variable {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [AbstractDerivationAction R V] [AbstractLieBracket V]
+variable {R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [AbstractDerivationAction R V] [AbstractLieBracket V]
 
 
 /-- Proves that the Riemann curvature tensor is C-infinity linear with respect to its third vector field argument. -/

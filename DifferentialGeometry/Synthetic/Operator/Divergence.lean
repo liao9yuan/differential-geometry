@@ -16,7 +16,7 @@ set_option linter.style.emptyLine false
 open DifferentialGeometry TensorAlgebra
 
 variable {R V : Type}
-variable [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
+variable [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
 variable [AbstractDerivationAction R V]
 
 open AbstractDerivationAction
@@ -65,7 +65,7 @@ Axiomatization of the global integral to establish integration by parts.
 -/
 
 /-- Abstract global integration operator. -/
-class IntegralOperator (R : Type) [CommRing R] where
+class IntegralOperator (R : Type) [Field R] [LinearOrder R] [IsStrictOrderedRing R] where
   integral : R → R
   integral_add : ∀ f g : R, integral (f + g) = integral f + integral g
   integral_smul : ∀ (c f : R), integral (c * f) = c * integral f

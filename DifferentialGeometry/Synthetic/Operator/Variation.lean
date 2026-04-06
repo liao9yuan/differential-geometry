@@ -21,7 +21,7 @@ Defines generic time derivatives and variation of metric.
 
 open AbstractDerivationAction AbstractLieBracket DifferentialGeometry TensorAlgebra
 
-variable {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
+variable {R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
 
 
 -- 1. Generic Time Derivative
@@ -37,7 +37,7 @@ class TimeDerivative (Time α : Type) where
 Axiomatizes the additivity and scalar multiplication linearity of the time derivative.
 Input: (Type, Type, Type)
 Output: Type -/
-class TimeDerivativeRules (Time R V : Type) [CommRing R] [AddCommGroup V] [Module R V] [TimeDerivative Time R] where
+class TimeDerivativeRules (Time R V : Type) [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TimeDerivative Time R] where
   t_add : ∀ (f₁ f₂ : Time → R) (t : Time),
     TimeDerivative.partial_t (fun s => f₁ s + f₂ s) t = TimeDerivative.partial_t f₁ t + TimeDerivative.partial_t f₂ t
   t_smul : ∀ (c : R) (f : Time → R) (t : Time),
@@ -47,7 +47,7 @@ class TimeDerivativeRules (Time R V : Type) [CommRing R] [AddCommGroup V] [Modul
 /-- Operator for metric variation.
 Constructed explicitly from bilinear function of metric derivative.
 -/
-def metric_var_form {Time R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
+def metric_var_form {Time R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
   [TimeDerivative Time R] [TimeDerivativeRules Time R V]
   (g_fam : Time → AbstractMetricTensor R V) (t : Time) : AbstractBilinearForm R V :=
   TensorAlgebra.fromBilinear {
@@ -98,7 +98,7 @@ def metric_var_form {Time R V : Type} [CommRing R] [AddCommGroup V] [Module R V]
       exact TimeDerivativeRules.t_smul V _ _ t
   }
 
-lemma metric_var_form_eval {Time R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
+lemma metric_var_form_eval {Time R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
   [TimeDerivative Time R] [TimeDerivativeRules Time R V] (g_fam : Time → AbstractMetricTensor R V) (t : Time) (X Y : V) :
   tensor_eval (metric_var_form g_fam t) ![X, Y] ![] = TimeDerivative.partial_t (fun s => (g_fam s).g X Y) t := by
   dsimp [metric_var_form]
@@ -107,7 +107,7 @@ lemma metric_var_form_eval {Time R V : Type} [CommRing R] [AddCommGroup V] [Modu
 
 -- 4. Metric Time Derivative Calculus Axioms
 /-- Product rule and constant rules for time derivatives involving the metric. -/
-class MetricTimeDerivativeRules (Time R V : Type) [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
+class MetricTimeDerivativeRules (Time R V : Type) [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
   [TimeDerivative Time R] [TimeDerivative Time V] [TR_OP : TraceOperator R V]
   [TimeDerivativeRules Time R V]
   (g_fam : Time → MetricDuality R V) where
@@ -122,7 +122,7 @@ class MetricTimeDerivativeRules (Time R V : Type) [CommRing R] [AddCommGroup V] 
     (g_fam t).g (TimeDerivative.partial_t X t) (Y t) +
     (g_fam t).g (X t) (TimeDerivative.partial_t Y t)
 
-lemma metric_zero_right {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] (metric : AbstractMetricTensor R V) (X : V) : metric.g X 0 = 0 := by
+lemma metric_zero_right {R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] (metric : AbstractMetricTensor R V) (X : V) : metric.g X 0 = 0 := by
   have h1 : metric.g X (0 + 0) = metric.g X 0 + metric.g X 0 := by
     have h1a : metric.g (0 + 0) X = metric.g 0 X + metric.g 0 X := metric.bilinear_add_left 0 0 X
     have h1b : metric.g X (0 + 0) = metric.g (0 + 0) X := metric.symm X (0 + 0)
@@ -133,14 +133,14 @@ lemma metric_zero_right {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] 
     _ = metric.g X 0 - metric.g X 0 := by rw [add_zero]
     _ = 0 := by abel
 
-lemma metric_zero_left {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] (metric : AbstractMetricTensor R V) (X : V) : metric.g 0 X = 0 := by
+lemma metric_zero_left {R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] (metric : AbstractMetricTensor R V) (X : V) : metric.g 0 X = 0 := by
   have h1 : metric.g 0 X = metric.g X 0 := metric.symm 0 X
   rw [h1]
   exact metric_zero_right metric X
 
 -- 5. Inverse Metric Variation
 /-- Variation of the raised index tensor (inverse metric). -/
-lemma raise_variation {Time R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
+lemma raise_variation {Time R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
   [TimeDerivative Time R] [TimeDerivative Time V] [TraceOperator R V] [TimeDerivativeRules Time R V]
   (g_fam : Time → MetricDuality R V) [MetricTimeDerivativeRules Time R V g_fam]
   (T : AbstractBilinearForm R V) (X Y : V) (t : Time) :
@@ -183,7 +183,7 @@ lemma raise_variation {Time R V : Type} [CommRing R] [AddCommGroup V] [Module R 
 
 -- 6. Metric Trace Variation
 /-- Time variation of the trace of a fixed metric. -/
-lemma tr_g_variation {Time R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
+lemma tr_g_variation {Time R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
   [TimeDerivative Time R] [TimeDerivative Time V] [TR_OP : TraceOperator R V] [TR : TraceLinearityRules R V]
   [TimeDerivativeRules Time R V]
   (g_fam : Time → MetricDuality R V) [MetricTimeDerivativeRules Time R V g_fam]
@@ -244,7 +244,7 @@ lemma tr_g_variation {Time R V : Type} [CommRing R] [AddCommGroup V] [Module R V
 -- 7. Variation of the Connection (Palatini Identity)
 
 /-- Axiom relating time derivatives to derivation action. -/
-class ActionTimeDerivativeRules (Time R V : Type) [CommRing R] [AddCommGroup V] [Module R V]
+class ActionTimeDerivativeRules (Time R V : Type) [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V]
   [TimeDerivative Time R] [AbstractDerivationAction R V] where
   t_action : ∀ (X : V) (f : Time → R) (t : Time),
     TimeDerivative.partial_t (fun s => action X (f s)) t = action X (TimeDerivative.partial_t f t)

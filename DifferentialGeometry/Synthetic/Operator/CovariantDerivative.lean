@@ -12,7 +12,7 @@ set_option linter.style.emptyLine false
 
 open AbstractDerivationAction DifferentialGeometry TensorAlgebra
 
-variable {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] [AbstractDerivationAction R V] [AbstractLieBracket V]
+variable {R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] [AbstractDerivationAction R V] [AbstractLieBracket V]
 
 /-!
 # Covariant Derivative of Tensors
@@ -109,7 +109,7 @@ lemma rawCovDeriv_smul_right (a : R) (Y Z : V) :
 
 end Linearity
 
-class BilinearFormExt (R V : Type) [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] where
+class BilinearFormExt (R V : Type) [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] where
   ext : ∀ (T₁ T₂ : AbstractBilinearForm R V), (∀ Y Z, tensor_eval T₁ ![Y, Z] ![] = tensor_eval T₂ ![Y, Z] ![]) → T₁ = T₂
 
 variable (conn : AbstractAffineConnection R V) [DerivationRules R V] [AffineTensorCalculus conn]
@@ -234,12 +234,12 @@ section GenericCovDeriv
 Universal covariant derivative of a tensor of rank (r, s),
 mapping a vector field X and a tensor T to a tensor of the same rank.
 -/
-def genericCovDeriv {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] [AbstractDerivationAction R V]
+def genericCovDeriv {R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] [AbstractDerivationAction R V]
   (conn : AbstractAffineConnection R V) [AffineTensorCalculus conn]
   (X : V) {r s : ℕ} (T : AbstractTensor R V r s) : AbstractTensor R V r s :=
   AffineTensorCalculus.nabla_tensor conn X T
 
-variable {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] [AbstractDerivationAction R V]
+variable {R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] [AbstractDerivationAction R V]
   {conn : AbstractAffineConnection R V} [AffineTensorCalculus conn]
 
 lemma genericCovDeriv_add (X : V) {r s : ℕ} (T1 T2 : AbstractTensor R V r s) :

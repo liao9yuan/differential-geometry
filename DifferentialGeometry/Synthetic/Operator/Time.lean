@@ -15,13 +15,13 @@ set_option linter.style.whitespace false
 /--
 This axiomatizes the existence of 1/t, its derivative rule ∂_t (1/t) = -1/t^2, and its positivity.
 -/
-class TimeWeight (R : Type) [CommRing R] [PartialOrder R] (Time : Type) [TimeDerivative Time R] where
+class TimeWeight (R : Type) [Field R] [LinearOrder R] [IsStrictOrderedRing R] [PartialOrder R] (Time : Type) [TimeDerivative Time R] where
   inv_t : Time → R
   dt_inv_t : ∀ t, TimeDerivative.partial_t inv_t t = - (inv_t t)^2
   inv_t_nonneg : ∀ t, (0:R) ≤ inv_t t
 
 /-- Single-variable calculus rules for scalar time derivatives. -/
-class ScalarTimeDerivativeRules (R : Type) [CommRing R] (Time : Type) [TimeDerivative Time R] where
+class ScalarTimeDerivativeRules (R : Type) [Field R] [LinearOrder R] [IsStrictOrderedRing R] (Time : Type) [TimeDerivative Time R] where
   /-- Product rule for addition: $\partial_t(f + g) = \partial_t f + \partial_t g$ -/
   dt_add : ∀ (f g : Time → R) t, TimeDerivative.partial_t (fun s => f s + g s) t = TimeDerivative.partial_t f t + TimeDerivative.partial_t g t
   /-- Product rule for subtraction: $\partial_t(f - g) = \partial_t f - \partial_t g$ -/
@@ -35,7 +35,7 @@ class ScalarTimeDerivativeRules (R : Type) [CommRing R] (Time : Type) [TimeDeriv
 open DifferentialGeometry TensorAlgebra
 
 variable {R V : Type}
-variable [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] [AbstractDerivationAction R V]
+variable [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] [AbstractDerivationAction R V]
 
 class StaticMetricTimeRules
   (Time : Type)
@@ -56,7 +56,7 @@ class StaticMetricTimeRules
 /--
 Generic time derivative operator acting directly on abstract tensors.
 -/
-class TensorTimeCalculus (Time R V : Type) [CommRing R] [AddCommGroup V] [Module R V]
+class TensorTimeCalculus (Time R V : Type) [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V]
     [TensorAlgebra R V] [TimeDerivative Time R] [TimeDerivative Time V] where
   partial_t_tensor (t : Time) {r s : ℕ} : (Time → AbstractTensor R V r s) → AbstractTensor R V r s
 

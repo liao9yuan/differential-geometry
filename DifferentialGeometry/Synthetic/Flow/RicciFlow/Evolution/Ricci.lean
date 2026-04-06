@@ -16,7 +16,7 @@ import Mathlib.Algebra.Ring.Basic
 open AbstractDerivationAction DifferentialGeometry TensorAlgebra
 
 variable {Time R V : Type}
-  [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
+  [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
   [AbstractDerivationAction R V] [AbstractLieBracket V]
   [TimeDerivative Time R] [TimeDerivative Time V]
   [TimeDerivativeRules Time R V] [TensorTimeCalculus Time R V]

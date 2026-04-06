@@ -11,7 +11,7 @@ set_option linter.style.emptyLine false
 
 open AbstractDerivationAction AbstractLieBracket DifferentialGeometry TensorAlgebra
 
-variable {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] [AbstractDerivationAction R V]
+variable {R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] [AbstractDerivationAction R V]
 
 -- Defines the conformal transformation of an affine connection algebraically.
 def conformalConnection_nabla (metric : MetricDuality R V)

@@ -20,7 +20,7 @@ open AbstractDerivationAction
 open AbstractLieBracket
 
 variable {R V : Type}
-variable [CommRing R] [AddCommGroup V] [Module R V]
+variable [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V]
 variable [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V]
 
 local notation "⁅" X ", " Y "⁆" => bracket X Y
