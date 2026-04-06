@@ -25,44 +25,22 @@ variable {R V : Type}
 variable [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
 variable [AbstractDerivationAction R V] [AbstractLieBracket V]
 
-/-- Constructs the Ricci curvature as a rigorously proven AbstractBilinearForm. -/
-def ricciForm (conn : AbstractAffineConnection R V) [DerivationRules R V] [LieDerivationRules R V] [TraceOperator R V] [TraceLinearityRules R V] : AbstractBilinearForm R V :=
-  TensorAlgebra.fromBilinear {
-    toFun := fun X => {
-      toFun := fun Y => TraceOperator.trace (fun Z => Rm conn Z X Y)
-      map_add' := fun Y₁ Y₂ => by
-        have h_add : (fun Z => Rm conn Z X (Y₁ + Y₂)) = (fun Z => Rm conn Z X Y₁) + (fun Z => Rm conn Z X Y₂) := by
-          ext Z
-          exact Rm_add_Z conn Z X Y₁ Y₂
-        rw [h_add]
-        exact TraceLinearityRules.trace_add
-      map_smul' := fun c Y => by
-        have h_smul : (fun Z => Rm conn Z X (c • Y)) = c • (fun Z => Rm conn Z X Y) := by
-          ext Z
-          exact Rm_smul_Z conn c Z X Y
-        rw [h_smul]
-        exact TraceLinearityRules.trace_smul
-    }
-    map_add' := fun X₁ X₂ => by
-      ext Y
-      change (TraceOperator.trace (fun Z => Rm conn Z (X₁ + X₂) Y) : R) = TraceOperator.trace (fun Z => Rm conn Z X₁ Y) + TraceOperator.trace (fun Z => Rm conn Z X₂ Y)
-      have h_add : (fun Z => Rm conn Z (X₁ + X₂) Y) = (fun Z => Rm conn Z X₁ Y) + (fun Z => Rm conn Z X₂ Y) := by
-        ext Z
-        exact Rm_add_Y conn Z X₁ X₂ Y
-      rw [h_add]
-      exact TraceLinearityRules.trace_add
-    map_smul' := fun c X => by
-      ext Y
-      change (TraceOperator.trace (fun Z => Rm conn Z (c • X) Y) : R) = c * TraceOperator.trace (fun Z => Rm conn Z X Y)
-      have h_smul : (fun Z => Rm conn Z (c • X) Y) = c • (fun Z => Rm conn Z X Y) := by
-        ext Z
-        exact Rm_smul_Y conn c Z X Y
-      rw [h_smul]
-      exact TraceLinearityRules.trace_smul
-  }
+/-- Ricci curvature tensor defined natively as (0,2) abstract tensor by contracting Riemann tensor --/
+def rc_tensor (conn : AbstractAffineConnection R V) [op : RiemannCurvatureTensorOp conn] : AbstractTensor R V 0 2 :=
+  TensorAlgebra.contract_general (0 : Fin 1) (0 : Fin 3) op.Rm_tensor
 
-lemma tensor_eval_ricciForm (conn : AbstractAffineConnection R V) [DerivationRules R V] [LieDerivationRules R V] [TraceOperator R V] [TraceLinearityRules R V] (X Y : V) :
-  tensor_eval (ricciForm conn) ![X, Y] ![] = Rc conn X Y := by
-  dsimp [ricciForm, Rc]
-  rw [TensorAlgebra.tensor_eval_fromBilinear]
-  rfl
+/-- Ricci curvature pointwise evaluation. --/
+def Rc (conn : AbstractAffineConnection R V) [op : RiemannCurvatureTensorOp conn] (X Y : V) : R :=
+  tensor_eval (rc_tensor conn) ![X, Y] ![]
+
+/-- Scalar curvature pointwise evaluation. --/
+def ScalarCurvature (metric : MetricDuality R V) (conn : AbstractAffineConnection R V) [op : RiemannCurvatureTensorOp conn] : R :=
+  tensor_eval (metric_trace metric (0: Fin 2) (0: Fin 1) (rc_tensor conn)) ![] ![]
+
+/-- Backward compatibility alias for Evolution proofs avoiding AbstractBilinearForm wrappers --/
+def ricciForm (conn : AbstractAffineConnection R V) [op : RiemannCurvatureTensorOp conn] : AbstractTensor R V 0 2 :=
+  rc_tensor conn
+
+lemma tensor_eval_ricciForm (conn : AbstractAffineConnection R V) [op : RiemannCurvatureTensorOp conn] (X Y : V) :
+  tensor_eval (ricciForm conn) ![X, Y] ![] = Rc conn X Y := by rfl
+

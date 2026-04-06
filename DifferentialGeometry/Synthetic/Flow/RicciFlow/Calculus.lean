@@ -38,6 +38,8 @@ class RicciFlowCalculus
   [MetricTimeDerivativeRules Time R V g_fam]
   [∀ s, MetricTraceOperator R V ((g_fam s).toNonDegenerateMetric.toAbstractMetricTensor)]
   [∀ s, TensorInnerProductRules R V (g_fam s)]
+  [∀ s, AffineTensorCalculus (conn_fam s)]
+  [∀ s, RiemannCurvatureTensorOp (conn_fam s)]
   [RicciFlow Time (fun t => (g_fam t).toNonDegenerateMetric.toAbstractMetricTensor) conn_fam]
   [∀ s, MetricCompatible (conn_fam s) (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor] where
 
@@ -55,9 +57,9 @@ class RicciFlowCalculus
 
   -- 3. Scalar Curvature Evolution
   dt_R : ∀ (t : Time),
-    (∀ s, ScalarCurvature (conn_fam s) ((g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) =
+    (∀ s, ScalarCurvature (g_fam s) (conn_fam s) =
           TraceOperator.trace (fun X => (g_fam s).raise (ricciForm (conn_fam s)) X)) →
-    TimeDerivative.partial_t (fun s => ScalarCurvature (conn_fam s) ((g_fam s).toNonDegenerateMetric.toAbstractMetricTensor)) t =
+    TimeDerivative.partial_t (fun s => ScalarCurvature (g_fam s) (conn_fam s)) t =
     (2:R) * tensorNormSq (g_fam t) (ricciForm (conn_fam t)) +
     TraceOperator.trace (fun X => (g_fam t).raise (partial_ricci_form conn_fam t) X)
 
@@ -74,6 +76,8 @@ instance instRicciFlowCalculus
   [MetricTimeDerivativeRules Time R V g_fam]
   [∀ s, MetricTraceOperator R V ((g_fam s).toNonDegenerateMetric.toAbstractMetricTensor)]
   [∀ s, TensorInnerProductRules R V (g_fam s)]
+  [∀ s, AffineTensorCalculus (conn_fam s)]
+  [∀ s, RiemannCurvatureTensorOp (conn_fam s)]
   [RicciFlow Time (fun t => (g_fam t).toNonDegenerateMetric.toAbstractMetricTensor) conn_fam]
   [∀ s, MetricCompatible (conn_fam s) (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor] :
   RicciFlowCalculus g_fam conn_fam where

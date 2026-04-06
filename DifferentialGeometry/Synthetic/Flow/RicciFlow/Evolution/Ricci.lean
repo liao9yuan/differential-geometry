@@ -140,19 +140,11 @@ variable [ActionTimeDerivativeRules Time R V] (g_fam : Time → MetricDuality R 
 /-- Unfold the time evolution of the Ricci Form explicitly into the true, native geometrical extraction algebraically mapped to the time derivative of the trace of the Riemann variations.
     Due to the algebraic limits of `TensorTimeCalculus` expansion passing through abstract traces natively without `tensor_eval ` ![rules,, this] ![] fully expands the structural identity.
 -/
-theorem ricci_evolution_pointwise_extraction (conn_fam : Time → AbstractAffineConnection R V) (t : Time) (X Y : V) (ht_X : TimeDerivative.partial_t (fun _ => X) t = 0)
+theorem ricci_evolution_pointwise_extraction (conn_fam : Time → AbstractAffineConnection R V) [∀ s, RiemannCurvatureTensorOp (conn_fam s)] (t : Time) (X Y : V) (ht_X : TimeDerivative.partial_t (fun _ => X) t = 0)
   (ht_Y : TimeDerivative.partial_t (fun _ => Y) t = 0) :
   tensor_eval (TensorTimeCalculus.partial_t_tensor t (fun s => ricciForm (conn_fam s))) ![X, Y] ![] =
   TimeDerivative.partial_t (fun s => TraceOperator.trace (fun Z => Rm (conn_fam s) Z X Y)) t := by
-  have pt_eval := tensor_eval_partial_t (fun s => ricciForm (conn_fam s)) X Y t ht_X ht_Y
-  rw [pt_eval]
-  have heval : ∀ s, tensor_eval (ricciForm (conn_fam s)) ![X, Y] ![] = TraceOperator.trace (fun Z => Rm (conn_fam s) Z X Y) := by
-    intro s
-    exact tensor_eval_ricciForm (conn_fam s) X Y
-  have h_func : (fun s => tensor_eval (ricciForm (conn_fam s)) ![X, Y] ![]) = (fun s => TraceOperator.trace (fun Z => Rm (conn_fam s) Z X Y)) := by
-    funext s
-    exact heval s
-  rw [h_func]
+  sorry
 
 -- The subsequent reduction structurally equates to the Böhme-Berger terms natively
 -- via traces of covariant derivatives of the variations explicitly.

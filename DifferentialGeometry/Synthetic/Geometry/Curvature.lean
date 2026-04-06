@@ -40,16 +40,6 @@ class RiemannCurvatureTensorOp where
   Rm_tensor : AbstractTensor R V 1 3 := TensorAlgebra.fromData Rm_data
 
 
-/-- Ricci curvature tensor.
-Input: (X : V, Y : V)
-Output: R -/
-def Rc [TraceOperator R V] (X Y : V) : R :=
-  TraceOperator.trace (fun Z => Rm conn Z X Y)
 
-/-- Scalar curvature.
-Input: (AbstractMetricTensor R V)
-Output: R -/
-def ScalarCurvature [TraceOperator R V] (metric : AbstractMetricTensor R V) [MetricTraceOperator R V metric] : R :=
-  MetricTraceOperator.metric_trace metric (Rc conn)
 
 end Curvature

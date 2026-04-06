@@ -42,11 +42,11 @@ class StaticMetricTimeRules
   [TimeDerivative Time R]
   [TimeDerivative Time V]
   (metric : MetricDuality R V)
-  [MetricTraceOperator R V metric.toNonDegenerateMetric.toAbstractMetricTensor]
-  (conn : AbstractAffineConnection R V) where
+  (conn : AbstractAffineConnection R V)
+  [AffineTensorCalculus conn] where
   dt_laplacian : ∀ (f : Time → R) t,
-    TimeDerivative.partial_t (fun s => laplacian metric.toNonDegenerateMetric.toAbstractMetricTensor conn (f s)) t =
-    laplacian metric.toNonDegenerateMetric.toAbstractMetricTensor conn (TimeDerivative.partial_t f t)
+    TimeDerivative.partial_t (fun s => laplacian metric conn (f s)) t =
+    laplacian metric conn (TimeDerivative.partial_t f t)
   dt_grad : ∀ (f : Time → R) t,
     TimeDerivative.partial_t (fun s => grad metric (f s)) t = grad metric (TimeDerivative.partial_t f t)
   dt_metric_g : ∀ (X : Time → V) t,

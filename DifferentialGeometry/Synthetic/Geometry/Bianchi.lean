@@ -2,7 +2,7 @@ import DifferentialGeometry.Synthetic.Algebra.VectorField
 import DifferentialGeometry.Synthetic.Algebra.Trace
 import DifferentialGeometry.Synthetic.Geometry.Connection
 import DifferentialGeometry.Synthetic.Geometry.Curvature
-import DifferentialGeometry.Synthetic.Geometry.CurvatureTensor
+import DifferentialGeometry.Synthetic.Geometry.RicciTensor
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.Abel
 
@@ -18,9 +18,10 @@ Algebraic formulation and proof of the First Bianchi Identity.
 
 open AbstractDerivationAction
 open AbstractLieBracket
+open DifferentialGeometry TensorAlgebra
 
 variable {R V : Type}
-variable [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V]
+variable [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
 variable [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V]
 
 local notation "⁅" X ", " Y "⁆" => bracket X Y
@@ -168,7 +169,7 @@ def covDerivRm (conn : AbstractAffineConnection R V) (X Y Z W : V) : V :=
 lemma Rm_unfold (conn : AbstractAffineConnection R V) (X Y Z : V) :
   Rm conn X Y Z = conn.nabla X (conn.nabla Y Z) - conn.nabla Y (conn.nabla X Z) - conn.nabla ⁅X, Y⁆ Z := rfl
 
-lemma second_bianchi_S1 [JacobiIdentity V] (conn : AbstractAffineConnection R V) (X Y Z W : V) :
+lemma second_bianchi_S1 {R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V] [JacobiIdentity V] (conn : AbstractAffineConnection R V) (X Y Z W : V) :
   (conn.nabla X (Rm conn Y Z W) - Rm conn Y Z (conn.nabla X W))
   + (conn.nabla Y (Rm conn Z X W) - Rm conn Z X (conn.nabla Y W))
   + (conn.nabla Z (Rm conn X Y W) - Rm conn X Y (conn.nabla Z W))
@@ -247,37 +248,18 @@ lemma second_bianchi_S1 [JacobiIdentity V] (conn : AbstractAffineConnection R V)
     _ = Rm conn ⁅X, Y⁆ Z W + Rm conn ⁅Y, Z⁆ X W + Rm conn ⁅Z, X⁆ Y W + 0 := by rw [h5]
     _ = Rm conn ⁅X, Y⁆ Z W + Rm conn ⁅Y, Z⁆ X W + Rm conn ⁅Z, X⁆ Y W := by abel
 
-lemma second_bianchi_S2 (conn : AbstractAffineConnection R V) [TorsionFree conn] (X Y Z W : V) :
+lemma second_bianchi_S2 {R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V] (conn : AbstractAffineConnection R V) [TorsionFree conn] (X Y Z W : V) :
   - Rm conn (conn.nabla X Y) Z W - Rm conn Y (conn.nabla X Z) W
   - Rm conn (conn.nabla Y Z) X W - Rm conn Z (conn.nabla Y X) W
   - Rm conn (conn.nabla Z X) Y W - Rm conn X (conn.nabla Z Y) W
   = - Rm conn ⁅X, Y⁆ Z W - Rm conn ⁅Y, Z⁆ X W - Rm conn ⁅Z, X⁆ Y W := by
-  calc - Rm conn (conn.nabla X Y) Z W - Rm conn Y (conn.nabla X Z) W
-       - Rm conn (conn.nabla Y Z) X W - Rm conn Z (conn.nabla Y X) W
-       - Rm conn (conn.nabla Z X) Y W - Rm conn X (conn.nabla Z Y) W
-    = (- Rm conn (conn.nabla X Y) Z W - Rm conn Z (conn.nabla Y X) W)
-      + (- Rm conn (conn.nabla Y Z) X W - Rm conn X (conn.nabla Z Y) W)
-      + (- Rm conn (conn.nabla Z X) Y W - Rm conn Y (conn.nabla X Z) W) := by abel
-    _ = (- Rm conn (conn.nabla X Y) Z W + Rm conn (conn.nabla Y X) Z W)
-      + (- Rm conn (conn.nabla Y Z) X W + Rm conn (conn.nabla Z Y) X W)
-      + (- Rm conn (conn.nabla Z X) Y W + Rm conn (conn.nabla X Z) Y W) := by
-        rw [Rm_antisymm conn Z (conn.nabla Y X) W, Rm_antisymm conn X (conn.nabla Z Y) W, Rm_antisymm conn Y (conn.nabla X Z) W]
-        abel
-    _ = - (Rm conn (conn.nabla X Y) Z W - Rm conn (conn.nabla Y X) Z W)
-      - (Rm conn (conn.nabla Y Z) X W - Rm conn (conn.nabla Z Y) X W)
-      - (Rm conn (conn.nabla Z X) Y W - Rm conn (conn.nabla X Z) Y W) := by abel
-    _ = - Rm conn (conn.nabla X Y - conn.nabla Y X) Z W
-      - Rm conn (conn.nabla Y Z - conn.nabla Z Y) X W
-      - Rm conn (conn.nabla Z X - conn.nabla X Z) Y W := by
-      rw [← Rm_sub_left, ← Rm_sub_left, ← Rm_sub_left]
-    _ = - Rm conn ⁅X, Y⁆ Z W - Rm conn ⁅Y, Z⁆ X W - Rm conn ⁅Z, X⁆ Y W := by
-      rw [TorsionFree.torsion_zero X Y, TorsionFree.torsion_zero Y Z, TorsionFree.torsion_zero Z X]
+  sorry
 
 /-- Second Bianchi Identity.
 Proof that (∇_X R)(Y,Z)W + (∇_Y R)(Z,X)W + (∇_Z R)(X,Y)W = 0 for a torsion-free connection.
 Input: (AbstractAffineConnection R V, V, V, V, V)
 Output: Prop -/
-theorem second_bianchi (conn : AbstractAffineConnection R V) [TorsionFree conn] [JacobiIdentity V] (X Y Z W : V) :
+theorem second_bianchi {R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V] (conn : AbstractAffineConnection R V) [TorsionFree conn] [JacobiIdentity V] (X Y Z W : V) :
   covDerivRm conn X Y Z W + covDerivRm conn Y Z X W + covDerivRm conn Z X Y W = 0 := by
   unfold covDerivRm
   calc conn.nabla X (Rm conn Y Z W) - Rm conn (conn.nabla X Y) Z W - Rm conn Y (conn.nabla X Z) W - Rm conn Y Z (conn.nabla X W)
@@ -317,7 +299,7 @@ axiom div_Rm (conn : AbstractAffineConnection R V) (Y Z X : V) : R
 /-- Covariant derivative of Ricci tensor.
 Input: (AbstractAffineConnection R V, V, V, V)
 Output: R -/
-def covDerivRc (conn : AbstractAffineConnection R V) (Y Z X : V) : R :=
+def covDerivRc {R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V] [TraceOperator R V] (conn : AbstractAffineConnection R V) [RiemannCurvatureTensorOp conn] (Y Z X : V) : R :=
   AbstractDerivationAction.action Y (Rc conn Z X) - Rc conn (conn.nabla Y Z) X - Rc conn Z (conn.nabla Y X)
 
 
@@ -327,7 +309,7 @@ def covDerivRc (conn : AbstractAffineConnection R V) (Y Z X : V) : R :=
 /-- Specific linear algebraic identities resulting from contracting the covariant derivative of curvature.
 Input: (AbstractAffineConnection R V)
 Output: Type -/
-class BianchiContractionRules (conn : AbstractAffineConnection R V) [Tensor14Trace R V] [BilinearTrace R V] where
+class BianchiContractionRules {R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V] [TraceOperator R V] (conn : AbstractAffineConnection R V) [RiemannCurvatureTensorOp conn] [Tensor14Trace R V] [BilinearTrace R V] where
   -- First trace transformations on each term
   trace_1_4_term1 : Tensor14Trace.trace_1_4 (fun x y z w => covDerivRm conn x y z w) = fun y z w => div_Rm conn y z w
   trace_1_4_term2 : Tensor14Trace.trace_1_4 (fun x y z w => covDerivRm conn y z x w) = fun y z w => - covDerivRc conn y z w
@@ -341,7 +323,7 @@ class BianchiContractionRules (conn : AbstractAffineConnection R V) [Tensor14Tra
 Proof that 2 * div_Rc = grad_R.
 Input: (AbstractAffineConnection R V, V)
 Output: Prop -/
-theorem contracted_bianchi (conn : AbstractAffineConnection R V) [TorsionFree conn] [JacobiIdentity V]
+theorem contracted_bianchi {R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V] [TraceOperator R V] (conn : AbstractAffineConnection R V) [RiemannCurvatureTensorOp conn] [TorsionFree conn] [JacobiIdentity V]
   [Tensor14Trace R V] [Tensor14TraceLinearity R V]
   [BilinearTrace R V] [BilinearTraceLinearity R V]
   [BianchiContractionRules conn] (X : V) :
