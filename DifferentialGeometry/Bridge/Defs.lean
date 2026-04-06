@@ -7,7 +7,7 @@ import Mathlib.Geometry.Manifold.Algebra.Structures
 import Mathlib.Geometry.Manifold.VectorField.LieBracket
 import Mathlib.Analysis.Normed.Module.Dual
 import Mathlib.Geometry.Manifold.BumpFunction
-import DifferentialGeometry.Algebra.VectorField
+import DifferentialGeometry.Synthetic.Algebra.VectorField
 import Mathlib.LinearAlgebra.Multilinear.Basic
 
 set_option autoImplicit false
