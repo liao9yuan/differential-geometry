@@ -50,7 +50,7 @@ class RicciFlowCalculus
   -- 2. Gradient Squared Evolution
   dt_grad_sq : ∀ (u : Time → R) t,
     TimeDerivative.partial_t (fun s => (g_fam s).g (grad (g_fam s) (u s)) (grad (g_fam s) (u s))) t =
-    (2:R) * eval02 (ricciForm (conn_fam t)) (grad (g_fam t) (u t)) (grad (g_fam t) (u t)) +
+    (2:R) * tensor_eval (ricciForm (conn_fam t)) ![(grad (g_fam t) (u t)), (grad (g_fam t) (u t))] ![] +
     (2:R) * (g_fam t).g (grad (g_fam t) (u t)) (grad (g_fam t) (TimeDerivative.partial_t u t))
 
   -- 3. Scalar Curvature Evolution

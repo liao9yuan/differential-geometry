@@ -21,15 +21,15 @@ set_option linter.style.emptyLine false
 open AbstractDerivationAction DifferentialGeometry TensorAlgebra
 
 variable {Time R V : Type}
-  [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] 
+  [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
   [AbstractDerivationAction R V] [AbstractLieBracket V]
-  [TimeDerivative Time R] [TimeDerivative Time V] 
+  [TimeDerivative Time R] [TimeDerivative Time V]
   [TimeDerivativeRules Time R V] [TensorTimeCalculus Time R V]
 
 /-!
 # Time Evolution of Ricci Curvature
 
-This file mathematically extracts the exact geometric Böhme-Berger terms 
+This file mathematically extracts the exact geometric Böhme-Berger terms
 from the point-wise abstract tensor calculus evaluation of the Ricci tensor drift.
 -/
 
@@ -96,8 +96,8 @@ lemma contract_zero {r s : ℕ} : TensorAlgebra.contract (0 : AbstractTensor R V
 lemma partial_t_eval02 (T : Time → AbstractTensor R V 0 2) (X Y : V) (t : Time)
   (ht_X : TimeDerivative.partial_t (fun _ => X) t = 0)
   (ht_Y : TimeDerivative.partial_t (fun _ => Y) t = 0) :
-  eval02 (TensorTimeCalculus.partial_t_tensor t T) X Y = 
-  TimeDerivative.partial_t (fun s => eval02 (T s) X Y) t := by
+  tensor_eval (TensorTimeCalculus.partial_t_tensor t T) ![X, Y] ![] =
+  TimeDerivative.partial_t (fun s => tensor_eval (T s) ![X, Y] ![]) t := by
   let P_YZ := TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector (R:=R) X) (fromVector (R:=R) Y)
   let A (s : Time) := contract (r:=0) (s:=0) (contract (r:=1) (s:=1) (TensorAlgebra.tensor_prod (r1:=0) (s1:=2) (r2:=2) (s2:=0) (T s) P_YZ))
   have h1 : TensorTimeCalculus.partial_t_tensor t (fun _ => P_YZ) = 0 := by
@@ -115,9 +115,9 @@ lemma partial_t_eval02 (T : Time → AbstractTensor R V 0 2) (X Y : V) (t : Time
     have hc1 := TensorTimeCalculus.t_contract (r:=0) (s:=0) (fun s => contract (r:=1) (s:=1) (TensorAlgebra.tensor_prod (r1:=0) (s1:=2) (r2:=2) (s2:=0) (T s) P_YZ)) t
     have hc2 := TensorTimeCalculus.t_contract (r:=1) (s:=1) (fun s => TensorAlgebra.tensor_prod (r1:=0) (s1:=2) (r2:=2) (s2:=0) (T s) P_YZ) t
     rw [hc1, hc2, h2]
-  have h4 : ∀ s, A s = fromData (scalarToData (eval02 (T s) X Y)) := by
+  have h4 : ∀ s, A s = fromData (scalarToData (tensor_eval (T s) ![X, Y] ![])) := by
     intro s
-    have hz : eval02 (T s) X Y = (((toData (A s)) ![]) ![]) := rfl
+    have hz : tensor_eval (T s) ![X, Y] ![] = (((toData (A s)) ![]) ![]) := tensor_eval_isomorphism (T s) X Y
     have hx : fromData (scalarToData (((toData (A s)) ![]) ![])) = A s := by
       have hy : scalarToData (((toData (A s)) ![]) ![]) = toData (A s) := by
         ext m n
@@ -128,13 +128,13 @@ lemma partial_t_eval02 (T : Time → AbstractTensor R V 0 2) (X Y : V) (t : Time
       rw [hy, TensorAlgebra.fromData_toData]
     rw [hz]
     exact hx.symm
-  have h5 : TensorTimeCalculus.partial_t_tensor t A = fromData (scalarToData (TimeDerivative.partial_t (fun s => eval02 (T s) X Y) t)) := by
-    have func_eq : A = fun s => fromData (scalarToData (eval02 (T s) X Y)) := by funext s; exact h4 s
+  have h5 : TensorTimeCalculus.partial_t_tensor t A = fromData (scalarToData (TimeDerivative.partial_t (fun s => tensor_eval (T s) ![X, Y] ![]) t)) := by
+    have func_eq : A = fun s => fromData (scalarToData (tensor_eval (T s) ![X, Y] ![])) := by funext s; exact h4 s
     rw [func_eq]
-    exact TensorTimeCalculus.t_scalar (fun s => eval02 (T s) X Y) t
-  have h6 : eval02 (TensorTimeCalculus.partial_t_tensor t T) X Y = (((toData (TensorTimeCalculus.partial_t_tensor t A)) ![]) ![]) := by
-    dsimp [eval02, P_YZ]
-    rw [← h3]
+    exact TensorTimeCalculus.t_scalar (fun s => tensor_eval (T s) ![X, Y] ![]) t
+  have h6 : tensor_eval (TensorTimeCalculus.partial_t_tensor t T) ![X, Y] ![] = (((toData (TensorTimeCalculus.partial_t_tensor t A)) ![]) ![]) := by
+    rw [h3]
+    exact tensor_eval_isomorphism (TensorTimeCalculus.partial_t_tensor t T) X Y
   rw [h6, h5]
   rw [TensorAlgebra.toData_fromData]
   dsimp [scalarToData, MultilinearMap.constOfIsEmpty]
@@ -143,18 +143,18 @@ variable [TraceOperator R V] [DerivationRules R V] [LieDerivationRules R V] [Tra
 variable [ActionTimeDerivativeRules Time R V] (g_fam : Time → MetricDuality R V) [MetricTimeDerivativeRules Time R V g_fam]
 
 /-- Unfold the time evolution of the Ricci Form explicitly into the true, native geometrical extraction algebraically mapped to the time derivative of the trace of the Riemann variations.
-    Due to the algebraic limits of `TensorTimeCalculus` expansion passing through abstract traces natively without `eval02` rules, this fully expands the structural identity.
+    Due to the algebraic limits of `TensorTimeCalculus` expansion passing through abstract traces natively without `tensor_eval ` ![rules,, this] ![] fully expands the structural identity.
 -/
 theorem ricci_evolution_pointwise_extraction (conn_fam : Time → AbstractAffineConnection R V) (t : Time) (X Y : V) (ht_X : TimeDerivative.partial_t (fun _ => X) t = 0)
   (ht_Y : TimeDerivative.partial_t (fun _ => Y) t = 0) :
-  eval02 (TensorTimeCalculus.partial_t_tensor t (fun s => ricciForm (conn_fam s))) X Y =
+  tensor_eval (TensorTimeCalculus.partial_t_tensor t (fun s => ricciForm (conn_fam s))) ![X, Y] ![] =
   TimeDerivative.partial_t (fun s => TraceOperator.trace (fun Z => Rm (conn_fam s) Z X Y)) t := by
   have pt_eval := partial_t_eval02 (fun s => ricciForm (conn_fam s)) X Y t ht_X ht_Y
   rw [pt_eval]
-  have heval : ∀ s, eval02 (ricciForm (conn_fam s)) X Y = TraceOperator.trace (fun Z => Rm (conn_fam s) Z X Y) := by
+  have heval : ∀ s, tensor_eval (ricciForm (conn_fam s)) ![X, Y] ![] = TraceOperator.trace (fun Z => Rm (conn_fam s) Z X Y) := by
     intro s
-    exact eval02_ricciForm (conn_fam s) X Y
-  have h_func : (fun s => eval02 (ricciForm (conn_fam s)) X Y) = (fun s => TraceOperator.trace (fun Z => Rm (conn_fam s) Z X Y)) := by
+    exact tensor_eval_ricciForm (conn_fam s) X Y
+  have h_func : (fun s => tensor_eval (ricciForm (conn_fam s)) ![X, Y] ![]) = (fun s => TraceOperator.trace (fun Z => Rm (conn_fam s) Z X Y)) := by
     funext s
     exact heval s
   rw [h_func]

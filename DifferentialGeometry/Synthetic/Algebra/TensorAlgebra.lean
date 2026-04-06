@@ -144,6 +144,7 @@ lemma fromVector_add (X Y : V) : fromVector (R:=R) (X + Y) = TensorAlgebra.add (
     rw [TensorAlgebra.toData_add, TensorAlgebra.toData_fromData, TensorAlgebra.toData_fromData]
   rw [← h_add, TensorAlgebra.fromData_toData]
 
+
 lemma fromVector_smul (c : R) (X : V) : fromVector (R:=R) (c • X) = TensorAlgebra.smul c (fromVector (R:=R) X) := by
   dsimp [fromVector]
   rw [vectorToData_smul (R:=R) c X]
@@ -170,17 +171,111 @@ lemma contract_swap_covariant_eval {r s : ℕ} (X Y : V) (T : TensorAlgebra.Abst
   rw [TensorAlgebra.fromData_toData, TensorAlgebra.fromData_toData] at h1
   exact h1
 
-lemma eval02_isomorphism (T : TensorAlgebra.AbstractTensor R V 0 2) (X Y : V) :
-    (TensorAlgebra.toData (TensorAlgebra.contract (r:=0) (s:=0) (TensorAlgebra.contract (r:=1) (s:=1) (TensorAlgebra.tensor_prod (r1:=0) (s1:=2) (r2:=2) (s2:=0) T (TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector X) (fromVector Y)))))) ![] ![] =
-    (TensorAlgebra.toData T) ![X, Y] ![] := by
-  have hz : TensorAlgebra.toData (TensorAlgebra.contract (r:=0) (s:=0) (TensorAlgebra.contract (r:=1) (s:=1) (TensorAlgebra.tensor_prod (r1:=0) (s1:=2) (r2:=2) (s2:=0) T (TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector X) (fromVector Y))))) =
-            TensorAlgebra.data_contract (r:=0) (s:=0) (TensorAlgebra.data_contract (r:=1) (s:=1) (TensorAlgebra.data_tensor_prod (r1:=0) (s1:=2) (r2:=2) (s2:=0) (TensorAlgebra.toData T) (TensorAlgebra.data_tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (vectorToData X) (vectorToData Y)))) := by
-    rw [TensorAlgebra.toData_contract, TensorAlgebra.toData_contract, TensorAlgebra.toData_tensor_prod, TensorAlgebra.toData_tensor_prod]
-    have hx : TensorAlgebra.toData (fromVector (R:=R) X) = vectorToData X := TensorAlgebra.toData_fromData _
-    have hy : TensorAlgebra.toData (fromVector (R:=R) Y) = vectorToData Y := TensorAlgebra.toData_fromData _
-    rw [hx, hy]
-  rw [hz]
-  rw [TensorAlgebra.data_eval_contract_contract]
+def tensor_eval {r s : ℕ} (T : TensorAlgebra.AbstractTensor R V r s)
+  (vs : Fin s → V) (αs : Fin r → (V →ₗ[R] R)) : R :=
+  TensorAlgebra.toData T vs αs
+
+lemma tensor_eval_add {r s : ℕ} (T1 T2 : TensorAlgebra.AbstractTensor R V r s)
+  (vs : Fin s → V) (αs : Fin r → (V →ₗ[R] R)) :
+  tensor_eval (TensorAlgebra.add T1 T2) vs αs = tensor_eval T1 vs αs + tensor_eval T2 vs αs := by
+  dsimp [tensor_eval]
+  rw [TensorAlgebra.toData_add]
   rfl
+
+lemma tensor_eval_smul {r s : ℕ} (c : R) (T : TensorAlgebra.AbstractTensor R V r s)
+  (vs : Fin s → V) (αs : Fin r → (V →ₗ[R] R)) :
+  tensor_eval (TensorAlgebra.smul c T) vs αs = c * tensor_eval T vs αs := by
+  dsimp [tensor_eval]
+  rw [TensorAlgebra.toData_smul]
+  rfl
+
+
+
+lemma tensor_eval_add_left (T : TensorAlgebra.AbstractTensor R V 0 2) (X Y Z : V) :
+  tensor_eval T ![X + Y, Z] ![] = tensor_eval T ![X, Z] ![] + tensor_eval T ![Y, Z] ![] := by
+  dsimp [tensor_eval]
+  have hz : ![X + Y, Z] = Function.update ![X, Z] 0 (X + Y) := by
+    ext i
+    fin_cases i <;> rfl
+  rw [hz]
+  have h_add := MultilinearMap.map_update_add (TensorAlgebra.toData T) ![X, Z] 0 X Y
+  rw [h_add]
+  have hz_x : Function.update ![X, Z] 0 X = ![X, Z] := by
+    ext i
+    fin_cases i <;> rfl
+  have hz_y : Function.update ![X, Z] 0 Y = ![Y, Z] := by
+    ext i
+    fin_cases i <;> rfl
+  rw [hz_x, hz_y]
+  exact MultilinearMap.add_apply _ _ _
+
+lemma tensor_eval_smul_left (T : TensorAlgebra.AbstractTensor R V 0 2) (f : R) (X Y : V) :
+  tensor_eval T ![f • X, Y] ![] = f * tensor_eval T ![X, Y] ![] := by
+  dsimp [tensor_eval]
+  have hz : ![f • X, Y] = Function.update ![X, Y] 0 (f • X) := by
+    ext i
+    fin_cases i <;> rfl
+  rw [hz]
+  have h_smul := MultilinearMap.map_update_smul (TensorAlgebra.toData T) ![X, Y] 0 f X
+  rw [h_smul]
+  have hz_x : Function.update ![X, Y] 0 X = ![X, Y] := by
+    ext i
+    fin_cases i <;> rfl
+  rw [hz_x]
+  exact MultilinearMap.smul_apply _ _ _
+
+lemma tensor_eval_add_right (T : TensorAlgebra.AbstractTensor R V 0 2) (X Y Z : V) :
+  tensor_eval T ![X, Y + Z] ![] = tensor_eval T ![X, Y] ![] + tensor_eval T ![X, Z] ![] := by
+  dsimp [tensor_eval]
+  have hz : ![X, Y + Z] = Function.update ![X, Z] 1 (Y + Z) := by
+    ext i
+    fin_cases i <;> rfl
+  rw [hz]
+  have h_add := MultilinearMap.map_update_add (TensorAlgebra.toData T) ![X, Z] 1 Y Z
+  rw [h_add]
+  have hz_x : Function.update ![X, Z] 1 Y = ![X, Y] := by
+    ext i
+    fin_cases i <;> rfl
+  have hz_y : Function.update ![X, Z] 1 Z = ![X, Z] := by
+    ext i
+    fin_cases i <;> rfl
+  rw [hz_x, hz_y]
+  exact MultilinearMap.add_apply _ _ _
+
+lemma tensor_eval_smul_right (T : TensorAlgebra.AbstractTensor R V 0 2) (f : R) (X Y : V) :
+  tensor_eval T ![X, f • Y] ![] = f * tensor_eval T ![X, Y] ![] := by
+  dsimp [tensor_eval]
+  have hz : ![X, f • Y] = Function.update ![X, Y] 1 (f • Y) := by
+    ext i
+    fin_cases i <;> rfl
+  rw [hz]
+  have h_smul := MultilinearMap.map_update_smul (TensorAlgebra.toData T) ![X, Y] 1 f Y
+  rw [h_smul]
+  have hz_x : Function.update ![X, Y] 1 Y = ![X, Y] := by
+    ext i
+    fin_cases i <;> rfl
+  rw [hz_x]
+  exact MultilinearMap.smul_apply _ _ _
+
+
+
+lemma tensor_eval_isomorphism (T : TensorAlgebra.AbstractTensor R V 0 2) (X Y : V) :
+  tensor_eval T ![X, Y] ![] = ((TensorAlgebra.toData (TensorAlgebra.contract (R:=R) (r:=0) (s:=0) (TensorAlgebra.contract (R:=R) (r:=1) (s:=1) (TensorAlgebra.tensor_prod (R:=R) (r1:=0) (s1:=2) (r2:=2) (s2:=0) T (TensorAlgebra.tensor_prod (R:=R) (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector (R:=R) X) (fromVector (R:=R) Y)))))) ![]) ![] := by
+  dsimp [tensor_eval]
+  have step1 : TensorAlgebra.toData (TensorAlgebra.contract (R:=R) (r:=0) (s:=0) (TensorAlgebra.contract (R:=R) (r:=1) (s:=1) (TensorAlgebra.tensor_prod (R:=R) (r1:=0) (s1:=2) (r2:=2) (s2:=0) T (TensorAlgebra.tensor_prod (R:=R) (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector (R:=R) X) (fromVector (R:=R) Y))))) = TensorAlgebra.data_contract (r:=0) (s:=0) (TensorAlgebra.data_contract (r:=1) (s:=1) (TensorAlgebra.data_tensor_prod (r1:=0) (s1:=2) (r2:=2) (s2:=0) (TensorAlgebra.toData T) (TensorAlgebra.data_tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (vectorToData (R:=R) X) (vectorToData (R:=R) Y)))) := by
+    rw [TensorAlgebra.toData_contract]
+    rw [TensorAlgebra.toData_contract]
+    rw [TensorAlgebra.toData_tensor_prod]
+    have h_vec1 : TensorAlgebra.toData (fromVector (R:=R) X) = vectorToData (R:=R) X := TensorAlgebra.toData_fromData (vectorToData (R:=R) X)
+    have h_vec2 : TensorAlgebra.toData (fromVector (R:=R) Y) = vectorToData (R:=R) Y := TensorAlgebra.toData_fromData (vectorToData (R:=R) Y)
+    rw [TensorAlgebra.toData_tensor_prod]
+    rw [h_vec1, h_vec2]
+  rw [step1]
+  have step2 := TensorAlgebra.data_eval_contract_contract (r:=0) (s:=0) (TensorAlgebra.toData T) X Y ![] ![]
+  have h_eq : Fin.cons X (Fin.cons Y ![]) = ![X, Y] := by
+    ext i
+    fin_cases i <;> rfl
+  rw [h_eq] at step2
+  exact step2.symm
 
 end DifferentialGeometry

@@ -39,9 +39,9 @@ variable [Invertible (2 : R)]
 /-- The covariant derivative of the Ricci form at time t. -/
 def ricci_cov_deriv {Time : Type} [TimeDerivative Time R] [TimeDerivativeRules Time R V]
   (g_fam : Time → MetricDuality R V) (conn_fam : Time → AbstractAffineConnection R V) (t : Time) (X Y Z : V) : R :=
-  action X (eval02 (ricciForm (conn_fam t)) Y Z)
-  - eval02 (ricciForm (conn_fam t)) ((nabla_fam g_fam t).nabla X Y) Z
-  - eval02 (ricciForm (conn_fam t)) Y ((nabla_fam g_fam t).nabla X Z)
+  action X (tensor_eval (ricciForm (conn_fam t)) ![Y, Z] ![])
+  - tensor_eval (ricciForm (conn_fam t)) ![((nabla_fam g_fam t).nabla X Y), Z] ![]
+  - tensor_eval (ricciForm (conn_fam t)) ![Y, ((nabla_fam g_fam t).nabla X Z)] ![]
 
 /--
 Mathematical Identity: $\partial_t \Gamma_{ij}^k = - g^{kl} ( \nabla_i R_{jl} + \nabla_j R_{il} - \nabla_l R_{ij} )$
@@ -59,21 +59,21 @@ lemma connection_evolution {Time : Type}
   - ricci_cov_deriv g_fam conn_fam t X Y Z
   - ricci_cov_deriv g_fam conn_fam t Y X Z
   + ricci_cov_deriv g_fam conn_fam t Z X Y := by
-  have h_metric_var : ∀ A B, eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) A B = (- (2:R)) * eval02 (ricciForm (conn_fam t)) A B := by
+  have h_metric_var : ∀ A B, tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![A, B] ![] = (- (2:R)) * tensor_eval (ricciForm (conn_fam t)) ![A, B] ![] := by
     have heq : metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t = (- (2:R)) • ricciForm (conn_fam t) := RicciFlow.evolution t
     intro A B
-    have heq_eval : eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) A B = eval02 ((- (2:R)) • ricciForm (conn_fam t)) A B := by rw [heq]
+    have heq_eval : tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![A, B] ![] = tensor_eval ((- (2:R)) • ricciForm (conn_fam t)) ![A, B] ![] := by rw [heq]
     rw [heq_eval]
-    exact eval02_smul (ricciForm (conn_fam t)) (- (2:R)) A B
+    exact tensor_eval_smul (- (2:R)) (ricciForm (conn_fam t)) ![A, B] ![]
 
   have h_cov_eq : ∀ A B C : V, h_cov_deriv g_fam t A B C = (- (2:R)) * ricci_cov_deriv g_fam conn_fam t A B C := by
     intro A B C
     dsimp [h_cov_deriv, ricci_cov_deriv]
-    have hm : ∀ Y Z : V, eval02 (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) Y Z = (- (2:R)) * eval02 (ricciForm (conn_fam t)) Y Z := by
+    have hm : ∀ Y Z : V, tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![Y, Z] ![] = (- (2:R)) * tensor_eval (ricciForm (conn_fam t)) ![Y, Z] ![] := by
       intro Y Z
       exact h_metric_var Y Z
     rw [hm B C, hm ((nabla_fam g_fam t).nabla A B) C, hm B ((nabla_fam g_fam t).nabla A C)]
-    rw [action_mul_const A (- (2:R)) (eval02 (ricciForm (conn_fam t)) B C) (action_neg_two A)]
+    rw [action_mul_const A (- (2:R)) (tensor_eval (ricciForm (conn_fam t)) ![B, C] ![]) (action_neg_two A)]
     ring
   have h_variation := connection_variation g_fam X Y Z t
   have h_rhs : h_cov_deriv g_fam t X Y Z + h_cov_deriv g_fam t Y X Z - h_cov_deriv g_fam t Z X Y =
