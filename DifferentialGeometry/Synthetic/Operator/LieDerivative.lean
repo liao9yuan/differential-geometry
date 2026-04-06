@@ -14,7 +14,7 @@ set_option linter.style.emptyLine false
 Definition of the Lie derivative of a metric tensor.
 -/
 
-open AbstractDerivationAction AbstractLieBracket DifferentialGeometry.Bridge TensorAlgebra
+open AbstractDerivationAction AbstractLieBracket DifferentialGeometry TensorAlgebra
 
 variable {R V : Type}
 variable [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]

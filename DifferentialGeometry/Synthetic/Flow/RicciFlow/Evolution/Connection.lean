@@ -18,7 +18,7 @@ set_option linter.style.emptyLine false
 
 open AbstractDerivationAction
 
-open DifferentialGeometry.Bridge TensorAlgebra
+open DifferentialGeometry TensorAlgebra
 
 variable {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
 variable [AbstractDerivationAction R V] [AbstractLieBracket V]

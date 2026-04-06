@@ -19,7 +19,7 @@ set_option linter.style.emptyLine false
 Defines generic time derivatives and variation of metric.
 -/
 
-open AbstractDerivationAction AbstractLieBracket DifferentialGeometry.Bridge TensorAlgebra
+open AbstractDerivationAction AbstractLieBracket DifferentialGeometry TensorAlgebra
 
 variable {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
 

@@ -1,4 +1,5 @@
-import DifferentialGeometry.Bridge.Defs
+import DifferentialGeometry.VectorField
+import DifferentialGeometry.Synthetic.Algebra.TensorAlgebra
 import DifferentialGeometry.Synthetic.Algebra.VectorField
 import DifferentialGeometry.Synthetic.Algebra.BilinearForm
 import Mathlib.Tactic.Ring
@@ -8,7 +9,7 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 set_option linter.style.emptyLine false
 
-open DifferentialGeometry.Bridge
+open DifferentialGeometry
 open TensorAlgebra
 
 /-!

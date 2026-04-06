@@ -4,7 +4,8 @@ import DifferentialGeometry.Synthetic.Geometry.CurvatureTensor
 import DifferentialGeometry.Synthetic.Algebra.BilinearForm
 import DifferentialGeometry.Synthetic.Algebra.Trace
 import DifferentialGeometry.Synthetic.Algebra.VectorField
-import DifferentialGeometry.Bridge.Defs
+import DifferentialGeometry.VectorField
+import DifferentialGeometry.Synthetic.Algebra.TensorAlgebra
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -18,7 +19,7 @@ Rigorous construction of the Ricci curvature as a smooth bilinear form.
 
 open AbstractDerivationAction
 open AbstractLieBracket
-open DifferentialGeometry.Bridge TensorAlgebra
+open DifferentialGeometry TensorAlgebra
 
 variable {R V : Type}
 variable [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]

@@ -1,4 +1,5 @@
-import DifferentialGeometry.Bridge.Defs
+import DifferentialGeometry.VectorField
+import DifferentialGeometry.Synthetic.Algebra.TensorAlgebra
 
 import DifferentialGeometry.Synthetic.Algebra.VectorField
 import DifferentialGeometry.Synthetic.Algebra.BilinearForm

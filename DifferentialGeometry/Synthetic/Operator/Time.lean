@@ -32,7 +32,7 @@ class ScalarTimeDerivativeRules (R : Type) [CommRing R] (Time : Type) [TimeDeriv
   dt_mul : ∀ (f g : Time → R) t, TimeDerivative.partial_t (fun s => f s * g s) t = TimeDerivative.partial_t f t * g t + f t * TimeDerivative.partial_t g t
 
 
-open DifferentialGeometry.Bridge TensorAlgebra
+open DifferentialGeometry TensorAlgebra
 
 variable {R V : Type}
 variable [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] [AbstractDerivationAction R V]

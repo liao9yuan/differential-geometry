@@ -1,4 +1,5 @@
-import DifferentialGeometry.Bridge.Defs
+import DifferentialGeometry.VectorField
+import DifferentialGeometry.Synthetic.Algebra.TensorAlgebra
 import DifferentialGeometry.Synthetic.Algebra.VectorField
 import DifferentialGeometry.Synthetic.Algebra.Metric
 import Mathlib.Tactic.Ring
@@ -23,7 +24,7 @@ variable [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules 
 
 open AbstractDerivationAction
 open AbstractLieBracket
-open DifferentialGeometry.Bridge
+open DifferentialGeometry
 open TensorAlgebra
 
 /-- Affine connection (covariant derivative) on a vector bundle.

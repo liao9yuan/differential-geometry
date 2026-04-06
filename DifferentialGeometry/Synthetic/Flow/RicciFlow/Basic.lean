@@ -13,7 +13,7 @@ set_option linter.style.emptyLine false
 Defines the Ricci flow equation and Levi-Civita connections.
 -/
 
-open DifferentialGeometry.Bridge TensorAlgebra
+open DifferentialGeometry TensorAlgebra
 
 variable {R V : Type} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
 variable [AbstractDerivationAction R V] [AbstractLieBracket V] [TraceOperator R V]

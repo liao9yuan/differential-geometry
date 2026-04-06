@@ -48,7 +48,7 @@ class BilinearTraceLinearity (R V : Type) [CommRing R] [AddCommGroup V] [Bilinea
   tr_sub : ∀ (T₁ T₂ : V → V → R), (BilinearTrace.tr (fun Y Z => T₁ Y Z - T₂ Y Z) : R) = BilinearTrace.tr T₁ - BilinearTrace.tr T₂
   tr_zero : (BilinearTrace.tr (fun (_ _ : V) => (0 : R)) : R) = (0 : R)
 
-open DifferentialGeometry.Bridge TensorAlgebra
+open DifferentialGeometry TensorAlgebra
 
 -- Axiomatic rules for the trace of rank-1 operators to support divergence product rule.
 class MetricTraceRankOneRules (R V : Type) [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] (metric : AbstractMetricTensor R V) [MetricTraceOperator R V metric] where

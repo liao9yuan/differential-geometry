@@ -1,5 +1,6 @@
 import DifferentialGeometry.Synthetic.Algebra.VectorField
-import DifferentialGeometry.Bridge.Defs
+import DifferentialGeometry.VectorField
+import DifferentialGeometry.Synthetic.Algebra.TensorAlgebra
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.Abel
 
@@ -8,7 +9,7 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 set_option linter.style.emptyLine false
 
-open DifferentialGeometry.Bridge
+open DifferentialGeometry
 
 /-!
 # Smooth Bilinear Form
