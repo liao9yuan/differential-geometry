@@ -1,3 +1,4 @@
+import DifferentialGeometry.Synthetic.Operator.Time
 import DifferentialGeometry.Synthetic.Algebra.VectorField
 import DifferentialGeometry.Synthetic.Algebra.Metric
 import DifferentialGeometry.Synthetic.Algebra.Metric
@@ -21,8 +22,8 @@ open AbstractDerivationAction
 open DifferentialGeometry TensorAlgebra
 
 variable {R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
-variable [AbstractDerivationAction R V] [AbstractLieBracket V] [TraceOperator R V]
-variable [DerivationRules R V] [LieDerivationRules R V] [TraceLinearityRules R V]
+variable [AbstractDerivationAction R V] [AbstractLieBracket V]
+variable [DerivationRules R V] [LieDerivationRules R V]
 
 /-!
 # Evolution of the Gradient under Ricci Flow
@@ -38,7 +39,7 @@ Evolution of the gradient of a time-independent scalar function under Ricci flow
 -/
 lemma gradient_evolution {Time : Type}
   [TimeDerivative Time R] [TimeDerivative Time V]
-  [TimeDerivativeRules Time R V] [ActionTimeDerivativeRules Time R V]
+  [TimeDerivativeRules Time R V] [ActionTimeDerivativeRules Time R V] [TensorTimeCalculus Time R V]
   (g_fam : Time → MetricDuality R V)
   (conn_fam : Time → AbstractAffineConnection R V)
   [MetricTimeDerivativeRules Time R V g_fam]
@@ -108,7 +109,7 @@ Evolution of the squared gradient of a time-dependent scalar function under Ricc
 -/
 lemma gradient_squared_evolution {Time : Type}
   [TimeDerivative Time R] [TimeDerivative Time V]
-  [TimeDerivativeRules Time R V] [ActionTimeDerivativeRules Time R V]
+  [TimeDerivativeRules Time R V] [ActionTimeDerivativeRules Time R V] [TensorTimeCalculus Time R V]
   (g_fam : Time → MetricDuality R V)
   (conn_fam : Time → AbstractAffineConnection R V)
   [MetricTimeDerivativeRules Time R V g_fam]

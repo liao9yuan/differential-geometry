@@ -26,39 +26,7 @@ variable {R V}
 /-- The unique zero tensor. -/
 def zero_tensor {r s : ℕ} : TensorAlgebra.AbstractTensor R V r s := TensorAlgebra.fromData (0 : TensorData R V r s)
 
-/-- Create a bilinear form from a linear map over linear maps -/
-def TensorAlgebra.fromBilinear {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
-  (B : V →ₗ[R] V →ₗ[R] R) : AbstractBilinearForm R V :=
-  TensorAlgebra.fromData {
-    toFun := fun X => MultilinearMap.constOfIsEmpty R _ (B (X 0) (X 1))
-    map_update_add' := by
-      intro instDec m i x y
-      ext _
-      fin_cases i
-      · dsimp [Function.update]
-        have hz : (1 : Fin 2) ≠ 0 := by clear instDec; decide
-        simp [hz]
-      · dsimp [Function.update]
-        have hz : (0 : Fin 2) ≠ 1 := by clear instDec; decide
-        simp [hz]
-    map_update_smul' := by
-      intro instDec m i c x
-      ext _
-      fin_cases i
-      · dsimp [Function.update]
-        have hz : (1 : Fin 2) ≠ 0 := by clear instDec; decide
-        simp [hz]
-      · dsimp [Function.update]
-        have hz : (0 : Fin 2) ≠ 1 := by clear instDec; decide
-        simp [hz]
-  }
 
-lemma TensorAlgebra.tensor_eval_fromBilinear {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
-  (B : V →ₗ[R] V →ₗ[R] R) (X Y : V) :
-  tensor_eval (TensorAlgebra.fromBilinear B) ![X, Y] ![] = B X Y := by
-  dsimp [tensor_eval]
-  rw [TensorAlgebra.fromBilinear, TensorAlgebra.toData_fromData]
-  rfl
 
 
 /-- Zero typeclass instance for generic tensors -/

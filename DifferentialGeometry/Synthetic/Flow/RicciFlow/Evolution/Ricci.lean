@@ -1,3 +1,4 @@
+import DifferentialGeometry.Synthetic.Operator.Time
 import DifferentialGeometry.Synthetic.Algebra.VectorField
 import DifferentialGeometry.Synthetic.Algebra.BilinearForm
 import DifferentialGeometry.Synthetic.Algebra.Metric
@@ -134,7 +135,7 @@ lemma tensor_eval_partial_t (T : Time → AbstractTensor R V 0 2) (X Y : V) (t :
   rw [TensorAlgebra.toData_fromData]
   dsimp [scalarToData, MultilinearMap.constOfIsEmpty]
 
-variable [TraceOperator R V] [DerivationRules R V] [LieDerivationRules R V] [TraceLinearityRules R V] [Invertible (2 : R)]
+variable [DerivationRules R V] [LieDerivationRules R V] [Invertible (2 : R)]
 variable [ActionTimeDerivativeRules Time R V] (g_fam : Time → MetricDuality R V) [MetricTimeDerivativeRules Time R V g_fam]
 
 /-- Unfold the time evolution of the Ricci Form explicitly into the true, native geometrical extraction algebraically mapped to the time derivative of the trace of the Riemann variations.
@@ -143,7 +144,7 @@ variable [ActionTimeDerivativeRules Time R V] (g_fam : Time → MetricDuality R 
 theorem ricci_evolution_pointwise_extraction (conn_fam : Time → AbstractAffineConnection R V) [∀ s, RiemannCurvatureTensorOp (conn_fam s)] (t : Time) (X Y : V) (ht_X : TimeDerivative.partial_t (fun _ => X) t = 0)
   (ht_Y : TimeDerivative.partial_t (fun _ => Y) t = 0) :
   tensor_eval (TensorTimeCalculus.partial_t_tensor t (fun s => ricciForm (conn_fam s))) ![X, Y] ![] =
-  TimeDerivative.partial_t (fun s => TraceOperator.trace (fun Z => Rm (conn_fam s) Z X Y)) t := by
+  TimeDerivative.partial_t (fun s => tensor_eval (ricciForm (conn_fam s)) ![X, Y] ![]) t := by
   sorry
 
 -- The subsequent reduction structurally equates to the Böhme-Berger terms natively

@@ -34,8 +34,6 @@ def tensorInnerProduct (T S : AbstractBilinearForm R V) : R :=
 
 class TensorInnerProductRules (R V : Type) [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] (metric : MetricDuality R V) where
   inner_symm : ∀ (T S : AbstractBilinearForm R V), tensorInnerProduct metric T S = tensorInnerProduct metric S T
-  inner_trace : ∀ (T S : AbstractBilinearForm R V) [TR_OP : TraceOperator R V],
-    tensorInnerProduct metric T S = @TraceOperator.trace R V TR_OP (fun X => metric.raise T (metric.raise S X))
 
 variable [IR : TensorInnerProductRules R V metric]
 

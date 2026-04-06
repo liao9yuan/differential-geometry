@@ -1,4 +1,5 @@
 import DifferentialGeometry.Synthetic.Operator.Variation
+import DifferentialGeometry.Synthetic.Operator.Time
 import DifferentialGeometry.Synthetic.Geometry.RicciTensor
 import DifferentialGeometry.Synthetic.Geometry.Connection
 import DifferentialGeometry.Synthetic.Algebra.Metric
@@ -16,8 +17,8 @@ Defines the Ricci flow equation and Levi-Civita connections.
 open DifferentialGeometry TensorAlgebra
 
 variable {R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
-variable [AbstractDerivationAction R V] [AbstractLieBracket V] [TraceOperator R V]
-variable [DerivationRules R V] [LieDerivationRules R V] [TraceLinearityRules R V]
+variable [AbstractDerivationAction R V] [AbstractLieBracket V]
+variable [DerivationRules R V] [LieDerivationRules R V]
 
 -- 1. Levi-Civita Property
 class LeviCivita (conn : AbstractAffineConnection R V) (g : AbstractMetricTensor R V) : Prop where
@@ -25,7 +26,7 @@ class LeviCivita (conn : AbstractAffineConnection R V) (g : AbstractMetricTensor
   torsion_free : TorsionFree conn
 
 -- 2. Ricci Flow Equation
-class RicciFlow (Time : Type) [TimeDerivative Time R] [TimeDerivativeRules Time R V]
+class RicciFlow (Time : Type) [TimeDerivative Time R] [TimeDerivative Time V] [TimeDerivativeRules Time R V] [TensorTimeCalculus Time R V]
   (g_fam : Time → AbstractMetricTensor R V) (conn_fam : Time → AbstractAffineConnection R V)
   [∀ t, RiemannCurvatureTensorOp (conn_fam t)] where
   is_levi_civita : ∀ t, LeviCivita (conn_fam t) (g_fam t)

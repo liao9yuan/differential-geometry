@@ -47,25 +47,7 @@ lemma laplacian_smul (metric : MetricDuality R V)
 
 section GenericLaplacian
 
-/--
-Operator mapping a generic V → V → Tensor form into its metric trace.
-Used for constructing the generic Laplacian from the second covariant derivative.
--/
-class MetricTensorTraceOperator {R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
-    (metric : AbstractMetricTensor R V) {r s : ℕ} where
-  metric_trace_tensor : (V → V → AbstractTensor R V r s) → AbstractTensor R V r s
 
-/--
-Requirements for trace linearity on the generalized trace operator.
--/
-class MetricTensorTraceRules {R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
-    (metric : AbstractMetricTensor R V) {r s : ℕ} [MetricTensorTraceOperator metric (r := r) (s := s)] where
-  trace_add : ∀ (A B : V → V → AbstractTensor R V r s),
-    MetricTensorTraceOperator.metric_trace_tensor metric (fun X Y => TensorAlgebra.add (A X Y) (B X Y)) =
-    TensorAlgebra.add (MetricTensorTraceOperator.metric_trace_tensor metric A) (MetricTensorTraceOperator.metric_trace_tensor metric B)
-  trace_smul : ∀ (c : R) (A : V → V → AbstractTensor R V r s),
-    MetricTensorTraceOperator.metric_trace_tensor metric (fun X Y => TensorAlgebra.smul c (A X Y)) =
-    TensorAlgebra.smul c (MetricTensorTraceOperator.metric_trace_tensor metric A)
 
 /--
 The second covariant derivative $\nabla^2_{X,Y} T$ for an arbitrary tensor.
@@ -84,9 +66,9 @@ The generic rough tensor Laplacian $\Delta T$.
 Constructed as $\text{tr}_g(\nabla^2 T)$.
 -/
 def genericLaplacian {R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] [AbstractDerivationAction R V]
-    (metric : AbstractMetricTensor R V) {r s : ℕ} [MetricTensorTraceOperator metric (r := r) (s := s)]
+    (metric : MetricDuality R V) {r s : ℕ}
     (conn : AbstractAffineConnection R V) [AffineTensorCalculus conn]
     (T : AbstractTensor R V r s) : AbstractTensor R V r s :=
-  MetricTensorTraceOperator.metric_trace_tensor metric (SecondCovDerivTensor conn T)
+  sorry
 
 end GenericLaplacian

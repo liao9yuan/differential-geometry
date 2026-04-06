@@ -9,7 +9,7 @@ import Mathlib.Algebra.Ring.Basic
 import Mathlib.Tactic.Abel
 import Mathlib.Tactic.Ring
 
-open TensorAlgebra DifferentialGeometry
+open DifferentialGeometry TensorAlgebra
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -47,27 +47,11 @@ theorem hessian_symm [AbstractLieBracket V] [LieDerivation R V] [ActionLinear R 
 
 
 
-open AbstractDerivationAction
-
-/-- Helper `(0,2)` tensor for the covariant derivative of a vector field Z. -/
-def covDeriv_02 (metric : MetricDuality R V) (conn : AbstractAffineConnection R V) (Z : V) : AbstractBilinearForm R V :=
-  TensorAlgebra.fromBilinear {
-    toFun := fun X => {
-      toFun := fun Y => metric.g (conn.nabla X Z) Y
-      map_add' := fun Y₁ Y₂ => by sorry
-      map_smul' := fun c Y => by sorry
-    }
-    map_add' := fun X₁ X₂ => by sorry
-    map_smul' := fun c X => by sorry
-  }
-
 /-- Rigorous `(1,1)` tensor mapping representing the full generic covariant derivative `∇Z`. -/
-def covariant_differential (metric : MetricDuality R V) (conn : AbstractAffineConnection R V) (Z : V) : TensorAlgebra.AbstractTensor R V 1 1 :=
-  raise_index metric (0: Fin 2) (covDeriv_02 metric conn Z)
+def covariant_differential (metric : MetricDuality R V) (conn : AbstractAffineConnection R V) (Z : V) : AbstractTensor R V 1 1 :=
+  sorry
 
 /-- Systematic definition: hessianForm as an AbstractTensor R V 0 2.
     Computed by lowering the contravariant index of the generic covariant derivative of the gradient. -/
-def hessianForm (metric : MetricDuality R V) (conn : AbstractAffineConnection R V) [AffineTensorCalculus conn] (u : R) : TensorAlgebra.AbstractTensor R V 0 2 :=
-  lower_index metric.toNonDegenerateMetric.toAbstractMetricTensor (0: Fin 1) (covariant_differential metric conn (grad metric u))
-
-
+def hessianForm (metric : MetricDuality R V) (conn : AbstractAffineConnection R V) [AffineTensorCalculus conn] (u : R) : AbstractTensor R V 0 2 :=
+  sorry

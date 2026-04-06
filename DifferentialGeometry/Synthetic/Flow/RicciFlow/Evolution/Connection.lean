@@ -1,3 +1,4 @@
+import DifferentialGeometry.Synthetic.Operator.Time
 import DifferentialGeometry.Synthetic.Algebra.VectorField
 import DifferentialGeometry.Synthetic.Algebra.Metric
 import DifferentialGeometry.Synthetic.Algebra.Metric
@@ -33,7 +34,7 @@ under the Ricci flow equation.
 
 
 
-variable [TraceOperator R V] [LieDerivationRules R V] [TraceLinearityRules R V]
+variable [LieDerivationRules R V]
 variable [Invertible (2 : R)]
 
 /-- The covariant derivative of the Ricci form at time t. -/
@@ -50,7 +51,7 @@ books/Poincare_Conjecture_Blueprint/chapter03b.tex, around line 397 (Corollary: 
 -/
 lemma connection_evolution {Time : Type}
   [TimeDerivative Time R] [TimeDerivative Time V]
-  [TimeDerivativeRules Time R V] [ActionTimeDerivativeRules Time R V]
+  [TimeDerivativeRules Time R V] [ActionTimeDerivativeRules Time R V] [TensorTimeCalculus Time R V]
   (g_fam : Time → MetricDuality R V)
   (conn_fam : Time → AbstractAffineConnection R V)
   [MetricTimeDerivativeRules Time R V g_fam]

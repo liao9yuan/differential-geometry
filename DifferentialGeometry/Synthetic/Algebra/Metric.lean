@@ -101,23 +101,7 @@ lemma metric_sub_left {R V} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [A
     _ = metric.g X Z + - metric.g Y Z := by rw [metric_neg_left]
     _ = metric.g X Z - metric.g Y Z := by rw [sub_eq_add_neg]
 
-/-- Trace operator associated with a specific metric tensor.
-Input: (V → V → R)
-Output: R -/
-class MetricTraceOperator (R V : Type*) [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] (metric : AbstractMetricTensor R V) where
-  metric_trace : (V → V → R) → R
 
-/-- Axiomatic rules for the metric trace operator.
-Input: (AbstractMetricTensor R V)
-Output: Type -/
-class MetricTraceRules (R V : Type*) [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
-  (metric : AbstractMetricTensor R V) [MetricTraceOperator R V metric] where
-  trace_add : ∀ (T₁ T₂ : V → V → R),
-    MetricTraceOperator.metric_trace metric (fun X Y => T₁ X Y + T₂ X Y) =
-    MetricTraceOperator.metric_trace metric T₁ + MetricTraceOperator.metric_trace metric T₂
-  trace_smul : ∀ (a : R) (T : V → V → R),
-    MetricTraceOperator.metric_trace metric (fun X Y => a * T X Y) =
-    a * MetricTraceOperator.metric_trace metric T
 
 /-- A metric tensor is non-degenerate if it implies equality of vector fields
 when their inner products with all other vector fields are equal.

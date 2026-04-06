@@ -3,7 +3,7 @@ import DifferentialGeometry.Synthetic.Algebra.Metric
 import DifferentialGeometry.Synthetic.Geometry.Connection
 import DifferentialGeometry.Synthetic.Operator.Gradient
 import DifferentialGeometry.Synthetic.Operator.Laplacian
-import DifferentialGeometry.Synthetic.Operator.Variation
+import DifferentialGeometry.Synthetic.Operator.Laplacian
 import Mathlib.Algebra.Order.Ring.Defs
 
 set_option autoImplicit false
@@ -12,6 +12,15 @@ set_option linter.unusedSectionVars false
 set_option linter.style.emptyLine false
 set_option linter.style.whitespace false
 
+open AbstractDerivationAction DifferentialGeometry TensorAlgebra
+
+/-- Generic time derivative operator.
+Defines the `partial_t` operator for time-dependent functions.
+Input: (Type, Type)
+Output: Type -/
+class TimeDerivative (Time α : Type) where
+  partial_t : (Time → α) → Time → α
+
 /--
 This axiomatizes the existence of 1/t, its derivative rule ∂_t (1/t) = -1/t^2, and its positivity.
 -/
@@ -19,6 +28,22 @@ class TimeWeight (R : Type) [Field R] [LinearOrder R] [IsStrictOrderedRing R] [P
   inv_t : Time → R
   dt_inv_t : ∀ t, TimeDerivative.partial_t inv_t t = - (inv_t t)^2
   inv_t_nonneg : ∀ t, (0:R) ≤ inv_t t
+
+/-- Rules for the generic time derivative operator.
+Axiomatizes the additivity and scalar multiplication linearity of the time derivative.
+Input: (Type, Type, Type)
+Output: Type -/
+class TimeDerivativeRules (Time R V : Type) [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TimeDerivative Time R] where
+  t_add : ∀ (f₁ f₂ : Time → R) (t : Time),
+    TimeDerivative.partial_t (fun s => f₁ s + f₂ s) t = TimeDerivative.partial_t f₁ t + TimeDerivative.partial_t f₂ t
+  t_smul : ∀ (c : R) (f : Time → R) (t : Time),
+    TimeDerivative.partial_t (fun s => c * f s) t = c * TimeDerivative.partial_t f t
+
+/-- Axiom relating time derivatives to derivation action. -/
+class ActionTimeDerivativeRules (Time R V : Type) [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V]
+  [TimeDerivative Time R] [AbstractDerivationAction R V] where
+  t_action : ∀ (X : V) (f : Time → R) (t : Time),
+    TimeDerivative.partial_t (fun s => action X (f s)) t = action X (TimeDerivative.partial_t f t)
 
 /-- Single-variable calculus rules for scalar time derivatives. -/
 class ScalarTimeDerivativeRules (R : Type) [Field R] [LinearOrder R] [IsStrictOrderedRing R] (Time : Type) [TimeDerivative Time R] where
@@ -32,7 +57,6 @@ class ScalarTimeDerivativeRules (R : Type) [Field R] [LinearOrder R] [IsStrictOr
   dt_mul : ∀ (f g : Time → R) t, TimeDerivative.partial_t (fun s => f s * g s) t = TimeDerivative.partial_t f t * g t + f t * TimeDerivative.partial_t g t
 
 
-open DifferentialGeometry TensorAlgebra
 
 variable {R V : Type}
 variable [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] [AbstractDerivationAction R V]
