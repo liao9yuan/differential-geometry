@@ -33,6 +33,13 @@ Output: V -/
 def Rm (X Y Z : V) : V :=
   conn.nabla X (conn.nabla Y Z) - conn.nabla Y (conn.nabla X Z) - conn.nabla (bracket X Y) Z
 
+/-- RiemannCurvatureTensorOp: mathematically defined class/operator that structurally wraps the vector function Rm tightly into an AbstractTensor R V 1 3 -/
+class RiemannCurvatureTensorOp where
+  Rm_data : TensorData R V 1 3
+  eval_eq : ∀ (X Y Z : V) (ω : V →ₗ[R] R), Rm_data ![X, Y, Z] ![ω] = ω (Rm conn X Y Z)
+  Rm_tensor : AbstractTensor R V 1 3 := TensorAlgebra.fromData Rm_data
+
+
 /-- Ricci curvature tensor.
 Input: (X : V, Y : V)
 Output: R -/
