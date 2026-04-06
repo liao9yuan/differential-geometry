@@ -11,11 +11,6 @@ import Mathlib.Tactic.Ring
 
 open DifferentialGeometry TensorAlgebra
 
-set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.style.emptyLine false
-
 variable {R V : Type}
 variable [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
 variable [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V]
@@ -48,10 +43,38 @@ theorem hessian_symm [AbstractLieBracket V] [LieDerivation R V] [ActionLinear R 
 
 
 /-- Rigorous `(1,1)` tensor mapping representing the full generic covariant derivative `∇Z`. -/
-def covariant_differential (metric : MetricDuality R V) (conn : AbstractAffineConnection R V) (Z : V) : AbstractTensor R V 1 1 :=
-  sorry
+def covariant_differential (_metric : MetricDuality R V) (conn : AbstractAffineConnection R V) [AffineTensorCalculus conn] (Z : V) : AbstractTensor R V 1 1 :=
+  TensorAlgebra.fromData {
+    toFun := fun m => (TensorAlgebra.toData (genericCovDeriv conn (m 0) (fromVector Z))) ![]
+    map_update_add' := fun m i X1 X2 => by
+      have hz : i = 0 := Subsingleton.elim _ _
+      subst hz
+      dsimp [genericCovDeriv, fromVector]
+      rw [AffineTensorCalculus.nabla_vector]
+      rw [AffineTensorCalculus.nabla_vector]
+      rw [AffineTensorCalculus.nabla_vector]
+      simp only [Fin.isValue, Function.update_self]
+      rw [conn.nabla_add_left X1 X2 Z]
+      rw [TensorAlgebra.toData_fromData]
+      rw [TensorAlgebra.toData_fromData]
+      rw [TensorAlgebra.toData_fromData]
+      rw [vectorToData_add]
+      rfl
+    map_update_smul' := fun m i c X => by
+      have hz : i = 0 := Subsingleton.elim _ _
+      subst hz
+      dsimp [genericCovDeriv, fromVector]
+      rw [AffineTensorCalculus.nabla_vector]
+      rw [AffineTensorCalculus.nabla_vector]
+      simp only [Fin.isValue, Function.update_self]
+      rw [conn.nabla_smul_left c X Z]
+      rw [TensorAlgebra.toData_fromData]
+      rw [TensorAlgebra.toData_fromData]
+      rw [vectorToData_smul]
+      rfl
+  }
 
 /-- Systematic definition: hessianForm as an AbstractTensor R V 0 2.
     Computed by lowering the contravariant index of the generic covariant derivative of the gradient. -/
 def hessianForm (metric : MetricDuality R V) (conn : AbstractAffineConnection R V) [AffineTensorCalculus conn] (u : R) : AbstractTensor R V 0 2 :=
-  sorry
+  lower_index metric.toNonDegenerateMetric.toAbstractMetricTensor (0: Fin 1) (covariant_differential metric conn (grad metric u))
