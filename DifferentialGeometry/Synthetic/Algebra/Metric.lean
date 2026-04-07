@@ -125,6 +125,15 @@ class MetricDuality (R V : Type*) [Field R] [LinearOrder R] [IsStrictOrderedRing
   g_sharp : ∀ (f : V → R) (Z : V), AbstractMetricTensor.g toAbstractMetricTensor (sharp f) Z = f Z
   flat_def : ∀ (X Y : V), flat X Y = AbstractMetricTensor.g toAbstractMetricTensor X Y
 
+  /-- The inverse metric g_inv contracts with the metric tensor to produce the
+  Kronecker delta: g^{ac} g_{cb} = δ^a_b. This is verified in local coordinates
+  by the matrix identity (g^{-1})^{ac} g_{cb} = δ^a_b. -/
+  metric_inverse_contract :
+    TensorAlgebra.contract_general (r:=1) (s:=1) (1 : Fin 2) (0 : Fin 2)
+      (TensorAlgebra.tensor_prod (r1:=2) (s1:=0) (r2:=0) (s2:=2)
+        g_inv toAbstractMetricTensor.g_tensor) =
+    TensorAlgebra.delta_tensor
+
 variable (metric_duality : MetricDuality R V)
 
 /-- Prove linearity of raise over addition. -/

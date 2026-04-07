@@ -50,3 +50,17 @@ class AffineTensorCalculus (conn : AbstractAffineConnection R V) where
   nabla_smul : ∀ (X : V) (c : R) {r s : ℕ} (T : AbstractTensor R V r s),
     nabla_tensor X (TensorAlgebra.smul c T) =
       TensorAlgebra.add (TensorAlgebra.smul (action X c) T) (TensorAlgebra.smul c (nabla_tensor X T))
+
+  /-- Axiom 7: Additivity in the direction argument.
+  ∇_{X+Y} T = ∇_X T + ∇_Y T. The covariant derivative is R-linear in the
+  differentiation direction. In local coordinates this is immediate from
+  (X+Y)^μ Γ^λ_μν = X^μ Γ^λ_μν + Y^μ Γ^λ_μν. -/
+  nabla_add_left : ∀ (X Y : V) {r s : ℕ} (T : AbstractTensor R V r s),
+    nabla_tensor (X + Y) T = TensorAlgebra.add (nabla_tensor X T) (nabla_tensor Y T)
+
+  /-- Axiom 8: C∞-linearity in the direction argument.
+  ∇_{fX} T = f · ∇_X T. The covariant derivative scales linearly with the
+  direction vector field. In local coordinates: (fX)^μ = f X^μ, so
+  (fX)^μ (∂_μ T + Γ·T) = f · X^μ (∂_μ T + Γ·T). -/
+  nabla_smul_left : ∀ (c : R) (X : V) {r s : ℕ} (T : AbstractTensor R V r s),
+    nabla_tensor (c • X) T = TensorAlgebra.smul c (nabla_tensor X T)

@@ -88,6 +88,17 @@ class TensorAlgebra (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] whe
     (data_contract (r:=r) (s:=s) (data_contract (r:=r+1) (s:=s+1) (data_tensor_prod (r1:=r) (s1:=s+2) (r2:=2) (s2:=0) D (data_tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (vectorToData X) (vectorToData Y))))) m n =
     D (Fin.cons X (Fin.cons Y m)) n
 
+  /-- Single-vector contraction axiom: tensor-producting a (r, s+1) tensor D with
+  a vector v and contracting reduces to evaluating D at v in the first covariant slot.
+  This is the fundamental evaluation-via-contraction principle, from which the
+  two-vector version `data_eval_contract_contract` can be derived by applying twice.
+  In local coordinates: (D ⊗ v)^{i...}_{j₀ j₁...jₛ, } contracted on the new
+  contra and first co slot gives D^{i...}_{v j₁...jₛ}. -/
+  data_eval_single_contract : ∀ {r s : ℕ} (D : TensorData R V r (s + 1)) (v : V)
+    (m : Fin s → V) (n : Fin r → (V →ₗ[R] R)),
+    (data_contract (r:=r) (s:=s) (data_tensor_prod (r1:=r) (s1:=s+1) (r2:=1) (s2:=0) D (vectorToData v))) m n =
+    D (Fin.cons v m) n
+
   -- Data-bound swap axiom parametrized generically across ∀ {r s : ℕ}
   data_contract_swap_covariant_eval : ∀ {r s : ℕ} (X Y : V) (D : TensorData R V r (s + 2)),
     data_contract (r:=r) (s:=s) (data_contract (r:=r+1) (s:=s+1) (data_tensor_prod (r1:=r) (s1:=s+2) (r2:=2) (s2:=0) (toData (swap_covariant 0 1 (fromData D))) (data_tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (vectorToData X) (vectorToData Y)))) =
