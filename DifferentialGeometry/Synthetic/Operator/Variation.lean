@@ -79,7 +79,27 @@ lemma raise_variation {Time R V : Type} [Field R] [LinearOrder R] [IsStrictOrder
   (T : AbstractBilinearForm R V) (X Y : V) (t : Time) :
   (g_fam t).g (TimeDerivative.partial_t (fun s => (g_fam s).raise T X) t) Y =
   - tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![((g_fam t).raise T X), Y] ![] := by
-  sorry
+  have h1 : (fun s => (g_fam s).g ((g_fam s).raise T X) Y) = (fun s => tensor_eval (R:=R) (V:=V) T ![X, Y] ![]) := by
+    funext s
+    exact (g_fam s).g_raise T X Y
+  have h2 : TimeDerivative.partial_t (fun s => (g_fam s).g ((g_fam s).raise T X) Y) t = TimeDerivative.partial_t (fun s : Time => tensor_eval (R:=R) (V:=V) T ![X, Y] ![]) t := by rw [h1]
+  have h3 : TimeDerivative.partial_t (fun s : Time => tensor_eval (R:=R) (V:=V) T ![X, Y] ![]) t = 0 := MetricTimeDerivativeRules.t_const_R g_fam (tensor_eval (R:=R) (V:=V) T ![X, Y] ![]) t
+  have h4 : TimeDerivative.partial_t (fun s => (g_fam s).g ((g_fam s).raise T X) Y) t =
+    tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![(g_fam t).raise T X, Y] ![] +
+    (g_fam t).g (TimeDerivative.partial_t (fun s => (g_fam s).raise T X) t) Y +
+    (g_fam t).g ((g_fam t).raise T X) (TimeDerivative.partial_t (fun _ => Y) t) := MetricTimeDerivativeRules.t_metric (fun s => (g_fam s).raise T X) (fun _ => Y) t
+  have h5 : TimeDerivative.partial_t (fun _ => Y) t = 0 := MetricTimeDerivativeRules.t_const_V g_fam Y t
+  have h6 : (g_fam t).g ((g_fam t).raise T X) (TimeDerivative.partial_t (fun _ => Y) t) = 0 := by
+    rw [h5]
+    exact metric_zero_right _ _
+  have h_comm : tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![((g_fam t).raise T X), Y] ![] + (g_fam t).g (TimeDerivative.partial_t (fun s => (g_fam s).raise T X) t) Y = (g_fam t).g (TimeDerivative.partial_t (fun s => (g_fam s).raise T X) t) Y + tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![((g_fam t).raise T X), Y] ![] := add_comm _ _
+  calc (g_fam t).g (TimeDerivative.partial_t (fun s => (g_fam s).raise T X) t) Y
+    _ = (g_fam t).g (TimeDerivative.partial_t (fun s => (g_fam s).raise T X) t) Y + tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![((g_fam t).raise T X), Y] ![] - tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![((g_fam t).raise T X), Y] ![] := by abel
+    _ = tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![((g_fam t).raise T X), Y] ![] + (g_fam t).g (TimeDerivative.partial_t (fun s => (g_fam s).raise T X) t) Y + (g_fam t).g ((g_fam t).raise T X) (TimeDerivative.partial_t (fun _ => Y) t) - tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![((g_fam t).raise T X), Y] ![] := by
+      rw [h6, add_zero, h_comm]
+    _ = TimeDerivative.partial_t (fun s => (g_fam s).g ((g_fam s).raise T X) Y) t - tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![((g_fam t).raise T X), Y] ![] := by rw [← h4]
+    _ = 0 - tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![((g_fam t).raise T X), Y] ![] := by rw [h2, h3]
+    _ = - tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![((g_fam t).raise T X), Y] ![] := by abel
 
 -- 6. Metric Trace Variation
 /-- Time variation of the trace of a fixed metric. -/

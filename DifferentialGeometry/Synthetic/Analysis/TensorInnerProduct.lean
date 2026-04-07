@@ -34,6 +34,7 @@ def tensorInnerProduct (T S : AbstractBilinearForm R V) : R :=
 
 class TensorInnerProductRules (R V : Type) [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] (metric : MetricDuality R V) where
   inner_symm : ∀ (T S : AbstractBilinearForm R V), tensorInnerProduct metric T S = tensorInnerProduct metric S T
+  inner_trace : ∀ (T S : AbstractBilinearForm R V), tensorInnerProduct metric T S = tensor_eval (metric_trace metric (0: Fin 2) (0: Fin 1) (TensorAlgebra.contract (r:=0) (s:=2) (TensorAlgebra.tensor_prod (r1:=1) (s1:=1) (r2:=0) (s2:=2) (raise_index metric (0: Fin 2) T) S))) ![] ![]
 
 variable [IR : TensorInnerProductRules R V metric]
 
