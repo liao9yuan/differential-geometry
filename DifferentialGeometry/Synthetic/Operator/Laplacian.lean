@@ -50,8 +50,6 @@ lemma laplacian_smul (metric : MetricDuality R V)
 
 section GenericLaplacian
 
-
-
 /--
 The second covariant derivative $\nabla^2_{X,Y} T$ for an arbitrary tensor.
 Defined as $\nabla_X (\nabla_Y T) - \nabla_{\nabla_X Y} T$.
