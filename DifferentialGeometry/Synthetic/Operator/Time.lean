@@ -108,3 +108,7 @@ class TensorTimeCalculus (Time R V : Type) [Field R] [LinearOrder R] [IsStrictOr
   -- Commutativity with contraction
   t_contract : ∀ {r s : ℕ} (T : Time → AbstractTensor R V (r + 1) (s + 1)) (t : Time),
     partial_t_tensor t (fun x => TensorAlgebra.contract (T x)) = TensorAlgebra.contract (partial_t_tensor t T)
+
+  -- Commutativity with evaluation at constant arguments
+  t_eval : ∀ {r s : ℕ} (T_fam : Time → AbstractTensor R V r s) (vs : Fin s → V) (αs : Fin r → (V →ₗ[R] R)) (t : Time),
+    tensor_eval (partial_t_tensor t T_fam) vs αs = TimeDerivative.partial_t (fun x => tensor_eval (T_fam x) vs αs) t
