@@ -78,3 +78,56 @@ def covariant_differential (_metric : MetricDuality R V) (conn : AbstractAffineC
     Computed by lowering the contravariant index of the generic covariant derivative of the gradient. -/
 def hessianForm (metric : MetricDuality R V) (conn : AbstractAffineConnection R V) [AffineTensorCalculus conn] (u : R) : AbstractTensor R V 0 2 :=
   lower_index metric.toNonDegenerateMetric.toAbstractMetricTensor (0: Fin 1) (covariant_differential metric conn (grad metric u))
+
+-- Linearity of covariant_differential in its vector argument
+lemma covariant_differential_add_vec (metric : MetricDuality R V) (conn : AbstractAffineConnection R V) [AffineTensorCalculus conn]
+    (Z1 Z2 : V) :
+    covariant_differential metric conn (Z1 + Z2) = TensorAlgebra.add (covariant_differential metric conn Z1) (covariant_differential metric conn Z2) := by
+  conv_lhs => rw [← TensorAlgebra.fromData_toData (covariant_differential metric conn (Z1 + Z2))]
+  conv_rhs => rw [← TensorAlgebra.fromData_toData (TensorAlgebra.add (covariant_differential metric conn Z1) (covariant_differential metric conn Z2))]
+  congr 1
+  rw [TensorAlgebra.toData_add]
+  simp only [covariant_differential, TensorAlgebra.toData_fromData]
+  ext m
+  simp only [MultilinearMap.add_apply, fromVector_add, genericCovDeriv_add, TensorAlgebra.toData_add]
+  rfl
+
+-- Linearity of hessianForm in the scalar argument
+lemma hessianForm_add (metric : MetricDuality R V) (conn : AbstractAffineConnection R V) [AffineTensorCalculus conn]
+    (f g : R) :
+    hessianForm metric conn (f + g) = TensorAlgebra.add (hessianForm metric conn f) (hessianForm metric conn g) := by
+  unfold hessianForm
+  rw [grad_add, covariant_differential_add_vec, lower_index_add]
+
+-- Linearity of covariant_differential in its vector argument (scalar multiplication)
+lemma covariant_differential_smul_vec (metric : MetricDuality R V) (conn : AbstractAffineConnection R V) [AffineTensorCalculus conn]
+    (c : R) (Z : V) (hc : ∀ X : V, action X c = 0) :
+    covariant_differential metric conn (c • Z) = TensorAlgebra.smul c (covariant_differential metric conn Z) := by
+  conv_lhs => rw [← TensorAlgebra.fromData_toData (covariant_differential metric conn (c • Z))]
+  conv_rhs => rw [← TensorAlgebra.fromData_toData (TensorAlgebra.smul c (covariant_differential metric conn Z))]
+  congr 1
+  rw [TensorAlgebra.toData_smul]
+  simp only [covariant_differential, TensorAlgebra.toData_fromData]
+  ext m i
+  simp only [MultilinearMap.coe_mk, fromVector_smul, genericCovDeriv_smul, TensorAlgebra.toData_add, TensorAlgebra.toData_smul, MultilinearMap.add_apply, MultilinearMap.smul_apply]
+  have hz : action (m 0) c = 0 := hc (m 0)
+  rw [hz, zero_smul, zero_add]
+
+lemma grad_smul_const (metric : MetricDuality R V) (c f : R) (hc : ∀ X : V, action X c = 0) :
+    grad metric (c * f) = c • grad metric f := by
+  apply metric.toNonDegenerateMetric.eq_of_forall_g_eq
+  intro X
+  have h1 : metric.g (grad metric (c * f)) X = action X (c * f) := g_grad metric (c * f) X
+  have h2 : action X (c * f) = c * action X f := action_mul_const X c f (hc X)
+  have h3 : metric.g (c • grad metric f) X = c * metric.g (grad metric f) X := metric.toNonDegenerateMetric.toAbstractMetricTensor.bilinear_smul_left _ _ _
+  have h4 : metric.g (grad metric f) X = action X f := g_grad metric f X
+  have h5 : metric.g (c • grad metric f) X = c * action X f := by rw [h3, h4]
+  rw [h1, h2, ← h5]
+
+-- Linearity of hessianForm in the scalar argument
+lemma hessianForm_smul (metric : MetricDuality R V) (conn : AbstractAffineConnection R V) [AffineTensorCalculus conn]
+    (c f : R) (hc : ∀ X : V, action X c = 0) :
+    hessianForm metric conn (c * f) = TensorAlgebra.smul c (hessianForm metric conn f) := by
+  unfold hessianForm
+  rw [grad_smul_const metric c f hc, covariant_differential_smul_vec metric conn c (grad metric f) hc, lower_index_smul]
+
