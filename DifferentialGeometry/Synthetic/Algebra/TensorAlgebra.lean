@@ -96,6 +96,7 @@ class TensorAlgebra (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] whe
   -- 2. Scalar Definition:
   toScalar_add : ∀ T1 T2 : AbstractTensor 0 0, toScalar (add T1 T2) = toScalar T1 + toScalar T2
   toScalar_smul : ∀ (c : R) (T : AbstractTensor 0 0), toScalar (smul c T) = c * toScalar T
+  toScalar_eq_toData : ∀ (T : AbstractTensor 0 0), toScalar T = toData T ![] ![]
 
   tensor_prod_add_left : ∀ {r1 s1 r2 s2 : ℕ} (T1 T2 : AbstractTensor r1 s1) (T3 : AbstractTensor r2 s2),
     tensor_prod (add T1 T2) T3 = add (tensor_prod T1 T3) (tensor_prod T2 T3)
@@ -105,6 +106,12 @@ class TensorAlgebra (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] whe
     tensor_prod (smul c T1) T2 = smul c (tensor_prod T1 T2)
   tensor_prod_smul_right : ∀ {r1 s1 r2 s2 : ℕ} (c : R) (T1 : AbstractTensor r1 s1) (T2 : AbstractTensor r2 s2),
     tensor_prod T1 (smul c T2) = smul c (tensor_prod T1 T2)
+
+  -- Rank-1 Outer Product & Evaluation
+  outerProduct : V → (V →ₗ[R] R) → AbstractTensor 1 1
+  contract_outerProduct : ∀ (X : V) (α : V →ₗ[R] R), toScalar (contract (outerProduct X α)) = α X
+  toData_outerProduct : ∀ (X : V) (α : V →ₗ[R] R) (m : Fin 1 → V) (n : Fin 1 → (V →ₗ[R] R)),
+    toData (outerProduct X α) m n = α (m 0) * n 0 X
 
 namespace TensorAlgebra
 
@@ -118,16 +125,16 @@ def contract_general {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] [T
 lemma swap_covariant_add {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
     {r s : ℕ} (i j : Fin s) (T1 T2 : AbstractTensor R V r s) :
     swap_covariant i j (add T1 T2) = add (swap_covariant i j T1) (swap_covariant i j T2) := by
-  have h : toData (swap_covariant i j (add T1 T2)) = toData (add (swap_covariant i j T1) (swap_covariant i j T2)) := by
-    ext m n
-    have lhs : toData (swap_covariant i j (add T1 T2)) m n = (toData T1 + toData T2) (m ∘ Equiv.swap i j) n := by
-      rw [toData_swap_covariant]; rw [toData_add]
-    have rhs : toData (add (swap_covariant i j T1) (swap_covariant i j T2)) m n =
-      toData (swap_covariant i j T1) m n + toData (swap_covariant i j T2) m n := by
-      rw [toData_add]; rfl
-    rw [lhs, rhs, toData_swap_covariant, toData_swap_covariant]
-    rfl
-  rw [← fromData_toData (swap_covariant i j (add T1 T2)), ← fromData_toData (add (swap_covariant i j T1) (swap_covariant i j T2)), h]
+    have h : toData (swap_covariant i j (add T1 T2)) = toData (add (swap_covariant i j T1) (swap_covariant i j T2)) := by
+      ext m n
+      have lhs : toData (swap_covariant i j (add T1 T2)) m n = (toData T1 + toData T2) (m ∘ Equiv.swap i j) n := by
+        rw [toData_swap_covariant]; rw [toData_add]
+      have rhs : toData (add (swap_covariant i j T1) (swap_covariant i j T2)) m n =
+        toData (swap_covariant i j T1) m n + toData (swap_covariant i j T2) m n := by
+        rw [toData_add]; rfl
+      rw [lhs, rhs, toData_swap_covariant, toData_swap_covariant]
+      rfl
+    rw [← fromData_toData (swap_covariant i j (add T1 T2)), ← fromData_toData (add (swap_covariant i j T1) (swap_covariant i j T2)), h]
 
 lemma swap_covariant_smul {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
     {r s : ℕ} (i j : Fin s) (c : R) (T : AbstractTensor R V r s) :
@@ -135,12 +142,33 @@ lemma swap_covariant_smul {R V : Type*} [CommRing R] [AddCommGroup V] [Module R 
   have h : toData (swap_covariant i j (smul c T)) = toData (smul c (swap_covariant i j T)) := by
     ext m n
     have lhs : toData (swap_covariant i j (smul c T)) m n = (c • toData T) (m ∘ Equiv.swap i j) n := by
-      rw [toData_swap_covariant]; rw [toData_smul]
-    have rhs : toData (smul c (swap_covariant i j T)) m n = c • (toData (swap_covariant i j T)) m n := by
+      rw [toData_swap_covariant, toData_smul]
+    have rhs : toData (smul c (swap_covariant i j T)) m n = c * toData (swap_covariant i j T) m n := by
       rw [toData_smul]; rfl
     rw [lhs, rhs, toData_swap_covariant]
     rfl
   rw [← fromData_toData (swap_covariant i j (smul c T)), ← fromData_toData (smul c (swap_covariant i j T)), h]
+
+lemma contract_general_0_0 {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
+    {r s : ℕ} (T : AbstractTensor R V (r + 1) (s + 1)) :
+    contract_general (0 : Fin (r + 1)) (0 : Fin (s + 1)) T = contract T := by
+  unfold contract_general
+  have h_cov : swap_covariant (0 : Fin _) (0 : Fin _) (swap_contravariant (0 : Fin _) (0 : Fin _) T) = swap_contravariant (0 : Fin _) (0 : Fin _) T := by
+    have hd : toData (swap_covariant (0 : Fin _) (0 : Fin _) (swap_contravariant (0 : Fin _) (0 : Fin _) T)) = toData (swap_contravariant (0 : Fin _) (0 : Fin _) T) := by
+      ext m n
+      rw [toData_swap_covariant, Equiv.swap_self]
+      rfl
+    rw [← fromData_toData (swap_covariant (0 : Fin _) (0 : Fin _) (swap_contravariant (0 : Fin _) (0 : Fin _) T))]
+    rw [hd, fromData_toData]
+  rw [h_cov]
+  have h_con : swap_contravariant (0 : Fin _) (0 : Fin _) T = T := by
+    have hd : toData (swap_contravariant (0 : Fin _) (0 : Fin _) T) = toData T := by
+      ext m n
+      rw [toData_swap_contravariant, Equiv.swap_self]
+      rfl
+    rw [← fromData_toData (swap_contravariant (0 : Fin _) (0 : Fin _) T)]
+    rw [hd, fromData_toData]
+  rw [h_con]
 
 lemma swap_contravariant_add {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
     {r s : ℕ} (i j : Fin r) (T1 T2 : AbstractTensor R V r s) :

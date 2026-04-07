@@ -217,3 +217,7 @@ lemma raise_index_smul {R V : Type*} [Field R] [LinearOrder R] [IsStrictOrderedR
   unfold raise_index
   simp only [TensorAlgebra.tensor_prod_smul_right]
   rw [cast_tensor_smul (by omega) (by omega), TensorAlgebra.contract_general_smul]
+
+class MetricInverse (R V : Type*) [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] (metric : MetricDuality R V) where
+  raise_lower_id : ∀ (T : AbstractTensor R V 1 1), raise_index metric (r:=0) (s:=1) (0 : Fin 2) (lower_index metric.toNonDegenerateMetric.toAbstractMetricTensor (r:=0) (s:=1) (0 : Fin 1) T) = T
+  lower_raise_id : ∀ (T : AbstractTensor R V 1 1), lower_index metric.toNonDegenerateMetric.toAbstractMetricTensor (r:=1) (s:=0) (0 : Fin 2) (raise_index metric (r:=1) (s:=0) (0 : Fin 1) T) = T
