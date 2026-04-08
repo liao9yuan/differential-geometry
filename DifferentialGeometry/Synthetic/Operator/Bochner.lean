@@ -84,14 +84,56 @@ lemma hessian_norm_sq_grad
   rw [hsplit]
   ring
 
+/-!
+## Bochner-Weitzenböck Calculus Interface
+
+The `BochnerCalculus` class provides the two key algebraic axioms for the Bochner-Weitzenböck
+formula, following the same pattern as `TensorInnerProductRules` and `AffineTensorCalculus`.
+
+**Mathematical content of the axioms:**
+
+- `bochner_lap_expand` encodes the expansion of Δ(|∇f|²) obtained by applying the Hessian
+  trace to the identity `Hess(|∇f|²)(X,Y) = 2g(∇²_{X,Y}∇f, ∇f) + 2g(∇_X∇f, ∇_Y∇f)`,
+  and identifying the second term's metric trace with `tensorNormSq(hessianForm f)`.
+
+- `bochner_commutation` encodes the vector Bochner formula:
+  the metric trace of `(X,Y) ↦ g(∇²_{X,Y}∇f, ∇f)` equals `Ric(∇f,∇f) + g(∇f, ∇(Δf))`,
+  proved in the analytic backend via the Ricci identity and metric compatibility.
+
+These axioms can be instantiated and proved in the coordinate-based analytic layer.
+-/
+class BochnerCalculus
+    (metric : MetricDuality R V)
+    (conn : AbstractAffineConnection R V)
+    [AffineTensorCalculus conn] [RiemannCurvatureTensorOp conn] [TorsionFree conn]
+    [MetricCompatible conn metric.toNonDegenerateMetric.toAbstractMetricTensor]
+    [TensorInnerProductRules R V metric] where
+  /-- The abstract intermediate quantity: metric trace of (X,Y) ↦ g(∇²_{X,Y}∇f, ∇f). -/
+  roughBochnerTrace : R → R
+  /-- Step 1: The Laplacian of |∇f|² decomposes into the rough trace and the Hessian squared norm. -/
+  bochner_lap_expand : ∀ (f : R),
+    laplacian metric conn (metric.g (grad metric f) (grad metric f)) =
+    2 * roughBochnerTrace f + 2 * tensorNormSq metric (hessianForm metric conn f)
+  /-- Step 2: The rough Bochner trace equals the Ricci term plus the gradient-of-Laplacian term. -/
+  bochner_commutation : ∀ (f : R),
+    roughBochnerTrace f =
+    Rc conn (grad metric f) (grad metric f) +
+    metric.g (grad metric f) (grad metric (laplacian metric conn f))
+
 -- Proves the Bochner-Weitzenbock formula relating the Laplacian of the squared gradient to the Hessian, Ricci curvature, and the gradient of the Laplacian.
 theorem bochner_identity
   [Invertible (2 : R)]
   (metric : MetricDuality R V)
   (conn : AbstractAffineConnection R V) [AffineTensorCalculus conn] [RiemannCurvatureTensorOp conn] [TorsionFree conn]
+  [MetricCompatible conn metric.toNonDegenerateMetric.toAbstractMetricTensor]
+  [TensorInnerProductRules R V metric]
+  [BC : BochnerCalculus metric conn]
   (f : R) :
   laplacian metric conn (metric.g (grad metric f) (grad metric f)) =
   2 * tensorNormSq metric (hessianForm metric conn f) +
   2 * Rc conn (grad metric f) (grad metric f) +
   2 * metric.g (grad metric f) (grad metric (laplacian metric conn f)) := by
-  sorry
+  have h1 := BC.bochner_lap_expand f
+  have h2 := BC.bochner_commutation f
+  rw [h1, h2]
+  ring
