@@ -19,18 +19,6 @@ open DifferentialGeometry TensorAlgebra
 
 variable {R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
 variable (metric : MetricDuality R V)
-def contract4 (T : AbstractTensor R V 4 4) : AbstractTensor R V 0 0 :=
-  contract (r:=0) (s:=0) (contract (r:=1) (s:=1) (contract (r:=2) (s:=2) (contract (r:=3) (s:=3) T)))
-
--- 2. Define Tensor Inner Product
-def tensorInnerProduct (T S : AbstractBilinearForm R V) : R :=
-  toScalar (
-    contract4 (
-      tensor_prod (r1:=4) (s1:=0) (r2:=0) (s2:=4)
-        (tensor_prod (r1:=2) (s1:=0) (r2:=2) (s2:=0) metric.g_inv metric.g_inv)
-        (tensor_prod (r1:=0) (s1:=2) (r2:=0) (s2:=2) T S)
-    )
-  )
 
 class TensorInnerProductRules (R V : Type) [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] (metric : MetricDuality R V) where
   inner_symm : ∀ (T S : AbstractBilinearForm R V), tensorInnerProduct metric T S = tensorInnerProduct metric S T

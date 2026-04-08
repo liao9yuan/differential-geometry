@@ -230,3 +230,15 @@ lemma raise_index_smul {R V : Type*} [Field R] [LinearOrder R] [IsStrictOrderedR
 class MetricInverse (R V : Type*) [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] (metric : MetricDuality R V) where
   raise_lower_id : ∀ (T : AbstractTensor R V 1 1), raise_index metric (r:=0) (s:=1) (0 : Fin 2) (lower_index metric.toNonDegenerateMetric.toAbstractMetricTensor (r:=0) (s:=1) (0 : Fin 1) T) = T
   lower_raise_id : ∀ (T : AbstractTensor R V 1 1), lower_index metric.toNonDegenerateMetric.toAbstractMetricTensor (r:=1) (s:=0) (0 : Fin 2) (raise_index metric (r:=1) (s:=0) (0 : Fin 1) T) = T
+
+/--
+Axiomatizes the fundamental geometric fact (musical isomorphism evaluation):
+If a (1,1) abstract tensor T analytically represents a vector-valued operator `Z_op`
+(i.e., `T(Y, n) = n(Z_op Y)`), then lowering its contravariant index algebraically
+results in the (0,2) tensor evalutating to `g(X, Z_op Y)`.
+This strictly isolates tensor algebra representations from combinatorial data_contract unrolling.
+-/
+class MetricEvaluationRules (R V : Type*) [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] (metric : AbstractMetricTensor R V) where
+  lower_index_1_1_eval : ∀ (T : AbstractTensor R V 1 1) (Z_op : V → V),
+    (∀ (Y : V) (n : (V →ₗ[R] R)), tensor_eval T ![Y] ![n] = n (Z_op Y)) →
+    ∀ (X Y : V), tensor_eval (lower_index metric (0: Fin 1) T) ![X, Y] ![] = metric.g X (Z_op Y)
