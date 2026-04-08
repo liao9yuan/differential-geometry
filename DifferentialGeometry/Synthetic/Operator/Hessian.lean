@@ -131,3 +131,59 @@ lemma hessianForm_smul (metric : MetricDuality R V) (conn : AbstractAffineConnec
   unfold hessianForm
   rw [grad_smul_const metric c f hc, covariant_differential_smul_vec metric conn c (grad metric f) hc, lower_index_smul]
 
+/-- Evaluating `hessianForm metric conn u` at vectors `(X, Y)` exactly matches `Hess conn u X Y`.
+This connects the abstract tensor formulation to the pointwise definition. -/
+lemma hessianForm_eval (metric : MetricDuality R V)
+    (conn : AbstractAffineConnection R V) [AffineTensorCalculus conn]
+    [MetricEvaluationRules R V metric.toNonDegenerateMetric.toAbstractMetricTensor]
+    [MetricCompatible conn metric.toNonDegenerateMetric.toAbstractMetricTensor]
+    [TorsionFree conn] [LieDerivation R V] [ActionLinear R V]
+    (u : R) (X Y : V) :
+    tensor_eval (hessianForm metric conn u) ![X, Y] ![] =
+    Hess conn u X Y := by
+  -- Step 1: Unfold hessianForm to lower_index of covariant_differential
+  unfold hessianForm
+  -- Step 2: Prove that covariant_differential evaluates as T(Y', n) = n(∇_{Y'} grad u)
+  have h_cov_eval : ∀ (Y' : V) (n : V →ₗ[R] R),
+      tensor_eval (covariant_differential metric conn (grad metric u)) ![Y'] ![n] =
+      n (conn.nabla Y' (grad metric u)) := by
+    intro Y' n
+    simp only [tensor_eval, covariant_differential, TensorAlgebra.toData_fromData]
+    dsimp only [MultilinearMap.coe_mk]
+    -- Reduce ![Y'] 0 to Y' via definitional equality
+    change ((TensorAlgebra.toData (genericCovDeriv conn Y' (fromVector (grad metric u)))) ![]) (![n]) =
+      n (conn.nabla Y' (grad metric u))
+    have h_nabla : genericCovDeriv conn Y' (fromVector (R:=R) (grad metric u)) =
+        fromVector (R:=R) (conn.nabla Y' (grad metric u)) := by
+      simp only [genericCovDeriv, fromVector]
+      exact AffineTensorCalculus.nabla_vector Y' (grad metric u)
+    rw [h_nabla]
+    simp only [fromVector, TensorAlgebra.toData_fromData]
+    dsimp [vectorToData, MultilinearMap.constOfIsEmpty, MultilinearMap.ofSubsingleton, evalLinear]
+  -- Step 3: Apply MetricEvaluationRules.lower_index_1_1_eval
+  have h_lower := MetricEvaluationRules.lower_index_1_1_eval
+    (metric := metric.toNonDegenerateMetric.toAbstractMetricTensor)
+    (covariant_differential metric conn (grad metric u))
+    (fun Y' => conn.nabla Y' (grad metric u))
+    h_cov_eval X Y
+  rw [h_lower]
+  -- Goal: metric.g X (∇_Y grad u) = Hess conn u X Y
+  -- Step 4: Use metric compatibility to show g(X, ∇_Y grad u) = Hess u Y X
+  have h_compat := MetricCompatible.compat (conn:=conn)
+    (metric:=metric.toNonDegenerateMetric.toAbstractMetricTensor) Y X (grad metric u)
+  -- h_compat : action Y (g X (grad u)) = g(∇_Y X, grad u) + g(X, ∇_Y grad u)
+  have h1 : metric.g X (grad metric u) = action X u := by
+    rw [metric.toNonDegenerateMetric.toAbstractMetricTensor.symm X (grad metric u)]
+    exact g_grad metric u X
+  have h2 : metric.g (conn.nabla Y X) (grad metric u) = action (conn.nabla Y X) u := by
+    rw [metric.toNonDegenerateMetric.toAbstractMetricTensor.symm (conn.nabla Y X) (grad metric u)]
+    exact g_grad metric u (conn.nabla Y X)
+  rw [h1, h2] at h_compat
+  -- h_compat : action Y (action X u) = action (∇_Y X) u + g(X, ∇_Y grad u)
+  -- So g(X, ∇_Y grad u) = action Y (action X u) - action (∇_Y X) u = Hess u Y X
+  have h3 : metric.g X (conn.nabla Y (grad metric u)) =
+      action Y (action X u) - action (conn.nabla Y X) u := by linarith
+  rw [h3]
+  -- Goal: Hess conn u Y X = Hess conn u X Y (definitionally)
+  exact hessian_symm conn u Y X
+
