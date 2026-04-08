@@ -64,3 +64,18 @@ class AffineTensorCalculus (conn : AbstractAffineConnection R V) where
   (fX)^μ (∂_μ T + Γ·T) = f · X^μ (∂_μ T + Γ·T). -/
   nabla_smul_left : ∀ (c : R) (X : V) {r s : ℕ} (T : AbstractTensor R V r s),
     nabla_tensor (c • X) T = TensorAlgebra.smul c (nabla_tensor X T)
+
+  /-- Axiom 9: Commutes with covariant index permutations.
+  ∇_X (swap_{ij} T) = swap_{ij} (∇_X T). Index permutations are purely
+  algebraic and commute with the covariant derivative. -/
+  nabla_swap_covariant : ∀ (X : V) {r s : ℕ} (i j : Fin s) (T : AbstractTensor R V r s),
+    nabla_tensor X (TensorAlgebra.swap_covariant i j T) = TensorAlgebra.swap_covariant i j (nabla_tensor X T)
+
+  /-- Axiom 10: Commutes with contravariant index permutations.
+  ∇_X (swap_{ij} T) = swap_{ij} (∇_X T). -/
+  nabla_swap_contravariant : ∀ (X : V) {r s : ℕ} (i j : Fin r) (T : AbstractTensor R V r s),
+    nabla_tensor X (TensorAlgebra.swap_contravariant i j T) = TensorAlgebra.swap_contravariant i j (nabla_tensor X T)
+
+  /-- Axiom 11: ∇_X δ = 0. The Kronecker delta is covariantly constant because
+  its components are 0 or 1 in every coordinate system. -/
+  nabla_delta : ∀ (X : V), nabla_tensor X TensorAlgebra.delta_tensor = 0
