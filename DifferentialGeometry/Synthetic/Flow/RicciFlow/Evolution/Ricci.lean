@@ -94,11 +94,11 @@ lemma tensor_eval_partial_t (T : Time → AbstractTensor R V 0 2) (X Y : V) (t :
   (ht_Y : TimeDerivative.partial_t (fun _ => Y) t = 0) :
   tensor_eval (TensorTimeCalculus.partial_t_tensor t T) ![X, Y] ![] =
   TimeDerivative.partial_t (fun s => tensor_eval (T s) ![X, Y] ![]) t := by
-  let P_YZ := TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector (R:=R) X) (fromVector (R:=R) Y)
+  let P_YZ := TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector (R:=R) Y) (fromVector (R:=R) X)
   let A (s : Time) := contract (r:=0) (s:=0) (contract (r:=1) (s:=1) (TensorAlgebra.tensor_prod (r1:=0) (s1:=2) (r2:=2) (s2:=0) (T s) P_YZ))
   have h1 : TensorTimeCalculus.partial_t_tensor t (fun _ => P_YZ) = 0 := by
-    have h_prod := TensorTimeCalculus.t_tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fun _ => fromVector (R:=R) X) (fun _ => fromVector (R:=R) Y) t
-    rw [partial_t_fromVector X t ht_X, partial_t_fromVector Y t ht_Y] at h_prod
+    have h_prod := TensorTimeCalculus.t_tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fun _ => fromVector (R:=R) Y) (fun _ => fromVector (R:=R) X) t
+    rw [partial_t_fromVector Y t ht_Y, partial_t_fromVector X t ht_X] at h_prod
     rw [tensor_prod_zero_left, tensor_prod_zero_right, tensor_add_zero] at h_prod
     exact h_prod
   have h2 : TensorTimeCalculus.partial_t_tensor t (fun s => TensorAlgebra.tensor_prod (r1:=0) (s1:=2) (r2:=2) (s2:=0) (T s) P_YZ) = TensorAlgebra.tensor_prod (r1:=0) (s1:=2) (r2:=2) (s2:=0) (TensorTimeCalculus.partial_t_tensor t T) P_YZ := by

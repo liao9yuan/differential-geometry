@@ -8,7 +8,7 @@ open BigOperators
 
 namespace DifferentialGeometry
 
-class DualFrame (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] (d : ℕ) where
+class DualFrame (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] (d : outParam ℕ) where
   basis : Fin d → V
   dual : Fin d → (V →ₗ[R] R)
   dual_basis_eval : ∀ i j : Fin d, dual i (basis j) = if i = j then 1 else 0

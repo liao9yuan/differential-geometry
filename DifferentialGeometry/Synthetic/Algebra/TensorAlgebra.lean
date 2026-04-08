@@ -85,7 +85,7 @@ class TensorAlgebra (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] whe
   
   -- Evaluation of double contraction of any generic D ⊗ X ⊗ Y uniformly evaluates to prepending to parameter array
   data_eval_contract_contract : ∀ {r s : ℕ} (D : TensorData R V r (s + 2)) (X Y : V) (m : Fin s → V) (n : Fin r → (V →ₗ[R] R)),
-    (data_contract (r:=r) (s:=s) (data_contract (r:=r+1) (s:=s+1) (data_tensor_prod (r1:=r) (s1:=s+2) (r2:=2) (s2:=0) D (data_tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (vectorToData X) (vectorToData Y))))) m n =
+    (data_contract (r:=r) (s:=s) (data_contract (r:=r+1) (s:=s+1) (data_tensor_prod (r1:=r) (s1:=s+2) (r2:=2) (s2:=0) D (data_tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (vectorToData Y) (vectorToData X))))) m n =
     D (Fin.cons X (Fin.cons Y m)) n
 
   /-- Single-vector contraction axiom: tensor-producting a (r, s+1) tensor D with
@@ -366,14 +366,14 @@ lemma tensor_eval_smul_right (T : TensorAlgebra.AbstractTensor R V 0 2) (f : R) 
 
 
 lemma tensor_eval_isomorphism (T : TensorAlgebra.AbstractTensor R V 0 2) (X Y : V) :
-  tensor_eval T ![X, Y] ![] = ((TensorAlgebra.toData (TensorAlgebra.contract (R:=R) (r:=0) (s:=0) (TensorAlgebra.contract (R:=R) (r:=1) (s:=1) (TensorAlgebra.tensor_prod (R:=R) (r1:=0) (s1:=2) (r2:=2) (s2:=0) T (TensorAlgebra.tensor_prod (R:=R) (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector (R:=R) X) (fromVector (R:=R) Y)))))) ![]) ![] := by
+  tensor_eval T ![X, Y] ![] = ((TensorAlgebra.toData (TensorAlgebra.contract (R:=R) (r:=0) (s:=0) (TensorAlgebra.contract (R:=R) (r:=1) (s:=1) (TensorAlgebra.tensor_prod (R:=R) (r1:=0) (s1:=2) (r2:=2) (s2:=0) T (TensorAlgebra.tensor_prod (R:=R) (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector (R:=R) Y) (fromVector (R:=R) X)))))) ![]) ![] := by
   dsimp [tensor_eval]
-  have step1 : TensorAlgebra.toData (TensorAlgebra.contract (R:=R) (r:=0) (s:=0) (TensorAlgebra.contract (R:=R) (r:=1) (s:=1) (TensorAlgebra.tensor_prod (R:=R) (r1:=0) (s1:=2) (r2:=2) (s2:=0) T (TensorAlgebra.tensor_prod (R:=R) (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector (R:=R) X) (fromVector (R:=R) Y))))) = TensorAlgebra.data_contract (r:=0) (s:=0) (TensorAlgebra.data_contract (r:=1) (s:=1) (TensorAlgebra.data_tensor_prod (r1:=0) (s1:=2) (r2:=2) (s2:=0) (TensorAlgebra.toData T) (TensorAlgebra.data_tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (vectorToData (R:=R) X) (vectorToData (R:=R) Y)))) := by
+  have step1 : TensorAlgebra.toData (TensorAlgebra.contract (R:=R) (r:=0) (s:=0) (TensorAlgebra.contract (R:=R) (r:=1) (s:=1) (TensorAlgebra.tensor_prod (R:=R) (r1:=0) (s1:=2) (r2:=2) (s2:=0) T (TensorAlgebra.tensor_prod (R:=R) (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector (R:=R) Y) (fromVector (R:=R) X))))) = TensorAlgebra.data_contract (r:=0) (s:=0) (TensorAlgebra.data_contract (r:=1) (s:=1) (TensorAlgebra.data_tensor_prod (r1:=0) (s1:=2) (r2:=2) (s2:=0) (TensorAlgebra.toData T) (TensorAlgebra.data_tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (vectorToData (R:=R) Y) (vectorToData (R:=R) X)))) := by
     rw [TensorAlgebra.toData_contract]
     rw [TensorAlgebra.toData_contract]
     rw [TensorAlgebra.toData_tensor_prod]
-    have h_vec1 : TensorAlgebra.toData (fromVector (R:=R) X) = vectorToData (R:=R) X := TensorAlgebra.toData_fromData (vectorToData (R:=R) X)
-    have h_vec2 : TensorAlgebra.toData (fromVector (R:=R) Y) = vectorToData (R:=R) Y := TensorAlgebra.toData_fromData (vectorToData (R:=R) Y)
+    have h_vec1 : TensorAlgebra.toData (fromVector (R:=R) Y) = vectorToData (R:=R) Y := TensorAlgebra.toData_fromData (vectorToData (R:=R) Y)
+    have h_vec2 : TensorAlgebra.toData (fromVector (R:=R) X) = vectorToData (R:=R) X := TensorAlgebra.toData_fromData (vectorToData (R:=R) X)
     rw [TensorAlgebra.toData_tensor_prod]
     rw [h_vec1, h_vec2]
   rw [step1]

@@ -141,9 +141,9 @@ lemma covDeriv_eval (X : V) (T : AbstractBilinearForm R V) (Y Z : V) :
     rw [AffineTensorCalculus.nabla_scalar X]
     rw [TensorAlgebra.toData_fromData]
     rfl
-  let P_YZ := TensorAlgebra.tensor_prod (R:=R) (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector (R:=R) Y) (fromVector (R:=R) Z)
-  let P_nYZ := TensorAlgebra.tensor_prod (R:=R) (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector (R:=R) (conn.nabla X Y)) (fromVector (R:=R) Z)
-  let P_YnZ := TensorAlgebra.tensor_prod (R:=R) (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector (R:=R) Y) (fromVector (R:=R) (conn.nabla X Z))
+  let P_YZ := TensorAlgebra.tensor_prod (R:=R) (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector (R:=R) Z) (fromVector (R:=R) Y)
+  let P_nYZ := TensorAlgebra.tensor_prod (R:=R) (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector (R:=R) Z) (fromVector (R:=R) (conn.nabla X Y))
+  let P_YnZ := TensorAlgebra.tensor_prod (R:=R) (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector (R:=R) (conn.nabla X Z)) (fromVector (R:=R) Y)
   let TYZ := TensorAlgebra.tensor_prod (R:=R) (r1:=0) (s1:=2) (r2:=2) (s2:=0) T P_YZ
   let nTYZ := TensorAlgebra.tensor_prod (R:=R) (r1:=0) (s1:=2) (r2:=2) (s2:=0) (AffineTensorCalculus.nabla_tensor conn X T) P_YZ
   let TnYZ := TensorAlgebra.tensor_prod (R:=R) (r1:=0) (s1:=2) (r2:=2) (s2:=0) T P_nYZ
@@ -171,6 +171,17 @@ lemma covDeriv_eval (X : V) (T : AbstractBilinearForm R V) (Y Z : V) :
       have hz : fromVector (R:=R) Z = TensorAlgebra.fromData (vectorToData Z) := rfl
       rw [hz, AffineTensorCalculus.nabla_vector (R:=R) X Z]; rfl
     rw [h5, h6]
+    -- nabla_tensor_prod gives add P_YnZ P_nYZ, but we need add P_nYZ P_YnZ
+    -- Prove commutativity via toData
+    have hadd_comm : TensorAlgebra.add P_YnZ P_nYZ = TensorAlgebra.add P_nYZ P_YnZ := by
+      have h := TensorAlgebra.fromData_toData (TensorAlgebra.add P_YnZ P_nYZ)
+      rw [TensorAlgebra.toData_add] at h
+      have h' := TensorAlgebra.fromData_toData (TensorAlgebra.add P_nYZ P_YnZ)
+      rw [TensorAlgebra.toData_add] at h'
+      rw [← h, ← h']
+      congr 1
+      exact add_comm (TensorAlgebra.toData P_YnZ) (TensorAlgebra.toData P_nYZ)
+    exact hadd_comm
   have h7 : TensorAlgebra.tensor_prod (R:=R) (r1:=0) (s1:=2) (r2:=2) (s2:=0) T (AffineTensorCalculus.nabla_tensor conn X P_YZ) = TensorAlgebra.add (R:=R) TnYZ TYnZ := by
     rw [h4]
     dsimp [TnYZ, TYnZ]
