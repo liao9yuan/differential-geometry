@@ -112,6 +112,20 @@ end Linearity
 class BilinearFormExt (R V : Type) [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] where
   ext : ∀ (T₁ T₂ : AbstractBilinearForm R V), (∀ Y Z, tensor_eval T₁ ![Y, Z] ![] = tensor_eval T₂ ![Y, Z] ![]) → T₁ = T₂
 
+instance instBilinearFormExtFromTensorAlgebra {R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] :
+    BilinearFormExt R V where
+  ext := fun T₁ T₂ h => by
+    have h_toData : TensorAlgebra.toData T₁ = TensorAlgebra.toData T₂ := by
+      ext m n
+      have hm : m = ![m 0, m 1] := by
+        ext i
+        fin_cases i <;> rfl
+      have hn : n = ![] := Subsingleton.elim _ _
+      rw [hn, hm]
+      exact h (m 0) (m 1)
+    rw [← TensorAlgebra.fromData_toData T₁, ← TensorAlgebra.fromData_toData T₂]
+    rw [h_toData]
+
 variable (conn : AbstractAffineConnection R V) [DerivationRules R V] [AffineTensorCalculus conn]
 
 /-- Covariant derivative of a (0,2)-tensor as an operator returning a new AbstractBilinearForm.
@@ -152,7 +166,7 @@ lemma covDeriv_eval (X : V) (T : AbstractBilinearForm R V) (Y Z : V) :
   let CnTYZ := contract (R:=R) (r:=0) (s:=0) (contract (R:=R) (r:=1) (s:=1) nTYZ)
   let CTnYZ := contract (R:=R) (r:=0) (s:=0) (contract (R:=R) (r:=1) (s:=1) TnYZ)
   let CTYnZ := contract (R:=R) (r:=0) (s:=0) (contract (R:=R) (r:=1) (s:=1) TYnZ)
-  
+
   have h1 : action X (((TensorAlgebra.toData CTYZ) ![]) ![]) = ((TensorAlgebra.toData (AffineTensorCalculus.nabla_tensor conn X CTYZ)) ![]) ![] :=
     (h_scalar _).symm
   have h2 : AffineTensorCalculus.nabla_tensor conn X CTYZ = contract (R:=R) (r:=0) (s:=0) (contract (R:=R) (r:=1) (s:=1) (AffineTensorCalculus.nabla_tensor conn X TYZ)) := by
@@ -264,7 +278,7 @@ lemma genericCovDeriv_smul (X : V) (c : R) {r s : ℕ} (T : AbstractTensor R V r
   rw [AffineTensorCalculus.nabla_smul X c T]
 
 lemma genericCovDeriv_tensor_prod (X : V) {r1 s1 r2 s2 : ℕ} (T1 : AbstractTensor R V r1 s1) (T2 : AbstractTensor R V r2 s2) :
-  genericCovDeriv conn X (TensorAlgebra.tensor_prod T1 T2) = 
+  genericCovDeriv conn X (TensorAlgebra.tensor_prod T1 T2) =
     TensorAlgebra.add (TensorAlgebra.tensor_prod (genericCovDeriv conn X T1) T2) (TensorAlgebra.tensor_prod T1 (genericCovDeriv conn X T2)) := by
   dsimp [genericCovDeriv]
   rw [AffineTensorCalculus.nabla_tensor_prod X T1 T2]
@@ -275,4 +289,3 @@ lemma genericCovDeriv_contract (X : V) {r s : ℕ} (T : AbstractTensor R V (r + 
   rw [AffineTensorCalculus.nabla_contract X T]
 
 end GenericCovDeriv
-
