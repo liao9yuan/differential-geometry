@@ -62,5 +62,35 @@ lemma connection_evolution {Time : Type}
   - ricci_cov_deriv g_fam conn_fam t X Y Z
   - ricci_cov_deriv g_fam conn_fam t Y X Z
   + ricci_cov_deriv g_fam conn_fam t Z X Y := by
-  sorry
+  -- Ricci Flow evolution: metric_var_form = -2 • Rc
+  have evol : metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t =
+    (- (2:R)) • ricciForm (conn_fam t) := RicciFlow.evolution t
+  -- Tensor evaluation distributes scalar: tensor_eval(-2 • Rc) = -2 * tensor_eval(Rc)
+  have eval_eq : ∀ P Q : V,
+    tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![P, Q] ![] =
+    (- (2:R)) * tensor_eval (ricciForm (conn_fam t)) ![P, Q] ![] := by
+    intro P Q
+    rw [evol]
+    exact tensor_eval_smul (- (2:R)) (ricciForm (conn_fam t)) ![P, Q] ![]
+  -- h_cov_deriv = -2 * ricci_cov_deriv (metric variation is -2 Rc)
+  have h_eq : ∀ A B C : V,
+    h_cov_deriv g_fam t A B C = (- (2:R)) * ricci_cov_deriv g_fam conn_fam t A B C := by
+    intro A B C
+    unfold h_cov_deriv ricci_cov_deriv
+    rw [eval_eq B C, eval_eq ((nabla_fam g_fam t).nabla A B) C, eval_eq B ((nabla_fam g_fam t).nabla A C)]
+    rw [action_mul_const A (- (2:R)) _ (action_neg_two A)]
+    ring
+  -- Palatini identity: 2*g(∂_t ∇_X Y, Z) = h_cov(X,Y,Z) + h_cov(Y,X,Z) - h_cov(Z,X,Y)
+  have palatini := connection_variation g_fam X Y Z t
+  rw [h_eq X Y Z, h_eq Y X Z, h_eq Z X Y] at palatini
+  -- Factor out -2 and equate with 2 * goal
+  have algebra : (- (2:R)) * ricci_cov_deriv g_fam conn_fam t X Y Z +
+    (- (2:R)) * ricci_cov_deriv g_fam conn_fam t Y X Z -
+    (- (2:R)) * ricci_cov_deriv g_fam conn_fam t Z X Y =
+    2 * (- ricci_cov_deriv g_fam conn_fam t X Y Z -
+    ricci_cov_deriv g_fam conn_fam t Y X Z +
+    ricci_cov_deriv g_fam conn_fam t Z X Y) := by ring
+  rw [algebra] at palatini
+  -- Cancel factor of 2
+  exact mul_left_cancel₀ (Invertible.ne_zero (2:R)) palatini
 
