@@ -40,7 +40,16 @@ lemma ricci_raise_variation {Time : Type}
   (g_fam t).g (TimeDerivative.partial_t (fun s => (g_fam s).raise (ricciForm (conn_fam s)) X) t) Y =
   - tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![((g_fam t).raise (ricciForm (conn_fam t)) X), Y] ![]
   + tensor_eval (TensorTimeCalculus.partial_t_tensor t (fun s => ricciForm (conn_fam s))) ![X, Y] ![] := by
-  sorry
+  have h1 : (fun s => (g_fam s).g ((g_fam s).raise (ricciForm (conn_fam s)) X) Y) = (fun s => tensor_eval (ricciForm (conn_fam s)) ![X, Y] ![]) := by
+    funext s; exact (g_fam s).g_raise (ricciForm (conn_fam s)) X Y
+  have h2 : TimeDerivative.partial_t (fun s => (g_fam s).g ((g_fam s).raise (ricciForm (conn_fam s)) X) Y) t = TimeDerivative.partial_t (fun s => tensor_eval (ricciForm (conn_fam s)) ![X, Y] ![]) t := by rw [h1]
+  have h3 : TimeDerivative.partial_t (fun s => tensor_eval (ricciForm (conn_fam s)) ![X, Y] ![]) t = tensor_eval (TensorTimeCalculus.partial_t_tensor t (fun s => ricciForm (conn_fam s))) ![X, Y] ![] := (TensorTimeCalculus.t_eval (fun s => ricciForm (conn_fam s)) ![X, Y] ![] t).symm
+  have h4 := MetricTimeDerivativeRules.t_metric (g_fam := g_fam) (fun s => (g_fam s).raise (ricciForm (conn_fam s)) X) (fun _ => Y) t
+  have h5 : TimeDerivative.partial_t (fun _ => Y) t = 0 := MetricTimeDerivativeRules.t_const_V g_fam Y t
+  have h6 : (g_fam t).g ((g_fam t).raise (ricciForm (conn_fam t)) X) (TimeDerivative.partial_t (fun _ => Y) t) = 0 := by
+    rw [h5]; exact metric_zero_right _ _
+  rw [h6, add_zero] at h4
+  linarith
 
 /--
 $\partial_t R = \Delta R + 2 |\text{Ric}|^2$
@@ -61,4 +70,19 @@ lemma scalar_curvature_evolution {Time : Type}
   TimeDerivative.partial_t (fun s => ScalarCurvature (g_fam s) (conn_fam s)) t =
   (2:R) * tensorNormSq (g_fam t) (ricciForm (conn_fam t))
   + tensor_eval (metric_trace (g_fam t) (0: Fin 2) (0: Fin 1) (TensorTimeCalculus.partial_t_tensor t (fun s => ricciForm (conn_fam s)))) ![] ![] := by
-  sorry
+  -- Step 1: Rewrite ScalarCurvature using the trace hypothesis
+  have h_rw : (fun s => ScalarCurvature (g_fam s) (conn_fam s)) = (fun s => tensor_eval (metric_trace (g_fam s) (0: Fin 2) (0: Fin 1) (ricciForm (conn_fam s))) ![] ![]) := by
+    funext s; exact h_trace_R s
+  rw [h_rw]
+  -- Step 2: Apply the product rule for metric trace with varying tensor
+  have h_prod := MetricTimeDerivativeRules.t_metric_trace_varying (g_fam := g_fam) (fun s => ricciForm (conn_fam s)) t IR
+  -- Step 3: Substitute the Ricci flow equation: metric_var_form = -2 • Ric
+  have h_ricci : metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t = (-(2:R)) • ricciForm (conn_fam t) :=
+    RicciFlow.evolution t
+  -- Step 4: Compute -⟨-2 Ric, Ric⟩ = 2⟨Ric, Ric⟩ = 2 * tensorNormSq
+  have h_inner : - tensorInnerProduct (g_fam t) ((-(2:R)) • ricciForm (conn_fam t)) (ricciForm (conn_fam t)) =
+    (2:R) * tensorNormSq (g_fam t) (ricciForm (conn_fam t)) := by
+    rw [tensor_inner_smul_left]
+    unfold tensorNormSq
+    ring
+  rw [h_prod, h_ricci, h_inner]

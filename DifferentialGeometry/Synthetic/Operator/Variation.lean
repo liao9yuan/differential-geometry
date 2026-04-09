@@ -58,6 +58,12 @@ class MetricTimeDerivativeRules (Time R V : Type) [Field R] [LinearOrder R] [IsS
   t_metric_trace : ∀ (T : AbstractBilinearForm R V) (t : Time) (_ : TensorInnerProductRules R V (g_fam t)),
     TimeDerivative.partial_t (fun s => tensor_eval (metric_trace (g_fam s) (0: Fin 2) (0: Fin 1) T) ![] ![]) t =
     - tensorInnerProduct (g_fam t) (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) T
+  /-- Product rule for metric trace with varying tensor:
+      ∂_t[tr_{g(s)}(T(s))] = -⟨∂_t g, T(t)⟩ + tr_{g(t)}(∂_t T). -/
+  t_metric_trace_varying : ∀ (T : Time → AbstractBilinearForm R V) (t : Time) (_ : TensorInnerProductRules R V (g_fam t)),
+    TimeDerivative.partial_t (fun s => tensor_eval (metric_trace (g_fam s) (0: Fin 2) (0: Fin 1) (T s)) ![] ![]) t =
+    - tensorInnerProduct (g_fam t) (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) (T t)
+    + tensor_eval (metric_trace (g_fam t) (0: Fin 2) (0: Fin 1) (TensorTimeCalculus.partial_t_tensor t T)) ![] ![]
 
 lemma metric_zero_right {R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] (metric : AbstractMetricTensor R V) (X : V) : metric.g X 0 = 0 := by
   have h1 : metric.g X (0 + 0) = metric.g X 0 + metric.g X 0 := by

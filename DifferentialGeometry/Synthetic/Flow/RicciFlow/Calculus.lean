@@ -46,7 +46,7 @@ class RicciFlowCalculus
   -- 1. Laplacian Evolution
   dt_laplacian : ∀ (u : R) t,
     TimeDerivative.partial_t (fun s => tensor_eval (metric_trace (g_fam s) (0: Fin 2) (0: Fin 1) (hessianForm (g_fam s) (conn_fam s) u)) ![] ![]) t =
-    (2:R) * tensorInnerProduct (g_fam t) (ricciForm (conn_fam t)) (hessianForm (g_fam t) (conn_fam t) u) -
+    (2:R) * tensorInnerProduct (g_fam t) (ricciForm (conn_fam t)) (hessianForm (g_fam t) (conn_fam t) u) +
     tensor_eval (metric_trace (g_fam t) (0: Fin 2) (0: Fin 1) (TensorTimeCalculus.partial_t_tensor t (fun s => hessianForm (g_fam s) (conn_fam s) u))) ![] ![]
 
   -- 2. Gradient Squared Evolution
