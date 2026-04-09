@@ -1,5 +1,6 @@
 import Mathlib.Algebra.Module.Basic
 import Mathlib.Algebra.Ring.Basic
+import Mathlib.Algebra.Module.LinearMap.End
 import DifferentialGeometry.Synthetic.Algebra.VectorField
 import DifferentialGeometry.Synthetic.Algebra.BilinearForm
 import DifferentialGeometry.Synthetic.Algebra.Metric
@@ -12,12 +13,40 @@ set_option linter.style.emptyLine false
 
 /-!
 # Abstract Trace Concepts
-Abstract trace operations over tensors and bilinear forms.
+
+## The Algebraic `AbstractTrace`
+
+We introduce a coordinate-free abstract trace for endomorphisms `(V →ₗ[R] V) → R`.
+This is the foundational algebraic primitive from which all tensor contraction
+evaluation ultimately derives. It avoids any dependence on frames or bases,
+making it valid on non-parallelizable manifolds.
+
+The class `AbstractTraceRules` axiomatizes:
+- `tr`: a linear map `(V →ₗ[R] V) →ₗ[R] R`
+- `trace_outer`: the outer product trace identity `tr(n.smulRight Y) = n(Y)`,
+  which characterizes the trace of a rank-1 endomorphism `X ↦ n(X) • Y`
+- `trace_comm`: cyclic commutativity `tr(A ∘ₗ B) = tr(B ∘ₗ A)`
+
+## Metric Trace
+
+The `metric_trace` operator contracts a (0, s+2) tensor over two covariant indices
+by raising one index via the metric inverse and then applying `contract_general`.
 -/
 
-
-
 open DifferentialGeometry TensorAlgebra
+
+/--
+Abstract trace of an endomorphism, axiomatized coordinate-free.
+`tr` is a linear functional on `End(V)` satisfying the outer product identity
+and cyclic commutativity.
+-/
+class AbstractTraceRules (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] where
+  /-- The abstract trace linear map `End(V) → R`. -/
+  tr : (V →ₗ[R] V) →ₗ[R] R
+  /-- Outer product trace: `tr(X ↦ n(X) • Y) = n(Y)`. -/
+  trace_outer : ∀ (Y : V) (n : V →ₗ[R] R), tr (n.smulRight Y) = n Y
+  /-- Cyclic commutativity: `tr(A ∘ B) = tr(B ∘ A)`. -/
+  trace_comm : ∀ (A B : V →ₗ[R] V), tr (A ∘ₗ B) = tr (B ∘ₗ A)
 
 /--
 Universal abstract metric trace operator.
