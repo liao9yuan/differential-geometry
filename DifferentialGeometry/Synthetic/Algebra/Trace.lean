@@ -48,6 +48,61 @@ class AbstractTraceRules (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V
   /-- Cyclic commutativity: `tr(A ∘ B) = tr(B ∘ A)`. -/
   trace_comm : ∀ (A B : V →ₗ[R] V), tr (A ∘ₗ B) = tr (B ∘ₗ A)
 
+/-!
+## Universal Evaluation Functors
+-/
+
+/--
+Axiom 1: Raise Index Dictionary.
+
+Given a (0,2) tensor `T` satisfying `T(X, Y) = g(X, L_T Y)` for some
+endomorphism `L_T`, raising its first covariant index produces the (1,1)
+tensor that evaluates as `(raise T)(X, n) = n(L_T X)`.
+
+This is the fundamental bridge from metric-bilinear forms to endomorphisms.
+-/
+class RaiseIndexEvaluationRules (R V : Type*) [Field R] [LinearOrder R] [IsStrictOrderedRing R]
+    [AddCommGroup V] [Module R V] [TensorAlgebra R V] (metric : MetricDuality R V) where
+  raise_eval : ∀ (T : AbstractTensor R V 0 2) (L_T : V →ₗ[R] V),
+    (∀ X Y, tensor_eval T ![X, Y] ![] = metric.g X (L_T Y)) →
+    ∀ X n, tensor_eval (raise_index metric (0 : Fin 2) T) ![X] ![n] = n (L_T X)
+
+/--
+Axiom 2: Universal Scalar Contraction.
+
+Full contraction of a (1,1) tensor `T` with associated endomorphism `L_T`
+(i.e., `T(X, n) = n(L_T X)`) evaluates to the abstract trace `tr(L_T)`.
+
+This axiom connects the tensor-algebraic `contract_general` operation to
+the algebraic `AbstractTraceRules.tr`.
+-/
+class Contract11EvaluationRules (R V : Type*) [Field R] [LinearOrder R] [IsStrictOrderedRing R]
+    [AddCommGroup V] [Module R V] [TensorAlgebra R V] [AbstractTraceRules R V] where
+  contract_11_eval : ∀ (T : AbstractTensor R V 1 1) (L_T : V →ₗ[R] V),
+    (∀ X n, tensor_eval T ![X] ![n] = n (L_T X)) →
+    tensor_eval (TensorAlgebra.contract_general (0 : Fin 1) (0 : Fin 1) T) ![] ![] =
+    AbstractTraceRules.tr L_T
+
+/--
+Axiom 3: Universal Partial Contraction (Endomorphism Pre-composition).
+
+Given a (1,1) tensor `A` with associated endomorphism `L_A` and a (0,2)
+tensor `B`, the partial contraction `Tr_{first pair}(A ⊗ B)` evaluates to
+`B(L_A X, Y)`. In index notation: `A^i_k B_{il} = B(L_A(X), Y)`.
+
+This axiom implements the pre-composition of an endomorphism into a bilinear form,
+which is the key operation for evaluating Hessian norm squares and similar
+quadratic tensor expressions.
+-/
+class ContractCompositionRules (R V : Type*) [Field R] [LinearOrder R] [IsStrictOrderedRing R]
+    [AddCommGroup V] [Module R V] [TensorAlgebra R V] where
+  contract_comp_eval : ∀ (A : AbstractTensor R V 1 1) (B : AbstractTensor R V 0 2)
+    (L_A : V →ₗ[R] V),
+    (∀ X n, tensor_eval A ![X] ![n] = n (L_A X)) →
+    ∀ X Y, tensor_eval (TensorAlgebra.contract (r := 0) (s := 2)
+      (TensorAlgebra.tensor_prod (r1 := 1) (s1 := 1) (r2 := 0) (s2 := 2) A B)) ![X, Y] ![] =
+    tensor_eval B ![Y, L_A X] ![]
+
 /--
 Universal abstract metric trace operator.
 Traces an `AbstractTensor R V r (s+2)` over two covariant indices, yielding `AbstractTensor R V r s`.
