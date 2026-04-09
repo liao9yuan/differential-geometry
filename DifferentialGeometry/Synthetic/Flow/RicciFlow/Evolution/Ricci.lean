@@ -145,7 +145,7 @@ theorem ricci_evolution_pointwise_extraction (conn_fam : Time → AbstractAffine
   (ht_Y : TimeDerivative.partial_t (fun _ => Y) t = 0) :
   tensor_eval (TensorTimeCalculus.partial_t_tensor t (fun s => ricciForm (conn_fam s))) ![X, Y] ![] =
   TimeDerivative.partial_t (fun s => tensor_eval (ricciForm (conn_fam s)) ![X, Y] ![]) t := by
-  sorry
+  exact tensor_eval_partial_t (fun s => ricciForm (conn_fam s)) X Y t ht_X ht_Y
 
 -- The subsequent reduction structurally equates to the Böhme-Berger terms natively
 -- via traces of covariant derivatives of the variations explicitly.
