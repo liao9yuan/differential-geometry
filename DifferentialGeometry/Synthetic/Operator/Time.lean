@@ -56,7 +56,30 @@ class ScalarTimeDerivativeRules (R : Type) [Field R] [LinearOrder R] [IsStrictOr
   /-- Product rule for multiplication: $\partial_t(fg) = (\partial_t f)g + f(\partial_t g)$ -/
   dt_mul : ∀ (f g : Time → R) t, TimeDerivative.partial_t (fun s => f s * g s) t = TimeDerivative.partial_t f t * g t + f t * TimeDerivative.partial_t g t
 
+/-- Rules for time derivatives of V-valued functions.
+Axiomatizes subtraction linearity of ∂_t on vector-valued functions. -/
+class VectorTimeDerivativeRules (Time R V : Type)
+  [Field R] [LinearOrder R] [IsStrictOrderedRing R]
+  [AddCommGroup V] [Module R V]
+  [TimeDerivative Time V] where
+  t_sub_V : ∀ (F G : Time → V) (t : Time),
+    TimeDerivative.partial_t (fun s => F s - G s) t =
+    TimeDerivative.partial_t F t - TimeDerivative.partial_t G t
 
+/-- Product rule for time-evolving affine connections acting on
+time-varying vector fields. This is the atomic Leibniz rule:
+  ∂_t[∇(t)_X F(t)] = ∂_t[∇(t)_X (F t₀)] + ∇(t₀)_X(∂_t F)
+where the first term captures pure connection variation and the
+second captures transport of the vector's time derivative. -/
+class ConnectionTimeCalculus (Time R V : Type)
+  [Field R] [LinearOrder R] [IsStrictOrderedRing R]
+  [AddCommGroup V] [Module R V]
+  [AbstractDerivationAction R V]
+  [TimeDerivative Time R] [TimeDerivative Time V] where
+  t_conn_apply : ∀ (conn_fam : Time → AbstractAffineConnection R V) (X : V) (F : Time → V) (t : Time),
+    TimeDerivative.partial_t (fun s => (conn_fam s).nabla X (F s)) t =
+    TimeDerivative.partial_t (fun s => (conn_fam s).nabla X (F t)) t +
+    (conn_fam t).nabla X (TimeDerivative.partial_t F t)
 
 variable {R V : Type}
 variable [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] [AbstractDerivationAction R V]

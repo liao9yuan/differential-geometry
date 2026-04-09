@@ -36,4 +36,5 @@ import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.Connection
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.Laplacian
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.ScalarCurvature
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.Ricci
+import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.Riemann
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Calculus
