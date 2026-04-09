@@ -52,6 +52,16 @@ class MetricTraceEvaluationRules (R V : Type*) [Field R] [LinearOrder R] [IsStri
     tensor_eval (metric_trace metric (0 : Fin 2) (0 : Fin 1) T) ![] ![] =
     tensorInnerProduct metric metric.toNonDegenerateMetric.toAbstractMetricTensor.g_tensor T
 
+/--
+Axiomatizes the evaluation of an endomorphism matrix contraction pointwise without frames.
+Contracting a raised (0,2) tensor against itself mathematically evaluates to the inner product
+of the corresponding operator's output vectors.
+-/
+class EndomorphismContractionRules (R V : Type*) [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] (metric : MetricDuality R V) where
+  contract_raise_02_eval : ∀ (T : AbstractTensor R V 0 2) (Z_op : V → V),
+    (∀ X Y, tensor_eval T ![X, Y] ![] = metric.g X (Z_op Y)) →
+    ∀ X Y, tensor_eval (TensorAlgebra.contract (r:=0) (s:=2) (TensorAlgebra.tensor_prod (r1:=1) (s1:=1) (r2:=0) (s2:=2) (raise_index metric (0 : Fin 2) T) T)) ![X, Y] ![] = metric.g (Z_op X) (Z_op Y)
+
 lemma metric_trace_add {R V : Type*} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
     (metric : MetricDuality R V) {r s : ℕ} (idx1 : Fin (s + 2)) (idx2 : Fin (s + 1)) (T1 T2 : AbstractTensor R V r (s + 2)) :
     metric_trace metric idx1 idx2 (TensorAlgebra.add T1 T2) = TensorAlgebra.add (metric_trace metric idx1 idx2 T1) (metric_trace metric idx1 idx2 T2) := by

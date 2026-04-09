@@ -1,9 +1,11 @@
 import DifferentialGeometry.Synthetic.Algebra.VectorField
 import DifferentialGeometry.Synthetic.Algebra.Metric
+import DifferentialGeometry.Synthetic.Algebra.Trace
 import DifferentialGeometry.Synthetic.Geometry.Connection
 import DifferentialGeometry.Synthetic.Operator.Hessian
 import DifferentialGeometry.Synthetic.Operator.Laplacian
 import DifferentialGeometry.Synthetic.Geometry.Curvature
+import DifferentialGeometry.Synthetic.Geometry.CurvatureTensor
 import DifferentialGeometry.Synthetic.Geometry.RicciTensor
 import DifferentialGeometry.Synthetic.Geometry.RicciIdentity
 import DifferentialGeometry.Synthetic.Operator.Gradient
@@ -15,6 +17,7 @@ import Mathlib.Algebra.Module.Basic
 import Mathlib.Algebra.Ring.Basic
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.Abel
+import Mathlib.Tactic.Linarith
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -85,45 +88,18 @@ lemma hessian_norm_sq_grad
   ring
 
 /-!
-## Bochner-Weitzenböck Calculus Interface
+## Bochner-Weitzenböck Calculus
 
-The `BochnerCalculus` class provides the two key algebraic axioms for the Bochner-Weitzenböck
-formula, following the same pattern as `TensorInnerProductRules` and `AffineTensorCalculus`.
+The `secondCovDeriv_02_tensor` encodes the (0,2) tensor `(X, Y) ↦ g(∇²_{X,Y}∇f, ∇f)`.
+It is defined algebraically as the residual of `hessianForm(|∇f|²)` after subtracting
+the Hessian norm contribution, scaled by `⅟2`.
 
-**Mathematical content of the axioms:**
-
-- `bochner_lap_expand` encodes the expansion of Δ(|∇f|²) obtained by applying the Hessian
-  trace to the identity `Hess(|∇f|²)(X,Y) = 2g(∇²_{X,Y}∇f, ∇f) + 2g(∇_X∇f, ∇_Y∇f)`,
-  and identifying the second term's metric trace with `tensorNormSq(hessianForm f)`.
-
-- `bochner_commutation` encodes the vector Bochner formula:
-  the metric trace of `(X,Y) ↦ g(∇²_{X,Y}∇f, ∇f)` equals `Ric(∇f,∇f) + g(∇f, ∇(Δf))`,
-  proved in the analytic backend via the Ricci identity and metric compatibility.
-
-These axioms can be instantiated and proved in the coordinate-based analytic layer.
+The two main theorems are:
+- `bochner_lap_expand_thm`: Δ(|∇f|²) = 2·tr(SCT) + 2·|∇²f|²
+- `bochner_commutation_thm`: tr(SCT) = Ric(∇f,∇f) + ⟨∇f, ∇Δf⟩
+Together they give the Bochner-Weitzenböck identity.
 -/
-class BochnerCalculus
-    (metric : MetricDuality R V)
-    (conn : AbstractAffineConnection R V)
-    [AffineTensorCalculus conn] [RiemannCurvatureTensorOp conn] [TorsionFree conn]
-    [MetricCompatible conn metric.toNonDegenerateMetric.toAbstractMetricTensor]
-    [TensorInnerProductRules R V metric] where
-  /-- The abstract intermediate quantity: metric trace of (X,Y) ↦ g(∇²_{X,Y}∇f, ∇f). -/
-  roughBochnerTrace : R → R
-  /-- Step 1: The Laplacian of |∇f|² decomposes into the rough trace and the Hessian squared norm. -/
-  bochner_lap_expand : ∀ (f : R),
-    laplacian metric conn (metric.g (grad metric f) (grad metric f)) =
-    2 * roughBochnerTrace f + 2 * tensorNormSq metric (hessianForm metric conn f)
-  /-- Step 2: The rough Bochner trace equals the Ricci term plus the gradient-of-Laplacian term. -/
-  bochner_commutation : ∀ (f : R),
-    roughBochnerTrace f =
-    Rc conn (grad metric f) (grad metric f) +
-    metric.g (grad metric f) (grad metric (laplacian metric conn f))
 
-/-- The (0,2) abstract tensor encoding `(X, Y) ↦ g(∇²_{X,Y}∇f, ∇f)`.
-Defined algebraically as the residual of `hessianForm(|∇f|²)` after subtracting
-the Hessian norm contribution, scaled by `⅟2`. The metric trace of this tensor
-recovers the "rough Bochner trace" in the Bochner–Weitzenböck formula. -/
 noncomputable def secondCovDeriv_02_tensor
     [Invertible (2 : R)]
     (metric : MetricDuality R V)
@@ -141,7 +117,6 @@ noncomputable def secondCovDeriv_02_tensor
       (hessianForm metric conn (metric.g (grad metric f) (grad metric f)))
       (TensorAlgebra.smul (-2 : R) Q))
 
-/-- Helper: the abstract Hessian-norm tensor from `inner_trace`. -/
 private noncomputable def hessNormQ
     (metric : MetricDuality R V)
     (conn : AbstractAffineConnection R V)
@@ -179,29 +154,14 @@ theorem bochner_lap_expand_thm
     2 * (tensor_eval (metric_trace metric (0 : Fin 2) (0 : Fin 1)
       (secondCovDeriv_02_tensor metric conn f)) ![] ![]) +
     2 * tensorNormSq metric (hessianForm metric conn f) := by
-  -- Step 1: Unfold laplacian and secondCovDeriv_02_tensor
   simp only [laplacian, secondCovDeriv_02_tensor]
-  -- Step 2: Distribute metric_trace through smul and add
   rw [metric_trace_smul, metric_trace_add, metric_trace_smul]
-  -- Step 3: Distribute tensor_eval through smul and add
   rw [tensor_eval_smul, tensor_eval_add, tensor_eval_smul]
-  -- Step 4: Identify the hessNormQ trace with tensorNormSq via inner_trace
   rw [tensorNormSq_eq_trace_hessNormQ metric conn f]
   simp only [hessNormQ]
-  -- Step 5: Algebraic simplification: L = 2 * (⅟2 * (L + (-2) * N)) + 2 * N
-  -- where L = laplacian term, N = norm term
-  -- Goal is now: L = 2 * (⅟2 * (L + (-2) * N)) + 2 * N
-  -- where L, N are specific tensor_eval expressions.
-  -- Use 2 * ⅟2 = 1 to simplify.
   set L := tensor_eval (metric_trace metric (0 : Fin 2) (0 : Fin 1) (hessianForm metric conn (metric.g (grad metric f) (grad metric f)))) ![] ![]
   set N := tensor_eval (metric_trace metric (0 : Fin 2) (0 : Fin 1) (TensorAlgebra.contract (r:=0) (s:=2) (TensorAlgebra.tensor_prod (r1:=1) (s1:=1) (r2:=0) (s2:=2) (raise_index metric (0 : Fin 2) (hessianForm metric conn f)) (hessianForm metric conn f)))) ![] ![]
   have h2 : (2 : R) * ⅟(2 : R) = 1 := mul_invOf_self (2 : R)
-  have h_inv2 : ⅟(2 : R) * 2 = 1 := invOf_mul_self (2 : R)
-  -- Expand RHS: 2 * (⅟2 * (L + (-2) * N)) + 2 * N
-  -- = (2 * ⅟2) * (L + (-2) * N) + 2 * N   [assoc]
-  -- = 1 * (L + (-2) * N) + 2 * N            [h2]
-  -- = L + (-2) * N + 2 * N                  [one_mul]
-  -- = L
   have key : 2 * (⅟(2 : R) * (L + (-2) * N)) + 2 * N = L := by
     have : 2 * (⅟(2 : R) * (L + (-2) * N)) = L + (-2) * N := by
       calc 2 * (⅟(2 : R) * (L + (-2) * N))
@@ -211,20 +171,364 @@ theorem bochner_lap_expand_thm
     linarith
   linarith [key]
 
--- Proves the Bochner-Weitzenbock formula relating the Laplacian of the squared gradient to the Hessian, Ricci curvature, and the gradient of the Laplacian.
+/-- The rough Bochner trace defined directly via `secondCovDeriv_02_tensor`. -/
+noncomputable def roughBochnerTrace
+    [Invertible (2 : R)]
+    (metric : MetricDuality R V)
+    (conn : AbstractAffineConnection R V)
+    [AffineTensorCalculus conn]
+    [MetricCompatible conn metric.toNonDegenerateMetric.toAbstractMetricTensor]
+    [TensorInnerProductRules R V metric]
+    (f : R) : R :=
+  tensor_eval (metric_trace metric (0 : Fin 2) (0 : Fin 1)
+    (secondCovDeriv_02_tensor metric conn f)) ![] ![]
+
+/-!
+### Hessian metric symmetry
+
+For a torsion-free metric-compatible connection, the Hessian pairing is symmetric:
+`g(∇_A ∇f, B) = g(∇_B ∇f, A)`.
+-/
+private lemma hessian_metric_symm
+    [LieDerivation R V] [ActionLinear R V]
+    (metric : MetricDuality R V)
+    (conn : AbstractAffineConnection R V)
+    [TorsionFree conn]
+    [MetricCompatible conn metric.toNonDegenerateMetric.toAbstractMetricTensor]
+    (f : R) (A B : V) :
+    metric.g (conn.nabla A (grad metric f)) B =
+    metric.g (conn.nabla B (grad metric f)) A := by
+  set m := metric.toNonDegenerateMetric.toAbstractMetricTensor
+  -- g(∇_A ∇f, B) = Hess(f)(A, B) via metric compat + g_grad
+  have hAB : m.g (conn.nabla A (grad metric f)) B = Hess conn f A B := by
+    have mc := MetricCompatible.compat (conn:=conn) (metric:=m) A B (grad metric f)
+    have g1 : m.g B (grad metric f) = action B f := by
+      rw [m.symm]; exact g_grad metric f B
+    have g2 : m.g (conn.nabla A B) (grad metric f) = action (conn.nabla A B) f := by
+      rw [m.symm]; exact g_grad metric f (conn.nabla A B)
+    rw [g1, g2] at mc
+    -- mc: action A (action B f) = action (∇_A B) f + g(B, ∇_A ∇f)
+    -- So g(B, ∇_A ∇f) = action A (action B f) - action (∇_A B) f = Hess f A B
+    have : m.g B (conn.nabla A (grad metric f)) = Hess conn f A B := by
+      dsimp [Hess]; linarith
+    rw [m.symm] at this; exact this
+  have hBA : m.g (conn.nabla B (grad metric f)) A = Hess conn f B A := by
+    have mc := MetricCompatible.compat (conn:=conn) (metric:=m) B A (grad metric f)
+    have g1 : m.g A (grad metric f) = action A f := by
+      rw [m.symm]; exact g_grad metric f A
+    have g2 : m.g (conn.nabla B A) (grad metric f) = action (conn.nabla B A) f := by
+      rw [m.symm]; exact g_grad metric f (conn.nabla B A)
+    rw [g1, g2] at mc
+    have : m.g A (conn.nabla B (grad metric f)) = Hess conn f B A := by
+      dsimp [Hess]; linarith
+    rw [m.symm] at this; exact this
+  rw [hAB, hBA, hessian_symm]
+
+/-!
+### Weitzenböck pointwise decomposition
+
+`g(∇²_{X,Y}∇f, ∇f) = g(∇²_{∇f,X}∇f, Y) - g(Rm(X,∇f)Y, ∇f)`
+-/
+private lemma secondCovDeriv_weitzenbock
+    [LieDerivation R V] [ActionLinear R V] [LieDerivationRules R V]
+    (metric : MetricDuality R V)
+    (conn : AbstractAffineConnection R V) [TorsionFree conn]
+    [MetricCompatible conn metric.toNonDegenerateMetric.toAbstractMetricTensor]
+    (f : R) (X Y : V) :
+    metric.g (secondCovDeriv conn X Y (grad metric f)) (grad metric f) =
+    metric.g (secondCovDeriv conn (grad metric f) X (grad metric f)) Y -
+    metric.g (Rm conn X (grad metric f) Y) (grad metric f) := by
+  set m := metric.toNonDegenerateMetric.toAbstractMetricTensor
+  set gf := grad metric f
+  -- Abbreviation for hessian metric symmetry
+  have hms : ∀ A B : V, m.g (conn.nabla A gf) B = m.g (conn.nabla B gf) A :=
+    hessian_metric_symm metric conn f
+  -- Step 1: g(∇²_{X,Y}∇f, ∇f) = g(∇²_{X,∇f}∇f, Y)
+  -- Expand both secondCovDeriv's
+  have lhs : m.g (secondCovDeriv conn X Y gf) gf =
+      m.g (conn.nabla X (conn.nabla Y gf)) gf - m.g (conn.nabla (conn.nabla X Y) gf) gf := by
+    dsimp [secondCovDeriv]; rw [metric_sub_left]
+  have rhs_step : m.g (secondCovDeriv conn X gf gf) Y =
+      m.g (conn.nabla X (conn.nabla gf gf)) Y - m.g (conn.nabla (conn.nabla X gf) gf) Y := by
+    dsimp [secondCovDeriv]; rw [metric_sub_left]
+  -- Metric compat: g(∇_X(∇_Y∇f), ∇f) = X(g(∇_Y∇f, ∇f)) - g(∇_Y∇f, ∇_X∇f)
+  have mc1 : action X (m.g (conn.nabla Y gf) gf) =
+      m.g (conn.nabla X (conn.nabla Y gf)) gf + m.g (conn.nabla Y gf) (conn.nabla X gf) :=
+    MetricCompatible.compat (conn:=conn) (metric:=m) X (conn.nabla Y gf) gf
+  -- Metric compat: X(g(∇_{∇f}∇f, Y)) = g(∇_X(∇_{∇f}∇f), Y) + g(∇_{∇f}∇f, ∇_XY)
+  have mc2 : action X (m.g (conn.nabla gf gf) Y) =
+      m.g (conn.nabla X (conn.nabla gf gf)) Y + m.g (conn.nabla gf gf) (conn.nabla X Y) :=
+    MetricCompatible.compat (conn:=conn) (metric:=m) X (conn.nabla gf gf) Y
+  -- Hessian symmetry gives: g(∇_Y∇f, ∇f) = g(∇_{∇f}∇f, Y) and g(∇_{∇_XY}∇f, ∇f) = g(∇_{∇f}∇f, ∇_XY)
+  have hsym1 : m.g (conn.nabla Y gf) gf = m.g (conn.nabla gf gf) Y := hms Y gf
+  have hsym2 : m.g (conn.nabla (conn.nabla X Y) gf) gf = m.g (conn.nabla gf gf) (conn.nabla X Y) := hms (conn.nabla X Y) gf
+  have hsym3 : m.g (conn.nabla (conn.nabla X gf) gf) Y = m.g (conn.nabla Y gf) (conn.nabla X gf) := hms (conn.nabla X gf) Y
+  -- Key bridge: action X respects the symmetry hsym1
+  have hsym1_action : action X (m.g (conn.nabla Y gf) gf) = action X (m.g (conn.nabla gf gf) Y) := by
+    rw [hsym1]
+  -- Now show the two sides are equal
+  have step1 : m.g (secondCovDeriv conn X Y gf) gf = m.g (secondCovDeriv conn X gf gf) Y := by
+    rw [lhs, rhs_step]
+    linarith [hsym1_action, hsym2, hsym3, mc1, mc2]
+  -- Step 2: Ricci identity: ∇²_{X,∇f}∇f = ∇²_{∇f,X}∇f + Rm(X,∇f)∇f
+  have ricci_id : secondCovDeriv conn X gf gf = secondCovDeriv conn gf X gf + Rm conn X gf gf := by
+    have h_comm := ricci_identity conn X gf gf
+    dsimp [secondCovDerivCommutator] at h_comm
+    -- h_comm: secondCovDeriv X gf gf - secondCovDeriv gf X gf = Rm X gf gf
+    have := sub_eq_iff_eq_add.mp h_comm
+    rwa [add_comm] at this
+  -- Step 3: Rm_metric_antisymm: g(Rm(X,∇f)∇f, Y) = -g(Rm(X,∇f)Y, ∇f)
+  have rm_flip : m.g (Rm conn X gf gf) Y = - m.g (Rm conn X gf Y) gf :=
+    Rm_metric_antisymm conn metric X gf gf Y
+  -- Combine
+  calc m.g (secondCovDeriv conn X Y gf) gf
+    _ = m.g (secondCovDeriv conn X gf gf) Y := step1
+    _ = m.g (secondCovDeriv conn gf X gf + Rm conn X gf gf) Y := by rw [ricci_id]
+    _ = m.g (secondCovDeriv conn gf X gf) Y + m.g (Rm conn X gf gf) Y := m.bilinear_add_left _ _ _
+    _ = m.g (secondCovDeriv conn gf X gf) Y - m.g (Rm conn X gf Y) gf := by rw [rm_flip]; ring
+
+/-!
+### Pointwise evaluation bridge for SCT
+
+Proves that `tensor_eval SCT ![X,Y] ![]` = `tensor_eval (∇_{∇f} hessianForm(f)) ![X,Y] ![]` -
+`g(Rm(X,∇f)Y, ∇f)` using:
+- `hessianForm_eval` + `hessian_norm_sq_grad` + `EndomorphismContractionRules` for SCT evaluation
+- `covDeriv_eval` + `hessianForm_eval` + metric compatibility for ∇(hessianForm) evaluation
+- `secondCovDeriv_weitzenbock` for the geometric identity
+-/
+private lemma SCT_eval_eq
+    [Invertible (2 : R)]
+    [LieDerivation R V] [ActionLinear R V] [LieDerivationRules R V]
+    (metric : MetricDuality R V)
+    (conn : AbstractAffineConnection R V)
+    [AffineTensorCalculus conn] [TorsionFree conn]
+    [MetricCompatible conn metric.toNonDegenerateMetric.toAbstractMetricTensor]
+    [TensorInnerProductRules R V metric]
+    [MetricEvaluationRules R V metric.toNonDegenerateMetric.toAbstractMetricTensor]
+    [EndomorphismContractionRules R V metric]
+    (f : R) (X Y : V) :
+    tensor_eval (secondCovDeriv_02_tensor metric conn f) ![X, Y] ![] =
+    metric.g (secondCovDeriv conn X Y (grad metric f)) (grad metric f) := by
+  set m := metric.toNonDegenerateMetric.toAbstractMetricTensor
+  set gf := grad metric f
+  set hF := hessianForm metric conn f
+  -- Unfold SCT = ⅟2 * (hessianForm(|∇f|²) + (-2) * Q)
+  simp only [secondCovDeriv_02_tensor]
+  rw [tensor_eval_smul, tensor_eval_add, tensor_eval_smul]
+  -- Evaluate hessianForm(|∇f|²)(X,Y) = Hess(|∇f|²)(X,Y) via hessianForm_eval
+  have h_hF_norm := hessianForm_eval metric conn (m.g gf gf) X Y
+  -- Expand using hessian_norm_sq_grad
+  have h_norm := hessian_norm_sq_grad metric conn f X Y
+  rw [h_hF_norm, h_norm]
+  -- Evaluate Q = contract(raise(hF) ⊗ hF) via EndomorphismContractionRules
+  -- hF(X,Y) = Hess(f)(X,Y) = g(X, ∇_Y∇f) (from hessianForm_eval proof chain)
+  have h_hF_eval : ∀ A B : V, tensor_eval hF ![A, B] ![] = m.g A (conn.nabla B gf) := by
+    intro A B
+    rw [hessianForm_eval metric conn f A B]
+    dsimp [Hess]
+    have mc := MetricCompatible.compat (conn:=conn) (metric:=m) B A gf
+    have g1 : m.g A gf = action A f := by rw [m.symm]; exact g_grad metric f A
+    have g2 : m.g (conn.nabla B A) gf = action (conn.nabla B A) f := by rw [m.symm]; exact g_grad metric f (conn.nabla B A)
+    rw [g1, g2] at mc
+    have : m.g A (conn.nabla B gf) = action B (action A f) - action (conn.nabla B A) f := by linarith
+    rw [this]; exact (hessian_symm conn f B A).symm
+  have h_Q := EndomorphismContractionRules.contract_raise_02_eval (metric := metric) hF
+    (fun Y' => conn.nabla Y' gf) h_hF_eval X Y
+  rw [h_Q]
+  -- Algebra: ⅟2 * (2 * g(∇²∇f, ∇f) + 2 * g(∇_X∇f, ∇_Y∇f) + (-2) * g(∇_X∇f, ∇_Y∇f))
+  -- = g(∇²∇f, ∇f)
+  have h2 : (2 : R) * ⅟(2 : R) = 1 := mul_invOf_self (2 : R)
+  have : ⅟(2 : R) * (2 * m.g (secondCovDeriv conn X Y gf) gf + 2 * m.g (conn.nabla X gf) (conn.nabla Y gf) + (-2) * m.g (conn.nabla X gf) (conn.nabla Y gf)) = m.g (secondCovDeriv conn X Y gf) gf := by
+    have : ⅟(2 : R) * (2 * m.g (secondCovDeriv conn X Y gf) gf + 2 * m.g (conn.nabla X gf) (conn.nabla Y gf) + (-2) * m.g (conn.nabla X gf) (conn.nabla Y gf))
+      = ⅟(2 : R) * (2 * m.g (secondCovDeriv conn X Y gf) gf) := by ring
+    rw [this]; calc ⅟(2 : R) * (2 * m.g (secondCovDeriv conn X Y gf) gf)
+      _ = (2 * ⅟(2 : R)) * m.g (secondCovDeriv conn X Y gf) gf := by ring
+      _ = 1 * m.g (secondCovDeriv conn X Y gf) gf := by rw [h2]
+      _ = m.g (secondCovDeriv conn X Y gf) gf := by ring
+  linarith
+
+private lemma T_lap_eval
+    [LieDerivation R V] [ActionLinear R V]
+    (metric : MetricDuality R V)
+    (conn : AbstractAffineConnection R V)
+    [AffineTensorCalculus conn] [TorsionFree conn]
+    [MetricCompatible conn metric.toNonDegenerateMetric.toAbstractMetricTensor]
+    [MetricEvaluationRules R V metric.toNonDegenerateMetric.toAbstractMetricTensor]
+    (f : R) (X Y : V) :
+    tensor_eval (genericCovDeriv conn (grad metric f) (hessianForm metric conn f)) ![X, Y] ![] =
+    metric.g (secondCovDeriv conn (grad metric f) X (grad metric f)) Y := by
+  set m := metric.toNonDegenerateMetric.toAbstractMetricTensor
+  set gf := grad metric f
+  set hF := hessianForm metric conn f
+  -- Step 1: tensor_eval = rawCovDeriv via covDeriv_eval
+  have h_cov := covDeriv_eval conn gf hF X Y
+  dsimp [covDerivOp, genericCovDeriv] at h_cov ⊢; rw [h_cov]
+  -- Step 2: rawCovDeriv of symmetric hF is symmetric in X,Y
+  -- So rawCovDeriv gf hF X Y = rawCovDeriv gf hF Y X
+  have h_sym : rawCovDeriv conn gf hF X Y = rawCovDeriv conn gf hF Y X := by
+    dsimp [rawCovDeriv]
+    rw [hessianForm_eval metric conn f X Y, hessianForm_eval metric conn f Y X,
+        hessianForm_eval metric conn f (conn.nabla gf X) Y,
+        hessianForm_eval metric conn f (conn.nabla gf Y) X,
+        hessianForm_eval metric conn f X (conn.nabla gf Y),
+        hessianForm_eval metric conn f Y (conn.nabla gf X)]
+    rw [hessian_symm conn f X Y,
+        hessian_symm conn f (conn.nabla gf X) Y,
+        hessian_symm conn f X (conn.nabla gf Y)]
+    ring
+  -- Step 3: Evaluate rawCovDeriv gf hF Y X = g(Y, secondCovDeriv gf X gf)
+  -- by the natural expansion
+  have h_nat : rawCovDeriv conn gf hF Y X = m.g Y (secondCovDeriv conn gf X gf) := by
+    dsimp [rawCovDeriv]
+    rw [hessianForm_eval metric conn f Y X,
+        hessianForm_eval metric conn f (conn.nabla gf Y) X,
+        hessianForm_eval metric conn f Y (conn.nabla gf X)]
+    -- Now: action gf (Hess f Y X) - Hess f (∇_{gf}Y) X - Hess f Y (∇_{gf}X)
+    -- Hess f Y X = g(Y, ∇_X gf) (by hess_gXY + hessian_symm)
+    have hess_to_g : ∀ A B : V, Hess conn f A B = m.g A (conn.nabla B gf) := by
+      intro A B
+      have mc' := MetricCompatible.compat (conn:=conn) (metric:=m) B A gf
+      have g1 : m.g A gf = action A f := by rw [m.symm]; exact g_grad metric f A
+      have g2 : m.g (conn.nabla B A) gf = action (conn.nabla B A) f := by rw [m.symm]; exact g_grad metric f (conn.nabla B A)
+      rw [g1, g2] at mc'; dsimp [Hess]
+      have h := hessian_symm conn f B A; dsimp [Hess] at h; linarith
+    rw [hess_to_g Y X, hess_to_g (conn.nabla gf Y) X, hess_to_g Y (conn.nabla gf X)]
+    -- action gf (g(Y, ∇_X gf)) - g(∇_{gf}Y, ∇_X gf) - g(Y, ∇_{∇_{gf}X} gf)
+    have mc := MetricCompatible.compat (conn:=conn) (metric:=m) gf Y (conn.nabla X gf)
+    -- mc: gf(g(Y, ∇_X gf)) = g(∇_{gf}Y, ∇_X gf) + g(Y, ∇_{gf}(∇_X gf))
+    dsimp [secondCovDeriv]
+    -- Goal: ... = g(Y, ∇_{gf}(∇_X gf) - ∇_{∇_{gf}X} gf)
+    -- Expand g(Y, A - B) = g(Y, A) - g(Y, B) using metric symmetry + metric_sub_left
+    have hsub : m.g Y (conn.nabla gf (conn.nabla X gf) - conn.nabla (conn.nabla gf X) gf) =
+        m.g Y (conn.nabla gf (conn.nabla X gf)) - m.g Y (conn.nabla (conn.nabla gf X) gf) := by
+      rw [m.symm Y, metric_sub_left, m.symm (conn.nabla gf (conn.nabla X gf)),
+          m.symm (conn.nabla (conn.nabla gf X) gf)]
+    rw [hsub]; linarith
+  -- Step 4: g(Y, secondCovDeriv gf X gf) = g(secondCovDeriv gf X gf, Y) by metric symm
+  rw [h_sym, h_nat, m.symm]
+
+private lemma pw_decomp
+    [Invertible (2 : R)]
+    [LieDerivation R V] [ActionLinear R V] [LieDerivationRules R V]
+    (metric : MetricDuality R V)
+    (conn : AbstractAffineConnection R V)
+    [AffineTensorCalculus conn] [TorsionFree conn]
+    [MetricCompatible conn metric.toNonDegenerateMetric.toAbstractMetricTensor]
+    [TensorInnerProductRules R V metric]
+    [MetricEvaluationRules R V metric.toNonDegenerateMetric.toAbstractMetricTensor]
+    [EndomorphismContractionRules R V metric]
+    (f : R) (X Y : V) :
+    tensor_eval (secondCovDeriv_02_tensor metric conn f) ![X, Y] ![] =
+    tensor_eval (genericCovDeriv conn (grad metric f) (hessianForm metric conn f)) ![X, Y] ![] -
+    metric.g (Rm conn X (grad metric f) Y) (grad metric f) := by
+  rw [SCT_eval_eq metric conn f X Y, T_lap_eval metric conn f X Y]
+  exact secondCovDeriv_weitzenbock metric conn f X Y
+
+/-!
+### Bochner commutation theorem
+
+The Weitzenböck trace identity: `tr_g(SCT) = -Rc(∇f,∇f) + ⟨∇f, ∇Δf⟩`.
+-/
+theorem bochner_commutation_thm
+    [Invertible (2 : R)]
+    [LieDerivation R V] [ActionLinear R V] [LieDerivationRules R V]
+    (metric : MetricDuality R V)
+    (conn : AbstractAffineConnection R V)
+    [AffineTensorCalculus conn] [RiemannCurvatureTensorOp conn] [TorsionFree conn]
+    [MetricCompatible conn metric.toNonDegenerateMetric.toAbstractMetricTensor]
+    [TensorInnerProductRules R V metric]
+    [BilinearFormExt R V]
+    [MetricEvaluationRules R V metric.toNonDegenerateMetric.toAbstractMetricTensor]
+    [MetricTraceEvaluationRules R V metric]
+    [RicciEvaluationRules R V metric conn]
+    [EndomorphismContractionRules R V metric]
+    (f : R)
+    (h_ginv : ∀ X : V, AffineTensorCalculus.nabla_tensor conn X metric.g_inv = 0) :
+    tensor_eval (metric_trace metric (0 : Fin 2) (0 : Fin 1)
+      (secondCovDeriv_02_tensor metric conn f)) ![] ![] =
+    - Rc conn (grad metric f) (grad metric f) +
+    metric.g (grad metric f) (grad metric (laplacian metric conn f)) := by
+  -- Abbreviations
+  let gf := grad metric f
+  let hF := hessianForm metric conn f
+  let SCT := secondCovDeriv_02_tensor metric conn f
+  let T_lap := genericCovDeriv conn gf hF
+  -- Step 1: Build T_neg_rm = SCT - T_lap, which evaluates to -g(Rm(X,∇f)Y, ∇f)
+  let T_neg_rm := TensorAlgebra.add SCT (TensorAlgebra.smul (-1 : R) T_lap)
+  -- Step 2: Use BilinearFormExt to show SCT = T_lap + T_neg_rm
+  have h_decomp : SCT = TensorAlgebra.add T_lap T_neg_rm := by
+    apply BilinearFormExt.ext
+    intro X Y
+    rw [tensor_eval_add, tensor_eval_add, tensor_eval_smul]
+    have := pw_decomp metric conn f X Y
+    linarith
+  -- Step 3: Trace linearity
+  have trace_split : tensor_eval (metric_trace metric (0 : Fin 2) (0 : Fin 1) SCT) ![] ![] =
+      tensor_eval (metric_trace metric (0 : Fin 2) (0 : Fin 1) T_lap) ![] ![] +
+      tensor_eval (metric_trace metric (0 : Fin 2) (0 : Fin 1) T_neg_rm) ![] ![] := by
+    rw [h_decomp, metric_trace_add, tensor_eval_add]
+  -- Step 4: Trace of smul (-1) T_neg_rm matches Rm pattern → traces to Rc(∇f, ∇f)
+  have trace_rm_val : tensor_eval (metric_trace metric (0 : Fin 2) (0 : Fin 1)
+      (TensorAlgebra.smul (-1 : R) T_neg_rm)) ![] ![] = Rc conn gf gf := by
+    apply RicciEvaluationRules.trace_rm_eval _ gf gf
+    intro X Y
+    -- Show: tensor_eval (smul (-1) T_neg_rm) ![X,Y] ![] = g(Rm(X, gf)Y, gf)
+    change tensor_eval (TensorAlgebra.smul (-1 : R) (TensorAlgebra.add SCT (TensorAlgebra.smul (-1 : R) T_lap))) ![X, Y] ![] = _
+    rw [tensor_eval_smul, tensor_eval_add, tensor_eval_smul]
+    have := pw_decomp metric conn f X Y
+    linarith
+  -- Step 5: From trace_rm_val, derive tr_g(T_neg_rm) = -Rc(∇f, ∇f)
+  have trace_neg_rm_val : tensor_eval (metric_trace metric (0 : Fin 2) (0 : Fin 1) T_neg_rm) ![] ![] =
+      - Rc conn gf gf := by
+    have h := trace_rm_val
+    change tensor_eval (metric_trace metric (0 : Fin 2) (0 : Fin 1) (TensorAlgebra.smul (-1 : R) T_neg_rm)) ![] ![] = _ at h
+    rw [metric_trace_smul, tensor_eval_smul] at h
+    linarith
+  -- Step 6: Trace of T_lap = g(∇f, ∇Δf) via nabla_metric_trace
+  have trace_lap : tensor_eval (metric_trace metric (0 : Fin 2) (0 : Fin 1) T_lap) ![] ![] =
+      metric.g gf (grad metric (laplacian metric conn f)) := by
+    -- nabla_metric_trace: ∇ commutes with metric_trace
+    have h_comm := nabla_metric_trace metric conn gf (0 : Fin 2) (0 : Fin 1) hF (h_ginv gf)
+    have h_mt_eq : metric_trace metric (0 : Fin 2) (0 : Fin 1) T_lap =
+        genericCovDeriv conn gf (metric_trace metric (0 : Fin 2) (0 : Fin 1) hF) := h_comm.symm
+    rw [h_mt_eq]
+    dsimp [genericCovDeriv]
+    -- Show the scalar tensor metric_trace hF = fromData (scalarToData (laplacian f))
+    set S := metric_trace metric (0 : Fin 2) (0 : Fin 1) hF
+    have h_S_scalar : S = TensorAlgebra.fromData (scalarToData (tensor_eval S ![] ![])) := by
+      have h_td : scalarToData (tensor_eval S ![] ![]) = TensorAlgebra.toData S := by
+        ext m n; dsimp [tensor_eval, scalarToData, MultilinearMap.constOfIsEmpty]
+        rw [show m = ![] from Subsingleton.elim _ _, show n = ![] from Subsingleton.elim _ _]
+      rw [h_td, TensorAlgebra.fromData_toData]
+    have h_lap_val : tensor_eval S ![] ![] = laplacian metric conn f := rfl
+    rw [h_S_scalar, AffineTensorCalculus.nabla_scalar gf, h_lap_val]
+    dsimp [tensor_eval]; rw [TensorAlgebra.toData_fromData]
+    dsimp [scalarToData, MultilinearMap.constOfIsEmpty]
+    rw [metric.toNonDegenerateMetric.toAbstractMetricTensor.symm gf (grad metric (laplacian metric conn f))]
+    exact (g_grad metric (laplacian metric conn f) gf).symm
+  -- Step 7: Combine
+  rw [trace_split, trace_lap, trace_neg_rm_val]; ring
+
+-- Proves the Bochner-Weitzenbock formula
 theorem bochner_identity
   [Invertible (2 : R)]
+  [LieDerivation R V] [ActionLinear R V] [LieDerivationRules R V]
   (metric : MetricDuality R V)
   (conn : AbstractAffineConnection R V) [AffineTensorCalculus conn] [RiemannCurvatureTensorOp conn] [TorsionFree conn]
   [MetricCompatible conn metric.toNonDegenerateMetric.toAbstractMetricTensor]
   [TensorInnerProductRules R V metric]
-  [BC : BochnerCalculus metric conn]
-  (f : R) :
+  [BilinearFormExt R V]
+  [MetricEvaluationRules R V metric.toNonDegenerateMetric.toAbstractMetricTensor]
+  [MetricTraceEvaluationRules R V metric]
+  [RicciEvaluationRules R V metric conn]
+  [EndomorphismContractionRules R V metric]
+  (f : R)
+  (h_ginv : ∀ X : V, AffineTensorCalculus.nabla_tensor conn X metric.g_inv = 0) :
   laplacian metric conn (metric.g (grad metric f) (grad metric f)) =
-  2 * tensorNormSq metric (hessianForm metric conn f) +
+  2 * tensorNormSq metric (hessianForm metric conn f) -
   2 * Rc conn (grad metric f) (grad metric f) +
   2 * metric.g (grad metric f) (grad metric (laplacian metric conn f)) := by
-  have h1 := BC.bochner_lap_expand f
-  have h2 := BC.bochner_commutation f
+  have h1 := bochner_lap_expand_thm metric conn f
+  have h2 := bochner_commutation_thm metric conn f h_ginv
   rw [h1, h2]
   ring

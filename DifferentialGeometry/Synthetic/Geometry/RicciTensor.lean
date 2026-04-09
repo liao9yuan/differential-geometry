@@ -44,3 +44,12 @@ def ricciForm (conn : AbstractAffineConnection R V) [op : RiemannCurvatureTensor
 lemma tensor_eval_ricciForm (conn : AbstractAffineConnection R V) [op : RiemannCurvatureTensorOp conn] (X Y : V) :
   tensor_eval (ricciForm conn) ![X, Y] ![] = Rc conn X Y := by rfl
 
+/--
+Foundational Geometric Axiom: The metric trace of any (0,2) tensor that evaluates pointwise
+as the Riemann curvature endomorphism pairing is defined to evaluate to the Ricci curvature.
+-/
+class RicciEvaluationRules (R V : Type) [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] [AbstractDerivationAction R V] [AbstractLieBracket V] (metric : MetricDuality R V) (conn : AbstractAffineConnection R V) [RiemannCurvatureTensorOp conn] where
+  trace_rm_eval : ∀ (T : AbstractTensor R V 0 2) (U W : V),
+    (∀ X Y, tensor_eval T ![X, Y] ![] = metric.g (Rm conn X U Y) W) →
+    tensor_eval (metric_trace metric (0 : Fin 2) (0 : Fin 1) T) ![] ![] = Rc conn U W
+

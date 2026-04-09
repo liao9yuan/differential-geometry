@@ -3,6 +3,7 @@ import DifferentialGeometry.Synthetic.Geometry.Curvature
 import DifferentialGeometry.Synthetic.Algebra.VectorField
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.Abel
+import Mathlib.Tactic.Linarith
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -123,3 +124,69 @@ theorem Rm_smul_X (conn : AbstractAffineConnection R V) [DerivationRules R V] [L
   rw [conn.nabla_smul_left (action Y f) X Z]
   rw [smul_sub, smul_sub]
   abel
+
+/-- The Riemann curvature endomorphism is skew-symmetric with respect to the metric:
+    g(Rm(X,Y)Z, W) = -g(Rm(X,Y)W, Z).
+    Proved by double expansion of metric compatibility and the bracket-action identity,
+    where cross-terms cancel and remaining terms collect into the Rm definition. -/
+lemma Rm_metric_antisymm {R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R]
+    [AddCommGroup V] [Module R V] [DifferentialGeometry.TensorAlgebra R V]
+    [AbstractDerivationAction R V] [AbstractLieBracket V]
+    [DerivationRules R V] [LieDerivationRules R V]
+    (conn : AbstractAffineConnection R V)
+    (metric : MetricDuality R V)
+    [MetricCompatible conn metric.toNonDegenerateMetric.toAbstractMetricTensor]
+    (X Y Z W : V) :
+    metric.g (Rm conn X Y Z) W = - metric.g (Rm conn X Y W) Z := by
+  -- Abbreviate the underlying AbstractMetricTensor
+  set m := metric.toNonDegenerateMetric.toAbstractMetricTensor with hm_def
+  -- Step 1: Suffices to show g(Rm(X,Y)Z, W) + g(Z, Rm(X,Y)W) = 0
+  suffices h : m.g (Rm conn X Y Z) W + m.g Z (Rm conn X Y W) = 0 by
+    have hsymm : m.g Z (Rm conn X Y W) = m.g (Rm conn X Y W) Z := m.symm Z (Rm conn X Y W)
+    linarith
+  -- Step 2: Metric subtraction in the second argument
+  have metric_sub_right : ∀ A B C : V, m.g C (A - B) = m.g C A - m.g C B := fun A B C => by
+    rw [m.symm C (A - B), metric_sub_left m A B C, m.symm A C, m.symm B C]
+  -- Step 3: Metric compatibility — single expansions
+  have c1 : action Y (m.g Z W) = m.g (conn.nabla Y Z) W + m.g Z (conn.nabla Y W) :=
+    MetricCompatible.compat Y Z W
+  have c2 : action X (m.g Z W) = m.g (conn.nabla X Z) W + m.g Z (conn.nabla X W) :=
+    MetricCompatible.compat X Z W
+  -- Step 4: Metric compatibility — double expansions (X after Y, and Y after X)
+  have c3 : action X (m.g (conn.nabla Y Z) W) =
+      m.g (conn.nabla X (conn.nabla Y Z)) W + m.g (conn.nabla Y Z) (conn.nabla X W) :=
+    MetricCompatible.compat X (conn.nabla Y Z) W
+  have c4 : action X (m.g Z (conn.nabla Y W)) =
+      m.g (conn.nabla X Z) (conn.nabla Y W) + m.g Z (conn.nabla X (conn.nabla Y W)) :=
+    MetricCompatible.compat X Z (conn.nabla Y W)
+  have c5 : action Y (m.g (conn.nabla X Z) W) =
+      m.g (conn.nabla Y (conn.nabla X Z)) W + m.g (conn.nabla X Z) (conn.nabla Y W) :=
+    MetricCompatible.compat Y (conn.nabla X Z) W
+  have c6 : action Y (m.g Z (conn.nabla X W)) =
+      m.g (conn.nabla Y Z) (conn.nabla X W) + m.g Z (conn.nabla Y (conn.nabla X W)) :=
+    MetricCompatible.compat Y Z (conn.nabla X W)
+  -- Step 5: Metric compatibility — bracket expansion
+  have c7 : action (bracket X Y) (m.g Z W) =
+      m.g (conn.nabla (bracket X Y) Z) W + m.g Z (conn.nabla (bracket X Y) W) :=
+    MetricCompatible.compat (bracket X Y) Z W
+  -- Step 6: Full double expansions via action distributivity + compat
+  --   X(Y(g(Z,W))) = g(∇_X∇_YZ, W) + g(∇_YZ, ∇_XW) + g(∇_XZ, ∇_YW) + g(Z, ∇_X∇_YW)
+  have hXY : action X (action Y (m.g Z W)) =
+      m.g (conn.nabla X (conn.nabla Y Z)) W + m.g (conn.nabla Y Z) (conn.nabla X W) +
+      m.g (conn.nabla X Z) (conn.nabla Y W) + m.g Z (conn.nabla X (conn.nabla Y W)) := by
+    rw [c1, DerivationRules.action_add_right, c3, c4]; ring
+  --   Y(X(g(Z,W))) = g(∇_Y∇_XZ, W) + g(∇_XZ, ∇_YW) + g(∇_YZ, ∇_XW) + g(Z, ∇_Y∇_XW)
+  have hYX : action Y (action X (m.g Z W)) =
+      m.g (conn.nabla Y (conn.nabla X Z)) W + m.g (conn.nabla X Z) (conn.nabla Y W) +
+      m.g (conn.nabla Y Z) (conn.nabla X W) + m.g Z (conn.nabla Y (conn.nabla X W)) := by
+    rw [c2, DerivationRules.action_add_right, c5, c6]; ring
+  -- Step 7: Bracket-action identity [X,Y](f) = X(Y(f)) - Y(X(f))
+  have ba : action (bracket X Y) (m.g Z W) =
+      action X (action Y (m.g Z W)) - action Y (action X (m.g Z W)) :=
+    LieDerivationRules.action_bracket X Y (m.g Z W)
+  -- Step 8: Unfold Rm, distribute metric over subtraction, close by linarith
+  --   Cross-terms g(∇_YZ,∇_XW) and g(∇_XZ,∇_YW) cancel in X(Y(g))−Y(X(g)),
+  --   and remaining terms regroup into g(Rm(X,Y)Z, W) + g(Z, Rm(X,Y)W) = 0.
+  unfold Rm
+  rw [metric_sub_left, metric_sub_left, metric_sub_right, metric_sub_right]
+  linarith
