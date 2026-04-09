@@ -104,6 +104,22 @@ class ContractCompositionRules (R V : Type*) [Field R] [LinearOrder R] [IsStrict
     tensor_eval B ![Y, L_A X] ![]
 
 /--
+Axiom 4: Universal (1,3) Contraction.
+
+Contracting a (1,3) tensor `T` with a parametric endomorphism family
+`L : V → V → (V →ₗ[R] V)` such that `T(X, U, W, n) = n(L U W X)` over
+the contravariant index and the first covariant index evaluates to `tr(L U W)`.
+This is the final atomic functor needed for direct Ricci trace evaluation
+without any metric-dependent patches.
+-/
+class Contract13EvaluationRules (R V : Type*) [Field R] [LinearOrder R] [IsStrictOrderedRing R]
+    [AddCommGroup V] [Module R V] [TensorAlgebra R V] [AbstractTraceRules R V] where
+  contract_13_eval : ∀ (T : AbstractTensor R V 1 3) (L : V → V → (V →ₗ[R] V)),
+    (∀ X U W n, tensor_eval T ![X, U, W] ![n] = n (L U W X)) →
+    ∀ U W, tensor_eval (TensorAlgebra.contract_general (0 : Fin 1) (0 : Fin 3) T) ![U, W] ![] =
+    AbstractTraceRules.tr (L U W)
+
+/--
 Universal abstract metric trace operator.
 Traces an `AbstractTensor R V r (s+2)` over two covariant indices, yielding `AbstractTensor R V r s`.
 It heavily leverages `raise_index` and `contract_general`.
@@ -127,24 +143,28 @@ def tensorInnerProduct {R V : Type*} [Field R] [LinearOrder R] [IsStrictOrderedR
   )
 
 /--
-Axiomatizes the geometric definition of trace: the metric trace of a (0,2) abstract tensor
-to a scalar is algebraically identically its tensor inner product against the metric's g_tensor:
-tr_g(T) = ⟨g, T⟩.
+Derived evaluation of `metric_trace`: for a (0,2) tensor `T` with associated
+endomorphism `L_T` (i.e., `T(X,Y) = g(X, L_T Y)`), the metric trace evaluates
+to `tr(L_T)`. This replaces the old `MetricTraceEvaluationRules` axiom class
+by deriving the result from `RaiseIndexEvaluationRules` (Axiom 1) and
+`Contract11EvaluationRules` (Axiom 2).
 -/
-class MetricTraceEvaluationRules (R V : Type*) [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] (metric : MetricDuality R V) where
-  trace_eq_inner_product_g : ∀ (T : AbstractTensor R V 0 2),
+lemma metric_trace_eval {R V : Type*} [Field R] [LinearOrder R] [IsStrictOrderedRing R]
+    [AddCommGroup V] [Module R V] [TensorAlgebra R V]
+    [AbstractTraceRules R V]
+    (metric : MetricDuality R V) [RaiseIndexEvaluationRules R V metric]
+    [Contract11EvaluationRules R V]
+    (T : AbstractTensor R V 0 2) (L_T : V →ₗ[R] V)
+    (h_eval : ∀ X Y, tensor_eval T ![X, Y] ![] = metric.g X (L_T Y)) :
     tensor_eval (metric_trace metric (0 : Fin 2) (0 : Fin 1) T) ![] ![] =
-    tensorInnerProduct metric metric.toNonDegenerateMetric.toAbstractMetricTensor.g_tensor T
-
-/--
-Axiomatizes the evaluation of an endomorphism matrix contraction pointwise without frames.
-Contracting a raised (0,2) tensor against itself mathematically evaluates to the inner product
-of the corresponding operator's output vectors.
--/
-class EndomorphismContractionRules (R V : Type*) [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] (metric : MetricDuality R V) where
-  contract_raise_02_eval : ∀ (T : AbstractTensor R V 0 2) (Z_op : V → V),
-    (∀ X Y, tensor_eval T ![X, Y] ![] = metric.g X (Z_op Y)) →
-    ∀ X Y, tensor_eval (TensorAlgebra.contract (r:=0) (s:=2) (TensorAlgebra.tensor_prod (r1:=1) (s1:=1) (r2:=0) (s2:=2) (raise_index metric (0 : Fin 2) T) T)) ![X, Y] ![] = metric.g (Z_op X) (Z_op Y)
+    AbstractTraceRules.tr L_T := by
+  -- metric_trace T = contract_general 0 0 (raise_index metric 0 T)
+  unfold metric_trace
+  -- By Axiom 2: contract_general of a (1,1) tensor with endo L evaluates to tr(L)
+  apply Contract11EvaluationRules.contract_11_eval
+    (raise_index metric (0 : Fin 2) T) L_T
+  -- By Axiom 1: raise_index of T with endo L_T evaluates as n(L_T X)
+  exact RaiseIndexEvaluationRules.raise_eval T L_T h_eval
 
 lemma metric_trace_add {R V : Type*} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
     (metric : MetricDuality R V) {r s : ℕ} (idx1 : Fin (s + 2)) (idx2 : Fin (s + 1)) (T1 T2 : AbstractTensor R V r (s + 2)) :

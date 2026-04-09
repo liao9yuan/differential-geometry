@@ -190,3 +190,118 @@ lemma Rm_metric_antisymm {R V : Type} [Field R] [LinearOrder R] [IsStrictOrdered
   unfold Rm
   rw [metric_sub_left, metric_sub_left, metric_sub_right, metric_sub_right]
   linarith
+
+/-- Antisymmetry of Rm in the first two arguments: `Rm(X,Y)Z = -Rm(Y,X)Z`. -/
+private lemma Rm_antisymm_local (conn : AbstractAffineConnection R V) [DerivationRules R V] (X Y Z : V) :
+    Rm conn X Y Z = - Rm conn Y X Z := by
+  unfold Rm
+  rw [DerivationRules.bracket_antisymm R X Y, nabla_neg_left]; abel
+
+/-- `∇_X(0) = 0` from additivity. -/
+private lemma nabla_zero_right (conn : AbstractAffineConnection R V) (X : V) :
+    conn.nabla X (0 : V) = 0 := by
+  have hd : conn.nabla X 0 + conn.nabla X 0 = conn.nabla X 0 := by
+    conv_rhs => rw [show (0 : V) = 0 + 0 from (add_zero 0).symm]
+    exact (conn.nabla_add_right X 0 0).symm
+  exact add_left_cancel (hd.trans (add_zero _).symm)
+
+/-- `∇_X(-Y) = -∇_X Y` for the second argument. -/
+private lemma nabla_neg_right_local (conn : AbstractAffineConnection R V) (X Y : V) :
+    conn.nabla X (-Y) = - conn.nabla X Y := by
+  have h := conn.nabla_add_right X Y (-Y)
+  rw [add_neg_cancel, nabla_zero_right] at h
+  exact eq_neg_of_add_eq_zero_right h.symm
+
+/-- First Bianchi Identity: `Rm(X,Y)Z + Rm(Y,Z)X + Rm(Z,X)Y = 0`. -/
+private lemma first_bianchi_local
+    (conn : AbstractAffineConnection R V) [DerivationRules R V]
+    [TorsionFree conn] [JacobiIdentity V] (X Y Z : V) :
+    Rm conn X Y Z + Rm conn Y Z X + Rm conn Z X Y = 0 := by
+  have torsion : ∀ A B : V, conn.nabla A B - conn.nabla B A = bracket A B :=
+    fun A B => TorsionFree.torsion_zero A B
+  have nsub : ∀ A B C : V, conn.nabla A (B - C) = conn.nabla A B - conn.nabla A C := by
+    intro A B C
+    calc conn.nabla A (B - C) = conn.nabla A (B + -C) := by rw [sub_eq_add_neg]
+      _ = conn.nabla A B + conn.nabla A (-C) := conn.nabla_add_right A B (-C)
+      _ = conn.nabla A B + - conn.nabla A C := by rw [nabla_neg_right_local conn A C]
+      _ = conn.nabla A B - conn.nabla A C := by rw [sub_eq_add_neg]
+  have regroup : ∀ A B C : V, conn.nabla A (conn.nabla B C) - conn.nabla A (conn.nabla C B) =
+      conn.nabla A (bracket B C) := by
+    intro A B C; rw [← nsub, torsion]
+  unfold Rm
+  have r1 := regroup X Y Z; have r2 := regroup Y Z X; have r3 := regroup Z X Y
+  have t1 := torsion X (bracket Y Z); have t2 := torsion Y (bracket Z X); have t3 := torsion Z (bracket X Y)
+  have jac := JacobiIdentity.jacobi X Y Z
+  -- All equalities are in the additive group V — close with abel
+  calc conn.nabla X (conn.nabla Y Z) - conn.nabla Y (conn.nabla X Z) - conn.nabla (bracket X Y) Z
+    + (conn.nabla Y (conn.nabla Z X) - conn.nabla Z (conn.nabla Y X) - conn.nabla (bracket Y Z) X)
+    + (conn.nabla Z (conn.nabla X Y) - conn.nabla X (conn.nabla Z Y) - conn.nabla (bracket Z X) Y)
+      = (conn.nabla X (conn.nabla Y Z) - conn.nabla X (conn.nabla Z Y))
+      + (conn.nabla Y (conn.nabla Z X) - conn.nabla Y (conn.nabla X Z))
+      + (conn.nabla Z (conn.nabla X Y) - conn.nabla Z (conn.nabla Y X))
+      - conn.nabla (bracket X Y) Z - conn.nabla (bracket Y Z) X - conn.nabla (bracket Z X) Y := by abel
+    _ = conn.nabla X (bracket Y Z)
+      + conn.nabla Y (bracket Z X)
+      + conn.nabla Z (bracket X Y)
+      - conn.nabla (bracket X Y) Z - conn.nabla (bracket Y Z) X - conn.nabla (bracket Z X) Y := by rw [r1, r2, r3]
+    _ = (conn.nabla X (bracket Y Z) - conn.nabla (bracket Y Z) X)
+      + (conn.nabla Y (bracket Z X) - conn.nabla (bracket Z X) Y)
+      + (conn.nabla Z (bracket X Y) - conn.nabla (bracket X Y) Z) := by abel
+    _ = bracket X (bracket Y Z) + bracket Y (bracket Z X) + bracket Z (bracket X Y) := by rw [t1, t2, t3]
+    _ = 0 := jac
+
+/-- Riemann tensor block symmetry: `g(Rm(X,Y)Z, W) = g(Rm(Z,W)X, Y)`.
+    Proved algebraically from the first Bianchi identity and the metric
+    antisymmetry of Rm, using four permutations of the metric Bianchi
+    identity paired with the two antisymmetries. -/
+lemma Rm_symm_blocks {R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R]
+    [AddCommGroup V] [Module R V] [DifferentialGeometry.TensorAlgebra R V]
+    [AbstractDerivationAction R V] [AbstractLieBracket V]
+    [DerivationRules R V] [LieDerivationRules R V]
+    (conn : AbstractAffineConnection R V)
+    [TorsionFree conn] [JacobiIdentity V]
+    (metric : MetricDuality R V)
+    [MetricCompatible conn metric.toNonDegenerateMetric.toAbstractMetricTensor]
+    (X Y Z W : V) :
+    metric.g (Rm conn X Y Z) W = metric.g (Rm conn Z W X) Y := by
+  set m := metric.toNonDegenerateMetric.toAbstractMetricTensor
+  -- g(0, D) = 0
+  have g_zero : ∀ D : V, m.g 0 D = 0 := by
+    intro D
+    have h3 : m.g (0 + 0) D = m.g 0 D + m.g 0 D := m.bilinear_add_left 0 0 D
+    rw [add_zero] at h3; linarith
+  -- Metric Bianchi: B(A,B,C,D) + B(B,C,A,D) + B(C,A,B,D) = 0
+  have bianchi : ∀ A B C D : V, m.g (Rm conn A B C) D + m.g (Rm conn B C A) D + m.g (Rm conn C A B) D = 0 := by
+    intro A B C D
+    have fb := first_bianchi_local conn A B C
+    calc m.g (Rm conn A B C) D + m.g (Rm conn B C A) D + m.g (Rm conn C A B) D
+      _ = m.g (Rm conn A B C + Rm conn B C A + Rm conn C A B) D := by
+          rw [m.bilinear_add_left, m.bilinear_add_left]
+      _ = m.g 0 D := by rw [fb]
+      _ = 0 := g_zero D
+  -- A2: antisymmetry in 2nd pair
+  have a2 : ∀ A B C D : V, m.g (Rm conn A B C) D = - m.g (Rm conn A B D) C :=
+    Rm_metric_antisymm conn metric
+  -- A1: antisymmetry in 1st pair
+  have a1 : ∀ A B C D : V, m.g (Rm conn A B C) D = - m.g (Rm conn B A C) D := by
+    intro A B C D
+    rw [Rm_antisymm_local conn A B C, metric_neg_left]
+  -- Provide Bianchi instances + all antisymmetry instances needed
+  have b1 := bianchi X Y Z W
+  have b2 := bianchi X Z W Y
+  have b3 := bianchi Y W X Z
+  have b4 := bianchi Y W Z X
+  -- A2 instances
+  have h1 := a2 X Y Z W; have h2 := a2 X Y W Z
+  have h3 := a2 Y Z X W; have h4 := a2 Y Z W X
+  have h5 := a2 Z X Y W; have h6 := a2 Z X W Y
+  have h7 := a2 X Z W Y; have h8 := a2 X Z Y W
+  have h9 := a2 Z W X Y; have h10 := a2 Z W Y X
+  have h11 := a2 Y W X Z; have h12 := a2 Y W Z X
+  have h13 := a2 W X Z Y; have h14 := a2 W X Y Z
+  -- A1 instances
+  have h15 := a1 X Z W Y; have h16 := a1 W X Z Y
+  have h17 := a1 W X Y Z; have h18 := a1 W Z Y X
+  have h19 := a1 Z Y W X; have h20 := a1 X Y W Z
+  have h21 := a1 Y W Z X; have h22 := a1 Y W X Z
+  linarith

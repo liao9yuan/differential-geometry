@@ -38,6 +38,7 @@ class RiemannCurvatureTensorOp where
   Rm_data : TensorData R V 1 3
   eval_eq : ∀ (X Y Z : V) (ω : V →ₗ[R] R), Rm_data ![X, Y, Z] ![ω] = ω (Rm conn X Y Z)
   Rm_tensor : AbstractTensor R V 1 3 := TensorAlgebra.fromData Rm_data
+  toData_Rm_tensor : TensorAlgebra.toData Rm_tensor = Rm_data
 
 
 
