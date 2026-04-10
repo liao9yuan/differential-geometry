@@ -12,6 +12,7 @@ import DifferentialGeometry.Synthetic.Geometry.Connection
 import DifferentialGeometry.Synthetic.Geometry.Curvature
 import DifferentialGeometry.Synthetic.Geometry.CurvatureTensor
 import DifferentialGeometry.Synthetic.Geometry.RicciIdentity
+import DifferentialGeometry.Synthetic.Geometry.TensorRicciIdentity
 
 
 import DifferentialGeometry.Synthetic.Geometry.RicciTensor
