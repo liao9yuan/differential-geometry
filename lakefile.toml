@@ -12,6 +12,7 @@ autoImplicit = false
 linter.style.longLine = false
 linter.unusedSectionVars = false
 linter.style.emptyLine = false
+linter.style.whitespace = false
 
 [[require]]
 name = "mathlib"
