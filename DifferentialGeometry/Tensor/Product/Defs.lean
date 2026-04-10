@@ -3,7 +3,7 @@ Authors: Yuan Liao, Jack McCarthy
 -/
 import DifferentialGeometry.Tensor.Product.HomEquiv
 import DifferentialGeometry.Tensor.RSTensor.Defs
-import DifferentialGeometry.Tensor.Multilinear.TensorFiber
+
 import DifferentialGeometry.Tensor.Alternating.Curry
 /-!
 # TensorProduct.mapL and its properties

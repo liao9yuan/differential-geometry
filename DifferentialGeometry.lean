@@ -71,11 +71,7 @@ import DifferentialGeometry.Tensor.Multilinear.Fiber
 import DifferentialGeometry.Tensor.Multilinear.Field
 import DifferentialGeometry.Tensor.Multilinear.Flip
 import DifferentialGeometry.Tensor.Multilinear.Dual
-import DifferentialGeometry.Tensor.Multilinear.DualBundle
-import DifferentialGeometry.Tensor.Multilinear.DualFiber
-import DifferentialGeometry.Tensor.Multilinear.DualSection
-import DifferentialGeometry.Tensor.Multilinear.TensorFiber
-import DifferentialGeometry.Tensor.Multilinear.TensorSection
+import DifferentialGeometry.Tensor.Multilinear.Tensor
 import DifferentialGeometry.Tensor.Mixed.Bundle
 import DifferentialGeometry.Tensor.Mixed.Fiber
 import DifferentialGeometry.Tensor.Mixed.DualFiber

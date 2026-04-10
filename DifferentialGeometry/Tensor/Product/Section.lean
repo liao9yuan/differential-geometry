@@ -125,10 +125,10 @@ noncomputable def ContMDiffSection.tensorProduct
     letI (x : B) : TopologicalSpace (E₁ x ⊗[𝕜] E₂ x) :=
       Bundle.TensorProduct.tensorFiberTopology 𝕜 F₁ F₂ E₁ E₂ x
     letI : FiberBundle (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x) :=
-      Bundle.TensorProduct.Bundle.TensorProduct.fiberBundle
+      Bundle.TensorProduct.fiberBundle
         (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
     letI : VectorBundle 𝕜 (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x) :=
-      Bundle.TensorProduct.Bundle.TensorProduct.vectorBundle
+      Bundle.TensorProduct.vectorBundle
         (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
     ContMDiffSection IB (F₁ ⊗[𝕜] F₂) n (fun x => E₁ x ⊗[𝕜] E₂ x) :=
   letI (x : B) : TopologicalSpace (E₁ x ⊗[𝕜] E₂ x) :=
@@ -137,10 +137,10 @@ noncomputable def ContMDiffSection.tensorProduct
     Bundle.TensorProduct.tensorTotalSpaceTop
       (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
   letI : FiberBundle (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x) :=
-    Bundle.TensorProduct.Bundle.TensorProduct.fiberBundle
+    Bundle.TensorProduct.fiberBundle
       (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
   letI : VectorBundle 𝕜 (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x) :=
-    Bundle.TensorProduct.Bundle.TensorProduct.vectorBundle
+    Bundle.TensorProduct.vectorBundle
       (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
   letI : ContMDiffVectorBundle n (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x) IB :=
     (Bundle.TensorProduct.vectorPrebundle
@@ -178,10 +178,10 @@ theorem ContMDiffSection.tensorProduct_apply
     letI (x : B) : TopologicalSpace (E₁ x ⊗[𝕜] E₂ x) :=
       Bundle.TensorProduct.tensorFiberTopology 𝕜 F₁ F₂ E₁ E₂ x
     letI : FiberBundle (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x) :=
-      Bundle.TensorProduct.Bundle.TensorProduct.fiberBundle
+      Bundle.TensorProduct.fiberBundle
         (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
     letI : VectorBundle 𝕜 (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x) :=
-      Bundle.TensorProduct.Bundle.TensorProduct.vectorBundle
+      Bundle.TensorProduct.vectorBundle
         (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
     ContMDiffSection.tensorProduct IB n g h x = g x ⊗ₜ[𝕜] h x := rfl
 

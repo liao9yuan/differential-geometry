@@ -4,7 +4,7 @@ Authors: Yuan Liao, Jack McCarthy
 import DifferentialGeometry.Tensor.RSTensor.Defs
 import DifferentialGeometry.Tensor.Product.Defs
 import DifferentialGeometry.Tensor.Multilinear.Basis
-import DifferentialGeometry.Tensor.Multilinear.TensorFiber
+import DifferentialGeometry.Tensor.Multilinear.Tensor
 
 /-!
 # Smooth Tensor Fields on Manifolds

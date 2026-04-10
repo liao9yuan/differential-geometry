@@ -48,7 +48,7 @@ namespace Bundle.TensorProduct
 
 /-- The topology on the tensor product fiber `E₁ x ⊗[𝕜] E₂ x`, induced from
 `F₁ ⊗[𝕜] F₂` via the trivialization CLEs. -/
-noncomputable def tensorFiberTopology (x : B) : TopologicalSpace (E₁ x ⊗[𝕜] E₂ x) :=
+@[reducible] noncomputable def tensorFiberTopology (x : B) : TopologicalSpace (E₁ x ⊗[𝕜] E₂ x) :=
   TopologicalSpace.induced
     (TensorProduct.map
       ((trivializationAt F₁ E₁ x).continuousLinearEquivAt 𝕜 x
