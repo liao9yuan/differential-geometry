@@ -2,7 +2,7 @@
 Authors: Jack McCarthy
 -/
 import DifferentialGeometry.Tensor.Mixed.Fiber
-import DifferentialGeometry.Tensor.Multilinear.DualFiber
+import DifferentialGeometry.Tensor.Multilinear.Dual
 import Mathlib.LinearAlgebra.Contraction
 /-!
 # Mixed multilinear bundle fiber as a tensor product
@@ -128,7 +128,7 @@ noncomputable def mixedFiberTensorEquivAt (r s : ℕ) (x : B) :
        ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E x) 𝕜) ≃ₗ[𝕜]
     ((ContinuousMultilinearMap 𝕜 (fun _ : Fin r => (E x →L[𝕜] 𝕜)) 𝕜) ⊗[𝕜]
        ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E x) 𝕜) := by
-  haveI : FiniteDimensional 𝕜 (E x) := fiberFiniteDimensional 𝕜 F E x
+  haveI : FiniteDimensional 𝕜 (E x) := VectorBundle.finiteDimensional 𝕜 F E x
   haveI : FiniteDimensional 𝕜 (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => E x) 𝕜) :=
     continuousMultilinearMap_finiteDimensional r
   haveI : FiniteDimensional 𝕜 (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E x) 𝕜) :=

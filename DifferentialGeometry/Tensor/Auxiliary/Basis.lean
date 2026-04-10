@@ -42,3 +42,20 @@ theorem exists_predual_basis [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜]
   rw [agree]
   change (b_alg i) (B j) = _
   simp [B, Module.Basis.map_apply, Finsupp.single_apply]
+
+/-- The continuous-linear analogue of `Basis.sum_dual_apply_smul_coord`: any
+continuous linear functional on `E` decomposes in the dual basis as
+`α = ∑ k, α (b k) • LinearMap.toContinuousLinearMap (b.coord k)`. -/
+theorem cdual_sum_repr {d : ℕ} [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜]
+    (b : Module.Basis (Fin d) 𝕜 E) (α : E →L[𝕜] 𝕜) :
+    (∑ k, (α (b k)) • LinearMap.toContinuousLinearMap (b.coord k)) = α := by
+  -- Lift to the algebraic dual via `Basis.sum_dual_apply_smul_coord`.
+  apply ContinuousLinearMap.coe_injective
+  -- Goal (after coe): ∑ k, α (b k) • b.coord k = α
+  rw [show ((∑ k, (α (b k)) • LinearMap.toContinuousLinearMap (b.coord k)
+        : E →L[𝕜] 𝕜) : E →ₗ[𝕜] 𝕜) =
+      ∑ k, (α (b k)) • (b.coord k) by
+    rw [ContinuousLinearMap.coe_sum]
+    refine Finset.sum_congr rfl fun k _ => ?_
+    rw [ContinuousLinearMap.coe_smul, LinearMap.coe_toContinuousLinearMap]]
+  exact b.sum_dual_apply_smul_coord (α : E →ₗ[𝕜] 𝕜)
