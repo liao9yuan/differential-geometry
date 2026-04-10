@@ -32,7 +32,7 @@ variable
   {N : Type*} [NormedAddCommGroup N] [NormedSpace 𝕜 N]
   {N' : Type*} [NormedAddCommGroup N'] [NormedSpace 𝕜 N']
   {N'' : Type*} [NormedAddCommGroup N''] [NormedSpace 𝕜 N'']
-  {m n p : ℕ}
+  {m n p m' d : ℕ}
 
 /-- The wedge product of two continuous alternating maps `g` an `h` with respect to a
 bilinear map `f`. -/
