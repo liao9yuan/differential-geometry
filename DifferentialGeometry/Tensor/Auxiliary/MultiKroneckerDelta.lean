@@ -1,4 +1,4 @@
-import DifferentialGeometry.Tensor.Aux.Perm
+import DifferentialGeometry.Tensor.Auxiliary.Perm
 import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
 
 open Equiv.Perm
