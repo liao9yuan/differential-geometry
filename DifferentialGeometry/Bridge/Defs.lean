@@ -390,7 +390,7 @@ class TensorAlgebra (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] whe
 
   add {r s : ℕ} : AbstractTensor r s → AbstractTensor r s → AbstractTensor r s -- done
   smul {r s : ℕ} : R → AbstractTensor r s → AbstractTensor r s -- done
-  tensor_prod {r1 s1 r2 s2 : ℕ} : AbstractTensor r1 s1 → AbstractTensor r2 s2 → AbstractTensor (r1 + r2) (s1 + s2) -- done
+  tensor_prod {r1 s1 r2 s2 : ℕ} : AbstractTensor r1 s1 → AbstractTensor r2 s2 → AbstractTensor (r1 + r2) (s1 + s2)  -- in progress
 
   -- Embedding
   fromScalar : R → AbstractTensor 0 0

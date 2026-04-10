@@ -4,6 +4,7 @@ Authors: Yuan Liao, Jack McCarthy
 import DifferentialGeometry.Tensor.RSTensor.Defs
 import DifferentialGeometry.Tensor.Product.Defs
 import DifferentialGeometry.Tensor.Multilinear.Basis
+import DifferentialGeometry.Tensor.Multilinear.TensorFiber
 
 /-!
 # Smooth Tensor Fields on Manifolds
@@ -337,7 +338,7 @@ noncomputable def tensor0SField_product
     have hβ := ((contMDiff_multilinearSection_iff_coord (TangentSpace I) n b
       (fun x => (β x : Tensor0SSpace q I x))).mp β.contMDiff)
     -- Rewrite the coordinate of the product as a product of coordinates
-    simp_rw [triv_coord_tensor0S_product b σ x₀ _ (α _) (β _)]
+    simp_rw [Bundle.continuousMultilinearMap.triv_coord_product b σ x₀ _ (α _) (β _)]
     exact (contMDiffAt_const (c := ContinuousLinearMap.mul 𝕜 𝕜).clm_apply
       (hα (σ ∘ Fin.castAdd q) x₀)).clm_apply (hβ (σ ∘ Fin.natAdd s) x₀)⟩
 
