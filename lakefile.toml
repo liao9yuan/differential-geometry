@@ -8,6 +8,10 @@ pp.unicode.fun = true
 relaxedAutoImplicit = false
 weak.linter.mathlibStandardSet = true
 maxSynthPendingDepth = 3
+autoImplicit = false
+linter.style.longLine = false
+linter.unusedSectionVars = false
+linter.style.emptyLine = false
 
 [[require]]
 name = "mathlib"

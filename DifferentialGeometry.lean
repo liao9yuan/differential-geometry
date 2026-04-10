@@ -1,39 +1,42 @@
-import DifferentialGeometry.Bridge.Defs
+import DifferentialGeometry.VectorField
+import DifferentialGeometry.Synthetic.Algebra.TensorAlgebra
 
-import DifferentialGeometry.Algebra.VectorField
-import DifferentialGeometry.Algebra.BilinearForm
-import DifferentialGeometry.Algebra.Metric
-import DifferentialGeometry.Algebra.Trace
+import DifferentialGeometry.Synthetic.Algebra.VectorField
+import DifferentialGeometry.Synthetic.Algebra.BilinearForm
+import DifferentialGeometry.Synthetic.Algebra.Metric
+import DifferentialGeometry.Synthetic.Algebra.Trace
 
-import DifferentialGeometry.Geometry.Bianchi
-import DifferentialGeometry.Geometry.Conformal
-import DifferentialGeometry.Geometry.Connection
-import DifferentialGeometry.Geometry.Curvature
-import DifferentialGeometry.Geometry.CurvatureTensor
-import DifferentialGeometry.Geometry.RicciIdentity
+import DifferentialGeometry.Synthetic.Geometry.Bianchi
+import DifferentialGeometry.Synthetic.Geometry.Conformal
+import DifferentialGeometry.Synthetic.Geometry.Connection
+import DifferentialGeometry.Synthetic.Geometry.Curvature
+import DifferentialGeometry.Synthetic.Geometry.CurvatureTensor
+import DifferentialGeometry.Synthetic.Geometry.RicciIdentity
 
-import DifferentialGeometry.Geometry.RicciTensor
-import DifferentialGeometry.Analysis.TensorInnerProduct
-import DifferentialGeometry.Algebra.Trace
 
-import DifferentialGeometry.Operators.Bochner
-import DifferentialGeometry.Operators.CovariantDerivative
-import DifferentialGeometry.Operators.Divergence
-import DifferentialGeometry.Operators.Gradient
-import DifferentialGeometry.Operators.Hessian
-import DifferentialGeometry.Operators.Laplacian
-import DifferentialGeometry.Operators.LieDerivative
-import DifferentialGeometry.Operators.SecondCovariantDerivative
-import DifferentialGeometry.Operators.SpatialConstant
-import DifferentialGeometry.Operators.Time
-import DifferentialGeometry.Operators.Variation
+import DifferentialGeometry.Synthetic.Geometry.RicciTensor
+import DifferentialGeometry.Synthetic.Analysis.TensorInnerProduct
+import DifferentialGeometry.Synthetic.Algebra.Trace
 
-import DifferentialGeometry.Flows.RicciFlow.Basic
-import DifferentialGeometry.Flows.RicciFlow.Evolution.Gradient
-import DifferentialGeometry.Flows.RicciFlow.Evolution.Connection
-import DifferentialGeometry.Flows.RicciFlow.Evolution.Laplacian
-import DifferentialGeometry.Flows.RicciFlow.Evolution.ScalarCurvature
-import DifferentialGeometry.Flows.RicciFlow.Calculus
+import DifferentialGeometry.Synthetic.Operator.Bochner
+import DifferentialGeometry.Synthetic.Operator.CovariantDerivative
+import DifferentialGeometry.Synthetic.Operator.Divergence
+import DifferentialGeometry.Synthetic.Operator.Gradient
+import DifferentialGeometry.Synthetic.Operator.Hessian
+import DifferentialGeometry.Synthetic.Operator.Laplacian
+import DifferentialGeometry.Synthetic.Operator.LieDerivative
+import DifferentialGeometry.Synthetic.Operator.SecondCovariantDerivative
+import DifferentialGeometry.Synthetic.Operator.SpatialConstant
+import DifferentialGeometry.Synthetic.Operator.Time
+import DifferentialGeometry.Synthetic.Operator.Variation
+
+import DifferentialGeometry.Synthetic.Flow.RicciFlow.Basic
+import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.Gradient
+import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.Connection
+import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.Laplacian
+import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.ScalarCurvature
+import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.Ricci
+import DifferentialGeometry.Synthetic.Flow.RicciFlow.Calculus
 
 import DifferentialGeometry.VectorBundle.Dual
 import DifferentialGeometry.VectorBundle.Equiv
