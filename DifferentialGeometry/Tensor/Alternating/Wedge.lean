@@ -4,10 +4,10 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yury Kudryashov
 Coauthors: Jack McCarthy
 -/
-import DifferentialGeometry.Tensor.Aux.Perm
-import DifferentialGeometry.Tensor.Aux.MultiKroneckerDelta
-import DifferentialGeometry.Tensor.Aux.Basis
-import DifferentialGeometry.Tensor.Aux.ShuffleSplit
+import DifferentialGeometry.Tensor.Auxiliary.Perm
+import DifferentialGeometry.Tensor.Auxiliary.MultiKroneckerDelta
+import DifferentialGeometry.Tensor.Auxiliary.Basis
+import DifferentialGeometry.Tensor.Auxiliary.ShuffleSplit
 import DifferentialGeometry.Tensor.Alternating.Congr
 import DifferentialGeometry.Tensor.Alternating.Comp
 import DifferentialGeometry.Tensor.Alternating.Curry

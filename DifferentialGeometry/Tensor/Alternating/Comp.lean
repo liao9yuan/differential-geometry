@@ -5,7 +5,7 @@ Authors: Yury Kudryashov
 Coauthors: Jack McCarthy
 -/
 import DifferentialGeometry.Tensor.Multilinear.Comp
-import DifferentialGeometry.Tensor.Aux.LIContDiff
+import DifferentialGeometry.Tensor.Auxiliary.LIContDiff
 import Mathlib.Analysis.Calculus.ContDiff.CPolynomial
 import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
 import Mathlib.LinearAlgebra.Multilinear.FiniteDimensional

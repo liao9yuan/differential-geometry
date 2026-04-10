@@ -73,7 +73,6 @@ section SmulByFun
 variable {r s : ℕ} [CompleteSpace 𝕜]
 
 -- RS bundle instance synthesis for `smul_section` is expensive.
-set_option maxHeartbeats 400000 in
 /-- Pointwise scalar multiplication of a `C^n` (r,s)-tensor field by a `C^n` scalar function
 `φ : M → 𝕜` is again a `C^n` (r,s)-tensor field.
 
