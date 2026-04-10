@@ -7,6 +7,7 @@ Coauthors: Jack McCarthy
 import DifferentialGeometry.Tensor.Alternating.Flip
 import DifferentialGeometry.Tensor.Alternating.Comp
 import DifferentialGeometry.Tensor.Alternating.Congr
+import DifferentialGeometry.Tensor.Aux.ShuffleDecomposition
 import Mathlib.Analysis.Normed.Module.Alternating.Curry
 import Mathlib.LinearAlgebra.Alternating.DomCoprod
 import Mathlib.LinearAlgebra.Alternating.Uncurry.Fin
@@ -172,6 +173,15 @@ theorem curryFin_apply (f : E [⋀^Fin (n + 1)]→L[𝕜] F) (x : E) (m : Fin n 
     curryFin f x m = f (Fin.cons x m) :=
   rfl
 
+/-- Norm bound for `curryFin`: `‖curryFin f‖ ≤ ‖f‖`. -/
+theorem norm_curryFin_le (f : E [⋀^Fin (n + 1)]→L[𝕜] F) :
+    ‖curryFin f‖ ≤ ‖f‖ := by
+  refine ContinuousLinearMap.opNorm_le_bound _ (norm_nonneg _) (fun x => ?_)
+  refine ContinuousAlternatingMap.opNorm_le_bound _
+    (mul_nonneg (norm_nonneg _) (norm_nonneg _)) (fun m => ?_)
+  rw [curryFin_apply]
+  exact f.1.norm_map_cons_le x m
+
 /-- `curryFin` is additive in `f`. -/
 theorem curryFin_add (f g : E [⋀^Fin (n + 1)]→L[𝕜] F) :
     curryFin (f + g) = curryFin f + curryFin g := by
@@ -184,6 +194,35 @@ theorem curryFin_smul {M : Type*} [Monoid M] [DistribMulAction M F] [ContinuousC
     curryFin (c • f) = c • curryFin f := by
   ext e v
   simp [curryFin_apply]
+
+/-- Right-curry a curried alternating map: given
+`F : E [⋀^Fin(m+1)]→L E [⋀^Fin(n+1)]→L G` and `x : E`, produce
+`F_right x : E [⋀^Fin(m+1)]→L E [⋀^Fin n]→L G` satisfying
+`(F_right x) v w = F v (Fin.cons x w)`. This is `F` post-composed with `curryFin · x`. -/
+def curryFinRight
+    (F : E [⋀^Fin (m + 1)]→L[𝕜] E [⋀^Fin (n + 1)]→L[𝕜] G) (x : E) :
+    E [⋀^Fin (m + 1)]→L[𝕜] E [⋀^Fin n]→L[𝕜] G :=
+  let g : (E [⋀^Fin (n + 1)]→L[𝕜] G) →L[𝕜] (E [⋀^Fin n]→L[𝕜] G) :=
+    LinearMap.mkContinuous
+      { toFun := fun f => curryFin f x
+        map_add' := fun f₁ f₂ => by rw [curryFin_add]; rfl
+        map_smul' := fun c f => by rw [curryFin_smul]; rfl }
+      ‖x‖
+      (fun f => by
+        show ‖curryFin f x‖ ≤ ‖x‖ * ‖f‖
+        calc ‖curryFin f x‖
+            ≤ ‖curryFin f‖ * ‖x‖ := (curryFin f).le_opNorm x
+          _ ≤ ‖f‖ * ‖x‖ := by
+              exact mul_le_mul_of_nonneg_right (norm_curryFin_le f) (norm_nonneg _)
+          _ = ‖x‖ * ‖f‖ := by ring)
+  g.compContinuousAlternatingMap F
+
+@[simp] theorem curryFinRight_apply
+    (F : E [⋀^Fin (m + 1)]→L[𝕜] E [⋀^Fin (n + 1)]→L[𝕜] G)
+    (x : E) (v : Fin (m + 1) → E) (w : Fin n → E) :
+    curryFinRight F x v w = F v (Fin.cons x w) := by
+  show curryFin (F v) x w = F v (Fin.cons x w)
+  rw [curryFin_apply]
 
 variable [DecidableEq ι] [DecidableEq ι']
 
@@ -235,6 +274,20 @@ theorem uncurrySum.summand_mk'' (f : E [⋀^ι]→L[𝕜] E [⋀^ι']→L[𝕜] 
     (ContinuousMultilinearMap.uncurrySum
     (f.toContinuousMultilinearMap.flipAlternating.toContinuousMultilinearMap.flipMultilinear)
       : ContinuousMultilinearMap 𝕜 (fun _ => E) F).domDomCongr σ :=
+  rfl
+
+/-- Direct evaluation of `uncurrySum.summand` at a representative `σ` and a vector `v`,
+giving an explicit formula in terms of `f`. -/
+theorem uncurrySum_summand_eval
+    (f : E [⋀^ι]→L[𝕜] E [⋀^ι']→L[𝕜] F)
+    (σ : Equiv.Perm (ι ⊕ ι')) (v : ι ⊕ ι' → E) :
+    uncurrySum.summand f (Quotient.mk'' σ) v =
+      Equiv.Perm.sign σ • f (fun i => v (σ (Sum.inl i))) (fun i => v (σ (Sum.inr i))) := by
+  rw [uncurrySum.summand_mk'']
+  simp only [ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.domDomCongr_apply,
+    ContinuousMultilinearMap.uncurrySum_apply,
+    ContinuousMultilinearMap.flipMultilinear_apply, coe_toContinuousMultilinearMap,
+    ContinuousMultilinearMap.flipAlternating_apply]
   rfl
 
 /-- If `v i = v j` and `i ≠ j`, then a summand and its image under swapping cancel:
@@ -366,6 +419,254 @@ theorem lift_comp_domCoprod_eq_uncurrySum
     coe_toContinuousMultilinearMap, ContinuousMultilinearMap.flipAlternating_apply,
     ContinuousLinearMap.compContinuousAlternatingMap₂_apply]
   rw [LinearMap.map_smul_of_tower φ, hφ]; rfl
+
+/-! ### Summand matching for the shuffle decomposition
+
+The bijections `shuffleLeftRestrict` / `shuffleRightRestrict` from `ShuffleDecomposition`
+match the summands of `uncurrySum F` (over the bigger coset space) with the summands
+of `uncurrySum (curryFin F x)` / `uncurrySum (curryFinRight F x)` (over the smaller
+coset spaces). These identities are used in the proof of the graded Leibniz rule. -/
+
+variable {N'' : Type*} [NormedAddCommGroup N''] [NormedSpace 𝕜 N'']
+
+/-- **Summand matching (left case):** For a shuffle `σ` where `x` enters the left factor,
+the summand of the `(m+1, n+1)`-shuffle sum equals the corresponding summand of
+the `(m, n+1)`-shuffle sum with `curryFin` applied to the left factor. -/
+theorem summand_left_match
+    (F : E [⋀^Fin (m + 1)]→L[𝕜] E [⋀^Fin (n + 1)]→L[𝕜] N'')
+    (x : E) (w : Fin (m + 1) ⊕ Fin (n + 1) → E) (hw : w (Sum.inl 0) = x)
+    (σ : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)))
+    (hσ : ∃ k, σ⁻¹ (Sum.inl 0) = Sum.inl k)
+    (σ' : Equiv.Perm (Fin m ⊕ Fin (n + 1)))
+    (hσ' : Quotient.mk'' σ' = shuffleLeftRestrict
+      ⟨Quotient.mk'' σ, shuffleLeftRestrict_subtype_of_inv σ hσ⟩) :
+    uncurrySum.summand F (Quotient.mk'' σ) w =
+      uncurrySum.summand (curryFin F x) (Quotient.mk'' σ') (w ∘ Sum.map Fin.succ id) := by
+  -- Step 1: Replace σ' by the canonical representative `shuffleLeftFwd σ hσ`.
+  have h_coset : (Quotient.mk'' σ' :
+      Equiv.Perm.ModSumCongr (Fin m) (Fin (n + 1))) =
+      Quotient.mk'' (shuffleLeftFwd σ hσ) := by
+    rw [hσ']
+    show Quotient.mk'' (shuffleLeftFwd (Quotient.out (Quotient.mk'' σ)) _) =
+      Quotient.mk'' (shuffleLeftFwd σ hσ)
+    apply Quotient.sound'
+    apply shuffleLeftFwd_wd
+    rw [QuotientGroup.leftRel_apply]
+    have h_eq : (Quotient.mk'' (Quotient.out (Quotient.mk'' σ)) :
+      Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin (n + 1))) = Quotient.mk'' σ :=
+      Quotient.out_eq _
+    exact QuotientGroup.leftRel_apply.mp (Quotient.exact' h_eq)
+  rw [h_coset]
+  set k := hσ.choose
+  set hk := hσ.choose_spec
+  set σ_can := shuffleLeftFwd σ hσ
+  -- Step 2: Sign computation: sign σ_can = sign σ * sign (swap 0 k).
+  have h_sign : Equiv.Perm.sign σ_can =
+      Equiv.Perm.sign σ * Equiv.Perm.sign (Equiv.swap 0 k) := by
+    show Equiv.Perm.sign (shuffleLeftFwd σ hσ) = _
+    unfold shuffleLeftFwd
+    rw [restrictComplement_sign]
+    show Equiv.Perm.sign (normalizeLeft σ k hk) = _
+    unfold normalizeLeft
+    rw [Equiv.Perm.sign_mul]
+    congr 1
+    rw [Equiv.Perm.sign_sumCongr]; simp
+  rw [uncurrySum_summand_eval, uncurrySum_summand_eval]
+  set ν := normalizeLeft σ k hk
+  have hν_fix : ν (Sum.inl 0) = Sum.inl 0 := normalizeLeft_fixes σ k hk
+  have hσ_can_eq : σ_can = restrictComplement ν hν_fix := rfl
+  have hν_inl : ∀ a : Fin (m + 1), ν (Sum.inl a) = σ (Sum.inl ((Equiv.swap 0 k) a)) := by
+    intro a; rfl
+  have hν_inr : ∀ b : Fin (n + 1), ν (Sum.inr b) = σ (Sum.inr b) := by
+    intro b; rfl
+  have hw'_inl : ∀ j : Fin m, (w ∘ Sum.map Fin.succ id) (σ_can (Sum.inl j)) =
+      w (ν (Sum.inl j.succ)) := by
+    intro j
+    show w (Sum.map Fin.succ id (σ_can (Sum.inl j))) = w (ν (Sum.inl j.succ))
+    rw [hσ_can_eq, restrictComplement_lift ν hν_fix (Sum.inl j)]
+    rfl
+  have hw'_inr : ∀ b : Fin (n + 1), (w ∘ Sum.map Fin.succ id) (σ_can (Sum.inr b)) =
+      w (ν (Sum.inr b)) := by
+    intro b
+    show w (Sum.map Fin.succ id (σ_can (Sum.inr b))) = w (ν (Sum.inr b))
+    rw [hσ_can_eq, restrictComplement_lift ν hν_fix (Sum.inr b)]
+    rfl
+  have h_inr_eq : (fun i => w (σ (Sum.inr i))) =
+      (fun i => (w ∘ Sum.map Fin.succ id) (σ_can (Sum.inr i))) := by
+    funext b; rw [hw'_inr, hν_inr]
+  have h_first_eq : ((fun i => w (σ (Sum.inl i))) ∘ (Equiv.swap (0 : Fin (m + 1)) k)) =
+      Fin.cons x (fun j => (w ∘ Sum.map Fin.succ id) (σ_can (Sum.inl j))) := by
+    funext i
+    refine Fin.cases ?_ ?_ i
+    · simp only [Function.comp_apply, Equiv.swap_apply_left, Fin.cons_zero]
+      rw [show σ (Sum.inl k) = Sum.inl (0 : Fin (m + 1)) from ?_, hw]
+      have := hk; rw [← Equiv.eq_symm_apply] at this; exact this.symm
+    · intro j
+      simp only [Function.comp_apply, Fin.cons_succ]
+      rw [hσ_can_eq, restrictComplement_lift ν hν_fix (Sum.inl j),
+          show Sum.map Fin.succ id (Sum.inl j : Fin m ⊕ Fin (n + 1)) =
+            Sum.inl j.succ from rfl, hν_inl]
+  have h_alt : (F ((fun i => w (σ (Sum.inl i))) ∘ (Equiv.swap (0 : Fin (m + 1)) k)) :
+      E [⋀^Fin (n + 1)]→L[𝕜] N'') =
+      Equiv.Perm.sign (Equiv.swap (0 : Fin (m + 1)) k) • F (fun i => w (σ (Sum.inl i))) := by
+    have := F.toAlternatingMap.map_perm (fun i => w (σ (Sum.inl i)))
+      (Equiv.swap (0 : Fin (m + 1)) k)
+    simp only [ContinuousAlternatingMap.coe_toAlternatingMap] at this
+    exact this
+  rw [h_inr_eq]
+  rw [show (curryFin F x) (fun j => (w ∘ Sum.map Fin.succ id) (σ_can (Sum.inl j))) =
+      F (Fin.cons x (fun j => (w ∘ Sum.map Fin.succ id) (σ_can (Sum.inl j)))) from rfl]
+  rw [← h_first_eq]
+  rw [h_alt]
+  rw [h_sign]
+  simp only [ContinuousAlternatingMap.smul_apply]
+  rw [smul_smul, mul_assoc, Int.units_mul_self, mul_one]
+
+/-- **Summand matching (right case):** For a shuffle `σ` where `x` enters the right
+factor, the summand of the `(m+1, n+1)`-shuffle sum equals minus the corresponding
+summand of the `(m+1, n)`-shuffle sum with `curryFinRight` applied to the right factor.
+The sign factor `-1` arises from the swap `(inl 0)(inr 0)` used in `normalizeRight`. -/
+theorem summand_right_match
+    (F : E [⋀^Fin (m + 1)]→L[𝕜] E [⋀^Fin (n + 1)]→L[𝕜] N'')
+    (x : E) (w : Fin (m + 1) ⊕ Fin (n + 1) → E) (hw : w (Sum.inl 0) = x)
+    (σ : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)))
+    (hσ : ∃ k, σ⁻¹ (Sum.inl 0) = Sum.inr k)
+    (σ' : Equiv.Perm (Fin (m + 1) ⊕ Fin n))
+    (hσ' : Quotient.mk'' σ' =
+      shuffleRightRestrict ⟨Quotient.mk'' σ,
+        shuffleRightRestrict_subtype_of_inv σ hσ⟩) :
+    uncurrySum.summand F (Quotient.mk'' σ) w =
+      -(uncurrySum.summand (curryFinRight F x) (Quotient.mk'' σ')
+        (fun y => w (Equiv.swap (Sum.inl (0 : Fin (m + 1))) (Sum.inr 0)
+          (Sum.map id Fin.succ y)))) := by
+  have h_coset : (Quotient.mk'' σ' :
+      Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin n)) =
+      Quotient.mk'' (shuffleRightFwd σ hσ) := by
+    rw [hσ']
+    show Quotient.mk'' (shuffleRightFwd (Quotient.out (Quotient.mk'' σ)) _) =
+      Quotient.mk'' (shuffleRightFwd σ hσ)
+    apply Quotient.sound'
+    apply shuffleRightFwd_wd
+    rw [QuotientGroup.leftRel_apply]
+    have h_eq : (Quotient.mk'' (Quotient.out (Quotient.mk'' σ)) :
+      Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin (n + 1))) = Quotient.mk'' σ :=
+      Quotient.out_eq _
+    exact QuotientGroup.leftRel_apply.mp (Quotient.exact' h_eq)
+  rw [h_coset]
+  set k := hσ.choose
+  set hk := hσ.choose_spec
+  set σ_can := shuffleRightFwd σ hσ
+  have h_sign : Equiv.Perm.sign σ_can =
+      -Equiv.Perm.sign σ * Equiv.Perm.sign (Equiv.swap (0 : Fin (n + 1)) k) := by
+    show Equiv.Perm.sign (shuffleRightFwd σ hσ) = _
+    unfold shuffleRightFwd
+    rw [restrictComplementRight_sign]
+    show Equiv.Perm.sign (normalizeRight σ k hk) = _
+    unfold normalizeRight
+    rw [Equiv.Perm.sign_mul, Equiv.Perm.sign_mul, Equiv.Perm.sign_sumCongr,
+      Equiv.Perm.sign_swap (show (Sum.inl (0 : Fin (m + 1)) : Fin (m + 1) ⊕ Fin (n + 1)) ≠
+        Sum.inr 0 from by simp)]
+    simp
+  set ν := normalizeRight σ k hk
+  have hν_fix : ν (Sum.inr 0) = Sum.inr 0 := normalizeRight_fixes σ k hk
+  have hσ_can_eq : σ_can = restrictComplementRight ν hν_fix := rfl
+  have hν_inl : ∀ a : Fin (m + 1),
+      ν (Sum.inl a) =
+        Equiv.swap (Sum.inl (0 : Fin (m + 1))) (Sum.inr 0) (σ (Sum.inl a)) := by
+    intro a; rfl
+  have hν_inr : ∀ b : Fin (n + 1),
+      ν (Sum.inr b) =
+        Equiv.swap (Sum.inl (0 : Fin (m + 1))) (Sum.inr 0)
+          (σ (Sum.inr ((Equiv.swap (0 : Fin (n + 1)) k) b))) := by
+    intro b; rfl
+  have hw_R_inl : ∀ j : Fin (m + 1),
+      w (Equiv.swap (Sum.inl (0 : Fin (m + 1))) (Sum.inr 0)
+        (Sum.map id Fin.succ (σ_can (Sum.inl j)))) =
+      w (σ (Sum.inl j)) := by
+    intro j
+    rw [hσ_can_eq, restrictComplementRight_lift ν hν_fix (Sum.inl j)]
+    show w (Equiv.swap _ _ (ν (Sum.inl j))) = _
+    rw [hν_inl, Equiv.swap_apply_self]
+  have hw_R_inr : ∀ j : Fin n,
+      w (Equiv.swap (Sum.inl (0 : Fin (m + 1))) (Sum.inr 0)
+        (Sum.map id Fin.succ (σ_can (Sum.inr j)))) =
+      w (σ (Sum.inr ((Equiv.swap (0 : Fin (n + 1)) k) j.succ))) := by
+    intro j
+    rw [hσ_can_eq, restrictComplementRight_lift ν hν_fix (Sum.inr j)]
+    show w (Equiv.swap _ _ (ν (Sum.inr j.succ))) = _
+    rw [hν_inr, Equiv.swap_apply_self]
+  rw [uncurrySum_summand_eval, uncurrySum_summand_eval]
+  have h_first_eq : (fun i => w (σ (Sum.inl i))) =
+      (fun i => w (Equiv.swap (Sum.inl (0 : Fin (m + 1))) (Sum.inr 0)
+        (Sum.map id Fin.succ (σ_can (Sum.inl i))))) := by
+    funext i; rw [hw_R_inl]
+  have h_second_eq : ((fun i => w (σ (Sum.inr i))) ∘ (Equiv.swap (0 : Fin (n + 1)) k)) =
+      Fin.cons x (fun j => w (Equiv.swap (Sum.inl (0 : Fin (m + 1))) (Sum.inr 0)
+        (Sum.map id Fin.succ (σ_can (Sum.inr j))))) := by
+    funext i
+    refine Fin.cases ?_ ?_ i
+    · simp only [Function.comp_apply, Equiv.swap_apply_left, Fin.cons_zero]
+      rw [show σ (Sum.inr k) = Sum.inl (0 : Fin (m + 1)) from ?_, hw]
+      have := hk; rw [← Equiv.eq_symm_apply] at this; exact this.symm
+    · intro j
+      simp only [Function.comp_apply, Fin.cons_succ]
+      rw [hw_R_inr]
+  have h_alt : (F (fun i => w (σ (Sum.inl i))) :
+      E [⋀^Fin (n + 1)]→L[𝕜] N'')
+      ((fun i => w (σ (Sum.inr i))) ∘ (Equiv.swap (0 : Fin (n + 1)) k)) =
+      Equiv.Perm.sign (Equiv.swap (0 : Fin (n + 1)) k) •
+        (F (fun i => w (σ (Sum.inl i)))) (fun i => w (σ (Sum.inr i))) := by
+    have := (F (fun i => w (σ (Sum.inl i)))).toAlternatingMap.map_perm
+      (fun i => w (σ (Sum.inr i))) (Equiv.swap (0 : Fin (n + 1)) k)
+    simp only [ContinuousAlternatingMap.coe_toAlternatingMap] at this
+    exact this
+  show Equiv.Perm.sign σ • F _ _ = -(Equiv.Perm.sign σ_can • _)
+  rw [show ((curryFinRight F x)
+      (fun i => w (Equiv.swap (Sum.inl (0 : Fin (m + 1))) (Sum.inr 0)
+        (Sum.map id Fin.succ (σ_can (Sum.inl i)))) :
+        Fin (m + 1) → E) :
+      E [⋀^Fin n]→L[𝕜] N'')
+      (fun i => w (Equiv.swap (Sum.inl (0 : Fin (m + 1))) (Sum.inr 0)
+        (Sum.map id Fin.succ (σ_can (Sum.inr i))))) =
+    F (fun i => w (Equiv.swap (Sum.inl (0 : Fin (m + 1))) (Sum.inr 0)
+        (Sum.map id Fin.succ (σ_can (Sum.inl i)))))
+      (Fin.cons x (fun i => w (Equiv.swap (Sum.inl (0 : Fin (m + 1))) (Sum.inr 0)
+        (Sum.map id Fin.succ (σ_can (Sum.inr i)))))) from rfl]
+  rw [← h_first_eq, ← h_second_eq, h_alt, h_sign]
+  rw [smul_smul]
+  rw [show (-Equiv.Perm.sign σ * Equiv.Perm.sign (Equiv.swap (0 : Fin (n + 1)) k)) *
+      Equiv.Perm.sign (Equiv.swap (0 : Fin (n + 1)) k) = -Equiv.Perm.sign σ from by
+    rw [mul_assoc, Int.units_mul_self, mul_one]]
+  rw [show (-Equiv.Perm.sign σ : ℤˣ) • (F (fun i => w (σ (Sum.inl i)))
+      : E [⋀^Fin (n + 1)]→L[𝕜] N'') (fun i => w (σ (Sum.inr i))) =
+    -(Equiv.Perm.sign σ • (F (fun i => w (σ (Sum.inl i))))
+      (fun i => w (σ (Sum.inr i)))) from by
+    rw [Units.neg_smul]]
+  rw [neg_neg]
+
+/-! ### Distribution lemmas for `curryFin` -/
+
+/-- `curryFin` (point-free) distributes over a finite sum of scaled alternating maps. -/
+theorem curryFin_sum_smul_clm {κ : Type*} {p : ℕ}
+    (s : Finset κ) (c : κ → 𝕜)
+    (f : κ → E [⋀^Fin (p + 1)]→L[𝕜] F) :
+    curryFin (∑ i ∈ s, c i • f i) = ∑ i ∈ s, c i • curryFin (f i) := by
+  classical
+  induction s using Finset.induction_on with
+  | empty =>
+    simp only [Finset.sum_empty]
+    ext y v; simp [curryFin_apply]
+  | insert _ _ hni ih =>
+    rw [Finset.sum_insert hni, curryFin_add, curryFin_smul, ih, Finset.sum_insert hni]
+
+/-- `curryFin` (evaluated at `x`) distributes over a finite sum of scaled alternating maps. -/
+theorem curryFin_sum_smul {κ : Type*} {p : ℕ}
+    (s : Finset κ) (c : κ → 𝕜)
+    (f : κ → E [⋀^Fin (p + 1)]→L[𝕜] F) (x : E) :
+    curryFin (∑ i ∈ s, c i • f i) x = ∑ i ∈ s, c i • curryFin (f i) x := by
+  have := congr_fun (congr_arg DFunLike.coe (curryFin_sum_smul_clm s c f)) x
+  simp only [ContinuousLinearMap.sum_apply, ContinuousLinearMap.smul_apply] at this
+  exact this
 
 end curry
 end ContinuousAlternatingMap

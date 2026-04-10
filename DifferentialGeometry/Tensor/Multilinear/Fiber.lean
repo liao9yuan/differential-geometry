@@ -3,7 +3,6 @@ Authors: Jack McCarthy
 -/
 import DifferentialGeometry.Tensor.Multilinear.Bundle
 import DifferentialGeometry.Tensor.Multilinear.Basis
-import Mathlib.RingTheory.TensorProduct.Finite
 /-!
 # Fiber-level results for the continuous multilinear map bundle
 
@@ -200,6 +199,123 @@ theorem ext {s : ℕ} {x : B}
   ContinuousMultilinearMap.ext h
 
 /-!
+## Degeneracy of the `0`-multilinear bundle trivialization
+
+For the `0`-multilinear bundle, the trivialization at any base point is degenerate:
+because the trivialization precomposes with `symmL` per argument, and on `Fin 0` arguments
+this composition is vacuous, the trivialized form of any fiber element evaluated at any
+input reduces to the original element evaluated at the unique empty tuple.
+
+This degeneracy is the technical content that makes the equivalence between mixed
+`(0, s)`-sections and pure `s`-multilinear sections work smoothly.
+-/
+
+/-- The trivialization at `x₀` of a `0`-multilinear bundle fiber element `T` at point `x`,
+when evaluated at any `Fin 0 → F` argument, equals `T Fin.elim0`. The trivialization is
+defined by precomposing with `symmL` per argument, which on `Fin 0` arguments is vacuous. -/
+theorem triv_zero_apply_eq (x₀ x : B)
+    (T : Bundle.continuousMultilinearMap 𝕜 0 F E x)
+    (w : Fin 0 → F) :
+    (trivializationAt (ContinuousMultilinearMap 𝕜 (fun _ : Fin 0 => F) 𝕜)
+      (Bundle.continuousMultilinearMap 𝕜 0 F E) x₀ ⟨x, T⟩).2 w = T Fin.elim0 := by
+  change T (fun i : Fin 0 => (trivializationAt F E x₀).symmL 𝕜 x (w i)) = T Fin.elim0
+  exact congrArg T (Subsingleton.elim _ _)
+
+/-- Symmetric version: applying the inverse of the trivialization at `x₀` to a model-fiber
+element `ω₀ : MLF 0` and then evaluating at `Fin.elim0` recovers `ω₀ 0`. Used to compute
+the trivialized form of `eval₀`-style smooth sections. -/
+theorem triv_zero_symmL_apply_elim0 (x₀ x : B)
+    (hx : x ∈ (trivializationAt F E x₀).baseSet)
+    (ω₀ : ContinuousMultilinearMap 𝕜 (fun _ : Fin 0 => F) 𝕜) :
+    ((trivializationAt (ContinuousMultilinearMap 𝕜 (fun _ : Fin 0 => F) 𝕜)
+        (Bundle.continuousMultilinearMap 𝕜 0 F E) x₀).symmL 𝕜 x ω₀ :
+        Bundle.continuousMultilinearMap 𝕜 0 F E x) Fin.elim0 = ω₀ 0 := by
+  set e := trivializationAt (ContinuousMultilinearMap 𝕜 (fun _ : Fin 0 => F) 𝕜)
+    (Bundle.continuousMultilinearMap 𝕜 0 F E) x₀ with he_def
+  have hbase : x ∈ e.baseSet := hx
+  -- `e.symmL 𝕜 x ω₀` and `e.symm x ω₀` agree as fiber elements (definitional via simps).
+  have hsymmL : (e.symmL 𝕜 x ω₀ : Bundle.continuousMultilinearMap 𝕜 0 F E x) =
+      e.symm x ω₀ := by
+    simp [Trivialization.symmL_apply]
+  rw [hsymmL]
+  -- Apply triv_zero_apply_eq to the fiber element T = e.symm x ω₀, with input 0.
+  have h1 := triv_zero_apply_eq (F := F) (E := E) x₀ x (e.symm x ω₀) 0
+  -- h1 : (e ⟨x, e.symm x ω₀⟩).2 0 = (e.symm x ω₀) Fin.elim0
+  -- Use that e ⟨x, e.symm x ω₀⟩ = (x, ω₀) via apply_mk_symm.
+  have h2 : (e ⟨x, e.symm x ω₀⟩ : B × _) = (x, ω₀) :=
+    e.apply_mk_symm hbase ω₀
+  rw [show (e ⟨x, e.symm x ω₀⟩ : B × _).2 = ω₀ from congrArg Prod.snd h2] at h1
+  exact h1.symm
+
+/-!
+## Inverse trivialization formula for `s`-multilinear bundles
+
+The inverse trivialization `e.symmL 𝕜 x T` of the multilinear bundle at `x₀` sends a
+model-fiber element `T : MLF s` to a fiber element that, when applied to any
+`v : Fin s → E x`, gives `T (fun i => (trivAt F E x₀).continuousLinearMapAt 𝕜 x (v i))`.
+
+This is the analog of `triv_zero_apply_eq` for the inverse direction and for general `s`.
+-/
+
+/-- The inverse trivialization of the multilinear bundle at `x₀`, applied to a model-fiber
+element `T : MLF s` at point `x ∈ baseSet`, when evaluated at `v : Fin s → E x`, equals
+`T` applied to `(trivAt F E x₀).continuousLinearMapAt 𝕜 x` composed into each argument.
+
+The proof uses the round-trip: apply the forward trivialization to `e.symm x T` and use
+`e.apply_mk_symm` to recover `T`, then match via the forward trivialization formula. -/
+theorem triv_symmL_eq_compContinuousLinearMap {s : ℕ} (x₀ x : B)
+    (hx : x ∈ (trivializationAt F E x₀).baseSet)
+    (T : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜) :
+    ((trivializationAt (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜)
+        (Bundle.continuousMultilinearMap 𝕜 s F E) x₀).symmL 𝕜 x T :
+        Bundle.continuousMultilinearMap 𝕜 s F E x) =
+      T.compContinuousLinearMap
+        (fun _ : Fin s => (trivializationAt F E x₀).continuousLinearMapAt 𝕜 x) := by
+  set e := trivializationAt (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜)
+    (Bundle.continuousMultilinearMap 𝕜 s F E) x₀ with he_def
+  have hbase : x ∈ e.baseSet := hx
+  -- Convert `e.symmL` to `e.symm` (they agree as functions).
+  have hsymmL : (e.symmL 𝕜 x T : Bundle.continuousMultilinearMap 𝕜 s F E x) =
+      e.symm x T := by
+    simp [Trivialization.symmL_apply]
+  rw [hsymmL]
+  -- Both sides are continuous multilinear maps on `E x`. Check equality on any input.
+  apply Bundle.continuousMultilinearMap.ext
+  intro v
+  -- RHS at v: T (fun i => (trivAt F E x₀).continuousLinearMapAt 𝕜 x (v i))
+  rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
+  -- LHS at v: (e.symm x T) v
+  -- Use the round-trip: `(e ⟨x, e.symm x T⟩).2 = T` (by `e.apply_mk_symm`).
+  -- The forward trivialization formula gives:
+  -- `(e ⟨x, M⟩).2 w = M (fun i => (trivAt F E x₀).symmL 𝕜 x (w i))` (definitionally).
+  -- So `T w = (e.symm x T) (fun i => (trivAt F E x₀).symmL 𝕜 x (w i))`.
+  -- Setting `w i = (trivAt F E x₀).continuousLinearMapAt 𝕜 x (v i)`:
+  -- `T (fun i => e.cLMA x (v i)) = (e.symm x T) (fun i => e.symmL x (e.cLMA x (v i)))`
+  -- `= (e.symm x T) (fun i => v i)` by `symmL_continuousLinearMapAt`.
+  -- This is `(e.symm x T) v`. ✓
+  have h_fwd : ∀ (M : Bundle.continuousMultilinearMap 𝕜 s F E x)
+      (w : Fin s → F),
+      (e ⟨x, M⟩).2 w = M (fun i => (trivializationAt F E x₀).symmL 𝕜 x (w i)) := by
+    intro M w; rfl
+  have h_rt : (e ⟨x, e.symm x T⟩ : B × _) = (x, T) :=
+    e.apply_mk_symm hbase T
+  -- From h_rt: `(e ⟨x, e.symm x T⟩).2 = T`.
+  have h_snd : (e ⟨x, e.symm x T⟩ : B × _).2 = T := congrArg Prod.snd h_rt
+  -- From h_fwd with M = e.symm x T, w i = (trivAt F E x₀).continuousLinearMapAt 𝕜 x (v i):
+  have h_apply := h_fwd (e.symm x T)
+    (fun i => (trivializationAt F E x₀).continuousLinearMapAt 𝕜 x (v i))
+  -- h_apply: (e ⟨x, e.symm x T⟩).2 (fun i => e.cLMA x (v i))
+  --        = (e.symm x T) (fun i => e.symmL x (e.cLMA x (v i)))
+  rw [h_snd] at h_apply
+  -- h_apply: T (fun i => e.cLMA x (v i)) = (e.symm x T) (fun i => e.symmL x (e.cLMA x (v i)))
+  -- The RHS of h_apply simplifies: e.symmL x ∘ e.cLMA x = id (by symmL_continuousLinearMapAt).
+  conv_rhs at h_apply =>
+    arg 2; ext i
+    rw [(trivializationAt F E x₀).symmL_continuousLinearMapAt hx (v i)]
+  -- h_apply: T (fun i => e.cLMA x (v i)) = (e.symm x T) v
+  exact h_apply.symm
+
+/-!
 ## Coercion to model fiber
 
 The continuous linear equivalence `continuousLinearEquivAt` identifies each fiber with
@@ -316,105 +432,6 @@ theorem finrank_eq (s : ℕ) (x : B) :
     (Module.finrank 𝕜 F) ^ s := by
   rw [(continuousLinearEquivAt (F := F) (E := E) s x).toLinearEquiv.finrank_eq,
       finrank_continuousMultilinearMap s]
-
-/-!
-## Tensor product of multilinear bundle fibers
-
-The pointwise tensor product of an `s`-multilinear and a `q`-multilinear bundle fiber element
-yields an `(s+q)`-multilinear element by concatenating inputs. The construction works by
-mapping to the model fiber via `toModel`, forming the product there using
-`smulRight`/`uncurrySum`/`domDomCongr`, and mapping back via `ofModel`.
--/
-
-/-- The pointwise tensor product of two multilinear bundle fiber elements,
-yielding an `(s+q)`-multilinear map by concatenating their inputs. -/
-noncomputable def product_fun {s q : ℕ} {x : B}
-    (α : Bundle.continuousMultilinearMap 𝕜 s F E x)
-    (β : Bundle.continuousMultilinearMap 𝕜 q F E x) :
-    Bundle.continuousMultilinearMap 𝕜 (s + q) F E x :=
-  ofModel (F := F) (E := E)
-    ((toModel (F := F) (E := E) α |>.smulRight
-      (toModel (F := F) (E := E) β)).uncurrySum.domDomCongr finSumFinEquiv)
-
-scoped infixl:70 " ⊗ₘ " => product_fun
-
-/-- The tensor product of multilinear bundle fiber elements is bilinear. -/
-noncomputable def product_bilinear (s q : ℕ) (x : B) :
-    Bundle.continuousMultilinearMap 𝕜 s F E x →ₗ[𝕜]
-    Bundle.continuousMultilinearMap 𝕜 q F E x →ₗ[𝕜]
-    Bundle.continuousMultilinearMap 𝕜 (s + q) F E x :=
-  LinearMap.mk₂ 𝕜 product_fun
-    (fun α₁ α₂ β => by
-      apply toModel_injective (F := F) (E := E)
-      simp only [product_fun, toModel_add, toModel_ofModel]
-      ext m
-      simp only [ContinuousMultilinearMap.domDomCongr_apply,
-                 ContinuousMultilinearMap.uncurrySum_apply,
-                 ContinuousMultilinearMap.smulRight_apply,
-                 ContinuousMultilinearMap.add_apply,
-                 ContinuousMultilinearMap.smul_apply, smul_eq_mul]
-      ring)
-    (fun c α β => by
-      apply toModel_injective (F := F) (E := E)
-      simp only [product_fun, toModel_smul, toModel_ofModel]
-      ext m
-      simp only [ContinuousMultilinearMap.domDomCongr_apply,
-                 ContinuousMultilinearMap.uncurrySum_apply,
-                 ContinuousMultilinearMap.smulRight_apply,
-                 ContinuousMultilinearMap.smul_apply, smul_eq_mul]
-      ring)
-    (fun α β₁ β₂ => by
-      apply toModel_injective (F := F) (E := E)
-      simp only [product_fun, toModel_add, toModel_ofModel]
-      ext m
-      simp only [ContinuousMultilinearMap.domDomCongr_apply,
-                 ContinuousMultilinearMap.uncurrySum_apply,
-                 ContinuousMultilinearMap.smulRight_apply,
-                 ContinuousMultilinearMap.add_apply,
-                 ContinuousMultilinearMap.smul_apply, smul_eq_mul]
-      ring)
-    (fun c α β => by
-      apply toModel_injective (F := F) (E := E)
-      simp only [product_fun, toModel_smul, toModel_ofModel]
-      ext m
-      simp only [ContinuousMultilinearMap.domDomCongr_apply,
-                 ContinuousMultilinearMap.uncurrySum_apply,
-                 ContinuousMultilinearMap.smulRight_apply,
-                 ContinuousMultilinearMap.smul_apply, smul_eq_mul]
-      ring)
-
-/-- The tensor product map lifted to the abstract tensor product via the universal property. -/
-noncomputable def fromTensor (s q : ℕ) (x : B) :
-    TensorProduct 𝕜 (Bundle.continuousMultilinearMap 𝕜 s F E x)
-      (Bundle.continuousMultilinearMap 𝕜 q F E x) →ₗ[𝕜]
-    Bundle.continuousMultilinearMap 𝕜 (s + q) F E x :=
-  TensorProduct.lift (product_bilinear (F := F) (E := E) s q x)
-
-set_option backward.isDefEq.respectTransparency false in
-/-- Linear equivalence between the `(s+q)`-multilinear bundle fiber and the tensor product
-of the `s`- and `q`-multilinear bundle fibers, obtained by dimension counting. -/
-noncomputable def equiv (s q : ℕ) (x : B) :
-    Bundle.continuousMultilinearMap 𝕜 (s + q) F E x ≃ₗ[𝕜]
-    TensorProduct 𝕜 (Bundle.continuousMultilinearMap 𝕜 s F E x)
-      (Bundle.continuousMultilinearMap 𝕜 q F E x) := by
-  haveI := instFiniteDimensional (𝕜 := 𝕜) (F := F) (E := E) s x
-  haveI := instFiniteDimensional (𝕜 := 𝕜) (F := F) (E := E) q x
-  haveI := instFiniteDimensional (𝕜 := 𝕜) (F := F) (E := E) (s + q) x
-  haveI : Module.Free 𝕜 (Bundle.continuousMultilinearMap 𝕜 s F E x) :=
-    Module.Free.of_divisionRing 𝕜 _
-  haveI : Module.Free 𝕜 (Bundle.continuousMultilinearMap 𝕜 q F E x) :=
-    Module.Free.of_divisionRing 𝕜 _
-  haveI : Module.Free 𝕜 (Bundle.continuousMultilinearMap 𝕜 (s + q) F E x) :=
-    Module.Free.of_divisionRing 𝕜 _
-  haveI : FiniteDimensional 𝕜 (TensorProduct 𝕜
-      (Bundle.continuousMultilinearMap 𝕜 s F E x)
-      (Bundle.continuousMultilinearMap 𝕜 q F E x)) :=
-    Module.Finite.tensorProduct 𝕜 _ _
-  exact LinearEquiv.ofFinrankEq _ _ (by
-    rw [Module.finrank_tensorProduct,
-        finrank_eq (𝕜 := 𝕜) (F := F) (E := E) s x,
-        finrank_eq (𝕜 := 𝕜) (F := F) (E := E) q x,
-        finrank_eq (𝕜 := 𝕜) (F := F) (E := E) (s + q) x, pow_add])
 
 end Bundle.continuousMultilinearMap
 

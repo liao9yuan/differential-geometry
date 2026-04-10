@@ -7,10 +7,26 @@ A lightweight, self-contained formalization of differential geometry in Lean 4. 
 ```mermaid
 flowchart BT
     subgraph AnalyticLayer [Analytic Layer]
-        DirRSB[RSTensor]
-        
-        DirAux[Aux] --> DirAlt[Alternating]
-        DirAlt --> DirDiffForm[DifferentialForm]
+        DirVB[VectorBundle]
+
+        subgraph Tensor [Tensor]
+            DirAux[Aux]
+            DirMultilinear[Multilinear]
+            DirProduct[Product]
+            DirMixed[Mixed]
+            DirAlt[Alternating]
+            DirDiffForm[DifferentialForm]
+            DirRSB[RSTensor]
+
+            DirAux --> DirAlt
+            DirMultilinear --> DirAlt
+            DirMultilinear --> DirMixed
+            DirProduct --> DirMixed
+            DirAlt --> DirDiffForm
+        end
+
+        DirVB --> DirMultilinear
+        DirVB --> DirProduct
     end
 
     DirRSB --> Bridge[Bridge.lean]
@@ -48,20 +64,36 @@ This library prioritizes algebraic structure over topological construction.
 * **Axiom Injection:** Analytical bottlenecks (e.g., PDE existence, maximum principles) can be easily isolated and injected as axioms by the user. This permits strict algebraic verification of tensor evolutions (e.g., Ricci flow) without the prerequisite of building topological manifolds.
 * **Abstract definition:** Higher-order derivatives and complex geometric flows are constructed via pure functional composition rather than hardcoded index manipulations.
 
-## Current Capabilities
-- **Affine Connections:** Conformal transformations, covariant derivatives, Koszul formula, torsion-free property, metric compatibility.
-- **Algebraic Foundations:** Standard modules over commutative rings (`Module R V`), derivation actions, Lie brackets, trace operators, Lie derivation rules, vector field non-degeneracy, Jacobi identity.
-- **Curvature Tensors:** Riemann, Ricci, and Scalar curvature, Ricci identities, First Bianchi identity, rigorous Ricci form construction, tensoriality of Riemann curvature.
-- **Differential Operators:** Bochner identity, Divergence, Gradient, Hessian, Laplacian, Lie Derivative, Second Covariant Derivative.
-- **Geometric Flows:** Ricci Flow equation, Levi-Civita connection property.
-- **Integration Operations:** Global integrals and Divergence Theorem.
-- **Levi-Civita Theorem:** Existence and uniqueness of the Levi-Civita connection via the Koszul formula.
-- **Ordered Tensors:** Positivity of smooth bilinear forms, algebraic spatial maximum principles, and trace order rules.
-- **Riemannian Metrics:** Symmetric $C^\infty$-bilinear forms, metric trace operators, rank-1 metric trace rules, non-degenerate metrics, and musical endomorphisms.
-- **Spatial Constants:** Operator behavior for spatial constants (e.g., zero gradient, zero Laplacian) and linearity.
-- **Tensor Operations:** Smooth bilinear forms, covariant derivatives, second covariant derivatives, and inner products of $(0,2)$-tensors.
-- **Time Derivatives:** Generic time derivatives for scalar functions and metric variation forms.
-- **Applications:** 1D Li-Yau Harnack Inequality on a static, flat metric evolution where $u$ solves the heat equation.
+## API
+
+### Analytic Layer
+
+Built on Mathlib's smooth manifold library. The **VectorBundle** module provides foundational infrastructure: module structure for smooth sections ($\Gamma^n(V)$) over the ring of smooth functions, local-to-global frame extensions via bump functions, bundle homomorphisms/equivalences, and dual bundle constructions.
+
+The **Tensor** module builds on this to formalize tensor algebra over vector bundles:
+
+| Subfolder | Description |
+|---|---|
+| **Aux** | Combinatorial utilities: permutations, multi-index Kronecker deltas, and shuffle decompositions for graded Leibniz rules. |
+| **Multilinear** | Vector bundles of continuous multilinear maps, with fiber/bundle/section-level constructions for duals and tensor products. |
+| **Product** | Tensor products of vector bundles, including pretrivializations, fiber structure, and explicit basis/finrank computations. |
+| **Mixed** | Mixed $(r,s)$-tensor bundles realized as hom bundles between multilinear bundles, with dual fiber isomorphisms. |
+| **Alternating** | Continuous alternating multilinear maps: wedge products (via shuffle decomposition), currying, and Fréchet derivatives. |
+| **DifferentialForm** | Smooth differential $n$-forms as sections of alternating bundles. |
+| **RSTensor** | Classical $(r,s)$-tensor fields on smooth manifolds: contractions, metric structures, and Lie derivatives. |
+
+**Bridge** connects the two layers by instantiating all synthetic typeclasses on concrete smooth manifolds, proving that Mathlib's manifold definitions satisfy the abstract axioms.
+
+### Synthetic Layer
+
+Operates abstractly over a commutative ring $R$ and module $V$, with no dependence on charts or topological structure.
+
+| Folder | Description |
+|---|---|
+| **Algebra** | Foundational structures: vector fields as derivations, Lie brackets, abstract bilinear forms (0,2)-tensors, metric tensors, musical isomorphisms, and trace operators. |
+| **Geometry** | Core geometric objects: affine connections (covariant derivatives, Christoffel symbols), Riemann/Ricci/scalar curvature, conformal transformations, and the fundamental identities (Bianchi, Ricci). |
+| **Operators** | Differential operators: gradient, Hessian, Laplacian, divergence, Lie derivative, second covariant derivative, spatial constants, time derivatives, and metric variation. |
+| **Analysis** | Higher-order tensor analysis: universal covariant derivative extending to arbitrary $(r,s)$-tensors, and inner products of (0,2)-tensors. |
 
 ## Proven Theorems
 - **Bochner-Weitzenböck Identity:** 
@@ -120,25 +152,12 @@ This library prioritizes algebraic structure over topological construction.
 
   
 ## Proven Properties
-- **Divergence Product Rule:** The Leibniz rule for the divergence of a scalar-multiplied vector field. Theorem: `divergence_smul` in `DifferentialGeometry/Operators/Divergence.lean`
-- **Gradient Linearity:** The gradient operator linearly distributes over addition and subtraction of scalar functions. Lemmas: `grad_add`, `grad_sub` in `DifferentialGeometry/Operators/Gradient.lean`
-- **Hessian and Gradient Properties:** Algebraic verification of Hessian-gradient commutators and evaluation, as well as derivations of squared norms. Lemmas: `hessian_eq_g_nabla_grad`, `grad_norm_sq_deriv` in `DifferentialGeometry/Operators/Bochner.lean`
-- **Hessian Symmetry:** Hessian symmetry for torsion-free connections. Theorem: `hessian_symm` in `DifferentialGeometry/Operators/Hessian.lean`
-- **Jacobi Identity:** Rigorous proof of the Jacobi identity from first principles using vector field non-degeneracy. Theorem: `jacobi_identity_proof` in `DifferentialGeometry/Algebra/Lie.lean`
-- **Laplacian Linearity:** The Laplacian operator linearly distributes over addition and subtraction of scalar functions. Lemmas: `laplacian_add`, `laplacian_sub` in `DifferentialGeometry/Operators/Laplacian.lean`
 
-- **Metric Compatibility of Covariant Derivative:** The covariant derivative of the metric tensor is exactly zero. Theorem: `metric_covDerivOp_zero` in `DifferentialGeometry/Operators/CovariantDerivative.lean`
-- **Metric Compatibility of Squared Norm:** Directional derivative of a squared vector norm. Theorem: `norm_sq_deriv` in `DifferentialGeometry/Geometry/Connection.lean`
-- **Metric Sign and Subtraction Properties:** Algebraic behavior of the metric tensor under negation and subtraction in its arguments. Lemmas: `metric_neg_left_local`, `metric_sub_left_local`, `metric_sub_right_local` in `DifferentialGeometry/Operators/LieDerivative.lean`
-- **Metric Subtraction Properties:** Properties of the metric tensor under subtraction. Theorem: `metric_sub_left` in `DifferentialGeometry/Algebra/Metric.lean`
-- **Musical Endomorphism Linearity:** The metric `raise` operator preserves tensor addition and scalar multiplication. Theorems: `raise_add`, `raise_smul` in `DifferentialGeometry/Algebra/Musical.lean`
-- **Rank-1 Metric Trace:** Pure linear algebra rule for evaluating the trace of rank-1 operators (e.g., outer products). Axiom: `trace_rank_one` in `DifferentialGeometry/Algebra/Trace.lean`
-- **Ricci Bilinearity:** Rigorous construction of the Ricci curvature as a `SmoothBilinearForm`, proven via $C^\infty$-linearity of the Riemann tensor and trace linearity. Theorem: `ricciForm` in `DifferentialGeometry/Geometry/RicciTensor.lean`
-- **Riemann Curvature Tensoriality:** $C^\infty$-linearity of the Riemann curvature tensor with respect to its first and third vector field arguments. Theorems: `Rm_smul_X`, `Rm_smul_Z` in `DifferentialGeometry/Geometry/CurvatureTensor.lean`
-- **Second Covariant Derivative Bilinearity:** $C^\infty$-linearity of the second covariant derivative operator with respect to both vector field arguments. Theorems: `secondCovDeriv_smul_X`, `secondCovDeriv_smul_Y` in `DifferentialGeometry/Operators/SecondCovariantDerivative.lean`
-- **Spatial Constants:** Gradient and Laplacian of spatial constants evaluate to zero, and spatial scalars can be pulled out of these operators. Lemmas: `grad_zero`, `laplacian_zero`, `grad_smul`, `laplacian_smul` in `DifferentialGeometry/Operators/SpatialConstant.lean`
-- **Tensor Inner Product Properties:** Symmetry, additivity, and scalar multiplication linearity of the inner product of (0,2)-tensors. Theorems: `tensorInnerProduct_symm`, `tensorInnerProduct_add_left`, `tensorInnerProduct_smul_left` in `DifferentialGeometry/Analysis/TensorInnerProduct.lean`
-- **Time Derivative Bilinearity:** Formal distribution of metric time variations according to metric scalar multiplication and addition properties. Formalized within the definition of `metric_var_form` in `DifferentialGeometry/Operators/Variation.lean`
+Highlights include Hessian symmetry, the Jacobi identity, Riemann curvature tensoriality, Ricci bilinearity, metric compatibility of the covariant derivative, and operator linearity for gradient, Laplacian, and divergence.
+
+The library also supports **ordered tensors** (positivity of bilinear forms, algebraic spatial maximum principles, trace order rules) and **geometric flows** (Ricci Flow evolution equation, Levi-Civita connection property).
+
+For the complete list of verified properties, see [PROPERTIES.md](PROPERTIES.md).
 
 ## Limitations
 This library inherently assumes:
@@ -207,14 +226,6 @@ The irreducible mathematical axioms injected into the system are categorized bel
 - **`StaticMetricTimeRules`** — Axiomatizes that fundamental spatial operators are invariant under time derivatives when the underlying metric is static.
 - **`TimeDerivativeRules`** — The time derivative operator $\partial_t$ is linear.
 - **`TimeWeight`** — Axiomatizes properties of continuous time inverse weights (e.g., $1/t$), ensuring parameters map correctly within valid time domains.
-
-## Completed Work
-
-The following are completed and removed from "Future Work":
-
-- **`JacobiIdentity`** — Proven by expanding the Lie bracket commutator definitions from first principles in `DifferentialGeometry/Algebra/Lie.lean`. (2026-02-24)
-- **`MusicalIsomorphismRules`** — Replaced by `MetricDuality` integrating directly into the standard `MetricTensor` hierarchy. The linearity rules of the raising exact tensor index operator are rigorously proven algebraically from metric definitions in `DifferentialGeometry/Algebra/Musical.lean`. (2026-02-25)
-- **Standard Module Adoption** — The custom `ScalarMul` implementations and properties have been seamlessly removed, fully migrating to Mathlib's robust `Module R V` types with complete backwards compatibility. (2026-02-25)
 
 ## Future Work
 

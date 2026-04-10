@@ -407,11 +407,12 @@ theorem pullback_wedge (f : G → E) (ω₁ : E → E [⋀^Fin m]→L[ℝ] F) (�
   simp only [Function.comp_apply, smul_left_cancel_iff]
   rfl
 
-theorem iprod_wedge (ω : E → E [⋀^Fin (m + 1)]→L[ℝ] F) (τ : E → E [⋀^Fin (n + 1)]→L[ℝ] F') (f : F →L[ℝ] F' →L[ℝ] F'')
+theorem iprod_wedge [FiniteDimensional ℝ E]
+    (ω : E → E [⋀^Fin (m + 1)]→L[ℝ] ℝ) (τ : E → E [⋀^Fin (n + 1)]→L[ℝ] ℝ)
     (v : E → E) :
-      iprod (domDomCongr Fin.finAddFlipAssoc (ω ∧r[f] τ)) v = ((iprod ω v) ∧r[f] τ)
-        + (-1 : ℝ)^m • (domDomCongr Fin.finAddFlipAssoc (ω ∧r[f] (iprod τ v))) := by
+      iprod (domDomCongr Fin.finAddFlipAssoc (ω ∧r τ)) v = ((iprod ω v) ∧r τ)
+        + (-1 : ℝ)^(m + 1) • (domDomCongr Fin.finAddFlipAssoc (ω ∧r (iprod τ v))) := by
   funext e
-  exact ContinuousAlternatingMap.iprod_wedge_product (ω e) (τ e) f (v e)
+  exact ContinuousAlternatingMap.iprod_wedge_product_mul (ω e) (τ e) (v e)
 
 end RoughDifferentialForm

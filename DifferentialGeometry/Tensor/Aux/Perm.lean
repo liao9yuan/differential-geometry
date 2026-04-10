@@ -9,7 +9,7 @@ namespace Equiv.Perm
 
 open Fin
 
-variable {m n p : ℕ}
+variable {m n p k : ℕ}
 
 @[simps!]
 def addAssocPerm : Equiv.Perm ((Fin m ⊕ Fin n) ⊕ Fin p) ≃ Equiv.Perm (Fin m ⊕ Fin n ⊕ Fin p) :=
