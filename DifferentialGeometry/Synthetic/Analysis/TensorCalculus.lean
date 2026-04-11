@@ -2,6 +2,7 @@ import DifferentialGeometry.VectorField
 import DifferentialGeometry.Synthetic.Algebra.TensorAlgebra
 import DifferentialGeometry.Synthetic.Algebra.VectorField
 import DifferentialGeometry.Synthetic.Geometry.Connection
+import Mathlib.LinearAlgebra.Multilinear.Curry
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -79,3 +80,55 @@ class AffineTensorCalculus (conn : AbstractAffineConnection R V) where
   /-- Axiom 11: ∇_X δ = 0. The Kronecker delta is covariantly constant because
   its components are 0 or 1 in every coordinate system. -/
   nabla_delta : ∀ (X : V), nabla_tensor X TensorAlgebra.delta_tensor = 0
+
+
+-- ============================================================
+-- Total Covariant Derivative (rank-increasing ∇)
+-- ============================================================
+
+variable (conn : AbstractAffineConnection R V) [AffineTensorCalculus conn]
+
+/-- The curried nabla map: for each vs : Fin s → V, produce the linear map
+X ↦ toData(∇_X T) vs. Linearity in X uses Axiom 7/8 (nabla_add_left/smul_left);
+multilinearity in vs uses the existing MultilinearMap structure of toData. -/
+private noncomputable def nabla_curried {r s : ℕ} (T : AbstractTensor R V r s) :
+    MultilinearMap R (fun _ : Fin s => V)
+      (V →ₗ[R] MultilinearMap R (fun _ : Fin r => (V →ₗ[R] R)) R) where
+  toFun vs :=
+    { toFun := fun X => TensorAlgebra.toData (AffineTensorCalculus.nabla_tensor conn X T) vs
+      map_add' := fun X Y => by
+        have h := AffineTensorCalculus.nabla_add_left (conn := conn) X Y T
+        change TensorAlgebra.toData (AffineTensorCalculus.nabla_tensor conn (X + Y) T) vs = _
+        rw [h, TensorAlgebra.toData_add]; rfl
+      map_smul' := fun c X => by
+        have h := AffineTensorCalculus.nabla_smul_left (conn := conn) c X T
+        change TensorAlgebra.toData (AffineTensorCalculus.nabla_tensor conn (c • X) T) vs = _
+        rw [h, TensorAlgebra.toData_smul]; rfl }
+  map_update_add' := fun m i x y => by
+    ext X : 1
+    exact MultilinearMap.map_update_add (TensorAlgebra.toData (AffineTensorCalculus.nabla_tensor conn X T)) m i x y
+  map_update_smul' := fun m i c x => by
+    ext X : 1
+    exact MultilinearMap.map_update_smul (TensorAlgebra.toData (AffineTensorCalculus.nabla_tensor conn X T)) m i c x
+
+/-- Total covariant derivative: ∇T packs X ↦ ∇_X T into an (r, s+1) tensor.
+The LAST covariant slot (index `Fin.last s`) encodes the differentiation direction.
+
+Constructed via `MultilinearMap.uncurryRight` applied to `nabla_curried`,
+which avoids manual multilinearity proofs for the combined argument space.
+Axiom 7 (`nabla_add_left`) and Axiom 8 (`nabla_smul_left`) provide the
+R-linearity in the direction slot; the tensor evaluation slots inherit their
+multilinearity from the existing `TensorData` structure. -/
+noncomputable def total_nabla {r s : ℕ} (T : AbstractTensor R V r s) :
+    AbstractTensor R V r (s + 1) :=
+  TensorAlgebra.fromData (nabla_curried conn T).uncurryRight
+
+/-- Evaluation of `total_nabla`: the last covariant slot is the differentiation direction.
+  tensor_eval (total_nabla conn T) (Fin.snoc vs X) αs = tensor_eval (∇_X T) vs αs -/
+lemma total_nabla_eval {r s : ℕ} (T : AbstractTensor R V r s)
+    (vs : Fin s → V) (X : V) (αs : Fin r → (V →ₗ[R] R)) :
+    tensor_eval (total_nabla conn T) (Fin.snoc vs X) αs =
+    tensor_eval (AffineTensorCalculus.nabla_tensor conn X T) vs αs := by
+  simp only [tensor_eval, total_nabla, TensorAlgebra.toData_fromData,
+    MultilinearMap.uncurryRight_apply, Fin.init_snoc, Fin.snoc_last, nabla_curried]
+  rfl
