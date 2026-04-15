@@ -29,6 +29,9 @@ import DifferentialGeometry.Synthetic.Operator.Variation
 -- Axiom Interface
 import DifferentialGeometry.Synthetic.Axioms
 
+-- Bridge: Synthetic → Concrete grounding
+import DifferentialGeometry.Synthetic.Bridge.Basic
+
 -- Ricci Flow
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Basic
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Calculus
