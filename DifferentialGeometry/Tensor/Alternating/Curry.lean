@@ -195,6 +195,19 @@ theorem curryFin_smul {M : Type*} [Monoid M] [DistribMulAction M F] [ContinuousC
   ext e v
   simp [curryFin_apply]
 
+/-- Round-trip identity: `uncurryFin (curryFin f) = (n + 1) • f`.
+Continuous version of `AlternatingMap.alternatizeUncurryFin_curryLeft`. -/
+theorem uncurryFin_curryFin (f : E [⋀^Fin (n + 1)]→L[𝕜] F) :
+    uncurryFin (curryFin f) = (n + 1 : ℕ) • f := by
+  apply toAlternatingMap_injective
+  rw [toAlternatingMap_uncurryFin]
+  have h : toAlternatingMapLinear ∘ₗ (curryFin f).toLinearMap =
+      AlternatingMap.curryLeft f.toAlternatingMap := by
+    ext x m; rfl
+  rw [h, AlternatingMap.alternatizeUncurryFin_curryLeft]
+  rfl
+
+
 /-- Right-curry a curried alternating map: given
 `F : E [⋀^Fin(m+1)]→L E [⋀^Fin(n+1)]→L G` and `x : E`, produce
 `F_right x : E [⋀^Fin(m+1)]→L E [⋀^Fin n]→L G` satisfying

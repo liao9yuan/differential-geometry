@@ -7,7 +7,7 @@ Coauthors: Jack McCarthy
 import DifferentialGeometry.Tensor.Alternating.Bundle
 import DifferentialGeometry.Tensor.Alternating.FDeriv
 import DifferentialGeometry.Tensor.Alternating.Wedge
-import DifferentialGeometry.Tensor.DifferentialForm.Defs
+import DifferentialGeometry.DifferentialForm.Defs
 import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
@@ -350,13 +350,15 @@ theorem smul_wedge (ω : E → E [⋀^Fin m]→L[ℝ] ℝ) (τ : E → E [⋀^Fi
     c • (ω ∧r τ) = (c • ω) ∧r τ := by
   ext1 x
   rw[_root_.smul_apply, wedge_product_mul, wedge_product_mul, _root_.smul_apply]
-  exact ContinuousAlternatingMap.smul_wedge (ω x) (τ x) c
+  exact (ContinuousAlternatingMap.smul_wedge c (ω x) (τ x)
+    (ContinuousLinearMap.mul ℝ ℝ)).symm
 
 theorem wedge_smul (ω : E → E [⋀^Fin m]→L[ℝ] ℝ) (τ : E → E [⋀^Fin n]→L[ℝ] ℝ) (c : ℝ) :
     c • (ω ∧r τ) = ω ∧r (c • τ) := by
   ext1 x
   rw[_root_.smul_apply, wedge_product_mul, wedge_product_mul, _root_.smul_apply]
-  exact ContinuousAlternatingMap.wedge_smul (ω x) (τ x) c
+  exact (ContinuousAlternatingMap.wedge_smul c (ω x) (τ x)
+    (ContinuousLinearMap.mul ℝ ℝ)).symm
 
 /- Antisymmetry of multiplication wedge product -/
 theorem wedge_antisymm [FiniteDimensional ℝ E]

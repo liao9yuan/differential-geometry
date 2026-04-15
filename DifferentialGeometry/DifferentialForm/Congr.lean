@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yury Kudryashov
 Coauthors: Jack McCarthy
 -/
-import DifferentialGeometry.Tensor.DifferentialForm.Defs
+import DifferentialGeometry.DifferentialForm.Defs
 import DifferentialGeometry.Tensor.Alternating.Flip
 
 open ContinuousAlternatingMap

@@ -20,8 +20,14 @@ along with `modelFromTensorEquiv`: a constructive linear equivalence from the te
 product of model fibers to `MLF (s+q)`, obtained via `LinearEquiv.ofBijective` from
 the surjectivity of `modelFromTensor` together with matching dimensions.
 
-These are the fiber-level building blocks for the section-level constructions in
-`TensorSection.lean`.
+The fiberwise linear equivalence `multilinearTensorFiberwiseEquiv` is assembled by
+composing the trivialization CLEs with the model-level equivalence, and total-space
+smoothness is proved directly via the trivialization compatibility lemmas
+(`triv_fromTensor_eq_modelFromTensor`, `triv_toTensor_eq_modelFromTensorEquiv_symm`).
+This yields the final `C^n` vector bundle equivalence
+`multilinearBundle_tensorProduct_equiv`, proving `T_{s+q}(E) ≃ T_s(E) ⊗ T_q(E)`
+over any `NontriviallyNormedField 𝕜` via
+`ContMDiffVectorBundleEquiv.ofFiberwiseLinearEquiv`.
 
 ## Main Definitions
 
@@ -33,9 +39,11 @@ These are the fiber-level building blocks for the section-level constructions in
 * `Bundle.continuousMultilinearMap.modelFromTensor` : model-fiber analogue of `fromTensor`.
 * `Bundle.continuousMultilinearMap.modelFromTensorEquiv` : `modelFromTensor` as a linear
   equivalence (via dimension counting).
-* `Bundle.continuousMultilinearMap.equiv` : the abstract linear equivalence between the
+* `multilinearTensorFiberwiseEquiv` : the fiberwise linear equivalence between the
   `(s+q)`-multilinear bundle fiber and the tensor product of the `s`- and `q`-multilinear
-  bundle fibers, obtained by dimension counting.
+  bundle fibers.
+* `multilinearBundle_tensorProduct_equiv` : the `C^n` vector bundle equivalence, constructed
+  via `ContMDiffVectorBundleEquiv.ofFiberwiseLinearEquiv`.
 
 ## Main Results
 
@@ -47,10 +55,12 @@ These are the fiber-level building blocks for the section-level constructions in
 * `modelFromTensor_surjective` : `modelFromTensor` is surjective.
 * `product_fun_ofModel`, `fromTensor_map_ofModel` : compatibility of `product_fun`/`fromTensor`
   with `ofModel` and the model-fiber operations.
+* `multilinearTensorFiberwiseEquiv_smooth` : the total-space map is `C^n`.
+* `multilinearTensorFiberwiseEquiv_symm_smooth` : the inverse total-space map is `C^n`.
 
 ## Tags
 
-multilinear map, vector bundle, tensor product, fiber
+multilinear map, vector bundle, tensor product, fiber, fiberwise equivalence
 -/
 
 noncomputable section
@@ -391,14 +401,8 @@ end
 
 This section defines tensor products at the section level for smooth multilinear sections,
 and establishes a `C^n` vector bundle equivalence between the `(s+q)`-multilinear bundle
-and the tensor product of the `s`- and `q`-multilinear bundles.
-
-The key building blocks (defined fiberwise earlier in this file) are `fromTensor` (the
-universal-property lift of `product_fun` to the abstract tensor product of multilinear
-fibers) and its constructive inverse `modelFromTensorEquiv.symm`. Trivialization
-compatibility lemmas (`triv_fromTensor_eq_modelFromTensor` and
-`triv_toTensor_eq_modelFromTensorEquiv_symm`) are proved here because they require
-`Product.Bundle` for the tensor product bundle trivialization.
+and the tensor product of the `s`- and `q`-multilinear bundles via
+`ContMDiffVectorBundleEquiv.ofFiberwiseLinearEquiv`.
 -/
 
 noncomputable section
@@ -560,10 +564,6 @@ variable (n : WithTop ℕ∞) [ContMDiffVectorBundle n F E IB]
 
 /-!
 ## Tensor product of multilinear sections
-
-The tensor product of a `C^n` `s`-multilinear section `α` and a `C^n` `q`-multilinear section
-`β` is a `C^n` `(s+q)`-multilinear section, defined pointwise by
-`Bundle.continuousMultilinearMap.product_fun`.
 -/
 
 section Product
@@ -571,12 +571,7 @@ section Product
 variable {s q : ℕ}
 
 /-- The tensor product of a `C^n` `s`-multilinear section `α` and a `C^n` `q`-multilinear
-section `β` is a `C^n` `(s+q)`-multilinear section, defined pointwise by `product_fun`.
-
-Smoothness is proved by reducing to basis coordinates via
-`contMDiff_multilinearSection_iff_coord`: the trivialized coordinate of `α ⊗ β` at
-`σ : Fin (s+q) → Fin d` equals the product of the coordinate of `α` at `σ ∘ Fin.castAdd q`
-and the coordinate of `β` at `σ ∘ Fin.natAdd s`, both of which are smooth. -/
+section `β` is a `C^n` `(s+q)`-multilinear section, defined pointwise by `product_fun`. -/
 noncomputable def product
     (α : MultilinearSection 𝕜 F IB E n s)
     (β : MultilinearSection 𝕜 F IB E n q) :
@@ -599,10 +594,6 @@ end Product
 
 /-!
 ## Tensor product instances
-
-To avoid threading `letI` throughout the module, we declare local instances for the
-topological space and bundle structures on the tensor product of two multilinear bundles.
-This section wraps all tensor-product-related definitions and theorems.
 -/
 
 section TensorProductInstances
@@ -658,223 +649,272 @@ local instance multilinearTensorVectorBundle {𝕜 : Type*} [NontriviallyNormedF
     (E₂ := Bundle.continuousMultilinearMap 𝕜 q F E)
 
 /-!
-## From tensor product sections to multilinear sections
+## Bundle equivalence via fiberwise linear equivalence
+
+The `(s+q)`-multilinear bundle is `C^n`-equivalent to the tensor product of the
+`s`- and `q`-multilinear bundles, proved directly via
+`ContMDiffVectorBundleEquiv.ofFiberwiseLinearEquiv`.
+
+This works over any `NontriviallyNormedField 𝕜` and does not require `IsManifold`,
+`SigmaCompactSpace`, `T2Space`, or `FiniteDimensional 𝕜 EM`.
+
+The construction proceeds in four steps:
+1. **Fiberwise linear equivalence**: `multilinearTensorFiberwiseEquiv` composes the
+   trivialization CLE, the model-level `(modelFromTensorEquiv).symm`, and the factor
+   untrivializations. Its inverse is `fromTensor`.
+2. **Model-level CLMs**: `modelFromTensorCLM` and `modelToTensorCLM` package the model-level
+   maps as continuous linear maps between finite-dimensional normed spaces.
+3. **Total-space smoothness**: In local trivializations, the forward map reduces to
+   `modelToTensorCLM` and the inverse to `modelFromTensorCLM`, both constant CLMs. Smoothness
+   follows by `congr_of_eventuallyEq` with the trivialization compatibility lemmas.
+4. **Bundle equivalence**: `multilinearBundle_tensorProduct_equiv` assembles the result via
+   `ContMDiffVectorBundleEquiv.ofFiberwiseLinearEquiv`.
 -/
 
-section FromTensorProduct
+section BundleEquiv
 
 open Bundle.continuousMultilinearMap
 
-/-- Construct a `C^n` `(s+q)`-multilinear section from a `C^n` section of the tensor product
-bundle of the `s`- and `q`-multilinear bundles, by applying `fromTensor` fiberwise.
+/-! ### Fiberwise linear equivalence -/
 
-Smoothness is proved via local trivializations: the trivialized `(s+q)`-section equals
-`modelFromTensor` (a fixed CLM) composed with the trivialized tensor product section. -/
-noncomputable def fromTensorProduct
-    (γ : ContMDiffSection IB ((MLF s) ⊗[𝕜] (MLF q)) n
+/-- The fiberwise linear equivalence between the `(s+q)`-multilinear bundle fiber and
+the tensor product of the `s`- and `q`-multilinear bundle fibers.
+
+Constructed as the composition of three linear equivalences:
+1. `continuousLinearEquivAt (s+q) x` : trivialize the source fiber
+2. `(modelFromTensorEquiv).symm` : model-level equivalence
+3. `TensorProduct.congr` : untrivialize each tensor factor -/
+noncomputable def multilinearTensorFiberwiseEquiv (s q : ℕ) (x : B) :
+    Bundle.continuousMultilinearMap 𝕜 (s + q) F E x ≃ₗ[𝕜]
+    TensorProduct 𝕜 (Bundle.continuousMultilinearMap 𝕜 s F E x)
+      (Bundle.continuousMultilinearMap 𝕜 q F E x) :=
+  (continuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) (s + q) x).toLinearEquiv.trans
+    ((modelFromTensorEquiv (Module.finBasis 𝕜 F) s q).symm.trans
+      (TensorProduct.congr
+        (continuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) s x).symm.toLinearEquiv
+        (continuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) q x).symm.toLinearEquiv))
+
+/-- The inverse of `multilinearTensorFiberwiseEquiv` agrees with `fromTensor` on all
+tensor product elements. -/
+theorem multilinearTensorFiberwiseEquiv_symm_eq (s q : ℕ) (x : B)
+    (t : TensorProduct 𝕜 (Bundle.continuousMultilinearMap 𝕜 s F E x)
+      (Bundle.continuousMultilinearMap 𝕜 q F E x)) :
+    (multilinearTensorFiberwiseEquiv s q x).symm t = fromTensor s q x t := by
+  induction t using TensorProduct.induction_on with
+  | zero => simp [multilinearTensorFiberwiseEquiv, fromTensor]
+  | add _ _ ih₁ ih₂ => simp only [map_add, ih₁, ih₂]
+  | tmul a b =>
+    simp only [multilinearTensorFiberwiseEquiv, LinearEquiv.trans_symm,
+      LinearEquiv.symm_symm, LinearEquiv.trans_apply]
+    simp only [fromTensor, TensorProduct.lift.tmul, product_bilinear, LinearMap.mk₂_apply]
+    rfl
+
+/-! ### Model-level continuous linear maps -/
+
+/-- `modelFromTensor s q` packaged as a continuous linear map between model fibers.
+This is the model-level map for the inverse direction of the bundle equivalence. -/
+noncomputable def modelFromTensorCLM (s q : ℕ) :
+    ((MLF s) ⊗[𝕜] (MLF q)) →L[𝕜] (MLF (s + q)) :=
+  haveI := continuousMultilinearMap_finiteDimensional (𝕜 := 𝕜) (F := F) s
+  haveI := continuousMultilinearMap_finiteDimensional (𝕜 := 𝕜) (F := F) q
+  haveI : FiniteDimensional 𝕜 ((MLF s) ⊗[𝕜] (MLF q)) :=
+    Module.Finite.tensorProduct 𝕜 _ _
+  (modelFromTensor (𝕜 := 𝕜) (F := F) s q).toContinuousLinearMap
+
+/-- `(modelFromTensorEquiv).symm` packaged as a continuous linear map between model fibers.
+This is the model-level map for the forward direction of the bundle equivalence. -/
+noncomputable def modelToTensorCLM (s q : ℕ) :
+    (MLF (s + q)) →L[𝕜] ((MLF s) ⊗[𝕜] (MLF q)) :=
+  haveI := continuousMultilinearMap_finiteDimensional (𝕜 := 𝕜) (F := F) s
+  haveI := continuousMultilinearMap_finiteDimensional (𝕜 := 𝕜) (F := F) q
+  haveI : FiniteDimensional 𝕜 ((MLF s) ⊗[𝕜] (MLF q)) :=
+    Module.Finite.tensorProduct 𝕜 _ _
+  haveI := continuousMultilinearMap_finiteDimensional (𝕜 := 𝕜) (F := F) (s + q)
+  LinearMap.toContinuousLinearMap
+    (modelFromTensorEquiv (𝕜 := 𝕜) (F := F) (Module.finBasis 𝕜 F) s q).symm.toLinearMap
+
+/-! ### Trivialization compatibility -/
+
+/-- Trivialization compatibility for the forward direction: trivializing
+`multilinearTensorFiberwiseEquiv s q x α` equals `modelToTensorCLM` applied to the
+trivialization of `α`. -/
+theorem triv_fwdEquiv_eq (s q : ℕ) (x₀ x : B)
+    (hx : x ∈ (trivializationAt F E x₀).baseSet)
+    (α : Bundle.continuousMultilinearMap 𝕜 (s + q) F E x) :
+    (trivializationAt ((MLF s) ⊗[𝕜] (MLF q))
+      (fun x => Bundle.continuousMultilinearMap 𝕜 s F E x ⊗[𝕜]
+                 Bundle.continuousMultilinearMap 𝕜 q F E x) x₀
+      ⟨x, multilinearTensorFiberwiseEquiv s q x α⟩).2 =
+    modelToTensorCLM s q
+      ((trivializationAt (MLF (s + q))
+        (fun x => Bundle.continuousMultilinearMap 𝕜 (s + q) F E x) x₀
+        ⟨x, α⟩).2) := by
+  set t := multilinearTensorFiberwiseEquiv s q x α
+  have hα : α = fromTensor s q x t := by
+    rw [← multilinearTensorFiberwiseEquiv_symm_eq]
+    exact ((multilinearTensorFiberwiseEquiv s q x).symm_apply_apply α).symm
+  rw [hα]
+  exact (triv_toTensor_eq_modelFromTensorEquiv_symm (Module.finBasis 𝕜 F) s q x₀ x hx t).symm
+
+/-! ### Total-space smoothness -/
+
+set_option linter.unusedSectionVars false in
+/-- The total-space map induced by `multilinearTensorFiberwiseEquiv` (forward direction)
+is `C^n`. In local trivializations, the map reduces to the constant continuous linear map
+`modelToTensorCLM` applied to the source fiber coordinate, by `triv_fwdEquiv_eq`. -/
+theorem multilinearTensorFiberwiseEquiv_smooth :
+    ContMDiff
+      (IB.prod 𝓘(𝕜, MLF (s + q)))
+      (IB.prod 𝓘(𝕜, (MLF s) ⊗[𝕜] (MLF q)))
+      n
+      (fun p : TotalSpace (MLF (s + q))
+          (fun x => Bundle.continuousMultilinearMap 𝕜 (s + q) F E x) =>
+        (⟨p.1, multilinearTensorFiberwiseEquiv s q p.1 p.2⟩ :
+          TotalSpace ((MLF s) ⊗[𝕜] (MLF q))
             (fun x => Bundle.continuousMultilinearMap 𝕜 s F E x ⊗[𝕜]
-                       Bundle.continuousMultilinearMap 𝕜 q F E x)) :
-    MultilinearSection 𝕜 F IB E n (s + q) :=
-  ⟨fun x => fromTensor s q x (γ x), by
-    intro x₀
-    rw [contMDiffAt_section x₀]
-    have hγ_triv := (contMDiffAt_section x₀).mp (γ.contMDiff x₀)
-    refine ((modelFromTensor (𝕜 := 𝕜) (F := F) s q).toContinuousLinearMap.contMDiffAt.comp
-      x₀ hγ_triv).congr_of_eventuallyEq ?_
-    exact (Filter.Eventually.mono
-      ((trivializationAt F E x₀).open_baseSet.mem_nhds
-        (mem_baseSet_trivializationAt F E x₀))
-      fun x hx => triv_fromTensor_eq_modelFromTensor s q x₀ x hx (γ x))⟩
+                       Bundle.continuousMultilinearMap 𝕜 q F E x))) := by
+  haveI : ContMDiffVectorBundle n
+      ((MLF s) ⊗[𝕜] (MLF q))
+      (fun x => Bundle.continuousMultilinearMap 𝕜 s F E x ⊗[𝕜]
+                 Bundle.continuousMultilinearMap 𝕜 q F E x) IB := inferInstance
+  intro p₀
+  rw [contMDiffAt_totalSpace]
+  refine ⟨?_, ?_⟩
+  · exact (contMDiff_proj
+      (fun x => Bundle.continuousMultilinearMap 𝕜 (s + q) F E x)).contMDiffAt
+  · have h_fiber : ContMDiffAt
+        (IB.prod 𝓘(𝕜, MLF (s + q)))
+        𝓘(𝕜, MLF (s + q)) n
+        (fun p => (trivializationAt (MLF (s + q))
+          (fun x => Bundle.continuousMultilinearMap 𝕜 (s + q) F E x) p₀.proj p).2)
+        p₀ :=
+      (contMDiffAt_totalSpace.mp contMDiffAt_id).2
+    refine ((contMDiffAt_const (c := modelToTensorCLM s q)).clm_apply
+        h_fiber).congr_of_eventuallyEq ?_
+    filter_upwards [
+      ((trivializationAt F E p₀.proj).open_baseSet.preimage
+        (FiberBundle.continuous_proj _ _)).mem_nhds
+        (mem_baseSet_trivializationAt F E p₀.proj)
+    ] with p hp
+    exact triv_fwdEquiv_eq s q p₀.proj p.proj hp p.snd
 
-end FromTensorProduct
+set_option maxHeartbeats 400000 in
+set_option linter.unusedSectionVars false in
+/-- The total-space map induced by the inverse of `multilinearTensorFiberwiseEquiv` is `C^n`.
+In local trivializations, the map reduces to the constant continuous linear map
+`modelFromTensorCLM` applied to the source fiber coordinate, by
+`triv_fromTensor_eq_modelFromTensor`. -/
+theorem multilinearTensorFiberwiseEquiv_symm_smooth :
+    ContMDiff
+      (IB.prod 𝓘(𝕜, (MLF s) ⊗[𝕜] (MLF q)))
+      (IB.prod 𝓘(𝕜, MLF (s + q)))
+      n
+      (fun p : TotalSpace ((MLF s) ⊗[𝕜] (MLF q))
+          (fun x => Bundle.continuousMultilinearMap 𝕜 s F E x ⊗[𝕜]
+                     Bundle.continuousMultilinearMap 𝕜 q F E x) =>
+        (⟨p.1, (multilinearTensorFiberwiseEquiv s q p.1).symm p.2⟩ :
+          TotalSpace (MLF (s + q))
+            (fun x => Bundle.continuousMultilinearMap 𝕜 (s + q) F E x))) := by
+  haveI : ContMDiffVectorBundle n
+      ((MLF s) ⊗[𝕜] (MLF q))
+      (fun x => Bundle.continuousMultilinearMap 𝕜 s F E x ⊗[𝕜]
+                 Bundle.continuousMultilinearMap 𝕜 q F E x) IB := inferInstance
+  intro p₀
+  rw [contMDiffAt_totalSpace]
+  refine ⟨?_, ?_⟩
+  · exact (contMDiff_proj
+      (fun x => Bundle.continuousMultilinearMap 𝕜 s F E x ⊗[𝕜]
+                 Bundle.continuousMultilinearMap 𝕜 q F E x)).contMDiffAt
+  · have h_fiber : ContMDiffAt
+        (IB.prod 𝓘(𝕜, (MLF s) ⊗[𝕜] (MLF q)))
+        𝓘(𝕜, (MLF s) ⊗[𝕜] (MLF q)) n
+        (fun p => (trivializationAt ((MLF s) ⊗[𝕜] (MLF q))
+          (fun x => Bundle.continuousMultilinearMap 𝕜 s F E x ⊗[𝕜]
+                     Bundle.continuousMultilinearMap 𝕜 q F E x) p₀.proj p).2)
+        p₀ :=
+      (contMDiffAt_totalSpace.mp contMDiffAt_id).2
+    refine ((contMDiffAt_const (c := modelFromTensorCLM s q)).clm_apply
+        h_fiber).congr_of_eventuallyEq ?_
+    filter_upwards [
+      ((trivializationAt F E p₀.proj).open_baseSet.preimage
+        (FiberBundle.continuous_proj _ _)).mem_nhds
+        (mem_baseSet_trivializationAt F E p₀.proj)
+    ] with p hp
+    rw [multilinearTensorFiberwiseEquiv_symm_eq]
+    exact triv_fromTensor_eq_modelFromTensor s q p₀.proj p.proj hp p.snd
 
-/-!
-## From multilinear sections to tensor product sections
--/
+/-! ### The bundle equivalence -/
 
-section ToTensorProduct
+/-- The `(s+q)`-multilinear bundle is `C^n`-equivalent to the tensor product of the
+`s`- and `q`-multilinear bundles, proved directly via
+`ContMDiffVectorBundleEquiv.ofFiberwiseLinearEquiv`.
 
-open Bundle.continuousMultilinearMap
+This works over any `NontriviallyNormedField 𝕜` and does not require `IsManifold`,
+`SigmaCompactSpace`, `T2Space`, or `FiniteDimensional 𝕜 EM`. -/
+noncomputable def multilinearBundle_tensorProduct_equiv :
+    ContMDiffVectorBundleEquiv 𝕜 IB n
+      (MLF (s + q))
+      (fun x => Bundle.continuousMultilinearMap 𝕜 (s + q) F E x)
+      ((MLF s) ⊗[𝕜] (MLF q))
+      (fun x => Bundle.continuousMultilinearMap 𝕜 s F E x ⊗[𝕜]
+                 Bundle.continuousMultilinearMap 𝕜 q F E x) :=
+  ContMDiffVectorBundleEquiv.ofFiberwiseLinearEquiv
+    (fun x => multilinearTensorFiberwiseEquiv s q x)
+    (multilinearTensorFiberwiseEquiv_smooth n)
+    (multilinearTensorFiberwiseEquiv_symm_smooth n)
+
+/-! ### Section-level API derived from the bundle equivalence -/
 
 /-- Decompose a `C^n` `(s+q)`-multilinear section into a `C^n` section of the tensor product
-bundle of the `s`- and `q`-multilinear bundles. -/
+bundle, by applying the fiberwise equivalence pointwise. Smoothness follows from the
+smooth total-space map. -/
 noncomputable def toTensorProduct
     (α : MultilinearSection 𝕜 F IB E n (s + q)) :
     ContMDiffSection IB ((MLF s) ⊗[𝕜] (MLF q)) n
       (fun x => Bundle.continuousMultilinearMap 𝕜 s F E x ⊗[𝕜]
                  Bundle.continuousMultilinearMap 𝕜 q F E x) :=
-  let d := Module.finrank 𝕜 F
-  let b : Module.Basis (Fin d) 𝕜 F := Module.finBasis 𝕜 F
-  ⟨fun x =>
-    TensorProduct.map
-      ((continuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) s x).symm :
-        (MLF s) →ₗ[𝕜] Bundle.continuousMultilinearMap 𝕜 s F E x)
-      ((continuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) q x).symm :
-        (MLF q) →ₗ[𝕜] Bundle.continuousMultilinearMap 𝕜 q F E x)
-      ((modelFromTensorEquiv (𝕜 := 𝕜) (F := F) b s q).symm
-        (continuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) (s + q) x (α x))),
-   by
-    intro x₀
-    rw [contMDiffAt_section x₀]
-    have hα_triv := (contMDiffAt_section x₀).mp (α.contMDiff x₀)
-    set e := (modelFromTensorEquiv (𝕜 := 𝕜) (F := F) b s q).symm.toContinuousLinearEquiv
-    refine (e.toContinuousLinearMap.contMDiffAt.comp x₀ hα_triv).congr_of_eventuallyEq ?_
-    exact (Filter.Eventually.mono
-      ((trivializationAt F E x₀).open_baseSet.mem_nhds
-        (mem_baseSet_trivializationAt F E x₀)) fun x hx => by
-      have hfrom := fromTensor_map_ofModel
-        (𝕜 := 𝕜) (F := F) (E := E) (s := s) (q := q) (x := x)
-        ((modelFromTensorEquiv b s q).symm
-          (continuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) (s + q) x (α x)))
-      have happly := (modelFromTensorEquiv b s q).apply_symm_apply
-        (continuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) (s + q) x (α x))
-      set u := (modelFromTensorEquiv b s q).symm
-        (continuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) (s + q) x (α x))
-      have hid : fromTensor s q x (TensorProduct.map
-          ((continuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) s x).symm :
-            (MLF s) →ₗ[𝕜] _)
-          ((continuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) q x).symm :
-            (MLF q) →ₗ[𝕜] _)
-          u) = α x :=
-        hfrom.trans (congrArg (ofModel (F := F) (E := E)) happly |>.trans (ofModel_toModel _))
-      have h1 := triv_toTensor_eq_modelFromTensorEquiv_symm b s q x₀ x hx
-        (TensorProduct.map
-          ((continuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) s x).symm :
-            (MLF s) →ₗ[𝕜] _)
-          ((continuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) q x).symm :
-            (MLF q) →ₗ[𝕜] _)
-          u)
-      simp only [hid] at h1
-      exact h1.symm)⟩
+  ⟨fun x => multilinearTensorFiberwiseEquiv s q x (α x),
+   ((multilinearTensorFiberwiseEquiv_smooth n).comp α.contMDiff).congr fun _ => rfl⟩
 
-end ToTensorProduct
+/-- Construct a `C^n` `(s+q)`-multilinear section from a `C^n` section of the tensor product
+bundle, by applying the inverse fiberwise equivalence pointwise. -/
+noncomputable def fromTensorProduct
+    (γ : ContMDiffSection IB ((MLF s) ⊗[𝕜] (MLF q)) n
+            (fun x => Bundle.continuousMultilinearMap 𝕜 s F E x ⊗[𝕜]
+                       Bundle.continuousMultilinearMap 𝕜 q F E x)) :
+    MultilinearSection 𝕜 F IB E n (s + q) :=
+  ⟨fun x => (multilinearTensorFiberwiseEquiv s q x).symm (γ x),
+   ((multilinearTensorFiberwiseEquiv_symm_smooth n).comp γ.contMDiff).congr fun _ => rfl⟩
 
-/-!
-## Round-trip identities
--/
-
-section RoundTrip
-
-open Bundle.continuousMultilinearMap
-
-/-- `fromTensor ∘ toTensorProduct = id` pointwise:
-decomposing into a tensor product and then reassembling via `fromTensor` gives back
-the original section value. -/
-theorem fromTensor_toTensorProduct
+theorem fromTensorProduct_toTensorProduct
     (α : MultilinearSection 𝕜 F IB E n (s + q)) (x : B) :
-    fromTensor s q x ((toTensorProduct n α).1 x) = α x := by
-  change fromTensor s q x (TensorProduct.map
-    ((continuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) s x).symm :
-      (MLF s) →ₗ[𝕜] _)
-    ((continuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) q x).symm :
-      (MLF q) →ₗ[𝕜] _)
-    ((modelFromTensorEquiv (Module.finBasis 𝕜 F) s q).symm
-      (continuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) (s + q) x (α x)))) = α x
-  rw [fromTensor_map_ofModel]
-  change ofModel (F := F) (E := E)
-    ((modelFromTensorEquiv (Module.finBasis 𝕜 F) s q)
-      ((modelFromTensorEquiv (Module.finBasis 𝕜 F) s q).symm
-        (continuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) (s + q) x (α x)))) = α x
-  rw [LinearEquiv.apply_symm_apply]
-  exact ofModel_toModel _
+    (fromTensorProduct n (toTensorProduct n α)).1 x = α x :=
+  (multilinearTensorFiberwiseEquiv s q x).symm_apply_apply (α x)
 
-/-- `toTensorProduct ∘ fromTensorProduct = id` pointwise:
-reassembling from a tensor product section via `fromTensor` and then decomposing gives
-back the original tensor product fiber element. -/
 theorem toTensorProduct_fromTensorProduct
     (γ : ContMDiffSection IB ((MLF s) ⊗[𝕜] (MLF q)) n
             (fun x => Bundle.continuousMultilinearMap 𝕜 s F E x ⊗[𝕜]
                        Bundle.continuousMultilinearMap 𝕜 q F E x))
     (x : B) :
-    (toTensorProduct n (fromTensorProduct n γ)).1 x = γ x := by
-  set b := Module.finBasis 𝕜 F
-  have key : ∀ (t : Bundle.continuousMultilinearMap 𝕜 s F E x ⊗[𝕜]
-      Bundle.continuousMultilinearMap 𝕜 q F E x),
-      fromTensor s q x t = ofModel (F := F) (E := E) (modelFromTensor s q
-        (TensorProduct.map
-          ((continuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) s x :
-            _ →ₗ[𝕜] MLF s))
-          ((continuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) q x :
-            _ →ₗ[𝕜] MLF q)) t)) := by
-    intro t
-    have hrt : ∀ (u : Bundle.continuousMultilinearMap 𝕜 s F E x ⊗[𝕜]
-        Bundle.continuousMultilinearMap 𝕜 q F E x),
-        TensorProduct.map
-          ((continuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) s x).symm :
-            (MLF s) →ₗ[𝕜] _)
-          ((continuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) q x).symm :
-            (MLF q) →ₗ[𝕜] _)
-          (TensorProduct.map
-            ((continuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) s x : _ →ₗ[𝕜] MLF s))
-            ((continuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) q x : _ →ₗ[𝕜] MLF q))
-            u) = u := by
-      intro u
-      induction u using TensorProduct.induction_on with
-      | zero => simp [map_zero]
-      | add _ _ ih₁ ih₂ => simp only [map_add, ih₁, ih₂]
-      | tmul a b =>
-        change ofModel (toModel a) ⊗ₜ[𝕜] ofModel (toModel b) = a ⊗ₜ[𝕜] b
-        rw [ofModel_toModel, ofModel_toModel]
-    conv_lhs => rw [← hrt t]
-    exact fromTensor_map_ofModel _
-  change TensorProduct.map
-    ((continuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) s x).symm : (MLF s) →ₗ[𝕜] _)
-    ((continuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) q x).symm : (MLF q) →ₗ[𝕜] _)
-    ((modelFromTensorEquiv b s q).symm
-      (continuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) (s + q) x
-        (fromTensor s q x (γ x)))) = γ x
-  rw [key (γ x)]
-  simp only [ofModel, ContinuousLinearEquiv.apply_symm_apply]
-  change TensorProduct.map _ _
-    ((modelFromTensorEquiv b s q).symm
-      ((modelFromTensorEquiv b s q)
-        (TensorProduct.map _ _ (γ x)))) = γ x
-  rw [LinearEquiv.symm_apply_apply]
-  induction (γ x) using TensorProduct.induction_on with
-  | zero => simp [map_zero]
-  | add _ _ ih₁ ih₂ => simp only [map_add, ih₁, ih₂]
-  | tmul a c =>
-    change ofModel (toModel a) ⊗ₜ[𝕜] ofModel (toModel c) = a ⊗ₜ[𝕜] c
-    rw [ofModel_toModel, ofModel_toModel]
+    (toTensorProduct n (fromTensorProduct n γ)).1 x = γ x :=
+  (multilinearTensorFiberwiseEquiv s q x).apply_symm_apply (γ x)
 
-end RoundTrip
+/-! ### Linearity -/
 
-/-!
-## Linearity properties
--/
-
-section Linearity
-
-open Bundle.continuousMultilinearMap
-
-/-- `toTensorProduct` is additive. -/
 theorem toTensorProduct_add
     (α β : MultilinearSection 𝕜 F IB E n (s + q)) (x : B) :
     (toTensorProduct n (α + β)).1 x =
-    (toTensorProduct n α).1 x + (toTensorProduct n β).1 x := by
-  change TensorProduct.map _ _ ((modelFromTensorEquiv _ s q).symm
-    (continuousLinearEquivAt (s + q) x ((α + β) x))) =
-    TensorProduct.map _ _ ((modelFromTensorEquiv _ s q).symm
-      (continuousLinearEquivAt (s + q) x (α x))) +
-    TensorProduct.map _ _ ((modelFromTensorEquiv _ s q).symm
-      (continuousLinearEquivAt (s + q) x (β x)))
-  simp [map_add]
+    (toTensorProduct n α).1 x + (toTensorProduct n β).1 x :=
+  map_add _ (α x) (β x)
 
-/-- `toTensorProduct` commutes with scalar multiplication by a smooth function. -/
 theorem toTensorProduct_smulByFun
     (φ : B → 𝕜) (hφ : ContMDiff IB 𝓘(𝕜) n φ)
     (α : MultilinearSection 𝕜 F IB E n (s + q)) (x : B) :
     (toTensorProduct n (smulByFun n φ hφ α)).1 x =
-    φ x • (toTensorProduct n α).1 x := by
-  change TensorProduct.map _ _ ((modelFromTensorEquiv _ s q).symm
-    (continuousLinearEquivAt (s + q) x ((smulByFun n φ hφ α) x))) =
-    φ x • TensorProduct.map _ _ ((modelFromTensorEquiv _ s q).symm
-      (continuousLinearEquivAt (s + q) x (α x)))
-  simp [smulByFun_apply, map_smul]
+    φ x • (toTensorProduct n α).1 x :=
+  map_smul _ (φ x) (α x)
 
 omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F] in
-/-- `fromTensorProduct` is additive (pointwise):
-`fromTensor(γ₁ x + γ₂ x) = fromTensor(γ₁ x) + fromTensor(γ₂ x)`. -/
 theorem fromTensorProduct_add
     (γ₁ γ₂ : ∀ x : B, Bundle.continuousMultilinearMap 𝕜 s F E x ⊗[𝕜]
                         Bundle.continuousMultilinearMap 𝕜 q F E x) (x : B) :
@@ -882,116 +922,11 @@ theorem fromTensorProduct_add
   map_add _ _ _
 
 omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F] in
-/-- `fromTensorProduct` commutes with scalar multiplication (pointwise):
-`fromTensor(c • γ x) = c • fromTensor(γ x)`. -/
 theorem fromTensorProduct_smul
     (c : 𝕜) (γ : ∀ x : B, Bundle.continuousMultilinearMap 𝕜 s F E x ⊗[𝕜]
                     Bundle.continuousMultilinearMap 𝕜 q F E x) (x : B) :
     fromTensor s q x (c • γ x) = c • fromTensor s q x (γ x) :=
   (fromTensor s q x).map_smul c (γ x)
-
-end Linearity
-
-/-!
-## Bundle equivalence via the section characterization lemma
-
-The `toTensorProduct`/`fromTensorProduct` maps define a fiberwise linear equivalence
-between the `(s+q)`-multilinear bundle and the tensor product of the `s`- and
-`q`-multilinear bundles. By the vector bundle section characterization lemma
-(`ContMDiffVectorBundleEquiv.ofLinearEquivSection`), this gives a `C^n` vector bundle
-equivalence.
-
-The key ingredients (all proved above) are:
-* `fromTensor_toTensorProduct` : left inverse
-* `toTensorProduct_fromTensorProduct` : right inverse
-* `toTensorProduct_add`, `fromTensorProduct_add` : additivity
-* `toTensorProduct_smulByFun`, `fromTensorProduct_smul` : smooth-function linearity
--/
-
-section BundleEquiv
-
-open Bundle.continuousMultilinearMap
-
-/-- The section-level equivalence underlying `multilinearBundle_tensorProduct_equiv`. -/
-noncomputable def multilinearBundle_tensorProduct_sectionEquiv
-    {EM : Type*} [NormedAddCommGroup EM] [NormedSpace ℝ EM]
-    {HM : Type*} [TopologicalSpace HM]
-    {IM : ModelWithCorners ℝ EM HM}
-    {M : Type*} [TopologicalSpace M] [ChartedSpace HM M]
-    {FM : Type*} [NormedAddCommGroup FM] [NormedSpace ℝ FM] [FiniteDimensional ℝ FM]
-    [CompleteSpace ℝ]
-    {EM' : M → Type*} [∀ x, NormedAddCommGroup (EM' x)] [∀ x, NormedSpace ℝ (EM' x)]
-    [TopologicalSpace (TotalSpace FM EM')]
-    [FiberBundle FM EM'] [VectorBundle ℝ FM EM']
-    {nm : ℕ∞} [Fact (1 ≤ nm)] [ContMDiffVectorBundle nm FM EM' IM]
-    [IsManifold IM ∞ M] [SigmaCompactSpace M] [T2Space M]
-    [FiniteDimensional ℝ EM] :
-    Cₛ^nm⟮IM; ContinuousMultilinearMap ℝ (fun _ : Fin (s + q) => FM) ℝ,
-      Bundle.continuousMultilinearMap ℝ (s + q) FM EM'⟯
-    ≃ₗ[C^nm⟮IM, M; ℝ⟯]
-    Cₛ^nm⟮IM; ContinuousMultilinearMap ℝ (fun _ : Fin s => FM) ℝ ⊗[ℝ]
-      ContinuousMultilinearMap ℝ (fun _ : Fin q => FM) ℝ,
-      fun x => Bundle.continuousMultilinearMap ℝ s FM EM' x ⊗[ℝ]
-                Bundle.continuousMultilinearMap ℝ q FM EM' x⟯ := by
-  letI : ContMDiffVectorBundle nm
-    (ContinuousMultilinearMap ℝ (fun _ : Fin s => FM) ℝ ⊗[ℝ]
-     ContinuousMultilinearMap ℝ (fun _ : Fin q => FM) ℝ)
-    (fun x => Bundle.continuousMultilinearMap ℝ s FM EM' x ⊗[ℝ]
-              Bundle.continuousMultilinearMap ℝ q FM EM' x) IM :=
-    (Bundle.TensorProduct.vectorPrebundle
-      (𝕜 := ℝ) (B := M)
-      (F₁ := ContinuousMultilinearMap ℝ (fun _ : Fin s => FM) ℝ)
-      (F₂ := ContinuousMultilinearMap ℝ (fun _ : Fin q => FM) ℝ)
-      (E₁ := Bundle.continuousMultilinearMap ℝ s FM EM')
-      (E₂ := Bundle.continuousMultilinearMap ℝ q FM EM')).contMDiffVectorBundle IM
-  exact { toFun := fun α => toTensorProduct nm α
-          invFun := fun γ => fromTensorProduct nm γ
-          map_add' := fun α β => by
-            apply ContMDiffSection.ext; intro x
-            exact toTensorProduct_add nm α β x
-          map_smul' := fun φ α => by
-            apply ContMDiffSection.ext; intro x
-            exact toTensorProduct_smulByFun nm φ φ.contMDiff α x
-          left_inv := fun α => by
-            apply ContMDiffSection.ext; intro x
-            exact fromTensor_toTensorProduct (n := nm) α x
-          right_inv := fun γ => by
-            apply ContMDiffSection.ext; intro x
-            exact toTensorProduct_fromTensorProduct (n := nm) γ x }
-
-/-- The `(s+q)`-multilinear bundle is `C^n`-equivalent to the tensor product of the
-`s`- and `q`-multilinear bundles, as a consequence of the vector bundle section
-characterization lemma applied to `toTensorProduct`/`fromTensorProduct`.
-
-This specializes to `𝕜 = ℝ` and requires `IsManifold`, `SigmaCompactSpace`, `T2Space`,
-and `FiniteDimensional` to apply the section characterization lemma. -/
-noncomputable def multilinearBundle_tensorProduct_equiv
-    {EM : Type*} [NormedAddCommGroup EM] [NormedSpace ℝ EM]
-    {HM : Type*} [TopologicalSpace HM]
-    {IM : ModelWithCorners ℝ EM HM}
-    {M : Type*} [TopologicalSpace M] [ChartedSpace HM M]
-    {FM : Type*} [NormedAddCommGroup FM] [NormedSpace ℝ FM] [FiniteDimensional ℝ FM]
-    [CompleteSpace ℝ]
-    {EM' : M → Type*} [∀ x, NormedAddCommGroup (EM' x)] [∀ x, NormedSpace ℝ (EM' x)]
-    [TopologicalSpace (TotalSpace FM EM')]
-    [FiberBundle FM EM'] [VectorBundle ℝ FM EM']
-    {nm : ℕ∞} [h1nm : Fact (1 ≤ nm)] [ContMDiffVectorBundle nm FM EM' IM]
-    [IsManifold IM ∞ M] [SigmaCompactSpace M] [T2Space M]
-    [FiniteDimensional ℝ EM] :
-    ContMDiffVectorBundleEquiv ℝ IM nm
-      (ContinuousMultilinearMap ℝ (fun _ : Fin (s + q) => FM) ℝ)
-      (Bundle.continuousMultilinearMap ℝ (s + q) FM EM')
-      (ContinuousMultilinearMap ℝ (fun _ : Fin s => FM) ℝ ⊗[ℝ]
-       ContinuousMultilinearMap ℝ (fun _ : Fin q => FM) ℝ)
-      (fun x => Bundle.continuousMultilinearMap ℝ s FM EM' x ⊗[ℝ]
-                 Bundle.continuousMultilinearMap ℝ q FM EM' x) := by
-  letI : ContMDiffVectorBundle nm
-      (ContinuousMultilinearMap ℝ (fun _ : Fin s => FM) ℝ ⊗[ℝ]
-       ContinuousMultilinearMap ℝ (fun _ : Fin q => FM) ℝ)
-      (fun x => Bundle.continuousMultilinearMap ℝ s FM EM' x ⊗[ℝ]
-                 Bundle.continuousMultilinearMap ℝ q FM EM' x) IM :=
-    inferInstance
-  exact ContMDiffVectorBundleEquiv.ofLinearEquivSection multilinearBundle_tensorProduct_sectionEquiv
 
 end BundleEquiv
 
@@ -1000,4 +935,3 @@ end TensorProductInstances
 end MultilinearSection
 
 end
-
