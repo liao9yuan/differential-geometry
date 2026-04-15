@@ -1,9 +1,10 @@
 /-
 Authors: Jack McCarthy
 -/
-import DifferentialGeometry.Tensor.Aux.Fin
-import DifferentialGeometry.Tensor.Aux.MultiKroneckerDelta
-import DifferentialGeometry.Tensor.Aux.Basis
+import DifferentialGeometry.Tensor.Auxiliary.Fin
+import DifferentialGeometry.Tensor.Auxiliary.MultiKroneckerDelta
+import DifferentialGeometry.Tensor.Auxiliary.Basis
+import DifferentialGeometry.Tensor.Alternating.Curry
 import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
 import Mathlib.Analysis.Normed.Module.Alternating.Basic
 import Mathlib.LinearAlgebra.Dual.Basis
@@ -104,6 +105,21 @@ theorem elementaryCovector_apply
   change Matrix.det (fun r c : Fin k => b (ι c) (v r)) =
     Matrix.det (fun i j : Fin k => b (ι i) (v j))
   rw [← Matrix.det_transpose]; rfl
+
+/-- Cofactor expansion: the interior product `curryFin (elementaryCovector b I) x` expands as a
+sum over deleted row indices, via Laplace expansion of the determinant along the first column. -/
+theorem curryFin_elementaryCovector
+    (b : Module.Basis (Fin n) 𝕜 (E →L[𝕜] 𝕜))
+    (I : Fin (k + 1) → Fin n) (x : E) :
+    curryFin (elementaryCovector b I) x =
+    ∑ i : Fin (k + 1), ((-1 : 𝕜) ^ i.val * b (I i) x) •
+      elementaryCovector b (I ∘ Fin.succAbove i) := by
+  ext v
+  simp only [curryFin_apply, sum_apply, smul_apply, smul_eq_mul]
+  rw [elementaryCovector_apply, Matrix.det_succ_column_zero]
+  apply Finset.sum_congr rfl; intro i _
+  simp only [Fin.cons_zero]
+  congr 1; rw [elementaryCovector_apply]; congr 1
 
 /-- Evaluating an elementary covector on basis vectors gives the generalized
 Kronecker delta. Given a dual basis pair `(B, b)` with `b i (B j) = δ_{ij}`,

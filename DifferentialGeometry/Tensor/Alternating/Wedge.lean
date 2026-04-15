@@ -4,9 +4,10 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Yury Kudryashov
 Coauthors: Jack McCarthy
 -/
-import DifferentialGeometry.Tensor.Aux.Perm
-import DifferentialGeometry.Tensor.Aux.MultiKroneckerDelta
-import DifferentialGeometry.Tensor.Aux.Basis
+import DifferentialGeometry.Tensor.Auxiliary.Perm
+import DifferentialGeometry.Tensor.Auxiliary.MultiKroneckerDelta
+import DifferentialGeometry.Tensor.Auxiliary.Basis
+import DifferentialGeometry.Tensor.Auxiliary.ShuffleSplit
 import DifferentialGeometry.Tensor.Alternating.Congr
 import DifferentialGeometry.Tensor.Alternating.Comp
 import DifferentialGeometry.Tensor.Alternating.Curry
@@ -31,7 +32,7 @@ variable
   {N : Type*} [NormedAddCommGroup N] [NormedSpace 𝕜 N]
   {N' : Type*} [NormedAddCommGroup N'] [NormedSpace 𝕜 N']
   {N'' : Type*} [NormedAddCommGroup N''] [NormedSpace 𝕜 N'']
-  {m n p : ℕ}
+  {m n p m' d : ℕ}
 
 /-- The wedge product of two continuous alternating maps `g` an `h` with respect to a
 bilinear map `f`. -/
@@ -111,7 +112,6 @@ Therefore
 
 4. If p = (Fin.addCases) ∘ σ for some permutation σ and is injective, then this reduces to case 3. Sice the effect of σ is merely to multiply both sides of the calculation by sign σ.
 -/
-
 theorem elementaryCovector_wedge [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜] [CharZero 𝕜]
     (b : Module.Basis (Fin d) 𝕜 (M →L[𝕜] 𝕜))
     (I : Fin m' → Fin d) (J : Fin p → Fin d) :
@@ -441,17 +441,158 @@ theorem wedge_antisymm [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜] [CharZero
   rw [h_anti]
   ring
 
-/-- The graded Leibniz rule for the interior product (curryFin) and wedge product:
-  ι_x(g ∧_f h) = (ι_x g) ∧_f h + (-1)^m • g ∧_f (ι_x h)
-  where `finAddFlipAssoc` handles the index rearrangement needed to make
-  the result well-typed. -/
-theorem iprod_wedge_product
-    (g : M [⋀^Fin (m+1)]→L[𝕜] N) (h : M [⋀^Fin (n+1)]→L[𝕜] N')
-    (f : N →L[𝕜] N' →L[𝕜] N'') (x : M) :
-    curryFin (domDomCongr Fin.finAddFlipAssoc (g ∧[f] h)) x =
-      (curryFin g x ∧[f] h) +
-      (-1 : 𝕜) ^ m • domDomCongr Fin.finAddFlipAssoc (g ∧[f] curryFin h x) := by
-  sorry
+/-- The graded Leibniz rule for `iprod` and wedge product, specialized to elementary covectors. -/
+theorem elementaryCovector_iprod_wedge_product
+    [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜] [CharZero 𝕜]
+    {d : ℕ} (b : Module.Basis (Fin d) 𝕜 (M →L[𝕜] 𝕜))
+    (I : Fin (m + 1) → Fin d) (J : Fin (n + 1) → Fin d) (x : M) :
+    curryFin (domDomCongr Fin.finAddFlipAssoc
+      ((elementaryCovector b I) ∧[𝕜] (elementaryCovector b J))) x =
+      (curryFin (elementaryCovector b I) x ∧[𝕜] (elementaryCovector b J)) +
+      (-1 : 𝕜) ^ (m + 1) • domDomCongr Fin.finAddFlipAssoc
+        ((elementaryCovector b I) ∧[𝕜] curryFin (elementaryCovector b J) x) := by
+  -- Step 1: Rewrite wedge products and expand cofactor formulas
+  rw [elementaryCovector_wedge b I J,
+    curryFin_elementaryCovector b I x, sum_smul_wedge_left]
+  simp_rw [elementaryCovector_wedge b _ J]
+  rw [curryFin_elementaryCovector b J x, sum_smul_wedge_right]
+  simp_rw [elementaryCovector_wedge b I _]
+  -- Step 2: Unfold to determinants and Laplace-expand LHS
+  ext v; simp only [curryFin_apply, domDomCongr_apply, add_apply, smul_apply,
+    sum_apply, smul_eq_mul, elementaryCovector_apply]
+  rw [Matrix.det_succ_column_zero]
+  simp_rw [show (Fin.cons x v ∘ ⇑Fin.finAddFlipAssoc)
+      (0 : Fin ((m + 1) + (n + 1))) = x from by
+    simp [Fin.finAddFlipAssoc, finCongr, Fin.cons_zero]]
+  -- Step 3: Merge RHS into single sum and match term-by-term
+  conv_rhs => rw [Finset.mul_sum]
+  rw [show ∀ (f : Fin (m + 1) → 𝕜) (g : Fin (n + 1) → 𝕜),
+      (∑ i, f i) + (∑ j, g j) =
+      ∑ k, (Fin.addCases f g : Fin ((m + 1) + (n + 1)) → 𝕜) k from fun f g =>
+    ((Fin.sum_univ_add (Fin.addCases f g)).symm ▸ by
+      simp [Fin.addCases_left, Fin.addCases_right])]
+  apply Finset.sum_congr rfl; intro ⟨k, hk⟩ _
+  -- Step 4: Split into left (I) and right (J) blocks
+  by_cases hlt : k < m + 1
+  · -- Left block: addCases picks the I-term
+    rw [show (⟨k, hk⟩ : Fin _) = Fin.castAdd (n + 1) ⟨k, hlt⟩ from Fin.ext rfl]
+    simp only [Fin.addCases_left, Fin.val_castAdd]
+    congr 1
+    exact Fin.det_subst_eq (Nat.add_right_comm m 1 n) _ _ (by
+      intro i j; simp only [Matrix.submatrix_apply,
+        Fin.addCases_succAbove_castAdd I J ⟨k, hlt⟩ i]
+      have : ∀ j : Fin (m + n + 1),
+          (Fin.cons x v ∘ ⇑(@Fin.finAddFlipAssoc m (n + 1) 1))
+            (Fin.succ (Fin.cast (Nat.add_right_comm m 1 n).symm j)) = v j :=
+        fun j => by simp [Function.comp, Fin.cons_succ, Fin.finAddFlipAssoc, finCongr]
+      simp only [this])
+  · -- Right block: addCases picks the J-term with (-1)^(m+1) sign
+    have hge := Nat.le_of_not_lt hlt
+    set j' : Fin (n + 1) := ⟨k - (m + 1), Nat.sub_lt_left_of_lt_add hge hk⟩
+    rw [show (⟨k, hk⟩ : Fin _) = Fin.natAdd (m + 1) j' from
+      Fin.ext (Nat.add_sub_cancel' hge).symm]
+    simp only [Fin.addCases_right, Fin.val_natAdd]
+    rw [pow_add]; ring_nf
+    exact congr_arg (- ((b (J j')) x * · * (-1 : 𝕜) ^ m * (-1) ^ j'.val))
+      (congr_arg Matrix.det (funext fun i => funext fun j => by
+        simp only [Matrix.submatrix_apply,
+          Fin.addCases_succAbove_natAdd I J j' i]; congr 1))
+
+/-- The scalar-valued graded Leibniz rule for interior product and wedge product.
+Proved by expanding g, h in the elementaryCovector basis and applying
+`elementaryCovector_iprod_wedge_product` to each basis pair. -/
+theorem iprod_wedge_product_mul [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜] [CharZero 𝕜]
+    (g : M [⋀^Fin (m+1)]→L[𝕜] 𝕜) (h : M [⋀^Fin (n+1)]→L[𝕜] 𝕜) (x : M) :
+    curryFin (domDomCongr Fin.finAddFlipAssoc (g ∧[𝕜] h)) x =
+      (curryFin g x ∧[𝕜] h) +
+      (-1 : 𝕜) ^ (m + 1) • domDomCongr Fin.finAddFlipAssoc (g ∧[𝕜] curryFin h x) := by
+  -- Step 1: Set up the elementary covector basis.
+  set d := Module.finrank 𝕜 M with hd_def
+  let B : Module.Basis (Fin d) 𝕜 M := Module.finBasis 𝕜 M
+  let b : Module.Basis (Fin d) 𝕜 (M →L[𝕜] 𝕜) :=
+    B.dualBasis.map LinearMap.toContinuousLinearMap
+  have dual : ∀ i j, b i (B j) = if i = j then 1 else 0 := by
+    intro i j
+    change LinearMap.toContinuousLinearMap (B.dualBasis i) (B j) = _
+    change B.dualBasis i (B j) = _
+    rw [Module.Basis.dualBasis_apply_self]
+    split_ifs with h1 h2 <;> simp_all [eq_comm]
+  let basisG : Module.Basis (Fin (m + 1) ↪o Fin d) 𝕜 (M [⋀^Fin (m + 1)]→L[𝕜] 𝕜) :=
+    elementaryCovectorBasis B b dual
+  let basisH : Module.Basis (Fin (n + 1) ↪o Fin d) 𝕜 (M [⋀^Fin (n + 1)]→L[𝕜] 𝕜) :=
+    elementaryCovectorBasis B b dual
+  -- basisG / basisH evaluated at I/J equals elementaryCovector b I/J.
+  have basisG_eq : ∀ I : Fin (m + 1) ↪o Fin d,
+      basisG I = elementaryCovector b ↑I := by
+    intro I
+    show (elementaryCovectorBasis B b dual) I = elementaryCovector b ↑I
+    rw [elementaryCovectorBasis, Module.Basis.mk_apply]
+  have basisH_eq : ∀ J : Fin (n + 1) ↪o Fin d,
+      basisH J = elementaryCovector b ↑J := by
+    intro J
+    show (elementaryCovectorBasis B b dual) J = elementaryCovector b ↑J
+    rw [elementaryCovectorBasis, Module.Basis.mk_apply]
+  -- Step 2: Expand g and h in the basis.
+  have hg : g = ∑ I : Fin (m + 1) ↪o Fin d, basisG.repr g I • elementaryCovector b ↑I := by
+    conv_lhs => rw [← basisG.sum_repr g]
+    apply Finset.sum_congr rfl; intro I _
+    rw [basisG_eq]
+  have hh : h = ∑ J : Fin (n + 1) ↪o Fin d, basisH.repr h J • elementaryCovector b ↑J := by
+    conv_lhs => rw [← basisH.sum_repr h]
+    apply Finset.sum_congr rfl; intro J _
+    rw [basisH_eq]
+  -- Step 3: Restate goal as a double sum on each side.
+  rw [hg, hh]
+  rw [sum_smul_wedge_left]
+  -- LHS now: curryFin (domDomCongr finAddFlipAssoc (∑ I, basisG.repr g I • (eI ∧ ∑J, ...))) x
+  -- (Actually we need to also distribute the inner sum over the wedge.)
+  simp_rw [sum_smul_wedge_right]
+  -- LHS: curryFin (domDomCongr finAddFlipAssoc (∑ I, basisG.repr g I •
+  --   ∑ J, basisH.repr h J • (eI ∧ eJ))) x
+  rw [domDomCongr_sum_smul]
+  simp_rw [domDomCongr_sum_smul]
+  -- LHS: curryFin (∑ I, basisG.repr g I • ∑ J, basisH.repr h J •
+  --   domDomCongr finAddFlipAssoc (eI ∧ eJ)) x
+  -- Distribute curryFin over all sums (LHS double sum + RHS occurrences).
+  simp_rw [curryFin_sum_smul]
+  -- After the simp_rw, the state is:
+  -- LHS: ∑ I, c_I • ∑ J, d_J • curryFin (domDomCongr finAddFlipAssoc (eI ∧ eJ)) x
+  -- RHS first term: ∑ J, d_J • (∑ I, c_I • curryFin eI x) ∧ eJ
+  -- RHS second term: (-1)^(m+1) • domDomCongr finAddFlipAssoc
+  --                    (∑ I, c_I • eI ∧ ∑ J, d_J • curryFin eJ x)
+  -- Distribute the inner sums in both terms.
+  simp_rw [sum_smul_wedge_left, sum_smul_wedge_right]
+  -- Distribute domDomCongr over the sums in the second term.
+  rw [domDomCongr_sum_smul]
+  simp_rw [domDomCongr_sum_smul]
+  -- Pull out (-1)^(m+1) into the inner double sum.
+  rw [Finset.smul_sum]
+  simp_rw [Finset.smul_sum, smul_comm ((-1 : 𝕜) ^ (m + 1))]
+  -- Swap the order of summation in the RHS first term so it matches LHS structure.
+  rw [Finset.sum_comm
+    (f := fun J I => basisH.repr h J •
+      basisG.repr g I •
+        (curryFin (elementaryCovector b ↑I) x ∧[𝕜] elementaryCovector b ↑J))]
+  -- Now combine the two RHS sums.
+  rw [← Finset.sum_add_distrib]
+  apply Finset.sum_congr rfl; intro I _
+  rw [← Finset.sum_add_distrib]
+  apply Finset.sum_congr rfl; intro J _
+  -- Goal: c_I • d_J • curryFin (domDomCongr finAddFlipAssoc (eI ∧ eJ)) x =
+  --   d_J • c_I • (curryFin eI x ∧ eJ) +
+  --   c_I • d_J • (-1)^(m+1) • domDomCongr finAddFlipAssoc (eI ∧ curryFin eJ x)
+  -- Bring c_I and d_J to the same side using smul_comm.
+  rw [show basisH.repr h J • basisG.repr g I •
+      (curryFin (elementaryCovector b ↑I) x ∧[𝕜] elementaryCovector b ↑J) =
+      basisG.repr g I • basisH.repr h J •
+        (curryFin (elementaryCovector b ↑I) x ∧[𝕜] elementaryCovector b ↑J) from
+    smul_comm _ _ _]
+  rw [← smul_add, ← smul_add]
+  congr 1
+  congr 1
+  -- Goal: curryFin (domDomCongr finAddFlipAssoc (eI ∧ eJ)) x =
+  --   curryFin eI x ∧ eJ + (-1)^(m+1) • domDomCongr finAddFlipAssoc (eI ∧ curryFin eJ x)
+  exact elementaryCovector_iprod_wedge_product b I J x
 
 variable {M : Type*} [NormedAddCommGroup M] [NormedSpace ℝ M] [FiniteDimensional ℝ M]
 

@@ -3,15 +3,15 @@ Authors: Jack McCarthy
 -/
 import Mathlib.Topology.VectorBundle.Basic
 import Mathlib.Geometry.Manifold.Diffeomorph
-import DifferentialGeometry.Bundle.Zero
+import DifferentialGeometry.VectorBundle.Zero
 import Mathlib.Geometry.Manifold.VectorBundle.Basic
 
 set_option autoImplicit false
 
 /-!
-# Vector Bundle Maps and Equivalences
+# Vector Bundle Homomorphisms and Equivalences
 
-A vector bundle map between vector bundles `E₁` over `B₁` and `E₂` over `B₂` is a
+A vector bundle homomorphism between vector bundles `E₁` over `B₁` and `E₂` over `B₂` is a
 continuous map between total spaces that sends fibers linearly into fibers, covering
 some base map `baseMap : B₁ → B₂`.
 
@@ -24,22 +24,22 @@ the total space map. The lemma `baseMap_eq` recovers it as
 
 ## Main Definitions
 
-* `VectorBundleMap` : a continuous, fiberwise-linear map between vector bundles.
+* `VectorBundleHom` : a continuous, fiberwise-linear homomorphism between vector bundles.
 * `VectorBundleEquiv` : a vector bundle isomorphism.
-* `ContMDiffVectorBundleMap` : a `C^n` vector bundle map.
+* `ContMDiffVectorBundleHom` : a `C^n` vector bundle homomorphism.
 * `ContMDiffVectorBundleEquiv` : a `C^n` vector bundle equivalence.
 
 ## Tags
 
-vector bundle, map, equivalence, isomorphism, diffeomorphism
+vector bundle, homomorphism, equivalence, isomorphism, diffeomorphism
 -/
 
 open Bundle
 
-/-! ## Vector bundle maps -/
+/-! ## Vector bundle homomorphisms -/
 
-/-- A vector bundle map from `E₁` over `B₁` to `E₂` over `B₂`. -/
-structure VectorBundleMap
+/-- A vector bundle homomorphism from `E₁` over `B₁` to `E₂` over `B₂`. -/
+structure VectorBundleHom
     (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     {B₁ : Type*} [TopologicalSpace B₁] {B₂ : Type*} [TopologicalSpace B₂]
     (F₁ : Type*) [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁]
@@ -48,7 +48,7 @@ structure VectorBundleMap
     (F₂ : Type*) [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂]
     (E₂ : B₂ → Type*) [∀ x, AddCommGroup (E₂ x)] [∀ x, Module 𝕜 (E₂ x)]
     [TopologicalSpace (TotalSpace F₂ E₂)] where
-  /-- The base map covered by this bundle map. -/
+  /-- The base map covered by this bundle homomorphism. -/
   baseMap : B₁ → B₂
   /-- The underlying continuous map between total spaces. -/
   toFun : TotalSpace F₁ E₁ → TotalSpace F₂ E₂
@@ -60,7 +60,7 @@ structure VectorBundleMap
   fiber_compat : ∀ (x : B₁) (v : E₁ x),
     toFun ⟨x, v⟩ = ⟨baseMap x, fiberLinearMap x v⟩
 
-namespace VectorBundleMap
+namespace VectorBundleHom
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   {B₁ : Type*} [TopologicalSpace B₁]
@@ -76,14 +76,14 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   {E₃ : B₃ → Type*} [∀ x, AddCommGroup (E₃ x)] [∀ x, Module 𝕜 (E₃ x)]
   [TopologicalSpace (TotalSpace F₃ E₃)]
 
-/-- Construct a `VectorBundleMap` without specifying the base map, deriving it as
+/-- Construct a `VectorBundleHom` without specifying the base map, deriving it as
 `fun x => (Φ ⟨x, 0⟩).proj`. -/
 def mk'
     (Φ : TotalSpace F₁ E₁ → TotalSpace F₂ E₂) (hΦ : Continuous Φ)
     (φ : ∀ x : B₁, E₁ x →ₗ[𝕜] E₂ ((Φ ⟨x, 0⟩).proj))
     (hcompat : ∀ (x : B₁) (v : E₁ x),
       Φ ⟨x, v⟩ = ⟨(Φ ⟨x, 0⟩).proj, φ x v⟩) :
-    VectorBundleMap 𝕜 F₁ E₁ F₂ E₂ where
+    VectorBundleHom 𝕜 F₁ E₁ F₂ E₂ where
   baseMap x := (Φ ⟨x, 0⟩).proj
   toFun := Φ
   continuous_toFun := hΦ
@@ -91,7 +91,7 @@ def mk'
   fiber_compat := hcompat
 
 @[ext]
-theorem ext (A B : VectorBundleMap 𝕜 F₁ E₁ F₂ E₂)
+theorem ext (A B : VectorBundleHom 𝕜 F₁ E₁ F₂ E₂)
     (h : A.toFun = B.toFun) : A = B := by
   obtain ⟨f_A, Φ_A, _, φ_A, hA⟩ := A
   obtain ⟨f_B, Φ_B, _, φ_B, hB⟩ := B
@@ -110,16 +110,16 @@ theorem ext (A B : VectorBundleMap 𝕜 F₁ E₁ F₂ E₂)
   exact TotalSpace.mk_inj.mp h1.symm
 
 /-- The base map equals the projection of the total space map on the zero section. -/
-theorem baseMap_eq (f : VectorBundleMap 𝕜 F₁ E₁ F₂ E₂) (x : B₁) :
+theorem baseMap_eq (f : VectorBundleHom 𝕜 F₁ E₁ F₂ E₂) (x : B₁) :
     f.baseMap x = (f.toFun ⟨x, 0⟩).proj := by
   simp [f.fiber_compat, map_zero]
 
-/-- The base map of a vector bundle map is continuous, since it factors as
+/-- The base map of a vector bundle homomorphism is continuous, since it factors as
 `π₂ ∘ Φ ∘ zeroSection` and the zero section is continuous. -/
 theorem baseMapContinuous
     [∀ x, TopologicalSpace (E₁ x)] [FiberBundle F₁ E₁] [VectorBundle 𝕜 F₁ E₁]
     [∀ x, TopologicalSpace (E₂ x)] [FiberBundle F₂ E₂]
-    (f : VectorBundleMap 𝕜 F₁ E₁ F₂ E₂) : Continuous f.baseMap := by
+    (f : VectorBundleHom 𝕜 F₁ E₁ F₂ E₂) : Continuous f.baseMap := by
   have h : f.baseMap = TotalSpace.proj ∘ f.toFun ∘ zeroSection F₁ E₁ := by
     ext x; simp [baseMap_eq, zeroSection]
   rw [h]
@@ -127,24 +127,24 @@ theorem baseMapContinuous
     (f.continuous_toFun.comp (continuous_zeroSection 𝕜))
 
 @[simp]
-theorem proj_eq (f : VectorBundleMap 𝕜 F₁ E₁ F₂ E₂) (p : TotalSpace F₁ E₁) :
+theorem proj_eq (f : VectorBundleHom 𝕜 F₁ E₁ F₂ E₂) (p : TotalSpace F₁ E₁) :
     (f.toFun p).proj = f.baseMap p.proj := by
   obtain ⟨x, v⟩ := p; simp [f.fiber_compat]
 
 @[simp]
-theorem toFun_apply (f : VectorBundleMap 𝕜 F₁ E₁ F₂ E₂) (x : B₁) (v : E₁ x) :
+theorem toFun_apply (f : VectorBundleHom 𝕜 F₁ E₁ F₂ E₂) (x : B₁) (v : E₁ x) :
     f.toFun ⟨x, v⟩ = ⟨f.baseMap x, f.fiberLinearMap x v⟩ :=
   f.fiber_compat x v
 
-def id : VectorBundleMap 𝕜 F₁ E₁ F₁ E₁ where
+def id : VectorBundleHom 𝕜 F₁ E₁ F₁ E₁ where
   baseMap := _root_.id
   toFun := _root_.id
   continuous_toFun := continuous_id
   fiberLinearMap _ := LinearMap.id
   fiber_compat _ _ := rfl
 
-def comp (g : VectorBundleMap 𝕜 F₂ E₂ F₃ E₃) (f : VectorBundleMap 𝕜 F₁ E₁ F₂ E₂) :
-    VectorBundleMap 𝕜 F₁ E₁ F₃ E₃ where
+def comp (g : VectorBundleHom 𝕜 F₂ E₂ F₃ E₃) (f : VectorBundleHom 𝕜 F₁ E₁ F₂ E₂) :
+    VectorBundleHom 𝕜 F₁ E₁ F₃ E₃ where
   baseMap := g.baseMap ∘ f.baseMap
   toFun := g.toFun ∘ f.toFun
   continuous_toFun := g.continuous_toFun.comp f.continuous_toFun
@@ -153,7 +153,7 @@ def comp (g : VectorBundleMap 𝕜 F₂ E₂ F₃ E₃) (f : VectorBundleMap �
     simp only [Function.comp_apply, f.fiber_compat, g.fiber_compat]
     congr 1
 
-end VectorBundleMap
+end VectorBundleHom
 
 /-! ## Vector bundle equivalences -/
 
@@ -252,9 +252,9 @@ theorem toHomeomorph_apply (e : VectorBundleEquiv 𝕜 F₁ E₁ F₂ E₂) (x :
     e.toHomeomorph ⟨x, v⟩ = ⟨e.baseMap x, e.fiberLinearEquiv x v⟩ :=
   e.fiber_compat x v
 
-/-- A `VectorBundleEquiv` gives a `VectorBundleMap` in the forward direction. -/
-def toVectorBundleMap (e : VectorBundleEquiv 𝕜 F₁ E₁ F₂ E₂) :
-    VectorBundleMap 𝕜 F₁ E₁ F₂ E₂ where
+/-- A `VectorBundleEquiv` gives a `VectorBundleHom` in the forward direction. -/
+def toVectorBundleHom (e : VectorBundleEquiv 𝕜 F₁ E₁ F₂ E₂) :
+    VectorBundleHom 𝕜 F₁ E₁ F₂ E₂ where
   baseMap := e.baseMap
   toFun := e.toHomeomorph
   continuous_toFun := e.toHomeomorph.continuous
@@ -298,7 +298,7 @@ def trans (e₁₂ : VectorBundleEquiv 𝕜 F₁ E₁ F₂ E₂) (e₂₃ : Vect
 
 end VectorBundleEquiv
 
-/-! ## Bijective bundle maps are equivalences -/
+/-! ## Bijective bundle homomorphisms are equivalences -/
 
 /- Proof sketch
 1. Note since π₂ ∘ F = π₁, applying F⁻¹ to both sides immediately yields π₁ ∘ F⁻¹ = π₂
@@ -309,11 +309,11 @@ end VectorBundleEquiv
 6. Therefore, (e₁ ∘ F.inv ∘ e₂.symm) : U × F₂ → U × F₁ is cotinuous since it takes the form ⟨q, v⟩ ↦ ⟨q, A⁻¹(q) v⟩ and the inverse map on matrices is smooth (this requires assuming that F₁, F₂ are finite dimesnional)
 7. Thus, F.inv is continuous at ⟨x,v⟩ since e₁ and e₂ are homeomorphisms around ⟨x,v⟩
 -/
-/-- A bijective vector bundle map is a vector bundle equivalence. The inverse total space
+/-- A bijective vector bundle homomorphism is a vector bundle equivalence. The inverse total space
 map is continuous by the open mapping theorem (a continuous bijection from a compact space,
 or more generally by the structure of fiber bundle total spaces), and the fiberwise linear
 maps are promoted to linear equivalences by the fiberwise bijectivity. -/
-noncomputable def VectorBundleMap.toVectorBundleEquiv {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+noncomputable def VectorBundleHom.toVectorBundleEquiv {𝕜 : Type*} [NontriviallyNormedField 𝕜]
     [CompleteSpace 𝕜]
     {B : Type*} [TopologicalSpace B]
     {F₁ : Type*} [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁] [FiniteDimensional 𝕜 F₁]
@@ -324,7 +324,7 @@ noncomputable def VectorBundleMap.toVectorBundleEquiv {𝕜 : Type*} [Nontrivial
     {E₂ : B → Type*} [∀ x, AddCommGroup (E₂ x)] [∀ x, Module 𝕜 (E₂ x)]
     [TopologicalSpace (TotalSpace F₂ E₂)] [∀ x, TopologicalSpace (E₂ x)]
     [FiberBundle F₂ E₂] [VectorBundle 𝕜 F₂ E₂]
-    (f : VectorBundleMap 𝕜 F₁ E₁ F₂ E₂)
+    (f : VectorBundleHom 𝕜 F₁ E₁ F₂ E₂)
     (hid : f.baseMap = _root_.id)
     (hbij : Function.Bijective f.toFun) :
     VectorBundleEquiv 𝕜 F₁ E₁ F₂ E₂ := by
@@ -641,10 +641,10 @@ def trans (e₁₂ : ContMDiffVectorBundleEquiv 𝕜 IB n F₁ E₁ F₂ E₂)
 
 end ContMDiffVectorBundleEquiv
 
-/-! ## `C^n` vector bundle maps -/
+/-! ## `C^n` vector bundle homomorphisms -/
 
-/-- A `C^n` vector bundle map from `E₁` over `B₁` to `E₂` over `B₂`. -/
-structure ContMDiffVectorBundleMap
+/-- A `C^n` vector bundle homomorphism from `E₁` over `B₁` to `E₂` over `B₂`. -/
+structure ContMDiffVectorBundleHom
     (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     {EB : Type*} [NormedAddCommGroup EB] [NormedSpace 𝕜 EB]
     {HB : Type*} [TopologicalSpace HB]
@@ -667,7 +667,7 @@ structure ContMDiffVectorBundleMap
   fiber_compat : ∀ (x : B₁) (v : E₁ x),
     toFun ⟨x, v⟩ = ⟨baseMap x, fiberLinearMap x v⟩
 
-namespace ContMDiffVectorBundleMap
+namespace ContMDiffVectorBundleHom
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   {EB : Type*} [NormedAddCommGroup EB] [NormedSpace 𝕜 EB]
@@ -690,7 +690,7 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   [TopologicalSpace (TotalSpace F₃ E₃)] [∀ x, TopologicalSpace (E₃ x)]
   [FiberBundle F₃ E₃] [VectorBundle 𝕜 F₃ E₃]
 
-/-- Construct a `ContMDiffVectorBundleMap` without specifying the base map, deriving it as
+/-- Construct a `ContMDiffVectorBundleHom` without specifying the base map, deriving it as
 `fun x => (Φ ⟨x, 0⟩).proj`. -/
 def mk'
     (Φ : TotalSpace F₁ E₁ → TotalSpace F₂ E₂)
@@ -698,7 +698,7 @@ def mk'
     (φ : ∀ x : B₁, E₁ x →ₗ[𝕜] E₂ ((Φ ⟨x, 0⟩).proj))
     (hcompat : ∀ (x : B₁) (v : E₁ x),
       Φ ⟨x, v⟩ = ⟨(Φ ⟨x, 0⟩).proj, φ x v⟩) :
-    ContMDiffVectorBundleMap 𝕜 IB n F₁ E₁ F₂ E₂ where
+    ContMDiffVectorBundleHom 𝕜 IB n F₁ E₁ F₂ E₂ where
   baseMap x := (Φ ⟨x, 0⟩).proj
   toFun := Φ
   contMDiff_toFun := hΦ
@@ -706,7 +706,7 @@ def mk'
   fiber_compat := hcompat
 
 @[ext]
-theorem ext (A B : ContMDiffVectorBundleMap 𝕜 IB n F₁ E₁ F₂ E₂)
+theorem ext (A B : ContMDiffVectorBundleHom 𝕜 IB n F₁ E₁ F₂ E₂)
     (h : A.toFun = B.toFun) : A = B := by
   obtain ⟨f_A, Φ_A, _, φ_A, hA⟩ := A
   obtain ⟨f_B, Φ_B, _, φ_B, hB⟩ := B
@@ -721,14 +721,14 @@ theorem ext (A B : ContMDiffVectorBundleMap 𝕜 IB n F₁ E₁ F₂ E₂)
   have h₁ := hA x v; rw [hB] at h₁
   exact TotalSpace.mk_inj.mp h₁.symm
 
-theorem baseMap_eq (f : ContMDiffVectorBundleMap 𝕜 IB n F₁ E₁ F₂ E₂) (x : B₁) :
+theorem baseMap_eq (f : ContMDiffVectorBundleHom 𝕜 IB n F₁ E₁ F₂ E₂) (x : B₁) :
     f.baseMap x = (f.toFun ⟨x, 0⟩).proj := by
   simp [f.fiber_compat, map_zero]
 
-/-- The base map of a `C^n` vector bundle map is `C^n`, since it factors as
+/-- The base map of a `C^n` vector bundle homomorphism is `C^n`, since it factors as
 `π₂ ∘ Φ ∘ zeroSection`. -/
 theorem baseMapContMDiff [ContMDiffVectorBundle n F₁ E₁ IB]
-    (f : ContMDiffVectorBundleMap 𝕜 IB n F₁ E₁ F₂ E₂) :
+    (f : ContMDiffVectorBundleHom 𝕜 IB n F₁ E₁ F₂ E₂) :
     ContMDiff IB IB n f.baseMap := by
   have h : f.baseMap = TotalSpace.proj ∘ f.toFun ∘ zeroSection F₁ E₁ := by
     ext x; simp [baseMap_eq, zeroSection]
@@ -739,8 +739,8 @@ theorem baseMapContMDiff [ContMDiffVectorBundle n F₁ E₁ IB]
     (contMDiff_proj E₂).of_le le_top
   exact h₂.comp (f.contMDiff_toFun.comp h₁)
 
-def toVectorBundleMap (f : ContMDiffVectorBundleMap 𝕜 IB n F₁ E₁ F₂ E₂) :
-    VectorBundleMap 𝕜 F₁ E₁ F₂ E₂ where
+def toVectorBundleHom (f : ContMDiffVectorBundleHom 𝕜 IB n F₁ E₁ F₂ E₂) :
+    VectorBundleHom 𝕜 F₁ E₁ F₂ E₂ where
   baseMap := f.baseMap
   toFun := f.toFun
   continuous_toFun := f.contMDiff_toFun.continuous
@@ -748,27 +748,27 @@ def toVectorBundleMap (f : ContMDiffVectorBundleMap 𝕜 IB n F₁ E₁ F₂ E�
   fiber_compat x v := f.fiber_compat x v
 
 @[simp]
-theorem proj_eq (f : ContMDiffVectorBundleMap 𝕜 IB n F₁ E₁ F₂ E₂)
+theorem proj_eq (f : ContMDiffVectorBundleHom 𝕜 IB n F₁ E₁ F₂ E₂)
     (p : TotalSpace F₁ E₁) :
     (f.toFun p).proj = f.baseMap p.proj := by
   obtain ⟨x, v⟩ := p; simp [f.fiber_compat]
 
 @[simp]
-theorem toFun_apply (f : ContMDiffVectorBundleMap 𝕜 IB n F₁ E₁ F₂ E₂)
+theorem toFun_apply (f : ContMDiffVectorBundleHom 𝕜 IB n F₁ E₁ F₂ E₂)
     (x : B₁) (v : E₁ x) :
     f.toFun ⟨x, v⟩ = ⟨f.baseMap x, f.fiberLinearMap x v⟩ :=
   f.fiber_compat x v
 
-def id : ContMDiffVectorBundleMap 𝕜 IB n F₁ E₁ F₁ E₁ where
+def id : ContMDiffVectorBundleHom 𝕜 IB n F₁ E₁ F₁ E₁ where
   baseMap := _root_.id
   toFun := _root_.id
   contMDiff_toFun := contMDiff_id
   fiberLinearMap _ := LinearMap.id
   fiber_compat _ _ := rfl
 
-def comp (g : ContMDiffVectorBundleMap 𝕜 IB n F₂ E₂ F₃ E₃)
-    (f : ContMDiffVectorBundleMap 𝕜 IB n F₁ E₁ F₂ E₂) :
-    ContMDiffVectorBundleMap 𝕜 IB n F₁ E₁ F₃ E₃ where
+def comp (g : ContMDiffVectorBundleHom 𝕜 IB n F₂ E₂ F₃ E₃)
+    (f : ContMDiffVectorBundleHom 𝕜 IB n F₁ E₁ F₂ E₂) :
+    ContMDiffVectorBundleHom 𝕜 IB n F₁ E₁ F₃ E₃ where
   baseMap := g.baseMap ∘ f.baseMap
   toFun := g.toFun ∘ f.toFun
   contMDiff_toFun := g.contMDiff_toFun.comp f.contMDiff_toFun
@@ -778,14 +778,14 @@ def comp (g : ContMDiffVectorBundleMap 𝕜 IB n F₂ E₂ F₃ E₃)
     congr 1
 
 def ofEquiv (e : ContMDiffVectorBundleEquiv 𝕜 IB n F₁ E₁ F₂ E₂) :
-    ContMDiffVectorBundleMap 𝕜 IB n F₁ E₁ F₂ E₂ where
+    ContMDiffVectorBundleHom 𝕜 IB n F₁ E₁ F₂ E₂ where
   baseMap := e.baseMap
   toFun := e.toDiffeomorph
   contMDiff_toFun := e.toDiffeomorph.contMDiff
   fiberLinearMap x := (e.fiberLinearEquiv x).toLinearMap
   fiber_compat x v := e.fiber_compat x v
 
-/-- A bijective `C^n` vector bundle map over the identity is a `C^n` vector bundle equiv. -/
+/-- A bijective `C^n` vector bundle homomorphism over the identity is a `C^n` vector bundle equiv. -/
 noncomputable def toContMDiffVectorBundleEquiv
     {B : Type*} [TopologicalSpace B] [ChartedSpace HB B]
     {E₁ : B → Type*} [∀ x, AddCommGroup (E₁ x)] [∀ x, Module 𝕜 (E₁ x)]
@@ -796,11 +796,11 @@ noncomputable def toContMDiffVectorBundleEquiv
     [FiberBundle F₂ E₂] [VectorBundle 𝕜 F₂ E₂]
     [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F₁] [FiniteDimensional 𝕜 F₂]
     [ContMDiffVectorBundle n F₁ E₁ IB] [ContMDiffVectorBundle n F₂ E₂ IB]
-    (f : ContMDiffVectorBundleMap 𝕜 IB n F₁ E₁ F₂ E₂)
+    (f : ContMDiffVectorBundleHom 𝕜 IB n F₁ E₁ F₂ E₂)
     (hid : f.baseMap = _root_.id)
     (hbij : Function.Bijective f.toFun) :
     ContMDiffVectorBundleEquiv 𝕜 IB n F₁ E₁ F₂ E₂ := by
-  -- Same structure as VectorBundleMap.toVectorBundleEquiv, with ContMDiff replacing Continuous
+  -- Same structure as VectorBundleHom.toVectorBundleEquiv, with ContMDiff replacing Continuous
   obtain ⟨bm, Φ, hΦ_smooth, φ, hcompat⟩ := f
   simp only at hid; subst hid
   change Function.Bijective Φ at hbij
@@ -1010,4 +1010,4 @@ noncomputable def toContMDiffVectorBundleEquiv
     fiber_compat := fun x v => hcompat' x v
   }
 
-end ContMDiffVectorBundleMap
+end ContMDiffVectorBundleHom

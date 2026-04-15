@@ -2,14 +2,14 @@
 Authors: Yury Kudryashov
 Coauthors: Jack McCarthy
 -/
-import DifferentialGeometry.Tensor.Aux.Fin
+import DifferentialGeometry.Tensor.Auxiliary.Fin
 import Mathlib.LinearAlgebra.Alternating.DomCoprod
 
 namespace Equiv.Perm
 
 open Fin
 
-variable {m n p : ℕ}
+variable {m n p k : ℕ}
 
 @[simps!]
 def addAssocPerm : Equiv.Perm ((Fin m ⊕ Fin n) ⊕ Fin p) ≃ Equiv.Perm (Fin m ⊕ Fin n ⊕ Fin p) :=

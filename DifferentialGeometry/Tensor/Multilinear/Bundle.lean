@@ -48,7 +48,13 @@ set_option linter.unusedVariables false in
 to the scalar field `𝕜`. At each point `x : B`, the fiber is
 `ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E x) 𝕜`.
 We intentionally include `F` as a (phantom) argument so that typeclass instances on
-this type can refer to it. -/
+this type can refer to it.
+
+Marked `@[reducible]` so the type is transparent during instance synthesis. This
+collapses the topology diamond between the bundle topology
+(`instTopologicalSpaceContinuousMultilinearMap`) and the standard `ContinuousMultilinearMap`
+topology, enabling section-level lifts of fiberwise iso constructions. -/
+@[reducible]
 protected def Bundle.continuousMultilinearMap (F : Type*) (E : B → Type*)
     [Π x, AddCommMonoid (E x)] [Π x, Module 𝕜 (E x)] [Π x, TopologicalSpace (E x)]
     (x : B) : Type _ :=

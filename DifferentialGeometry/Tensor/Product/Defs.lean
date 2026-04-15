@@ -3,6 +3,7 @@ Authors: Yuan Liao, Jack McCarthy
 -/
 import DifferentialGeometry.Tensor.Product.HomEquiv
 import DifferentialGeometry.Tensor.RSTensor.Defs
+
 import DifferentialGeometry.Tensor.Alternating.Curry
 /-!
 # TensorProduct.mapL and its properties
@@ -148,47 +149,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
   [Module.Finite 𝕜 E] [FiniteDimensional 𝕜 E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ω M]
-
-/-- Given T : (r,s) and T' : (r',s'), we define T ⊗ T' : (r+r',s+s').
-
-Concretely, via `Bundle.continuousMultilinearMap.equiv`, the (0,r+r')-tensor space is
-identified with `(0,r) ⊗[𝕜] (0,r')`, and we transport `TensorProduct.map T T'` along
-these isomorphisms. We use the algebraic `TensorProduct.map` with a single outer
-`LinearMap.toContinuousLinearMap`, since composing algebraic linear maps avoids
-synthesizing `TopologicalSpace` instances on the intermediate tensor products. -/
--- TODO: Add notation for tensor product of tensors using ⊗ symbol
--- TODO: Define tensor product on sections/bundles, not just pointwise
--- TODO: Show that the product of smooth tensor fields is again smooth
-noncomputable def tensorRS_product (r s r' s' : ℕ) (x : M)
-    (T : TensorRSSpace r s I x) (T' : TensorRSSpace r' s' I x) :
-    TensorRSSpace (r + r') (s + s') I x :=
-  let eq := Bundle.continuousMultilinearMap.equiv (𝕜 := 𝕜) (F := E) (E := TangentSpace I)
-  LinearMap.toContinuousLinearMap
-    ((eq s s' x).symm.toLinearMap ∘ₗ
-     TensorProduct.map T.toLinearMap T'.toLinearMap ∘ₗ
-     (eq r r' x).toLinearMap)
-
-/-- The trivialized basis coordinate of a pointwise tensor product of multilinear bundle
-fiber elements decomposes as a product of the trivialized basis coordinates of the factors.
-
-Specifically, the `σ`-coordinate of `product_fun α β` (trivialized at `x₀`)
-equals the `(σ ∘ Fin.castAdd q)`-coordinate of `α` times the `(σ ∘ Fin.natAdd s)`-coordinate
-of `β`. -/
-theorem triv_coord_tensor0S_product {s q d : ℕ}
-    (b : Module.Basis (Fin d) 𝕜 E)
-    (σ : Fin (s + q) → Fin d) (x₀ x : M)
-    (α : Tensor0SSpace s I x) (β : Tensor0SSpace q I x) :
-    (continuousMultilinearMap_basis b (s + q)).repr
-      (trivializationAt (Tensor0SModel (s + q) 𝕜 E)
-        (fun x => Tensor0SSpace (s + q) I x) x₀
-        ⟨x, Bundle.continuousMultilinearMap.product_fun α β⟩).2 σ =
-    (continuousMultilinearMap_basis b s).repr
-      (trivializationAt (Tensor0SModel s 𝕜 E)
-        (fun x => Tensor0SSpace s I x) x₀ ⟨x, α⟩).2 (σ ∘ Fin.castAdd q) *
-    (continuousMultilinearMap_basis b q).repr
-      (trivializationAt (Tensor0SModel q 𝕜 E)
-        (fun x => Tensor0SSpace q I x) x₀ ⟨x, β⟩).2 (σ ∘ Fin.natAdd s) := by
-  sorry
 
 end Tensor0SBundle
 
