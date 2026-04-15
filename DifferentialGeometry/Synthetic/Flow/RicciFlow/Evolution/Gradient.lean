@@ -1,14 +1,5 @@
-import DifferentialGeometry.Synthetic.Operator.Time
-import DifferentialGeometry.Synthetic.Algebra.VectorField
-import DifferentialGeometry.Synthetic.Algebra.Metric
-import DifferentialGeometry.Synthetic.Algebra.Metric
-import DifferentialGeometry.Synthetic.Geometry.Connection
-import DifferentialGeometry.Synthetic.Geometry.Curvature
+import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.ScalarCurvature
 import DifferentialGeometry.Synthetic.Operator.Gradient
-import DifferentialGeometry.Synthetic.Operator.Time
-import DifferentialGeometry.Synthetic.Operator.Variation
-import DifferentialGeometry.Synthetic.Flow.RicciFlow.Basic
-import DifferentialGeometry.Synthetic.Geometry.RicciTensor
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.Abel
 
@@ -17,194 +8,157 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 set_option linter.style.emptyLine false
 
-open AbstractDerivationAction
-
-open DifferentialGeometry TensorAlgebra
-
-variable {R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
-variable [AbstractDerivationAction R V] [AbstractLieBracket V]
-variable [DerivationRules R V] [LieDerivationRules R V]
-
 /-!
-# Evolution of the Gradient under Ricci Flow
+# Time Evolution of the Gradient under Ricci Flow
 
-This file establishes how the gradient vector field of a time-independent
-scalar function evolves when the background metric shifts according to
-the Ricci flow equation.
+- `gradient_evolution`: ∂_t[g(t)(grad u, Y)] = 2 Rc(grad u, Y)
+- `gradient_squared_evolution`: ∂_t|∇u|² = 2 Rc(∇u,∇u) + 2 g(∇u, ∇(∂_t u))
 -/
 
-/--
-Mathematical Identity: $\partial_t (\nabla u) = 2 \text{Rc}^\sharp (\nabla u)$
-Evolution of the gradient of a time-independent scalar function under Ricci flow.
--/
-lemma gradient_evolution {Time : Type}
-  [TimeDerivative Time R] [TimeDerivative Time V]
-  [TimeDerivativeRules Time R V] [ActionTimeDerivativeRules Time R V] [TensorTimeCalculus Time R V]
-  (g_fam : Time → MetricDuality R V)
-  (conn_fam : Time → AbstractAffineConnection R V)
-  [MetricTimeDerivativeRules Time R V g_fam]
-  [∀ s, AffineTensorCalculus (conn_fam s)] [∀ s, RiemannCurvatureTensorOp (conn_fam s)]
-  [RicciFlow Time (fun t => (g_fam t).toNonDegenerateMetric.toAbstractMetricTensor) conn_fam]
-  (u : R) (t : Time) :
-  TimeDerivative.partial_t (fun s => grad (g_fam s) u) t =
-  (2:R) • (g_fam t).raise (ricciForm (conn_fam t)) (grad (g_fam t) u) := by
-  apply (g_fam t).toNonDegenerateMetric.eq_of_forall_g_eq
-  intro Y
-  have h1 : (fun s => (g_fam s).g (grad (g_fam s) u) Y) = fun s => action Y u := by
-    funext s
-    exact g_grad (g_fam s) u Y
-  have h2 : TimeDerivative.partial_t (fun s => (g_fam s).g (grad (g_fam s) u) Y) t = TimeDerivative.partial_t (fun _ => action Y u) t := by
-    rw [h1]
-  have h3 : TimeDerivative.partial_t (fun _ => action Y u) t = 0 := MetricTimeDerivativeRules.t_const_R g_fam (action Y u) t
-  have h4 : TimeDerivative.partial_t (fun s => (g_fam s).g (grad (g_fam s) u) Y) t =
-            tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![(grad (g_fam t) u), Y] ![] +
-            (g_fam t).g (TimeDerivative.partial_t (fun s => grad (g_fam s) u) t) Y +
-            (g_fam t).g (grad (g_fam t) u) (TimeDerivative.partial_t (fun s => Y) t) := by
-    exact MetricTimeDerivativeRules.t_metric (fun s => grad (g_fam s) u) (fun s => Y) t
-  have h5 : TimeDerivative.partial_t (fun _ => Y) t = 0 := MetricTimeDerivativeRules.t_const_V g_fam Y t
-  have h6 : (g_fam t).g (grad (g_fam t) u) (TimeDerivative.partial_t (fun s => Y) t) = 0 := by
-    rw [h5]
-    exact metric_zero_right ((g_fam t).toNonDegenerateMetric.toAbstractMetricTensor) _
-  have h7 : 0 = tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![(grad (g_fam t) u), Y] ![] +
-                (g_fam t).g (TimeDerivative.partial_t (fun s => grad (g_fam s) u) t) Y := by
-    calc 0 = TimeDerivative.partial_t (fun _ => action Y u) t := h3.symm
-         _ = TimeDerivative.partial_t (fun s => (g_fam s).g (grad (g_fam s) u) Y) t := h2.symm
-         _ = tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![(grad (g_fam t) u), Y] ![] +
-             (g_fam t).g (TimeDerivative.partial_t (fun s => grad (g_fam s) u) t) Y +
-             (g_fam t).g (grad (g_fam t) u) (TimeDerivative.partial_t (fun s => Y) t) := h4
-         _ = tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![(grad (g_fam t) u), Y] ![] +
-             (g_fam t).g (TimeDerivative.partial_t (fun s => grad (g_fam s) u) t) Y + 0 := by rw [h6]
-         _ = tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![(grad (g_fam t) u), Y] ![] +
-             (g_fam t).g (TimeDerivative.partial_t (fun s => grad (g_fam s) u) t) Y := by abel
-  have h8 : (g_fam t).g (TimeDerivative.partial_t (fun s => grad (g_fam s) u) t) Y =
-            - tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![(grad (g_fam t) u), Y] ![] := by
-    calc (g_fam t).g (TimeDerivative.partial_t (fun s => grad (g_fam s) u) t) Y
-        = tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![(grad (g_fam t) u), Y] ![] +
-          (g_fam t).g (TimeDerivative.partial_t (fun s => grad (g_fam s) u) t) Y -
-          tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![(grad (g_fam t) u), Y] ![] := by abel
-      _ = 0 - tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![(grad (g_fam t) u), Y] ![] := by rw [← h7]
-      _ = - tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![(grad (g_fam t) u), Y] ![] := by abel
-  have h9 : (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) = (- (2:R)) • ricciForm (conn_fam t) :=
-    RicciFlow.evolution t
-  have h10 : tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![(grad (g_fam t) u), Y] ![] =
-             (- (2:R)) * tensor_eval (ricciForm (conn_fam t)) ![(grad (g_fam t) u), Y] ![] := by
-    have hsmul : tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![(grad (g_fam t) u), Y] ![] = tensor_eval ((- (2:R)) • ricciForm (conn_fam t)) ![(grad (g_fam t) u), Y] ![] := by rw [h9]
-    rw [hsmul]
-    exact tensor_eval_smul (- (2:R)) (ricciForm (conn_fam t)) ![(grad (g_fam t) u), Y] ![]
-  have h11 : (g_fam t).g (TimeDerivative.partial_t (fun s => grad (g_fam s) u) t) Y =
-             (2:R) * tensor_eval (ricciForm (conn_fam t)) ![(grad (g_fam t) u), Y] ![] := by
-    rw [h8, h10]
-    ring
-  have h12 : (g_fam t).g ((2:R) • (g_fam t).raise (ricciForm (conn_fam t)) (grad (g_fam t) u)) Y =
-             (2:R) * ((g_fam t).g ((g_fam t).raise (ricciForm (conn_fam t)) (grad (g_fam t) u)) Y) := by
-    exact (g_fam t).toNonDegenerateMetric.toAbstractMetricTensor.bilinear_smul_left (2:R) _ Y
-  have h13 : (g_fam t).g ((g_fam t).raise (ricciForm (conn_fam t)) (grad (g_fam t) u)) Y =
-             tensor_eval (ricciForm (conn_fam t)) ![(grad (g_fam t) u), Y] ![] := (g_fam t).g_raise _ _ _
-  rw [h13] at h12
-  rw [h11, ← h12]
+open SyntheticTensor
 
-/--
-Mathematical Identity: $\partial_t |\nabla u|^2 = 2 \text{Rc}(\nabla u, \nabla u) + 2 g(\nabla u, \nabla (\partial_t u))$
-Evolution of the squared gradient of a time-dependent scalar function under Ricci flow.
--/
-lemma gradient_squared_evolution {Time : Type}
-  [TimeDerivative Time R] [TimeDerivative Time V]
-  [TimeDerivativeRules Time R V] [ActionTimeDerivativeRules Time R V] [TensorTimeCalculus Time R V]
-  (g_fam : Time → MetricDuality R V)
-  (conn_fam : Time → AbstractAffineConnection R V)
-  [MetricTimeDerivativeRules Time R V g_fam]
-  [∀ s, AffineTensorCalculus (conn_fam s)] [∀ s, RiemannCurvatureTensorOp (conn_fam s)]
-  [RicciFlow Time (fun t => (g_fam t).toNonDegenerateMetric.toAbstractMetricTensor) conn_fam]
-  (u : Time → R) (t : Time) :
-  TimeDerivative.partial_t (fun s => (g_fam s).g (grad (g_fam s) (u s)) (grad (g_fam s) (u s))) t =
-  (2:R) * tensor_eval (ricciForm (conn_fam t)) ![(grad (g_fam t) (u t)), (grad (g_fam t) (u t))] ![]
-  + (2:R) * (g_fam t).g (grad (g_fam t) (u t)) (grad (g_fam t) (TimeDerivative.partial_t u t)) := by
-  let Y := fun s => grad (g_fam s) (u s)
-  let Z := Y t
+-- ============================================================
+-- Section 1: Gradient evolution
+-- ============================================================
 
-  have h1 : TimeDerivative.partial_t (fun s => (g_fam s).g (Y s) (Y s)) t =
-    tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![(Y t), (Y t)] ![] +
-    (g_fam t).g (TimeDerivative.partial_t Y t) (Y t) +
-    (g_fam t).g (Y t) (TimeDerivative.partial_t Y t) :=
-    MetricTimeDerivativeRules.t_metric Y Y t
+section GradEvolution
 
-  have h2 : (g_fam t).g (Y t) (TimeDerivative.partial_t Y t) =
-            (g_fam t).g (TimeDerivative.partial_t Y t) (Y t) :=
-    (g_fam t).symm _ _
+variable {k R V Time : Type*}
+variable [Field k] [CommRing R] [Algebra k R]
+variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 
-  have h1b : TimeDerivative.partial_t (fun s => (g_fam s).g (Y s) (Y s)) t =
-    tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![(Y t), (Y t)] ![] +
-    (2:R) * (g_fam t).g (TimeDerivative.partial_t Y t) (Y t) := by
-    rw [h1, h2]
-    ring
+/-- Gradient evolution under Ricci flow for a time-independent scalar u.
 
-  have pt_Z : TimeDerivative.partial_t (fun s => Z) t = 0 := MetricTimeDerivativeRules.t_const_V g_fam Z t
+    g(s)(grad_s u, Y) = Y(u) is constant in s, so its total derivative is 0.
+    By the metric product rule, 0 = (∂_t g)(grad_t u, Y) + ∂_t[g(t)(grad_s u, Y)].
+    Under Ricci flow (∂_t g = -2Rc):
+      ∂_t[g(t)(grad_s u, Y)] = 2 Rc(grad_t u, Y). -/
+theorem gradient_evolution
+    (emb : DerivationEmbedding k R V)
+    (td : TimeDerivativeData R Time)
+    (atr : AbstractTrace R V)
+    (g_fam : Time → MetricDuality R V) 
+    (conn_fam : Time → V → V → V)
+    (ha_fam : ∀ s, ∀ X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
+    (hal_fam : ∀ s, ∀ X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z)
+    (hsl_fam : ∀ s, ∀ (f : R) X Z, conn_fam s (f • X) Z = f • conn_fam s X Z)
+    (hl_fam : ∀ s, ∀ X (f : R) Y, conn_fam s X (f • Y) = (emb.embed X) f • Y + f • conn_fam s X Y)
+    (h_rf : IsRicciFlow emb td atr g_fam conn_fam ha_fam hal_fam hsl_fam hl_fam)
+    (h_mvp : MetricBilinProductRule td g_fam)
+    (u : R) (Y : V) (t : Time) :
+    (td.dt (fun s => (g_fam t).g (grad emb (g_fam s) u) Y)) t =
+    2 * ricciForm_tensor emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr
+      ![grad emb (g_fam t) u, Y] ![] := by
+  -- g(s)(grad_s u, Y) = Y(u) is constant in s
+  have h_const : (fun s => (g_fam s).g (grad emb (g_fam s) u) Y) =
+      (fun _ => action emb Y u) :=
+    funext (fun s => g_grad emb (g_fam s) u Y)
+  -- ∂_t of constant = 0
+  have h_zero : (td.dt (fun s => (g_fam s).g (grad emb (g_fam s) u) Y)) t = 0 := by
+    rw [h_const]; exact congr_fun (t_const_R td (action emb Y u)) t
+  -- Product rule: 0 = metric_var(grad_t u, Y) + ∂_t[g(t)(grad_s u, Y)]
+  have h_prod := h_mvp (fun s => grad emb (g_fam s) u) Y t
+  rw [h_zero] at h_prod
+  -- ∂_t[g(t)(grad_s u, Y)] = -metric_var(grad_t u, Y)
+  have h_neg : (td.dt (fun s => (g_fam t).g (grad emb (g_fam s) u) Y)) t =
+    -metric_var_form td g_fam t ![grad emb (g_fam t) u, Y] ![] :=
+    (neg_eq_of_add_eq_zero_right h_prod.symm).symm
+  -- Substitute Ricci flow: metric_var = -2 • Rc
+  rw [h_neg, h_rf.evolution t]; simp only [MultilinearMap.smul_apply, smul_eq_mul]; ring
 
-  have h3 : TimeDerivative.partial_t (fun s => (g_fam s).g (Y s) Z) t =
-    tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![(Y t), Z] ![] +
-    (g_fam t).g (TimeDerivative.partial_t Y t) Z +
-    (g_fam t).g (Y t) (TimeDerivative.partial_t (fun s => Z) t) :=
-    MetricTimeDerivativeRules.t_metric Y (fun s => Z) t
+end GradEvolution
 
-  have h4 : (g_fam t).g (Y t) (TimeDerivative.partial_t (fun s => Z) t) = 0 := by
-    rw [pt_Z]
-    exact metric_zero_right ((g_fam t).toNonDegenerateMetric.toAbstractMetricTensor) (Y t)
+-- ============================================================
+-- Section 2: Gradient squared evolution
+-- ============================================================
 
-  have h5 : TimeDerivative.partial_t (fun s => (g_fam s).g (Y s) Z) t =
-    tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![(Y t), Z] ![] +
-    (g_fam t).g (TimeDerivative.partial_t Y t) Z := by
-    rw [h3, h4]
-    abel
+section GradSquaredEvolution
 
-  have h6 : (fun s => (g_fam s).g (Y s) Z) = (fun s => action Z (u s)) := by
-    funext s
-    exact g_grad (g_fam s) (u s) Z
+variable {k R V Time : Type*}
+variable [Field k] [CommRing R] [Algebra k R]
+variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 
-  have h7 : TimeDerivative.partial_t (fun s => (g_fam s).g (Y s) Z) t =
-            TimeDerivative.partial_t (fun s => action Z (u s)) t := by
-    rw [h6]
+/-- Full metric product rule: both arguments varying.
 
-  have h8 : TimeDerivative.partial_t (fun s => action Z (u s)) t =
-            action Z (TimeDerivative.partial_t u t) :=
-    ActionTimeDerivativeRules.t_action Z u t
+    ∂_t[g(s)(A(s), B(s))] = metric_var(A(t), B(t))
+      + ∂_t[g(t)(A(s), B(t))] + ∂_t[g(t)(A(t), B(s))] -/
+def MetricFullProductRule
+    (td : TimeDerivativeData R Time)
+    (g_fam : Time → MetricDuality R V) : Prop :=
+  ∀ (A B : Time → V) (t : Time),
+    (td.dt (fun s => (g_fam s).g (A s) (B s))) t =
+    metric_var_form td g_fam t ![A t, B t] ![] +
+    (td.dt (fun s => (g_fam t).g (A s) (B t))) t +
+    (td.dt (fun s => (g_fam t).g (A t) (B s))) t
 
-  have h9 : tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![(Y t), Z] ![] +
-            (g_fam t).g (TimeDerivative.partial_t Y t) Z =
-            action Z (TimeDerivative.partial_t u t) := by
-    rw [← h5, h7, h8]
+/-- Gradient squared evolution under Ricci flow:
 
-  have h10 : (g_fam t).g (TimeDerivative.partial_t Y t) (Y t) =
-             action (Y t) (TimeDerivative.partial_t u t) -
-             tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![(Y t), (Y t)] ![] := by
-    change tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![(Y t), (Y t)] ![] + (g_fam t).g (TimeDerivative.partial_t Y t) (Y t) = action (Y t) (TimeDerivative.partial_t u t) at h9
-    calc (g_fam t).g (TimeDerivative.partial_t Y t) (Y t)
-       = tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![(Y t), (Y t)] ![] +
-         (g_fam t).g (TimeDerivative.partial_t Y t) (Y t)
-         - tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![(Y t), (Y t)] ![] := by ring
-     _ = action (Y t) (TimeDerivative.partial_t u t) -
-         tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![(Y t), (Y t)] ![] := by rw [h9]
+    ∂_t|∇u|² = 2 Rc(∇u, ∇u) + 2 g(∇u, ∇(∂_t u)). -/
+theorem gradient_squared_evolution
+    (emb : DerivationEmbedding k R V)
+    (td : TimeDerivativeData R Time)
+    (atr : AbstractTrace R V)
+    (g_fam : Time → MetricDuality R V) 
+    (conn_fam : Time → V → V → V)
+    (ha_fam : ∀ s, ∀ X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
+    (hal_fam : ∀ s, ∀ X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z)
+    (hsl_fam : ∀ s, ∀ (f : R) X Z, conn_fam s (f • X) Z = f • conn_fam s X Z)
+    (hl_fam : ∀ s, ∀ X (f : R) Y, conn_fam s X (f • Y) = (emb.embed X) f • Y + f • conn_fam s X Y)
+    (h_rf : IsRicciFlow emb td atr g_fam conn_fam ha_fam hal_fam hsl_fam hl_fam)
+    (h_mfp : MetricFullProductRule td g_fam)
+    (h_st : SpatialTemporalComm emb td)
+    (u : Time → R) (t : Time) :
+    (td.dt (fun s => (g_fam s).g
+      (grad emb (g_fam s) (u s))
+      (grad emb (g_fam s) (u s)))) t =
+    2 * ricciForm_tensor emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr
+      ![grad emb (g_fam t) (u t), grad emb (g_fam t) (u t)] ![] +
+    2 * (g_fam t).g (grad emb (g_fam t) (u t))
+                    (grad emb (g_fam t) ((td.dt u) t)) := by
+  set G := fun s => grad emb (g_fam s) (u s)
+  set Z := G t
+  -- Full product rule: ∂_t[g(G,G)] = metric_var(Z,Z) + 2*dt[g(t)(G(s),Z)]
+  have h_prod := h_mfp G G t
+  -- The two variation terms are equal by g-symmetry
+  have h_sym : (td.dt (fun s => (g_fam t).g Z (G s))) t =
+      (td.dt (fun s => (g_fam t).g (G s) Z)) t := by
+    show (td.dt (fun s => (g_fam t).g Z (G s))) t = _
+    rw [show (fun s => (g_fam t).g Z (G s)) = (fun s => (g_fam t).g (G s) Z) from
+      funext (fun s => (g_fam t).g_symm Z (G s))]
+  have h_prod2 : (td.dt (fun s => (g_fam s).g (G s) (G s))) t =
+      metric_var_form td g_fam t ![Z, Z] ![] +
+      2 * (td.dt (fun s => (g_fam t).g (G s) Z)) t := by
+    rw [h_prod, h_sym]; ring
+  -- dt[g(s)(G(s), Z)] = metric_var(Z,Z) + dt[g(t)(G(s),Z)] (from full product rule with const Z)
+  have h_bprod : (td.dt (fun s => (g_fam s).g (G s) Z)) t =
+      metric_var_form td g_fam t ![Z, Z] ![] +
+      (td.dt (fun s => (g_fam t).g (G s) Z)) t := by
+    have h := h_mfp G (fun _ => Z) t
+    have h0 : (td.dt (fun s => (g_fam t).g Z ((fun _ => Z) s))) t = 0 :=
+      congr_fun (t_const_R td ((g_fam t).g Z Z)) t
+    rw [h0] at h; rw [h]; ring
+  -- g(s)(G(s), Z) = action(Z, u(s)) by gradient identity
+  have h_gyz : (fun s => (g_fam s).g (G s) Z) = (fun s => action emb Z (u s)) :=
+    funext (fun s => g_grad emb (g_fam s) (u s) Z)
+  -- dt[g(s)(G(s),Z)] = action(Z, dt(u)) by SpatialTemporalComm
+  have h_dt_action : (td.dt (fun s => (g_fam s).g (G s) Z)) t =
+      action emb Z ((td.dt u) t) := by
+    rw [h_gyz]; exact h_st Z u t
+  -- dt[g(t)(G(s), Z)] = action(Z, dt(u)) - metric_var(Z,Z)
+  have h_var : (td.dt (fun s => (g_fam t).g (G s) Z)) t =
+      action emb Z ((td.dt u) t) - metric_var_form td g_fam t ![Z, Z] ![] := by
+    have h := h_bprod; rw [h_dt_action] at h
+    rw [add_comm] at h; exact (sub_eq_of_eq_add h).symm
+  -- Substitute into h_prod2
+  have h_combined : (td.dt (fun s => (g_fam s).g (G s) (G s))) t =
+      2 * action emb Z ((td.dt u) t) - metric_var_form td g_fam t ![Z, Z] ![] := by
+    rw [h_prod2, h_var]; ring
+  -- action(Z, dt(u)) = g(t)(grad_t(dt(u)), Z) = g(t)(Z, grad_t(dt(u)))
+  have h_action_grad : action emb Z ((td.dt u) t) =
+      (g_fam t).g Z (grad emb (g_fam t) ((td.dt u) t)) := by
+    rw [(g_fam t).g_symm]; exact (g_grad emb (g_fam t) ((td.dt u) t) Z).symm
+  -- Under Ricci flow: metric_var = -2 • Rc
+  rw [h_combined, h_action_grad, h_rf.evolution t]
+  simp only [MultilinearMap.smul_apply, smul_eq_mul]; ring
 
-  have h13 : action (Y t) (TimeDerivative.partial_t u t) =
-             (g_fam t).g (Y t) (grad (g_fam t) (TimeDerivative.partial_t u t)) := by
-    have hs := g_grad (g_fam t) (TimeDerivative.partial_t u t) (Y t)
-    have h_symm := (g_fam t).symm (grad (g_fam t) (TimeDerivative.partial_t u t)) (Y t)
-    rw [← hs, h_symm]
-
-  have h14 : (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) =
-             (- (2:R)) • ricciForm (conn_fam t) :=
-    RicciFlow.evolution t
-
-  have h15 : tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![(Y t), (Y t)] ![] =
-             (- (2:R)) * tensor_eval (ricciForm (conn_fam t)) ![(Y t), (Y t)] ![] := by
-    have hsmul : tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![(Y t), (Y t)] ![] = tensor_eval ((- (2:R)) • ricciForm (conn_fam t)) ![(Y t), (Y t)] ![] := by rw [h14]
-    rw [hsmul]
-    exact tensor_eval_smul (- (2:R)) (ricciForm (conn_fam t)) ![(Y t), (Y t)] ![]
-
-  calc TimeDerivative.partial_t (fun s => (g_fam s).g (Y s) (Y s)) t
-     = tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![(Y t), (Y t)] ![] +
-       (2:R) * (g_fam t).g (TimeDerivative.partial_t Y t) (Y t) := h1b
-   _ = tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![(Y t), (Y t)] ![] +
-       (2:R) * (action (Y t) (TimeDerivative.partial_t u t) - tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![(Y t), (Y t)] ![]) := by rw [h10]
-   _ = (2:R) * action (Y t) (TimeDerivative.partial_t u t) - tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![(Y t), (Y t)] ![] := by ring
-   _ = (2:R) * (g_fam t).g (Y t) (grad (g_fam t) (TimeDerivative.partial_t u t)) - (- (2:R)) * tensor_eval (ricciForm (conn_fam t)) ![(Y t), (Y t)] ![] := by rw [h13, h15]
-   _ = (2:R) * tensor_eval (ricciForm (conn_fam t)) ![(Y t), (Y t)] ![] + (2:R) * (g_fam t).g (Y t) (grad (g_fam t) (TimeDerivative.partial_t u t)) := by ring
+end GradSquaredEvolution

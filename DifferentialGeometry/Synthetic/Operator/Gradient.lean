@@ -1,7 +1,4 @@
-import DifferentialGeometry.Synthetic.Algebra.VectorField
 import DifferentialGeometry.Synthetic.Algebra.Metric
-import DifferentialGeometry.Synthetic.Algebra.Metric
-import DifferentialGeometry.Synthetic.Geometry.Connection
 import Mathlib.Tactic.Abel
 
 set_option autoImplicit false
@@ -9,55 +6,55 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 set_option linter.style.emptyLine false
 
-open AbstractDerivationAction DifferentialGeometry TensorAlgebra
+/-!
+# Gradient Operator
+-/
 
-variable {R V : Type}
-variable [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
-variable [AbstractDerivationAction R V]
+section GradientDefs
+
+variable {k R V : Type*}
+variable [Field k] [CommRing R] [Algebra k R]
+variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+
+/-- The covector df: X ↦ X(f), as an R-linear map. -/
+def df_covector (emb : DerivationEmbedding k R V) (u : R) : V →ₗ[R] R where
+  toFun X := action emb X u
+  map_add' X Y := action_add_left emb X Y u
+  map_smul' c X := by simp [action_smul_left emb c X u, smul_eq_mul]
 
 /-- Gradient of a scalar function `u`.
-Input: (AbstractMetricTensor R V, R)
-Output: V -/
-def grad (metric : MetricDuality R V) (u : R) : V :=
-  metric.sharp (fun X => action X u)
+    grad(u) = sharp(df), the vector field metrically dual to the covector df. -/
+noncomputable def grad (emb : DerivationEmbedding k R V) (met : MetricDuality R V)
+    (u : R) : V :=
+  met.sharp (df_covector emb u)
 
-lemma g_grad (metric : MetricDuality R V) (u : R) (X : V) :
-  metric.g (grad metric u) X = action X u := by
-  dsimp [grad]
-  exact metric.g_sharp (fun Y => action Y u) X
+lemma g_grad (emb : DerivationEmbedding k R V) (met : MetricDuality R V)
+    (u : R) (X : V) :
+    met.g (grad emb met u) X = action emb X u :=
+  met.g_sharp (df_covector emb u) X
 
-lemma grad_add [AbstractLieBracket V] [DerivationRules R V] (metric : MetricDuality R V) (f g : R) : grad metric (f + g) = grad metric f + grad metric g := by
-  apply metric.toNonDegenerateMetric.eq_of_forall_g_eq
-  intro X
-  have h1 : metric.g (grad metric (f + g)) X = AbstractDerivationAction.action X (f + g) := g_grad metric (f + g) X
-  have h2 : AbstractDerivationAction.action X (f + g) = AbstractDerivationAction.action X f + AbstractDerivationAction.action X g := DerivationRules.action_add_right X f g
-  have h3 : metric.g (grad metric f + grad metric g) X = metric.g (grad metric f) X + metric.g (grad metric g) X := metric.toNonDegenerateMetric.toAbstractMetricTensor.bilinear_add_left _ _ _
-  have h4 : metric.g (grad metric f) X = AbstractDerivationAction.action X f := g_grad metric f X
-  have h5 : metric.g (grad metric g) X = AbstractDerivationAction.action X g := g_grad metric g X
-  rw [h4, h5] at h3
-  rw [h1, h2, ← h3]
+lemma grad_add (emb : DerivationEmbedding k R V) (met : MetricDuality R V)
+    (f g : R) :
+    grad emb met (f + g) = grad emb met f + grad emb met g := by
+  apply met.eq_of_forall_g_eq; intro Z
+  -- goal is g_tensor ![...] ![] = g_tensor ![...] ![]; these are defeq to met.g ... Z
+  change met.g (grad emb met (f + g)) Z =
+       met.g (grad emb met f + grad emb met g) Z
+  rw [met.g_add_left, g_grad, g_grad, g_grad, action_add_right]
 
-lemma grad_sub [AbstractLieBracket V] [DerivationRules R V] (metric : MetricDuality R V) (f g : R) : grad metric (f - g) = grad metric f - grad metric g := by
-  apply metric.toNonDegenerateMetric.eq_of_forall_g_eq
-  intro X
-  have h1 : metric.g (grad metric (f - g)) X = action X (f - g) := g_grad metric (f - g) X
-  have action_sub : action X (f - g) = action X f - action X g := by
-    have hz : f - g = f + -g := sub_eq_add_neg f g
-    rw [hz]
-    have h_add : action X (f + -g) = action X f + action X (-g) := DerivationRules.action_add_right X f (-g)
-    rw [h_add]
-    have h_neg : action X (-g) = - action X g := action_neg X g
-    rw [h_neg]
-    exact (sub_eq_add_neg (action X f) (action X g)).symm
-  have h2 : metric.g (grad metric f - grad metric g) X = metric.g (grad metric f) X - metric.g (grad metric g) X := by
-    have hsub : grad metric f - grad metric g = grad metric f + - grad metric g := sub_eq_add_neg _ _
-    rw [hsub, metric.toNonDegenerateMetric.toAbstractMetricTensor.bilinear_add_left]
-    have hneg : metric.g (- grad metric g) X = - metric.g (grad metric g) X := by
-      have hmm : - grad metric g = (-1:R) • grad metric g := by rw [neg_one_smul]
-      rw [hmm, metric.toNonDegenerateMetric.toAbstractMetricTensor.bilinear_smul_left]
-      ring
-    rw [hneg, ← sub_eq_add_neg]
-  have h4 : metric.g (grad metric f) X = action X f := g_grad metric f X
-  have h5 : metric.g (grad metric g) X = action X g := g_grad metric g X
-  rw [h4, h5] at h2
-  rw [h1, action_sub, ← h2]
+lemma grad_sub (emb : DerivationEmbedding k R V) (met : MetricDuality R V)
+    (f g : R) :
+    grad emb met (f - g) = grad emb met f - grad emb met g := by
+  apply met.eq_of_forall_g_eq; intro Z
+  change met.g (grad emb met (f - g)) Z =
+       met.g (grad emb met f - grad emb met g) Z
+  have g_sub_left : ∀ A B C : V, met.g (A - B) C = met.g A C - met.g B C := by
+    intro A B C
+    calc met.g (A - B) C = met.g (A + -B) C := by rw [sub_eq_add_neg]
+      _ = met.g A C + met.g (-B) C := met.g_add_left _ _ _
+      _ = met.g A C + -(met.g B C) := by
+          congr 1; rw [show -B = (-1 : R) • B from by rw [neg_one_smul], met.g_smul_left]; ring
+      _ = met.g A C - met.g B C := by rw [sub_eq_add_neg]
+  rw [g_sub_left, g_grad, g_grad, g_grad, action_sub_right]
+
+end GradientDefs
