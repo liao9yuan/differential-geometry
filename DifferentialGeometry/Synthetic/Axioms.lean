@@ -93,8 +93,3 @@ structure RicciFlowBundle (k R V Time : Type*)
   ricci_flow : IsRicciFlow emb td atr g_fam conn_fam ha_fam hal_fam hsl_fam hl_fam
   /-- Product rule for ∂_t and ∇ with varying connections. -/
   nabla_time_product_rule : NablaTimeProductRule emb td conn_fam ha_fam hl_fam
-  /-- Multilinear time Leibniz for metric evaluation. -/
-  metric_product_rule : ∀ (F : Time → V) (W : V) (t : Time),
-    (td.dt (fun s => (g_fam s).g (F s) W)) t =
-    metric_var_form td g_fam t ![F t, W] ![] +
-    (td.dt (fun s => (g_fam t).flat W (F s))) t

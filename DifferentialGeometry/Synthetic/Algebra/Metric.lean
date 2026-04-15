@@ -48,19 +48,14 @@ end FlatHelper
 /-- Metric duality: a (0,2) symmetric tensor with inverse.
 
     DATA: g_tensor, g_inv. PROPERTIES: symmetry, non-degeneracy,
-    metric_inverse_contract, inverse_eval. -/
+    inverse_eval, sharp_spec. -/
 structure MetricDuality (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] where
   g_tensor : TensorData R V 0 2
   symm_tensor : swap_covariant 0 1 g_tensor = g_tensor
   g_inv : TensorData R V 2 0
   eq_of_forall_g_eq : ∀ X Y : V,
     (∀ Z : V, g_tensor ![X, Z] ![] = g_tensor ![Y, Z] ![]) → X = Y
-  /-- g^{ac}g_{cb} = δ^a_b (tensor contraction form). -/
-  metric_inverse_contract : ∀ (atr : AbstractTrace R V),
-    contract_general atr ⟨1, by omega⟩ (0 : Fin 2)
-      (tensor_prod (r₁ := 2) (s₁ := 0) (r₂ := 0) (s₂ := 2) g_inv g_tensor) =
-    delta_tensor
-  /-- g⁻¹(α, flat(Y)) = α(Y) (usable evaluation form). -/
+  /-- g⁻¹(α, flat(Y)) = α(Y). -/
   inverse_eval : ∀ (Y : V) (α : V →ₗ[R] R),
     g_inv ![] ![α, flat_covector g_tensor Y] = α Y
   /-- Every covector is in the image of flat (surjectivity). -/
