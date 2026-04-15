@@ -1,127 +1,153 @@
-import DifferentialGeometry.Synthetic.Algebra.VectorField
-import DifferentialGeometry.Synthetic.Algebra.Metric
 import DifferentialGeometry.Synthetic.Operator.Hessian
 import Mathlib.Algebra.Module.Basic
 import Mathlib.Algebra.Ring.Basic
 import Mathlib.Tactic.Abel
-import DifferentialGeometry.Synthetic.Geometry.Connection
-import DifferentialGeometry.Synthetic.Operator.CovariantDerivative
 
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 set_option linter.style.emptyLine false
-set_option linter.style.docString false
 
-open AbstractDerivationAction DifferentialGeometry TensorAlgebra
-
-variable {R V : Type}
-variable [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
-variable [AbstractDerivationAction R V]
-
-/-- Laplacian of a function defined as the metric trace of its Hessian: `Δu = tr_g(∇²u)`.
-Input: (AbstractMetricTensor R V, AbstractAffineConnection R V, R)
-Output: R -/
-def laplacian (metric : AbstractMetricTensor R V) [MetricTraceOperator R V metric]
-    (conn : AbstractAffineConnection R V) (u : R) : R :=
-  MetricTraceOperator.metric_trace metric (Hess conn u)
-
-/-- $\Delta(f+g) = \Delta f + \Delta g$ -/
-lemma laplacian_add (metric : AbstractMetricTensor R V) [MetricTraceOperator R V metric]
-  [MetricTraceRules R V metric] (conn : AbstractAffineConnection R V) [AbstractLieBracket V] [DerivationRules R V] (f g : R) :
-  laplacian metric conn (f + g) = laplacian metric conn f + laplacian metric conn g := by
-  dsimp [laplacian]
-  have hessian_add : Hess conn (f + g) = (fun X Y => Hess conn f X Y + Hess conn g X Y) := by
-    funext X Y
-    dsimp [Hess]
-    have h1 : action Y (f + g) = action Y f + action Y g := DerivationRules.action_add_right Y f g
-    rw [h1]
-    have h2 : action X (action Y f + action Y g) = action X (action Y f) + action X (action Y g) := DerivationRules.action_add_right X (action Y f) (action Y g)
-    rw [h2]
-    have h3 : action (conn.nabla X Y) (f + g) = action (conn.nabla X Y) f + action (conn.nabla X Y) g := DerivationRules.action_add_right (conn.nabla X Y) f g
-    rw [h3]
-    ring
-  rw [hessian_add]
-  exact MetricTraceRules.trace_add (metric := metric) (fun X Y => Hess conn f X Y) (fun X Y => Hess conn g X Y)
-
-/-- $\Delta(f-g) = \Delta f - \Delta g$ -/
-lemma laplacian_sub (metric : AbstractMetricTensor R V) [MetricTraceOperator R V metric]
-  [MetricTraceRules R V metric] (conn : AbstractAffineConnection R V) [AbstractLieBracket V] [DerivationRules R V] (f g : R) :
-  laplacian metric conn (f - g) = laplacian metric conn f - laplacian metric conn g := by
-  dsimp [laplacian]
-  have action_sub : ∀ (X : V) (f g : R), action X (f - g) = action X f - action X g := by
-    intro X f g
-    have hz : f - g = f + -g := sub_eq_add_neg f g
-    rw [hz]
-    have h1 : action X (f + -g) = action X f + action X (-g) := DerivationRules.action_add_right X f (-g)
-    rw [h1]
-    have hneg : action X (-g) = - action X g := action_neg X g
-    rw [hneg]
-    exact (sub_eq_add_neg (action X f) (action X g)).symm
-  have hessian_sub : Hess conn (f - g) = (fun X Y => Hess conn f X Y - Hess conn g X Y) := by
-    funext X Y
-    dsimp [Hess]
-    have h1 : action Y (f - g) = action Y f - action Y g := action_sub Y f g
-    rw [h1]
-    have h2 : action X (action Y f - action Y g) = action X (action Y f) - action X (action Y g) := action_sub X (action Y f) (action Y g)
-    rw [h2]
-    have h3 : action (conn.nabla X Y) (f - g) = action (conn.nabla X Y) f - action (conn.nabla X Y) g := action_sub (conn.nabla X Y) f g
-    rw [h3]
-    ring
-  rw [hessian_sub]
-  have h_sub : (fun X Y => Hess conn f X Y - Hess conn g X Y) = ((fun X Y => Hess conn f X Y) + (fun X Y => (-1:R) * Hess conn g X Y)) := by
-    funext X Y
-    calc Hess conn f X Y - Hess conn g X Y = Hess conn f X Y - 1 * Hess conn g X Y := by ring
-      _ = Hess conn f X Y + (-1:R) * Hess conn g X Y := by ring
-  rw [h_sub]
-  have t1 : MetricTraceOperator.metric_trace metric ((fun X Y => Hess conn f X Y) + (fun X Y => (-1:R) * Hess conn g X Y)) = MetricTraceOperator.metric_trace metric (fun X Y => Hess conn f X Y) + MetricTraceOperator.metric_trace metric (fun X Y => (-1:R) * Hess conn g X Y) := MetricTraceRules.trace_add (metric := metric) (fun X Y => Hess conn f X Y) (fun X Y => (-1:R) * Hess conn g X Y)
-  rw [t1]
-  have t2 : MetricTraceOperator.metric_trace metric (fun X Y => (-1:R) * Hess conn g X Y) = (-1:R) * MetricTraceOperator.metric_trace metric (fun X Y => Hess conn g X Y) := MetricTraceRules.trace_smul (metric := metric) (-1:R) (fun X Y => Hess conn g X Y)
-  rw [t2]
-  ring
-
-section GenericLaplacian
-
-/--
-Operator mapping a generic V → V → Tensor form into its metric trace.
-Used for constructing the generic Laplacian from the second covariant derivative.
+/-!
+# Laplacian Operator
 -/
-class MetricTensorTraceOperator {R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
-    (metric : AbstractMetricTensor R V) {r s : ℕ} where
-  metric_trace_tensor : (V → V → AbstractTensor R V r s) → AbstractTensor R V r s
 
-/--
-Requirements for trace linearity on the generalized trace operator.
--/
-class MetricTensorTraceRules {R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
-    (metric : AbstractMetricTensor R V) {r s : ℕ} [MetricTensorTraceOperator metric (r := r) (s := s)] where
-  trace_add : ∀ (A B : V → V → AbstractTensor R V r s),
-    MetricTensorTraceOperator.metric_trace_tensor metric (fun X Y => TensorAlgebra.add (A X Y) (B X Y)) =
-    TensorAlgebra.add (MetricTensorTraceOperator.metric_trace_tensor metric A) (MetricTensorTraceOperator.metric_trace_tensor metric B)
-  trace_smul : ∀ (c : R) (A : V → V → AbstractTensor R V r s),
-    MetricTensorTraceOperator.metric_trace_tensor metric (fun X Y => TensorAlgebra.smul c (A X Y)) =
-    TensorAlgebra.smul c (MetricTensorTraceOperator.metric_trace_tensor metric A)
+open SyntheticTensor
 
-/--
-The second covariant derivative $\nabla^2_{X,Y} T$ for an arbitrary tensor.
-Defined as $\nabla_X (\nabla_Y T) - \nabla_{\nabla_X Y} T$.
--/
-def SecondCovDerivTensor {R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] [AbstractDerivationAction R V]
-    (conn : AbstractAffineConnection R V) [AffineTensorCalculus conn]
-    {r s : ℕ} (T : AbstractTensor R V r s) (X Y : V) : AbstractTensor R V r s :=
-  let nXY_T := genericCovDeriv conn (conn.nabla X Y) T
-  let nY_T := genericCovDeriv conn Y T
-  let nX_nY_T := genericCovDeriv conn X nY_T
-  TensorAlgebra.add nX_nY_T (TensorAlgebra.smul (-1:R) nXY_T)
+section LaplacianHelpers
 
-/--
-The generic rough tensor Laplacian $\Delta T$.
-Constructed as $\text{tr}_g(\nabla^2 T)$.
--/
-def genericLaplacian {R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] [AbstractDerivationAction R V]
-    (metric : AbstractMetricTensor R V) {r s : ℕ} [MetricTensorTraceOperator metric (r := r) (s := s)]
-    (conn : AbstractAffineConnection R V) [AffineTensorCalculus conn]
-    (T : AbstractTensor R V r s) : AbstractTensor R V r s :=
-  MetricTensorTraceOperator.metric_trace_tensor metric (SecondCovDerivTensor conn T)
+variable {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V]
 
-end GenericLaplacian
+-- Eq.mpr transport helpers (same pattern as Hessian.lean)
+private lemma mpr_add_td' {r₁ r₂ s₁ s₂ : ℕ} (hr : r₁ = r₂) (hs : s₁ = s₂)
+    (A B : TensorData R V r₁ s₁) :
+    (hr ▸ hs ▸ (A + B) : TensorData R V r₂ s₂) =
+    (hr ▸ hs ▸ A) + (hr ▸ hs ▸ B) := by subst hr; subst hs; rfl
+
+private lemma mpr_smul_td' {r₁ r₂ s₁ s₂ : ℕ} (hr : r₁ = r₂) (hs : s₁ = s₂)
+    (c : R) (A : TensorData R V r₁ s₁) :
+    (hr ▸ hs ▸ (c • A) : TensorData R V r₂ s₂) =
+    c • (hr ▸ hs ▸ A) := by subst hr; subst hs; rfl
+
+private lemma raise_index_add
+    (met : MetricDuality R V) (atr : AbstractTrace R V)
+    {r s : ℕ} (idx : Fin (s + 1))
+    (T₁ T₂ : TensorData R V r (s + 1)) :
+    raise_index met atr idx (T₁ + T₂) =
+    raise_index met atr idx T₁ + raise_index met atr idx T₂ := by
+  simp only [raise_index]
+  have h_tp : tensor_prod (r₁ := 2) (s₁ := 0) (r₂ := r) (s₂ := s + 1)
+      met.g_inv (T₁ + T₂) = tensor_prod met.g_inv T₁ + tensor_prod met.g_inv T₂ := by
+    ext vs αs; simp [tensor_prod_eval, MultilinearMap.add_apply, mul_add]
+  rw [h_tp, mpr_add_td', contract_general_add]
+
+private lemma raise_index_smul
+    (met : MetricDuality R V) (atr : AbstractTrace R V)
+    {r s : ℕ} (idx : Fin (s + 1))
+    (c : R) (T : TensorData R V r (s + 1)) :
+    raise_index met atr idx (c • T) =
+    c • raise_index met atr idx T := by
+  simp only [raise_index]
+  have h_tp : tensor_prod (r₁ := 2) (s₁ := 0) (r₂ := r) (s₂ := s + 1)
+      met.g_inv (c • T) = c • tensor_prod met.g_inv T := by
+    ext vs αs; simp [tensor_prod_eval, MultilinearMap.smul_apply, smul_eq_mul, mul_left_comm]
+  rw [h_tp, mpr_smul_td', contract_general_smul]
+
+private lemma metric_trace_add
+    (met : MetricDuality R V) (atr : AbstractTrace R V)
+    {r s : ℕ} (idx₁ : Fin (s + 2)) (idx₂ : Fin (s + 1))
+    (T₁ T₂ : TensorData R V r (s + 2)) :
+    metric_trace met atr idx₁ idx₂ (T₁ + T₂) =
+    metric_trace met atr idx₁ idx₂ T₁ + metric_trace met atr idx₁ idx₂ T₂ := by
+  simp only [metric_trace, raise_index_add, contract_general_add]
+
+private lemma metric_trace_smul
+    (met : MetricDuality R V) (atr : AbstractTrace R V)
+    {r s : ℕ} (idx₁ : Fin (s + 2)) (idx₂ : Fin (s + 1))
+    (c : R) (T : TensorData R V r (s + 2)) :
+    metric_trace met atr idx₁ idx₂ (c • T) =
+    c • metric_trace met atr idx₁ idx₂ T := by
+  simp only [metric_trace, raise_index_smul, contract_general_smul]
+
+end LaplacianHelpers
+
+section Laplacian
+
+variable {k R V : Type*}
+variable [Field k] [CommRing R] [Algebra k R]
+variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+
+/-- Laplacian of a function defined as the metric trace of its Hessian tensor form. -/
+noncomputable def laplacian
+    (emb : DerivationEmbedding k R V) (met : MetricDuality R V) 
+    (atr : AbstractTrace R V) (conn : V → V → V)
+    (ha : ∀ X Y Z : V, conn X (Y + Z) = conn X Y + conn X Z)
+    (hl : ∀ X (f : R) (Y : V), conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (conn_add_left : ∀ X Y Z : V, conn (X + Y) Z = conn X Z + conn Y Z)
+    (conn_smul_left : ∀ (f : R) (X Z : V), conn (f • X) Z = f • conn X Z)
+    (u : R) : R :=
+  (metric_trace met atr (0 : Fin 2) (0 : Fin 1)
+    (hessianForm emb met atr conn ha hl conn_add_left conn_smul_left u)) ![] ![]
+
+/-- Δ(f+g) = Δf + Δg -/
+lemma laplacian_add
+    (emb : DerivationEmbedding k R V) (met : MetricDuality R V) 
+    (atr : AbstractTrace R V) (conn : V → V → V)
+    (ha : ∀ X Y Z : V, conn X (Y + Z) = conn X Y + conn X Z)
+    (hl : ∀ X (f : R) (Y : V), conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (conn_add_left : ∀ X Y Z : V, conn (X + Y) Z = conn X Z + conn Y Z)
+    (conn_smul_left : ∀ (f : R) (X Z : V), conn (f • X) Z = f • conn X Z)
+    (f g : R) :
+    laplacian emb met atr conn ha hl conn_add_left conn_smul_left (f + g) =
+    laplacian emb met atr conn ha hl conn_add_left conn_smul_left f +
+    laplacian emb met atr conn ha hl conn_add_left conn_smul_left g := by
+  simp only [laplacian, hessianForm_add, metric_trace_add, MultilinearMap.add_apply]
+
+/-- Δ(f-g) = Δf - Δg -/
+lemma laplacian_sub
+    (emb : DerivationEmbedding k R V) (met : MetricDuality R V) 
+    (atr : AbstractTrace R V) (conn : V → V → V)
+    (ha : ∀ X Y Z : V, conn X (Y + Z) = conn X Y + conn X Z)
+    (hl : ∀ X (f : R) (Y : V), conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (conn_add_left : ∀ X Y Z : V, conn (X + Y) Z = conn X Z + conn Y Z)
+    (conn_smul_left : ∀ (f : R) (X Z : V), conn (f • X) Z = f • conn X Z)
+    (f g : R) :
+    laplacian emb met atr conn ha hl conn_add_left conn_smul_left (f - g) =
+    laplacian emb met atr conn ha hl conn_add_left conn_smul_left f -
+    laplacian emb met atr conn ha hl conn_add_left conn_smul_left g := by
+  have hsub : f - g = f + (-1) * g := by ring
+  rw [hsub, laplacian_add]
+  have hc : ∀ X : V, action emb X (-1 : R) = 0 := by
+    intro X; rw [show (-1 : R) = -1 from rfl, action_neg_right, action_one]; ring
+  have hz : laplacian emb met atr conn ha hl conn_add_left conn_smul_left ((-1) * g) =
+      (-1) * laplacian emb met atr conn ha hl conn_add_left conn_smul_left g := by
+    simp only [laplacian, hessianForm_smul emb met atr conn ha hl conn_add_left conn_smul_left (-1) g hc,
+               metric_trace_smul, MultilinearMap.smul_apply, smul_eq_mul]
+  rw [hz]; ring
+
+/-- Δ(c*f) = c * Δf for spatial constant c -/
+lemma laplacian_smul
+    (emb : DerivationEmbedding k R V) (met : MetricDuality R V) 
+    (atr : AbstractTrace R V) (conn : V → V → V)
+    (ha : ∀ X Y Z : V, conn X (Y + Z) = conn X Y + conn X Z)
+    (hl : ∀ X (f : R) (Y : V), conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (conn_add_left : ∀ X Y Z : V, conn (X + Y) Z = conn X Z + conn Y Z)
+    (conn_smul_left : ∀ (f : R) (X Z : V), conn (f • X) Z = f • conn X Z)
+    (c f : R) (hc : ∀ X : V, action emb X c = 0) :
+    laplacian emb met atr conn ha hl conn_add_left conn_smul_left (c * f) =
+    c * laplacian emb met atr conn ha hl conn_add_left conn_smul_left f := by
+  simp only [laplacian, hessianForm_smul emb met atr conn ha hl conn_add_left conn_smul_left c f hc,
+             metric_trace_smul, MultilinearMap.smul_apply, smul_eq_mul]
+
+/-- Second covariant derivative of tensors. -/
+noncomputable def SecondCovDerivTensor
+    (emb : DerivationEmbedding k R V) (conn : V → V → V)
+    (ha : ∀ X Y Z : V, conn X (Y + Z) = conn X Y + conn X Z)
+    (hl : ∀ X (f : R) (Y : V), conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    {r s : ℕ} (T : TensorData R V r s) (X Y : V) : TensorData R V r s :=
+  let nXY_T := genericCovDeriv emb conn ha hl (conn X Y) T
+  let nY_T := genericCovDeriv emb conn ha hl Y T
+  let nX_nY_T := genericCovDeriv emb conn ha hl X nY_T
+  nX_nY_T + (-1 : R) • nXY_T
+
+end Laplacian

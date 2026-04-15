@@ -1,9 +1,7 @@
-import DifferentialGeometry.Synthetic.Algebra.VectorField
-import DifferentialGeometry.Synthetic.Algebra.Metric
-import DifferentialGeometry.Synthetic.Geometry.Connection
-import DifferentialGeometry.Synthetic.Operator.Laplacian
-import DifferentialGeometry.Synthetic.Operator.Gradient
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Basic
+import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.Connection
+import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.RiemannEvolution
+import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.Ricci
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.ScalarCurvature
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.Gradient
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.Laplacian
@@ -13,76 +11,113 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 set_option linter.style.emptyLine false
 
-open DifferentialGeometry TensorAlgebra
-
-variable {Time R V : Type}
-variable [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
-variable [AbstractDerivationAction R V] [AbstractLieBracket V] [TraceOperator R V]
-variable [DerivationRules R V] [LieDerivationRules R V] [TraceLinearityRules R V]
-variable [Invertible (2 : R)]
-variable [TimeDerivative Time R] [TimeDerivative Time V]
-variable [TimeDerivativeRules Time R V] [ActionTimeDerivativeRules Time R V]
-
 /-!
-# Ricci Flow Calculus Interface
+# Ricci Flow Calculus
 
-This file extracts the key Ricci flow evolution properties proven in the `Evolution` folder
- into an integrated calculus interface (`RicciFlowCalculus`).
-
-Note that the class here is supported by instance `instRicciFlowCalculus`, not axioms.
+`RicciFlowData` bundles the geometric data and hypotheses.
+Evolution equations for the connection, curvature, and scalar curvature.
 -/
 
-class RicciFlowCalculus
-  (g_fam : Time → MetricDuality R V)
-  (conn_fam : Time → AbstractAffineConnection R V)
-  [MetricTimeDerivativeRules Time R V g_fam]
-  [∀ s, MetricTraceOperator R V ((g_fam s).toNonDegenerateMetric.toAbstractMetricTensor)]
-  [∀ s, TensorInnerProductRules R V (g_fam s)]
-  [RicciFlow Time (fun t => (g_fam t).toNonDegenerateMetric.toAbstractMetricTensor) conn_fam]
-  [∀ s, MetricCompatible (conn_fam s) (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor] where
+open SyntheticTensor
 
-  -- 1. Laplacian Evolution
-  dt_laplacian : ∀ (u : R) t,
-    TimeDerivative.partial_t (fun s => TraceOperator.trace (fun X => (g_fam s).raise (hessianForm (g_fam s) (conn_fam s) u) X)) t =
-    (2:R) * tensorInnerProduct (g_fam t) (ricciForm (conn_fam t)) (hessianForm (g_fam t) (conn_fam t) u) -
-    TraceOperator.trace (fun X => (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X)
+-- ============================================================
+-- Bundled Ricci Flow Data
+-- ============================================================
 
-  -- 2. Gradient Squared Evolution
-  dt_grad_sq : ∀ (u : Time → R) t,
-    TimeDerivative.partial_t (fun s => (g_fam s).g (grad (g_fam s) (u s)) (grad (g_fam s) (u s))) t =
-    (2:R) * tensor_eval (ricciForm (conn_fam t)) ![(grad (g_fam t) (u t)), (grad (g_fam t) (u t))] ![] +
-    (2:R) * (g_fam t).g (grad (g_fam t) (u t)) (grad (g_fam t) (TimeDerivative.partial_t u t))
+section RicciFlowData
 
-  -- 3. Scalar Curvature Evolution
-  dt_R : ∀ (t : Time),
-    (∀ s, ScalarCurvature (conn_fam s) ((g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) =
-          TraceOperator.trace (fun X => (g_fam s).raise (ricciForm (conn_fam s)) X)) →
-    TimeDerivative.partial_t (fun s => ScalarCurvature (conn_fam s) ((g_fam s).toNonDegenerateMetric.toAbstractMetricTensor)) t =
-    (2:R) * tensorNormSq (g_fam t) (ricciForm (conn_fam t)) +
-    TraceOperator.trace (fun X => (g_fam t).raise (partial_ricci_form conn_fam t) X)
+variable (k R V Time : Type*)
+variable [Field k] [CommRing R] [Algebra k R]
+variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 
-instance instRicciFlowCalculus
-  {Time R V : Type}
-  [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
-  [AbstractDerivationAction R V] [AbstractLieBracket V] [TraceOperator R V]
-  [DerivationRules R V] [LieDerivationRules R V] [TraceLinearityRules R V]
-  [Invertible (2 : R)]
-  [TimeDerivative Time R] [TimeDerivative Time V]
-  [TimeDerivativeRules Time R V] [ActionTimeDerivativeRules Time R V]
-  (g_fam : Time → MetricDuality R V)
-  (conn_fam : Time → AbstractAffineConnection R V)
-  [MetricTimeDerivativeRules Time R V g_fam]
-  [∀ s, MetricTraceOperator R V ((g_fam s).toNonDegenerateMetric.toAbstractMetricTensor)]
-  [∀ s, TensorInnerProductRules R V (g_fam s)]
-  [RicciFlow Time (fun t => (g_fam t).toNonDegenerateMetric.toAbstractMetricTensor) conn_fam]
-  [∀ s, MetricCompatible (conn_fam s) (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor] :
-  RicciFlowCalculus g_fam conn_fam where
-  dt_laplacian := by
-    intro u t
-    exact laplacian_evolution g_fam conn_fam u t
-  dt_grad_sq := by
-    intro u t
-    exact gradient_squared_evolution g_fam conn_fam u t
-  dt_R := by
-    intro t h_trace
-    exact scalar_curvature_evolution g_fam conn_fam h_trace t
+/-- Bundled Ricci flow data: geometric structures and connecting
+    properties needed for the evolution equations. -/
+structure RicciFlowData where
+  emb : DerivationEmbedding k R V
+  td : TimeDerivativeData R Time
+  atr : AbstractTrace R V
+  g_fam : Time → MetricDuality R V
+  conn_fam : Time → V → V → V
+  ha_fam : ∀ s, ∀ X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z
+  hal_fam : ∀ s, ∀ X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z
+  hsl_fam : ∀ s, ∀ (f : R) X Z, conn_fam s (f • X) Z = f • conn_fam s X Z
+  hl_fam : ∀ s, ∀ X (f : R) Y, conn_fam s X (f • Y) = (emb.embed X) f • Y + f • conn_fam s X Y
+  h_rf : IsRicciFlow emb td atr g_fam conn_fam ha_fam hal_fam hsl_fam hl_fam
+  h_st : SpatialTemporalComm emb td
+  h_mvp : MetricBilinProductRule td g_fam
+  h_mfp : MetricFullProductRule td g_fam
+  h_sc_prod : ScalarCurvatureProductRule emb td atr g_fam conn_fam ha_fam hal_fam hsl_fam hl_fam
+
+end RicciFlowData
+
+-- ============================================================
+-- Evolution Equations from RicciFlowData
+-- ============================================================
+
+section Equations
+
+variable {k R V Time : Type*}
+variable [Field k] [CommRing R] [Algebra k R]
+variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+
+/-- Scalar curvature evolution under Ricci flow:
+    ∂_t R = 2|Rc|² + metric_trace_g(t)(∂_t Rc).
+
+    Extracted from `scalar_curvature_evolution` using the bundled data. -/
+theorem RicciFlowData.dt_R (D : RicciFlowData k R V Time) (t : Time) :
+    (D.td.dt (fun s => ScalarCurvature D.emb (D.conn_fam s) (D.ha_fam s) (D.hal_fam s) (D.hsl_fam s) (D.hl_fam s) D.atr (D.g_fam s))) t =
+    2 * ricci_norm_sq D.emb (D.conn_fam t) (D.ha_fam t) (D.hal_fam t) (D.hsl_fam t) (D.hl_fam t) D.atr (D.g_fam t) +
+    metric_trace (D.g_fam t) D.atr (0 : Fin 2) (0 : Fin 1)
+      (dt_tensor D.td t (fun s => ricciForm_tensor D.emb (D.conn_fam s) (D.ha_fam s) (D.hal_fam s) (D.hsl_fam s) (D.hl_fam s) D.atr)) ![] ![] :=
+  scalar_curvature_evolution D.emb D.td D.atr D.g_fam D.conn_fam
+    D.ha_fam D.hal_fam D.hsl_fam D.hl_fam D.h_rf D.h_sc_prod t
+
+/-- Gradient evolution under Ricci flow for a time-independent scalar:
+    ∂_t[g(t)(grad_s u, Y)] = 2 Rc(grad_t u, Y). -/
+theorem RicciFlowData.dt_grad (D : RicciFlowData k R V Time)
+    (u : R) (Y : V) (t : Time) :
+    (D.td.dt (fun s => (D.g_fam t).g (grad D.emb (D.g_fam s) u) Y)) t =
+    2 * ricciForm_tensor D.emb (D.conn_fam t) (D.ha_fam t) (D.hal_fam t) (D.hsl_fam t) (D.hl_fam t) D.atr
+      ![grad D.emb (D.g_fam t) u, Y] ![] :=
+  gradient_evolution D.emb D.td D.atr D.g_fam D.conn_fam
+    D.ha_fam D.hal_fam D.hsl_fam D.hl_fam D.h_rf D.h_mvp u Y t
+
+/-- Gradient squared evolution under Ricci flow:
+    ∂_t|∇u|² = 2 Rc(∇u,∇u) + 2 g(∇u, ∇(∂_t u)). -/
+theorem RicciFlowData.dt_grad_sq (D : RicciFlowData k R V Time)
+    (u : Time → R) (t : Time) :
+    (D.td.dt (fun s => (D.g_fam s).g
+      (grad D.emb (D.g_fam s) (u s))
+      (grad D.emb (D.g_fam s) (u s)))) t =
+    2 * ricciForm_tensor D.emb (D.conn_fam t) (D.ha_fam t) (D.hal_fam t) (D.hsl_fam t) (D.hl_fam t) D.atr
+      ![grad D.emb (D.g_fam t) (u t), grad D.emb (D.g_fam t) (u t)] ![] +
+    2 * (D.g_fam t).g (grad D.emb (D.g_fam t) (u t))
+                      (grad D.emb (D.g_fam t) ((D.td.dt u) t)) :=
+  gradient_squared_evolution D.emb D.td D.atr D.g_fam D.conn_fam
+    D.ha_fam D.hal_fam D.hsl_fam D.hl_fam D.h_rf D.h_mfp D.h_st u t
+
+/-- Laplacian evolution under Ricci flow:
+    ∂_t(Δu) = 2⟨Rc, Hess(u)⟩ + metric_trace_t(∂_t Hess). -/
+theorem RicciFlowData.dt_laplacian (D : RicciFlowData k R V Time)
+    (hessian_fam : Time → TensorData R V 0 2)
+    (h_lap_prod : LaplacianProductRule D.emb D.td D.atr D.g_fam hessian_fam)
+    (t : Time) :
+    (D.td.dt (fun s =>
+      metric_trace (D.g_fam s) D.atr (0 : Fin 2) (0 : Fin 1) (hessian_fam s) ![] ![])) t =
+    2 * tensor_inner_02 (D.g_fam t) D.atr
+      (ricciForm_tensor D.emb (D.conn_fam t) (D.ha_fam t) (D.hal_fam t) (D.hsl_fam t) (D.hl_fam t) D.atr)
+      (hessian_fam t) +
+    metric_trace (D.g_fam t) D.atr (0 : Fin 2) (0 : Fin 1)
+      (dt_tensor D.td t hessian_fam) ![] ![] :=
+  laplacian_evolution D.emb D.td D.atr D.g_fam D.conn_fam
+    D.ha_fam D.hal_fam D.hsl_fam D.hl_fam D.h_rf hessian_fam h_lap_prod t
+
+/-- Ricci tensor evolution (pointwise extraction):
+    ∂_t of Rc evaluated at constant X, Y equals the scalar ∂_t of Rc(X,Y). -/
+theorem RicciFlowData.dt_Rc (D : RicciFlowData k R V Time) (t : Time) (X Y : V) :
+    tensor_eval (dt_tensor D.td t (fun s => ricciForm_tensor D.emb (D.conn_fam s) (D.ha_fam s) (D.hal_fam s) (D.hsl_fam s) (D.hl_fam s) D.atr)) ![X, Y] ![] =
+    (D.td.dt (fun s => tensor_eval (ricciForm_tensor D.emb (D.conn_fam s) (D.ha_fam s) (D.hal_fam s) (D.hsl_fam s) (D.hl_fam s) D.atr) ![X, Y] ![])) t :=
+  ricci_evolution_pointwise_extraction D.emb D.td D.atr D.conn_fam
+    D.ha_fam D.hal_fam D.hsl_fam D.hl_fam t X Y
+
+end Equations

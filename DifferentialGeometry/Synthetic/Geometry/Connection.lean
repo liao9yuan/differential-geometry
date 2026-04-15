@@ -1,353 +1,460 @@
-import DifferentialGeometry.VectorField
-import DifferentialGeometry.Synthetic.Algebra.TensorAlgebra
-import DifferentialGeometry.Synthetic.Algebra.VectorField
+import DifferentialGeometry.Synthetic.Algebra.VectorFieldAlgebra
 import DifferentialGeometry.Synthetic.Algebra.Metric
-import Mathlib.Tactic.Ring
 import Mathlib.Tactic.Abel
-import Mathlib.Algebra.Module.Basic
-import Mathlib.Algebra.Ring.Basic
-
-set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.style.emptyLine false
 
 /-!
-# Affine and Levi-Civita Connections
-Definitions for affine connections, torsion, metric compatibility, and the Levi-Civita theorem.
+# Affine Connections and Curvature
+
+Torsion-free and Levi-Civita conditions, Riemann curvature Rm(X,Y)Z,
+Rm multilinearity, and the first Bianchi identity.
 -/
 
-variable (R V : Type*)
-variable [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V]
+set_option autoImplicit false
+set_option linter.unusedSectionVars false
+open SyntheticTensor
 
-variable [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V]
+-- ============================================================
+-- IsTorsionFree, IsLeviCivita
+-- ============================================================
 
-open AbstractDerivationAction
-open AbstractLieBracket
-open DifferentialGeometry
-open TensorAlgebra
+section Conditions
+variable {k R V : Type*}
+variable [Field k] [CommRing R] [Algebra k R]
+variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 
-/-- Affine connection (covariant derivative) on a vector bundle.
-Input: (V, V)
-Output: V
+def IsTorsionFree (emb : DerivationEmbedding k R V) (conn : V → V → V) : Prop :=
+  ∀ X Y : V, conn X Y - conn Y X = bracket emb X Y
 
-# Reference:
-# Hongxi Wu, An Introduction to Riemannian Geometry. (2014). Higher Education Press.
--/
-structure AbstractAffineConnection [AbstractDerivationAction R V] where
-  nabla : V → V → V
-  nabla_add_left : ∀ X Y Z : V, nabla (X + Y) Z = nabla X Z + nabla Y Z
-  nabla_add_right : ∀ X Y Z : V, nabla X (Y + Z) = nabla X Y + nabla X Z
-  nabla_smul_left : ∀ (f : R) (X Z : V), nabla (f • X) Z = f • (nabla X Z)
-  leibniz : ∀ (f : R) (X Y : V), nabla X (f • Y) = (action X f) • Y + f • (nabla X Y)
+def IsLeviCivita (emb : DerivationEmbedding k R V) (conn : V → V → V)
+    (met : MetricDuality R V) : Prop :=
+  IsMetricCompatible emb conn met ∧ IsTorsionFree emb conn
 
--- 2. Local Frames & Christoffel Symbols
-variable {I : Type}
+end Conditions
 
-structure LocalFrame (I R V : Type*) where
-  vec : I → V
-  coord : V → I → R
+-- ============================================================
+-- Connection helpers
+-- ============================================================
 
-section Symbols
+section ConnHelpers
+variable {V : Type*} [AddCommGroup V]
 
-variable {R V} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] {I : Type*}
+theorem conn_zero_left (conn : V → V → V)
+    (hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z) (Z : V) :
+    conn 0 Z = 0 := by
+  have h := hal 0 0 Z; simp only [zero_add] at h
+  -- h : conn 0 Z = conn 0 Z + conn 0 Z
+  have : conn 0 Z + conn 0 Z = conn 0 Z + 0 := by rw [← h, add_zero]
+  exact add_left_cancel this
 
-/-- Christoffel symbols characterizing the connection in a local frame.
-Input: (AbstractAffineConnection R V, LocalFrame I R V, I, I, I)
-Output: R
--/
-def christoffel_symbol [AbstractDerivationAction R V]
-  (conn : AbstractAffineConnection R V) (frame : LocalFrame I R V) (i j k : I) : R :=
-  frame.coord (conn.nabla (frame.vec i) (frame.vec j)) k
+theorem conn_neg_left (conn : V → V → V)
+    (hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z) (X Z : V) :
+    conn (-X) Z = -conn X Z := by
+  have h := hal X (-X) Z; rw [add_neg_cancel, conn_zero_left conn hal] at h
+  -- h : 0 = conn X Z + conn (-X) Z, i.e. conn X Z + conn (-X) Z = 0
+  exact eq_neg_of_add_eq_zero_left (by rw [add_comm]; exact h.symm)
 
-end Symbols
+theorem conn_sub_left (conn : V → V → V)
+    (hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z) (A B Z : V) :
+    conn (A - B) Z = conn A Z - conn B Z := by
+  rw [sub_eq_add_neg, hal, conn_neg_left conn hal, ← sub_eq_add_neg]
 
--- 3. Metric Compatibility & Torsion-Free Conditions
-variable {R V} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
-variable [AbstractDerivationAction R V]
+theorem conn_zero_right (conn : V → V → V)
+    (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z) (X : V) :
+    conn X 0 = 0 := by
+  have h := ha X 0 0; simp only [zero_add] at h
+  have : conn X 0 + conn X 0 = conn X 0 + 0 := by rw [← h, add_zero]
+  exact add_left_cancel this
 
-/-- Metric compatibility condition: `X⟨Y, Z⟩ = ⟨∇_X Y, Z⟩ + ⟨Y, ∇_X Z⟩`.
-Input: (AbstractAffineConnection R V, AbstractMetricTensor R V)
-Output: Prop -/
-class MetricCompatible (conn : AbstractAffineConnection R V) (metric : AbstractMetricTensor R V) where
-  compat : ∀ X Y Z : V,
-    action X (metric.g Y Z) = metric.g (conn.nabla X Y) Z + metric.g Y (conn.nabla X Z)
+theorem conn_neg_right (conn : V → V → V)
+    (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z) (X Y : V) :
+    conn X (-Y) = -conn X Y := by
+  have h := ha X Y (-Y); rw [add_neg_cancel, conn_zero_right conn ha] at h
+  exact eq_neg_of_add_eq_zero_left (by rw [add_comm]; exact h.symm)
 
-/-- Directional derivative of squared norm under metric compatibility: `X⟨Y, Y⟩ = 2⟨∇_X Y, Y⟩`.
-Input: (V, V)
-Output: Prop -/
-theorem norm_sq_deriv (conn : AbstractAffineConnection R V) (metric : AbstractMetricTensor R V) [MetricCompatible conn metric] (X Y : V) :
-  action X (metric.g Y Y) = metric.g (conn.nabla X Y) Y + metric.g (conn.nabla X Y) Y := by
-  -- Step 1: Expand using metric compatibility: X ⟨Y, Y⟩ = ⟨∇_X Y, Y⟩ + ⟨Y, ∇_X Y⟩
-  rw [MetricCompatible.compat (conn := conn) X Y Y]
-  -- Step 2: Use the symmetry of the metric tensor: ⟨Y, ∇_X Y⟩ = ⟨∇_X Y, Y⟩
-  rw [metric.symm Y (conn.nabla X Y)]
+theorem conn_sub_right (conn : V → V → V)
+    (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z) (X A B : V) :
+    conn X (A - B) = conn X A - conn X B := by
+  rw [sub_eq_add_neg, ha, conn_neg_right conn ha, ← sub_eq_add_neg]
 
-/-- Torsion-free condition: `∇_X Y - ∇_Y X = [X, Y]`.
-Input: (AbstractAffineConnection R V)
-Output: Prop -/
-class TorsionFree (conn : AbstractAffineConnection R V) [AbstractLieBracket V] where
-  torsion_zero : ∀ X Y : V, conn.nabla X Y - conn.nabla Y X = bracket X Y
+end ConnHelpers
 
-/-- Koszul formula deriving the unique Levi-Civita connection.
-Input: (AbstractAffineConnection R V, AbstractMetricTensor R V, V, V, V)
-Output: Prop
+-- ============================================================
+-- Riemann curvature
+-- ============================================================
 
-# Reference:
-# Differential Geometry and Applications, Richard Hamilton, Monique Chyba and Xiaodong Cao
--/
-theorem levi_civita_uniqueness [AbstractLieBracket V]
-  (conn : AbstractAffineConnection R V) (metric : AbstractMetricTensor R V)
-  [MetricCompatible conn metric] [TorsionFree conn] (X Y Z : V) :
-  2 * metric.g (conn.nabla X Y) Z =
-    action X (metric.g Y Z) + action Y (metric.g X Z) - action Z (metric.g X Y)
-    - metric.g X (bracket Y Z) + metric.g Y (bracket Z X) + metric.g Z (bracket X Y) := by
-  have a2 : action Y (metric.g X Z) = action Y (metric.g Z X) := congrArg (action Y) (metric.symm X Z)
-  have eq1 : action X (metric.g Y Z) = metric.g (conn.nabla X Y) Z + metric.g (conn.nabla X Z) Y := by
-    rw [MetricCompatible.compat (conn := conn) X Y Z, metric.symm Y (conn.nabla X Z)]
-  have eq2 : action Y (metric.g X Z) = metric.g (conn.nabla Y Z) X + metric.g (conn.nabla Y X) Z := by
-    rw [a2, MetricCompatible.compat (conn := conn) Y Z X, metric.symm Z (conn.nabla Y X)]
-  have eq3 : action Z (metric.g X Y) = metric.g (conn.nabla Z X) Y + metric.g (conn.nabla Z Y) X := by
-    rw [MetricCompatible.compat (conn := conn) Z X Y, metric.symm X (conn.nabla Z Y)]
-  have t1 : conn.nabla X Y = conn.nabla Y X + bracket X Y := by
-    calc conn.nabla X Y = conn.nabla X Y - conn.nabla Y X + conn.nabla Y X := by abel
-      _ = bracket X Y + conn.nabla Y X := by rw [TorsionFree.torsion_zero (conn := conn)]
-      _ = conn.nabla Y X + bracket X Y := by abel
-  have t2 : conn.nabla Z X = conn.nabla X Z + bracket Z X := by
-    calc conn.nabla Z X = conn.nabla Z X - conn.nabla X Z + conn.nabla X Z := by abel
-      _ = bracket Z X + conn.nabla X Z := by rw [TorsionFree.torsion_zero (conn := conn)]
-      _ = conn.nabla X Z + bracket Z X := by abel
-  have t3 : conn.nabla Y Z = conn.nabla Z Y + bracket Y Z := by
-    calc conn.nabla Y Z = conn.nabla Y Z - conn.nabla Z Y + conn.nabla Z Y := by abel
-      _ = bracket Y Z + conn.nabla Z Y := by rw [TorsionFree.torsion_zero (conn := conn)]
-      _ = conn.nabla Z Y + bracket Y Z := by abel
-  have g1 : metric.g (conn.nabla X Y) Z = metric.g (conn.nabla Y X) Z + metric.g (bracket X Y) Z := by
-    rw [t1, metric.bilinear_add_left]
-  have g2 : metric.g (conn.nabla Z X) Y = metric.g (conn.nabla X Z) Y + metric.g (bracket Z X) Y := by
-    rw [t2, metric.bilinear_add_left]
-  have g3 : metric.g (conn.nabla Y Z) X = metric.g (conn.nabla Z Y) X + metric.g (bracket Y Z) X := by
-    rw [t3, metric.bilinear_add_left]
-  have s1 : metric.g X (bracket Y Z) = metric.g (bracket Y Z) X := metric.symm _ _
-  have s2 : metric.g Y (bracket Z X) = metric.g (bracket Z X) Y := metric.symm _ _
-  have s3 : metric.g Z (bracket X Y) = metric.g (bracket X Y) Z := metric.symm _ _
-  rw [eq1, eq2, eq3, g1, g2, g3, s1, s2, s3]
-  ring
+section Curvature
+variable {k R V : Type*}
+variable [Field k] [CommRing R] [Algebra k R]
+variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 
-variable [AbstractLieBracket V]
-variable [DerivationRules R V]
+noncomputable def Rm (emb : DerivationEmbedding k R V) (conn : V → V → V)
+    (X Y Z : V) : V :=
+  conn X (conn Y Z) - conn Y (conn X Z) - conn (bracket emb X Y) Z
 
-/-- Explicit construction of the Levi-Civita connection using the Koszul formula.
-Input: (AbstractMetricTensor R V)
-Output: AbstractAffineConnection R V
+theorem Rm_antisymm (emb : DerivationEmbedding k R V) (conn : V → V → V)
+    (hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (X Y Z : V) :
+    Rm emb conn X Y Z = -Rm emb conn Y X Z := by
+  simp only [Rm, bracket_antisymm emb X Y, conn_neg_left conn hal]; abel
 
-# Reference:
-# Differential Geometry and Applications, Richard Hamilton, Monique Chyba and Xiaodong Cao
--/
-def koszul_connection [Invertible (2 : R)] [AbstractLieBracket V] [DerivationRules R V]
-  (metric : MetricDuality R V) : AbstractAffineConnection R V where
-  nabla X Y := metric.sharp (fun Z =>
-    (action X (metric.g Y Z) + action Y (metric.g Z X) - action Z (metric.g X Y)
-      - metric.g X (bracket Y Z) + metric.g Y (bracket Z X) + metric.g Z (bracket X Y)) * ⅟2)
-  nabla_add_left X1 X2 Y := by
-    have eq_func : (fun Z : V => (action (X1 + X2) (metric.g Y Z) + action Y (metric.g Z (X1 + X2)) - action Z (metric.g (X1 + X2) Y) - metric.g (X1 + X2) (bracket Y Z) + metric.g Y (bracket Z (X1 + X2)) + metric.g Z (bracket (X1 + X2) Y)) * ⅟2)
-                   = (fun Z : V => (action X1 (metric.g Y Z) + action Y (metric.g Z X1) - action Z (metric.g X1 Y) - metric.g X1 (bracket Y Z) + metric.g Y (bracket Z X1) + metric.g Z (bracket X1 Y)) * ⅟2 +
-                                   (action X2 (metric.g Y Z) + action Y (metric.g Z X2) - action Z (metric.g X2 Y) - metric.g X2 (bracket Y Z) + metric.g Y (bracket Z X2) + metric.g Z (bracket X2 Y)) * ⅟2) := by
-      funext Z
-      have h1 : action (X1 + X2) (metric.g Y Z) = action X1 (metric.g Y Z) + action X2 (metric.g Y Z) := DerivationRules.action_add_left X1 X2 _
-      have h2 : metric.g Z (X1 + X2) = metric.g Z X1 + metric.g Z X2 := by rw [metric.symm Z (X1 + X2), metric.bilinear_add_left, metric.symm X1 Z, metric.symm X2 Z]
-      have h3 : action Y (metric.g Z (X1 + X2)) = action Y (metric.g Z X1) + action Y (metric.g Z X2) := by rw [h2, DerivationRules.action_add_right]
-      have h4 : metric.g (X1 + X2) Y = metric.g X1 Y + metric.g X2 Y := metric.bilinear_add_left _ _ _
-      have h5 : action Z (metric.g (X1 + X2) Y) = action Z (metric.g X1 Y) + action Z (metric.g X2 Y) := by rw [h4, DerivationRules.action_add_right]
-      have h6 : metric.g (X1 + X2) (bracket Y Z) = metric.g X1 (bracket Y Z) + metric.g X2 (bracket Y Z) := metric.bilinear_add_left _ _ _
-      have h7 : bracket Z (X1 + X2) = bracket Z X1 + bracket Z X2 := DerivationRules.bracket_add_right R Z X1 X2
-      have h8 : metric.g Y (bracket Z (X1 + X2)) = metric.g Y (bracket Z X1) + metric.g Y (bracket Z X2) := by rw [h7, metric.symm Y _, metric.bilinear_add_left, metric.symm _ Y, metric.symm _ Y]
-      have h9 : bracket (X1 + X2) Y = bracket X1 Y + bracket X2 Y := DerivationRules.bracket_add_left R X1 X2 Y
-      have h10 : metric.g Z (bracket (X1 + X2) Y) = metric.g Z (bracket X1 Y) + metric.g Z (bracket X2 Y) := by rw [h9, metric.symm Z _, metric.bilinear_add_left, metric.symm _ Z, metric.symm _ Z]
-      rw [h1, h3, h5, h6, h8, h10]
-      ring_nf
-    change metric.sharp _ = metric.sharp _ + metric.sharp _
-    rw [← metric.sharp_add]
-    congr 1
-  nabla_add_right X Y1 Y2 := by
-    have eq_func : (fun Z : V => (action X (metric.g (Y1 + Y2) Z) + action (Y1 + Y2) (metric.g Z X) - action Z (metric.g X (Y1 + Y2)) - metric.g X (bracket (Y1 + Y2) Z) + metric.g (Y1 + Y2) (bracket Z X) + metric.g Z (bracket X (Y1 + Y2))) * ⅟2)
-                   = (fun Z : V => (action X (metric.g Y1 Z) + action Y1 (metric.g Z X) - action Z (metric.g X Y1) - metric.g X (bracket Y1 Z) + metric.g Y1 (bracket Z X) + metric.g Z (bracket X Y1)) * ⅟2 +
-                                   (action X (metric.g Y2 Z) + action Y2 (metric.g Z X) - action Z (metric.g X Y2) - metric.g X (bracket Y2 Z) + metric.g Y2 (bracket Z X) + metric.g Z (bracket X Y2)) * ⅟2) := by
-      funext Z
-      have h1 : metric.g (Y1 + Y2) Z = metric.g Y1 Z + metric.g Y2 Z := metric.bilinear_add_left _ _ _
-      have h1a : action X (metric.g (Y1 + Y2) Z) = action X (metric.g Y1 Z) + action X (metric.g Y2 Z) := by rw [h1, DerivationRules.action_add_right]
-      have h2 : action (Y1 + Y2) (metric.g Z X) = action Y1 (metric.g Z X) + action Y2 (metric.g Z X) := DerivationRules.action_add_left Y1 Y2 _
-      have h3 : metric.g X (Y1 + Y2) = metric.g X Y1 + metric.g X Y2 := by rw [metric.symm X _, metric.bilinear_add_left, metric.symm _ X, metric.symm _ X]
-      have h3a : action Z (metric.g X (Y1 + Y2)) = action Z (metric.g X Y1) + action Z (metric.g X Y2) := by rw [h3, DerivationRules.action_add_right]
-      have h4 : bracket (Y1 + Y2) Z = bracket Y1 Z + bracket Y2 Z := DerivationRules.bracket_add_left R Y1 Y2 Z
-      have h4a : metric.g X (bracket (Y1 + Y2) Z) = metric.g X (bracket Y1 Z) + metric.g X (bracket Y2 Z) := by rw [h4, metric.symm X _, metric.bilinear_add_left, metric.symm _ X, metric.symm _ X]
-      have h5 : bracket Z (Y1 + Y2) = bracket Z Y1 + bracket Z Y2 := DerivationRules.bracket_add_right R Z Y1 Y2
-      have h5a : metric.g (Y1 + Y2) (bracket Z X) = metric.g Y1 (bracket Z X) + metric.g Y2 (bracket Z X) := metric.bilinear_add_left _ _ _
-      have h6 : bracket X (Y1 + Y2) = bracket X Y1 + bracket X Y2 := DerivationRules.bracket_add_right R X Y1 Y2
-      have h6a : metric.g Z (bracket X (Y1 + Y2)) = metric.g Z (bracket X Y1) + metric.g Z (bracket X Y2) := by rw [h6, metric.symm Z _, metric.bilinear_add_left, metric.symm _ Z, metric.symm _ Z]
-      rw [h1a, h2, h3a, h4a, h5a, h6a]
-      ring_nf
-    change metric.sharp _ = metric.sharp _ + metric.sharp _
-    rw [← metric.sharp_add]
-    congr 1
-  nabla_smul_left c X Y := by
-    have eq_func : (fun Z : V => (action (c • X) (metric.g Y Z) + action Y (metric.g Z (c • X)) - action Z (metric.g (c • X) Y) - metric.g (c • X) (bracket Y Z) + metric.g Y (bracket Z (c • X)) + metric.g Z (bracket (c • X) Y)) * ⅟2)
-                   = (fun Z : V => c * ((action X (metric.g Y Z) + action Y (metric.g Z X) - action Z (metric.g X Y) - metric.g X (bracket Y Z) + metric.g Y (bracket Z X) + metric.g Z (bracket X Y)) * ⅟2)) := by
-      funext Z
-      have h1 : action (c • X) (metric.g Y Z) = c * action X (metric.g Y Z) := DerivationRules.action_smul_left c X _
-      have h2 : metric.g Z (c • X) = c * metric.g Z X := by rw [metric.symm Z _, metric.bilinear_smul_left, metric.symm X Z]
-      have h2a : action Y (metric.g Z (c • X)) = action Y c * metric.g Z X + c * action Y (metric.g Z X) := by rw [h2, DerivationRules.action_smul_right]
-      have h3 : metric.g (c • X) Y = c * metric.g X Y := metric.bilinear_smul_left _ _ _
-      have h3a : action Z (metric.g (c • X) Y) = action Z c * metric.g X Y + c * action Z (metric.g X Y) := by rw [h3, DerivationRules.action_smul_right]
-      have h4 : metric.g (c • X) (bracket Y Z) = c * metric.g X (bracket Y Z) := metric.bilinear_smul_left _ _ _
-      have h5 : bracket Z (c • X) = c • (bracket Z X) + (action Z c) • X := DerivationRules.bracket_smul_right c Z X
-      have h5a : metric.g Y (bracket Z (c • X)) = c * metric.g Y (bracket Z X) + action Z c * metric.g Y X := by rw [h5, metric.symm Y _, metric.bilinear_add_left, metric.bilinear_smul_left, metric.bilinear_smul_left, metric.symm (bracket _ _) Y, metric.symm X Y]
-      have h6 : bracket (c • X) Y = c • (bracket X Y) - (action Y c) • X := DerivationRules.bracket_smul_left c X Y
-      have h6a : metric.g Z (bracket (c • X) Y) = c * metric.g Z (bracket X Y) - action Y c * metric.g Z X := by rw [h6, metric.symm Z _, metric_sub_left (metric:=metric.toNonDegenerateMetric.toAbstractMetricTensor), metric.bilinear_smul_left, metric.bilinear_smul_left, metric.symm (bracket _ _) Z, metric.symm X Z]
-      rw [h1, h2a, h3a, h4, h5a, h6a]
-      have s1 : metric.g Z X = metric.g X Z := metric.symm Z X
-      have s2 : metric.g Y X = metric.g X Y := metric.symm Y X
-      rw [s1, s2]
-      ring_nf
-    change metric.sharp _ = c • metric.sharp _
-    rw [← metric.sharp_smul]
-    congr 1
-  leibniz c X Y := by
-    have eq_func : (fun Z : V => (action X (metric.g (c • Y) Z) + action (c • Y) (metric.g Z X) - action Z (metric.g X (c • Y)) - metric.g X (bracket (c • Y) Z) + metric.g (c • Y) (bracket Z X) + metric.g Z (bracket X (c • Y))) * ⅟2)
-                   = (fun Z : V => action X c * metric.g Y Z * ⅟2 * 2 +
-                                   c * ((action X (metric.g Y Z) + action Y (metric.g Z X) - action Z (metric.g X Y) - metric.g X (bracket Y Z) + metric.g Y (bracket Z X) + metric.g Z (bracket X Y)) * ⅟2)) := by
-      funext Z
-      have h1 : metric.g (c • Y) Z = c * metric.g Y Z := metric.bilinear_smul_left _ _ _
-      have h1a : action X (metric.g (c • Y) Z) = action X c * metric.g Y Z + c * action X (metric.g Y Z) := by rw [h1, DerivationRules.action_smul_right]
-      have h2 : action (c • Y) (metric.g Z X) = c * action Y (metric.g Z X) := DerivationRules.action_smul_left c Y _
-      have h3 : metric.g X (c • Y) = c * metric.g X Y := by rw [metric.symm X _, metric.bilinear_smul_left, metric.symm Y X]
-      have h3a : action Z (metric.g X (c • Y)) = action Z c * metric.g X Y + c * action Z (metric.g X Y) := by rw [h3, DerivationRules.action_smul_right]
-      have h4 : bracket (c • Y) Z = c • (bracket Y Z) - (action Z c) • Y := DerivationRules.bracket_smul_left c Y Z
-      have h4a : metric.g X (bracket (c • Y) Z) = c * metric.g X (bracket Y Z) - action Z c * metric.g X Y := by rw [h4, metric.symm X _, metric_sub_left (metric:=metric.toNonDegenerateMetric.toAbstractMetricTensor), metric.bilinear_smul_left, metric.bilinear_smul_left, metric.symm (bracket _ _) X, metric.symm Y X]
-      have h5 : bracket Z (c • Y) = c • (bracket Z Y) + (action Z c) • Y := DerivationRules.bracket_smul_right c Z Y
-      have h5a : metric.g (c • Y) (bracket Z X) = c * metric.g Y (bracket Z X) := metric.bilinear_smul_left _ _ _
-      have h6 : bracket X (c • Y) = c • (bracket X Y) + (action X c) • Y := DerivationRules.bracket_smul_right c X Y
-      have h6a : metric.g Z (bracket X (c • Y)) = c * metric.g Z (bracket X Y) + action X c * metric.g Z Y := by rw [h6, metric.symm Z _, metric.bilinear_add_left, metric.bilinear_smul_left, metric.bilinear_smul_left, metric.symm (bracket _ _) Z, metric.symm Y Z]
-      rw [h1a, h2, h3a, h4a, h5a, h6a]
-      have s1 : metric.g Z Y = metric.g Y Z := metric.symm Z Y
-      rw [s1]
-      ring_nf
-    have direct_term : metric.sharp (fun Z => action X c * metric.g Y Z * ⅟2 * 2) = (action X c) • Y := by
-      have h_cancel : ∀ Z, action X c * metric.g Y Z * ⅟2 * 2 = action X c * metric.g Y Z := fun Z => by
-        calc action X c * metric.g Y Z * ⅟2 * 2 = action X c * metric.g Y Z * (⅟2 * 2) := by ring
-          _ = action X c * metric.g Y Z * 1 := by rw [invOf_mul_self 2]
-          _ = action X c * metric.g Y Z := by ring
-      have h : (fun Z => action X c * metric.g Y Z * ⅟2 * 2) = (fun Z => action X c * metric.g Y Z) := funext h_cancel
-      rw [h, metric.sharp_smul, metric.sharp_g]
-    change metric.sharp _ = (action X c) • Y + c • metric.sharp _
-    rw [← direct_term, ← metric.sharp_smul, ← metric.sharp_add]
-    congr 1
+theorem Rm_add_Z (emb : DerivationEmbedding k R V) (conn : V → V → V)
+    (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (_hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (X Y Z₁ Z₂ : V) :
+    Rm emb conn X Y (Z₁ + Z₂) = Rm emb conn X Y Z₁ + Rm emb conn X Y Z₂ := by
+  simp only [Rm, ha]; abel
 
-instance metric_compat_koszul [Invertible (2 : R)] [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V] (metric : MetricDuality R V) : MetricCompatible (koszul_connection metric) metric.toNonDegenerateMetric.toAbstractMetricTensor where
-  compat X Y Z := by
-    let nabla := (koszul_connection metric).nabla
-    have h1 : metric.g (nabla X Y) Z = (action X (metric.g Y Z) + action Y (metric.g Z X) - action Z (metric.g X Y) - metric.g X (bracket Y Z) + metric.g Y (bracket Z X) + metric.g Z (bracket X Y)) * ⅟2 := by
-      exact metric.g_sharp _ _
-    have h2 : metric.g (nabla X Z) Y = (action X (metric.g Z Y) + action Z (metric.g Y X) - action Y (metric.g X Z) - metric.g X (bracket Z Y) + metric.g Z (bracket Y X) + metric.g Y (bracket X Z)) * ⅟2 := by
-      exact metric.g_sharp _ _
-    have h3 : metric.g Y (nabla X Z) = metric.g (nabla X Z) Y := metric.symm _ _
-    rw [h1, h3, h2]
-    have s1 : metric.g Z Y = metric.g Y Z := metric.symm Z Y
-    have s2 : metric.g Y X = metric.g X Y := metric.symm Y X
-    have s3 : metric.g X Z = metric.g Z X := metric.symm X Z
-    have b1 : bracket Z Y = - bracket Y Z := DerivationRules.bracket_antisymm R Z Y
-    have b2 : bracket Y X = - bracket X Y := DerivationRules.bracket_antisymm R Y X
-    have b3 : bracket X Z = - bracket Z X := DerivationRules.bracket_antisymm R X Z
-    have m1 : metric.g X (bracket Z Y) = - metric.g X (bracket Y Z) := by rw [b1, metric.symm X _, metric_neg_left (metric:=metric.toNonDegenerateMetric.toAbstractMetricTensor), metric.symm _ X]
-    have m2 : metric.g Z (bracket Y X) = - metric.g Z (bracket X Y) := by rw [b2, metric.symm Z _, metric_neg_left (metric:=metric.toNonDegenerateMetric.toAbstractMetricTensor), metric.symm _ Z]
-    have m3 : metric.g Y (bracket X Z) = - metric.g Y (bracket Z X) := by rw [b3, metric.symm Y _, metric_neg_left (metric:=metric.toNonDegenerateMetric.toAbstractMetricTensor), metric.symm _ Y]
-    rw [s1, s2, s3, m1, m2, m3]
-    have eq_rhs : (action X (metric.g Y Z) + action Y (metric.g Z X) - action Z (metric.g X Y) - metric.g X (bracket Y Z) + metric.g Y (bracket Z X) + metric.g Z (bracket X Y)) * ⅟2 + (action X (metric.g Y Z) + action Z (metric.g X Y) - action Y (metric.g Z X) - -metric.g X (bracket Y Z) + -metric.g Z (bracket X Y) + -metric.g Y (bracket Z X)) * ⅟2 = action X (metric.g Y Z) * ⅟2 * 2 := by ring_nf
-    rw [eq_rhs]
-    calc action X (metric.g Y Z) = action X (metric.g Y Z) * 1 := by ring
-        _ = action X (metric.g Y Z) * (⅟2 * 2) := by rw [← invOf_mul_self 2]
-        _ = action X (metric.g Y Z) * ⅟2 * 2 := by ring
+theorem Rm_add_X (emb : DerivationEmbedding k R V) (conn : V → V → V)
+    (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (X₁ X₂ Y Z : V) :
+    Rm emb conn (X₁ + X₂) Y Z = Rm emb conn X₁ Y Z + Rm emb conn X₂ Y Z := by
+  simp only [Rm, hal, ha, bracket_add_left emb]; abel
 
-instance torsion_free_koszul [Invertible (2 : R)] [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V] (metric : MetricDuality R V) : TorsionFree (koszul_connection metric) where
-  torsion_zero X Y := by
-    let nabla := (koszul_connection metric).nabla
-    have eq_func : (fun Z : V => (action X (metric.g Y Z) + action Y (metric.g Z X) - action Z (metric.g X Y) - metric.g X (bracket Y Z) + metric.g Y (bracket Z X) + metric.g Z (bracket X Y)) * ⅟2 - (action Y (metric.g X Z) + action X (metric.g Z Y) - action Z (metric.g Y X) - metric.g Y (bracket X Z) + metric.g X (bracket Z Y) + metric.g Z (bracket Y X)) * ⅟2) = (fun Z : V => metric.g (bracket X Y) Z) := by
-      funext Z
-      have s1 : metric.g X Z = metric.g Z X := metric.symm X Z
-      have s2 : metric.g Z Y = metric.g Y Z := metric.symm Z Y
-      have s3 : metric.g Y X = metric.g X Y := metric.symm Y X
-      have b1 : bracket X Z = - bracket Z X := DerivationRules.bracket_antisymm R X Z
-      have b2 : bracket Z Y = - bracket Y Z := DerivationRules.bracket_antisymm R Z Y
-      have b3 : bracket Y X = - bracket X Y := DerivationRules.bracket_antisymm R Y X
-      have m1 : metric.g Y (bracket X Z) = - metric.g Y (bracket Z X) := by rw [b1, metric.symm Y _, metric_neg_left (metric:=metric.toNonDegenerateMetric.toAbstractMetricTensor), metric.symm _ Y]
-      have m2 : metric.g X (bracket Z Y) = - metric.g X (bracket Y Z) := by rw [b2, metric.symm X _, metric_neg_left (metric:=metric.toNonDegenerateMetric.toAbstractMetricTensor), metric.symm _ X]
-      have m3 : metric.g Z (bracket Y X) = - metric.g Z (bracket X Y) := by rw [b3, metric.symm Z _, metric_neg_left (metric:=metric.toNonDegenerateMetric.toAbstractMetricTensor), metric.symm _ Z]
-      rw [s1, s2, s3, m1, m2, m3]
-      have eq_rhs : (action X (metric.g Y Z) + action Y (metric.g Z X) - action Z (metric.g X Y) - metric.g X (bracket Y Z) + metric.g Y (bracket Z X) + metric.g Z (bracket X Y)) * ⅟2 - (action Y (metric.g Z X) + action X (metric.g Y Z) - action Z (metric.g X Y) - -metric.g Y (bracket Z X) + -metric.g X (bracket Y Z) + -metric.g Z (bracket X Y)) * ⅟2 = metric.g Z (bracket X Y) * ⅟2 * 2 := by ring_nf
-      rw [eq_rhs]
-      have h_cancel : metric.g Z (bracket X Y) * ⅟2 * 2 = metric.g Z (bracket X Y) := by
-        calc metric.g Z (bracket X Y) * ⅟2 * 2 = metric.g Z (bracket X Y) * (⅟2 * 2) := by ring
-          _ = metric.g Z (bracket X Y) * 1 := by rw [invOf_mul_self 2]
-          _ = metric.g Z (bracket X Y) := by ring
-      rw [h_cancel]
-      exact metric.symm Z (bracket X Y)
-    have g_inj : ∀ A B : V, (∀ Z, metric.g A Z = metric.g B Z) → A = B := by
-      intro A B h
-      have hA : metric.sharp (fun Z => metric.g A Z) = A := metric.sharp_g A
-      have hB : metric.sharp (fun Z => metric.g B Z) = B := metric.sharp_g B
-      have hF : (fun Z => metric.g A Z) = (fun Z => metric.g B Z) := funext h
-      rw [← hA, ← hB, hF]
-    apply g_inj
-    intro Z
-    have hg : metric.g (nabla X Y - nabla Y X) Z = metric.g (nabla X Y) Z - metric.g (nabla Y X) Z := by
-      have hsub : nabla X Y - nabla Y X = nabla X Y + - nabla Y X := sub_eq_add_neg _ _
-      rw [hsub, metric.bilinear_add_left, metric_neg_left (metric:=metric.toNonDegenerateMetric.toAbstractMetricTensor), ← sub_eq_add_neg]
-    rw [hg]
-    have gX : metric.g (nabla X Y) Z = (action X (metric.g Y Z) + action Y (metric.g Z X) - action Z (metric.g X Y) - metric.g X (bracket Y Z) + metric.g Y (bracket Z X) + metric.g Z (bracket X Y)) * ⅟2 := metric.g_sharp _ _
-    have gY : metric.g (nabla Y X) Z = (action Y (metric.g X Z) + action X (metric.g Z Y) - action Z (metric.g Y X) - metric.g Y (bracket X Z) + metric.g X (bracket Z Y) + metric.g Z (bracket Y X)) * ⅟2 := metric.g_sharp _ _
-    rw [gX, gY]
-    exact congrFun eq_func Z
+theorem Rm_add_Y (emb : DerivationEmbedding k R V) (conn : V → V → V)
+    (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (X Y₁ Y₂ Z : V) :
+    Rm emb conn X (Y₁ + Y₂) Z = Rm emb conn X Y₁ Z + Rm emb conn X Y₂ Z := by
+  simp only [Rm, hal, ha, bracket_add_right emb]; abel
 
-/-- Fundamental Theorem of Riemannian Geometry:
-For any Riemannian manifold, there exists a unique affine connection that is symmetric (torsion-free) and compatible with the metric.
-Input: (AbstractMetricTensor R V)
-Output: Prop
+theorem Rm_smul_Z (emb : DerivationEmbedding k R V) (conn : V → V → V)
+    (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (_hsl : ∀ (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : ∀ X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (f : R) (X Y Z : V) :
+    Rm emb conn X Y (f • Z) = f • Rm emb conn X Y Z := by
+  unfold Rm
+  rw [hl Y f Z, hl X f Z, hl (bracket emb X Y) f Z,
+      ha X _ _, ha Y _ _,
+      hl X ((emb.embed Y) f) Z, hl Y ((emb.embed X) f) Z,
+      hl X f (conn Y Z), hl Y f (conn X Z)]
+  -- Key: [X,Y](f) = X(Y(f)) - Y(X(f)) by action_bracket
+  -- In the goal, (emb.embed (bracket emb X Y)) f appears, which is action emb (bracket emb X Y) f
+  have hab : (emb.embed (bracket emb X Y)) f =
+      (emb.embed X) ((emb.embed Y) f) - (emb.embed Y) ((emb.embed X) f) :=
+    action_bracket emb X Y f
+  rw [hab, sub_smul, smul_sub, smul_sub]; abel
 
-# Reference:
-# Differential Geometry and Applications, Richard Hamilton, Monique Chyba and Xiaodong Cao
--/
-theorem levi_civita_exists_unique [Invertible (2 : R)] [AbstractDerivationAction R V] [AbstractLieBracket V] [DerivationRules R V] (metric : MetricDuality R V) :
-  ∃ (conn : AbstractAffineConnection R V),
-    (MetricCompatible conn metric.toNonDegenerateMetric.toAbstractMetricTensor ∧ TorsionFree conn) ∧
-    (∀ (conn' : AbstractAffineConnection R V), MetricCompatible conn' metric.toNonDegenerateMetric.toAbstractMetricTensor ∧ TorsionFree conn' → conn' = conn) := by
-  use koszul_connection metric
-  constructor
-  · exact ⟨metric_compat_koszul metric, torsion_free_koszul metric⟩
-  · intro conn' h
-    rcases h with ⟨compat', torsion'⟩
-    have h_nabla : conn'.nabla = (koszul_connection metric).nabla := by
-      funext X Y
-      have g_inj : ∀ A B : V, (∀ Z, metric.g A Z = metric.g B Z) → A = B := by
-        intro A B h_g
-        have hA : metric.sharp (fun Z => metric.g A Z) = A := metric.sharp_g A
-        have hB : metric.sharp (fun Z => metric.g B Z) = B := metric.sharp_g B
-        have hF : (fun Z => metric.g A Z) = (fun Z => metric.g B Z) := funext h_g
-        rw [← hA, ← hB, hF]
-      apply g_inj
-      intro Z
-      have h1 : 2 * metric.g (conn'.nabla X Y) Z = action X (metric.g Y Z) + action Y (metric.g X Z) - action Z (metric.g X Y) - metric.g X (bracket Y Z) + metric.g Y (bracket Z X) + metric.g Z (bracket X Y) := levi_civita_uniqueness conn' metric.toNonDegenerateMetric.toAbstractMetricTensor X Y Z
-      have h2 : metric.g ((koszul_connection metric).nabla X Y) Z = (action X (metric.g Y Z) + action Y (metric.g Z X) - action Z (metric.g X Y) - metric.g X (bracket Y Z) + metric.g Y (bracket Z X) + metric.g Z (bracket X Y)) * ⅟2 := metric.g_sharp _ _
-      have sx : metric.g X Z = metric.g Z X := metric.symm X Z
-      rw [sx] at h1
-      calc metric.g (conn'.nabla X Y) Z = metric.g (conn'.nabla X Y) Z * 1 := by ring
-        _ = metric.g (conn'.nabla X Y) Z * (2 * ⅟2) := by rw [mul_invOf_self 2]
-        _ = (2 * metric.g (conn'.nabla X Y) Z) * ⅟2 := by ring
-        _ = (action X (metric.g Y Z) + action Y (metric.g Z X) - action Z (metric.g X Y) - metric.g X (bracket Y Z) + metric.g Y (bracket Z X) + metric.g Z (bracket X Y)) * ⅟2 := by rw [h1]
-        _ = metric.g ((koszul_connection metric).nabla X Y) Z := by rw [← h2]
-    cases conn'
-    subst h_nabla
-    rfl
+theorem Rm_smul_Y (emb : DerivationEmbedding k R V) (conn : V → V → V)
+    (hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : ∀ (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : ∀ X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (f : R) (X Y Z : V) :
+    Rm emb conn X (f • Y) Z = f • Rm emb conn X Y Z := by
+  unfold Rm
+  rw [hsl f Y Z, hl X f (conn Y Z), hsl f Y (conn X Z),
+      bracket_smul_right emb, hal _ _ Z, hsl f _ Z,
+      show action emb X f = (emb.embed X) f from rfl,
+      hsl ((emb.embed X) f) Y Z, smul_sub, smul_sub]; abel
 
--- 5. Bundled Levi-Civita Connection
-class AbstractLeviCivitaConnection (metric : AbstractMetricTensor R V) [AbstractLieBracket V] extends AbstractAffineConnection R V where
-  compat : ∀ X Y Z : V, action X (metric.g Y Z) = metric.g (nabla X Y) Z + metric.g Y (nabla X Z)
-  torsion_zero : ∀ X Y : V, nabla X Y - nabla Y X = bracket X Y
+theorem Rm_smul_X (emb : DerivationEmbedding k R V) (conn : V → V → V)
+    (hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : ∀ (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : ∀ X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (f : R) (X Y Z : V) :
+    Rm emb conn (f • X) Y Z = f • Rm emb conn X Y Z := by
+  unfold Rm
+  rw [hsl f X (conn Y Z), hsl f X Z, hl Y f (conn X Z),
+      bracket_smul_left emb,
+      show action emb Y f = (emb.embed Y) f from rfl,
+      conn_sub_left conn hal, hsl f _ Z, hsl ((emb.embed Y) f) X Z,
+      smul_sub, smul_sub]; abel
+
+end Curvature
+
+-- ============================================================
+-- First Bianchi identity
+-- ============================================================
+
+section Bianchi
+variable {k R V : Type*}
+variable [Field k] [CommRing R] [Algebra k R]
+variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+
+theorem first_bianchi (emb : DerivationEmbedding k R V) (conn : V → V → V)
+    (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (_hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (h_tf : IsTorsionFree emb conn)
+    (X Y Z : V) :
+    Rm emb conn X Y Z + Rm emb conn Y Z X + Rm emb conn Z X Y = 0 := by
+  have t : ∀ A B, bracket emb A B = conn A B - conn B A := fun A B => (h_tf A B).symm
+  have r : ∀ A B C, conn A (conn B C) - conn A (conn C B) = conn A (bracket emb B C) := by
+    intro A B C; rw [← conn_sub_right conn ha, t]
+  unfold Rm
+  calc conn X (conn Y Z) - conn Y (conn X Z) - conn (bracket emb X Y) Z
+    + (conn Y (conn Z X) - conn Z (conn Y X) - conn (bracket emb Y Z) X)
+    + (conn Z (conn X Y) - conn X (conn Z Y) - conn (bracket emb Z X) Y)
+      = (conn X (conn Y Z) - conn X (conn Z Y))
+      + (conn Y (conn Z X) - conn Y (conn X Z))
+      + (conn Z (conn X Y) - conn Z (conn Y X))
+      - conn (bracket emb X Y) Z - conn (bracket emb Y Z) X
+      - conn (bracket emb Z X) Y := by abel
+    _ = conn X (bracket emb Y Z) + conn Y (bracket emb Z X) + conn Z (bracket emb X Y)
+      - conn (bracket emb X Y) Z - conn (bracket emb Y Z) X
+      - conn (bracket emb Z X) Y := by rw [r X Y Z, r Y Z X, r Z X Y]
+    _ = (conn X (bracket emb Y Z) - conn (bracket emb Y Z) X)
+      + (conn Y (bracket emb Z X) - conn (bracket emb Z X) Y)
+      + (conn Z (bracket emb X Y) - conn (bracket emb X Y) Z) := by abel
+    _ = bracket emb X (bracket emb Y Z) + bracket emb Y (bracket emb Z X)
+      + bracket emb Z (bracket emb X Y) := by
+      rw [t X (bracket emb Y Z), t Y (bracket emb Z X), t Z (bracket emb X Y)]
+    _ = 0 := jacobi_identity emb X Y Z
+
+end Bianchi
+
+-- ============================================================
+-- Koszul formula (levi_civita_uniqueness)
+-- ============================================================
+
+section Koszul
+variable {k R V : Type*}
+variable [Field k] [CommRing R] [Algebra k R]
+variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+
+-- Metric subtraction helpers
+private theorem g_sub_left' (met : MetricDuality R V) (A B C : V) :
+    met.g (A - B) C = met.g A C - met.g B C := by
+  have h1 := met.g_add_left A (-B) C
+  rw [show A + -B = A - B from (sub_eq_add_neg A B).symm] at h1
+  have h2 : met.g (-B) C = -met.g B C := by
+    have := met.g_smul_left (-1 : R) B C; rwa [neg_one_smul, neg_one_mul] at this
+  rw [h1, h2, sub_eq_add_neg]
+
+private theorem g_sub_right' (met : MetricDuality R V) (A B C : V) :
+    met.g A (B - C) = met.g A B - met.g A C := by
+  rw [met.g_symm A (B - C), g_sub_left' met B C A, met.g_symm B A, met.g_symm C A]
+
+/-- Koszul formula: any metric-compatible torsion-free connection satisfies
+    2·g(∇_X Y, Z) = X(g(Y,Z)) + Y(g(Z,X)) - Z(g(X,Y))
+                   - g(X, [Y,Z]) + g(Y, [Z,X]) + g(Z, [X,Y]). -/
+theorem levi_civita_uniqueness
+    (emb : DerivationEmbedding k R V)
+    (conn : V → V → V)
+    (_ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (_hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (_hl : ∀ X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (met : MetricDuality R V)
+    (h_mc : IsMetricCompatible emb conn met)
+    (h_tf : IsTorsionFree emb conn) (X Y Z : V) :
+    2 * met.g (conn X Y) Z =
+      (emb.embed X) (met.g Y Z) + (emb.embed Y) (met.g Z X) - (emb.embed Z) (met.g X Y)
+      - met.g X (bracket emb Y Z) + met.g Y (bracket emb Z X) + met.g Z (bracket emb X Y) := by
+  have eq1 := h_mc X Y Z
+  have eq2 := h_mc Y Z X
+  have eq3 := h_mc Z X Y
+  rw [show bracket emb X Y = conn X Y - conn Y X from (h_tf X Y).symm,
+      show bracket emb Z X = conn Z X - conn X Z from (h_tf Z X).symm,
+      show bracket emb Y Z = conn Y Z - conn Z Y from (h_tf Y Z).symm,
+      g_sub_right' met X _ _, g_sub_right' met Y _ _, g_sub_right' met Z _ _,
+      eq1, eq2, eq3,
+      met.g_symm (conn Y Z) X, met.g_symm Z (conn Y X),
+      met.g_symm (conn Z X) Y, met.g_symm X (conn Z Y),
+      met.g_symm Z (conn X Y)]; ring
+
+end Koszul
+
+-- ============================================================
+-- Rm metric antisymmetry: g(Rm(X,Y)Z, W) = -g(Rm(X,Y)W, Z)
+-- ============================================================
+
+section RmMetric
+variable {k R V : Type*}
+variable [Field k] [CommRing R] [Algebra k R]
+variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+
+/-- g(Rm(X,Y)Z, W) = -g(Rm(X,Y)W, Z): the Riemann curvature is skew-symmetric
+    in the last two arguments with respect to the metric. -/
+theorem Rm_metric_antisymm
+    (emb : DerivationEmbedding k R V)
+    (conn : V → V → V)
+    (met : MetricDuality R V)
+    (h_mc : IsMetricCompatible emb conn met)
+    (X Y Z W : V) :
+    met.g (Rm emb conn X Y Z) W = -met.g (Rm emb conn X Y W) Z := by
+  suffices h : met.g (Rm emb conn X Y Z) W + met.g Z (Rm emb conn X Y W) = 0 by
+    rw [met.g_symm Z _] at h; exact eq_neg_of_add_eq_zero_left h
+  -- Metric compatibility: X(g(A,B)) = g(∇XA,B) + g(A,∇XB)
+  have c1 := h_mc Y Z W; have c2 := h_mc X Z W
+  have c3 := h_mc X (conn Y Z) W; have c4 := h_mc X Z (conn Y W)
+  have c5 := h_mc Y (conn X Z) W; have c6 := h_mc Y Z (conn X W)
+  have c7 := h_mc (bracket emb X Y) Z W
+  -- Double expansions: X(Y(g(Z,W))) and Y(X(g(Z,W)))
+  have hXY : (emb.embed X) ((emb.embed Y) (met.g Z W)) =
+      met.g (conn X (conn Y Z)) W + met.g (conn Y Z) (conn X W) +
+      met.g (conn X Z) (conn Y W) + met.g Z (conn X (conn Y W)) := by
+    rw [c1, (emb.embed X).map_add (met.g (conn Y Z) W) (met.g Z (conn Y W)), c3, c4]; ring
+  have hYX : (emb.embed Y) ((emb.embed X) (met.g Z W)) =
+      met.g (conn Y (conn X Z)) W + met.g (conn X Z) (conn Y W) +
+      met.g (conn Y Z) (conn X W) + met.g Z (conn Y (conn X W)) := by
+    rw [c2, (emb.embed Y).map_add (met.g (conn X Z) W) (met.g Z (conn X W)), c5, c6]; ring
+  -- Key identity: g(∇[X,Y]Z,W) + g(Z,∇[X,Y]W) = g(∇X∇YZ,W) - g(∇Y∇XZ,W) + g(Z,∇X∇YW) - g(Z,∇Y∇XW)
+  -- From c7 + action_bracket + hXY + hYX
+  have key : met.g (conn (bracket emb X Y) Z) W + met.g Z (conn (bracket emb X Y) W) =
+      met.g (conn X (conn Y Z)) W - met.g (conn Y (conn X Z)) W +
+      met.g Z (conn X (conn Y W)) - met.g Z (conn Y (conn X W)) := by
+    -- c7 gives LHS = (emb.embed [X,Y])(g(Z,W))
+    -- action_bracket gives [X,Y](g) = X(Y(g)) - Y(X(g))
+    -- hXY/hYX expand X(Y(g)) and Y(X(g)), cross terms cancel
+    have hab : (emb.embed (bracket emb X Y)) (met.g Z W) =
+        (emb.embed X) ((emb.embed Y) (met.g Z W)) -
+        (emb.embed Y) ((emb.embed X) (met.g Z W)) :=
+      action_bracket emb X Y (met.g Z W)
+    rw [← c7, hab, hXY, hYX]; ring
+  -- Unfold Rm and distribute metric over subtraction
+  unfold Rm
+  rw [g_sub_left' met, g_sub_left' met, g_sub_right' met, g_sub_right' met]
+  -- Goal: A - B - C + (D - E - F) = 0 where key says C + F = A - B + D - E
+  -- Rearrange: (A - B + D - E) - (C + F) = 0, then apply key
+  rw [show met.g (conn X (conn Y Z)) W - met.g (conn Y (conn X Z)) W -
+      met.g (conn (bracket emb X Y) Z) W +
+      (met.g Z (conn X (conn Y W)) - met.g Z (conn Y (conn X W)) -
+       met.g Z (conn (bracket emb X Y) W)) =
+      (met.g (conn X (conn Y Z)) W - met.g (conn Y (conn X Z)) W +
+       met.g Z (conn X (conn Y W)) - met.g Z (conn Y (conn X W))) -
+      (met.g (conn (bracket emb X Y) Z) W + met.g Z (conn (bracket emb X Y) W)) from by ring,
+      key, sub_self]
+
+end RmMetric
+
+-- ============================================================
+-- Second Bianchi identity
+-- ============================================================
+
+section SecondBianchi
+variable {k R V : Type*}
+variable [Field k] [CommRing R] [Algebra k R]
+variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+
+/-- Covariant derivative of Rm. -/
+noncomputable def covDerivRm (emb : DerivationEmbedding k R V) (conn : V → V → V)
+    (X Y Z W : V) : V :=
+  conn X (Rm emb conn Y Z W) - Rm emb conn (conn X Y) Z W
+  - Rm emb conn Y (conn X Z) W - Rm emb conn Y Z (conn X W)
+
+theorem second_bianchi
+    (emb : DerivationEmbedding k R V)
+    (conn : V → V → V)
+    (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (h_tf : IsTorsionFree emb conn)
+    (X Y Z W : V) :
+    covDerivRm emb conn X Y Z W + covDerivRm emb conn Y Z X W +
+    covDerivRm emb conn Z X Y W = 0 := by
+  -- ∇_X Rm(Y,Z)W = conn X (Rm Y Z W) - Rm(∇XY,Z)W - Rm(Y,∇XZ)W - Rm(Y,Z,∇XW)
+  -- Use first_bianchi on the bracket-level structure:
+  -- After expanding, the sum telescopes to bracket(bracket) terms which vanish by Jacobi.
+  have t : ∀ A B, bracket emb A B = conn A B - conn B A := fun A B => (h_tf A B).symm
+  have sl : ∀ A B C, conn (A - B) C = conn A C - conn B C := conn_sub_left conn hal
+  have sr : ∀ A B C, conn A (B - C) = conn A B - conn A C := conn_sub_right conn ha
+  unfold covDerivRm Rm
+  simp only [t, sl, sr]
+  -- 12 terms of form ± conn(conn(a)(b))(W). Group pairs using sl on OUTER conn:
+  -- conn(conn(connXY)Z)W - conn(conn(connYX)Z)W = conn(conn(connXY - connYX)Z)W
+  --   = conn(conn([X,Y])Z)W by torsion-free
+  -- But abel can't do this. Rewrite manually:
+  -- Rearrange 12 terms into 6 pairs, each differing in inner first-arg
+  -- Pair helpers: combine ± conn(conn(a)(b))(W) using conn_sub_left on inner conn
+  have p1 : conn (conn (conn X Y) Z) W - conn (conn (conn Y X) Z) W =
+      conn (conn (bracket emb X Y) Z) W := by
+    rw [← sl]; congr 1; rw [← sl, t]
+  have p2 : conn (conn (conn Y Z) X) W - conn (conn (conn Z Y) X) W =
+      conn (conn (bracket emb Y Z) X) W := by
+    rw [← sl]; congr 1; rw [← sl, t]
+  have p3 : conn (conn (conn Z X) Y) W - conn (conn (conn X Z) Y) W =
+      conn (conn (bracket emb Z X) Y) W := by
+    rw [← sl]; congr 1; rw [← sl, t]
+  have p4 : conn (conn Z (conn Y X)) W - conn (conn Z (conn X Y)) W =
+      conn (conn Z (-(bracket emb X Y))) W := by
+    rw [← sl]; congr 1; rw [← sr]; congr 1; rw [t]; abel
+  have p5 : conn (conn X (conn Z Y)) W - conn (conn X (conn Y Z)) W =
+      conn (conn X (-(bracket emb Y Z))) W := by
+    rw [← sl]; congr 1; rw [← sr]; congr 1; rw [t]; abel
+  have p6 : conn (conn Y (conn X Z)) W - conn (conn Y (conn Z X)) W =
+      conn (conn Y (-(bracket emb Z X))) W := by
+    rw [← sl]; congr 1; rw [← sr]; congr 1; rw [t]; abel
+  -- Combine all 12 terms into the 6 paired expressions
+  -- The 12 terms after abel_nf grouping: rearrange to form the 6 differences
+  calc _ = (conn (conn (conn X Y) Z) W - conn (conn (conn Y X) Z) W) +
+           (conn (conn (conn Y Z) X) W - conn (conn (conn Z Y) X) W) +
+           (conn (conn (conn Z X) Y) W - conn (conn (conn X Z) Y) W) +
+           (conn (conn Z (conn Y X)) W - conn (conn Z (conn X Y)) W) +
+           (conn (conn X (conn Z Y)) W - conn (conn X (conn Y Z)) W) +
+           (conn (conn Y (conn X Z)) W - conn (conn Y (conn Z X)) W) := by abel
+    _ = conn (conn (bracket emb X Y) Z) W + conn (conn (bracket emb Y Z) X) W +
+        conn (conn (bracket emb Z X) Y) W +
+        conn (conn Z (-(bracket emb X Y))) W + conn (conn X (-(bracket emb Y Z))) W +
+        conn (conn Y (-(bracket emb Z X))) W := by rw [p1, p2, p3, p4, p5, p6]
+    _ = conn (conn (bracket emb X Y) Z) W - conn (conn Z (bracket emb X Y)) W +
+        (conn (conn (bracket emb Y Z) X) W - conn (conn X (bracket emb Y Z)) W) +
+        (conn (conn (bracket emb Z X) Y) W - conn (conn Y (bracket emb Z X)) W) := by
+      simp only [conn_neg_right conn ha, conn_neg_left conn hal]; abel
+    _ = conn (bracket emb (bracket emb X Y) Z) W +
+        conn (bracket emb (bracket emb Y Z) X) W +
+        conn (bracket emb (bracket emb Z X) Y) W := by
+      rw [← sl, ← t, ← sl, ← t, ← sl, ← t]
+    _ = conn (bracket emb (bracket emb X Y) Z + bracket emb (bracket emb Y Z) X +
+             bracket emb (bracket emb Z X) Y) W := by
+      rw [← hal, ← hal]
+    _ = conn (-(bracket emb Z (bracket emb X Y) + bracket emb X (bracket emb Y Z) +
+                bracket emb Y (bracket emb Z X))) W := by
+      congr 1; rw [bracket_antisymm emb (bracket emb X Y) Z,
+                    bracket_antisymm emb (bracket emb Y Z) X,
+                    bracket_antisymm emb (bracket emb Z X) Y]; abel
+    _ = conn (-(0 : V)) W := by rw [jacobi_identity emb Z X Y]
+    _ = conn 0 W := by rw [neg_zero]
+    _ = 0 := conn_zero_left conn hal W
+
+end SecondBianchi
+
+-- ============================================================
+-- Ricci identity: [∇_X, ∇_Y]Z = Rm(X,Y)Z for torsion-free ∇
+-- ============================================================
+
+section RicciIdentity
+variable {k R V : Type*}
+variable [Field k] [CommRing R] [Algebra k R]
+variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+
+def secondCovDerivCommutator (conn : V → V → V) (X Y Z : V) : V :=
+  conn X (conn Y Z) - conn Y (conn X Z) - conn (conn X Y - conn Y X) Z
+
+theorem ricci_identity
+    (emb : DerivationEmbedding k R V) (conn : V → V → V)
+    (_hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (h_tf : IsTorsionFree emb conn) (X Y Z : V) :
+    secondCovDerivCommutator conn X Y Z = Rm emb conn X Y Z := by
+  unfold secondCovDerivCommutator Rm
+  rw [(h_tf X Y).symm]
+
+end RicciIdentity
+
+-- ============================================================
+-- Ricci tensor and scalar curvature
+-- ============================================================
+
+section RicciTensor
+variable {k R V : Type*}
+variable [Field k] [CommRing R] [Algebra k R]
+variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+
+noncomputable def RcEndo (emb : DerivationEmbedding k R V) (conn : V → V → V)
+    (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : ∀ (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : ∀ X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (X Z : V) : V →ₗ[R] V where
+  toFun Y := Rm emb conn Y X Z
+  map_add' Y₁ Y₂ := Rm_add_X emb conn ha hal Y₁ Y₂ X Z
+  map_smul' f Y := by
+    simp only [RingHom.id_apply]; exact Rm_smul_X emb conn hal hsl hl f Y X Z
+
+noncomputable def Rc (emb : DerivationEmbedding k R V) (conn : V → V → V)
+    (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : ∀ (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : ∀ X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (atr : AbstractTrace R V) (X Z : V) : R :=
+  atr.tr (RcEndo emb conn ha hal hsl hl X Z)
+
+end RicciTensor

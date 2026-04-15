@@ -1,281 +1,573 @@
 import Mathlib.LinearAlgebra.Multilinear.Basic
+import Mathlib.LinearAlgebra.Multilinear.Curry
+import DifferentialGeometry.Synthetic.Algebra.VectorFieldAlgebra
 
-set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
-set_option linter.style.emptyLine false
+/-!
+# Tensor Algebra
 
-namespace DifferentialGeometry
-
-/-
-  ## Tensor Calculus
+`TensorData R V r s` is a type alias for `MultilinearMap`.
+Contraction uses `AbstractTrace.tr`.
 -/
 
-/-- Pure Tensor Algebra (Layer 1): Depends only on module structure, no geometry or calculus.
-This is implemented by the analytic backend using multidimensional arrays. -/
+set_option autoImplicit false
+set_option linter.unusedSectionVars false
 
-abbrev TensorData (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] (r s : ℕ) :=
-  MultilinearMap R (fun _ : Fin s => V) (MultilinearMap R (fun _ : Fin r => (V →ₗ[R] R)) R)
+namespace SyntheticTensor
 
-instance {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] {r s : ℕ} : Zero (TensorData R V r s) := inferInstanceAs (Zero (MultilinearMap R (fun _ : Fin s => V) (MultilinearMap R (fun _ : Fin r => (V →ₗ[R] R)) R)))
-instance {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] {r s : ℕ} : Add (TensorData R V r s) := inferInstanceAs (Add (MultilinearMap R (fun _ : Fin s => V) (MultilinearMap R (fun _ : Fin r => (V →ₗ[R] R)) R)))
-instance {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] {r s : ℕ} : SMul R (TensorData R V r s) := inferInstanceAs (SMul R (MultilinearMap R (fun _ : Fin s => V) (MultilinearMap R (fun _ : Fin r => (V →ₗ[R] R)) R)))
-def scalarToData {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] (f : R) : TensorData R V 0 0 :=
-  MultilinearMap.constOfIsEmpty R (fun _ : Fin 0 => V)
-    (MultilinearMap.constOfIsEmpty R (fun _ : Fin 0 => (V →ₗ[R] R)) f)
+-- ============================================================
+-- TensorData: the transparent tensor type
+-- ============================================================
 
-def evalLinear {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] (v : V) : (V →ₗ[R] R) →ₗ[R] R where
-  toFun w := w v
+/-- A (r,s)-tensor is a multilinear map: s vectors → r covectors → scalar. -/
+abbrev TensorData (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V]
+    (r s : ℕ) :=
+  MultilinearMap R (fun _ : Fin s => V)
+    (MultilinearMap R (fun _ : Fin r => (V →ₗ[R] R)) R)
+
+/-- AbstractTensor is definitionally TensorData. -/
+abbrev AbstractTensor (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V]
+    (r s : ℕ) := TensorData R V r s
+
+-- ============================================================
+-- Basic helpers
+-- ============================================================
+
+section Helpers
+variable {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V]
+
+/-- Evaluation linear map: evaluates a covector at a vector. -/
+def evalLinear (v : V) : (V →ₗ[R] R) →ₗ[R] R where
+  toFun α := α v
   map_add' _ _ := rfl
   map_smul' _ _ := rfl
 
-def vectorToData {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] (v : V) : TensorData R V 1 0 :=
+/-- Scalar as a (0,0)-tensor. -/
+def scalarToData (f : R) : TensorData R V 0 0 :=
+  MultilinearMap.constOfIsEmpty R (fun _ : Fin 0 => V)
+    (MultilinearMap.constOfIsEmpty R (fun _ : Fin 0 => (V →ₗ[R] R)) f)
+
+/-- Vector as a (1,0)-tensor: v ↦ (α ↦ α(v)). -/
+def vectorToData (v : V) : TensorData R V 1 0 :=
   MultilinearMap.constOfIsEmpty R (fun _ : Fin 0 => V)
     (MultilinearMap.ofSubsingleton R (V →ₗ[R] R) R (0 : Fin 1) (evalLinear v))
 
-class TensorAlgebra (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] where
-  /-- Generic graded tensor type (r: contravariant, s: covariant) -/
-  AbstractTensor : ℕ → ℕ → Type
+/-- Covector as a (0,1)-tensor: α ↦ (v ↦ α(v)). -/
+def covectorToData (α : V →ₗ[R] R) : TensorData R V 0 1 where
+  toFun m := MultilinearMap.constOfIsEmpty R (fun _ : Fin 0 => (V →ₗ[R] R)) (α (m 0))
+  map_update_add' m i x y := by
+    have hi : i = 0 := Subsingleton.elim _ _; subst hi
+    simp only [Function.update_self]
+    ext n; simp only [MultilinearMap.constOfIsEmpty_apply, MultilinearMap.add_apply]
+    exact map_add α x y
+  map_update_smul' m i c x := by
+    have hi : i = 0 := Subsingleton.elim _ _; subst hi
+    simp only [Function.update_self]
+    ext n; simp only [MultilinearMap.constOfIsEmpty_apply, MultilinearMap.smul_apply, smul_eq_mul]
+    exact α.map_smul c x
 
-  add {r s : ℕ} : AbstractTensor r s → AbstractTensor r s → AbstractTensor r s -- done
-  smul {r s : ℕ} : R → AbstractTensor r s → AbstractTensor r s -- done
-  tensor_prod {r1 s1 r2 s2 : ℕ} : AbstractTensor r1 s1 → AbstractTensor r2 s2 → AbstractTensor (r1 + r2) (s1 + s2) -- done
+@[simp] theorem covectorToData_eval (α : V →ₗ[R] R) (v : V) :
+    covectorToData (R := R) α ![v] ![] = α v := rfl
 
-  -- Embedding & Extraction
-  fromData {r s : ℕ} : TensorData R V r s → AbstractTensor r s
-  toData {r s : ℕ} : AbstractTensor r s → TensorData R V r s
+end Helpers
 
-  -- Identity Operator (Kronecker Delta)
-  delta_tensor : AbstractTensor 1 1
+-- ============================================================
+-- Tensor evaluation and extensionality
+-- ============================================================
 
-  -- Extraction
-  toScalar : AbstractTensor 0 0 → R
+section EvalExt
+variable {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V]
 
-  -- Permutations (Routing Mechanism)
-  swap_contravariant {r s : ℕ} (i j : Fin r) : AbstractTensor r s → AbstractTensor r s
-  swap_covariant {r s : ℕ} (i j : Fin s) : AbstractTensor r s → AbstractTensor r s
+/-- Evaluate a tensor at vectors and covectors. -/
+def tensor_eval {r s : ℕ} (T : TensorData R V r s)
+    (vs : Fin s → V) (αs : Fin r → (V →ₗ[R] R)) : R :=
+  T vs αs
 
-  /-- General contraction between one contravariant and one covariant slot -/
-  contract {r s : ℕ} : AbstractTensor (r + 1) (s + 1) → AbstractTensor r s
+/-- Tensor extensionality: two tensors are equal iff they agree on all inputs. -/
+theorem tensor_ext {r s : ℕ} (T₁ T₂ : TensorData R V r s)
+    (h : ∀ vs αs, tensor_eval T₁ vs αs = tensor_eval T₂ vs αs) : T₁ = T₂ := by
+  ext vs αs; exact h vs αs
 
-  -- Multilinear Data Binding Ops
-  data_tensor_prod {r1 s1 r2 s2 : ℕ} : TensorData R V r1 s1 → TensorData R V r2 s2 → TensorData R V (r1 + r2) (s1 + s2)
-  data_contract {r s : ℕ} : TensorData R V (r + 1) (s + 1) → TensorData R V r s
+end EvalExt
 
-  --  Axioms:
-  -- 1. Linearity of Contraction:
-  contract_add {r s : ℕ} : ∀ T1 T2 : AbstractTensor (r + 1) (s + 1), contract (add T1 T2) = add (contract T1) (contract T2)
-  contract_smul {r s : ℕ} : ∀ (f : R) (T : AbstractTensor (r + 1) (s + 1)), contract (smul f T) = smul f (contract T)
+-- ============================================================
+-- Swap operations
+-- ============================================================
 
-  -- Evaluation Isomorphism Axioms
-  fromData_toData {r s : ℕ} : ∀ (T : AbstractTensor r s), fromData (toData T) = T
-  toData_fromData {r s : ℕ} : ∀ (D : TensorData R V r s), toData (fromData D) = D
-  toData_add {r s : ℕ} : ∀ T1 T2 : AbstractTensor r s, toData (add T1 T2) = toData T1 + toData T2
-  toData_smul {r s : ℕ} : ∀ (c : R) (T : AbstractTensor r s), toData (smul c T) = c • toData T
-  toData_swap_covariant {r s : ℕ} : ∀ (i j : Fin s) (T : AbstractTensor r s) (m : Fin s → V) (n : Fin r → (V →ₗ[R] R)),
-    toData (swap_covariant i j T) m n = toData T (m ∘ Equiv.swap i j) n
-  toData_tensor_prod {r1 s1 r2 s2 : ℕ} : ∀ T1 : AbstractTensor r1 s1, ∀ T2 : AbstractTensor r2 s2,
-    toData (tensor_prod T1 T2) = data_tensor_prod (toData T1) (toData T2)
-  toData_contract {r s : ℕ} : ∀ T : AbstractTensor (r + 1) (s + 1),
-    toData (contract T) = data_contract (toData T)
+section Swap
+variable {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V]
 
-  -- Universal Data-Layer Axioms
-  
-  -- Evaluation of double contraction of any generic D ⊗ X ⊗ Y uniformly evaluates to prepending to parameter array
-  data_eval_contract_contract : ∀ {r s : ℕ} (D : TensorData R V r (s + 2)) (X Y : V) (m : Fin s → V) (n : Fin r → (V →ₗ[R] R)),
-    (data_contract (r:=r) (s:=s) (data_contract (r:=r+1) (s:=s+1) (data_tensor_prod (r1:=r) (s1:=s+2) (r2:=2) (s2:=0) D (data_tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (vectorToData X) (vectorToData Y))))) m n =
-    D (Fin.cons X (Fin.cons Y m)) n
+/-- Swap two covariant (vector) slots. -/
+def swap_covariant {r s : ℕ} (i j : Fin s) (T : TensorData R V r s) :
+    TensorData R V r s :=
+  T.domDomCongr (Equiv.swap i j)
 
-  -- Data-bound swap axiom parametrized generically across ∀ {r s : ℕ}
-  data_contract_swap_covariant_eval : ∀ {r s : ℕ} (X Y : V) (D : TensorData R V r (s + 2)),
-    data_contract (r:=r) (s:=s) (data_contract (r:=r+1) (s:=s+1) (data_tensor_prod (r1:=r) (s1:=s+2) (r2:=2) (s2:=0) (toData (swap_covariant 0 1 (fromData D))) (data_tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (vectorToData X) (vectorToData Y)))) =
-    data_contract (r:=r) (s:=s) (data_contract (r:=r+1) (s:=s+1) (data_tensor_prod (r1:=r) (s1:=s+2) (r2:=2) (s2:=0) D (data_tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (vectorToData Y) (vectorToData X))))
+/-- Swap two contravariant (covector) slots. -/
+def swap_contravariant {r s : ℕ} (i j : Fin r) (T : TensorData R V r s) :
+    TensorData R V r s where
+  toFun m := (T m).domDomCongr (Equiv.swap i j)
+  map_update_add' := by
+    intro _ m k x y; ext n
+    change (T (Function.update m k (x + y))) (n ∘ Equiv.swap i j) =
+         (T (Function.update m k x)) (n ∘ Equiv.swap i j) +
+         (T (Function.update m k y)) (n ∘ Equiv.swap i j)
+    rw [T.map_update_add]; rfl
+  map_update_smul' := by
+    intro _ m k c x; ext n
+    change (T (Function.update m k (c • x))) (n ∘ Equiv.swap i j) =
+         c • (T (Function.update m k x)) (n ∘ Equiv.swap i j)
+    rw [T.map_update_smul]; rfl
 
-  -- 2. Scalar Definition:
-  toScalar_add : ∀ T1 T2 : AbstractTensor 0 0, toScalar (add T1 T2) = toScalar T1 + toScalar T2
-  toScalar_smul : ∀ (c : R) (T : AbstractTensor 0 0), toScalar (smul c T) = c * toScalar T
+theorem swap_covariant_eval {r s : ℕ} (i j : Fin s) (T : TensorData R V r s)
+    (m : Fin s → V) (n : Fin r → (V →ₗ[R] R)) :
+    swap_covariant i j T m n = T (m ∘ Equiv.swap i j) n := rfl
 
-  tensor_prod_add_left : ∀ {r1 s1 r2 s2 : ℕ} (T1 T2 : AbstractTensor r1 s1) (T3 : AbstractTensor r2 s2),
-    tensor_prod (add T1 T2) T3 = add (tensor_prod T1 T3) (tensor_prod T2 T3)
-  tensor_prod_add_right : ∀ {r1 s1 r2 s2 : ℕ} (T1 : AbstractTensor r1 s1) (T2 T3 : AbstractTensor r2 s2),
-    tensor_prod T1 (add T2 T3) = add (tensor_prod T1 T2) (tensor_prod T1 T3)
-  tensor_prod_smul_left : ∀ {r1 s1 r2 s2 : ℕ} (c : R) (T1 : AbstractTensor r1 s1) (T2 : AbstractTensor r2 s2),
-    tensor_prod (smul c T1) T2 = smul c (tensor_prod T1 T2)
-  tensor_prod_smul_right : ∀ {r1 s1 r2 s2 : ℕ} (c : R) (T1 : AbstractTensor r1 s1) (T2 : AbstractTensor r2 s2),
-    tensor_prod T1 (smul c T2) = smul c (tensor_prod T1 T2)
+theorem swap_contravariant_eval {r s : ℕ} (i j : Fin r) (T : TensorData R V r s)
+    (m : Fin s → V) (n : Fin r → (V →ₗ[R] R)) :
+    swap_contravariant i j T m n = T m (n ∘ Equiv.swap i j) := rfl
 
-namespace TensorAlgebra
+end Swap
 
-/-
-Generalized Contraction.
--/
-def contract_general {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
-  {r s : ℕ} (i : Fin (r + 1)) (j : Fin (s + 1)) (T : AbstractTensor R V (r + 1) (s + 1)) : AbstractTensor R V r s :=
-  contract (swap_covariant 0 j (swap_contravariant 0 i T))
+-- ============================================================
+-- Tensor product
+-- ============================================================
 
-end TensorAlgebra
+section TensorProd
+variable {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V]
 
+/-- Tensor product: (T₁ ⊗ T₂)(m₁m₂)(n₁n₂) = T₁(m₁)(n₁) * T₂(m₂)(n₂). -/
+noncomputable def tensor_prod {r₁ s₁ r₂ s₂ : ℕ}
+    (T₁ : TensorData R V r₁ s₁) (T₂ : TensorData R V r₂ s₂) :
+    TensorData R V (r₁ + r₂) (s₁ + s₂) where
+  toFun m :=
+    { toFun := fun n =>
+        T₁ (m ∘ Fin.castAdd s₂) (n ∘ Fin.castAdd r₂) *
+        T₂ (m ∘ Fin.natAdd s₁) (n ∘ Fin.natAdd r₁)
+      map_update_add' := by
+        intro _ n i x y
+        by_cases h : i.val < r₁
+        · let j : Fin r₁ := ⟨i.val, h⟩
+          have hj : Fin.castAdd r₂ j = i := Fin.ext rfl
+          have hc : ∀ v, Function.update n i v ∘ Fin.castAdd r₂ =
+              Function.update (n ∘ Fin.castAdd r₂) j v := fun v => by
+            rw [← hj]; exact Function.update_comp_eq_of_injective n
+              (Fin.castAdd_injective r₁ r₂) j v
+          have hn : ∀ v, Function.update n i v ∘ Fin.natAdd r₁ = n ∘ Fin.natAdd r₁ := fun v =>
+            Function.update_comp_eq_of_forall_ne n v
+              (fun k => by simp only [ne_eq, Fin.ext_iff, Fin.val_natAdd]; omega)
+          simp only [hc, hn, (T₁ (m ∘ Fin.castAdd s₂)).map_update_add]
+          ring
+        · push Not at h
+          let j : Fin r₂ := ⟨i.val - r₁, by omega⟩
+          have hj : Fin.natAdd r₁ j = i := Fin.ext (by change r₁ + (i.val - r₁) = i.val; omega)
+          have hc : ∀ v, Function.update n i v ∘ Fin.natAdd r₁ =
+              Function.update (n ∘ Fin.natAdd r₁) j v := fun v => by
+            rw [← hj]; exact Function.update_comp_eq_of_injective n
+              (Fin.natAdd_injective r₂ r₁) j v
+          have hn : ∀ v, Function.update n i v ∘ Fin.castAdd r₂ = n ∘ Fin.castAdd r₂ := fun v =>
+            Function.update_comp_eq_of_forall_ne n v
+              (fun k => by simp only [ne_eq, Fin.ext_iff, Fin.val_castAdd]; omega)
+          simp only [hc, hn, (T₂ (m ∘ Fin.natAdd s₁)).map_update_add]
+          ring
+      map_update_smul' := by
+        intro _ n i c x
+        by_cases h : i.val < r₁
+        · let j : Fin r₁ := ⟨i.val, h⟩
+          have hj : Fin.castAdd r₂ j = i := Fin.ext rfl
+          have hc : ∀ v, Function.update n i v ∘ Fin.castAdd r₂ =
+              Function.update (n ∘ Fin.castAdd r₂) j v := fun v => by
+            rw [← hj]; exact Function.update_comp_eq_of_injective n
+              (Fin.castAdd_injective r₁ r₂) j v
+          have hn : ∀ v, Function.update n i v ∘ Fin.natAdd r₁ = n ∘ Fin.natAdd r₁ := fun v =>
+            Function.update_comp_eq_of_forall_ne n v
+              (fun k => by simp only [ne_eq, Fin.ext_iff, Fin.val_natAdd]; omega)
+          simp only [hc, hn, (T₁ (m ∘ Fin.castAdd s₂)).map_update_smul, smul_eq_mul]
+          ring
+        · push Not at h
+          let j : Fin r₂ := ⟨i.val - r₁, by omega⟩
+          have hj : Fin.natAdd r₁ j = i := Fin.ext (by change r₁ + (i.val - r₁) = i.val; omega)
+          have hc : ∀ v, Function.update n i v ∘ Fin.natAdd r₁ =
+              Function.update (n ∘ Fin.natAdd r₁) j v := fun v => by
+            rw [← hj]; exact Function.update_comp_eq_of_injective n
+              (Fin.natAdd_injective r₂ r₁) j v
+          have hn : ∀ v, Function.update n i v ∘ Fin.castAdd r₂ = n ∘ Fin.castAdd r₂ := fun v =>
+            Function.update_comp_eq_of_forall_ne n v
+              (fun k => by simp only [ne_eq, Fin.ext_iff, Fin.val_castAdd]; omega)
+          simp only [hc, hn, (T₂ (m ∘ Fin.natAdd s₁)).map_update_smul, smul_eq_mul]
+          ring }
+  map_update_add' := by
+    intro _ m i x y; ext n
+    simp only [MultilinearMap.coe_mk, MultilinearMap.add_apply]
+    by_cases h : i.val < s₁
+    · let j : Fin s₁ := ⟨i.val, h⟩
+      have hj : Fin.castAdd s₂ j = i := Fin.ext rfl
+      have hc : ∀ v, Function.update m i v ∘ Fin.castAdd s₂ =
+          Function.update (m ∘ Fin.castAdd s₂) j v := fun v => by
+        rw [← hj]; exact Function.update_comp_eq_of_injective m
+          (Fin.castAdd_injective s₁ s₂) j v
+      have hn : ∀ v, Function.update m i v ∘ Fin.natAdd s₁ = m ∘ Fin.natAdd s₁ := fun v =>
+        Function.update_comp_eq_of_forall_ne m v
+          (fun k => by simp only [ne_eq, Fin.ext_iff, Fin.val_natAdd]; omega)
+      simp only [hc, hn, T₁.map_update_add, MultilinearMap.add_apply]
+      ring
+    · push Not at h
+      let j : Fin s₂ := ⟨i.val - s₁, by omega⟩
+      have hj : Fin.natAdd s₁ j = i := Fin.ext (by change s₁ + (i.val - s₁) = i.val; omega)
+      have hc : ∀ v, Function.update m i v ∘ Fin.natAdd s₁ =
+          Function.update (m ∘ Fin.natAdd s₁) j v := fun v => by
+        rw [← hj]; exact Function.update_comp_eq_of_injective m
+          (Fin.natAdd_injective s₂ s₁) j v
+      have hn : ∀ v, Function.update m i v ∘ Fin.castAdd s₂ = m ∘ Fin.castAdd s₂ := fun v =>
+        Function.update_comp_eq_of_forall_ne m v
+          (fun k => by simp only [ne_eq, Fin.ext_iff, Fin.val_castAdd]; omega)
+      simp only [hc, hn, T₂.map_update_add, MultilinearMap.add_apply]
+      ring
+  map_update_smul' := by
+    intro _ m i c x; ext n
+    simp only [MultilinearMap.coe_mk, MultilinearMap.smul_apply, smul_eq_mul]
+    by_cases h : i.val < s₁
+    · let j : Fin s₁ := ⟨i.val, h⟩
+      have hj : Fin.castAdd s₂ j = i := Fin.ext rfl
+      have hc : ∀ v, Function.update m i v ∘ Fin.castAdd s₂ =
+          Function.update (m ∘ Fin.castAdd s₂) j v := fun v => by
+        rw [← hj]; exact Function.update_comp_eq_of_injective m
+          (Fin.castAdd_injective s₁ s₂) j v
+      have hn : ∀ v, Function.update m i v ∘ Fin.natAdd s₁ = m ∘ Fin.natAdd s₁ := fun v =>
+        Function.update_comp_eq_of_forall_ne m v
+          (fun k => by simp only [ne_eq, Fin.ext_iff, Fin.val_natAdd]; omega)
+      simp only [hc, hn, T₁.map_update_smul, MultilinearMap.smul_apply, smul_eq_mul]
+      ring
+    · push Not at h
+      let j : Fin s₂ := ⟨i.val - s₁, by omega⟩
+      have hj : Fin.natAdd s₁ j = i := Fin.ext (by change s₁ + (i.val - s₁) = i.val; omega)
+      have hc : ∀ v, Function.update m i v ∘ Fin.natAdd s₁ =
+          Function.update (m ∘ Fin.natAdd s₁) j v := fun v => by
+        rw [← hj]; exact Function.update_comp_eq_of_injective m
+          (Fin.natAdd_injective s₂ s₁) j v
+      have hn : ∀ v, Function.update m i v ∘ Fin.castAdd s₂ = m ∘ Fin.castAdd s₂ := fun v =>
+        Function.update_comp_eq_of_forall_ne m v
+          (fun k => by simp only [ne_eq, Fin.ext_iff, Fin.val_castAdd]; omega)
+      simp only [hc, hn, T₂.map_update_smul, MultilinearMap.smul_apply, smul_eq_mul]
+      ring
 
--- The following is used to protect previous structure from failing.
+theorem tensor_prod_eval {r₁ s₁ r₂ s₂ : ℕ}
+    (T₁ : TensorData R V r₁ s₁) (T₂ : TensorData R V r₂ s₂)
+    (m : Fin (s₁ + s₂) → V) (n : Fin (r₁ + r₂) → (V →ₗ[R] R)) :
+    tensor_prod T₁ T₂ m n =
+    T₁ (m ∘ Fin.castAdd s₂) (n ∘ Fin.castAdd r₂) *
+    T₂ (m ∘ Fin.natAdd s₁) (n ∘ Fin.natAdd r₁) := rfl
 
-variable {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
+end TensorProd
 
-def fromScalar (f : R) : TensorAlgebra.AbstractTensor R V 0 0 := TensorAlgebra.fromData (scalarToData f)
-def fromVector (X : V) : TensorAlgebra.AbstractTensor R V 1 0 := TensorAlgebra.fromData (vectorToData X)
+-- ============================================================
+-- Covector from tensor (via curryLeft) — needed before AbstractTrace
+-- ============================================================
 
-lemma vectorToData_add {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] (X Y : V) :
-  vectorToData (R:=R) (V:=V) (X + Y) = vectorToData (R:=R) X + vectorToData (R:=R) Y := by
+section CovectorFromTensor
+variable {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V]
+
+/-- Extract a covector from a tensor by fixing remaining slots.
+    φ(w) = D(Fin.cons w m)(n), linear in w via curryLeft. -/
+def covector_from_tensor {r s : ℕ} (D : TensorData R V r (s + 1))
+    (m : Fin s → V) (n : Fin r → (V →ₗ[R] R)) : V →ₗ[R] R where
+  toFun w := D (Fin.cons w m) n
+  map_add' x y := by
+    change D.curryLeft (x + y) m n = D.curryLeft x m n + D.curryLeft y m n
+    rw [D.curryLeft.map_add, MultilinearMap.add_apply, MultilinearMap.add_apply]
+  map_smul' c x := by
+    change D.curryLeft (c • x) m n = c • (D.curryLeft x m n)
+    rw [D.curryLeft.map_smul, MultilinearMap.smul_apply, MultilinearMap.smul_apply]
+
+end CovectorFromTensor
+
+-- ============================================================
+-- Endomorphism → (1,1)-tensor (needed before AbstractTrace)
+-- ============================================================
+
+section EndoToTensorDef
+variable {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V]
+
+/-- Convert an endomorphism to a (1,1)-tensor: T_L(v)(α) = α(L(v)).
+    Defined before AbstractTrace so it can appear in the structure. -/
+def endo_to_tensor (L : V →ₗ[R] V) : TensorData R V 1 1 where
+  toFun m :=
+    { toFun := fun n => n 0 (L (m 0))
+      map_update_add' := by
+        intro _ n i x y
+        have hi := Subsingleton.elim i 0; subst hi
+        simp [Function.update_self]
+      map_update_smul' := by
+        intro _ n i c x
+        have hi := Subsingleton.elim i 0; subst hi
+        simp [Function.update_self, smul_eq_mul] }
+  map_update_add' := by
+    intro _ m i x y; ext n
+    have hi := Subsingleton.elim i 0; subst hi
+    simp only [Function.update_self, MultilinearMap.coe_mk, MultilinearMap.add_apply, map_add]
+  map_update_smul' := by
+    intro _ m i c x; ext n
+    have hi := Subsingleton.elim i 0; subst hi
+    simp only [Function.update_self, MultilinearMap.coe_mk, MultilinearMap.smul_apply,
+      smul_eq_mul, map_smul]
+
+theorem endo_to_tensor_eval (L : V →ₗ[R] V) (v : V) (α : V →ₗ[R] R) :
+    endo_to_tensor L ![v] ![α] = α (L v) := rfl
+
+end EndoToTensorDef
+
+-- ============================================================
+-- AbstractTrace: trace on End(V) + general tensor contraction
+-- ============================================================
+
+/-- Abstract trace on endomorphisms of V, plus general tensor contraction.
+    NOT Mathlib's `LinearMap.trace` (which needs `Module.Free` = parallelizable manifold).
+    - `tr` : trace on endomorphisms V →ₗ[R] V
+    - `tensor_contract` : general (r+1, s+1) → (r, s) contraction
+    - `data_eval_single_contract` : connects tensor_contract to evaluation -/
+structure AbstractTrace (R V : Type*)
+    [CommRing R] [AddCommGroup V] [Module R V] where
+  /-- Trace on endomorphisms. -/
+  tr : (V →ₗ[R] V) →ₗ[R] R
+  /-- tr(α.smulRight v) = α(v) -/
+  trace_outer : ∀ (v : V) (α : V →ₗ[R] R), tr (α.smulRight v) = α v
+  /-- tr(AB) = tr(BA) -/
+  trace_comm : ∀ (A B : V →ₗ[R] V), tr (A * B) = tr (B * A)
+  /-- General contraction: (r+1, s+1) → (r, s). Contracts first co/contra pair. -/
+  tensor_contract {r s : ℕ} :
+    TensorData R V (r + 1) (s + 1) → TensorData R V r s
+  /-- tensor_contract is additive. -/
+  tensor_contract_add {r s : ℕ} (T₁ T₂ : TensorData R V (r + 1) (s + 1)) :
+    tensor_contract (T₁ + T₂) = tensor_contract T₁ + tensor_contract T₂
+  /-- tensor_contract is R-linear. -/
+  tensor_contract_smul {r s : ℕ} (c : R) (T : TensorData R V (r + 1) (s + 1)) :
+    tensor_contract (c • T) = c • tensor_contract T
+  /-- Evaluation axiom: contract(D ⊗ vectorToData(v)) = D evaluated with v in first co slot. -/
+  data_eval_single_contract {r s : ℕ}
+    (D : TensorData R V r (s + 1)) (v : V)
+    (m : Fin s → V) (n : Fin r → (V →ₗ[R] R)) :
+    (tensor_contract (tensor_prod (s₂ := 0) D (vectorToData (R := R) v))) m n =
+    D (Fin.cons v m) n
+  /-- Dual evaluation axiom: contracting a (0, s₁+1)-tensor A with a (r+1, s₂)-tensor B
+      pairs A's first covariant slot with B's first contravariant slot.
+      The result plugs the covector `v ↦ A(v, m₁)` into B's first contra slot.
+      When A = covectorToData(α) (s₁ = 0), this reduces to plugging α directly. -/
+  data_eval_single_contract_dual {r s₁ s₂ : ℕ}
+    (A : TensorData R V 0 (s₁ + 1)) (B : TensorData R V (r + 1) s₂)
+    (m : Fin (s₁ + s₂) → V) (n : Fin r → (V →ₗ[R] R)) :
+    (tensor_contract
+      ((show 0 + (r + 1) = r + 1 from by omega) ▸
+       (show (s₁ + 1) + s₂ = (s₁ + s₂) + 1 from by omega) ▸
+       tensor_prod (r₁ := 0) (s₁ := s₁ + 1) (r₂ := r + 1) (s₂ := s₂) A B)) m n =
+    B (m ∘ Fin.natAdd s₁) (Fin.cons (covector_from_tensor A (m ∘ Fin.castAdd s₂) ![]) n)
+  /-- Consistency: tensor_contract on the (1,1)-tensor representation of an endomorphism
+      agrees with tr. In any basis model this is immediate from the coordinate definition. -/
+  tensor_contract_endo (L : V →ₗ[R] V) :
+    (tensor_contract (endo_to_tensor L)) ![] ![] = tr L
+
+-- ============================================================
+-- Scalar and vector operations
+-- ============================================================
+
+section ScalarVector
+variable {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V]
+
+def toScalar (T : TensorData R V 0 0) : R := T ![] ![]
+def fromScalar (f : R) : TensorData R V 0 0 := scalarToData f
+def fromVector (v : V) : TensorData R V 1 0 := vectorToData v
+
+theorem toScalar_fromScalar (f : R) : toScalar (fromScalar f : TensorData R V 0 0) = f := rfl
+
+theorem fromVector_eval (v : V) (α : V →ₗ[R] R) :
+    vectorToData (R := R) v ![] ![α] = α v := rfl
+
+end ScalarVector
+
+-- ============================================================
+-- Delta tensor, outerProduct (endo_to_tensor moved before AbstractTrace)
+-- ============================================================
+
+section EndoTensor
+variable {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V]
+
+/-- Kronecker delta tensor = identity endomorphism as (1,1)-tensor. -/
+def delta_tensor : TensorData R V 1 1 := endo_to_tensor LinearMap.id
+
+theorem delta_tensor_eval (v : V) (α : V →ₗ[R] R) :
+    (delta_tensor : TensorData R V 1 1) ![v] ![α] = α v := rfl
+
+/-- Outer product as an endomorphism: (α.smulRight v)(w) = α(w) • v. -/
+def outerProduct (v : V) (α : V →ₗ[R] R) : V →ₗ[R] V := α.smulRight v
+
+end EndoTensor
+
+-- ============================================================
+-- Contraction via AbstractTrace
+-- ============================================================
+
+section Contract
+variable {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V]
+
+/-- Contract (trace) an endomorphism using AbstractTrace. -/
+def contract (atr : AbstractTrace R V) (L : V →ₗ[R] V) : R := atr.tr L
+
+/-- Contraction of outer product = evaluation (from trace_outer). -/
+theorem contract_outerProduct (atr : AbstractTrace R V) (v : V) (α : V →ₗ[R] R) :
+    contract atr (outerProduct v α) = α v :=
+  atr.trace_outer v α
+
+/-- Contraction commutes: tr(AB) = tr(BA). -/
+theorem contract_comm (atr : AbstractTrace R V) (A B : V →ₗ[R] V) :
+    contract atr (A * B) = contract atr (B * A) :=
+  atr.trace_comm A B
+
+theorem contract_add (atr : AbstractTrace R V) (L₁ L₂ : V →ₗ[R] V) :
+    contract atr (L₁ + L₂) = contract atr L₁ + contract atr L₂ :=
+  map_add atr.tr L₁ L₂
+
+theorem contract_smul (atr : AbstractTrace R V) (c : R) (L : V →ₗ[R] V) :
+    contract atr (c • L) = c * contract atr L := by
+  change atr.tr (c • L) = c * atr.tr L
+  rw [map_smul]; rfl
+
+end Contract
+
+-- ============================================================
+-- Evaluation theorem (uses covector_from_tensor from above)
+-- ============================================================
+
+section EvalContract
+variable {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V]
+
+/-- Build the endomorphism for data_eval_single_contract:
+    w ↦ φ(w) • v where φ(w) = D(Fin.cons w m)(n). -/
+def eval_endo {r s : ℕ} (D : TensorData R V r (s + 1)) (v : V)
+    (m : Fin s → V) (n : Fin r → (V →ₗ[R] R)) : V →ₗ[R] V :=
+  outerProduct v (covector_from_tensor D m n)
+
+/-- The key evaluation theorem: contracting the endomorphism built from
+    D and v gives D evaluated at v. Uses trace_outer from AbstractTrace. -/
+theorem data_eval_single_contract (atr : AbstractTrace R V) {r s : ℕ}
+    (D : TensorData R V r (s + 1)) (v : V)
+    (m : Fin s → V) (n : Fin r → (V →ₗ[R] R)) :
+    contract atr (eval_endo D v m n) = D (Fin.cons v m) n := by
+  unfold contract eval_endo outerProduct
+  rw [atr.trace_outer]
+  rfl
+
+end EvalContract
+
+-- ============================================================
+-- Bilinearity of tensor operations
+-- ============================================================
+
+section Bilinearity
+variable {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V]
+
+theorem tensor_eval_add {r s : ℕ} (T₁ T₂ : TensorData R V r s)
+    (vs : Fin s → V) (αs : Fin r → (V →ₗ[R] R)) :
+    tensor_eval (T₁ + T₂) vs αs = tensor_eval T₁ vs αs + tensor_eval T₂ vs αs := by
+  simp [tensor_eval, MultilinearMap.add_apply]
+
+theorem tensor_eval_smul {r s : ℕ} (c : R) (T : TensorData R V r s)
+    (vs : Fin s → V) (αs : Fin r → (V →ₗ[R] R)) :
+    tensor_eval (c • T) vs αs = c * tensor_eval T vs αs := by
+  simp [tensor_eval, MultilinearMap.smul_apply, smul_eq_mul]
+
+theorem vectorToData_add (X Y : V) :
+    vectorToData (R := R) (X + Y) = vectorToData X + vectorToData Y := by
   ext m n
-  dsimp [vectorToData, evalLinear, MultilinearMap.constOfIsEmpty, MultilinearMap.ofSubsingleton]
-  rw [LinearMap.map_add]
+  simp [vectorToData, evalLinear, MultilinearMap.constOfIsEmpty, MultilinearMap.ofSubsingleton,
+    LinearMap.map_add]
 
-lemma vectorToData_smul {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V] (c : R) (X : V) :
-  vectorToData (R:=R) (V:=V) (c • X) = c • vectorToData (R:=R) X := by
+theorem vectorToData_smul (c : R) (X : V) :
+    vectorToData (R := R) (c • X) = c • vectorToData X := by
   ext m n
-  dsimp [vectorToData, evalLinear, MultilinearMap.constOfIsEmpty, MultilinearMap.ofSubsingleton]
-  rw [LinearMap.map_smul]
-  rfl
+  simp [vectorToData, evalLinear, MultilinearMap.constOfIsEmpty, MultilinearMap.ofSubsingleton,
+    smul_eq_mul]
 
-lemma fromVector_add (X Y : V) : fromVector (R:=R) (X + Y) = TensorAlgebra.add (fromVector (R:=R) X) (fromVector (R:=R) Y) := by
-  dsimp [fromVector]
-  rw [vectorToData_add (R:=R) X Y]
-  have h_add : TensorAlgebra.toData (TensorAlgebra.add (TensorAlgebra.fromData (vectorToData (R:=R) X)) (TensorAlgebra.fromData (vectorToData (R:=R) Y))) =
-    vectorToData (R:=R) X + vectorToData (R:=R) Y := by
-    rw [TensorAlgebra.toData_add, TensorAlgebra.toData_fromData, TensorAlgebra.toData_fromData]
-  rw [← h_add, TensorAlgebra.fromData_toData]
+end Bilinearity
 
+-- ============================================================
+-- General contraction via index permutation + tensor_contract
+-- ============================================================
 
-lemma fromVector_smul (c : R) (X : V) : fromVector (R:=R) (c • X) = TensorAlgebra.smul c (fromVector (R:=R) X) := by
-  dsimp [fromVector]
-  rw [vectorToData_smul (R:=R) c X]
-  have h_smul : TensorAlgebra.toData (TensorAlgebra.smul c (TensorAlgebra.fromData (vectorToData (R:=R) X))) = c • vectorToData (R:=R) X := by
-    rw [TensorAlgebra.toData_smul, TensorAlgebra.toData_fromData]
-  rw [← h_smul, TensorAlgebra.fromData_toData]
+section GeneralContract
+variable {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V]
 
-lemma contract_swap_covariant_eval {r s : ℕ} (X Y : V) (T : TensorAlgebra.AbstractTensor R V r (s + 2)) :
-    TensorAlgebra.contract (r:=r) (s:=s) (TensorAlgebra.contract (r:=r+1) (s:=s+1) (TensorAlgebra.tensor_prod (r1:=r) (s1:=s+2) (r2:=2) (s2:=0) (TensorAlgebra.swap_covariant 0 1 T) (TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector X) (fromVector Y)))) =
-    TensorAlgebra.contract (r:=r) (s:=s) (TensorAlgebra.contract (r:=r+1) (s:=s+1) (TensorAlgebra.tensor_prod (r1:=r) (s1:=s+2) (r2:=2) (s2:=0) T (TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector Y) (fromVector X)))) := by
-  have hz : TensorAlgebra.toData (TensorAlgebra.contract (r:=r) (s:=s) (TensorAlgebra.contract (r:=r+1) (s:=s+1) (TensorAlgebra.tensor_prod (r1:=r) (s1:=s+2) (r2:=2) (s2:=0) (TensorAlgebra.swap_covariant 0 1 T) (TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector X) (fromVector Y))))) =
-            TensorAlgebra.toData (TensorAlgebra.contract (r:=r) (s:=s) (TensorAlgebra.contract (r:=r+1) (s:=s+1) (TensorAlgebra.tensor_prod (r1:=r) (s1:=s+2) (r2:=2) (s2:=0) T (TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector Y) (fromVector X))))) := by
-    rw [TensorAlgebra.toData_contract, TensorAlgebra.toData_contract, TensorAlgebra.toData_tensor_prod, TensorAlgebra.toData_contract, TensorAlgebra.toData_contract, TensorAlgebra.toData_tensor_prod]
-    rw [TensorAlgebra.toData_tensor_prod, TensorAlgebra.toData_tensor_prod]
-    have hx : TensorAlgebra.toData (fromVector (R:=R) X) = vectorToData X := TensorAlgebra.toData_fromData _
-    have hy : TensorAlgebra.toData (fromVector (R:=R) Y) = vectorToData Y := TensorAlgebra.toData_fromData _
-    rw [hx, hy]
-    have h_swap := TensorAlgebra.data_contract_swap_covariant_eval X Y (TensorAlgebra.toData T)
-    rw [TensorAlgebra.fromData_toData] at h_swap
-    exact h_swap
-  have h1 : TensorAlgebra.fromData (TensorAlgebra.toData (TensorAlgebra.contract (r:=r) (s:=s) (TensorAlgebra.contract (r:=r+1) (s:=s+1) (TensorAlgebra.tensor_prod (r1:=r) (s1:=s+2) (r2:=2) (s2:=0) (TensorAlgebra.swap_covariant 0 1 T) (TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector X) (fromVector Y)))))) =
-            TensorAlgebra.fromData (TensorAlgebra.toData (TensorAlgebra.contract (r:=r) (s:=s) (TensorAlgebra.contract (r:=r+1) (s:=s+1) (TensorAlgebra.tensor_prod (r1:=r) (s1:=s+2) (r2:=2) (s2:=0) T (TensorAlgebra.tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector Y) (fromVector X)))))) := by
-    rw [hz]
-  rw [TensorAlgebra.fromData_toData, TensorAlgebra.fromData_toData] at h1
-  exact h1
+/-- General contraction at specified index pair (i, j):
+    permute indices so that i→0 (contra) and j→0 (cov), then tensor_contract. -/
+def contract_general (atr : AbstractTrace R V) {r s : ℕ}
+    (i : Fin (r + 1)) (j : Fin (s + 1))
+    (T : TensorData R V (r + 1) (s + 1)) : TensorData R V r s :=
+  atr.tensor_contract (swap_covariant 0 j (swap_contravariant 0 i T))
 
-def tensor_eval {r s : ℕ} (T : TensorAlgebra.AbstractTensor R V r s)
-  (vs : Fin s → V) (αs : Fin r → (V →ₗ[R] R)) : R :=
-  TensorAlgebra.toData T vs αs
+theorem contract_general_add (atr : AbstractTrace R V) {r s : ℕ}
+    (i : Fin (r + 1)) (j : Fin (s + 1))
+    (T₁ T₂ : TensorData R V (r + 1) (s + 1)) :
+    contract_general atr i j (T₁ + T₂) =
+    contract_general atr i j T₁ + contract_general atr i j T₂ := by
+  unfold contract_general
+  -- swap_covariant and swap_contravariant distribute over addition
+  have h_contra : swap_contravariant 0 i (T₁ + T₂) =
+      swap_contravariant 0 i T₁ + swap_contravariant 0 i T₂ := by
+    ext m n; simp [swap_contravariant_eval, MultilinearMap.add_apply]
+  have h_cov : swap_covariant 0 j (swap_contravariant 0 i T₁ + swap_contravariant 0 i T₂) =
+      swap_covariant 0 j (swap_contravariant 0 i T₁) +
+      swap_covariant 0 j (swap_contravariant 0 i T₂) := by
+    ext m n; simp [swap_covariant_eval, MultilinearMap.add_apply]
+  rw [h_contra, h_cov, atr.tensor_contract_add]
 
-lemma tensor_eval_add {r s : ℕ} (T1 T2 : TensorAlgebra.AbstractTensor R V r s)
-  (vs : Fin s → V) (αs : Fin r → (V →ₗ[R] R)) :
-  tensor_eval (TensorAlgebra.add T1 T2) vs αs = tensor_eval T1 vs αs + tensor_eval T2 vs αs := by
-  dsimp [tensor_eval]
-  rw [TensorAlgebra.toData_add]
-  rfl
+theorem contract_general_smul (atr : AbstractTrace R V) {r s : ℕ}
+    (i : Fin (r + 1)) (j : Fin (s + 1))
+    (c : R) (T : TensorData R V (r + 1) (s + 1)) :
+    contract_general atr i j (c • T) =
+    c • contract_general atr i j T := by
+  unfold contract_general
+  have h_contra : swap_contravariant 0 i (c • T) =
+      c • swap_contravariant 0 i T := by
+    ext m n; simp [swap_contravariant_eval, MultilinearMap.smul_apply, smul_eq_mul]
+  have h_cov : swap_covariant 0 j (c • swap_contravariant 0 i T) =
+      c • swap_covariant 0 j (swap_contravariant 0 i T) := by
+    ext m n; simp [swap_covariant_eval, MultilinearMap.smul_apply, smul_eq_mul]
+  rw [h_contra, h_cov, atr.tensor_contract_smul]
 
-lemma tensor_eval_smul {r s : ℕ} (c : R) (T : TensorAlgebra.AbstractTensor R V r s)
-  (vs : Fin s → V) (αs : Fin r → (V →ₗ[R] R)) :
-  tensor_eval (TensorAlgebra.smul c T) vs αs = c * tensor_eval T vs αs := by
-  dsimp [tensor_eval]
-  rw [TensorAlgebra.toData_smul]
-  rfl
+/-- contract_general at (0, 0) is just tensor_contract. -/
+theorem contract_general_0_0 (atr : AbstractTrace R V) {r s : ℕ}
+    (T : TensorData R V (r + 1) (s + 1)) :
+    contract_general atr 0 0 T = atr.tensor_contract T := by
+  unfold contract_general
+  congr 1; ext m n
+  simp [swap_covariant_eval, swap_contravariant_eval, Equiv.swap_self]
 
+end GeneralContract
 
+-- ============================================================
+-- Connecting Properties
+-- ============================================================
 
-lemma tensor_eval_add_left (T : TensorAlgebra.AbstractTensor R V 0 2) (X Y Z : V) :
-  tensor_eval T ![X + Y, Z] ![] = tensor_eval T ![X, Z] ![] + tensor_eval T ![Y, Z] ![] := by
-  dsimp [tensor_eval]
-  have hz : ![X + Y, Z] = Function.update ![X, Z] 0 (X + Y) := by
-    ext i
-    fin_cases i <;> rfl
-  rw [hz]
-  have h_add := MultilinearMap.map_update_add (TensorAlgebra.toData T) ![X, Z] 0 X Y
-  rw [h_add]
-  have hz_x : Function.update ![X, Z] 0 X = ![X, Z] := by
-    ext i
-    fin_cases i <;> rfl
-  have hz_y : Function.update ![X, Z] 0 Y = ![Y, Z] := by
-    ext i
-    fin_cases i <;> rfl
-  rw [hz_x, hz_y]
-  exact MultilinearMap.add_apply _ _ _
+/-- ∇ commutes with trace: X(tr L) = tr([∇_X, L]).
+    Uses commutatorEndo for the R-linear commutator. -/
+def NablaTrComm {k R V : Type*}
+    [Field k] [CommRing R] [Algebra k R]
+    [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+    (emb : DerivationEmbedding k R V) (atr : AbstractTrace R V)
+    (conn_nabla : V → V → V)
+    (conn_add : ∀ X Y Z, conn_nabla X (Y + Z) = conn_nabla X Y + conn_nabla X Z)
+    (conn_leibniz : ∀ X (f : R) Y, conn_nabla X (f • Y) =
+      (emb.embed X) f • Y + f • conn_nabla X Y) : Prop :=
+  ∀ (X : V) (L : V →ₗ[R] V),
+    (emb.embed X) (atr.tr L) = atr.tr (commutatorEndo
+      (emb.embed X).toFun (conn_nabla X)
+      (conn_add X) (conn_leibniz X) L)
 
-lemma tensor_eval_smul_left (T : TensorAlgebra.AbstractTensor R V 0 2) (f : R) (X Y : V) :
-  tensor_eval T ![f • X, Y] ![] = f * tensor_eval T ![X, Y] ![] := by
-  dsimp [tensor_eval]
-  have hz : ![f • X, Y] = Function.update ![X, Y] 0 (f • X) := by
-    ext i
-    fin_cases i <;> rfl
-  rw [hz]
-  have h_smul := MultilinearMap.map_update_smul (TensorAlgebra.toData T) ![X, Y] 0 f X
-  rw [h_smul]
-  have hz_x : Function.update ![X, Y] 0 X = ![X, Y] := by
-    ext i
-    fin_cases i <;> rfl
-  rw [hz_x]
-  exact MultilinearMap.smul_apply _ _ _
+/-- ∂_t commutes with trace.
+    For a time-dependent endomorphism L, if dL is characterized as its time derivative
+    (i.e., for all v, α: α(dL v) = dt(s ↦ α(L s v)) at t), then dt(tr(L)) = tr(dL). -/
+def TimeTrComm {R V Time : Type*}
+    [CommRing R] [AddCommGroup V] [Module R V]
+    (atr : AbstractTrace R V) (td : TimeDerivativeData R Time) : Prop :=
+  ∀ (L : Time → V →ₗ[R] V) (dL : V →ₗ[R] V) (t : Time),
+    (∀ (v : V) (α : V →ₗ[R] R),
+      α (dL v) = (td.dt (fun s => α (L s v))) t) →
+    (td.dt (fun s => atr.tr (L s))) t = atr.tr dL
 
-lemma tensor_eval_add_right (T : TensorAlgebra.AbstractTensor R V 0 2) (X Y Z : V) :
-  tensor_eval T ![X, Y + Z] ![] = tensor_eval T ![X, Y] ![] + tensor_eval T ![X, Z] ![] := by
-  dsimp [tensor_eval]
-  have hz : ![X, Y + Z] = Function.update ![X, Z] 1 (Y + Z) := by
-    ext i
-    fin_cases i <;> rfl
-  rw [hz]
-  have h_add := MultilinearMap.map_update_add (TensorAlgebra.toData T) ![X, Z] 1 Y Z
-  rw [h_add]
-  have hz_x : Function.update ![X, Z] 1 Y = ![X, Y] := by
-    ext i
-    fin_cases i <;> rfl
-  have hz_y : Function.update ![X, Z] 1 Z = ![X, Z] := by
-    ext i
-    fin_cases i <;> rfl
-  rw [hz_x, hz_y]
-  exact MultilinearMap.add_apply _ _ _
-
-lemma tensor_eval_smul_right (T : TensorAlgebra.AbstractTensor R V 0 2) (f : R) (X Y : V) :
-  tensor_eval T ![X, f • Y] ![] = f * tensor_eval T ![X, Y] ![] := by
-  dsimp [tensor_eval]
-  have hz : ![X, f • Y] = Function.update ![X, Y] 1 (f • Y) := by
-    ext i
-    fin_cases i <;> rfl
-  rw [hz]
-  have h_smul := MultilinearMap.map_update_smul (TensorAlgebra.toData T) ![X, Y] 1 f Y
-  rw [h_smul]
-  have hz_x : Function.update ![X, Y] 1 Y = ![X, Y] := by
-    ext i
-    fin_cases i <;> rfl
-  rw [hz_x]
-  exact MultilinearMap.smul_apply _ _ _
-
-
-
-lemma tensor_eval_isomorphism (T : TensorAlgebra.AbstractTensor R V 0 2) (X Y : V) :
-  tensor_eval T ![X, Y] ![] = ((TensorAlgebra.toData (TensorAlgebra.contract (R:=R) (r:=0) (s:=0) (TensorAlgebra.contract (R:=R) (r:=1) (s:=1) (TensorAlgebra.tensor_prod (R:=R) (r1:=0) (s1:=2) (r2:=2) (s2:=0) T (TensorAlgebra.tensor_prod (R:=R) (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector (R:=R) X) (fromVector (R:=R) Y)))))) ![]) ![] := by
-  dsimp [tensor_eval]
-  have step1 : TensorAlgebra.toData (TensorAlgebra.contract (R:=R) (r:=0) (s:=0) (TensorAlgebra.contract (R:=R) (r:=1) (s:=1) (TensorAlgebra.tensor_prod (R:=R) (r1:=0) (s1:=2) (r2:=2) (s2:=0) T (TensorAlgebra.tensor_prod (R:=R) (r1:=1) (s1:=0) (r2:=1) (s2:=0) (fromVector (R:=R) X) (fromVector (R:=R) Y))))) = TensorAlgebra.data_contract (r:=0) (s:=0) (TensorAlgebra.data_contract (r:=1) (s:=1) (TensorAlgebra.data_tensor_prod (r1:=0) (s1:=2) (r2:=2) (s2:=0) (TensorAlgebra.toData T) (TensorAlgebra.data_tensor_prod (r1:=1) (s1:=0) (r2:=1) (s2:=0) (vectorToData (R:=R) X) (vectorToData (R:=R) Y)))) := by
-    rw [TensorAlgebra.toData_contract]
-    rw [TensorAlgebra.toData_contract]
-    rw [TensorAlgebra.toData_tensor_prod]
-    have h_vec1 : TensorAlgebra.toData (fromVector (R:=R) X) = vectorToData (R:=R) X := TensorAlgebra.toData_fromData (vectorToData (R:=R) X)
-    have h_vec2 : TensorAlgebra.toData (fromVector (R:=R) Y) = vectorToData (R:=R) Y := TensorAlgebra.toData_fromData (vectorToData (R:=R) Y)
-    rw [TensorAlgebra.toData_tensor_prod]
-    rw [h_vec1, h_vec2]
-  rw [step1]
-  have step2 := TensorAlgebra.data_eval_contract_contract (r:=0) (s:=0) (TensorAlgebra.toData T) X Y ![] ![]
-  have h_eq : Fin.cons X (Fin.cons Y ![]) = ![X, Y] := by
-    ext i
-    fin_cases i <;> rfl
-  rw [h_eq] at step2
-  exact step2.symm
-
-end DifferentialGeometry
+end SyntheticTensor

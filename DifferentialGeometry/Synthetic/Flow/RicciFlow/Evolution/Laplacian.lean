@@ -1,235 +1,146 @@
-import DifferentialGeometry.Synthetic.Algebra.VectorField
-import DifferentialGeometry.Synthetic.Algebra.Metric
-import DifferentialGeometry.Synthetic.Algebra.Trace
-import DifferentialGeometry.Synthetic.Geometry.Connection
-import DifferentialGeometry.Synthetic.Geometry.Curvature
+import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.ScalarCurvature
 import DifferentialGeometry.Synthetic.Operator.Hessian
-import DifferentialGeometry.Synthetic.Operator.Laplacian
-import DifferentialGeometry.Synthetic.Operator.Time
-import DifferentialGeometry.Synthetic.Operator.Variation
-import DifferentialGeometry.Synthetic.Operator.Bochner
-import DifferentialGeometry.Synthetic.Flow.RicciFlow.Basic
-import DifferentialGeometry.Synthetic.Geometry.RicciTensor
-import DifferentialGeometry.Synthetic.Analysis.TensorInnerProduct
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.Abel
-import Mathlib.Algebra.Module.Basic
-import Mathlib.Algebra.Ring.Basic
 
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 set_option linter.style.emptyLine false
 
-open AbstractDerivationAction
-open AbstractLieBracket
+/-!
+# Time Evolution of the Laplacian under Ricci Flow
 
-open DifferentialGeometry TensorAlgebra
-
-variable {R V : Type} [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V]
-variable [AbstractDerivationAction R V] [AbstractLieBracket V] [TraceOperator R V]
-variable [DerivationRules R V] [LieDerivationRules R V] [TraceLinearityRules R V]
-variable [Invertible (2 : R)]
-
-def partial_conn_form {Time R V : Type}
-  [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] [AbstractDerivationAction R V] [AbstractLieBracket V] [TraceOperator R V] [DerivationRules R V]
-  [TimeDerivative Time R] [TimeDerivative Time V]
-  [TimeDerivativeRules Time R V] [ActionTimeDerivativeRules Time R V]
-  (g_fam : Time → MetricDuality R V)
-  (conn_fam : Time → AbstractAffineConnection R V)
-  [MetricTimeDerivativeRules Time R V g_fam]
-  (u : R) (t : Time) : AbstractBilinearForm R V :=
-  TensorAlgebra.fromBilinear
-    { toFun := fun X =>
-        { toFun := fun Y => TimeDerivative.partial_t (fun s => action ((conn_fam s).nabla X Y) u) t
-          map_add' := fun Y1 Y2 => by
-            have h : (fun s => action ((conn_fam s).nabla X (Y1 + Y2)) u) = fun s => action ((conn_fam s).nabla X Y1) u + action ((conn_fam s).nabla X Y2) u := by
-              funext s; rw [(conn_fam s).nabla_add_right X Y1 Y2, DerivationRules.action_add_left]
-            rw [h, TimeDerivativeRules.t_add V]
-          map_smul' := fun c Y => by
-            have h : (fun s => action ((conn_fam s).nabla X (c • Y)) u) = fun s => c * action ((conn_fam s).nabla X Y) u + action X c * action Y u := by
-              funext s
-              have step1 : (conn_fam s).nabla X (c • Y) = action X c • Y + c • (conn_fam s).nabla X Y := (conn_fam s).leibniz c X Y
-              rw [step1, DerivationRules.action_add_left]
-              have sa1 : action (action X c • Y) u = action X c * action Y u := DerivationRules.action_smul_left _ _ u
-              have sa2 : action (c • (conn_fam s).nabla X Y) u = c * action ((conn_fam s).nabla X Y) u := DerivationRules.action_smul_left _ _ u
-              rw [sa1, sa2, add_comm]
-            rw [h, TimeDerivativeRules.t_add V, TimeDerivativeRules.t_smul V c, MetricTimeDerivativeRules.t_const_R g_fam (action X c * action Y u) t, add_zero]
-            rfl }
-      map_add' := fun X1 X2 => LinearMap.ext fun Y => by
-        simp only [LinearMap.coe_mk, AddHom.coe_mk, LinearMap.add_apply]
-        have h : (fun s => action ((conn_fam s).nabla (X1 + X2) Y) u) = fun s => action ((conn_fam s).nabla X1 Y) u + action ((conn_fam s).nabla X2 Y) u := by
-          funext s; rw [(conn_fam s).nabla_add_left X1 X2 Y, DerivationRules.action_add_left]
-        rw [h, TimeDerivativeRules.t_add V]
-      map_smul' := fun c X => LinearMap.ext fun Y => by
-        simp only [LinearMap.coe_mk, AddHom.coe_mk, LinearMap.smul_apply, RingHom.id_apply]
-        have h : (fun s => action ((conn_fam s).nabla (c • X) Y) u) = fun s => c * action ((conn_fam s).nabla X Y) u := by
-          funext s; rw [(conn_fam s).nabla_smul_left c X Y, DerivationRules.action_smul_left]
-        rw [h, TimeDerivativeRules.t_smul V c]
-        rfl }
-
-lemma partial_conn_form_eval {Time R V : Type}
-  [Field R] [LinearOrder R] [IsStrictOrderedRing R] [AddCommGroup V] [Module R V] [TensorAlgebra R V] [AbstractDerivationAction R V] [AbstractLieBracket V] [TraceOperator R V] [DerivationRules R V]
-  [TimeDerivative Time R] [TimeDerivative Time V]
-  [TimeDerivativeRules Time R V] [ActionTimeDerivativeRules Time R V]
-  (g_fam : Time → MetricDuality R V)
-  (conn_fam : Time → AbstractAffineConnection R V)
-  [MetricTimeDerivativeRules Time R V g_fam]
-  (u : R) (X Y : V) (t : Time) :
-  tensor_eval (partial_conn_form g_fam conn_fam u t) ![X, Y] ![] = TimeDerivative.partial_t (fun s => action ((conn_fam s).nabla X Y) u) t := by
-  dsimp [partial_conn_form]
-  rw [TensorAlgebra.tensor_eval_fromBilinear]
-  rfl
-
-lemma hessian_raise_variation {Time : Type}
-  [TimeDerivative Time R] [TimeDerivative Time V]
-  [TimeDerivativeRules Time R V] [ActionTimeDerivativeRules Time R V]
-  (g_fam : Time → MetricDuality R V)
-  (conn_fam : Time → AbstractAffineConnection R V)
-  [MetricTimeDerivativeRules Time R V g_fam]
-  [∀ s, MetricCompatible (conn_fam s) (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor]
-
-  (u : R) (X Y : V) (t : Time) :
-  (g_fam t).g (TimeDerivative.partial_t (fun s => (g_fam s).raise (hessianForm (g_fam s) (conn_fam s) u) X) t) Y =
-  - tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X), Y] ![]
-  - tensor_eval (partial_conn_form g_fam conn_fam u t) ![X, Y] ![] := by
-  have raise_def : ∀ s, (g_fam s).g ((g_fam s).raise (hessianForm (g_fam s) (conn_fam s) u) X) Y = tensor_eval (hessianForm (g_fam s) (conn_fam s) u) ![X, Y] ![] := fun s => (g_fam s).g_raise (hessianForm (g_fam s) (conn_fam s) u) X Y
-  have t_both : TimeDerivative.partial_t (fun s => (g_fam s).g ((g_fam s).raise (hessianForm (g_fam s) (conn_fam s) u) X) Y) t = TimeDerivative.partial_t (fun s => tensor_eval (hessianForm (g_fam s) (conn_fam s) u) ![X, Y] ![]) t := by
-    congr 1; funext s; exact raise_def s
-  have t_metric_val : TimeDerivative.partial_t (fun s => (g_fam s).g ((g_fam s).raise (hessianForm (g_fam s) (conn_fam s) u) X) Y) t =
-    tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X), Y] ![] +
-    (g_fam t).g (TimeDerivative.partial_t (fun s => (g_fam s).raise (hessianForm (g_fam s) (conn_fam s) u) X) t) Y +
-    (g_fam t).g ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) (TimeDerivative.partial_t (fun _ => Y) t) :=
-    MetricTimeDerivativeRules.t_metric (fun s => (g_fam s).raise (hessianForm (g_fam s) (conn_fam s) u) X) (fun _ => Y) t
-  have t_Y : TimeDerivative.partial_t (fun _ => Y) t = 0 := MetricTimeDerivativeRules.t_const_V g_fam Y t
-  rw [t_Y] at t_metric_val
-  have h_zero : (g_fam t).g ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) 0 = 0 := metric_zero_right _ _
-  rw [h_zero, add_zero] at t_metric_val
-  rw [t_metric_val] at t_both
-  have h_hess : ∀ s, tensor_eval (hessianForm (g_fam s) (conn_fam s) u) ![X, Y] ![] = action X (action Y u) - action ((conn_fam s).nabla X Y) u := by
-    intro s
-    exact eval02_hessianForm (g_fam s) (conn_fam s) u X Y
-  have t_hess : TimeDerivative.partial_t (fun s => tensor_eval (hessianForm (g_fam s) (conn_fam s) u) ![X, Y] ![]) t = TimeDerivative.partial_t (fun s => action X (action Y u) - action ((conn_fam s).nabla X Y) u) t := by
-    congr 1; funext s; exact h_hess s
-  rw [t_hess] at t_both
-  have heq : (fun s => action X (action Y u) - action ((conn_fam s).nabla X Y) u) = (fun s => action X (action Y u) + (-1:R) * action ((conn_fam s).nabla X Y) u) := by
-    funext s
-    ring
-  rw [heq] at t_both
-  have t_add_rule : TimeDerivative.partial_t (fun s => action X (action Y u) + (-1:R) * action ((conn_fam s).nabla X Y) u) t =
-                    TimeDerivative.partial_t (fun s => action X (action Y u)) t + TimeDerivative.partial_t (fun s => (-1:R) * action ((conn_fam s).nabla X Y) u) t := TimeDerivativeRules.t_add V _ _ t
-  rw [t_add_rule] at t_both
-  have t_smul_rule : TimeDerivative.partial_t (fun s => (-1:R) * action ((conn_fam s).nabla X Y) u) t = (-1:R) * TimeDerivative.partial_t (fun s => action ((conn_fam s).nabla X Y) u) t := TimeDerivativeRules.t_smul V (-1:R) _ t
-  rw [t_smul_rule] at t_both
-  have t_const : TimeDerivative.partial_t (fun s => action X (action Y u)) t = 0 := MetricTimeDerivativeRules.t_const_R g_fam (action X (action Y u)) t
-  rw [t_const, zero_add] at t_both
-  have t_both_eq : (-1:R) * TimeDerivative.partial_t (fun s => action ((conn_fam s).nabla X Y) u) t = - TimeDerivative.partial_t (fun s => action ((conn_fam s).nabla X Y) u) t := by ring
-  rw [t_both_eq] at t_both
-  have h_conn : TimeDerivative.partial_t (fun s => action ((conn_fam s).nabla X Y) u) t = tensor_eval (partial_conn_form g_fam conn_fam u t) ![X, Y] ![] := by exact (partial_conn_form_eval g_fam conn_fam u X Y t).symm
-  rw [h_conn] at t_both
-  calc (g_fam t).g (TimeDerivative.partial_t (fun s => (g_fam s).raise (hessianForm (g_fam s) (conn_fam s) u) X) t) Y
-    _ = tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X), Y] ![] + (g_fam t).g (TimeDerivative.partial_t (fun s => (g_fam s).raise (hessianForm (g_fam s) (conn_fam s) u) X) t) Y - tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X), Y] ![] := by abel
-    _ = - tensor_eval (partial_conn_form g_fam conn_fam u t) ![X, Y] ![] - tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X), Y] ![] := by rw [t_both]
-    _ = - tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X), Y] ![] - tensor_eval (partial_conn_form g_fam conn_fam u t) ![X, Y] ![] := by abel
-
-
-/--
-$\partial_t (\Delta u) = 2 \langle \text{Rc}, \text{Hess}(u) \rangle - \text{tr}_g \langle \partial_t \Gamma, \nabla u \rangle$
-books/Poincare_Conjecture_Blueprint/chapter03b.tex, implicitly around line 572
+- `hessian_raise_variation`: variation of the raised Hessian
+- `laplacian_evolution`: ∂_t(Δu) = 2⟨Rc, Hess(u)⟩ + metric_trace(∂_t Hess)
 -/
-lemma laplacian_evolution {Time : Type}
-  [TimeDerivative Time R] [TimeDerivative Time V]
-  [TimeDerivativeRules Time R V] [ActionTimeDerivativeRules Time R V]
-  (g_fam : Time → MetricDuality R V)
-  (conn_fam : Time → AbstractAffineConnection R V)
-  [MetricTimeDerivativeRules Time R V g_fam]
-  [RicciFlow Time (fun t => (g_fam t).toNonDegenerateMetric.toAbstractMetricTensor) conn_fam]
-  [∀ s, MetricCompatible (conn_fam s) (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor]
-  (u : R) (t : Time) [IR : TensorInnerProductRules R V (g_fam t)] :
-  TimeDerivative.partial_t (fun s => TraceOperator.trace (fun X => (g_fam s).raise (hessianForm (g_fam s) (conn_fam s) u) X)) t =
-  (2:R) * tensorInnerProduct (g_fam t) (ricciForm (conn_fam t)) (hessianForm (g_fam t) (conn_fam t) u)
-  - TraceOperator.trace (fun X => (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X) := by
-  have product_rule : TimeDerivative.partial_t (fun s => TraceOperator.trace (fun X => (g_fam s).raise (hessianForm (g_fam s) (conn_fam s) u) X)) t =
-                      TraceOperator.trace (fun X => TimeDerivative.partial_t (fun s => (g_fam s).raise (hessianForm (g_fam s) (conn_fam s) u) X) t) :=
-    MetricTimeDerivativeRules.t_trace g_fam (fun s X => (g_fam s).raise (hessianForm (g_fam s) (conn_fam s) u) X) t
-  rw [product_rule]
-  have partial_raise_eq : ∀ X, TimeDerivative.partial_t (fun s => (g_fam s).raise (hessianForm (g_fam s) (conn_fam s) u) X) t =
-                          - (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)
-                          - (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X := by
-    intro X
-    apply (g_fam t).toNonDegenerateMetric.eq_of_forall_g_eq
-    intro Z
-    have h1 := hessian_raise_variation g_fam conn_fam u X Z t
-    rw [h1]
-    have h2 : (g_fam t).g (- (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) - (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X) Z =
-              (g_fam t).g (- (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) Z +
-              (g_fam t).g (- (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X) Z := by
-      have sub_eq : - (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) - (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X =
-                    - (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) + - (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X := sub_eq_add_neg _ _
-      rw [sub_eq]
-      exact (g_fam t).bilinear_add_left _ _ _
-    rw [h2]
-    have h3 : (g_fam t).g (- (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) Z =
-              - (g_fam t).g ((g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) Z := metric_neg_left _ _ _
-    have h4 : (g_fam t).g (- (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X) Z =
-              - (g_fam t).g ((g_fam t).raise (partial_conn_form g_fam conn_fam u t) X) Z := metric_neg_left _ _ _
-    rw [h3, h4]
-    have h5 : (g_fam t).g ((g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) Z =
-              tensor_eval (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ![((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X), Z] ![] := (g_fam t).g_raise _ _ _
-    have h6 : (g_fam t).g ((g_fam t).raise (partial_conn_form g_fam conn_fam u t) X) Z =
-              tensor_eval (partial_conn_form g_fam conn_fam u t) ![X, Z] ![] := (g_fam t).g_raise _ _ _
-    rw [h5, h6]
-    exact sub_eq_add_neg _ _
-  have trace_eq : (TraceOperator.trace (fun X => TimeDerivative.partial_t (fun s => (g_fam s).raise (hessianForm (g_fam s) (conn_fam s) u) X) t) : R) =
-                  TraceOperator.trace (fun X => - (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) - (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X) := by
-    congr 1
-    funext X
-    exact partial_raise_eq X
-  rw [trace_eq]
-  have trace_sub : (TraceOperator.trace (fun X => - (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) - (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X) : R) =
-                   TraceOperator.trace (fun X => - (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) +
-                   TraceOperator.trace (fun X => - (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X) := by
-    have split_eq : (fun X => - (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X) - (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X) =
-                    (fun X => - (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) +
-                    (fun X => - (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X) := by
-      funext X
-      exact sub_eq_add_neg _ _
-    rw [split_eq]
-    exact TraceLinearityRules.trace_add
-  rw [trace_sub]
-  have trace_neg1 : (TraceOperator.trace (fun X => - (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) : R) =
-                    -(1:R) * TraceOperator.trace (fun X => (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) := by
-    have smul_eq : (fun X => - (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) =
-                   (fun X => -(1:R) • (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) := by
-      funext X
-      exact (neg_one_smul R _).symm
-    rw [smul_eq]
-    exact TraceLinearityRules.trace_smul
-  have trace_neg2 : (TraceOperator.trace (fun X => - (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X) : R) =
-                    -(1:R) * TraceOperator.trace (fun X => (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X) := by
-    have smul_eq : (fun X => - (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X) =
-                   (fun X => -(1:R) • (g_fam t).raise (partial_conn_form g_fam conn_fam u t) X) := by
-      funext X
-      exact (neg_one_smul R _).symm
-    rw [smul_eq]
-    exact TraceLinearityRules.trace_smul
-  rw [trace_neg1, trace_neg2]
-  have h_rf : (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) = (-(2:R)) • (ricciForm (conn_fam t)) := RicciFlow.evolution t
-  have h_raise_rf : ∀ Z, (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) Z =
-                         (-(2:R)) • (g_fam t).raise (ricciForm (conn_fam t)) Z := by
-    intro Z
-    rw [h_rf]
-    exact raise_smul (g_fam t) (ricciForm (conn_fam t)) (-(2:R)) Z
-  have inner_prod_sub : (TraceOperator.trace (fun X => (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) : R) =
-                        -(2:R) * TraceOperator.trace (fun X => (g_fam t).raise (ricciForm (conn_fam t)) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) := by
-    have eq_func : (fun X => (g_fam t).raise (metric_var_form (fun s => (g_fam s).toNonDegenerateMetric.toAbstractMetricTensor) t) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) =
-                   (fun X => (-(2:R)) • (g_fam t).raise (ricciForm (conn_fam t)) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) := by
-      funext X
-      exact h_raise_rf ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)
-    rw [eq_func]
-    exact TraceLinearityRules.trace_smul
-  rw [inner_prod_sub]
-  have def_inner : tensorInnerProduct (g_fam t) (ricciForm (conn_fam t)) (hessianForm (g_fam t) (conn_fam t) u) =
-                   TraceOperator.trace (fun X => (g_fam t).raise (ricciForm (conn_fam t)) ((g_fam t).raise (hessianForm (g_fam t) (conn_fam t) u) X)) := IR.inner_trace _ _
-  rw [← def_inner]
-  ring
+
+open SyntheticTensor
+
+-- ============================================================
+-- Section 1: Hessian raise variation
+-- ============================================================
+
+section HessianRaise
+
+variable {k R V Time : Type*}
+variable [Field k] [CommRing R] [Algebra k R]
+variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+
+/-- Hessian raise variation: the scalar time derivative of the raised Hessian
+    observed through g(t).
+
+    Same structure as ricci_raise_variation but for the Hessian form:
+    ∂_t[g(t)(sharp_s(Hess_s(X,·)), Y)] = dt_tensor(Hess)(X,Y) - metric_var(sharp_t(Hess_t(X,·)), Y)
+
+    Proof uses: g(s)(sharp_s(Hess_s(X,·)), Y) = Hess_s(X,Y) is the Hessian evaluation,
+    which depends on s through the metric and connection. By the metric product rule,
+    the time derivative decomposes into the metric variation and the g(t)-variation. -/
+theorem hessian_raise_variation
+    (emb : DerivationEmbedding k R V)
+    (td : TimeDerivativeData R Time)
+    (_atr : AbstractTrace R V)
+    (g_fam : Time → MetricDuality R V) 
+    (conn_fam : Time → V → V → V)
+    (_ha_fam : ∀ s, ∀ X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
+    (_hal_fam : ∀ s, ∀ X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z)
+    (_hsl_fam : ∀ s, ∀ (f : R) X Z, conn_fam s (f • X) Z = f • conn_fam s X Z)
+    (_hl_fam : ∀ s, ∀ X (f : R) Y, conn_fam s X (f • Y) = (emb.embed X) f • Y + f • conn_fam s X Y)
+    (h_mvp : MetricBilinProductRule td g_fam)
+    (hessian_fam : Time → TensorData R V 0 2)
+    (h_sharp_fam : Time → V → V)
+    (h_sharp_spec : ∀ s X Y, (g_fam s).g (h_sharp_fam s X) Y = hessian_fam s ![X, Y] ![])
+    (t : Time) (X Y : V) :
+    (td.dt (fun s => (g_fam t).g (h_sharp_fam s X) Y)) t =
+    dt_tensor td t hessian_fam ![X, Y] ![] -
+    metric_var_form td g_fam t ![h_sharp_fam t X, Y] ![] := by
+  -- g(s)(sharp_s(Hess_s(X,·)), Y) = Hess_s(X, Y) for all s
+  have h_feq : (fun s => (g_fam s).g (h_sharp_fam s X) Y) =
+      (fun s => hessian_fam s ![X, Y] ![]) :=
+    funext (fun s => h_sharp_spec s X Y)
+  -- dt of LHS = dt of RHS
+  have h_dt_eq : (td.dt (fun s => (g_fam s).g (h_sharp_fam s X) Y)) t =
+      (td.dt (fun s => hessian_fam s ![X, Y] ![])) t :=
+    congr_arg (fun f => (td.dt f) t) h_feq
+  -- Product rule
+  have h_prod := h_mvp (fun s => h_sharp_fam s X) Y t
+  -- dt of hessian evaluations = dt_tensor(Hess) by definition
+  change _ = (td.dt (fun s => hessian_fam s ![X, Y] ![])) t - _
+  rw [h_dt_eq] at h_prod; rw [add_comm] at h_prod
+  exact (sub_eq_of_eq_add h_prod).symm
+
+end HessianRaise
+
+-- ============================================================
+-- Section 2: Laplacian evolution
+-- ============================================================
+
+section LaplacianEvolution
+
+variable {k R V Time : Type*}
+variable [Field k] [CommRing R] [Algebra k R]
+variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+
+/-- The Laplacian product rule: ∂_t[metric_trace_s(Hess_s)] decomposes into
+    a metric variation term and a Hessian variation term.
+
+    Analogous to ScalarCurvatureProductRule but for the Hessian instead of Ricci.
+    Combines TimeTrComm + metric product rule + trace-endomorphism relationship. -/
+def LaplacianProductRule
+    (_emb : DerivationEmbedding k R V)
+    (td : TimeDerivativeData R Time)
+    (atr : AbstractTrace R V)
+    (g_fam : Time → MetricDuality R V) 
+    (hessian_fam : Time → TensorData R V 0 2) : Prop :=
+  ∀ t,
+    (td.dt (fun s =>
+      metric_trace (g_fam s) atr (0 : Fin 2) (0 : Fin 1) (hessian_fam s) ![] ![])) t =
+    -tensor_inner_02 (g_fam t) atr
+      (metric_var_form td g_fam t) (hessian_fam t) +
+    metric_trace (g_fam t) atr (0 : Fin 2) (0 : Fin 1)
+      (dt_tensor td t hessian_fam) ![] ![]
+
+/-- Laplacian evolution under Ricci flow:
+
+    ∂_t(Δu) = 2⟨Rc, Hess(u)⟩ + metric_trace_t(∂_t Hess)
+
+    where ⟨Rc, Hess(u)⟩ = tr(Rc♯ ∘ Hess♯) is the tensor inner product,
+    and the second term is the metric trace of the time derivative of the Hessian.
+
+    The proof substitutes the Ricci flow equation (∂_t g = -2Rc) into the
+    product rule and simplifies -⟨-2Rc, Hess(u)⟩ = 2⟨Rc, Hess(u)⟩. -/
+theorem laplacian_evolution
+    (emb : DerivationEmbedding k R V)
+    (td : TimeDerivativeData R Time)
+    (atr : AbstractTrace R V)
+    (g_fam : Time → MetricDuality R V) 
+    (conn_fam : Time → V → V → V)
+    (ha_fam : ∀ s, ∀ X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
+    (hal_fam : ∀ s, ∀ X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z)
+    (hsl_fam : ∀ s, ∀ (f : R) X Z, conn_fam s (f • X) Z = f • conn_fam s X Z)
+    (hl_fam : ∀ s, ∀ X (f : R) Y, conn_fam s X (f • Y) = (emb.embed X) f • Y + f • conn_fam s X Y)
+    (h_rf : IsRicciFlow emb td atr g_fam conn_fam ha_fam hal_fam hsl_fam hl_fam)
+    (hessian_fam : Time → TensorData R V 0 2)
+    (h_lap_prod : LaplacianProductRule emb td atr g_fam hessian_fam)
+    (t : Time) :
+    (td.dt (fun s =>
+      metric_trace (g_fam s) atr (0 : Fin 2) (0 : Fin 1) (hessian_fam s) ![] ![])) t =
+    2 * tensor_inner_02 (g_fam t) atr
+      (ricciForm_tensor emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr)
+      (hessian_fam t) +
+    metric_trace (g_fam t) atr (0 : Fin 2) (0 : Fin 1)
+      (dt_tensor td t hessian_fam) ![] ![] := by
+  -- Apply the product rule
+  have h_prod := h_lap_prod t
+  -- Ricci flow: metric_var = -2 • Rc
+  have h_rf_eq := h_rf.evolution t
+  -- Compute -inner(-2•Rc, Hess) = 2*inner(Rc, Hess)
+  have h_inner : -tensor_inner_02 (g_fam t) atr
+      (metric_var_form td g_fam t) (hessian_fam t) =
+    2 * tensor_inner_02 (g_fam t) atr
+      (ricciForm_tensor emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr)
+      (hessian_fam t) := by
+    rw [h_rf_eq, tensor_inner_02_smul_left]; ring
+  rw [h_prod, h_inner]
+
+end LaplacianEvolution
