@@ -37,7 +37,7 @@ so the multilinear-of-dual bundle's fiber at `x` is multilinear maps on `E x →
 
 * `ContinuousMultilinearMap.homEquivCDualTensor` : the abstract tensor-hom iso
   `(V →L[𝕜] W) ≃ₗ[𝕜] (V →L[𝕜] 𝕜) ⊗[𝕜] W`.
-* `Bundle.continuousMultilinearMap.mixedFiberTensorEquivAt` : the bundle-fiber-level
+* `Bundle.continuousMultilinearMap.multilinearHomTensorEquivAt` : the bundle-fiber-level
   iso between the mixed `(r, s)` fiber at `x` and `(mlf-of-dual r at x) ⊗ (MLF s at x)`.
 
 ## Tags
@@ -67,18 +67,36 @@ linear maps are continuous), Mathlib's `Module.dualTensorHomEquiv` (which gives
 between `Module.Dual` and the continuous dual. -/
 noncomputable def homEquivCDualTensor :
     (V →L[𝕜] W) ≃ₗ[𝕜] ((V →L[𝕜] 𝕜) ⊗[𝕜] W) := by
-  -- Step 1: (V →L[𝕜] W) ≃ₗ (V →ₗ[𝕜] W) (finite-dim)
   let e1 : (V →L[𝕜] W) ≃ₗ[𝕜] (V →ₗ[𝕜] W) := LinearMap.toContinuousLinearMap.symm
-  -- Step 2: (V →ₗ[𝕜] W) ≃ₗ (Module.Dual 𝕜 V ⊗[𝕜] W) via dualTensorHomEquiv.symm
   let e2 : (V →ₗ[𝕜] W) ≃ₗ[𝕜] (Module.Dual 𝕜 V ⊗[𝕜] W) :=
     (dualTensorHomEquiv 𝕜 V W).symm
-  -- Step 3: Replace `Module.Dual 𝕜 V` with the continuous dual `V →L[𝕜] 𝕜` in the first
-  -- tensor factor.
   let cdualEquiv : (V →L[𝕜] 𝕜) ≃ₗ[𝕜] Module.Dual 𝕜 V :=
     LinearMap.toContinuousLinearMap.symm
   let e3 : (Module.Dual 𝕜 V ⊗[𝕜] W) ≃ₗ[𝕜] ((V →L[𝕜] 𝕜) ⊗[𝕜] W) :=
     TensorProduct.congr cdualEquiv.symm (LinearEquiv.refl 𝕜 W)
   exact e1.trans (e2.trans e3)
+
+/-- The model-level linear equivalence between the hom-space of `r`- and `s`-multilinear
+maps on a finite-dimensional space `F`, and the tensor product of `r`-multilinear maps on
+the dual `F →L[𝕜] 𝕜` with `s`-multilinear maps on `F`:
+`(MLF r F →L[𝕜] MLF s F) ≃ₗ[𝕜] (MLF r (F →L[𝕜] 𝕜) ⊗[𝕜] MLF s F)`. -/
+noncomputable def multilinearHomEquivDualMultilinearTensor
+    (F : Type*) [NormedAddCommGroup F] [NormedSpace 𝕜 F] [FiniteDimensional 𝕜 F]
+    (r s : ℕ) :
+    (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜 →L[𝕜]
+       ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜) ≃ₗ[𝕜]
+    (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => (F →L[𝕜] 𝕜)) 𝕜 ⊗[𝕜]
+       ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜) :=
+  haveI : FiniteDimensional 𝕜 (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜) :=
+    continuousMultilinearMap_finiteDimensional r
+  haveI : FiniteDimensional 𝕜 (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜) :=
+    continuousMultilinearMap_finiteDimensional s
+  (homEquivCDualTensor 𝕜
+      (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜)
+      (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜)).trans
+    (TensorProduct.congr
+      (dualMultilinearEquivMultilinearOfDual 𝕜 F r)
+      (LinearEquiv.refl 𝕜 _))
 
 end ContinuousMultilinearMap
 
@@ -97,7 +115,7 @@ variable [FiberBundle F E] [VectorBundle 𝕜 F E]
 -- `Bundle.continuousMultilinearMap 𝕜 r F E x →L[𝕜] Bundle.continuousMultilinearMap 𝕜 s F E x`
 -- and the unfolded form `CMM 𝕜 (Fin r → E x) 𝕜 →L[𝕜] CMM 𝕜 (Fin s → E x) 𝕜` would be
 -- needed to bridge `MixedSection.toFun` (which uses the bundle form) with
--- `mixedFiberTensorEquivAt` (stated on the unfolded form).
+-- `multilinearHomTensorEquivAt` (stated on the unfolded form).
 --
 -- An attempt to define such a transport via `arrowCongr` of two identity CLEs failed
 -- due to instance diamonds: even though the underlying types are equal (since
@@ -106,7 +124,7 @@ variable [FiberBundle F E] [VectorBundle 𝕜 F E]
 -- depending on which path it takes through the typeclass graph.
 --
 -- This is the same diamond that `Mixed/Fiber.lean` navigates with its private
--- `mixed_type_eq` theorem. Lifting `mixedFiberTensorEquivAt` to the section level
+-- `mixed_type_eq` theorem. Lifting `multilinearHomTensorEquivAt` to the section level
 -- requires a more invasive approach (e.g. routing through the model fiber over `F`).
 
 /-! ## The bundle-fiber-level mixed iso -/
@@ -123,7 +141,7 @@ The construction:
 2. Use `dualMultilinearLinearEquivAt` (the bundle-fiber-level dual iso from
    `Multilinear/DualFiber.lean`) to convert `(MLF r at x →L[𝕜] 𝕜)` into the
    multilinear-of-dual fiber `mlf-of-dual r at x`. -/
-noncomputable def mixedFiberTensorEquivAt (r s : ℕ) (x : B) :
+noncomputable def multilinearHomTensorEquivAt (r s : ℕ) (x : B) :
     ((ContinuousMultilinearMap 𝕜 (fun _ : Fin r => E x) 𝕜) →L[𝕜]
        ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E x) 𝕜) ≃ₗ[𝕜]
     ((ContinuousMultilinearMap 𝕜 (fun _ : Fin r => (E x →L[𝕜] 𝕜)) 𝕜) ⊗[𝕜]
@@ -133,7 +151,6 @@ noncomputable def mixedFiberTensorEquivAt (r s : ℕ) (x : B) :
     continuousMultilinearMap_finiteDimensional r
   haveI : FiniteDimensional 𝕜 (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E x) 𝕜) :=
     continuousMultilinearMap_finiteDimensional s
-  -- Step 1: The tensor-hom helper at V := MLF r fiber, W := MLF s fiber.
   let e1 : ((ContinuousMultilinearMap 𝕜 (fun _ : Fin r => E x) 𝕜) →L[𝕜]
             ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E x) 𝕜) ≃ₗ[𝕜]
         ((ContinuousMultilinearMap 𝕜 (fun _ : Fin r => E x) 𝕜) →L[𝕜] 𝕜) ⊗[𝕜]
@@ -141,7 +158,6 @@ noncomputable def mixedFiberTensorEquivAt (r s : ℕ) (x : B) :
     ContinuousMultilinearMap.homEquivCDualTensor 𝕜
       (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => E x) 𝕜)
       (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E x) 𝕜)
-  -- Step 2: Apply `dualMultilinearLinearEquivAt` to the first tensor factor.
   let e2 : ((ContinuousMultilinearMap 𝕜 (fun _ : Fin r => E x) 𝕜) →L[𝕜] 𝕜) ⊗[𝕜]
             ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E x) 𝕜 ≃ₗ[𝕜]
         (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => (E x →L[𝕜] 𝕜)) 𝕜) ⊗[𝕜]
@@ -150,6 +166,45 @@ noncomputable def mixedFiberTensorEquivAt (r s : ℕ) (x : B) :
       (dualMultilinearLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) r x)
       (LinearEquiv.refl 𝕜 _)
   exact e1.trans e2
+
+/-- Untrivialize each factor of a tensor product of model multilinear fibers back to the
+corresponding tensor product of bundle multilinear fibers at `x`. The first factor is
+untrivialized to the dual bundle's `r`-multilinear fiber; the second to `E`'s `s`-multilinear
+fiber.
+
+This is `TensorProduct.congr` of two applications of `(continuousLinearEquivAt _ x).symm`,
+the only point being to package the per-factor bundle-from-model untrivialization once. -/
+noncomputable def dualTensorMultilinearUntrivializeAt (r s : ℕ) (x : B) :
+    (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => (F →L[𝕜] 𝕜)) 𝕜 ⊗[𝕜]
+       ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜) ≃ₗ[𝕜]
+    (Bundle.continuousMultilinearMap 𝕜 r (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x ⊗[𝕜]
+       Bundle.continuousMultilinearMap 𝕜 s F E x) :=
+  TensorProduct.congr
+    (continuousLinearEquivAt (𝕜 := 𝕜) (F := F →L[𝕜] 𝕜)
+      (E := Bundle.dual 𝕜 E) r x).symm.toLinearEquiv
+    (continuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) s x).symm.toLinearEquiv
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The bundle-fiber-level linear equivalence between the mixed multilinear bundle
+fiber at `x` and the tensor product `(r-multilinear bundle on the dual) ⊗ (s-multilinear
+bundle on E)`, both stated in the `Bundle.continuousMultilinearMap` form.
+
+This is the bundle-form analogue of `multilinearHomTensorEquivAt`. The source uses the
+mixed-fiber bundle topology path (`instTopologicalSpaceContinuousMultilinearMap`), so we
+cannot reuse `multilinearHomTensorEquivAt` directly — the topology diamond with the norm
+topology on `ContinuousMultilinearMap` prevents Lean from unifying the two forms.
+
+The construction routes through the model fiber: `mixedContinuousLinearEquivAt` to the
+model form, then the model-level `multilinearHomEquivDualMultilinearTensor`, then
+`dualTensorMultilinearUntrivializeAt` to lift each tensor factor back to its bundle fiber. -/
+noncomputable def multilinearHomTensorEquivAt_bundle (r s : ℕ) (x : B) :
+    (Bundle.continuousMultilinearMap 𝕜 r F E x →L[𝕜]
+       Bundle.continuousMultilinearMap 𝕜 s F E x) ≃ₗ[𝕜]
+    ((Bundle.continuousMultilinearMap 𝕜 r (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x) ⊗[𝕜]
+       Bundle.continuousMultilinearMap 𝕜 s F E x) :=
+  ((mixedContinuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) r s x).toLinearEquiv.trans
+    (ContinuousMultilinearMap.multilinearHomEquivDualMultilinearTensor 𝕜 F r s)).trans
+    (dualTensorMultilinearUntrivializeAt (𝕜 := 𝕜) (F := F) (E := E) r s x)
 
 end Bundle.continuousMultilinearMap
 

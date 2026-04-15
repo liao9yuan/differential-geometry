@@ -13,6 +13,11 @@ import DifferentialGeometry.Tensor.Alternating.Comp
 import DifferentialGeometry.Tensor.Alternating.Curry
 import DifferentialGeometry.Tensor.Product.Defs
 import DifferentialGeometry.Tensor.Alternating.Basis
+import DifferentialGeometry.Tensor.Auxiliary.ShuffleDeriv
+
+/-
+d(Sum_J ω_J dx^J) := Sum dω_J ∧ dx^J
+-/
 
 /-
 # Wedge Products
@@ -43,6 +48,18 @@ def wedge_product (g : M [⋀^Fin m]→L[𝕜] N) (h : M [⋀^Fin n]→L[𝕜] N
 -- TODO: change notation
 notation g "∧["f"]" h => wedge_product g h f
 notation g "∧["𝕜"]" h => wedge_product g h (ContinuousLinearMap.mul 𝕜 𝕜)
+
+/-- Wedge of a continuous linear functional (1-cotangent) with an alternating
+`n`-form, producing an alternating `(n + 1)`-form. The 1-cotangent `α : M →L[𝕜] 𝕜`
+is viewed as an alternating 1-form via `ofSubsingleton`; the result is reindexed
+from `Fin (1 + n)` to `Fin (n + 1)` via `finAddFlip`. -/
+noncomputable def covectorWedge (α : M →L[𝕜] 𝕜) (β : M [⋀^Fin n]→L[𝕜] 𝕜) :
+    M [⋀^Fin (n + 1)]→L[𝕜] 𝕜 :=
+  domDomCongr finAddFlip
+    (wedge_product (ofSubsingleton 𝕜 M 𝕜 0 α) β (ContinuousLinearMap.mul 𝕜 𝕜))
+
+@[inherit_doc]
+notation:70 α " ∧₁ " β => covectorWedge α β
 
 theorem wedge_product_def {g : M [⋀^Fin m]→L[𝕜] N} {h : M [⋀^Fin n]→L[𝕜] N'}
     {f : N →L[𝕜] N' →L[𝕜] N''} {x : Fin (m + n) → M} :
@@ -205,57 +222,172 @@ theorem wedge_add (g : M [⋀^Fin m]→L[𝕜] N)
       ContinuousLinearMap.compContinuousAlternatingMap₂_apply]
   rw[add_apply, map_add, smul_add]
 
-theorem smul_wedge (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜) (c : 𝕜) :
-    c • (g ∧[𝕜] h) = (c • g) ∧[𝕜] h := by
+/-- Left scalar-linearity of the wedge product. -/
+theorem smul_wedge (c : 𝕜) (g : M [⋀^Fin m]→L[𝕜] N)
+    (h : M [⋀^Fin n]→L[𝕜] N') (f : N →L[𝕜] N' →L[𝕜] N'') :
+      ((c • g) ∧[f] h) = c • (g ∧[f] h) := by
   ext x
-  rw[smul_apply, wedge_product_def, uncurryFinAdd, domDomCongr_apply, uncurrySum_apply,
-    ContinuousMultilinearMap.sum_apply, Finset.smul_sum]
-  rw[wedge_product_def, uncurryFinAdd, domDomCongr_apply, uncurrySum_apply,
-    ContinuousMultilinearMap.sum_apply]
+  rw [smul_apply, wedge_product_def, uncurryFinAdd, domDomCongr_apply, uncurrySum_apply,
+    wedge_product_def, uncurryFinAdd, domDomCongr_apply, uncurrySum_apply,
+    ContinuousMultilinearMap.sum_apply, ContinuousMultilinearMap.sum_apply, Finset.smul_sum]
   apply Finset.sum_congr rfl
   intro σ hσ
   rcases σ with ⟨σ₁⟩
-  rw[uncurrySum.summand_mk]
-  simp only [ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.domDomCongr_apply,
-    Function.comp_apply, ContinuousMultilinearMap.uncurrySum_apply,
-    ContinuousMultilinearMap.flipMultilinear_apply, coe_toContinuousMultilinearMap,
-    ContinuousMultilinearMap.flipAlternating_apply,
-    ContinuousLinearMap.compContinuousAlternatingMap₂_apply,
-    ContinuousLinearMap.mul_apply', ← smul_assoc, smul_comm]
-  rw[smul_assoc, smul_eq_mul, ← mul_assoc]
-  rw[uncurrySum.summand_mk]
-  simp only [ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.domDomCongr_apply,
-    Function.comp_apply, ContinuousMultilinearMap.uncurrySum_apply,
-    ContinuousMultilinearMap.flipMultilinear_apply, coe_toContinuousMultilinearMap,
-    ContinuousMultilinearMap.flipAlternating_apply,
-    ContinuousLinearMap.compContinuousAlternatingMap₂_apply, ContinuousLinearMap.mul_apply',
-    smul_apply, smul_eq_mul]
+  repeat
+    rw [uncurrySum.summand_mk]
+    simp only [ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.domDomCongr_apply,
+      Function.comp_apply, ContinuousMultilinearMap.uncurrySum_apply,
+      ContinuousMultilinearMap.flipMultilinear_apply, coe_toContinuousMultilinearMap,
+      ContinuousMultilinearMap.flipAlternating_apply,
+      ContinuousLinearMap.compContinuousAlternatingMap₂_apply]
+  rw [ContinuousAlternatingMap.smul_apply, f.map_smul, ContinuousLinearMap.smul_apply, smul_comm]
 
-theorem wedge_smul (g : M [⋀^Fin m]→L[𝕜] 𝕜) (h : M [⋀^Fin n]→L[𝕜] 𝕜) (c : 𝕜) :
-    c • (g ∧[𝕜] h) = g ∧[𝕜] (c • h) := by
+/-- Right scalar-linearity of the wedge product. -/
+theorem wedge_smul (c : 𝕜) (g : M [⋀^Fin m]→L[𝕜] N)
+    (h : M [⋀^Fin n]→L[𝕜] N') (f : N →L[𝕜] N' →L[𝕜] N'') :
+      (g ∧[f] (c • h)) = c • (g ∧[f] h) := by
   ext x
-  rw[smul_apply, wedge_product_def, uncurryFinAdd, domDomCongr_apply, uncurrySum_apply,
-    ContinuousMultilinearMap.sum_apply, Finset.smul_sum]
-  rw[wedge_product_def, uncurryFinAdd, domDomCongr_apply, uncurrySum_apply,
-    ContinuousMultilinearMap.sum_apply]
+  rw [smul_apply, wedge_product_def, uncurryFinAdd, domDomCongr_apply, uncurrySum_apply,
+    wedge_product_def, uncurryFinAdd, domDomCongr_apply, uncurrySum_apply,
+    ContinuousMultilinearMap.sum_apply, ContinuousMultilinearMap.sum_apply, Finset.smul_sum]
   apply Finset.sum_congr rfl
   intro σ hσ
   rcases σ with ⟨σ₁⟩
-  rw[uncurrySum.summand_mk]
-  simp only [ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.domDomCongr_apply,
-    Function.comp_apply, ContinuousMultilinearMap.uncurrySum_apply,
-    ContinuousMultilinearMap.flipMultilinear_apply, coe_toContinuousMultilinearMap,
-    ContinuousMultilinearMap.flipAlternating_apply,
-    ContinuousLinearMap.compContinuousAlternatingMap₂_apply, ContinuousLinearMap.mul_apply',
-    ← smul_assoc, smul_comm]
-  rw[smul_assoc, smul_eq_mul, ← mul_assoc]
-  rw[uncurrySum.summand_mk]
-  simp only [ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.domDomCongr_apply,
-    Function.comp_apply, ContinuousMultilinearMap.uncurrySum_apply,
-    ContinuousMultilinearMap.flipMultilinear_apply, coe_toContinuousMultilinearMap,
-    ContinuousMultilinearMap.flipAlternating_apply,
-    ContinuousLinearMap.compContinuousAlternatingMap₂_apply, ContinuousLinearMap.mul_apply',
-    smul_apply, smul_eq_mul, ← mul_assoc, mul_comm]
+  repeat
+    rw [uncurrySum.summand_mk]
+    simp only [ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.domDomCongr_apply,
+      Function.comp_apply, ContinuousMultilinearMap.uncurrySum_apply,
+      ContinuousMultilinearMap.flipMultilinear_apply, coe_toContinuousMultilinearMap,
+      ContinuousMultilinearMap.flipAlternating_apply,
+      ContinuousLinearMap.compContinuousAlternatingMap₂_apply]
+  rw [ContinuousAlternatingMap.smul_apply, ContinuousLinearMap.map_smul, smul_comm]
+
+/-- Operator norm bound for the wedge product:
+`‖g ∧[f] h‖ ≤ #(ModSumCongr (Fin m) (Fin n)) · ‖f‖ · ‖g‖ · ‖h‖`.
+The constant is the number of `(m,n)`-shuffles, equal to `(m+n).choose m`. -/
+theorem norm_wedge_product_le (g : M [⋀^Fin m]→L[𝕜] N) (h : M [⋀^Fin n]→L[𝕜] N')
+    (f : N →L[𝕜] N' →L[𝕜] N'') :
+    ‖g ∧[f] h‖ ≤
+      Fintype.card (Equiv.Perm.ModSumCongr (Fin m) (Fin n)) * (‖f‖ * ‖g‖ * ‖h‖) := by
+  refine ContinuousAlternatingMap.opNorm_le_bound _ (by positivity) fun v => ?_
+  change ‖uncurryFinAdd (f.compContinuousAlternatingMap₂ g h) v‖ ≤ _
+  rw [uncurryFinAdd, ContinuousAlternatingMap.domDomCongr_apply, uncurrySum_apply,
+      ContinuousMultilinearMap.sum_apply]
+  have key : ∀ q : Equiv.Perm.ModSumCongr (Fin m) (Fin n),
+      ‖uncurrySum.summand (f.compContinuousAlternatingMap₂ g h) q
+          (v ∘ ⇑finSumFinEquiv)‖ ≤ (‖f‖ * ‖g‖ * ‖h‖) * ∏ i, ‖v i‖ := by
+    intro q
+    induction q using Quotient.inductionOn' with | h σ =>
+    rw [uncurrySum_summand_eval]
+    have hsign : ∀ z : N'', ‖(Equiv.Perm.sign σ : ℤˣ) • z‖ = ‖z‖ := fun z => by
+      rcases Int.units_eq_one_or (Equiv.Perm.sign σ) with hs | hs <;> simp [hs]
+    rw [hsign]
+    change ‖f (g (fun i => (v ∘ ⇑finSumFinEquiv) (σ (Sum.inl i))))
+            (h (fun i => (v ∘ ⇑finSumFinEquiv) (σ (Sum.inr i))))‖ ≤ _
+    calc ‖f (g _) (h _)‖
+        ≤ ‖f‖ * ‖g (fun i => (v ∘ ⇑finSumFinEquiv) (σ (Sum.inl i)))‖ *
+            ‖h (fun i => (v ∘ ⇑finSumFinEquiv) (σ (Sum.inr i)))‖ := f.le_opNorm₂ _ _
+      _ ≤ ‖f‖ * (‖g‖ * ∏ i, ‖(v ∘ ⇑finSumFinEquiv) (σ (Sum.inl i))‖) *
+            (‖h‖ * ∏ i, ‖(v ∘ ⇑finSumFinEquiv) (σ (Sum.inr i))‖) := by
+          gcongr
+          · exact g.le_opNorm _
+          · exact h.le_opNorm _
+      _ = ‖f‖ * ‖g‖ * ‖h‖ *
+            ((∏ i, ‖(v ∘ ⇑finSumFinEquiv) (σ (Sum.inl i))‖) *
+              ∏ i, ‖(v ∘ ⇑finSumFinEquiv) (σ (Sum.inr i))‖) := by ring
+      _ = ‖f‖ * ‖g‖ * ‖h‖ * ∏ k : Fin m ⊕ Fin n, ‖(v ∘ ⇑finSumFinEquiv) (σ k)‖ := by
+          rw [← Fintype.prod_sum_type (fun k => ‖(v ∘ ⇑finSumFinEquiv) (σ k)‖)]
+      _ = ‖f‖ * ‖g‖ * ‖h‖ * ∏ k : Fin m ⊕ Fin n, ‖(v ∘ ⇑finSumFinEquiv) k‖ := by
+          rw [Equiv.prod_comp σ (fun k => ‖(v ∘ ⇑finSumFinEquiv) k‖)]
+      _ = ‖f‖ * ‖g‖ * ‖h‖ * ∏ i, ‖v i‖ := by
+          simp only [Function.comp_apply]
+          rw [Equiv.prod_comp finSumFinEquiv (fun i => ‖v i‖)]
+  calc ‖∑ q, uncurrySum.summand (f.compContinuousAlternatingMap₂ g h) q
+            (v ∘ ⇑finSumFinEquiv)‖
+      ≤ ∑ q, ‖uncurrySum.summand (f.compContinuousAlternatingMap₂ g h) q
+            (v ∘ ⇑finSumFinEquiv)‖ := norm_sum_le _ _
+    _ ≤ ∑ _q : Equiv.Perm.ModSumCongr (Fin m) (Fin n),
+          (‖f‖ * ‖g‖ * ‖h‖) * ∏ i, ‖v i‖ := Finset.sum_le_sum fun q _ => key q
+    _ = (Fintype.card (Equiv.Perm.ModSumCongr (Fin m) (Fin n)) : ℝ) *
+          ((‖f‖ * ‖g‖ * ‖h‖) * ∏ i, ‖v i‖) := by
+        rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
+    _ = Fintype.card (Equiv.Perm.ModSumCongr (Fin m) (Fin n)) * (‖f‖ * ‖g‖ * ‖h‖) *
+          ∏ i, ‖v i‖ := by ring
+
+/-- The wedge product as a continuous bilinear map. -/
+noncomputable def wedge_productL (f : N →L[𝕜] N' →L[𝕜] N'') :
+    (M [⋀^Fin m]→L[𝕜] N) →L[𝕜] (M [⋀^Fin n]→L[𝕜] N') →L[𝕜]
+        (M [⋀^Fin (m + n)]→L[𝕜] N'') :=
+  LinearMap.mkContinuous₂
+    { toFun := fun g =>
+        { toFun := fun h => wedge_product g h f
+          map_add' := fun h₁ h₂ => wedge_add g h₁ h₂ f
+          map_smul' := fun c h => wedge_smul c g h f }
+      map_add' := fun g₁ g₂ => by ext h : 1; exact add_wedge g₁ g₂ h f
+      map_smul' := fun c g => by ext h : 1; exact smul_wedge c g h f }
+    (Fintype.card (Equiv.Perm.ModSumCongr (Fin m) (Fin n)) * ‖f‖ + 1) fun g h => by
+      change ‖wedge_product g h f‖ ≤ _
+      have hwedge := norm_wedge_product_le g h f
+      nlinarith [hwedge, norm_nonneg g, norm_nonneg h, norm_nonneg f]
+
+@[simp] theorem wedge_productL_apply (f : N →L[𝕜] N' →L[𝕜] N'')
+    (g : M [⋀^Fin m]→L[𝕜] N) (h : M [⋀^Fin n]→L[𝕜] N') :
+    wedge_productL f g h = wedge_product g h f := rfl
+
+/-- LHS evaluation formula: `uncurryFin` of a `precompL` of `wedge_productL` expands to
+a sum over derivative positions, with each summand being a wedge product. -/
+theorem uncurryFin_wedge_productL_precompL_apply (f : N →L[𝕜] N' →L[𝕜] N'')
+    (g' : M →L[𝕜] (M [⋀^Fin m]→L[𝕜] N)) (h : M [⋀^Fin n]→L[𝕜] N')
+    (v : Fin (m + n + 1) → M) :
+    uncurryFin ((wedge_productL f).precompL M g' h) v =
+      ∑ k : Fin (m + n + 1), (-1 : ℤ) ^ k.val •
+        wedge_product (g' (v k)) h f (k.removeNth v) := by
+  rw [uncurryFin_apply]
+  refine Finset.sum_congr rfl fun k _ => ?_
+  simp only [ContinuousLinearMap.precompL_apply, wedge_productL_apply]
+
+/-- RHS evaluation formula: the wedge product of `uncurryFin g'` with `h`, evaluated at
+`v ∘ finAddFlipAssoc`, pushes `uncurryFin` through the bilinear `f` to give a sum over
+derivative positions within each shuffle summand. -/
+theorem wedge_product_uncurryFin_apply (f : N →L[𝕜] N' →L[𝕜] N'')
+    (g' : M →L[𝕜] (M [⋀^Fin m]→L[𝕜] N)) (h : M [⋀^Fin n]→L[𝕜] N')
+    (v : Fin (m + n + 1) → M) :
+    domDomCongr Fin.finAddFlipAssoc (wedge_product (uncurryFin g') h f) v =
+      (wedge_product (uncurryFin g') h f) (v ∘ ⇑Fin.finAddFlipAssoc) := by
+  rw [ContinuousAlternatingMap.domDomCongr_apply]
+
+/-- Antisymmetrizing a left-precomposition of `wedge_productL` equals wedging the
+antisymmetrization on the left. The `Fin.finAddFlipAssoc` rewrites
+`Fin (m + 1 + n)` to `Fin (m + n + 1)`.
+
+Both sides are the alternation of the same underlying multilinear map
+`v ↦ f (g' (v 0) (v 1, …, v m)) (h (v_{m+1}, …, v_{m+n}))`: the LHS computes it by
+alternating the derivative slot (via `uncurryFin`) then the wedge slots (via
+`uncurrySum`), the RHS by first alternating the derivative slot into the left factor
+(via `uncurryFin g'`) then wedging the result with `h`. -/
+theorem uncurryFin_wedge_productL_precompL (f : N →L[𝕜] N' →L[𝕜] N'')
+    (g' : M →L[𝕜] (M [⋀^Fin m]→L[𝕜] N)) (h : M [⋀^Fin n]→L[𝕜] N') :
+    uncurryFin ((wedge_productL f).precompL M g' h) =
+      domDomCongr Fin.finAddFlipAssoc
+        (wedge_product (uncurryFin g') h f) := by
+  ext v
+  rw [uncurryFin_wedge_productL_precompL_apply, wedge_product_uncurryFin_apply]
+  -- LHS = ∑ k, (-1)^k • wedge_product (g' (v k)) h f (k.removeNth v)
+  -- RHS = (wedge_product (uncurryFin g') h f) (v ∘ finAddFlipAssoc)
+  -- Both sides compute the full alternation of `w ↦ f(g'(w₀)(w₁,…,wₘ))(h(wₘ₊₁,…,wₘ₊ₙ))`.
+  -- The LHS sums over `(k, σ)` derivative-position × (m,n)-shuffle pairs.
+  -- The RHS sums over `(τ, i)` (m+1,n)-shuffle × left-block-position pairs.
+  -- These are matched by `derivShuffleEquivLeft`.
+  sorry
+
+/-- Antisymmetrizing a right-precomposition of `wedge_productL` equals wedging the
+antisymmetrization on the right, with a sign `(-1)^m` from moving the new differentiation
+index past the `m` left-factor indices. -/
+theorem uncurryFin_wedge_productL_precompR (f : N →L[𝕜] N' →L[𝕜] N'')
+    (g : M [⋀^Fin m]→L[𝕜] N) (h' : M →L[𝕜] (M [⋀^Fin n]→L[𝕜] N')) :
+    uncurryFin ((wedge_productL f).precompR M g h') =
+      ((-1 : 𝕜) ^ m) • wedge_product g (uncurryFin h') f := by
+  sorry
 
 private theorem zero_wedge' (h : M [⋀^Fin n]→L[𝕜] 𝕜) :
     wedge_product (0 : M [⋀^Fin m]→L[𝕜] 𝕜) h (ContinuousLinearMap.mul 𝕜 𝕜) = 0 := by
@@ -338,23 +470,19 @@ theorem wedge_mul_assoc [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜] [CharZer
           (ContinuousLinearMap.mul 𝕜 𝕜)) =
       wedge_product (wedge_product g h (ContinuousLinearMap.mul 𝕜 𝕜)) l
         (ContinuousLinearMap.mul 𝕜 𝕜) from DFunLike.congr_fun h_eq v
-  -- Construct a dual basis pair (B, b)
+  -- Elementary covector bases for each degree
   set d' := Module.finrank 𝕜 M
   let B : Module.Basis (Fin d') 𝕜 M := Module.finBasis 𝕜 M
-  let b : Module.Basis (Fin d') 𝕜 (M →L[𝕜] 𝕜) := B.dualBasis.map LinearMap.toContinuousLinearMap
-  have dual : ∀ i j, b i (B j) = if i = j then 1 else 0 := by
-    intro i j; change B.dualBasis i (B j) = _
-    rw [Module.Basis.dualBasis_apply_self]; split_ifs with h1 h2 <;> simp_all [eq_comm]
-  -- Elementary covector bases for each degree
-  let bm := elementaryCovectorBasis B b dual (k := m)
-  let bn := elementaryCovectorBasis B b dual (k := n)
-  let bp := elementaryCovectorBasis B b dual (k := p)
+  let b : Module.Basis (Fin d') 𝕜 (M →L[𝕜] 𝕜) := B.cDualBasis
+  let bm := elementaryCovectorBasis (k := m) B
+  let bn := elementaryCovectorBasis (k := n) B
+  let bp := elementaryCovectorBasis (k := p) B
   have hbm : ∀ I : Fin m ↪o Fin d', bm I = elementaryCovector b ↑I :=
-    fun I => by simp [bm, elementaryCovectorBasis, Module.Basis.mk_apply]
+    fun I => elementaryCovectorBasis_apply B I
   have hbn : ∀ J : Fin n ↪o Fin d', bn J = elementaryCovector b ↑J :=
-    fun J => by simp [bn, elementaryCovectorBasis, Module.Basis.mk_apply]
+    fun J => elementaryCovectorBasis_apply B J
   have hbp : ∀ K : Fin p ↪o Fin d', bp K = elementaryCovector b ↑K :=
-    fun K => by simp [bp, elementaryCovectorBasis, Module.Basis.mk_apply]
+    fun K => elementaryCovectorBasis_apply B K
   -- Expand g = ∑ c_I • e_I and distribute
   rw [show g = ∑ I, bm.repr g I • bm I from (bm.sum_repr g).symm]; simp only [hbm]
   rw [sum_smul_wedge_left (m := m) (n := n + p), domDomCongr_sum_smul,
@@ -411,16 +539,13 @@ theorem wedge_antisymm [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜] [CharZero
     (g ∧[𝕜] h) = ((-1 : 𝕜)^(m*n) • (h ∧[𝕜] g)).domDomCongr Fin.finAddCongr := by
   set d' := Module.finrank 𝕜 M
   let B : Module.Basis (Fin d') 𝕜 M := Module.finBasis 𝕜 M
-  let b : Module.Basis (Fin d') 𝕜 (M →L[𝕜] 𝕜) := B.dualBasis.map LinearMap.toContinuousLinearMap
-  have dual : ∀ i j, b i (B j) = if i = j then 1 else 0 := by
-    intro i j; change B.dualBasis i (B j) = _
-    rw [Module.Basis.dualBasis_apply_self]; split_ifs with h1 h2 <;> simp_all [eq_comm]
-  let bm := elementaryCovectorBasis B b dual (k := m)
-  let bn := elementaryCovectorBasis B b dual (k := n)
+  let b : Module.Basis (Fin d') 𝕜 (M →L[𝕜] 𝕜) := B.cDualBasis
+  let bm := elementaryCovectorBasis (k := m) B
+  let bn := elementaryCovectorBasis (k := n) B
   have hbm : ∀ I : Fin m ↪o Fin d', bm I = elementaryCovector b ↑I :=
-    fun I => by simp [bm, elementaryCovectorBasis, Module.Basis.mk_apply]
+    fun I => elementaryCovectorBasis_apply B I
   have hbn : ∀ J : Fin n ↪o Fin d', bn J = elementaryCovector b ↑J :=
-    fun J => by simp [bn, elementaryCovectorBasis, Module.Basis.mk_apply]
+    fun J => elementaryCovectorBasis_apply B J
   nth_rw 1 [show g = ∑ I, bm.repr g I • bm I from (bm.sum_repr g).symm]
   nth_rw 2 [show g = ∑ I, bm.repr g I • bm I from (bm.sum_repr g).symm]
   nth_rw 1 [show h = ∑ J, bn.repr h J • bn J from (bn.sum_repr h).symm]
@@ -509,29 +634,16 @@ theorem iprod_wedge_product_mul [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜] 
   -- Step 1: Set up the elementary covector basis.
   set d := Module.finrank 𝕜 M with hd_def
   let B : Module.Basis (Fin d) 𝕜 M := Module.finBasis 𝕜 M
-  let b : Module.Basis (Fin d) 𝕜 (M →L[𝕜] 𝕜) :=
-    B.dualBasis.map LinearMap.toContinuousLinearMap
-  have dual : ∀ i j, b i (B j) = if i = j then 1 else 0 := by
-    intro i j
-    change LinearMap.toContinuousLinearMap (B.dualBasis i) (B j) = _
-    change B.dualBasis i (B j) = _
-    rw [Module.Basis.dualBasis_apply_self]
-    split_ifs with h1 h2 <;> simp_all [eq_comm]
+  let b : Module.Basis (Fin d) 𝕜 (M →L[𝕜] 𝕜) := B.cDualBasis
   let basisG : Module.Basis (Fin (m + 1) ↪o Fin d) 𝕜 (M [⋀^Fin (m + 1)]→L[𝕜] 𝕜) :=
-    elementaryCovectorBasis B b dual
+    elementaryCovectorBasis B
   let basisH : Module.Basis (Fin (n + 1) ↪o Fin d) 𝕜 (M [⋀^Fin (n + 1)]→L[𝕜] 𝕜) :=
-    elementaryCovectorBasis B b dual
+    elementaryCovectorBasis B
   -- basisG / basisH evaluated at I/J equals elementaryCovector b I/J.
   have basisG_eq : ∀ I : Fin (m + 1) ↪o Fin d,
-      basisG I = elementaryCovector b ↑I := by
-    intro I
-    show (elementaryCovectorBasis B b dual) I = elementaryCovector b ↑I
-    rw [elementaryCovectorBasis, Module.Basis.mk_apply]
+      basisG I = elementaryCovector b ↑I := fun I => elementaryCovectorBasis_apply B I
   have basisH_eq : ∀ J : Fin (n + 1) ↪o Fin d,
-      basisH J = elementaryCovector b ↑J := by
-    intro J
-    show (elementaryCovectorBasis B b dual) J = elementaryCovector b ↑J
-    rw [elementaryCovectorBasis, Module.Basis.mk_apply]
+      basisH J = elementaryCovector b ↑J := fun J => elementaryCovectorBasis_apply B J
   -- Step 2: Expand g and h in the basis.
   have hg : g = ∑ I : Fin (m + 1) ↪o Fin d, basisG.repr g I • elementaryCovector b ↑I := by
     conv_lhs => rw [← basisG.sum_repr g]

@@ -328,39 +328,33 @@ theorem elementaryCovector_span
   · intro ι _ hne; rw [hvanish ι hne, mul_zero]
   · intro h; exact absurd (Finset.mem_univ ι₀) h
 
-/-- The elementary covectors indexed by strictly increasing
-multi-indices `Fin k ↪o Fin n` form a basis for the space of
-continuous alternating `k`-forms `E [⋀^Fin k]→L[𝕜] 𝕜`. -/
+/-- The elementary covectors indexed by strictly increasing multi-indices
+`Fin k ↪o Fin n` form a basis for the space of continuous alternating `k`-forms
+`E [⋀^Fin k]→L[𝕜] 𝕜`. The covectors are built from `B.cDualBasis`, the continuous
+dual basis induced by `B`. -/
 noncomputable def elementaryCovectorBasis
-    (B : Module.Basis (Fin n) 𝕜 E)
-    (b : Module.Basis (Fin n) 𝕜 (E →L[𝕜] 𝕜))
-    (dual : ∀ i j, b i (B j) = if i = j then 1 else 0) :
+    (B : Module.Basis (Fin n) 𝕜 E) :
     Module.Basis (Fin k ↪o Fin n) 𝕜
       (E [⋀^Fin k]→L[𝕜] 𝕜) :=
   Module.Basis.mk
-    (elementaryCovector_linearIndependent B b dual)
-    (fun F _ => elementaryCovector_span B b dual F)
+    (elementaryCovector_linearIndependent B B.cDualBasis B.cDualBasis_apply_self)
+    (fun F _ => elementaryCovector_span B B.cDualBasis B.cDualBasis_apply_self F)
+
+@[simp]
+theorem elementaryCovectorBasis_apply
+    (B : Module.Basis (Fin n) 𝕜 E) (I : Fin k ↪o Fin n) :
+    (elementaryCovectorBasis B : Module.Basis (Fin k ↪o Fin n) 𝕜 _) I =
+      elementaryCovector B.cDualBasis ↑I := by
+  rw [elementaryCovectorBasis, Module.Basis.mk_apply]
 
 /-- The dimension of `E [⋀^Fin k]→L[𝕜] 𝕜` is `(finrank 𝕜 E).choose k`. -/
 theorem finrank_continuousAlternatingMap :
     Module.finrank 𝕜 (E [⋀^Fin k]→L[𝕜] 𝕜) =
       (Module.finrank 𝕜 E).choose k := by
   set d := Module.finrank 𝕜 E
-  -- Construct a basis B for E and its continuous dual basis b
   let B : Module.Basis (Fin d) 𝕜 E := Module.finBasis 𝕜 E
-  let b : Module.Basis (Fin d) 𝕜 (E →L[𝕜] 𝕜) :=
-    B.dualBasis.map LinearMap.toContinuousLinearMap
-  -- The duality pairing: b i (B j) = if i = j then 1 else 0
-  have dual : ∀ i j, b i (B j) = if i = j then 1 else 0 := by
-    intro i j
-    change LinearMap.toContinuousLinearMap (B.dualBasis i)
-      (B j) = _
-    -- toContinuousLinearMap f x = f x by rfl
-    change B.dualBasis i (B j) = _
-    rw [Module.Basis.dualBasis_apply_self]
-    split_ifs with h1 h2 <;> simp_all [eq_comm]
   rw [Module.finrank_eq_card_basis
-      (elementaryCovectorBasis B b dual)]
+      (elementaryCovectorBasis (k := k) B)]
   -- Fintype.card (Fin k ↪o Fin d) = d.choose k
   rw [Fintype.card_congr
     (Set.powersetCard.ofFinEmbEquiv

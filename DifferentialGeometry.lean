@@ -63,10 +63,10 @@ import DifferentialGeometry.Tensor.Auxiliary.MultiKroneckerDelta
 import DifferentialGeometry.Tensor.Auxiliary.Perm
 import DifferentialGeometry.Tensor.Auxiliary.ShuffleDecomposition
 import DifferentialGeometry.Tensor.Auxiliary.ShuffleSplit
-import DifferentialGeometry.Tensor.DifferentialForm.Basic
-import DifferentialGeometry.Tensor.DifferentialForm.Congr
-import DifferentialGeometry.Tensor.DifferentialForm.Defs
-import DifferentialGeometry.Tensor.DifferentialForm.Rough
+import DifferentialGeometry.DifferentialForm.Basic
+import DifferentialGeometry.DifferentialForm.Congr
+import DifferentialGeometry.DifferentialForm.Defs
+import DifferentialGeometry.DifferentialForm.Rough
 import DifferentialGeometry.Tensor.Multilinear.Basis
 import DifferentialGeometry.Tensor.Multilinear.Bundle
 import DifferentialGeometry.Tensor.Multilinear.Comp

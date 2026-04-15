@@ -19,6 +19,22 @@ variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
   {d : ℕ}
 
+/-- Continuous dual basis of `E →L[𝕜] 𝕜` induced by a basis `B` of `E`. Obtained by
+transporting the algebraic dual basis `B.dualBasis` across the finite-dimensional
+linear equivalence `E →ₗ[𝕜] 𝕜 ≃ₗ[𝕜] E →L[𝕜] 𝕜`. -/
+noncomputable def Module.Basis.cDualBasis [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜]
+    (B : Module.Basis (Fin d) 𝕜 E) :
+    Module.Basis (Fin d) 𝕜 (E →L[𝕜] 𝕜) :=
+  B.dualBasis.map LinearMap.toContinuousLinearMap
+
+/-- Duality pairing of `B.cDualBasis` with `B`: `B.cDualBasis i (B j) = δᵢⱼ`. -/
+theorem Module.Basis.cDualBasis_apply_self [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜]
+    (B : Module.Basis (Fin d) 𝕜 E) (i j : Fin d) :
+    B.cDualBasis i (B j) = if i = j then (1 : 𝕜) else 0 := by
+  change B.dualBasis i (B j) = _
+  rw [Module.Basis.dualBasis_apply_self]
+  split_ifs with h1 h2 <;> simp_all [eq_comm]
+
 /-- Existence of a predual basis. Given a basis `b` of the continuous dual
 `E →L[𝕜] 𝕜`, there exists a basis `B` of `E` such that `b i (B j) = δ_{ij}`. -/
 theorem exists_predual_basis [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜]
