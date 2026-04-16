@@ -149,9 +149,10 @@ end RicciNormSq
 
 section RicciRaise
 
-variable {k R V Time : Type*}
+variable {k R V Time : Type*} {A : Type*}
 variable [Field k] [CommRing R] [Algebra k R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+variable [CommRing A] [Algebra R A]
 
 /-- Product rule for the metric with a varying vector argument.
 
@@ -161,12 +162,12 @@ variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
     time derivatives of the metric with time derivatives of vector-valued
     functions observed through the metric. -/
 def MetricBilinProductRule
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (g_fam : Time → MetricDuality R V) : Prop :=
   ∀ (A : Time → V) (B : V) (t : Time),
-    (td.dt (fun s => (g_fam s).g (A s) B)) t =
+    td.dt_apply (fun s => (g_fam s).g (A s) B) t =
     metric_var_form td g_fam t ![A t, B] ![] +
-    (td.dt (fun s => (g_fam t).g (A s) B)) t
+    td.dt_apply (fun s => (g_fam t).g (A s) B) t
 
 /-- Ricci raise variation: the time derivative of the raised Ricci tensor
     observed through the fixed metric g(t) equals the Ricci variation
@@ -175,9 +176,9 @@ def MetricBilinProductRule
     Formulated using scalar time derivatives only (no V-valued derivatives). -/
 theorem ricci_raise_variation
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (atr : AbstractTrace R V)
-    (g_fam : Time → MetricDuality R V) 
+    (g_fam : Time → MetricDuality R V)
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ s, ∀ X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
     (hal_fam : ∀ s, ∀ X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z)
@@ -185,8 +186,8 @@ theorem ricci_raise_variation
     (hl_fam : ∀ s, ∀ X (f : R) Y, conn_fam s X (f • Y) = (emb.embed X) f • Y + f • conn_fam s X Y)
     (h_mvp : MetricBilinProductRule td g_fam)
     (t : Time) (X Y : V) :
-    (td.dt (fun s => (g_fam t).g
-      (RicciEndomorphism emb (conn_fam s) (ha_fam s) (hal_fam s) (hsl_fam s) (hl_fam s) atr (g_fam s) X) Y)) t =
+    td.dt_apply (fun s => (g_fam t).g
+      (RicciEndomorphism emb (conn_fam s) (ha_fam s) (hal_fam s) (hsl_fam s) (hl_fam s) atr (g_fam s) X) Y) t =
     dt_tensor td t (fun s => ricciForm_tensor emb (conn_fam s) (ha_fam s) (hal_fam s) (hsl_fam s) (hl_fam s) atr) ![X, Y] ![] -
     metric_var_form td g_fam t
       ![RicciEndomorphism emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr (g_fam t) X, Y] ![] := by
@@ -200,16 +201,12 @@ theorem ricci_raise_variation
   have h_prod := h_mvp
     (fun s => RicciEndomorphism emb (conn_fam s) (ha_fam s) (hal_fam s) (hsl_fam s) (hl_fam s) atr (g_fam s) X) Y t
   -- Rewrite LHS of h_prod: dt[g(s)(RicciEndo_s(X), Y)] = dt[Rc_s(X, Y)]
-  rw [show (td.dt (fun s => (g_fam s).g
-      (RicciEndomorphism emb (conn_fam s) (ha_fam s) (hal_fam s) (hsl_fam s) (hl_fam s) atr (g_fam s) X) Y)) t =
-    (td.dt (fun s => ricciForm_tensor emb (conn_fam s) (ha_fam s) (hal_fam s) (hsl_fam s) (hl_fam s) atr ![X, Y] ![])) t from
-    congr_arg (fun f => (td.dt f) t) h_feq] at h_prod
+  rw [show td.dt_apply (fun s => (g_fam s).g
+      (RicciEndomorphism emb (conn_fam s) (ha_fam s) (hal_fam s) (hsl_fam s) (hl_fam s) atr (g_fam s) X) Y) t =
+    td.dt_apply (fun s => ricciForm_tensor emb (conn_fam s) (ha_fam s) (hal_fam s) (hsl_fam s) (hl_fam s) atr ![X, Y] ![]) t from
+    congr_arg (fun f => td.dt_apply f t) h_feq] at h_prod
   -- h_prod now: dt[ricciForm(X,Y)] = metric_var + dt[g(t)(A(s), Y)]
   -- Goal: dt[g(t)(A(s), Y)] = dt_tensor(Rc)(X,Y) - metric_var
-  -- Convert dt_tensor to td.dt form in the goal (they're defeq by dt_tensor_eval)
-  change _ = (td.dt (fun s => ricciForm_tensor emb (conn_fam s) (ha_fam s) (hal_fam s) (hsl_fam s) (hl_fam s) atr ![X, Y] ![])) t -
-    metric_var_form td g_fam t
-      ![RicciEndomorphism emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr (g_fam t) X, Y] ![]
   rw [add_comm] at h_prod; exact (sub_eq_of_eq_add h_prod).symm
 
 end RicciRaise
@@ -220,9 +217,10 @@ end RicciRaise
 
 section SCProductRule
 
-variable {k R V Time : Type*}
+variable {k R V Time : Type*} {A : Type*}
 variable [Field k] [CommRing R] [Algebra k R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+variable [CommRing A] [Algebra R A]
 
 /-- The scalar curvature product rule: ∂_t(ScalarCurvature) decomposes
     into a metric variation term and a Ricci variation term.
@@ -232,9 +230,9 @@ variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
     analog of the old MetricTimeDerivativeRules.t_metric_trace_varying. -/
 def ScalarCurvatureProductRule
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (atr : AbstractTrace R V)
-    (g_fam : Time → MetricDuality R V) 
+    (g_fam : Time → MetricDuality R V)
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ s, ∀ X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
     (hal_fam : ∀ s, ∀ X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z)
@@ -242,7 +240,7 @@ def ScalarCurvatureProductRule
     (hl_fam : ∀ s, ∀ X (f : R) Y, conn_fam s X (f • Y) = (emb.embed X) f • Y + f • conn_fam s X Y)
     : Prop :=
   ∀ t,
-    (td.dt (fun s => ScalarCurvature emb (conn_fam s) (ha_fam s) (hal_fam s) (hsl_fam s) (hl_fam s) atr (g_fam s))) t =
+    td.dt_apply (fun s => ScalarCurvature emb (conn_fam s) (ha_fam s) (hal_fam s) (hsl_fam s) (hl_fam s) atr (g_fam s)) t =
     -tensor_inner_02 (g_fam t) atr
       (metric_var_form td g_fam t)
       (ricciForm_tensor emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr) +
@@ -257,9 +255,10 @@ end SCProductRule
 
 section SCEvolution
 
-variable {k R V Time : Type*}
+variable {k R V Time : Type*} {A : Type*}
 variable [Field k] [CommRing R] [Algebra k R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+variable [CommRing A] [Algebra R A]
 
 /-- Scalar curvature evolution under Ricci flow:
 
@@ -271,9 +270,9 @@ variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
     via the contracted second Bianchi identity (proved separately). -/
 theorem scalar_curvature_evolution
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (atr : AbstractTrace R V)
-    (g_fam : Time → MetricDuality R V) 
+    (g_fam : Time → MetricDuality R V)
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ s, ∀ X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
     (hal_fam : ∀ s, ∀ X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z)
@@ -282,7 +281,7 @@ theorem scalar_curvature_evolution
     (h_rf : IsRicciFlow emb td atr g_fam conn_fam ha_fam hal_fam hsl_fam hl_fam)
     (h_sc_prod : ScalarCurvatureProductRule emb td atr g_fam conn_fam ha_fam hal_fam hsl_fam hl_fam)
     (t : Time) :
-    (td.dt (fun s => ScalarCurvature emb (conn_fam s) (ha_fam s) (hal_fam s) (hsl_fam s) (hl_fam s) atr (g_fam s))) t =
+    td.dt_apply (fun s => ScalarCurvature emb (conn_fam s) (ha_fam s) (hal_fam s) (hsl_fam s) (hl_fam s) atr (g_fam s)) t =
     2 * ricci_norm_sq emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr (g_fam t) +
     metric_trace (g_fam t) atr (0 : Fin 2) (0 : Fin 1)
       (dt_tensor td t (fun s => ricciForm_tensor emb (conn_fam s) (ha_fam s) (hal_fam s) (hsl_fam s) (hl_fam s) atr)) ![] ![] := by

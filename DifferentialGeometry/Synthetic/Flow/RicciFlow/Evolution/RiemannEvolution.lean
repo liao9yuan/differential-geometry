@@ -24,6 +24,7 @@ section RiemannEvolution
 variable {k R V Time : Type*}
 variable [Field k] [CommRing R] [Algebra k R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+variable {A : Type*} [CommRing A] [Algebra R A]
 
 /-- The Riemann variation tensor, defined through the geometric variation formula.
 
@@ -33,7 +34,7 @@ variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
     dt_tensor(Rm) established by `variation_scalar_eq_dt_tensor`. -/
 noncomputable def riemann_variation_tensor
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ s, ∀ X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
     (hal_fam : ∀ s, ∀ X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z)
@@ -93,7 +94,7 @@ noncomputable def riemann_variation_tensor
 /-- The Riemann variation formula: dt_tensor(Rm) equals the variation tensor. -/
 theorem riemann_variation_formula
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ s, ∀ X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
     (hal_fam : ∀ s, ∀ X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z)
@@ -111,7 +112,7 @@ theorem riemann_variation_formula
 
 /-- The quadratic curvature operator Q(Rm) = riemann_variation_tensor − ΔRm. -/
 noncomputable def Q_rm
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (emb : DerivationEmbedding k R V)
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ s, ∀ X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
@@ -130,7 +131,7 @@ noncomputable def Q_rm
 /-- Evolution of the Riemann curvature tensor: ∂_t Rm = Δ(Rm) + Q(Rm). -/
 theorem riemann_tensor_evolution
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (_h_st : SpatialTemporalComm emb td)
     (atr : AbstractTrace R V)
     (conn_fam : Time → V → V → V)
@@ -163,6 +164,7 @@ section HamiltonQuadratic
 variable {k R V Time : Type*}
 variable [Field k] [CommRing R] [Algebra k R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+variable {A : Type*} [CommRing A] [Algebra R A]
 
 -- ============================================================
 -- 2.1  A_rf_scalar: connection variation under Ricci flow
@@ -189,7 +191,7 @@ noncomputable def A_rf_scalar
 /-- Under Ricci flow, the connection variation evaluates as A_rf_scalar. -/
 theorem conn_var_eq_A_rf
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (h_st : SpatialTemporalComm emb td)
     (atr : AbstractTrace R V)
     (g_fam : Time → MetricDuality R V)
@@ -203,9 +205,9 @@ theorem conn_var_eq_A_rf
     
     (t : Time)
     (h_decomp : ∀ (F : Time → V) (W : V),
-      (td.dt (fun s => (g_fam s).g (F s) W)) t =
+      td.dt_apply (fun s => (g_fam s).g (F s) W) t =
       metric_var_form td g_fam t ![F t, W] ![] +
-      (td.dt (fun s => (g_fam t).g (F s) W)) t)
+      td.dt_apply (fun s => (g_fam t).g (F s) W) t)
     (U W : V) (ω : V →ₗ[R] R) :
     conn_var_vector td conn_fam t U W ![] ![ω] =
     A_rf_scalar emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t)
@@ -281,7 +283,7 @@ private theorem nabla_10_eval
 /-- Under Ricci flow, nabla_conn_var_scalar equals the A_rf_scalar expansion. -/
 private theorem nabla_conn_var_as_A_rf
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (h_st : SpatialTemporalComm emb td)
     (atr : AbstractTrace R V)
     (g_fam : Time → MetricDuality R V)
@@ -295,9 +297,9 @@ private theorem nabla_conn_var_as_A_rf
     
     (t : Time)
     (h_decomp : ∀ (F : Time → V) (W : V),
-      (td.dt (fun s => (g_fam s).g (F s) W)) t =
+      td.dt_apply (fun s => (g_fam s).g (F s) W) t =
       metric_var_form td g_fam t ![F t, W] ![] +
-      (td.dt (fun s => (g_fam t).g (F s) W)) t)
+      td.dt_apply (fun s => (g_fam t).g (F s) W) t)
     (X Y Z : V) (ω : V →ₗ[R] R) :
     nabla_conn_var_scalar emb td conn_fam ha_fam hl_fam t X Y Z ω =
     (emb.embed X) (A_rf_scalar emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t)
@@ -329,7 +331,7 @@ private theorem nabla_conn_var_as_A_rf
 /-- Q_rm equals the Hamilton quadratic. -/
 theorem Q_rm_eq_hamilton
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (h_st : SpatialTemporalComm emb td)
     (atr : AbstractTrace R V)
     (g_fam : Time → MetricDuality R V)
@@ -345,9 +347,9 @@ theorem Q_rm_eq_hamilton
     
     (t : Time)
     (h_decomp : ∀ (F : Time → V) (W : V),
-      (td.dt (fun s => (g_fam s).g (F s) W)) t =
+      td.dt_apply (fun s => (g_fam s).g (F s) W) t =
       metric_var_form td g_fam t ![F t, W] ![] +
-      (td.dt (fun s => (g_fam t).g (F s) W)) t)
+      td.dt_apply (fun s => (g_fam t).g (F s) W) t)
     (X Y Z : V) (ω : V →ₗ[R] R) :
     Q_rm td emb conn_fam ha_fam hal_fam hsl_fam hl_fam h_pr h_tf atr (g_fam t) t
       ![X, Y, Z] ![ω] =
@@ -384,7 +386,7 @@ theorem Q_rm_eq_hamilton
     the Riemann variation = ΔRm + Q_hamilton. -/
 theorem hamilton_decomposition
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (h_st : SpatialTemporalComm emb td)
     (atr : AbstractTrace R V)
     (g_fam : Time → MetricDuality R V)
@@ -400,9 +402,9 @@ theorem hamilton_decomposition
     
     (t : Time)
     (h_decomp : ∀ (F : Time → V) (W : V),
-      (td.dt (fun s => (g_fam s).g (F s) W)) t =
+      td.dt_apply (fun s => (g_fam s).g (F s) W) t =
       metric_var_form td g_fam t ![F t, W] ![] +
-      (td.dt (fun s => (g_fam t).g (F s) W)) t)
+      td.dt_apply (fun s => (g_fam t).g (F s) W) t)
     (X Y Z : V) (ω : V →ₗ[R] R) :
     dt_tensor td t (fun s => Rm_tensor emb (conn_fam s) (ha_fam s) (hal_fam s) (hsl_fam s)
       (hl_fam s)) ![X, Y, Z] ![ω] =
@@ -1152,6 +1154,7 @@ section TensorEvolutionHamilton
 variable {k R V Time : Type*}
 variable [Field k] [CommRing R] [Algebra k R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+variable {A : Type*} [CommRing A] [Algebra R A]
 
 -- ============================================================
 -- 5.1  Q_rm_independent: TensorData from Q_hamilton_scalar — NO td
@@ -1244,7 +1247,7 @@ theorem Q_rm_independent_eval
     This is the tensor-level version of Q_rm_eq_hamilton. -/
 theorem Q_rm_independent_eq_Q_rm
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (h_st : SpatialTemporalComm emb td)
     (atr : AbstractTrace R V)
     (g_fam : Time → MetricDuality R V)
@@ -1260,9 +1263,9 @@ theorem Q_rm_independent_eq_Q_rm
     
     (t : Time)
     (h_decomp : ∀ (F : Time → V) (W : V),
-      (td.dt (fun s => (g_fam s).g (F s) W)) t =
+      td.dt_apply (fun s => (g_fam s).g (F s) W) t =
       metric_var_form td g_fam t ![F t, W] ![] +
-      (td.dt (fun s => (g_fam t).g (F s) W)) t) :
+      td.dt_apply (fun s => (g_fam t).g (F s) W) t) :
     Q_rm_independent emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t)
       atr (g_fam t) =
     Q_rm td emb conn_fam ha_fam hal_fam hsl_fam hl_fam h_pr h_tf atr (g_fam t) t := by
@@ -1282,7 +1285,7 @@ theorem Q_rm_independent_eq_Q_rm
     expression in Rm, Rc, g, ∇, atr.tr, sharp. No time derivatives appear in Q. -/
 theorem riemann_tensor_evolution_hamilton
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (h_st : SpatialTemporalComm emb td)
     (atr : AbstractTrace R V)
     (g_fam : Time → MetricDuality R V)
@@ -1298,9 +1301,9 @@ theorem riemann_tensor_evolution_hamilton
     
     (t : Time)
     (h_decomp : ∀ (F : Time → V) (W : V),
-      (td.dt (fun s => (g_fam s).g (F s) W)) t =
+      td.dt_apply (fun s => (g_fam s).g (F s) W) t =
       metric_var_form td g_fam t ![F t, W] ![] +
-      (td.dt (fun s => (g_fam t).g (F s) W)) t) :
+      td.dt_apply (fun s => (g_fam t).g (F s) W) t) :
     dt_tensor td t (fun s => Rm_tensor emb (conn_fam s) (ha_fam s) (hal_fam s) (hsl_fam s)
       (hl_fam s)) =
     rough_laplacian_Rm emb (conn_fam t) (ha_fam t) (hl_fam t) (hal_fam t) (hsl_fam t)

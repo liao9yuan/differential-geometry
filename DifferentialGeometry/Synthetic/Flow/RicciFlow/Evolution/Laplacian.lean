@@ -23,9 +23,10 @@ open SyntheticTensor
 
 section HessianRaise
 
-variable {k R V Time : Type*}
+variable {k R V : Type*} {A Time : Type*}
 variable [Field k] [CommRing R] [Algebra k R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+variable [CommRing A] [Algebra R A]
 
 /-- Hessian raise variation: the scalar time derivative of the raised Hessian
     observed through g(t).
@@ -38,7 +39,7 @@ variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
     the time derivative decomposes into the metric variation and the g(t)-variation. -/
 theorem hessian_raise_variation
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (_atr : AbstractTrace R V)
     (g_fam : Time → MetricDuality R V) 
     (conn_fam : Time → V → V → V)
@@ -51,7 +52,7 @@ theorem hessian_raise_variation
     (h_sharp_fam : Time → V → V)
     (h_sharp_spec : ∀ s X Y, (g_fam s).g (h_sharp_fam s X) Y = hessian_fam s ![X, Y] ![])
     (t : Time) (X Y : V) :
-    (td.dt (fun s => (g_fam t).g (h_sharp_fam s X) Y)) t =
+    td.dt_apply (fun s => (g_fam t).g (h_sharp_fam s X) Y) t =
     dt_tensor td t hessian_fam ![X, Y] ![] -
     metric_var_form td g_fam t ![h_sharp_fam t X, Y] ![] := by
   -- g(s)(sharp_s(Hess_s(X,·)), Y) = Hess_s(X, Y) for all s
@@ -59,13 +60,13 @@ theorem hessian_raise_variation
       (fun s => hessian_fam s ![X, Y] ![]) :=
     funext (fun s => h_sharp_spec s X Y)
   -- dt of LHS = dt of RHS
-  have h_dt_eq : (td.dt (fun s => (g_fam s).g (h_sharp_fam s X) Y)) t =
-      (td.dt (fun s => hessian_fam s ![X, Y] ![])) t :=
-    congr_arg (fun f => (td.dt f) t) h_feq
+  have h_dt_eq : td.dt_apply (fun s => (g_fam s).g (h_sharp_fam s X) Y) t =
+      td.dt_apply (fun s => hessian_fam s ![X, Y] ![]) t :=
+    congr_arg (fun f => td.dt_apply f t) h_feq
   -- Product rule
   have h_prod := h_mvp (fun s => h_sharp_fam s X) Y t
   -- dt of hessian evaluations = dt_tensor(Hess) by definition
-  change _ = (td.dt (fun s => hessian_fam s ![X, Y] ![])) t - _
+  change _ = td.dt_apply (fun s => hessian_fam s ![X, Y] ![]) t - _
   rw [h_dt_eq] at h_prod; rw [add_comm] at h_prod
   exact (sub_eq_of_eq_add h_prod).symm
 
@@ -77,9 +78,10 @@ end HessianRaise
 
 section LaplacianEvolution
 
-variable {k R V Time : Type*}
+variable {k R V : Type*} {A Time : Type*}
 variable [Field k] [CommRing R] [Algebra k R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+variable [CommRing A] [Algebra R A]
 
 /-- The Laplacian product rule: ∂_t[metric_trace_s(Hess_s)] decomposes into
     a metric variation term and a Hessian variation term.
@@ -88,13 +90,13 @@ variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
     Combines TimeTrComm + metric product rule + trace-endomorphism relationship. -/
 def LaplacianProductRule
     (_emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (atr : AbstractTrace R V)
     (g_fam : Time → MetricDuality R V) 
     (hessian_fam : Time → TensorData R V 0 2) : Prop :=
   ∀ t,
-    (td.dt (fun s =>
-      metric_trace (g_fam s) atr (0 : Fin 2) (0 : Fin 1) (hessian_fam s) ![] ![])) t =
+    td.dt_apply (fun s =>
+      metric_trace (g_fam s) atr (0 : Fin 2) (0 : Fin 1) (hessian_fam s) ![] ![]) t =
     -tensor_inner_02 (g_fam t) atr
       (metric_var_form td g_fam t) (hessian_fam t) +
     metric_trace (g_fam t) atr (0 : Fin 2) (0 : Fin 1)
@@ -111,9 +113,9 @@ def LaplacianProductRule
     product rule and simplifies -⟨-2Rc, Hess(u)⟩ = 2⟨Rc, Hess(u)⟩. -/
 theorem laplacian_evolution
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (atr : AbstractTrace R V)
-    (g_fam : Time → MetricDuality R V) 
+    (g_fam : Time → MetricDuality R V)
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ s, ∀ X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
     (hal_fam : ∀ s, ∀ X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z)
@@ -123,8 +125,8 @@ theorem laplacian_evolution
     (hessian_fam : Time → TensorData R V 0 2)
     (h_lap_prod : LaplacianProductRule emb td atr g_fam hessian_fam)
     (t : Time) :
-    (td.dt (fun s =>
-      metric_trace (g_fam s) atr (0 : Fin 2) (0 : Fin 1) (hessian_fam s) ![] ![])) t =
+    td.dt_apply (fun s =>
+      metric_trace (g_fam s) atr (0 : Fin 2) (0 : Fin 1) (hessian_fam s) ![] ![]) t =
     2 * tensor_inner_02 (g_fam t) atr
       (ricciForm_tensor emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr)
       (hessian_fam t) +

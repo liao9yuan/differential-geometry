@@ -560,14 +560,33 @@ def NablaTrComm {k R V : Type*}
       (conn_add X) (conn_leibniz X) L)
 
 /-- ∂_t commutes with trace.
-    For a time-dependent endomorphism L, if dL is characterized as its time derivative
-    (i.e., for all v, α: α(dL v) = dt(s ↦ α(L s v)) at t), then dt(tr(L)) = tr(dL). -/
-def TimeTrComm {R V Time : Type*}
+    Generalized over an abstract time algebra A with `td.eval` for evaluation.
+    For a time-dependent endomorphism L with time derivative dL, if for each v, α
+    we have elements `αLv v α ∈ A` representing `s ↦ α(L(s)(v))` and `trL ∈ A`
+    representing `s ↦ tr(L(s))`, then eval(dt(trL))(t) = tr(dL). -/
+def TimeTrComm {R V : Type*} {A Time : Type*}
     [CommRing R] [AddCommGroup V] [Module R V]
-    (atr : AbstractTrace R V) (td : TimeDerivativeData R Time) : Prop :=
-  ∀ (L : Time → V →ₗ[R] V) (dL : V →ₗ[R] V) (t : Time),
-    (∀ (v : V) (α : V →ₗ[R] R),
-      α (dL v) = (td.dt (fun s => α (L s v))) t) →
-    (td.dt (fun s => atr.tr (L s))) t = atr.tr dL
+    [CommRing A] [Algebra R A]
+    (atr : AbstractTrace R V) (td : TimeDerivativeData R A Time) : Prop :=
+  ∀ (L : Time → V →ₗ[R] V) (dL : V →ₗ[R] V) (t : Time)
+    (αLv : V → (V →ₗ[R] R) → A) (trL : A),
+    (∀ v α s, td.eval (αLv v α) s = α (L s v)) →
+    (∀ s, td.eval trL s = atr.tr (L s)) →
+    (∀ (v : V) (α : V →ₗ[R] R), α (dL v) = td.eval (td.dt (αLv v α)) t) →
+    td.eval (td.dt trL) t = atr.tr dL
+
+/-- For `A = Time → R` with the identity lift/eval, recover the original direct API. -/
+theorem TimeTrComm.of_pi {R V Time : Type*}
+    [CommRing R] [AddCommGroup V] [Module R V]
+    {atr : AbstractTrace R V} {td : TimeDerivativeData R (Time → R) Time}
+    (h : TimeTrComm atr td)
+    (L : Time → V →ₗ[R] V) (dL : V →ₗ[R] V) (t : Time)
+    (h_char : ∀ (v : V) (α : V →ₗ[R] R),
+      α (dL v) = td.eval (td.dt (td.lift (fun s => α (L s v)))) t) :
+    td.eval (td.dt (td.lift (fun s => atr.tr (L s)))) t = atr.tr dL :=
+  h L dL t (fun v α => td.lift (fun s => α (L s v))) (td.lift (fun s => atr.tr (L s)))
+    (fun v α s => by rw [td.eval_lift])
+    (fun s => by rw [td.eval_lift])
+    h_char
 
 end SyntheticTensor

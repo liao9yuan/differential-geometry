@@ -4,7 +4,7 @@ import Mathlib.Algebra.BigOperators.Group.Finset.Basic
 /-!
 # Time Derivative on Tensors
 
-∂_t on (r,s) tensors, defined pointwise via `dt`.
+∂_t on (r,s) tensors, defined pointwise via `dt_apply`.
 -/
 
 set_option autoImplicit false
@@ -13,47 +13,24 @@ open BigOperators
 open SyntheticTensor
 
 -- ============================================================
--- Pointwise helpers for dt on (Time → R)
--- ============================================================
-
-section DtHelpers
-
-variable {R Time : Type*} [CommRing R]
-
-/-- dt(const(c) * f) evaluated at t equals c * dt(f)(t). -/
-private lemma dt_const_mul_apply (td : TimeDerivativeData R Time) (c : R)
-    (f : Time → R) (t : Time) :
-    (td.dt (algebraMap R (Time → R) c * f)) t = c * (td.dt f) t := by
-  rw [dt_smul_const td c f]; rfl
-
-/-- dt(f * g) evaluated at t equals f(t)*dt(g)(t) + g(t)*dt(f)(t). -/
-private lemma dt_mul_apply (td : TimeDerivativeData R Time)
-    (f g : Time → R) (t : Time) :
-    (td.dt (f * g)) t = f t * (td.dt g) t + g t * (td.dt f) t := by
-  have h := congr_fun (dt_mul td f g) t
-  simp only [Pi.add_apply, smul_eq_mul] at h
-  exact h
-
-end DtHelpers
-
--- ============================================================
 -- ∂_t on (r,s)-tensors: pointwise definition
 -- ============================================================
 
 section DtTensor
 
-variable {R V Time : Type*}
+variable {R V : Type*} {A Time : Type*}
 variable [CommRing R] [AddCommGroup V] [Module R V]
+variable [CommRing A] [Algebra R A]
 
 /-- Time derivative of a time-dependent (r,s)-tensor. Defined pointwise:
-    (dt_tensor t T)(vs)(αs) = dt(s ↦ T(s)(vs)(αs)) at t.
+    (dt_tensor t T)(vs)(αs) = dt_apply(s ↦ T(s)(vs)(αs)) at t.
 
     Multilinearity follows from T(s) being multilinear for each s,
-    combined with dt being additive and killing R-constants. -/
-noncomputable def dt_tensor (td : TimeDerivativeData R Time)
+    combined with dt_apply being additive and killing R-constants. -/
+noncomputable def dt_tensor (td : TimeDerivativeData R A Time)
     (t : Time) {r s : ℕ} (T : Time → TensorData R V r s) : TensorData R V r s where
   toFun vs :=
-    { toFun := fun αs => (td.dt (fun s => T s vs αs)) t
+    { toFun := fun αs => td.dt_apply (fun s => T s vs αs) t
       map_update_add' := by
         intro inst αs idx β₁ β₂
         have : inst = instDecidableEqFin r := Subsingleton.elim _ _; subst this
@@ -61,17 +38,17 @@ noncomputable def dt_tensor (td : TimeDerivativeData R Time)
             (fun s => T s vs (Function.update αs idx β₁)) +
             (fun s => T s vs (Function.update αs idx β₂)) := by
           ext s; exact (T s vs).map_update_add αs idx β₁ β₂
-        rw [h, map_add]; rfl
+        rw [h, td.dt_apply_add]
       map_update_smul' := by
         intro inst αs idx c β
         have : inst = instDecidableEqFin r := Subsingleton.elim _ _; subst this
         simp only [smul_eq_mul]
         have h : (fun s => T s vs (Function.update αs idx (c • β))) =
-            algebraMap R (Time → R) c * (fun s => T s vs (Function.update αs idx β)) := by
+            (fun s => c * T s vs (Function.update αs idx β)) := by
           ext s
           change T s vs (Function.update αs idx (c • β)) = c * T s vs (Function.update αs idx β)
           have := (T s vs).map_update_smul αs idx c β; rwa [smul_eq_mul] at this
-        rw [h]; exact dt_const_mul_apply td c _ t }
+        rw [h]; exact td.dt_apply_const_mul c _ t }
   map_update_add' := by
     intro inst vs idx v₁ v₂; ext αs
     have : inst = instDecidableEqFin s := Subsingleton.elim _ _; subst this
@@ -80,38 +57,38 @@ noncomputable def dt_tensor (td : TimeDerivativeData R Time)
         (fun s => T s (Function.update vs idx v₁) αs) +
         (fun s => T s (Function.update vs idx v₂) αs) := by
       ext s; exact congr_arg (· αs) ((T s).map_update_add vs idx v₁ v₂)
-    rw [h, map_add]; rfl
+    rw [h, td.dt_apply_add]
   map_update_smul' := by
     intro inst vs idx c v; ext αs
     have : inst = instDecidableEqFin s := Subsingleton.elim _ _; subst this
     simp only [MultilinearMap.coe_mk, MultilinearMap.smul_apply, smul_eq_mul]
     have h : (fun s => T s (Function.update vs idx (c • v)) αs) =
-        algebraMap R (Time → R) c * (fun s => T s (Function.update vs idx v) αs) := by
+        (fun s => c * T s (Function.update vs idx v) αs) := by
       ext s; change T s (Function.update vs idx (c • v)) αs = c * T s (Function.update vs idx v) αs
       have := congr_arg (· αs) ((T s).map_update_smul vs idx c v)
       simp only [MultilinearMap.smul_apply, smul_eq_mul] at this; exact this
-    rw [h]; exact dt_const_mul_apply td c _ t
+    rw [h]; exact td.dt_apply_const_mul c _ t
 
 -- ============================================================
 -- Evaluation lemma and basic properties
 -- ============================================================
 
-/-- Evaluation: (dt_tensor t T)(vs)(αs) = dt(s ↦ T(s)(vs)(αs)) at t. -/
-theorem dt_tensor_eval (td : TimeDerivativeData R Time)
+/-- Evaluation: (dt_tensor t T)(vs)(αs) = dt_apply(s ↦ T(s)(vs)(αs)) at t. -/
+theorem dt_tensor_eval (td : TimeDerivativeData R A Time)
     (t : Time) {r s : ℕ} (T : Time → TensorData R V r s) (vs αs) :
-    dt_tensor td t T vs αs = (td.dt (fun s => T s vs αs)) t := by
+    dt_tensor td t T vs αs = td.dt_apply (fun s => T s vs αs) t := by
   rfl
 
 /-- ∂_t of a time-constant tensor is zero. -/
-theorem dt_tensor_const (td : TimeDerivativeData R Time)
+theorem dt_tensor_const (td : TimeDerivativeData R A Time)
     (t : Time) {r s : ℕ} (T : TensorData R V r s) :
     dt_tensor td t (fun _ => T) = 0 := by
   ext vs αs
   simp only [dt_tensor_eval, MultilinearMap.zero_apply]
-  exact congr_fun (t_const_R td (T vs αs)) t
+  exact td.dt_apply_const (T vs αs) t
 
 /-- ∂_t is additive: ∂_t(T₁ + T₂) = ∂_t T₁ + ∂_t T₂. -/
-theorem dt_tensor_add (td : TimeDerivativeData R Time)
+theorem dt_tensor_add (td : TimeDerivativeData R A Time)
     (t : Time) {r s : ℕ} (T₁ T₂ : Time → TensorData R V r s) :
     dt_tensor td t (fun s => T₁ s + T₂ s) =
     dt_tensor td t T₁ + dt_tensor td t T₂ := by
@@ -119,19 +96,19 @@ theorem dt_tensor_add (td : TimeDerivativeData R Time)
   simp only [dt_tensor_eval, MultilinearMap.add_apply]
   have h : (fun s => T₁ s vs αs + T₂ s vs αs) =
       (fun s => T₁ s vs αs) + (fun s => T₂ s vs αs) := rfl
-  rw [h, map_add]; rfl
+  rw [h, td.dt_apply_add]
 
 /-- ∂_t respects negation. -/
-theorem dt_tensor_neg (td : TimeDerivativeData R Time)
+theorem dt_tensor_neg (td : TimeDerivativeData R A Time)
     (t : Time) {r s : ℕ} (T : Time → TensorData R V r s) :
     dt_tensor td t (fun s => -T s) = -dt_tensor td t T := by
   ext vs αs
   simp only [dt_tensor_eval, MultilinearMap.neg_apply]
   have h : (fun s => -(T s vs αs)) = -(fun s => T s vs αs) := rfl
-  rw [h, map_neg]; rfl
+  rw [h, td.dt_apply_neg]
 
 /-- ∂_t respects subtraction. -/
-theorem dt_tensor_sub (td : TimeDerivativeData R Time)
+theorem dt_tensor_sub (td : TimeDerivativeData R A Time)
     (t : Time) {r s : ℕ} (T₁ T₂ : Time → TensorData R V r s) :
     dt_tensor td t (fun s => T₁ s - T₂ s) =
     dt_tensor td t T₁ - dt_tensor td t T₂ := by
@@ -139,32 +116,31 @@ theorem dt_tensor_sub (td : TimeDerivativeData R Time)
   simp only [dt_tensor_eval, MultilinearMap.sub_apply]
   have h : (fun s => T₁ s vs αs - T₂ s vs αs) =
       (fun s => T₁ s vs αs) - (fun s => T₂ s vs αs) := rfl
-  rw [h, map_sub]; rfl
+  rw [h, td.dt_apply_sub]
 
 /-- Leibniz rule for time-dependent scalar multiplication:
-    ∂_t(f · T) = dt(f) · T(t) + f(t) · ∂_t T. -/
-theorem dt_tensor_smul (td : TimeDerivativeData R Time)
+    ∂_t(f · T) = dt_apply(f) · T(t) + f(t) · ∂_t T. -/
+theorem dt_tensor_smul (td : TimeDerivativeData R A Time)
     (t : Time) {r s : ℕ} (f : Time → R) (T : Time → TensorData R V r s) (vs αs) :
     dt_tensor td t (fun s => f s • T s) vs αs =
-    (td.dt f) t * (T t vs αs) + f t * dt_tensor td t T vs αs := by
+    td.dt_apply f t * (T t vs αs) + f t * dt_tensor td t T vs αs := by
   simp only [dt_tensor_eval, MultilinearMap.smul_apply, smul_eq_mul]
   rw [show (fun s => f s * T s vs αs) = f * (fun s => T s vs αs) from rfl]
-  rw [dt_mul_apply]; ring
+  rw [td.dt_apply_mul]; ring
 
 /-- ∂_t commutes with constant R-scalar multiplication:
     ∂_t(c · T) = c · ∂_t T for c ∈ R (not time-dependent). -/
-theorem dt_tensor_smul_const (td : TimeDerivativeData R Time)
+theorem dt_tensor_smul_const (td : TimeDerivativeData R A Time)
     (t : Time) {r s : ℕ} (c : R) (T : Time → TensorData R V r s) :
     dt_tensor td t (fun s => c • T s) = c • dt_tensor td t T := by
   ext vs αs
   simp only [dt_tensor_eval, MultilinearMap.smul_apply, smul_eq_mul]
-  have h : (fun s => c * T s vs αs) =
-      algebraMap R (Time → R) c * (fun s => T s vs αs) := rfl
-  rw [h]; exact dt_const_mul_apply td c _ t
+  have h : (fun s => c * T s vs αs) = (fun s => c * T s vs αs) := rfl
+  exact td.dt_apply_const_mul c _ t
 
 /-- Leibniz rule for tensor product:
     ∂_t(T₁ ⊗ T₂) = (∂_t T₁) ⊗ T₂(t) + T₁(t) ⊗ (∂_t T₂). -/
-theorem dt_tensor_prod (td : TimeDerivativeData R Time)
+theorem dt_tensor_prod (td : TimeDerivativeData R A Time)
     (t : Time) {r₁ s₁ r₂ s₂ : ℕ}
     (T₁ : Time → TensorData R V r₁ s₁) (T₂ : Time → TensorData R V r₂ s₂) :
     dt_tensor td t (fun s => tensor_prod (T₁ s) (T₂ s)) =
@@ -176,10 +152,10 @@ theorem dt_tensor_prod (td : TimeDerivativeData R Time)
   set ns₁ := αs ∘ Fin.castAdd r₂; set ns₂ := αs ∘ Fin.natAdd r₁
   rw [show (fun s => T₁ s vs₁ ns₁ * T₂ s vs₂ ns₂) =
       (fun s => T₁ s vs₁ ns₁) * (fun s => T₂ s vs₂ ns₂) from rfl]
-  rw [dt_mul_apply]; ring
+  rw [td.dt_apply_mul]; ring
 
 /-- ∂_t commutes with swap_covariant. -/
-theorem dt_tensor_swap (td : TimeDerivativeData R Time)
+theorem dt_tensor_swap (td : TimeDerivativeData R A Time)
     (t : Time) {r s : ℕ} (i j : Fin s)
     (T : Time → TensorData R V r s) (vs αs) :
     dt_tensor td t (fun s => swap_covariant i j (T s)) vs αs =
@@ -192,12 +168,15 @@ theorem dt_tensor_swap (td : TimeDerivativeData R Time)
 
 /-- ∂_t commutes with endomorphism trace.
     Direct corollary of the TimeTrComm hypothesis. -/
-theorem dt_tr (td : TimeDerivativeData R Time) (atr : AbstractTrace R V)
+theorem dt_tr (td : TimeDerivativeData R A Time) (atr : AbstractTrace R V)
     (h_tt : TimeTrComm atr td)
     (L : Time → V →ₗ[R] V) (dL : V →ₗ[R] V) (t : Time)
     (h_char : ∀ (v : V) (α : V →ₗ[R] R),
-      α (dL v) = (td.dt (fun s => α (L s v))) t) :
-    (td.dt (fun s => atr.tr (L s))) t = atr.tr dL :=
-  h_tt L dL t h_char
+      α (dL v) = td.dt_apply (fun s => α (L s v)) t) :
+    td.dt_apply (fun s => atr.tr (L s)) t = atr.tr dL :=
+  h_tt L dL t (fun v α => td.lift (fun s => α (L s v))) (td.lift (fun s => atr.tr (L s)))
+    (fun v α s => td.eval_lift (fun s => α (L s v)) s)
+    (fun s => td.eval_lift (fun s => atr.tr (L s)) s)
+    h_char
 
 end DtTensor

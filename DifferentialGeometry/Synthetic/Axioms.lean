@@ -46,27 +46,29 @@ structure RiemannianManifoldData (k R V : Type*)
   /-- Characteristic ≠ 2: 2a = 0 → a = 0. -/
   char_ne_2 : ∀ (a : R), (2 : R) * a = 0 → a = 0
 
-structure TimeEvolvingManifoldData (k R V Time : Type*)
+structure TimeEvolvingManifoldData (k R V Time A : Type*)
     [Field k] [CommRing R] [Algebra k R]
     [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+    [CommRing A] [Algebra R A]
     extends RiemannianManifoldData k R V where
   /-- Time derivative as a Mathlib derivation. -/
-  td : TimeDerivativeData R Time
+  td : TimeDerivativeData R A Time
   /-- Spatial and temporal derivatives commute. -/
   spatial_temporal_comm : SpatialTemporalComm emb td
   /-- ∂_t commutes with trace. -/
   time_tr_comm : TimeTrComm atr td
 
 
-structure RicciFlowBundle (k R V Time : Type*)
+structure RicciFlowBundle (k R V Time A : Type*)
     [Field k] [CommRing R] [Algebra k R]
-    [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V] where
+    [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+    [CommRing A] [Algebra R A] where
   /-- Derivation embedding: vector fields as derivations. -/
   emb : DerivationEmbedding k R V
   /-- Abstract trace and tensor contraction. -/
   atr : AbstractTrace R V
   /-- Time derivative. -/
-  td : TimeDerivativeData R Time
+  td : TimeDerivativeData R A Time
   /-- Time-dependent family of metrics. -/
   g_fam : Time → MetricDuality R V
   /-- Time-dependent family of connections. -/

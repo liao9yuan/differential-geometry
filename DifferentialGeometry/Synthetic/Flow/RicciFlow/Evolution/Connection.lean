@@ -13,9 +13,10 @@ set_option linter.style.emptyLine false
 
 open SyntheticTensor
 
-variable {k R V Time : Type*}
+variable {k R V Time : Type*} {A : Type*}
 variable [Field k] [CommRing R] [Algebra k R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+variable [CommRing A] [Algebra R A]
 
 /-- The covariant derivative of the Ricci form at time t:
     (∇_X Ric)(Y, Z) = X(Ric(Y,Z)) - Ric(∇_X Y, Z) - Ric(Y, ∇_X Z). -/
@@ -52,7 +53,7 @@ private lemma ricciForm_smul_eval
     This follows directly from the Palatini identity and the Ricci flow equation. -/
 theorem connection_evolution_combined
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (h_st : SpatialTemporalComm emb td)
     (atr : AbstractTrace R V)
     (g_fam : Time → MetricDuality R V)
@@ -64,7 +65,7 @@ theorem connection_evolution_combined
     (h_rf : IsRicciFlow emb td atr g_fam conn_fam ha_fam hal_fam hsl_fam hl_fam)
     (h2 : ∀ (a : R), (2 : R) * a = 0 → a = 0)
     (X Y Z : V) (t : Time) :
-    (td.dt (fun s => (g_fam s).g (conn_fam s X Y) Z)) t =
+    td.dt_apply (fun s => (g_fam s).g (conn_fam s X Y) Z) t =
     - ricci_cov_deriv emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr X Y Z
     - ricci_cov_deriv emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr Y X Z
     + ricci_cov_deriv emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr Z X Y
@@ -116,13 +117,13 @@ theorem connection_evolution_combined
     2 * (-rcd X Y Z - rcd Y X Z + rcd Z X Y +
          metric_var_form td g_fam t ![n X Y, Z] ![]) := by ring
   rw [algebra] at palatini
-  suffices h : (td.dt (fun s => (g_fam s).g (conn_fam s X Y) Z)) t -
+  suffices h : td.dt_apply (fun s => (g_fam s).g (conn_fam s X Y) Z) t -
     (-rcd X Y Z - rcd Y X Z + rcd Z X Y + metric_var_form td g_fam t ![n X Y, Z] ![]) = 0 from
     eq_of_sub_eq_zero h
   apply h2
-  calc 2 * ((td.dt (fun s => (g_fam s).g (conn_fam s X Y) Z)) t -
+  calc 2 * (td.dt_apply (fun s => (g_fam s).g (conn_fam s X Y) Z) t -
     (-rcd X Y Z - rcd Y X Z + rcd Z X Y + metric_var_form td g_fam t ![n X Y, Z] ![]))
-      = 2 * (td.dt (fun s => (g_fam s).g (conn_fam s X Y) Z)) t -
+      = 2 * td.dt_apply (fun s => (g_fam s).g (conn_fam s X Y) Z) t -
         2 * (-rcd X Y Z - rcd Y X Z + rcd Z X Y + metric_var_form td g_fam t ![n X Y, Z] ![]) := by ring
     _ = 0 := by rw [palatini]; ring
 
@@ -133,7 +134,7 @@ theorem connection_evolution_combined
     derivative of g(s)(V(s), W) into a metric-variation term and a pure-vector term. -/
 theorem connection_evolution
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (h_st : SpatialTemporalComm emb td)
     (atr : AbstractTrace R V)
     (g_fam : Time → MetricDuality R V)
@@ -147,21 +148,21 @@ theorem connection_evolution
     (t : Time)
     -- Metric product rule: splitting dt(g(s)(V(s), W)) into metric and vector parts
     (h_decomp : ∀ (F : Time → V) (W : V),
-      (td.dt (fun s => (g_fam s).g (F s) W)) t =
+      td.dt_apply (fun s => (g_fam s).g (F s) W) t =
       metric_var_form td g_fam t ![F t, W] ![] +
-      (td.dt (fun s => (g_fam t).g (F s) W)) t)
+      td.dt_apply (fun s => (g_fam t).g (F s) W) t)
     (X Y Z : V) :
-    (td.dt (fun s => (g_fam t).g (conn_fam s X Y) Z)) t =
+    td.dt_apply (fun s => (g_fam t).g (conn_fam s X Y) Z) t =
     - ricci_cov_deriv emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr X Y Z
     - ricci_cov_deriv emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr Y X Z
     + ricci_cov_deriv emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr Z X Y := by
   have h_combined := connection_evolution_combined emb td h_st atr g_fam conn_fam ha_fam hal_fam hsl_fam hl_fam h_rf h2 X Y Z t
   have h_split := h_decomp (fun s => conn_fam s X Y) Z
-  -- h_combined: dt(g(s)(conn(s)XY, Z)) = -rcd_X - rcd_Y + rcd_Z + mvf
-  -- h_split:    dt(g(s)(conn(s)XY, Z)) = mvf(conn(t)XY, Z) + dt(g(t)(conn(s)XY, Z))
-  -- Therefore:  dt(g(t)(conn(s)XY, Z)) = -rcd_X - rcd_Y + rcd_Z
-  calc (td.dt (fun s => (g_fam t).g (conn_fam s X Y) Z)) t
-      = (td.dt (fun s => (g_fam s).g (conn_fam s X Y) Z)) t -
+  -- h_combined: dt_apply(g(s)(conn(s)XY, Z)) = -rcd_X - rcd_Y + rcd_Z + mvf
+  -- h_split:    dt_apply(g(s)(conn(s)XY, Z)) = mvf(conn(t)XY, Z) + dt_apply(g(t)(conn(s)XY, Z))
+  -- Therefore:  dt_apply(g(t)(conn(s)XY, Z)) = -rcd_X - rcd_Y + rcd_Z
+  calc td.dt_apply (fun s => (g_fam t).g (conn_fam s X Y) Z) t
+      = td.dt_apply (fun s => (g_fam s).g (conn_fam s X Y) Z) t -
         metric_var_form td g_fam t ![conn_fam t X Y, Z] ![] := by rw [h_split]; ring
     _ = (-ricci_cov_deriv emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr X Y Z -
          ricci_cov_deriv emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr Y X Z +

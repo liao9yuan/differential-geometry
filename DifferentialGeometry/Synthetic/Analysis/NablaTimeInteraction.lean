@@ -20,16 +20,17 @@ open SyntheticTensor
 
 section FixedConn
 
-variable {k R V Time : Type*}
+variable {k R V : Type*} {A Time : Type*}
 variable [Field k] [CommRing R] [Algebra k R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+variable [CommRing A] [Algebra R A]
 
 /-- ∂_t commutes with ∇ when the connection is FIXED (not time-dependent).
     Proof uses SpatialTemporalComm for the leading X(T vs αs) term;
     correction sums commute because conn and nabla_dual are constant in time. -/
 theorem t_nabla_tensor
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (h_st : SpatialTemporalComm emb td)
     (conn : V → V → V)
     (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
@@ -39,21 +40,7 @@ theorem t_nabla_tensor
     nabla_tensor emb conn ha hl X (dt_tensor td t T) := by
   ext vs αs
   simp only [dt_tensor_eval, nabla_tensor_eval]
-  -- LHS: td.dt (fun τ => X(T τ vs αs) - Σᵢ ... - Σⱼ ...) t
-  -- Split dt over subtraction and sums
-  -- Leading term: SpatialTemporalComm
-  have h_lead : (td.dt (fun τ => (emb.embed X) (T τ vs αs))) t =
-      (emb.embed X) ((td.dt (fun τ => T τ vs αs)) t) :=
-    h_st X (fun τ => T τ vs αs) t
-  -- Vector correction: conn is constant, so update arg is constant
-  -- td.dt (fun τ => T τ (update vs i (conn X (vs i))) αs) t
-  -- = (dt_tensor td t T) (update vs i (conn X (vs i))) αs  [by def]
-  -- Covector correction: nabla_dual is constant, so update arg is constant
-  -- td.dt (fun τ => T τ vs (update αs j (nabla_dual ... X (αs j)))) t
-  -- = (dt_tensor td t T) vs (update αs j (nabla_dual ... X (αs j)))  [by def]
-  -- All correction sums are just dt_tensor evaluated at fixed arguments.
-  -- So LHS = X(dt T vs αs) - Σᵢ (dt T)(update vs i ...) αs - Σⱼ (dt T) vs (update αs j ...) = RHS
-  -- Formalize: split the Time → R function into three parts
+  -- Split the lambda into three parts
   have h_eq : (fun τ => (emb.embed X) (T τ vs αs)
       - ∑ i : Fin s, T τ (Function.update vs i (conn X (vs i))) αs
       - ∑ j : Fin r, T τ vs (Function.update αs j
@@ -63,12 +50,10 @@ theorem t_nabla_tensor
       - (fun τ => ∑ j : Fin r, T τ vs (Function.update αs j
           (nabla_dual emb conn ha hl X (αs j)))) := by
     funext τ; simp only [Pi.sub_apply]
-  rw [h_eq, map_sub, map_sub]
-  simp only [Pi.sub_apply]
-  -- Now use h_lead for the first term
-  rw [h_lead]
-  -- For the sum terms: dt distributes over Finset.sum
-  -- Vector correction sum
+  rw [h_eq, td.dt_apply_sub, td.dt_apply_sub]
+  -- Leading term: SpatialTemporalComm
+  rw [h_st X (fun τ => T τ vs αs) t]
+  -- Vector correction sum: factor out finset sum from lambda
   have h_vec : (fun τ => ∑ i : Fin s,
       T τ (Function.update vs i (conn X (vs i))) αs) =
       ∑ i : Fin s, (fun τ => T τ (Function.update vs i (conn X (vs i))) αs) := by
@@ -79,7 +64,7 @@ theorem t_nabla_tensor
       ∑ j : Fin r, (fun τ => T τ vs (Function.update αs j
         (nabla_dual emb conn ha hl X (αs j)))) := by
     funext τ; simp [Finset.sum_apply]
-  rw [h_vec, h_cov, map_sum, map_sum]; simp [Finset.sum_apply]
+  rw [h_vec, h_cov, td.dt_apply_sum, td.dt_apply_sum]
 
 end FixedConn
 
@@ -89,21 +74,22 @@ end FixedConn
 
 section ConnVar
 
-variable {k R V Time : Type*}
+variable {k R V : Type*} {A Time : Type*}
 variable [Field k] [CommRing R] [Algebra k R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+variable [CommRing A] [Algebra R A]
 
 /-- Connection variation tensor: measures how ∇_X T changes as the connection varies.
     conn_var_tensor(t, X, T) = ∂_t[∇^(s)_X T] with T FIXED (not time-dependent).
 
     Evaluation: conn_var_tensor(t, X, T)(vs)(αs) =
-      - Σᵢ dt(s ↦ T(update vs i (conn(s) X (vs i)))(αs)) at t
-      - Σⱼ dt(s ↦ T(vs)(update αs j (∇*^(s)_X αⱼ))) at t
+      - Σᵢ dt_apply(s ↦ T(update vs i (conn(s) X (vs i)))(αs)) at t
+      - Σⱼ dt_apply(s ↦ T(vs)(update αs j (∇*^(s)_X αⱼ))) at t
 
     The leading X(T vs αs) term vanishes because T is constant in time. -/
 noncomputable def conn_var_tensor
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ τ, ∀ X Y Z, conn_fam τ X (Y + Z) = conn_fam τ X Y + conn_fam τ X Z)
     (hl_fam : ∀ τ, ∀ X (f : R) Y,
@@ -115,22 +101,22 @@ noncomputable def conn_var_tensor
     because T doesn't depend on time. -/
 theorem conn_var_tensor_eval
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ τ, ∀ X Y Z, conn_fam τ X (Y + Z) = conn_fam τ X Y + conn_fam τ X Z)
     (hl_fam : ∀ τ, ∀ X (f : R) Y,
       conn_fam τ X (f • Y) = (emb.embed X) f • Y + f • conn_fam τ X Y)
     (t : Time) (X : V) {r s : ℕ} (T : TensorData R V r s) (vs αs) :
     conn_var_tensor emb td conn_fam ha_fam hl_fam t X T vs αs =
-    - (td.dt (fun τ => ∑ i : Fin s,
-        T (Function.update vs i (conn_fam τ X (vs i))) αs)) t
-    - (td.dt (fun τ => ∑ j : Fin r,
+    - td.dt_apply (fun τ => ∑ i : Fin s,
+        T (Function.update vs i (conn_fam τ X (vs i))) αs) t
+    - td.dt_apply (fun τ => ∑ j : Fin r,
         T vs (Function.update αs j
-          (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j))))) t := by
+          (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) t := by
   simp only [conn_var_tensor, dt_tensor_eval, nabla_tensor_eval]
-  -- The leading X(T vs αs) term is constant → dt kills it
-  have h_const : (td.dt (fun _ => (emb.embed X) (T vs αs))) t = 0 :=
-    congr_fun (t_const_R td ((emb.embed X) (T vs αs))) t
+  -- The leading X(T vs αs) term is constant → dt_apply kills it
+  have h_const : td.dt_apply (fun _ => (emb.embed X) (T vs αs)) t = 0 :=
+    td.dt_apply_const ((emb.embed X) (T vs αs)) t
   -- Split the subtraction
   have h_eq : (fun τ => (emb.embed X) (T vs αs)
       - ∑ i : Fin s, T (Function.update vs i (conn_fam τ X (vs i))) αs
@@ -141,8 +127,7 @@ theorem conn_var_tensor_eval
       - (fun τ => ∑ j : Fin r, T vs (Function.update αs j
           (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) := by
     funext τ; simp only [Pi.sub_apply]
-  rw [h_eq, map_sub, map_sub]
-  simp only [Pi.sub_apply, h_const]; ring
+  rw [h_eq, td.dt_apply_sub, td.dt_apply_sub, h_const]; ring
 
 end ConnVar
 
@@ -152,18 +137,19 @@ end ConnVar
 
 section VaryingConnT
 
-variable {k R V Time : Type*}
+variable {k R V : Type*} {A Time : Type*}
 variable [Field k] [CommRing R] [Algebra k R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+variable [CommRing A] [Algebra R A]
 
 /-- Exact evaluation formula for ∂_t[∇^(s)_X T(s)] when both connection and tensor
     vary with time. Uses SpatialTemporalComm for the leading term; correction sums
-    retain the full time-dependent expressions under dt.
+    retain the full time-dependent expressions under dt_apply.
 
     This generalizes both t_nabla_tensor (conn fixed) and conn_var_tensor (T fixed). -/
 theorem t_nabla_eval
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (h_st : SpatialTemporalComm emb td)
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ τ, ∀ X Y Z, conn_fam τ X (Y + Z) = conn_fam τ X Y + conn_fam τ X Z)
@@ -172,12 +158,12 @@ theorem t_nabla_eval
     (X : V) {r s : ℕ} (T : Time → TensorData R V r s) (t : Time) (vs αs) :
     dt_tensor td t (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (T τ))
       vs αs =
-    (emb.embed X) ((td.dt (fun τ => T τ vs αs)) t)
-    - (td.dt (fun τ => ∑ i : Fin s,
-        T τ (Function.update vs i (conn_fam τ X (vs i))) αs)) t
-    - (td.dt (fun τ => ∑ j : Fin r,
+    (emb.embed X) (td.dt_apply (fun τ => T τ vs αs) t)
+    - td.dt_apply (fun τ => ∑ i : Fin s,
+        T τ (Function.update vs i (conn_fam τ X (vs i))) αs) t
+    - td.dt_apply (fun τ => ∑ j : Fin r,
         T τ vs (Function.update αs j
-          (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j))))) t := by
+          (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) t := by
   simp only [dt_tensor_eval, nabla_tensor_eval]
   have h_eq : (fun τ => (emb.embed X) (T τ vs αs)
       - ∑ i : Fin s, T τ (Function.update vs i (conn_fam τ X (vs i))) αs
@@ -188,15 +174,14 @@ theorem t_nabla_eval
       - (fun τ => ∑ j : Fin r, T τ vs (Function.update αs j
           (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) := by
     funext τ; simp only [Pi.sub_apply]
-  rw [h_eq, map_sub, map_sub]
-  simp only [Pi.sub_apply]
+  rw [h_eq, td.dt_apply_sub, td.dt_apply_sub]
   -- Leading term: SpatialTemporalComm
   rw [h_st X (fun τ => T τ vs αs) t]
 
 /-- conn_var_tensor is additive in T. -/
 theorem conn_var_tensor_add
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ τ, ∀ X Y Z, conn_fam τ X (Y + Z) = conn_fam τ X Y + conn_fam τ X Z)
     (hl_fam : ∀ τ, ∀ X (f : R) Y,
@@ -215,7 +200,7 @@ theorem conn_var_tensor_add
 /-- conn_var_tensor commutes with constant R-scalar multiplication. -/
 theorem conn_var_tensor_smul
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ τ, ∀ X Y Z, conn_fam τ X (Y + Z) = conn_fam τ X Y + conn_fam τ X Z)
     (hl_fam : ∀ τ, ∀ X (f : R) Y,
@@ -242,15 +227,16 @@ end VaryingConnT
 
 section TLinearMap
 
-variable {R V Time : Type*}
+variable {R V : Type*} {A Time : Type*}
 variable [CommRing R] [AddCommGroup V] [Module R V]
+variable [CommRing A] [Algebra R A]
 
 /-- ∂_t(ω(F(s))) equals the evaluation of dt_tensor on vectorToData(F(s)) at covector ω.
     This is the canonical way to express "∂_t commutes with constant covectors"
     in the transparent tensor framework. Proof by rfl. -/
-theorem t_linear_map (td : TimeDerivativeData R Time) (t : Time)
+theorem t_linear_map (td : TimeDerivativeData R A Time) (t : Time)
     (ω : V →ₗ[R] R) (F : Time → V) :
-    (td.dt (fun s => ω (F s))) t =
+    td.dt_apply (fun s => ω (F s)) t =
     dt_tensor td t (fun s => vectorToData (R := R) (F s)) ![] ![ω] :=
   rfl
 
@@ -264,9 +250,10 @@ end TLinearMap
 
 section TConnApply
 
-variable {k R V Time : Type*}
+variable {k R V : Type*} {A Time : Type*}
 variable [Field k] [CommRing R] [Algebra k R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+variable [CommRing A] [Algebra R A]
 
 /-- For a FIXED connection, ∂_t commutes with ∇_X on vectors:
     ∂_t[vectorToData(conn X (F τ))] = ∇_X(∂_t[vectorToData(F τ)]).
@@ -274,7 +261,7 @@ variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
     using nabla_vector to identify ∇_X(vectorToData v) = vectorToData(conn X v). -/
 theorem t_conn_apply
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (h_st : SpatialTemporalComm emb td)
     (conn : V → V → V)
     (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)

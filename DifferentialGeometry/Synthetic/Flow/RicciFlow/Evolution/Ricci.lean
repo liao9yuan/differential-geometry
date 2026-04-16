@@ -13,9 +13,10 @@ set_option linter.style.emptyLine false
 
 open SyntheticTensor
 
-variable {k R V Time : Type*}
+variable {k R V : Type*} {A Time : Type*}
 variable [Field k] [CommRing R] [Algebra k R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+variable [CommRing A] [Algebra R A]
 
 /-- The time derivative of the Ricci tensor evaluated at constant vectors X, Y
     equals the scalar time derivative of Rc(X,Y).
@@ -24,7 +25,7 @@ variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
     which holds by `rfl`. -/
 theorem ricci_evolution_pointwise_extraction
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (atr : AbstractTrace R V)
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ s, ∀ X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
@@ -33,5 +34,5 @@ theorem ricci_evolution_pointwise_extraction
     (hl_fam : ∀ s, ∀ X (f : R) Y, conn_fam s X (f • Y) = (emb.embed X) f • Y + f • conn_fam s X Y)
     (t : Time) (X Y : V) :
     tensor_eval (dt_tensor td t (fun s => ricciForm_tensor emb (conn_fam s) (ha_fam s) (hal_fam s) (hsl_fam s) (hl_fam s) atr)) ![X, Y] ![] =
-    (td.dt (fun s => tensor_eval (ricciForm_tensor emb (conn_fam s) (ha_fam s) (hal_fam s) (hsl_fam s) (hl_fam s) atr) ![X, Y] ![])) t := by
+    td.dt_apply (fun s => tensor_eval (ricciForm_tensor emb (conn_fam s) (ha_fam s) (hal_fam s) (hsl_fam s) (hl_fam s) atr) ![X, Y] ![]) t := by
   rfl

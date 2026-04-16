@@ -195,14 +195,15 @@ end RicciFormTensor
 
 section RicciFlowDef
 
-variable {k R V Time : Type*}
+variable {k R V Time : Type*} {A : Type*}
 variable [Field k] [CommRing R] [Algebra k R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+variable [CommRing A] [Algebra R A]
 
 /-- Ricci flow condition: the metric evolves by -2·Ric and the connection is always Levi-Civita. -/
 def IsRicciFlow
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (atr : AbstractTrace R V)
     (g_fam : Time → MetricDuality R V)
     (conn_fam : Time → V → V → V)
@@ -218,7 +219,7 @@ def IsRicciFlow
 /-- Extract the Levi-Civita property from IsRicciFlow. -/
 theorem IsRicciFlow.levi_civita
     {emb : DerivationEmbedding k R V}
-    {td : TimeDerivativeData R Time}
+    {td : TimeDerivativeData R A Time}
     {atr : AbstractTrace R V}
     {g_fam : Time → MetricDuality R V}
     {conn_fam : Time → V → V → V}
@@ -230,7 +231,7 @@ theorem IsRicciFlow.levi_civita
 /-- Extract the evolution equation from IsRicciFlow. -/
 theorem IsRicciFlow.evolution
     {emb : DerivationEmbedding k R V}
-    {td : TimeDerivativeData R Time}
+    {td : TimeDerivativeData R A Time}
     {atr : AbstractTrace R V}
     {g_fam : Time → MetricDuality R V}
     {conn_fam : Time → V → V → V}
@@ -243,7 +244,7 @@ theorem IsRicciFlow.evolution
 /-- Extract metric compatibility from IsRicciFlow. -/
 theorem IsRicciFlow.metric_compat
     {emb : DerivationEmbedding k R V}
-    {td : TimeDerivativeData R Time}
+    {td : TimeDerivativeData R A Time}
     {atr : AbstractTrace R V}
     {g_fam : Time → MetricDuality R V}
     {conn_fam : Time → V → V → V}
@@ -255,7 +256,7 @@ theorem IsRicciFlow.metric_compat
 /-- Extract torsion-free from IsRicciFlow. -/
 theorem IsRicciFlow.torsion_free
     {emb : DerivationEmbedding k R V}
-    {td : TimeDerivativeData R Time}
+    {td : TimeDerivativeData R A Time}
     {atr : AbstractTrace R V}
     {g_fam : Time → MetricDuality R V}
     {conn_fam : Time → V → V → V}
@@ -272,9 +273,10 @@ end RicciFlowDef
 
 section ProductRule
 
-variable {k R V Time : Type*}
+variable {k R V Time : Type*} {A : Type*}
 variable [Field k] [CommRing R] [Algebra k R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+variable [CommRing A] [Algebra R A]
 
 /-- Product rule for time derivative and covariant derivative.
     This is the tensor-level analog of the old ConnectionTimeCalculus.t_conn_apply.
@@ -288,7 +290,7 @@ variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
     in local coordinates. -/
 def NablaTimeProductRule
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ τ, ∀ X Y Z, conn_fam τ X (Y + Z) = conn_fam τ X Y + conn_fam τ X Z)
     (hl_fam : ∀ τ, ∀ X (f : R) Y, conn_fam τ X (f • Y) = (emb.embed X) f • Y + f • conn_fam τ X Y)
