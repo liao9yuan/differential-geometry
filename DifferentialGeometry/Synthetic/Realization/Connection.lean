@@ -2,12 +2,12 @@
 Copyright (c) 2026 Differential Geometry Project. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import DifferentialGeometry.Synthetic.Bridge.Embedding
+import DifferentialGeometry.Synthetic.Realization.Embedding
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
 
 /-!
-# Bridge Layer 2: Connection from CovariantDerivative
+# SmoothRicciFlow: Connection from CovariantDerivative
 
 Given a Mathlib `CovariantDerivative I E (TangentSpace I)` on the tangent bundle of `M`,
 this file constructs the Synthetic layer's `conn : V → V → V` and proves its four

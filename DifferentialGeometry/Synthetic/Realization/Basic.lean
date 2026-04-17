@@ -11,7 +11,7 @@ import DifferentialGeometry.VectorBundle.Section
 import DifferentialGeometry.Tensor.RSTensor.Defs
 
 /-!
-# Bridge Scaffolding
+# SmoothRicciFlow Scaffolding
 
 Imports, instance verification, and `IsScalarTower` for the concrete instantiation
 `k = ℝ`, `R = C^∞(M, ℝ)`, `V = Γ(TM)`, `Time = ℝ`.
@@ -26,7 +26,7 @@ open Bundle
 -- Standard variable context
 -- ============================================================
 
-section BridgeContext
+section SmoothRicciFlowContext
 
 variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
@@ -74,6 +74,6 @@ theorem char_ne_2_smooth_functions :
   simp only [ContMDiffMap.coe_add, Pi.add_apply, ContMDiffMap.coe_zero, Pi.zero_apply] at this ⊢
   linarith
 
-end BridgeContext
+end SmoothRicciFlowContext
 
 end

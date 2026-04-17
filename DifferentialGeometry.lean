@@ -29,11 +29,11 @@ import DifferentialGeometry.Synthetic.Operator.Variation
 -- Axiom Interface
 import DifferentialGeometry.Synthetic.Axioms
 
--- Bridge: Synthetic → Concrete grounding
-import DifferentialGeometry.Synthetic.Bridge.Basic
-import DifferentialGeometry.Synthetic.Bridge.Embedding
-import DifferentialGeometry.Synthetic.Bridge.Connection
-import DifferentialGeometry.Synthetic.Bridge.Trace
+-- Realization: Concrete Ricci flow solution analysis
+import DifferentialGeometry.Synthetic.Realization.Basic
+import DifferentialGeometry.Synthetic.Realization.Embedding
+import DifferentialGeometry.Synthetic.Realization.Connection
+import DifferentialGeometry.Synthetic.Realization.Trace
 
 -- Ricci Flow
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Basic

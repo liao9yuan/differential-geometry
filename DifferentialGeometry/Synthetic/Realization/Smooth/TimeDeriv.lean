@@ -4,7 +4,7 @@ import Mathlib.Algebra.BigOperators.Group.Finset.Basic
 import Mathlib.Data.Real.Basic
 
 /-!
-# Bridge Layer: Time Derivative via Bare Jet Sequences
+# SmoothRicciFlow: Time Derivative via Bare Jet Sequences
 
 Constructs a concrete `TimeDerivativeData R (JetFun R) ℝ` using bare jet sequences
 (no smoothness/HasDerivAt constraint between jets).

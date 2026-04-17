@@ -28,7 +28,7 @@ structure DerivationEmbedding (k R V : Type*)
 
 /-- Time derivative operator as an R-derivation on a time function algebra A.
     The algebra A generalizes `Time → R`: for the pure abstract layer, A = Time → R
-    with Pi instances; for the Bridge layer, A can be a restricted sub-algebra
+    with Pi instances; for the SmoothRicciFlow layer, A can be a restricted sub-algebra
     (e.g., smooth-in-time functions, or a jet algebra) where the Derivation axioms
     hold unconditionally.
     `lift` injects `Time → R` into `A`; `eval` projects back (both ring homs).

@@ -122,7 +122,7 @@ theorem MetricDuality.g_smul_right (met : MetricDuality R V) (c : R) (X Z : V) :
 def SharpSpec (met : MetricDuality R V) : Prop :=
   ∀ (α : V →ₗ[R] R), ∃ v : V, ∀ Z : V, met.g v Z = α Z
 
-/-- Bridge: the `sharp_spec` field implies `SharpSpec`. -/
+/-- The `sharp_spec` field implies `SharpSpec`. -/
 theorem MetricDuality.sharpSpec (met : MetricDuality R V) : SharpSpec met :=
   fun α => met.sharp_spec α
 

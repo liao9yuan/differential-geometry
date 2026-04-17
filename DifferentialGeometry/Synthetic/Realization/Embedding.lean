@@ -2,13 +2,13 @@
 Copyright (c) 2026 Differential Geometry Project. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import DifferentialGeometry.Synthetic.Bridge.Basic
+import DifferentialGeometry.Synthetic.Realization.Basic
 import Mathlib.Geometry.Manifold.MFDeriv.NormedSpace
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 
 /-!
-# Bridge Layer 0: Embedding of vector fields as derivations
+# SmoothRicciFlow: Embedding of vector fields as derivations
 
 This file defines the pointwise action of a smooth vector field on a smooth function,
 proves the result is smooth, and packages the action as a `Derivation ℝ C^∞⟮I,M;ℝ⟯ C^∞⟮I,M;ℝ⟯`.

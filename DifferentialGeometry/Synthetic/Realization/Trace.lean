@@ -2,11 +2,11 @@
 Copyright (c) 2026 Differential Geometry Project. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import DifferentialGeometry.Synthetic.Bridge.Basic
+import DifferentialGeometry.Synthetic.Realization.Basic
 import DifferentialGeometry.VectorBundle.Section
 
 /-!
-# Bridge Layer 1: Trace construction
+# SmoothRicciFlow: Trace construction
 
 This file constructs the trace components of `AbstractTrace` for the concrete
 instantiation `R = C^∞(M, ℝ)`, `V = Γ(TM)`.
