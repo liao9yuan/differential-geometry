@@ -34,6 +34,7 @@ import DifferentialGeometry.Synthetic.Realization.Basic
 import DifferentialGeometry.Synthetic.Realization.Embedding
 import DifferentialGeometry.Synthetic.Realization.Connection
 import DifferentialGeometry.Synthetic.Realization.Trace
+import DifferentialGeometry.Synthetic.Realization.Metric
 
 -- Ricci Flow
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Basic

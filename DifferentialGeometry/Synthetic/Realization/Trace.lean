@@ -202,7 +202,7 @@ noncomputable def concreteTr :
 
 /-- A `C^∞(M)`-linear map `α : Γ(TM) → C^∞(M)` acts pointwise:
     if `σ₁(x) = σ₂(x)` then `(α σ₁)(x) = (α σ₂)(x)`. -/
-private theorem smoothLinearMap_acts_pointwise
+theorem smoothLinearMap_acts_pointwise
     (α : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ →ₗ[C^∞⟮I, M; ℝ⟯] C^∞⟮I, M; ℝ⟯)
     (σ₁ σ₂ : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (p : M)
     (h : σ₁ p = σ₂ p) :
