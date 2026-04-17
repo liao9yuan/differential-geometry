@@ -32,10 +32,12 @@ import DifferentialGeometry.Synthetic.Axioms
 -- Realization: Concrete Ricci flow solution analysis
 import DifferentialGeometry.Synthetic.Realization.Basic
 import DifferentialGeometry.Synthetic.Realization.Embedding
+import DifferentialGeometry.Synthetic.Realization.SmoothSections
 import DifferentialGeometry.Synthetic.Realization.Connection
 import DifferentialGeometry.Synthetic.Realization.Trace
 import DifferentialGeometry.Synthetic.Realization.Metric
 import DifferentialGeometry.Synthetic.Realization.LeviCivita
+import DifferentialGeometry.Synthetic.Realization.TensorNabla
 
 -- Ricci Flow
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Basic

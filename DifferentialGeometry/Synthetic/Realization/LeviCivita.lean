@@ -5,6 +5,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 import DifferentialGeometry.Synthetic.Realization.Connection
 import DifferentialGeometry.Synthetic.Realization.Metric
 import DifferentialGeometry.Synthetic.Geometry.Connection
+import DifferentialGeometry.Synthetic.Geometry.ConnectionExtended
 
 /-!
 # Realization: Levi-Civita (Metric Compatibility and Torsion-Free)
@@ -210,5 +211,138 @@ theorem concreteIsLeviCivita
    concreteConn_torsion_free I M cov h_tf⟩
 
 end LeviCivitaRealization
+
+-- ============================================================
+-- Koszul formula construction: instantiating Synthetic layer
+-- ============================================================
+
+section KoszulRealization
+
+variable
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  {H : Type*} [TopologicalSpace H]
+  (I : ModelWithCorners ℝ E H)
+  (M : Type*) [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [SigmaCompactSpace M] [T2Space M]
+
+private abbrev V_k := Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯
+private abbrev R_k := C^∞⟮I, M; ℝ⟯
+
+/-! ### Invertible (2 : C^∞(M, ℝ))
+
+The constant function `1/2` provides the two-sided inverse of `2` in `C^∞(M, ℝ)`.
+We lift `Invertible (2 : ℝ)` through `algebraMap`. -/
+
+/-- `2 : C^∞(M, ℝ)` is invertible (with inverse the constant function `1/2`).
+Constructed by mapping `Invertible (2 : ℝ)` through `algebraMap ℝ C^∞(M, ℝ)`. -/
+private theorem two_smooth_eval (x : M) : (2 : R_k I M) x = (2 : ℝ) := by
+  have h2a : (2 : R_k I M) * (1 : R_k I M) = (2 : R_k I M) := mul_one _
+  have h_two_eq : (2 : R_k I M) = (1 : R_k I M) + (1 : R_k I M) := by norm_num
+  have := DFunLike.congr_fun h_two_eq x
+  simp only [ContMDiffMap.coe_add, Pi.add_apply, ContMDiffMap.coe_one, Pi.one_apply] at this
+  linarith
+
+noncomputable instance invertible2SmoothFunctions :
+    Invertible (2 : R_k I M) where
+  invOf := algebraMap ℝ (R_k I M) (1/2 : ℝ)
+  invOf_mul_self := by
+    apply ContMDiffMap.ext; intro x
+    have : (algebraMap ℝ (R_k I M) (1/2 : ℝ) * (2 : R_k I M)) x =
+        (1/2 : ℝ) * (2 : R_k I M) x := by
+      simp only [ContMDiffMap.coe_mul, Pi.mul_apply, Algebra.algebraMap_eq_smul_one,
+        ContMDiffMap.coe_smul, Pi.smul_apply, smul_eq_mul, ContMDiffMap.coe_one,
+        Pi.one_apply, mul_one]
+    rw [this, two_smooth_eval, ContMDiffMap.coe_one, Pi.one_apply]; norm_num
+  mul_invOf_self := by
+    apply ContMDiffMap.ext; intro x
+    have : ((2 : R_k I M) * algebraMap ℝ (R_k I M) (1/2 : ℝ)) x =
+        (2 : R_k I M) x * (1/2 : ℝ) := by
+      simp only [ContMDiffMap.coe_mul, Pi.mul_apply, Algebra.algebraMap_eq_smul_one,
+        ContMDiffMap.coe_smul, Pi.smul_apply, smul_eq_mul, ContMDiffMap.coe_one,
+        Pi.one_apply, mul_one]
+    rw [this, two_smooth_eval, ContMDiffMap.coe_one, Pi.one_apply]; norm_num
+
+/-! ### Koszul connection in the concrete setting -/
+
+/-- The Koszul connection on smooth tangent sections, constructed by applying the
+Synthetic layer's `koszul_connection` to the concrete `DerivationEmbedding` and
+`MetricDuality`. -/
+noncomputable def concreteKoszulConnection
+    (g : Bundle.ContMDiffRiemannianMetric I ω E (TangentSpace I : M → Type _)) :
+    V_k I M → V_k I M → V_k I M :=
+  koszul_connection (concreteDerivationEmbedding I M) (concreteMetricDuality I M g)
+
+/-! ### Koszul connection is Levi-Civita -/
+
+/-- The concrete Koszul connection is the Levi-Civita connection: it is both
+metric-compatible and torsion-free. This follows directly from the Synthetic
+layer's `levi_civita_exists`. -/
+theorem concreteKoszulIsLeviCivita
+    (g : Bundle.ContMDiffRiemannianMetric I ω E (TangentSpace I : M → Type _)) :
+    IsLeviCivita (concreteDerivationEmbedding I M)
+      (concreteKoszulConnection I M g)
+      (concreteMetricDuality I M g) :=
+  levi_civita_exists (concreteDerivationEmbedding I M) (concreteMetricDuality I M g)
+    (char_ne_2_smooth_functions I M)
+
+/-! ### Connection linearity properties -/
+
+/-- Right-additivity of the Koszul connection. -/
+theorem concreteKoszul_add_right
+    (g : Bundle.ContMDiffRiemannianMetric I ω E (TangentSpace I : M → Type _))
+    (X Y₁ Y₂ : V_k I M) :
+    concreteKoszulConnection I M g X (Y₁ + Y₂) =
+    concreteKoszulConnection I M g X Y₁ + concreteKoszulConnection I M g X Y₂ :=
+  koszul_connection_add_right (concreteDerivationEmbedding I M) (concreteMetricDuality I M g)
+    X Y₁ Y₂
+
+/-- Left-additivity of the Koszul connection. -/
+theorem concreteKoszul_add_left
+    (g : Bundle.ContMDiffRiemannianMetric I ω E (TangentSpace I : M → Type _))
+    (X₁ X₂ Z : V_k I M) :
+    concreteKoszulConnection I M g (X₁ + X₂) Z =
+    concreteKoszulConnection I M g X₁ Z + concreteKoszulConnection I M g X₂ Z :=
+  koszul_connection_add_left (concreteDerivationEmbedding I M) (concreteMetricDuality I M g)
+    X₁ X₂ Z
+
+/-- Left scalar multiplication for the Koszul connection. -/
+theorem concreteKoszul_smul_left
+    (g : Bundle.ContMDiffRiemannianMetric I ω E (TangentSpace I : M → Type _))
+    (f : R_k I M) (X Z : V_k I M) :
+    concreteKoszulConnection I M g (f • X) Z =
+    f • concreteKoszulConnection I M g X Z :=
+  koszul_connection_smul_left (concreteDerivationEmbedding I M) (concreteMetricDuality I M g)
+    f X Z
+
+/-- Leibniz rule for the Koszul connection. -/
+theorem concreteKoszul_leibniz
+    (g : Bundle.ContMDiffRiemannianMetric I ω E (TangentSpace I : M → Type _))
+    (X : V_k I M) (f : R_k I M) (Y : V_k I M) :
+    concreteKoszulConnection I M g X (f • Y) =
+    (concreteDerivationEmbedding I M).embed X f • Y +
+    f • concreteKoszulConnection I M g X Y :=
+  koszul_connection_leibniz (concreteDerivationEmbedding I M) (concreteMetricDuality I M g)
+    (char_ne_2_smooth_functions I M) X f Y
+
+/-! ### Uniqueness: any Levi-Civita connection equals the Koszul connection -/
+
+/-- Any connection that is both metric-compatible and torsion-free must equal
+the Koszul connection. This is the concrete instantiation of
+`levi_civita_unique` from the Synthetic layer. -/
+theorem concreteKoszul_unique
+    (g : Bundle.ContMDiffRiemannianMetric I ω E (TangentSpace I : M → Type _))
+    (conn : V_k I M → V_k I M → V_k I M)
+    (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hl : ∀ X (f : R_k I M) Y,
+      conn X (f • Y) = (concreteDerivationEmbedding I M).embed X f • Y + f • conn X Y)
+    (h_mc : IsMetricCompatible (concreteDerivationEmbedding I M) conn (concreteMetricDuality I M g))
+    (h_tf : IsTorsionFree (concreteDerivationEmbedding I M) conn)
+    (X Y : V_k I M) :
+    conn X Y = concreteKoszulConnection I M g X Y :=
+  levi_civita_unique (concreteDerivationEmbedding I M) conn ha hal hl
+    (concreteMetricDuality I M g) (char_ne_2_smooth_functions I M) h_mc h_tf X Y
+
+end KoszulRealization
 
 end

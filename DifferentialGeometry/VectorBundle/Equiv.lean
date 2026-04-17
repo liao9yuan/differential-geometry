@@ -999,7 +999,7 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
 continuous-linear-map-valued map lifts to operator-valued smoothness when the source
 is finite-dimensional, by embedding `F₁ →L[𝕜] F₂` into `Fin (rank F₁) → F₂` via evaluation
 on a basis and using a continuous linear left inverse. -/
-private lemma contMDiffAt_clm_of_pointwise
+lemma contMDiffAt_clm_of_pointwise
     {X : Type*} [TopologicalSpace X] [ChartedSpace HB X]
     {A : X → (F₁ →L[𝕜] F₂)} {x : X}
     (h : ∀ v, ContMDiffAt IB 𝓘(𝕜, F₂) n (fun q => A q v) x) :
