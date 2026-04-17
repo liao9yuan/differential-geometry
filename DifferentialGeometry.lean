@@ -31,6 +31,7 @@ import DifferentialGeometry.Synthetic.Axioms
 
 -- Bridge: Synthetic → Concrete grounding
 import DifferentialGeometry.Synthetic.Bridge.Basic
+import DifferentialGeometry.Synthetic.Bridge.Trace
 
 -- Ricci Flow
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Basic
