@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import DifferentialGeometry.Synthetic.Bridge.Embedding
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic
+import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
 
 /-!
 # Bridge Layer 2: Connection from CovariantDerivative
@@ -171,6 +172,76 @@ theorem concreteConn_leibniz
   --        vectorFieldActionSmooth I M X f x • Y x + f x • cov Y x (X x)
   simp only [vectorFieldActionSmooth, ContMDiffMap.coeFn_mk, vectorFieldAction]
   abel
+
+/-! ### DerivationEmbedding and torsion-free condition -/
+
+/-- The concrete `DerivationEmbedding` assembling `embedLinearMap`, its injectivity,
+and bracket closure into the Synthetic layer's core structure. -/
+noncomputable def concreteDerivationEmbedding :
+    DerivationEmbedding ℝ C^∞⟮I, M; ℝ⟯
+      Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ where
+  embed := embedLinearMap I M
+  embed_injective := embedLinearMap_injective I M
+  bracket_closed := embed_bracket_closed I M
+
+/-- The Synthetic bracket from `concreteDerivationEmbedding` equals the Mathlib
+Lie bracket section `mlieBracketSection`.
+
+Both satisfy `embedLinearMap Z = ⁅embedLinearMap X, embedLinearMap Y⁆`:
+- `bracket` is defined as `Classical.choose (embed_bracket_closed X Y)`.
+- `mlieBracketSection` is the witness used in the proof of `embed_bracket_closed`.
+
+By injectivity of `embedLinearMap`, they must be equal. -/
+theorem bracket_eq_mlieBracketSection
+    (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
+    bracket (concreteDerivationEmbedding I M) X Y = mlieBracketSection I M X Y := by
+  apply (embedLinearMap_injective I M)
+  -- bracket_spec: embed (bracket emb X Y) = ⁅embed X, embed Y⁆
+  have h1 := bracket_spec (concreteDerivationEmbedding I M) X Y
+  -- mlieBracketSection also maps to the same commutator
+  have h2 : embedLinearMap I M (mlieBracketSection I M X Y) =
+      ⁅embedLinearMap I M X, embedLinearMap I M Y⁆ := by
+    apply Derivation.ext; intro f
+    exact embedDeriv_mlieBracket I M X Y f
+  -- Both h1 and h2 have the same RHS (up to definitional equality of embed vs embedLinearMap)
+  -- so transitivity gives the result
+  exact h1.trans h2.symm
+
+/-- When the Mathlib covariant derivative has zero torsion, the Synthetic layer's
+`IsTorsionFree` condition holds.
+
+The proof uses `torsion_eq_zero_iff` from Mathlib:
+  `cov.torsion = 0 ↔ ∀ X Y x, MDiffAt X x → MDiffAt Y x →
+    cov Y x (X x) - cov X x (Y x) = mlieBracket I X Y x`
+
+The LHS of `IsTorsionFree` is `concreteConn cov X Y - concreteConn cov Y X`,
+which pointwise equals `cov Y x (X x) - cov X x (Y x)`.
+
+The RHS is `bracket concreteDerivationEmbedding X Y`, which equals
+`mlieBracketSection I M X Y` by `bracket_eq_mlieBracketSection`,
+which pointwise equals `mlieBracket I X Y x`. -/
+theorem concreteConn_torsion_free
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    [ContMDiffCovariantDerivative cov ∞]
+    (h_tf : cov.torsion = 0) :
+    IsTorsionFree (concreteDerivationEmbedding I M)
+      (concreteConn I M cov) := by
+  intro X Y
+  apply ContMDiffSection.ext; intro x
+  -- LHS: (concreteConn cov X Y - concreteConn cov Y X) x
+  --     = cov Y x (X x) - cov X x (Y x)
+  change concreteConn I M cov X Y x - concreteConn I M cov Y X x =
+    bracket (concreteDerivationEmbedding I M) X Y x
+  rw [concreteConn_apply, concreteConn_apply]
+  -- Apply torsion_eq_zero_iff to get pointwise identity
+  have h_eq := cov.torsion_eq_zero_iff.mp h_tf
+    (X.mdifferentiableAt (x := x)) (Y.mdifferentiableAt (x := x))
+  -- h_eq : cov Y x (X x) - cov X x (Y x) = mlieBracket I X Y x
+  rw [h_eq]
+  -- RHS: bracket concreteDerivationEmbedding X Y x = mlieBracketSection I M X Y x
+  --     = mlieBracket I X Y x
+  rw [bracket_eq_mlieBracketSection]
+  rfl
 
 end Connection
 
