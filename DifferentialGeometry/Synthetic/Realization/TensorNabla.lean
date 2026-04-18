@@ -34,6 +34,7 @@ direction `v`; the second is the input to the resulting 1-form `(∇*_v α)`.
 noncomputable section
 
 set_option linter.unusedSectionVars false
+set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 400000
 set_option maxHeartbeats 400000
 
@@ -152,7 +153,7 @@ private theorem Psi_smul_right
     mdiffAt_pairing I M hα hY
   have h_fun : (fun y => α y ((f • Y) y)) = f • (fun y => α y (Y y)) := by
     funext y
-    simp [Pi.smul_apply, ContinuousLinearMap.map_smul, smul_eq_mul]
+    simp [smul_eq_mul]
   have hY_T : MDiffAt (T% fun y => Y y) x := hY
   simp only [Psi]
   rw [h_fun]
@@ -323,15 +324,13 @@ private theorem dualCovariantDerivativeFun_isCovOn
     -- The RHS is `(g x • A + B.smulRight v) (Y x)` where A and v are covectors.
     -- Distribute the (Y x) application using ContinuousLinearMap.add_apply and smul_apply.
     rw [dualCovariantDerivativeFun_apply I M cov (g • α) hgα hV_diff hY_diff]
-    show Psi I M cov (g • α) V Y x =
+    change Psi I M cov (g • α) V Y x =
       g x • (dualCovariantDerivativeFun I M cov α x (V x)) (Y x) +
       ((extDerivFun g x) (V x)) * (α x) (Y x)
     rw [dualCovariantDerivativeFun_apply I M cov α hα' hV_diff hY_diff]
-    -- Goal: Psi (g • α) V Y x =
-    --   g x * Psi α V Y x + extDerivFun g x (V x) • α x (Y x)
     have h_funeq : (fun y => (g • α) y (Y y)) = g • (fun y => α y (Y y)) := by
       funext y
-      simp [Pi.smul_apply, ContinuousLinearMap.smul_apply, smul_eq_mul]
+      simp [ContinuousLinearMap.smul_apply, smul_eq_mul]
     have hαY : MDifferentiableAt I 𝓘(ℝ, ℝ) (fun y => α y (Y y)) x :=
       mdiffAt_pairing I M hα' hY_diff
     simp only [Psi]
@@ -343,9 +342,7 @@ private theorem dualCovariantDerivativeFun_isCovOn
       simp only [extDerivFun, ContinuousLinearMap.comp_apply, ContinuousLinearEquiv.coe_coe]
     have h_prod := fromTangentSpace_mfderiv_smul_apply (I := I) hg hαY (V x)
     rw [h_extDeriv_eq _ _ (V x), h_prod]
-    -- (g • α) x = g x • α x
-    have hgα_apply : (g • α) x = g x • α x := by
-      simp [Pi.smul_apply]
+    have hgα_apply : (g • α) x = g x • α x := rfl
     rw [hgα_apply]
     simp only [ContinuousLinearMap.smul_apply, smul_eq_mul]
     -- Convert remaining fromTangentSpace expressions back to extDerivFun.

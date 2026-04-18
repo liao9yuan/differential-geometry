@@ -41,6 +41,8 @@ import DifferentialGeometry.Synthetic.Realization.TensorNabla
 import DifferentialGeometry.Synthetic.Realization.HomNabla
 import DifferentialGeometry.Synthetic.Realization.Tensor0SBridge
 import DifferentialGeometry.Synthetic.Realization.Tensor0SNabla
+import DifferentialGeometry.Synthetic.Realization.GenHomNabla
+import DifferentialGeometry.Synthetic.Realization.TensorRSNabla
 
 -- Ricci Flow
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Basic

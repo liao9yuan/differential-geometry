@@ -41,6 +41,7 @@ By `TensorialAt.mkHom₂`, this gives a continuous bilinear map
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
+set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 400000
 set_option maxHeartbeats 400000
 set_option linter.unusedSectionVars false
@@ -169,7 +170,7 @@ private theorem Psi_smul_right
   -- Recall (f • Y) y = f y • Y y, so τ y ((f • Y) y) = f y • τ y (Y y) by CLM-linearity.
   have h_fun : (fun y => τ y ((f • Y) y)) = f • (fun y => τ y (Y y)) := by
     funext y
-    simp [Pi.smul_apply, ContinuousLinearMap.map_smul]
+    exact ContinuousLinearMap.map_smul (τ y) (f y) (Y y)
   have hY_T : MDiffAt (T% fun y => Y y) x := hY
   simp only [Psi]
   rw [h_fun]
@@ -344,15 +345,13 @@ private theorem homBundleCovariantDerivativeFun_isCovOn
     --   g x • Psi τ V_field Y x + (extDerivFun g x V_field) • τ x (Y x)
     have h_funeq : (fun y => (g • τ) y (Y y)) = g • (fun y => τ y (Y y)) := by
       funext y
-      simp [Pi.smul_apply, ContinuousLinearMap.smul_apply]
+      rfl
     have hτY : MDiffAtV I M F V (fun y => τ y (Y y)) x :=
       mdiffAt_apply I M F V hτ' hY_diff
     simp only [Psi]
     rw [h_funeq]
-    -- Expand cov_V using its Leibniz rule for V-valued sections.
     rw [cov_V.isCovariantDerivativeOn.leibniz hτY hg]
-    -- Compute (g • τ) x (cov_TM Y x V_field) = g x • τ x (cov_TM Y x V_field).
-    have hgτ_apply : (g • τ) x = g x • τ x := by simp [Pi.smul_apply]
+    have hgτ_apply : (g • τ) x = g x • τ x := rfl
     rw [hgτ_apply]
     simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
       ContinuousLinearMap.smulRight_apply]

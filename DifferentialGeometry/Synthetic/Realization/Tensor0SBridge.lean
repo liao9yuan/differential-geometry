@@ -41,6 +41,7 @@ underlying data) to the norm-topology space
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
+set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 400000
 set_option maxHeartbeats 800000
 set_option linter.unusedSectionVars false
@@ -81,29 +82,29 @@ noncomputable def scalarFn (T : Π x : M, Tensor0SSpace 0 I x) : M → ℝ :=
 theorem scalarFn_add (T₁ T₂ : Π x : M, Tensor0SSpace 0 I x) :
     scalarFn I M (T₁ + T₂) = scalarFn I M T₁ + scalarFn I M T₂ := by
   funext x
-  show tensor0Iso I M x ((T₁ + T₂) x) =
+  change tensor0Iso I M x ((T₁ + T₂) x) =
     tensor0Iso I M x (T₁ x) + tensor0Iso I M x (T₂ x)
-  show tensor0Iso I M x (T₁ x + T₂ x) = _
+  change tensor0Iso I M x (T₁ x + T₂ x) = _
   exact map_add (tensor0Iso I M x) (T₁ x) (T₂ x)
 
 theorem scalarFn_smul (g : M → ℝ) (T : Π x : M, Tensor0SSpace 0 I x) :
     scalarFn I M (g • T) = g • scalarFn I M T := by
   funext x
-  show tensor0Iso I M x ((g • T) x) = g x • tensor0Iso I M x (T x)
-  show tensor0Iso I M x (g x • T x) = _
+  change tensor0Iso I M x ((g • T) x) = g x • tensor0Iso I M x (T x)
+  change tensor0Iso I M x (g x • T x) = _
   exact map_smul (tensor0Iso I M x) (g x) (T x)
 
 theorem scalarFn_zero :
     scalarFn I M (0 : Π x : M, Tensor0SSpace 0 I x) = 0 := by
   funext x
-  show tensor0Iso I M x ((0 : Π x : M, Tensor0SSpace 0 I x) x) = 0
-  show tensor0Iso I M x (0 : Tensor0SSpace 0 I x) = 0
+  change tensor0Iso I M x ((0 : Π x : M, Tensor0SSpace 0 I x) x) = 0
+  change tensor0Iso I M x (0 : Tensor0SSpace 0 I x) = 0
   exact map_zero (tensor0Iso I M x)
 
 /-- The fiberwise inverse iso `(tensor0Iso x).symm` sends `scalarFn T x` back to `T x`. -/
 @[simp] theorem tensor0Iso_symm_scalarFn (T : Π x : M, Tensor0SSpace 0 I x) (x : M) :
     (tensor0Iso I M x).symm ((scalarFn I M T) x) = T x := by
-  show (tensor0Iso I M x).symm (tensor0Iso I M x (T x)) = T x
+  change (tensor0Iso I M x).symm (tensor0Iso I M x (T x)) = T x
   exact (tensor0Iso I M x).symm_apply_apply (T x)
 
 /-- The `(tensor0Iso x).symm` inverse CLE sends a scalar `a • scalarFn T x` to
@@ -136,25 +137,25 @@ noncomputable def curriedSection {s : ℕ} (T : Π x : M, Tensor0SSpace (s+1) I 
 theorem curriedSection_add {s : ℕ} (T₁ T₂ : Π x : M, Tensor0SSpace (s+1) I x) :
     curriedSection I M (T₁ + T₂) = curriedSection I M T₁ + curriedSection I M T₂ := by
   funext x
-  show tensor0S_curry (I := I) (M := M) s x ((T₁ + T₂) x) =
+  change tensor0S_curry (I := I) (M := M) s x ((T₁ + T₂) x) =
     tensor0S_curry (I := I) (M := M) s x (T₁ x) +
     tensor0S_curry (I := I) (M := M) s x (T₂ x)
-  show tensor0S_curry (I := I) (M := M) s x (T₁ x + T₂ x) = _
+  change tensor0S_curry (I := I) (M := M) s x (T₁ x + T₂ x) = _
   exact map_add (tensor0S_curry (I := I) (M := M) s x) (T₁ x) (T₂ x)
 
 theorem curriedSection_smul {s : ℕ} (g : M → ℝ) (T : Π x : M, Tensor0SSpace (s+1) I x) :
     curriedSection I M (g • T) = g • curriedSection I M T := by
   funext x
-  show tensor0S_curry (I := I) (M := M) s x ((g • T) x) =
+  change tensor0S_curry (I := I) (M := M) s x ((g • T) x) =
     g x • tensor0S_curry (I := I) (M := M) s x (T x)
-  show tensor0S_curry (I := I) (M := M) s x (g x • T x) = _
+  change tensor0S_curry (I := I) (M := M) s x (g x • T x) = _
   exact map_smul (tensor0S_curry (I := I) (M := M) s x) (g x) (T x)
 
 theorem curriedSection_zero {s : ℕ} :
     curriedSection I M (0 : Π x : M, Tensor0SSpace (s+1) I x) = 0 := by
   funext x
-  show tensor0S_curry (I := I) (M := M) s x ((0 : Π x : M, Tensor0SSpace (s+1) I x) x) = 0
-  show tensor0S_curry (I := I) (M := M) s x (0 : Tensor0SSpace (s+1) I x) = 0
+  change tensor0S_curry (I := I) (M := M) s x ((0 : Π x : M, Tensor0SSpace (s+1) I x) x) = 0
+  change tensor0S_curry (I := I) (M := M) s x (0 : Tensor0SSpace (s+1) I x) = 0
   exact map_zero (tensor0S_curry (I := I) (M := M) s x)
 
 /-! ### Trivialization formula at `s = 0`
