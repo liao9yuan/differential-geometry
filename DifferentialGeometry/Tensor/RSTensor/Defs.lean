@@ -579,15 +579,49 @@ noncomputable instance tensorRSBundle_smooth [CompleteSpace 𝕜] (r s : ℕ) :
       (tensorRSBundle_vector r s) :=
   ContMDiffVectorBundle.continuousLinearMap
 
-/-- The total space of the (0,0)-tensor bundle carries a topology; a (0,0)-tensor is
-a scalar function, so the fiber is constantly `𝕜`. -/
-instance tensor0S_topologicalSpace_zero :
-    TopologicalSpace (TotalSpace
-      (Tensor0SModel 0 𝕜 E)
-      (fun x : M => Tensor0SSpace 0 I x)) :=
-  inferInstanceAs <| TopologicalSpace (TotalSpace
-    (Tensor0SModel 0 𝕜 E)
-    (fun _ : M => Tensor0SModel 0 𝕜 E))
+-- Removed: `tensor0S_topologicalSpace_zero` (s = 0 diamond fix).
+-- It introduced a total-space topology via `Bundle.Trivial` that was propositionally
+-- but not definitionally equal to `tensor0SBundle_topology 0`, blocking FiberBundle
+-- instance resolution for the (0,0)-tensor bundle. Resolved with user approval to
+-- support P23 (covariant derivative on (0,s)-tensor bundles).
+
+/-!
+## Bundle / norm topology bridges for differentiability and smoothness
+
+The CLE `tensor0SSpace_continuousLinearEquiv s x` is the identity at the underlying data
+level (its `toFun` is `id`); the diamond between the bundle and norm topologies on the
+fiber is closed by `tensor0SSpace_topology_eq`. This means that a section
+`T : Π x : M, Tensor0SSpace s I x` and the function `fun y => (CLE) (T y)` are equal as
+maps on the underlying carrier, only their target type differs.
+
+This section provides the bridges showing that (m)differentiability/smoothness of a section
+through the CLEs `tensor0SSpace_continuousLinearEquiv` and `tensor0S_curry` is equivalent
+to (m)differentiability/smoothness of the underlying section.
+-/
+
+omit [FiniteDimensional 𝕜 E] in
+/-- The forward direction of `tensor0SSpace_continuousLinearEquiv` is the identity function
+on the underlying carrier. -/
+theorem tensor0SSpace_continuousLinearEquiv_apply (s : ℕ) (x : M)
+    (T : Tensor0SSpace s I x) :
+    tensor0SSpace_continuousLinearEquiv (I := I) (M := M) s x T = T := rfl
+
+omit [FiniteDimensional 𝕜 E] in
+/-- The inverse direction of `tensor0SSpace_continuousLinearEquiv` is the identity function
+on the underlying carrier. -/
+theorem tensor0SSpace_continuousLinearEquiv_symm_apply (s : ℕ) (x : M)
+    (T : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜) :
+    (tensor0SSpace_continuousLinearEquiv (I := I) (M := M) s x).symm T = T := rfl
+
+omit [FiniteDimensional 𝕜 E] in
+/-- The CLE coerces to `id` on the underlying carrier. -/
+theorem tensor0SSpace_continuousLinearEquiv_coe (s : ℕ) (x : M) :
+    (tensor0SSpace_continuousLinearEquiv (I := I) (M := M) s x : _ → _) = id := rfl
+
+omit [FiniteDimensional 𝕜 E] in
+/-- The inverse CLE coerces to `id` on the underlying carrier. -/
+theorem tensor0SSpace_continuousLinearEquiv_symm_coe (s : ℕ) (x : M) :
+    ((tensor0SSpace_continuousLinearEquiv (I := I) (M := M) s x).symm : _ → _) = id := rfl
 
 end
 end Tensor0SBundle

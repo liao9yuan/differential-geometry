@@ -38,6 +38,9 @@ import DifferentialGeometry.Synthetic.Realization.Trace
 import DifferentialGeometry.Synthetic.Realization.Metric
 import DifferentialGeometry.Synthetic.Realization.LeviCivita
 import DifferentialGeometry.Synthetic.Realization.TensorNabla
+import DifferentialGeometry.Synthetic.Realization.HomNabla
+import DifferentialGeometry.Synthetic.Realization.Tensor0SBridge
+import DifferentialGeometry.Synthetic.Realization.Tensor0SNabla
 
 -- Ricci Flow
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Basic
