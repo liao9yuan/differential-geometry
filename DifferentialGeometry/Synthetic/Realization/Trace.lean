@@ -1,7 +1,3 @@
-/-
-Copyright (c) 2026 Differential Geometry Project. All rights reserved.
-Released under Apache 2.0 license as described in the file LICENSE.
--/
 import DifferentialGeometry.Synthetic.Realization.Basic
 import DifferentialGeometry.VectorBundle.Section
 
@@ -46,7 +42,7 @@ variable
 /-! ### VBC fiberwise map and its properties -/
 
 /-- Apply VBC to a `C^∞(M)`-linear endomorphism on sections to get the fiberwise linear map. -/
-private def vbcFiber
+noncomputable def vbcFiber
     (L : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ →ₗ[C^∞⟮I, M; ℝ⟯]
          Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (x : M) : TangentSpace I x →ₗ[ℝ] TangentSpace I x := by
@@ -54,7 +50,7 @@ private def vbcFiber
   exact (ContMDiffVectorBundleHom.ofLinearMapSection (I := I) (n := (⊤ : ℕ∞)) L).fiberLinearMap x
 
 /-- The fundamental VBC specification: the fiberwise map agrees with the section map. -/
-private theorem vbcFiber_spec
+theorem vbcFiber_spec
     (L : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ →ₗ[C^∞⟮I, M; ℝ⟯]
          Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (σ : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -66,7 +62,7 @@ private theorem vbcFiber_spec
     (ContMDiffSection.exists_eq_at x (σ x)).choose_spec
 
 /-- The fiberwise map is additive in L. -/
-private theorem vbcFiber_add
+theorem vbcFiber_add
     (L₁ L₂ : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ →ₗ[C^∞⟮I, M; ℝ⟯]
               Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (x : M) : vbcFiber I M (L₁ + L₂) x = vbcFiber I M L₁ x + vbcFiber I M L₂ x := by
@@ -78,7 +74,7 @@ private theorem vbcFiber_add
   rfl
 
 /-- The fiberwise map is `C^∞(M)`-homogeneous in L. -/
-private theorem vbcFiber_smul
+theorem vbcFiber_smul
     (f : C^∞⟮I, M; ℝ⟯)
     (L : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ →ₗ[C^∞⟮I, M; ℝ⟯]
          Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -92,7 +88,7 @@ private theorem vbcFiber_smul
   simp [ContMDiffSection.coe_smulContMDiffMap]
 
 /-- The fiberwise map respects composition. -/
-private theorem vbcFiber_mul
+theorem vbcFiber_mul
     (A B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ →ₗ[C^∞⟮I, M; ℝ⟯]
            Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (x : M) : vbcFiber I M (A * B) x = vbcFiber I M A x * vbcFiber I M B x := by
@@ -108,67 +104,73 @@ private theorem vbcFiber_mul
 /-! ### Smoothness of the trace -/
 
 /-- The pointwise trace function. -/
-private def concreteTr_fun
+noncomputable def concreteTr_fun
     (L : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ →ₗ[C^∞⟮I, M; ℝ⟯]
          Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) : M → ℝ :=
   fun x => LinearMap.trace ℝ (TangentSpace I x) (vbcFiber I M L x)
 
+/-- **Local trace formula.** For any `C^∞(M)`-linear endomorphism `L` of `Γ(TM)`, a
+base point `x₀ ∈ M`, the canonical trivialization `e = trivializationAt E (TangentSpace I) x₀`,
+the standard basis `b` of `E`, and any family of global smooth sections `σ' : Fin d → Γ(TM)`
+that agree with `e.localFrame b` on a neighborhood `U` of `x₀`, the pointwise trace
+equals the sum of local matrix diagonal entries on `U`:
+```
+(concreteTr L) x = ∑ᵢ b.equivFun ((e ⟨x, (L (σ' i)) x⟩).2) i     for x in a nbhd of x₀.
+```
+This is the computational heart of `concreteTr_fun_smooth`. -/
+theorem concreteTr_fun_local_formula
+    (L : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ →ₗ[C^∞⟮I, M; ℝ⟯]
+         Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
+    (x₀ : M)
+    (σ' : Fin (Module.finrank ℝ E) → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
+    (hσ' : ∀ᶠ x in nhds x₀, ∀ i,
+      (σ' i) x = (trivializationAt E (TangentSpace I : M → Type _) x₀).localFrame
+        (Module.finBasis ℝ E) i x) :
+    ∀ᶠ x in nhds x₀,
+      concreteTr_fun I M L x =
+        ∑ i, (Module.finBasis ℝ E).equivFun
+          (((trivializationAt E (TangentSpace I : M → Type _) x₀)
+            ⟨x, (L (σ' i)) x⟩).2) i := by
+  haveI : Fact (1 ≤ (⊤ : ℕ∞)) := ⟨le_top⟩
+  let e := trivializationAt E (TangentSpace I : M → Type _) x₀
+  have he : x₀ ∈ e.baseSet := mem_baseSet_trivializationAt E _ x₀
+  let b := Module.finBasis ℝ E
+  filter_upwards [hσ', e.open_baseSet.mem_nhds he] with x hσ'x hx
+  let le := e.linearEquivAt ℝ x hx
+  change LinearMap.trace ℝ (TangentSpace I x) (vbcFiber I M L x) =
+    ∑ i, b.equivFun ((e ⟨x, (L (σ' i)) x⟩).2) i
+  rw [← LinearMap.trace_conj' (vbcFiber I M L x) le]
+  rw [LinearMap.trace_eq_matrix_trace ℝ b, Matrix.trace]
+  simp only [Matrix.diag_apply, LinearMap.toMatrix_apply]
+  congr 1; ext i
+  have hσ'_eq : (σ' i) x = le.symm (b i) := by
+    rw [hσ'x i]
+    change e.localFrame b i x = le.symm (b i)
+    rw [e.localFrame_apply_of_mem_baseSet (hx := hx)]
+    simp [Trivialization.basisAt, le]
+  have hconj : le.conj (vbcFiber I M L x) (b i) = (e ⟨x, (L (σ' i)) x⟩).2 := by
+    simp only [LinearEquiv.conj_apply, LinearMap.comp_apply, LinearEquiv.coe_coe]
+    rw [show le.symm (b i) = (σ' i) x from hσ'_eq.symm]
+    rw [vbcFiber_spec I M L (σ' i) x]
+    simp [le]
+  rw [hconj]; rfl
+
 /-- The trace function is smooth. -/
-private theorem concreteTr_fun_smooth
+theorem concreteTr_fun_smooth
     (L : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ →ₗ[C^∞⟮I, M; ℝ⟯]
          Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (concreteTr_fun I M L) := by
   haveI : Fact (1 ≤ (⊤ : ℕ∞)) := ⟨le_top⟩
   intro x₀
-  -- Get a local frame near x₀
   let e := trivializationAt E (TangentSpace I : M → Type _) x₀
   have he : x₀ ∈ e.baseSet := mem_baseSet_trivializationAt E _ x₀
   let b := Module.finBasis ℝ E
   let hframe := e.isLocalFrameOn_localFrame_baseSet I (↑(⊤ : ℕ∞)) b
   obtain ⟨σ', hσ'⟩ := hframe.exists_contMDiffSection_eqOn_nhd e.open_baseSet he
-  -- The trace equals ∑ᵢ b.equivFun ((e ⟨x, (L (σ' i)) x⟩).2) i near x₀
-  -- because trace(φ_x) = ∑ᵢ eᵢ*(φ_x(eᵢ)) and in the trivialization
-  -- eᵢ = le⁻¹(bᵢ) = σ'ᵢ(x), so φ_x(eᵢ) = (L σ'ᵢ)(x) by VBC.
-  have htr_eq : ∀ᶠ x in nhds x₀,
-      concreteTr_fun I M L x =
-        ∑ i, b.equivFun ((e ⟨x, (L (σ' i)) x⟩).2) i := by
-    filter_upwards [hσ', e.open_baseSet.mem_nhds he] with x hσ'x hx
-    let le := e.linearEquivAt ℝ x hx
-    -- trace(vbcFiber L x) using the basis {le⁻¹(bᵢ)} of TangentSpace I x
-    -- = ∑ᵢ (le⁻¹(bᵢ))*.repr(vbcFiber L x (le⁻¹(bᵢ)))(i)
-    -- where (le⁻¹(bᵢ))* is the dual basis.
-    -- In coordinates via le: trace = ∑ᵢ b.equivFun(le(vbcFiber L x (le⁻¹(bᵢ))))(i)
-    -- = ∑ᵢ b.equivFun(le(L(σ'ᵢ)(x)))(i)    [by VBC and σ'ᵢ(x) = le⁻¹(bᵢ)]
-    -- = ∑ᵢ b.equivFun((e ⟨x, L(σ'ᵢ)(x)⟩).2)(i)   [since (e ⟨x, v⟩).2 = le(v)]
-    change LinearMap.trace ℝ (TangentSpace I x) (vbcFiber I M L x) =
-      ∑ i, b.equivFun ((e ⟨x, (L (σ' i)) x⟩).2) i
-    -- The trace of the fiberwise endomorphism equals the trace of its
-    -- conjugation to E via the trivialization linear equiv.
-    -- trace(φ_x) = trace(le ∘ φ_x ∘ le⁻¹) since trace is conjugation-invariant.
-    -- The i-th diagonal entry of le ∘ φ_x ∘ le⁻¹ in basis b is
-    -- b.equivFun(le(φ_x(le⁻¹(bᵢ))))(i) = b.equivFun((e ⟨x, (L σ'ᵢ)(x)⟩).2)(i)
-    -- Conjugate to E via le to use trace invariance under conjugation
-    rw [← LinearMap.trace_conj' (vbcFiber I M L x) le]
-    rw [LinearMap.trace_eq_matrix_trace ℝ b, Matrix.trace]
-    simp only [Matrix.diag_apply, LinearMap.toMatrix_apply]
-    congr 1; ext i
-    -- φ_E (b i) = le (vbcFiber L x (le.symm (b i))) = le ((L σ'ᵢ)(x)) = (e ⟨x, (L σ'ᵢ)(x)⟩).2
-    have hσ'_eq : (σ' i) x = le.symm (b i) := by
-      rw [hσ'x i]
-      simp [Trivialization.localFrame, Trivialization.basisAt, hx, le]
-    have hconj : le.conj (vbcFiber I M L x) (b i) = (e ⟨x, (L (σ' i)) x⟩).2 := by
-      simp only [LinearEquiv.conj_apply, LinearMap.comp_apply, LinearEquiv.coe_coe]
-      rw [show le.symm (b i) = (σ' i) x from hσ'_eq.symm]
-      rw [vbcFiber_spec I M L (σ' i) x]
-      -- le v = (e ⟨x, v⟩).2 by definition of linearEquivAt
-      simp [le]
-    rw [hconj]; rfl
+  have htr_eq := concreteTr_fun_local_formula I M L x₀ σ' hσ'
   refine (ContMDiffAt.congr_of_eventuallyEq ?_ htr_eq).contMDiffWithinAt
   apply ContMDiffAt.sum
   intro i _
-  -- b.equivFun ((e ⟨x, (L (σ' i)) x⟩).2) i is a composition of smooth maps:
-  -- x ↦ (e ⟨x, (L (σ' i)) x⟩).2 is smooth (L(σ'ᵢ) is a smooth section)
-  -- w ↦ b.equivFun w i is a CLM (coordinate projection)
   have h_sect : ContMDiffAt I 𝓘(ℝ, E) ∞
       (fun x => (e ⟨x, (L (σ' i)) x⟩).2) x₀ :=
     (contMDiffAt_section x₀).mp (L (σ' i)).contMDiff.contMDiffAt

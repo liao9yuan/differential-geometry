@@ -1,7 +1,3 @@
-/-
-Copyright (c) 2026 Differential Geometry Project. All rights reserved.
-Released under Apache 2.0 license as described in the file LICENSE.
--/
 import DifferentialGeometry.Synthetic.Realization.Connection
 import DifferentialGeometry.Synthetic.Realization.Metric
 import DifferentialGeometry.Synthetic.Geometry.Connection

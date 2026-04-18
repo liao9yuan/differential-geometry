@@ -70,7 +70,7 @@ instance : IntCast (JetFun R) where
 @[simp] theorem zero_jet (n : ℕ) (t : ℝ) : (0 : JetFun R).jet n t = 0 := rfl
 @[simp] theorem one_jet_zero (t : ℝ) : (1 : JetFun R).jet 0 t = 1 := rfl
 @[simp] theorem one_jet_succ (n : ℕ) (t : ℝ) : (1 : JetFun R).jet (n + 1) t = 0 := by
-  show (if n + 1 = 0 then (1 : R) else 0) = 0; simp
+  change (if n + 1 = 0 then (1 : R) else 0) = 0; simp
 @[simp] theorem add_jet (f g : JetFun R) (n : ℕ) (t : ℝ) :
     (f + g).jet n t = f.jet n t + g.jet n t := rfl
 @[simp] theorem neg_jet (f : JetFun R) (n : ℕ) (t : ℝ) :
@@ -103,7 +103,7 @@ private theorem one_mul_jet (f : JetFun R) (n : ℕ) (t : ℝ) :
   · simp
   · intro k _ hk0
     have : (1 : JetFun R).jet k t = 0 := by
-      show (if k = 0 then (1 : R) else 0) = 0; simp [hk0]
+      change (if k = 0 then (1 : R) else 0) = 0; simp [hk0]
     simp [this]
 
 private theorem left_distrib_jet (a b c : JetFun R) (n : ℕ) (t : ℝ) :
@@ -134,23 +134,23 @@ private theorem mul_assoc_jet (a b c : JetFun R) (n : ℕ) (t : ℝ) :
       (fun (p : Σ _, ℕ) => (⟨p.2, p.1 - p.2⟩ : Σ _, ℕ))
       (fun (p : Σ _, ℕ) => (⟨p.1 + p.2, p.1⟩ : Σ _, ℕ))
     · intro ⟨j, i⟩ hp
-      simp only [S₁, S₂, Finset.mem_sigma, Finset.mem_range] at hp ⊢; omega
+      simp only [S₂, Finset.mem_sigma, Finset.mem_range] at hp ⊢; omega
     · intro ⟨k, l⟩ hq
-      simp only [S₁, S₂, Finset.mem_sigma, Finset.mem_range] at hq ⊢; omega
+      simp only [S₂, Finset.mem_sigma, Finset.mem_range] at hq ⊢; omega
     · intro ⟨j, i⟩ hp
-      simp only [S₁, Finset.mem_sigma, Finset.mem_range] at hp
-      simp only [Sigma.eta]; ext <;> simp <;> omega
+      simp only [Finset.mem_sigma, Finset.mem_range] at hp
+      refine Sigma.ext ?_ ?_ <;> simp_all
     · intro ⟨k, l⟩ hq
       simp only [S₂, Finset.mem_sigma, Finset.mem_range] at hq
-      simp only [Sigma.eta]; ext <;> simp <;> omega
+      ext <;> simp
     · intro ⟨j, i⟩ hp
-      simp only [S₁, Finset.mem_sigma, Finset.mem_range] at hp
+      simp only [Finset.mem_sigma, Finset.mem_range] at hp
       have hij : i ≤ j := by omega
       have h_choose : (n.choose j : R) * (j.choose i : R) =
           (n.choose i : R) * ((n - i).choose (j - i) : R) := by
         have h := Nat.choose_mul hij (n := n)
         rw [← Nat.cast_mul, ← Nat.cast_mul, h]
-      simp only [Sigma.fst, Sigma.snd]
+      simp only []
       rw [show n - j = n - i - (j - i) from by omega]
       calc ↑(n.choose j) * (↑(j.choose i) * a.jet i t * b.jet (j - i) t) *
               c.jet (n - i - (j - i)) t
@@ -165,7 +165,7 @@ private theorem mul_assoc_jet (a b c : JetFun R) (n : ℕ) (t : ℝ) :
     conv_lhs => arg 2; ext k; rw [Finset.mul_sum]
     rw [Finset.sum_sigma']
     apply Finset.sum_congr rfl; intro ⟨k, l⟩ hq
-    simp only [S₂, Finset.mem_sigma, Finset.mem_range] at hq
+    simp only [Finset.mem_sigma, Finset.mem_range] at hq
     ring
 
 -- ============================================================
@@ -196,16 +196,16 @@ instance : CommRing (JetFun R) where
   neg_add_cancel a := by ext n t; simp
   nsmul := nsmulRec
   zsmul := zsmulRec
-  natCast_zero := by ext n t; simp [NatCast.natCast, Zero.zero]
+  natCast_zero := by ext n t; simp [NatCast.natCast]
   natCast_succ m := by
-    ext n t; show (if n = 0 then ((m + 1 : ℕ) : R) else 0) =
+    ext n t; change (if n = 0 then ((m + 1 : ℕ) : R) else 0) =
       (if n = 0 then (m : R) else 0) + (if n = 0 then (1 : R) else 0)
     by_cases h : n = 0 <;> simp [h, Nat.cast_succ]
   intCast_ofNat m := by
-    ext n t; show (if n = 0 then ((m : ℤ) : R) else 0) = (if n = 0 then (m : R) else 0)
+    ext n t; change (if n = 0 then ((m : ℤ) : R) else 0) = (if n = 0 then (m : R) else 0)
     by_cases h : n = 0 <;> simp [h]
   intCast_negSucc m := by
-    ext n t; show (if n = 0 then ((Int.negSucc m : ℤ) : R) else 0) =
+    ext n t; change (if n = 0 then ((Int.negSucc m : ℤ) : R) else 0) =
       -(if n = 0 then ((m + 1 : ℕ) : R) else 0)
     by_cases h : n = 0 <;> simp [h, Int.negSucc_eq]
 
@@ -397,7 +397,7 @@ def timeDeriv : Derivation R (JetFun R) (JetFun R) where
       map_add' := dt_map_add
       map_smul' := dt_map_smul }
   leibniz' f g := by
-    show dt (f * g) = f * dt g + g * dt f
+    change dt (f * g) = f * dt g + g * dt f
     exact dt_leibniz f g
   map_one_eq_zero' := dt_one
 
