@@ -623,6 +623,40 @@ theorem elementaryCovector_iprod_wedge_product
         simp only [Matrix.submatrix_apply,
           Fin.addCases_succAbove_natAdd I J j' i]; congr 1))
 
+/-- The graded Leibniz rule for `uncurryFin (α.smulRight ·)` and wedge product,
+specialized to elementary covectors. This is the dual of `elementaryCovector_iprod_wedge_product`:
+`α ∧₁ (e_I ∧ e_J) = domDomCongr fAFA ((α ∧₁ e_I) ∧ e_J) + (-1)^m (e_I ∧ (α ∧₁ e_J))`. -/
+theorem elementaryCovector_ederiv_wedge_product
+    [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜] [CharZero 𝕜]
+    {d : ℕ} (b : Module.Basis (Fin d) 𝕜 (M →L[𝕜] 𝕜))
+    (I : Fin m → Fin d) (J : Fin n → Fin d) (α : M →L[𝕜] 𝕜) :
+    uncurryFin (α.smulRight ((elementaryCovector b I) ∧[𝕜] (elementaryCovector b J))) =
+      domDomCongr Fin.finAddFlipAssoc
+        (wedge_product (uncurryFin (α.smulRight (elementaryCovector b I)))
+          (elementaryCovector b J) (ContinuousLinearMap.mul 𝕜 𝕜))
+      + ((-1 : 𝕜)^m • wedge_product (elementaryCovector b I)
+          (uncurryFin (α.smulRight (elementaryCovector b J)))
+          (ContinuousLinearMap.mul 𝕜 𝕜)) := by
+  -- Step 1: Rewrite e_I ∧ e_J = e_{addCases I J}
+  rw [elementaryCovector_wedge b I J]
+  -- Step 2: Unfold LHS and RHS uncurryFin terms using ederiv_smul_const-style expansion
+  -- then expand wedge products into sums via sum_smul_wedge_left/right
+  -- For the RHS, use uncurryFin_smulRight_eq_toAlt_wedge to convert uncurryFin(α.smulRight e)
+  -- to a wedge product, then use wedge_mul_assoc and wedge_antisymm to rearrange.
+  -- Step 3: Both sides reduce to determinants. Match via Laplace expansion.
+  -- This follows the same pattern as elementaryCovector_iprod_wedge_product but for uncurryFin.
+  ext v
+  simp only [uncurryFin_apply, ContinuousLinearMap.smulRight_apply, smul_apply, smul_eq_mul,
+    add_apply, domDomCongr_apply, elementaryCovector_apply]
+  -- LHS: ∑_k (-1)^k α(v k) det(b(addCases I J _)((k.removeNth v) _))
+  -- This is the Laplace expansion of a bordered determinant.
+  -- RHS term 1: (uncurryFin(α.smulRight e_I) ∧ e_J)(v ∘ finAddFlipAssoc)
+  -- RHS term 2: (-1)^m (e_I ∧ uncurryFin(α.smulRight e_J))(v)
+  -- Both reduce to sums over shuffles of cofactor expansions.
+  -- The identity is a consequence of the Laplace expansion by complementary minors
+  -- of the bordered (m+n+1)×(m+n+1) determinant.
+  sorry
+
 /-- The scalar-valued graded Leibniz rule for interior product and wedge product.
 Proved by expanding g, h in the elementaryCovector basis and applying
 `elementaryCovector_iprod_wedge_product` to each basis pair. -/

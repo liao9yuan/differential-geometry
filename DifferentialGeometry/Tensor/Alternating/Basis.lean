@@ -121,6 +121,23 @@ theorem curryFin_elementaryCovector
   simp only [Fin.cons_zero]
   congr 1; rw [elementaryCovector_apply]; congr 1
 
+/-- Dual cofactor expansion: `uncurryFin ((b j).smulRight (elementaryCovector b F))`
+equals `elementaryCovector b (Fin.cons j F)`. This is the Laplace expansion of the
+bordered determinant along its first row (the `b j` row). -/
+theorem uncurryFin_smulRight_elementaryCovector
+    (b : Module.Basis (Fin n) 𝕜 (E →L[𝕜] 𝕜))
+    (j : Fin n) (F : Fin k → Fin n) :
+    uncurryFin ((b j).smulRight (elementaryCovector b F)) =
+      elementaryCovector b (Fin.cons j F) := by
+  ext v
+  simp only [uncurryFin_apply, ContinuousLinearMap.smulRight_apply, smul_apply, smul_eq_mul,
+    elementaryCovector_apply]
+  rw [Matrix.det_succ_row_zero]
+  apply Finset.sum_congr rfl; intro i _
+  simp only [Fin.cons_zero,
+    zsmul_eq_mul, Int.cast_pow, Int.cast_neg, Int.cast_one]
+  ring
+
 /-- Evaluating an elementary covector on basis vectors gives the generalized
 Kronecker delta. Given a dual basis pair `(B, b)` with `b i (B j) = δ_{ij}`,
 we have `elementaryCovector b I (B ∘ J) = multiKroneckerDelta I J`. -/

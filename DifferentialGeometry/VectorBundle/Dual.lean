@@ -38,7 +38,7 @@ variable (E : B → Type*) [∀ x, AddCommGroup (E x)] [∀ x, Module 𝕜 (E x)
 continuous dual `E x →L[𝕜] 𝕜`. Realized as a special case of the hom bundle with the
 trivial `𝕜`-bundle as the codomain. -/
 abbrev dual : B → Type _ :=
-  fun x => E x →L[𝕜] Bundle.Trivial B 𝕜 x
+  fun x => E x →L[𝕜] 𝕜
 
 end Bundle
 

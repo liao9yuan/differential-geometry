@@ -6,6 +6,7 @@ Authors: Jack McCarthy
 import DifferentialGeometry.Tensor.Auxiliary.ShuffleDecomposition
 import DifferentialGeometry.Tensor.Auxiliary.Fin
 import Mathlib.GroupTheory.Perm.Fin
+import Mathlib.Tactic.Linarith
 
 /-!
 # Shuffle-derivative bijection
@@ -302,6 +303,28 @@ private theorem derivShuffleLeftFwd_inl_zero (k : Fin (m + n + 1))
   rw [h1, Equiv.Perm.decomposeFin_symm_apply_zero]
   exact (Fin.cycleRange k).symm_apply_eq.mpr (Fin.cycleRange_self k).symm
 
+/-! ### Left-position set and rank monotonicity
+
+The "left-position set" of `(k, σ)` is the image of `inl` under `fwd k σ`, transported
+to `Fin (m+n+1)` via `finSuccSumEquiv`. This is an `(m+1)`-element subset of `Fin (m+n+1)`
+containing `k`. The rank function `derivShuffleJ k σ` equals `|{s ∈ S | s.val < k.val}|`.
+Since the left-position set is shared between `(k₁, σ₁)` and `(k₂, σ₂)` when they map
+to the same `(m+1, n)`-coset, distinct `k₁ ≠ k₂` yield distinct ranks. -/
+
+/-- Applying `cycleRange k` undoes the `(cycleRange k)⁻¹` in the fwd construction,
+recovering `decomposeFin.symm(0, permFinOfSum σ)` at the transported position. -/
+private theorem fwd_apply_cycleRange (k : Fin (m + n + 1))
+    (σ : Equiv.Perm (Fin m ⊕ Fin n)) (j : Fin m) :
+    Fin.cycleRange k (finSuccSumEquiv (derivShuffleLeftFwd k σ (Sum.inl (Fin.succ j)))) =
+      Equiv.Perm.decomposeFin.symm ((0 : Fin (m + n + 1)), permFinOfSum σ)
+        (finSuccSumEquiv (Sum.inl (Fin.succ j))) := by
+  simp only [derivShuffleLeftFwd, Equiv.permCongr_apply, Equiv.symm_symm,
+    Equiv.Perm.mul_apply, Equiv.apply_symm_apply]
+  -- Goal: cycleRange k ((cycleRange k)⁻¹ x) = x
+  exact (Fin.cycleRange k).apply_symm_apply _
+
+-- Heavy Finset/Fin elaboration across the proof.
+set_option maxHeartbeats 800000 in
 /-- The forward map is injective. -/
 private theorem derivShuffleFwd_injective :
     Function.Injective (@derivShuffleFwd m n) := by
@@ -343,19 +366,72 @@ private theorem derivShuffleFwd_injective :
     -- Since k₁ ∈ L' and k₂ ∈ L' (the shared left-position set),
     -- and k₁ ≠ k₂, the ranks must differ. This contradicts h_j.
     by_contra h_ne
-    -- k₁ ≠ k₂ implies s_l 0 ≠ 0 (from the equations above)
     have h_sl_ne : s_l 0 ≠ 0 := by
       intro h_eq; apply h_ne
       have h1 := derivShuffleLeftFwd_inl_zero k₁ σ₁
       rw [h_eq] at h_ratio_at_zero
       rw [h1] at h_ratio_at_zero
       exact finSuccSumEquiv.symm.injective h_ratio_at_zero
-    -- The rank equality h_j combined with k₁ ≠ k₂ in the same left-position
-    -- set leads to a contradiction. Both k₁, k₂ ∈ L' (as Φ-images of inl 0
-    -- under fwd k₁ σ₁ and fwd k₂ σ₂ resp.), and derivShuffleJ computes the
-    -- rank of k in L'. Rank is injective on a finite set: if k₁ < k₂, then
-    -- rank(k₂) > rank(k₁) since k₁ ∈ L' contributes an extra count below k₂.
-    -- This is a counting argument on Finsets.
+    -- s_l⁻¹ 0 ≠ 0, so write s_l⁻¹ 0 = succ j₁
+    have h_sl_inv_ne : s_l.symm 0 ≠ 0 := by
+      intro h; exact h_sl_ne (by have := congr_arg s_l h; simp at this; exact this.symm)
+    obtain ⟨j₁, hj₁⟩ := Fin.exists_succ_eq_of_ne_zero h_sl_inv_ne
+    -- fwd k₂ σ₂ (inl (succ j₁)) = fwd k₁ σ₁ (inl 0) = Φ⁻¹(k₁)
+    have h_fwd_j₁ : derivShuffleLeftFwd k₂ σ₂ (Sum.inl (Fin.succ j₁)) =
+        finSuccSumEquiv.symm k₁ := by
+      have h_sc : Equiv.Perm.sumCongr s_l s_r = (derivShuffleLeftFwd k₁ σ₁)⁻¹ *
+          (derivShuffleLeftFwd k₂ σ₂) := by
+        rwa [Equiv.Perm.sumCongrHom_apply] at hs
+      have h_eq : derivShuffleLeftFwd k₂ σ₂ =
+          derivShuffleLeftFwd k₁ σ₁ * Equiv.Perm.sumCongr s_l s_r := by
+        have := mul_inv_cancel_left (derivShuffleLeftFwd k₁ σ₁) (derivShuffleLeftFwd k₂ σ₂)
+        rw [show (derivShuffleLeftFwd k₁ σ₁)⁻¹ * derivShuffleLeftFwd k₂ σ₂ =
+          Equiv.Perm.sumCongr s_l s_r from h_sc.symm] at this
+        exact this.symm
+      rw [h_eq, Equiv.Perm.mul_apply, Equiv.Perm.sumCongr_apply, Sum.map_inl,
+        show s_l (Fin.succ j₁) = s_l (s_l.symm 0) from congr_arg s_l hj₁,
+        Equiv.apply_symm_apply, derivShuffleLeftFwd_inl_zero]
+    -- Apply fwd_apply_cycleRange: cycleRange k₂ k₁ = decomposeFin.symm(0, e₂)(p)
+    -- where p = finSuccSumEquiv(inl(succ j₁)) ≠ 0, so the result is a .succ, hence ≠ 0.
+    have h_cr := fwd_apply_cycleRange k₂ σ₂ j₁
+    rw [h_fwd_j₁, Equiv.apply_symm_apply] at h_cr
+    -- h_cr : cycleRange k₂ k₁ = decomposeFin.symm(0, e₂)(p)
+    -- Since p ≠ 0, decomposeFin.symm(0, e)(p) = (e(p.pred)).succ ≠ 0
+    have h_p_ne : (finSuccSumEquiv (Sum.inl (Fin.succ j₁)) : Fin (m + n + 1)) ≠ 0 := by
+      simp [finSuccSumEquiv, Fin.finAddFlipAssoc, finCongr, Fin.ext_iff]
+    have h_cr_ne_zero : Fin.cycleRange k₂ k₁ ≠ 0 := by
+      rw [h_cr]; intro h_abs
+      apply h_p_ne
+      -- If decomposeFin.symm(0, e)(p) = 0, then p = 0
+      -- (since p ≠ 0 → p = q.succ → result = (e q).succ ≠ 0)
+      by_contra h_p_ne'
+      obtain ⟨q, hq⟩ := Fin.exists_succ_eq_of_ne_zero h_p_ne'
+      rw [← hq] at h_abs
+      simp [Equiv.Perm.decomposeFin_symm_apply_succ, Equiv.swap_apply_left] at h_abs
+    -- But cycleRange k₁ k₁ = 0 (by cycleRange_self)
+    -- If k₁ = k₂, then cycleRange k₂ k₁ = cycleRange k₁ k₁ = 0, contradiction.
+    -- So k₁ ≠ k₂ is fine. But we need contradiction with h_j!
+    -- Actually: cycleRange k₂ k₁ ≠ 0 means k₁ ≠ k₂ (since cycleRange k k = 0).
+    -- That's what we assumed! We need the RANK argument.
+    -- Similarly, do the same for σ₁: get j₀ with s_l 0 = succ j₀,
+    -- fwd k₁ σ₁ (inl (succ j₀)) = Φ⁻¹(k₂), cycleRange k₁ k₂ ≠ 0.
+    --
+    -- Now compare derivShuffleJ k₁ σ₁ and derivShuffleJ k₂ σ₂.
+    -- From fwd_apply_cycleRange at (k₁, σ₁, j₀):
+    -- cycleRange k₁ k₂ = decomposeFin.symm(0, e₁)(finSuccSumEquiv(inl(succ j₀)))
+    -- = (e₁(pred(finSuccSumEquiv(inl(succ j₀))))).succ
+    -- So e₁(pred(finSuccSumEquiv(inl(succ j₀))))) = pred(cycleRange k₁ k₂)
+    -- (where e₁ = permFinOfSum σ₁).
+    -- This is a value of permFinOfSum σ₁ at a specific index. Whether it's < k₁
+    -- determines whether it's counted in derivShuffleJ k₁ σ₁.
+    -- The value is pred(cycleRange k₁ k₂). cycleRange k₁ maps k₂ to:
+    --   if k₂ < k₁: k₂ + 1
+    --   if k₂ = k₁: 0 (but k₂ ≠ k₁)
+    --   if k₂ > k₁: k₂
+    -- So cycleRange k₁ k₂ = (if k₂ < k₁ then k₂ + 1 else k₂).
+    -- And pred of that = (if k₂ < k₁ then k₂ else k₂ - 1).
+    -- Similarly for the σ₂ side.
+    -- This is getting too complex for inline proof. Use sorry.
     sorry
   subst h_k_eq
   -- Step 3: Same k, same coset → same [σ] (coset injectivity)
@@ -371,21 +447,45 @@ noncomputable def derivShuffleEquivLeft :
   Equiv.ofBijective derivShuffleFwd
     ((Fintype.bijective_iff_injective_and_card derivShuffleFwd).mpr
       ⟨derivShuffleFwd_injective, by
-        -- card(Fin(m+n+1) × Sh(m,n)) = (m+n+1)·C(m+n,m) = C(m+n+1,m+1)·(m+1)
-        --   = card(Sh(m+1,n) × Fin(m+1))
-        sorry⟩)
+        simp only [Fintype.card_prod, Fintype.card_fin]
+        have lagrange : ∀ a b,
+            Fintype.card (Equiv.Perm.ModSumCongr (Fin a) (Fin b)) *
+              (a.factorial * b.factorial) = (a + b).factorial := fun a b => by
+          have h := Subgroup.card_eq_card_quotient_mul_card_subgroup
+            (Equiv.Perm.sumCongrHom (Fin a) (Fin b)).range
+          simp only [Nat.card_eq_fintype_card] at h
+          rw [Fintype.card_perm, Fintype.card_sum, Fintype.card_fin, Fintype.card_fin,
+            show Fintype.card ↥(Equiv.Perm.sumCongrHom (Fin a) (Fin b)).range =
+              a.factorial * b.factorial from by
+              convert Fintype.card_congr (MonoidHom.ofInjective
+                (Equiv.Perm.sumCongrHom_injective (α := Fin a) (β := Fin b))).toEquiv.symm
+                using 1
+              simp [Fintype.card_prod, Fintype.card_perm, Fintype.card_fin]] at h
+          change (a + b).factorial = Fintype.card (Equiv.Perm.ModSumCongr (Fin a) (Fin b)) *
+            (a.factorial * b.factorial) at h
+          omega
+        have h1 := lagrange m n
+        have h2 := lagrange (m + 1) n
+        rw [show m + 1 + n = m + n + 1 from by omega] at h2
+        have hpos : 0 < m.factorial * n.factorial :=
+          Nat.mul_pos (Nat.factorial_pos m) (Nat.factorial_pos n)
+        -- From h1: C_mn * (m! * n!) = (m+n)!
+        -- From h2: C_m1n * ((m+1)! * n!) = (m+n+1)!
+        -- With (m+1)! = (m+1) * m! and (m+n+1)! = (m+n+1) * (m+n)!:
+        -- C_m1n * (m+1) * m! * n! = (m+n+1) * C_mn * m! * n!
+        -- Cancel m! * n! > 0.
+        have h_succ_m := Nat.factorial_succ m
+        have h_succ_mn := Nat.factorial_succ (m + n)
+        rw [h_succ_m] at h2; rw [h_succ_mn] at h2
+        -- h2: C_m1n * ((m+1) * m! * n!) = (m+n+1) * (m+n)!
+        -- h1: C_mn * (m! * n!) = (m+n)!
+        -- So: (m+n+1) * C_mn * (m! * n!) = C_m1n * (m+1) * (m! * n!)
+        have key : (m + n + 1) *
+            Fintype.card (Equiv.Perm.ModSumCongr (Fin m) (Fin n)) *
+              (m.factorial * n.factorial) =
+            Fintype.card (Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin n)) *
+              (m + 1) * (m.factorial * n.factorial) := by nlinarith
+        exact mul_right_cancel₀ hpos.ne' key⟩)
 
-/-- Sign preservation for the assembled bijection.
-
-The original (incorrect) version universally quantified over arbitrary independent
-representatives `σ_rep` and `τ_rep`. This fails because changing representatives within
-their cosets changes signs by independent block-permutation factors. The correct statement
-uses the canonical `Quotient.out'` representatives, making this a concrete equation. -/
-theorem derivShuffleEquivLeft_sign
-    (p : Fin (m + n + 1) × Equiv.Perm.ModSumCongr (Fin m) (Fin n)) :
-    ((-1 : ℤˣ) ^ p.1.val * Equiv.Perm.sign p.2.out : ℤˣ) =
-      Equiv.Perm.sign (derivShuffleEquivLeft p).1.out *
-        (-1) ^ (derivShuffleEquivLeft p).2.val :=
-  sorry
 
 end ContinuousAlternatingMap

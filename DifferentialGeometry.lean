@@ -74,11 +74,13 @@ import DifferentialGeometry.Tensor.Multilinear.Dual
 import DifferentialGeometry.Tensor.Multilinear.Tensor
 import DifferentialGeometry.Tensor.Mixed.Bundle
 import DifferentialGeometry.Tensor.Mixed.Fiber
-import DifferentialGeometry.Tensor.Mixed.DualFiber
 import DifferentialGeometry.Tensor.Mixed.Field
+import DifferentialGeometry.Tensor.Mixed.Vector
 import DifferentialGeometry.Tensor.Product.Basis
 import DifferentialGeometry.Tensor.Product.Bundle
+import DifferentialGeometry.Tensor.Product.Contract
 import DifferentialGeometry.Tensor.Product.Defs
+import DifferentialGeometry.Tensor.Product.Equiv
 import DifferentialGeometry.Tensor.Product.Fiber
 import DifferentialGeometry.Tensor.Product.HomEquiv
 import DifferentialGeometry.Tensor.Product.Pretrivialization
