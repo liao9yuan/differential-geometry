@@ -45,7 +45,7 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
   [Module.Finite 𝕜 E] [FiniteDimensional 𝕜 E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
-variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ω M]
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I 1 M]
 
 /-!
 ## Model-level interior product
@@ -115,6 +115,59 @@ noncomputable def model_tensorWithCovector (r : ℕ) (α : Tensor0SModel 1 𝕜 
           ContinuousMultilinearMap.smul_apply, smul_eq_mul, RingHom.id_apply]
         ring }
 
+/-- The model-level embedding `β ↦ α ⊗ β : (0,r) →L (0,1+r)`, given a (0,1)-tensor `α`.
+This puts `α` in the *first* slot (position 0), as opposed to `model_tensorWithCovector`
+which puts it in the last slot. -/
+noncomputable def model_tensorWithCovector_first (r : ℕ) (α : Tensor0SModel 1 𝕜 E) :
+    Tensor0SModel r 𝕜 E →L[𝕜] Tensor0SModel (1 + r) 𝕜 E :=
+  LinearMap.toContinuousLinearMap
+    { toFun := fun β => Bundle.continuousMultilinearMap.modelProduct 1 r α β
+      map_add' := fun β₁ β₂ => by
+        ext v
+        simp only [Bundle.continuousMultilinearMap.modelProduct_apply,
+          ContinuousMultilinearMap.add_apply, mul_add]
+      map_smul' := fun c β => by
+        ext v
+        simp only [Bundle.continuousMultilinearMap.modelProduct_apply,
+          ContinuousMultilinearMap.smul_apply, smul_eq_mul, RingHom.id_apply]
+        ring }
+
+/-- The curry `α ↦ (β ↦ α ⊗ β)` as a continuous bilinear map, with `α` in slot 0. -/
+noncomputable def model_tensorWithCovector_first_bilinear (r : ℕ) :
+    Tensor0SModel 1 𝕜 E →L[𝕜]
+      (Tensor0SModel r 𝕜 E →L[𝕜] Tensor0SModel (1 + r) 𝕜 E) :=
+  LinearMap.toContinuousLinearMap
+    { toFun := fun α =>
+        LinearMap.toContinuousLinearMap
+          { toFun := fun β => Bundle.continuousMultilinearMap.modelProduct 1 r α β
+            map_add' := fun β₁ β₂ => by
+              ext v
+              simp only [Bundle.continuousMultilinearMap.modelProduct_apply,
+                ContinuousMultilinearMap.add_apply, mul_add]
+            map_smul' := fun c β => by
+              ext v
+              simp only [Bundle.continuousMultilinearMap.modelProduct_apply,
+                ContinuousMultilinearMap.smul_apply, smul_eq_mul, RingHom.id_apply]
+              ring }
+      map_add' := fun α₁ α₂ => by
+        ext β v
+        simp only [LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk,
+          Bundle.continuousMultilinearMap.modelProduct_apply,
+          ContinuousLinearMap.add_apply, ContinuousMultilinearMap.add_apply, add_mul]
+      map_smul' := fun c α => by
+        ext β v
+        simp only [LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk,
+          Bundle.continuousMultilinearMap.modelProduct_apply,
+          ContinuousLinearMap.smul_apply, ContinuousMultilinearMap.smul_apply,
+          smul_eq_mul, RingHom.id_apply]
+        ring }
+
+set_option linter.unusedSectionVars false in
+theorem model_tensorWithCovector_first_bilinear_apply (r : ℕ)
+    (α : Tensor0SModel 1 𝕜 E) (β : Tensor0SModel r 𝕜 E) :
+    model_tensorWithCovector_first_bilinear (𝕜 := 𝕜) (E := E) r α β =
+      model_tensorWithCovector_first r α β := rfl
+
 /-!
 ## Contraction of smooth tensor fields
 
@@ -124,6 +177,44 @@ This corresponds to the standard result that contraction of a (0,s)-tensor field
 a smooth vector field yields a (0,s−1)-tensor field, using the Lean indexing
 convention `s + 1 → s`.
 -/
+
+/-!
+## Model-level bilinear contractions on `TensorRSModel`
+
+For smoothness of field-level contractions of `TensorRSField`, we package the fiber-level
+`contract_covariant` and `contract_contravariant_first` as continuous bilinear maps in their
+contraction-vector / contraction-covector argument. -/
+
+/-- Model-level bilinear contraction covariant: pairs a vector with a `(r, s+1)`-tensor to
+produce an `(r, s)`-tensor. Linear in the vector. -/
+noncomputable def model_contract_covariant_bilinear (r s : ℕ) :
+    E →L[𝕜] (TensorRSModel r (s + 1) 𝕜 E →L[𝕜] TensorRSModel r s 𝕜 E) :=
+  (ContinuousLinearMap.compL 𝕜
+      (Tensor0SModel r 𝕜 E)
+      (Tensor0SModel (s + 1) 𝕜 E)
+      (Tensor0SModel s 𝕜 E)).comp
+    (model_interior_bilinear 𝕜 E s)
+
+set_option linter.unusedSectionVars false in
+theorem model_contract_covariant_bilinear_apply (r s : ℕ) (v : E)
+    (T : TensorRSModel r (s + 1) 𝕜 E) :
+    model_contract_covariant_bilinear (𝕜 := 𝕜) (E := E) r s v T =
+      (model_interior_product s v).comp T := rfl
+
+/-- Model-level bilinear contraction contravariant-first: pairs a `(0,1)`-tensor (covector)
+with a `(1+r, s)`-tensor to produce an `(r, s)`-tensor. Linear in the covector. -/
+noncomputable def model_contract_contravariant_first_bilinear (r s : ℕ) :
+    Tensor0SModel 1 𝕜 E →L[𝕜]
+      (TensorRSModel (1 + r) s 𝕜 E →L[𝕜] TensorRSModel r s 𝕜 E) :=
+  (ContinuousLinearMap.compL 𝕜
+        (Tensor0SModel r 𝕜 E) (Tensor0SModel (1 + r) 𝕜 E) (Tensor0SModel s 𝕜 E)).flip.comp
+    (model_tensorWithCovector_first_bilinear (𝕜 := 𝕜) (E := E) r)
+
+set_option linter.unusedSectionVars false in
+theorem model_contract_contravariant_first_bilinear_apply (r s : ℕ)
+    (α : Tensor0SModel 1 𝕜 E) (T : TensorRSModel (1 + r) s 𝕜 E) :
+    model_contract_contravariant_first_bilinear (𝕜 := 𝕜) (E := E) r s α T =
+      T.comp (model_tensorWithCovector_first r α) := rfl
 
 section FieldContraction
 
@@ -234,6 +325,25 @@ noncomputable def contract_contravariant (r s : ℕ) (x : M)
         (Tensor0SModel (r + 1) 𝕜 E)
         (Tensor0SModel s 𝕜 E)).flip embed_model).comp
       (tensorRSSpace_continuousLinearEquiv (I := I) (r + 1) s x).toContinuousLinearMap)
+
+/-- Contraction of (1+r, s) tensor with a cotangent vector (1-form) into the *first*
+contravariant slot, yielding a (r, s)-tensor.
+
+Given `T : (0,1+r) →L (0,s)` and `α ∈ (0,1)`, we pre-compose `T` with the embedding
+`β ↦ α ⊗ β : (0,r) →L (0,1+r)`. This contracts `α` with the first slot of the
+(0,1+r)-tensor input — i.e. the first upper index of `T`. -/
+noncomputable def contract_contravariant_first (r s : ℕ) (x : M)
+    (α : Tensor0SSpace 1 I x) :
+    TensorRSSpace (1 + r) s I x →L[𝕜] TensorRSSpace r s I x :=
+  let α_model : Tensor0SModel 1 𝕜 E := Tensor0SSpace.toModel α
+  let embed_model : Tensor0SModel r 𝕜 E →L[𝕜] Tensor0SModel (1 + r) 𝕜 E :=
+    model_tensorWithCovector_first r α_model
+  (tensorRSSpace_continuousLinearEquiv (I := I) r s x).symm.toContinuousLinearMap.comp
+    (((ContinuousLinearMap.compL 𝕜
+        (Tensor0SModel r 𝕜 E)
+        (Tensor0SModel (1 + r) 𝕜 E)
+        (Tensor0SModel s 𝕜 E)).flip embed_model).comp
+      (tensorRSSpace_continuousLinearEquiv (I := I) (1 + r) s x).toContinuousLinearMap)
 
 end FieldContraction
 
