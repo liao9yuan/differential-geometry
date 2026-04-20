@@ -340,11 +340,17 @@ structure AbstractTrace (R V : Type*)
   /-- tensor_contract is R-linear. -/
   tensor_contract_smul {r s : ℕ} (c : R) (T : TensorData R V (r + 1) (s + 1)) :
     tensor_contract (c • T) = c • tensor_contract T
-  /-- Evaluation axiom: contract(D ⊗ vectorToData(v)) = D evaluated with v in first co slot. -/
+  /-- Evaluation axiom: contract(vectorToData(v) ⊗ D) = D evaluated with v in first co slot.
+      Uses the "vectorToData first" argument order so that the lone contravariant slot from
+      `vectorToData v` sits at position 0, matching `tensor_contract`'s first/first pairing. -/
   data_eval_single_contract {r s : ℕ}
     (D : TensorData R V r (s + 1)) (v : V)
     (m : Fin s → V) (n : Fin r → (V →ₗ[R] R)) :
-    (tensor_contract (tensor_prod (s₂ := 0) D (vectorToData (R := R) v))) m n =
+    (tensor_contract
+      ((show 1 + r = r + 1 from by omega) ▸
+       (show 0 + (s + 1) = s + 1 from by omega) ▸
+       tensor_prod (r₁ := 1) (s₁ := 0) (r₂ := r) (s₂ := s + 1)
+         (vectorToData (R := R) v) D)) m n =
     D (Fin.cons v m) n
   /-- Dual evaluation axiom: contracting a (0, s₁+1)-tensor A with a (r+1, s₂)-tensor B
       pairs A's first covariant slot with B's first contravariant slot.
