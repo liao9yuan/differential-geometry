@@ -1,5 +1,7 @@
-import DifferentialGeometry.Synthetic.Realization.NablaContractComm
+import DifferentialGeometry.Synthetic.Realization.TensorRSNabla
+import DifferentialGeometry.Synthetic.Realization.NablaComm
 import DifferentialGeometry.Synthetic.Algebra.TensorAlgebra
+import DifferentialGeometry.Tensor.RSTensor.Field
 
 /-!
 # SmoothRicciFlow: TensorData-level contraction (P27.1)
@@ -85,7 +87,6 @@ set_option maxHeartbeats 800000
 open scoped Manifold ContDiff Topology
 open Bundle
 open Tensor0SBundle
-open TensorContractComm
 open SyntheticTensor
 
 namespace TensorContractRealization
@@ -306,8 +307,8 @@ end Chunk2
 /-! ### Chunk 3 — Local dual-covector basis and pointwise canonical formula
 
 The `(0,1)`-bundle has a local frame defined by the tangent bundle's local frame's
-dual. We re-declare `dualCovectorBasis` here (since the version in `NablaContractComm`
-is private) to obtain a smooth dual frame via `exists_contMDiffSection_eqOn_nhd`. -/
+dual. We declare `dualCovectorBasis'` here to obtain a smooth dual frame via
+`exists_contMDiffSection_eqOn_nhd`. -/
 
 section Chunk3
 
@@ -434,8 +435,6 @@ private lemma chooseLocalFrames_biorth_eventually (x₀ : M) :
     (mem_baseSet_trivializationAt _ _ x₀)
   filter_upwards [hσ, hθ, hbase_tan, hbase_1] with y hσy hθy hy_tan hy_1 i j
   rw [hσy j, hθy i]
-  -- Apply the matching_frames_biorth lemma from NablaContractComm, but that is `private`.
-  -- We inline the same argument here.
   set e_tan := trivializationAt E (TangentSpace I : M → Type _) x₀
   set e_1 := trivializationAt (Tensor0SModel 1 ℝ E) (fun x => Tensor0SSpace 1 I x) x₀
   set b := Module.finBasis (R := ℝ) (M := E)

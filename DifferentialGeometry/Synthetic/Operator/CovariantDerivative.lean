@@ -145,9 +145,6 @@ theorem covDeriv_eval
     ext i; fin_cases i <;> simp [Function.update]
   rw [h0, h1]; ring
 
-/-- The metric as a (0,2) bilinear form (alias for g_tensor). -/
-def metricToForm (met : MetricDuality R V) : TensorData R V 0 2 := met.g_tensor
-
 theorem metric_covDerivOp_zero
     (emb : DerivationEmbedding k R V) (conn : V → V → V)
     (ha : ∀ X Y Z : V, conn X (Y + Z) = conn X Y + conn X Z)
@@ -158,58 +155,3 @@ theorem metric_covDerivOp_zero
   nabla_g_zero emb conn ha hl met h_mc X
 
 end CovDerivOp
-
-section GenericCovDeriv
-
-variable {k R V : Type*}
-variable [Field k] [CommRing R] [Algebra k R]
-variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
-
-noncomputable def genericCovDeriv
-    (emb : DerivationEmbedding k R V) (conn : V → V → V)
-    (ha : ∀ X Y Z : V, conn X (Y + Z) = conn X Y + conn X Z)
-    (hl : ∀ X (f : R) (Y : V), conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
-    (X : V) {r s : ℕ} (T : TensorData R V r s) : TensorData R V r s :=
-  nabla_tensor emb conn ha hl X T
-
-lemma genericCovDeriv_add
-    (emb : DerivationEmbedding k R V) (conn : V → V → V)
-    (ha : ∀ X Y Z : V, conn X (Y + Z) = conn X Y + conn X Z)
-    (hl : ∀ X (f : R) (Y : V), conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
-    (X : V) {r s : ℕ} (T1 T2 : TensorData R V r s) :
-    genericCovDeriv emb conn ha hl X (T1 + T2) =
-    genericCovDeriv emb conn ha hl X T1 + genericCovDeriv emb conn ha hl X T2 :=
-  nabla_add emb conn ha hl X T1 T2
-
-lemma genericCovDeriv_smul
-    (emb : DerivationEmbedding k R V) (conn : V → V → V)
-    (ha : ∀ X Y Z : V, conn X (Y + Z) = conn X Y + conn X Z)
-    (hl : ∀ X (f : R) (Y : V), conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
-    (X : V) (c : R) {r s : ℕ} (T : TensorData R V r s) (vs αs) :
-    genericCovDeriv emb conn ha hl X (c • T) vs αs =
-    (emb.embed X) c * T vs αs + c * genericCovDeriv emb conn ha hl X T vs αs :=
-  nabla_smul emb conn ha hl X c T vs αs
-
-noncomputable def genericCovDeriv_tensor_prod
-    (emb : DerivationEmbedding k R V) (conn : V → V → V)
-    (ha : ∀ X Y Z : V, conn X (Y + Z) = conn X Y + conn X Z)
-    (hl : ∀ X (f : R) (Y : V), conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
-    (X : V) {r₁ s₁ r₂ s₂ : ℕ}
-    (T₁ : TensorData R V r₁ s₁) (T₂ : TensorData R V r₂ s₂) :
-    genericCovDeriv emb conn ha hl X (tensor_prod T₁ T₂) =
-    tensor_prod (genericCovDeriv emb conn ha hl X T₁) T₂ +
-    tensor_prod T₁ (genericCovDeriv emb conn ha hl X T₂) :=
-  nabla_tensor_prod emb conn ha hl X T₁ T₂
-
-lemma genericCovDeriv_contract
-    (emb : DerivationEmbedding k R V) (conn : V → V → V)
-    (ha : ∀ X Y Z : V, conn X (Y + Z) = conn X Y + conn X Z)
-    (hl : ∀ X (f : R) (Y : V), conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
-    (atr : AbstractTrace R V)
-    (h_ntc : NablaTensorContractComm emb atr conn ha hl)
-    (X : V) {r s : ℕ} (T : TensorData R V (r + 1) (s + 1)) :
-    genericCovDeriv emb conn ha hl X (atr.tensor_contract T) =
-    atr.tensor_contract (genericCovDeriv emb conn ha hl X T) :=
-  h_ntc X T
-
-end GenericCovDeriv

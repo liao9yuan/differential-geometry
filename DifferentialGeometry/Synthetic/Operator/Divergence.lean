@@ -45,10 +45,6 @@ noncomputable def divergence
     (lower_index met atr (0 : Fin 1)
       (cov_diff_vec emb conn ha hl conn_add_left conn_smul_left X))) ![] ![]
 
-/-- The covector df: X ↦ X(f), as an R-linear map. Reexported from Gradient.lean. -/
-def df_covector' (emb : DerivationEmbedding k R V) (f : R) : V →ₗ[R] R :=
-  df_covector emb f
-
 -- ============================================================
 -- Leibniz rule for covariant differential under scalar multiplication
 -- ============================================================

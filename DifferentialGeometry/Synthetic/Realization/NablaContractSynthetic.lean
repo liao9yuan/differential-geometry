@@ -49,7 +49,6 @@ set_option maxHeartbeats 800000
 open scoped Manifold ContDiff Topology
 open Bundle CovariantDerivative
 open Tensor0SBundle
-open TensorContractComm
 open SyntheticTensor
 open TensorContractRealization
 
