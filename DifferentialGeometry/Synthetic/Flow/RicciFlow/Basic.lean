@@ -203,7 +203,7 @@ variable [CommRing A] [Algebra R A]
 /-- Ricci flow condition: the metric evolves by -2·Ric and the connection is always Levi-Civita. -/
 def IsRicciFlow
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (atr : AbstractTrace R V)
     (g_fam : Time → MetricDuality R V)
     (h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs))
@@ -220,7 +220,7 @@ def IsRicciFlow
 /-- Extract the Levi-Civita property from IsRicciFlow. -/
 theorem IsRicciFlow.levi_civita
     {emb : DerivationEmbedding k R V}
-    {td : TimeDerivativeData R A Time}
+    {td : TimeDerivativeData R A Time} [TimeRegularFam td]
     {atr : AbstractTrace R V}
     {g_fam : Time → MetricDuality R V}
     {h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs)}
@@ -233,7 +233,7 @@ theorem IsRicciFlow.levi_civita
 /-- Extract the evolution equation from IsRicciFlow. -/
 theorem IsRicciFlow.evolution
     {emb : DerivationEmbedding k R V}
-    {td : TimeDerivativeData R A Time}
+    {td : TimeDerivativeData R A Time} [TimeRegularFam td]
     {atr : AbstractTrace R V}
     {g_fam : Time → MetricDuality R V}
     {h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs)}
@@ -247,7 +247,7 @@ theorem IsRicciFlow.evolution
 /-- Extract metric compatibility from IsRicciFlow. -/
 theorem IsRicciFlow.metric_compat
     {emb : DerivationEmbedding k R V}
-    {td : TimeDerivativeData R A Time}
+    {td : TimeDerivativeData R A Time} [TimeRegularFam td]
     {atr : AbstractTrace R V}
     {g_fam : Time → MetricDuality R V}
     {h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs)}
@@ -260,7 +260,7 @@ theorem IsRicciFlow.metric_compat
 /-- Extract torsion-free from IsRicciFlow. -/
 theorem IsRicciFlow.torsion_free
     {emb : DerivationEmbedding k R V}
-    {td : TimeDerivativeData R A Time}
+    {td : TimeDerivativeData R A Time} [TimeRegularFam td]
     {atr : AbstractTrace R V}
     {g_fam : Time → MetricDuality R V}
     {h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs)}
@@ -312,7 +312,7 @@ variable [CommRing A] [Algebra R A]
     covector into `T` (both for varying `T τ` and for the frozen `T t`). -/
 def NablaTimeProductRule
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ τ, ∀ X Y Z, conn_fam τ X (Y + Z) = conn_fam τ X Y + conn_fam τ X Z)
     (hl_fam : ∀ τ, ∀ X (f : R) Y, conn_fam τ X (f • Y) = (emb.embed X) f • Y + f • conn_fam τ X Y)

@@ -53,10 +53,14 @@ structure TimeEvolvingManifoldData (k R V Time A : Type*)
     extends RiemannianManifoldData k R V where
   /-- Time derivative as a Mathlib derivation. -/
   td : TimeDerivativeData R A Time
+  /-- Regularity filter + closure axioms for `td`. -/
+  [td_regular : TimeRegularFam td]
   /-- Spatial and temporal derivatives commute. -/
   spatial_temporal_comm : SpatialTemporalComm emb td
   /-- ∂_t commutes with trace. -/
   time_tr_comm : TimeTrComm atr td
+
+attribute [instance] TimeEvolvingManifoldData.td_regular
 
 
 structure RicciFlowBundle (k R V Time A : Type*)
@@ -69,6 +73,8 @@ structure RicciFlowBundle (k R V Time A : Type*)
   atr : AbstractTrace R V
   /-- Time derivative. -/
   td : TimeDerivativeData R A Time
+  /-- Regularity filter + closure axioms for `td`. -/
+  [td_regular : TimeRegularFam td]
   /-- Time-dependent family of metrics. -/
   g_fam : Time → MetricDuality R V
   /-- Smoothness of the metric family's scalar slices. -/
@@ -97,3 +103,5 @@ structure RicciFlowBundle (k R V Time A : Type*)
   ricci_flow : IsRicciFlow emb td atr g_fam h_met conn_fam ha_fam hal_fam hsl_fam hl_fam
   /-- Product rule for ∂_t and ∇ with varying connections. -/
   nabla_time_product_rule : NablaTimeProductRule emb td conn_fam ha_fam hl_fam
+
+attribute [instance] RicciFlowBundle.td_regular

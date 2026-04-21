@@ -53,7 +53,7 @@ private lemma ricciForm_smul_eval
     This follows directly from the Palatini identity and the Ricci flow equation. -/
 theorem connection_evolution_combined
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (h_st : SpatialTemporalComm emb td)
     (atr : AbstractTrace R V)
     (g_fam : Time → MetricDuality R V)
@@ -139,7 +139,7 @@ theorem connection_evolution_combined
     derivative of g(s)(V(s), W) into a metric-variation term and a pure-vector term. -/
 theorem connection_evolution
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (h_st : SpatialTemporalComm emb td)
     (atr : AbstractTrace R V)
     (g_fam : Time → MetricDuality R V)

@@ -587,6 +587,7 @@ Requires smoothness of the `α (L s v)` and `tr (L s)` families so that
 theorem TimeTrComm.of_pi {R V Time : Type*}
     [CommRing R] [AddCommGroup V] [Module R V]
     {atr : AbstractTrace R V} {td : TimeDerivativeData R (Time → R) Time}
+    [TimeRegularFam td]
     (h : TimeTrComm atr td)
     (L : Time → V →ₗ[R] V) (dL : V →ₗ[R] V) (t : Time)
     (h_αLv_smooth : ∀ (v : V) (α : V →ₗ[R] R),

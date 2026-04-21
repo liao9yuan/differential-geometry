@@ -39,7 +39,7 @@ variable [CommRing A] [Algebra R A]
     the time derivative decomposes into the metric variation and the g(t)-variation. -/
 theorem hessian_raise_variation
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (_atr : AbstractTrace R V)
     (g_fam : Time → MetricDuality R V)
     (h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs))
@@ -93,7 +93,7 @@ variable [CommRing A] [Algebra R A]
     Combines TimeTrComm + metric product rule + trace-endomorphism relationship. -/
 def LaplacianProductRule
     (_emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (atr : AbstractTrace R V)
     (g_fam : Time → MetricDuality R V)
     (h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs))
@@ -120,7 +120,7 @@ def LaplacianProductRule
     product rule and simplifies -⟨-2Rc, Hess(u)⟩ = 2⟨Rc, Hess(u)⟩. -/
 theorem laplacian_evolution
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (atr : AbstractTrace R V)
     (g_fam : Time → MetricDuality R V)
     (h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs))

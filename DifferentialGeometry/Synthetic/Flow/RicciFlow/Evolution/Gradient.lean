@@ -36,7 +36,7 @@ variable [CommRing A] [Algebra R A]
       ∂_t[g(t)(grad_s u, Y)] = 2 Rc(grad_t u, Y). -/
 theorem gradient_evolution
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (atr : AbstractTrace R V)
     (g_fam : Time → MetricDuality R V)
     (h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs))
@@ -86,7 +86,7 @@ variable [CommRing A] [Algebra R A]
     ∂_t[g(s)(A(s), B(s))] = metric_var(A(t), B(t))
       + ∂_t[g(t)(A(s), B(t))] + ∂_t[g(t)(A(t), B(s))] -/
 def MetricFullProductRule
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (g_fam : Time → MetricDuality R V)
     (h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs))
     : Prop :=
@@ -101,7 +101,7 @@ def MetricFullProductRule
     ∂_t|∇u|² = 2 Rc(∇u, ∇u) + 2 g(∇u, ∇(∂_t u)). -/
 theorem gradient_squared_evolution
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (atr : AbstractTrace R V)
     (g_fam : Time → MetricDuality R V)
     (h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs))

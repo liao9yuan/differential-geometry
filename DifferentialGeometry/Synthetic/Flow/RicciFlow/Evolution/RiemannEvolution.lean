@@ -34,7 +34,7 @@ variable {A : Type*} [CommRing A] [Algebra R A]
     dt_tensor(Rm) established by `variation_scalar_eq_dt_tensor`. -/
 noncomputable def riemann_variation_tensor
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ s, ∀ X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
     (hal_fam : ∀ s, ∀ X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z)
@@ -132,7 +132,7 @@ noncomputable def riemann_variation_tensor
 /-- The Riemann variation formula: dt_tensor(Rm) equals the variation tensor. -/
 theorem riemann_variation_formula
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ s, ∀ X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
     (hal_fam : ∀ s, ∀ X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z)
@@ -177,7 +177,7 @@ theorem riemann_variation_formula
 
 /-- The quadratic curvature operator Q(Rm) = riemann_variation_tensor − ΔRm. -/
 noncomputable def Q_rm
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (emb : DerivationEmbedding k R V)
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ s, ∀ X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
@@ -215,7 +215,7 @@ noncomputable def Q_rm
 /-- Evolution of the Riemann curvature tensor: ∂_t Rm = Δ(Rm) + Q(Rm). -/
 theorem riemann_tensor_evolution
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (_h_st : SpatialTemporalComm emb td)
     (atr : AbstractTrace R V)
     (conn_fam : Time → V → V → V)
@@ -298,7 +298,7 @@ noncomputable def A_rf_scalar
 /-- Under Ricci flow, the connection variation evaluates as A_rf_scalar. -/
 theorem conn_var_eq_A_rf
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (h_st : SpatialTemporalComm emb td)
     (atr : AbstractTrace R V)
     (g_fam : Time → MetricDuality R V)
@@ -396,7 +396,7 @@ private theorem nabla_10_eval
 /-- Under Ricci flow, nabla_conn_var_scalar equals the A_rf_scalar expansion. -/
 private theorem nabla_conn_var_as_A_rf
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (h_st : SpatialTemporalComm emb td)
     (atr : AbstractTrace R V)
     (g_fam : Time → MetricDuality R V)
@@ -452,7 +452,7 @@ private theorem nabla_conn_var_as_A_rf
 /-- Q_rm equals the Hamilton quadratic. -/
 theorem Q_rm_eq_hamilton
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (h_st : SpatialTemporalComm emb td)
     (atr : AbstractTrace R V)
     (g_fam : Time → MetricDuality R V)
@@ -548,7 +548,7 @@ theorem Q_rm_eq_hamilton
     the Riemann variation = ΔRm + Q_hamilton. -/
 theorem hamilton_decomposition
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (h_st : SpatialTemporalComm emb td)
     (atr : AbstractTrace R V)
     (g_fam : Time → MetricDuality R V)
@@ -1436,7 +1436,7 @@ theorem Q_rm_independent_eval
     This is the tensor-level version of Q_rm_eq_hamilton. -/
 theorem Q_rm_independent_eq_Q_rm
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (h_st : SpatialTemporalComm emb td)
     (atr : AbstractTrace R V)
     (g_fam : Time → MetricDuality R V)
@@ -1500,7 +1500,7 @@ theorem Q_rm_independent_eq_Q_rm
     expression in Rm, Rc, g, ∇, atr.tr, sharp. No time derivatives appear in Q. -/
 theorem riemann_tensor_evolution_hamilton
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (h_st : SpatialTemporalComm emb td)
     (atr : AbstractTrace R V)
     (g_fam : Time → MetricDuality R V)

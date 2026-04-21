@@ -50,14 +50,14 @@ variable [CommRing A] [Algebra R A]
     Requires a smoothness hypothesis `h_met` on the metric family's scalar
     evaluations (i.e. `τ ↦ g(τ)(X, Y)` is smooth for all `X`, `Y`). -/
 noncomputable def metric_var_form
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (g_fam : Time → MetricDuality R V)
     (h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs))
     (t : Time) : TensorData R V 0 2 :=
   dt_tensor td t (fun s => (g_fam s).g_tensor) h_met
 
 lemma metric_var_form_eval
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (g_fam : Time → MetricDuality R V)
     (h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs))
     (t : Time) (X Y : V) :
@@ -67,7 +67,7 @@ lemma metric_var_form_eval
 
 /-- Symmetry of the metric variation. -/
 lemma metric_var_form_symm
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (g_fam : Time → MetricDuality R V)
     (h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs))
     (t : Time) (A' B : V) :
@@ -95,7 +95,7 @@ variable [CommRing A] [Algebra R A]
     (∇_X h)(Y, Z) = X(h(Y, Z)) - h(∇_X Y, Z) - h(Y, ∇_X Z). -/
 noncomputable def h_cov_deriv
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (g_fam : Time → MetricDuality R V)
     (h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs))
     (conn : V → V → V)
@@ -119,7 +119,8 @@ variable [CommRing A] [Algebra R A]
 
 /-- Helper: metric_var_form is additive in second slot. -/
 private lemma mvf_sub_right
-    (td : TimeDerivativeData R A Time) (g_fam : Time → MetricDuality R V)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
+    (g_fam : Time → MetricDuality R V)
     (h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs))
     (t : Time) (A' B C : V) :
     metric_var_form td g_fam h_met t ![A', B - C] ![] =
@@ -148,7 +149,7 @@ private lemma mvf_sub_right
     2 * [dt(g(s)(conn(s) X Y, Z)) - h(conn(t) X Y, Z)] = h_cov_sum. -/
 theorem connection_variation
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (h_st : SpatialTemporalComm emb td)
     (g_fam : Time → MetricDuality R V)
     (h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs))
@@ -363,7 +364,7 @@ variable [CommRing A] [Algebra R A]
 /-- Key identity: g(s)(sharp_s(α), Y) is constant in s when α is time-independent.
     Therefore its time derivative is zero. -/
 theorem raise_variation_const
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (g_fam : Time → MetricDuality R V)
     (T : TensorData R V 0 2) (X Y : V) (t : Time) :
     td.dt_apply (fun s => (g_fam s).g ((g_fam s).sharp (flat_covector T X)) Y) t = 0 := by
@@ -378,7 +379,7 @@ theorem raise_variation_const
     Given a decomposition hypothesis (product rule for varying metric + varying vector),
     we obtain the standard raise variation identity. -/
 theorem raise_variation
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (g_fam : Time → MetricDuality R V)
     (h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs))
     (T : TensorData R V 0 2) (X Y : V) (t : Time)
@@ -412,7 +413,7 @@ variable [CommRing A] [Algebra R A]
     This is recorded as a definitional equality when metric_trace
     is expanded via raise_index + contract_general. -/
 theorem tr_g_variation
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (g_fam : Time → MetricDuality R V)
     (atr : AbstractTrace R V)
     (T : TensorData R V 0 2)

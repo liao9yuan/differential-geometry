@@ -45,6 +45,7 @@ variable [CommRing A] [Algebra R A]
 structure RicciFlowData where
   emb : DerivationEmbedding k R V
   td : TimeDerivativeData R A Time
+  [td_regular : TimeRegularFam td]
   atr : AbstractTrace R V
   g_fam : Time → MetricDuality R V
   h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs)
@@ -61,6 +62,8 @@ structure RicciFlowData where
     (fun τ => ricciForm_tensor emb (conn_fam τ) (ha_fam τ) (hal_fam τ) (hsl_fam τ) (hl_fam τ) atr vs αs)
   h_sc_prod : ScalarCurvatureProductRule emb td atr g_fam h_met conn_fam
     ha_fam hal_fam hsl_fam hl_fam h_Rc_smooth
+
+attribute [instance] RicciFlowData.td_regular
 
 end RicciFlowData
 

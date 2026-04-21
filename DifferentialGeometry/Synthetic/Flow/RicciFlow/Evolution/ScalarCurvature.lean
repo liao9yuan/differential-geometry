@@ -162,7 +162,7 @@ variable [CommRing A] [Algebra R A]
     time derivatives of the metric with time derivatives of vector-valued
     functions observed through the metric. -/
 def MetricBilinProductRule
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (g_fam : Time → MetricDuality R V)
     (h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs))
     : Prop :=
@@ -178,7 +178,7 @@ def MetricBilinProductRule
     Formulated using scalar time derivatives only (no V-valued derivatives). -/
 theorem ricci_raise_variation
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (atr : AbstractTrace R V)
     (g_fam : Time → MetricDuality R V)
     (h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs))
@@ -236,7 +236,7 @@ variable [CommRing A] [Algebra R A]
     analog of the old MetricTimeDerivativeRules.t_metric_trace_varying. -/
 def ScalarCurvatureProductRule
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (atr : AbstractTrace R V)
     (g_fam : Time → MetricDuality R V)
     (h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs))
@@ -280,7 +280,7 @@ variable [CommRing A] [Algebra R A]
     via the contracted second Bianchi identity (proved separately). -/
 theorem scalar_curvature_evolution
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (atr : AbstractTrace R V)
     (g_fam : Time → MetricDuality R V)
     (h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs))

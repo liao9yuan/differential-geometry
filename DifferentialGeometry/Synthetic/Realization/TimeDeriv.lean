@@ -337,14 +337,19 @@ noncomputable def concreteTimeDerivativeData :
   dt := concreteDt I M
   lift := concreteLift I M
   eval := concreteEval I M
-  isSmoothFam := concreteIsSmoothFam I M
-  eval_lift := fun f hf t => concreteEval_concreteLift I M f hf t
-  lift_add := concreteLift_add I M
-  lift_mul := concreteLift_mul I M
   lift_algebraMap := concreteLift_algebraMap I M
   eval_add := concreteEval_add I M
   eval_mul := concreteEval_mul I M
   eval_algebraMap := concreteEval_algebraMap I M
+
+/-- The distinguished `TimeRegularFam` instance for the concrete joint-smooth
+    realisation: a family is regular iff it is jointly `C^∞` on `ℝ × M`. -/
+noncomputable instance concreteTimeRegularFam :
+    TimeRegularFam (concreteTimeDerivativeData I M) where
+  isSmoothFam := concreteIsSmoothFam I M
+  eval_lift := fun f hf t => concreteEval_concreteLift I M f hf t
+  lift_add := concreteLift_add I M
+  lift_mul := concreteLift_mul I M
   isSmoothFam_const := concreteIsSmoothFam_const I M
   isSmoothFam_add := concreteIsSmoothFam_add I M
   isSmoothFam_mul := concreteIsSmoothFam_mul I M

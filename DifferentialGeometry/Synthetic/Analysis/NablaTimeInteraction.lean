@@ -35,7 +35,7 @@ variable [CommRing A] [Algebra R A]
     `fun τ => (emb.embed X)(T τ vs αs)` is supplied separately as `hXT`. -/
 theorem t_nabla_tensor
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (h_st : SpatialTemporalComm emb td)
     (conn : V → V → V)
     (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
@@ -123,7 +123,7 @@ variable [CommRing A] [Algebra R A]
     dependent scalar families in each vector- and covector-slot respectively. -/
 noncomputable def conn_var_tensor
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ τ, ∀ X Y Z, conn_fam τ X (Y + Z) = conn_fam τ X Y + conn_fam τ X Z)
     (hl_fam : ∀ τ, ∀ X (f : R) Y,
@@ -139,7 +139,7 @@ noncomputable def conn_var_tensor
     because T doesn't depend on time. -/
 theorem conn_var_tensor_eval
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ τ, ∀ X Y Z, conn_fam τ X (Y + Z) = conn_fam τ X Y + conn_fam τ X Z)
     (hl_fam : ∀ τ, ∀ X (f : R) Y,
@@ -226,7 +226,7 @@ variable [CommRing A] [Algebra R A]
       vector/covector slot families. -/
 theorem t_nabla_eval
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (h_st : SpatialTemporalComm emb td)
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ τ, ∀ X Y Z, conn_fam τ X (Y + Z) = conn_fam τ X Y + conn_fam τ X Z)
@@ -291,7 +291,7 @@ theorem t_nabla_eval
 /-- conn_var_tensor is additive in T. -/
 theorem conn_var_tensor_add
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ τ, ∀ X Y Z, conn_fam τ X (Y + Z) = conn_fam τ X Y + conn_fam τ X Z)
     (hl_fam : ∀ τ, ∀ X (f : R) Y,
@@ -330,7 +330,7 @@ theorem conn_var_tensor_add
 /-- conn_var_tensor commutes with constant R-scalar multiplication. -/
 theorem conn_var_tensor_smul
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ τ, ∀ X Y Z, conn_fam τ X (Y + Z) = conn_fam τ X Y + conn_fam τ X Z)
     (hl_fam : ∀ τ, ∀ X (f : R) Y,
@@ -377,7 +377,8 @@ variable [CommRing A] [Algebra R A]
 /-- ∂_t(ω(F(s))) equals the evaluation of dt_tensor on vectorToData(F(s)) at covector ω.
     This is the canonical way to express "∂_t commutes with constant covectors"
     in the transparent tensor framework. Proof by rfl. -/
-theorem t_linear_map (td : TimeDerivativeData R A Time) (t : Time)
+theorem t_linear_map (td : TimeDerivativeData R A Time) [TimeRegularFam td]
+    (t : Time)
     (ω : V →ₗ[R] R) (F : Time → V)
     (hVF : ∀ vs αs, td.isSmoothFam
       (fun τ => vectorToData (R := R) (F τ) vs αs)) :
@@ -406,7 +407,7 @@ variable [CommRing A] [Algebra R A]
     using nabla_vector to identify ∇_X(vectorToData v) = vectorToData(conn X v). -/
 theorem t_conn_apply
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (h_st : SpatialTemporalComm emb td)
     (conn : V → V → V)
     (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)

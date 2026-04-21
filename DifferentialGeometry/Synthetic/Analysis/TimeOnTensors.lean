@@ -29,7 +29,7 @@ variable [CommRing A] [Algebra R A]
     combined with dt_apply being additive and killing R-constants on smooth
     scalar families. The hypothesis `hT` asserts the scalar evaluation at every
     point is a smooth family — propagated to dt_apply's internal calls. -/
-noncomputable def dt_tensor (td : TimeDerivativeData R A Time)
+noncomputable def dt_tensor (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (t : Time) {r s : ℕ} (T : Time → TensorData R V r s)
     (hT : ∀ vs αs, td.isSmoothFam (fun τ => T τ vs αs)) : TensorData R V r s where
   toFun vs :=
@@ -83,14 +83,14 @@ noncomputable def dt_tensor (td : TimeDerivativeData R A Time)
 -- ============================================================
 
 /-- Evaluation: (dt_tensor t T)(vs)(αs) = dt_apply(s ↦ T(s)(vs)(αs)) at t. -/
-theorem dt_tensor_eval (td : TimeDerivativeData R A Time)
+theorem dt_tensor_eval (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (t : Time) {r s : ℕ} (T : Time → TensorData R V r s)
     (hT : ∀ vs αs, td.isSmoothFam (fun τ => T τ vs αs)) (vs αs) :
     dt_tensor td t T hT vs αs = td.dt_apply (fun s => T s vs αs) t := by
   rfl
 
 /-- ∂_t of a time-constant tensor is zero. -/
-theorem dt_tensor_const (td : TimeDerivativeData R A Time)
+theorem dt_tensor_const (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (t : Time) {r s : ℕ} (T : TensorData R V r s) :
     dt_tensor td t (fun _ => T)
       (fun vs αs => td.isSmoothFam_const (T vs αs)) = 0 := by
@@ -99,7 +99,7 @@ theorem dt_tensor_const (td : TimeDerivativeData R A Time)
   exact td.dt_apply_const (T vs αs) t
 
 /-- ∂_t is additive: ∂_t(T₁ + T₂) = ∂_t T₁ + ∂_t T₂. -/
-theorem dt_tensor_add (td : TimeDerivativeData R A Time)
+theorem dt_tensor_add (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (t : Time) {r s : ℕ} (T₁ T₂ : Time → TensorData R V r s)
     (hT₁ : ∀ vs αs, td.isSmoothFam (fun τ => T₁ τ vs αs))
     (hT₂ : ∀ vs αs, td.isSmoothFam (fun τ => T₂ τ vs αs)) :
@@ -113,7 +113,7 @@ theorem dt_tensor_add (td : TimeDerivativeData R A Time)
   rw [h, td.dt_apply_add _ _ _ (hT₁ vs αs) (hT₂ vs αs)]
 
 /-- ∂_t respects negation. -/
-theorem dt_tensor_neg (td : TimeDerivativeData R A Time)
+theorem dt_tensor_neg (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (t : Time) {r s : ℕ} (T : Time → TensorData R V r s)
     (hT : ∀ vs αs, td.isSmoothFam (fun τ => T τ vs αs)) :
     dt_tensor td t (fun s => -T s)
@@ -124,7 +124,7 @@ theorem dt_tensor_neg (td : TimeDerivativeData R A Time)
   rw [h, td.dt_apply_neg _ _ (hT vs αs)]
 
 /-- ∂_t respects subtraction. -/
-theorem dt_tensor_sub (td : TimeDerivativeData R A Time)
+theorem dt_tensor_sub (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (t : Time) {r s : ℕ} (T₁ T₂ : Time → TensorData R V r s)
     (hT₁ : ∀ vs αs, td.isSmoothFam (fun τ => T₁ τ vs αs))
     (hT₂ : ∀ vs αs, td.isSmoothFam (fun τ => T₂ τ vs αs)) :
@@ -139,7 +139,7 @@ theorem dt_tensor_sub (td : TimeDerivativeData R A Time)
 
 /-- Leibniz rule for time-dependent scalar multiplication:
     ∂_t(f · T) = dt_apply(f) · T(t) + f(t) · ∂_t T. -/
-theorem dt_tensor_smul (td : TimeDerivativeData R A Time)
+theorem dt_tensor_smul (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (t : Time) {r s : ℕ} (f : Time → R) (T : Time → TensorData R V r s)
     (hf : td.isSmoothFam f)
     (hT : ∀ vs αs, td.isSmoothFam (fun τ => T τ vs αs))
@@ -153,7 +153,7 @@ theorem dt_tensor_smul (td : TimeDerivativeData R A Time)
 
 /-- ∂_t commutes with constant R-scalar multiplication:
     ∂_t(c · T) = c · ∂_t T for c ∈ R (not time-dependent). -/
-theorem dt_tensor_smul_const (td : TimeDerivativeData R A Time)
+theorem dt_tensor_smul_const (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (t : Time) {r s : ℕ} (c : R) (T : Time → TensorData R V r s)
     (hT : ∀ vs αs, td.isSmoothFam (fun τ => T τ vs αs)) :
     dt_tensor td t (fun s => c • T s)
@@ -165,7 +165,7 @@ theorem dt_tensor_smul_const (td : TimeDerivativeData R A Time)
 
 /-- Leibniz rule for tensor product:
     ∂_t(T₁ ⊗ T₂) = (∂_t T₁) ⊗ T₂(t) + T₁(t) ⊗ (∂_t T₂). -/
-theorem dt_tensor_prod (td : TimeDerivativeData R A Time)
+theorem dt_tensor_prod (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (t : Time) {r₁ s₁ r₂ s₂ : ℕ}
     (T₁ : Time → TensorData R V r₁ s₁) (T₂ : Time → TensorData R V r₂ s₂)
     (hT₁ : ∀ vs αs, td.isSmoothFam (fun τ => T₁ τ vs αs))
@@ -184,7 +184,7 @@ theorem dt_tensor_prod (td : TimeDerivativeData R A Time)
   rw [td.dt_apply_mul _ _ _ (hT₁ vs₁ ns₁) (hT₂ vs₂ ns₂)]; ring
 
 /-- ∂_t commutes with swap_covariant. -/
-theorem dt_tensor_swap (td : TimeDerivativeData R A Time)
+theorem dt_tensor_swap (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (t : Time) {r s : ℕ} (i j : Fin s)
     (T : Time → TensorData R V r s)
     (hT : ∀ vs αs, td.isSmoothFam (fun τ => T τ vs αs))
@@ -202,7 +202,8 @@ theorem dt_tensor_swap (td : TimeDerivativeData R A Time)
     Direct corollary of the TimeTrComm hypothesis. Requires smoothness of
     the scalar-valued families `α (L s v)` and `tr (L s)` so that
     `eval_lift` applies. -/
-theorem dt_tr (td : TimeDerivativeData R A Time) (atr : AbstractTrace R V)
+theorem dt_tr (td : TimeDerivativeData R A Time) [TimeRegularFam td]
+    (atr : AbstractTrace R V)
     (h_tt : TimeTrComm atr td)
     (L : Time → V →ₗ[R] V) (dL : V →ₗ[R] V) (t : Time)
     (h_αLv_smooth : ∀ (v : V) (α : V →ₗ[R] R),

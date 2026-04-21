@@ -563,12 +563,14 @@ section TimeDeriv
 variable {R V : Type*} {A Time : Type*} [CommRing R] [AddCommGroup V] [Module R V]
   [CommRing A] [Algebra R A]
 
-theorem t_const_V (td : TimeDerivativeData R A Time) (t : Time) (X : V) :
+theorem t_const_V (td : TimeDerivativeData R A Time) [TimeRegularFam td]
+    (t : Time) (X : V) :
     dt_tensor td t (fun _ => vectorToData (R := R) X)
       (fun vs αs => td.isSmoothFam_const (vectorToData (R := R) X vs αs)) = 0 :=
   dt_tensor_const td t (vectorToData X)
 
-theorem t_const_scalar (td : TimeDerivativeData R A Time) (t : Time) (c : R) :
+theorem t_const_scalar (td : TimeDerivativeData R A Time) [TimeRegularFam td]
+    (t : Time) (c : R) :
     dt_tensor td t (fun _ => scalarToData (R := R) (V := V) c)
       (fun vs αs => td.isSmoothFam_const
         (scalarToData (R := R) (V := V) c vs αs)) = 0 :=
@@ -576,7 +578,7 @@ theorem t_const_scalar (td : TimeDerivativeData R A Time) (t : Time) (c : R) :
 
 /-- ∂_t(g(s)(X, Y)) = (∂_t g_tensor)(X, Y) for constant vector arguments. -/
 theorem dt_metric_const_args
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (met_fam : Time → MetricDuality R V)
     (h_met : ∀ vs αs, td.isSmoothFam (fun τ => (met_fam τ).g_tensor vs αs))
     (X Y : V) (t : Time) :

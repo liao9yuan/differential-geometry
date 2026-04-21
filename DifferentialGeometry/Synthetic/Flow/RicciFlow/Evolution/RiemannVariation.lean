@@ -35,7 +35,7 @@ variable [CommRing A] [Algebra R A]
     of `τ ↦ ω(conn_fam τ X Y)` for every covector `ω`; this is exactly what
     `dt_tensor` needs for the (1,0) slice since `vectorToData v ![] ![ω] = ω v`. -/
 noncomputable def conn_var_vector
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (conn_fam : Time → V → V → V)
     (t : Time) (X Y : V)
     (h_conn_smooth : ∀ (ω : V →ₗ[R] R),
@@ -44,7 +44,8 @@ noncomputable def conn_var_vector
     (fun _ αs => h_conn_smooth (αs 0))
 
 theorem conn_var_vector_eval
-    (td : TimeDerivativeData R A Time) (conn_fam : Time → V → V → V)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
+    (conn_fam : Time → V → V → V)
     (t : Time) (X Y : V) (ω : V →ₗ[R] R)
     (h_conn_smooth : ∀ (ω : V →ₗ[R] R),
       td.isSmoothFam (fun τ => ω (conn_fam τ X Y))) :
@@ -81,7 +82,7 @@ variable [CommRing A] [Algebra R A]
       used in the decomposition (`YZ`, `XZ`, constant `Z`). -/
 theorem riemann_variation_raw
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ s, ∀ X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
     (_hal_fam : ∀ s, ∀ X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z)
@@ -449,7 +450,8 @@ theorem riemann_variation_raw
 /-- Connection variation is additive in its first argument:
     A(X₁ + X₂, Y) = A(X₁, Y) + A(X₂, Y). -/
 theorem conn_var_add_left
-    (td : TimeDerivativeData R A Time) (conn_fam : Time → V → V → V)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
+    (conn_fam : Time → V → V → V)
     (hal_fam : ∀ s, ∀ X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z)
     (t : Time) (X₁ X₂ Y : V)
     (h₁ : ∀ (ω : V →ₗ[R] R), td.isSmoothFam (fun τ => ω (conn_fam τ X₁ Y)))
@@ -475,7 +477,8 @@ theorem conn_var_add_left
 /-- Connection variation respects subtraction in the first argument:
     A(X₁ - X₂, Y) = A(X₁, Y) - A(X₂, Y). -/
 theorem conn_var_sub_left
-    (td : TimeDerivativeData R A Time) (conn_fam : Time → V → V → V)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
+    (conn_fam : Time → V → V → V)
     (hal_fam : ∀ s, ∀ X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z)
     (hsl_fam : ∀ s, ∀ (f : R) X Z, conn_fam s (f • X) Z = f • conn_fam s X Z)
     (t : Time) (X₁ X₂ Y : V)
@@ -510,6 +513,7 @@ theorem conn_var_sub_left
     Takes smoothness hypotheses used to form the component `conn_var_vector`s. -/
 noncomputable def nabla_conn_var_scalar
     (emb : DerivationEmbedding k R V) (td : TimeDerivativeData R A Time)
+    [TimeRegularFam td]
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ s, ∀ X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
     (hl_fam : ∀ s, ∀ X (f : R) Y, conn_fam s X (f • Y) = (emb.embed X) f • Y + f • conn_fam s X Y)
@@ -528,7 +532,7 @@ noncomputable def nabla_conn_var_scalar
     where (∇_X A)(Y,Z) is the tensor-level covariant derivative of A. -/
 theorem riemann_variation_torsion_free
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ s, ∀ X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
     (hal_fam : ∀ s, ∀ X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z)
@@ -608,7 +612,7 @@ theorem riemann_variation_torsion_free
     dt_tensor(Rm)(X,Y,Z)(ω) = dt(s ↦ ω(Rm_s(X,Y)Z)) by dt_tensor_eval + Rm_tensor_eval. -/
 theorem variation_eq_dt
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ s, ∀ X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
     (hal_fam : ∀ s, ∀ X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z)
@@ -629,6 +633,7 @@ theorem variation_eq_dt
     independently of dt_tensor(Rm). -/
 noncomputable def riemann_variation_scalar
     (emb : DerivationEmbedding k R V) (td : TimeDerivativeData R A Time)
+    [TimeRegularFam td]
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ s, ∀ X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
     (hl_fam : ∀ s, ∀ X (f : R) Y, conn_fam s X (f • Y) = (emb.embed X) f • Y + f • conn_fam s X Y)
@@ -647,6 +652,7 @@ noncomputable def riemann_variation_scalar
     This is the bridge between the geometric formula and the tensor-level object. -/
 theorem variation_scalar_eq_dt_tensor
     (emb : DerivationEmbedding k R V) (td : TimeDerivativeData R A Time)
+    [TimeRegularFam td]
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ s, ∀ X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
     (hal_fam : ∀ s, ∀ X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z)

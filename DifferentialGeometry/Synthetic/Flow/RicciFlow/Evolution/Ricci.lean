@@ -25,7 +25,7 @@ variable [CommRing A] [Algebra R A]
     which holds by `rfl`. -/
 theorem ricci_evolution_pointwise_extraction
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (atr : AbstractTrace R V)
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ s, ∀ X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
