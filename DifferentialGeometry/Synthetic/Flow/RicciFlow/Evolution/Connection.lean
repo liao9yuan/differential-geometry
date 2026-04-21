@@ -66,7 +66,7 @@ theorem connection_evolution_combined
     (hsl_fam : ∀ s, ∀ (f : R) X Z, conn_fam s (f • X) Z = f • conn_fam s X Z)
     (hl_fam : ∀ s, ∀ X (f : R) Y, conn_fam s X (f • Y) = (emb.embed X) f • Y + f • conn_fam s X Y)
     (h_rf : IsRicciFlow emb td atr g_fam h_met conn_fam ha_fam hal_fam hsl_fam hl_fam)
-    (h2 : ∀ (a : R), (2 : R) * a = 0 → a = 0)
+    [Invertible (2 : R)]
     (X Y Z : V) (t : Time)
     (h_conn_smooth : td.isSmoothFam (fun s => (g_fam s).g (conn_fam s X Y) Z)) :
     td.dt_apply (fun s => (g_fam s).g (conn_fam s X Y) Z) t =
@@ -125,7 +125,7 @@ theorem connection_evolution_combined
   suffices h : td.dt_apply (fun s => (g_fam s).g (conn_fam s X Y) Z) t -
     (-rcd X Y Z - rcd Y X Z + rcd Z X Y + metric_var_form td g_fam h_met t ![n X Y, Z] ![]) = 0 from
     eq_of_sub_eq_zero h
-  apply h2
+  apply char_ne_2_of_invertible_two
   calc 2 * (td.dt_apply (fun s => (g_fam s).g (conn_fam s X Y) Z) t -
     (-rcd X Y Z - rcd Y X Z + rcd Z X Y + metric_var_form td g_fam h_met t ![n X Y, Z] ![]))
       = 2 * td.dt_apply (fun s => (g_fam s).g (conn_fam s X Y) Z) t -
@@ -152,7 +152,7 @@ theorem connection_evolution
     (hsl_fam : ∀ s, ∀ (f : R) X Z, conn_fam s (f • X) Z = f • conn_fam s X Z)
     (hl_fam : ∀ s, ∀ X (f : R) Y, conn_fam s X (f • Y) = (emb.embed X) f • Y + f • conn_fam s X Y)
     (h_rf : IsRicciFlow emb td atr g_fam h_met conn_fam ha_fam hal_fam hsl_fam hl_fam)
-    (h2 : ∀ (a : R), (2 : R) * a = 0 → a = 0)
+    [Invertible (2 : R)]
     (t : Time)
     -- Metric product rule: splitting dt(g(s)(V(s), W)) into metric and vector parts
     (h_decomp : ∀ (F : Time → V) (W : V),
@@ -166,7 +166,7 @@ theorem connection_evolution
     - ricci_cov_deriv emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr Y X Z
     + ricci_cov_deriv emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr Z X Y := by
   have h_combined := connection_evolution_combined emb td h_st atr g_fam h_met h_emb_met
-    conn_fam ha_fam hal_fam hsl_fam hl_fam h_rf h2 X Y Z t h_conn_smooth
+    conn_fam ha_fam hal_fam hsl_fam hl_fam h_rf X Y Z t h_conn_smooth
   have h_split := h_decomp (fun s => conn_fam s X Y) Z
   -- h_combined: dt_apply(g(s)(conn(s)XY, Z)) = -rcd_X - rcd_Y + rcd_Z + mvf
   -- h_split:    dt_apply(g(s)(conn(s)XY, Z)) = mvf(conn(t)XY, Z) + dt_apply(g(t)(conn(s)XY, Z))

@@ -22,7 +22,7 @@ open SyntheticTensor
 
 /-- Bundle for a reaction-diffusion equation `∂_t u = Δu + f(u)`. -/
 structure ReactionDiffusionBundle (k R V Time A : Type*)
-    [Field k] [CommRing R] [Algebra k R]
+    [Field k] [CommRing R] [Algebra k R] [Invertible (2 : R)]
     [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
     [CommRing A] [Algebra R A]
     extends RiemannianManifoldData k R V where

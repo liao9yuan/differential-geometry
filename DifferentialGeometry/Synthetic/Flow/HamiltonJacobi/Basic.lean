@@ -51,7 +51,7 @@ The Hamiltonian `H` depends only on the differential `du`. For state-dependent
 Hamiltonians `H(x, u, du)`, fold the `x` dependence into `R = C^∞(M)` naturally,
 and extend this bundle if `u`-dependence is needed (see `HamiltonJacobiWithStateBundle`). -/
 structure HamiltonJacobiBundle (k R V Time A : Type*)
-    [Field k] [CommRing R] [Algebra k R]
+    [Field k] [CommRing R] [Algebra k R] [Invertible (2 : R)]
     [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
     [CommRing A] [Algebra R A]
     extends RiemannianManifoldData k R V where
@@ -76,7 +76,7 @@ attribute [instance] HamiltonJacobiBundle.td_regular
 /-- Variant where the Hamiltonian depends on both `u` and `du`
 (i.e. `∂_t u + H(u, du) = 0`). -/
 structure HamiltonJacobiWithStateBundle (k R V Time A : Type*)
-    [Field k] [CommRing R] [Algebra k R]
+    [Field k] [CommRing R] [Algebra k R] [Invertible (2 : R)]
     [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
     [CommRing A] [Algebra R A]
     extends RiemannianManifoldData k R V where

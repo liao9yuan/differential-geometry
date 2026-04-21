@@ -147,7 +147,6 @@ noncomputable def concreteRicciFlowBundle
     simp only [concreteAbstractTrace_tr]
     exact h
   nabla_contract_comm := fun t => concrete_NablaTensorContractComm I M (cov_fam t)
-  char_ne_2 := char_ne_2_smooth_functions I M
   ricci_flow := h_ricci_flow
   nabla_time_product_rule :=
     concrete_nabla_time_product_rule I M

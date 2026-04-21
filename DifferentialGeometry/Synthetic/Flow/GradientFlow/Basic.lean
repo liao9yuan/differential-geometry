@@ -30,7 +30,7 @@ open SyntheticTensor
 
 /-- Scalar gradient flow on a fixed Riemannian manifold. -/
 structure ScalarGradientFlowBundle (k R V Time A : Type*)
-    [Field k] [CommRing R] [Algebra k R]
+    [Field k] [CommRing R] [Algebra k R] [Invertible (2 : R)]
     [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
     [CommRing A] [Algebra R A]
     extends RiemannianManifoldData k R V where

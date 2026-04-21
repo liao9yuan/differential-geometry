@@ -61,18 +61,50 @@ instance smoothSectionScalarTower :
   smul_assoc r f s := by ext x; exact mul_smul (r : ℝ) (f x : ℝ) (s x)
 
 -- ============================================================
+-- Invertible (2 : C^∞(M, ℝ))
+-- ============================================================
+
+/-! The constant function `1/2` provides the two-sided inverse of `2` in `C^∞(M, ℝ)`.
+We lift `Invertible (2 : ℝ)` through `algebraMap`. -/
+
+/-- `2 : C^∞(M, ℝ)` is invertible (with inverse the constant function `1/2`).
+Constructed by mapping `Invertible (2 : ℝ)` through `algebraMap ℝ C^∞(M, ℝ)`. -/
+private theorem two_smooth_eval (x : M) : (2 : C^∞⟮I, M; ℝ⟯) x = (2 : ℝ) := by
+  have h2a : (2 : C^∞⟮I, M; ℝ⟯) * (1 : C^∞⟮I, M; ℝ⟯) = (2 : C^∞⟮I, M; ℝ⟯) := mul_one _
+  have h_two_eq : (2 : C^∞⟮I, M; ℝ⟯) = (1 : C^∞⟮I, M; ℝ⟯) + (1 : C^∞⟮I, M; ℝ⟯) := by norm_num
+  have := DFunLike.congr_fun h_two_eq x
+  simp only [ContMDiffMap.coe_add, Pi.add_apply, ContMDiffMap.coe_one, Pi.one_apply] at this
+  linarith
+
+noncomputable instance invertible2SmoothFunctions :
+    Invertible (2 : C^∞⟮I, M; ℝ⟯) where
+  invOf := algebraMap ℝ C^∞⟮I, M; ℝ⟯ (1/2 : ℝ)
+  invOf_mul_self := by
+    apply ContMDiffMap.ext; intro x
+    have : (algebraMap ℝ C^∞⟮I, M; ℝ⟯ (1/2 : ℝ) * (2 : C^∞⟮I, M; ℝ⟯)) x =
+        (1/2 : ℝ) * (2 : C^∞⟮I, M; ℝ⟯) x := by
+      simp only [ContMDiffMap.coe_mul, Pi.mul_apply, Algebra.algebraMap_eq_smul_one,
+        ContMDiffMap.coe_smul, Pi.smul_apply, smul_eq_mul, ContMDiffMap.coe_one,
+        Pi.one_apply, mul_one]
+    rw [this, two_smooth_eval, ContMDiffMap.coe_one, Pi.one_apply]; norm_num
+  mul_invOf_self := by
+    apply ContMDiffMap.ext; intro x
+    have : ((2 : C^∞⟮I, M; ℝ⟯) * algebraMap ℝ C^∞⟮I, M; ℝ⟯ (1/2 : ℝ)) x =
+        (2 : C^∞⟮I, M; ℝ⟯) x * (1/2 : ℝ) := by
+      simp only [ContMDiffMap.coe_mul, Pi.mul_apply, Algebra.algebraMap_eq_smul_one,
+        ContMDiffMap.coe_smul, Pi.smul_apply, smul_eq_mul, ContMDiffMap.coe_one,
+        Pi.one_apply, mul_one]
+    rw [this, two_smooth_eval, ContMDiffMap.coe_one, Pi.one_apply]; norm_num
+
+-- ============================================================
 -- char_ne_2 for C^∞(M, ℝ)
 -- ============================================================
 
-/-- `CharZero ℝ` lifts pointwise: `2a = 0 → a = 0` in `C^∞(M, ℝ)`. -/
+/-- `Invertible (2 : C^∞(M, ℝ))` gives `2a = 0 → a = 0` via the generic lemma
+`char_ne_2_of_invertible_two`. -/
 theorem char_ne_2_smooth_functions :
-    ∀ (a : C^∞⟮I, M; ℝ⟯), (2 : C^∞⟮I, M; ℝ⟯) * a = 0 → a = 0 := by
-  intro a ha
-  have h2a : a + a = 0 := by rwa [← two_mul]
-  ext x
-  have := DFunLike.congr_fun h2a x
-  simp only [ContMDiffMap.coe_add, Pi.add_apply, ContMDiffMap.coe_zero, Pi.zero_apply] at this ⊢
-  linarith
+    ∀ (a : C^∞⟮I, M; ℝ⟯), (2 : C^∞⟮I, M; ℝ⟯) * a = 0 → a = 0 :=
+  char_ne_2_of_invertible_two
 
 end SmoothRicciFlowContext
 

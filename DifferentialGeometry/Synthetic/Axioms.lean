@@ -34,7 +34,7 @@ structure SyntheticManifoldData (k R V : Type*)
   nabla_contract_comm : NablaTensorContractComm emb atr conn conn_add_right conn_leibniz
 
 structure RiemannianManifoldData (k R V : Type*)
-    [Field k] [CommRing R] [Algebra k R]
+    [Field k] [CommRing R] [Algebra k R] [Invertible (2 : R)]
     [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
     extends SyntheticManifoldData k R V where
   /-- Metric duality: metric tensor, inverse, sharp/flat. -/
@@ -43,11 +43,9 @@ structure RiemannianManifoldData (k R V : Type*)
   metric_compat : IsMetricCompatible emb conn met
   /-- The connection is torsion-free. -/
   torsion_free : IsTorsionFree emb conn
-  /-- Characteristic ≠ 2: 2a = 0 → a = 0. -/
-  char_ne_2 : ∀ (a : R), (2 : R) * a = 0 → a = 0
 
 structure TimeEvolvingManifoldData (k R V Time A : Type*)
-    [Field k] [CommRing R] [Algebra k R]
+    [Field k] [CommRing R] [Algebra k R] [Invertible (2 : R)]
     [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
     [CommRing A] [Algebra R A]
     extends RiemannianManifoldData k R V where
@@ -64,7 +62,7 @@ attribute [instance] TimeEvolvingManifoldData.td_regular
 
 
 structure RicciFlowBundle (k R V Time A : Type*)
-    [Field k] [CommRing R] [Algebra k R]
+    [Field k] [CommRing R] [Algebra k R] [Invertible (2 : R)]
     [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
     [CommRing A] [Algebra R A] where
   /-- Derivation embedding: vector fields as derivations. -/
@@ -97,8 +95,6 @@ structure RicciFlowBundle (k R V Time A : Type*)
   nabla_tr_comm : ∀ s, NablaTrComm emb atr (conn_fam s) (ha_fam s) (hl_fam s)
   /-- ∇ commutes with tensor contraction, for each time. -/
   nabla_contract_comm : ∀ s, NablaTensorContractComm emb atr (conn_fam s) (ha_fam s) (hl_fam s)
-  /-- Characteristic ≠ 2. -/
-  char_ne_2 : ∀ (a : R), (2 : R) * a = 0 → a = 0
   /-- The Ricci flow equation: ∂_t g = -2 Rc, with Levi-Civita at each time. -/
   ricci_flow : IsRicciFlow emb td atr g_fam h_met conn_fam ha_fam hal_fam hsl_fam hl_fam
   /-- Product rule for ∂_t and ∇ with varying connections. -/

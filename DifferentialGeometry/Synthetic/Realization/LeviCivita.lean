@@ -224,40 +224,6 @@ variable
 private abbrev V_k := Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯
 private abbrev R_k := C^∞⟮I, M; ℝ⟯
 
-/-! ### Invertible (2 : C^∞(M, ℝ))
-
-The constant function `1/2` provides the two-sided inverse of `2` in `C^∞(M, ℝ)`.
-We lift `Invertible (2 : ℝ)` through `algebraMap`. -/
-
-/-- `2 : C^∞(M, ℝ)` is invertible (with inverse the constant function `1/2`).
-Constructed by mapping `Invertible (2 : ℝ)` through `algebraMap ℝ C^∞(M, ℝ)`. -/
-private theorem two_smooth_eval (x : M) : (2 : R_k I M) x = (2 : ℝ) := by
-  have h2a : (2 : R_k I M) * (1 : R_k I M) = (2 : R_k I M) := mul_one _
-  have h_two_eq : (2 : R_k I M) = (1 : R_k I M) + (1 : R_k I M) := by norm_num
-  have := DFunLike.congr_fun h_two_eq x
-  simp only [ContMDiffMap.coe_add, Pi.add_apply, ContMDiffMap.coe_one, Pi.one_apply] at this
-  linarith
-
-noncomputable instance invertible2SmoothFunctions :
-    Invertible (2 : R_k I M) where
-  invOf := algebraMap ℝ (R_k I M) (1/2 : ℝ)
-  invOf_mul_self := by
-    apply ContMDiffMap.ext; intro x
-    have : (algebraMap ℝ (R_k I M) (1/2 : ℝ) * (2 : R_k I M)) x =
-        (1/2 : ℝ) * (2 : R_k I M) x := by
-      simp only [ContMDiffMap.coe_mul, Pi.mul_apply, Algebra.algebraMap_eq_smul_one,
-        ContMDiffMap.coe_smul, Pi.smul_apply, smul_eq_mul, ContMDiffMap.coe_one,
-        Pi.one_apply, mul_one]
-    rw [this, two_smooth_eval, ContMDiffMap.coe_one, Pi.one_apply]; norm_num
-  mul_invOf_self := by
-    apply ContMDiffMap.ext; intro x
-    have : ((2 : R_k I M) * algebraMap ℝ (R_k I M) (1/2 : ℝ)) x =
-        (2 : R_k I M) x * (1/2 : ℝ) := by
-      simp only [ContMDiffMap.coe_mul, Pi.mul_apply, Algebra.algebraMap_eq_smul_one,
-        ContMDiffMap.coe_smul, Pi.smul_apply, smul_eq_mul, ContMDiffMap.coe_one,
-        Pi.one_apply, mul_one]
-    rw [this, two_smooth_eval, ContMDiffMap.coe_one, Pi.one_apply]; norm_num
-
 /-! ### Koszul connection in the concrete setting -/
 
 /-- The Koszul connection on smooth tangent sections, constructed by applying the
@@ -279,7 +245,6 @@ theorem concreteKoszulIsLeviCivita
       (concreteKoszulConnection I M g)
       (concreteMetricDuality I M g) :=
   levi_civita_exists (concreteDerivationEmbedding I M) (concreteMetricDuality I M g)
-    (char_ne_2_smooth_functions I M)
 
 /-! ### Connection linearity properties -/
 
@@ -318,7 +283,7 @@ theorem concreteKoszul_leibniz
     (concreteDerivationEmbedding I M).embed X f • Y +
     f • concreteKoszulConnection I M g X Y :=
   koszul_connection_leibniz (concreteDerivationEmbedding I M) (concreteMetricDuality I M g)
-    (char_ne_2_smooth_functions I M) X f Y
+    X f Y
 
 /-! ### Uniqueness: any Levi-Civita connection equals the Koszul connection -/
 
@@ -337,7 +302,7 @@ theorem concreteKoszul_unique
     (X Y : V_k I M) :
     conn X Y = concreteKoszulConnection I M g X Y :=
   levi_civita_unique (concreteDerivationEmbedding I M) conn ha hal hl
-    (concreteMetricDuality I M g) (char_ne_2_smooth_functions I M) h_mc h_tf X Y
+    (concreteMetricDuality I M g) h_mc h_tf X Y
 
 end KoszulRealization
 

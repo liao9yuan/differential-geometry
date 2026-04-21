@@ -231,7 +231,6 @@ theorem riemann_tensor_evolution
     (h_pr : NablaTimeProductRule emb td conn_fam ha_fam hl_fam)
     (h_emb_closure : ∀ (A : V) (f : Time → R),
       td.isSmoothFam f → td.isSmoothFam (fun τ => (emb.embed A) (f τ)))
-    (_h2 : ∀ (a : R), (2 : R) * a = 0 → a = 0)
     (h_conn_smooth : ∀ (U W : V) (β : V →ₗ[R] R),
       td.isSmoothFam (fun τ => β (conn_fam τ U W)))
     (h_nested_smooth : ∀ (P U W : V) (β : V →ₗ[R] R),
@@ -311,7 +310,7 @@ theorem conn_var_eq_A_rf
     (hsl_fam : ∀ s, ∀ (f : R) X Z, conn_fam s (f • X) Z = f • conn_fam s X Z)
     (hl_fam : ∀ s, ∀ X (f : R) Y, conn_fam s X (f • Y) = (emb.embed X) f • Y + f • conn_fam s X Y)
     (h_rf : IsRicciFlow emb td atr g_fam h_met conn_fam ha_fam hal_fam hsl_fam hl_fam)
-    (h2 : ∀ (a : R), (2 : R) * a = 0 → a = 0)
+    [Invertible (2 : R)]
     (t : Time)
     (h_decomp : ∀ (F : Time → V) (W : V),
       td.dt_apply (fun s => (g_fam s).g (F s) W) t =
@@ -339,7 +338,7 @@ theorem conn_var_eq_A_rf
            + ricci_cov_deriv emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr
               ((g_fam t).sharp ω) U W
   exact connection_evolution emb td h_st atr g_fam h_met h_emb_met conn_fam ha_fam hal_fam hsl_fam hl_fam
-    h_rf h2 t h_decomp U W ((g_fam t).sharp ω) h_g_conn_smooth
+    h_rf t h_decomp U W ((g_fam t).sharp ω) h_g_conn_smooth
 
 -- ============================================================
 -- 2.3  Q_hamilton_scalar: independent definition
@@ -409,7 +408,7 @@ private theorem nabla_conn_var_as_A_rf
     (hsl_fam : ∀ s, ∀ (f : R) X Z, conn_fam s (f • X) Z = f • conn_fam s X Z)
     (hl_fam : ∀ s, ∀ X (f : R) Y, conn_fam s X (f • Y) = (emb.embed X) f • Y + f • conn_fam s X Y)
     (h_rf : IsRicciFlow emb td atr g_fam h_met conn_fam ha_fam hal_fam hsl_fam hl_fam)
-    (h2 : ∀ (a : R), (2 : R) * a = 0 → a = 0)
+    [Invertible (2 : R)]
     (t : Time)
     (h_decomp : ∀ (F : Time → V) (W : V),
       td.dt_apply (fun s => (g_fam s).g (F s) W) t =
@@ -435,7 +434,7 @@ private theorem nabla_conn_var_as_A_rf
       A_rf_scalar emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t)
         atr (g_fam t) P Q β :=
     fun P Q β => conn_var_eq_A_rf emb td h_st atr g_fam h_met h_emb_met conn_fam
-      ha_fam hal_fam hsl_fam hl_fam h_rf h2 t h_decomp P Q β
+      ha_fam hal_fam hsl_fam hl_fam h_rf t h_decomp P Q β
       (h_conn_smooth P Q) (h_g_conn_smooth P Q ((g_fam t).sharp β))
   simp only [nabla_conn_var_scalar]
   rw [nabla_10_eval emb (conn_fam t) (ha_fam t) (hl_fam t) X
@@ -469,7 +468,7 @@ theorem Q_rm_eq_hamilton
       td.isSmoothFam f → td.isSmoothFam (fun τ => (emb.embed A) (f τ)))
     (h_tf : ∀ s, IsTorsionFree emb (conn_fam s))
     (h_rf : IsRicciFlow emb td atr g_fam h_met conn_fam ha_fam hal_fam hsl_fam hl_fam)
-    (h2 : ∀ (a : R), (2 : R) * a = 0 → a = 0)
+    [Invertible (2 : R)]
     (t : Time)
     (h_decomp : ∀ (F : Time → V) (W : V),
       td.dt_apply (fun s => (g_fam s).g (F s) W) t =
@@ -535,9 +534,9 @@ theorem Q_rm_eq_hamilton
       (h_nabla_Tconst (bracket emb X Y) Z) (h_nabla_Tconst (bracket emb X Y) Z)
   rw [h_var]
   rw [nabla_conn_var_as_A_rf emb td h_st atr g_fam h_met h_emb_met conn_fam
-        ha_fam hal_fam hsl_fam hl_fam h_rf h2 t h_decomp X Y Z ω h_conn_smooth h_g_conn_smooth,
+        ha_fam hal_fam hsl_fam hl_fam h_rf t h_decomp X Y Z ω h_conn_smooth h_g_conn_smooth,
       nabla_conn_var_as_A_rf emb td h_st atr g_fam h_met h_emb_met conn_fam
-        ha_fam hal_fam hsl_fam hl_fam h_rf h2 t h_decomp Y X Z ω h_conn_smooth h_g_conn_smooth]
+        ha_fam hal_fam hsl_fam hl_fam h_rf t h_decomp Y X Z ω h_conn_smooth h_g_conn_smooth]
   simp only [Q_hamilton_scalar]
 
 -- ============================================================
@@ -565,7 +564,7 @@ theorem hamilton_decomposition
       td.isSmoothFam f → td.isSmoothFam (fun τ => (emb.embed A) (f τ)))
     (h_tf : ∀ s, IsTorsionFree emb (conn_fam s))
     (h_rf : IsRicciFlow emb td atr g_fam h_met conn_fam ha_fam hal_fam hsl_fam hl_fam)
-    (h2 : ∀ (a : R), (2 : R) * a = 0 → a = 0)
+    [Invertible (2 : R)]
     (t : Time)
     (h_decomp : ∀ (F : Time → V) (W : V),
       td.dt_apply (fun s => (g_fam s).g (F s) W) t =
@@ -596,7 +595,7 @@ theorem hamilton_decomposition
     Q_hamilton_scalar emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t)
       atr (g_fam t) X Y Z ω := by
   have h_evol := riemann_tensor_evolution emb td h_st atr conn_fam ha_fam hal_fam hsl_fam hl_fam
-    h_tf g_fam h_met (fun s => (h_rf.levi_civita s).1) h_rf h_pr h_emb_closure h2
+    h_tf g_fam h_met (fun s => (h_rf.levi_civita s).1) h_rf h_pr h_emb_closure
     h_conn_smooth h_nested_smooth h_Rm_smooth
     h_nabla_Tτ_YZ h_nabla_Tt_YZ h_nabla_Tconst t
   have h_eval : dt_tensor td t (fun s => Rm_tensor emb (conn_fam s) (ha_fam s) (hal_fam s)
@@ -608,7 +607,7 @@ theorem hamilton_decomposition
       ![X, Y, Z] ![ω] := by rw [h_evol]
   rw [h_eval]; simp only [MultilinearMap.add_apply]
   rw [Q_rm_eq_hamilton emb td h_st atr g_fam h_met h_emb_met conn_fam
-      ha_fam hal_fam hsl_fam hl_fam h_pr h_emb_closure h_tf h_rf h2 t h_decomp X Y Z ω
+      ha_fam hal_fam hsl_fam hl_fam h_pr h_emb_closure h_tf h_rf t h_decomp X Y Z ω
       h_conn_smooth h_g_conn_smooth h_nested_smooth h_Rm_smooth
       h_nabla_Tτ_YZ h_nabla_Tt_YZ h_nabla_Tconst]
 
@@ -1453,7 +1452,7 @@ theorem Q_rm_independent_eq_Q_rm
       td.isSmoothFam f → td.isSmoothFam (fun τ => (emb.embed A) (f τ)))
     (h_tf : ∀ s, IsTorsionFree emb (conn_fam s))
     (h_rf : IsRicciFlow emb td atr g_fam h_met conn_fam ha_fam hal_fam hsl_fam hl_fam)
-    (h2 : ∀ (a : R), (2 : R) * a = 0 → a = 0)
+    [Invertible (2 : R)]
     (t : Time)
     (h_decomp : ∀ (F : Time → V) (W : V),
       td.dt_apply (fun s => (g_fam s).g (F s) W) t =
@@ -1483,7 +1482,7 @@ theorem Q_rm_independent_eq_Q_rm
       h_nabla_Tτ_YZ h_nabla_Tt_YZ h_nabla_Tconst atr (g_fam t) t := by
   ext vs αs
   exact (Q_rm_eq_hamilton emb td h_st atr g_fam h_met h_emb_met conn_fam
-    ha_fam hal_fam hsl_fam hl_fam h_pr h_emb_closure h_tf h_rf h2 t h_decomp
+    ha_fam hal_fam hsl_fam hl_fam h_pr h_emb_closure h_tf h_rf t h_decomp
     (vs 0) (vs 1) (vs 2) (αs 0)
     h_conn_smooth h_g_conn_smooth h_nested_smooth h_Rm_smooth
     h_nabla_Tτ_YZ h_nabla_Tt_YZ h_nabla_Tconst).symm
@@ -1517,7 +1516,7 @@ theorem riemann_tensor_evolution_hamilton
       td.isSmoothFam f → td.isSmoothFam (fun τ => (emb.embed A) (f τ)))
     (h_tf : ∀ s, IsTorsionFree emb (conn_fam s))
     (h_rf : IsRicciFlow emb td atr g_fam h_met conn_fam ha_fam hal_fam hsl_fam hl_fam)
-    (h2 : ∀ (a : R), (2 : R) * a = 0 → a = 0)
+    [Invertible (2 : R)]
     (t : Time)
     (h_decomp : ∀ (F : Time → V) (W : V),
       td.dt_apply (fun s => (g_fam s).g (F s) W) t =
@@ -1547,11 +1546,11 @@ theorem riemann_tensor_evolution_hamilton
     Q_rm_independent emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t)
       atr (g_fam t) := by
   have h_evol := riemann_tensor_evolution emb td h_st atr conn_fam ha_fam hal_fam hsl_fam hl_fam
-    h_tf g_fam h_met (fun s => (h_rf.levi_civita s).1) h_rf h_pr h_emb_closure h2
+    h_tf g_fam h_met (fun s => (h_rf.levi_civita s).1) h_rf h_pr h_emb_closure
     h_conn_smooth h_nested_smooth h_Rm_smooth
     h_nabla_Tτ_YZ h_nabla_Tt_YZ h_nabla_Tconst t
   rw [← Q_rm_independent_eq_Q_rm emb td h_st atr g_fam h_met h_emb_met conn_fam
-    ha_fam hal_fam hsl_fam hl_fam h_pr h_emb_closure h_tf h_rf h2 t h_decomp
+    ha_fam hal_fam hsl_fam hl_fam h_pr h_emb_closure h_tf h_rf t h_decomp
     h_conn_smooth h_g_conn_smooth h_nested_smooth h_Rm_smooth
     h_nabla_Tτ_YZ h_nabla_Tt_YZ h_nabla_Tconst] at h_evol
   exact h_evol

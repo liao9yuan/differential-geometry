@@ -27,7 +27,7 @@ open SyntheticTensor
 /-- Bundle for a conformal (Yamabe-like) metric flow
     `∂_t g = scalar_velocity(t) · g` with Levi-Civita connection at each time. -/
 structure YamabeFlowBundle (k R V Time A : Type*)
-    [Field k] [CommRing R] [Algebra k R]
+    [Field k] [CommRing R] [Algebra k R] [Invertible (2 : R)]
     [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
     [CommRing A] [Algebra R A] where
   /-- Derivation embedding. -/
@@ -60,8 +60,6 @@ structure YamabeFlowBundle (k R V Time A : Type*)
   nabla_tr_comm : ∀ s, NablaTrComm emb atr (conn_fam s) (ha_fam s) (hl_fam s)
   /-- ∇ commutes with tensor contraction, for each time. -/
   nabla_contract_comm : ∀ s, NablaTensorContractComm emb atr (conn_fam s) (ha_fam s) (hl_fam s)
-  /-- Characteristic ≠ 2. -/
-  char_ne_2 : ∀ (a : R), (2 : R) * a = 0 → a = 0
   /-- The connection is Levi-Civita for the metric at every time. -/
   levi_civita : ∀ s, IsLeviCivita emb (conn_fam s) (g_fam s)
   /-- Scalar velocity. For unnormalized Yamabe: `scalar_velocity t = -S(t)`;
