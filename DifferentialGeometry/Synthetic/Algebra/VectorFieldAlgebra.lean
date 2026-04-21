@@ -559,3 +559,47 @@ def SpatialTemporalComm {k R V : Type*} {A Time : Type*}
     [TimeRegularFam td] : Prop :=
   ∀ (X : V) (f : Time → R) (t : Time), td.isSmoothFam f →
     td.dt_apply (fun s => (emb.embed X) (f s)) t = (emb.embed X) (td.dt_apply f t)
+
+-- ============================================================
+-- Two-time regular families and the diagonal chain rule
+-- ============================================================
+
+/-- Two-time smoothness extension of `TimeRegularFam`.
+    Carries an abstract predicate `isSmoothFam2` on families of type
+    `Time × Time → R`, with closure under algebra operations, single-time
+    embeddings, and projections to single-time smoothness. The distinguished
+    axiom `dt_apply_diag_leibniz` captures the Leibniz rule for the diagonal
+    of a two-time smooth family: it is the synthetic-level statement of the
+    classical identity
+    `deriv (τ ↦ G(τ, τ)) t = deriv (τ ↦ G(τ, t)) t + deriv (τ ↦ G(t, τ)) t`
+    expressed via `dt_apply`. Decoupling this from `TimeRegularFam` lets
+    concrete realizations register a separate two-time smooth class (C^∞,
+    C^k, piecewise-smooth, …) without affecting the one-time data. -/
+class TimeRegularFam2 {R : Type*} {A : Type*} {Time : Type*}
+    [CommRing R] [CommRing A] [Algebra R A]
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td] where
+  /-- Two-time smooth-family predicate. -/
+  isSmoothFam2 : (Time × Time → R) → Prop
+  /-- Closure: constants are 2-smooth. -/
+  isSmoothFam2_const : ∀ c, isSmoothFam2 (fun _ => c)
+  /-- Closure: pointwise addition. -/
+  isSmoothFam2_add : ∀ f g, isSmoothFam2 f → isSmoothFam2 g → isSmoothFam2 (f + g)
+  /-- Closure: pointwise multiplication. -/
+  isSmoothFam2_mul : ∀ f g, isSmoothFam2 f → isSmoothFam2 g → isSmoothFam2 (f * g)
+  /-- Closure: pointwise negation. -/
+  isSmoothFam2_neg : ∀ f, isSmoothFam2 f → isSmoothFam2 (-f)
+  /-- Embed a 1-smooth family depending only on the first coordinate. -/
+  isSmoothFam2_of_single_fst : ∀ f, td.isSmoothFam f → isSmoothFam2 (fun p => f p.1)
+  /-- Embed a 1-smooth family depending only on the second coordinate. -/
+  isSmoothFam2_of_single_snd : ∀ f, td.isSmoothFam f → isSmoothFam2 (fun p => f p.2)
+  /-- The diagonal `τ ↦ G(τ, τ)` is 1-smooth. -/
+  diag_isSmoothFam : ∀ G, isSmoothFam2 G → td.isSmoothFam (fun τ => G (τ, τ))
+  /-- The left-frozen slice `τ ↦ G(τ, τ₀)` is 1-smooth. -/
+  slice_left_isSmoothFam : ∀ G τ₀, isSmoothFam2 G → td.isSmoothFam (fun τ => G (τ, τ₀))
+  /-- The right-frozen slice `τ ↦ G(τ₀, τ)` is 1-smooth. -/
+  slice_right_isSmoothFam : ∀ G τ₀, isSmoothFam2 G → td.isSmoothFam (fun τ => G (τ₀, τ))
+  /-- **Diagonal chain rule.** Given a 2-smooth family `G`,
+      `dt_apply (τ ↦ G(τ,τ)) t = dt_apply (τ ↦ G(τ,t)) t + dt_apply (τ ↦ G(t,τ)) t`. -/
+  dt_apply_diag_leibniz : ∀ G (t : Time), isSmoothFam2 G →
+      td.dt_apply (fun τ => G (τ, τ)) t =
+      td.dt_apply (fun τ => G (τ, t)) t + td.dt_apply (fun τ => G (t, τ)) t

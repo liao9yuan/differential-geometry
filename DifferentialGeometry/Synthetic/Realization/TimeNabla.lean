@@ -1,5 +1,6 @@
 import DifferentialGeometry.Synthetic.Realization.Connection
 import DifferentialGeometry.Synthetic.Realization.TimeDeriv
+import DifferentialGeometry.Synthetic.Realization.TimeJointSmoothness
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Basic
 import DifferentialGeometry.Synthetic.Analysis.NablaTimeInteraction
 
@@ -10,7 +11,7 @@ This file realizes the Synthetic-level `NablaTimeProductRule` predicate for the
 canonical concrete realization `concreteTimeDerivativeData` of
 `Synthetic/Realization/TimeDeriv.lean` (the jointly-smooth algebra on `ℝ × M`).
 
-## Approach: localised discrete Leibniz identities
+## Approach: 2-smoothness hypotheses + slot-Leibniz helpers
 
 Given the 8 smoothness hypotheses of `NablaTimeProductRule`, the equation
 asserted by the rule reduces to two *discrete Leibniz identities* — one for
@@ -24,11 +25,14 @@ dt_apply (fun τ => T τ (…(conn_fam τ X (vs i))…) αs) t =
 + dt_apply (fun τ => T τ (…(conn_fam t X (vs i))…) αs) t
 ```
 
-and are genuinely "jointly-smooth Leibniz" facts about partial differentiation
-on `ℝ × M`. Rather than axiomatising them globally, we localise them to two
-*local hypotheses* `h_leibniz_v` / `h_leibniz_c` on this theorem — downstream
-Ricci-flow users can supply them using concrete calculus on joint-smooth
-families.
+and are exactly the diagonal chain rule packaged by
+`TimeRegularFam2.dt_apply_diag_leibniz`. The concrete realization
+`concreteTimeRegularFam2` (from `Synthetic/Realization/TimeJointSmoothness.lean`)
+registers the jointly-smooth predicate on `ℝ × M`, so rather than
+axiomatising the discrete Leibniz identities globally we accept the much
+smaller *2-smoothness witnesses* `h_2smooth_v` / `h_2smooth_c` and invoke
+`TimeDerivativeData.dt_apply_leibniz_slot_vector` /
+`dt_apply_leibniz_slot_covector` to extract the identities on the fly.
 -/
 
 noncomputable section
@@ -58,8 +62,11 @@ jointly-smooth time-derivative model of `TimeDeriv.lean`.
 
 After unfolding both sides pointwise via `t_nabla_eval`, `conn_var_tensor_eval`,
 and `nabla_tensor_eval`, the equality reduces to a pair of discrete-Leibniz
-identities — one per vector/covector slot — which are supplied as local
-hypotheses `h_leibniz_v` / `h_leibniz_c`. -/
+identities — one per vector/covector slot — which are produced from two
+2-smoothness witnesses `h_2smooth_v` / `h_2smooth_c` via the helpers
+`TimeDerivativeData.dt_apply_leibniz_slot_vector` /
+`dt_apply_leibniz_slot_covector`. The 2-smoothness class instance on
+`concreteTimeDerivativeData I M` is `concreteTimeRegularFam2`. -/
 theorem concrete_nabla_time_product_rule
     (conn_fam : ℝ →
       Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ →
@@ -69,40 +76,30 @@ theorem concrete_nabla_time_product_rule
     (hl_fam : ∀ τ X (f : C^∞⟮I, M; ℝ⟯) Y,
         conn_fam τ X (f • Y) =
           (concreteDerivationEmbedding I M).embed X f • Y + f • conn_fam τ X Y)
-    (h_leibniz_v : ∀ {r s : ℕ}
+    (h_2smooth_v : ∀ {r s : ℕ}
         (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
         (T : ℝ → TensorData C^∞⟮I, M; ℝ⟯
           Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ r s)
-        (t : ℝ) (i : Fin s)
+        (i : Fin s)
         (vs : Fin s → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
         (αs : Fin r →
           Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ →ₗ[C^∞⟮I, M; ℝ⟯] C^∞⟮I, M; ℝ⟯),
-        (concreteTimeDerivativeData I M).dt_apply
-            (fun τ => T τ (Function.update vs i (conn_fam τ X (vs i))) αs) t
-          = (concreteTimeDerivativeData I M).dt_apply
-              (fun τ => T t (Function.update vs i (conn_fam τ X (vs i))) αs) t
-            + (concreteTimeDerivativeData I M).dt_apply
-                (fun τ => T τ (Function.update vs i (conn_fam t X (vs i))) αs) t)
-    (h_leibniz_c : ∀ {r s : ℕ}
+        TimeRegularFam2.isSmoothFam2 (td := concreteTimeDerivativeData I M)
+          (fun p : ℝ × ℝ =>
+            T p.1 (Function.update vs i (conn_fam p.2 X (vs i))) αs))
+    (h_2smooth_c : ∀ {r s : ℕ}
         (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
         (T : ℝ → TensorData C^∞⟮I, M; ℝ⟯
           Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ r s)
-        (t : ℝ) (j : Fin r)
+        (j : Fin r)
         (vs : Fin s → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
         (αs : Fin r →
           Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ →ₗ[C^∞⟮I, M; ℝ⟯] C^∞⟮I, M; ℝ⟯),
-        (concreteTimeDerivativeData I M).dt_apply
-            (fun τ => T τ vs (Function.update αs j
-              (nabla_dual (concreteDerivationEmbedding I M) (conn_fam τ)
-                (ha_fam τ) (hl_fam τ) X (αs j)))) t
-          = (concreteTimeDerivativeData I M).dt_apply
-              (fun τ => T t vs (Function.update αs j
-                (nabla_dual (concreteDerivationEmbedding I M) (conn_fam τ)
-                  (ha_fam τ) (hl_fam τ) X (αs j)))) t
-            + (concreteTimeDerivativeData I M).dt_apply
-                (fun τ => T τ vs (Function.update αs j
-                  (nabla_dual (concreteDerivationEmbedding I M) (conn_fam t)
-                    (ha_fam t) (hl_fam t) X (αs j)))) t) :
+        TimeRegularFam2.isSmoothFam2 (td := concreteTimeDerivativeData I M)
+          (fun p : ℝ × ℝ =>
+            T p.1 vs (Function.update αs j
+              (nabla_dual (concreteDerivationEmbedding I M) (conn_fam p.2)
+                (ha_fam p.2) (hl_fam p.2) X (αs j))))) :
     NablaTimeProductRule (concreteDerivationEmbedding I M)
       (concreteTimeDerivativeData I M) conn_fam ha_fam hl_fam := by
   -- Bind the 8 hypotheses of `NablaTimeProductRule`.
@@ -206,7 +203,8 @@ theorem concrete_nabla_time_product_rule
     rw [← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl ?_
     intro i _
-    exact h_leibniz_v X T t i vs αs
+    exact TimeDerivativeData.dt_apply_leibniz_slot_vector
+      (td := td) conn_fam X T t i vs αs (h_2smooth_v X T i vs αs)
   have h_leibniz_sum_c : ∑ j : Fin r,
         td.dt_apply (fun τ => T τ vs (Function.update αs j
           (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) t =
@@ -219,7 +217,9 @@ theorem concrete_nabla_time_product_rule
     rw [← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl ?_
     intro j _
-    exact h_leibniz_c X T t j vs αs
+    exact TimeDerivativeData.dt_apply_leibniz_slot_covector
+      (emb := emb) (td := td) conn_fam ha_fam hl_fam X T t j vs αs
+      (h_2smooth_c X T j vs αs)
   rw [h_leibniz_sum_v, h_leibniz_sum_c]
   -- Rearrange: goal is now purely algebraic in the RHS split forms.
   ring
