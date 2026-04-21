@@ -49,6 +49,13 @@ import DifferentialGeometry.Synthetic.Realization.TensorContract
 import DifferentialGeometry.Synthetic.Realization.TimeDeriv
 import DifferentialGeometry.Synthetic.Realization.TimeNabla
 
+-- Non-Ricci flows (plug-in demonstrations of flow-agnostic abstraction)
+import DifferentialGeometry.Synthetic.Flow.Heat.Basic
+import DifferentialGeometry.Synthetic.Flow.GradientFlow.Basic
+import DifferentialGeometry.Synthetic.Flow.ReactionDiffusion.Basic
+import DifferentialGeometry.Synthetic.Flow.HamiltonJacobi.Basic
+import DifferentialGeometry.Synthetic.Flow.Yamabe.Basic
+
 -- Ricci Flow
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Basic
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Calculus
