@@ -581,18 +581,23 @@ def TimeTrComm {R V : Type*} {A Time : Type*}
     (∀ (v : V) (α : V →ₗ[R] R), α (dL v) = td.eval (td.dt (αLv v α)) t) →
     td.eval (td.dt trL) t = atr.tr dL
 
-/-- For `A = Time → R` with the identity lift/eval, recover the original direct API. -/
+/-- For `A = Time → R` with the identity lift/eval, recover the original direct API.
+Requires smoothness of the `α (L s v)` and `tr (L s)` families so that
+`eval_lift` applies. -/
 theorem TimeTrComm.of_pi {R V Time : Type*}
     [CommRing R] [AddCommGroup V] [Module R V]
     {atr : AbstractTrace R V} {td : TimeDerivativeData R (Time → R) Time}
     (h : TimeTrComm atr td)
     (L : Time → V →ₗ[R] V) (dL : V →ₗ[R] V) (t : Time)
+    (h_αLv_smooth : ∀ (v : V) (α : V →ₗ[R] R),
+      td.isSmoothFam (fun s => α (L s v)))
+    (h_trL_smooth : td.isSmoothFam (fun s => atr.tr (L s)))
     (h_char : ∀ (v : V) (α : V →ₗ[R] R),
       α (dL v) = td.eval (td.dt (td.lift (fun s => α (L s v)))) t) :
     td.eval (td.dt (td.lift (fun s => atr.tr (L s)))) t = atr.tr dL :=
   h L dL t (fun v α => td.lift (fun s => α (L s v))) (td.lift (fun s => atr.tr (L s)))
-    (fun v α s => by rw [td.eval_lift])
-    (fun s => by rw [td.eval_lift])
+    (fun v α s => by rw [td.eval_lift _ (h_αLv_smooth v α)])
+    (fun s => by rw [td.eval_lift _ h_trL_smooth])
     h_char
 
 end SyntheticTensor

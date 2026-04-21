@@ -32,7 +32,11 @@ theorem ricci_evolution_pointwise_extraction
     (hal_fam : ∀ s, ∀ X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z)
     (hsl_fam : ∀ s, ∀ (f : R) X Z, conn_fam s (f • X) Z = f • conn_fam s X Z)
     (hl_fam : ∀ s, ∀ X (f : R) Y, conn_fam s X (f • Y) = (emb.embed X) f • Y + f • conn_fam s X Y)
+    (h_Rc_smooth : ∀ vs αs, td.isSmoothFam
+      (fun τ => ricciForm_tensor emb (conn_fam τ) (ha_fam τ) (hal_fam τ) (hsl_fam τ) (hl_fam τ) atr vs αs))
     (t : Time) (X Y : V) :
-    tensor_eval (dt_tensor td t (fun s => ricciForm_tensor emb (conn_fam s) (ha_fam s) (hal_fam s) (hsl_fam s) (hl_fam s) atr)) ![X, Y] ![] =
+    tensor_eval (dt_tensor td t
+      (fun s => ricciForm_tensor emb (conn_fam s) (ha_fam s) (hal_fam s) (hsl_fam s) (hl_fam s) atr)
+      h_Rc_smooth) ![X, Y] ![] =
     td.dt_apply (fun s => tensor_eval (ricciForm_tensor emb (conn_fam s) (ha_fam s) (hal_fam s) (hsl_fam s) (hl_fam s) atr) ![X, Y] ![]) t := by
   rfl

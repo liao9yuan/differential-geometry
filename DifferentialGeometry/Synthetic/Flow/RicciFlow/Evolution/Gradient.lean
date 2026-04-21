@@ -38,14 +38,15 @@ theorem gradient_evolution
     (emb : DerivationEmbedding k R V)
     (td : TimeDerivativeData R A Time)
     (atr : AbstractTrace R V)
-    (g_fam : Time → MetricDuality R V) 
+    (g_fam : Time → MetricDuality R V)
+    (h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs))
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ s, ∀ X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
     (hal_fam : ∀ s, ∀ X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z)
     (hsl_fam : ∀ s, ∀ (f : R) X Z, conn_fam s (f • X) Z = f • conn_fam s X Z)
     (hl_fam : ∀ s, ∀ X (f : R) Y, conn_fam s X (f • Y) = (emb.embed X) f • Y + f • conn_fam s X Y)
-    (h_rf : IsRicciFlow emb td atr g_fam conn_fam ha_fam hal_fam hsl_fam hl_fam)
-    (h_mvp : MetricBilinProductRule td g_fam)
+    (h_rf : IsRicciFlow emb td atr g_fam h_met conn_fam ha_fam hal_fam hsl_fam hl_fam)
+    (h_mvp : MetricBilinProductRule td g_fam h_met)
     (u : R) (Y : V) (t : Time) :
     td.dt_apply (fun s => (g_fam t).g (grad emb (g_fam s) u) Y) t =
     2 * ricciForm_tensor emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr
@@ -62,7 +63,7 @@ theorem gradient_evolution
   rw [h_zero] at h_prod
   -- ∂_t[g(t)(grad_s u, Y)] = -metric_var(grad_t u, Y)
   have h_neg : td.dt_apply (fun s => (g_fam t).g (grad emb (g_fam s) u) Y) t =
-    -metric_var_form td g_fam t ![grad emb (g_fam t) u, Y] ![] :=
+    -metric_var_form td g_fam h_met t ![grad emb (g_fam t) u, Y] ![] :=
     (neg_eq_of_add_eq_zero_right h_prod.symm).symm
   -- Substitute Ricci flow: metric_var = -2 • Rc
   rw [h_neg, h_rf.evolution t]; simp only [MultilinearMap.smul_apply, smul_eq_mul]; ring
@@ -86,10 +87,12 @@ variable [CommRing A] [Algebra R A]
       + ∂_t[g(t)(A(s), B(t))] + ∂_t[g(t)(A(t), B(s))] -/
 def MetricFullProductRule
     (td : TimeDerivativeData R A Time)
-    (g_fam : Time → MetricDuality R V) : Prop :=
+    (g_fam : Time → MetricDuality R V)
+    (h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs))
+    : Prop :=
   ∀ (A B : Time → V) (t : Time),
     td.dt_apply (fun s => (g_fam s).g (A s) (B s)) t =
-    metric_var_form td g_fam t ![A t, B t] ![] +
+    metric_var_form td g_fam h_met t ![A t, B t] ![] +
     td.dt_apply (fun s => (g_fam t).g (A s) (B t)) t +
     td.dt_apply (fun s => (g_fam t).g (A t) (B s)) t
 
@@ -100,16 +103,17 @@ theorem gradient_squared_evolution
     (emb : DerivationEmbedding k R V)
     (td : TimeDerivativeData R A Time)
     (atr : AbstractTrace R V)
-    (g_fam : Time → MetricDuality R V) 
+    (g_fam : Time → MetricDuality R V)
+    (h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs))
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ s, ∀ X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
     (hal_fam : ∀ s, ∀ X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z)
     (hsl_fam : ∀ s, ∀ (f : R) X Z, conn_fam s (f • X) Z = f • conn_fam s X Z)
     (hl_fam : ∀ s, ∀ X (f : R) Y, conn_fam s X (f • Y) = (emb.embed X) f • Y + f • conn_fam s X Y)
-    (h_rf : IsRicciFlow emb td atr g_fam conn_fam ha_fam hal_fam hsl_fam hl_fam)
-    (h_mfp : MetricFullProductRule td g_fam)
+    (h_rf : IsRicciFlow emb td atr g_fam h_met conn_fam ha_fam hal_fam hsl_fam hl_fam)
+    (h_mfp : MetricFullProductRule td g_fam h_met)
     (h_st : SpatialTemporalComm emb td)
-    (u : Time → R) (t : Time) :
+    (u : Time → R) (hu : td.isSmoothFam u) (t : Time) :
     td.dt_apply (fun s => (g_fam s).g
       (grad emb (g_fam s) (u s))
       (grad emb (g_fam s) (u s))) t =
@@ -128,12 +132,12 @@ theorem gradient_squared_evolution
     rw [show (fun s => (g_fam t).g Z (G s)) = (fun s => (g_fam t).g (G s) Z) from
       funext (fun s => (g_fam t).g_symm Z (G s))]
   have h_prod2 : td.dt_apply (fun s => (g_fam s).g (G s) (G s)) t =
-      metric_var_form td g_fam t ![Z, Z] ![] +
+      metric_var_form td g_fam h_met t ![Z, Z] ![] +
       2 * td.dt_apply (fun s => (g_fam t).g (G s) Z) t := by
     rw [h_prod, h_sym]; ring
   -- dt[g(s)(G(s), Z)] = metric_var(Z,Z) + dt[g(t)(G(s),Z)] (from full product rule with const Z)
   have h_bprod : td.dt_apply (fun s => (g_fam s).g (G s) Z) t =
-      metric_var_form td g_fam t ![Z, Z] ![] +
+      metric_var_form td g_fam h_met t ![Z, Z] ![] +
       td.dt_apply (fun s => (g_fam t).g (G s) Z) t := by
     have h := h_mfp G (fun _ => Z) t
     have h0 : td.dt_apply (fun s => (g_fam t).g Z ((fun _ => Z) s)) t = 0 :=
@@ -145,15 +149,15 @@ theorem gradient_squared_evolution
   -- dt[g(s)(G(s),Z)] = action(Z, dt(u)) by SpatialTemporalComm
   have h_dt_action : td.dt_apply (fun s => (g_fam s).g (G s) Z) t =
       action emb Z (td.dt_apply u t) := by
-    rw [h_gyz]; exact h_st Z u t
+    rw [h_gyz]; exact h_st Z u t hu
   -- dt[g(t)(G(s), Z)] = action(Z, dt(u)) - metric_var(Z,Z)
   have h_var : td.dt_apply (fun s => (g_fam t).g (G s) Z) t =
-      action emb Z (td.dt_apply u t) - metric_var_form td g_fam t ![Z, Z] ![] := by
+      action emb Z (td.dt_apply u t) - metric_var_form td g_fam h_met t ![Z, Z] ![] := by
     have h := h_bprod; rw [h_dt_action] at h
     rw [add_comm] at h; exact (sub_eq_of_eq_add h).symm
   -- Substitute into h_prod2
   have h_combined : td.dt_apply (fun s => (g_fam s).g (G s) (G s)) t =
-      2 * action emb Z (td.dt_apply u t) - metric_var_form td g_fam t ![Z, Z] ![] := by
+      2 * action emb Z (td.dt_apply u t) - metric_var_form td g_fam h_met t ![Z, Z] ![] := by
     rw [h_prod2, h_var]; ring
   -- action(Z, dt(u)) = g(t)(grad_t(dt(u)), Z) = g(t)(Z, grad_t(dt(u)))
   have h_action_grad : action emb Z (td.dt_apply u t) =

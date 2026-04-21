@@ -27,7 +27,12 @@ variable [CommRing A] [Algebra R A]
 
 /-- ∂_t commutes with ∇ when the connection is FIXED (not time-dependent).
     Proof uses SpatialTemporalComm for the leading X(T vs αs) term;
-    correction sums commute because conn and nabla_dual are constant in time. -/
+    correction sums commute because conn and nabla_dual are constant in time.
+
+    The smoothness hypothesis `hT` gives smoothness of every scalar slice of
+    `T`. The first sum's summands are also slices of T (at fixed arguments),
+    so closure follows via `isSmoothFam_sum`. The *spatial* derivative family
+    `fun τ => (emb.embed X)(T τ vs αs)` is supplied separately as `hXT`. -/
 theorem t_nabla_tensor
     (emb : DerivationEmbedding k R V)
     (td : TimeDerivativeData R A Time)
@@ -35,9 +40,13 @@ theorem t_nabla_tensor
     (conn : V → V → V)
     (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
     (hl : ∀ X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
-    (X : V) {r s : ℕ} (T : Time → TensorData R V r s) (t : Time) :
-    dt_tensor td t (fun τ => nabla_tensor emb conn ha hl X (T τ)) =
-    nabla_tensor emb conn ha hl X (dt_tensor td t T) := by
+    (X : V) {r s : ℕ} (T : Time → TensorData R V r s) (t : Time)
+    (hT : ∀ vs αs, td.isSmoothFam (fun τ => T τ vs αs))
+    (hXT : ∀ vs αs, td.isSmoothFam (fun τ => (emb.embed X) (T τ vs αs)))
+    (hT_nabla : ∀ vs αs, td.isSmoothFam
+      (fun τ => nabla_tensor emb conn ha hl X (T τ) vs αs)) :
+    dt_tensor td t (fun τ => nabla_tensor emb conn ha hl X (T τ)) hT_nabla =
+    nabla_tensor emb conn ha hl X (dt_tensor td t T hT) := by
   ext vs αs
   simp only [dt_tensor_eval, nabla_tensor_eval]
   -- Split the lambda into three parts
@@ -50,9 +59,6 @@ theorem t_nabla_tensor
       - (fun τ => ∑ j : Fin r, T τ vs (Function.update αs j
           (nabla_dual emb conn ha hl X (αs j)))) := by
     funext τ; simp only [Pi.sub_apply]
-  rw [h_eq, td.dt_apply_sub, td.dt_apply_sub]
-  -- Leading term: SpatialTemporalComm
-  rw [h_st X (fun τ => T τ vs αs) t]
   -- Vector correction sum: factor out finset sum from lambda
   have h_vec : (fun τ => ∑ i : Fin s,
       T τ (Function.update vs i (conn X (vs i))) αs) =
@@ -64,7 +70,32 @@ theorem t_nabla_tensor
       ∑ j : Fin r, (fun τ => T τ vs (Function.update αs j
         (nabla_dual emb conn ha hl X (αs j)))) := by
     funext τ; simp [Finset.sum_apply]
-  rw [h_vec, h_cov, td.dt_apply_sum, td.dt_apply_sum]
+  -- Smoothness of the three pieces
+  have hS_X : td.isSmoothFam (fun τ => (emb.embed X) (T τ vs αs)) := hXT vs αs
+  have hS_vec_i : ∀ i : Fin s, td.isSmoothFam
+      (fun τ => T τ (Function.update vs i (conn X (vs i))) αs) :=
+    fun i => hT (Function.update vs i (conn X (vs i))) αs
+  have hS_vec_sum : td.isSmoothFam
+      (fun τ => ∑ i : Fin s, T τ (Function.update vs i (conn X (vs i))) αs) := by
+    rw [h_vec]
+    exact td.isSmoothFam_sum Finset.univ _ (fun i _ => hS_vec_i i)
+  have hS_cov_j : ∀ j : Fin r, td.isSmoothFam
+      (fun τ => T τ vs (Function.update αs j
+        (nabla_dual emb conn ha hl X (αs j)))) :=
+    fun j => hT vs (Function.update αs j (nabla_dual emb conn ha hl X (αs j)))
+  have hS_cov_sum : td.isSmoothFam
+      (fun τ => ∑ j : Fin r, T τ vs (Function.update αs j
+        (nabla_dual emb conn ha hl X (αs j)))) := by
+    rw [h_cov]
+    exact td.isSmoothFam_sum Finset.univ _ (fun j _ => hS_cov_j j)
+  rw [h_eq,
+      td.dt_apply_sub _ _ _ (td.isSmoothFam_sub _ _ hS_X hS_vec_sum) hS_cov_sum,
+      td.dt_apply_sub _ _ _ hS_X hS_vec_sum]
+  -- Leading term: SpatialTemporalComm (requires smoothness of `fun τ => T τ vs αs`)
+  rw [h_st X (fun τ => T τ vs αs) t (hT vs αs)]
+  rw [h_vec, h_cov,
+      td.dt_apply_sum _ _ _ (fun i _ => hS_vec_i i),
+      td.dt_apply_sum _ _ _ (fun j _ => hS_cov_j j)]
 
 end FixedConn
 
@@ -86,7 +117,10 @@ variable [CommRing A] [Algebra R A]
       - Σᵢ dt_apply(s ↦ T(update vs i (conn(s) X (vs i)))(αs)) at t
       - Σⱼ dt_apply(s ↦ T(vs)(update αs j (∇*^(s)_X αⱼ))) at t
 
-    The leading X(T vs αs) term vanishes because T is constant in time. -/
+    The leading X(T vs αs) term vanishes because T is constant in time.
+
+    `h_conn_smooth_v` / `h_conn_smooth_c` assert smoothness of the connection-
+    dependent scalar families in each vector- and covector-slot respectively. -/
 noncomputable def conn_var_tensor
     (emb : DerivationEmbedding k R V)
     (td : TimeDerivativeData R A Time)
@@ -94,8 +128,12 @@ noncomputable def conn_var_tensor
     (ha_fam : ∀ τ, ∀ X Y Z, conn_fam τ X (Y + Z) = conn_fam τ X Y + conn_fam τ X Z)
     (hl_fam : ∀ τ, ∀ X (f : R) Y,
       conn_fam τ X (f • Y) = (emb.embed X) f • Y + f • conn_fam τ X Y)
-    (t : Time) (X : V) {r s : ℕ} (T : TensorData R V r s) : TensorData R V r s :=
+    (t : Time) (X : V) {r s : ℕ} (T : TensorData R V r s)
+    (h_nabla_smooth : ∀ vs αs, td.isSmoothFam
+      (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X T vs αs))
+    : TensorData R V r s :=
   dt_tensor td t (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X T)
+    h_nabla_smooth
 
 /-- Evaluation formula for conn_var_tensor. The leading X-term vanishes
     because T doesn't depend on time. -/
@@ -106,8 +144,16 @@ theorem conn_var_tensor_eval
     (ha_fam : ∀ τ, ∀ X Y Z, conn_fam τ X (Y + Z) = conn_fam τ X Y + conn_fam τ X Z)
     (hl_fam : ∀ τ, ∀ X (f : R) Y,
       conn_fam τ X (f • Y) = (emb.embed X) f • Y + f • conn_fam τ X Y)
-    (t : Time) (X : V) {r s : ℕ} (T : TensorData R V r s) (vs αs) :
-    conn_var_tensor emb td conn_fam ha_fam hl_fam t X T vs αs =
+    (t : Time) (X : V) {r s : ℕ} (T : TensorData R V r s)
+    (h_nabla_smooth : ∀ vs αs, td.isSmoothFam
+      (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X T vs αs))
+    (h_conn_smooth_v : ∀ i vs αs, td.isSmoothFam
+      (fun τ => T (Function.update vs i (conn_fam τ X (vs i))) αs))
+    (h_conn_smooth_c : ∀ j vs αs, td.isSmoothFam
+      (fun τ => T vs (Function.update αs j
+        (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))))
+    (vs αs) :
+    conn_var_tensor emb td conn_fam ha_fam hl_fam t X T h_nabla_smooth vs αs =
     - td.dt_apply (fun τ => ∑ i : Fin s,
         T (Function.update vs i (conn_fam τ X (vs i))) αs) t
     - td.dt_apply (fun τ => ∑ j : Fin r,
@@ -127,7 +173,32 @@ theorem conn_var_tensor_eval
       - (fun τ => ∑ j : Fin r, T vs (Function.update αs j
           (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) := by
     funext τ; simp only [Pi.sub_apply]
-  rw [h_eq, td.dt_apply_sub, td.dt_apply_sub, h_const]; ring
+  have h_vec_sum : (fun τ => ∑ i : Fin s,
+      T (Function.update vs i (conn_fam τ X (vs i))) αs) =
+      ∑ i : Fin s, (fun τ => T (Function.update vs i (conn_fam τ X (vs i))) αs) := by
+    funext τ; simp [Finset.sum_apply]
+  have h_cov_sum : (fun τ => ∑ j : Fin r,
+      T vs (Function.update αs j
+        (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) =
+      ∑ j : Fin r, (fun τ => T vs (Function.update αs j
+        (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) := by
+    funext τ; simp [Finset.sum_apply]
+  -- Smoothness of the three pieces
+  have hS_const : td.isSmoothFam (fun _ => (emb.embed X) (T vs αs)) :=
+    td.isSmoothFam_const _
+  have hS_vec_sum : td.isSmoothFam
+      (fun τ => ∑ i : Fin s, T (Function.update vs i (conn_fam τ X (vs i))) αs) := by
+    rw [h_vec_sum]
+    exact td.isSmoothFam_sum Finset.univ _ (fun i _ => h_conn_smooth_v i vs αs)
+  have hS_cov_sum : td.isSmoothFam
+      (fun τ => ∑ j : Fin r, T vs (Function.update αs j
+        (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) := by
+    rw [h_cov_sum]
+    exact td.isSmoothFam_sum Finset.univ _ (fun j _ => h_conn_smooth_c j vs αs)
+  rw [h_eq,
+      td.dt_apply_sub _ _ _
+        (td.isSmoothFam_sub _ _ hS_const hS_vec_sum) hS_cov_sum,
+      td.dt_apply_sub _ _ _ hS_const hS_vec_sum, h_const]; ring
 
 end ConnVar
 
@@ -146,7 +217,13 @@ variable [CommRing A] [Algebra R A]
     vary with time. Uses SpatialTemporalComm for the leading term; correction sums
     retain the full time-dependent expressions under dt_apply.
 
-    This generalizes both t_nabla_tensor (conn fixed) and conn_var_tensor (T fixed). -/
+    This generalizes both t_nabla_tensor (conn fixed) and conn_var_tensor (T fixed).
+
+    Smoothness hypotheses distinguish the three kinds of scalar families
+    appearing in the evaluation:
+    * `hT` / `hXT` are the direct slice and its spatial derivative,
+    * `h_conn_smooth_v` / `h_conn_smooth_c` are the connection-dependent
+      vector/covector slot families. -/
 theorem t_nabla_eval
     (emb : DerivationEmbedding k R V)
     (td : TimeDerivativeData R A Time)
@@ -155,9 +232,19 @@ theorem t_nabla_eval
     (ha_fam : ∀ τ, ∀ X Y Z, conn_fam τ X (Y + Z) = conn_fam τ X Y + conn_fam τ X Z)
     (hl_fam : ∀ τ, ∀ X (f : R) Y,
       conn_fam τ X (f • Y) = (emb.embed X) f • Y + f • conn_fam τ X Y)
-    (X : V) {r s : ℕ} (T : Time → TensorData R V r s) (t : Time) (vs αs) :
+    (X : V) {r s : ℕ} (T : Time → TensorData R V r s) (t : Time)
+    (hT : ∀ vs αs, td.isSmoothFam (fun τ => T τ vs αs))
+    (hXT : ∀ vs αs, td.isSmoothFam (fun τ => (emb.embed X) (T τ vs αs)))
+    (h_conn_smooth_v : ∀ i vs αs, td.isSmoothFam
+      (fun τ => T τ (Function.update vs i (conn_fam τ X (vs i))) αs))
+    (h_conn_smooth_c : ∀ j vs αs, td.isSmoothFam
+      (fun τ => T τ vs (Function.update αs j
+        (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))))
+    (hT_nabla : ∀ vs αs, td.isSmoothFam
+      (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (T τ) vs αs))
+    (vs αs) :
     dt_tensor td t (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (T τ))
-      vs αs =
+      hT_nabla vs αs =
     (emb.embed X) (td.dt_apply (fun τ => T τ vs αs) t)
     - td.dt_apply (fun τ => ∑ i : Fin s,
         T τ (Function.update vs i (conn_fam τ X (vs i))) αs) t
@@ -174,9 +261,32 @@ theorem t_nabla_eval
       - (fun τ => ∑ j : Fin r, T τ vs (Function.update αs j
           (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) := by
     funext τ; simp only [Pi.sub_apply]
-  rw [h_eq, td.dt_apply_sub, td.dt_apply_sub]
-  -- Leading term: SpatialTemporalComm
-  rw [h_st X (fun τ => T τ vs αs) t]
+  have h_vec_sum : (fun τ => ∑ i : Fin s,
+      T τ (Function.update vs i (conn_fam τ X (vs i))) αs) =
+      ∑ i : Fin s, (fun τ => T τ (Function.update vs i (conn_fam τ X (vs i))) αs) := by
+    funext τ; simp [Finset.sum_apply]
+  have h_cov_sum : (fun τ => ∑ j : Fin r,
+      T τ vs (Function.update αs j
+        (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) =
+      ∑ j : Fin r, (fun τ => T τ vs (Function.update αs j
+        (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) := by
+    funext τ; simp [Finset.sum_apply]
+  -- Smoothness of the three pieces
+  have hS_X : td.isSmoothFam (fun τ => (emb.embed X) (T τ vs αs)) := hXT vs αs
+  have hS_vec_sum : td.isSmoothFam
+      (fun τ => ∑ i : Fin s, T τ (Function.update vs i (conn_fam τ X (vs i))) αs) := by
+    rw [h_vec_sum]
+    exact td.isSmoothFam_sum Finset.univ _ (fun i _ => h_conn_smooth_v i vs αs)
+  have hS_cov_sum : td.isSmoothFam
+      (fun τ => ∑ j : Fin r, T τ vs (Function.update αs j
+        (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) := by
+    rw [h_cov_sum]
+    exact td.isSmoothFam_sum Finset.univ _ (fun j _ => h_conn_smooth_c j vs αs)
+  rw [h_eq,
+      td.dt_apply_sub _ _ _ (td.isSmoothFam_sub _ _ hS_X hS_vec_sum) hS_cov_sum,
+      td.dt_apply_sub _ _ _ hS_X hS_vec_sum]
+  -- Leading term: SpatialTemporalComm (requires smoothness of `fun τ => T τ vs αs`)
+  rw [h_st X (fun τ => T τ vs αs) t (hT vs αs)]
 
 /-- conn_var_tensor is additive in T. -/
 theorem conn_var_tensor_add
@@ -186,16 +296,36 @@ theorem conn_var_tensor_add
     (ha_fam : ∀ τ, ∀ X Y Z, conn_fam τ X (Y + Z) = conn_fam τ X Y + conn_fam τ X Z)
     (hl_fam : ∀ τ, ∀ X (f : R) Y,
       conn_fam τ X (f • Y) = (emb.embed X) f • Y + f • conn_fam τ X Y)
-    (t : Time) (X : V) {r s : ℕ} (T₁ T₂ : TensorData R V r s) :
-    conn_var_tensor emb td conn_fam ha_fam hl_fam t X (T₁ + T₂) =
-    conn_var_tensor emb td conn_fam ha_fam hl_fam t X T₁ +
-    conn_var_tensor emb td conn_fam ha_fam hl_fam t X T₂ := by
+    (t : Time) (X : V) {r s : ℕ} (T₁ T₂ : TensorData R V r s)
+    (h₁ : ∀ vs αs, td.isSmoothFam
+      (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X T₁ vs αs))
+    (h₂ : ∀ vs αs, td.isSmoothFam
+      (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X T₂ vs αs))
+    (h₁₂ : ∀ vs αs, td.isSmoothFam
+      (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (T₁ + T₂) vs αs)) :
+    conn_var_tensor emb td conn_fam ha_fam hl_fam t X (T₁ + T₂) h₁₂ =
+    conn_var_tensor emb td conn_fam ha_fam hl_fam t X T₁ h₁ +
+    conn_var_tensor emb td conn_fam ha_fam hl_fam t X T₂ h₂ := by
   simp only [conn_var_tensor]
+  -- Goal: dt_tensor td t (fun τ => nabla X (T₁ + T₂)) h₁₂ = dt_tensor h₁ + dt_tensor h₂
   have h : (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (T₁ + T₂)) =
       (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X T₁ +
                 nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X T₂) := by
     funext τ; exact nabla_add emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X T₁ T₂
-  rw [h]; exact dt_tensor_add td t _ _
+  -- Rewrite the argument to dt_tensor; must also rewrite the companion hypothesis.
+  -- We argue pointwise instead, which avoids complicated dependent rewriting.
+  ext vs αs
+  simp only [dt_tensor_eval, MultilinearMap.add_apply]
+  have h_fun : (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (T₁ + T₂) vs αs)
+      = (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X T₁ vs αs)
+        + (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X T₂ vs αs) := by
+    funext τ
+    change nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (T₁ + T₂) vs αs =
+        nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X T₁ vs αs +
+        nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X T₂ vs αs
+    rw [nabla_add emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X T₁ T₂]
+    simp [MultilinearMap.add_apply]
+  rw [h_fun, td.dt_apply_add _ _ _ (h₁ vs αs) (h₂ vs αs)]
 
 /-- conn_var_tensor commutes with constant R-scalar multiplication. -/
 theorem conn_var_tensor_smul
@@ -205,18 +335,31 @@ theorem conn_var_tensor_smul
     (ha_fam : ∀ τ, ∀ X Y Z, conn_fam τ X (Y + Z) = conn_fam τ X Y + conn_fam τ X Z)
     (hl_fam : ∀ τ, ∀ X (f : R) Y,
       conn_fam τ X (f • Y) = (emb.embed X) f • Y + f • conn_fam τ X Y)
-    (t : Time) (X : V) {r s : ℕ} (c : R) (T : TensorData R V r s) :
-    conn_var_tensor emb td conn_fam ha_fam hl_fam t X (c • T) =
-    c • conn_var_tensor emb td conn_fam ha_fam hl_fam t X T := by
+    (t : Time) (X : V) {r s : ℕ} (c : R) (T : TensorData R V r s)
+    (hT_nabla : ∀ vs αs, td.isSmoothFam
+      (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X T vs αs))
+    (h_cT_nabla : ∀ vs αs, td.isSmoothFam
+      (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (c • T) vs αs)) :
+    conn_var_tensor emb td conn_fam ha_fam hl_fam t X (c • T) h_cT_nabla =
+    c • conn_var_tensor emb td conn_fam ha_fam hl_fam t X T hT_nabla := by
   simp only [conn_var_tensor]
-  have h : (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (c • T)) =
-      (fun τ => c • nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X T +
-                (emb.embed X) c • T) := by
-    funext τ; ext vs αs
-    rw [nabla_smul emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X c T vs αs]
-    simp [MultilinearMap.add_apply, MultilinearMap.smul_apply, smul_eq_mul]; ring
-  rw [h, dt_tensor_add, dt_tensor_smul_const, dt_tensor_const]
-  simp [add_zero]
+  -- Again argue pointwise.
+  ext vs αs
+  simp only [dt_tensor_eval, MultilinearMap.smul_apply, smul_eq_mul]
+  have h_fun :
+      (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (c • T) vs αs) =
+      (fun _ => (emb.embed X) c * T vs αs) +
+      (fun τ => c * nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X T vs αs) := by
+    funext τ
+    change nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (c • T) vs αs =
+      (emb.embed X) c * T vs αs + c * nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X T vs αs
+    exact nabla_smul emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X c T vs αs
+  rw [h_fun,
+      td.dt_apply_add _ _ _
+        (td.isSmoothFam_const ((emb.embed X) c * T vs αs))
+        (td.isSmoothFam_const_mul c _ (hT_nabla vs αs)),
+      td.dt_apply_const, zero_add,
+      td.dt_apply_const_mul c _ t (hT_nabla vs αs)]
 
 end VaryingConnT
 
@@ -235,9 +378,11 @@ variable [CommRing A] [Algebra R A]
     This is the canonical way to express "∂_t commutes with constant covectors"
     in the transparent tensor framework. Proof by rfl. -/
 theorem t_linear_map (td : TimeDerivativeData R A Time) (t : Time)
-    (ω : V →ₗ[R] R) (F : Time → V) :
+    (ω : V →ₗ[R] R) (F : Time → V)
+    (hVF : ∀ vs αs, td.isSmoothFam
+      (fun τ => vectorToData (R := R) (F τ) vs αs)) :
     td.dt_apply (fun s => ω (F s)) t =
-    dt_tensor td t (fun s => vectorToData (R := R) (F s)) ![] ![ω] :=
+    dt_tensor td t (fun s => vectorToData (R := R) (F s)) hVF ![] ![ω] :=
   rfl
 
 end TLinearMap
@@ -266,15 +411,42 @@ theorem t_conn_apply
     (conn : V → V → V)
     (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
     (hl : ∀ X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
-    (X : V) (F : Time → V) (t : Time) :
-    dt_tensor td t (fun τ => vectorToData (R := R) (conn X (F τ))) =
-    nabla_tensor emb conn ha hl X (dt_tensor td t (fun τ => vectorToData (R := R) (F τ))) := by
+    (X : V) (F : Time → V) (t : Time)
+    (hVF : ∀ vs αs, td.isSmoothFam
+      (fun τ => vectorToData (R := R) (F τ) vs αs))
+    (hXVF : ∀ vs αs, td.isSmoothFam
+      (fun τ => (emb.embed X) (vectorToData (R := R) (F τ) vs αs)))
+    (hVcF : ∀ vs αs, td.isSmoothFam
+      (fun τ => vectorToData (R := R) (conn X (F τ)) vs αs))
+    (hN_VF : ∀ vs αs, td.isSmoothFam
+      (fun τ => nabla_tensor emb conn ha hl X (vectorToData (R := R) (F τ)) vs αs)) :
+    dt_tensor td t (fun τ => vectorToData (R := R) (conn X (F τ))) hVcF =
+    nabla_tensor emb conn ha hl X
+      (dt_tensor td t (fun τ => vectorToData (R := R) (F τ)) hVF) := by
   -- Step 1: Rewrite LHS using nabla_vector in reverse
   have h_eq : (fun τ => vectorToData (R := R) (conn X (F τ))) =
       (fun τ => nabla_tensor emb conn ha hl X (vectorToData (R := R) (F τ))) := by
     funext τ; exact (nabla_vector emb conn ha hl X (F τ)).symm
-  rw [h_eq]
-  -- Step 2: Apply t_nabla_tensor (∂_t commutes with ∇ for fixed connection)
-  exact t_nabla_tensor emb td h_st conn ha hl X (fun τ => vectorToData (R := R) (F τ)) t
+  -- We cannot `rw [h_eq]` because the smoothness hypothesis also depends on the
+  -- function. Instead argue pointwise via dt_tensor_eval.
+  ext vs αs
+  simp only [dt_tensor_eval]
+  have h_scalar : (fun τ => vectorToData (R := R) (conn X (F τ)) vs αs) =
+      (fun τ => nabla_tensor emb conn ha hl X (vectorToData (R := R) (F τ)) vs αs) := by
+    funext τ
+    have := nabla_vector emb conn ha hl X (F τ)
+    -- `nabla_vector` says vectorToData(conn X v) = nabla_tensor X (vectorToData v)
+    rw [this]
+  rw [h_scalar]
+  -- Now the goal is the scalar form of t_nabla_tensor.
+  have h_eq_lambda : (fun τ => nabla_tensor emb conn ha hl X
+      (vectorToData (R := R) (F τ))) =
+      (fun τ => nabla_tensor emb conn ha hl X (vectorToData (R := R) (F τ))) := rfl
+  have h_tens := t_nabla_tensor emb td h_st conn ha hl X
+    (fun τ => vectorToData (R := R) (F τ)) t hVF hXVF hN_VF
+  -- h_tens : dt_tensor td t (fun τ => nabla X (vectorToData F τ)) hN_VF =
+  --         nabla X (dt_tensor td t (fun τ => vectorToData F τ) hVF)
+  have h_eval := congr_arg (fun (D : TensorData R V 1 0) => D vs αs) h_tens
+  simpa [dt_tensor_eval] using h_eval
 
 end TConnApply

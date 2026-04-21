@@ -41,20 +41,23 @@ theorem hessian_raise_variation
     (emb : DerivationEmbedding k R V)
     (td : TimeDerivativeData R A Time)
     (_atr : AbstractTrace R V)
-    (g_fam : Time → MetricDuality R V) 
+    (g_fam : Time → MetricDuality R V)
+    (h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs))
     (conn_fam : Time → V → V → V)
     (_ha_fam : ∀ s, ∀ X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
     (_hal_fam : ∀ s, ∀ X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z)
     (_hsl_fam : ∀ s, ∀ (f : R) X Z, conn_fam s (f • X) Z = f • conn_fam s X Z)
     (_hl_fam : ∀ s, ∀ X (f : R) Y, conn_fam s X (f • Y) = (emb.embed X) f • Y + f • conn_fam s X Y)
-    (h_mvp : MetricBilinProductRule td g_fam)
+    (h_mvp : MetricBilinProductRule td g_fam h_met)
     (hessian_fam : Time → TensorData R V 0 2)
+    (h_hess_smooth : ∀ vs αs, td.isSmoothFam
+      (fun τ => hessian_fam τ vs αs))
     (h_sharp_fam : Time → V → V)
     (h_sharp_spec : ∀ s X Y, (g_fam s).g (h_sharp_fam s X) Y = hessian_fam s ![X, Y] ![])
     (t : Time) (X Y : V) :
     td.dt_apply (fun s => (g_fam t).g (h_sharp_fam s X) Y) t =
-    dt_tensor td t hessian_fam ![X, Y] ![] -
-    metric_var_form td g_fam t ![h_sharp_fam t X, Y] ![] := by
+    dt_tensor td t hessian_fam h_hess_smooth ![X, Y] ![] -
+    metric_var_form td g_fam h_met t ![h_sharp_fam t X, Y] ![] := by
   -- g(s)(sharp_s(Hess_s(X,·)), Y) = Hess_s(X, Y) for all s
   have h_feq : (fun s => (g_fam s).g (h_sharp_fam s X) Y) =
       (fun s => hessian_fam s ![X, Y] ![]) :=
@@ -92,15 +95,19 @@ def LaplacianProductRule
     (_emb : DerivationEmbedding k R V)
     (td : TimeDerivativeData R A Time)
     (atr : AbstractTrace R V)
-    (g_fam : Time → MetricDuality R V) 
-    (hessian_fam : Time → TensorData R V 0 2) : Prop :=
+    (g_fam : Time → MetricDuality R V)
+    (h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs))
+    (hessian_fam : Time → TensorData R V 0 2)
+    (h_hess_smooth : ∀ vs αs, td.isSmoothFam
+      (fun τ => hessian_fam τ vs αs))
+    : Prop :=
   ∀ t,
     td.dt_apply (fun s =>
       metric_trace (g_fam s) atr (0 : Fin 2) (0 : Fin 1) (hessian_fam s) ![] ![]) t =
     -tensor_inner_02 (g_fam t) atr
-      (metric_var_form td g_fam t) (hessian_fam t) +
+      (metric_var_form td g_fam h_met t) (hessian_fam t) +
     metric_trace (g_fam t) atr (0 : Fin 2) (0 : Fin 1)
-      (dt_tensor td t hessian_fam) ![] ![]
+      (dt_tensor td t hessian_fam h_hess_smooth) ![] ![]
 
 /-- Laplacian evolution under Ricci flow:
 
@@ -116,14 +123,17 @@ theorem laplacian_evolution
     (td : TimeDerivativeData R A Time)
     (atr : AbstractTrace R V)
     (g_fam : Time → MetricDuality R V)
+    (h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs))
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ s, ∀ X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
     (hal_fam : ∀ s, ∀ X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z)
     (hsl_fam : ∀ s, ∀ (f : R) X Z, conn_fam s (f • X) Z = f • conn_fam s X Z)
     (hl_fam : ∀ s, ∀ X (f : R) Y, conn_fam s X (f • Y) = (emb.embed X) f • Y + f • conn_fam s X Y)
-    (h_rf : IsRicciFlow emb td atr g_fam conn_fam ha_fam hal_fam hsl_fam hl_fam)
+    (h_rf : IsRicciFlow emb td atr g_fam h_met conn_fam ha_fam hal_fam hsl_fam hl_fam)
     (hessian_fam : Time → TensorData R V 0 2)
-    (h_lap_prod : LaplacianProductRule emb td atr g_fam hessian_fam)
+    (h_hess_smooth : ∀ vs αs, td.isSmoothFam
+      (fun τ => hessian_fam τ vs αs))
+    (h_lap_prod : LaplacianProductRule emb td atr g_fam h_met hessian_fam h_hess_smooth)
     (t : Time) :
     td.dt_apply (fun s =>
       metric_trace (g_fam s) atr (0 : Fin 2) (0 : Fin 1) (hessian_fam s) ![] ![]) t =
@@ -131,14 +141,14 @@ theorem laplacian_evolution
       (ricciForm_tensor emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr)
       (hessian_fam t) +
     metric_trace (g_fam t) atr (0 : Fin 2) (0 : Fin 1)
-      (dt_tensor td t hessian_fam) ![] ![] := by
+      (dt_tensor td t hessian_fam h_hess_smooth) ![] ![] := by
   -- Apply the product rule
   have h_prod := h_lap_prod t
   -- Ricci flow: metric_var = -2 • Rc
   have h_rf_eq := h_rf.evolution t
   -- Compute -inner(-2•Rc, Hess) = 2*inner(Rc, Hess)
   have h_inner : -tensor_inner_02 (g_fam t) atr
-      (metric_var_form td g_fam t) (hessian_fam t) =
+      (metric_var_form td g_fam h_met t) (hessian_fam t) =
     2 * tensor_inner_02 (g_fam t) atr
       (ricciForm_tensor emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr)
       (hessian_fam t) := by

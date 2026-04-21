@@ -564,20 +564,24 @@ variable {R V : Type*} {A Time : Type*} [CommRing R] [AddCommGroup V] [Module R 
   [CommRing A] [Algebra R A]
 
 theorem t_const_V (td : TimeDerivativeData R A Time) (t : Time) (X : V) :
-    dt_tensor td t (fun _ => vectorToData (R := R) X) = 0 :=
+    dt_tensor td t (fun _ => vectorToData (R := R) X)
+      (fun vs αs => td.isSmoothFam_const (vectorToData (R := R) X vs αs)) = 0 :=
   dt_tensor_const td t (vectorToData X)
 
 theorem t_const_scalar (td : TimeDerivativeData R A Time) (t : Time) (c : R) :
-    dt_tensor td t (fun _ => scalarToData (R := R) (V := V) c) = 0 :=
+    dt_tensor td t (fun _ => scalarToData (R := R) (V := V) c)
+      (fun vs αs => td.isSmoothFam_const
+        (scalarToData (R := R) (V := V) c vs αs)) = 0 :=
   dt_tensor_const td t (scalarToData c)
 
 /-- ∂_t(g(s)(X, Y)) = (∂_t g_tensor)(X, Y) for constant vector arguments. -/
 theorem dt_metric_const_args
     (td : TimeDerivativeData R A Time)
     (met_fam : Time → MetricDuality R V)
+    (h_met : ∀ vs αs, td.isSmoothFam (fun τ => (met_fam τ).g_tensor vs αs))
     (X Y : V) (t : Time) :
     td.dt_apply (fun s => (met_fam s).g X Y) t =
-    dt_tensor td t (fun s => (met_fam s).g_tensor) ![X, Y] ![] := by
+    dt_tensor td t (fun s => (met_fam s).g_tensor) h_met ![X, Y] ![] := by
   rfl
 
 /-- ∂_t of metric with one varying left argument:

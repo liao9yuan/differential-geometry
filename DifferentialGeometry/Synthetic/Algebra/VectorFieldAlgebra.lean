@@ -30,24 +30,35 @@ structure DerivationEmbedding (k R V : Type*)
     The algebra A generalizes `Time → R`: for the pure abstract layer, A = Time → R
     with Pi instances; for the SmoothRicciFlow layer, A can be a restricted sub-algebra
     (e.g., smooth-in-time functions, or a jet algebra) where the Derivation axioms
-    hold unconditionally.
-    `lift` injects `Time → R` into `A`; `eval` projects back (both ring homs).
+    hold on the distinguished class of smooth families.
+    `lift` injects `Time → R` into `A`; `eval` projects back.
     `eval ∘ lift = id` (round-trip).
+    `isSmoothFam` identifies the distinguished "smooth-in-time" families: the
+    `lift`/`dt` machinery need only respect addition/multiplication on these
+    families, and callers propagate `isSmoothFam` hypotheses through proofs.
     Additivity, Leibniz, dt(constant)=0 are FREE from Mathlib's `Derivation`. -/
 structure TimeDerivativeData (R : Type*) (A : Type*) (Time : Type*)
     [CommRing R] [CommRing A] [Algebra R A] where
   /-- The time derivation on the abstract algebra A. -/
   dt : Derivation R A A
-  /-- Lift a time-dependent R-valued function into A (ring homomorphism). -/
+  /-- Lift a time-dependent R-valued function into A. -/
   lift : (Time → R) → A
-  /-- Evaluate an A-element at a time point (ring homomorphism to Time → R). -/
+  /-- Evaluate an A-element at a time point. -/
   eval : A → Time → R
-  /-- eval ∘ lift = id (round-trip). -/
-  eval_lift : ∀ (f : Time → R) (t : Time), eval (lift f) t = f t
-  /-- lift preserves addition. -/
-  lift_add : ∀ (f g : Time → R), lift (f + g) = lift f + lift g
-  /-- lift preserves multiplication. -/
-  lift_mul : ∀ (f g : Time → R), lift (f * g) = lift f * lift g
+  /-- A predicate identifying "smooth-in-time" families. Concrete realizations
+      restrict `lift`/`dt` to honor this predicate; abstract reasoning may
+      propagate the predicate as hypothesis. -/
+  isSmoothFam : (Time → R) → Prop
+  /-- `eval ∘ lift = id` on smooth families. For non-smooth `f`, concrete
+      realisations typically send `lift f` to zero, so this equation is not
+      expected to hold universally. -/
+  eval_lift : ∀ (f : Time → R), isSmoothFam f → ∀ (t : Time), eval (lift f) t = f t
+  /-- lift preserves addition on smooth families. -/
+  lift_add : ∀ (f g : Time → R), isSmoothFam f → isSmoothFam g →
+    lift (f + g) = lift f + lift g
+  /-- lift preserves multiplication on smooth families. -/
+  lift_mul : ∀ (f g : Time → R), isSmoothFam f → isSmoothFam g →
+    lift (f * g) = lift f * lift g
   /-- lift preserves R-constants (= time-independent functions). -/
   lift_algebraMap : ∀ (c : R), lift (fun _ => c) = algebraMap R A c
   /-- eval preserves addition. -/
@@ -56,6 +67,16 @@ structure TimeDerivativeData (R : Type*) (A : Type*) (Time : Type*)
   eval_mul : ∀ (a b : A) (t : Time), eval (a * b) t = eval a t * eval b t
   /-- eval preserves R-constants. -/
   eval_algebraMap : ∀ (c : R) (t : Time), eval (algebraMap R A c) t = c
+  /-- Constants are smooth families. -/
+  isSmoothFam_const : ∀ (c : R), isSmoothFam (fun _ => c)
+  /-- Smooth families are closed under addition. -/
+  isSmoothFam_add : ∀ (f g : Time → R), isSmoothFam f → isSmoothFam g →
+    isSmoothFam (f + g)
+  /-- Smooth families are closed under multiplication. -/
+  isSmoothFam_mul : ∀ (f g : Time → R), isSmoothFam f → isSmoothFam g →
+    isSmoothFam (f * g)
+  /-- Smooth families are closed under negation. -/
+  isSmoothFam_neg : ∀ (f : Time → R), isSmoothFam f → isSmoothFam (-f)
 
 -- ============================================================
 -- Definitions from DerivationEmbedding
@@ -340,10 +361,42 @@ theorem TimeDerivativeData.eval_zero (td : TimeDerivativeData R A Time) (t : Tim
   have h : (0 : A) = algebraMap R A 0 := by simp
   rw [h, td.eval_algebraMap]
 
+-- Declare the derived isSmoothFam closure lemmas FIRST (inside the DtApply section)
+-- so they are available to `dt_apply_*` proofs below.
+
+theorem TimeDerivativeData.isSmoothFam_sub (td : TimeDerivativeData R A Time)
+    (f g : Time → R) (hf : td.isSmoothFam f) (hg : td.isSmoothFam g) :
+    td.isSmoothFam (f - g) := by
+  have heq : f - g = f + (-g) := by ext s; simp [sub_eq_add_neg]
+  rw [heq]; exact td.isSmoothFam_add _ _ hf (td.isSmoothFam_neg _ hg)
+
+theorem TimeDerivativeData.isSmoothFam_sum (td : TimeDerivativeData R A Time)
+    {ι : Type*} (s : Finset ι) (f : ι → Time → R)
+    (h : ∀ i ∈ s, td.isSmoothFam (f i)) :
+    td.isSmoothFam (∑ i ∈ s, f i) := by
+  induction s using Finset.cons_induction with
+  | empty =>
+    simp only [Finset.sum_empty]
+    change td.isSmoothFam (fun _ => (0 : R))
+    exact td.isSmoothFam_const 0
+  | cons a s' _ha ih =>
+    rw [Finset.sum_cons]
+    have h_head : td.isSmoothFam (f a) := h a (Finset.mem_cons_self _ _)
+    have h_tail : ∀ i ∈ s', td.isSmoothFam (f i) :=
+      fun i hi => h i (Finset.mem_cons.mpr (Or.inr hi))
+    exact td.isSmoothFam_add _ _ h_head (ih h_tail)
+
+theorem TimeDerivativeData.isSmoothFam_const_mul (td : TimeDerivativeData R A Time)
+    (c : R) (f : Time → R) (hf : td.isSmoothFam f) :
+    td.isSmoothFam (fun s => c * f s) := by
+  have heq : (fun s => c * f s) = (fun _ => c) * f := by ext s; rfl
+  rw [heq]; exact td.isSmoothFam_mul _ _ (td.isSmoothFam_const c) hf
+
 theorem TimeDerivativeData.dt_apply_add (td : TimeDerivativeData R A Time)
-    (f g : Time → R) (t : Time) :
+    (f g : Time → R) (t : Time)
+    (hf : td.isSmoothFam f) (hg : td.isSmoothFam g) :
     td.dt_apply (f + g) t = td.dt_apply f t + td.dt_apply g t := by
-  simp only [TimeDerivativeData.dt_apply, td.lift_add, map_add, td.eval_add]
+  simp only [TimeDerivativeData.dt_apply, td.lift_add f g hf hg, map_add, td.eval_add]
 
 theorem TimeDerivativeData.dt_apply_const (td : TimeDerivativeData R A Time)
     (c : R) (t : Time) :
@@ -352,22 +405,24 @@ theorem TimeDerivativeData.dt_apply_const (td : TimeDerivativeData R A Time)
     Derivation.map_algebraMap, td.eval_zero]
 
 theorem TimeDerivativeData.dt_apply_mul (td : TimeDerivativeData R A Time)
-    (f g : Time → R) (t : Time) :
+    (f g : Time → R) (t : Time)
+    (hf : td.isSmoothFam f) (hg : td.isSmoothFam g) :
     td.dt_apply (f * g) t = f t * td.dt_apply g t + g t * td.dt_apply f t := by
-  simp only [TimeDerivativeData.dt_apply, td.lift_mul]
+  simp only [TimeDerivativeData.dt_apply, td.lift_mul f g hf hg]
   rw [td.dt.leibniz (td.lift f) (td.lift g)]
-  simp only [td.eval_add, td.eval_mul, smul_eq_mul, td.eval_lift]
+  simp only [td.eval_add, td.eval_mul, smul_eq_mul, td.eval_lift f hf, td.eval_lift g hg]
 
 theorem TimeDerivativeData.dt_apply_const_mul (td : TimeDerivativeData R A Time)
-    (c : R) (f : Time → R) (t : Time) :
+    (c : R) (f : Time → R) (t : Time) (hf : td.isSmoothFam f) :
     td.dt_apply (fun s => c * f s) t = c * td.dt_apply f t := by
   have hcf : (fun s => c * f s) = (fun _ => c) * f := by ext s; rfl
-  rw [hcf, td.dt_apply_mul, td.dt_apply_const, mul_zero, add_zero]
+  rw [hcf, td.dt_apply_mul _ _ _ (td.isSmoothFam_const c) hf,
+      td.dt_apply_const, mul_zero, add_zero]
 
 theorem TimeDerivativeData.dt_apply_neg (td : TimeDerivativeData R A Time)
-    (f : Time → R) (t : Time) :
+    (f : Time → R) (t : Time) (hf : td.isSmoothFam f) :
     td.dt_apply (-f) t = -td.dt_apply f t := by
-  have h := td.dt_apply_add f (-f) t
+  have h := td.dt_apply_add f (-f) t hf (td.isSmoothFam_neg f hf)
   simp only [add_neg_cancel] at h
   have h0 : td.dt_apply 0 t = 0 := by
     change td.dt_apply (fun _ => (0 : R)) t = 0
@@ -376,21 +431,30 @@ theorem TimeDerivativeData.dt_apply_neg (td : TimeDerivativeData R A Time)
   exact eq_neg_of_add_eq_zero_right h.symm
 
 theorem TimeDerivativeData.dt_apply_sub (td : TimeDerivativeData R A Time)
-    (f g : Time → R) (t : Time) :
+    (f g : Time → R) (t : Time)
+    (hf : td.isSmoothFam f) (hg : td.isSmoothFam g) :
     td.dt_apply (f - g) t = td.dt_apply f t - td.dt_apply g t := by
-  have : f - g = f + (-g) := by ext s; simp [sub_eq_add_neg]
-  rw [this, td.dt_apply_add, td.dt_apply_neg]; ring
+  have heq : f - g = f + (-g) := by ext s; simp [sub_eq_add_neg]
+  rw [heq, td.dt_apply_add _ _ _ hf (td.isSmoothFam_neg g hg),
+      td.dt_apply_neg _ _ hg]; ring
 
 theorem TimeDerivativeData.dt_apply_sum (td : TimeDerivativeData R A Time)
-    {ι : Type*} (s : Finset ι) (f : ι → Time → R) (t : Time) :
+    {ι : Type*} (s : Finset ι) (f : ι → Time → R) (t : Time)
+    (hfs : ∀ i ∈ s, td.isSmoothFam (f i)) :
     td.dt_apply (∑ i ∈ s, f i) t = ∑ i ∈ s, td.dt_apply (f i) t := by
   induction s using Finset.cons_induction with
   | empty =>
     simp only [Finset.sum_empty]
     change td.dt_apply (fun _ => (0 : R)) t = 0
     exact td.dt_apply_const 0 t
-  | cons a s ha ih =>
-    rw [Finset.sum_cons, td.dt_apply_add, ih, Finset.sum_cons]
+  | cons a s' _ha ih =>
+    have h_head : td.isSmoothFam (f a) := hfs a (Finset.mem_cons_self _ _)
+    have h_tail : ∀ i ∈ s', td.isSmoothFam (f i) :=
+      fun i hi => hfs i (Finset.mem_cons.mpr (Or.inr hi))
+    have h_tail_sum : td.isSmoothFam (∑ i ∈ s', f i) :=
+      td.isSmoothFam_sum s' f h_tail
+    rw [Finset.sum_cons, td.dt_apply_add _ _ _ h_head h_tail_sum, ih h_tail,
+        Finset.sum_cons]
 
 end DtApply
 
@@ -405,13 +469,16 @@ instance piDFunLike (R Time : Type*) : DFunLike (Time → R) Time (fun _ => R) w
   coe f := f
   coe_injective' := fun _ _ h => h
 
-/-- Spatial and temporal derivatives commute.
-    For any time-dependent function `f : Time → R`,
-    `dt_apply (s ↦ X(f s)) t = X(dt_apply f t)`. -/
+/-- Spatial and temporal derivatives commute on smooth families.
+    For any vector field `X` and smooth time-dependent function `f : Time → R`,
+    `dt_apply (s ↦ X(f s)) t = X(dt_apply f t)`. The `isSmoothFam f` hypothesis
+    is required because in concrete realizations `lift` only honors addition/
+    multiplication on the distinguished smooth class, and the relevant Schwarz-type
+    identities are only guaranteed there. -/
 def SpatialTemporalComm {k R V : Type*} {A Time : Type*}
     [Field k] [CommRing R] [Algebra k R]
     [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
     [CommRing A] [Algebra R A]
     (emb : DerivationEmbedding k R V) (td : TimeDerivativeData R A Time) : Prop :=
-  ∀ (X : V) (f : Time → R) (t : Time),
+  ∀ (X : V) (f : Time → R) (t : Time), td.isSmoothFam f →
     td.dt_apply (fun s => (emb.embed X) (f s)) t = (emb.embed X) (td.dt_apply f t)

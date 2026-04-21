@@ -46,6 +46,8 @@ import DifferentialGeometry.Synthetic.Realization.GenHomNabla
 import DifferentialGeometry.Synthetic.Realization.TensorRSNabla
 import DifferentialGeometry.Synthetic.Realization.NablaContractComm
 import DifferentialGeometry.Synthetic.Realization.TensorContract
+import DifferentialGeometry.Synthetic.Realization.TimeDeriv
+import DifferentialGeometry.Synthetic.Realization.TimeNabla
 
 -- Ricci Flow
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Basic
@@ -63,6 +65,7 @@ import DifferentialGeometry.Synthetic.Flow.RicciFlow.Calculus
 import DifferentialGeometry.VectorBundle.Dual
 import DifferentialGeometry.VectorBundle.Equiv
 import DifferentialGeometry.VectorBundle.Frame
+import DifferentialGeometry.VectorBundle.PartialMfderiv
 import DifferentialGeometry.VectorBundle.Section
 import DifferentialGeometry.VectorBundle.Zero
 

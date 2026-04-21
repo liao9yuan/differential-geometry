@@ -71,6 +71,8 @@ structure RicciFlowBundle (k R V Time A : Type*)
   td : TimeDerivativeData R A Time
   /-- Time-dependent family of metrics. -/
   g_fam : Time → MetricDuality R V
+  /-- Smoothness of the metric family's scalar slices. -/
+  h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs)
   /-- Time-dependent family of connections. -/
   conn_fam : Time → V → V → V
   /-- Connection right additivity for each time. -/
@@ -92,6 +94,6 @@ structure RicciFlowBundle (k R V Time A : Type*)
   /-- Characteristic ≠ 2. -/
   char_ne_2 : ∀ (a : R), (2 : R) * a = 0 → a = 0
   /-- The Ricci flow equation: ∂_t g = -2 Rc, with Levi-Civita at each time. -/
-  ricci_flow : IsRicciFlow emb td atr g_fam conn_fam ha_fam hal_fam hsl_fam hl_fam
+  ricci_flow : IsRicciFlow emb td atr g_fam h_met conn_fam ha_fam hal_fam hsl_fam hl_fam
   /-- Product rule for ∂_t and ∇ with varying connections. -/
   nabla_time_product_rule : NablaTimeProductRule emb td conn_fam ha_fam hl_fam
