@@ -73,6 +73,8 @@ structure RicciFlowBundle (k R V Time A : Type*)
   td : TimeDerivativeData R A Time
   /-- Regularity filter + closure axioms for `td`. -/
   [td_regular : TimeRegularFam td]
+  /-- Joint (2-time) regularity for `td`, needed by the ∂_t/∇ product rule. -/
+  [td_regular2 : TimeRegularFam2 td]
   /-- Time-dependent family of metrics. -/
   g_fam : Time → MetricDuality R V
   /-- Smoothness of the metric family's scalar slices. -/
@@ -101,3 +103,4 @@ structure RicciFlowBundle (k R V Time A : Type*)
   nabla_time_product_rule : NablaTimeProductRule emb td conn_fam ha_fam hl_fam
 
 attribute [instance] RicciFlowBundle.td_regular
+attribute [instance] RicciFlowBundle.td_regular2

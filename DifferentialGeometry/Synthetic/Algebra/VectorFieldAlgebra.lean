@@ -603,3 +603,18 @@ class TimeRegularFam2 {R : Type*} {A : Type*} {Time : Type*}
   dt_apply_diag_leibniz : ∀ G (t : Time), isSmoothFam2 G →
       td.dt_apply (fun τ => G (τ, τ)) t =
       td.dt_apply (fun τ => G (τ, t)) t + td.dt_apply (fun τ => G (t, τ)) t
+
+/-- Subtraction closure for 2-time smooth families, derived from `isSmoothFam2_add`
+    and `isSmoothFam2_neg`. Uses the pointwise identity `f - g = f + (-g)`. -/
+theorem TimeRegularFam2.isSmoothFam2_sub
+    {R : Type*} {A : Type*} {Time : Type*}
+    [CommRing R] [CommRing A] [Algebra R A]
+    {td : TimeDerivativeData R A Time} [TimeRegularFam td] [TimeRegularFam2 td]
+    (f g : Time × Time → R)
+    (hf : TimeRegularFam2.isSmoothFam2 (td := td) f)
+    (hg : TimeRegularFam2.isSmoothFam2 (td := td) g) :
+    TimeRegularFam2.isSmoothFam2 (td := td) (f - g) := by
+  have h_eq : f - g = f + (-g) := by
+    funext p; simp [sub_eq_add_neg]
+  rw [h_eq]
+  exact TimeRegularFam2.isSmoothFam2_add _ _ hf (TimeRegularFam2.isSmoothFam2_neg _ hg)

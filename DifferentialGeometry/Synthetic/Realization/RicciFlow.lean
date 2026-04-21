@@ -30,8 +30,6 @@ Besides the ambient manifold `I`, `M`:
 * `cov_fam : ℝ → CovariantDerivative I E (TangentSpace I)` — the time-dependent
   covariant derivative, provided by the user (Levi-Civita of each `g_fam t`).
 * `h_met` — pointwise smoothness in `t` of `(g_fam t).inner v w`.
-* `h_2smooth_v, h_2smooth_c` — two-time joint-smoothness witnesses consumed by
-  `concrete_nabla_time_product_rule`.
 * `h_ricci_flow` — the Ricci flow PDE (`∂_t g = -2 Rc`) together with
   `IsLeviCivita` at every time.
 
@@ -68,7 +66,7 @@ The only genuinely mathematical inputs are:
 
 * the metric family `g_fam` and the user-supplied covariant derivative family
   `cov_fam`,
-* the four smoothness witnesses `h_met`, `h_2smooth_v`, `h_2smooth_c`,
+* the metric smoothness witness `h_met`,
 * the Ricci flow PDE `h_ricci_flow` (which also asserts that each `cov_fam t`
   is Levi-Civita for `g_fam t`).
 
@@ -86,32 +84,6 @@ noncomputable def concreteRicciFlowBundle
           (fun τ => ((concreteMetricDuality I M (g_fam τ)).g_tensor :
             TensorData C^∞⟮I, M; ℝ⟯
               Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ 0 2) vs αs))
-    (h_2smooth_v : ∀ {r s : ℕ}
-        (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
-        (T : ℝ → TensorData C^∞⟮I, M; ℝ⟯
-              Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ r s)
-        (i : Fin s)
-        (vs : Fin s → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
-        (αs : Fin r →
-          Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ →ₗ[C^∞⟮I, M; ℝ⟯] C^∞⟮I, M; ℝ⟯),
-        TimeRegularFam2.isSmoothFam2 (td := concreteTimeDerivativeData I M)
-          (fun p : ℝ × ℝ =>
-            T p.1 (Function.update vs i (concreteConn I M (cov_fam p.2) X (vs i))) αs))
-    (h_2smooth_c : ∀ {r s : ℕ}
-        (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
-        (T : ℝ → TensorData C^∞⟮I, M; ℝ⟯
-              Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ r s)
-        (j : Fin r)
-        (vs : Fin s → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
-        (αs : Fin r →
-          Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ →ₗ[C^∞⟮I, M; ℝ⟯] C^∞⟮I, M; ℝ⟯),
-        TimeRegularFam2.isSmoothFam2 (td := concreteTimeDerivativeData I M)
-          (fun p : ℝ × ℝ =>
-            T p.1 vs (Function.update αs j
-              (nabla_dual (concreteDerivationEmbedding I M)
-                (concreteConn I M (cov_fam p.2))
-                (concreteConn_add_right I M (cov_fam p.2))
-                (concreteConn_leibniz I M (cov_fam p.2)) X (αs j)))))
     (h_ricci_flow : IsRicciFlow
         (concreteDerivationEmbedding I M)
         (concreteTimeDerivativeData I M)
@@ -153,8 +125,6 @@ noncomputable def concreteRicciFlowBundle
       (fun t => concreteConn I M (cov_fam t))
       (fun t => concreteConn_add_right I M (cov_fam t))
       (fun t => concreteConn_leibniz I M (cov_fam t))
-      h_2smooth_v
-      h_2smooth_c
 
 /-- **Downstream demo.** The concrete `RicciFlowBundle` carries a Levi-Civita
 connection at every time, obtained by invoking the Synthetic extractor
@@ -171,32 +141,6 @@ example
           (fun τ => ((concreteMetricDuality I M (g_fam τ)).g_tensor :
             TensorData C^∞⟮I, M; ℝ⟯
               Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ 0 2) vs αs))
-    (h_2smooth_v : ∀ {r s : ℕ}
-        (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
-        (T : ℝ → TensorData C^∞⟮I, M; ℝ⟯
-              Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ r s)
-        (i : Fin s)
-        (vs : Fin s → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
-        (αs : Fin r →
-          Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ →ₗ[C^∞⟮I, M; ℝ⟯] C^∞⟮I, M; ℝ⟯),
-        TimeRegularFam2.isSmoothFam2 (td := concreteTimeDerivativeData I M)
-          (fun p : ℝ × ℝ =>
-            T p.1 (Function.update vs i (concreteConn I M (cov_fam p.2) X (vs i))) αs))
-    (h_2smooth_c : ∀ {r s : ℕ}
-        (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
-        (T : ℝ → TensorData C^∞⟮I, M; ℝ⟯
-              Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ r s)
-        (j : Fin r)
-        (vs : Fin s → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
-        (αs : Fin r →
-          Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ →ₗ[C^∞⟮I, M; ℝ⟯] C^∞⟮I, M; ℝ⟯),
-        TimeRegularFam2.isSmoothFam2 (td := concreteTimeDerivativeData I M)
-          (fun p : ℝ × ℝ =>
-            T p.1 vs (Function.update αs j
-              (nabla_dual (concreteDerivationEmbedding I M)
-                (concreteConn I M (cov_fam p.2))
-                (concreteConn_add_right I M (cov_fam p.2))
-                (concreteConn_leibniz I M (cov_fam p.2)) X (αs j)))))
     (h_ricci_flow : IsRicciFlow
         (concreteDerivationEmbedding I M)
         (concreteTimeDerivativeData I M)
@@ -210,11 +154,11 @@ example
         (fun t => concreteConn_leibniz I M (cov_fam t)))
     (t : ℝ) :
     IsLeviCivita
-      (concreteRicciFlowBundle I M g_fam cov_fam h_met h_2smooth_v h_2smooth_c
+      (concreteRicciFlowBundle I M g_fam cov_fam h_met
         h_ricci_flow).emb
-      ((concreteRicciFlowBundle I M g_fam cov_fam h_met h_2smooth_v h_2smooth_c
+      ((concreteRicciFlowBundle I M g_fam cov_fam h_met
         h_ricci_flow).conn_fam t)
-      ((concreteRicciFlowBundle I M g_fam cov_fam h_met h_2smooth_v h_2smooth_c
+      ((concreteRicciFlowBundle I M g_fam cov_fam h_met
         h_ricci_flow).g_fam t) :=
   h_ricci_flow.levi_civita t
 

@@ -75,40 +75,136 @@ theorem concrete_nabla_time_product_rule
     (ha_fam : ∀ τ X Y Z, conn_fam τ X (Y + Z) = conn_fam τ X Y + conn_fam τ X Z)
     (hl_fam : ∀ τ X (f : C^∞⟮I, M; ℝ⟯) Y,
         conn_fam τ X (f • Y) =
-          (concreteDerivationEmbedding I M).embed X f • Y + f • conn_fam τ X Y)
-    (h_2smooth_v : ∀ {r s : ℕ}
-        (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
-        (T : ℝ → TensorData C^∞⟮I, M; ℝ⟯
-          Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ r s)
-        (i : Fin s)
-        (vs : Fin s → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
-        (αs : Fin r →
-          Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ →ₗ[C^∞⟮I, M; ℝ⟯] C^∞⟮I, M; ℝ⟯),
-        TimeRegularFam2.isSmoothFam2 (td := concreteTimeDerivativeData I M)
-          (fun p : ℝ × ℝ =>
-            T p.1 (Function.update vs i (conn_fam p.2 X (vs i))) αs))
-    (h_2smooth_c : ∀ {r s : ℕ}
-        (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
-        (T : ℝ → TensorData C^∞⟮I, M; ℝ⟯
-          Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ r s)
-        (j : Fin r)
-        (vs : Fin s → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
-        (αs : Fin r →
-          Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ →ₗ[C^∞⟮I, M; ℝ⟯] C^∞⟮I, M; ℝ⟯),
-        TimeRegularFam2.isSmoothFam2 (td := concreteTimeDerivativeData I M)
-          (fun p : ℝ × ℝ =>
-            T p.1 vs (Function.update αs j
-              (nabla_dual (concreteDerivationEmbedding I M) (conn_fam p.2)
-                (ha_fam p.2) (hl_fam p.2) X (αs j))))) :
+          (concreteDerivationEmbedding I M).embed X f • Y + f • conn_fam τ X Y) :
     NablaTimeProductRule (concreteDerivationEmbedding I M)
       (concreteTimeDerivativeData I M) conn_fam ha_fam hl_fam := by
-  -- Bind the 8 hypotheses of `NablaTimeProductRule`.
-  intro X r s T t hT hXT h_conn_smooth_v_var h_conn_smooth_c_var hT_nabla
-    h_conn_smooth_v_at h_conn_smooth_c_at h_nabla_t
+  -- Bind the 4 hypotheses of `NablaTimeProductRule` (new signature).
+  intro X r s T t hT hXT h_2smooth_v h_2smooth_c
   -- Short-hands.
   set emb := concreteDerivationEmbedding I M with hemb
   set td := concreteTimeDerivativeData I M with htd
   set h_st := concrete_spatial_temporal_comm_general I M
+  -- Reconstruct the 6 "aggregate" smoothness witnesses that the old 8-hypothesis
+  -- form supplied directly. Each is derived from the two 2-smoothness hypotheses
+  -- via `TimeRegularFam2.diag_isSmoothFam` (varying τ) and
+  -- `slice_right_isSmoothFam` (τ frozen at t).
+  have h_conn_smooth_v_var : ∀ (i : Fin s) vs αs, td.isSmoothFam
+      (fun τ => T τ (Function.update vs i (conn_fam τ X (vs i))) αs) := fun i vs αs =>
+    TimeRegularFam2.diag_isSmoothFam (td := td)
+      (fun p : ℝ × ℝ =>
+        T p.1 (Function.update vs i (conn_fam p.2 X (vs i))) αs)
+      (h_2smooth_v i vs αs)
+  have h_conn_smooth_c_var : ∀ (j : Fin r) vs αs, td.isSmoothFam
+      (fun τ => T τ vs (Function.update αs j
+        (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) := fun j vs αs =>
+    TimeRegularFam2.diag_isSmoothFam (td := td)
+      (fun p : ℝ × ℝ =>
+        T p.1 vs (Function.update αs j
+          (nabla_dual emb (conn_fam p.2) (ha_fam p.2) (hl_fam p.2) X (αs j))))
+      (h_2smooth_c j vs αs)
+  have h_conn_smooth_v_at : ∀ (i : Fin s) vs αs, td.isSmoothFam
+      (fun τ => T t (Function.update vs i (conn_fam τ X (vs i))) αs) := fun i vs αs =>
+    TimeRegularFam2.slice_right_isSmoothFam (td := td)
+      (fun p : ℝ × ℝ =>
+        T p.1 (Function.update vs i (conn_fam p.2 X (vs i))) αs) t
+      (h_2smooth_v i vs αs)
+  have h_conn_smooth_c_at : ∀ (j : Fin r) vs αs, td.isSmoothFam
+      (fun τ => T t vs (Function.update αs j
+        (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) := fun j vs αs =>
+    TimeRegularFam2.slice_right_isSmoothFam (td := td)
+      (fun p : ℝ × ℝ =>
+        T p.1 vs (Function.update αs j
+          (nabla_dual emb (conn_fam p.2) (ha_fam p.2) (hl_fam p.2) X (αs j)))) t
+      (h_2smooth_c j vs αs)
+  -- Inline the same derivation as in `nablaTimeProductRule_hT_nabla_of_aux`.
+  have hT_nabla : ∀ vs αs, td.isSmoothFam
+      (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (T τ) vs αs) := by
+    intro vs αs
+    have h_eq : (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (T τ) vs αs) =
+        (fun τ => (emb.embed X) (T τ vs αs)
+          - ∑ i : Fin s, T τ (Function.update vs i (conn_fam τ X (vs i))) αs
+          - ∑ j : Fin r, T τ vs (Function.update αs j
+              (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) := by
+      funext τ
+      exact nabla_tensor_eval emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (T τ) vs αs
+    rw [h_eq]
+    have h_split : (fun τ => (emb.embed X) (T τ vs αs)
+        - ∑ i : Fin s, T τ (Function.update vs i (conn_fam τ X (vs i))) αs
+        - ∑ j : Fin r, T τ vs (Function.update αs j
+            (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) =
+        (fun τ => (emb.embed X) (T τ vs αs))
+        - (fun τ => ∑ i : Fin s, T τ (Function.update vs i (conn_fam τ X (vs i))) αs)
+        - (fun τ => ∑ j : Fin r, T τ vs (Function.update αs j
+            (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) := by
+      funext τ; simp only [Pi.sub_apply]
+    have h_vec_sum : (fun τ => ∑ i : Fin s,
+        T τ (Function.update vs i (conn_fam τ X (vs i))) αs) =
+        ∑ i : Fin s, (fun τ => T τ (Function.update vs i (conn_fam τ X (vs i))) αs) := by
+      funext τ; simp [Finset.sum_apply]
+    have h_cov_sum : (fun τ => ∑ j : Fin r,
+        T τ vs (Function.update αs j
+          (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) =
+        ∑ j : Fin r, (fun τ => T τ vs (Function.update αs j
+          (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) := by
+      funext τ; simp [Finset.sum_apply]
+    have hS_X : td.isSmoothFam (fun τ => (emb.embed X) (T τ vs αs)) := hXT vs αs
+    have hS_vec_sum : td.isSmoothFam
+        (fun τ => ∑ i : Fin s, T τ (Function.update vs i (conn_fam τ X (vs i))) αs) := by
+      rw [h_vec_sum]
+      exact td.isSmoothFam_sum Finset.univ _ (fun i _ => h_conn_smooth_v_var i vs αs)
+    have hS_cov_sum : td.isSmoothFam
+        (fun τ => ∑ j : Fin r, T τ vs (Function.update αs j
+          (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) := by
+      rw [h_cov_sum]
+      exact td.isSmoothFam_sum Finset.univ _ (fun j _ => h_conn_smooth_c_var j vs αs)
+    rw [h_split]
+    exact td.isSmoothFam_sub _ _
+      (td.isSmoothFam_sub _ _ hS_X hS_vec_sum) hS_cov_sum
+  -- Inline the same derivation as in `nablaTimeProductRule_h_nabla_t_of_aux`.
+  have h_nabla_t : ∀ vs αs, td.isSmoothFam
+      (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (T t) vs αs) := by
+    intro vs αs
+    have h_eq : (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (T t) vs αs) =
+        (fun τ => (emb.embed X) (T t vs αs)
+          - ∑ i : Fin s, T t (Function.update vs i (conn_fam τ X (vs i))) αs
+          - ∑ j : Fin r, T t vs (Function.update αs j
+              (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) := by
+      funext τ
+      exact nabla_tensor_eval emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (T t) vs αs
+    rw [h_eq]
+    have h_split : (fun τ => (emb.embed X) (T t vs αs)
+        - ∑ i : Fin s, T t (Function.update vs i (conn_fam τ X (vs i))) αs
+        - ∑ j : Fin r, T t vs (Function.update αs j
+            (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) =
+        (fun _ => (emb.embed X) (T t vs αs))
+        - (fun τ => ∑ i : Fin s, T t (Function.update vs i (conn_fam τ X (vs i))) αs)
+        - (fun τ => ∑ j : Fin r, T t vs (Function.update αs j
+            (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) := by
+      funext τ; simp only [Pi.sub_apply]
+    have h_vec_sum : (fun τ => ∑ i : Fin s,
+        T t (Function.update vs i (conn_fam τ X (vs i))) αs) =
+        ∑ i : Fin s, (fun τ => T t (Function.update vs i (conn_fam τ X (vs i))) αs) := by
+      funext τ; simp [Finset.sum_apply]
+    have h_cov_sum : (fun τ => ∑ j : Fin r,
+        T t vs (Function.update αs j
+          (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) =
+        ∑ j : Fin r, (fun τ => T t vs (Function.update αs j
+          (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) := by
+      funext τ; simp [Finset.sum_apply]
+    have hS_const : td.isSmoothFam (fun _ : ℝ => (emb.embed X) (T t vs αs)) :=
+      td.isSmoothFam_const _
+    have hS_vec_sum : td.isSmoothFam
+        (fun τ => ∑ i : Fin s, T t (Function.update vs i (conn_fam τ X (vs i))) αs) := by
+      rw [h_vec_sum]
+      exact td.isSmoothFam_sum Finset.univ _ (fun i _ => h_conn_smooth_v_at i vs αs)
+    have hS_cov_sum : td.isSmoothFam
+        (fun τ => ∑ j : Fin r, T t vs (Function.update αs j
+          (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) := by
+      rw [h_cov_sum]
+      exact td.isSmoothFam_sum Finset.univ _ (fun j _ => h_conn_smooth_c_at j vs αs)
+    rw [h_split]
+    exact td.isSmoothFam_sub _ _
+      (td.isSmoothFam_sub _ _ hS_const hS_vec_sum) hS_cov_sum
   -- Reduce the tensor equality to a pointwise MultilinearMap equality in `R`.
   -- Use `MultilinearMap.ext` twice to avoid auto-extension into `C^∞⟮I,M;ℝ⟯`'s
   -- pointwise `M → ℝ` level.
@@ -204,7 +300,7 @@ theorem concrete_nabla_time_product_rule
     refine Finset.sum_congr rfl ?_
     intro i _
     exact TimeDerivativeData.dt_apply_leibniz_slot_vector
-      (td := td) conn_fam X T t i vs αs (h_2smooth_v X T i vs αs)
+      (td := td) conn_fam X T t i vs αs (h_2smooth_v i vs αs)
   have h_leibniz_sum_c : ∑ j : Fin r,
         td.dt_apply (fun τ => T τ vs (Function.update αs j
           (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) t =
@@ -219,7 +315,7 @@ theorem concrete_nabla_time_product_rule
     intro j _
     exact TimeDerivativeData.dt_apply_leibniz_slot_covector
       (emb := emb) (td := td) conn_fam ha_fam hl_fam X T t j vs αs
-      (h_2smooth_c X T j vs αs)
+      (h_2smooth_c j vs αs)
   rw [h_leibniz_sum_v, h_leibniz_sum_c]
   -- Rearrange: goal is now purely algebraic in the RHS split forms.
   ring
