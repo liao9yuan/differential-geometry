@@ -179,9 +179,9 @@ lemma secondCovDeriv_weitzenbock
     (ha : ∀ X Y Z : V, conn X (Y + Z) = conn X Y + conn X Z)
     (conn_add_left : ∀ X Y Z : V, conn (X + Y) Z = conn X Z + conn Y Z)
     (_hl : ∀ X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
-    (met : MetricDuality R V) 
+    (met : MetricDuality R V)
     (h_mc : IsMetricCompatible emb conn met) (h_tf : IsTorsionFree emb conn)
-    (h2 : ∀ (a : R), 2 * a = 0 → a = 0)
+    [Invertible (2 : R)]
     (f : R) (X Y : V) :
     met.g (secondCovDeriv conn X Y (grad emb met f)) (grad emb met f) =
     met.g (secondCovDeriv conn (grad emb met f) X (grad emb met f)) Y -
@@ -264,14 +264,14 @@ lemma secondCovDeriv_weitzenbock
   -- Step 3: Rm block symmetry: g(Rm(X,gf)gf, Y) = -g(Rm(X,gf)Y, gf)
   have rm_flip : met.g (Rm emb conn X gf gf) Y = - met.g (Rm emb conn X gf Y) gf := by
     -- Block symmetry: g(Rm(X,gf)gf, Y) = g(Rm(gf,Y)X, gf)
-    have h_block1 := Rm_symm_blocks emb conn ha conn_add_left met h_mc h_tf h2 X gf gf Y
+    have h_block1 := Rm_symm_blocks emb conn ha conn_add_left met h_mc h_tf X gf gf Y
     -- Antisymmetry: Rm(gf,Y) = -Rm(Y,gf)
     have h_anti : Rm emb conn gf Y X = -(Rm emb conn Y gf X) := Rm_antisymm emb conn conn_add_left gf Y X
     have h_neg : met.g (Rm emb conn gf Y X) gf = -met.g (Rm emb conn Y gf X) gf := by
       rw [h_anti, show -(Rm emb conn Y gf X) = (-1 : R) • Rm emb conn Y gf X
         from (neg_one_smul R _).symm, met.g_smul_left]; ring
     -- Block symmetry: g(Rm(Y,gf)X, gf) = g(Rm(X,gf)Y, gf)
-    have h_block2 := Rm_symm_blocks emb conn ha conn_add_left met h_mc h_tf h2 Y gf X gf
+    have h_block2 := Rm_symm_blocks emb conn ha conn_add_left met h_mc h_tf Y gf X gf
     -- Chain: g(Rm(X,gf)gf, Y) = g(Rm(gf,Y)X, gf) [h_block1]
     --      = -g(Rm(Y,gf)X, gf) [h_neg]
     --      = -g(Rm(X,gf)Y, gf) [h_block2]
@@ -305,16 +305,16 @@ theorem bochner_pointwise
     (ha : ∀ X Y Z : V, conn X (Y + Z) = conn X Y + conn X Z)
     (conn_add_left : ∀ X Y Z : V, conn (X + Y) Z = conn X Z + conn Y Z)
     (hl : ∀ X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
-    (met : MetricDuality R V) 
+    (met : MetricDuality R V)
     (h_mc : IsMetricCompatible emb conn met) (h_tf : IsTorsionFree emb conn)
-    (h2 : ∀ (a : R), 2 * a = 0 → a = 0)
+    [Invertible (2 : R)]
     (f : R) (X Y : V) :
     Hess emb conn (met.g (grad emb met f) (grad emb met f)) X Y =
     2 * met.g (secondCovDeriv conn (grad emb met f) X (grad emb met f)) Y -
     2 * met.g (Rm emb conn X (grad emb met f) Y) (grad emb met f) +
     2 * met.g (conn X (grad emb met f)) (conn Y (grad emb met f)) := by
   have h_norm := hessian_norm_sq_grad emb conn met h_mc f X Y
-  have h_wb := secondCovDeriv_weitzenbock emb conn ha conn_add_left hl met h_mc h_tf h2 f X Y
+  have h_wb := secondCovDeriv_weitzenbock emb conn ha conn_add_left hl met h_mc h_tf f X Y
   rw [h_norm, h_wb]; ring
 
 end BochnerDefs

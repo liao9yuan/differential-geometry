@@ -27,7 +27,45 @@ import DifferentialGeometry.Synthetic.Operator.SpatialConstant
 import DifferentialGeometry.Synthetic.Operator.Variation
 
 -- Axiom Interface
-import DifferentialGeometry.Synthetic.Axioms
+import DifferentialGeometry.Synthetic.Assembly
+
+-- Realization: Concrete Ricci flow solution analysis
+import DifferentialGeometry.Synthetic.Realization.Basic
+import DifferentialGeometry.Synthetic.Realization.Embedding
+import DifferentialGeometry.Synthetic.Realization.SmoothSections
+import DifferentialGeometry.Synthetic.Realization.Connection
+import DifferentialGeometry.Synthetic.Realization.Trace
+import DifferentialGeometry.Synthetic.Realization.Metric
+import DifferentialGeometry.Synthetic.Realization.LeviCivita
+import DifferentialGeometry.Synthetic.Realization.KoszulGerm
+import DifferentialGeometry.Synthetic.Realization.SmoothExtension
+import DifferentialGeometry.Synthetic.Realization.SmoothExtensionMDiff
+import DifferentialGeometry.Synthetic.Realization.KoszulCov
+import DifferentialGeometry.Synthetic.Realization.TensorNabla
+import DifferentialGeometry.Synthetic.Realization.NablaComm
+import DifferentialGeometry.Synthetic.Realization.HomNabla
+import DifferentialGeometry.Synthetic.Realization.Tensor0SBridge
+import DifferentialGeometry.Synthetic.Realization.Tensor0SNabla
+import DifferentialGeometry.Synthetic.Realization.GenHomNabla
+import DifferentialGeometry.Synthetic.Realization.TensorRSNabla
+import DifferentialGeometry.Synthetic.Realization.TensorContract
+import DifferentialGeometry.Synthetic.Realization.NablaContractSynthetic
+import DifferentialGeometry.Synthetic.Realization.TimeDeriv
+import DifferentialGeometry.Synthetic.Realization.SpatialTemporalCommOn
+import DifferentialGeometry.Synthetic.Realization.TimeNabla
+import DifferentialGeometry.Synthetic.Realization.TimeTrace
+import DifferentialGeometry.Synthetic.Realization.TimeJointSmoothness
+import DifferentialGeometry.Synthetic.Realization.RicciFlow
+import DifferentialGeometry.Synthetic.Realization.SmoothRicciFlow
+import DifferentialGeometry.Synthetic.Realization.RicciFlowOn
+import DifferentialGeometry.Synthetic.Realization.SmoothRicciFlowOn
+
+-- Non-Ricci flows (plug-in demonstrations of flow-agnostic abstraction)
+import DifferentialGeometry.Synthetic.Flow.Heat.Basic
+import DifferentialGeometry.Synthetic.Flow.GradientFlow.Basic
+import DifferentialGeometry.Synthetic.Flow.ReactionDiffusion.Basic
+import DifferentialGeometry.Synthetic.Flow.HamiltonJacobi.Basic
+import DifferentialGeometry.Synthetic.Flow.Yamabe.Basic
 
 -- Ricci Flow
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Basic
@@ -45,6 +83,7 @@ import DifferentialGeometry.Synthetic.Flow.RicciFlow.Calculus
 import DifferentialGeometry.VectorBundle.Dual
 import DifferentialGeometry.VectorBundle.Equiv
 import DifferentialGeometry.VectorBundle.Frame
+import DifferentialGeometry.VectorBundle.PartialMfderiv
 import DifferentialGeometry.VectorBundle.Section
 import DifferentialGeometry.VectorBundle.Zero
 
