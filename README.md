@@ -36,21 +36,19 @@ flowchart BT
             DirGeom[Geometry]
             DirOp[Operator]
             DirAna[Analysis]
+            DirAsm[Assembly]
+            DirFlow[Flow]
 
             DirAlg --> DirGeom
             DirAlg --> DirOp
             DirGeom --> DirOp
             DirAlg --> DirAna
+            DirAlg --> DirAsm
+            DirAsm --> DirFlow
         end
 
-        DirAsm[Assembly]
-        AlgHalf --> DirAsm
-
-        DirFlow[Flow]
-        DirAsm --> DirFlow
-
         DirReal[Realization]
-        DirReal --> DirAsm
+        DirReal --> AlgHalf
     end
 
     AnalyticLayer --> DirReal
