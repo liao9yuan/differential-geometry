@@ -51,7 +51,8 @@ flowchart BT
         DirReal --> AlgHalf
     end
 
-    AnalyticLayer --> DirReal
+    DirVB --> DirReal
+    DirRSB --> DirReal
 ```
 
 ## Architecture
