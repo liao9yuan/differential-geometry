@@ -27,7 +27,7 @@ import DifferentialGeometry.Synthetic.Operator.SpatialConstant
 import DifferentialGeometry.Synthetic.Operator.Variation
 
 -- Axiom Interface
-import DifferentialGeometry.Synthetic.Axioms
+import DifferentialGeometry.Synthetic.Assembly
 
 -- Realization: Concrete Ricci flow solution analysis
 import DifferentialGeometry.Synthetic.Realization.Basic

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Synthetic.Axioms
+import DifferentialGeometry.Synthetic.Assembly
 import Mathlib.Geometry.Manifold.DerivationBundle
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion

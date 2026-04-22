@@ -3,7 +3,7 @@ import DifferentialGeometry.Synthetic.Realization.TimeTrace
 import DifferentialGeometry.Synthetic.Realization.NablaComm
 import DifferentialGeometry.Synthetic.Realization.NablaContractSynthetic
 import DifferentialGeometry.Synthetic.Realization.TimeNabla
-import DifferentialGeometry.Synthetic.Axioms
+import DifferentialGeometry.Synthetic.Assembly
 
 /-!
 # P29.4: Final Assembly of `concreteRicciFlowBundle`
@@ -98,27 +98,29 @@ noncomputable def concreteRicciFlowBundle
     RicciFlowBundle ℝ C^∞⟮I, M; ℝ⟯
       Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ ℝ
       (SmoothTimeAlgebra I M) where
-  emb := concreteDerivationEmbedding I M
-  atr := concreteAbstractTrace I M
-  td := concreteTimeDerivativeData I M
-  g_fam := fun t => concreteMetricDuality I M (g_fam t)
-  h_met := h_met
-  conn_fam := fun t => concreteConn I M (cov_fam t)
-  ha_fam := fun t => concreteConn_add_right I M (cov_fam t)
-  hal_fam := fun t => concreteConn_add_left I M (cov_fam t)
-  hsl_fam := fun t => concreteConn_smul_left I M (cov_fam t)
-  hl_fam := fun t => concreteConn_leibniz I M (cov_fam t)
-  spatial_temporal_comm := concrete_spatial_temporal_comm_general I M
-  time_tr_comm := concrete_time_tr_comm I M
-  nabla_tr_comm := fun t X L => by
-    -- `concrete_nabla_tr_comm` gives the identity using `concreteTr I M` and
-    -- `vectorFieldActionSmooth I M X`. Via the simp lemma `concreteAbstractTrace_tr`
-    -- this matches the Synthetic `NablaTrComm` shape; the remaining pieces
-    -- (`(emb.embed X)` vs `vectorFieldActionSmooth I M X`) agree definitionally.
-    have h := concrete_nabla_tr_comm I M (cov_fam t) X L
-    simp only [concreteAbstractTrace_tr]
-    exact h
-  nabla_contract_comm := fun t => concrete_NablaTensorContractComm I M (cov_fam t)
+  toTimeEvolvingFamilyManifoldData :=
+    { emb := concreteDerivationEmbedding I M
+      atr := concreteAbstractTrace I M
+      td := concreteTimeDerivativeData I M
+      g_fam := fun t => concreteMetricDuality I M (g_fam t)
+      h_met := h_met
+      conn_fam := fun t => concreteConn I M (cov_fam t)
+      ha_fam := fun t => concreteConn_add_right I M (cov_fam t)
+      hal_fam := fun t => concreteConn_add_left I M (cov_fam t)
+      hsl_fam := fun t => concreteConn_smul_left I M (cov_fam t)
+      hl_fam := fun t => concreteConn_leibniz I M (cov_fam t)
+      spatial_temporal_comm := concrete_spatial_temporal_comm_general I M
+      time_tr_comm := concrete_time_tr_comm I M
+      nabla_tr_comm := fun t X L => by
+        -- `concrete_nabla_tr_comm` gives the identity using `concreteTr I M` and
+        -- `vectorFieldActionSmooth I M X`. Via the simp lemma `concreteAbstractTrace_tr`
+        -- this matches the Synthetic `NablaTrComm` shape; the remaining pieces
+        -- (`(emb.embed X)` vs `vectorFieldActionSmooth I M X`) agree definitionally.
+        have h := concrete_nabla_tr_comm I M (cov_fam t) X L
+        simp only [concreteAbstractTrace_tr]
+        exact h
+      nabla_contract_comm := fun t => concrete_NablaTensorContractComm I M (cov_fam t)
+      levi_civita := fun t => h_ricci_flow.levi_civita t }
   ricci_flow := h_ricci_flow
   nabla_time_product_rule :=
     concrete_nabla_time_product_rule I M
