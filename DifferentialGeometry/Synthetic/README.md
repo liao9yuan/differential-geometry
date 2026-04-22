@@ -4,35 +4,25 @@ This layer formalizes Riemannian geometry and geometric PDEs via Serre–Swan du
 
 ```mermaid
 flowchart TB
-    SMD["SyntheticManifoldData<br/>(emb, atr, conn)"]
-    RMD["RiemannianManifoldData<br/>(+ met, metric_compat, torsion_free)"]
-    SMD --> RMD
+    SMD["SyntheticManifoldData\n(emb, atr, conn)"]
 
-    TEMD["TimeEvolvingManifoldData"]
-    STEMD["ScalarTimeEvolvingManifoldData<br/>(+ u_fam, h_u, time, spat_temp)"]
-    RMD --> TEMD
-    RMD --> STEMD
+    SMD -->|extends| RMD["RiemannianManifoldData\n(+ met, metric_compat, torsion_free)"]
 
-    HF["HeatFlowBundle"]
-    SGF["ScalarGradientFlowBundle"]
-    RD["ReactionDiffusionBundle"]
-    HJ["HamiltonJacobiBundle"]
-    HJS["HamiltonJacobiWithStateBundle"]
-    STEMD --> HF
-    STEMD --> SGF
-    STEMD --> RD
-    STEMD --> HJ
-    STEMD --> HJS
+    RMD -->|extends| TEMD["TimeEvolvingManifoldData\n(+ td, spat_temp_comm, time_tr_comm)"]
+    RMD -->|extends| STEMD["ScalarTimeEvolvingManifoldData\n(+ td, u_fam, h_u, spat_temp_comm)"]
 
-    TEFMD["TimeEvolvingFamilyManifoldData<br/>(g_fam, conn_fam, levi_civita, ...)"]
+    STEMD -->|extends| HF[HeatFlowBundle]
+    STEMD -->|extends| SGF[ScalarGradientFlowBundle]
+    STEMD -->|extends| RD[ReactionDiffusionBundle]
+    STEMD -->|extends| HJ[HamiltonJacobiBundle]
+    STEMD -->|extends| HJS[HamiltonJacobiWithStateBundle]
 
-    RFB["RicciFlowBundle"]
-    YFB["YamabeFlowBundle"]
-    TEFMD --> RFB
-    TEFMD --> YFB
+    TEFMD["TimeEvolvingFamilyManifoldData\n(independent; g_fam, conn_fam, levi_civita, ...)"]
 
-    RFD["RicciFlowData"]
-    RFB --> RFD
+    TEFMD -->|extends| RFB[RicciFlowBundle]
+    TEFMD -->|extends| YFB[YamabeFlowBundle]
+
+    RFB -->|extends| RFD[RicciFlowData]
 ```
 
 The layer splits into two halves.
