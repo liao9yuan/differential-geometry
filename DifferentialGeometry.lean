@@ -37,6 +37,10 @@ import DifferentialGeometry.Synthetic.Realization.Connection
 import DifferentialGeometry.Synthetic.Realization.Trace
 import DifferentialGeometry.Synthetic.Realization.Metric
 import DifferentialGeometry.Synthetic.Realization.LeviCivita
+import DifferentialGeometry.Synthetic.Realization.KoszulGerm
+import DifferentialGeometry.Synthetic.Realization.SmoothExtension
+import DifferentialGeometry.Synthetic.Realization.SmoothExtensionMDiff
+import DifferentialGeometry.Synthetic.Realization.KoszulCov
 import DifferentialGeometry.Synthetic.Realization.TensorNabla
 import DifferentialGeometry.Synthetic.Realization.NablaComm
 import DifferentialGeometry.Synthetic.Realization.HomNabla
