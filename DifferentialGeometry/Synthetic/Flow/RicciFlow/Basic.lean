@@ -200,7 +200,7 @@ variable [Field k] [CommRing R] [Algebra k R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 variable [CommRing A] [Algebra R A]
 
-/-- Ricci flow condition: the metric evolves by -2·Ric and the connection is always Levi-Civita. -/
+/-- Ricci flow condition: the metric evolves by -2·Ric. (Levi-Civita is a separate bundle field.) -/
 def IsRicciFlow
     (emb : DerivationEmbedding k R V)
     (td : TimeDerivativeData R A Time) [TimeRegularFam td]
@@ -213,24 +213,11 @@ def IsRicciFlow
     (hsl_fam : ∀ s, ∀ (f : R) X Z, conn_fam s (f • X) Z = f • conn_fam s X Z)
     (hl_fam : ∀ s, ∀ X (f : R) Y, conn_fam s X (f • Y) = (emb.embed X) f • Y + f • conn_fam s X Y)
     : Prop :=
-  (∀ s, IsLeviCivita emb (conn_fam s) (g_fam s)) ∧
-  (∀ t, metric_var_form td g_fam h_met t =
-    (-2 : R) • ricciForm_tensor emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr)
+  ∀ t, metric_var_form td g_fam h_met t =
+    (-2 : R) • ricciForm_tensor emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr
 
-/-- Extract the Levi-Civita property from IsRicciFlow. -/
-theorem IsRicciFlow.levi_civita
-    {emb : DerivationEmbedding k R V}
-    {td : TimeDerivativeData R A Time} [TimeRegularFam td]
-    {atr : AbstractTrace R V}
-    {g_fam : Time → MetricDuality R V}
-    {h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs)}
-    {conn_fam : Time → V → V → V}
-    {ha_fam hal_fam hsl_fam hl_fam}
-    (h : IsRicciFlow emb td atr g_fam h_met conn_fam ha_fam hal_fam hsl_fam hl_fam)
-    (s : Time) : IsLeviCivita emb (conn_fam s) (g_fam s) :=
-  h.1 s
-
-/-- Extract the evolution equation from IsRicciFlow. -/
+/-- Extract the evolution equation from IsRicciFlow. Trivial alias kept for
+    readability at call sites. -/
 theorem IsRicciFlow.evolution
     {emb : DerivationEmbedding k R V}
     {td : TimeDerivativeData R A Time} [TimeRegularFam td]
@@ -242,33 +229,7 @@ theorem IsRicciFlow.evolution
     (h : IsRicciFlow emb td atr g_fam h_met conn_fam ha_fam hal_fam hsl_fam hl_fam)
     (t : Time) : metric_var_form td g_fam h_met t =
     (-2 : R) • ricciForm_tensor emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr :=
-  h.2 t
-
-/-- Extract metric compatibility from IsRicciFlow. -/
-theorem IsRicciFlow.metric_compat
-    {emb : DerivationEmbedding k R V}
-    {td : TimeDerivativeData R A Time} [TimeRegularFam td]
-    {atr : AbstractTrace R V}
-    {g_fam : Time → MetricDuality R V}
-    {h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs)}
-    {conn_fam : Time → V → V → V}
-    {ha_fam hal_fam hsl_fam hl_fam}
-    (h : IsRicciFlow emb td atr g_fam h_met conn_fam ha_fam hal_fam hsl_fam hl_fam)
-    (s : Time) : IsMetricCompatible emb (conn_fam s) (g_fam s) :=
-  (h.levi_civita s).1
-
-/-- Extract torsion-free from IsRicciFlow. -/
-theorem IsRicciFlow.torsion_free
-    {emb : DerivationEmbedding k R V}
-    {td : TimeDerivativeData R A Time} [TimeRegularFam td]
-    {atr : AbstractTrace R V}
-    {g_fam : Time → MetricDuality R V}
-    {h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs)}
-    {conn_fam : Time → V → V → V}
-    {ha_fam hal_fam hsl_fam hl_fam}
-    (h : IsRicciFlow emb td atr g_fam h_met conn_fam ha_fam hal_fam hsl_fam hl_fam)
-    (s : Time) : IsTorsionFree emb (conn_fam s) :=
-  (h.levi_civita s).2
+  h t
 
 end RicciFlowDef
 

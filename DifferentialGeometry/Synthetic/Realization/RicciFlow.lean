@@ -30,16 +30,17 @@ Besides the ambient manifold `I`, `M`:
 * `cov_fam : ℝ → CovariantDerivative I E (TangentSpace I)` — the time-dependent
   covariant derivative, provided by the user (Levi-Civita of each `g_fam t`).
 * `h_met` — pointwise smoothness in `t` of `(g_fam t).inner v w`.
-* `h_ricci_flow` — the Ricci flow PDE (`∂_t g = -2 Rc`) together with
-  `IsLeviCivita` at every time.
+* `h_ricci_flow` — the Ricci flow PDE (`∂_t g = -2 Rc`).
+* `h_lc` — `IsLeviCivita` at every time, supplied as a separate hypothesis
+  (it is now a bundle field rather than part of `IsRicciFlow`).
 
 All other fields are derived from the infrastructure proved earlier in the
 Realization layer.
 
 ## Downstream demo
 
-`example_isLeviCivita_of_concreteRicciFlowBundle` shows that the Synthetic
-theorem `IsRicciFlow.levi_civita` applies transparently to the concrete bundle.
+`example_isLeviCivita_of_concreteRicciFlowBundle` shows that the Levi-Civita
+property stored on the concrete bundle is exactly the user-supplied `h_lc`.
 -/
 
 noncomputable section
@@ -67,8 +68,9 @@ The only genuinely mathematical inputs are:
 * the metric family `g_fam` and the user-supplied covariant derivative family
   `cov_fam`,
 * the metric smoothness witness `h_met`,
-* the Ricci flow PDE `h_ricci_flow` (which also asserts that each `cov_fam t`
-  is Levi-Civita for `g_fam t`).
+* the Ricci flow PDE `h_ricci_flow` (evolution only: `∂_t g = -2 Rc`),
+* the Levi-Civita witness `h_lc`, supplied separately at every time (this is
+  now a bundle field rather than part of `IsRicciFlow`).
 
 Everything else — the derivation embedding, the abstract trace, the time
 derivative, the spatial/temporal commutation, the trace and tensor-contract
@@ -94,7 +96,11 @@ noncomputable def concreteRicciFlowBundle
         (fun t => concreteConn_add_right I M (cov_fam t))
         (fun t => concreteConn_add_left I M (cov_fam t))
         (fun t => concreteConn_smul_left I M (cov_fam t))
-        (fun t => concreteConn_leibniz I M (cov_fam t))) :
+        (fun t => concreteConn_leibniz I M (cov_fam t)))
+    (h_lc : ∀ t, IsLeviCivita
+        (concreteDerivationEmbedding I M)
+        (concreteConn I M (cov_fam t))
+        (concreteMetricDuality I M (g_fam t))) :
     RicciFlowBundle ℝ C^∞⟮I, M; ℝ⟯
       Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ ℝ
       (SmoothTimeAlgebra I M) where
@@ -120,7 +126,7 @@ noncomputable def concreteRicciFlowBundle
         simp only [concreteAbstractTrace_tr]
         exact h
       nabla_contract_comm := fun t => concrete_NablaTensorContractComm I M (cov_fam t)
-      levi_civita := fun t => h_ricci_flow.levi_civita t }
+      levi_civita := h_lc }
   ricci_flow := h_ricci_flow
   nabla_time_product_rule :=
     concrete_nabla_time_product_rule I M
@@ -129,10 +135,10 @@ noncomputable def concreteRicciFlowBundle
       (fun t => concreteConn_leibniz I M (cov_fam t))
 
 /-- **Downstream demo.** The concrete `RicciFlowBundle` carries a Levi-Civita
-connection at every time, obtained by invoking the Synthetic extractor
-`IsRicciFlow.levi_civita`. This showcases that every theorem proved in the
-Synthetic Ricci flow library specialises, with no extra work, to the Mathlib
-smooth-manifold setting. -/
+connection at every time, read off directly from the `h_lc` input used to
+build it. This showcases that every theorem proved in the Synthetic Ricci
+flow library specialises, with no extra work, to the Mathlib smooth-manifold
+setting. -/
 example
     (g_fam : ℝ → Bundle.ContMDiffRiemannianMetric I ω E (TangentSpace I : M → Type _))
     (cov_fam : ℝ → CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -154,14 +160,18 @@ example
         (fun t => concreteConn_add_left I M (cov_fam t))
         (fun t => concreteConn_smul_left I M (cov_fam t))
         (fun t => concreteConn_leibniz I M (cov_fam t)))
+    (h_lc : ∀ t, IsLeviCivita
+        (concreteDerivationEmbedding I M)
+        (concreteConn I M (cov_fam t))
+        (concreteMetricDuality I M (g_fam t)))
     (t : ℝ) :
     IsLeviCivita
       (concreteRicciFlowBundle I M g_fam cov_fam h_met
-        h_ricci_flow).emb
+        h_ricci_flow h_lc).emb
       ((concreteRicciFlowBundle I M g_fam cov_fam h_met
-        h_ricci_flow).conn_fam t)
+        h_ricci_flow h_lc).conn_fam t)
       ((concreteRicciFlowBundle I M g_fam cov_fam h_met
-        h_ricci_flow).g_fam t) :=
-  h_ricci_flow.levi_civita t
+        h_ricci_flow h_lc).g_fam t) :=
+  h_lc t
 
 end
