@@ -34,27 +34,26 @@ flowchart BT
         subgraph AlgHalf ["Algebraic Half"]
             DirAlg[Algebra]
             DirGeom[Geometry]
-            DirOperators[Operator]
-            DirAnalysis[Analysis]
+            DirOp[Operator]
+            DirAna[Analysis]
+            DirFlow[Flow]
 
             DirAlg --> DirGeom
-            DirAlg --> DirOperators
-            DirGeom --> DirOperators
-            DirAlg --> DirAnalysis
+            DirAlg --> DirOp
+            DirGeom --> DirOp
+            DirAlg --> DirAna
+            DirOp --> DirFlow
+            DirAna --> DirFlow
         end
 
         DirAsm[Assembly]
         AlgHalf --> DirAsm
 
         DirReal[Realization]
-        DirReal -->|"discharges axioms"| DirAsm
-
-        DirFlow[Flow]
-        DirAsm --> DirFlow
     end
 
-    DirRSB -.->|planned| DirAlg
-    DirDiffForm -.->|planned| DirAlg
+    AnalyticLayer --> DirReal
+    DirReal --> AlgHalf
 ```
 
 ## Architecture

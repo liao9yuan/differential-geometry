@@ -4,38 +4,35 @@ This layer formalizes Riemannian geometry and geometric PDEs via Serre–Swan du
 
 ```mermaid
 flowchart TB
-    subgraph Algebraic ["Algebraic Half (abstract R, V)"]
-        Alg["Algebra<br/>DerivationEmbedding, AbstractTrace,<br/>MetricDuality, TimeDerivativeData"]
-        Geom["Geometry<br/>Connections, Curvature,<br/>Bianchi, Koszul"]
-        Op["Operator<br/>Gradient, Hessian, Laplacian,<br/>Bochner, Palatini"]
-        Ana["Analysis<br/>Nabla on tensors,<br/>dt on tensors"]
+    SMD["SyntheticManifoldData<br/>(emb, atr, conn)"]
+    RMD["RiemannianManifoldData<br/>(+ met, metric_compat, torsion_free)"]
+    SMD --> RMD
 
-        Alg --> Geom
-        Alg --> Op
-        Geom --> Op
-        Alg --> Ana
-    end
+    TEMD["TimeEvolvingManifoldData"]
+    STEMD["ScalarTimeEvolvingManifoldData<br/>(+ u_fam, h_u, time, spat_temp)"]
+    RMD --> TEMD
+    RMD --> STEMD
 
-    Asm["Assembly<br/>SyntheticManifoldData → ... → RicciFlowBundle"]
-    Algebraic --> Asm
+    HF["HeatFlowBundle"]
+    SGF["ScalarGradientFlowBundle"]
+    RD["ReactionDiffusionBundle"]
+    HJ["HamiltonJacobiBundle"]
+    HJS["HamiltonJacobiWithStateBundle"]
+    STEMD --> HF
+    STEMD --> SGF
+    STEMD --> RD
+    STEMD --> HJ
+    STEMD --> HJS
 
-    subgraph Flows ["Flow (downstream applications)"]
-        RF["Ricci Flow<br/>Evolution of Rm, Rc, Scal, ..."]
-        Other["Yamabe / Heat / Gradient Flow / ..."]
-    end
-    Asm --> Flows
+    TEFMD["TimeEvolvingFamilyManifoldData<br/>(g_fam, conn_fam, levi_civita, ...)"]
 
-    subgraph Real ["Realization Half (Mathlib bridge)"]
-        Concrete["k = R, R = C∞⟨I,M;R⟩, V = Γ∞(TM)<br/>Koszul–Germ, TensorContract,<br/>TimeDeriv, JointSmoothness"]
-    end
-    Real -->|"discharges axioms"| Asm
+    RFB["RicciFlowBundle"]
+    YFB["YamabeFlowBundle"]
+    TEFMD --> RFB
+    TEFMD --> YFB
 
-    subgraph Assumptions ["Assumptions (future: DeTurck)"]
-        A1["Metric family g(t)"]
-        A2["Joint smoothness"]
-        A3["Governing PDE"]
-    end
-    Assumptions -->|"input"| Real
+    RFD["RicciFlowData"]
+    RFB --> RFD
 ```
 
 The layer splits into two halves.
