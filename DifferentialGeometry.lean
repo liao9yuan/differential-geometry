@@ -55,6 +55,7 @@ import DifferentialGeometry.Synthetic.Realization.TimeNabla
 import DifferentialGeometry.Synthetic.Realization.TimeTrace
 import DifferentialGeometry.Synthetic.Realization.TimeJointSmoothness
 import DifferentialGeometry.Synthetic.Realization.RicciFlow
+import DifferentialGeometry.Synthetic.Realization.SmoothRicciFlow
 
 -- Non-Ricci flows (plug-in demonstrations of flow-agnostic abstraction)
 import DifferentialGeometry.Synthetic.Flow.Heat.Basic
