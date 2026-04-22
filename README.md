@@ -31,22 +31,30 @@ flowchart BT
     end
 
     subgraph SyntheticLayer [Synthetic Layer]
-        DirAlg[Algebra]
-        DirGeom[Geometry]
-        DirOperators[Operators]
-        DirAnalysis[Analysis]
+        subgraph AlgHalf ["Algebraic Half"]
+            DirAlg[Algebra]
+            DirGeom[Geometry]
+            DirOperators[Operator]
+            DirAnalysis[Analysis]
 
-        DirAlg --> DirOperators
-        DirGeom --> DirOperators
+            DirAlg --> DirGeom
+            DirAlg --> DirOperators
+            DirGeom --> DirOperators
+            DirAlg --> DirAnalysis
+        end
 
-        DirAlg --> DirAnalysis
-        DirGeom --> DirAnalysis
+        DirAsm[Assembly]
+        AlgHalf --> DirAsm
+
+        DirReal[Realization]
+        DirReal -->|"discharges axioms"| DirAsm
+
+        DirFlow[Flow]
+        DirAsm --> DirFlow
     end
 
     DirRSB -.->|planned| DirAlg
-    DirRSB -.->|planned| DirGeom
     DirDiffForm -.->|planned| DirAlg
-    DirDiffForm -.->|planned| DirGeom
 ```
 
 ## Architecture
@@ -89,124 +97,16 @@ In each case, the proof proceeds by defining fiberwise maps, showing they are co
 | **DifferentialForm** | Smooth differential $n$-forms as sections of alternating bundles. Based on code by Yury G. Kudryashov. |
 | **Auxiliary** | Combinatorial utilities: permutations, multi-index Kronecker deltas, and shuffle decompositions for graded Leibniz rules. |
 
-### Synthetic Layer (axiom-driven)
+### Synthetic Layer
 
-A purely algebraic library that operates over a commutative ring $R$ and module $V$, with no dependence on coordinates, charts, or topological structure. This layer relies on injected axioms for facts that require analytic machinery — tensor algebra identities, Riemannian geometry properties, PDE existence, and maximum principles.
+Formalizes geometric analysis via Serre–Swan structure.
 
-This permits algebraic verification of results like the Bochner identity or Ricci flow evolution without building topological manifolds first. Higher-order derivatives and geometric flows are constructed via pure functional composition rather than index manipulations. See [Axioms and Assumptions](#axioms-and-assumptions) below for the full list.
+- **Algebraic half** derives results over abstract $(R, V)$ with no reference to manifolds or charts.
+- **Realization half** bridges every axiom to Mathlib's smooth-manifold infrastructure.
+- **Key results:** Bochner–Weitzenböck identity, both Bianchi identities, Palatini identity, Ricci flow evolution equations ($\partial_t \nabla$, $\partial_t \mathrm{Rm}$, $\partial_t \mathrm{Rc}$, $\partial_t \mathrm{Scal}$, $\partial_t |\nabla f|^2$, $\partial_t \Delta f$).
+- **Irreducible assumptions:** (1) a time-dependent metric family $g(t)$, (2) joint smoothness of the metric components, and (3) a governing PDE (e.g., $\partial_t g = -2\,\mathrm{Rc}$). These will be discharged by a concrete PDE layer via DeTurck's tric in the future.
 
-| Folder | Description |
-|---|---|
-| **Algebra** | Foundational structures: vector fields as derivations, Lie brackets, abstract bilinear forms (0,2)-tensors, metric tensors, musical isomorphisms, and trace operators. |
-| **Geometry** | Core geometric objects: affine connections (covariant derivatives, Christoffel symbols), Riemann/Ricci/scalar curvature, conformal transformations, and the fundamental identities (Bianchi, Ricci). |
-| **Operators** | Differential operators: gradient, Hessian, Laplacian, divergence, Lie derivative, second covariant derivative, spatial constants, time derivatives, and metric variation. |
-| **Analysis** | Higher-order tensor analysis: universal covariant derivative extending to arbitrary $(r,s)$-tensors, and inner products of (0,2)-tensors. |
-
-#### Axioms and Assumptions
-
-The irreducible mathematical axioms injected into the system are categorized below. Purely structural type definitions (e.g., the existence of a trace operator or scalar multiplication) are omitted from this list.
-
-**Algebraic & Differential Rules**
-- ✅ **`DerivationRules`** / **`ActionLinear`** — Full Leibniz and linearity rules for the derivation action: $(X+Y)f = Xf + Yf$, etc. Implemented in `DifferentialGeometry/VectorField.lean`.
-- ✅ **`LieDerivation`** — The Lie bracket acts strictly as a commutator of derivations: $[X, Y]f = X(Yf) - Y(Xf)$. Implemented in `DifferentialGeometry/VectorField.lean`.
-- ✅ **`VectorFieldNonDegenerate`** — Vector fields are distinguished by their action on scalar functions. Implemented in `DifferentialGeometry/VectorField.lean`.
-- ❌ **`IsSpatialConstant`** — Axiomatizes a scalar whose spatial derivation vanishes automatically.
-- ❌ **`BilinearFormExt`** — Extensionality for bilinear forms: two (0,2)-tensors agreeing on all inputs are equal.
-
-**Tensor Algebra**
-- ⚠️ **`TensorAlgebra`** — Abstract graded tensor operations: addition, scalar multiplication, tensor product, contraction, and index swaps. *Work in progress.*
-- ❌ **`TraceLinearityRules`** — The trace operators (both abstract and metric-dependent) are additive and homogeneous.
-- ❌ **`Tensor14Trace`** / **`Tensor14TraceLinearity`** — Axiomatizes (1,4)-tensor contraction and its linearity.
-- ❌ **`BilinearTrace`** / **`BilinearTraceLinearity`** — Trace of bilinear forms $(V \times V \to R)$ and its linearity.
-- ❌ **`MetricTraceRules`** — Additivity and scalar multiplication rules for the metric-based trace operator.
-- ❌ **`MetricTraceRankOneRules`** — Trace of rank-one metric operators (e.g., outer products).
-- ❌ **`MetricTensorTraceOperator`** / **`MetricTensorTraceRules`** — Generalized trace operator for arbitrary tensors and its linearity.
-- ❌ **`BochnerTraceRules`** — Trace rules for second covariant derivatives in the Bochner formula.
-- ❌ **`AffineTensorCalculus`** — Universal covariant derivative extending from vector fields to arbitrary $(r,s)$-tensors, with Leibniz rule, contraction commutation, and degeneration axioms.
-- ❌ **`TensorInnerProductRules`** — Symmetry, additivity, and scalar linearity of the inner product of (0,2)-tensors.
-- ❌ **`BianchiContractionRules`** — Axiomatizes the commutation and linearity of traces with covariant derivatives required to contract the Second Bianchi Identity.
-
-**Riemannian Geometry**
-- ❌ **`MetricDuality`** — The metric is non-degenerate and equipped with a strictly inverting sharp operator $\sharp$, acting as a bijection such that $g(\sharp\omega, Z) = \omega(Z)$.
-- ❌ **`MetricCompatible`** — The connection preserves the metric: $Xg(Y, Z) = g(\nabla_X Y, Z) + g(Y, \nabla_X Z)$.
-- ❌ **`TorsionFree`** — The connection is torsion-free: $\nabla_X Y - \nabla_Y X = [X, Y]$.
-
-**Analysis & Topology (Blackboxed)**
-- ❌ **`DivergenceTheorem`** — The global integral of a divergence vanishes: $\int \text{div}(X) = 0$.
-- ❌ **`SpatialMaximum`** — At a spatial maximum of a scalar function $f$, the gradient vanishes ($\nabla f = 0$) and the Hessian is negative semi-definite ($\text{Hess}(f) \le 0$).
-- ❌ **`TraceOrderRules`** — The metric trace of a positive semi-definite bilinear form is non-negative: $T \ge 0 \implies \text{tr}_g(T) \ge 0$.
-- ❌ **`PositiveSemiDefinite02`** — Non-negative definiteness for (0,2)-tensors.
-
-**Time Evolution**
-- ❌ **`RicciFlow`** — A one-parameter family of metrics $g(t)$ evolves by the Ricci flow equation: $\partial_t g = -2\text{Rc}$.
-- ❌ **`RicciFlowCalculus`** — Integrated Ricci flow evolution calculus combining metric variation with curvature evolution.
-- ❌ **`TimeDerivativeRules`** — The time derivative operator $\partial_t$ is linear.
-- ❌ **`MetricTimeDerivativeRules`** — Product rules for time derivatives of metric evaluations.
-- ❌ **`ActionTimeDerivativeRules`** — Time derivative commutes with the derivation action.
-- ❌ **`ScalarTimeDerivativeRules`** — Scalar time derivative product rules.
-- ❌ **`TensorTimeCalculus`** — Universal time derivative on the full tensor algebra.
-- ❌ **`StaticMetricTimeRules`** — Axiomatizes that fundamental spatial operators are invariant under time derivatives when the underlying metric is static.
-- ❌ **`TimeWeight`** — Axiomatizes properties of continuous time inverse weights (e.g., $1/t$), ensuring parameters map correctly within valid time domains.
-
-#### Proven Theorems
-- **Bochner-Weitzenböck Identity:** 
-  > If $f \colon M \rightarrow \mathbb{R}$ is a smooth function, then 
-  > $$\Delta |\nabla f|^2 = 2 |\nabla^2 f|^2 + 2 \text{Ric}(\nabla f, \nabla f) + 2 g(\nabla f, \nabla \Delta f)$$
-  
-  Theorem: `bochner_identity` in `DifferentialGeometry/Synthetic/Operator/Bochner.lean`
-- **Conformal Modification of Connection:** 
-  > If $\nabla$ is a torsion-free connection on a manifold $M$, then its conformal transformation via a scalar function $u \in C^\infty(M)$ strictly preserves the torsion-free property.
-  
-  Theorem: `conformal_torsion_free` in `DifferentialGeometry/Synthetic/Geometry/Conformal.lean`
-- **Contracted Bianchi Identity:** 
-  > If $\nabla$ is a torsion-free connection on a manifold $M$, the divergence of the Ricci tensor is half the gradient of the scalar curvature:
-  > $$\text{div}(Rc) = \frac{1}{2} \nabla R$$
-  
-  Theorem: `contracted_bianchi` in `DifferentialGeometry/Synthetic/Geometry/Bianchi.lean`
-- **First Bianchi Identity:** 
-  > If $\nabla$ is a torsion-free connection on a manifold $M$, then for any vector fields $X, Y, Z \in \mathfrak{X}(M)$, the Riemann curvature tensor $R$ satisfies
-  > $$R(X,Y)Z + R(Y,Z)X + R(Z,X)Y = 0$$
-  
-  Theorem: `first_bianchi` in `DifferentialGeometry/Synthetic/Geometry/Bianchi.lean`
-- **Second Bianchi Identity:** 
-  > If $\nabla$ is a torsion-free connection on a manifold $M$, then for any vector fields $X, Y, Z, W \in \mathfrak{X}(M)$, the covariant derivative of the Riemann curvature tensor $R$ satisfies the differential identity:
-  > $$(\nabla_X R)(Y,Z)W + (\nabla_Y R)(Z,X)W + (\nabla_Z R)(X,Y)W = 0$$
-  
-  Theorem: `second_bianchi` in `DifferentialGeometry/Synthetic/Geometry/Bianchi.lean`
-- **Fundamental Theorem of Riemannian Geometry:** 
-  > For any Riemannian manifold $(M, g)$, there exists a unique affine connection $\nabla$ (the Levi-Civita connection) such that for all vector fields $X, Y, Z \in \mathfrak{X}(M)$:
-  > $$[X, Y] = \nabla_X Y - \nabla_Y X \quad \text{and} \quad X(g(Y, Z)) = g(\nabla_X Y, Z) + g(Y, \nabla_X Z)$$
-  
-  Theorem: `levi_civita_exists_unique` in `DifferentialGeometry/Synthetic/Geometry/Connection.lean`
-- **Integration by Parts (Green's First Identity):** 
-  > Assuming the global integral of a divergence vanishes ($\int \text{div}(X) = 0$), then for any vector field $X$ and scalar function $f$, Green's first identity is algebraically satisfied:
-  > $$\int f \text{div}(X) + \int X(f) = 0$$
-  
-  Theorem: `integration_by_parts` in `DifferentialGeometry/Synthetic/Operator/Divergence.lean`
-- **Lie Derivative of Metric Tensor:** 
-  > If $\nabla$ is a torsion-free, metric-compatible connection on a manifold $M$, then for any vector fields $X, Y, Z \in \mathfrak{X}(M)$, the Lie derivative of the metric $g$ along $X$ is equivalently formulated using the symmetrized covariant derivative:
-  > $$(\mathcal{L}_X g)(Y, Z) = g(\nabla_Y X, Z) + g(Y, \nabla_Z X)$$
-  
-  Theorem: `lieDerivMetric_eq_nabla` in `DifferentialGeometry/Synthetic/Operator/LieDerivative.lean`
-- **Palatini Identity:** 
-  > The variation of the Levi-Civita connection under a metric variation $h = \partial_t g$ is algebraically derived via the Koszul formula equivalent:
-  > $$2 g((\partial_t \nabla)_X Y, Z) = (\nabla_X h)(Y, Z) + (\nabla_Y h)(X, Z) - (\nabla_Z h)(X, Y)$$
-  
-  Theorem: `connection_variation` in `DifferentialGeometry/Synthetic/Operator/Variation.lean`
-- **Ricci Identity:** 
-  > If $\nabla$ is a torsion-free connection on a manifold $M$, then for any vector fields $X, Y, Z \in \mathfrak{X}(M)$, the commutator of the second covariant derivative satisfies
-  > $$\nabla^2_{X,Y} Z - \nabla^2_{Y,X} Z = R(X,Y)Z$$
-  
-  Theorem: `ricci_identity` in `DifferentialGeometry/Synthetic/Geometry/RicciIdentity.lean`
-
-#### Proven Properties
-
-Highlights include Hessian symmetry, the Jacobi identity, Riemann curvature tensoriality, Ricci bilinearity, metric compatibility of the covariant derivative, and operator linearity for gradient, Laplacian, and divergence. For the complete list, see [PROPERTIES.md](PROPERTIES.md).
-
-#### Limitations
-This library inherently assumes:
-* **Intrinsic Smoothness:** Smoothness and convergence are absorbed by the type system. The framework cannot model Sobolev spaces, distributions, or measure-theoretic jump functions. For singularities occurring at time $T$, such as in Ricci Flow, one must work on $t \in [0,T)$, before the metric degenerates.
-* **Strict Non-degeneracy:** The musical isomorphism (`InverseMetric`) enforces a strict bijection. The framework effectively assumes **finite-dimensional** manifolds.
+See [Synthetic/README.md](DifferentialGeometry/Synthetic/README.md) for full details.
 
 
 ## FAQ
