@@ -2,29 +2,6 @@
 
 This layer formalizes Riemannian geometry and geometric PDEs via Serre–Swan duality. A smooth manifold $M$ is represented by an algebraic triple $(k, R, V)$: the ground field $k = \mathbb{R}$, the commutative ring $R = C^\infty(M, \mathbb{R})$, and the $R$-module $V = \Gamma(TM)$. All differential-geometric structures—connections, curvature, differential operators—are then statements about $R$-module maps, derivations, and multilinear forms over $(R, V)$.
 
-```mermaid
-flowchart TB
-    SMD["SyntheticManifoldData\n(emb, atr, conn)"]
-
-    SMD -->|extends| RMD["RiemannianManifoldData\n(+ met, metric_compat, torsion_free)"]
-
-    RMD -->|extends| TEMD["TimeEvolvingManifoldData\n(+ td, spat_temp_comm, time_tr_comm)"]
-    RMD -->|extends| STEMD["ScalarTimeEvolvingManifoldData\n(+ td, u_fam, h_u, spat_temp_comm)"]
-
-    STEMD -->|extends| HF[HeatFlowBundle]
-    STEMD -->|extends| SGF[ScalarGradientFlowBundle]
-    STEMD -->|extends| RD[ReactionDiffusionBundle]
-    STEMD -->|extends| HJ[HamiltonJacobiBundle]
-    STEMD -->|extends| HJS[HamiltonJacobiWithStateBundle]
-
-    TEFMD["TimeEvolvingFamilyManifoldData\n(independent; g_fam, conn_fam, levi_civita, ...)"]
-
-    TEFMD -->|extends| RFB[RicciFlowBundle]
-    TEFMD -->|extends| YFB[YamabeFlowBundle]
-
-    RFB -->|extends| RFD[RicciFlowData]
-```
-
 The layer splits into two halves.
 
 ---

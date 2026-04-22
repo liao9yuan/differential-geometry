@@ -80,38 +80,6 @@ theorem model_interior_bilinear_apply (s : ℕ) (v : E) (T : Tensor0SModel (s + 
     model_interior_bilinear 𝕜 E s v T = model_interior_product s v T := rfl
 
 /-!
-## Model-level interior product
-
-The pointwise interior product works at the model fiber level first. This is a pure
-`NormedSpace`-level construction (currying + applying a vector), which we transport
-to the bundle fiber via `tensor0SSpace_continuousLinearEquiv`.
--/
-
-/-- The model-level interior product: given a vector `v : E`, contract a (0,s+1)-tensor
-model fiber with `v` in its first slot. This is currying-then-applying. -/
-noncomputable def model_interior_product (s : ℕ) (v : E) :
-    Tensor0SModel (s + 1) 𝕜 E →L[𝕜] Tensor0SModel s 𝕜 E :=
-  (ContinuousLinearMap.apply 𝕜
-    (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜) v).comp
-    (continuousMultilinearCurryLeftEquiv 𝕜
-      (fun _ : Fin (s + 1) => E) 𝕜).toContinuousLinearEquiv.toContinuousLinearMap
-
-/-- The model-level interior product, packaged as a continuous bilinear map in the
-vector argument and the (0,s+1)-tensor argument. Used to prove smoothness of the
-interior-product field operation. -/
-noncomputable def model_interior_bilinear (𝕜 : Type*) [NontriviallyNormedField 𝕜]
-    [CompleteSpace 𝕜] (E : Type*) [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-    [Module.Finite 𝕜 E] [FiniteDimensional 𝕜 E] (s : ℕ) :
-    E →L[𝕜] (Tensor0SModel (s + 1) 𝕜 E →L[𝕜] Tensor0SModel s 𝕜 E) :=
-  ContinuousLinearMap.flip
-    (continuousMultilinearCurryLeftEquiv 𝕜
-      (fun _ : Fin (s + 1) => E) 𝕜).toContinuousLinearEquiv.toContinuousLinearMap
-
-set_option linter.unusedSectionVars false in
-theorem model_interior_bilinear_apply (s : ℕ) (v : E) (T : Tensor0SModel (s + 1) 𝕜 E) :
-    model_interior_bilinear 𝕜 E s v T = model_interior_product s v T := rfl
-
-/-!
 ## Interior product
 -/
 
@@ -146,6 +114,57 @@ noncomputable def model_tensorWithCovector (r : ℕ) (α : Tensor0SModel 1 𝕜 
         simp only [Bundle.continuousMultilinearMap.modelProduct_apply,
           ContinuousMultilinearMap.smul_apply, smul_eq_mul, RingHom.id_apply]
         ring }
+
+
+noncomputable def model_tensorWithCovector_first (r : ℕ) (α : Tensor0SModel 1 𝕜 E) :
+    Tensor0SModel r 𝕜 E →L[𝕜] Tensor0SModel (1 + r) 𝕜 E :=
+  LinearMap.toContinuousLinearMap
+    { toFun := fun β => Bundle.continuousMultilinearMap.modelProduct 1 r α β
+      map_add' := fun β₁ β₂ => by
+        ext v
+        simp only [Bundle.continuousMultilinearMap.modelProduct_apply,
+          ContinuousMultilinearMap.add_apply, mul_add]
+      map_smul' := fun c β => by
+        ext v
+        simp only [Bundle.continuousMultilinearMap.modelProduct_apply,
+          ContinuousMultilinearMap.smul_apply, smul_eq_mul, RingHom.id_apply]
+        ring }
+
+/-- The curry `α ↦ (β ↦ α ⊗ β)` as a continuous bilinear map, with `α` in slot 0. -/
+noncomputable def model_tensorWithCovector_first_bilinear (r : ℕ) :
+    Tensor0SModel 1 𝕜 E →L[𝕜]
+      (Tensor0SModel r 𝕜 E →L[𝕜] Tensor0SModel (1 + r) 𝕜 E) :=
+  LinearMap.toContinuousLinearMap
+    { toFun := fun α =>
+        LinearMap.toContinuousLinearMap
+          { toFun := fun β => Bundle.continuousMultilinearMap.modelProduct 1 r α β
+            map_add' := fun β₁ β₂ => by
+              ext v
+              simp only [Bundle.continuousMultilinearMap.modelProduct_apply,
+                ContinuousMultilinearMap.add_apply, mul_add]
+            map_smul' := fun c β => by
+              ext v
+              simp only [Bundle.continuousMultilinearMap.modelProduct_apply,
+                ContinuousMultilinearMap.smul_apply, smul_eq_mul, RingHom.id_apply]
+              ring }
+      map_add' := fun α₁ α₂ => by
+        ext β v
+        simp only [LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk,
+          Bundle.continuousMultilinearMap.modelProduct_apply,
+          ContinuousLinearMap.add_apply, ContinuousMultilinearMap.add_apply, add_mul]
+      map_smul' := fun c α => by
+        ext β v
+        simp only [LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk,
+          Bundle.continuousMultilinearMap.modelProduct_apply,
+          ContinuousLinearMap.smul_apply, ContinuousMultilinearMap.smul_apply,
+          smul_eq_mul, RingHom.id_apply]
+        ring }
+
+set_option linter.unusedSectionVars false in
+theorem model_tensorWithCovector_first_bilinear_apply (r : ℕ)
+    (α : Tensor0SModel 1 𝕜 E) (β : Tensor0SModel r 𝕜 E) :
+    model_tensorWithCovector_first_bilinear (𝕜 := 𝕜) (E := E) r α β =
+      model_tensorWithCovector_first r α β := rfl
 
 /-!
 ## Contraction of smooth tensor fields
