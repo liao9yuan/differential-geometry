@@ -51,11 +51,14 @@ import DifferentialGeometry.Synthetic.Realization.TensorRSNabla
 import DifferentialGeometry.Synthetic.Realization.TensorContract
 import DifferentialGeometry.Synthetic.Realization.NablaContractSynthetic
 import DifferentialGeometry.Synthetic.Realization.TimeDeriv
+import DifferentialGeometry.Synthetic.Realization.SpatialTemporalCommOn
 import DifferentialGeometry.Synthetic.Realization.TimeNabla
 import DifferentialGeometry.Synthetic.Realization.TimeTrace
 import DifferentialGeometry.Synthetic.Realization.TimeJointSmoothness
 import DifferentialGeometry.Synthetic.Realization.RicciFlow
 import DifferentialGeometry.Synthetic.Realization.SmoothRicciFlow
+import DifferentialGeometry.Synthetic.Realization.RicciFlowOn
+import DifferentialGeometry.Synthetic.Realization.SmoothRicciFlowOn
 
 -- Non-Ricci flows (plug-in demonstrations of flow-agnostic abstraction)
 import DifferentialGeometry.Synthetic.Flow.Heat.Basic

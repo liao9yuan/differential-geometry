@@ -373,7 +373,7 @@ open Bundle in
 /-- The section `(s, x) ↦ ⟨(s, x), (0, X x)⟩` of the tangent bundle of `ℝ × M` is
 smooth. It lifts the spatial vector field `X` to a "time-horizontal" vector field
 on the product manifold. -/
-private theorem concreteIsSmoothFam_embed_liftedSection_contMDiff
+theorem concreteIsSmoothFam_embed_liftedSection_contMDiff
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ContMDiff (𝓘(ℝ, ℝ).prod I)
       ((𝓘(ℝ, ℝ).prod I).prod 𝓘(ℝ, ℝ × E)) ∞
@@ -1566,4 +1566,1136 @@ theorem concrete_spatial_temporal_comm_general :
   -- Combine via Schwarz.
   rw [hLHS_eq, hRHS_eq]
   exact hsymm ((1, 0) : ℝ × E) ((0, v) : ℝ × E)
+
+-- ============================================================
+-- Subset-time realisation: `SmoothTimeAlgebraOn I M s`
+-- ============================================================
+
+/-!
+### Subset-time joint-smooth algebra
+
+The `SmoothTimeAlgebra` abbrev above is hard-wired to *global* joint smoothness
+on `ℝ × M`. For Ricci flow on arbitrary time windows `s : Set ℝ` (for example
+`Set.Ioo a b` or `Set.Icc a b`), we introduce a parallel *subset-time* family
+`SmoothTimeAlgebraOn I M s` whose elements carry both
+* a formal curried family `fam : ℝ → C^∞⟮I, M; ℝ⟯`, and
+* a joint-smoothness witness for the uncurried map on `s ×ˢ Set.univ`.
+
+Storing the formal family as data (rather than defining an element as the raw
+uncurried function) lets us define `concreteEvalOn` as `F.fam t` on the nose —
+agreeing with `f t` for every `t : ℝ`, including `t ∉ s` — which is what the
+abstract `TimeRegularFam.eval_lift` axiom demands.
+
+All algebraic structure (`CommRing`, `Algebra C^∞⟮I, M; ℝ⟯ _`) is induced
+pointwise on `fam`; closure under the ring operations follows from the standard
+Mathlib `ContMDiffOn.add`/`.mul`/`.neg` API.
+-/
+
+/-- Subset-time joint-smooth algebra: a curried family
+`fam : ℝ → C^∞⟮I, M; ℝ⟯` together with a witness that the uncurried map
+`(t, x) ↦ fam t x` is jointly `C^∞` on `s ×ˢ Set.univ`. -/
+structure SmoothTimeAlgebraOn (s : Set ℝ) : Type _ where
+  /-- The underlying time-parametrised family of smooth maps. -/
+  fam : ℝ → C^∞⟮I, M; ℝ⟯
+  /-- The uncurried family is jointly smooth on the product set `s ×ˢ univ`. -/
+  smooth_on :
+    ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞ (fun p : ℝ × M => fam p.1 p.2)
+      (s ×ˢ (Set.univ : Set M))
+
+namespace SmoothTimeAlgebraOn
+
+variable {I M} {s : Set ℝ}
+
+/-- Extensionality: two elements of `SmoothTimeAlgebraOn I M s` are equal when
+their underlying families agree pointwise. -/
+@[ext]
+theorem ext {F G : SmoothTimeAlgebraOn I M s} (h : ∀ t, F.fam t = G.fam t) : F = G := by
+  cases F with
+  | mk f hf =>
+    cases G with
+    | mk g hg =>
+      congr
+      funext t
+      exact h t
+
+/-- `SmoothTimeAlgebraOn.mk f h` unfolds to `f` on the `fam` projection. -/
+@[simp]
+theorem fam_mk (f : ℝ → C^∞⟮I, M; ℝ⟯)
+    (h : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞ (fun p : ℝ × M => f p.1 p.2)
+      (s ×ˢ (Set.univ : Set M))) :
+    (SmoothTimeAlgebraOn.mk f h).fam = f := rfl
+
+/-- Injectivity of `fam`: two elements are equal iff their families coincide. -/
+theorem fam_injective :
+    Function.Injective (SmoothTimeAlgebraOn.fam (I := I) (M := M) (s := s)) := by
+  intro F G hFG
+  cases F with
+  | mk f hf =>
+    cases G with
+    | mk g hg =>
+      dsimp only at hFG
+      subst hFG
+      rfl
+
+end SmoothTimeAlgebraOn
+
+/-!
+#### Pointwise algebraic instances
+
+Each instance is defined by pointwise action on `fam` and justified by the
+ordinary `ContMDiffOn` closure laws (`add`, `mul`, `neg`, `const`).
+-/
+
+namespace SmoothTimeAlgebraOn
+
+variable {I M} {s : Set ℝ}
+
+/-- Helper: the uncurried map of the zero family is the constant zero function. -/
+private theorem uncurry_zero_eq :
+    (fun p : ℝ × M => ((0 : ℝ → C^∞⟮I, M; ℝ⟯) p.1) p.2) = fun _ => (0 : ℝ) := by
+  funext p
+  change ((0 : C^∞⟮I, M; ℝ⟯) : M → ℝ) p.2 = 0
+  simp
+
+/-- Helper: the uncurried map of the unit family is the constant one function. -/
+private theorem uncurry_one_eq :
+    (fun p : ℝ × M => ((1 : ℝ → C^∞⟮I, M; ℝ⟯) p.1) p.2) = fun _ => (1 : ℝ) := by
+  funext p
+  change ((1 : C^∞⟮I, M; ℝ⟯) : M → ℝ) p.2 = 1
+  simp
+
+/-- Helper: the uncurried pointwise sum. -/
+private theorem uncurry_add_eq (f g : ℝ → C^∞⟮I, M; ℝ⟯) :
+    (fun p : ℝ × M => ((f + g) p.1) p.2) =
+      (fun p : ℝ × M => f p.1 p.2) + (fun p : ℝ × M => g p.1 p.2) := by
+  funext p
+  change ((f p.1 + g p.1) : C^∞⟮I, M; ℝ⟯) p.2 = f p.1 p.2 + g p.1 p.2
+  simp [ContMDiffMap.coe_add]
+
+/-- Helper: the uncurried pointwise product. -/
+private theorem uncurry_mul_eq (f g : ℝ → C^∞⟮I, M; ℝ⟯) :
+    (fun p : ℝ × M => ((f * g) p.1) p.2) =
+      (fun p : ℝ × M => f p.1 p.2) * (fun p : ℝ × M => g p.1 p.2) := by
+  funext p
+  change ((f p.1 * g p.1) : C^∞⟮I, M; ℝ⟯) p.2 = f p.1 p.2 * g p.1 p.2
+  simp [ContMDiffMap.coe_mul]
+
+/-- Helper: the uncurried pointwise negation. -/
+private theorem uncurry_neg_eq (f : ℝ → C^∞⟮I, M; ℝ⟯) :
+    (fun p : ℝ × M => ((-f) p.1) p.2) = fun p : ℝ × M => -(f p.1 p.2) := by
+  funext p
+  change ((-f p.1) : C^∞⟮I, M; ℝ⟯) p.2 = -(f p.1 p.2)
+  simp [ContMDiffMap.coe_neg]
+
+/-- Helper: the uncurried pointwise subtraction. -/
+private theorem uncurry_sub_eq (f g : ℝ → C^∞⟮I, M; ℝ⟯) :
+    (fun p : ℝ × M => ((f - g) p.1) p.2) =
+      (fun p : ℝ × M => f p.1 p.2) - (fun p : ℝ × M => g p.1 p.2) := by
+  funext p
+  change ((f p.1 - g p.1) : C^∞⟮I, M; ℝ⟯) p.2 = f p.1 p.2 - g p.1 p.2
+  simp [ContMDiffMap.coe_sub]
+
+/-- Helper: repeated-addition `ℕ` action on `C^∞⟮I, M; ℝ⟯` agrees with
+real multiplication by `(n : ℝ)` on pointwise values. -/
+private theorem coe_nsmul_apply (n : ℕ) (c : C^∞⟮I, M; ℝ⟯) (x : M) :
+    ((n • c : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = ((n : ℕ) : ℝ) * c x := by
+  induction n with
+  | zero => simp
+  | succ k ih =>
+    rw [succ_nsmul, ContMDiffMap.coe_add, Pi.add_apply, ih]
+    push_cast
+    ring
+
+/-- Helper: repeated-addition `ℤ` action on `C^∞⟮I, M; ℝ⟯` agrees with
+real multiplication by `(n : ℝ)` on pointwise values. -/
+private theorem coe_zsmul_apply (n : ℤ) (c : C^∞⟮I, M; ℝ⟯) (x : M) :
+    ((n • c : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = ((n : ℤ) : ℝ) * c x := by
+  match n with
+  | Int.ofNat k =>
+    -- `((k : ℕ) : ℤ) • c = (k : ℕ) • c`.
+    change ((((k : ℕ) : ℤ) • c : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = _
+    have hzn : (((k : ℕ) : ℤ) • (c : C^∞⟮I, M; ℝ⟯)) = (k : ℕ) • c :=
+      natCast_zsmul c k
+    rw [hzn, coe_nsmul_apply]
+    change ((k : ℕ) : ℝ) * c x = ((Int.ofNat k : ℤ) : ℝ) * c x
+    simp
+  | Int.negSucc k =>
+    -- `Int.negSucc k • c = -((k + 1 : ℕ) • c)`.
+    change ((Int.negSucc k • c : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = _
+    have hns : (Int.negSucc k • (c : C^∞⟮I, M; ℝ⟯)) = -((k + 1 : ℕ) • c) :=
+      negSucc_zsmul c k
+    rw [hns, ContMDiffMap.coe_neg, Pi.neg_apply, coe_nsmul_apply]
+    push_cast
+    ring
+
+/-- Helper: `n • f` uncurried equals constant `(n : ℝ)` times the uncurried `f`. -/
+private theorem uncurry_nsmul_eq (n : ℕ) (f : ℝ → C^∞⟮I, M; ℝ⟯) :
+    (fun p : ℝ × M => ((n • f) p.1) p.2) =
+      (fun _ : ℝ × M => ((n : ℕ) : ℝ)) * (fun p : ℝ × M => f p.1 p.2) := by
+  funext p
+  change ((n • f p.1 : C^∞⟮I, M; ℝ⟯) : M → ℝ) p.2 = ((n : ℕ) : ℝ) * f p.1 p.2
+  rw [coe_nsmul_apply]
+
+/-- Helper: `n • f` uncurried (for `ℤ` action) equals constant `(n : ℝ)` times
+the uncurried `f`. -/
+private theorem uncurry_zsmul_eq (n : ℤ) (f : ℝ → C^∞⟮I, M; ℝ⟯) :
+    (fun p : ℝ × M => ((n • f) p.1) p.2) =
+      (fun _ : ℝ × M => ((n : ℤ) : ℝ)) * (fun p : ℝ × M => f p.1 p.2) := by
+  funext p
+  change ((n • f p.1 : C^∞⟮I, M; ℝ⟯) : M → ℝ) p.2 = ((n : ℤ) : ℝ) * f p.1 p.2
+  rw [coe_zsmul_apply]
+
+/-- Helper: the uncurried power equals the pointwise power of the uncurried. -/
+private theorem uncurry_pow_eq (f : ℝ → C^∞⟮I, M; ℝ⟯) (n : ℕ) :
+    (fun p : ℝ × M => ((f ^ n) p.1) p.2) =
+      (fun p : ℝ × M => f p.1 p.2) ^ n := by
+  funext p
+  change ((f p.1 ^ n : C^∞⟮I, M; ℝ⟯) : M → ℝ) p.2 = (f p.1 p.2) ^ n
+  induction n with
+  | zero => simp
+  | succ k ih =>
+    rw [pow_succ, ContMDiffMap.coe_mul, Pi.mul_apply, ih, pow_succ]
+
+/-- Helper: `((n : ℕ) : C^∞⟮I, M; ℝ⟯) x = (n : ℝ)` for any point `x`. -/
+private theorem coe_natCast_apply (n : ℕ) (x : M) :
+    (((n : ℕ) : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = ((n : ℕ) : ℝ) := by
+  induction n with
+  | zero => simp
+  | succ k ih =>
+    have : (((k + 1 : ℕ) : ℕ) : C^∞⟮I, M; ℝ⟯) =
+        ((k : ℕ) : C^∞⟮I, M; ℝ⟯) + 1 := by push_cast; rfl
+    rw [this, ContMDiffMap.coe_add, Pi.add_apply, ih]
+    simp
+
+/-- Helper: the uncurried `NatCast` constant family is constant. -/
+private theorem uncurry_natCast_eq (n : ℕ) :
+    (fun p : ℝ × M => (((n : ℕ) : ℝ → C^∞⟮I, M; ℝ⟯) p.1) p.2) =
+      fun _ => ((n : ℕ) : ℝ) := by
+  funext p
+  change (((n : ℕ) : C^∞⟮I, M; ℝ⟯) : M → ℝ) p.2 = ((n : ℕ) : ℝ)
+  rw [coe_natCast_apply]
+
+/-- Helper: `((n : ℤ) : C^∞⟮I, M; ℝ⟯) x = (n : ℝ)` for any point `x`. -/
+private theorem coe_intCast_apply (n : ℤ) (x : M) :
+    (((n : ℤ) : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = ((n : ℤ) : ℝ) := by
+  match n with
+  | Int.ofNat k =>
+    change (((k : ℕ) : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = ((k : ℕ) : ℝ)
+    exact coe_natCast_apply k x
+  | Int.negSucc k =>
+    -- `((Int.negSucc k : ℤ) : C^∞⟮I, M; ℝ⟯) = -((k + 1 : ℕ) : C^∞⟮I, M; ℝ⟯)`
+    -- by `Int.cast_negSucc`.
+    rw [Int.cast_negSucc]
+    rw [ContMDiffMap.coe_neg, Pi.neg_apply, coe_natCast_apply]
+    push_cast
+    rfl
+
+/-- Helper: the uncurried `IntCast` constant family is constant. -/
+private theorem uncurry_intCast_eq (n : ℤ) :
+    (fun p : ℝ × M => (((n : ℤ) : ℝ → C^∞⟮I, M; ℝ⟯) p.1) p.2) =
+      fun _ => ((n : ℤ) : ℝ) := by
+  funext p
+  change (((n : ℤ) : C^∞⟮I, M; ℝ⟯) : M → ℝ) p.2 = ((n : ℤ) : ℝ)
+  rw [coe_intCast_apply]
+
+/-- The zero element: constantly zero in every slice. -/
+noncomputable instance instZero : Zero (SmoothTimeAlgebraOn I M s) where
+  zero :=
+    { fam := 0
+      smooth_on := by
+        rw [uncurry_zero_eq]
+        exact contMDiffOn_const }
+
+@[simp]
+theorem fam_zero : (0 : SmoothTimeAlgebraOn I M s).fam = 0 := rfl
+
+/-- The unit element: constantly one in every slice. -/
+noncomputable instance instOne : One (SmoothTimeAlgebraOn I M s) where
+  one :=
+    { fam := 1
+      smooth_on := by
+        rw [uncurry_one_eq]
+        exact contMDiffOn_const }
+
+@[simp]
+theorem fam_one : (1 : SmoothTimeAlgebraOn I M s).fam = 1 := rfl
+
+/-- Pointwise addition. -/
+noncomputable instance instAdd : Add (SmoothTimeAlgebraOn I M s) where
+  add F G :=
+    { fam := F.fam + G.fam
+      smooth_on := by
+        rw [uncurry_add_eq]
+        exact F.smooth_on.add G.smooth_on }
+
+@[simp]
+theorem fam_add (F G : SmoothTimeAlgebraOn I M s) : (F + G).fam = F.fam + G.fam := rfl
+
+/-- Pointwise multiplication. -/
+noncomputable instance instMul : Mul (SmoothTimeAlgebraOn I M s) where
+  mul F G :=
+    { fam := F.fam * G.fam
+      smooth_on := by
+        rw [uncurry_mul_eq]
+        exact F.smooth_on.mul G.smooth_on }
+
+@[simp]
+theorem fam_mul (F G : SmoothTimeAlgebraOn I M s) : (F * G).fam = F.fam * G.fam := rfl
+
+/-- Pointwise negation. -/
+noncomputable instance instNeg : Neg (SmoothTimeAlgebraOn I M s) where
+  neg F :=
+    { fam := -F.fam
+      smooth_on := by
+        rw [uncurry_neg_eq]
+        exact F.smooth_on.neg }
+
+@[simp]
+theorem fam_neg (F : SmoothTimeAlgebraOn I M s) : (-F).fam = -F.fam := rfl
+
+/-- Pointwise subtraction. -/
+noncomputable instance instSub : Sub (SmoothTimeAlgebraOn I M s) where
+  sub F G :=
+    { fam := F.fam - G.fam
+      smooth_on := by
+        rw [uncurry_sub_eq]
+        -- `ContMDiffOn` is closed under `sub` via `add` and `neg`.
+        have := F.smooth_on.add G.smooth_on.neg
+        simpa [Pi.sub_def, sub_eq_add_neg, Pi.add_def, Pi.neg_def] using this }
+
+@[simp]
+theorem fam_sub (F G : SmoothTimeAlgebraOn I M s) : (F - G).fam = F.fam - G.fam := rfl
+
+/-- Natural-number scalar multiplication: `n • F` has underlying family `n • F.fam`. -/
+noncomputable instance instSMulNat : SMul ℕ (SmoothTimeAlgebraOn I M s) where
+  smul n F :=
+    { fam := n • F.fam
+      smooth_on := by
+        rw [uncurry_nsmul_eq]
+        exact (contMDiffOn_const (c := ((n : ℕ) : ℝ))).mul F.smooth_on }
+
+@[simp]
+theorem fam_nsmul (n : ℕ) (F : SmoothTimeAlgebraOn I M s) :
+    (n • F).fam = n • F.fam := rfl
+
+/-- Integer scalar multiplication: `n • F` has underlying family `n • F.fam`. -/
+noncomputable instance instSMulInt : SMul ℤ (SmoothTimeAlgebraOn I M s) where
+  smul n F :=
+    { fam := n • F.fam
+      smooth_on := by
+        rw [uncurry_zsmul_eq]
+        exact (contMDiffOn_const (c := ((n : ℤ) : ℝ))).mul F.smooth_on }
+
+@[simp]
+theorem fam_zsmul (n : ℤ) (F : SmoothTimeAlgebraOn I M s) :
+    (n • F).fam = n • F.fam := rfl
+
+/-- Natural-number power (iterated multiplication). -/
+noncomputable instance instPowNat : Pow (SmoothTimeAlgebraOn I M s) ℕ where
+  pow F n :=
+    { fam := F.fam ^ n
+      smooth_on := by
+        rw [uncurry_pow_eq]
+        induction n with
+        | zero =>
+          show ContMDiffOn _ _ _ ((fun p : ℝ × M => F.fam p.1 p.2) ^ 0) _
+          simpa [pow_zero] using
+            (contMDiffOn_const : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+              (fun _ : ℝ × M => (1 : ℝ)) (s ×ˢ (Set.univ : Set M)))
+        | succ k ih =>
+          show ContMDiffOn _ _ _ ((fun p : ℝ × M => F.fam p.1 p.2) ^ (k + 1)) _
+          rw [pow_succ]
+          exact ih.mul F.smooth_on }
+
+@[simp]
+theorem fam_pow (F : SmoothTimeAlgebraOn I M s) (n : ℕ) :
+    (F ^ n).fam = F.fam ^ n := rfl
+
+/-- Natural number coercion into `SmoothTimeAlgebraOn`: constantly `n`. -/
+noncomputable instance instNatCast : NatCast (SmoothTimeAlgebraOn I M s) where
+  natCast n :=
+    { fam := (n : ℝ → C^∞⟮I, M; ℝ⟯)
+      smooth_on := by
+        rw [uncurry_natCast_eq]
+        exact contMDiffOn_const }
+
+@[simp]
+theorem fam_natCast (n : ℕ) :
+    ((n : SmoothTimeAlgebraOn I M s).fam) = (n : ℝ → C^∞⟮I, M; ℝ⟯) := rfl
+
+/-- Integer coercion into `SmoothTimeAlgebraOn`: constantly `n`. -/
+noncomputable instance instIntCast : IntCast (SmoothTimeAlgebraOn I M s) where
+  intCast n :=
+    { fam := (n : ℝ → C^∞⟮I, M; ℝ⟯)
+      smooth_on := by
+        rw [uncurry_intCast_eq]
+        exact contMDiffOn_const }
+
+@[simp]
+theorem fam_intCast (n : ℤ) :
+    ((n : SmoothTimeAlgebraOn I M s).fam) = (n : ℝ → C^∞⟮I, M; ℝ⟯) := rfl
+
+/-- `SmoothTimeAlgebraOn I M s` is a commutative ring via pointwise operations
+on `fam`. The CommRing instance is pulled back through the injective
+projection `fam : SmoothTimeAlgebraOn I M s → ℝ → C^∞⟮I, M; ℝ⟯`. -/
+noncomputable instance instCommRing : CommRing (SmoothTimeAlgebraOn I M s) :=
+  fam_injective.commRing
+    (f := fam)
+    (zero := fam_zero)
+    (one := fam_one)
+    (add := fam_add)
+    (mul := fam_mul)
+    (neg := fam_neg)
+    (sub := fam_sub)
+    (nsmul := fun n F => fam_nsmul n F)
+    (zsmul := fun n F => fam_zsmul n F)
+    (npow := fun F n => fam_pow F n)
+    (natCast := fam_natCast)
+    (intCast := fam_intCast)
+
+/-- Auxiliary: the constant-in-time lift of a spatial smooth function. -/
+private noncomputable def constLift (c : C^∞⟮I, M; ℝ⟯) : SmoothTimeAlgebraOn I M s :=
+  { fam := fun _ => c
+    smooth_on := (c.contMDiff.comp contMDiff_snd).contMDiffOn }
+
+@[simp]
+private theorem fam_constLift (c : C^∞⟮I, M; ℝ⟯) (t : ℝ) :
+    (constLift (s := s) (I := I) (M := M) c).fam t = c := rfl
+
+/-- The `C^∞⟮I, M; ℝ⟯`-algebra structure on `SmoothTimeAlgebraOn I M s`: a
+spatial smooth function `c` embeds as the constant-in-time family `fun _ => c`. -/
+noncomputable def compSndRingHomOn :
+    C^∞⟮I, M; ℝ⟯ →+* SmoothTimeAlgebraOn I M s where
+  toFun := constLift (I := I) (M := M) (s := s)
+  map_one' := by
+    apply fam_injective
+    funext _
+    rw [fam_constLift, fam_one]; rfl
+  map_mul' c₁ c₂ := by
+    apply fam_injective
+    funext _
+    rw [fam_constLift, fam_mul]
+    change c₁ * c₂ = (constLift (I := I) (M := M) (s := s) c₁).fam _ *
+      (constLift (I := I) (M := M) (s := s) c₂).fam _
+    rw [fam_constLift, fam_constLift]
+  map_zero' := by
+    apply fam_injective
+    funext _
+    rw [fam_constLift, fam_zero]; rfl
+  map_add' c₁ c₂ := by
+    apply fam_injective
+    funext _
+    rw [fam_constLift, fam_add]
+    change c₁ + c₂ = (constLift (I := I) (M := M) (s := s) c₁).fam _ +
+      (constLift (I := I) (M := M) (s := s) c₂).fam _
+    rw [fam_constLift, fam_constLift]
+
+@[simp]
+theorem fam_compSndRingHomOn (c : C^∞⟮I, M; ℝ⟯) (t : ℝ) :
+    (compSndRingHomOn (I := I) (M := M) (s := s) c).fam t = c := rfl
+
+/-- `C^∞⟮I, M; ℝ⟯`-algebra structure on `SmoothTimeAlgebraOn I M s` obtained
+from `compSndRingHomOn`. -/
+noncomputable instance instAlgebra :
+    Algebra C^∞⟮I, M; ℝ⟯ (SmoothTimeAlgebraOn I M s) :=
+  (compSndRingHomOn (I := I) (M := M) (s := s)).toAlgebra
+
+end SmoothTimeAlgebraOn
+
+-- ============================================================
+-- Smooth-in-time-on-`s` predicate and bridge from global smoothness
+-- ============================================================
+
+/-- A family `f : ℝ → C^∞⟮I, M; ℝ⟯` is *jointly smooth on `s`* when the
+uncurried map `(t, x) ↦ f t x` is jointly `C^∞` on `s ×ˢ Set.univ`. This is the
+subset-time analogue of `concreteIsSmoothFam`. -/
+def concreteIsSmoothFamOn (s : Set ℝ) (f : ℝ → C^∞⟮I, M; ℝ⟯) : Prop :=
+  ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞ (fun p : ℝ × M => f p.1 p.2)
+    (s ×ˢ (Set.univ : Set M))
+
+/-- Global joint smoothness implies joint smoothness on any subset. -/
+theorem concreteIsSmoothFam.of_global_to_on
+    (s : Set ℝ) (f : ℝ → C^∞⟮I, M; ℝ⟯)
+    (hf : concreteIsSmoothFam I M f) :
+    concreteIsSmoothFamOn I M s f :=
+  hf.contMDiffOn
+
+/-- Constant families are jointly smooth on any subset. -/
+theorem concreteIsSmoothFamOn_const (s : Set ℝ) (c : C^∞⟮I, M; ℝ⟯) :
+    concreteIsSmoothFamOn I M s (fun _ => c) :=
+  (concreteIsSmoothFam_const I M c).contMDiffOn
+
+/-- Subset-smooth families are closed under pointwise addition. -/
+theorem concreteIsSmoothFamOn_add (s : Set ℝ) (f g : ℝ → C^∞⟮I, M; ℝ⟯)
+    (hf : concreteIsSmoothFamOn I M s f) (hg : concreteIsSmoothFamOn I M s g) :
+    concreteIsSmoothFamOn I M s (f + g) := by
+  change ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+    (fun p : ℝ × M => (f + g) p.1 p.2) (s ×ˢ (Set.univ : Set M))
+  have heq : (fun p : ℝ × M => (f + g) p.1 p.2) =
+      (fun p : ℝ × M => f p.1 p.2) + (fun p : ℝ × M => g p.1 p.2) := by
+    funext p
+    change (f p.1 + g p.1) p.2 = f p.1 p.2 + g p.1 p.2
+    simp [ContMDiffMap.coe_add]
+  rw [heq]
+  exact hf.add hg
+
+/-- Subset-smooth families are closed under pointwise multiplication. -/
+theorem concreteIsSmoothFamOn_mul (s : Set ℝ) (f g : ℝ → C^∞⟮I, M; ℝ⟯)
+    (hf : concreteIsSmoothFamOn I M s f) (hg : concreteIsSmoothFamOn I M s g) :
+    concreteIsSmoothFamOn I M s (f * g) := by
+  change ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+    (fun p : ℝ × M => (f * g) p.1 p.2) (s ×ˢ (Set.univ : Set M))
+  have heq : (fun p : ℝ × M => (f * g) p.1 p.2) =
+      (fun p : ℝ × M => f p.1 p.2) * (fun p : ℝ × M => g p.1 p.2) := by
+    funext p
+    change (f p.1 * g p.1) p.2 = f p.1 p.2 * g p.1 p.2
+    simp [ContMDiffMap.coe_mul]
+  rw [heq]
+  exact hf.mul hg
+
+/-- Subset-smooth families are closed under pointwise negation. -/
+theorem concreteIsSmoothFamOn_neg (s : Set ℝ) (f : ℝ → C^∞⟮I, M; ℝ⟯)
+    (hf : concreteIsSmoothFamOn I M s f) :
+    concreteIsSmoothFamOn I M s (-f) := by
+  change ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+    (fun p : ℝ × M => (-f) p.1 p.2) (s ×ˢ (Set.univ : Set M))
+  have heq : (fun p : ℝ × M => (-f) p.1 p.2) =
+      (fun p : ℝ × M => -(f p.1 p.2)) := by
+    funext p
+    change (-(f p.1)) p.2 = -(f p.1 p.2)
+    simp [ContMDiffMap.coe_neg]
+  rw [heq]
+  exact hf.neg
+
+/-- Subset-smooth families are closed under pointwise subtraction. -/
+theorem concreteIsSmoothFamOn_sub (s : Set ℝ) (f g : ℝ → C^∞⟮I, M; ℝ⟯)
+    (hf : concreteIsSmoothFamOn I M s f) (hg : concreteIsSmoothFamOn I M s g) :
+    concreteIsSmoothFamOn I M s (f - g) := by
+  have heq : f - g = f + (-g) := by funext t; simp [sub_eq_add_neg]
+  rw [heq]
+  exact concreteIsSmoothFamOn_add I M s f _ hf (concreteIsSmoothFamOn_neg I M s g hg)
+
+-- ============================================================
+-- `concreteLiftOn` and `concreteEvalOn`
+-- ============================================================
+
+/-- Lift a family `f : ℝ → C^∞⟮I, M; ℝ⟯` to an element of
+`SmoothTimeAlgebraOn I M s`; when `f` is not jointly smooth on `s`, fall back
+to `0`. The formal family is stored on the `fam` projection so that
+`concreteEvalOn` can recover `f t` verbatim for every `t`. -/
+noncomputable def concreteLiftOn (s : Set ℝ) (f : ℝ → C^∞⟮I, M; ℝ⟯) :
+    SmoothTimeAlgebraOn I M s :=
+  open Classical in
+  if h : concreteIsSmoothFamOn I M s f then
+    { fam := f, smooth_on := h }
+  else 0
+
+/-- Partial evaluation at a fixed time `t`: recover `F.fam t`. Because the
+formal family is stored as data, this always returns the slice that `lift`
+originally packed in, irrespective of whether `t ∈ s`. -/
+def concreteEvalOn {s : Set ℝ} (F : SmoothTimeAlgebraOn I M s) (t : ℝ) :
+    C^∞⟮I, M; ℝ⟯ :=
+  F.fam t
+
+/-- When `f` is subset-smooth, `concreteLiftOn` stores `f` verbatim as its
+underlying family. -/
+theorem concreteEvalOn_concreteLiftOn_apply
+    {s : Set ℝ} (f : ℝ → C^∞⟮I, M; ℝ⟯)
+    (hf : concreteIsSmoothFamOn I M s f) :
+    (concreteLiftOn I M s f).fam = f := by
+  simp only [concreteLiftOn, dif_pos hf, SmoothTimeAlgebraOn.fam_mk]
+
+/-- Fundamental identity: evaluating the lift of a subset-smooth family at any
+time `t` recovers `f t`. This holds for *all* `t : ℝ`, not just `t ∈ s`,
+because `fam` is stored as data. -/
+theorem concreteEvalOn_concreteLiftOn
+    {s : Set ℝ} (f : ℝ → C^∞⟮I, M; ℝ⟯)
+    (hf : concreteIsSmoothFamOn I M s f) (t : ℝ) :
+    concreteEvalOn I M (concreteLiftOn I M s f) t = f t := by
+  change (concreteLiftOn I M s f).fam t = f t
+  rw [concreteEvalOn_concreteLiftOn_apply I M f hf]
+
+/-- `concreteLiftOn` is additive on subset-smooth families. -/
+theorem concreteLiftOn_add
+    {s : Set ℝ} (f g : ℝ → C^∞⟮I, M; ℝ⟯)
+    (hf : concreteIsSmoothFamOn I M s f)
+    (hg : concreteIsSmoothFamOn I M s g) :
+    concreteLiftOn I M s (f + g) =
+      concreteLiftOn I M s f + concreteLiftOn I M s g := by
+  have hfg : concreteIsSmoothFamOn I M s (f + g) :=
+    concreteIsSmoothFamOn_add I M s f g hf hg
+  apply SmoothTimeAlgebraOn.fam_injective
+  rw [SmoothTimeAlgebraOn.fam_add]
+  rw [concreteEvalOn_concreteLiftOn_apply I M (f + g) hfg,
+      concreteEvalOn_concreteLiftOn_apply I M f hf,
+      concreteEvalOn_concreteLiftOn_apply I M g hg]
+
+/-- `concreteLiftOn` is multiplicative on subset-smooth families. -/
+theorem concreteLiftOn_mul
+    {s : Set ℝ} (f g : ℝ → C^∞⟮I, M; ℝ⟯)
+    (hf : concreteIsSmoothFamOn I M s f)
+    (hg : concreteIsSmoothFamOn I M s g) :
+    concreteLiftOn I M s (f * g) =
+      concreteLiftOn I M s f * concreteLiftOn I M s g := by
+  have hfg : concreteIsSmoothFamOn I M s (f * g) :=
+    concreteIsSmoothFamOn_mul I M s f g hf hg
+  apply SmoothTimeAlgebraOn.fam_injective
+  rw [SmoothTimeAlgebraOn.fam_mul]
+  rw [concreteEvalOn_concreteLiftOn_apply I M (f * g) hfg,
+      concreteEvalOn_concreteLiftOn_apply I M f hf,
+      concreteEvalOn_concreteLiftOn_apply I M g hg]
+
+/-- `concreteLiftOn` of a constant family equals the algebra-map image of the
+constant. -/
+theorem concreteLiftOn_algebraMap {s : Set ℝ} (c : C^∞⟮I, M; ℝ⟯) :
+    concreteLiftOn I M s (fun _ => c) =
+      algebraMap C^∞⟮I, M; ℝ⟯ (SmoothTimeAlgebraOn I M s) c := by
+  have hc : concreteIsSmoothFamOn I M s (fun _ => c) :=
+    concreteIsSmoothFamOn_const I M s c
+  apply SmoothTimeAlgebraOn.fam_injective
+  rw [concreteEvalOn_concreteLiftOn_apply I M (fun _ => c) hc]
+  funext t
+  -- RHS reduces to `compSndRingHomOn c` by the `RingHom.toAlgebra` definition.
+  change c = (SmoothTimeAlgebraOn.compSndRingHomOn (I := I) (M := M) (s := s) c).fam t
+  simp
+
+/-- `concreteEvalOn` is additive. -/
+theorem concreteEvalOn_add
+    {s : Set ℝ} (F G : SmoothTimeAlgebraOn I M s) (t : ℝ) :
+    concreteEvalOn I M (F + G) t = concreteEvalOn I M F t + concreteEvalOn I M G t := by
+  change (F + G).fam t = F.fam t + G.fam t
+  rw [SmoothTimeAlgebraOn.fam_add]; rfl
+
+/-- `concreteEvalOn` is multiplicative. -/
+theorem concreteEvalOn_mul
+    {s : Set ℝ} (F G : SmoothTimeAlgebraOn I M s) (t : ℝ) :
+    concreteEvalOn I M (F * G) t = concreteEvalOn I M F t * concreteEvalOn I M G t := by
+  change (F * G).fam t = F.fam t * G.fam t
+  rw [SmoothTimeAlgebraOn.fam_mul]; rfl
+
+/-- `concreteEvalOn` agrees with the algebra map on constant-in-time elements. -/
+theorem concreteEvalOn_algebraMap {s : Set ℝ} (c : C^∞⟮I, M; ℝ⟯) (t : ℝ) :
+    concreteEvalOn I M
+        (algebraMap C^∞⟮I, M; ℝ⟯ (SmoothTimeAlgebraOn I M s) c) t = c := by
+  -- `algebraMap = compSndRingHomOn` by the `RingHom.toAlgebra` instance.
+  change (SmoothTimeAlgebraOn.compSndRingHomOn (I := I) (M := M) (s := s) c).fam t = c
+  simp
+
+-- ============================================================
+-- Subset-time partial `derivWithin` as a `SmoothTimeAlgebraOn`
+-- ============================================================
+
+/-!
+### Joint smoothness of the partial `derivWithin` in the time direction
+
+The core technical lemma: if `F : ℝ × M → ℝ` is jointly `ContMDiffOn` on
+`s ×ˢ univ` (with `UniqueDiffOn ℝ s`), then the uncurried partial derivative
+`(t, x) ↦ derivWithin (fun τ => F (τ, x)) s t` is itself jointly `ContMDiffOn`
+on `s ×ˢ univ`.
+
+This is the subset-time analogue of `DifferentialGeometry.contMDiff_partial_deriv_fst`.
+The proof reduces `derivWithin` to `mfderivWithin` applied to `1`, then invokes
+`ContMDiffWithinAt.mfderivWithin_apply` with the product ambient space
+`(ℝ × M) × ℝ` serving as the "parameter × differentiation" domain.
+-/
+
+/-- The partial `derivWithin` along the ℝ-factor of a function jointly
+`ContMDiffOn` on `s ×ˢ univ` is itself jointly `ContMDiffOn` on `s ×ˢ univ`,
+provided `UniqueDiffOn ℝ s`. -/
+theorem contMDiffOn_partial_derivWithin_fst
+    {s : Set ℝ} (hs : UniqueDiffOn ℝ s)
+    {F : ℝ × M → ℝ}
+    (hF : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞ F (s ×ˢ (Set.univ : Set M))) :
+    ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => derivWithin (fun τ : ℝ => F (τ, p.2)) s p.1)
+      (s ×ˢ (Set.univ : Set M)) := by
+  -- Rewrite `derivWithin` as `mfderivWithin ... 1`.
+  have hrw : (fun p : ℝ × M => derivWithin (fun τ : ℝ => F (τ, p.2)) s p.1) =
+      fun p : ℝ × M =>
+        (mfderivWithin 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (fun τ : ℝ => F (τ, p.2)) s p.1) (1 : ℝ) := by
+    funext p
+    rw [mfderivWithin_eq_fderivWithin]
+    exact fderivWithin_derivWithin.symm
+  rw [hrw]
+  -- Reduce `∞` to every natural level.
+  rw [contMDiffOn_infty]
+  intro n p₀ hp₀
+  -- Joint smoothness of `(q : (ℝ × M) × ℝ) ↦ F (q.2, q.1.2)` on
+  -- `(s ×ˢ univ) ×ˢ s`: derived from `hF` by pre-composing with `(p, τ) ↦ (τ, p.2)`.
+  have harg : ContMDiffOn ((𝓘(ℝ, ℝ).prod I).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod I) ∞
+      (fun q : (ℝ × M) × ℝ => (q.2, q.1.2))
+      ((s ×ˢ (Set.univ : Set M)) ×ˢ s) := by
+    have h1 : ContMDiff ((𝓘(ℝ, ℝ).prod I).prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod I) ∞
+        (fun q : (ℝ × M) × ℝ => (q.2, q.1.2)) :=
+      ContMDiff.prodMk contMDiff_snd contMDiff_fst.snd
+    exact h1.contMDiffOn
+  have hF' : ContMDiffOn ((𝓘(ℝ, ℝ).prod I).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+      (fun q : (ℝ × M) × ℝ => F (q.2, q.1.2))
+      ((s ×ˢ (Set.univ : Set M)) ×ˢ s) := by
+    have hmap : Set.MapsTo (fun q : (ℝ × M) × ℝ => (q.2, q.1.2))
+        ((s ×ˢ (Set.univ : Set M)) ×ˢ s) (s ×ˢ (Set.univ : Set M)) := by
+      intro q hq
+      rcases hq with ⟨hq1, hq2⟩
+      refine ⟨hq2, ?_⟩
+      exact Set.mem_univ _
+    exact hF.comp harg hmap
+  -- Apply `ContMDiffWithinAt.mfderivWithin_apply` with `m = n`, `n' = n + 1`.
+  have hmn : ((n : WithTop ℕ∞) : WithTop ℕ∞) + 1 ≤ ∞ := by
+    exact_mod_cast le_top
+  have hf_at :
+      ContMDiffWithinAt ((𝓘(ℝ, ℝ).prod I).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ((n : WithTop ℕ∞) + 1)
+        (Function.uncurry (fun (p : ℝ × M) (τ : ℝ) => F (τ, p.2)))
+        ((s ×ˢ (Set.univ : Set M)) ×ˢ s) (p₀, p₀.1) := by
+    have hmem : (p₀, p₀.1) ∈ (s ×ˢ (Set.univ : Set M)) ×ˢ s := by
+      exact ⟨hp₀, hp₀.1⟩
+    have hFat : ContMDiffWithinAt ((𝓘(ℝ, ℝ).prod I).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+        (fun q : (ℝ × M) × ℝ => F (q.2, q.1.2))
+        ((s ×ˢ (Set.univ : Set M)) ×ˢ s) (p₀, p₀.1) := hF' _ hmem
+    have hFat' : ContMDiffWithinAt ((𝓘(ℝ, ℝ).prod I).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ)
+        ((n : WithTop ℕ∞) + 1)
+        (fun q : (ℝ × M) × ℝ => F (q.2, q.1.2))
+        ((s ×ˢ (Set.univ : Set M)) ×ˢ s) (p₀, p₀.1) := hFat.of_le hmn
+    -- `Function.uncurry` of `fun p τ => F (τ, p.2)` unfolds to `fun q => F (q.2, q.1.2)`.
+    change ContMDiffWithinAt ((𝓘(ℝ, ℝ).prod I).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ)
+        ((n : WithTop ℕ∞) + 1)
+        (fun q : (ℝ × M) × ℝ => F (q.2, q.1.2))
+        ((s ×ˢ (Set.univ : Set M)) ×ˢ s) (p₀, p₀.1)
+    exact hFat'
+  have h_apply :=
+    ContMDiffWithinAt.mfderivWithin_apply
+      (I := 𝓘(ℝ, ℝ)) (I' := 𝓘(ℝ, ℝ))
+      (f := fun (p : ℝ × M) (τ : ℝ) => F (τ, p.2))
+      (g := fun p : ℝ × M => p.1)
+      (g₁ := fun p : ℝ × M => p)
+      (g₂ := fun _ : ℝ × M => (1 : ℝ))
+      (t := s ×ˢ (Set.univ : Set M))
+      (u := s)
+      (v := s ×ˢ (Set.univ : Set M))
+      (x₀ := p₀)
+      (m := (n : WithTop ℕ∞))
+      (n := (n : WithTop ℕ∞) + 1)
+      hf_at
+      (contMDiffWithinAt_fst (I := 𝓘(ℝ, ℝ)) (J := I))
+      contMDiffWithinAt_id
+      contMDiffWithinAt_const
+      le_rfl
+      (Set.mapsTo_id _)
+      hp₀
+      (fun q hq => hq.1)
+      hs.uniqueMDiffOn
+  -- The source and target models are model spaces, so `inTangentCoordinates`
+  -- collapses to the raw `mfderivWithin`.
+  simpa [inTangentCoordinates_model_space] using h_apply
+
+/-- Specialization: joint `ContMDiffOn` on `s ×ˢ univ` of the partial time
+derivative of a `SmoothTimeAlgebraOn` element. -/
+theorem SmoothTimeAlgebraOn.derivWithin_contMDiffOn
+    {s : Set ℝ} (hs : UniqueDiffOn ℝ s) (F : SmoothTimeAlgebraOn I M s) :
+    ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => derivWithin (fun τ : ℝ => F.fam τ p.2) s p.1)
+      (s ×ˢ (Set.univ : Set M)) :=
+  contMDiffOn_partial_derivWithin_fst I M hs F.smooth_on
+
+/-- Per-slice spatial smoothness at `t ∈ s`: if the joint `ContMDiffOn` holds
+on `s ×ˢ univ`, then for every `t ∈ s` the spatial slice
+`x ↦ derivWithin (fun τ => F.fam τ x) s t` is smooth on `M`. -/
+theorem SmoothTimeAlgebraOn.derivWithin_contMDiff_slice
+    {s : Set ℝ} (hs : UniqueDiffOn ℝ s) (F : SmoothTimeAlgebraOn I M s)
+    {t : ℝ} (ht : t ∈ s) :
+    ContMDiff I 𝓘(ℝ, ℝ) ∞
+      (fun x : M => derivWithin (fun τ : ℝ => F.fam τ x) s t) := by
+  have hjoint := SmoothTimeAlgebraOn.derivWithin_contMDiffOn I M hs F
+  intro x
+  -- Compose with `x ↦ (t, x)`, which maps `univ : Set M` into `s ×ˢ univ`.
+  have hemb : ContMDiff I (𝓘(ℝ, ℝ).prod I) ∞ (fun y : M => (t, y)) :=
+    (contMDiff_const : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun _ : M => t)).prodMk contMDiff_id
+  have hmap : Set.MapsTo (fun y : M => (t, y))
+      (Set.univ : Set M) (s ×ˢ (Set.univ : Set M)) := by
+    intro y _
+    exact ⟨ht, Set.mem_univ _⟩
+  have hcomp : ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+      ((fun p : ℝ × M => derivWithin (fun τ : ℝ => F.fam τ p.2) s p.1) ∘
+        fun y : M => (t, y))
+      (Set.univ : Set M) :=
+    hjoint.comp hemb.contMDiffOn hmap
+  -- Simplify the composition.
+  have heq : ((fun p : ℝ × M => derivWithin (fun τ : ℝ => F.fam τ p.2) s p.1) ∘
+      fun y : M => (t, y)) = fun y : M => derivWithin (fun τ : ℝ => F.fam τ y) s t := by
+    funext y; rfl
+  rw [heq] at hcomp
+  exact (contMDiffOn_univ.mp hcomp) x
+
+/-!
+### The subset-time time-derivative family and its joint smoothness
+
+We package the partial `derivWithin` as a curried family
+`ℝ → C^∞⟮I, M; ℝ⟯`: at each `t ∈ s` the slice is the actual partial
+derivative; at `t ∉ s` we take the slice to be `0` so the family is
+well-defined on all of `ℝ`. Joint smoothness on `s ×ˢ univ` only sees the
+`t ∈ s` case, where the conditional agrees with the actual derivative.
+-/
+
+/-- The per-slice component of the subset-time time-derivative: for `t ∈ s`,
+the smooth function `x ↦ derivWithin (fun τ => F.fam τ x) s t`; for `t ∉ s`,
+the zero function. -/
+noncomputable def concreteDtOnFam {s : Set ℝ} (hs : UniqueDiffOn ℝ s)
+    (F : SmoothTimeAlgebraOn I M s) (t : ℝ) : C^∞⟮I, M; ℝ⟯ :=
+  open Classical in
+  if ht : t ∈ s then
+    ⟨fun x : M => derivWithin (fun τ : ℝ => F.fam τ x) s t,
+      SmoothTimeAlgebraOn.derivWithin_contMDiff_slice I M hs F ht⟩
+  else 0
+
+/-- On `s`, `concreteDtOnFam` has the expected underlying function. -/
+theorem concreteDtOnFam_apply_of_mem {s : Set ℝ} (hs : UniqueDiffOn ℝ s)
+    (F : SmoothTimeAlgebraOn I M s) {t : ℝ} (ht : t ∈ s) (x : M) :
+    (concreteDtOnFam I M hs F t : M → ℝ) x = derivWithin (fun τ : ℝ => F.fam τ x) s t := by
+  simp only [concreteDtOnFam, dif_pos ht, ContMDiffMap.coeFn_mk]
+
+/-- Off `s`, `concreteDtOnFam` is the zero function. -/
+theorem concreteDtOnFam_of_notMem {s : Set ℝ} (hs : UniqueDiffOn ℝ s)
+    (F : SmoothTimeAlgebraOn I M s) {t : ℝ} (ht : t ∉ s) :
+    concreteDtOnFam I M hs F t = 0 := by
+  simp only [concreteDtOnFam, dif_neg ht]
+
+/-- Joint smoothness of the uncurried `concreteDtOnFam` on `s ×ˢ univ`. -/
+theorem concreteDtOnFam_smooth_on {s : Set ℝ} (hs : UniqueDiffOn ℝ s)
+    (F : SmoothTimeAlgebraOn I M s) :
+    ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => concreteDtOnFam I M hs F p.1 p.2)
+      (s ×ˢ (Set.univ : Set M)) := by
+  -- On `s ×ˢ univ`, the uncurried `concreteDtOnFam` coincides with the raw
+  -- `derivWithin`, which is jointly smooth by `derivWithin_contMDiffOn`.
+  have hjoint := SmoothTimeAlgebraOn.derivWithin_contMDiffOn I M hs F
+  refine hjoint.congr ?_
+  intro p hp
+  obtain ⟨ht, _⟩ := hp
+  simp [concreteDtOnFam_apply_of_mem I M hs F ht p.2]
+
+-- ============================================================
+-- `concreteDtOn` as a `Derivation`
+-- ============================================================
+
+/-- Underlying set-function of the subset-time time-derivative: assembles the
+per-slice `concreteDtOnFam` into a `SmoothTimeAlgebraOn` element. -/
+noncomputable def concreteDtOnFun {s : Set ℝ} (hs : UniqueDiffOn ℝ s)
+    (F : SmoothTimeAlgebraOn I M s) : SmoothTimeAlgebraOn I M s where
+  fam := concreteDtOnFam I M hs F
+  smooth_on := concreteDtOnFam_smooth_on I M hs F
+
+@[simp]
+theorem concreteDtOnFun_fam {s : Set ℝ} (hs : UniqueDiffOn ℝ s)
+    (F : SmoothTimeAlgebraOn I M s) :
+    (concreteDtOnFun I M hs F).fam = concreteDtOnFam I M hs F := rfl
+
+/-- On `s`, the `fam` component of `concreteDtOnFun F` has the pointwise
+`derivWithin` expression. -/
+theorem concreteDtOnFun_fam_apply_of_mem
+    {s : Set ℝ} (hs : UniqueDiffOn ℝ s)
+    (F : SmoothTimeAlgebraOn I M s) {t : ℝ} (ht : t ∈ s) (x : M) :
+    ((concreteDtOnFun I M hs F).fam t : M → ℝ) x =
+      derivWithin (fun τ : ℝ => F.fam τ x) s t := by
+  change (concreteDtOnFam I M hs F t : M → ℝ) x = _
+  exact concreteDtOnFam_apply_of_mem I M hs F ht x
+
+/-!
+### Per-slice differentiability witnesses
+
+For the algebraic laws of `concreteDt` (additivity, Leibniz, …) we need each
+`t ∈ s` slice `τ ↦ F.fam τ x` to be `DifferentiableWithinAt ℝ _ s t` for every
+`x : M`. This follows from the joint `ContMDiffOn` hypothesis: the spatial
+slice at fixed `x` is `ContMDiffOn ℝ ∞` on `s`, hence
+`DifferentiableWithinAt` on `s`.
+-/
+
+/-- For any `x : M` and `t ∈ s`, the function `τ ↦ F.fam τ x` is
+`DifferentiableWithinAt ℝ _ s t`. -/
+theorem SmoothTimeAlgebraOn.fam_slice_differentiableWithinAt
+    {s : Set ℝ} (F : SmoothTimeAlgebraOn I M s) (x : M) {t : ℝ} (ht : t ∈ s) :
+    DifferentiableWithinAt ℝ (fun τ : ℝ => F.fam τ x) s t := by
+  -- Compose `F.smooth_on` with `τ ↦ (τ, x)`.
+  have hemb : ContMDiff 𝓘(ℝ, ℝ) (𝓘(ℝ, ℝ).prod I) ∞ (fun τ : ℝ => (τ, x)) :=
+    contMDiff_id.prodMk (contMDiff_const : ContMDiff 𝓘(ℝ, ℝ) I ∞ (fun _ : ℝ => x))
+  have hmap : Set.MapsTo (fun τ : ℝ => (τ, x)) s (s ×ˢ (Set.univ : Set M)) := by
+    intro τ hτ; exact ⟨hτ, Set.mem_univ _⟩
+  have hcomp : ContMDiffOn 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) ∞
+      ((fun p : ℝ × M => F.fam p.1 p.2) ∘ fun τ : ℝ => (τ, x)) s :=
+    F.smooth_on.comp hemb.contMDiffOn hmap
+  have heq : ((fun p : ℝ × M => F.fam p.1 p.2) ∘ fun τ : ℝ => (τ, x)) =
+      fun τ : ℝ => F.fam τ x := by
+    funext τ; rfl
+  rw [heq] at hcomp
+  -- Transport `ContMDiffOn` to `ContDiffOn` (via `contMDiffOn_iff_contDiffOn`
+  -- for model spaces).
+  have hContDiff : ContDiffOn ℝ ∞ (fun τ : ℝ => F.fam τ x) s := by
+    rw [contMDiffOn_iff_contDiffOn] at hcomp
+    exact hcomp
+  have hdiff : DifferentiableOn ℝ (fun τ : ℝ => F.fam τ x) s :=
+    hContDiff.differentiableOn (by decide)
+  exact hdiff t ht
+
+/-- `concreteDtOnFun` is additive. -/
+private theorem concreteDtOnFun_add
+    {s : Set ℝ} (hs : UniqueDiffOn ℝ s) (F G : SmoothTimeAlgebraOn I M s) :
+    concreteDtOnFun I M hs (F + G) =
+      concreteDtOnFun I M hs F + concreteDtOnFun I M hs G := by
+  apply SmoothTimeAlgebraOn.fam_injective
+  rw [SmoothTimeAlgebraOn.fam_add, concreteDtOnFun_fam, concreteDtOnFun_fam,
+      concreteDtOnFun_fam]
+  funext t
+  ext x
+  by_cases ht : t ∈ s
+  · -- On `s`: use `derivWithin_add`.
+    have hFdiff := SmoothTimeAlgebraOn.fam_slice_differentiableWithinAt I M F x ht
+    have hGdiff := SmoothTimeAlgebraOn.fam_slice_differentiableWithinAt I M G x ht
+    -- The slice of `F + G` equals `τ ↦ F.fam τ x + G.fam τ x`.
+    have hslice : (fun τ : ℝ => (F + G).fam τ x) =
+        (fun τ : ℝ => F.fam τ x) + (fun τ : ℝ => G.fam τ x) := by
+      funext τ
+      change ((F + G).fam τ : M → ℝ) x = ((F.fam τ : M → ℝ) x + (G.fam τ : M → ℝ) x)
+      rw [SmoothTimeAlgebraOn.fam_add]
+      change ((F.fam τ + G.fam τ) : C^∞⟮I, M; ℝ⟯) x = (F.fam τ) x + (G.fam τ) x
+      simp [ContMDiffMap.coe_add]
+    change (concreteDtOnFam I M hs (F + G) t : M → ℝ) x =
+      ((concreteDtOnFam I M hs F t + concreteDtOnFam I M hs G t :
+        C^∞⟮I, M; ℝ⟯) : M → ℝ) x
+    rw [concreteDtOnFam_apply_of_mem I M hs (F + G) ht x, hslice,
+        derivWithin_add hFdiff hGdiff, ContMDiffMap.coe_add, Pi.add_apply,
+        concreteDtOnFam_apply_of_mem I M hs F ht x,
+        concreteDtOnFam_apply_of_mem I M hs G ht x]
+  · -- Off `s`: all three slices are 0.
+    change (concreteDtOnFam I M hs (F + G) t : M → ℝ) x =
+      ((concreteDtOnFam I M hs F t + concreteDtOnFam I M hs G t :
+        C^∞⟮I, M; ℝ⟯) : M → ℝ) x
+    rw [concreteDtOnFam_of_notMem I M hs (F + G) ht,
+        concreteDtOnFam_of_notMem I M hs F ht,
+        concreteDtOnFam_of_notMem I M hs G ht]
+    simp
+
+/-- `concreteDtOnFun` commutes with scalar multiplication by `C^∞⟮I, M; ℝ⟯`:
+spatial smooth functions don't depend on time, so the time derivative
+passes through. -/
+private theorem concreteDtOnFun_smul
+    {s : Set ℝ} (hs : UniqueDiffOn ℝ s)
+    (c : C^∞⟮I, M; ℝ⟯) (F : SmoothTimeAlgebraOn I M s) :
+    concreteDtOnFun I M hs (c • F) = c • concreteDtOnFun I M hs F := by
+  apply SmoothTimeAlgebraOn.fam_injective
+  funext t
+  ext x
+  by_cases ht : t ∈ s
+  · -- On `s`: `c • F` has slice `τ ↦ c x * F.fam τ x` at point `x`.
+    have hFdiff := SmoothTimeAlgebraOn.fam_slice_differentiableWithinAt I M F x ht
+    have hslice : (fun τ : ℝ => ((c • F).fam τ : M → ℝ) x) =
+        fun τ : ℝ => c x * (F.fam τ : M → ℝ) x := by
+      funext τ
+      change ((c • F).fam τ : M → ℝ) x = c x * (F.fam τ : M → ℝ) x
+      -- `c • F = (compSndRingHomOn c) * F` by `RingHom.toAlgebra`.
+      change (((SmoothTimeAlgebraOn.compSndRingHomOn (I := I) (M := M) (s := s) c
+        : SmoothTimeAlgebraOn I M s) * F).fam τ : M → ℝ) x = c x * (F.fam τ : M → ℝ) x
+      rw [SmoothTimeAlgebraOn.fam_mul]
+      change ((SmoothTimeAlgebraOn.compSndRingHomOn (I := I) (M := M) (s := s) c).fam τ *
+        F.fam τ : C^∞⟮I, M; ℝ⟯) x = c x * (F.fam τ) x
+      rw [ContMDiffMap.coe_mul]
+      simp
+    -- `c • concreteDtOnFun hs F` at `(t, x)` equals `c x * (concreteDtOnFun hs F).fam t x`.
+    change (concreteDtOnFam I M hs (c • F) t : M → ℝ) x =
+      ((c • concreteDtOnFun I M hs F).fam t : M → ℝ) x
+    rw [concreteDtOnFam_apply_of_mem I M hs (c • F) ht x]
+    -- Rewrite the slice.
+    have hderivEq : derivWithin (fun τ : ℝ => ((c • F).fam τ : M → ℝ) x) s t =
+        c x * derivWithin (fun τ : ℝ => (F.fam τ : M → ℝ) x) s t := by
+      rw [hslice, derivWithin_const_mul _ hFdiff]
+    change derivWithin (fun τ : ℝ => ((c • F).fam τ : M → ℝ) x) s t = _
+    rw [hderivEq]
+    -- Simplify the RHS: `c • concreteDtOnFun hs F` has fam `(compSndRingHomOn c) * fam`.
+    change c x * derivWithin (fun τ : ℝ => (F.fam τ : M → ℝ) x) s t =
+      ((SmoothTimeAlgebraOn.compSndRingHomOn (I := I) (M := M) (s := s) c *
+        concreteDtOnFun I M hs F).fam t : M → ℝ) x
+    rw [SmoothTimeAlgebraOn.fam_mul]
+    change c x * derivWithin (fun τ : ℝ => (F.fam τ : M → ℝ) x) s t =
+      (((SmoothTimeAlgebraOn.compSndRingHomOn (I := I) (M := M) (s := s) c).fam t *
+        (concreteDtOnFun I M hs F).fam t : C^∞⟮I, M; ℝ⟯) : M → ℝ) x
+    rw [ContMDiffMap.coe_mul]
+    change c x * derivWithin (fun τ : ℝ => (F.fam τ : M → ℝ) x) s t =
+      (SmoothTimeAlgebraOn.compSndRingHomOn (I := I) (M := M) (s := s) c).fam t x *
+        ((concreteDtOnFun I M hs F).fam t : M → ℝ) x
+    rw [SmoothTimeAlgebraOn.fam_compSndRingHomOn,
+        concreteDtOnFun_fam_apply_of_mem I M hs F ht x]
+  · -- Off `s`: `concreteDtOnFam (c • F) t = 0` and `c • 0 = 0` on the slice.
+    change (concreteDtOnFam I M hs (c • F) t : M → ℝ) x =
+      ((c • concreteDtOnFun I M hs F).fam t : M → ℝ) x
+    rw [concreteDtOnFam_of_notMem I M hs (c • F) ht]
+    -- RHS: the slice of `c • concreteDtOnFun hs F` at `t ∉ s` is `c x * 0 = 0`.
+    change ((0 : C^∞⟮I, M; ℝ⟯) : M → ℝ) x =
+      ((SmoothTimeAlgebraOn.compSndRingHomOn (I := I) (M := M) (s := s) c *
+        concreteDtOnFun I M hs F).fam t : M → ℝ) x
+    rw [SmoothTimeAlgebraOn.fam_mul]
+    change ((0 : C^∞⟮I, M; ℝ⟯) : M → ℝ) x =
+      (((SmoothTimeAlgebraOn.compSndRingHomOn (I := I) (M := M) (s := s) c).fam t *
+        (concreteDtOnFun I M hs F).fam t : C^∞⟮I, M; ℝ⟯) : M → ℝ) x
+    rw [ContMDiffMap.coe_mul]
+    change ((0 : C^∞⟮I, M; ℝ⟯) : M → ℝ) x =
+      (SmoothTimeAlgebraOn.compSndRingHomOn (I := I) (M := M) (s := s) c).fam t x *
+        ((concreteDtOnFun I M hs F).fam t : M → ℝ) x
+    change ((0 : C^∞⟮I, M; ℝ⟯) : M → ℝ) x =
+      (SmoothTimeAlgebraOn.compSndRingHomOn (I := I) (M := M) (s := s) c).fam t x *
+        ((concreteDtOnFam I M hs F t : C^∞⟮I, M; ℝ⟯) : M → ℝ) x
+    rw [concreteDtOnFam_of_notMem I M hs F ht]
+    simp
+
+/-- `concreteDtOnFun` satisfies the Leibniz rule. -/
+private theorem concreteDtOnFun_mul
+    {s : Set ℝ} (hs : UniqueDiffOn ℝ s) (F G : SmoothTimeAlgebraOn I M s) :
+    concreteDtOnFun I M hs (F * G) =
+      F * concreteDtOnFun I M hs G + G * concreteDtOnFun I M hs F := by
+  apply SmoothTimeAlgebraOn.fam_injective
+  funext t
+  ext x
+  by_cases ht : t ∈ s
+  · -- Product rule via `derivWithin_mul`.
+    have hFdiff := SmoothTimeAlgebraOn.fam_slice_differentiableWithinAt I M F x ht
+    have hGdiff := SmoothTimeAlgebraOn.fam_slice_differentiableWithinAt I M G x ht
+    have hslice : (fun τ : ℝ => ((F * G).fam τ : M → ℝ) x) =
+        (fun τ : ℝ => (F.fam τ : M → ℝ) x) *
+          (fun τ : ℝ => (G.fam τ : M → ℝ) x) := by
+      funext τ
+      change ((F * G).fam τ : M → ℝ) x =
+        (F.fam τ : M → ℝ) x * (G.fam τ : M → ℝ) x
+      rw [SmoothTimeAlgebraOn.fam_mul]
+      change ((F.fam τ * G.fam τ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = _
+      rw [ContMDiffMap.coe_mul]; rfl
+    -- LHS: derivWithin of the product slice.
+    change (concreteDtOnFam I M hs (F * G) t : M → ℝ) x =
+      ((F * concreteDtOnFun I M hs G + G * concreteDtOnFun I M hs F).fam t :
+        M → ℝ) x
+    rw [concreteDtOnFam_apply_of_mem I M hs (F * G) ht x]
+    -- RHS: `fam_add`/`fam_mul` unfolding.
+    rw [SmoothTimeAlgebraOn.fam_add, SmoothTimeAlgebraOn.fam_mul,
+        SmoothTimeAlgebraOn.fam_mul]
+    change derivWithin (fun τ : ℝ => ((F * G).fam τ : M → ℝ) x) s t =
+      ((F.fam t * (concreteDtOnFun I M hs G).fam t +
+        G.fam t * (concreteDtOnFun I M hs F).fam t : C^∞⟮I, M; ℝ⟯) : M → ℝ) x
+    rw [hslice, derivWithin_mul hFdiff hGdiff, ContMDiffMap.coe_add,
+        ContMDiffMap.coe_mul, ContMDiffMap.coe_mul]
+    change derivWithin (fun τ : ℝ => (F.fam τ : M → ℝ) x) s t *
+          (G.fam t : M → ℝ) x +
+        (F.fam t : M → ℝ) x *
+          derivWithin (fun τ : ℝ => (G.fam τ : M → ℝ) x) s t =
+      (F.fam t : M → ℝ) x * ((concreteDtOnFun I M hs G).fam t : M → ℝ) x +
+      (G.fam t : M → ℝ) x * ((concreteDtOnFun I M hs F).fam t : M → ℝ) x
+    rw [concreteDtOnFun_fam_apply_of_mem I M hs F ht x,
+        concreteDtOnFun_fam_apply_of_mem I M hs G ht x]
+    ring
+  · -- Off `s`: all `concreteDtOn` slices are zero.
+    change (concreteDtOnFam I M hs (F * G) t : M → ℝ) x =
+      ((F * concreteDtOnFun I M hs G + G * concreteDtOnFun I M hs F).fam t :
+        M → ℝ) x
+    rw [concreteDtOnFam_of_notMem I M hs (F * G) ht,
+        SmoothTimeAlgebraOn.fam_add, SmoothTimeAlgebraOn.fam_mul,
+        SmoothTimeAlgebraOn.fam_mul]
+    change ((0 : C^∞⟮I, M; ℝ⟯) : M → ℝ) x =
+      ((F.fam t * (concreteDtOnFun I M hs G).fam t +
+        G.fam t * (concreteDtOnFun I M hs F).fam t : C^∞⟮I, M; ℝ⟯) : M → ℝ) x
+    have hDG : (concreteDtOnFun I M hs G).fam t = 0 := by
+      change concreteDtOnFam I M hs G t = 0
+      exact concreteDtOnFam_of_notMem I M hs G ht
+    have hDF : (concreteDtOnFun I M hs F).fam t = 0 := by
+      change concreteDtOnFam I M hs F t = 0
+      exact concreteDtOnFam_of_notMem I M hs F ht
+    rw [hDG, hDF]
+    simp
+
+/-- `concreteDtOnFun` sends the constant `1` to `0`. -/
+private theorem concreteDtOnFun_one {s : Set ℝ} (hs : UniqueDiffOn ℝ s) :
+    concreteDtOnFun I M hs (1 : SmoothTimeAlgebraOn I M s) = 0 := by
+  apply SmoothTimeAlgebraOn.fam_injective
+  funext t
+  ext x
+  by_cases ht : t ∈ s
+  · -- On `s`: the constant slice `τ ↦ 1` has derivWithin = 0.
+    change (concreteDtOnFam I M hs (1 : SmoothTimeAlgebraOn I M s) t : M → ℝ) x =
+      ((0 : SmoothTimeAlgebraOn I M s).fam t : M → ℝ) x
+    rw [concreteDtOnFam_apply_of_mem I M hs 1 ht x]
+    -- The slice `τ ↦ ((1 : _).fam τ : M → ℝ) x` is constantly 1 (so derivWithin = 0).
+    have hslice : (fun τ : ℝ => ((1 : SmoothTimeAlgebraOn I M s).fam τ : M → ℝ) x) =
+        fun _ : ℝ => (1 : ℝ) := by
+      funext τ
+      change ((1 : SmoothTimeAlgebraOn I M s).fam τ : M → ℝ) x = 1
+      rw [SmoothTimeAlgebraOn.fam_one]
+      change ((1 : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = 1
+      rw [ContMDiffMap.coe_one]; rfl
+    rw [hslice]
+    change derivWithin (fun _ : ℝ => (1 : ℝ)) s t =
+      ((0 : SmoothTimeAlgebraOn I M s).fam t : M → ℝ) x
+    rw [show (fun _ : ℝ => (1 : ℝ)) = Function.const ℝ (1 : ℝ) from rfl,
+        derivWithin_const]
+    -- The RHS is `((0 : SmoothTimeAlgebraOn _).fam t : M → ℝ) x = 0`.
+    change (0 : ℝ) = ((0 : SmoothTimeAlgebraOn I M s).fam t : M → ℝ) x
+    rw [SmoothTimeAlgebraOn.fam_zero]
+    change (0 : ℝ) = ((0 : C^∞⟮I, M; ℝ⟯) : M → ℝ) x
+    rw [ContMDiffMap.coe_zero]; rfl
+  · -- Off `s`: both sides are 0.
+    change (concreteDtOnFam I M hs (1 : SmoothTimeAlgebraOn I M s) t : M → ℝ) x =
+      ((0 : SmoothTimeAlgebraOn I M s).fam t : M → ℝ) x
+    rw [concreteDtOnFam_of_notMem I M hs 1 ht, SmoothTimeAlgebraOn.fam_zero]
+    change ((0 : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = ((0 : C^∞⟮I, M; ℝ⟯) : M → ℝ) x
+    rfl
+
+/-- The subset-time time-derivation: the `Derivation` on
+`SmoothTimeAlgebraOn I M s` induced by partial `derivWithin` in the
+time direction. -/
+noncomputable def concreteDtOn {s : Set ℝ} (hs : UniqueDiffOn ℝ s) :
+    Derivation C^∞⟮I, M; ℝ⟯ (SmoothTimeAlgebraOn I M s)
+      (SmoothTimeAlgebraOn I M s) where
+  toLinearMap :=
+    { toFun := concreteDtOnFun I M hs
+      map_add' := concreteDtOnFun_add I M hs
+      map_smul' := fun c F => concreteDtOnFun_smul I M hs c F }
+  map_one_eq_zero' := concreteDtOnFun_one I M hs
+  leibniz' F G := by
+    change concreteDtOnFun I M hs (F * G) =
+      F • concreteDtOnFun I M hs G + G • concreteDtOnFun I M hs F
+    -- `•` on `SmoothTimeAlgebraOn` (as a module over itself) reduces to `*`.
+    have hF_smul :
+        (F : SmoothTimeAlgebraOn I M s) • (concreteDtOnFun I M hs G) =
+          F * concreteDtOnFun I M hs G := smul_eq_mul _ _
+    have hG_smul :
+        (G : SmoothTimeAlgebraOn I M s) • (concreteDtOnFun I M hs F) =
+          G * concreteDtOnFun I M hs F := smul_eq_mul _ _
+    rw [hF_smul, hG_smul]
+    exact concreteDtOnFun_mul I M hs F G
+
+-- ============================================================
+-- Package: `TimeDerivativeData` and `TimeRegularFam` on subset-time
+-- ============================================================
+
+/-- Subset-time `TimeDerivativeData`. -/
+noncomputable def concreteTimeDerivativeDataOn
+    (s : Set ℝ) (hs : UniqueDiffOn ℝ s) :
+    TimeDerivativeData C^∞⟮I, M; ℝ⟯ (SmoothTimeAlgebraOn I M s) ℝ where
+  dt := concreteDtOn I M hs
+  lift := concreteLiftOn I M s
+  eval := concreteEvalOn I M (s := s)
+  lift_algebraMap := concreteLiftOn_algebraMap I M (s := s)
+  eval_add := fun F G t => concreteEvalOn_add I M F G t
+  eval_mul := fun F G t => concreteEvalOn_mul I M F G t
+  eval_algebraMap := fun c t => concreteEvalOn_algebraMap I M (s := s) c t
+
+/-- The distinguished `TimeRegularFam` realisation for subset-time: a family
+is regular on `s` iff its uncurried map is jointly `ContMDiffOn` on
+`s ×ˢ univ`. Registered as an `instance` so that downstream declarations
+(structure fields depending on `concreteTimeDerivativeDataOn`) can resolve
+the typeclass automatically. -/
+@[reducible]
+noncomputable instance concreteTimeRegularFamOn
+    (s : Set ℝ) (hs : UniqueDiffOn ℝ s) :
+    TimeRegularFam (concreteTimeDerivativeDataOn I M s hs) where
+  isSmoothFam := concreteIsSmoothFamOn I M s
+  eval_lift := fun f hf t => concreteEvalOn_concreteLiftOn I M (s := s) f hf t
+  lift_add := fun f g hf hg => concreteLiftOn_add I M (s := s) f g hf hg
+  lift_mul := fun f g hf hg => concreteLiftOn_mul I M (s := s) f g hf hg
+  isSmoothFam_const := fun c => concreteIsSmoothFamOn_const I M s c
+  isSmoothFam_add := fun f g hf hg => concreteIsSmoothFamOn_add I M s f g hf hg
+  isSmoothFam_mul := fun f g hf hg => concreteIsSmoothFamOn_mul I M s f g hf hg
+  isSmoothFam_neg := fun f hf => concreteIsSmoothFamOn_neg I M s f hf
 

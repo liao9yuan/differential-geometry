@@ -218,4 +218,172 @@ theorem concrete_time_tr_comm :
 
 end ConcreteTimeTrComm
 
+-- ============================================================
+-- Subset-time realisation of `TimeTrComm`
+-- ============================================================
+
+/-!
+### Subset-time `TimeTrComm`
+
+Subset-time analogue of `concrete_time_tr_comm`: the trace/time-derivative
+commutation holds for the subset-time `TimeDerivativeData` built on
+`SmoothTimeAlgebraOn I M s`, for any `s : Set ℝ` with `UniqueDiffOn ℝ s`.
+
+The proof structure mirrors the global one: build local biorthogonal frames at
+`x₀`, rewrite the trace as a frame sum, differentiate the slice `τ ↦ trL.fam τ x₀`
+using `derivWithin_fun_sum`, then recover the sum via the `h_dL_char` hypothesis.
+The only genuine differences from the global proof are (i) `derivWithin` in place
+of `deriv`, (ii) `DifferentiableWithinAt` in place of `DifferentiableAt`, and
+(iii) an explicit branch on `t ∈ s` vs `t ∉ s` (the latter forcing both sides
+to `0` through `concreteDtOnFam_of_notMem`).
+-/
+
+section ConcreteTimeTrCommOn
+
+variable
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  {H : Type*} [TopologicalSpace H]
+  (I : ModelWithCorners ℝ E H)
+  (M : Type*) [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [SigmaCompactSpace M] [T2Space M]
+
+/-- The concrete **subset-time** `TimeTrComm` theorem: ∂_t and the endomorphism
+trace commute on the subset-time algebra `SmoothTimeAlgebraOn I M s` for any
+`s : Set ℝ` with `UniqueDiffOn ℝ s`. -/
+theorem concrete_time_tr_commOn
+    (s : Set ℝ) (hs : UniqueDiffOn ℝ s) :
+    TimeTrComm (concreteAbstractTrace I M)
+      (concreteTimeDerivativeDataOn I M s hs) := by
+  haveI : Fact (1 ≤ (⊤ : ℕ∞)) := ⟨le_top⟩
+  classical
+  intro L dL t αLv trL h_αLv_eval h_trL_eval h_dL_char
+  set td := concreteTimeDerivativeDataOn I M s hs with htd_def
+  ext x₀
+  -- Rewrite the goal in explicit form using `concreteAbstractTrace_tr`.
+  change (td.eval (td.dt trL) t : C^∞⟮I, M; ℝ⟯) x₀ =
+    ((concreteAbstractTrace I M).tr dL : C^∞⟮I, M; ℝ⟯) x₀
+  rw [concreteAbstractTrace_tr]
+  -- LHS unfolds to `concreteDtOnFam I M hs trL t : C^∞⟮I, M; ℝ⟯` evaluated at `x₀`.
+  change ((concreteDtOnFam I M hs trL t : C^∞⟮I, M; ℝ⟯) : M → ℝ) x₀ =
+    (concreteTr I M dL : C^∞⟮I, M; ℝ⟯) x₀
+  -- Build local biorthogonal frames `σ'` (tangent) and `θ'` (dual) at `x₀`.
+  let e_tan := trivializationAt E (TangentSpace I : M → Type _) x₀
+  have he_tan : x₀ ∈ e_tan.baseSet := mem_baseSet_trivializationAt E _ x₀
+  let b := Module.finBasis (R := ℝ) (M := E)
+  let hframe_tan := e_tan.isLocalFrameOn_localFrame_baseSet I (↑(⊤ : ℕ∞)) b
+  obtain ⟨σ', hσ'⟩ :=
+    hframe_tan.exists_contMDiffSection_eqOn_nhd e_tan.open_baseSet he_tan
+  let e_1 := trivializationAt (Tensor0SModel 1 ℝ E) (fun x => Tensor0SSpace 1 I x) x₀
+  have he_1 : x₀ ∈ e_1.baseSet := mem_baseSet_trivializationAt _ _ x₀
+  let hframe_1 :=
+    e_1.isLocalFrameOn_localFrame_baseSet I (↑(⊤ : ℕ∞)) (dualCovectorBasis' (E := E))
+  obtain ⟨θ', hθ'⟩ :=
+    hframe_1.exists_contMDiffSection_eqOn_nhd e_1.open_baseSet he_1
+  set α_at :
+      Fin (Module.finrank ℝ E) →
+        (Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ →ₗ[C^∞⟮I, M; ℝ⟯] C^∞⟮I, M; ℝ⟯) :=
+    fun i => covectorToFunctional I M (θ' i) with hα_def
+  -- Core frame-sum identity: `tr L' x₀ = ∑ᵢ (α_i (L' σᵢ)) x₀` for any `L'`.
+  have h_tr_eq_frame_sum : ∀ (L' : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ →ₗ[C^∞⟮I, M; ℝ⟯]
+          Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯),
+      (concreteTr I M L' : C^∞⟮I, M; ℝ⟯) x₀ =
+        ∑ i, (α_at i (L' (σ' i))) x₀ := by
+    intro L'
+    have h_endo : concreteTr I M L' =
+        (concreteTensorContract I M 0 0 (endo_to_tensor L')) ![] ![] :=
+      (concreteTensorContract_endo I M L').symm
+    rw [h_endo]
+    rw [concreteTensorContract_eq_localSum I M 0 0 (endo_to_tensor L') ![] ![] x₀
+      σ' θ' hσ' hθ']
+    rw [concreteTensorContract_localSum_apply]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    have h_cons_v : (Fin.cons (σ' i) ![] :
+        Fin 1 → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) = ![σ' i] := by
+      funext k; fin_cases k; rfl
+    have h_cons_c : (Fin.cons (covectorToFunctional I M (θ' i)) ![] :
+        Fin 1 →
+          Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ →ₗ[C^∞⟮I, M; ℝ⟯] C^∞⟮I, M; ℝ⟯) =
+        ![covectorToFunctional I M (θ' i)] := by
+      funext k; fin_cases k; rfl
+    rw [h_cons_v, h_cons_c, endo_to_tensor_eval]
+  -- Main slice-identity: `(trL.fam u) x₀ = ∑ᵢ (αLv σᵢ αᵢ .fam u) x₀`.
+  have h_slice_eq :
+      (fun u : ℝ => ((trL.fam u : C^∞⟮I, M; ℝ⟯) : M → ℝ) x₀) =
+      (fun u : ℝ => ∑ i,
+        (((αLv (σ' i) (α_at i)).fam u : C^∞⟮I, M; ℝ⟯) : M → ℝ) x₀) := by
+    funext u
+    have h_trL_u : ((trL.fam u : C^∞⟮I, M; ℝ⟯) : M → ℝ) x₀ =
+        (concreteTr I M (L u) : C^∞⟮I, M; ℝ⟯) x₀ := by
+      have hev := h_trL_eval u
+      rw [concreteAbstractTrace_tr] at hev
+      -- `hev : td.eval trL u = concreteTr I M (L u)` in `C^∞⟮I, M; ℝ⟯`.
+      -- `td.eval trL u = trL.fam u` by definition.
+      have := DFunLike.congr_fun hev x₀
+      change ((trL.fam u : C^∞⟮I, M; ℝ⟯) : M → ℝ) x₀ =
+        (concreteTr I M (L u) : C^∞⟮I, M; ℝ⟯) x₀
+      exact this
+    rw [h_trL_u, h_tr_eq_frame_sum (L u)]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    have hev := h_αLv_eval (σ' i) (α_at i) u
+    have heq := DFunLike.congr_fun hev x₀
+    change (α_at i (L u (σ' i)) : C^∞⟮I, M; ℝ⟯) x₀ =
+      (((αLv (σ' i) (α_at i)).fam u : C^∞⟮I, M; ℝ⟯) : M → ℝ) x₀
+    exact heq.symm
+  -- Per-index identity: ties each `α_at i (dL (σ' i)) x₀` to the per-slice
+  -- `concreteDtOnFam` at `t`. On `s`: expressed as `derivWithin`; off `s`: zero.
+  have h_per_index_mem : t ∈ s → ∀ i,
+      (α_at i (dL (σ' i))) x₀ =
+        derivWithin (fun u : ℝ =>
+          (((αLv (σ' i) (α_at i)).fam u : C^∞⟮I, M; ℝ⟯) : M → ℝ) x₀) s t := by
+    intro ht i
+    have hdL := h_dL_char (σ' i) (α_at i)
+    -- hdL : α_at i (dL (σ' i)) = td.eval (td.dt (αLv (σ' i) (α_at i))) t
+    -- RHS = concreteDtOnFam I M hs (αLv (σ' i) (α_at i)) t
+    rw [hdL]
+    change ((concreteDtOnFam I M hs (αLv (σ' i) (α_at i)) t : C^∞⟮I, M; ℝ⟯) :
+        M → ℝ) x₀ = _
+    rw [concreteDtOnFam_apply_of_mem I M hs (αLv (σ' i) (α_at i)) ht x₀]
+  -- Off-s: each per-index term vanishes.
+  have h_per_index_notMem : t ∉ s → ∀ i,
+      (α_at i (dL (σ' i))) x₀ = 0 := by
+    intro ht i
+    have hdL := h_dL_char (σ' i) (α_at i)
+    rw [hdL]
+    change ((concreteDtOnFam I M hs (αLv (σ' i) (α_at i)) t : C^∞⟮I, M; ℝ⟯) :
+        M → ℝ) x₀ = 0
+    rw [concreteDtOnFam_of_notMem I M hs (αLv (σ' i) (α_at i)) ht]
+    rfl
+  -- Now split on `t ∈ s` vs `t ∉ s`.
+  by_cases ht : t ∈ s
+  · -- Main case.
+    rw [concreteDtOnFam_apply_of_mem I M hs trL ht x₀]
+    -- LHS = derivWithin (slice trL x₀) s t. Rewrite the slice via `h_slice_eq`
+    -- (the two sides have the same underlying function, so `.fam` matches).
+    have hslice_rw :
+        (fun u : ℝ => (trL.fam u : M → ℝ) x₀) =
+        fun u : ℝ => ∑ i, (((αLv (σ' i) (α_at i)).fam u : C^∞⟮I, M; ℝ⟯) : M → ℝ) x₀ := by
+      change (fun u : ℝ => ((trL.fam u : C^∞⟮I, M; ℝ⟯) : M → ℝ) x₀) = _
+      exact h_slice_eq
+    rw [hslice_rw]
+    -- Move derivWithin inside the sum.
+    rw [derivWithin_fun_sum
+      (u := (Finset.univ : Finset (Fin (Module.finrank ℝ E))))
+      (fun i _ =>
+        SmoothTimeAlgebraOn.fam_slice_differentiableWithinAt I M
+          (αLv (σ' i) (α_at i)) x₀ ht)]
+    rw [h_tr_eq_frame_sum dL]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    exact (h_per_index_mem ht i).symm
+  · -- `t ∉ s`: both sides are zero.
+    rw [concreteDtOnFam_of_notMem I M hs trL ht]
+    change ((0 : C^∞⟮I, M; ℝ⟯) : M → ℝ) x₀ = (concreteTr I M dL : C^∞⟮I, M; ℝ⟯) x₀
+    rw [h_tr_eq_frame_sum dL]
+    -- Each summand is 0.
+    have : ∀ i ∈ (Finset.univ : Finset (Fin (Module.finrank ℝ E))),
+        (α_at i (dL (σ' i))) x₀ = 0 := fun i _ => h_per_index_notMem ht i
+    rw [Finset.sum_congr rfl this]
+    simp
+
+end ConcreteTimeTrCommOn
+
 end
