@@ -50,7 +50,7 @@ flowchart BT
         DirAsm --> DirFlow
 
         DirReal[Realization]
-        DirAsm --> DirReal
+        DirReal --> DirAsm
     end
 
     AnalyticLayer --> DirReal
