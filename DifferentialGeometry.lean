@@ -131,3 +131,10 @@ import DifferentialGeometry.Tensor.RSTensor.Defs
 import DifferentialGeometry.Tensor.RSTensor.Field
 import DifferentialGeometry.Tensor.RSTensor.LieDerivative
 import DifferentialGeometry.Tensor.RSTensor.Metric
+
+import DifferentialGeometry.Integral.Measure.ChartDensity
+import DifferentialGeometry.Integral.Measure.Glue
+import DifferentialGeometry.Integral.Measure.Invariance
+import DifferentialGeometry.Integral.Measure.Properties
+import DifferentialGeometry.Integral.Measure.Family
+import DifferentialGeometry.Integral.SyntheticBridge.SmoothFamily
