@@ -61,6 +61,18 @@ theorem domDomCongr_sum {ι : Type*}
   | insert _ _ hni ih =>
     rw [Finset.sum_insert hni, domDomCongr_add, ih, Finset.sum_insert hni]
 
+/-- `domDomCongr` distributes over a finite sum of scalar multiples. -/
+theorem domDomCongr_sum_smul {ι : Type*}
+    (e : Fin m ≃ Fin n) (s : Finset ι) (c : ι → 𝕜) (f : ι → M [⋀^Fin m]→L[𝕜] 𝕜) :
+    domDomCongr e (∑ i ∈ s, c i • f i) = ∑ i ∈ s, c i • domDomCongr e (f i) := by
+  rw [domDomCongr_sum]; congr 1
+
+/-- `domDomCongr` distributes over scalar multiplication. -/
+@[simp]
+theorem domDomCongr_smul (e : Fin m ≃ Fin n) (c : 𝕜) (f : M [⋀^Fin m]→L[𝕜] 𝕜) :
+    domDomCongr e (c • f) = c • domDomCongr e f := by
+  ext x; simp [domDomCongr_apply, smul_apply]
+
 variable {ι₁ ι₂ : Type*} [Fintype ι₁] [Fintype ι₂] [DecidableEq ι₁] [DecidableEq ι₂]
 
 /-- Alternatization commutes with `MultilinearMap.domDomCongr` by an equivalence. -/

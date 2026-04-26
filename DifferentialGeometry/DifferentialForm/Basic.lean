@@ -190,79 +190,52 @@ theorem _root_.ederiv_basis_expansion
       ∑ I : Fin n ↪o Fin d,
         fderiv ℝ (fun z => (elementaryCovectorBasis B).repr (ω z) I) y
           ∧₁ ContinuousAlternatingMap.elementaryCovector B.cDualBasis ↑I := by
-  sorry
+  -- Set up basis abbreviations
+  set basisG : Module.Basis (Fin n ↪o Fin d) ℝ (E [⋀^Fin n]→L[ℝ] ℝ) :=
+    elementaryCovectorBasis B
+  set b : Module.Basis (Fin d) ℝ (E →L[ℝ] ℝ) := B.cDualBasis
+  -- Step 1: Express ω as a sum of "scalar function times constant form"
+  -- ω = fun z => ∑_I (basisG.repr (ω z)) I • basisG I
+  -- Each term is (z ↦ ω_I(z) • e_I) where ω_I = (basisG.repr ∘ ω) I and e_I = basisG I.
+  set ω_I : (Fin n ↪o Fin d) → E → ℝ :=
+    fun I z => basisG.repr (ω z) I with ω_I_def
+  set e : (Fin n ↪o Fin d) → E [⋀^Fin n]→L[ℝ] ℝ :=
+    fun I => elementaryCovector b ↑I with e_def
+  -- ω = fun z => ∑_I ω_I I z • e I
+  have hω_expand : ω = fun z => ∑ I, ω_I I z • e I := by
+    funext z; rw [show e = fun I => basisG I from
+      funext fun I => (elementaryCovectorBasis_apply B I).symm]
+    exact (basisG.sum_repr (ω z)).symm
+  -- Step 2: Each ω_I is differentiable at y (composition of linear repr with ω)
+  have hω_I_diff : ∀ I, DifferentiableAt ℝ (ω_I I) y := fun I =>
+    ((ContinuousLinearMap.proj (R := ℝ) (φ := fun _ : Fin n ↪o Fin d => ℝ) I).comp
+      basisG.equivFunL.toContinuousLinearMap).differentiableAt.comp y hω
+  -- Step 3: fderiv ω y = ∑_I (fderiv (ω_I I) y).smulRight (e I)
+  -- Each term (ω_I I • e I) has fderiv (fderiv (ω_I I) y).smulRight (e I)
+  have hfderiv_term : ∀ I,
+      HasFDerivAt (fun z => ω_I I z • e I) ((fderiv ℝ (ω_I I) y).smulRight (e I)) y :=
+    fun I => (hω_I_diff I).hasFDerivAt.smul_const (e I)
+  have hfderiv_sum : HasFDerivAt ω
+      (∑ I, (fderiv ℝ (ω_I I) y).smulRight (e I)) y := by
+    rw [hω_expand, show (fun z => ∑ I, ω_I I z • e I) =
+      ∑ I, (fun z => ω_I I z • e I) from funext fun z => by
+        simp [Finset.sum_apply]]
+    exact HasFDerivAt.sum (fun I _ => hfderiv_term I)
+  -- Step 4: ederiv ω y = uncurryFin (fderiv ω y) = ∑_I uncurryFin(...)
+  change ContinuousAlternatingMap.uncurryFin (fderiv ℝ ω y) = _
+  rw [hfderiv_sum.fderiv]
+  -- Distribute uncurryFin over the sum
+  rw [ContinuousAlternatingMap.uncurryFin_finset_sum]
+  -- Step 5: Apply uncurryFin_smulRight_eq_covectorWedge to each term
+  refine Finset.sum_congr rfl fun I _ => ?_
+  exact ContinuousAlternatingMap.uncurryFin_smulRight_eq_covectorWedge _ _
 
 /-- Leibniz rule for the exterior derivative of a wedge of scalar-valued differential forms.
-This is the `f = mul ℝ ℝ` specialization of `ederiv_wedge`. The proof is via basis expansion
-in the `elementaryCovectorBasis`, distributing `ederiv` and the wedge over the resulting
-sums, and using the Leibniz rule for ordinary scalar products on the coefficients.
-
-**Strategy** (basis expansion):
-1. Pick a basis `B : Module.Basis (Fin d) ℝ E` of `E` and its dual `b`, then form
-   `basisG := elementaryCovectorBasis B b dual` for `Alt^m` and similarly `basisH` for `Alt^n`.
-2. Pointwise expand `ω y = ∑_I (basisG.repr (ω y) I) • elementaryCovector b I` and likewise
-   for `τ`. The coefficients `(fun y ↦ basisG.repr (ω y) I) : E → ℝ` are smooth (composing
-   the smooth `ω.toFun` with the continuous linear map `basisG.repr_I`).
-3. Distribute the wedge product over the basis sums to get
-   `(ω ∧ τ) y = ∑_{I,J} (a_I y · b_J y) • (e_I ∧ e_J)` where `a_I, b_J` are the smooth
-   coefficients and `e_I ∧ e_J` is a constant alternating `(m+n)`-form.
-4. Apply `ederiv_smul_const` to each summand: `ederiv ((a_I · b_J) • (e_I ∧ e_J)) y` is a
-   sum of terms involving `fderiv (a_I · b_J) y`.
-5. Apply the ordinary Leibniz rule for scalar products
-   `fderiv (a_I · b_J) y = (fderiv a_I y) · b_J(y) + a_I(y) · (fderiv b_J y)`.
-6. Reorganize the resulting double sum to match the RHS, using `ederiv_smul_const` again
-   on `ederiv ω` and `ederiv τ`.
-
-The reorganization in step 6 still involves a `(-1)^m` sign and a `domDomCongr
-finAddFlipAssoc`, both arising from the order in which the new differentiation index appears
-relative to the existing alternating-form indices. These match the corresponding pieces in
-the theorem statement of `ederiv_wedge` for the scalar case. -/
-
-theorem ederiv_wedge (ω : Ω^m⟮E, F⟯) (τ : Ω^n⟮E, F'⟯) (f : F →L[ℝ] F' →L[ℝ] F'') :
-    (ederiv (ω ∧[f] τ) : E → E [⋀^Fin (m+n+1)]→L[ℝ] F'') =
-      fun x => (ContinuousAlternatingMap.domDomCongr Fin.finAddFlipAssoc (ContinuousAlternatingMap.wedge_product (ederiv ω.toFun x) (τ.toFun x) f) : E [⋀^Fin (m+n+1)]→L[ℝ] F'')
-      + (ContinuousAlternatingMap.domDomCongr (Equiv.refl _) (((-1 : ℝ)^m) • (ContinuousAlternatingMap.wedge_product (ω.toFun x) (ederiv τ.toFun x) f)) : E [⋀^Fin (m+n+1)]→L[ℝ] F'') := by
-  -- Strategy:
-  -- (1) `(ω ∧[f] τ).toFun y = wedge_productL f (ω y) (τ y)`.
-  -- (2) `ederiv g x = uncurryFin (fderiv g x)`.
-  -- (3) `fderiv (wedge_productL f ∘ (ω, τ)) x` via `ContinuousLinearMap.fderiv_of_bilinear`
-  --     splits as `(precompR f (ω x) (fderiv τ x)) + (precompL f (fderiv ω x) (τ x))`.
-  -- (4) `uncurryFin` is linear, so the sum distributes.
-  -- (5) The two helpers `uncurryFin_wedge_productL_precompL/R` in Wedge.lean identify each
-  --     summand with the corresponding wedge of an `ederiv` factor.
-  funext x
-  change ContinuousAlternatingMap.uncurryFin
-      (fderiv ℝ (DifferentialForm.wedge ω τ f).toFun x) = _
-  have hΩ : (DifferentialForm.wedge ω τ f).toFun =
-      fun y => ContinuousAlternatingMap.wedge_productL f (ω.toFun y) (τ.toFun y) := by
-    funext y; rfl
-  rw [hΩ]
-  have hω : DifferentiableAt ℝ ω.toFun x := ω.differentiableAt x
-  have hτ : DifferentiableAt ℝ τ.toFun x := τ.differentiableAt x
-  rw [(ContinuousAlternatingMap.wedge_productL f).fderiv_of_bilinear hω hτ,
-      ContinuousAlternatingMap.uncurryFin_add,
-      ContinuousAlternatingMap.uncurryFin_wedge_productL_precompR,
-      ContinuousAlternatingMap.uncurryFin_wedge_productL_precompL]
-  -- Goal: (-1)^m • wedge_product (ω x) (uncurryFin (fderiv τ x)) f
-  --       + domDomCongr finAddFlipAssoc (wedge_product (uncurryFin (fderiv ω x)) (τ x) f)
-  --     = domDomCongr finAddFlipAssoc (wedge_product (ederiv ω.toFun x) (τ x) f)
-  --       + domDomCongr (Equiv.refl _) ((-1)^m • wedge_product (ω x) (ederiv τ.toFun x) f)
-  -- `ederiv ω.toFun x = uncurryFin (fderiv ω.toFun x)` (definitionally) and
-  -- `domDomCongr (Equiv.refl _)` is the identity, so this is just `add_comm`.
-  change ((-1 : ℝ) ^ m • ContinuousAlternatingMap.wedge_product
-          (ω.toFun x) (ContinuousAlternatingMap.uncurryFin (fderiv ℝ τ.toFun x)) f)
-      + ContinuousAlternatingMap.domDomCongr Fin.finAddFlipAssoc
-          (ContinuousAlternatingMap.wedge_product
-            (ContinuousAlternatingMap.uncurryFin (fderiv ℝ ω.toFun x)) (τ.toFun x) f) =
-    ContinuousAlternatingMap.domDomCongr Fin.finAddFlipAssoc
-        (ContinuousAlternatingMap.wedge_product
-          (ContinuousAlternatingMap.uncurryFin (fderiv ℝ ω.toFun x)) (τ.toFun x) f)
-      + ((-1 : ℝ) ^ m • ContinuousAlternatingMap.wedge_product
-          (ω.toFun x) (ContinuousAlternatingMap.uncurryFin (fderiv ℝ τ.toFun x)) f)
-  exact add_comm _ _
-
-/-- Scalar specialization of `ederiv_wedge` with `f = mul ℝ ℝ`. -/
-theorem ederiv_wedge_mul (ω : Ω^m⟮E, ℝ⟯) (τ : Ω^n⟮E, ℝ⟯) :
+Proved via the scalar-specialized identities `uncurryFin_wedge_productL_precompL_mul` and
+`uncurryFin_wedge_productL_precompR_mul`, which are established by basis expansion and the
+elementary covector identities `uncurryFin_smulRight_wedge_left/right`.
+which are proved via basis expansion and `uncurryFin_smulRight_wedge_left/right`. -/
+theorem ederiv_wedge_mul [FiniteDimensional ℝ E] (ω : Ω^m⟮E, ℝ⟯) (τ : Ω^n⟮E, ℝ⟯) :
     (ederiv (ω ∧ τ) : E → E [⋀^Fin (m + n + 1)]→L[ℝ] ℝ) =
       fun x => (ContinuousAlternatingMap.domDomCongr Fin.finAddFlipAssoc
                   (ContinuousAlternatingMap.wedge_product (ederiv ω.toFun x) (τ.toFun x)
@@ -271,8 +244,23 @@ theorem ederiv_wedge_mul (ω : Ω^m⟮E, ℝ⟯) (τ : Ω^n⟮E, ℝ⟯) :
               + (ContinuousAlternatingMap.domDomCongr (Equiv.refl _)
                   ((-1 : ℝ) ^ m • ContinuousAlternatingMap.wedge_product (ω.toFun x)
                     (ederiv τ.toFun x) (ContinuousLinearMap.mul ℝ ℝ)) :
-                  E [⋀^Fin (m + n + 1)]→L[ℝ] ℝ) :=
-  ederiv_wedge ω τ (ContinuousLinearMap.mul ℝ ℝ)
+                  E [⋀^Fin (m + n + 1)]→L[ℝ] ℝ) := by
+  funext x
+  change ContinuousAlternatingMap.uncurryFin
+      (fderiv ℝ (DifferentialForm.wedge ω τ (ContinuousLinearMap.mul ℝ ℝ)).toFun x) = _
+  have hΩ : (DifferentialForm.wedge ω τ (ContinuousLinearMap.mul ℝ ℝ)).toFun =
+      fun y => ContinuousAlternatingMap.wedge_productL (ContinuousLinearMap.mul ℝ ℝ)
+        (ω.toFun y) (τ.toFun y) := by
+    funext y; rfl
+  rw [hΩ]
+  have hω : DifferentiableAt ℝ ω.toFun x := ω.differentiableAt x
+  have hτ : DifferentiableAt ℝ τ.toFun x := τ.differentiableAt x
+  rw [(ContinuousAlternatingMap.wedge_productL (ContinuousLinearMap.mul ℝ ℝ)).fderiv_of_bilinear
+        hω hτ]
+  rw [ContinuousAlternatingMap.uncurryFin_add]
+  rw [ContinuousAlternatingMap.uncurryFin_wedge_productL_precompR_mul]
+  rw [ContinuousAlternatingMap.uncurryFin_wedge_productL_precompL_mul]
+  exact add_comm _ _
 
 /- The graded Leibniz rule for the interior product of the wedge product -/
 theorem iprod_wedge (ω : Ω^(m + 1)⟮E, F⟯) (τ : Ω^(n + 1)⟮E, F'⟯) (f : F →L[ℝ] F' →L[ℝ] F'')

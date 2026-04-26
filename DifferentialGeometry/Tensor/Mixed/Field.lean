@@ -52,7 +52,7 @@ The fiber at `x` is
 `Bundle.continuousMultilinearMap 𝕜 r F E x →L[𝕜] Bundle.continuousMultilinearMap 𝕜 s F E x`,
 i.e. continuous linear maps from `r`-multilinear forms to `s`-multilinear forms on the fiber
 `E x`. This generalizes `TensorRSField` from tangent bundles to arbitrary vector bundles. -/
-abbrev ContMixedSection
+abbrev MixedSection
     (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     (F : Type*) [NormedAddCommGroup F] [NormedSpace 𝕜 F]
     {EB : Type*} [NormedAddCommGroup EB] [NormedSpace 𝕜 EB]

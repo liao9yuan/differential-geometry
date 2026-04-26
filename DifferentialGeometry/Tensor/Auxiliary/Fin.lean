@@ -203,4 +203,86 @@ lemma det_subst_eq {R : Type*} [CommRing R] {a b : ℕ} (h : a = b)
     Matrix.det f = Matrix.det g := by
   subst h; exact congr_arg _ (funext fun i => funext fun j => hfg i j)
 
+/-- `cons k (addCases f g)` composed with a cast equals `addCases (cons k f) g`.
+This is a pure Fin-level identity relating two ways of prepending an element to a
+concatenated tuple. -/
+theorem cons_addCases_eq_addCases_cons {α : Type*} {m n : ℕ}
+    (k : α) (f : Fin m → α) (g : Fin n → α) (i : Fin (m + 1 + n)) :
+    @Fin.cons (m + n) (fun _ => α) k (@Fin.addCases m n (fun _ => α) f g)
+      (Fin.cast (by omega : m + n + 1 = m + 1 + n).symm i) =
+    @Fin.addCases (m + 1) n (fun _ => α) (@Fin.cons m (fun _ => α) k f) g i := by
+  obtain ⟨_ | p, hi⟩ := i
+  · -- i.val = 0: both sides equal k
+    have h0 : Fin.cast (show m + n + 1 = m + 1 + n by omega).symm
+      (⟨0, hi⟩ : Fin (m + 1 + n)) = (0 : Fin ((m + n) + 1)) := Fin.ext rfl
+    rw [h0, @Fin.cons_zero (m + n) (fun _ => α) k]
+    rw [show (⟨0, hi⟩ : Fin (m + 1 + n)) = Fin.castAdd n (0 : Fin (m + 1)) from
+      Fin.ext rfl, @Fin.addCases_left (m + 1) n (fun _ => α) (Fin.cons k f) g,
+      @Fin.cons_zero m (fun _ => α) k f]
+  · -- i.val = p + 1
+    have hcast : Fin.cast (show m + n + 1 = m + 1 + n by omega).symm
+      (⟨p + 1, hi⟩ : Fin (m + 1 + n)) =
+      @Fin.succ (m + n) ⟨p, by omega⟩ := Fin.ext rfl
+    rw [hcast, @Fin.cons_succ (m + n) (fun _ => α) k _ ⟨p, by omega⟩]
+    by_cases hp : p < m
+    · -- Left block on both sides
+      rw [show (⟨p, by omega⟩ : Fin (m + n)) = Fin.castAdd n ⟨p, hp⟩ from Fin.ext rfl,
+        @Fin.addCases_left m n (fun _ => α) f g]
+      rw [show (⟨p + 1, hi⟩ : Fin (m + 1 + n)) =
+        Fin.castAdd n (@Fin.succ m ⟨p, hp⟩) from Fin.ext rfl,
+        @Fin.addCases_left (m + 1) n (fun _ => α) (Fin.cons k f) g,
+        @Fin.cons_succ m (fun _ => α) k f ⟨p, hp⟩]
+    · -- Right block on both sides
+      rw [show (⟨p, by omega⟩ : Fin (m + n)) = Fin.natAdd m ⟨p - m, by omega⟩ from
+        Fin.ext (by simp [Fin.natAdd]; omega),
+        @Fin.addCases_right m n (fun _ => α) f g]
+      rw [show (⟨p + 1, hi⟩ : Fin (m + 1 + n)) = Fin.natAdd (m + 1) ⟨p - m, by omega⟩
+        from Fin.ext (by simp [Fin.natAdd]; omega),
+        @Fin.addCases_right (m + 1) n (fun _ => α) (Fin.cons k f) g]
+
+/-- `addCases f (cons k g)` equals `insertNth ⟨m, _⟩ k (addCases f g)`.
+This is a pure Fin-level identity: inserting an element at the boundary between two
+concatenated tuples is the same as prepending it to the right tuple. -/
+theorem addCases_cons_eq_insertNth {α : Type*} {m n : ℕ}
+    (f : Fin m → α) (k : α) (g : Fin n → α) :
+    @Fin.addCases m (n + 1) (fun _ => α) f (@Fin.cons n (fun _ => α) k g) =
+    @Fin.insertNth (m + n) (fun _ => α) ⟨m, by omega⟩ k
+      (@Fin.addCases m n (fun _ => α) f g) := by
+  funext j
+  rcases Fin.eq_self_or_eq_succAbove (⟨m, by omega⟩ : Fin ((m + n) + 1)) j with rfl | ⟨i, rfl⟩
+  · -- Case j = ⟨m, _⟩: both sides equal k
+    rw [Fin.insertNth_apply_same]
+    show @Fin.addCases m (n + 1) (fun _ => α) f (Fin.cons k g) ⟨m, _⟩ = k
+    have : (⟨m, by omega⟩ : Fin (m + (n + 1))) = Fin.natAdd m ⟨0, by omega⟩ :=
+      Fin.ext (by simp)
+    rw [this, @Fin.addCases_right m (n + 1) (fun _ => α) f (Fin.cons k g)]
+    simp [Fin.cons]
+  · -- Case j = succAbove ⟨m, _⟩ i: both sides equal addCases f g i
+    rw [Fin.insertNth_apply_succAbove]
+    by_cases hi : (i : ℕ) < m
+    · -- i < m: castSucc i < ⟨m,_⟩, so succAbove = castSucc
+      have hlt : Fin.castSucc i < (⟨m, by omega⟩ : Fin ((m + n) + 1)) := by
+        rwa [Fin.lt_def, Fin.val_castSucc]
+      rw [Fin.succAbove_of_castSucc_lt _ _ hlt]
+      have hcs : Fin.castSucc i = Fin.castAdd (n + 1) ⟨i, hi⟩ := by
+        ext; simp [Fin.castSucc, Fin.castAdd]
+      rw [hcs, @Fin.addCases_left m (n + 1) (fun _ => α) f (Fin.cons k g)]
+      conv_rhs => rw [show i = Fin.castAdd n ⟨i, hi⟩ from Fin.ext (by simp)]
+      rw [@Fin.addCases_left m n (fun _ => α) f g]
+    · -- i ≥ m: ⟨m,_⟩ ≤ castSucc i, so succAbove = succ
+      have hi' : m ≤ (i : ℕ) := Nat.not_lt.mp hi
+      have hge : (⟨m, by omega⟩ : Fin ((m + n) + 1)) ≤ Fin.castSucc i := by
+        rwa [Fin.le_def, Fin.val_castSucc]
+      rw [Fin.succAbove_of_le_castSucc _ _ hge]
+      have hsi : Fin.succ i =
+          Fin.natAdd m (⟨(i : ℕ) + 1 - m, by omega⟩ : Fin (n + 1)) :=
+        Fin.ext (by simp [Fin.val_succ]; omega)
+      rw [hsi, @Fin.addCases_right m (n + 1) (fun _ => α) f (Fin.cons k g)]
+      have : (⟨(i : ℕ) + 1 - m, by omega⟩ : Fin (n + 1)) =
+          Fin.succ ⟨(i : ℕ) - m, by omega⟩ := Fin.ext (by simp; omega)
+      rw [this, Fin.cons_succ]
+      conv_rhs => rw [show i = Fin.natAdd m ⟨(i : ℕ) - m, by omega⟩ from
+        Fin.ext (by simp; omega)]
+      rw [@Fin.addCases_right m n (fun _ => α) f g]
+
 end Fin

@@ -42,6 +42,8 @@ import DifferentialGeometry.VectorBundle.Dual
 import DifferentialGeometry.VectorBundle.Equiv
 import DifferentialGeometry.VectorBundle.Frame
 import DifferentialGeometry.VectorBundle.Section
+import DifferentialGeometry.Category.MfldCat.Basic
+import DifferentialGeometry.Category.MfldCat.TangentFunctor
 import DifferentialGeometry.VectorBundle.Zero
 
 import DifferentialGeometry.Tensor.Alternating.Basis

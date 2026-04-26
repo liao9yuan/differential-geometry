@@ -59,44 +59,23 @@ local instance : NormedSpace 𝕜 (F₂ ⊗[𝕜] F₁) :=
   instNormedSpace_tensor (𝕜 := 𝕜) (F₁ := F₂) (F₂ := F₁)
 
 /-- Smooth bundle equivalence swapping the factors of a tensor product bundle:
-`E₁ ⊗ E₂ ≃ E₂ ⊗ E₁`. The fiberwise equivalence is `TensorProduct.comm`. -/
-noncomputable def tensorProductComm :
-    letI (x : B) : TopologicalSpace (E₁ x ⊗[𝕜] E₂ x) :=
-      Bundle.TensorProduct.tensorFiberTopology 𝕜 F₁ F₂ E₁ E₂ x
-    letI : FiberBundle (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x) :=
-      Bundle.TensorProduct.fiberBundle (𝕜 := 𝕜) (B := B)
-        (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
-    letI : VectorBundle 𝕜 (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x) :=
-      Bundle.TensorProduct.vectorBundle (𝕜 := 𝕜) (B := B)
-        (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
-    letI (x : B) : TopologicalSpace (E₂ x ⊗[𝕜] E₁ x) :=
-      Bundle.TensorProduct.tensorFiberTopology 𝕜 F₂ F₁ E₂ E₁ x
-    letI : FiberBundle (F₂ ⊗[𝕜] F₁) (fun x => E₂ x ⊗[𝕜] E₁ x) :=
-      Bundle.TensorProduct.fiberBundle (𝕜 := 𝕜) (B := B)
-        (F₁ := F₂) (F₂ := F₁) (E₁ := E₂) (E₂ := E₁)
-    letI : VectorBundle 𝕜 (F₂ ⊗[𝕜] F₁) (fun x => E₂ x ⊗[𝕜] E₁ x) :=
-      Bundle.TensorProduct.vectorBundle (𝕜 := 𝕜) (B := B)
-        (F₁ := F₂) (F₂ := F₁) (E₁ := E₂) (E₂ := E₁)
+`E₁ ⊗ E₂ ≃ E₂ ⊗ E₁`. The fiberwise equivalence is `TensorProduct.comm`.
+
+The source and target tensor product bundle instances are taken as parameters
+so that callers can ensure instance coherence when composing via `trans`. -/
+noncomputable def tensorProductComm
+    [∀ x, TopologicalSpace (E₁ x ⊗[𝕜] E₂ x)]
+    [TopologicalSpace (TotalSpace (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x))]
+    [FiberBundle (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x)]
+    [VectorBundle 𝕜 (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x)]
+    [∀ x, TopologicalSpace (E₂ x ⊗[𝕜] E₁ x)]
+    [TopologicalSpace (TotalSpace (F₂ ⊗[𝕜] F₁) (fun x => E₂ x ⊗[𝕜] E₁ x))]
+    [FiberBundle (F₂ ⊗[𝕜] F₁) (fun x => E₂ x ⊗[𝕜] E₁ x)]
+    [VectorBundle 𝕜 (F₂ ⊗[𝕜] F₁) (fun x => E₂ x ⊗[𝕜] E₁ x)] :
     ContMDiffVectorBundleEquiv 𝕜 IB n
       (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x)
-      (F₂ ⊗[𝕜] F₁) (fun x => E₂ x ⊗[𝕜] E₁ x) := by
-  letI (x : B) : TopologicalSpace (E₁ x ⊗[𝕜] E₂ x) :=
-    Bundle.TensorProduct.tensorFiberTopology 𝕜 F₁ F₂ E₁ E₂ x
-  letI : FiberBundle (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x) :=
-    Bundle.TensorProduct.fiberBundle (𝕜 := 𝕜) (B := B)
-      (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
-  letI : VectorBundle 𝕜 (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x) :=
-    Bundle.TensorProduct.vectorBundle (𝕜 := 𝕜) (B := B)
-      (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
-  letI (x : B) : TopologicalSpace (E₂ x ⊗[𝕜] E₁ x) :=
-    Bundle.TensorProduct.tensorFiberTopology 𝕜 F₂ F₁ E₂ E₁ x
-  letI : FiberBundle (F₂ ⊗[𝕜] F₁) (fun x => E₂ x ⊗[𝕜] E₁ x) :=
-    Bundle.TensorProduct.fiberBundle (𝕜 := 𝕜) (B := B)
-      (F₁ := F₂) (F₂ := F₁) (E₁ := E₂) (E₂ := E₁)
-  letI : VectorBundle 𝕜 (F₂ ⊗[𝕜] F₁) (fun x => E₂ x ⊗[𝕜] E₁ x) :=
-    Bundle.TensorProduct.vectorBundle (𝕜 := 𝕜) (B := B)
-      (F₁ := F₂) (F₂ := F₁) (E₁ := E₂) (E₂ := E₁)
-  exact ContMDiffVectorBundleEquiv.ofFiberwiseLinearEquiv
+      (F₂ ⊗[𝕜] F₁) (fun x => E₂ x ⊗[𝕜] E₁ x) :=
+  ContMDiffVectorBundleEquiv.ofFiberwiseLinearEquiv
     (fun x => TensorProduct.comm 𝕜 (E₁ x) (E₂ x))
     sorry -- smoothness of the forward map
     sorry -- smoothness of the inverse map
@@ -119,49 +98,59 @@ local instance : NormedSpace 𝕜 (F₃ ⊗[𝕜] F₂) :=
 
 /-- Smooth bundle equivalence from mapping the first factor of a tensor product:
 given a smooth bundle equivalence `E₁ ≃ E₃` covering `id`, produce
-`E₁ ⊗ E₂ ≃ E₃ ⊗ E₂`. The fiberwise equivalence is `TensorProduct.congr`. -/
+`E₁ ⊗ E₂ ≃ E₃ ⊗ E₂`. The fiberwise equivalence is `TensorProduct.congr`.
+
+The source and target tensor product bundle instances are taken as parameters
+(not constructed internally) so that callers can ensure instance coherence
+when composing via `trans`. -/
 noncomputable def tensorProductMapLeft
     (e : ContMDiffVectorBundleEquiv 𝕜 IB n F₁ E₁ F₃ E₃)
-    (hid : e.baseMap = _root_.id) :
-    letI (x : B) : TopologicalSpace (E₁ x ⊗[𝕜] E₂ x) :=
-      Bundle.TensorProduct.tensorFiberTopology 𝕜 F₁ F₂ E₁ E₂ x
-    letI : FiberBundle (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x) :=
-      Bundle.TensorProduct.fiberBundle (𝕜 := 𝕜) (B := B)
-        (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
-    letI : VectorBundle 𝕜 (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x) :=
-      Bundle.TensorProduct.vectorBundle (𝕜 := 𝕜) (B := B)
-        (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
-    letI (x : B) : TopologicalSpace (E₃ x ⊗[𝕜] E₂ x) :=
-      Bundle.TensorProduct.tensorFiberTopology 𝕜 F₃ F₂ E₃ E₂ x
-    letI : FiberBundle (F₃ ⊗[𝕜] F₂) (fun x => E₃ x ⊗[𝕜] E₂ x) :=
-      Bundle.TensorProduct.fiberBundle (𝕜 := 𝕜) (B := B)
-        (F₁ := F₃) (F₂ := F₂) (E₁ := E₃) (E₂ := E₂)
-    letI : VectorBundle 𝕜 (F₃ ⊗[𝕜] F₂) (fun x => E₃ x ⊗[𝕜] E₂ x) :=
-      Bundle.TensorProduct.vectorBundle (𝕜 := 𝕜) (B := B)
-        (F₁ := F₃) (F₂ := F₂) (E₁ := E₃) (E₂ := E₂)
+    (hid : e.baseMap = _root_.id)
+    [∀ x, TopologicalSpace (E₁ x ⊗[𝕜] E₂ x)]
+    [TopologicalSpace (TotalSpace (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x))]
+    [FiberBundle (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x)]
+    [VectorBundle 𝕜 (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x)]
+    [∀ x, TopologicalSpace (E₃ x ⊗[𝕜] E₂ x)]
+    [TopologicalSpace (TotalSpace (F₃ ⊗[𝕜] F₂) (fun x => E₃ x ⊗[𝕜] E₂ x))]
+    [FiberBundle (F₃ ⊗[𝕜] F₂) (fun x => E₃ x ⊗[𝕜] E₂ x)]
+    [VectorBundle 𝕜 (F₃ ⊗[𝕜] F₂) (fun x => E₃ x ⊗[𝕜] E₂ x)] :
     ContMDiffVectorBundleEquiv 𝕜 IB n
       (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x)
       (F₃ ⊗[𝕜] F₂) (fun x => E₃ x ⊗[𝕜] E₂ x) := by
-  letI (x : B) : TopologicalSpace (E₁ x ⊗[𝕜] E₂ x) :=
-    Bundle.TensorProduct.tensorFiberTopology 𝕜 F₁ F₂ E₁ E₂ x
-  letI : FiberBundle (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x) :=
-    Bundle.TensorProduct.fiberBundle (𝕜 := 𝕜) (B := B)
-      (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
-  letI : VectorBundle 𝕜 (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x) :=
-    Bundle.TensorProduct.vectorBundle (𝕜 := 𝕜) (B := B)
-      (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
-  letI (x : B) : TopologicalSpace (E₃ x ⊗[𝕜] E₂ x) :=
-    Bundle.TensorProduct.tensorFiberTopology 𝕜 F₃ F₂ E₃ E₂ x
-  letI : FiberBundle (F₃ ⊗[𝕜] F₂) (fun x => E₃ x ⊗[𝕜] E₂ x) :=
-    Bundle.TensorProduct.fiberBundle (𝕜 := 𝕜) (B := B)
-      (F₁ := F₃) (F₂ := F₂) (E₁ := E₃) (E₂ := E₂)
-  letI : VectorBundle 𝕜 (F₃ ⊗[𝕜] F₂) (fun x => E₃ x ⊗[𝕜] E₂ x) :=
-    Bundle.TensorProduct.vectorBundle (𝕜 := 𝕜) (B := B)
-      (F₁ := F₃) (F₂ := F₂) (E₁ := E₃) (E₂ := E₂)
-  -- The fiberwise equivalence is `TensorProduct.congr (e.fiberLinearEquiv x) (refl)`,
-  -- but casting `E₃ (e.baseMap x) = E₃ x` via `hid` involves dependent instance issues.
-  -- The smoothness proofs are also sorry'd.
-  sorry
+  have fiberEquiv : ∀ x, E₁ x ≃ₗ[𝕜] E₃ x := by
+    intro x; have := e.fiberLinearEquiv x; rw [hid] at this; exact this
+  exact ContMDiffVectorBundleEquiv.ofFiberwiseLinearEquiv
+    (fun x => TensorProduct.congr (fiberEquiv x) (LinearEquiv.refl 𝕜 (E₂ x)))
+    sorry -- smoothness of the forward map
+    sorry -- smoothness of the inverse map
+
+/-- Smooth bundle equivalence from mapping the second factor of a tensor product:
+given a smooth bundle equivalence `E₂ ≃ E₃` covering `id`, produce
+`E₁ ⊗ E₂ ≃ E₁ ⊗ E₃`. The fiberwise equivalence is `TensorProduct.congr`.
+
+The source and target tensor product bundle instances are taken as parameters
+(not constructed internally) so that callers can ensure instance coherence
+when composing via `trans`. -/
+noncomputable def tensorProductMapRight
+    (e : ContMDiffVectorBundleEquiv 𝕜 IB n F₂ E₂ F₃ E₃)
+    (hid : e.baseMap = _root_.id)
+    [∀ x, TopologicalSpace (E₁ x ⊗[𝕜] E₂ x)]
+    [TopologicalSpace (TotalSpace (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x))]
+    [FiberBundle (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x)]
+    [VectorBundle 𝕜 (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x)]
+    [∀ x, TopologicalSpace (E₁ x ⊗[𝕜] E₃ x)]
+    [TopologicalSpace (TotalSpace (F₁ ⊗[𝕜] F₃) (fun x => E₁ x ⊗[𝕜] E₃ x))]
+    [FiberBundle (F₁ ⊗[𝕜] F₃) (fun x => E₁ x ⊗[𝕜] E₃ x)]
+    [VectorBundle 𝕜 (F₁ ⊗[𝕜] F₃) (fun x => E₁ x ⊗[𝕜] E₃ x)] :
+    ContMDiffVectorBundleEquiv 𝕜 IB n
+      (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x)
+      (F₁ ⊗[𝕜] F₃) (fun x => E₁ x ⊗[𝕜] E₃ x) := by
+  have fiberEquiv : ∀ x, E₂ x ≃ₗ[𝕜] E₃ x := by
+    intro x; have := e.fiberLinearEquiv x; rw [hid] at this; exact this
+  exact ContMDiffVectorBundleEquiv.ofFiberwiseLinearEquiv
+    (fun x => TensorProduct.congr (LinearEquiv.refl 𝕜 (E₁ x)) (fiberEquiv x))
+    sorry -- smoothness of the forward map
+    sorry -- smoothness of the inverse map
 
 /-!
 ### Associativity
@@ -251,6 +240,92 @@ noncomputable def tensorProductAssoc :
       (E₁ := E₁) (E₂ := fun x => E₂ x ⊗[𝕜] E₃ x)
   exact ContMDiffVectorBundleEquiv.ofFiberwiseLinearEquiv
     (fun x => TensorProduct.assoc 𝕜 (E₁ x) (E₂ x) (E₃ x))
+    sorry -- smoothness of the forward map
+    sorry -- smoothness of the inverse map
+
+/-!
+### Four-factor shuffle
+-/
+
+variable {F₄ : Type*} [NormedAddCommGroup F₄] [NormedSpace 𝕜 F₄] [FiniteDimensional 𝕜 F₄]
+variable {E₄ : B → Type*} [∀ x, AddCommGroup (E₄ x)] [∀ x, Module 𝕜 (E₄ x)]
+  [TopologicalSpace (TotalSpace F₄ E₄)] [∀ x, TopologicalSpace (E₄ x)]
+  [FiberBundle F₄ E₄] [VectorBundle 𝕜 F₄ E₄]
+  [∀ x, ContinuousAdd (E₄ x)] [∀ x, ContinuousSMul 𝕜 (E₄ x)]
+  [ContMDiffVectorBundle n F₄ E₄ IB]
+
+local instance : NormedAddCommGroup (F₁ ⊗[𝕜] F₃) :=
+  instNormedAddCommGroup_tensor 𝕜 F₁ F₃
+local instance : NormedSpace 𝕜 (F₁ ⊗[𝕜] F₃) :=
+  instNormedSpace_tensor (𝕜 := 𝕜) (F₁ := F₁) (F₂ := F₃)
+local instance : NormedAddCommGroup (F₂ ⊗[𝕜] F₄) :=
+  instNormedAddCommGroup_tensor 𝕜 F₂ F₄
+local instance : NormedSpace 𝕜 (F₂ ⊗[𝕜] F₄) :=
+  instNormedSpace_tensor (𝕜 := 𝕜) (F₁ := F₂) (F₂ := F₄)
+local instance : NormedAddCommGroup ((F₁ ⊗[𝕜] F₂) ⊗[𝕜] (F₃ ⊗[𝕜] F₄)) :=
+  instNormedAddCommGroup_tensor 𝕜 (F₁ ⊗[𝕜] F₂) (F₃ ⊗[𝕜] F₄)
+local instance : NormedSpace 𝕜 ((F₁ ⊗[𝕜] F₂) ⊗[𝕜] (F₃ ⊗[𝕜] F₄)) :=
+  instNormedSpace_tensor (𝕜 := 𝕜) (F₁ := F₁ ⊗[𝕜] F₂) (F₂ := F₃ ⊗[𝕜] F₄)
+local instance : NormedAddCommGroup ((F₁ ⊗[𝕜] F₃) ⊗[𝕜] (F₂ ⊗[𝕜] F₄)) :=
+  instNormedAddCommGroup_tensor 𝕜 (F₁ ⊗[𝕜] F₃) (F₂ ⊗[𝕜] F₄)
+local instance : NormedSpace 𝕜 ((F₁ ⊗[𝕜] F₃) ⊗[𝕜] (F₂ ⊗[𝕜] F₄)) :=
+  instNormedSpace_tensor (𝕜 := 𝕜) (F₁ := F₁ ⊗[𝕜] F₃) (F₂ := F₂ ⊗[𝕜] F₄)
+
+/-- Smooth bundle equivalence shuffling four tensor factors:
+`(E₁ ⊗ E₂) ⊗ (E₃ ⊗ E₄) ≃ (E₁ ⊗ E₃) ⊗ (E₂ ⊗ E₄)`. The fiberwise equivalence is
+`TensorProduct.tensorTensorTensorComm`. -/
+noncomputable def tensorProductShuffle
+    [∀ x, TopologicalSpace (E₁ x ⊗[𝕜] E₂ x)]
+    [∀ x, TopologicalSpace (E₃ x ⊗[𝕜] E₄ x)]
+    [∀ x, TopologicalSpace ((E₁ x ⊗[𝕜] E₂ x) ⊗[𝕜] (E₃ x ⊗[𝕜] E₄ x))]
+    [TopologicalSpace (TotalSpace ((F₁ ⊗[𝕜] F₂) ⊗[𝕜] (F₃ ⊗[𝕜] F₄))
+      (fun x => (E₁ x ⊗[𝕜] E₂ x) ⊗[𝕜] (E₃ x ⊗[𝕜] E₄ x)))]
+    [FiberBundle ((F₁ ⊗[𝕜] F₂) ⊗[𝕜] (F₃ ⊗[𝕜] F₄))
+      (fun x => (E₁ x ⊗[𝕜] E₂ x) ⊗[𝕜] (E₃ x ⊗[𝕜] E₄ x))]
+    [VectorBundle 𝕜 ((F₁ ⊗[𝕜] F₂) ⊗[𝕜] (F₃ ⊗[𝕜] F₄))
+      (fun x => (E₁ x ⊗[𝕜] E₂ x) ⊗[𝕜] (E₃ x ⊗[𝕜] E₄ x))]
+    [∀ x, TopologicalSpace (E₁ x ⊗[𝕜] E₃ x)]
+    [∀ x, TopologicalSpace (E₂ x ⊗[𝕜] E₄ x)]
+    [∀ x, TopologicalSpace ((E₁ x ⊗[𝕜] E₃ x) ⊗[𝕜] (E₂ x ⊗[𝕜] E₄ x))]
+    [TopologicalSpace (TotalSpace ((F₁ ⊗[𝕜] F₃) ⊗[𝕜] (F₂ ⊗[𝕜] F₄))
+      (fun x => (E₁ x ⊗[𝕜] E₃ x) ⊗[𝕜] (E₂ x ⊗[𝕜] E₄ x)))]
+    [FiberBundle ((F₁ ⊗[𝕜] F₃) ⊗[𝕜] (F₂ ⊗[𝕜] F₄))
+      (fun x => (E₁ x ⊗[𝕜] E₃ x) ⊗[𝕜] (E₂ x ⊗[𝕜] E₄ x))]
+    [VectorBundle 𝕜 ((F₁ ⊗[𝕜] F₃) ⊗[𝕜] (F₂ ⊗[𝕜] F₄))
+      (fun x => (E₁ x ⊗[𝕜] E₃ x) ⊗[𝕜] (E₂ x ⊗[𝕜] E₄ x))] :
+    ContMDiffVectorBundleEquiv 𝕜 IB n
+      ((F₁ ⊗[𝕜] F₂) ⊗[𝕜] (F₃ ⊗[𝕜] F₄)) (fun x => (E₁ x ⊗[𝕜] E₂ x) ⊗[𝕜] (E₃ x ⊗[𝕜] E₄ x))
+      ((F₁ ⊗[𝕜] F₃) ⊗[𝕜] (F₂ ⊗[𝕜] F₄)) (fun x => (E₁ x ⊗[𝕜] E₃ x) ⊗[𝕜] (E₂ x ⊗[𝕜] E₄ x)) :=
+  ContMDiffVectorBundleEquiv.ofFiberwiseLinearEquiv
+    (fun x => TensorProduct.tensorTensorTensorComm 𝕜 (E₁ x) (E₂ x) (E₃ x) (E₄ x))
+    sorry -- smoothness of the forward map
+    sorry -- smoothness of the inverse map
+
+/-- Smooth bundle equivalence from mapping both factors of a tensor product:
+given `E₁ ≃ E₃` and `E₂ ≃ E₄` covering `id`, produce `E₁ ⊗ E₂ ≃ E₃ ⊗ E₄`.
+The fiberwise equivalence is `TensorProduct.congr`. -/
+noncomputable def tensorProductMapBoth
+    (e₁ : ContMDiffVectorBundleEquiv 𝕜 IB n F₁ E₁ F₃ E₃)
+    (h₁ : e₁.baseMap = _root_.id)
+    (e₂ : ContMDiffVectorBundleEquiv 𝕜 IB n F₂ E₂ F₄ E₄)
+    (h₂ : e₂.baseMap = _root_.id)
+    [∀ x, TopologicalSpace (E₁ x ⊗[𝕜] E₂ x)]
+    [TopologicalSpace (TotalSpace (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x))]
+    [FiberBundle (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x)]
+    [VectorBundle 𝕜 (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x)]
+    [∀ x, TopologicalSpace (E₃ x ⊗[𝕜] E₄ x)]
+    [TopologicalSpace (TotalSpace (F₃ ⊗[𝕜] F₄) (fun x => E₃ x ⊗[𝕜] E₄ x))]
+    [FiberBundle (F₃ ⊗[𝕜] F₄) (fun x => E₃ x ⊗[𝕜] E₄ x)]
+    [VectorBundle 𝕜 (F₃ ⊗[𝕜] F₄) (fun x => E₃ x ⊗[𝕜] E₄ x)] :
+    ContMDiffVectorBundleEquiv 𝕜 IB n
+      (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x)
+      (F₃ ⊗[𝕜] F₄) (fun x => E₃ x ⊗[𝕜] E₄ x) := by
+  have fe₁ : ∀ x, E₁ x ≃ₗ[𝕜] E₃ x := by
+    intro x; have := e₁.fiberLinearEquiv x; rw [h₁] at this; exact this
+  have fe₂ : ∀ x, E₂ x ≃ₗ[𝕜] E₄ x := by
+    intro x; have := e₂.fiberLinearEquiv x; rw [h₂] at this; exact this
+  exact ContMDiffVectorBundleEquiv.ofFiberwiseLinearEquiv
+    (fun x => TensorProduct.congr (fe₁ x) (fe₂ x))
     sorry -- smoothness of the forward map
     sorry -- smoothness of the inverse map
 

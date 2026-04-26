@@ -361,7 +361,7 @@ local instance instDTTop (r s : ℕ) (x : B) :
 local instance instDTAddCommGroup (r s : ℕ) (x : B) :
     AddCommGroup (Bundle.continuousMultilinearMap 𝕜 r (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x ⊗[𝕜]
                   Bundle.continuousMultilinearMap 𝕜 s F E x) :=
-  Module.addCommMonoidToAddCommGroup 𝕜
+  TensorProduct.addCommGroup
 
 local instance instDTTotalTop (r s : ℕ) :
     TopologicalSpace (TotalSpace

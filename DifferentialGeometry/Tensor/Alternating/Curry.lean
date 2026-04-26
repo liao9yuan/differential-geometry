@@ -681,5 +681,20 @@ theorem curryFin_sum_smul {κ : Type*} {p : ℕ}
   simp only [ContinuousLinearMap.sum_apply, ContinuousLinearMap.smul_apply] at this
   exact this
 
+/-! ### Distribution lemmas for `uncurryFin` over sums -/
+
+/-- `uncurryFin` distributes over a finite sum. -/
+theorem uncurryFin_finset_sum {ι : Type*} {k : ℕ} (s : Finset ι)
+    (f : ι → E →L[𝕜] E [⋀^Fin k]→L[𝕜] F) :
+    uncurryFin (∑ i ∈ s, f i) = ∑ i ∈ s, uncurryFin (f i) :=
+  _root_.map_sum (uncurryFinCLM (𝕜 := 𝕜) (E := E) (F := F) (n := k)) _ _
+
+/-- `uncurryFin` distributes over a finite sum of scalar multiples. -/
+theorem uncurryFin_finset_smul_sum {ι : Type*} {k : ℕ} (s : Finset ι)
+    (c : ι → 𝕜) (f : ι → E →L[𝕜] E [⋀^Fin k]→L[𝕜] F) :
+    uncurryFin (∑ i ∈ s, c i • f i) = ∑ i ∈ s, c i • uncurryFin (f i) := by
+  rw [uncurryFin_finset_sum]; refine Finset.sum_congr rfl fun i _ => ?_
+  exact uncurryFin_smul (M := 𝕜) _ _
+
 end curry
 end ContinuousAlternatingMap

@@ -136,7 +136,32 @@ theorem uncurryFin_smulRight_elementaryCovector
   apply Finset.sum_congr rfl; intro i _
   simp only [Fin.cons_zero,
     zsmul_eq_mul, Int.cast_pow, Int.cast_neg, Int.cast_one]
-  ring
+  ring_nf; congr 1
+
+/-- An elementary 1-covector `elementaryCovector b ![j]` equals `ofSubsingleton 𝕜 E 𝕜 0 (b j)`. -/
+theorem elementaryCovector_singleton
+    (b : Module.Basis (Fin n) 𝕜 (E →L[𝕜] 𝕜)) (j : Fin n) :
+    elementaryCovector b ![j] = ofSubsingleton 𝕜 E 𝕜 0 (b j) := by
+  ext v; simp [elementaryCovector_apply, ofSubsingleton, Matrix.det_unique]
+
+/-- `smulRight` distributes over a finite sum of scalar multiples:
+`α.smulRight (∑ c_i • f_i) = ∑ c_i • α.smulRight (f_i)`. -/
+theorem smulRight_sum_smul {ι : Type*} {s : Finset ι} {k' : ℕ}
+    (α : E →L[𝕜] 𝕜) (c : ι → 𝕜) (f : ι → E [⋀^Fin k']→L[𝕜] 𝕜) :
+    α.smulRight (∑ i ∈ s, c i • f i) = ∑ i ∈ s, c i • α.smulRight (f i) := by
+  ext v w; simp only [ContinuousLinearMap.smulRight_apply, ContinuousAlternatingMap.smul_apply,
+    ContinuousLinearMap.sum_apply, ContinuousAlternatingMap.sum_apply,
+    ContinuousLinearMap.smul_apply, smul_eq_mul, Finset.sum_mul, Finset.mul_sum]
+  congr 1; ext i; ring
+
+/-- `smulRight` distributes over a basis-coefficient sum: given a basis `b` and
+`α = ∑ c_j • b j`, we have `α.smulRight e = ∑ c_j • (b j).smulRight e`. -/
+theorem smulRight_basis_sum (b : Module.Basis (Fin n) 𝕜 (E →L[𝕜] 𝕜))
+    (α : E →L[𝕜] 𝕜) {k' : ℕ} (e : E [⋀^Fin k']→L[𝕜] 𝕜) :
+    (∑ j, b.repr α j • b j).smulRight e = ∑ j, b.repr α j • (b j).smulRight e := by
+  ext v w; simp only [ContinuousLinearMap.smulRight_apply, ContinuousAlternatingMap.smul_apply,
+    ContinuousLinearMap.sum_apply, ContinuousAlternatingMap.sum_apply,
+    ContinuousLinearMap.smul_apply, smul_eq_mul, Finset.sum_mul, mul_assoc]
 
 /-- Evaluating an elementary covector on basis vectors gives the generalized
 Kronecker delta. Given a dual basis pair `(B, b)` with `b i (B j) = δ_{ij}`,
@@ -219,6 +244,51 @@ theorem elementaryCovector_comp_perm
   rw [elementaryCovector_basis_eval B b dual,
     elementaryCovector_basis_eval B b dual,
     Fin.multiKroneckerDelta_comp_perm_left, smul_eq_mul]
+
+/-- `cons k (addCases I J)` and `addCases (cons k I) J` give the same values
+at corresponding positions, so their elementary covectors agree after reindexing
+via `finAddFlipAssoc`. -/
+theorem elementaryCovector_cons_addCases_left
+    {m n d : ℕ}
+    (b : Module.Basis (Fin d) 𝕜 (E →L[𝕜] 𝕜))
+    (k : Fin d) (I : Fin m → Fin d) (J : Fin n → Fin d) :
+    elementaryCovector b (Fin.cons k (Fin.addCases I J)) =
+      domDomCongr Fin.finAddFlipAssoc
+        (elementaryCovector b (Fin.addCases (Fin.cons k I) J)) := by
+  ext v; simp only [domDomCongr_apply, elementaryCovector_apply]
+  refine Fin.det_subst_eq (R := 𝕜) (by omega : m + n + 1 = m + 1 + n) _ _ (fun i j => ?_)
+  have hcol : Fin.cast (by omega : m + n + 1 = m + 1 + n).symm j = Fin.finAddFlipAssoc j :=
+    Fin.ext (by simp [Fin.finAddFlipAssoc, finCongr])
+  rw [hcol]
+  simp only [Fin.cons_addCases_eq_addCases_cons, Function.comp_apply]
+
+/-- `cons k (addCases I J)` is obtained from `addCases I (cons k J)` by a row
+permutation of sign `(-1)^m`. -/
+theorem elementaryCovector_cons_addCases_right
+    [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜]
+    {m n d : ℕ}
+    (b : Module.Basis (Fin d) 𝕜 (E →L[𝕜] 𝕜))
+    (k : Fin d) (I : Fin m → Fin d) (J : Fin n → Fin d) :
+    elementaryCovector b (Fin.cons k (Fin.addCases I J)) =
+      (-1 : 𝕜) ^ m • elementaryCovector b (Fin.addCases I (Fin.cons k J)) := by
+  -- Step 1: addCases I (cons k J) = insertNth ⟨m, _⟩ k (addCases I J)
+  have h_insert : @Fin.addCases m (n + 1) (fun _ => Fin d) I (Fin.cons k J) =
+      @Fin.insertNth (m + n) (fun _ => Fin d) ⟨m, by omega⟩ k
+        (@Fin.addCases m n (fun _ => Fin d) I J) :=
+    Fin.addCases_cons_eq_insertNth I k J
+  -- Step 2: cons k (addCases I J) = addCases I (cons k J) ∘ (cycleRange ⟨m, _⟩)⁻¹
+  have h_comp : @Fin.cons (m + n) (fun _ => Fin d) k (@Fin.addCases m n (fun _ => Fin d) I J) =
+      @Fin.addCases m (n + 1) (fun _ => Fin d) I (Fin.cons k J) ∘
+        ⇑(Fin.cycleRange (⟨m, by omega⟩ : Fin ((m + n) + 1))).symm := by
+    rw [h_insert]
+    exact (Fin.insertNth_comp_cycleRange_symm _ k
+      (@Fin.addCases m n (fun _ => Fin d) I J)).symm
+  -- Step 3: apply elementaryCovector_comp_perm
+  conv_lhs => rw [h_comp]
+  rw [elementaryCovector_comp_perm]
+  -- Step 4: sign of (cycleRange ⟨m, _⟩)⁻¹ = (-1)^m
+  congr 1
+  simp [Equiv.Perm.sign_symm, Fin.sign_cycleRange]
 
 /-!
 ## Basis of elementary covectors
