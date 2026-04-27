@@ -161,3 +161,9 @@ import DifferentialGeometry.Tensor.Multilinear.MetricLowering
 import DifferentialGeometry.Integral.Measure.BorelManifold.Defs
 import DifferentialGeometry.Integral.Measure.BorelManifold.Derived
 import DifferentialGeometry.Integral.Measure.BorelManifold.StandardInstances
+
+import DifferentialGeometry.Integral.Integration.L2Hilbert.Defs
+import DifferentialGeometry.Integral.Integration.L2Hilbert.Inherited
+import DifferentialGeometry.Integral.Integration.L2Hilbert.DenseSubset
+import DifferentialGeometry.Integral.Integration.L2Hilbert.SimpLemmas
+import DifferentialGeometry.Integral.Integration.L2Hilbert.Operators
