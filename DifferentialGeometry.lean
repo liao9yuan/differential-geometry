@@ -126,11 +126,17 @@ import DifferentialGeometry.Tensor.Product.Fiber
 import DifferentialGeometry.Tensor.Product.HomEquiv
 import DifferentialGeometry.Tensor.Product.Pretrivialization
 import DifferentialGeometry.Tensor.Product.Section
+import DifferentialGeometry.Tensor.RSTensor.BundleSectionContinuity
+import DifferentialGeometry.Tensor.RSTensor.ChartJacobianSmooth
+import DifferentialGeometry.Tensor.RSTensor.ChartJacobianSmoothness
 import DifferentialGeometry.Tensor.RSTensor.Contract
 import DifferentialGeometry.Tensor.RSTensor.Defs
 import DifferentialGeometry.Tensor.RSTensor.Field
 import DifferentialGeometry.Tensor.RSTensor.LieDerivative
 import DifferentialGeometry.Tensor.RSTensor.Metric
+import DifferentialGeometry.Tensor.RSTensor.TangentRiemannian
+import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian
+import DifferentialGeometry.Tensor.RSTensor.TensorRSRiemannian
 
 import DifferentialGeometry.Integral.Measure.ChartDensity
 import DifferentialGeometry.Integral.Measure.Glue
@@ -138,3 +144,20 @@ import DifferentialGeometry.Integral.Measure.Invariance
 import DifferentialGeometry.Integral.Measure.Properties
 import DifferentialGeometry.Integral.Measure.Family
 import DifferentialGeometry.Integral.SyntheticBridge.SmoothFamily
+import DifferentialGeometry.Integral.Integration.Basic
+import DifferentialGeometry.Integral.Integration.CompactSupport
+import DifferentialGeometry.Integral.Integration.PointwiseInner.DualMetric
+import DifferentialGeometry.Integral.Integration.PointwiseInner.Defs
+import DifferentialGeometry.Integral.Integration.PointwiseInner.Algebra
+import DifferentialGeometry.Integral.Integration.GlobalPairing.Defs
+import DifferentialGeometry.Integral.Integration.GlobalPairing.Algebra
+import DifferentialGeometry.Integral.Integration.GlobalPairing.CauchySchwarz
+import DifferentialGeometry.Integral.Integration.SmoothSections.Defs
+import DifferentialGeometry.Integral.Integration.SmoothSections.PreHilbert
+import DifferentialGeometry.Integral.Integration.SmoothSections.Integrability
+import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEval
+import DifferentialGeometry.Tensor.Multilinear.MetricLowering
+
+import DifferentialGeometry.Integral.Measure.BorelManifold.Defs
+import DifferentialGeometry.Integral.Measure.BorelManifold.Derived
+import DifferentialGeometry.Integral.Measure.BorelManifold.StandardInstances

@@ -77,13 +77,13 @@ private local instance : BorelSpace M := ⟨rfl⟩
 /-- Given a smoothly-time-parameterised Riemannian metric family, the associated
 family of Riemannian volume measures on `M`. -/
 def riemannianMeasureFamily
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [T2Space M] [SigmaCompactSpace M]
     (g_fam : ℝ → SmoothRiemannianMetric I M) : ℝ → MeasureTheory.Measure M :=
   fun t => riemannianVolumeMeasure (I := I) (M := M) (g_fam t)
 
 /-- Unfolding lemma for the time-parameterised Riemannian volume measure. -/
 lemma riemannianMeasureFamily_def
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [T2Space M] [SigmaCompactSpace M]
     (g_fam : ℝ → SmoothRiemannianMetric I M) (t : ℝ) :
     riemannianMeasureFamily (I := I) (M := M) g_fam t =
       riemannianVolumeMeasure (I := I) (M := M) (g_fam t) := rfl
@@ -597,7 +597,6 @@ the restricted canonical Haar measure. -/
 /-- Bochner integral characterisation of the chart-local measure for a
 measurable, integrable real-valued function. -/
 theorem integral_chartLocalMeasure
-    [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (h : M → ℝ) (hh_meas : Measurable h) :
     ∫ x, h x ∂(chartLocalMeasure (I := I) g x₀)
@@ -605,10 +604,8 @@ theorem integral_chartLocalMeasure
           chartDensity g x₀ ((extChartAt I x₀).symm y) *
             h ((extChartAt I x₀).symm y)
           ∂(modelHaar (E := E)) := by
-  have htarget_open : IsOpen (extChartAt I x₀).target :=
-    isOpen_extChartAt_target (I := I) x₀
   have htarget_meas : MeasurableSet (extChartAt I x₀).target :=
-    htarget_open.measurableSet
+    measurableSet_extChartAt_target (I := I) x₀
   -- Set up the two-step measure as `Measure.map symm (withDensity (…))`.
   set μ₀ : MeasureTheory.Measure E :=
     (modelHaar (E := E)).restrict (extChartAt I x₀).target with hμ₀
@@ -715,7 +712,7 @@ lemma chartAtlasPOU_weight_zero_of_notMem
 /-- For a POU index outside the finite-support set, the weighted chart-local measure
 is the zero measure. -/
 lemma chartAtlasPOU_withDensity_zero_of_notMem
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
     {α : M} (hα : α ∉ chartAtlasPOU_finset (I := I) (M := M)) :
     (chartLocalMeasure (I := I) g α).withDensity
@@ -1093,7 +1090,7 @@ lemma traceTimeDerivMetric_eq_trace_chartGramMatrix
 /-- On a compact manifold, the canonical Riemannian volume measure equals the
 finite sum of POU-weighted chart-local measures over the finite support set. -/
 theorem riemannianVolumeMeasure_eq_finset_sum
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) :
     riemannianVolumeMeasure (I := I) (M := M) g =
       ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
@@ -1131,7 +1128,7 @@ finite sum over the chart-atlas POU support. Each summand is the Bochner
 integral of `h` against the POU-weighted chart-local measure at `α`. -/
 
 theorem integral_riemannianVolumeMeasure_eq_finset_sum
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
     (h : M → ℝ)
     (hh_cont : Continuous h) :
@@ -1185,7 +1182,7 @@ This formulation cleanly separates the analytic kernel (the chart-local
 parametric differentiation and bound construction) from the global measure
 assembly (which is pure linear algebra). -/
 theorem volume_variation_formula_from_chart_derivs
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g_fam : ℝ → SmoothRiemannianMetric I M)
     (f : ℝ → M → ℝ) (t : ℝ)
     (Iα : M → ℝ)
@@ -1220,7 +1217,7 @@ This identity, combined with the chart-local parametric `HasDerivAt` given by
 `HasDerivAt` for `t ↦ ∫ x, f t x ∂riemannianMeasureFamily gFam t`.
 -/
 theorem integral_riemannianMeasureFamily_eq_finset_sum
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g_fam : ℝ → SmoothRiemannianMetric I M)
     (f : ℝ → M → ℝ) (t : ℝ)
     (hf_cont : Continuous (f t)) :
@@ -1245,7 +1242,7 @@ measure, plus the hypothesis that `f` is continuous in `s` in a neighborhood of
 `integral_riemannianMeasureFamily_eq_finset_sum` go through). The conclusion
 is a `HasDerivAt` for `s ↦ ∫ x, f s x ∂volume_s` at `s = t`. -/
 theorem volume_variation_formula
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g_fam : ℝ → SmoothRiemannianMetric I M)
     (f : ℝ → M → ℝ) (t : ℝ)
     (Iα : M → ℝ) (Iglobal : ℝ)
@@ -1405,7 +1402,7 @@ Given a continuous integrand `h : M → ℝ`, on a compact manifold,
 This is obtained by rewriting each summand via the `withDensity → smul`
 identity and applying the finite-sum decomposition of the Riemannian measure. -/
 theorem chartLocal_weighted_finset_sum_eq_riemannianMeasure_integral
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g_fam : ℝ → SmoothRiemannianMetric I M) (t : ℝ)
     (h : M → ℝ) (hh_cont : Continuous h) :
     ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
@@ -1472,7 +1469,7 @@ composed with parametric integration. The `hh_cont` hypothesis ensures the
 RHS integrand is continuous, enabling the finite-sum-to-global-integral
 identity. -/
 theorem volume_variation_formula_clean_of_chart_derivs
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g_fam : ℝ → SmoothRiemannianMetric I M)
     (f : ℝ → M → ℝ) (t : ℝ)
     (hf_cont : ∀ᶠ s in 𝓝 t, Continuous (f s))
@@ -1534,7 +1531,6 @@ the Gram matrix and its pointwise time-derivatives on `ℝ × base_α`, together
 continuity of the matrix inverse on the positive-determinant locus and of the
 matrix trace. -/
 lemma continuousOn_traceTimeDerivMetric_on_base
-    [I.Boundaryless]
     {g_fam : ℝ → SmoothRiemannianMetric I M} {t : ℝ}
     (hreg : MetricFamilyRegularAt (I := I) g_fam t)
     (α : M) :
@@ -1701,7 +1697,6 @@ lemma continuousOn_traceTimeDerivMetric_on_base
 coordinate-invariant scalar, so continuity is established by switching to the
 canonical chart at each point and applying the continuous-on-base-set result. -/
 lemma traceTimeDerivMetric_continuous
-    [I.Boundaryless]
     {g_fam : ℝ → SmoothRiemannianMetric I M} {t : ℝ}
     (hreg : MetricFamilyRegularAt (I := I) g_fam t) :
     Continuous (fun x : M => traceTimeDerivMetric (I := I) g_fam t x) := by
@@ -1760,7 +1755,6 @@ lemma traceTimeDerivMetric_continuous
 `Set.univ ×ˢ base_α`, for any chart `α`. Obtained from the chart-local
 trace formula via `traceTimeDerivMetric_eq_trace_chartGramMatrix`. -/
 lemma continuousOn_traceTimeDerivMetric_of_base
-    [I.Boundaryless]
     {g_fam : ℝ → SmoothRiemannianMetric I M} {t : ℝ}
     (hreg : MetricFamilyRegularAt (I := I) g_fam t) (α : M) :
     ContinuousOn
@@ -1783,7 +1777,6 @@ lemma continuousOn_traceTimeDerivMetric_of_base
 /-- Joint continuity of the chart-local density `(t, x) ↦ chartDensity (g_fam t) α x`
 on `Set.univ ×ˢ base_α`, derived from the regularity interface. -/
 lemma continuousOn_chartDensity_family
-    [I.Boundaryless]
     {g_fam : ℝ → SmoothRiemannianMetric I M} {t : ℝ}
     (hreg : MetricFamilyRegularAt (I := I) g_fam t) (α : M) :
     ContinuousOn
@@ -1824,7 +1817,6 @@ lemma continuousOn_chartDensity_family
 through the chart symm, on an arbitrary set `S ⊆ ℝ × E` mapping into the base
 set. -/
 lemma continuousOn_chartTrace_form_of_base_pullback
-    [I.Boundaryless]
     {g_fam : ℝ → SmoothRiemannianMetric I M} {t : ℝ}
     (hreg : MetricFamilyRegularAt (I := I) g_fam t) (α : M)
     {S : Set (ℝ × E)} (sym : E → M)
@@ -1874,7 +1866,7 @@ set_option maxHeartbeats 16000000 in
 derivative at `t` given by the explicit formula
 `∫ x, (∂_t f + ½ tr_g(∂_t g) f) · ρ_α ∂(chartLocalMeasure (g_fam t) α)`. -/
 lemma per_chart_hasDerivAt
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g_fam : ℝ → SmoothRiemannianMetric I M} {f : ℝ → M → ℝ} {t : ℝ}
     (hreg : MetricFamilyRegularAt (I := I) g_fam t)
     (hf : FunctionRegularAt f t)
@@ -1894,8 +1886,8 @@ lemma per_chart_hasDerivAt
   set μₐ : MeasureTheory.Measure M := chartLocalMeasure (I := I) (g_fam t) α with hμα_def
   set target : Set E := (extChartAt I α).target with htarget_def
   set symm : E → M := fun y => (extChartAt I α).symm y with hsymm_def
-  have htarget_open : IsOpen target := isOpen_extChartAt_target (I := I) α
-  have htarget_meas : MeasurableSet target := htarget_open.measurableSet
+  have htarget_meas : MeasurableSet target :=
+    measurableSet_extChartAt_target (I := I) α
   -- Continuity facts for ρα, f, density, and the combined integrand.
   have hρα_cont : Continuous ρα := ((chartAtlasPOU I M) α).contMDiff.continuous
   have hρα_nonneg : ∀ x, 0 ≤ ρα x := fun x => (chartAtlasPOU I M).nonneg _ _
@@ -1933,7 +1925,7 @@ lemma per_chart_hasDerivAt
   -- The map symm : E → M is continuous on target.
   have h_symm_contOn : ContinuousOn symm target :=
     continuousOn_extChartAt_symm (I := I) α
-  -- Under [I.Boundaryless], target = chartAt.target; symm maps target into source = base.
+  -- The chart symm maps target into the chart source (= trivialization base set).
   have h_symm_maps : ∀ y ∈ target, symm y ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
     intro y hy
     have hsrc : symm y ∈ (extChartAt I α).source := (extChartAt I α).map_target hy
@@ -2539,11 +2531,11 @@ variable {g_fam : ℝ → SmoothRiemannianMetric I M}
 regular integrand `f : ℝ → M → ℝ`, at a base time `t₀`, equals the integral of
 `∂_t f + ½ tr_g(∂_t g) · f` against the Riemannian volume measure at `t₀`.
 
-Hypotheses: compact boundary-less σ-compact Hausdorff manifold `M`, a regularity
+Hypotheses: compact σ-compact Hausdorff manifold `M`, a regularity
 interface `MetricFamilyRegularAt g_fam t₀` for the metric family, and a
 regularity interface `FunctionRegularAt f t₀` for the integrand. -/
 theorem volume_variation_formula_clean
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g_fam : ℝ → SmoothRiemannianMetric I M}
     {f : ℝ → M → ℝ} {t₀ : ℝ}
     (hg : MetricFamilyRegularAt (I := I) g_fam t₀)

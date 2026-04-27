@@ -14,12 +14,15 @@ import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
 # Chart invariance of chart-local and global Riemannian measures
 
 This file develops the chart-invariance story of the Riemannian volume measure
-built in `ChartDensity.lean` and `Glue.lean`.
+built in `ChartDensity.lean` and `Glue.lean`. The development is independent of
+boundary assumptions on the model: every public statement holds for manifolds
+modelled on `ModelWithCorners ℝ E H` regardless of whether the model has
+boundary or corners.
 
-The Integral/PDE layer of this formalisation targets closed (boundaryless)
-manifolds exclusively, so wherever the openness of `(extChartAt I x).target`
-or related manifold-level analytic facts are needed, we assume
-`[I.Boundaryless]`.
+Where the closed (boundaryless) case admits a stronger statement — for
+instance the chart image of an open subset of the chart source is open in `E`,
+not merely Borel-measurable — that variant is kept as a separate lemma carrying
+the `[I.Boundaryless]` hypothesis explicitly.
 
 ## Main results
 
@@ -96,12 +99,24 @@ lemma extChartAt_symm_preimage_inter_target_eq_empty
   rw [this] at hne
   exact hne
 
+/-! ## Borel-measurability of the extended-chart target -/
+
+/-- The extended-chart target is Borel-measurable in `E`. This works in the
+boundary case as well, because `(extChartAt I x₀).target = I.symm ⁻¹' (chartAt H x₀).target ∩ range I`,
+the first factor being the preimage of an open set under a continuous map and
+the second factor being closed. -/
+lemma measurableSet_extChartAt_target (x₀ : M) :
+    MeasurableSet (extChartAt I x₀).target := by
+  rw [extChartAt_target (I := I)]
+  refine MeasurableSet.inter ?_ ?_
+  · exact (I.continuous_symm.isOpen_preimage _ (chartAt H x₀).open_target).measurableSet
+  · exact I.isClosed_range.measurableSet
+
 /-! ## Chart-local measure vanishes outside the chart source -/
 
 /-- The chart-local measure assigns zero mass to any measurable set disjoint
 from the base-chart source. -/
 theorem chartLocalMeasure_apply_of_disjoint_source
-    [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     {A : Set M} (hAmeas : MeasurableSet A)
     (hA : Disjoint A (chartAt H x₀).source) :
@@ -111,10 +126,8 @@ theorem chartLocalMeasure_apply_of_disjoint_source
     fun y : E => ENNReal.ofReal (chartDensity g x₀ ((extChartAt I x₀).symm y))
   set ν : MeasureTheory.Measure E :=
     ((modelHaar (E := E)).restrict (extChartAt I x₀).target).withDensity w with hν
-  have htarget_open : IsOpen (extChartAt I x₀).target :=
-    isOpen_extChartAt_target (I := I) x₀
   have htarget_meas : MeasurableSet (extChartAt I x₀).target :=
-    htarget_open.measurableSet
+    measurableSet_extChartAt_target (I := I) x₀
   have hcontOn : ContinuousOn (extChartAt I x₀).symm
       (extChartAt I x₀).target := continuousOn_extChartAt_symm (I := I) x₀
   have haemeas_base :
@@ -417,9 +430,8 @@ lemma measurableSet_chartAt_source_inter (x₀ x₁ : M) :
     MeasurableSet ((chartAt H x₀).source ∩ (chartAt H x₁).source) :=
   (isOpen_chartAt_source_inter (H := H) (M := M) x₀ x₁).measurableSet
 
-/-- Under `I.Boundaryless`, the extended-chart source coincides with the
-chart source. -/
-lemma extChartAt_source_eq_chartAt_source [I.Boundaryless] (x₀ : M) :
+/-- The extended-chart source coincides with the chart source. -/
+lemma extChartAt_source_eq_chartAt_source (x₀ : M) :
     (extChartAt I x₀).source = (chartAt H x₀).source := by
   rw [extChartAt_source]
 
@@ -457,28 +469,24 @@ lemma riemannianVolumeMeasure_def
 /-- `AEMeasurable` for `(extChartAt I x₀).symm` with respect to the restricted
 canonical Haar measure on the chart target. Used repeatedly below. -/
 lemma aemeasurable_extChartAt_symm_restrict_target
-    [I.Boundaryless] (x₀ : M) :
+    (x₀ : M) :
     AEMeasurable ((extChartAt I x₀).symm)
       ((modelHaar (E := E)).restrict (extChartAt I x₀).target) := by
-  have htarget_open : IsOpen (extChartAt I x₀).target :=
-    isOpen_extChartAt_target (I := I) x₀
-  exact (continuousOn_extChartAt_symm (I := I) x₀).aemeasurable
-    htarget_open.measurableSet
+  have htarget_meas : MeasurableSet (extChartAt I x₀).target :=
+    measurableSet_extChartAt_target (I := I) x₀
+  exact (continuousOn_extChartAt_symm (I := I) x₀).aemeasurable htarget_meas
 
 /-- The density `y ↦ ENNReal.ofReal (chartDensity g x₀ ((extChartAt I x₀).symm y))`
 is `AEMeasurable` with respect to the restricted canonical Haar measure on the chart
 target. -/
 lemma aemeasurable_chartDensity_symm_pullback
-    [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x₀ : M) :
     AEMeasurable
       (fun y : E =>
         ENNReal.ofReal (chartDensity g x₀ ((extChartAt I x₀).symm y)))
       ((modelHaar (E := E)).restrict (extChartAt I x₀).target) := by
-  have htarget_open : IsOpen (extChartAt I x₀).target :=
-    isOpen_extChartAt_target (I := I) x₀
   have htarget_meas : MeasurableSet (extChartAt I x₀).target :=
-    htarget_open.measurableSet
+    measurableSet_extChartAt_target (I := I) x₀
   have hcontOn : ContinuousOn (chartDensity g x₀ ∘ (extChartAt I x₀).symm)
       (extChartAt I x₀).target := by
     refine (chartDensity_continuousOn (I := I) g x₀).comp
@@ -496,7 +504,6 @@ lemma aemeasurable_chartDensity_symm_pullback
 
 /-- Basic integral characterisation of the chart-local measure. -/
 theorem chartLocalMeasure_lintegral
-    [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     {F : M → ℝ≥0∞} (hF : Measurable F) :
     ∫⁻ x, F x ∂(chartLocalMeasure (I := I) g x₀) =
@@ -504,10 +511,8 @@ theorem chartLocalMeasure_lintegral
         ENNReal.ofReal (chartDensity g x₀ ((extChartAt I x₀).symm y)) *
           F ((extChartAt I x₀).symm y) ∂ (modelHaar (E := E)) := by
   unfold chartLocalMeasure
-  have htarget_open : IsOpen (extChartAt I x₀).target :=
-    isOpen_extChartAt_target (I := I) x₀
   have htarget_meas : MeasurableSet (extChartAt I x₀).target :=
-    htarget_open.measurableSet
+    measurableSet_extChartAt_target (I := I) x₀
   have haem_base : AEMeasurable (extChartAt I x₀).symm
       ((modelHaar (E := E)).restrict (extChartAt I x₀).target) :=
     aemeasurable_extChartAt_symm_restrict_target (I := I) (E := E) x₀
@@ -611,7 +616,6 @@ any measurable set `U`, the integral of `F` over `U` with respect to
 `chartLocalMeasure` equals the Euclidean integral of
 `ofReal (density ∘ symm) * (U.indicator F ∘ symm)`. -/
 theorem chartLocalMeasure_setLintegral_indicator
-    [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     {U : Set M} (hUmeas : MeasurableSet U)
     {F : M → ℝ≥0∞} (hF : Measurable F) :
@@ -626,7 +630,7 @@ theorem chartLocalMeasure_setLintegral_indicator
 
 /-- The image of an open subset `U` of `(chartAt H x₀).source` under
 `extChartAt I x₀` is open in `E` under the Boundaryless assumption. -/
-lemma extChartAt_image_isOpen_of_open_subset_source
+lemma extChartAt_image_isOpen_of_open_subset_source_of_boundaryless
     [I.Boundaryless] (x₀ : M)
     {U : Set M} (hUopen : IsOpen U) (hUsub : U ⊆ (chartAt H x₀).source) :
     IsOpen ((extChartAt I x₀) '' U) := by
@@ -640,14 +644,35 @@ lemma extChartAt_image_isOpen_of_open_subset_source
   rw [himg_eq]
   exact I.toHomeomorph.isOpenMap _ hchart_img
 
-/-- Under Boundaryless, the overlap-image is measurable. -/
-lemma extChartAt_image_measurableSet_of_overlap
-    [I.Boundaryless] (x₀ x₁ : M) :
+/-- Without any boundary assumption, the image of an open subset `U` of
+`(chartAt H x₀).source` under `extChartAt I x₀` is Borel-measurable in `E`.
+This is the boundary-tolerant analogue of
+`extChartAt_image_isOpen_of_open_subset_source_of_boundaryless`: while the image
+need not be open in the boundary case, it is always the image under the closed
+embedding `I` of an open set in `H`, hence Borel-measurable. -/
+lemma extChartAt_image_measurableSet_of_open_subset_source (x₀ : M)
+    {U : Set M} (hUopen : IsOpen U) (hUsub : U ⊆ (chartAt H x₀).source) :
+    MeasurableSet ((extChartAt I x₀) '' U) := by
+  -- `extChartAt I x₀ = I ∘ chartAt H x₀`, so the image is `I '' (chartAt H x₀ '' U)`.
+  have hchart_img : IsOpen ((chartAt H x₀) '' U) :=
+    (chartAt H x₀).isOpen_image_of_subset_source hUopen hUsub
+  have himg_eq : (extChartAt I x₀) '' U = I '' ((chartAt H x₀) '' U) := by
+    rw [extChartAt]
+    simp only [OpenPartialHomeomorph.extend_coe]
+    rw [image_comp]
+  rw [himg_eq]
+  -- `I` is a closed embedding, so it is a measurable embedding;
+  -- the image of any measurable set under a measurable embedding is measurable.
+  exact I.isClosedEmbedding.measurableEmbedding.measurableSet_image.mpr
+    hchart_img.measurableSet
+
+/-- Without any boundary assumption, the overlap-image is Borel-measurable. -/
+lemma extChartAt_image_measurableSet_of_overlap (x₀ x₁ : M) :
     MeasurableSet ((extChartAt I x₀) ''
       ((chartAt H x₀).source ∩ (chartAt H x₁).source)) :=
-  (extChartAt_image_isOpen_of_open_subset_source (I := I) x₀
+  extChartAt_image_measurableSet_of_open_subset_source (I := I) x₀
     (isOpen_chartAt_source_inter (H := H) (M := M) x₀ x₁)
-    Set.inter_subset_left).measurableSet
+    Set.inter_subset_left
 
 /-! ## The chart-transition map and its derivative on the overlap -/
 
@@ -655,7 +680,7 @@ lemma extChartAt_image_measurableSet_of_overlap
 well-defined on `(extChartAt I x₀).target` and carries the overlap image
 `(extChartAt I x₀) '' U` to `(extChartAt I x₁) '' U`. -/
 lemma extChartAt_transition_image
-    [I.Boundaryless] (x₀ x₁ : M) {U : Set M}
+    (x₀ x₁ : M) {U : Set M}
     (hUsub0 : U ⊆ (chartAt H x₀).source) (_hUsub1 : U ⊆ (chartAt H x₁).source) :
     (extChartAt I x₁ ∘ (extChartAt I x₀).symm) '' ((extChartAt I x₀) '' U) =
       (extChartAt I x₁) '' U := by
@@ -669,7 +694,7 @@ lemma extChartAt_transition_image
 
 /-- Injectivity of the chart transition on the overlap image. -/
 lemma extChartAt_transition_injOn_overlap_image
-    [I.Boundaryless] (x₀ x₁ : M) {U : Set M}
+    (x₀ x₁ : M) {U : Set M}
     (hUsub0 : U ⊆ (chartAt H x₀).source) (hUsub1 : U ⊆ (chartAt H x₁).source) :
     Set.InjOn (extChartAt I x₁ ∘ (extChartAt I x₀).symm)
       ((extChartAt I x₀) '' U) := by
@@ -696,7 +721,7 @@ lemma extChartAt_transition_injOn_overlap_image
 at each point `y = extChartAt I x₀ x` of the overlap image, within the image
 set itself. -/
 lemma extChartAt_transition_hasFDerivWithinAt_on_overlap_image
-    [I.Boundaryless] (x₀ x₁ : M) {U : Set M}
+    (x₀ x₁ : M) {U : Set M}
     (hUsub0 : U ⊆ (chartAt H x₀).source) (hUsub1 : U ⊆ (chartAt H x₁).source) :
     ∀ y ∈ (extChartAt I x₀) '' U,
       HasFDerivWithinAt (extChartAt I x₁ ∘ (extChartAt I x₀).symm)
@@ -712,10 +737,14 @@ lemma extChartAt_transition_hasFDerivWithinAt_on_overlap_image
   have hfull := hasFDerivWithinAt_tangentCoordChange (I := I) (x := x₀) (y := x₁)
     (z := x) ⟨hxS0, hxS1⟩
   -- Move to `HasFDerivWithinAt` on a smaller set:
+  -- Each point `y' = extChartAt I x₀ z` for `z ∈ U` lies in
+  -- `(extChartAt I x₀).target ⊆ range I`.
   have himage_sub : (extChartAt I x₀) '' U ⊆ Set.range I := by
     intro y' hy'
-    rcases hy' with ⟨z, _, rfl⟩
-    exact I.range_eq_univ ▸ Set.mem_univ _
+    rcases hy' with ⟨z, hzU, rfl⟩
+    have hzS0 : z ∈ (extChartAt I x₀).source := by
+      rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hUsub0 hzU
+    exact extChartAt_target_subset_range (I := I) x₀ ((extChartAt I x₀).map_source hzS0)
   -- `symm (extChartAt x) = x`:
   have hsymm_eq : (extChartAt I x₀).symm ((extChartAt I x₀) x) = x :=
     (extChartAt I x₀).left_inv hxS0
@@ -728,7 +757,7 @@ lemma extChartAt_transition_hasFDerivWithinAt_on_overlap_image
 overlap image can be rewritten as a set-lintegral over `φⱼ '' U`, given that
 `U ⊆ source_j` is open. -/
 lemma setLIntegral_target_eq_setLIntegral_image
-    [I.Boundaryless] (x₀ : M)
+    (x₀ : M)
     {U : Set M} (hUopen : IsOpen U) (hUsub : U ⊆ (chartAt H x₀).source)
     (h : E → ℝ≥0∞) :
     ∫⁻ y in (extChartAt I x₀).target,
@@ -754,11 +783,11 @@ lemma setLIntegral_target_eq_setLIntegral_image
         rw [himg]; exact fun h => hy' h.2
       rw [Set.indicator_of_notMem hy', Set.indicator_of_notMem hy_nimg, zero_mul]
   have htarget_meas : MeasurableSet (extChartAt I x₀).target :=
-    (isOpen_extChartAt_target (I := I) x₀).measurableSet
+    measurableSet_extChartAt_target (I := I) x₀
   rw [MeasureTheory.setLIntegral_congr_fun htarget_meas hptwise]
   have hV_meas : MeasurableSet ((extChartAt I x₀) '' U) :=
-    (extChartAt_image_isOpen_of_open_subset_source (I := I) x₀
-      hUopen hUsub).measurableSet
+    extChartAt_image_measurableSet_of_open_subset_source (I := I) x₀
+      hUopen hUsub
   rw [MeasureTheory.setLIntegral_indicator hV_meas]
   -- (V ∩ target) = V since V ⊆ target.
   rw [show ((extChartAt I x₀) '' U) ∩ (extChartAt I x₀).target =
@@ -770,7 +799,6 @@ lemma setLIntegral_target_eq_setLIntegral_image
 /-- Variant: the `U.indicator`-form integral equals a straight
 set-lintegral over `(extChartAt I x₀) '' U`. -/
 lemma chartLocalMeasure_lintegral_U_eq_setLIntegral_image
-    [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     {U : Set M} (hUopen : IsOpen U) (hUsub : U ⊆ (chartAt H x₀).source)
     {F : M → ℝ≥0∞} (hF : Measurable F)
@@ -795,14 +823,13 @@ lemma chartLocalMeasure_lintegral_U_eq_setLIntegral_image
     · rw [Set.indicator_of_notMem hy, Set.indicator_of_notMem hy,
         mul_zero, zero_mul]
   conv_lhs => rw [MeasureTheory.setLIntegral_congr_fun
-    (isOpen_extChartAt_target (I := I) x₀).measurableSet
+    (measurableSet_extChartAt_target (I := I) x₀)
     (fun y _ => hpt y)]
   exact setLIntegral_target_eq_setLIntegral_image (I := I) (E := E) x₀ hUopen hUsub _
 
 /-- Core Substep D: chart-local measures agree on any measurable subset of the
 chart-source overlap. -/
 theorem chartLocalMeasure_lintegral_U_eq_of_overlap
-    [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x₀ x₁ : M)
     {F : M → ℝ≥0∞} (hF : Measurable F) :
     ∫⁻ x in (chartAt H x₀).source ∩ (chartAt H x₁).source, F x
@@ -826,8 +853,8 @@ theorem chartLocalMeasure_lintegral_U_eq_of_overlap
   -- `HasFDerivWithinAt T (tangentCoordChange I x₀ x₁ (symm₀ y)) (φ₀ '' U) y`
   -- for all `y ∈ φ₀ '' U`.
   have hV0_meas : MeasurableSet ((extChartAt I x₀) '' U) :=
-    (extChartAt_image_isOpen_of_open_subset_source (I := I) x₀
-      hUopen hUsub0).measurableSet
+    extChartAt_image_measurableSet_of_open_subset_source (I := I) x₀
+      hUopen hUsub0
   have hT_image :
       (extChartAt I x₁ ∘ (extChartAt I x₀).symm) '' ((extChartAt I x₀) '' U) =
         (extChartAt I x₁) '' U :=
@@ -910,7 +937,6 @@ theorem chartLocalMeasure_lintegral_U_eq_of_overlap
 /-- Substep D (final form): the chart-local measures at `x₀` and `x₁` agree
 on the overlap of the two chart sources. -/
 theorem chartLocalMeasure_restrict_overlap_eq
-    [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x₀ x₁ : M) :
     (chartLocalMeasure (I := I) g x₀).restrict
         ((chartAt H x₀).source ∩ (chartAt H x₁).source) =
@@ -925,7 +951,6 @@ theorem chartLocalMeasure_restrict_overlap_eq
 two chart sources, then its lintegrals against the two chart-local measures
 agree. -/
 lemma chartLocalMeasure_lintegral_eq_of_support_in_overlap
-    [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x₀ x₁ : M)
     {f : M → ℝ≥0∞} (hf : Measurable f)
     (hsupp : ∀ x, x ∉ (chartAt H x₀).source ∩ (chartAt H x₁).source → f x = 0) :
@@ -1110,7 +1135,6 @@ lemma ofReal_pou_mul_expand_on_subtype
 /-- Substep E (final): the Riemannian measure is independent of the chosen
 POU subordinate to the chart atlas. -/
 theorem riemannianMeasure_eq_of_pou_independent
-    [I.Boundaryless]
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
     (ρ ρ' : SmoothPartitionOfUnity M I M univ)
@@ -1214,7 +1238,7 @@ choice of smooth partition of unity subordinate to the canonical chart atlas
 `fun α ↦ (chartAt H α).source`. This is a renaming of the POU-independence theorem
 in the language of the canonical Mathlib-level chart atlas. -/
 theorem riemannianMeasure_independent_of_atlas
-    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
     (ρ ρ' : SmoothPartitionOfUnity M I M univ)
     (hρ  : ρ.IsSubordinate (fun α : M => (chartAt H α).source))
@@ -1227,7 +1251,6 @@ theorem riemannianMeasure_independent_of_atlas
 /-- The canonical Riemannian volume measure equals `riemannianMeasure` for any
 POU subordinate to the chart atlas. -/
 theorem riemannianMeasure_eq_riemannianVolumeMeasure
-    [I.Boundaryless]
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
     (ρ : SmoothPartitionOfUnity M I M univ)

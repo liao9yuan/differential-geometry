@@ -104,7 +104,16 @@ private lemma contDiff_chartGramMatrix_time
 end SmoothRiemannianMetricFamily
 
 /-- From a jointly-smooth family, extract the minimum pointwise regularity
-interface at any base time. -/
+interface at any base time.
+
+The hypothesis `[I.Boundaryless]` is required by the current proof, which
+pulls each chart-local Gram-matrix entry back to a function on a Euclidean
+domain via the chart and computes the time-derivative via `fderiv`; this
+chart-image-as-Euclidean-open argument requires the chart target to be open
+in `E`. The pointwise regularity interface `MetricFamilyRegularAt` itself is
+boundary-tolerant; users on a manifold with boundary may construct it
+directly from their joint smoothness assumption without invoking this
+packaging lemma. -/
 theorem metricFamilyRegularAt_of_smoothFamily
     [I.Boundaryless]
     (gFam : SmoothRiemannianMetricFamily I M) (t₀ : ℝ) :
@@ -275,7 +284,15 @@ theorem metricFamilyRegularAt_of_smoothFamily
     exact hcont_ambient.comp continuousAt_subtype_val
 
 /-- From a jointly `C^∞` function `(t, x) ↦ f t x`, extract the minimum
-pointwise regularity interface for a scalar integrand at any base time. -/
+pointwise regularity interface for a scalar integrand at any base time.
+
+The hypothesis `[I.Boundaryless]` is required by the current proof, which
+pulls `f` back to a function on a Euclidean domain via the chart and
+computes the time-derivative via `fderiv`; this chart-image-as-Euclidean-open
+argument requires the chart target to be open in `E`. The pointwise
+regularity interface `FunctionRegularAt` itself is boundary-tolerant; users
+on a manifold with boundary may construct it directly from their joint
+smoothness assumption without invoking this packaging lemma. -/
 theorem functionRegularAt_of_jointContMDiff
     [I.Boundaryless]
     {f : ℝ → M → ℝ} (t₀ : ℝ)
