@@ -22,6 +22,23 @@ integrand `f : ℝ → M → ℝ` that is jointly smooth on `ℝ × M`.
 * `metricFamilyRegularAt_of_smoothFamily` : extract the regularity interface.
 * `functionRegularAt_of_jointContMDiff` : extract the regularity interface for
   a jointly-smooth integrand.
+
+## Note on the `[I.Boundaryless]` hypothesis
+
+The bridge lemmas in this file carry an `[I.Boundaryless]` hypothesis. This
+hypothesis is local to this bridge file: it is needed by the current proofs
+that translate joint smoothness on `ℝ × M` into the pointwise `MetricFamilyRegularAt`
+interface (the proofs unfold chart-Gram entries via `(extChartAt I α).symm`,
+which is `C^∞` at every target point only when the chart target is open in `E`,
+i.e., only under `[I.Boundaryless]`).
+
+This hypothesis does **not** propagate into the integration / divergence /
+parabolic engines. Those engines consume only the `MetricFamilyRegularAt`
+and `FunctionRegularAt` interfaces, which are defined without any
+`Boundaryless` reference. Down-stream calls that need a with-boundary
+packaging should furnish a different bridge (e.g., one constructed from
+`fderivWithin (range I)`-style joint regularity), without revisiting the
+present file.
 -/
 
 noncomputable section
