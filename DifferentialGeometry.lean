@@ -167,3 +167,17 @@ import DifferentialGeometry.Integral.Integration.L2Hilbert.Inherited
 import DifferentialGeometry.Integral.Integration.L2Hilbert.DenseSubset
 import DifferentialGeometry.Integral.Integration.L2Hilbert.SimpLemmas
 import DifferentialGeometry.Integral.Integration.L2Hilbert.Operators
+
+import DifferentialGeometry.Integral.DivergenceTheorem.LocalFormula
+import DifferentialGeometry.Integral.DivergenceTheorem.Invariance
+import DifferentialGeometry.Integral.DivergenceTheorem.TangentAction
+import DifferentialGeometry.Integral.DivergenceTheorem.Ibp
+import DifferentialGeometry.Integral.DivergenceTheorem.ChartInvariance
+import DifferentialGeometry.Integral.DivergenceTheorem.POUReduction
+import DifferentialGeometry.Integral.DivergenceTheorem.Closed
+import DifferentialGeometry.Integral.DivergenceTheorem.Proper
+import DifferentialGeometry.Integral.DivergenceTheorem.IntegrationByParts
+import DifferentialGeometry.Integral.DivergenceTheorem.Gradient
+import DifferentialGeometry.Integral.DivergenceTheorem.Laplacian
+import DifferentialGeometry.Integral.DivergenceTheorem.Green
+import DifferentialGeometry.Integral.DivergenceTheorem.Family
