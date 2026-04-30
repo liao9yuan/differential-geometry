@@ -1,6 +1,7 @@
-import DeGiorgi.BallScaling
-import DeGiorgi.DeGiorgiIteration
-import DeGiorgi.Localization
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.BallScaling
+import DifferentialGeometry.External.DeGiorgi.DeGiorgiIteration
+import DifferentialGeometry.External.DeGiorgi.Localization
 
 /-!
 # Moser Iteration Constants

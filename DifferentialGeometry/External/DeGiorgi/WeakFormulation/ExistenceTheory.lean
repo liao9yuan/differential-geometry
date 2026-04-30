@@ -1,4 +1,5 @@
-import DeGiorgi.WeakFormulation.CoefficientOperator
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.WeakFormulation.CoefficientOperator
 import Mathlib.Analysis.InnerProductSpace.LaxMilgram
 import Mathlib.Analysis.Normed.Operator.Extend
 

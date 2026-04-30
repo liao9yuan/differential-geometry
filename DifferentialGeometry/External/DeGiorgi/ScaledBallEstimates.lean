@@ -1,6 +1,7 @@
-import DeGiorgi.BallScaling
-import DeGiorgi.Localization
-import DeGiorgi.WeakHarnack
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.BallScaling
+import DifferentialGeometry.External.DeGiorgi.Localization
+import DifferentialGeometry.External.DeGiorgi.WeakHarnack
 
 /-!
 # Chapter 07: Scaled Moser Corollaries

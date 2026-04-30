@@ -1,4 +1,5 @@
-import DeGiorgi.BallExtension.SmoothCore
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.BallExtension.SmoothCore
 
 /-!
 # Ball Extension Approximation Control

@@ -1,4 +1,5 @@
-import DeGiorgi.SobolevSpace.Approximation
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.SobolevSpace.Approximation
 
 /-!
 # Chapter 02: Sobolev Positive-Part Prelude

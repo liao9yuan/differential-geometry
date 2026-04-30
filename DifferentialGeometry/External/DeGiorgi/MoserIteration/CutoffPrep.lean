@@ -1,10 +1,11 @@
-import DeGiorgi.MoserIteration.CutoffPrep.Basics
-import DeGiorgi.MoserIteration.CutoffPrep.Profiles
-import DeGiorgi.MoserIteration.CutoffPrep.ExactRegularization
-import DeGiorgi.MoserIteration.CutoffPrep.RegularizedWitnesses
-import DeGiorgi.MoserIteration.CutoffPrep.RegularizedEnergy
-import DeGiorgi.MoserIteration.CutoffPrep.WitnessConstruction
-import DeGiorgi.MoserIteration.CutoffPrep.PreEstimate
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.MoserIteration.CutoffPrep.Basics
+import DifferentialGeometry.External.DeGiorgi.MoserIteration.CutoffPrep.Profiles
+import DifferentialGeometry.External.DeGiorgi.MoserIteration.CutoffPrep.ExactRegularization
+import DifferentialGeometry.External.DeGiorgi.MoserIteration.CutoffPrep.RegularizedWitnesses
+import DifferentialGeometry.External.DeGiorgi.MoserIteration.CutoffPrep.RegularizedEnergy
+import DifferentialGeometry.External.DeGiorgi.MoserIteration.CutoffPrep.WitnessConstruction
+import DifferentialGeometry.External.DeGiorgi.MoserIteration.CutoffPrep.PreEstimate
 
 /-!
 # Moser Iteration Preparation

@@ -1,4 +1,5 @@
-import DeGiorgi.MoserIteration.CutoffPrep.Profiles
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.MoserIteration.CutoffPrep.Profiles
 
 /-!
 # Moser Exact Regularization

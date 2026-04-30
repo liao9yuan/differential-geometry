@@ -1,3 +1,4 @@
+-- Modified 2026-04-28: updated internal import paths for project namespace
 import Mathlib.MeasureTheory.Function.LpSeminorm.Basic
 import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality
 import Mathlib.MeasureTheory.Function.LpSpace.Complete

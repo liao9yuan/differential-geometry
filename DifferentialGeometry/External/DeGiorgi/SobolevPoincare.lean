@@ -1,8 +1,9 @@
-import DeGiorgi.SobolevSpace
-import DeGiorgi.Poincare
-import DeGiorgi.BallExtension
-import DeGiorgi.BallExtensionEstimates
-import DeGiorgi.LpFunctionToolkit
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.SobolevSpace
+import DifferentialGeometry.External.DeGiorgi.Poincare
+import DifferentialGeometry.External.DeGiorgi.BallExtension
+import DifferentialGeometry.External.DeGiorgi.BallExtensionEstimates
+import DifferentialGeometry.External.DeGiorgi.LpFunctionToolkit
 
 /-!
 # Chapter 02: Sobolev-Poincare On The Unit Ball

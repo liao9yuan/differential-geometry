@@ -1,5 +1,6 @@
-import DeGiorgi.ScaledBallEstimates
-import DeGiorgi.WeakHarnack
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.ScaledBallEstimates
+import DifferentialGeometry.External.DeGiorgi.WeakHarnack
 
 /-!
 # Support: Iteration Constants

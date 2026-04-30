@@ -1,4 +1,5 @@
-import DeGiorgi.DeGiorgiIteration.CutoffAdmissibility
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.DeGiorgiIteration.CutoffAdmissibility
 
 /-!
 # De Giorgi Iteration: Energy and Pre-Iteration

@@ -13,6 +13,7 @@ linter.style.longLine = false
 linter.unusedSectionVars = false
 linter.style.emptyLine = false
 linter.style.whitespace = false
+linter.style.maxHeartbeats = false
 
 [[require]]
 name = "mathlib"

@@ -1,4 +1,5 @@
-import DeGiorgi.Crossover.LogGradient
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.Crossover.LogGradient
 
 /-!
 # Crossover Exponential Integrability

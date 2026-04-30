@@ -1,4 +1,5 @@
-import DeGiorgi.BallExtension.SmoothApproximation
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.BallExtension.SmoothApproximation
 
 /-!
 # Chapter 02: Ball Extension

@@ -1,4 +1,5 @@
-import DeGiorgi.DeGiorgiIteration.Energy
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.DeGiorgiIteration.Energy
 
 /-!
 # De Giorgi Iteration: Pre-Iteration

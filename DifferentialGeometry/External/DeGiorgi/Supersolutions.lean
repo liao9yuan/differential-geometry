@@ -1,4 +1,5 @@
-import DeGiorgi.Supersolutions.StageOne
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.Supersolutions.StageOne
 
 /-!
 # Chapter 06: Supersolution Estimates

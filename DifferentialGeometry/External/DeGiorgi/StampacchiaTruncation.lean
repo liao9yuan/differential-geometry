@@ -1,5 +1,6 @@
-import DeGiorgi.Common
-import DeGiorgi.SobolevChainRule
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.Common
+import DifferentialGeometry.External.DeGiorgi.SobolevChainRule
 
 /-!
 # Chapter 02: Stampacchia

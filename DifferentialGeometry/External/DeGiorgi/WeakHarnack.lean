@@ -1,6 +1,7 @@
-import DeGiorgi.Supersolutions
-import DeGiorgi.Crossover
-import DeGiorgi.Support.MeasureBounds
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.Supersolutions
+import DifferentialGeometry.External.DeGiorgi.Crossover
+import DifferentialGeometry.External.DeGiorgi.Support.MeasureBounds
 
 /-!
 # Chapter 06: Weak Harnack Inequality

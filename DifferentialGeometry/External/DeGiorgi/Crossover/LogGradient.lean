@@ -1,11 +1,12 @@
+-- Modified 2026-04-28: updated internal import paths for project namespace
 import Mathlib.MeasureTheory.Integral.Layercake
 import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
-import DeGiorgi.Crossover.LocalIntegrability
-import DeGiorgi.Oscillation
-import DeGiorgi.SobolevChainRule
-import DeGiorgi.UnitBallApproximation
-import DeGiorgi.Localization
-import DeGiorgi.Supersolutions
+import DifferentialGeometry.External.DeGiorgi.Crossover.LocalIntegrability
+import DifferentialGeometry.External.DeGiorgi.Oscillation
+import DifferentialGeometry.External.DeGiorgi.SobolevChainRule
+import DifferentialGeometry.External.DeGiorgi.UnitBallApproximation
+import DifferentialGeometry.External.DeGiorgi.Localization
+import DifferentialGeometry.External.DeGiorgi.Supersolutions
 
 /-!
 # Chapter 06: Crossover Logarithmic Gradient Layer

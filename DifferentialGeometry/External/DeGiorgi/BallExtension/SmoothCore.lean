@@ -1,4 +1,5 @@
-import DeGiorgi.BallExtension.RoughInput
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.BallExtension.RoughInput
 
 /-!
 # Ball Extension Smooth Core

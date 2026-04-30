@@ -1,5 +1,6 @@
-import DeGiorgi.Foundations
-import DeGiorgi.WholeSpaceSobolev
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.Foundations
+import DifferentialGeometry.External.DeGiorgi.WholeSpaceSobolev
 import Mathlib.Analysis.Calculus.BumpFunction.Convolution
 import Mathlib.Analysis.Calculus.BumpFunction.Normed
 import Mathlib.Analysis.Calculus.ContDiff.Convolution

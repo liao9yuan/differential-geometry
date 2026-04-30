@@ -1,6 +1,7 @@
+-- Modified 2026-04-28: updated internal import paths for project namespace
 import Mathlib.Topology.Algebra.Order.LiminfLimsup
-import DeGiorgi.MoserIteration
-import DeGiorgi.Support.MeasureBounds
+import DifferentialGeometry.External.DeGiorgi.MoserIteration
+import DifferentialGeometry.External.DeGiorgi.Support.MeasureBounds
 
 /-!
 # Chapter 06: Supersolution Estimates

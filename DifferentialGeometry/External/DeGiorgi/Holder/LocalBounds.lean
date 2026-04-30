@@ -1,6 +1,7 @@
-import DeGiorgi.Harnack
-import DeGiorgi.Support.MeasureBounds
-import DeGiorgi.Support.IterationConstants
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.Harnack
+import DifferentialGeometry.External.DeGiorgi.Support.MeasureBounds
+import DifferentialGeometry.External.DeGiorgi.Support.IterationConstants
 import Mathlib.Topology.Algebra.Order.LiminfLimsup
 import Mathlib.Algebra.Order.Group.OrderIso
 import Mathlib.Topology.Order.Lattice

@@ -1,5 +1,6 @@
-import DeGiorgi.UnitBallApproximation
-import DeGiorgi.WeakFormulation
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.UnitBallApproximation
+import DifferentialGeometry.External.DeGiorgi.WeakFormulation
 
 /-!
 # Chapter 04: Scaling

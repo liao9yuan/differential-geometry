@@ -1,4 +1,5 @@
-import DeGiorgi.Oscillation.BMO
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.Oscillation.BMO
 
 /-!
 # Chapter 02: Local John-Nirenberg Theory

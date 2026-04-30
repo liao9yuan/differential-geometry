@@ -1,10 +1,11 @@
-import DeGiorgi.DeGiorgiIteration
-import DeGiorgi.Localization
-import DeGiorgi.WeakHarnack
-import DeGiorgi.FiniteCover
-import DeGiorgi.ScaledBallEstimates
-import DeGiorgi.Support.MeasureBounds
-import DeGiorgi.Support.IterationConstants
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.DeGiorgiIteration
+import DifferentialGeometry.External.DeGiorgi.Localization
+import DifferentialGeometry.External.DeGiorgi.WeakHarnack
+import DifferentialGeometry.External.DeGiorgi.FiniteCover
+import DifferentialGeometry.External.DeGiorgi.ScaledBallEstimates
+import DifferentialGeometry.External.DeGiorgi.Support.MeasureBounds
+import DifferentialGeometry.External.DeGiorgi.Support.IterationConstants
 import Mathlib.MeasureTheory.Function.EssSup
 import Mathlib.MeasureTheory.Measure.OpenPos
 import Mathlib.Topology.Compactness.Compact

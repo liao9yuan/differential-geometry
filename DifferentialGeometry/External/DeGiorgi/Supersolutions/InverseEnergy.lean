@@ -1,5 +1,6 @@
-import DeGiorgi.Supersolutions.RegularizationSupport
-import DeGiorgi.Supersolutions.Caccioppoli
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.Supersolutions.RegularizationSupport
+import DifferentialGeometry.External.DeGiorgi.Supersolutions.Caccioppoli
 
 /-!
 # Supersolutions Inverse Energy

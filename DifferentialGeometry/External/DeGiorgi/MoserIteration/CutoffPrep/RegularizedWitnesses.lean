@@ -1,4 +1,5 @@
-import DeGiorgi.MoserIteration.CutoffPrep.ExactRegularization
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.MoserIteration.CutoffPrep.ExactRegularization
 
 /-!
 # Moser Regularized Witnesses

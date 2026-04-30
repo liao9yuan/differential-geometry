@@ -1,5 +1,6 @@
-import DeGiorgi.SobolevSpace
-import DeGiorgi.StampacchiaTruncation
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.SobolevSpace
+import DifferentialGeometry.External.DeGiorgi.StampacchiaTruncation
 
 /-!
 # Chapter 02: Positive-Part And Approximation Layer

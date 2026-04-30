@@ -1,6 +1,7 @@
-import DeGiorgi.PositivePart
-import DeGiorgi.BallExtension
-import DeGiorgi.WeakFormulation
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.PositivePart
+import DifferentialGeometry.External.DeGiorgi.BallExtension
+import DifferentialGeometry.External.DeGiorgi.WeakFormulation
 
 /-!
 # De Giorgi Iteration: Cutoff Admissibility

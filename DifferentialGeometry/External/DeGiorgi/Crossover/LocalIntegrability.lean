@@ -1,12 +1,13 @@
+-- Modified 2026-04-28: updated internal import paths for project namespace
 import Mathlib.MeasureTheory.Integral.Layercake
 import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
-import DeGiorgi.Oscillation
-import DeGiorgi.FiniteCover
-import DeGiorgi.SobolevPoincare
-import DeGiorgi.SobolevChainRule
-import DeGiorgi.UnitBallApproximation
-import DeGiorgi.Localization
-import DeGiorgi.Supersolutions
+import DifferentialGeometry.External.DeGiorgi.Oscillation
+import DifferentialGeometry.External.DeGiorgi.FiniteCover
+import DifferentialGeometry.External.DeGiorgi.SobolevPoincare
+import DifferentialGeometry.External.DeGiorgi.SobolevChainRule
+import DifferentialGeometry.External.DeGiorgi.UnitBallApproximation
+import DifferentialGeometry.External.DeGiorgi.Localization
+import DifferentialGeometry.External.DeGiorgi.Supersolutions
 
 /-!
 # Crossover Local Integrability

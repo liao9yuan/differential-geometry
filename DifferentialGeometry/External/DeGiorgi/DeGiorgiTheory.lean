@@ -1,8 +1,9 @@
-import DeGiorgi.DeGiorgiIteration
-import DeGiorgi.WeakHarnack
-import DeGiorgi.ScaledBallEstimates
-import DeGiorgi.Harnack
-import DeGiorgi.Holder
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.DeGiorgiIteration
+import DifferentialGeometry.External.DeGiorgi.WeakHarnack
+import DifferentialGeometry.External.DeGiorgi.ScaledBallEstimates
+import DifferentialGeometry.External.DeGiorgi.Harnack
+import DifferentialGeometry.External.DeGiorgi.Holder
 
 /-!
 # De Giorgi Theory Root

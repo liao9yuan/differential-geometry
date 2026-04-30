@@ -1,4 +1,5 @@
-import DeGiorgi.Supersolutions.ForwardIteration.OneStep
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.Supersolutions.ForwardIteration.OneStep
 
 /-!
 # Supersolutions Forward Finite Iteration

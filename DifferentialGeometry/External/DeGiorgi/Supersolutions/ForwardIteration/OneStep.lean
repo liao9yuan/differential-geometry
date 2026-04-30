@@ -1,4 +1,5 @@
-import DeGiorgi.Supersolutions.ForwardIteration.Energy
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.Supersolutions.ForwardIteration.Energy
 
 /-!
 # Supersolutions Forward One-Step Estimate

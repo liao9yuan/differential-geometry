@@ -1,6 +1,7 @@
-import DeGiorgi.BallScaling
-import DeGiorgi.BallExtension
-import DeGiorgi.PositivePart
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.BallScaling
+import DifferentialGeometry.External.DeGiorgi.BallExtension
+import DifferentialGeometry.External.DeGiorgi.PositivePart
 
 /-!
 # Chapter 06: Localization Helpers

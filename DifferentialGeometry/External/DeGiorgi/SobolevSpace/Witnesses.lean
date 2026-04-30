@@ -1,4 +1,5 @@
-import DeGiorgi.SobolevSpace.WeakDerivatives
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.SobolevSpace.WeakDerivatives
 
 /-!
 # Chapter 02: Sobolev Witness Layer

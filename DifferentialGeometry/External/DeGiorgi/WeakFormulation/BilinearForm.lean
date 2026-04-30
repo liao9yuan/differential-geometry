@@ -1,6 +1,7 @@
-import DeGiorgi.SobolevSpace
-import DeGiorgi.Poincare
-import DeGiorgi.EllipticCoefficients
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.SobolevSpace
+import DifferentialGeometry.External.DeGiorgi.Poincare
+import DifferentialGeometry.External.DeGiorgi.EllipticCoefficients
 
 /-!
 # Weak Formulation: Bilinear Form And Right-Hand Sides

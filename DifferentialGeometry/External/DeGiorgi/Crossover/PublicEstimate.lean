@@ -1,4 +1,5 @@
-import DeGiorgi.Crossover.ProductBound
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.Crossover.ProductBound
 
 /-!
 # Chapter 06: Public Crossover Estimates

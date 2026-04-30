@@ -1,4 +1,5 @@
-import DeGiorgi.UnitBallApproximationCore.Dilation
+-- Modified 2026-04-28: updated internal import paths for project namespace
+import DifferentialGeometry.External.DeGiorgi.UnitBallApproximationCore.Dilation
 
 /-!
 # Chapter 02: Unit-Ball Approximation Package
