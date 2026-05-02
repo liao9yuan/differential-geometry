@@ -185,7 +185,7 @@ private theorem iterWeakPartial_smooth_ae_eq_iterClassicalPartial_local
 /-- For a smooth + compactly supported function `η` and a fixed natural number
 `k`, the iterated derivatives of `η` up to order `k` are uniformly bounded
 on all of `E`. -/
-private lemma exists_iter_deriv_bound_of_smooth_compactSupport
+lemma exists_iter_deriv_bound_of_smooth_compactSupport
     {η : E → ℝ} (hη_smooth : ContDiff ℝ (⊤ : ℕ∞) η)
     (hη_cpt : HasCompactSupport η) (k : ℕ) :
     ∃ Mη : ℝ, 0 ≤ Mη ∧ ∀ i, i ≤ k → ∀ y : E, ‖iteratedFDeriv ℝ i η y‖ ≤ Mη := by

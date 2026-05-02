@@ -546,6 +546,569 @@ lemma wkpNorm_le_of_tsupport_subset_mem_small
   rw [h_iter1_Ω, h_iter1_Ω']
   exact h_partial_le (α 0)
 
+/-! ## Helper: `chosenWeakPartial'` a.e. equality on a subset -/
+
+/-- If `u ∈ MemW1p p Ω` and `Ω' ⊆ Ω` is open, then `chosenWeakPartial'` on
+`Ω` agrees a.e. with `chosenWeakPartial'` on `Ω'` when restricted to `Ω'`. -/
+private lemma chosenWeakPartial_ae_eq_on_subset
+    {d : ℕ} [NeZero d]
+    {p : ℝ≥0∞} (hp_one : 1 ≤ p)
+    {Ω Ω' : Set (EuclideanSpace ℝ (Fin d))}
+    (hΩ : IsOpen Ω) (hΩ' : IsOpen Ω') (hΩΩ' : Ω' ⊆ Ω)
+    {u : EuclideanSpace ℝ (Fin d) → ℝ}
+    (hu : DeGiorgi.MemW1p (d := d) p u Ω) (i : Fin d) :
+    chosenWeakPartial' (d := d) p i u Ω =ᵐ[volume.restrict Ω']
+      chosenWeakPartial' (d := d) p i u Ω' := by
+  classical
+  have hu_Ω' : DeGiorgi.MemW1p (d := d) p u Ω' :=
+    DeGiorgi.MemW1pWitness.restrict (d := d) hΩ' hΩΩ' hu.someWitness |>.memW1p
+  have hP_Ω :=
+    chosenWeakPartial'_isWeakPartial_of_mem (d := d) hu i
+  have hP_Ω' :=
+    chosenWeakPartial'_isWeakPartial_of_mem (d := d) hu_Ω' i
+  have hP_Ω_restricted : DeGiorgi.HasWeakPartialDeriv (d := d) i
+      (chosenWeakPartial' (d := d) p i u Ω) u Ω' :=
+    DeGiorgi.HasWeakPartialDeriv.restrict (d := d) hΩ' hΩΩ' hP_Ω
+  have hP_Ω_loc_Ω' : LocallyIntegrable
+      (chosenWeakPartial' (d := d) p i u Ω) (volume.restrict Ω') := by
+    have hmem : MeasureTheory.MemLp
+        (chosenWeakPartial' (d := d) p i u Ω) p (volume.restrict Ω) :=
+      chosenWeakPartial'_memLp_of_mem (d := d) hu i
+    have hmem' : MeasureTheory.MemLp
+        (chosenWeakPartial' (d := d) p i u Ω) p (volume.restrict Ω') :=
+      hmem.mono_measure (Measure.restrict_mono_set volume hΩΩ')
+    exact hmem'.locallyIntegrable hp_one
+  have hP_Ω'_loc_Ω' : LocallyIntegrable
+      (chosenWeakPartial' (d := d) p i u Ω') (volume.restrict Ω') := by
+    have hmem : MeasureTheory.MemLp
+        (chosenWeakPartial' (d := d) p i u Ω') p (volume.restrict Ω') :=
+      chosenWeakPartial'_memLp_of_mem (d := d) hu_Ω' i
+    exact hmem.locallyIntegrable hp_one
+  exact DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ' hP_Ω_restricted hP_Ω'
+    hP_Ω_loc_Ω' hP_Ω'_loc_Ω'
+
+/-! ## Helper: iterWeakPartial a.e. equality on subset open set -/
+
+/-- For `u ∈ MemWkp (h+1) p Ω` that is a.e. zero on an open set `U ⊆ Ω`
+with `Ω \ Ω' ⊆ U`, the iterated weak partials of `u` on `Ω` and `Ω'`
+agree a.e. on `Ω'`. The proof uses induction on the order `h`. -/
+private lemma iterWeakPartial_ae_eq_of_ae_zero_open_subset
+    {d : ℕ} [NeZero d]
+    {h : ℕ} {p : ℝ≥0∞} (hp_one : 1 ≤ p)
+    {Ω Ω' U : Set (EuclideanSpace ℝ (Fin d))}
+    (hΩ : IsOpen Ω) (hΩ' : IsOpen Ω') (hU_open : IsOpen U)
+    (hΩΩ' : Ω' ⊆ Ω) (hU_sub : U ⊆ Ω) (hU_contains : Ω \ Ω' ⊆ U)
+    {u : EuclideanSpace ℝ (Fin d) → ℝ}
+    (hu_mem : MemWkp (d := d) h p u Ω)
+    (hu_zero : u =ᵐ[volume.restrict U] (fun _ => 0))
+    (α : Fin h → Fin d) :
+    iterWeakPartial (d := d) p h α u Ω =ᵐ[volume.restrict Ω']
+      iterWeakPartial (d := d) p h α u Ω' := by
+  induction h generalizing u with
+  | zero =>
+      simp [iterWeakPartial_zero]
+  | succ h ih =>
+      rw [iterWeakPartial_succ, iterWeakPartial_succ]
+      set f : EuclideanSpace ℝ (Fin d) → ℝ :=
+        chosenWeakPartial' (d := d) p (α 0) u Ω with hf_def
+      set g : EuclideanSpace ℝ (Fin d) → ℝ :=
+        chosenWeakPartial' (d := d) p (α 0) u Ω' with hg_def
+      -- f ∈ MemWkp h p Ω.
+      have hf_mem : MemWkp (d := d) h p f Ω := by
+        rw [hf_def]
+        rw [MemWkp_succ] at hu_mem
+        exact hu_mem.2 (α 0)
+      -- f =ᵐ 0 on U (weak partial of a.e.-zero function is a.e. zero).
+      have hf_zero : f =ᵐ[volume.restrict U] (fun _ => 0) := by
+        rw [hf_def]
+        have hu_memW1p : DeGiorgi.MemW1p (d := d) p u Ω := by
+          rw [MemWkp_succ] at hu_mem; exact hu_mem.1
+        have h_ae_eq : chosenWeakPartial' (d := d) p (α 0) u Ω =ᵐ[volume.restrict U]
+            chosenWeakPartial' (d := d) p (α 0) u U :=
+          chosenWeakPartial_ae_eq_on_subset (d := d) hp_one hΩ hU_open hU_sub hu_memW1p (α 0)
+        have h_ae_zero : chosenWeakPartial' (d := d) p (α 0) u U =ᵐ[volume.restrict U]
+            (fun _ => 0) :=
+          chosenWeakPartial'_ae_zero_of_ae_zero (d := d) hp_one hU_open hu_zero (α 0)
+        exact h_ae_eq.trans h_ae_zero
+      -- f =ᵐ g on Ω'.
+      have h_ae_fg : f =ᵐ[volume.restrict Ω'] g := by
+        rw [hf_def, hg_def]
+        have hu_memW1p : DeGiorgi.MemW1p (d := d) p u Ω := by
+          rw [MemWkp_succ] at hu_mem; exact hu_mem.1
+        exact chosenWeakPartial_ae_eq_on_subset (d := d) hp_one hΩ hΩ' hΩΩ'
+          hu_memW1p (α 0)
+      -- Apply IH to f.
+      have h_ih : iterWeakPartial (d := d) p h (fun i : Fin h => α i.succ) f Ω
+          =ᵐ[volume.restrict Ω']
+          iterWeakPartial (d := d) p h (fun i : Fin h => α i.succ) f Ω' :=
+        ih hf_mem hf_zero (fun i : Fin h => α i.succ)
+      -- Use iterWeakPartial_ae_congr to relate f-version on Ω' to g-version on Ω'.
+      have h_congr : iterWeakPartial (d := d) p h (fun i : Fin h => α i.succ) f Ω'
+          =ᵐ[volume.restrict Ω']
+          iterWeakPartial (d := d) p h (fun i : Fin h => α i.succ) g Ω' :=
+        iterWeakPartial_ae_congr (d := d) hp_one hΩ' h
+          (fun i : Fin h => α i.succ) h_ae_fg
+      exact h_ih.trans h_congr
+
+/-- Variant of `iterWeakPartial_ae_eq_of_ae_zero_open_subset` specialised to
+the case where the open set `U` is `Ω \ tsupport u`, which always works when
+`tsupport u ⊆ Ω'`. This is the lemma most callers need. -/
+private lemma iterWeakPartial_ae_eq_tsupport_subset
+    {d : ℕ} [NeZero d]
+    {j : ℕ} {p : ℝ≥0∞} (hp_one : 1 ≤ p)
+    {Ω Ω' : Set (EuclideanSpace ℝ (Fin d))}
+    (hΩ : IsOpen Ω) (hΩ' : IsOpen Ω') (hΩΩ' : Ω' ⊆ Ω)
+    {u : EuclideanSpace ℝ (Fin d) → ℝ}
+    (hu_mem : MemWkp (d := d) j p u Ω)
+    (hu_supp : tsupport u ⊆ Ω')
+    (α : Fin j → Fin d) :
+    iterWeakPartial (d := d) p j α u Ω =ᵐ[volume.restrict Ω']
+      iterWeakPartial (d := d) p j α u Ω' := by
+  set U : Set (EuclideanSpace ℝ (Fin d)) := Ω \ tsupport u with hU_def
+  have hU_open : IsOpen U := hΩ.sdiff (isClosed_tsupport _)
+  have hU_sub : U ⊆ Ω := fun x hx => hx.1
+  have hU_contains : Ω \ Ω' ⊆ U := by
+    intro x hx
+    refine ⟨hx.1, ?_⟩
+    intro hx_supp
+    exact hx.2 (hu_supp hx_supp)
+  have hu_zero : u =ᵐ[volume.restrict U] (fun _ => 0) := by
+    refine (ae_restrict_iff' hU_open.measurableSet).mpr ?_
+    refine Filter.Eventually.of_forall ?_
+    intro x hx
+    exact image_eq_zero_of_notMem_tsupport hx.2
+  exact iterWeakPartial_ae_eq_of_ae_zero_open_subset (d := d) hp_one
+    hΩ hΩ' hU_open hΩΩ' hU_sub hU_contains hu_mem hu_zero α
+
+/-! ## General-k versions of `wkpNorm` monotonicity under tsupport restriction -/
+
+/-- **General-k version of `wkpNorm_eq_of_tsupport_subset`.** For a function
+`u : EuclideanSpace ℝ (Fin d) → ℝ` with `tsupport u ⊆ Ω' ⊆ Ω` (both open)
+and `u ∈ MemWkp k p Ω`, the `wkpNorm k p` on `Ω` agrees with the one on `Ω'`.
+The `MemWkp` membership on `Ω'` is also delivered. -/
+lemma wkpNorm_eq_of_tsupport_subset_general
+    {d : ℕ} [NeZero d]
+    (k : ℕ) {p : ℝ≥0∞} (hp_one : 1 ≤ p)
+    {Ω Ω' : Set (EuclideanSpace ℝ (Fin d))}
+    (hΩ : IsOpen Ω) (hΩ' : IsOpen Ω') (hΩΩ' : Ω' ⊆ Ω)
+    {u : EuclideanSpace ℝ (Fin d) → ℝ}
+    (hu : MemWkp (d := d) k p u Ω) (hu_supp : tsupport u ⊆ Ω') :
+    MemWkp (d := d) k p u Ω' ∧
+    wkpNorm (d := d) k p u Ω = wkpNorm (d := d) k p u Ω' := by
+  classical
+  have hp_zero : p ≠ 0 := by
+    intro hpz; rw [hpz] at hp_one
+    exact absurd hp_one (by norm_num)
+  -- First hold: prove MemWkp membership on Ω'.
+  have h_mem_Ω' : MemWkp (d := d) k p u Ω' := by
+    induction k generalizing u with
+    | zero =>
+        rw [MemWkp_zero] at hu ⊢
+        exact hu.mono_measure (Measure.restrict_mono_set volume hΩΩ')
+    | succ k ih =>
+        rw [MemWkp_succ] at hu ⊢
+        have hu_memW1p : DeGiorgi.MemW1p (d := d) p u Ω := hu.1
+        have hu_memW1p_Ω' : DeGiorgi.MemW1p (d := d) p u Ω' :=
+          DeGiorgi.MemW1pWitness.restrict (d := d) hΩ' hΩΩ'
+            hu_memW1p.someWitness |>.memW1p
+        refine ⟨hu_memW1p_Ω', fun i => ?_⟩
+        -- Need: chosenWeakPartial' p i u Ω' ∈ MemWkp k p Ω'.
+        have h_partial_ae :
+            chosenWeakPartial' (d := d) p i u Ω =ᵐ[volume.restrict Ω']
+              chosenWeakPartial' (d := d) p i u Ω' :=
+          chosenWeakPartial_ae_eq_on_subset (d := d) hp_one hΩ hΩ' hΩΩ'
+            hu_memW1p i
+        have h_partial_mem_Ω : MemWkp (d := d) k p
+            (chosenWeakPartial' (d := d) p i u Ω) Ω := hu.2 i
+        -- We want to know that the Ω-partial is in MemWkp k p Ω'.
+        -- Since it's a.e. zero on Ω \ Ω' (by u=0 there), we can use the
+        -- induction hypothesis with a function that is a.e. equal to it
+        -- on Ω' and zero on Ω \ Ω'.
+        -- Simpler: prove directly that the Ω-partial restricted to Ω' is
+        -- in MemWkp k p Ω'. This is the same as the whole proof we're
+        -- doing with k replaced by k+1 and u by the partial.
+        -- But we don't know tsupport ⊆ Ω' for the partial.
+        -- Use MemWkp_congr_ae: the Ω'-partial equals the Ω-partial a.e. on Ω',
+        -- so it's enough to show the Ω-partial ∈ MemWkp k p Ω'.
+        -- For this, we use the open set U = Ω \ tsupport u where the partial
+        -- is a.e. zero, and then essentially the same induction as the
+        -- membership proof but with the a.e.-zero-on-U hypothesis.
+        have h_partial_mem_Ω' : MemWkp (d := d) k p
+            (chosenWeakPartial' (d := d) p i u Ω) Ω' := by
+          -- Use the induction hypothesis on the partial with a modified
+          -- tsupport. The partial is a.e. zero on Ω \ Ω', and equal to the
+          -- partial on Ω' a.e. So we can construct a function that agrees
+          -- with it on Ω' and is zero outside.
+          -- Actually, we use the general induction on k with the partial.
+          -- The partial is a.e. zero on the open set U where u=0.
+          set f : EuclideanSpace ℝ (Fin d) → ℝ :=
+            chosenWeakPartial' (d := d) p i u Ω with hf_def
+          have hf_mem : MemWkp (d := d) k p f Ω := h_partial_mem_Ω
+          -- f is a.e. zero on U = Ω \ tsupport u.
+          set U : Set (EuclideanSpace ℝ (Fin d)) := Ω \ tsupport u with hU_def
+          have hU_open : IsOpen U := hΩ.sdiff (isClosed_tsupport _)
+          have hU_sub : U ⊆ Ω := fun x hx => hx.1
+          have hf_zero : f =ᵐ[volume.restrict U] (fun _ => 0) := by
+            rw [hf_def]
+            have hu_U_zero : u =ᵐ[volume.restrict U] (fun _ => 0) := by
+              refine (ae_restrict_iff' hU_open.measurableSet).mpr ?_
+              refine Filter.Eventually.of_forall ?_
+              intro x hx
+              exact image_eq_zero_of_notMem_tsupport hx.2
+            have hu_memW1p_Ω : DeGiorgi.MemW1p (d := d) p u Ω := hu.1
+            have h_ae_eq : chosenWeakPartial' (d := d) p i u Ω =ᵐ[volume.restrict U]
+                chosenWeakPartial' (d := d) p i u U :=
+              chosenWeakPartial_ae_eq_on_subset (d := d) hp_one hΩ hU_open hU_sub hu_memW1p_Ω i
+            have h_ae_zero : chosenWeakPartial' (d := d) p i u U =ᵐ[volume.restrict U]
+                (fun _ => 0) :=
+              chosenWeakPartial'_ae_zero_of_ae_zero (d := d) hp_one hU_open hu_U_zero i
+            exact h_ae_eq.trans h_ae_zero
+          -- Now we do an inner induction on k to transfer membership from Ω to Ω'.
+          -- Use Nat.rec to avoid name clash with outer induction.
+          have h_inner : MemWkp (d := d) k p f Ω' :=
+            Nat.rec
+              (by
+                intro g hg_mem _
+                rw [MemWkp_zero] at hg_mem ⊢
+                exact hg_mem.mono_measure (Measure.restrict_mono_set volume hΩΩ'))
+              (fun m ih g hg_mem hg_zero => by
+                rw [MemWkp_succ] at hg_mem ⊢
+                have hg_memW1p : DeGiorgi.MemW1p (d := d) p g Ω := hg_mem.1
+                have hg_memW1p_Ω' : DeGiorgi.MemW1p (d := d) p g Ω' :=
+                  DeGiorgi.MemW1pWitness.restrict (d := d) hΩ' hΩΩ'
+                    hg_memW1p.someWitness |>.memW1p
+                refine ⟨hg_memW1p_Ω', fun i' => ?_⟩
+                set g_partial : EuclideanSpace ℝ (Fin d) → ℝ :=
+                  chosenWeakPartial' (d := d) p i' g Ω with hg_partial_def
+                have hg_partial_mem : MemWkp (d := d) m p g_partial Ω := hg_mem.2 i'
+                have hg_partial_zero : g_partial =ᵐ[volume.restrict U] (fun _ => 0) := by
+                  rw [hg_partial_def]
+                  have h_ae_eq : chosenWeakPartial' (d := d) p i' g Ω =ᵐ[volume.restrict U]
+                      chosenWeakPartial' (d := d) p i' g U :=
+                    chosenWeakPartial_ae_eq_on_subset (d := d) hp_one hΩ hU_open hU_sub
+                      hg_memW1p i'
+                  have h_ae_zero : chosenWeakPartial' (d := d) p i' g U =ᵐ[volume.restrict U]
+                      (fun _ => 0) :=
+                    chosenWeakPartial'_ae_zero_of_ae_zero (d := d) hp_one hU_open hg_zero i'
+                  exact h_ae_eq.trans h_ae_zero
+                have h_ih_inner : MemWkp (d := d) m p g_partial Ω' :=
+                  ih g_partial hg_partial_mem hg_partial_zero
+                -- Rewrite g_partial back to the chosenWeakPartial' expression
+                rw [hg_partial_def] at h_ih_inner
+                have h_ae_eq' : chosenWeakPartial' (d := d) p i' g Ω =ᵐ[volume.restrict Ω']
+                    chosenWeakPartial' (d := d) p i' g Ω' :=
+                  chosenWeakPartial_ae_eq_on_subset (d := d) hp_one hΩ hΩ' hΩΩ'
+                    hg_memW1p i'
+                exact (MemWkp_congr_ae (d := d) hp_one hΩ' h_ae_eq').mp h_ih_inner)
+              k f hf_mem hf_zero
+          -- Now we have the Ω-partial f in MemWkp k p Ω'.
+          -- Return it directly (caller will transfer to Ω'-partial via MemWkp_congr_ae).
+          simpa [hf_def] using h_inner
+        -- Transfer from Ω-partial on Ω' to Ω'-partial on Ω' via a.e. equality.
+        exact (MemWkp_congr_ae (d := d) hp_one hΩ' h_partial_ae.symm).mpr h_partial_mem_Ω'
+  -- Second goal: prove wkpNorm equality.
+  -- Use the iterWeakPartial a.e. equality lemma.
+  have h_norm_eq : wkpNorm (d := d) k p u Ω = wkpNorm (d := d) k p u Ω' := by
+    unfold wkpNorm
+    refine Finset.sum_congr rfl ?_
+    intro j hj
+    rw [Finset.mem_range] at hj
+    have hj_le : j ≤ k := by omega
+    have hu_mem_j : MemWkp (d := d) j p u Ω := MemWkp.le_of_le hj_le hu
+    refine Finset.sum_congr rfl ?_
+    intro α _
+    have h_iter_ae : iterWeakPartial (d := d) p j α u Ω =ᵐ[volume.restrict Ω']
+        iterWeakPartial (d := d) p j α u Ω' :=
+      iterWeakPartial_ae_eq_tsupport_subset (d := d) hp_one hΩ hΩ' hΩΩ'
+        hu_mem_j hu_supp α
+    -- First, the Ω-version is a.e. zero on Ω \ Ω' (because u=0 on U ⊇ Ω\Ω').
+    have h_iter_zero_on_diff :
+        iterWeakPartial (d := d) p j α u Ω =ᵐ[volume.restrict (Ω \ Ω')]
+          (fun _ => 0) := by
+      set U : Set (EuclideanSpace ℝ (Fin d)) := Ω \ tsupport u with hU_def'
+      have hU_open' : IsOpen U := hΩ.sdiff (isClosed_tsupport _)
+      have hU_sub' : U ⊆ Ω := fun x hx => hx.1
+      have hu_zero_U' : u =ᵐ[volume.restrict U] (fun _ => 0) := by
+        refine (ae_restrict_iff' hU_open'.measurableSet).mpr ?_
+        refine Filter.Eventually.of_forall ?_
+        intro x hx
+        exact image_eq_zero_of_notMem_tsupport hx.2
+      have h_zero_on_U : iterWeakPartial (d := d) p j α u Ω =ᵐ[volume.restrict U]
+          (fun _ => 0) :=
+        -- Use Nat.rec with a motive that includes the MemWkp membership
+        -- so we can extract MemW1p for the chosenWeakPartial_ae_eq_on_subset call.
+        Nat.rec
+          (fun α' v hv_mem hzero => by
+            simpa [iterWeakPartial_zero] using hzero)
+          (fun j' ih α' v hv_mem hzero => by
+            rw [iterWeakPartial_succ]
+            have hv_memW1p : DeGiorgi.MemW1p (d := d) p v Ω :=
+              hv_mem.memW1p
+            have h_chosen_zero_U : chosenWeakPartial' (d := d) p (α' 0) v Ω
+                =ᵐ[volume.restrict U] (fun _ => 0) := by
+              have h_ae_eq : chosenWeakPartial' (d := d) p (α' 0) v Ω =ᵐ[volume.restrict U]
+                  chosenWeakPartial' (d := d) p (α' 0) v U :=
+                chosenWeakPartial_ae_eq_on_subset (d := d) hp_one hΩ hU_open' hU_sub'
+                  hv_memW1p (α' 0)
+              have h_ae_zero : chosenWeakPartial' (d := d) p (α' 0) v U =ᵐ[volume.restrict U]
+                  (fun _ => 0) :=
+                chosenWeakPartial'_ae_zero_of_ae_zero (d := d) hp_one hU_open' hzero (α' 0)
+              exact h_ae_eq.trans h_ae_zero
+            have h_partial_mem : MemWkp (d := d) j' p
+                (chosenWeakPartial' (d := d) p (α' 0) v Ω) Ω :=
+              hv_mem.2 (α' 0)
+            have h_rest : iterWeakPartial (d := d) p j' (fun i : Fin j' => α' i.succ)
+                (chosenWeakPartial' (d := d) p (α' 0) v Ω) Ω =ᵐ[volume.restrict U]
+                (fun _ => 0) :=
+              ih (fun i : Fin j' => α' i.succ)
+                (chosenWeakPartial' (d := d) p (α' 0) v Ω)
+                h_partial_mem
+                h_chosen_zero_U
+            simpa using h_rest)
+          j α u hu_mem_j hu_zero_U'
+      have h_meas_diff : MeasurableSet (Ω \ Ω') :=
+        hΩ.measurableSet.diff hΩ'.measurableSet
+      have h_diff_subset_U : Ω \ Ω' ⊆ U := by
+        intro x hx; refine ⟨hx.1, fun h => hx.2 (hu_supp h)⟩
+      have h_restrict_eq : (volume.restrict U).restrict (Ω \ Ω') =
+          volume.restrict (Ω \ Ω') := by
+        rw [Measure.restrict_restrict h_meas_diff]
+        rw [Set.inter_eq_left.mpr h_diff_subset_U]
+      have h_restricted := h_zero_on_U.restrict (s := Ω \ Ω')
+      rw [h_restrict_eq] at h_restricted
+      exact h_restricted
+    -- eLpNorm on Ω = eLpNorm on Ω' for the Ω-version.
+    have h_eLp_Ω_eq_Ω' :
+        eLpNorm (iterWeakPartial (d := d) p j α u Ω) p (volume.restrict Ω) =
+        eLpNorm (iterWeakPartial (d := d) p j α u Ω) p (volume.restrict Ω') :=
+      eLpNorm_restrict_eq_of_ae_zero_off
+        hΩ.measurableSet hΩ'.measurableSet hΩΩ' h_iter_zero_on_diff
+    -- eLpNorm on Ω' for Ω-version = eLpNorm on Ω' for Ω'-version (by a.e. eq).
+    have h_eLp_eq_on_Ω' :
+        eLpNorm (iterWeakPartial (d := d) p j α u Ω) p (volume.restrict Ω') =
+        eLpNorm (iterWeakPartial (d := d) p j α u Ω') p (volume.restrict Ω') :=
+      eLpNorm_congr_ae h_iter_ae
+    rw [h_eLp_Ω_eq_Ω', h_eLp_eq_on_Ω']
+  exact ⟨h_mem_Ω', h_norm_eq⟩
+
+/-! ## Helper: per-term eLpNorm comparison for `wkpNorm_le` -/
+
+/-- For `u ∈ MemWkp j p Ω'` with `u =ᵐ 0` on an open set `U ⊆ Ω` that contains
+`Ω \ Ω'` (where `Ω' ⊆ Ω` open), every iterated weak partial on `Ω` has
+`eLpNorm` on `Ω'` at most that of the same-order iterated weak partial on `Ω'`.
+The proof inducts on the order `j` and uses `U` to propagate the a.e.-zero
+property to all higher-order weak partials. -/
+private lemma eLpNorm_iterWeakPartial_Ω_le_Ω'_with_U
+    {d : ℕ} [NeZero d]
+    {j : ℕ} {p : ℝ≥0∞} (hp_one : 1 ≤ p)
+    {Ω Ω' U : Set (EuclideanSpace ℝ (Fin d))}
+    (hΩ : IsOpen Ω) (hΩ' : IsOpen Ω') (hU_open : IsOpen U)
+    (hΩΩ' : Ω' ⊆ Ω) (hU_sub : U ⊆ Ω) (hU_contains : Ω \ Ω' ⊆ U)
+    {u : EuclideanSpace ℝ (Fin d) → ℝ}
+    (hu_mem : MemWkp (d := d) j p u Ω')
+    (hu_zero_U : u =ᵐ[volume.restrict U] (fun _ => 0))
+    (α : Fin j → Fin d) :
+    eLpNorm (iterWeakPartial (d := d) p j α u Ω) p (volume.restrict Ω') ≤
+      eLpNorm (iterWeakPartial (d := d) p j α u Ω') p (volume.restrict Ω') := by
+  induction j generalizing u with
+  | zero =>
+      simp [iterWeakPartial_zero]
+  | succ j ih =>
+      rw [iterWeakPartial_succ, iterWeakPartial_succ]
+      set f_Ω : EuclideanSpace ℝ (Fin d) → ℝ :=
+        chosenWeakPartial' (d := d) p (α 0) u Ω with hf_Ω_def
+      set f_Ω' : EuclideanSpace ℝ (Fin d) → ℝ :=
+        chosenWeakPartial' (d := d) p (α 0) u Ω' with hf_Ω'_def
+      by_cases hu_memW1p_Ω : DeGiorgi.MemW1p (d := d) p u Ω
+      · -- Case 1: u ∈ MemW1p p Ω. Then partials agree a.e. on Ω'.
+        have h_ae_f : f_Ω =ᵐ[volume.restrict Ω'] f_Ω' := by
+          rw [hf_Ω_def, hf_Ω'_def]
+          exact chosenWeakPartial_ae_eq_on_subset (d := d) hp_one hΩ hΩ' hΩΩ'
+            hu_memW1p_Ω (α 0)
+        -- f_Ω is a.e. zero on U (weak partial of a.e.-zero function on open set).
+        have hf_Ω_zero_U : f_Ω =ᵐ[volume.restrict U] (fun _ => 0) := by
+          rw [hf_Ω_def]
+          have h_ae_eq : chosenWeakPartial' (d := d) p (α 0) u Ω =ᵐ[volume.restrict U]
+              chosenWeakPartial' (d := d) p (α 0) u U :=
+            chosenWeakPartial_ae_eq_on_subset (d := d) hp_one hΩ hU_open hU_sub hu_memW1p_Ω (α 0)
+          have h_ae_zero : chosenWeakPartial' (d := d) p (α 0) u U =ᵐ[volume.restrict U]
+              (fun _ => 0) :=
+            chosenWeakPartial'_ae_zero_of_ae_zero (d := d) hp_one hU_open hu_zero_U (α 0)
+          exact h_ae_eq.trans h_ae_zero
+        -- f_Ω' ∈ MemWkp j p Ω'.
+        have hf_Ω'_mem : MemWkp (d := d) j p f_Ω' Ω' := by
+          rw [hf_Ω'_def]
+          rw [MemWkp_succ] at hu_mem
+          exact hu_mem.2 (α 0)
+        -- f_Ω ∈ MemWkp j p Ω' (via a.e. equality on Ω').
+        have hf_Ω_mem_Ω' : MemWkp (d := d) j p f_Ω Ω' :=
+          (MemWkp_congr_ae (d := d) hp_one hΩ' h_ae_f.symm).mp hf_Ω'_mem
+        -- Apply IH to f_Ω (uses the SAME open set U).
+        have h_ih : eLpNorm (iterWeakPartial (d := d) p j (fun i : Fin j => α i.succ) f_Ω Ω)
+            p (volume.restrict Ω') ≤
+          eLpNorm (iterWeakPartial (d := d) p j (fun i : Fin j => α i.succ) f_Ω Ω')
+            p (volume.restrict Ω') :=
+          ih hf_Ω_mem_Ω' hf_Ω_zero_U (fun i : Fin j => α i.succ)
+        -- The RHS (f_Ω, Ω') equals the RHS (f_Ω', Ω') by a.e. equality.
+        have h_congr : eLpNorm (iterWeakPartial (d := d) p j (fun i : Fin j => α i.succ) f_Ω Ω')
+            p (volume.restrict Ω') =
+          eLpNorm (iterWeakPartial (d := d) p j (fun i : Fin j => α i.succ) f_Ω' Ω')
+            p (volume.restrict Ω') := by
+          have h_ae_iter : iterWeakPartial (d := d) p j (fun i : Fin j => α i.succ) f_Ω Ω'
+              =ᵐ[volume.restrict Ω']
+            iterWeakPartial (d := d) p j (fun i : Fin j => α i.succ) f_Ω' Ω' :=
+            iterWeakPartial_ae_congr (d := d) hp_one hΩ' j
+              (fun i : Fin j => α i.succ) h_ae_f
+          exact eLpNorm_congr_ae h_ae_iter
+        rw [h_congr] at h_ih
+        exact h_ih
+      · -- Case 2: u ∉ MemW1p p Ω. Then f_Ω = 0.
+        rw [hf_Ω_def, chosenWeakPartial'_of_not_mem hu_memW1p_Ω]
+        -- iterWeakPartial of the zero function is a.e. zero (for the j-part of the succ term).
+        have h_zero_iter : iterWeakPartial (d := d) p j (fun i : Fin j => α i.succ)
+            (0 : EuclideanSpace ℝ (Fin d) → ℝ) Ω =ᵐ[volume.restrict Ω']
+            (fun _ => 0) := by
+          have h_input_zero : (0 : EuclideanSpace ℝ (Fin d) → ℝ)
+              =ᵐ[volume.restrict Ω] (fun _ => 0) := by rfl
+          have h := iterWeakPartial_ae_zero_of_input_ae_zero (d := d) hp_one hΩ
+            j (fun i : Fin j => α i.succ) h_input_zero
+          -- h: iterWeakPartial ... 0 Ω =ᵐ[volume.restrict Ω] 0
+          -- need: ... =ᵐ[volume.restrict Ω'] 0
+          have h_meas : MeasurableSet Ω' := hΩ'.measurableSet
+          have h_restrict_eq : (volume.restrict Ω).restrict Ω' = volume.restrict Ω' := by
+            rw [Measure.restrict_restrict h_meas, Set.inter_eq_left.mpr hΩΩ']
+          have h_restricted := h.restrict (s := Ω')
+          simpa [h_restrict_eq] using h_restricted
+        rw [eLpNorm_congr_ae h_zero_iter]
+        simp
+
+/-- **General-k version of `wkpNorm_le_of_tsupport_subset_mem_small`.** For
+`Ω', Ω` open, `Ω' ⊆ Ω`, `u` with `tsupport u ⊆ Ω'`, and `u ∈ MemWkp k p Ω'`
+(note: only on the smaller open set), `wkpNorm k p u Ω ≤ wkpNorm k p u Ω'`.
+
+The proof uses the per-term `eLpNorm` comparison lemma above, together with
+the fact that `iterWeakPartial` on `Ω` is a.e. zero on `Ω \ Ω'` (since `u`
+vanishes there), so the `eLpNorm` on `Ω` equals the one on `Ω'`. -/
+lemma wkpNorm_le_of_tsupport_subset_mem_small_general
+    {d : ℕ} [NeZero d]
+    (k : ℕ) {p : ℝ≥0∞} (hp_one : 1 ≤ p)
+    {Ω Ω' : Set (EuclideanSpace ℝ (Fin d))}
+    (hΩ : IsOpen Ω) (hΩ' : IsOpen Ω') (hΩΩ' : Ω' ⊆ Ω)
+    {u : EuclideanSpace ℝ (Fin d) → ℝ}
+    (hu : MemWkp (d := d) k p u Ω') (hu_supp : tsupport u ⊆ Ω') :
+    wkpNorm (d := d) k p u Ω ≤ wkpNorm (d := d) k p u Ω' := by
+  classical
+  -- u = 0 pointwise outside Ω' (via tsupport).
+  have hu_zero_diff : ∀ x ∈ Ω \ Ω', u x = 0 := by
+    intro x hx
+    have hx_off : x ∉ tsupport u := fun h => hx.2 (hu_supp h)
+    exact image_eq_zero_of_notMem_tsupport hx_off
+  have h_meas_diff : MeasurableSet (Ω \ Ω') :=
+    hΩ.measurableSet.diff hΩ'.measurableSet
+  have hu_zero_diff_ae : ∀ᵐ x ∂(volume.restrict (Ω \ Ω')), u x = 0 := by
+    refine (ae_restrict_iff' h_meas_diff).mpr ?_
+    refine Filter.Eventually.of_forall ?_
+    intro x hx
+    exact hu_zero_diff x hx
+  -- The open set U = Ω \ tsupport u where u = 0 pointwise.
+  set U : Set (EuclideanSpace ℝ (Fin d)) := Ω \ tsupport u with hU_def
+  have hU_open : IsOpen U := hΩ.sdiff (isClosed_tsupport _)
+  have hU_sub : U ⊆ Ω := fun x hx => hx.1
+  have h_diff_sub_U : Ω \ Ω' ⊆ U := by
+    intro x hx
+    refine ⟨hx.1, fun h => hx.2 (hu_supp h)⟩
+  have hu_zero_U : u =ᵐ[volume.restrict U] (fun _ => 0) := by
+    refine (ae_restrict_iff' hU_open.measurableSet).mpr ?_
+    refine Filter.Eventually.of_forall ?_
+    intro x hx
+    exact image_eq_zero_of_notMem_tsupport hx.2
+  -- Each iterWeakPartial on Ω is a.e. zero on Ω \ Ω' (via U).
+  -- Summing the inequality per term.
+  unfold wkpNorm
+  refine Finset.sum_le_sum ?_
+  intro j hj
+  rw [Finset.mem_range] at hj
+  have hj_le : j ≤ k := by omega
+  have hu_mem_j : MemWkp (d := d) j p u Ω' := MemWkp.le_of_le hj_le hu
+  refine Finset.sum_le_sum ?_
+  intro α _
+  -- Step A: iterWeakPartial on Ω is a.e. zero on Ω \ Ω'.
+  have h_iter_zero_on_diff :
+      iterWeakPartial (d := d) p j α u Ω =ᵐ[volume.restrict (Ω \ Ω')]
+        (fun _ => 0) := by
+    have h_zero_on_U : iterWeakPartial (d := d) p j α u Ω =ᵐ[volume.restrict U]
+        (fun _ => 0) :=
+      Nat.rec
+        (fun α' v hv_zero => by
+          simpa [iterWeakPartial_zero] using hv_zero)
+        (fun j' ih α' v hv_zero => by
+          rw [iterWeakPartial_succ]
+          by_cases hv_memW1p_Ω : DeGiorgi.MemW1p (d := d) p v Ω
+          · -- v ∈ MemW1p p Ω: use HasWeakPartialDeriv.ae_eq
+            have hP_Ω : DeGiorgi.HasWeakPartialDeriv (d := d) (α' 0)
+                (chosenWeakPartial' (d := d) p (α' 0) v Ω) v Ω :=
+              chosenWeakPartial'_isWeakPartial_of_mem (d := d) hv_memW1p_Ω (α' 0)
+            have hP_U : DeGiorgi.HasWeakPartialDeriv (d := d) (α' 0)
+                (chosenWeakPartial' (d := d) p (α' 0) v Ω) v U :=
+              DeGiorgi.HasWeakPartialDeriv.restrict (d := d) hU_open hU_sub hP_Ω
+            have hZero_isWeak : DeGiorgi.HasWeakPartialDeriv (d := d) (α' 0)
+                (fun _ => (0 : ℝ)) v U := by
+              intro φ hφ hφ_supp hφ_sub
+              have h_integrand_zero : (fun x => v x * (fderiv ℝ φ x) (EuclideanSpace.single (α' 0) 1))
+                  =ᵐ[volume.restrict U] (fun _ => (0 : ℝ)) := by
+                filter_upwards [hv_zero] with x hx
+                simp [hx]
+              have hint_lhs : ∫ x in U, v x * (fderiv ℝ φ x) (EuclideanSpace.single (α' 0) 1) = 0 :=
+                integral_eq_zero_of_ae h_integrand_zero
+              rw [hint_lhs]; simp
+            have hP_loc_U : LocallyIntegrable
+                (chosenWeakPartial' (d := d) p (α' 0) v Ω) (volume.restrict U) := by
+              have hmem : MeasureTheory.MemLp
+                  (chosenWeakPartial' (d := d) p (α' 0) v Ω) p (volume.restrict Ω) :=
+                chosenWeakPartial'_memLp_of_mem (d := d) hv_memW1p_Ω (α' 0)
+              have hmem' : MeasureTheory.MemLp
+                  (chosenWeakPartial' (d := d) p (α' 0) v Ω) p (volume.restrict U) :=
+                hmem.mono_measure (Measure.restrict_mono_set volume hU_sub)
+              exact hmem'.locallyIntegrable hp_one
+            have hZero_loc_U : LocallyIntegrable
+                (fun _ : EuclideanSpace ℝ (Fin d) => (0 : ℝ)) (volume.restrict U) :=
+              locallyIntegrable_const (0 : ℝ)
+            have h_chosen_zero_U : chosenWeakPartial' (d := d) p (α' 0) v Ω
+                =ᵐ[volume.restrict U] (fun _ => (0 : ℝ)) :=
+              DeGiorgi.HasWeakPartialDeriv.ae_eq hU_open hP_U hZero_isWeak hP_loc_U hZero_loc_U
+            exact ih (fun i : Fin j' => α' i.succ)
+              (chosenWeakPartial' (d := d) p (α' 0) v Ω) h_chosen_zero_U
+          · -- v ∉ MemW1p p Ω: chosenWeakPartial' returns 0
+            rw [chosenWeakPartial'_of_not_mem hv_memW1p_Ω]
+            have h0 : (0 : EuclideanSpace ℝ (Fin d) → ℝ) =ᵐ[volume.restrict Ω] (fun _ => 0) := by rfl
+            have htemp := iterWeakPartial_ae_zero_of_input_ae_zero (d := d) hp_one hΩ
+              j' (fun i : Fin j' => α' i.succ) h0
+            -- htemp: iterWeakPartial ... 0 Ω =ᵐ[volume.restrict Ω] 0
+            -- need: ... =ᵐ[volume.restrict U] 0
+            have hUmeas : MeasurableSet U := hU_open.measurableSet
+            have hrestr : (volume.restrict Ω).restrict U = volume.restrict U := by
+              rw [Measure.restrict_restrict hUmeas, Set.inter_eq_left.mpr hU_sub]
+            have htemp_restricted := htemp.restrict (s := U)
+            simpa [hrestr] using htemp_restricted)
+        j α u hu_zero_U
+    have h_restrict_eq : (volume.restrict U).restrict (Ω \ Ω') =
+        volume.restrict (Ω \ Ω') := by
+      rw [Measure.restrict_restrict h_meas_diff]
+      rw [Set.inter_eq_left.mpr h_diff_sub_U]
+    have h_restricted := h_zero_on_U.restrict (s := Ω \ Ω')
+    rw [h_restrict_eq] at h_restricted
+    exact h_restricted
+  -- Step B: eLpNorm on Ω = eLpNorm on Ω' (for the Ω-version).
+  have h_eLp_Ω_eq_Ω' :
+      eLpNorm (iterWeakPartial (d := d) p j α u Ω) p (volume.restrict Ω) =
+      eLpNorm (iterWeakPartial (d := d) p j α u Ω) p (volume.restrict Ω') :=
+    eLpNorm_restrict_eq_of_ae_zero_off
+      hΩ.measurableSet hΩ'.measurableSet hΩΩ' h_iter_zero_on_diff
+  rw [h_eLp_Ω_eq_Ω']
+  -- Step C: the remaining eLpNorm on Ω' is ≤ the corresponding Ω' term.
+  exact eLpNorm_iterWeakPartial_Ω_le_Ω'_with_U (d := d) hp_one hΩ hΩ' hU_open hΩΩ' hU_sub
+    h_diff_sub_U hu_mem_j hu_zero_U α
+
 end Euclidean
 
 namespace Chart

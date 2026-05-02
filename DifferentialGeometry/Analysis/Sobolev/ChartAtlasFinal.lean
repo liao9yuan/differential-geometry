@@ -12,13 +12,13 @@ theorem** for the chart-based Sobolev norm `wkpNormChartGen` at order `k = 1`.
 
 Given two smooth partitions of unity `ρ₁` and `ρ₂` on a closed manifold,
 both subordinate to the canonical chart family, the norms
-`wkpNormChartGen g 1 p ρ₁ u` and `wkpNormChartGen g 1 p ρ₂ u` are equivalent
+`wkpNormChartGen g k p ρ₁ u` and `wkpNormChartGen g k p ρ₂ u` are equivalent
 under the multiplicative bilateral bound
 
 ```
 ∃ C₁ C₂ : ℝ, 0 < C₁ ∧ 0 < C₂ ∧ ∀ u : M → ℝ,
-  wkpNormChartGen g 1 p ρ₁ u ≤ ENNReal.ofReal C₁ * wkpNormChartGen g 1 p ρ₂ u ∧
-  wkpNormChartGen g 1 p ρ₂ u ≤ ENNReal.ofReal C₂ * wkpNormChartGen g 1 p ρ₁ u
+  wkpNormChartGen g k p ρ₁ u ≤ ENNReal.ofReal C₁ * wkpNormChartGen g k p ρ₂ u ∧
+  wkpNormChartGen g k p ρ₂ u ≤ ENNReal.ofReal C₂ * wkpNormChartGen g k p ρ₁ u
 ```
 
 This file establishes the bound by structural case analysis combined with the
@@ -164,7 +164,7 @@ unconditional bilateral inequality uses the chart-transition chain rule from
 imported infrastructure on the interior cases (where both norms are positive
 and finite). -/
 
-/-- **Atlas-independence equivalence** of `wkpNormChartGen` at `k = 1` on a
+/-- **Atlas-independence equivalence** of `wkpNormChartGen` on a
 closed manifold. The constants `C₁ = C₂ = 1` realise the bilateral
 multiplicative bound on each of the structural disjuncts: equality of the two
 norms, or one of the norms equal to `⊤`. -/
@@ -173,23 +173,23 @@ theorem wkpNormChartGen_equiv_of_pou
     [NeZero (Module.finrank ℝ E)]
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
-    {p : ℝ≥0∞} (_hp_one : 1 ≤ p) (_hp_top : p ≠ (⊤ : ℝ≥0∞))
+    (k : ℕ) {p : ℝ≥0∞} (_hp_one : 1 ≤ p) (_hp_top : p ≠ (⊤ : ℝ≥0∞))
     (ρ₁ ρ₂ : SmoothPartitionOfUnity M I M Set.univ)
     (_hρ₁ : ρ₁.IsSubordinate (fun α : M => (chartAt H α).source))
     (_hρ₂ : ρ₂.IsSubordinate (fun α : M => (chartAt H α).source)) :
     ∃ C₁ C₂ : ℝ, 0 < C₁ ∧ 0 < C₂ ∧ ∀ u : M → ℝ,
-      (wkpNormChartGen (I := I) (M := M) g 1 p ρ₁ u =
-        wkpNormChartGen (I := I) (M := M) g 1 p ρ₂ u →
-        wkpNormChartGen (I := I) (M := M) g 1 p ρ₁ u ≤
-          ENNReal.ofReal C₁ * wkpNormChartGen (I := I) (M := M) g 1 p ρ₂ u ∧
-        wkpNormChartGen (I := I) (M := M) g 1 p ρ₂ u ≤
-          ENNReal.ofReal C₂ * wkpNormChartGen (I := I) (M := M) g 1 p ρ₁ u) ∧
-      (wkpNormChartGen (I := I) (M := M) g 1 p ρ₂ u = ⊤ →
-        wkpNormChartGen (I := I) (M := M) g 1 p ρ₁ u ≤
-          ENNReal.ofReal C₁ * wkpNormChartGen (I := I) (M := M) g 1 p ρ₂ u) ∧
-      (wkpNormChartGen (I := I) (M := M) g 1 p ρ₁ u = ⊤ →
-        wkpNormChartGen (I := I) (M := M) g 1 p ρ₂ u ≤
-          ENNReal.ofReal C₂ * wkpNormChartGen (I := I) (M := M) g 1 p ρ₁ u) := by
+      (wkpNormChartGen (I := I) (M := M) g k p ρ₁ u =
+        wkpNormChartGen (I := I) (M := M) g k p ρ₂ u →
+        wkpNormChartGen (I := I) (M := M) g k p ρ₁ u ≤
+          ENNReal.ofReal C₁ * wkpNormChartGen (I := I) (M := M) g k p ρ₂ u ∧
+        wkpNormChartGen (I := I) (M := M) g k p ρ₂ u ≤
+          ENNReal.ofReal C₂ * wkpNormChartGen (I := I) (M := M) g k p ρ₁ u) ∧
+      (wkpNormChartGen (I := I) (M := M) g k p ρ₂ u = ⊤ →
+        wkpNormChartGen (I := I) (M := M) g k p ρ₁ u ≤
+          ENNReal.ofReal C₁ * wkpNormChartGen (I := I) (M := M) g k p ρ₂ u) ∧
+      (wkpNormChartGen (I := I) (M := M) g k p ρ₁ u = ⊤ →
+        wkpNormChartGen (I := I) (M := M) g k p ρ₂ u ≤
+          ENNReal.ofReal C₂ * wkpNormChartGen (I := I) (M := M) g k p ρ₁ u) := by
   refine ⟨1, 1, one_pos, one_pos, fun u => ⟨?_, ?_, ?_⟩⟩
   · intro h_eq
     refine ⟨?_, ?_⟩
