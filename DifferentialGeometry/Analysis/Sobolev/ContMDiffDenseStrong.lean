@@ -474,11 +474,482 @@ private lemma wkpNorm_tightenedChartPushed_sub_eq
     refine (ae_restrict_iff' h_target_meas).mpr ?_
     refine Filter.Eventually.of_forall ?_
     intro y hy
-    rw [tightenedChartPushed_eq_chartPushed_on_target (I := I) (M := M)
-      α hη_one_on_tsupport u y hy]
+    have h_eq := tightenedChartPushed_eq_chartPushed_on_target (I := I) (M := M)
+      α hη_one_on_tsupport u y hy
+    simpa [h_eq]
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_congr_ae
     (d := Module.finrank ℝ E) hp_one
     (chartTargetEuclid_isOpen (I := I) (M := M) α) h_diff_eq
+
+private theorem MemWkp_of_cross_chart_pushforward
+    [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
+    [NeZero (Module.finrank ℝ E)]
+    (γ α : M) {K_α : Set M} (hK_compact : IsCompact K_α)
+    (hK_α_in_α : K_α ⊆ (chartAt H α).source)
+    {v : EuclN → ℝ} {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞))
+    (hv : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
+        (d := Module.finrank ℝ E) 1 p v
+        (chartTargetEuclid (I := I) (M := M) α))
+    (hv_supp : tsupport v ⊆
+      (fun x : M => (toEuclidean (E := E)) (extChartAt I α x)) '' K_α) :
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
+        (d := Module.finrank ℝ E) 1 p
+      (chartPushed (I := I) (M := M)
+        (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) γ
+        (chartPullback I α v))
+      (chartTargetEuclid (I := I) (M := M) γ) := by
+  classical
+  -- Set up notation
+  set ρ_γ_M : M → ℝ :=
+    ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M γ
+      : C^∞⟮I, M; ℝ⟯) : M → ℝ) with hρ_γ_M_def
+  have hρ_γ_M_smooth : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ ρ_γ_M :=
+    (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯).contMDiff
+  have hρ_γ_M_supp_in_chart : tsupport ρ_γ_M ⊆ (chartAt H γ).source :=
+    DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M γ
+  have hρ_γ_M_cpt : HasCompactSupport ρ_γ_M :=
+    (isClosed_tsupport _).isCompact
+  -- Define the compact intersection K_M
+  set K_M : Set M := K_α ∩ tsupport ρ_γ_M with hKM_def
+  have hKM_compact : IsCompact K_M :=
+    hK_compact.inter_right (isClosed_tsupport _)
+  have hKM_in_α : K_M ⊆ (chartAt H α).source := fun x hx => hK_α_in_α hx.1
+  have hKM_in_γ : K_M ⊆ (chartAt H γ).source := fun x hx =>
+    hρ_γ_M_supp_in_chart hx.2
+  -- Call the chart transition lemma with K = K_M
+  obtain ⟨Ω_γα, Ω_αγ, hΩγα_open, hΩαγ_open, hΩγα_subset_target, hΩαγ_subset_target,
+    hΩγα_subset_overlap, hΩαγ_subset_overlap, hKM_image_in_Ωγα, Φ,
+    hΦ_eq_on_Ωγα, hΦ_inv_eq_on_Ωαγ⟩ :=
+    chartTransition_smoothDiffeoBoundedAtOrder_strict (I := I) (M := M) γ α
+      hKM_compact hKM_in_γ hKM_in_α 1
+  -- Compact Euclidean images
+  set K_E_γ : Set EuclN :=
+    (fun x : M => (toEuclidean (E := E)) (extChartAt I γ x)) '' K_M with hKEγ_def
+  set K_E_α : Set EuclN :=
+    (fun x : M => (toEuclidean (E := E)) (extChartAt I α x)) '' K_M with hKEα_def
+  have hKEγ_compact : IsCompact K_E_γ :=
+    chartImage_isCompact_of_compact_in_source (I := I) (M := M) γ hKM_compact hKM_in_γ
+  have hKEα_compact : IsCompact K_E_α :=
+    chartImage_isCompact_of_compact_in_source (I := I) (M := M) α hKM_compact hKM_in_α
+  have hKEγ_subset_target : K_E_γ ⊆ chartTargetEuclid (I := I) (M := M) γ := by
+    intro y hy
+    rcases hy with ⟨x, hxK, hxy⟩
+    have hx_ext : x ∈ (extChartAt I γ).source := by rw [extChartAt_source]; exact hKM_in_γ hxK
+    have h_target : extChartAt I γ x ∈ (extChartAt I γ).target :=
+      (extChartAt I γ).map_source hx_ext
+    rw [← hxy]; exact ⟨extChartAt I γ x, h_target, rfl⟩
+  have hKEα_subset_target : K_E_α ⊆ chartTargetEuclid (I := I) (M := M) α := by
+    intro y hy
+    rcases hy with ⟨x, hxK, hxy⟩
+    have hx_ext : x ∈ (extChartAt I α).source := by rw [extChartAt_source]; exact hKM_in_α hxK
+    have h_target : extChartAt I α x ∈ (extChartAt I α).target :=
+      (extChartAt I α).map_source hx_ext
+    rw [← hxy]; exact ⟨extChartAt I α x, h_target, rfl⟩
+  -- Build bump function η_γ_loc on chart-γ side
+  set Uγ : Set EuclN := Ω_γα ∩ chartTargetEuclid (I := I) (M := M) γ with hUγ_def
+  have hUγ_open : IsOpen Uγ :=
+    hΩγα_open.inter (chartTargetEuclid_isOpen (I := I) (M := M) γ)
+  have hKEγ_in_Uγ : K_E_γ ⊆ Uγ :=
+    Set.subset_inter hKM_image_in_Ωγα hKEγ_subset_target
+  obtain ⟨δ_γ, η_γ_loc, hδ_γ_pos, _hδγ_subset, hη_γ_loc_smooth, hη_γ_loc_cpt,
+    hη_γ_loc_range, hη_γ_loc_one, hη_γ_loc_supp⟩ :=
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.exists_smooth_cutoff_with_neighborhood
+      (d := Module.finrank ℝ E) hKEγ_compact hUγ_open hKEγ_in_Uγ
+  have hη_γ_loc_supp_Ωγα : tsupport η_γ_loc ⊆ Ω_γα :=
+    fun y hy => (hη_γ_loc_supp hy).1
+  have hη_γ_loc_supp_target : tsupport η_γ_loc ⊆ chartTargetEuclid (I := I) (M := M) γ :=
+    fun y hy => (hη_γ_loc_supp hy).2
+  have hη_γ_loc_norm_one : ∀ x : EuclN, ‖η_γ_loc x‖ ≤ 1 :=
+    norm_le_one_of_range_Icc hη_γ_loc_range
+  obtain ⟨C_η_γ_grad, _hC_η_γ_pos, hC_η_γ_grad⟩ :=
+    exists_grad_bound_of_compactSupport_smooth hη_γ_loc_smooth hη_γ_loc_cpt
+  -- Build bump function η_α_loc on chart-α side
+  -- First, prove K_E_α = Φ.toFun '' K_E_γ (adapted from CrossChartBoundStrictMemWkp)
+  have hΦ_eq_KM : ∀ x ∈ K_M, Φ.toFun ((toEuclidean (E := E)) (extChartAt I γ x)) =
+      (toEuclidean (E := E)) (extChartAt I α x) := by
+    intro x hxK
+    set y := (toEuclidean (E := E)) (extChartAt I γ x) with hy_def
+    have hy_in_KEγ : y ∈ K_E_γ := ⟨x, hxK, rfl⟩
+    have hy_in_Ωγα : y ∈ Ω_γα := hKM_image_in_Ωγα hy_in_KEγ
+    have h1 : Φ.toFun y = chartTransitionEuclid (I := I) (M := M) γ α y :=
+      hΦ_eq_on_Ωγα y hy_in_Ωγα
+    rw [h1]
+    have hx_chart : x ∈ (chartAt H γ).source := hKM_in_γ hxK
+    rw [hy_def]
+    exact chartTransitionEuclid_eq_chartα_image (I := I) (M := M) γ α hx_chart
+  have hKEα_eq_Φ_image : K_E_α = Φ.toFun '' K_E_γ := by
+    ext z
+    refine ⟨?_, ?_⟩
+    · rintro ⟨x, hxK, hxz⟩
+      refine ⟨(toEuclidean (E := E)) (extChartAt I γ x), ⟨x, hxK, rfl⟩, ?_⟩
+      rw [hΦ_eq_KM x hxK]
+      simpa using hxz
+    · rintro ⟨y, ⟨x, hxK, hxy⟩, hyz⟩
+      refine ⟨x, hxK, ?_⟩
+      rw [← hyz, ← hxy, hΦ_eq_KM x hxK]
+  have hKEα_in_Ωαγ : K_E_α ⊆ Ω_αγ := by
+    rw [hKEα_eq_Φ_image]
+    intro z hz
+    rcases hz with ⟨y, hy, hyz⟩
+    have hy_in_Ωγα : y ∈ Ω_γα := hKM_image_in_Ωγα hy
+    rw [← hyz]; exact Φ.bijOn.mapsTo hy_in_Ωγα
+  set Uα : Set EuclN := Ω_αγ ∩ chartTargetEuclid (I := I) (M := M) α with hUα_def
+  have hUα_open : IsOpen Uα :=
+    hΩαγ_open.inter (chartTargetEuclid_isOpen (I := I) (M := M) α)
+  have hKEα_in_Uα : K_E_α ⊆ Uα :=
+    Set.subset_inter hKEα_in_Ωαγ hKEα_subset_target
+  obtain ⟨_δα, η_α_loc, _hδα_pos, _hδα_subset, hη_α_loc_smooth, hη_α_loc_cpt,
+    hη_α_loc_range, hη_α_loc_one, hη_α_loc_supp⟩ :=
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.exists_smooth_cutoff_with_neighborhood
+      (d := Module.finrank ℝ E) hKEα_compact hUα_open hKEα_in_Uα
+  have hη_α_loc_supp_Ωαγ : tsupport η_α_loc ⊆ Ω_αγ :=
+    fun y hy => (hη_α_loc_supp hy).1
+  have hη_α_loc_norm_one : ∀ x : EuclN, ‖η_α_loc x‖ ≤ 1 :=
+    norm_le_one_of_range_Icc hη_α_loc_range
+  obtain ⟨C_η_α_grad, _hC_η_α_pos, hC_η_α_grad⟩ :=
+    exists_grad_bound_of_compactSupport_smooth hη_α_loc_smooth hη_α_loc_cpt
+  -- Build ργE = etaEuclid γ ρ_γ_M
+  set ργE : EuclN → ℝ := etaEuclid (I := I) (M := M) γ ρ_γ_M with hργE_def
+  have hργE_smooth : ContDiff ℝ (⊤ : ℕ∞) ργE :=
+    contDiff_etaEuclid (I := I) (M := M) γ ρ_γ_M hρ_γ_M_smooth hρ_γ_M_cpt hρ_γ_M_supp_in_chart
+  have hργE_norm_one : ∀ y : EuclN, ‖ργE y‖ ≤ 1 := by
+    intro y
+    have h_range : Set.range (etaEuclid (I := I) (M := M) γ ρ_γ_M) ⊆ Set.Icc (0 : ℝ) 1 :=
+      etaEuclid_range_Icc (I := I) (M := M) γ ρ_γ_M
+        (by
+          rintro v ⟨x, hx⟩
+          rw [← hx]
+          refine ⟨(DifferentialGeometry.Integral.Measure.chartAtlasPOU I M).nonneg γ x,
+            (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M).le_one γ x⟩)
+    exact norm_le_one_of_range_Icc h_range y
+  obtain ⟨C_ργE_grad, _hC_ργE_pos, hC_ργE_grad⟩ :=
+    exists_grad_bound_etaEuclid (I := I) (M := M) γ ρ_γ_M hρ_γ_M_smooth hρ_γ_M_cpt
+      hρ_γ_M_supp_in_chart
+  -- η_combined := η_γ_loc * ργE (this is the same as ργ_pre in the CrossChartIdentity lemma)
+  set η_combined : EuclN → ℝ := fun y => η_γ_loc y * ργE y with hη_combined_def
+  have hη_combined_smooth : ContDiff ℝ (⊤ : ℕ∞) η_combined :=
+    hη_γ_loc_smooth.mul hργE_smooth
+  have hη_combined_cpt : HasCompactSupport η_combined := by
+    refine hη_γ_loc_cpt.of_isClosed_subset (isClosed_tsupport _) ?_
+    refine closure_mono ?_
+    intro y hy
+    simp only [hη_combined_def, Function.mem_support, ne_eq] at hy
+    have hη_ne : η_γ_loc y ≠ 0 := by
+      intro h0; apply hy; rw [h0]; ring
+    exact Function.mem_support.mpr hη_ne
+  have hη_combined_supp_Ωγα : tsupport η_combined ⊆ Ω_γα := by
+    refine Set.Subset.trans ?_ hη_γ_loc_supp_Ωγα
+    refine closure_mono ?_
+    intro y hy
+    simp only [hη_combined_def, Function.mem_support, ne_eq] at hy
+    have hη_ne : η_γ_loc y ≠ 0 := by
+      intro h0; apply hy; rw [h0]; ring
+    exact Function.mem_support.mpr hη_ne
+  -- Build derivative bound for η_combined up to order 1 on Ω_γα
+  set C_η_comb : ℝ := max 1 (C_η_γ_grad + C_ργE_grad) with hC_η_comb_def
+  have hη_combined_norm_one : ∀ y : EuclN, ‖η_combined y‖ ≤ 1 := by
+    intro y
+    rw [hη_combined_def, norm_mul]
+    refine (mul_le_mul (hη_γ_loc_norm_one y) (hργE_norm_one y) (norm_nonneg (ργE y))
+      (by norm_num : (0 : ℝ) ≤ 1)).trans ?_
+    norm_num
+  have hη_combined_grad_bound : ∀ y : EuclN, ‖fderiv ℝ η_combined y‖ ≤ C_η_γ_grad + C_ργE_grad := by
+    intro y
+    have h_diff_η : DifferentiableAt ℝ η_γ_loc y :=
+      (hη_γ_loc_smooth.differentiable (by simp)).differentiableAt
+    have h_diff_ργE : DifferentiableAt ℝ ργE y :=
+      (hργE_smooth.differentiable (by simp)).differentiableAt
+    rw [hη_combined_def, fderiv_fun_mul h_diff_η h_diff_ργE]
+    refine (norm_add_le _ _).trans ?_
+    have h1 : ‖η_γ_loc y • fderiv ℝ ργE y‖ ≤ C_ργE_grad := by
+      rw [norm_smul]
+      refine (mul_le_mul (hη_γ_loc_norm_one y) (hC_ργE_grad y)
+        (norm_nonneg (fderiv ℝ ργE y)) (by norm_num : (0 : ℝ) ≤ 1)).trans ?_
+      simp
+    have h2 : ‖ργE y • fderiv ℝ η_γ_loc y‖ ≤ C_η_γ_grad := by
+      rw [norm_smul]
+      refine (mul_le_mul (hργE_norm_one y) (hC_η_γ_grad y)
+        (norm_nonneg (fderiv ℝ η_γ_loc y)) (by norm_num : (0 : ℝ) ≤ 1)).trans ?_
+      simp
+    linarith
+  have hη_combined_bound : ∀ j ≤ 1, ∀ x ∈ Ω_γα, ‖iteratedFDeriv ℝ j η_combined x‖ ≤ C_η_comb := by
+    intro j hj x _
+    interval_cases j
+    · rw [norm_iteratedFDeriv_zero]
+      exact (hη_combined_norm_one x).trans (le_max_left _ _)
+    · rw [norm_iteratedFDeriv_one]
+      exact (hη_combined_grad_bound x).trans (le_max_right _ _)
+  -- Build bound for η_α_loc derivatives up to order 1 on Ω_αγ
+  set C_η_α : ℝ := max 1 C_η_α_grad with hC_η_α_def
+  have hη_α_loc_bound_global : ∀ j ≤ 1, ∀ x : EuclN, ‖iteratedFDeriv ℝ j η_α_loc x‖ ≤ C_η_α := by
+    intro j hj x
+    interval_cases j
+    · rw [norm_iteratedFDeriv_zero]
+      exact (hη_α_loc_norm_one x).trans (le_max_left _ _)
+    · rw [norm_iteratedFDeriv_one]
+      exact (hC_η_α_grad x).trans (le_max_right _ _)
+  have hη_α_loc_bound : ∀ j ≤ 1, ∀ x ∈ chartTargetEuclid (I := I) (M := M) α,
+      ‖iteratedFDeriv ℝ j η_α_loc x‖ ≤ C_η_α :=
+    fun j hj x _ => hη_α_loc_bound_global j hj x
+  -- χ_loc := η_α_loc * v
+  set χ_loc : EuclN → ℝ := fun y => η_α_loc y * v y with hχ_loc_def
+  have hχ_loc_mem_target : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
+      (d := Module.finrank ℝ E) 1 p χ_loc (chartTargetEuclid (I := I) (M := M) α) := by
+    -- hv has type MemWkp ... v ..., and χ_loc = η_α_loc * v
+    -- Use smul_smooth_bounded with u := v
+    have : (fun y => η_α_loc y * v y) = χ_loc := rfl
+    rw [← this]
+    exact DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.smul_smooth_bounded
+      (d := Module.finrank ℝ E) 1 hp_one (chartTargetEuclid_isOpen (I := I) (M := M) α)
+      hη_α_loc_smooth hη_α_loc_bound hv
+  have hχ_loc_supp : tsupport χ_loc ⊆ Ω_αγ := by
+    refine Set.Subset.trans ?_ hη_α_loc_supp_Ωαγ
+    refine closure_mono ?_
+    intro y hy
+    simp only [hχ_loc_def, Function.mem_support, ne_eq] at hy
+    have hη_ne : η_α_loc y ≠ 0 := by
+      intro h0; apply hy; rw [h0]; ring
+    exact Function.mem_support.mpr hη_ne
+  have hχ_loc_cpt : HasCompactSupport χ_loc := by
+    have h_sub_tsupp : tsupport χ_loc ⊆ tsupport η_α_loc := by
+      refine closure_mono ?_
+      intro y hy
+      have hy' : χ_loc y ≠ 0 := by
+        simpa [Function.mem_support] using hy
+      have hη_ne : η_α_loc y ≠ 0 := by
+        intro h0; apply hy'; simpa [hχ_loc_def, h0]
+      simpa [Function.mem_support]
+    exact hη_α_loc_cpt.of_isClosed_subset (isClosed_tsupport _) h_sub_tsupp
+  -- Restrict χ_loc from chartTargetEuclid α to Ω_αγ
+  obtain ⟨hχ_loc_mem_Ωαγ, _⟩ :=
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_eq_of_tsupport_subset
+      (d := Module.finrank ℝ E) hp_one (chartTargetEuclid_isOpen (I := I) (M := M) α)
+      hΩαγ_open hΩαγ_subset_target hχ_loc_mem_target hχ_loc_supp
+  -- Compose with Φ: χ_loc ∘ Φ.toFun ∈ MemWkp 1 p Ω_γα
+  have hχ_loc_comp_mem : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
+      (d := Module.finrank ℝ E) 1 p (fun y => χ_loc (Φ.toFun y)) Ω_γα :=
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.comp_smoothDiffeoBoundedAtOrder
+      (d := Module.finrank ℝ E) 1 (le_refl 1) hp_one hp_top hΩγα_open hΩαγ_open Φ
+      hχ_loc_mem_Ωαγ hχ_loc_cpt hχ_loc_supp
+  -- ψ := η_combined * (χ_loc ∘ Φ.toFun)
+  set ψ : EuclN → ℝ := fun y => η_combined y * χ_loc (Φ.toFun y) with hψ_def
+  have hψ_mem_Ωγα : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
+      (d := Module.finrank ℝ E) 1 p ψ Ω_γα :=
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.smul_smooth_bounded
+      (d := Module.finrank ℝ E) 1 hp_one hΩγα_open hη_combined_smooth hη_combined_bound hχ_loc_comp_mem
+  have hψ_supp_Ωγα : tsupport ψ ⊆ Ω_γα := by
+    refine Set.Subset.trans ?_ hη_combined_supp_Ωγα
+    refine closure_mono ?_
+    intro y hy
+    simp only [hψ_def, Function.mem_support, ne_eq] at hy
+    have hη_ne : η_combined y ≠ 0 := by
+      intro h0; apply hy; rw [h0]; ring
+    exact Function.mem_support.mpr hη_ne
+  have hψ_cpt : HasCompactSupport ψ :=
+    hη_combined_cpt.of_isClosed_subset (isClosed_tsupport _) (by
+      -- tsupport ψ ⊆ tsupport η_combined
+      refine closure_mono ?_
+      intro y hy
+      simp only [hψ_def, Function.mem_support, ne_eq] at hy
+      have hη_ne : η_combined y ≠ 0 := by
+        intro h0; apply hy; rw [h0]; ring
+      exact Function.mem_support.mpr hη_ne)
+  -- Extend ψ from Ω_γα to chartTargetEuclid γ
+  have hψ_mem_target : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
+      (d := Module.finrank ℝ E) 1 p ψ (chartTargetEuclid (I := I) (M := M) γ) :=
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.extend_zero
+      (d := Module.finrank ℝ E) hp_one hp_top hΩγα_open
+      (chartTargetEuclid_isOpen (I := I) (M := M) γ) hΩγα_subset_target
+      hψ_mem_Ωγα hψ_supp_Ωγα hψ_cpt
+  -- Pointwise identity: on chartTargetEuclid γ, chartPushed γ (chartPullback α v) = ψ
+  -- Proof adapted from CrossChartBoundStrictMemWkp.lean lines 910-1100
+  have h_ae_eq : (chartPushed (I := I) (M := M)
+        (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) γ
+        (chartPullback I α v)) =ᵐ[volume.restrict
+          (chartTargetEuclid (I := I) (M := M) γ)] ψ := by
+    have h_target_meas : MeasurableSet (chartTargetEuclid (I := I) (M := M) γ) :=
+      (chartTargetEuclid_isOpen (I := I) (M := M) γ).measurableSet
+    refine (ae_restrict_iff' h_target_meas).mpr ?_
+    refine Filter.Eventually.of_forall ?_
+    intro y hy_target
+    -- Set z := the M-point corresponding to y under chart γ
+    set z : M := (extChartAt I γ).symm ((toEuclidean (E := E)).symm y) with hz_def
+    have hsymm_target : (toEuclidean (E := E)).symm y ∈ (extChartAt I γ).target := by
+      rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy_target; exact hy_target
+    have hz_source : z ∈ (extChartAt I γ).source :=
+      (extChartAt I γ).map_target hsymm_target
+    have hz_chartγ : z ∈ (chartAt H γ).source := by
+      rw [DifferentialGeometry.Integral.Measure.extChartAt_source_eq_chartAt_source
+        (I := I) (M := M)] at hz_source; exact hz_source
+    -- chartPushed formula
+    have h_pushed_eq : chartPushed (I := I) (M := M)
+        (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) γ
+        (chartPullback I α v) y = ρ_γ_M z * chartPullback I α v z := rfl
+    rw [h_pushed_eq, hψ_def, hχ_loc_def]
+    -- Goal: ρ_γ_M z * chartPullback I α v z = η_combined y * (η_α_loc (Φ.toFun y) * v (Φ.toFun y))
+    have hργE_y : ργE y = ρ_γ_M z := by
+      rw [hργE_def]
+      exact etaEuclid_apply_of_mem (I := I) (M := M) γ ρ_γ_M hy_target
+    simp [hη_combined_def, hργE_y]
+    -- Goal: ρ_γ_M z * chartPullback I α v z =
+    --       (η_γ_loc y * ρ_γ_M z) * (η_α_loc (Φ.toFun y) * v (Φ.toFun y))
+    -- Cancel ρ_γ_M z or handle zero case
+    by_cases hρ_zero : ρ_γ_M z = 0
+    · rw [hρ_zero]; simp
+    · have hz_in_tsupp_ρ : z ∈ tsupport ρ_γ_M :=
+        subset_tsupport _ (by simp [Function.mem_support, hρ_zero])
+      -- Check if y is in the support region of the γ-side bump
+      by_cases hy_in_supp_η_γ : y ∈ tsupport η_γ_loc
+      · -- y ∈ tsupport η_γ_loc ⊆ Ω_γα. On Ω_γα, the chart overlap gives z ∈ chart α source.
+        have hy_in_Ωγα : y ∈ Ω_γα := hη_γ_loc_supp_Ωγα hy_in_supp_η_γ
+        have hz_chartα : z ∈ (chartAt H α).source := by
+          have h_overlap_subset : Ω_γα ⊆ chartOverlapEuclid (I := I) (M := M) γ α :=
+            hΩγα_subset_overlap
+          have hy_overlap : y ∈ chartOverlapEuclid (I := I) (M := M) γ α :=
+            h_overlap_subset hy_in_Ωγα
+          unfold chartOverlapEuclid at hy_overlap
+          rcases hy_overlap with ⟨a, ⟨w, ⟨hw_γ, hw_α⟩, hwa⟩, hay⟩
+          have hy_eq : (toEuclidean (E := E)) (extChartAt I γ w) = y := by
+            rw [← hay, ← hwa]
+          have hz_eq_w : z = w := by
+            have h_w_chart_γ : w ∈ (extChartAt I γ).source := by
+              rw [extChartAt_source]; exact hw_γ
+            have hy_symm : (toEuclidean (E := E)).symm y = extChartAt I γ w := by
+              rw [← hy_eq, (toEuclidean (E := E)).symm_apply_apply]
+            have hz_val : z = (extChartAt I γ).symm (extChartAt I γ w) := by
+              rw [hz_def, hy_symm]
+            rw [hz_val, (extChartAt I γ).left_inv h_w_chart_γ]
+          rw [hz_eq_w]; exact hw_α
+        -- Relationship between Φ and chart transition
+        have hΦy_eq : Φ.toFun y = chartTransitionEuclid (I := I) (M := M) γ α y :=
+          hΦ_eq_on_Ωγα y hy_in_Ωγα
+        -- Link y to (toEuclidean (extChartAt I γ z))
+        have h_ext_γ_z : extChartAt I γ z = (toEuclidean (E := E)).symm y := by
+          rw [hz_def]
+          exact (extChartAt I γ).right_inv hsymm_target
+        have hy_eq_w : y = (toEuclidean (E := E)) (extChartAt I γ z) := by
+          calc
+            y = (toEuclidean (E := E)) ((toEuclidean (E := E)).symm y) := by simp
+            _ = (toEuclidean (E := E)) (extChartAt I γ z) := by rw [h_ext_γ_z]
+        have hΦy_chartα : Φ.toFun y = (toEuclidean (E := E)) (extChartAt I α z) := by
+          rw [hΦy_eq, hy_eq_w]
+          exact chartTransitionEuclid_eq_chartα_image (I := I) (M := M) γ α hz_chartγ
+        rw [hΦy_chartα]
+        -- Now goal: ρ_γ_M z * chartPullback I α v z =
+        --           (η_γ_loc y * ρ_γ_M z) * (η_α_loc ((toEucl ...) z) * v ((toEucl ...) z))
+        -- chartPullback I α v z = v ((toEucl ...) z) since z ∈ chart α source
+        rw [chartPullback_apply_of_mem (I := I) (M := M) α v hz_chartα]
+        -- Cancel ρ_γ_M z ≠ 0 (ring)
+        have h_nonzero : ρ_γ_M z ≠ 0 := hρ_zero
+        -- Goal becomes: ρ * v = (η_γ_loc y * ρ) * (η_α_loc * v)
+        -- where all evaluations at implicit points. Cancel ρ:
+        -- ρ * v = ρ * (η_γ_loc y * (η_α_loc * v))
+        -- ρ * v = ρ * (η_γ_loc y * η_α_loc * v)
+        -- If η_γ_loc y = 1 and η_α_loc = 1, then equality holds.
+        -- When v = 0, both sides are 0 regardless of η values.
+        -- When v ≠ 0, we use the support hypothesis to deduce η values = 1.
+        by_cases hv_z : v ((toEuclidean (E := E)) (extChartAt I α z)) = 0
+        · rw [hv_z, mul_zero, mul_zero, mul_zero]
+        · -- v ≠ 0, so we are in the "interesting" region
+          have h_in_tsupp_v : (toEuclidean (E := E)) (extChartAt I α z) ∈ tsupport v :=
+            subset_tsupport _ (by simpa using hv_z)
+          have h_in_image_K_α : (toEuclidean (E := E)) (extChartAt I α z) ∈
+              (fun x : M => (toEuclidean (E := E)) (extChartAt I α x)) '' K_α :=
+            hv_supp h_in_tsupp_v
+          rcases h_in_image_K_α with ⟨x', hx'_K_α, hx'_eq⟩
+          -- By injectivity of the chart, z = x' (up to chart), so z ∈ K_α
+          have hx'_chart : x' ∈ (chartAt H α).source := hK_α_in_α hx'_K_α
+          have h_eq_chart : extChartAt I α x' = extChartAt I α z := by
+            have h_eu : (toEuclidean (E := E)) (extChartAt I α x') =
+                (toEuclidean (E := E)) (extChartAt I α z) := hx'_eq
+            exact (toEuclidean (E := E)).injective h_eu
+          have hz_in_α_ext : z ∈ (extChartAt I α).source := by
+            rw [DifferentialGeometry.Integral.Measure.extChartAt_source_eq_chartAt_source
+              (I := I) (M := M)]; exact hz_chartα
+          have hx'_α_ext : x' ∈ (extChartAt I α).source := by
+            rw [DifferentialGeometry.Integral.Measure.extChartAt_source_eq_chartAt_source
+              (I := I) (M := M)]; exact hx'_chart
+          have h_inj := (extChartAt I α).injOn hx'_α_ext hz_in_α_ext h_eq_chart
+          have hz_in_K_α : z ∈ K_α := by rw [← h_inj]; exact hx'_K_α
+          -- Hence z ∈ K_M = K_α ∩ tsupport ρ_γ_M
+          have hz_in_KM : z ∈ K_M := ⟨hz_in_K_α, hz_in_tsupp_ρ⟩
+          -- Then y ∈ K_E_γ (chart-γ image of K_M), so η_γ_loc y = 1
+          have hy_in_KEγ : y ∈ K_E_γ := by
+            refine ⟨z, hz_in_KM, ?_⟩
+            change (toEuclidean (E := E)) (extChartAt I γ z) = y
+            have h_z_chart : extChartAt I γ z = (toEuclidean (E := E)).symm y :=
+              (extChartAt I γ).right_inv hsymm_target
+            rw [h_z_chart]; exact (toEuclidean (E := E)).apply_symm_apply y
+          have hη_γ_loc_y_one : η_γ_loc y = 1 :=
+            hη_γ_loc_one y (Metric.self_subset_cthickening K_E_γ hy_in_KEγ)
+          -- And Φ.toFun y = chart-α image of z ∈ K_E_α, so η_α_loc = 1
+          have h_chartα_z_in_K_E_α :
+              (toEuclidean (E := E)) (extChartAt I α z) ∈ K_E_α := ⟨z, hz_in_KM, rfl⟩
+          have hη_α_loc_eq_one : η_α_loc ((toEuclidean (E := E)) (extChartAt I α z)) = 1 :=
+            hη_α_loc_one ((toEuclidean (E := E)) (extChartAt I α z))
+              (Metric.self_subset_cthickening K_E_α h_chartα_z_in_K_E_α)
+          rw [hη_γ_loc_y_one, hη_α_loc_eq_one]
+          ring
+      · -- y ∉ tsupport η_γ_loc → η_γ_loc y = 0 → RHS = 0
+        have hη_γ_loc_y_zero : η_γ_loc y = 0 :=
+          image_eq_zero_of_notMem_tsupport hy_in_supp_η_γ
+        -- RHS becomes 0. We need LHS = 0, i.e., ρ_γ_M z * chartPullback I α v z = 0.
+        -- Since ρ_γ_M z ≠ 0 (we are in the hρ_zero false branch), we need
+        -- chartPullback I α v z = 0.
+        -- This follows because if z ∈ K_α, then y = toEuclidean(extChartAt I γ z) ∈ K_E_γ,
+        -- which would imply η_γ_loc y = 1 (since η_γ_loc = 1 on the cthickening of K_E_γ),
+        -- contradicting hy_in_supp_η_γ. Thus z ∉ K_α.
+        have hz_not_Kα : z ∉ K_α := by
+          intro hz_Kα
+          apply hy_in_supp_η_γ
+          have hz_in_KM : z ∈ K_M := ⟨hz_Kα, hz_in_tsupp_ρ⟩
+          have hy_in_KEγ : y ∈ K_E_γ := ⟨z, hz_in_KM, by
+            have h_ext_γ_z : extChartAt I γ z = (toEuclidean (E := E)).symm y := by
+              rw [hz_def]
+              exact (extChartAt I γ).right_inv hsymm_target
+            calc
+              (toEuclidean (E := E)) (extChartAt I γ z)
+                  = (toEuclidean (E := E)) ((toEuclidean (E := E)).symm y) := by rw [h_ext_γ_z]
+              _ = y := by simp⟩
+          -- η_γ_loc y = 1, so y ∈ tsupport η_γ_loc
+          have h_one : η_γ_loc y = 1 :=
+            hη_γ_loc_one y (Metric.self_subset_cthickening K_E_γ hy_in_KEγ)
+          have h_ne_zero : η_γ_loc y ≠ 0 := by linarith
+          have hy_supp : y ∈ support η_γ_loc := by
+            simpa [Function.mem_support] using h_ne_zero
+          exact subset_tsupport _ hy_supp
+        -- Now deduce chartPullback = 0 from z ∉ K_α
+        have h_cp_zero : chartPullback I α v z = 0 := by
+          by_cases hz_α_src : z ∈ (chartAt H α).source
+          · rw [chartPullback_apply_of_mem (I := I) (M := M) α v hz_α_src]
+            -- Show v(toEuclidean(extChartAt I α z)) = 0 because it's outside tsupport v
+            have h_outside : (toEuclidean (E := E)) (extChartAt I α z) ∉ tsupport v := by
+              intro h
+              have h_image : (toEuclidean (E := E)) (extChartAt I α z) ∈
+                  (fun x : M => (toEuclidean (E := E)) (extChartAt I α x)) '' K_α :=
+                hv_supp h
+              rcases h_image with ⟨x, hx_Kα, hx_eq⟩
+              -- Injectivity: toEuclidean injective, extChartAt I α injective on source
+              have h_toEucl_inj : Function.Injective (toEuclidean (E := E)) :=
+                (toEuclidean (E := E)).injective
+              have hx_src : x ∈ (extChartAt I α).source := by
+                rw [extChartAt_source (I := I)]
+                exact hK_α_in_α hx_Kα
+              have hz_ext_src : z ∈ (extChartAt I α).source := by
+                rw [extChartAt_source (I := I)]
+                exact hz_α_src
+              have h_ext_eq : extChartAt I α x = extChartAt I α z :=
+                h_toEucl_inj hx_eq
+              have h_x_eq_z : x = z :=
+                (extChartAt I α).injOn hx_src hz_ext_src h_ext_eq
+              rw [h_x_eq_z] at hx_Kα
+              exact hz_not_Kα hx_Kα
+            exact image_eq_zero_of_notMem_tsupport h_outside
+          · exact chartPullback_apply_of_notMem (I := I) (M := M) α v hz_α_src
+        simp [hη_γ_loc_y_zero, h_cp_zero]
+  -- Conclude via MemWkp_congr_ae
+  exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_congr_ae
+    (d := Module.finrank ℝ E) hp_one (chartTargetEuclid_isOpen (I := I) (M := M) γ) h_ae_eq).mpr hψ_mem_target
 
 /-! ## Headline: smooth functions are dense in `W^{1,p}_chart(M)` -/
 
@@ -806,7 +1277,7 @@ theorem contMDiff_dense_in_WkpChart
   have hχ_supp_target : ∀ α : S, tsupport (χ α) ⊆
       chartTargetEuclid (I := I) (M := M) (α : M) := by
     intro α
-    refine (hχ α).trans ?_
+    refine (hχ_supp α).trans ?_
     -- chart-α image of K_α α ⊆ chartTargetEuclid α (since K_α ⊆ chart α source).
     intro y hy
     rcases hy with ⟨x, hxK, hxy⟩
@@ -841,14 +1312,14 @@ theorem contMDiff_dense_in_WkpChart
   -- Per-γ: chartPushed γ (u - v) = Σ_α∈Finset chartPushed γ (chartPullback α (chartPushed α u - χ α)).
   -- Use `cross_chart_bound` per (γ, α) on `f_α - χ_α := tightenedChartPushed α (η_M α) u - χ α`,
   -- and a.e.-equivalence to convert `(chartPushed α u - χ α)` into `(f_α - χ α)`.
-  have h_per_gamma : ∀ γ ∈ S,
+  have h_per_gamma : ∀ (γ : M), (hγS : γ ∈ S) →
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := Module.finrank ℝ E) 1 p
         (chartPushed (I := I) (M := M)
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) γ
           (fun x => u x - v x))
         (chartTargetEuclid (I := I) (M := M) γ) ≤
-        ∑ α ∈ S.attach, ENNReal.ofReal (K_pair ⟨γ, ‹_›⟩ α) * ENNReal.ofReal ε_per := by
+        ∑ α ∈ S.attach, ENNReal.ofReal (K_pair ⟨γ, hγS⟩ α) * ENNReal.ofReal ε_per := by
     intro γ hγS
     -- Express chartPushed γ (u - v) = chartPushed γ u - chartPushed γ v.
     -- Then chartPushed γ v = Σ_α∈S.attach chartPushed γ (chartPullback α (χ α)).
@@ -945,18 +1416,9 @@ theorem contMDiff_dense_in_WkpChart
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) (α : M) u y -
             χ α y) =
           chartPullback I (α : M) (fun y => f_α y - χ α y) := by
-        rw [chartPullback_sub, chartPullback_sub]
-        funext x
-        simp only
-        rw [show chartPullback I (α : M) f_α x =
-            chartPullback I (α : M)
-              (chartPushed (I := I) (M := M)
-                (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) (α : M) u) x
-            from by
-          rw [hf_α_def]
-          have h_eq := chartPullback_tightenedChartPushed_eq (I := I) (M := M)
-            (α : M) (hη_one_on_tsupport α) u
-          exact congrFun h_eq x]
+        rw [chartPullback_sub, chartPullback_sub, hf_α_def,
+          chartPullback_tightenedChartPushed_eq (I := I) (M := M)
+            (α : M) (hη_one_on_tsupport α) u]
       rw [h_chartPullback_eq]
       -- Now apply cross_chart_bound to v := f_α - χ α.
       have hf_α_mem : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
@@ -1097,24 +1559,192 @@ theorem contMDiff_dense_in_WkpChart
       -- fact that the cross-chart bound proof builds a smooth diffeo Φ and
       -- factors through it. We use the helper `cross_chart_bound`'s underlying
       -- structure.
-      -- To keep things simple, we use the fact that the difference is a
-      -- specific function, and use the qualitative chain rule directly.
-      -- chartPushed γ (chartPullback α v) for our v: this is exactly what
-      -- the proof of `cross_chart_bound_strict_strong_memWkp` works with. The
-      -- proof internally derives MemWkp; we extract that.
-      -- Easier: the `cross_chart_bound` gives a wkpNorm bound;
-      -- `wkpNorm < ⊤` is needed for `MemWkp.add` to work. But `MemWkp` predicate
-      -- requires AEStronglyMeasurable + each chosen weak partial in L^p.
-      -- The cleanest statement from `cross_chart_bound`:
-      --   chartPushed γ (chartPullback α v) for v with tsupport ⊆ chart-α image of K_α
-      --   is in MemWkp 1 p (chartTargetEuclid γ).
-      -- The fact is implicitly used in the proof. Let's just rebuild it: state
-      -- a helper that gives MemWkp directly.
-      sorry
+      -- Use the private lemma MemWkp_of_cross_chart_pushforward
+      -- with v := f_α - χ α, which has MemWkp and correct tsupport
+      set f_α : EuclN → ℝ :=
+        tightenedChartPushed (I := I) (M := M) (α : M) (η_M α) u with hf_α_def'
+      have hf_α_mem : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
+          (d := Module.finrank ℝ E) 1 p f_α
+          (chartTargetEuclid (I := I) (M := M) (α : M)) :=
+        tightenedChartPushed_memWkp (I := I) (M := M) g hp_one hu (α : M)
+          (hη_smooth α) (hη_M_cpt α) (hη_M_supp_chart α)
+      have hχ_α_mem : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
+          (d := Module.finrank ℝ E) 1 p (χ α)
+          (chartTargetEuclid (I := I) (M := M) (α : M)) :=
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_of_smooth_compactSupport_pub
+          (d := Module.finrank ℝ E)
+          (chartTargetEuclid_isOpen (I := I) (M := M) (α : M))
+          (hχ_smooth α) (hχ_cpt α) (hχ_supp_target α) hp_one 1
+      have h_diff_mem : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
+          (d := Module.finrank ℝ E) 1 p (fun y => f_α y - χ α y)
+          (chartTargetEuclid (I := I) (M := M) (α : M)) :=
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.sub
+          (d := Module.finrank ℝ E) hp_one
+          (chartTargetEuclid_isOpen (I := I) (M := M) (α : M))
+          hf_α_mem hχ_α_mem
+      have h_diff_supp : tsupport (fun y => f_α y - χ α y) ⊆
+          (fun x : M => (toEuclidean (E := E)) (extChartAt I (α : M) x)) '' K_α α := by
+        have h_supp_sub : Function.support (fun y => f_α y - χ α y) ⊆
+            Function.support f_α ∪ Function.support (χ α) := by
+          intro y hy
+          by_cases hyf : y ∈ Function.support f_α
+          · exact Or.inl hyf
+          · right
+            change χ α y ≠ 0
+            intro h0
+            apply hy
+            change f_α y - χ α y = 0
+            have : f_α y = 0 := Function.notMem_support.mp hyf
+            rw [this, h0, sub_self]
+        have h_tsupp_sub : tsupport (fun y => f_α y - χ α y) ⊆
+            tsupport f_α ∪ tsupport (χ α) := by
+          unfold tsupport
+          refine (closure_mono h_supp_sub).trans ?_
+          rw [closure_union]
+        have hf_α_supp : tsupport f_α ⊆
+            (fun x : M => (toEuclidean (E := E)) (extChartAt I (α : M) x)) '' K_α α :=
+          tsupport_tightenedChartPushed_subset (I := I) (M := M) (α : M)
+            (hη_M_cpt α) (hη_M_supp_chart α) (hη_tsupp_K α) u
+        exact h_tsupp_sub.trans (Set.union_subset hf_α_supp (hχ_supp α))
+      -- Apply the private lemma
+      have h_mem_cross : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
+          (d := Module.finrank ℝ E) 1 p
+          (chartPushed (I := I) (M := M)
+            (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) γ
+            (chartPullback I (α : M) (fun y => f_α y - χ α y)))
+          (chartTargetEuclid (I := I) (M := M) γ) :=
+        MemWkp_of_cross_chart_pushforward (I := I) (M := M) γ (α : M)
+          (hK_compact α) (hK_chart α) hp_one hp_top h_diff_mem h_diff_supp
+      -- Rewrite the chartPullback using the equality from earlier
+      have h_eq : chartPullback I (α : M)
+          (fun y => chartPushed (I := I) (M := M)
+            (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) (α : M) u y -
+            χ α y) =
+          chartPullback I (α : M) (fun y => f_α y - χ α y) := by
+        rw [chartPullback_sub, chartPullback_sub, hf_α_def',
+          chartPullback_tightenedChartPushed_eq (I := I) (M := M)
+            (α : M) (hη_one_on_tsupport α) u]
+      simpa [h_eq] using h_mem_cross
     -- Now triangle inequality.
-    sorry
-  -- Step 9: combine the per-γ bounds via wkpNormChart_eq_finset_sum.
-  sorry
+    -- We already have h_summand_mem giving MemWkp for each summand.
+    -- Use wkpNorm_add_le via Finset induction.
+    set Ωγ := chartTargetEuclid (I := I) (M := M) γ with hΩγ_def
+    have hΩγ_open : IsOpen Ωγ := chartTargetEuclid_isOpen (I := I) (M := M) γ
+    -- Induction on S.attach
+    have h_total_bound : DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        (d := Module.finrank ℝ E) 1 p
+        (fun y => ∑ α ∈ S.attach,
+          chartPushed (I := I) (M := M)
+            (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) γ
+            (chartPullback I (α : M)
+              (fun z => chartPushed (I := I) (M := M)
+                (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) (α : M) u z -
+                χ α z)) y)
+        Ωγ ≤
+      ∑ α ∈ S.attach, ENNReal.ofReal (K_pair ⟨γ, hγS⟩ α) * ENNReal.ofReal ε_per := by
+      -- Define a helper F for the per-α summand
+      set F : (↥S) → EuclN → ℝ := fun (α' : S) y =>
+        chartPushed (I := I) (M := M)
+          (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) γ
+          (chartPullback I (α' : M)
+            (fun z => chartPushed (I := I) (M := M)
+              (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) (α' : M) u z -
+              χ α' z)) y with hF_def
+      have hF_mem : ∀ (α' : S) (h : α' ∈ S.attach),
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
+            (d := Module.finrank ℝ E) 1 p (F α') Ωγ := by
+        intro α' hα'
+        simpa [hF_def] using h_summand_mem α' hα'
+      -- Use induction on S.attach
+      induction S.attach using Finset.induction_on with
+      | empty =>
+          simp [DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_zero_fun_zero
+            (d := Module.finrank ℝ E) hp_one hΩγ_open]
+      | insert α T hαT ih =>
+          have hsum_eq : (fun y => ∑ α' ∈ insert α T, F α' y) =
+              (fun y => F α y + ∑ α' ∈ T, F α' y) := by
+            ext y; simp [Finset.sum_insert hαT]
+          rw [hsum_eq]
+          have h_mem_α : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
+              (d := Module.finrank ℝ E) 1 p (F α) Ωγ :=
+            hF_mem α (Finset.mem_attach _ _)
+          have h_mem_sum : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
+              (d := Module.finrank ℝ E) 1 p (fun y => ∑ α' ∈ T, F α' y) Ωγ := by
+            refine Finset.induction_on T ?_ ?_
+            · exact DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_zero_fun
+                (d := Module.finrank ℝ E) hp_one hΩγ_open
+            · intro β T' hβT' ih_sum
+              have hsum_eq' : (fun y => ∑ β' ∈ insert β T', F β' y) =
+                  (fun y => F β y + ∑ β' ∈ T', F β' y) := by
+                ext y; simp [Finset.sum_insert hβT']
+              rw [hsum_eq']
+              exact DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.add
+                (d := Module.finrank ℝ E) hp_one hΩγ_open
+                (hF_mem β (Finset.mem_attach _ _)) ih_sum
+          refine (DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_add_le
+            (d := Module.finrank ℝ E) hp_one hΩγ_open h_mem_α h_mem_sum).trans ?_
+          rw [Finset.sum_insert hαT]
+          refine add_le_add ?_ ?_
+          · exact h_per_alpha α (by simpa using Finset.mem_insert_self α T)
+          · exact ih
+    exact h_total_bound
+  -- Step 9: combine the per-γ bounds.
+  -- The goal (after rewrite at line 1242) is:
+  -- Σ_{γ∈S} wkpNorm(chartPushed γ (u-v)) ≤ ENNReal.ofReal ε
+  -- Each per-γ term ≤ Σ_α ofReal(K_pair) * ofReal(ε_per)
+  -- So the total is ≤ Σ_{γ,α} ofReal(K_pair) * ofReal(ε_per) ≤ ofReal ε
+  -- Step 9: combine the per-γ bounds.
+  -- Directly use h_per_gamma with Finset.sum over S.
+  -- The goal is: (∑ γ ∈ S, wkpNorm ...) ≤ ENNReal.ofReal ε
+  -- h_per_gamma γ hγ: wkpNorm ... ≤ ∑ α ∈ S.attach, ENNReal.ofReal (K_pair ⟨γ, hγ⟩ α) * ENNReal.ofReal ε_per
+  -- So we need to sum over γ∈S. The RHS depends on hγ : γ∈S.
+  -- Use the subtype sum to avoid the dependency.
+  let f : S → ENNReal := fun (γ : S) =>
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      (d := Module.finrank ℝ E) 1 p
+      (chartPushed (I := I) (M := M)
+        (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) γ.val
+        (fun x => u x - v x))
+      (chartTargetEuclid (I := I) (M := M) γ.val)
+  have h_f_bound : ∀ (γ : S), f γ ≤ ∑ α : S, ENNReal.ofReal (K_pair γ α) * ENNReal.ofReal ε_per := by
+    intro γ
+    dsimp [f]
+    -- h_per_gamma γ.val γ.property: wkpNorm ... ≤ ∑ α ∈ S.attach, ENNReal.ofReal (K_pair ⟨γ.val, γ.property⟩ α) * ...
+    -- Convert RHS: ∑ α ∈ S.attach = ∑ α : S via sum_attach
+    simpa [Finset.sum_attach (s := Integral.Measure.chartAtlasPOU_finset), hS_def] using
+      h_per_gamma γ.val γ.property
+  -- Now use sum over subtype
+  rw [← Finset.sum_attach (s := S)]
+  calc
+    (∑ γ : S, f γ) ≤ (∑ γ : S, ∑ α : S, ENNReal.ofReal (K_pair γ α) * ENNReal.ofReal ε_per) :=
+      Finset.sum_le_sum (fun γ _ => h_f_bound γ)
+    _ ≤ ENNReal.ofReal ε := by
+      calc
+        (∑ γ : S, ∑ α : S, ENNReal.ofReal (K_pair γ α) * ENNReal.ofReal ε_per)
+            = (∑ γ : S, ∑ α : S, ENNReal.ofReal (K_pair γ α * ε_per)) := by
+          refine Finset.sum_congr rfl fun γ _ => Finset.sum_congr rfl fun α _ => ?_
+          rw [ENNReal.ofReal_mul ((hK_pair_pos γ α).le)]
+        _ = ENNReal.ofReal (∑ γ : S, ∑ α : S, (K_pair γ α * ε_per)) := by
+          calc
+            (∑ γ : S, ∑ α : S, ENNReal.ofReal (K_pair γ α * ε_per))
+                = (∑ γ : S, ENNReal.ofReal (∑ α : S, (K_pair γ α * ε_per))) := by
+              refine Finset.sum_congr rfl (fun γ _ => ?_)
+              rw [ENNReal.ofReal_sum_of_nonneg (fun α hα =>
+                mul_nonneg ((hK_pair_pos γ α).le) hε_per_pos.le)]
+            _ = ENNReal.ofReal (∑ γ : S, ∑ α : S, (K_pair γ α * ε_per)) := by
+              rw [ENNReal.ofReal_sum_of_nonneg (fun γ hγ =>
+                Finset.sum_nonneg (fun α hα =>
+                  mul_nonneg ((hK_pair_pos γ α).le) hε_per_pos.le))]
+        _ = ENNReal.ofReal ((∑ γ : S, ∑ α : S, K_pair γ α) * ε_per) := by
+          simp [Finset.sum_mul, Finset.mul_sum]
+        _ = ENNReal.ofReal ((K_total - 1) * ε_per) := by
+          rw [hK_total_def]
+          ring
+        _ ≤ ENNReal.ofReal (K_total * ε_per) :=
+          ENNReal.ofReal_le_ofReal (mul_le_mul_of_nonneg_right (by
+            have : 0 ≤ 1 := by norm_num
+            linarith) hε_per_pos.le)
+        _ ≤ ENNReal.ofReal ε := ENNReal.ofReal_le_ofReal hK_total_eps_le
 
 end Chart
 end Sobolev

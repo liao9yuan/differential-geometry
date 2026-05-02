@@ -418,6 +418,196 @@ theorem hasWeakPartialDeriv_indicator_chosenWeakPartial_univ
     _ = -∫ x in Ω, g x * ψ x := by rw [hRHS_eq]
     _ = -∫ x : E, Ω.indicator g x * ψ x := by rw [hRHS_E]
 
+/-! ## Zero-extension of iterated `W^{k,p}` membership -/
+
+set_option linter.unusedVariables false in
+/-- **Zero-extension of `MemWkp` membership.** If `u ∈ W^{k,p}(Ω)` with compact support
+inside `Ω`, then `u ∈ W^{k,p}(V)` for any larger open set `V ⊇ Ω`. The weak partials
+extend by zero from `Ω` to `V`. -/
+theorem MemWkp.extend_zero {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞))
+    {Ω V : Set E} (hΩ : IsOpen Ω) (hV : IsOpen V) (hΩV : Ω ⊆ V)
+    {u : E → ℝ} (hu : MemWkp (d := d) k p u Ω)
+    (hu_supp : tsupport u ⊆ Ω) (hu_compactSupport : HasCompactSupport u) :
+    MemWkp (d := d) k p u V := by
+  induction k generalizing u with
+  | zero =>
+      rw [MemWkp_zero] at hu ⊢
+      -- hu : MemLp u p (volume.restrict Ω), goal: MemLp u p (volume.restrict V)
+      -- Use indicator extension: u = Ω.indicator u on V (pointwise, since u=0 outside Ω)
+      have h_indicator_mem : MemLp (Ω.indicator u) p (volume.restrict V) := by
+        rw [memLp_indicator_iff_restrict hΩ.measurableSet]
+        rw [Measure.restrict_restrict_of_subset hΩV]
+        exact hu
+      have hu_eq_indicator_ae : u =ᵐ[volume.restrict V] Ω.indicator u := by
+        refine (ae_restrict_iff' hV.measurableSet).mpr ?_
+        refine Filter.Eventually.of_forall fun x (hx : x ∈ V) => ?_
+        by_cases hxΩ : x ∈ Ω
+        · rw [Set.indicator_of_mem hxΩ]
+        · have hx_not_supp : x ∉ tsupport u := fun h => hxΩ (hu_supp h)
+          rw [image_eq_zero_of_notMem_tsupport hx_not_supp, Set.indicator_of_notMem hxΩ]
+      exact (memLp_congr_ae hu_eq_indicator_ae).mpr h_indicator_mem
+  | succ k ih =>
+      rw [MemWkp_succ] at hu ⊢
+      rcases hu with ⟨hu_W_Ω, hwp_Ω⟩
+      -- Part A: `DeGiorgi.MemW1p p u V`
+      have hu_memLp_V : MemLp u p (volume.restrict V) := by
+        have h_indicator_mem : MemLp (Ω.indicator u) p (volume.restrict V) := by
+          rw [memLp_indicator_iff_restrict hΩ.measurableSet]
+          rw [Measure.restrict_restrict_of_subset hΩV]
+          exact hu_W_Ω.1
+        have hu_eq_indicator_ae : u =ᵐ[volume.restrict V] Ω.indicator u := by
+          refine (ae_restrict_iff' hV.measurableSet).mpr ?_
+          refine Filter.Eventually.of_forall fun x (hx : x ∈ V) => ?_
+          by_cases hxΩ : x ∈ Ω
+          · rw [Set.indicator_of_mem hxΩ]
+          · have hx_not_supp : x ∉ tsupport u := fun h => hxΩ (hu_supp h)
+            rw [image_eq_zero_of_notMem_tsupport hx_not_supp, Set.indicator_of_notMem hxΩ]
+        exact (memLp_congr_ae hu_eq_indicator_ae).mpr h_indicator_mem
+      have hΩ_meas : MeasurableSet Ω := hΩ.measurableSet
+      have h_weak_partials_V : ∀ i : Fin d, ∃ g : E → ℝ,
+          MemLp g p (volume.restrict V) ∧ DeGiorgi.HasWeakPartialDeriv i g u V := by
+        intro i
+        have h_univ : DeGiorgi.HasWeakPartialDeriv i
+            (Ω.indicator (chosenWeakPartial' p i u Ω)) u Set.univ :=
+          hasWeakPartialDeriv_indicator_chosenWeakPartial_univ hp hΩ hu_W_Ω
+            hu_compactSupport hu_supp i
+        have h_V : DeGiorgi.HasWeakPartialDeriv i
+            (Ω.indicator (chosenWeakPartial' p i u Ω)) u V :=
+          DeGiorgi.HasWeakPartialDeriv.restrict hV (Set.subset_univ V) h_univ
+        have h_memLp : MemLp (Ω.indicator (chosenWeakPartial' p i u Ω)) p
+            (volume.restrict V) := by
+          rw [memLp_indicator_iff_restrict hΩ_meas]
+          rw [Measure.restrict_restrict_of_subset hΩV]
+          exact chosenWeakPartial'_memLp_of_mem hu_W_Ω i
+        exact ⟨Ω.indicator (chosenWeakPartial' p i u Ω), h_memLp, h_V⟩
+      have hu_W_V : DeGiorgi.MemW1p p u V :=
+        ⟨hu_memLp_V, h_weak_partials_V⟩
+      -- Part B: `∀ i, MemWkp k p (chosenWeakPartial' p i u V) V`
+      have hwp_V : ∀ i : Fin d, MemWkp (d := d) k p (chosenWeakPartial' p i u V) V := by
+        intro i
+        set g_Ω := chosenWeakPartial' p i u Ω with hg_Ω_def
+        set g_V := chosenWeakPartial' p i u V with hg_V_def
+        -- Construct a modification of `g_Ω` with topological support inside `tsupport u`
+        let g_mod : E → ℝ := (tsupport u).indicator g_Ω
+        have h_tsupp_u_closed : IsClosed (tsupport u) := isClosed_tsupport _
+        have h_tsupp_u_compact : IsCompact (tsupport u) := hu_compactSupport
+        have h_supp_g_mod_subset : Function.support g_mod ⊆ tsupport u := by
+          intro x hx
+          have hx_nonzero : g_mod x ≠ 0 := hx
+          dsimp [g_mod] at hx_nonzero
+          by_contra hx_not
+          have : g_mod x = 0 := Set.indicator_of_notMem hx_not _
+          exact hx_nonzero this
+        have h_tsupp_g_mod_subset : tsupport g_mod ⊆ tsupport u :=
+          (closure_mono h_supp_g_mod_subset).trans
+            (by rw [h_tsupp_u_closed.closure_eq])
+        have hg_mod_compactSupport : HasCompactSupport g_mod :=
+          h_tsupp_u_compact.of_isClosed_subset (isClosed_tsupport _) h_tsupp_g_mod_subset
+        have hg_mod_tsupport_subset_Ω : tsupport g_mod ⊆ Ω :=
+          h_tsupp_g_mod_subset.trans hu_supp
+        -- `g_mod =ᵐ g_Ω` on `volume.restrict Ω`
+        have hg_mod_ae_eq_g_Ω : g_mod =ᵐ[volume.restrict Ω] g_Ω := by
+          have h_meas_tsupp_u : MeasurableSet (tsupport u) := h_tsupp_u_closed.measurableSet
+          have h_ae_tsupport : g_mod =ᵐ[volume.restrict (tsupport u)] g_Ω := by
+            refine (ae_restrict_iff' h_meas_tsupp_u).mpr ?_
+            refine Filter.Eventually.of_forall ?_
+            intro x hx
+            dsimp [g_mod]
+            rw [Set.indicator_of_mem hx]
+          have h_ae_diff : g_mod =ᵐ[volume.restrict (Ω \ tsupport u)] g_Ω := by
+            have h_g_Ω_zero : g_Ω =ᵐ[volume.restrict (Ω \ tsupport u)]
+                (fun _ : E => (0 : ℝ)) :=
+              chosenWeakPartial'_ae_zero_on_sdiff_tsupport hp hΩ hu_W_Ω i
+            have h_g_mod_zero : g_mod =ᵐ[volume.restrict (Ω \ tsupport u)]
+                (fun _ : E => (0 : ℝ)) := by
+              have h_meas : MeasurableSet (Ω \ tsupport u) :=
+                hΩ.measurableSet.diff (isClosed_tsupport _).measurableSet
+              refine (ae_restrict_iff' h_meas).mpr ?_
+              refine Filter.Eventually.of_forall fun x hx => ?_
+              dsimp [g_mod]
+              have hx_not : x ∉ tsupport u := hx.2
+              rw [Set.indicator_of_notMem hx_not]
+            exact h_g_mod_zero.trans h_g_Ω_zero.symm
+          have h_union : Ω = tsupport u ∪ (Ω \ tsupport u) := by
+            ext x; constructor
+            · intro hx
+              by_cases hx' : x ∈ tsupport u
+              · exact Or.inl hx'
+              · exact Or.inr ⟨hx, hx'⟩
+            · rintro (hx | ⟨hx, -⟩)
+              · exact hu_supp hx
+              · exact hx
+          rw [h_union]
+          exact ((ae_restrict_union_iff (tsupport u) (Ω \ tsupport u)
+            (fun x => g_mod x = g_Ω x)).mpr ⟨h_ae_tsupport, h_ae_diff⟩)
+        -- `g_mod` inherits `MemWkp k p` on `Ω` via ae-equality
+        have hg_Ω_mem : MemWkp (d := d) k p g_Ω Ω := hwp_Ω i
+        have hg_mod_mem_Ω : MemWkp (d := d) k p g_mod Ω :=
+          (MemWkp_congr_ae hp hΩ hg_mod_ae_eq_g_Ω).mpr hg_Ω_mem
+        -- Extend `g_mod` from `Ω` to `V` using the induction hypothesis
+        have hg_mod_mem_V : MemWkp (d := d) k p g_mod V :=
+          ih hg_mod_mem_Ω hg_mod_tsupport_subset_Ω hg_mod_compactSupport
+        -- `g_mod =ᵐ g_V` on `volume.restrict V`
+        have hg_mod_ae_eq_g_V : g_mod =ᵐ[volume.restrict V] g_V := by
+          -- On `Ω`: `g_mod =ᵐ g_Ω` (by construction) and `g_Ω =ᵐ g_V` (uniqueness of weak partials)
+          have hg_Ω_ae_g_V_Ω : g_Ω =ᵐ[volume.restrict Ω] g_V := by
+            have h_g_Ω_weak : DeGiorgi.HasWeakPartialDeriv i g_Ω u Ω :=
+              chosenWeakPartial'_isWeakPartial_of_mem hu_W_Ω i
+            have h_g_V_weak : DeGiorgi.HasWeakPartialDeriv i g_V u V :=
+              chosenWeakPartial'_isWeakPartial_of_mem hu_W_V i
+            have h_g_V_weak_Ω : DeGiorgi.HasWeakPartialDeriv i g_V u Ω :=
+              DeGiorgi.HasWeakPartialDeriv.restrict hΩ hΩV h_g_V_weak
+            have h_g_Ω_loc : LocallyIntegrable g_Ω (volume.restrict Ω) :=
+              (chosenWeakPartial'_memLp_of_mem hu_W_Ω i).locallyIntegrable hp
+            have h_g_V_loc : LocallyIntegrable g_V (volume.restrict Ω) := by
+              have h_mem : MemLp g_V p (volume.restrict V) :=
+                chosenWeakPartial'_memLp_of_mem hu_W_V i
+              have h_mem_Ω : MemLp g_V p (volume.restrict Ω) :=
+                h_mem.mono_measure (Measure.restrict_mono_set volume hΩV)
+              exact h_mem_Ω.locallyIntegrable hp
+            exact DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ h_g_Ω_weak h_g_V_weak_Ω
+              h_g_Ω_loc h_g_V_loc
+          have h_ae_Ω : g_mod =ᵐ[volume.restrict Ω] g_V :=
+            hg_mod_ae_eq_g_Ω.trans hg_Ω_ae_g_V_Ω
+          -- On `V \ Ω`: `g_mod` is zero pointwise, `g_V` is zero a.e.
+          have h_ae_V_diff : g_mod =ᵐ[volume.restrict (V \ Ω)] g_V := by
+            have h_g_V_zero : g_V =ᵐ[volume.restrict (V \ tsupport u)]
+                (fun _ : E => (0 : ℝ)) :=
+              chosenWeakPartial'_ae_zero_on_sdiff_tsupport hp hV hu_W_V i
+            have h_subset : V \ Ω ⊆ V \ tsupport u :=
+              Set.diff_subset_diff_right hu_supp
+            have h_g_V_zero' : g_V =ᵐ[volume.restrict (V \ Ω)]
+                (fun _ : E => (0 : ℝ)) :=
+              ae_restrict_of_ae_restrict_of_subset h_subset h_g_V_zero
+            have h_meas_V_diff : MeasurableSet (V \ Ω) :=
+              (hV.measurableSet.diff hΩ_meas)
+            have h_g_mod_zero : g_mod =ᵐ[volume.restrict (V \ Ω)]
+                (fun _ : E => (0 : ℝ)) := by
+              refine (ae_restrict_iff' h_meas_V_diff).mpr ?_
+              refine Filter.Eventually.of_forall ?_
+              intro x hx
+              have hx_not_Ω : x ∉ Ω := hx.2
+              have hx_not_tsupp : x ∉ tsupport g_mod :=
+                fun h => hx_not_Ω (hg_mod_tsupport_subset_Ω h)
+              exact image_eq_zero_of_notMem_tsupport hx_not_tsupp
+            exact h_g_mod_zero.trans h_g_V_zero'.symm
+          -- Combine via `ae_restrict_union_iff` on the decomposition `V = Ω ∪ (V \ Ω)`
+          have h_union_V : V = Ω ∪ (V \ Ω) := by
+            ext x; constructor
+            · intro hx
+              by_cases hx' : x ∈ Ω
+              · exact Or.inl hx'
+              · exact Or.inr ⟨hx, hx'⟩
+            · rintro (hx | ⟨hx, -⟩)
+              · exact hΩV hx
+              · exact hx
+          rw [h_union_V]
+          exact ((ae_restrict_union_iff Ω (V \ Ω) (fun x => g_mod x = g_V x)).mpr
+            ⟨h_ae_Ω, h_ae_V_diff⟩)
+        -- Transfer back via `MemWkp_congr_ae`
+        exact (MemWkp_congr_ae hp hV hg_mod_ae_eq_g_V).mp hg_mod_mem_V
+      exact ⟨hu_W_V, hwp_V⟩
+
 /-! ## Convolution + IBP: classical partial of mollification = convolution with weak partial -/
 
 /-- The IBP identity at the convolution level: for `u` with a weak partial `g` on
