@@ -592,15 +592,17 @@ theorem exists_strict_strong_support_approx
   have hC_one_on_Ωα : ∀ y ∈ Ωα, ‖ηE y‖ ≤ C := fun y _ => hC_one y
   have hC_grad_on_Ωα : ∀ y ∈ Ωα, ‖fderiv ℝ ηE y‖ ≤ C := fun y _ => hC_grad y
   -- Step 5: get the Leibniz constant K from `wkpNorm_smul_smooth_bounded_le_one`.
-  have h_zero_memWkp :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
-        (d := Module.finrank ℝ E) 1 p (fun _ : EuclN => (0 : ℝ)) Ωα :=
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_zero_fun
-      (d := Module.finrank ℝ E) hp_one hΩα_open
+  have hC_nonneg : 0 ≤ C := le_trans zero_le_one (le_max_right _ _)
+  have hηE_iter_bound :
+      ∀ j ≤ 1, ∀ y ∈ Ωα, ‖iteratedFDeriv ℝ j ηE y‖ ≤ C := by
+    intro j hj y hy
+    interval_cases j
+    · rw [norm_iteratedFDeriv_zero]; exact hC_one_on_Ωα y hy
+    · rw [norm_iteratedFDeriv_one]; exact hC_grad_on_Ωα y hy
   obtain ⟨K_leib, hK_leib_pos, hK_leib_bound⟩ :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_smul_smooth_bounded_le_one
-      (d := Module.finrank ℝ E) hp_one hp_top hΩα_open hηE_smooth
-      hC_one_on_Ωα hC_grad_on_Ωα h_zero_memWkp
+      1 (le_refl _) (d := Module.finrank ℝ E) hp_one hp_top hΩα_open hηE_smooth
+      hC_nonneg hηE_iter_bound
   -- Step 6: package the result.
   refine ⟨K_α, hK_compact, hK_chart, h_tsupp_in_int_K, ?_⟩
   intro u hu ε_per hε_per

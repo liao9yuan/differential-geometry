@@ -1124,29 +1124,32 @@ theorem cross_chart_bound_strict_strong
   set Ωα_target : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩα_target_def
   have hΩγ_target_open : IsOpen Ωγ_target := chartTargetEuclid_isOpen (I := I) (M := M) γ
   have hΩα_target_open : IsOpen Ωα_target := chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- Apply Leibniz on Ω_γα (for the η_combined product) — first need a witness u
-  -- in MemWkp 1 p Ω_γα.
-  have h_zero_memWkp_Ωγα :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
-        (d := Module.finrank ℝ E) 1 p (fun _ : EuclN => (0 : ℝ)) Ω_γα :=
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_zero_fun
-      (d := Module.finrank ℝ E) hp_one hΩγα_open
+  -- Apply Leibniz on Ω_γα (for the η_combined product).
+  have hCmax_combined_nonneg : 0 ≤ Cmax_combined :=
+    le_trans zero_le_one (le_max_left _ _)
+  have hη_combined_iter_bound :
+      ∀ j ≤ 1, ∀ y ∈ Ω_γα, ‖iteratedFDeriv ℝ j η_combined y‖ ≤ Cmax_combined := by
+    intro j hj y _
+    interval_cases j
+    · rw [norm_iteratedFDeriv_zero]; exact hCmax_combined_norm y
+    · rw [norm_iteratedFDeriv_one]; exact hCmax_combined_grad y
   obtain ⟨K_leib, hK_leib_pos, hK_leib_bound⟩ :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_smul_smooth_bounded_le_one
-      (d := Module.finrank ℝ E) hp_one hp_top hΩγα_open hη_combined_smooth
-      (fun y _ => hCmax_combined_norm y)
-      (fun y _ => hCmax_combined_grad y) h_zero_memWkp_Ωγα
+      1 (le_refl _) (d := Module.finrank ℝ E) hp_one hp_top hΩγα_open hη_combined_smooth
+      hCmax_combined_nonneg hη_combined_iter_bound
   -- Apply Leibniz on chart-α target (for η_α_loc · χ).
-  have h_zero_memWkp_Ωα_target :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
-        (d := Module.finrank ℝ E) 1 p (fun _ : EuclN => (0 : ℝ)) Ωα_target :=
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_zero_fun
-      (d := Module.finrank ℝ E) hp_one hΩα_target_open
+  have hCmax_η_α_nonneg : 0 ≤ Cmax_η_α :=
+    le_trans zero_le_one (le_max_left _ _)
+  have hη_α_loc_iter_bound :
+      ∀ j ≤ 1, ∀ y ∈ Ωα_target, ‖iteratedFDeriv ℝ j η_α_loc y‖ ≤ Cmax_η_α := by
+    intro j hj y _
+    interval_cases j
+    · rw [norm_iteratedFDeriv_zero]; exact hCmax_η_α_norm y
+    · rw [norm_iteratedFDeriv_one]; exact hCmax_η_α_grad y
   obtain ⟨K_leib_α, hK_leib_α_pos, hK_leib_α_bound⟩ :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_smul_smooth_bounded_le_one
-      (d := Module.finrank ℝ E) hp_one hp_top hΩα_target_open hη_α_loc_smooth
-      (fun y _ => hCmax_η_α_norm y)
-      (fun y _ => hCmax_η_α_grad y) h_zero_memWkp_Ωα_target
+      1 (le_refl _) (d := Module.finrank ℝ E) hp_one hp_top hΩα_target_open hη_α_loc_smooth
+      hCmax_η_α_nonneg hη_α_loc_iter_bound
   -- Step 7: chain rule constant K_chain := Φ.wkpComp_const' 1 p.
   set K_chain : ℝ := Φ.wkpComp_const' 1 p with hK_chain_def
   -- Inline positivity proof, since `wkpComp_const'_pos` is private.

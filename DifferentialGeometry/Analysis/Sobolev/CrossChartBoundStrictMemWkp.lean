@@ -554,7 +554,7 @@ private lemma chosenWeakPartial_ae_eq_on_subset
     {d : ℕ} [NeZero d]
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     {Ω Ω' : Set (EuclideanSpace ℝ (Fin d))}
-    (hΩ : IsOpen Ω) (hΩ' : IsOpen Ω') (hΩΩ' : Ω' ⊆ Ω)
+    (_hΩ : IsOpen Ω) (hΩ' : IsOpen Ω') (hΩΩ' : Ω' ⊆ Ω)
     {u : EuclideanSpace ℝ (Fin d) → ℝ}
     (hu : DeGiorgi.MemW1p (d := d) p u Ω) (i : Fin d) :
     chosenWeakPartial' (d := d) p i u Ω =ᵐ[volume.restrict Ω']
@@ -597,7 +597,7 @@ private lemma iterWeakPartial_ae_eq_of_ae_zero_open_subset
     {h : ℕ} {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     {Ω Ω' U : Set (EuclideanSpace ℝ (Fin d))}
     (hΩ : IsOpen Ω) (hΩ' : IsOpen Ω') (hU_open : IsOpen U)
-    (hΩΩ' : Ω' ⊆ Ω) (hU_sub : U ⊆ Ω) (hU_contains : Ω \ Ω' ⊆ U)
+    (hΩΩ' : Ω' ⊆ Ω) (hU_sub : U ⊆ Ω) (_hU_contains : Ω \ Ω' ⊆ U)
     {u : EuclideanSpace ℝ (Fin d) → ℝ}
     (hu_mem : MemWkp (d := d) h p u Ω)
     (hu_zero : u =ᵐ[volume.restrict U] (fun _ => 0))
@@ -903,7 +903,7 @@ private lemma eLpNorm_iterWeakPartial_Ω_le_Ω'_with_U
     {j : ℕ} {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     {Ω Ω' U : Set (EuclideanSpace ℝ (Fin d))}
     (hΩ : IsOpen Ω) (hΩ' : IsOpen Ω') (hU_open : IsOpen U)
-    (hΩΩ' : Ω' ⊆ Ω) (hU_sub : U ⊆ Ω) (hU_contains : Ω \ Ω' ⊆ U)
+    (hΩΩ' : Ω' ⊆ Ω) (hU_sub : U ⊆ Ω) (_hU_contains : Ω \ Ω' ⊆ U)
     {u : EuclideanSpace ℝ (Fin d) → ℝ}
     (hu_mem : MemWkp (d := d) j p u Ω')
     (hu_zero_U : u =ᵐ[volume.restrict U] (fun _ => 0))
@@ -1355,26 +1355,30 @@ theorem cross_chart_bound_strict_strong_memWkp
   have hΩγ_target_open : IsOpen Ωγ_target := chartTargetEuclid_isOpen (I := I) (M := M) γ
   have hΩα_target_open : IsOpen Ωα_target := chartTargetEuclid_isOpen (I := I) (M := M) α
   -- Get Leibniz constants on Ω_γα (for η_combined) and on Ωα_target (for η_α_loc).
-  have h_zero_memWkp_Ωγα :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
-        (d := Module.finrank ℝ E) 1 p (fun _ : EuclN => (0 : ℝ)) Ω_γα :=
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_zero_fun
-      (d := Module.finrank ℝ E) hp_one hΩγα_open
+  have hCmax_combined_nonneg : 0 ≤ Cmax_combined :=
+    le_trans zero_le_one (le_max_left _ _)
+  have hη_combined_iter_bound :
+      ∀ j ≤ 1, ∀ y ∈ Ω_γα, ‖iteratedFDeriv ℝ j η_combined y‖ ≤ Cmax_combined := by
+    intro j hj y _
+    interval_cases j
+    · rw [norm_iteratedFDeriv_zero]; exact hCmax_combined_norm y
+    · rw [norm_iteratedFDeriv_one]; exact hCmax_combined_grad y
   obtain ⟨K_leib, hK_leib_pos, hK_leib_bound⟩ :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_smul_smooth_bounded_le_one
-      (d := Module.finrank ℝ E) hp_one hp_top hΩγα_open hη_combined_smooth
-      (fun y _ => hCmax_combined_norm y)
-      (fun y _ => hCmax_combined_grad y) h_zero_memWkp_Ωγα
-  have h_zero_memWkp_Ωα_target :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
-        (d := Module.finrank ℝ E) 1 p (fun _ : EuclN => (0 : ℝ)) Ωα_target :=
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_zero_fun
-      (d := Module.finrank ℝ E) hp_one hΩα_target_open
+      1 (le_refl _) (d := Module.finrank ℝ E) hp_one hp_top hΩγα_open hη_combined_smooth
+      hCmax_combined_nonneg hη_combined_iter_bound
+  have hCmax_η_α_nonneg : 0 ≤ Cmax_η_α :=
+    le_trans zero_le_one (le_max_left _ _)
+  have hη_α_loc_iter_bound :
+      ∀ j ≤ 1, ∀ y ∈ Ωα_target, ‖iteratedFDeriv ℝ j η_α_loc y‖ ≤ Cmax_η_α := by
+    intro j hj y _
+    interval_cases j
+    · rw [norm_iteratedFDeriv_zero]; exact hCmax_η_α_norm y
+    · rw [norm_iteratedFDeriv_one]; exact hCmax_η_α_grad y
   obtain ⟨K_leib_α, hK_leib_α_pos, hK_leib_α_bound⟩ :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_smul_smooth_bounded_le_one
-      (d := Module.finrank ℝ E) hp_one hp_top hΩα_target_open hη_α_loc_smooth
-      (fun y _ => hCmax_η_α_norm y)
-      (fun y _ => hCmax_η_α_grad y) h_zero_memWkp_Ωα_target
+      1 (le_refl _) (d := Module.finrank ℝ E) hp_one hp_top hΩα_target_open hη_α_loc_smooth
+      hCmax_η_α_nonneg hη_α_loc_iter_bound
   -- Chain rule constant.
   set K_chain : ℝ := Φ.wkpComp_const' 1 p with hK_chain_def
   have hK_chain_pos : 0 < K_chain := by

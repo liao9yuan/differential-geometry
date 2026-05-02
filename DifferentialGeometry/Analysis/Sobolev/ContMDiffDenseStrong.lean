@@ -241,7 +241,7 @@ private lemma chartPullback_tightenedChartPushed_eq
     --   ηE_α(toEucl(ext α x)) = 1 (since the chart-α image of x lies in the
     --   chart-α image of tsupport ρ_α, where ηE_α ≡ 1).
     set y : EuclN := (toEuclidean (E := E)) ((extChartAt I α) x) with hy_def
-    show tightenedChartPushed (I := I) (M := M) α η_M u y =
+    change tightenedChartPushed (I := I) (M := M) α η_M u y =
       chartPushed (I := I) (M := M)
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u y
     unfold tightenedChartPushed
@@ -476,7 +476,7 @@ private lemma wkpNorm_tightenedChartPushed_sub_eq
     intro y hy
     have h_eq := tightenedChartPushed_eq_chartPushed_on_target (I := I) (M := M)
       α hη_one_on_tsupport u y hy
-    simpa [h_eq]
+    simp [h_eq]
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_congr_ae
     (d := Module.finrank ℝ E) hp_one
     (chartTargetEuclid_isOpen (I := I) (M := M) α) h_diff_eq
@@ -717,7 +717,7 @@ private theorem MemWkp_of_cross_chart_pushforward
       have hy' : χ_loc y ≠ 0 := by
         simpa [Function.mem_support] using hy
       have hη_ne : η_α_loc y ≠ 0 := by
-        intro h0; apply hy'; simpa [hχ_loc_def, h0]
+        intro h0; apply hy'; simp [hχ_loc_def, h0]
       simpa [Function.mem_support]
     exact hη_α_loc_cpt.of_isClosed_subset (isClosed_tsupport _) h_sub_tsupp
   -- Restrict χ_loc from chartTargetEuclid α to Ω_αγ
@@ -790,7 +790,7 @@ private theorem MemWkp_of_cross_chart_pushforward
     have hργE_y : ργE y = ρ_γ_M z := by
       rw [hργE_def]
       exact etaEuclid_apply_of_mem (I := I) (M := M) γ ρ_γ_M hy_target
-    simp [hη_combined_def, hργE_y]
+    simp only [hη_combined_def, hργE_y]
     -- Goal: ρ_γ_M z * chartPullback I α v z =
     --       (η_γ_loc y * ρ_γ_M z) * (η_α_loc (Φ.toFun y) * v (Φ.toFun y))
     -- Cancel ρ_γ_M z or handle zero case
@@ -1141,15 +1141,17 @@ theorem contMDiff_dense_in_WkpChart
     have hC_one_on_Ωα : ∀ y ∈ Ωα, ‖ηE y‖ ≤ C := fun y _ => hC_one y
     have hC_grad_on_Ωα : ∀ y ∈ Ωα, ‖fderiv ℝ ηE y‖ ≤ C := fun y _ => hC_grad y
     -- Apply the Leibniz quantitative bound to get K_leib.
-    have h_zero_memWkp :
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
-          (d := Module.finrank ℝ E) 1 p (fun _ : EuclN => (0 : ℝ)) Ωα :=
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_zero_fun
-        (d := Module.finrank ℝ E) hp_one hΩα_open
+    have hC_nonneg : 0 ≤ C := le_trans zero_le_one (le_max_right _ _)
+    have hηE_iter_bound :
+        ∀ j ≤ 1, ∀ y ∈ Ωα, ‖iteratedFDeriv ℝ j ηE y‖ ≤ C := by
+      intro j hj y hy
+      interval_cases j
+      · rw [norm_iteratedFDeriv_zero]; exact hC_one_on_Ωα y hy
+      · rw [norm_iteratedFDeriv_one]; exact hC_grad_on_Ωα y hy
     obtain ⟨K_leib, hK_leib_pos, hK_leib_bound⟩ :=
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_smul_smooth_bounded_le_one
-        (d := Module.finrank ℝ E) hp_one hp_top hΩα_open hηE_smooth
-        hC_one_on_Ωα hC_grad_on_Ωα h_zero_memWkp
+        1 (le_refl _) (d := Module.finrank ℝ E) hp_one hp_top hΩα_open hηE_smooth
+        hC_nonneg hηE_iter_bound
     -- Use the strong-support approximation `exists_smooth_strong_support_approx`.
     set ε_inner : ℝ := ε_per / (K_leib + 1) with hε_inner_def
     have hε_inner_pos : 0 < ε_inner := by
@@ -1685,7 +1687,7 @@ theorem contMDiff_dense_in_WkpChart
             (d := Module.finrank ℝ E) hp_one hΩγ_open h_mem_α h_mem_sum).trans ?_
           rw [Finset.sum_insert hαT]
           refine add_le_add ?_ ?_
-          · exact h_per_alpha α (by simpa using Finset.mem_insert_self α T)
+          · exact h_per_alpha α (Finset.mem_attach _ _)
           · exact ih
     exact h_total_bound
   -- Step 9: combine the per-γ bounds.
@@ -1736,7 +1738,7 @@ theorem contMDiff_dense_in_WkpChart
                 Finset.sum_nonneg (fun α hα =>
                   mul_nonneg ((hK_pair_pos γ α).le) hε_per_pos.le))]
         _ = ENNReal.ofReal ((∑ γ : S, ∑ α : S, K_pair γ α) * ε_per) := by
-          simp [Finset.sum_mul, Finset.mul_sum]
+          simp [Finset.sum_mul]
         _ = ENNReal.ofReal ((K_total - 1) * ε_per) := by
           rw [hK_total_def]
           ring

@@ -188,20 +188,20 @@ are uniformly bounded by `C` on the open set `Ω`, the operation `u ↦ η · u`
 uniformly bounded on `W^{k,p}(Ω)` by a constant depending only on `C`, `k`, and
 the dimension `d`.
 
-Proved for `k = 0` and `k = 1`. The general case `k ≥ 2` follows by induction
-using the Leibniz rule for iterated weak partials and is left as future work. -/
+Currently established for `k ≤ 1`; the iterated Leibniz step for `k ≥ 2`
+will be added when needed. -/
 theorem wkpNorm_smul_smooth_bounded_le_one
-    (k : ℕ) {d : ℕ} [NeZero d]
+    (k : ℕ) (hk : k ≤ 1) {d : ℕ} [NeZero d]
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {Ω : Set (EuclideanSpace ℝ (Fin d))} (hΩ_open : IsOpen Ω)
     {η : EuclideanSpace ℝ (Fin d) → ℝ}
     (hη_smooth : ContDiff ℝ (⊤ : ℕ∞) η)
     {C : ℝ} (hC_nonneg : 0 ≤ C)
     (hη_bound : ∀ j ≤ k, ∀ x ∈ Ω, ‖iteratedFDeriv ℝ j η x‖ ≤ C) :
-    ∃ K : ℝ, 0 < K ∧ ∀ {u : EuclideanSpace ℝ (Fin d) → ℝ} (hu : MemWkp k p u Ω),
+    ∃ K : ℝ, 0 < K ∧ ∀ {u : EuclideanSpace ℝ (Fin d) → ℝ} (_hu : MemWkp k p u Ω),
       wkpNorm k p (fun x => η x * u x) Ω ≤ ENNReal.ofReal K * wkpNorm k p u Ω := by
-  match k with
-  | 0 =>
+  match k, hk with
+  | 0, _ =>
     have h0 : ∀ x ∈ Ω, ‖η x‖ ≤ C := by
       intro x hx
       have h := hη_bound 0 (zero_le _) x hx
@@ -220,7 +220,7 @@ theorem wkpNorm_smul_smooth_bounded_le_one
     have hC : ENNReal.ofReal C ≤ ENNReal.ofReal (C + 1) :=
       ENNReal.ofReal_le_ofReal (by linarith)
     exact hb.trans (mul_le_mul' hC (le_refl _))
-  | 1 =>
+  | 1, _ =>
     -- k = 1: the original proof, adapted to use hη_bound
     have h_eta0 : ∀ x ∈ Ω, ‖η x‖ ≤ C := by
       intro x hx
@@ -402,13 +402,6 @@ theorem wkpNorm_smul_smooth_bounded_le_one
       ((1 + d : ℕ) : ℝ≥0∞) * OC * Au + OC * SBu
           ≤ OK * Au + OK * SBu := add_le_add hbnd_Au hbnd_SBu
       _ = OK * (Au + SBu) := by rw [mul_add]
-  | _ =>
-    -- k ≥ 2: the general induction proof is left as future work.
-    -- The membership lemma `MemWkp.smul_smooth_bounded` already gives
-    -- η·u ∈ W^{k,p} for all k. The quantitative bound follows by induction
-    -- on k using the Leibniz decomposition (same pattern as k=0→k=1 step).
-    -- For Phase 5 applications, only k=0 and k=1 are required.
-    sorry
 
 end Euclidean
 end Sobolev
