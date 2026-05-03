@@ -213,3 +213,145 @@ lemma genericCovDeriv_contract
   h_ntc X T
 
 end GenericCovDeriv
+
+section TensorDivergence02
+
+variable {k R V : Type*}
+variable [Field k] [CommRing R] [Algebra k R]
+variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+
+/-- For fixed derivative direction `X` and trailing argument `Y`, the covector
+`Z |-> (nabla_X T)(Z,Y)` for a `(0,2)` tensor `T`. This is the component that
+gets traced in the Section 14.2 divergence of a covariant 2-tensor. -/
+noncomputable def covDeriv02TraceCovector
+    (emb : DerivationEmbedding k R V) (conn : V -> V -> V)
+    (ha : forall X Y Z : V, conn X (Y + Z) = conn X Y + conn X Z)
+    (hl : forall X (f : R) (Y : V),
+      conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (X : V) (T : TensorData R V 0 2) (Y : V) : V →ₗ[R] R where
+  toFun Z := rawCovDeriv emb conn X T Z Y
+  map_add' Z1 Z2 := rawCovDeriv_add_left emb conn ha X T Z1 Z2 Y
+  map_smul' c Z := by
+    simp only [RingHom.id_apply, smul_eq_mul]
+    exact rawCovDeriv_smul_left emb conn hl X T c Z Y
+
+theorem covDeriv02TraceCovector_apply
+    (emb : DerivationEmbedding k R V) (conn : V -> V -> V)
+    (ha : forall X Y Z : V, conn X (Y + Z) = conn X Y + conn X Z)
+    (hl : forall X (f : R) (Y : V),
+      conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (X : V) (T : TensorData R V 0 2) (Y Z : V) :
+    covDeriv02TraceCovector emb conn ha hl X T Y Z =
+      nabla_tensor emb conn ha hl X T ![Z, Y] ![] := by
+  change rawCovDeriv emb conn X T Z Y =
+    nabla_tensor emb conn ha hl X T ![Z, Y] ![]
+  exact (covDeriv_eval emb conn ha hl X T Z Y).symm
+
+/-- The endomorphism whose abstract trace is the divergence of a `(0,2)` tensor
+at `Y`: `X |-> sharp (Z |-> (nabla_X T)(Z,Y))`. -/
+noncomputable def covDivergence02Endomorphism
+    (emb : DerivationEmbedding k R V) (met : MetricDuality R V)
+    (conn : V -> V -> V)
+    (ha : forall X Y Z : V, conn X (Y + Z) = conn X Y + conn X Z)
+    (conn_add_left : forall X Y Z : V, conn (X + Y) Z = conn X Z + conn Y Z)
+    (conn_smul_left : forall (f : R) (X Z : V), conn (f • X) Z = f • conn X Z)
+    (hl : forall X (f : R) (Y : V),
+      conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (T : TensorData R V 0 2) (Y : V) : V →ₗ[R] V where
+  toFun X := met.sharp (covDeriv02TraceCovector emb conn ha hl X T Y)
+  map_add' X1 X2 := by
+    apply met.eq_of_forall_g_eq
+    intro Z
+    change met.g (met.sharp (covDeriv02TraceCovector emb conn ha hl (X1 + X2) T Y)) Z =
+      met.g (met.sharp (covDeriv02TraceCovector emb conn ha hl X1 T Y) +
+        met.sharp (covDeriv02TraceCovector emb conn ha hl X2 T Y)) Z
+    rw [met.g_sharp, met.g_add_left, met.g_sharp, met.g_sharp]
+    rw [covDeriv02TraceCovector_apply emb conn ha hl (X1 + X2) T Y Z,
+      covDeriv02TraceCovector_apply emb conn ha hl X1 T Y Z,
+      covDeriv02TraceCovector_apply emb conn ha hl X2 T Y Z]
+    exact nabla_add_left emb conn ha conn_add_left hl X1 X2 T ![Z, Y] ![]
+  map_smul' c X := by
+    simp only [RingHom.id_apply]
+    apply met.eq_of_forall_g_eq
+    intro Z
+    change met.g (met.sharp (covDeriv02TraceCovector emb conn ha hl (c • X) T Y)) Z =
+      met.g (c • met.sharp (covDeriv02TraceCovector emb conn ha hl X T Y)) Z
+    rw [met.g_sharp, met.g_smul_left, met.g_sharp]
+    rw [covDeriv02TraceCovector_apply emb conn ha hl (c • X) T Y Z,
+      covDeriv02TraceCovector_apply emb conn ha hl X T Y Z]
+    exact nabla_smul_left emb conn ha conn_smul_left hl c X T ![Z, Y] ![]
+
+/-- Divergence of a `(0,2)` tensor, evaluated at a vector `Y`. This is the
+metric trace of `(X,Z) |-> (nabla_X T)(Z,Y)`, expressed through the existing
+abstract trace API. A later realization lemma can identify this with the
+`metric_trace` definition from local frames. -/
+noncomputable def covariantDivergence02At
+    (emb : DerivationEmbedding k R V) (met : MetricDuality R V)
+    (atr : AbstractTrace R V) (conn : V -> V -> V)
+    (ha : forall X Y Z : V, conn X (Y + Z) = conn X Y + conn X Z)
+    (conn_add_left : forall X Y Z : V, conn (X + Y) Z = conn X Z + conn Y Z)
+    (conn_smul_left : forall (f : R) (X Z : V), conn (f • X) Z = f • conn X Z)
+    (hl : forall X (f : R) (Y : V),
+      conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (T : TensorData R V 0 2) (Y : V) : R :=
+  atr.tr (covDivergence02Endomorphism emb met conn ha conn_add_left conn_smul_left hl T Y)
+
+theorem covariantDivergence02At_eval
+    (emb : DerivationEmbedding k R V) (met : MetricDuality R V)
+    (atr : AbstractTrace R V) (conn : V -> V -> V)
+    (ha : forall X Y Z : V, conn X (Y + Z) = conn X Y + conn X Z)
+    (conn_add_left : forall X Y Z : V, conn (X + Y) Z = conn X Z + conn Y Z)
+    (conn_smul_left : forall (f : R) (X Z : V), conn (f • X) Z = f • conn X Z)
+    (hl : forall X (f : R) (Y : V),
+      conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (T : TensorData R V 0 2) (Y : V) :
+    covariantDivergence02At emb met atr conn ha conn_add_left conn_smul_left hl T Y =
+      atr.tr (covDivergence02Endomorphism emb met conn ha conn_add_left
+        conn_smul_left hl T Y) := by
+  rfl
+
+/-- Divergence of a scalar multiple of the metric:
+`div(f g)(Y) = Y(f)`. This is the Section 14.2 product-rule calculation
+needed to turn an Einstein Ricci formula into a divergence formula. -/
+theorem covariantDivergence02At_smul_metric
+    (emb : DerivationEmbedding k R V) (met : MetricDuality R V)
+    (atr : AbstractTrace R V) (conn : V -> V -> V)
+    (ha : forall X Y Z : V, conn X (Y + Z) = conn X Y + conn X Z)
+    (conn_add_left : forall X Y Z : V, conn (X + Y) Z = conn X Z + conn Y Z)
+    (conn_smul_left : forall (f : R) (X Z : V), conn (f • X) Z = f • conn X Z)
+    (hl : forall X (f : R) (Y : V),
+      conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (h_mc : IsMetricCompatible emb conn met)
+    (f : R) (Y : V) :
+    covariantDivergence02At emb met atr conn ha conn_add_left conn_smul_left hl
+      (f • met.g_tensor) Y = action emb Y f := by
+  let df : V →ₗ[R] R := {
+    toFun X := action emb X f
+    map_add' X Z := action_add_left emb X Z f
+    map_smul' c X := by
+      simp only [RingHom.id_apply, smul_eq_mul]
+      exact action_smul_left emb c X f }
+  rw [covariantDivergence02At_eval]
+  have h_endo :
+      covDivergence02Endomorphism emb met conn ha conn_add_left conn_smul_left hl
+        (f • met.g_tensor) Y =
+        df.smulRight Y := by
+    ext X
+    apply met.eq_of_forall_g_eq
+    intro Z
+    change
+      met.g
+        (met.sharp
+          (covDeriv02TraceCovector emb conn ha hl X (f • met.g_tensor) Y)) Z =
+        met.g ((df.smulRight Y) X) Z
+    rw [met.g_sharp]
+    rw [covDeriv02TraceCovector_apply emb conn ha hl X (f • met.g_tensor) Y Z]
+    rw [nabla_smul emb conn ha hl X f met.g_tensor ![Z, Y] ![]]
+    rw [nabla_g_zero emb conn ha hl met h_mc X]
+    simp only [MultilinearMap.zero_apply, mul_zero, add_zero, LinearMap.smulRight_apply]
+    change action emb X f * met.g Z Y = met.g (action emb X f • Y) Z
+    rw [met.g_smul_left, met.g_symm Z Y]
+  rw [h_endo]
+  exact atr.trace_outer Y df
+
+end TensorDivergence02

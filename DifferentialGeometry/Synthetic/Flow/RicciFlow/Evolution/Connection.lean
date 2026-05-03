@@ -180,3 +180,12 @@ theorem connection_evolution
          metric_var_form td g_fam h_met t ![conn_fam t X Y, Z] ![]) -
         metric_var_form td g_fam h_met t ![conn_fam t X Y, Z] ![] := by rw [h_combined]
     _ = _ := by ring
+
+/-- Lemma 14.23, invariant lower-index form.
+
+This is the coordinate evolution of Christoffel symbols before raising the output
+index: the time derivative of the Levi-Civita connection, paired against the
+metric frozen at time `t`, is the Ricci-derivative combination. A later coordinate
+realization turns this into
+`partial_t Gamma^k_ij = -g^{kl}(nabla_i Ric_jl + nabla_j Ric_il - nabla_l Ric_ij)`. -/
+alias christoffel_evolution_metric_paired := connection_evolution

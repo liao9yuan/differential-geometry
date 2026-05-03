@@ -1,4 +1,5 @@
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.Connection
+import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.Lichnerowicz
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.Abel
 
@@ -78,6 +79,35 @@ def RicciEvolutionEquation
         (hl_fam s) atr)
       h_Rc_smooth = rhs t
 
+/-- Ricci evolution RHS packaged as rough Laplacian plus curvature reaction. -/
+noncomputable def ricci_laplace_reaction_rhs
+    (rough reaction : Time -> TensorData R V 0 2) : Time -> TensorData R V 0 2 :=
+  fun t => lichnerowicz_laplacian_02 (rough t) (reaction t)
+
+theorem ricci_laplace_reaction_rhs_eval
+    (rough reaction : Time -> TensorData R V 0 2) (t : Time) (X Y : V) :
+    ricci_laplace_reaction_rhs rough reaction t ![X, Y] ![] =
+      rough t ![X, Y] ![] + reaction t ![X, Y] ![] := by
+  rfl
+
+/-- Interface for the Ricci evolution equation in Lichnerowicz form. -/
+def RicciLichnerowiczEvolutionEquation
+    (emb : DerivationEmbedding k R V)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
+    (atr : AbstractTrace R V)
+    (conn_fam : Time -> V -> V -> V)
+    (ha_fam : forall s, forall X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
+    (hal_fam : forall s, forall X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z)
+    (hsl_fam : forall s, forall (f : R) X Z, conn_fam s (f • X) Z = f • conn_fam s X Z)
+    (hl_fam : forall s, forall X (f : R) Y,
+      conn_fam s X (f • Y) = (emb.embed X) f • Y + f • conn_fam s X Y)
+    (h_Rc_smooth : forall vs αs, td.isSmoothFam
+      (fun τ => ricciForm_tensor emb (conn_fam τ) (ha_fam τ) (hal_fam τ) (hsl_fam τ)
+        (hl_fam τ) atr vs αs))
+    (rough reaction : Time -> TensorData R V 0 2) : Prop :=
+  RicciEvolutionEquation emb td atr conn_fam ha_fam hal_fam hsl_fam hl_fam
+    h_Rc_smooth (ricci_laplace_reaction_rhs rough reaction)
+
 theorem ricci_evolution_from_equation
     (emb : DerivationEmbedding k R V)
     (td : TimeDerivativeData R A Time) [TimeRegularFam td]
@@ -125,5 +155,56 @@ theorem ricci_evolution_from_equation_eval
         h_Rc_smooth) ![X, Y] ![] =
     tensor_eval (rhs t) ![X, Y] ![] := by
   rw [h_evol t]
+
+theorem ricci_evolution_from_lichnerowicz_equation
+    (emb : DerivationEmbedding k R V)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
+    (atr : AbstractTrace R V)
+    (conn_fam : Time -> V -> V -> V)
+    (ha_fam : forall s, forall X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
+    (hal_fam : forall s, forall X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z)
+    (hsl_fam : forall s, forall (f : R) X Z, conn_fam s (f • X) Z = f • conn_fam s X Z)
+    (hl_fam : forall s, forall X (f : R) Y,
+      conn_fam s X (f • Y) = (emb.embed X) f • Y + f • conn_fam s X Y)
+    (h_Rc_smooth : forall vs αs, td.isSmoothFam
+      (fun τ => ricciForm_tensor emb (conn_fam τ) (ha_fam τ) (hal_fam τ) (hsl_fam τ)
+        (hl_fam τ) atr vs αs))
+    (rough reaction : Time -> TensorData R V 0 2)
+    (h_evol : RicciLichnerowiczEvolutionEquation emb td atr conn_fam ha_fam hal_fam
+      hsl_fam hl_fam h_Rc_smooth rough reaction)
+    (t : Time) :
+    dt_tensor td t
+      (fun s => ricciForm_tensor emb (conn_fam s) (ha_fam s) (hal_fam s) (hsl_fam s)
+        (hl_fam s) atr)
+      h_Rc_smooth =
+    lichnerowicz_laplacian_02 (rough t) (reaction t) :=
+  h_evol t
+
+theorem ricci_evolution_from_lichnerowicz_equation_eval
+    (emb : DerivationEmbedding k R V)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
+    (atr : AbstractTrace R V)
+    (conn_fam : Time -> V -> V -> V)
+    (ha_fam : forall s, forall X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
+    (hal_fam : forall s, forall X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z)
+    (hsl_fam : forall s, forall (f : R) X Z, conn_fam s (f • X) Z = f • conn_fam s X Z)
+    (hl_fam : forall s, forall X (f : R) Y,
+      conn_fam s X (f • Y) = (emb.embed X) f • Y + f • conn_fam s X Y)
+    (h_Rc_smooth : forall vs αs, td.isSmoothFam
+      (fun τ => ricciForm_tensor emb (conn_fam τ) (ha_fam τ) (hal_fam τ) (hsl_fam τ)
+        (hl_fam τ) atr vs αs))
+    (rough reaction : Time -> TensorData R V 0 2)
+    (h_evol : RicciLichnerowiczEvolutionEquation emb td atr conn_fam ha_fam hal_fam
+      hsl_fam hl_fam h_Rc_smooth rough reaction)
+    (t : Time) (X Y : V) :
+    tensor_eval
+      (dt_tensor td t
+        (fun s => ricciForm_tensor emb (conn_fam s) (ha_fam s) (hal_fam s) (hsl_fam s)
+          (hl_fam s) atr)
+        h_Rc_smooth) ![X, Y] ![] =
+    rough t ![X, Y] ![] + reaction t ![X, Y] ![] := by
+  rw [ricci_evolution_from_lichnerowicz_equation emb td atr conn_fam ha_fam hal_fam
+    hsl_fam hl_fam h_Rc_smooth rough reaction h_evol t]
+  rfl
 
 end RicciEvolutionInterface

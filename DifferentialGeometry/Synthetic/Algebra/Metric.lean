@@ -71,7 +71,13 @@ variable {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V]
 def MetricDuality.g (met : MetricDuality R V) (X Y : V) : R :=
   met.g_tensor ![X, Y] ![]
 
-/-- Flat map: X ↦ g(X, −) as a covector. -/
+/-- Evaluation of a scalar multiple of the metric tensor. -/
+theorem MetricDuality.g_tensor_smul_eval
+    (met : MetricDuality R V) (c : R) (X Y : V) :
+    (c • met.g_tensor) ![X, Y] ![] = c * met.g X Y := by
+  simp [MetricDuality.g, smul_eq_mul]
+
+/-- Flat map: X ↦ g(X, –) as a covector. -/
 def MetricDuality.flat (met : MetricDuality R V) (X : V) : V →ₗ[R] R :=
   flat_covector met.g_tensor X
 

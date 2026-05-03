@@ -57,6 +57,121 @@ noncomputable def tracefree_ricci_norm_sq
     (tracefree_ricci_tensor emb conn ha hal hsl hl atr met nInv)
     (tracefree_ricci_tensor emb conn ha hal hsl hl atr met nInv)
 
+/-- Expansion of `|Rc - (R/n)g|^2` into the four bilinear terms. -/
+theorem tracefree_ricci_norm_sq_expand
+    (emb : DerivationEmbedding k R V) (conn : V -> V -> V)
+    (ha : forall X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : forall X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : forall (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : forall X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (atr : AbstractTrace R V) (met : MetricDuality R V) (nInv : R) :
+    tracefree_ricci_norm_sq emb conn ha hal hsl hl atr met nInv =
+      tensor_inner_02 met atr
+        (ricciForm_tensor emb conn ha hal hsl hl atr)
+        (ricciForm_tensor emb conn ha hal hsl hl atr) -
+      tensor_inner_02 met atr
+        (ricciForm_tensor emb conn ha hal hsl hl atr)
+        ((nInv * ScalarCurvature emb conn ha hal hsl hl atr met) • met.g_tensor) -
+      tensor_inner_02 met atr
+        ((nInv * ScalarCurvature emb conn ha hal hsl hl atr met) • met.g_tensor)
+        (ricciForm_tensor emb conn ha hal hsl hl atr) +
+      tensor_inner_02 met atr
+        ((nInv * ScalarCurvature emb conn ha hal hsl hl atr met) • met.g_tensor)
+        ((nInv * ScalarCurvature emb conn ha hal hsl hl atr met) • met.g_tensor) := by
+  unfold tracefree_ricci_norm_sq tracefree_ricci_tensor
+  rw [tensor_inner_02_sub_sub]
+
+/-- Expansion of `|Rc - (R/n)g|^2` with scalar multiples pulled out. -/
+theorem tracefree_ricci_norm_sq_expand_scalar
+    (emb : DerivationEmbedding k R V) (conn : V -> V -> V)
+    (ha : forall X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : forall X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : forall (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : forall X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (atr : AbstractTrace R V) (met : MetricDuality R V) (nInv : R) :
+    tracefree_ricci_norm_sq emb conn ha hal hsl hl atr met nInv =
+      ricci_norm_sq emb conn ha hal hsl hl atr met -
+      (nInv * ScalarCurvature emb conn ha hal hsl hl atr met) *
+        tensor_inner_02 met atr
+          (ricciForm_tensor emb conn ha hal hsl hl atr) met.g_tensor -
+      (nInv * ScalarCurvature emb conn ha hal hsl hl atr met) *
+        tensor_inner_02 met atr met.g_tensor
+          (ricciForm_tensor emb conn ha hal hsl hl atr) +
+      (nInv * ScalarCurvature emb conn ha hal hsl hl atr met) *
+        ((nInv * ScalarCurvature emb conn ha hal hsl hl atr met) *
+          tensor_inner_02 met atr met.g_tensor met.g_tensor) := by
+  rw [tracefree_ricci_norm_sq_expand, tensor_inner_02_ricciForm]
+  repeat rw [tensor_inner_02_smul_right]
+  repeat rw [tensor_inner_02_smul_left]
+
+/-- Closed trace-free Ricci norm expansion, assuming the missing metric-contraction bridge.
+
+The hypotheses are exactly the remaining realization/contraction facts needed
+to turn the algebraic expansion into the classical identity:
+`<Rc,g> = R`, `<g,g> = dim`, and `nInv * dim = 1`. -/
+theorem tracefree_ricci_norm_sq_expand_closed
+    (emb : DerivationEmbedding k R V) (conn : V -> V -> V)
+    (ha : forall X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : forall X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : forall (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : forall X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (atr : AbstractTrace R V) (met : MetricDuality R V) (nInv dim : R)
+    (h_Rc_g :
+      tensor_inner_02 met atr
+        (ricciForm_tensor emb conn ha hal hsl hl atr) met.g_tensor =
+      ScalarCurvature emb conn ha hal hsl hl atr met)
+    (h_g_g : tensor_inner_02 met atr met.g_tensor met.g_tensor = dim)
+    (h_nInv_dim : nInv * dim = 1) :
+    tracefree_ricci_norm_sq emb conn ha hal hsl hl atr met nInv =
+      ricci_norm_sq emb conn ha hal hsl hl atr met -
+        nInv * ScalarCurvature emb conn ha hal hsl hl atr met *
+          ScalarCurvature emb conn ha hal hsl hl atr met := by
+  rw [tracefree_ricci_norm_sq_expand_scalar, h_Rc_g,
+    tensor_inner_02_symm met atr met.g_tensor
+      (ricciForm_tensor emb conn ha hal hsl hl atr),
+    h_Rc_g, h_g_g]
+  have h_last :
+      (nInv * ScalarCurvature emb conn ha hal hsl hl atr met) *
+        ((nInv * ScalarCurvature emb conn ha hal hsl hl atr met) * dim) =
+      nInv * ScalarCurvature emb conn ha hal hsl hl atr met *
+        ScalarCurvature emb conn ha hal hsl hl atr met := by
+    calc
+      (nInv * ScalarCurvature emb conn ha hal hsl hl atr met) *
+          ((nInv * ScalarCurvature emb conn ha hal hsl hl atr met) * dim)
+          = (nInv * dim) *
+              (nInv * ScalarCurvature emb conn ha hal hsl hl atr met *
+                ScalarCurvature emb conn ha hal hsl hl atr met) := by ring
+      _ = 1 *
+              (nInv * ScalarCurvature emb conn ha hal hsl hl atr met *
+                ScalarCurvature emb conn ha hal hsl hl atr met) := by rw [h_nInv_dim]
+      _ = nInv * ScalarCurvature emb conn ha hal hsl hl atr met *
+            ScalarCurvature emb conn ha hal hsl hl atr met := by ring
+  rw [h_last]
+  ring
+
+/-- Closed trace-free Ricci norm expansion using the abstract trace dimension `tr(id)`.
+
+This removes the previously separate contraction bridge hypotheses:
+`<Rc,g> = R` and `<g,g> = tr(id)` are now proved in `ScalarCurvature.lean`.
+The only remaining dimension normalization is `nInv * tr(id) = 1`. -/
+theorem tracefree_ricci_norm_sq_expand_abstractTraceDimension
+    (emb : DerivationEmbedding k R V) (conn : V -> V -> V)
+    (ha : forall X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : forall X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : forall (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : forall X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (atr : AbstractTrace R V) (met : MetricDuality R V) (nInv : R)
+    (h_nInv_dim : nInv * abstractTraceDimension atr = 1) :
+    tracefree_ricci_norm_sq emb conn ha hal hsl hl atr met nInv =
+      ricci_norm_sq emb conn ha hal hsl hl atr met -
+        nInv * ScalarCurvature emb conn ha hal hsl hl atr met *
+          ScalarCurvature emb conn ha hal hsl hl atr met :=
+  tracefree_ricci_norm_sq_expand_closed emb conn ha hal hsl hl atr met nInv
+    (abstractTraceDimension atr)
+    (tensor_inner_02_ricciForm_metric emb conn ha hal hsl hl atr met)
+    (tensor_inner_02_metric_metric met atr)
+    h_nInv_dim
+
 end TracefreeRicci
 
 section NormEvolutionInterfaces

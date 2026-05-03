@@ -47,6 +47,7 @@ import DifferentialGeometry.Synthetic.Flow.RicciFlow.Calculus
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Holonomy
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.DimensionThree.CurvatureAlgebra
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.DimensionThree.Pinching
+import DifferentialGeometry.Synthetic.Flow.RicciFlow.DimensionThree.ImprovedPinching
 import DifferentialGeometry.Synthetic.Analysis.Parabolic.ScalarMaximumPrinciple
 import DifferentialGeometry.Synthetic.Analysis.Parabolic.TensorMaximumPrinciple
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Global.Existence

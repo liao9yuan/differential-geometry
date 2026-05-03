@@ -1,4 +1,5 @@
 import Mathlib.Order.Basic
+import Mathlib.Algebra.Order.Group.Defs
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -40,6 +41,27 @@ theorem scalar_wmp_preserve_nonpositive
     (t : Time) (ht : P.domain t) :
     u t <= 0 :=
   ScalarWeakMaximumPrinciple.preserve_nonpositive P u hsub hinit t ht
+
+/-- Weak maximum-principle upper-bound form. This is the small reusable
+parabolic-analysis step needed by Hamilton's pinching estimate: apply the weak
+maximum principle to `u - C`.
+
+This wrapper intentionally asks for the ordered additive-group structure needed
+to form and rearrange `u - C`; the underlying weak maximum-principle interface
+itself only needs `Preorder R` and `Zero R`. -/
+theorem scalar_wmp_preserve_upper_bound
+    {R Time : Type*} [AddCommGroup R] [PartialOrder R] [IsOrderedAddMonoid R]
+    [ScalarWeakMaximumPrinciple R Time]
+    (P : ScalarParabolicProblem R Time) (u : Time -> R) (C : R)
+    (hsub : IsScalarSubsolution P (fun t => u t - C))
+    (hinit : IsInitiallyNonpositive P (fun t => u t - C))
+    (t : Time) (ht : P.domain t) :
+    u t <= C := by
+  have hnonpos :
+      u t - C <= 0 :=
+    scalar_wmp_preserve_nonpositive P (fun t => u t - C) hsub hinit t ht
+  have h := add_le_add_right hnonpos C
+  simpa [sub_eq_add_neg, add_assoc, add_left_comm, add_comm] using h
 
 /-- Black-box strong maximum principle for scalar parabolic inequalities. -/
 class ScalarStrongMaximumPrinciple (R Time : Type*) [Preorder R] [Zero R] where

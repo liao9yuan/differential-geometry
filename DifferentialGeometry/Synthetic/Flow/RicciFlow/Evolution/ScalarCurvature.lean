@@ -60,10 +60,63 @@ noncomputable def tensor_02_endo (met : MetricDuality R V)
     simp only [RingHom.id_apply]
     rw [flat_covector_first_smul]; exact met.sharp_smul c _
 
+/-- Raising one index is additive in the tensor argument. -/
+theorem tensor_02_endo_add (met : MetricDuality R V)
+    (T S : TensorData R V 0 2) :
+    tensor_02_endo met (T + S) = tensor_02_endo met T + tensor_02_endo met S := by
+  ext X
+  change met.sharp (flat_covector (T + S) X) =
+    met.sharp (flat_covector T X) + met.sharp (flat_covector S X)
+  have hflat : flat_covector (T + S) X = flat_covector T X + flat_covector S X := by
+    ext Z
+    simp [flat_covector_apply]
+  rw [hflat, met.sharp_add]
+
+/-- Raising one index is homogeneous in the tensor argument. -/
+theorem tensor_02_endo_smul (met : MetricDuality R V) (c : R)
+    (T : TensorData R V 0 2) :
+    tensor_02_endo met (c • T) = c • tensor_02_endo met T := by
+  ext X
+  change met.sharp (flat_covector (c • T) X) = c • met.sharp (flat_covector T X)
+  rw [flat_covector_tensor_smul]; exact met.sharp_smul c _
+
+/-- Raising one index commutes with negation. -/
+theorem tensor_02_endo_neg (met : MetricDuality R V)
+    (T : TensorData R V 0 2) :
+    tensor_02_endo met (-T) = -tensor_02_endo met T := by
+  simpa only [neg_one_smul] using tensor_02_endo_smul met (-1 : R) T
+
+/-- Raising one index commutes with subtraction. -/
+theorem tensor_02_endo_sub (met : MetricDuality R V)
+    (T S : TensorData R V 0 2) :
+    tensor_02_endo met (T - S) = tensor_02_endo met T - tensor_02_endo met S := by
+  rw [sub_eq_add_neg, tensor_02_endo_add, tensor_02_endo_neg]
+  rw [sub_eq_add_neg]
+
+/-- Raising one index of the metric tensor gives the identity endomorphism. -/
+theorem tensor_02_endo_metric (met : MetricDuality R V) :
+    tensor_02_endo met met.g_tensor = LinearMap.id := by
+  ext X
+  change met.sharp (flat_covector met.g_tensor X) = X
+  exact met.sharp_flat X
+
+/-- Abstract dimension associated with the trace functional: `tr(id)`. -/
+noncomputable def abstractTraceDimension (atr : AbstractTrace R V) : R :=
+  atr.tr (LinearMap.id : V →ₗ[R] V)
+
 /-- Inner product of two (0,2) tensors: ⟨T, S⟩_g = tr(T♯ ∘ S♯). -/
 noncomputable def tensor_inner_02 (met : MetricDuality R V) 
     (atr : AbstractTrace R V) (T S : TensorData R V 0 2) : R :=
   atr.tr ((tensor_02_endo met T).comp (tensor_02_endo met S))
+
+/-- Cubic trace of a `(0,2)` tensor after raising one index:
+`tr(T♯ ∘ T♯ ∘ T♯)`.
+
+This is the synthetic object needed to bridge Hamilton's eigenvalue expression
+`λ₁^3 + λ₂^3 + λ₃^3` back to the Ricci tensor. -/
+noncomputable def tensor_trace_cube_02 (met : MetricDuality R V)
+    (atr : AbstractTrace R V) (T : TensorData R V 0 2) : R :=
+  atr.tr ((tensor_02_endo met T).comp ((tensor_02_endo met T).comp (tensor_02_endo met T)))
 
 end TensorEndo
 
@@ -75,19 +128,108 @@ section InnerProps
 
 variable {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V]
 
+/-- tensor_inner_02(T + U, S) = tensor_inner_02(T, S) + tensor_inner_02(U, S). -/
+theorem tensor_inner_02_add_left (met : MetricDuality R V)
+    (atr : AbstractTrace R V) (T U S : TensorData R V 0 2) :
+    tensor_inner_02 met atr (T + U) S =
+      tensor_inner_02 met atr T S + tensor_inner_02 met atr U S := by
+  simp only [tensor_inner_02, tensor_02_endo_add]
+  have h_comp :
+      ((tensor_02_endo met T + tensor_02_endo met U).comp (tensor_02_endo met S)) =
+        (tensor_02_endo met T).comp (tensor_02_endo met S) +
+          (tensor_02_endo met U).comp (tensor_02_endo met S) := by
+    ext X
+    rfl
+  rw [h_comp, map_add]
+
 /-- tensor_inner_02(c•T, S) = c * tensor_inner_02(T, S). -/
 theorem tensor_inner_02_smul_left (met : MetricDuality R V) 
     (atr : AbstractTrace R V) (c : R) (T S : TensorData R V 0 2) :
     tensor_inner_02 met atr (c • T) S = c * tensor_inner_02 met atr T S := by
   simp only [tensor_inner_02]
-  have h_endo : tensor_02_endo met (c • T) = c • tensor_02_endo met T := by
-    ext X
-    change met.sharp (flat_covector (c • T) X) = c • met.sharp (flat_covector T X)
-    rw [flat_covector_tensor_smul]; exact met.sharp_smul c _
   have h_comp : (tensor_02_endo met (c • T)).comp (tensor_02_endo met S) =
       c • (tensor_02_endo met T).comp (tensor_02_endo met S) := by
-    rw [h_endo]; ext v; simp [LinearMap.smul_apply]
+    rw [tensor_02_endo_smul]; ext v; simp [LinearMap.smul_apply]
   rw [h_comp, map_smul, smul_eq_mul]
+
+/-- tensor_inner_02(-T, S) = -tensor_inner_02(T, S). -/
+theorem tensor_inner_02_neg_left (met : MetricDuality R V)
+    (atr : AbstractTrace R V) (T S : TensorData R V 0 2) :
+    tensor_inner_02 met atr (-T) S = -tensor_inner_02 met atr T S := by
+  simpa only [neg_one_smul, neg_mul, one_mul] using
+    tensor_inner_02_smul_left met atr (-1 : R) T S
+
+/-- tensor_inner_02(T - U, S) = tensor_inner_02(T, S) - tensor_inner_02(U, S). -/
+theorem tensor_inner_02_sub_left (met : MetricDuality R V)
+    (atr : AbstractTrace R V) (T U S : TensorData R V 0 2) :
+    tensor_inner_02 met atr (T - U) S =
+      tensor_inner_02 met atr T S - tensor_inner_02 met atr U S := by
+  rw [sub_eq_add_neg, tensor_inner_02_add_left, tensor_inner_02_neg_left]
+  rw [sub_eq_add_neg]
+
+/-- tensor_inner_02(T, S + U) = tensor_inner_02(T, S) + tensor_inner_02(T, U). -/
+theorem tensor_inner_02_add_right (met : MetricDuality R V)
+    (atr : AbstractTrace R V) (T S U : TensorData R V 0 2) :
+    tensor_inner_02 met atr T (S + U) =
+      tensor_inner_02 met atr T S + tensor_inner_02 met atr T U := by
+  simp only [tensor_inner_02, tensor_02_endo_add]
+  have h_comp :
+      (tensor_02_endo met T).comp (tensor_02_endo met S + tensor_02_endo met U) =
+        (tensor_02_endo met T).comp (tensor_02_endo met S) +
+          (tensor_02_endo met T).comp (tensor_02_endo met U) := by
+    ext X
+    simp [LinearMap.comp_apply, LinearMap.add_apply]
+  rw [h_comp, map_add]
+
+/-- tensor_inner_02(T, c•S) = c * tensor_inner_02(T, S). -/
+theorem tensor_inner_02_smul_right (met : MetricDuality R V)
+    (atr : AbstractTrace R V) (c : R) (T S : TensorData R V 0 2) :
+    tensor_inner_02 met atr T (c • S) = c * tensor_inner_02 met atr T S := by
+  simp only [tensor_inner_02]
+  have h_comp : (tensor_02_endo met T).comp (tensor_02_endo met (c • S)) =
+      c • (tensor_02_endo met T).comp (tensor_02_endo met S) := by
+    rw [tensor_02_endo_smul]
+    ext v
+    simp [LinearMap.comp_apply, LinearMap.smul_apply]
+  rw [h_comp, map_smul, smul_eq_mul]
+
+/-- tensor_inner_02(T, -S) = -tensor_inner_02(T, S). -/
+theorem tensor_inner_02_neg_right (met : MetricDuality R V)
+    (atr : AbstractTrace R V) (T S : TensorData R V 0 2) :
+    tensor_inner_02 met atr T (-S) = -tensor_inner_02 met atr T S := by
+  simpa only [neg_one_smul, neg_mul, one_mul] using
+    tensor_inner_02_smul_right met atr (-1 : R) T S
+
+/-- tensor_inner_02(T, S - U) = tensor_inner_02(T, S) - tensor_inner_02(T, U). -/
+theorem tensor_inner_02_sub_right (met : MetricDuality R V)
+    (atr : AbstractTrace R V) (T S U : TensorData R V 0 2) :
+    tensor_inner_02 met atr T (S - U) =
+      tensor_inner_02 met atr T S - tensor_inner_02 met atr T U := by
+  rw [sub_eq_add_neg, tensor_inner_02_add_right, tensor_inner_02_neg_right]
+  rw [sub_eq_add_neg]
+
+/-- Symmetry of the abstract trace inner product. -/
+theorem tensor_inner_02_symm (met : MetricDuality R V)
+    (atr : AbstractTrace R V) (T S : TensorData R V 0 2) :
+    tensor_inner_02 met atr T S = tensor_inner_02 met atr S T := by
+  exact atr.trace_comm (tensor_02_endo met T) (tensor_02_endo met S)
+
+/-- The metric has squared norm `tr(id)` for the abstract trace. -/
+theorem tensor_inner_02_metric_metric (met : MetricDuality R V)
+    (atr : AbstractTrace R V) :
+    tensor_inner_02 met atr met.g_tensor met.g_tensor =
+      abstractTraceDimension atr := by
+  simp only [tensor_inner_02, abstractTraceDimension, tensor_02_endo_metric]
+  rw [LinearMap.comp_id]
+
+/-- Expand the inner product of two tensor differences. -/
+theorem tensor_inner_02_sub_sub (met : MetricDuality R V)
+    (atr : AbstractTrace R V) (T U S W : TensorData R V 0 2) :
+    tensor_inner_02 met atr (T - U) (S - W) =
+      tensor_inner_02 met atr T S - tensor_inner_02 met atr T W -
+        tensor_inner_02 met atr U S + tensor_inner_02 met atr U W := by
+  rw [tensor_inner_02_sub_left, tensor_inner_02_sub_right, tensor_inner_02_sub_right]
+  ring
 
 end InnerProps
 
@@ -112,6 +254,19 @@ noncomputable def ricci_norm_sq
     : R :=
   atr.tr ((RicciEndomorphism emb conn ha hal hsl hl atr met).comp
           (RicciEndomorphism emb conn ha hal hsl hl atr met))
+
+/-- Cubic trace of the Ricci endomorphism: `tr(Ric♯ ∘ Ric♯ ∘ Ric♯)`. -/
+noncomputable def ricci_trace_cube
+    (emb : DerivationEmbedding k R V) (conn : V -> V -> V)
+    (ha : forall X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : forall X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : forall (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : forall X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (atr : AbstractTrace R V) (met : MetricDuality R V)
+    : R :=
+  atr.tr ((RicciEndomorphism emb conn ha hal hsl hl atr met).comp
+    ((RicciEndomorphism emb conn ha hal hsl hl atr met).comp
+      (RicciEndomorphism emb conn ha hal hsl hl atr met)))
 
 /-- tensor_02_endo of ricciForm_tensor equals RicciEndomorphism. -/
 theorem tensor_02_endo_ricciForm
@@ -140,6 +295,48 @@ theorem tensor_inner_02_ricciForm
       (ricciForm_tensor emb conn ha hal hsl hl atr) =
     ricci_norm_sq emb conn ha hal hsl hl atr met := by
   simp only [tensor_inner_02, ricci_norm_sq, tensor_02_endo_ricciForm]
+
+/-- The synthetic cubic trace of `ricciForm_tensor` is the cubic trace of the
+Ricci endomorphism. -/
+theorem tensor_trace_cube_02_ricciForm
+    (emb : DerivationEmbedding k R V) (conn : V -> V -> V)
+    (ha : forall X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : forall X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : forall (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : forall X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (atr : AbstractTrace R V) (met : MetricDuality R V) :
+    tensor_trace_cube_02 met atr
+      (ricciForm_tensor emb conn ha hal hsl hl atr) =
+    ricci_trace_cube emb conn ha hal hsl hl atr met := by
+  simp only [tensor_trace_cube_02, ricci_trace_cube, tensor_02_endo_ricciForm]
+
+/-- The trace inner product of Ricci with the metric is scalar curvature. -/
+theorem tensor_inner_02_ricciForm_metric
+    (emb : DerivationEmbedding k R V) (conn : V → V → V)
+    (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : ∀ (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : ∀ X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (atr : AbstractTrace R V) (met : MetricDuality R V) :
+    tensor_inner_02 met atr
+      (ricciForm_tensor emb conn ha hal hsl hl atr) met.g_tensor =
+    ScalarCurvature emb conn ha hal hsl hl atr met := by
+  simp only [tensor_inner_02, tensor_02_endo_ricciForm, tensor_02_endo_metric,
+    ScalarCurvature]
+  rw [LinearMap.comp_id]
+
+/-- The trace inner product of the metric with Ricci is scalar curvature. -/
+theorem tensor_inner_02_metric_ricciForm
+    (emb : DerivationEmbedding k R V) (conn : V → V → V)
+    (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : ∀ (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : ∀ X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (atr : AbstractTrace R V) (met : MetricDuality R V) :
+    tensor_inner_02 met atr met.g_tensor
+      (ricciForm_tensor emb conn ha hal hsl hl atr) =
+    ScalarCurvature emb conn ha hal hsl hl atr met := by
+  rw [tensor_inner_02_symm, tensor_inner_02_ricciForm_metric]
 
 end RicciNormSq
 
@@ -348,6 +545,45 @@ def RicciTraceIdentity
           (hl_fam s) atr)
         h_Rc_smooth) ![] ![] = scalar_laplacian t
 
+/-- Trace identity for a supplied Ricci-evolution RHS tensor. -/
+def RicciTraceIdentityForRHS
+    (atr : AbstractTrace R V)
+    (g_fam : Time -> MetricDuality R V)
+    (rhs : Time -> TensorData R V 0 2)
+    (rhs_trace : Time -> R) : Prop :=
+  forall t,
+    metric_trace (g_fam t) atr (0 : Fin 2) (0 : Fin 1) (rhs t) ![] ![] =
+      rhs_trace t
+
+/-- Build `RicciTraceIdentity` from a Ricci evolution RHS and the trace of that RHS. -/
+theorem ricciTraceIdentity_from_rhs_evolution
+    (emb : DerivationEmbedding k R V)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
+    (atr : AbstractTrace R V)
+    (g_fam : Time -> MetricDuality R V)
+    (conn_fam : Time -> V -> V -> V)
+    (ha_fam : forall s, forall X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
+    (hal_fam : forall s, forall X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z)
+    (hsl_fam : forall s, forall (f : R) X Z, conn_fam s (f • X) Z = f • conn_fam s X Z)
+    (hl_fam : forall s, forall X (f : R) Y,
+      conn_fam s X (f • Y) = (emb.embed X) f • Y + f • conn_fam s X Y)
+    (h_Rc_smooth : forall vs αs, td.isSmoothFam
+      (fun τ => ricciForm_tensor emb (conn_fam τ) (ha_fam τ) (hal_fam τ) (hsl_fam τ)
+        (hl_fam τ) atr vs αs))
+    (rhs : Time -> TensorData R V 0 2)
+    (rhs_trace : Time -> R)
+    (h_evol : forall t,
+      dt_tensor td t
+        (fun s => ricciForm_tensor emb (conn_fam s) (ha_fam s) (hal_fam s) (hsl_fam s)
+          (hl_fam s) atr)
+        h_Rc_smooth = rhs t)
+    (h_trace : RicciTraceIdentityForRHS atr g_fam rhs rhs_trace) :
+    RicciTraceIdentity emb td atr g_fam conn_fam ha_fam hal_fam hsl_fam hl_fam
+      h_Rc_smooth rhs_trace := by
+  intro t
+  rw [h_evol t]
+  exact h_trace t
+
 /-- Closed scalar curvature evolution, once the Ricci trace identity is supplied. -/
 theorem scalar_curvature_evolution_full
     (emb : DerivationEmbedding k R V)
@@ -381,5 +617,44 @@ theorem scalar_curvature_evolution_full
     hl_fam h_Rc_smooth h_rf h_sc_prod t]
   rw [h_trace t]
   ring
+
+/-- Closed scalar curvature evolution from a supplied Ricci-evolution RHS and its trace. -/
+theorem scalar_curvature_evolution_full_from_rhs
+    (emb : DerivationEmbedding k R V)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
+    (atr : AbstractTrace R V)
+    (g_fam : Time -> MetricDuality R V)
+    (h_met : forall vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs))
+    (conn_fam : Time -> V -> V -> V)
+    (ha_fam : forall s, forall X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
+    (hal_fam : forall s, forall X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z)
+    (hsl_fam : forall s, forall (f : R) X Z, conn_fam s (f • X) Z = f • conn_fam s X Z)
+    (hl_fam : forall s, forall X (f : R) Y,
+      conn_fam s X (f • Y) = (emb.embed X) f • Y + f • conn_fam s X Y)
+    (h_Rc_smooth : forall vs αs, td.isSmoothFam
+      (fun τ => ricciForm_tensor emb (conn_fam τ) (ha_fam τ) (hal_fam τ) (hsl_fam τ)
+        (hl_fam τ) atr vs αs))
+    (h_rf : IsRicciFlow emb td atr g_fam h_met conn_fam ha_fam hal_fam hsl_fam hl_fam)
+    (h_sc_prod : ScalarCurvatureProductRule emb td atr g_fam h_met conn_fam
+      ha_fam hal_fam hsl_fam hl_fam h_Rc_smooth)
+    (rhs : Time -> TensorData R V 0 2)
+    (rhs_trace : Time -> R)
+    (h_evol : forall t,
+      dt_tensor td t
+        (fun s => ricciForm_tensor emb (conn_fam s) (ha_fam s) (hal_fam s) (hsl_fam s)
+          (hl_fam s) atr)
+        h_Rc_smooth = rhs t)
+    (h_trace : RicciTraceIdentityForRHS atr g_fam rhs rhs_trace)
+    (t : Time) :
+    td.dt_apply
+      (fun s => ScalarCurvature emb (conn_fam s) (ha_fam s) (hal_fam s) (hsl_fam s)
+        (hl_fam s) atr (g_fam s)) t =
+    rhs_trace t +
+      2 * ricci_norm_sq emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t)
+        (hl_fam t) atr (g_fam t) :=
+  scalar_curvature_evolution_full emb td atr g_fam h_met conn_fam ha_fam hal_fam
+    hsl_fam hl_fam h_Rc_smooth h_rf h_sc_prod rhs_trace
+    (ricciTraceIdentity_from_rhs_evolution emb td atr g_fam conn_fam ha_fam hal_fam
+      hsl_fam hl_fam h_Rc_smooth rhs rhs_trace h_evol h_trace) t
 
 end FullScalarEvolution

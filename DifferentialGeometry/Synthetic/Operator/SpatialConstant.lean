@@ -24,6 +24,15 @@ variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 def IsSpatialConstant (emb : DerivationEmbedding k R V) (c : R) : Prop :=
   ∀ X : V, action emb X c = 0
 
+/-- Base-field constants are spatially constant. For the synthetic scalar ring
+`R` this applies to coefficients written as `algebraMap k R c`; arbitrary
+elements of `R` need not be constants. -/
+lemma isSpatialConstant_algebraMap
+    (emb : DerivationEmbedding k R V) (c : k) :
+    IsSpatialConstant emb (algebraMap k R c) := by
+  intro X
+  exact action_algebraMap emb X c
+
 lemma grad_zero_of_const
     (emb : DerivationEmbedding k R V) (met : MetricDuality R V) 
     (c : R) (hc : IsSpatialConstant emb c) :
