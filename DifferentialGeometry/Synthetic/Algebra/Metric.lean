@@ -48,19 +48,14 @@ end FlatHelper
 /-- Metric duality: a (0,2) symmetric tensor with inverse.
 
     DATA: g_tensor, g_inv. PROPERTIES: symmetry, non-degeneracy,
-    metric_inverse_contract, inverse_eval. -/
+    inverse_eval, sharp_spec. -/
 structure MetricDuality (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V] where
   g_tensor : TensorData R V 0 2
   symm_tensor : swap_covariant 0 1 g_tensor = g_tensor
   g_inv : TensorData R V 2 0
   eq_of_forall_g_eq : ∀ X Y : V,
     (∀ Z : V, g_tensor ![X, Z] ![] = g_tensor ![Y, Z] ![]) → X = Y
-  /-- g^{ac}g_{cb} = δ^a_b (tensor contraction form). -/
-  metric_inverse_contract : ∀ (atr : AbstractTrace R V),
-    contract_general atr ⟨1, by omega⟩ (0 : Fin 2)
-      (tensor_prod (r₁ := 2) (s₁ := 0) (r₂ := 0) (s₂ := 2) g_inv g_tensor) =
-    delta_tensor
-  /-- g⁻¹(α, flat(Y)) = α(Y) (usable evaluation form). -/
+  /-- g⁻¹(α, flat(Y)) = α(Y). -/
   inverse_eval : ∀ (Y : V) (α : V →ₗ[R] R),
     g_inv ![] ![α, flat_covector g_tensor Y] = α Y
   /-- Every covector is in the image of flat (surjectivity). -/
@@ -127,7 +122,7 @@ theorem MetricDuality.g_smul_right (met : MetricDuality R V) (c : R) (X Z : V) :
 def SharpSpec (met : MetricDuality R V) : Prop :=
   ∀ (α : V →ₗ[R] R), ∃ v : V, ∀ Z : V, met.g v Z = α Z
 
-/-- Bridge: the `sharp_spec` field implies `SharpSpec`. -/
+/-- The `sharp_spec` field implies `SharpSpec`. -/
 theorem MetricDuality.sharpSpec (met : MetricDuality R V) : SharpSpec met :=
   fun α => met.sharp_spec α
 
@@ -565,44 +560,51 @@ end NablaMetricTrace
 -- ============================================================
 
 section TimeDeriv
-variable {R V Time : Type*} [CommRing R] [AddCommGroup V] [Module R V]
+variable {R V : Type*} {A Time : Type*} [CommRing R] [AddCommGroup V] [Module R V]
+  [CommRing A] [Algebra R A]
 
-theorem t_const_V (td : TimeDerivativeData R Time) (t : Time) (X : V) :
-    dt_tensor td t (fun _ => vectorToData (R := R) X) = 0 :=
+theorem t_const_V (td : TimeDerivativeData R A Time) [TimeRegularFam td]
+    (t : Time) (X : V) :
+    dt_tensor td t (fun _ => vectorToData (R := R) X)
+      (fun vs αs => td.isSmoothFam_const (vectorToData (R := R) X vs αs)) = 0 :=
   dt_tensor_const td t (vectorToData X)
 
-theorem t_const_scalar (td : TimeDerivativeData R Time) (t : Time) (c : R) :
-    dt_tensor td t (fun _ => scalarToData (R := R) (V := V) c) = 0 :=
+theorem t_const_scalar (td : TimeDerivativeData R A Time) [TimeRegularFam td]
+    (t : Time) (c : R) :
+    dt_tensor td t (fun _ => scalarToData (R := R) (V := V) c)
+      (fun vs αs => td.isSmoothFam_const
+        (scalarToData (R := R) (V := V) c vs αs)) = 0 :=
   dt_tensor_const td t (scalarToData c)
 
 /-- ∂_t(g(s)(X, Y)) = (∂_t g_tensor)(X, Y) for constant vector arguments. -/
 theorem dt_metric_const_args
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (met_fam : Time → MetricDuality R V)
+    (h_met : ∀ vs αs, td.isSmoothFam (fun τ => (met_fam τ).g_tensor vs αs))
     (X Y : V) (t : Time) :
-    (td.dt (fun s => (met_fam s).g X Y)) t =
-    dt_tensor td t (fun s => (met_fam s).g_tensor) ![X, Y] ![] := by
+    td.dt_apply (fun s => (met_fam s).g X Y) t =
+    dt_tensor td t (fun s => (met_fam s).g_tensor) h_met ![X, Y] ![] := by
   rfl
 
 /-- ∂_t of metric with one varying left argument:
     met.g (f s) Y = met.flat Y (f s), so the time derivative is just dt of
     a constant covector applied to a varying vector. -/
 theorem t_metric_one_varying_left
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (met : MetricDuality R V) (f : Time → V) (Y : V) (t : Time) :
-    (td.dt (fun s => met.g (f s) Y)) t =
-    (td.dt (fun s => met.flat Y (f s))) t := by
-  show (td.dt (fun s => met.g (f s) Y)) t = _
+    td.dt_apply (fun s => met.g (f s) Y) t =
+    td.dt_apply (fun s => met.flat Y (f s)) t := by
+  show td.dt_apply (fun s => met.g (f s) Y) t = _
   rw [show (fun s => met.g (f s) Y) = (fun s => met.flat Y (f s)) from
     funext (fun s => met.g_symm (f s) Y)]
 
 /-- ∂_t of metric with one varying right argument:
     met.g X (f s) = met.flat X (f s). -/
 theorem t_metric_one_varying_right
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (met : MetricDuality R V) (X : V) (f : Time → V) (t : Time) :
-    (td.dt (fun s => met.g X (f s))) t =
-    (td.dt (fun s => met.flat X (f s))) t := by
+    td.dt_apply (fun s => met.g X (f s)) t =
+    td.dt_apply (fun s => met.flat X (f s)) t := by
   rfl
 
 /-- Full Leibniz expansion for ∂_t(g(s)(X(s), Y(s))) when g, X, Y all vary.
@@ -627,10 +629,10 @@ theorem t_metric_one_varying_right
 
     We state the most general useful form: dt of each "partial variation". -/
 theorem t_metric_partial_variations
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (met_fam : Time → MetricDuality R V) (X Y : V) (t : Time) :
-    (td.dt (fun s => (met_fam s).g X Y)) t =
-    (td.dt (fun s => (met_fam s).g_tensor ![X, Y] ![])) t := by
+    td.dt_apply (fun s => (met_fam s).g X Y) t =
+    td.dt_apply (fun s => (met_fam s).g_tensor ![X, Y] ![]) t := by
   rfl
 
 /-- When the metric is FIXED and both arguments vary,
@@ -638,10 +640,10 @@ theorem t_metric_partial_variations
     This is useful for Palatini/connection variation contexts where the metric
     is frozen at a time instant but vector arguments change. -/
 theorem t_metric_fixed_both_varying
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time)
     (met : MetricDuality R V) (f_X f_Y : Time → V) (t : Time) :
-    (td.dt (fun s => met.g (f_X s) (f_Y s))) t =
-    (td.dt (fun s => met.flat (f_X s) (f_Y s))) t := by
+    td.dt_apply (fun s => met.g (f_X s) (f_Y s)) t =
+    td.dt_apply (fun s => met.flat (f_X s) (f_Y s)) t := by
   rfl
 
 end TimeDeriv

@@ -13,6 +13,7 @@ import DifferentialGeometry.Synthetic.Analysis.NablaTimeInteraction
 -- Synthetic Geometry
 import DifferentialGeometry.Synthetic.Geometry.Connection
 import DifferentialGeometry.Synthetic.Geometry.ConnectionExtended
+import DifferentialGeometry.Synthetic.Geometry.Holonomy
 
 -- Synthetic Operators
 import DifferentialGeometry.Synthetic.Operator.Bochner
@@ -35,12 +36,27 @@ import DifferentialGeometry.Synthetic.Flow.RicciFlow.Calculus
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.Connection
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.Gradient
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.Laplacian
+import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.Lichnerowicz
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.ScalarCurvature
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.Ricci
+import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.RicciNorm
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.RiemannVariation
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.RiemannLaplacian
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.RiemannEvolution
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Calculus
+import DifferentialGeometry.Synthetic.Flow.RicciFlow.Holonomy
+import DifferentialGeometry.Synthetic.Flow.RicciFlow.DimensionThree.CurvatureAlgebra
+import DifferentialGeometry.Synthetic.Flow.RicciFlow.DimensionThree.Pinching
+import DifferentialGeometry.Synthetic.Analysis.Parabolic.ScalarMaximumPrinciple
+import DifferentialGeometry.Synthetic.Analysis.Parabolic.TensorMaximumPrinciple
+import DifferentialGeometry.Synthetic.Flow.RicciFlow.Global.Existence
+import DifferentialGeometry.Synthetic.Flow.RicciFlow.Global.BlowUp
+import DifferentialGeometry.Synthetic.Flow.RicciFlow.Global.Compactness
+import DifferentialGeometry.Synthetic.Flow.RicciFlow.HamiltonThreeManifold
+import DifferentialGeometry.Synthetic.Realization.Coordinates.Basic
+import DifferentialGeometry.Synthetic.Realization.Coordinates.Christoffel
+
+import DifferentialGeometry.Synthetic.Realization.TensorRSField
 
 import DifferentialGeometry.VectorBundle.Dual
 import DifferentialGeometry.VectorBundle.Equiv

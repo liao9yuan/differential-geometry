@@ -311,7 +311,6 @@ noncomputable instance Bundle.TensorProduct.topologicalSpaceTotalSpace :
     Bundle.TensorProduct.tensorFiberTopology
       (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂) b
 
-
 /-- The topology on the total space of the tensor product bundle, assembled from the
 `VectorPrebundle` via the fiber topologies from `tensorFiberTop`. -/
 @[reducible] noncomputable def tensorTotalSpaceTop :
@@ -321,8 +320,6 @@ noncomputable instance Bundle.TensorProduct.topologicalSpaceTotalSpace :
     tensorFiberTop (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
   (Bundle.TensorProduct.vectorPrebundle
     (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)).totalSpaceTopology
-attribute [local instance] tensorTotalSpaceTop
-
 
 
 /-- The tensor product of two vector bundles forms a fiber bundle. -/
@@ -340,12 +337,13 @@ noncomputable instance fiberBundle :
   classical
   letI : (b : B) → TopologicalSpace (E₁ b ⊗[𝕜] E₂ b) :=
     tensorFiberTop (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
+  letI : TopologicalSpace
+      (TotalSpace (F₁ ⊗[𝕜] F₂) (fun x : B ↦ E₁ x ⊗[𝕜] E₂ x)) :=
+    tensorTotalSpaceTop
+      (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
   exact
     (Bundle.TensorProduct.vectorPrebundle
       (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)).toFiberBundle
-attribute [local instance] fiberBundle
-
-
 
 /-- The tensor product of two vector bundles forms a vector bundle. -/
 noncomputable instance vectorBundle :
@@ -359,6 +357,13 @@ noncomputable instance vectorBundle :
   classical
   letI : (x : B) → TopologicalSpace (E₁ x ⊗[𝕜] E₂ x) :=
     tensorFiberTop
+      (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
+  letI : TopologicalSpace
+      (TotalSpace (F₁ ⊗[𝕜] F₂) (fun x ↦ E₁ x ⊗[𝕜] E₂ x)) :=
+    tensorTotalSpaceTop
+      (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
+  letI : FiberBundle (F₁ ⊗[𝕜] F₂) (fun x ↦ E₁ x ⊗[𝕜] E₂ x) :=
+    Bundle.TensorProduct.fiberBundle
       (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
   exact
     (Bundle.TensorProduct.vectorPrebundle
@@ -376,6 +381,9 @@ noncomputable def _root_.Bundle.Trivialization.tensorProduct :
   classical
   letI : (x : B) → TopologicalSpace (E₁ x ⊗[𝕜] E₂ x) :=
     tensorFiberTop (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
+  letI : TopologicalSpace
+      (TotalSpace (F₁ ⊗[𝕜] F₂) (fun x ↦ E₁ x ⊗[𝕜] E₂ x)) :=
+    tensorTotalSpaceTop (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
   exact
     VectorPrebundle.trivializationOfMemPretrivializationAtlas _
       ⟨e₁, e₂, he₁, he₂, rfl⟩
@@ -385,6 +393,9 @@ the trivialization atlas. -/
 noncomputable instance memTrivializationAtlas :
     letI : (x : B) → TopologicalSpace (E₁ x ⊗[𝕜] E₂ x) :=
       tensorFiberTop (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
+    letI : FiberBundle (F₁ ⊗[𝕜] F₂) (fun x ↦ E₁ x ⊗[𝕜] E₂ x) :=
+      Bundle.TensorProduct.fiberBundle
+        (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
     MemTrivializationAtlas
       (e₁.tensorProduct (𝕜 := 𝕜) e₂ :
         Trivialization (F₁ ⊗[𝕜] F₂) (π (F₁ ⊗[𝕜] F₂) (fun x ↦ E₁ x ⊗[𝕜] E₂ x))) := by
@@ -414,6 +425,9 @@ tensor product of the canonical trivializations of `E₁` and `E₂` at `x₀`. 
 theorem tensorProduct_trivializationAt (x₀ : B) :
       letI : (x : B) → TopologicalSpace (E₁ x ⊗[𝕜] E₂ x) :=
       tensorFiberTop (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
+      letI : FiberBundle (F₁ ⊗[𝕜] F₂) (fun x ↦ E₁ x ⊗[𝕜] E₂ x) :=
+      Bundle.TensorProduct.fiberBundle
+       (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
     trivializationAt (F₁ ⊗[𝕜] F₂) (fun x ↦ E₁ x ⊗[𝕜] E₂ x) x₀ =
       (trivializationAt F₁ E₁ x₀).tensorProduct (𝕜 := 𝕜) (trivializationAt F₂ E₂ x₀) := rfl
 
@@ -423,6 +437,9 @@ of the base sets of the factor trivializations. -/
 theorem tensorProduct_trivializationAt_source (x₀ : B) :
       letI : (x : B) → TopologicalSpace (E₁ x ⊗[𝕜] E₂ x) :=
       tensorFiberTop (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
+      letI : FiberBundle (F₁ ⊗[𝕜] F₂) (fun x ↦ E₁ x ⊗[𝕜] E₂ x) :=
+      Bundle.TensorProduct.fiberBundle
+        (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
     (trivializationAt (F₁ ⊗[𝕜] F₂) (fun x ↦ E₁ x ⊗[𝕜] E₂ x) x₀).source =
       π (F₁ ⊗[𝕜] F₂) (fun x ↦ E₁ x ⊗[𝕜] E₂ x) ⁻¹'
         ((trivializationAt F₁ E₁ x₀).baseSet ∩ (trivializationAt F₂ E₂ x₀).baseSet) :=
@@ -434,6 +451,8 @@ of base sets with the full model fiber. -/
 theorem tensorProduct_trivializationAt_target (x₀ : B) :
       letI : (x : B) → TopologicalSpace (E₁ x ⊗[𝕜] E₂ x) :=
       tensorFiberTop (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
+      letI : FiberBundle (F₁ ⊗[𝕜] F₂) (fun x ↦ E₁ x ⊗[𝕜] E₂ x) :=
+      Bundle.TensorProduct.fiberBundle
     (trivializationAt (F₁ ⊗[𝕜] F₂) (fun x ↦ E₁ x ⊗[𝕜] E₂ x) x₀).target =
       ((trivializationAt F₁ E₁ x₀).baseSet ∩ (trivializationAt F₂ E₂ x₀).baseSet) ×ˢ Set.univ :=
   rfl
@@ -444,6 +463,8 @@ base sets of the factor trivializations. -/
 theorem tensorProduct_trivializationAt_baseSet (x₀ : B) :
     letI : (x : B) → TopologicalSpace (E₁ x ⊗[𝕜] E₂ x) :=
       tensorFiberTop (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
+    letI : FiberBundle (F₁ ⊗[𝕜] F₂) (fun x ↦ E₁ x ⊗[𝕜] E₂ x) :=
+      Bundle.TensorProduct.fiberBundle
     (trivializationAt (F₁ ⊗[𝕜] F₂) (fun x ↦ E₁ x ⊗[𝕜] E₂ x) x₀).baseSet =
       ((trivializationAt F₁ E₁ x₀).baseSet ∩ (trivializationAt F₂ E₂ x₀).baseSet) :=
   rfl
@@ -503,7 +524,6 @@ instance Bundle.TensorProduct.vectorPrebundle.isContMDiff :
 instance ContMDiffVectorBundle.tensorProduct :
     letI (x : B) : TopologicalSpace (E₁ x ⊗[𝕜] E₂ x) :=
       Bundle.TensorProduct.tensorFiberTopology 𝕜 F₁ F₂ E₁ E₂ x
-<<<<<<< Updated upstream
     letI : FiberBundle (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x) :=
       Bundle.TensorProduct.fiberBundle
         (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
@@ -522,11 +542,6 @@ instance ContMDiffVectorBundle.tensorProduct :
   letI : VectorBundle 𝕜 (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x) :=
     Bundle.TensorProduct.vectorBundle
       (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂) (E₁ := E₁) (E₂ := E₂)
-=======
-    ContMDiffVectorBundle n (F₁ ⊗[𝕜] F₂) (fun x => E₁ x ⊗[𝕜] E₂ x) IB := by
-  letI (x : B) : TopologicalSpace (E₁ x ⊗[𝕜] E₂ x) :=
-    Bundle.TensorProduct.tensorFiberTopology 𝕜 F₁ F₂ E₁ E₂ x
->>>>>>> Stashed changes
   exact (Bundle.TensorProduct.vectorPrebundle
     (𝕜 := 𝕜) (B := B) (F₁ := F₁) (F₂ := F₂)
     (E₁ := E₁) (E₂ := E₂)).contMDiffVectorBundle IB

@@ -46,29 +46,39 @@ structure RiemannianManifoldData (k R V : Type*)
   /-- Characteristic ≠ 2: 2a = 0 → a = 0. -/
   char_ne_2 : ∀ (a : R), (2 : R) * a = 0 → a = 0
 
-structure TimeEvolvingManifoldData (k R V Time : Type*)
+structure TimeEvolvingManifoldData (k R V Time A : Type*)
     [Field k] [CommRing R] [Algebra k R]
     [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+    [CommRing A] [Algebra R A]
     extends RiemannianManifoldData k R V where
   /-- Time derivative as a Mathlib derivation. -/
-  td : TimeDerivativeData R Time
+  td : TimeDerivativeData R A Time
+  /-- Regularity filter + closure axioms for `td`. -/
+  [td_regular : TimeRegularFam td]
   /-- Spatial and temporal derivatives commute. -/
   spatial_temporal_comm : SpatialTemporalComm emb td
   /-- ∂_t commutes with trace. -/
   time_tr_comm : TimeTrComm atr td
 
+attribute [instance] TimeEvolvingManifoldData.td_regular
 
-structure RicciFlowBundle (k R V Time : Type*)
+
+structure RicciFlowBundle (k R V Time A : Type*)
     [Field k] [CommRing R] [Algebra k R]
-    [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V] where
+    [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+    [CommRing A] [Algebra R A] where
   /-- Derivation embedding: vector fields as derivations. -/
   emb : DerivationEmbedding k R V
   /-- Abstract trace and tensor contraction. -/
   atr : AbstractTrace R V
   /-- Time derivative. -/
-  td : TimeDerivativeData R Time
+  td : TimeDerivativeData R A Time
+  /-- Regularity filter + closure axioms for `td`. -/
+  [td_regular : TimeRegularFam td]
   /-- Time-dependent family of metrics. -/
   g_fam : Time → MetricDuality R V
+  /-- Smoothness of the metric family's scalar slices. -/
+  h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs)
   /-- Time-dependent family of connections. -/
   conn_fam : Time → V → V → V
   /-- Connection right additivity for each time. -/
@@ -90,11 +100,8 @@ structure RicciFlowBundle (k R V Time : Type*)
   /-- Characteristic ≠ 2. -/
   char_ne_2 : ∀ (a : R), (2 : R) * a = 0 → a = 0
   /-- The Ricci flow equation: ∂_t g = -2 Rc, with Levi-Civita at each time. -/
-  ricci_flow : IsRicciFlow emb td atr g_fam conn_fam ha_fam hal_fam hsl_fam hl_fam
+  ricci_flow : IsRicciFlow emb td atr g_fam h_met conn_fam ha_fam hal_fam hsl_fam hl_fam
   /-- Product rule for ∂_t and ∇ with varying connections. -/
   nabla_time_product_rule : NablaTimeProductRule emb td conn_fam ha_fam hl_fam
-  /-- Multilinear time Leibniz for metric evaluation. -/
-  metric_product_rule : ∀ (F : Time → V) (W : V) (t : Time),
-    (td.dt (fun s => (g_fam s).g (F s) W)) t =
-    metric_var_form td g_fam t ![F t, W] ![] +
-    (td.dt (fun s => (g_fam t).flat W (F s))) t
+
+attribute [instance] RicciFlowBundle.td_regular

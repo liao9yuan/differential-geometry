@@ -340,11 +340,17 @@ structure AbstractTrace (R V : Type*)
   /-- tensor_contract is R-linear. -/
   tensor_contract_smul {r s : ℕ} (c : R) (T : TensorData R V (r + 1) (s + 1)) :
     tensor_contract (c • T) = c • tensor_contract T
-  /-- Evaluation axiom: contract(D ⊗ vectorToData(v)) = D evaluated with v in first co slot. -/
+  /-- Evaluation axiom: contract(vectorToData(v) ⊗ D) = D evaluated with v in first co slot.
+      Uses the "vectorToData first" argument order so that the lone contravariant slot from
+      `vectorToData v` sits at position 0, matching `tensor_contract`'s first/first pairing. -/
   data_eval_single_contract {r s : ℕ}
     (D : TensorData R V r (s + 1)) (v : V)
     (m : Fin s → V) (n : Fin r → (V →ₗ[R] R)) :
-    (tensor_contract (tensor_prod (s₂ := 0) D (vectorToData (R := R) v))) m n =
+    (tensor_contract
+      ((show 1 + r = r + 1 from by omega) ▸
+       (show 0 + (s + 1) = s + 1 from by omega) ▸
+       tensor_prod (r₁ := 1) (s₁ := 0) (r₂ := r) (s₂ := s + 1)
+         (vectorToData (R := R) v) D)) m n =
     D (Fin.cons v m) n
   /-- Dual evaluation axiom: contracting a (0, s₁+1)-tensor A with a (r+1, s₂)-tensor B
       pairs A's first covariant slot with B's first contravariant slot.
@@ -560,14 +566,39 @@ def NablaTrComm {k R V : Type*}
       (conn_add X) (conn_leibniz X) L)
 
 /-- ∂_t commutes with trace.
-    For a time-dependent endomorphism L, if dL is characterized as its time derivative
-    (i.e., for all v, α: α(dL v) = dt(s ↦ α(L s v)) at t), then dt(tr(L)) = tr(dL). -/
-def TimeTrComm {R V Time : Type*}
+    Generalized over an abstract time algebra A with `td.eval` for evaluation.
+    For a time-dependent endomorphism L with time derivative dL, if for each v, α
+    we have elements `αLv v α ∈ A` representing `s ↦ α(L(s)(v))` and `trL ∈ A`
+    representing `s ↦ tr(L(s))`, then eval(dt(trL))(t) = tr(dL). -/
+def TimeTrComm {R V : Type*} {A Time : Type*}
     [CommRing R] [AddCommGroup V] [Module R V]
-    (atr : AbstractTrace R V) (td : TimeDerivativeData R Time) : Prop :=
-  ∀ (L : Time → V →ₗ[R] V) (dL : V →ₗ[R] V) (t : Time),
-    (∀ (v : V) (α : V →ₗ[R] R),
-      α (dL v) = (td.dt (fun s => α (L s v))) t) →
-    (td.dt (fun s => atr.tr (L s))) t = atr.tr dL
+    [CommRing A] [Algebra R A]
+    (atr : AbstractTrace R V) (td : TimeDerivativeData R A Time) : Prop :=
+  ∀ (L : Time → V →ₗ[R] V) (dL : V →ₗ[R] V) (t : Time)
+    (αLv : V → (V →ₗ[R] R) → A) (trL : A),
+    (∀ v α s, td.eval (αLv v α) s = α (L s v)) →
+    (∀ s, td.eval trL s = atr.tr (L s)) →
+    (∀ (v : V) (α : V →ₗ[R] R), α (dL v) = td.eval (td.dt (αLv v α)) t) →
+    td.eval (td.dt trL) t = atr.tr dL
+
+/-- For `A = Time → R` with the identity lift/eval, recover the original direct API.
+Requires smoothness of the `α (L s v)` and `tr (L s)` families so that
+`eval_lift` applies. -/
+theorem TimeTrComm.of_pi {R V Time : Type*}
+    [CommRing R] [AddCommGroup V] [Module R V]
+    {atr : AbstractTrace R V} {td : TimeDerivativeData R (Time → R) Time}
+    [TimeRegularFam td]
+    (h : TimeTrComm atr td)
+    (L : Time → V →ₗ[R] V) (dL : V →ₗ[R] V) (t : Time)
+    (h_αLv_smooth : ∀ (v : V) (α : V →ₗ[R] R),
+      td.isSmoothFam (fun s => α (L s v)))
+    (h_trL_smooth : td.isSmoothFam (fun s => atr.tr (L s)))
+    (h_char : ∀ (v : V) (α : V →ₗ[R] R),
+      α (dL v) = td.eval (td.dt (td.lift (fun s => α (L s v)))) t) :
+    td.eval (td.dt (td.lift (fun s => atr.tr (L s)))) t = atr.tr dL :=
+  h L dL t (fun v α => td.lift (fun s => α (L s v))) (td.lift (fun s => atr.tr (L s)))
+    (fun v α s => by rw [td.eval_lift _ (h_αLv_smooth v α)])
+    (fun s => by rw [td.eval_lift _ h_trL_smooth])
+    h_char
 
 end SyntheticTensor

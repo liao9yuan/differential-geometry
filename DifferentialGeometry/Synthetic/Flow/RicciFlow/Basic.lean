@@ -195,16 +195,18 @@ end RicciFormTensor
 
 section RicciFlowDef
 
-variable {k R V Time : Type*}
+variable {k R V Time : Type*} {A : Type*}
 variable [Field k] [CommRing R] [Algebra k R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+variable [CommRing A] [Algebra R A]
 
 /-- Ricci flow condition: the metric evolves by -2·Ric and the connection is always Levi-Civita. -/
 def IsRicciFlow
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (atr : AbstractTrace R V)
     (g_fam : Time → MetricDuality R V)
+    (h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs))
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ s, ∀ X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
     (hal_fam : ∀ s, ∀ X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z)
@@ -212,55 +214,59 @@ def IsRicciFlow
     (hl_fam : ∀ s, ∀ X (f : R) Y, conn_fam s X (f • Y) = (emb.embed X) f • Y + f • conn_fam s X Y)
     : Prop :=
   (∀ s, IsLeviCivita emb (conn_fam s) (g_fam s)) ∧
-  (∀ t, metric_var_form td g_fam t =
+  (∀ t, metric_var_form td g_fam h_met t =
     (-2 : R) • ricciForm_tensor emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr)
 
 /-- Extract the Levi-Civita property from IsRicciFlow. -/
 theorem IsRicciFlow.levi_civita
     {emb : DerivationEmbedding k R V}
-    {td : TimeDerivativeData R Time}
+    {td : TimeDerivativeData R A Time} [TimeRegularFam td]
     {atr : AbstractTrace R V}
     {g_fam : Time → MetricDuality R V}
+    {h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs)}
     {conn_fam : Time → V → V → V}
     {ha_fam hal_fam hsl_fam hl_fam}
-    (h : IsRicciFlow emb td atr g_fam conn_fam ha_fam hal_fam hsl_fam hl_fam)
+    (h : IsRicciFlow emb td atr g_fam h_met conn_fam ha_fam hal_fam hsl_fam hl_fam)
     (s : Time) : IsLeviCivita emb (conn_fam s) (g_fam s) :=
   h.1 s
 
 /-- Extract the evolution equation from IsRicciFlow. -/
 theorem IsRicciFlow.evolution
     {emb : DerivationEmbedding k R V}
-    {td : TimeDerivativeData R Time}
+    {td : TimeDerivativeData R A Time} [TimeRegularFam td]
     {atr : AbstractTrace R V}
     {g_fam : Time → MetricDuality R V}
+    {h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs)}
     {conn_fam : Time → V → V → V}
     {ha_fam hal_fam hsl_fam hl_fam}
-    (h : IsRicciFlow emb td atr g_fam conn_fam ha_fam hal_fam hsl_fam hl_fam)
-    (t : Time) : metric_var_form td g_fam t =
+    (h : IsRicciFlow emb td atr g_fam h_met conn_fam ha_fam hal_fam hsl_fam hl_fam)
+    (t : Time) : metric_var_form td g_fam h_met t =
     (-2 : R) • ricciForm_tensor emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr :=
   h.2 t
 
 /-- Extract metric compatibility from IsRicciFlow. -/
 theorem IsRicciFlow.metric_compat
     {emb : DerivationEmbedding k R V}
-    {td : TimeDerivativeData R Time}
+    {td : TimeDerivativeData R A Time} [TimeRegularFam td]
     {atr : AbstractTrace R V}
     {g_fam : Time → MetricDuality R V}
+    {h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs)}
     {conn_fam : Time → V → V → V}
     {ha_fam hal_fam hsl_fam hl_fam}
-    (h : IsRicciFlow emb td atr g_fam conn_fam ha_fam hal_fam hsl_fam hl_fam)
+    (h : IsRicciFlow emb td atr g_fam h_met conn_fam ha_fam hal_fam hsl_fam hl_fam)
     (s : Time) : IsMetricCompatible emb (conn_fam s) (g_fam s) :=
   (h.levi_civita s).1
 
 /-- Extract torsion-free from IsRicciFlow. -/
 theorem IsRicciFlow.torsion_free
     {emb : DerivationEmbedding k R V}
-    {td : TimeDerivativeData R Time}
+    {td : TimeDerivativeData R A Time} [TimeRegularFam td]
     {atr : AbstractTrace R V}
     {g_fam : Time → MetricDuality R V}
+    {h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs)}
     {conn_fam : Time → V → V → V}
     {ha_fam hal_fam hsl_fam hl_fam}
-    (h : IsRicciFlow emb td atr g_fam conn_fam ha_fam hal_fam hsl_fam hl_fam)
+    (h : IsRicciFlow emb td atr g_fam h_met conn_fam ha_fam hal_fam hsl_fam hl_fam)
     (s : Time) : IsTorsionFree emb (conn_fam s) :=
   (h.levi_civita s).2
 
@@ -272,9 +278,16 @@ end RicciFlowDef
 
 section ProductRule
 
-variable {k R V Time : Type*}
+-- `NablaTimeProductRule` introduces smoothness hypotheses that are not used in
+-- the stated equation itself (they are supplied by every consumer of the rule
+-- whenever it must be applied). Disable the unusedVariables linter in this
+-- section so these consumer-facing hypotheses do not trigger warnings.
+set_option linter.unusedVariables false
+
+variable {k R V Time : Type*} {A : Type*}
 variable [Field k] [CommRing R] [Algebra k R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+variable [CommRing A] [Algebra R A]
 
 /-- Product rule for time derivative and covariant derivative.
     This is the tensor-level analog of the old ConnectionTimeCalculus.t_conn_apply.
@@ -285,17 +298,45 @@ variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
     for varying connections acting on varying tensors.
 
     In concrete models (smooth manifolds), this follows from the product rule
-    in local coordinates. -/
+    in local coordinates.
+
+    Smoothness hypotheses propagate the smoothness of the scalar slices of T,
+    the connection-varying vector and covector slot families, and the nabla
+    result itself; they are required by `dt_tensor` and `conn_var_tensor`.
+
+    The five new hypotheses `hXT`, `h_conn_smooth_v_var`, `h_conn_smooth_c_var`,
+    `h_conn_smooth_v_at`, `h_conn_smooth_c_at` propagate the smoothness of the
+    pieces that appear inside the evaluation formula for `nabla_tensor`: the
+    embedded-derivation application to the scalar slices of `T`, and the slices
+    obtained by substituting a connection-varying vector or nabla_dual-varying
+    covector into `T` (both for varying `T τ` and for the frozen `T t`). -/
 def NablaTimeProductRule
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R Time)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ τ, ∀ X Y Z, conn_fam τ X (Y + Z) = conn_fam τ X Y + conn_fam τ X Z)
     (hl_fam : ∀ τ, ∀ X (f : R) Y, conn_fam τ X (f • Y) = (emb.embed X) f • Y + f • conn_fam τ X Y)
     : Prop :=
-  ∀ (X : V) {r s : ℕ} (T : Time → TensorData R V r s) (t : Time),
-    dt_tensor td t (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (T τ)) =
-    conn_var_tensor emb td conn_fam ha_fam hl_fam t X (T t) +
-    nabla_tensor emb (conn_fam t) (ha_fam t) (hl_fam t) X (dt_tensor td t T)
+  ∀ (X : V) {r s : ℕ} (T : Time → TensorData R V r s) (t : Time)
+    (hT : ∀ vs αs, td.isSmoothFam (fun τ => T τ vs αs))
+    (hXT : ∀ vs αs, td.isSmoothFam (fun τ => (emb.embed X) (T τ vs αs)))
+    (h_conn_smooth_v_var : ∀ (i : Fin s) vs αs, td.isSmoothFam
+      (fun τ => T τ (Function.update vs i (conn_fam τ X (vs i))) αs))
+    (h_conn_smooth_c_var : ∀ (j : Fin r) vs αs, td.isSmoothFam
+      (fun τ => T τ vs (Function.update αs j
+        (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))))
+    (hT_nabla : ∀ vs αs, td.isSmoothFam
+      (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (T τ) vs αs))
+    (h_conn_smooth_v_at : ∀ (i : Fin s) vs αs, td.isSmoothFam
+      (fun τ => T t (Function.update vs i (conn_fam τ X (vs i))) αs))
+    (h_conn_smooth_c_at : ∀ (j : Fin r) vs αs, td.isSmoothFam
+      (fun τ => T t vs (Function.update αs j
+        (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))))
+    (h_nabla_t : ∀ vs αs, td.isSmoothFam
+      (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (T t) vs αs)),
+    dt_tensor td t (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (T τ))
+      hT_nabla =
+    conn_var_tensor emb td conn_fam ha_fam hl_fam t X (T t) h_nabla_t +
+    nabla_tensor emb (conn_fam t) (ha_fam t) (hl_fam t) X (dt_tensor td t T hT)
 
 end ProductRule
