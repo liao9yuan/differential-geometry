@@ -1,4 +1,5 @@
 import DifferentialGeometry.Synthetic.Realization.Coordinates.Basic
+import DifferentialGeometry.Synthetic.Analysis.TimeOnTensors
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -135,6 +136,96 @@ theorem christoffelSymbolDifferenceInFrame_eq_sub
   simp
 
 end Difference
+
+section TimeDerivative
+
+variable {A Time : Type*} [CommRing A] [Algebra Real A]
+
+/-- The coordinate-facing time derivative `partial_t Gamma^k_ij` in a fixed local frame. -/
+noncomputable def christoffelSymbolTimeDerivativeInFrame
+    (td : TimeDerivativeData Real A Time)
+    (covFam : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (frame : ι -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (t : Time) (x : M) (i j k : ι) : Real :=
+  td.dt_apply (fun s => christoffelSymbolInFrame (covFam s) frame hframe x i j k) t
+
+theorem christoffelSymbolTimeDerivativeInFrame_eval
+    (td : TimeDerivativeData Real A Time)
+    (covFam : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (frame : ι -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (t : Time) (x : M) (i j k : ι) :
+    christoffelSymbolTimeDerivativeInFrame td covFam frame hframe t x i j k =
+      td.dt_apply (fun s => christoffelSymbolInFrame (covFam s) frame hframe x i j k) t := by
+  rfl
+
+/-- A named coordinate evolution equation for Christoffel coefficients. The intended Ricci-flow
+right hand side is supplied by `ricciFlowChristoffelEvolutionRHSInFrame` below. -/
+def ChristoffelSymbolEvolutionEquationInFrame
+    (td : TimeDerivativeData Real A Time)
+    (covFam : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (frame : ι -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (rhs : Time -> M -> ι -> ι -> ι -> Real) : Prop :=
+  forall t x i j k,
+    christoffelSymbolTimeDerivativeInFrame td covFam frame hframe t x i j k =
+      rhs t x i j k
+
+theorem christoffelSymbolEvolution_from_equation
+    (td : TimeDerivativeData Real A Time)
+    (covFam : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (frame : ι -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (rhs : Time -> M -> ι -> ι -> ι -> Real)
+    (h_evol : ChristoffelSymbolEvolutionEquationInFrame td covFam frame hframe rhs)
+    (t : Time) (x : M) (i j k : ι) :
+    christoffelSymbolTimeDerivativeInFrame td covFam frame hframe t x i j k =
+      rhs t x i j k :=
+  h_evol t x i j k
+
+/-- Ricci-flow right hand side for Lemma 14.23 in a local frame.
+
+`nablaRicLastRaised t x i j k` represents `g^{kl} (nabla_i Ric)_{jl}`.
+`nablaRicDirectionRaised t x i j k` represents `g^{kl} (nabla_l Ric)_{ij}`.
+Supplying these already-raised contractions keeps this file independent of the
+future coordinate metric/Ricci component API. -/
+def ricciFlowChristoffelEvolutionRHSInFrame
+    (nablaRicLastRaised nablaRicDirectionRaised : Time -> M -> ι -> ι -> ι -> Real)
+    (t : Time) (x : M) (i j k : ι) : Real :=
+  - nablaRicLastRaised t x i j k -
+    nablaRicLastRaised t x j i k +
+    nablaRicDirectionRaised t x i j k
+
+/-- Coordinate statement of Lemma 14.23, parameterized by the raised Ricci-derivative
+components that will be supplied by the later metric/Ricci coordinate realization. -/
+def RicciFlowChristoffelSymbolEvolutionEquationInFrame
+    (td : TimeDerivativeData Real A Time)
+    (covFam : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (frame : ι -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (nablaRicLastRaised nablaRicDirectionRaised : Time -> M -> ι -> ι -> ι -> Real) : Prop :=
+  ChristoffelSymbolEvolutionEquationInFrame td covFam frame hframe
+    (ricciFlowChristoffelEvolutionRHSInFrame nablaRicLastRaised nablaRicDirectionRaised)
+
+theorem ricciFlow_christoffelSymbolEvolution_from_equation
+    (td : TimeDerivativeData Real A Time)
+    (covFam : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (frame : ι -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (nablaRicLastRaised nablaRicDirectionRaised : Time -> M -> ι -> ι -> ι -> Real)
+    (h_evol : RicciFlowChristoffelSymbolEvolutionEquationInFrame
+      td covFam frame hframe nablaRicLastRaised nablaRicDirectionRaised)
+    (t : Time) (x : M) (i j k : ι) :
+    christoffelSymbolTimeDerivativeInFrame td covFam frame hframe t x i j k =
+      - nablaRicLastRaised t x i j k -
+        nablaRicLastRaised t x j i k +
+        nablaRicDirectionRaised t x i j k := by
+  simpa [RicciFlowChristoffelSymbolEvolutionEquationInFrame,
+    ChristoffelSymbolEvolutionEquationInFrame, ricciFlowChristoffelEvolutionRHSInFrame]
+    using h_evol t x i j k
+
+end TimeDerivative
 
 end FrameChristoffel
 
