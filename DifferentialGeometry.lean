@@ -282,3 +282,10 @@ import DifferentialGeometry.Analysis.Sobolev.CrossChartBoundStrict
 import DifferentialGeometry.Analysis.Sobolev.CrossChartIdentity
 import DifferentialGeometry.Analysis.Sobolev.CrossChartBoundStrictMemWkp
 import DifferentialGeometry.Analysis.Sobolev.ChartBanachManifold
+import DifferentialGeometry.Analysis.Sobolev.EmbeddingSubcritical
+import DifferentialGeometry.Analysis.Sobolev.EuclideanMorrey
+import DifferentialGeometry.Analysis.Sobolev.MorreyManifold
+import DifferentialGeometry.Analysis.Sobolev.IteratedSobolevEmbedding
+import DifferentialGeometry.Analysis.Sobolev.SobolevAlgebra
+import DifferentialGeometry.Analysis.Sobolev.IntrinsicLp
+import DifferentialGeometry.Analysis.Sobolev.EquivalenceFull
