@@ -59,6 +59,8 @@ import DifferentialGeometry.Synthetic.Realization.RicciFlow
 import DifferentialGeometry.Synthetic.Realization.SmoothRicciFlow
 import DifferentialGeometry.Synthetic.Realization.RicciFlowOn
 import DifferentialGeometry.Synthetic.Realization.SmoothRicciFlowOn
+import DifferentialGeometry.Synthetic.Realization.Coordinates.Basic
+import DifferentialGeometry.Synthetic.Realization.Coordinates.Christoffel
 
 -- Non-Ricci flows (plug-in demonstrations of flow-agnostic abstraction)
 import DifferentialGeometry.Synthetic.Flow.Heat.Basic
