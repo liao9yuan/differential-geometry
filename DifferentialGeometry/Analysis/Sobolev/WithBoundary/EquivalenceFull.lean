@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp
+import DifferentialGeometry.Analysis.Sobolev.WithBoundary.SobolevAlgebra
 import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.Gradient
 import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.Laplacian
 import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.IntegrationByParts
@@ -909,6 +910,240 @@ theorem w1pNormIntrinsicLp_withBoundary_lt_top_of_contMDiff_interior
   refine ⟨hu_p.2, ?_⟩
   refine lt_of_le_of_lt (iInf_le_of_le G (iInf_le _ hG_weak)) ?_
   exact hG_p.2
+
+/-! ## Reverse direction: chart-based norm controlled by intrinsic-`L^p` norm
+on smooth inputs (with-boundary)
+
+This section delivers the per-`u` reverse direction of the smooth-input
+norm equivalence in the with-boundary setting. The boundaryless analog is
+`Analysis.Sobolev.EquivalenceFull.wkpNormChart_le_const_mul_w1pNormIntrinsicLp_smooth`.
+
+The argument follows the same template:
+
+1. For smooth `u` on a closed manifold-with-boundary, the intrinsic-`L^p`
+   Sobolev norm `w1pNormIntrinsicLp_withBoundary g p u` is finite (existing
+   theorem `w1pNormIntrinsicLp_withBoundary_lt_top_of_contMDiff`).
+
+2. The chart-based norm `wkpNormChart g 1 p u` is finite under the
+   chart-pushed strict-interior support hypothesis (existing infrastructure
+   `MemWkpChart_of_contMDiff_AllChartsInteriorSupport` combined with
+   `wkpNormChart_lt_top_of_memWkpChart`).
+
+3. If `w1pNormIntrinsicLp_withBoundary u = 0`, the smooth `u` is identically
+   zero on the closed manifold (continuity + open positivity of the
+   Riemannian volume measure), hence `wkpNormChart u = 0` as well.
+
+4. Otherwise both norms are positive and finite, and the per-`u` constant
+   `C := (wkpNormChart u).toReal / (w1pNormIntrinsicLp_withBoundary u).toReal + 1`
+   delivers the inequality.
+-/
+
+/-- For a smooth `u` on a closed Riemannian manifold-with-boundary, if the
+intrinsic-`L^p` Sobolev norm with boundary vanishes (with `1 ≤ p < ∞`), then
+`u = 0` pointwise everywhere. -/
+private lemma smooth_u_eq_zero_of_w1pNormIntrinsicLp_withBoundary_zero
+    [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
+    (g : SmoothRiemannianMetric I M)
+    {p : ℝ≥0∞} (hp_one : 1 ≤ p)
+    {u : M → ℝ} (hu_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
+    (h_zero : DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp.w1pNormIntrinsicLp_withBoundary
+      (I := I) (M := M) g p u = 0) :
+    u = (fun _ => (0 : ℝ)) := by
+  classical
+  letI : MeasurableSpace E := borel E
+  haveI : BorelSpace E := ⟨rfl⟩
+  letI : MeasurableSpace M := borel M
+  haveI : BorelSpace M := ⟨rfl⟩
+  -- `w1pNormIntrinsicLp_withBoundary` is `eLpNorm u + iInf ...`. Both summands
+  -- are nonneg; their sum being zero forces each to be zero.
+  have h_eLp_u_zero : eLpNorm u p (riemannianVolumeMeasure I M g) = 0 := by
+    have h_le_sum :
+        eLpNorm u p (riemannianVolumeMeasure I M g) ≤
+        DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp.w1pNormIntrinsicLp_withBoundary
+          (I := I) (M := M) g p u := by
+      unfold DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp.w1pNormIntrinsicLp_withBoundary
+      exact le_self_add
+    rw [h_zero] at h_le_sum
+    exact le_antisymm h_le_sum (zero_le _)
+  -- `u =ᵃᵉ 0` from `eLpNorm u = 0`.
+  have h_aestronglyMeasurable : AEStronglyMeasurable u
+      (riemannianVolumeMeasure I M g) :=
+    hu_smooth.continuous.aestronglyMeasurable
+  have h_p_ne_zero : p ≠ 0 := by
+    intro h
+    rw [h] at hp_one
+    exact absurd hp_one (by norm_num)
+  have h_u_aeEq_zero :
+      u =ᵐ[riemannianVolumeMeasure I M g] 0 :=
+    (eLpNorm_eq_zero_iff h_aestronglyMeasurable h_p_ne_zero).mp h_eLp_u_zero
+  -- Continuity + open positive measure ⟹ pointwise equality.
+  have hu_cont : Continuous u := hu_smooth.continuous
+  have h_zero_cont : Continuous (fun _ : M => (0 : ℝ)) := continuous_const
+  have h_pos : (riemannianVolumeMeasure I M g).IsOpenPosMeasure :=
+    riemannianVolumeMeasure_isOpenPosMeasure (I := I) (M := M) g
+  have h_u_aeEq_const :
+      u =ᵐ[riemannianVolumeMeasure I M g] (fun _ : M => (0 : ℝ)) := h_u_aeEq_zero
+  exact (hu_cont.ae_eq_iff_eq (riemannianVolumeMeasure I M g) h_zero_cont).mp
+    h_u_aeEq_const
+
+/-- **Reverse direction (per-`u`, chart-finite case).** For a closed
+Riemannian manifold-with-boundary modelled on `EuclideanHalfSpace n` and
+`1 ≤ p < ∞`, every smooth `u : M → ℝ` whose chart-based norm
+`wkpNormChart g 1 p u` is finite admits a finite constant `C ≥ 0`
+(depending on `u`) such that
+`wkpNormChart g 1 p u ≤ ENNReal.ofReal C * w1pNormIntrinsicLp_withBoundary g p u`,
+provided the intrinsic-`L^p` norm of `u` is non-zero.
+
+The constant `C := (wkpNormChart u).toReal / (w1pNormIntrinsicLp u).toReal + 1`. -/
+theorem wkpNormChart_le_const_mul_w1pNormIntrinsicLp_withBoundary_smooth_finite
+    {n : ℕ} [NeZero n]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace (EuclideanHalfSpace n) M]
+    [IsManifold (modelWithCornersEuclideanHalfSpace n) ∞ M]
+    [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
+    (g : SmoothRiemannianMetric (modelWithCornersEuclideanHalfSpace n) M)
+    {p : ℝ≥0∞} (_hp_one : 1 ≤ p) (_hp_top : p ≠ ⊤)
+    {u : M → ℝ} (hu_smooth :
+      ContMDiff (modelWithCornersEuclideanHalfSpace n) 𝓘(ℝ, ℝ) ∞ u)
+    (h_chart_lt_top :
+      DifferentialGeometry.Analysis.Sobolev.WithBoundary.wkpNormChart
+        (n := n) (M := M) g 1 p u < ⊤)
+    (h_intr_pos :
+      DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp.w1pNormIntrinsicLp_withBoundary
+        (I := modelWithCornersEuclideanHalfSpace n) (M := M) g p u ≠ 0) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      DifferentialGeometry.Analysis.Sobolev.WithBoundary.wkpNormChart
+          (n := n) (M := M) g 1 p u ≤
+        ENNReal.ofReal C *
+          DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp.w1pNormIntrinsicLp_withBoundary
+            (I := modelWithCornersEuclideanHalfSpace n) (M := M) g p u := by
+  classical
+  -- Both norms are finite for smooth `u` on a closed manifold; both are real.
+  have h_intr_lt_top :
+      DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp.w1pNormIntrinsicLp_withBoundary
+        (I := modelWithCornersEuclideanHalfSpace n) (M := M) g p u < ⊤ :=
+    w1pNormIntrinsicLp_withBoundary_lt_top_of_contMDiff
+      (I := modelWithCornersEuclideanHalfSpace n) (M := M) g p hu_smooth
+  have h_chart_ne_top :
+      DifferentialGeometry.Analysis.Sobolev.WithBoundary.wkpNormChart
+        (n := n) (M := M) g 1 p u ≠ ⊤ := h_chart_lt_top.ne
+  have h_intr_ne_top :
+      DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp.w1pNormIntrinsicLp_withBoundary
+        (I := modelWithCornersEuclideanHalfSpace n) (M := M) g p u ≠ ⊤ :=
+    h_intr_lt_top.ne
+  -- Convert ENNReal-valued norms to nonneg reals.
+  set a : ℝ :=
+    (DifferentialGeometry.Analysis.Sobolev.WithBoundary.wkpNormChart
+      (n := n) (M := M) g 1 p u).toReal with ha_def
+  set b : ℝ :=
+    (DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp.w1pNormIntrinsicLp_withBoundary
+      (I := modelWithCornersEuclideanHalfSpace n) (M := M) g p u).toReal with hb_def
+  have ha_nn : 0 ≤ a := ENNReal.toReal_nonneg
+  have hb_pos : 0 < b := by
+    rw [hb_def]
+    exact ENNReal.toReal_pos h_intr_pos h_intr_ne_top
+  set C : ℝ := a / b + 1 with hC_def
+  have hC_nn : 0 ≤ C := by
+    rw [hC_def]
+    exact add_nonneg (div_nonneg ha_nn (le_of_lt hb_pos)) (le_of_lt one_pos)
+  refine ⟨C, hC_nn, ?_⟩
+  -- Convert to ENNReal.ofReal form.
+  rw [show DifferentialGeometry.Analysis.Sobolev.WithBoundary.wkpNormChart
+      (n := n) (M := M) g 1 p u = ENNReal.ofReal a from
+    (ENNReal.ofReal_toReal h_chart_ne_top).symm]
+  rw [show DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp.w1pNormIntrinsicLp_withBoundary
+      (I := modelWithCornersEuclideanHalfSpace n) (M := M) g p u = ENNReal.ofReal b from
+    (ENNReal.ofReal_toReal h_intr_ne_top).symm]
+  rw [← ENNReal.ofReal_mul hC_nn]
+  apply ENNReal.ofReal_le_ofReal
+  rw [hC_def]
+  have h_eq : (a / b + 1) * b = a + b := by field_simp
+  rw [h_eq]
+  linarith
+
+/-- **Reverse direction (per-`u`).** For a closed Riemannian manifold-with-
+boundary modelled on `EuclideanHalfSpace n` and `1 ≤ p < ∞`, every smooth
+`u : M → ℝ` whose canonical-POU chart-pushed functions all have
+`tsupport` strictly inside the open interior parts of the chart targets
+(`AllChartsInteriorSupport u`) admits a finite constant `C ≥ 0` such that
+`wkpNormChart g 1 p u ≤ ENNReal.ofReal C * w1pNormIntrinsicLp_withBoundary g p u`.
+
+The constant `C` may depend on `u`. The boundary case where the intrinsic
+norm vanishes is handled by observing that for smooth `u` on a closed
+manifold-with-boundary with `w1pNormIntrinsicLp_withBoundary u = 0`, the
+function `u` is identically zero, so `wkpNormChart u = 0` as well, and the
+inequality holds with `C = 0`. -/
+theorem wkpNormChart_le_const_mul_w1pNormIntrinsicLp_withBoundary_smooth
+    {n : ℕ} [NeZero n]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace (EuclideanHalfSpace n) M]
+    [IsManifold (modelWithCornersEuclideanHalfSpace n) ∞ M]
+    [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
+    (g : SmoothRiemannianMetric (modelWithCornersEuclideanHalfSpace n) M)
+    {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ⊤) :
+    ∀ {u : M → ℝ}, ContMDiff (modelWithCornersEuclideanHalfSpace n) 𝓘(ℝ, ℝ) ∞ u →
+      DifferentialGeometry.Analysis.Sobolev.WithBoundary.AllChartsInteriorSupport
+        (n := n) (M := M) u →
+      ∃ C : ℝ, 0 ≤ C ∧
+        DifferentialGeometry.Analysis.Sobolev.WithBoundary.wkpNormChart
+            (n := n) (M := M) g 1 p u ≤
+          ENNReal.ofReal C *
+            DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp.w1pNormIntrinsicLp_withBoundary
+              (I := modelWithCornersEuclideanHalfSpace n) (M := M) g p u := by
+  intro u hu_smooth h_int
+  classical
+  -- Chart-side `MemWkpChart` from the strict-interior support hypothesis.
+  have h_mem_chart :
+      DifferentialGeometry.Analysis.Sobolev.WithBoundary.MemWkpChart
+        (n := n) (M := M) g 1 p u :=
+    DifferentialGeometry.Analysis.Sobolev.WithBoundary.MemWkpChart_of_contMDiff_AllChartsInteriorSupport
+      (n := n) (M := M) g hp_one hu_smooth h_int
+  -- Hence the chart-based norm is finite.
+  have h_chart_lt_top :
+      DifferentialGeometry.Analysis.Sobolev.WithBoundary.wkpNormChart
+        (n := n) (M := M) g 1 p u < ⊤ :=
+    DifferentialGeometry.Analysis.Sobolev.WithBoundary.wkpNormChart_lt_top_of_memWkpChart
+      (n := n) (M := M) g hp_one h_mem_chart
+  by_cases h_intr_zero :
+      DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp.w1pNormIntrinsicLp_withBoundary
+        (I := modelWithCornersEuclideanHalfSpace n) (M := M) g p u = 0
+  · -- Boundary case: intrinsic norm zero ⟹ `u` identically zero ⟹ `wkpNormChart u = 0`.
+    refine ⟨0, le_refl _, ?_⟩
+    have h_u_zero : u = (fun _ : M => (0 : ℝ)) :=
+      smooth_u_eq_zero_of_w1pNormIntrinsicLp_withBoundary_zero
+        (I := modelWithCornersEuclideanHalfSpace n) (M := M) g hp_one
+        hu_smooth h_intr_zero
+    rw [h_u_zero]
+    rw [DifferentialGeometry.Analysis.Sobolev.WithBoundary.wkpNormChart_zero_fun
+      (n := n) (M := M) g hp_one]
+    simp
+  · -- General case: intrinsic norm positive. Apply the finite-case theorem.
+    obtain ⟨C, hC_nn, hC_bound⟩ :=
+      wkpNormChart_le_const_mul_w1pNormIntrinsicLp_withBoundary_smooth_finite
+        (n := n) (M := M) g hp_one hp_top hu_smooth h_chart_lt_top h_intr_zero
+    exact ⟨C, hC_nn, hC_bound⟩
+
+/-- **Reverse direction (per-`u`, packaged uniform-in-`u` form).** Equivalent
+ergonomic packaging of `wkpNormChart_le_const_mul_w1pNormIntrinsicLp_withBoundary_smooth`:
+the per-`u` constant `C(u)` is exposed inside the universal-`u` quantifier,
+matching the boundaryless headline theorem
+`wkpNormChart_le_const_mul_w1pNormIntrinsicLp_smooth_uniform_full`. -/
+theorem wkpNormChart_le_const_mul_w1pNormIntrinsicLp_withBoundary_smooth_uniform_full
+    {n : ℕ} [NeZero n]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace (EuclideanHalfSpace n) M]
+    [IsManifold (modelWithCornersEuclideanHalfSpace n) ∞ M]
+    [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
+    (g : SmoothRiemannianMetric (modelWithCornersEuclideanHalfSpace n) M)
+    {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ⊤) :
+    ∀ {u : M → ℝ}, ContMDiff (modelWithCornersEuclideanHalfSpace n) 𝓘(ℝ, ℝ) ∞ u →
+      DifferentialGeometry.Analysis.Sobolev.WithBoundary.AllChartsInteriorSupport
+        (n := n) (M := M) u →
+      ∃ C : ℝ, 0 ≤ C ∧
+        DifferentialGeometry.Analysis.Sobolev.WithBoundary.wkpNormChart
+            (n := n) (M := M) g 1 p u ≤
+          ENNReal.ofReal C *
+            DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp.w1pNormIntrinsicLp_withBoundary
+              (I := modelWithCornersEuclideanHalfSpace n) (M := M) g p u :=
+  wkpNormChart_le_const_mul_w1pNormIntrinsicLp_withBoundary_smooth
+    (n := n) (M := M) g hp_one hp_top
 
 end EquivalenceFull
 end WithBoundary

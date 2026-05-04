@@ -290,6 +290,7 @@ import DifferentialGeometry.Analysis.Sobolev.WithBoundary.EmbeddingSubcritical
 import DifferentialGeometry.Analysis.Sobolev.IteratedSobolevEmbedding
 import DifferentialGeometry.Analysis.Sobolev.WithBoundary.IteratedSobolevEmbedding
 import DifferentialGeometry.Analysis.Sobolev.WithBoundary.MorreyManifold
+import DifferentialGeometry.Analysis.Sobolev.WithBoundary.MorreyManifoldUnconditional
 import DifferentialGeometry.Analysis.Sobolev.SobolevAlgebra
 import DifferentialGeometry.Analysis.Sobolev.WithBoundary.SobolevAlgebra
 import DifferentialGeometry.Analysis.Sobolev.IntrinsicLp
