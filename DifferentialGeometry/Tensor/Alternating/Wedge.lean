@@ -50,13 +50,14 @@ notation g "∧["f"]" h => wedge_product g h f
 notation g "∧["𝕜"]" h => wedge_product g h (ContinuousLinearMap.mul 𝕜 𝕜)
 
 /-- Wedge of a continuous linear functional (1-cotangent) with an alternating
-`n`-form, producing an alternating `(n + 1)`-form. The 1-cotangent `α : M →L[𝕜] 𝕜`
-is viewed as an alternating 1-form via `ofSubsingleton`; the result is reindexed
-from `Fin (1 + n)` to `Fin (n + 1)` via `finAddFlip`. -/
+`n`-form, producing an alternating `(n + 1)`-form.
+
+This is the `uncurryFin` convention: the covector supplies the distinguished first
+slot before antisymmetrization, matching the indexing convention used by exterior
+derivatives. -/
 noncomputable def covectorWedge (α : M →L[𝕜] 𝕜) (β : M [⋀^Fin n]→L[𝕜] 𝕜) :
     M [⋀^Fin (n + 1)]→L[𝕜] 𝕜 :=
-  domDomCongr finAddFlip
-    (wedge_product (ofSubsingleton 𝕜 M 𝕜 0 α) β (ContinuousLinearMap.mul 𝕜 𝕜))
+  uncurryFin (α.smulRight β)
 
 @[inherit_doc]
 notation:70 α " ∧₁ " β => covectorWedge α β

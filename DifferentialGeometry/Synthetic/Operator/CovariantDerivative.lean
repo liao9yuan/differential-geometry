@@ -310,6 +310,179 @@ theorem covariantDivergence02At_eval
         conn_smul_left hl T Y) := by
   rfl
 
+/-- Divergence endomorphism is additive in the `(0,2)` tensor input. -/
+theorem covDivergence02Endomorphism_add
+    (emb : DerivationEmbedding k R V) (met : MetricDuality R V)
+    (conn : V -> V -> V)
+    (ha : forall X Y Z : V, conn X (Y + Z) = conn X Y + conn X Z)
+    (conn_add_left : forall X Y Z : V, conn (X + Y) Z = conn X Z + conn Y Z)
+    (conn_smul_left : forall (f : R) (X Z : V), conn (f • X) Z = f • conn X Z)
+    (hl : forall X (f : R) (Y : V),
+      conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (T S : TensorData R V 0 2) (Y : V) :
+    covDivergence02Endomorphism emb met conn ha conn_add_left conn_smul_left hl
+        (T + S) Y =
+      covDivergence02Endomorphism emb met conn ha conn_add_left conn_smul_left hl T Y +
+        covDivergence02Endomorphism emb met conn ha conn_add_left conn_smul_left hl S Y := by
+  ext X
+  apply met.eq_of_forall_g_eq
+  intro Z
+  change
+    met.g
+      (met.sharp
+        (covDeriv02TraceCovector emb conn ha hl X (T + S) Y)) Z =
+      met.g
+        (met.sharp (covDeriv02TraceCovector emb conn ha hl X T Y) +
+          met.sharp (covDeriv02TraceCovector emb conn ha hl X S Y)) Z
+  rw [met.g_sharp, met.g_add_left, met.g_sharp, met.g_sharp]
+  rw [covDeriv02TraceCovector_apply emb conn ha hl X (T + S) Y Z,
+    covDeriv02TraceCovector_apply emb conn ha hl X T Y Z,
+    covDeriv02TraceCovector_apply emb conn ha hl X S Y Z]
+  have h := congr_arg (fun U : TensorData R V 0 2 => U ![Z, Y] ![])
+    (nabla_add emb conn ha hl X T S)
+  simpa only [MultilinearMap.add_apply] using h
+
+/-- Divergence is additive in the `(0,2)` tensor input. -/
+theorem covariantDivergence02At_add
+    (emb : DerivationEmbedding k R V) (met : MetricDuality R V)
+    (atr : AbstractTrace R V) (conn : V -> V -> V)
+    (ha : forall X Y Z : V, conn X (Y + Z) = conn X Y + conn X Z)
+    (conn_add_left : forall X Y Z : V, conn (X + Y) Z = conn X Z + conn Y Z)
+    (conn_smul_left : forall (f : R) (X Z : V), conn (f • X) Z = f • conn X Z)
+    (hl : forall X (f : R) (Y : V),
+      conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (T S : TensorData R V 0 2) (Y : V) :
+    covariantDivergence02At emb met atr conn ha conn_add_left conn_smul_left hl
+        (T + S) Y =
+      covariantDivergence02At emb met atr conn ha conn_add_left conn_smul_left hl T Y +
+        covariantDivergence02At emb met atr conn ha conn_add_left conn_smul_left hl S Y := by
+  unfold covariantDivergence02At
+  rw [covDivergence02Endomorphism_add emb met conn ha conn_add_left conn_smul_left hl T S Y,
+    map_add]
+
+/-- Divergence of the zero `(0,2)` tensor. -/
+theorem covariantDivergence02At_zero
+    (emb : DerivationEmbedding k R V) (met : MetricDuality R V)
+    (atr : AbstractTrace R V) (conn : V -> V -> V)
+    (ha : forall X Y Z : V, conn X (Y + Z) = conn X Y + conn X Z)
+    (conn_add_left : forall X Y Z : V, conn (X + Y) Z = conn X Z + conn Y Z)
+    (conn_smul_left : forall (f : R) (X Z : V), conn (f • X) Z = f • conn X Z)
+    (hl : forall X (f : R) (Y : V),
+      conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (Y : V) :
+    covariantDivergence02At emb met atr conn ha conn_add_left conn_smul_left hl
+        (0 : TensorData R V 0 2) Y = 0 := by
+  let div0 :=
+    covariantDivergence02At emb met atr conn ha conn_add_left conn_smul_left hl
+      (0 : TensorData R V 0 2) Y
+  change div0 = 0
+  have h : div0 = div0 + div0 := by
+    simpa [div0] using
+      covariantDivergence02At_add emb met atr conn ha conn_add_left conn_smul_left hl
+        (0 : TensorData R V 0 2) (0 : TensorData R V 0 2) Y
+  calc
+    div0 = (div0 + div0) - div0 := by ring
+    _ = div0 - div0 := by rw [h.symm]
+    _ = 0 := by ring
+
+/-- If `c` is spatially constant, the divergence endomorphism of `c • T` is
+`c` times the divergence endomorphism of `T`. The hypothesis is stated directly
+as `forall X, action emb X c = 0` so this core tensor API does not depend on the
+`SpatialConstant` module. -/
+theorem covDivergence02Endomorphism_const_smul
+    (emb : DerivationEmbedding k R V) (met : MetricDuality R V)
+    (conn : V -> V -> V)
+    (ha : forall X Y Z : V, conn X (Y + Z) = conn X Y + conn X Z)
+    (conn_add_left : forall X Y Z : V, conn (X + Y) Z = conn X Z + conn Y Z)
+    (conn_smul_left : forall (f : R) (X Z : V), conn (f • X) Z = f • conn X Z)
+    (hl : forall X (f : R) (Y : V),
+      conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (c : R) (hc : forall X : V, action emb X c = 0)
+    (T : TensorData R V 0 2) (Y : V) :
+    covDivergence02Endomorphism emb met conn ha conn_add_left conn_smul_left hl
+        (c • T) Y =
+      c • covDivergence02Endomorphism emb met conn ha conn_add_left conn_smul_left hl T Y := by
+  ext X
+  apply met.eq_of_forall_g_eq
+  intro Z
+  change
+    met.g
+      (met.sharp
+        (covDeriv02TraceCovector emb conn ha hl X (c • T) Y)) Z =
+      met.g
+        (c • met.sharp (covDeriv02TraceCovector emb conn ha hl X T Y)) Z
+  rw [met.g_sharp, met.g_smul_left, met.g_sharp]
+  rw [covDeriv02TraceCovector_apply emb conn ha hl X (c • T) Y Z,
+    covDeriv02TraceCovector_apply emb conn ha hl X T Y Z]
+  rw [nabla_smul emb conn ha hl X c T ![Z, Y] ![]]
+  have hX : (emb.embed X) c = 0 := by
+    simpa [action] using hc X
+  rw [hX, zero_mul, zero_add]
+
+/-- Divergence of a spatially constant scalar multiple of a `(0,2)` tensor. -/
+theorem covariantDivergence02At_const_smul
+    (emb : DerivationEmbedding k R V) (met : MetricDuality R V)
+    (atr : AbstractTrace R V) (conn : V -> V -> V)
+    (ha : forall X Y Z : V, conn X (Y + Z) = conn X Y + conn X Z)
+    (conn_add_left : forall X Y Z : V, conn (X + Y) Z = conn X Z + conn Y Z)
+    (conn_smul_left : forall (f : R) (X Z : V), conn (f • X) Z = f • conn X Z)
+    (hl : forall X (f : R) (Y : V),
+      conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (c : R) (hc : forall X : V, action emb X c = 0)
+    (T : TensorData R V 0 2) (Y : V) :
+    covariantDivergence02At emb met atr conn ha conn_add_left conn_smul_left hl
+        (c • T) Y =
+      c * covariantDivergence02At emb met atr conn ha conn_add_left conn_smul_left hl
+        T Y := by
+  unfold covariantDivergence02At
+  rw [covDivergence02Endomorphism_const_smul emb met conn ha conn_add_left
+    conn_smul_left hl c hc T Y, map_smul]
+  rfl
+
+/-- Divergence of the negative of a `(0,2)` tensor. -/
+theorem covariantDivergence02At_neg
+    (emb : DerivationEmbedding k R V) (met : MetricDuality R V)
+    (atr : AbstractTrace R V) (conn : V -> V -> V)
+    (ha : forall X Y Z : V, conn X (Y + Z) = conn X Y + conn X Z)
+    (conn_add_left : forall X Y Z : V, conn (X + Y) Z = conn X Z + conn Y Z)
+    (conn_smul_left : forall (f : R) (X Z : V), conn (f • X) Z = f • conn X Z)
+    (hl : forall X (f : R) (Y : V),
+      conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (T : TensorData R V 0 2) (Y : V) :
+    covariantDivergence02At emb met atr conn ha conn_add_left conn_smul_left hl
+        (-T) Y =
+      -covariantDivergence02At emb met atr conn ha conn_add_left conn_smul_left hl
+        T Y := by
+  have hneg_const : forall X : V, action emb X (-1 : R) = 0 := by
+    intro X
+    rw [action_neg_right emb X (1 : R), action_one emb X, neg_zero]
+  have hsmul :=
+    covariantDivergence02At_const_smul emb met atr conn ha conn_add_left
+      conn_smul_left hl (-1 : R) hneg_const T Y
+  rw [neg_one_smul R T] at hsmul
+  simpa using hsmul
+
+/-- Divergence of a difference of `(0,2)` tensors. -/
+theorem covariantDivergence02At_sub
+    (emb : DerivationEmbedding k R V) (met : MetricDuality R V)
+    (atr : AbstractTrace R V) (conn : V -> V -> V)
+    (ha : forall X Y Z : V, conn X (Y + Z) = conn X Y + conn X Z)
+    (conn_add_left : forall X Y Z : V, conn (X + Y) Z = conn X Z + conn Y Z)
+    (conn_smul_left : forall (f : R) (X Z : V), conn (f • X) Z = f • conn X Z)
+    (hl : forall X (f : R) (Y : V),
+      conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (T S : TensorData R V 0 2) (Y : V) :
+    covariantDivergence02At emb met atr conn ha conn_add_left conn_smul_left hl
+        (T - S) Y =
+      covariantDivergence02At emb met atr conn ha conn_add_left conn_smul_left hl
+        T Y -
+      covariantDivergence02At emb met atr conn ha conn_add_left conn_smul_left hl
+        S Y := by
+  rw [sub_eq_add_neg,
+    covariantDivergence02At_add emb met atr conn ha conn_add_left conn_smul_left hl,
+    covariantDivergence02At_neg emb met atr conn ha conn_add_left conn_smul_left hl,
+    sub_eq_add_neg]
+
 /-- Divergence of a scalar multiple of the metric:
 `div(f g)(Y) = Y(f)`. This is the Section 14.2 product-rule calculation
 needed to turn an Einstein Ricci formula into a divergence formula. -/

@@ -2,6 +2,7 @@ import Mathlib.Geometry.Manifold.VectorBundle.LocalFrame
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.MFDeriv.Tangent
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic
+import DifferentialGeometry.ForMathlib.Geometry.Manifold.VectorBundle.OrthonormalFrame
 
 set_option autoImplicit false
 set_option linter.style.longLine false

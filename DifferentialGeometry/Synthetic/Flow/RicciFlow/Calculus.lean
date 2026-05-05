@@ -1,7 +1,7 @@
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Basic
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.Connection
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.RiemannEvolution
-import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.Ricci
+import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.RicciCore
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.ScalarCurvature
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.Gradient
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.Laplacian

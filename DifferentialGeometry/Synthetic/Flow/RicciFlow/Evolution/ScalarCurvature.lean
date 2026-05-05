@@ -84,7 +84,7 @@ theorem tensor_02_endo_smul (met : MetricDuality R V) (c : R)
 theorem tensor_02_endo_neg (met : MetricDuality R V)
     (T : TensorData R V 0 2) :
     tensor_02_endo met (-T) = -tensor_02_endo met T := by
-  simpa only [neg_one_smul] using tensor_02_endo_smul met (-1 : R) T
+  rw [← neg_one_smul R T, tensor_02_endo_smul, neg_one_smul]
 
 /-- Raising one index commutes with subtraction. -/
 theorem tensor_02_endo_sub (met : MetricDuality R V)
@@ -156,8 +156,8 @@ theorem tensor_inner_02_smul_left (met : MetricDuality R V)
 theorem tensor_inner_02_neg_left (met : MetricDuality R V)
     (atr : AbstractTrace R V) (T S : TensorData R V 0 2) :
     tensor_inner_02 met atr (-T) S = -tensor_inner_02 met atr T S := by
-  simpa only [neg_one_smul, neg_mul, one_mul] using
-    tensor_inner_02_smul_left met atr (-1 : R) T S
+  rw [← neg_one_smul R T, tensor_inner_02_smul_left]
+  ring
 
 /-- tensor_inner_02(T - U, S) = tensor_inner_02(T, S) - tensor_inner_02(U, S). -/
 theorem tensor_inner_02_sub_left (met : MetricDuality R V)
@@ -197,8 +197,8 @@ theorem tensor_inner_02_smul_right (met : MetricDuality R V)
 theorem tensor_inner_02_neg_right (met : MetricDuality R V)
     (atr : AbstractTrace R V) (T S : TensorData R V 0 2) :
     tensor_inner_02 met atr T (-S) = -tensor_inner_02 met atr T S := by
-  simpa only [neg_one_smul, neg_mul, one_mul] using
-    tensor_inner_02_smul_right met atr (-1 : R) T S
+  rw [← neg_one_smul R S, tensor_inner_02_smul_right]
+  ring
 
 /-- tensor_inner_02(T, S - U) = tensor_inner_02(T, S) - tensor_inner_02(T, U). -/
 theorem tensor_inner_02_sub_right (met : MetricDuality R V)

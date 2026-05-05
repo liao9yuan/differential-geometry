@@ -444,10 +444,10 @@ noncomputable def RcEndo (emb : DerivationEmbedding k R V) (conn : V → V → V
     (hsl : ∀ (f : R) X Z, conn (f • X) Z = f • conn X Z)
     (hl : ∀ X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
     (X Z : V) : V →ₗ[R] V where
-  toFun Y := Rm emb conn Y X Z
-  map_add' Y₁ Y₂ := Rm_add_X emb conn ha hal Y₁ Y₂ X Z
+  toFun Y := Rm emb conn X Y Z
+  map_add' Y₁ Y₂ := Rm_add_Y emb conn ha hal X Y₁ Y₂ Z
   map_smul' f Y := by
-    simp only [RingHom.id_apply]; exact Rm_smul_X emb conn hal hsl hl f Y X Z
+    simp only [RingHom.id_apply]; exact Rm_smul_Y emb conn hal hsl hl f X Y Z
 
 noncomputable def Rc (emb : DerivationEmbedding k R V) (conn : V → V → V)
     (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)

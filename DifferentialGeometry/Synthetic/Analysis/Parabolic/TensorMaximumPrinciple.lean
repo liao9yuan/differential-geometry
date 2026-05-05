@@ -45,3 +45,15 @@ theorem tensor_wmp_preserve_cone
     (t : Time) (ht : P.domain t) :
     P.cone.mem (u t) :=
   TensorWeakMaximumPrinciple.preserve_cone P u hsub hinit t ht
+
+/-- Common cone-invariance proof pattern: if the initial cone membership is
+given pointwise rather than already packaged as `IsInitiallyInCone`, package it
+once and apply the tensor weak maximum principle. -/
+theorem tensor_wmp_preserve_cone_of_initial
+    {T Time : Type*} [TensorWeakMaximumPrinciple T Time]
+    (P : TensorParabolicProblem T Time) (u : Time -> T)
+    (hsub : IsTensorSubsolution P u)
+    (hinit : forall t, P.initial t -> P.cone.mem (u t))
+    (t : Time) (ht : P.domain t) :
+    P.cone.mem (u t) :=
+  tensor_wmp_preserve_cone P u hsub hinit t ht

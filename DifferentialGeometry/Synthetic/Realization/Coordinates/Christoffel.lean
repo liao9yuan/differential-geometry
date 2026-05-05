@@ -269,6 +269,164 @@ theorem christoffelSymbolLowerTimeDerivativeInFrame_eval
         (fun s => christoffelSymbolLowerInFrame (fiberMetricFam t) (covFam s) frame x i j l) t := by
   rfl
 
+/-- Metric raising of frame lower components recovers the local-frame
+coefficient of the vector. -/
+theorem raiseCovectorComponentsInFrame_metric_pairing
+    [Fintype ι]
+    (fiberMetric : (x : M) -> MetricDuality Real (TangentSpace I x))
+    (frame : ι -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    {x : M} (hx : x ∈ u) (Vx : TangentSpace I x) (k : ι) :
+    (fiberMetric x).raiseCovectorComponentsInBasis (hframe.toBasisAt hx)
+        (fun l => (fiberMetric x).g Vx (frame l x)) k =
+      hframe.coeff k x Vx := by
+  have hcomponents :
+      (fun l => (fiberMetric x).g Vx (frame l x)) =
+        fun l => (fiberMetric x).g Vx ((hframe.toBasisAt hx) l) := by
+    funext l
+    simp only [IsLocalFrameOn.toBasisAt_coe]
+  rw [hcomponents]
+  rw [MetricDuality.raiseCovectorComponentsInBasis_metric_pairing]
+  simp only [IsLocalFrameOn.coeff, hx, ↓reduceDIte, Module.Basis.coord_apply]
+
+/-- Discharge the time-raising bridge from a vector-valued connection variation.
+
+If the upper-index time derivative is the frame coefficient of a vector
+variation and the lower-index time derivative is its metric pairing with the
+frame, then metric raising the lower-index derivative gives the upper-index
+derivative. -/
+theorem christoffelSymbolTimeDerivativeInFrame_eq_raise_lower_of_vector_variation
+    [Fintype ι]
+    (td : TimeDerivativeData Real A Time)
+    (fiberMetricFam : Time -> (x : M) -> MetricDuality Real (TangentSpace I x))
+    (covFam : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (frame : ι -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (connectionVariation :
+      (t : Time) -> (x : M) -> ι -> ι -> TangentSpace I x)
+    (t : Time) {x : M} (hx : x ∈ u) (i j k : ι)
+    (h_upper :
+      christoffelSymbolTimeDerivativeInFrame td covFam frame hframe t x i j k =
+        hframe.coeff k x (connectionVariation t x i j))
+    (h_lower : forall l,
+      christoffelSymbolLowerTimeDerivativeInFrame td fiberMetricFam covFam frame t x i j l =
+        (fiberMetricFam t x).g (connectionVariation t x i j) (frame l x)) :
+    christoffelSymbolTimeDerivativeInFrame td covFam frame hframe t x i j k =
+      (fiberMetricFam t x).raiseCovectorComponentsInBasis (hframe.toBasisAt hx)
+        (fun l =>
+          christoffelSymbolLowerTimeDerivativeInFrame
+            td fiberMetricFam covFam frame t x i j l) k := by
+  rw [h_upper]
+  have hcomponents :
+      (fun l =>
+          christoffelSymbolLowerTimeDerivativeInFrame
+            td fiberMetricFam covFam frame t x i j l) =
+        fun l => (fiberMetricFam t x).g
+          (connectionVariation t x i j) (frame l x) := by
+    funext l
+    exact h_lower l
+  rw [hcomponents]
+  exact (raiseCovectorComponentsInFrame_metric_pairing
+    (fiberMetricFam t) frame hframe hx (connectionVariation t x i j) k).symm
+
+/-- Commute the time derivative through the fixed metric-raising map.
+
+The metric is frozen at the differentiated time `t`, so the upper-index
+Christoffel derivative is obtained by applying the fixed inverse-metric
+raising map to the lower-index Christoffel derivatives. This is the coordinate
+calculation `∂ₜ Γ^k_{ij} = g^{kℓ} ∂ₜ Γ_{ijℓ}` for a fixed frame and fixed
+spatial point. -/
+theorem christoffelSymbolTimeDerivativeInFrame_eq_raise_lower
+    [Fintype ι]
+    (td : TimeDerivativeData Real A Time) [TimeRegularFam td]
+    (fiberMetricFam : Time -> (x : M) -> MetricDuality Real (TangentSpace I x))
+    (covFam : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (frame : ι -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    {x : M} (hx : x ∈ u) (t : Time) (i j k : ι)
+    (h_lower_smooth : forall l,
+      td.isSmoothFam
+        (fun s =>
+          christoffelSymbolLowerInFrame (fiberMetricFam t) (covFam s)
+            frame x i j l)) :
+    christoffelSymbolTimeDerivativeInFrame td covFam frame hframe t x i j k =
+      (fiberMetricFam t x).raiseCovectorComponentsInBasis (hframe.toBasisAt hx)
+        (fun l =>
+          christoffelSymbolLowerTimeDerivativeInFrame
+            td fiberMetricFam covFam frame t x i j l) k := by
+  classical
+  let met := fiberMetricFam t x
+  let basis := hframe.toBasisAt hx
+  have h_point : forall s,
+      christoffelSymbolInFrame (covFam s) frame hframe x i j k =
+        met.raiseCovectorComponentsInBasis basis
+          (fun l =>
+            christoffelSymbolLowerInFrame (fiberMetricFam t) (covFam s)
+              frame x i j l) k := by
+    intro s
+    have h := (raiseCovectorComponentsInFrame_metric_pairing
+      (fiberMetricFam t) frame hframe hx
+      ((covFam s (frame j) x) (frame i x)) k).symm
+    simpa [christoffelSymbolInFrame, christoffelSymbolLowerInFrame, met, basis]
+      using h
+  have h_upper_fun :
+      (fun s => christoffelSymbolInFrame (covFam s) frame hframe x i j k) =
+        fun s =>
+          met.raiseCovectorComponentsInBasis basis
+            (fun l =>
+              christoffelSymbolLowerInFrame (fiberMetricFam t) (covFam s)
+                frame x i j l) k := by
+    funext s
+    exact h_point s
+  have h_raise_sum :
+      (fun s =>
+          met.raiseCovectorComponentsInBasis basis
+            (fun l =>
+              christoffelSymbolLowerInFrame (fiberMetricFam t) (covFam s)
+                frame x i j l) k) =
+        fun s =>
+          ∑ l, met.g_inv ![] ![basis.coord k, basis.coord l] *
+            christoffelSymbolLowerInFrame (fiberMetricFam t) (covFam s)
+              frame x i j l := by
+    funext s
+    exact MetricDuality.raiseCovectorComponentsInBasis_apply_eq_sum_g_inv
+      met basis
+      (fun l =>
+        christoffelSymbolLowerInFrame (fiberMetricFam t) (covFam s)
+          frame x i j l) k
+  rw [christoffelSymbolTimeDerivativeInFrame_eval, h_upper_fun, h_raise_sum]
+  rw [MetricDuality.raiseCovectorComponentsInBasis_apply_eq_sum_g_inv]
+  have h_sum_fun :
+      (fun s =>
+          ∑ l, met.g_inv ![] ![basis.coord k, basis.coord l] *
+            christoffelSymbolLowerInFrame (fiberMetricFam t) (covFam s)
+              frame x i j l) =
+        (∑ l, fun s =>
+          met.g_inv ![] ![basis.coord k, basis.coord l] *
+            christoffelSymbolLowerInFrame (fiberMetricFam t) (covFam s)
+              frame x i j l) := by
+    funext s
+    simp only [Finset.sum_apply]
+  rw [h_sum_fun]
+  rw [td.dt_apply_sum Finset.univ
+    (fun l s =>
+      met.g_inv ![] ![basis.coord k, basis.coord l] *
+        christoffelSymbolLowerInFrame (fiberMetricFam t) (covFam s)
+          frame x i j l) t]
+  · refine Finset.sum_congr rfl (fun l _ => ?_)
+    rw [td.dt_apply_const_mul
+      (met.g_inv ![] ![basis.coord k, basis.coord l])
+      (fun s =>
+        christoffelSymbolLowerInFrame (fiberMetricFam t) (covFam s)
+          frame x i j l) t (h_lower_smooth l)]
+    rfl
+  · intro l _
+    exact td.isSmoothFam_const_mul
+      (met.g_inv ![] ![basis.coord k, basis.coord l])
+      (fun s =>
+        christoffelSymbolLowerInFrame (fiberMetricFam t) (covFam s)
+          frame x i j l) (h_lower_smooth l)
+
 /-- Ricci-flow RHS for the lower-index Christoffel evolution:
 `-nabla_i Ric_{jl} - nabla_j Ric_{il} + nabla_l Ric_{ij}`. -/
 def ricciFlowChristoffelLowerEvolutionRHSInFrame
@@ -300,6 +458,72 @@ theorem ricciFlow_christoffelLowerEvolution_from_equation
       - nablaRic t x i j l - nablaRic t x j i l + nablaRic t x l i j := by
   simpa [RicciFlowChristoffelLowerEvolutionEquationInFrame,
     ricciFlowChristoffelLowerEvolutionRHSInFrame] using h_evol t x i j l
+
+/-- Raise the lower-index Christoffel evolution to the displayed upper-index
+coordinate formula.
+
+Here `raiseCovector t x` is the inverse-metric raising map on frame covector
+components at `(t,x)`. The theorem is the algebraic final step from
+
+`partial_t Gamma_ij l = -nabla_i Ric_jl - nabla_j Ric_il + nabla_l Ric_ij`
+
+to
+
+`partial_t Gamma^k_ij =
+ -g^{kl} nabla_i Ric_jl - g^{kl} nabla_j Ric_il + g^{kl} nabla_l Ric_ij`.
+
+The hypotheses `h_dt_raise`, `h_last`, and `h_direction` are the realization
+bridges identifying the chosen coordinate raising map with the time derivative
+of the upper Christoffel coefficients and with the two raised Ricci-derivative
+terms. -/
+theorem ricciFlow_christoffelSymbolEvolution_from_lower_evolution
+    (td : TimeDerivativeData Real A Time)
+    (fiberMetricFam : Time -> (x : M) -> MetricDuality Real (TangentSpace I x))
+    (covFam : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (frame : ι -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (nablaRic : Time -> M -> ι -> ι -> ι -> Real)
+    (raiseCovector : Time -> M -> (ι -> Real) →ₗ[Real] (ι -> Real))
+    (nablaRicLastRaised nablaRicDirectionRaised : Time -> M -> ι -> ι -> ι -> Real)
+    (h_lower : RicciFlowChristoffelLowerEvolutionEquationInFrame
+      td fiberMetricFam covFam frame nablaRic)
+    (h_dt_raise : forall t x i j k,
+      christoffelSymbolTimeDerivativeInFrame td covFam frame hframe t x i j k =
+        raiseCovector t x
+          (fun l => christoffelSymbolLowerTimeDerivativeInFrame
+            td fiberMetricFam covFam frame t x i j l) k)
+    (h_last : forall t x i j k,
+      raiseCovector t x (fun l => nablaRic t x i j l) k =
+        nablaRicLastRaised t x i j k)
+    (h_direction : forall t x i j k,
+      raiseCovector t x (fun l => nablaRic t x l i j) k =
+        nablaRicDirectionRaised t x i j k) :
+    RicciFlowChristoffelSymbolEvolutionEquationInFrame
+      td covFam frame hframe nablaRicLastRaised nablaRicDirectionRaised := by
+  intro t x i j k
+  rw [h_dt_raise t x i j k]
+  have h_lower_fun :
+      (fun l =>
+        christoffelSymbolLowerTimeDerivativeInFrame
+          td fiberMetricFam covFam frame t x i j l) =
+      (fun l => -nablaRic t x i j l - nablaRic t x j i l +
+        nablaRic t x l i j) := by
+    funext l
+    exact h_lower t x i j l
+  rw [h_lower_fun]
+  have h_split :
+      (fun l => -nablaRic t x i j l - nablaRic t x j i l +
+        nablaRic t x l i j) =
+      -(fun l => nablaRic t x i j l) -
+        (fun l => nablaRic t x j i l) +
+        (fun l => nablaRic t x l i j) := by
+    funext l
+    simp only [Pi.add_apply, Pi.sub_apply, Pi.neg_apply]
+  rw [h_split]
+  simp only [map_add, map_sub, map_neg, Pi.add_apply, Pi.sub_apply,
+    Pi.neg_apply]
+  rw [h_last t x i j k, h_last t x j i k, h_direction t x i j k]
+  rfl
 
 /-- Component bridge for the covariant derivative of Ricci in a frame.
 
@@ -401,6 +625,28 @@ theorem christoffelSymbolInRawCoordinates_eq_frame
         (rawCoordinateFrame_isLocalFrameOn (I := I) (M := M) x₀) x i j k := by
   rfl
 
+/-- Raw-coordinate upper-index Christoffel time derivative `∂ₜ Γ^k_ij`. -/
+noncomputable def christoffelSymbolTimeDerivativeInRawCoordinates
+    (td : TimeDerivativeData Real A Time)
+    (covFam : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (t : Time) (x₀ x : M)
+    (i j k : Fin (Module.finrank Real E)) : Real :=
+  christoffelSymbolTimeDerivativeInFrame td covFam
+    (rawCoordinateFrame (I := I) (M := M) x₀)
+    (rawCoordinateFrame_isLocalFrameOn (I := I) (M := M) x₀) t x i j k
+
+theorem christoffelSymbolTimeDerivativeInRawCoordinates_eq_frame
+    (td : TimeDerivativeData Real A Time)
+    (covFam : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (t : Time) (x₀ x : M) (i j k : Fin (Module.finrank Real E)) :
+    christoffelSymbolTimeDerivativeInRawCoordinates (I := I) (M := M)
+      td covFam t x₀ x i j k =
+      christoffelSymbolTimeDerivativeInFrame td covFam
+        (rawCoordinateFrame (I := I) (M := M) x₀)
+        (rawCoordinateFrame_isLocalFrameOn (I := I) (M := M) x₀)
+        t x i j k := by
+  rfl
+
 /-- Lower-index raw-coordinate Christoffel coefficients `Γ_ijℓ`. -/
 noncomputable def christoffelSymbolLowerInRawCoordinates
     (fiberMetric : (x : M) -> MetricDuality Real (TangentSpace I x))
@@ -468,6 +714,81 @@ theorem ricciCovDerivComponentsInRawCoordinates_components
   intro t x a b c
   rfl
 
+/-- Canonical inverse-metric raising map for raw-coordinate covector
+components at a point in the raw coordinate domain. -/
+noncomputable def rawCoordinateRaiseCovector
+    (fiberMetricFam : Time -> (x : M) -> MetricDuality Real (TangentSpace I x))
+    (x₀ : M) (t : Time) (x : M)
+    (hx : x ∈ rawCoordinateDomain (I := I) (M := M) x₀) :
+    (Fin (Module.finrank Real E) -> Real) →ₗ[Real]
+      (Fin (Module.finrank Real E) -> Real) :=
+  (fiberMetricFam t x).raiseCovectorComponentsInBasis
+    ((rawCoordinateFrame_isLocalFrameOn (I := I) (M := M) x₀).toBasisAt hx)
+
+/-- Raw-coordinate version of
+`∂ₜ Γ^k_{ij} = g^{kℓ} ∂ₜ Γ_{ijℓ}` with the metric frozen at `t`. -/
+theorem christoffelSymbolTimeDerivativeInRawCoordinates_eq_raise_lower
+    (td : TimeDerivativeData Real A Time) [TimeRegularFam td]
+    (fiberMetricFam : Time -> (x : M) -> MetricDuality Real (TangentSpace I x))
+    (covFam : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (x₀ : M) (t : Time) (x : M)
+    (hx : x ∈ rawCoordinateDomain (I := I) (M := M) x₀)
+    (i j k : Fin (Module.finrank Real E))
+    (h_lower_smooth : forall l,
+      td.isSmoothFam
+        (fun s =>
+          christoffelSymbolLowerInRawCoordinates (I := I) (M := M)
+            (fiberMetricFam t) (covFam s) x₀ x i j l)) :
+    christoffelSymbolTimeDerivativeInRawCoordinates (I := I) (M := M)
+        td covFam t x₀ x i j k =
+      rawCoordinateRaiseCovector (I := I) (M := M) fiberMetricFam x₀ t x hx
+        (fun l =>
+          christoffelSymbolLowerTimeDerivativeInRawCoordinates
+            (I := I) (M := M) td fiberMetricFam covFam t x₀ x i j l) k := by
+  have h_smooth_frame : forall l,
+      td.isSmoothFam
+        (fun s =>
+          christoffelSymbolLowerInFrame (fiberMetricFam t) (covFam s)
+            (rawCoordinateFrame (I := I) (M := M) x₀) x i j l) := by
+    intro l
+    simpa [christoffelSymbolLowerInRawCoordinates] using h_lower_smooth l
+  simpa [christoffelSymbolTimeDerivativeInRawCoordinates,
+    christoffelSymbolLowerTimeDerivativeInRawCoordinates,
+    rawCoordinateRaiseCovector] using
+    (christoffelSymbolTimeDerivativeInFrame_eq_raise_lower
+      (I := I) (M := M) td fiberMetricFam covFam
+      (rawCoordinateFrame (I := I) (M := M) x₀)
+      (rawCoordinateFrame_isLocalFrameOn (I := I) (M := M) x₀)
+      hx t i j k h_smooth_frame)
+
+/-- The raised raw-coordinate components `g^{kℓ}(∇_i Ric)_{jℓ}`. -/
+noncomputable def ricciCovDerivLastRaisedInRawCoordinates
+    (fiberMetricFam : Time -> (x : M) -> MetricDuality Real (TangentSpace I x))
+    (fiberRicciCovDeriv :
+      (t : Time) -> (x : M) ->
+        TangentSpace I x -> TangentSpace I x -> TangentSpace I x -> Real)
+    (x₀ : M) (t : Time) (x : M)
+    (hx : x ∈ rawCoordinateDomain (I := I) (M := M) x₀)
+    (i j k : Fin (Module.finrank Real E)) : Real :=
+  rawCoordinateRaiseCovector (I := I) (M := M) fiberMetricFam x₀ t x hx
+    (fun l =>
+      ricciCovDerivComponentsInRawCoordinates (I := I) (M := M)
+        fiberRicciCovDeriv x₀ t x i j l) k
+
+/-- The raised raw-coordinate components `g^{kℓ}(∇_ℓ Ric)_{ij}`. -/
+noncomputable def ricciCovDerivDirectionRaisedInRawCoordinates
+    (fiberMetricFam : Time -> (x : M) -> MetricDuality Real (TangentSpace I x))
+    (fiberRicciCovDeriv :
+      (t : Time) -> (x : M) ->
+        TangentSpace I x -> TangentSpace I x -> TangentSpace I x -> Real)
+    (x₀ : M) (t : Time) (x : M)
+    (hx : x ∈ rawCoordinateDomain (I := I) (M := M) x₀)
+    (i j k : Fin (Module.finrank Real E)) : Real :=
+  rawCoordinateRaiseCovector (I := I) (M := M) fiberMetricFam x₀ t x hx
+    (fun l =>
+      ricciCovDerivComponentsInRawCoordinates (I := I) (M := M)
+        fiberRicciCovDeriv x₀ t x l i j) k
+
 /-- Raw-coordinate lower-index Christoffel evolution. This removes the former
 `nablaRic` component placeholder by choosing the actual coordinate components
 of the invariant Ricci covariant derivative in the tangent-trivialization
@@ -518,6 +839,245 @@ theorem ricciFlowChristoffelLowerEvolution_in_raw_coordinates
     exact h_dt t x i j l
   · exact ricciCovDerivComponentsInRawCoordinates_components
       (I := I) (M := M) fiberRicciCovDeriv x₀
+
+/-- Pointwise raw-coordinate upper-index Christoffel evolution using the
+canonical metric raising map from `MetricDuality`.
+
+The only remaining bridge is `h_dt_raise`: the time derivative of the upper
+Christoffel coefficient agrees with metric-raising the time derivative of the
+lower coefficient. This is a time/coordinate realization fact, not a
+Christoffel-specific algebra fact. -/
+theorem ricciFlowChristoffelSymbolEvolution_in_raw_coordinates_metric_raise
+    (td : TimeDerivativeData Real A Time)
+    (fiberMetricFam : Time -> (x : M) -> MetricDuality Real (TangentSpace I x))
+    (covFam : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (x₀ : M)
+    (connectionVariationLower :
+      Time -> M -> Fin (Module.finrank Real E) -> Fin (Module.finrank Real E) ->
+        Fin (Module.finrank Real E) -> Real)
+    (fiberRicciCovDeriv :
+      (t : Time) -> (x : M) ->
+        TangentSpace I x -> TangentSpace I x -> TangentSpace I x -> Real)
+    (h_dt_lower : forall t x i j l,
+      christoffelSymbolLowerTimeDerivativeInRawCoordinates (I := I) (M := M)
+        td fiberMetricFam covFam t x₀ x i j l =
+        connectionVariationLower t x i j l)
+    (h_invariant : forall t x i j l,
+      connectionVariationLower t x i j l =
+        - fiberRicciCovDeriv t x
+            (rawCoordinateFrame (I := I) (M := M) x₀ i x)
+            (rawCoordinateFrame (I := I) (M := M) x₀ j x)
+            (rawCoordinateFrame (I := I) (M := M) x₀ l x) -
+          fiberRicciCovDeriv t x
+            (rawCoordinateFrame (I := I) (M := M) x₀ j x)
+            (rawCoordinateFrame (I := I) (M := M) x₀ i x)
+            (rawCoordinateFrame (I := I) (M := M) x₀ l x) +
+          fiberRicciCovDeriv t x
+            (rawCoordinateFrame (I := I) (M := M) x₀ l x)
+            (rawCoordinateFrame (I := I) (M := M) x₀ i x)
+            (rawCoordinateFrame (I := I) (M := M) x₀ j x))
+    (t : Time) (x : M)
+    (hx : x ∈ rawCoordinateDomain (I := I) (M := M) x₀)
+    (i j k : Fin (Module.finrank Real E))
+    (h_dt_raise :
+      christoffelSymbolTimeDerivativeInRawCoordinates (I := I) (M := M)
+        td covFam t x₀ x i j k =
+        rawCoordinateRaiseCovector (I := I) (M := M) fiberMetricFam x₀ t x hx
+          (fun l =>
+            christoffelSymbolLowerTimeDerivativeInRawCoordinates
+              (I := I) (M := M) td fiberMetricFam covFam t x₀ x i j l) k) :
+    christoffelSymbolTimeDerivativeInRawCoordinates (I := I) (M := M)
+        td covFam t x₀ x i j k =
+      - ricciCovDerivLastRaisedInRawCoordinates (I := I) (M := M)
+          fiberMetricFam fiberRicciCovDeriv x₀ t x hx i j k -
+        ricciCovDerivLastRaisedInRawCoordinates (I := I) (M := M)
+          fiberMetricFam fiberRicciCovDeriv x₀ t x hx j i k +
+        ricciCovDerivDirectionRaisedInRawCoordinates (I := I) (M := M)
+          fiberMetricFam fiberRicciCovDeriv x₀ t x hx i j k := by
+  rw [h_dt_raise]
+  have h_lower :
+      RicciFlowChristoffelLowerEvolutionEquationInFrame td fiberMetricFam covFam
+        (rawCoordinateFrame (I := I) (M := M) x₀)
+        (ricciCovDerivComponentsInRawCoordinates (I := I) (M := M)
+          fiberRicciCovDeriv x₀) :=
+    ricciFlowChristoffelLowerEvolution_in_raw_coordinates
+      (I := I) (M := M) td fiberMetricFam covFam x₀ connectionVariationLower
+      fiberRicciCovDeriv h_dt_lower h_invariant
+  have h_lower_fun :
+      (fun l =>
+        christoffelSymbolLowerTimeDerivativeInRawCoordinates
+          (I := I) (M := M) td fiberMetricFam covFam t x₀ x i j l) =
+      (fun l =>
+        - ricciCovDerivComponentsInRawCoordinates (I := I) (M := M)
+            fiberRicciCovDeriv x₀ t x i j l -
+          ricciCovDerivComponentsInRawCoordinates (I := I) (M := M)
+            fiberRicciCovDeriv x₀ t x j i l +
+          ricciCovDerivComponentsInRawCoordinates (I := I) (M := M)
+            fiberRicciCovDeriv x₀ t x l i j) := by
+    funext l
+    exact h_lower t x i j l
+  rw [h_lower_fun]
+  have h_split :
+      (fun l =>
+        - ricciCovDerivComponentsInRawCoordinates (I := I) (M := M)
+            fiberRicciCovDeriv x₀ t x i j l -
+          ricciCovDerivComponentsInRawCoordinates (I := I) (M := M)
+            fiberRicciCovDeriv x₀ t x j i l +
+          ricciCovDerivComponentsInRawCoordinates (I := I) (M := M)
+            fiberRicciCovDeriv x₀ t x l i j) =
+      -(fun l =>
+          ricciCovDerivComponentsInRawCoordinates (I := I) (M := M)
+            fiberRicciCovDeriv x₀ t x i j l) -
+        (fun l =>
+          ricciCovDerivComponentsInRawCoordinates (I := I) (M := M)
+            fiberRicciCovDeriv x₀ t x j i l) +
+        (fun l =>
+          ricciCovDerivComponentsInRawCoordinates (I := I) (M := M)
+            fiberRicciCovDeriv x₀ t x l i j) := by
+    funext l
+    simp only [Pi.add_apply, Pi.sub_apply, Pi.neg_apply]
+  rw [h_split]
+  simp only [map_add, map_sub, map_neg, Pi.add_apply, Pi.sub_apply,
+    Pi.neg_apply, ricciCovDerivLastRaisedInRawCoordinates,
+    ricciCovDerivDirectionRaisedInRawCoordinates]
+
+/-- Raw-coordinate upper-index Christoffel evolution with the time/raising
+bridge discharged by the fixed-metric finite-sum calculation.
+
+The remaining smoothness hypothesis is exactly what is needed to move `∂ₜ`
+through the frozen inverse metric raising map. -/
+theorem ricciFlowChristoffelSymbolEvolution_in_raw_coordinates_metric_raise_of_smooth_lower
+    (td : TimeDerivativeData Real A Time) [TimeRegularFam td]
+    (fiberMetricFam : Time -> (x : M) -> MetricDuality Real (TangentSpace I x))
+    (covFam : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (x₀ : M)
+    (connectionVariationLower :
+      Time -> M -> Fin (Module.finrank Real E) -> Fin (Module.finrank Real E) ->
+        Fin (Module.finrank Real E) -> Real)
+    (fiberRicciCovDeriv :
+      (t : Time) -> (x : M) ->
+        TangentSpace I x -> TangentSpace I x -> TangentSpace I x -> Real)
+    (h_dt_lower : forall t x i j l,
+      christoffelSymbolLowerTimeDerivativeInRawCoordinates (I := I) (M := M)
+        td fiberMetricFam covFam t x₀ x i j l =
+        connectionVariationLower t x i j l)
+    (h_invariant : forall t x i j l,
+      connectionVariationLower t x i j l =
+        - fiberRicciCovDeriv t x
+            (rawCoordinateFrame (I := I) (M := M) x₀ i x)
+            (rawCoordinateFrame (I := I) (M := M) x₀ j x)
+            (rawCoordinateFrame (I := I) (M := M) x₀ l x) -
+          fiberRicciCovDeriv t x
+            (rawCoordinateFrame (I := I) (M := M) x₀ j x)
+            (rawCoordinateFrame (I := I) (M := M) x₀ i x)
+            (rawCoordinateFrame (I := I) (M := M) x₀ l x) +
+          fiberRicciCovDeriv t x
+            (rawCoordinateFrame (I := I) (M := M) x₀ l x)
+            (rawCoordinateFrame (I := I) (M := M) x₀ i x)
+            (rawCoordinateFrame (I := I) (M := M) x₀ j x))
+    (t : Time) (x : M)
+    (hx : x ∈ rawCoordinateDomain (I := I) (M := M) x₀)
+    (i j k : Fin (Module.finrank Real E))
+    (h_lower_smooth : forall l,
+      td.isSmoothFam
+        (fun s =>
+          christoffelSymbolLowerInRawCoordinates (I := I) (M := M)
+            (fiberMetricFam t) (covFam s) x₀ x i j l)) :
+    christoffelSymbolTimeDerivativeInRawCoordinates (I := I) (M := M)
+        td covFam t x₀ x i j k =
+      - ricciCovDerivLastRaisedInRawCoordinates (I := I) (M := M)
+          fiberMetricFam fiberRicciCovDeriv x₀ t x hx i j k -
+        ricciCovDerivLastRaisedInRawCoordinates (I := I) (M := M)
+          fiberMetricFam fiberRicciCovDeriv x₀ t x hx j i k +
+        ricciCovDerivDirectionRaisedInRawCoordinates (I := I) (M := M)
+          fiberMetricFam fiberRicciCovDeriv x₀ t x hx i j k := by
+  refine ricciFlowChristoffelSymbolEvolution_in_raw_coordinates_metric_raise
+    (I := I) (M := M) td fiberMetricFam covFam x₀ connectionVariationLower
+    fiberRicciCovDeriv h_dt_lower h_invariant t x hx i j k ?_
+  exact christoffelSymbolTimeDerivativeInRawCoordinates_eq_raise_lower
+    (I := I) (M := M) td fiberMetricFam covFam x₀ t x hx i j k
+    h_lower_smooth
+
+/-- Raw-coordinate upper-index Christoffel evolution.
+
+This is the displayed Lemma 6.2 formula in the raw coordinate frame, with the
+inverse-metric raising operation isolated as `raiseCovector`. The lower-index
+evolution is supplied by `ricciFlowChristoffelLowerEvolution_in_raw_coordinates`;
+this theorem raises its final index and packages the result as the upper-index
+coordinate equation. -/
+theorem ricciFlowChristoffelSymbolEvolution_in_raw_coordinates
+    (td : TimeDerivativeData Real A Time)
+    (fiberMetricFam : Time -> (x : M) -> MetricDuality Real (TangentSpace I x))
+    (covFam : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (x₀ : M)
+    (connectionVariationLower :
+      Time -> M -> Fin (Module.finrank Real E) -> Fin (Module.finrank Real E) ->
+        Fin (Module.finrank Real E) -> Real)
+    (fiberRicciCovDeriv :
+      (t : Time) -> (x : M) ->
+        TangentSpace I x -> TangentSpace I x -> TangentSpace I x -> Real)
+    (raiseCovector :
+      Time -> M ->
+        (Fin (Module.finrank Real E) -> Real) →ₗ[Real]
+          (Fin (Module.finrank Real E) -> Real))
+    (nablaRicLastRaised nablaRicDirectionRaised :
+      Time -> M -> Fin (Module.finrank Real E) -> Fin (Module.finrank Real E) ->
+        Fin (Module.finrank Real E) -> Real)
+    (h_dt_lower : forall t x i j l,
+      christoffelSymbolLowerTimeDerivativeInRawCoordinates (I := I) (M := M)
+        td fiberMetricFam covFam t x₀ x i j l =
+        connectionVariationLower t x i j l)
+    (h_invariant : forall t x i j l,
+      connectionVariationLower t x i j l =
+        - fiberRicciCovDeriv t x
+            (rawCoordinateFrame (I := I) (M := M) x₀ i x)
+            (rawCoordinateFrame (I := I) (M := M) x₀ j x)
+            (rawCoordinateFrame (I := I) (M := M) x₀ l x) -
+          fiberRicciCovDeriv t x
+            (rawCoordinateFrame (I := I) (M := M) x₀ j x)
+            (rawCoordinateFrame (I := I) (M := M) x₀ i x)
+            (rawCoordinateFrame (I := I) (M := M) x₀ l x) +
+          fiberRicciCovDeriv t x
+            (rawCoordinateFrame (I := I) (M := M) x₀ l x)
+            (rawCoordinateFrame (I := I) (M := M) x₀ i x)
+            (rawCoordinateFrame (I := I) (M := M) x₀ j x))
+    (h_dt_raise : forall t x i j k,
+      christoffelSymbolTimeDerivativeInRawCoordinates (I := I) (M := M)
+        td covFam t x₀ x i j k =
+        raiseCovector t x
+          (fun l => christoffelSymbolLowerTimeDerivativeInRawCoordinates
+            (I := I) (M := M) td fiberMetricFam covFam t x₀ x i j l) k)
+    (h_last : forall t x i j k,
+      raiseCovector t x
+        (fun l =>
+          ricciCovDerivComponentsInRawCoordinates (I := I) (M := M)
+            fiberRicciCovDeriv x₀ t x i j l) k =
+        nablaRicLastRaised t x i j k)
+    (h_direction : forall t x i j k,
+      raiseCovector t x
+        (fun l =>
+          ricciCovDerivComponentsInRawCoordinates (I := I) (M := M)
+            fiberRicciCovDeriv x₀ t x l i j) k =
+        nablaRicDirectionRaised t x i j k) :
+    RicciFlowChristoffelSymbolEvolutionEquationInFrame td covFam
+      (rawCoordinateFrame (I := I) (M := M) x₀)
+      (rawCoordinateFrame_isLocalFrameOn (I := I) (M := M) x₀)
+      nablaRicLastRaised nablaRicDirectionRaised := by
+  refine ricciFlow_christoffelSymbolEvolution_from_lower_evolution
+    td fiberMetricFam covFam
+    (rawCoordinateFrame (I := I) (M := M) x₀)
+    (rawCoordinateFrame_isLocalFrameOn (I := I) (M := M) x₀)
+    (ricciCovDerivComponentsInRawCoordinates (I := I) (M := M)
+      fiberRicciCovDeriv x₀)
+    raiseCovector nablaRicLastRaised nablaRicDirectionRaised ?_ ?_ h_last
+    h_direction
+  · exact ricciFlowChristoffelLowerEvolution_in_raw_coordinates
+      (I := I) (M := M) td fiberMetricFam covFam x₀ connectionVariationLower
+      fiberRicciCovDeriv h_dt_lower h_invariant
+  · intro t x i j k
+    simpa [christoffelSymbolTimeDerivativeInRawCoordinates,
+      christoffelSymbolLowerTimeDerivativeInRawCoordinates]
+      using h_dt_raise t x i j k
 
 end RawCoordinates
 

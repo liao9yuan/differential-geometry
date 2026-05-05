@@ -109,18 +109,20 @@ it satisfies `removeNone(σ₁⁻¹ * σ₂) = (removeNone σ₁)⁻¹ * (remove
 This is proved via `optionCongr_injective`: both sides map to `σ₁⁻¹ * σ₂` under `optionCongr`. -/
 
 /-- For a permutation `σ` of `Option α` fixing `none`, `optionCongr(removeNone σ) = σ`. -/
-theorem optionCongr_removeNone_of_fix_none {α : Type*} [DecidableEq α]
+theorem optionCongr_removeNone_of_fix_none {α : Type*}
     (σ : Equiv.Perm (Option α)) (h : σ none = none) :
     (Equiv.removeNone σ).optionCongr = σ := by
+  classical
   rw [map_equiv_removeNone, h]; simp
 
 /-- `removeNone` is multiplicative on the stabilizer of `none`:
 `removeNone(σ₁⁻¹ * σ₂) = (removeNone σ₁)⁻¹ * (removeNone σ₂)` when both fix `none`. -/
-theorem removeNone_inv_mul {α : Type*} [DecidableEq α]
+theorem removeNone_inv_mul {α : Type*}
     (σ₁ σ₂ : Equiv.Perm (Option α))
     (h₁ : σ₁ none = none) (h₂ : σ₂ none = none) :
     Equiv.removeNone (σ₁⁻¹ * σ₂) =
       (Equiv.removeNone σ₁)⁻¹ * Equiv.removeNone σ₂ := by
+  classical
   apply Equiv.optionCongr_injective
   have h12 : (σ₁⁻¹ * σ₂) none = none := by simp [Equiv.Perm.coe_mul, h₁, h₂]
   have h12 : (σ₁⁻¹ * σ₂) none = none := by simp [Equiv.Perm.coe_mul, h₁, h₂]
@@ -148,11 +150,11 @@ theorem removeNone_inv_mul {α : Type*} [DecidableEq α]
       simp only [Equiv.optionCongr_apply, Equiv.Perm.coe_mul,
         Function.comp_apply, Equiv.Perm.inv_def]
       show Option.map _ none = _
-      simp [h₂]; exact (σ₁.symm_apply_eq.mpr h₁.symm).symm
+      simp only [h₂]; exact (σ₁.symm_apply_eq.mpr h₁.symm).symm
     | some a =>
       simp only [Equiv.optionCongr_apply, Equiv.Perm.coe_mul,
         Function.comp_apply, Equiv.Perm.inv_def]
-      show some ((Equiv.removeNone σ₁).symm ((Equiv.removeNone σ₂) a)) =
+      change some ((Equiv.removeNone σ₁).symm ((Equiv.removeNone σ₂) a)) =
         σ₁.symm (σ₂ (some a))
       -- Goal: some ((rn σ₁).symm ((rn σ₂) a)) = σ₁.symm (σ₂ (some a))
       rw [← h_oc σ₂ h₂ a]
@@ -193,7 +195,7 @@ theorem permCongr_inv_mul {α β : Type*}
   have h_inv : (Equiv.permCongr e σ₁ : Equiv.Perm _)⁻¹ =
       Equiv.permCongr e σ₁⁻¹ := by
     ext y
-    show (Equiv.permCongr e σ₁).symm y = e (σ₁⁻¹ (e.symm y))
+    change (Equiv.permCongr e σ₁).symm y = e (σ₁⁻¹ (e.symm y))
     simp [Equiv.permCongr_def, Equiv.Perm.inv_def]
   ext x
   simp only [Equiv.Perm.coe_mul, Function.comp_apply, Equiv.permCongr_apply,

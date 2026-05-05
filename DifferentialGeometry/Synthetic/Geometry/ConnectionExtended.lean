@@ -244,13 +244,13 @@ noncomputable def RcCovector
     simp only [Rc]
     rw [show RcEndo emb conn ha hal hsl hl X (Z₁ + Z₂) =
         RcEndo emb conn ha hal hsl hl X Z₁ + RcEndo emb conn ha hal hsl hl X Z₂ from
-      LinearMap.ext (fun Y => Rm_add_Z emb conn ha hal Y X Z₁ Z₂)]
+      LinearMap.ext (fun Y => Rm_add_Z emb conn ha hal X Y Z₁ Z₂)]
     exact map_add atr.tr _ _
   map_smul' f Z := by
     simp only [Rc, RingHom.id_apply, smul_eq_mul]
     rw [show RcEndo emb conn ha hal hsl hl X (f • Z) =
         f • RcEndo emb conn ha hal hsl hl X Z from
-      LinearMap.ext (fun Y => Rm_smul_Z emb conn ha hsl hl f Y X Z)]
+      LinearMap.ext (fun Y => Rm_smul_Z emb conn ha hsl hl f X Y Z)]
     exact atr.tr.map_smul f _
 
 /-- Ricci endomorphism Rc♯: the unique L : V →ₗ[R] V such that
@@ -272,7 +272,7 @@ noncomputable def RicciEndomorphism
       simp only [RcCovector, LinearMap.coe_mk, AddHom.coe_mk, LinearMap.add_apply, Rc]
       rw [show RcEndo emb conn ha hal hsl hl (X₁ + X₂) Z =
           RcEndo emb conn ha hal hsl hl X₁ Z + RcEndo emb conn ha hal hsl hl X₂ Z from
-        LinearMap.ext (fun Y => Rm_add_Y emb conn ha hal Y X₁ X₂ Z)]
+        LinearMap.ext (fun Y => Rm_add_X emb conn ha hal X₁ X₂ Y Z)]
       exact map_add atr.tr _ _
     rw [h, met.sharp_add]
   map_smul' f X := by
@@ -283,7 +283,7 @@ noncomputable def RicciEndomorphism
         smul_eq_mul, Rc]
       rw [show RcEndo emb conn ha hal hsl hl (f • X) Z =
           f • RcEndo emb conn ha hal hsl hl X Z from
-        LinearMap.ext (fun Y => Rm_smul_Y emb conn hal hsl hl f Y X Z)]
+        LinearMap.ext (fun Y => Rm_smul_X emb conn hal hsl hl f X Y Z)]
       exact atr.tr.map_smul f _
     simp only [RingHom.id_apply]; rw [h, met.sharp_smul]
 

@@ -12,62 +12,12 @@ set_option linter.style.emptyLine false
 # Laplacian Operator
 -/
 
+open BigOperators
 open SyntheticTensor
 
 section LaplacianHelpers
 
 variable {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V]
-
--- Eq.mpr transport helpers (same pattern as Hessian.lean)
-private lemma mpr_add_td' {r₁ r₂ s₁ s₂ : ℕ} (hr : r₁ = r₂) (hs : s₁ = s₂)
-    (A B : TensorData R V r₁ s₁) :
-    (hr ▸ hs ▸ (A + B) : TensorData R V r₂ s₂) =
-    (hr ▸ hs ▸ A) + (hr ▸ hs ▸ B) := by subst hr; subst hs; rfl
-
-private lemma mpr_smul_td' {r₁ r₂ s₁ s₂ : ℕ} (hr : r₁ = r₂) (hs : s₁ = s₂)
-    (c : R) (A : TensorData R V r₁ s₁) :
-    (hr ▸ hs ▸ (c • A) : TensorData R V r₂ s₂) =
-    c • (hr ▸ hs ▸ A) := by subst hr; subst hs; rfl
-
-private lemma raise_index_add
-    (met : MetricDuality R V) (atr : AbstractTrace R V)
-    {r s : ℕ} (idx : Fin (s + 1))
-    (T₁ T₂ : TensorData R V r (s + 1)) :
-    raise_index met atr idx (T₁ + T₂) =
-    raise_index met atr idx T₁ + raise_index met atr idx T₂ := by
-  simp only [raise_index]
-  have h_tp : tensor_prod (r₁ := 2) (s₁ := 0) (r₂ := r) (s₂ := s + 1)
-      met.g_inv (T₁ + T₂) = tensor_prod met.g_inv T₁ + tensor_prod met.g_inv T₂ := by
-    ext vs αs; simp [tensor_prod_eval, MultilinearMap.add_apply, mul_add]
-  rw [h_tp, mpr_add_td', contract_general_add]
-
-private lemma raise_index_smul
-    (met : MetricDuality R V) (atr : AbstractTrace R V)
-    {r s : ℕ} (idx : Fin (s + 1))
-    (c : R) (T : TensorData R V r (s + 1)) :
-    raise_index met atr idx (c • T) =
-    c • raise_index met atr idx T := by
-  simp only [raise_index]
-  have h_tp : tensor_prod (r₁ := 2) (s₁ := 0) (r₂ := r) (s₂ := s + 1)
-      met.g_inv (c • T) = c • tensor_prod met.g_inv T := by
-    ext vs αs; simp [tensor_prod_eval, MultilinearMap.smul_apply, smul_eq_mul, mul_left_comm]
-  rw [h_tp, mpr_smul_td', contract_general_smul]
-
-private lemma metric_trace_add
-    (met : MetricDuality R V) (atr : AbstractTrace R V)
-    {r s : ℕ} (idx₁ : Fin (s + 2)) (idx₂ : Fin (s + 1))
-    (T₁ T₂ : TensorData R V r (s + 2)) :
-    metric_trace met atr idx₁ idx₂ (T₁ + T₂) =
-    metric_trace met atr idx₁ idx₂ T₁ + metric_trace met atr idx₁ idx₂ T₂ := by
-  simp only [metric_trace, raise_index_add, contract_general_add]
-
-private lemma metric_trace_smul
-    (met : MetricDuality R V) (atr : AbstractTrace R V)
-    {r s : ℕ} (idx₁ : Fin (s + 2)) (idx₂ : Fin (s + 1))
-    (c : R) (T : TensorData R V r (s + 2)) :
-    metric_trace met atr idx₁ idx₂ (c • T) =
-    c • metric_trace met atr idx₁ idx₂ T := by
-  simp only [metric_trace, raise_index_smul, contract_general_smul]
 
 end LaplacianHelpers
 
@@ -149,5 +99,79 @@ noncomputable def SecondCovDerivTensor
   let nY_T := genericCovDeriv emb conn ha hl Y T
   let nX_nY_T := genericCovDeriv emb conn ha hl X nY_T
   nX_nY_T + (-1 : R) • nXY_T
+
+/-- Bochner product rule for the rough Laplacian of a tensor norm.
+
+For a time-slice tensor `T`, this is the abstract scalar identity
+`Delta |T|^2 = 2 <roughDelta T, T> + 2 |nabla T|^2`.
+
+The current synthetic Laplacian file has scalar linearity and second covariant
+derivatives, but not yet the full tensor-inner-product expansion. This named
+property is the reusable D target; concrete tensor-calculus proofs should
+discharge it here rather than threading an anonymous `h_lap_component` through
+Ricci-flow files. -/
+def TensorNormLaplacianProductRule
+    (lapNormSq roughLapInner covDerivNormSq : R) : Prop :=
+  lapNormSq = 2 * roughLapInner + 2 * covDerivNormSq
+
+/-- Consume the named tensor-norm Bochner product rule. -/
+theorem tensor_norm_laplacian_eq_of_product_rule
+    (lapNormSq roughLapInner covDerivNormSq : R)
+    (h : TensorNormLaplacianProductRule lapNormSq roughLapInner covDerivNormSq) :
+    lapNormSq = 2 * roughLapInner + 2 * covDerivNormSq :=
+  h
+
+/-- Coordinate Bochner reduction for the rough Laplacian of a tensor norm.
+
+This is the finite-frame form of the standard computation
+
+`Delta |T|^2 = 2 <roughDelta T, T> + 2 |nabla T|^2`.
+
+The proof assumes the realization has already identified the three scalar
+quantities with their coordinate traces:
+
+* `lapNormSq` is the trace of the second derivative of the component norm,
+  expanded by the scalar product rule;
+* `roughLapInner` is the trace of `(roughDelta T)` paired with `T`;
+* `covDerivNormSq` is the trace of the squared first covariant derivative.
+
+Once those identifications are in this coordinate shape, the Bochner identity
+is just distributivity over finite sums. -/
+theorem tensorNormLaplacianProductRule_of_coordinate_bochner_sum
+    {ι κ : Type*} [Fintype ι] [Fintype κ]
+    (lapNormSq roughLapInner covDerivNormSq : R)
+    (second first : κ -> ι -> R) (component : ι -> R)
+    (h_lap : lapNormSq =
+      ∑ a : κ, ∑ I : ι,
+        (2 * second a I * component I + 2 * first a I * first a I))
+    (h_rough : roughLapInner =
+      ∑ a : κ, ∑ I : ι, second a I * component I)
+    (h_cov : covDerivNormSq =
+      ∑ a : κ, ∑ I : ι, first a I * first a I) :
+    TensorNormLaplacianProductRule lapNormSq roughLapInner covDerivNormSq := by
+  unfold TensorNormLaplacianProductRule
+  rw [h_lap, h_rough, h_cov]
+  have hrough :
+      (∑ a : κ, ∑ I : ι, 2 * (second a I * component I)) =
+        2 * (∑ a : κ, ∑ I : ι, second a I * component I) := by
+    rw [Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro a _
+    rw [Finset.mul_sum]
+  have hcov :
+      (∑ a : κ, ∑ I : ι, 2 * (first a I * first a I)) =
+        2 * (∑ a : κ, ∑ I : ι, first a I * first a I) := by
+    rw [Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro a _
+    rw [Finset.mul_sum]
+  rw [← hrough, ← hcov]
+  rw [← Finset.sum_add_distrib]
+  apply Finset.sum_congr rfl
+  intro a _
+  rw [← Finset.sum_add_distrib]
+  apply Finset.sum_congr rfl
+  intro I _
+  ring
 
 end Laplacian

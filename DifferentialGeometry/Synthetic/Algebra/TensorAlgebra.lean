@@ -544,7 +544,162 @@ theorem contract_general_0_0 (atr : AbstractTrace R V) {r s : ℕ}
   congr 1; ext m n
   simp [swap_covariant_eval, swap_contravariant_eval, Equiv.swap_self]
 
+/-- Coordinate evaluation law for the Ricci-style middle-slot trace of a
+`(1,3)` tensor.
+
+For fixed exterior vector slots `X` and `Y`, if the slice `Z |-> T(X,Z,Y)`
+is represented by an endomorphism `L`, then contracting the contravariant slot
+against the middle covariant slot evaluates to `tr L`.
+
+This is the reusable theorem-form obligation supplied by concrete coordinate
+trace realizations. It is intentionally not built into `AbstractTrace`: the
+basic trace structure only knows how to contract the first pair and how to
+recognize `(1,1)` endomorphism tensors. -/
+def ContractGeneral13MiddleTraceEval (atr : AbstractTrace R V) : Prop :=
+  forall (T : TensorData R V 1 3) (X Y : V) (L : V →ₗ[R] V),
+    (forall Z (α : V →ₗ[R] R), T ![X, Z, Y] ![α] = α (L Z)) ->
+      contract_general atr (0 : Fin 1) (1 : Fin 3) T ![X, Y] ![] = atr.tr L
+
+/-- Projection form of `ContractGeneral13MiddleTraceEval`. -/
+theorem contract_general_13_middle_trace_eval
+    (atr : AbstractTrace R V) (h_eval : ContractGeneral13MiddleTraceEval atr)
+    (T : TensorData R V 1 3) (X Y : V) (L : V →ₗ[R] V)
+    (hL : forall Z (α : V →ₗ[R] R), T ![X, Z, Y] ![α] = α (L Z)) :
+    contract_general atr (0 : Fin 1) (1 : Fin 3) T ![X, Y] ![] = atr.tr L :=
+  h_eval T X Y L hL
+
 end GeneralContract
+
+-- ============================================================
+-- Iterated tensor-contraction coherence
+-- ============================================================
+
+section TensorContractFubini
+variable {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V]
+
+/-- Contract the first contravariant/covariant pair twice. This is the raw
+`AbstractTrace.tensor_contract` double contraction, before metric raising or
+slot permutations are added by `metric_trace`. -/
+noncomputable def tensor_contract_twice (atr : AbstractTrace R V) {r s : ℕ}
+    (T : TensorData R V ((r + 1) + 1) ((s + 1) + 1)) : TensorData R V r s :=
+  atr.tensor_contract (atr.tensor_contract T)
+
+/-- Fubini/coherence law for two successive `AbstractTrace.tensor_contract`s:
+contracting slots `(0,0)` then `(1,1)` agrees with first swapping the first two
+contravariant slots and the first two covariant slots, then contracting twice.
+
+This is not derivable from the existing single-contraction evaluation axioms
+alone. Concrete trace realizations should prove it from their coordinate
+definition of `tensor_contract`. -/
+def TensorContractFubini (atr : AbstractTrace R V) : Prop :=
+  ∀ {r s : ℕ} (T : TensorData R V ((r + 1) + 1) ((s + 1) + 1)),
+    tensor_contract_twice atr T =
+      tensor_contract_twice atr
+        (swap_covariant (0 : Fin ((s + 1) + 1)) ⟨1, by omega⟩
+          (swap_contravariant (0 : Fin ((r + 1) + 1)) ⟨1, by omega⟩ T))
+
+/-- Typeclass form of `TensorContractFubini`, so synthetic theorems can require
+the coherence law without changing the core `AbstractTrace` structure. -/
+class HasTensorContractFubini (atr : AbstractTrace R V) : Prop where
+  tensor_contract_fubini : TensorContractFubini atr
+
+theorem tensor_contract_twice_swap
+    (atr : AbstractTrace R V) [HasTensorContractFubini atr]
+    {r s : ℕ} (T : TensorData R V ((r + 1) + 1) ((s + 1) + 1)) :
+    tensor_contract_twice atr T =
+      tensor_contract_twice atr
+        (swap_covariant (0 : Fin ((s + 1) + 1)) ⟨1, by omega⟩
+          (swap_contravariant (0 : Fin ((r + 1) + 1)) ⟨1, by omega⟩ T)) :=
+  HasTensorContractFubini.tensor_contract_fubini T
+
+theorem tensor_contract_twice_swap_of_fubini
+    (atr : AbstractTrace R V) (h : TensorContractFubini atr)
+    {r s : ℕ} (T : TensorData R V ((r + 1) + 1) ((s + 1) + 1)) :
+    tensor_contract_twice atr T =
+      tensor_contract_twice atr
+        (swap_covariant (0 : Fin ((s + 1) + 1)) ⟨1, by omega⟩
+          (swap_contravariant (0 : Fin ((r + 1) + 1)) ⟨1, by omega⟩ T)) :=
+  h T
+
+end TensorContractFubini
+
+-- ============================================================
+-- Naturality of tensor_contract under swaps of uncontracted slots
+-- ============================================================
+
+section TensorContractSwapNaturality
+variable {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V]
+
+/-- Naturality law: `AbstractTrace.tensor_contract` always contracts the
+*first* contravariant/covariant pair (slot `0`/`0`). Swapping any two
+*uncontracted* slots therefore commutes with contraction, after the obvious
+`Fin.succ` renumbering of indices.
+
+This is not derivable from `AbstractTrace`'s structural axioms alone — they
+only relate `tensor_contract` to evaluation against `vectorToData` /
+`covectorToData`. Concrete trace realizations should prove it from their
+coordinate definition. -/
+def TensorContractSwapNaturality (atr : AbstractTrace R V) : Prop :=
+  (∀ {r s : ℕ} (i j : Fin s) (T : TensorData R V (r + 1) (s + 1)),
+      atr.tensor_contract (swap_covariant i.succ j.succ T) =
+        swap_covariant i j (atr.tensor_contract T)) ∧
+  (∀ {r s : ℕ} (i j : Fin r) (T : TensorData R V (r + 1) (s + 1)),
+      atr.tensor_contract (swap_contravariant i.succ j.succ T) =
+        swap_contravariant i j (atr.tensor_contract T))
+
+/-- Typeclass form of `TensorContractSwapNaturality`, mirroring
+`HasTensorContractFubini`. Synthetic theorems can require the naturality law
+as a separate hypothesis without changing the core `AbstractTrace`
+structure. -/
+class HasTensorContractSwapNaturality (atr : AbstractTrace R V) : Prop where
+  contract_swap_covariant :
+    ∀ {r s : ℕ} (i j : Fin s) (T : TensorData R V (r + 1) (s + 1)),
+      atr.tensor_contract (swap_covariant i.succ j.succ T) =
+        swap_covariant i j (atr.tensor_contract T)
+  contract_swap_contravariant :
+    ∀ {r s : ℕ} (i j : Fin r) (T : TensorData R V (r + 1) (s + 1)),
+      atr.tensor_contract (swap_contravariant i.succ j.succ T) =
+        swap_contravariant i j (atr.tensor_contract T)
+
+/-- Theorem form of covariant-slot naturality for `tensor_contract`, avoiding
+typeclass search at call sites that already carry the naturality law. -/
+theorem tensor_contract_swap_covariant_succ_of_naturality
+    (atr : AbstractTrace R V) (h : TensorContractSwapNaturality atr)
+    {r s : ℕ} (i j : Fin s) (T : TensorData R V (r + 1) (s + 1)) :
+    atr.tensor_contract (swap_covariant i.succ j.succ T) =
+      swap_covariant i j (atr.tensor_contract T) :=
+  h.1 i j T
+
+/-- Theorem form of contravariant-slot naturality for `tensor_contract`,
+avoiding typeclass search at call sites that already carry the naturality law. -/
+theorem tensor_contract_swap_contravariant_succ_of_naturality
+    (atr : AbstractTrace R V) (h : TensorContractSwapNaturality atr)
+    {r s : ℕ} (i j : Fin r) (T : TensorData R V (r + 1) (s + 1)) :
+    atr.tensor_contract (swap_contravariant i.succ j.succ T) =
+      swap_contravariant i j (atr.tensor_contract T) :=
+  h.2 i j T
+
+theorem tensor_contract_swap_covariant_succ
+    (atr : AbstractTrace R V) [HasTensorContractSwapNaturality atr]
+    {r s : ℕ} (i j : Fin s) (T : TensorData R V (r + 1) (s + 1)) :
+    atr.tensor_contract (swap_covariant i.succ j.succ T) =
+      swap_covariant i j (atr.tensor_contract T) :=
+  HasTensorContractSwapNaturality.contract_swap_covariant i j T
+
+theorem tensor_contract_swap_contravariant_succ
+    (atr : AbstractTrace R V) [HasTensorContractSwapNaturality atr]
+    {r s : ℕ} (i j : Fin r) (T : TensorData R V (r + 1) (s + 1)) :
+    atr.tensor_contract (swap_contravariant i.succ j.succ T) =
+      swap_contravariant i j (atr.tensor_contract T) :=
+  HasTensorContractSwapNaturality.contract_swap_contravariant i j T
+
+theorem hasTensorContractSwapNaturality_of_naturality
+    (atr : AbstractTrace R V) (h : TensorContractSwapNaturality atr) :
+    HasTensorContractSwapNaturality atr where
+  contract_swap_covariant := h.1
+  contract_swap_contravariant := h.2
+
+end TensorContractSwapNaturality
 
 -- ============================================================
 -- Connecting Properties

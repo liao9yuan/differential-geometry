@@ -441,6 +441,164 @@ theorem nabla_add_left (emb : DerivationEmbedding k R V)
     simp]
   simp only [Finset.sum_add_distrib]; ring
 
+/-- Bundled covariant derivative of a tensor.
+
+If `T` is an `(r,s)` tensor, then `covariantDerivativeTensor T` is the
+`(r,s+1)` tensor whose first covariant slot is the derivative direction:
+
+```text
+(∇T)(X, Y₁, ..., Yₛ; α₁, ..., αᵣ)
+  = (∇_X T)(Y₁, ..., Yₛ; α₁, ..., αᵣ).
+```
+
+This is the general version of the curvature-specific `(0,5)` tensor used in
+contracted Bianchi: that object is simply `∇` applied to the lowered `(0,4)`
+Riemann tensor. -/
+noncomputable def covariantDerivativeTensor
+    (emb : DerivationEmbedding k R V)
+    (conn : V → V → V)
+    (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : ∀ (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : ∀ X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    {r s : ℕ} (T : TensorData R V r s) : TensorData R V r (s + 1) where
+  toFun vs := nabla_tensor emb conn ha hl (vs 0) T (fun i : Fin s => vs i.succ)
+  map_update_add' := by
+    intro inst vs idx X₁ X₂
+    have : inst = instDecidableEqFin (s + 1) := Subsingleton.elim _ _
+    subst this
+    ext αs
+    cases idx using Fin.cases with
+    | zero =>
+        change
+          nabla_tensor emb conn ha hl (X₁ + X₂) T (fun i : Fin s => vs i.succ) αs =
+            nabla_tensor emb conn ha hl X₁ T
+              (fun i : Fin s => (Function.update vs 0 X₁) i.succ) αs +
+            nabla_tensor emb conn ha hl X₂ T
+              (fun i : Fin s => (Function.update vs 0 X₂) i.succ) αs
+        simpa only [Function.update_self, Function.update_of_ne, Fin.succ_ne_zero] using
+          nabla_add_left emb conn ha hal hl X₁ X₂ T (fun i : Fin s => vs i.succ) αs
+    | succ idx =>
+        let tail : Fin s → V := fun i => vs i.succ
+        have htail_add :
+            (fun i : Fin s => (Function.update vs idx.succ (X₁ + X₂)) i.succ) =
+              Function.update tail idx (X₁ + X₂) := by
+          ext i
+          by_cases hi : i = idx
+          · subst hi
+            simp only [Function.update_self]
+          · have hne : i.succ ≠ idx.succ := by
+              intro h
+              exact hi (Fin.succ_injective s h)
+            simp only [Function.update_of_ne hne, Function.update_of_ne hi, tail]
+        have htail₁ :
+            (fun i : Fin s => (Function.update vs idx.succ X₁) i.succ) =
+              Function.update tail idx X₁ := by
+          ext i
+          by_cases hi : i = idx
+          · subst hi
+            simp only [Function.update_self]
+          · have hne : i.succ ≠ idx.succ := by
+              intro h
+              exact hi (Fin.succ_injective s h)
+            simp only [Function.update_of_ne hne, Function.update_of_ne hi, tail]
+        have htail₂ :
+            (fun i : Fin s => (Function.update vs idx.succ X₂) i.succ) =
+              Function.update tail idx X₂ := by
+          ext i
+          by_cases hi : i = idx
+          · subst hi
+            simp only [Function.update_self]
+          · have hne : i.succ ≠ idx.succ := by
+              intro h
+              exact hi (Fin.succ_injective s h)
+            simp only [Function.update_of_ne hne, Function.update_of_ne hi, tail]
+        have hdir :
+            (Function.update vs idx.succ (X₁ + X₂)) 0 = vs 0 := by
+          simp only [Function.update_of_ne (Fin.succ_ne_zero idx).symm]
+        have hdir₁ :
+            (Function.update vs idx.succ X₁) 0 = vs 0 := by
+          simp only [Function.update_of_ne (Fin.succ_ne_zero idx).symm]
+        have hdir₂ :
+            (Function.update vs idx.succ X₂) 0 = vs 0 := by
+          simp only [Function.update_of_ne (Fin.succ_ne_zero idx).symm]
+        change
+          nabla_tensor emb conn ha hl
+              ((Function.update vs idx.succ (X₁ + X₂)) 0) T
+              (fun i : Fin s => (Function.update vs idx.succ (X₁ + X₂)) i.succ) αs =
+            nabla_tensor emb conn ha hl ((Function.update vs idx.succ X₁) 0) T
+              (fun i : Fin s => (Function.update vs idx.succ X₁) i.succ) αs +
+            nabla_tensor emb conn ha hl ((Function.update vs idx.succ X₂) 0) T
+              (fun i : Fin s => (Function.update vs idx.succ X₂) i.succ) αs
+        rw [hdir, hdir₁, hdir₂, htail_add, htail₁, htail₂]
+        exact congr_arg (fun S => S αs)
+          ((nabla_tensor emb conn ha hl (vs 0) T).map_update_add tail idx X₁ X₂)
+  map_update_smul' := by
+    intro inst vs idx c X
+    have : inst = instDecidableEqFin (s + 1) := Subsingleton.elim _ _
+    subst this
+    ext αs
+    cases idx using Fin.cases with
+    | zero =>
+        change
+          nabla_tensor emb conn ha hl (c • X) T (fun i : Fin s => vs i.succ) αs =
+            c * nabla_tensor emb conn ha hl X T
+              (fun i : Fin s => (Function.update vs 0 X) i.succ) αs
+        simpa only [Function.update_self, Function.update_of_ne, Fin.succ_ne_zero, smul_eq_mul] using
+          nabla_smul_left emb conn ha hsl hl c X T (fun i : Fin s => vs i.succ) αs
+    | succ idx =>
+        let tail : Fin s → V := fun i => vs i.succ
+        have htail :
+            (fun i : Fin s => (Function.update vs idx.succ (c • X)) i.succ) =
+              Function.update tail idx (c • X) := by
+          ext i
+          by_cases hi : i = idx
+          · subst hi
+            simp only [Function.update_self]
+          · have hne : i.succ ≠ idx.succ := by
+              intro h
+              exact hi (Fin.succ_injective s h)
+            simp only [Function.update_of_ne hne, Function.update_of_ne hi, tail]
+        have htailX :
+            (fun i : Fin s => (Function.update vs idx.succ X) i.succ) =
+              Function.update tail idx X := by
+          ext i
+          by_cases hi : i = idx
+          · subst hi
+            simp only [Function.update_self]
+          · have hne : i.succ ≠ idx.succ := by
+              intro h
+              exact hi (Fin.succ_injective s h)
+            simp only [Function.update_of_ne hne, Function.update_of_ne hi, tail]
+        have hdir :
+            (Function.update vs idx.succ (c • X)) 0 = vs 0 := by
+          simp only [Function.update_of_ne (Fin.succ_ne_zero idx).symm]
+        have hdirX :
+            (Function.update vs idx.succ X) 0 = vs 0 := by
+          simp only [Function.update_of_ne (Fin.succ_ne_zero idx).symm]
+        change
+          nabla_tensor emb conn ha hl ((Function.update vs idx.succ (c • X)) 0) T
+              (fun i : Fin s => (Function.update vs idx.succ (c • X)) i.succ) αs =
+            c * nabla_tensor emb conn ha hl ((Function.update vs idx.succ X) 0) T
+              (fun i : Fin s => (Function.update vs idx.succ X) i.succ) αs
+        rw [hdir, hdirX, htail, htailX]
+        exact congr_arg (fun S => S αs)
+          ((nabla_tensor emb conn ha hl (vs 0) T).map_update_smul tail idx c X)
+
+/-- Evaluation of the bundled covariant derivative in cons form. -/
+theorem covariantDerivativeTensor_eval_cons
+    (emb : DerivationEmbedding k R V)
+    (conn : V → V → V)
+    (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : ∀ (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : ∀ X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (X : V) {r s : ℕ} (T : TensorData R V r s)
+    (vs : Fin s → V) (αs : Fin r → (V →ₗ[R] R)) :
+    covariantDerivativeTensor emb conn ha hal hsl hl T (Fin.cons X vs) αs =
+      nabla_tensor emb conn ha hl X T vs αs := by
+  rfl
+
 /-- ∇_X(δ) = 0 — covariant derivative of the identity (1,1)-tensor vanishes. -/
 theorem nabla_delta (emb : DerivationEmbedding k R V)
     (conn : V → V → V)

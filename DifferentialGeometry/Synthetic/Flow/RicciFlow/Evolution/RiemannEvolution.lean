@@ -364,6 +364,284 @@ noncomputable def Q_hamilton_scalar
   -- minus ΔRm(X,Y,Z)(ω):
   - rough_laplacian_Rm emb conn ha hl hal hsl atr met ![X, Y, Z] ![ω]
 
+/-! The next two lemmas are the first forward steps in the Ricci-evolution
+calculation: evaluate Hamilton's connection-variation term on a lowered vector,
+then use metric compatibility to keep the covector derivative lowered. -/
+
+/-- Hamilton's Ricci-flow connection variation evaluated on a flat covector. -/
+theorem A_rf_scalar_flat_eq
+    (emb : DerivationEmbedding k R V) (conn : V → V → V)
+    (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : ∀ (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : ∀ X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (atr : AbstractTrace R V) (met : MetricDuality R V)
+    (U W E : V) :
+    A_rf_scalar emb conn ha hal hsl hl atr met U W (met.flat E) =
+      - ricci_cov_deriv emb conn ha hal hsl hl atr U W E
+      - ricci_cov_deriv emb conn ha hal hsl hl atr W U E
+      + ricci_cov_deriv emb conn ha hal hsl hl atr E U W := by
+  simp only [A_rf_scalar]
+  rw [met.sharp_flat E]
+
+/-- Hamilton's quadratic term evaluated on a flat covector, with the dual
+connection rewritten by metric compatibility:
+`∇*_X (flat E) = flat (conn X E)`.
+
+This is the forward expansion needed before the second-derivative Ricci terms
+are cancelled by the Bianchi identities and curvature commutators. -/
+theorem Q_hamilton_scalar_flat_eq_of_metric_compatible
+    (emb : DerivationEmbedding k R V) (conn : V → V → V)
+    (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : ∀ (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : ∀ X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (atr : AbstractTrace R V) (met : MetricDuality R V)
+    (h_mc : IsMetricCompatible emb conn met)
+    (X Y Z E : V) :
+    Q_hamilton_scalar emb conn ha hal hsl hl atr met X Y Z (met.flat E) =
+      ((emb.embed X) (A_rf_scalar emb conn ha hal hsl hl atr met Y Z (met.flat E))
+        - A_rf_scalar emb conn ha hal hsl hl atr met Y Z (met.flat (conn X E))
+        - A_rf_scalar emb conn ha hal hsl hl atr met (conn X Y) Z (met.flat E)
+        - A_rf_scalar emb conn ha hal hsl hl atr met Y (conn X Z) (met.flat E))
+      - ((emb.embed Y) (A_rf_scalar emb conn ha hal hsl hl atr met X Z (met.flat E))
+        - A_rf_scalar emb conn ha hal hsl hl atr met X Z (met.flat (conn Y E))
+        - A_rf_scalar emb conn ha hal hsl hl atr met (conn Y X) Z (met.flat E)
+        - A_rf_scalar emb conn ha hal hsl hl atr met X (conn Y Z) (met.flat E))
+      - rough_laplacian_Rm emb conn ha hl hal hsl atr met ![X, Y, Z] ![met.flat E] := by
+  simp only [Q_hamilton_scalar]
+  rw [nabla_dual_flat emb conn ha hl met h_mc X E,
+    nabla_dual_flat emb conn ha hl met h_mc Y E]
+
+/-- Second covariant derivative of the Ricci tensor, in scalar `(0,3)` form:
+`(∇_X ∇Ric)(U,W,E)`.
+
+This is the forward object that appears after substituting the Ricci-flow
+connection variation into Hamilton's Riemann evolution formula. -/
+noncomputable def ricci_second_cov_deriv
+    (emb : DerivationEmbedding k R V) (conn : V → V → V)
+    (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : ∀ (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : ∀ X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (atr : AbstractTrace R V) (X U W E : V) : R :=
+  (emb.embed X) (ricci_cov_deriv emb conn ha hal hsl hl atr U W E)
+    - ricci_cov_deriv emb conn ha hal hsl hl atr (conn X U) W E
+    - ricci_cov_deriv emb conn ha hal hsl hl atr U (conn X W) E
+    - ricci_cov_deriv emb conn ha hal hsl hl atr U W (conn X E)
+
+/-- Evaluation of the covariant derivative of the Ricci tensor. -/
+theorem nabla_ricciForm_tensor_eval
+    (emb : DerivationEmbedding k R V) (conn : V → V → V)
+    (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : ∀ (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : ∀ X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (atr : AbstractTrace R V) (X Y Z : V) :
+    nabla_tensor emb conn ha hl X
+        (ricciForm_tensor emb conn ha hal hsl hl atr) ![Y, Z] ![] =
+      ricci_cov_deriv emb conn ha hal hsl hl atr X Y Z := by
+  rw [nabla_tensor_eval]
+  rw [show (∑ j : Fin 0,
+      ricciForm_tensor emb conn ha hal hsl hl atr ![Y, Z]
+        (Function.update ![] j
+          (nabla_dual emb conn ha hl X (![] j)))) = 0 from by
+    simp [Finset.univ_eq_empty]]
+  rw [sub_zero, Fin.sum_univ_two]
+  have h0 : Function.update ![Y, Z] (0 : Fin 2) (conn X (![Y, Z] 0)) =
+      ![conn X Y, Z] := by
+    ext i
+    fin_cases i <;> simp [Function.update]
+  have h1 : Function.update ![Y, Z] (1 : Fin 2) (conn X (![Y, Z] 1)) =
+      ![Y, conn X Z] := by
+    ext i
+    fin_cases i <;> simp [Function.update]
+  rw [h0, h1,
+    ricciForm_tensor_eval emb conn ha hal hsl hl atr Y Z,
+    ricciForm_tensor_eval emb conn ha hal hsl hl atr (conn X Y) Z,
+    ricciForm_tensor_eval emb conn ha hal hsl hl atr Y (conn X Z)]
+  unfold ricci_cov_deriv action
+  ring
+
+/-- Tensor-level form of `ricci_second_cov_deriv`. -/
+theorem ricci_second_cov_deriv_eq_nabla_tensor
+    (emb : DerivationEmbedding k R V) (conn : V → V → V)
+    (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : ∀ (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : ∀ X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (atr : AbstractTrace R V) (X U W E : V) :
+    ricci_second_cov_deriv emb conn ha hal hsl hl atr X U W E =
+      nabla_tensor emb conn ha hl X
+          (nabla_tensor emb conn ha hl U
+            (ricciForm_tensor emb conn ha hal hsl hl atr)) ![W, E] ![]
+        - nabla_tensor emb conn ha hl (conn X U)
+          (ricciForm_tensor emb conn ha hal hsl hl atr) ![W, E] ![] := by
+  rw [nabla_tensor_eval]
+  rw [show (∑ j : Fin 0,
+      nabla_tensor emb conn ha hl U
+        (ricciForm_tensor emb conn ha hal hsl hl atr) ![W, E]
+        (Function.update ![] j
+          (nabla_dual emb conn ha hl X (![] j)))) = 0 from by
+    simp [Finset.univ_eq_empty]]
+  rw [sub_zero, Fin.sum_univ_two]
+  have h0 : Function.update ![W, E] (0 : Fin 2) (conn X (![W, E] 0)) =
+      ![conn X W, E] := by
+    ext i
+    fin_cases i <;> simp [Function.update]
+  have h1 : Function.update ![W, E] (1 : Fin 2) (conn X (![W, E] 1)) =
+      ![W, conn X E] := by
+    ext i
+    fin_cases i <;> simp [Function.update]
+  rw [h0, h1]
+  rw [nabla_ricciForm_tensor_eval emb conn ha hal hsl hl atr U W E,
+    nabla_ricciForm_tensor_eval emb conn ha hal hsl hl atr U (conn X W) E,
+    nabla_ricciForm_tensor_eval emb conn ha hal hsl hl atr U W (conn X E),
+    nabla_ricciForm_tensor_eval emb conn ha hal hsl hl atr (conn X U) W E]
+  simp only [ricci_second_cov_deriv]
+  ring
+
+/-- Ricci identity for the second covariant derivative of the Ricci tensor.
+
+This is the forward commutator step in the Ricci evolution calculation:
+antisymmetrizing the first two covariant-derivative slots leaves the curvature
+action on the two tensor slots of `Ric`. -/
+theorem ricci_second_cov_deriv_commutator
+    (emb : DerivationEmbedding k R V) (conn : V → V → V)
+    (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : ∀ (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : ∀ X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (atr : AbstractTrace R V)
+    (h_tf : IsTorsionFree emb conn)
+    (X U W E : V) :
+    ricci_second_cov_deriv emb conn ha hal hsl hl atr X U W E
+      - ricci_second_cov_deriv emb conn ha hal hsl hl atr U X W E =
+      - Rc emb conn ha hal hsl hl atr (Rm emb conn X U W) E
+      - Rc emb conn ha hal hsl hl atr W (Rm emb conn X U E) := by
+  let T := ricciForm_tensor emb conn ha hal hsl hl atr
+  have hbr :
+      nabla_tensor emb conn ha hl (bracket emb X U) T ![W, E] ![] =
+        nabla_tensor emb conn ha hl (conn X U) T ![W, E] ![] -
+          nabla_tensor emb conn ha hl (conn U X) T ![W, E] ![] := by
+    rw [← h_tf X U]
+    calc
+      nabla_tensor emb conn ha hl (conn X U - conn U X) T ![W, E] ![] =
+          nabla_tensor emb conn ha hl (conn X U + -(conn U X)) T ![W, E] ![] := by
+            rw [sub_eq_add_neg]
+      _ = nabla_tensor emb conn ha hl (conn X U) T ![W, E] ![] +
+          nabla_tensor emb conn ha hl (-(conn U X)) T ![W, E] ![] := by
+            exact nabla_add_left emb conn ha hal hl (conn X U) (-(conn U X)) T ![W, E] ![]
+      _ = nabla_tensor emb conn ha hl (conn X U) T ![W, E] ![] -
+          nabla_tensor emb conn ha hl (conn U X) T ![W, E] ![] := by
+            rw [show -(conn U X) = (-1 : R) • conn U X by simp,
+              nabla_smul_left emb conn ha hsl hl (-1 : R) (conn U X) T ![W, E] ![]]
+            rw [sub_eq_add_neg]
+            simp
+  have hRXY :
+      ricci_second_cov_deriv emb conn ha hal hsl hl atr X U W E
+        - ricci_second_cov_deriv emb conn ha hal hsl hl atr U X W E =
+        R_XY emb conn ha hl X U T ![W, E] ![] := by
+    rw [ricci_second_cov_deriv_eq_nabla_tensor emb conn ha hal hsl hl atr X U W E,
+      ricci_second_cov_deriv_eq_nabla_tensor emb conn ha hal hsl hl atr U X W E,
+      R_XY_eval emb conn ha hl X U T ![W, E] ![]]
+    rw [hbr]
+    ring
+  rw [hRXY]
+  rw [tensor_ricci_identity_02 emb conn ha hal hl h_tf X U W E T]
+  rw [ricciForm_tensor_eval emb conn ha hal hsl hl atr (Rm emb conn X U W) E,
+    ricciForm_tensor_eval emb conn ha hal hsl hl atr W (Rm emb conn X U E)]
+
+/-- If Ricci is symmetric, its covariant derivative is symmetric in the two
+Ricci tensor slots. -/
+theorem ricci_cov_deriv_symm_of_Rc_symm
+    (emb : DerivationEmbedding k R V) (conn : V → V → V)
+    (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : ∀ (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : ∀ X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (atr : AbstractTrace R V)
+    (h_Rc_symm : ∀ Y Z,
+      Rc emb conn ha hal hsl hl atr Y Z = Rc emb conn ha hal hsl hl atr Z Y)
+    (X Y Z : V) :
+    ricci_cov_deriv emb conn ha hal hsl hl atr X Y Z =
+      ricci_cov_deriv emb conn ha hal hsl hl atr X Z Y := by
+  unfold ricci_cov_deriv
+  rw [h_Rc_symm Y Z, h_Rc_symm (conn X Y) Z, h_Rc_symm Y (conn X Z)]
+  ring
+
+/-- If Ricci is symmetric, the second covariant Ricci derivative remains
+symmetric in the two Ricci tensor slots. -/
+theorem ricci_second_cov_deriv_symm_last_of_Rc_symm
+    (emb : DerivationEmbedding k R V) (conn : V → V → V)
+    (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : ∀ (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : ∀ X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (atr : AbstractTrace R V)
+    (h_Rc_symm : ∀ Y Z,
+      Rc emb conn ha hal hsl hl atr Y Z = Rc emb conn ha hal hsl hl atr Z Y)
+    (X U W E : V) :
+    ricci_second_cov_deriv emb conn ha hal hsl hl atr X U W E =
+      ricci_second_cov_deriv emb conn ha hal hsl hl atr X U E W := by
+  unfold ricci_second_cov_deriv
+  rw [ricci_cov_deriv_symm_of_Rc_symm emb conn ha hal hsl hl atr h_Rc_symm U W E,
+    ricci_cov_deriv_symm_of_Rc_symm emb conn ha hal hsl hl atr h_Rc_symm (conn X U) W E,
+    ricci_cov_deriv_symm_of_Rc_symm emb conn ha hal hsl hl atr h_Rc_symm U (conn X W) E,
+    ricci_cov_deriv_symm_of_Rc_symm emb conn ha hal hsl hl atr h_Rc_symm U W (conn X E)]
+  ring
+
+/-- The covariant derivative of `A_rf_scalar`, evaluated on a flat covector,
+is the corresponding signed sum of second covariant Ricci derivatives. -/
+theorem covariant_derivative_A_rf_scalar_flat_eq
+    (emb : DerivationEmbedding k R V) (conn : V → V → V)
+    (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : ∀ (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : ∀ X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (atr : AbstractTrace R V) (met : MetricDuality R V)
+    (X U W E : V) :
+    (emb.embed X) (A_rf_scalar emb conn ha hal hsl hl atr met U W (met.flat E))
+        - A_rf_scalar emb conn ha hal hsl hl atr met U W (met.flat (conn X E))
+        - A_rf_scalar emb conn ha hal hsl hl atr met (conn X U) W (met.flat E)
+        - A_rf_scalar emb conn ha hal hsl hl atr met U (conn X W) (met.flat E) =
+      - ricci_second_cov_deriv emb conn ha hal hsl hl atr X U W E
+      - ricci_second_cov_deriv emb conn ha hal hsl hl atr X W U E
+      + ricci_second_cov_deriv emb conn ha hal hsl hl atr X E U W := by
+  rw [A_rf_scalar_flat_eq emb conn ha hal hsl hl atr met U W E,
+    A_rf_scalar_flat_eq emb conn ha hal hsl hl atr met U W (conn X E),
+    A_rf_scalar_flat_eq emb conn ha hal hsl hl atr met (conn X U) W E,
+    A_rf_scalar_flat_eq emb conn ha hal hsl hl atr met U (conn X W) E]
+  simp only [ricci_second_cov_deriv, map_add, map_sub, map_neg]
+  ring
+
+/-- Forward second-derivative form of Hamilton's quadratic term.
+
+The remaining mathematical work after this theorem is the Ricci-identity and
+Bianchi cancellation showing that the trace of the displayed `∇²Ric` expression
+is `2 Rm*Ric - 2 Ric^2`. -/
+theorem Q_hamilton_scalar_flat_second_cov_deriv_eq_of_metric_compatible
+    (emb : DerivationEmbedding k R V) (conn : V → V → V)
+    (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : ∀ (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : ∀ X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (atr : AbstractTrace R V) (met : MetricDuality R V)
+    (h_mc : IsMetricCompatible emb conn met)
+    (X Y Z E : V) :
+    Q_hamilton_scalar emb conn ha hal hsl hl atr met X Y Z (met.flat E) =
+      (- ricci_second_cov_deriv emb conn ha hal hsl hl atr X Y Z E
+        - ricci_second_cov_deriv emb conn ha hal hsl hl atr X Z Y E
+        + ricci_second_cov_deriv emb conn ha hal hsl hl atr X E Y Z)
+      - (- ricci_second_cov_deriv emb conn ha hal hsl hl atr Y X Z E
+        - ricci_second_cov_deriv emb conn ha hal hsl hl atr Y Z X E
+        + ricci_second_cov_deriv emb conn ha hal hsl hl atr Y E X Z)
+      - rough_laplacian_Rm emb conn ha hl hal hsl atr met ![X, Y, Z] ![met.flat E] := by
+  rw [Q_hamilton_scalar_flat_eq_of_metric_compatible emb conn ha hal hsl hl atr met
+    h_mc X Y Z E]
+  rw [covariant_derivative_A_rf_scalar_flat_eq emb conn ha hal hsl hl atr met X Y Z E]
+  rw [covariant_derivative_A_rf_scalar_flat_eq emb conn ha hal hsl hl atr met Y X Z E]
+
 -- ============================================================
 -- 2.4  Helper: nabla of (1,0) tensor expansion
 -- ============================================================
@@ -633,7 +911,7 @@ private theorem Rc_add_X
   simp only [Rc]
   rw [show RcEndo emb conn ha hal hsl hl (X₁ + X₂) Z =
       RcEndo emb conn ha hal hsl hl X₁ Z + RcEndo emb conn ha hal hsl hl X₂ Z from
-    LinearMap.ext (fun Y => Rm_add_Y emb conn ha hal Y X₁ X₂ Z)]
+    LinearMap.ext (fun Y => Rm_add_X emb conn ha hal X₁ X₂ Y Z)]
   exact map_add atr.tr _ _
 
 private theorem Rc_smul_X
@@ -644,7 +922,7 @@ private theorem Rc_smul_X
   simp only [Rc]
   rw [show RcEndo emb conn ha hal hsl hl (c • X) Z =
       c • RcEndo emb conn ha hal hsl hl X Z from
-    LinearMap.ext (fun Y => Rm_smul_Y emb conn hal hsl hl c Y X Z)]
+    LinearMap.ext (fun Y => Rm_smul_X emb conn hal hsl hl c X Y Z)]
   rw [atr.tr.map_smul, smul_eq_mul]
 
 private theorem Rc_add_Z
@@ -655,7 +933,7 @@ private theorem Rc_add_Z
   simp only [Rc]
   rw [show RcEndo emb conn ha hal hsl hl X (Z₁ + Z₂) =
       RcEndo emb conn ha hal hsl hl X Z₁ + RcEndo emb conn ha hal hsl hl X Z₂ from
-    LinearMap.ext (fun Y => Rm_add_Z emb conn ha hal Y X Z₁ Z₂)]
+    LinearMap.ext (fun Y => Rm_add_Z emb conn ha hal X Y Z₁ Z₂)]
   exact map_add atr.tr _ _
 
 private theorem Rc_smul_Z
@@ -666,7 +944,7 @@ private theorem Rc_smul_Z
   simp only [Rc]
   rw [show RcEndo emb conn ha hal hsl hl X (c • Z) =
       c • RcEndo emb conn ha hal hsl hl X Z from
-    LinearMap.ext (fun Y => Rm_smul_Z emb conn ha hsl hl c Y X Z)]
+    LinearMap.ext (fun Y => Rm_smul_Z emb conn ha hsl hl c X Y Z)]
   rw [atr.tr.map_smul, smul_eq_mul]
 
 -- ricci_cov_deriv linearity in each argument
@@ -1427,6 +1705,104 @@ theorem Q_rm_independent_eval
     (X Y Z : V) (ω : V →ₗ[R] R) :
     Q_rm_independent emb conn ha hal hsl hl atr met ![X, Y, Z] ![ω] =
     Q_hamilton_scalar emb conn ha hal hsl hl atr met X Y Z ω := rfl
+
+/-- Forward second-derivative form of `Q_rm_independent` on a flat covector. -/
+theorem Q_rm_independent_flat_second_cov_deriv_eq_of_metric_compatible
+    (emb : DerivationEmbedding k R V) (conn : V → V → V)
+    (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : ∀ (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : ∀ X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (atr : AbstractTrace R V) (met : MetricDuality R V)
+    (h_mc : IsMetricCompatible emb conn met)
+    (X Y Z E : V) :
+    Q_rm_independent emb conn ha hal hsl hl atr met ![X, Y, Z] ![met.flat E] =
+      (- ricci_second_cov_deriv emb conn ha hal hsl hl atr X Y Z E
+        - ricci_second_cov_deriv emb conn ha hal hsl hl atr X Z Y E
+        + ricci_second_cov_deriv emb conn ha hal hsl hl atr X E Y Z)
+      - (- ricci_second_cov_deriv emb conn ha hal hsl hl atr Y X Z E
+        - ricci_second_cov_deriv emb conn ha hal hsl hl atr Y Z X E
+        + ricci_second_cov_deriv emb conn ha hal hsl hl atr Y E X Z)
+      - rough_laplacian_Rm emb conn ha hl hal hsl atr met ![X, Y, Z] ![met.flat E] := by
+  rw [Q_rm_independent_eval emb conn ha hal hsl hl atr met X Y Z (met.flat E)]
+  exact Q_hamilton_scalar_flat_second_cov_deriv_eq_of_metric_compatible
+    emb conn ha hal hsl hl atr met h_mc X Y Z E
+
+/-- Ricci-slot form of the forward Hessian calculation.
+
+This is the scalar identity that will be paired with the Ricci-slot trace:
+`Q(X,Z,Y,flat E)` is the second-covariant-Ricci expression whose trace is
+later simplified by the Ricci commutator and Bianchi cancellations. -/
+theorem Q_rm_ricciSlot_flat_eq_ricciHessian
+    (emb : DerivationEmbedding k R V) (conn : V → V → V)
+    (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : ∀ (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : ∀ X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (atr : AbstractTrace R V) (met : MetricDuality R V)
+    (h_mc : IsMetricCompatible emb conn met)
+    (X Y Z E : V) :
+    Q_rm_independent emb conn ha hal hsl hl atr met ![X, Z, Y] ![met.flat E] =
+      (- ricci_second_cov_deriv emb conn ha hal hsl hl atr X Z Y E
+        - ricci_second_cov_deriv emb conn ha hal hsl hl atr X Y Z E
+        + ricci_second_cov_deriv emb conn ha hal hsl hl atr X E Z Y)
+      - (- ricci_second_cov_deriv emb conn ha hal hsl hl atr Z X Y E
+        - ricci_second_cov_deriv emb conn ha hal hsl hl atr Z Y X E
+        + ricci_second_cov_deriv emb conn ha hal hsl hl atr Z E X Y)
+      - rough_laplacian_Rm emb conn ha hl hal hsl atr met ![X, Z, Y] ![met.flat E] := by
+  exact Q_rm_independent_flat_second_cov_deriv_eq_of_metric_compatible
+    emb conn ha hal hsl hl atr met h_mc X Z Y E
+
+/-- Ricci-slot Hamilton quadratic after commuting the first Hessian pair.
+
+The displayed `Rc(Rm(...), ...)` terms are the first reaction terms produced by
+the Ricci identity. The remaining second-derivative terms are the divergence /
+scalar-Hessian terms whose Ricci-slot trace is cancelled by contracted Bianchi,
+together with the rough-laplacian trace. -/
+theorem Q_rm_ricciSlot_flat_eq_commutedRicciHessian
+    (emb : DerivationEmbedding k R V) (conn : V → V → V)
+    (ha : ∀ X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : ∀ X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : ∀ (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : ∀ X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (atr : AbstractTrace R V) (met : MetricDuality R V)
+    (h_mc : IsMetricCompatible emb conn met)
+    (h_tf : IsTorsionFree emb conn)
+    (X Y Z E : V) :
+    Q_rm_independent emb conn ha hal hsl hl atr met ![X, Z, Y] ![met.flat E] =
+      Rc emb conn ha hal hsl hl atr (Rm emb conn X Z Y) E
+      + Rc emb conn ha hal hsl hl atr Y (Rm emb conn X Z E)
+      - ricci_second_cov_deriv emb conn ha hal hsl hl atr X Y Z E
+      + ricci_second_cov_deriv emb conn ha hal hsl hl atr X E Z Y
+      + ricci_second_cov_deriv emb conn ha hal hsl hl atr Z Y X E
+      - ricci_second_cov_deriv emb conn ha hal hsl hl atr Z E X Y
+      - rough_laplacian_Rm emb conn ha hl hal hsl atr met ![X, Z, Y] ![met.flat E] := by
+  set a : R := ricci_second_cov_deriv emb conn ha hal hsl hl atr X Z Y E
+  set b : R := ricci_second_cov_deriv emb conn ha hal hsl hl atr X Y Z E
+  set c : R := ricci_second_cov_deriv emb conn ha hal hsl hl atr X E Z Y
+  set d : R := ricci_second_cov_deriv emb conn ha hal hsl hl atr Z X Y E
+  set e : R := ricci_second_cov_deriv emb conn ha hal hsl hl atr Z Y X E
+  set f : R := ricci_second_cov_deriv emb conn ha hal hsl hl atr Z E X Y
+  set p : R := Rc emb conn ha hal hsl hl atr (Rm emb conn X Z Y) E
+  set q : R := Rc emb conn ha hal hsl hl atr Y (Rm emb conn X Z E)
+  set r : R := rough_laplacian_Rm emb conn ha hl hal hsl atr met ![X, Z, Y] ![met.flat E]
+  have hpair : -a + d = p + q := by
+    have hcomm :=
+      ricci_second_cov_deriv_commutator emb conn ha hal hsl hl atr h_tf X Z Y E
+    change a - d = -p - q at hcomm
+    calc
+      -a + d = -(a - d) := by ring
+      _ = -(-p - q) := by rw [hcomm]
+      _ = p + q := by ring
+  calc
+    Q_rm_independent emb conn ha hal hsl hl atr met ![X, Z, Y] ![met.flat E] =
+        (-a - b + c) - (-d - e + f) - r := by
+          unfold a b c d e f r
+          exact Q_rm_ricciSlot_flat_eq_ricciHessian
+            emb conn ha hal hsl hl atr met h_mc X Y Z E
+    _ = (-a + d) - b + c + e - f - r := by ring
+    _ = (p + q) - b + c + e - f - r := by rw [hpair]
+    _ = p + q - b + c + e - f - r := by ring
 
 -- ============================================================
 -- 5.3  Q_rm_independent = Q_rm (tensor equality)

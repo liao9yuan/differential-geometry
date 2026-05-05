@@ -333,6 +333,26 @@ theorem scalar_limit_eq_one_from_rescaling_curvature_convergence
   have hlim := scalar_limit_eq_of_constant_samples k R V Time A conclusion 1 hseq hconst hunique
   rwa [conclusion.scalar_limit_eq] at hlim
 
+/-- P9-facing name for the Section 12 scalar-normalization transfer from CGH
+curvature convergence. -/
+theorem limit_scalar_normalized_from_cgh_convergence
+    {Point Index : Type*}
+    (rescaling : ParabolicRescalingData k R V Time A Point Index)
+    (conclusion : CurvatureConvergenceConclusion k R V Time A Index)
+    (hsequence : conclusion.sequence.flow = rescaling.rescaled)
+    (htime : conclusion.time = rescaling.time)
+    (hscalar_sample : forall i,
+      ricciFlowScalarCurvatureAt k R V Time A (rescaling.rescaled i) (rescaling.time i) =
+        rescaling.scalarQuantity (rescaling.rescaled i) (rescaling.point i) (rescaling.time i))
+    (hconst : conclusion.profile.scalarConvergesTo (fun _ => (1 : R)) 1)
+    (hunique :
+      forall (seq : Index -> R) (a b : R),
+        conclusion.profile.scalarConvergesTo seq a ->
+        conclusion.profile.scalarConvergesTo seq b -> a = b) :
+    ricciFlowScalarCurvatureAt k R V Time A conclusion.limit.flow conclusion.limitTime = 1 :=
+  scalar_limit_eq_one_from_rescaling_curvature_convergence k R V Time A
+    rescaling conclusion hsequence htime hscalar_sample hconst hunique
+
 /-- Black-box form of Lemma 11.5: smooth CGH convergence implies smooth
 convergence of curvature and its contractions/norms. -/
 class CurvatureConvergenceUnderSmoothCGH (Index : Type*) where
@@ -450,6 +470,370 @@ theorem limit_tracefree_ricci_norm_sq_eq_zero_of_squeezed_ratio
 
 end CompactnessInterfaces
 
+section GeometricCompactnessInterfaces
+
+variable (k R V Time A Manifold Point Metric : Type*)
+variable [Field k] [CommRing R] [Algebra k R] [Preorder R]
+variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+variable [CommRing A] [Algebra R A]
+
+/-- A sequence of pointed geometric Ricci flows. -/
+structure GeometricPointedRicciFlowSequence (Index : Type*) where
+  flow : Index -> GeometricFlow k R V Time A Manifold Point Metric
+
+/-- Geometric point-selection hypothesis: a pointwise scalar quantity is
+unbounded above on a spacetime domain. -/
+def GeometricPointSelectionHypothesis
+    (scalarQuantity :
+      GeometricFlow k R V Time A Manifold Point Metric -> Point -> Time -> R)
+    (domain :
+      GeometricFlow k R V Time A Manifold Point Metric -> Point -> Time -> Prop)
+    (G : GeometricFlow k R V Time A Manifold Point Metric) : Prop :=
+  UnboundedAboveOnSpacetime (scalarQuantity G) (domain G)
+
+/-- Parabolic rescaling data selected near a singular time in the geometric
+layer. The original and rescaled flows carry their own manifolds and metrics. -/
+structure GeometricParabolicRescalingData (Index : Type*) where
+  original : GeometricFlow k R V Time A Manifold Point Metric
+  point : Index -> Point
+  time : Index -> Time
+  scale : Index -> R
+  rescaled : Index -> GeometricFlow k R V Time A Manifold Point Metric
+  scalarQuantity :
+    GeometricFlow k R V Time A Manifold Point Metric -> Point -> Time -> R
+  pinchingRatio :
+    GeometricFlow k R V Time A Manifold Point Metric -> Point -> Time -> R
+  pinchingDecayQuantity :
+    GeometricFlow k R V Time A Manifold Point Metric -> Point -> Time -> R
+  pinchingDecayFactor : Index -> R
+  backwardRegion : Index -> Point -> Time -> Prop
+  scale_tends_to_infinity : UnboundedAboveOn scale (fun _ => True)
+  normalized_scalar_at_base :
+    forall i, scalarQuantity (rescaled i) (point i) (time i) = 1
+  scalar_max_on_backward_interval :
+    forall i p t, backwardRegion i p t -> scalarQuantity original p t <= scale i
+  scale_invariant_pinching_ratio_preserved :
+    forall i, pinchingRatio (rescaled i) (point i) (time i) =
+      pinchingRatio original (point i) (time i)
+  pinching_ratio_decay_rule_at_base :
+    forall i, pinchingRatio (rescaled i) (point i) (time i) =
+      pinchingDecayFactor i * pinchingDecayQuantity original (point i) (time i)
+  scale_invariant_pinching_ratio_preserved_on_backward_region :
+    forall i p t, backwardRegion i p t ->
+      pinchingRatio (rescaled i) p t = pinchingRatio original p t
+
+/-- Geometric form of point selection and parabolic rescaling. -/
+class GeometricPointSelectionAndRescalingTheorem (Index : Type*) where
+  scalarQuantity :
+    GeometricFlow k R V Time A Manifold Point Metric -> Point -> Time -> R
+  domain :
+    GeometricFlow k R V Time A Manifold Point Metric -> Point -> Time -> Prop
+  pinchingRatio :
+    GeometricFlow k R V Time A Manifold Point Metric -> Point -> Time -> R
+  pinchingDecayQuantity :
+    GeometricFlow k R V Time A Manifold Point Metric -> Point -> Time -> R
+  pinchingDecayFactor : Index -> R
+  selection :
+    forall G : GeometricFlow k R V Time A Manifold Point Metric,
+      GeometricPointSelectionHypothesis k R V Time A Manifold Point Metric
+        scalarQuantity domain G ->
+        Nonempty { data :
+            GeometricParabolicRescalingData k R V Time A Manifold Point Metric Index //
+          data.original = G /\ data.scalarQuantity = scalarQuantity /\
+            data.pinchingRatio = pinchingRatio /\
+            data.pinchingDecayQuantity = pinchingDecayQuantity /\
+            data.pinchingDecayFactor = pinchingDecayFactor }
+
+theorem geometric_point_selection_rescaling_from_interface
+    {Index : Type*}
+    [H : GeometricPointSelectionAndRescalingTheorem
+      k R V Time A Manifold Point Metric Index]
+    (G : GeometricFlow k R V Time A Manifold Point Metric)
+    (hG :
+      GeometricPointSelectionHypothesis k R V Time A Manifold Point Metric
+        H.scalarQuantity H.domain G) :
+    Nonempty { data :
+        GeometricParabolicRescalingData k R V Time A Manifold Point Metric Index //
+      data.original = G /\ data.scalarQuantity = H.scalarQuantity /\
+        data.pinchingRatio = H.pinchingRatio /\
+        data.pinchingDecayQuantity = H.pinchingDecayQuantity /\
+        data.pinchingDecayFactor = H.pinchingDecayFactor } :=
+  H.selection G hG
+
+/-- Candidate compactness limit for geometric Ricci flows. -/
+structure GeometricRicciFlowLimitCandidate where
+  flow : GeometricFlow k R V Time A Manifold Point Metric
+
+/-- Smooth pointed Cheeger-Gromov-Hamilton convergence data in the geometric
+layer. The limit and sequence flows already contain their manifolds. -/
+structure GeometricSmoothCGHConvergenceData (Index : Type*) where
+  sequence : GeometricPointedRicciFlowSequence k R V Time A Manifold Point Metric Index
+  limit : GeometricRicciFlowLimitCandidate k R V Time A Manifold Point Metric
+  smoothConvergesTo :
+    (Index -> GeometricFlow k R V Time A Manifold Point Metric) ->
+      GeometricFlow k R V Time A Manifold Point Metric -> Prop
+  smoothConvergence :
+    ConvergenceWitness Index
+      (GeometricFlow k R V Time A Manifold Point Metric) smoothConvergesTo
+  smooth_seq_eq : smoothConvergence.seq = sequence.flow
+  smooth_limit_eq : smoothConvergence.limit = limit.flow
+
+/-- Hamilton-Cheeger-Gromov compactness in the geometric layer. -/
+class GeometricHamiltonCompactnessTheorem (Index : Type*) where
+  extract_limit :
+    forall sequence :
+        GeometricPointedRicciFlowSequence k R V Time A Manifold Point Metric Index,
+      Nonempty { data :
+          GeometricSmoothCGHConvergenceData k R V Time A Manifold Point Metric Index //
+        data.sequence = sequence }
+
+/-- Compact-limit diffeomorphism conclusion for geometric CGH convergence.
+There is no `manifoldOfFlow` field: each geometric flow carries its manifold. -/
+structure GeometricCompactLimitDiffeomorphismConclusion
+    (Index Diffeomorphism : Type*) where
+  sequence : GeometricPointedRicciFlowSequence k R V Time A Manifold Point Metric Index
+  limit : GeometricRicciFlowLimitCandidate k R V Time A Manifold Point Metric
+  eventually : (Index -> Prop) -> Prop
+  diffeomorphism : Index -> Diffeomorphism
+  isDiffeomorphism : Diffeomorphism -> Manifold -> Manifold -> Prop
+  eventually_diffeomorphic :
+    eventually (fun i =>
+      isDiffeomorphism (diffeomorphism i)
+        (sequence.flow i).manifold limit.flow.manifold)
+
+/-- Compact-limit diffeomorphism interface in the geometric layer. -/
+class GeometricCompactLimitDiffeomorphismUnderSmoothCGH
+    (Index Diffeomorphism : Type*) where
+  IsCompact : Manifold -> Prop
+  eventually : (Index -> Prop) -> Prop
+  IsDiffeomorphism : Diffeomorphism -> Manifold -> Manifold -> Prop
+  diffeomorphic_for_large_i :
+    forall data :
+        GeometricSmoothCGHConvergenceData k R V Time A Manifold Point Metric Index,
+      IsCompact data.limit.flow.manifold ->
+        Nonempty { conclusion :
+            GeometricCompactLimitDiffeomorphismConclusion
+              k R V Time A Manifold Point Metric Index Diffeomorphism //
+          conclusion.sequence = data.sequence /\ conclusion.limit = data.limit /\
+            conclusion.eventually = eventually /\
+            conclusion.isDiffeomorphism = IsDiffeomorphism }
+
+theorem geometric_compact_limit_diffeomorphism_from_interface
+    {Index Diffeomorphism : Type*}
+    [H : GeometricCompactLimitDiffeomorphismUnderSmoothCGH
+      k R V Time A Manifold Point Metric Index Diffeomorphism]
+    (data : GeometricSmoothCGHConvergenceData k R V Time A Manifold Point Metric Index)
+    (hcompact : H.IsCompact data.limit.flow.manifold) :
+    Nonempty { conclusion :
+        GeometricCompactLimitDiffeomorphismConclusion
+          k R V Time A Manifold Point Metric Index Diffeomorphism //
+      conclusion.sequence = data.sequence /\ conclusion.limit = data.limit /\
+        conclusion.eventually = H.eventually /\
+        conclusion.isDiffeomorphism = H.IsDiffeomorphism } :=
+  H.diffeomorphic_for_large_i data hcompact
+
+end GeometricCompactnessInterfaces
+
+section IntervalGeometricCompactnessInterfaces
+
+variable (k R V FlowTime AmbientTime A Manifold Point Metric : Type*)
+variable [Field k] [CommRing R] [Algebra k R] [Preorder R]
+variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+variable [CommRing A] [Algebra R A]
+
+/-- A sequence of pointed interval-aware geometric Ricci flows. -/
+structure IntervalGeometricPointedRicciFlowSequence (Index : Type*) where
+  flow :
+    Index ->
+      IntervalGeometricFlow k R V FlowTime AmbientTime A Manifold Point Metric
+
+/-- Interval-aware point-selection hypothesis: a pointwise scalar quantity is
+unbounded above on a regular spacetime domain. -/
+def IntervalGeometricPointSelectionHypothesis
+    (scalarQuantity :
+      IntervalGeometricFlow k R V FlowTime AmbientTime A Manifold Point Metric ->
+        Point -> FlowTime -> R)
+    (domain :
+      IntervalGeometricFlow k R V FlowTime AmbientTime A Manifold Point Metric ->
+        Point -> FlowTime -> Prop)
+    (G : IntervalGeometricFlow k R V FlowTime AmbientTime A Manifold Point Metric) :
+    Prop :=
+  UnboundedAboveOnSpacetime (scalarQuantity G) (domain G)
+
+/-- Parabolic rescaling data selected near an ambient singular time. The
+selected times and backward regions use only regular `FlowTime`s. -/
+structure IntervalGeometricParabolicRescalingData (Index : Type*) where
+  original :
+    IntervalGeometricFlow k R V FlowTime AmbientTime A Manifold Point Metric
+  point : Index -> Point
+  time : Index -> FlowTime
+  scale : Index -> R
+  rescaled :
+    Index ->
+      IntervalGeometricFlow k R V FlowTime AmbientTime A Manifold Point Metric
+  scalarQuantity :
+    IntervalGeometricFlow k R V FlowTime AmbientTime A Manifold Point Metric ->
+      Point -> FlowTime -> R
+  pinchingRatio :
+    IntervalGeometricFlow k R V FlowTime AmbientTime A Manifold Point Metric ->
+      Point -> FlowTime -> R
+  pinchingDecayQuantity :
+    IntervalGeometricFlow k R V FlowTime AmbientTime A Manifold Point Metric ->
+      Point -> FlowTime -> R
+  pinchingDecayFactor : Index -> R
+  backwardRegion : Index -> Point -> FlowTime -> Prop
+  scale_tends_to_infinity : UnboundedAboveOn scale (fun _ => True)
+  normalized_scalar_at_base :
+    forall i, scalarQuantity (rescaled i) (point i) (time i) = 1
+  scalar_max_on_backward_interval :
+    forall i p t, backwardRegion i p t -> scalarQuantity original p t <= scale i
+  scale_invariant_pinching_ratio_preserved :
+    forall i, pinchingRatio (rescaled i) (point i) (time i) =
+      pinchingRatio original (point i) (time i)
+  pinching_ratio_decay_rule_at_base :
+    forall i, pinchingRatio (rescaled i) (point i) (time i) =
+      pinchingDecayFactor i * pinchingDecayQuantity original (point i) (time i)
+  scale_invariant_pinching_ratio_preserved_on_backward_region :
+    forall i p t, backwardRegion i p t ->
+      pinchingRatio (rescaled i) p t = pinchingRatio original p t
+
+/-- Interval-aware form of point selection and parabolic rescaling. -/
+class IntervalGeometricPointSelectionAndRescalingTheorem (Index : Type*) where
+  scalarQuantity :
+    IntervalGeometricFlow k R V FlowTime AmbientTime A Manifold Point Metric ->
+      Point -> FlowTime -> R
+  domain :
+    IntervalGeometricFlow k R V FlowTime AmbientTime A Manifold Point Metric ->
+      Point -> FlowTime -> Prop
+  pinchingRatio :
+    IntervalGeometricFlow k R V FlowTime AmbientTime A Manifold Point Metric ->
+      Point -> FlowTime -> R
+  pinchingDecayQuantity :
+    IntervalGeometricFlow k R V FlowTime AmbientTime A Manifold Point Metric ->
+      Point -> FlowTime -> R
+  pinchingDecayFactor : Index -> R
+  selection :
+    forall G :
+        IntervalGeometricFlow k R V FlowTime AmbientTime A Manifold Point Metric,
+      IntervalGeometricPointSelectionHypothesis
+        k R V FlowTime AmbientTime A Manifold Point Metric scalarQuantity domain G ->
+        Nonempty { data :
+            IntervalGeometricParabolicRescalingData
+              k R V FlowTime AmbientTime A Manifold Point Metric Index //
+          data.original = G /\ data.scalarQuantity = scalarQuantity /\
+            data.pinchingRatio = pinchingRatio /\
+            data.pinchingDecayQuantity = pinchingDecayQuantity /\
+            data.pinchingDecayFactor = pinchingDecayFactor }
+
+theorem interval_geometric_point_selection_rescaling_from_interface
+    {Index : Type*}
+    [H : IntervalGeometricPointSelectionAndRescalingTheorem
+      k R V FlowTime AmbientTime A Manifold Point Metric Index]
+    (G : IntervalGeometricFlow k R V FlowTime AmbientTime A Manifold Point Metric)
+    (hG :
+      IntervalGeometricPointSelectionHypothesis
+        k R V FlowTime AmbientTime A Manifold Point Metric
+        H.scalarQuantity H.domain G) :
+    Nonempty { data :
+        IntervalGeometricParabolicRescalingData
+          k R V FlowTime AmbientTime A Manifold Point Metric Index //
+      data.original = G /\ data.scalarQuantity = H.scalarQuantity /\
+        data.pinchingRatio = H.pinchingRatio /\
+        data.pinchingDecayQuantity = H.pinchingDecayQuantity /\
+        data.pinchingDecayFactor = H.pinchingDecayFactor } :=
+  H.selection G hG
+
+/-- Candidate compactness limit for interval-aware geometric Ricci flows. -/
+structure IntervalGeometricRicciFlowLimitCandidate where
+  flow : IntervalGeometricFlow k R V FlowTime AmbientTime A Manifold Point Metric
+
+/-- Smooth pointed Cheeger-Gromov-Hamilton convergence data in the
+interval-aware geometric layer. The sequence and limit flows carry their own
+manifolds and ambient interval data. -/
+structure IntervalGeometricSmoothCGHConvergenceData (Index : Type*) where
+  sequence :
+    IntervalGeometricPointedRicciFlowSequence
+      k R V FlowTime AmbientTime A Manifold Point Metric Index
+  limit :
+    IntervalGeometricRicciFlowLimitCandidate
+      k R V FlowTime AmbientTime A Manifold Point Metric
+  smoothConvergesTo :
+    (Index ->
+      IntervalGeometricFlow k R V FlowTime AmbientTime A Manifold Point Metric) ->
+      IntervalGeometricFlow k R V FlowTime AmbientTime A Manifold Point Metric -> Prop
+  smoothConvergence :
+    ConvergenceWitness Index
+      (IntervalGeometricFlow k R V FlowTime AmbientTime A Manifold Point Metric)
+      smoothConvergesTo
+  smooth_seq_eq : smoothConvergence.seq = sequence.flow
+  smooth_limit_eq : smoothConvergence.limit = limit.flow
+
+/-- Hamilton-Cheeger-Gromov compactness in the interval-aware geometric layer. -/
+class IntervalGeometricHamiltonCompactnessTheorem (Index : Type*) where
+  extract_limit :
+    forall sequence :
+        IntervalGeometricPointedRicciFlowSequence
+          k R V FlowTime AmbientTime A Manifold Point Metric Index,
+      Nonempty { data :
+          IntervalGeometricSmoothCGHConvergenceData
+            k R V FlowTime AmbientTime A Manifold Point Metric Index //
+        data.sequence = sequence }
+
+/-- Compact-limit diffeomorphism conclusion for interval-aware CGH convergence.
+There is no `manifoldOfFlow` field: each flow stores its manifold. -/
+structure IntervalGeometricCompactLimitDiffeomorphismConclusion
+    (Index Diffeomorphism : Type*) where
+  sequence :
+    IntervalGeometricPointedRicciFlowSequence
+      k R V FlowTime AmbientTime A Manifold Point Metric Index
+  limit :
+    IntervalGeometricRicciFlowLimitCandidate
+      k R V FlowTime AmbientTime A Manifold Point Metric
+  eventually : (Index -> Prop) -> Prop
+  diffeomorphism : Index -> Diffeomorphism
+  isDiffeomorphism : Diffeomorphism -> Manifold -> Manifold -> Prop
+  eventually_diffeomorphic :
+    eventually (fun i =>
+      isDiffeomorphism (diffeomorphism i)
+        (sequence.flow i).manifold limit.flow.manifold)
+
+/-- Compact-limit diffeomorphism interface in the interval-aware geometric
+layer. -/
+class IntervalGeometricCompactLimitDiffeomorphismUnderSmoothCGH
+    (Index Diffeomorphism : Type*) where
+  IsCompact : Manifold -> Prop
+  eventually : (Index -> Prop) -> Prop
+  IsDiffeomorphism : Diffeomorphism -> Manifold -> Manifold -> Prop
+  diffeomorphic_for_large_i :
+    forall data :
+        IntervalGeometricSmoothCGHConvergenceData
+          k R V FlowTime AmbientTime A Manifold Point Metric Index,
+      IsCompact data.limit.flow.manifold ->
+        Nonempty { conclusion :
+            IntervalGeometricCompactLimitDiffeomorphismConclusion
+              k R V FlowTime AmbientTime A Manifold Point Metric Index Diffeomorphism //
+          conclusion.sequence = data.sequence /\ conclusion.limit = data.limit /\
+            conclusion.eventually = eventually /\
+            conclusion.isDiffeomorphism = IsDiffeomorphism }
+
+theorem interval_geometric_compact_limit_diffeomorphism_from_interface
+    {Index Diffeomorphism : Type*}
+    [H : IntervalGeometricCompactLimitDiffeomorphismUnderSmoothCGH
+      k R V FlowTime AmbientTime A Manifold Point Metric Index Diffeomorphism]
+    (data :
+      IntervalGeometricSmoothCGHConvergenceData
+        k R V FlowTime AmbientTime A Manifold Point Metric Index)
+    (hcompact : H.IsCompact data.limit.flow.manifold) :
+    Nonempty { conclusion :
+        IntervalGeometricCompactLimitDiffeomorphismConclusion
+          k R V FlowTime AmbientTime A Manifold Point Metric Index Diffeomorphism //
+      conclusion.sequence = data.sequence /\ conclusion.limit = data.limit /\
+        conclusion.eventually = H.eventually /\
+        conclusion.isDiffeomorphism = H.IsDiffeomorphism } :=
+  H.diffeomorphic_for_large_i data hcompact
+
+end IntervalGeometricCompactnessInterfaces
+
 section ImprovedPinchingCompactnessBridge
 
 variable (k R V Time A : Type*)
@@ -515,6 +899,55 @@ theorem limit_tracefree_ricci_norm_sq_eq_zero_of_improved_pinching_wmp_decay
     conclusion E hratio_seq hdomain
     (fun i hi => improved_ricci_pinching_ratio_bound_from_wmp E i hi)
     hupper hnonneg
+
+/-- P6-facing name for the improved-pinching consumer chain:
+weak maximum principle plus a zero-convergent decay upper bound forces the CGH
+limit sample to have vanishing trace-free Ricci norm squared. -/
+theorem limit_tracefree_norm_zero_from_improved_pinching
+    {Index : Type*}
+    [ScalarWeakMaximumPrinciple R Index]
+    (conclusion : CurvatureRatioConvergenceConclusion k R V Time A Index)
+    [Hsq : ScalarConvergenceSqueezeToZero Index R
+      conclusion.curvature.profile.scalarConvergesTo
+      conclusion.curvature.profile.eventually]
+    [Hev : EventuallyImp Index conclusion.curvature.profile.eventually]
+    (E : ImprovedRicciPinchingEstimateAlongFlow (R := R) (Time := Index))
+    (hratio_seq : conclusion.tracefree_ratio.seq = E.ratio)
+    (hdomain : conclusion.curvature.profile.eventually (fun i => E.problem.domain i))
+    (hupper :
+      conclusion.curvature.profile.scalarConvergesTo
+        (fun i => E.C * E.decay i) 0)
+    (hnonneg : conclusion.curvature.profile.eventually
+      (fun i => 0 <= conclusion.tracefree_ratio.seq i)) :
+    ricciFlowTracefreeRicciNormSqAt k R V Time A conclusion.curvature.limit.flow
+      conclusion.curvature.nInv conclusion.curvature.limitTime = 0 :=
+  limit_tracefree_ricci_norm_sq_eq_zero_of_improved_pinching_wmp_decay
+    k R V Time A conclusion E hratio_seq hdomain hupper hnonneg
+
+/-- P6-facing bridge using the Hamilton P4 producer directly. This is the
+Section 12 consumer shape after the quotient-evolution calculation has been
+packaged as `HamiltonImprovedPinchingProducerData`. -/
+theorem limit_tracefree_norm_zero_from_hamilton_improved_pinching_producer
+    {Index : Type*}
+    [ScalarWeakMaximumPrinciple R Index]
+    (conclusion : CurvatureRatioConvergenceConclusion k R V Time A Index)
+    [Hsq : ScalarConvergenceSqueezeToZero Index R
+      conclusion.curvature.profile.scalarConvergesTo
+      conclusion.curvature.profile.eventually]
+    [Hev : EventuallyImp Index conclusion.curvature.profile.eventually]
+    (D : HamiltonImprovedPinchingProducerData (R := R) (Time := Index))
+    (hratio_seq : conclusion.tracefree_ratio.seq = D.ratio)
+    (hdomain : conclusion.curvature.profile.eventually (fun i => D.problem.domain i))
+    (hupper :
+      conclusion.curvature.profile.scalarConvergesTo
+        (fun i => D.C * D.decay i) 0)
+    (hnonneg : conclusion.curvature.profile.eventually
+      (fun i => 0 <= conclusion.tracefree_ratio.seq i)) :
+    ricciFlowTracefreeRicciNormSqAt k R V Time A conclusion.curvature.limit.flow
+      conclusion.curvature.nInv conclusion.curvature.limitTime = 0 :=
+  limit_tracefree_norm_zero_from_improved_pinching k R V Time A conclusion
+    (improved_ricci_pinching_estimate_along_flow_of_hamilton_producer D)
+    hratio_seq hdomain hupper hnonneg
 
 end ImprovedPinchingCompactnessBridge
 
@@ -729,6 +1162,28 @@ theorem myers_compactness_from_positive_ricci_interface
     Nonempty { conclusion : MyersCompactnessConclusion R Manifold //
       conclusion.manifold = M /\ conclusion.IsCompact = H.IsCompact } :=
   H.compact_of_positive_ricci M lower hlower hRic
+
+/-- P8-facing compactness consumer. A geometric bridge from constant positive
+sectional curvature to a positive Ricci lower bound, followed by the Myers
+interface, gives compactness of the limit manifold. -/
+theorem limit_compact_from_constant_positive_consumer
+    {Manifold Metric : Type*} [H : MyersPositiveRicciCompactness R Manifold]
+    (MetricOn ConstantPositiveSectionalCurvature : Manifold -> Metric -> Prop)
+    (M : Manifold) (g : Metric) (lower : R)
+    (hmetric : MetricOn M g)
+    (hconst : ConstantPositiveSectionalCurvature M g)
+    (hlower : 0 < lower)
+    (hRic :
+      MetricOn M g ->
+        ConstantPositiveSectionalCurvature M g ->
+          H.HasPositiveRicciLowerBound M lower) :
+    H.IsCompact M := by
+  obtain ⟨conclusion, hconclusion⟩ :=
+    myers_compactness_from_positive_ricci_interface R M lower hlower
+      (hRic hmetric hconst)
+  have hcompact := conclusion.compact
+  rw [hconclusion.1, hconclusion.2] at hcompact
+  exact hcompact
 
 /-- Myers-type compactness conclusion needed for the final contradiction. -/
 class MyersTheoremInterface (Input Output : Type*) where

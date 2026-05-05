@@ -484,6 +484,41 @@ theorem TimeDerivativeData.dt_apply_mul (td : TimeDerivativeData R A Time)
   rw [td.dt.leibniz (td.lift f) (td.lift g)]
   simp only [td.eval_add, td.eval_mul, smul_eq_mul, td.eval_lift f hf, td.eval_lift g hg]
 
+/-- Product rule for four scalar time functions.
+
+This is the local-coordinate calculus used when differentiating coordinate
+expressions such as `g^{ia} g^{jb} Ric_ij Ric_ab`: every entry is just a scalar
+time function, so the proof is repeated Leibniz. -/
+theorem TimeDerivativeData.dt_apply_mul_four (td : TimeDerivativeData R A Time)
+    [TimeRegularFam td]
+    (a b c d : Time → R) (t : Time)
+    (ha : td.isSmoothFam a) (hb : td.isSmoothFam b)
+    (hc : td.isSmoothFam c) (hd : td.isSmoothFam d) :
+    td.dt_apply (fun s => a s * b s * c s * d s) t =
+      td.dt_apply a t * b t * c t * d t +
+        a t * td.dt_apply b t * c t * d t +
+        a t * b t * td.dt_apply c t * d t +
+        a t * b t * c t * td.dt_apply d t := by
+  have hab : td.isSmoothFam (fun s => a s * b s) :=
+    td.isSmoothFam_mul _ _ ha hb
+  have habc : td.isSmoothFam (fun s => a s * b s * c s) :=
+    td.isSmoothFam_mul _ _ hab hc
+  have hprod :
+      (fun s => a s * b s * c s * d s) =
+        (fun s => a s * b s * c s) * d := by
+    rfl
+  rw [hprod, td.dt_apply_mul _ _ _ habc hd]
+  have hprod3 :
+      (fun s => a s * b s * c s) =
+        (fun s => a s * b s) * c := by
+    rfl
+  rw [hprod3, td.dt_apply_mul _ _ _ hab hc]
+  have hprod2 :
+      (fun s => a s * b s) = a * b := by
+    rfl
+  rw [hprod2, td.dt_apply_mul _ _ _ ha hb]
+  ring
+
 theorem TimeDerivativeData.dt_apply_const_mul (td : TimeDerivativeData R A Time)
     [TimeRegularFam td]
     (c : R) (f : Time → R) (t : Time) (hf : td.isSmoothFam f) :
@@ -531,6 +566,245 @@ theorem TimeDerivativeData.dt_apply_sum (td : TimeDerivativeData R A Time)
       td.isSmoothFam_sum s' f h_tail
     rw [Finset.sum_cons, td.dt_apply_add _ _ _ h_head h_tail_sum, ih h_tail,
         Finset.sum_cons]
+
+/-- Product rule for a finite coordinate sum of four scalar time functions.
+
+This is the finite-index version of `dt_apply_mul_four`; it is the reusable
+"A" step for norm evolutions written in local coordinates. The index type can
+itself be a product type, so a four-index expression may be passed as one
+finite family of summands. -/
+theorem TimeDerivativeData.dt_apply_sum_mul_four
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
+    {ι : Type*} [Fintype ι]
+    (a b c d : ι → Time → R) (t : Time)
+    (ha : ∀ i, td.isSmoothFam (a i))
+    (hb : ∀ i, td.isSmoothFam (b i))
+    (hc : ∀ i, td.isSmoothFam (c i))
+    (hd : ∀ i, td.isSmoothFam (d i)) :
+    td.dt_apply (fun s => ∑ i : ι, a i s * b i s * c i s * d i s) t =
+      ∑ i : ι,
+        (td.dt_apply (a i) t * b i t * c i t * d i t +
+          a i t * td.dt_apply (b i) t * c i t * d i t +
+          a i t * b i t * td.dt_apply (c i) t * d i t +
+          a i t * b i t * c i t * td.dt_apply (d i) t) := by
+  have hsumfun :
+      (fun s => ∑ i : ι, a i s * b i s * c i s * d i s) =
+        ∑ i : ι, (fun s => a i s * b i s * c i s * d i s) := by
+    ext s
+    simp
+  rw [hsumfun]
+  rw [td.dt_apply_sum Finset.univ
+    (fun i s => a i s * b i s * c i s * d i s) t]
+  · apply Finset.sum_congr rfl
+    intro i _
+    exact td.dt_apply_mul_four (a i) (b i) (c i) (d i) t
+      (ha i) (hb i) (hc i) (hd i)
+  · intro i _
+    exact td.isSmoothFam_mul _ _
+      (td.isSmoothFam_mul _ _
+        (td.isSmoothFam_mul _ _ (ha i) (hb i))
+        (hc i))
+      (hd i)
+
+/-- Finite-coordinate evaluation of a squared `(0,2)` tensor norm.
+
+This is deliberately not Ricci-specific. A realization discharges this by
+choosing a finite index package for the two inverse-metric slots and the two
+tensor slots, proving
+
+`|T|^2 = Σ I, gInvLeft_I * gInvRight_I * componentLeft_I * componentRight_I`.
+
+For Ricci, downstream code specializes `componentLeft` and `componentRight` to
+the corresponding Ricci components. -/
+def TensorNormSqCoordinateEvaluation
+    {ι : Type*} [Fintype ι]
+    (normSq : Time -> R)
+    (gInvLeft gInvRight componentLeft componentRight : ι -> Time -> R) : Prop :=
+  forall s,
+    normSq s =
+      ∑ I : ι,
+        gInvLeft I s * gInvRight I s *
+          componentLeft I s * componentRight I s
+
+/-- Time derivative of a finite-coordinate squared tensor norm.
+
+This is the generic local-coordinate product-rule step for
+`|T|^2 = g^{ia} g^{jb} T_ij T_ab`; Ricci-norm evolution uses it only after
+specializing `T` to the Ricci tensor. -/
+theorem TimeDerivativeData.dt_apply_tensor_norm_sq_coordinate_evaluation
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
+    {ι : Type*} [Fintype ι]
+    (normSq : Time -> R)
+    (gInvLeft gInvRight componentLeft componentRight : ι -> Time -> R)
+    (h_eval :
+      TensorNormSqCoordinateEvaluation normSq
+        gInvLeft gInvRight componentLeft componentRight)
+    (h_gInvLeft : forall I, td.isSmoothFam (gInvLeft I))
+    (h_gInvRight : forall I, td.isSmoothFam (gInvRight I))
+    (h_componentLeft : forall I, td.isSmoothFam (componentLeft I))
+    (h_componentRight : forall I, td.isSmoothFam (componentRight I)) :
+    forall t,
+      td.dt_apply normSq t =
+        ∑ I : ι,
+          (td.dt_apply (gInvLeft I) t * gInvRight I t *
+              componentLeft I t * componentRight I t +
+            gInvLeft I t * td.dt_apply (gInvRight I) t *
+              componentLeft I t * componentRight I t +
+            gInvLeft I t * gInvRight I t *
+              td.dt_apply (componentLeft I) t * componentRight I t +
+            gInvLeft I t * gInvRight I t *
+              componentLeft I t * td.dt_apply (componentRight I) t) := by
+  intro t
+  have hfun :
+      normSq =
+        fun s =>
+          ∑ I : ι,
+            gInvLeft I s * gInvRight I s *
+              componentLeft I s * componentRight I s := by
+    ext s
+    exact h_eval s
+  rw [hfun]
+  exact td.dt_apply_sum_mul_four gInvLeft gInvRight componentLeft componentRight t
+    h_gInvLeft h_gInvRight h_componentLeft h_componentRight
+
+/-- Time derivative of a finite matrix product, written componentwise.
+
+This is the reusable local-coordinate product rule behind differentiating
+`g^{ik} g_{kj}`: the coordinate entries are scalar time functions, so the proof
+is just `dt_apply_sum` plus `dt_apply_mul`. -/
+theorem TimeDerivativeData.dt_apply_matrix_product
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
+    {ι : Type*} [Fintype ι]
+    (A B : Time -> ι -> ι -> R)
+    (hA : ∀ i j, td.isSmoothFam (fun s => A s i j))
+    (hB : ∀ i j, td.isSmoothFam (fun s => B s i j))
+    (i j : ι) (t : Time) :
+    td.dt_apply (fun s => ∑ k : ι, A s i k * B s k j) t =
+      ∑ k : ι,
+        (A t i k * td.dt_apply (fun s => B s k j) t +
+          B t k j * td.dt_apply (fun s => A s i k) t) := by
+  have hsumfun :
+      (fun s => ∑ k : ι, A s i k * B s k j) =
+        ∑ k : ι, (fun s => A s i k * B s k j) := by
+    ext s
+    simp
+  rw [hsumfun]
+  rw [td.dt_apply_sum Finset.univ
+    (fun k s => A s i k * B s k j) t]
+  · exact Finset.sum_congr rfl (fun k _ => by
+      have hprod :
+          (fun s => A s i k * B s k j) =
+            (fun s => A s i k) * (fun s => B s k j) := by
+        ext s
+        rfl
+      rw [hprod, td.dt_apply_mul _ _ _ (hA i k) (hB k j)])
+  · intro k _
+    exact td.isSmoothFam_mul _ _ (hA i k) (hB k j)
+
+/-- Differentiating a coordinate matrix product that is constant gives the
+usual zero derivative identity.
+
+For inverse metrics this is the component statement obtained from
+`∂_t(g^{ik} g_{kj}) = ∂_t δ^i_j = 0`. -/
+theorem TimeDerivativeData.dt_apply_matrix_product_eq_const
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
+    {ι : Type*} [Fintype ι]
+    (A B : Time -> ι -> ι -> R)
+    (hA : ∀ i j, td.isSmoothFam (fun s => A s i j))
+    (hB : ∀ i j, td.isSmoothFam (fun s => B s i j))
+    (i j : ι) (t : Time) (c : R)
+    (hAB : ∀ s, (∑ k : ι, A s i k * B s k j) = c) :
+      ∑ k : ι,
+        (A t i k * td.dt_apply (fun s => B s k j) t +
+          B t k j * td.dt_apply (fun s => A s i k) t) = 0 := by
+  have hfun :
+      (fun s => ∑ k : ι, A s i k * B s k j) = fun _ => c := by
+    ext s
+    exact hAB s
+  have hdt :
+      td.dt_apply (fun s => ∑ k : ι, A s i k * B s k j) t = 0 := by
+    rw [hfun, td.dt_apply_const]
+  rw [td.dt_apply_matrix_product A B hA hB i j t] at hdt
+  exact hdt
+
+/-- Derivative of a finite inverse matrix.
+
+If `A(s) * B(s) = I` and `B(s) * A(s) = I`, then
+`∂_t A = - A * (∂_t B) * A`. This is the scalar coordinate theorem needed for
+the inverse metric variation; the entries are ordinary scalar time functions,
+so no geometric realization is involved in this calculation. -/
+theorem TimeDerivativeData.dt_apply_matrix_inverse_left
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (A B : Time -> ι -> ι -> R)
+    (hA : ∀ i j, td.isSmoothFam (fun s => A s i j))
+    (hB : ∀ i j, td.isSmoothFam (fun s => B s i j))
+    (hAB : ∀ s i j, (∑ k : ι, A s i k * B s k j) = if i = j then 1 else 0)
+    (hBA : ∀ s i j, (∑ k : ι, B s i k * A s k j) = if i = j then 1 else 0)
+    (i j : ι) (t : Time) :
+    td.dt_apply (fun s => A s i j) t =
+      -∑ b : ι, ∑ a : ι,
+        A t i a * td.dt_apply (fun s => B s a b) t * A t b j := by
+  let dA : ι -> R := fun k => td.dt_apply (fun s => A s i k) t
+  let dB : ι -> ι -> R := fun a b => td.dt_apply (fun s => B s a b) t
+  have hdiff : ∀ b,
+      ∑ k : ι, (A t i k * dB k b + B t k b * dA k) = 0 := by
+    intro b
+    simpa [dA, dB] using
+      td.dt_apply_matrix_product_eq_const A B hA hB i b t (if i = b then 1 else 0)
+        (fun s => hAB s i b)
+  have hBDA : ∀ b,
+      (∑ k : ι, B t k b * dA k) = -∑ k : ι, A t i k * dB k b := by
+    intro b
+    have hsplit :
+        (∑ k : ι, A t i k * dB k b) + (∑ k : ι, B t k b * dA k) = 0 := by
+      rw [← Finset.sum_add_distrib]
+      exact hdiff b
+    have hswap :
+        (∑ k : ι, B t k b * dA k) + (∑ k : ι, A t i k * dB k b) = 0 := by
+      rw [add_comm]
+      exact hsplit
+    exact eq_neg_of_add_eq_zero_left hswap
+  have hdelta :
+      dA j = ∑ k : ι, dA k * (if k = j then 1 else 0) := by
+    rw [show (∑ k : ι, dA k * (if k = j then 1 else 0)) =
+        ∑ k : ι, if k = j then dA k else 0 from by
+          apply Finset.sum_congr rfl
+          intro k _
+          by_cases hk : k = j <;> simp [hk]]
+    simp
+  calc
+    td.dt_apply (fun s => A s i j) t = dA j := rfl
+    _ = ∑ k : ι, dA k * (if k = j then 1 else 0) := hdelta
+    _ = ∑ k : ι, dA k * (∑ b : ι, B t k b * A t b j) := by
+      apply Finset.sum_congr rfl
+      intro k _
+      rw [hBA t k j]
+    _ = ∑ b : ι, (∑ k : ι, B t k b * dA k) * A t b j := by
+      calc
+        (∑ k : ι, dA k * (∑ b : ι, B t k b * A t b j))
+            = ∑ k : ι, ∑ b : ι, dA k * (B t k b * A t b j) := by
+              apply Finset.sum_congr rfl
+              intro k _
+              rw [Finset.mul_sum]
+        _ = ∑ b : ι, ∑ k : ι, dA k * (B t k b * A t b j) := by
+              rw [Finset.sum_comm]
+        _ = ∑ b : ι, (∑ k : ι, B t k b * dA k) * A t b j := by
+              apply Finset.sum_congr rfl
+              intro b _
+              rw [Finset.sum_mul]
+              apply Finset.sum_congr rfl
+              intro k _
+              ring
+    _ = ∑ b : ι, (-(∑ k : ι, A t i k * dB k b)) * A t b j := by
+      apply Finset.sum_congr rfl
+      intro b _
+      rw [hBDA b]
+    _ = -∑ b : ι, ∑ a : ι, A t i a * dB a b * A t b j := by
+      rw [← Finset.sum_neg_distrib]
+      apply Finset.sum_congr rfl
+      intro b _
+      rw [neg_mul, Finset.sum_mul, ← Finset.sum_neg_distrib]
 
 end DtApply
 

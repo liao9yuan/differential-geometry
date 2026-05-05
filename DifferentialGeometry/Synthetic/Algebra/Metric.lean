@@ -1,6 +1,7 @@
 import DifferentialGeometry.Synthetic.Algebra.TensorAlgebra
 import DifferentialGeometry.Synthetic.Analysis.NablaOnTensors
 import DifferentialGeometry.Synthetic.Analysis.TimeOnTensors
+import Mathlib.LinearAlgebra.Dual.Basis
 
 /-!
 # Metric Infrastructure
@@ -98,6 +99,43 @@ theorem MetricDuality.g_symm (met : MetricDuality R V) (X Y : V) :
   rw [show (![X, Y] : Fin 2 → V) ∘ (Equiv.swap (0 : Fin 2) 1) = ![Y, X] from by
     ext i; fin_cases i <;> rfl] at h; exact h.symm
 
+/-- The inverse metric is symmetric as a bilinear form on covectors. -/
+theorem MetricDuality.g_inv_symm (met : MetricDuality R V)
+    (α β : V →ₗ[R] R) :
+    met.g_inv ![] ![α, β] = met.g_inv ![] ![β, α] := by
+  obtain ⟨X, hX⟩ := met.sharp_spec α
+  obtain ⟨Y, hY⟩ := met.sharp_spec β
+  have hα : α = met.flat X := by
+    ext Z
+    exact (hX Z).symm
+  have hβ : β = met.flat Y := by
+    ext Z
+    exact (hY Z).symm
+  subst hα
+  subst hβ
+  rw [met.inverse_eval' Y (met.flat X), met.inverse_eval' X (met.flat Y)]
+  exact met.g_symm X Y
+
+/-- Tensor form of symmetry of the inverse metric. -/
+theorem MetricDuality.g_inv_symm_tensor (met : MetricDuality R V) :
+    swap_contravariant (0 : Fin 2) 1 met.g_inv = met.g_inv := by
+  ext m n
+  have hm : m = ![] := by
+    ext i
+    exact i.elim0
+  have hn : n = ![n 0, n 1] := by
+    ext i
+    fin_cases i <;> rfl
+  rw [hm, hn]
+  simp only [swap_contravariant_eval]
+  have hswap :
+      (![n 0, n 1] : Fin 2 → (V →ₗ[R] R)) ∘ Equiv.swap (0 : Fin 2) 1 =
+        ![n 1, n 0] := by
+    ext i
+    fin_cases i <;> rfl
+  rw [hswap]
+  exact met.g_inv_symm (n 1) (n 0)
+
 theorem MetricDuality.g_add_left (met : MetricDuality R V) (X Y Z : V) :
     met.g (X + Y) Z = met.g X Z + met.g Y Z := by
   change met.g_tensor ![X + Y, Z] ![] = met.g_tensor ![X, Z] ![] + met.g_tensor ![Y, Z] ![]
@@ -170,6 +208,157 @@ theorem MetricDuality.sharp_smul (met : MetricDuality R V)
   change met.g (met.sharp (c • α)) Z = met.g (c • met.sharp α) Z
   rw [met.g_sharp, met.g_smul_left, met.g_sharp]
   simp [LinearMap.smul_apply, smul_eq_mul]
+
+/-- Build a covector from its components in the dual basis of `basis`.
+
+If `c i` are lower-index components, this is `∑ i c_i e^i`. -/
+noncomputable def MetricDuality.covectorFromComponentsInBasis
+    {ι : Type*} [Fintype ι] (basis : Module.Basis ι R V) :
+    (ι -> R) →ₗ[R] (V →ₗ[R] R) where
+  toFun c := ∑ i, c i • basis.coord i
+  map_add' c d := by
+    ext X
+    simp only [LinearMap.sum_apply, LinearMap.add_apply, Pi.add_apply,
+      LinearMap.smul_apply]
+    rw [← Finset.sum_add_distrib]
+    apply Finset.sum_congr rfl
+    intro i _
+    simp only [add_smul]
+  map_smul' a c := by
+    ext X
+    simp only [LinearMap.sum_apply, LinearMap.smul_apply, Pi.smul_apply]
+    rw [Finset.smul_sum]
+    apply Finset.sum_congr rfl
+    intro i _
+    simp only [smul_eq_mul, RingHom.id_apply]
+    ring
+
+@[simp] theorem MetricDuality.covectorFromComponentsInBasis_apply
+    {ι : Type*} [Fintype ι] (basis : Module.Basis ι R V)
+    (c : ι -> R) (X : V) :
+    MetricDuality.covectorFromComponentsInBasis basis c X =
+      ∑ i, c i * basis.coord i X := by
+  simp [MetricDuality.covectorFromComponentsInBasis, smul_eq_mul]
+
+/-- Raise lower covector components in a basis using the metric duality.
+
+This is the coordinate-free implementation of
+`c^i = g^{ij} c_j`: first rebuild the covector `c_j e^j`, then apply
+`sharp`, then read off the vector components in the same basis. -/
+noncomputable def MetricDuality.raiseCovectorComponentsInBasis
+    {ι : Type*} [Fintype ι] (met : MetricDuality R V)
+    (basis : Module.Basis ι R V) :
+    (ι -> R) →ₗ[R] (ι -> R) where
+  toFun c := fun i =>
+    basis.repr (met.sharp (MetricDuality.covectorFromComponentsInBasis basis c)) i
+  map_add' c d := by
+    ext i
+    simp only [Pi.add_apply]
+    rw [LinearMap.map_add, met.sharp_add, LinearEquiv.map_add]
+    rfl
+  map_smul' a c := by
+    ext i
+    simp only [Pi.smul_apply]
+    rw [LinearMap.map_smul, met.sharp_smul, LinearEquiv.map_smul]
+    rfl
+
+@[simp] theorem MetricDuality.raiseCovectorComponentsInBasis_apply
+    {ι : Type*} [Fintype ι] (met : MetricDuality R V)
+    (basis : Module.Basis ι R V) (c : ι -> R) (i : ι) :
+    met.raiseCovectorComponentsInBasis basis c i =
+      basis.repr (met.sharp (MetricDuality.covectorFromComponentsInBasis basis c)) i := by
+  rfl
+
+/-- Raising the metric-paired lower components of a vector recovers the vector's
+basis coefficients. This is the reusable algebra behind the Christoffel
+raising step `Γ_ijℓ -> Γ^k_ij`. -/
+theorem MetricDuality.raiseCovectorComponentsInBasis_metric_pairing
+    {ι : Type*} [Fintype ι] (met : MetricDuality R V)
+    (basis : Module.Basis ι R V) (X : V) (i : ι) :
+    met.raiseCovectorComponentsInBasis basis (fun j => met.g X (basis j)) i =
+      basis.repr X i := by
+  have hcov :
+      MetricDuality.covectorFromComponentsInBasis basis
+        (fun j => met.g X (basis j)) = met.flat X := by
+    calc
+      MetricDuality.covectorFromComponentsInBasis basis
+          (fun j => met.g X (basis j)) =
+          ∑ j, met.g X (basis j) • basis.coord j := rfl
+      _ = ∑ j, met.flat X (basis j) • basis.coord j := by rfl
+      _ = met.flat X := Module.Basis.sum_dual_apply_smul_coord basis (met.flat X)
+  simp only [MetricDuality.raiseCovectorComponentsInBasis_apply, hcov,
+    met.sharp_flat]
+
+/-- Coordinate expansion of metric raising:
+`c^i = g^{ij} c_j`.
+
+This keeps the abstract `sharp`-based definition usable for coordinate
+calculations where one needs to commute a time derivative through a fixed
+metric-raising map. -/
+theorem MetricDuality.raiseCovectorComponentsInBasis_apply_eq_sum_g_inv
+    {ι : Type*} [Fintype ι] (met : MetricDuality R V)
+    (basis : Module.Basis ι R V) (c : ι -> R) (i : ι) :
+    met.raiseCovectorComponentsInBasis basis c i =
+      ∑ j, met.g_inv ![] ![basis.coord i, basis.coord j] * c j := by
+  classical
+  let α : V →ₗ[R] R := MetricDuality.covectorFromComponentsInBasis basis c
+  have hflat : met.flat (met.sharp α) = α := by
+    ext Z
+    exact met.g_sharp α Z
+  have hcoord :
+      basis.repr (met.sharp α) i = met.g_inv ![] ![basis.coord i, α] := by
+    calc
+      basis.repr (met.sharp α) i = basis.coord i (met.sharp α) := rfl
+      _ = met.g_inv ![] ![basis.coord i, met.flat (met.sharp α)] := by
+        exact (met.inverse_eval' (met.sharp α) (basis.coord i)).symm
+      _ = met.g_inv ![] ![basis.coord i, α] := by
+        rw [hflat]
+  rw [MetricDuality.raiseCovectorComponentsInBasis_apply]
+  change basis.repr (met.sharp α) i =
+    ∑ j, met.g_inv ![] ![basis.coord i, basis.coord j] * c j
+  rw [hcoord]
+  have harg :
+      (![basis.coord i, α] : Fin 2 -> (V →ₗ[R] R)) =
+        Function.update
+          (![basis.coord i, (0 : V →ₗ[R] R)] : Fin 2 -> (V →ₗ[R] R)) 1 α := by
+    ext q
+    fin_cases q <;> simp [Function.update]
+  rw [harg]
+  change (met.g_inv ![])
+      (Function.update
+        (![basis.coord i, (0 : V →ₗ[R] R)] : Fin 2 -> (V →ₗ[R] R)) 1
+          (∑ j, c j • basis.coord j)) =
+    ∑ j, (met.g_inv ![]) ![basis.coord i, basis.coord j] * c j
+  rw [(met.g_inv ![]).map_update_sum (t := Finset.univ)
+    (g := fun j => c j • basis.coord j)
+    (m := (![basis.coord i, (0 : V →ₗ[R] R)] : Fin 2 -> (V →ₗ[R] R))) (i := 1)]
+  refine Finset.sum_congr rfl (fun j _ => ?_)
+  rw [(met.g_inv ![]).map_update_smul
+    (![basis.coord i, (0 : V →ₗ[R] R)] : Fin 2 -> (V →ₗ[R] R)) 1
+    (c j) (basis.coord j)]
+  rw [smul_eq_mul]
+  have hupdate :
+      Function.update
+        (![basis.coord i, (0 : V →ₗ[R] R)] : Fin 2 -> (V →ₗ[R] R)) 1
+          (basis.coord j) =
+        (![basis.coord i, basis.coord j] : Fin 2 -> (V →ₗ[R] R)) := by
+    ext q
+    fin_cases q <;> simp [Function.update]
+  rw [hupdate]
+  ring
+
+/-- Trace compatibility with metric adjoints.
+
+This is a separate bridge because `AbstractTrace` only knows about traces of
+endomorphisms and cyclicity inside `End(V)`, while metric adjoints pass through
+the metric duality between `V` and `V*`. The concrete finite-dimensional trace
+should satisfy this by the standard fact `tr(A) = tr(A†)`. -/
+class HasMetricAdjointTraceInvariant
+    (atr : AbstractTrace R V) (met : MetricDuality R V) : Prop where
+  trace_eq_of_metric_adjoint :
+    forall A B : V →ₗ[R] V,
+      (forall X Y, met.g (A X) Y = met.g X (B Y)) ->
+        atr.tr A = atr.tr B
 
 end MetricDefs
 
@@ -328,6 +517,125 @@ noncomputable def metric_trace (met : MetricDuality R V) (atr : AbstractTrace R 
     {r s : ℕ} (idx₁ : Fin (s + 2)) (idx₂ : Fin (s + 1))
     (T : TensorData R V r (s + 2)) : TensorData R V r s :=
   contract_general atr (0 : Fin (r + 1)) idx₂ (raise_index met atr idx₁ T)
+
+/-- Transport addition through an `Eq.mpr` cast of tensor arities. -/
+private lemma mpr_add_td {r₁ r₂ s₁ s₂ : ℕ} (hr : r₁ = r₂) (hs : s₁ = s₂)
+    (A B : TensorData R V r₁ s₁) :
+    (hr ▸ hs ▸ (A + B) : TensorData R V r₂ s₂) =
+    (hr ▸ hs ▸ A) + (hr ▸ hs ▸ B) := by
+  subst hr
+  subst hs
+  rfl
+
+/-- Transport scalar multiplication through an `Eq.mpr` cast of tensor arities. -/
+private lemma mpr_smul_td {r₁ r₂ s₁ s₂ : ℕ} (hr : r₁ = r₂) (hs : s₁ = s₂)
+    (c : R) (A : TensorData R V r₁ s₁) :
+    (hr ▸ hs ▸ (c • A) : TensorData R V r₂ s₂) =
+    c • (hr ▸ hs ▸ A) := by
+  subst hr
+  subst hs
+  rfl
+
+/-- Raising an index is additive in the tensor argument. -/
+theorem raise_index_add
+    (met : MetricDuality R V) (atr : AbstractTrace R V)
+    {r s : ℕ} (idx : Fin (s + 1))
+    (T₁ T₂ : TensorData R V r (s + 1)) :
+    raise_index met atr idx (T₁ + T₂) =
+    raise_index met atr idx T₁ + raise_index met atr idx T₂ := by
+  simp only [raise_index]
+  have h_tp : tensor_prod (r₁ := 2) (s₁ := 0) (r₂ := r) (s₂ := s + 1)
+      met.g_inv (T₁ + T₂) = tensor_prod met.g_inv T₁ + tensor_prod met.g_inv T₂ := by
+    ext vs αs
+    simp [tensor_prod_eval, MultilinearMap.add_apply, mul_add]
+  rw [h_tp, mpr_add_td, contract_general_add]
+
+/-- Raising an index commutes with scalar multiplication. -/
+theorem raise_index_smul
+    (met : MetricDuality R V) (atr : AbstractTrace R V)
+    {r s : ℕ} (idx : Fin (s + 1))
+    (c : R) (T : TensorData R V r (s + 1)) :
+    raise_index met atr idx (c • T) =
+    c • raise_index met atr idx T := by
+  simp only [raise_index]
+  have h_tp : tensor_prod (r₁ := 2) (s₁ := 0) (r₂ := r) (s₂ := s + 1)
+      met.g_inv (c • T) = c • tensor_prod met.g_inv T := by
+    ext vs αs
+    simp [tensor_prod_eval, MultilinearMap.smul_apply, smul_eq_mul, mul_left_comm]
+  rw [h_tp, mpr_smul_td, contract_general_smul]
+
+/-- Raising an index sends the zero tensor to zero. -/
+theorem raise_index_zero
+    (met : MetricDuality R V) (atr : AbstractTrace R V)
+    {r s : ℕ} (idx : Fin (s + 1)) :
+    raise_index met atr idx (0 : TensorData R V r (s + 1)) = 0 := by
+  rw [← zero_smul R (0 : TensorData R V r (s + 1)),
+    raise_index_smul]
+  simp
+
+/-- Raising an index commutes with negation. -/
+theorem raise_index_neg
+    (met : MetricDuality R V) (atr : AbstractTrace R V)
+    {r s : ℕ} (idx : Fin (s + 1))
+    (T : TensorData R V r (s + 1)) :
+    raise_index met atr idx (-T) = - raise_index met atr idx T := by
+  rw [← neg_one_smul R T, ← neg_one_smul R (raise_index met atr idx T)]
+  exact raise_index_smul met atr idx (-1 : R) T
+
+/-- Raising an index commutes with subtraction. -/
+theorem raise_index_sub
+    (met : MetricDuality R V) (atr : AbstractTrace R V)
+    {r s : ℕ} (idx : Fin (s + 1))
+    (T₁ T₂ : TensorData R V r (s + 1)) :
+    raise_index met atr idx (T₁ - T₂) =
+    raise_index met atr idx T₁ - raise_index met atr idx T₂ := by
+  rw [sub_eq_add_neg, sub_eq_add_neg, raise_index_add, raise_index_neg]
+
+/-- Metric trace is additive in the tensor argument. -/
+theorem metric_trace_add
+    (met : MetricDuality R V) (atr : AbstractTrace R V)
+    {r s : ℕ} (idx₁ : Fin (s + 2)) (idx₂ : Fin (s + 1))
+    (T₁ T₂ : TensorData R V r (s + 2)) :
+    metric_trace met atr idx₁ idx₂ (T₁ + T₂) =
+    metric_trace met atr idx₁ idx₂ T₁ + metric_trace met atr idx₁ idx₂ T₂ := by
+  simp only [metric_trace, raise_index_add, contract_general_add]
+
+/-- Metric trace commutes with scalar multiplication. -/
+theorem metric_trace_smul
+    (met : MetricDuality R V) (atr : AbstractTrace R V)
+    {r s : ℕ} (idx₁ : Fin (s + 2)) (idx₂ : Fin (s + 1))
+    (c : R) (T : TensorData R V r (s + 2)) :
+    metric_trace met atr idx₁ idx₂ (c • T) =
+    c • metric_trace met atr idx₁ idx₂ T := by
+  simp only [metric_trace, raise_index_smul, contract_general_smul]
+
+/-- Metric trace sends the zero tensor to zero. -/
+theorem metric_trace_zero
+    (met : MetricDuality R V) (atr : AbstractTrace R V)
+    {r s : ℕ} (idx₁ : Fin (s + 2)) (idx₂ : Fin (s + 1)) :
+    metric_trace met atr idx₁ idx₂ (0 : TensorData R V r (s + 2)) = 0 := by
+  rw [← zero_smul R (0 : TensorData R V r (s + 2)),
+    metric_trace_smul]
+  simp
+
+/-- Metric trace commutes with negation. -/
+theorem metric_trace_neg
+    (met : MetricDuality R V) (atr : AbstractTrace R V)
+    {r s : ℕ} (idx₁ : Fin (s + 2)) (idx₂ : Fin (s + 1))
+    (T : TensorData R V r (s + 2)) :
+    metric_trace met atr idx₁ idx₂ (-T) =
+    - metric_trace met atr idx₁ idx₂ T := by
+  rw [← neg_one_smul R T, ← neg_one_smul R (metric_trace met atr idx₁ idx₂ T)]
+  exact metric_trace_smul met atr idx₁ idx₂ (-1 : R) T
+
+/-- Metric trace commutes with subtraction. -/
+theorem metric_trace_sub
+    (met : MetricDuality R V) (atr : AbstractTrace R V)
+    {r s : ℕ} (idx₁ : Fin (s + 2)) (idx₂ : Fin (s + 1))
+    (T₁ T₂ : TensorData R V r (s + 2)) :
+    metric_trace met atr idx₁ idx₂ (T₁ - T₂) =
+    metric_trace met atr idx₁ idx₂ T₁ - metric_trace met atr idx₁ idx₂ T₂ := by
+  rw [sub_eq_add_neg, sub_eq_add_neg, metric_trace_add, metric_trace_neg]
 
 end IndexOps
 

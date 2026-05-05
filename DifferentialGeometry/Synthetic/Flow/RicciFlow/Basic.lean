@@ -17,7 +17,138 @@ set_option linter.style.emptyLine false
 `IsRicciFlow`, `Rm_tensor` (1,3), and `ricciForm_tensor` (0,2).
 -/
 
+open BigOperators
 open SyntheticTensor
+
+-- ============================================================
+-- Inverse metric variation
+-- ============================================================
+
+section InverseMetricVariation
+
+variable {R V Time : Type*} {A : Type*}
+variable [CommRing R] [AddCommGroup V] [Module R V]
+variable [CommRing A] [Algebra R A]
+
+/-- Inverse metric variation form: `partial_t(g_inv)`.
+
+This is the contravariant partner of `metric_var_form`. The key geometric
+identity is not definitional: it comes from differentiating
+`g_inv(s) * g(s) = id` and using the time product rule. See
+`InverseMetricProductRule` and
+`inverse_metric_var_form_flat_eq_neg_metric_var`. -/
+noncomputable def inverse_metric_var_form
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
+    (g_fam : Time → MetricDuality R V)
+    (h_ginv : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_inv vs αs))
+    (t : Time) : TensorData R V 2 0 :=
+  dt_tensor td t (fun s => (g_fam s).g_inv) h_ginv
+
+/-- Product-rule consequence of differentiating the inverse identity.
+
+In coordinates this is exactly
+`partial_t(g^{ik} g_{kj}) = 0`, hence
+`(partial_t g^{ik}) g_{kj} + g^{ik} (partial_t g_{kj}) = 0`.
+After pairing both free indices with vectors `X` and `Y`, it becomes
+`(partial_t g_inv)(flat X, flat Y) + (partial_t g)(X,Y) = 0`.
+
+Concrete coordinate realizations should prove this from the scalar product rule
+and the inverse identity; downstream Ricci-flow arguments should consume this
+named property rather than introducing a second realized inverse metric. -/
+def InverseMetricProductRule
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
+    (g_fam : Time → MetricDuality R V)
+    (h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs))
+    (h_ginv : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_inv vs αs))
+    : Prop :=
+  ∀ t X Y,
+    inverse_metric_var_form td g_fam h_ginv t ![] ![(g_fam t).flat X, (g_fam t).flat Y] +
+      metric_var_form td g_fam h_met t ![X, Y] ![] = 0
+
+/-- The inverse metric variation is the negative of the metric variation after
+lowering both free indices with the metric at the reference time.
+
+This is the abstract form of
+`partial_t g^{ij} = - g^{ia} g^{jb} partial_t g_ab`. -/
+theorem inverse_metric_var_form_flat_eq_neg_metric_var
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
+    (g_fam : Time → MetricDuality R V)
+    (h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs))
+    (h_ginv : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_inv vs αs))
+    (h_prod : InverseMetricProductRule td g_fam h_met h_ginv)
+    (t : Time) (X Y : V) :
+    inverse_metric_var_form td g_fam h_ginv t ![] ![(g_fam t).flat X, (g_fam t).flat Y] =
+      -metric_var_form td g_fam h_met t ![X, Y] ![] := by
+  have h := h_prod t X Y
+  exact eq_neg_of_add_eq_zero_left h
+
+/-- Coordinate constructor for `InverseMetricProductRule`.
+
+This is the finite-dimensional coordinate bridge for B: the only calculus input
+is `TimeDerivativeData.dt_apply_matrix_inverse_left`, i.e. the scalar theorem
+`partial_t A = - A (partial_t B) A` for inverse coordinate matrices. The
+remaining hypotheses are evaluation bridges saying that the chosen coordinate
+arrays reconstruct the synthetic metric and inverse-metric variations. -/
+theorem inverseMetricProductRule_of_matrix_inverse_components
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
+    (g_fam : Time -> MetricDuality R V)
+    (h_met : forall vs covs, td.isSmoothFam (fun s => (g_fam s).g_tensor vs covs))
+    (h_ginv : forall vs covs, td.isSmoothFam (fun s => (g_fam s).g_inv vs covs))
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (gInvComp gComp : Time -> ι -> ι -> R)
+    (leftCoord rightCoord : Time -> V -> ι -> R)
+    (h_gInvComp_smooth : forall i j, td.isSmoothFam (fun s => gInvComp s i j))
+    (h_gComp_smooth : forall i j, td.isSmoothFam (fun s => gComp s i j))
+    (h_left_inv : forall s i j,
+      (∑ k : ι, gInvComp s i k * gComp s k j) = if i = j then 1 else 0)
+    (h_right_inv : forall s i j,
+      (∑ k : ι, gComp s i k * gInvComp s k j) = if i = j then 1 else 0)
+    (h_inv_eval : forall t X Y,
+      inverse_metric_var_form td g_fam h_ginv t ![] ![(g_fam t).flat X, (g_fam t).flat Y] =
+        ∑ i : ι, ∑ j : ι,
+          leftCoord t X i * td.dt_apply (fun s => gInvComp s i j) t *
+            rightCoord t Y j)
+    (h_metric_eval : forall t X Y,
+      metric_var_form td g_fam h_met t ![X, Y] ![] =
+        ∑ i : ι, ∑ j : ι,
+          leftCoord t X i *
+            (∑ b : ι, ∑ a : ι,
+              gInvComp t i a * td.dt_apply (fun s => gComp s a b) t *
+                gInvComp t b j) *
+            rightCoord t Y j) :
+    InverseMetricProductRule td g_fam h_met h_ginv := by
+  intro t X Y
+  rw [h_inv_eval t X Y, h_metric_eval t X Y]
+  have hentry : forall i j,
+      td.dt_apply (fun s => gInvComp s i j) t =
+        -∑ b : ι, ∑ a : ι,
+          gInvComp t i a * td.dt_apply (fun s => gComp s a b) t *
+            gInvComp t b j := by
+    intro i j
+    exact td.dt_apply_matrix_inverse_left gInvComp gComp h_gInvComp_smooth
+      h_gComp_smooth h_left_inv h_right_inv i j t
+  have hsum :
+      (∑ i : ι, ∑ j : ι,
+          leftCoord t X i * td.dt_apply (fun s => gInvComp s i j) t *
+            rightCoord t Y j) =
+        -∑ i : ι, ∑ j : ι,
+          leftCoord t X i *
+            (∑ b : ι, ∑ a : ι,
+              gInvComp t i a * td.dt_apply (fun s => gComp s a b) t *
+                gInvComp t b j) *
+            rightCoord t Y j := by
+    rw [← Finset.sum_neg_distrib]
+    apply Finset.sum_congr rfl
+    intro i _
+    rw [← Finset.sum_neg_distrib]
+    apply Finset.sum_congr rfl
+    intro j _
+    rw [hentry i j]
+    ring
+  rw [hsum]
+  ring
+
+end InverseMetricVariation
 
 -- ============================================================
 -- Rm_tensor: the Riemann curvature as a (1,3) tensor
@@ -137,7 +268,7 @@ noncomputable def ricciForm_tensor
       unfold Rc
       rw [show RcEndo emb conn ha hal hsl hl (v₁ + v₂) (vs 1) =
           RcEndo emb conn ha hal hsl hl v₁ (vs 1) + RcEndo emb conn ha hal hsl hl v₂ (vs 1) from
-        LinearMap.ext (fun Y => Rm_add_Y emb conn ha hal Y v₁ v₂ (vs 1))]
+        LinearMap.ext (fun Y => Rm_add_X emb conn ha hal v₁ v₂ Y (vs 1))]
       exact map_add atr.tr _ _
     · -- Rc(X, v₁ + v₂) = Rc(X, v₁) + Rc(X, v₂)
       simp only [Fin.mk_one, Fin.isValue, ne_eq, zero_ne_one, not_false_eq_true, Function.update_of_ne, Function.update_self, Function.const_apply]
@@ -155,7 +286,7 @@ noncomputable def ricciForm_tensor
       unfold Rc
       rw [show RcEndo emb conn ha hal hsl hl (c • v) (vs 1) =
           c • RcEndo emb conn ha hal hsl hl v (vs 1) from
-        LinearMap.ext (fun Y => Rm_smul_Y emb conn hal hsl hl c Y v (vs 1))]
+        LinearMap.ext (fun Y => Rm_smul_X emb conn hal hsl hl c v Y (vs 1))]
       rw [atr.tr.map_smul, smul_eq_mul]
     · simp only [Function.update]
       change Rc emb conn ha hal hsl hl atr (vs 0) (c • v) =
@@ -243,6 +374,36 @@ theorem IsRicciFlow.evolution
     (t : Time) : metric_var_form td g_fam h_met t =
     (-2 : R) • ricciForm_tensor emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr :=
   h.2 t
+
+/-- Along Ricci flow, differentiating the inverse identity gives
+`partial_t g^{-1} = 2 Ric` after both free contravariant slots are paired
+with the metric at the reference time.
+
+The hypothesis `h_prod` is the product-rule calculation for
+`partial_t(g^{-1} g) = 0`; see `InverseMetricProductRule`. -/
+theorem IsRicciFlow.inverse_metric_variation
+    {emb : DerivationEmbedding k R V}
+    {td : TimeDerivativeData R A Time} [TimeRegularFam td]
+    {atr : AbstractTrace R V}
+    {g_fam : Time → MetricDuality R V}
+    {h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs)}
+    {h_ginv : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_inv vs αs)}
+    {conn_fam : Time → V → V → V}
+    {ha_fam hal_fam hsl_fam hl_fam}
+    (h : IsRicciFlow emb td atr g_fam h_met conn_fam ha_fam hal_fam hsl_fam hl_fam)
+    (h_prod : InverseMetricProductRule td g_fam h_met h_ginv)
+    (t : Time) (X Y : V) :
+    inverse_metric_var_form td g_fam h_ginv t ![] ![(g_fam t).flat X, (g_fam t).flat Y] =
+      2 * ricciForm_tensor emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr ![X, Y] ![] := by
+  rw [inverse_metric_var_form_flat_eq_neg_metric_var td g_fam h_met h_ginv h_prod t X Y]
+  have h_rf_eq := congr_arg (fun T => T ![X, Y] ![]) (h.evolution t)
+  have h_eval :
+      metric_var_form td g_fam h_met t ![X, Y] ![] =
+        ((-2 : R) • ricciForm_tensor emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr) ![X, Y] ![] :=
+    h_rf_eq
+  rw [h_eval]
+  simp only [MultilinearMap.smul_apply, smul_eq_mul]
+  ring
 
 /-- Extract metric compatibility from IsRicciFlow. -/
 theorem IsRicciFlow.metric_compat

@@ -2,6 +2,7 @@ import DifferentialGeometry.Synthetic.Realization.Connection
 import DifferentialGeometry.Synthetic.Realization.Metric
 import DifferentialGeometry.Synthetic.Geometry.Connection
 import DifferentialGeometry.Synthetic.Geometry.ConnectionExtended
+import DifferentialGeometry.ForMathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.LeviCivita
 
 /-!
 # Realization: Levi-Civita (Metric Compatibility and Torsion-Free)
@@ -19,8 +20,10 @@ Combined with the torsion-free result from `Connection.lean`, this gives `IsLevi
 ## Main definitions
 
 * `concreteMetricDuality` : assembles the full `MetricDuality` from `Metric.lean` components
-* `IsMetricCompatibleMathlib` : Mathlib-level metric compatibility predicate
-* `concreteMetricCompat` : Mathlib metric compat implies Synthetic `IsMetricCompatible`
+* `metricPairingSmooth` : the smooth function `x ↦ g_x(X_x,Y_x)`
+* `metricCompatibilityDefect` : the `g`-parameterized compatibility defect
+* `IsMetricCompatibleWithMetric` : vanishing of that defect
+* `concreteMetricCompat` : explicit metric compat implies Synthetic `IsMetricCompatible`
 * `concreteIsLeviCivita` : combines metric compat + torsion-free into `IsLeviCivita`
 
 ## Strategy
@@ -33,8 +36,32 @@ The Synthetic `IsMetricCompatible emb conn met` says:
 The LHS is the directional derivative of `g(Y,Z)` along X.
 The RHS is `g(nabla_X Y, Z) + g(Y, nabla_X Z)`.
 
-The Mathlib-level hypothesis `IsMetricCompatibleMathlib` asserts exactly the
+The realization-level hypothesis `IsMetricCompatibleWithMetric` asserts exactly the
 pointwise identity that connects these.
+
+## Relation to the ForMathlib metric-connection API
+
+`DifferentialGeometry.ForMathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Metric`
+packages metric compatibility as `CovariantDerivative.compatibilityTensor = 0`,
+using an `InnerProductSpace` instance on each fiber. This realization file keeps
+the metric explicit as a `Bundle.ContMDiffRiemannianMetric g`. That avoids
+choosing global ownership of the tangent-fiber inner-product instances in the
+synthetic layer.
+
+The intended bridge is:
+
+* if a `CovariantDerivative` is constructed using the same fiber
+  norm/module/topology instance package as ForMathlib's metric-connection API,
+  and the ForMathlib fiber `inner` is proved pointwise equal to `g.inner`, then
+  the product-rule theorem behind `CovariantDerivative.IsCompatible` should
+  discharge `IsMetricCompatibleWithMetric`;
+* after that, `concreteMetricCompat` and `concreteIsLeviCivita` are the
+  synthetic-facing entry points.
+
+We do not install the `RiemannianBundle` induced by `g` globally in this file:
+doing so also introduces fiber `NormedAddCommGroup`/module/topology instances,
+which can make a previously constructed `CovariantDerivative` live over a
+definitionally different bundle instance package.
 -/
 
 noncomputable section
@@ -86,46 +113,136 @@ theorem concreteMetricDuality_g_eval
     (concreteMetricDuality I M g).g X Y x = g.inner x (X x) (Y x) := by
   simp [concreteMetricDuality, MetricDuality.g, concreteGTensor_eval_pt]
 
-/-! ### Mathlib-level metric compatibility -/
+/-! ### Metric compatibility, parameterized by an explicit Riemannian metric -/
 
-/-- Mathlib-level metric compatibility for a `CovariantDerivative` and a Riemannian metric.
+/-- The smooth function `x ↦ g_x(X_x,Y_x)`.
 
-This states that the directional derivative of the inner product decomposes via the
-connection: for all smooth sections X, Y, Z and all points x,
+This packages the metric pairing once, so compatibility predicates do not need
+to carry an inline smoothness proof for every pair of sections. -/
+noncomputable def metricPairingSmooth
+    (g : Bundle.ContMDiffRiemannianMetric I ω E (TangentSpace I : M → Type _))
+    (X Y : V_ I M) : R_ I M :=
+  (concreteMetricDuality I M g).g X Y
 
-```
-  vectorFieldAction X (met.g Y Z) x = g.inner x (cov Y x (X x)) (Z x)
-                                     + g.inner x (Y x) (cov Z x (X x))
-```
+/-- Pointwise evaluation of `metricPairingSmooth`. -/
+theorem metricPairingSmooth_apply
+    (g : Bundle.ContMDiffRiemannianMetric I ω E (TangentSpace I : M → Type _))
+    (X Y : V_ I M) (x : M) :
+    metricPairingSmooth I M g X Y x = g.inner x (X x) (Y x) :=
+  concreteMetricDuality_g_eval I M g X Y x
 
-The LHS is `extDerivFun (fun y => g.inner y (Y y) (Z y)) x (X x)`, i.e., the
-directional derivative of the smooth function `y mapsto g_y(Y_y, Z_y)` along X. -/
+/-- The smooth metric-compatibility defect of a covariant derivative:
+
+`X(g(Y,Z)) - (g(∇_X Y,Z) + g(Y,∇_X Z))`.
+
+This is the realization-layer analogue of a metric-compatibility tensor, but it
+is parameterized by an explicit `ContMDiffRiemannianMetric g`. It therefore
+does not force the tangent bundle's module/norm structure to be owned by an
+`InnerProductSpace` instance. -/
+noncomputable def metricCompatibilityDefect
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    [ContMDiffCovariantDerivative cov ∞]
+    (g : Bundle.ContMDiffRiemannianMetric I ω E (TangentSpace I : M → Type _))
+    (X Y Z : V_ I M) : R_ I M :=
+  vectorFieldActionSmooth I M X (metricPairingSmooth I M g Y Z) -
+    (metricPairingSmooth I M g (concreteConn I M cov X Y) Z +
+      metricPairingSmooth I M g Y (concreteConn I M cov X Z))
+
+/-- Pointwise evaluation of `metricCompatibilityDefect`.
+
+This is the explicit-`g` analogue of ForMathlib's
+`CovariantDerivative.compatibilityTensor_apply`: it exposes the product-rule
+defect
+`X(g(Y,Z)) - g(∇_X Y,Z) - g(Y,∇_X Z)` at a point. -/
+theorem metricCompatibilityDefect_apply
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    [ContMDiffCovariantDerivative cov ∞]
+    (g : Bundle.ContMDiffRiemannianMetric I ω E (TangentSpace I : M → Type _))
+    (X Y Z : V_ I M) (x : M) :
+    metricCompatibilityDefect I M cov g X Y Z x =
+      vectorFieldAction I M X (metricPairingSmooth I M g Y Z) x -
+        (g.inner x (cov Y x (X x)) (Z x) +
+          g.inner x (Y x) (cov Z x (X x))) := by
+  simp [metricCompatibilityDefect, metricPairingSmooth, vectorFieldActionSmooth,
+    concreteConn_apply, concreteMetricDuality_g_eval]
+
+/-- Metric compatibility of a `CovariantDerivative` with an explicit
+`ContMDiffRiemannianMetric`.
+
+This is the preferred realization-layer API. It is deliberately `g`-parameterized
+instead of using the `InnerProductSpace` typeclass on tangent fibers. -/
+def IsMetricCompatibleWithMetric
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    [ContMDiffCovariantDerivative cov ∞]
+    (g : Bundle.ContMDiffRiemannianMetric I ω E (TangentSpace I : M → Type _)) : Prop :=
+  ∀ X Y Z : V_ I M, metricCompatibilityDefect I M cov g X Y Z = 0
+
+/-- Pointwise product-rule form of `IsMetricCompatibleWithMetric`. -/
+theorem IsMetricCompatibleWithMetric.apply
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    [ContMDiffCovariantDerivative cov ∞]
+    (g : Bundle.ContMDiffRiemannianMetric I ω E (TangentSpace I : M → Type _))
+    (h_mc : IsMetricCompatibleWithMetric I M cov g)
+    (X Y Z : V_ I M) (x : M) :
+    vectorFieldAction I M X (metricPairingSmooth I M g Y Z) x =
+      g.inner x (cov Y x (X x)) (Z x) + g.inner x (Y x) (cov Z x (X x)) := by
+  have hzero := congrArg (fun f : R_ I M => f x) (h_mc X Y Z)
+  have hsub :
+      vectorFieldAction I M X (metricPairingSmooth I M g Y Z) x -
+        (g.inner x (cov Y x (X x)) (Z x) +
+          g.inner x (Y x) (cov Z x (X x))) = 0 := by
+    simpa [metricCompatibilityDefect, metricPairingSmooth, vectorFieldActionSmooth,
+      concreteConn_apply, concreteMetricDuality_g_eval] using hzero
+  exact sub_eq_zero.mp hsub
+
+/-- Backwards-compatible name for the old realization metric-compatibility
+predicate. New code should use `IsMetricCompatibleWithMetric`. -/
 def IsMetricCompatibleMathlib
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    [ContMDiffCovariantDerivative cov ∞]
     (g : Bundle.ContMDiffRiemannianMetric I ω E (TangentSpace I : M → Type _)) : Prop :=
-  ∀ (X Y Z : V_ I M) (x : M),
-    vectorFieldAction I M X
-      ⟨fun y => g.inner y (Y y) (Z y), by
-        intro x₀
-        have hg : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
-            (fun x => (⟨x, g.inner x⟩ :
-              TotalSpace (E →L[ℝ] E →L[ℝ] ℝ)
-                (fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ))) :=
-          g.contMDiff.of_le le_top
-        have hgX : ContMDiffAt I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) ∞
-            (fun x => (⟨x, g.inner x (Y x)⟩ :
-              TotalSpace (E →L[ℝ] ℝ)
-                (fun y : M => TangentSpace I y →L[ℝ] ℝ))) x₀ :=
-          ContMDiffAt.clm_bundle_apply hg.contMDiffAt Y.contMDiff.contMDiffAt
-        have hgXY : ContMDiffAt I (I.prod 𝓘(ℝ, ℝ)) ∞
-            (fun x => (⟨x, g.inner x (Y x) (Z x)⟩ :
-              TotalSpace ℝ (fun _ : M => ℝ))) x₀ :=
-          ContMDiffAt.clm_bundle_apply hgX Z.contMDiff.contMDiffAt
-        simp only [contMDiffAt_totalSpace] at hgXY
-        exact hgXY.2⟩ x =
-      g.inner x (cov Y x (X x)) (Z x) + g.inner x (Y x) (cov Z x (X x))
+  IsMetricCompatibleWithMetric I M cov g
 
-/-- If the Mathlib-level metric compatibility holds, then the Synthetic layer's
+/-- Pointwise product-rule form of the backwards-compatible predicate. -/
+theorem IsMetricCompatibleMathlib.apply
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    [ContMDiffCovariantDerivative cov ∞]
+    (g : Bundle.ContMDiffRiemannianMetric I ω E (TangentSpace I : M → Type _))
+    (h_mc : IsMetricCompatibleMathlib I M cov g)
+    (X Y Z : V_ I M) (x : M) :
+    vectorFieldAction I M X (metricPairingSmooth I M g Y Z) x =
+      g.inner x (cov Y x (X x)) (Z x) + g.inner x (Y x) (cov Z x (X x)) :=
+  IsMetricCompatibleWithMetric.apply I M cov g h_mc X Y Z x
+
+/-! ### Bridge note for ForMathlib's `CovariantDerivative.IsCompatible` -/
+
+/-- If one locally installs the `RiemannianBundle` induced by `g`, the fiber
+inner product selected by typeclass inference is the explicit metric field
+`g.inner`.
+
+This is the agreement fact behind the intended bridge to ForMathlib's
+`CovariantDerivative.IsCompatible`. The full bridge cannot be stated for an
+already constructed `cov : CovariantDerivative I E (TangentSpace I)` without
+also controlling the whole tangent-fiber norm/module/topology instance package:
+installing `RiemannianBundle` locally changes those inferred instances too. -/
+theorem metricInner_eq_g_inner_of_local_riemannianBundle
+    (g : Bundle.ContMDiffRiemannianMetric I ω E (TangentSpace I : M → Type _))
+    (x : M) (v w : TangentSpace I x) :
+    (letI : RiemannianBundle (TangentSpace I : M → Type _) := ⟨g.toRiemannianMetric⟩;
+      inner ℝ v w) = g.inner x v w := by
+  rfl
+
+/-! The following theorem upgrades the explicit metric-compatibility predicate to
+the synthetic `IsMetricCompatible` structure. -/
+
+/-!
+Historical note: this file used to expose only a pointwise predicate named
+`IsMetricCompatibleMathlib`, with an inline smoothness proof for the metric
+pairing in the predicate body. The `metricCompatibilityDefect` API above is the
+same mathematical content packaged as a smooth function.
+-/
+
+/-- If explicit metric compatibility holds, then the Synthetic layer's
 `IsMetricCompatible` condition holds.
 
 The proof is pointwise: at each `x : M`, the Synthetic `IsMetricCompatible` identity
@@ -137,33 +254,16 @@ theorem concreteMetricCompat
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [ContMDiffCovariantDerivative cov ∞]
     (g : Bundle.ContMDiffRiemannianMetric I ω E (TangentSpace I : M → Type _))
-    (h_mc : IsMetricCompatibleMathlib I M cov g) :
+    (h_mc : IsMetricCompatibleWithMetric I M cov g) :
     IsMetricCompatible (concreteDerivationEmbedding I M)
       (concreteConn I M cov) (concreteMetricDuality I M g) := by
   intro X Y Z
   apply ContMDiffMap.ext; intro x
-  -- Unfold both sides to pointwise expressions
-  -- LHS: ((concreteDerivationEmbedding I M).embed X) ((concreteMetricDuality I M g).g Y Z) x
-  -- = (embedLinearMap I M X) ((concreteMetricDuality I M g).g Y Z) x
-  -- = (embedDeriv I M X) ((concreteMetricDuality I M g).g Y Z) x
-  -- = (vectorFieldActionSmooth I M X ((concreteMetricDuality I M g).g Y Z)) x
-  -- = vectorFieldAction I M X ((concreteMetricDuality I M g).g Y Z) x
-  -- The key is that (concreteMetricDuality I M g).g Y Z is the smooth function
-  -- whose underlying function is fun y => g.inner y (Y y) (Z y)
-  -- RHS: ((concreteMetricDuality I M g).g (concreteConn I M cov X Y) Z
-  --      + (concreteMetricDuality I M g).g Y (concreteConn I M cov X Z)) x
-  -- = g.inner x (concreteConn I M cov X Y x) (Z x)
-  --   + g.inner x (Y x) (concreteConn I M cov X Z x)
-  -- = g.inner x (cov Y x (X x)) (Z x) + g.inner x (Y x) (cov Z x (X x))
-
-  -- The LHS unfolds to vectorFieldAction applied to met.g Y Z
-  -- met.g Y Z is a ContMDiffMap whose underlying function matches the one in IsMetricCompatibleMathlib
   have h_lhs : ((concreteDerivationEmbedding I M).embed X
       ((concreteMetricDuality I M g).g Y Z)) x =
-      vectorFieldAction I M X ((concreteMetricDuality I M g).g Y Z) x := by
+      vectorFieldAction I M X (metricPairingSmooth I M g Y Z) x := by
     rfl
   rw [h_lhs]
-  -- The RHS unfolds using concreteMetricDuality_g_eval and concreteConn_apply
   have h_rhs : ((concreteMetricDuality I M g).g (concreteConn I M cov X Y) Z +
       (concreteMetricDuality I M g).g Y (concreteConn I M cov X Z)) x =
       g.inner x (cov Y x (X x)) (Z x) + g.inner x (Y x) (cov Z x (X x)) := by
@@ -171,24 +271,7 @@ theorem concreteMetricCompat
     rw [concreteMetricDuality_g_eval, concreteMetricDuality_g_eval,
         concreteConn_apply, concreteConn_apply]
   rw [h_rhs]
-  -- Now need: vectorFieldAction I M X ((concreteMetricDuality I M g).g Y Z) x = RHS
-  -- The key: (concreteMetricDuality I M g).g Y Z has the same underlying function as the
-  -- smooth function in the IsMetricCompatibleMathlib hypothesis
-  -- vectorFieldAction only depends on the underlying function (via extDerivFun)
-  have h_fn_eq : ((concreteMetricDuality I M g).g Y Z : M → ℝ) =
-      (fun y => g.inner y (Y y) (Z y)) := by
-    ext y; exact concreteMetricDuality_g_eval I M g Y Z y
-  -- vectorFieldAction uses extDerivFun which only depends on the underlying function
-  simp only [vectorFieldAction]
-  -- Now LHS is extDerivFun ((concreteMetricDuality I M g).g Y Z) x (X x)
-  -- and we need to show this equals the RHS.
-  -- Since the underlying functions are equal, extDerivFun gives the same result.
-  -- extDerivFun is defined using mfderiv, which depends only on the germ of the function.
-  -- Since the underlying functions are pointwise equal everywhere, they are equal.
-  have : ((concreteMetricDuality I M g).g Y Z : M → ℝ) =
-      (fun y => g.inner y (Y y) (Z y)) := h_fn_eq
-  rw [this]
-  exact h_mc X Y Z x
+  exact IsMetricCompatibleWithMetric.apply I M cov g h_mc X Y Z x
 
 /-- If the Mathlib `CovariantDerivative` is both metric-compatible and torsion-free,
 then the Synthetic `IsLeviCivita` condition holds.
@@ -199,14 +282,119 @@ theorem concreteIsLeviCivita
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [ContMDiffCovariantDerivative cov ∞]
     (g : Bundle.ContMDiffRiemannianMetric I ω E (TangentSpace I : M → Type _))
-    (h_mc : IsMetricCompatibleMathlib I M cov g)
+    (h_mc : IsMetricCompatibleWithMetric I M cov g)
     (h_tf : cov.torsion = 0) :
     IsLeviCivita (concreteDerivationEmbedding I M)
       (concreteConn I M cov) (concreteMetricDuality I M g) :=
   ⟨concreteMetricCompat I M cov g h_mc,
    concreteConn_torsion_free I M cov h_tf⟩
 
+/-- P1-facing name for the concrete Levi-Civita bridge.
+
+This is the entry point used by the contracted-Bianchi/Section 12 realization
+pipeline: a concrete `CovariantDerivative` whose explicit metric-compatibility
+defect vanishes and whose torsion is zero realizes the synthetic
+`IsLeviCivita` predicate for `concreteConn` and `concreteMetricDuality`.
+
+The theorem deliberately keeps the metric compatibility hypothesis in the
+explicit-`g` form `IsMetricCompatibleWithMetric`. A direct wrapper from the
+ForMathlib `CovariantDerivative.IsLeviCivitaConnection` API still needs an
+agreement theorem showing that the fiber `inner` selected by typeclass
+inference is the same instance package used to construct `cov`. -/
+theorem concreteLeviCivita_of_metricCompatible_torsionFree
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    [ContMDiffCovariantDerivative cov ∞]
+    (g : Bundle.ContMDiffRiemannianMetric I ω E (TangentSpace I : M → Type _))
+    (h_mc : IsMetricCompatibleWithMetric I M cov g)
+    (h_tf : cov.torsion = 0) :
+    IsLeviCivita (concreteDerivationEmbedding I M)
+      (concreteConn I M cov) (concreteMetricDuality I M g) :=
+  concreteIsLeviCivita I M cov g h_mc h_tf
+
 end LeviCivitaRealization
+
+section ForMathlibLeviCivitaBridge
+
+variable
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  {H : Type*} [TopologicalSpace H]
+  (I : ModelWithCorners ℝ E H)
+  (M : Type*) [EMetricSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [SigmaCompactSpace M] [T2Space M]
+  [RiemannianBundle (fun x : M => TangentSpace I x)]
+
+/-- Bridge from the ForMathlib PR-style metric-compatibility predicate to the
+explicit-metric predicate used by this realization file.
+
+The extra hypothesis `h_inner` is the only metric-choice agreement needed: it
+says the `RiemannianBundle` inner product selected by typeclass inference is
+the same pointwise pairing as the chosen `ContMDiffRiemannianMetric g`. -/
+theorem isMetricCompatibleWithMetric_of_forMathlib_isCompatibleConnection
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    [ContMDiffCovariantDerivative cov ∞]
+    (g : Bundle.ContMDiffRiemannianMetric I ω E (TangentSpace I : M → Type _))
+    (h_inner : ∀ x (v w : TangentSpace I x), g.inner x v w = inner ℝ v w)
+    (hcompat : cov.IsCompatibleConnection) :
+    IsMetricCompatibleWithMetric I M cov g := by
+  intro X Y Z
+  apply ContMDiffMap.ext
+  intro x
+  rw [metricCompatibilityDefect_apply]
+  have h := hcompat (X : ∀ x : M, TangentSpace I x)
+    (Y : ∀ x : M, TangentSpace I x)
+    (Z : ∀ x : M, TangentSpace I x) x
+  have hprod :
+      CovariantDerivative.product (I := I) (M := M)
+        (Y : ∀ x : M, TangentSpace I x) (Z : ∀ x : M, TangentSpace I x) =
+        fun y => g.inner y (Y y) (Z y) := by
+    funext y
+    simp only [CovariantDerivative.product]
+    exact (h_inner y (Y y) (Z y)).symm
+  have hprod_left :
+      CovariantDerivative.product (I := I) (M := M)
+        (fun y => cov Y y (X y)) (Z : ∀ x : M, TangentSpace I x) =
+        fun y => g.inner y (cov Y y (X y)) (Z y) := by
+    funext y
+    simp only [CovariantDerivative.product]
+    exact (h_inner y (cov Y y (X y)) (Z y)).symm
+  have hprod_right :
+      CovariantDerivative.product (I := I) (M := M)
+        (Y : ∀ x : M, TangentSpace I x) (fun y => cov Z y (X y)) =
+        fun y => g.inner y (Y y) (cov Z y (X y)) := by
+    funext y
+    simp only [CovariantDerivative.product]
+    exact (h_inner y (Y y) (cov Z y (X y))).symm
+  rw [hprod, hprod_left, hprod_right] at h
+  change vectorFieldAction I M X (metricPairingSmooth I M g Y Z) x -
+      (g.inner x (cov Y x (X x)) (Z x) +
+        g.inner x (Y x) (cov Z x (X x))) = 0
+  have hmetricfun :
+      (fun y => g.inner y (Y y) (Z y)) =
+        fun y => metricPairingSmooth I M g Y Z y := by
+    funext y
+    rw [metricPairingSmooth_apply]
+  rw [hmetricfun] at h
+  unfold vectorFieldAction
+  simpa [sub_eq_add_neg] using sub_eq_zero.mpr h
+
+/-- A PR-style metric-compatible, torsion-free concrete covariant derivative is
+synthetic Levi-Civita for the explicitly chosen metric `g`, once the chosen
+metric agrees with the `RiemannianBundle` inner product. -/
+theorem concreteLeviCivita_of_forMathlib_metricCompatible_torsionFree
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    [ContMDiffCovariantDerivative cov ∞]
+    (g : Bundle.ContMDiffRiemannianMetric I ω E (TangentSpace I : M → Type _))
+    (h_inner : ∀ x (v w : TangentSpace I x), g.inner x v w = inner ℝ v w)
+    (hcompat : cov.IsCompatibleConnection)
+    (h_tf : cov.torsion = 0) :
+    IsLeviCivita (concreteDerivationEmbedding I M)
+      (concreteConn I M cov) (concreteMetricDuality I M g) :=
+  concreteLeviCivita_of_metricCompatible_torsionFree I M cov g
+    (isMetricCompatibleWithMetric_of_forMathlib_isCompatibleConnection
+      I M cov g h_inner hcompat)
+    h_tf
+
+end ForMathlibLeviCivitaBridge
 
 -- ============================================================
 -- Koszul formula construction: instantiating Synthetic layer

@@ -239,6 +239,26 @@ lemma lieDeriv_correction_zero (DX : E →L[𝕜] E)
   dsimp[lieDeriv_correction]
   simp only [Finset.univ_eq_empty, Finset.sum_empty]
 
+/-!
+## (r,s) Lie derivative — DEAD CODE (commented out, no callers)
+
+The (r,s)-tensor Lie derivative chain below — `lieDeriv_tensorRSWithin`,
+`lieDeriv_tensorRS`, `mlieDeriv_tensorRSWithin`, `mlieDeriv_tensorRS` — has
+no callers anywhere in the codebase, and `mlieDeriv_tensorRSWithin` carries
+an unfilled smoothness obligation (`contMDiff_toFun := sorry`). Filling it
+would require:
+
+* combining smoothness of `T : TensorRSField` (via `T.contMDiff`),
+* smoothness of `X` (via `X.contMDiff`),
+* smoothness of `extChartAt` and its inverse,
+* smoothness of `fderivWithin` (used inside `lieDeriv_tensorRSWithin`),
+* smoothness of `tensorRSSpace_continuousLinearEquiv` (the bundle ↔ model
+  bridge as a CLE)
+
+— estimated ~150–200 lines. Commented out (rather than deleted) so the
+design intent is preserved and callers can reinstate when needed.
+
+```
 variable [CompleteSpace 𝕜]
 /-- Lie derivative of an (r,s) tensor field in a vector space within a set.
 This is the principal term; the full formula includes correction terms. -/
@@ -301,6 +321,8 @@ noncomputable def mlieDeriv_tensorRS (r s : ℕ) {m : WithTop ℕ∞}
   mlieDeriv_tensorRSWithin (n := n) r s X T univ uniqueMDiffOn_univ hmn
 
 end SmoothVectorFieldRSLieDeriv
+```
+-/
 
 end ManifoldLieDeriv
 

@@ -14,6 +14,7 @@ import DifferentialGeometry.Synthetic.Analysis.NablaTimeInteraction
 import DifferentialGeometry.Synthetic.Geometry.Connection
 import DifferentialGeometry.Synthetic.Geometry.ConnectionExtended
 import DifferentialGeometry.Synthetic.Geometry.Holonomy
+import DifferentialGeometry.Synthetic.Geometry.Riemannian.Basic
 
 -- Synthetic Operators
 import DifferentialGeometry.Synthetic.Operator.Bochner
@@ -46,6 +47,7 @@ import DifferentialGeometry.Synthetic.Flow.RicciFlow.Evolution.RiemannEvolution
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Calculus
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.Holonomy
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.DimensionThree.CurvatureAlgebra
+import DifferentialGeometry.Synthetic.Flow.RicciFlow.DimensionThree.RiemannFromRicci3D
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.DimensionThree.Pinching
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.DimensionThree.ImprovedPinching
 import DifferentialGeometry.Synthetic.Analysis.Parabolic.ScalarMaximumPrinciple

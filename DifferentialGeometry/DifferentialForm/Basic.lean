@@ -10,6 +10,7 @@ import DifferentialGeometry.Tensor.Alternating.Wedge
 import DifferentialGeometry.DifferentialForm.Defs
 import DifferentialGeometry.DifferentialForm.Congr
 import DifferentialGeometry.DifferentialForm.Rough
+import Mathlib.Analysis.Calculus.DifferentialForm.Basic
 import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
@@ -171,6 +172,15 @@ theorem _root_.ederiv_smul_const (a : E → ℝ) (e : E [⋀^Fin m]→L[ℝ] ℝ
   -- equals `(-1)^k • (fderiv a y (v k)) • e (k.removeNth v)`.
   simp only [ContinuousLinearMap.smulRight_apply, ContinuousAlternatingMap.smul_apply]
 
+/-- The local exterior derivative used in this project agrees with Mathlib's `extDeriv`. -/
+theorem _root_.ederiv_eq_extDeriv (ω : E → E [⋀^Fin n]→L[ℝ] F) (x : E) :
+    _root_.ederiv ω x = extDeriv ω x := by
+  change ContinuousAlternatingMap.uncurryFin (fderiv ℝ ω x) =
+    ContinuousAlternatingMap.alternatizeUncurryFin (fderiv ℝ ω x)
+  apply ContinuousAlternatingMap.toAlternatingMap_injective
+  rw [ContinuousAlternatingMap.toAlternatingMap_uncurryFin,
+    ContinuousAlternatingMap.toAlternatingMap_alternatizeUncurryFin]
+
 /-- Basis-expansion formula for the exterior derivative of a scalar-valued form.
 Given a basis `B` of `E`, every alternating `n`-form expands uniquely as
 `ω y = ∑_I ω_I(y) • elementaryCovector B.cDualBasis I`, where the sum ranges over
@@ -190,7 +200,54 @@ theorem _root_.ederiv_basis_expansion
       ∑ I : Fin n ↪o Fin d,
         fderiv ℝ (fun z => (elementaryCovectorBasis B).repr (ω z) I) y
           ∧₁ ContinuousAlternatingMap.elementaryCovector B.cDualBasis ↑I := by
-  sorry
+  let basisG := elementaryCovectorBasis (k := n) B
+  have hcoeff :
+      ∀ I : Fin n ↪o Fin d,
+        DifferentiableAt ℝ (fun z => basisG.repr (ω z) I) y := by
+    intro I
+    let coord : (E [⋀^Fin n]→L[ℝ] ℝ) →L[ℝ] ℝ :=
+      (ContinuousLinearMap.proj (R := ℝ) (φ := fun _ : Fin n ↪o Fin d => ℝ) I).comp
+        basisG.equivFunL.toContinuousLinearMap
+    have hcoord : DifferentiableAt ℝ (fun z => coord (ω z)) y :=
+      coord.differentiableAt.comp y hω
+    simpa [coord, Module.Basis.equivFunL_apply] using hcoord
+  have hω_expand :
+      ω = fun z => ∑ I : Fin n ↪o Fin d, basisG.repr (ω z) I • basisG I := by
+    funext z
+    exact (basisG.sum_repr (ω z)).symm
+  calc
+    _root_.ederiv ω y =
+        _root_.ederiv (fun z => ∑ I : Fin n ↪o Fin d,
+          basisG.repr (ω z) I • basisG I) y := by
+      exact congrArg (fun η => _root_.ederiv η y) hω_expand
+    _ = ∑ I : Fin n ↪o Fin d,
+        fderiv ℝ (fun z => basisG.repr (ω z) I) y
+          ∧₁ ContinuousAlternatingMap.elementaryCovector B.cDualBasis ↑I := by
+      have hsum_fun :
+          (fun z => ∑ I : Fin n ↪o Fin d, basisG.repr (ω z) I • basisG I) =
+            (∑ I : Fin n ↪o Fin d, fun z => basisG.repr (ω z) I • basisG I) := by
+        funext z
+        simp
+      rw [hsum_fun]
+      rw [_root_.ederiv_finset_sum
+        (s := Finset.univ)
+        (ω := fun I : Fin n ↪o Fin d => fun z => basisG.repr (ω z) I • basisG I)
+        (x := y)]
+      · refine Finset.sum_congr rfl fun I _ => ?_
+        have hderiv :
+            fderiv ℝ (fun z => basisG.repr (ω z) I • basisG I) y =
+              (fderiv ℝ (fun z => basisG.repr (ω z) I) y).smulRight (basisG I) :=
+          ((hcoeff I).hasFDerivAt.smul_const (basisG I)).fderiv
+        change
+          ContinuousAlternatingMap.uncurryFin
+              (fderiv ℝ (fun z => basisG.repr (ω z) I • basisG I) y) =
+            ContinuousAlternatingMap.covectorWedge
+              (fderiv ℝ (fun z => basisG.repr (ω z) I) y)
+              (ContinuousAlternatingMap.elementaryCovector B.cDualBasis ↑I)
+        rw [hderiv]
+        simp [basisG, ContinuousAlternatingMap.covectorWedge]
+      · intro I _
+        exact (hcoeff I).smul_const (basisG I)
 
 /-- Leibniz rule for the exterior derivative of a wedge of scalar-valued differential forms.
 This is the `f = mul ℝ ℝ` specialization of `ederiv_wedge`. The proof is via basis expansion
@@ -274,55 +331,46 @@ theorem ederiv_wedge_mul (ω : Ω^m⟮E, ℝ⟯) (τ : Ω^n⟮E, ℝ⟯) :
                   E [⋀^Fin (m + n + 1)]→L[ℝ] ℝ) :=
   ederiv_wedge ω τ (ContinuousLinearMap.mul ℝ ℝ)
 
-/- The graded Leibniz rule for the interior product of the wedge product -/
-theorem iprod_wedge (ω : Ω^(m + 1)⟮E, F⟯) (τ : Ω^(n + 1)⟮E, F'⟯) (f : F →L[ℝ] F' →L[ℝ] F'')
+/- The graded Leibniz rule for the interior product of the scalar wedge product. -/
+theorem iprod_wedge [FiniteDimensional ℝ E]
+    (ω : Ω^(m + 1)⟮E, ℝ⟯) (τ : Ω^(n + 1)⟮E, ℝ⟯)
     (v : E → E) (hv : ContDiff ℝ ⊤ v) :
-      iprod (DifferentialForm.domDomCongr Fin.finAddFlipAssoc (ω ∧[f] τ)) v hv = ((iprod ω v hv) ∧[f] τ)
-        + (-1 : ℝ)^(m + 1) • (DifferentialForm.domDomCongr Fin.finAddFlipAssoc (ω ∧[f] (iprod τ v hv))) := by
+      iprod (DifferentialForm.domDomCongr Fin.finAddFlipAssoc (ω ∧ τ)) v hv =
+        ((iprod ω v hv) ∧ τ)
+        + (-1 : ℝ)^(m + 1) •
+          (DifferentialForm.domDomCongr Fin.finAddFlipAssoc (ω ∧ (iprod τ v hv))) := by
   ext e x
-  erw[DifferentialForm.add_apply, ContinuousAlternatingMap.add_apply] -- FIXME
-  simp only [Nat.add_eq, iprod_apply, DifferentialForm.domDomCongr_apply, DifferentialForm.smul_apply, coe_smul]
-  sorry
+  simpa [iprod_apply, DifferentialForm.domDomCongr_apply, DifferentialForm.wedge,
+    ContinuousAlternatingMap.domDomCongr_apply, ContinuousAlternatingMap.smul_apply]
+    using congrArg (fun η : E [⋀^Fin (m + n + 1)]→L[ℝ] ℝ => η x)
+      (ContinuousAlternatingMap.iprod_wedge_product_mul (ω e) (τ e) (v e))
 
 namespace DifferentialForm
 
 /-- Pullback of a smooth differential form under a smooth map. -/
-noncomputable def pullback (f : E → F) (ω : Ω^k⟮F, G⟯) : Ω^k⟮E, G⟯ where
-  toFun := fun x ↦ (ω (f x)).compContinuousLinearMap (fderiv ℝ f x)
-  smooth := by sorry
+noncomputable def pullback (f : E → F) (ω : Ω^k⟮F, G⟯)
+    (h_smooth : ContDiff ℝ ⊤ (RoughDifferentialForm.pullback f ω.toFun)) : Ω^k⟮E, G⟯ where
+  toFun := RoughDifferentialForm.pullback f ω.toFun
+  smooth := h_smooth
 
 @[simp]
-theorem pullback_toFun (f : E → F) (ω : Ω^k⟮F, G⟯) :
-    (pullback f ω).toFun = RoughDifferentialForm.pullback f ω.toFun := rfl
+theorem pullback_toFun (f : E → F) (ω : Ω^k⟮F, G⟯)
+    (h_smooth : ContDiff ℝ ⊤ (RoughDifferentialForm.pullback f ω.toFun)) :
+    (pullback f ω h_smooth).toFun = RoughDifferentialForm.pullback f ω.toFun := rfl
 
 /- Exterior derivative commutes with pullback -/
-theorem pullback_ederiv (f : E → F) (ω : Ω^n⟮F, G⟯) {x : E} (hf : ContDiffAt ℝ 2 f x) :
-    pullback f (ederiv ω) x = ederiv (pullback f ω) x := by
-  /- ext v
-  rw[pullback, ederiv, ContinuousAlternatingMap.compContinuousLinearMap_apply,
-    uncurryFin_apply, ederiv, uncurryFin_apply]
-  apply Finset.sum_congr rfl
-  intro p q
-  refine Mathlib.Tactic.LinearCombination.smul_const_eq ?H.p ((-1) ^ (p : ℕ))
-  simp only [Function.comp_apply]
-  have hω_diff : DifferentiableAt ℝ ω.toFun (f x) := ω.differentiableAt (f x)
-  rw [← ContinuousLinearMap.comp_apply, ← fderiv_comp x hω_diff (hf.differentiableAt (by simp))]
-  simp +unfoldPartialApp only [pullback]
-  rw[fderiv_apply, fderiv_apply]
-  · simp only [Function.comp_apply, compContinuousLinearMap_apply]
-    refine DFunLike.congr ?H.p.h₁ rfl
-    have : p.removeNth (⇑(fderiv ℝ f x) ∘ v) = (fderiv ℝ f x) ∘ p.removeNth v :=
-    rfl
-    rw[this]
-    apply EventuallyEq.fderiv_eq
-    refine EventuallyEq.comp₂ (Eq.eventuallyEq rfl) DFunLike.coe ?h1
-    refine EventuallyEq.comp₂ ?h2 Function.comp (Eq.eventuallyEq rfl)
-    refine EventuallyEq.comp₂ (Eq.eventuallyEq rfl) (@DFunLike.coe (E →L[ℝ] F) E fun x ↦ F) ?h2.Hg
-  -- Differentiability conditions
-    sorry
-  · sorry
-  · exact DifferentiableAt.comp x hω_diff (hf.differentiableAt (by simp)) -/
-  sorry
+theorem pullback_ederiv (f : E → F) (ω : Ω^n⟮F, G⟯)
+    (h_pull : ContDiff ℝ ⊤ (RoughDifferentialForm.pullback f ω.toFun))
+    (h_ederiv_pull : ContDiff ℝ ⊤ (RoughDifferentialForm.pullback f (ederiv ω).toFun))
+    {x : E} (hf : ContDiffAt ℝ 2 f x) :
+    pullback f (ederiv ω) h_ederiv_pull x = ederiv (pullback f ω h_pull) x := by
+  have h := extDeriv_pullback
+    (𝕜 := ℝ) (ω := ω.toFun) (f := f) (x := x)
+    (hω := ω.differentiableAt (f x)) (hf := hf) (hr := by simp)
+  change (_root_.ederiv ω.toFun (f x)).compContinuousLinearMap (fderiv ℝ f x) =
+    _root_.ederiv (RoughDifferentialForm.pullback f ω.toFun) x
+  rw [_root_.ederiv_eq_extDeriv, _root_.ederiv_eq_extDeriv]
+  exact h.symm
 
 end DifferentialForm
 

@@ -128,6 +128,52 @@ theorem hamiltonCubicQ3_factorized [CommRing R] (l1 l2 l3 : R) :
     ricciEigenTraceCube3
   ring
 
+/-- The 3D Riemann-from-Ricci contraction against two diagonal Ricci tensors,
+written in Ricci eigenvalues. In an orthonormal Ricci eigenframe,
+`K₁₂ = (λ₁ + λ₂ - λ₃)/2`, etc., and the contraction is
+`2 * Σ Kᵢⱼ λᵢ λⱼ`. -/
+def ricciEigenRiemannReaction3 [CommRing R] (l1 l2 l3 : R) : R :=
+  l1 * l2 * (l1 + l2 - l3) +
+    l1 * l3 * (l1 + l3 - l2) +
+    l2 * l3 * (l2 + l3 - l1)
+
+/-- Cubic reaction relation produced by the 3D Riemann-from-Ricci formula in a
+Ricci eigenframe:
+`2 R * reaction = 2 |Ric|^4 - Q`.
+
+This is the scalar algebraic form of the P2 contraction needed by P3.3. The
+definition of `Q` used here is the same `hamiltonCubicQ3` whose Lemma 10.7
+factorization is proved by `hamiltonCubicQ3_factorized`. -/
+theorem ricciEigenRiemannReaction3_cubicQ_relation [CommRing R] (l1 l2 l3 : R) :
+    2 * ricciEigenScalar3 l1 l2 l3 * ricciEigenRiemannReaction3 l1 l2 l3 =
+      2 * ricciEigenNormSq3 l1 l2 l3 ^ 2 - hamiltonCubicQ3 l1 l2 l3 := by
+  unfold ricciEigenRiemannReaction3 hamiltonCubicQ3 ricciEigenScalar3 ricciEigenNormSq3
+    ricciEigenTraceCube3
+  ring
+
+/-- P3.3 scalar simplification in a Ricci eigenframe. The geometric content is
+that the Riemann/Ricci reaction has been identified with
+`ricciEigenRiemannReaction3`; the conclusion is the Hamilton trace-free
+reaction term. -/
+theorem hamilton3D_cubic_reaction_simplification_of_eigen_reaction
+    [Field R] (l1 l2 l3 nInv tracefreeNormSq : R)
+    (h_scalar_ne : ricciEigenScalar3 l1 l2 l3 ≠ 0)
+    (h_nInv : nInv = (1 : R) / 3)
+    (h_tracefree :
+      tracefreeNormSq =
+        ricciEigenNormSq3 l1 l2 l3 -
+          nInv * ricciEigenScalar3 l1 l2 l3 * ricciEigenScalar3 l1 l2 l3) :
+    4 * ricciEigenRiemannReaction3 l1 l2 l3 -
+        4 * nInv * ricciEigenScalar3 l1 l2 l3 * ricciEigenNormSq3 l1 l2 l3 =
+      (4 * ricciEigenNormSq3 l1 l2 l3 * tracefreeNormSq -
+          2 * hamiltonCubicQ3 l1 l2 l3) /
+        ricciEigenScalar3 l1 l2 l3 :=
+  hamilton3D_cubic_reaction_simplification nInv
+    (ricciEigenScalar3 l1 l2 l3) (ricciEigenNormSq3 l1 l2 l3)
+    tracefreeNormSq (hamiltonCubicQ3 l1 l2 l3)
+    (ricciEigenRiemannReaction3 l1 l2 l3) h_scalar_ne h_nInv h_tracefree
+    (ricciEigenRiemannReaction3_cubicQ_relation l1 l2 l3)
+
 /-- Hamilton's factorized `Q` after setting
 `l1 = z + b + a`, `l2 = z + b`, `l3 = z`. -/
 def hamiltonCubicQOrderedGaps3 [CommRing R] (a b z : R) : R :=
@@ -274,10 +320,10 @@ theorem hamiltonCubicQ3_lower_bound_ordered_nonnegative_eigenvalues
 
 end HamiltonCubicQEigenvalueAlgebra
 
-section HamiltonCubicQGeometricBridge
+section HamiltonCubicQGeometricDefinition
 
 variable {k R V : Type*}
-variable [Field k] [Field R] [Algebra k R]
+variable [Field k] [CommRing R] [Algebra k R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 
 /-- Hamilton's cubic reaction quantity `Q` in synthetic Ricci-tensor form. -/
@@ -294,6 +340,14 @@ noncomputable def hamiltonCubicQ
       ricci_norm_sq emb conn ha hal hsl hl atr met +
     4 * ScalarCurvature emb conn ha hal hsl hl atr met *
       ricci_trace_cube emb conn ha hal hsl hl atr met
+
+end HamiltonCubicQGeometricDefinition
+
+section HamiltonCubicQGeometricBridge
+
+variable {k R V : Type*}
+variable [Field k] [Field R] [Algebra k R]
+variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 
 /-- Exact obligations needed to realize the eigenvalue version of Hamilton's
 cubic `Q` from the synthetic Ricci tensor. The nontrivial future work is
