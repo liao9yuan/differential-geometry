@@ -68,7 +68,7 @@ theorem Rm_symm_blocks
     (met : MetricDuality R V)
     (h_mc : IsMetricCompatible emb conn met)
     (h_tf : IsTorsionFree emb conn)
-    (h2 : ∀ (a : R), 2 * a = 0 → a = 0)
+    [Invertible (2 : R)]
     (X Y Z W : V) :
     met.g (Rm emb conn X Y Z) W = met.g (Rm emb conn Z W X) Y := by
   have mb := metric_bianchi emb conn ha hal met h_tf
@@ -86,7 +86,7 @@ theorem Rm_symm_blocks
   rw [anti34 W X Y Z, anti34 X Y W Z] at b4
   suffices h : met.g (Rm emb conn X Y Z) W - met.g (Rm emb conn Z W X) Y = 0 from
     sub_eq_zero.mp h
-  apply h2
+  apply char_ne_2_of_invertible_two
   linear_combination b1 + b2 - b3 - b4
 
 end RmSymmBlocks
@@ -444,8 +444,7 @@ theorem koszul_connection_spec (emb : DerivationEmbedding k R V)
 /-- The Koszul connection is torsion-free. -/
 theorem koszul_torsion_free (emb : DerivationEmbedding k R V)
     (met : MetricDuality R V)
-    [Invertible (2 : R)]
-    (h2 : ∀ (a : R), (2 : R) * a = 0 → a = 0) :
+    [Invertible (2 : R)] :
     IsTorsionFree emb (koszul_connection emb met) := by
   intro X Y
   apply met.eq_of_forall_g_eq; intro Z
@@ -455,7 +454,7 @@ theorem koszul_torsion_free (emb : DerivationEmbedding k R V)
   suffices hsuff : met.g (koszul_connection emb met X Y) Z -
       met.g (koszul_connection emb met Y X) Z -
       met.g (bracket emb X Y) Z = 0 from sub_eq_zero.mp hsuff
-  apply h2
+  apply char_ne_2_of_invertible_two
   have spec1 := koszul_connection_spec emb met X Y Z
   have spec2 := koszul_connection_spec emb met Y X Z
   calc 2 * (met.g (koszul_connection emb met X Y) Z -
@@ -473,15 +472,14 @@ theorem koszul_torsion_free (emb : DerivationEmbedding k R V)
 /-- The Koszul connection is metric-compatible. -/
 theorem koszul_metric_compat (emb : DerivationEmbedding k R V)
     (met : MetricDuality R V)
-    [Invertible (2 : R)]
-    (h2 : ∀ (a : R), (2 : R) * a = 0 → a = 0) :
+    [Invertible (2 : R)] :
     IsMetricCompatible emb (koszul_connection emb met) met := by
   intro X Y Z
   suffices hsuff : (emb.embed X) (met.g Y Z) -
       (met.g (koszul_connection emb met X Y) Z +
        met.g Y (koszul_connection emb met X Z)) = 0 from
     eq_of_sub_eq_zero hsuff
-  apply h2
+  apply char_ne_2_of_invertible_two
   rw [met.g_symm Y (koszul_connection emb met X Z)]
   have spec1 := koszul_connection_spec emb met X Y Z
   have spec2 := koszul_connection_spec emb met X Z Y
@@ -500,11 +498,10 @@ theorem koszul_metric_compat (emb : DerivationEmbedding k R V)
 /-- Levi-Civita existence. -/
 theorem levi_civita_exists (emb : DerivationEmbedding k R V)
     (met : MetricDuality R V)
-    [Invertible (2 : R)]
-    (h2 : ∀ (a : R), (2 : R) * a = 0 → a = 0) :
+    [Invertible (2 : R)] :
     IsLeviCivita emb (koszul_connection emb met) met :=
-  ⟨koszul_metric_compat emb met h2,
-   koszul_torsion_free emb met h2⟩
+  ⟨koszul_metric_compat emb met,
+   koszul_torsion_free emb met⟩
 
 /-- Levi-Civita uniqueness. -/
 theorem levi_civita_unique (emb : DerivationEmbedding k R V)
@@ -514,14 +511,13 @@ theorem levi_civita_unique (emb : DerivationEmbedding k R V)
     (hl : ∀ X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
     (met : MetricDuality R V)
     [Invertible (2 : R)]
-    (h2 : ∀ (a : R), (2 : R) * a = 0 → a = 0)
     (h_mc : IsMetricCompatible emb conn met)
     (h_tf : IsTorsionFree emb conn) (X Y : V) :
     conn X Y = koszul_connection emb met X Y := by
   apply met.eq_of_forall_g_eq; intro Z
   suffices hsuff : met.g (conn X Y) Z - met.g (koszul_connection emb met X Y) Z = 0 from
     eq_of_sub_eq_zero hsuff
-  apply h2
+  apply char_ne_2_of_invertible_two
   have spec := koszul_connection_spec emb met X Y Z
   have koszul := levi_civita_uniqueness emb conn ha hal hl met h_mc h_tf X Y Z
   simp only [koszul_rhs] at spec
@@ -633,7 +629,6 @@ theorem koszul_connection_smul_left (emb : DerivationEmbedding k R V)
 /-- Leibniz rule: ∇_X (f • Y) = X(f) • Y + f • ∇_X Y. -/
 theorem koszul_connection_leibniz (emb : DerivationEmbedding k R V)
     (met : MetricDuality R V) [Invertible (2 : R)]
-    (h2 : ∀ (a : R), (2 : R) * a = 0 → a = 0)
     (X : V) (f : R) (Y : V) :
     koszul_connection emb met X (f • Y) =
     (emb.embed X) f • Y + f • koszul_connection emb met X Y := by
@@ -641,7 +636,7 @@ theorem koszul_connection_leibniz (emb : DerivationEmbedding k R V)
   suffices hsuff : met.g (koszul_connection emb met X (f • Y)) Z -
       met.g ((emb.embed X) f • Y + f • koszul_connection emb met X Y) Z = 0 from
     eq_of_sub_eq_zero hsuff
-  apply h2
+  apply char_ne_2_of_invertible_two
   rw [met.g_add_left ((emb.embed X) f • Y) (f • koszul_connection emb met X Y) Z,
       met.g_smul_left ((emb.embed X) f) Y Z,
       met.g_smul_left f (koszul_connection emb met X Y) Z]

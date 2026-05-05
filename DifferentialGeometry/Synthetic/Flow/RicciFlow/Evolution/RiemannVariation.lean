@@ -82,7 +82,7 @@ variable [CommRing A] [Algebra R A]
       used in the decomposition (`YZ`, `XZ`, constant `Z`). -/
 theorem riemann_variation_raw
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td] [TimeRegularFam2 td]
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ s, ∀ X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
     (_hal_fam : ∀ s, ∀ X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z)
@@ -96,24 +96,9 @@ theorem riemann_variation_raw
       td.isSmoothFam (fun τ => β (conn_fam τ U W)))
     (h_nested_smooth : ∀ (P U W : V) (β : V →ₗ[R] R),
       td.isSmoothFam (fun τ => β (conn_fam τ P (conn_fam τ U W))))
-    (h_nabla_T1τ : ∀ (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
-      td.isSmoothFam (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X
-        (vectorToData (R := R) (conn_fam τ Y Z)) vs αs))
-    (h_nabla_T1t : ∀ (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
-      td.isSmoothFam (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X
-        (vectorToData (R := R) (conn_fam t Y Z)) vs αs))
-    (h_nabla_T2τ : ∀ (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
-      td.isSmoothFam (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) Y
-        (vectorToData (R := R) (conn_fam τ X Z)) vs αs))
-    (h_nabla_T2t : ∀ (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
-      td.isSmoothFam (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) Y
-        (vectorToData (R := R) (conn_fam t X Z)) vs αs))
-    (h_nabla_T3τ : ∀ (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
-      td.isSmoothFam (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) (bracket emb X Y)
-        (vectorToData (R := R) Z) vs αs))
-    (h_nabla_T3t : ∀ (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
-      td.isSmoothFam (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) (bracket emb X Y)
-        (vectorToData (R := R) Z) vs αs)) :
+    (h_nested_joint_smooth : ∀ (P U W : V) (α : V →ₗ[R] R),
+      TimeRegularFam2.isSmoothFam2 (td := td)
+        (fun p : Time × Time => α (conn_fam p.2 P (conn_fam p.1 U W)))) :
     td.dt_apply (fun s => ω (Rm emb (conn_fam s) X Y Z)) t =
     nabla_tensor emb (conn_fam t) (ha_fam t) (hl_fam t) X
       (conn_var_vector td conn_fam t Y Z (h_conn_smooth Y Z)) ![] ![ω]
@@ -164,95 +149,88 @@ theorem riemann_variation_raw
         MultilinearMap.ofSubsingleton]
     rw [h_eq]
     exact h_emb_closure X (fun τ => (αs 0) (conn_fam τ Y Z)) (h_conn_smooth Y Z (αs 0))
-  have h_conn_v_var_1 : ∀ (i : Fin 0) (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
-      td.isSmoothFam (fun τ =>
-        (vectorToData (R := R) (conn_fam τ Y Z))
-          (Function.update vs i (conn_fam τ X (vs i))) αs) := fun i _ _ => i.elim0
-  have h_conn_c_var_1 : ∀ (j : Fin 1) (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
-      td.isSmoothFam (fun τ =>
-        (vectorToData (R := R) (conn_fam τ Y Z)) vs
-          (Function.update αs j
-            (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) := by
+  -- Vacuous (s = 0):
+  have h_2smooth_v_1 : ∀ (i : Fin 0)
+      (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
+      TimeRegularFam2.isSmoothFam2 (td := td)
+        (fun p : Time × Time =>
+          (vectorToData (R := R) (conn_fam p.1 Y Z))
+            (Function.update vs i (conn_fam p.2 X (vs i))) αs) :=
+    fun i _ _ => i.elim0
+  -- Non-vacuous (r = 1): unfold vectorToData + nabla_dual, show as sub of two 2-smooth pieces.
+  have h_2smooth_c_1 : ∀ (j : Fin 1)
+      (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
+      TimeRegularFam2.isSmoothFam2 (td := td)
+        (fun p : Time × Time =>
+          (vectorToData (R := R) (conn_fam p.1 Y Z)) vs
+            (Function.update αs j
+              (nabla_dual emb (conn_fam p.2) (ha_fam p.2) (hl_fam p.2) X (αs j)))) := by
     intro j vs αs
-    have hj : j = 0 := Subsingleton.elim _ _; subst hj
-    have h_eq : (fun τ => (vectorToData (R := R) (conn_fam τ Y Z)) vs
-        (Function.update αs 0
-          (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs 0)))) =
-        (fun τ => (emb.embed X) ((αs 0) (conn_fam τ Y Z)) -
-          (αs 0) (conn_fam τ X (conn_fam τ Y Z))) := by
-      funext τ
+    have hj : j = 0 := Subsingleton.elim _ _
+    subst hj
+    have h_eq : (fun p : Time × Time =>
+        (vectorToData (R := R) (conn_fam p.1 Y Z)) vs
+          (Function.update αs 0
+            (nabla_dual emb (conn_fam p.2) (ha_fam p.2) (hl_fam p.2) X (αs 0)))) =
+        (fun p : Time × Time =>
+          (emb.embed X) ((αs 0) (conn_fam p.1 Y Z)) -
+          (αs 0) (conn_fam p.2 X (conn_fam p.1 Y Z))) := by
+      funext p
       simp [vectorToData, evalLinear, MultilinearMap.constOfIsEmpty,
         MultilinearMap.ofSubsingleton, nabla_dual]
     rw [h_eq]
-    exact td.isSmoothFam_sub _ _
-      (h_emb_closure X (fun τ => (αs 0) (conn_fam τ Y Z)) (h_conn_smooth Y Z (αs 0)))
-      (h_nested_smooth X Y Z (αs 0))
-  have h_conn_v_at_1 : ∀ (i : Fin 0) (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
-      td.isSmoothFam (fun τ =>
-        (vectorToData (R := R) (conn_fam t Y Z))
-          (Function.update vs i (conn_fam τ X (vs i))) αs) := fun i _ _ => i.elim0
-  have h_conn_c_at_1 : ∀ (j : Fin 1) (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
-      td.isSmoothFam (fun τ =>
-        (vectorToData (R := R) (conn_fam t Y Z)) vs
-          (Function.update αs j
-            (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) := by
-    intro j vs αs
-    have hj : j = 0 := Subsingleton.elim _ _; subst hj
-    have h_eq : (fun τ => (vectorToData (R := R) (conn_fam t Y Z)) vs
-        (Function.update αs 0
-          (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs 0)))) =
-        (fun τ => (emb.embed X) ((αs 0) (conn_fam t Y Z)) -
-          (αs 0) (conn_fam τ X (conn_fam t Y Z))) := by
-      funext τ
-      simp [vectorToData, evalLinear, MultilinearMap.constOfIsEmpty,
-        MultilinearMap.ofSubsingleton, nabla_dual]
-    rw [h_eq]
-    exact td.isSmoothFam_sub _ _
-      (td.isSmoothFam_const ((emb.embed X) ((αs 0) (conn_fam t Y Z))))
-      (h_conn_smooth X (conn_fam t Y Z) (αs 0))
-  have h_pr1 := h_pr X (fun s => vectorToData (R := R) (conn_fam s Y Z)) t hT1
-    hXT1 h_conn_v_var_1 h_conn_c_var_1 h_nabla_T1τ h_conn_v_at_1 h_conn_c_at_1 h_nabla_T1t
-  -- h_pr1 is a tensor equality. Rewrite the LHS function to match.
-  have h_pr1_T1τ_compat :
-      (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X
-        (vectorToData (R := R) (conn_fam τ Y Z))) =
-      (fun s => vectorToData (R := R) (conn_fam s X (conn_fam s Y Z))) :=
-    funext (fun s => (h_nv1 s).symm)
+    have part1 : TimeRegularFam2.isSmoothFam2 (td := td)
+        (fun p : Time × Time => (emb.embed X) ((αs 0) (conn_fam p.1 Y Z))) :=
+      TimeRegularFam2.isSmoothFam2_of_single_fst
+        (fun τ => (emb.embed X) ((αs 0) (conn_fam τ Y Z)))
+        (h_emb_closure X _ (h_conn_smooth Y Z (αs 0)))
+    have part2 : TimeRegularFam2.isSmoothFam2 (td := td)
+        (fun p : Time × Time => (αs 0) (conn_fam p.2 X (conn_fam p.1 Y Z))) :=
+      h_nested_joint_smooth X Y Z (αs 0)
+    exact TimeRegularFam2.isSmoothFam2_sub _ _ part1 part2
+  have h_pr1 := h_pr X (fun s => vectorToData (R := R) (conn_fam s Y Z)) t hT1 hXT1
+    h_2smooth_v_1 h_2smooth_c_1
   -- Evaluate term 1 at ![] ![ω]
   have h_t1 : td.dt_apply (fun s => ω (conn_fam s X (conn_fam s Y Z))) t =
       conn_var_vector td conn_fam t X (conn_fam t Y Z)
         (h_conn_smooth X (conn_fam t Y Z)) ![] ![ω] +
       nabla_tensor emb (conn_fam t) (ha_fam t) (hl_fam t) X
         (conn_var_vector td conn_fam t Y Z (h_conn_smooth Y Z)) ![] ![ω] := by
-    -- Reduce both sides to dt_tensor evaluations.
-    change (dt_tensor td t (fun s => vectorToData (R := R) (conn_fam s X (conn_fam s Y Z)))
-      (fun _ αs => h_nested_smooth X Y Z (αs 0))) ![] ![ω] = _
-    -- Apply product rule and simplify.
-    have h_pr1' := h_pr1
-    -- Interpret the LHS of h_pr1 as the dt_tensor on the nested form; rewrite to match
-    have := congr_arg (fun (T : TensorData R V 1 0) => T ![] ![ω]) h_pr1'
-    simp only [MultilinearMap.add_apply] at this
-    -- RHS₁ of this: conn_var_tensor evaluated on a constant vector tensor = conn_var_vector
-    have h_conn_var_eq : conn_var_tensor emb td conn_fam ha_fam hl_fam t X
-        (vectorToData (R := R) (conn_fam t Y Z)) h_nabla_T1t ![] ![ω] =
+    -- Apply product rule at scalar level: project h_pr1 to ![] ![ω].
+    have h_pr1_s := congr_arg (fun (T : TensorData R V 1 0) => T ![] ![ω]) h_pr1
+    simp only [MultilinearMap.add_apply] at h_pr1_s
+    -- Simplify h_pr1_s' LHS: `dt_tensor td t F _ ![] ![ω] = td.dt_apply (fun τ => F τ ![] ![ω]) t`.
+    rw [dt_tensor_eval] at h_pr1_s
+    -- Reduce the goal's LHS via h_nv1 (pointwise).
+    have h_goal_lhs_eq :
+        (fun s => ω (conn_fam s X (conn_fam s Y Z))) =
+        (fun τ => (nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X
+          (vectorToData (R := R) (conn_fam τ Y Z))) ![] ![ω]) := by
+      funext s
+      have : nabla_tensor emb (conn_fam s) (ha_fam s) (hl_fam s) X
+          (vectorToData (R := R) (conn_fam s Y Z)) =
+          vectorToData (R := R) (conn_fam s X (conn_fam s Y Z)) := (h_nv1 s).symm
+      rw [this]; rfl
+    rw [h_goal_lhs_eq]
+    rw [h_pr1_s]
+    -- Now goal has two summands:
+    --   summand1: conn_var_tensor ... X (vectorToData (conn_fam t Y Z)) _ ![] ![ω]
+    --   summand2: (nabla_tensor ... X (dt_tensor td t T hT1)) ![] ![ω]
+    -- Show summand1 = conn_var_vector.
+    have h_conn_var_eq : ∀ (w : ∀ vs αs, td.isSmoothFam
+        (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X
+          (vectorToData (R := R) (conn_fam t Y Z)) vs αs)),
+        conn_var_tensor emb td conn_fam ha_fam hl_fam t X
+          (vectorToData (R := R) (conn_fam t Y Z)) w ![] ![ω] =
         conn_var_vector td conn_fam t X (conn_fam t Y Z)
           (h_conn_smooth X (conn_fam t Y Z)) ![] ![ω] := by
+      intro w
       simp only [conn_var_tensor, conn_var_vector, dt_tensor_eval]
       congr 1; funext τ
       exact congr_arg (fun (T : TensorData R V 1 0) => T ![] ![ω])
         (nabla_vector emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (conn_fam t Y Z))
-    rw [show dt_tensor td t (fun s => vectorToData (R := R) (conn_fam s X (conn_fam s Y Z)))
-          (fun _ αs => h_nested_smooth X Y Z (αs 0)) ![] ![ω] =
-        dt_tensor td t
-          (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X
-            (vectorToData (R := R) (conn_fam τ Y Z))) h_nabla_T1τ ![] ![ω] from by
-      simp only [dt_tensor_eval]
-      exact congr_arg (fun f => td.dt_apply f t)
-        (funext (fun s => by rw [h_nv1 s]))]
-    rw [this, h_conn_var_eq]
-    -- Remaining: nabla_tensor X (dt_tensor (fun s => vectorToData(conn_fam s Y Z))) ![] ![ω]
-    --         = nabla_tensor X (conn_var_vector Y Z) ![] ![ω]
-    -- These are literally equal by definition of conn_var_vector.
+    rw [h_conn_var_eq]
+    -- Second summand: `dt_tensor td t T hT1` is literally `conn_var_vector t Y Z`.
     rfl
   -- TERM 2: same structure with X↔Y
   have h_nv2 : ∀ s, vectorToData (R := R) (conn_fam s Y (conn_fam s X Z)) =
@@ -274,80 +252,78 @@ theorem riemann_variation_raw
         MultilinearMap.ofSubsingleton]
     rw [h_eq]
     exact h_emb_closure Y (fun τ => (αs 0) (conn_fam τ X Z)) (h_conn_smooth X Z (αs 0))
-  have h_conn_v_var_2 : ∀ (i : Fin 0) (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
-      td.isSmoothFam (fun τ =>
-        (vectorToData (R := R) (conn_fam τ X Z))
-          (Function.update vs i (conn_fam τ Y (vs i))) αs) := fun i _ _ => i.elim0
-  have h_conn_c_var_2 : ∀ (j : Fin 1) (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
-      td.isSmoothFam (fun τ =>
-        (vectorToData (R := R) (conn_fam τ X Z)) vs
-          (Function.update αs j
-            (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) Y (αs j)))) := by
+  have h_2smooth_v_2 : ∀ (i : Fin 0)
+      (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
+      TimeRegularFam2.isSmoothFam2 (td := td)
+        (fun p : Time × Time =>
+          (vectorToData (R := R) (conn_fam p.1 X Z))
+            (Function.update vs i (conn_fam p.2 Y (vs i))) αs) :=
+    fun i _ _ => i.elim0
+  have h_2smooth_c_2 : ∀ (j : Fin 1)
+      (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
+      TimeRegularFam2.isSmoothFam2 (td := td)
+        (fun p : Time × Time =>
+          (vectorToData (R := R) (conn_fam p.1 X Z)) vs
+            (Function.update αs j
+              (nabla_dual emb (conn_fam p.2) (ha_fam p.2) (hl_fam p.2) Y (αs j)))) := by
     intro j vs αs
-    have hj : j = 0 := Subsingleton.elim _ _; subst hj
-    have h_eq : (fun τ => (vectorToData (R := R) (conn_fam τ X Z)) vs
-        (Function.update αs 0
-          (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) Y (αs 0)))) =
-        (fun τ => (emb.embed Y) ((αs 0) (conn_fam τ X Z)) -
-          (αs 0) (conn_fam τ Y (conn_fam τ X Z))) := by
-      funext τ
+    have hj : j = 0 := Subsingleton.elim _ _
+    subst hj
+    have h_eq : (fun p : Time × Time =>
+        (vectorToData (R := R) (conn_fam p.1 X Z)) vs
+          (Function.update αs 0
+            (nabla_dual emb (conn_fam p.2) (ha_fam p.2) (hl_fam p.2) Y (αs 0)))) =
+        (fun p : Time × Time =>
+          (emb.embed Y) ((αs 0) (conn_fam p.1 X Z)) -
+          (αs 0) (conn_fam p.2 Y (conn_fam p.1 X Z))) := by
+      funext p
       simp [vectorToData, evalLinear, MultilinearMap.constOfIsEmpty,
         MultilinearMap.ofSubsingleton, nabla_dual]
     rw [h_eq]
-    exact td.isSmoothFam_sub _ _
-      (h_emb_closure Y (fun τ => (αs 0) (conn_fam τ X Z)) (h_conn_smooth X Z (αs 0)))
-      (h_nested_smooth Y X Z (αs 0))
-  have h_conn_v_at_2 : ∀ (i : Fin 0) (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
-      td.isSmoothFam (fun τ =>
-        (vectorToData (R := R) (conn_fam t X Z))
-          (Function.update vs i (conn_fam τ Y (vs i))) αs) := fun i _ _ => i.elim0
-  have h_conn_c_at_2 : ∀ (j : Fin 1) (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
-      td.isSmoothFam (fun τ =>
-        (vectorToData (R := R) (conn_fam t X Z)) vs
-          (Function.update αs j
-            (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) Y (αs j)))) := by
-    intro j vs αs
-    have hj : j = 0 := Subsingleton.elim _ _; subst hj
-    have h_eq : (fun τ => (vectorToData (R := R) (conn_fam t X Z)) vs
-        (Function.update αs 0
-          (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) Y (αs 0)))) =
-        (fun τ => (emb.embed Y) ((αs 0) (conn_fam t X Z)) -
-          (αs 0) (conn_fam τ Y (conn_fam t X Z))) := by
-      funext τ
-      simp [vectorToData, evalLinear, MultilinearMap.constOfIsEmpty,
-        MultilinearMap.ofSubsingleton, nabla_dual]
-    rw [h_eq]
-    exact td.isSmoothFam_sub _ _
-      (td.isSmoothFam_const ((emb.embed Y) ((αs 0) (conn_fam t X Z))))
-      (h_conn_smooth Y (conn_fam t X Z) (αs 0))
-  have h_pr2 := h_pr Y (fun s => vectorToData (R := R) (conn_fam s X Z)) t hT2
-    hXT2 h_conn_v_var_2 h_conn_c_var_2 h_nabla_T2τ h_conn_v_at_2 h_conn_c_at_2 h_nabla_T2t
+    have part1 : TimeRegularFam2.isSmoothFam2 (td := td)
+        (fun p : Time × Time => (emb.embed Y) ((αs 0) (conn_fam p.1 X Z))) :=
+      TimeRegularFam2.isSmoothFam2_of_single_fst
+        (fun τ => (emb.embed Y) ((αs 0) (conn_fam τ X Z)))
+        (h_emb_closure Y _ (h_conn_smooth X Z (αs 0)))
+    have part2 : TimeRegularFam2.isSmoothFam2 (td := td)
+        (fun p : Time × Time => (αs 0) (conn_fam p.2 Y (conn_fam p.1 X Z))) :=
+      h_nested_joint_smooth Y X Z (αs 0)
+    exact TimeRegularFam2.isSmoothFam2_sub _ _ part1 part2
+  have h_pr2 := h_pr Y (fun s => vectorToData (R := R) (conn_fam s X Z)) t hT2 hXT2
+    h_2smooth_v_2 h_2smooth_c_2
   have h_t2 : td.dt_apply (fun s => ω (conn_fam s Y (conn_fam s X Z))) t =
       conn_var_vector td conn_fam t Y (conn_fam t X Z)
         (h_conn_smooth Y (conn_fam t X Z)) ![] ![ω] +
       nabla_tensor emb (conn_fam t) (ha_fam t) (hl_fam t) Y
         (conn_var_vector td conn_fam t X Z (h_conn_smooth X Z)) ![] ![ω] := by
-    change (dt_tensor td t (fun s => vectorToData (R := R) (conn_fam s Y (conn_fam s X Z)))
-      (fun _ αs => h_nested_smooth Y X Z (αs 0))) ![] ![ω] = _
-    have := congr_arg (fun (T : TensorData R V 1 0) => T ![] ![ω]) h_pr2
-    simp only [MultilinearMap.add_apply] at this
-    have h_conn_var_eq : conn_var_tensor emb td conn_fam ha_fam hl_fam t Y
-        (vectorToData (R := R) (conn_fam t X Z)) h_nabla_T2t ![] ![ω] =
+    have h_pr2_s := congr_arg (fun (T : TensorData R V 1 0) => T ![] ![ω]) h_pr2
+    simp only [MultilinearMap.add_apply] at h_pr2_s
+    rw [dt_tensor_eval] at h_pr2_s
+    have h_goal_lhs_eq :
+        (fun s => ω (conn_fam s Y (conn_fam s X Z))) =
+        (fun τ => (nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) Y
+          (vectorToData (R := R) (conn_fam τ X Z))) ![] ![ω]) := by
+      funext s
+      have : nabla_tensor emb (conn_fam s) (ha_fam s) (hl_fam s) Y
+          (vectorToData (R := R) (conn_fam s X Z)) =
+          vectorToData (R := R) (conn_fam s Y (conn_fam s X Z)) := (h_nv2 s).symm
+      rw [this]; rfl
+    rw [h_goal_lhs_eq]
+    rw [h_pr2_s]
+    have h_conn_var_eq : ∀ (w : ∀ vs αs, td.isSmoothFam
+        (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) Y
+          (vectorToData (R := R) (conn_fam t X Z)) vs αs)),
+        conn_var_tensor emb td conn_fam ha_fam hl_fam t Y
+          (vectorToData (R := R) (conn_fam t X Z)) w ![] ![ω] =
         conn_var_vector td conn_fam t Y (conn_fam t X Z)
           (h_conn_smooth Y (conn_fam t X Z)) ![] ![ω] := by
+      intro w
       simp only [conn_var_tensor, conn_var_vector, dt_tensor_eval]
       congr 1; funext τ
       exact congr_arg (fun (T : TensorData R V 1 0) => T ![] ![ω])
         (nabla_vector emb (conn_fam τ) (ha_fam τ) (hl_fam τ) Y (conn_fam t X Z))
-    rw [show dt_tensor td t (fun s => vectorToData (R := R) (conn_fam s Y (conn_fam s X Z)))
-          (fun _ αs => h_nested_smooth Y X Z (αs 0)) ![] ![ω] =
-        dt_tensor td t
-          (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) Y
-            (vectorToData (R := R) (conn_fam τ X Z))) h_nabla_T2τ ![] ![ω] from by
-      simp only [dt_tensor_eval]
-      exact congr_arg (fun f => td.dt_apply f t)
-        (funext (fun s => by rw [h_nv2 s]))]
-    rw [this, h_conn_var_eq]; rfl
+    rw [h_conn_var_eq]
+    rfl
   -- TERM 3: bracket term (bracket is time-independent)
   have h_nv3 : ∀ s, vectorToData (R := R) (conn_fam s (bracket emb X Y) Z) =
       nabla_tensor emb (conn_fam s) (ha_fam s) (hl_fam s) (bracket emb X Y)
@@ -362,88 +338,86 @@ theorem riemann_variation_raw
       td.isSmoothFam
         (fun τ => (emb.embed (bracket emb X Y)) ((vectorToData (R := R) Z) vs αs)) :=
     fun _ _ => td.isSmoothFam_const _
-  have h_conn_v_var_3 : ∀ (i : Fin 0) (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
-      td.isSmoothFam (fun τ =>
-        (vectorToData (R := R) Z)
-          (Function.update vs i (conn_fam τ (bracket emb X Y) (vs i))) αs) :=
+  have h_2smooth_v_3 : ∀ (i : Fin 0)
+      (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
+      TimeRegularFam2.isSmoothFam2 (td := td)
+        (fun p : Time × Time =>
+          (vectorToData (R := R) Z)
+            (Function.update vs i (conn_fam p.2 (bracket emb X Y) (vs i))) αs) :=
     fun i _ _ => i.elim0
-  have h_conn_c_var_3 : ∀ (j : Fin 1) (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
-      td.isSmoothFam (fun τ =>
-        (vectorToData (R := R) Z) vs
-          (Function.update αs j
-            (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) (bracket emb X Y) (αs j)))) := by
+  have h_2smooth_c_3 : ∀ (j : Fin 1)
+      (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
+      TimeRegularFam2.isSmoothFam2 (td := td)
+        (fun p : Time × Time =>
+          (vectorToData (R := R) Z) vs
+            (Function.update αs j
+              (nabla_dual emb (conn_fam p.2) (ha_fam p.2) (hl_fam p.2) (bracket emb X Y)
+                (αs j)))) := by
     intro j vs αs
-    have hj : j = 0 := Subsingleton.elim _ _; subst hj
-    have h_eq : (fun τ => (vectorToData (R := R) Z) vs
-        (Function.update αs 0
-          (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) (bracket emb X Y) (αs 0)))) =
-        (fun τ => (emb.embed (bracket emb X Y)) ((αs 0) Z) -
-          (αs 0) (conn_fam τ (bracket emb X Y) Z)) := by
-      funext τ
+    have hj : j = 0 := Subsingleton.elim _ _
+    subst hj
+    have h_eq : (fun p : Time × Time =>
+        (vectorToData (R := R) Z) vs
+          (Function.update αs 0
+            (nabla_dual emb (conn_fam p.2) (ha_fam p.2) (hl_fam p.2) (bracket emb X Y)
+              (αs 0)))) =
+        (fun p : Time × Time =>
+          (emb.embed (bracket emb X Y)) ((αs 0) Z) -
+          (αs 0) (conn_fam p.2 (bracket emb X Y) Z)) := by
+      funext p
       simp [vectorToData, evalLinear, MultilinearMap.constOfIsEmpty,
         MultilinearMap.ofSubsingleton, nabla_dual]
     rw [h_eq]
-    exact td.isSmoothFam_sub _ _
-      (td.isSmoothFam_const ((emb.embed (bracket emb X Y)) ((αs 0) Z)))
-      (h_conn_smooth (bracket emb X Y) Z (αs 0))
-  have h_conn_v_at_3 : ∀ (i : Fin 0) (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
-      td.isSmoothFam (fun τ =>
-        (vectorToData (R := R) Z)
-          (Function.update vs i (conn_fam τ (bracket emb X Y) (vs i))) αs) :=
-    fun i _ _ => i.elim0
-  have h_conn_c_at_3 : ∀ (j : Fin 1) (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
-      td.isSmoothFam (fun τ =>
-        (vectorToData (R := R) Z) vs
-          (Function.update αs j
-            (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) (bracket emb X Y) (αs j)))) := by
-    intro j vs αs
-    have hj : j = 0 := Subsingleton.elim _ _; subst hj
-    have h_eq : (fun τ => (vectorToData (R := R) Z) vs
-        (Function.update αs 0
-          (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) (bracket emb X Y) (αs 0)))) =
-        (fun τ => (emb.embed (bracket emb X Y)) ((αs 0) Z) -
-          (αs 0) (conn_fam τ (bracket emb X Y) Z)) := by
-      funext τ
-      simp [vectorToData, evalLinear, MultilinearMap.constOfIsEmpty,
-        MultilinearMap.ofSubsingleton, nabla_dual]
-    rw [h_eq]
-    exact td.isSmoothFam_sub _ _
-      (td.isSmoothFam_const ((emb.embed (bracket emb X Y)) ((αs 0) Z)))
-      (h_conn_smooth (bracket emb X Y) Z (αs 0))
-  have h_pr3 := h_pr (bracket emb X Y) (fun _ => vectorToData (R := R) Z) t hT3
-    hXT3 h_conn_v_var_3 h_conn_c_var_3 h_nabla_T3τ h_conn_v_at_3 h_conn_c_at_3 h_nabla_T3t
+    have part1 : TimeRegularFam2.isSmoothFam2 (td := td)
+        (fun _ : Time × Time => (emb.embed (bracket emb X Y)) ((αs 0) Z)) :=
+      TimeRegularFam2.isSmoothFam2_const _
+    have part2 : TimeRegularFam2.isSmoothFam2 (td := td)
+        (fun p : Time × Time => (αs 0) (conn_fam p.2 (bracket emb X Y) Z)) :=
+      TimeRegularFam2.isSmoothFam2_of_single_snd
+        (fun τ => (αs 0) (conn_fam τ (bracket emb X Y) Z))
+        (h_conn_smooth (bracket emb X Y) Z (αs 0))
+    exact TimeRegularFam2.isSmoothFam2_sub _ _ part1 part2
+  have h_pr3 := h_pr (bracket emb X Y) (fun _ => vectorToData (R := R) Z) t hT3 hXT3
+    h_2smooth_v_3 h_2smooth_c_3
   have h_const_z : dt_tensor td t (fun _ => vectorToData (R := R) Z) hT3 = 0 := by
     ext vs' αs'; simp only [dt_tensor_eval, MultilinearMap.zero_apply]
     exact td.dt_apply_const _ _
   have h_t3 : td.dt_apply (fun s => ω (conn_fam s (bracket emb X Y) Z)) t =
       conn_var_vector td conn_fam t (bracket emb X Y) Z
         (h_conn_smooth (bracket emb X Y) Z) ![] ![ω] := by
-    change (dt_tensor td t (fun s => vectorToData (R := R) (conn_fam s (bracket emb X Y) Z))
-      (fun _ αs => h_conn_smooth (bracket emb X Y) Z (αs 0))) ![] ![ω] = _
-    have := congr_arg (fun (T : TensorData R V 1 0) => T ![] ![ω]) h_pr3
-    simp only [MultilinearMap.add_apply] at this
-    have h_conn_var_eq : conn_var_tensor emb td conn_fam ha_fam hl_fam t (bracket emb X Y)
-        (vectorToData (R := R) Z) h_nabla_T3t ![] ![ω] =
+    have h_pr3_s := congr_arg (fun (T : TensorData R V 1 0) => T ![] ![ω]) h_pr3
+    simp only [MultilinearMap.add_apply] at h_pr3_s
+    rw [dt_tensor_eval] at h_pr3_s
+    have h_goal_lhs_eq :
+        (fun s => ω (conn_fam s (bracket emb X Y) Z)) =
+        (fun τ => (nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) (bracket emb X Y)
+          (vectorToData (R := R) Z)) ![] ![ω]) := by
+      funext s
+      have : nabla_tensor emb (conn_fam s) (ha_fam s) (hl_fam s) (bracket emb X Y)
+          (vectorToData (R := R) Z) =
+          vectorToData (R := R) (conn_fam s (bracket emb X Y) Z) := (h_nv3 s).symm
+      rw [this]; rfl
+    rw [h_goal_lhs_eq]
+    rw [h_pr3_s]
+    have h_conn_var_eq : ∀ (w : ∀ vs αs, td.isSmoothFam
+        (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) (bracket emb X Y)
+          (vectorToData (R := R) Z) vs αs)),
+        conn_var_tensor emb td conn_fam ha_fam hl_fam t (bracket emb X Y)
+          (vectorToData (R := R) Z) w ![] ![ω] =
         conn_var_vector td conn_fam t (bracket emb X Y) Z
           (h_conn_smooth (bracket emb X Y) Z) ![] ![ω] := by
+      intro w
       simp only [conn_var_tensor, conn_var_vector, dt_tensor_eval]
       congr 1; funext τ
       exact congr_arg (fun (T : TensorData R V 1 0) => T ![] ![ω])
         (nabla_vector emb (conn_fam τ) (ha_fam τ) (hl_fam τ) (bracket emb X Y) Z)
+    rw [h_conn_var_eq]
     have h_zero : nabla_tensor emb (conn_fam t) (ha_fam t) (hl_fam t) (bracket emb X Y)
         (dt_tensor td t (fun _ => vectorToData (R := R) Z) hT3) ![] ![ω] = 0 := by
       rw [h_const_z]
       simp only [nabla_tensor_eval, MultilinearMap.zero_apply]
       simp
-    rw [show dt_tensor td t (fun s => vectorToData (R := R) (conn_fam s (bracket emb X Y) Z))
-          (fun _ αs => h_conn_smooth (bracket emb X Y) Z (αs 0)) ![] ![ω] =
-        dt_tensor td t
-          (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) (bracket emb X Y)
-            (vectorToData (R := R) Z)) h_nabla_T3τ ![] ![ω] from by
-      simp only [dt_tensor_eval]
-      exact congr_arg (fun f => td.dt_apply f t)
-        (funext (fun s => by rw [h_nv3 s]))]
-    rw [this, h_conn_var_eq, h_zero, add_zero]
+    rw [h_zero, add_zero]
   -- Combine all three terms
   rw [h_t1, h_t2, h_t3]; ring
 
@@ -532,7 +506,7 @@ noncomputable def nabla_conn_var_scalar
     where (∇_X A)(Y,Z) is the tensor-level covariant derivative of A. -/
 theorem riemann_variation_torsion_free
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td] [TimeRegularFam2 td]
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ s, ∀ X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
     (hal_fam : ∀ s, ∀ X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z)
@@ -547,24 +521,9 @@ theorem riemann_variation_torsion_free
       td.isSmoothFam (fun τ => β (conn_fam τ U W)))
     (h_nested_smooth : ∀ (P U W : V) (β : V →ₗ[R] R),
       td.isSmoothFam (fun τ => β (conn_fam τ P (conn_fam τ U W))))
-    (h_nabla_T1τ : ∀ (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
-      td.isSmoothFam (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X
-        (vectorToData (R := R) (conn_fam τ Y Z)) vs αs))
-    (h_nabla_T1t : ∀ (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
-      td.isSmoothFam (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X
-        (vectorToData (R := R) (conn_fam t Y Z)) vs αs))
-    (h_nabla_T2τ : ∀ (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
-      td.isSmoothFam (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) Y
-        (vectorToData (R := R) (conn_fam τ X Z)) vs αs))
-    (h_nabla_T2t : ∀ (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
-      td.isSmoothFam (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) Y
-        (vectorToData (R := R) (conn_fam t X Z)) vs αs))
-    (h_nabla_T3τ : ∀ (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
-      td.isSmoothFam (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) (bracket emb X Y)
-        (vectorToData (R := R) Z) vs αs))
-    (h_nabla_T3t : ∀ (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
-      td.isSmoothFam (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) (bracket emb X Y)
-        (vectorToData (R := R) Z) vs αs)) :
+    (h_nested_joint_smooth : ∀ (P U W : V) (α : V →ₗ[R] R),
+      TimeRegularFam2.isSmoothFam2 (td := td)
+        (fun p : Time × Time => α (conn_fam p.2 P (conn_fam p.1 U W)))) :
     td.dt_apply (fun s => ω (Rm emb (conn_fam s) X Y Z)) t =
     nabla_conn_var_scalar emb td conn_fam ha_fam hl_fam t X Y Z ω
       (h_conn_smooth Y Z) (h_conn_smooth _ Z) (h_conn_smooth Y _) -
@@ -572,8 +531,7 @@ theorem riemann_variation_torsion_free
       (h_conn_smooth X Z) (h_conn_smooth _ Z) (h_conn_smooth X _) := by
   rw [riemann_variation_raw emb td conn_fam ha_fam hal_fam hsl_fam hl_fam h_pr h_emb_closure
         X Y Z ω t
-        h_conn_smooth h_nested_smooth
-        h_nabla_T1τ h_nabla_T1t h_nabla_T2τ h_nabla_T2t h_nabla_T3τ h_nabla_T3t]
+        h_conn_smooth h_nested_smooth h_nested_joint_smooth]
   simp only [nabla_conn_var_scalar]
   -- Evaluate bracket term as difference using torsion_free.
   have h_tf_eq : bracket emb X Y = conn_fam t X Y - conn_fam t Y X := (h_tf t X Y).symm
@@ -652,7 +610,7 @@ noncomputable def riemann_variation_scalar
     This is the bridge between the geometric formula and the tensor-level object. -/
 theorem variation_scalar_eq_dt_tensor
     (emb : DerivationEmbedding k R V) (td : TimeDerivativeData R A Time)
-    [TimeRegularFam td]
+    [TimeRegularFam td] [TimeRegularFam2 td]
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ s, ∀ X Y Z, conn_fam s X (Y + Z) = conn_fam s X Y + conn_fam s X Z)
     (hal_fam : ∀ s, ∀ X Y Z, conn_fam s (X + Y) Z = conn_fam s X Z + conn_fam s Y Z)
@@ -666,26 +624,11 @@ theorem variation_scalar_eq_dt_tensor
       td.isSmoothFam (fun τ => β (conn_fam τ U W)))
     (h_nested_smooth : ∀ (P U W : V) (β : V →ₗ[R] R),
       td.isSmoothFam (fun τ => β (conn_fam τ P (conn_fam τ U W))))
+    (h_nested_joint_smooth : ∀ (P U W : V) (α : V →ₗ[R] R),
+      TimeRegularFam2.isSmoothFam2 (td := td)
+        (fun p : Time × Time => α (conn_fam p.2 P (conn_fam p.1 U W))))
     (h_Rm_smooth : ∀ vs αs, td.isSmoothFam
-      (fun τ => Rm_tensor emb (conn_fam τ) (ha_fam τ) (hal_fam τ) (hsl_fam τ) (hl_fam τ) vs αs))
-    (h_nabla_T1τ : ∀ (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
-      td.isSmoothFam (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X
-        (vectorToData (R := R) (conn_fam τ Y Z)) vs αs))
-    (h_nabla_T1t : ∀ (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
-      td.isSmoothFam (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X
-        (vectorToData (R := R) (conn_fam t Y Z)) vs αs))
-    (h_nabla_T2τ : ∀ (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
-      td.isSmoothFam (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) Y
-        (vectorToData (R := R) (conn_fam τ X Z)) vs αs))
-    (h_nabla_T2t : ∀ (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
-      td.isSmoothFam (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) Y
-        (vectorToData (R := R) (conn_fam t X Z)) vs αs))
-    (h_nabla_T3τ : ∀ (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
-      td.isSmoothFam (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) (bracket emb X Y)
-        (vectorToData (R := R) Z) vs αs))
-    (h_nabla_T3t : ∀ (vs : Fin 0 → V) (αs : Fin 1 → V →ₗ[R] R),
-      td.isSmoothFam (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) (bracket emb X Y)
-        (vectorToData (R := R) Z) vs αs)) :
+      (fun τ => Rm_tensor emb (conn_fam τ) (ha_fam τ) (hal_fam τ) (hsl_fam τ) (hl_fam τ) vs αs)) :
     riemann_variation_scalar emb td conn_fam ha_fam hl_fam t X Y Z ω h_conn_smooth =
     dt_tensor td t (fun s => Rm_tensor emb (conn_fam s) (ha_fam s) (hal_fam s) (hsl_fam s) (hl_fam s))
       h_Rm_smooth ![X, Y, Z] ![ω] := by
@@ -693,7 +636,6 @@ theorem variation_scalar_eq_dt_tensor
   rw [variation_eq_dt emb td conn_fam ha_fam hal_fam hsl_fam hl_fam X Y Z ω t h_Rm_smooth]
   exact (riemann_variation_raw emb td conn_fam ha_fam hal_fam hsl_fam hl_fam h_pr h_emb_closure
     X Y Z ω t
-    h_conn_smooth h_nested_smooth
-    h_nabla_T1τ h_nabla_T1t h_nabla_T2τ h_nabla_T2t h_nabla_T3τ h_nabla_T3t).symm
+    h_conn_smooth h_nested_smooth h_nested_joint_smooth).symm
 
 end RiemannVariation

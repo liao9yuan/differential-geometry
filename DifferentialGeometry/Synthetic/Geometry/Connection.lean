@@ -14,6 +14,19 @@ set_option linter.unusedSectionVars false
 open SyntheticTensor
 
 -- ============================================================
+-- Generic: Invertible 2 implies annihilation form of 2-regularity
+-- ============================================================
+
+/-- Generic derivation: given `Invertible (2 : R)` in a monoid-with-zero structure,
+`2 * a = 0 → a = 0`. This is the annihilation form of 2-regularity, and is implied
+by `Invertible (2 : R)`. -/
+theorem char_ne_2_of_invertible_two {R : Type*} [MonoidWithZero R]
+    [OfNat R 2] [Invertible (2 : R)] (a : R) (h : (2 : R) * a = 0) : a = 0 := by
+  calc a = ⅟(2 : R) * ((2 : R) * a) := (invOf_mul_cancel_left _ _).symm
+    _ = ⅟(2 : R) * 0 := by rw [h]
+    _ = 0 := mul_zero _
+
+-- ============================================================
 -- IsTorsionFree, IsLeviCivita
 -- ============================================================
 

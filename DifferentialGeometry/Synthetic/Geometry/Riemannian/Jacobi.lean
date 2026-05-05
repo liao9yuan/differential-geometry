@@ -18,6 +18,7 @@ section Jacobi
 
 variable {k R V A Gamma : Type*}
 variable [Field k] [CommRing R] [Algebra k R]
+variable [Invertible (2 : R)]
 variable [CommRing A]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 variable [AddCommGroup Gamma] [Module A Gamma]

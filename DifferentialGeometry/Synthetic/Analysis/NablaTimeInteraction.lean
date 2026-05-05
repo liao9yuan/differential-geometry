@@ -451,3 +451,81 @@ theorem t_conn_apply
   simpa [dt_tensor_eval] using h_eval
 
 end TConnApply
+
+-- ============================================================
+-- Per-slot Leibniz helpers for NablaTimeProductRule
+-- ============================================================
+
+section SlotLeibniz
+
+variable {k R V : Type*} {A Time : Type*}
+variable [Field k] [CommRing R] [Algebra k R]
+variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+variable [CommRing A] [Algebra R A]
+
+/-- Vector-slot Leibniz: given a 2-smooth family in the diagonal pairs
+    `(τ, τ)` obtained by substituting a connection-varying vector into the
+    `i`-th vector slot of a time-dependent tensor `T τ`, the diagonal time
+    derivative splits into the sum of the two single-slot time derivatives
+    via `TimeRegularFam2.dt_apply_diag_leibniz`. This is the exact form
+    consumed by `concrete_nabla_time_product_rule` when unfolding the
+    product rule on a vector slot. -/
+theorem TimeDerivativeData.dt_apply_leibniz_slot_vector
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td] [TimeRegularFam2 td]
+    (conn_fam : Time → V → V → V)
+    (X : V) {r s : ℕ} (T : Time → TensorData R V r s) (t : Time) (i : Fin s)
+    (vs : Fin s → V) (αs : Fin r → V →ₗ[R] R)
+    (h_2smooth : TimeRegularFam2.isSmoothFam2 (td := td)
+      (fun p : Time × Time =>
+        T p.1 (Function.update vs i (conn_fam p.2 X (vs i))) αs)) :
+    td.dt_apply
+        (fun τ => T τ (Function.update vs i (conn_fam τ X (vs i))) αs) t
+      = td.dt_apply
+          (fun τ => T t (Function.update vs i (conn_fam τ X (vs i))) αs) t
+        + td.dt_apply
+            (fun τ => T τ (Function.update vs i (conn_fam t X (vs i))) αs) t := by
+  have h := TimeRegularFam2.dt_apply_diag_leibniz
+    (td := td)
+    (fun p : Time × Time => T p.1 (Function.update vs i (conn_fam p.2 X (vs i))) αs)
+    t h_2smooth
+  simp only at h
+  rw [add_comm]; exact h
+
+/-- Covector-slot Leibniz: given a 2-smooth family in the diagonal pairs
+    `(τ, τ)` obtained by substituting a `nabla_dual`-varying covector into
+    the `j`-th covector slot of a time-dependent tensor `T τ`, the diagonal
+    time derivative splits into the sum of the two single-slot time
+    derivatives via `TimeRegularFam2.dt_apply_diag_leibniz`. This is the
+    exact form consumed by `concrete_nabla_time_product_rule` when
+    unfolding the product rule on a covector slot. -/
+theorem TimeDerivativeData.dt_apply_leibniz_slot_covector
+    (emb : DerivationEmbedding k R V)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td] [TimeRegularFam2 td]
+    (conn_fam : Time → V → V → V)
+    (ha_fam : ∀ τ, ∀ X Y Z, conn_fam τ X (Y + Z) = conn_fam τ X Y + conn_fam τ X Z)
+    (hl_fam : ∀ τ, ∀ X (f : R) Y,
+      conn_fam τ X (f • Y) = (emb.embed X) f • Y + f • conn_fam τ X Y)
+    (X : V) {r s : ℕ} (T : Time → TensorData R V r s) (t : Time) (j : Fin r)
+    (vs : Fin s → V) (αs : Fin r → V →ₗ[R] R)
+    (h_2smooth : TimeRegularFam2.isSmoothFam2 (td := td)
+      (fun p : Time × Time =>
+        T p.1 vs (Function.update αs j
+          (nabla_dual emb (conn_fam p.2) (ha_fam p.2) (hl_fam p.2) X (αs j))))) :
+    td.dt_apply
+        (fun τ => T τ vs (Function.update αs j
+          (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) t
+      = td.dt_apply
+          (fun τ => T t vs (Function.update αs j
+            (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) t
+        + td.dt_apply
+            (fun τ => T τ vs (Function.update αs j
+              (nabla_dual emb (conn_fam t) (ha_fam t) (hl_fam t) X (αs j)))) t := by
+  have h := TimeRegularFam2.dt_apply_diag_leibniz
+    (td := td)
+    (fun p : Time × Time => T p.1 vs (Function.update αs j
+      (nabla_dual emb (conn_fam p.2) (ha_fam p.2) (hl_fam p.2) X (αs j))))
+    t h_2smooth
+  simp only at h
+  rw [add_comm]; exact h
+
+end SlotLeibniz

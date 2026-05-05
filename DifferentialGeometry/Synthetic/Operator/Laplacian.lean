@@ -95,9 +95,9 @@ noncomputable def SecondCovDerivTensor
     (ha : ∀ X Y Z : V, conn X (Y + Z) = conn X Y + conn X Z)
     (hl : ∀ X (f : R) (Y : V), conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
     {r s : ℕ} (T : TensorData R V r s) (X Y : V) : TensorData R V r s :=
-  let nXY_T := genericCovDeriv emb conn ha hl (conn X Y) T
-  let nY_T := genericCovDeriv emb conn ha hl Y T
-  let nX_nY_T := genericCovDeriv emb conn ha hl X nY_T
+  let nXY_T := nabla_tensor emb conn ha hl (conn X Y) T
+  let nY_T := nabla_tensor emb conn ha hl Y T
+  let nX_nY_T := nabla_tensor emb conn ha hl X nY_T
   nX_nY_T + (-1 : R) • nXY_T
 
 /-- Bochner product rule for the rough Laplacian of a tensor norm.

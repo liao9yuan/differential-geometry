@@ -17,138 +17,7 @@ set_option linter.style.emptyLine false
 `IsRicciFlow`, `Rm_tensor` (1,3), and `ricciForm_tensor` (0,2).
 -/
 
-open BigOperators
 open SyntheticTensor
-
--- ============================================================
--- Inverse metric variation
--- ============================================================
-
-section InverseMetricVariation
-
-variable {R V Time : Type*} {A : Type*}
-variable [CommRing R] [AddCommGroup V] [Module R V]
-variable [CommRing A] [Algebra R A]
-
-/-- Inverse metric variation form: `partial_t(g_inv)`.
-
-This is the contravariant partner of `metric_var_form`. The key geometric
-identity is not definitional: it comes from differentiating
-`g_inv(s) * g(s) = id` and using the time product rule. See
-`InverseMetricProductRule` and
-`inverse_metric_var_form_flat_eq_neg_metric_var`. -/
-noncomputable def inverse_metric_var_form
-    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
-    (g_fam : Time → MetricDuality R V)
-    (h_ginv : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_inv vs αs))
-    (t : Time) : TensorData R V 2 0 :=
-  dt_tensor td t (fun s => (g_fam s).g_inv) h_ginv
-
-/-- Product-rule consequence of differentiating the inverse identity.
-
-In coordinates this is exactly
-`partial_t(g^{ik} g_{kj}) = 0`, hence
-`(partial_t g^{ik}) g_{kj} + g^{ik} (partial_t g_{kj}) = 0`.
-After pairing both free indices with vectors `X` and `Y`, it becomes
-`(partial_t g_inv)(flat X, flat Y) + (partial_t g)(X,Y) = 0`.
-
-Concrete coordinate realizations should prove this from the scalar product rule
-and the inverse identity; downstream Ricci-flow arguments should consume this
-named property rather than introducing a second realized inverse metric. -/
-def InverseMetricProductRule
-    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
-    (g_fam : Time → MetricDuality R V)
-    (h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs))
-    (h_ginv : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_inv vs αs))
-    : Prop :=
-  ∀ t X Y,
-    inverse_metric_var_form td g_fam h_ginv t ![] ![(g_fam t).flat X, (g_fam t).flat Y] +
-      metric_var_form td g_fam h_met t ![X, Y] ![] = 0
-
-/-- The inverse metric variation is the negative of the metric variation after
-lowering both free indices with the metric at the reference time.
-
-This is the abstract form of
-`partial_t g^{ij} = - g^{ia} g^{jb} partial_t g_ab`. -/
-theorem inverse_metric_var_form_flat_eq_neg_metric_var
-    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
-    (g_fam : Time → MetricDuality R V)
-    (h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs))
-    (h_ginv : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_inv vs αs))
-    (h_prod : InverseMetricProductRule td g_fam h_met h_ginv)
-    (t : Time) (X Y : V) :
-    inverse_metric_var_form td g_fam h_ginv t ![] ![(g_fam t).flat X, (g_fam t).flat Y] =
-      -metric_var_form td g_fam h_met t ![X, Y] ![] := by
-  have h := h_prod t X Y
-  exact eq_neg_of_add_eq_zero_left h
-
-/-- Coordinate constructor for `InverseMetricProductRule`.
-
-This is the finite-dimensional coordinate bridge for B: the only calculus input
-is `TimeDerivativeData.dt_apply_matrix_inverse_left`, i.e. the scalar theorem
-`partial_t A = - A (partial_t B) A` for inverse coordinate matrices. The
-remaining hypotheses are evaluation bridges saying that the chosen coordinate
-arrays reconstruct the synthetic metric and inverse-metric variations. -/
-theorem inverseMetricProductRule_of_matrix_inverse_components
-    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
-    (g_fam : Time -> MetricDuality R V)
-    (h_met : forall vs covs, td.isSmoothFam (fun s => (g_fam s).g_tensor vs covs))
-    (h_ginv : forall vs covs, td.isSmoothFam (fun s => (g_fam s).g_inv vs covs))
-    {ι : Type*} [Fintype ι] [DecidableEq ι]
-    (gInvComp gComp : Time -> ι -> ι -> R)
-    (leftCoord rightCoord : Time -> V -> ι -> R)
-    (h_gInvComp_smooth : forall i j, td.isSmoothFam (fun s => gInvComp s i j))
-    (h_gComp_smooth : forall i j, td.isSmoothFam (fun s => gComp s i j))
-    (h_left_inv : forall s i j,
-      (∑ k : ι, gInvComp s i k * gComp s k j) = if i = j then 1 else 0)
-    (h_right_inv : forall s i j,
-      (∑ k : ι, gComp s i k * gInvComp s k j) = if i = j then 1 else 0)
-    (h_inv_eval : forall t X Y,
-      inverse_metric_var_form td g_fam h_ginv t ![] ![(g_fam t).flat X, (g_fam t).flat Y] =
-        ∑ i : ι, ∑ j : ι,
-          leftCoord t X i * td.dt_apply (fun s => gInvComp s i j) t *
-            rightCoord t Y j)
-    (h_metric_eval : forall t X Y,
-      metric_var_form td g_fam h_met t ![X, Y] ![] =
-        ∑ i : ι, ∑ j : ι,
-          leftCoord t X i *
-            (∑ b : ι, ∑ a : ι,
-              gInvComp t i a * td.dt_apply (fun s => gComp s a b) t *
-                gInvComp t b j) *
-            rightCoord t Y j) :
-    InverseMetricProductRule td g_fam h_met h_ginv := by
-  intro t X Y
-  rw [h_inv_eval t X Y, h_metric_eval t X Y]
-  have hentry : forall i j,
-      td.dt_apply (fun s => gInvComp s i j) t =
-        -∑ b : ι, ∑ a : ι,
-          gInvComp t i a * td.dt_apply (fun s => gComp s a b) t *
-            gInvComp t b j := by
-    intro i j
-    exact td.dt_apply_matrix_inverse_left gInvComp gComp h_gInvComp_smooth
-      h_gComp_smooth h_left_inv h_right_inv i j t
-  have hsum :
-      (∑ i : ι, ∑ j : ι,
-          leftCoord t X i * td.dt_apply (fun s => gInvComp s i j) t *
-            rightCoord t Y j) =
-        -∑ i : ι, ∑ j : ι,
-          leftCoord t X i *
-            (∑ b : ι, ∑ a : ι,
-              gInvComp t i a * td.dt_apply (fun s => gComp s a b) t *
-                gInvComp t b j) *
-            rightCoord t Y j := by
-    rw [← Finset.sum_neg_distrib]
-    apply Finset.sum_congr rfl
-    intro i _
-    rw [← Finset.sum_neg_distrib]
-    apply Finset.sum_congr rfl
-    intro j _
-    rw [hentry i j]
-    ring
-  rw [hsum]
-  ring
-
-end InverseMetricVariation
 
 -- ============================================================
 -- Rm_tensor: the Riemann curvature as a (1,3) tensor
@@ -331,7 +200,7 @@ variable [Field k] [CommRing R] [Algebra k R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 variable [CommRing A] [Algebra R A]
 
-/-- Ricci flow condition: the metric evolves by -2·Ric and the connection is always Levi-Civita. -/
+/-- Ricci flow condition: the metric evolves by -2·Ric. (Levi-Civita is a separate bundle field.) -/
 def IsRicciFlow
     (emb : DerivationEmbedding k R V)
     (td : TimeDerivativeData R A Time) [TimeRegularFam td]
@@ -344,24 +213,11 @@ def IsRicciFlow
     (hsl_fam : ∀ s, ∀ (f : R) X Z, conn_fam s (f • X) Z = f • conn_fam s X Z)
     (hl_fam : ∀ s, ∀ X (f : R) Y, conn_fam s X (f • Y) = (emb.embed X) f • Y + f • conn_fam s X Y)
     : Prop :=
-  (∀ s, IsLeviCivita emb (conn_fam s) (g_fam s)) ∧
-  (∀ t, metric_var_form td g_fam h_met t =
-    (-2 : R) • ricciForm_tensor emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr)
+  ∀ t, metric_var_form td g_fam h_met t =
+    (-2 : R) • ricciForm_tensor emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr
 
-/-- Extract the Levi-Civita property from IsRicciFlow. -/
-theorem IsRicciFlow.levi_civita
-    {emb : DerivationEmbedding k R V}
-    {td : TimeDerivativeData R A Time} [TimeRegularFam td]
-    {atr : AbstractTrace R V}
-    {g_fam : Time → MetricDuality R V}
-    {h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs)}
-    {conn_fam : Time → V → V → V}
-    {ha_fam hal_fam hsl_fam hl_fam}
-    (h : IsRicciFlow emb td atr g_fam h_met conn_fam ha_fam hal_fam hsl_fam hl_fam)
-    (s : Time) : IsLeviCivita emb (conn_fam s) (g_fam s) :=
-  h.1 s
-
-/-- Extract the evolution equation from IsRicciFlow. -/
+/-- Extract the evolution equation from IsRicciFlow. Trivial alias kept for
+    readability at call sites. -/
 theorem IsRicciFlow.evolution
     {emb : DerivationEmbedding k R V}
     {td : TimeDerivativeData R A Time} [TimeRegularFam td]
@@ -373,63 +229,7 @@ theorem IsRicciFlow.evolution
     (h : IsRicciFlow emb td atr g_fam h_met conn_fam ha_fam hal_fam hsl_fam hl_fam)
     (t : Time) : metric_var_form td g_fam h_met t =
     (-2 : R) • ricciForm_tensor emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr :=
-  h.2 t
-
-/-- Along Ricci flow, differentiating the inverse identity gives
-`partial_t g^{-1} = 2 Ric` after both free contravariant slots are paired
-with the metric at the reference time.
-
-The hypothesis `h_prod` is the product-rule calculation for
-`partial_t(g^{-1} g) = 0`; see `InverseMetricProductRule`. -/
-theorem IsRicciFlow.inverse_metric_variation
-    {emb : DerivationEmbedding k R V}
-    {td : TimeDerivativeData R A Time} [TimeRegularFam td]
-    {atr : AbstractTrace R V}
-    {g_fam : Time → MetricDuality R V}
-    {h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs)}
-    {h_ginv : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_inv vs αs)}
-    {conn_fam : Time → V → V → V}
-    {ha_fam hal_fam hsl_fam hl_fam}
-    (h : IsRicciFlow emb td atr g_fam h_met conn_fam ha_fam hal_fam hsl_fam hl_fam)
-    (h_prod : InverseMetricProductRule td g_fam h_met h_ginv)
-    (t : Time) (X Y : V) :
-    inverse_metric_var_form td g_fam h_ginv t ![] ![(g_fam t).flat X, (g_fam t).flat Y] =
-      2 * ricciForm_tensor emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr ![X, Y] ![] := by
-  rw [inverse_metric_var_form_flat_eq_neg_metric_var td g_fam h_met h_ginv h_prod t X Y]
-  have h_rf_eq := congr_arg (fun T => T ![X, Y] ![]) (h.evolution t)
-  have h_eval :
-      metric_var_form td g_fam h_met t ![X, Y] ![] =
-        ((-2 : R) • ricciForm_tensor emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t) atr) ![X, Y] ![] :=
-    h_rf_eq
-  rw [h_eval]
-  simp only [MultilinearMap.smul_apply, smul_eq_mul]
-  ring
-
-/-- Extract metric compatibility from IsRicciFlow. -/
-theorem IsRicciFlow.metric_compat
-    {emb : DerivationEmbedding k R V}
-    {td : TimeDerivativeData R A Time} [TimeRegularFam td]
-    {atr : AbstractTrace R V}
-    {g_fam : Time → MetricDuality R V}
-    {h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs)}
-    {conn_fam : Time → V → V → V}
-    {ha_fam hal_fam hsl_fam hl_fam}
-    (h : IsRicciFlow emb td atr g_fam h_met conn_fam ha_fam hal_fam hsl_fam hl_fam)
-    (s : Time) : IsMetricCompatible emb (conn_fam s) (g_fam s) :=
-  (h.levi_civita s).1
-
-/-- Extract torsion-free from IsRicciFlow. -/
-theorem IsRicciFlow.torsion_free
-    {emb : DerivationEmbedding k R V}
-    {td : TimeDerivativeData R A Time} [TimeRegularFam td]
-    {atr : AbstractTrace R V}
-    {g_fam : Time → MetricDuality R V}
-    {h_met : ∀ vs αs, td.isSmoothFam (fun τ => (g_fam τ).g_tensor vs αs)}
-    {conn_fam : Time → V → V → V}
-    {ha_fam hal_fam hsl_fam hl_fam}
-    (h : IsRicciFlow emb td atr g_fam h_met conn_fam ha_fam hal_fam hsl_fam hl_fam)
-    (s : Time) : IsTorsionFree emb (conn_fam s) :=
-  (h.levi_civita s).2
+  h t
 
 end RicciFlowDef
 
@@ -450,6 +250,179 @@ variable [Field k] [CommRing R] [Algebra k R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 variable [CommRing A] [Algebra R A]
 
+/-- Reconstruct the `nabla_tensor` aggregate smoothness witness for the
+    time-varying family `fun τ => T τ` from the four primary smoothness
+    hypotheses used by `NablaTimeProductRule`. The reconstruction unfolds
+    `nabla_tensor` via `nabla_tensor_eval` (which holds by `rfl`) and then
+    assembles the scalar family from the spatial-derivative term `hXT`,
+    the vector-slot slice family (via `diag_isSmoothFam` applied to
+    `h_2smooth_v`), and the covector-slot slice family (via
+    `diag_isSmoothFam` applied to `h_2smooth_c`). -/
+private theorem nablaTimeProductRule_hT_nabla_of_aux
+    (emb : DerivationEmbedding k R V)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td] [TimeRegularFam2 td]
+    (conn_fam : Time → V → V → V)
+    (ha_fam : ∀ τ, ∀ X Y Z, conn_fam τ X (Y + Z) = conn_fam τ X Y + conn_fam τ X Z)
+    (hl_fam : ∀ τ, ∀ X (f : R) Y,
+      conn_fam τ X (f • Y) = (emb.embed X) f • Y + f • conn_fam τ X Y)
+    (X : V) {r s : ℕ} (T : Time → TensorData R V r s)
+    (hXT : ∀ vs αs, td.isSmoothFam (fun τ => (emb.embed X) (T τ vs αs)))
+    (h_2smooth_v : ∀ (i : Fin s) vs αs,
+      TimeRegularFam2.isSmoothFam2 (td := td)
+        (fun p : Time × Time =>
+          T p.1 (Function.update vs i (conn_fam p.2 X (vs i))) αs))
+    (h_2smooth_c : ∀ (j : Fin r) vs αs,
+      TimeRegularFam2.isSmoothFam2 (td := td)
+        (fun p : Time × Time =>
+          T p.1 vs (Function.update αs j
+            (nabla_dual emb (conn_fam p.2) (ha_fam p.2) (hl_fam p.2) X (αs j))))) :
+    ∀ vs αs, td.isSmoothFam
+      (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (T τ) vs αs) := by
+  intro vs αs
+  -- Unfold `nabla_tensor` via its evaluation formula (which holds by `rfl`).
+  have h_eq : (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (T τ) vs αs) =
+      (fun τ => (emb.embed X) (T τ vs αs)
+        - ∑ i : Fin s, T τ (Function.update vs i (conn_fam τ X (vs i))) αs
+        - ∑ j : Fin r, T τ vs (Function.update αs j
+            (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) := by
+    funext τ
+    exact nabla_tensor_eval emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (T τ) vs αs
+  rw [h_eq]
+  -- Smoothness of each per-slot slice via the diagonal projection of `h_2smooth_*`.
+  have h_cs_v_var : ∀ (i : Fin s), td.isSmoothFam
+      (fun τ => T τ (Function.update vs i (conn_fam τ X (vs i))) αs) := fun i =>
+    TimeRegularFam2.diag_isSmoothFam (td := td)
+      (fun p : Time × Time =>
+        T p.1 (Function.update vs i (conn_fam p.2 X (vs i))) αs)
+      (h_2smooth_v i vs αs)
+  have h_cs_c_var : ∀ (j : Fin r), td.isSmoothFam
+      (fun τ => T τ vs (Function.update αs j
+        (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) := fun j =>
+    TimeRegularFam2.diag_isSmoothFam (td := td)
+      (fun p : Time × Time =>
+        T p.1 vs (Function.update αs j
+          (nabla_dual emb (conn_fam p.2) (ha_fam p.2) (hl_fam p.2) X (αs j))))
+      (h_2smooth_c j vs αs)
+  -- Factor the lambda into three closed-under-∑ pieces.
+  have h_split : (fun τ => (emb.embed X) (T τ vs αs)
+      - ∑ i : Fin s, T τ (Function.update vs i (conn_fam τ X (vs i))) αs
+      - ∑ j : Fin r, T τ vs (Function.update αs j
+          (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) =
+      (fun τ => (emb.embed X) (T τ vs αs))
+      - (fun τ => ∑ i : Fin s, T τ (Function.update vs i (conn_fam τ X (vs i))) αs)
+      - (fun τ => ∑ j : Fin r, T τ vs (Function.update αs j
+          (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) := by
+    funext τ; simp only [Pi.sub_apply]
+  have h_vec_sum : (fun τ => ∑ i : Fin s,
+      T τ (Function.update vs i (conn_fam τ X (vs i))) αs) =
+      ∑ i : Fin s, (fun τ => T τ (Function.update vs i (conn_fam τ X (vs i))) αs) := by
+    funext τ; simp [Finset.sum_apply]
+  have h_cov_sum : (fun τ => ∑ j : Fin r,
+      T τ vs (Function.update αs j
+        (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) =
+      ∑ j : Fin r, (fun τ => T τ vs (Function.update αs j
+        (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) := by
+    funext τ; simp [Finset.sum_apply]
+  have hS_X : td.isSmoothFam (fun τ => (emb.embed X) (T τ vs αs)) := hXT vs αs
+  have hS_vec_sum : td.isSmoothFam
+      (fun τ => ∑ i : Fin s, T τ (Function.update vs i (conn_fam τ X (vs i))) αs) := by
+    rw [h_vec_sum]
+    exact td.isSmoothFam_sum Finset.univ _ (fun i _ => h_cs_v_var i)
+  have hS_cov_sum : td.isSmoothFam
+      (fun τ => ∑ j : Fin r, T τ vs (Function.update αs j
+        (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) := by
+    rw [h_cov_sum]
+    exact td.isSmoothFam_sum Finset.univ _ (fun j _ => h_cs_c_var j)
+  rw [h_split]
+  exact td.isSmoothFam_sub _ _
+    (td.isSmoothFam_sub _ _ hS_X hS_vec_sum) hS_cov_sum
+
+/-- Reconstruct the `nabla_tensor` aggregate smoothness witness for the
+    time-fixed tensor `T t` from the two 2-smoothness hypotheses used by
+    `NablaTimeProductRule`. Because `T t` is constant in `τ`, the leading
+    `(emb.embed X)(T t vs αs)` term is smooth by `isSmoothFam_const`; the
+    per-slot slices come from `slice_right_isSmoothFam` applied at `τ₀ = t`
+    (freezing the `.1` coordinate to `t`, so only `conn_fam p.2` / the
+    `nabla_dual` varies in `τ`). -/
+private theorem nablaTimeProductRule_h_nabla_t_of_aux
+    (emb : DerivationEmbedding k R V)
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td] [TimeRegularFam2 td]
+    (conn_fam : Time → V → V → V)
+    (ha_fam : ∀ τ, ∀ X Y Z, conn_fam τ X (Y + Z) = conn_fam τ X Y + conn_fam τ X Z)
+    (hl_fam : ∀ τ, ∀ X (f : R) Y,
+      conn_fam τ X (f • Y) = (emb.embed X) f • Y + f • conn_fam τ X Y)
+    (X : V) {r s : ℕ} (T : Time → TensorData R V r s) (t : Time)
+    (h_2smooth_v : ∀ (i : Fin s) vs αs,
+      TimeRegularFam2.isSmoothFam2 (td := td)
+        (fun p : Time × Time =>
+          T p.1 (Function.update vs i (conn_fam p.2 X (vs i))) αs))
+    (h_2smooth_c : ∀ (j : Fin r) vs αs,
+      TimeRegularFam2.isSmoothFam2 (td := td)
+        (fun p : Time × Time =>
+          T p.1 vs (Function.update αs j
+            (nabla_dual emb (conn_fam p.2) (ha_fam p.2) (hl_fam p.2) X (αs j))))) :
+    ∀ vs αs, td.isSmoothFam
+      (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (T t) vs αs) := by
+  intro vs αs
+  -- Unfold `nabla_tensor` via its evaluation formula.
+  have h_eq : (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (T t) vs αs) =
+      (fun τ => (emb.embed X) (T t vs αs)
+        - ∑ i : Fin s, T t (Function.update vs i (conn_fam τ X (vs i))) αs
+        - ∑ j : Fin r, T t vs (Function.update αs j
+            (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) := by
+    funext τ
+    exact nabla_tensor_eval emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (T t) vs αs
+  rw [h_eq]
+  -- Per-slot slices: first coordinate frozen at `t`, so use `slice_right_isSmoothFam`.
+  have h_cs_v_at : ∀ (i : Fin s), td.isSmoothFam
+      (fun τ => T t (Function.update vs i (conn_fam τ X (vs i))) αs) := fun i =>
+    TimeRegularFam2.slice_right_isSmoothFam (td := td)
+      (fun p : Time × Time =>
+        T p.1 (Function.update vs i (conn_fam p.2 X (vs i))) αs) t
+      (h_2smooth_v i vs αs)
+  have h_cs_c_at : ∀ (j : Fin r), td.isSmoothFam
+      (fun τ => T t vs (Function.update αs j
+        (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) := fun j =>
+    TimeRegularFam2.slice_right_isSmoothFam (td := td)
+      (fun p : Time × Time =>
+        T p.1 vs (Function.update αs j
+          (nabla_dual emb (conn_fam p.2) (ha_fam p.2) (hl_fam p.2) X (αs j)))) t
+      (h_2smooth_c j vs αs)
+  -- Factor the lambda into three closed-under-∑ pieces.
+  have h_split : (fun τ => (emb.embed X) (T t vs αs)
+      - ∑ i : Fin s, T t (Function.update vs i (conn_fam τ X (vs i))) αs
+      - ∑ j : Fin r, T t vs (Function.update αs j
+          (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) =
+      (fun _ => (emb.embed X) (T t vs αs))
+      - (fun τ => ∑ i : Fin s, T t (Function.update vs i (conn_fam τ X (vs i))) αs)
+      - (fun τ => ∑ j : Fin r, T t vs (Function.update αs j
+          (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) := by
+    funext τ; simp only [Pi.sub_apply]
+  have h_vec_sum : (fun τ => ∑ i : Fin s,
+      T t (Function.update vs i (conn_fam τ X (vs i))) αs) =
+      ∑ i : Fin s, (fun τ => T t (Function.update vs i (conn_fam τ X (vs i))) αs) := by
+    funext τ; simp [Finset.sum_apply]
+  have h_cov_sum : (fun τ => ∑ j : Fin r,
+      T t vs (Function.update αs j
+        (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) =
+      ∑ j : Fin r, (fun τ => T t vs (Function.update αs j
+        (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) := by
+    funext τ; simp [Finset.sum_apply]
+  have hS_const : td.isSmoothFam (fun _ : Time => (emb.embed X) (T t vs αs)) :=
+    td.isSmoothFam_const _
+  have hS_vec_sum : td.isSmoothFam
+      (fun τ => ∑ i : Fin s, T t (Function.update vs i (conn_fam τ X (vs i))) αs) := by
+    rw [h_vec_sum]
+    exact td.isSmoothFam_sum Finset.univ _ (fun i _ => h_cs_v_at i)
+  have hS_cov_sum : td.isSmoothFam
+      (fun τ => ∑ j : Fin r, T t vs (Function.update αs j
+        (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))) := by
+    rw [h_cov_sum]
+    exact td.isSmoothFam_sum Finset.univ _ (fun j _ => h_cs_c_at j)
+  rw [h_split]
+  exact td.isSmoothFam_sub _ _
+    (td.isSmoothFam_sub _ _ hS_const hS_vec_sum) hS_cov_sum
+
 /-- Product rule for time derivative and covariant derivative.
     This is the tensor-level analog of the old ConnectionTimeCalculus.t_conn_apply.
     States: ∂_t[∇(s)_X T(s)] = conn_var(t, X, T(t)) + ∇(t)_X(∂_t T).
@@ -461,19 +434,21 @@ variable [CommRing A] [Algebra R A]
     In concrete models (smooth manifolds), this follows from the product rule
     in local coordinates.
 
-    Smoothness hypotheses propagate the smoothness of the scalar slices of T,
-    the connection-varying vector and covector slot families, and the nabla
-    result itself; they are required by `dt_tensor` and `conn_var_tensor`.
-
-    The five new hypotheses `hXT`, `h_conn_smooth_v_var`, `h_conn_smooth_c_var`,
-    `h_conn_smooth_v_at`, `h_conn_smooth_c_at` propagate the smoothness of the
-    pieces that appear inside the evaluation formula for `nabla_tensor`: the
-    embedded-derivation application to the scalar slices of `T`, and the slices
-    obtained by substituting a connection-varying vector or nabla_dual-varying
-    covector into `T` (both for varying `T τ` and for the frozen `T t`). -/
+    The statement takes exactly four per-`T` smoothness hypotheses:
+    * `hT` — smoothness of the scalar slices `τ ↦ T τ vs αs`;
+    * `hXT` — smoothness of `τ ↦ (emb.embed X) (T τ vs αs)`;
+    * `h_2smooth_v` — joint (2-time) smoothness of the vector-slot
+      substitution family `p ↦ T p.1 (update vs i (conn_fam p.2 X (vs i))) αs`;
+    * `h_2smooth_c` — joint (2-time) smoothness of the covector-slot
+      substitution family `p ↦ T p.1 vs (update αs j (nabla_dual … p.2 … (αs j)))`.
+    The aggregate `nabla_tensor` smoothness witnesses consumed by
+    `dt_tensor`/`conn_var_tensor` are reconstructed internally from these four
+    via `TimeRegularFam2.diag_isSmoothFam` and `slice_right_isSmoothFam` (see
+    the helper theorems `nablaTimeProductRule_hT_nabla_of_aux` and
+    `nablaTimeProductRule_h_nabla_t_of_aux`). -/
 def NablaTimeProductRule
     (emb : DerivationEmbedding k R V)
-    (td : TimeDerivativeData R A Time) [TimeRegularFam td]
+    (td : TimeDerivativeData R A Time) [TimeRegularFam td] [TimeRegularFam2 td]
     (conn_fam : Time → V → V → V)
     (ha_fam : ∀ τ, ∀ X Y Z, conn_fam τ X (Y + Z) = conn_fam τ X Y + conn_fam τ X Z)
     (hl_fam : ∀ τ, ∀ X (f : R) Y, conn_fam τ X (f • Y) = (emb.embed X) f • Y + f • conn_fam τ X Y)
@@ -481,23 +456,21 @@ def NablaTimeProductRule
   ∀ (X : V) {r s : ℕ} (T : Time → TensorData R V r s) (t : Time)
     (hT : ∀ vs αs, td.isSmoothFam (fun τ => T τ vs αs))
     (hXT : ∀ vs αs, td.isSmoothFam (fun τ => (emb.embed X) (T τ vs αs)))
-    (h_conn_smooth_v_var : ∀ (i : Fin s) vs αs, td.isSmoothFam
-      (fun τ => T τ (Function.update vs i (conn_fam τ X (vs i))) αs))
-    (h_conn_smooth_c_var : ∀ (j : Fin r) vs αs, td.isSmoothFam
-      (fun τ => T τ vs (Function.update αs j
-        (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))))
-    (hT_nabla : ∀ vs αs, td.isSmoothFam
-      (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (T τ) vs αs))
-    (h_conn_smooth_v_at : ∀ (i : Fin s) vs αs, td.isSmoothFam
-      (fun τ => T t (Function.update vs i (conn_fam τ X (vs i))) αs))
-    (h_conn_smooth_c_at : ∀ (j : Fin r) vs αs, td.isSmoothFam
-      (fun τ => T t vs (Function.update αs j
-        (nabla_dual emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (αs j)))))
-    (h_nabla_t : ∀ vs αs, td.isSmoothFam
-      (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (T t) vs αs)),
+    (h_2smooth_v : ∀ (i : Fin s) vs αs,
+      TimeRegularFam2.isSmoothFam2 (td := td)
+        (fun p : Time × Time =>
+          T p.1 (Function.update vs i (conn_fam p.2 X (vs i))) αs))
+    (h_2smooth_c : ∀ (j : Fin r) vs αs,
+      TimeRegularFam2.isSmoothFam2 (td := td)
+        (fun p : Time × Time =>
+          T p.1 vs (Function.update αs j
+            (nabla_dual emb (conn_fam p.2) (ha_fam p.2) (hl_fam p.2) X (αs j))))),
     dt_tensor td t (fun τ => nabla_tensor emb (conn_fam τ) (ha_fam τ) (hl_fam τ) X (T τ))
-      hT_nabla =
-    conn_var_tensor emb td conn_fam ha_fam hl_fam t X (T t) h_nabla_t +
+      (nablaTimeProductRule_hT_nabla_of_aux emb td conn_fam ha_fam hl_fam X T
+        hXT h_2smooth_v h_2smooth_c) =
+    conn_var_tensor emb td conn_fam ha_fam hl_fam t X (T t)
+      (nablaTimeProductRule_h_nabla_t_of_aux emb td conn_fam ha_fam hl_fam X T t
+        h_2smooth_v h_2smooth_c) +
     nabla_tensor emb (conn_fam t) (ha_fam t) (hl_fam t) X (dt_tensor td t T hT)
 
 end ProductRule

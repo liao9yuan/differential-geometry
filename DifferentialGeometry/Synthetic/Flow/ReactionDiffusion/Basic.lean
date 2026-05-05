@@ -1,5 +1,5 @@
 import DifferentialGeometry.Synthetic.Operator.Laplacian
-import DifferentialGeometry.Synthetic.Axioms
+import DifferentialGeometry.Synthetic.Assembly
 
 /-!
 # Reaction-Diffusion Bundle
@@ -22,27 +22,15 @@ open SyntheticTensor
 
 /-- Bundle for a reaction-diffusion equation `∂_t u = Δu + f(u)`. -/
 structure ReactionDiffusionBundle (k R V Time A : Type*)
-    [Field k] [CommRing R] [Algebra k R]
+    [Field k] [CommRing R] [Algebra k R] [Invertible (2 : R)]
     [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
     [CommRing A] [Algebra R A]
-    extends RiemannianManifoldData k R V where
-  /-- Time derivative. -/
-  td : TimeDerivativeData R A Time
-  /-- Regularity filter + closure axioms. -/
-  [td_regular : TimeRegularFam td]
-  /-- Spatial and temporal derivatives commute. -/
-  spatial_temporal_comm : SpatialTemporalComm emb td
+    extends ScalarTimeEvolvingManifoldData k R V Time A where
   /-- The reaction term `f : R → R`. -/
   reaction : R → R
-  /-- Time-dependent scalar state `u(t) : R`. -/
-  u_fam : Time → R
-  /-- The state is a regular time family. -/
-  h_u : td.isSmoothFam u_fam
   /-- The reaction-diffusion equation `∂_t u = Δu + f(u)`. -/
   rd_eq : ∀ t : Time,
     td.dt_apply u_fam t =
       laplacian emb met atr conn conn_add_right conn_leibniz
         conn_add_left conn_smul_left (u_fam t) +
       reaction (u_fam t)
-
-attribute [instance] ReactionDiffusionBundle.td_regular

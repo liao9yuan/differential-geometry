@@ -1,4 +1,4 @@
-import DifferentialGeometry.Synthetic.Axioms
+import DifferentialGeometry.Synthetic.Assembly
 
 /-!
 # Scalar Gradient Flow Bundle
@@ -30,23 +30,11 @@ open SyntheticTensor
 
 /-- Scalar gradient flow on a fixed Riemannian manifold. -/
 structure ScalarGradientFlowBundle (k R V Time A : Type*)
-    [Field k] [CommRing R] [Algebra k R]
+    [Field k] [CommRing R] [Algebra k R] [Invertible (2 : R)]
     [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
     [CommRing A] [Algebra R A]
-    extends RiemannianManifoldData k R V where
-  /-- Time derivative. -/
-  td : TimeDerivativeData R A Time
-  /-- Regularity filter + closure axioms. -/
-  [td_regular : TimeRegularFam td]
-  /-- Spatial and temporal derivatives commute. -/
-  spatial_temporal_comm : SpatialTemporalComm emb td
+    extends ScalarTimeEvolvingManifoldData k R V Time A where
   /-- The velocity functional. Think of this as `-grad E` for some energy `E`. -/
   velocity : R → R
-  /-- Time-dependent scalar state `u(t) : R`. -/
-  u_fam : Time → R
-  /-- The state is a regular time family. -/
-  h_u : td.isSmoothFam u_fam
   /-- The gradient-flow equation `∂_t u = velocity(u)`. -/
   flow_eq : ∀ t : Time, td.dt_apply u_fam t = velocity (u_fam t)
-
-attribute [instance] ScalarGradientFlowBundle.td_regular

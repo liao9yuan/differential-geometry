@@ -1,5 +1,7 @@
-import DifferentialGeometry.Synthetic.Realization.NablaContractComm
+import DifferentialGeometry.Synthetic.Realization.TensorRSNabla
+import DifferentialGeometry.Synthetic.Realization.NablaComm
 import DifferentialGeometry.Synthetic.Algebra.TensorAlgebra
+import DifferentialGeometry.Tensor.RSTensor.Field
 
 /-!
 # SmoothRicciFlow: TensorData-level contraction (P27.1)
@@ -85,7 +87,6 @@ set_option maxHeartbeats 800000
 open scoped Manifold ContDiff Topology
 open Bundle
 open Tensor0SBundle
-open TensorContractComm
 open SyntheticTensor
 
 namespace TensorContractRealization
@@ -306,8 +307,8 @@ end Chunk2
 /-! ### Chunk 3 — Local dual-covector basis and pointwise canonical formula
 
 The `(0,1)`-bundle has a local frame defined by the tangent bundle's local frame's
-dual. We re-declare `dualCovectorBasis` here (since the version in `NablaContractComm`
-is private) to obtain a smooth dual frame via `exists_contMDiffSection_eqOn_nhd`. -/
+dual. We declare `dualCovectorBasis'` here to obtain a smooth dual frame via
+`exists_contMDiffSection_eqOn_nhd`. -/
 
 section Chunk3
 
@@ -324,7 +325,7 @@ noncomputable def dualCovectorBasis' :
 `θ_smooth : Fin d → Tensor0SField ∞ 1` (dual) agreeing with
 `trivializationAt x₀`'s local frames on a neighborhood of `x₀`.
 Uses `Classical.choose` to produce a deterministic pair. -/
-noncomputable def chooseLocalFrames (x₀ : M) :
+private noncomputable def chooseLocalFrames (x₀ : M) :
     (Fin (Module.finrank ℝ E) → V_ I M) ×
     (Fin (Module.finrank ℝ E) →
       Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) (n := ∞) 1) :=
@@ -339,10 +340,9 @@ noncomputable def chooseLocalFrames (x₀ : M) :
    Classical.choose (hframe_1.exists_contMDiffSection_eqOn_nhd
       e_1.open_baseSet (mem_baseSet_trivializationAt _ _ x₀)))
 
-omit [CompleteSpace E] [SigmaCompactSpace M] in
 /-- The tangent frame chosen by `chooseLocalFrames x₀` agrees with `trivializationAt x₀`'s
 local frame on a neighborhood of `x₀`. -/
-lemma chooseLocalFrames_σ_eqOn (x₀ : M) :
+private lemma chooseLocalFrames_σ_eqOn (x₀ : M) :
     ∀ᶠ x in nhds x₀, ∀ i, ((chooseLocalFrames I M x₀).1 i) x =
       (trivializationAt E (TangentSpace I : M → Type _) x₀).localFrame
         (Module.finBasis ℝ E) i x := by
@@ -352,10 +352,9 @@ lemma chooseLocalFrames_σ_eqOn (x₀ : M) :
   exact Classical.choose_spec (hframe_tan.exists_contMDiffSection_eqOn_nhd
     e_tan.open_baseSet (mem_baseSet_trivializationAt _ _ x₀))
 
-omit [CompleteSpace E] [SigmaCompactSpace M] in
 /-- The dual frame chosen by `chooseLocalFrames x₀` agrees with the `(0,1)`-bundle's local
 frame for `dualCovectorBasis'` on a neighborhood of `x₀`. -/
-lemma chooseLocalFrames_θ_eqOn (x₀ : M) :
+private lemma chooseLocalFrames_θ_eqOn (x₀ : M) :
     ∀ᶠ x in nhds x₀, ∀ i, ((chooseLocalFrames I M x₀).2 i) x =
       (trivializationAt (Tensor0SModel 1 ℝ E)
         (fun x => Tensor0SSpace 1 I x) x₀).localFrame
@@ -388,7 +387,6 @@ noncomputable def concreteTensorContract_fun (r s : ℕ)
     let frames := chooseLocalFrames I M x₀
     (concreteTensorContract_localSum I M r s T frames.1 frames.2 m n) x₀
 
-omit [CompleteSpace E] [SigmaCompactSpace M] in
 /-- Unfolding lemma: the pointwise value of `concreteTensorContract_fun` at `x₀` is the
 local-frame sum at `x₀` using `chooseLocalFrames x₀`. -/
 @[simp] theorem concreteTensorContract_fun_apply (r s : ℕ)
@@ -417,14 +415,13 @@ and expose the `chooseLocalFrames` interface. -/
 
 section Chunk5
 
-omit [CompleteSpace E] [SigmaCompactSpace M] in
 /-- The frames chosen at `x₀` (via `Classical.choose`) form a biorthogonal pair at every
 point `y` in a neighborhood of `x₀`: the dual-covector frame evaluated against the tangent
 frame gives the identity matrix.
 
 This follows from `matching_frames_biorth` (applied on the appropriate intersection of base
 sets) combined with `chooseLocalFrames_σ_eqOn` and `chooseLocalFrames_θ_eqOn`. -/
-lemma chooseLocalFrames_biorth_eventually (x₀ : M) :
+private lemma chooseLocalFrames_biorth_eventually (x₀ : M) :
     ∀ᶠ y in nhds x₀, ∀ i j : Fin (Module.finrank ℝ E),
       (Tensor0SSpace.toModel ((chooseLocalFrames I M x₀).2 i y))
         (fun _ : Fin 1 => (((chooseLocalFrames I M x₀).1 j) y : TangentSpace I y)) =
@@ -438,8 +435,6 @@ lemma chooseLocalFrames_biorth_eventually (x₀ : M) :
     (mem_baseSet_trivializationAt _ _ x₀)
   filter_upwards [hσ, hθ, hbase_tan, hbase_1] with y hσy hθy hy_tan hy_1 i j
   rw [hσy j, hθy i]
-  -- Apply the matching_frames_biorth lemma from NablaContractComm, but that is `private`.
-  -- We inline the same argument here.
   set e_tan := trivializationAt E (TangentSpace I : M → Type _) x₀
   set e_1 := trivializationAt (Tensor0SModel 1 ℝ E) (fun x => Tensor0SSpace 1 I x) x₀
   set b := Module.finBasis (R := ℝ) (M := E)
@@ -2123,99 +2118,6 @@ theorem concreteTensorContract_endo (L : V_ I M →ₗ[R_ I M] V_ I M) :
   rw [basis_coord_eq_toModel_θ I M σ_x₀ θ_x₀ x₀ hbiorth h_basis_σ i
     ((vbcFiber I M L x₀) ((σ_x₀ i) x₀ : TangentSpace I x₀))]
 
-/-- **Pointwise covector expansion in the chosen local frame.**
-
-At `x₀`, the local frame selected by `chooseLocalFrames` and its dual expand any
-`C^∞(M)`-linear covector on vector fields:
-`α(X)(x₀) = ∑ᵢ θᵢ(X)(x₀) α(σᵢ)(x₀)`.
-
-This is the finite-frame algebra used by metric-trace realization proofs after
-unfolding `concreteAbstractTrace.tr`. -/
-theorem chooseLocalFrames_covector_expand_at
-    (α : V_ I M →ₗ[R_ I M] R_ I M) (X : V_ I M) (x₀ : M) :
-    (α X) x₀ =
-      ∑ i,
-        ((covectorToFunctional I M ((chooseLocalFrames I M x₀).2 i)) X) x₀ *
-          (α ((chooseLocalFrames I M x₀).1 i)) x₀ := by
-  classical
-  set σ_x₀ := (chooseLocalFrames I M x₀).1 with hσ_def
-  set θ_x₀ := (chooseLocalFrames I M x₀).2 with hθ_def
-  have hbiorth : ∀ i j,
-      (Tensor0SSpace.toModel ((θ_x₀ i) x₀))
-        (fun _ : Fin 1 => ((σ_x₀ j) x₀ : TangentSpace I x₀)) = if i = j then 1 else 0 :=
-    Filter.Eventually.self_of_nhds (chooseLocalFrames_biorth_eventually I M x₀)
-  have hbase_tan : x₀ ∈ (trivializationAt E (TangentSpace I : M → Type _) x₀).baseSet :=
-    mem_baseSet_trivializationAt _ _ x₀
-  have h_basis_σ : LinearIndependent ℝ
-      (fun i => (σ_x₀ i) x₀ : Fin (Module.finrank ℝ E) → TangentSpace I x₀) ∧
-      Submodule.span ℝ (Set.range (fun i => (σ_x₀ i) x₀ :
-        Fin (Module.finrank ℝ E) → TangentSpace I x₀)) = ⊤ := by
-    have hσ_x₀_eq := Filter.Eventually.self_of_nhds (chooseLocalFrames_σ_eqOn I M x₀)
-    let le : TangentSpace I x₀ ≃ₗ[ℝ] E :=
-      (trivializationAt E (TangentSpace I : M → Type _) x₀).linearEquivAt ℝ x₀ hbase_tan
-    let b := Module.finBasis (R := ℝ) (M := E)
-    have hσ_eq : ∀ i, (σ_x₀ i) x₀ = le.symm (b i) := fun i => by
-      rw [hσ_x₀_eq i]
-      change (trivializationAt E (TangentSpace I : M → Type _) x₀).localFrame b i x₀ =
-        le.symm (b i)
-      rw [(trivializationAt E (TangentSpace I : M → Type _) x₀).localFrame_apply_of_mem_baseSet
-        (hx := hbase_tan)]
-      simp [Trivialization.basisAt, le]
-    have h1 : LinearIndependent ℝ (fun i => le.symm (b i)) :=
-      b.linearIndependent.map' le.symm.toLinearMap le.symm.ker
-    have h2 : (fun i => (σ_x₀ i) x₀ : Fin (Module.finrank ℝ E) → TangentSpace I x₀) =
-        (fun i => le.symm (b i)) := funext hσ_eq
-    refine ⟨?_, ?_⟩
-    · rw [h2]; exact h1
-    · rw [h2]
-      rw [show (Set.range (fun i => le.symm (b i)) : Set (TangentSpace I x₀)) =
-          le.symm.toLinearMap '' Set.range b by
-        ext w; simp [Set.mem_range, Set.mem_image]]
-      rw [Submodule.span_image, b.span_eq]
-      simp
-  set basis : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x₀) :=
-    Module.Basis.mk h_basis_σ.1 (le_of_eq h_basis_σ.2.symm) with hbasis_def
-  have hb_apply : ∀ i, basis i = (σ_x₀ i) x₀ := fun i => Module.Basis.mk_apply _ _ _
-  have h_coord : ∀ i,
-      ((covectorToFunctional I M (θ_x₀ i)) X) x₀ = basis.coord i (X x₀) := by
-    intro i
-    rw [covectorToFunctional_apply]
-    symm
-    exact basis_coord_eq_toModel_θ I M σ_x₀ θ_x₀ x₀ hbiorth h_basis_σ i (X x₀)
-  let coord_const : Fin (Module.finrank ℝ E) → R_ I M := fun i =>
-    ⟨fun _ => basis.coord i (X x₀), contMDiff_const⟩
-  let Z : V_ I M := ∑ i, coord_const i • σ_x₀ i
-  have hZ_at_x₀ : Z x₀ = X x₀ := by
-    change (∑ i, coord_const i • σ_x₀ i) x₀ = X x₀
-    simp only [ContMDiffSection.finset_sum_apply, ContMDiffSection.coe_smulContMDiffMap]
-    have h_expand : X x₀ = ∑ i, basis.coord i (X x₀) • basis i := by
-      conv_lhs => rw [← basis.sum_repr (X x₀)]
-      refine Finset.sum_congr rfl (fun i _ => ?_)
-      rw [basis.coord_apply]
-    rw [h_expand]
-    refine Finset.sum_congr rfl (fun i _ => ?_)
-    rw [hb_apply]
-    rfl
-  have hα_XZ : (α X) x₀ = (α Z) x₀ :=
-    smoothLinearMap_acts_pointwise I M α X Z x₀ hZ_at_x₀.symm
-  rw [hα_XZ]
-  have hα_Z : α Z = ∑ i, coord_const i * α (σ_x₀ i) := by
-    change α (∑ i, coord_const i • σ_x₀ i) = _
-    rw [map_sum α]
-    refine Finset.sum_congr rfl (fun i _ => ?_)
-    change α (coord_const i • σ_x₀ i) = coord_const i * α (σ_x₀ i)
-    rw [LinearMap.map_smul]
-    change coord_const i • α (σ_x₀ i) = coord_const i * α (σ_x₀ i)
-    rfl
-  rw [hα_Z, R_evalAt_sum]
-  refine Finset.sum_congr rfl (fun i _ => ?_)
-  rw [hσ_def, hθ_def]
-  change (coord_const i) x₀ * (α ((chooseLocalFrames I M x₀).1 i)) x₀ =
-    ((covectorToFunctional I M ((chooseLocalFrames I M x₀).2 i)) X) x₀ *
-      (α ((chooseLocalFrames I M x₀).1 i)) x₀
-  rw [← hσ_def, ← hθ_def, h_coord i]
-  rfl
-
 end Chunk12
 
 /-! ### Chunk 13 — `data_eval_single_contract` axiom
@@ -2851,84 +2753,11 @@ noncomputable def concreteAbstractTrace : AbstractTrace (R_ I M) (V_ I M) where
 @[simp] theorem concreteAbstractTrace_tr :
     (concreteAbstractTrace I M).tr = concreteTr I M := rfl
 
-/-- `concreteAbstractTrace.tr` is the fiberwise linear trace of the bundle
-endomorphism represented by the `C^∞(M)`-linear endomorphism of sections. -/
-@[simp] theorem concreteAbstractTrace_tr_apply
-    (L : V_ I M →ₗ[R_ I M] V_ I M) (x : M) :
-    ((concreteAbstractTrace I M).tr L) x =
-      LinearMap.trace ℝ (TangentSpace I x) (vbcFiber I M L x) := rfl
-
 /-- `concreteAbstractTrace.tensor_contract` unfolds to `concreteTensorContract`. -/
 @[simp] theorem concreteAbstractTrace_tensor_contract (r s : ℕ)
     (T : TensorData (R_ I M) (V_ I M) (r + 1) (s + 1)) :
     (concreteAbstractTrace I M).tensor_contract T =
       concreteTensorContract I M r s T := rfl
-
-/-- Concrete coordinate proof of the Ricci-style middle-slot trace evaluation.
-
-If the slice `Z ↦ T(X,Z,Y)` is represented by an endomorphism `L`, then
-contracting the unique contravariant slot against the middle covariant slot and
-evaluating on the remaining exterior slots `(X,Y)` equals `tr L`.
-
-The proof unfolds the concrete contraction local-frame sum. After the slot swap,
-the summand is `T(X,σ_i,Y,θ_i)`, which the hypothesis identifies with
-`θ_i(L σ_i)`. That is exactly the local-frame sum for
-`tensor_contract (endo_to_tensor L)`, already identified with `concreteTr L` by
-`concreteTensorContract_endo`. -/
-theorem concreteContractGeneral13MiddleTraceEval
-    (T : TensorData (R_ I M) (V_ I M) 1 3)
-    (X Y : V_ I M) (L : V_ I M →ₗ[R_ I M] V_ I M)
-    (hL : forall Z (α : V_ I M →ₗ[R_ I M] R_ I M),
-      T ![X, Z, Y] ![α] = α (L Z)) :
-    contract_general (concreteAbstractTrace I M) (0 : Fin 1) (1 : Fin 3) T ![X, Y] ![] =
-      (concreteAbstractTrace I M).tr L := by
-  apply ContMDiffMap.ext
-  intro x₀
-  have hendo :
-      (concreteTensorContract I M 0 0 (endo_to_tensor L) ![] ![]) x₀ =
-        (concreteTr I M L) x₀ := by
-    exact congr_arg (fun f : R_ I M => f x₀) (concreteTensorContract_endo I M L)
-  change (contract_general (concreteAbstractTrace I M) (0 : Fin 1) (1 : Fin 3) T ![X, Y] ![]) x₀ =
-    ((concreteAbstractTrace I M).tr L) x₀
-  rw [concreteAbstractTrace_tr, ← hendo]
-  unfold contract_general
-  rw [concreteAbstractTrace_tensor_contract]
-  rw [concreteTensorContract_apply, concreteTensorContract_fun_apply,
-    concreteTensorContract_apply, concreteTensorContract_fun_apply]
-  refine Finset.sum_congr rfl (fun i _ => ?_)
-  let σ : V_ I M := (chooseLocalFrames I M x₀).1 i
-  let θ : V_ I M →ₗ[R_ I M] R_ I M :=
-    covectorToFunctional I M ((chooseLocalFrames I M x₀).2 i)
-  have hv :
-      (Fin.cons σ ![X, Y] : Fin 3 → V_ I M) ∘
-          Equiv.swap (0 : Fin 3) (1 : Fin 3) =
-        ![X, σ, Y] := by
-    funext j
-    fin_cases j <;> rfl
-  have hα :
-      (Fin.cons θ ![] : Fin 1 → V_ I M →ₗ[R_ I M] R_ I M) ∘
-          Equiv.swap (0 : Fin 1) (0 : Fin 1) =
-        ![θ] := by
-    funext j
-    fin_cases j
-    rfl
-  calc
-    (swap_covariant (0 : Fin 3) (1 : Fin 3)
-        (swap_contravariant (0 : Fin 1) (0 : Fin 1) T)
-        (Fin.cons ((chooseLocalFrames I M x₀).1 i) ![X, Y])
-        (Fin.cons (covectorToFunctional I M ((chooseLocalFrames I M x₀).2 i)) ![])) x₀ =
-        (T ![X, σ, Y] ![θ]) x₀ := by
-      rw [swap_covariant_eval, swap_contravariant_eval]
-      change (T ((Fin.cons σ ![X, Y]) ∘ Equiv.swap (0 : Fin 3) (1 : Fin 3))
-          ((Fin.cons θ ![]) ∘ Equiv.swap (0 : Fin 1) (0 : Fin 1))) x₀ =
-        (T ![X, σ, Y] ![θ]) x₀
-      rw [hv, hα]
-    _ = (θ (L σ)) x₀ := by
-      rw [hL σ θ]
-    _ = (endo_to_tensor L
-          (Fin.cons ((chooseLocalFrames I M x₀).1 i) ![])
-          (Fin.cons (covectorToFunctional I M ((chooseLocalFrames I M x₀).2 i)) ![])) x₀ := by
-      rfl
 
 end Chunk15
 

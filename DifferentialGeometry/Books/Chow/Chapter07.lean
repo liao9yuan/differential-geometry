@@ -349,13 +349,15 @@ theorem metric_product_rule
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [ContMDiffCovariantDerivative cov ∞]
     (g : RiemannianMetric (I := I) (M := M))
-    (h_mc : IsMetricCompatibleWithMetric I M cov g)
+    (h_mc : IsMetricCompatibleMathlib I M cov g)
     (X Y Z : 𝒳) (x : M) :
-    vectorFieldAction I M X (metricPairingSmooth I M g Y Z) x =
+    ((concreteDerivationEmbedding I M).embed X
+        ((concreteMetricDuality I M g).g Y Z)) x =
       g.pairing x (∇[cov](X, Y) x) (Z x) +
         g.pairing x (Y x) (∇[cov](X, Z) x) := by
-  simpa [RiemannianMetric.pairing, concreteConn_apply] using
-    IsMetricCompatibleWithMetric.apply I M cov g h_mc X Y Z x
+  have h_syn := concreteMetricCompat I M cov g h_mc
+  have hx := congrArg (fun f => f x) (h_syn X Y Z)
+  simpa [RiemannianMetric.pairing, concreteConn_apply, concreteMetricDuality_g_eval] using hx
 
 /-- Torsion-free means `∇_X Y - ∇_Y X = [X,Y]`. -/
 theorem torsion_free_connection_identity
@@ -374,11 +376,11 @@ theorem isLeviCivita_of_metricCompatible_torsionFree
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [ContMDiffCovariantDerivative cov ∞]
     (g : RiemannianMetric (I := I) (M := M))
-    (h_mc : IsMetricCompatibleWithMetric I M cov g)
+    (h_mc : IsMetricCompatibleMathlib I M cov g)
     (h_tf : cov.torsion = 0) :
     IsLeviCivita (concreteDerivationEmbedding I M)
       (concreteConn I M cov) (concreteMetricDuality I M g) :=
-  concreteLeviCivita_of_metricCompatible_torsionFree I M cov g h_mc h_tf
+  concreteIsLeviCivita I M cov g h_mc h_tf
 
 end DefinitionOfTheLeviCivitaConnection
 
@@ -587,6 +589,7 @@ section ParallelVectorFieldsAlongMaps
 
 variable {k R V A Gamma : Type*}
 variable [Field k] [CommRing R] [Algebra k R]
+variable [Invertible (2 : R)]
 variable [CommRing A]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 variable [AddCommGroup Gamma] [Module A Gamma]
@@ -630,6 +633,7 @@ section DefinitionOfGeodesic
 
 variable {k R V A Gamma : Type*}
 variable [Field k] [CommRing R] [Algebra k R]
+variable [Invertible (2 : R)]
 variable [CommRing A]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 variable [AddCommGroup Gamma] [Module A Gamma]
@@ -773,6 +777,7 @@ section GeodesicsAreCriticalPoints
 
 variable {k R V A Gamma : Type*}
 variable [Field k] [CommRing R] [Algebra k R]
+variable [Invertible (2 : R)]
 variable [CommRing A]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 variable [AddCommGroup Gamma] [Module A Gamma]
@@ -807,6 +812,7 @@ open Manifold Set
 
 variable {k R V A Gamma : Type*}
 variable [Field k] [CommRing R] [Algebra k R]
+variable [Invertible (2 : R)]
 variable [CommRing A]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 variable [AddCommGroup Gamma] [Module A Gamma]
