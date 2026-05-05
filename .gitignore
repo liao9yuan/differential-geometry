@@ -11,6 +11,8 @@
 !/.gitignore
 # end of whitelist
 
+/DifferentialGeometry/Analysis/
+
 .lake/
 
 .DS_Store
