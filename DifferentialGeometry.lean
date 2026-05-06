@@ -206,6 +206,7 @@ import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.Orientation
 import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.Stokes
 import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.GreenWithBoundary
 import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.Family
+import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.GradientContinuity
 
 -- Vendored Sobolev / elliptic-regularity library
 import DifferentialGeometry.External.DeGiorgi.SobolevSpace
@@ -321,9 +322,21 @@ import DifferentialGeometry.Analysis.Laplacian.WithBoundary.InteriorH1Compl
 import DifferentialGeometry.Analysis.Laplacian.WithBoundary.InteriorVariational
 import DifferentialGeometry.Analysis.Laplacian.WithBoundary.InteriorSmoothBridge
 import DifferentialGeometry.Analysis.Laplacian.WithBoundary.Neumann.H1Compl
+import DifferentialGeometry.Analysis.Laplacian.WithBoundary.Neumann.FullSmoothScalarPreH1
+import DifferentialGeometry.Analysis.Laplacian.WithBoundary.Neumann.FullH1Compl
+import DifferentialGeometry.Analysis.Laplacian.WithBoundary.Neumann.FullSmoothBridge
 import DifferentialGeometry.Analysis.Laplacian.WithBoundary.Dirichlet.H1Compl
 import DifferentialGeometry.Analysis.Sobolev.EquivalenceReverse
 import DifferentialGeometry.Analysis.Laplacian.Compactness
 import DifferentialGeometry.Analysis.Laplacian.SpectrumUnconditional
 import DifferentialGeometry.Analysis.Sobolev.NirenbergH2
 import DifferentialGeometry.Analysis.Sobolev.DifferenceQuotientWeakLimit
+import DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction
+import DifferentialGeometry.Analysis.Sobolev.NirenbergSubstitution
+import DifferentialGeometry.Analysis.Sobolev.NirenbergCoercivity
+import DifferentialGeometry.Analysis.Sobolev.NirenbergCrossBounds
+import DifferentialGeometry.Analysis.Sobolev.NirenbergH2Regularity
+import DifferentialGeometry.Analysis.Sobolev.NirenbergIteration
+import DifferentialGeometry.Analysis.Sobolev.IntrinsicH1Lp
+import DifferentialGeometry.Analysis.Laplacian.EllipticRegularity
+import DifferentialGeometry.Analysis.Laplacian.Lichnerowicz

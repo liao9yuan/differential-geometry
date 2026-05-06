@@ -213,6 +213,41 @@ theorem exists_cutoff
   · rw [tsupport, hη_support]
     exact (Metric.closure_thickening_subset_cthickening δ K).trans hδΩ
 
+/-- A smooth cutoff with a quantitative bound on its derivative.
+
+Strengthening of `exists_cutoff`: in addition to existence of `η ∈ C^∞(E)`
+with `0 ≤ η ≤ 1`, `η = 1` on `K`, and `tsupport η ⊆ Ω'`, we extract a finite
+constant `N ≥ 0` such that `‖fderiv ℝ η x‖ ≤ N` for every `x : E`. The bound
+arises from continuity of the Fréchet derivative on the compact `tsupport η`,
+combined with the fact that `fderiv ℝ η = 0` outside `tsupport η`. -/
+theorem exists_cutoff_with_fderiv_bound
+    {K Ω' : Set E} (hK : IsCompact K) (hΩ' : IsOpen Ω') (hKΩ' : K ⊆ Ω') :
+    ∃ η : E → ℝ,
+      ContDiff ℝ (⊤ : ℕ∞) η ∧
+      HasCompactSupport η ∧
+      Set.range η ⊆ Set.Icc (0 : ℝ) 1 ∧
+      (∀ x ∈ K, η x = 1) ∧
+      tsupport η ⊆ Ω' ∧
+      ∃ N : ℝ, 0 ≤ N ∧ ∀ x : E, ‖fderiv ℝ η x‖ ≤ N := by
+  obtain ⟨η, hη_cd, hη_supp, hη_range, hη_one, hη_tsupp⟩ :=
+    exists_cutoff hK hΩ' hKΩ'
+  refine ⟨η, hη_cd, hη_supp, hη_range, hη_one, hη_tsupp, ?_⟩
+  -- Continuity of `fderiv ℝ η`.
+  have h_fderiv_cont : Continuous (fderiv ℝ η) :=
+    hη_cd.continuous_fderiv (by simp)
+  -- Norm of `fderiv ℝ η` is continuous.
+  have h_norm_cont : Continuous (fun x : E => ‖fderiv ℝ η x‖) := h_fderiv_cont.norm
+  -- `fderiv ℝ η` has compact support, so its norm has compact support too.
+  have h_fderiv_cs : HasCompactSupport (fderiv ℝ η) := hη_supp.fderiv ℝ
+  have h_norm_cs : HasCompactSupport (fun x : E => ‖fderiv ℝ η x‖) := by
+    apply h_fderiv_cs.comp_left
+    simp
+  -- A continuous function with compact support is bounded above.
+  obtain ⟨N₀, hN₀⟩ := h_norm_cont.bddAbove_range_of_hasCompactSupport h_norm_cs
+  refine ⟨max N₀ 0, le_max_right _ _, fun x => ?_⟩
+  have h_le : ‖fderiv ℝ η x‖ ≤ N₀ := hN₀ ⟨x, rfl⟩
+  exact h_le.trans (le_max_left _ _)
+
 /-! ## Supremum bound for the coefficients on a compact set -/
 
 /-- The coefficient matrix is bounded on any compact set. -/
