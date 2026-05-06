@@ -340,18 +340,91 @@ This is independent of the basis (it is the categorical trace of the slot-isomor
 `E ⊗ E^* ≅ End(E)` applied to the chosen pair of slots).
 -/
 
+/-- Convert a continuous linear covector into the corresponding one-slot covariant
+model tensor. -/
+noncomputable def model_covectorOfCLM :
+    (E →L[𝕜] 𝕜) →L[𝕜] Tensor0SModel 1 𝕜 E :=
+  (continuousMultilinearCurryFin1 𝕜 E 𝕜).symm.toContinuousLinearMap
+
+/-- Model-level trace contraction of an `(r+1, s+1)` tensor to an `(r, s)` tensor.
+
+Internally this uses the canonical finite basis of the model space. The public
+pointwise operation below transports this model map through the bundle-fiber
+equivalences, so the external API remains coordinate-free. -/
+noncomputable def model_contract_trace (r s : ℕ) :
+    TensorRSModel (r + 1) (s + 1) 𝕜 E →L[𝕜] TensorRSModel r s 𝕜 E :=
+  let d := Module.finrank 𝕜 E
+  let b : Module.Basis (Fin d) 𝕜 E := Module.finBasis 𝕜 E
+  LinearMap.toContinuousLinearMap
+    { toFun := fun T =>
+        LinearMap.toContinuousLinearMap
+          { toFun := fun β =>
+              ∑ i : Fin d,
+                model_interior_product s (b i)
+                  (T (model_tensorWithCovector r
+                    (model_covectorOfCLM (𝕜 := 𝕜) (E := E)
+                      (LinearMap.toContinuousLinearMap (b.coord i))) β))
+            map_add' := fun β₁ β₂ => by
+              ext v
+              simp only [ContinuousLinearMap.map_add, ContinuousMultilinearMap.sum_apply,
+                ContinuousMultilinearMap.add_apply]
+              rw [Finset.sum_add_distrib]
+            map_smul' := fun c β => by
+              ext v
+              simp only [ContinuousLinearMap.map_smul, ContinuousMultilinearMap.sum_apply,
+                ContinuousMultilinearMap.smul_apply, smul_eq_mul, RingHom.id_apply]
+              rw [Finset.mul_sum] }
+      map_add' := fun T₁ T₂ => by
+        refine ContinuousLinearMap.ext fun β => ?_
+        ext v
+        simp only [LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk,
+          ContinuousLinearMap.add_apply, ContinuousLinearMap.map_add,
+          ContinuousMultilinearMap.sum_apply, ContinuousMultilinearMap.add_apply]
+        rw [Finset.sum_add_distrib]
+      map_smul' := fun c T => by
+        refine ContinuousLinearMap.ext fun β => ?_
+        ext v
+        simp only [LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk,
+          ContinuousLinearMap.smul_apply, ContinuousLinearMap.map_smul,
+          ContinuousMultilinearMap.sum_apply, ContinuousMultilinearMap.smul_apply,
+          smul_eq_mul, RingHom.id_apply]
+        rw [Finset.mul_sum] }
+
+set_option linter.unusedSectionVars false in
+theorem model_contract_trace_apply (r s : ℕ)
+    (T : TensorRSModel (r + 1) (s + 1) 𝕜 E) (β : Tensor0SModel r 𝕜 E) :
+    model_contract_trace (𝕜 := 𝕜) (E := E) r s T β =
+      ∑ i : Fin (Module.finrank 𝕜 E),
+        model_interior_product s ((Module.finBasis 𝕜 E) i)
+          (T (model_tensorWithCovector r
+            (model_covectorOfCLM (𝕜 := 𝕜) (E := E)
+              (LinearMap.toContinuousLinearMap ((Module.finBasis 𝕜 E).coord i))) β)) :=
+  rfl
+
 /-- Pointwise trace contraction of an (r+1, s+1)-tensor at `x` to an (r, s)-tensor,
 contracting the first upper slot with the first lower slot.
 
-TODO: this requires a basis-free description of the trace `E ⊗ E* → 𝕜` at the
-fiber level. The cleanest route is to package the trace as a continuous linear
-form on `Tensor0SModel 1 𝕜 E ⊗ Tensor0SModel 1 𝕜 E^*` (or directly on the
-finite-dimensional fiber `End(TangentSpace I x)`) and lift it through the bundle
-trivialization. The current scaffold leaves the construction abstract; the
-field-level lift `contract_TensorRSField` then inherits this `sorry`. -/
+This is implemented by the finite-basis model trace and transported through the
+fiber/model continuous linear equivalences. -/
 noncomputable def contract_trace (r s : ℕ) (x : M) :
     TensorRSSpace (r + 1) (s + 1) I x →L[𝕜] TensorRSSpace r s I x :=
-  sorry
+  (tensorRSSpace_continuousLinearEquiv (I := I) r s x).symm.toContinuousLinearMap.comp
+    ((model_contract_trace (𝕜 := 𝕜) (E := E) r s).comp
+      (tensorRSSpace_continuousLinearEquiv (I := I) (r + 1) (s + 1) x).toContinuousLinearMap)
+
+set_option linter.unusedSectionVars false in
+theorem contract_trace_apply (r s : ℕ) (x : M)
+    (T : TensorRSSpace (r + 1) (s + 1) I x) (β : Tensor0SSpace r I x) :
+    contract_trace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s x T β =
+      (tensor0SSpace_continuousLinearEquiv (I := I) s x).symm
+        (∑ i : Fin (Module.finrank 𝕜 E),
+          model_interior_product s ((Module.finBasis 𝕜 E) i)
+            ((TensorRSSpace.toModel (I := I) T)
+              (model_tensorWithCovector r
+                (model_covectorOfCLM (𝕜 := 𝕜) (E := E)
+                  (LinearMap.toContinuousLinearMap ((Module.finBasis 𝕜 E).coord i)))
+                (Tensor0SSpace.toModel β)))) := by
+  rfl
 
 /-!
 ## Field-level contractions
@@ -735,7 +808,24 @@ noncomputable def contract_TensorRSField (r s : ℕ)
     TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) r s := by
   letI := tensorRSBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (r + 1) (s + 1)
   letI := tensorRSBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s
-  exact ⟨contract_TensorRSField_fun r s (fun x => T x), sorry⟩
+  refine ⟨contract_TensorRSField_fun r s (fun x => T x), ?_⟩
+  intro x₀
+  rw [contMDiffAt_section]
+  have hT := T.contMDiff x₀
+  rw [contMDiffAt_section] at hT
+  have h_combine :
+      ContMDiffAt I 𝓘(𝕜, TensorRSModel r s 𝕜 E) n
+        (fun x => model_contract_trace (𝕜 := 𝕜) (E := E) r s
+          ((trivializationAt (TensorRSModel (r + 1) (s + 1) 𝕜 E)
+            (fun x => TensorRSSpace (r + 1) (s + 1) I x) x₀ ⟨x, T x⟩).2)) x₀ :=
+    (model_contract_trace (𝕜 := 𝕜) (E := E) r s).contMDiffAt.comp x₀ hT
+  refine h_combine.congr_of_eventuallyEq ?_
+  have hbase := (trivializationAt E (TangentSpace I) x₀).open_baseSet.mem_nhds
+    (mem_baseSet_trivializationAt _ _ x₀)
+  filter_upwards [hbase] with x hx
+  refine ContinuousLinearMap.ext fun β => ?_
+  refine ContinuousMultilinearMap.ext fun v => ?_
+  simp [contract_TensorRSField_fun, contract_trace, model_contract_trace]
 
 end FieldContraction
 

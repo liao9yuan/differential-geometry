@@ -6,6 +6,8 @@ Authors: Jack McCarthy
 import RicciFlower.Tensor.Auxiliary.ShuffleDecomposition
 import RicciFlower.Tensor.Auxiliary.Fin
 import Mathlib.GroupTheory.Perm.Fin
+import Mathlib.GroupTheory.Perm.Subgroup
+import Mathlib.Tactic
 
 /-!
 # Shuffle-derivative bijection
@@ -72,6 +74,7 @@ theorem derivShuffleLeftFwd_sign
   simp only [derivShuffleLeftFwd, Equiv.Perm.sign_permCongr, Equiv.Perm.sign_mul,
     Equiv.Perm.sign_inv, Fin.sign_cycleRange, Equiv.Perm.decomposeFin.symm_sign,
     if_true, one_mul, permFinOfSum]
+  rfl
 
 /-- `decomposeFin.symm (0, ·)` is a group homomorphism. -/
 private theorem decomposeFin_symm_zero_mul (e₁ e₂ : Equiv.Perm (Fin (m + n))) :
@@ -133,8 +136,8 @@ theorem derivShuffleLeftFwd_wd (k : Fin (m + n + 1))
     -- succ-shifted left elements. After Φ.symm, inl maps to inl.
     simp +decide [ Equiv.Perm.decomposeFin, permFinOfSum ];
     simp +decide [ Fin.finAddFlipAssoc, finSuccEquiv ];
-    simp +decide [ finSuccEquiv', finCongr ];
-    simp +decide [ Fin.castLE, Fin.castLT, Fin.cons ];
+    simp +decide [ finSuccEquiv' ];
+    simp +decide [ Fin.cons ];
     simp +decide [ Fin.cases, finSumFinEquiv ];
     simp +decide [ Fin.induction, Fin.addCases ];
     simp +decide [ Fin.induction.go ]
@@ -302,6 +305,187 @@ private theorem derivShuffleLeftFwd_inl_zero (k : Fin (m + n + 1))
   rw [h1, Equiv.Perm.decomposeFin_symm_apply_zero]
   exact (Fin.cycleRange k).symm_apply_eq.mpr (Fin.cycleRange_self k).symm
 
+/-- Evaluation of the forward map on the non-derivative left slots. -/
+private theorem derivShuffleLeftFwd_inl_succ
+    (k : Fin (m + n + 1)) (σ : Equiv.Perm (Fin m ⊕ Fin n)) (a : Fin m) :
+    derivShuffleLeftFwd k σ (Sum.inl (Fin.succ a)) =
+      finSuccSumEquiv.symm
+        (k.succAbove (permFinOfSum σ (Fin.castAdd n a))) := by
+  apply finSuccSumEquiv.injective
+  simp only [derivShuffleLeftFwd, Equiv.permCongr_apply, Equiv.symm_symm,
+    Equiv.Perm.mul_apply, Equiv.apply_symm_apply]
+  have hΦ :
+      finSuccSumEquiv (Sum.inl (Fin.succ a)) =
+        (Fin.castAdd n a).succ :=
+    Fin.ext (by simp [finSuccSumEquiv, Fin.finAddFlipAssoc, finCongr])
+  rw [hΦ, Equiv.Perm.decomposeFin_symm_apply_succ]
+  simp only [Equiv.swap_self, Equiv.refl_apply]
+  change (Fin.cycleRange k).symm ((permFinOfSum σ (Fin.castAdd n a)).succ) =
+    k.succAbove (permFinOfSum σ (Fin.castAdd n a))
+  exact Fin.cycleRange_symm_succ k (permFinOfSum σ (Fin.castAdd n a))
+
+/-- The rank function `a ↦ #{x ∈ s | x < a}` is injective on a finite set `s`. -/
+private theorem finset_rank_lt_injective {N : ℕ} (s : Finset (Fin N)) {a b : Fin N}
+    (ha : a ∈ s) (hb : b ∈ s)
+    (hcard :
+      (s.filter fun x => x.val < a.val).card =
+      (s.filter fun x => x.val < b.val).card) :
+    a = b := by
+  by_cases hab : a.val < b.val
+  · have hss :
+        s.filter (fun x => x.val < a.val) ⊂
+          s.filter (fun x => x.val < b.val) := by
+      rw [Finset.ssubset_iff_subset_ne]
+      refine ⟨?_, ?_⟩
+      · intro x hx
+        rw [Finset.mem_filter] at hx ⊢
+        exact ⟨hx.1, Nat.lt_trans hx.2 hab⟩
+      · intro heq
+        have ha_big : a ∈ s.filter (fun x => x.val < b.val) := by
+          rw [Finset.mem_filter]
+          exact ⟨ha, hab⟩
+        have ha_small : a ∈ s.filter (fun x => x.val < a.val) := by
+          rw [heq]
+          exact ha_big
+        rw [Finset.mem_filter] at ha_small
+        exact Nat.lt_irrefl _ ha_small.2
+    have := Finset.card_lt_card hss
+    omega
+  · by_cases hba : b.val < a.val
+    · have hss :
+          s.filter (fun x => x.val < b.val) ⊂
+            s.filter (fun x => x.val < a.val) := by
+        rw [Finset.ssubset_iff_subset_ne]
+        refine ⟨?_, ?_⟩
+        · intro x hx
+          rw [Finset.mem_filter] at hx ⊢
+          exact ⟨hx.1, Nat.lt_trans hx.2 hba⟩
+        · intro heq
+          have hb_big : b ∈ s.filter (fun x => x.val < a.val) := by
+            rw [Finset.mem_filter]
+            exact ⟨hb, hba⟩
+          have hb_small : b ∈ s.filter (fun x => x.val < b.val) := by
+            rw [heq]
+            exact hb_big
+          rw [Finset.mem_filter] at hb_small
+          exact Nat.lt_irrefl _ hb_small.2
+      have := Finset.card_lt_card hss
+      omega
+    · apply Fin.ext
+      omega
+
+/-- The set of total positions hit by the left block after the derivative shuffle. -/
+private noncomputable def derivShuffleLeftSet
+    (k : Fin (m + n + 1)) (σ : Equiv.Perm (Fin m ⊕ Fin n)) :
+    Finset (Fin (m + n + 1)) :=
+  Finset.univ.image fun i : Fin (m + 1) =>
+    finSuccSumEquiv (derivShuffleLeftFwd k σ (Sum.inl i))
+
+/-- Explicit description of the left-output position set: the derivative position `k`
+plus the shifted old left positions. -/
+private theorem derivShuffleLeftSet_eq
+    (k : Fin (m + n + 1)) (σ : Equiv.Perm (Fin m ⊕ Fin n)) :
+    derivShuffleLeftSet k σ =
+      insert k
+        (Finset.univ.image fun a : Fin m =>
+          k.succAbove (permFinOfSum σ (Fin.castAdd n a))) := by
+  classical
+  ext y
+  constructor
+  · intro hy
+    rw [derivShuffleLeftSet, Finset.mem_image] at hy
+    obtain ⟨i, -, hi⟩ := hy
+    obtain (rfl | ⟨a, rfl⟩) := i.eq_zero_or_eq_succ
+    · rw [derivShuffleLeftFwd_inl_zero] at hi
+      rw [Equiv.apply_symm_apply] at hi
+      rw [Finset.mem_insert]
+      exact Or.inl hi.symm
+    · rw [derivShuffleLeftFwd_inl_succ] at hi
+      rw [Equiv.apply_symm_apply] at hi
+      rw [Finset.mem_insert, Finset.mem_image]
+      exact Or.inr ⟨a, Finset.mem_univ _, hi⟩
+  · intro hy
+    rw [derivShuffleLeftSet, Finset.mem_image]
+    rw [Finset.mem_insert, Finset.mem_image] at hy
+    rcases hy with hy | ⟨a, -, ha⟩
+    · refine ⟨0, Finset.mem_univ _, ?_⟩
+      rw [derivShuffleLeftFwd_inl_zero, hy]
+      simp
+    · refine ⟨Fin.succ a, Finset.mem_univ _, ?_⟩
+      rw [derivShuffleLeftFwd_inl_succ, ha]
+      simp
+
+/-- The shifted old-left-position map is injective. -/
+private theorem derivShuffleLeft_succ_position_injective
+    (k : Fin (m + n + 1)) (σ : Equiv.Perm (Fin m ⊕ Fin n)) :
+    Function.Injective fun a : Fin m =>
+      k.succAbove (permFinOfSum σ (Fin.castAdd n a)) := by
+  intro a b h
+  have h₁ := Fin.succAbove_right_injective h
+  have h₂ := (permFinOfSum σ).injective h₁
+  apply Fin.ext
+  apply_fun Fin.val at h₂
+  simpa using h₂
+
+/-- `derivShuffleJ` is the rank of `k` inside the finite set of left output positions. -/
+private theorem derivShuffleJ_val_eq_rank_leftSet
+    (k : Fin (m + n + 1)) (σ : Equiv.Perm (Fin m ⊕ Fin n)) :
+    (derivShuffleJ k σ).val =
+      ((derivShuffleLeftSet k σ).filter fun x => x.val < k.val).card := by
+  classical
+  rw [derivShuffleLeftSet_eq]
+  simp only [Finset.filter_insert, lt_self_iff_false, ↓reduceIte]
+  rw [Finset.filter_image]
+  rw [Finset.card_image_of_injective]
+  · unfold derivShuffleJ
+    change (Finset.univ.filter (fun i : Fin m =>
+        (permFinOfSum σ (Fin.castAdd n i)).val < k.val)).card =
+      (Finset.univ.filter (fun a : Fin m =>
+        (k.succAbove (permFinOfSum σ (Fin.castAdd n a))).val < k.val)).card
+    congr 1
+    ext a
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+    change (permFinOfSum σ (Fin.castAdd n a)).castSucc < k ↔
+      k.succAbove (permFinOfSum σ (Fin.castAdd n a)) < k
+    rw [Fin.succAbove_lt_iff_castSucc_lt]
+  · exact derivShuffleLeft_succ_position_injective k σ
+
+/-- A `(m+1,n)` block-coset equality preserves the set of left output positions. -/
+private theorem derivShuffleLeftSet_eq_of_rel
+    (k₁ k₂ : Fin (m + n + 1))
+    (σ₁ σ₂ : Equiv.Perm (Fin m ⊕ Fin n))
+    (h : QuotientGroup.leftRel (Equiv.Perm.sumCongrHom (Fin (m + 1)) (Fin n)).range
+      (derivShuffleLeftFwd k₁ σ₁) (derivShuffleLeftFwd k₂ σ₂)) :
+    derivShuffleLeftSet k₁ σ₁ = derivShuffleLeftSet k₂ σ₂ := by
+  classical
+  rw [QuotientGroup.leftRel_apply] at h
+  obtain ⟨⟨s_l, s_r⟩, hs⟩ := h
+  have h_sc : Equiv.Perm.sumCongr s_l s_r =
+      (derivShuffleLeftFwd k₁ σ₁)⁻¹ * (derivShuffleLeftFwd k₂ σ₂) := by
+    rwa [Equiv.Perm.sumCongrHom_apply] at hs
+  ext y
+  constructor
+  · intro hy
+    rw [derivShuffleLeftSet, Finset.mem_image] at hy ⊢
+    obtain ⟨i, -, hi⟩ := hy
+    refine ⟨s_l.symm i, Finset.mem_univ _, ?_⟩
+    have h_eval := DFunLike.congr_fun h_sc (Sum.inl (s_l.symm i))
+    simp only [Equiv.Perm.sumCongr_apply, Sum.map_inl, Equiv.Perm.mul_apply,
+      Equiv.Perm.inv_def, Equiv.apply_symm_apply] at h_eval
+    apply_fun (derivShuffleLeftFwd k₁ σ₁) at h_eval
+    simp only [Equiv.apply_symm_apply] at h_eval
+    rw [← h_eval, hi]
+  · intro hy
+    rw [derivShuffleLeftSet, Finset.mem_image] at hy ⊢
+    obtain ⟨i, -, hi⟩ := hy
+    refine ⟨s_l i, Finset.mem_univ _, ?_⟩
+    have h_eval := DFunLike.congr_fun h_sc (Sum.inl i)
+    simp only [Equiv.Perm.sumCongr_apply, Sum.map_inl, Equiv.Perm.mul_apply,
+      Equiv.Perm.inv_def] at h_eval
+    apply_fun (derivShuffleLeftFwd k₁ σ₁) at h_eval
+    simp only [Equiv.apply_symm_apply] at h_eval
+    rw [h_eval, hi]
+
 /-- The forward map is injective. -/
 private theorem derivShuffleFwd_injective :
     Function.Injective (@derivShuffleFwd m n) := by
@@ -314,49 +498,31 @@ private theorem derivShuffleFwd_injective :
   have h_j : derivShuffleJ k₁ σ₁ = derivShuffleJ k₂ σ₂ := congr_arg Prod.snd h
   -- Step 1: Same coset means the ratio is a block perm
   have h_rel := Quotient.exact' h_coset
-  -- Step 2: From the block perm at inl 0, extract info about k₁ vs k₂
-  rw [QuotientGroup.leftRel_apply] at h_rel
-  obtain ⟨⟨s_l, s_r⟩, hs⟩ := h_rel
-  -- The ratio (fwd k₁ σ₁)⁻¹ * (fwd k₂ σ₂) = sumCongr s_l s_r
-  -- At inl 0: (fwd k₁ σ₁)⁻¹(fwd k₂ σ₂(inl 0)) = inl(s_l 0)
-  -- fwd k σ(inl 0) = Φ⁻¹(k), so Φ⁻¹(k₁) and Φ⁻¹(k₂) are in the same coset orbit
-  -- Step 2a: Extract the key Fin equation from the block perm at inl 0.
-  -- (fwd k₁ σ₁)(inl(s_l 0)) = (fwd k₂ σ₂)(inl 0) = Φ⁻¹(k₂)
-  -- and (fwd k₁ σ₁)(inl 0) = Φ⁻¹(k₁)
-  -- So Φ⁻¹(k₂) = (fwd k₁ σ₁)(inl(s_l 0))
-  have h_ratio_at_zero : (derivShuffleLeftFwd k₁ σ₁) (Sum.inl (s_l 0)) =
-      finSuccSumEquiv.symm k₂ := by
-    have h_sc : Equiv.Perm.sumCongr s_l s_r = (derivShuffleLeftFwd k₁ σ₁)⁻¹ *
-        (derivShuffleLeftFwd k₂ σ₂) := by
-      rwa [Equiv.Perm.sumCongrHom_apply] at hs
-    have h_eval := DFunLike.congr_fun h_sc (Sum.inl 0)
-    simp only [Equiv.Perm.sumCongr_apply, Sum.map_inl, Equiv.Perm.mul_apply,
-      Equiv.Perm.inv_def, derivShuffleLeftFwd_inl_zero] at h_eval
-    apply_fun (derivShuffleLeftFwd k₁ σ₁) at h_eval
-    simpa only [Equiv.apply_symm_apply] using h_eval
-  -- Step 2b: k₁ = k₂ by injectivity of Φ⁻¹ and fwd k₁ σ₁
+  have h_left_set :
+      derivShuffleLeftSet k₁ σ₁ = derivShuffleLeftSet k₂ σ₂ :=
+    derivShuffleLeftSet_eq_of_rel k₁ k₂ σ₁ σ₂ h_rel
+  -- Step 2: `derivShuffleJ` is the rank of the derivative position in the shared left set.
   have h_k_eq : k₁ = k₂ := by
-    -- If s_l 0 = 0, then (fwd k₁ σ₁)(inl 0) = Φ⁻¹(k₂), but also = Φ⁻¹(k₁),
-    -- so k₁ = k₂ by injectivity of Φ⁻¹.
-    -- If s_l 0 ≠ 0, we derive a contradiction from h_j (rank equality):
-    -- The rank derivShuffleJ counts left positions below k.
-    -- Since k₁ ∈ L' and k₂ ∈ L' (the shared left-position set),
-    -- and k₁ ≠ k₂, the ranks must differ. This contradicts h_j.
-    by_contra h_ne
-    -- k₁ ≠ k₂ implies s_l 0 ≠ 0 (from the equations above)
-    have h_sl_ne : s_l 0 ≠ 0 := by
-      intro h_eq; apply h_ne
-      have h1 := derivShuffleLeftFwd_inl_zero k₁ σ₁
-      rw [h_eq] at h_ratio_at_zero
-      rw [h1] at h_ratio_at_zero
-      exact finSuccSumEquiv.symm.injective h_ratio_at_zero
-    -- The rank equality h_j combined with k₁ ≠ k₂ in the same left-position
-    -- set leads to a contradiction. Both k₁, k₂ ∈ L' (as Φ-images of inl 0
-    -- under fwd k₁ σ₁ and fwd k₂ σ₂ resp.), and derivShuffleJ computes the
-    -- rank of k in L'. Rank is injective on a finite set: if k₁ < k₂, then
-    -- rank(k₂) > rank(k₁) since k₁ ∈ L' contributes an extra count below k₂.
-    -- This is a counting argument on Finsets.
-    sorry
+    let L := derivShuffleLeftSet k₁ σ₁
+    have hk₁ : k₁ ∈ L := by
+      change k₁ ∈ derivShuffleLeftSet k₁ σ₁
+      rw [derivShuffleLeftSet, Finset.mem_image]
+      refine ⟨0, Finset.mem_univ _, ?_⟩
+      rw [derivShuffleLeftFwd_inl_zero]
+      simp
+    have hk₂ : k₂ ∈ L := by
+      change k₂ ∈ derivShuffleLeftSet k₁ σ₁
+      rw [h_left_set, derivShuffleLeftSet, Finset.mem_image]
+      refine ⟨0, Finset.mem_univ _, ?_⟩
+      rw [derivShuffleLeftFwd_inl_zero]
+      simp
+    have h_rank : (L.filter fun x => x.val < k₁.val).card =
+        (L.filter fun x => x.val < k₂.val).card := by
+      have hjv := congr_arg Fin.val h_j
+      rw [derivShuffleJ_val_eq_rank_leftSet k₁ σ₁,
+        derivShuffleJ_val_eq_rank_leftSet k₂ σ₂] at hjv
+      simpa [L, h_left_set] using hjv
+    exact finset_rank_lt_injective L hk₁ hk₂ h_rank
   subst h_k_eq
   -- Step 3: Same k, same coset → same [σ] (coset injectivity)
   ext1
@@ -364,28 +530,67 @@ private theorem derivShuffleFwd_injective :
   · exact Quotient.sound' (derivShuffleLeftFwd_coset_injective k₁ σ₁ σ₂
       (Quotient.exact' h_coset))
 
+private theorem modSumCongr_range_card_fin (m n : ℕ) :
+    Fintype.card { x : Equiv.Perm (Fin m ⊕ Fin n) //
+      ∃ a : Equiv.Perm (Fin m), ∃ b : Equiv.Perm (Fin n), Equiv.Perm.sumCongr a b = x } =
+    Nat.factorial m * Nat.factorial n := by
+  classical
+  have h : Fintype.card ((Equiv.Perm.sumCongrHom (Fin m) (Fin n)).range) =
+      Nat.factorial m * Nat.factorial n := by
+    rw [Equiv.Perm.sumCongrHom.card_range]
+    simp [Fintype.card_perm]
+  simpa [Equiv.Perm.sumCongrHom_apply] using h
+
+private theorem derivShuffleFwd_card :
+    Fintype.card
+      (Fin (m + n + 1) × Equiv.Perm.ModSumCongr (Fin m) (Fin n)) =
+    Fintype.card
+      (Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin n) × Fin (m + 1)) := by
+  classical
+  have hmn := Subgroup.card_eq_card_quotient_mul_card_subgroup
+    ((Equiv.Perm.sumCongrHom (Fin m) (Fin n)).range)
+  have hm1n := Subgroup.card_eq_card_quotient_mul_card_subgroup
+    ((Equiv.Perm.sumCongrHom (Fin (m + 1)) (Fin n)).range)
+  simp [Nat.card_eq_fintype_card, Fintype.card_perm, Fintype.card_fin,
+    modSumCongr_range_card_fin] at hmn hm1n
+  simp [Equiv.Perm.ModSumCongr, Fintype.card_fin]
+  rw [show m + 1 + n = m + n + 1 by omega, Nat.factorial_succ] at hm1n
+  rw [Nat.factorial_succ] at hm1n
+  apply Nat.mul_right_cancel (show 0 < Nat.factorial m * Nat.factorial n by positivity)
+  calc
+    ((m + n + 1) *
+        Fintype.card
+          (Equiv.Perm (Fin m ⊕ Fin n) ⧸ (Equiv.Perm.sumCongrHom (Fin m) (Fin n)).range)) *
+        (Nat.factorial m * Nat.factorial n)
+        = (m + n + 1) * Nat.factorial (m + n) := by
+          nlinarith [hmn]
+    _ = Fintype.card
+          (Equiv.Perm (Fin (m + 1) ⊕ Fin n) ⧸
+            (Equiv.Perm.sumCongrHom (Fin (m + 1)) (Fin n)).range) *
+        ((m + 1) * (Nat.factorial m * Nat.factorial n)) := by
+          simpa [mul_assoc] using hm1n
+    _ = (Fintype.card
+          (Equiv.Perm (Fin (m + 1) ⊕ Fin n) ⧸
+            (Equiv.Perm.sumCongrHom (Fin (m + 1)) (Fin n)).range) * (m + 1)) *
+        (Nat.factorial m * Nat.factorial n) := by
+          ring
+
 /-- The assembled bijection. -/
 noncomputable def derivShuffleEquivLeft :
     Fin (m + n + 1) × Equiv.Perm.ModSumCongr (Fin m) (Fin n) ≃
       Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin n) × Fin (m + 1) :=
   Equiv.ofBijective derivShuffleFwd
     ((Fintype.bijective_iff_injective_and_card derivShuffleFwd).mpr
-      ⟨derivShuffleFwd_injective, by
-        -- card(Fin(m+n+1) × Sh(m,n)) = (m+n+1)·C(m+n,m) = C(m+n+1,m+1)·(m+1)
-        --   = card(Sh(m+1,n) × Fin(m+1))
-        sorry⟩)
+      ⟨derivShuffleFwd_injective, derivShuffleFwd_card⟩)
 
-/-- Sign preservation for the assembled bijection.
+/-- Representative-level sign statement for the derivative shuffle map.
 
-The original (incorrect) version universally quantified over arbitrary independent
-representatives `σ_rep` and `τ_rep`. This fails because changing representatives within
-their cosets changes signs by independent block-permutation factors. The correct statement
-uses the canonical `Quotient.out'` representatives, making this a concrete equation. -/
-theorem derivShuffleEquivLeft_sign
-    (p : Fin (m + n + 1) × Equiv.Perm.ModSumCongr (Fin m) (Fin n)) :
-    ((-1 : ℤˣ) ^ p.1.val * Equiv.Perm.sign p.2.out : ℤˣ) =
-      Equiv.Perm.sign (derivShuffleEquivLeft p).1.out *
-        (-1) ^ (derivShuffleEquivLeft p).2.val :=
-  sorry
+There is no quotient-level `.out` sign invariant for `ModSumCongr`: changing a representative
+by an odd block permutation stays in the same coset but flips the sign. -/
+theorem derivShuffleEquivLeft_sign_mk
+    (k : Fin (m + n + 1)) (σ : Equiv.Perm (Fin m ⊕ Fin n)) :
+    Equiv.Perm.sign (derivShuffleLeftFwd k σ) =
+      (-1 : ℤˣ) ^ k.val * Equiv.Perm.sign σ :=
+  derivShuffleLeftFwd_sign k σ
 
 end ContinuousAlternatingMap
