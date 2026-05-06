@@ -295,7 +295,7 @@ private noncomputable def derivShuffleFwd :
 
 /-- `derivShuffleLeftFwd k σ` sends `inl 0` to `finSuccSumEquiv.symm k`, which depends
 only on `k` and not on `σ`. -/
-private theorem derivShuffleLeftFwd_inl_zero (k : Fin (m + n + 1))
+theorem derivShuffleLeftFwd_inl_zero (k : Fin (m + n + 1))
     (σ : Equiv.Perm (Fin m ⊕ Fin n)) :
     derivShuffleLeftFwd k σ (Sum.inl 0) = finSuccSumEquiv.symm k := by
   simp only [derivShuffleLeftFwd, Equiv.permCongr_apply, Equiv.symm_symm, Equiv.Perm.mul_apply]
@@ -306,7 +306,7 @@ private theorem derivShuffleLeftFwd_inl_zero (k : Fin (m + n + 1))
   exact (Fin.cycleRange k).symm_apply_eq.mpr (Fin.cycleRange_self k).symm
 
 /-- Evaluation of the forward map on the non-derivative left slots. -/
-private theorem derivShuffleLeftFwd_inl_succ
+theorem derivShuffleLeftFwd_inl_succ
     (k : Fin (m + n + 1)) (σ : Equiv.Perm (Fin m ⊕ Fin n)) (a : Fin m) :
     derivShuffleLeftFwd k σ (Sum.inl (Fin.succ a)) =
       finSuccSumEquiv.symm
@@ -323,6 +323,25 @@ private theorem derivShuffleLeftFwd_inl_succ
   change (Fin.cycleRange k).symm ((permFinOfSum σ (Fin.castAdd n a)).succ) =
     k.succAbove (permFinOfSum σ (Fin.castAdd n a))
   exact Fin.cycleRange_symm_succ k (permFinOfSum σ (Fin.castAdd n a))
+
+/-- Evaluation of the forward map on the right slots. -/
+theorem derivShuffleLeftFwd_inr
+    (k : Fin (m + n + 1)) (σ : Equiv.Perm (Fin m ⊕ Fin n)) (b : Fin n) :
+    derivShuffleLeftFwd k σ (Sum.inr b) =
+      finSuccSumEquiv.symm
+        (k.succAbove (permFinOfSum σ (Fin.natAdd m b))) := by
+  apply finSuccSumEquiv.injective
+  simp only [derivShuffleLeftFwd, Equiv.permCongr_apply, Equiv.symm_symm,
+    Equiv.Perm.mul_apply, Equiv.apply_symm_apply]
+  have hΦ :
+      finSuccSumEquiv (Sum.inr b) =
+        (Fin.natAdd m b).succ :=
+    Fin.ext (by simp [finSuccSumEquiv, Fin.finAddFlipAssoc, finCongr]; omega)
+  rw [hΦ, Equiv.Perm.decomposeFin_symm_apply_succ]
+  simp only [Equiv.swap_self, Equiv.refl_apply]
+  change (Fin.cycleRange k).symm ((permFinOfSum σ (Fin.natAdd m b)).succ) =
+    k.succAbove (permFinOfSum σ (Fin.natAdd m b))
+  exact Fin.cycleRange_symm_succ k (permFinOfSum σ (Fin.natAdd m b))
 
 /-- The rank function `a ↦ #{x ∈ s | x < a}` is injective on a finite set `s`. -/
 private theorem finset_rank_lt_injective {N : ℕ} (s : Finset (Fin N)) {a b : Fin N}
@@ -582,6 +601,72 @@ noncomputable def derivShuffleEquivLeft :
   Equiv.ofBijective derivShuffleFwd
     ((Fintype.bijective_iff_injective_and_card derivShuffleFwd).mpr
       ⟨derivShuffleFwd_injective, derivShuffleFwd_card⟩)
+
+@[simp] theorem derivShuffleEquivLeft_apply_mk
+    (k : Fin (m + n + 1)) (σ : Equiv.Perm (Fin m ⊕ Fin n)) :
+    derivShuffleEquivLeft (k, Quotient.mk'' σ) =
+      (Quotient.mk'' (derivShuffleLeftFwd k σ), derivShuffleJ k σ) :=
+  rfl
+
+/-- A representative of the output coset whose derivative slot is the recorded rank
+`derivShuffleJ k σ`, rather than the auxiliary slot `0` used by `derivShuffleLeftFwd`.
+
+This representative is useful for summand-level wedge computations: the quotient remembers the
+rank, while the raw forward representative chooses a convenient block representative. -/
+noncomputable def derivShuffleLeftFwdRanked
+    (k : Fin (m + n + 1)) (σ : Equiv.Perm (Fin m ⊕ Fin n)) :
+    Equiv.Perm (Fin (m + 1) ⊕ Fin n) :=
+  derivShuffleLeftFwd k σ *
+    Equiv.Perm.sumCongr (Fin.cycleRange (derivShuffleJ k σ)) 1
+
+@[simp] theorem derivShuffleLeftFwdRanked_mk
+    (k : Fin (m + n + 1)) (σ : Equiv.Perm (Fin m ⊕ Fin n)) :
+    (Quotient.mk'' (derivShuffleLeftFwdRanked k σ) :
+      Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin n)) =
+      Quotient.mk'' (derivShuffleLeftFwd k σ) := by
+  apply Quotient.sound'
+  rw [QuotientGroup.leftRel_apply]
+  refine ⟨⟨(Fin.cycleRange (derivShuffleJ k σ))⁻¹, 1⟩, ?_⟩
+  change Equiv.Perm.sumCongr (Fin.cycleRange (derivShuffleJ k σ))⁻¹ 1 =
+    (derivShuffleLeftFwdRanked k σ)⁻¹ * derivShuffleLeftFwd k σ
+  simp [derivShuffleLeftFwdRanked]
+
+theorem derivShuffleLeftFwdRanked_sign
+    (k : Fin (m + n + 1)) (σ : Equiv.Perm (Fin m ⊕ Fin n)) :
+    Equiv.Perm.sign (derivShuffleLeftFwdRanked k σ) =
+      (-1 : ℤˣ) ^ k.val * Equiv.Perm.sign σ *
+        (-1 : ℤˣ) ^ (derivShuffleJ k σ).val := by
+  rw [derivShuffleLeftFwdRanked, Equiv.Perm.sign_mul, Equiv.Perm.sign_sumCongr,
+    derivShuffleLeftFwd_sign, Fin.sign_cycleRange]
+  simp [mul_assoc]
+  rfl
+
+theorem derivShuffleLeftFwdRanked_inl_j
+    (k : Fin (m + n + 1)) (σ : Equiv.Perm (Fin m ⊕ Fin n)) :
+    derivShuffleLeftFwdRanked k σ (Sum.inl (derivShuffleJ k σ)) =
+      finSuccSumEquiv.symm k := by
+  rw [derivShuffleLeftFwdRanked]
+  simp only [Equiv.Perm.mul_apply, Equiv.Perm.sumCongr_apply, Sum.map_inl]
+  rw [Fin.cycleRange_self, derivShuffleLeftFwd_inl_zero]
+
+theorem derivShuffleLeftFwdRanked_inl_succAbove
+    (k : Fin (m + n + 1)) (σ : Equiv.Perm (Fin m ⊕ Fin n)) (a : Fin m) :
+    derivShuffleLeftFwdRanked k σ (Sum.inl ((derivShuffleJ k σ).succAbove a)) =
+      finSuccSumEquiv.symm
+        (k.succAbove (permFinOfSum σ (Fin.castAdd n a))) := by
+  rw [derivShuffleLeftFwdRanked]
+  simp only [Equiv.Perm.mul_apply, Equiv.Perm.sumCongr_apply, Sum.map_inl]
+  rw [Fin.cycleRange_succAbove, derivShuffleLeftFwd_inl_succ]
+
+theorem derivShuffleLeftFwdRanked_inr
+    (k : Fin (m + n + 1)) (σ : Equiv.Perm (Fin m ⊕ Fin n)) (b : Fin n) :
+    derivShuffleLeftFwdRanked k σ (Sum.inr b) =
+      finSuccSumEquiv.symm
+        (k.succAbove (permFinOfSum σ (Fin.natAdd m b))) := by
+  rw [derivShuffleLeftFwdRanked]
+  simp only [Equiv.Perm.mul_apply, Equiv.Perm.sumCongr_apply, Sum.map_inr]
+  rw [show (1 : Equiv.Perm (Fin n)) b = b from rfl]
+  rw [derivShuffleLeftFwd_inr]
 
 /-- Representative-level sign statement for the derivative shuffle map.
 

@@ -5,8 +5,10 @@ import RicciFlower.Tensor.RSTensor.Defs
 import RicciFlower.Tensor.Multilinear.Curry
 import RicciFlower.Tensor.Multilinear.Tensor
 import RicciFlower.Tensor.RSTensor.Field
+import RicciFlower.Tensor.Auxiliary.Basis
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Topology.VectorBundle.Basic
+import Mathlib.LinearAlgebra.Trace
 /-!
 # Interior Product and Contraction of Tensors
 
@@ -114,7 +116,6 @@ noncomputable def model_tensorWithCovector (r : ℕ) (α : Tensor0SModel 1 𝕜 
         simp only [Bundle.continuousMultilinearMap.modelProduct_apply,
           ContinuousMultilinearMap.smul_apply, smul_eq_mul, RingHom.id_apply]
         ring }
-
 
 noncomputable def model_tensorWithCovector_first (r : ℕ) (α : Tensor0SModel 1 𝕜 E) :
     Tensor0SModel r 𝕜 E →L[𝕜] Tensor0SModel (1 + r) 𝕜 E :=
@@ -346,85 +347,249 @@ noncomputable def model_covectorOfCLM :
     (E →L[𝕜] 𝕜) →L[𝕜] Tensor0SModel 1 𝕜 E :=
   (continuousMultilinearCurryFin1 𝕜 E 𝕜).symm.toContinuousLinearMap
 
-/-- Model-level trace contraction of an `(r+1, s+1)` tensor to an `(r, s)` tensor.
+set_option linter.unusedSectionVars false in
+@[simp]
+theorem model_covectorOfCLM_apply (α : E →L[𝕜] 𝕜) (v : Fin 1 → E) :
+    model_covectorOfCLM (𝕜 := 𝕜) (E := E) α v = α (v 0) := by
+  change ((continuousMultilinearCurryFin1 𝕜 E 𝕜).symm α) v = α (v 0)
+  rfl
+
+/-- Model-level trace contraction of a `(1+r, s+1)` tensor to an `(r, s)` tensor.
 
 Internally this uses the canonical finite basis of the model space. The public
 pointwise operation below transports this model map through the bundle-fiber
 equivalences, so the external API remains coordinate-free. -/
 noncomputable def model_contract_trace (r s : ℕ) :
-    TensorRSModel (r + 1) (s + 1) 𝕜 E →L[𝕜] TensorRSModel r s 𝕜 E :=
+    TensorRSModel (1 + r) (s + 1) 𝕜 E →L[𝕜] TensorRSModel r s 𝕜 E :=
   let d := Module.finrank 𝕜 E
-  let b : Module.Basis (Fin d) 𝕜 E := Module.finBasis 𝕜 E
-  LinearMap.toContinuousLinearMap
-    { toFun := fun T =>
-        LinearMap.toContinuousLinearMap
-          { toFun := fun β =>
-              ∑ i : Fin d,
-                model_interior_product s (b i)
-                  (T (model_tensorWithCovector r
-                    (model_covectorOfCLM (𝕜 := 𝕜) (E := E)
-                      (LinearMap.toContinuousLinearMap (b.coord i))) β))
-            map_add' := fun β₁ β₂ => by
-              ext v
-              simp only [ContinuousLinearMap.map_add, ContinuousMultilinearMap.sum_apply,
-                ContinuousMultilinearMap.add_apply]
-              rw [Finset.sum_add_distrib]
-            map_smul' := fun c β => by
-              ext v
-              simp only [ContinuousLinearMap.map_smul, ContinuousMultilinearMap.sum_apply,
-                ContinuousMultilinearMap.smul_apply, smul_eq_mul, RingHom.id_apply]
-              rw [Finset.mul_sum] }
-      map_add' := fun T₁ T₂ => by
-        refine ContinuousLinearMap.ext fun β => ?_
-        ext v
-        simp only [LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk,
-          ContinuousLinearMap.add_apply, ContinuousLinearMap.map_add,
-          ContinuousMultilinearMap.sum_apply, ContinuousMultilinearMap.add_apply]
-        rw [Finset.sum_add_distrib]
-      map_smul' := fun c T => by
-        refine ContinuousLinearMap.ext fun β => ?_
-        ext v
-        simp only [LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk,
-          ContinuousLinearMap.smul_apply, ContinuousLinearMap.map_smul,
-          ContinuousMultilinearMap.sum_apply, ContinuousMultilinearMap.smul_apply,
-          smul_eq_mul, RingHom.id_apply]
-        rw [Finset.mul_sum] }
+  let B : Module.Basis (Fin d) 𝕜 E := Module.finBasis 𝕜 E
+  let b : Module.Basis (Fin d) 𝕜 (E →L[𝕜] 𝕜) := B.cDualBasis
+  ∑ i : Fin d,
+    (model_contract_covariant_bilinear (𝕜 := 𝕜) (E := E) r s (B i)).comp
+      (model_contract_contravariant_first_bilinear
+        (𝕜 := 𝕜) (E := E) r (s + 1)
+        (model_covectorOfCLM (𝕜 := 𝕜) (E := E) (b i)))
 
 set_option linter.unusedSectionVars false in
 theorem model_contract_trace_apply (r s : ℕ)
-    (T : TensorRSModel (r + 1) (s + 1) 𝕜 E) (β : Tensor0SModel r 𝕜 E) :
-    model_contract_trace (𝕜 := 𝕜) (E := E) r s T β =
+    (T : TensorRSModel (1 + r) (s + 1) 𝕜 E) :
+    model_contract_trace (𝕜 := 𝕜) (E := E) r s T =
       ∑ i : Fin (Module.finrank 𝕜 E),
-        model_interior_product s ((Module.finBasis 𝕜 E) i)
-          (T (model_tensorWithCovector r
+        (model_contract_covariant_bilinear
+          (𝕜 := 𝕜) (E := E) r s
+          ((Module.finBasis 𝕜 E) i))
+          ((model_contract_contravariant_first_bilinear
+            (𝕜 := 𝕜) (E := E) r (s + 1)
             (model_covectorOfCLM (𝕜 := 𝕜) (E := E)
-              (LinearMap.toContinuousLinearMap ((Module.finBasis 𝕜 E).coord i))) β)) :=
-  rfl
+              ((Module.finBasis 𝕜 E).cDualBasis i))) T) := by
+  simp [model_contract_trace]
 
-/-- Pointwise trace contraction of an (r+1, s+1)-tensor at `x` to an (r, s)-tensor,
+/-- Pointwise trace contraction of a `(1+r, s+1)` tensor at `x` to an `(r, s)` tensor,
 contracting the first upper slot with the first lower slot.
 
 This is implemented by the finite-basis model trace and transported through the
 fiber/model continuous linear equivalences. -/
 noncomputable def contract_trace (r s : ℕ) (x : M) :
-    TensorRSSpace (r + 1) (s + 1) I x →L[𝕜] TensorRSSpace r s I x :=
+    TensorRSSpace (1 + r) (s + 1) I x →L[𝕜] TensorRSSpace r s I x :=
   (tensorRSSpace_continuousLinearEquiv (I := I) r s x).symm.toContinuousLinearMap.comp
     ((model_contract_trace (𝕜 := 𝕜) (E := E) r s).comp
-      (tensorRSSpace_continuousLinearEquiv (I := I) (r + 1) (s + 1) x).toContinuousLinearMap)
+      (tensorRSSpace_continuousLinearEquiv (I := I) (1 + r) (s + 1) x).toContinuousLinearMap)
 
 set_option linter.unusedSectionVars false in
 theorem contract_trace_apply (r s : ℕ) (x : M)
-    (T : TensorRSSpace (r + 1) (s + 1) I x) (β : Tensor0SSpace r I x) :
-    contract_trace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s x T β =
-      (tensor0SSpace_continuousLinearEquiv (I := I) s x).symm
-        (∑ i : Fin (Module.finrank 𝕜 E),
-          model_interior_product s ((Module.finBasis 𝕜 E) i)
-            ((TensorRSSpace.toModel (I := I) T)
-              (model_tensorWithCovector r
-                (model_covectorOfCLM (𝕜 := 𝕜) (E := E)
-                  (LinearMap.toContinuousLinearMap ((Module.finBasis 𝕜 E).coord i)))
-                (Tensor0SSpace.toModel β)))) := by
+    (T : TensorRSSpace (1 + r) (s + 1) I x) :
+    contract_trace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s x T =
+      (tensorRSSpace_continuousLinearEquiv (I := I) r s x).symm
+        (model_contract_trace (𝕜 := 𝕜) (E := E) r s
+          (tensorRSSpace_continuousLinearEquiv (I := I) (1 + r) (s + 1) x T)) := by
   rfl
+
+set_option linter.unusedSectionVars false in
+private theorem trace_bilinear_change_frame_coord
+    (L K : E →L[𝕜] E) (hKL : ∀ z, K (L z) = z)
+    (F : (E →L[𝕜] 𝕜) →L[𝕜] E →L[𝕜] 𝕜) :
+    (∑ i : Fin (Module.finrank 𝕜 E),
+        F ((LinearMap.toContinuousLinearMap ((Module.finBasis 𝕜 E).coord i)).comp L)
+          (K ((Module.finBasis 𝕜 E) i))) =
+      ∑ i : Fin (Module.finrank 𝕜 E),
+        F (LinearMap.toContinuousLinearMap ((Module.finBasis 𝕜 E).coord i))
+          ((Module.finBasis 𝕜 E) i) := by
+  let d := Module.finrank 𝕜 E
+  let b : Module.Basis (Fin d) 𝕜 E := Module.finBasis 𝕜 E
+  change (∑ i : Fin d, F ((LinearMap.toContinuousLinearMap (b.coord i)).comp L)
+      (K (b i))) =
+    ∑ i : Fin d, F (LinearMap.toContinuousLinearMap (b.coord i)) (b i)
+  have h_cov : ∀ j : Fin d,
+      (∑ i : Fin d, (b.coord j (K (b i))) •
+          ((LinearMap.toContinuousLinearMap (b.coord i)).comp L)) =
+        LinearMap.toContinuousLinearMap (b.coord j) := by
+    intro j
+    ext z
+    calc
+      (∑ i : Fin d, (b.coord j (K (b i))) •
+          ((LinearMap.toContinuousLinearMap (b.coord i)).comp L)) z
+          = ∑ i : Fin d, b.coord j (K (b i)) * b.coord i (L z) := by
+              simp [smul_eq_mul]
+      _ = b.coord j (∑ i : Fin d, b.coord i (L z) • K (b i)) := by
+              symm
+              rw [map_sum]
+              refine Finset.sum_congr rfl fun i _ => ?_
+              rw [map_smul]
+              simp [smul_eq_mul, mul_comm]
+      _ = b.coord j (K (∑ i : Fin d, b.coord i (L z) • b i)) := by
+              congr 1
+              symm
+              rw [map_sum]
+              refine Finset.sum_congr rfl fun i _ => ?_
+              rw [map_smul]
+      _ = b.coord j (K (L z)) := by
+              rw [show (∑ i : Fin d, b.coord i (L z) • b i) = L z from b.sum_repr (L z)]
+      _ = b.coord j z := by rw [hKL z]
+      _ = (LinearMap.toContinuousLinearMap (b.coord j)) z := rfl
+  calc
+    (∑ i : Fin d, F ((LinearMap.toContinuousLinearMap (b.coord i)).comp L) (K (b i)))
+        = ∑ i : Fin d, ∑ j : Fin d,
+            (b.coord j (K (b i))) •
+              F ((LinearMap.toContinuousLinearMap (b.coord i)).comp L) (b j) := by
+          refine Finset.sum_congr rfl fun i _ => ?_
+          calc
+            F ((LinearMap.toContinuousLinearMap (b.coord i)).comp L) (K (b i))
+                = F ((LinearMap.toContinuousLinearMap (b.coord i)).comp L)
+                    (∑ j : Fin d, b.coord j (K (b i)) • b j) := by
+                  rw [show (∑ j : Fin d, b.coord j (K (b i)) • b j) = K (b i) from
+                    b.sum_repr (K (b i))]
+            _ = ∑ j : Fin d, (b.coord j (K (b i))) •
+                    F ((LinearMap.toContinuousLinearMap (b.coord i)).comp L) (b j) := by
+                  rw [map_sum]
+                  refine Finset.sum_congr rfl fun j _ => ?_
+                  rw [map_smul]
+    _ = ∑ j : Fin d, ∑ i : Fin d,
+            (b.coord j (K (b i))) •
+              F ((LinearMap.toContinuousLinearMap (b.coord i)).comp L) (b j) := by
+          rw [Finset.sum_comm]
+    _ = ∑ j : Fin d, F
+            (∑ i : Fin d, (b.coord j (K (b i))) •
+              ((LinearMap.toContinuousLinearMap (b.coord i)).comp L)) (b j) := by
+          refine Finset.sum_congr rfl fun j _ => ?_
+          rw [map_sum]
+          simp [map_smul]
+    _ = ∑ j : Fin d, F (LinearMap.toContinuousLinearMap (b.coord j)) (b j) := by
+          refine Finset.sum_congr rfl fun j _ => ?_
+          rw [h_cov j]
+
+set_option linter.unusedSectionVars false in
+private theorem trace_bilinear_change_frame_cdual
+    (L K : E →L[𝕜] E) (hKL : ∀ z, K (L z) = z)
+    (F : (E →L[𝕜] 𝕜) →L[𝕜] E →L[𝕜] 𝕜) :
+    (∑ i : Fin (Module.finrank 𝕜 E),
+        F (((Module.finBasis 𝕜 E).cDualBasis i).comp L)
+          (K ((Module.finBasis 𝕜 E) i))) =
+      ∑ i : Fin (Module.finrank 𝕜 E),
+        F ((Module.finBasis 𝕜 E).cDualBasis i)
+          ((Module.finBasis 𝕜 E) i) := by
+  simpa [Module.Basis.cDualBasis, Module.Basis.coe_dualBasis]
+    using trace_bilinear_change_frame_coord (𝕜 := 𝕜) (E := E) L K hKL F
+
+private noncomputable def model_trace_pairing_first (r s : ℕ)
+    (T : TensorRSModel (1 + r) (s + 1) 𝕜 E)
+    (β : Tensor0SModel r 𝕜 E) (tail : Fin s → E) :
+    (E →L[𝕜] 𝕜) →L[𝕜] E →L[𝕜] 𝕜 :=
+  let covToTensor : (E →L[𝕜] 𝕜) →L[𝕜] Tensor0SModel (1 + r) 𝕜 E :=
+    ((ContinuousLinearMap.apply 𝕜 (Tensor0SModel (1 + r) 𝕜 E) β).comp
+      ((model_tensorWithCovector_first_bilinear (𝕜 := 𝕜) (E := E) r).comp
+        (model_covectorOfCLM (𝕜 := 𝕜) (E := E))))
+  let covToOutput : (E →L[𝕜] 𝕜) →L[𝕜] Tensor0SModel (s + 1) 𝕜 E :=
+    T.comp covToTensor
+  let evalTail : Tensor0SModel s 𝕜 E →L[𝕜] 𝕜 :=
+    ContinuousMultilinearMap.apply 𝕜 (fun _ : Fin s => E) 𝕜 tail
+  let curry :
+      Tensor0SModel (s + 1) 𝕜 E →L[𝕜] E →L[𝕜] Tensor0SModel s 𝕜 E :=
+    (continuousMultilinearCurryLeftEquiv 𝕜
+      (fun _ : Fin (s + 1) => E) 𝕜).toContinuousLinearEquiv.toContinuousLinearMap
+  let outputToPair : Tensor0SModel (s + 1) 𝕜 E →L[𝕜] E →L[𝕜] 𝕜 :=
+    ((ContinuousLinearMap.compL 𝕜 E (Tensor0SModel s 𝕜 E) 𝕜) evalTail).comp curry
+  outputToPair.comp covToOutput
+
+set_option linter.unusedSectionVars false in
+private theorem model_trace_pairing_first_apply (r s : ℕ)
+    (T : TensorRSModel (1 + r) (s + 1) 𝕜 E)
+    (β : Tensor0SModel r 𝕜 E) (tail : Fin s → E)
+    (α : E →L[𝕜] 𝕜) (X : E) :
+    model_trace_pairing_first (𝕜 := 𝕜) (E := E) r s T β tail α X =
+      (model_interior_product s X
+        (T (model_tensorWithCovector_first r
+          (model_covectorOfCLM (𝕜 := 𝕜) (E := E) α) β))) tail := by
+  simp [model_trace_pairing_first, model_tensorWithCovector_first_bilinear_apply,
+    model_interior_product]
+
+/-- Precompose every covariant slot of a model `(0,k)` tensor by `L`. -/
+noncomputable def model_covariantChange (k : ℕ) (L : E →L[𝕜] E) :
+    Tensor0SModel k 𝕜 E →L[𝕜] Tensor0SModel k 𝕜 E :=
+  ContinuousMultilinearMap.compContinuousLinearMapL (fun _ : Fin k => L)
+
+set_option linter.unusedSectionVars false in
+@[simp]
+theorem model_covariantChange_apply (k : ℕ) (L : E →L[𝕜] E)
+    (T : Tensor0SModel k 𝕜 E) (v : Fin k → E) :
+    model_covariantChange (𝕜 := 𝕜) (E := E) k L T v =
+      T (fun i => L (v i)) := by
+  rfl
+
+set_option linter.unusedSectionVars false in
+private theorem model_covariantChange_tensorWithCovector_first (r : ℕ)
+    (L : E →L[𝕜] E) (α : E →L[𝕜] 𝕜) (β : Tensor0SModel r 𝕜 E) :
+    model_covariantChange (𝕜 := 𝕜) (E := E) (1 + r) L
+      (model_tensorWithCovector_first r (model_covectorOfCLM (𝕜 := 𝕜) (E := E) α) β) =
+    model_tensorWithCovector_first r
+      (model_covectorOfCLM (𝕜 := 𝕜) (E := E) (α.comp L))
+      (model_covariantChange (𝕜 := 𝕜) (E := E) r L β) := by
+  refine ContinuousMultilinearMap.ext fun w => ?_
+  simp [model_covariantChange_apply, model_tensorWithCovector_first,
+    model_covectorOfCLM_apply, Bundle.continuousMultilinearMap.modelProduct_apply]
+
+/-- Model trace commutes with an invertible change of frame.
+
+This is the reusable algebraic content behind smoothness of trace contraction on
+the tensor bundle: the trace finite sum is independent of the local frame used
+to trivialize the tangent bundle. -/
+theorem model_contract_trace_naturality
+    (r s : ℕ) (L Linv : E →L[𝕜] E)
+    (hL : L.comp Linv = ContinuousLinearMap.id 𝕜 E)
+    (_hR : Linv.comp L = ContinuousLinearMap.id 𝕜 E)
+    (T : TensorRSModel (1 + r) (s + 1) 𝕜 E) :
+    model_contract_trace (𝕜 := 𝕜) (E := E) r s
+      ((model_covariantChange (𝕜 := 𝕜) (E := E) (s + 1) L).comp
+        (T.comp (model_covariantChange (𝕜 := 𝕜) (E := E) (1 + r) Linv))) =
+    (model_covariantChange (𝕜 := 𝕜) (E := E) s L).comp
+      ((model_contract_trace (𝕜 := 𝕜) (E := E) r s T).comp
+        (model_covariantChange (𝕜 := 𝕜) (E := E) r Linv)) := by
+  -- The proof is the finite-basis invariance of trace under change of frame.
+  -- The private helper `trace_bilinear_change_frame_cdual` gives the core
+  -- dual-basis sum; the remaining work is the pointwise expansion matching this
+  -- statement to `model_contract_trace`.
+  sorry
+
+/-- Naturality of trace contraction under the local trivialization at `x₀`.
+
+This is the compatibility used by `contract_TensorRSField`: trivializing after
+pointwise trace is the same as applying the model trace after trivializing the
+original tensor. -/
+theorem contract_trace_trivialization_eq
+    {r s : ℕ} {x₀ x : M}
+    (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
+    (T : TensorRSSpace (1 + r) (s + 1) I x) :
+    (trivializationAt (TensorRSModel r s 𝕜 E)
+      (fun y => TensorRSSpace r s I y) x₀
+      ⟨x, contract_trace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s x T⟩).2 =
+    model_contract_trace (𝕜 := 𝕜) (E := E) r s
+      ((trivializationAt (TensorRSModel (1 + r) (s + 1) 𝕜 E)
+        (fun y => TensorRSSpace (1 + r) (s + 1) I y) x₀
+        ⟨x, T⟩).2) := by
+  -- Thin bundle-level wrapper around `model_contract_trace_naturality`, with
+  -- `L = symmL` and `Linv = continuousLinearMapAt` for the tangent
+  -- trivialization. Keeping this lemma named prevents the field-level
+  -- smoothness proof from carrying the change-of-frame calculation inline.
+  sorry
 
 /-!
 ## Field-level contractions
@@ -788,44 +953,42 @@ noncomputable def contract_contravariantField (r s : ℕ)
     rw [h_atilde_eq]
     rfl
 
-/-- Pointwise trace contraction of an (r+1, s+1)-tensor field. -/
+/-- Pointwise trace contraction of a `(1+r, s+1)` tensor field. -/
 noncomputable def contract_TensorRSField_fun (r s : ℕ)
-    (T : (x : M) → TensorRSSpace (r + 1) (s + 1) I x) :
+    (T : (x : M) → TensorRSSpace (1 + r) (s + 1) I x) :
     (x : M) → TensorRSSpace r s I x :=
   fun x => contract_trace r s x (T x)
 
-/-- Trace contraction of a smooth (r+1, s+1)-tensor field, yielding a smooth
-(r, s)-tensor field.
+/-- Trace contraction of a smooth `(1+r, s+1)` tensor field, yielding a smooth
+`(r, s)` tensor field.
 
-TODO: blocked on `contract_trace`. Once the pointwise trace is defined as a
-continuous linear map between the model fibers (independent of `x`), smoothness
-follows from the same `congr_of_eventuallyEq` pattern used for
-`contract_covariantField`/`contract_contravariantField`: pre-compose the
-trivialized section with the constant model trace and unfold via
-`Trivialization.continuousLinearMapAt_symmL` on the trivialization base set. -/
+The field-level proof is deliberately only the smooth-section skeleton: after
+trivializing the input field, compose with the constant model trace and use
+`contract_trace_trivialization_eq` for the pointwise frame-compatibility. -/
 noncomputable def contract_TensorRSField (r s : ℕ)
-    (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) (r + 1) (s + 1)) :
+    (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n)
+      (1 + r) (s + 1)) :
     TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) r s := by
-  letI := tensorRSBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (r + 1) (s + 1)
+  letI := tensorRSBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (1 + r) (s + 1)
   letI := tensorRSBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s
   refine ⟨contract_TensorRSField_fun r s (fun x => T x), ?_⟩
   intro x₀
   rw [contMDiffAt_section]
   have hT := T.contMDiff x₀
   rw [contMDiffAt_section] at hT
-  have h_combine :
+  have hTrace :
       ContMDiffAt I 𝓘(𝕜, TensorRSModel r s 𝕜 E) n
         (fun x => model_contract_trace (𝕜 := 𝕜) (E := E) r s
-          ((trivializationAt (TensorRSModel (r + 1) (s + 1) 𝕜 E)
-            (fun x => TensorRSSpace (r + 1) (s + 1) I x) x₀ ⟨x, T x⟩).2)) x₀ :=
+          ((trivializationAt (TensorRSModel (1 + r) (s + 1) 𝕜 E)
+            (fun x => TensorRSSpace (1 + r) (s + 1) I x) x₀ ⟨x, T x⟩).2)) x₀ :=
     (model_contract_trace (𝕜 := 𝕜) (E := E) r s).contMDiffAt.comp x₀ hT
-  refine h_combine.congr_of_eventuallyEq ?_
+  refine hTrace.congr_of_eventuallyEq ?_
   have hbase := (trivializationAt E (TangentSpace I) x₀).open_baseSet.mem_nhds
     (mem_baseSet_trivializationAt _ _ x₀)
   filter_upwards [hbase] with x hx
-  refine ContinuousLinearMap.ext fun β => ?_
-  refine ContinuousMultilinearMap.ext fun v => ?_
-  simp [contract_TensorRSField_fun, contract_trace, model_contract_trace]
+  exact contract_trace_trivialization_eq
+    (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+    (r := r) (s := s) (x₀ := x₀) (x := x) hx (T x)
 
 end FieldContraction
 

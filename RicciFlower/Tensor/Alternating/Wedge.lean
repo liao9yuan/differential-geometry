@@ -357,6 +357,119 @@ theorem wedge_product_uncurryFin_apply (f : N →L[𝕜] N' →L[𝕜] N'')
       (wedge_product (uncurryFin g') h f) (v ∘ ⇑Fin.finAddFlipAssoc) := by
   rw [ContinuousAlternatingMap.domDomCongr_apply]
 
+private def uncurryFinLeftExpandedSummand
+    (f : N →L[𝕜] N' →L[𝕜] N'')
+    (g' : M →L[𝕜] (M [⋀^Fin m]→L[𝕜] N)) (h : M [⋀^Fin n]→L[𝕜] N')
+    (w : Fin (m + 1) ⊕ Fin n → M)
+    (τ : Equiv.Perm (Fin (m + 1) ⊕ Fin n)) (j : Fin (m + 1)) : N'' :=
+  Equiv.Perm.sign τ •
+    f (((-1 : ℤ) ^ j.val) •
+        g' (w (τ (Sum.inl j)))
+          (j.removeNth fun i : Fin (m + 1) => w (τ (Sum.inl i))))
+      (h fun i : Fin n => w (τ (Sum.inr i)))
+
+private theorem uncurrySum_summand_uncurryFin_left_expand_mk
+    (f : N →L[𝕜] N' →L[𝕜] N'')
+    (g' : M →L[𝕜] (M [⋀^Fin m]→L[𝕜] N)) (h : M [⋀^Fin n]→L[𝕜] N')
+    (w : Fin (m + 1) ⊕ Fin n → M)
+    (τ : Equiv.Perm (Fin (m + 1) ⊕ Fin n)) :
+    uncurrySum.summand (f.compContinuousAlternatingMap₂ (uncurryFin g') h)
+        (Quotient.mk'' τ) w =
+      ∑ j : Fin (m + 1), uncurryFinLeftExpandedSummand f g' h w τ j := by
+  rw [uncurrySum_summand_eval]
+  simp only [ContinuousLinearMap.compContinuousAlternatingMap₂_apply]
+  rw [uncurryFin_apply]
+  let L : N →L[𝕜] N'' :=
+    (ContinuousLinearMap.apply 𝕜 N'' (h fun i : Fin n => w (τ (Sum.inr i)))).comp f
+  change Equiv.Perm.sign τ •
+      L (∑ k : Fin (m + 1),
+        (-1 : ℤ) ^ k.val •
+          g' (w (τ (Sum.inl k))) (k.removeNth fun i : Fin (m + 1) => w (τ (Sum.inl i)))) =
+    ∑ j : Fin (m + 1), uncurryFinLeftExpandedSummand f g' h w τ j
+  rw [_root_.map_sum L]
+  rw [Finset.smul_sum]
+  refine Finset.sum_congr rfl fun j _ => ?_
+  simp [L, uncurryFinLeftExpandedSummand]
+
+private theorem derivShuffleLeft_expanded_summand_eq
+    (f : N →L[𝕜] N' →L[𝕜] N'')
+    (g' : M →L[𝕜] (M [⋀^Fin m]→L[𝕜] N)) (h : M [⋀^Fin n]→L[𝕜] N')
+    (v : Fin (m + n + 1) → M)
+    (k : Fin (m + n + 1)) (σ : Equiv.Perm (Fin m ⊕ Fin n)) :
+    ((-1 : ℤ) ^ k.val) •
+      (uncurrySum.summand (f.compContinuousAlternatingMap₂ (g' (v k)) h)
+        (Quotient.mk'' σ) ((k.removeNth v) ∘ ⇑finSumFinEquiv)) =
+      uncurryFinLeftExpandedSummand f g' h
+        ((v ∘ ⇑Fin.finAddFlipAssoc) ∘ ⇑finSumFinEquiv)
+        (derivShuffleLeftFwdRanked k σ) (derivShuffleJ k σ) := by
+  rw [uncurrySum_summand_eval]
+  unfold uncurryFinLeftExpandedSummand
+  rw [derivShuffleLeftFwdRanked_sign]
+  simp only [ContinuousLinearMap.compContinuousAlternatingMap₂_apply]
+  rw [derivShuffleLeftFwdRanked_inl_j]
+  simp only [Function.comp_apply]
+  have hleft :
+      (fun i : Fin m =>
+          ((v ∘ ⇑Fin.finAddFlipAssoc) ∘ ⇑finSumFinEquiv)
+            (derivShuffleLeftFwdRanked k σ (Sum.inl ((derivShuffleJ k σ).succAbove i)))) =
+        fun i : Fin m => ((k.removeNth v) ∘ ⇑finSumFinEquiv) (σ (Sum.inl i)) := by
+    funext i
+    rw [derivShuffleLeftFwdRanked_inl_succAbove]
+    simp [Function.comp_apply, Fin.removeNth_apply, permFinOfSum,
+      Equiv.permCongr_apply, finSumFinEquiv_symm_apply_castAdd]
+  have hright :
+      (fun i : Fin n =>
+          ((v ∘ ⇑Fin.finAddFlipAssoc) ∘ ⇑finSumFinEquiv)
+            (derivShuffleLeftFwdRanked k σ (Sum.inr i))) =
+        fun i : Fin n => ((k.removeNth v) ∘ ⇑finSumFinEquiv) (σ (Sum.inr i)) := by
+    funext i
+    rw [derivShuffleLeftFwdRanked_inr]
+    simp [Function.comp_apply, Fin.removeNth_apply, permFinOfSum,
+      Equiv.permCongr_apply]
+  have hleft_remove :
+      (derivShuffleJ k σ).removeNth
+          (fun i : Fin (m + 1) =>
+            v (Fin.finAddFlipAssoc (finSumFinEquiv (derivShuffleLeftFwdRanked k σ (Sum.inl i))))) =
+        fun i : Fin m => v (k.succAbove (finSumFinEquiv (σ (Sum.inl i)))) := by
+    funext i
+    simpa [Function.comp_apply, Fin.removeNth_apply] using congr_fun hleft i
+  have hright_eval :
+      (fun i : Fin n =>
+          v (Fin.finAddFlipAssoc (finSumFinEquiv (derivShuffleLeftFwdRanked k σ (Sum.inr i))))) =
+        fun i : Fin n => v (k.succAbove (finSumFinEquiv (σ (Sum.inr i)))) := by
+    funext i
+    simpa [Function.comp_apply, Fin.removeNth_apply] using congr_fun hright i
+  have hk_eval :
+      v (Fin.finAddFlipAssoc (finSumFinEquiv (finSuccSumEquiv.symm k))) = v k := by
+    simp [finSuccSumEquiv]
+  rw [hleft_remove, hright_eval, hk_eval]
+  simp only [Fin.removeNth_apply]
+  simp only [Units.smul_def, smul_smul, mul_assoc]
+  simp [map_zsmul, smul_smul, mul_assoc]
+  congr 1
+  rcases Nat.even_or_odd k.val with hq | hq <;>
+    rcases Nat.even_or_odd (derivShuffleJ k σ).val with hj | hj
+  · have hqu : ((-1 : ℤˣ) ^ k.val) = 1 := hq.neg_one_pow
+    have hqz : (-1 : ℤ) ^ k.val = 1 := hq.neg_one_pow
+    have hju : ((-1 : ℤˣ) ^ (derivShuffleJ k σ).val) = 1 := hj.neg_one_pow
+    have hjz : (-1 : ℤ) ^ (derivShuffleJ k σ).val = 1 := hj.neg_one_pow
+    simp [hqu, hqz, hju, hjz]
+  · have hqu : ((-1 : ℤˣ) ^ k.val) = 1 := hq.neg_one_pow
+    have hqz : (-1 : ℤ) ^ k.val = 1 := hq.neg_one_pow
+    have hju : ((-1 : ℤˣ) ^ (derivShuffleJ k σ).val) = -1 := hj.neg_one_pow
+    have hjz : (-1 : ℤ) ^ (derivShuffleJ k σ).val = -1 := hj.neg_one_pow
+    simp [hqu, hqz, hju, hjz]
+  · have hqu : ((-1 : ℤˣ) ^ k.val) = -1 := hq.neg_one_pow
+    have hqz : (-1 : ℤ) ^ k.val = -1 := hq.neg_one_pow
+    have hju : ((-1 : ℤˣ) ^ (derivShuffleJ k σ).val) = 1 := hj.neg_one_pow
+    have hjz : (-1 : ℤ) ^ (derivShuffleJ k σ).val = 1 := hj.neg_one_pow
+    simp [hqu, hqz, hju, hjz]
+  · have hqu : ((-1 : ℤˣ) ^ k.val) = -1 := hq.neg_one_pow
+    have hqz : (-1 : ℤ) ^ k.val = -1 := hq.neg_one_pow
+    have hju : ((-1 : ℤˣ) ^ (derivShuffleJ k σ).val) = -1 := hj.neg_one_pow
+    have hjz : (-1 : ℤ) ^ (derivShuffleJ k σ).val = -1 := hj.neg_one_pow
+    simp [hqu, hqz, hju, hjz]
+
 /-- Antisymmetrizing a left-precomposition of `wedge_productL` equals wedging the
 antisymmetrization on the left. The `Fin.finAddFlipAssoc` rewrites
 `Fin (m + 1 + n)` to `Fin (m + n + 1)`.

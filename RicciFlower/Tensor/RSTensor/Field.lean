@@ -269,34 +269,14 @@ A `Tensor0SSpace s I x` element `T` embeds into `TensorRSSpace 0 s I x`
 `c ↦ (toModel c Fin.elim0) • T`, i.e. extracting the scalar from the
 (0,0)-tensor `c` and scaling `T`.
 
-Currently unused anywhere in the codebase. Commented out (rather than
-deleted) so it can be reinstated when a downstream caller appears. The
-smoothness obligation in `toTensorRSField` requires identifying
-`evalScalar x ∘ e₁.symmL 𝕜 x` with the constant `applyFinElim0` for `x`
-in the trivialization base set — a non-trivial chase through the bundle
-topology bridge / canonical id-as-CLE.
-
-```
-omit n in
-/-- The continuous linear map that extracts the scalar value from a
-`Tensor0SSpace 0 I x` element: compose `toModelL` (the identity equiv)
-with evaluation at the empty tuple. -/
-noncomputable def tensor0SSpace_evalScalar (x : M) :
-    Tensor0SSpace 0 I x →L[𝕜] 𝕜 :=
-  (ContinuousMultilinearMap.apply 𝕜 (fun _ : Fin 0 => E) 𝕜 Fin.elim0).comp
-    (Tensor0SSpace.toModelL 0 x)
-
-/-- Embed a (0,s)-tensor into a (0,s)-valued (0,0→s) tensor: given
-`T : Tensor0SSpace s I x`, produce the continuous linear map
-`c ↦ (evalScalar c) • T`. -/
-noncomputable def Tensor0SField.toTensorRSField {s : ℕ} [CompleteSpace 𝕜]
-    (α : Tensor0SField n s (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) :
-    TensorRSField n 0 s (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) :=
-  letI := tensorRSBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) 0 s
-  letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s
-  ⟨fun x => ContinuousLinearMap.smulRight (tensor0SSpace_evalScalar x) (α x), by
-    sorry⟩
-```
+This old specialized sketch is not kept as commented Lean code, because it is
+easy for stub audits to mistake it for an active obligation. The live general
+version is `MixedSection.fromMultilinearSection` in `RicciFlower.Tensor.Mixed.Field`:
+it constructs the same fiberwise map
+`c ↦ (eval₀ x c) • T` and proves smoothness by trivializing both multilinear
+bundles, reducing the `0`-multilinear coordinate to evaluation at `Fin.elim0`,
+and applying a constant `ContinuousLinearMap.smulRightL` to the smooth
+multilinear section.
 -/
 
 end
