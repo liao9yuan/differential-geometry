@@ -2,9 +2,12 @@
 
 # whitelist
 !/DifferentialGeometry/
+!/RicciFlower/
+!/RicciFlower/**
 !/.github
 !/Examples/
 !/DifferentialGeometry.lean
+!/RicciFlower.lean
 !/lakefile.toml
 !/lean-toolchain
 !/README.md

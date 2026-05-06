@@ -1,7 +1,7 @@
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.DimensionThree.ImprovedPinching
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.DimensionThree.RicciReaction
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.DimensionThree.RiemannFromRicci3D
-import DifferentialGeometry.Synthetic.Flow.RicciFlow.Global.Compactness
+import DifferentialGeometry.Synthetic.Flow.RicciFlow.blackbox
 import DifferentialGeometry.Synthetic.Analysis.Parabolic.ScalarMaximumPrinciple
 import DifferentialGeometry.Synthetic.Analysis.Parabolic.TensorMaximumPrinciple
 
@@ -22,7 +22,7 @@ open SyntheticTensor
 section HamiltonThreeManifold
 
 variable (k R V Time A : Type*)
-variable [Field k] [CommRing R] [Algebra k R] [Preorder R]
+variable [Field k] [CommRing R] [Algebra k R] [Invertible (2 : R)] [Preorder R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 variable [CommRing A] [Algebra R A]
 
@@ -1101,9 +1101,13 @@ structure HamiltonSection12Claims
     ctx.isDiffeomorphism original_limit_diffeomorphism input.initialManifold
       (ctx.manifoldOfFlow rescalingConvergence.cgh.limit.flow)
 
-/-- P1 named typeclass witness: the contracted second Bianchi identity is
-available on every time slice of a synthetic Ricci-flow datum. Replacing this
-typeclass by a theorem is exactly the future `second_bianchi` contraction task. -/
+/-- Hamilton-level P1 witness: the contracted second Bianchi identity is
+available on every time slice of a synthetic Ricci-flow datum.
+
+The preferred producer is `HamiltonP1NamedCalculusInputs`, which supplies the
+named trace/Fubini/commutation calculus and derives this theorem mechanically.
+This class remains as the Section 12-facing interface, not as an invitation to
+restart the contracted-Bianchi proof stack. -/
 class HamiltonP1ContractedSecondBianchiTheorem where
   contracted_second_bianchi :
     forall (D : RicciFlowData k R V Time A) (t : Time) (half : R),
@@ -1151,7 +1155,7 @@ metric compatibility and torsion-freeness through its Levi-Civita hypothesis. -/
     exact contractedSecondBianchiIdentity_from_second_bianchi_named_patterns
       D.emb (D.conn_fam t) (D.ha_fam t) (D.hal_fam t) (D.hsl_fam t)
       (D.hl_fam t) D.atr (D.g_fam t) half h_half
-      (D.h_rf.metric_compat t) (D.h_rf.torsion_free t) (h_ntr D t)
+      (D.levi_civita t).1 (D.levi_civita t).2 (h_ntr D t)
 
 /-- Bundled P1 inputs in the form produced by the named-pattern contraction
 work.
@@ -1184,9 +1188,12 @@ instance (priority := 100) hamiltonP1ContractedSecondBianchiTheorem_of_named_cal
   hamiltonP1ContractedSecondBianchiTheorem_of_named_calculus k R V Time A
     P1.metric_trace_fubini P1.named_pattern_calculus P1.trace_comm
 
-/-- P2 named typeclass witness: the three-dimensional Riemann-from-Ricci formula
-is available from `IsDimensionThree`. The future proof should discharge this
-from the finite-dimensional algebraic curvature decomposition. -/
+/-- Hamilton-level P2 witness: the three-dimensional Riemann-from-Ricci formula
+is available from `IsDimensionThree`.
+
+The preferred producer is the trace/eigenframe route
+`hamiltonP2RiemannFromRicci3DTheorem_of_trace_eigenframe_packages`; finite-frame
+and real-trace constructors are supported bridges for concrete realizations. -/
 class HamiltonP2RiemannFromRicci3DTheorem where
   riemann_from_ricci_3d :
     forall (D : RicciFlowData k R V Time A) (t : Time) (half : R),
@@ -1198,8 +1205,8 @@ class HamiltonP2RiemannFromRicci3DTheorem where
 /-- Build the Hamilton-level P2 witness from the slice-level
 Riemann-from-Ricci calculus package.
 
-This keeps `HamiltonP2RiemannFromRicci3DTheorem` as the global Section 12 gap
-while giving realization layers a concrete theorem-shaped path for supplying
+This keeps `HamiltonP2RiemannFromRicci3DTheorem` as the Section 12-facing
+interface while giving realization layers a theorem-shaped path for supplying
 that witness on each Ricci-flow time slice. -/
 @[reducible] def hamiltonP2RiemannFromRicci3DTheorem_of_dim3_calculus
     (h_calc :
@@ -1353,7 +1360,7 @@ its Levi-Civita hypothesis. -/
         (hal := D.hal_fam t) (hsl := D.hsl_fam t) (hl := D.hl_fam t)
         (atr := D.atr) (met := D.g_fam t) (reaction := reaction t)
         (h_geom := h_reaction t) (h_dim := h_dim)
-        (h_mc := D.h_rf.metric_compat t) (h_tf := D.h_rf.torsion_free t)
+        (h_mc := (D.levi_civita t).1) (h_tf := (D.levi_civita t).2)
     rw [h_cubicQ t]
     simpa [ricciFlowScalarCurvatureAt, ricciFlowRicciNormSqAt] using h_relation
 
@@ -1461,9 +1468,10 @@ into the Section 12 claim bundle.
 This record is not a fourth mathematical black box: it collects the concrete
 choices that the global realization must still make, such as scalar
 normalization samples, the improved-pinching decay comparison, the limit metric,
-and the final compact-limit diffeomorphism witness. The three named hard
-synthetic gaps are the typeclass arguments consumed by
-`limit_tracefree_norm_zero_from_p3` and `constant_positive_from_p1_p2`.
+and the final compact-limit diffeomorphism witness. The local theorem packages
+P1, P2, and P3 are consumed by `limit_tracefree_norm_zero_from_p3` and
+`constant_positive_from_p1_p2`; P1 and P2 already have concrete preferred
+producer routes in this file.
 Gap typeclass arguments inside builder field types are resolved from the
 surrounding instance scope when the builder is consumed. -/
 structure HamiltonSection12ClaimBuilderInput
@@ -1576,8 +1584,8 @@ structure HamiltonSection12ClaimBuilderInput
         input.initialManifold (ctx.manifoldOfFlow sectionData.cgh.limit.flow)
 
 /-- P10 producer: build the typed Section 12 claim bundle from positive-Ricci
-input, the existing analytic/global interfaces, and the three named remaining
-synthetic gap typeclasses (`P1`, `P2`, and `P3.3-geom`).
+input, the existing analytic/global interfaces, and the local P1/P2/P3 theorem
+packages.
 
 The theorem deliberately returns `Nonempty` because the rescaling/CGH prefix is
 obtained through abstract extraction interfaces. -/
@@ -1700,58 +1708,43 @@ theorem hamilton_three_manifold_from_typed_input_explicit_interfaces
   exact ⟨conclusion.metric, conclusion.metric_on_initial,
     conclusion.constant_positive_sectional_curvature⟩
 
-/-- Bundled analytic/global inputs for the Section 12 synthetic assembly.
+/-- Bundled inputs for the Section 12 synthetic assembly.
 
-This intentionally bundles only the analytic and global interface stack. The
-three synthetic gap typeclasses P1, P2, and P3.3 stay separate so they can be
-discharged independently as the tensor-contraction work lands. -/
-class HamiltonSyntheticAnalyticInputs (Point Index : Type*) where
-  finite_time : PositiveScalarFiniteTimeTheorem k R V Time A
+The hard global analytic stack is inherited from
+`HamiltonGlobalAnalyticBlackBoxes` in `blackbox.lean`. The two remaining fields
+are the local bridges that should stay visible here because they are realistic
+synthetic proof obligations. -/
+class HamiltonSyntheticAnalyticInputs (Point Index : Type*) extends
+    HamiltonGlobalAnalyticBlackBoxes k R V Time A Point Index where
   positive_scalar_from_ricci :
     PositiveInitialScalarFromRicciPositive k R V Time A finite_time.PositiveInitialScalar
-  maximal_time : MaximalTimeWitness k R V Time A finite_time.HasFiniteMaximalTime
-  curvature_blowup : CurvatureBlowUpAlternative k R V Time A
-  scalar_blowup : ScalarBlowUpFromCurvatureBlowUp k R V Time A
-  point_selection : PointSelectionAndRescalingTheorem k R V Time A Point Index
   scalar_spatial_promotion :
     ScalarSpatialPromotionFromTime k R V Time A Point
       scalar_blowup.scalarQuantity point_selection.scalarQuantity
       scalar_blowup.domain point_selection.domain
-  compactness : HamiltonCompactnessTheorem k R V Time A Index
-  curvature_ratio_convergence : CurvatureRatioConvergenceUnderSmoothCGH k R V Time A Index
 
 /-- Low-priority constructor for the analytic/global input bundle from the
 individual interface instances. This keeps downstream realization code usable
 while still allowing a custom bundled instance to override it. -/
 instance (priority := 100) hamiltonSyntheticAnalyticInputs_of_components
     {Point Index : Type*}
-    [H : PositiveScalarFiniteTimeTheorem k R V Time A]
-    [F : PositiveInitialScalarFromRicciPositive k R V Time A H.PositiveInitialScalar]
-    [W : MaximalTimeWitness k R V Time A H.HasFiniteMaximalTime]
-    [B : CurvatureBlowUpAlternative k R V Time A]
-    [S : ScalarBlowUpFromCurvatureBlowUp k R V Time A]
-    [P : PointSelectionAndRescalingTheorem k R V Time A Point Index]
+    [GB : HamiltonGlobalAnalyticBlackBoxes k R V Time A Point Index]
+    [F : PositiveInitialScalarFromRicciPositive k R V Time A
+      GB.finite_time.PositiveInitialScalar]
     [SP : ScalarSpatialPromotionFromTime k R V Time A Point
-      S.scalarQuantity P.scalarQuantity S.domain P.domain]
-    [K : HamiltonCompactnessTheorem k R V Time A Index]
-    [CR : CurvatureRatioConvergenceUnderSmoothCGH k R V Time A Index] :
+      GB.scalar_blowup.scalarQuantity GB.point_selection.scalarQuantity
+      GB.scalar_blowup.domain GB.point_selection.domain] :
     HamiltonSyntheticAnalyticInputs k R V Time A Point Index where
-  finite_time := H
+  toHamiltonGlobalAnalyticBlackBoxes := GB
   positive_scalar_from_ricci := F
-  maximal_time := W
-  curvature_blowup := B
-  scalar_blowup := S
-  point_selection := P
   scalar_spatial_promotion := SP
-  compactness := K
-  curvature_ratio_convergence := CR
 
 /-- HAMILTON POSITIVE RICCI THEOREM (synthetic, conditional).
 
 Canonical export for the synthetic Section 12 layer: typed positive Ricci input
 gives a constant-positive-sectional-curvature metric on the initial manifold,
 conditional on the bundled analytic/global interfaces, the concrete builder
-witnesses, the P1/P2 synthetic gap instances, and the P3
+witnesses, the P1/P2 theorem-package instances, and the P3
 Riemann-Ricci-Ricci contraction data predicate supplied by the selected
 `HamiltonP3CubicReactionGeometryTheorem` instance. -/
 theorem hamilton_three_manifold_from_typed_input
@@ -1789,7 +1782,8 @@ route for the cubic Riemann-Ricci-Ricci contraction correction.
 Compared with `hamilton_three_manifold_from_typed_input`, this wrapper no
 longer asks callers for `[HamiltonP3CubicReactionGeometryTheorem]` directly:
 it derives P3 from `hamiltonP3CubicReactionGeometryTheorem_of_eigenvalue_packages`.
-P1 and P2 remain explicit synthetic gap typeclasses. -/
+P1 and P2 remain explicit theorem-package inputs; prefer the P1 named-calculus
+and P2 trace/eigenframe producers when supplying them. -/
 theorem hamilton_three_manifold_from_typed_input_with_p3_eigenvalue_packages
     {Point Index SpaceTime Manifold Metric Diffeomorphism : Type*}
     [ScalarStrongMaximumPrinciple R SpaceTime]
@@ -1815,7 +1809,8 @@ contracted-Bianchi package.
 Compared with `hamilton_three_manifold_from_typed_input`, this wrapper no
 longer asks callers for `[HamiltonP1ContractedSecondBianchiTheorem]` directly:
 it derives P1 from `HamiltonP1NamedCalculusInputs`. P2 and P3 remain explicit
-synthetic gap typeclasses. -/
+theorem-package inputs, with P2 normally supplied by the trace/eigenframe or
+real-trace constructors above. -/
 theorem hamilton_three_manifold_from_typed_input_with_p1_named_calculus
     {Point Index SpaceTime Manifold Metric Diffeomorphism : Type*}
     [ScalarStrongMaximumPrinciple R SpaceTime]
@@ -1991,3 +1986,124 @@ theorem hamilton_three_manifold_from_black_boxes
   H.proves_spherical_space_form input
 
 end HamiltonThreeManifold
+
+section HamiltonSection12P4Bridge
+
+variable {k R V Time A : Type*}
+variable [Field k] [CommRing R] [Algebra k R] [Invertible (2 : R)]
+variable [LinearOrder R] [IsStrictOrderedRing R]
+variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
+variable [CommRing A] [Algebra R A]
+
+/-- Section 12 handoff from the P4 improved-pinching producer.
+
+This is the local bridge from the synthetic P4 producer to the exact
+trace-free-Ricci vanishing claim used by the Section 12 assembly. The only
+remaining inputs are the convergence and eventuality witnesses needed by the
+global compactness consumer. -/
+theorem section12_limit_tracefree_norm_zero_from_p4
+    {Point Index Manifold Metric Diffeomorphism : Type*}
+    [ScalarWeakMaximumPrinciple R Index]
+    (ctx : HamiltonThreeManifoldGeometricContext k R V Time A Manifold Metric Diffeomorphism)
+    (input : HamiltonThreeManifoldTypedInput k R V Time A ctx)
+    (sectionData :
+      HamiltonSection12RescalingConvergenceData k R V Time A ctx input
+        (Point := Point) (Index := Index))
+    [Hsq : ScalarConvergenceSqueezeToZero Index R
+      sectionData.ratio.curvature.profile.scalarConvergesTo
+      sectionData.ratio.curvature.profile.eventually]
+    [Hev : EventuallyImp Index sectionData.ratio.curvature.profile.eventually]
+    (D : HamiltonImprovedPinchingProducerData (R := R) (Time := Index))
+    (hratio_seq : sectionData.ratio.tracefree_ratio.seq = D.ratio)
+    (hdomain :
+      sectionData.ratio.curvature.profile.eventually
+        (fun i => D.problem.domain i))
+    (hupper :
+      sectionData.ratio.curvature.profile.scalarConvergesTo
+        (fun i => D.C * D.decay i) 0)
+    (hnonneg :
+      sectionData.ratio.curvature.profile.eventually
+        (fun i => 0 <= sectionData.ratio.tracefree_ratio.seq i)) :
+    ricciFlowTracefreeRicciNormSqAt k R V Time A sectionData.cgh.limit.flow
+      sectionData.ratio.curvature.nInv sectionData.ratio.curvature.limitTime = 0 := by
+  have hzero :
+      ricciFlowTracefreeRicciNormSqAt k R V Time A
+        sectionData.ratio.curvature.limit.flow
+        sectionData.ratio.curvature.nInv sectionData.ratio.curvature.limitTime = 0 :=
+    limit_tracefree_norm_zero_from_hamilton_improved_pinching_producer
+      k R V Time A sectionData.ratio D hratio_seq hdomain hupper hnonneg
+  simpa [sectionData.ratio_limit_eq] using hzero
+
+/-- Compatibility adapter: fill the legacy Section 12 builder field
+`limit_tracefree_norm_zero_from_p3` using the P4 improved-pinching producer.
+
+The legacy field still accepts dimension-three and P3 arguments because older
+realization code may fill it directly from P3. This adapter ignores those
+arguments and routes through P4 instead. -/
+theorem section12_limit_tracefree_norm_zero_from_p4_builder_field
+    {Point Index Manifold Metric Diffeomorphism : Type*}
+    [ScalarWeakMaximumPrinciple R Index]
+    (ctx : HamiltonThreeManifoldGeometricContext k R V Time A Manifold Metric Diffeomorphism)
+    (input : HamiltonThreeManifoldTypedInput k R V Time A ctx)
+    (producer :
+      forall _sectionData :
+        HamiltonSection12RescalingConvergenceData k R V Time A ctx input
+          (Point := Point) (Index := Index),
+        HamiltonImprovedPinchingProducerData (R := R) (Time := Index))
+    (hratio_seq :
+      forall sectionData :
+        HamiltonSection12RescalingConvergenceData k R V Time A ctx input
+          (Point := Point) (Index := Index),
+        sectionData.ratio.tracefree_ratio.seq = (producer sectionData).ratio)
+    (hdomain :
+      forall sectionData :
+        HamiltonSection12RescalingConvergenceData k R V Time A ctx input
+          (Point := Point) (Index := Index),
+        sectionData.ratio.curvature.profile.eventually
+          (fun i => (producer sectionData).problem.domain i))
+    (hupper :
+      forall sectionData :
+        HamiltonSection12RescalingConvergenceData k R V Time A ctx input
+          (Point := Point) (Index := Index),
+        sectionData.ratio.curvature.profile.scalarConvergesTo
+          (fun i => (producer sectionData).C * (producer sectionData).decay i) 0)
+    (hnonneg :
+      forall sectionData :
+        HamiltonSection12RescalingConvergenceData k R V Time A ctx input
+          (Point := Point) (Index := Index),
+        sectionData.ratio.curvature.profile.eventually
+          (fun i => 0 <= sectionData.ratio.tracefree_ratio.seq i))
+    (hsqueeze :
+      forall sectionData :
+        HamiltonSection12RescalingConvergenceData k R V Time A ctx input
+          (Point := Point) (Index := Index),
+        ScalarConvergenceSqueezeToZero Index R
+          sectionData.ratio.curvature.profile.scalarConvergesTo
+          sectionData.ratio.curvature.profile.eventually)
+    (heventually :
+      forall sectionData :
+        HamiltonSection12RescalingConvergenceData k R V Time A ctx input
+          (Point := Point) (Index := Index),
+        EventuallyImp Index sectionData.ratio.curvature.profile.eventually) :
+    forall sectionData :
+        HamiltonSection12RescalingConvergenceData k R V Time A ctx input
+          (Point := Point) (Index := Index),
+      IsDimensionThree sectionData.cgh.limit.flow.atr ->
+        [HamiltonP3CubicReactionGeometryTheorem k R V Time A] ->
+        ricciFlowTracefreeRicciNormSqAt k R V Time A sectionData.cgh.limit.flow
+          sectionData.ratio.curvature.nInv sectionData.ratio.curvature.limitTime = 0 := by
+  intro sectionData _h_dim _G3
+  letI : ScalarConvergenceSqueezeToZero Index R
+      sectionData.ratio.curvature.profile.scalarConvergesTo
+      sectionData.ratio.curvature.profile.eventually :=
+    hsqueeze sectionData
+  letI : EventuallyImp Index sectionData.ratio.curvature.profile.eventually :=
+    heventually sectionData
+  exact
+    section12_limit_tracefree_norm_zero_from_p4
+      (k := k) (R := R) (V := V) (Time := Time) (A := A)
+      (Point := Point) (Index := Index) ctx input sectionData
+      (producer sectionData) (hratio_seq sectionData) (hdomain sectionData)
+      (hupper sectionData) (hnonneg sectionData)
+
+end HamiltonSection12P4Bridge

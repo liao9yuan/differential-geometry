@@ -966,6 +966,157 @@ def hamiltonPinchingAdjustedEvolutionData_of_tracefree_heat_and_scalar_calculus
     h_tracefree_heat h_scalar_heat h_scalar_ne h_phiCoeff h_psiCoeff
     h_gradient_completion shifted_adjusted_heat_eq
 
+/-- Public P4-A constructor for the improved-pinching quotient evolution.
+
+This is the named handoff for LaTeX item (8):
+`P = |Ric^0|^2 / R^(2 - epsilon)`. It is deliberately stated over the concrete
+heat-equation inputs instead of importing the Ricci-norm evolution module into
+the dimension-three pinching file. In applications, the trace-free heat input
+is supplied by `hamilton3D_tracefree_norm_eq_of_heat_components` and the scalar
+heat input by `scalar_heat_eq_of_full_evolution`, both from
+`Evolution/RicciNorm.lean`.
+
+The realization-sensitive pieces remain explicit: scalar positivity,
+denominator nonzero, the power-coefficient identities for `beta = 2 - epsilon`,
+the gradient-square completion, and the shifted adjusted heat identity. -/
+@[reducible] def hamiltonPinchingAdjustedEvolutionData_of_tracefree_ricci_norm_heat
+    (problem bareProblem : ScalarParabolicProblem R Time)
+    (Calc : ScalarParabolicCalculus bareProblem)
+    (tracefreeNormSq scalar denomP ratio : Time -> R)
+    (epsilon bound : R) (decay ricciNormSq cubicQ : Time -> R)
+    (driftCoeff gradScalarGradP completedSquareWeight completedSquareNormSq
+      scalarGradientWeight reactionWeight : Time -> R)
+    (nablaRicNormSq : Time -> R)
+    (h_tracefree_smooth : Calc.Smooth tracefreeNormSq)
+    (h_scalar_smooth : Calc.Smooth scalar)
+    (h_scalar_pos : Calc.Positive scalar)
+    (denomP_nonzero : forall t, problem.domain t -> denomP t ≠ 0)
+    (P_mul_denomP_eq : forall t, problem.domain t ->
+      (tracefreeNormSq t * Calc.pow (-(2 - epsilon)) scalar t) * denomP t =
+        tracefreeNormSq t)
+    (h_tracefree_heat : forall t,
+      bareProblem.heat tracefreeNormSq t =
+        -2 * nablaRicNormSq t + ((2 : R) / 3) * Calc.gradNormSq scalar t +
+          (4 * ricciNormSq t * tracefreeNormSq t - 2 * cubicQ t) / scalar t)
+    (h_scalar_heat : forall t,
+      bareProblem.heat scalar t = 2 * ricciNormSq t)
+    (h_scalar_ne : forall t, scalar t ≠ 0)
+    (h_phiCoeff : forall t,
+      2 * Calc.pow (-(2 - epsilon)) scalar t = reactionWeight t * scalar t)
+    (h_psiCoeff : forall t,
+      2 * (tracefreeNormSq t * Calc.pow (-(2 - epsilon) - 1) scalar t) =
+        reactionWeight t * tracefreeNormSq t)
+    (h_gradient_completion : forall t,
+      Calc.pow (-(2 - epsilon)) scalar t *
+          (-2 * nablaRicNormSq t + ((2 : R) / 3) * Calc.gradNormSq scalar t) -
+        (2 - epsilon) * ((2 - epsilon) + 1) *
+            (tracefreeNormSq t * Calc.pow (-(2 - epsilon) - 2) scalar t) *
+            Calc.gradNormSq scalar t +
+        2 * (2 - epsilon) * Calc.pow (-(2 - epsilon) - 1) scalar t *
+            Calc.gradInner tracefreeNormSq scalar t =
+          driftCoeff t * gradScalarGradP t -
+            completedSquareWeight t * completedSquareNormSq t -
+            scalarGradientWeight t * tracefreeNormSq t * Calc.gradNormSq scalar t)
+    (shifted_adjusted_heat_eq :
+      forall t, problem.domain t ->
+        problem.heat
+            (fun s => tracefreeNormSq s * Calc.pow (-(2 - epsilon)) scalar s - bound) t =
+          bareProblem.heat
+              (fun s => tracefreeNormSq s * Calc.pow (-(2 - epsilon)) scalar s) t -
+            driftCoeff t * gradScalarGradP t +
+              completedSquareWeight t * completedSquareNormSq t +
+                scalarGradientWeight t * tracefreeNormSq t * Calc.gradNormSq scalar t) :
+    HamiltonPinchingAdjustedEvolutionData (R := R) (Time := Time) :=
+  hamiltonPinchingAdjustedEvolutionData_of_tracefree_heat_and_scalar_calculus
+    problem bareProblem Calc tracefreeNormSq scalar denomP ratio epsilon bound decay
+    ricciNormSq cubicQ driftCoeff gradScalarGradP completedSquareWeight
+    completedSquareNormSq scalarGradientWeight reactionWeight nablaRicNormSq
+    h_tracefree_smooth h_scalar_smooth h_scalar_pos denomP_nonzero P_mul_denomP_eq
+    h_tracefree_heat h_scalar_heat h_scalar_ne h_phiCoeff h_psiCoeff
+    h_gradient_completion shifted_adjusted_heat_eq
+
+/-- One-stop P4 producer from the trace-free Ricci-norm heat equation.
+
+This composes the public P4-A quotient-evolution constructor with the
+maximum-principle producer constructor. The remaining inputs are precisely the
+realization-sensitive signs, initial bound, coefficient identities, and decay
+relations that are not part of the synthetic quotient calculation. -/
+@[reducible] def hamilton_improved_pinching_producer_data_of_tracefree_ricci_norm_heat
+    (problem bareProblem : ScalarParabolicProblem R Time)
+    (Calc : ScalarParabolicCalculus bareProblem)
+    (tracefreeNormSq scalar denomP ratio : Time -> R)
+    (epsilon bound : R) (decay ricciNormSq cubicQ : Time -> R)
+    (driftCoeff gradScalarGradP completedSquareWeight completedSquareNormSq
+      scalarGradientWeight reactionWeight : Time -> R)
+    (nablaRicNormSq : Time -> R)
+    (h_tracefree_smooth : Calc.Smooth tracefreeNormSq)
+    (h_scalar_smooth : Calc.Smooth scalar)
+    (h_scalar_pos : Calc.Positive scalar)
+    (denomP_nonzero : forall t, problem.domain t -> denomP t ≠ 0)
+    (P_mul_denomP_eq : forall t, problem.domain t ->
+      (tracefreeNormSq t * Calc.pow (-(2 - epsilon)) scalar t) * denomP t =
+        tracefreeNormSq t)
+    (h_tracefree_heat : forall t,
+      bareProblem.heat tracefreeNormSq t =
+        -2 * nablaRicNormSq t + ((2 : R) / 3) * Calc.gradNormSq scalar t +
+          (4 * ricciNormSq t * tracefreeNormSq t - 2 * cubicQ t) / scalar t)
+    (h_scalar_heat : forall t,
+      bareProblem.heat scalar t = 2 * ricciNormSq t)
+    (h_scalar_ne : forall t, scalar t ≠ 0)
+    (h_phiCoeff : forall t,
+      2 * Calc.pow (-(2 - epsilon)) scalar t = reactionWeight t * scalar t)
+    (h_psiCoeff : forall t,
+      2 * (tracefreeNormSq t * Calc.pow (-(2 - epsilon) - 1) scalar t) =
+        reactionWeight t * tracefreeNormSq t)
+    (h_gradient_completion : forall t,
+      Calc.pow (-(2 - epsilon)) scalar t *
+          (-2 * nablaRicNormSq t + ((2 : R) / 3) * Calc.gradNormSq scalar t) -
+        (2 - epsilon) * ((2 - epsilon) + 1) *
+            (tracefreeNormSq t * Calc.pow (-(2 - epsilon) - 2) scalar t) *
+            Calc.gradNormSq scalar t +
+        2 * (2 - epsilon) * Calc.pow (-(2 - epsilon) - 1) scalar t *
+            Calc.gradInner tracefreeNormSq scalar t =
+          driftCoeff t * gradScalarGradP t -
+            completedSquareWeight t * completedSquareNormSq t -
+            scalarGradientWeight t * tracefreeNormSq t * Calc.gradNormSq scalar t)
+    (shifted_adjusted_heat_eq :
+      forall t, problem.domain t ->
+        problem.heat
+            (fun s => tracefreeNormSq s * Calc.pow (-(2 - epsilon)) scalar s - bound) t =
+          bareProblem.heat
+              (fun s => tracefreeNormSq s * Calc.pow (-(2 - epsilon)) scalar s) t -
+            driftCoeff t * gradScalarGradP t +
+              completedSquareWeight t * completedSquareNormSq t +
+                scalarGradientWeight t * tracefreeNormSq t * Calc.gradNormSq scalar t)
+    (delta : R)
+    (epsilon_le : epsilon <= 2 * delta ^ 2)
+    (reaction_product_nonnegative :
+      forall t, problem.domain t -> 0 <= ricciNormSq t * tracefreeNormSq t)
+    (cubicQ_lower_bound :
+      forall t, problem.domain t ->
+        2 * delta ^ 2 * ricciNormSq t * tracefreeNormSq t <= cubicQ t)
+    (reactionWeight_nonnegative :
+      forall t, problem.domain t -> 0 <= reactionWeight t)
+    (initial_bound :
+      IsInitiallyNonpositive problem
+        (fun t => tracefreeNormSq t * Calc.pow (-(2 - epsilon)) scalar t - bound))
+    (ratio_decay_relation :
+      forall t, problem.domain t ->
+        ratio t <=
+          (tracefreeNormSq t * Calc.pow (-(2 - epsilon)) scalar t) * decay t)
+    (decay_nonnegative : forall t, problem.domain t -> 0 <= decay t) :
+    HamiltonImprovedPinchingProducerData (R := R) (Time := Time) :=
+  hamilton_improved_pinching_producer_data_of_adjusted_pinching_evolution
+    (hamiltonPinchingAdjustedEvolutionData_of_tracefree_ricci_norm_heat
+      problem bareProblem Calc tracefreeNormSq scalar denomP ratio epsilon bound
+      decay ricciNormSq cubicQ driftCoeff gradScalarGradP completedSquareWeight
+      completedSquareNormSq scalarGradientWeight reactionWeight nablaRicNormSq
+      h_tracefree_smooth h_scalar_smooth h_scalar_pos denomP_nonzero
+      P_mul_denomP_eq h_tracefree_heat h_scalar_heat h_scalar_ne h_phiCoeff
+      h_psiCoeff h_gradient_completion shifted_adjusted_heat_eq)
+    delta epsilon_le reaction_product_nonnegative cubicQ_lower_bound
+    reactionWeight_nonnegative initial_bound ratio_decay_relation decay_nonnegative
+
 end ImprovedPinchingEvolutionCalculation
 
 section ImprovedPinchingQuotientAlgebra

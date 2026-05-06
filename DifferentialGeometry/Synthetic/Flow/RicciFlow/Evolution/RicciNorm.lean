@@ -379,8 +379,63 @@ theorem ricci_norm_dt_coordinate_product_rule
     ext s
     exact h_coord s
   rw [hfun]
-  exact td.dt_apply_sum_mul_four gInvLeft gInvRight ricciLeft ricciRight t
-    h_gInvLeft h_gInvRight h_ricciLeft h_ricciRight
+  calc
+    td.dt_apply
+        (fun s =>
+          ∑ I : ι,
+            gInvLeft I s * gInvRight I s * ricciLeft I s * ricciRight I s) t
+        =
+          td.dt_apply
+            (∑ I : ι,
+              (((gInvLeft I * gInvRight I) * ricciLeft I) *
+                ricciRight I)) t := by
+          congr 1
+          ext s
+          simp
+    _ =
+          ∑ I : ι,
+            td.dt_apply
+              (((gInvLeft I * gInvRight I) * ricciLeft I) *
+                ricciRight I) t := by
+          have h_term_smooth :
+              ∀ I ∈ (Finset.univ : Finset ι),
+                td.isSmoothFam
+                  (((gInvLeft I * gInvRight I) * ricciLeft I) *
+                    ricciRight I) := by
+            intro I _
+            exact td.isSmoothFam_mul _ _
+              (td.isSmoothFam_mul _ _
+                (td.isSmoothFam_mul _ _ (h_gInvLeft I) (h_gInvRight I))
+                (h_ricciLeft I))
+              (h_ricciRight I)
+          simpa using
+            td.dt_apply_sum (Finset.univ : Finset ι)
+              (fun I =>
+                (((gInvLeft I * gInvRight I) * ricciLeft I) *
+                  ricciRight I)) t h_term_smooth
+    _ =
+          ∑ I : ι,
+            (td.dt_apply (gInvLeft I) t * gInvRight I t *
+                ricciLeft I t * ricciRight I t +
+              gInvLeft I t * td.dt_apply (gInvRight I) t *
+                ricciLeft I t * ricciRight I t +
+              gInvLeft I t * gInvRight I t *
+                td.dt_apply (ricciLeft I) t * ricciRight I t +
+              gInvLeft I t * gInvRight I t *
+                ricciLeft I t * td.dt_apply (ricciRight I) t) := by
+          apply Finset.sum_congr rfl
+          intro I _
+          have h_gInv_smooth :
+              td.isSmoothFam (gInvLeft I * gInvRight I) :=
+            td.isSmoothFam_mul _ _ (h_gInvLeft I) (h_gInvRight I)
+          have h_three_smooth :
+              td.isSmoothFam ((gInvLeft I * gInvRight I) * ricciLeft I) :=
+            td.isSmoothFam_mul _ _ h_gInv_smooth (h_ricciLeft I)
+          rw [td.dt_apply_mul _ _ _ h_three_smooth (h_ricciRight I),
+            td.dt_apply_mul _ _ _ h_gInv_smooth (h_ricciLeft I),
+            td.dt_apply_mul _ _ _ (h_gInvLeft I) (h_gInvRight I)]
+          simp only [Pi.mul_apply]
+          ring_nf
 
 /-- Split the coordinate time-derivative terms into their two mathematical
 sources.
@@ -487,6 +542,7 @@ theorem ricci_norm_dt_component_of_coordinate_product_rule
     forall t,
       ricciNormDt t = 2 * lapInner t + 4 * curvRicciRicci t := by
   apply ricci_norm_dt_component_of_trace_cube_cancellation
+    ricciNormDt lapInner curvRicciRicci ricciTraceCube
   intro t
   calc
     ricciNormDt t = td.dt_apply ricciNormSq t := (h_dt_eval t).symm

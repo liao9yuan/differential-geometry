@@ -77,7 +77,7 @@ namespace SyntheticTensor
 section RicciReactionContractionArchitecture
 
 variable {k R V : Type*}
-variable [Field k] [CommRing R] [Algebra k R]
+variable [Field k] [CommRing R] [Algebra k R] [Invertible (2 : R)]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 
 /-- Residual form of the dim-3 Riemann-Ricci-Ricci contraction identity.
@@ -1079,7 +1079,7 @@ end RicciReactionContractionArchitecture
 section TracefreeRicciNormHeatFromContractionCalculus
 
 variable {k R V Time : Type*} {A : Type*}
-variable [Field k] [Field R] [Algebra k R]
+variable [Field k] [Field R] [Algebra k R] [Invertible (2 : R)]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 variable [CommRing A] [Algebra R A]
 

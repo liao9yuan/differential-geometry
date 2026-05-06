@@ -410,6 +410,70 @@ theorem hamiltonCubicQ_lower_bound_of_ordered_nonnegative_eigenvalue_realization
   exact hamiltonCubicQ3_lower_bound_ordered_nonnegative_eigenvalues l1 l2 l3 delta
     h12 h23 h1 h2 h3 hdelta hpinch
 
+/-- Domain-wise version of the geometric `Q` lower bound.
+
+This is the P4-B handoff: a realization that diagonalizes Ricci at every time
+in the domain supplies the exact `cubicQ_lower_bound` field used by
+`HamiltonImprovedPinchingProducerData`. -/
+theorem cubicQ_lower_bound_on_domain_of_ordered_nonnegative_eigenvalue_realizations
+    [LinearOrder R] [IsStrictOrderedRing R]
+    {Time : Type*} (domain : Time -> Prop)
+    (emb : DerivationEmbedding k R V) (conn_fam : Time -> V -> V -> V)
+    (ha_fam : forall t, forall X Y Z,
+      conn_fam t X (Y + Z) = conn_fam t X Y + conn_fam t X Z)
+    (hal_fam : forall t, forall X Y Z,
+      conn_fam t (X + Y) Z = conn_fam t X Z + conn_fam t Y Z)
+    (hsl_fam : forall t, forall (f : R) X Z,
+      conn_fam t (f • X) Z = f • conn_fam t X Z)
+    (hl_fam : forall t, forall X (f : R) Y,
+      conn_fam t X (f • Y) =
+        (emb.embed X) f • Y + f • conn_fam t X Y)
+    (atr : AbstractTrace R V) (met_fam : Time -> MetricDuality R V)
+    (nInv delta : R)
+    (ricciNormSq tracefreeNormSq cubicQ l1 l2 l3 : Time -> R)
+    (h_ricciNormSq : forall t, domain t ->
+      ricciNormSq t =
+        ricci_norm_sq emb (conn_fam t) (ha_fam t) (hal_fam t)
+          (hsl_fam t) (hl_fam t) atr (met_fam t))
+    (h_tracefreeNormSq : forall t, domain t ->
+      tracefreeNormSq t =
+        tracefree_ricci_norm_sq emb (conn_fam t) (ha_fam t) (hal_fam t)
+          (hsl_fam t) (hl_fam t) atr (met_fam t) nInv)
+    (h_cubicQ : forall t, domain t ->
+      cubicQ t =
+        hamiltonCubicQ emb (conn_fam t) (ha_fam t) (hal_fam t)
+          (hsl_fam t) (hl_fam t) atr (met_fam t))
+    (h_eig : forall t, domain t ->
+      HamiltonCubicQEigenvalueRealization emb (conn_fam t) (ha_fam t)
+        (hal_fam t) (hsl_fam t) (hl_fam t) atr (met_fam t)
+        nInv (l1 t) (l2 t) (l3 t))
+    (h12 : forall t, domain t -> l2 t <= l1 t)
+    (h23 : forall t, domain t -> l3 t <= l2 t)
+    (h1 : forall t, domain t -> 0 <= l1 t)
+    (h2 : forall t, domain t -> 0 <= l2 t)
+    (h3 : forall t, domain t -> 0 <= l3 t)
+    (hdelta : 0 <= delta)
+    (hpinch : forall t, domain t ->
+      delta * ricciEigenScalar3 (l1 t) (l2 t) (l3 t) <= l3 t) :
+    forall t, domain t ->
+      2 * delta ^ 2 * ricciNormSq t * tracefreeNormSq t <= cubicQ t := by
+  intro t ht
+  have hpoint :
+      2 * delta ^ 2 *
+            ricci_norm_sq emb (conn_fam t) (ha_fam t) (hal_fam t)
+              (hsl_fam t) (hl_fam t) atr (met_fam t) *
+          tracefree_ricci_norm_sq emb (conn_fam t) (ha_fam t) (hal_fam t)
+            (hsl_fam t) (hl_fam t) atr (met_fam t) nInv <=
+        hamiltonCubicQ emb (conn_fam t) (ha_fam t) (hal_fam t)
+          (hsl_fam t) (hl_fam t) atr (met_fam t) := by
+    exact
+      hamiltonCubicQ_lower_bound_of_ordered_nonnegative_eigenvalue_realization
+        emb (conn_fam t) (ha_fam t) (hal_fam t) (hsl_fam t) (hl_fam t)
+        atr (met_fam t) nInv (l1 t) (l2 t) (l3 t) delta
+        (h_eig t ht) (h12 t ht) (h23 t ht) (h1 t ht) (h2 t ht)
+        (h3 t ht) hdelta (hpinch t ht)
+  simpa [h_ricciNormSq t ht, h_tracefreeNormSq t ht, h_cubicQ t ht] using hpoint
+
 end HamiltonCubicQGeometricBridge
 
 section PinchingQuantities

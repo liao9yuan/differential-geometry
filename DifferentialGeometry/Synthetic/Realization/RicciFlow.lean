@@ -64,6 +64,23 @@ variable
   (M : Type*) [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M]
 
+/-- Concrete metric slice with its Koszul Levi-Civita connection. -/
+noncomputable def concreteLeviCivitaMetricData
+    (g : Bundle.ContMDiffRiemannianMetric I ω E (TangentSpace I : M → Type _)) :
+    LeviCivitaMetricData (concreteDerivationEmbedding I M) where
+  met := concreteMetricDuality I M g
+  conn := concreteConn I M (concreteKoszulCov I M g)
+  conn_add_right := concreteConn_add_right I M (concreteKoszulCov I M g)
+  conn_add_left := concreteConn_add_left I M (concreteKoszulCov I M g)
+  conn_smul_left := concreteConn_smul_left I M (concreteKoszulCov I M g)
+  conn_leibniz := concreteConn_leibniz I M (concreteKoszulCov I M g)
+  metric_compat :=
+    concreteMetricCompat I M (concreteKoszulCov I M g) g
+      (concreteKoszulCov_metric_compat I M g)
+  torsion_free :=
+    concreteConn_torsion_free I M (concreteKoszulCov I M g)
+      (concreteKoszulCov_torsion_free I M g)
+
 /-- **The concrete `RicciFlowBundle`.** Packages every piece of Realization
 infrastructure into a single `RicciFlowBundle`, so that the whole Synthetic
 Ricci flow theory specialises to Mathlib's concrete smooth-manifold setting.
@@ -111,13 +128,8 @@ noncomputable def concreteRicciFlowBundle
     { emb := concreteDerivationEmbedding I M
       atr := concreteAbstractTrace I M
       td := concreteTimeDerivativeData I M
-      g_fam := fun t => concreteMetricDuality I M (g_fam t)
+      lc_fam := fun t => concreteLeviCivitaMetricData I M (g_fam t)
       h_met := h_met
-      conn_fam := fun t => concreteConn I M (concreteKoszulCov I M (g_fam t))
-      ha_fam := fun t => concreteConn_add_right I M (concreteKoszulCov I M (g_fam t))
-      hal_fam := fun t => concreteConn_add_left I M (concreteKoszulCov I M (g_fam t))
-      hsl_fam := fun t => concreteConn_smul_left I M (concreteKoszulCov I M (g_fam t))
-      hl_fam := fun t => concreteConn_leibniz I M (concreteKoszulCov I M (g_fam t))
       spatial_temporal_comm := concrete_spatial_temporal_comm_general I M
       time_tr_comm := concrete_time_tr_comm I M
       nabla_tr_comm := fun t X L => by
@@ -129,17 +141,16 @@ noncomputable def concreteRicciFlowBundle
         simp only [concreteAbstractTrace_tr]
         exact h
       nabla_contract_comm := fun t =>
-        concrete_NablaTensorContractComm I M (concreteKoszulCov I M (g_fam t))
-      levi_civita := fun t =>
-        concreteIsLeviCivita I M (concreteKoszulCov I M (g_fam t)) (g_fam t)
-          (concreteKoszulCov_metric_compat I M (g_fam t))
-          (concreteKoszulCov_torsion_free I M (g_fam t)) }
-  ricci_flow := h_ricci_flow
+        concrete_NablaTensorContractComm I M (concreteKoszulCov I M (g_fam t)) }
+  ricci_flow := by
+    simpa [concreteLeviCivitaMetricData] using h_ricci_flow
   nabla_time_product_rule :=
-    concrete_nabla_time_product_rule I M
-      (fun t => concreteConn I M (concreteKoszulCov I M (g_fam t)))
-      (fun t => concreteConn_add_right I M (concreteKoszulCov I M (g_fam t)))
-      (fun t => concreteConn_leibniz I M (concreteKoszulCov I M (g_fam t)))
+    by
+      simpa [concreteLeviCivitaMetricData] using
+        concrete_nabla_time_product_rule I M
+          (fun t => concreteConn I M (concreteKoszulCov I M (g_fam t)))
+          (fun t => concreteConn_add_right I M (concreteKoszulCov I M (g_fam t)))
+          (fun t => concreteConn_leibniz I M (concreteKoszulCov I M (g_fam t)))
 
 /-- **Downstream demo.** The concrete `RicciFlowBundle` carries a Levi-Civita
 connection at every time, supplied automatically by the Koszul construction

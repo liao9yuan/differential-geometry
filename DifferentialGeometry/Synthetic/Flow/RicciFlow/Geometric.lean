@@ -19,7 +19,7 @@ open SyntheticTensor
 section GeometricRicciFlowData
 
 variable (k R V Time A Manifold Point Metric : Type*)
-variable [Field k] [CommRing R] [Algebra k R] [Preorder R]
+variable [Field k] [CommRing R] [Algebra k R] [Preorder R] [Invertible (2 : R)]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 variable [CommRing A] [Algebra R A]
 
@@ -57,7 +57,7 @@ structure GeometricRicciFlowData where
 namespace GeometricRicciFlowData
 
 variable {k R V Time A Manifold Point Metric : Type*}
-variable [Field k] [CommRing R] [Algebra k R] [Preorder R]
+variable [Field k] [CommRing R] [Algebra k R] [Preorder R] [Invertible (2 : R)]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 variable [CommRing A] [Algebra R A]
 
@@ -159,7 +159,7 @@ end GeometricRicciFlowData
 section GeometricRicciFlowOnInterval
 
 variable (k R V FlowTime AmbientTime A Manifold Point Metric : Type*)
-variable [Field k] [CommRing R] [Algebra k R] [Preorder R]
+variable [Field k] [CommRing R] [Algebra k R] [Preorder R] [Invertible (2 : R)]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 variable [CommRing A] [Algebra R A]
 
@@ -201,7 +201,7 @@ structure GeometricRicciFlowOnInterval where
 namespace GeometricRicciFlowOnInterval
 
 variable {k R V FlowTime AmbientTime A Manifold Point Metric : Type*}
-variable [Field k] [CommRing R] [Algebra k R] [Preorder R]
+variable [Field k] [CommRing R] [Algebra k R] [Preorder R] [Invertible (2 : R)]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 variable [CommRing A] [Algebra R A]
 

@@ -27,7 +27,7 @@ def UnboundedAboveOn {R Time : Type*} [Preorder R]
 section BlowUpInterfaces
 
 variable (k R V Time A : Type*)
-variable [Field k] [CommRing R] [Algebra k R] [Preorder R]
+variable [Field k] [CommRing R] [Algebra k R] [Invertible (2 : R)] [Preorder R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 variable [CommRing A] [Algebra R A]
 
@@ -147,7 +147,7 @@ end BlowUpInterfaces
 section GeometricBlowUpInterfaces
 
 variable (k R V Time A Manifold Point Metric : Type*)
-variable [Field k] [CommRing R] [Algebra k R] [Preorder R]
+variable [Field k] [CommRing R] [Algebra k R] [Invertible (2 : R)] [Preorder R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 variable [CommRing A] [Algebra R A]
 
@@ -285,7 +285,7 @@ end GeometricBlowUpInterfaces
 section IntervalGeometricBlowUpInterfaces
 
 variable (k R V FlowTime AmbientTime A Manifold Point Metric : Type*)
-variable [Field k] [CommRing R] [Algebra k R] [Preorder R]
+variable [Field k] [CommRing R] [Algebra k R] [Invertible (2 : R)] [Preorder R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 variable [CommRing A] [Algebra R A]
 

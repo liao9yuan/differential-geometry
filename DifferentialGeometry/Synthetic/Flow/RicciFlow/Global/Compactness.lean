@@ -64,7 +64,7 @@ class EventuallyImp (Index : Type*) (eventually : (Index -> Prop) -> Prop) : Pro
 section CompactnessInterfaces
 
 variable (k R V Time A : Type*)
-variable [Field k] [CommRing R] [Algebra k R] [Preorder R]
+variable [Field k] [CommRing R] [Algebra k R] [Invertible (2 : R)] [Preorder R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 variable [CommRing A] [Algebra R A]
 
@@ -473,7 +473,7 @@ end CompactnessInterfaces
 section GeometricCompactnessInterfaces
 
 variable (k R V Time A Manifold Point Metric : Type*)
-variable [Field k] [CommRing R] [Algebra k R] [Preorder R]
+variable [Field k] [CommRing R] [Algebra k R] [Invertible (2 : R)] [Preorder R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 variable [CommRing A] [Algebra R A]
 
@@ -637,7 +637,7 @@ end GeometricCompactnessInterfaces
 section IntervalGeometricCompactnessInterfaces
 
 variable (k R V FlowTime AmbientTime A Manifold Point Metric : Type*)
-variable [Field k] [CommRing R] [Algebra k R] [Preorder R]
+variable [Field k] [CommRing R] [Algebra k R] [Invertible (2 : R)] [Preorder R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 variable [CommRing A] [Algebra R A]
 
@@ -837,7 +837,7 @@ end IntervalGeometricCompactnessInterfaces
 section ImprovedPinchingCompactnessBridge
 
 variable (k R V Time A : Type*)
-variable [Field k] [CommRing R] [Algebra k R] [LinearOrder R] [IsStrictOrderedRing R]
+variable [Field k] [CommRing R] [Algebra k R] [Invertible (2 : R)] [LinearOrder R] [IsStrictOrderedRing R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 variable [CommRing A] [Algebra R A]
 
@@ -954,7 +954,7 @@ end ImprovedPinchingCompactnessBridge
 section CompactnessInterfaces
 
 variable (k R V Time A : Type*)
-variable [Field k] [CommRing R] [Algebra k R] [Preorder R]
+variable [Field k] [CommRing R] [Algebra k R] [Invertible (2 : R)] [Preorder R]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 variable [CommRing A] [Algebra R A]
 

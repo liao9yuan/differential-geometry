@@ -42,6 +42,31 @@ def IsLeviCivita (emb : DerivationEmbedding k R V) (conn : V → V → V)
     (met : MetricDuality R V) : Prop :=
   IsMetricCompatible emb conn met ∧ IsTorsionFree emb conn
 
+/-- A Riemannian metric together with its chosen Levi-Civita connection.
+
+This lives in the geometry layer, not in `MetricDuality`, so the algebraic
+metric-duality API stays independent of connections and derivation embeddings. -/
+structure LeviCivitaMetricData (emb : DerivationEmbedding k R V) where
+  met : MetricDuality R V
+  conn : V -> V -> V
+  conn_add_right : forall X Y Z, conn X (Y + Z) = conn X Y + conn X Z
+  conn_add_left : forall X Y Z, conn (X + Y) Z = conn X Z + conn Y Z
+  conn_smul_left : forall (f : R) X Z, conn (f • X) Z = f • conn X Z
+  conn_leibniz :
+    forall X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y
+  metric_compat : IsMetricCompatible emb conn met
+  torsion_free : IsTorsionFree emb conn
+
+namespace LeviCivitaMetricData
+
+variable {emb : DerivationEmbedding k R V}
+
+theorem levi_civita (D : LeviCivitaMetricData emb) :
+    IsLeviCivita emb D.conn D.met :=
+  ⟨D.metric_compat, D.torsion_free⟩
+
+end LeviCivitaMetricData
+
 end Conditions
 
 -- ============================================================

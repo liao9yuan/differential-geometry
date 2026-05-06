@@ -36,4 +36,5 @@ structure YamabeFlowBundle (k R V Time A : Type*)
   scalar_velocity : Time → R
   /-- The Yamabe / conformal flow equation `∂_t g = scalar_velocity · g`. -/
   yamabe_eq : ∀ t : Time,
-    metric_var_form td g_fam h_met t = scalar_velocity t • (g_fam t).g_tensor
+    metric_var_form td (fun τ => (lc_fam τ).met) h_met t =
+      scalar_velocity t • ((lc_fam t).met).g_tensor

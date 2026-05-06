@@ -39,12 +39,16 @@ variable [CommRing A] [Algebra R A]
     All geometric structures (`emb`, `atr`, `td`, `g_fam`, `conn_fam`, …) and
     the Ricci flow equation itself are inherited from `RicciFlowBundle`. -/
 structure RicciFlowData extends RicciFlowBundle k R V Time A where
-  h_mvp : MetricBilinProductRule td g_fam h_met
-  h_mfp : MetricFullProductRule td g_fam h_met
+  h_mvp : MetricBilinProductRule td (fun τ => (lc_fam τ).met) h_met
+  h_mfp : MetricFullProductRule td (fun τ => (lc_fam τ).met) h_met
   h_Rc_smooth : ∀ vs αs, td.isSmoothFam
-    (fun τ => ricciForm_tensor emb (conn_fam τ) (ha_fam τ) (hal_fam τ) (hsl_fam τ) (hl_fam τ) atr vs αs)
-  h_sc_prod : ScalarCurvatureProductRule emb td atr g_fam h_met conn_fam
-    ha_fam hal_fam hsl_fam hl_fam h_Rc_smooth
+    (fun τ => ricciForm_tensor emb ((lc_fam τ).conn) ((lc_fam τ).conn_add_right)
+      ((lc_fam τ).conn_add_left) ((lc_fam τ).conn_smul_left)
+      ((lc_fam τ).conn_leibniz) atr vs αs)
+  h_sc_prod : ScalarCurvatureProductRule emb td atr (fun τ => (lc_fam τ).met) h_met
+    (fun τ => (lc_fam τ).conn) (fun τ => (lc_fam τ).conn_add_right)
+    (fun τ => (lc_fam τ).conn_add_left) (fun τ => (lc_fam τ).conn_smul_left)
+    (fun τ => (lc_fam τ).conn_leibniz) h_Rc_smooth
 
 end RicciFlowData
 

@@ -6,11 +6,31 @@ This file inventories the first-party Lean dependency tree for `DifferentialGeom
 
 - Root: `DifferentialGeometry/Synthetic/Flow/RicciFlow/HamiltonThreeManifold.lean`
 - First-party modules in closure: 41
-- Theorem/lemma declarations in closure: 690
-- All declaration-like entries found: 1066
+- Theorem/lemma declarations in closure: 693
+- All declaration-like entries found: 1071
+
+## Post-P4 Delta
+
+- P4 now has a producer-level synthetic closeout:
+  `hamilton_improved_pinching_producer_data_of_tracefree_ricci_norm_heat`
+  composes the trace-free Ricci quotient evolution with
+  `hamilton_improved_pinching_producer_data_of_adjusted_pinching_evolution`.
+- P4-B now has a domain-wise `Q` helper:
+  `cubicQ_lower_bound_on_domain_of_ordered_nonnegative_eigenvalue_realizations`.
+- `wordlyLatex.lean` exposes the improved-pinching estimate and the P4
+  limit-zero consumer.
+- `HamiltonThreeManifold.lean` now has
+  `section12_limit_tracefree_norm_zero_from_p4` and
+  `section12_limit_tracefree_norm_zero_from_p4_builder_field`, so a realization
+  can fill the compatibility field `limit_tracefree_norm_zero_from_p3` from P4
+  data without renaming the builder API.
+- The next P4 work is realization-level: coefficient identities, denominator
+  nonzero, gradient-square completion, ratio-decay, and eventual decay inputs.
 
 ## Immediate Refactor Conclusions
 
+- P4 producer and Section 12 handoff packaging are done; the remaining P4 gap is
+  instantiating the realization-level scalar-power and decay inputs.
 - Product, chain, and power rules should be proved once in a general scalar calculus layer, not carried as one-off hypotheses for Lemma 10.5 or later P4 lemmas.
 - `ScalarParabolicCalculus` and `ScalarParabolicDoubleDivergenceCalculus` are useful scaffolding, but the long-term target should prove their fields from a concrete `dt`, `grad`, `divergence`, and `laplacian = div grad` calculation.
 - Existing reusable pieces already present: `TimeDerivativeData.dt_apply_mul`, `divergence_smul`, `scalarDoubleDivergenceAt_eq_laplacian`, `heat_product_rule_of_doubleDivergence`, and `heat_power_rule_of_doubleDivergence`.
@@ -68,7 +88,7 @@ This file inventories the first-party Lean dependency tree for `DifferentialGeom
 - `hamilton_three_manifold_from_section12_claims`: final convenience wrapper from `HamiltonSection12Claims`.
 - `hamilton_section12_assembly_from_claims`: packs claims into assembly data.
 - `hamilton_three_manifold_from_typed_input`: typed-input wrapper using `HamiltonSyntheticAnalyticInputs` plus `HamiltonSection12ClaimBuilderInput`.
-- `HamiltonSection12ClaimBuilderInput`: current collaborator-facing claim bundle for analytic/global inputs.
+- `HamiltonSection12ClaimBuilderInput`: current collaborator-facing claim bundle for analytic/global inputs; it still exposes `limit_tracefree_norm_zero_from_p3` as the compatibility route, and `section12_limit_tracefree_norm_zero_from_p4_builder_field` fills that route from P4 producer data.
 
 ## Theorem And Lemma Inventory
 
@@ -106,6 +126,8 @@ This file inventories the first-party Lean dependency tree for `DifferentialGeom
 - L1586 `theorem hamilton_three_manifold_from_section12_claims`
 - L1601 `theorem hamilton_section12_claims_smoke`
 - L1636 `theorem hamilton_three_manifold_from_black_boxes`
+- L2004 `theorem section12_limit_tracefree_norm_zero_from_p4`
+- L2043 `theorem section12_limit_tracefree_norm_zero_from_p4_builder_field`
 
 ### `DifferentialGeometry/Synthetic/Flow/RicciFlow/DimensionThree/ImprovedPinching.lean`
 
@@ -143,6 +165,7 @@ This file inventories the first-party Lean dependency tree for `DifferentialGeom
 - L304 `theorem hamiltonCubicQ3_lower_bound_ordered_nonnegative_eigenvalues`
 - L374 `theorem hamiltonCubicQ_eq_hamiltonCubicQ3_of_eigenvalue_realization`
 - L390 `theorem hamiltonCubicQ_lower_bound_of_ordered_nonnegative_eigenvalue_realization`
+- L418 `theorem cubicQ_lower_bound_on_domain_of_ordered_nonnegative_eigenvalue_realizations`
 - L433 `theorem tracefreeRicciPinchingQuantity_eval`
 - L447 `theorem tracefreeRicciPinchingQuantity_expand_abstractTraceDimension`
 - L466 `theorem tracefreeRicciPinchingQuantity_eq_ricciNorm_div_scalarSq_sub_nInv`
@@ -933,6 +956,8 @@ Definitions, structures, classes, and axioms are not theorem declarations, but m
 - L545 `def hamiltonImprovedPinchingQuantity`
 - L557 `def hamiltonImprovedPinchingQuantityFromRicci`
 - L601 `structure HamiltonPinchingQuotientRealizationData`
+- L982 `def hamiltonPinchingAdjustedEvolutionData_of_tracefree_ricci_norm_heat`
+- L1044 `def hamilton_improved_pinching_producer_data_of_tracefree_ricci_norm_heat`
 
 ### `DifferentialGeometry/Synthetic/Flow/RicciFlow/DimensionThree/Pinching.lean`
 

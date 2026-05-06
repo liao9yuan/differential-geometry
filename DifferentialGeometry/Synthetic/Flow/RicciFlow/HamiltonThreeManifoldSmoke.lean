@@ -1,5 +1,6 @@
 import DifferentialGeometry.Synthetic.Flow.RicciFlow.HamiltonThreeManifold
-import Mathlib.Data.ZMod.Basic
+import Mathlib.Algebra.CharP.Invertible
+import Mathlib.Data.Rat.Defs
 import Mathlib.Tactic
 
 set_option autoImplicit false
@@ -25,14 +26,11 @@ open SyntheticTensor
 
 namespace HamiltonThreeManifoldSmoke
 
-instance fact_prime_two : Fact (Nat.Prime (2 : Nat)) where
-  out := by norm_num
-
-abbrev K := ZMod 2
-abbrev R := ZMod 2
+abbrev K := ℚ
+abbrev R := ℚ
 abbrev V := PUnit.{1}
 abbrev Time := PUnit.{1}
-abbrev A := ZMod 2
+abbrev A := ℚ
 abbrev Point := PUnit.{1}
 abbrev Index := PUnit.{1}
 abbrev SpaceTime := PUnit.{1}
@@ -40,30 +38,8 @@ abbrev Manifold := PUnit.{1}
 abbrev Metric := PUnit.{1}
 abbrev Diffeomorphism := PUnit.{1}
 
-/-- A tiny preorder on `ZMod 2` used only to make `0 < 1` available for the
-smoke theorem. -/
-instance zmod2Preorder : Preorder R where
-  le x y := LE.le (ZMod.val x) (ZMod.val y)
-  lt x y := LT.lt (ZMod.val x) (ZMod.val y)
-  le_refl := by
-    intro x
-    exact Nat.le_refl (ZMod.val x)
-  le_trans := by
-    intro _ _ _ hab hbc
-    exact Nat.le_trans hab hbc
-  lt_iff_le_not_ge := by
-    intro _ _
-    exact lt_iff_le_not_ge
-
-theorem zmod2_zero_lt_one : (0 : R) < 1 := by
-  decide
-
-theorem no_half_coefficient (half : R) : Not (IsHalfCoefficient half) := by
-  intro h
-  have h2 : (2 : R) = 0 := ZMod.natCast_self 2
-  unfold IsHalfCoefficient at h
-  rw [h2, zero_mul] at h
-  exact zero_ne_one h
+noncomputable instance ratInvertibleTwo : Invertible (2 : R) :=
+  invertibleOfNonzero (by norm_num : (2 : R) ≠ 0)
 
 noncomputable def toyEmb : DerivationEmbedding K R V where
   embed := 0
@@ -115,6 +91,28 @@ noncomputable def toyMetricDuality : MetricDuality R V where
     rw [hZ]
     exact (map_zero alpha).symm
 
+theorem toyMetricCompatible : IsMetricCompatible toyEmb toyConn toyMetricDuality := by
+  intro X Y Z
+  have hX : X = 0 := Subsingleton.elim X 0
+  have hY : Y = 0 := Subsingleton.elim Y 0
+  have hZ : Z = 0 := Subsingleton.elim Z 0
+  rw [hX, hY, hZ]
+  simp [toyConn, toyMetricDuality, MetricDuality.g]
+
+theorem toyTorsionFree : IsTorsionFree toyEmb toyConn := by
+  intro X Y
+  exact Subsingleton.elim _ _
+
+noncomputable def toyLC : LeviCivitaMetricData toyEmb where
+  met := toyMetricDuality
+  conn := toyConn
+  conn_add_right := toyConn_add_right
+  conn_add_left := toyConn_add_left
+  conn_smul_left := toyConn_smul_left
+  conn_leibniz := toyConn_leibniz
+  metric_compat := toyMetricCompatible
+  torsion_free := toyTorsionFree
+
 noncomputable def toyTD : TimeDerivativeData R A Time where
   dt := 0
   lift f := f PUnit.unit
@@ -157,6 +155,39 @@ instance toyTimeRegularFam : TimeRegularFam toyTD where
     intro _ _
     trivial
 
+instance toyTimeRegularFam2 : TimeRegularFam2 toyTD where
+  isSmoothFam2 _ := True
+  isSmoothFam2_const := by
+    intro _
+    trivial
+  isSmoothFam2_add := by
+    intro _ _ _ _
+    trivial
+  isSmoothFam2_mul := by
+    intro _ _ _ _
+    trivial
+  isSmoothFam2_neg := by
+    intro _ _
+    trivial
+  isSmoothFam2_of_single_fst := by
+    intro _ _
+    trivial
+  isSmoothFam2_of_single_snd := by
+    intro _ _
+    trivial
+  diag_isSmoothFam := by
+    intro _ _
+    trivial
+  slice_left_isSmoothFam := by
+    intro _ _ _
+    trivial
+  slice_right_isSmoothFam := by
+    intro _ _ _
+    trivial
+  dt_apply_diag_leibniz := by
+    intro G t _
+    simp [TimeDerivativeData.dt_apply, toyTD]
+
 axiom toyAtr : AbstractTrace R V
 axiom toyDimensionThree : IsDimensionThree toyAtr
 axiom toyRicciPositive :
@@ -165,6 +196,7 @@ axiom toyRicciPositive :
 
 noncomputable def toyGFam (_ : Time) : MetricDuality R V := toyMetricDuality
 def toyConnFam (_ : Time) : V -> V -> V := toyConn
+noncomputable def toyLCFam (_ : Time) : LeviCivitaMetricData toyEmb := toyLC
 
 theorem toyHMet : forall vs as, toyTD.isSmoothFam (fun t => (toyGFam t).g_tensor vs as) := by
   intro _ _
@@ -201,6 +233,13 @@ axiom toyIsRicciFlow :
     toyHslFam toyHlFam
 
 axiom toySpatialTemporalComm : SpatialTemporalComm toyEmb toyTD
+axiom toyTimeTrComm : TimeTrComm toyAtr toyTD
+axiom toyNablaTrComm :
+  forall t, NablaTrComm toyEmb toyAtr (toyConnFam t) (toyHaFam t) (toyHlFam t)
+axiom toyNablaContractComm :
+  forall t, NablaTensorContractComm toyEmb toyAtr (toyConnFam t) (toyHaFam t) (toyHlFam t)
+axiom toyNablaTimeProductRule :
+  NablaTimeProductRule toyEmb toyTD toyConnFam toyHaFam toyHlFam
 axiom toyMetricBilinProductRule : MetricBilinProductRule toyTD toyGFam toyHMet
 axiom toyMetricFullProductRule : MetricFullProductRule toyTD toyGFam toyHMet
 axiom toyScalarCurvatureProductRule :
@@ -211,15 +250,21 @@ noncomputable def toyFlow : RicciFlowData K R V Time A where
   emb := toyEmb
   td := toyTD
   atr := toyAtr
-  g_fam := toyGFam
-  h_met := toyHMet
-  conn_fam := toyConnFam
-  ha_fam := toyHaFam
-  hal_fam := toyHalFam
-  hsl_fam := toyHslFam
-  hl_fam := toyHlFam
-  h_rf := toyIsRicciFlow
-  h_st := toySpatialTemporalComm
+  lc_fam := toyLCFam
+  h_met := by
+    simpa [toyLCFam, toyLC, toyGFam] using toyHMet
+  ricci_flow := by
+    simpa [toyLCFam, toyLC, toyGFam, toyConnFam] using toyIsRicciFlow
+  nabla_time_product_rule := by
+    simpa [toyLCFam, toyLC, toyConnFam] using toyNablaTimeProductRule
+  spatial_temporal_comm := toySpatialTemporalComm
+  time_tr_comm := toyTimeTrComm
+  nabla_tr_comm := by
+    intro t
+    simpa [toyLCFam, toyLC, toyConnFam] using toyNablaTrComm t
+  nabla_contract_comm := by
+    intro t
+    simpa [toyLCFam, toyLC, toyConnFam] using toyNablaContractComm t
   h_mvp := toyMetricBilinProductRule
   h_mfp := toyMetricFullProductRule
   h_Rc_smooth := toyHRcSmooth
@@ -248,15 +293,27 @@ noncomputable def toyInput : HamiltonThreeManifoldTypedInput K R V Time A toyCon
   connectedInitialManifold := trivial
   positiveRicciInitial := toyRicciPositive
 
-/-- Fake P1 gap witness. In characteristic two, `IsHalfCoefficient half` is
-false, so the differential identity is discharged by contradiction. -/
-instance toyP1 : HamiltonP1ContractedSecondBianchiTheorem K R V Time A where
-  contracted_second_bianchi := by
-    intro D t half h_half
-    exact And.intro h_half (fun Y => False.elim (no_half_coefficient half h_half))
+axiom toyContractedSecondBianchi :
+  forall (D : RicciFlowData K R V Time A) (t : Time) (half : R),
+    IsHalfCoefficient half ->
+      ContractedSecondBianchiIdentity D.emb (D.conn_fam t) (D.ha_fam t)
+        (D.hal_fam t) (D.hsl_fam t) (D.hl_fam t) D.atr (D.g_fam t) half
 
-/-- Fake slice-level P2 calculus. The residual equation is vacuous for the
-same characteristic-two half-coefficient reason. -/
+/-- Fake P1 gap witness. The smoke test only checks final wrapper wiring. -/
+instance toyP1 : HamiltonP1ContractedSecondBianchiTheorem K R V Time A where
+  contracted_second_bianchi := toyContractedSecondBianchi
+
+axiom toyRiemannFromRicci3DResidualZero
+    (emb : DerivationEmbedding K R V) (conn : V -> V -> V)
+    (ha : forall X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : forall X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : forall (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : forall X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (atr : AbstractTrace R V) (met : MetricDuality R V) :
+  forall (_ : IsDimensionThree atr) (half : R) (h_half : IsHalfCoefficient half) X Y Z W,
+    riemannFromRicci3DResidual emb conn ha hal hsl hl atr met half h_half X Y Z W = 0
+
+/-- Fake slice-level P2 calculus. The smoke test only checks final wrapper wiring. -/
 @[reducible] def toyRiemannFromRicci3DCalculus
     (emb : DerivationEmbedding K R V) (conn : V -> V -> V)
     (ha : forall X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
@@ -265,9 +322,7 @@ same characteristic-two half-coefficient reason. -/
     (hl : forall X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
     (atr : AbstractTrace R V) (met : MetricDuality R V) :
     HasRiemannFromRicci3DCalculus emb conn ha hal hsl hl atr met where
-  residual_zero := by
-    intro _ half h_half X Y Z W
-    exact False.elim (no_half_coefficient half h_half)
+  residual_zero := toyRiemannFromRicci3DResidualZero emb conn ha hal hsl hl atr met
 
 /-- Fake P2 gap witness, intentionally routed through the P2 architecture
 bridge from slice-level calculus to the Hamilton-level gap typeclass. -/

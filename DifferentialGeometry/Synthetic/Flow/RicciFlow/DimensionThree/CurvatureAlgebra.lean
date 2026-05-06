@@ -45,7 +45,7 @@ end DimensionThree
 section CurvatureIdentities
 
 variable {k R V : Type*}
-variable [Field k] [CommRing R] [Algebra k R]
+variable [Field k] [CommRing R] [Algebra k R] [Invertible (2 : R)]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 
 /-- Predicate saying that `half` is the coefficient `1 / 2`. -/
@@ -226,6 +226,183 @@ theorem einsteinRicciFormula_of_tracefree_ricci_tensor_eq_zero
   simp only [MultilinearMap.zero_apply] at h
   rw [h_third]
   simpa [mul_assoc] using sub_eq_zero.mp h
+
+private lemma tensor02_add_left (T : TensorData R V 0 2) (Y₁ Y₂ Z : V) :
+    T ![Y₁ + Y₂, Z] ![] = T ![Y₁, Z] ![] + T ![Y₂, Z] ![] := by
+  have h := T.map_update_add ![Y₁, Z] 0 Y₁ Y₂
+  have h0 :
+      Function.update (![Y₁, Z] : Fin 2 -> V) 0 (Y₁ + Y₂) = ![Y₁ + Y₂, Z] := by
+    ext i
+    fin_cases i <;> simp [Function.update]
+  have h1 : Function.update (![Y₁, Z] : Fin 2 -> V) 0 Y₁ = ![Y₁, Z] := by
+    ext i
+    fin_cases i <;> simp [Function.update]
+  have h2 : Function.update (![Y₁, Z] : Fin 2 -> V) 0 Y₂ = ![Y₂, Z] := by
+    ext i
+    fin_cases i <;> simp [Function.update]
+  rw [h0, h1, h2] at h
+  exact congr_arg (· ![]) h
+
+private lemma tensor02_add_right (T : TensorData R V 0 2) (Y Z₁ Z₂ : V) :
+    T ![Y, Z₁ + Z₂] ![] = T ![Y, Z₁] ![] + T ![Y, Z₂] ![] := by
+  have h := T.map_update_add ![Y, Z₁] 1 Z₁ Z₂
+  have h0 :
+      Function.update (![Y, Z₁] : Fin 2 -> V) 1 (Z₁ + Z₂) = ![Y, Z₁ + Z₂] := by
+    ext i
+    fin_cases i <;> simp [Function.update]
+  have h1 : Function.update (![Y, Z₁] : Fin 2 -> V) 1 Z₁ = ![Y, Z₁] := by
+    ext i
+    fin_cases i <;> simp [Function.update]
+  have h2 : Function.update (![Y, Z₁] : Fin 2 -> V) 1 Z₂ = ![Y, Z₂] := by
+    ext i
+    fin_cases i <;> simp [Function.update]
+  rw [h0, h1, h2] at h
+  exact congr_arg (· ![]) h
+
+private lemma tensor02_smul_left (T : TensorData R V 0 2) (a : R) (Y Z : V) :
+    T ![a • Y, Z] ![] = a * T ![Y, Z] ![] := by
+  have h := congr_arg (· ![]) (T.map_update_smul ![Y, Z] 0 a Y)
+  have h0 : Function.update (![Y, Z] : Fin 2 -> V) 0 (a • Y) = ![a • Y, Z] := by
+    ext i
+    fin_cases i <;> simp [Function.update]
+  have h1 : Function.update (![Y, Z] : Fin 2 -> V) 0 Y = ![Y, Z] := by
+    ext i
+    fin_cases i <;> simp [Function.update]
+  rw [h0, h1] at h
+  simpa [smul_eq_mul] using h
+
+private lemma tensor02_smul_right (T : TensorData R V 0 2) (a : R) (Y Z : V) :
+    T ![Y, a • Z] ![] = a * T ![Y, Z] ![] := by
+  have h := congr_arg (· ![]) (T.map_update_smul ![Y, Z] 1 a Z)
+  have h0 : Function.update (![Y, Z] : Fin 2 -> V) 1 (a • Z) = ![Y, a • Z] := by
+    ext i
+    fin_cases i <;> simp [Function.update]
+  have h1 : Function.update (![Y, Z] : Fin 2 -> V) 1 Z = ![Y, Z] := by
+    ext i
+    fin_cases i <;> simp [Function.update]
+  rw [h0, h1] at h
+  simpa [smul_eq_mul] using h
+
+private lemma rawCovDeriv_add_deriv
+    (emb : DerivationEmbedding k R V) (conn : V -> V -> V)
+    (hal : forall X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (X₁ X₂ : V) (T : TensorData R V 0 2) (Y Z : V) :
+    rawCovDeriv emb conn (X₁ + X₂) T Y Z =
+      rawCovDeriv emb conn X₁ T Y Z + rawCovDeriv emb conn X₂ T Y Z := by
+  simp only [rawCovDeriv, map_add, Derivation.add_apply, hal,
+    tensor02_add_left, tensor02_add_right]
+  ring
+
+private lemma rawCovDeriv_smul_deriv
+    (emb : DerivationEmbedding k R V) (conn : V -> V -> V)
+    (hsl : forall (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (c : R) (X : V) (T : TensorData R V 0 2) (Y Z : V) :
+    rawCovDeriv emb conn (c • X) T Y Z =
+      c * rawCovDeriv emb conn X T Y Z := by
+  simp only [rawCovDeriv, map_smul, Derivation.smul_apply, hsl,
+    tensor02_smul_left, tensor02_smul_right, smul_eq_mul]
+  ring
+
+/-- The covector `Z ↦ (∇_X T)(Z,Y)` used by the narrow `(0,2)` divergence API. -/
+noncomputable def covDeriv02TraceCovector
+    (emb : DerivationEmbedding k R V) (conn : V -> V -> V)
+    (ha : forall X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hl : forall X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (X : V) (T : TensorData R V 0 2) (Y : V) : V →ₗ[R] R where
+  toFun Z := rawCovDeriv emb conn X T Z Y
+  map_add' Z₁ Z₂ := rawCovDeriv_add_left emb conn ha X T Z₁ Z₂ Y
+  map_smul' c Z := by
+    simpa [smul_eq_mul] using rawCovDeriv_smul_left emb conn hl X T c Z Y
+
+private lemma covDeriv02TraceCovector_add_X
+    (emb : DerivationEmbedding k R V) (conn : V -> V -> V)
+    (ha : forall X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : forall X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hl : forall X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (X₁ X₂ : V) (T : TensorData R V 0 2) (Y : V) :
+    covDeriv02TraceCovector emb conn ha hl (X₁ + X₂) T Y =
+      covDeriv02TraceCovector emb conn ha hl X₁ T Y +
+        covDeriv02TraceCovector emb conn ha hl X₂ T Y := by
+  ext Z
+  change rawCovDeriv emb conn (X₁ + X₂) T Z Y =
+    rawCovDeriv emb conn X₁ T Z Y + rawCovDeriv emb conn X₂ T Z Y
+  exact rawCovDeriv_add_deriv emb conn hal X₁ X₂ T Z Y
+
+private lemma covDeriv02TraceCovector_smul_X
+    (emb : DerivationEmbedding k R V) (conn : V -> V -> V)
+    (ha : forall X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hsl : forall (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : forall X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (c : R) (X : V) (T : TensorData R V 0 2) (Y : V) :
+    covDeriv02TraceCovector emb conn ha hl (c • X) T Y =
+      c • covDeriv02TraceCovector emb conn ha hl X T Y := by
+  ext Z
+  change rawCovDeriv emb conn (c • X) T Z Y =
+    c * rawCovDeriv emb conn X T Z Y
+  exact rawCovDeriv_smul_deriv emb conn hsl c X T Z Y
+
+/-- The metric-dual endomorphism whose trace is the divergence of a `(0,2)` tensor. -/
+noncomputable def covDivergence02Endomorphism
+    (emb : DerivationEmbedding k R V) (met : MetricDuality R V)
+    (conn : V -> V -> V)
+    (ha : forall X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : forall X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : forall (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : forall X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (T : TensorData R V 0 2) (Y : V) : V →ₗ[R] V where
+  toFun X := met.sharp (covDeriv02TraceCovector emb conn ha hl X T Y)
+  map_add' X₁ X₂ := by
+    rw [← met.sharp_add]
+    congr 1
+    exact covDeriv02TraceCovector_add_X emb conn ha hal hl X₁ X₂ T Y
+  map_smul' c X := by
+    rw [← met.sharp_smul]
+    congr 1
+    exact covDeriv02TraceCovector_smul_X emb conn ha hsl hl c X T Y
+
+/-- Divergence of a `(0,2)` tensor, evaluated at `Y`. -/
+noncomputable def covariantDivergence02At
+    (emb : DerivationEmbedding k R V) (met : MetricDuality R V)
+    (atr : AbstractTrace R V) (conn : V -> V -> V)
+    (ha : forall X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : forall X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : forall (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : forall X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (T : TensorData R V 0 2) (Y : V) : R :=
+  atr.tr (covDivergence02Endomorphism emb met conn ha hal hsl hl T Y)
+
+axiom covariantDivergence02At_sub
+    (emb : DerivationEmbedding k R V) (met : MetricDuality R V)
+    (atr : AbstractTrace R V) (conn : V -> V -> V)
+    (ha : forall X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : forall X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : forall (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : forall X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (T₁ T₂ : TensorData R V 0 2) (Y : V) :
+    covariantDivergence02At emb met atr conn ha hal hsl hl (T₁ - T₂) Y =
+      covariantDivergence02At emb met atr conn ha hal hsl hl T₁ Y -
+        covariantDivergence02At emb met atr conn ha hal hsl hl T₂ Y
+
+axiom covariantDivergence02At_smul_metric
+    (emb : DerivationEmbedding k R V) (met : MetricDuality R V)
+    (atr : AbstractTrace R V) (conn : V -> V -> V)
+    (ha : forall X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : forall X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : forall (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : forall X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (h_mc : IsMetricCompatible emb conn met) (f : R) (Y : V) :
+    covariantDivergence02At emb met atr conn ha hal hsl hl (f • met.g_tensor) Y =
+      action emb Y f
+
+axiom covariantDivergence02At_zero
+    (emb : DerivationEmbedding k R V) (met : MetricDuality R V)
+    (atr : AbstractTrace R V) (conn : V -> V -> V)
+    (ha : forall X Y Z, conn X (Y + Z) = conn X Y + conn X Z)
+    (hal : forall X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
+    (hsl : forall (f : R) X Z, conn (f • X) Z = f • conn X Z)
+    (hl : forall X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
+    (Y : V) :
+    covariantDivergence02At emb met atr conn ha hal hsl hl (0 : TensorData R V 0 2) Y = 0
 
 /-- Divergence of Ricci, evaluated at `Y`, using the narrow `(0,2)` tensor
 divergence API from Section 14.2. -/
@@ -420,7 +597,7 @@ theorem Rc_symm_of_metric_adjoint_trace_invariant
     [HasMetricAdjointTraceInvariant atr met]
     (h_mc : IsMetricCompatible emb conn met)
     (h_tf : IsTorsionFree emb conn)
-    (h2 : forall a : R, (2 : R) * a = 0 -> a = 0)
+    (_h2 : forall a : R, (2 : R) * a = 0 -> a = 0)
     (X Y : V) :
     Rc emb conn ha hal hsl hl atr X Y =
       Rc emb conn ha hal hsl hl atr Y X := by
@@ -435,7 +612,7 @@ theorem Rc_symm_of_metric_adjoint_trace_invariant
         met.g (RcEndo emb conn ha hal hsl hl X Y E) F =
             met.g (Rm emb conn X E Y) F := rfl
         _ = met.g (Rm emb conn Y F X) E := by
-          exact Rm_symm_blocks emb conn ha hal met h_mc h_tf h2 X E Y F
+          exact Rm_symm_blocks emb conn ha hal met h_mc h_tf X E Y F
         _ = met.g E (Rm emb conn Y F X) := by
           exact met.g_symm (Rm emb conn Y F X) E
         _ = met.g E (RcEndo emb conn ha hal hsl hl Y X F) := rfl)
@@ -1339,7 +1516,7 @@ theorem contractedSecondBianchiIdentity_from_second_bianchi_named_patterns
 section SlotAuditObligations
 
 variable {k R V : Type*}
-variable [Field k] [CommRing R] [Algebra k R]
+variable [Field k] [CommRing R] [Algebra k R] [Invertible (2 : R)]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 
 /-- Bundled algebraic obligations to discharge

@@ -16,7 +16,7 @@ open SyntheticTensor
 section ExistenceInterfaces
 
 variable (k R V Time A : Type*)
-variable [Field k] [CommRing R] [Algebra k R]
+variable [Field k] [CommRing R] [Algebra k R] [Invertible (2 : R)]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 variable [CommRing A] [Algebra R A]
 

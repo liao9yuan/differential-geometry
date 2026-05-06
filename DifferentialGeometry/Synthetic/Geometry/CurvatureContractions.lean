@@ -172,12 +172,13 @@ theorem Rm_lowered_block_symm
     (hal : forall X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
     (met : MetricDuality R V)
     (h_mc : IsMetricCompatible emb conn met) (h_tf : IsTorsionFree emb conn)
-    (h2 : forall (a : R), 2 * a = 0 -> a = 0)
+    [Invertible (2 : R)]
+    (_h2 : forall (a : R), 2 * a = 0 -> a = 0)
     (X Y Z W : V) :
     Rm_lowered emb conn met X Y Z W =
       Rm_lowered emb conn met Z W X Y := by
   unfold Rm_lowered
-  exact Rm_symm_blocks emb conn ha hal met h_mc h_tf h2 X Y Z W
+  exact Rm_symm_blocks emb conn ha hal met h_mc h_tf X Y Z W
 
 /-- Algebraic first Bianchi identity for lowered curvature. -/
 theorem Rm_lowered_first_bianchi
@@ -249,12 +250,13 @@ theorem loweredRmTensor_block_symm
     (hl : forall X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
     (met : MetricDuality R V)
     (h_mc : IsMetricCompatible emb conn met) (h_tf : IsTorsionFree emb conn)
-    (h2 : forall (a : R), 2 * a = 0 -> a = 0)
+    [Invertible (2 : R)]
+    (_h2 : forall (a : R), 2 * a = 0 -> a = 0)
     (X Y Z W : V) :
     loweredRmTensor emb conn ha hal hsl hl met ![X, Y, Z, W] ![] =
       loweredRmTensor emb conn ha hal hsl hl met ![Z, W, X, Y] ![] := by
   rw [loweredRmTensor_eval, loweredRmTensor_eval]
-  exact Rm_lowered_block_symm emb conn ha hal met h_mc h_tf h2 X Y Z W
+  exact Rm_lowered_block_symm emb conn ha hal met h_mc h_tf _h2 X Y Z W
 
 /-- Constructor for the lowered Riemann tensor package. -/
 noncomputable def loweredRmTensorData
@@ -538,13 +540,14 @@ theorem covDerivRm_lowered_block_symm
     (hal : forall X Y Z, conn (X + Y) Z = conn X Z + conn Y Z)
     (met : MetricDuality R V)
     (h_mc : IsMetricCompatible emb conn met) (h_tf : IsTorsionFree emb conn)
-    (h2 : forall (a : R), 2 * a = 0 -> a = 0)
+    [Invertible (2 : R)]
+    (_h2 : forall (a : R), 2 * a = 0 -> a = 0)
     (A X Y Z W : V) :
     covDerivRm_lowered emb conn met A X Y Z W =
       covDerivRm_lowered emb conn met A Z W X Y := by
   unfold covDerivRm_lowered covDerivRm
   have h_der := congr_arg (emb.embed A)
-    (Rm_symm_blocks emb conn ha hal met h_mc h_tf h2 X Y Z W)
+    (Rm_symm_blocks emb conn ha hal met h_mc h_tf X Y Z W)
   have h_conn :
       met.g (conn A (Rm emb conn X Y Z)) W =
         met.g (conn A (Rm emb conn Z W X)) Y +
@@ -575,10 +578,10 @@ theorem covDerivRm_lowered_block_symm
             ring
   simp only [MetricDuality.g_sub_left]
   rw [h_conn]
-  rw [Rm_symm_blocks emb conn ha hal met h_mc h_tf h2 (conn A X) Y Z W]
-  rw [Rm_symm_blocks emb conn ha hal met h_mc h_tf h2 X (conn A Y) Z W]
-  rw [Rm_symm_blocks emb conn ha hal met h_mc h_tf h2 X Y (conn A Z) W]
-  rw [Rm_symm_blocks emb conn ha hal met h_mc h_tf h2 X Y Z (conn A W)]
+  rw [Rm_symm_blocks emb conn ha hal met h_mc h_tf (conn A X) Y Z W]
+  rw [Rm_symm_blocks emb conn ha hal met h_mc h_tf X (conn A Y) Z W]
+  rw [Rm_symm_blocks emb conn ha hal met h_mc h_tf X Y (conn A Z) W]
+  rw [Rm_symm_blocks emb conn ha hal met h_mc h_tf X Y Z (conn A W)]
   ring
 
 /-- Evaluation-level block symmetry for the lowered `nabla Rm` tensor. -/
@@ -590,6 +593,7 @@ theorem covDerivRmLoweredTensor_block_symm
     (hl : forall X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
     (met : MetricDuality R V)
     (h_mc : IsMetricCompatible emb conn met) (h_tf : IsTorsionFree emb conn)
+    [Invertible (2 : R)]
     (h2 : forall (a : R), 2 * a = 0 -> a = 0)
     (A X Y Z W : V) :
     covDerivRmLoweredTensor emb conn ha hal hsl hl met ![A, X, Y, Z, W] ![] =

@@ -564,7 +564,7 @@ private theorem Rc_add_X
   simp only [Rc]
   rw [show RcEndo emb conn ha hal hsl hl (X₁ + X₂) Z =
       RcEndo emb conn ha hal hsl hl X₁ Z + RcEndo emb conn ha hal hsl hl X₂ Z from
-    LinearMap.ext (fun Y => Rm_add_Y emb conn ha hal Y X₁ X₂ Z)]
+    LinearMap.ext (fun Y => Rm_add_X emb conn ha hal X₁ X₂ Y Z)]
   exact map_add atr.tr _ _
 
 private theorem Rc_smul_X
@@ -575,7 +575,7 @@ private theorem Rc_smul_X
   simp only [Rc]
   rw [show RcEndo emb conn ha hal hsl hl (c • X) Z =
       c • RcEndo emb conn ha hal hsl hl X Z from
-    LinearMap.ext (fun Y => Rm_smul_Y emb conn hal hsl hl c Y X Z)]
+    LinearMap.ext (fun Y => Rm_smul_X emb conn hal hsl hl c X Y Z)]
   rw [atr.tr.map_smul, smul_eq_mul]
 
 private theorem Rc_add_Z
@@ -586,7 +586,7 @@ private theorem Rc_add_Z
   simp only [Rc]
   rw [show RcEndo emb conn ha hal hsl hl X (Z₁ + Z₂) =
       RcEndo emb conn ha hal hsl hl X Z₁ + RcEndo emb conn ha hal hsl hl X Z₂ from
-    LinearMap.ext (fun Y => Rm_add_Z emb conn ha hal Y X Z₁ Z₂)]
+    LinearMap.ext (fun Y => Rm_add_Z emb conn ha hal X Y Z₁ Z₂)]
   exact map_add atr.tr _ _
 
 private theorem Rc_smul_Z
@@ -597,7 +597,7 @@ private theorem Rc_smul_Z
   simp only [Rc]
   rw [show RcEndo emb conn ha hal hsl hl X (c • Z) =
       c • RcEndo emb conn ha hal hsl hl X Z from
-    LinearMap.ext (fun Y => Rm_smul_Z emb conn ha hsl hl c Y X Z)]
+    LinearMap.ext (fun Y => Rm_smul_Z emb conn ha hsl hl c X Y Z)]
   rw [atr.tr.map_smul, smul_eq_mul]
 
 -- ricci_cov_deriv linearity in each argument

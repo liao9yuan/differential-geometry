@@ -24,7 +24,7 @@ open SyntheticTensor
 section RiemannFromRicci3D
 
 variable {k R V : Type*}
-variable [Field k] [CommRing R] [Algebra k R]
+variable [Field k] [CommRing R] [Algebra k R] [Invertible (2 : R)]
 variable [AddCommGroup V] [Module R V] [Module k V] [IsScalarTower k R V]
 
 private theorem tensor02_add_left (T : TensorData R V 0 2) (X₁ X₂ Y : V) :
@@ -320,7 +320,6 @@ theorem riemannFromRicci3DResidual_block_symm_of_ricci_symm
     (hl : forall X (f : R) Y, conn X (f • Y) = (emb.embed X) f • Y + f • conn X Y)
     (atr : AbstractTrace R V) (met : MetricDuality R V)
     (h_mc : IsMetricCompatible emb conn met) (h_tf : IsTorsionFree emb conn)
-    (h2 : forall a : R, 2 * a = 0 -> a = 0)
     (h_Rc_symm : swap_covariant (0 : Fin 2) 1
         (ricciForm_tensor emb conn ha hal hsl hl atr) =
       ricciForm_tensor emb conn ha hal hsl hl atr)
@@ -330,7 +329,7 @@ theorem riemannFromRicci3DResidual_block_symm_of_ricci_symm
   have hRm :
       Rm_lowered emb conn met Z W X Y = Rm_lowered emb conn met X Y Z W := by
     unfold Rm_lowered
-    exact Rm_symm_blocks emb conn ha hal met h_mc h_tf h2 Z W X Y
+    exact Rm_symm_blocks emb conn ha hal met h_mc h_tf Z W X Y
   have hRhs :=
     riemannFromRicci3DRHS_block_symm_of_ricci_symm met
       (ricciForm_tensor emb conn ha hal hsl hl atr)
@@ -1671,7 +1670,7 @@ theorem hasRiemannFromRicci3DCalculus_of_ordered_block_basis_components
   · intro X Y Z W
     simpa [riemannFromRicci3DResidualTensor_eval] using
       riemannFromRicci3DResidual_block_symm_of_ricci_symm emb conn ha hal hsl hl
-        atr met h_mc h_tf h2 h_Rc_symm half h_half X Y Z W
+        atr met h_mc h_tf h_Rc_symm half h_half X Y Z W
   · intro i j k l hij hkl hlex
     exact h_components h_dim half h_half i j k l hij hkl hlex
 

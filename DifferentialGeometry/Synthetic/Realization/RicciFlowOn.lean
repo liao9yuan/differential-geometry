@@ -93,13 +93,8 @@ noncomputable def concreteRicciFlowBundleOn
         { emb := concreteDerivationEmbedding I M
           atr := concreteAbstractTrace I M
           td := concreteTimeDerivativeDataOn I M s hs
-          g_fam := fun t => concreteMetricDuality I M (g_fam t)
+          lc_fam := fun t => concreteLeviCivitaMetricData I M (g_fam t)
           h_met := h_met
-          conn_fam := fun t => concreteConn I M (concreteKoszulCov I M (g_fam t))
-          ha_fam := fun t => concreteConn_add_right I M (concreteKoszulCov I M (g_fam t))
-          hal_fam := fun t => concreteConn_add_left I M (concreteKoszulCov I M (g_fam t))
-          hsl_fam := fun t => concreteConn_smul_left I M (concreteKoszulCov I M (g_fam t))
-          hl_fam := fun t => concreteConn_leibniz I M (concreteKoszulCov I M (g_fam t))
           spatial_temporal_comm := h_st
           time_tr_comm := concrete_time_tr_commOn I M s hs
           nabla_tr_comm := fun t X L => by
@@ -107,16 +102,15 @@ noncomputable def concreteRicciFlowBundleOn
             simp only [concreteAbstractTrace_tr]
             exact h
           nabla_contract_comm := fun t =>
-            concrete_NablaTensorContractComm I M (concreteKoszulCov I M (g_fam t))
-          levi_civita := fun t =>
-            concreteIsLeviCivita I M (concreteKoszulCov I M (g_fam t)) (g_fam t)
-              (concreteKoszulCov_metric_compat I M (g_fam t))
-              (concreteKoszulCov_torsion_free I M (g_fam t)) }
-      ricci_flow := h_ricci_flow
+            concrete_NablaTensorContractComm I M (concreteKoszulCov I M (g_fam t)) }
+      ricci_flow := by
+        simpa [concreteLeviCivitaMetricData] using h_ricci_flow
       nabla_time_product_rule :=
-        concrete_nabla_time_product_ruleOn I M s hs h_st
-          (fun t => concreteConn I M (concreteKoszulCov I M (g_fam t)))
-          (fun t => concreteConn_add_right I M (concreteKoszulCov I M (g_fam t)))
-          (fun t => concreteConn_leibniz I M (concreteKoszulCov I M (g_fam t))) }
+        by
+          simpa [concreteLeviCivitaMetricData] using
+            concrete_nabla_time_product_ruleOn I M s hs h_st
+              (fun t => concreteConn I M (concreteKoszulCov I M (g_fam t)))
+              (fun t => concreteConn_add_right I M (concreteKoszulCov I M (g_fam t)))
+              (fun t => concreteConn_leibniz I M (concreteKoszulCov I M (g_fam t))) }
 
 end
