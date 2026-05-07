@@ -162,6 +162,20 @@ def hom [AddCommGroup V] [Module Real V] [FiniteDimensional Real V]
     (hom_nonneg DV DW).2.1
     (hom_nonneg DV DW).2.2
 
+/-- The Hilbert-Schmidt metric on continuous Hom fibers, obtained by
+transporting the algebraic Hom metric across finite-dimensional automatic
+continuity. -/
+def homCLM [AddCommGroup V] [Module Real V] [TopologicalSpace V]
+    [IsTopologicalAddGroup V] [ContinuousSMul Real V] [T2Space V]
+    [FiniteDimensional Real V]
+    [AddCommGroup W] [Module Real W] [TopologicalSpace W]
+    [IsTopologicalAddGroup W] [ContinuousSMul Real W] [FiniteDimensional Real W]
+    (DV : MetricFiberData V) (DW : MetricFiberData W) :
+    MetricFiberData (V →L[Real] W) :=
+  MetricFiberData.pullback
+    (LinearMap.toContinuousLinearMap (𝕜 := Real) (E := V) (F' := W)).symm
+    (MetricFiberData.hom DV DW)
+
 end MetricFiberData
 
 /-- The scalar metric on `(0,0)` tensor fibers. -/
@@ -172,83 +186,59 @@ def scalarMetricData (_g : SmoothMetric I M) (x : M) :
       (continuousMultilinearCurryFin0 Real (TangentSpace I x) Real).toLinearEquiv)
     MetricFiberData.real
 
-/-- Algebraic currying map for covariant tensor fibers.
-
-The bundle model gives continuous multilinear maps. For the fiberwise metric
-construction we only need the algebraic curried linear map, obtained by
-currying the model tensor and translating back to the bundle fiber. -/
-private def tensor0S_curryLinearMap (s : Nat) (x : M) :
-    Tensor0SSpace (s + 1) I x →ₗ[Real]
-      (TangentSpace I x →ₗ[Real] Tensor0SSpace s I x) where
-  toFun T :=
-    { toFun := fun X =>
-        (tensor0SSpace_continuousLinearEquiv (I := I) (M := M) s x).symm
-          (((tensor0SSpace_continuousLinearEquiv (I := I) (M := M) (s + 1) x T).curryLeft) X)
-      map_add' := by
-        intro X Y
-        apply (tensor0SSpace_continuousLinearEquiv (I := I) (M := M) s x).injective
-        ext v
-        simpa [ContinuousMultilinearMap.curryLeft_apply, Fin.update_cons_zero] using
-          ((tensor0SSpace_continuousLinearEquiv (I := I) (M := M) (s + 1) x T).map_update_add
-            (Fin.cons X v) 0 X Y)
-      map_smul' := by
-        intro c X
-        apply (tensor0SSpace_continuousLinearEquiv (I := I) (M := M) s x).injective
-        ext v
-        simpa [ContinuousMultilinearMap.curryLeft_apply, Fin.update_cons_zero] using
-          ((tensor0SSpace_continuousLinearEquiv (I := I) (M := M) (s + 1) x T).map_update_smul
-            (Fin.cons X v) 0 c X) }
-  map_add' := by
-    intro A B
-    ext X v
-    change
-      ((tensor0SSpace_continuousLinearEquiv (I := I) (M := M) (s + 1) x (A + B))
-          (Fin.cons X v)) =
-        ((tensor0SSpace_continuousLinearEquiv (I := I) (M := M) (s + 1) x A)
-            (Fin.cons X v)) +
-          ((tensor0SSpace_continuousLinearEquiv (I := I) (M := M) (s + 1) x B)
-            (Fin.cons X v))
-    simp
-  map_smul' := by
-    intro c A
-    ext X v
-    change
-      ((tensor0SSpace_continuousLinearEquiv (I := I) (M := M) (s + 1) x (c • A))
-          (Fin.cons X v)) =
-        c *
-          ((tensor0SSpace_continuousLinearEquiv (I := I) (M := M) (s + 1) x A)
-            (Fin.cons X v))
-    simp
-
-/-- The algebraic currying map is bijective.
-
-This is the fiberwise content of the already-defined continuous currying
-equivalence `tensor0S_curry`. The proof should be a direct unpacking of that
-equivalence, but Lean currently needs local topological instances for the Hom
-target that are not exported cleanly for these bundle fibers. -/
-private theorem tensor0S_curryLinearMap_bijective (s : Nat) (x : M) :
-    Function.Bijective (tensor0S_curryLinearMap (I := I) (M := M) s x) := by
-  sorry
-
-private def tensor0S_curryLinearEquiv (s : Nat) (x : M) :
-    Tensor0SSpace (s + 1) I x ≃ₗ[Real]
-      (TangentSpace I x →ₗ[Real] Tensor0SSpace s I x) :=
-  LinearEquiv.ofBijective
-    (tensor0S_curryLinearMap (I := I) (M := M) s x)
-    (tensor0S_curryLinearMap_bijective (I := I) (M := M) s x)
-
 /-- One recursive step for the metric on covariant tensor powers.
 
-Using `tensor0S_curryLinearMap`, a `(0,s+1)` tensor is a linear map
-`T_x M -> Tensor0SSpace s I x`.  The metric is the Hilbert-Schmidt metric
-from the tangent metric and the already constructed metric on `(0,s)` tensors. -/
+Using `tensor0S_curry`, a `(0,s+1)` tensor is a continuous linear map
+`T_x M -> Tensor0SSpace s I x`. The metric is the Hilbert-Schmidt metric
+on that Hom fiber. -/
 def tensor0SMetricStep
     (g : SmoothMetric I M) (x : M) (s : Nat)
     (D : MetricFiberData (Tensor0SSpace s I x)) :
     MetricFiberData (Tensor0SSpace (s + 1) I x) :=
+  have hTopAdd0 : IsTopologicalAddGroup (Tensor0SSpace s I x) :=
+    Bundle.continuousMultilinearMap.instIsTopologicalAddGroup
+      (𝕜 := Real) (F := E) (E := TangentSpace I) s x
+  letI : IsTopologicalAddGroup (Tensor0SSpace s I x) := hTopAdd0
+  have hContAdd0 : ContinuousAdd (Tensor0SSpace s I x) :=
+    IsTopologicalAddGroup.toContinuousAdd
+  letI : ContinuousAdd (Tensor0SSpace s I x) := hContAdd0
+  have hContSMul0 : ContinuousSMul Real (Tensor0SSpace s I x) :=
+    Bundle.continuousMultilinearMap.instContinuousSMul
+      (𝕜 := Real) (F := E) (E := TangentSpace I) s x
+  letI : ContinuousSMul Real (Tensor0SSpace s I x) := hContSMul0
+  letI : ContinuousConstSMul Real (Tensor0SSpace s I x) := inferInstance
+  letI : TopologicalSpace (TangentSpace I x →L[Real] Tensor0SSpace s I x) :=
+    @ContinuousLinearMap.topologicalSpace
+      Real Real inferInstance inferInstance (RingHom.id Real)
+      (TangentSpace I x) (Tensor0SSpace s I x)
+      inferInstance inferInstance inferInstance inferInstance
+      inferInstance inferInstance hTopAdd0
+  letI : AddCommGroup (TangentSpace I x →L[Real] Tensor0SSpace s I x) :=
+    @ContinuousLinearMap.addCommGroup
+      Real inferInstance Real inferInstance
+      (TangentSpace I x) inferInstance inferInstance
+      (Tensor0SSpace s I x) inferInstance inferInstance
+      inferInstance inferInstance (RingHom.id Real) hTopAdd0
+  letI : Module Real (TangentSpace I x →L[Real] Tensor0SSpace s I x) :=
+    @ContinuousLinearMap.module
+      Real Real Real inferInstance inferInstance inferInstance
+      (TangentSpace I x) inferInstance inferInstance inferInstance
+      (Tensor0SSpace s I x) inferInstance inferInstance
+      inferInstance inferInstance inferInstance inferInstance
+      (RingHom.id Real) hContAdd0
+  letI : FiniteDimensional Real (TangentSpace I x →L[Real] Tensor0SSpace s I x) :=
+    (@LinearMap.toContinuousLinearMap
+      Real inferInstance
+      (TangentSpace I x) inferInstance inferInstance inferInstance inferInstance inferInstance
+      (Tensor0SSpace s I x) inferInstance inferInstance inferInstance hTopAdd0 hContSMul0
+      inferInstance inferInstance inferInstance).finiteDimensional
   MetricFiberData.pullback
-    (tensor0S_curryLinearEquiv (I := I) (M := M) s x)
-    (MetricFiberData.hom (tangentMetricData (I := I) g x).metric D)
+    (tensor0S_curry (I := I) (𝕜 := Real) (M := M) s x).toLinearEquiv
+    (@MetricFiberData.homCLM
+      (TangentSpace I x) (Tensor0SSpace s I x)
+      inferInstance inferInstance inferInstance inferInstance inferInstance inferInstance inferInstance
+      inferInstance inferInstance inferInstance hTopAdd0 hContSMul0 inferInstance
+      (tangentMetricData (I := I) g x).metric D)
 
 /-- The Riemannian metric on covariant `s`-tensor fibers, constructed
 recursively from `g`. -/
@@ -317,6 +307,20 @@ def coordInner0S
       tensor0SComponent (I := I) A (fun i => basis i) I0 *
         tensor0SComponent (I := I) B (fun i => basis i) J0
 
+private theorem sum_fin_two_fun {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {α : Type*} [AddCommMonoid α]
+    (F : (Fin 2 -> Idx) -> α) :
+    (∑ I0 : Fin 2 -> Idx, F I0) =
+      ∑ i : Idx, ∑ j : Idx, F (fun a : Fin 2 => if a = 0 then i else j) := by
+  classical
+  rw [Fintype.sum_equiv (finTwoArrowEquiv Idx) F
+    (fun p : Idx × Idx => F (fun a : Fin 2 => if a = 0 then p.1 else p.2))]
+  · rw [Fintype.sum_prod_type]
+  · intro I0
+    congr
+    funext a
+    fin_cases a <;> simp [finTwoArrowEquiv]
+
 /-- Coordinate formula for the covariant tensor metric in a basis.
 
 This is the general tensor-power contraction theorem. The `s = 1` theorem is
@@ -362,9 +366,40 @@ theorem inner0S_two_eq_coord
         gInv i k * gInv j l *
           A (fun a : Fin 2 => if a = 0 then basis i else basis j) *
             B (fun a : Fin 2 => if a = 0 then basis k else basis l) := by
-  -- Expected proof: specialize `inner0S_eq_coord` to `s = 2` and reindex
-  -- functions `Fin 2 -> Idx` by pairs of indices.
-  sorry
+  classical
+  rw [inner0S_eq_coord (I := I) g x 2 basis gInv _hinv]
+  unfold coordInner0S tensor0SComponent
+  rw [sum_fin_two_fun
+    (F := fun I0 : Fin 2 -> Idx =>
+      ∑ J0 : Fin 2 -> Idx,
+        (∏ a : Fin 2, gInv (I0 a) (J0 a)) *
+          A (fun a => basis (I0 a)) *
+            B (fun a => basis (J0 a)))]
+  apply Finset.sum_congr rfl
+  intro i _
+  apply Finset.sum_congr rfl
+  intro j _
+  rw [sum_fin_two_fun
+    (F := fun J0 : Fin 2 -> Idx =>
+      (∏ a : Fin 2, gInv ((fun a : Fin 2 => if a = 0 then i else j) a) (J0 a)) *
+        A (fun a => basis ((fun a : Fin 2 => if a = 0 then i else j) a)) *
+          B (fun a => basis (J0 a)))]
+  apply Finset.sum_congr rfl
+  intro k _
+  apply Finset.sum_congr rfl
+  intro l _
+  simp [Fin.prod_univ_two]
+  have hA :
+      (fun a : Fin 2 => basis (if a = 0 then i else j)) =
+        fun a : Fin 2 => if a = 0 then basis i else basis j := by
+    funext a
+    by_cases ha : a = 0 <;> simp [ha]
+  have hB :
+      (fun a : Fin 2 => basis (if a = 0 then k else l)) =
+        fun a : Fin 2 => if a = 0 then basis k else basis l := by
+    funext a
+    by_cases ha : a = 0 <;> simp [ha]
+  rw [hA, hB]
 
 /-- Coordinate squared norms are independent of the chosen frame realization,
 because both coordinate sums equal the intrinsic norm. -/

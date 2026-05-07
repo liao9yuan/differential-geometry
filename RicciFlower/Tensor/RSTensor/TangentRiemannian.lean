@@ -70,6 +70,51 @@ theorem inner_nonneg (D : MetricFiberData V) (v : V) :
     0 <= D.inner v v := by
   exact D.nonneg v
 
+/-- A metric fiber has no nonzero null vectors. -/
+theorem inner_self_eq_zero_iff (D : MetricFiberData V) (v : V) :
+    D.inner v v = 0 ↔ v = 0 := by
+  constructor
+  · intro hv
+    have hvw : forall w : V, D.inner v w = 0 := by
+      intro w
+      by_contra hne
+      let a := D.inner v w
+      let b := D.inner w w
+      let t := -((b + 1) / (2 * a))
+      have ha : a ≠ 0 := hne
+      have hquad : 0 <= D.inner (w + t • v) (w + t • v) :=
+        D.inner_nonneg (w + t • v)
+      have hcalc : D.inner (w + t • v) (w + t • v) = -1 := by
+        have hexpand :
+            D.inner (w + t • v) (w + t • v) =
+              b + 2 * t * a + t * t * D.inner v v := by
+          unfold inner a b
+          simp only [map_add, map_smul, LinearMap.add_apply, LinearMap.smul_apply,
+            smul_eq_mul]
+          rw [D.symm w v]
+          simp [inner]
+          ring_nf
+        rw [hexpand, hv]
+        unfold t b a
+        field_simp [ha]
+        ring
+      linarith
+    have hflat : D.flat v = 0 := by
+      ext w
+      exact hvw w
+    exact D.flat.injective (by simpa using hflat)
+  · intro hv
+    simp [hv, inner]
+
+/-- Positive-definiteness of a metric fiber. -/
+theorem inner_pos_of_ne_zero (D : MetricFiberData V) {v : V} (hv : v ≠ 0) :
+    0 < D.inner v v := by
+  have hnonneg := D.inner_nonneg v
+  have hne : D.inner v v ≠ 0 := by
+    intro hzero
+    exact hv ((D.inner_self_eq_zero_iff v).1 hzero)
+  exact lt_of_le_of_ne' hnonneg hne
+
 variable {W : Type*} [AddCommGroup W] [Module Real W] [FiniteDimensional Real W]
 
 /-- Metric adjoint of a linear map between metric fibers. -/
