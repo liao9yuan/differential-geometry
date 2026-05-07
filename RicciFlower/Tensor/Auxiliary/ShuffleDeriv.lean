@@ -631,6 +631,13 @@ noncomputable def derivShuffleLeftFwdRanked
     (derivShuffleLeftFwdRanked k σ)⁻¹ * derivShuffleLeftFwd k σ
   simp [derivShuffleLeftFwdRanked]
 
+@[simp] theorem derivShuffleEquivLeft_apply_mk_ranked
+    (k : Fin (m + n + 1)) (σ : Equiv.Perm (Fin m ⊕ Fin n)) :
+    derivShuffleEquivLeft (k, Quotient.mk'' σ) =
+      (Quotient.mk'' (derivShuffleLeftFwdRanked k σ), derivShuffleJ k σ) := by
+  rw [derivShuffleEquivLeft_apply_mk]
+  simp
+
 theorem derivShuffleLeftFwdRanked_sign
     (k : Fin (m + n + 1)) (σ : Equiv.Perm (Fin m ⊕ Fin n)) :
     Equiv.Perm.sign (derivShuffleLeftFwdRanked k σ) =

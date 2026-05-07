@@ -1,4 +1,5 @@
-import RicciFlower.Realized.Connection
+import RicciFlower.Realized.LeviCivita.Basic
+import Mathlib.Analysis.Calculus.Deriv.Basic
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -70,6 +71,73 @@ theorem metric_dt_eq_neg_two_ricci_of_isRealizedRicciFlow
     (t : Time) (x : M) (X Y : TangentSpace I x) :
     metricTimeDerivative td S.family t x X Y = (-2 : Real) * Ric t x X Y :=
   metric_dt_eq_neg_two_ricci_of_metricVariationEquation td S.family Ric hS t x X Y
+
+section Interval
+
+variable [FiniteDimensional Real E] [CompleteSpace E]
+variable [SigmaCompactSpace M] [T2Space M]
+
+/-- The Ricci-flow metric variation equation on a concrete real time interval.
+
+It is stated with `HasDerivWithinAt` on the interval carrier, and only required
+at regular times. -/
+def MetricVariationEquationOn
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (Ric : RealizedTwoTensorField (I := I) (M := M) Real) : Prop :=
+  forall (t : RealTimeInterval.RegularTime D) (x : M) (X Y : TangentSpace I x),
+    HasDerivWithinAt
+      (fun s : Real => (G.metric s).inner x X Y)
+      ((-2 : Real) * Ric (t : Real) x X Y)
+      D.carrier
+      (t : Real)
+
+/-- A data-only realized Ricci-flow candidate on a real interval. -/
+structure RealizedRicciFlowCandidateOn (D : RealTimeInterval) where
+  family : RealizedMetricFamilyOn (I := I) (M := M) D
+  ricci : RealizedTwoTensorField (I := I) (M := M) Real
+
+/-- Predicate package saying a data-only interval family is a Ricci-flow
+solution. Curvature realization is kept in `Curvature.lean` to avoid an import
+cycle; this package starts from an explicit Ricci tensor field. -/
+structure IsRealizedRicciFlowSolutionOn
+    {D : RealTimeInterval}
+    (S : RealizedRicciFlowCandidateOn (I := I) (M := M) D) : Prop where
+  smoothMetric : MetricFamilySmoothOn (I := I) (M := M) D S.family
+  smoothConnection : ConnectionFamilySmoothOn (I := I) (M := M) S.family
+  leviCivita : LeviCivita.IsLeviCivitaFamilyOn (I := I) S.family
+  equation : MetricVariationEquationOn (I := I) S.family S.ricci
+
+/-- The interval metric-evolution theorem extracted from the equation
+predicate. -/
+theorem metric_derivWithin_eq_neg_two_ricci_of_metricVariationEquationOn
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (Ric : RealizedTwoTensorField (I := I) (M := M) Real)
+    (hEq : MetricVariationEquationOn (I := I) G Ric)
+    (t : RealTimeInterval.RegularTime D) (x : M) (X Y : TangentSpace I x) :
+    HasDerivWithinAt
+      (fun s : Real => (G.metric s).inner x X Y)
+      ((-2 : Real) * Ric (t : Real) x X Y)
+      D.carrier
+      (t : Real) :=
+  hEq t x X Y
+
+/-- The interval metric-evolution theorem extracted from a Ricci-flow solution
+package. -/
+theorem metric_derivWithin_eq_neg_two_ricci_of_isRealizedRicciFlowSolutionOn
+    {D : RealTimeInterval}
+    (S : RealizedRicciFlowCandidateOn (I := I) (M := M) D)
+    (hS : IsRealizedRicciFlowSolutionOn (I := I) S)
+    (t : RealTimeInterval.RegularTime D) (x : M) (X Y : TangentSpace I x) :
+    HasDerivWithinAt
+      (fun s : Real => (S.family.metric s).inner x X Y)
+      ((-2 : Real) * S.ricci (t : Real) x X Y)
+      D.carrier
+      (t : Real) :=
+  hS.equation t x X Y
+
+end Interval
 
 end Realized
 end RicciFlower

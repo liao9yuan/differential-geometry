@@ -16,7 +16,7 @@ can be extended to smooth global sections that agree with the frame near the poi
   open neighborhood `u` of `p`, there exist C^n global sections `{sᵢ'}` that agree with `{sᵢ}`
   on a neighborhood of `p`.
 * `exists_contMDiffSection_eqOn_nhd` : the underlying extension lemma without a local-frame
-  hypothesis — any family of sections that is C^n on an open neighborhood of `p` admits
+  hypothesis — any family of sections that is C^n on an open neighborhood of `p` has
   C^n global extensions agreeing with it near `p`.
 
 ## Tags

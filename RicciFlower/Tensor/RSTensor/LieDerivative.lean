@@ -289,7 +289,66 @@ lemma lieDeriv_correction_zero (DX : E →L[𝕜] E)
   dsimp[lieDeriv_correction]
   simp only [Finset.univ_eq_empty, Finset.sum_empty]
 
+/-- The covariant-slot correction is a derivation for the model tensor product.
 
+This is the model-space Leibniz rule behind both Lie derivatives and the future
+extension of a connection to covariant tensor fields: applying the same
+endomorphism `DX` in every slot of `α ⊗ β` splits into the slots of `α` plus the
+slots of `β`. -/
+lemma lieDeriv_correction_modelProduct (s q : ℕ) (DX : E →L[𝕜] E)
+    (α : Tensor0SModel (𝕜 := 𝕜) (E := E) s)
+    (β : Tensor0SModel (𝕜 := 𝕜) (E := E) q) :
+    lieDeriv_correction (s + q) DX
+        (Bundle.continuousMultilinearMap.modelProduct s q α β) =
+      Bundle.continuousMultilinearMap.modelProduct s q
+          (lieDeriv_correction s DX α) β +
+        Bundle.continuousMultilinearMap.modelProduct s q
+          α (lieDeriv_correction q DX β) := by
+  ext v
+  rw [lieDeriv_correction, Fin.sum_univ_add]
+  simp only [lieDeriv_correction, ContinuousMultilinearMap.sum_apply,
+    ContinuousMultilinearMap.add_apply, Bundle.continuousMultilinearMap.modelProduct_apply]
+  congr 1
+  · rw [Finset.sum_mul]
+    apply Finset.sum_congr rfl
+    intro i _
+    simp only [substituteArg, ContinuousMultilinearMap.compContinuousLinearMap_apply,
+      Bundle.continuousMultilinearMap.modelProduct_apply, Function.comp_apply]
+    congr 1
+    · congr 1
+      funext j
+      by_cases hji : j = i
+      · subst j
+        simp
+      · simp [hji]
+    · congr 1
+      funext j
+      have hneq : Fin.natAdd s j ≠ Fin.castAdd q i := by
+        intro h
+        have hval := congrArg Fin.val h
+        simp [Fin.val_natAdd, Fin.val_castAdd] at hval
+        omega
+      simp [hneq]
+  · rw [Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro i _
+    simp only [substituteArg, ContinuousMultilinearMap.compContinuousLinearMap_apply,
+      Bundle.continuousMultilinearMap.modelProduct_apply, Function.comp_apply]
+    congr 1
+    · congr 1
+      funext j
+      have hneq : Fin.castAdd q j ≠ Fin.natAdd s i := by
+        intro h
+        have hval := congrArg Fin.val h
+        simp [Fin.val_natAdd, Fin.val_castAdd] at hval
+        omega
+      simp [hneq]
+    · congr 1
+      funext j
+      by_cases hji : j = i
+      · subst j
+        simp
+      · simp [hji]
 
 variable [CompleteSpace 𝕜]
 

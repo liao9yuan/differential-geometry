@@ -1,4 +1,6 @@
 import RicciFlower.Analysis.Time
+import RicciFlower.Realized.TimeInterval
+import Mathlib.Analysis.Calculus.ContDiff.Basic
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
@@ -42,6 +44,14 @@ structure RealizedMetricFamily (Time : Type*) where
   metric : Time -> SmoothRiemannianMetric I M
   connection : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _)
 
+/-- A realized metric family over a concrete real time interval.
+
+The functions are defined on all real times, but later predicates only require
+the Ricci-flow data on the interval's carrier or regular subdomain. -/
+structure RealizedMetricFamilyOn (D : RealTimeInterval) where
+  metric : Real -> SmoothRiemannianMetric I M
+  connection : Real -> CovariantDerivative I E (TangentSpace I : M -> Type _)
+
 namespace RealizedMetricFamily
 
 @[simp] theorem metric_mk
@@ -60,6 +70,56 @@ namespace RealizedMetricFamily
   rfl
 
 end RealizedMetricFamily
+
+namespace RealizedMetricFamilyOn
+
+/-- View an interval family as a family indexed by its flow-time subtype. -/
+def toFlowTimeFamily
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D) :
+    RealizedMetricFamily (I := I) (M := M) (RealTimeInterval.FlowTime D) where
+  metric := fun t => G.metric (t : Real)
+  connection := fun t => G.connection (t : Real)
+
+/-- View an interval family as a family indexed by regular times. -/
+def toRegularTimeFamily
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D) :
+    RealizedMetricFamily (I := I) (M := M) (RealTimeInterval.RegularTime D) where
+  metric := fun t => G.metric (t : Real)
+  connection := fun t => G.connection (t : Real)
+
+/-- Metric at a flow time. -/
+def metricAt
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (t : RealTimeInterval.FlowTime D) :
+    SmoothRiemannianMetric I M :=
+  G.metric (t : Real)
+
+/-- Connection at a flow time. -/
+def connectionAt
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (t : RealTimeInterval.FlowTime D) :
+    CovariantDerivative I E (TangentSpace I : M -> Type _) :=
+  G.connection (t : Real)
+
+@[simp] theorem metricAt_eq
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (t : RealTimeInterval.FlowTime D) :
+    G.metricAt t = G.metric (t : Real) := by
+  rfl
+
+@[simp] theorem connectionAt_eq
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (t : RealTimeInterval.FlowTime D) :
+    G.connectionAt t = G.connection (t : Real) := by
+  rfl
+
+end RealizedMetricFamilyOn
 
 section TimeSmoothness
 
@@ -99,6 +159,40 @@ noncomputable def metricTimeDerivative
   rfl
 
 end TimeSmoothness
+
+section IntervalSmoothness
+
+/-- Time smoothness of metric coefficients over a concrete real interval. -/
+def MetricFamilySmoothOn
+    (D : RealTimeInterval)
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D) : Prop :=
+  forall (x : M) (X Y : TangentSpace I x),
+    ContDiffOn Real ⊤ (fun t : Real => (G.metric t).inner x X Y) D.carrier
+
+/-- Extract a metric coefficient's interval time smoothness. -/
+theorem metric_smooth_coeff_of_metricFamilySmoothOn
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (x : M) (X Y : TangentSpace I x) :
+    ContDiffOn Real ⊤ (fun t : Real => (G.metric t).inner x X Y) D.carrier :=
+  hG x X Y
+
+/-- The scalar metric coefficient used in interval derivative statements. -/
+noncomputable def metricCoeff
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (x : M) (X Y : TangentSpace I x) : Real -> Real :=
+  fun t => (G.metric t).inner x X Y
+
+@[simp] theorem metricCoeff_eq
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (x : M) (X Y : TangentSpace I x) (t : Real) :
+    metricCoeff G x X Y t = (G.metric t).inner x X Y := by
+  rfl
+
+end IntervalSmoothness
 
 end Realized
 end RicciFlower

@@ -166,6 +166,66 @@ theorem elementaryCovector_wedge [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜]
   -- Step 7: Apply the Cauchy-Binet identity for multiKroneckerDelta
   exact Fin.multiKroneckerDelta_cauchyBinet I J v
 
+/-- Uncurrying a covector times an elementary form inserts that covector as the new
+first slot.
+
+This is the finite-rank primitive for the wedge/precomposition proof: after expanding
+a form-valued linear map in a basis of covectors and elementary forms, the remaining
+calculation reduces to this Laplace expansion and `elementaryCovector_wedge`. -/
+theorem uncurryFin_smulRight_elementaryCovector
+    (b : Module.Basis (Fin d) 𝕜 (M →L[𝕜] 𝕜))
+    (a : Fin d) (I : Fin m → Fin d) :
+    uncurryFin ((b a).smulRight (elementaryCovector b I)) =
+      (elementaryCovector b (Fin.cons a I) :
+        M [⋀^Fin (m + 1)]→L[𝕜] 𝕜) := by
+  ext v
+  rw [uncurryFin_apply, elementaryCovector_apply, Matrix.det_succ_row_zero]
+  simp only [ContinuousLinearMap.smulRight_apply, ContinuousAlternatingMap.smul_apply,
+    smul_eq_mul, Fin.cons_zero]
+  apply Finset.sum_congr rfl
+  intro j _
+  let J : Fin (m + 1) → Fin d := Fin.cons a I
+  have hdet : (elementaryCovector b I) (j.removeNth v) =
+      (Matrix.submatrix (fun r c : Fin (m + 1) => (b (J r)) (v c))
+        Fin.succ j.succAbove).det := by
+    rw [elementaryCovector_apply]
+    rfl
+  rw [hdet]
+  simp [J, zsmul_eq_mul, mul_assoc]
+
+/-- Finite-dimensional expansion of a form-valued linear map into covector
+coefficients times elementary forms.
+
+This is the basis-expansion entry point for the finite-rank wedge/precomposition
+route. It avoids choosing representatives in the shuffle quotient: after this rewrite,
+the proof is reduced to `uncurryFin_smulRight_elementaryCovector` and
+`elementaryCovector_wedge`. -/
+theorem formValuedLinearMap_eq_sum_smulRight_elementaryCovector
+    [FiniteDimensional 𝕜 M] [CompleteSpace 𝕜]
+    (g' : M →L[𝕜] (M [⋀^Fin m]→L[𝕜] 𝕜)) :
+    let d := Module.finrank 𝕜 M
+    let B : Module.Basis (Fin d) 𝕜 M := Module.finBasis 𝕜 M
+    let b : Module.Basis (Fin d) 𝕜 (M →L[𝕜] 𝕜) := B.cDualBasis
+    let bm := elementaryCovectorBasis (k := m) B
+    g' = ∑ I : Fin m ↪o Fin d,
+      (((bm.coord I).comp g'.toLinearMap).toContinuousLinearMap).smulRight
+        (elementaryCovector b (I : Fin m → Fin d)) := by
+  dsimp
+  ext x v
+  rw [ContinuousLinearMap.sum_apply]
+  simp only [ContinuousLinearMap.smulRight_apply]
+  rw [ContinuousAlternatingMap.sum_apply]
+  have hsum : g' x = ∑ I : Fin m ↪o Fin (Module.finrank 𝕜 M),
+      (elementaryCovectorBasis (k := m) (Module.finBasis 𝕜 M)).repr (g' x) I •
+        (elementaryCovectorBasis (k := m) (Module.finBasis 𝕜 M)) I :=
+    ((elementaryCovectorBasis (k := m) (Module.finBasis 𝕜 M)).sum_repr (g' x)).symm
+  rw [hsum]
+  simp only [ContinuousAlternatingMap.sum_apply, ContinuousAlternatingMap.smul_apply]
+  apply Finset.sum_congr rfl
+  intro I _
+  rw [elementaryCovectorBasis_apply]
+  rfl
+
 /- The wedge product wrt multiplication -/
 theorem wedge_product_mul {g : M [⋀^Fin m]→L[𝕜] 𝕜} {h : M [⋀^Fin n]→L[𝕜] 𝕜} {x : Fin (m + n) → M} :
     (g ∧[ContinuousLinearMap.mul 𝕜 𝕜] h) x =
@@ -470,38 +530,15 @@ private theorem derivShuffleLeft_expanded_summand_eq
     have hjz : (-1 : ℤ) ^ (derivShuffleJ k σ).val = -1 := hj.neg_one_pow
     simp [hqu, hqz, hju, hjz]
 
-/-- Antisymmetrizing a left-precomposition of `wedge_productL` equals wedging the
-antisymmetrization on the left. The `Fin.finAddFlipAssoc` rewrites
-`Fin (m + 1 + n)` to `Fin (m + n + 1)`.
-
-Both sides are the alternation of the same underlying multilinear map
-`v ↦ f (g' (v 0) (v 1, …, v m)) (h (v_{m+1}, …, v_{m+n}))`: the LHS computes it by
-alternating the derivative slot (via `uncurryFin`) then the wedge slots (via
-`uncurrySum`), the RHS by first alternating the derivative slot into the left factor
-(via `uncurryFin g'`) then wedging the result with `h`. -/
-theorem uncurryFin_wedge_productL_precompL (f : N →L[𝕜] N' →L[𝕜] N'')
-    (g' : M →L[𝕜] (M [⋀^Fin m]→L[𝕜] N)) (h : M [⋀^Fin n]→L[𝕜] N') :
-    uncurryFin ((wedge_productL f).precompL M g' h) =
-      domDomCongr Fin.finAddFlipAssoc
-        (wedge_product (uncurryFin g') h f) := by
-  ext v
-  rw [uncurryFin_wedge_productL_precompL_apply, wedge_product_uncurryFin_apply]
-  -- LHS = ∑ k, (-1)^k • wedge_product (g' (v k)) h f (k.removeNth v)
-  -- RHS = (wedge_product (uncurryFin g') h f) (v ∘ finAddFlipAssoc)
-  -- Both sides compute the full alternation of `w ↦ f(g'(w₀)(w₁,…,wₘ))(h(wₘ₊₁,…,wₘ₊ₙ))`.
-  -- The LHS sums over `(k, σ)` derivative-position × (m,n)-shuffle pairs.
-  -- The RHS sums over `(τ, i)` (m+1,n)-shuffle × left-block-position pairs.
-  -- These are matched by `derivShuffleEquivLeft`.
-  sorry
-
-/-- Antisymmetrizing a right-precomposition of `wedge_productL` equals wedging the
-antisymmetrization on the right, with a sign `(-1)^m` from moving the new differentiation
-index past the `m` left-factor indices. -/
-theorem uncurryFin_wedge_productL_precompR (f : N →L[𝕜] N' →L[𝕜] N'')
-    (g : M [⋀^Fin m]→L[𝕜] N) (h' : M →L[𝕜] (M [⋀^Fin n]→L[𝕜] N')) :
-    uncurryFin ((wedge_productL f).precompR M g h') =
-      ((-1 : 𝕜) ^ m) • wedge_product g (uncurryFin h') f := by
-  sorry
+/-!
+The fully general vector-valued precomposition identities for `wedge_productL` are
+intentionally not stated here. A direct quotient-shuffle proof would have to transport
+individual summands through `Equiv.Perm.ModSumCongr`, but those summands depend on
+representatives. For the RicciFlower tensor-calculus use case we instead use the
+finite-rank route above: expand form-valued linear maps into elementary covectors and
+reduce the computation to determinant identities such as
+`uncurryFin_smulRight_elementaryCovector`.
+-/
 
 private theorem zero_wedge' (h : M [⋀^Fin n]→L[𝕜] 𝕜) :
     wedge_product (0 : M [⋀^Fin m]→L[𝕜] 𝕜) h (ContinuousLinearMap.mul 𝕜 𝕜) = 0 := by

@@ -45,6 +45,21 @@ theorem connection_smooth_at_of_connectionFamilySmooth
     ContMDiffCovariantDerivative (G.connection t) ∞ :=
   hG t
 
+/-- Spatial smoothness of each connection over a concrete real time interval. -/
+def ConnectionFamilySmoothOn
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D) : Prop :=
+  forall t : RealTimeInterval.FlowTime D, ContMDiffCovariantDerivative (G.connectionAt t) ∞
+
+/-- Extract smoothness at a flow time from the interval predicate. -/
+theorem connection_smooth_at_of_connectionFamilySmoothOn
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (hG : ConnectionFamilySmoothOn (I := I) (M := M) G)
+    (t : RealTimeInterval.FlowTime D) :
+    ContMDiffCovariantDerivative (G.connectionAt t) ∞ :=
+  hG t
+
 end Smoothness
 
 section Compatibility
