@@ -1,5 +1,7 @@
 import RicciFlower.Tensor.RSTensor.CotangentRiemannian
 import Mathlib.LinearAlgebra.Trace
+import Mathlib.Topology.Algebra.Module.FiniteDimension
+import Mathlib.Topology.Algebra.Module.LinearMap
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -76,19 +78,89 @@ def pullback [AddCommGroup V] [Module Real V] [FiniteDimensional Real V]
     change 0 <= D.flat (e v) (e v)
     exact D.nonneg (e v)
 
-/-- The Hilbert-Schmidt metric on a finite-dimensional Hom fiber.
+/-- The Hilbert-Schmidt flat map on a finite-dimensional algebraic Hom fiber.
 
 Expected construction: the flat map sends `A` to the functional
 `B ↦ tr(A† ∘ B)`, where `A†` is the metric adjoint built from `DV` and `DW`.
 The proof obligation is that this flat map is symmetric and positive
-semidefinite, hence gives genuine metric data on `V →L[Real] W`. -/
-def hom [NormedAddCommGroup V] [NormedSpace Real V] [FiniteDimensional Real V]
-    [NormedAddCommGroup W] [NormedSpace Real W] [FiniteDimensional Real W]
+semidefinite, hence gives genuine metric data on `V →ₗ[Real] W`.
+
+We use algebraic Hom here because the metric is fiberwise. Continuous Hom
+models are connected to this one by finite-dimensional continuity equivalences
+at the tensor-curry boundary. -/
+private def homFlatLinear [AddCommGroup V] [Module Real V] [FiniteDimensional Real V]
+    [AddCommGroup W] [Module Real W] [FiniteDimensional Real W]
     (DV : MetricFiberData V) (DW : MetricFiberData W) :
-    MetricFiberData (V →L[Real] W) := by
-  -- The intended proof is the finite-dimensional Hilbert-Schmidt metric
-  -- `⟨A,B⟩ = tr(A†B)`, with positivity from a metric-orthonormal basis.
+    (V →ₗ[Real] W) →ₗ[Real] Module.Dual Real (V →ₗ[Real] W) where
+  toFun A :=
+    { toFun := fun B =>
+        LinearMap.trace Real V
+          ((MetricFiberData.adjoint DV DW A).comp B)
+      map_add' := by
+        intro B C
+        simp [LinearMap.comp_add, map_add]
+      map_smul' := by
+        intro c B
+        simp [LinearMap.comp_smul, map_smul] }
+  map_add' := by
+    intro A B
+    ext C
+    have hdual :
+        (A + B).dualMap = A.dualMap + B.dualMap := by
+      ext φ x
+      simp
+    change
+      LinearMap.trace Real V
+          ((DV.flat.symm.toLinearMap.comp
+            (((A + B).dualMap).comp DW.flat.toLinearMap)).comp C) =
+        LinearMap.trace Real V
+          ((DV.flat.symm.toLinearMap.comp
+            (A.dualMap.comp DW.flat.toLinearMap)).comp C) +
+          LinearMap.trace Real V
+            ((DV.flat.symm.toLinearMap.comp
+              (B.dualMap.comp DW.flat.toLinearMap)).comp C)
+    rw [hdual]
+    simp [LinearMap.add_comp, LinearMap.comp_add, map_add]
+  map_smul' := by
+    intro c A
+    ext B
+    have hdual :
+        (c • A).dualMap = c • A.dualMap := by
+      ext φ x
+      simp
+    change
+      LinearMap.trace Real V
+          ((DV.flat.symm.toLinearMap.comp
+            (((c • A).dualMap).comp DW.flat.toLinearMap)).comp B) =
+        c *
+          LinearMap.trace Real V
+            ((DV.flat.symm.toLinearMap.comp
+              (A.dualMap.comp DW.flat.toLinearMap)).comp B)
+    rw [hdual]
+    simp [LinearMap.smul_comp, LinearMap.comp_smul, map_smul]
+
+private theorem hom_nonneg [AddCommGroup V] [Module Real V] [FiniteDimensional Real V]
+    [AddCommGroup W] [Module Real W] [FiniteDimensional Real W]
+    (DV : MetricFiberData V) (DW : MetricFiberData W) :
+    Function.Injective (homFlatLinear DV DW) ∧
+      (forall A B : V →ₗ[Real] W,
+        homFlatLinear DV DW A B = homFlatLinear DV DW B A) ∧
+      (forall A : V →ₗ[Real] W, 0 <= homFlatLinear DV DW A A) := by
+  -- The intended proof is the finite-dimensional Hilbert-Schmidt metric:
+  -- choose a metric-dual basis, rewrite `tr(A†B)` as a finite sum of
+  -- component products, then use the resulting sum-of-squares formula for
+  -- injectivity and nonnegativity. Symmetry follows from the same coordinate
+  -- formula, or equivalently from trace invariance under metric adjoint.
   sorry
+
+def hom [AddCommGroup V] [Module Real V] [FiniteDimensional Real V]
+    [AddCommGroup W] [Module Real W] [FiniteDimensional Real W]
+    (DV : MetricFiberData V) (DW : MetricFiberData W) :
+    MetricFiberData (V →ₗ[Real] W) :=
+  MetricFiberData.ofFlat (homFlatLinear DV DW)
+    (hom_nonneg DV DW).1
+    (hom_nonneg DV DW).2.1
+    (hom_nonneg DV DW).2.2
 
 end MetricFiberData
 
@@ -100,19 +172,83 @@ def scalarMetricData (_g : SmoothMetric I M) (x : M) :
       (continuousMultilinearCurryFin0 Real (TangentSpace I x) Real).toLinearEquiv)
     MetricFiberData.real
 
+/-- Algebraic currying map for covariant tensor fibers.
+
+The bundle model gives continuous multilinear maps. For the fiberwise metric
+construction we only need the algebraic curried linear map, obtained by
+currying the model tensor and translating back to the bundle fiber. -/
+private def tensor0S_curryLinearMap (s : Nat) (x : M) :
+    Tensor0SSpace (s + 1) I x →ₗ[Real]
+      (TangentSpace I x →ₗ[Real] Tensor0SSpace s I x) where
+  toFun T :=
+    { toFun := fun X =>
+        (tensor0SSpace_continuousLinearEquiv (I := I) (M := M) s x).symm
+          (((tensor0SSpace_continuousLinearEquiv (I := I) (M := M) (s + 1) x T).curryLeft) X)
+      map_add' := by
+        intro X Y
+        apply (tensor0SSpace_continuousLinearEquiv (I := I) (M := M) s x).injective
+        ext v
+        simpa [ContinuousMultilinearMap.curryLeft_apply, Fin.update_cons_zero] using
+          ((tensor0SSpace_continuousLinearEquiv (I := I) (M := M) (s + 1) x T).map_update_add
+            (Fin.cons X v) 0 X Y)
+      map_smul' := by
+        intro c X
+        apply (tensor0SSpace_continuousLinearEquiv (I := I) (M := M) s x).injective
+        ext v
+        simpa [ContinuousMultilinearMap.curryLeft_apply, Fin.update_cons_zero] using
+          ((tensor0SSpace_continuousLinearEquiv (I := I) (M := M) (s + 1) x T).map_update_smul
+            (Fin.cons X v) 0 c X) }
+  map_add' := by
+    intro A B
+    ext X v
+    change
+      ((tensor0SSpace_continuousLinearEquiv (I := I) (M := M) (s + 1) x (A + B))
+          (Fin.cons X v)) =
+        ((tensor0SSpace_continuousLinearEquiv (I := I) (M := M) (s + 1) x A)
+            (Fin.cons X v)) +
+          ((tensor0SSpace_continuousLinearEquiv (I := I) (M := M) (s + 1) x B)
+            (Fin.cons X v))
+    simp
+  map_smul' := by
+    intro c A
+    ext X v
+    change
+      ((tensor0SSpace_continuousLinearEquiv (I := I) (M := M) (s + 1) x (c • A))
+          (Fin.cons X v)) =
+        c *
+          ((tensor0SSpace_continuousLinearEquiv (I := I) (M := M) (s + 1) x A)
+            (Fin.cons X v))
+    simp
+
+/-- The algebraic currying map is bijective.
+
+This is the fiberwise content of the already-defined continuous currying
+equivalence `tensor0S_curry`. The proof should be a direct unpacking of that
+equivalence, but Lean currently needs local topological instances for the Hom
+target that are not exported cleanly for these bundle fibers. -/
+private theorem tensor0S_curryLinearMap_bijective (s : Nat) (x : M) :
+    Function.Bijective (tensor0S_curryLinearMap (I := I) (M := M) s x) := by
+  sorry
+
+private def tensor0S_curryLinearEquiv (s : Nat) (x : M) :
+    Tensor0SSpace (s + 1) I x ≃ₗ[Real]
+      (TangentSpace I x →ₗ[Real] Tensor0SSpace s I x) :=
+  LinearEquiv.ofBijective
+    (tensor0S_curryLinearMap (I := I) (M := M) s x)
+    (tensor0S_curryLinearMap_bijective (I := I) (M := M) s x)
+
 /-- One recursive step for the metric on covariant tensor powers.
 
-Using `tensor0S_curry`, a `(0,s+1)` tensor is a linear map
-`T_x M ->L Tensor0SSpace s I x`.  The metric is the Hilbert-Schmidt metric
+Using `tensor0S_curryLinearMap`, a `(0,s+1)` tensor is a linear map
+`T_x M -> Tensor0SSpace s I x`.  The metric is the Hilbert-Schmidt metric
 from the tangent metric and the already constructed metric on `(0,s)` tensors. -/
 def tensor0SMetricStep
     (g : SmoothMetric I M) (x : M) (s : Nat)
     (D : MetricFiberData (Tensor0SSpace s I x)) :
-    MetricFiberData (Tensor0SSpace (s + 1) I x) := by
-  -- Expected proof: transport across `tensor0S_curry s x`, then use
-  -- `MetricFiberData.hom (tangentMetricData g x).metric D` for the
-  -- Hilbert-Schmidt metric on `T_x M ->L Tensor0SSpace s I x`.
-  sorry
+    MetricFiberData (Tensor0SSpace (s + 1) I x) :=
+  MetricFiberData.pullback
+    (tensor0S_curryLinearEquiv (I := I) (M := M) s x)
+    (MetricFiberData.hom (tangentMetricData (I := I) g x).metric D)
 
 /-- The Riemannian metric on covariant `s`-tensor fibers, constructed
 recursively from `g`. -/

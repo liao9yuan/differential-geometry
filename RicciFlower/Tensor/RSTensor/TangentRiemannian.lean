@@ -70,6 +70,27 @@ theorem inner_nonneg (D : MetricFiberData V) (v : V) :
     0 <= D.inner v v := by
   exact D.nonneg v
 
+variable {W : Type*} [AddCommGroup W] [Module Real W] [FiniteDimensional Real W]
+
+/-- Metric adjoint of a linear map between metric fibers. -/
+def adjoint (DV : MetricFiberData V) (DW : MetricFiberData W)
+    (A : V →ₗ[Real] W) : W →ₗ[Real] V :=
+  DV.flat.symm.toLinearMap.comp
+    (A.dualMap.comp DW.flat.toLinearMap)
+
+/-- The metric adjoint satisfies the expected defining identity. -/
+theorem adjoint_inner
+    (DV : MetricFiberData V) (DW : MetricFiberData W)
+    (A : V →ₗ[Real] W) (y : W) (x : V) :
+    DV.inner (adjoint DV DW A y) x = DW.inner y (A x) := by
+  unfold inner adjoint
+  change
+    DV.flat (DV.flat.symm
+        ((A.dualMap.comp DW.flat.toLinearMap) y)) x =
+      DW.flat y (A x)
+  rw [DV.flat.apply_symm_apply]
+  rfl
+
 end MetricFiberData
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]

@@ -163,6 +163,24 @@ def tensor02Comp
     (t : Time) (x : M) (i j : Idx) : Real :=
   A t x (fun a => if a = 0 then frame i x else frame j x)
 
+/-- A local frame turns the frame inverse-component predicate into the
+basis-level inverse predicate needed by tensor coordinate formulas. -/
+theorem metricInverseInBasis_of_frame
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {u : Set M}
+    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (gInv : InverseMetricComponents (I := I) (M := M) Time Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E ∞ frame u)
+    (hinv : InverseMetricComponentsInFrame (I := I) G gInv frame)
+    (t : Time) {x : M} (hx : x ∈ u) :
+    Tensor0SBundle.MetricInverseInBasis (I := I) (M := M) (G.metric t) x
+      (hframe.toBasisAt hx) (fun i j : Idx => gInv t x i j) := by
+  intro i j
+  constructor
+  · simpa [IsLocalFrameOn.toBasisAt_coe] using (hinv t x i j).1
+  · simpa [IsLocalFrameOn.toBasisAt_coe] using (hinv t x i j).2
+
 /-- Coordinate contraction formula for the first-principles `(0,2)` tensor
 inner product. This is the bridge that should be proved from the local-frame
 basis expansion and the inverse metric identities. -/
@@ -183,11 +201,8 @@ theorem inner02_eq_coord
             tensor02Comp (I := I) B frame t x k l := by
   have hinvAt :
       Tensor0SBundle.MetricInverseInBasis (I := I) (M := M) (G.metric t) x
-        (hframe.toBasisAt hx) (fun i j : Idx => gInv t x i j) := by
-    intro i j
-    constructor
-    · simpa [IsLocalFrameOn.toBasisAt_coe] using (hinv t x i j).1
-    · simpa [IsLocalFrameOn.toBasisAt_coe] using (hinv t x i j).2
+        (hframe.toBasisAt hx) (fun i j : Idx => gInv t x i j) :=
+    metricInverseInBasis_of_frame (I := I) G gInv frame hframe hinv t hx
   simpa [IsLocalFrameOn.toBasisAt_coe, tensor02Comp] using
     Tensor0SBundle.inner0S_two_eq_coord (I := I) (M := M) (G.metric t) x
       (hframe.toBasisAt hx) (fun i j : Idx => gInv t x i j) hinvAt

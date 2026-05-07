@@ -237,8 +237,14 @@ theorem cotangentMetricData_inner
       cotangentInner (I := I) g x α β := by
   rfl
 
-/-- A frame inverse-metric predicate at one point. -/
-def MetricInverseInFrame {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+/-- The inverse Gram-matrix predicate for an indexed finite family of
+tangent vectors.
+
+This is intentionally not used as a hypothesis for tensor coordinate
+formulas: an arbitrary finite family with an inverse Gram matrix on its span
+does not by itself give a basis of the tangent fiber. Use
+`MetricInverseInBasis` for coordinate identities. -/
+def MetricInverseOnFiniteFrameGram {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric I M) (x : M)
     (frame : Idx -> TangentSpace I x)
     (gInv : Idx -> Idx -> Real) : Prop :=
@@ -277,17 +283,18 @@ theorem cotangentSharp_inner
         ((tangentMetricData (I := I) g x).metric.sharp
           (cotangentToDual (I := I) α)) X =
       cotangentToDual (I := I) α X
-  simp [MetricFiberData.sharp] at h ⊢
+  exact h
 
 /-- Two tangent vectors are equal if they have the same metric pairing with a
 basis. -/
 theorem eq_of_inner_basis_eq
-    {Idx : Type*} [Fintype Idx]
+    {Idx : Type*} [Finite Idx]
     (g : SmoothMetric I M) (x : M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
     {X Y : TangentSpace I x}
     (h : forall i : Idx, g.inner x X (basis i) = g.inner x Y (basis i)) :
     X = Y := by
+  letI : Fintype Idx := Fintype.ofFinite Idx
   apply tangentFlatLinear_injective (I := I) g x
   ext Z
   have hcoord (L : TangentSpace I x →ₗ[Real] Real) :
