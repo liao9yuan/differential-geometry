@@ -1,4 +1,5 @@
 import RicciFlower.Tensor.RSTensor.Defs
+import Mathlib.Analysis.InnerProductSpace.Defs
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
 
@@ -114,6 +115,38 @@ theorem inner_pos_of_ne_zero (D : MetricFiberData V) {v : V} (hv : v ≠ 0) :
     intro hzero
     exact hv ((D.inner_self_eq_zero_iff v).1 hzero)
   exact lt_of_le_of_ne' hnonneg hne
+
+/-- The inner-product core induced by metric fiber data.
+
+This is used only as a private bridge to Mathlib finite-dimensional
+Hilbert-space trace lemmas; the public tensor metric API remains based on
+`MetricFiberData`. -/
+@[reducible] def toCore (D : MetricFiberData V) : InnerProductSpace.Core Real V where
+  inner := fun v w => D.inner v w
+  conj_inner_symm := by
+    intro x y
+    exact D.symm y x
+  re_inner_nonneg := by
+    intro x
+    simpa using D.inner_nonneg x
+  add_left := by
+    intro x y z
+    simp [MetricFiberData.inner, map_add]
+  smul_left := by
+    intro x y r
+    simp [MetricFiberData.inner, smul_eq_mul]
+  definite := by
+    intro x hx
+    exact (D.inner_self_eq_zero_iff x).1 (by simpa using hx)
+
+theorem toCore_inner (D : MetricFiberData V) (v w : V) :
+    letI : InnerProductSpace.Core Real V := D.toCore
+    letI : NormedAddCommGroup V := InnerProductSpace.Core.toNormedAddCommGroup
+    letI : InnerProductSpace Real V :=
+      @InnerProductSpace.ofCore Real V _ _ _ D.toCore.toCore
+    Inner.inner Real v w = D.inner v w := by
+  change D.toCore.inner v w = D.inner v w
+  rfl
 
 variable {W : Type*} [AddCommGroup W] [Module Real W] [FiniteDimensional Real W]
 

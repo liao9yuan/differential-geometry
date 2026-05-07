@@ -1,4 +1,6 @@
 import RicciFlower.Tensor.RSTensor.CotangentRiemannian
+import Mathlib.Analysis.InnerProductSpace.Adjoint
+import Mathlib.Algebra.Order.BigOperators.Group.Finset
 import Mathlib.LinearAlgebra.Trace
 import Mathlib.Topology.Algebra.Module.FiniteDimension
 import Mathlib.Topology.Algebra.Module.LinearMap
@@ -139,6 +141,187 @@ private def homFlatLinear [AddCommGroup V] [Module Real V] [FiniteDimensional Re
     rw [hdual]
     simp [LinearMap.smul_comp, LinearMap.comp_smul, map_smul]
 
+private theorem trace_adjoint_comp_eq_sum_inner
+    {V W : Type*}
+    [NormedAddCommGroup V] [InnerProductSpace Real V] [FiniteDimensional Real V]
+    [NormedAddCommGroup W] [InnerProductSpace Real W] [FiniteDimensional Real W]
+    (A B : V →ₗ[Real] W) :
+    LinearMap.trace Real V ((LinearMap.adjoint A).comp B) =
+      ∑ i : Fin (Module.finrank Real V),
+        Inner.inner Real (A (stdOrthonormalBasis Real V i))
+          (B (stdOrthonormalBasis Real V i)) := by
+  rw [LinearMap.trace_eq_matrix_trace Real
+    (stdOrthonormalBasis Real V).toBasis ((LinearMap.adjoint A).comp B)]
+  rw [Matrix.trace]
+  simp only [Matrix.diag_apply]
+  apply Finset.sum_congr rfl
+  intro i _
+  rw [show
+      (LinearMap.toMatrix (stdOrthonormalBasis Real V).toBasis
+        (stdOrthonormalBasis Real V).toBasis
+        ((LinearMap.adjoint A).comp B)) i i =
+        (LinearMap.toMatrixOrthonormal (stdOrthonormalBasis Real V)
+          ((LinearMap.adjoint A).comp B)) i i from rfl]
+  rw [LinearMap.toMatrixOrthonormal_apply_apply]
+  exact LinearMap.adjoint_inner_right A
+    (stdOrthonormalBasis Real V i) (B (stdOrthonormalBasis Real V i))
+
+private theorem trace_adjoint_comp_nonneg
+    {V W : Type*}
+    [NormedAddCommGroup V] [InnerProductSpace Real V] [FiniteDimensional Real V]
+    [NormedAddCommGroup W] [InnerProductSpace Real W] [FiniteDimensional Real W]
+    (A : V →ₗ[Real] W) :
+    0 <= LinearMap.trace Real V ((LinearMap.adjoint A).comp A) := by
+  rw [trace_adjoint_comp_eq_sum_inner]
+  exact Finset.sum_nonneg fun _ _ => real_inner_self_nonneg
+
+private theorem trace_adjoint_comp_eq_zero_iff
+    {V W : Type*}
+    [NormedAddCommGroup V] [InnerProductSpace Real V] [FiniteDimensional Real V]
+    [NormedAddCommGroup W] [InnerProductSpace Real W] [FiniteDimensional Real W]
+    (A : V →ₗ[Real] W) :
+    LinearMap.trace Real V ((LinearMap.adjoint A).comp A) = 0 ↔ A = 0 := by
+  constructor
+  · intro htrace
+    have hsum :
+        (∑ i : Fin (Module.finrank Real V),
+          Inner.inner Real (A (stdOrthonormalBasis Real V i))
+            (A (stdOrthonormalBasis Real V i))) = 0 := by
+      simpa [trace_adjoint_comp_eq_sum_inner] using htrace
+    have hzero :
+        forall i : Fin (Module.finrank Real V),
+          A (stdOrthonormalBasis Real V i) = 0 := by
+      intro i
+      have hi :
+          Inner.inner Real (A (stdOrthonormalBasis Real V i))
+            (A (stdOrthonormalBasis Real V i)) = 0 := by
+        have hs := (Finset.sum_eq_zero_iff_of_nonneg
+          (s := Finset.univ)
+          (f := fun i : Fin (Module.finrank Real V) =>
+            Inner.inner Real (A (stdOrthonormalBasis Real V i))
+              (A (stdOrthonormalBasis Real V i)))
+          (by intro _ _; exact real_inner_self_nonneg)).1 hsum
+        exact hs i (Finset.mem_univ i)
+      exact (inner_self_eq_zero).1 hi
+    apply (stdOrthonormalBasis Real V).toBasis.ext
+    intro i
+    simpa using hzero i
+  · intro hA
+    simp [hA]
+
+private theorem trace_adjoint_comp_comm
+    {V W : Type*}
+    [NormedAddCommGroup V] [InnerProductSpace Real V] [FiniteDimensional Real V]
+    [NormedAddCommGroup W] [InnerProductSpace Real W] [FiniteDimensional Real W]
+    (A B : V →ₗ[Real] W) :
+    LinearMap.trace Real V ((LinearMap.adjoint A).comp B) =
+      LinearMap.trace Real V ((LinearMap.adjoint B).comp A) := by
+  rw [trace_adjoint_comp_eq_sum_inner, trace_adjoint_comp_eq_sum_inner]
+  apply Finset.sum_congr rfl
+  intro i _
+  exact (real_inner_comm (A (stdOrthonormalBasis Real V i))
+    (B (stdOrthonormalBasis Real V i))).symm
+
+private theorem metric_adjoint_eq_adjoint
+    [AddCommGroup V] [Module Real V] [FiniteDimensional Real V]
+    [AddCommGroup W] [Module Real W] [FiniteDimensional Real W]
+    (DV : MetricFiberData V) (DW : MetricFiberData W) (A : V →ₗ[Real] W) :
+    letI : InnerProductSpace.Core Real V := DV.toCore
+    letI : NormedAddCommGroup V :=
+      @InnerProductSpace.Core.toNormedAddCommGroup Real V _ _ _ DV.toCore
+    letI : InnerProductSpace Real V :=
+      @InnerProductSpace.ofCore Real V _ _ _ DV.toCore.toCore
+    letI : InnerProductSpace.Core Real W := DW.toCore
+    letI : NormedAddCommGroup W :=
+      @InnerProductSpace.Core.toNormedAddCommGroup Real W _ _ _ DW.toCore
+    letI : InnerProductSpace Real W :=
+      @InnerProductSpace.ofCore Real W _ _ _ DW.toCore.toCore
+    MetricFiberData.adjoint DV DW A = LinearMap.adjoint A := by
+  letI : InnerProductSpace.Core Real V := DV.toCore
+  letI : NormedAddCommGroup V :=
+    @InnerProductSpace.Core.toNormedAddCommGroup Real V _ _ _ DV.toCore
+  letI : InnerProductSpace Real V :=
+    @InnerProductSpace.ofCore Real V _ _ _ DV.toCore.toCore
+  letI : InnerProductSpace.Core Real W := DW.toCore
+  letI : NormedAddCommGroup W :=
+    @InnerProductSpace.Core.toNormedAddCommGroup Real W _ _ _ DW.toCore
+  letI : InnerProductSpace Real W :=
+    @InnerProductSpace.ofCore Real W _ _ _ DW.toCore.toCore
+  apply LinearMap.ext
+  intro y
+  apply ext_inner_right Real
+  intro x
+  change DV.inner (MetricFiberData.adjoint DV DW A y) x =
+    DV.inner (LinearMap.adjoint A y) x
+  rw [MetricFiberData.adjoint_inner]
+  rw [← DW.toCore_inner y (A x), ← DV.toCore_inner (LinearMap.adjoint A y) x]
+  exact (LinearMap.adjoint_inner_left A x y).symm
+
+private theorem homFlatLinear_comm [AddCommGroup V] [Module Real V]
+    [FiniteDimensional Real V] [AddCommGroup W] [Module Real W]
+    [FiniteDimensional Real W]
+    (DV : MetricFiberData V) (DW : MetricFiberData W)
+    (A B : V →ₗ[Real] W) :
+    homFlatLinear DV DW A B = homFlatLinear DV DW B A := by
+  letI : InnerProductSpace.Core Real V := DV.toCore
+  letI : NormedAddCommGroup V :=
+    @InnerProductSpace.Core.toNormedAddCommGroup Real V _ _ _ DV.toCore
+  letI : InnerProductSpace Real V :=
+    @InnerProductSpace.ofCore Real V _ _ _ DV.toCore.toCore
+  letI : InnerProductSpace.Core Real W := DW.toCore
+  letI : NormedAddCommGroup W :=
+    @InnerProductSpace.Core.toNormedAddCommGroup Real W _ _ _ DW.toCore
+  letI : InnerProductSpace Real W :=
+    @InnerProductSpace.ofCore Real W _ _ _ DW.toCore.toCore
+  have hA := metric_adjoint_eq_adjoint DV DW A
+  have hB := metric_adjoint_eq_adjoint DV DW B
+  change LinearMap.trace Real V ((MetricFiberData.adjoint DV DW A).comp B) =
+    LinearMap.trace Real V ((MetricFiberData.adjoint DV DW B).comp A)
+  rw [hA, hB]
+  exact trace_adjoint_comp_comm A B
+
+private theorem homFlatLinear_nonneg [AddCommGroup V] [Module Real V]
+    [FiniteDimensional Real V] [AddCommGroup W] [Module Real W]
+    [FiniteDimensional Real W]
+    (DV : MetricFiberData V) (DW : MetricFiberData W)
+    (A : V →ₗ[Real] W) :
+    0 <= homFlatLinear DV DW A A := by
+  letI : InnerProductSpace.Core Real V := DV.toCore
+  letI : NormedAddCommGroup V :=
+    @InnerProductSpace.Core.toNormedAddCommGroup Real V _ _ _ DV.toCore
+  letI : InnerProductSpace Real V :=
+    @InnerProductSpace.ofCore Real V _ _ _ DV.toCore.toCore
+  letI : InnerProductSpace.Core Real W := DW.toCore
+  letI : NormedAddCommGroup W :=
+    @InnerProductSpace.Core.toNormedAddCommGroup Real W _ _ _ DW.toCore
+  letI : InnerProductSpace Real W :=
+    @InnerProductSpace.ofCore Real W _ _ _ DW.toCore.toCore
+  have hA := metric_adjoint_eq_adjoint DV DW A
+  change 0 <= LinearMap.trace Real V ((MetricFiberData.adjoint DV DW A).comp A)
+  rw [hA]
+  exact trace_adjoint_comp_nonneg A
+
+private theorem homFlatLinear_self_eq_zero_iff [AddCommGroup V] [Module Real V]
+    [FiniteDimensional Real V] [AddCommGroup W] [Module Real W]
+    [FiniteDimensional Real W]
+    (DV : MetricFiberData V) (DW : MetricFiberData W)
+    (A : V →ₗ[Real] W) :
+    homFlatLinear DV DW A A = 0 ↔ A = 0 := by
+  letI : InnerProductSpace.Core Real V := DV.toCore
+  letI : NormedAddCommGroup V :=
+    @InnerProductSpace.Core.toNormedAddCommGroup Real V _ _ _ DV.toCore
+  letI : InnerProductSpace Real V :=
+    @InnerProductSpace.ofCore Real V _ _ _ DV.toCore.toCore
+  letI : InnerProductSpace.Core Real W := DW.toCore
+  letI : NormedAddCommGroup W :=
+    @InnerProductSpace.Core.toNormedAddCommGroup Real W _ _ _ DW.toCore
+  letI : InnerProductSpace Real W :=
+    @InnerProductSpace.ofCore Real W _ _ _ DW.toCore.toCore
+  have hA := metric_adjoint_eq_adjoint DV DW A
+  change LinearMap.trace Real V ((MetricFiberData.adjoint DV DW A).comp A) = 0 ↔ A = 0
+  rw [hA]
+  exact trace_adjoint_comp_eq_zero_iff A
+
 private theorem hom_nonneg [AddCommGroup V] [Module Real V] [FiniteDimensional Real V]
     [AddCommGroup W] [Module Real W] [FiniteDimensional Real W]
     (DV : MetricFiberData V) (DW : MetricFiberData W) :
@@ -146,12 +329,18 @@ private theorem hom_nonneg [AddCommGroup V] [Module Real V] [FiniteDimensional R
       (forall A B : V →ₗ[Real] W,
         homFlatLinear DV DW A B = homFlatLinear DV DW B A) ∧
       (forall A : V →ₗ[Real] W, 0 <= homFlatLinear DV DW A A) := by
-  -- The intended proof is the finite-dimensional Hilbert-Schmidt metric:
-  -- choose a metric-dual basis, rewrite `tr(A†B)` as a finite sum of
-  -- component products, then use the resulting sum-of-squares formula for
-  -- injectivity and nonnegativity. Symmetry follows from the same coordinate
-  -- formula, or equivalently from trace invariance under metric adjoint.
-  sorry
+  refine ⟨?_, ?_, ?_⟩
+  · intro A B hAB
+    have hflat : homFlatLinear DV DW (A - B) = 0 := by
+      rw [map_sub, hAB, sub_self]
+    have hdiag : homFlatLinear DV DW (A - B) (A - B) = 0 := by
+      rw [hflat]
+      rfl
+    have hzero : A - B = 0 :=
+      (homFlatLinear_self_eq_zero_iff DV DW (A - B)).1 hdiag
+    exact sub_eq_zero.mp hzero
+  · exact homFlatLinear_comm DV DW
+  · exact homFlatLinear_nonneg DV DW
 
 def hom [AddCommGroup V] [Module Real V] [FiniteDimensional Real V]
     [AddCommGroup W] [Module Real W] [FiniteDimensional Real W]
@@ -320,6 +509,286 @@ private theorem sum_fin_two_fun {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     congr
     funext a
     fin_cases a <;> simp [finTwoArrowEquiv]
+
+private theorem basis_repr_eq_sum_inv_inner
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (g : SmoothMetric I M) (x : M)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInv)
+    (Z : TangentSpace I x) (i : Idx) :
+    basis.repr Z i =
+      ∑ j : Idx, gInv i j * g.inner x Z (basis j) := by
+  classical
+  let Z' : TangentSpace I x :=
+    ∑ i : Idx, (∑ j : Idx, gInv i j * g.inner x Z (basis j)) • basis i
+  have hZ : Z = Z' := by
+    apply eq_of_inner_basis_eq (I := I) g x basis
+    intro l
+    calc
+      g.inner x Z (basis l)
+          = ∑ j : Idx, (if l = j then 1 else 0) *
+              g.inner x Z (basis j) := by
+            simp
+      _ = ∑ j : Idx,
+            (∑ i : Idx, g.inner x (basis l) (basis i) * gInv i j) *
+              g.inner x Z (basis j) := by
+            apply Finset.sum_congr rfl
+            intro j _
+            rw [(hinv l j).2]
+      _ = ∑ i : Idx,
+            (∑ j : Idx, gInv i j * g.inner x Z (basis j)) *
+              g.inner x (basis i) (basis l) := by
+            calc
+              (∑ j : Idx,
+                  (∑ i : Idx, g.inner x (basis l) (basis i) * gInv i j) *
+                    g.inner x Z (basis j))
+                  = ∑ j : Idx, ∑ i : Idx,
+                      (g.inner x (basis l) (basis i) * gInv i j) *
+                        g.inner x Z (basis j) := by
+                      apply Finset.sum_congr rfl
+                      intro j _
+                      rw [Finset.sum_mul]
+              _ = ∑ i : Idx, ∑ j : Idx,
+                      (g.inner x (basis l) (basis i) * gInv i j) *
+                        g.inner x Z (basis j) := by
+                      rw [Finset.sum_comm]
+              _ = ∑ i : Idx,
+                    (∑ j : Idx, gInv i j * g.inner x Z (basis j)) *
+                      g.inner x (basis i) (basis l) := by
+                      apply Finset.sum_congr rfl
+                      intro i _
+                      rw [Finset.sum_mul]
+                      apply Finset.sum_congr rfl
+                      intro j _
+                      rw [g.symm x (basis l) (basis i)]
+                      ring
+      _ = g.inner x Z' (basis l) := by
+            simp [Z', map_sum]
+  calc
+    basis.repr Z i = basis.repr Z' i := by rw [hZ]
+    _ = ∑ j : Idx, gInv i j * g.inner x Z (basis j) := by
+      change
+        basis.repr
+            (∑ i : Idx, (∑ j : Idx, gInv i j * g.inner x Z (basis j)) • basis i) i =
+          ∑ j : Idx, gInv i j * g.inner x Z (basis j)
+      rw [map_sum]
+      rw [show
+          (∑ x_1 : Idx,
+              basis.repr
+                ((∑ j : Idx, gInv x_1 j * g.inner x Z (basis j)) • basis x_1)) i =
+          ∑ x_1 : Idx,
+              (basis.repr
+                ((∑ j : Idx, gInv x_1 j * g.inner x Z (basis j)) • basis x_1)) i by
+        simpa using
+          (Finsupp.finset_sum_apply (Finset.univ : Finset Idx)
+            (fun x_1 : Idx =>
+              basis.repr
+                ((∑ j : Idx, gInv x_1 j * g.inner x Z (basis j)) • basis x_1))
+            i)]
+      simp only [map_smul]
+      rw [Finset.sum_eq_single i]
+      · simp
+      · intro b _ hb
+        simp [hb]
+      · intro hi
+        simp at hi
+
+private theorem hom_normSq_eq_basis
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {W : Type*} [AddCommGroup W] [Module Real W] [FiniteDimensional Real W]
+    (g : SmoothMetric I M) (x : M)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInv)
+    (D : MetricFiberData W)
+    (A : TangentSpace I x →ₗ[Real] W) :
+    MetricFiberData.homFlatLinear (tangentMetricData (I := I) g x).metric D A A =
+      ∑ i : Idx, ∑ j : Idx,
+        gInv i j * D.inner (A (basis i)) (A (basis j)) := by
+  change LinearMap.trace Real (TangentSpace I x)
+      ((MetricFiberData.adjoint (tangentMetricData (I := I) g x).metric D A).comp A) =
+    ∑ i : Idx, ∑ j : Idx,
+      gInv i j * D.inner (A (basis i)) (A (basis j))
+  classical
+  rw [LinearMap.trace_eq_matrix_trace Real basis
+    ((MetricFiberData.adjoint (tangentMetricData (I := I) g x).metric D A).comp A)]
+  rw [Matrix.trace]
+  simp only [Matrix.diag_apply]
+  apply Finset.sum_congr rfl
+  intro i _
+  rw [LinearMap.toMatrix_apply]
+  rw [basis_repr_eq_sum_inv_inner (I := I) g x basis gInv hinv]
+  apply Finset.sum_congr rfl
+  intro j _
+  congr 1
+  change
+    g.inner x
+        ((MetricFiberData.adjoint (tangentMetricData (I := I) g x).metric D A)
+          (A (basis i)))
+        (basis j) =
+      D.inner (A (basis i)) (A (basis j))
+  rw [← TangentMetricData.inner_eq (I := I)
+    (tangentMetricData (I := I) g x)
+    ((MetricFiberData.adjoint (tangentMetricData (I := I) g x).metric D A)
+      (A (basis i)))
+    (basis j)]
+  exact MetricFiberData.adjoint_inner
+    (tangentMetricData (I := I) g x).metric D A (A (basis i)) (basis j)
+
+private theorem homCLM_normSq_eq_basis
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {W : Type*} [AddCommGroup W] [Module Real W] [TopologicalSpace W]
+    (hTopAdd : IsTopologicalAddGroup W) (hContSMul : ContinuousSMul Real W)
+    [FiniteDimensional Real W]
+    (g : SmoothMetric I M) (x : M)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInv)
+    (D : MetricFiberData W)
+    (A : TangentSpace I x →L[Real] W) :
+    (@MetricFiberData.homCLM
+      (TangentSpace I x) W
+      inferInstance inferInstance inferInstance inferInstance inferInstance inferInstance inferInstance
+      inferInstance inferInstance inferInstance hTopAdd hContSMul inferInstance
+      (tangentMetricData (I := I) g x).metric D).flat A A =
+      ∑ i : Idx, ∑ j : Idx,
+        gInv i j * D.inner (A (basis i)) (A (basis j)) := by
+  exact hom_normSq_eq_basis (I := I) g x basis gInv hinv D A.toLinearMap
+
+private theorem tensor0S_curry_one_apply
+    {x : M} (A : Tensor0SSpace 2 I x)
+    (X Y : TangentSpace I x) :
+    (tensor0S_curry (I := I) (𝕜 := Real) (M := M) 1 x A X)
+        (fun _ : Fin 1 => Y) =
+      A (fun a : Fin 2 => if a = 0 then X else Y) := by
+  change
+    (((continuousMultilinearCurryLeftEquiv Real
+        (fun _ : Fin (1 + 1) => E) Real)
+        ((tensor0SSpace_continuousLinearEquiv (I := I) (M := M) (1 + 1) x) A)
+        X)
+        (fun _ : Fin 1 => Y)) =
+      ((tensor0SSpace_continuousLinearEquiv (I := I) (M := M) (1 + 1) x) A)
+        (fun a : Fin 2 => if a = 0 then X else Y)
+  rw [continuousMultilinearCurryLeftEquiv_apply]
+  congr 1
+  funext a
+  fin_cases a <;> simp [Fin.cons_zero]
+
+/-- Direct coordinate squared-norm formula for `(0,2)` covariant tensors.
+
+This is the no-`sorry` bridge used by the Bochner layer while the fully general
+`inner0S_eq_coord` induction remains open. -/
+theorem normSq0S_two_eq_coord
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (g : SmoothMetric I M) (x : M)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInv)
+    (A : Tensor0SSpace 2 I x) :
+    normSq0S (I := I) g x 2 A =
+      ∑ i : Idx, ∑ j : Idx, ∑ k : Idx, ∑ l : Idx,
+        gInv i k * gInv j l *
+          A (fun a : Fin 2 => if a = 0 then basis i else basis j) *
+            A (fun a : Fin 2 => if a = 0 then basis k else basis l) := by
+  classical
+  have hTopAdd1 : IsTopologicalAddGroup (Tensor0SSpace 1 I x) :=
+    Bundle.continuousMultilinearMap.instIsTopologicalAddGroup
+      (𝕜 := Real) (F := E) (E := TangentSpace I) 1 x
+  haveI : IsTopologicalAddGroup (Tensor0SSpace 1 I x) := hTopAdd1
+  have hContSMul1 : ContinuousSMul Real (Tensor0SSpace 1 I x) :=
+    Bundle.continuousMultilinearMap.instContinuousSMul
+      (𝕜 := Real) (F := E) (E := TangentSpace I) 1 x
+  haveI : ContinuousSMul Real (Tensor0SSpace 1 I x) := hContSMul1
+  have hContAdd1 : ContinuousAdd (Tensor0SSpace 1 I x) :=
+    IsTopologicalAddGroup.toContinuousAdd
+  haveI : ContinuousAdd (Tensor0SSpace 1 I x) := hContAdd1
+  haveI : ContinuousConstSMul Real (Tensor0SSpace 1 I x) := inferInstance
+  letI : TopologicalSpace (TangentSpace I x →L[Real] Tensor0SSpace 1 I x) :=
+    @ContinuousLinearMap.topologicalSpace
+      Real Real inferInstance inferInstance (RingHom.id Real)
+      (TangentSpace I x) (Tensor0SSpace 1 I x)
+      inferInstance inferInstance inferInstance inferInstance
+      inferInstance inferInstance hTopAdd1
+  letI : AddCommGroup (TangentSpace I x →L[Real] Tensor0SSpace 1 I x) :=
+    @ContinuousLinearMap.addCommGroup
+      Real inferInstance Real inferInstance
+      (TangentSpace I x) inferInstance inferInstance
+      (Tensor0SSpace 1 I x) inferInstance inferInstance
+      inferInstance inferInstance (RingHom.id Real) hTopAdd1
+  letI : Module Real (TangentSpace I x →L[Real] Tensor0SSpace 1 I x) :=
+    @ContinuousLinearMap.module
+      Real Real Real inferInstance inferInstance inferInstance
+      (TangentSpace I x) inferInstance inferInstance inferInstance
+      (Tensor0SSpace 1 I x) inferInstance inferInstance
+      inferInstance inferInstance inferInstance inferInstance
+      (RingHom.id Real) hContAdd1
+  letI : FiniteDimensional Real (TangentSpace I x →L[Real] Tensor0SSpace 1 I x) :=
+    (@LinearMap.toContinuousLinearMap
+      Real inferInstance
+      (TangentSpace I x) inferInstance inferInstance inferInstance inferInstance inferInstance
+      (Tensor0SSpace 1 I x) inferInstance inferInstance inferInstance hTopAdd1 hContSMul1
+      inferInstance inferInstance inferInstance).finiteDimensional
+  unfold normSq0S inner0S MetricFiberData.inner
+  change
+    (tensor0SMetricStep (I := I) g x 1 (cotangentMetricData (I := I) g x)).flat A A =
+      ∑ i : Idx, ∑ j : Idx, ∑ k : Idx, ∑ l : Idx,
+        gInv i k * gInv j l *
+          A (fun a : Fin 2 => if a = 0 then basis i else basis j) *
+            A (fun a : Fin 2 => if a = 0 then basis k else basis l)
+  unfold tensor0SMetricStep MetricFiberData.pullback MetricFiberData.homCLM
+    MetricFiberData.hom
+  change
+    MetricFiberData.homFlatLinear
+      (tangentMetricData (I := I) g x).metric
+      (cotangentMetricData (I := I) g x)
+      ((tensor0S_curry (I := I) (𝕜 := Real) (M := M) 1 x A).toLinearMap)
+      ((tensor0S_curry (I := I) (𝕜 := Real) (M := M) 1 x A).toLinearMap) =
+      ∑ i : Idx, ∑ j : Idx, ∑ k : Idx, ∑ l : Idx,
+        gInv i k * gInv j l *
+          A (fun a : Fin 2 => if a = 0 then basis i else basis j) *
+            A (fun a : Fin 2 => if a = 0 then basis k else basis l)
+  rw [hom_normSq_eq_basis (I := I) g x basis gInv hinv
+    (cotangentMetricData (I := I) g x)
+    ((tensor0S_curry (I := I) (𝕜 := Real) (M := M) 1 x A).toLinearMap)]
+  calc
+    (∑ i : Idx, ∑ k : Idx,
+        gInv i k *
+          (cotangentMetricData (I := I) g x).inner
+            ((tensor0S_curry (I := I) (𝕜 := Real) (M := M) 1 x A) (basis i))
+            ((tensor0S_curry (I := I) (𝕜 := Real) (M := M) 1 x A) (basis k)))
+        = ∑ i : Idx, ∑ k : Idx, ∑ j : Idx, ∑ l : Idx,
+            gInv i k *
+              (gInv j l *
+                A (fun a : Fin 2 => if a = 0 then basis i else basis j) *
+                  A (fun a : Fin 2 => if a = 0 then basis k else basis l)) := by
+          apply Finset.sum_congr rfl
+          intro i _
+          apply Finset.sum_congr rfl
+          intro k _
+          rw [cotangentMetricData_inner_eq_coord (I := I) g x basis gInv hinv]
+          rw [Finset.mul_sum]
+          apply Finset.sum_congr rfl
+          intro j _
+          rw [Finset.mul_sum]
+          apply Finset.sum_congr rfl
+          intro l _
+          rw [cotangentToDual_apply, cotangentToDual_apply]
+          rw [tensor0S_curry_one_apply, tensor0S_curry_one_apply]
+    _ = ∑ i : Idx, ∑ j : Idx, ∑ k : Idx, ∑ l : Idx,
+        gInv i k * gInv j l *
+          A (fun a : Fin 2 => if a = 0 then basis i else basis j) *
+            A (fun a : Fin 2 => if a = 0 then basis k else basis l) := by
+          apply Finset.sum_congr rfl
+          intro i _
+          rw [Finset.sum_comm]
+          apply Finset.sum_congr rfl
+          intro j _
+          apply Finset.sum_congr rfl
+          intro k _
+          apply Finset.sum_congr rfl
+          intro l _
+          ring
 
 /-- Coordinate formula for the covariant tensor metric in a basis.
 

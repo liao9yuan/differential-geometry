@@ -224,8 +224,15 @@ theorem normSq02_eq_coord
         gInv t x i k * gInv t x j l *
           tensor02Comp (I := I) A frame t x i j *
             tensor02Comp (I := I) A frame t x k l := by
-  unfold tensorNormSq02 normSq02
-  exact inner02_eq_coord (I := I) G A A gInv frame hframe hinv t hx
+  have hinvAt :
+      Tensor0SBundle.MetricInverseInBasis (I := I) (M := M) (G.metric t) x
+        (hframe.toBasisAt hx) (fun i j : Idx => gInv t x i j) :=
+    metricInverseInBasis_of_frame (I := I) G gInv frame hframe hinv t hx
+  simpa [tensorNormSq02, normSq02, inner02, tensor02Comp,
+    IsLocalFrameOn.toBasisAt_coe] using
+    Tensor0SBundle.normSq0S_two_eq_coord (I := I) (M := M) (G.metric t) x
+      (hframe.toBasisAt hx) (fun i j : Idx => gInv t x i j) hinvAt
+      (A t x)
 
 end TensorInner
 
