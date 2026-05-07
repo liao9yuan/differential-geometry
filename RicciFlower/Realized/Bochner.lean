@@ -173,22 +173,25 @@ theorem inner02_eq_coord
     (A B : Tensor02Field (I := I) (M := M) (Time := Time))
     (gInv : InverseMetricComponents (I := I) (M := M) Time Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
-    (_hframe : IsLocalFrameOn I E ∞ frame u)
+    (hframe : IsLocalFrameOn I E ∞ frame u)
     (hinv : InverseMetricComponentsInFrame (I := I) G gInv frame)
-    (t : Time) {x : M} (_hx : x ∈ u) :
+    (t : Time) {x : M} (hx : x ∈ u) :
     inner02 (I := I) (G.metric t) x (A t x) (B t x) =
       ∑ i : Idx, ∑ j : Idx, ∑ k : Idx, ∑ l : Idx,
         gInv t x i k * gInv t x j l *
           tensor02Comp (I := I) A frame t x i j *
             tensor02Comp (I := I) B frame t x k l := by
   have hinvAt :
-      Tensor0SBundle.MetricInverseInFrame (I := I) (M := M) (G.metric t) x
-        (fun i : Idx => frame i x) (fun i j : Idx => gInv t x i j) := by
+      Tensor0SBundle.MetricInverseInBasis (I := I) (M := M) (G.metric t) x
+        (hframe.toBasisAt hx) (fun i j : Idx => gInv t x i j) := by
     intro i j
-    exact hinv t x i j
-  exact Tensor0SBundle.inner0S_two_eq_coord (I := I) (M := M) (G.metric t) x
-    (fun i : Idx => frame i x) (fun i j : Idx => gInv t x i j) hinvAt
-    (A t x) (B t x)
+    constructor
+    · simpa [IsLocalFrameOn.toBasisAt_coe] using (hinv t x i j).1
+    · simpa [IsLocalFrameOn.toBasisAt_coe] using (hinv t x i j).2
+  simpa [IsLocalFrameOn.toBasisAt_coe, tensor02Comp] using
+    Tensor0SBundle.inner0S_two_eq_coord (I := I) (M := M) (G.metric t) x
+      (hframe.toBasisAt hx) (fun i j : Idx => gInv t x i j) hinvAt
+      (A t x) (B t x)
 
 /-- Coordinate formula for the first-principles squared norm. -/
 theorem normSq02_eq_coord

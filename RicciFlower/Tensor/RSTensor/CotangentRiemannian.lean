@@ -1,4 +1,5 @@
 import RicciFlower.Tensor.RSTensor.TangentRiemannian
+import Mathlib.LinearAlgebra.Dual.Basis
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -247,33 +248,184 @@ def MetricInverseInFrame {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
       (∑ k : Idx, g.inner x (frame i) (frame k) * gInv k j) =
         (if i = j then 1 else 0)
 
-/-- Coordinate formula for the cotangent metric in a frame. -/
+/-- A basis inverse-metric predicate at one point. This is the correct
+hypothesis for coordinate formulas: the indexed vectors must span the tangent
+fiber, not just have an invertible Gram matrix on their own span. -/
+def MetricInverseInBasis {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (g : SmoothMetric I M) (x : M)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real) : Prop :=
+  forall i j : Idx,
+    (∑ k : Idx, gInv i k * g.inner x (basis k) (basis j)) =
+        (if i = j then 1 else 0) ∧
+      (∑ k : Idx, g.inner x (basis i) (basis k) * gInv k j) =
+        (if i = j then 1 else 0)
+
+/-- Raising a covector is inverse to lowering by the metric. -/
+theorem cotangentSharp_inner
+    (g : SmoothMetric I M) (x : M)
+    (α : Tensor0SSpace 1 I x) (X : TangentSpace I x) :
+    g.inner x (cotangentSharp (I := I) g x α) X =
+      cotangentToDual (I := I) α X := by
+  have h :=
+    congrArg
+      (fun L : Module.Dual Real (TangentSpace I x) => L X)
+      ((tangentMetricData (I := I) g x).metric.flat.apply_symm_apply
+        (cotangentToDual (I := I) α))
+  change
+    (tangentMetricData (I := I) g x).metric.flat
+        ((tangentMetricData (I := I) g x).metric.sharp
+          (cotangentToDual (I := I) α)) X =
+      cotangentToDual (I := I) α X
+  simp [MetricFiberData.sharp] at h ⊢
+
+/-- Two tangent vectors are equal if they have the same metric pairing with a
+basis. -/
+theorem eq_of_inner_basis_eq
+    {Idx : Type*} [Fintype Idx]
+    (g : SmoothMetric I M) (x : M)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    {X Y : TangentSpace I x}
+    (h : forall i : Idx, g.inner x X (basis i) = g.inner x Y (basis i)) :
+    X = Y := by
+  apply tangentFlatLinear_injective (I := I) g x
+  ext Z
+  have hcoord (L : TangentSpace I x →ₗ[Real] Real) :
+      L Z = ∑ i : Idx, basis.repr Z i • L (basis i) := by
+    conv_lhs => rw [← basis.sum_repr Z]
+    rw [map_sum]
+    apply Finset.sum_congr rfl
+    intro i _
+    rw [map_smul]
+  calc
+    tangentFlatLinear (I := I) g x X Z
+        = ∑ i : Idx, basis.repr Z i • tangentFlatLinear (I := I) g x X (basis i) :=
+          hcoord (tangentFlatLinear (I := I) g x X)
+    _ = ∑ i : Idx, basis.repr Z i • tangentFlatLinear (I := I) g x Y (basis i) := by
+          apply Finset.sum_congr rfl
+          intro i _
+          rw [tangentFlatLinear_apply, tangentFlatLinear_apply, h i]
+    _ = tangentFlatLinear (I := I) g x Y Z := by
+          exact (hcoord (tangentFlatLinear (I := I) g x Y)).symm
+
+/-- Coordinate reconstruction of the raised covector. -/
+theorem cotangentSharp_eq_sum_inv
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (g : SmoothMetric I M) (x : M)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInv)
+    (β : Tensor0SSpace 1 I x) :
+    cotangentSharp (I := I) g x β =
+      ∑ i : Idx,
+        (∑ j : Idx, gInv i j * cotangentToDual (I := I) β (basis j)) •
+          basis i := by
+  apply eq_of_inner_basis_eq (I := I) g x basis
+  intro l
+  calc
+    g.inner x (cotangentSharp (I := I) g x β) (basis l)
+        = cotangentToDual (I := I) β (basis l) := by
+          rw [cotangentSharp_inner]
+    _ = ∑ j : Idx, (if l = j then 1 else 0) *
+          cotangentToDual (I := I) β (basis j) := by
+          simp
+    _ = ∑ j : Idx,
+          (∑ i : Idx, g.inner x (basis l) (basis i) * gInv i j) *
+            cotangentToDual (I := I) β (basis j) := by
+          apply Finset.sum_congr rfl
+          intro j _
+          rw [(hinv l j).2]
+    _ = ∑ i : Idx,
+          (∑ j : Idx, gInv i j * cotangentToDual (I := I) β (basis j)) *
+            g.inner x (basis i) (basis l) := by
+          calc
+            (∑ j : Idx,
+                (∑ i : Idx, g.inner x (basis l) (basis i) * gInv i j) *
+                  cotangentToDual (I := I) β (basis j))
+                = ∑ j : Idx, ∑ i : Idx,
+                    (g.inner x (basis l) (basis i) * gInv i j) *
+                      cotangentToDual (I := I) β (basis j) := by
+                    apply Finset.sum_congr rfl
+                    intro j _
+                    rw [Finset.sum_mul]
+            _ = ∑ i : Idx, ∑ j : Idx,
+                    (g.inner x (basis l) (basis i) * gInv i j) *
+                      cotangentToDual (I := I) β (basis j) := by
+                    rw [Finset.sum_comm]
+            _ = ∑ i : Idx,
+                  (∑ j : Idx, gInv i j * cotangentToDual (I := I) β (basis j)) *
+                    g.inner x (basis i) (basis l) := by
+                    apply Finset.sum_congr rfl
+                    intro i _
+                    rw [Finset.sum_mul]
+                    apply Finset.sum_congr rfl
+                    intro j _
+                    rw [g.symm x (basis l) (basis i)]
+                    ring
+    _ = g.inner x
+          (∑ i : Idx,
+            (∑ j : Idx, gInv i j * cotangentToDual (I := I) β (basis j)) •
+              basis i)
+          (basis l) := by
+          simp [map_sum]
+
+/-- Coordinate formula for the cotangent metric in a basis. -/
 theorem cotangentInner_eq_coord
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric I M) (x : M)
-    (frame : Idx -> TangentSpace I x)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
     (gInv : Idx -> Idx -> Real)
-    (_hinv : MetricInverseInFrame (I := I) g x frame gInv)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInv)
     (α β : Tensor0SSpace 1 I x) :
     cotangentInner (I := I) g x α β =
       ∑ i : Idx, ∑ j : Idx,
-        gInv i j * cotangentToDual (I := I) α (frame i) *
-          cotangentToDual (I := I) β (frame j) := by
-  sorry
+        gInv i j * cotangentToDual (I := I) α (basis i) *
+          cotangentToDual (I := I) β (basis j) := by
+  calc
+    cotangentInner (I := I) g x α β
+        = g.inner x (cotangentSharp (I := I) g x α)
+            (cotangentSharp (I := I) g x β) := rfl
+    _ = cotangentToDual (I := I) α (cotangentSharp (I := I) g x β) := by
+          rw [cotangentSharp_inner]
+    _ = cotangentToDual (I := I) α
+          (∑ i : Idx,
+            (∑ j : Idx, gInv i j * cotangentToDual (I := I) β (basis j)) •
+              basis i) := by
+          rw [cotangentSharp_eq_sum_inv (I := I) g x basis gInv hinv β]
+    _ = ∑ i : Idx, ∑ j : Idx,
+          gInv i j * cotangentToDual (I := I) α (basis i) *
+            cotangentToDual (I := I) β (basis j) := by
+          rw [map_sum]
+          apply Finset.sum_congr rfl
+          intro i _
+          rw [map_smul]
+          change (∑ j : Idx, gInv i j * cotangentToDual (I := I) β (basis j)) *
+              cotangentToDual (I := I) α (basis i) =
+            ∑ j : Idx,
+              gInv i j * cotangentToDual (I := I) α (basis i) *
+                cotangentToDual (I := I) β (basis j)
+          rw [Finset.sum_mul]
+          apply Finset.sum_congr rfl
+          intro j _
+          change (gInv i j * cotangentToDual (I := I) β (basis j)) *
+              cotangentToDual (I := I) α (basis i) =
+            gInv i j * cotangentToDual (I := I) α (basis i) *
+              cotangentToDual (I := I) β (basis j)
+          ring
 
 /-- Coordinate formula for the packaged cotangent metric. -/
 theorem cotangentMetricData_inner_eq_coord
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric I M) (x : M)
-    (frame : Idx -> TangentSpace I x)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
     (gInv : Idx -> Idx -> Real)
-    (hinv : MetricInverseInFrame (I := I) g x frame gInv)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInv)
     (α β : Tensor0SSpace 1 I x) :
     (cotangentMetricData (I := I) g x).inner α β =
       ∑ i : Idx, ∑ j : Idx,
-        gInv i j * cotangentToDual (I := I) α (frame i) *
-          cotangentToDual (I := I) β (frame j) := by
-  rw [cotangentMetricData_inner, cotangentInner_eq_coord (I := I) g x frame gInv hinv]
+        gInv i j * cotangentToDual (I := I) α (basis i) *
+          cotangentToDual (I := I) β (basis j) := by
+  rw [cotangentMetricData_inner, cotangentInner_eq_coord (I := I) g x basis gInv hinv]
 
 end
 

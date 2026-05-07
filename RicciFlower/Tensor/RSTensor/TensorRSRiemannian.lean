@@ -41,6 +41,24 @@ def adjointRS
   ((flat0S (I := I) g x r).symm.toLinearMap).comp
     (A.toLinearMap.dualMap.comp (flat0S (I := I) g x s).toLinearMap)
 
+/-- The Hom-model adjoint is adjoint with respect to the metric-induced
+inner products on the covariant source and target fibers. -/
+theorem adjointRS_inner
+    {g : SmoothMetric I M} {x : M}
+    (r s : Nat) (A : TensorRSSpace r s I x)
+    (Y : Tensor0SSpace s I x) (X : Tensor0SSpace r I x) :
+    inner0S (I := I) g x r (adjointRS (I := I) (g := g) (x := x) r s A Y) X =
+      inner0S (I := I) g x s Y (A X) := by
+  unfold inner0S adjointRS flat0S MetricFiberData.inner
+  change
+    (tensor0SMetricData (I := I) g x r).flat
+        ((tensor0SMetricData (I := I) g x r).flat.symm
+          (((A.toLinearMap.dualMap.comp
+            (tensor0SMetricData (I := I) g x s).flat.toLinearMap) Y))) X =
+      (tensor0SMetricData (I := I) g x s).flat Y (A X)
+  rw [(tensor0SMetricData (I := I) g x r).flat.apply_symm_apply]
+  rfl
+
 /-- Metric-induced inner product on all `(r,s)` tensors in the realized
 `TensorRSSpace` Hom model. -/
 def innerRS
@@ -48,6 +66,14 @@ def innerRS
     (r s : Nat) (A B : TensorRSSpace r s I x) : Real :=
   LinearMap.trace Real (Tensor0SSpace r I x)
     ((adjointRS (I := I) (g := g) (x := x) r s A).comp B.toLinearMap)
+
+@[simp] theorem innerRS_eq_trace
+    {g : SmoothMetric I M} {x : M}
+    (r s : Nat) (A B : TensorRSSpace r s I x) :
+    innerRS (I := I) (g := g) (x := x) r s A B =
+      LinearMap.trace Real (Tensor0SSpace r I x)
+        ((adjointRS (I := I) (g := g) (x := x) r s A).comp B.toLinearMap) := by
+  rfl
 
 /-- Squared norm of a realized `(r,s)` tensor. -/
 def normSqRS
