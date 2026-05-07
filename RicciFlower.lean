@@ -1,5 +1,9 @@
 import RicciFlower.VectorBundle.Section
 import RicciFlower.Tensor.RSTensor.Metric
+import RicciFlower.Tensor.RSTensor.TangentRiemannian
+import RicciFlower.Tensor.RSTensor.CotangentRiemannian
+import RicciFlower.Tensor.RSTensor.Tensor0SRiemannian
+import RicciFlower.Tensor.RSTensor.TensorRSRiemannian
 import RicciFlower.Tensor.RSTensor.NablaOnTensors
 import RicciFlower.Coordinates.Tensor
 import RicciFlower.Tensor.Section12Interface
