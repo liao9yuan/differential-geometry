@@ -1,5 +1,6 @@
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 import Mathlib.Geometry.Manifold.MFDeriv.FDeriv
+import Mathlib.Geometry.Manifold.MFDeriv.NormedSpace
 import Mathlib.Geometry.Manifold.ContMDiffMap
 import Mathlib.Analysis.Calculus.Deriv.Basic
 
@@ -62,5 +63,40 @@ theorem contMDiff_partial_deriv_fst
   -- The source and target models are model spaces, so `inTangentCoordinates`
   -- collapses to the raw `mfderiv`.
   simpa [inTangentCoordinates_model_space] using h_apply
+
+/-- Fixed-base time derivative of a spatial exterior derivative.
+
+This is the scalar mixed-partial frontier used by the Ricci-flow Christoffel
+calculation.  It deliberately freezes the spatial base point and tangent vector:
+the only varying parameter is the real time parameter.  A future coordinate
+proof from joint `C^2` regularity should construct this predicate. -/
+def FixedBaseExtDerivTimeDerivativeOn
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    {H : Type*} [TopologicalSpace H] (I : ModelWithCorners ℝ E H)
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    (timeSet : Set ℝ) (u : Set M)
+    (F Ft : ℝ -> M -> ℝ) : Prop :=
+  forall (t : ℝ) (x : M), x ∈ u ->
+    forall V : TangentSpace I x,
+      HasDerivWithinAt
+        (fun s : ℝ => extDerivFun (I := I) (F s) x V)
+        (extDerivFun (I := I) (Ft t) x V)
+        timeSet
+        t
+
+theorem fixedBaseExtDerivTimeDerivativeOn_apply
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    {H : Type*} [TopologicalSpace H] (I : ModelWithCorners ℝ E H)
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    {timeSet : Set ℝ} {u : Set M}
+    {F Ft : ℝ -> M -> ℝ}
+    (h : FixedBaseExtDerivTimeDerivativeOn (I := I) timeSet u F Ft)
+    {t : ℝ} {x : M} (hx : x ∈ u) (V : TangentSpace I x) :
+    HasDerivWithinAt
+      (fun s : ℝ => extDerivFun (I := I) (F s) x V)
+      (extDerivFun (I := I) (Ft t) x V)
+      timeSet
+      t :=
+  h t x hx V
 
 end RicciFlower

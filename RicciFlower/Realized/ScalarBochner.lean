@@ -1,7 +1,10 @@
 import RicciFlower.Realized.Operators
+import RicciFlower.Realized.RoughLaplacian
 import RicciFlower.Realized.CurvatureComponents
 import RicciFlower.Realized.LeviCivita.MetricCompatibility
 import RicciFlower.Realized.LeviCivita.Torsion
+import RicciFlower.Tensor.RSTensor.CoordinateBasis
+import RicciFlower.Tensor.RSTensor.NablaOnTensors
 import RicciFlower.Tensor.RSTensor.Tensor0SRiemannian
 
 set_option autoImplicit false
@@ -35,11 +38,147 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+variable [IsManifold I 1 M] [IsManifold I 2 M]
+variable [IsManifold I ((⊤ : WithTop ℕ∞) + 1) M]
 
 /-- The realized one-form `du`, represented as a `(0,1)` tensor. -/
 def differential1FormFun (u : M -> Real) (x : M) :
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x :=
   dualToCotangent (I := I) (mfderiv I 𝓘(Real, Real) u x).toLinearMap
+
+/-- Smooth one-form sections used by the section-level covariant-derivative API. -/
+abbrev OneFormSection :=
+  Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) ⊤ 1
+
+/-- Smooth covariant two-tensor sections used by the section-level derivative API. -/
+abbrev TwoTensorSection :=
+  Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) ⊤ 2
+
+/-- Raw differential one-form as a pointwise function. Bundling it as a smooth
+section is kept as an explicit regularity/realization step. -/
+def duField (u : M -> Real) (x : M) :
+    Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x :=
+  differential1FormFun (I := I) u x
+
+/-- A bundled one-form section realizes the raw differential of `u`. -/
+def DuFieldRealizes (u : M -> Real)
+    (du : OneFormSection (I := I) (M := M)) : Prop :=
+  ∀ x : M, du x = duField (I := I) u x
+
+/-- Section-level covariant derivative of a bundled differential one-form along
+a smooth vector field. The separate `DuFieldRealizes` predicate records when
+the supplied one-form is actually `du`. -/
+noncomputable def nablaDuAt
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (du : OneFormSection (I := I) (M := M)) (x : M) :
+    Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x :=
+  nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 cov X du x
+
+/-- Supplied Hessian candidate at a point. The equality with `∇du` is recorded
+by `HessianRealizesNablaDuAt`; this definition does not bake in that frontier. -/
+def hessianAt
+    (Hess : (x : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (x : M) :
+    Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x :=
+  Hess x
+
+/-- Pointwise frontier saying a supplied Hessian tensor is the tensor
+`(X,Y) ↦ (∇_X du)(Y)`. -/
+def HessianRealizesNablaDuAt
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (du : OneFormSection (I := I) (M := M))
+    (Hess : (x : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (x : M) : Prop :=
+  ∀ (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+      (Y : TangentSpace I x),
+    Hess x (vec2 (X x) Y) =
+      nablaDuAt (I := I) cov X du x (fun _ : Fin 1 => Y)
+
+theorem nablaDu_eq_hessian
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (du : OneFormSection (I := I) (M := M))
+    (Hess : (x : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (x : M)
+    (hHess : HessianRealizesNablaDuAt (I := I) cov du Hess x)
+    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (Y : TangentSpace I x) :
+    nablaDuAt (I := I) cov X du x (fun _ : Fin 1 => Y) =
+      Hess x (vec2 (X x) Y) :=
+  (hHess X Y).symm
+
+/-- A supplied scalar second-derivative tensor realizes the scalar Laplacian
+as its basis-level metric trace at `x`. -/
+def ScalarLaplacianRealizesTraceAt
+    {Idx : Type*} [Fintype Idx]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (f : M -> Real)
+    (hessF :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x) :
+    Prop :=
+  laplacian (I := I) cov g f x =
+    metricTrace0S2InBasis (I := I) basis gInv hessF Fin.elim0
+
+/-- Convert an explicit scalar Hessian trace equality into the scalar
+Laplacian trace realization predicate. The actual analytic work is the supplied
+trace equality. -/
+theorem scalar_laplacian_trace_of_hessian
+    {Idx : Type*} [Fintype Idx]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (f : M -> Real)
+    (hessF :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (htrace :
+      laplacian (I := I) cov g f x =
+        metricTrace0S2InBasis (I := I) basis gInv hessF Fin.elim0) :
+    ScalarLaplacianRealizesTraceAt (I := I) cov g basis gInv f hessF :=
+  htrace
+
+/-- A supplied `(0,2)` tensor field realizes the covariant derivative of a
+bundled one-form at `x`. -/
+def NablaOneFormRealizesAt
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (alpha : OneFormSection (I := I) (M := M))
+    (nablaAlpha : (x : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (x : M) : Prop :=
+  ∀ (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+      (Y : TangentSpace I x),
+    nablaAlpha x (vec2 (X x) Y) =
+      nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        1 cov X alpha x (fun _ : Fin 1 => Y)
+
+/-- A supplied `(0,3)` tensor realizes the second covariant derivative of a
+bundled one-form derivative tensor at `x`. -/
+def Nabla2OneFormRealizesAt
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (nablaAlpha : TwoTensorSection (I := I) (M := M))
+    (x : M)
+    (nabla2Alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x) : Prop :=
+  ∀ (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+      (Y Z : TangentSpace I x),
+    nabla2Alpha (vec3 (X x) Y Z) =
+      nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 cov X nablaAlpha x (vec2 Y Z)
+
+/-- A chosen family of smooth vector fields realizes a pointwise tangent basis
+at `x`. -/
+def SmoothBasisFieldsAt
+    {Idx : Type*} [Fintype Idx]
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (X : Idx -> ContMDiffSection I E (⊤ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _)) : Prop :=
+  ∀ i : Idx, X i x = basis i
 
 /-- Squared norm of the realized gradient of a scalar function. -/
 def gradNormSq (g : SmoothRiemannianMetric I M) (u : M -> Real) : M -> Real :=
@@ -82,6 +221,16 @@ theorem inner0S_differential1FormFun_pair_eq_grad_inner
   rw [Tensor0SBundle.inner0S_one_eq_cotangent, cotangentInner_eq_sharp]
   rw [cotangentSharp_differential1FormFun_eq_gradientFun,
     cotangentSharp_differential1FormFun_eq_gradientFun]
+
+/-- Pairing one-forms with the metric equals evaluating the first one-form on
+the sharp of the second. -/
+theorem inner0S_one_eq_eval_sharp_right
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (α β : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x) :
+    inner0S (I := I) g x 1 α β =
+      cotangentToDual (I := I) α (cotangentSharp (I := I) g x β) := by
+  rw [Tensor0SBundle.inner0S_one_eq_cotangent, cotangentInner_eq_sharp,
+    cotangentSharp_inner]
 
 /-- The norm of `du` agrees with the squared norm of `grad u`. -/
 theorem inner0S_differential1FormFun_eq_gradNormSq
@@ -134,6 +283,44 @@ def DifferentialOneFormCommutatorAt
         (differential1FormFun (I := I) u x) +
       ricciGradGrad (I := I) Ric g u x
 
+/-- Primary pointwise one-form commutator interface:
+`roughDu = d(Δu) + Ric(·, ∇u)` at `x`. -/
+def OneFormCommutatorEvalAt
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    (Ric : Tensor02Section (I := I) (M := M))
+    (u : M -> Real)
+    (roughDu : (x : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
+    (x : M) : Prop :=
+  ∀ Y : TangentSpace I x,
+    roughDu x (fun _ : Fin 1 => Y) =
+      differential1FormFun (I := I) (laplacian (I := I) cov g u) x
+          (fun _ : Fin 1 => Y) +
+        Ric x (vec2 Y (gradientFun (I := I) g u x))
+
+/-- Pairing the pointwise commutator with `du` gives the scalar commutator
+term used by Bochner. -/
+theorem oneForm_commutator_pair_of_eval
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    (Ric : Tensor02Section (I := I) (M := M))
+    (u : M -> Real)
+    (roughDu : (x : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
+    (x : M)
+    (hcomm : OneFormCommutatorEvalAt (I := I) cov g Ric u roughDu x) :
+    DifferentialOneFormCommutatorAt (I := I) cov g Ric u roughDu x := by
+  unfold DifferentialOneFormCommutatorAt
+  rw [inner0S_one_eq_eval_sharp_right (I := I) g x
+    (roughDu x) (differential1FormFun (I := I) u x)]
+  rw [inner0S_one_eq_eval_sharp_right (I := I) g x
+    (differential1FormFun (I := I) (laplacian (I := I) cov g u) x)
+    (differential1FormFun (I := I) u x)]
+  rw [cotangentSharp_differential1FormFun_eq_gradientFun]
+  simpa [OneFormCommutatorEvalAt, ricciGradGrad, cotangentToDual_apply] using
+    hcomm (gradientFun (I := I) g u x)
+
 /-- The covariant derivative of `du` realizes the Hessian norm used in the
 scalar Bochner formula. -/
 def HessianNormRealizesNablaDifferentialAt
@@ -143,6 +330,514 @@ def HessianNormRealizesNablaDifferentialAt
     (x : M) : Prop :=
   normSq0S (I := I) g x 2 (nablaDu x) =
     hessianNormSq (I := I) g Hess x
+
+/-- Coordinate expression for `<tr_g ∇²α, α>`. -/
+def oneFormRoughInnerCoord
+    {Idx : Type*} [Fintype Idx]
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (αx : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
+    (nabla2Alpha : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      3 x) : Real :=
+  ∑ i : Idx, ∑ j : Idx,
+    gInv i j * roughLap1FormAt (I := I) basis gInv nabla2Alpha (basis i) *
+      αx (fun _ : Fin 1 => basis j)
+
+/-- Coordinate expression for `|∇α|²`. -/
+def oneFormNablaNormCoord
+    {Idx : Type*} [Fintype Idx]
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (nablaAlphaX :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x) :
+    Real :=
+  ∑ i : Idx, ∑ j : Idx, ∑ k : Idx, ∑ l : Idx,
+    gInv i k * gInv j l *
+      nablaAlphaX (vec2 (basis i) (basis j)) *
+        nablaAlphaX (vec2 (basis k) (basis l))
+
+/-- Component-level product rule for the second derivative of the pointwise
+one-form norm in a basis, already weighted by the trace coefficient. This
+avoids dividing by inverse-metric components, which may be zero. -/
+def OneFormNormSecondProductInBasis
+    {Idx : Type*} [Fintype Idx]
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (alphaX : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
+    (nablaAlphaX :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (nabla2Alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (normSecond :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x) :
+    Prop :=
+  ∀ i j : Idx,
+    gInv i j *
+        normSecond (metricTraceInput (I := I) (basis i) (basis j) Fin.elim0) =
+      (2 : Real) *
+        (gInv i j * roughLap1FormAt (I := I) basis gInv nabla2Alpha (basis i) *
+            alphaX (fun _ : Fin 1 => basis j) +
+          ∑ k : Idx, ∑ l : Idx,
+            gInv i k * gInv j l *
+              nablaAlphaX (vec2 (basis i) (basis j)) *
+                nablaAlphaX (vec2 (basis k) (basis l)))
+
+/-- Metric-trace product rule for the scalar norm of a one-form.
+
+This is the honest analytic producer for the coordinate calculation: it says
+that the trace of the supplied scalar second derivative of `|alpha|^2` is the
+sum of the rough-inner and `|nabla alpha|^2` coordinate terms. -/
+def MetricTraceInnerProductRuleAt
+    {Idx : Type*} [Fintype Idx]
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (alphaX : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
+    (nablaAlphaX :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (nabla2Alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (normSecond :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x) :
+    Prop :=
+  metricTrace0S2InBasis (I := I) basis gInv normSecond Fin.elim0 =
+    (2 : Real) *
+      (oneFormRoughInnerCoord (I := I) basis gInv alphaX nabla2Alpha +
+        oneFormNablaNormCoord (I := I) basis gInv nablaAlphaX)
+
+theorem metricTrace_inner_product_rule
+    {Idx : Type*} [Fintype Idx]
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (alphaX : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
+    (nablaAlphaX :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (nabla2Alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (normSecond :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (h : MetricTraceInnerProductRuleAt (I := I) basis gInv alphaX nablaAlphaX
+      nabla2Alpha normSecond) :
+    metricTrace0S2InBasis (I := I) basis gInv normSecond Fin.elim0 =
+      (2 : Real) *
+        (oneFormRoughInnerCoord (I := I) basis gInv alphaX nabla2Alpha +
+          oneFormNablaNormCoord (I := I) basis gInv nablaAlphaX) :=
+  h
+
+/-- The component product rule implies the traced product rule used by the
+one-form Bochner norm identity. -/
+theorem metricTrace_inner_product_rule_of_second_product
+    {Idx : Type*} [Fintype Idx]
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (alphaX : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
+    (nablaAlphaX :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (nabla2Alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (normSecond :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (hprod : OneFormNormSecondProductInBasis (I := I) basis gInv alphaX
+      nablaAlphaX nabla2Alpha normSecond) :
+    MetricTraceInnerProductRuleAt (I := I) basis gInv alphaX nablaAlphaX
+      nabla2Alpha normSecond := by
+  classical
+  unfold MetricTraceInnerProductRuleAt metricTrace0S2InBasis
+    oneFormRoughInnerCoord oneFormNablaNormCoord
+  calc
+    (∑ i : Idx, ∑ j : Idx,
+        gInv i j *
+          normSecond (metricTraceInput (I := I) (basis i) (basis j) Fin.elim0))
+        =
+      ∑ i : Idx, ∑ j : Idx,
+        (2 : Real) *
+          (gInv i j * roughLap1FormAt (I := I) basis gInv nabla2Alpha (basis i) *
+              alphaX (fun _ : Fin 1 => basis j) +
+            ∑ k : Idx, ∑ l : Idx,
+              gInv i k * gInv j l *
+                nablaAlphaX (vec2 (basis i) (basis j)) *
+                  nablaAlphaX (vec2 (basis k) (basis l))) := by
+          apply Finset.sum_congr rfl
+          intro i _
+          apply Finset.sum_congr rfl
+          intro j _
+          exact hprod i j
+    _ =
+      (2 : Real) *
+        ((∑ i : Idx, ∑ j : Idx,
+            gInv i j * roughLap1FormAt (I := I) basis gInv nabla2Alpha (basis i) *
+              alphaX (fun _ : Fin 1 => basis j)) +
+          ∑ i : Idx, ∑ j : Idx, ∑ k : Idx, ∑ l : Idx,
+            gInv i k * gInv j l *
+                nablaAlphaX (vec2 (basis i) (basis j)) *
+                nablaAlphaX (vec2 (basis k) (basis l))) := by
+          simp_rw [mul_add, Finset.sum_add_distrib]
+          simp_rw [Finset.mul_sum]
+
+/-- Explicit coordinate product-rule input for the one-form Bochner norm
+identity. This is the analytic normal-frame calculation, separated from the
+finite-sum consumer theorem below. -/
+def OneFormNormProductRuleInBasis
+    {Idx : Type*} [Fintype Idx]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (α : (y : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 y)
+    (nablaAlpha : (y : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 y)
+    (nabla2Alpha : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      3 x) : Prop :=
+  (1 / 2 : Real) *
+      laplacian (I := I) cov g
+        (fun y : M => inner0S (I := I) g y 1 (α y) (α y)) x =
+    oneFormRoughInnerCoord (I := I) basis gInv (α x) nabla2Alpha +
+      oneFormNablaNormCoord (I := I) basis gInv (nablaAlpha x)
+
+/-- Pairing a rough one-form with `α` is the coordinate rough-inner sum once
+the rough one-form realizes the metric trace of the second covariant derivative. -/
+theorem rough_inner_eq_coord_of_trace
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (g : SmoothRiemannianMetric I M)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInv)
+    (αx roughAlphaX :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
+    (nabla2Alpha : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      3 x)
+    (hrough : RoughLap0SRealizesMetricTrace (I := I) basis gInv
+      (s := 1) roughAlphaX nabla2Alpha) :
+    inner0S (I := I) g x 1 roughAlphaX αx =
+      oneFormRoughInnerCoord (I := I) basis gInv αx nabla2Alpha := by
+  rw [inner0S_one_eq_cotangent,
+    cotangentInner_eq_coord (I := I) g x basis gInv hinv]
+  unfold oneFormRoughInnerCoord
+  apply Finset.sum_congr rfl
+  intro i _
+  apply Finset.sum_congr rfl
+  intro j _
+  have hrough_i :
+      (cotangentToDual (I := I) roughAlphaX) (basis i) =
+        roughLap1FormAt (I := I) basis gInv nabla2Alpha (basis i) := by
+    simpa [cotangentToDual_apply] using
+      roughLap1FormAt_eq_of_realizes (I := I) basis gInv roughAlphaX
+        nabla2Alpha hrough (basis i)
+  rw [hrough_i]
+  simp [cotangentToDual_apply, mul_assoc]
+
+/-- The norm of a covariant derivative two-tensor is the direct `(0,2)`
+coordinate norm sum. -/
+theorem nabla_norm_eq_coord
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (g : SmoothRiemannianMetric I M)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInv)
+    (nablaAlphaX :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x) :
+    normSq0S (I := I) g x 2 nablaAlphaX =
+      oneFormNablaNormCoord (I := I) basis gInv nablaAlphaX := by
+  simpa [oneFormNablaNormCoord, vec2] using
+    Tensor0SBundle.normSq0S_two_eq_coord (I := I) (M := M) g x
+      basis gInv hinv nablaAlphaX
+
+/-- The coordinate one-form norm product rule follows from the scalar
+Laplacian trace realization and the explicit metric-trace product rule. -/
+theorem oneForm_norm_product_rule_of_trace
+    {Idx : Type*} [Fintype Idx]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (alphaRaw : (y : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 y)
+    (nablaAlpha : (y : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 y)
+    (nabla2Alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (normSecond :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (hlap : ScalarLaplacianRealizesTraceAt (I := I) cov g basis gInv
+      (fun y : M => inner0S (I := I) g y 1 (alphaRaw y) (alphaRaw y)) normSecond)
+    (htrace : MetricTraceInnerProductRuleAt (I := I) basis gInv
+      (alphaRaw x) (nablaAlpha x) nabla2Alpha normSecond) :
+    OneFormNormProductRuleInBasis (I := I) cov g basis gInv
+      alphaRaw nablaAlpha nabla2Alpha := by
+  unfold OneFormNormProductRuleInBasis ScalarLaplacianRealizesTraceAt at *
+  rw [hlap, htrace]
+  ring
+
+/-- Provenance wrapper for the coordinate one-form norm product rule.
+
+The metric-compatibility and derivative-realization hypotheses record the
+geometric source of `htrace`; this theorem still consumes the explicit trace
+product-rule input rather than proving that analytic producer. -/
+theorem oneForm_norm_product_rule_of_metric_compatible
+    {Idx : Type*} [Fintype Idx]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (alpha : OneFormSection (I := I) (M := M))
+    (alphaRaw : (y : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 y)
+    (nablaAlpha : (y : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 y)
+    (nablaAlphaSec : TwoTensorSection (I := I) (M := M))
+    (nabla2Alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (normSecond :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (_hmc : LeviCivita.IsMetricCompatibleAt (I := I) cov g x)
+    (_hnabla : NablaOneFormRealizesAt (I := I) cov alpha nablaAlpha x)
+    (_hnabla2 : Nabla2OneFormRealizesAt (I := I) cov nablaAlphaSec x nabla2Alpha)
+    (hlap : ScalarLaplacianRealizesTraceAt (I := I) cov g basis gInv
+      (fun y : M => inner0S (I := I) g y 1 (alphaRaw y) (alphaRaw y)) normSecond)
+    (htrace : MetricTraceInnerProductRuleAt (I := I) basis gInv
+      (alphaRaw x) (nablaAlpha x) nabla2Alpha normSecond) :
+    OneFormNormProductRuleInBasis (I := I) cov g basis gInv
+      alphaRaw nablaAlpha nabla2Alpha :=
+  oneForm_norm_product_rule_of_trace (I := I) cov g basis gInv
+    alphaRaw nablaAlpha nabla2Alpha normSecond hlap htrace
+
+/-- Provenance wrapper from the weighted component product rule to the traced
+product rule. The metric-compatibility and derivative-realization hypotheses
+record where the component rule should come from geometrically. -/
+theorem oneForm_norm_second_product_of_metric_compatible
+    {Idx : Type*} [Fintype Idx]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (alpha : OneFormSection (I := I) (M := M))
+    (alphaRaw : (y : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 y)
+    (nablaAlpha : (y : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 y)
+    (nablaAlphaSec : TwoTensorSection (I := I) (M := M))
+    (nabla2Alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (normSecond :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (_hmc : LeviCivita.IsMetricCompatibleAt (I := I) cov g x)
+    (_hnabla : NablaOneFormRealizesAt (I := I) cov alpha nablaAlpha x)
+    (_hnabla2 : Nabla2OneFormRealizesAt (I := I) cov nablaAlphaSec x nabla2Alpha)
+    (hprod : OneFormNormSecondProductInBasis (I := I) basis gInv
+      (alphaRaw x) (nablaAlpha x) nabla2Alpha normSecond) :
+    MetricTraceInnerProductRuleAt (I := I) basis gInv
+      (alphaRaw x) (nablaAlpha x) nabla2Alpha normSecond :=
+  metricTrace_inner_product_rule_of_second_product (I := I) basis gInv
+    (alphaRaw x) (nablaAlpha x) nabla2Alpha normSecond hprod
+
+/-- Coordinate consumer for the one-form norm product rule.
+
+The analytic content is exactly `hprod`; this theorem only rewrites the two
+coordinate sums back to the intrinsic rough-inner and `(0,2)` norm terms. -/
+theorem oneForm_norm_bochner_coord
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInv)
+    (α roughAlpha : (y : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 y)
+    (nablaAlpha : (y : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 y)
+    (nabla2Alpha : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      3 x)
+    (hprod : OneFormNormProductRuleInBasis (I := I) cov g basis gInv
+      α nablaAlpha nabla2Alpha)
+    (_hrough : RoughLap0SRealizesMetricTrace (I := I) basis gInv
+      (s := 1) (roughAlpha x) nabla2Alpha) :
+    OneFormNormBochnerAt (I := I) cov g α roughAlpha nablaAlpha x := by
+  unfold OneFormNormBochnerAt
+  rw [hprod]
+  rw [rough_inner_eq_coord_of_trace (I := I) g basis gInv hinv
+    (α x) (roughAlpha x) nabla2Alpha _hrough]
+  rw [nabla_norm_eq_coord (I := I) g basis gInv hinv (nablaAlpha x)]
+
+/-- One-form norm Bochner producer, isolated through the coordinate frontier. -/
+theorem oneForm_norm_bochner_at
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInv)
+    (α roughAlpha : (y : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 y)
+    (nablaAlpha : (y : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 y)
+    (nabla2Alpha : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      3 x)
+    (hprod : OneFormNormProductRuleInBasis (I := I) cov g basis gInv
+      α nablaAlpha nabla2Alpha)
+    (hrough : RoughLap0SRealizesMetricTrace (I := I) basis gInv
+      (s := 1) (roughAlpha x) nabla2Alpha) :
+    OneFormNormBochnerAt (I := I) cov g α roughAlpha nablaAlpha x :=
+  oneForm_norm_bochner_coord (I := I) cov g basis gInv hinv
+    α roughAlpha nablaAlpha nabla2Alpha hprod hrough
+
+/-- If a supplied Hessian tensor agrees pointwise with the covariant derivative
+of `du`, then its norm is the Hessian norm used in scalar Bochner. -/
+theorem hessian_realizes_nabla_du
+    (g : SmoothRiemannianMetric I M)
+    (Hess nablaDu : (x : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (x : M) (h : nablaDu x = Hess x) :
+    HessianNormRealizesNablaDifferentialAt (I := I) g Hess nablaDu x := by
+  unfold HessianNormRealizesNablaDifferentialAt hessianNormSq
+  rw [h]
+
+/-- Component equality in a basis is enough to identify the supplied Hessian
+with `nablaDu`, hence to realize the Hessian norm. -/
+theorem hessian_norm_realizes_of_nabla_du
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (g : SmoothRiemannianMetric I M)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (Hess nablaDu : (x : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (hcomp : ∀ slots : Fin 2 -> Idx,
+      component0S (I := I) basis (nablaDu x) slots =
+        component0S (I := I) basis (Hess x) slots) :
+    HessianNormRealizesNablaDifferentialAt (I := I) g Hess nablaDu x :=
+  hessian_realizes_nabla_du (I := I) g Hess nablaDu x
+    (ext0S_basis (I := I) basis hcomp)
+
+/-- Components of `nablaDu` agree with a supplied Hessian in a basis, provided
+the basis vectors are realized by smooth vector fields at the point. -/
+theorem hessian_components_of_nabla_du
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (X : Idx -> ContMDiffSection I E (⊤ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    (du : OneFormSection (I := I) (M := M))
+    (Hess nablaDu : (x : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (hfields : SmoothBasisFieldsAt (I := I) basis X)
+    (hHess : HessianRealizesNablaDuAt (I := I) cov du Hess x)
+    (hnabla : NablaOneFormRealizesAt (I := I) cov du nablaDu x) :
+    ∀ slots : Fin 2 -> Idx,
+      component0S (I := I) basis (nablaDu x) slots =
+        component0S (I := I) basis (Hess x) slots := by
+  intro slots
+  let X0 := X (slots 0)
+  let Y := basis (slots 1)
+  have hvec : vec2 (X0 x) Y = fun a : Fin 2 => basis (slots a) := by
+    funext a
+    fin_cases a
+    · simp [X0, Y, vec2, hfields (slots 0)]
+    · simp [Y, vec2]
+  have hn := hnabla X0 Y
+  have hh := hHess X0 Y
+  change nablaDu x (fun a : Fin 2 => basis (slots a)) =
+    Hess x (fun a : Fin 2 => basis (slots a))
+  rw [← hvec]
+  rw [hn, hh]
+  rfl
+
+/-- Accessor form of the one-form commutator frontier for `du`. -/
+theorem roughLap_du_eq_d_lap_add_ric_of_comm
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    (Ric : Tensor02Section (I := I) (M := M))
+    (u : M -> Real)
+    (roughDu : (x : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
+    (x : M)
+    (hcomm : DifferentialOneFormCommutatorAt (I := I) cov g Ric u roughDu x) :
+    inner0S (I := I) g x 1 (roughDu x) (differential1FormFun (I := I) u x) =
+      inner0S (I := I) g x 1
+          (differential1FormFun (I := I) (laplacian (I := I) cov g u) x)
+          (differential1FormFun (I := I) u x) +
+        ricciGradGrad (I := I) Ric g u x :=
+  hcomm
+
+/-- Component Ricci-identity frontier for one-forms.
+
+This is the remaining geometric producer: it should prove the pointwise
+commutator `roughDu = d(Δu) + Ric(·, ∇u)` from the tensor Ricci identity,
+the rough-Laplacian trace realization, and curvature trace realization. -/
+theorem oneForm_ricci_identity_components
+    {Idx : Type*} [Fintype Idx]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    (Ric : Tensor02Section (I := I) (M := M))
+    (Rm13 : Tensor13Section (I := I) (M := M))
+    (u : M -> Real)
+    (roughDu : (x : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (duSec : OneFormSection (I := I) (M := M))
+    (nablaDu : (x : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (nablaDuSec : TwoTensorSection (I := I) (M := M))
+    (nabla2Du :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (_hlc : LeviCivita.IsLeviCivita (I := I) cov g)
+    (_hRm : Rm13RealizesConnection (I := I) cov Rm13)
+    (_hRic : RicciTensorRealizesRm13Trace (I := I) Ric Rm13)
+    (_hdu : DuFieldRealizes (I := I) u duSec)
+    (_hnabla : NablaOneFormRealizesAt (I := I) cov duSec nablaDu x)
+    (_hnabla2 : Nabla2OneFormRealizesAt (I := I) cov nablaDuSec x nabla2Du)
+    (_hrough : RoughLap0SRealizesMetricTrace (I := I) basis gInv
+      (s := 1) (roughDu x) nabla2Du) :
+    OneFormCommutatorEvalAt (I := I) cov g Ric u roughDu x := by
+  sorry
+
+/-- Geometric wrapper exposing the pointwise commutator interface from the
+component Ricci-identity frontier. -/
+theorem oneForm_commutator_eval_of_components
+    {Idx : Type*} [Fintype Idx]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    (Ric : Tensor02Section (I := I) (M := M))
+    (Rm13 : Tensor13Section (I := I) (M := M))
+    (u : M -> Real)
+    (roughDu : (x : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (duSec : OneFormSection (I := I) (M := M))
+    (nablaDu : (x : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (nablaDuSec : TwoTensorSection (I := I) (M := M))
+    (nabla2Du :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (hlc : LeviCivita.IsLeviCivita (I := I) cov g)
+    (hRm : Rm13RealizesConnection (I := I) cov Rm13)
+    (hRic : RicciTensorRealizesRm13Trace (I := I) Ric Rm13)
+    (hdu : DuFieldRealizes (I := I) u duSec)
+    (hnabla : NablaOneFormRealizesAt (I := I) cov duSec nablaDu x)
+    (hnabla2 : Nabla2OneFormRealizesAt (I := I) cov nablaDuSec x nabla2Du)
+    (hrough : RoughLap0SRealizesMetricTrace (I := I) basis gInv
+      (s := 1) (roughDu x) nabla2Du) :
+    OneFormCommutatorEvalAt (I := I) cov g Ric u roughDu x :=
+  oneForm_ricci_identity_components (I := I) cov g Ric Rm13 u roughDu
+    basis gInv duSec nablaDu nablaDuSec nabla2Du
+    hlc hRm hRic hdu hnabla hnabla2 hrough
+
+/-- One-form commutator formula for `du`, produced from the primary pointwise
+commutator interface. -/
+theorem roughLap_du_eq_d_lap_add_ric
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    (Ric : Tensor02Section (I := I) (M := M))
+    (u : M -> Real)
+    (roughDu : (x : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
+    (x : M)
+    (hcomm : OneFormCommutatorEvalAt (I := I) cov g Ric u roughDu x) :
+    inner0S (I := I) g x 1 (roughDu x) (differential1FormFun (I := I) u x) =
+      inner0S (I := I) g x 1
+          (differential1FormFun (I := I) (laplacian (I := I) cov g u) x)
+          (differential1FormFun (I := I) u x) +
+        ricciGradGrad (I := I) Ric g u x :=
+  oneForm_commutator_pair_of_eval (I := I) cov g Ric u roughDu x hcomm
 
 /-- Scalar Bochner formula, assembled from the realized one-form product rule
 and the realized commutator identity for `du`.
@@ -187,6 +882,185 @@ theorem half_laplacian_gradNormSq_eq
   rw [h_norm, h_comm, h_hess]
   rw [inner0S_differential1FormFun_pair_eq_grad_inner]
   ring
+
+/-- Fundamental scalar Bochner formula.
+
+This is a clean consumer theorem: it composes the trace product rule, the
+pointwise one-form commutator interface, Hessian norm realization, and the
+algebraic endpoint. -/
+theorem fundamental_bochner
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    (Ric : Tensor02Section (I := I) (M := M))
+    (Rm04 : Tensor04Section (I := I) (M := M))
+    (gInvFrame : InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hlc : LeviCivita.IsLeviCivita (I := I) cov g)
+    (hRic04 : RicciTensorRealizesRm04TraceInFrame (I := I) Ric Rm04 gInvFrame frame)
+    (u : M -> Real)
+    (Hess nablaDu : (x : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (roughDu : (x : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInvAt : Idx -> Idx -> Real)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInvAt)
+    (nabla2Du :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (normSecond :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (hlap : ScalarLaplacianRealizesTraceAt (I := I) cov g basis gInvAt
+      (fun y : M =>
+        inner0S (I := I) g y 1
+          (differential1FormFun (I := I) u y)
+          (differential1FormFun (I := I) u y)) normSecond)
+    (htrace : MetricTraceInnerProductRuleAt (I := I) basis gInvAt
+      (differential1FormFun (I := I) u x) (nablaDu x) nabla2Du normSecond)
+    (hrough : RoughLap0SRealizesMetricTrace (I := I) basis gInvAt
+      (s := 1) (roughDu x) nabla2Du)
+    (hcomm : OneFormCommutatorEvalAt (I := I) cov g Ric u roughDu x)
+    (hHessComp : ∀ slots : Fin 2 -> Idx,
+      component0S (I := I) basis (nablaDu x) slots =
+        component0S (I := I) basis (Hess x) slots) :
+    (1 / 2 : Real) * laplacian (I := I) cov g (gradNormSq (I := I) g u) x =
+      g.inner x
+          (gradientFun (I := I) g (laplacian (I := I) cov g u) x)
+          (gradientFun (I := I) g u x) +
+        hessianNormSq (I := I) g Hess x +
+          ricciGradGrad (I := I) Ric g u x := by
+  refine half_laplacian_gradNormSq_eq (I := I) cov g Ric Rm04 gInvFrame frame
+    hlc hRic04 u Hess nablaDu roughDu x ?_ ?_ ?_
+  · exact oneForm_norm_bochner_at (I := I) cov g basis gInvAt hinv
+      (differential1FormFun (I := I) u) roughDu nablaDu nabla2Du
+      (oneForm_norm_product_rule_of_trace (I := I) cov g basis gInvAt
+        (differential1FormFun (I := I) u) nablaDu nabla2Du normSecond hlap htrace)
+      hrough
+  · exact oneForm_commutator_pair_of_eval (I := I) cov g Ric u roughDu x hcomm
+  · exact hessian_norm_realizes_of_nabla_du (I := I) g basis Hess nablaDu hHessComp
+
+/-- Fundamental scalar Bochner formula with the scalar Laplacian trace,
+norm-product trace, and Hessian component inputs discharged by named producers.
+The one-form commutator remains the primary explicit interface. -/
+theorem fundamental_bochner_of_terms
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    (Ric : Tensor02Section (I := I) (M := M))
+    (Rm04 : Tensor04Section (I := I) (M := M))
+    (gInvFrame : InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hlc : LeviCivita.IsLeviCivita (I := I) cov g)
+    (hRic04 : RicciTensorRealizesRm04TraceInFrame (I := I) Ric Rm04 gInvFrame frame)
+    (u : M -> Real)
+    (Hess nablaDu : (x : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (roughDu : (x : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInvAt : Idx -> Idx -> Real)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInvAt)
+    (X : Idx -> ContMDiffSection I E (⊤ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    (duSec : OneFormSection (I := I) (M := M))
+    (nablaDuSec : TwoTensorSection (I := I) (M := M))
+    (nabla2Du :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (normSecond :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (hfields : SmoothBasisFieldsAt (I := I) basis X)
+    (hmc : LeviCivita.IsMetricCompatibleAt (I := I) cov g x)
+    (hHess : HessianRealizesNablaDuAt (I := I) cov duSec Hess x)
+    (hnabla : NablaOneFormRealizesAt (I := I) cov duSec nablaDu x)
+    (hnabla2 : Nabla2OneFormRealizesAt (I := I) cov nablaDuSec x nabla2Du)
+    (hlapTrace :
+      laplacian (I := I) cov g
+        (fun y : M =>
+          inner0S (I := I) g y 1
+            (differential1FormFun (I := I) u y)
+            (differential1FormFun (I := I) u y)) x =
+        metricTrace0S2InBasis (I := I) basis gInvAt normSecond Fin.elim0)
+    (hsecond : OneFormNormSecondProductInBasis (I := I) basis gInvAt
+      (differential1FormFun (I := I) u x) (nablaDu x) nabla2Du normSecond)
+    (hrough : RoughLap0SRealizesMetricTrace (I := I) basis gInvAt
+      (s := 1) (roughDu x) nabla2Du)
+    (hcomm : OneFormCommutatorEvalAt (I := I) cov g Ric u roughDu x) :
+    (1 / 2 : Real) * laplacian (I := I) cov g (gradNormSq (I := I) g u) x =
+      g.inner x
+          (gradientFun (I := I) g (laplacian (I := I) cov g u) x)
+          (gradientFun (I := I) g u x) +
+        hessianNormSq (I := I) g Hess x +
+          ricciGradGrad (I := I) Ric g u x := by
+  refine fundamental_bochner (I := I) cov g Ric Rm04 gInvFrame frame
+    hlc hRic04 u Hess nablaDu roughDu basis gInvAt hinv nabla2Du normSecond
+    ?_ ?_ hrough hcomm ?_
+  · exact scalar_laplacian_trace_of_hessian (I := I) cov g basis gInvAt
+      (fun y : M =>
+        inner0S (I := I) g y 1
+          (differential1FormFun (I := I) u y)
+          (differential1FormFun (I := I) u y)) normSecond hlapTrace
+  · exact oneForm_norm_second_product_of_metric_compatible (I := I) cov g
+      basis gInvAt duSec (differential1FormFun (I := I) u) nablaDu
+      nablaDuSec nabla2Du normSecond hmc hnabla hnabla2 hsecond
+  · exact hessian_components_of_nabla_du (I := I) cov basis X duSec Hess
+      nablaDu hfields hHess hnabla
+
+/-- Geometric wrapper for the fundamental scalar Bochner formula, using the
+component Ricci-identity frontier to supply the pointwise commutator interface. -/
+theorem fundamental_bochner_of_components
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    (Ric : Tensor02Section (I := I) (M := M))
+    (Rm13 : Tensor13Section (I := I) (M := M))
+    (Rm04 : Tensor04Section (I := I) (M := M))
+    (gInvFrame : InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hlc : LeviCivita.IsLeviCivita (I := I) cov g)
+    (hRm13 : Rm13RealizesConnection (I := I) cov Rm13)
+    (hRic13 : RicciTensorRealizesRm13Trace (I := I) Ric Rm13)
+    (hRic04 : RicciTensorRealizesRm04TraceInFrame (I := I) Ric Rm04 gInvFrame frame)
+    (u : M -> Real)
+    (Hess nablaDu : (x : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (roughDu : (x : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInvAt : Idx -> Idx -> Real)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInvAt)
+    (duSec : OneFormSection (I := I) (M := M))
+    (nablaDuSec : TwoTensorSection (I := I) (M := M))
+    (nabla2Du :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (normSecond :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (hdu : DuFieldRealizes (I := I) u duSec)
+    (hnabla : NablaOneFormRealizesAt (I := I) cov duSec nablaDu x)
+    (hnabla2 : Nabla2OneFormRealizesAt (I := I) cov nablaDuSec x nabla2Du)
+    (hlap : ScalarLaplacianRealizesTraceAt (I := I) cov g basis gInvAt
+      (fun y : M =>
+        inner0S (I := I) g y 1
+          (differential1FormFun (I := I) u y)
+          (differential1FormFun (I := I) u y)) normSecond)
+    (htrace : MetricTraceInnerProductRuleAt (I := I) basis gInvAt
+      (differential1FormFun (I := I) u x) (nablaDu x) nabla2Du normSecond)
+    (hrough : RoughLap0SRealizesMetricTrace (I := I) basis gInvAt
+      (s := 1) (roughDu x) nabla2Du)
+    (hHessComp : ∀ slots : Fin 2 -> Idx,
+      component0S (I := I) basis (nablaDu x) slots =
+        component0S (I := I) basis (Hess x) slots) :
+    (1 / 2 : Real) * laplacian (I := I) cov g (gradNormSq (I := I) g u) x =
+      g.inner x
+          (gradientFun (I := I) g (laplacian (I := I) cov g u) x)
+          (gradientFun (I := I) g u x) +
+        hessianNormSq (I := I) g Hess x +
+          ricciGradGrad (I := I) Ric g u x := by
+  refine fundamental_bochner (I := I) cov g Ric Rm04 gInvFrame frame
+    hlc hRic04 u Hess nablaDu roughDu basis gInvAt hinv nabla2Du normSecond
+    hlap htrace hrough ?_ hHessComp
+  exact oneForm_commutator_eval_of_components (I := I) cov g Ric Rm13 u roughDu
+    basis gInvAt duSec nablaDu nablaDuSec nabla2Du
+    hlc hRm13 hRic13 hdu hnabla hnabla2 hrough
 
 end Realized
 end RicciFlower

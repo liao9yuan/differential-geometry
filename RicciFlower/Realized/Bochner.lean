@@ -97,6 +97,25 @@ def tensor02Comp
     (t : Time) (x : M) (i j : Idx) : Real :=
   A t x (fun a => if a = 0 then frame i x else frame j x)
 
+/-- Basis-coordinate contraction formula for the pointwise `(0,2)` tensor inner
+product. This is the direct bridge from the intrinsic tensor metric to local
+coordinates. -/
+theorem inner02_eq_coord_direct
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (hinv : Tensor0SBundle.MetricInverseInBasis (I := I) (M := M) g x basis gInv)
+    (A B : Tensor02At (I := I) x) :
+    inner02 (I := I) g x A B =
+      ∑ i : Idx, ∑ j : Idx, ∑ k : Idx, ∑ l : Idx,
+        gInv i k * gInv j l *
+          A (vec2 (basis i) (basis j)) *
+            B (vec2 (basis k) (basis l)) := by
+  simpa [inner02, vec2] using
+    Tensor0SBundle.inner0S_two_eq_coord_direct (I := I) (M := M) g x
+      basis gInv hinv A B
+
 /-- A local frame turns the frame inverse-component predicate into the
 basis-level inverse predicate needed by tensor coordinate formulas. -/
 theorem metricInverseInBasis_of_frame
@@ -136,8 +155,8 @@ theorem inner02_eq_coord
       Tensor0SBundle.MetricInverseInBasis (I := I) (M := M) (G.metric t) x
         (hframe.toBasisAt hx) (fun i j : Idx => gInv t x i j) :=
     metricInverseInBasis_of_frame (I := I) G gInv frame hframe hinv t hx
-  simpa [inner02, tensor02Comp, IsLocalFrameOn.toBasisAt_coe] using
-    Tensor0SBundle.inner0S_two_eq_coord (I := I) (M := M) (G.metric t) x
+  simpa [tensor02Comp, vec2, IsLocalFrameOn.toBasisAt_coe] using
+    inner02_eq_coord_direct (I := I) (G.metric t) x
       (hframe.toBasisAt hx) (fun i j : Idx => gInv t x i j) hinvAt
       (A t x) (B t x)
 

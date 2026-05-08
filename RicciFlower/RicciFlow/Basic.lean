@@ -45,7 +45,7 @@ namespace RicciSectionFamily
 /-- View a bundled Ricci section family as the pointwise tensor field expected
 by the compatibility `Realized.RicciFlow` API. -/
 def toTensorField (Ric : RicciSectionFamily (I := I) (M := M)) :
-    Realized.RealizedTwoTensorField (I := I) (M := M) Real :=
+    Realized.RicciTensorField (I := I) (M := M) Real :=
   fun t x X Y => Ric t x (Realized.vec2 X Y)
 
 @[simp] theorem toTensorField_apply

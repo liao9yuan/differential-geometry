@@ -1,0 +1,895 @@
+# RicciFlow LaTeX Theorem Status
+
+Source: `RicciFlow/main.tex`.
+
+Numbering note: the LaTeX file uses one shared theorem counter per section for
+theorems, lemmas, propositions, corollaries, definitions, assumptions,
+black boxes, and remarks.  This is why the Bochner statements in the appendix
+are numbered `14.18`, `14.19`, and `14.22`: earlier definitions and remarks in
+Section 14 also increment the counter.
+
+Distance scale:
+
+- `0`: native `RicciFlower` theorem is closed.
+- `1`: essentially done; needs a presentation wrapper or small compatibility theorem.
+- `2`: finite-sum/component consumer work remains.
+- `3`: real geometric producer remains, such as Ricci identity, Bianchi,
+  curvature construction, or metric-compatibility product rule.
+- `4`: major analytic/global Ricci-flow infrastructure remains, or only the
+  old synthetic route exists.
+- `5`: deliberate black box or external-scale theorem for now.
+
+## Main Body
+
+### Theorem 2.1, `thm:main-hamilton-3d`
+
+Statement:
+
+```text
+If M^3 is closed, connected, and smooth, and M admits a Riemannian metric
+g0 with Ric(g0) > 0, then M admits a metric of constant positive sectional
+curvature. Equivalently, M is diffeomorphic to a spherical space form.
+```
+
+Status: old synthetic assembly exists as `wordly_latex_thm_main_hamilton_3d`.
+There is no native unconditional `RicciFlower` theorem yet.
+
+Distance: `5`.
+
+Next target: replace the typed synthetic assembly by concrete Ricci-flow
+solution data, analytic inputs, realized curvature, and pinching/convergence
+theorems.
+
+### Assumption 3.1, `ass:riemannian-calculus`
+
+Statement:
+
+```text
+Assume standard smooth Riemannian tensor calculus: Levi-Civita connection,
+extension of nabla to tensors, torsion-free and metric-compatible properties,
+Rm from commutators, Ricci and scalar curvature as contractions, Rm symmetries,
+Bianchi identities, tensor commutator identities, norms, traces, divergences,
+contractions, and rough Laplacian Delta T = g^{ij} nabla_i nabla_j T.
+```
+
+Status: partially native.  Relevant files include
+`RicciFlower/Realized/Connection.lean`,
+`RicciFlower/Realized/Curvature.lean`,
+`RicciFlower/Realized/CurvatureTensor.lean`,
+`RicciFlower/Realized/CurvatureComponents.lean`,
+`RicciFlower/Tensor/RSTensor/NablaOnTensors.lean`, and tensor metric files.
+
+Distance: `3`.
+
+Next target: close tensor Ricci identity, Bianchi/contracted Bianchi, curvature
+section producers, and intrinsic tensor rough Laplacian.
+
+### Black Box 4.2, `bb:strictly-parabolic-short-time`
+
+Statement:
+
+```text
+A smooth strictly parabolic system on a closed manifold with smooth initial
+data has a smooth short-time solution, unique in the appropriate parabolic
+class.
+```
+
+Status: explicit analytic black box in the old synthetic route.
+
+Distance: `5`.
+
+Next target: keep as black box unless the project expands to parabolic PDE
+existence.
+
+### Theorem 4.3, `thm:rf-short-time-existence`
+
+Statement:
+
+```text
+For every smooth Riemannian metric g0 on a closed manifold M, there exists
+T > 0 and a smooth Ricci flow g(t) on [0,T) with g(0) = g0.
+```
+
+Status: old synthetic wrapper `wordly_latex_thm_rf_short_time_existence`;
+native `RicciFlower/Realized/RicciFlow.lean` has solution interfaces, not the
+DeTurck existence theorem.
+
+Distance: `5`.
+
+Next target: build a concrete DeTurck wrapper around the analytic black box and
+the realized Ricci-flow solution structure.
+
+### Black Box 5.1, `bb:maximal-rf-interval`
+
+Statement:
+
+```text
+Starting from any smooth metric on a closed manifold, there is a unique maximal
+Ricci flow g(t), t in [0,Tmax), agreeing with every other flow on common
+domains and admitting no smooth extension past Tmax.
+```
+
+Status: old synthetic maximal-flow interfaces only.
+
+Distance: `5`.
+
+Next target: concrete maximal-interval construction, uniqueness, and terminal
+time API.
+
+### Lemma 6.1, `lem:evol-inverse-metric`
+
+Statement:
+
+```text
+Along Ricci flow, partial_t g^{ij} = 2 Ric^{ij}.
+```
+
+Status: native component interfaces exist in
+`RicciFlower/RicciFlow/Evolution/Metric.lean` and
+`RicciFlower/RicciFlow/Basic.lean`.
+
+Distance: `2`.
+
+Next target: expose a clean LaTeX-facing theorem over metric families and local
+frames.
+
+### Lemma 6.2, `lem:evol-christoffel`
+
+Statement:
+
+```text
+Along Ricci flow,
+partial_t Gamma^k_ij =
+- g^{kl} (nabla_i Ric_jl + nabla_j Ric_il - nabla_l Ric_ij).
+```
+
+Status: coordinate equation consumers exist in
+`RicciFlower/Coordinates/Christoffel.lean`; interval wrappers exist in
+`RicciFlower/RicciFlow/Evolution/Connection.lean`.  The old synthetic file has
+an invariant proof core through `connection_evolution`.
+
+Distance: `3`.
+
+Next target: prove the realized producer from metric variation and component
+raising/lowering.
+
+### Lemma 6.3, `lem:evol-ricci`
+
+Statement:
+
+```text
+Along Ricci flow,
+partial_t Ric_ij = Delta Ric_ij + 2 R_ikjl Ric^{kl}
+  - 2 Ric_i^k Ric_kj.
+Equivalently,
+(partial_t - Delta) Ric_ij = 2 R_ikjl Ric^{kl} - 2 Ric_i^k Ric_kj.
+```
+
+Status: component consumer infrastructure exists in
+`RicciFlower/RicciFlow/Evolution/Ricci.lean`.
+
+Distance: `3`.
+
+Next target: close the geometric producer from Christoffel variation, curvature
+variation, commutators, and Bianchi reductions.
+
+### Corollary 6.5, `cor:ricci-lichnerowicz`
+
+Statement:
+
+```text
+Along Ricci flow, partial_t Ric = Delta_L Ric.
+```
+
+Status: component consumer/interface in `RicciFlower/RicciFlow/Evolution/Ricci.lean`.
+
+Distance: `3`.
+
+Next target: package Lemma 6.3 through the Lichnerowicz definition.
+
+### Lemma 6.6, `lem:evol-scalar`
+
+Statement:
+
+```text
+Along Ricci flow, partial_t R = Delta R + 2 |Ric|^2.
+Equivalently, (partial_t - Delta) R = 2 |Ric|^2.
+```
+
+Status: interface/consumer in `RicciFlower/RicciFlow/Basic.lean`.
+
+Distance: `3`.
+
+Next target: prove contraction of Ricci evolution plus inverse-metric variation
+in the realized layer.
+
+### Lemma 6.7, `lem:evol-ricci-norm`
+
+Statement:
+
+```text
+Along Ricci flow,
+(partial_t - Delta) |Ric|^2 =
+-2 |nabla Ric|^2 + 4 R_ikjl Ric^{ij} Ric^{kl}.
+```
+
+Status: finite-sum consumer theorem exists as
+`RicciFlower.Realized.ricci_norm_heat_eq_of_bochner_components` in
+`RicciFlower/Realized/Bochner.lean`.
+
+Distance: `3`.
+
+Next target: supply the real Ricci time-derivative producer and the tensor
+Bochner/Laplacian producer.
+
+### Theorem 7.1, `thm:scalar-wmp-super`
+
+Statement:
+
+```text
+For a scalar supersolution
+partial_t u >= Delta_g(t) u + <X, grad u> + F(u,t),
+with F locally Lipschitz and nondecreasing in u, comparison with the ODE
+c' = F(c,t) preserves u >= c.
+```
+
+Status: partially native in `RicciFlower/MaximumPrinciple/ScalarWeak.lean`;
+old synthetic wrapper exists.
+
+Distance: `3`.
+
+Next target: close the remaining analytic proof holes in the scalar weak
+maximum principle.
+
+### Theorem 7.2, `thm:scalar-wmp-sub`
+
+Statement:
+
+```text
+For the corresponding subsolution inequality
+partial_t u <= Delta_g(t) u + <X, grad u> + F(u,t),
+comparison with c' = F(c,t) preserves u <= c.
+```
+
+Status: partially native in `RicciFlower/MaximumPrinciple/ScalarWeak.lean`;
+old synthetic wrapper exists.
+
+Distance: `3`.
+
+Next target: derive cleanly from the supersolution theorem or duplicate the
+barrier proof.
+
+### Corollary 7.3, `cor:scalar-lower-bound`
+
+Statement:
+
+```text
+For Ricci flow on a closed n-manifold, if c0 = inf_M R(.,0), then
+R(x,t) >= c0 / (1 - (2/n)c0 t)
+while the denominator is positive. In particular, positive initial scalar
+curvature remains positive.
+```
+
+Status: not native; synthetic/GOALS route only.
+
+Distance: `4`.
+
+Next target: combine scalar evolution, |Ric|^2 >= R^2/n, and scalar WMP.
+
+### Corollary 7.4, `cor:positive-scalar-finite-time`
+
+Statement:
+
+```text
+If R(g(0)) > 0 on a closed n-manifold, then the maximal existence time
+satisfies Tmax <= n / (2 min_M R(g(0))) < infinity.
+```
+
+Status: synthetic wrapper `wordly_latex_cor_positive_scalar_finite_time`.
+
+Distance: `4`.
+
+Next target: port the finite-time ODE comparison and positive-Ricci-to-positive
+scalar bridge.
+
+### Theorem 7.5, `thm:hamilton-tensor-wmp`
+
+Statement:
+
+```text
+For a symmetric 2-tensor S satisfying
+(partial_t - Delta) S_ij >= X^k nabla_k S_ij + N_ij(S,g,t),
+if the null-eigenvector condition holds and S(0) >= 0, then S(t) >= 0.
+```
+
+Status: synthetic `TensorWeakMaximumPrinciple` interface.
+
+Distance: `5`.
+
+Next target: keep as analytic tensor maximum-principle input until scalar and
+evolution layers are stable.
+
+### Black Box 7.6, `bb:scalar-strong-mp`
+
+Statement:
+
+```text
+For a complete connected Ricci-flow background with the needed bounded geometry,
+a nonnegative scalar supersolution that is not identically zero becomes
+strictly positive at later times.
+```
+
+Status: synthetic strong maximum-principle interface.
+
+Distance: `5`.
+
+Next target: keep as analytic black box for blow-up limits.
+
+### Lemma 7.7, `lem:limit-scalar-positive`
+
+Statement:
+
+```text
+For a complete connected 3D blow-up limit with Ric >= 0, R >= 0, and
+R(x0,0) = 1, one has R > 0 on N x (alpha,0].
+```
+
+Status: synthetic consumer of scalar strong MP.
+
+Distance: `4`.
+
+Next target: port after the complete-limit Ricci-flow setting and strong MP
+interface exist natively.
+
+### Lemma 8.1, `lem:3d-curvature-identities`
+
+Statement:
+
+```text
+In dimension 3,
+R_ijkl =
+  g_ik Ric_jl - g_il Ric_jk
+  - g_jk Ric_il + g_jl Ric_ik
+  - (R/2)(g_ik g_jl - g_il g_jk).
+If Ric has eigenvalues lambda_1, lambda_2, lambda_3, then
+K_ij = (lambda_i + lambda_j - lambda_k)/2.
+```
+
+Status: old synthetic P2 route; native curvature component trace bridges exist.
+
+Distance: `3`.
+
+Next target: prove native 3D algebra over bundled `Tensor04Section` and
+`Tensor02Section`.
+
+### Lemma 9.1, `lem:preserve-ricci-nonnegative`
+
+Statement:
+
+```text
+For a closed 3D Ricci flow, Ric(g(0)) >= 0 implies Ric(g(t)) >= 0.
+```
+
+Status: synthetic tensor-WMP consumer.
+
+Distance: `4`.
+
+Next target: combine native Ricci evolution, 3D curvature algebra, and tensor
+WMP.
+
+### Lemma 9.2, `lem:preserve-ricci-pinching`
+
+Statement:
+
+```text
+For 0 <= delta <= 1/3, if Ric(g(0)) >= delta R(g(0)) g(0), then
+Ric(g(t)) >= delta R(g(t)) g(t).
+```
+
+Status: synthetic tensor-WMP consumer.
+
+Distance: `4`.
+
+Next target: prove shifted tensor reaction algebra and feed tensor WMP.
+
+### Corollary 9.3, `cor:strict-positive-gives-pinching`
+
+Statement:
+
+```text
+If M^3 is closed and Ric(g0) > 0, then there exists delta > 0, depending only
+on g0, such that Ric(g0) >= delta R(g0) g0. Consequently the same pinching
+holds along the Ricci flow from g0.
+```
+
+Status: not native.
+
+Distance: `4`.
+
+Next target: compactness of the unit tangent bundle/continuous eigenvalue
+minimum plus Lemma 9.2.
+
+### Lemma 10.4, `lem:evol-tracefree-ricci-norm`
+
+Statement:
+
+```text
+In dimension 3, along Ricci flow and wherever R > 0,
+(partial_t - Delta)|Ric^o|^2 =
+  -2 |nabla Ric|^2 + (2/3)|nabla R|^2
+  + (4 |Ric|^2 |Ric^o|^2 - 2 Q) / R.
+```
+
+Status: synthetic P3/P4 route.
+
+Distance: `4`.
+
+Next target: port trace-free decomposition, scalar evolution, Ricci norm
+evolution, and the algebraic reaction reduction.
+
+### Lemma 10.5, `lem:quotient-evolution`
+
+Statement:
+
+```text
+For smooth spacetime functions phi >= 0 and psi > 0,
+(partial_t - Delta)(phi^alpha / psi^beta)
+equals the displayed product/chain-rule expression with gradient-square and
+cross-gradient terms.
+```
+
+Status: synthetic algebra exists.
+
+Distance: `2`.
+
+Next target: port the pure scalar quotient algebra to `RicciFlower` if needed
+by native pinching.
+
+### Lemma 10.6, `lem:evol-pinching-P`
+
+Statement:
+
+```text
+For P = |Ric^o|^2 / R^{2-eps}, 0 < eps < 1,
+partial_t P =
+Delta P + (2(1-eps)/R)<nabla R,nabla P>
+- 2 R^{eps-4}|R nabla Ric - nabla R tensor Ric|^2
+- eps(1-eps) R^{eps-4}|Ric^o|^2 |nabla R|^2
++ 2 R^{eps-3}(eps |Ric|^2 |Ric^o|^2 - Q).
+```
+
+Status: synthetic improved-pinching producer/interface.
+
+Distance: `4`.
+
+Next target: native trace-free Ricci evolution, quotient algebra, and
+gradient-square rearrangement.
+
+### Lemma 10.7, `lem:Q-factorization`
+
+Statement:
+
+```text
+For Ricci eigenvalues lambda_1, lambda_2, lambda_3 and
+R = lambda_1 + lambda_2 + lambda_3,
+Q = sum_{i<j} (lambda_i - lambda_j)^2 (R - 2 lambda_k)^2.
+```
+
+Status: synthetic algebra proved as `wordly_latex_lem_Q_factorization`.
+
+Distance: `1`.
+
+Next target: port or re-export as native `RicciFlower` algebra.
+
+### Lemma 10.8, `lem:Q-lower-bound`
+
+Statement:
+
+```text
+If R > 0 and Ric >= delta R g with delta > 0, then
+Q >= 2 delta^2 |Ric|^2 |Ric^o|^2.
+```
+
+Status: synthetic ordered-eigenvalue algebra proved as
+`wordly_latex_lem_Q_lower_bound`.
+
+Distance: `1`.
+
+Next target: port to native algebra namespace.
+
+### Corollary 10.9, `cor:improved-ricci-pinching`
+
+Statement:
+
+```text
+For a closed 3D Ricci flow with Ric(g0) > 0, there exist eps > 0 and C < infinity
+depending only on g0 such that |Ric^o|^2 / R^2 <= C R^{-eps}.
+```
+
+Status: synthetic P4 wrapper.
+
+Distance: `4`.
+
+Next target: native scalar WMP, pinching evolution, and Q lower bound.
+
+### Lemma 11.1, `lem:finite-time`
+
+Statement:
+
+```text
+The maximal Ricci flow starting from a closed 3-manifold with R(g0) > 0 has
+finite maximal time, bounded by data from g0.
+```
+
+Status: synthetic finite-time wrapper.
+
+Distance: `4`.
+
+Next target: follows natively after Corollary 7.4 and maximal interval API.
+
+### Black Box 11.2, `bb:rf-extension-criterion`
+
+Statement:
+
+```text
+If a closed-manifold Ricci flow on [0,T) has sup_{M x [0,T)} |Rm| < infinity,
+then it extends smoothly to [0,T+eta).
+```
+
+Status: synthetic/global interface.
+
+Distance: `5`.
+
+Next target: keep as global analytic black box.
+
+### Lemma 11.3, `lem:finite-time-curvature-blow-up`
+
+Statement:
+
+```text
+For a maximal Ricci flow with finite maximal time Tmax,
+sup_{M x [0,Tmax)} |Rm| = infinity.
+```
+
+Status: synthetic wrapper around extension criterion.
+
+Distance: `4`.
+
+Next target: native wrapper once maximal interval and extension criterion APIs
+are concrete.
+
+### Corollary 11.4, `cor:ricci-controls-rm`
+
+Statement:
+
+```text
+There exists a universal constant C3 such that on any 3D Riemannian manifold
+with Ric >= 0, |Rm| <= C3 R.
+```
+
+Status: synthetic curvature algebra route.
+
+Distance: `3`.
+
+Next target: port 3D sectional-curvature algebra and norm comparison.
+
+### Lemma 11.6, `lem:point-selection-rescaling`
+
+Statement:
+
+```text
+For the maximal Ricci flow from a closed 3-manifold with Ric(g0) > 0, there
+exist points/times (x_i,t_i), t_i -> Tmax, and R_i = R(x_i,t_i) -> infinity,
+such that the parabolically rescaled flows satisfy
+R(g^{R_i})(x_i,0) = max_{M x [-R_i t_i,0]} R(g^{R_i}) = 1.
+```
+
+Status: synthetic Section 12 interface.
+
+Distance: `4`.
+
+Next target: finite-time scalar blow-up plus concrete point-selection/rescaling.
+
+### Black Box 11.8, `bb:no-local-collapsing`
+
+Statement:
+
+```text
+Perelman's no local collapsing theorem: for a closed Ricci flow on [0,T),
+there is kappa > 0 such that the flow is kappa-noncollapsed at all scales
+controlled by curvature, invariant under parabolic rescaling.
+```
+
+Status: black box.
+
+Distance: `5`.
+
+Next target: keep as global analytic/geometric black box.
+
+### Lemma 11.10, `lem:cgh-curvature-convergence`
+
+Statement:
+
+```text
+Under smooth pointed Cheeger-Gromov-Hamilton convergence, pulled-back Rm, Ric,
+R, |Rm|^2, |Ric|^2, and |Ric^o|^2 converge smoothly on compact subdomains and
+compact time subintervals.
+```
+
+Status: synthetic convergence interface.
+
+Distance: `5`.
+
+Next target: requires a concrete smooth CGH convergence theory; likely remains
+black-box level.
+
+### Corollary 11.11, `cor:cgh-curvature-ratio-convergence`
+
+Statement:
+
+```text
+If the CGH limit has R > 0 on a compact spacetime set, then the pulled-back
+ratios |Ric^o|^2 / R^2 converge smoothly to the limit ratio there.
+```
+
+Status: synthetic wrapper.
+
+Distance: `4`.
+
+Next target: prove as consumer of CGH curvature convergence and positivity of
+the scalar limit.
+
+### Black Box 11.12, `bb:cgh-compactness`
+
+Statement:
+
+```text
+Hamilton compactness theorem for pointed Ricci flows with uniform local
+curvature bounds and basepoint noncollapsing.
+```
+
+Status: black box.
+
+Distance: `5`.
+
+Next target: keep as global compactness input.
+
+### Black Box 11.14, `bb:myers`
+
+Statement:
+
+```text
+If a complete Riemannian manifold has Ric >= (n-1)k g for k > 0, then it is
+compact and has diameter at most pi / sqrt(k).
+```
+
+Status: black box in the LaTeX spine.
+
+Distance: `5`.
+
+Next target: possibly use mathlib if available, otherwise keep as global input.
+
+### Lemma 11.15, `lem:3d-einstein-space-form`
+
+Statement:
+
+```text
+If (N^3,h) is connected, Ric^o(h) = 0, and R(h) is positive somewhere, then
+R(h) is a positive constant and h has constant positive sectional curvature.
+```
+
+Status: synthetic algebra route; partial realized curvature objects exist.
+
+Distance: `3`.
+
+Next target: native contracted Bianchi plus 3D Riemann-from-Ricci formula and
+sectional-curvature API.
+
+## Appendix Calculus Statements
+
+### Lemma 14.2, `lem:3D Riem as Ricci and R`
+
+Statement:
+
+```text
+If n = 3, then
+R_ijkl = R_il g_jk - R_jl g_ik - R_ik g_jl + R_jk g_il
+  - (1/2) R (g_il g_jk - g_jl g_ik).
+```
+
+Status: same target as Lemma 8.1.
+
+Distance: `3`.
+
+Next target: native 3D tensor algebra for `Tensor04Section`.
+
+### Lemma 14.10, `lem:curvature_on_1forms`
+
+Statement:
+
+```text
+(nabla_X nabla_Y omega)(Z) - (nabla_Y nabla_X omega)(Z)
+  - (nabla_[X,Y] omega)(Z) = - omega(R(X,Y)Z).
+```
+
+Status: represented by the current Bochner frontier
+`oneForm_ricci_identity_components`, but not proved as a standalone native
+theorem.
+
+Distance: `3`.
+
+Next target: prove from `nabla0SFun`, connection curvature realization, and
+tensor extensionality.
+
+### Theorem 14.12, `thm:ricci_identity`
+
+Statement:
+
+```text
+nabla_i nabla_j alpha_{k_1 ... k_s}
+- nabla_j nabla_i alpha_{k_1 ... k_s}
+= - sum_{q=1}^s sum_m R_{i j k_q}^m
+    alpha_{k_1 ... k_{q-1} m k_{q+1} ... k_s}.
+```
+
+Status: interface only; `NablaOnTensors.lean` has the section-level derivative
+backend.
+
+Distance: `3`.
+
+Next target: prove tensor commutator for `(0,s)` tensors, starting with `s=1`.
+
+### Lemma 14.18, `ex:laplace_u_squared`
+
+Statement:
+
+```text
+(1/2) Delta(u^2) = div(u grad u) = u Delta u + |grad u|^2.
+```
+
+Status: native theorem `half_laplacian_mul_self` in
+`RicciFlower/Realized/Operators.lean`, under explicit differentiability
+hypotheses.
+
+Distance: `0`.
+
+Next target: none for the algebraic identity; only improve presentation if
+needed.
+
+### Lemma 14.19, `lem:laplace_d_commutator`
+
+Statement:
+
+```text
+Delta(du) = d(Delta u) + Ric(du),
+where Ric acts on 1-forms by (Ric(alpha))(W) = alpha(Ric(W)).
+```
+
+Status: native consumer interface exists:
+`OneFormCommutatorEvalAt`, `oneForm_commutator_pair_of_eval`,
+`roughLap_du_eq_d_lap_add_ric`.  The actual geometric producer
+`oneForm_ricci_identity_components` still has the controlled frontier proof.
+
+Distance: `3`.
+
+Next target: close `oneForm_ricci_identity_components`.
+
+### Proposition 14.22, `prop:FundBochnerFormNormSq`
+
+Statement:
+
+```text
+For any smooth function u on a Riemannian manifold,
+(1/2) Delta |du|^2 =
+  <du, d(Delta u)> + |nabla du|^2 + Ric(grad u, grad u).
+
+Equivalently,
+(1/2) Delta |grad u|^2 =
+  <grad u, grad(Delta u)> + |nabla^(2) u|^2 + Ric(grad u, grad u).
+```
+
+Status: native consumer theorem exists:
+`fundamental_bochner`, with stronger wrappers
+`fundamental_bochner_of_terms` and `fundamental_bochner_of_components` in
+`RicciFlower/Realized/ScalarBochner.lean`.
+
+Distance: `3`.
+
+Next target: the final theorem is assembled; the missing geometric proof is
+exactly Lemma 14.19's producer `oneForm_ricci_identity_components`.
+
+### Lemma 14.23, `lem:christoffel_evolution`
+
+Statement:
+
+```text
+For a smooth metric family g(t) with h = partial_t g,
+partial_t Gamma^k_ij =
+  (1/2) g^{kl} (nabla_i h_jl + nabla_j h_il - nabla_l h_ij).
+```
+
+Status: coordinate consumers exist; full native producer is not closed.
+
+Distance: `3`.
+
+Next target: prove the metric variation formula in realized coordinates.
+
+### Corollary 14.24, `cor:christoffel_evolution_RF`
+
+Statement:
+
+```text
+Under Ricci flow,
+partial_t Gamma^k_ij =
+- g^{kl} (nabla_i R_jl + nabla_j R_il - nabla_l R_ij).
+```
+
+Status: consumer/interface exists via
+`ricciFlow_christoffelSymbolEvolution_from_equation`.
+
+Distance: `2`.
+
+Next target: once Lemma 14.23 is proved, specialize with `h_ij = -2 R_ij`.
+
+### Lemma 14.27, `lem: sing time iff max time`
+
+Statement:
+
+```text
+A finite-endpoint Ricci flow forms a singularity at the endpoint if and only
+if it is maximal.
+```
+
+Status: synthetic terminal-time interfaces.
+
+Distance: `4`.
+
+Next target: native maximal interval, smooth extension criterion, and terminal
+singularity definitions.
+
+### Lemma 14.29, `lem: vol extinct implies max`
+
+Statement:
+
+```text
+If a closed connected Ricci flow becomes volume extinct at a finite time omega,
+then the flow is maximal.
+```
+
+Status: no native target yet.
+
+Distance: `4`.
+
+Next target: volume form/evolution and maximal interval infrastructure.
+
+### Lemma 14.30, unlabeled
+
+Statement:
+
+```text
+If a Ricci flow becomes volume extinct at finite time omega, then
+sup_{M x [alpha,omega)} R = infinity. In particular, it forms a singularity.
+```
+
+Status: no native target yet.
+
+Distance: `4`.
+
+Next target: volume evolution, scalar curvature bounds, and singular/maximal
+bridge.
+
+## Immediate Native Priority
+
+The nearest high-value theorem is Proposition 14.22.  In Lean it is already a
+clean consumer theorem, but it is not yet a fully geometric proof because it
+depends on Lemma 14.19 through the frontier
+`oneForm_ricci_identity_components`.
+
+Concrete next order:
+
+1. Prove Lemma 14.10 for one-forms in the realized tensor setting.
+2. Use it to prove Lemma 14.19, i.e. close `oneForm_ricci_identity_components`.
+3. Promote rough Laplacian from basis-level trace predicates to an intrinsic
+   tensor operation.
+4. Then mark Proposition 14.22 as distance `0`.
+

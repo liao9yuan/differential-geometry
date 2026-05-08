@@ -99,6 +99,76 @@ def InverseMetricDerivativeComponentsOn
       D.carrier
       (t : Real)
 
+/-- Metric-side regularity in a fixed local frame.
+
+This package is deliberately metric-side: it records smooth time dependence of
+the frame Gram matrix, nondegeneracy through a chosen two-sided inverse frame
+matrix, time differentiability of that inverse matrix, and uniqueness of time
+derivatives on the interval.  The inverse evolution formula itself is still
+proved by differentiating the inverse identity in
+`inverseMetricEvolutionEquationInFrame_of_inverse_components`; it is not assumed
+here. -/
+structure MetricFrameTimeRegularityInFrameOnLocal
+    [DecidableEq Idx]
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (gInvDt : Real -> M -> Idx -> Idx -> Real)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (u : Set M) : Prop where
+  metricSmooth :
+    forall x : M, x ∈ u -> forall i j : Idx,
+      ContDiffOn Real ⊤
+        (fun t : Real => metricCompInFrame (I := I) S frame t x i j)
+        D.carrier
+  /-- Nondegeneracy is represented by an explicit two-sided inverse of the
+  frame Gram matrix. -/
+  nondegenerateGram :
+    InverseMetricComponentsInFrameOn (I := I) S gInv frame
+  inverseSymmetric :
+    SymmetricInverseMetricComponentsInFrameOn gInv
+  inverseMetricDerivative :
+    InverseMetricDerivativeComponentsOn (D := D) gInv gInvDt
+  uniqueTimeDerivatives :
+    forall t : Realized.RealTimeInterval.RegularTime D,
+      UniqueDiffWithinAt Real D.carrier (t : Real)
+
+/-- Spacetime metric regularity in a fixed local frame.
+
+The extra mixed-derivative field is the fixed-base statement
+`∂s d_x(g_s) = d_x(∂s g_s)` specialized to the Ricci-flow metric variation
+`∂s g_s = -2 Ric_s`.  This is weaker than, and does not assert, commutation of
+`∂t` with the evolving covariant derivative. -/
+structure MetricFrameSpacetimeRegularityInFrameOnLocal
+    [DecidableEq Idx]
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (gInvDt : Real -> M -> Idx -> Idx -> Real)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (u : Set M) : Prop extends
+      MetricFrameTimeRegularityInFrameOnLocal
+        (I := I) S gInv gInvDt frame u where
+  frameMetricSpacetimeSmooth :
+    forall i j : Idx,
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ⊤
+        (fun p : Real × M => metricCompInFrame (I := I) S frame p.1 p.2 i j)
+        (D.carrier ×ˢ u)
+  frameMetricExtDerivTimeDerivative :
+    forall (t : Realized.RealTimeInterval.RegularTime D) (x : M), x ∈ u ->
+      forall d a b : Idx,
+        HasDerivWithinAt
+          (fun s : Real =>
+            extDerivFun (I := I)
+              (fun y : M => metricCompInFrame (I := I) S frame s y a b)
+              x (frame d x))
+          ((-2 : Real) *
+            extDerivFun (I := I)
+              (fun y : M => ricciCompInFrame (I := I) S frame (t : Real) y a b)
+              x (frame d x))
+          D.carrier
+          (t : Real)
+
 private theorem inverseMetric_derivative_row_eq
     [DecidableEq Idx]
     {D : Realized.RealTimeInterval}
@@ -114,10 +184,10 @@ private theorem inverseMetric_derivative_row_eq
     (t : Realized.RealTimeInterval.RegularTime D)
     (x : M) (i j : Idx) :
     (∑ a : Idx,
-        gInvDt (t : Real) x i a *
+        (gInvDt (t : Real) x i a *
           metricCompInFrame (I := I) S frame (t : Real) x a j +
         gInv (t : Real) x i a *
-          ((-2 : Real) * ricciCompInFrame (I := I) S frame (t : Real) x a j)) =
+          ((-2 : Real) * ricciCompInFrame (I := I) S frame (t : Real) x a j))) =
       0 := by
   let lhs : Real -> Real :=
     fun s => ∑ a : Idx,
@@ -125,10 +195,10 @@ private theorem inverseMetric_derivative_row_eq
   have hlhs :
       HasDerivWithinAt lhs
         (∑ a : Idx,
-          gInvDt (t : Real) x i a *
+          (gInvDt (t : Real) x i a *
             metricCompInFrame (I := I) S frame (t : Real) x a j +
           gInv (t : Real) x i a *
-            ((-2 : Real) * ricciCompInFrame (I := I) S frame (t : Real) x a j))
+            ((-2 : Real) * ricciCompInFrame (I := I) S frame (t : Real) x a j)))
         D.carrier
         (t : Real) := by
     dsimp [lhs]
@@ -138,10 +208,10 @@ private theorem inverseMetric_derivative_row_eq
         (A := fun a s =>
           gInv s x i a * metricCompInFrame (I := I) S frame s x a j)
         (A' := fun a =>
-          gInvDt (t : Real) x i a *
+          (gInvDt (t : Real) x i a *
             metricCompInFrame (I := I) S frame (t : Real) x a j +
           gInv (t : Real) x i a *
-            ((-2 : Real) * ricciCompInFrame (I := I) S frame (t : Real) x a j))
+            ((-2 : Real) * ricciCompInFrame (I := I) S frame (t : Real) x a j)))
         (s := D.carrier) (x := (t : Real))
         (fun a _ha =>
           by
@@ -155,10 +225,8 @@ private theorem inverseMetric_derivative_row_eq
         (x := (t : Real)) (s := D.carrier)
         (c := (if i = j then 1 else 0 : Real))).congr
         (fun s _hs => by
-          symm
           exact (hinv s x i j).1)
         (by
-          symm
           exact (hinv (t : Real) x i j).1)
   have h1 := hlhs.derivWithin (hunique t)
   have h0 := hconst.derivWithin (hunique t)
@@ -169,7 +237,8 @@ private theorem inverseMetric_derivative_solve
     (metric ric gInv gInvDt : Idx -> Idx -> Real)
     (i : Idx)
     (hrow : forall j : Idx,
-      (∑ a : Idx, gInvDt i a * metric a j + gInv i a * ((-2 : Real) * ric a j)) = 0)
+      (∑ a : Idx,
+        (gInvDt i a * metric a j + gInv i a * ((-2 : Real) * ric a j))) = 0)
     (hright : forall a b : Idx,
       (∑ k : Idx, metric a k * gInv k b) = (if a = b then 1 else 0))
     (hsymm : forall a b : Idx, gInv a b = gInv b a)
@@ -185,7 +254,7 @@ private theorem inverseMetric_derivative_solve
     have hm' :
         (∑ a : Idx, gInvDt i a * metric a m) +
             (-2 : Real) * (∑ a : Idx, gInv i a * ric a m) = 0 := by
-      simpa [Finset.mul_sum, mul_assoc] using hm
+      simpa [Finset.mul_sum, mul_assoc, mul_left_comm, mul_comm] using hm
     linarith
   calc
     gInvDt i j
@@ -196,22 +265,51 @@ private theorem inverseMetric_derivative_solve
             refine Finset.sum_congr rfl fun a _ha => ?_
             rw [hright a j]
     _ = ∑ k : Idx, (∑ a : Idx, gInvDt i a * metric a k) * gInv k j := by
-            rw [Finset.sum_comm]
-            refine Finset.sum_congr rfl fun k _hk => ?_
-            rw [Finset.sum_mul]
-            refine Finset.sum_congr rfl fun a _ha => ?_
-            ring
+            calc
+              (∑ a : Idx, gInvDt i a *
+                  (∑ k : Idx, metric a k * gInv k j))
+                  =
+                ∑ a : Idx, ∑ k : Idx,
+                  gInvDt i a * (metric a k * gInv k j) := by
+                    refine Finset.sum_congr rfl fun a _ha => ?_
+                    rw [Finset.mul_sum]
+              _ = ∑ k : Idx, ∑ a : Idx,
+                  gInvDt i a * (metric a k * gInv k j) := by
+                    rw [Finset.sum_comm]
+              _ = ∑ k : Idx, (∑ a : Idx, gInvDt i a * metric a k) * gInv k j := by
+                    refine Finset.sum_congr rfl fun k _hk => ?_
+                    rw [Finset.sum_mul]
+                    refine Finset.sum_congr rfl fun a _ha => ?_
+                    ring
     _ = ∑ k : Idx, (2 * (∑ a : Idx, gInv i a * ric a k)) * gInv k j := by
             refine Finset.sum_congr rfl fun k _hk => ?_
             rw [hrow' k]
     _ = 2 * (∑ a : Idx, ∑ b : Idx, gInv i a * gInv j b * ric a b) := by
-            rw [Finset.mul_sum]
-            rw [Finset.sum_comm]
-            refine Finset.sum_congr rfl fun a _ha => ?_
-            rw [Finset.mul_sum]
-            refine Finset.sum_congr rfl fun b _hb => ?_
-            rw [hsymm b j]
-            ring
+            calc
+              (∑ k : Idx, (2 * (∑ a : Idx, gInv i a * ric a k)) * gInv k j)
+                  =
+                2 * (∑ k : Idx, (∑ a : Idx, gInv i a * ric a k) * gInv k j) := by
+                  rw [Finset.mul_sum]
+                  refine Finset.sum_congr rfl fun k _hk => ?_
+                  ring
+              _ = 2 * (∑ a : Idx, ∑ b : Idx, gInv i a * gInv j b * ric a b) := by
+                  congr 1
+                  calc
+                    (∑ k : Idx, (∑ a : Idx, gInv i a * ric a k) * gInv k j)
+                        =
+                      ∑ k : Idx, ∑ a : Idx,
+                        (gInv i a * ric a k) * gInv k j := by
+                          refine Finset.sum_congr rfl fun k _hk => ?_
+                          rw [Finset.sum_mul]
+                    _ = ∑ a : Idx, ∑ b : Idx,
+                        (gInv i a * ric a b) * gInv b j := by
+                          rw [Finset.sum_comm]
+                    _ = ∑ a : Idx, ∑ b : Idx,
+                        gInv i a * gInv j b * ric a b := by
+                          refine Finset.sum_congr rfl fun a _ha => ?_
+                          refine Finset.sum_congr rfl fun b _hb => ?_
+                          rw [hsymm b j]
+                          ring
 
 /-- Inverse-metric evolution from the differentiated identity `g^{-1}g = I`.
 
@@ -237,10 +335,10 @@ theorem inverseMetricEvolutionEquationInFrame_of_inverse_components
   intro t x i j
   have hrow : forall m : Idx,
       (∑ a : Idx,
-          gInvDt (t : Real) x i a *
+          (gInvDt (t : Real) x i a *
             metricCompInFrame (I := I) S frame (t : Real) x a m +
           gInv (t : Real) x i a *
-            ((-2 : Real) * ricciCompInFrame (I := I) S frame (t : Real) x a m)) =
+            ((-2 : Real) * ricciCompInFrame (I := I) S frame (t : Real) x a m))) =
         0 := by
     intro m
     exact inverseMetric_derivative_row_eq
@@ -260,6 +358,31 @@ theorem inverseMetricEvolutionEquationInFrame_of_inverse_components
       (fun a b => hsymm (t : Real) x a b)
       j
   exact (hdt t x i j).congr_deriv hsolve
+
+/-- Metric-frame regularity produces the inverse-metric evolution equation.
+
+The computation is the existing inverse-identity differentiation theorem; this
+wrapper keeps the future matrix-inverse smoothness work attached to the metric
+regularity package rather than to the Christoffel evolution layer. -/
+theorem inverseMetricEvolution_of_metricFrameTimeRegularity
+    [DecidableEq Idx]
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (gInvDt : Real -> M -> Idx -> Idx -> Real)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    {u : Set M}
+    (hreg :
+      MetricFrameTimeRegularityInFrameOnLocal
+        (I := I) S gInv gInvDt frame u) :
+    InverseMetricEvolutionEquationInFrame (I := I) S gInv frame :=
+  inverseMetricEvolutionEquationInFrame_of_inverse_components
+    (I := I) S hS gInv gInvDt frame
+    hreg.inverseMetricDerivative
+    hreg.nondegenerateGram
+    hreg.inverseSymmetric
+    hreg.uniqueTimeDerivatives
 
 end Components
 
