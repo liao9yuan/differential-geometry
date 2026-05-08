@@ -104,6 +104,106 @@ theorem roughLap1FormAt_eq_of_realizes
       roughLap1FormAt (I := I) basis gInv nabla2α Y :=
   h (fun _ : Fin 1 => Y)
 
+/-!
+## Intrinsic-facing realization predicates
+
+The actual intrinsic metric trace is the tensor obtained by contracting the
+first two covariant slots with the inverse metric.  Constructing that tensor
+globally from the metric is a geometric producer frontier.  The predicates
+below record the coordinate-free interface without selecting an arbitrary
+basis or an arbitrary witness: a supplied tensor realizes the intrinsic trace
+exactly when every basis/inverse-metric coordinate formula gives the same
+value.
+-/
+
+/-- A supplied `(0,s)` tensor realizes the metric trace of a supplied
+`(0,s+2)` tensor if all basis coordinate trace formulas agree with it. -/
+def metric_trace_0s
+    (g : SmoothRiemannianMetric I M)
+    {x : M} {s : ℕ}
+    (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (s + 2) x)
+    (traceT : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      s x) : Prop :=
+  ∀ {Idx : Type} [Fintype Idx] [DecidableEq Idx]
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real),
+      MetricInverseInBasis (I := I) g x basis gInv ->
+        ∀ tail : Fin s -> TangentSpace I x,
+          traceT tail = metricTrace0S2InBasis (I := I) basis gInv T tail
+
+/-- Intrinsic-facing rough Laplacian realization for covariant tensors. -/
+def rough_lap_0s
+    (g : SmoothRiemannianMetric I M)
+    {x : M} {s : ℕ}
+    (nabla2A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (s + 2) x)
+    (roughA : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      s x) : Prop :=
+  metric_trace_0s (I := I) g nabla2A roughA
+
+/-- One-form specialization of the intrinsic-facing rough Laplacian interface. -/
+def rough_lap_one_form
+    (g : SmoothRiemannianMetric I M)
+    {x : M}
+    (nabla2α : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      3 x)
+    (roughα : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      1 x) : Prop :=
+  rough_lap_0s (I := I) g (s := 1) nabla2α roughα
+
+theorem metric_trace_0s_apply_basis
+    (g : SmoothRiemannianMetric I M)
+    {Idx : Type} [Fintype Idx] [DecidableEq Idx]
+    {x : M} {s : ℕ}
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (s + 2) x)
+    (traceT : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      s x)
+    (htrace : metric_trace_0s (I := I) g T traceT)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInv)
+    (tail : Fin s -> TangentSpace I x) :
+    traceT tail = metricTrace0S2InBasis (I := I) basis gInv T tail :=
+  htrace basis gInv hinv tail
+
+theorem rough_lap_0s_apply_basis
+    (g : SmoothRiemannianMetric I M)
+    {Idx : Type} [Fintype Idx] [DecidableEq Idx]
+    {x : M} {s : ℕ}
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (nabla2A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (s + 2) x)
+    (roughA : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      s x)
+    (hrough : rough_lap_0s (I := I) g nabla2A roughA)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInv)
+    (tail : Fin s -> TangentSpace I x) :
+    roughA tail = roughLap0SAt (I := I) basis gInv nabla2A tail :=
+  by
+    simpa [roughLap0SAt] using hrough basis gInv hinv tail
+
+theorem rough_lap_one_form_apply_basis
+    (g : SmoothRiemannianMetric I M)
+    {Idx : Type} [Fintype Idx] [DecidableEq Idx]
+    {x : M}
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (nabla2α : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      3 x)
+    (roughα : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      1 x)
+    (hrough : rough_lap_one_form (I := I) g nabla2α roughα)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInv)
+    (Y : TangentSpace I x) :
+    roughα (fun _ : Fin 1 => Y) =
+      roughLap1FormAt (I := I) basis gInv nabla2α Y :=
+  by
+    simpa [rough_lap_one_form, rough_lap_0s, roughLap1FormAt, roughLap0SAt] using
+      hrough basis gInv hinv (fun _ : Fin 1 => Y)
+
 end
 
 end Realized

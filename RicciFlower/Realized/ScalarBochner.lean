@@ -1,8 +1,10 @@
 import RicciFlower.Realized.Operators
 import RicciFlower.Realized.RoughLaplacian
 import RicciFlower.Realized.CurvatureComponents
+import RicciFlower.Realized.TensorRicciIdentity
 import RicciFlower.Realized.LeviCivita.MetricCompatibility
 import RicciFlower.Realized.LeviCivita.Torsion
+import RicciFlower.Coordinates.CoordinateFrame
 import RicciFlower.Tensor.RSTensor.CoordinateBasis
 import RicciFlower.Tensor.RSTensor.NablaOnTensors
 import RicciFlower.Tensor.RSTensor.Tensor0SRiemannian
@@ -298,6 +300,196 @@ def OneFormCommutatorEvalAt
       differential1FormFun (I := I) (laplacian (I := I) cov g u) x
           (fun _ : Fin 1 => Y) +
         Ric x (vec2 Y (gradientFun (I := I) g u x))
+
+/-- The traced Hessian-derivative term that should realize `d (Delta u)`. -/
+def traceNablaHessianForDLap
+    {Idx : Type*} [Fintype Idx]
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (nabla2Du :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (Y : TangentSpace I x) : Real :=
+  traceNablaOneFormAt (I := I) basis gInv nabla2Du Y
+
+/-- Pointwise producer saying that the traced Hessian derivative is `d(Delta u)`. -/
+def TraceNablaHessianRealizesDLapAt
+    {Idx : Type*} [Fintype Idx]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (u : M -> Real)
+    (nabla2Du :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x) :
+    Prop :=
+  ∀ Y : TangentSpace I x,
+    traceNablaHessianForDLap (I := I) basis gInv nabla2Du Y =
+      differential1FormFun (I := I) (laplacian (I := I) cov g u) x
+        (fun _ : Fin 1 => Y)
+
+/-- Pointwise producer for the Ricci commutator trace term:
+`tr_g ∇²du(.,.,Y) = tr_g ∇²du(Y,.,.) + Ric(Y, grad u)`. -/
+def OneFormRicciTraceCommAt
+    {Idx : Type*} [Fintype Idx]
+    (g : SmoothRiemannianMetric I M)
+    (Ric : Tensor02Section (I := I) (M := M))
+    (u : M -> Real)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (nabla2Du :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x) :
+    Prop :=
+  OneFormRicciTraceCommWithVectorAt (I := I) Ric basis gInv
+    (gradientFun (I := I) g u x) nabla2Du
+
+/-- Coordinate-frame specialization of the one-form Ricci trace commutator at
+one point. The basis is the chart-induced tangent basis from
+`Coordinates.coordinateFrameAt_toBasis`; the bracket-free coordinate fact is
+kept in the coordinate-frame layer. -/
+def oneFormRicciTraceComm_coordAt
+    (g : SmoothRiemannianMetric I M)
+    (Ric : Tensor02Section (I := I) (M := M))
+    (u : M -> Real)
+    (x₀ : M)
+    (gInv : Coordinates.CoordinateIdx E -> Coordinates.CoordinateIdx E -> Real)
+    (nabla2Du :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x₀) :
+    Prop :=
+  OneFormRicciTraceCommAt (I := I) g Ric u
+    (Coordinates.coordinateFrameAt_toBasis (I := I) x₀) gInv nabla2Du
+
+theorem oneFormRicciTraceComm_coordAt_iff
+    (g : SmoothRiemannianMetric I M)
+    (Ric : Tensor02Section (I := I) (M := M))
+    (u : M -> Real)
+    (x₀ : M)
+    (gInv : Coordinates.CoordinateIdx E -> Coordinates.CoordinateIdx E -> Real)
+    (nabla2Du :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x₀) :
+    oneFormRicciTraceComm_coordAt (I := I) g Ric u x₀ gInv nabla2Du ↔
+      OneFormRicciTraceCommAt (I := I) g Ric u
+        (Coordinates.coordinateFrameAt_toBasis (I := I) x₀) gInv nabla2Du :=
+  Iff.rfl
+
+/-- The signed curvature trace appearing when commuting the first two slots of
+`∇²du`.
+
+The leading minus sign matches the realized convention
+`Rm13 alpha X Y Z = alpha (R(X,Y)Z)`, since covectors see the negative
+curvature action. -/
+def curvatureTraceDuAt
+    {Idx : Type*} [Fintype Idx]
+    (Rm13 : Tensor13Section (I := I) (M := M))
+    (u : M -> Real)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (Y : TangentSpace I x) : Real :=
+  curvatureTraceOneFormAt (I := I) Rm13
+    (differential1FormFun (I := I) u x) basis gInv Y
+
+/-- The metric trace of the one-form curvature commutator realizes
+`Ric(Y, ∇u)`. -/
+def CurvatureTraceDuEqRicciGradAt
+    {Idx : Type*} [Fintype Idx]
+    (g : SmoothRiemannianMetric I M)
+    (Ric : Tensor02Section (I := I) (M := M))
+    (Rm13 : Tensor13Section (I := I) (M := M))
+    (u : M -> Real)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real) : Prop :=
+  CurvatureTraceOneFormEqRicVectorAt (I := I) Ric Rm13
+    (differential1FormFun (I := I) u x) basis gInv
+    (gradientFun (I := I) g u x)
+
+/-- Coordinate components of the supplied second covariant derivative of `du`
+in a pointwise tangent basis. -/
+def nabla2DuCoord
+    {Idx : Type*}
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (nabla2Du :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (i j k : Idx) : Real :=
+  nabla2OneFormCoord (I := I) basis nabla2Du i j k
+
+/-- Signed curvature-action components for `du`.  The minus sign is the
+covector curvature-action sign for the convention
+`Rm13 alpha X Y Z = alpha (R(X,Y)Z)`. -/
+def curvatureActionOnDuCoord
+    {Idx : Type*}
+    (Rm13 : Tensor13Section (I := I) (M := M))
+    (u : M -> Real)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (i k j : Idx) : Real :=
+  curvatureActionOnOneFormCoord (I := I) Rm13
+    (differential1FormFun (I := I) u x) basis i k j
+
+/-- Ricci-gradient components in a pointwise tangent basis. -/
+def ricGradCoord
+    {Idx : Type*}
+    (g : SmoothRiemannianMetric I M)
+    (Ric : Tensor02Section (I := I) (M := M))
+    (u : M -> Real)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (k : Idx) : Real :=
+  ricciVectorCoord (I := I) Ric basis (gradientFun (I := I) g u x) k
+
+theorem nabla2DuTrailingSymmCoord_of_tensor
+    {Idx : Type*}
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (nabla2Du :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (hsymm : OneFormLastTwoSymmAt (I := I) nabla2Du) :
+    Nabla2DuTrailingSymmCoord (nabla2DuCoord (I := I) basis nabla2Du) := by
+  simpa [nabla2DuCoord] using
+    nabla2OneFormTrailingSymmCoord_of_tensor (I := I) basis nabla2Du hsymm
+
+theorem curvatureActionTraceEqualsRicGradCoord_of_tensor
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (g : SmoothRiemannianMetric I M)
+    (Ric : Tensor02Section (I := I) (M := M))
+    (Rm13 : Tensor13Section (I := I) (M := M))
+    (u : M -> Real)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (hcurv : CurvatureTraceDuEqRicciGradAt (I := I) g Ric Rm13 u basis gInv) :
+    CurvatureActionTraceEqualsRicGradCoord gInv
+      (curvatureActionOnDuCoord (I := I) Rm13 u basis)
+      (ricGradCoord (I := I) g Ric u basis) := by
+  simpa [curvatureActionOnDuCoord, ricGradCoord, CurvatureTraceDuEqRicciGradAt] using
+    curvatureActionTraceEqualsRicVectorCoord_of_tensor (I := I) Ric Rm13
+      (differential1FormFun (I := I) u x) basis gInv
+      (gradientFun (I := I) g u x) hcurv
+
+/-- Coordinate-frame producer for the existing trace commutator interface.
+
+The coordinate-frame theorem supplies the bracket-free frame package; the
+remaining geometric inputs are still the one-form Ricci identity, trailing-slot
+symmetry, and curvature trace-to-Ricci identification. -/
+theorem oneFormRicciTraceComm_coordAt_of_third_comm
+    (g : SmoothRiemannianMetric I M)
+    (Ric : Tensor02Section (I := I) (M := M))
+    (Rm13 : Tensor13Section (I := I) (M := M))
+    (u : M -> Real)
+    (x₀ : M)
+    (gInv : Coordinates.CoordinateIdx E -> Coordinates.CoordinateIdx E -> Real)
+    (nabla2Du :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x₀)
+    (hsymm : OneFormLastTwoSymmAt (I := I) nabla2Du)
+    (hcomm : OneFormThirdCovDerivCommAt (I := I) Rm13
+      (differential1FormFun (I := I) u x₀) nabla2Du)
+    (hcurv : CurvatureTraceDuEqRicciGradAt (I := I) g Ric Rm13 u
+      (Coordinates.coordinateFrameAt_toBasis (I := I) x₀) gInv) :
+    oneFormRicciTraceComm_coordAt (I := I) g Ric u x₀ gInv nabla2Du := by
+  rw [oneFormRicciTraceComm_coordAt_iff]
+  simpa [OneFormRicciTraceCommAt, CurvatureTraceDuEqRicciGradAt, curvatureTraceDuAt] using
+    oneForm_ricci_trace_comm_of_third_comm (I := I) Ric Rm13
+      (differential1FormFun (I := I) u x₀)
+      (Coordinates.coordinateFrameAt_toBasis (I := I) x₀) gInv
+      (gradientFun (I := I) g u x₀) nabla2Du hsymm hcomm
+      (by
+        intro Y
+        simpa [CurvatureTraceDuEqRicciGradAt, curvatureTraceDuAt,
+          curvatureTraceOneFormAt] using hcurv Y)
 
 /-- Pairing the pointwise commutator with `du` gives the scalar commutator
 term used by Bochner. -/
@@ -762,7 +954,7 @@ This is the remaining geometric producer: it should prove the pointwise
 commutator `roughDu = d(Δu) + Ric(·, ∇u)` from the tensor Ricci identity,
 the rough-Laplacian trace realization, and curvature trace realization. -/
 theorem oneForm_ricci_identity_components
-    {Idx : Type*} [Fintype Idx]
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
     (Ric : Tensor02Section (I := I) (M := M))
@@ -778,21 +970,66 @@ theorem oneForm_ricci_identity_components
     (nablaDuSec : TwoTensorSection (I := I) (M := M))
     (nabla2Du :
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (_hinv : MetricInverseInBasis (I := I) g x basis gInv)
     (_hlc : LeviCivita.IsLeviCivita (I := I) cov g)
     (_hRm : Rm13RealizesConnection (I := I) cov Rm13)
     (_hRic : RicciTensorRealizesRm13Trace (I := I) Ric Rm13)
     (_hdu : DuFieldRealizes (I := I) u duSec)
     (_hnabla : NablaOneFormRealizesAt (I := I) cov duSec nablaDu x)
     (_hnabla2 : Nabla2OneFormRealizesAt (I := I) cov nablaDuSec x nabla2Du)
-    (_hrough : RoughLap0SRealizesMetricTrace (I := I) basis gInv
-      (s := 1) (roughDu x) nabla2Du) :
+    (hrough : RoughLap0SRealizesMetricTrace (I := I) basis gInv
+      (s := 1) (roughDu x) nabla2Du)
+    (hdlap : TraceNablaHessianRealizesDLapAt (I := I) cov g basis gInv u nabla2Du)
+    (hcomm : OneFormRicciTraceCommAt (I := I) g Ric u basis gInv nabla2Du) :
     OneFormCommutatorEvalAt (I := I) cov g Ric u roughDu x := by
+  intro Y
+  calc
+    roughDu x (fun _ : Fin 1 => Y)
+        = roughLap1FormAt (I := I) basis gInv nabla2Du Y := by
+          exact roughLap1FormAt_eq_of_realizes (I := I) basis gInv (roughDu x)
+            nabla2Du hrough Y
+    _ = traceNablaHessianForDLap (I := I) basis gInv nabla2Du Y +
+          Ric x (vec2 Y (gradientFun (I := I) g u x)) := by
+          simpa [OneFormRicciTraceCommAt, traceNablaHessianForDLap] using
+            (show OneFormRicciTraceCommWithVectorAt (I := I) Ric basis gInv
+              (gradientFun (I := I) g u x) nabla2Du from hcomm) Y
+    _ = differential1FormFun (I := I) (laplacian (I := I) cov g u) x
+            (fun _ : Fin 1 => Y) +
+          Ric x (vec2 Y (gradientFun (I := I) g u x)) := by
+          rw [hdlap Y]
+
+/-- Geometric frontier for the Ricci trace commutator.  This is where the
+future tensor Ricci-identity proof belongs; the consumer theorem
+`oneForm_ricci_identity_components` above is already closed. -/
+theorem one_form_ricci_trace_comm_of_lc
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    (Ric : Tensor02Section (I := I) (M := M))
+    (Rm13 : Tensor13Section (I := I) (M := M))
+    (u : M -> Real)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (duSec : OneFormSection (I := I) (M := M))
+    (nablaDu : (x : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (nablaDuSec : TwoTensorSection (I := I) (M := M))
+    (nabla2Du :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (_hinv : MetricInverseInBasis (I := I) g x basis gInv)
+    (_hlc : LeviCivita.IsLeviCivita (I := I) cov g)
+    (_hRm : Rm13RealizesConnection (I := I) cov Rm13)
+    (_hRic : RicciTensorRealizesRm13Trace (I := I) Ric Rm13)
+    (_hdu : DuFieldRealizes (I := I) u duSec)
+    (_hnabla : NablaOneFormRealizesAt (I := I) cov duSec nablaDu x)
+    (_hnabla2 : Nabla2OneFormRealizesAt (I := I) cov nablaDuSec x nabla2Du) :
+    OneFormRicciTraceCommAt (I := I) g Ric u basis gInv nabla2Du := by
   sorry
 
 /-- Geometric wrapper exposing the pointwise commutator interface from the
 component Ricci-identity frontier. -/
 theorem oneForm_commutator_eval_of_components
-    {Idx : Type*} [Fintype Idx]
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
     (Ric : Tensor02Section (I := I) (M := M))
@@ -808,6 +1045,7 @@ theorem oneForm_commutator_eval_of_components
     (nablaDuSec : TwoTensorSection (I := I) (M := M))
     (nabla2Du :
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInv)
     (hlc : LeviCivita.IsLeviCivita (I := I) cov g)
     (hRm : Rm13RealizesConnection (I := I) cov Rm13)
     (hRic : RicciTensorRealizesRm13Trace (I := I) Ric Rm13)
@@ -815,11 +1053,50 @@ theorem oneForm_commutator_eval_of_components
     (hnabla : NablaOneFormRealizesAt (I := I) cov duSec nablaDu x)
     (hnabla2 : Nabla2OneFormRealizesAt (I := I) cov nablaDuSec x nabla2Du)
     (hrough : RoughLap0SRealizesMetricTrace (I := I) basis gInv
-      (s := 1) (roughDu x) nabla2Du) :
+      (s := 1) (roughDu x) nabla2Du)
+    (hdlap : TraceNablaHessianRealizesDLapAt (I := I) cov g basis gInv u nabla2Du)
+    (hcomm : OneFormRicciTraceCommAt (I := I) g Ric u basis gInv nabla2Du) :
     OneFormCommutatorEvalAt (I := I) cov g Ric u roughDu x :=
   oneForm_ricci_identity_components (I := I) cov g Ric Rm13 u roughDu
     basis gInv duSec nablaDu nablaDuSec nabla2Du
-    hlc hRm hRic hdu hnabla hnabla2 hrough
+    hinv hlc hRm hRic hdu hnabla hnabla2 hrough hdlap hcomm
+
+/-- Geometric wrapper using the Ricci trace-commutator frontier to supply the
+pointwise commutator interface. -/
+theorem oneForm_commutator_eval_of_lc
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    (Ric : Tensor02Section (I := I) (M := M))
+    (Rm13 : Tensor13Section (I := I) (M := M))
+    (u : M -> Real)
+    (roughDu : (x : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (duSec : OneFormSection (I := I) (M := M))
+    (nablaDu : (x : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (nablaDuSec : TwoTensorSection (I := I) (M := M))
+    (nabla2Du :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInv)
+    (hlc : LeviCivita.IsLeviCivita (I := I) cov g)
+    (hRm : Rm13RealizesConnection (I := I) cov Rm13)
+    (hRic : RicciTensorRealizesRm13Trace (I := I) Ric Rm13)
+    (hdu : DuFieldRealizes (I := I) u duSec)
+    (hnabla : NablaOneFormRealizesAt (I := I) cov duSec nablaDu x)
+    (hnabla2 : Nabla2OneFormRealizesAt (I := I) cov nablaDuSec x nabla2Du)
+    (hrough : RoughLap0SRealizesMetricTrace (I := I) basis gInv
+      (s := 1) (roughDu x) nabla2Du)
+    (hdlap : TraceNablaHessianRealizesDLapAt (I := I) cov g basis gInv u nabla2Du) :
+    OneFormCommutatorEvalAt (I := I) cov g Ric u roughDu x :=
+  oneForm_commutator_eval_of_components (I := I) cov g Ric Rm13 u roughDu
+    basis gInv duSec nablaDu nablaDuSec nabla2Du
+    hinv hlc hRm hRic hdu hnabla hnabla2 hrough hdlap
+    (one_form_ricci_trace_comm_of_lc (I := I) cov g Ric Rm13 u basis gInv
+      duSec nablaDu nablaDuSec nabla2Du
+      hinv hlc hRm hRic hdu hnabla hnabla2)
 
 /-- One-form commutator formula for `du`, produced from the primary pointwise
 commutator interface. -/
@@ -1046,6 +1323,8 @@ theorem fundamental_bochner_of_components
       (differential1FormFun (I := I) u x) (nablaDu x) nabla2Du normSecond)
     (hrough : RoughLap0SRealizesMetricTrace (I := I) basis gInvAt
       (s := 1) (roughDu x) nabla2Du)
+    (hdlap : TraceNablaHessianRealizesDLapAt (I := I) cov g basis gInvAt u nabla2Du)
+    (hricciComm : OneFormRicciTraceCommAt (I := I) g Ric u basis gInvAt nabla2Du)
     (hHessComp : ∀ slots : Fin 2 -> Idx,
       component0S (I := I) basis (nablaDu x) slots =
         component0S (I := I) basis (Hess x) slots) :
@@ -1060,7 +1339,7 @@ theorem fundamental_bochner_of_components
     hlap htrace hrough ?_ hHessComp
   exact oneForm_commutator_eval_of_components (I := I) cov g Ric Rm13 u roughDu
     basis gInvAt duSec nablaDu nablaDuSec nabla2Du
-    hlc hRm13 hRic13 hdu hnabla hnabla2 hrough
+    hinv hlc hRm13 hRic13 hdu hnabla hnabla2 hrough hdlap hricciComm
 
 end Realized
 end RicciFlower

@@ -40,6 +40,14 @@ def christoffelSymbolInFrame
     (x : M) (i j k : Idx) : Real :=
   hframe.coeff k x ((cov (frame j) x) (frame i x))
 
+/-- Christoffel coefficient with an arbitrary tangent direction in the first slot. -/
+def christoffelAlongInFrame
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (x : M) (X : TangentSpace I x) (j k : Idx) : Real :=
+  hframe.coeff k x ((cov (frame j) x) X)
+
 @[simp] theorem christoffelSymbolInFrame_eval
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -47,6 +55,26 @@ def christoffelSymbolInFrame
     (x : M) (i j k : Idx) :
     christoffelSymbolInFrame cov frame hframe x i j k =
       hframe.coeff k x ((cov (frame j) x) (frame i x)) := by
+  rfl
+
+@[simp] theorem christoffelAlongInFrame_eval
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (x : M) (X : TangentSpace I x) (j k : Idx) :
+    christoffelAlongInFrame cov frame hframe x X j k =
+      hframe.coeff k x ((cov (frame j) x) X) := by
+  rfl
+
+/-- `christoffelAlongInFrame` recovers ordinary Christoffel symbols when the
+direction is a frame vector. -/
+theorem christoffelAlongInFrame_frame
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (x : M) (i j k : Idx) :
+    christoffelAlongInFrame cov frame hframe x (frame i x) j k =
+      christoffelSymbolInFrame cov frame hframe x i j k := by
   rfl
 
 /-- Expansion of `nabla_{frame i} frame j` in the local frame. -/

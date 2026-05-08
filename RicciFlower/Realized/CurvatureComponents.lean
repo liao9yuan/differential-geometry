@@ -1,4 +1,5 @@
 import RicciFlower.Realized.CurvatureTensor
+import RicciFlower.Realized.TensorRicciIdentity
 import RicciFlower.Tensor.RSTensor.Components
 
 set_option autoImplicit false
@@ -193,6 +194,62 @@ def Rm04LowersRm13At
     Rm04 (vec4 W X Y Z) =
       Rm13 (dualToCotangent (I := I) ((tangentFlatLinear (I := I) g x) W))
         (vec3 X Y Z)
+
+/-- The signed curvature trace appearing when commuting the first two slots of
+`∇²α` for a one-form `α`.
+
+The leading minus sign matches the realized convention
+`Rm13 alpha X Y Z = alpha (R(X,Y)Z)`, since covectors see the negative
+curvature action. -/
+def curvatureTraceOneFormAt
+    (Rm13 : Tensor13Section (I := I) (M := M))
+    {x : M}
+    (alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (Y : TangentSpace I x) : Real :=
+  -∑ i : Idx, ∑ j : Idx,
+    gInv i j * Rm13 x alpha (vec3 (basis i) Y (basis j))
+
+/-- The metric trace of the one-form curvature commutator realizes a Ricci
+pairing with a supplied vector.  In the scalar specialization, the vector is
+`∇u`. -/
+def CurvatureTraceOneFormEqRicVectorAt
+    (Ric : Tensor02Section (I := I) (M := M))
+    (Rm13 : Tensor13Section (I := I) (M := M))
+    {x : M}
+    (alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (curvatureVector : TangentSpace I x) : Prop :=
+  ∀ Y : TangentSpace I x,
+    curvatureTraceOneFormAt (I := I) Rm13 alpha basis gInv Y =
+      Ric x (vec2 Y curvatureVector)
+
+theorem curvatureActionTraceEqualsRicVectorCoord_of_tensor
+    (Ric : Tensor02Section (I := I) (M := M))
+    (Rm13 : Tensor13Section (I := I) (M := M))
+    {x : M}
+    (alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (curvatureVector : TangentSpace I x)
+    (hcurv : CurvatureTraceOneFormEqRicVectorAt (I := I) Ric Rm13 alpha
+      basis gInv curvatureVector) :
+    CurvatureActionTraceEqualsRicGradCoord gInv
+      (fun i k j => -Rm13 x alpha (vec3 (basis i) (basis k) (basis j)))
+      (fun k => Ric x (vec2 (basis k) curvatureVector)) := by
+  intro k
+  calc
+    (∑ i : Idx, ∑ j : Idx,
+        gInv i j * -Rm13 x alpha (vec3 (basis i) (basis k) (basis j)))
+        = curvatureTraceOneFormAt (I := I) Rm13 alpha basis gInv (basis k) := by
+          unfold curvatureTraceOneFormAt
+          simp_rw [mul_neg, Finset.sum_neg_distrib]
+    _ = Ric x (vec2 (basis k) curvatureVector) := hcurv (basis k)
 
 /-- Coordinate covectors are inverse-metric contractions of metric-lowered basis
 covectors. -/

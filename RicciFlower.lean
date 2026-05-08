@@ -8,6 +8,7 @@ import RicciFlower.Tensor.RSTensor.CoordinateBasis
 import RicciFlower.Tensor.RSTensor.Components
 import RicciFlower.Tensor.RSTensor.NablaOnTensors
 import RicciFlower.Coordinates.Tensor
+import RicciFlower.Coordinates.CoordinateFrame
 import RicciFlower.Tensor.Section12Interface
 import RicciFlower.Realized.TimeInterval
 import RicciFlower.Realized.MetricFamily
@@ -23,6 +24,8 @@ import RicciFlower.RicciFlow.Evolution.BlackBox
 import RicciFlower.Realized.Curvature
 import RicciFlower.Realized.CurvatureTensor
 import RicciFlower.Realized.CurvatureComponents
+import RicciFlower.DimensionThree.CurvatureAlgebra
+import RicciFlower.DimensionThree.RiemannFromRicci
 import RicciFlower.Realized.Operators
 import RicciFlower.Realized.Bochner
 import RicciFlower.MaximumPrinciple.ScalarWeak

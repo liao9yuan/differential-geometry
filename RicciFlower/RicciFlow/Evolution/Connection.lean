@@ -536,6 +536,16 @@ theorem metricCovDerivDerivativeComponents_of_ricciFlow
   · simp [metricCovDerivCompInFrameAtBase, metricCompInFrame, Ca, Cb]
   · have hn := hnabla (t : Real) x hx d a b
     unfold ricciCovDerivCompInFrame at hn
+    change
+      (-2 : Real) *
+            extDerivFun (I := I)
+              (fun y : M => ricciCompInFrame (I := I) S frame (t : Real) y a b)
+              x (frame d x) -
+          (-2 : Real) *
+            S.ricci (t : Real) x (Realized.vec2 Ca (frame b x)) -
+          (-2 : Real) *
+            S.ricci (t : Real) x (Realized.vec2 (frame a x) Cb) =
+        (-2 : Real) * nablaRic (t : Real) x d a b
     rw [hn]
     simp [Ca, Cb]
     ring

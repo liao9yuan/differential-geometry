@@ -1,7 +1,7 @@
 name = "DifferentialGeometry"
 version = "1.2.1"
 keywords = ["math"]
-defaultTargets = ["DifferentialGeometry", "RicciFlower"]
+defaultTargets = ["RicciFlower"]
 
 [leanOptions]
 pp.unicode.fun = true
