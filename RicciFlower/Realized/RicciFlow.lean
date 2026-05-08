@@ -24,8 +24,11 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable {A Time : Type*} [CommRing A] [Algebra Real A]
 
-/-- A pointwise symmetric two-covariant curvature field, used for Ricci. -/
-abbrev RealizedTwoTensorField (Time : Type*) :=
+/-- A Ricci tensor field supplied to the Ricci-flow equation.
+
+The general curvature layer uses its own pointwise tensor aliases; this file
+does not import that layer, so Ricci flow does not sit below general curvature. -/
+abbrev RicciTensorField (Time : Type*) :=
   Time -> (x : M) -> TangentSpace I x -> TangentSpace I x -> Real
 
 /-- The Ricci-flow metric variation equation, evaluated on fixed tangent vectors.
@@ -34,7 +37,7 @@ This is the realized version of `partial_t g = -2 Ric`. -/
 def MetricVariationEquation
     (td : TimeDerivativeData Real A Time)
     (G : RealizedMetricFamily (I := I) (M := M) Time)
-    (Ric : RealizedTwoTensorField (I := I) (M := M) Time) : Prop :=
+    (Ric : RicciTensorField (I := I) (M := M) Time) : Prop :=
   forall (t : Time) (x : M) (X Y : TangentSpace I x),
     metricTimeDerivative td G t x X Y = (-2 : Real) * Ric t x X Y
 
@@ -42,7 +45,7 @@ def MetricVariationEquation
 theorem metric_dt_eq_neg_two_ricci_of_metricVariationEquation
     (td : TimeDerivativeData Real A Time)
     (G : RealizedMetricFamily (I := I) (M := M) Time)
-    (Ric : RealizedTwoTensorField (I := I) (M := M) Time)
+    (Ric : RicciTensorField (I := I) (M := M) Time)
     (hEq : MetricVariationEquation td G Ric)
     (t : Time) (x : M) (X Y : TangentSpace I x) :
     metricTimeDerivative td G t x X Y = (-2 : Real) * Ric t x X Y :=
@@ -60,13 +63,13 @@ for the supplied Ricci tensor field. -/
 def IsRealizedRicciFlow
     (td : TimeDerivativeData Real A Time)
     (S : RealizedRicciFlowData (I := I) (M := M) (Time := Time))
-    (Ric : RealizedTwoTensorField (I := I) (M := M) Time) : Prop :=
+    (Ric : RicciTensorField (I := I) (M := M) Time) : Prop :=
   MetricVariationEquation td S.family Ric
 
 theorem metric_dt_eq_neg_two_ricci_of_isRealizedRicciFlow
     (td : TimeDerivativeData Real A Time)
     (S : RealizedRicciFlowData (I := I) (M := M) (Time := Time))
-    (Ric : RealizedTwoTensorField (I := I) (M := M) Time)
+    (Ric : RicciTensorField (I := I) (M := M) Time)
     (hS : IsRealizedRicciFlow td S Ric)
     (t : Time) (x : M) (X Y : TangentSpace I x) :
     metricTimeDerivative td S.family t x X Y = (-2 : Real) * Ric t x X Y :=
@@ -84,7 +87,7 @@ at regular times. -/
 def MetricVariationEquationOn
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (Ric : RealizedTwoTensorField (I := I) (M := M) Real) : Prop :=
+    (Ric : RicciTensorField (I := I) (M := M) Real) : Prop :=
   forall (t : RealTimeInterval.RegularTime D) (x : M) (X Y : TangentSpace I x),
     HasDerivWithinAt
       (fun s : Real => (G.metric s).inner x X Y)
@@ -95,11 +98,11 @@ def MetricVariationEquationOn
 /-- A data-only realized Ricci-flow candidate on a real interval. -/
 structure RealizedRicciFlowCandidateOn (D : RealTimeInterval) where
   family : RealizedMetricFamilyOn (I := I) (M := M) D
-  ricci : RealizedTwoTensorField (I := I) (M := M) Real
+  ricci : RicciTensorField (I := I) (M := M) Real
 
 /-- Predicate package saying a data-only interval family is a Ricci-flow
-solution. Curvature realization is kept in `Curvature.lean` to avoid an import
-cycle; this package starts from an explicit Ricci tensor field. -/
+solution. Curvature realization is available in the curvature layer below this
+file; this package starts from an explicit Ricci tensor field. -/
 structure IsRealizedRicciFlowSolutionOn
     {D : RealTimeInterval}
     (S : RealizedRicciFlowCandidateOn (I := I) (M := M) D) : Prop where
@@ -113,7 +116,7 @@ predicate. -/
 theorem metric_derivWithin_eq_neg_two_ricci_of_metricVariationEquationOn
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
-    (Ric : RealizedTwoTensorField (I := I) (M := M) Real)
+    (Ric : RicciTensorField (I := I) (M := M) Real)
     (hEq : MetricVariationEquationOn (I := I) G Ric)
     (t : RealTimeInterval.RegularTime D) (x : M) (X Y : TangentSpace I x) :
     HasDerivWithinAt

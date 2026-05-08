@@ -71,6 +71,30 @@ theorem cotangentToDualLinear_injective {x : M} :
   have h0 := congrArg (fun L : Module.Dual Real (TangentSpace I x) => L (v 0)) h
   simpa [cotangentToDualLinear, cotangentToDual_apply, hv] using h0
 
+/-- Realize an algebraic cotangent vector as a `(0,1)` tensor.
+
+In finite dimension the algebraic linear functional is automatically continuous,
+so it can be uncurried into the one-slot continuous multilinear tensor model. -/
+def dualToCotangent {x : M} (α : Module.Dual Real (TangentSpace I x)) :
+    Tensor0SSpace 1 I x :=
+  Tensor0SSpace.ofModel (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+    ((continuousMultilinearCurryFin1 Real (TangentSpace I x) Real).symm
+      (LinearMap.toContinuousLinearMap α))
+
+@[simp] theorem dualToCotangent_apply {x : M}
+    (α : Module.Dual Real (TangentSpace I x)) (X : TangentSpace I x) :
+    dualToCotangent (I := I) α (fun _ : Fin 1 => X) = α X := by
+  change
+    ((continuousMultilinearCurryFin1 Real (TangentSpace I x) Real).symm
+        (LinearMap.toContinuousLinearMap α)) (fun _ : Fin 1 => X) = α X
+  rfl
+
+@[simp] theorem cotangentToDual_dualToCotangent {x : M}
+    (α : Module.Dual Real (TangentSpace I x)) :
+    cotangentToDual (I := I) (dualToCotangent (I := I) α) = α := by
+  ext X
+  simp
+
 /-- The linear sharp map `T_x^*M -> T_xM` induced by `g`. -/
 def cotangentSharpLinear (g : SmoothMetric I M) (x : M) :
     Tensor0SSpace 1 I x →ₗ[Real] TangentSpace I x :=

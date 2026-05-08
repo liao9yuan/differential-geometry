@@ -16,6 +16,7 @@ import RicciFlower.Realized.LeviCivita.MetricCompatibility
 import RicciFlower.Realized.LeviCivita.Uniqueness
 import RicciFlower.Realized.RicciFlow
 import RicciFlower.Realized.Curvature
+import RicciFlower.Realized.CurvatureTensor
 import RicciFlower.Realized.Operators
 import RicciFlower.Realized.Bochner
 import RicciFlower.MaximumPrinciple.ScalarWeak
