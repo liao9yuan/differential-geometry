@@ -1,3 +1,4 @@
+import RicciFlower.Realized.ScalarBochner
 import RicciFlower.Realized.CurvatureTensor
 import RicciFlower.Coordinates.Tensor
 import RicciFlower.Tensor.RSTensor.Tensor0SRiemannian

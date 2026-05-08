@@ -1,5 +1,6 @@
 import RicciFlower.Realized.Connection
 import Mathlib.Analysis.Calculus.LocalExtr.Basic
+import Mathlib.Geometry.Manifold.MFDeriv.NormedSpace
 import Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
 import Mathlib.LinearAlgebra.Dual.Lemmas
@@ -212,6 +213,51 @@ theorem gradientFun_sub
   exact e.map_sub (mfderiv I 𝓘(Real, Real) f x).toLinearMap
     (mfderiv I 𝓘(Real, Real) h x).toLinearMap
 
+/-- First derivative of `f^2`, stated as a linear-map scalar-multiplication
+identity. The proof deliberately stays in module scalar multiplication while
+the target is the scalar model tangent space. -/
+theorem mfderiv_mul_self_toLinearMap
+    {f : M -> Real} {x : M}
+    (hf : MDifferentiableAt I 𝓘(Real, Real) f x) :
+    (mfderiv I 𝓘(Real, Real) (fun y : M => f y * f y) x).toLinearMap =
+      (2 * f x) • (mfderiv I 𝓘(Real, Real) f x).toLinearMap := by
+  have hmul :
+      mfderiv I 𝓘(Real, Real) (fun y : M => f y * f y) x =
+        f x • mfderiv I 𝓘(Real, Real) f x +
+          f x • mfderiv I 𝓘(Real, Real) f x := by
+    simpa only [Pi.mul_apply] using
+      (hf.hasMFDerivAt.mul hf.hasMFDerivAt).mfderiv
+  rw [hmul]
+  ext v
+  rw [ContinuousLinearMap.coe_add]
+  change
+    f x • ((mfderiv I 𝓘(Real, Real) f x).toLinearMap v) +
+      f x • ((mfderiv I 𝓘(Real, Real) f x).toLinearMap v) =
+        (2 * f x) • ((mfderiv I 𝓘(Real, Real) f x).toLinearMap v)
+  rw [← add_smul]
+  congr 1
+  ring
+
+/-- Gradient of a scalar square. -/
+theorem gradientFun_mul_self
+    (g : SmoothRiemannianMetric I M)
+    {f : M -> Real} {x : M}
+    (hf : MDifferentiableAt I 𝓘(Real, Real) f x) :
+    gradientFun (I := I) g (fun y : M => f y * f y) x =
+      (2 * f x) • gradientFun (I := I) g f x := by
+  unfold gradientFun metricSharp
+  change
+    (metricFlatEquiv (I := I) g x).symm
+      ((mfderiv I 𝓘(Real, Real) (fun y : M => f y * f y) x).toLinearMap) =
+      (2 * f x) •
+        (metricFlatEquiv (I := I) g x).symm
+          ((mfderiv I 𝓘(Real, Real) f x).toLinearMap)
+  rw [mfderiv_mul_self_toLinearMap (I := I) (f := f) hf]
+  exact LinearEquiv.map_smul
+    (metricFlatEquiv (I := I) g x).symm
+    (2 * f x)
+    ((mfderiv I 𝓘(Real, Real) f x).toLinearMap)
+
 /-- Divergence of a vector field, defined as the trace of its covariant derivative. -/
 def divergence
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -272,6 +318,28 @@ theorem divergence_const_smul
   unfold divergence
   rw [cov.isCovariantDerivativeOnUniv.smul_const a hX]
   simp
+
+/-- Product rule for divergence of a scalar multiple of a vector field. -/
+theorem divergence_smul
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    {f : M -> Real} {X : (x : M) -> TangentSpace I x} {x : M}
+    (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
+    (hX : MDiffAt (T% X) x) :
+    divergence (I := I) cov (f • X) x =
+      f x * divergence (I := I) cov X x +
+        extDerivFun (I := I) f x (X x) := by
+  unfold divergence
+  rw [cov.isCovariantDerivativeOnUniv.leibniz hX hf]
+  rw [ContinuousLinearMap.coe_add]
+  rw [map_add]
+  change
+      LinearMap.trace Real (TangentSpace I x) (f x • (cov X x).toLinearMap) +
+          LinearMap.trace Real (TangentSpace I x)
+            ((extDerivFun (I := I) f x).toLinearMap.smulRight (X x)) =
+        f x * LinearMap.trace Real (TangentSpace I x) (cov X x).toLinearMap +
+          extDerivFun (I := I) f x (X x)
+  rw [map_smul, LinearMap.trace_smulRight]
+  simp [smul_eq_mul]
 
 /-- Divergence is linear under subtraction on differentiable vector fields. -/
 theorem divergence_sub
@@ -346,6 +414,74 @@ theorem laplacian_const_smul
     _ = a * laplacian (I := I) cov g f x := by
       rw [divergence_const_smul (I := I) cov a hgrad]
       rfl
+
+/-- Divergence of `u ∇u`: the middle identity in the scalar square
+Laplacian formula. -/
+theorem divergence_smul_gradientFun
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    {f : M -> Real} {x : M}
+    (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
+    (hgrad : MDiffAt (T% fun y : M => gradientFun (I := I) g f y) x) :
+    divergence (I := I) cov (f • fun y : M => gradientFun (I := I) g f y) x =
+      f x * laplacian (I := I) cov g f x +
+        g.inner x (gradientFun (I := I) g f x) (gradientFun (I := I) g f x) := by
+  rw [divergence_smul (I := I) cov hf hgrad]
+  have hinner := inner_gradientFun (I := I) g f x (gradientFun (I := I) g f x)
+  simpa [extDerivFun] using congrArg id hinner.symm
+
+/-- Left identity in the scalar square Laplacian formula:
+`(1 / 2) Δ(f^2) = div(f ∇f)`. -/
+theorem half_laplacian_mul_self_eq_divergence_smul_gradientFun
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    {f : M -> Real} {x : M}
+    (hf : forall y : M, MDifferentiableAt I 𝓘(Real, Real) f y)
+    (hfg : MDiffAt
+      (T% (f • fun y : M => gradientFun (I := I) g f y)) x) :
+    (1 / 2 : Real) * laplacian (I := I) cov g (fun y : M => f y * f y) x =
+      divergence (I := I) cov
+        (f • fun y : M => gradientFun (I := I) g f y) x := by
+  have hgrad :
+      gradientFun (I := I) g (fun y : M => f y * f y) =
+        (2 : Real) •
+          (f • fun y : M => gradientFun (I := I) g f y) := by
+    funext y
+    rw [gradientFun_mul_self (I := I) g (hf y)]
+    simp [Pi.smul_apply, smul_smul, mul_comm]
+  calc
+    (1 / 2 : Real) * laplacian (I := I) cov g (fun y : M => f y * f y) x =
+        (1 / 2 : Real) *
+          divergence (I := I) cov
+            ((2 : Real) •
+              (f • fun y : M => gradientFun (I := I) g f y)) x := by
+      simp [laplacian, hgrad]
+    _ = (1 / 2 : Real) *
+        (2 * divergence (I := I) cov
+          (f • fun y : M => gradientFun (I := I) g f y) x) := by
+      rw [divergence_const_smul (I := I) cov (2 : Real) hfg]
+    _ = divergence (I := I) cov
+        (f • fun y : M => gradientFun (I := I) g f y) x := by
+      ring
+
+/-- Scalar square Laplacian formula:
+`(1 / 2) Δ(f^2) = f Δf + |∇f|^2`. -/
+theorem half_laplacian_mul_self
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    {f : M -> Real} {x : M}
+    (hf_all : forall y : M, MDifferentiableAt I 𝓘(Real, Real) f y)
+    (hf_x : MDifferentiableAt I 𝓘(Real, Real) f x)
+    (hgrad : MDiffAt (T% fun y : M => gradientFun (I := I) g f y) x)
+    (hfg : MDiffAt
+      (T% (f • fun y : M => gradientFun (I := I) g f y)) x) :
+    (1 / 2 : Real) * laplacian (I := I) cov g (fun y : M => f y * f y) x =
+      f x * laplacian (I := I) cov g f x +
+        g.inner x (gradientFun (I := I) g f x)
+          (gradientFun (I := I) g f x) := by
+  rw [half_laplacian_mul_self_eq_divergence_smul_gradientFun
+    (I := I) cov g hf_all hfg]
+  exact divergence_smul_gradientFun (I := I) cov g hf_x hgrad
 
 end AlgebraicRules
 

@@ -1,6 +1,7 @@
 import RicciFlower.Realized.Curvature
 import RicciFlower.Coordinates.Tensor
 import RicciFlower.Tensor.RSTensor.CotangentRiemannian
+import RicciFlower.Tensor.RSTensor.Contract
 import RicciFlower.Tensor.RSTensor.Field
 
 set_option autoImplicit false
@@ -63,6 +64,24 @@ abbrev Tensor02At (x : M) :=
 /-- Pointwise `(0,4)` tensor fiber. -/
 abbrev Tensor04At (x : M) :=
   Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x
+
+/-- Pointwise `(1,3)` tensor fiber. -/
+abbrev Tensor13At (x : M) :=
+  TensorRSSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 3 x
+
+/-- The unit `(0,0)` tensor used to read a `TensorRSSpace 0 s` as a
+covariant `(0,s)` tensor. -/
+def scalarOne0S (x : M) : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) 0 x :=
+  ContinuousMultilinearMap.constOfIsEmpty Real
+    (fun _ : Fin 0 => TangentSpace I x) 1
+
+/-- Ricci curvature as the trace of the endomorphism
+`X ↦ Rm13(X,Y)Z`, expressed in the realized Hom tensor model by tracing the
+leading upper/lower pair of a `(1,3)` tensor. -/
+def ricciFromRm13At {x : M} (Rm13 : Tensor13At (I := I) (M := M) x) :
+    Tensor02At (I := I) (M := M) x :=
+  (contract_trace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 0 2 x Rm13)
+    (scalarOne0S (I := I) x)
 
 /-- Feed two explicit tangent vectors into a `Fin 2` tensor. -/
 def vec2 {x : M} (X Y : TangentSpace I x) : Fin 2 -> TangentSpace I x :=
@@ -141,6 +160,12 @@ def Rm04RealizesConnection
     Rm04 x (vec4 (W x) (X x) (Y x) (Z x)) =
       g.inner x (W x) ((connectionRiemannCurvatureField (I := I) cov X Y Z) x)
 
+/-- A bundled Ricci tensor is the trace contraction of bundled `(1,3)` Riemann. -/
+def RicciTensorRealizesRm13Trace
+    (Ric : Tensor02Section (I := I) (M := M))
+    (Rm13 : Tensor13Section (I := I) (M := M)) : Prop :=
+  forall x : M, Ric x = ricciFromRm13At (I := I) (M := M) (Rm13 x)
+
 /-- A bundled Ricci tensor is the frame metric trace of bundled lowered Riemann. -/
 def RicciTensorRealizesRm04TraceInFrame
     {Idx : Type*} [Fintype Idx]
@@ -170,6 +195,21 @@ theorem rm04_comp_eq_eval
     rm04Comp (I := I) Rm04 frame x i j k l =
       Rm04 x (vec4 (frame i x) (frame j x) (frame k x) (frame l x)) :=
   rfl
+
+theorem rm04_comp_eq_connection
+    {Idx : Type*}
+    (g : SmoothRiemannianMetric I M)
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (Rm04 : Tensor04Section (I := I) (M := M))
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hRm : Rm04RealizesConnection (I := I) g cov Rm04)
+    (x : M) (a b c d : Idx) :
+    rm04Comp (I := I) Rm04 frame x a b c d =
+      g.inner x (frame a x) ((connectionRiemannCurvatureField (I := I) cov
+        (fun y => frame b y) (fun y => frame c y) (fun y => frame d y)) x) := by
+  simpa [rm04Comp] using
+    hRm (fun y => frame a y) (fun y => frame b y) (fun y => frame c y)
+      (fun y => frame d y) x
 
 theorem ricciComp_eq_trace
     {Idx : Type*} [Fintype Idx]
@@ -216,6 +256,80 @@ theorem rm13_comp_eq_connection
   simpa [rm13Comp] using
     hRm (fun y => frame b y) (fun y => frame c y) (fun y => frame d y) x
       (dualToCotangent (hframe.coeff a x))
+
+namespace CurvatureTensorData
+
+theorem rm13_comp_eq_connection
+    {Idx : Type*} {u : Set M}
+    (K : CurvatureTensorData (I := I) (M := M))
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E ∞ frame u)
+    (hRm : Rm13RealizesConnection (I := I) cov K.rm13)
+    (x : M) (a b c d : Idx) :
+    rm13Comp (I := I) K.rm13 frame hframe x a b c d =
+      hframe.coeff a x ((connectionRiemannCurvatureField (I := I) cov
+        (fun y => frame b y) (fun y => frame c y) (fun y => frame d y)) x) :=
+  RicciFlower.Realized.rm13_comp_eq_connection (I := I) cov K.rm13 frame hframe hRm x a b c d
+
+theorem rm04_comp_eq_connection
+    {Idx : Type*}
+    (K : CurvatureTensorData (I := I) (M := M))
+    (g : SmoothRiemannianMetric I M)
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hRm : Rm04RealizesConnection (I := I) g cov K.rm04)
+    (x : M) (a b c d : Idx) :
+    rm04Comp (I := I) K.rm04 frame x a b c d =
+      g.inner x (frame a x) ((connectionRiemannCurvatureField (I := I) cov
+        (fun y => frame b y) (fun y => frame c y) (fun y => frame d y)) x) :=
+  RicciFlower.Realized.rm04_comp_eq_connection (I := I) g cov K.rm04 frame hRm x a b c d
+
+theorem ricci_comp_eq_trace
+    {Idx : Type*} [Fintype Idx]
+    (K : CurvatureTensorData (I := I) (M := M))
+    (gInv : InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hRic : RicciTensorRealizesRm04TraceInFrame (I := I) K.ricci K.rm04 gInv frame)
+    (x : M) (i j : Idx) :
+    ricciComp (I := I) K.ricci frame x i j =
+      ∑ k : Idx, ∑ l : Idx,
+        gInv x k l * rm04Comp (I := I) K.rm04 frame x k i j l :=
+  RicciFlower.Realized.ricciComp_eq_trace (I := I) K.ricci K.rm04 gInv frame hRic x i j
+
+theorem ricci_comp_eq_connection_trace
+    {Idx : Type*} [Fintype Idx]
+    (K : CurvatureTensorData (I := I) (M := M))
+    (g : SmoothRiemannianMetric I M)
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (gInv : InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hRm : Rm04RealizesConnection (I := I) g cov K.rm04)
+    (hRic : RicciTensorRealizesRm04TraceInFrame (I := I) K.ricci K.rm04 gInv frame)
+    (x : M) (i j : Idx) :
+    ricciComp (I := I) K.ricci frame x i j =
+      ∑ k : Idx, ∑ l : Idx,
+        gInv x k l *
+          g.inner x (frame k x) ((connectionRiemannCurvatureField (I := I) cov
+            (fun y => frame i y) (fun y => frame j y) (fun y => frame l y)) x) := by
+  rw [CurvatureTensorData.ricci_comp_eq_trace (I := I) K gInv frame hRic x i j]
+  refine Finset.sum_congr rfl fun k _ => ?_
+  refine Finset.sum_congr rfl fun l _ => ?_
+  rw [RicciFlower.Realized.rm04_comp_eq_connection (I := I) g cov K.rm04 frame hRm x k i j l]
+
+theorem scalar_eq_trace
+    {Idx : Type*} [Fintype Idx]
+    (K : CurvatureTensorData (I := I) (M := M))
+    (gInv : InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hScalar : ScalarSectionRealizesRicciTraceInFrame (I := I) K.scalar K.ricci gInv frame)
+    (x : M) :
+    K.scalar x =
+      ∑ i : Idx, ∑ j : Idx,
+        gInv x i j * ricciComp (I := I) K.ricci frame x i j :=
+  RicciFlower.Realized.scalarSection_eq_trace (I := I) K.scalar K.ricci gInv frame hScalar x
+
+end CurvatureTensorData
 
 end Realized
 end RicciFlower

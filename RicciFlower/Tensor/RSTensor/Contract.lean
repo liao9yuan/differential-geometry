@@ -522,6 +522,120 @@ private theorem model_trace_pairing_first_apply (r s : ℕ)
   simp [model_trace_pairing_first, model_tensorWithCovector_first_bilinear_apply,
     model_interior_product]
 
+set_option linter.unusedSectionVars false in
+private theorem trace_bilinear_basis_coord
+    {Idx : Type*} [Fintype Idx]
+    (basis : Module.Basis Idx 𝕜 E)
+    (F : (E →L[𝕜] 𝕜) →L[𝕜] E →L[𝕜] 𝕜) :
+    (∑ i : Idx,
+        F (LinearMap.toContinuousLinearMap (basis.coord i)) (basis i)) =
+      ∑ j : Fin (Module.finrank 𝕜 E),
+        F (LinearMap.toContinuousLinearMap ((Module.finBasis 𝕜 E).coord j))
+          ((Module.finBasis 𝕜 E) j) := by
+  let d := Module.finrank 𝕜 E
+  let b : Module.Basis (Fin d) 𝕜 E := Module.finBasis 𝕜 E
+  change (∑ i : Idx,
+      F (LinearMap.toContinuousLinearMap (basis.coord i)) (basis i)) =
+    ∑ j : Fin d, F (LinearMap.toContinuousLinearMap (b.coord j)) (b j)
+  have h_cov : ∀ j : Fin d,
+      (∑ i : Idx, (b.coord j (basis i)) •
+          LinearMap.toContinuousLinearMap (basis.coord i)) =
+        LinearMap.toContinuousLinearMap (b.coord j) := by
+    intro j
+    ext z
+    calc
+      (∑ i : Idx, (b.coord j (basis i)) •
+          LinearMap.toContinuousLinearMap (basis.coord i)) z
+          = ∑ i : Idx, b.coord j (basis i) * basis.coord i z := by
+              simp [smul_eq_mul]
+      _ = b.coord j (∑ i : Idx, basis.coord i z • basis i) := by
+              symm
+              rw [map_sum]
+              refine Finset.sum_congr rfl fun i _ => ?_
+              rw [map_smul]
+              simp [smul_eq_mul, mul_comm]
+      _ = b.coord j z := by
+              rw [show (∑ i : Idx, basis.coord i z • basis i) = z from basis.sum_repr z]
+      _ = (LinearMap.toContinuousLinearMap (b.coord j)) z := rfl
+  calc
+    (∑ i : Idx, F (LinearMap.toContinuousLinearMap (basis.coord i)) (basis i))
+        = ∑ i : Idx, ∑ j : Fin d,
+            (b.coord j (basis i)) •
+              F (LinearMap.toContinuousLinearMap (basis.coord i)) (b j) := by
+          refine Finset.sum_congr rfl fun i _ => ?_
+          calc
+            F (LinearMap.toContinuousLinearMap (basis.coord i)) (basis i)
+                = F (LinearMap.toContinuousLinearMap (basis.coord i))
+                    (∑ j : Fin d, b.coord j (basis i) • b j) := by
+                  rw [show (∑ j : Fin d, b.coord j (basis i) • b j) = basis i from
+                    b.sum_repr (basis i)]
+            _ = ∑ j : Fin d, (b.coord j (basis i)) •
+                    F (LinearMap.toContinuousLinearMap (basis.coord i)) (b j) := by
+                  rw [map_sum]
+                  refine Finset.sum_congr rfl fun j _ => ?_
+                  rw [map_smul]
+    _ = ∑ j : Fin d, ∑ i : Idx,
+            (b.coord j (basis i)) •
+              F (LinearMap.toContinuousLinearMap (basis.coord i)) (b j) := by
+          rw [Finset.sum_comm]
+    _ = ∑ j : Fin d, F
+            (∑ i : Idx, (b.coord j (basis i)) •
+              LinearMap.toContinuousLinearMap (basis.coord i)) (b j) := by
+          refine Finset.sum_congr rfl fun j _ => ?_
+          rw [map_sum]
+          simp [map_smul]
+    _ = ∑ j : Fin d, F (LinearMap.toContinuousLinearMap (b.coord j)) (b j) := by
+          refine Finset.sum_congr rfl fun j _ => ?_
+          rw [h_cov j]
+
+set_option linter.unusedSectionVars false in
+/-- Model trace contraction evaluated in an arbitrary finite basis. -/
+theorem model_contract_trace_apply_basis
+    {Idx : Type*} [Fintype Idx]
+    (basis : Module.Basis Idx 𝕜 E) (r s : ℕ)
+    (T : TensorRSModel (1 + r) (s + 1) 𝕜 E)
+    (β : Tensor0SModel r 𝕜 E) (tail : Fin s → E) :
+    (model_contract_trace (𝕜 := 𝕜) (E := E) r s T β) tail =
+      ∑ i : Idx,
+        (model_interior_product s (basis i)
+          (T (model_tensorWithCovector_first r
+            (model_covectorOfCLM (𝕜 := 𝕜) (E := E)
+              (LinearMap.toContinuousLinearMap (basis.coord i))) β))) tail := by
+  rw [model_contract_trace_apply]
+  rw [ContinuousLinearMap.sum_apply]
+  rw [ContinuousMultilinearMap.sum_apply]
+  symm
+  calc
+    (∑ i : Idx,
+        (model_interior_product s (basis i)
+          (T (model_tensorWithCovector_first r
+            (model_covectorOfCLM (𝕜 := 𝕜) (E := E)
+              (LinearMap.toContinuousLinearMap (basis.coord i))) β))) tail)
+        = ∑ i : Idx,
+            model_trace_pairing_first (𝕜 := 𝕜) (E := E) r s T β tail
+              (LinearMap.toContinuousLinearMap (basis.coord i)) (basis i) := by
+          refine Finset.sum_congr rfl fun i _ => ?_
+          rw [model_trace_pairing_first_apply]
+    _ = ∑ j : Fin (Module.finrank 𝕜 E),
+          model_trace_pairing_first (𝕜 := 𝕜) (E := E) r s T β tail
+            (LinearMap.toContinuousLinearMap ((Module.finBasis 𝕜 E).coord j))
+            ((Module.finBasis 𝕜 E) j) := by
+          exact trace_bilinear_basis_coord (𝕜 := 𝕜) (E := E) basis
+            (model_trace_pairing_first (𝕜 := 𝕜) (E := E) r s T β tail)
+    _ = ∑ j : Fin (Module.finrank 𝕜 E),
+          (model_contract_covariant_bilinear
+            (𝕜 := 𝕜) (E := E) r s
+            ((Module.finBasis 𝕜 E) j))
+            ((model_contract_contravariant_first_bilinear
+              (𝕜 := 𝕜) (E := E) r (s + 1)
+              (model_covectorOfCLM (𝕜 := 𝕜) (E := E)
+                ((Module.finBasis 𝕜 E).cDualBasis j))) T) β tail := by
+          refine Finset.sum_congr rfl fun j _ => ?_
+          rw [model_trace_pairing_first_apply,
+            model_contract_covariant_bilinear_apply,
+            model_contract_contravariant_first_bilinear_apply]
+          simp [Module.Basis.cDualBasis, Module.Basis.coe_dualBasis]
+
 /-- Precompose every covariant slot of a model `(0,k)` tensor by `L`. -/
 noncomputable def model_covariantChange (k : ℕ) (L : E →L[𝕜] E) :
     Tensor0SModel k 𝕜 E →L[𝕜] Tensor0SModel k 𝕜 E :=

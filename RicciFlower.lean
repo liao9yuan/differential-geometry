@@ -4,6 +4,8 @@ import RicciFlower.Tensor.RSTensor.TangentRiemannian
 import RicciFlower.Tensor.RSTensor.CotangentRiemannian
 import RicciFlower.Tensor.RSTensor.Tensor0SRiemannian
 import RicciFlower.Tensor.RSTensor.TensorRSRiemannian
+import RicciFlower.Tensor.RSTensor.CoordinateBasis
+import RicciFlower.Tensor.RSTensor.Components
 import RicciFlower.Tensor.RSTensor.NablaOnTensors
 import RicciFlower.Coordinates.Tensor
 import RicciFlower.Tensor.Section12Interface
@@ -17,6 +19,7 @@ import RicciFlower.Realized.LeviCivita.Uniqueness
 import RicciFlower.Realized.RicciFlow
 import RicciFlower.Realized.Curvature
 import RicciFlower.Realized.CurvatureTensor
+import RicciFlower.Realized.CurvatureComponents
 import RicciFlower.Realized.Operators
 import RicciFlower.Realized.Bochner
 import RicciFlower.MaximumPrinciple.ScalarWeak
