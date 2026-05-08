@@ -17,6 +17,8 @@ import RicciFlower.Realized.LeviCivita.Torsion
 import RicciFlower.Realized.LeviCivita.MetricCompatibility
 import RicciFlower.Realized.LeviCivita.Uniqueness
 import RicciFlower.Realized.RicciFlow
+import RicciFlower.RicciFlow.Basic
+import RicciFlower.RicciFlow.Evolution.Ricci
 import RicciFlower.Realized.Curvature
 import RicciFlower.Realized.CurvatureTensor
 import RicciFlower.Realized.CurvatureComponents

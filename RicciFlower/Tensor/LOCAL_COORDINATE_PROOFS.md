@@ -81,3 +81,123 @@ prefer this order:
 If a proof gets stuck, stop at a precise basis-level theorem. Do not replace an
 intrinsic definition by a coordinate definition just to make downstream algebra
 typecheck.
+
+## Trace Contraction In A Basis
+
+The reusable trace-contraction bridge is:
+
+- `Tensor0SBundle.model_contract_trace_apply_basis`
+
+It lives in `Tensor/RSTensor/Contract.lean` and is the model-fiber statement
+behind Ricci-as-trace coordinate calculations.  In mathematical notation, for
+
+```text
+T : (V*)^(r+1) -> (V*)^(s+1)
+β : (V*)^r
+tail : V^s
+```
+
+it proves:
+
+```text
+(tr T β)(tail)
+  = sum_i i_{e_i}
+      (T((e^i) ⊗ β))(tail),
+```
+
+where `basis i = e_i` and `basis.coord i = e^i`.  This is exactly the finite
+basis trace formula: contract the first contravariant/covariant pair by feeding
+the dual basis covector into the input side and the basis vector into the output
+side.
+
+### Proof Idea
+
+The definition of `model_contract_trace` is initially expressed using
+`Module.finBasis`.  The theorem upgrades it to an arbitrary basis by proving the
+trace sum is basis-independent.
+
+The proof has three steps:
+
+1. Unfold the model trace:
+
+   ```lean
+   rw [model_contract_trace_apply]
+   rw [ContinuousLinearMap.sum_apply]
+   rw [ContinuousMultilinearMap.sum_apply]
+   ```
+
+2. Package the summand as a bilinear functional
+
+   ```lean
+   model_trace_pairing_first ... :
+     (E ->L[𝕜] 𝕜) ->L[𝕜] E ->L[𝕜] 𝕜
+   ```
+
+   and rewrite the desired summand with
+   `model_trace_pairing_first_apply`.
+
+3. Apply the private basis-change lemma
+   `trace_bilinear_basis_coord`, which proves
+
+   ```text
+   sum_i F(e^i, e_i)
+     = sum_j F(finBasis.coord j, finBasis j)
+   ```
+
+   for any continuous bilinear `F`.  Its proof expands each arbitrary basis
+   vector in `Module.finBasis`, reconstructs `finBasis.coord j` from
+   `sum_i finBasis.coord j (basis i) • basis.coord i`, swaps finite sums, and
+   uses bilinearity.
+
+This is why `model_contract_trace_apply_basis` is not a coordinate definition:
+it is a theorem that the intrinsic trace contraction can be evaluated in any
+pointwise basis.
+
+### How To Use It
+
+Use it whenever an intrinsic trace has to become an explicit coordinate sum.
+
+The typical pointwise proof shape is:
+
+```lean
+unfold contract_trace
+change ((model_contract_trace ... (TensorRSSpace.toModel T))
+    (Tensor0SSpace.toModel β)) tail = _
+rw [model_contract_trace_apply_basis (𝕜 := Real) (E := E) basis r s]
+```
+
+Then simplify the model-level input tensor and the resulting `Fin` vectors until
+the summand is the component expression you want.
+
+The current curvature example is:
+
+- `RicciFlower.Realized.contract_trace13_component_basis`
+- `RicciFlower.Realized.ricciFromRm13_comp_eq_rm04_trace`
+
+For `r = 0` and `s = 2`, the first theorem proves:
+
+```text
+((contract_trace 0 2 Rm13) 1)(e_i,e_j)
+  = sum_a Rm13(e^a)(e_a,e_i,e_j).
+```
+
+The second theorem then rewrites the coordinate covector by the inverse metric:
+
+```text
+e^a(-) = sum_k g^{ak} g(e_k, -),
+```
+
+and lowers `Rm13` with the metric, giving:
+
+```text
+Ric_ij = sum_a sum_k g^{ak} Rm04(e_k,e_a,e_i,e_j).
+```
+
+This is the correct bridge from the intrinsic definition
+
+```text
+Ric(Y,Z) = trace (X |-> R(X,Y)Z)
+```
+
+to the lowered Riemann component formula.  Future curvature calculations should
+reuse this theorem instead of re-expanding `contract_trace` directly.
