@@ -1,4 +1,4 @@
-import DifferentialGeometry.VectorField
+import DifferentialGeometry.VectorBundle.VectorField
 
 -- Synthetic Algebra
 import DifferentialGeometry.Synthetic.Algebra.VectorFieldAlgebra
@@ -59,6 +59,8 @@ import DifferentialGeometry.Synthetic.Realization.RicciFlow
 import DifferentialGeometry.Synthetic.Realization.SmoothRicciFlow
 import DifferentialGeometry.Synthetic.Realization.RicciFlowOn
 import DifferentialGeometry.Synthetic.Realization.SmoothRicciFlowOn
+import DifferentialGeometry.Synthetic.Realization.Coordinates.Basic
+import DifferentialGeometry.Synthetic.Realization.Coordinates.Christoffel
 
 -- Non-Ricci flows (plug-in demonstrations of flow-agnostic abstraction)
 import DifferentialGeometry.Synthetic.Flow.Heat.Basic
@@ -126,8 +128,281 @@ import DifferentialGeometry.Tensor.Product.Fiber
 import DifferentialGeometry.Tensor.Product.HomEquiv
 import DifferentialGeometry.Tensor.Product.Pretrivialization
 import DifferentialGeometry.Tensor.Product.Section
+import DifferentialGeometry.Tensor.RSTensor.BundleSectionContinuity
+import DifferentialGeometry.Tensor.RSTensor.ChartJacobianSmooth
+import DifferentialGeometry.Tensor.RSTensor.ChartJacobianSmoothness
 import DifferentialGeometry.Tensor.RSTensor.Contract
 import DifferentialGeometry.Tensor.RSTensor.Defs
 import DifferentialGeometry.Tensor.RSTensor.Field
 import DifferentialGeometry.Tensor.RSTensor.LieDerivative
 import DifferentialGeometry.Tensor.RSTensor.Metric
+import DifferentialGeometry.Tensor.RSTensor.TangentRiemannian
+import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian
+import DifferentialGeometry.Tensor.RSTensor.TensorRSRiemannian
+
+import DifferentialGeometry.Integral.Measure.ChartDensity
+import DifferentialGeometry.Integral.Measure.Glue
+import DifferentialGeometry.Integral.Measure.Invariance
+import DifferentialGeometry.Integral.Measure.Properties
+import DifferentialGeometry.Integral.Measure.Family
+import DifferentialGeometry.Integral.SmoothFamily
+import DifferentialGeometry.Integral.L2.Basic
+import DifferentialGeometry.Integral.L2.CompactSupport
+import DifferentialGeometry.Integral.L2.PointwiseInner.DualMetric
+import DifferentialGeometry.Integral.L2.PointwiseInner.Defs
+import DifferentialGeometry.Integral.L2.PointwiseInner.Algebra
+import DifferentialGeometry.Integral.L2.Pairing.Defs
+import DifferentialGeometry.Integral.L2.Pairing.Algebra
+import DifferentialGeometry.Integral.L2.Pairing.CauchySchwarz
+import DifferentialGeometry.Integral.L2.SmoothSections.Defs
+import DifferentialGeometry.Integral.L2.SmoothSections.PreHilbert
+import DifferentialGeometry.Integral.L2.SmoothSections.Integrability
+import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEval
+import DifferentialGeometry.Tensor.Multilinear.MetricLowering
+
+import DifferentialGeometry.Integral.Measure.BorelManifold.Defs
+import DifferentialGeometry.Integral.Measure.BorelManifold.Derived
+import DifferentialGeometry.Integral.Measure.BorelManifold.StandardInstances
+
+import DifferentialGeometry.Integral.L2.Hilbert.Defs
+import DifferentialGeometry.Integral.L2.Hilbert.Inherited
+import DifferentialGeometry.Integral.L2.Hilbert.DenseSubset
+import DifferentialGeometry.Integral.L2.Hilbert.SimpLemmas
+import DifferentialGeometry.Integral.L2.Hilbert.Operators
+
+import DifferentialGeometry.Integral.DivergenceTheorem.LocalFormula
+import DifferentialGeometry.Integral.DivergenceTheorem.Invariance
+import DifferentialGeometry.Integral.DivergenceTheorem.TangentAction
+import DifferentialGeometry.Integral.DivergenceTheorem.Ibp
+import DifferentialGeometry.Integral.DivergenceTheorem.ChartInvariance
+import DifferentialGeometry.Integral.DivergenceTheorem.POUReduction
+import DifferentialGeometry.Integral.DivergenceTheorem.Closed
+import DifferentialGeometry.Integral.DivergenceTheorem.Proper
+import DifferentialGeometry.Integral.DivergenceTheorem.IntegrationByParts
+import DifferentialGeometry.Geometry.Gradient
+import DifferentialGeometry.Geometry.Laplacian
+import DifferentialGeometry.Geometry.Hessian
+import DifferentialGeometry.Geometry.Curvature.Riemann
+import DifferentialGeometry.Geometry.VossWeyl
+import DifferentialGeometry.Geometry.HessianTrace
+import DifferentialGeometry.Integral.DivergenceTheorem.Green
+import DifferentialGeometry.Integral.DivergenceTheorem.Family
+import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary
+import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.PartialDerivWithin
+import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.LocalFormula
+import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.Ibp
+import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.ChartInvariance
+import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.Global
+import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.POUReduction
+import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.InteriorCompactSupport
+import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.IntegrationByParts
+import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.Gradient
+import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.Laplacian
+import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.Green
+import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.ModelBoundary
+import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.BoundaryManifold
+import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.InducedMetric
+import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.SurfaceMeasure
+import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.EuclideanHalfSpaceInstance
+import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.BoundaryGramMatrix
+import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.OutwardNormal
+import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.Orientation
+import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.Stokes
+import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.GreenWithBoundary
+import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.Family
+import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.GradientContinuity
+import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.GradientGlobalSection
+import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.SurfaceIntegralIdentification
+import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.GreenFull
+
+-- Vendored Sobolev / elliptic-regularity library
+import DifferentialGeometry.External.DeGiorgi.SobolevSpace
+import DifferentialGeometry.External.DeGiorgi.WholeSpaceSobolev
+import DifferentialGeometry.External.DeGiorgi.Poincare
+import DifferentialGeometry.External.DeGiorgi.SobolevPoincare
+import DifferentialGeometry.External.DeGiorgi.UnitBallApproximation
+import DifferentialGeometry.External.DeGiorgi.Holder.PublicEstimate
+import DifferentialGeometry.External.DeGiorgi.EllipticCoefficients
+import DifferentialGeometry.External.DeGiorgi.WeakFormulation
+import DifferentialGeometry.External.DeGiorgi.SobolevChainRule
+import DifferentialGeometry.External.DeGiorgi.DeGiorgiTheory
+import DifferentialGeometry.External.DeGiorgi.Harnack
+import DifferentialGeometry.External.DeGiorgi.MoserIteration
+import DifferentialGeometry.External.DeGiorgi.Holder
+import DifferentialGeometry.External.DeGiorgi.Crossover
+
+-- Project-internal facade for Euclidean Sobolev API
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Init
+
+-- Translation continuity for Sobolev functions
+import DifferentialGeometry.Analysis.Sobolev.Tools.Translation
+import DifferentialGeometry.Analysis.Sobolev.Tools.Mollifier
+import DifferentialGeometry.Analysis.Sobolev.Tools.Convolution
+import DifferentialGeometry.Analysis.Sobolev.Tools.ArzelaAscoli
+import DifferentialGeometry.Analysis.Sobolev.Tools.FrechetKolmogorov
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Rellich
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolev
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiply
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.ChainRule
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.ChainRuleHigherK
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevHalfSpace
+import DifferentialGeometry.Analysis.Sobolev.Tools.WeakPartialLimit
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevCauchy
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevBanach
+import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
+import DifferentialGeometry.Analysis.Sobolev.Chart.Banach
+import DifferentialGeometry.Analysis.Sobolev.Chart.Completeness
+import DifferentialGeometry.Analysis.Sobolev.Chart.Atlas
+import DifferentialGeometry.Analysis.Sobolev.Intrinsic.Defs
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedL2
+import DifferentialGeometry.Analysis.Sobolev.Chart.L2
+import DifferentialGeometry.Analysis.Sobolev.WithBoundary.Chart
+import DifferentialGeometry.Analysis.Sobolev.WithBoundary.ChartBanach
+import DifferentialGeometry.Analysis.Sobolev.WithBoundary.EuclideanIteratedSobolevBanachHalfSpace
+import DifferentialGeometry.Analysis.Sobolev.WithBoundary.Completeness
+import DifferentialGeometry.Analysis.Sobolev.WithBoundary.EuclideanIteratedL2
+import DifferentialGeometry.Analysis.Sobolev.WithBoundary.ChartL2
+import DifferentialGeometry.Analysis.Sobolev.WithBoundary.Trace
+import DifferentialGeometry.Analysis.Sobolev.Manifold.Embedding
+import DifferentialGeometry.Analysis.Sobolev.Manifold.Rellich
+import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
+import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridgeUniform
+import DifferentialGeometry.Analysis.Sobolev.Chart.CompletenessAux
+import DifferentialGeometry.Analysis.Sobolev.Intrinsic.Equivalence
+import DifferentialGeometry.Analysis.Sobolev.Manifold.RellichManifold
+import DifferentialGeometry.Analysis.Sobolev.WithBoundary.EuclideanDensity
+import DifferentialGeometry.Analysis.Sobolev.Chart.DensityInfra
+import DifferentialGeometry.Analysis.Sobolev.Manifold.EmbeddingManifold
+import DifferentialGeometry.Analysis.Sobolev.Manifold.RellichOnM
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.CompChainRuleK
+import DifferentialGeometry.Analysis.Sobolev.Chart.TransitionDiffeo
+import DifferentialGeometry.Analysis.Sobolev.Chart.TransitionPipeline
+import DifferentialGeometry.Analysis.Sobolev.Chart.Transition
+import DifferentialGeometry.Analysis.Sobolev.Chart.AtlasIndependence
+import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity
+import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseHelpers
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.MultiplyQuant
+import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBound
+import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
+import DifferentialGeometry.Analysis.Sobolev.Tools.StrictStrongSupport
+import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBoundStrict
+import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartIdentity
+import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBoundStrictMemWkp
+import DifferentialGeometry.Analysis.Sobolev.Chart.BanachManifold
+import DifferentialGeometry.Analysis.Sobolev.Manifold.EmbeddingSubcritical
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Morrey
+import DifferentialGeometry.Analysis.Sobolev.Manifold.MorreyManifold
+import DifferentialGeometry.Analysis.Sobolev.WithBoundary.EuclideanMorrey
+import DifferentialGeometry.Analysis.Sobolev.WithBoundary.EmbeddingSubcritical
+import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
+import DifferentialGeometry.Analysis.Sobolev.WithBoundary.IteratedSobolevEmbedding
+import DifferentialGeometry.Analysis.Sobolev.WithBoundary.MorreyManifold
+import DifferentialGeometry.Analysis.Sobolev.Manifold.SobolevAlgebra
+import DifferentialGeometry.Analysis.Sobolev.WithBoundary.SobolevAlgebra
+import DifferentialGeometry.Analysis.Sobolev.Intrinsic.Lp
+import DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp
+import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceFull
+import DifferentialGeometry.Analysis.Sobolev.WithBoundary.EquivalenceFull
+import DifferentialGeometry.Analysis.Sobolev.Intrinsic.H1Lp
+import DifferentialGeometry.Analysis.Sobolev.Tools.DifferenceQuotient
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.Euclidean
+import DifferentialGeometry.Analysis.Laplacian.Regularity.H1Submodule
+import DifferentialGeometry.Analysis.Laplacian.Regularity.H1Intrinsic
+import DifferentialGeometry.Analysis.Laplacian.Operator.DirichletForm
+import DifferentialGeometry.Analysis.Laplacian.MetricBounds
+import DifferentialGeometry.Analysis.Laplacian.Operator.SmoothBridge
+import DifferentialGeometry.Analysis.Laplacian.Regularity.SmoothScalarPreH1
+import DifferentialGeometry.Analysis.Laplacian.Regularity.H1Compl
+import DifferentialGeometry.Analysis.Laplacian.Regularity.L2Inclusion
+import DifferentialGeometry.Analysis.Laplacian.Variational
+import DifferentialGeometry.Analysis.Laplacian.Operator.SmoothDenseLp
+import DifferentialGeometry.Analysis.Laplacian.Operator.Operator
+import DifferentialGeometry.Analysis.Laplacian.Spectral.Resolvent
+import DifferentialGeometry.Analysis.Laplacian.Spectral.Spectrum
+import DifferentialGeometry.Analysis.Laplacian.WithBoundary.InteriorSmoothScalarPreH1
+import DifferentialGeometry.Analysis.Laplacian.WithBoundary.InteriorH1Compl
+import DifferentialGeometry.Analysis.Laplacian.WithBoundary.InteriorVariational
+import DifferentialGeometry.Analysis.Laplacian.WithBoundary.InteriorSmoothBridge
+import DifferentialGeometry.Analysis.Laplacian.WithBoundary.Neumann.H1Compl
+import DifferentialGeometry.Analysis.Laplacian.WithBoundary.Neumann.FullSmoothScalarPreH1
+import DifferentialGeometry.Analysis.Laplacian.WithBoundary.Neumann.FullH1Compl
+import DifferentialGeometry.Analysis.Laplacian.WithBoundary.Neumann.FullSmoothBridge
+import DifferentialGeometry.Analysis.Laplacian.WithBoundary.Neumann.FullSmoothBridgeNeumann
+import DifferentialGeometry.Analysis.Laplacian.WithBoundary.Dirichlet.H1Compl
+import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceReverse
+import DifferentialGeometry.Analysis.Laplacian.Compactness
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2
+import DifferentialGeometry.Analysis.Sobolev.Tools.DifferenceQuotientWeakLimit
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.TestFunction
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.Substitution
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.Coercivity
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.CrossBounds
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.Iteration
+import DifferentialGeometry.Analysis.Sobolev.Intrinsic.H1Lp
+import DifferentialGeometry.Analysis.Laplacian.Regularity.EllipticRegularity
+import DifferentialGeometry.Analysis.Laplacian.Lichnerowicz
+
+import DifferentialGeometry.Geometry.NormGradSq
+
+import DifferentialGeometry.Analysis.Sobolev.Solutions.FriedrichsCommutator
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.NonSmooth
+
+import DifferentialGeometry.Analysis.Laplacian.MetricExtension
+import DifferentialGeometry.Analysis.Laplacian.Operator.ChartMeasureEquiv
+import DifferentialGeometry.Analysis.Laplacian.Operator.ChartLocalLaplacian
+import DifferentialGeometry.Analysis.Laplacian.Regularity.ManifoldH2
+
+import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.SecondFundamentalForm
+import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.BoundaryLaplacian
+import DifferentialGeometry.Analysis.Laplacian.WithBoundary.Neumann.Reilly
+
+import DifferentialGeometry.Analysis.Sobolev.Solutions.SobolevToCinftyRep
+
+import DifferentialGeometry.Geometry.Curvature.Ricci
+
+import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothApproximationConstruction
+
+import DifferentialGeometry.Analysis.Sobolev.Solutions.H2NonSmoothDirect
+
+import DifferentialGeometry.Analysis.Sobolev.Solutions.WeakSolution
+
+import DifferentialGeometry.Analysis.Sobolev.Solutions.H2WeakSolution
+
+import DifferentialGeometry.Integral.Connection.MetricCompatible
+
+import DifferentialGeometry.Integral.Connection.Koszul
+
+import DifferentialGeometry.Integral.Connection.ChartMetric
+
+import DifferentialGeometry.Integral.Connection.ChartSection
+import DifferentialGeometry.Integral.Connection.ChartLieBracket
+
+import DifferentialGeometry.Integral.Connection.LeviCivitaChartLocal
+
+import DifferentialGeometry.Integral.Connection.LeviCivitaChartTorsion
+
+import DifferentialGeometry.Integral.Connection.LeviCivitaChartMetric
+
+import DifferentialGeometry.Integral.Connection.LeviCivitaChartSmooth
+
+import DifferentialGeometry.Integral.Connection.LeviCivita
+import DifferentialGeometry.Integral.Connection.CotangentExtension
+import DifferentialGeometry.Integral.Connection.TensorExtension
+import DifferentialGeometry.Integral.Connection.Curvature
+import DifferentialGeometry.Integral.Connection.CurvatureBundling
+import DifferentialGeometry.Integral.Connection.Ricci
+
+import DifferentialGeometry.Integral.Connection.ChartBridge.Gradient
+import DifferentialGeometry.Integral.Connection.RicciIdentity
+import DifferentialGeometry.Integral.Connection.ChartBridge.Hessian
+import DifferentialGeometry.Integral.Connection.ChartBridge.Riemann
+import DifferentialGeometry.Integral.Connection.ChartBridge.Ricci
+import DifferentialGeometry.Integral.Connection.RicciIdentitySmoothFrame
+import DifferentialGeometry.Integral.Connection.ConnectionLaplacian
+import DifferentialGeometry.Integral.Connection.ChartBridge.Laplacian
+import DifferentialGeometry.Integral.Connection.ChartBridge.HessFrobenius
+import DifferentialGeometry.Integral.Connection.Bochner
+import DifferentialGeometry.Integral.Connection.BochnerConcrete
+import DifferentialGeometry.Integral.Connection.WithBoundary.BochnerConcrete

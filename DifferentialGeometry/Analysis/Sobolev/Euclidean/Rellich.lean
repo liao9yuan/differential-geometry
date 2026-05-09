@@ -1,0 +1,781 @@
+import DifferentialGeometry.Analysis.Sobolev.Tools.FrechetKolmogorov
+
+/-!
+# Rellich–Kondrachov compact embedding
+
+Translation-continuity infrastructure and the Rellich–Kondrachov compact
+embedding theorem `W^{1,p}_0(Ω) ↪ L^p(Ω)` for bounded open `Ω ⊆ ℝ^d`.
+-/
+
+noncomputable section
+
+open MeasureTheory Metric Filter Topology Set Function
+open scoped ENNReal NNReal Convolution Pointwise
+
+namespace DifferentialGeometry.Analysis.Sobolev
+
+variable {d : ℕ} [NeZero d]
+
+local notation "E" => EuclideanSpace ℝ (Fin d)
+
+omit [NeZero d] in
+/-- For an Euclidean-space-valued vector, each component is bounded by the norm. -/
+private lemma euclidean_component_norm_le (v : E) (i : Fin d) : ‖v i‖ ≤ ‖v‖ := by
+  rw [EuclideanSpace.norm_eq]
+  have : ‖v i‖ ^ 2 ≤ ∑ j, ‖v j‖ ^ 2 := by
+    refine Finset.single_le_sum (f := fun j => ‖v j‖ ^ 2)
+      (fun j _ => sq_nonneg _) (Finset.mem_univ i)
+  have hsum_nn : 0 ≤ ∑ j, ‖v j‖ ^ 2 := by
+    refine Finset.sum_nonneg ?_
+    intros
+    exact sq_nonneg _
+  have hnorm_nn : 0 ≤ ‖v i‖ := norm_nonneg _
+  calc
+    ‖v i‖ = Real.sqrt (‖v i‖ ^ 2) := (Real.sqrt_sq hnorm_nn).symm
+    _ ≤ Real.sqrt (∑ j, ‖v j‖ ^ 2) := Real.sqrt_le_sqrt this
+
+omit [NeZero d] in
+/-- Each weak partial derivative of a `MemW1p` function is dominated in the
+`L^p` quasi-norm by the Euclidean norm of the weak gradient. -/
+theorem eLpNorm_weakGrad_component_le
+    {p : ℝ≥0∞} {Ω : Set E} {u : E → ℝ}
+    (hw : DeGiorgi.MemW1pWitness p u Ω) (i : Fin d) :
+    eLpNorm (fun x => hw.weakGrad x i) p (volume.restrict Ω) ≤
+      eLpNorm (fun x => ‖hw.weakGrad x‖) p (volume.restrict Ω) := by
+  refine eLpNorm_mono_ae_real ?_
+  filter_upwards with x
+  exact euclidean_component_norm_le (hw.weakGrad x) i
+
+/-! ## Phase B: translation estimate for `MemW01p` functions -/
+
+omit [NeZero d] in
+/-- Pointwise bound: the operator norm of `fderiv ℝ φ x` (a continuous linear
+form `E → ℝ`) is bounded by the sum of absolute values of its components in
+the canonical basis of `EuclideanSpace ℝ (Fin d)`. -/
+private lemma fderiv_norm_le_sum_components
+    {φ : E → ℝ} (x : E) :
+    ‖fderiv ℝ φ x‖ ≤ ∑ i : Fin d, |(fderiv ℝ φ x) (EuclideanSpace.single i 1)| := by
+  classical
+  set L : E →L[ℝ] ℝ := fderiv ℝ φ x
+  have h_apply : ∀ v : E, L v = ∑ i : Fin d, v i * L (EuclideanSpace.single i 1) := by
+    intro v
+    have hv : v = ∑ i : Fin d, v i • EuclideanSpace.single i (1 : ℝ) := by
+      ext j
+      simp [EuclideanSpace.single, Pi.single_apply, smul_eq_mul]
+    conv_lhs => rw [hv]
+    rw [map_sum]
+    simp [smul_eq_mul]
+  refine ContinuousLinearMap.opNorm_le_bound L ?_ ?_
+  · exact Finset.sum_nonneg (fun i _ => abs_nonneg _)
+  · intro v
+    rw [h_apply v]
+    calc
+      ‖∑ i : Fin d, v i * L (EuclideanSpace.single i 1)‖
+          ≤ ∑ i : Fin d, ‖v i * L (EuclideanSpace.single i 1)‖ :=
+            norm_sum_le _ _
+      _ = ∑ i : Fin d, ‖v i‖ * ‖L (EuclideanSpace.single i 1)‖ := by
+            simp [norm_mul]
+      _ ≤ ∑ i : Fin d, ‖v‖ * ‖L (EuclideanSpace.single i 1)‖ := by
+            refine Finset.sum_le_sum ?_
+            intro i _
+            have hvi : ‖v i‖ ≤ ‖v‖ := euclidean_component_norm_le v i
+            exact mul_le_mul_of_nonneg_right hvi (norm_nonneg _)
+      _ = ‖v‖ * ∑ i : Fin d, ‖L (EuclideanSpace.single i 1)‖ := by
+            rw [← Finset.mul_sum]
+      _ = ‖v‖ * ∑ i : Fin d, |L (EuclideanSpace.single i 1)| := by
+            have hcongr :
+                (∑ i : Fin d, ‖L (EuclideanSpace.single i 1)‖) =
+                  ∑ i : Fin d, |L (EuclideanSpace.single i 1)| := by
+              apply Finset.sum_congr rfl
+              intros i _
+              exact Real.norm_eq_abs _
+            rw [hcongr]
+      _ = (∑ i : Fin d, |L (EuclideanSpace.single i 1)|) * ‖v‖ := by ring
+
+/-- `eLpNorm` of `‖fderiv ℝ φ‖` is bounded by the sum of `eLpNorm`s of the
+components of `fderiv ℝ φ`. -/
+private lemma eLpNorm_fderiv_le_sum_components
+    {p : ℝ≥0∞} (hp_one : 1 ≤ p)
+    {φ : E → ℝ} (hφ : ContDiff ℝ (⊤ : ℕ∞) φ) :
+    eLpNorm (fun x => ‖fderiv ℝ φ x‖) p volume ≤
+      ∑ i : Fin d,
+        eLpNorm (fun x => (fderiv ℝ φ x) (EuclideanSpace.single i 1)) p volume := by
+  classical
+  -- AEStronglyMeasurable for each component
+  have hcomp_aem :
+      ∀ i : Fin d,
+        AEStronglyMeasurable
+          (fun x => (fderiv ℝ φ x) (EuclideanSpace.single i 1)) volume := by
+    intro i
+    have hcont : Continuous
+        (fun x => (fderiv ℝ φ x) (EuclideanSpace.single i 1)) :=
+      (hφ.continuous_fderiv (by simp)).clm_apply continuous_const
+    exact hcont.aestronglyMeasurable
+  -- Pointwise bound `‖fderiv φ‖ ≤ ∑ᵢ |∂_i φ|`
+  have hbound : ∀ x, ‖fderiv ℝ φ x‖ ≤
+      ∑ i : Fin d, |(fderiv ℝ φ x) (EuclideanSpace.single i 1)| := by
+    intro x
+    exact fderiv_norm_le_sum_components (d := d) x
+  -- Step 1: eLpNorm-monotonicity (`f ↦ ‖fderiv φ x‖` is non-negative pointwise, so we can
+  -- apply `eLpNorm_mono_ae_real` after rewriting `‖fderiv φ x‖` as `‖‖fderiv φ x‖‖`)
+  have hmono :
+      eLpNorm (fun x => ‖fderiv ℝ φ x‖) p volume ≤
+        eLpNorm
+          (fun x => ∑ i : Fin d, |(fderiv ℝ φ x) (EuclideanSpace.single i 1)|) p volume := by
+    refine eLpNorm_mono_ae_real ?_
+    filter_upwards with x
+    have hnn : 0 ≤ ‖fderiv ℝ φ x‖ := norm_nonneg _
+    rw [Real.norm_eq_abs, abs_of_nonneg hnn]
+    exact hbound x
+  -- Step 2: Minkowski for finite sums
+  have hAesm :
+      ∀ i : Fin d,
+        AEStronglyMeasurable
+          (fun x => |(fderiv ℝ φ x) (EuclideanSpace.single i 1)|) volume := by
+    intro i
+    have h := (hcomp_aem i).norm
+    have hEq : (fun x => ‖(fderiv ℝ φ x) (EuclideanSpace.single i 1)‖) =
+        (fun x => |(fderiv ℝ φ x) (EuclideanSpace.single i 1)|) := by
+      funext x
+      rw [Real.norm_eq_abs]
+    rw [hEq] at h
+    exact h
+  -- Generalised statement: sum over an arbitrary finset, by induction
+  have h_step_general :
+      ∀ (T : Finset (Fin d)),
+        eLpNorm
+            (fun x => ∑ i ∈ T, |(fderiv ℝ φ x) (EuclideanSpace.single i 1)|) p volume ≤
+          ∑ i ∈ T,
+            eLpNorm
+              (fun x => |(fderiv ℝ φ x) (EuclideanSpace.single i 1)|) p volume := by
+    intro T
+    classical
+    refine Finset.induction_on T ?_ ?_
+    · simp
+    · intros a s hi IH
+      have hsum_eq_LHS :
+          (fun x => ∑ i ∈ insert a s,
+              |(fderiv ℝ φ x) (EuclideanSpace.single i 1)|) =
+            fun x =>
+              |(fderiv ℝ φ x) (EuclideanSpace.single a 1)| +
+                ∑ i ∈ s, |(fderiv ℝ φ x) (EuclideanSpace.single i 1)| := by
+        funext x
+        exact Finset.sum_insert hi
+      rw [hsum_eq_LHS]
+      have hsum_eq_RHS :
+          ∑ i ∈ insert a s,
+              eLpNorm
+                (fun x => |(fderiv ℝ φ x) (EuclideanSpace.single i 1)|) p volume =
+            eLpNorm
+                (fun x => |(fderiv ℝ φ x) (EuclideanSpace.single a 1)|) p volume +
+              ∑ i ∈ s,
+                eLpNorm
+                  (fun x => |(fderiv ℝ φ x) (EuclideanSpace.single i 1)|) p volume :=
+        Finset.sum_insert hi
+      rw [hsum_eq_RHS]
+      have h1 :
+          AEStronglyMeasurable
+            (fun x => |(fderiv ℝ φ x) (EuclideanSpace.single a 1)|) volume :=
+        hAesm a
+      have h2 :
+          AEStronglyMeasurable
+            (fun x => ∑ i ∈ s, |(fderiv ℝ φ x) (EuclideanSpace.single i 1)|) volume := by
+        have hsum := Finset.aestronglyMeasurable_sum (μ := volume) s
+          (f := fun (i : Fin d) (x : E) =>
+            |(fderiv ℝ φ x) (EuclideanSpace.single i 1)|)
+          (fun i _ => hAesm i)
+        -- Convert from `∑ i ∈ s, (fun i x => f i x) i` to `fun x => ∑ i ∈ s, f i x`.
+        have hEq :
+            (fun x => ∑ i ∈ s, |(fderiv ℝ φ x) (EuclideanSpace.single i 1)|) =
+              ∑ i ∈ s, (fun (i : Fin d) (x : E) =>
+                |(fderiv ℝ φ x) (EuclideanSpace.single i 1)|) i := by
+          funext x
+          simp [Finset.sum_apply]
+        rw [hEq]
+        exact hsum
+      have hadd_le :=
+        eLpNorm_add_le (μ := volume) (p := p)
+          (f := fun x => |(fderiv ℝ φ x) (EuclideanSpace.single a 1)|)
+          (g := fun x => ∑ i ∈ s, |(fderiv ℝ φ x) (EuclideanSpace.single i 1)|)
+          h1 h2 hp_one
+      refine hadd_le.trans ?_
+      gcongr
+  have h_step := h_step_general (Finset.univ : Finset (Fin d))
+  refine hmono.trans (h_step.trans ?_)
+  refine Finset.sum_le_sum ?_
+  intro i _
+  -- eLpNorm of |f| equals eLpNorm of f, by eLpNorm_norm
+  refine le_of_eq ?_
+  have hcongr :
+      (fun x => |(fderiv ℝ φ x) (EuclideanSpace.single i 1)|) =
+        (fun x => ‖(fderiv ℝ φ x) (EuclideanSpace.single i 1)‖) := by
+    funext x
+    exact (Real.norm_eq_abs _).symm
+  rw [hcongr, eLpNorm_norm]
+
+/-- For a smooth function `φ`, the `L^p` norm of the translation difference is
+bounded by `‖h‖` times the sum of the `L^p` norms of the partial derivatives. -/
+private lemma eLpNorm_translate_sub_le_sum_components
+    {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
+    {φ : E → ℝ} (hφ : ContDiff ℝ (⊤ : ℕ∞) φ) (h : E) :
+    eLpNorm (fun x => φ (x - h) - φ x) p volume ≤
+      ENNReal.ofReal ‖h‖ *
+        ∑ i : Fin d,
+          eLpNorm (fun x => (fderiv ℝ φ x) (EuclideanSpace.single i 1)) p volume := by
+  classical
+  -- Phase A: Translation difference bound by `|h| * ‖fderiv φ‖_{L^p}`
+  have hPhaseA :
+      eLpNorm (fun x => φ x - φ (x - h)) p volume ≤
+        ENNReal.ofReal ‖h‖ * eLpNorm (fun x => ‖fderiv ℝ φ x‖) p volume :=
+    eLpNorm_translate_sub_le_smul_eLpNorm_fderiv (d := d) hp_one hp_top hφ h
+  -- Negation: same bound for `φ(x-h) - φ x`
+  have hSym :
+      eLpNorm (fun x => φ (x - h) - φ x) p volume =
+        eLpNorm (fun x => φ x - φ (x - h)) p volume := by
+    have hEq1 : (fun x => φ (x - h) - φ x) =
+        ((fun x => φ (x - h)) - (fun x => φ x)) := by
+      funext x; rfl
+    have hEq2 : (fun x => φ x - φ (x - h)) =
+        ((fun x => φ x) - (fun x => φ (x - h))) := by
+      funext x; rfl
+    rw [hEq1, hEq2]
+    exact eLpNorm_sub_comm (μ := volume) (p := p)
+      (f := fun x => φ (x - h)) (g := fun x => φ x)
+  rw [hSym]
+  refine hPhaseA.trans ?_
+  -- Multiply the bound from `eLpNorm_fderiv_le_sum_components`
+  have hgrad_bound :
+      eLpNorm (fun x => ‖fderiv ℝ φ x‖) p volume ≤
+        ∑ i : Fin d,
+          eLpNorm (fun x => (fderiv ℝ φ x) (EuclideanSpace.single i 1)) p volume :=
+    eLpNorm_fderiv_le_sum_components (d := d) hp_one hφ
+  gcongr
+
+/-- Each gradient component of a smooth-compactly-supported approximant `φ`
+has the same `L^p` quasi-norm on the whole space and on `Ω`, as long as
+`tsupport φ ⊆ Ω`. -/
+private lemma eLpNorm_grad_eq_restrict
+    {Ω : Set E} (hΩ_meas : MeasurableSet Ω)
+    {φ : E → ℝ} (hφ_smooth : ContDiff ℝ (⊤ : ℕ∞) φ)
+    (hφ_sub : tsupport φ ⊆ Ω)
+    {p : ℝ≥0∞} (i : Fin d) :
+    eLpNorm (fun x => (fderiv ℝ φ x) (EuclideanSpace.single i 1)) p volume =
+      eLpNorm (fun x => (fderiv ℝ φ x) (EuclideanSpace.single i 1)) p
+        (volume.restrict Ω) := by
+  have hgrad_eq_indicator :
+      (fun x => (fderiv ℝ φ x) (EuclideanSpace.single i 1)) =
+        Ω.indicator (fun x => (fderiv ℝ φ x) (EuclideanSpace.single i 1)) := by
+    funext x
+    by_cases hx : x ∈ Ω
+    · simp [hx]
+    · have hzero :=
+        DeGiorgi.fderiv_apply_zero_outside_of_tsupport_subset
+          (Ω := Ω) (hf := hφ_smooth) (hsub := hφ_sub) hx i
+      simp [hx, hzero]
+  conv_lhs => rw [hgrad_eq_indicator]
+  exact MeasureTheory.eLpNorm_indicator_eq_eLpNorm_restrict
+    (μ := volume) (s := Ω) (p := p)
+    (f := fun x => (fderiv ℝ φ x) (EuclideanSpace.single i 1)) hΩ_meas
+
+/-- A pointwise rearrangement: the `L^p`-norm of `φ - Ω.indicator u` over the
+whole space equals the `L^p`-norm of `φ - u` over `Ω`, when `tsupport φ ⊆ Ω`. -/
+private lemma eLpNorm_phi_sub_indicator_eq
+    {Ω : Set E} (hΩ_meas : MeasurableSet Ω)
+    {φ u : E → ℝ}
+    (hφ_sub : tsupport φ ⊆ Ω)
+    {p : ℝ≥0∞} :
+    eLpNorm (fun x => φ x - Ω.indicator u x) p volume =
+      eLpNorm (fun x => φ x - u x) p (volume.restrict Ω) := by
+  have hEq :
+      (fun x => φ x - Ω.indicator u x) =
+        Ω.indicator (fun x => φ x - u x) := by
+    funext x
+    by_cases hx : x ∈ Ω
+    · simp [hx]
+    · have hφx : φ x = 0 :=
+        DeGiorgi.zero_outside_of_tsupport_subset (Ω := Ω) hφ_sub hx
+      simp [hx, hφx]
+  conv_lhs => rw [hEq]
+  exact MeasureTheory.eLpNorm_indicator_eq_eLpNorm_restrict
+    (μ := volume) (s := Ω) (p := p) (f := fun x => φ x - u x) hΩ_meas
+
+/-- Phase B: translation estimate for `MemW01p` functions.
+
+For a `W^{1,p}_0` function `u` on an open set `Ω`, with `1 ≤ p < ∞`, the
+zero-extension `Ω.indicator u` to all of `ℝ^d` satisfies the translation
+estimate
+
+  `‖τ_h ũ − ũ‖_{L^p(ℝ^d)} ≤ ‖h‖ · Σ_i ‖∂_i u‖_{L^p(Ω)}`
+
+where the right-hand side sums the `L^p`-quasinorms of the components of the
+weak gradient of any `W^{1,p}` witness for `u` (the value is independent of
+the witness, by `MemW1pWitness.ae_eq_p`). The form below uses the canonical
+witness extracted from the `MemW01p` data. -/
+theorem eLpNorm_translate_sub_le_of_memW01p
+    {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
+    {Ω : Set E} (hΩ_open : IsOpen Ω)
+    {u : E → ℝ}
+    (hu : DeGiorgi.MemW01p p u Ω)
+    (h : E) :
+    eLpNorm (fun x => Ω.indicator u (x - h) - Ω.indicator u x) p volume ≤
+      ENNReal.ofReal ‖h‖ *
+        ∑ i : Fin d,
+          eLpNorm (fun x => (Classical.choose hu.2).weakGrad x i)
+            p (volume.restrict Ω) := by
+  classical
+  have hΩ_meas : MeasurableSet Ω := hΩ_open.measurableSet
+  set hw : DeGiorgi.MemW1pWitness p u Ω := Classical.choose hu.2 with hw_def
+  have hSpec := Classical.choose_spec hu.2
+  -- Now `hSpec` has type:
+  --   ∃ φ, (...) where the first ∃ is matched to `Classical.choose hu.2 = hw`.
+  -- We unfold `hSpec` to extract `φ` and the convergence data.
+  set φ : ℕ → E → ℝ := Classical.choose hSpec with hφ_def
+  have hSpec' := Classical.choose_spec hSpec
+  have hφ_smooth : ∀ n, ContDiff ℝ (⊤ : ℕ∞) (φ n) := hSpec'.1
+  have hφ_compact : ∀ n, HasCompactSupport (φ n) := hSpec'.2.1
+  have hφ_sub : ∀ n, tsupport (φ n) ⊆ Ω := hSpec'.2.2.1
+  have hφ_fun :
+      Tendsto (fun n => eLpNorm (fun x => φ n x - u x) p (volume.restrict Ω))
+        atTop (nhds 0) := hSpec'.2.2.2.1
+  have hφ_grad : ∀ i : Fin d,
+      Tendsto
+        (fun n => eLpNorm
+          (fun x =>
+            (fderiv ℝ (φ n) x) (EuclideanSpace.single i 1) - hw.weakGrad x i)
+          p (volume.restrict Ω))
+        atTop (nhds 0) := hSpec'.2.2.2.2
+  -- Convenient measurability
+  have hu_aesm_restrict :
+      AEStronglyMeasurable u (volume.restrict Ω) := hw.memLp.aestronglyMeasurable
+  have hu_ind_aesm :
+      AEStronglyMeasurable (Ω.indicator u) volume :=
+    (aestronglyMeasurable_indicator_iff (μ := volume) hΩ_meas).mpr hu_aesm_restrict
+  have hφ_smooth_aesm : ∀ n, AEStronglyMeasurable (φ n) volume :=
+    fun n => (hφ_smooth n).continuous.aestronglyMeasurable
+  have hMP_subh : MeasurePreserving (fun x : E => x - h) volume volume := by
+    have hMP_neg : MeasurePreserving (fun x : E => x + (-h)) volume volume :=
+      measurePreserving_add_right volume (-h)
+    have hEq : (fun x : E => x - h) = (fun x : E => x + (-h)) := by
+      funext x
+      exact sub_eq_add_neg x h
+    rw [hEq]
+    exact hMP_neg
+  -- φ_n → ũ in L^p(volume)  (where ũ = Ω.indicator u)
+  have hφ_to_uExt :
+      Tendsto (fun n => eLpNorm (fun x => φ n x - Ω.indicator u x) p volume)
+        atTop (nhds 0) := by
+    have hEq :
+        (fun n => eLpNorm (fun x => φ n x - Ω.indicator u x) p volume) =
+          (fun n => eLpNorm (fun x => φ n x - u x) p (volume.restrict Ω)) := by
+      funext n
+      exact eLpNorm_phi_sub_indicator_eq (d := d) hΩ_meas (hφ_sub n) (φ := φ n) (u := u)
+    rw [hEq]
+    exact hφ_fun
+  -- Set abbreviations for LHS, S, RHS, and the gradient-correction sequence Dseq.
+  set LHS : ℝ≥0∞ :=
+    eLpNorm (fun x => Ω.indicator u (x - h) - Ω.indicator u x) p volume with hLHS_def
+  set S : ℝ≥0∞ :=
+    ∑ i : Fin d,
+      eLpNorm (fun x => hw.weakGrad x i) p (volume.restrict Ω) with hS_def
+  set Dseq : ℕ → ℝ≥0∞ := fun n =>
+    ∑ i : Fin d,
+      eLpNorm
+        (fun x =>
+          (fderiv ℝ (φ n) x) (EuclideanSpace.single i 1) - hw.weakGrad x i)
+        p (volume.restrict Ω) with hDseq_def
+  -- Show LHS ≤ ENNReal.ofReal ‖h‖ * S
+  change LHS ≤ ENNReal.ofReal ‖h‖ * S
+  -- Triangle inequality, for each n: LHS ≤ A_n + B_n + C_n
+  have hTri : ∀ n : ℕ,
+      LHS ≤
+        eLpNorm (fun x => Ω.indicator u (x - h) - φ n (x - h)) p volume +
+          eLpNorm (fun x => φ n (x - h) - φ n x) p volume +
+          eLpNorm (fun x => φ n x - Ω.indicator u x) p volume := by
+    intro n
+    have hu_th_aesm : AEStronglyMeasurable (fun x : E => Ω.indicator u (x - h)) volume :=
+      hu_ind_aesm.comp_measurePreserving hMP_subh
+    have hφ_th_aesm : AEStronglyMeasurable (fun x : E => φ n (x - h)) volume :=
+      (hφ_smooth_aesm n).comp_measurePreserving hMP_subh
+    have hT1 : AEStronglyMeasurable
+        (fun x => Ω.indicator u (x - h) - φ n (x - h)) volume :=
+      hu_th_aesm.sub hφ_th_aesm
+    have hT2 : AEStronglyMeasurable
+        (fun x => φ n (x - h) - φ n x) volume :=
+      hφ_th_aesm.sub (hφ_smooth_aesm n)
+    have hT3 : AEStronglyMeasurable
+        (fun x => φ n x - Ω.indicator u x) volume :=
+      (hφ_smooth_aesm n).sub hu_ind_aesm
+    have hDecomp :
+        (fun x => Ω.indicator u (x - h) - Ω.indicator u x) =
+          (fun x => Ω.indicator u (x - h) - φ n (x - h)) +
+            ((fun x => φ n (x - h) - φ n x) +
+              (fun x => φ n x - Ω.indicator u x)) := by
+      funext x
+      change _ = (Ω.indicator u (x - h) - φ n (x - h)) +
+        ((φ n (x - h) - φ n x) + (φ n x - Ω.indicator u x))
+      ring
+    have hLHS_eq :
+        LHS = eLpNorm
+            ((fun x => Ω.indicator u (x - h) - φ n (x - h)) +
+                ((fun x => φ n (x - h) - φ n x) +
+                  (fun x => φ n x - Ω.indicator u x))) p volume := by
+      rw [hLHS_def, hDecomp]
+    rw [hLHS_eq]
+    calc
+      eLpNorm
+          ((fun x => Ω.indicator u (x - h) - φ n (x - h)) +
+            ((fun x => φ n (x - h) - φ n x) +
+              (fun x => φ n x - Ω.indicator u x))) p volume
+          ≤
+        eLpNorm (fun x => Ω.indicator u (x - h) - φ n (x - h)) p volume +
+          eLpNorm
+            ((fun x => φ n (x - h) - φ n x) +
+              (fun x => φ n x - Ω.indicator u x)) p volume :=
+        eLpNorm_add_le hT1 (hT2.add hT3) hp_one
+      _ ≤ eLpNorm (fun x => Ω.indicator u (x - h) - φ n (x - h)) p volume +
+            (eLpNorm (fun x => φ n (x - h) - φ n x) p volume +
+              eLpNorm (fun x => φ n x - Ω.indicator u x) p volume) := by
+              gcongr
+              exact eLpNorm_add_le hT2 hT3 hp_one
+      _ = _ := by ring
+  -- A_n → 0
+  have hA_to_zero :
+      Tendsto
+        (fun n => eLpNorm (fun x => Ω.indicator u (x - h) - φ n (x - h)) p volume)
+        atTop (nhds 0) := by
+    have hEq_each :
+        ∀ n,
+          eLpNorm (fun x => Ω.indicator u (x - h) - φ n (x - h)) p volume =
+            eLpNorm (fun x => φ n x - Ω.indicator u x) p volume := by
+      intro n
+      have hSM : AEStronglyMeasurable (fun x : E => Ω.indicator u x - φ n x) volume :=
+        hu_ind_aesm.sub (hφ_smooth_aesm n)
+      have hTrEq :
+          eLpNorm (fun x => Ω.indicator u (x - h) - φ n (x - h)) p volume =
+            eLpNorm (fun x => Ω.indicator u x - φ n x) p volume :=
+        eLpNorm_translate_eq (p := p) hSM h
+      have hSign :
+          eLpNorm (fun x => Ω.indicator u x - φ n x) p volume =
+            eLpNorm (fun x => φ n x - Ω.indicator u x) p volume :=
+        eLpNorm_sub_comm (μ := volume) (p := p) (f := Ω.indicator u) (g := φ n)
+      rw [hTrEq, hSign]
+    rw [show
+        (fun n => eLpNorm (fun x => Ω.indicator u (x - h) - φ n (x - h)) p volume) =
+        (fun n => eLpNorm (fun x => φ n x - Ω.indicator u x) p volume)
+      from funext hEq_each]
+    exact hφ_to_uExt
+  -- Phase A bound for each n
+  have hPhaseA : ∀ n,
+      eLpNorm (fun x => φ n (x - h) - φ n x) p volume ≤
+        ENNReal.ofReal ‖h‖ *
+          ∑ i : Fin d,
+            eLpNorm (fun x => (fderiv ℝ (φ n) x) (EuclideanSpace.single i 1))
+              p volume :=
+    fun n =>
+      eLpNorm_translate_sub_le_sum_components hp_one hp_top (hφ_smooth n) h
+  -- ‖∂ᵢ φ_n‖_{L^p(volume)} = ‖∂ᵢ φ_n‖_{L^p(restrict Ω)}
+  have hgrad_eLp_eq :
+      ∀ n i,
+        eLpNorm (fun x => (fderiv ℝ (φ n) x) (EuclideanSpace.single i 1)) p volume =
+          eLpNorm (fun x => (fderiv ℝ (φ n) x) (EuclideanSpace.single i 1)) p
+            (volume.restrict Ω) := by
+    intro n i
+    exact eLpNorm_grad_eq_restrict (d := d) hΩ_meas (hφ_smooth n) (hφ_sub n) i
+  have hcomp_aesm_restrict : ∀ n i,
+      AEStronglyMeasurable
+        (fun x => (fderiv ℝ (φ n) x) (EuclideanSpace.single i 1))
+        (volume.restrict Ω) := by
+    intro n i
+    have hcont : Continuous
+        (fun x => (fderiv ℝ (φ n) x) (EuclideanSpace.single i 1)) :=
+      ((hφ_smooth n).continuous_fderiv (by simp)).clm_apply continuous_const
+    exact hcont.aestronglyMeasurable
+  have hwgrad_aesm : ∀ i,
+      AEStronglyMeasurable (fun x => hw.weakGrad x i) (volume.restrict Ω) :=
+    fun i => (hw.weakGrad_component_memLp i).aestronglyMeasurable
+  -- Triangle on restrict Ω
+  have hgrad_triangle : ∀ n i,
+      eLpNorm (fun x => (fderiv ℝ (φ n) x) (EuclideanSpace.single i 1)) p
+          (volume.restrict Ω) ≤
+        eLpNorm
+            (fun x =>
+              (fderiv ℝ (φ n) x) (EuclideanSpace.single i 1) - hw.weakGrad x i)
+            p (volume.restrict Ω) +
+          eLpNorm (fun x => hw.weakGrad x i) p (volume.restrict Ω) := by
+    intro n i
+    have hEq :
+        (fun x => (fderiv ℝ (φ n) x) (EuclideanSpace.single i 1)) =
+          (fun x =>
+              ((fderiv ℝ (φ n) x) (EuclideanSpace.single i 1) - hw.weakGrad x i) +
+                hw.weakGrad x i) := by
+      funext x; ring
+    rw [hEq]
+    exact eLpNorm_add_le
+      ((hcomp_aesm_restrict n i).sub (hwgrad_aesm i))
+      (hwgrad_aesm i) hp_one
+  -- Combine into: B_n ≤ |h| * (D_n + S)
+  have hB_bound : ∀ n,
+      eLpNorm (fun x => φ n (x - h) - φ n x) p volume ≤
+        ENNReal.ofReal ‖h‖ * (Dseq n + S) := by
+    intro n
+    refine (hPhaseA n).trans ?_
+    have hEq_sum :
+        ∑ i : Fin d,
+            eLpNorm (fun x => (fderiv ℝ (φ n) x) (EuclideanSpace.single i 1))
+              p volume =
+          ∑ i : Fin d,
+            eLpNorm (fun x => (fderiv ℝ (φ n) x) (EuclideanSpace.single i 1))
+              p (volume.restrict Ω) := by
+      apply Finset.sum_congr rfl
+      intros i _
+      exact hgrad_eLp_eq n i
+    rw [hEq_sum]
+    have hsum_le :
+        ∑ i : Fin d,
+            eLpNorm (fun x => (fderiv ℝ (φ n) x) (EuclideanSpace.single i 1))
+              p (volume.restrict Ω) ≤
+          Dseq n + S := by
+      rw [hDseq_def, hS_def]
+      rw [show (∑ i : Fin d,
+                eLpNorm (fun x =>
+                    (fderiv ℝ (φ n) x) (EuclideanSpace.single i 1) - hw.weakGrad x i)
+                  p (volume.restrict Ω)) +
+              ∑ i : Fin d,
+                eLpNorm (fun x => hw.weakGrad x i) p (volume.restrict Ω) =
+            ∑ i : Fin d,
+              (eLpNorm (fun x =>
+                (fderiv ℝ (φ n) x) (EuclideanSpace.single i 1) - hw.weakGrad x i)
+                p (volume.restrict Ω) +
+                eLpNorm (fun x => hw.weakGrad x i) p (volume.restrict Ω)) from
+              (Finset.sum_add_distrib).symm]
+      refine Finset.sum_le_sum ?_
+      intros i _
+      exact hgrad_triangle n i
+    gcongr
+  -- LHS ≤ A_n + |h|*(D_n + S) + C_n for each n
+  have hLHS_le : ∀ n,
+      LHS ≤
+        eLpNorm (fun x => Ω.indicator u (x - h) - φ n (x - h)) p volume +
+          ENNReal.ofReal ‖h‖ * (Dseq n + S) +
+          eLpNorm (fun x => φ n x - Ω.indicator u x) p volume := by
+    intro n
+    refine (hTri n).trans ?_
+    gcongr
+    exact hB_bound n
+  -- C_n → 0
+  have hC_to_zero :
+      Tendsto (fun n => eLpNorm (fun x => φ n x - Ω.indicator u x) p volume)
+        atTop (nhds 0) := hφ_to_uExt
+  -- D_n → 0
+  have hD_to_zero : Tendsto Dseq atTop (nhds 0) := by
+    have hsum_zero :
+        Tendsto Dseq atTop (nhds (∑ _i : Fin d, (0 : ℝ≥0∞))) := by
+      rw [hDseq_def]
+      exact tendsto_finset_sum (Finset.univ : Finset (Fin d)) (fun i _ => hφ_grad i)
+    simpa using hsum_zero
+  -- |h| * (D_n + S) → |h| * S
+  have h_mul_tendsto :
+      Tendsto (fun n => ENNReal.ofReal ‖h‖ * (Dseq n + S))
+        atTop (nhds (ENNReal.ofReal ‖h‖ * S)) := by
+    have hadd : Tendsto (fun n => Dseq n + S) atTop (nhds (0 + S)) :=
+      hD_to_zero.add tendsto_const_nhds
+    have h_zero_add : (0 : ℝ≥0∞) + S = S := by simp
+    rw [show (ENNReal.ofReal ‖h‖ * S) = ENNReal.ofReal ‖h‖ * (0 + S) by rw [h_zero_add]]
+    exact ENNReal.Tendsto.const_mul hadd (Or.inr ENNReal.ofReal_ne_top)
+  -- (A + |h|*(D + S) + C) → 0 + |h|*S + 0 = |h|*S
+  have h_sum_tendsto :
+      Tendsto
+        (fun n =>
+          eLpNorm (fun x => Ω.indicator u (x - h) - φ n (x - h)) p volume +
+            ENNReal.ofReal ‖h‖ * (Dseq n + S) +
+            eLpNorm (fun x => φ n x - Ω.indicator u x) p volume)
+        atTop (nhds (ENNReal.ofReal ‖h‖ * S)) := by
+    have h1 :
+        Tendsto
+          (fun n =>
+            eLpNorm (fun x => Ω.indicator u (x - h) - φ n (x - h)) p volume +
+              ENNReal.ofReal ‖h‖ * (Dseq n + S))
+          atTop (nhds (0 + ENNReal.ofReal ‖h‖ * S)) :=
+      hA_to_zero.add h_mul_tendsto
+    have h2 :
+        Tendsto
+          (fun n =>
+            eLpNorm (fun x => Ω.indicator u (x - h) - φ n (x - h)) p volume +
+              ENNReal.ofReal ‖h‖ * (Dseq n + S) +
+              eLpNorm (fun x => φ n x - Ω.indicator u x) p volume)
+          atTop (nhds (0 + ENNReal.ofReal ‖h‖ * S + 0)) :=
+      h1.add hC_to_zero
+    simpa using h2
+  exact le_of_tendsto_of_tendsto' tendsto_const_nhds h_sum_tendsto hLHS_le
+
+/-! ## Step D — Rellich–Kondrachov compact embedding `W^{1,p}_0(Ω) ↪ L^p(Ω)`. -/
+
+omit [NeZero d] in
+/-- A bounded set in finite-dim normed space has compact closure. -/
+private lemma isCompact_closure_of_bounded
+    {Ω : Set E} (hΩ_bdd : Bornology.IsBounded Ω) :
+    IsCompact (closure Ω) :=
+  hΩ_bdd.isCompact_closure
+
+omit [NeZero d] in
+/-- For an open bounded set `Ω`, `Ω.indicator u` is supported in `closure Ω`. -/
+private lemma indicator_supp_subset_closure
+    {Ω : Set E} {u : E → ℝ} (x : E) (hx : x ∉ closure Ω) :
+    Ω.indicator u x = 0 := by
+  rw [Set.indicator_of_notMem]
+  intro hxΩ
+  exact hx (subset_closure hxΩ)
+
+/-- **The Rellich-Kondrachov compact embedding theorem** for the Euclidean
+case. For an open bounded set `Ω ⊆ ℝ^d`, any sequence in `W^{1,p}_0(Ω)`
+that is bounded in both function and gradient norms has a subsequence
+converging in `L^p(Ω)`. -/
+theorem rellich_kondrachov_W01p_seq
+    {Ω : Set E}
+    (hΩ_open : IsOpen Ω) (hΩ_bdd : Bornology.IsBounded Ω)
+    {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
+    {u : ℕ → E → ℝ}
+    (hu_mem : ∀ n, DeGiorgi.MemW01p p (u n) Ω)
+    {R : ℝ}
+    (hu_bdd_fun : ∀ n, eLpNorm (u n) p (volume.restrict Ω) ≤ ENNReal.ofReal R)
+    (hu_bdd_grad : ∀ n,
+      ∑ i : Fin d,
+        eLpNorm (fun x => (Classical.choose (hu_mem n).2).weakGrad x i)
+          p (volume.restrict Ω) ≤ ENNReal.ofReal R) :
+    ∃ (φ : ℕ → ℕ), StrictMono φ ∧
+      ∃ u_lim : E → ℝ,
+        MeasureTheory.MemLp u_lim p (volume.restrict Ω) ∧
+        Filter.Tendsto
+          (fun k => eLpNorm (fun x => u (φ k) x - u_lim x) p (volume.restrict Ω))
+          Filter.atTop (𝓝 0) := by
+  classical
+  -- Step 1: K := closure Ω is compact (closed thickening of bounded = compact in finite-dim).
+  set K : Set E := closure Ω with hK_def
+  have hK_compact : IsCompact K := isCompact_closure_of_bounded (d := d) hΩ_bdd
+  have hΩ_meas : MeasurableSet Ω := hΩ_open.measurableSet
+  -- Step 2: Define the zero-extension ũ_n := Ω.indicator (u n).
+  set u_ext : ℕ → E → ℝ := fun n => Ω.indicator (u n) with hu_ext_def
+  -- u_ext n is supported in Ω ⊆ K.
+  have hu_ext_supp : ∀ n, ∀ x, x ∉ K → u_ext n x = 0 := by
+    intro n x hx
+    rw [hu_ext_def]
+    exact indicator_supp_subset_closure (d := d) x hx
+  -- u_ext n MemLp p volume.
+  have hu_ext_memLp : ∀ n, MemLp (u_ext n) p volume := by
+    intro n
+    -- Ω.indicator u : MemLp p volume ↔ u : MemLp p (volume.restrict Ω).
+    have h_iff := MeasureTheory.memLp_indicator_iff_restrict (μ := volume) (s := Ω)
+      (f := u n) (p := p) hΩ_meas
+    rw [hu_ext_def]
+    exact h_iff.mpr ((hu_mem n).1).1
+  -- L^p-norm bound: eLpNorm (u_ext n) p volume = eLpNorm (u n) p (volume.restrict Ω) ≤ R.
+  have hu_ext_eLp : ∀ n,
+      eLpNorm (u_ext n) p volume = eLpNorm (u n) p (volume.restrict Ω) := by
+    intro n
+    rw [hu_ext_def]
+    exact MeasureTheory.eLpNorm_indicator_eq_eLpNorm_restrict (μ := volume) (s := Ω)
+      (f := u n) (p := p) hΩ_meas
+  have hu_ext_bdd : ∀ n, eLpNorm (u_ext n) p volume ≤ ENNReal.ofReal R := by
+    intro n
+    rw [hu_ext_eLp n]
+    exact hu_bdd_fun n
+  -- Translation continuity for u_ext n: from Phase B (eLpNorm_translate_sub_le_of_memW01p).
+  -- For each n, we have:
+  --   ‖τ_h u_ext n - u_ext n‖_{L^p(volume)} ≤ ‖h‖ * Σ_i ‖∂_i u_n‖_{L^p(Ω)} ≤ ‖h‖ * R.
+  -- Note Phase B states ‖u_ext (· - h) - u_ext‖, our requirement is the same.
+  have hu_ext_translation :
+      ∀ ε > 0, ∃ δ > 0, ∀ n, ∀ h : E, ‖h‖ < δ →
+        eLpNorm (fun x => u_ext n (x - h) - u_ext n x) p volume ≤
+          ENNReal.ofReal ε := by
+    intro ε hε
+    -- Choose δ := ε / (R + 1) (ensures bound).
+    -- The phase B bound: eLpNorm ≤ ofReal ‖h‖ * grad_sum ≤ ofReal ‖h‖ * ofReal R.
+    -- We want this ≤ ofReal ε. So need ‖h‖ * R ≤ ε, i.e., ‖h‖ ≤ ε / R (for R > 0; for R ≤ 0 the bound is 0).
+    -- But R might be negative or zero. Let R' := max R 0; then R' ≥ 0 and R ≤ R'.
+    -- Then eLpNorm ≤ ofReal ‖h‖ * ofReal R ≤ ofReal ‖h‖ * ofReal R'.
+    -- Choose δ := ε / (R' + 1). Then ‖h‖ < δ → ‖h‖ < ε / (R' + 1) → ‖h‖ * (R' + 1) < ε
+    --   → ‖h‖ * R' < ε - ‖h‖ ≤ ε (since ‖h‖ > 0).
+    -- Wait, let me think again. We have ‖h‖ < δ = ε/(R'+1). So ‖h‖ * (R'+1) < ε.
+    -- Thus ‖h‖ * R' ≤ ‖h‖ * (R' + 1) < ε. Good.
+    refine ⟨ε / (max R 0 + 1), ?_, ?_⟩
+    · positivity
+    intro n h hh
+    -- Phase B bound:
+    have hPhB := eLpNorm_translate_sub_le_of_memW01p (d := d) hp_one hp_top
+      hΩ_open (hu_mem n) h
+    -- hPhB : eLpNorm (Ω.indicator u_n (· - h) - Ω.indicator u_n) p vol ≤
+    --        ofReal ‖h‖ * Σ_i ‖∂_i u_n‖_{Lp(Ω)}
+    have hgrad := hu_bdd_grad n
+    -- Σ_i ‖∂_i u_n‖_{L^p(Ω)} ≤ R, i.e., ≤ ofReal R.
+    -- So eLpNorm ≤ ofReal ‖h‖ * ofReal R.
+    -- Combine:
+    have hPhB' : eLpNorm (fun x => u_ext n (x - h) - u_ext n x) p volume ≤
+        ENNReal.ofReal ‖h‖ * ENNReal.ofReal R := by
+      refine hPhB.trans ?_
+      exact mul_le_mul' le_rfl hgrad
+    -- Now bound ofReal ‖h‖ * ofReal R ≤ ofReal ‖h‖ * ofReal (max R 0).
+    have hR_le_max : (R : ℝ) ≤ max R 0 := le_max_left R 0
+    have h2 : ENNReal.ofReal ‖h‖ * ENNReal.ofReal R ≤
+        ENNReal.ofReal ‖h‖ * ENNReal.ofReal (max R 0) :=
+      mul_le_mul' le_rfl (ENNReal.ofReal_le_ofReal hR_le_max)
+    -- And ofReal ‖h‖ * ofReal (max R 0) ≤ ofReal ε via ‖h‖ < δ.
+    have hmaxR_nn : 0 ≤ max R 0 := le_max_right R 0
+    have hdelta_pos : 0 < (max R 0 + 1) := by linarith
+    have hh_le : ‖h‖ ≤ ε / (max R 0 + 1) := hh.le
+    have hh_nn : 0 ≤ ‖h‖ := norm_nonneg _
+    -- ‖h‖ * (max R 0) ≤ ‖h‖ * (max R 0 + 1) ≤ ε (using ‖h‖ ≤ ε / (max R 0 + 1)).
+    have h3 : ‖h‖ * max R 0 ≤ ε := by
+      have h3a : ‖h‖ * max R 0 ≤ ‖h‖ * (max R 0 + 1) :=
+        mul_le_mul_of_nonneg_left (by linarith) hh_nn
+      have h3b : ‖h‖ * (max R 0 + 1) ≤ ε := by
+        rw [show (ε : ℝ) = ε / (max R 0 + 1) * (max R 0 + 1) from
+          (div_mul_cancel₀ ε hdelta_pos.ne').symm]
+        exact mul_le_mul_of_nonneg_right hh_le (by linarith)
+      linarith
+    -- Combine to ENNReal.
+    have h4 : ENNReal.ofReal ‖h‖ * ENNReal.ofReal (max R 0) ≤ ENNReal.ofReal ε := by
+      rw [← ENNReal.ofReal_mul hh_nn]
+      exact ENNReal.ofReal_le_ofReal h3
+    exact hPhB'.trans (h2.trans h4)
+  -- Step 3: Apply C.8 (tendsto_subseq_of_uniform_translation_in_Lp).
+  rcases tendsto_subseq_of_uniform_translation_in_Lp (d := d)
+    hp_one hp_top hK_compact hu_ext_memLp hu_ext_supp hu_ext_bdd hu_ext_translation with
+    ⟨φ, hφ_mono, u_lim_v, hu_lim_v_memLp, h_tendsto_v⟩
+  -- Step 4: We have the convergence in L^p(volume). Convert to L^p(volume.restrict Ω).
+  -- Define the desired limit u_lim := u_lim_v restricted to Ω (or the full function; only Ω matters).
+  -- Set u_lim := u_lim_v. Note: MemLp u_lim_v p volume → MemLp u_lim_v p (volume.restrict Ω)
+  -- since volume.restrict Ω ≤ volume.
+  refine ⟨φ, hφ_mono, u_lim_v, hu_lim_v_memLp.restrict Ω, ?_⟩
+  -- h_tendsto_v : Tendsto (fun k => eLpNorm (u_ext (φ k) - u_lim_v) p volume) atTop (𝓝 0)
+  -- We need: Tendsto (fun k => eLpNorm (u (φ k) - u_lim_v) p (volume.restrict Ω)) atTop (𝓝 0).
+  -- u_ext (φ k) =ᵐ Ω.indicator (u (φ k)).
+  -- eLpNorm (u_ext (φ k) - u_lim_v) p volume ≥ eLpNorm (u_ext (φ k) - u_lim_v) p (volume.restrict Ω)
+  -- (since restrict ≤ vol).
+  -- And on Ω: u_ext (φ k) = u (φ k). So difference is u (φ k) - u_lim_v on Ω.
+  -- Hence eLpNorm (u (φ k) - u_lim_v) p (vol.restrict Ω) ≤ eLpNorm (u_ext (φ k) - u_lim_v) p vol.
+  -- So convergence in volume implies convergence in restrict Ω.
+  have hSqueeze : ∀ k,
+      eLpNorm (fun x => u (φ k) x - u_lim_v x) p (volume.restrict Ω) ≤
+        eLpNorm (fun x => u_ext (φ k) x - u_lim_v x) p volume := by
+    intro k
+    -- On Ω, u_ext (φ k) = u (φ k), so u_ext (φ k) x - u_lim_v x = u (φ k) x - u_lim_v x for x ∈ Ω.
+    have h_cong : ∀ᵐ x ∂(volume.restrict Ω),
+        u (φ k) x - u_lim_v x = u_ext (φ k) x - u_lim_v x := by
+      filter_upwards [self_mem_ae_restrict hΩ_meas] with x hx
+      simp [hu_ext_def, Set.indicator_of_mem hx]
+    -- eLpNorm congr.
+    have h_eq : eLpNorm (fun x => u (φ k) x - u_lim_v x) p (volume.restrict Ω) =
+        eLpNorm (fun x => u_ext (φ k) x - u_lim_v x) p (volume.restrict Ω) :=
+      eLpNorm_congr_ae h_cong
+    rw [h_eq]
+    -- restrict ≤ volume gives the bound.
+    exact eLpNorm_mono_measure _ Measure.restrict_le_self
+  -- Squeeze theorem: f_k ≤ g_k → 0, both ≥ 0, so f_k → 0.
+  refine ENNReal.tendsto_atTop_zero.mpr ?_
+  intro ε hε
+  rw [ENNReal.tendsto_atTop_zero] at h_tendsto_v
+  rcases h_tendsto_v ε hε with ⟨N, hN⟩
+  refine ⟨N, fun n hn => ?_⟩
+  exact (hSqueeze n).trans (hN n hn)
+
+end DifferentialGeometry.Analysis.Sobolev
