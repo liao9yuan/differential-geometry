@@ -48,14 +48,6 @@ def differential1FormFun (u : M -> Real) (x : M) :
     Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x :=
   dualToCotangent (I := I) (mfderiv I 𝓘(Real, Real) u x).toLinearMap
 
-/-- Smooth one-form sections used by the section-level covariant-derivative API. -/
-abbrev OneFormSection :=
-  Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) ⊤ 1
-
-/-- Smooth covariant two-tensor sections used by the section-level derivative API. -/
-abbrev TwoTensorSection :=
-  Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) ⊤ 2
-
 /-- Raw differential one-form as a pointwise function. Bundling it as a smooth
 section is kept as an explicit regularity/realization step. -/
 def duField (u : M -> Real) (x : M) :
@@ -144,34 +136,6 @@ theorem scalar_laplacian_trace_of_hessian
         metricTrace0S2InBasis (I := I) basis gInv hessF Fin.elim0) :
     ScalarLaplacianRealizesTraceAt (I := I) cov g basis gInv f hessF :=
   htrace
-
-/-- A supplied `(0,2)` tensor field realizes the covariant derivative of a
-bundled one-form at `x`. -/
-def NablaOneFormRealizesAt
-    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (alpha : OneFormSection (I := I) (M := M))
-    (nablaAlpha : (x : M) ->
-      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
-    (x : M) : Prop :=
-  ∀ (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
-      (Y : TangentSpace I x),
-    nablaAlpha x (vec2 (X x) Y) =
-      nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-        1 cov X alpha x (fun _ : Fin 1 => Y)
-
-/-- A supplied `(0,3)` tensor realizes the second covariant derivative of a
-bundled one-form derivative tensor at `x`. -/
-def Nabla2OneFormRealizesAt
-    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (nablaAlpha : TwoTensorSection (I := I) (M := M))
-    (x : M)
-    (nabla2Alpha :
-      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x) : Prop :=
-  ∀ (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
-      (Y Z : TangentSpace I x),
-    nabla2Alpha (vec3 (X x) Y Z) =
-      nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-        2 cov X nablaAlpha x (vec2 Y Z)
 
 /-- A chosen family of smooth vector fields realizes a pointwise tangent basis
 at `x`. -/
@@ -400,6 +364,37 @@ def CurvatureTraceDuEqRicciGradAt
   CurvatureTraceOneFormEqRicVectorAt (I := I) Ric Rm13
     (differential1FormFun (I := I) u x) basis gInv
     (gradientFun (I := I) g u x)
+
+/-- The pointwise differential one-form is the metric dual of the gradient. -/
+theorem differential1FormFun_eq_metric_dual_gradientFun
+    (g : SmoothRiemannianMetric I M) (u : M -> Real) (x : M) :
+    differential1FormFun (I := I) u x =
+      dualToCotangent (I := I)
+        ((tangentFlatLinear (I := I) g x) (gradientFun (I := I) g u x)) := by
+  apply cotangentToDualLinear_injective (I := I) (x := x)
+  ext V
+  simp [differential1FormFun, tangentFlatLinear_apply]
+  exact (inner_gradientFun (I := I) g u x V).symm
+
+/-- The curvature trace term for `du` is the Ricci-gradient pairing, assuming
+the `(1,3)` curvature tensor is the Ricci trace source and satisfies the
+metric skew-adjointness of the curvature endomorphism. -/
+theorem curvatureTraceDuEqRicciGradAt_of_metric_dual
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (g : SmoothRiemannianMetric I M)
+    (Ric : Tensor02Section (I := I) (M := M))
+    (Rm13 : Tensor13Section (I := I) (M := M))
+    (u : M -> Real)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInv)
+    (hRic : RicciTensorRealizesRm13Trace (I := I) Ric Rm13)
+    (hSkew : Rm13MetricSkewAt (I := I) g x (Rm13 x)) :
+    CurvatureTraceDuEqRicciGradAt (I := I) g Ric Rm13 u basis gInv := by
+  exact curvatureTraceOneFormEqRicVectorAt_of_metric_dual (I := I) g Ric Rm13
+    (differential1FormFun (I := I) u x) basis gInv
+    (gradientFun (I := I) g u x) hinv hRic hSkew
+    (differential1FormFun_eq_metric_dual_gradientFun (I := I) g u x)
 
 /-- Coordinate components of the supplied second covariant derivative of `du`
 in a pointwise tangent basis. -/
@@ -783,7 +778,7 @@ theorem oneForm_norm_product_rule_of_metric_compatible
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (_hmc : LeviCivita.IsMetricCompatibleAt (I := I) cov g x)
     (_hnabla : NablaOneFormRealizesAt (I := I) cov alpha nablaAlpha x)
-    (_hnabla2 : Nabla2OneFormRealizesAt (I := I) cov nablaAlphaSec x nabla2Alpha)
+    (_hnabla2 : Nabla2OneFormRealizesAt (I := I) cov alpha nablaAlphaSec x nabla2Alpha)
     (hlap : ScalarLaplacianRealizesTraceAt (I := I) cov g basis gInv
       (fun y : M => inner0S (I := I) g y 1 (alphaRaw y) (alphaRaw y)) normSecond)
     (htrace : MetricTraceInnerProductRuleAt (I := I) basis gInv
@@ -814,7 +809,7 @@ theorem oneForm_norm_second_product_of_metric_compatible
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (_hmc : LeviCivita.IsMetricCompatibleAt (I := I) cov g x)
     (_hnabla : NablaOneFormRealizesAt (I := I) cov alpha nablaAlpha x)
-    (_hnabla2 : Nabla2OneFormRealizesAt (I := I) cov nablaAlphaSec x nabla2Alpha)
+    (_hnabla2 : Nabla2OneFormRealizesAt (I := I) cov alpha nablaAlphaSec x nabla2Alpha)
     (hprod : OneFormNormSecondProductInBasis (I := I) basis gInv
       (alphaRaw x) (nablaAlpha x) nabla2Alpha normSecond) :
     MetricTraceInnerProductRuleAt (I := I) basis gInv
@@ -976,7 +971,7 @@ theorem oneForm_ricci_identity_components
     (_hRic : RicciTensorRealizesRm13Trace (I := I) Ric Rm13)
     (_hdu : DuFieldRealizes (I := I) u duSec)
     (_hnabla : NablaOneFormRealizesAt (I := I) cov duSec nablaDu x)
-    (_hnabla2 : Nabla2OneFormRealizesAt (I := I) cov nablaDuSec x nabla2Du)
+    (_hnabla2 : Nabla2OneFormRealizesAt (I := I) cov duSec nablaDuSec x nabla2Du)
     (hrough : RoughLap0SRealizesMetricTrace (I := I) basis gInv
       (s := 1) (roughDu x) nabla2Du)
     (hdlap : TraceNablaHessianRealizesDLapAt (I := I) cov g basis gInv u nabla2Du)
@@ -998,9 +993,12 @@ theorem oneForm_ricci_identity_components
           Ric x (vec2 Y (gradientFun (I := I) g u x)) := by
           rw [hdlap Y]
 
-/-- Geometric frontier for the Ricci trace commutator.  This is where the
-future tensor Ricci-identity proof belongs; the consumer theorem
-`oneForm_ricci_identity_components` above is already closed. -/
+/-- Ricci trace commutator from the three geometric one-form inputs.
+
+The strengthened `Nabla2OneFormRealizesAt` records that `nabla2Du` is the true
+iterated derivative of `du`; the still-separate geometric producers are
+trailing-slot symmetry, the untraced one-form curvature commutator, and the
+metric skew-adjointness needed to trace curvature to Ricci. -/
 theorem one_form_ricci_trace_comm_of_lc
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -1022,9 +1020,21 @@ theorem one_form_ricci_trace_comm_of_lc
     (_hRic : RicciTensorRealizesRm13Trace (I := I) Ric Rm13)
     (_hdu : DuFieldRealizes (I := I) u duSec)
     (_hnabla : NablaOneFormRealizesAt (I := I) cov duSec nablaDu x)
-    (_hnabla2 : Nabla2OneFormRealizesAt (I := I) cov nablaDuSec x nabla2Du) :
+    (_hnabla2 : Nabla2OneFormRealizesAt (I := I) cov duSec nablaDuSec x nabla2Du)
+    (hsymm : OneFormLastTwoSymmAt (I := I) nabla2Du)
+    (hthird : OneFormThirdCovDerivCommAt (I := I) Rm13
+      (differential1FormFun (I := I) u x) nabla2Du)
+    (hSkew : Rm13MetricSkewAt (I := I) g x (Rm13 x)) :
     OneFormRicciTraceCommAt (I := I) g Ric u basis gInv nabla2Du := by
-  sorry
+  exact oneForm_ricci_trace_comm_of_third_comm (I := I) Ric Rm13
+    (differential1FormFun (I := I) u x) basis gInv
+    (gradientFun (I := I) g u x) nabla2Du hsymm hthird
+    (by
+      have hcurv := curvatureTraceDuEqRicciGradAt_of_metric_dual
+        (I := I) g Ric Rm13 u basis gInv _hinv _hRic hSkew
+      intro Y
+      simpa [CurvatureTraceDuEqRicciGradAt, curvatureTraceDuAt,
+        curvatureTraceOneFormAt] using hcurv Y)
 
 /-- Geometric wrapper exposing the pointwise commutator interface from the
 component Ricci-identity frontier. -/
@@ -1051,7 +1061,7 @@ theorem oneForm_commutator_eval_of_components
     (hRic : RicciTensorRealizesRm13Trace (I := I) Ric Rm13)
     (hdu : DuFieldRealizes (I := I) u duSec)
     (hnabla : NablaOneFormRealizesAt (I := I) cov duSec nablaDu x)
-    (hnabla2 : Nabla2OneFormRealizesAt (I := I) cov nablaDuSec x nabla2Du)
+    (hnabla2 : Nabla2OneFormRealizesAt (I := I) cov duSec nablaDuSec x nabla2Du)
     (hrough : RoughLap0SRealizesMetricTrace (I := I) basis gInv
       (s := 1) (roughDu x) nabla2Du)
     (hdlap : TraceNablaHessianRealizesDLapAt (I := I) cov g basis gInv u nabla2Du)
@@ -1086,7 +1096,11 @@ theorem oneForm_commutator_eval_of_lc
     (hRic : RicciTensorRealizesRm13Trace (I := I) Ric Rm13)
     (hdu : DuFieldRealizes (I := I) u duSec)
     (hnabla : NablaOneFormRealizesAt (I := I) cov duSec nablaDu x)
-    (hnabla2 : Nabla2OneFormRealizesAt (I := I) cov nablaDuSec x nabla2Du)
+    (hnabla2 : Nabla2OneFormRealizesAt (I := I) cov duSec nablaDuSec x nabla2Du)
+    (hsymm : OneFormLastTwoSymmAt (I := I) nabla2Du)
+    (hthird : OneFormThirdCovDerivCommAt (I := I) Rm13
+      (differential1FormFun (I := I) u x) nabla2Du)
+    (hSkew : Rm13MetricSkewAt (I := I) g x (Rm13 x))
     (hrough : RoughLap0SRealizesMetricTrace (I := I) basis gInv
       (s := 1) (roughDu x) nabla2Du)
     (hdlap : TraceNablaHessianRealizesDLapAt (I := I) cov g basis gInv u nabla2Du) :
@@ -1096,7 +1110,7 @@ theorem oneForm_commutator_eval_of_lc
     hinv hlc hRm hRic hdu hnabla hnabla2 hrough hdlap
     (one_form_ricci_trace_comm_of_lc (I := I) cov g Ric Rm13 u basis gInv
       duSec nablaDu nablaDuSec nabla2Du
-      hinv hlc hRm hRic hdu hnabla hnabla2)
+      hinv hlc hRm hRic hdu hnabla hnabla2 hsymm hthird hSkew)
 
 /-- One-form commutator formula for `du`, produced from the primary pointwise
 commutator interface. -/
@@ -1249,7 +1263,7 @@ theorem fundamental_bochner_of_terms
     (hmc : LeviCivita.IsMetricCompatibleAt (I := I) cov g x)
     (hHess : HessianRealizesNablaDuAt (I := I) cov duSec Hess x)
     (hnabla : NablaOneFormRealizesAt (I := I) cov duSec nablaDu x)
-    (hnabla2 : Nabla2OneFormRealizesAt (I := I) cov nablaDuSec x nabla2Du)
+    (hnabla2 : Nabla2OneFormRealizesAt (I := I) cov duSec nablaDuSec x nabla2Du)
     (hlapTrace :
       laplacian (I := I) cov g
         (fun y : M =>
@@ -1313,7 +1327,7 @@ theorem fundamental_bochner_of_components
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (hdu : DuFieldRealizes (I := I) u duSec)
     (hnabla : NablaOneFormRealizesAt (I := I) cov duSec nablaDu x)
-    (hnabla2 : Nabla2OneFormRealizesAt (I := I) cov nablaDuSec x nabla2Du)
+    (hnabla2 : Nabla2OneFormRealizesAt (I := I) cov duSec nablaDuSec x nabla2Du)
     (hlap : ScalarLaplacianRealizesTraceAt (I := I) cov g basis gInvAt
       (fun y : M =>
         inner0S (I := I) g y 1

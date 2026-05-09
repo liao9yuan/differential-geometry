@@ -30,3 +30,4 @@ import RicciFlower.Realized.Operators
 import RicciFlower.Realized.Bochner
 import RicciFlower.MaximumPrinciple.ScalarWeak
 import RicciFlower.Coordinates.Christoffel
+import RicciFlower.Coordinates.NablaComponents

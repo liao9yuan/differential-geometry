@@ -1,5 +1,6 @@
 import RicciFlower.Realized.CurvatureTensor
 import RicciFlower.Realized.TensorRicciIdentity
+import RicciFlower.Coordinates.NablaComponents.Basic
 import RicciFlower.Tensor.RSTensor.Components
 
 set_option autoImplicit false
@@ -184,6 +185,71 @@ theorem contract_trace13_component_basis
   · change vec2 (basis i) (basis j) 1 = basis j
     simp [vec2]
 
+/-- Basis-coordinate evaluation of the intrinsic trace contraction defining
+Ricci from a `(1,3)` tensor, with arbitrary second and third inputs. -/
+theorem ricciFromRm13At_apply_basis_trace
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (Rm13 : Tensor13At (I := I) (M := M) x)
+    (Y Z : TangentSpace I x) :
+    ricciFromRm13At (I := I) (M := M) Rm13 (vec2 Y Z) =
+      ∑ a : Idx,
+        Rm13 (dualToCotangent (I := I) (basis.coord a))
+          (vec3 (basis a) Y Z) := by
+  haveI : IsManifold I 1 M := IsManifold.of_le (I := I) (M := M) (n := ∞) (by simp)
+  letI := tensor0SBundle_topology (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 0
+  letI := tensor0SBundle_topology (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1
+  letI := tensor0SBundle_topology (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2
+  letI := tensor0SBundle_topology (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3
+  letI := tensorRSBundle_topology (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 0 2
+  letI := tensorRSBundle_topology (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 3
+  change ((contract_trace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 0 2 x Rm13)
+      (scalarOne0S (I := I) x)) (vec2 Y Z) = _
+  unfold contract_trace
+  change ((model_contract_trace (𝕜 := Real) (E := E) 0 2
+      (TensorRSSpace.toModel (I := I) Rm13))
+      (Tensor0SSpace.toModel (I := I) (scalarOne0S (I := I) x)))
+      (vec2 Y Z) = _
+  rw [model_contract_trace_apply_basis (𝕜 := Real) (E := E) basis 0 2]
+  refine Finset.sum_congr rfl fun a _ => ?_
+  let covM : Tensor0SModel 1 Real E :=
+    (continuousMultilinearCurryFin1 Real E Real).symm
+      (LinearMap.toContinuousLinearMap (basis.coord a))
+  have hinput :
+      Bundle.continuousMultilinearMap.modelProduct 1 0 covM
+          (ContinuousMultilinearMap.constOfIsEmpty Real (fun _ : Fin 0 => TangentSpace I x) 1) =
+        covM := by
+    ext v
+    rw [Bundle.continuousMultilinearMap.modelProduct_apply]
+    change (basis.coord a) (v 0) * 1 = (basis.coord a) (v 0)
+    ring
+  simp only [model_interior_product, model_tensorWithCovector_first, model_covectorOfCLM,
+    scalarOne0S, TensorRSSpace.toModel, Tensor0SSpace.toModel,
+    tensorRSSpace_continuousLinearEquiv]
+  change (Rm13
+      (Bundle.continuousMultilinearMap.modelProduct 1 0 covM
+        (ContinuousMultilinearMap.constOfIsEmpty Real (fun _ : Fin 0 => TangentSpace I x) 1)))
+      (Fin.cons (basis a) (vec2 Y Z)) =
+    Rm13 (dualToCotangent (I := I) (basis.coord a)) (vec3 (basis a) Y Z)
+  have hleft :
+      (Rm13
+        (Bundle.continuousMultilinearMap.modelProduct 1 0 covM
+          (ContinuousMultilinearMap.constOfIsEmpty Real (fun _ : Fin 0 => TangentSpace I x) 1)))
+        (Fin.cons (basis a) (vec2 Y Z)) =
+      (Rm13 covM) (Fin.cons (basis a) (vec2 Y Z)) := by
+    exact congrArg
+      (fun U => (Rm13 U) (Fin.cons (basis a) (vec2 Y Z))) hinput
+  rw [hleft]
+  change (Rm13 (dualToCotangent (I := I) (basis.coord a)))
+      (Fin.cons (basis a) (vec2 Y Z)) =
+    Rm13 (dualToCotangent (I := I) (basis.coord a)) (vec3 (basis a) Y Z)
+  congr 1
+  funext q
+  fin_cases q
+  · rfl
+  · rfl
+  · change vec2 Y Z 1 = Z
+    simp [vec2]
+
 /-- A lowered `(0,4)` tensor is obtained from a `(1,3)` tensor by lowering the
 output slot with the metric. -/
 def Rm04LowersRm13At
@@ -194,6 +260,40 @@ def Rm04LowersRm13At
     Rm04 (vec4 W X Y Z) =
       Rm13 (dualToCotangent (I := I) ((tangentFlatLinear (I := I) g x) W))
         (vec3 X Y Z)
+
+/-- Metric skew-adjointness of the curvature endomorphism in `(1,3)` form:
+`g(W,R(X,Y)Z) = -g(Z,R(X,Y)W)`. -/
+def Rm13MetricSkewAt
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (Rm13 : Tensor13At (I := I) (M := M) x) : Prop :=
+  forall W X Y Z : TangentSpace I x,
+    Rm13 (dualToCotangent (I := I) ((tangentFlatLinear (I := I) g x) W))
+        (vec3 X Y Z) =
+      -Rm13 (dualToCotangent (I := I) ((tangentFlatLinear (I := I) g x) Z))
+        (vec3 X Y W)
+
+/-- Last-pair metric skew for a lowered Riemann tensor in RicciFlower's slot
+order `Rm04(W,X,Y,Z) = g(W,R(X,Y)Z)`. -/
+def Rm04OutputSkewAt
+    (Rm04 : Tensor04At (I := I) (M := M) x) : Prop :=
+  forall W X Y Z : TangentSpace I x,
+    Rm04 (vec4 W X Y Z) = -Rm04 (vec4 Z X Y W)
+
+theorem rm13MetricSkewAt_of_rm04_outputSkew
+    (g : SmoothRiemannianMetric I M)
+    (Rm13 : Tensor13At (I := I) (M := M) x)
+    (Rm04 : Tensor04At (I := I) (M := M) x)
+    (hLower : Rm04LowersRm13At (I := I) g x Rm13 Rm04)
+    (hSkew : Rm04OutputSkewAt (I := I) Rm04) :
+    Rm13MetricSkewAt (I := I) g x Rm13 := by
+  intro W X Y Z
+  calc
+    Rm13 (dualToCotangent (I := I) ((tangentFlatLinear (I := I) g x) W))
+        (vec3 X Y Z)
+        = Rm04 (vec4 W X Y Z) := (hLower W X Y Z).symm
+    _ = -Rm04 (vec4 Z X Y W) := hSkew W X Y Z
+    _ = -Rm13 (dualToCotangent (I := I) ((tangentFlatLinear (I := I) g x) Z))
+        (vec3 X Y W) := by rw [hLower Z X Y W]
 
 /-- The signed curvature trace appearing when commuting the first two slots of
 `∇²α` for a one-form `α`.
@@ -287,6 +387,96 @@ theorem basis_coord_eq_sum_inv_inner
           rw [(hinv a j).1]
     _ = basis.coord a V := by
           simp
+
+theorem rm13_dualCoord_apply_eq_sum_inv_flat
+    (g : SmoothRiemannianMetric I M)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInv)
+    (Rm13 : Tensor13At (I := I) (M := M) x)
+    (a : Idx) (X Y Z : TangentSpace I x) :
+    Rm13 (dualToCotangent (I := I) (basis.coord a)) (vec3 X Y Z) =
+      ∑ k : Idx,
+        gInv a k *
+          Rm13 (dualToCotangent (I := I) ((tangentFlatLinear (I := I) g x) (basis k)))
+            (vec3 X Y Z) := by
+  have hdual :
+      dualToCotangent (I := I) (basis.coord a) =
+        ∑ k : Idx, gInv a k •
+          dualToCotangent (I := I) ((tangentFlatLinear (I := I) g x) (basis k)) := by
+    apply cotangentToDualLinear_injective (I := I) (x := x)
+    ext V
+    simp [tangentFlatLinear_apply,
+      basis_coord_eq_sum_inv_inner (I := I) g basis gInv hinv a V]
+  rw [hdual]
+  rw [_root_.map_sum Rm13]
+  rw [tensor0SSpace_sum_apply]
+  refine Finset.sum_congr rfl fun k _ => ?_
+  rw [map_smul]
+  rw [ContinuousMultilinearMap.smul_apply]
+  simp [smul_eq_mul]
+
+theorem curvatureTraceOneFormEqRicVectorAt_of_metric_dual
+    (g : SmoothRiemannianMetric I M)
+    (Ric : Tensor02Section (I := I) (M := M))
+    (Rm13 : Tensor13Section (I := I) (M := M))
+    {x : M}
+    (alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (curvatureVector : TangentSpace I x)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInv)
+    (hRic : RicciTensorRealizesRm13Trace (I := I) Ric Rm13)
+    (hSkew : Rm13MetricSkewAt (I := I) g x (Rm13 x))
+    (hAlpha :
+      alpha =
+        dualToCotangent (I := I)
+          ((tangentFlatLinear (I := I) g x) curvatureVector)) :
+    CurvatureTraceOneFormEqRicVectorAt (I := I) Ric Rm13 alpha basis gInv
+      curvatureVector := by
+  intro Y
+  unfold curvatureTraceOneFormAt
+  rw [hAlpha]
+  calc
+    -(∑ i : Idx, ∑ j : Idx,
+        gInv i j *
+          Rm13 x
+            (dualToCotangent (I := I)
+              ((tangentFlatLinear (I := I) g x) curvatureVector))
+            (vec3 (basis i) Y (basis j)))
+        = ∑ i : Idx, ∑ j : Idx,
+            gInv i j *
+              Rm13 x
+                (dualToCotangent (I := I)
+                  ((tangentFlatLinear (I := I) g x) (basis j)))
+                (vec3 (basis i) Y curvatureVector) := by
+          have hrewrite : ∀ i j : Idx,
+              Rm13 x
+                (dualToCotangent (I := I)
+                  ((tangentFlatLinear (I := I) g x) curvatureVector))
+                (vec3 (basis i) Y (basis j)) =
+              -Rm13 x
+                (dualToCotangent (I := I)
+                  ((tangentFlatLinear (I := I) g x) (basis j)))
+                (vec3 (basis i) Y curvatureVector) := by
+            intro i j
+            exact hSkew curvatureVector (basis i) Y (basis j)
+          simp_rw [hrewrite]
+          simp_rw [mul_neg, Finset.sum_neg_distrib]
+          ring
+    _ = ∑ i : Idx,
+          Rm13 x (dualToCotangent (I := I) (basis.coord i))
+            (vec3 (basis i) Y curvatureVector) := by
+          refine Finset.sum_congr rfl fun i _ => ?_
+          exact (rm13_dualCoord_apply_eq_sum_inv_flat (I := I) g basis gInv hinv
+            (Rm13 x) i (basis i) Y curvatureVector).symm
+    _ = ricciFromRm13At (I := I) (M := M) (Rm13 x)
+          (vec2 Y curvatureVector) := by
+          rw [ricciFromRm13At_apply_basis_trace (I := I) basis (Rm13 x)
+            Y curvatureVector]
+    _ = Ric x (vec2 Y curvatureVector) := by
+          rw [hRic x]
 
 /-- Coordinate form of `Ric(Y,Z) = trace (X |-> R(X,Y)Z)`, rewritten through a
 lowered `(0,4)` Riemann tensor. With the convention
@@ -509,6 +699,172 @@ theorem scalar_eq_trace_ricci_frame
     (gInv x) (scalarTraceAt_of_frame (I := I) scalar Ric gInv frame hframe hScalar hx)
 
 end LocalFrame
+
+section CoordinateChristoffelCurvature
+
+open RicciFlower.Coordinates
+
+variable [Module.Finite Real E] [CompleteSpace Real]
+variable [IsManifold I 1 M] [IsManifold I 2 M]
+variable [IsManifold I ((⊤ : WithTop ℕ∞) + 1) M]
+
+/-- Christoffel coefficients in the chart-induced coordinate frame at `x₀`.
+
+With this convention `christoffelCoordAt cov x₀ i j k` is `Γ^k_{ij}(x₀)`. -/
+def christoffelCoordAt
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (x₀ : M) (i j k : CoordinateIdx E) : Real :=
+  christoffelSymbolInFrame cov (coordinateFrameAt (I := I) x₀)
+    (coordinateFrameAt_isLocalFrame_one (I := I) x₀) x₀ i j k
+
+/-- The coordinate-frame Christoffel coefficient as a scalar function near `x₀`. -/
+def christoffelCoordFun
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (x₀ : M) (i j k : CoordinateIdx E) (x : M) : Real :=
+  christoffelSymbolInFrame cov (coordinateFrameAt (I := I) x₀)
+    (coordinateFrameAt_isLocalFrame_one (I := I) x₀) x i j k
+
+/-- Directional derivative of a coordinate-frame Christoffel coefficient at `x₀`. -/
+def christoffelCoordDerivAt
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (x₀ : M) (dir i j k : CoordinateIdx E) : Real :=
+  extDerivFun (I := I) (christoffelCoordFun (I := I) cov x₀ i j k) x₀
+    (coordinateFrameAt (I := I) x₀ dir x₀)
+
+/-- Coordinate curvature coefficient for the chart-induced coordinate frame.
+
+The convention is
+`R^m_{j i k} = ∂ᵢ Γ^m_{k j} - ∂ₖ Γ^m_{i j}
+  + Γ^a_{k j} Γ^m_{i a} - Γ^a_{i j} Γ^m_{k a}`.
+The bracket term is absent only for this coordinate frame. -/
+def christoffelCurvCoeffAt
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (x₀ : M) (i k j m : CoordinateIdx E) : Real :=
+  christoffelCoordDerivAt (I := I) cov x₀ i k j m -
+    christoffelCoordDerivAt (I := I) cov x₀ k i j m +
+    (∑ a : CoordinateIdx E,
+      christoffelCoordAt (I := I) cov x₀ k j a *
+        christoffelCoordAt (I := I) cov x₀ i a m) -
+    (∑ a : CoordinateIdx E,
+      christoffelCoordAt (I := I) cov x₀ i j a *
+        christoffelCoordAt (I := I) cov x₀ k a m)
+
+/-- Coordinate-frame expansion of the connection curvature vector.
+
+This is the geometric Christoffel-expansion frontier: it is where the product
+rule for `∇_{eᵢ}(Γ^a_{kj} e_a)` and the coordinate-frame bracket-zero theorem
+belong.  Downstream tensor statements should consume this predicate rather than
+re-expanding vector-field covariant derivatives. -/
+def ConnectionCurvatureCoordAt
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (x₀ : M) : Prop :=
+  ∀ i k j : CoordinateIdx E,
+    (connectionRiemannCurvatureField (I := I) cov
+      (coordinateFrameAt (I := I) x₀ i)
+      (coordinateFrameAt (I := I) x₀ k)
+      (coordinateFrameAt (I := I) x₀ j)) x₀ =
+        ∑ m : CoordinateIdx E,
+          christoffelCurvCoeffAt (I := I) cov x₀ i k j m •
+            coordinateFrameAt (I := I) x₀ m x₀
+
+/-- Future producer theorem for `ConnectionCurvatureCoordAt`.
+
+The proof should use `covariantDerivative_eq_sum_christoffel`, the coordinate
+frame expansion product rule, and `coordinateFrameAt_bracket_zero`. -/
+theorem connection_curvature_coord_of_christoffel
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (x₀ : M) :
+    ConnectionCurvatureCoordAt (I := I) cov x₀ := by
+  -- Frontier: this is the honest vector-field calculation
+  -- `∇ᵢ(Γ^a_{kj} e_a) - ∇ₖ(Γ^a_{ij} e_a)` in the chart-induced coordinate
+  -- frame, plus the already proved bracket-zero theorem for that frame.
+  sorry
+
+/-- The supplied `(1,3)` curvature tensor evaluates to the Christoffel
+curvature coefficients in the chart-induced coordinate frame. -/
+theorem rm13_eval_eq_christoffelCurvCoord
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (Rm13 : Tensor13Section (I := I) (M := M))
+    (x₀ : M)
+    (alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x₀)
+    (hRm : Rm13RealizesConnection (I := I) cov Rm13)
+    (hcurv : ConnectionCurvatureCoordAt (I := I) cov x₀)
+    (i k j : CoordinateIdx E) :
+    Rm13 x₀ alpha
+        (vec3 (coordinateFrameAt (I := I) x₀ i x₀)
+          (coordinateFrameAt (I := I) x₀ k x₀)
+          (coordinateFrameAt (I := I) x₀ j x₀)) =
+      ∑ m : CoordinateIdx E,
+        christoffelCurvCoeffAt (I := I) cov x₀ i k j m *
+          alpha (fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ m x₀) := by
+  rw [hRm (coordinateFrameAt (I := I) x₀ i)
+    (coordinateFrameAt (I := I) x₀ k) (coordinateFrameAt (I := I) x₀ j)
+    x₀ alpha]
+  rw [hcurv i k j]
+  change cotangentToDual (I := I) alpha
+      (∑ m : CoordinateIdx E,
+        christoffelCurvCoeffAt (I := I) cov x₀ i k j m •
+          coordinateFrameAt (I := I) x₀ m x₀) =
+    ∑ m : CoordinateIdx E,
+      christoffelCurvCoeffAt (I := I) cov x₀ i k j m *
+        alpha (fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ m x₀)
+  rw [map_sum]
+  refine Finset.sum_congr rfl fun m _ => ?_
+  simp [cotangentToDual_apply, smul_eq_mul]
+
+/-- Coordinate Christoffel-form one-form Ricci identity.
+
+This is the scalar-coordinate producer that should be discharged by expanding
+`nabla0SFun` with the coordinate Christoffel formulas and commuting the scalar
+second derivatives. -/
+def OneFormThirdCommChristoffelCoordAt
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (x₀ : M)
+    (alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x₀)
+    (nabla2Alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x₀) :
+    Prop :=
+  ∀ i k j : CoordinateIdx E,
+    nabla2Alpha
+        (vec3 (coordinateFrameAt (I := I) x₀ i x₀)
+          (coordinateFrameAt (I := I) x₀ k x₀)
+          (coordinateFrameAt (I := I) x₀ j x₀)) -
+      nabla2Alpha
+        (vec3 (coordinateFrameAt (I := I) x₀ k x₀)
+          (coordinateFrameAt (I := I) x₀ i x₀)
+          (coordinateFrameAt (I := I) x₀ j x₀)) =
+        -∑ m : CoordinateIdx E,
+          christoffelCurvCoeffAt (I := I) cov x₀ i k j m *
+            alpha (fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ m x₀)
+
+/-- The Christoffel-coordinate commutator implies the tensor one-form Ricci
+identity once the supplied `Rm13` tensor is known to realize connection
+curvature and the connection curvature has the Christoffel-coordinate expansion. -/
+theorem one_form_third_comm_coord_of_christoffelCurv
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (Rm13 : Tensor13Section (I := I) (M := M))
+    (x₀ : M)
+    (alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x₀)
+    (nabla2Alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x₀)
+    (hRm : Rm13RealizesConnection (I := I) cov Rm13)
+    (hcurv : ConnectionCurvatureCoordAt (I := I) cov x₀)
+    (hcoord : OneFormThirdCommChristoffelCoordAt (I := I) cov x₀ alpha nabla2Alpha) :
+    OneFormThirdCovDerivCommAt (I := I) Rm13 alpha nabla2Alpha := by
+  refine one_form_third_comm_of_coord_ijk (I := I) Rm13 alpha
+    (coordinateFrameAt_toBasis (I := I) x₀) nabla2Alpha ?_
+  intro i k j
+  have hRmCoord := rm13_eval_eq_christoffelCurvCoord
+    (I := I) cov Rm13 x₀ alpha hRm hcurv i k j
+  have hcoord' := hcoord i k j
+  simp only [coordinateFrameAt_toBasis_apply]
+  rw [hRmCoord]
+  exact hcoord'
+
+end CoordinateChristoffelCurvature
 
 end Realized
 end RicciFlower

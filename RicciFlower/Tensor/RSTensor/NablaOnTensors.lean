@@ -10,6 +10,12 @@ mathlib's bundled `CovariantDerivative` on the tangent bundle, extracts the
 local chart connection endomorphism `Γ_X`, and feeds it into the model formula
 for `(r,s)` tensor fields.
 
+Downstream geometry should treat `nabla0SFun` and `nablaRSFun` as the canonical
+raw pointwise covariant derivatives, and `nabla0S` / `nablaRS` as the canonical
+bundled section versions.  The model-space and `mcovariantDeriv_*` declarations
+below are implementation bridges used to prove component formulas; they should
+not be new public notions of covariant derivative.
+
 The Lie derivative file owns the shared slot-correction algebra.  This file
 owns the interpretation of that algebra as a covariant derivative.
 -/
@@ -35,6 +41,14 @@ variable {x x₀ : M} {s : Set M}
 variable [CompleteSpace 𝕜]
 
 section ModelCovariantDerivative
+
+/-!
+## Implementation layer: model-space tensor formula
+
+These definitions are the fixed-vector-space formulas used after trivializing
+the tensor bundle in a chart.  They are deliberately lower-level than
+`nabla0SFun` / `nablaRSFun`.
+-/
 
 /-- Pointwise model formula for the covariant derivative of a covariant tensor.
 
@@ -96,6 +110,21 @@ def covariantDeriv_tensorRSModelAt (r s : ℕ)
         - (lieDeriv_correctionL (𝕜 := 𝕜) (E := E) s ΓX).comp T
         + T.comp (lieDeriv_correctionL (𝕜 := 𝕜) (E := E) r ΓX) := by
   rfl
+
+/-- Evaluation form of the model-space covariant derivative of an `(r,s)`
+tensor.
+
+In the `Hom((0,r),(0,s))` model, the connection correction subtracts from the
+output covariant slots and adds through the input covariant slots. -/
+theorem covariantDeriv_tensorRSModelAt_eval (r s : ℕ)
+    (dT_X : TensorRSModel r s 𝕜 E) (ΓX : E →L[𝕜] E)
+    (T : TensorRSModel r s 𝕜 E)
+    (β : Tensor0SModel (𝕜 := 𝕜) (E := E) r) (v : Fin s → E) :
+    (covariantDeriv_tensorRSModelAt (𝕜 := 𝕜) (E := E) r s dT_X ΓX T β) v =
+      (dT_X β) v -
+        ((lieDeriv_correctionL (𝕜 := 𝕜) (E := E) s ΓX) (T β)) v +
+        (T ((lieDeriv_correctionL (𝕜 := 𝕜) (E := E) r ΓX) β)) v := by
+  simp [covariantDeriv_tensorRSModelAt, sub_eq_add_neg, add_assoc]
 
 section ChristoffelModel
 
@@ -184,6 +213,62 @@ private theorem tensor0SModel_two_eval_second_basis_sum
     fin_cases q <;> simp [base]
   simpa [hbase, hupdate] using h
 
+/-- Model-space covariant derivative in Christoffel coordinates for arbitrary
+covariant valence.
+
+This is the recursive slot formula behind the one- and two-slot component
+lemmas: evaluate on basis slots, then subtract the connection correction in
+each slot. -/
+theorem covariantDeriv_tensor0SModelAt_apply_basis_slots {s : ℕ}
+    (basis : Module.Basis Idx 𝕜 E)
+    (dα_X : Tensor0SModel (𝕜 := 𝕜) (E := E) s)
+    (ΓX : E →L[𝕜] E)
+    (α : Tensor0SModel (𝕜 := 𝕜) (E := E) s)
+    (slots : Fin s → Idx) :
+    covariantDeriv_tensor0SModelAt (𝕜 := 𝕜) (E := E) s dα_X ΓX α
+        (fun a : Fin s => basis (slots a)) =
+      dα_X (fun a : Fin s => basis (slots a)) -
+        ∑ a : Fin s, ∑ k : Idx,
+          connectionEndomorphismCoeff basis ΓX (slots a) k *
+            α (Function.update (fun b : Fin s => basis (slots b)) a (basis k)) := by
+  classical
+  unfold covariantDeriv_tensor0SModelAt lieDeriv_correction substituteArg
+    connectionEndomorphismCoeff
+  simp only [ContinuousMultilinearMap.sub_apply, ContinuousMultilinearMap.sum_apply,
+    ContinuousMultilinearMap.compContinuousLinearMap_apply]
+  congr 1
+  refine Finset.sum_congr rfl fun a _ => ?_
+  have hslot :
+      α (fun b : Fin s =>
+          (if b = a then ΓX else ContinuousLinearMap.id 𝕜 E) (basis (slots b))) =
+        α (Function.update (fun b : Fin s => basis (slots b)) a (ΓX (basis (slots a)))) := by
+    congr 1
+    funext b
+    by_cases hb : b = a
+    · subst hb
+      simp
+    · simp [Function.update, hb]
+  rw [hslot]
+  exact tensor0SModel_eval_update_basis_sum basis α
+    (fun b : Fin s => basis (slots b)) a (ΓX (basis (slots a)))
+
+/-- Within-set variant of
+`covariantDeriv_tensor0SModelAt_apply_basis_slots`. -/
+theorem covariantDeriv_tensor0SModelWithin_apply_basis_slots {s : ℕ}
+    (basis : Module.Basis Idx 𝕜 E)
+    (X : E → E) (ΓX : E → E →L[𝕜] E)
+    (α : E → Tensor0SModel (𝕜 := 𝕜) (E := E) s)
+    (u : Set E) (x : E) (slots : Fin s → Idx) :
+    covariantDeriv_tensor0SModelWithin (𝕜 := 𝕜) (E := E) s X ΓX α u x
+        (fun a : Fin s => basis (slots a)) =
+      fderivWithin 𝕜 α u x (X x) (fun a : Fin s => basis (slots a)) -
+        ∑ a : Fin s, ∑ k : Idx,
+          connectionEndomorphismCoeff basis (ΓX x) (slots a) k *
+            α x (Function.update (fun b : Fin s => basis (slots b)) a (basis k)) := by
+  unfold covariantDeriv_tensor0SModelWithin
+  exact covariantDeriv_tensor0SModelAt_apply_basis_slots (𝕜 := 𝕜) (E := E)
+    basis (fderivWithin 𝕜 α u x (X x)) (ΓX x) (α x) slots
+
 /-- Model-space one-form covariant derivative in Christoffel coordinates:
 `(∇_X α)_j = X(α_j) - Γ^k_j α_k`.
 
@@ -257,6 +342,75 @@ theorem covariantDeriv_tensor0SModelAt_two_apply_basis
   rw [tensor0SModel_two_eval_first_basis_sum basis A (ΓX (basis j)) (basis l)]
   rw [tensor0SModel_two_eval_second_basis_sum basis A (basis j) (ΓX (basis l))]
   abel
+
+/-- Within-set variant of the one-form Christoffel component formula. -/
+theorem covariantDeriv_tensor0SModelWithin_one_apply_basis
+    (basis : Module.Basis Idx 𝕜 E)
+    (X : E → E) (ΓX : E → E →L[𝕜] E)
+    (α : E → Tensor0SModel (𝕜 := 𝕜) (E := E) 1)
+    (u : Set E) (x : E) (j : Idx) :
+    covariantDeriv_tensor0SModelWithin (𝕜 := 𝕜) (E := E) 1 X ΓX α u x
+        (fun _ : Fin 1 => basis j) =
+      fderivWithin 𝕜 α u x (X x) (fun _ : Fin 1 => basis j) -
+        ∑ k : Idx, connectionEndomorphismCoeff basis (ΓX x) j k *
+          α x (fun _ : Fin 1 => basis k) := by
+  unfold covariantDeriv_tensor0SModelWithin
+  exact covariantDeriv_tensor0SModelAt_one_apply_basis (𝕜 := 𝕜) (E := E)
+    basis (fderivWithin 𝕜 α u x (X x)) (ΓX x) (α x) j
+
+/-- Within-set variant of the `(0,2)` Christoffel component formula. -/
+theorem covariantDeriv_tensor0SModelWithin_two_apply_basis
+    (basis : Module.Basis Idx 𝕜 E)
+    (X : E → E) (ΓX : E → E →L[𝕜] E)
+    (A : E → Tensor0SModel (𝕜 := 𝕜) (E := E) 2)
+    (u : Set E) (x : E) (j l : Idx) :
+    covariantDeriv_tensor0SModelWithin (𝕜 := 𝕜) (E := E) 2 X ΓX A u x
+        (fun q : Fin 2 => if q = 0 then basis j else basis l) =
+      fderivWithin 𝕜 A u x (X x)
+          (fun q : Fin 2 => if q = 0 then basis j else basis l) -
+        ∑ k : Idx, connectionEndomorphismCoeff basis (ΓX x) j k *
+          A x (fun q : Fin 2 => if q = 0 then basis k else basis l) -
+        ∑ k : Idx, connectionEndomorphismCoeff basis (ΓX x) l k *
+          A x (fun q : Fin 2 => if q = 0 then basis j else basis k) := by
+  unfold covariantDeriv_tensor0SModelWithin
+  exact covariantDeriv_tensor0SModelAt_two_apply_basis (𝕜 := 𝕜) (E := E)
+    basis (fderivWithin 𝕜 A u x (X x)) (ΓX x) (A x) j l
+
+/-- Raw-`ContinuousMultilinearMap` version of the within-set one-form formula.
+
+This is the same component identity as
+`covariantDeriv_tensor0SModelWithin_one_apply_basis`, but its derivative term
+has a raw continuous-multilinear-map codomain. This avoids exposing
+`Tensor0SModel` alias instance elaboration to coordinate-facing files. -/
+theorem covariantDeriv_tensor0SModelWithin_one_apply_basis_clm
+    (basis : Module.Basis Idx 𝕜 E)
+    (X : E → E) (ΓX : E → E →L[𝕜] E)
+    (α : E → ContinuousMultilinearMap 𝕜 (fun _ : Fin 1 => E) 𝕜)
+    (u : Set E) (x : E) (j : Idx) :
+    covariantDeriv_tensor0SModelWithin (𝕜 := 𝕜) (E := E) 1 X ΓX α u x
+        (fun _ : Fin 1 => basis j) =
+      fderivWithin 𝕜 α u x (X x) (fun _ : Fin 1 => basis j) -
+        ∑ k : Idx, connectionEndomorphismCoeff basis (ΓX x) j k *
+          α x (fun _ : Fin 1 => basis k) := by
+  exact covariantDeriv_tensor0SModelWithin_one_apply_basis (𝕜 := 𝕜) (E := E)
+    basis X ΓX α u x j
+
+/-- Raw-`ContinuousMultilinearMap` version of the within-set `(0,2)` formula. -/
+theorem covariantDeriv_tensor0SModelWithin_two_apply_basis_clm
+    (basis : Module.Basis Idx 𝕜 E)
+    (X : E → E) (ΓX : E → E →L[𝕜] E)
+    (A : E → ContinuousMultilinearMap 𝕜 (fun _ : Fin 2 => E) 𝕜)
+    (u : Set E) (x : E) (j l : Idx) :
+    covariantDeriv_tensor0SModelWithin (𝕜 := 𝕜) (E := E) 2 X ΓX A u x
+        (fun q : Fin 2 => if q = 0 then basis j else basis l) =
+      fderivWithin 𝕜 A u x (X x)
+          (fun q : Fin 2 => if q = 0 then basis j else basis l) -
+        ∑ k : Idx, connectionEndomorphismCoeff basis (ΓX x) j k *
+          A x (fun q : Fin 2 => if q = 0 then basis k else basis l) -
+        ∑ k : Idx, connectionEndomorphismCoeff basis (ΓX x) l k *
+          A x (fun q : Fin 2 => if q = 0 then basis j else basis k) := by
+  exact covariantDeriv_tensor0SModelWithin_two_apply_basis (𝕜 := 𝕜) (E := E)
+    basis X ΓX A u x j l
 
 end ChristoffelModel
 
@@ -488,7 +642,90 @@ end TangentCovariantDerivative
 
 section SmoothVectorFieldRSNabla
 
+/-!
+## Implementation layer: chart transport and connection extraction
+
+The `mcovariantDeriv_*` declarations transport the model-space formula through a
+chart and optionally extract the local connection endomorphism from mathlib's
+`CovariantDerivative`.  They are support code for the canonical `nabla*` API.
+-/
+
 variable [IsManifold I 1 M] [IsManifold I (n + 1) M]
+
+/-- Trivialize a covariant tensor fiber using the multilinear tensor-bundle
+trivialization centered at `x₀`.  This is the coordinate model that should be
+used for tensor components in a chart; unlike `tensor0SSpace_continuousLinearEquiv`,
+it transports the tensor arguments by the tangent-bundle trivialization at
+`x₀`. -/
+noncomputable def tensor0SModelAt (s : ℕ) (x₀ x : M)
+    (A : Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s x) :
+    Tensor0SModel (𝕜 := 𝕜) (E := E) s :=
+  ((trivializationAt (Tensor0SModel (𝕜 := 𝕜) (E := E) s)
+      (Bundle.continuousMultilinearMap 𝕜 s E (TangentSpace I : M → Type _)) x₀)
+    ⟨x, A⟩).2
+
+/-- At the center of the chosen tensor-bundle trivialization, transporting a
+model tensor to the fiber and back gives the original model tensor. -/
+theorem tensor0SModelAt_trivializationAt_symm (s : ℕ) (x₀ : M)
+    (T : Tensor0SModel (𝕜 := 𝕜) (E := E) s) :
+    tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        s x₀ x₀
+        ((trivializationAt (Tensor0SModel (𝕜 := 𝕜) (E := E) s)
+          (Bundle.continuousMultilinearMap 𝕜 s E (TangentSpace I : M → Type _)) x₀).symm
+          x₀ T) = T := by
+  unfold tensor0SModelAt
+  exact congrArg Prod.snd
+    ((trivializationAt (Tensor0SModel (𝕜 := 𝕜) (E := E) s)
+      (Bundle.continuousMultilinearMap 𝕜 s E (TangentSpace I : M → Type _)) x₀).apply_mk_symm
+        (mem_baseSet_trivializationAt (Tensor0SModel (𝕜 := 𝕜) (E := E) s)
+          (Bundle.continuousMultilinearMap 𝕜 s E (TangentSpace I : M → Type _)) x₀)
+        T)
+
+/-- The chart-local model tensor field obtained from a covariant tensor field by
+the multilinear tensor-bundle trivialization centered at `x₀`. -/
+noncomputable def tensor0SModelInChart (s : ℕ) (x₀ : M)
+    (A : (x : M) →
+      Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s x)
+    (y : E) : Tensor0SModel (𝕜 := 𝕜) (E := E) s :=
+  tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+    s x₀ ((extChartAt I x₀).symm y) (A ((extChartAt I x₀).symm y))
+
+/-- Smooth tensor fields become smooth model-valued fields after transporting them
+by the tensor-bundle trivialization and pulling back through the chart inverse. -/
+theorem tensor0SModelInChart_contMDiffWithinAt (s : ℕ) (x₀ : M)
+    (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := n) s) :
+    ContMDiffWithinAt 𝓘(𝕜, E) 𝓘(𝕜, Tensor0SModel (𝕜 := 𝕜) (E := E) s) n
+      (tensor0SModelInChart (𝕜 := 𝕜) (E := E) (H := H)
+        (I := I) (M := M) s x₀ (fun x => α x))
+      (((extChartAt I x₀).symm ⁻¹' Set.univ) ∩ Set.range I)
+      (extChartAt I x₀ x₀) := by
+  let S : Set E := ((extChartAt I x₀).symm ⁻¹' Set.univ) ∩ Set.range I
+  have hα_model :
+      ContMDiffAt I 𝓘(𝕜, Tensor0SModel (𝕜 := 𝕜) (E := E) s) n
+        (fun x : M =>
+          tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+            s x₀ x (α x)) x₀ := by
+    have h := α.contMDiff x₀
+    rw [contMDiffAt_section] at h
+    simpa [tensor0SModelAt] using h
+  have hsymm :
+      ContMDiffWithinAt 𝓘(𝕜, E) I n (extChartAt I x₀).symm S
+        (extChartAt I x₀ x₀) := by
+    simpa [S] using
+      contMDiffWithinAt_extChartAt_symm_range_self (I := I) (n := n) x₀
+  have hα_model_center :
+      ContMDiffAt I 𝓘(𝕜, Tensor0SModel (𝕜 := 𝕜) (E := E) s) n
+        (fun x : M =>
+          tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+            s x₀ x (α x))
+        ((extChartAt I x₀).symm (extChartAt I x₀ x₀)) := by
+    simpa [extChartAt_to_inv] using hα_model
+  have hcomp := ContMDiffAt.comp_contMDiffWithinAt
+    (I := 𝓘(𝕜, E)) (I' := I)
+    (I'' := 𝓘(𝕜, Tensor0SModel (𝕜 := 𝕜) (E := E) s))
+    (x := extChartAt I x₀ x₀) hα_model_center hsymm
+  simpa [S, tensor0SModelInChart, Function.comp] using hcomp
 
 /-- Pointwise covariant derivative of a covariant `(0,s)` tensor field in a chosen chart,
 with the local connection endomorphism supplied explicitly.
@@ -503,12 +740,128 @@ noncomputable def mcovariantDeriv_tensor0SWithin (s : ℕ)
     (u : Set M) (x₀ : M) : Tensor0SSpace s I x₀ := by
   let X' := mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm X (range I)
   let α' : E → Tensor0SModel (𝕜 := 𝕜) (E := E) s :=
-    fun y => tensor0SSpace_continuousLinearEquiv (I := I) s
-      ((extChartAt I x₀).symm y) (α.toFun ((extChartAt I x₀).symm y))
-  exact (tensor0SSpace_continuousLinearEquiv (I := I) s x₀).symm
-    (covariantDeriv_tensor0SModelWithin s X' ΓX α'
-      ((extChartAt I x₀).symm ⁻¹' u ∩ range I)
-      (extChartAt I x₀ x₀))
+    tensor0SModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      s x₀ (fun x => α x)
+  exact
+    (trivializationAt (Tensor0SModel (𝕜 := 𝕜) (E := E) s)
+      (Bundle.continuousMultilinearMap 𝕜 s E (TangentSpace I : M → Type _)) x₀).symm
+        x₀
+      (covariantDeriv_tensor0SModelWithin s X' ΓX α'
+        ((extChartAt I x₀).symm ⁻¹' u ∩ range I)
+        (extChartAt I x₀ x₀))
+
+theorem mcovariantDeriv_tensor0SWithin_one_apply_basis
+    {Idx : Type*} [Fintype Idx]
+    (basis : Module.Basis Idx 𝕜 E)
+    (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
+    (ΓX : E → E →L[𝕜] E)
+    (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := n) 1)
+    (u : Set M) (x₀ : M) (j : Idx) :
+    (tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        1 x₀ x₀
+        (mcovariantDeriv_tensor0SWithin (𝕜 := 𝕜) (E := E) (H := H)
+          (I := I) (M := M) (n := n) 1 X ΓX α u x₀))
+        (fun _ : Fin 1 => basis j) =
+      fderivWithin 𝕜
+          (fun y =>
+            tensor0SModelInChart (𝕜 := 𝕜) (E := E) (H := H)
+              (I := I) (M := M) 1 x₀ (fun x => α x) y)
+          (((extChartAt I x₀).symm ⁻¹' u) ∩ range I)
+          (extChartAt I x₀ x₀)
+          (VectorField.mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm
+            X (range I) (extChartAt I x₀ x₀))
+          (fun _ : Fin 1 => basis j) -
+        ∑ k : Idx,
+          connectionEndomorphismCoeff basis (ΓX (extChartAt I x₀ x₀)) j k *
+            (tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+              1 x₀ x₀ (α x₀)) (fun _ : Fin 1 => basis k) := by
+  classical
+  unfold mcovariantDeriv_tensor0SWithin
+  rw [tensor0SModelAt_trivializationAt_symm]
+  rw [covariantDeriv_tensor0SModelWithin_one_apply_basis_clm (basis := basis)]
+  simp only [tensor0SModelInChart]
+  rw [extChartAt_to_inv]
+  rfl
+
+theorem mcovariantDeriv_tensor0SWithin_two_apply_basis
+    {Idx : Type*} [Fintype Idx]
+    (basis : Module.Basis Idx 𝕜 E)
+    (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
+    (ΓX : E → E →L[𝕜] E)
+    (A : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := n) 2)
+    (u : Set M) (x₀ : M) (j l : Idx) :
+    (tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        2 x₀ x₀
+        (mcovariantDeriv_tensor0SWithin (𝕜 := 𝕜) (E := E) (H := H)
+          (I := I) (M := M) (n := n) 2 X ΓX A u x₀))
+        (fun q : Fin 2 => if q = 0 then basis j else basis l) =
+      fderivWithin 𝕜
+          (fun y =>
+            tensor0SModelInChart (𝕜 := 𝕜) (E := E) (H := H)
+              (I := I) (M := M) 2 x₀ (fun x => A x) y)
+          (((extChartAt I x₀).symm ⁻¹' u) ∩ range I)
+          (extChartAt I x₀ x₀)
+          (VectorField.mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm
+            X (range I) (extChartAt I x₀ x₀))
+          (fun q : Fin 2 => if q = 0 then basis j else basis l) -
+        ∑ k : Idx,
+          connectionEndomorphismCoeff basis (ΓX (extChartAt I x₀ x₀)) j k *
+            (tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+              2 x₀ x₀ (A x₀)) (fun q : Fin 2 => if q = 0 then basis k else basis l) -
+        ∑ k : Idx,
+          connectionEndomorphismCoeff basis (ΓX (extChartAt I x₀ x₀)) l k *
+            (tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+              2 x₀ x₀ (A x₀)) (fun q : Fin 2 => if q = 0 then basis j else basis k) := by
+  classical
+  unfold mcovariantDeriv_tensor0SWithin
+  rw [tensor0SModelAt_trivializationAt_symm]
+  rw [covariantDeriv_tensor0SModelWithin_two_apply_basis_clm (basis := basis)]
+  simp only [tensor0SModelInChart]
+  rw [extChartAt_to_inv]
+  rfl
+
+/-- Arbitrary-valence coordinate-basis formula for the chart-level covariant
+derivative of a covariant tensor.
+
+This is the transported version of
+`covariantDeriv_tensor0SModelAt_apply_basis_slots`; the one- and two-slot
+component lemmas are special cases of this statement. -/
+theorem mcovariantDeriv_tensor0SWithin_apply_basis_slots
+    {Idx : Type*} [Fintype Idx] {s : ℕ}
+    (basis : Module.Basis Idx 𝕜 E)
+    (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
+    (ΓX : E → E →L[𝕜] E)
+    (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := n) s)
+    (u : Set M) (x₀ : M) (slots : Fin s → Idx) :
+    (tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        s x₀ x₀
+        (mcovariantDeriv_tensor0SWithin (𝕜 := 𝕜) (E := E) (H := H)
+          (I := I) (M := M) (n := n) s X ΓX α u x₀))
+        (fun a : Fin s => basis (slots a)) =
+      fderivWithin 𝕜
+          (fun y =>
+            tensor0SModelInChart (𝕜 := 𝕜) (E := E) (H := H)
+              (I := I) (M := M) s x₀ (fun x => α x) y)
+          (((extChartAt I x₀).symm ⁻¹' u) ∩ range I)
+          (extChartAt I x₀ x₀)
+          (VectorField.mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm
+            X (range I) (extChartAt I x₀ x₀))
+          (fun a : Fin s => basis (slots a)) -
+        ∑ a : Fin s, ∑ k : Idx,
+          connectionEndomorphismCoeff basis (ΓX (extChartAt I x₀ x₀)) (slots a) k *
+            (tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+              s x₀ x₀ (α x₀))
+              (Function.update (fun b : Fin s => basis (slots b)) a (basis k)) := by
+  classical
+  unfold mcovariantDeriv_tensor0SWithin
+  rw [tensor0SModelAt_trivializationAt_symm]
+  rw [covariantDeriv_tensor0SModelWithin_apply_basis_slots (basis := basis)]
+  simp only [tensor0SModelInChart]
+  rw [extChartAt_to_inv]
+  rfl
 
 /-- Pointwise covariant derivative of a covariant `(0,s)` tensor field in a chosen chart,
 with supplied local connection endomorphism. -/
@@ -619,8 +972,12 @@ variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [IsManifold I (⊤ : WithTop ℕ∞) M]
 variable [IsManifold I ((⊤ : WithTop ℕ∞) + 1) M]
 
-/-- Raw pointwise covariant derivative of a covariant tensor field along a smooth vector
-field, using a realized connection. The bundled section version is `nabla0S`. -/
+/-- Canonical raw pointwise covariant derivative of a covariant tensor field
+along a smooth vector field, using a realized connection.
+
+Use this in downstream geometry.  It is implemented by trivializing to the
+model-space tensor formula and extracting the local connection endomorphism from
+mathlib's `CovariantDerivative`.  The bundled section version is `nabla0S`. -/
 noncomputable def nabla0SFun (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -631,8 +988,11 @@ noncomputable def nabla0SFun (s : ℕ)
     (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
     (n := (⊤ : WithTop ℕ∞)) s cov X α x
 
-/-- Raw pointwise covariant derivative of a mixed tensor field along a smooth vector
-field, using a realized connection. The bundled section version is `nablaRS`. -/
+/-- Canonical raw pointwise covariant derivative of a mixed tensor field along a
+smooth vector field, using a realized connection.
+
+Use this in downstream geometry.  The lower-level model and chart declarations
+above are implementation bridges.  The bundled section version is `nablaRS`. -/
 noncomputable def nablaRSFun (r s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))

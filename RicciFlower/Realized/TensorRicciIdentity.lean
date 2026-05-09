@@ -1,6 +1,7 @@
 import RicciFlower.Realized.RoughLaplacian
 import RicciFlower.Realized.CurvatureTensor
 import RicciFlower.Tensor.RSTensor.CoordinateBasis
+import RicciFlower.Tensor.RSTensor.NablaOnTensors
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -28,6 +29,93 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+
+/-- Smooth one-form sections used by the section-level covariant-derivative API. -/
+abbrev OneFormSection :=
+  Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) ⊤ 1
+
+/-- Smooth covariant two-tensor sections used by the section-level derivative API. -/
+abbrev TwoTensorSection :=
+  Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) ⊤ 2
+
+/-- A supplied `(0,2)` tensor field realizes the covariant derivative of a
+bundled one-form at one point. -/
+def NablaOneFormRealizesAt
+    [IsManifold I 1 M] [IsManifold I 2 M]
+    [IsManifold I ((⊤ : WithTop ℕ∞) + 1) M]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (alpha : OneFormSection (I := I) (M := M))
+    (nablaAlpha : (x : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (x : M) : Prop :=
+  ∀ (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+      (Y : TangentSpace I x),
+    nablaAlpha x (vec2 (X x) Y) =
+      nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        1 cov X alpha x (fun _ : Fin 1 => Y)
+
+/-- Section-level realization of `nablaAlpha = ∇ alpha`.
+
+This is stronger than a single pointwise realization and is the information
+needed to interpret a second derivative tensor as the true iterated derivative
+of the original one-form. -/
+def NablaOneFormSectionRealizes
+    [IsManifold I 1 M] [IsManifold I 2 M]
+    [IsManifold I ((⊤ : WithTop ℕ∞) + 1) M]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (alpha : OneFormSection (I := I) (M := M))
+    (nablaAlpha : TwoTensorSection (I := I) (M := M)) : Prop :=
+  ∀ x : M, NablaOneFormRealizesAt (I := I) cov alpha (fun y => nablaAlpha y) x
+
+/-- A supplied `(0,3)` tensor realizes the true second covariant derivative of a
+bundled one-form at `x`: the bundled two-tensor section realizes `∇ alpha`,
+and the supplied three-tensor is `∇(∇ alpha)` at `x`. -/
+def Nabla2OneFormRealizesAt
+    [IsManifold I 1 M] [IsManifold I 2 M]
+    [IsManifold I ((⊤ : WithTop ℕ∞) + 1) M]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (alpha : OneFormSection (I := I) (M := M))
+    (nablaAlpha : TwoTensorSection (I := I) (M := M))
+    (x : M)
+    (nabla2Alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x) :
+    Prop :=
+  NablaOneFormSectionRealizes (I := I) cov alpha nablaAlpha ∧
+    ∀ (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+        (Y Z : TangentSpace I x),
+      nabla2Alpha (vec3 (X x) Y Z) =
+        nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+          2 cov X nablaAlpha x (vec2 Y Z)
+
+theorem nabla2OneFormRealizesAt_first
+    [IsManifold I 1 M] [IsManifold I 2 M]
+    [IsManifold I ((⊤ : WithTop ℕ∞) + 1) M]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (alpha : OneFormSection (I := I) (M := M))
+    (nablaAlpha : TwoTensorSection (I := I) (M := M))
+    (x : M)
+    (nabla2Alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (h : Nabla2OneFormRealizesAt (I := I) cov alpha nablaAlpha x nabla2Alpha) :
+    NablaOneFormSectionRealizes (I := I) cov alpha nablaAlpha :=
+  h.1
+
+theorem nabla2OneFormRealizesAt_apply
+    [IsManifold I 1 M] [IsManifold I 2 M]
+    [IsManifold I ((⊤ : WithTop ℕ∞) + 1) M]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (alpha : OneFormSection (I := I) (M := M))
+    (nablaAlpha : TwoTensorSection (I := I) (M := M))
+    (x : M)
+    (nabla2Alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (h : Nabla2OneFormRealizesAt (I := I) cov alpha nablaAlpha x nabla2Alpha)
+    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (Y Z : TangentSpace I x) :
+    nabla2Alpha (vec3 (X x) Y Z) =
+      nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 cov X nablaAlpha x (vec2 Y Z) :=
+  h.2 X Y Z
 
 /-- Component-level trailing-slot symmetry for a third covariant derivative
 candidate `U`. -/
