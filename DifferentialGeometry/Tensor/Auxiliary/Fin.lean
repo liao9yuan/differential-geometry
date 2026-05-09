@@ -75,6 +75,75 @@ These are the core index-juggling facts needed for the graded Leibniz rule
 /-- Deleting an element from the left block of `addCases I J` (at position `castAdd`):
 `(addCases I J) ∘ succAbove (castAdd (n+1) i) = (addCases (I ∘ succAbove i) J) ∘ cast _`.
 The cast accounts for `(m + n + 1) ≠ (m + (n + 1))` definitionally. -/
+private theorem addCases_succAbove_castAdd_assoc {α : Type*} {m' n' : ℕ}
+    (f : Fin (m' + 1) → α) (g : Fin (n' + 1) → α) (i : Fin (m' + 1))
+    (k : Fin (m' + (n' + 1))) :
+    (Fin.addCases f g : Fin ((m' + 1) + (n' + 1)) → α)
+      ((Fin.castAdd (n' + 1) i).succAbove
+        (Fin.cast (show m' + (n' + 1) = m' + 1 + n' from by omega) k)) =
+    (Fin.addCases (fun a => f (i.succAbove a)) g : Fin (m' + (n' + 1)) → α) k := by
+  have hleft : forall a : Fin m',
+      (Fin.addCases f g : Fin ((m' + 1) + (n' + 1)) → α)
+        ((Fin.castAdd (n' + 1) i).succAbove
+          (Fin.cast (show m' + (n' + 1) = m' + 1 + n' from by omega)
+            (Fin.castAdd (n' + 1) a))) =
+      (Fin.addCases (fun a => f (i.succAbove a)) g : Fin (m' + (n' + 1)) → α)
+        (Fin.castAdd (n' + 1) a) := by
+    intro a
+    by_cases h : a.castSucc < i
+    case pos =>
+      have hlt : (Fin.cast (show m' + (n' + 1) = m' + 1 + n' from by omega)
+          (Fin.castAdd (n' + 1) a)).castSucc < Fin.castAdd (n' + 1) i := by
+        apply Fin.lt_def.mpr
+        simpa [Fin.val_castAdd, Fin.val_cast, Fin.val_castSucc] using h
+      rw [Fin.succAbove_of_castSucc_lt _ _ hlt]
+      rw [show (Fin.cast (show m' + (n' + 1) = m' + 1 + n' from by omega)
+          (Fin.castAdd (n' + 1) a)).castSucc = Fin.castAdd (n' + 1) a.castSucc by
+        ext
+        simp]
+      simp [Fin.addCases_left, Fin.succAbove_of_castSucc_lt _ _ h]
+    case neg =>
+      have hle : Fin.castAdd (n' + 1) i <=
+          (Fin.cast (show m' + (n' + 1) = m' + 1 + n' from by omega)
+            (Fin.castAdd (n' + 1) a)).castSucc := by
+        apply Fin.le_def.mpr
+        have ha : i.val <= a.val := Fin.le_def.mp (Fin.not_lt.mp h)
+        simp [Fin.val_castAdd, Fin.val_cast, Fin.val_castSucc]
+        omega
+      rw [Fin.succAbove_of_le_castSucc _ _ hle]
+      rw [show (Fin.cast (show m' + (n' + 1) = m' + 1 + n' from by omega)
+          (Fin.castAdd (n' + 1) a)).succ = Fin.castAdd (n' + 1) a.succ by
+        ext
+        simp]
+      simp [Fin.addCases_left, Fin.succAbove_of_le_castSucc _ _ (Fin.not_lt.mp h)]
+  have hright : forall b : Fin (n' + 1),
+      (Fin.addCases f g : Fin ((m' + 1) + (n' + 1)) → α)
+        ((Fin.castAdd (n' + 1) i).succAbove
+          (Fin.cast (show m' + (n' + 1) = m' + 1 + n' from by omega)
+            (Fin.natAdd m' b))) =
+      (Fin.addCases (fun a => f (i.succAbove a)) g : Fin (m' + (n' + 1)) → α)
+        (Fin.natAdd m' b) := by
+    intro b
+    have hle : Fin.castAdd (n' + 1) i <=
+        (Fin.cast (show m' + (n' + 1) = m' + 1 + n' from by omega)
+          (Fin.natAdd m' b)).castSucc := by
+      apply Fin.le_def.mpr
+      simp [Fin.val_castAdd, Fin.val_cast, Fin.val_natAdd, Fin.val_castSucc]
+      omega
+    rw [Fin.succAbove_of_le_castSucc _ _ hle]
+    rw [show (Fin.cast (show m' + (n' + 1) = m' + 1 + n' from by omega)
+        (Fin.natAdd m' b)).succ = Fin.natAdd (m' + 1) b by
+      ext
+      simp [Fin.val_natAdd]
+      omega]
+    simp [Fin.addCases_right]
+  exact Fin.addCases (motive := fun k =>
+      (Fin.addCases f g : Fin ((m' + 1) + (n' + 1)) → α)
+        ((Fin.castAdd (n' + 1) i).succAbove
+          (Fin.cast (show m' + (n' + 1) = m' + 1 + n' from by omega) k)) =
+      (Fin.addCases (fun a => f (i.succAbove a)) g : Fin (m' + (n' + 1)) → α) k)
+    hleft hright k
+
 theorem addCases_succAbove_castAdd {α : Type*} {m' n' : ℕ}
     (f : Fin (m' + 1) → α) (g : Fin (n' + 1) → α) (i : Fin (m' + 1))
     (k : Fin (m' + n' + 1)) :
@@ -82,7 +151,7 @@ theorem addCases_succAbove_castAdd {α : Type*} {m' n' : ℕ}
       ((Fin.castAdd (n' + 1) i).succAbove
         (Fin.cast (show m' + n' + 1 = m' + 1 + n' from by omega) k)) =
     (Fin.addCases (f ∘ i.succAbove) g : Fin (m' + (n' + 1)) → α) k := by
-  sorry
+  simpa using addCases_succAbove_castAdd_assoc (m' := m') (n' := n') f g i k
 
 /-- Deleting an element from the right block of `addCases I J` (at position `natAdd`):
 `(addCases I J) ∘ succAbove (natAdd (m+1) j) = addCases I (J ∘ succAbove j)`. -/
@@ -92,7 +161,58 @@ theorem addCases_succAbove_natAdd {α : Type*} {m' n' : ℕ}
     (Fin.addCases f g : Fin ((m' + 1) + (n' + 1)) → α)
       ((Fin.natAdd (m' + 1) j).succAbove k) =
     (Fin.addCases f (g ∘ j.succAbove) : Fin ((m' + 1) + n') → α) k := by
-  sorry
+  have hleft : forall a : Fin (m' + 1),
+      (Fin.addCases f g : Fin ((m' + 1) + (n' + 1)) → α)
+        ((Fin.natAdd (m' + 1) j).succAbove (Fin.castAdd n' a)) =
+      (Fin.addCases f (fun a => g (j.succAbove a)) : Fin ((m' + 1) + n') → α)
+        (Fin.castAdd n' a) := by
+    intro a
+    have hlt : (Fin.castAdd n' a).castSucc < Fin.natAdd (m' + 1) j := by
+      apply Fin.lt_def.mpr
+      simp [Fin.val_natAdd]
+      omega
+    rw [Fin.succAbove_of_castSucc_lt _ _ hlt]
+    rw [show (Fin.castAdd n' a).castSucc = Fin.castAdd (n' + 1) a by
+      ext
+      simp]
+    simp [Fin.addCases_left]
+  have hright : forall b : Fin n',
+      (Fin.addCases f g : Fin ((m' + 1) + (n' + 1)) → α)
+        ((Fin.natAdd (m' + 1) j).succAbove (Fin.natAdd (m' + 1) b)) =
+      (Fin.addCases f (fun a => g (j.succAbove a)) : Fin ((m' + 1) + n') → α)
+        (Fin.natAdd (m' + 1) b) := by
+    intro b
+    simp only [Fin.addCases_right]
+    by_cases h : b.castSucc < j
+    case pos =>
+      rw [Fin.succAbove_of_castSucc_lt]
+      case h =>
+        apply Fin.lt_def.mpr
+        simpa [Fin.val_natAdd, Fin.val_castSucc] using h
+      rw [show (Fin.natAdd (m' + 1) b).castSucc =
+          Fin.natAdd (m' + 1) b.castSucc by
+        ext
+        simp]
+      rw [Fin.addCases_right]
+      rw [Fin.succAbove_of_castSucc_lt _ _ h]
+    case neg =>
+      rw [Fin.succAbove_of_le_castSucc]
+      case h =>
+        apply Fin.le_def.mpr
+        have hb : j.val <= b.val := Fin.le_def.mp (Fin.not_lt.mp h)
+        simp [Fin.val_natAdd, Fin.val_castSucc]
+        omega
+      rw [show (Fin.natAdd (m' + 1) b).succ = Fin.natAdd (m' + 1) b.succ by
+        ext
+        simp
+        omega]
+      rw [Fin.addCases_right]
+      rw [Fin.succAbove_of_le_castSucc _ _ (Fin.not_lt.mp h)]
+  exact Fin.addCases (motive := fun k =>
+      (Fin.addCases f g : Fin ((m' + 1) + (n' + 1)) → α)
+        ((Fin.natAdd (m' + 1) j).succAbove k) =
+      (Fin.addCases f (fun a => g (j.succAbove a)) : Fin ((m' + 1) + n') → α) k)
+    hleft hright k
 
 /-- Substituting a `ℕ` equality lets us compare determinants of matrices indexed by `Fin a`
 and `Fin b` once their pointwise values agree under the cast. -/
