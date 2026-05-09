@@ -1,8 +1,8 @@
 import DifferentialGeometry.Tensor.RSTensor.Defs
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian
-import DifferentialGeometry.Integral.Integration.PointwiseInner.Defs
-import DifferentialGeometry.Integral.Integration.PointwiseInner.DualMetric
-import DifferentialGeometry.Integral.Integration.PointwiseInner.Algebra
+import DifferentialGeometry.Integral.L2.PointwiseInner.Defs
+import DifferentialGeometry.Integral.L2.PointwiseInner.DualMetric
+import DifferentialGeometry.Integral.L2.PointwiseInner.Algebra
 import DifferentialGeometry.Integral.Measure.ChartDensity
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
@@ -21,7 +21,7 @@ The reduction follows the definitional decomposition
   tensorInnerPointwise_0s (r + s) g b
     (lowerAllUpperIndices g r s b T)
     (lowerAllUpperIndices g r s b S)`
-already provided in `Integral.Integration.PointwiseInner.Defs`.
+already provided in `Integral.L2.PointwiseInner.Defs`.
 
 Composing the lowering with the chart-trivialisation `chartJinv α b` of the
 tangent bundle on each of the `r + s` slots, we obtain a chart-α-trivialised
@@ -43,7 +43,7 @@ namespace Tensor
 namespace TensorRSRiemannian
 
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.Integral.Integration
+open DifferentialGeometry.Integral.L2
 open Tensor0SBundle
 open DifferentialGeometry.Tensor.Tensor0SRiemannian
 
@@ -378,7 +378,7 @@ open scoped Manifold Topology Bundle BigOperators
 open Tensor0SBundle Bundle Set
 open DifferentialGeometry.Tensor.TensorRSRiemannian
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.Integral.Integration
+open DifferentialGeometry.Integral.L2
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [FiniteDimensional ℝ E]

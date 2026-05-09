@@ -1,6 +1,6 @@
 import DifferentialGeometry.Integral.DivergenceTheorem.LocalFormula
-import DifferentialGeometry.Integral.DivergenceTheorem.Gradient
-import DifferentialGeometry.Integral.DivergenceTheorem.Laplacian
+import DifferentialGeometry.Geometry.Gradient
+import DifferentialGeometry.Geometry.Laplacian
 import DifferentialGeometry.Integral.DivergenceTheorem.IntegrationByParts
 import DifferentialGeometry.Integral.DivergenceTheorem.Closed
 import DifferentialGeometry.Integral.DivergenceTheorem.Proper

@@ -1,5 +1,5 @@
 import DifferentialGeometry.Integral.Measure.BorelManifold.Defs
-import DifferentialGeometry.Integral.Integration.SmoothSections.Defs
+import DifferentialGeometry.Integral.L2.SmoothSections.Defs
 import DifferentialGeometry.Tensor.RSTensor.Defs
 import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
@@ -56,7 +56,7 @@ namespace Integral
 namespace Measure
 namespace BorelManifold
 
-open DifferentialGeometry.Integral.Integration
+open DifferentialGeometry.Integral.L2
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [FiniteDimensional ℝ E]

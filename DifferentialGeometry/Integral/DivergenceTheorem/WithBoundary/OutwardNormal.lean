@@ -1,5 +1,5 @@
 import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.InducedMetric
-import DifferentialGeometry.Integral.DivergenceTheorem.Gradient
+import DifferentialGeometry.Geometry.Gradient
 import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 import Mathlib.Analysis.SpecialFunctions.Sqrt

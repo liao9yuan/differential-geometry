@@ -1,4 +1,4 @@
-import DifferentialGeometry.Integral.DivergenceTheorem.Laplacian
+import DifferentialGeometry.Geometry.Laplacian
 import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.Gradient
 import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.Green
 import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.Laplacian

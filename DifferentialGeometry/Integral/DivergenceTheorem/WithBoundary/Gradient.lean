@@ -1,4 +1,4 @@
-import DifferentialGeometry.Integral.DivergenceTheorem.Gradient
+import DifferentialGeometry.Geometry.Gradient
 import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.PartialDerivWithin
 import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.LocalFormula
 import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.POUReduction

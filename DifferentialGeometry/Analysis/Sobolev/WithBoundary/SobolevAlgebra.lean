@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.WithBoundary.MorreyManifold
-import DifferentialGeometry.Analysis.Sobolev.EuclideanMultiplyQuant
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.MultiplyQuant
 
 /-!
 # Chart-based Sobolev algebra closure under multiplication

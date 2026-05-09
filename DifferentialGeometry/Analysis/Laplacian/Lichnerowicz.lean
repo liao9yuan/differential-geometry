@@ -1,8 +1,11 @@
 import DifferentialGeometry.Integral.DivergenceTheorem.Closed
 import DifferentialGeometry.Integral.DivergenceTheorem.Green
-import DifferentialGeometry.Integral.DivergenceTheorem.Gradient
-import DifferentialGeometry.Integral.DivergenceTheorem.Laplacian
+import DifferentialGeometry.Geometry.Gradient
+import DifferentialGeometry.Geometry.Laplacian
+import DifferentialGeometry.Geometry.NormGradSq
 import DifferentialGeometry.Integral.Measure.Properties
+import DifferentialGeometry.Integral.Connection.BochnerConcrete
+import DifferentialGeometry.Integral.Connection.ChartBridge.Hessian
 import DifferentialGeometry.Tensor.RSTensor.TangentRiemannian
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 import Mathlib.MeasureTheory.Integral.Bochner.Set
@@ -19,31 +22,42 @@ operator with eigenvalue `-λ` (`λ > 0`) satisfies `λ ≥ n K`.
 
 The argument is the classical scalar Bochner-Weitzenböck argument:
 
-1. **Bochner identity** (input as a hypothesis):
+1. **Bochner identity**:
    `Δ |∇f|² = 2 |∇²f|² + 2 Ric(∇f, ∇f) + 2 g(∇f, ∇(Δf))` pointwise.
 2. **Divergence theorem on a closed manifold**: `∫ Δ φ d μ_g = 0` for any
    smooth scalar `φ`.
 3. **Eigenvalue equation**: `Δ f = -λ f` so `∇(Δf) = -λ ∇f`, hence
    `g(∇f, ∇(Δf)) = -λ |∇f|²`.
-4. **Cauchy-Schwarz Hessian bound** (input as a hypothesis):
-   `|∇²f|² ≥ (Δf)² / n`.
-5. **Ricci bound** (input as a hypothesis): `Ric(∇f, ∇f) ≥ (n - 1) K |∇f|²`.
+4. **Cauchy-Schwarz Hessian bound**: `|∇²f|² ≥ (Δf)² / n`.
+5. **Ricci bound**: `Ric(∇f, ∇f) ≥ (n - 1) K |∇f|²`.
 6. **Green's first identity** (integration by parts): `∫ |∇f|² = -∫ f Δf
     = λ ∫ f²`.
 7. **Strict positivity of the L² self-integral** for the nonzero
-   eigenfunction (input as a hypothesis): `0 < ∫ f²`.
+   eigenfunction: `0 < ∫ f²`.
 
 Combining these inputs, the equation `0 = ∫ Δ |∇f|²` forces `λ ≥ n K`.
 
-The Bochner identity, the Hessian-trace bound, and the Ricci bound enter as
-hypotheses. The concrete pointwise Hessian and Ricci tensors, together with
-the analytic proof of the Bochner identity in the concrete `mfderiv`
-framework, are not part of the inputs at this level: they will be supplied
-by downstream specialisations.
+This file delivers the inequality in two forms:
 
-## Main result
+* `lichnerowicz_inequality` is the abstract foundation: it takes the
+  Bochner identity, the Hessian Cauchy-Schwarz bound, the Ricci bound, and
+  the L² positivity of `f` as scalar hypotheses on `M`.
+* `lichnerowicz_closed_unconditional` is the headline endpoint: with the
+  abstract scalar witnesses replaced by the concrete `chartHessFrobeniusSq`
+  and the abstract `ricciTensor`, all of the analytic ingredients (Bochner
+  identity, Cauchy-Schwarz Hessian bound, smoothness witnesses, and
+  continuity of the Hessian-Frobenius and Ricci-on-gradient functions) are
+  discharged from the project's existing infrastructure. The user supplies
+  only the eigenvalue equation, the universal Ricci lower bound, and the
+  L²-positivity hypothesis.
 
-* `lichnerowicz_inequality` : the eigenvalue lower bound `n K ≤ λ`.
+## Main results
+
+* `lichnerowicz_inequality` : the eigenvalue lower bound `n K ≤ λ` from the
+  abstract scalar hypotheses.
+* `lichnerowicz_closed_unconditional` : the same lower bound `n K ≤ λ` with
+  all auxiliary continuity, Bochner, and Hessian-trace hypotheses
+  discharged internally.
 -/
 
 noncomputable section
@@ -62,6 +76,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Integral.Connection
 
 /-! ## File-local Borel-space instances on `E` and `M` -/
 
@@ -108,7 +123,7 @@ private theorem integral_inner_grad_self_eq_neg_integral_f_Δf
   have hf_cs : HasCompactSupport f := HasCompactSupport.of_compactSpace _
   exact integral_inner_grad_eq_neg_integral_smul_laplacian (I := I) g hf hf hf_cs
 
-/-! ## The Lichnerowicz eigenvalue inequality
+/-! ## The Lichnerowicz eigenvalue inequality (abstract form)
 
 The headline statement assumes the pointwise Bochner identity, a Cauchy-Schwarz
 type bound on the Hessian Frobenius-norm-squared, and a Ricci lower bound, all
@@ -451,6 +466,501 @@ theorem lichnerowicz_inequality
   -- `(n K) * a ≤ λ * a` and `a > 0` ⇒ `n K ≤ λ`.
   exact le_of_mul_le_mul_right (by linarith [h_n_chain]) h_factor_pos
 
+/-! ## Unconditional form
+
+The unconditional version takes the abstract scalar witnesses of
+`lichnerowicz_inequality` and instantiates them with the concrete
+`chartHessFrobeniusSq` and the abstract `ricciTensor`, discharging the
+Bochner identity, the Cauchy-Schwarz Hessian bound, and the continuity
+witnesses from the project's existing infrastructure. -/
+
+/-! ### Helpers: Parseval-style expansion on a `g_x`-orthonormal basis -/
+
+/-- **Parseval expansion of `|u|²_g` on a `g_x`-orthonormal basis.**
+For any `g_x`-orthonormal basis `B : Fin n → T_x M` and any tangent vector
+`u ∈ T_x M`, the squared `g_x`-norm of `u` equals the sum of squared inner
+products with the basis vectors:
+`g.inner x u u = ∑ j, (g.inner x u (B j))²`. -/
+private theorem g_inner_self_eq_sum_sq_inner_orthonormal
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (u : TangentSpace I x)
+    (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
+    (hB_basis : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x))
+    (hB_eq : ∀ i, hB_basis i = B i)
+    (hB_orth : ∀ i j : Fin (Module.finrank ℝ E),
+      g.inner x (B i) (B j) = if i = j then (1 : ℝ) else 0) :
+    g.inner x u u =
+      ∑ j : Fin (Module.finrank ℝ E), (g.inner x u (B j))^2 := by
+  classical
+  -- Decompose `u = ∑ j (hB_basis.repr u) j • B j`.
+  -- Use a let-binding `c` for the coefficients to avoid rewriting them when
+  -- substituting `u`.
+  set c : Fin (Module.finrank ℝ E) → ℝ := fun j => hB_basis.repr u j with hc_def
+  have hu_decomp : u =
+      ∑ j : Fin (Module.finrank ℝ E),
+        c j • (B j : TangentSpace I x) := by
+    have h : (∑ i : Fin (Module.finrank ℝ E),
+        hB_basis.repr u i • (hB_basis i : TangentSpace I x)) = u :=
+      hB_basis.sum_repr u
+    -- Goal after `← h`: `∑ i, hB_basis.repr u i • hB_basis i = ∑ j, c j • B j`.
+    rw [← h]
+    -- Both sums are indexed identically; congruence: `c j = hB_basis.repr u j`
+    -- and `B j = hB_basis j`.
+    refine Finset.sum_congr rfl ?_
+    intro i _
+    rw [hB_eq i]
+  -- For each `k`, identify the basis-rep coefficient with `g.inner x u (B k)`.
+  -- Compute `g.inner x u (B k) = g.inner x (∑ j c_j • B j) (B k) =
+  --   ∑ j c_j * g.inner x (B j) (B k) = c_k`, using orthonormality.
+  have h_coeff : ∀ k : Fin (Module.finrank ℝ E),
+      g.inner x u (B k) = c k := by
+    intro k
+    -- LHS = g.inner x (B k) u (by g.symm).
+    rw [g.symm x u (B k)]
+    -- Apply g.inner x (B k) to both sides of `hu_decomp`.
+    have hgoal :
+        g.inner x (B k) u =
+          ∑ j : Fin (Module.finrank ℝ E), c j * g.inner x (B k) (B j) := by
+      have h_apply : (g.inner x (B k)) u =
+          (g.inner x (B k)) (∑ j : Fin (Module.finrank ℝ E),
+            c j • (B j : TangentSpace I x)) :=
+        congrArg (g.inner x (B k)) hu_decomp
+      rw [h_apply]
+      rw [map_sum]
+      refine Finset.sum_congr rfl ?_
+      intro j _
+      rw [(g.inner x (B k)).map_smul (c j) (B j), smul_eq_mul]
+    rw [hgoal]
+    -- Apply orthonormality.
+    rw [show (∑ j : Fin (Module.finrank ℝ E),
+          c j * g.inner x (B k) (B j)) =
+        ∑ j : Fin (Module.finrank ℝ E),
+          c j * (if k = j then (1 : ℝ) else 0) from by
+      refine Finset.sum_congr rfl ?_
+      intro j _
+      rw [hB_orth k j]]
+    -- Only the `j = k` summand survives.
+    rw [Finset.sum_eq_single k]
+    · rw [if_pos rfl, mul_one]
+    · intro j _ hjk
+      rw [if_neg (fun h => hjk h.symm), mul_zero]
+    · intro hk
+      exact absurd (Finset.mem_univ k) hk
+  -- Now `g.inner x u u = ∑ j c j² = ∑ j (g.inner x u (B j))²`.
+  -- Use `map_sum` on the second slot only.
+  have hgoal :
+      g.inner x u u = ∑ j : Fin (Module.finrank ℝ E),
+        c j * g.inner x u (B j) := by
+    -- `g.inner x u : T_x M →L ℝ`. Apply it to both sides of `hu_decomp`.
+    have h_apply : (g.inner x u) u =
+        (g.inner x u) (∑ j : Fin (Module.finrank ℝ E),
+          c j • (B j : TangentSpace I x)) :=
+      congrArg (g.inner x u) hu_decomp
+    rw [h_apply]
+    rw [map_sum]
+    refine Finset.sum_congr rfl ?_
+    intro j _
+    rw [(g.inner x u).map_smul (c j) (B j), smul_eq_mul]
+  rw [hgoal]
+  refine Finset.sum_congr rfl ?_
+  intro j _
+  rw [h_coeff j]
+  ring
+
+/-! ### Pointwise dimension-Laplacian Cauchy-Schwarz inequality
+
+The argument works at a single point `x`. We pick the `g_x`-orthonormal frame
+`B_i := smoothOrthoFrame g x i x`.
+
+* `∑_i abstractHessian g f x (B_i) (B_i) = Δ_g g hf x`, via
+  `sum_abstractHessian_orthonormal_eq_laplacian`.
+
+* `∑_{ij} (abstractHessian g f x (B_i) (B_j))² = chartHessFrobeniusSq g f x`,
+  using the Parseval identity above to expand
+  `|T(B_i)|²_g = ∑_j (g(T(B_i), B_j))²` (where `T = LC g (∇f) x`) and the
+  bridge `frobeniusSq_grad_vector_eq_chartHessFrobeniusSq`.
+
+* The basis-naive Cauchy-Schwarz `bilinForm_trace_sq_le_card_mul_frobenius_sq`
+  applied to the bilinear form `abstractHessianLin g f x` and the vectors `B`
+  closes the inequality.
+-/
+
+/-- **Pointwise dimension-Laplacian inequality, unconditional form.**
+For a closed-input smooth scalar `f` on a boundaryless smooth Riemannian
+manifold,
+`(Δ_g g hf x)² ≤ (finrank ℝ E) · chartHessFrobeniusSq g f x`. -/
+private theorem laplacian_sq_le_dim_mul_chartHessFrobeniusSq_pointwise
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    (g : SmoothRiemannianMetric I M)
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (x : M) :
+    (Δ_g (I := I) g hf x)^2 ≤
+      (Module.finrank ℝ E : ℝ) * chartHessFrobeniusSq (I := I) g f x := by
+  classical
+  -- Pick the smooth orthonormal frame at `x`, evaluated at `x`.
+  set B : Fin (Module.finrank ℝ E) → TangentSpace I x :=
+    fun i => smoothOrthoFrame (I := I) g x i x with hB_def
+  have hB_orth : ∀ i j : Fin (Module.finrank ℝ E),
+      g.inner x (B i) (B j) = if i = j then (1 : ℝ) else 0 := fun i j =>
+    smoothOrthoFrame_orthonormal_at_center (I := I) g x i j
+  -- Step 1: the basis-naive Cauchy-Schwarz on `abstractHessianLin g f x`.
+  have hCS :
+      (∑ i : Fin (Module.finrank ℝ E),
+        abstractHessianLin (I := I) g f x (B i) (B i))^2 ≤
+        (Fintype.card (Fin (Module.finrank ℝ E)) : ℝ) *
+          ∑ i : Fin (Module.finrank ℝ E),
+            ∑ j : Fin (Module.finrank ℝ E),
+              (abstractHessianLin (I := I) g f x (B i) (B j))^2 :=
+    bilinForm_trace_sq_le_card_mul_frobenius_sq
+      (V := TangentSpace I x) (ι := Fin (Module.finrank ℝ E))
+      (abstractHessianLin (I := I) g f x) B
+  rw [Fintype.card_fin] at hCS
+  -- Step 2: identify the LHS with `(Δ_g g hf x)²`.
+  have hLHS_eq : ∑ i : Fin (Module.finrank ℝ E),
+      abstractHessianLin (I := I) g f x (B i) (B i) =
+      Δ_g (I := I) g hf x := by
+    -- `abstractHessianLin = abstractHessian` and the orthonormal-frame trace
+    -- identity `sum_abstractHessian_orthonormal_eq_laplacian` is in the
+    -- `Connection` namespace.
+    have h := sum_abstractHessian_orthonormal_eq_laplacian (I := I) g hf x B hB_orth
+    refine h ▸ ?_
+    refine Finset.sum_congr rfl ?_
+    intro i _
+    exact abstractHessianLin_apply (I := I) g f x (B i) (B i)
+  rw [hLHS_eq] at hCS
+  -- Step 3: identify the RHS with `n · chartHessFrobeniusSq g f x`.
+  -- Each row sum `∑_j (abstractHessian g f x (B_i) (B_j))²` equals
+  -- `|T(B_i)|²_g` where `T = LC g (∇f) x`, by the Parseval expansion.
+  set T : TangentSpace I x →L[ℝ] TangentSpace I x :=
+    (LeviCivita (I := I) g).toFun
+      (fun b : M => gradFun (I := I) g f b) x with hT_def
+  -- Bridge: `abstractHessianLin g f x v w = g.inner x (T v) w`.
+  have h_AH_eq_inner : ∀ v w : TangentSpace I x,
+      abstractHessianLin (I := I) g f x v w =
+        g.inner x (T v) w := by
+    intro v w
+    rw [abstractHessianLin_apply (I := I) g f x v w]
+    rw [hT_def]
+    -- `abstractHessian g f x v w = g.inner x ((LC g)(∇f) x v) w`.
+    rw [(abstractHessian_eq_inner_cov_gradFun_extend (I := I) g hf x v w).symm]
+  -- Row-sum Parseval identity using the `g_x`-orthonormal basis structure on
+  -- `B`. The `Module.finBasis ℝ E` is a basis of `TangentSpace I x = E`, but
+  -- so is any orthonormal tuple. We assemble the basis from `B`:
+  -- it has the right cardinality `n`, and is linearly independent because
+  -- it is `g_x`-orthonormal in a positive-definite inner product.
+  -- Construct the basis from B.
+  have hB_li : LinearIndependent ℝ B := by
+    rw [linearIndependent_iff']
+    intro s c hsum k hk_mem
+    -- `g_x(B_k, ∑ s_j c_j • B_j) = c_k` by orthonormality, but the sum is 0,
+    -- so `c_k = 0`.
+    have h_zero : g.inner x (B k) (∑ j ∈ s, c j • B j) = 0 := by
+      rw [hsum]; simp
+    rw [map_sum] at h_zero
+    have h_pull : ∀ j ∈ s, g.inner x (B k) (c j • B j) =
+        c j * g.inner x (B k) (B j) := by
+      intro j _
+      rw [(g.inner x (B k)).map_smul (c j) (B j), smul_eq_mul]
+    rw [Finset.sum_congr rfl h_pull] at h_zero
+    -- Use orthonormality: g.inner x (B k) (B j) = if k = j then 1 else 0
+    -- (note the symmetry `B k, B j` vs `B j, B k`).
+    have h_pull2 : ∀ j ∈ s, c j * g.inner x (B k) (B j) =
+        c j * (if k = j then (1 : ℝ) else 0) := by
+      intro j _
+      rw [hB_orth k j]
+    rw [Finset.sum_congr rfl h_pull2] at h_zero
+    -- Only `j = k` (in `s`) contributes.
+    rw [Finset.sum_eq_single_of_mem k hk_mem] at h_zero
+    · rw [if_pos rfl, mul_one] at h_zero
+      exact h_zero
+    · intro j _ hjk
+      rw [if_neg (fun h => hjk h.symm), mul_zero]
+  -- Assemble the basis `hB_basis`.
+  have hpos : 0 < Module.finrank ℝ E := Nat.pos_of_ne_zero (NeZero.ne _)
+  haveI : Nonempty (Fin (Module.finrank ℝ E)) :=
+    Fin.pos_iff_nonempty.mp hpos
+  have hcard : Fintype.card (Fin (Module.finrank ℝ E)) =
+      Module.finrank ℝ (TangentSpace I x) := by
+    rw [Fintype.card_fin]
+    -- TangentSpace I x = E definitionally.
+    rfl
+  -- `Module.Basis` from a linearly independent family of correct cardinality.
+  set hB_basis : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x) :=
+    basisOfLinearIndependentOfCardEqFinrank hB_li hcard with hB_basis_def
+  have hB_basis_eq : ∀ i, hB_basis i = B i := by
+    intro i
+    rw [hB_basis_def]
+    -- Use the simp lemma `coe_basisOfLinearIndependentOfCardEqFinrank`.
+    change (basisOfLinearIndependentOfCardEqFinrank hB_li hcard :
+        Fin (Module.finrank ℝ E) → TangentSpace I x) i = B i
+    rw [coe_basisOfLinearIndependentOfCardEqFinrank]
+  -- Apply the Parseval identity row by row.
+  have h_row : ∀ i : Fin (Module.finrank ℝ E),
+      ∑ j : Fin (Module.finrank ℝ E),
+          (abstractHessianLin (I := I) g f x (B i) (B j))^2 =
+        g.inner x (T (B i)) (T (B i)) := by
+    intro i
+    -- LHS = ∑_j (g(T(B_i), B_j))² (after `h_AH_eq_inner`).
+    rw [show (∑ j : Fin (Module.finrank ℝ E),
+            (abstractHessianLin (I := I) g f x (B i) (B j))^2) =
+        ∑ j : Fin (Module.finrank ℝ E),
+            (g.inner x (T (B i)) (B j))^2 from by
+      refine Finset.sum_congr rfl ?_
+      intro j _
+      rw [h_AH_eq_inner (B i) (B j)]]
+    -- This equals `|T(B_i)|²_g` by Parseval.
+    exact (g_inner_self_eq_sum_sq_inner_orthonormal
+      (g := g) (x := x) (u := T (B i)) (B := B)
+      (hB_basis := hB_basis) (hB_eq := hB_basis_eq) (hB_orth := hB_orth)).symm
+  -- Sum over `i`: `∑_{ij} = ∑_i |T(B_i)|²_g = frobeniusSq_grad_vector g (∇f) x`.
+  have h_full_sum :
+      ∑ i : Fin (Module.finrank ℝ E),
+        ∑ j : Fin (Module.finrank ℝ E),
+          (abstractHessianLin (I := I) g f x (B i) (B j))^2 =
+        frobeniusSq_grad_vector (I := I) g
+          (fun b : M => gradFun (I := I) g f b) x := by
+    rw [frobeniusSq_grad_vector_def]
+    refine Finset.sum_congr rfl ?_
+    intro i _
+    exact h_row i
+  rw [h_full_sum] at hCS
+  -- Bridge `frobeniusSq_grad_vector g (∇f) x = chartHessFrobeniusSq g f x`.
+  rw [frobeniusSq_grad_vector_eq_chartHessFrobeniusSq (I := I) g hf x] at hCS
+  exact hCS
+
+/-! ### Continuity of the Ricci pairing on the gradient -/
+
+/-- Smoothness of `b ↦ ricciTensor g b (∇f b) (∇f b)` for smooth `f`. -/
+private theorem ricciTensor_grad_grad_contMDiff
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    (g : SmoothRiemannianMetric I M)
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
+    ContMDiff I 𝓘(ℝ, ℝ) ∞
+      (fun b : M => ricciTensor (I := I) g b
+        (gradFun (I := I) g f b) (gradFun (I := I) g f b)) := by
+  classical
+  -- Ricci tensor as a smooth section of the (0,2)-tensor bundle.
+  have hRic := ricciTensor_contMDiff (I := I) g
+  -- Gradient as a smooth section of the tangent bundle.
+  have hG := gradFun_contMDiff_total_section (I := I) g hf
+  -- Apply `ContMDiff.clm_bundle_apply₂` to get smoothness of the scalar pairing.
+  have happ :
+      ContMDiff I (I.prod 𝓘(ℝ, ℝ)) ∞
+        (fun m : M => (⟨m,
+            ricciTensor (I := I) g m
+              (gradFun (I := I) g f m) (gradFun (I := I) g f m)⟩ :
+              TotalSpace ℝ (Bundle.Trivial M ℝ))) :=
+    ContMDiff.clm_bundle_apply₂ (F₁ := E) (F₂ := E) (F₃ := ℝ)
+      (b := id) hRic hG hG
+  -- Extract the scalar smoothness from the `TotalSpace.mk'` form.
+  intro m
+  have hpm := happ m
+  rw [Bundle.contMDiffAt_totalSpace] at hpm
+  exact hpm.2
+
+/-- Continuity of `b ↦ ricciTensor g b (∇f b) (∇f b)`. -/
+private theorem ricciTensor_grad_grad_continuous
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    (g : SmoothRiemannianMetric I M)
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
+    Continuous (fun b : M => ricciTensor (I := I) g b
+      (gradFun (I := I) g f b) (gradFun (I := I) g f b)) :=
+  (ricciTensor_grad_grad_contMDiff (I := I) g hf).continuous
+
+/-! ### Continuity of the Hessian Frobenius squared
+
+Derived algebraically from the unconditional Bochner identity by isolating
+`chartHessFrobeniusSq` and using continuity of the other three terms. -/
+
+/-- Continuity of `b ↦ chartHessFrobeniusSq g f b`. -/
+private theorem chartHessFrobeniusSq_continuous
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    (g : SmoothRiemannianMetric I M)
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
+    Continuous (fun b : M => chartHessFrobeniusSq (I := I) g f b) := by
+  classical
+  -- Set up the smooth gradient sections.
+  set Gf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+    grad_g (I := I) g hf with hGf_def
+  have hΔf : ContMDiff I 𝓘(ℝ, ℝ) ∞ (Δ_g (I := I) g hf) :=
+    Δ_g_contMDiff (I := I) g hf
+  set GΔf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+    grad_g (I := I) g hΔf with hGΔf_def
+  -- Continuity of the three "other" terms in the Bochner identity.
+  have h1 : Continuous (Δ_g (I := I) g (normGradSqFun_contMDiff (I := I) g hf)) :=
+    (Δ_g_contMDiff (I := I) g (normGradSqFun_contMDiff (I := I) g hf)).continuous
+  have h2 : Continuous (fun b : M => ricciTensor (I := I) g b
+      (gradFun (I := I) g f b) (gradFun (I := I) g f b)) :=
+    ricciTensor_grad_grad_continuous (I := I) g hf
+  have h3 : Continuous (fun b : M => g.inner b
+      ((Gf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) b)
+      ((GΔf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) b)) :=
+    TangentBundle.continuous_g_inner_of_smooth_sections (I := I) g Gf GΔf
+  -- The Bochner identity:
+  -- 2 * chartHessFrobeniusSq g f x =
+  --   Δ_g(|∇f|²)(x) - 2 * ricciTensor(...) - 2 * g.inner(...).
+  have h_bochner_isolate : ∀ x : M,
+      chartHessFrobeniusSq (I := I) g f x =
+        ((Δ_g (I := I) g (normGradSqFun_contMDiff (I := I) g hf) x) -
+          2 * ricciTensor (I := I) g x
+            (gradFun (I := I) g f x) (gradFun (I := I) g f x) -
+          2 * g.inner x
+            ((Gf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
+            ((GΔf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)) / 2 := by
+    intro x
+    have hB := bochner_pointwise_concrete_metric_unconditional (I := I) g hf x
+    -- `(Gf x) = gradFun g f x` and `(GΔf x) = gradFun g (Δ_g g hf) x` by `grad_g_apply`.
+    have hGf_x : (Gf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x =
+        gradFun (I := I) g f x := by
+      rw [hGf_def]; rfl
+    have hGΔf_x : (GΔf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x =
+        gradFun (I := I) g (Δ_g (I := I) g hf) x := by
+      rw [hGΔf_def]; rfl
+    rw [hGf_x, hGΔf_x]
+    linarith [hB]
+  -- Match continuity of the RHS function.
+  have hRHS_cont : Continuous (fun x : M =>
+      ((Δ_g (I := I) g (normGradSqFun_contMDiff (I := I) g hf) x) -
+        2 * ricciTensor (I := I) g x
+          (gradFun (I := I) g f x) (gradFun (I := I) g f x) -
+        2 * g.inner x
+          ((Gf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
+          ((GΔf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)) / 2) := by
+    refine ((h1.sub (continuous_const.mul h2)).sub
+      (continuous_const.mul h3)).div_const 2
+  refine hRHS_cont.congr ?_
+  intro x
+  exact (h_bochner_isolate x).symm
+
+/-! ### The closed-manifold Lichnerowicz inequality (unconditional form) -/
+
+/-- **Lichnerowicz's eigenvalue inequality on a closed Riemannian manifold,
+unconditional form.**
+
+Let `(M, g)` be a closed (compact and boundaryless) smooth Riemannian
+manifold of dimension `n := finrank ℝ E ≥ 2`. Suppose:
+
+* `K > 0` is a positive lower curvature parameter.
+* `f : M → ℝ` is smooth with `Δ_g f = -λ f` pointwise for some `λ > 0`
+  (the eigenfunction equation).
+* `Ric ≥ (n - 1) K g`, expressed in the universal form
+  `(n - 1) K g(X, X) ≤ Ric(X, X)` for every tangent vector `X`,
+  using the abstract `ricciTensor` of the Levi-Civita connection.
+* `0 < ∫ f²` (this is automatic for a nonzero smooth function on a closed
+  manifold; we expose it as an explicit hypothesis to keep the inequality
+  block self-contained).
+
+Then `n K ≤ λ`.
+
+The Bochner-Weitzenböck pointwise identity, the Cauchy-Schwarz Hessian-trace
+inequality, the smoothness of `|∇f|²_g`, and the continuity of the
+Hessian-Frobenius and Ricci-on-gradient witnesses are all discharged from
+the project's existing infrastructure; the user supplies only the
+eigenvalue equation, the universal Ricci lower bound, and the L²-positivity
+hypothesis. -/
+theorem lichnerowicz_closed_unconditional
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    (g : SmoothRiemannianMetric I M)
+    (hn_ge_two : 2 ≤ Module.finrank ℝ E)
+    {K : ℝ} (hK : 0 < K)
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
+    {lam : ℝ} (hlam_pos : 0 < lam)
+    (hf_eigen : ∀ x : M, Δ_g (I := I) g hf x = -lam * f x)
+    (h_ricci : ∀ x : M, ∀ X : TangentSpace I x,
+      ((Module.finrank ℝ E : ℝ) - 1) * K * g.inner x X X ≤
+        ricciTensor (I := I) g x X X)
+    (h_f_sq_pos : 0 < ∫ x, f x * f x
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g)) :
+    (Module.finrank ℝ E : ℝ) * K ≤ lam := by
+  classical
+  -- Smoothness of the gradient norm squared.
+  have hgrad_norm_sq_smooth :
+      ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun x : M => g.inner x
+        ((grad_g (I := I) g hf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
+        ((grad_g (I := I) g hf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)) :=
+    contMDiff_g_inner_of_smooth_sections (I := I) (M := M) g
+      (grad_g (I := I) g hf) (grad_g (I := I) g hf)
+  -- Continuity of `chartHessFrobeniusSq g f`.
+  have h_frob_cont :
+      Continuous (fun x : M => chartHessFrobeniusSq (I := I) g f x) :=
+    chartHessFrobeniusSq_continuous (I := I) g hf
+  -- Continuity of `ricciTensor g x (∇f x) (∇f x)`.
+  have h_ricci_cont :
+      Continuous (fun x : M => ricciTensor (I := I) g x
+        (gradFun (I := I) g f x) (gradFun (I := I) g f x)) :=
+    ricciTensor_grad_grad_continuous (I := I) g hf
+  -- Bochner identity, with `gradFun` replaced by `grad_g … x` (definitionally
+  -- equal via `grad_g_apply`).
+  have h_bochner_section : ∀ x : M,
+      Δ_g (I := I) g hgrad_norm_sq_smooth x =
+        2 * chartHessFrobeniusSq (I := I) g f x +
+          2 * ricciTensor (I := I) g x
+            ((grad_g (I := I) g hf :
+                Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
+            ((grad_g (I := I) g hf :
+                Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x) +
+          2 * g.inner x
+            ((grad_g (I := I) g hf :
+                Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
+            ((grad_g (I := I) g (Δ_g_contMDiff (I := I) g hf) :
+                Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x) := by
+    intro x
+    have hB := bochner_pointwise_concrete_metric_unconditional (I := I) g hf x
+    -- `Δ_g_contMDiff` uses the same smoothness witness mechanism as
+    -- `bochner_pointwise_concrete_metric_unconditional`. Both LHS use the
+    -- `normGradSqFun_contMDiff` witness. The resulting LHS scalars are equal
+    -- because `Δ_g` depends only on `f`, not on the witness chosen (see
+    -- `Δ_g_def`: it is `divergence_g (grad_g …)` which depends on `f` via
+    -- `gradFun`).
+    -- We rewrite `(grad_g g hf x) = gradFun g f x` and similarly for `Δf`.
+    have hGf_x : (grad_g (I := I) g hf :
+        Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x =
+        gradFun (I := I) g f x := grad_g_apply (I := I) g hf x
+    have hGΔf_x : (grad_g (I := I) g (Δ_g_contMDiff (I := I) g hf) :
+        Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x =
+        gradFun (I := I) g (Δ_g (I := I) g hf) x :=
+      grad_g_apply (I := I) g (Δ_g_contMDiff (I := I) g hf) x
+    rw [hGf_x, hGΔf_x]
+    -- Reduce `Δ_g g hgrad_norm_sq_smooth x = Δ_g g (normGradSqFun_contMDiff g hf) x`.
+    -- Both witnesses prove the same function is smooth, so the values agree.
+    have hLHS_eq : Δ_g (I := I) g hgrad_norm_sq_smooth x =
+        Δ_g (I := I) g (normGradSqFun_contMDiff (I := I) g hf) x := rfl
+    rw [hLHS_eq]
+    exact hB
+  -- Pointwise Hessian-trace bound from the unconditional CS.
+  have h_hess_lower_bound : ∀ x : M,
+      (Δ_g (I := I) g hf x)^2 / (Module.finrank ℝ E : ℝ) ≤
+        chartHessFrobeniusSq (I := I) g f x := by
+    intro x
+    have hne : (Module.finrank ℝ E : ℕ) ≠ 0 := NeZero.ne _
+    have hpos : (0 : ℝ) < (Module.finrank ℝ E : ℝ) := by
+      have : (0 : ℕ) < Module.finrank ℝ E := Nat.pos_of_ne_zero hne
+      exact_mod_cast this
+    have h := laplacian_sq_le_dim_mul_chartHessFrobeniusSq_pointwise
+      (I := I) g hf x
+    exact (div_le_iff₀ hpos).mpr (by linarith [h])
+  -- Apply the abstract `lichnerowicz_inequality`.
+  exact lichnerowicz_inequality (I := I) (M := M) g hn_ge_two hK hf hlam_pos
+    hf_eigen hgrad_norm_sq_smooth
+    (fun x => chartHessFrobeniusSq (I := I) g f x) h_frob_cont
+    (fun x => ricciTensor (I := I) g x
+      ((grad_g (I := I) g hf :
+          Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
+      ((grad_g (I := I) g hf :
+          Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x))
+    (by
+      refine h_ricci_cont.congr ?_
+      intro x
+      simp only [grad_g_apply])
+    h_bochner_section
+    h_hess_lower_bound
+    (by
+      intro x
+      exact h_ricci x ((grad_g (I := I) g hf :
+        Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x))
+    h_f_sq_pos
+
 end Laplacian
 end Analysis
 end DifferentialGeometry
+
+end

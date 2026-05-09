@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.IntrinsicLp
+import DifferentialGeometry.Analysis.Sobolev.Intrinsic.Lp
 import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.Gradient
 import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.IntegrationByParts
 import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.Global

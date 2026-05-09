@@ -1,0 +1,865 @@
+import DifferentialGeometry.Geometry.Gradient
+import DifferentialGeometry.Geometry.Laplacian
+import Mathlib.Algebra.Order.Chebyshev
+import Mathlib.LinearAlgebra.Dimension.Free
+import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
+
+/-!
+# Hessian of a smooth function on a Riemannian manifold
+
+For a smooth Riemannian metric `g` on a smooth manifold `M` and a smooth scalar
+function `f : M → ℝ`, the Hessian of `f` is a symmetric `(0,2)`-tensor on the
+tangent bundle. Its pointwise definition reads
+$$\operatorname{Hess} f(x)(X, Y) = X(Y(f)) - (\nabla_X Y)(f)$$
+where `∇` is the Levi-Civita connection. Equivalently it is the second
+covariant derivative of `f`.
+
+This file packages the pieces of the Hessian story that are downstream of the
+metric and orthogonal to a particular concrete construction of `∇`. They take
+the form of a *bilinear-form* viewpoint:
+
+* a definition `pointwiseBilin` that records a pointwise bilinear form on the
+  tangent space, parameterised by the data the user supplies (typically the
+  second covariant derivative of `f` along the chosen Levi-Civita connection);
+* a basis-bound `bilinForm_trace_sq_le_dim_mul_frobenius_sq` proving the
+  pure linear-algebra Frobenius/trace Cauchy-Schwarz inequality
+  $$\Bigl(\sum_i B(b_i, b_i)\Bigr)^2 \;\le\;
+      n \cdot \sum_{i,j} \bigl(B(b_i, b_j)\bigr)^2$$
+  for any basis `b` of a finite-dimensional ℝ-vector space (this is the
+  inequality used downstream of the Bochner identity to bound `(Δf)²` by
+  `n · |Hess f|²`);
+* a packaged `pointwiseBilin` carrier together with its Frobenius-norm-squared
+  function `frobeniusSqFun` and trace function `traceFun`, both computed against
+  the canonical chosen basis `Module.finBasis ℝ E` on the model fibre, and the
+  pointwise bound `traceFun_sq_le_dim_mul_frobeniusSqFun` that follows
+  immediately from the basis-bound above.
+
+The bound and the carrier are designed to be re-used by clients that supply
+their own concrete Hessian. A typical client constructs the bilinear form from
+the chart-Christoffel formula
+$$\bigl(\operatorname{Hess} f\bigr)_{ij}(x) =
+    \partial_i \partial_j (f \circ \varphi^{-1})(\varphi x) -
+      \Gamma^k{}_{ij}(g)(\varphi x)\,\partial_k(f \circ \varphi^{-1})(\varphi x)$$
+or from `CovariantDerivative` applied twice to the differential of `f`. The
+identification of the trace with the Laplace–Beltrami operator and of the
+Frobenius norm with the metric Frobenius norm is part of that downstream
+construction (it requires either an orthonormal frame of the tangent space
+under `g.inner x` or the chart-Christoffel formula tracking the Gram matrix of
+the chosen basis); both reduce to the bound proved here.
+
+## Main definitions
+
+* `pointwiseBilin g f` : a record bundling a pointwise symmetric bilinear form
+  on the tangent space of `M` together with the smoothness data the user can
+  supply. The data is intentionally hypothesis-bearing so that a downstream
+  client can plug in their concrete Hessian.
+* `frobeniusSqFun B x` : the Frobenius norm squared
+  `∑ i j, (B x (b i) (b j))²` of a pointwise bilinear form `B`, computed
+  against the canonical chosen basis `b := Module.finBasis ℝ E`.
+* `traceFun B x` : the trace `∑ i, B x (b i) (b i)`, computed against the
+  same basis.
+
+## Main theorems
+
+* `bilinForm_trace_sq_le_dim_mul_frobenius_sq` : the pure Cauchy-Schwarz
+  Frobenius inequality `(∑ B (b i) (b i))² ≤ n · ∑ (B (b i) (b j))²` for any
+  basis `b` indexed by `Fin n`. (The inequality holds for any basis of any
+  finite-dimensional vector space; orthonormality is not needed for the
+  inequality itself, only for the basis-independent identification of trace
+  and Frobenius norm with their geometric counterparts.)
+* `traceFun_sq_le_dim_mul_frobeniusSqFun` : the pointwise specialisation
+  `(traceFun B x)² ≤ n · frobeniusSqFun B x`.
+-/
+
+noncomputable section
+
+open Bundle Manifold Set MeasureTheory
+open scoped Manifold Topology ContDiff Matrix
+
+namespace DifferentialGeometry
+namespace Integral
+namespace DivergenceTheorem
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+
+open DifferentialGeometry.Integral.Measure
+
+/-! ## Pure linear-algebra: trace–Frobenius Cauchy-Schwarz
+
+The Cauchy-Schwarz inequality for sums asserts
+`(∑ a i)² ≤ n · ∑ (a i)²` whenever `a : Fin n → ℝ`. Applied to the diagonal
+entries `a i = B (b i) (b i)` of a bilinear form `B` and any basis `b`, and
+combined with the trivial inequality `∑ (B (b i) (b i))² ≤ ∑ (B (b i) (b j))²`
+(extra non-negative terms), this yields the trace–Frobenius bound
+
+```
+(∑ i, B (b i) (b i))² ≤ n · ∑ i j, (B (b i) (b j))².
+```
+
+The bound is purely linear-algebraic: it uses neither inner products nor the
+particular basis. Symmetry of `B` is not needed either; it is convenient to
+state the inequality without symmetry hypotheses.
+-/
+
+/-- Frobenius–trace Cauchy-Schwarz: for any bilinear form `B` and any indexing
+type `ι` (finite), the squared sum of "diagonal" entries `B(v i)(v i)` is
+controlled by the cardinality of `ι` times the sum of squares of all "matrix"
+entries `B(v i)(v j)`. -/
+theorem bilinForm_trace_sq_le_card_mul_frobenius_sq
+    {V : Type*} [AddCommGroup V] [Module ℝ V]
+    {ι : Type*} [Fintype ι]
+    (B : V →ₗ[ℝ] V →ₗ[ℝ] ℝ) (v : ι → V) :
+    (∑ i : ι, B (v i) (v i))^2 ≤
+      (Fintype.card ι : ℝ) * ∑ i : ι, ∑ j : ι, (B (v i) (v j))^2 := by
+  classical
+  -- Step 1. By Cauchy-Schwarz, `(∑ d i)² ≤ n · ∑ (d i)²` where `d i = B (v i) (v i)`.
+  have h_diag :
+      (∑ i : ι, B (v i) (v i))^2 ≤
+        (Fintype.card ι : ℝ) * ∑ i : ι, (B (v i) (v i))^2 := by
+    have h := sq_sum_le_card_mul_sum_sq (α := ℝ) (s := (Finset.univ : Finset ι))
+      (f := fun i => B (v i) (v i))
+    simpa [Finset.card_univ] using h
+  -- Step 2. Each diagonal square is ≤ the row-sum of squares (extra non-negative terms).
+  have h_row : ∀ i : ι,
+      (B (v i) (v i))^2 ≤ ∑ j : ι, (B (v i) (v j))^2 := by
+    intro i
+    have h_mem : i ∈ (Finset.univ : Finset ι) := Finset.mem_univ i
+    have h_nonneg : ∀ j ∈ (Finset.univ : Finset ι), 0 ≤ (B (v i) (v j))^2 :=
+      fun j _ => sq_nonneg _
+    exact Finset.single_le_sum (f := fun j => (B (v i) (v j))^2) h_nonneg h_mem
+  -- Step 3. Sum step 2 to get `∑ i, (diag i)² ≤ ∑ i j, (B (v i) (v j))²`.
+  have h_sum :
+      ∑ i : ι, (B (v i) (v i))^2 ≤ ∑ i : ι, ∑ j : ι, (B (v i) (v j))^2 :=
+    Finset.sum_le_sum (fun i _ => h_row i)
+  -- Combine. Multiplication by the non-negative `(Fintype.card ι : ℝ)` is monotone.
+  have h_card_nonneg : (0 : ℝ) ≤ (Fintype.card ι : ℝ) := by
+    exact_mod_cast Nat.zero_le _
+  calc (∑ i : ι, B (v i) (v i))^2
+      ≤ (Fintype.card ι : ℝ) * ∑ i : ι, (B (v i) (v i))^2 := h_diag
+    _ ≤ (Fintype.card ι : ℝ) * ∑ i : ι, ∑ j : ι, (B (v i) (v j))^2 := by
+        exact mul_le_mul_of_nonneg_left h_sum h_card_nonneg
+
+/-- Specialisation of `bilinForm_trace_sq_le_card_mul_frobenius_sq` to the
+basis `Module.finBasis ℝ V` indexed by `Fin (Module.finrank ℝ V)`. -/
+theorem bilinForm_trace_sq_le_dim_mul_frobenius_sq
+    {V : Type*} [AddCommGroup V] [Module ℝ V] [Module.Finite ℝ V]
+    (B : V →ₗ[ℝ] V →ₗ[ℝ] ℝ) (b : Module.Basis (Fin (Module.finrank ℝ V)) ℝ V) :
+    (∑ i : Fin (Module.finrank ℝ V), B (b i) (b i))^2 ≤
+      (Module.finrank ℝ V : ℝ) *
+        ∑ i : Fin (Module.finrank ℝ V),
+          ∑ j : Fin (Module.finrank ℝ V), (B (b i) (b j))^2 := by
+  have h := bilinForm_trace_sq_le_card_mul_frobenius_sq (V := V)
+    (ι := Fin (Module.finrank ℝ V)) B (fun i => b i)
+  simpa [Fintype.card_fin] using h
+
+/-! ## Pointwise bilinear form on the tangent bundle
+
+Every concrete pointwise Hessian (i.e. the value of the second covariant
+derivative of `f` at `x`) is a real-valued bilinear form on `TangentSpace I x`.
+The carrier `pointwiseBilin` packages this into a single mathematical object:
+clients construct a `pointwiseBilin` from their chart-Christoffel formula or
+from `CovariantDerivative`, and downstream theorems consume it. -/
+
+variable (I) in
+/-- A pointwise real-valued bilinear form on the tangent bundle of `M`. -/
+abbrev pointwiseBilin :=
+  ∀ x : M, TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ
+
+/-- A pointwise bilinear form `B` is *pointwise symmetric* if `B x v w = B x w v`
+for all `x`, `v`, `w`. -/
+def IsPointwiseSymm (B : pointwiseBilin (M := M) I) : Prop :=
+  ∀ x : M, ∀ v w : TangentSpace I x, B x v w = B x w v
+
+/-! ## Frobenius norm squared and trace, in the canonical basis
+
+Because `TangentSpace I x = E` definitionally, the canonical chosen finite
+basis `Module.finBasis ℝ E` is automatically a basis of `TangentSpace I x` for
+every `x`. We use it to compute the Frobenius norm squared and the trace of a
+pointwise bilinear form `B` as scalar functions on `M`.
+
+These functions are *not* basis-independent in general (they would be
+basis-independent only when one uses an orthonormal basis in the metric
+`g.inner x`). The Cauchy-Schwarz inequality below holds nevertheless, because
+the Cauchy-Schwarz inequality between trace and Frobenius norm holds for any
+basis. Downstream theorems that need the trace to coincide with `Δ_g g hf x`
+must supply an orthonormal frame under `g.inner x` and rebuild the Frobenius
+norm against that frame; the inequality is the same. -/
+
+/-- The Frobenius norm squared of a pointwise bilinear form `B`, computed
+against the canonical basis `Module.finBasis ℝ E`:
+`frobeniusSqFun B x = ∑ i, ∑ j, (B x (e i) (e j))²`
+where `e := Module.finBasis ℝ E`. -/
+def frobeniusSqFun (B : pointwiseBilin (M := M) I) (x : M) : ℝ :=
+  ∑ i : Fin (Module.finrank ℝ E),
+    ∑ j : Fin (Module.finrank ℝ E),
+      (B x ((Module.finBasis ℝ E) i) ((Module.finBasis ℝ E) j))^2
+
+@[simp] lemma frobeniusSqFun_def (B : pointwiseBilin (M := M) I) (x : M) :
+    frobeniusSqFun (I := I) (M := M) B x =
+      ∑ i : Fin (Module.finrank ℝ E),
+        ∑ j : Fin (Module.finrank ℝ E),
+          (B x ((Module.finBasis ℝ E) i) ((Module.finBasis ℝ E) j))^2 := rfl
+
+/-- The trace of a pointwise bilinear form `B`, computed against the
+canonical basis `Module.finBasis ℝ E`:
+`traceFun B x = ∑ i, B x (e i) (e i)` where `e := Module.finBasis ℝ E`. -/
+def traceFun (B : pointwiseBilin (M := M) I) (x : M) : ℝ :=
+  ∑ i : Fin (Module.finrank ℝ E),
+    B x ((Module.finBasis ℝ E) i) ((Module.finBasis ℝ E) i)
+
+@[simp] lemma traceFun_def (B : pointwiseBilin (M := M) I) (x : M) :
+    traceFun (I := I) (M := M) B x =
+      ∑ i : Fin (Module.finrank ℝ E),
+        B x ((Module.finBasis ℝ E) i) ((Module.finBasis ℝ E) i) := rfl
+
+/-- The Frobenius norm squared is non-negative. -/
+lemma frobeniusSqFun_nonneg (B : pointwiseBilin (M := M) I) (x : M) :
+    0 ≤ frobeniusSqFun (I := I) (M := M) B x := by
+  unfold frobeniusSqFun
+  exact Finset.sum_nonneg
+    (fun i _ => Finset.sum_nonneg (fun j _ => sq_nonneg _))
+
+/-! ## Pointwise Cauchy-Schwarz Frobenius bound
+
+Combining the linear-algebra fact with the basis-specific definitions yields
+the central pointwise inequality `(traceFun B x)² ≤ n · frobeniusSqFun B x`. -/
+
+/-- **Pointwise trace–Frobenius Cauchy-Schwarz.**
+For any pointwise bilinear form `B` and any point `x`, the square of the trace
+is bounded by the dimension times the Frobenius norm squared:
+`(traceFun B x)² ≤ (finrank ℝ E) · frobeniusSqFun B x`. -/
+theorem traceFun_sq_le_dim_mul_frobeniusSqFun
+    (B : pointwiseBilin (M := M) I) (x : M) :
+    (traceFun (I := I) (M := M) B x)^2 ≤
+      (Module.finrank ℝ E : ℝ) * frobeniusSqFun (I := I) (M := M) B x := by
+  have h := bilinForm_trace_sq_le_dim_mul_frobenius_sq
+    (V := TangentSpace I x) (B := B x) (b := Module.finBasis ℝ E)
+  simp only [traceFun_def, frobeniusSqFun_def]
+  exact h
+
+/-- The trace square divided by the dimension is bounded above by the Frobenius
+norm squared. This is the form usually quoted in the Bochner / Lichnerowicz
+literature. -/
+theorem traceFun_sq_div_dim_le_frobeniusSqFun
+    (B : pointwiseBilin (M := M) I) (x : M) :
+    (traceFun (I := I) (M := M) B x)^2 / (Module.finrank ℝ E : ℝ) ≤
+      frobeniusSqFun (I := I) (M := M) B x := by
+  have hne : (Module.finrank ℝ E : ℕ) ≠ 0 := NeZero.ne _
+  have hpos : (0 : ℝ) < (Module.finrank ℝ E : ℝ) := by
+    have : (0 : ℕ) < Module.finrank ℝ E := Nat.pos_of_ne_zero hne
+    exact_mod_cast this
+  have hbound := traceFun_sq_le_dim_mul_frobeniusSqFun (I := I) (M := M) B x
+  exact (div_le_iff₀ hpos).mpr (by linarith [hbound])
+
+/-! ## Chart Christoffel symbols
+
+For a smooth Riemannian metric `g` and a base point `α : M`, the chart-Christoffel
+symbol of the second kind is
+$$\Gamma^k{}_{ij}(g, \alpha)(x) = \tfrac12 \sum_l G^{kl}(\alpha, x)\,
+    \bigl(\partial_i G_{lj}(\alpha, x) + \partial_j G_{li}(\alpha, x)
+        - \partial_l G_{ij}(\alpha, x)\bigr),$$
+where `G_{ij}(α, x) := g.inner x (e_i(α, x), e_j(α, x))` is the chart Gram matrix
+and the partial derivatives `∂_i` are taken with respect to the chart coordinates
+on `(extChartAt I α).target ⊆ E` (after pulling back via the chart inverse).
+
+This is a pure scalar function on `M`; we record it as a value-by-value formula
+without proving smoothness. The downstream Hessian construction only uses the
+pointwise value and the symmetry in the lower indices.
+-/
+
+/-- The chart Gram matrix entry `g_{ij}(α, ·)` pulled back to the chart target
+`(extChartAt I α).target ⊆ E` via the chart inverse. -/
+def chartGramOnE (g : SmoothRiemannianMetric I M) (α : M)
+    (i j : Fin (Module.finrank ℝ E)) : E → ℝ :=
+  fun y => chartGramMatrix (I := I) g α ((extChartAt I α).symm y) i j
+
+@[simp] lemma chartGramOnE_def
+    (g : SmoothRiemannianMetric I M) (α : M)
+    (i j : Fin (Module.finrank ℝ E)) (y : E) :
+    chartGramOnE (I := I) g α i j y =
+      chartGramMatrix (I := I) g α ((extChartAt I α).symm y) i j := rfl
+
+/-- Symmetry of the chart Gram matrix entries pulled back to `E`. -/
+lemma chartGramOnE_symm
+    (g : SmoothRiemannianMetric I M) (α : M)
+    (i j : Fin (Module.finrank ℝ E)) (y : E) :
+    chartGramOnE (I := I) g α i j y = chartGramOnE (I := I) g α j i y := by
+  unfold chartGramOnE
+  rw [chartGramMatrix_apply, chartGramMatrix_apply]
+  exact g.symm _ _ _
+
+/-- The Christoffel symbol of the second kind associated to the chart at `α`.
+This is the pointwise scalar
+$$\Gamma^k{}_{ij}(g, \alpha)(y) = \tfrac12 \sum_l G^{kl}(\alpha, x_y)\,
+    \bigl(\partial_i G_{lj}(\alpha, \cdot)(y) + \partial_j G_{li}(\alpha, \cdot)(y)
+        - \partial_l G_{ij}(\alpha, \cdot)(y)\bigr),$$
+evaluated at the chart-coordinate point `y ∈ E`, where `x_y := (extChartAt I α).symm y`
+is the corresponding manifold point. -/
+def chartChristoffel (g : SmoothRiemannianMetric I M) (α : M)
+    (i j k : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
+  (1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
+    chartInvGramMatrix (I := I) g α ((extChartAt I α).symm y) k l *
+      (partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) y +
+       partialDeriv (E := E) j (chartGramOnE (I := I) g α l i) y -
+       partialDeriv (E := E) l (chartGramOnE (I := I) g α i j) y)
+
+@[simp] lemma chartChristoffel_def
+    (g : SmoothRiemannianMetric I M) (α : M)
+    (i j k : Fin (Module.finrank ℝ E)) (y : E) :
+    chartChristoffel (I := I) g α i j k y =
+      (1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
+        chartInvGramMatrix (I := I) g α ((extChartAt I α).symm y) k l *
+          (partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) y +
+           partialDeriv (E := E) j (chartGramOnE (I := I) g α l i) y -
+           partialDeriv (E := E) l (chartGramOnE (I := I) g α i j) y) := rfl
+
+/-- **Symmetry of the Christoffel symbol** in the lower indices: this is the
+torsion-free property of the Levi-Civita connection encoded directly in the
+chart-coordinate formula. -/
+theorem chartChristoffel_symm
+    (g : SmoothRiemannianMetric I M) (α : M)
+    (i j k : Fin (Module.finrank ℝ E)) (y : E) :
+    chartChristoffel (I := I) g α i j k y =
+      chartChristoffel (I := I) g α j i k y := by
+  classical
+  -- Both sides are `(1/2) * ∑ l, A k l * S i j l y` where
+  -- `S i j l y := ∂_i G_{l j} + ∂_j G_{l i} - ∂_l G_{i j}`
+  -- and `S j i l y = ∂_j G_{l i} + ∂_i G_{l j} - ∂_l G_{j i} = S i j l y`
+  -- using the symmetry `G_{i j} = G_{j i}`.
+  rw [chartChristoffel_def, chartChristoffel_def]
+  congr 1
+  refine Finset.sum_congr rfl ?_
+  intro l _
+  congr 1
+  -- Show `∂_i G_{l j} + ∂_j G_{l i} - ∂_l G_{i j} = ∂_j G_{l i} + ∂_i G_{l j} - ∂_l G_{j i}`.
+  have hsym : chartGramOnE (I := I) g α i j =
+      chartGramOnE (I := I) g α j i :=
+    funext (fun y' => chartGramOnE_symm (I := I) g α i j y')
+  -- Rewrite the third partialDeriv term using `hsym`, then the algebra falls out.
+  rw [show partialDeriv (E := E) l (chartGramOnE (I := I) g α i j) y =
+        partialDeriv (E := E) l (chartGramOnE (I := I) g α j i) y from by
+    rw [hsym]]
+  ring
+
+/-! ## Chart Hessian tensor
+
+The chart-coordinate Hessian of `f` at the manifold point `x` (with chart at `α`)
+is the matrix entry
+$$(\operatorname{Hess} f)_{ij}(\alpha, x) =
+    \partial_i \partial_j (f \circ \varphi_\alpha^{-1})(\varphi_\alpha(x)) -
+    \sum_k \Gamma^k{}_{ij}(g, \alpha)(\varphi_\alpha(x)) \cdot
+        \partial_k (f \circ \varphi_\alpha^{-1})(\varphi_\alpha(x)).$$
+
+The first term is the iterated Fréchet partial derivative of the chart pullback
+`scalarOnE α f`, in directions `e_j` then `e_i` (note the order: outer is `i`,
+inner is `j`, so the `(i, j)` entry of the Hessian matrix is the derivative
+twice — first `j`, then `i`). The second term is the "Christoffel correction"
+making the Hessian tensorial under coordinate changes. -/
+
+/-- The iterated partial derivative `∂_i (∂_j f̃)(y)` of the chart pullback
+`f̃ := scalarOnE α f`, where `e_j` is the inner direction and `e_i` is the outer
+direction. -/
+def chartIteratedPartialDeriv
+    (α : M) (f : M → ℝ) (i j : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
+  partialDeriv (E := E) i (partialDeriv (E := E) j (scalarOnE (I := I) α f)) y
+
+@[simp] lemma chartIteratedPartialDeriv_def
+    (α : M) (f : M → ℝ) (i j : Fin (Module.finrank ℝ E)) (y : E) :
+    chartIteratedPartialDeriv (I := I) α f i j y =
+      partialDeriv (E := E) i
+        (partialDeriv (E := E) j (scalarOnE (I := I) α f)) y := rfl
+
+/-- The chart-coordinate Hessian of `f` in the chart at `α`, evaluated at the
+manifold point `x`:
+$$(\operatorname{Hess} f)_{ij}(\alpha, x) =
+    \partial_i \partial_j f̃(\varphi(x)) - \sum_k \Gamma^k{}_{ij}\,\partial_k f̃(\varphi(x)).$$ -/
+def chartHessianTensor (g : SmoothRiemannianMetric I M)
+    (α : M) (f : M → ℝ) (i j : Fin (Module.finrank ℝ E)) (x : M) : ℝ :=
+  chartIteratedPartialDeriv (I := I) α f i j (extChartAt I α x) -
+    ∑ k : Fin (Module.finrank ℝ E),
+      chartChristoffel (I := I) g α i j k (extChartAt I α x) *
+        partialDeriv (E := E) k (scalarOnE (I := I) α f) (extChartAt I α x)
+
+@[simp] lemma chartHessianTensor_def
+    (g : SmoothRiemannianMetric I M)
+    (α : M) (f : M → ℝ) (i j : Fin (Module.finrank ℝ E)) (x : M) :
+    chartHessianTensor (I := I) g α f i j x =
+      chartIteratedPartialDeriv (I := I) α f i j (extChartAt I α x) -
+        ∑ k : Fin (Module.finrank ℝ E),
+          chartChristoffel (I := I) g α i j k (extChartAt I α x) *
+            partialDeriv (E := E) k (scalarOnE (I := I) α f) (extChartAt I α x) := rfl
+
+/-! ## Symmetry of the chart Hessian for smooth functions
+
+The chart Hessian is symmetric in `(i, j)`: the second-derivative term is
+symmetric by Schwarz's theorem on mixed partials (for `C^2` functions on `E`),
+and the Christoffel-correction term is symmetric by `chartChristoffel_symm`. -/
+
+/-- Mixed partials of a smooth function on `E` are symmetric *at points in the
+interior of the chart target*. This is Schwarz's theorem applied to the chart
+pullback `scalarOnE α f`. The hypothesis `y ∈ interior (extChartAt I α).target`
+is automatic under `[I.Boundaryless]` for `y = extChartAt I α x` with `x` in the
+chart source. -/
+lemma chartIteratedPartialDeriv_symm_of_contDiff
+    (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
+    (i j : Fin (Module.finrank ℝ E)) {y : E}
+    (hy : y ∈ interior (extChartAt I α).target) :
+    chartIteratedPartialDeriv (I := I) α f i j y =
+      chartIteratedPartialDeriv (I := I) α f j i y := by
+  classical
+  -- We rewrite the iterated partial deriv as
+  -- `fderiv ℝ (fderiv ℝ f̃) y (e_j) (e_i)` (or similar) and use Schwarz's theorem
+  -- (`ContDiffAt.isSymmSndFDerivAt`) on the smooth function `f̃ = scalarOnE α f`.
+  unfold chartIteratedPartialDeriv partialDeriv
+  -- `scalarOnE α f` is `C^∞` on the chart target.
+  have hsmooth_target : ContDiffOn ℝ ∞ (scalarOnE (I := I) α f)
+      (extChartAt I α).target :=
+    scalarOnE_contDiffOn (I := I) α hf
+  have hsmooth_int : ContDiffOn ℝ ∞ (scalarOnE (I := I) α f)
+      (interior (extChartAt I α).target) := hsmooth_target.mono interior_subset
+  have hopen_int : IsOpen (interior (extChartAt I α).target) := isOpen_interior
+  have hcontDiffAt : ContDiffAt ℝ ∞ (scalarOnE (I := I) α f) y :=
+    hsmooth_int.contDiffAt (hopen_int.mem_nhds hy)
+  have hsymm_2 :
+      IsSymmSndFDerivAt ℝ (scalarOnE (I := I) α f) y := by
+    refine ContDiffAt.isSymmSndFDerivAt hcontDiffAt ?_
+    -- minSmoothness ℝ 2 ≤ ∞: over ℝ, minSmoothness 2 = 2 and 2 ≤ ∞.
+    rw [minSmoothness_of_isRCLikeNormedField]
+    decide
+  -- `f̃` is differentiable at `y` and `fderiv f̃` is differentiable at `y`.
+  have hg_diff : DifferentiableAt ℝ (fderiv ℝ (scalarOnE (I := I) α f)) y := by
+    have hfderiv_smooth : ContDiffOn ℝ ∞
+        (fderiv ℝ (scalarOnE (I := I) α f))
+        (interior (extChartAt I α).target) :=
+      hsmooth_int.fderiv_of_isOpen isOpen_interior (by rw [ENat.coe_top_add_one])
+    have hcontDiff_at_fderiv :
+        ContDiffAt ℝ ∞ (fderiv ℝ (scalarOnE (I := I) α f)) y :=
+      hfderiv_smooth.contDiffAt (hopen_int.mem_nhds hy)
+    exact hcontDiff_at_fderiv.differentiableAt (by simp)
+  -- Key identity: `fderiv (fun z => fderiv f̃ z e_b) y e_a = (fderiv (fderiv f̃) y e_a) e_b`.
+  have hkey : ∀ a b : Fin (Module.finrank ℝ E),
+      fderiv ℝ
+          (fun z => fderiv ℝ (scalarOnE (I := I) α f) z ((Module.finBasis ℝ E) b))
+          y ((Module.finBasis ℝ E) a) =
+        (fderiv ℝ (fderiv ℝ (scalarOnE (I := I) α f)) y
+          ((Module.finBasis ℝ E) a)) ((Module.finBasis ℝ E) b) := by
+    intro a b
+    -- `(fun z => fderiv f̃ z e_b) = ((·) e_b) ∘ (fderiv f̃)`.
+    -- The first map is the continuous linear evaluation `L : (E →L[ℝ] ℝ) →L[ℝ] ℝ`
+    -- given by `M ↦ M e_b`.
+    set L : (E →L[ℝ] ℝ) →L[ℝ] ℝ :=
+      ContinuousLinearMap.apply ℝ ℝ ((Module.finBasis ℝ E) b)
+    -- Apply the chain rule: `fderiv (L ∘ fderiv f̃) y = L.comp (fderiv (fderiv f̃) y)`.
+    have hcomp_eq : (fun z : E =>
+          fderiv ℝ (scalarOnE (I := I) α f) z ((Module.finBasis ℝ E) b)) =
+        L ∘ (fderiv ℝ (scalarOnE (I := I) α f)) := by
+      funext z; rfl
+    rw [hcomp_eq, fderiv_comp y L.differentiableAt hg_diff]
+    -- `fderiv L (g y) = L` since `L` is a CLM.
+    rw [L.fderiv]
+    rfl
+  -- Now apply hkey on both sides and use IsSymmSndFDerivAt.
+  rw [hkey i j, hkey j i]
+  exact hsymm_2 _ _
+
+/-- **Symmetry of the chart Hessian** at points where the chart image lies in the
+interior of the chart target. -/
+theorem chartHessianTensor_symm
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
+    (i j : Fin (Module.finrank ℝ E))
+    {x : M} (hx_int : extChartAt I α x ∈ interior (extChartAt I α).target) :
+    chartHessianTensor (I := I) g α f i j x =
+      chartHessianTensor (I := I) g α f j i x := by
+  classical
+  rw [chartHessianTensor_def, chartHessianTensor_def]
+  -- The first term is symmetric by Schwarz's theorem on `f̃`.
+  rw [chartIteratedPartialDeriv_symm_of_contDiff (I := I) α hf i j hx_int]
+  -- The Christoffel-correction term is symmetric by `chartChristoffel_symm`.
+  congr 1
+  refine Finset.sum_congr rfl ?_
+  intro k _
+  rw [chartChristoffel_symm (I := I) g α i j k]
+
+/-- **Symmetry of the chart Hessian** under `[I.Boundaryless]`, requiring only
+that `x` is in the chart source (the interior condition is automatic). -/
+theorem chartHessianTensor_symm_of_boundaryless [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
+    (i j : Fin (Module.finrank ℝ E))
+    {x : M} (hx : x ∈ (chartAt H α).source) :
+    chartHessianTensor (I := I) g α f i j x =
+      chartHessianTensor (I := I) g α f j i x := by
+  have hxsrc : x ∈ (extChartAt I α).source := by
+    rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hx
+  have hx_target : extChartAt I α x ∈ (extChartAt I α).target :=
+    (extChartAt I α).map_source hxsrc
+  have hx_int : extChartAt I α x ∈ interior (extChartAt I α).target :=
+    extChartAt_target_subset_interior_of_boundaryless (I := I) α hx_target
+  exact chartHessianTensor_symm (I := I) g α hf i j hx_int
+
+/-! ## The pointwise Hessian as a `pointwiseBilin`
+
+We define `hessFun g f : pointwiseBilin I` by writing each tangent vector
+`v : TangentSpace I x` in the model basis `Module.finBasis ℝ E` (recall
+`TangentSpace I x = E` definitionally), summing the chart Hessian matrix entries
+against the basis representation.
+
+Concretely, `hessFun g f x v w = ∑ i j, v^i · w^j · (Hess f)_{ij}(x, x)`,
+where `v^i, w^j` are the components of `v, w` in the model basis (interpreted as
+a basis of the tangent space at `x`), and `(Hess f)_{ij}(x, x)` is the chart
+Hessian computed using the chart at `x`.
+
+The choice of basis is the canonical one provided by the carrier; using the
+model basis makes `hessFun g f` definitionally clean. The downstream symmetry
+property holds because the chart Hessian matrix is symmetric in `(i, j)`. -/
+
+/-- The pointwise Hessian of a smooth function `f` on a Riemannian manifold,
+packaged as a `pointwiseBilin`. At each point `x`, the bilinear form is computed
+in the chart at `x`, using the chart-coordinate Hessian formula involving the
+chart Christoffel symbols. The basis used to read off coordinates is the
+canonical model basis `Module.finBasis ℝ E`. -/
+def hessFun (g : SmoothRiemannianMetric I M) (f : M → ℝ) :
+    pointwiseBilin (M := M) I :=
+  fun x => LinearMap.mk₂ ℝ
+    (fun v w =>
+      ∑ i : Fin (Module.finrank ℝ E),
+        ∑ j : Fin (Module.finrank ℝ E),
+          ((Module.finBasis ℝ E).repr v) i *
+            ((Module.finBasis ℝ E).repr w) j *
+            chartHessianTensor (I := I) g x f i j x)
+    (fun v₁ v₂ w => by
+      classical
+      dsimp only
+      have hrepr : (Module.finBasis ℝ E).repr (v₁ + v₂) =
+          (Module.finBasis ℝ E).repr v₁ + (Module.finBasis ℝ E).repr v₂ := map_add _ _ _
+      rw [hrepr]
+      rw [← Finset.sum_add_distrib]
+      refine Finset.sum_congr rfl ?_
+      intro i _
+      rw [← Finset.sum_add_distrib]
+      refine Finset.sum_congr rfl ?_
+      intro j _
+      simp only [Finsupp.coe_add, Pi.add_apply]
+      ring)
+    (fun c v w => by
+      classical
+      dsimp only
+      have hrepr : (Module.finBasis ℝ E).repr (c • v) =
+          c • (Module.finBasis ℝ E).repr v := map_smul _ _ _
+      rw [hrepr]
+      simp only [smul_eq_mul, Finsupp.coe_smul, Pi.smul_apply]
+      rw [Finset.mul_sum]
+      refine Finset.sum_congr rfl ?_
+      intro i _
+      rw [Finset.mul_sum]
+      refine Finset.sum_congr rfl ?_
+      intro j _
+      ring)
+    (fun v w₁ w₂ => by
+      classical
+      dsimp only
+      have hrepr : (Module.finBasis ℝ E).repr (w₁ + w₂) =
+          (Module.finBasis ℝ E).repr w₁ + (Module.finBasis ℝ E).repr w₂ := map_add _ _ _
+      rw [hrepr]
+      rw [← Finset.sum_add_distrib]
+      refine Finset.sum_congr rfl ?_
+      intro i _
+      rw [← Finset.sum_add_distrib]
+      refine Finset.sum_congr rfl ?_
+      intro j _
+      simp only [Finsupp.coe_add, Pi.add_apply]
+      ring)
+    (fun c v w => by
+      classical
+      dsimp only
+      have hrepr : (Module.finBasis ℝ E).repr (c • w) =
+          c • (Module.finBasis ℝ E).repr w := map_smul _ _ _
+      rw [hrepr]
+      simp only [smul_eq_mul, Finsupp.coe_smul, Pi.smul_apply]
+      rw [Finset.mul_sum]
+      refine Finset.sum_congr rfl ?_
+      intro i _
+      rw [Finset.mul_sum]
+      refine Finset.sum_congr rfl ?_
+      intro j _
+      ring)
+
+/-- Pointwise expansion of `hessFun`: applied to two tangent vectors, it sums
+the chart Hessian matrix entries weighted by the model-basis coordinates. -/
+lemma hessFun_apply (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M)
+    (v w : TangentSpace I x) :
+    hessFun (I := I) g f x v w =
+      ∑ i : Fin (Module.finrank ℝ E),
+        ∑ j : Fin (Module.finrank ℝ E),
+          ((Module.finBasis ℝ E).repr v) i *
+            ((Module.finBasis ℝ E).repr w) j *
+            chartHessianTensor (I := I) g x f i j x := by
+  rfl
+
+/-! ## Symmetry of `hessFun`
+
+For smooth `f`, `hessFun g f` is pointwise symmetric: this follows from the
+symmetry of the chart Hessian matrix `(Hess f)_{ij}(x, x) = (Hess f)_{ji}(x, x)`,
+which holds at any chart-source point under `[I.Boundaryless]`. -/
+
+/-- **Symmetry of `hessFun`** for smooth functions, under `[I.Boundaryless]`. -/
+theorem hessFun_symm [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M)
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
+    IsPointwiseSymm (hessFun (I := I) (M := M) g f) := by
+  intro x v w
+  classical
+  rw [hessFun_apply, hessFun_apply]
+  -- The chart Hessian matrix is symmetric in (i, j); after swapping (i, j) ↔ (j, i)
+  -- on the RHS and using `H_{ji} = H_{ij}`, the two sides match.
+  have hxsrc : x ∈ (chartAt H x).source := mem_chart_source H x
+  have hsymm : ∀ i j, chartHessianTensor (I := I) g x f i j x =
+      chartHessianTensor (I := I) g x f j i x := fun i j =>
+    chartHessianTensor_symm_of_boundaryless (I := I) g x hf i j hxsrc
+  -- Swap the order of summation on RHS: ∑ i j, ... = ∑ j i, ...
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl ?_
+  intro i _
+  refine Finset.sum_congr rfl ?_
+  intro j _
+  rw [hsymm j i]
+  ring
+
+/-! ## Trace formula and Cauchy-Schwarz
+
+The chart-coordinate trace of `(Hess f)_{ij}` against the inverse Gram matrix
+`G^{ij}` gives the Laplace-Beltrami operator:
+$$\sum_{i,j} G^{ij}(x)\, (\operatorname{Hess} f)_{ij}(x, x) = \Delta_g f(x).$$
+
+The Frobenius norm in the metric is
+$$|\operatorname{Hess} f|^2_g(x) = \sum_{i,j,k,l} G^{ik}(x) G^{jl}(x)\,
+    (\operatorname{Hess} f)_{ij}(x, x)\,(\operatorname{Hess} f)_{kl}(x, x).$$
+
+The Bochner / Lichnerowicz–Cauchy-Schwarz inequality
+$$(\Delta_g f(x))^2 \le n \cdot |\operatorname{Hess} f|^2_g(x)$$
+follows by combining these identities with the linear-algebraic
+`bilinForm_trace_sq_le_dim_mul_frobenius_sq` from above, applied to the bilinear
+form `H_{ij}` and the Gram-orthonormal basis (when one is available).
+
+In this file we package the inequality in a form that is consumed directly by
+the Cauchy-Schwarz `traceFun_sq_le_dim_mul_frobeniusSqFun` from the
+`pointwiseBilin` carrier: a downstream client supplies the trace-equals-Δ
+identity and the Frobenius-norm comparison with the metric Frobenius norm, and
+the inequality follows. -/
+
+/-- The metric chart Frobenius norm squared of the chart Hessian matrix: this is
+the basis-independent "tensor" norm
+$$|\operatorname{Hess} f|^2_g(x) = \sum_{i,j,k,l} G^{ik}(x) G^{jl}(x)\,
+    H_{ij}\,H_{kl},$$
+where `H = chartHessianTensor g x f` and `G^{ij} = chartInvGramMatrix g x x`. -/
+def chartHessFrobeniusSq (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
+    ℝ :=
+  ∑ i : Fin (Module.finrank ℝ E),
+  ∑ j : Fin (Module.finrank ℝ E),
+  ∑ k : Fin (Module.finrank ℝ E),
+  ∑ l : Fin (Module.finrank ℝ E),
+    chartInvGramMatrix (I := I) g x x i k *
+      chartInvGramMatrix (I := I) g x x j l *
+        chartHessianTensor (I := I) g x f i j x *
+          chartHessianTensor (I := I) g x f k l x
+
+@[simp] lemma chartHessFrobeniusSq_def (g : SmoothRiemannianMetric I M)
+    (f : M → ℝ) (x : M) :
+    chartHessFrobeniusSq (I := I) g f x =
+      ∑ i : Fin (Module.finrank ℝ E),
+      ∑ j : Fin (Module.finrank ℝ E),
+      ∑ k : Fin (Module.finrank ℝ E),
+      ∑ l : Fin (Module.finrank ℝ E),
+        chartInvGramMatrix (I := I) g x x i k *
+          chartInvGramMatrix (I := I) g x x j l *
+            chartHessianTensor (I := I) g x f i j x *
+              chartHessianTensor (I := I) g x f k l x := rfl
+
+/-- The chart-coordinate trace of the Hessian against the inverse Gram matrix:
+$$\operatorname{tr}_g \operatorname{Hess} f(x) := \sum_{i, j} G^{ij}(x)\,
+    (\operatorname{Hess} f)_{ij}(x, x).$$ -/
+def chartHessTrace (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) : ℝ :=
+  ∑ i : Fin (Module.finrank ℝ E),
+  ∑ j : Fin (Module.finrank ℝ E),
+    chartInvGramMatrix (I := I) g x x i j *
+      chartHessianTensor (I := I) g x f i j x
+
+@[simp] lemma chartHessTrace_def (g : SmoothRiemannianMetric I M)
+    (f : M → ℝ) (x : M) :
+    chartHessTrace (I := I) g f x =
+      ∑ i : Fin (Module.finrank ℝ E),
+      ∑ j : Fin (Module.finrank ℝ E),
+        chartInvGramMatrix (I := I) g x x i j *
+          chartHessianTensor (I := I) g x f i j x := rfl
+
+/-- The bilinear form `hessFun g f x` evaluated on the canonical basis vectors
+`b i, b j` returns the chart Hessian tensor entry `H_{ij}(x, x)`. -/
+lemma hessFun_basis_apply
+    (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M)
+    (i j : Fin (Module.finrank ℝ E)) :
+    hessFun (I := I) g f x
+        ((Module.finBasis ℝ E) i) ((Module.finBasis ℝ E) j) =
+      chartHessianTensor (I := I) g x f i j x := by
+  classical
+  rw [hessFun_apply]
+  -- Use that `b.repr (b i) = Finsupp.single i 1`.
+  -- The double sum collapses to the `(i, j)` entry.
+  -- First rewrite the basis-rep entries.
+  conv_lhs => rw [show
+      (∑ i' : Fin (Module.finrank ℝ E),
+        ∑ j' : Fin (Module.finrank ℝ E),
+          ((Module.finBasis ℝ E).repr ((Module.finBasis ℝ E) i)) i' *
+            ((Module.finBasis ℝ E).repr ((Module.finBasis ℝ E) j)) j' *
+            chartHessianTensor (I := I) g x f i' j' x) =
+      (∑ i' : Fin (Module.finrank ℝ E),
+        ∑ j' : Fin (Module.finrank ℝ E),
+          (if i = i' then (1 : ℝ) else 0) *
+            (if j = j' then (1 : ℝ) else 0) *
+            chartHessianTensor (I := I) g x f i' j' x) from
+      Finset.sum_congr rfl (fun i' _ => Finset.sum_congr rfl (fun j' _ => by
+        rw [Module.Basis.repr_self_apply, Module.Basis.repr_self_apply]))]
+  -- After replacing reprs by Kronecker deltas, the only surviving term is `(i, j)`.
+  rw [Finset.sum_eq_single i]
+  · rw [Finset.sum_eq_single j]
+    · simp
+    · intro j' _ hj'_ne
+      have hjj' : ¬ j = j' := fun h => hj'_ne h.symm
+      simp [hjj']
+    · intro hj
+      exact absurd (Finset.mem_univ j) hj
+  · intro i' _ hi'_ne
+    apply Finset.sum_eq_zero
+    intro j' _
+    have hii' : ¬ i = i' := fun h => hi'_ne h.symm
+    simp [hii']
+  · intro hi
+    exact absurd (Finset.mem_univ i) hi
+
+/-- The `traceFun` of `hessFun g f` in the canonical basis equals the simple sum
+`∑ i, H_{ii}(x, x)` of the diagonal entries of the chart Hessian matrix. -/
+lemma traceFun_hessFun
+    (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
+    traceFun (I := I) (M := M) (hessFun (I := I) g f) x =
+      ∑ i : Fin (Module.finrank ℝ E), chartHessianTensor (I := I) g x f i i x := by
+  unfold traceFun
+  refine Finset.sum_congr rfl ?_
+  intro i _
+  exact hessFun_basis_apply (I := I) g f x i i
+
+/-- The `frobeniusSqFun` of `hessFun g f` in the canonical basis equals the
+simple Frobenius squared `∑ i j, (H_{ij}(x, x))²`. -/
+lemma frobeniusSqFun_hessFun
+    (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
+    frobeniusSqFun (I := I) (M := M) (hessFun (I := I) g f) x =
+      ∑ i : Fin (Module.finrank ℝ E),
+      ∑ j : Fin (Module.finrank ℝ E),
+        (chartHessianTensor (I := I) g x f i j x)^2 := by
+  unfold frobeniusSqFun
+  refine Finset.sum_congr rfl ?_
+  intro i _
+  refine Finset.sum_congr rfl ?_
+  intro j _
+  rw [hessFun_basis_apply]
+
+/-- **Pointwise Cauchy-Schwarz between the basis-naive trace and Frobenius of
+the chart Hessian matrix**, derived from `traceFun_sq_le_dim_mul_frobeniusSqFun`.
+This is the basis-naive version that holds without any orthonormality
+assumption. -/
+theorem chartHess_trace_sq_le_dim_mul_frobenius_sq
+    (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
+    (∑ i : Fin (Module.finrank ℝ E), chartHessianTensor (I := I) g x f i i x)^2 ≤
+      (Module.finrank ℝ E : ℝ) *
+        ∑ i : Fin (Module.finrank ℝ E),
+        ∑ j : Fin (Module.finrank ℝ E),
+          (chartHessianTensor (I := I) g x f i j x)^2 := by
+  classical
+  have hbound :=
+    traceFun_sq_le_dim_mul_frobeniusSqFun
+      (I := I) (M := M) (hessFun (I := I) g f) x
+  rw [traceFun_hessFun (I := I) g f x,
+      frobeniusSqFun_hessFun (I := I) g f x] at hbound
+  exact hbound
+
+/-! ## Hypothesis-bearing form of the Cauchy-Schwarz Bochner inequality
+
+The metric trace `chartHessTrace = ∑ G^{ij} H_{ij}` and the metric Frobenius
+norm `chartHessFrobeniusSq = ∑ G^{ik} G^{jl} H_{ij} H_{kl}` are basis-independent
+geometric quantities. The standard Cauchy-Schwarz inequality
+$$(\operatorname{tr}_g H)^2 \le n \cdot |H|^2_g$$
+follows from the spectral decomposition of the matrix
+$\tilde H = G^{-1/2} H G^{-1/2}$ (which is symmetric since `H` is symmetric and
+`G^{-1/2}` is symmetric), reducing to $(\operatorname{tr} \tilde H)^2 \le n \cdot |\tilde H|^2$
+which is the linear-algebraic Cauchy-Schwarz on real diagonalisable symmetric
+matrices.
+
+We expose this inequality in a hypothesis-bearing form: a downstream client
+supplies the proof of the metric trace = `Δ_g f` identity (which requires the
+chart-formula for the Laplacian) and obtains the inequality applied to the
+Laplacian.
+
+The basis-naive Cauchy-Schwarz proven above
+(`chartHess_trace_sq_le_dim_mul_frobenius_sq`) suffices for the most common
+downstream consumer: the Bochner-Lichnerowicz dimension-Laplacian estimate uses
+only the dimension factor, and the basis-naive trace and Frobenius norm equal
+the metric ones in any orthonormal basis (which is the canonical setting for
+the Bochner formula). -/
+
+/-- **Bochner-Lichnerowicz dimension-Laplacian inequality, hypothesis-bearing form.**
+Given the trace identity `(traceFun (hessFun g f) x = Δ_g f x)` as a hypothesis,
+the inequality `(Δ_g f x)² ≤ n · ∑ i j, (H_{ij})²` follows immediately from
+`chartHess_trace_sq_le_dim_mul_frobenius_sq`. -/
+theorem laplacian_sq_le_dim_mul_frobenius_sq_of_trace_eq
+    [I.Boundaryless] [T2Space M]
+    (g : SmoothRiemannianMetric I M)
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (x : M)
+    (htr : traceFun (I := I) (M := M) (hessFun (I := I) g f) x =
+        Δ_g (I := I) g hf x) :
+    (Δ_g (I := I) g hf x)^2 ≤
+      (Module.finrank ℝ E : ℝ) *
+        ∑ i : Fin (Module.finrank ℝ E),
+        ∑ j : Fin (Module.finrank ℝ E),
+          (chartHessianTensor (I := I) g x f i j x)^2 := by
+  classical
+  have hbound := chartHess_trace_sq_le_dim_mul_frobenius_sq (I := I) g f x
+  rw [traceFun_hessFun (I := I) g f x] at htr
+  rw [← htr]
+  exact hbound
+
+/-- **Pointwise dimension-Laplacian inequality, divided form.**
+Hypothesis-bearing version giving `(Δ_g f x)² / n ≤ ∑ i j, (H_{ij})²`. -/
+theorem laplacian_sq_div_dim_le_frobenius_sq_of_trace_eq
+    [I.Boundaryless] [T2Space M]
+    (g : SmoothRiemannianMetric I M)
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (x : M)
+    (htr : traceFun (I := I) (M := M) (hessFun (I := I) g f) x =
+        Δ_g (I := I) g hf x) :
+    (Δ_g (I := I) g hf x)^2 / (Module.finrank ℝ E : ℝ) ≤
+      ∑ i : Fin (Module.finrank ℝ E),
+      ∑ j : Fin (Module.finrank ℝ E),
+        (chartHessianTensor (I := I) g x f i j x)^2 := by
+  classical
+  have hne : (Module.finrank ℝ E : ℕ) ≠ 0 := NeZero.ne _
+  have hpos : (0 : ℝ) < (Module.finrank ℝ E : ℝ) := by
+    have : (0 : ℕ) < Module.finrank ℝ E := Nat.pos_of_ne_zero hne
+    exact_mod_cast this
+  have hbound :=
+    laplacian_sq_le_dim_mul_frobenius_sq_of_trace_eq (I := I) g hf x htr
+  exact (div_le_iff₀ hpos).mpr (by linarith [hbound])
+
+/-- **Cauchy-Schwarz inequality applied to `hessFun`.**
+The bound on `traceFun (hessFun g f)` directly via the carrier's Cauchy-Schwarz. -/
+theorem traceFun_hessFun_sq_le_dim_mul_frobeniusSqFun
+    (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
+    (traceFun (I := I) (M := M) (hessFun (I := I) g f) x)^2 ≤
+      (Module.finrank ℝ E : ℝ) *
+        frobeniusSqFun (I := I) (M := M) (hessFun (I := I) g f) x :=
+  traceFun_sq_le_dim_mul_frobeniusSqFun
+    (I := I) (M := M) (hessFun (I := I) g f) x
+
+end DivergenceTheorem
+end Integral
+end DifferentialGeometry

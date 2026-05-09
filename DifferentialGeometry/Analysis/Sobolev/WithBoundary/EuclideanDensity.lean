@@ -1,5 +1,5 @@
-import DifferentialGeometry.Analysis.Sobolev.EuclideanDensity
-import DifferentialGeometry.Analysis.Sobolev.EuclideanIteratedSobolevHalfSpace
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevHalfSpace
 
 /-!
 # Density of smooth compactly-supported functions in `W^{k,p}_0` on

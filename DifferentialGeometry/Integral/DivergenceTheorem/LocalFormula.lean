@@ -1,7 +1,7 @@
 import DifferentialGeometry.Integral.Measure.ChartDensity
 import DifferentialGeometry.Integral.Measure.Invariance
 import DifferentialGeometry.Integral.Measure.Properties
-import DifferentialGeometry.Integral.Integration.CompactSupport
+import DifferentialGeometry.Integral.L2.CompactSupport
 import Mathlib.Analysis.Calculus.FDeriv.Basic
 import Mathlib.Analysis.Calculus.FDeriv.Comp
 import Mathlib.Analysis.Calculus.FDeriv.Equiv

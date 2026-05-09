@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Laplacian.L2Inclusion
+import DifferentialGeometry.Analysis.Laplacian.Regularity.L2Inclusion
 import Mathlib.Analysis.InnerProductSpace.LaxMilgram
 import Mathlib.Analysis.InnerProductSpace.Dual
 

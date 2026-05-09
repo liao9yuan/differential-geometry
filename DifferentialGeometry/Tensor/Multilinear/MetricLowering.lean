@@ -1,8 +1,8 @@
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEval
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian
 import DifferentialGeometry.Tensor.RSTensor.TensorRSRiemannian
-import DifferentialGeometry.Integral.Integration.PointwiseInner.DualMetric
-import DifferentialGeometry.Integral.Integration.SmoothSections.Defs
+import DifferentialGeometry.Integral.L2.PointwiseInner.DualMetric
+import DifferentialGeometry.Integral.L2.SmoothSections.Defs
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
@@ -69,7 +69,7 @@ variable
   {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
   {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-open DifferentialGeometry.Integral.Integration
+open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Tensor.Tensor0SRiemannian
 open DifferentialGeometry.Tensor.TensorRSRiemannian

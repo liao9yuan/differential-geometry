@@ -1,8 +1,8 @@
 import DifferentialGeometry.Tensor.RSTensor.Defs
 import DifferentialGeometry.Tensor.RSTensor.TangentRiemannian
-import DifferentialGeometry.Integral.Integration.PointwiseInner.Defs
-import DifferentialGeometry.Integral.Integration.PointwiseInner.Algebra
-import DifferentialGeometry.Integral.Integration.PointwiseInner.DualMetric
+import DifferentialGeometry.Integral.L2.PointwiseInner.Defs
+import DifferentialGeometry.Integral.L2.PointwiseInner.Algebra
+import DifferentialGeometry.Integral.L2.PointwiseInner.DualMetric
 import DifferentialGeometry.Integral.Measure.ChartDensity
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
@@ -51,7 +51,7 @@ namespace Tensor
 namespace Tensor0SRiemannian
 
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.Integral.Integration
+open DifferentialGeometry.Integral.L2
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
