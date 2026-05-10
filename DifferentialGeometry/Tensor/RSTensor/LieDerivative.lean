@@ -40,7 +40,7 @@ noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
 
-open Bundle Set IsManifold ContinuousLinearMap VectorField Filter Tensor0SBundle
+open Bundle Set IsManifold ContinuousLinearMap VectorField Filter Tensor0SBundle Function
 open scoped Manifold Topology Bundle ContDiff
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
@@ -231,6 +231,56 @@ lemma lieDeriv_correction_smul (DX : E →L[𝕜] E) (c : 𝕜)
   rw [Finset.smul_sum]
   congr 1
 
+-- Helper: substituting in one covariant slot is additive in the substituted endomorphism.
+lemma substituteArg_add_right (i : Fin s)
+    (α : Tensor0SModel (𝕜 := 𝕜) (E := E) s) (DX DY : E →L[𝕜] E) :
+    substituteArg s i α (DX + DY) = substituteArg s i α DX + substituteArg s i α DY := by
+  ext v
+  simp only [substituteArg, ContinuousMultilinearMap.compContinuousLinearMap_apply,
+    ContinuousMultilinearMap.add_apply]
+  convert α.map_update_add (fun j => v j) i (DX (v i)) (DY (v i))
+  all_goals
+    rename_i j
+    by_cases hji : j = i
+    · subst j
+      simp
+    · simp [hji]
+
+-- Helper: substituting in one covariant slot is linear in the substituted endomorphism.
+lemma substituteArg_smul_right (i : Fin s)
+    (α : Tensor0SModel (𝕜 := 𝕜) (E := E) s) (c : 𝕜) (DX : E →L[𝕜] E) :
+    substituteArg s i α (c • DX) = c • substituteArg s i α DX := by
+  ext v
+  simp only [substituteArg, ContinuousMultilinearMap.compContinuousLinearMap_apply,
+    ContinuousMultilinearMap.smul_apply]
+  convert α.map_update_smul (fun j => v j) i c (DX (v i))
+  all_goals
+    rename_i j
+    by_cases hji : j = i
+    · subst j
+      simp
+    · simp [hji]
+
+-- Helper: the correction term is additive in the vector-field derivative.
+lemma lieDeriv_correction_add_right (α : Tensor0SModel (𝕜 := 𝕜) (E := E) s)
+    (DX DY : E →L[𝕜] E) :
+    lieDeriv_correction s (DX + DY) α =
+      lieDeriv_correction s DX α + lieDeriv_correction s DY α := by
+  unfold lieDeriv_correction
+  rw [← Finset.sum_add_distrib]
+  apply Finset.sum_congr rfl
+  intro i _
+  exact substituteArg_add_right (s := s) i α DX DY
+
+-- Helper: the correction term is linear in the vector-field derivative.
+lemma lieDeriv_correction_smul_right (α : Tensor0SModel (𝕜 := 𝕜) (E := E) s)
+    (c : 𝕜) (DX : E →L[𝕜] E) :
+    lieDeriv_correction s (c • DX) α = c • lieDeriv_correction s DX α := by
+  unfold lieDeriv_correction
+  rw [Finset.smul_sum]
+  apply Finset.sum_congr rfl
+  intro i _
+  exact substituteArg_smul_right (s := s) i α c DX
 
 -- Helper: correction vanishes for s = 0
 lemma lieDeriv_correction_zero (DX : E →L[𝕜] E)
@@ -239,7 +289,110 @@ lemma lieDeriv_correction_zero (DX : E →L[𝕜] E)
   dsimp[lieDeriv_correction]
   simp only [Finset.univ_eq_empty, Finset.sum_empty]
 
+/-- The covariant-slot correction is a derivation for the model tensor product.
+
+This is the model-space Leibniz rule behind both Lie derivatives and the future
+extension of a connection to covariant tensor fields: applying the same
+endomorphism `DX` in every slot of `α ⊗ β` splits into the slots of `α` plus the
+slots of `β`. -/
+lemma lieDeriv_correction_modelProduct (s q : ℕ) (DX : E →L[𝕜] E)
+    (α : Tensor0SModel (𝕜 := 𝕜) (E := E) s)
+    (β : Tensor0SModel (𝕜 := 𝕜) (E := E) q) :
+    lieDeriv_correction (s + q) DX
+        (Bundle.continuousMultilinearMap.modelProduct s q α β) =
+      Bundle.continuousMultilinearMap.modelProduct s q
+          (lieDeriv_correction s DX α) β +
+        Bundle.continuousMultilinearMap.modelProduct s q
+          α (lieDeriv_correction q DX β) := by
+  ext v
+  rw [lieDeriv_correction, Fin.sum_univ_add]
+  simp only [lieDeriv_correction, ContinuousMultilinearMap.sum_apply,
+    ContinuousMultilinearMap.add_apply, Bundle.continuousMultilinearMap.modelProduct_apply]
+  congr 1
+  · rw [Finset.sum_mul]
+    apply Finset.sum_congr rfl
+    intro i _
+    simp only [substituteArg, ContinuousMultilinearMap.compContinuousLinearMap_apply,
+      Bundle.continuousMultilinearMap.modelProduct_apply, Function.comp_apply]
+    congr 1
+    · congr 1
+      funext j
+      by_cases hji : j = i
+      · subst j
+        simp
+      · simp [hji]
+    · congr 1
+      funext j
+      have hneq : Fin.natAdd s j ≠ Fin.castAdd q i := by
+        intro h
+        have hval := congrArg Fin.val h
+        simp [Fin.val_natAdd, Fin.val_castAdd] at hval
+        omega
+      simp [hneq]
+  · rw [Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro i _
+    simp only [substituteArg, ContinuousMultilinearMap.compContinuousLinearMap_apply,
+      Bundle.continuousMultilinearMap.modelProduct_apply, Function.comp_apply]
+    congr 1
+    · congr 1
+      funext j
+      have hneq : Fin.castAdd q j ≠ Fin.natAdd s i := by
+        intro h
+        have hval := congrArg Fin.val h
+        simp [Fin.val_natAdd, Fin.val_castAdd] at hval
+        omega
+      simp [hneq]
+    · congr 1
+      funext j
+      by_cases hji : j = i
+      · subst j
+        simp
+      · simp [hji]
+
 variable [CompleteSpace 𝕜]
+
+/-- The covariant-slot correction as a continuous linear endomorphism of `(0,s)` tensors.
+
+For a covariant tensor `α`, `lieDeriv_correctionL s DX α` is the sum of the tensors
+obtained by inserting `DX` in each covariant slot. The vector-space Lie derivative of
+a `(0,s)` tensor field is `D α(X) - lieDeriv_correctionL s (DX) α`. -/
+noncomputable def lieDeriv_correctionL (s : ℕ) (DX : E →L[𝕜] E) :
+    Tensor0SModel (𝕜 := 𝕜) (E := E) s →L[𝕜]
+      Tensor0SModel (𝕜 := 𝕜) (E := E) s :=
+  LinearMap.toContinuousLinearMap
+    { toFun := fun α => lieDeriv_correction s DX α
+      map_add' := fun α β => lieDeriv_correction_add (s := s) DX α β
+      map_smul' := fun c α => lieDeriv_correction_smul (s := s) DX c α }
+
+@[simp]
+theorem lieDeriv_correctionL_apply (DX : E →L[𝕜] E)
+    (α : Tensor0SModel (𝕜 := 𝕜) (E := E) s) :
+    lieDeriv_correctionL (𝕜 := 𝕜) (E := E) s DX α = lieDeriv_correction s DX α := by
+  simp [lieDeriv_correctionL]
+
+/-- The covariant-slot correction is also continuous linear in the vector-field
+derivative. This is the fixed-chart smoothness hook for the full mixed-tensor
+Lie derivative. -/
+noncomputable def lieDeriv_correctionOpL (s : ℕ) :
+    (E →L[𝕜] E) →L[𝕜]
+      (Tensor0SModel (𝕜 := 𝕜) (E := E) s →L[𝕜]
+        Tensor0SModel (𝕜 := 𝕜) (E := E) s) :=
+  LinearMap.toContinuousLinearMap
+    { toFun := fun DX => lieDeriv_correctionL (𝕜 := 𝕜) (E := E) s DX
+      map_add' := fun DX DY => by
+        ext α
+        simp [lieDeriv_correction_add_right]
+      map_smul' := fun c DX => by
+        ext α
+        simp [lieDeriv_correction_smul_right] }
+
+@[simp]
+theorem lieDeriv_correctionOpL_apply (DX : E →L[𝕜] E) :
+    lieDeriv_correctionOpL (𝕜 := 𝕜) (E := E) s DX =
+      lieDeriv_correctionL (𝕜 := 𝕜) (E := E) s DX := by
+  simp [lieDeriv_correctionOpL]
+
 /-- Lie derivative of an (r,s) tensor field in a vector space within a set.
 This is the principal term; the full formula includes correction terms. -/
 noncomputable def lieDeriv_tensorRSWithin (r s : ℕ)
@@ -257,50 +410,145 @@ noncomputable def lieDeriv_tensorRS (r s : ℕ)
     Tensor0SModel (𝕜 := 𝕜) (E := E) r →L[𝕜] Tensor0SModel (𝕜 := 𝕜) (E := E) s :=
   fderiv 𝕜 T x (X x)
 
+/-- Full vector-space Lie derivative of an `(r,s)` tensor in the `Hom((0,r),(0,s))`
+model, within a set.
+
+The older `lieDeriv_tensorRSWithin` above is only the principal derivative
+`D T(X)`. That principal term is useful as a calculus component but is not invariant
+under coordinate changes. The coordinate-natural mixed-tensor formula is
+
+`D T(X) - C_s(DX) ∘ T + T ∘ C_r(DX)`,
+
+where `C_k(DX)` is the covariant-slot correction on `(0,k)` tensors. This is the
+object for which the `mlieBracket` fixed-chart/invariance proof pattern should apply. -/
+noncomputable def lieDeriv_tensorRSFullWithin (r s : ℕ)
+    (X : E → E)
+    (T : E → Tensor0SModel (𝕜 := 𝕜) (E := E) r →L[𝕜] Tensor0SModel (𝕜 := 𝕜) (E := E) s)
+    (t : Set E) (x : E) :
+    Tensor0SModel (𝕜 := 𝕜) (E := E) r →L[𝕜] Tensor0SModel (𝕜 := 𝕜) (E := E) s :=
+  let DX := fderivWithin 𝕜 X t x
+  fderivWithin 𝕜 T t x (X x)
+    - (lieDeriv_correctionL (𝕜 := 𝕜) (E := E) s DX).comp (T x)
+    + (T x).comp (lieDeriv_correctionL (𝕜 := 𝕜) (E := E) r DX)
+
+/-- Full vector-space Lie derivative of an `(r,s)` tensor in the `Hom((0,r),(0,s))`
+model. -/
+noncomputable def lieDeriv_tensorRSFull (r s : ℕ)
+    (X : E → E)
+    (T : E → Tensor0SModel (𝕜 := 𝕜) (E := E) r →L[𝕜] Tensor0SModel (𝕜 := 𝕜) (E := E) s)
+    (x : E) :
+    Tensor0SModel (𝕜 := 𝕜) (E := E) r →L[𝕜] Tensor0SModel (𝕜 := 𝕜) (E := E) s :=
+  let DX := fderiv 𝕜 X x
+  fderiv 𝕜 T x (X x)
+    - (lieDeriv_correctionL (𝕜 := 𝕜) (E := E) s DX).comp (T x)
+    + (T x).comp (lieDeriv_correctionL (𝕜 := 𝕜) (E := E) r DX)
+
+omit [CompleteSpace 𝕜] in
+/-- Smoothness of the model-space principal `(r,s)` Lie-derivative term on a fixed set.
+
+This is the fixed-set model-space calculus component: differentiating a `C^n`
+model-space tensor-valued function and applying the derivative to a `C^m` vector
+field loses one derivative. A manifold smoothness theorem should use this only
+after replacing the moving chart definition by a locally fixed-chart expression. -/
+theorem contDiffWithinAt_lieDeriv_tensorRSWithin (r s : ℕ) {m n' : WithTop ℕ∞}
+    {X : E → E}
+    {T : E → Tensor0SModel (𝕜 := 𝕜) (E := E) r →L[𝕜] Tensor0SModel (𝕜 := 𝕜) (E := E) s}
+    {u : Set E} {x : E}
+    (hT : ContDiffWithinAt 𝕜 n' T u x)
+    (hX : ContDiffWithinAt 𝕜 m X u x)
+    (hu : UniqueDiffOn 𝕜 u) (hmn : m + 1 ≤ n') (hx : x ∈ u) :
+    ContDiffWithinAt 𝕜 m (fun y => lieDeriv_tensorRSWithin r s X T u y) u x := by
+  simpa [lieDeriv_tensorRSWithin] using hT.fderivWithin_right_apply hX hu hmn hx
+
+/-- Smoothness of the full mixed `(r,s)` vector-space Lie derivative on a fixed set.
+
+This is the model-space calculus half of the manifold proof. The formula is the
+coordinate-natural one:
+`D T(X) - C_s(DX) ∘ T + T ∘ C_r(DX)`. -/
+theorem contDiffWithinAt_lieDeriv_tensorRSFullWithin (r s : ℕ) {m n' : WithTop ℕ∞}
+    {X : E → E}
+    {T : E → Tensor0SModel (𝕜 := 𝕜) (E := E) r →L[𝕜] Tensor0SModel (𝕜 := 𝕜) (E := E) s}
+    {u : Set E} {x : E}
+    (hT : ContDiffWithinAt 𝕜 n' T u x)
+    (hX : ContDiffWithinAt 𝕜 n' X u x)
+    (hu : UniqueDiffOn 𝕜 u) (hmn : m + 1 ≤ n') (hx : x ∈ u) :
+    ContDiffWithinAt 𝕜 m (fun y => lieDeriv_tensorRSFullWithin r s X T u y) u x := by
+  have hprincipal :
+      ContDiffWithinAt 𝕜 m (fun y => lieDeriv_tensorRSWithin r s X T u y) u x :=
+    contDiffWithinAt_lieDeriv_tensorRSWithin r s hT
+      (hX.of_le (le_trans le_self_add hmn)) hu hmn hx
+  have hT_m : ContDiffWithinAt 𝕜 m T u x :=
+    hT.of_le (le_trans le_self_add hmn)
+  have hDX : ContDiffWithinAt 𝕜 m (fun y => fderivWithin 𝕜 X u y) u x :=
+    hX.fderivWithin_right hu hmn hx
+  have hCorrS :
+      ContDiffWithinAt 𝕜 m
+        (fun y => lieDeriv_correctionL (𝕜 := 𝕜) (E := E) s
+          (fderivWithin 𝕜 X u y)) u x := by
+    simpa using
+      hDX.continuousLinearMap_comp
+        (lieDeriv_correctionOpL (𝕜 := 𝕜) (E := E) s)
+  have hCorrR :
+      ContDiffWithinAt 𝕜 m
+        (fun y => lieDeriv_correctionL (𝕜 := 𝕜) (E := E) r
+          (fderivWithin 𝕜 X u y)) u x := by
+    simpa using
+      hDX.continuousLinearMap_comp
+        (lieDeriv_correctionOpL (𝕜 := 𝕜) (E := E) r)
+  have hOut :
+      ContDiffWithinAt 𝕜 m
+        (fun y => (lieDeriv_correctionL (𝕜 := 𝕜) (E := E) s
+          (fderivWithin 𝕜 X u y)).comp (T y)) u x :=
+    hCorrS.clm_comp hT_m
+  have hIn :
+      ContDiffWithinAt 𝕜 m
+        (fun y => (T y).comp (lieDeriv_correctionL (𝕜 := 𝕜) (E := E) r
+          (fderivWithin 𝕜 X u y))) u x :=
+    hT_m.clm_comp hCorrR
+  simpa [lieDeriv_tensorRSFullWithin, lieDeriv_tensorRSWithin] using
+    (hprincipal.sub hOut).add hIn
+
 section SmoothVectorFieldRSLieDeriv
 
 variable [IsManifold I 1 M] [IsManifold I (n + 1) M]
 
-/-- Lie derivative of an (r,s) tensor field within a set.
+/-- Pointwise Lie derivative of an `(r,s)` tensor field within a set.
 
 The definition works by:
 1. Using `tensorRSSpace_continuousLinearEquiv` to convert the tensor field to a
    model-fiber-valued function
 2. Pulling back to the model space via `extChartAt`
-3. Computing the vector-space Lie derivative there
+3. Computing the full vector-space Lie derivative there
 4. Converting back via the inverse equivalence
 
-The output is `C^m` when the inputs are `C^n` with `m + 1 ≤ n`. -/
-noncomputable def mlieDeriv_tensorRSWithin (r s : ℕ) {m : WithTop ℕ∞}
+This mirrors mathlib's `VectorField.mlieBracketWithin`: the operation itself is
+pointwise. Smoothness of this pointwise operation should be a separate theorem,
+because the model-space theorem only gives smoothness within the pulled-back set. -/
+noncomputable def mlieDeriv_tensorRSWithin (r s : ℕ)
     (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
     (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) r s)
-    (u : Set M) (hu : UniqueMDiffOn I u) (hmn : m + 1 ≤ n) :
-    TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := m) r s :=
-  letI := tensorRSBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s
-  { toFun := fun x₀ => by
-      -- Pull back X to model space
-      let X' := mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm X (range I)
-      -- Pull back T to model space via the continuous linear equivalence
-      let T' : E → Tensor0SModel (𝕜 := 𝕜) (E := E) r →L[𝕜] Tensor0SModel (𝕜 := 𝕜) (E := E) s :=
-        fun y => tensorRSSpace_continuousLinearEquiv (I := I) r s
-          ((extChartAt I x₀).symm y) (T.toFun ((extChartAt I x₀).symm y))
-      -- Compute Lie derivative in model space and convert back
-      exact (tensorRSSpace_continuousLinearEquiv (I := I) r s x₀).symm
-        (lieDeriv_tensorRSWithin r s X' T'
-          ((extChartAt I x₀).symm ⁻¹' u ∩ range I)
-          (extChartAt I x₀ x₀))
-    contMDiff_toFun := sorry }
+    (u : Set M) (x₀ : M) : TensorRSSpace r s I x₀ := by
+  -- Pull back X to model space
+  let X' := mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm X (range I)
+  -- Pull back T to model space via the continuous linear equivalence
+  let T' : E → Tensor0SModel (𝕜 := 𝕜) (E := E) r →L[𝕜] Tensor0SModel (𝕜 := 𝕜) (E := E) s :=
+    fun y => tensorRSSpace_continuousLinearEquiv (I := I) r s
+      ((extChartAt I x₀).symm y) (T.toFun ((extChartAt I x₀).symm y))
+  -- Compute Lie derivative in model space and convert back
+  exact (tensorRSSpace_continuousLinearEquiv (I := I) r s x₀).symm
+    (lieDeriv_tensorRSFullWithin r s X' T'
+      ((extChartAt I x₀).symm ⁻¹' u ∩ range I)
+      (extChartAt I x₀ x₀))
 
-/-- Lie derivative of an (r,s) tensor field.
-The output is `C^m` when the inputs are `C^n` with `m + 1 ≤ n`. -/
-noncomputable def mlieDeriv_tensorRS (r s : ℕ) {m : WithTop ℕ∞}
+/-- Pointwise Lie derivative of an `(r,s)` tensor field. -/
+noncomputable def mlieDeriv_tensorRS (r s : ℕ)
     (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
     (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) r s)
-    (hmn : m + 1 ≤ n) :
-    TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := m) r s :=
-  mlieDeriv_tensorRSWithin (n := n) r s X T univ uniqueMDiffOn_univ hmn
+    (x₀ : M) : TensorRSSpace r s I x₀ :=
+  mlieDeriv_tensorRSWithin (n := n) r s X T univ x₀
 
 end SmoothVectorFieldRSLieDeriv
+
 
 end ManifoldLieDeriv
 
