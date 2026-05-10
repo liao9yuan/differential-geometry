@@ -1,30 +1,29 @@
-import RicciFlower.Realized.Connection.MetricCompatibility
-import RicciFlower.Realized.LeviCivita.Basic
+import RicciFlower.Realized.MetricFamily
 
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
 /-!
-# Levi-Civita Compatibility Wrappers
+# Metric-Compatible Connections
 
-Compatibility wrappers for the general metric-compatible connection API in
-`RicciFlower.Realized.Connection.MetricCompatibility`.
+This file contains apply theorems for arbitrary metric-compatible realized
+connections.  The predicates and metric-family compatibility fields live in
+`RicciFlower.Realized.MetricFamily`.
 -/
 
 namespace RicciFlower
 namespace Realized
-namespace LeviCivita
 
 open Bundle
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [SigmaCompactSpace M] [T2Space M]
+
+section Pointwise
 
 /-- Pointwise metric compatibility:
 `X <Y,Z> = <nabla_X Y,Z> + <Y,nabla_X Z>`. -/
@@ -37,7 +36,7 @@ theorem metric_compatible_at_apply
     mfderiv I 𝓘(Real, Real) (fun y : M => g.inner y (Y y) (Z y)) x (X x) =
       g.inner x (cov Y x (X x)) (Z x) +
         g.inner x (Y x) (cov Z x (X x)) :=
-  RicciFlower.Realized.metric_compatible_at_apply (I := I) hmc X Y Z hX hY hZ
+  hmc X Y Z hX hY hZ
 
 /-- Global metric compatibility at a point. -/
 theorem metric_compatible_apply
@@ -50,7 +49,25 @@ theorem metric_compatible_apply
     mfderiv I 𝓘(Real, Real) (fun y : M => g.inner y (Y y) (Z y)) x (X x) =
       g.inner x (cov Y x (X x)) (Z x) +
         g.inner x (Y x) (cov Z x (X x)) :=
-  RicciFlower.Realized.metric_compatible_apply (I := I) hmc X Y Z hX hY hZ
+  metric_compatible_at_apply (I := I) (hmc x) X Y Z hX hY hZ
+
+end Pointwise
+
+section Family
+
+/-- Metric compatibility for an interval metric family. -/
+def IsMetricCompatibleFamilyOn
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D) : Prop :=
+  forall t : RealTimeInterval.FlowTime D,
+    IsMetricCompatible (I := I) (G.connectionAt t) (G.metricAt t)
+
+/-- The metric-family field supplies interval metric compatibility. -/
+theorem isMetricCompatibleFamilyOn
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D) :
+    IsMetricCompatibleFamilyOn (I := I) G :=
+  fun t => G.metricCompatibleAt t
 
 /-- Family metric compatibility at a flow time. -/
 theorem metric_compatible_family_apply
@@ -65,8 +82,9 @@ theorem metric_compatible_family_apply
         (fun y : M => (G.metricAt t).inner y (Y y) (Z y)) x (X x) =
       (G.metricAt t).inner x ((G.connectionAt t) Y x (X x)) (Z x) +
         (G.metricAt t).inner x (Y x) ((G.connectionAt t) Z x (X x)) :=
-  RicciFlower.Realized.metric_compatible_family_apply (I := I) hmc t X Y Z hX hY hZ
+  metric_compatible_apply (I := I) (hmc t) X Y Z hX hY hZ
 
-end LeviCivita
+end Family
+
 end Realized
 end RicciFlower

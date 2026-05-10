@@ -1,4 +1,4 @@
-import RicciFlower.Tensor.RSTensor.Defs
+import RicciFlower.Tensor.RSTensor.Field
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Topology.VectorBundle.Hom
@@ -485,6 +485,27 @@ theorem contMDiff_section_apply
     ContMDiff I 𝓘(ℝ, ℝ) ∞
       (fun b : M => Tensor0SSpace.toModel (T b) (fun i : Fin n => v i b)) :=
   contMDiff_section_apply_aux n T hT v hv
+
+/-- Smooth tensor-field evaluation on smooth vector fields.
+
+This is a section-level wrapper around `contMDiff_section_apply`: if `T` is a
+smooth `(0,n)` tensor field and all input slots are smooth tangent sections,
+then the scalar evaluation `p ↦ T_p(v₁(p), ..., v_n(p))` is smooth. -/
+theorem contMDiff_tensor0SField_apply
+    {n : ℕ}
+    (T : Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) n)
+    (v : Fin n → ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _)) :
+    ContMDiff I 𝓘(ℝ, ℝ) ∞
+      (fun b : M => T b (fun i : Fin n => v i b)) := by
+  have hv : ∀ i : Fin n, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M =>
+        TotalSpace.mk' E (E := fun x : M => TangentSpace I x) b (v i b)) :=
+    fun i => (v i).contMDiff
+  have hEval := contMDiff_section_apply (I := I) (M := M) (n := n)
+    (T := fun b : M => T b) T.contMDiff (fun i b => v i b) hv
+  simpa [Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply] using hEval
 
 /-!
 ## Pointwise (`ContMDiffAt`) version of multilinear bundle evaluation

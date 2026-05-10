@@ -6,6 +6,8 @@ import RicciFlower.Tensor.RSTensor.NablaOnTensors
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
+set_option linter.unusedFintypeInType false
+set_option linter.unusedDecidableInType false
 
 /-!
 # Tensor Ricci Identity Interfaces

@@ -4,6 +4,8 @@ import RicciFlower.Tensor.RSTensor.Defs
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
+set_option linter.unusedFintypeInType false
+set_option linter.unusedDecidableInType false
 
 /-!
 # Pointwise tensor coordinates from a tangent basis

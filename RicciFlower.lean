@@ -6,6 +6,7 @@ import RicciFlower.Tensor.RSTensor.Tensor0SRiemannian
 import RicciFlower.Tensor.RSTensor.TensorRSRiemannian
 import RicciFlower.Tensor.RSTensor.CoordinateBasis
 import RicciFlower.Tensor.RSTensor.Components
+import RicciFlower.Tensor.RSTensor.Tensoriality
 import RicciFlower.Tensor.RSTensor.NablaOnTensors
 import RicciFlower.Coordinates.Tensor
 import RicciFlower.Coordinates.CoordinateFrame
@@ -16,11 +17,14 @@ import RicciFlower.Analysis.Measure
 import RicciFlower.Analysis.VolumeVariation
 import RicciFlower.Analysis.Green
 import RicciFlower.Realized.Connection
+import RicciFlower.Realized.Connection.MetricCompatibility
 import RicciFlower.Realized.LeviCivita.Basic
 import RicciFlower.Realized.LeviCivita.Torsion
 import RicciFlower.Realized.LeviCivita.MetricCompatibility
 import RicciFlower.Realized.LeviCivita.Uniqueness
 import RicciFlower.Realized.LeviCivita.Koszul
+import RicciFlower.Realized.LeviCivita.Curvature
+import RicciFlower.Realized.LeviCivita.ScalarBochner
 import RicciFlower.Realized.RicciFlow
 import RicciFlower.RicciFlow.Basic
 import RicciFlower.RicciFlow.Evolution.Ricci

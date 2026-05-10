@@ -1,5 +1,6 @@
 import RicciFlower.Analysis.Time
 import RicciFlower.Coordinates.Basic
+import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -87,6 +88,23 @@ theorem covariantDerivative_eq_sum_christoffel
     (cov (frame j) x) (frame i x) =
       ∑ k, christoffelSymbolInFrame cov frame hframe x i j k • frame k x := by
   exact hframe.coeff_sum_eq (fun y => (cov (frame j) y) (frame i y)) hx
+
+/-- The torsion tensor component in a local frame is the skew part of the
+Christoffel symbols, corrected by the frame bracket. -/
+theorem torsion_coeff_eq_christoffel_skew
+    [FiniteDimensional Real E] [CompleteSpace E]
+    [IsManifold I 2 M]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    {x : M} (i j k : Idx)
+    (hi : MDiffAt (T% (frame i)) x) (hj : MDiffAt (T% (frame j)) x) :
+    hframe.coeff k x (cov.torsion x (frame i x) (frame j x)) =
+      christoffelSymbolInFrame cov frame hframe x i j k -
+        christoffelSymbolInFrame cov frame hframe x j i k -
+          hframe.coeff k x (VectorField.mlieBracket I (frame i) (frame j) x) := by
+  rw [cov.torsion_apply hi hj]
+  simp [christoffelSymbolInFrame, map_sub]
 
 /-- Predicate saying a chosen local frame is normal for `cov` at `x`.
 

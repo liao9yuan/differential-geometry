@@ -11,6 +11,8 @@ import RicciFlower.Tensor.RSTensor.Tensor0SRiemannian
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
+set_option linter.unusedFintypeInType false
+set_option linter.unusedDecidableInType false
 
 /-!
 # Scalar Bochner Formula
@@ -372,7 +374,8 @@ theorem differential1FormFun_eq_metric_dual_gradientFun
         ((tangentFlatLinear (I := I) g x) (gradientFun (I := I) g u x)) := by
   apply cotangentToDualLinear_injective (I := I) (x := x)
   ext V
-  simp [differential1FormFun, tangentFlatLinear_apply]
+  simp only [cotangentToDualLinear_apply, cotangentToDual_apply, gradientFun_eq, metricSharp_eq,
+    cotangentToDual_dualToCotangent, tangentFlatLinear_apply]
   exact (inner_gradientFun (I := I) g u x V).symm
 
 /-- The curvature trace term for `du` is the Ricci-gradient pairing, assuming

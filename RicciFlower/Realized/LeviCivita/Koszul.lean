@@ -819,6 +819,34 @@ theorem koszulScalar_pair_sum
   simp only [map_neg]
   ring
 
+/-- The skew part of the Koszul scalar in the first two vector-field slots is
+the metric pairing with the Lie bracket. -/
+theorem koszulScalar_swap_sub
+    (g : SmoothRiemannianMetric I M)
+    (X Y Z : (p : M) -> TangentSpace I p) (x : M) :
+    (1 / 2 : Real) * koszulScalar (I := I) g X Y Z x -
+      (1 / 2 : Real) * koszulScalar (I := I) g Y X Z x =
+        g.inner x (VectorField.mlieBracket I X Y x) (Z x) := by
+  unfold koszulScalar
+  rw [show (fun y : M => g.inner y (X y) (Z y)) =
+      (fun y : M => g.inner y (Z y) (X y)) by
+      funext y
+      exact g.symm y (X y) (Z y)]
+  rw [show (fun y : M => g.inner y (Z y) (Y y)) =
+      (fun y : M => g.inner y (Y y) (Z y)) by
+      funext y
+      exact g.symm y (Z y) (Y y)]
+  rw [show (fun y : M => g.inner y (Y y) (X y)) =
+      (fun y : M => g.inner y (X y) (Y y)) by
+      funext y
+      exact g.symm y (Y y) (X y)]
+  rw [VectorField.mlieBracket_swap_apply (I := I) (V := Z) (W := X) (x := x)]
+  rw [VectorField.mlieBracket_swap_apply (I := I) (V := Z) (W := Y) (x := x)]
+  rw [VectorField.mlieBracket_swap_apply (I := I) (V := Y) (W := X) (x := x)]
+  simp only [map_neg]
+  rw [g.symm x (VectorField.mlieBracket I X Y x) (Z x)]
+  ring
+
 /-! ## Descent to a pointwise connection candidate -/
 
 /-- Tensoriality in the first vector-field argument.
@@ -986,7 +1014,7 @@ theorem leviCivitaConnectionCandidateAt_agreesWithDescended
 /-- The Koszul candidate assembled into mathlib's bundled
 `CovariantDerivative`.
 
-The covariant-derivative axioms are proved directly from the Koszul product
+The covariant-derivative laws are proved directly from the Koszul product
 rules, rather than through a provisional assumption structure. -/
 def leviCivitaConnectionOfMetric
     (g : SmoothRiemannianMetric I M) :
@@ -1051,6 +1079,29 @@ theorem leviCivitaConnectionOfMetric_inner_eq_koszulScalar
   rw [leviCivitaConnectionOfMetric_apply_descended (I := I) g Y x hY (X x)]
   rw [koszulNablaAt_eq_of_extension (I := I) g X Y x hX hY (X x) rfl]
   exact koszulNablaField_inner_eq_koszulScalar (I := I) g X Y Z x hX hY hZ
+
+/-- Inner-product Koszul formula tested against a single tangent vector.
+
+This is the pointwise convenience wrapper around
+`leviCivitaConnectionOfMetric_inner_eq_koszulScalar`: the test vector
+`v : T_x M` is extended by the chart-constant field `tangentConstAt x v`, and
+the center evaluation is simplified away. -/
+theorem leviCivitaConnectionOfMetric_inner_eq_koszulScalar_tangent
+    (g : SmoothRiemannianMetric I M)
+    (X Y : (p : M) -> TangentSpace I p) (x : M)
+    (hX : MDiffAt (T% X) x) (hY : MDiffAt (T% Y) x)
+    (v : TangentSpace I x) :
+    g.inner x ((leviCivitaConnectionOfMetric (I := I) g Y x) (X x)) v =
+      (1 / 2 : Real) *
+        koszulScalar (I := I) g X Y (tangentConstAt (I := I) x v) x := by
+  have hZ :
+      MDiffAt
+        (T% (tangentConstAt (I := I) x v : (p : M) -> TangentSpace I p)) x :=
+    mdifferentiableAt_tangentConstAt_self (I := I) x v
+  have h := leviCivitaConnectionOfMetric_inner_eq_koszulScalar
+    (I := I) g X Y (tangentConstAt (I := I) x v) x hX hY hZ
+  rw [tangentConstAt_self] at h
+  exact h
 
 /-- The Koszul-constructed Levi-Civita connection is metric-compatible. -/
 theorem leviCivitaConnectionOfMetric_isMetricCompatible

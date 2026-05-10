@@ -1,5 +1,4 @@
-import RicciFlower.Coordinates.Christoffel
-import RicciFlower.Coordinates.CoordinateFrame
+import RicciFlower.Coordinates.ConnectionCoefficients
 import RicciFlower.Tensor.RSTensor.NablaOnTensors
 
 set_option autoImplicit false
@@ -34,101 +33,6 @@ variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
 variable [IsManifold I (⊤ : WithTop ℕ∞) M]
 variable [IsManifold I ((⊤ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace Real]
-
-/-- The coordinate frame as a `C¹` local frame, for Christoffel-component APIs. -/
-def coordinateFrameAt_isLocalFrame_one (x₀ : M) :
-    IsLocalFrameOn I E (1 : WithTop ℕ∞)
-      (coordinateFrameAt (I := I) x₀) (coordinateFrameSet (I := I) x₀) :=
-  (coordinateTrivializationAt (I := I) x₀).isLocalFrameOn_localFrame_baseSet
-    I (1 : WithTop ℕ∞) (Module.finBasis Real E)
-
-/-- At the base point, the chart-induced coordinate basis is the model-space basis. -/
-theorem coordinateFrameAt_toBasis_eq_finBasis (x₀ : M) :
-    coordinateFrameAt_toBasis (I := I) x₀ = Module.finBasis Real E := by
-  ext i
-  rw [coordinateFrameAt_toBasis_apply]
-  rw [coordinateFrameAt_apply_of_mem (I := I) (coordinateFrameAt_mem (I := I) x₀) i]
-  rw [mfderivWithin_range_extChartAt_symm]
-  rfl
-
-private theorem tangentConstInChart_eq_coordinateFrame_eventually
-    (x₀ : M) (i : CoordinateIdx E) :
-    (tangentConstInChart (𝕜 := Real) (I := I) x₀ ((Module.finBasis Real E) i) :
-        (x : M) → TangentSpace I x) =ᶠ[𝓝 x₀]
-      coordinateFrameAt (I := I) x₀ i := by
-  filter_upwards
-    [((coordinateTrivializationAt (I := I) x₀).open_baseSet.mem_nhds
-      (coordinateFrameAt_mem (I := I) x₀))] with x hx
-  have hx_src : x ∈ (chartAt H x₀).source := by
-    simpa [coordinateFrameSet, coordinateTrivializationAt] using hx
-  rw [tangentConstInChart_apply]
-  rw [TangentBundle.symmL_trivializationAt (I := I) (𝕜 := Real) hx_src]
-  rw [coordinateFrameAt_apply_of_mem (I := I) (x₀ := x₀) (x := x) hx i]
-  rfl
-
-/-- Model connection coefficients agree with coordinate-frame Christoffel coefficients
-in the chart-induced coordinate frame. -/
-theorem connCoeff_eq_christoffelAlong_coord
-    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (X : (x : M) -> TangentSpace I x) (x₀ : M)
-    (j k : CoordinateIdx E) :
-    connectionEndomorphismCoeff (𝕜 := Real) (E := E) (Module.finBasis Real E)
-        (connectionEndomorphismInChart (𝕜 := Real) (I := I) cov X x₀
-          (extChartAt I x₀ x₀)) j k =
-      christoffelAlongInFrame cov (coordinateFrameAt (I := I) x₀)
-        (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
-        x₀ (X x₀) j k := by
-  classical
-  let e := coordinateTrivializationAt (I := I) x₀
-  have hx_base : x₀ ∈ e.baseSet := by
-    simp [e, coordinateTrivializationAt, coordinateFrameAt_mem (I := I) x₀]
-  have hconst :
-      MDiffAt
-        (T% (tangentConstInChart (𝕜 := Real) (I := I) x₀
-          ((Module.finBasis Real E) j) : (x : M) → TangentSpace I x)) x₀ :=
-    mdifferentiableAt_tangentConstInChart_of_mem
-      (𝕜 := Real) (I := I) (x₀ := x₀) (p := x₀)
-      ((Module.finBasis Real E) j) hx_base
-  have hframe :
-      MDiffAt (T% (coordinateFrameAt (I := I) x₀ j)) x₀ :=
-    ((coordinateFrameAt_isLocalFrame_one (I := I) x₀).contMDiffAt
-      (coordinateFrameSet_open (I := I) x₀)
-      (coordinateFrameAt_mem (I := I) x₀) j).mdifferentiableAt one_ne_zero
-  have hcov :
-      cov (tangentConstInChart (𝕜 := Real) (I := I) x₀
-            ((Module.finBasis Real E) j)) x₀ =
-        cov (coordinateFrameAt (I := I) x₀ j) x₀ :=
-    cov.isCovariantDerivativeOnUniv.congr_of_eventuallyEq hconst hframe
-      (by simp)
-      (tangentConstInChart_eq_coordinateFrame_eventually (I := I) x₀ j)
-  unfold connectionEndomorphismCoeff christoffelAlongInFrame
-  rw [connectionEndomorphismInChart_apply_of_mem
-    (𝕜 := Real) (I := I) cov X x₀ (mem_extChartAt_target x₀)
-    ((Module.finBasis Real E) j)]
-  rw [extChartAt_to_inv]
-  rw [hcov]
-  have hcoeff :
-      ((coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff k x₀
-        ((cov (coordinateFrameAt (I := I) x₀ j) x₀) (X x₀))) =
-        (Module.finBasis Real E).coord k
-          ((coordinateTrivializationAt (I := I) x₀).continuousLinearMapAt Real x₀
-            ((cov (coordinateFrameAt (I := I) x₀ j) x₀) (X x₀))) := by
-    have hbasis (hx : x₀ ∈ coordinateFrameSet (I := I) x₀) :
-        (coordinateFrameAt_isLocalFrame_one (I := I) x₀).toBasisAt hx =
-          (coordinateTrivializationAt (I := I) x₀).basisAt
-            (Module.finBasis Real E)
-            (by simpa [coordinateFrameSet, coordinateTrivializationAt] using hx) := by
-      ext a
-      rw [IsLocalFrameOn.toBasisAt_coe]
-      simp [coordinateFrameAt_isLocalFrame_one, coordinateFrameAt,
-        coordinateFrameSet, coordinateTrivializationAt]
-    unfold IsLocalFrameOn.coeff
-    rw [dif_pos (coordinateFrameAt_mem (I := I) x₀)]
-    rw [hbasis (coordinateFrameAt_mem (I := I) x₀)]
-    simp [Bundle.Trivialization.basisAt]
-    rw [Bundle.Trivialization.linearMapAt_apply]
-    simp [coordinateFrameAt_mem, coordinateFrameSet, coordinateTrivializationAt]
-  rw [hcoeff]
 
 /-- Directional derivative of a coordinate-frame covariant tensor component. -/
 def coordDeriv0SAt {s : ℕ}

@@ -1,0 +1,157 @@
+import RicciFlower.Realized.LeviCivita.Curvature
+import RicciFlower.Realized.ScalarBochner
+
+set_option autoImplicit false
+set_option linter.style.longLine false
+set_option linter.unusedSectionVars false
+set_option linter.unusedFintypeInType false
+set_option linter.unusedDecidableInType false
+
+/-!
+# Levi-Civita scalar Bochner endpoints
+
+This file packages the Levi-Civita geometric inputs for the generic scalar
+Bochner assembly in `RicciFlower.Realized.ScalarBochner`.
+-/
+
+noncomputable section
+
+namespace RicciFlower
+namespace Realized
+namespace LeviCivita
+
+open Bundle Tensor0SBundle
+open scoped Manifold ContDiff BigOperators
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
+variable {H : Type*} [TopologicalSpace H]
+variable {I : ModelWithCorners Real E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+variable [IsManifold I 1 M] [IsManifold I 2 M]
+variable [IsManifold I ((⊤ : WithTop ℕ∞) + 1) M]
+
+/-- Levi-Civita Hessian symmetry for a function, expressed as trailing-slot
+symmetry of the second covariant derivative of `du`. -/
+theorem oneFormLastTwoSymmAt_of_leviCivita_du
+    [SigmaCompactSpace M] [T2Space M]
+    (g : SmoothRiemannianMetric I M) (u : M -> Real)
+    (duSec : OneFormSection (I := I) (M := M))
+    (nablaDuSec : TwoTensorSection (I := I) (M := M))
+    {x : M}
+    (nabla2Du :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (hdu : DuFieldRealizes (I := I) u duSec)
+    (hnabla2 : Nabla2OneFormRealizesAt (I := I)
+      (leviCivitaConnectionOfMetric (I := I) g) duSec nablaDuSec x nabla2Du) :
+    OneFormLastTwoSymmAt (I := I) nabla2Du := by
+  -- Frontier: unfold the second covariant derivative of `du`, use
+  -- torsion-freeness of `leviCivitaConnectionOfMetric`, and commute scalar
+  -- second derivatives.
+  sorry
+
+/-- The trace of the Levi-Civita third covariant derivative of `du` realizes
+`d (Delta u)`. -/
+theorem traceNablaHessianRealizesDLapAt_of_leviCivita
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    [SigmaCompactSpace M] [T2Space M]
+    (g : SmoothRiemannianMetric I M) (u : M -> Real)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (duSec : OneFormSection (I := I) (M := M))
+    (nablaDuSec : TwoTensorSection (I := I) (M := M))
+    (nabla2Du :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInv)
+    (hdu : DuFieldRealizes (I := I) u duSec)
+    (hnabla2 : Nabla2OneFormRealizesAt (I := I)
+      (leviCivitaConnectionOfMetric (I := I) g) duSec nablaDuSec x nabla2Du) :
+    TraceNablaHessianRealizesDLapAt (I := I)
+      (leviCivitaConnectionOfMetric (I := I) g) g basis gInv u nabla2Du := by
+  -- Frontier: expand the scalar Laplacian as the metric trace of the Hessian,
+  -- then identify the differential of that trace with the trace of
+  -- `nabla Hess u` in the chosen basis.
+  sorry
+
+/-- Levi-Civita-facing scalar Bochner formula with the geometric LC inputs
+produced internally. -/
+theorem fundamental_bochner_of_leviCivita_terms
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    [SigmaCompactSpace M] [T2Space M]
+    (g : SmoothRiemannianMetric I M)
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
+      (leviCivitaConnectionOfMetric (I := I) g) (1 : WithTop ℕ∞))
+    (Ric : Tensor02Section (I := I) (M := M))
+    (Rm13 : Tensor13Section (I := I) (M := M))
+    (Rm04 : Tensor04Section (I := I) (M := M))
+    (gInvFrame : InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hRm13 : Rm13RealizesConnection (I := I)
+      (leviCivitaConnectionOfMetric (I := I) g) Rm13)
+    (hRm04 : Rm04RealizesConnection (I := I) g
+      (leviCivitaConnectionOfMetric (I := I) g) Rm04)
+    (hRic13 : RicciTensorRealizesRm13Trace (I := I) Ric Rm13)
+    (hRic04 : RicciTensorRealizesRm04TraceInFrame (I := I) Ric Rm04 gInvFrame frame)
+    (u : M -> Real)
+    (Hess nablaDu : (x : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (roughDu : (x : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInvAt : Idx -> Idx -> Real)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInvAt)
+    (X : Idx -> ContMDiffSection I E (⊤ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    (duSec : OneFormSection (I := I) (M := M))
+    (nablaDuSec : TwoTensorSection (I := I) (M := M))
+    (nabla2Du :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (normSecond :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (hfields : SmoothBasisFieldsAt (I := I) basis X)
+    (hHess : HessianRealizesNablaDuAt (I := I)
+      (leviCivitaConnectionOfMetric (I := I) g) duSec Hess x)
+    (hdu : DuFieldRealizes (I := I) u duSec)
+    (hnabla : NablaOneFormRealizesAt (I := I)
+      (leviCivitaConnectionOfMetric (I := I) g) duSec nablaDu x)
+    (hnabla2 : Nabla2OneFormRealizesAt (I := I)
+      (leviCivitaConnectionOfMetric (I := I) g) duSec nablaDuSec x nabla2Du)
+    (hlapTrace :
+      laplacian (I := I)
+        (leviCivitaConnectionOfMetric (I := I) g) g
+        (fun y : M =>
+          inner0S (I := I) g y 1
+            (differential1FormFun (I := I) u y)
+            (differential1FormFun (I := I) u y)) x =
+        metricTrace0S2InBasis (I := I) basis gInvAt normSecond Fin.elim0)
+    (hsecond : OneFormNormSecondProductInBasis (I := I) basis gInvAt
+      (differential1FormFun (I := I) u x) (nablaDu x) nabla2Du normSecond)
+    (hrough : RoughLap0SRealizesMetricTrace (I := I) basis gInvAt
+      (s := 1) (roughDu x) nabla2Du) :
+    (1 / 2 : Real) * laplacian (I := I)
+        (leviCivitaConnectionOfMetric (I := I) g) g
+        (gradNormSq (I := I) g u) x =
+      g.inner x
+          (gradientFun (I := I) g
+            (laplacian (I := I)
+              (leviCivitaConnectionOfMetric (I := I) g) g u) x)
+          (gradientFun (I := I) g u x) +
+        hessianNormSq (I := I) g Hess x +
+          ricciGradGrad (I := I) Ric g u x := by
+  refine fundamental_bochner_of_lc_terms (I := I) g Ric Rm13 Rm04
+    gInvFrame frame hRm13 hRic13 hRic04 u Hess nablaDu roughDu
+    basis gInvAt hinv X duSec nablaDuSec nabla2Du normSecond
+    hfields hHess hdu hnabla hnabla2 hlapTrace hsecond hrough ?_ ?_ ?_ ?_
+  · exact traceNablaHessianRealizesDLapAt_of_leviCivita (I := I)
+      g u basis gInvAt duSec nablaDuSec nabla2Du hinv hdu hnabla2
+  · exact oneFormLastTwoSymmAt_of_leviCivita_du (I := I)
+      g u duSec nablaDuSec nabla2Du hdu hnabla2
+  · exact oneFormThirdCovDerivCommAt_of_leviCivita (I := I)
+      g Rm13 duSec nablaDuSec (differential1FormFun (I := I) u x)
+      nabla2Du hRm13 (by simpa [duField] using hdu x) hnabla2
+  · exact rm13MetricSkewAt_of_leviCivita_realizes (I := I)
+      g hcov Rm13 Rm04 hRm13 hRm04
+
+end LeviCivita
+end Realized
+end RicciFlower

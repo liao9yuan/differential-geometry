@@ -1,4 +1,5 @@
 import RicciFlower.Coordinates.NablaComponents.Basic
+import RicciFlower.VectorBundle.PartialMfderiv
 
 /-!
 # Coordinate one-form covariant derivative components
@@ -316,7 +317,7 @@ private theorem extDerivFun_congr_eventually
   rw [hmf, hx]
 
 private theorem oneForm_pair_coordFrame_eventually
-    (Z : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (Z : (x : M) -> TangentSpace I x)
     (α : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (⊤ : WithTop ℕ∞)) 1)
     (x₀ : M) :
@@ -384,7 +385,8 @@ coefficient functions and fixed-slot tensor components are differentiable at
 the base point, and identify `dz` with the directional derivatives of the
 coefficients of `Z`. -/
 theorem oneForm_pair_coordFrame_product_rule
-    (X Z : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (Z : (x : M) -> TangentSpace I x)
     (α : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (⊤ : WithTop ℕ∞)) 1)
     (x₀ : M) (z dz : CoordinateIdx E -> Real)
@@ -461,7 +463,8 @@ connection-side product rule matching `oneForm_pair_coordFrame_product_rule`.
 -/
 theorem oneForm_covariantDerivative_coordFrame_product_rule
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (X Z : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (Z : (x : M) -> TangentSpace I x)
     (α : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (⊤ : WithTop ℕ∞)) 1)
     (x₀ : M) (z dz : CoordinateIdx E -> Real)
@@ -476,7 +479,8 @@ theorem oneForm_covariantDerivative_coordFrame_product_rule
     (hdiff_z : ∀ j : CoordinateIdx E,
       MDifferentiableAt I 𝓘(Real, Real)
         (fun y : M =>
-          (coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff j y (Z y)) x₀) :
+          (coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff j y (Z y)) x₀)
+    (hZ_diff : MDiffAt (T% Z) x₀) :
     α x₀ (fun _ : Fin 1 => (cov (fun y : M => Z y) x₀) (X x₀)) =
       ∑ j : CoordinateIdx E,
         (dz j * coordComponent0SAt (I := I) (α x₀) (fun _ : Fin 1 => j) +
@@ -509,8 +513,6 @@ theorem oneForm_covariantDerivative_coordFrame_product_rule
         exact hterm_diff j (by simp)
       simpa using MDifferentiableAt.sum_section
         (s := (Finset.univ : Finset (CoordinateIdx E))) (t := term) hterm_all)
-  have hZ_diff : MDiffAt (T% (fun y : M => Z y)) x₀ :=
-    Z.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
   have hZ_ev : (fun y : M => Z y) =ᶠ[𝓝 x₀]
       (fun y : M => ∑ j : CoordinateIdx E, term j y) := by
     exact hframe.eventually_eq_sum_coeff_smul (fun y => Z y)
@@ -688,7 +690,8 @@ textbook evaluation formula
 `(∇_X α)(Z) = X(α Z) - α(∇_X Z)` at the base point. -/
 theorem nabla0SFun_one_eval_of_coordFrame_product
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (X Z : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (Z : (x : M) -> TangentSpace I x)
     (α : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (⊤ : WithTop ℕ∞)) 1)
     (x₀ : M) (hderiv : ModelDerivEqCoordDeriv0SAt (I := I) X x₀ (fun x => α x))
@@ -729,7 +732,8 @@ theorem nabla0SFun_one_eval_of_coordFrame_product
 pairing product rule discharged by `oneForm_pair_coordFrame_product_rule`. -/
 theorem nabla0SFun_one_eval_of_coordFrame_product_rule
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (X Z : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (Z : (x : M) -> TangentSpace I x)
     (α : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (⊤ : WithTop ℕ∞)) 1)
     (x₀ : M) (hderiv : ModelDerivEqCoordDeriv0SAt (I := I) X x₀ (fun x => α x))
@@ -775,7 +779,8 @@ coordinate-frame bridge toward the textbook one-form formula
 `(∇_X α)(Z) = X(α Z) - α(∇_X Z)`. -/
 theorem nabla0SFun_one_eval_of_coordFrame_product_rules
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (X Z : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (Z : (x : M) -> TangentSpace I x)
     (α : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (⊤ : WithTop ℕ∞)) 1)
     (x₀ : M) (hderiv : ModelDerivEqCoordDeriv0SAt (I := I) X x₀ (fun x => α x))
@@ -794,7 +799,8 @@ theorem nabla0SFun_one_eval_of_coordFrame_product_rules
           (coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff j y (Z y)) x₀)
     (hdiff_α : ∀ j : CoordinateIdx E,
       MDifferentiableAt I 𝓘(Real, Real)
-        (fun y : M => α y (fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ j y)) x₀) :
+        (fun y : M => α y (fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ j y)) x₀)
+    (hZ_diff : MDiffAt (T% Z) x₀) :
     (nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       1 cov X α x₀) (fun _ : Fin 1 => Z x₀) =
       extDerivFun (I := I) (fun y : M => α y (fun _ : Fin 1 => Z y)) x₀ (X x₀) -
@@ -802,7 +808,7 @@ theorem nabla0SFun_one_eval_of_coordFrame_product_rules
   exact nabla0SFun_one_eval_of_coordFrame_product_rule
     (I := I) cov X Z α x₀ hderiv z dz hz hdz hdiff_z hdiff_α
     (oneForm_covariantDerivative_coordFrame_product_rule
-      (I := I) cov X Z α x₀ z dz hz hdz hdiff_z)
+      (I := I) cov X Z α x₀ z dz hz hdz hdiff_z hZ_diff)
 
 /-- Coordinate-frame moving-slot evaluation formula for a one-form.
 
@@ -838,6 +844,374 @@ theorem nabla0SFun_one_eval_coordFrame_moving
   exact nabla0SFun_one_eval_of_coordFrame_product_rules
     (I := I) cov X Z α x₀ hderiv z dz (by intro j; rfl) (by intro j; rfl)
     hdiff_z hdiff_α
+    (Z.contMDiff.contMDiffAt.mdifferentiableAt (by simp))
+
+/-- Local/raw version of `nabla0SFun_one_eval_coordFrame_moving`.
+
+The moving slot only has to be differentiable at the point, with the coordinate
+coefficient differentiability hypotheses stated explicitly. This is the local
+bridge needed for coordinate-frame fields, which are naturally local rather
+than global smooth sections. -/
+theorem nabla0SFun_one_eval_coordFrame_moving_raw
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (Z : (x : M) -> TangentSpace I x)
+    (α : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (⊤ : WithTop ℕ∞)) 1)
+    (x₀ : M) (hderiv : ModelDerivEqCoordDeriv0SAt (I := I) X x₀ (fun x => α x))
+    (hdiff_z : ∀ j : CoordinateIdx E,
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun y : M =>
+          (coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff j y (Z y)) x₀)
+    (hdiff_α : ∀ j : CoordinateIdx E,
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun y : M => α y (fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ j y)) x₀)
+    (hZ_diff : MDiffAt (T% Z) x₀) :
+    (nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      1 cov X α x₀) (fun _ : Fin 1 => Z x₀) =
+      extDerivFun (I := I) (fun y : M => α y (fun _ : Fin 1 => Z y)) x₀ (X x₀) -
+        α x₀ (fun _ : Fin 1 => (cov Z x₀) (X x₀)) := by
+  let z : CoordinateIdx E -> Real :=
+    fun j => (coordinateFrameAt_toBasis (I := I) x₀).coord j (Z x₀)
+  let dz : CoordinateIdx E -> Real :=
+    fun j =>
+      extDerivFun (I := I)
+        (fun y : M =>
+          (coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff j y (Z y))
+        x₀ (X x₀)
+  exact nabla0SFun_one_eval_of_coordFrame_product_rules
+    (I := I) cov X Z α x₀ hderiv z dz (by intro j; rfl) (by intro j; rfl)
+    hdiff_z hdiff_α hZ_diff
+
+private theorem coordinateFrame_coeff_contMDiffAt
+    (Z : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (x₀ : M) (j : CoordinateIdx E) :
+    ContMDiffAt I 𝓘(Real, Real) (⊤ : WithTop ℕ∞)
+      (fun y : M =>
+        (coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff j y (Z y)) x₀ := by
+  let e := coordinateTrivializationAt (I := I) x₀
+  have hx : x₀ ∈ e.baseSet := by
+    simp [e, coordinateTrivializationAt]
+  have hcoeff :=
+    contMDiffAt_localFrame_coeff
+      (I := I) (V := TangentSpace I) (e := e)
+      (b := Module.finBasis Real E) (s := fun y : M => Z y)
+      (k := (⊤ : WithTop ℕ∞)) hx Z.contMDiff.contMDiffAt j
+  simpa [e, coordinateTrivializationAt, coordinateFrameAt_isLocalFrame_one,
+    coordinateFrameAt] using hcoeff
+
+private theorem coordinateFrame_coeff_contMDiffAt_of_contMDiffAt
+    (Z : (x : M) -> TangentSpace I x) {x₀ : M}
+    (hZ : ContMDiffAt I (I.prod 𝓘(Real, E)) (∞ : WithTop ℕ∞)
+      (fun y : M => (⟨y, Z y⟩ : TotalSpace E (TangentSpace I : M -> Type _))) x₀)
+    (j : CoordinateIdx E) :
+    ContMDiffAt I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+      (fun y : M =>
+        (coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff j y (Z y)) x₀ := by
+  let e := coordinateTrivializationAt (I := I) x₀
+  have hx : x₀ ∈ e.baseSet := by
+    simp [e, coordinateTrivializationAt]
+  have hcoeff :=
+    contMDiffAt_localFrame_coeff
+      (I := I) (V := TangentSpace I) (e := e)
+      (b := Module.finBasis Real E) (s := Z)
+      (k := (∞ : WithTop ℕ∞)) hx hZ j
+  simpa [e, coordinateTrivializationAt, coordinateFrameAt_isLocalFrame_one,
+    coordinateFrameAt] using hcoeff
+
+set_option backward.isDefEq.respectTransparency false in
+private theorem oneForm_eval_coordinateFrame_contMDiffAt
+    (α : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (⊤ : WithTop ℕ∞)) 1)
+    (x₀ : M) (j : CoordinateIdx E) :
+    ContMDiffAt I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+      (fun y : M => α y (fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ j y)) x₀ := by
+  have hα_top := α.contMDiff x₀
+  have hα := hα_top.of_le
+    (by simp : (∞ : WithTop ℕ∞) ≤ (⊤ : WithTop ℕ∞))
+  have hframe :
+      ContMDiffAt I (I.prod 𝓘(Real, E)) (∞ : WithTop ℕ∞)
+        (fun y : M =>
+          (⟨y, coordinateFrameAt (I := I) x₀ j y⟩ :
+            TotalSpace E (TangentSpace I : M -> Type _))) x₀ :=
+    (coordinateFrameAt_isLocalFrame (I := I) x₀).contMDiffAt
+      (coordinateFrameSet_open (I := I) x₀)
+      (coordinateFrameAt_mem (I := I) x₀) j
+  have hEval := TensorMultilinear.contMDiffAt_section_apply
+    (I := I) (M := M) (n := 1) (x₀ := x₀)
+    (T := fun y : M => α y) hα
+    (v := fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ j)
+    (hv := fun _ : Fin 1 => hframe)
+  simpa [Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply] using hEval
+
+private theorem coordinateFrame_covariantDeriv_apply_contMDiffAt
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
+      (∞ : WithTop ℕ∞))
+    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (x₀ : M) (j : CoordinateIdx E) :
+    ContMDiffAt I (I.prod 𝓘(Real, E)) (∞ : WithTop ℕ∞)
+      (fun p : M =>
+        (⟨p, (cov (coordinateFrameAt (I := I) x₀ j) p) (X p)⟩ :
+          TotalSpace E (TangentSpace I : M -> Type _))) x₀ := by
+  let u := coordinateFrameSet (I := I) x₀
+  let frame := coordinateFrameAt (I := I) x₀
+  have hu : IsOpen u := coordinateFrameSet_open (I := I) x₀
+  have hx₀ : x₀ ∈ u := coordinateFrameAt_mem (I := I) x₀
+  have hframe_smooth :
+      CMDiff[u] ((∞ : WithTop ℕ∞) + 1) (T% (frame j)) := by
+    exact ((coordinateFrameAt_isLocalFrame (I := I) x₀).contMDiffOn j).of_le
+      (by simp)
+  have hcov_frame :
+      ContMDiffOn I (I.prod 𝓘(Real, E →L[Real] E)) (∞ : WithTop ℕ∞)
+        (fun p : M =>
+          (⟨p, cov (frame j) p⟩ :
+            TotalSpace (E →L[Real] E)
+              (fun p : M => TangentSpace I p →L[Real] TangentSpace I p)))
+        u := by
+    simpa [u, frame] using (hcov hu).contMDiff hframe_smooth
+  have hX_on :
+      CMDiff[u] (∞ : WithTop ℕ∞) (T% (fun p : M => X p)) :=
+    (X.contMDiff.of_le (by simp :
+      (∞ : WithTop ℕ∞) ≤ (⊤ : WithTop ℕ∞))).contMDiffOn
+  have hW_on :
+      ContMDiffOn I (I.prod 𝓘(Real, E)) (∞ : WithTop ℕ∞)
+        (fun p : M =>
+          (⟨p, (cov (frame j) p) (X p)⟩ :
+            TotalSpace E (TangentSpace I : M -> Type _)))
+        u := by
+    simpa [frame] using hcov_frame.clm_bundle_apply hX_on
+  exact (hW_on x₀ hx₀).contMDiffAt (hu.mem_nhds hx₀)
+
+set_option backward.isDefEq.respectTransparency false in
+/-- Smoothness of the scalar function obtained by evaluating `nabla0SFun 1`
+on a smooth vector field.
+
+This is the intrinsic one-form smoothness input: use the moving-slot formula,
+then prove smoothness of the exterior-derivative term and the correction term
+separately. -/
+theorem nabla0SFun_one_eval_contMDiff
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivative cov (⊤ : WithTop ℕ∞))
+    (X Z : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (α : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (⊤ : WithTop ℕ∞)) 1) :
+    ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+      (fun p : M =>
+        (nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+          1 cov X α p) (fun _ : Fin 1 => Z p)) := by
+  let pair : M -> Real := fun y => α y (fun _ : Fin 1 => Z y)
+  let Xinf : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
+    ⟨fun p : M => X p, X.contMDiff.of_le (by simp)⟩
+  let Zinf : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
+    ⟨fun p : M => Z p, Z.contMDiff.of_le (by simp)⟩
+  let αinf : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 1 :=
+    ⟨fun p : M => α p, α.contMDiff.of_le (by simp)⟩
+  have hpair : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) pair := by
+    simpa [pair, αinf, Zinf] using
+      (TensorMultilinear.contMDiff_tensor0SField_apply
+        (E := E) (H := H) (I := I) (M := M) (n := 1)
+        αinf (fun _ : Fin 1 => Zinf))
+  have hderiv :
+      ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+        (fun p : M => extDerivFun (I := I) pair p (X p)) :=
+    extDerivFun_apply_contMDiff (I := I) pair hpair Xinf
+  let W : (p : M) -> TangentSpace I p :=
+    fun p : M => (cov (fun q : M => Z q) p) (X p)
+  have hWtop :
+      ContMDiff I (I.prod 𝓘(Real, E)) (⊤ : WithTop ℕ∞)
+        (fun p : M => (⟨p, W p⟩ :
+          TotalSpace E (TangentSpace I : M -> Type _))) := by
+    simpa [W] using
+      (TensorLieDeriv.covariantDeriv_vectorField_contMDiff
+        (𝕜 := Real) (I := I) (M := M) cov hcov X Z)
+  let Winf : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
+    ⟨W, hWtop.of_le (by simp)⟩
+  have hcorr_raw :
+      ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+        (fun p : M => αinf p (fun _ : Fin 1 => Winf p)) := by
+    simpa using
+      (TensorMultilinear.contMDiff_tensor0SField_apply
+        (E := E) (H := H) (I := I) (M := M) (n := 1)
+        αinf (fun _ : Fin 1 => Winf))
+  have hcorr :
+      ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+        (fun p : M => α p
+          (fun _ : Fin 1 => (cov (fun q : M => Z q) p) (X p))) := by
+    refine hcorr_raw.congr ?_
+    intro p
+    simp [αinf, Winf, W]
+  have hmain :
+      ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+        (fun p : M =>
+          extDerivFun (I := I) pair p (X p) -
+            α p (fun _ : Fin 1 => (cov (fun q : M => Z q) p) (X p))) :=
+    hderiv.sub hcorr
+  refine hmain.congr ?_
+  intro p
+  rw [nabla0SFun_one_eval_coordFrame_moving
+    (I := I) cov X Z α p
+    (modelDeriv_eq_coordDeriv0SAt (I := I) X p α)
+    (fun j =>
+      (coordinateFrame_coeff_contMDiffAt (I := I) Z p j).mdifferentiableAt
+        (by simp))
+    (fun j =>
+        (oneForm_eval_coordinateFrame_contMDiffAt (I := I) α p j).mdifferentiableAt
+        (by simp))]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- Local coordinate-frame scalar smoothness for `nabla0SFun 1`.
+
+This is the local-frame version of `nabla0SFun_one_eval_contMDiff`: the moving
+slot is the chart-induced coordinate-frame field around `x₀`, which is only
+known to be smooth locally. The proof uses
+`ContMDiffCovariantDerivativeLocally`, not global smooth-section extension. -/
+theorem nabla0SFun_one_eval_coordinateFrame_contMDiffAt
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
+      (∞ : WithTop ℕ∞))
+    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (α : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (⊤ : WithTop ℕ∞)) 1)
+    (x₀ : M) (j : CoordinateIdx E) :
+    ContMDiffAt I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+      (fun p : M =>
+        (nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+          1 cov X α p)
+          (fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ j p)) x₀ := by
+  let Z : (p : M) -> TangentSpace I p := coordinateFrameAt (I := I) x₀ j
+  let pair : M -> Real := fun p => α p (fun _ : Fin 1 => Z p)
+  let Xinf : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
+    ⟨fun p : M => X p, X.contMDiff.of_le (by simp)⟩
+  let αinf : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 1 :=
+    ⟨fun p : M => α p, α.contMDiff.of_le (by simp)⟩
+  have hpair : ContMDiffAt I 𝓘(Real, Real) (∞ : WithTop ℕ∞) pair x₀ := by
+    simpa [pair, Z] using oneForm_eval_coordinateFrame_contMDiffAt
+      (I := I) α x₀ j
+  have hderiv :
+      ContMDiffAt I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+        (fun p : M => extDerivFun (I := I) pair p (X p)) x₀ :=
+    extDerivFun_apply_contMDiffAt (I := I) hpair Xinf
+  let W : (p : M) -> TangentSpace I p :=
+    fun p : M => (cov Z p) (X p)
+  have hW :
+      ContMDiffAt I (I.prod 𝓘(Real, E)) (∞ : WithTop ℕ∞)
+        (fun p : M => (⟨p, W p⟩ : TotalSpace E (TangentSpace I : M -> Type _))) x₀ := by
+    simpa [W, Z] using
+      coordinateFrame_covariantDeriv_apply_contMDiffAt
+        (I := I) cov hcov X x₀ j
+  have hcorr_raw :
+      ContMDiffAt I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+        (fun p : M => αinf p (fun _ : Fin 1 => W p)) x₀ := by
+    simpa using
+      (TensorMultilinear.contMDiffAt_section_apply
+        (I := I) (M := M) (n := 1) (x₀ := x₀)
+        (T := fun p : M => αinf p) αinf.contMDiff.contMDiffAt
+        (v := fun _ : Fin 1 => W)
+        (hv := fun _ : Fin 1 => hW))
+  have hcorr :
+      ContMDiffAt I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+        (fun p : M => α p (fun _ : Fin 1 => W p)) x₀ := by
+    refine hcorr_raw.congr_of_eventuallyEq ?_
+    filter_upwards with p
+    simp [αinf]
+  have hmain :
+      ContMDiffAt I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+        (fun p : M =>
+          extDerivFun (I := I) pair p (X p) -
+            α p (fun _ : Fin 1 => W p)) x₀ :=
+    hderiv.sub hcorr
+  refine hmain.congr_of_eventuallyEq ?_
+  filter_upwards [(coordinateFrameSet_open (I := I) x₀).mem_nhds
+      (coordinateFrameAt_mem (I := I) x₀)] with p hp
+  have hZ_at :
+      ContMDiffAt I (I.prod 𝓘(Real, E)) (∞ : WithTop ℕ∞)
+        (fun y : M => (⟨y, Z y⟩ : TotalSpace E (TangentSpace I : M -> Type _))) p := by
+    simpa [Z] using
+      (coordinateFrameAt_isLocalFrame (I := I) x₀).contMDiffAt
+        (coordinateFrameSet_open (I := I) x₀) hp j
+  rw [nabla0SFun_one_eval_coordFrame_moving_raw
+    (I := I) cov X Z α p
+    (modelDeriv_eq_coordDeriv0SAt (I := I) X p α)
+    (fun k =>
+      (coordinateFrame_coeff_contMDiffAt_of_contMDiffAt
+        (I := I) Z hZ_at k).mdifferentiableAt (by simp))
+    (fun k =>
+      (oneForm_eval_coordinateFrame_contMDiffAt
+        (I := I) α p k).mdifferentiableAt (by simp))
+    (hZ_at.mdifferentiableAt (by simp))]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- Local-frame proof that `nabla0SFun 1` is a smooth one-form section.
+
+This avoids global extension of coordinate-frame fields. Smoothness is checked
+in local tensor-bundle coordinates, whose basis coefficients are exactly the
+scalar evaluations handled by
+`nabla0SFun_one_eval_coordinateFrame_contMDiffAt`. -/
+theorem nabla0SFun_one_contMDiff
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
+      (∞ : WithTop ℕ∞))
+    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (α : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (⊤ : WithTop ℕ∞)) 1) :
+    letI := tensor0SBundle_topology (𝕜 := Real) (E := E) (H := H) (I := I)
+      (M := M) 1
+    ContMDiff I (I.prod 𝓘(Real, Tensor0SModel 1 Real E)) (∞ : WithTop ℕ∞)
+      (fun p : M =>
+        (⟨p, nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+          1 cov X α p⟩ :
+          TotalSpace (Tensor0SModel 1 Real E) (fun p : M => Tensor0SSpace 1 I p))) := by
+  letI := tensor0SBundle_topology (𝕜 := Real) (E := E) (H := H) (I := I)
+    (M := M) 1
+  let F : (p : M) -> Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I)
+      (M := M) 1 p :=
+    fun p : M =>
+      nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        1 cov X α p
+  let d := Module.finrank Real E
+  let b : Module.Basis (Fin d) Real E := Module.finBasis Real E
+  refine (contMDiff_multilinearSection_iff_coord (TangentSpace I)
+    (∞ : WithTop ℕ∞) b F).mpr ?_
+  intro σ x₀
+  let j : CoordinateIdx E := σ 0
+  have hframe_eval :=
+    nabla0SFun_one_eval_coordinateFrame_contMDiffAt
+      (I := I) cov hcov X α x₀ j
+  refine hframe_eval.congr_of_eventuallyEq ?_
+  filter_upwards
+    [(coordinateFrameSet_open (I := I) x₀).mem_nhds
+      (coordinateFrameAt_mem (I := I) x₀)] with p hp
+  have hslot :
+      (fun a : Fin 1 =>
+          (trivializationAt E (TangentSpace I : M -> Type _) x₀).symmL Real p
+            (b (σ a))) =
+        fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ j p := by
+    funext a
+    fin_cases a
+    have hp_src : p ∈ (chartAt H x₀).source := by
+      simpa [coordinateFrameSet, coordinateTrivializationAt] using hp
+    rw [coordinateFrameAt_apply_of_mem (I := I) (x₀ := x₀) (x := p) hp j]
+    simpa [j, b] using
+      congrArg
+        (fun L : E →L[Real] TangentSpace I p => L (b j))
+        (TangentBundle.symmL_trivializationAt (I := I) (𝕜 := Real) hp_src)
+  rw [continuousMultilinearMap_basis_repr]
+  change ((trivializationAt (Tensor0SModel 1 Real E)
+      (Bundle.continuousMultilinearMap Real 1 E (TangentSpace I : M -> Type _)) x₀
+      ⟨p, F p⟩).2)
+      (fun a : Fin 1 => b (σ a)) =
+    (nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      1 cov X α p) (fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ j p)
+  change (F p).compContinuousLinearMap
+      (fun _ : Fin 1 =>
+        (trivializationAt E (TangentSpace I : M -> Type _) x₀).symmL Real p)
+      (fun a : Fin 1 => b (σ a)) =
+    F p (fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ j p)
+  rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
+  rw [hslot]
 
 end Coordinates
 end RicciFlower

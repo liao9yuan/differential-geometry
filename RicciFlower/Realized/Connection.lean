@@ -1,4 +1,5 @@
 import RicciFlower.Realized.MetricFamily
+import RicciFlower.Realized.Connection.RicciIdentity
 
 set_option autoImplicit false
 set_option linter.style.longLine false

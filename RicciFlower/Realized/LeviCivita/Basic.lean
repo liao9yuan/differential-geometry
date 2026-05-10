@@ -1,5 +1,4 @@
-import RicciFlower.Realized.MetricFamily
-import Mathlib.Geometry.Manifold.MFDeriv.Basic
+import RicciFlower.Realized.Connection.MetricCompatibility
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
 
 set_option autoImplicit false
@@ -9,9 +8,10 @@ set_option linter.unusedSectionVars false
 /-!
 # Levi-Civita Calculus Predicates
 
-This file gives RicciFlower-facing predicates for metric compatibility,
-torsion-freeness, and Levi-Civita calculus.  These are explicit packages around
-realized metric/connection data, not typeclass instances.
+This file gives RicciFlower-facing predicates for torsion-freeness and
+Levi-Civita calculus.  Metric compatibility is part of the general realized
+metric-family layer, with compatibility aliases kept here for older
+Levi-Civita-facing imports.
 -/
 
 namespace RicciFlower
@@ -31,20 +31,11 @@ section Pointwise
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [SigmaCompactSpace M] [T2Space M]
 
-/-- Metric compatibility at a point, stated on differentiable tangent fields.
-
-This is the concrete realized form of
-`X <Y,Z> = <nabla_X Y, Z> + <Y, nabla_X Z>`. -/
-def IsMetricCompatibleAt
+/-- Compatibility alias for the general metric-compatible connection predicate. -/
+abbrev IsMetricCompatibleAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M) (x : M) : Prop :=
-  forall (X Y Z : (p : M) -> TangentSpace I p),
-    MDiffAt (T% X) x ->
-      MDiffAt (T% Y) x ->
-        MDiffAt (T% Z) x ->
-          mfderiv I 𝓘(Real, Real) (fun y : M => g.inner y (Y y) (Z y)) x (X x) =
-            g.inner x (cov Y x (X x)) (Z x) +
-              g.inner x (Y x) (cov Z x (X x))
+  RicciFlower.Realized.IsMetricCompatibleAt (I := I) cov g x
 
 /-- Torsion-freeness at a point. -/
 def IsTorsionFreeAt
@@ -57,11 +48,11 @@ def IsLeviCivitaAt
     (g : SmoothRiemannianMetric I M) (x : M) : Prop :=
   IsMetricCompatibleAt (I := I) cov g x /\ IsTorsionFreeAt (I := I) cov x
 
-/-- Metric compatibility at every point. -/
-def IsMetricCompatible
+/-- Compatibility alias for the general metric-compatible connection predicate. -/
+abbrev IsMetricCompatible
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M) : Prop :=
-  forall x : M, IsMetricCompatibleAt (I := I) cov g x
+  RicciFlower.Realized.IsMetricCompatible (I := I) cov g
 
 /-- Torsion-freeness at every point. -/
 def IsTorsionFree
@@ -103,12 +94,11 @@ section Family
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [SigmaCompactSpace M] [T2Space M]
 
-/-- Metric compatibility for an interval metric family. -/
-def IsMetricCompatibleFamilyOn
+/-- Compatibility alias for the general interval metric-compatible family predicate. -/
+abbrev IsMetricCompatibleFamilyOn
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D) : Prop :=
-  forall t : RealTimeInterval.FlowTime D,
-    IsMetricCompatible (I := I) (G.connectionAt t) (G.metricAt t)
+  RicciFlower.Realized.IsMetricCompatibleFamilyOn (I := I) G
 
 /-- Torsion-freeness for an interval metric family. -/
 def IsTorsionFreeFamilyOn

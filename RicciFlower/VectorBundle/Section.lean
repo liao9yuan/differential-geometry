@@ -113,13 +113,13 @@ theorem contMDiffAt_section_of_chart_model_eventuallyEq
   rw [contMDiffAt_iff_source_of_mem_source (x := x₀)
     (x' := x₀) (mem_chart_source H x₀)]
   refine hA.congr_of_eventuallyEq ?_ ?_
-  filter_upwards [extChartAt_target_mem_nhdsWithin (I := I) x₀] with y hy
-  change A (extChartAt I x₀ ((extChartAt I x₀).symm y)) = A y
-  rw [(extChartAt I x₀).right_inv hy]
-  change A (extChartAt I x₀
-      ((extChartAt I x₀).symm (extChartAt I x₀ x₀))) =
-    A (extChartAt I x₀ x₀)
-  rw [(extChartAt I x₀).right_inv (mem_extChartAt_target (I := I) x₀)]
+  · filter_upwards [extChartAt_target_mem_nhdsWithin (I := I) x₀] with y hy
+    change A (extChartAt I x₀ ((extChartAt I x₀).symm y)) = A y
+    rw [(extChartAt I x₀).right_inv hy]
+  · change A (extChartAt I x₀
+        ((extChartAt I x₀).symm (extChartAt I x₀ x₀))) =
+      A (extChartAt I x₀ x₀)
+    rw [(extChartAt I x₀).right_inv (mem_extChartAt_target (I := I) x₀)]
 
 end FixedTrivializationSmoothness
 
@@ -562,6 +562,7 @@ noncomputable def ContMDiffVectorBundleHom.ofLinearMapSection
   -- ===== Package everything =====
   exact ⟨_root_.id, fun p => ⟨p.proj, φ p.proj p.2⟩, Φ_smooth, φ, fun _ _ => rfl⟩
 
+set_option linter.unusedSectionVars false in
 /-- The bundle hom constructed by `ofLinearMapSection` covers the identity. -/
 theorem ContMDiffVectorBundleHom.ofLinearMapSection_baseMap
     (F : Cₛ^n⟮I; F₁, E₁⟯ →ₗ[C^n⟮I, M; ℝ⟯] Cₛ^n⟮I; F₂, E₂⟯) :
@@ -581,6 +582,7 @@ theorem ContMDiffVectorBundleHom.ofLinearMapSection_spec
   exact (linearMap_acts_pointwise F σ _ x
     (ContMDiffSection.exists_eq_at x (σ x)).choose_spec.symm)
 
+set_option linter.unusedSectionVars false in
 omit h1n in
 /-- `mapSection` followed by the characterization lemma recovers the original bundle map
 on each fiber: if `Φ` and `Ψ` both cover the identity and induce the same map on sections,

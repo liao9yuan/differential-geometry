@@ -66,6 +66,20 @@ theorem coordinateFrameAt_isLocalFrame (x₀ : M) :
   (coordinateTrivializationAt (I := I) x₀).isLocalFrameOn_localFrame_baseSet
     I (∞ : WithTop ℕ∞) (Module.finBasis Real E)
 
+/-- The coordinate frame as a `C¹` local frame, for Christoffel-component APIs. -/
+def coordinateFrameAt_isLocalFrame_one (x₀ : M) :
+    IsLocalFrameOn I E (1 : WithTop ℕ∞)
+      (coordinateFrameAt (I := I) x₀) (coordinateFrameSet (I := I) x₀) :=
+  (coordinateTrivializationAt (I := I) x₀).isLocalFrameOn_localFrame_baseSet
+    I (1 : WithTop ℕ∞) (Module.finBasis Real E)
+
+/-- Coordinate-frame vector fields are differentiable at the base point. -/
+theorem coordinateFrameAt_mdifferentiableAt (x₀ : M) (i : CoordinateIdx E) :
+    MDiffAt (T% (coordinateFrameAt (I := I) x₀ i)) x₀ := by
+  exact ((coordinateFrameAt_isLocalFrame (I := I) x₀).contMDiffAt
+    (coordinateFrameSet_open (I := I) x₀)
+    (coordinateFrameAt_mem (I := I) x₀) i).mdifferentiableAt (by simp)
+
 /-- The pointwise basis of `TangentSpace I x` induced by the coordinate frame. -/
 def coordinateFrameAt_basis (x₀ : M) {x : M}
     (hx : x ∈ coordinateFrameSet (I := I) x₀) :
@@ -90,6 +104,23 @@ theorem coordinateFrameAt_toBasis_apply (x₀ : M) (i : CoordinateIdx E) :
       coordinateFrameAt (I := I) x₀ i x₀ := by
   simp [coordinateFrameAt_toBasis]
 
+/-- At the base point, `IsLocalFrameOn.coeff` agrees with the coordinate-frame
+basis coordinate functional. -/
+theorem coordinateFrameAt_coeff_eq_toBasis_coord
+    (x₀ : M) (Z : TangentSpace I x₀) (j : CoordinateIdx E) :
+    (coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff j x₀ Z =
+      (coordinateFrameAt_toBasis (I := I) x₀).coord j Z := by
+  have hbasis :
+      (coordinateFrameAt_isLocalFrame_one (I := I) x₀).toBasisAt
+          (coordinateFrameAt_mem (I := I) x₀) =
+        coordinateFrameAt_toBasis (I := I) x₀ := by
+    ext k
+    rw [IsLocalFrameOn.toBasisAt_coe]
+    rw [coordinateFrameAt_toBasis_apply]
+  unfold IsLocalFrameOn.coeff
+  rw [dif_pos (coordinateFrameAt_mem (I := I) x₀)]
+  rw [hbasis]
+
 /-- On the coordinate chart domain, the coordinate frame is the derivative of
 `(extChartAt I x₀).symm` applied to the fixed model-space basis vector. -/
 theorem coordinateFrameAt_apply_of_mem {x₀ x : M}
@@ -112,6 +143,15 @@ theorem coordinateFrameAt_apply_of_mem {x₀ x : M}
   simpa [Bundle.Trivialization.basisAt, Trivialization.symmL_apply, extChartAt] using
     congrArg (fun L : E →L[Real] TangentSpace I x => L ((Module.finBasis Real E) i))
       (TangentBundle.symmL_trivializationAt (I := I) (𝕜 := Real) hx_src)
+
+/-- At the base point, the chart-induced coordinate basis is the model-space basis. -/
+theorem coordinateFrameAt_toBasis_eq_finBasis (x₀ : M) :
+    coordinateFrameAt_toBasis (I := I) x₀ = Module.finBasis Real E := by
+  ext i
+  rw [coordinateFrameAt_toBasis_apply]
+  rw [coordinateFrameAt_apply_of_mem (I := I) (coordinateFrameAt_mem (I := I) x₀) i]
+  rw [mfderivWithin_range_extChartAt_symm]
+  rfl
 
 private theorem coordinateFrame_pullback_eq_const (x₀ : M) (i : CoordinateIdx E) :
     VectorField.mpullbackWithin 𝓘(Real, E) I (extChartAt I x₀).symm
