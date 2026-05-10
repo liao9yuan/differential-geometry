@@ -204,6 +204,26 @@ theorem rough_lap_one_form_apply_basis
     simpa [rough_lap_one_form, rough_lap_0s, roughLap1FormAt, roughLap0SAt] using
       hrough basis gInv hinv (fun _ : Fin 1 => Y)
 
+/-- Basis-level realization extracted from the intrinsic one-form rough
+Laplacian interface. -/
+theorem rough_lap_one_form_realizes_metric_trace
+    (g : SmoothRiemannianMetric I M)
+    {Idx : Type} [Fintype Idx] [DecidableEq Idx]
+    {x : M}
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (nabla2α : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      3 x)
+    (roughα : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      1 x)
+    (hrough : rough_lap_one_form (I := I) g nabla2α roughα)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInv) :
+    RoughLap0SRealizesMetricTrace (I := I) basis gInv
+      (s := 1) roughα nabla2α := by
+  intro tail
+  simpa [rough_lap_one_form, rough_lap_0s, roughLap0SAt] using
+    hrough basis gInv hinv tail
+
 end
 
 end Realized

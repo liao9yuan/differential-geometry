@@ -1,5 +1,6 @@
 import RicciFlower.Realized.CurvatureTensor
 import RicciFlower.Realized.TensorRicciIdentity
+import RicciFlower.Realized.LeviCivita.Koszul
 import RicciFlower.Coordinates.NablaComponents.Basic
 import RicciFlower.Tensor.RSTensor.Components
 
@@ -261,6 +262,50 @@ def Rm04LowersRm13At
       Rm13 (dualToCotangent (I := I) ((tangentFlatLinear (I := I) g x) W))
         (vec3 X Y Z)
 
+/-- Realized `(1,3)` and lowered `(0,4)` curvature tensors are related by
+metric lowering at a point. -/
+theorem rm04LowersRm13At_of_realizes
+    [SigmaCompactSpace M] [T2Space M]
+    (g : SmoothRiemannianMetric I M)
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (Rm13 : Tensor13Section (I := I) (M := M))
+    (Rm04 : Tensor04Section (I := I) (M := M))
+    (hRm13 : Rm13RealizesConnection (I := I) cov Rm13)
+    (hRm04 : Rm04RealizesConnection (I := I) g cov Rm04)
+    (x : M) :
+    Rm04LowersRm13At (I := I) g x (Rm13 x) (Rm04 x) := by
+  intro W X Y Z
+  let Wsec : (p : M) -> TangentSpace I p := LeviCivita.tangentConstAt (I := I) x W
+  let Xsec : (p : M) -> TangentSpace I p := LeviCivita.tangentConstAt (I := I) x X
+  let Ysec : (p : M) -> TangentSpace I p := LeviCivita.tangentConstAt (I := I) x Y
+  let Zsec : (p : M) -> TangentSpace I p := LeviCivita.tangentConstAt (I := I) x Z
+  let alpha : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x :=
+    dualToCotangent (I := I) ((tangentFlatLinear (I := I) g x) W)
+  have h04 := hRm04 Wsec Xsec Ysec Zsec x
+  have h13 := hRm13 Xsec Ysec Zsec x alpha
+  have h04' :
+      Rm04 x (vec4 W X Y Z) =
+        g.inner x W
+          ((connectionRiemannCurvatureField (I := I) cov Xsec Ysec Zsec) x) := by
+    dsimp [Wsec, Xsec, Ysec, Zsec] at h04
+    rw [LeviCivita.tangentConstAt_self] at h04
+    rw [LeviCivita.tangentConstAt_self] at h04
+    rw [LeviCivita.tangentConstAt_self] at h04
+    rw [LeviCivita.tangentConstAt_self] at h04
+    exact h04
+  have h13' :
+      Rm13 x
+          (dualToCotangent (I := I) ((tangentFlatLinear (I := I) g x) W))
+          (vec3 X Y Z) =
+        g.inner x W
+          ((connectionRiemannCurvatureField (I := I) cov Xsec Ysec Zsec) x) := by
+    dsimp [Xsec, Ysec, Zsec, alpha] at h13
+    rw [LeviCivita.tangentConstAt_self] at h13
+    rw [LeviCivita.tangentConstAt_self] at h13
+    rw [LeviCivita.tangentConstAt_self] at h13
+    simpa [tangentFlatLinear_apply, cotangentToDual_apply] using h13
+  exact h04'.trans h13'.symm
+
 /-- Metric skew-adjointness of the curvature endomorphism in `(1,3)` form:
 `g(W,R(X,Y)Z) = -g(Z,R(X,Y)W)`. -/
 def Rm13MetricSkewAt
@@ -294,6 +339,23 @@ theorem rm13MetricSkewAt_of_rm04_outputSkew
     _ = -Rm04 (vec4 Z X Y W) := hSkew W X Y Z
     _ = -Rm13 (dualToCotangent (I := I) ((tangentFlatLinear (I := I) g x) Z))
         (vec3 X Y W) := by rw [hLower Z X Y W]
+
+/-- Metric skew-adjointness of `(1,3)` curvature follows from a lowered
+realization and output skew-adjointness of the lowered tensor. -/
+theorem rm13MetricSkewAt_of_realizes_outputSkew
+    [SigmaCompactSpace M] [T2Space M]
+    (g : SmoothRiemannianMetric I M)
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (Rm13 : Tensor13Section (I := I) (M := M))
+    (Rm04 : Tensor04Section (I := I) (M := M))
+    (hRm13 : Rm13RealizesConnection (I := I) cov Rm13)
+    (hRm04 : Rm04RealizesConnection (I := I) g cov Rm04)
+    {x : M}
+    (hSkew : Rm04OutputSkewAt (I := I) (Rm04 x)) :
+    Rm13MetricSkewAt (I := I) g x (Rm13 x) :=
+  rm13MetricSkewAt_of_rm04_outputSkew (I := I) g (Rm13 x) (Rm04 x)
+    (rm04LowersRm13At_of_realizes (I := I) g cov Rm13 Rm04 hRm13 hRm04 x)
+    hSkew
 
 /-- The signed curvature trace appearing when commuting the first two slots of
 `∇²α` for a one-form `α`.

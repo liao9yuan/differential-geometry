@@ -1,5 +1,30 @@
 import RicciFlower.Tensor.RSTensor.LieDerivative
+import RicciFlower.VectorBundle.TangentConst
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic
+
+namespace CovariantDerivative
+
+open Bundle
+open scoped Manifold ContDiff
+
+/-- Local smoothness interface for a covariant derivative.
+
+Mathlib's bundled `ContMDiffCovariantDerivative` tests only globally smooth
+sections. For generic scalar fields this does not give the local chart/frame
+coefficient smoothness needed for tensor-nabla regularity, because there is no
+generic bump-function extension theorem. This predicate records the local
+version directly. -/
+def ContMDiffCovariantDerivativeLocally
+    {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [IsManifold I 1 M]
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (k : WithTop ℕ∞) : Prop :=
+  ∀ ⦃u : Set M⦄, IsOpen u → ContMDiffCovariantDerivativeOn E k cov.toFun u
+
+end CovariantDerivative
 
 /-!
 # Covariant Derivative on Realized Mixed Tensors
@@ -39,6 +64,27 @@ variable (n : WithTop ℕ∞ := ⊤) [IsManifold I n M]
 variable {x x₀ : M} {s : Set M}
 
 variable [CompleteSpace 𝕜]
+
+/-- Private finite-dimensional calculus bridge: to prove a CLM-valued function
+is smooth within a set, it is enough to prove smoothness after applying it to
+each fixed vector in the finite-dimensional source. -/
+private theorem contDiffWithinAt_clm_of_apply
+    {D F : Type*} [NormedAddCommGroup D] [NormedSpace 𝕜 D]
+    [NormedAddCommGroup F] [NormedSpace 𝕜 F]
+    {n : WithTop ℕ∞} {Γ : D → E →L[𝕜] F} {u : Set D} {y : D}
+    (hΓ : ∀ v : E, ContDiffWithinAt 𝕜 n (fun z => Γ z v) u y) :
+    ContDiffWithinAt 𝕜 n Γ u y := by
+  classical
+  let d := Module.finrank 𝕜 E
+  have hd : d = Module.finrank 𝕜 (Fin d → 𝕜) :=
+    (Module.finrank_fin_fun (R := 𝕜) (n := d)).symm
+  let e₁ : E ≃L[𝕜] (Fin d → 𝕜) := ContinuousLinearEquiv.ofFinrankEq hd
+  let e₂ : (E →L[𝕜] F) ≃L[𝕜] (Fin d → F) :=
+    (e₁.arrowCongr (1 : F ≃L[𝕜] F)).trans (ContinuousLinearEquiv.piRing (Fin d))
+  rw [← id_comp Γ, ← e₂.symm_comp_self]
+  refine e₂.symm.contDiff.comp_contDiffWithinAt ?_
+  refine contDiffWithinAt_pi.mpr fun i => ?_
+  simpa [e₁, e₂, Function.comp_def] using hΓ (e₁.symm (Pi.single i (1 : 𝕜)))
 
 section ModelCovariantDerivative
 
@@ -430,6 +476,88 @@ def covariantDeriv_tensorRSModelWithin (r s : ℕ)
   covariantDeriv_tensorRSModelAt (𝕜 := 𝕜) (E := E) r s
     (fderivWithin 𝕜 T u x (X x)) (ΓX x) (T x)
 
+/-- Smoothness of the fixed-set model covariant derivative of a covariant tensor.
+
+This is the model-space calculus component of the regularity proof: if the
+tensor components have one more derivative than the output target, and the
+direction field and connection endomorphism are smooth to the target order,
+then `Dα(X) - C(ΓX) α` is smooth to the target order. -/
+theorem contDiffWithinAt_covariantDeriv_tensor0SModelWithin (s : ℕ)
+    {m n' : WithTop ℕ∞} {X : E → E} {ΓX : E → E →L[𝕜] E}
+    {α : E → Tensor0SModel (𝕜 := 𝕜) (E := E) s}
+    {u : Set E} {x : E}
+    (hα : ContDiffWithinAt 𝕜 n' α u x)
+    (hX : ContDiffWithinAt 𝕜 m X u x)
+    (hΓ : ContDiffWithinAt 𝕜 m ΓX u x)
+    (hu : UniqueDiffOn 𝕜 u) (hmn : m + 1 ≤ n') (hx : x ∈ u) :
+    ContDiffWithinAt 𝕜 m
+      (fun y => covariantDeriv_tensor0SModelWithin (𝕜 := 𝕜) (E := E)
+        s X ΓX α u y) u x := by
+  have hprincipal :
+      ContDiffWithinAt 𝕜 m
+        (fun y => fderivWithin 𝕜 α u y (X y)) u x :=
+    hα.fderivWithin_right_apply hX hu hmn hx
+  have hα_m : ContDiffWithinAt 𝕜 m α u x :=
+    hα.of_le (le_trans le_self_add hmn)
+  have hCorrOp :
+      ContDiffWithinAt 𝕜 m
+        (fun y => lieDeriv_correctionL (𝕜 := 𝕜) (E := E) s (ΓX y)) u x := by
+    simpa using
+      hΓ.continuousLinearMap_comp
+        (lieDeriv_correctionOpL (𝕜 := 𝕜) (E := E) s)
+  have hCorr :
+      ContDiffWithinAt 𝕜 m
+        (fun y => lieDeriv_correction (𝕜 := 𝕜) (E := E) s (ΓX y) (α y)) u x := by
+    simpa [lieDeriv_correctionL] using hCorrOp.clm_apply hα_m
+  simpa [covariantDeriv_tensor0SModelWithin, covariantDeriv_tensor0SModelAt] using
+    hprincipal.sub hCorr
+
+/-- Smoothness of the fixed-set model covariant derivative of a mixed tensor.
+
+This is the mixed-tensor analogue of
+`contDiffWithinAt_covariantDeriv_tensor0SModelWithin`: the principal term is
+`DT(X)`, the output covariant slots are corrected by precomposition with
+`C_s(ΓX)`, and the input covariant slots by postcomposition with `C_r(ΓX)`. -/
+theorem contDiffWithinAt_covariantDeriv_tensorRSModelWithin (r s : ℕ)
+    {m n' : WithTop ℕ∞} {X : E → E} {ΓX : E → E →L[𝕜] E}
+    {T : E → TensorRSModel r s 𝕜 E}
+    {u : Set E} {x : E}
+    (hT : ContDiffWithinAt 𝕜 n' T u x)
+    (hX : ContDiffWithinAt 𝕜 m X u x)
+    (hΓ : ContDiffWithinAt 𝕜 m ΓX u x)
+    (hu : UniqueDiffOn 𝕜 u) (hmn : m + 1 ≤ n') (hx : x ∈ u) :
+    ContDiffWithinAt 𝕜 m
+      (fun y => covariantDeriv_tensorRSModelWithin (𝕜 := 𝕜) (E := E)
+        r s X ΓX T u y) u x := by
+  have hprincipal :
+      ContDiffWithinAt 𝕜 m
+        (fun y => fderivWithin 𝕜 T u y (X y)) u x :=
+    hT.fderivWithin_right_apply hX hu hmn hx
+  have hT_m : ContDiffWithinAt 𝕜 m T u x :=
+    hT.of_le (le_trans le_self_add hmn)
+  have hCorrS :
+      ContDiffWithinAt 𝕜 m
+        (fun y => lieDeriv_correctionL (𝕜 := 𝕜) (E := E) s (ΓX y)) u x := by
+    simpa using
+      hΓ.continuousLinearMap_comp
+        (lieDeriv_correctionOpL (𝕜 := 𝕜) (E := E) s)
+  have hCorrR :
+      ContDiffWithinAt 𝕜 m
+        (fun y => lieDeriv_correctionL (𝕜 := 𝕜) (E := E) r (ΓX y)) u x := by
+    simpa using
+      hΓ.continuousLinearMap_comp
+        (lieDeriv_correctionOpL (𝕜 := 𝕜) (E := E) r)
+  have hOut :
+      ContDiffWithinAt 𝕜 m
+        (fun y => (lieDeriv_correctionL (𝕜 := 𝕜) (E := E) s (ΓX y)).comp (T y)) u x :=
+    hCorrS.clm_comp hT_m
+  have hIn :
+      ContDiffWithinAt 𝕜 m
+        (fun y => (T y).comp (lieDeriv_correctionL (𝕜 := 𝕜) (E := E) r (ΓX y))) u x :=
+    hT_m.clm_comp hCorrR
+  simpa [covariantDeriv_tensorRSModelWithin, covariantDeriv_tensorRSModelAt] using
+    (hprincipal.sub hOut).add hIn
+
 /- Reusable slot-correction Leibniz rule for the covariant tensor product.
 
 This is the same algebra proved for Lie derivatives; the only semantic change
@@ -469,60 +597,61 @@ omit [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜] in
     covariantDeriv_vectorField (I := I) cov X Y x = cov Y x (X x) := by
   rfl
 
-/-- The tangent field whose coordinates in the tangent-bundle trivialization centered at `x₀`
-are the constant vector `v`. -/
-noncomputable def tangentConstInChart (x₀ : M) (v : E) (p : M) :
-    TangentSpace I p :=
-  (trivializationAt E (TangentSpace I) x₀).symmL 𝕜 p v
-
-omit [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜] in
-@[simp] lemma tangentConstInChart_apply (x₀ : M) (v : E) (p : M) :
-    tangentConstInChart (𝕜 := 𝕜) (I := I) x₀ v p =
-      (trivializationAt E (TangentSpace I) x₀).symmL 𝕜 p v := by
-  rfl
-
-omit [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜] in
-lemma tangentConstInChart_add (x₀ : M) (v w : E) :
-    (tangentConstInChart x₀ (v + w) : (p : M) → TangentSpace I p) =
-      (tangentConstInChart x₀ v : (p : M) → TangentSpace I p) +
-        tangentConstInChart x₀ w := by
-  funext p
-  change (trivializationAt E (TangentSpace I) x₀).symmL 𝕜 p (v + w) =
-    (trivializationAt E (TangentSpace I) x₀).symmL 𝕜 p v +
-      (trivializationAt E (TangentSpace I) x₀).symmL 𝕜 p w
-  exact map_add _ _ _
-
-omit [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜] in
-lemma tangentConstInChart_smul (x₀ : M) (a : 𝕜) (v : E) :
-    (tangentConstInChart x₀ (a • v) : (p : M) → TangentSpace I p) =
-      a • (tangentConstInChart x₀ v : (p : M) → TangentSpace I p) := by
-  funext p
-  change (trivializationAt E (TangentSpace I) x₀).symmL 𝕜 p (a • v) =
-    a • (trivializationAt E (TangentSpace I) x₀).symmL 𝕜 p v
-  exact map_smul _ _ _
-
 section ConnectionEndomorphism
 
 variable [IsManifold I 2 M]
 
 omit [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜] in
-lemma mdifferentiableAt_tangentConstInChart_of_mem
-    {x₀ p : M} (v : E)
-    (hp : p ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
-    MDiffAt (T% (tangentConstInChart x₀ v : (p : M) → TangentSpace I p)) p := by
+/-- The chart-constant tangent field is smooth on the base set of the
+trivialization defining it. -/
+lemma tangentConstInChart_contMDiffOn_baseSet (x₀ : M) (v : E)
+    [IsManifold I (n + 1) M] :
+    CMDiff[(trivializationAt E (TangentSpace I) x₀).baseSet] n
+      (T% (tangentConstInChart (𝕜 := 𝕜) (I := I) x₀ v :
+        (p : M) → TangentSpace I p)) := by
   let e := trivializationAt E (TangentSpace I) x₀
-  refine (e.mdifferentiableAt_section_iff I
-    (tangentConstInChart x₀ v : (p : M) → TangentSpace I p) hp).mpr ?_
-  have hconst :
-      (fun y : M =>
-        (e ((T% (tangentConstInChart x₀ v : (p : M) → TangentSpace I p)) y)).2) =ᶠ[𝓝 p]
-          fun _ : M => v := by
-    filter_upwards [e.open_baseSet.mem_nhds hp] with y hy
-    have hcoe : ⇑(e.linearMapAt 𝕜 y) = fun z => (e ⟨y, z⟩).2 :=
-      e.coe_linearMapAt_of_mem (R := 𝕜) hy
-    simpa [Bundle.Trivialization.continuousLinearMapAt_apply, hcoe] using
-      (e.continuousLinearMapAt_symmL (R := 𝕜) hy v)
-  exact hconst.mdifferentiableAt_iff.mpr mdifferentiableAt_const
+  haveI : ContMDiffVectorBundle n E (TangentSpace I : M → Type _) I :=
+    TangentBundle.contMDiffVectorBundle (I := I) (M := M) (n := n)
+  rw [e.contMDiffOn_section_baseSet_iff]
+  refine (contMDiffOn_const (c := v)).congr ?_
+  intro y hy
+  have hcoe : ⇑(e.linearMapAt 𝕜 y) = fun z => (e ⟨y, z⟩).2 :=
+    e.coe_linearMapAt_of_mem (R := 𝕜) hy
+  simpa [e, tangentConstInChart, Bundle.Trivialization.continuousLinearMapAt_apply, hcoe] using
+    (e.continuousLinearMapAt_symmL (R := 𝕜) hy v)
+
+omit [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜] in
+/-- Applying a locally smooth covariant derivative to a chart-constant tangent
+field and then to a smooth direction field gives a locally smooth tangent
+section. -/
+lemma covariantDerivative_tangentConst_apply_contMDiffOn_baseSet
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov n)
+    (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
+    (x₀ : M) (v : E) [IsManifold I (n + 1) M] [IsManifold I (n + 1 + 1) M] :
+    CMDiff[(trivializationAt E (TangentSpace I) x₀).baseSet] n
+      (T% (fun p : M =>
+        (cov (tangentConstInChart (𝕜 := 𝕜) (I := I) x₀ v) p) (X p))) := by
+  let e := trivializationAt E (TangentSpace I) x₀
+  have hσ :
+      CMDiff[e.baseSet] (n + 1)
+        (T% (tangentConstInChart (𝕜 := 𝕜) (I := I) x₀ v :
+          (p : M) → TangentSpace I p)) := by
+    simpa [e] using
+      (tangentConstInChart_contMDiffOn_baseSet (𝕜 := 𝕜) (I := I) (M := M)
+        (n := n + 1) x₀ v)
+  have hcovσ :
+      ContMDiffOn I (I.prod 𝓘(𝕜, E →L[𝕜] E)) n
+        (fun p : M =>
+          (⟨p, cov (tangentConstInChart (𝕜 := 𝕜) (I := I) x₀ v) p⟩ :
+            TotalSpace (E →L[𝕜] E)
+              (fun p : M => TangentSpace I p →L[𝕜] TangentSpace I p)))
+        e.baseSet := by
+    exact (hcov e.open_baseSet).contMDiff hσ
+  have hX :
+      CMDiff[e.baseSet] n (T% (fun p : M => X p)) :=
+    X.contMDiff.contMDiffOn
+  simpa [e] using hcovσ.clm_bundle_apply hX
 
 /-- Local connection endomorphism in a chart, extracted from a mathlib covariant derivative.
 
@@ -636,6 +765,110 @@ noncomputable def connectionEndomorphismInChart
     else 0) = 0
   rw [if_neg hy]
 
+/-- Fixed-chart smoothness of the extracted connection endomorphism applied to
+a fixed model vector. -/
+lemma connectionEndomorphismInChart_apply_contDiffWithinAt
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov n)
+    (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
+    (x₀ : M) (v : E) [IsManifold I (n + 1) M] [IsManifold I (n + 1 + 1) M] :
+    ContDiffWithinAt 𝕜 n
+      (fun y : E =>
+        connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀ y v)
+      (Set.range I) (extChartAt I x₀ x₀) := by
+  let e := trivializationAt E (TangentSpace I) x₀
+  haveI : ContMDiffVectorBundle n E (TangentSpace I : M → Type _) I :=
+    TangentBundle.contMDiffVectorBundle (I := I) (M := M) (n := n)
+  let σ : (p : M) → TangentSpace I p :=
+    tangentConstInChart (𝕜 := 𝕜) (I := I) x₀ v
+  let W : (p : M) → TangentSpace I p := fun p => (cov σ p) (X p)
+  have hp₀ : x₀ ∈ e.baseSet := FiberBundle.mem_baseSet_trivializationAt' x₀
+  have hW_on :
+      CMDiff[e.baseSet] n (T% W) := by
+    simpa [e, σ, W] using
+      (covariantDerivative_tangentConst_apply_contMDiffOn_baseSet
+        (𝕜 := 𝕜) (I := I) (M := M) (n := n) cov hcov X x₀ v)
+  have hW_at : CMDiffAt n (T% W) x₀ :=
+    (hW_on x₀ hp₀).contMDiffAt (e.open_baseSet.mem_nhds hp₀)
+  have hcoord :
+      ContMDiffAt I 𝓘(𝕜, E) n
+        (fun p : M => (e ⟨p, W p⟩).2) x₀ :=
+    (e.contMDiffAt_section_iff hp₀).mp hW_at
+  have hsymm :
+      ContMDiffWithinAt 𝓘(𝕜, E) I n (extChartAt I x₀).symm
+        (Set.range I) (extChartAt I x₀ x₀) := by
+    simpa using
+      contMDiffWithinAt_extChartAt_symm_range_self (I := I) (n := n) x₀
+  have hcenter :
+      (extChartAt I x₀).symm (extChartAt I x₀ x₀) = x₀ :=
+    (extChartAt I x₀).left_inv (mem_extChartAt_source (I := I) x₀)
+  have hcoord_center :
+      ContMDiffAt I 𝓘(𝕜, E) n
+        (fun p : M => (e ⟨p, W p⟩).2)
+        ((extChartAt I x₀).symm (extChartAt I x₀ x₀)) := by
+    simpa [hcenter] using hcoord
+  have hfixed :
+      ContMDiffWithinAt 𝓘(𝕜, E) 𝓘(𝕜, E) n
+        ((fun p : M => (e ⟨p, W p⟩).2) ∘ (extChartAt I x₀).symm)
+        (Set.range I) (extChartAt I x₀ x₀) :=
+    hcoord_center.comp_contMDiffWithinAt (x := extChartAt I x₀ x₀) hsymm
+  have hmdiff : ContMDiffWithinAt 𝓘(𝕜, E) 𝓘(𝕜, E) n
+      (fun y : E =>
+        connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀ y v)
+      (Set.range I) (extChartAt I x₀ x₀) := by
+    refine hfixed.congr_of_eventuallyEq ?_ ?_
+    · filter_upwards [extChartAt_target_mem_nhdsWithin (I := I) x₀] with y hy
+      have hp_source : (extChartAt I x₀).symm y ∈ (extChartAt I x₀).source :=
+        (extChartAt I x₀).map_target hy
+      have hp_base : (extChartAt I x₀).symm y ∈ e.baseSet := by
+        simpa [e, TangentBundle.trivializationAt_baseSet, extChartAt_source] using hp_source
+      have hcoe :
+          ⇑(e.linearMapAt 𝕜 ((extChartAt I x₀).symm y)) =
+            fun z => (e ⟨(extChartAt I x₀).symm y, z⟩).2 :=
+        e.coe_linearMapAt_of_mem (R := 𝕜) hp_base
+      rw [connectionEndomorphismInChart_apply_of_mem
+        (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀ hy v]
+      rw [Bundle.Trivialization.continuousLinearMapAt_apply]
+      change (e.linearMapAt 𝕜 ((extChartAt I x₀).symm y))
+          (W ((extChartAt I x₀).symm y)) =
+        (e ⟨(extChartAt I x₀).symm y, W ((extChartAt I x₀).symm y)⟩).2
+      rw [hcoe]
+    · have hy : extChartAt I x₀ x₀ ∈ (extChartAt I x₀).target :=
+        mem_extChartAt_target (I := I) x₀
+      have hp_source :
+          (extChartAt I x₀).symm (extChartAt I x₀ x₀) ∈ (extChartAt I x₀).source :=
+        (extChartAt I x₀).map_target hy
+      have hp_base : (extChartAt I x₀).symm (extChartAt I x₀ x₀) ∈ e.baseSet := by
+        simpa [e, TangentBundle.trivializationAt_baseSet, extChartAt_source] using hp_source
+      have hcoe :
+          ⇑(e.linearMapAt 𝕜 ((extChartAt I x₀).symm (extChartAt I x₀ x₀))) =
+            fun z => (e ⟨(extChartAt I x₀).symm (extChartAt I x₀ x₀), z⟩).2 :=
+        e.coe_linearMapAt_of_mem (R := 𝕜) hp_base
+      rw [connectionEndomorphismInChart_apply_of_mem
+        (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀ hy v]
+      rw [Bundle.Trivialization.continuousLinearMapAt_apply]
+      change (e.linearMapAt 𝕜 ((extChartAt I x₀).symm (extChartAt I x₀ x₀)))
+          (W ((extChartAt I x₀).symm (extChartAt I x₀ x₀))) =
+        (e ⟨(extChartAt I x₀).symm (extChartAt I x₀ x₀),
+          W ((extChartAt I x₀).symm (extChartAt I x₀ x₀))⟩).2
+      rw [hcoe]
+  exact hmdiff.contDiffWithinAt
+
+/-- Fixed-chart smoothness of the extracted connection endomorphism as a
+CLM-valued map. -/
+lemma connectionEndomorphismInChart_contDiffWithinAt
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov n)
+    (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
+    (x₀ : M) [IsManifold I (n + 1) M] [IsManifold I (n + 1 + 1) M] :
+    ContDiffWithinAt 𝕜 n
+      (connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀)
+      (Set.range I) (extChartAt I x₀ x₀) := by
+  refine contDiffWithinAt_clm_of_apply (𝕜 := 𝕜) (E := E) ?_
+  intro v
+  exact connectionEndomorphismInChart_apply_contDiffWithinAt
+    (𝕜 := 𝕜) (I := I) (M := M) (n := n) cov hcov X x₀ v
+
 end ConnectionEndomorphism
 
 end TangentCovariantDerivative
@@ -726,6 +959,115 @@ theorem tensor0SModelInChart_contMDiffWithinAt (s : ℕ) (x₀ : M)
     (I'' := 𝓘(𝕜, Tensor0SModel (𝕜 := 𝕜) (E := E) s))
     (x := extChartAt I x₀ x₀) hα_model_center hsymm
   simpa [S, tensor0SModelInChart, Function.comp] using hcomp
+
+/-- Fixed-chart model expression for the covariant derivative of a covariant
+tensor field. This is the model-space function that should represent
+`nabla0SFun` after trivializing the output tensor bundle at the fixed base point
+`x₀`. -/
+private noncomputable def fixedChartNabla0SModel (s : ℕ)
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
+    (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := n) s)
+    (x₀ : M) [IsManifold I 2 M] (y : E) :
+    Tensor0SModel (𝕜 := 𝕜) (E := E) s :=
+  covariantDeriv_tensor0SModelWithin (𝕜 := 𝕜) (E := E) s
+    (mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm X (range I))
+    (connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀)
+    (tensor0SModelInChart (𝕜 := 𝕜) (E := E) (H := H)
+      (I := I) (M := M) s x₀ (fun x => α x))
+    (range I) y
+
+/-- Smoothness of the fixed-chart `(0,s)` model expression. This is the easy
+analytic part of `nabla0S_reg`; the remaining hard part is proving that the
+moving-center definition of `nabla0SFun` has this fixed-chart representative. -/
+private theorem fixedChartNabla0SModel_contDiffWithinAt (s : ℕ)
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov n)
+    (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
+    (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := n) s)
+    (x₀ : M) [IsManifold I 2 M] [IsManifold I (n + 1 + 1) M]
+    (hmn : n + 1 ≤ n) :
+    ContDiffWithinAt 𝕜 n
+      (fixedChartNabla0SModel (𝕜 := 𝕜) (E := E) (H := H)
+        (I := I) (M := M) (n := n) s cov X α x₀)
+      (range I) (extChartAt I x₀ x₀) := by
+  have hα :
+      ContDiffWithinAt 𝕜 n
+        (tensor0SModelInChart (𝕜 := 𝕜) (E := E) (H := H)
+          (I := I) (M := M) s x₀ (fun x => α x))
+        (range I) (extChartAt I x₀ x₀) := by
+    have h := tensor0SModelInChart_contMDiffWithinAt
+      (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := n) s x₀ α
+    simpa using h.contDiffWithinAt
+  have hX :
+      ContDiffWithinAt 𝕜 n
+        (mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm X (range I))
+        (range I) (extChartAt I x₀ x₀) := by
+    haveI : CompleteSpace E := FiniteDimensional.complete 𝕜 E
+    let z₀ : E := extChartAt I x₀ x₀
+    let W : E → E :=
+      mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm X (range I)
+    let e := trivializationAt E (TangentSpace 𝓘(𝕜, E) : E → Type _) z₀
+    have h :=
+      VectorField.contMDiffWithinAt_mpullbackWithin_extChartAt_symm
+        (I := I) (M := M) (n := n + 1)
+        (m := n) (s := Set.univ) (V := fun x => X x)
+        (X.contMDiff x₀) uniqueMDiffOn_univ (Set.mem_univ x₀)
+        (by simp)
+    have htotal :
+        ContMDiffWithinAt 𝓘(𝕜, E) (𝓘(𝕜, E).prod 𝓘(𝕜, E)) n
+          (fun y : E =>
+            (⟨y, W y⟩ :
+              TotalSpace E (TangentSpace 𝓘(𝕜, E) : E → Type _)))
+          (range I) z₀ := by
+      have htarget :
+          (extChartAt I x₀).target ∩ (extChartAt I x₀).symm ⁻¹' Set.univ
+            ∈ 𝓝[range I] z₀ := by
+        simpa [z₀] using extChartAt_target_mem_nhdsWithin (I := I) x₀
+      have h' := h.mono_of_mem_nhdsWithin htarget
+      simpa [W, z₀, Set.univ_inter] using h'
+    have hzsrc :
+        (⟨z₀, W z₀⟩ :
+          TotalSpace E (TangentSpace 𝓘(𝕜, E) : E → Type _)) ∈ e.source := by
+      exact FiberBundle.mem_trivializationAt_proj_source
+    have hcoord :
+        ContMDiffWithinAt 𝓘(𝕜, E) 𝓘(𝕜, E) n
+          (fun y : E =>
+            (e (⟨y, W y⟩ :
+              TotalSpace E (TangentSpace 𝓘(𝕜, E) : E → Type _))).2)
+          (range I) z₀ :=
+      ((Bundle.Trivialization.contMDiffWithinAt_iff
+        (e := e)
+        (f := fun y : E =>
+          (⟨y, W y⟩ :
+            TotalSpace E (TangentSpace 𝓘(𝕜, E) : E → Type _)))
+        (s := range I) (x₀ := z₀) hzsrc).mp htotal).2
+    have heq :
+        (fun y : E =>
+            (e (⟨y, W y⟩ :
+              TotalSpace E (TangentSpace 𝓘(𝕜, E) : E → Type _))).2)
+          =ᶠ[𝓝[range I] z₀] W := by
+      filter_upwards with y
+      simp [e]
+    have heq₀ :
+        (e (⟨z₀, W z₀⟩ :
+          TotalSpace E (TangentSpace 𝓘(𝕜, E) : E → Type _))).2 = W z₀ := by
+      simp [e]
+    simpa [W, z₀] using hcoord.contDiffWithinAt.congr_of_eventuallyEq heq.symm heq₀.symm
+  have hΓ :
+      ContDiffWithinAt 𝕜 n
+        (connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀)
+        (range I) (extChartAt I x₀ x₀) :=
+    connectionEndomorphismInChart_contDiffWithinAt
+      (𝕜 := 𝕜) (I := I) (M := M) (n := n) cov hcov X x₀
+  have hx : extChartAt I x₀ x₀ ∈ range I :=
+    extChartAt_target_subset_range x₀ (mem_extChartAt_target (I := I) x₀)
+  simpa [fixedChartNabla0SModel] using
+    contDiffWithinAt_covariantDeriv_tensor0SModelWithin
+      (𝕜 := 𝕜) (E := E) s hα hX hΓ I.uniqueDiffOn hmn hx
 
 /-- Pointwise covariant derivative of a covariant `(0,s)` tensor field in a chosen chart,
 with the local connection endomorphism supplied explicitly.
@@ -1109,9 +1451,14 @@ noncomputable def nablaRS (r s : ℕ)
 
 Expected proof: trivialize the tensor bundle, unfold `nabla0SFun`, use the chart formula
 for `mcovariantDeriv_tensor0SFromConnection`, and combine smoothness of the connection
-endomorphism with the model-space derivative/correction smoothness lemmas. -/
+endomorphism with the model-space derivative/correction smoothness lemmas.
+
+The smoothness hypothesis on `cov` is essential: a raw `CovariantDerivative`
+is not, by itself, a smooth connection. -/
 theorem nabla0S_reg (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (_hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
+      (⊤ : WithTop ℕ∞))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       (n := (⊤ : WithTop ℕ∞)) s) :
@@ -1122,9 +1469,14 @@ theorem nabla0S_reg (s : ℕ)
 
 Expected proof: trivialize the Hom tensor bundle, unfold `nablaRSFun`, use the chart formula
 for `mcovariantDeriv_tensorRSFromConnection`, and combine smoothness of the connection
-endomorphism with the model-space derivative/correction smoothness lemmas. -/
+endomorphism with the model-space derivative/correction smoothness lemmas.
+
+The smoothness hypothesis on `cov` is essential: a raw `CovariantDerivative`
+is not, by itself, a smooth connection. -/
 theorem nablaRS_reg (r s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (_hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
+      (⊤ : WithTop ℕ∞))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
     (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       (n := (⊤ : WithTop ℕ∞)) r s) :

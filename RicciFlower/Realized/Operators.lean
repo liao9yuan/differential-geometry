@@ -1,8 +1,7 @@
-import RicciFlower.Realized.Connection
+import RicciFlower.Realized.MetricFamily
 import Mathlib.Analysis.Calculus.LocalExtr.Basic
 import Mathlib.Geometry.Manifold.MFDeriv.NormedSpace
 import Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions
-import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
 import Mathlib.LinearAlgebra.Dual.Lemmas
 import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
 import Mathlib.LinearAlgebra.Trace
@@ -697,12 +696,9 @@ def LaplacianNonnegativeAtSpatialMinFamily
 assuming the local normal-frame/Hessian trace positivity input. -/
 theorem laplacian_nonneg_at_spatial_min
     [I.Boundaryless]
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
-    (_hmc : IsMetricCompatibleMathlib (I := I) (M := M) cov g)
-    (_htf : cov.torsion = 0)
     (hlap : LaplacianNonnegativeAtSpatialMin (I := I) cov g)
     {f : M -> Real} {x : M}
     (hmin : IsLocalMin f x)
@@ -714,11 +710,8 @@ theorem laplacian_nonneg_at_spatial_min
 /-- At a spatial local minimum, `Delta f + <X, grad f>` is nonnegative. -/
 theorem heatOperatorWithDrift_at_spatial_min_nonneg
     [I.Boundaryless]
-    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Time)
-    (_hmc : IsMetricCompatibleFamily G)
-    (_htf : IsTorsionFreeFamily G)
     (hlap : LaplacianNonnegativeAtSpatialMinFamily (I := I) G)
     (t : Time) (X : (x : M) -> TangentSpace I x)
     {f : M -> Real} {x : M}
@@ -729,7 +722,7 @@ theorem heatOperatorWithDrift_at_spatial_min_nonneg
   unfold heatOperatorWithDrift
   rw [driftTerm_eq_zero_at_spatial_min (I := I) G t X hmin hf, add_zero]
   exact laplacian_nonneg_at_spatial_min (I := I)
-    (G.connection t) (G.metric t) (_hmc t) (_htf t) (hlap t) hmin hf hgrad
+    (G.connection t) (G.metric t) (hlap t) hmin hf hgrad
 
 end
 

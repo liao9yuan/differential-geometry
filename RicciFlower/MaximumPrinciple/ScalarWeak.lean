@@ -149,7 +149,6 @@ theorem strict_barrier_nonnegative
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
-    (hmc : IsMetricCompatibleFamily G) (htf : IsTorsionFreeFamily G)
     (T : Real) (_hT : 0 <= T)
     (X : Real -> (x : M) -> TangentSpace I x)
     (w : Real -> M -> Real)
@@ -178,7 +177,6 @@ theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
-    (hmc : IsMetricCompatibleFamily G) (htf : IsTorsionFreeFamily G)
     (T : Real) (hT : 0 <= T)
     (X : Real -> (x : M) -> TangentSpace I x)
     (u : Real -> M -> Real) (c : Real -> Real)
@@ -250,7 +248,7 @@ theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values
         rw [← hexpCalc t ht x]
   have hw_nonneg :
       forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, 0 <= w t x :=
-    strict_barrier_nonnegative (I := I) G hmc htf T hT X w
+    strict_barrier_nonnegative (I := I) G T hT X w
       (by simpa [w, v] using hw_cont) hw0
       (by simpa [w, v] using hw_mdiff) (by simpa [w, v] using hw_grad)
       hnegative
@@ -274,7 +272,6 @@ theorem scalar_weak_maximum_principle_supersolutions_locallyLipschitz
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : RealizedMetricFamily (I := I) (M := M) Real)
-    (hmc : IsMetricCompatibleFamily G) (htf : IsTorsionFreeFamily G)
     (T : Real) (hT : 0 <= T)
     (X : Real -> (x : M) -> TangentSpace I x)
     (u : Real -> M -> Real) (c : Real -> Real)

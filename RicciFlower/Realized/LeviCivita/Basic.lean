@@ -1,4 +1,6 @@
-import RicciFlower.Realized.Connection
+import RicciFlower.Realized.MetricFamily
+import Mathlib.Geometry.Manifold.MFDeriv.Basic
+import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
 
 set_option autoImplicit false
 set_option linter.style.longLine false

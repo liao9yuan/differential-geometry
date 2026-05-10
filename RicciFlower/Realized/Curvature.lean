@@ -1,4 +1,4 @@
-import RicciFlower.Realized.Connection
+import RicciFlower.Realized.MetricFamily
 import Mathlib.Algebra.BigOperators.Group.Finset.Basic
 import Mathlib.Geometry.Manifold.VectorField.LieBracket
 

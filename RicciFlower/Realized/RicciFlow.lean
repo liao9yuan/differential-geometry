@@ -1,3 +1,4 @@
+import RicciFlower.Realized.Connection
 import RicciFlower.Realized.LeviCivita.Basic
 import Mathlib.Analysis.Calculus.Deriv.Basic
 

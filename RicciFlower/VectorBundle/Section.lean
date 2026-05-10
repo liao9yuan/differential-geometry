@@ -55,8 +55,73 @@ Recommended order: do (1) as a standalone change to `Equiv.lean` first, then
 
 set_option autoImplicit false
 
-open scoped Manifold ContDiff
+open scoped Manifold Topology ContDiff
 open Bundle
+
+/-! ## Fixed-trivialization smoothness wrappers -/
+
+section FixedTrivializationSmoothness
+
+variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+  {H : Type*} [TopologicalSpace H]
+  {I : ModelWithCorners 𝕜 E H}
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+  {n : WithTop ℕ∞}
+  {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
+  {V : M → Type*} [TopologicalSpace (TotalSpace F V)]
+  [∀ x, TopologicalSpace (V x)] [FiberBundle F V]
+  [∀ x, AddCommGroup (V x)] [∀ x, Module 𝕜 (V x)] [VectorBundle 𝕜 F V]
+  [ContMDiffVectorBundle n F V I]
+  {s : ∀ x, V x} {x₀ : M}
+
+/-- Prove section smoothness at `x₀` by giving a smooth model representative in a
+fixed trivialization and an eventual equality with the section's trivialized
+coordinates.
+
+This packages the common pattern
+`rw [contMDiffAt_section]; exact hModel.congr_of_eventuallyEq hEq`. -/
+theorem contMDiffAt_section_of_trivializationAt_eventuallyEq
+    (e : Trivialization F (Bundle.TotalSpace.proj : Bundle.TotalSpace F V → M))
+    [MemTrivializationAtlas e] (hx₀ : x₀ ∈ e.baseSet)
+    {A : M → F}
+    (hA : ContMDiffAt I 𝓘(𝕜, F) n A x₀)
+    (hEq : (fun x => (e ⟨x, s x⟩).2) =ᶠ[𝓝 x₀] A) :
+    ContMDiffAt I (I.prod 𝓘(𝕜, F)) n
+      (fun x => (⟨x, s x⟩ : TotalSpace F V)) x₀ := by
+  exact (e.contMDiffAt_section_iff hx₀).mpr (hA.congr_of_eventuallyEq hEq)
+
+variable [IsManifold I n M]
+
+/-- Variant of `contMDiffAt_section_of_trivializationAt_eventuallyEq` for the
+common case where the model representative is written in the fixed chart
+`extChartAt I x₀`. -/
+theorem contMDiffAt_section_of_chart_model_eventuallyEq
+    (e : Trivialization F (Bundle.TotalSpace.proj : Bundle.TotalSpace F V → M))
+    [MemTrivializationAtlas e] (hx₀ : x₀ ∈ e.baseSet)
+    {A : E → F}
+    (hA :
+      ContMDiffWithinAt 𝓘(𝕜, E) 𝓘(𝕜, F) n A (Set.range I)
+        (extChartAt I x₀ x₀))
+    (hEq :
+      (fun x => (e ⟨x, s x⟩).2) =ᶠ[𝓝 x₀]
+        fun x => A (extChartAt I x₀ x)) :
+    ContMDiffAt I (I.prod 𝓘(𝕜, F)) n
+      (fun x => (⟨x, s x⟩ : TotalSpace F V)) x₀ := by
+  refine contMDiffAt_section_of_trivializationAt_eventuallyEq (I := I)
+    (e := e) hx₀ ?_ hEq
+  rw [contMDiffAt_iff_source_of_mem_source (x := x₀)
+    (x' := x₀) (mem_chart_source H x₀)]
+  refine hA.congr_of_eventuallyEq ?_ ?_
+  filter_upwards [extChartAt_target_mem_nhdsWithin (I := I) x₀] with y hy
+  change A (extChartAt I x₀ ((extChartAt I x₀).symm y)) = A y
+  rw [(extChartAt I x₀).right_inv hy]
+  change A (extChartAt I x₀
+      ((extChartAt I x₀).symm (extChartAt I x₀ x₀))) =
+    A (extChartAt I x₀ x₀)
+  rw [(extChartAt I x₀).right_inv (mem_extChartAt_target (I := I) x₀)]
+
+end FixedTrivializationSmoothness
 
 /-! ## Module over smooth functions -/
 
