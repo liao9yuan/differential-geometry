@@ -21,9 +21,10 @@ namespace Tensor0SBundle
 open Bundle Module
 open scoped Manifold BigOperators
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E] [FiniteDimensional Real E]
+variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [FiniteDimensional 𝕜 E]
 variable {H : Type*} [TopologicalSpace H]
-variable {I : ModelWithCorners Real E H}
+variable {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I 1 M]
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {x : M}
@@ -31,7 +32,7 @@ variable {x : M}
 section Covariant
 
 variable {s q : Nat}
-variable (basis : Module.Basis Idx Real (TangentSpace I x))
+variable (basis : Module.Basis Idx 𝕜 (TangentSpace I x))
 
 @[simp]
 theorem component0S_add
@@ -42,7 +43,7 @@ theorem component0S_add
 
 @[simp]
 theorem component0S_smul
-    (c : Real) (A : Tensor0SSpace s I x) (slots : Fin s -> Idx) :
+    (c : 𝕜) (A : Tensor0SSpace s I x) (slots : Fin s -> Idx) :
     component0S (I := I) basis (c • A) slots =
       c * component0S (I := I) basis A slots := by
   rfl
@@ -63,7 +64,7 @@ end Covariant
 section Mixed
 
 variable {r s : Nat}
-variable (basis : Module.Basis Idx Real (TangentSpace I x))
+variable (basis : Module.Basis Idx 𝕜 (TangentSpace I x))
 
 /-- Conventional component of a mixed tensor in the Hom model.
 
@@ -71,7 +72,7 @@ The `upper` indices select the covariant basis tensor used as Hom input; the
 `lower` indices evaluate the covariant output on basis vectors. -/
 def componentRS
     (T : TensorRSSpace r s I x)
-    (upper : Fin r -> Idx) (lower : Fin s -> Idx) : Real :=
+    (upper : Fin r -> Idx) (lower : Fin s -> Idx) : 𝕜 :=
   component0S (I := I) basis (T (basisTensor0S (I := I) basis upper)) lower
 
 @[simp]

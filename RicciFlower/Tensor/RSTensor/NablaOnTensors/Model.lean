@@ -225,6 +225,36 @@ theorem fderivWithin_tensor0SModel_eval_slots {s : ℕ}
                 simpa using hderiv b
               · simp [Function.update, hb, L, A, one, ContinuousLinearMap.smulRight_apply]
 
+/-- Product rule for evaluating a model mixed `(r,s)` tensor on a variable
+model `(0,r)` input tensor and variable output slots. -/
+theorem fderivWithin_tensorRSModel_eval_slots {r s : ℕ}
+    (T : E → TensorRSModel r s 𝕜 E)
+    (β : E → Tensor0SModel (𝕜 := 𝕜) (E := E) r)
+    (V : Fin s → E → E)
+    (u : Set E) (y Xy : E)
+    (hT : DifferentiableWithinAt 𝕜 T u y)
+    (hβ : DifferentiableWithinAt 𝕜 β u y)
+    (hV : ∀ a : Fin s, DifferentiableWithinAt 𝕜 (V a) u y)
+    (hu : UniqueDiffWithinAt 𝕜 u y) :
+    fderivWithin 𝕜 (fun z : E => (T z (β z)) (fun a : Fin s => V a z)) u y Xy =
+      ((fderivWithin 𝕜 T u y Xy) (β y)) (fun a : Fin s => V a y) +
+        (T y (fderivWithin 𝕜 β u y Xy)) (fun a : Fin s => V a y) +
+        ∑ a : Fin s,
+          (T y (β y)) (Function.update (fun b : Fin s => V b y) a
+            (fderivWithin 𝕜 (V a) u y Xy)) := by
+  classical
+  let α : E → Tensor0SModel (𝕜 := 𝕜) (E := E) s := fun z => T z (β z)
+  have hα : DifferentiableWithinAt 𝕜 α u y := hT.clm_apply hβ
+  have hslots := fderivWithin_tensor0SModel_eval_slots
+    (𝕜 := 𝕜) (E := E) (s := s) α V u y Xy hα hV hu
+  have hαderiv :
+      fderivWithin 𝕜 α u y =
+        (T y).comp (fderivWithin 𝕜 β u y) +
+          (fderivWithin 𝕜 T u y).flip (β y) := by
+    simpa [α] using fderivWithin_clm_apply (𝕜 := 𝕜) (s := u) (x := y) hu hT hβ
+  rw [hslots, hαderiv]
+  simp [α, add_assoc, add_comm]
+
 /-- Pointwise model formula for the covariant derivative of a mixed `(r,s)` tensor.
 
 In the `Hom((0,r),(0,s))` model the connection acts on output covariant slots

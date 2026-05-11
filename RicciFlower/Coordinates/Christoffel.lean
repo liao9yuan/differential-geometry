@@ -25,9 +25,10 @@ open Bundle Module
 open scoped BigOperators Manifold ContDiff
 
 variable
-  {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+  {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
   {H : Type*} [TopologicalSpace H]
-  {I : ModelWithCorners Real E H}
+  {I : ModelWithCorners 𝕜 E H}
   {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I 1 M]
   {Idx : Type*}
   {u : Set M}
@@ -38,7 +39,7 @@ def christoffelSymbolInFrame
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
-    (x : M) (i j k : Idx) : Real :=
+    (x : M) (i j k : Idx) : 𝕜 :=
   hframe.coeff k x ((cov (frame j) x) (frame i x))
 
 /-- Christoffel coefficient with an arbitrary tangent direction in the first slot. -/
@@ -46,7 +47,7 @@ def christoffelAlongInFrame
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
-    (x : M) (X : TangentSpace I x) (j k : Idx) : Real :=
+    (x : M) (X : TangentSpace I x) (j k : Idx) : 𝕜 :=
   hframe.coeff k x ((cov (frame j) x) X)
 
 @[simp] theorem christoffelSymbolInFrame_eval
@@ -92,7 +93,7 @@ theorem covariantDerivative_eq_sum_christoffel
 /-- The torsion tensor component in a local frame is the skew part of the
 Christoffel symbols, corrected by the frame bracket. -/
 theorem torsion_coeff_eq_christoffel_skew
-    [FiniteDimensional Real E] [CompleteSpace E]
+    [FiniteDimensional 𝕜 E] [CompleteSpace E]
     [IsManifold I 2 M]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -119,8 +120,8 @@ def IsNormalFrameForConnectionAt
 
 section Difference
 
-variable [FiniteDimensional Real E]
-  [VectorBundle Real E (TangentSpace I : M -> Type _)]
+variable [FiniteDimensional 𝕜 E]
+  [VectorBundle 𝕜 E (TangentSpace I : M -> Type _)]
   [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
 
 /-- Components of the tensorial connection difference `cov - cov'` in a local frame. -/
@@ -128,7 +129,7 @@ def christoffelSymbolDifferenceInFrame
     (cov cov' : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
-    (x : M) (i j k : Idx) : Real :=
+    (x : M) (i j k : Idx) : 𝕜 :=
   hframe.coeff k x (((CovariantDerivative.difference cov cov' x) (frame j x)) (frame i x))
 
 /-- Expansion of the connection-difference tensor in the local frame. -/
@@ -171,19 +172,19 @@ end Difference
 
 section TimeDerivative
 
-variable {A Time : Type*} [CommRing A] [Algebra Real A]
+variable {A Time : Type*} [CommRing A] [Algebra 𝕜 A]
 
 /-- The coordinate-facing time derivative `partial_t Gamma^k_ij` in a fixed local frame. -/
 def christoffelSymbolTimeDerivativeInFrame
-    (td : TimeDerivativeData Real A Time)
+    (td : TimeDerivativeData 𝕜 A Time)
     (covFam : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
-    (t : Time) (x : M) (i j k : Idx) : Real :=
+    (t : Time) (x : M) (i j k : Idx) : 𝕜 :=
   td.dt_apply (fun s => christoffelSymbolInFrame (covFam s) frame hframe x i j k) t
 
 @[simp] theorem christoffelSymbolTimeDerivativeInFrame_eval
-    (td : TimeDerivativeData Real A Time)
+    (td : TimeDerivativeData 𝕜 A Time)
     (covFam : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
@@ -194,21 +195,21 @@ def christoffelSymbolTimeDerivativeInFrame
 
 /-- A named coordinate evolution equation for Christoffel coefficients. -/
 def ChristoffelSymbolEvolutionEquationInFrame
-    (td : TimeDerivativeData Real A Time)
+    (td : TimeDerivativeData 𝕜 A Time)
     (covFam : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
-    (rhs : Time -> M -> Idx -> Idx -> Idx -> Real) : Prop :=
+    (rhs : Time -> M -> Idx -> Idx -> Idx -> 𝕜) : Prop :=
   forall t x i j k,
     christoffelSymbolTimeDerivativeInFrame td covFam frame hframe t x i j k =
       rhs t x i j k
 
 theorem christoffelSymbolEvolution_from_equation
-    (td : TimeDerivativeData Real A Time)
+    (td : TimeDerivativeData 𝕜 A Time)
     (covFam : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
-    (rhs : Time -> M -> Idx -> Idx -> Idx -> Real)
+    (rhs : Time -> M -> Idx -> Idx -> Idx -> 𝕜)
     (h_evol : ChristoffelSymbolEvolutionEquationInFrame td covFam frame hframe rhs)
     (t : Time) (x : M) (i j k : Idx) :
     christoffelSymbolTimeDerivativeInFrame td covFam frame hframe t x i j k =
@@ -220,8 +221,8 @@ theorem christoffelSymbolEvolution_from_equation
 `nablaRicLastRaised t x i j k` represents `g^{kl} (nabla_i Ric)_{jl}`.
 `nablaRicDirectionRaised t x i j k` represents `g^{kl} (nabla_l Ric)_{ij}`. -/
 def ricciFlowChristoffelEvolutionRHSInFrame
-    (nablaRicLastRaised nablaRicDirectionRaised : Time -> M -> Idx -> Idx -> Idx -> Real)
-    (t : Time) (x : M) (i j k : Idx) : Real :=
+    (nablaRicLastRaised nablaRicDirectionRaised : Time -> M -> Idx -> Idx -> Idx -> 𝕜)
+    (t : Time) (x : M) (i j k : Idx) : 𝕜 :=
   - nablaRicLastRaised t x i j k -
     nablaRicLastRaised t x j i k +
     nablaRicDirectionRaised t x i j k
@@ -229,22 +230,22 @@ def ricciFlowChristoffelEvolutionRHSInFrame
 /-- Coordinate statement of the Ricci-flow Christoffel evolution equation,
 parameterized by the raised Ricci-derivative components. -/
 def RicciFlowChristoffelSymbolEvolutionEquationInFrame
-    (td : TimeDerivativeData Real A Time)
+    (td : TimeDerivativeData 𝕜 A Time)
     (covFam : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (nablaRicLastRaised nablaRicDirectionRaised :
-      Time -> M -> Idx -> Idx -> Idx -> Real) : Prop :=
+      Time -> M -> Idx -> Idx -> Idx -> 𝕜) : Prop :=
   ChristoffelSymbolEvolutionEquationInFrame td covFam frame hframe
     (ricciFlowChristoffelEvolutionRHSInFrame nablaRicLastRaised nablaRicDirectionRaised)
 
 theorem ricciFlow_christoffelSymbolEvolution_from_equation
-    (td : TimeDerivativeData Real A Time)
+    (td : TimeDerivativeData 𝕜 A Time)
     (covFam : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (nablaRicLastRaised nablaRicDirectionRaised :
-      Time -> M -> Idx -> Idx -> Idx -> Real)
+      Time -> M -> Idx -> Idx -> Idx -> 𝕜)
     (h_evol : RicciFlowChristoffelSymbolEvolutionEquationInFrame
       td covFam frame hframe nablaRicLastRaised nablaRicDirectionRaised)
     (t : Time) (x : M) (i j k : Idx) :

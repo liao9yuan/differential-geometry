@@ -55,6 +55,27 @@ theorem oneFormRicciIdentity_of_connection
   one_form_third_comm_coord_of_christoffelCurv (I := I) cov Rm13 x alpha
     nabla2Alpha hRm hcurv hcoord
 
+/-- Smooth-connection version of `oneFormRicciIdentity_of_connection`.
+
+The coordinate curvature hypothesis is now produced in the general
+connection-curvature layer.  The one-form coordinate commutator is intentionally
+left explicit until the higher-order covariant-derivative API is settled. -/
+theorem oneFormRicciIdentity_of_smooth_connection
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (Rm13 : Tensor13Section (I := I) (M := M))
+    (x : M)
+    (alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
+    (nabla2Alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (hRm : Rm13RealizesConnection (I := I) cov Rm13)
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
+      (∞ : WithTop ℕ∞))
+    (hcoord : OneFormThirdCommChristoffelCoordAt (I := I) cov x alpha nabla2Alpha) :
+    OneFormThirdCovDerivCommAt (I := I) Rm13 alpha nabla2Alpha :=
+  oneFormRicciIdentity_of_connection (I := I) cov Rm13 x alpha nabla2Alpha
+    hRm (connection_curvature_coord_of_christoffel (I := I) cov hcov x) hcoord
+
 /-- Evaluation form of `oneFormRicciIdentity_of_connection`. -/
 theorem oneFormRicciIdentity_of_connection_apply
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -73,6 +94,26 @@ theorem oneFormRicciIdentity_of_connection_apply
   one_form_third_covDeriv_comm (I := I) Rm13 alpha nabla2Alpha
     (oneFormRicciIdentity_of_connection (I := I) cov Rm13 x alpha nabla2Alpha
       hRm hcurv hcoord) X Y Z
+
+/-- Evaluation form of `oneFormRicciIdentity_of_smooth_connection`. -/
+theorem oneFormRicciIdentity_of_smooth_connection_apply
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (Rm13 : Tensor13Section (I := I) (M := M))
+    (x : M)
+    (alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
+    (nabla2Alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (hRm : Rm13RealizesConnection (I := I) cov Rm13)
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
+      (∞ : WithTop ℕ∞))
+    (hcoord : OneFormThirdCommChristoffelCoordAt (I := I) cov x alpha nabla2Alpha)
+    (X Y Z : TangentSpace I x) :
+    nabla2Alpha (vec3 X Y Z) - nabla2Alpha (vec3 Y X Z) =
+      -Rm13 x alpha (vec3 X Y Z) :=
+  one_form_third_covDeriv_comm (I := I) Rm13 alpha nabla2Alpha
+    (oneFormRicciIdentity_of_smooth_connection (I := I) cov Rm13 x alpha
+      nabla2Alpha hRm hcov hcoord) X Y Z
 
 end Connection
 end Realized

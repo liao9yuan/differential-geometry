@@ -9,11 +9,11 @@ relaxedAutoImplicit = false
 weak.linter.mathlibStandardSet = true
 maxSynthPendingDepth = 3
 autoImplicit = false
-linter.style.longLine = false
+weak.linter.style.longLine = false
 linter.unusedSectionVars = false
-linter.style.emptyLine = false
-linter.style.whitespace = false
-linter.style.maxHeartbeats = false
+weak.linter.style.emptyLine = false
+weak.linter.style.whitespace = false
+weak.linter.style.maxHeartbeats = false
 
 [[require]]
 name = "mathlib"

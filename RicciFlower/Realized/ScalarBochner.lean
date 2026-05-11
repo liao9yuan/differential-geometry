@@ -316,7 +316,7 @@ def oneFormRicciTraceComm_coordAt
     (Ric : Tensor02Section (I := I) (M := M))
     (u : M -> Real)
     (x₀ : M)
-    (gInv : Coordinates.CoordinateIdx E -> Coordinates.CoordinateIdx E -> Real)
+    (gInv : Coordinates.CoordinateIdx (𝕜 := Real) E -> Coordinates.CoordinateIdx (𝕜 := Real) E -> Real)
     (nabla2Du :
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x₀) :
     Prop :=
@@ -328,7 +328,7 @@ theorem oneFormRicciTraceComm_coordAt_iff
     (Ric : Tensor02Section (I := I) (M := M))
     (u : M -> Real)
     (x₀ : M)
-    (gInv : Coordinates.CoordinateIdx E -> Coordinates.CoordinateIdx E -> Real)
+    (gInv : Coordinates.CoordinateIdx (𝕜 := Real) E -> Coordinates.CoordinateIdx (𝕜 := Real) E -> Real)
     (nabla2Du :
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x₀) :
     oneFormRicciTraceComm_coordAt (I := I) g Ric u x₀ gInv nabla2Du ↔
@@ -468,7 +468,7 @@ theorem oneFormRicciTraceComm_coordAt_of_third_comm
     (Rm13 : Tensor13Section (I := I) (M := M))
     (u : M -> Real)
     (x₀ : M)
-    (gInv : Coordinates.CoordinateIdx E -> Coordinates.CoordinateIdx E -> Real)
+    (gInv : Coordinates.CoordinateIdx (𝕜 := Real) E -> Coordinates.CoordinateIdx (𝕜 := Real) E -> Real)
     (nabla2Du :
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x₀)
     (hsymm : OneFormLastTwoSymmAt (I := I) nabla2Du)

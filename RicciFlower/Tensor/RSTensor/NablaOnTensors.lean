@@ -1,4 +1,4 @@
-import RicciFlower.Tensor.RSTensor.NablaOnTensors.Raw
+import RicciFlower.Tensor.RSTensor.NablaOnTensors.HigherOrder
 
 /-!
 # Covariant derivatives on tensor fields

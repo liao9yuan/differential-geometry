@@ -74,7 +74,7 @@ theorem torsion_free_family_apply
 coordinate base point. -/
 theorem koszulScalar_coordinateFrame_symm
     (g : SmoothRiemannianMetric I M)
-    (x0 : M) (i j : CoordinateIdx E)
+    (x0 : M) (i j : CoordinateIdx (𝕜 := Real) E)
     (Z : (p : M) -> TangentSpace I p) :
     (1 / 2 : Real) *
         koszulScalar (I := I) g (coordinateFrameAt (I := I) x0 i)
@@ -92,7 +92,7 @@ Christoffel coefficients, because coordinate frame brackets vanish at the
 base point. -/
 theorem coordinate_torsion_coeff_eq_christoffel_skew
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (x0 : M) (i j k : CoordinateIdx E) :
+    (x0 : M) (i j k : CoordinateIdx (𝕜 := Real) E) :
     (coordinateFrameAt_isLocalFrame_one (I := I) x0).coeff k x0
         (cov.torsion x0
           (coordinateFrameAt (I := I) x0 i x0)
@@ -111,7 +111,7 @@ theorem coordinate_torsion_coeff_eq_christoffel_skew
 
 /-- The Koszul connection is symmetric on coordinate-frame basis vectors. -/
 theorem leviCivitaConnectionOfMetric_coordinateFrame_apply_symm
-    (g : SmoothRiemannianMetric I M) (x0 : M) (i j : CoordinateIdx E) :
+    (g : SmoothRiemannianMetric I M) (x0 : M) (i j : CoordinateIdx (𝕜 := Real) E) :
     (leviCivitaConnectionOfMetric (I := I) g
         (coordinateFrameAt (I := I) x0 j) x0)
         (coordinateFrameAt (I := I) x0 i x0) =
@@ -137,7 +137,7 @@ theorem leviCivitaConnectionOfMetric_coordinateFrame_apply_symm
 /-- Coordinate-frame Christoffel symbols of the Koszul connection are symmetric
 in the lower two coordinate indices. -/
 theorem leviCivitaConnectionOfMetric_coordinate_christoffel_symm
-    (g : SmoothRiemannianMetric I M) (x0 : M) (i j k : CoordinateIdx E) :
+    (g : SmoothRiemannianMetric I M) (x0 : M) (i j k : CoordinateIdx (𝕜 := Real) E) :
     christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) g)
         (coordinateFrameAt (I := I) x0)
         (coordinateFrameAt_isLocalFrame_one (I := I) x0) x0 i j k =
@@ -149,7 +149,7 @@ theorem leviCivitaConnectionOfMetric_coordinate_christoffel_symm
 
 /-- The Koszul connection has zero torsion on coordinate-frame basis vectors. -/
 theorem leviCivitaConnectionOfMetric_coordinate_torsion_basis_zero
-    (g : SmoothRiemannianMetric I M) (x0 : M) (i j : CoordinateIdx E) :
+    (g : SmoothRiemannianMetric I M) (x0 : M) (i j : CoordinateIdx (𝕜 := Real) E) :
     (leviCivitaConnectionOfMetric (I := I) g).torsion x0
         (coordinateFrameAt (I := I) x0 i x0)
         (coordinateFrameAt (I := I) x0 j x0) = 0 := by
@@ -180,9 +180,9 @@ theorem leviCivitaConnectionOfMetric_isTorsionFree
   apply ContinuousLinearMap.ext
   intro v
   let B := coordinateFrameAt_toBasis (I := I) x
-  have hu : u = ∑ i : CoordinateIdx E, B.repr u i • B i :=
+  have hu : u = ∑ i : CoordinateIdx (𝕜 := Real) E, B.repr u i • B i :=
     (B.sum_repr u).symm
-  have hv : v = ∑ j : CoordinateIdx E, B.repr v j • B j :=
+  have hv : v = ∑ j : CoordinateIdx (𝕜 := Real) E, B.repr v j • B j :=
     (B.sum_repr v).symm
   rw [hu, hv]
   simp [B, coordinateFrameAt_toBasis_apply,

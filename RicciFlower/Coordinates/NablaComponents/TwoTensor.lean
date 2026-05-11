@@ -19,24 +19,24 @@ namespace Coordinates
 open Bundle Set Tensor0SBundle TensorLieDeriv
 open scoped BigOperators Manifold ContDiff Topology
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+variable [Module.Finite 𝕜 E] [FiniteDimensional 𝕜 E]
 variable {H : Type*} [TopologicalSpace H]
-variable {I : ModelWithCorners Real E H}
+variable {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
 variable [IsManifold I (⊤ : WithTop ℕ∞) M]
 variable [IsManifold I ((⊤ : WithTop ℕ∞) + 1) M]
-variable [CompleteSpace Real]
 
 /-- Evaluate a `(0,2)` tensor on arbitrary tangent vectors by expanding both
 vectors in the coordinate-frame basis at the base point. -/
 theorem tensor0S_two_eval_coordFrame_sum
     {x₀ : M}
-    (Ax : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x₀)
+    (Ax : Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) 2 x₀)
     (Y Z : TangentSpace I x₀) :
     Ax (fun q : Fin 2 => if q = 0 then Y else Z) =
-      ∑ i : CoordinateIdx E, ∑ j : CoordinateIdx E,
+      ∑ i : CoordinateIdx (𝕜 := 𝕜) E, ∑ j : CoordinateIdx (𝕜 := 𝕜) E,
         (coordinateFrameAt_toBasis (I := I) x₀).coord i Y *
           (coordinateFrameAt_toBasis (I := I) x₀).coord j Z *
           Ax (fun q : Fin 2 =>
@@ -48,28 +48,28 @@ theorem tensor0S_two_eval_coordFrame_sum
     fun U V q => if q = 0 then U else V
   have hslot0 (W : TangentSpace I x₀) :
       Ax (pair Y W) =
-        ∑ i : CoordinateIdx E, b.coord i Y * Ax (pair (b i) W) := by
+        ∑ i : CoordinateIdx (𝕜 := 𝕜) E, b.coord i Y * Ax (pair (b i) W) := by
     have hupdate (w : TangentSpace I x₀) :
         Function.update (pair Y W) (0 : Fin 2) w = pair w W := by
       funext q
       fin_cases q <;> simp [pair]
     have hmap := Ax.toMultilinearMap.map_update_sum
-      (Finset.univ : Finset (CoordinateIdx E)) (0 : Fin 2)
-      (fun i : CoordinateIdx E => b.coord i Y • b i) (pair Y W)
+      (Finset.univ : Finset (CoordinateIdx (𝕜 := 𝕜) E)) (0 : Fin 2)
+      (fun i : CoordinateIdx (𝕜 := 𝕜) E => b.coord i Y • b i) (pair Y W)
     calc
       Ax (pair Y W)
           = Ax (Function.update (pair Y W) (0 : Fin 2)
-              (∑ i : CoordinateIdx E, b.coord i Y • b i)) := by
+              (∑ i : CoordinateIdx (𝕜 := 𝕜) E, b.coord i Y • b i)) := by
             rw [hupdate]
             congr 1
             funext q
             fin_cases q
             · exact (b.sum_repr Y).symm
             · simp [pair]
-      _ = ∑ i : CoordinateIdx E,
+      _ = ∑ i : CoordinateIdx (𝕜 := 𝕜) E,
             Ax (Function.update (pair Y W) (0 : Fin 2) (b.coord i Y • b i)) := by
             simpa using hmap
-      _ = ∑ i : CoordinateIdx E, b.coord i Y * Ax (pair (b i) W) := by
+      _ = ∑ i : CoordinateIdx (𝕜 := 𝕜) E, b.coord i Y * Ax (pair (b i) W) := by
             refine Finset.sum_congr rfl fun i _ => ?_
             rw [hupdate]
             have hconst :
@@ -87,28 +87,28 @@ theorem tensor0S_two_eval_coordFrame_sum
             simp [smul_eq_mul]
   have hslot1 (V : TangentSpace I x₀) :
       Ax (pair V Z) =
-        ∑ j : CoordinateIdx E, b.coord j Z * Ax (pair V (b j)) := by
+        ∑ j : CoordinateIdx (𝕜 := 𝕜) E, b.coord j Z * Ax (pair V (b j)) := by
     have hupdate (w : TangentSpace I x₀) :
         Function.update (pair V Z) (1 : Fin 2) w = pair V w := by
       funext q
       fin_cases q <;> simp [pair]
     have hmap := Ax.toMultilinearMap.map_update_sum
-      (Finset.univ : Finset (CoordinateIdx E)) (1 : Fin 2)
-      (fun j : CoordinateIdx E => b.coord j Z • b j) (pair V Z)
+      (Finset.univ : Finset (CoordinateIdx (𝕜 := 𝕜) E)) (1 : Fin 2)
+      (fun j : CoordinateIdx (𝕜 := 𝕜) E => b.coord j Z • b j) (pair V Z)
     calc
       Ax (pair V Z)
           = Ax (Function.update (pair V Z) (1 : Fin 2)
-              (∑ j : CoordinateIdx E, b.coord j Z • b j)) := by
+              (∑ j : CoordinateIdx (𝕜 := 𝕜) E, b.coord j Z • b j)) := by
             rw [hupdate]
             congr 1
             funext q
             fin_cases q
             · simp [pair]
             · exact (b.sum_repr Z).symm
-      _ = ∑ j : CoordinateIdx E,
+      _ = ∑ j : CoordinateIdx (𝕜 := 𝕜) E,
             Ax (Function.update (pair V Z) (1 : Fin 2) (b.coord j Z • b j)) := by
             simpa using hmap
-      _ = ∑ j : CoordinateIdx E, b.coord j Z * Ax (pair V (b j)) := by
+      _ = ∑ j : CoordinateIdx (𝕜 := 𝕜) E, b.coord j Z * Ax (pair V (b j)) := by
             refine Finset.sum_congr rfl fun j _ => ?_
             rw [hupdate]
             have hconst :
@@ -128,21 +128,21 @@ theorem tensor0S_two_eval_coordFrame_sum
     Ax (fun q : Fin 2 => if q = 0 then Y else Z)
         = Ax (pair Y Z) := by
           rfl
-    _ = ∑ i : CoordinateIdx E, b.coord i Y * Ax (pair (b i) Z) := by
+    _ = ∑ i : CoordinateIdx (𝕜 := 𝕜) E, b.coord i Y * Ax (pair (b i) Z) := by
           exact hslot0 Z
-    _ = ∑ i : CoordinateIdx E,
-          b.coord i Y * (∑ j : CoordinateIdx E, b.coord j Z * Ax (pair (b i) (b j))) := by
+    _ = ∑ i : CoordinateIdx (𝕜 := 𝕜) E,
+          b.coord i Y * (∑ j : CoordinateIdx (𝕜 := 𝕜) E, b.coord j Z * Ax (pair (b i) (b j))) := by
           refine Finset.sum_congr rfl fun i _ => ?_
           rw [hslot1 (b i)]
-    _ = ∑ i : CoordinateIdx E, ∑ j : CoordinateIdx E,
+    _ = ∑ i : CoordinateIdx (𝕜 := 𝕜) E, ∑ j : CoordinateIdx (𝕜 := 𝕜) E,
           b.coord i Y * (b.coord j Z * Ax (pair (b i) (b j))) := by
           simp [Finset.mul_sum]
-    _ = ∑ i : CoordinateIdx E, ∑ j : CoordinateIdx E,
+    _ = ∑ i : CoordinateIdx (𝕜 := 𝕜) E, ∑ j : CoordinateIdx (𝕜 := 𝕜) E,
           b.coord i Y * b.coord j Z * Ax (pair (b i) (b j)) := by
           refine Finset.sum_congr rfl fun i _ => ?_
           refine Finset.sum_congr rfl fun j _ => ?_
           ring
-    _ = ∑ i : CoordinateIdx E, ∑ j : CoordinateIdx E,
+    _ = ∑ i : CoordinateIdx (𝕜 := 𝕜) E, ∑ j : CoordinateIdx (𝕜 := 𝕜) E,
           (coordinateFrameAt_toBasis (I := I) x₀).coord i Y *
             (coordinateFrameAt_toBasis (I := I) x₀).coord j Z *
             Ax (fun q : Fin 2 =>
@@ -157,22 +157,22 @@ tensor, with the derivative term kept in the chart-model form used by
 theorem nabla0S_two_model_coord
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
-    (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+    (A : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       (n := (⊤ : WithTop ℕ∞)) 2)
-    (x₀ : M) (j l : CoordinateIdx E) :
+    (x₀ : M) (j l : CoordinateIdx (𝕜 := 𝕜) E) :
     coordComponent0SAt (I := I)
-        (nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        (nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
           2 cov X A x₀)
         (fun q : Fin 2 => if q = 0 then j else l) =
       modelDeriv0SAt (I := I) X x₀ (fun x => A x)
         (fun q : Fin 2 => if q = 0 then j else l) -
-        ∑ k : CoordinateIdx E,
+        ∑ k : CoordinateIdx (𝕜 := 𝕜) E,
           christoffelAlongInFrame cov (coordinateFrameAt (I := I) x₀)
             (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
             x₀ (X x₀) j k *
             coordComponent0SAt (I := I) (A x₀)
               (fun q : Fin 2 => if q = 0 then k else l) -
-        ∑ k : CoordinateIdx E,
+        ∑ k : CoordinateIdx (𝕜 := 𝕜) E,
           christoffelAlongInFrame cov (coordinateFrameAt (I := I) x₀)
             (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
             x₀ (X x₀) l k *
@@ -183,92 +183,92 @@ theorem nabla0S_two_model_coord
     TensorLieDeriv.mcovariantDeriv_tensor0SWithinFromConnection]
   rw [← tensor0SModelAt_coordComponent0SAt (I := I) x₀
     (TensorLieDeriv.mcovariantDeriv_tensor0SWithin
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       (n := (⊤ : WithTop ℕ∞)) 2 X
-      (connectionEndomorphismInChart (𝕜 := Real) (I := I) cov (fun x => X x) x₀)
+      (connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀)
       A Set.univ x₀) (fun q : Fin 2 => if q = 0 then j else l)]
   have hmodel := TensorLieDeriv.mcovariantDeriv_tensor0SWithin_two_apply_basis
-    (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-    (n := (⊤ : WithTop ℕ∞)) (Idx := CoordinateIdx E)
-    (basis := Module.finBasis Real E)
+    (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+    (n := (⊤ : WithTop ℕ∞)) (Idx := CoordinateIdx (𝕜 := 𝕜) E)
+    (basis := Module.finBasis 𝕜 E)
     (X := X)
-    (ΓX := connectionEndomorphismInChart (𝕜 := Real) (I := I) cov (fun x => X x) x₀)
+    (ΓX := connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀)
     (A := A)
     (u := Set.univ)
     (x₀ := x₀)
     (j := j) (l := l)
   have hslots :
-      (fun a : Fin 2 => (Module.finBasis Real E) (if a = 0 then j else l)) =
-        fun a : Fin 2 => if a = 0 then (Module.finBasis Real E) j
-          else (Module.finBasis Real E) l := by
+      (fun a : Fin 2 => (Module.finBasis 𝕜 E) (if a = 0 then j else l)) =
+        fun a : Fin 2 => if a = 0 then (Module.finBasis 𝕜 E) j
+          else (Module.finBasis 𝕜 E) l := by
     funext a
     by_cases ha : a = 0 <;> simp [ha]
   refine (congrArg
       (fun f : Fin 2 → E =>
         (TensorLieDeriv.tensor0SModelAt
-            (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x₀ x₀
+            (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) 2 x₀ x₀
             (TensorLieDeriv.mcovariantDeriv_tensor0SWithin
-              (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+              (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
               (n := (⊤ : WithTop ℕ∞)) 2 X
-              (connectionEndomorphismInChart (𝕜 := Real) (I := I) cov
+              (connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov
                 (fun x => X x) x₀) A Set.univ x₀)) f)
       hslots).trans (hmodel.trans ?_)
   simp_rw [connCoeff_eq_christoffelAlong_coord (I := I) cov (fun x => X x) x₀]
   simp only [modelDeriv0SAt]
-  have hslots_left (k : CoordinateIdx E) :
-      (fun a : Fin 2 => (Module.finBasis Real E) (if a = 0 then k else l)) =
-        fun a : Fin 2 => if a = 0 then (Module.finBasis Real E) k
-          else (Module.finBasis Real E) l := by
+  have hslots_left (k : CoordinateIdx (𝕜 := 𝕜) E) :
+      (fun a : Fin 2 => (Module.finBasis 𝕜 E) (if a = 0 then k else l)) =
+        fun a : Fin 2 => if a = 0 then (Module.finBasis 𝕜 E) k
+          else (Module.finBasis 𝕜 E) l := by
     funext a
     by_cases ha : a = 0 <;> simp [ha]
-  have hslots_right (k : CoordinateIdx E) :
-      (fun a : Fin 2 => (Module.finBasis Real E) (if a = 0 then j else k)) =
-        fun a : Fin 2 => if a = 0 then (Module.finBasis Real E) j
-          else (Module.finBasis Real E) k := by
+  have hslots_right (k : CoordinateIdx (𝕜 := 𝕜) E) :
+      (fun a : Fin 2 => (Module.finBasis 𝕜 E) (if a = 0 then j else k)) =
+        fun a : Fin 2 => if a = 0 then (Module.finBasis 𝕜 E) j
+          else (Module.finBasis 𝕜 E) k := by
     funext a
     by_cases ha : a = 0 <;> simp [ha]
-  have hleft_model (k : CoordinateIdx E) :
-      (tensor0SModelAt (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+  have hleft_model (k : CoordinateIdx (𝕜 := 𝕜) E) :
+      (tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
         2 x₀ x₀ (A x₀))
-          (fun a : Fin 2 => (Module.finBasis Real E) (if a = 0 then k else l)) =
+          (fun a : Fin 2 => (Module.finBasis 𝕜 E) (if a = 0 then k else l)) =
         coordComponent0SAt (I := I) (A x₀)
           (fun q : Fin 2 => if q = 0 then k else l) := by
     exact tensor0SModelAt_coordComponent0SAt (I := I) x₀ (A x₀)
       (fun q : Fin 2 => if q = 0 then k else l)
-  have hright_model (k : CoordinateIdx E) :
-      (tensor0SModelAt (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+  have hright_model (k : CoordinateIdx (𝕜 := 𝕜) E) :
+      (tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
         2 x₀ x₀ (A x₀))
-          (fun a : Fin 2 => (Module.finBasis Real E) (if a = 0 then j else k)) =
+          (fun a : Fin 2 => (Module.finBasis 𝕜 E) (if a = 0 then j else k)) =
         coordComponent0SAt (I := I) (A x₀)
           (fun q : Fin 2 => if q = 0 then j else k) := by
     exact tensor0SModelAt_coordComponent0SAt (I := I) x₀ (A x₀)
       (fun q : Fin 2 => if q = 0 then j else k)
-  have hleft_eval (k : CoordinateIdx E) :
-      (tensor0SModelAt (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+  have hleft_eval (k : CoordinateIdx (𝕜 := 𝕜) E) :
+      (tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
         2 x₀ x₀ (A x₀))
-          (fun a : Fin 2 => (Module.finBasis Real E) (if a = 0 then k else l)) =
+          (fun a : Fin 2 => (Module.finBasis 𝕜 E) (if a = 0 then k else l)) =
         (A x₀) (fun a : Fin 2 =>
           coordinateFrameAt (I := I) x₀ (if a = 0 then k else l) x₀) := by
     rw [hleft_model k]
     simp [coordComponent0SAt, component0S]
-  have hright_eval (k : CoordinateIdx E) :
-      (tensor0SModelAt (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+  have hright_eval (k : CoordinateIdx (𝕜 := 𝕜) E) :
+      (tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
         2 x₀ x₀ (A x₀))
-          (fun a : Fin 2 => (Module.finBasis Real E) (if a = 0 then j else k)) =
+          (fun a : Fin 2 => (Module.finBasis 𝕜 E) (if a = 0 then j else k)) =
         (A x₀) (fun a : Fin 2 =>
           coordinateFrameAt (I := I) x₀ (if a = 0 then j else k) x₀) := by
     rw [hright_model k]
     simp [coordComponent0SAt, component0S]
   rw [show
-      (∑ x : CoordinateIdx E,
+      (∑ x : CoordinateIdx (𝕜 := 𝕜) E,
         christoffelAlongInFrame cov (coordinateFrameAt (I := I) x₀)
           (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
           x₀ (X x₀) j x *
-          (tensor0SModelAt (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+          (tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
             2 x₀ x₀ (A x₀))
             (fun q : Fin 2 =>
-              if q = 0 then (Module.finBasis Real E) x else (Module.finBasis Real E) l)) =
-        ∑ k : CoordinateIdx E,
+              if q = 0 then (Module.finBasis 𝕜 E) x else (Module.finBasis 𝕜 E) l)) =
+        ∑ k : CoordinateIdx (𝕜 := 𝕜) E,
           christoffelAlongInFrame cov (coordinateFrameAt (I := I) x₀)
             (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
             x₀ (X x₀) j k *
@@ -280,15 +280,15 @@ theorem nabla0S_two_model_coord
         rw [← hslots_left k]
         exact hleft_model k]
   rw [show
-      (∑ x : CoordinateIdx E,
+      (∑ x : CoordinateIdx (𝕜 := 𝕜) E,
         christoffelAlongInFrame cov (coordinateFrameAt (I := I) x₀)
           (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
           x₀ (X x₀) l x *
-          (tensor0SModelAt (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+          (tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
             2 x₀ x₀ (A x₀))
             (fun q : Fin 2 =>
-              if q = 0 then (Module.finBasis Real E) j else (Module.finBasis Real E) x)) =
-        ∑ k : CoordinateIdx E,
+              if q = 0 then (Module.finBasis 𝕜 E) j else (Module.finBasis 𝕜 E) x)) =
+        ∑ k : CoordinateIdx (𝕜 := 𝕜) E,
           christoffelAlongInFrame cov (coordinateFrameAt (I := I) x₀)
             (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
             x₀ (X x₀) l k *
@@ -306,23 +306,23 @@ the derivative-identification bridge. -/
 theorem nabla0S_two_coord
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
-    (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+    (A : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       (n := (⊤ : WithTop ℕ∞)) 2)
     (x₀ : M) (hderiv : ModelDerivEqCoordDeriv0SAt (I := I) X x₀ (fun x => A x))
-    (j l : CoordinateIdx E) :
+    (j l : CoordinateIdx (𝕜 := 𝕜) E) :
     coordComponent0SAt (I := I)
-        (nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        (nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
           2 cov X A x₀)
         (fun q : Fin 2 => if q = 0 then j else l) =
       coordDeriv0SAt (I := I) (fun x => X x) x₀ (fun x => A x)
         (fun q : Fin 2 => if q = 0 then j else l) -
-        ∑ k : CoordinateIdx E,
+        ∑ k : CoordinateIdx (𝕜 := 𝕜) E,
           christoffelAlongInFrame cov (coordinateFrameAt (I := I) x₀)
             (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
             x₀ (X x₀) j k *
             coordComponent0SAt (I := I) (A x₀)
               (fun q : Fin 2 => if q = 0 then k else l) -
-        ∑ k : CoordinateIdx E,
+        ∑ k : CoordinateIdx (𝕜 := 𝕜) E,
           christoffelAlongInFrame cov (coordinateFrameAt (I := I) x₀)
             (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
             x₀ (X x₀) l k *
@@ -337,24 +337,24 @@ This is the coordinate-frame bridge from the canonical raw derivative
 theorem nabla0SFun_two_eval_coordFrame
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
-    (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+    (A : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       (n := (⊤ : WithTop ℕ∞)) 2)
     (x₀ : M) (hderiv : ModelDerivEqCoordDeriv0SAt (I := I) X x₀ (fun x => A x))
-    (j l : CoordinateIdx E) :
-    (nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+    (j l : CoordinateIdx (𝕜 := 𝕜) E) :
+    (nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       2 cov X A x₀)
         (fun q : Fin 2 =>
           if q = 0 then coordinateFrameAt (I := I) x₀ j x₀
           else coordinateFrameAt (I := I) x₀ l x₀) =
       coordDeriv0SAt (I := I) (fun x => X x) x₀ (fun x => A x)
         (fun q : Fin 2 => if q = 0 then j else l) -
-        ∑ k : CoordinateIdx E,
+        ∑ k : CoordinateIdx (𝕜 := 𝕜) E,
           christoffelAlongInFrame cov (coordinateFrameAt (I := I) x₀)
             (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
             x₀ (X x₀) j k *
             coordComponent0SAt (I := I) (A x₀)
               (fun q : Fin 2 => if q = 0 then k else l) -
-        ∑ k : CoordinateIdx E,
+        ∑ k : CoordinateIdx (𝕜 := 𝕜) E,
           christoffelAlongInFrame cov (coordinateFrameAt (I := I) x₀)
             (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
             x₀ (X x₀) l k *
@@ -375,24 +375,24 @@ vectors, obtained from the coordinate-basis formula by multilinearity. -/
 theorem nabla0SFun_two_eval_coordFrame_expanded
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
-    (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+    (A : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       (n := (⊤ : WithTop ℕ∞)) 2)
     (x₀ : M) (hderiv : ModelDerivEqCoordDeriv0SAt (I := I) X x₀ (fun x => A x))
     (Y Z : TangentSpace I x₀) :
-    (nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+    (nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       2 cov X A x₀) (fun q : Fin 2 => if q = 0 then Y else Z) =
-      ∑ j : CoordinateIdx E, ∑ l : CoordinateIdx E,
+      ∑ j : CoordinateIdx (𝕜 := 𝕜) E, ∑ l : CoordinateIdx (𝕜 := 𝕜) E,
         (coordinateFrameAt_toBasis (I := I) x₀).coord j Y *
           (coordinateFrameAt_toBasis (I := I) x₀).coord l Z *
           (coordDeriv0SAt (I := I) (fun x => X x) x₀ (fun x => A x)
               (fun q : Fin 2 => if q = 0 then j else l) -
-            ∑ k : CoordinateIdx E,
+            ∑ k : CoordinateIdx (𝕜 := 𝕜) E,
               christoffelAlongInFrame cov (coordinateFrameAt (I := I) x₀)
                 (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
                 x₀ (X x₀) j k *
                 coordComponent0SAt (I := I) (A x₀)
                   (fun q : Fin 2 => if q = 0 then k else l) -
-            ∑ k : CoordinateIdx E,
+            ∑ k : CoordinateIdx (𝕜 := 𝕜) E,
               christoffelAlongInFrame cov (coordinateFrameAt (I := I) x₀)
                 (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
                 x₀ (X x₀) l k *
@@ -400,7 +400,7 @@ theorem nabla0SFun_two_eval_coordFrame_expanded
                   (fun q : Fin 2 => if q = 0 then j else k)) := by
   classical
   rw [tensor0S_two_eval_coordFrame_sum (I := I)
-    ((nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+    ((nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       2 cov X A x₀)) Y Z]
   refine Finset.sum_congr rfl fun j _ => ?_
   refine Finset.sum_congr rfl fun l _ => ?_

@@ -1,4 +1,5 @@
 import RicciFlower.Coordinates.NablaComponents.Basic
+import RicciFlower.Coordinates.NablaComponents.Tensor0S
 import RicciFlower.Coordinates.NablaComponents.OneForm
 import RicciFlower.Coordinates.NablaComponents.TwoTensor
 

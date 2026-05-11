@@ -24,27 +24,28 @@ open Bundle Module
 open scoped Manifold ContDiff
 
 variable
-  {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-    [FiniteDimensional Real E]
+  {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+    [FiniteDimensional 𝕜 E]
   {H : Type*} [TopologicalSpace H]
-  {I : ModelWithCorners Real E H}
+  {I : ModelWithCorners 𝕜 E H}
   {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I 1 M]
   {Idx : Type*}
   {u : Set M}
 
 /-- A pointwise realized covariant tensor field on tangent spaces. -/
 abbrev FrameTensor0SField (s : Nat) :=
-  (x : M) -> Tensor0SBundle.Tensor0SSpace (𝕜 := Real) s I x
+  (x : M) -> Tensor0SBundle.Tensor0SSpace (𝕜 := 𝕜) s I x
 
 /-- A pointwise realized mixed tensor field in the `RSTensor` representation. -/
 abbrev FrameTensorRSField (r s : Nat) :=
-  (x : M) -> Tensor0SBundle.TensorRSSpace (𝕜 := Real) r s I x
+  (x : M) -> Tensor0SBundle.TensorRSSpace (𝕜 := 𝕜) r s I x
 
 /-- The dual coframe covector supplied by a local frame. -/
 def coframeInFrame
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
-    (x : M) (i : Idx) : TangentSpace I x →ₗ[Real] Real :=
+    (x : M) (i : Idx) : TangentSpace I x →ₗ[𝕜] 𝕜 :=
   hframe.coeff i x
 
 @[simp] theorem coframeInFrame_apply
@@ -60,7 +61,7 @@ def tensor0SComponentInFrame {s : Nat}
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (_hframe : IsLocalFrameOn I E 1 frame u)
     (x : M)
-    (vectorSlots : Fin s -> Idx) : Real :=
+    (vectorSlots : Fin s -> Idx) : 𝕜 :=
   T x (fun a => frame (vectorSlots a) x)
 
 @[simp] theorem tensor0SComponentInFrame_eval {s : Nat}
@@ -76,16 +77,16 @@ def tensor0SComponentInFrame {s : Nat}
 /-- Component of a realized mixed tensor after supplying its covariant input. -/
 def tensorRSComponentFromCovariantInputInFrame {r s : Nat}
     (T : FrameTensorRSField (I := I) (M := M) r s)
-    (input : (x : M) -> Tensor0SBundle.Tensor0SSpace (𝕜 := Real) r I x)
+    (input : (x : M) -> Tensor0SBundle.Tensor0SSpace (𝕜 := 𝕜) r I x)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (_hframe : IsLocalFrameOn I E 1 frame u)
     (x : M)
-    (vectorSlots : Fin s -> Idx) : Real :=
+    (vectorSlots : Fin s -> Idx) : 𝕜 :=
   (T x (input x)) (fun a => frame (vectorSlots a) x)
 
 @[simp] theorem tensorRSComponentFromCovariantInputInFrame_eval {r s : Nat}
     (T : FrameTensorRSField (I := I) (M := M) r s)
-    (input : (x : M) -> Tensor0SBundle.Tensor0SSpace (𝕜 := Real) r I x)
+    (input : (x : M) -> Tensor0SBundle.Tensor0SSpace (𝕜 := 𝕜) r I x)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (x : M)

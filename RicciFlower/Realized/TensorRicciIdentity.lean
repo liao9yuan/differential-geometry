@@ -119,6 +119,47 @@ theorem nabla2OneFormRealizesAt_apply
         2 cov X nablaAlpha x (vec2 Y Z) :=
   h.2 X Y Z
 
+/-- Build the existing pointwise second-one-form realization predicate from
+two total covariant derivative realization steps. -/
+theorem nabla2OneFormRealizesAt_of_totalNabla
+    [IsManifold I 1 M] [IsManifold I 2 M]
+    [IsManifold I ((⊤ : WithTop ℕ∞) + 1) M]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (alpha : OneFormSection (I := I) (M := M))
+    (nablaAlpha : TwoTensorSection (I := I) (M := M))
+    (nabla2AlphaSec :
+      Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        (n := (⊤ : WithTop ℕ∞)) 3)
+    (h1 : TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) 1 cov alpha nablaAlpha)
+    (h2 : TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) 2 cov nablaAlpha nabla2AlphaSec)
+    (x : M) :
+    Nabla2OneFormRealizesAt (I := I) cov alpha nablaAlpha x
+      (nabla2AlphaSec x) := by
+  constructor
+  · intro y X Y
+    have h := h1 X y (fun _ : Fin 1 => Y)
+    have hslots :
+        Fin.cons (X y) (fun _ : Fin 1 => Y) = vec2 (I := I) (X y) Y := by
+      funext i
+      fin_cases i <;> simp [vec2]
+    rw [hslots] at h
+    exact h
+  · intro X Y Z
+    have h := h2 X x (vec2 (I := I) Y Z)
+    have hslots :
+        Fin.cons (X x) (vec2 (I := I) Y Z) = vec3 (I := I) (X x) Y Z := by
+      funext i
+      fin_cases i
+      · simp [Fin.cons_zero, vec3]
+      · change (vec2 (I := I) Y Z) 0 = Y
+        simp [vec2]
+      · change (vec2 (I := I) Y Z) 1 = Z
+        simp [vec2]
+    rw [hslots] at h
+    exact h
+
 /-- Component-level trailing-slot symmetry for a third covariant derivative
 candidate `U`. -/
 def Nabla2DuTrailingSymmCoord {Idx : Type*}

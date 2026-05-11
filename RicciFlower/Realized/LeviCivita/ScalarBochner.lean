@@ -1,5 +1,5 @@
-import RicciFlower.Realized.LeviCivita.Curvature
 import RicciFlower.Realized.ScalarBochner
+import RicciFlower.Realized.LeviCivita.Curvature
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -30,6 +30,31 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [IsManifold I ((⊤ : WithTop ℕ∞) + 1) M]
+
+/-- Levi-Civita specialization of the bridge from two total covariant
+derivative realization steps to the existing pointwise second-one-form
+realization predicate. -/
+theorem nabla2OneFormRealizesAt_of_totalNabla_leviCivita
+    [SigmaCompactSpace M] [T2Space M]
+    (g : SmoothRiemannianMetric I M)
+    (alpha : OneFormSection (I := I) (M := M))
+    (nablaAlpha : TwoTensorSection (I := I) (M := M))
+    (nabla2AlphaSec :
+      Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        (n := (⊤ : WithTop ℕ∞)) 3)
+    (h1 : TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) 1 (leviCivitaConnectionOfMetric (I := I) g)
+      alpha nablaAlpha)
+    (h2 : TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) 2 (leviCivitaConnectionOfMetric (I := I) g)
+      nablaAlpha nabla2AlphaSec)
+    (x : M) :
+    Nabla2OneFormRealizesAt (I := I)
+      (leviCivitaConnectionOfMetric (I := I) g) alpha nablaAlpha x
+      (nabla2AlphaSec x) :=
+  nabla2OneFormRealizesAt_of_totalNabla (I := I)
+    (leviCivitaConnectionOfMetric (I := I) g) alpha nablaAlpha
+    nabla2AlphaSec h1 h2 x
 
 /-- Levi-Civita Hessian symmetry for a function, expressed as trailing-slot
 symmetry of the second covariant derivative of `du`. -/
