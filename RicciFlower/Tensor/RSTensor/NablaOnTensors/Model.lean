@@ -1,4 +1,5 @@
 import RicciFlower.Tensor.RSTensor.LieDerivative
+import RicciFlower.Tensor.RSTensor.Basis
 import Mathlib.Analysis.Calculus.FDeriv.ContinuousMultilinearMap
 
 /-!
@@ -106,6 +107,26 @@ theorem covariantDeriv_tensor0SModelWithin_apply_slots {s : ℕ}
   unfold covariantDeriv_tensor0SModelWithin
   exact covariantDeriv_tensor0SModelAt_apply_slots (𝕜 := 𝕜) (E := E)
     (fderivWithin 𝕜 α u x (X x)) (ΓX x) (α x) slots
+
+/-- Evaluation of the covariant-slot correction operator on explicit slots. -/
+theorem lieDeriv_correctionL_apply_slots {s : ℕ}
+    (ΓX : E →L[𝕜] E)
+    (α : Tensor0SModel (𝕜 := 𝕜) (E := E) s)
+    (slots : Fin s → E) :
+    (lieDeriv_correctionL (𝕜 := 𝕜) (E := E) s ΓX α) slots =
+      ∑ a : Fin s, α (Function.update slots a (ΓX (slots a))) := by
+  classical
+  rw [lieDeriv_correctionL_apply]
+  unfold lieDeriv_correction substituteArg
+  simp only [ContinuousMultilinearMap.sum_apply,
+    ContinuousMultilinearMap.compContinuousLinearMap_apply]
+  refine Finset.sum_congr rfl fun a _ => ?_
+  congr 1
+  funext b
+  by_cases hb : b = a
+  · subst hb
+    simp
+  · simp [Function.update, hb]
 
 /-- Product rule for evaluating a model `(0,s)` tensor on variable model slots
 written as continuous linear maps from `𝕜` and then evaluated on fixed scalar
@@ -596,6 +617,85 @@ def covariantDeriv_tensorRSModelWithin (r s : ℕ)
     TensorRSModel r s 𝕜 E :=
   covariantDeriv_tensorRSModelAt (𝕜 := 𝕜) (E := E) r s
     (fderivWithin 𝕜 T u x (X x)) (ΓX x) (T x)
+
+/-- Hom-derivation form of the mixed model covariant derivative. Evaluating
+`∇_X T` on a variable input covariant tensor and variable output slots equals
+the directional derivative of the scalar evaluation, minus the covariant
+derivative of the input and minus the covariant derivatives of the output
+slots. -/
+theorem covariantDeriv_tensorRSModelWithin_eval_derivation {r s : ℕ}
+    (T : E → TensorRSModel r s 𝕜 E)
+    (β : E → Tensor0SModel (𝕜 := 𝕜) (E := E) r)
+    (V : Fin s → E → E)
+    (X : E → E) (ΓX : E → E →L[𝕜] E)
+    (u : Set E) (y : E)
+    (hT : DifferentiableWithinAt 𝕜 T u y)
+    (hβ : DifferentiableWithinAt 𝕜 β u y)
+    (hV : ∀ a : Fin s, DifferentiableWithinAt 𝕜 (V a) u y)
+    (hu : UniqueDiffWithinAt 𝕜 u y) :
+    (covariantDeriv_tensorRSModelWithin (𝕜 := 𝕜) (E := E)
+        r s X ΓX T u y (β y)) (fun a : Fin s => V a y)
+      =
+        fderivWithin 𝕜
+          (fun z : E => (T z (β z)) (fun a : Fin s => V a z))
+          u y (X y)
+        - (T y
+          (covariantDeriv_tensor0SModelWithin (𝕜 := 𝕜) (E := E)
+            r X ΓX β u y))
+          (fun a : Fin s => V a y)
+        - ∑ a : Fin s,
+          (T y (β y))
+            (Function.update
+              (fun b : Fin s => V b y)
+              a
+              (fderivWithin 𝕜 (V a) u y (X y) + ΓX y (V a y))) := by
+  classical
+  have hprod := fderivWithin_tensorRSModel_eval_slots
+    (𝕜 := 𝕜) (E := E) (r := r) (s := s)
+    T β V u y (X y) hT hβ hV hu
+  rw [covariantDeriv_tensorRSModelWithin]
+  rw [covariantDeriv_tensorRSModelAt_eval]
+  rw [hprod]
+  have hβcov :
+      ((T y)
+        (covariantDeriv_tensor0SModelWithin (𝕜 := 𝕜) (E := E)
+          r X ΓX β u y)) (fun a : Fin s => V a y) =
+        ((T y) (fderivWithin 𝕜 β u y (X y))) (fun a : Fin s => V a y) -
+          ((T y) ((lieDeriv_correctionL (𝕜 := 𝕜) (E := E) r (ΓX y)) (β y)))
+            (fun a : Fin s => V a y) := by
+    simp [covariantDeriv_tensor0SModelWithin, covariantDeriv_tensor0SModelAt,
+      lieDeriv_correctionL_apply]
+  have hCorrS :
+      ((lieDeriv_correctionL (𝕜 := 𝕜) (E := E) s (ΓX y)) ((T y) (β y)))
+          (fun a : Fin s => V a y) =
+        ∑ a : Fin s,
+          ((T y) (β y))
+            (Function.update (fun b : Fin s => V b y) a (ΓX y (V a y))) := by
+    exact lieDeriv_correctionL_apply_slots (𝕜 := 𝕜) (E := E)
+      (s := s) (ΓX y) ((T y) (β y)) (fun a : Fin s => V a y)
+  have hsum :
+      (∑ a : Fin s,
+          ((T y) (β y))
+            (Function.update
+              (fun b : Fin s => V b y)
+              a
+              (fderivWithin 𝕜 (V a) u y (X y) + ΓX y (V a y)))) =
+        (∑ a : Fin s,
+          ((T y) (β y))
+            (Function.update
+              (fun b : Fin s => V b y)
+              a
+              (fderivWithin 𝕜 (V a) u y (X y)))) +
+        ∑ a : Fin s,
+          ((T y) (β y))
+            (Function.update (fun b : Fin s => V b y) a (ΓX y (V a y))) := by
+    rw [← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl fun a _ => ?_
+    exact ((T y) (β y)).map_update_add
+      (fun b : Fin s => V b y) a
+      (fderivWithin 𝕜 (V a) u y (X y)) (ΓX y (V a y))
+  rw [hβcov, hCorrS, hsum]
+  abel
 
 /-- Smoothness of the fixed-set model covariant derivative of a covariant tensor.
 

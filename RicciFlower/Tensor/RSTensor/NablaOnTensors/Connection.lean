@@ -72,30 +72,6 @@ theorem ContMDiffCovariantDerivative.contMDiff_apply
   rw [← contMDiffOn_univ]
   simpa using hcovY.clm_bundle_apply hX
 
-/-- Local smoothness of the covariant derivative of two chart-constant tangent
-fields.
-
-This is the curvature regularity frontier needed by the Levi-Civita skew
-calculation.  The proof belongs in this tensor/nabla layer: it should be
-deduced from `ContMDiffCovariantDerivativeLocally` and the local-frame
-regularity API for `tangentConstInChart`, not from the Levi-Civita
-construction. -/
-theorem tangentConst_cov_mdiffAt
-    {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-    [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜]
-    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
-    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-    [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I 3 M]
-    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
-    (hcov : ContMDiffCovariantDerivativeLocally cov (1 : WithTop ℕ∞))
-    {x : M} (v w : TangentSpace I x) :
-    MDiffAt
-      (T% (fun p : M =>
-        (cov (TensorLieDeriv.tangentConstInChart (𝕜 := 𝕜) (I := I) x w) p)
-          ((TensorLieDeriv.tangentConstInChart (𝕜 := 𝕜) (I := I) x v) p))) x := by
-  sorry
-
 end CovariantDerivative
 
 namespace TensorLieDeriv
@@ -887,3 +863,74 @@ end TangentCovariantDerivative
 end
 
 end TensorLieDeriv
+
+namespace CovariantDerivative
+
+open Bundle
+open scoped Manifold ContDiff
+
+/-- Local smoothness of the covariant derivative of two chart-constant tangent
+fields.
+
+This is the curvature regularity wrapper needed by the Levi-Civita skew
+calculation.  It is now just a consequence of the local smooth-connection
+predicate and the local-frame smoothness API for `tangentConstInChart`. -/
+theorem tangentConst_cov_mdiffAt
+    {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+    [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I 3 M]
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (hcov : ContMDiffCovariantDerivativeLocally cov (1 : WithTop ℕ∞))
+    {x : M} (v w : TangentSpace I x) :
+    MDiffAt
+      (T% (fun p : M =>
+        (cov (TensorLieDeriv.tangentConstInChart (𝕜 := 𝕜) (I := I) x w) p)
+          ((TensorLieDeriv.tangentConstInChart (𝕜 := 𝕜) (I := I) x v) p))) x := by
+  let e := trivializationAt E (TangentSpace I : M → Type _) x
+  have hx : x ∈ e.baseSet := FiberBundle.mem_baseSet_trivializationAt' x
+  haveI : IsManifold I ((1 : WithTop ℕ∞) + 1) M := by
+    have h : ((1 : WithTop ℕ∞) + 1) = (2 : WithTop ℕ∞) := by
+      norm_num
+    exact h.symm ▸ (inferInstance : IsManifold I 2 M)
+  haveI : IsManifold I (((1 : WithTop ℕ∞) + 1) + 1) M := by
+    have h : (((1 : WithTop ℕ∞) + 1) + 1) = (3 : WithTop ℕ∞) := by
+      norm_num
+    exact h.symm ▸ (inferInstance : IsManifold I 3 M)
+  have hw :
+      CMDiff[e.baseSet] ((1 : WithTop ℕ∞) + 1)
+        (T% (TensorLieDeriv.tangentConstInChart (𝕜 := 𝕜) (I := I) x w :
+          (p : M) → TangentSpace I p)) := by
+    simpa [e] using
+      (TensorLieDeriv.tangentConstInChart_contMDiffOn_baseSet
+        (𝕜 := 𝕜) (I := I) (M := M)
+        (n := (1 : WithTop ℕ∞) + 1) x w)
+  have hcovw :
+      ContMDiffOn I (I.prod 𝓘(𝕜, E →L[𝕜] E)) (1 : WithTop ℕ∞)
+        (fun p : M =>
+          (⟨p, cov (TensorLieDeriv.tangentConstInChart (𝕜 := 𝕜) (I := I) x w) p⟩ :
+            TotalSpace (E →L[𝕜] E)
+              (fun p : M =>
+                TangentSpace I p →L[𝕜] TangentSpace I p)))
+        e.baseSet := by
+    exact (hcov e.open_baseSet).contMDiff hw
+  have hv :
+      CMDiff[e.baseSet] (1 : WithTop ℕ∞)
+        (T% (TensorLieDeriv.tangentConstInChart (𝕜 := 𝕜) (I := I) x v :
+          (p : M) → TangentSpace I p)) := by
+    simpa [e] using
+      (TensorLieDeriv.tangentConstInChart_contMDiffOn_baseSet
+        (𝕜 := 𝕜) (I := I) (M := M)
+        (n := (1 : WithTop ℕ∞)) x v)
+  have h_on :
+      CMDiff[e.baseSet] (1 : WithTop ℕ∞)
+        (T% (fun p : M =>
+          (cov (TensorLieDeriv.tangentConstInChart (𝕜 := 𝕜) (I := I) x w) p)
+            ((TensorLieDeriv.tangentConstInChart (𝕜 := 𝕜) (I := I) x v) p))) := by
+    simpa [e] using hcovw.clm_bundle_apply hv
+  exact ((h_on x hx).contMDiffAt (e.open_baseSet.mem_nhds hx)).mdifferentiableAt
+    (by norm_num : (1 : WithTop ℕ∞) ≠ 0)
+
+end CovariantDerivative

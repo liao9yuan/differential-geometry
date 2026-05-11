@@ -1,5 +1,6 @@
 import RicciFlower.Realized.ScalarBochner
 import RicciFlower.Realized.LeviCivita.Curvature
+import RicciFlower.Realized.LeviCivita.Hessian
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -29,6 +30,7 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
+variable [IsManifold I (⊤ : WithTop ℕ∞) M]
 variable [IsManifold I ((⊤ : WithTop ℕ∞) + 1) M]
 
 /-- Levi-Civita specialization of the bridge from two total covariant
@@ -56,23 +58,25 @@ theorem nabla2OneFormRealizesAt_of_totalNabla_leviCivita
     (leviCivitaConnectionOfMetric (I := I) g) alpha nablaAlpha
     nabla2AlphaSec h1 h2 x
 
-/-- Levi-Civita Hessian symmetry for a function, expressed as trailing-slot
-symmetry of the second covariant derivative of `du`. -/
-theorem oneFormLastTwoSymmAt_of_leviCivita_du
+private theorem traceNablaHessianRealizesDLapAt_of_leviCivita_higherOrder_frontier
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M) (u : M -> Real)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
     (duSec : OneFormSection (I := I) (M := M))
     (nablaDuSec : TwoTensorSection (I := I) (M := M))
-    {x : M}
     (nabla2Du :
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInv)
     (hdu : DuFieldRealizes (I := I) u duSec)
     (hnabla2 : Nabla2OneFormRealizesAt (I := I)
       (leviCivitaConnectionOfMetric (I := I) g) duSec nablaDuSec x nabla2Du) :
-    OneFormLastTwoSymmAt (I := I) nabla2Du := by
-  -- Frontier: unfold the second covariant derivative of `du`, use
-  -- torsion-freeness of `leviCivitaConnectionOfMetric`, and commute scalar
-  -- second derivatives.
+    TraceNablaHessianRealizesDLapAt (I := I)
+      (leviCivitaConnectionOfMetric (I := I) g) g basis gInv u nabla2Du := by
+  -- Frontier: trace the higher-order Hessian derivative and identify it with
+  -- the differential of the scalar Laplacian.  This should be proved after the
+  -- total covariant derivative API supplies the Hessian trace derivative.
   sorry
 
 /-- The trace of the Levi-Civita third covariant derivative of `du` realizes
@@ -92,11 +96,9 @@ theorem traceNablaHessianRealizesDLapAt_of_leviCivita
     (hnabla2 : Nabla2OneFormRealizesAt (I := I)
       (leviCivitaConnectionOfMetric (I := I) g) duSec nablaDuSec x nabla2Du) :
     TraceNablaHessianRealizesDLapAt (I := I)
-      (leviCivitaConnectionOfMetric (I := I) g) g basis gInv u nabla2Du := by
-  -- Frontier: expand the scalar Laplacian as the metric trace of the Hessian,
-  -- then identify the differential of that trace with the trace of
-  -- `nabla Hess u` in the chosen basis.
-  sorry
+      (leviCivitaConnectionOfMetric (I := I) g) g basis gInv u nabla2Du :=
+  traceNablaHessianRealizesDLapAt_of_leviCivita_higherOrder_frontier
+    (I := I) g u basis gInv duSec nablaDuSec nabla2Du hinv hdu hnabla2
 
 /-- Levi-Civita-facing scalar Bochner formula with the geometric LC inputs
 produced internally. -/
@@ -118,6 +120,7 @@ theorem fundamental_bochner_of_leviCivita_terms
     (hRic13 : RicciTensorRealizesRm13Trace (I := I) Ric Rm13)
     (hRic04 : RicciTensorRealizesRm04TraceInFrame (I := I) Ric Rm04 gInvFrame frame)
     (u : M -> Real)
+    (hu : ContMDiff I 𝓘(Real, Real) ∞ u)
     (Hess nablaDu : (x : M) ->
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (roughDu : (x : M) ->
@@ -170,7 +173,7 @@ theorem fundamental_bochner_of_leviCivita_terms
   · exact traceNablaHessianRealizesDLapAt_of_leviCivita (I := I)
       g u basis gInvAt duSec nablaDuSec nabla2Du hinv hdu hnabla2
   · exact oneFormLastTwoSymmAt_of_leviCivita_du (I := I)
-      g u duSec nablaDuSec nabla2Du hdu hnabla2
+      g u hu duSec nablaDuSec nabla2Du hdu hnabla2
   · exact oneFormThirdCovDerivCommAt_of_leviCivita (I := I)
       g Rm13 duSec nablaDuSec (differential1FormFun (I := I) u x)
       nabla2Du hRm13 (by simpa [duField] using hdu x) hnabla2

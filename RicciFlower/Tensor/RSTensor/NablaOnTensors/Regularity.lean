@@ -1,4 +1,5 @@
 import RicciFlower.Tensor.RSTensor.NablaOnTensors.RawDefs
+import RicciFlower.Tensor.RSTensor.Basis
 import RicciFlower.Tensor.Multilinear.Basis
 import RicciFlower.VectorBundle.PartialMfderiv
 
@@ -348,6 +349,628 @@ private theorem fderivWithin_tensor0S_eval_modelSlots_center_eq_extDerivFun {s :
   exact fderivWithin_chart_scalar_eq_extDerivFun
     (I := I) X x₀ φ f hpair heq
 
+private theorem fderivWithin_localTensor0S_eval_modelSlots_center_eq_extDerivFun {s : ℕ}
+    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (β : (x : M) -> Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+      (M := M) s x)
+    (V : Fin s -> (x : M) -> TangentSpace I x) (x₀ : M)
+    (hpair : MDifferentiableAt I 𝓘(𝕜, 𝕜)
+      (fun p : M => β p (fun a : Fin s => V a p)) x₀) :
+    fderivWithin 𝕜
+        (fun y : E =>
+          tensor0SModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+            (M := M) s x₀ β y
+            (fun a : Fin s =>
+              tangentFieldModelInChart (𝕜 := 𝕜) (I := I) x₀ (V a) y))
+        (Set.range I) (extChartAt I x₀ x₀)
+        (VectorField.mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm
+          (fun x => X x) (Set.range I) (extChartAt I x₀ x₀)) =
+      extDerivFun (I := I) (fun p : M => β p (fun a : Fin s => V a p))
+        x₀ (X x₀) := by
+  let φ : E -> 𝕜 :=
+    fun y : E =>
+      tensor0SModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+        (M := M) s x₀ β y
+        (fun a : Fin s =>
+          tangentFieldModelInChart (𝕜 := 𝕜) (I := I) x₀ (V a) y)
+  let f : M -> 𝕜 := fun p : M => β p (fun a : Fin s => V a p)
+  have heq :
+      φ =ᶠ[𝓝[Set.range I] (extChartAt I x₀ x₀)]
+        writtenInExtChartAt I 𝓘(𝕜, 𝕜) x₀ f := by
+    filter_upwards [extChartAt_target_mem_nhdsWithin (I := I) x₀] with y hy
+    have hleft : (extChartAt I x₀).symm y ∈ (extChartAt I x₀).source :=
+      (extChartAt I x₀).map_target hy
+    have hbase :
+        (extChartAt I x₀).symm y ∈
+          (trivializationAt E (TangentSpace I : M -> Type _) x₀).baseSet := by
+      simpa [TangentBundle.trivializationAt_baseSet, extChartAt_source] using hleft
+    simp only [φ, f, writtenInExtChartAt, Function.comp_apply, ext_chart_model_space_apply]
+    rw [tensor0SModelInChart_apply]
+    congr
+    funext a
+    unfold tangentFieldModelInChart
+    exact (trivializationAt E (TangentSpace I : M -> Type _) x₀).symmL_continuousLinearMapAt
+      (R := 𝕜) hbase (V a ((extChartAt I x₀).symm y))
+  exact fderivWithin_chart_scalar_eq_extDerivFun
+    (I := I) X x₀ φ f hpair heq
+
+set_option backward.isDefEq.respectTransparency false in
+private theorem fderivWithin_tensorRS_eval_modelSlots_center_eq_extDerivFun {r s : ℕ}
+    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := (⊤ : WithTop ℕ∞)) r s)
+    (β : (x : M) -> Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+      (M := M) r x)
+    (V : Fin s -> (x : M) -> TangentSpace I x) (x₀ : M)
+    (hpair : MDifferentiableAt I 𝓘(𝕜, 𝕜)
+      (fun p : M => (T p (β p)) (fun a : Fin s => V a p)) x₀) :
+    fderivWithin 𝕜
+        (fun y : E =>
+          (tensorRSModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+              (M := M) r s x₀ (fun x => T x) y
+            (tensor0SModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+              (M := M) r x₀ β y))
+            (fun a : Fin s =>
+              tangentFieldModelInChart (𝕜 := 𝕜) (I := I) x₀ (V a) y))
+        (Set.range I) (extChartAt I x₀ x₀)
+        (VectorField.mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm
+          (fun x => X x) (Set.range I) (extChartAt I x₀ x₀)) =
+      extDerivFun (I := I) (fun p : M => (T p (β p)) (fun a : Fin s => V a p))
+        x₀ (X x₀) := by
+  letI : NormedSpace 𝕜 (Tensor0SModel r 𝕜 E) := inferInstance
+  let φ : E -> 𝕜 :=
+    fun y : E =>
+      (tensorRSModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+          (M := M) r s x₀ (fun x => T x) y
+        (tensor0SModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+          (M := M) r x₀ β y))
+        (fun a : Fin s =>
+          tangentFieldModelInChart (𝕜 := 𝕜) (I := I) x₀ (V a) y)
+  let f : M -> 𝕜 := fun p : M => (T p (β p)) (fun a : Fin s => V a p)
+  have heq :
+      φ =ᶠ[𝓝[Set.range I] (extChartAt I x₀ x₀)]
+        writtenInExtChartAt I 𝓘(𝕜, 𝕜) x₀ f := by
+    filter_upwards [extChartAt_target_mem_nhdsWithin (I := I) x₀] with y hy
+    have hleft : (extChartAt I x₀).symm y ∈ (extChartAt I x₀).source :=
+      (extChartAt I x₀).map_target hy
+    have hbase :
+        (extChartAt I x₀).symm y ∈
+          (trivializationAt E (TangentSpace I : M -> Type _) x₀).baseSet := by
+      simpa [TangentBundle.trivializationAt_baseSet, extChartAt_source] using hleft
+    simp only [φ, f, writtenInExtChartAt, Function.comp_apply, ext_chart_model_space_apply]
+    unfold tensorRSModelInChart tensorRSModelAt
+    rw [TensorRSSpace.trivializationAt_apply]
+    · congr 2
+      · unfold tensor0SModelInChart tensor0SModelAt
+        let eβ := trivializationAt (Tensor0SModel r 𝕜 E)
+          (fun x => Tensor0SSpace r I x) x₀
+        let p := (extChartAt I x₀).symm y
+        have hbaseβ : p ∈ eβ.baseSet := hbase
+        change eβ.symmL 𝕜 p ((eβ ⟨p, β p⟩).2) = β p
+        have hcoord : (eβ ⟨p, β p⟩).2 = eβ.continuousLinearMapAt 𝕜 p (β p) := by
+          rw [Bundle.Trivialization.continuousLinearMapAt_apply]
+          rw [eβ.coe_linearMapAt_of_mem (R := 𝕜) hbaseβ]
+        rw [hcoord]
+        exact eβ.symmL_continuousLinearMapAt (R := 𝕜) hbaseβ (β p)
+      · funext a
+        unfold tangentFieldModelInChart
+        exact (trivializationAt E (TangentSpace I : M -> Type _) x₀).symmL_continuousLinearMapAt
+          (R := 𝕜) hbase (V a ((extChartAt I x₀).symm y))
+    · exact hbase
+  exact fderivWithin_chart_scalar_eq_extDerivFun
+    (I := I) X x₀ φ f hpair heq
+
+private noncomputable def localCovariantDerivTensor0SAt (r : ℕ)
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (β : (x : M) -> Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+      (M := M) r x)
+    (x₀ : M) : Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r x₀ :=
+  (trivializationAt (Tensor0SModel r 𝕜 E)
+      (fun x => Tensor0SSpace r I x) x₀).symm x₀
+    (covariantDeriv_tensor0SModelWithin (𝕜 := 𝕜) (E := E) r
+      (VectorField.mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm
+        (fun x => X x) (Set.range I))
+      (connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀)
+      (tensor0SModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+        (M := M) r x₀ β)
+      (Set.range I) (extChartAt I x₀ x₀))
+
+set_option backward.isDefEq.respectTransparency false in
+private theorem localCovariantDerivTensor0SAt_eval_moving_raw {r : ℕ}
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (β : (x : M) -> Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+      (M := M) r x)
+    (V : Fin r -> (x : M) -> TangentSpace I x) (x₀ : M)
+    (hpair : MDifferentiableAt I 𝓘(𝕜, 𝕜)
+      (fun p : M => β p (fun a : Fin r => V a p)) x₀)
+    (hβmodel : DifferentiableWithinAt 𝕜
+      (tensor0SModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+        (M := M) r x₀ β)
+      (Set.range I) (extChartAt I x₀ x₀))
+    (hV : ∀ a : Fin r, MDiffAt (T% (V a)) x₀)
+    (hVmodel : ∀ a : Fin r,
+      DifferentiableWithinAt 𝕜
+        (tangentFieldModelInChart (𝕜 := 𝕜) (I := I) x₀ (V a))
+        (Set.range I) (extChartAt I x₀ x₀))
+    (hcoord : ∀ a : Fin r, ∀ i : Fin (Module.finrank 𝕜 E),
+      MDifferentiableAt I 𝓘(𝕜, 𝕜)
+        (fun p : M =>
+          (Module.finBasis 𝕜 E).coord i
+            (tangentFieldModelInChart (𝕜 := 𝕜) (I := I) x₀ (V a)
+              (extChartAt I x₀ p))) x₀) :
+    (localCovariantDerivTensor0SAt
+      (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r cov X β x₀)
+      (fun a : Fin r => V a x₀) =
+      extDerivFun (I := I) (fun p : M => β p (fun a : Fin r => V a p))
+        x₀ (X x₀) -
+        ∑ a : Fin r,
+          β x₀
+            (Function.update (fun b : Fin r => V b x₀) a
+              ((cov (V a) x₀) (X x₀))) := by
+  classical
+  let y₀ : E := extChartAt I x₀ x₀
+  let Xmodel : E :=
+    VectorField.mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm
+      (fun x => X x) (Set.range I) y₀
+  let βm : E -> Tensor0SModel (𝕜 := 𝕜) (E := E) r :=
+    tensor0SModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+      (M := M) r x₀ β
+  let Vm : Fin r -> E -> E :=
+    fun a => tangentFieldModelInChart (𝕜 := 𝕜) (I := I) x₀ (V a)
+  let Γ : E →L[𝕜] E :=
+    connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀ y₀
+  let slots : Fin r -> E := fun a => Vm a y₀
+  have hprod :=
+    fderivWithin_tensor0SModel_eval_slots
+      (𝕜 := 𝕜) (E := E) (s := r) βm Vm (Set.range I) y₀ Xmodel
+      hβmodel hVmodel
+      (I.uniqueDiffOn y₀
+        (extChartAt_target_subset_range x₀ (mem_extChartAt_target (I := I) x₀)))
+  have hpair_deriv :
+      fderivWithin 𝕜 (fun y : E => βm y (fun a : Fin r => Vm a y))
+          (Set.range I) y₀ Xmodel =
+        extDerivFun (I := I) (fun p : M => β p (fun a : Fin r => V a p))
+          x₀ (X x₀) := by
+    simpa [βm, Vm, Xmodel, y₀] using
+      fderivWithin_localTensor0S_eval_modelSlots_center_eq_extDerivFun
+        (I := I) X β V x₀ hpair
+  have hcov_model : ∀ a : Fin r,
+      tangentFieldModelInChart (𝕜 := 𝕜) (I := I) x₀
+          (fun p : M => (cov (V a) p) (X p)) y₀ =
+        fderivWithin 𝕜 (Vm a) (Set.range I) y₀ Xmodel + Γ (slots a) := by
+    intro a
+    simpa [Vm, Xmodel, Γ, slots, y₀] using
+      covariantDerivative_modelInChart_center_eq_fderiv_plus_connection
+        (I := I) cov X (V a) x₀ (hV a) (hVmodel a) (hcoord a)
+  have hslots_center :
+      (fun a : Fin r =>
+        (trivializationAt E (TangentSpace I : M -> Type _) x₀).symmL 𝕜 x₀
+          (slots a)) =
+        fun a : Fin r => V a x₀ := by
+    funext a
+    simpa [slots, Vm] using tangentFieldModelInChart_center_symmL (I := I) (V a) x₀
+  have hleft_model :
+      (localCovariantDerivTensor0SAt
+        (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r cov X β x₀)
+        (fun a : Fin r => V a x₀) =
+      (covariantDeriv_tensor0SModelWithin (𝕜 := 𝕜) (E := E) r
+        (VectorField.mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm
+          (fun x => X x) (Set.range I))
+        (connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀)
+        βm (Set.range I) y₀) slots := by
+    let eβ := trivializationAt (Tensor0SModel r 𝕜 E)
+      (fun x => Tensor0SSpace r I x) x₀
+    let Mβ : Tensor0SModel r 𝕜 E :=
+      covariantDeriv_tensor0SModelWithin (𝕜 := 𝕜) (E := E) r
+        (VectorField.mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm
+          (fun x => X x) (Set.range I))
+        (connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀)
+        βm (Set.range I) y₀
+    have hcoordEval :
+        ((eβ ⟨x₀, localCovariantDerivTensor0SAt
+          (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r cov X β x₀⟩).2)
+            slots =
+          (localCovariantDerivTensor0SAt
+            (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r cov X β x₀)
+            (fun a : Fin r => V a x₀) := by
+      have h := Tensor0SSpace.trivializationAt_apply
+        (𝕜 := 𝕜) (I := I) (x₀ := x₀) (x := x₀) r
+        (FiberBundle.mem_baseSet_trivializationAt' x₀)
+        (localCovariantDerivTensor0SAt
+          (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r cov X β x₀)
+        slots
+      rw [hslots_center] at h
+      exact h
+    have hmodel :
+        (eβ ⟨x₀, localCovariantDerivTensor0SAt
+          (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r cov X β x₀⟩).2 =
+          Mβ := by
+      unfold localCovariantDerivTensor0SAt
+      change (eβ ⟨x₀, eβ.symm x₀ Mβ⟩).2 = Mβ
+      rw [eβ.apply_mk_symm
+        (mem_baseSet_trivializationAt (Tensor0SModel r 𝕜 E)
+          (fun x => Tensor0SSpace r I x) x₀)]
+    calc
+      (localCovariantDerivTensor0SAt
+        (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r cov X β x₀)
+        (fun a : Fin r => V a x₀)
+          = ((eβ ⟨x₀, localCovariantDerivTensor0SAt
+              (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r cov X β x₀⟩).2)
+              slots := hcoordEval.symm
+      _ = Mβ slots := by rw [hmodel]
+  have hcorr_sum :
+      ∑ a : Fin r,
+        βm y₀
+          (Function.update slots a
+            (fderivWithin 𝕜 (Vm a) (Set.range I) y₀ Xmodel + Γ (slots a))) =
+      ∑ a : Fin r,
+        β x₀
+          (Function.update (fun b : Fin r => V b x₀) a
+            ((cov (V a) x₀) (X x₀))) := by
+    refine Finset.sum_congr rfl fun a _ => ?_
+    rw [← hcov_model a]
+    exact tensor0SModelInChart_apply_update_modelSlot_center
+      (I := I) β V (fun p : M => (cov (V a) p) (X p)) x₀ a
+  calc
+    (localCovariantDerivTensor0SAt
+      (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r cov X β x₀)
+      (fun a : Fin r => V a x₀)
+        =
+      (covariantDeriv_tensor0SModelWithin (𝕜 := 𝕜) (E := E) r
+        (VectorField.mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm
+          (fun x => X x) (Set.range I))
+        (connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀)
+        βm (Set.range I) y₀) slots := hleft_model
+    _ =
+      fderivWithin 𝕜 βm (Set.range I) y₀ Xmodel slots -
+        ∑ a : Fin r, βm y₀ (Function.update slots a (Γ (slots a))) := by
+          simp [covariantDeriv_tensor0SModelWithin_apply_slots, βm, Xmodel, Γ, slots, y₀]
+    _ =
+      extDerivFun (I := I) (fun p : M => β p (fun a : Fin r => V a p))
+          x₀ (X x₀) -
+        ∑ a : Fin r,
+          βm y₀
+            (Function.update slots a
+              (fderivWithin 𝕜 (Vm a) (Set.range I) y₀ Xmodel + Γ (slots a))) := by
+          rw [← hpair_deriv]
+          rw [hprod]
+          simp_rw [(βm y₀).map_update_add]
+          rw [Finset.sum_add_distrib]
+          abel
+    _ =
+      extDerivFun (I := I) (fun p : M => β p (fun a : Fin r => V a p))
+          x₀ (X x₀) -
+        ∑ a : Fin r,
+          β x₀
+            (Function.update (fun b : Fin r => V b x₀) a
+              ((cov (V a) x₀) (X x₀))) := by
+          rw [hcorr_sum]
+
+set_option backward.isDefEq.respectTransparency false in
+private theorem tensorRSModelInChart_apply_modelSlots_center {r s : ℕ}
+    (A : (x : M) -> TensorRSSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+      (M := M) r s x)
+    (βm : Tensor0SModel r 𝕜 E) (slots : Fin s -> E) (x₀ : M) :
+    (tensorRSModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        r s x₀ A (extChartAt I x₀ x₀) βm) slots =
+      (A x₀
+        ((trivializationAt (Tensor0SModel r 𝕜 E)
+          (fun x => Tensor0SSpace r I x) x₀).symmL 𝕜 x₀ βm))
+        (fun a : Fin s =>
+          (trivializationAt E (TangentSpace I : M -> Type _) x₀).symmL 𝕜 x₀
+            (slots a)) := by
+  rw [tensorRSModelInChart, extChartAt_to_inv]
+  exact TensorRSSpace.trivializationAt_apply
+    (𝕜 := 𝕜) (I := I) (x₀ := x₀) (x := x₀) r s
+    (FiberBundle.mem_baseSet_trivializationAt' x₀) (A x₀) βm slots
+
+set_option backward.isDefEq.respectTransparency false in
+private theorem tensorRSModelInChart_apply_update_modelOutputSlot_center {r s : ℕ}
+    (A : (x : M) -> TensorRSSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+      (M := M) r s x)
+    (β : (x : M) -> Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+      (M := M) r x)
+    (V : Fin s -> (x : M) -> TangentSpace I x)
+    (W : (x : M) -> TangentSpace I x) (x₀ : M) (a : Fin s) :
+    (tensorRSModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        r s x₀ A (extChartAt I x₀ x₀)
+        (tensor0SModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+          (M := M) r x₀ β (extChartAt I x₀ x₀)))
+        (Function.update
+          (fun b : Fin s =>
+            tangentFieldModelInChart (𝕜 := 𝕜) (I := I) x₀ (V b)
+              (extChartAt I x₀ x₀))
+          a
+          (tangentFieldModelInChart (𝕜 := 𝕜) (I := I) x₀ W
+            (extChartAt I x₀ x₀))) =
+      (A x₀ (β x₀)) (Function.update (fun b : Fin s => V b x₀) a (W x₀)) := by
+  rw [tensorRSModelInChart_apply_modelSlots_center]
+  have hβ :
+      (trivializationAt (Tensor0SModel r 𝕜 E)
+        (fun x => Tensor0SSpace r I x) x₀).symmL 𝕜 x₀
+          (tensor0SModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+            (M := M) r x₀ β (extChartAt I x₀ x₀)) =
+        β x₀ := by
+    unfold tensor0SModelInChart tensor0SModelAt
+    rw [extChartAt_to_inv]
+    let eβ := trivializationAt (Tensor0SModel r 𝕜 E)
+      (fun x => Tensor0SSpace r I x) x₀
+    change eβ.symmL 𝕜 x₀ ((eβ ⟨x₀, β x₀⟩).2) = β x₀
+    have hcoord : (eβ ⟨x₀, β x₀⟩).2 = eβ.continuousLinearMapAt 𝕜 x₀ (β x₀) := by
+      rw [Bundle.Trivialization.continuousLinearMapAt_apply]
+      rw [eβ.coe_linearMapAt_of_mem (R := 𝕜)
+        (FiberBundle.mem_baseSet_trivializationAt' x₀)]
+    rw [hcoord]
+    exact eβ.symmL_continuousLinearMapAt (R := 𝕜)
+      (FiberBundle.mem_baseSet_trivializationAt' x₀) (β x₀)
+  have hslots :
+      (fun b : Fin s =>
+        (trivializationAt E (TangentSpace I : M -> Type _) x₀).symmL 𝕜 x₀
+          ((Function.update
+            (fun b : Fin s =>
+              tangentFieldModelInChart (𝕜 := 𝕜) (I := I) x₀ (V b)
+                (extChartAt I x₀ x₀))
+            a
+            (tangentFieldModelInChart (𝕜 := 𝕜) (I := I) x₀ W
+              (extChartAt I x₀ x₀))) b)) =
+        Function.update (fun b : Fin s => V b x₀) a (W x₀) := by
+    funext b
+    by_cases hb : b = a
+    · subst hb
+      simp only [Function.update_self]
+      exact tangentFieldModelInChart_center_symmL (I := I) W x₀
+    · simp only [Function.update_of_ne hb]
+      exact tangentFieldModelInChart_center_symmL (I := I) (V b) x₀
+  rw [hβ, hslots]
+
+set_option backward.isDefEq.respectTransparency false in
+private theorem nablaRSFun_eval_moving_raw {r s : ℕ}
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := (⊤ : WithTop ℕ∞)) r s)
+    (β : (x : M) -> Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+      (M := M) r x)
+    (V : Fin s -> (x : M) -> TangentSpace I x) (x₀ : M)
+    (hpair : MDifferentiableAt I 𝓘(𝕜, 𝕜)
+      (fun p : M => (T p (β p)) (fun a : Fin s => V a p)) x₀)
+    (hβmodel : DifferentiableWithinAt 𝕜
+      (tensor0SModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+        (M := M) r x₀ β)
+      (Set.range I) (extChartAt I x₀ x₀))
+    (hV : ∀ a : Fin s, MDiffAt (T% (V a)) x₀)
+    (hVmodel : ∀ a : Fin s,
+      DifferentiableWithinAt 𝕜
+        (tangentFieldModelInChart (𝕜 := 𝕜) (I := I) x₀ (V a))
+        (Set.range I) (extChartAt I x₀ x₀))
+    (hcoord : ∀ a : Fin s, ∀ i : Fin (Module.finrank 𝕜 E),
+      MDifferentiableAt I 𝓘(𝕜, 𝕜)
+        (fun p : M =>
+          (Module.finBasis 𝕜 E).coord i
+            (tangentFieldModelInChart (𝕜 := 𝕜) (I := I) x₀ (V a)
+              (extChartAt I x₀ p))) x₀) :
+    (nablaRSFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      r s cov X T x₀) (β x₀) (fun a : Fin s => V a x₀) =
+      extDerivFun (I := I) (fun p : M => (T p (β p)) (fun a : Fin s => V a p))
+        x₀ (X x₀) -
+        (T x₀ (localCovariantDerivTensor0SAt
+          (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r cov X β x₀))
+          (fun a : Fin s => V a x₀) -
+        ∑ a : Fin s,
+          (T x₀ (β x₀))
+            (Function.update (fun b : Fin s => V b x₀) a
+              ((cov (V a) x₀) (X x₀))) := by
+  classical
+  let y₀ : E := extChartAt I x₀ x₀
+  let Xmodel : E :=
+    VectorField.mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm
+      (fun x => X x) (Set.range I) y₀
+  let Tm : E -> TensorRSModel r s 𝕜 E :=
+    tensorRSModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+      (M := M) r s x₀ (fun x => T x)
+  let βm : E -> Tensor0SModel r 𝕜 E :=
+    tensor0SModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+      (M := M) r x₀ β
+  let Vm : Fin s -> E -> E :=
+    fun a => tangentFieldModelInChart (𝕜 := 𝕜) (I := I) x₀ (V a)
+  let Γ : E →L[𝕜] E :=
+    connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀ y₀
+  let slots : Fin s -> E := fun a => Vm a y₀
+  have hTdiff : DifferentiableWithinAt 𝕜 Tm (Set.range I) y₀ := by
+    have hcd := (T.contMDiff x₀)
+    rw [contMDiffAt_section] at hcd
+    have hsymm :
+        ContMDiffWithinAt 𝓘(𝕜, E) I (⊤ : WithTop ℕ∞)
+          (extChartAt I x₀).symm (Set.range I) y₀ := by
+      simpa [y₀] using
+        contMDiffWithinAt_extChartAt_symm_range_self
+          (I := I) (n := (⊤ : WithTop ℕ∞)) x₀
+    have hmodel_center :
+        ContMDiffAt I 𝓘(𝕜, TensorRSModel r s 𝕜 E) (⊤ : WithTop ℕ∞)
+          (fun x : M => tensorRSModelAt (𝕜 := 𝕜) (E := E) (H := H)
+            (I := I) (M := M) r s x₀ x (T x))
+          ((extChartAt I x₀).symm y₀) := by
+      simpa [tensorRSModelAt, y₀, extChartAt_to_inv] using hcd
+    have hcomp := ContMDiffAt.comp_contMDiffWithinAt
+      (I := 𝓘(𝕜, E)) (I' := I)
+      (I'' := 𝓘(𝕜, TensorRSModel r s 𝕜 E))
+      (x := y₀) hmodel_center hsymm
+    have hdiff := hcomp.contDiffWithinAt.differentiableWithinAt (by simp)
+    simpa [Tm, tensorRSModelInChart, y₀] using hdiff
+  have hprod := covariantDeriv_tensorRSModelWithin_eval_derivation
+    (𝕜 := 𝕜) (E := E) (r := r) (s := s)
+    Tm βm Vm
+    (VectorField.mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm
+      (fun x => X x) (Set.range I))
+    (connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀)
+    (Set.range I) y₀ hTdiff hβmodel hVmodel
+    (I.uniqueDiffOn y₀
+      (extChartAt_target_subset_range x₀ (mem_extChartAt_target (I := I) x₀)))
+  have hpair_deriv :
+      fderivWithin 𝕜 (fun y : E => (Tm y (βm y)) (fun a : Fin s => Vm a y))
+          (Set.range I) y₀ Xmodel =
+        extDerivFun (I := I) (fun p : M => (T p (β p)) (fun a : Fin s => V a p))
+          x₀ (X x₀) := by
+    simpa [Tm, βm, Vm, Xmodel, y₀] using
+      fderivWithin_tensorRS_eval_modelSlots_center_eq_extDerivFun
+        (I := I) X T β V x₀ hpair
+  have hcov_model : ∀ a : Fin s,
+      tangentFieldModelInChart (𝕜 := 𝕜) (I := I) x₀
+          (fun p : M => (cov (V a) p) (X p)) y₀ =
+        fderivWithin 𝕜 (Vm a) (Set.range I) y₀ Xmodel + Γ (slots a) := by
+    intro a
+    simpa [Vm, Xmodel, Γ, slots, y₀] using
+      covariantDerivative_modelInChart_center_eq_fderiv_plus_connection
+        (I := I) cov X (V a) x₀ (hV a) (hVmodel a) (hcoord a)
+  have hslots_center :
+      (fun a : Fin s =>
+        (trivializationAt E (TangentSpace I : M -> Type _) x₀).symmL 𝕜 x₀
+          (slots a)) =
+        fun a : Fin s => V a x₀ := by
+    funext a
+    simpa [slots, Vm] using tangentFieldModelInChart_center_symmL (I := I) (V a) x₀
+  have hleft_model :
+      (nablaRSFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        r s cov X T x₀) (β x₀) (fun a : Fin s => V a x₀) =
+        (covariantDeriv_tensorRSModelWithin (𝕜 := 𝕜) (E := E) r s
+          (VectorField.mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm
+            (fun x => X x) (Set.range I))
+          (connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀)
+          Tm (Set.range I) y₀ (βm y₀)) slots := by
+    let eRS := trivializationAt (TensorRSModel r s 𝕜 E)
+      (fun x => TensorRSSpace r s I x) x₀
+    let F₀ : TensorRSSpace r s I x₀ :=
+      nablaRSFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        r s cov X T x₀
+    let MRS : TensorRSModel r s 𝕜 E :=
+      covariantDeriv_tensorRSModelWithin (𝕜 := 𝕜) (E := E) r s
+        (VectorField.mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm
+          (fun x => X x) (Set.range I))
+        (connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀)
+        Tm (Set.range I) y₀
+    have hβcenter :
+        (trivializationAt (Tensor0SModel r 𝕜 E)
+          (fun x => Tensor0SSpace r I x) x₀).symmL 𝕜 x₀ (βm y₀) =
+          β x₀ := by
+      unfold βm tensor0SModelInChart tensor0SModelAt
+      rw [extChartAt_to_inv]
+      let eβ := trivializationAt (Tensor0SModel r 𝕜 E)
+        (fun x => Tensor0SSpace r I x) x₀
+      change eβ.symmL 𝕜 x₀ ((eβ ⟨x₀, β x₀⟩).2) = β x₀
+      have hcoord : (eβ ⟨x₀, β x₀⟩).2 = eβ.continuousLinearMapAt 𝕜 x₀ (β x₀) := by
+        rw [Bundle.Trivialization.continuousLinearMapAt_apply]
+        rw [eβ.coe_linearMapAt_of_mem (R := 𝕜)
+          (FiberBundle.mem_baseSet_trivializationAt' x₀)]
+      rw [hcoord]
+      exact eβ.symmL_continuousLinearMapAt (R := 𝕜)
+        (FiberBundle.mem_baseSet_trivializationAt' x₀) (β x₀)
+    have hcoordEval :
+        ((eRS ⟨x₀, F₀⟩).2 (βm y₀)) slots =
+          F₀ (β x₀) (fun a : Fin s => V a x₀) := by
+      have h := TensorRSSpace.trivializationAt_apply
+        (𝕜 := 𝕜) (I := I) (x₀ := x₀) (x := x₀) r s
+        (FiberBundle.mem_baseSet_trivializationAt' x₀) F₀ (βm y₀) slots
+      rw [hβcenter, hslots_center] at h
+      exact h
+    have hmodel :
+        (eRS ⟨x₀, F₀⟩).2 = MRS := by
+      unfold F₀ MRS nablaRSFun TensorLieDeriv.mcovariantDeriv_tensorRSFromConnection
+        TensorLieDeriv.mcovariantDeriv_tensorRSWithinFromConnection
+        TensorLieDeriv.mcovariantDeriv_tensorRSWithin
+      change (eRS ⟨x₀, eRS.symm x₀
+        (covariantDeriv_tensorRSModelWithin (𝕜 := 𝕜) (E := E) r s
+          (VectorField.mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm
+            (fun x => X x) (Set.range I))
+          (connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀)
+          (tensorRSModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+            (M := M) r s x₀ (fun x => T x))
+          ((extChartAt I x₀).symm ⁻¹' Set.univ ∩ Set.range I)
+          (extChartAt I x₀ x₀))⟩).2 = MRS
+      rw [eRS.apply_mk_symm
+        (mem_baseSet_trivializationAt (TensorRSModel r s 𝕜 E)
+          (fun x => TensorRSSpace r s I x) x₀)]
+      simp [MRS, Tm, y₀]
+    calc
+      F₀ (β x₀) (fun a : Fin s => V a x₀)
+          = ((eRS ⟨x₀, F₀⟩).2 (βm y₀)) slots := hcoordEval.symm
+      _ = (MRS (βm y₀)) slots := by rw [hmodel]
+  have hinput :
+      (Tm y₀
+        (covariantDeriv_tensor0SModelWithin (𝕜 := 𝕜) (E := E) r
+          (VectorField.mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm
+            (fun x => X x) (Set.range I))
+          (connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀)
+          βm (Set.range I) y₀)) slots =
+        (T x₀ (localCovariantDerivTensor0SAt
+          (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r cov X β x₀))
+          (fun a : Fin s => V a x₀) := by
+    have h := tensorRSModelInChart_apply_modelSlots_center
+      (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (r := r) (s := s) (A := fun x => T x)
+      (βm := covariantDeriv_tensor0SModelWithin (𝕜 := 𝕜) (E := E) r
+        (VectorField.mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm
+          (fun x => X x) (Set.range I))
+        (connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀)
+        βm (Set.range I) y₀)
+      (slots := slots) x₀
+    rw [hslots_center] at h
+    simpa [Tm, βm, localCovariantDerivTensor0SAt, Xmodel, Γ, y₀] using h
+  have houtput_sum :
+      (∑ a : Fin s,
+        (Tm y₀ (βm y₀))
+          (Function.update (fun b : Fin s => Vm b y₀) a
+            (fderivWithin 𝕜 (Vm a) (Set.range I) y₀ Xmodel + Γ (Vm a y₀)))) =
+        ∑ a : Fin s,
+          (T x₀ (β x₀))
+            (Function.update (fun b : Fin s => V b x₀) a
+              ((cov (V a) x₀) (X x₀))) := by
+    refine Finset.sum_congr rfl fun a _ => ?_
+    rw [← hcov_model a]
+    simpa [Tm, βm, Vm, slots, y₀] using
+      tensorRSModelInChart_apply_update_modelOutputSlot_center
+        (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        (r := r) (s := s) (A := fun x => T x) (β := β)
+        (V := V) (W := fun p : M => (cov (V a) p) (X p)) x₀ a
+  calc
+    (nablaRSFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      r s cov X T x₀) (β x₀) (fun a : Fin s => V a x₀)
+        =
+      (covariantDeriv_tensorRSModelWithin (𝕜 := 𝕜) (E := E) r s
+          (VectorField.mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm
+            (fun x => X x) (Set.range I))
+          (connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀)
+          Tm (Set.range I) y₀ (βm y₀)) slots := hleft_model
+    _ =
+      fderivWithin 𝕜 (fun y : E => (Tm y (βm y)) (fun a : Fin s => Vm a y))
+          (Set.range I) y₀ Xmodel -
+        (Tm y₀
+          (covariantDeriv_tensor0SModelWithin (𝕜 := 𝕜) (E := E) r
+            (VectorField.mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm
+              (fun x => X x) (Set.range I))
+            (connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀)
+            βm (Set.range I) y₀))
+          (fun a : Fin s => Vm a y₀) -
+        ∑ a : Fin s,
+          (Tm y₀ (βm y₀))
+            (Function.update
+              (fun b : Fin s => Vm b y₀)
+              a
+              (fderivWithin 𝕜 (Vm a) (Set.range I) y₀ Xmodel + Γ (Vm a y₀))) := by
+          simpa [Xmodel, Γ, slots] using hprod
+    _ =
+      extDerivFun (I := I) (fun p : M => (T p (β p)) (fun a : Fin s => V a p))
+          x₀ (X x₀) -
+        (T x₀ (localCovariantDerivTensor0SAt
+          (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r cov X β x₀))
+          (fun a : Fin s => V a x₀) -
+        ∑ a : Fin s,
+          (T x₀ (β x₀))
+            (Function.update (fun b : Fin s => V b x₀) a
+              ((cov (V a) x₀) (X x₀))) := by
+          rw [hpair_deriv, hinput, houtput_sum]
+
 set_option backward.isDefEq.respectTransparency false in
 /-- Pointwise moving-slot derivation formula for `nabla0SFun` in arbitrary
 covariant valence.
@@ -616,6 +1239,168 @@ private theorem tangentFieldModelInChart_coord_mdiffAt_center_of_contMDiffAt
   exact (hscalar.congr_of_eventuallyEq heq).mdifferentiableAt (by simp)
 
 set_option backward.isDefEq.respectTransparency false in
+private theorem tensor0SConstInChart_contMDiffAt_of_mem {r : ℕ}
+    (x₀ : M) (β : Tensor0SModel r 𝕜 E) {x : M}
+    (hx : x ∈ (trivializationAt (Tensor0SModel r 𝕜 E)
+      (fun p : M => Tensor0SSpace r I p) x₀).baseSet) :
+    ContMDiffAt I (I.prod 𝓘(𝕜, Tensor0SModel r 𝕜 E)) (∞ : WithTop ℕ∞)
+      (fun p : M =>
+        (⟨p, Tensor0SSpace.constInChart
+          (𝕜 := 𝕜) (I := I) (M := M) r x₀ β p⟩ :
+          TotalSpace (Tensor0SModel r 𝕜 E)
+            (fun p : M => Tensor0SSpace r I p))) x := by
+  let e := trivializationAt (Tensor0SModel r 𝕜 E)
+    (fun p : M => Tensor0SSpace r I p) x₀
+  have hx' : x ∈ e.baseSet := by simpa [e] using hx
+  refine (e.contMDiffAt_section_iff hx').mpr ?_
+  have hconst : ContMDiffAt I 𝓘(𝕜, Tensor0SModel r 𝕜 E) (∞ : WithTop ℕ∞)
+      (fun _ : M => β) x := contMDiffAt_const
+  refine hconst.congr_of_eventuallyEq ?_
+  filter_upwards [e.open_baseSet.mem_nhds hx'] with p hp
+  have hcoe : ⇑(e.linearMapAt 𝕜 p) = fun z => (e ⟨p, z⟩).2 :=
+    e.coe_linearMapAt_of_mem (R := 𝕜) hp
+  change (e ⟨p, e.symmL 𝕜 p β⟩).2 = β
+  simpa [Bundle.Trivialization.continuousLinearMapAt_apply, hcoe] using
+    (e.continuousLinearMapAt_symmL (R := 𝕜) hp β)
+
+set_option backward.isDefEq.respectTransparency false in
+private theorem tensor0SConstInChart_contMDiffAt {r : ℕ}
+    (x₀ : M) (β : Tensor0SModel r 𝕜 E) :
+    ContMDiffAt I (I.prod 𝓘(𝕜, Tensor0SModel r 𝕜 E)) (∞ : WithTop ℕ∞)
+      (fun p : M =>
+        (⟨p, Tensor0SSpace.constInChart
+          (𝕜 := 𝕜) (I := I) (M := M) r x₀ β p⟩ :
+          TotalSpace (Tensor0SModel r 𝕜 E)
+            (fun p : M => Tensor0SSpace r I p))) x₀ := by
+  exact tensor0SConstInChart_contMDiffAt_of_mem
+    (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+    x₀ β (mem_baseSet_trivializationAt
+      (Tensor0SModel r 𝕜 E) (fun p : M => Tensor0SSpace r I p) x₀)
+
+set_option backward.isDefEq.respectTransparency false in
+private theorem tensor0SModelInChart_contDiffWithinAt_center_of_contMDiffAt {r : ℕ}
+    (β : (x : M) -> Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+      (M := M) r x)
+    (x₀ : M)
+    (hβ : ContMDiffAt I (I.prod 𝓘(𝕜, Tensor0SModel r 𝕜 E))
+      (∞ : WithTop ℕ∞)
+      (fun p : M =>
+        (⟨p, β p⟩ :
+          TotalSpace (Tensor0SModel r 𝕜 E)
+            (fun p : M => Tensor0SSpace r I p))) x₀) :
+    ContDiffWithinAt 𝕜 (∞ : WithTop ℕ∞)
+      (tensor0SModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+        (M := M) r x₀ β)
+      (Set.range I) (extChartAt I x₀ x₀) := by
+  let e := trivializationAt (Tensor0SModel r 𝕜 E)
+    (fun p : M => Tensor0SSpace r I p) x₀
+  have hx : x₀ ∈ e.baseSet := by
+    simpa [e] using
+      (mem_baseSet_trivializationAt
+        (Tensor0SModel r 𝕜 E) (fun p : M => Tensor0SSpace r I p) x₀)
+  have hcoord :
+      ContMDiffAt I 𝓘(𝕜, Tensor0SModel r 𝕜 E) (∞ : WithTop ℕ∞)
+        (fun p : M => (e ⟨p, β p⟩).2) x₀ :=
+    (e.contMDiffAt_section_iff hx).mp hβ
+  have hsymm :
+      ContMDiffWithinAt 𝓘(𝕜, E) I (∞ : WithTop ℕ∞)
+        (extChartAt I x₀).symm (Set.range I) (extChartAt I x₀ x₀) := by
+    simpa using
+      contMDiffWithinAt_extChartAt_symm_range_self
+        (I := I) (n := (∞ : WithTop ℕ∞)) x₀
+  have hcenter :
+      (extChartAt I x₀).symm (extChartAt I x₀ x₀) = x₀ :=
+    (extChartAt I x₀).left_inv (mem_extChartAt_source (I := I) x₀)
+  have hcoord_center :
+      ContMDiffAt I 𝓘(𝕜, Tensor0SModel r 𝕜 E) (∞ : WithTop ℕ∞)
+        (fun p : M => (e ⟨p, β p⟩).2)
+        ((extChartAt I x₀).symm (extChartAt I x₀ x₀)) := by
+    simpa [hcenter] using hcoord
+  have hfixed :
+      ContMDiffWithinAt 𝓘(𝕜, E) 𝓘(𝕜, Tensor0SModel r 𝕜 E)
+        (∞ : WithTop ℕ∞)
+        ((fun p : M => (e ⟨p, β p⟩).2) ∘ (extChartAt I x₀).symm)
+        (Set.range I) (extChartAt I x₀ x₀) :=
+    hcoord_center.comp_contMDiffWithinAt (x := extChartAt I x₀ x₀) hsymm
+  have heq :
+      tensor0SModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+        (M := M) r x₀ β
+        =ᶠ[𝓝[Set.range I] (extChartAt I x₀ x₀)]
+      (fun p : M => (e ⟨p, β p⟩).2) ∘ (extChartAt I x₀).symm := by
+    filter_upwards [extChartAt_target_mem_nhdsWithin (I := I) x₀] with y hy
+    simp [tensor0SModelInChart, tensor0SModelAt, e]
+  have hmdiff :
+      ContMDiffWithinAt 𝓘(𝕜, E) 𝓘(𝕜, Tensor0SModel r 𝕜 E)
+        (∞ : WithTop ℕ∞)
+        (tensor0SModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+          (M := M) r x₀ β)
+        (Set.range I) (extChartAt I x₀ x₀) := by
+    refine hfixed.congr_of_eventuallyEq heq ?_
+    simp [tensor0SModelInChart, tensor0SModelAt, e]
+  exact hmdiff.contDiffWithinAt
+
+set_option backward.isDefEq.respectTransparency false in
+private theorem tensor0SModelInChart_differentiableWithinAt_center_of_contMDiffAt {r : ℕ}
+    (β : (x : M) -> Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+      (M := M) r x)
+    (x₀ : M)
+    (hβ : ContMDiffAt I (I.prod 𝓘(𝕜, Tensor0SModel r 𝕜 E))
+      (∞ : WithTop ℕ∞)
+      (fun p : M =>
+        (⟨p, β p⟩ :
+          TotalSpace (Tensor0SModel r 𝕜 E)
+            (fun p : M => Tensor0SSpace r I p))) x₀) :
+    DifferentiableWithinAt 𝕜
+      (tensor0SModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+        (M := M) r x₀ β)
+      (Set.range I) (extChartAt I x₀ x₀) :=
+  (tensor0SModelInChart_contDiffWithinAt_center_of_contMDiffAt
+    (I := I) β x₀ hβ).differentiableWithinAt (by simp)
+
+set_option backward.isDefEq.respectTransparency false in
+private theorem tensorRS_eval_contMDiffAt {r s : ℕ}
+    (T : (p : M) -> TensorRSSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+      (M := M) r s p)
+    (β : (p : M) -> Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+      (M := M) r p)
+    (V : Fin s -> (p : M) -> TangentSpace I p) (x₀ : M)
+    (hT : ContMDiffAt I (I.prod 𝓘(𝕜, TensorRSModel r s 𝕜 E))
+      (∞ : WithTop ℕ∞)
+      (fun p : M =>
+        (⟨p, T p⟩ :
+          TotalSpace (TensorRSModel r s 𝕜 E)
+            (fun p : M => TensorRSSpace r s I p))) x₀)
+    (hβ : ContMDiffAt I (I.prod 𝓘(𝕜, Tensor0SModel r 𝕜 E))
+      (∞ : WithTop ℕ∞)
+      (fun p : M =>
+        (⟨p, β p⟩ :
+          TotalSpace (Tensor0SModel r 𝕜 E)
+            (fun p : M => Tensor0SSpace r I p))) x₀)
+    (hV : ∀ a : Fin s,
+      ContMDiffAt I (I.prod 𝓘(𝕜, E)) (∞ : WithTop ℕ∞)
+        (fun p : M =>
+          (⟨p, V a p⟩ : TotalSpace E (TangentSpace I : M -> Type _))) x₀) :
+    ContMDiffAt I 𝓘(𝕜, 𝕜) (∞ : WithTop ℕ∞)
+      (fun p : M => (T p (β p)) (fun a : Fin s => V a p)) x₀ := by
+  have hApplied :
+      ContMDiffAt I (I.prod 𝓘(𝕜, Tensor0SModel s 𝕜 E)) (∞ : WithTop ℕ∞)
+        (fun p : M =>
+          (⟨p, T p (β p)⟩ :
+            TotalSpace (Tensor0SModel s 𝕜 E)
+              (fun p : M => Tensor0SSpace s I p))) x₀ :=
+    ContMDiffAt.clm_bundle_apply (𝕜 := 𝕜) (n := (∞ : WithTop ℕ∞))
+      (F₁ := Tensor0SModel r 𝕜 E) (F₂ := Tensor0SModel s 𝕜 E)
+      (E₁ := fun p : M => Tensor0SSpace r I p)
+      (E₂ := fun p : M => Tensor0SSpace s I p)
+      (IM := I) (IB := I) (b := id)
+      (ϕ := fun p : M => T p) (v := fun p : M => β p) hT hβ
+  have hEval := TensorMultilinear.contMDiffAt_section_apply
+    (I := I) (M := M) (n := s) (x₀ := x₀)
+    (T := fun p : M => T p (β p)) hApplied
+    (v := V) hV
+  simpa [Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply] using hEval
+
+set_option backward.isDefEq.respectTransparency false in
 /-- Smoothness of a `(0,s)` tensor field evaluated on the chart-constant
 tangent fields from `trivializationAt E (TangentSpace I) x₀`.
 
@@ -771,6 +1556,257 @@ theorem tensor0S_eval_tangentConst_covariantDerivative_slot_contMDiffAt
     (hv := hframe)
   simpa [αinf, W, Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply]
     using hEval
+
+set_option backward.isDefEq.respectTransparency false in
+private theorem localCovariantDerivTensor0SAt_constInChart_eval_tangentConstInChart_contMDiffAt
+    {r : ℕ}
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
+      (∞ : WithTop ℕ∞))
+    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (x₀ : M) (β : Tensor0SModel r 𝕜 E)
+    (slots : Fin r -> Fin (Module.finrank 𝕜 E)) :
+    ContMDiffAt I 𝓘(𝕜, 𝕜) (∞ : WithTop ℕ∞)
+      (fun p : M =>
+        (localCovariantDerivTensor0SAt
+          (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r cov X
+          (fun y : M => Tensor0SSpace.constInChart
+            (𝕜 := 𝕜) (I := I) (M := M) r x₀ β y) p)
+          (fun a : Fin r =>
+            tangentConstInChart (𝕜 := 𝕜) (I := I) x₀
+              ((Module.finBasis 𝕜 E) (slots a)) p)) x₀ := by
+  let βsec : (p : M) -> Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+      (M := M) r p :=
+    fun p : M => Tensor0SSpace.constInChart
+      (𝕜 := 𝕜) (I := I) (M := M) r x₀ β p
+  let V : Fin r -> (p : M) -> TangentSpace I p :=
+    fun a => tangentConstInChart (𝕜 := 𝕜) (I := I) x₀
+      ((Module.finBasis 𝕜 E) (slots a))
+  let pair : M -> 𝕜 := fun p : M => βsec p (fun a : Fin r => V a p)
+  let Xinf : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
+    ⟨fun p : M => X p, X.contMDiff.of_le (by simp)⟩
+  have hβsec : ContMDiffAt I (I.prod 𝓘(𝕜, Tensor0SModel r 𝕜 E))
+      (∞ : WithTop ℕ∞)
+      (fun p : M =>
+        (⟨p, βsec p⟩ :
+          TotalSpace (Tensor0SModel r 𝕜 E)
+            (fun p : M => Tensor0SSpace r I p))) x₀ := by
+    simpa [βsec] using
+      tensor0SConstInChart_contMDiffAt
+        (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) x₀ β
+  have hV :
+      ∀ a : Fin r,
+        ContMDiffAt I (I.prod 𝓘(𝕜, E)) (∞ : WithTop ℕ∞)
+          (fun p : M => (⟨p, V a p⟩ : TotalSpace E (TangentSpace I : M -> Type _)))
+          x₀ := by
+    intro a
+    let e := trivializationAt E (TangentSpace I : M -> Type _) x₀
+    have hx₀ : x₀ ∈ e.baseSet := FiberBundle.mem_baseSet_trivializationAt' x₀
+    have hconst_on :
+        CMDiff[e.baseSet] (∞ : WithTop ℕ∞) (T% (V a)) := by
+      simpa [e, V] using
+        (tangentConstInChart_contMDiffOn_baseSet
+          (𝕜 := 𝕜) (I := I) (M := M) (n := (∞ : WithTop ℕ∞))
+          x₀ ((Module.finBasis 𝕜 E) (slots a)))
+    exact (hconst_on x₀ hx₀).contMDiffAt (e.open_baseSet.mem_nhds hx₀)
+  have hpair : ContMDiffAt I 𝓘(𝕜, 𝕜) (∞ : WithTop ℕ∞) pair x₀ := by
+    have hEval := TensorMultilinear.contMDiffAt_section_apply
+      (I := I) (M := M) (n := r) (x₀ := x₀)
+      (T := βsec) hβsec
+      (v := V) hV
+    simpa [pair, Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply]
+      using hEval
+  have hderiv :
+      ContMDiffAt I 𝓘(𝕜, 𝕜) (∞ : WithTop ℕ∞)
+        (fun p : M => extDerivFun (I := I) pair p (X p)) x₀ := by
+    simpa [Xinf] using RicciFlower.extDerivFun_apply_contMDiffAt I hpair Xinf
+  have hcorr_sum :
+      ContMDiffAt I 𝓘(𝕜, 𝕜) (∞ : WithTop ℕ∞)
+        (fun p : M =>
+          ∑ a : Fin r,
+            βsec p
+              (Function.update
+                (fun b : Fin r => V b p)
+                a
+                ((cov (V a) p) (X p)))) x₀ := by
+    apply ContMDiffAt.sum
+    intro a _
+    let W : (p : M) -> TangentSpace I p := fun p : M => (cov (V a) p) (X p)
+    have hW :
+        ContMDiffAt I (I.prod 𝓘(𝕜, E)) (∞ : WithTop ℕ∞)
+          (fun p : M => (⟨p, W p⟩ : TotalSpace E (TangentSpace I : M -> Type _)))
+          x₀ := by
+      simpa [W, V] using
+        tangentConst_covariantDeriv_apply_contMDiffAt
+          (I := I) cov hcov X x₀ ((Module.finBasis 𝕜 E) (slots a))
+    have hframe :
+        ∀ i : Fin r,
+          ContMDiffAt I (I.prod 𝓘(𝕜, E)) (∞ : WithTop ℕ∞)
+            (fun p : M =>
+              (⟨p, Function.update (fun b : Fin r => V b p) a (W p) i⟩ :
+                TotalSpace E (TangentSpace I : M -> Type _))) x₀ := by
+      intro i
+      by_cases hi : i = a
+      · subst hi
+        simpa using hW
+      · simpa [Function.update, hi] using hV i
+    have hEval := TensorMultilinear.contMDiffAt_section_apply
+      (I := I) (M := M) (n := r) (x₀ := x₀)
+      (T := βsec) hβsec
+      (v := fun i : Fin r => fun p : M =>
+        Function.update (fun b : Fin r => V b p) a (W p) i)
+      (hv := hframe)
+    simpa [W, Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply]
+      using hEval
+  have hmain :
+      ContMDiffAt I 𝓘(𝕜, 𝕜) (∞ : WithTop ℕ∞)
+        (fun p : M =>
+          extDerivFun (I := I) pair p (X p) -
+            ∑ a : Fin r,
+              βsec p
+                (Function.update
+                  (fun b : Fin r => V b p)
+                  a
+                  ((cov (V a) p) (X p)))) x₀ :=
+    hderiv.sub hcorr_sum
+  refine hmain.congr_of_eventuallyEq ?_
+  let eTan := trivializationAt E (TangentSpace I : M -> Type _) x₀
+  let eβ := trivializationAt (Tensor0SModel r 𝕜 E)
+    (fun p : M => Tensor0SSpace r I p) x₀
+  have hx₀Tan : x₀ ∈ eTan.baseSet := FiberBundle.mem_baseSet_trivializationAt' x₀
+  have hx₀β : x₀ ∈ eβ.baseSet := by
+    simpa [eβ] using
+      (mem_baseSet_trivializationAt
+        (Tensor0SModel r 𝕜 E) (fun p : M => Tensor0SSpace r I p) x₀)
+  filter_upwards [eTan.open_baseSet.mem_nhds hx₀Tan,
+    eβ.open_baseSet.mem_nhds hx₀β] with p hpTan hpβ
+  have hβ_p : ContMDiffAt I (I.prod 𝓘(𝕜, Tensor0SModel r 𝕜 E))
+      (∞ : WithTop ℕ∞)
+      (fun y : M =>
+        (⟨y, βsec y⟩ :
+          TotalSpace (Tensor0SModel r 𝕜 E)
+            (fun y : M => Tensor0SSpace r I y))) p := by
+    simpa [βsec] using
+      tensor0SConstInChart_contMDiffAt_of_mem
+        (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) x₀ β hpβ
+  have hV_p :
+      ∀ a : Fin r,
+        ContMDiffAt I (I.prod 𝓘(𝕜, E)) (∞ : WithTop ℕ∞)
+          (fun y : M => (⟨y, V a y⟩ : TotalSpace E (TangentSpace I : M -> Type _)))
+          p := by
+    intro a
+    have hconst_on :
+        CMDiff[eTan.baseSet] (∞ : WithTop ℕ∞) (T% (V a)) := by
+      simpa [eTan, V] using
+        (tangentConstInChart_contMDiffOn_baseSet
+          (𝕜 := 𝕜) (I := I) (M := M) (n := (∞ : WithTop ℕ∞))
+          x₀ ((Module.finBasis 𝕜 E) (slots a)))
+    exact (hconst_on p hpTan).contMDiffAt (eTan.open_baseSet.mem_nhds hpTan)
+  have hpair_md : MDifferentiableAt I 𝓘(𝕜, 𝕜) pair p := by
+    have hpair_p : ContMDiffAt I 𝓘(𝕜, 𝕜) (∞ : WithTop ℕ∞) pair p := by
+      have hEval := TensorMultilinear.contMDiffAt_section_apply
+        (I := I) (M := M) (n := r) (x₀ := p)
+        (T := βsec) hβ_p
+        (v := V) hV_p
+      simpa [pair, Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply]
+        using hEval
+    exact hpair_p.mdifferentiableAt (by simp)
+  have hβmodel_p :
+      DifferentiableWithinAt 𝕜
+        (tensor0SModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+          (M := M) r p βsec)
+        (Set.range I) (extChartAt I p p) :=
+    tensor0SModelInChart_differentiableWithinAt_center_of_contMDiffAt
+      (I := I) βsec p hβ_p
+  have hV_md : ∀ a : Fin r, MDiffAt (T% (V a)) p :=
+    fun a => (hV_p a).mdifferentiableAt (by simp)
+  have hVmodel_p : ∀ a : Fin r,
+      DifferentiableWithinAt 𝕜
+        (tangentFieldModelInChart (𝕜 := 𝕜) (I := I) p (V a))
+        (Set.range I) (extChartAt I p p) :=
+    fun a =>
+      tangentFieldModelInChart_differentiableWithinAt_center_of_contMDiffAt
+        (I := I) (V a) p (hV_p a)
+  have hcoord_p : ∀ a : Fin r, ∀ i : Fin (Module.finrank 𝕜 E),
+      MDifferentiableAt I 𝓘(𝕜, 𝕜)
+        (fun q : M =>
+          (Module.finBasis 𝕜 E).coord i
+            (tangentFieldModelInChart (𝕜 := 𝕜) (I := I) p (V a)
+              (extChartAt I p q))) p :=
+    fun a i =>
+      tangentFieldModelInChart_coord_mdiffAt_center_of_contMDiffAt
+        (I := I) (V a) p (hV_p a) i
+  rw [localCovariantDerivTensor0SAt_eval_moving_raw
+    (I := I) cov X βsec V p hpair_md hβmodel_p hV_md hVmodel_p hcoord_p]
+
+set_option backward.isDefEq.respectTransparency false in
+private theorem localCovariantDerivTensor0SAt_constInChart_contMDiffAt
+    {r : ℕ}
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
+      (∞ : WithTop ℕ∞))
+    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (x₀ : M) (β : Tensor0SModel r 𝕜 E) :
+    ContMDiffAt I (I.prod 𝓘(𝕜, Tensor0SModel r 𝕜 E)) (∞ : WithTop ℕ∞)
+      (fun p : M =>
+        (⟨p,
+          localCovariantDerivTensor0SAt
+            (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r cov X
+            (fun y : M => Tensor0SSpace.constInChart
+              (𝕜 := 𝕜) (I := I) (M := M) r x₀ β y) p⟩ :
+          TotalSpace (Tensor0SModel r 𝕜 E)
+            (fun p : M => Tensor0SSpace r I p))) x₀ := by
+  let F : (p : M) -> Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+      (M := M) r p :=
+    fun p : M =>
+      localCovariantDerivTensor0SAt
+        (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r cov X
+        (fun y : M => Tensor0SSpace.constInChart
+          (𝕜 := 𝕜) (I := I) (M := M) r x₀ β y) p
+  let e := trivializationAt (Tensor0SModel r 𝕜 E)
+    (fun p : M => Tensor0SSpace r I p) x₀
+  let d := Module.finrank 𝕜 E
+  let b : Module.Basis (Fin d) 𝕜 E := Module.finBasis 𝕜 E
+  rw [contMDiffAt_section]
+  let g : M -> Tensor0SModel r 𝕜 E := fun p : M => (e ⟨p, F p⟩).2
+  change ContMDiffAt I 𝓘(𝕜, Tensor0SModel r 𝕜 E) (∞ : WithTop ℕ∞) g x₀
+  let B := continuousMultilinearMap_basis (𝕜 := 𝕜) (F := E) b r
+  rw [show g = fun p : M => B.equivFun.symm (B.equivFun (g p)) from
+      funext fun p => (B.equivFun.symm_apply_apply (g p)).symm]
+  exact (B.equivFun.symm.toContinuousLinearEquiv.toContinuousLinearMap.contMDiffAt).comp x₀
+    (contMDiffAt_pi_space.mpr fun σ => by
+      have hcoeff :=
+        localCovariantDerivTensor0SAt_constInChart_eval_tangentConstInChart_contMDiffAt
+          (I := I) cov hcov X x₀ β σ
+      refine hcoeff.congr_of_eventuallyEq ?_
+      let eTan := trivializationAt E (TangentSpace I : M -> Type _) x₀
+      have hx₀Tan : x₀ ∈ eTan.baseSet := FiberBundle.mem_baseSet_trivializationAt' x₀
+      filter_upwards [eTan.open_baseSet.mem_nhds hx₀Tan] with p hp
+      change B.repr (g p) σ =
+        (localCovariantDerivTensor0SAt
+          (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r cov X
+          (fun y : M => Tensor0SSpace.constInChart
+            (𝕜 := 𝕜) (I := I) (M := M) r x₀ β y) p)
+          (fun a : Fin r =>
+            tangentConstInChart (𝕜 := 𝕜) (I := I) x₀
+              ((Module.finBasis 𝕜 E) (σ a)) p)
+      rw [continuousMultilinearMap_basis_repr]
+      change ((trivializationAt (Tensor0SModel r 𝕜 E)
+          (Bundle.continuousMultilinearMap 𝕜 r E (TangentSpace I : M -> Type _)) x₀
+          ⟨p, F p⟩).2)
+          (fun a : Fin r => b (σ a)) =
+        F p
+          (fun a : Fin r =>
+            tangentConstInChart (𝕜 := 𝕜) (I := I) x₀ (b (σ a)) p)
+      change (F p).compContinuousLinearMap
+          (fun _ : Fin r =>
+            (trivializationAt E (TangentSpace I : M -> Type _) x₀).symmL 𝕜 p)
+          (fun a : Fin r => b (σ a)) =
+        F p
+          (fun a : Fin r =>
+            tangentConstInChart (𝕜 := 𝕜) (I := I) x₀ (b (σ a)) p)
+      rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
+      congr)
 
 set_option backward.isDefEq.respectTransparency false in
 /-- Scalar coefficient smoothness for `nabla0SFun s` on chart-constant
@@ -936,11 +1972,12 @@ theorem nabla0S_reg (s : ℕ)
   exact hsec
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Mixed tensor regularity is intentionally still separate; this pass only
-cleans and closes the `(0,s)` dependency path. -/
+/-- Smoothness of the canonical raw covariant derivative for mixed `(r,s)`
+tensor fields, proved through Hom coordinates and local `(0,r)` input
+regularity. -/
 theorem nablaRS_reg (r s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (_hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
       (∞ : WithTop ℕ∞))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
@@ -964,26 +2001,249 @@ theorem nablaRS_reg (r s : ℕ)
   rw [contMDiffAt_section]
   let e := trivializationAt (TensorRSModel r s 𝕜 E)
     (fun p : M => TensorRSSpace r s I p) x₀
-  let b : Module.Basis (Fin (Module.finrank 𝕜 (TensorRSModel r s 𝕜 E)))
-      𝕜 (TensorRSModel r s 𝕜 E) :=
-    Module.finBasis 𝕜 (TensorRSModel r s 𝕜 E)
   have hx₀ : x₀ ∈ e.baseSet := by
     simpa [e] using
       (mem_baseSet_trivializationAt
         (TensorRSModel r s 𝕜 E) (fun p : M => TensorRSSpace r s I p) x₀)
   let G : M -> TensorRSModel r s 𝕜 E := fun p => (e ⟨p, F p⟩).2
-  have hcoords :
-      ContMDiffAt I 𝓘(𝕜, Fin (Module.finrank 𝕜 (TensorRSModel r s 𝕜 E)) -> 𝕜)
-        (∞ : WithTop ℕ∞) (fun p : M => b.equivFunL (G p)) x₀ := by
-    rw [contMDiffAt_pi_space]
-    intro i
-    sorry
-  have hsmooth :=
-    ((b.equivFunL.symm : (Fin (Module.finrank 𝕜 (TensorRSModel r s 𝕜 E)) -> 𝕜) →L[𝕜]
-        TensorRSModel r s 𝕜 E).contMDiff.contMDiffAt.comp x₀ hcoords)
-  refine hsmooth.congr_of_eventuallyEq ?_
-  filter_upwards with p
-  simp [G, F, e]
+  let d := Module.finrank 𝕜 E
+  let bE : Module.Basis (Fin d) 𝕜 E := Module.finBasis 𝕜 E
+  have hG : ContMDiffAt I 𝓘(𝕜, TensorRSModel r s 𝕜 E)
+      (∞ : WithTop ℕ∞) G x₀ := by
+    refine contMDiffAt_tensorRSModel_of_apply_basis_eval_basis
+      (I := I) (bE := bE) (G := G) (x₀ := x₀)
+      (n := (∞ : WithTop ℕ∞)) ?_
+    intro ρ σ
+    let eTan := trivializationAt E (TangentSpace I : M -> Type _) x₀
+    let βρ : Tensor0SModel r 𝕜 E :=
+      (continuousMultilinearMap_basis (𝕜 := 𝕜) (F := E) bE r) ρ
+    let vσ : Fin s -> E := fun a => bE (σ a)
+    have hintrinsic :
+        ContMDiffAt I 𝓘(𝕜, 𝕜) (∞ : WithTop ℕ∞)
+          (fun p : M =>
+            (F p (Tensor0SSpace.constInChart
+              (𝕜 := 𝕜) (I := I) (M := M) r x₀ βρ p))
+              (fun a : Fin s => eTan.symmL 𝕜 p (vσ a))) x₀ := by
+      let βsec : (p : M) -> Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H)
+          (I := I) (M := M) r p :=
+        fun p : M => Tensor0SSpace.constInChart
+          (𝕜 := 𝕜) (I := I) (M := M) r x₀ βρ p
+      let V : Fin s -> (p : M) -> TangentSpace I p :=
+        fun a => tangentConstInChart (𝕜 := 𝕜) (I := I) x₀ (vσ a)
+      let pair : M -> 𝕜 := fun p : M => (T p (βsec p)) (fun a : Fin s => V a p)
+      let Xinf : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
+        ⟨fun p : M => X p, X.contMDiff.of_le (by simp)⟩
+      have hT : ContMDiffAt I (I.prod 𝓘(𝕜, TensorRSModel r s 𝕜 E))
+          (∞ : WithTop ℕ∞)
+          (fun p : M =>
+            (⟨p, T p⟩ :
+              TotalSpace (TensorRSModel r s 𝕜 E)
+                (fun p : M => TensorRSSpace r s I p))) x₀ :=
+        (T.contMDiff x₀).of_le (by simp :
+          (∞ : WithTop ℕ∞) ≤ (⊤ : WithTop ℕ∞))
+      have hβ : ContMDiffAt I (I.prod 𝓘(𝕜, Tensor0SModel r 𝕜 E))
+          (∞ : WithTop ℕ∞)
+          (fun p : M =>
+            (⟨p, βsec p⟩ :
+              TotalSpace (Tensor0SModel r 𝕜 E)
+                (fun p : M => Tensor0SSpace r I p))) x₀ := by
+        simpa [βsec] using
+          tensor0SConstInChart_contMDiffAt
+            (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) x₀ βρ
+      have hV : ∀ a : Fin s,
+          ContMDiffAt I (I.prod 𝓘(𝕜, E)) (∞ : WithTop ℕ∞)
+            (fun p : M => (⟨p, V a p⟩ : TotalSpace E (TangentSpace I : M -> Type _)))
+            x₀ := by
+        intro a
+        have hx₀Tan : x₀ ∈ eTan.baseSet := by
+          dsimp [eTan]
+          exact mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x₀
+        have hconst_on :
+            CMDiff[eTan.baseSet] (∞ : WithTop ℕ∞) (T% (V a)) := by
+          simpa [eTan, V, vσ] using
+            (tangentConstInChart_contMDiffOn_baseSet
+              (𝕜 := 𝕜) (I := I) (M := M) (n := (∞ : WithTop ℕ∞))
+              x₀ (vσ a))
+        exact (hconst_on x₀ hx₀Tan).contMDiffAt (eTan.open_baseSet.mem_nhds hx₀Tan)
+      have hpair : ContMDiffAt I 𝓘(𝕜, 𝕜) (∞ : WithTop ℕ∞) pair x₀ := by
+        simpa [pair] using
+          tensorRS_eval_contMDiffAt
+            (I := I) (T := fun p : M => T p) (β := βsec) (V := V) x₀ hT hβ hV
+      have hderiv :
+          ContMDiffAt I 𝓘(𝕜, 𝕜) (∞ : WithTop ℕ∞)
+            (fun p : M => extDerivFun (I := I) pair p (X p)) x₀ := by
+        simpa [Xinf] using RicciFlower.extDerivFun_apply_contMDiffAt I hpair Xinf
+      have hinput :
+          ContMDiffAt I 𝓘(𝕜, 𝕜) (∞ : WithTop ℕ∞)
+            (fun p : M =>
+              (T p
+                (localCovariantDerivTensor0SAt
+                  (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r cov X βsec p))
+                (fun a : Fin s => V a p)) x₀ := by
+        have hβcorr :
+            ContMDiffAt I (I.prod 𝓘(𝕜, Tensor0SModel r 𝕜 E))
+              (∞ : WithTop ℕ∞)
+              (fun p : M =>
+                (⟨p,
+                  localCovariantDerivTensor0SAt
+                    (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r cov X βsec p⟩ :
+                  TotalSpace (Tensor0SModel r 𝕜 E)
+                    (fun p : M => Tensor0SSpace r I p))) x₀ := by
+          simpa [βsec] using
+            localCovariantDerivTensor0SAt_constInChart_contMDiffAt
+              (I := I) cov hcov X x₀ βρ
+        exact tensorRS_eval_contMDiffAt
+          (I := I) (T := fun p : M => T p)
+          (β := fun p : M =>
+            localCovariantDerivTensor0SAt
+              (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r cov X βsec p)
+          (V := V) x₀ hT hβcorr hV
+      have houtput :
+          ContMDiffAt I 𝓘(𝕜, 𝕜) (∞ : WithTop ℕ∞)
+            (fun p : M =>
+              ∑ a : Fin s,
+                (T p (βsec p))
+                  (Function.update (fun b : Fin s => V b p) a
+                    ((cov (V a) p) (X p)))) x₀ := by
+        apply ContMDiffAt.sum
+        intro a _
+        let W : (p : M) -> TangentSpace I p := fun p : M => (cov (V a) p) (X p)
+        have hW :
+            ContMDiffAt I (I.prod 𝓘(𝕜, E)) (∞ : WithTop ℕ∞)
+              (fun p : M => (⟨p, W p⟩ : TotalSpace E (TangentSpace I : M -> Type _)))
+              x₀ := by
+          simpa [W, V] using
+            tangentConst_covariantDeriv_apply_contMDiffAt
+              (I := I) cov hcov X x₀ (vσ a)
+        have hVupdate : ∀ i : Fin s,
+            ContMDiffAt I (I.prod 𝓘(𝕜, E)) (∞ : WithTop ℕ∞)
+              (fun p : M =>
+                (⟨p, Function.update (fun b : Fin s => V b p) a (W p) i⟩ :
+                  TotalSpace E (TangentSpace I : M -> Type _))) x₀ := by
+          intro i
+          by_cases hi : i = a
+          · subst hi
+            simpa using hW
+          · simpa [Function.update, hi] using hV i
+        exact tensorRS_eval_contMDiffAt
+          (I := I) (T := fun p : M => T p) (β := βsec)
+          (V := fun i : Fin s => fun p : M =>
+            Function.update (fun b : Fin s => V b p) a (W p) i)
+          x₀ hT hβ hVupdate
+      have hmain :
+          ContMDiffAt I 𝓘(𝕜, 𝕜) (∞ : WithTop ℕ∞)
+            (fun p : M =>
+              extDerivFun (I := I) pair p (X p) -
+                (T p
+                  (localCovariantDerivTensor0SAt
+                    (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r cov X βsec p))
+                  (fun a : Fin s => V a p) -
+                ∑ a : Fin s,
+                  (T p (βsec p))
+                    (Function.update (fun b : Fin s => V b p) a
+                      ((cov (V a) p) (X p)))) x₀ :=
+        (hderiv.sub hinput).sub houtput
+      refine hmain.congr_of_eventuallyEq ?_
+      let eβ := trivializationAt (Tensor0SModel r 𝕜 E)
+        (fun p : M => Tensor0SSpace r I p) x₀
+      have hx₀Tan : x₀ ∈ eTan.baseSet := by
+        dsimp [eTan]
+        exact mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x₀
+      have hx₀β : x₀ ∈ eβ.baseSet := by
+        simpa [eβ] using
+          (mem_baseSet_trivializationAt
+            (Tensor0SModel r 𝕜 E) (fun p : M => Tensor0SSpace r I p) x₀)
+      filter_upwards [eTan.open_baseSet.mem_nhds hx₀Tan,
+        eβ.open_baseSet.mem_nhds hx₀β] with p hpTan hpβ
+      have hT_p : ContMDiffAt I (I.prod 𝓘(𝕜, TensorRSModel r s 𝕜 E))
+          (∞ : WithTop ℕ∞)
+          (fun q : M =>
+            (⟨q, T q⟩ :
+              TotalSpace (TensorRSModel r s 𝕜 E)
+                (fun q : M => TensorRSSpace r s I q))) p :=
+        (T.contMDiff p).of_le (by simp :
+          (∞ : WithTop ℕ∞) ≤ (⊤ : WithTop ℕ∞))
+      have hβ_p : ContMDiffAt I (I.prod 𝓘(𝕜, Tensor0SModel r 𝕜 E))
+          (∞ : WithTop ℕ∞)
+          (fun q : M =>
+            (⟨q, βsec q⟩ :
+              TotalSpace (Tensor0SModel r 𝕜 E)
+                (fun q : M => Tensor0SSpace r I q))) p := by
+        simpa [βsec] using
+          tensor0SConstInChart_contMDiffAt_of_mem
+            (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) x₀ βρ hpβ
+      have hV_p : ∀ a : Fin s,
+          ContMDiffAt I (I.prod 𝓘(𝕜, E)) (∞ : WithTop ℕ∞)
+            (fun q : M => (⟨q, V a q⟩ : TotalSpace E (TangentSpace I : M -> Type _)))
+            p := by
+        intro a
+        have hconst_on :
+            CMDiff[eTan.baseSet] (∞ : WithTop ℕ∞) (T% (V a)) := by
+          simpa [eTan, V, vσ] using
+            (tangentConstInChart_contMDiffOn_baseSet
+              (𝕜 := 𝕜) (I := I) (M := M) (n := (∞ : WithTop ℕ∞))
+              x₀ (vσ a))
+        exact (hconst_on p hpTan).contMDiffAt (eTan.open_baseSet.mem_nhds hpTan)
+      have hpair_md : MDifferentiableAt I 𝓘(𝕜, 𝕜) pair p := by
+        have hpair_p : ContMDiffAt I 𝓘(𝕜, 𝕜) (∞ : WithTop ℕ∞) pair p := by
+          simpa [pair] using
+            tensorRS_eval_contMDiffAt
+              (I := I) (T := fun q : M => T q) (β := βsec) (V := V) p
+              hT_p hβ_p hV_p
+        exact hpair_p.mdifferentiableAt (by simp)
+      have hβmodel_p :
+          DifferentiableWithinAt 𝕜
+            (tensor0SModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+              (M := M) r p βsec)
+            (Set.range I) (extChartAt I p p) :=
+        tensor0SModelInChart_differentiableWithinAt_center_of_contMDiffAt
+          (I := I) βsec p hβ_p
+      have hV_md : ∀ a : Fin s, MDiffAt (T% (V a)) p :=
+        fun a => (hV_p a).mdifferentiableAt (by simp)
+      have hVmodel_p : ∀ a : Fin s,
+          DifferentiableWithinAt 𝕜
+            (tangentFieldModelInChart (𝕜 := 𝕜) (I := I) p (V a))
+            (Set.range I) (extChartAt I p p) :=
+        fun a =>
+          tangentFieldModelInChart_differentiableWithinAt_center_of_contMDiffAt
+            (I := I) (V a) p (hV_p a)
+      have hcoord_p : ∀ a : Fin s, ∀ i : Fin (Module.finrank 𝕜 E),
+          MDifferentiableAt I 𝓘(𝕜, 𝕜)
+            (fun q : M =>
+              (Module.finBasis 𝕜 E).coord i
+                (tangentFieldModelInChart (𝕜 := 𝕜) (I := I) p (V a)
+                  (extChartAt I p q))) p :=
+        fun a i =>
+          tangentFieldModelInChart_coord_mdiffAt_center_of_contMDiffAt
+            (I := I) (V a) p (hV_p a) i
+      have hVeq :
+          (fun a : Fin s => eTan.symmL 𝕜 p (vσ a)) =
+            fun a : Fin s => V a p := by
+        funext a
+        simp [V, eTan]
+      change ((nablaRSFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+          r s cov X T p) (βsec p))
+          (fun a : Fin s => eTan.symmL 𝕜 p (vσ a)) =
+        ((extDerivFun (I := I) pair p) (X p) -
+            (T p (localCovariantDerivTensor0SAt
+              (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r cov X βsec p))
+              (fun a : Fin s => V a p)) -
+          ∑ a : Fin s,
+            (T p (βsec p))
+              (Function.update (fun b : Fin s => V b p) a ((cov (V a) p) (X p)))
+      rw [hVeq]
+      rw [nablaRSFun_eval_moving_raw
+        (I := I) cov X T βsec V p hpair_md hβmodel_p hV_md hVmodel_p hcoord_p]
+    refine hintrinsic.congr_of_eventuallyEq ?_
+    have hx₀Tan : x₀ ∈ eTan.baseSet := by
+      dsimp [eTan]
+      exact mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x₀
+    filter_upwards [eTan.open_baseSet.mem_nhds hx₀Tan] with p hp
+    simpa [G, F, e, eTan, βρ, vσ] using
+      (TensorRSSpace.trivializationAt_basis_coord
+        (𝕜 := 𝕜) (I := I) (x₀ := x₀) (x := p)
+        (bE := bE) (r := r) (s := s) hp (F p) ρ σ)
+  simpa [G, F, e] using hG
 
 
 

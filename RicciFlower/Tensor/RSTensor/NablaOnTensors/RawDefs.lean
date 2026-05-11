@@ -224,10 +224,12 @@ noncomputable def mcovariantDeriv_tensorRSWithin (r s : ℕ)
     (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) r s)
     (u : Set M) (x₀ : M) : TensorRSSpace r s I x₀ := by
   let X' := mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm X (range I)
-  let T' : E → Tensor0SModel (𝕜 := 𝕜) (E := E) r →L[𝕜] Tensor0SModel (𝕜 := 𝕜) (E := E) s :=
-    fun y => tensorRSSpace_continuousLinearEquiv (I := I) r s
-      ((extChartAt I x₀).symm y) (T.toFun ((extChartAt I x₀).symm y))
-  exact (tensorRSSpace_continuousLinearEquiv (I := I) r s x₀).symm
+  let T' : E → TensorRSModel r s 𝕜 E :=
+    tensorRSModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      r s x₀ (fun x => T x)
+  exact
+    (trivializationAt (TensorRSModel r s 𝕜 E)
+      (fun x => TensorRSSpace r s I x) x₀).symm x₀
     (covariantDeriv_tensorRSModelWithin r s X' ΓX T'
       ((extChartAt I x₀).symm ⁻¹' u ∩ range I)
       (extChartAt I x₀ x₀))

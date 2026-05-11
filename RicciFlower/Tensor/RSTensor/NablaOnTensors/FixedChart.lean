@@ -144,6 +144,42 @@ theorem tensor0SModelInChart_contMDiffWithinAt (s : ℕ) (x₀ : M)
     (x := extChartAt I x₀ x₀) hα_model_center hsymm
   simpa [S, tensor0SModelInChart, Function.comp] using hcomp
 
+/-- Trivialize a mixed `(r,s)` tensor fiber using the fixed tensor-bundle
+trivialization centered at `x₀`.
+
+This is the mixed analogue of `tensor0SModelAt`; it is the coordinate model used
+by the aligned raw RS covariant derivative definition. -/
+noncomputable def tensorRSModelAt (r s : ℕ) (x₀ x : M)
+    (T : TensorRSSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s x) :
+    TensorRSModel r s 𝕜 E :=
+  ((trivializationAt (TensorRSModel r s 𝕜 E)
+      (fun x => TensorRSSpace r s I x) x₀) ⟨x, T⟩).2
+
+/-- At the center of the mixed tensor-bundle trivialization, transporting a model
+mixed tensor to the fiber and back gives the original model tensor. -/
+theorem tensorRSModelAt_trivializationAt_symm (r s : ℕ) (x₀ : M)
+    (T : TensorRSModel r s 𝕜 E) :
+    tensorRSModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        r s x₀ x₀
+        ((trivializationAt (TensorRSModel r s 𝕜 E)
+          (fun x => TensorRSSpace r s I x) x₀).symm x₀ T) = T := by
+  unfold tensorRSModelAt
+  exact congrArg Prod.snd
+    ((trivializationAt (TensorRSModel r s 𝕜 E)
+      (fun x => TensorRSSpace r s I x) x₀).apply_mk_symm
+        (mem_baseSet_trivializationAt (TensorRSModel r s 𝕜 E)
+          (fun x => TensorRSSpace r s I x) x₀)
+        T)
+
+/-- The chart-local model mixed tensor field obtained from a mixed tensor field
+by the fixed tensor-bundle trivialization centered at `x₀`. -/
+noncomputable def tensorRSModelInChart (r s : ℕ) (x₀ : M)
+    (T : (x : M) →
+      TensorRSSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s x)
+    (y : E) : TensorRSModel r s 𝕜 E :=
+  tensorRSModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+    r s x₀ ((extChartAt I x₀).symm y) (T ((extChartAt I x₀).symm y))
+
 /-- Fixed-chart model expression for the covariant derivative of a covariant
 tensor field. This is the model-space function that should represent
 `nabla0SFun` after trivializing the output tensor bundle at the fixed base point
