@@ -46,6 +46,149 @@ theorem leviCivitaConnectionOfMetric_isLeviCivita_smoothFile
     IsLeviCivita (I := I) (leviCivitaConnectionOfMetric (I := I) g) g :=
   leviCivitaConnectionOfMetric_isLeviCivita (I := I) g
 
+/-! ## Local-frame connection reconstruction algebra
+
+The next smoothness step is a local-frame reconstruction theorem for
+connections.  The first metric-free ingredient is the pointwise coefficient
+formula below: in a trivialization-induced local frame, the coefficient of
+`∇_{eᵢ} σ` is the directional derivative of the corresponding section
+coefficient plus the Christoffel correction.
+-/
+
+private theorem covariantDerivative_finset_sum_tangent
+    {ι : Type*} (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (t : Finset ι) (σ : ι → (x : M) → TangentSpace I x)
+    {x : M} (v : TangentSpace I x)
+    (hσ : ∀ i, MDiffAt (T% (σ i)) x) :
+    (cov (t.sum σ) x) v = t.sum (fun i => (cov (σ i) x) v) := by
+  classical
+  induction t using Finset.induction_on with
+  | empty =>
+      simp [cov.isCovariantDerivativeOnUniv.zero]
+  | insert i t hit ih =>
+      have hσi : MDiffAt (T% (σ i)) x := hσ i
+      have hsum : MDiffAt (T% (t.sum σ)) x := by
+        have hsum_raw := MDifferentiableAt.sum_section (s := t) (t := σ) hσ
+        simpa using hsum_raw
+      calc
+        (cov ((insert i t).sum σ) x) v
+            = (cov (σ i + t.sum σ) x) v := by
+              simp [Finset.sum_insert, hit]
+        _ = ((cov (σ i) x + cov (t.sum σ) x) v) := by
+              rw [cov.isCovariantDerivativeOnUniv.add hσi hsum]
+        _ = (cov (σ i) x) v + (cov (t.sum σ) x) v := by
+              simp
+        _ = (insert i t).sum (fun j => (cov (σ j) x) v) := by
+              rw [ih]
+              simp [Finset.sum_insert, hit]
+
+private theorem covariantDerivative_localFrame_coeff_eq
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
+    [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
+    {σ : (x : M) → TangentSpace I x} {x : M}
+    (hx : x ∈ e.baseSet) (hσ : MDiffAt (T% σ) x) (i k : ι) :
+    e.localFrame_coeff I b k x
+        ((cov σ x) (e.localFrame b i x)) =
+      extDerivFun (I := I) ((LinearMap.piApply (e.localFrame_coeff I b k)) σ)
+        x (e.localFrame b i x) +
+        ∑ j : ι,
+          e.localFrame_coeff I b j x (σ x) *
+            e.localFrame_coeff I b k x
+              ((cov (e.localFrame b j) x) (e.localFrame b i x)) := by
+  classical
+  let frame : ι → (x : M) → TangentSpace I x := fun j => e.localFrame b j
+  let coeff : ι → M → Real := fun j y => e.localFrame_coeff I b j y (σ y)
+  let term : ι → (x : M) → TangentSpace I x := fun j => coeff j • frame j
+  have hframe_diff (j : ι) : MDiffAt (T% (fun y => frame j y)) x := by
+    simpa [frame] using
+      ((e.isLocalFrameOn_localFrame_baseSet I ∞ b).contMDiffAt
+        e.open_baseSet hx j).mdifferentiableAt (by simp)
+  have hcoeff_diff (j : ι) :
+      MDifferentiableAt I 𝓘(Real, Real) (coeff j) x := by
+    simpa [coeff] using
+      mdifferentiableAt_localFrame_coeff
+        (I := I) (e := e) (b := b) hx hσ j
+  have hterm_diff (j : ι) : MDiffAt (T% (fun y => term j y)) x := by
+    exact (hcoeff_diff j).smul_section (hframe_diff j)
+  have hsum_diff :
+      MDiffAt (T% ((Finset.univ : Finset ι).sum term)) x := by
+    simpa using
+      MDifferentiableAt.sum_section
+        (s := (Finset.univ : Finset ι)) (t := term) hterm_diff
+  have hσ_ev :
+      σ =ᶠ[𝓝 x] fun y : M => ∑ j : ι, term j y := by
+    simpa [term, coeff, frame] using
+      e.eventually_eq_localFrame_sum_coeff_smul (I := I) b hx (s := σ)
+  have hcov_congr :
+      cov σ x = cov ((Finset.univ : Finset ι).sum term) x :=
+    cov.isCovariantDerivativeOnUniv.congr_of_eventuallyEq hσ hsum_diff
+      (by simp) (by simpa using hσ_ev)
+  have hcov_sum :
+      (cov σ x) (frame i x) =
+        ∑ j : ι,
+          (extDerivFun (I := I) (coeff j) x (frame i x) • frame j x +
+            coeff j x • (cov (frame j) x) (frame i x)) := by
+    calc
+      (cov σ x) (frame i x)
+          = (cov ((Finset.univ : Finset ι).sum term) x) (frame i x) := by
+            rw [hcov_congr]
+      _ = ∑ j : ι, (cov (term j) x) (frame i x) := by
+            rw [covariantDerivative_finset_sum_tangent (I := I) cov
+              (Finset.univ : Finset ι) term (frame i x) hterm_diff]
+      _ = ∑ j : ι,
+          (extDerivFun (I := I) (coeff j) x (frame i x) • frame j x +
+            coeff j x • (cov (frame j) x) (frame i x)) := by
+            refine Finset.sum_congr rfl fun j _ => ?_
+            have hleib := congr($(cov.isCovariantDerivativeOnUniv.leibniz
+              (σ := frame j) (g := coeff j) (x := x)
+              (hframe_diff j) (hcoeff_diff j)) (frame i x))
+            simpa [term, coeff, frame, add_comm] using hleib
+  have hcoeff_frame (j l : ι) :
+      e.localFrame_coeff I b l x (frame j x) = (if j = l then 1 else 0) := by
+    rw [e.localFrame_coeff_apply_of_mem_baseSet b hx]
+    change ((e.basisAt b hx).repr (e.localFrame b j x)) l = (if j = l then 1 else 0)
+    rw [e.localFrame_apply_of_mem_baseSet (b := b) hx]
+    rw [(e.basisAt b hx).repr_self]
+    simp [Finsupp.single_apply]
+  rw [hcov_sum]
+  rw [map_sum]
+  simp only [map_add]
+  rw [Finset.sum_add_distrib]
+  have hderiv_sum :
+      (∑ j : ι,
+          e.localFrame_coeff I b k x
+            (extDerivFun (I := I) (coeff j) x (frame i x) • frame j x)) =
+        extDerivFun (I := I) (coeff k) x (frame i x) := by
+    calc
+      (∑ j : ι,
+          e.localFrame_coeff I b k x
+            (extDerivFun (I := I) (coeff j) x (frame i x) • frame j x))
+          = ∑ j : ι,
+              extDerivFun (I := I) (coeff j) x (frame i x) *
+                e.localFrame_coeff I b k x (frame j x) := by
+              refine Finset.sum_congr rfl fun j _ => ?_
+              simp
+      _ = ∑ j : ι,
+            extDerivFun (I := I) (coeff j) x (frame i x) *
+              (if j = k then 1 else 0) := by
+              refine Finset.sum_congr rfl fun j _ => ?_
+              rw [hcoeff_frame j k]
+      _ = extDerivFun (I := I) (coeff k) x (frame i x) := by
+              simp
+  have hchristoffel_sum :
+      (∑ j : ι,
+          e.localFrame_coeff I b k x
+            (coeff j x • (cov (frame j) x) (frame i x))) =
+        ∑ j : ι,
+          coeff j x *
+            e.localFrame_coeff I b k x ((cov (frame j) x) (frame i x)) := by
+    refine Finset.sum_congr rfl fun j _ => ?_
+    simp
+  rw [hderiv_sum, hchristoffel_sum]
+  rfl
+
 /-! ## Metric coordinate smoothness
 
 The Christoffel formula in `Torsion.lean` reduces smoothness of the

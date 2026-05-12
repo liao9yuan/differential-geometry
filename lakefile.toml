@@ -25,3 +25,6 @@ name = "DifferentialGeometry"
 
 [[lean_lib]]
 name = "RicciFlower"
+
+[[lean_lib]]
+name = "BK"
