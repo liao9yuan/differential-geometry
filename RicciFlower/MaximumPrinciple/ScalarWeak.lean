@@ -1,7 +1,8 @@
 import RicciFlower.Realized.Operators
 import Mathlib.Analysis.Calculus.Deriv.Mul
 import Mathlib.Analysis.SpecialFunctions.ExpDeriv
-import Mathlib.Topology.EMetricSpace.Lipschitz
+import Mathlib.Topology.Algebra.MetricSpace.Lipschitz
+import Mathlib.Topology.MetricSpace.Lipschitz
 import Mathlib.Topology.Order.Compact
 import Mathlib.Tactic
 
@@ -14,10 +15,10 @@ set_option linter.unusedSectionVars false
 
 This file starts the realized formalization of Hamilton's scalar weak maximum
 principle for supersolutions. The proved part is the algebra that reduces the
-supersolution and ODE hypotheses to a negative-region inequality. The compact
-strict-barrier argument is stated as a precise theorem with a controlled
-`sorry`, because the endpoint time-derivative/minimum infrastructure is not yet
-fully packaged for the realized manifold layer.
+supersolution and ODE hypotheses to a negative-region inequality, together
+with the compact strict-barrier argument. The main WMP interfaces support both
+a constant Lipschitz coefficient and a supplied time-dependent coefficient with
+the corresponding positive weight.
 -/
 
 namespace RicciFlower
@@ -247,12 +248,7 @@ private theorem derivWithin_add_eps_mul_time
   rw [derivWithin_fun_add hw hlinear]
   rw [hderiv_linear]
 
-/-- Strict-barrier form of the scalar weak maximum principle.
-
-Expected proof: for each `ε > 0`, minimize `wε = w + εt` on the compact slab.
-At a negative minimum, use the endpoint derivative test to get
-`∂ₜ wε <= 0`, use `heatOperatorWithDrift_at_spatial_min_nonneg` to get the
-spatial operator nonnegative, and contradict `P wε = P w + ε > 0`. -/
+/-- Strict-barrier form of the scalar weak maximum principle. -/
 theorem strict_barrier_nonnegative
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
@@ -281,7 +277,7 @@ theorem strict_barrier_nonnegative
           0 <= w t x + ε * t := by
     intro ε hε
     by_contra hnot
-    push_neg at hnot
+    push Not at hnot
     rcases hnot with ⟨tb, htb, xb, hbneg⟩
     let Φ : Real × M -> Real := fun p => w p.1 p.2 + ε * p.1
     have hΦ_cont : ContinuousOn Φ (spacetimeSlab (M := M) T) := by
@@ -331,7 +327,7 @@ theorem strict_barrier_nonnegative
       nlinarith [hΦ0_neg, hεt_nonneg]
     have hspatial_min : IsLocalMin (w t0) x0 := by
       unfold IsLocalMin IsMinFilter
-      exact Eventually.of_forall fun y => by
+      exact Filter.Eventually.of_forall fun y => by
         have hymin : Φ (t0, x0) <= Φ (t0, y) :=
           hp0min (show (t0, y) ∈ spacetimeSlab (M := M) T from ⟨hp0_time, trivial⟩)
         dsimp [Φ] at hymin ⊢
@@ -339,7 +335,9 @@ theorem strict_barrier_nonnegative
     have hheat_nonneg :
         0 <= heatOperatorWithDrift (I := I) G t0 (X t0) (w t0) x0 :=
       heatOperatorWithDrift_at_spatial_min_nonneg (I := I) G t0 (X t0)
-        hspatial_min (hw_mdiff t0 hp0_time x0) (hw_grad t0 hp0_time x0)
+        hspatial_min (hw_mdiff t0 hp0_time x0)
+        (Filter.Eventually.of_forall fun y => hw_mdiff t0 hp0_time y)
+        (hw_grad t0 hp0_time x0)
     have hP_neg :
         parabolicOperatorWithDrift (I := I) G T X w t0 x0 < 0 := by
       unfold parabolicOperatorWithDrift
@@ -463,6 +461,124 @@ theorem scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values
     exact not_lt_of_ge (hw_nonneg t ht x) hprodneg
   exact sub_nonneg.mp (by simpa [v] using hvnonneg)
 
+/-- Hamilton Theorem 7.1 with a time-dependent reaction bound and a supplied
+positive weight.
+
+This is the core interface for non-uniform Lipschitz constants. Instead of a
+single constant `L`, it assumes the negative-region estimate with a coefficient
+`A t` and a weighted parabolic identity for `ρ(t) * (u-c)`. For example, when
+`ρ' = -Aρ`, the identity is the variable-coefficient analog of the exponential
+rescaling used by
+`scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values`. -/
+theorem scalar_weak_maximum_principle_supersolutions_of_weighted_lipschitz_on_values
+    [I.Boundaryless]
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (T : Real) (hT : 0 <= T)
+    (X : Real -> (x : M) -> TangentSpace I x)
+    (u : Real -> M -> Real) (c ρ A : Real -> Real)
+    (F : Real -> Real -> Real)
+    (hρ_pos : forall t : Real, t ∈ Set.Icc 0 T -> 0 < ρ t)
+    (hw_cont : ContinuousOn
+      (fun p : Real × M => ρ p.1 * (u p.1 p.2 - c p.1))
+      (spacetimeSlab (M := M) T))
+    (hw_time : forall t : Real, t ∈ Set.Icc 0 T ->
+      forall x : M, DifferentiableWithinAt Real
+        (fun s : Real => ρ s * (u s x - c s)) (Set.Icc 0 T) t)
+    (hw_mdiff : forall t : Real, t ∈ Set.Icc 0 T ->
+      forall x : M, MDifferentiableAt I 𝓘(Real, Real)
+        (fun y : M => ρ t * (u t y - c t)) x)
+    (hw_grad : forall t : Real, t ∈ Set.Icc 0 T ->
+      forall x : M, MDiffAt (T% fun y : M =>
+        gradientFun (I := I) (G.metric t)
+          (fun z : M => ρ t * (u t z - c t)) y) x)
+    (hsuper : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
+      F (u t x) t <= parabolicOperatorWithDrift (I := I) G T X u t x)
+    (hode : forall t : Real, t ∈ Set.Icc 0 T ->
+      derivWithin c (Set.Icc 0 T) t = F (c t) t)
+    (hinit : forall x : M, c 0 <= u 0 x)
+    (hlip : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
+      |F (u t x) t - F (c t) t| <= A t * |u t x - c t|)
+    (hsubCalc : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
+      parabolicOperatorWithDrift (I := I) G T X
+          (fun s y => u s y - c s) t x =
+        parabolicOperatorWithDrift (I := I) G T X u t x -
+          derivWithin c (Set.Icc 0 T) t)
+    (hweightCalc : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
+      parabolicOperatorWithDrift (I := I) G T X
+          (fun s y => ρ s * (u s y - c s)) t x =
+        ρ t *
+          (parabolicOperatorWithDrift (I := I) G T X
+              (fun s y => u s y - c s) t x - A t * (u t x - c t))) :
+    forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, c t <= u t x := by
+  let v : Real -> M -> Real := fun t x => u t x - c t
+  let w : Real -> M -> Real := fun t x => ρ t * v t x
+  have hw0 : forall x : M, 0 <= w 0 x := by
+    intro x
+    have h0mem : (0 : Real) ∈ Set.Icc 0 T := ⟨le_rfl, hT⟩
+    have hv0 : 0 <= v 0 x := by
+      exact sub_nonneg.mpr (hinit x)
+    exact mul_nonneg (le_of_lt (hρ_pos 0 h0mem)) hv0
+  have hnegative : forall t : Real, t ∈ Set.Icc 0 T ->
+      forall x : M, w t x < 0 ->
+        0 <= parabolicOperatorWithDrift (I := I) G T X w t x := by
+    intro t ht x hwneg
+    have hρt : 0 < ρ t := hρ_pos t ht
+    have hvneg : v t x < 0 := by
+      by_contra hnonneg
+      have hvnonneg : 0 <= v t x := le_of_not_gt hnonneg
+      have hprod : 0 <= ρ t * v t x :=
+        mul_nonneg (le_of_lt hρt) hvnonneg
+      exact not_le_of_gt (by simpa [w] using hwneg) hprod
+    have hPvLower :
+        A t * (u t x - c t) <=
+          parabolicOperatorWithDrift (I := I) G T X v t x := by
+      have hlow : A t * (u t x - c t) <= F (u t x) t - F (c t) t :=
+        reaction_difference_lower_bound_on_negative_region
+          (hlip t ht x) (by simpa [v] using hvneg)
+      have hupper :
+          F (u t x) t - F (c t) t <=
+            parabolicOperatorWithDrift (I := I) G T X v t x := by
+        calc
+          F (u t x) t - F (c t) t <=
+              parabolicOperatorWithDrift (I := I) G T X u t x -
+                derivWithin c (Set.Icc 0 T) t := by
+            rw [hode t ht]
+            exact sub_le_sub_right (hsuper t ht x) (F (c t) t)
+          _ = parabolicOperatorWithDrift (I := I) G T X v t x := by
+            have hsub :
+                parabolicOperatorWithDrift (I := I) G T X v t x =
+                  parabolicOperatorWithDrift (I := I) G T X u t x -
+                    derivWithin c (Set.Icc 0 T) t := by
+              simpa [v] using hsubCalc t ht x
+            exact hsub.symm
+      exact le_trans hlow hupper
+    have hregion :
+        0 <= parabolicOperatorWithDrift (I := I) G T X v t x - A t * v t x := by
+      exact sub_nonneg.mpr (by simpa [v] using hPvLower)
+    calc
+      0 <= ρ t *
+          (parabolicOperatorWithDrift (I := I) G T X v t x - A t * v t x) := by
+        exact mul_nonneg (le_of_lt hρt) hregion
+      _ = parabolicOperatorWithDrift (I := I) G T X w t x := by
+        rw [← hweightCalc t ht x]
+  have hw_nonneg :
+      forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, 0 <= w t x :=
+    strict_barrier_nonnegative (I := I) G T hT X w
+      (by simpa [w, v] using hw_cont) hw0
+      (by simpa [w, v] using hw_time)
+      (by simpa [w, v] using hw_mdiff) (by simpa [w, v] using hw_grad)
+      hnegative
+  intro t ht x
+  have hvnonneg : 0 <= v t x := by
+    by_contra hneg'
+    have hvneg : v t x < 0 := lt_of_not_ge hneg'
+    have hprodneg : w t x < 0 := by
+      exact mul_neg_of_pos_of_neg (hρ_pos t ht) hvneg
+    exact not_lt_of_ge (hw_nonneg t ht x) hprodneg
+  exact sub_nonneg.mp (by simpa [v] using hvnonneg)
+
 /-- Hamilton Theorem 7.1, realized core form where the two pointwise calculus
 identities are produced from ordinary time/spatial regularity hypotheses.
 
@@ -557,13 +673,153 @@ theorem scalar_wmp_supersolutions_of_lipschitz_on_values_of_regular
       exact le_antisymm htle ht.1
     simpa [ht0] using hinit x
 
-/-- Textbook locally-Lipschitz wrapper for Hamilton Theorem 7.1.
+/-! ## Slice-local Lipschitz extraction -/
 
-Expected proof: use compactness of the slab and continuity of `u` and `c` to
-put their values in a compact real interval, extract a uniform Lipschitz
-constant from `LocallyLipschitz`, then apply
-`scalar_weak_maximum_principle_supersolutions_of_lipschitz_on_values`. -/
-theorem scalar_weak_maximum_principle_supersolutions_locallyLipschitz
+/-- The scalar values seen by the comparison pair at one time slice. -/
+def scalarValueSet (u : Real -> M -> Real) (c : Real -> Real) (t : Real) : Set Real :=
+  Set.range (fun x : M => u t x) ∪ {c t}
+
+/-- The time-slice value set is compact when the spatial slice of `u` is continuous. -/
+theorem scalarValueSet_isCompact_of_continuous
+    [CompactSpace M]
+    (u : Real -> M -> Real) (c : Real -> Real) (t : Real)
+    (hu : Continuous (fun x : M => u t x)) :
+    IsCompact (scalarValueSet (M := M) u c t) := by
+  have hrange : IsCompact (Set.range (fun x : M => u t x)) := by
+    simpa using (isCompact_univ.image hu)
+  exact hrange.union isCompact_singleton
+
+/-- A compact locally-Lipschitz-on-set real function admits an absolute-value
+Lipschitz estimate on that set. -/
+theorem exists_abs_lipschitzOnWith_of_locallyLipschitzOn_isCompact
+    {f : Real -> Real} {s : Set Real}
+    (hs : IsCompact s)
+    (hf : LocallyLipschitzOn s f) :
+    ∃ K : NNReal, ∀ a ∈ s, ∀ b ∈ s,
+      |f a - f b| <= (K : Real) * |a - b| := by
+  obtain ⟨K, hK⟩ := LocallyLipschitzOn.exists_lipschitzOnWith_of_compact hs hf
+  refine ⟨K, ?_⟩
+  intro a ha b hb
+  simpa [Real.dist_eq] using hK.dist_le_mul a ha b hb
+
+/-- Slice-local Lipschitz control on compact value sets produces a
+time-dependent coefficient for the reaction estimate. -/
+theorem exists_time_dependent_lipschitz_bound_on_values
+    (F : Real -> Real -> Real)
+    (u : Real -> M -> Real) (c : Real -> Real) (T : Real)
+    (hF : ∀ t : Real, t ∈ Set.Icc 0 T ->
+      LocallyLipschitzOn (scalarValueSet (M := M) u c t)
+        (fun a : Real => F a t))
+    (hcompact : ∀ t : Real, t ∈ Set.Icc 0 T ->
+      IsCompact (scalarValueSet (M := M) u c t)) :
+    ∃ A : Real -> Real,
+      (∀ t : Real, t ∈ Set.Icc 0 T -> 0 <= A t) ∧
+      (∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M,
+        |F (u t x) t - F (c t) t| <= A t * |u t x - c t|) := by
+  classical
+  have hExists : ∀ t : Real, t ∈ Set.Icc 0 T ->
+      ∃ K : NNReal, ∀ a ∈ scalarValueSet (M := M) u c t,
+        ∀ b ∈ scalarValueSet (M := M) u c t,
+          |(fun a : Real => F a t) a - (fun a : Real => F a t) b| <=
+            (K : Real) * |a - b| := by
+    intro t ht
+    exact exists_abs_lipschitzOnWith_of_locallyLipschitzOn_isCompact
+      (hcompact t ht) (hF t ht)
+  let A : Real -> Real := fun t =>
+    if ht : t ∈ Set.Icc 0 T then
+      ((Classical.choose (hExists t ht) : NNReal) : Real)
+    else
+      0
+  refine ⟨A, ?_, ?_⟩
+  · intro t ht
+    dsimp [A]
+    rw [dif_pos ht]
+    exact NNReal.coe_nonneg _
+  · intro t ht x
+    dsimp [A]
+    rw [dif_pos ht]
+    have hu_mem : u t x ∈ scalarValueSet (M := M) u c t := by
+      left
+      exact ⟨x, rfl⟩
+    have hc_mem : c t ∈ scalarValueSet (M := M) u c t := by
+      right
+      rfl
+    exact Classical.choose_spec (hExists t ht) (u t x) hu_mem (c t) hc_mem
+
+/-- User-facing corollary from globally locally-Lipschitz time slices. -/
+theorem exists_time_dependent_lipschitz_bound_on_values_of_locallyLipschitz
+    (F : Real -> Real -> Real)
+    (u : Real -> M -> Real) (c : Real -> Real) (T : Real)
+    (hF : ∀ t : Real, t ∈ Set.Icc 0 T ->
+      LocallyLipschitz (fun a : Real => F a t))
+    (hcompact : ∀ t : Real, t ∈ Set.Icc 0 T ->
+      IsCompact (scalarValueSet (M := M) u c t)) :
+    ∃ A : Real -> Real,
+      (∀ t : Real, t ∈ Set.Icc 0 T -> 0 <= A t) ∧
+      (∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M,
+        |F (u t x) t - F (c t) t| <= A t * |u t x - c t|) := by
+  exact exists_time_dependent_lipschitz_bound_on_values (M := M) F u c T
+    (fun t ht => (hF t ht).locallyLipschitzOn) hcompact
+
+/-- The real values seen by the comparison pair on the compact spacetime slab. -/
+def scalarWMPValueSet (T : Real) (u : Real -> M -> Real) (c : Real -> Real) : Set Real :=
+  (fun p : Real × M => u p.1 p.2) '' spacetimeSlab (M := M) T ∪ c '' Set.Icc 0 T
+
+/-- `u(t,x)` belongs to the scalar-WMP value set. -/
+theorem scalarWMPValueSet_u_mem
+    (T : Real) (u : Real -> M -> Real) (c : Real -> Real)
+    {t : Real} (ht : t ∈ Set.Icc 0 T) (x : M) :
+    u t x ∈ scalarWMPValueSet (M := M) T u c := by
+  left
+  refine ⟨(t, x), ?_, rfl⟩
+  exact ⟨ht, trivial⟩
+
+/-- `c(t)` belongs to the scalar-WMP value set. -/
+theorem scalarWMPValueSet_c_mem
+    (T : Real) (u : Real -> M -> Real) (c : Real -> Real)
+    {t : Real} (ht : t ∈ Set.Icc 0 T) :
+    c t ∈ scalarWMPValueSet (M := M) T u c := by
+  right
+  exact ⟨t, ht, rfl⟩
+
+/-- The scalar-WMP value set is compact when the comparison functions are
+continuous on their natural domains. -/
+theorem scalarWMPValueSet_isCompact
+    [CompactSpace M]
+    (T : Real) (u : Real -> M -> Real) (c : Real -> Real)
+    (hu_cont : ContinuousOn (fun p : Real × M => u p.1 p.2)
+      (spacetimeSlab (M := M) T))
+    (hc_cont : ContinuousOn c (Set.Icc 0 T)) :
+    IsCompact (scalarWMPValueSet (M := M) T u c) := by
+  have hslab : IsCompact (spacetimeSlab (M := M) T) := by
+    simpa [spacetimeSlab] using (isCompact_Icc.prod (isCompact_univ : IsCompact (Set.univ : Set M)))
+  exact (hslab.image_of_continuousOn hu_cont).union (isCompact_Icc.image_of_continuousOn hc_cont)
+
+/-- A uniform Lipschitz bound on the compact scalar-WMP value set gives the
+pointwise Lipschitz inequality needed by the algebraic WMP core. -/
+theorem scalarWMP_lipschitz_on_valueSet_bound
+    (T : Real) (u : Real -> M -> Real) (c : Real -> Real)
+    (F : Real -> Real -> Real) (K : NNReal)
+    (hF_lip : forall t : Real, t ∈ Set.Icc 0 T ->
+      LipschitzOnWith K (fun a : Real => F a t)
+        (scalarWMPValueSet (M := M) T u c)) :
+    forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
+      |F (u t x) t - F (c t) t| <= (K : Real) * |u t x - c t| := by
+  intro t ht x
+  have hu_mem : u t x ∈ scalarWMPValueSet (M := M) T u c :=
+    scalarWMPValueSet_u_mem (M := M) T u c ht x
+  have hc_mem : c t ∈ scalarWMPValueSet (M := M) T u c :=
+    scalarWMPValueSet_c_mem (M := M) T u c ht
+  simpa [Real.dist_eq] using (hF_lip t ht).dist_le_mul (u t x) hu_mem (c t) hc_mem
+
+/-- Hamilton Theorem 7.1 with a uniform Lipschitz constant on the compact
+value set of the comparison functions.
+
+The pointwise-in-time `LocallyLipschitz` hypothesis is not enough by itself:
+the WMP core needs one constant that works for every `t ∈ [0,T]` and every
+value attained by `u` or `c`. This theorem records that uniform-on-values
+interface and delegates the parabolic argument to the proved regular core. -/
+theorem scalar_wmp_supersolutions_of_lipschitz_on_value_set_of_regular
     [I.Boundaryless]
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
@@ -571,20 +827,43 @@ theorem scalar_weak_maximum_principle_supersolutions_locallyLipschitz
     (T : Real) (hT : 0 <= T)
     (X : Real -> (x : M) -> TangentSpace I x)
     (u : Real -> M -> Real) (c : Real -> Real)
-    (F : Real -> Real -> Real)
-    (_hu_cont : ContinuousOn (fun p : Real × M => u p.1 p.2) (spacetimeSlab (M := M) T))
-    (_hc_cont : ContinuousOn c (Set.Icc 0 T))
-    (_hF_local : forall t : Real, t ∈ Set.Icc 0 T ->
-      LocallyLipschitz (fun a : Real => F a t))
-    (_hF_mono : forall t : Real, t ∈ Set.Icc 0 T ->
-      Monotone (fun a : Real => F a t))
-    (_hsuper : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
+    (F : Real -> Real -> Real) (K : NNReal)
+    (hw_cont : ContinuousOn
+      (fun p : Real × M => Real.exp (-(K : Real) * p.1) * (u p.1 p.2 - c p.1))
+      (spacetimeSlab (M := M) T))
+    (hw_mdiff : forall t : Real, t ∈ Set.Icc 0 T ->
+      forall x : M, MDifferentiableAt I 𝓘(Real, Real)
+        (fun y : M => Real.exp (-(K : Real) * t) * (u t y - c t)) x)
+    (hw_grad : forall t : Real, t ∈ Set.Icc 0 T ->
+      forall x : M, MDiffAt (T% fun y : M =>
+        gradientFun (I := I) (G.metric t)
+          (fun z : M => Real.exp (-(K : Real) * t) * (u t z - c t)) y) x)
+    (hu_time : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
+      DifferentiableWithinAt Real (fun s : Real => u s x) (Set.Icc 0 T) t)
+    (hc_time : forall t : Real, t ∈ Set.Icc 0 T ->
+      DifferentiableWithinAt Real c (Set.Icc 0 T) t)
+    (hu_space : forall t : Real, t ∈ Set.Icc 0 T ->
+      forall y : M, MDifferentiableAt I 𝓘(Real, Real) (u t) y)
+    (hv_space : forall t : Real, t ∈ Set.Icc 0 T ->
+      forall y : M, MDifferentiableAt I 𝓘(Real, Real)
+        (fun z : M => u t z - c t) y)
+    (hv_grad : forall t : Real, t ∈ Set.Icc 0 T ->
+      forall x : M, MDiffAt (T% fun y : M =>
+        gradientFun (I := I) (G.metric t) (fun z : M => u t z - c t) y) x)
+    (hsuper : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
       F (u t x) t <= parabolicOperatorWithDrift (I := I) G T X u t x)
-    (_hode : forall t : Real, t ∈ Set.Icc 0 T ->
+    (hode : forall t : Real, t ∈ Set.Icc 0 T ->
       derivWithin c (Set.Icc 0 T) t = F (c t) t)
-    (_hinit : forall x : M, c 0 <= u 0 x) :
+    (hinit : forall x : M, c 0 <= u 0 x)
+    (hF_lip : forall t : Real, t ∈ Set.Icc 0 T ->
+      LipschitzOnWith K (fun a : Real => F a t)
+        (scalarWMPValueSet (M := M) T u c)) :
     forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, c t <= u t x := by
-  sorry
+  exact scalar_wmp_supersolutions_of_lipschitz_on_values_of_regular
+    (I := I) G T hT X u c F (K : Real)
+    hw_cont hw_mdiff hw_grad hu_time hc_time hu_space hv_space hv_grad
+    hsuper hode hinit
+    (scalarWMP_lipschitz_on_valueSet_bound (M := M) T u c F K hF_lip)
 
 end
 

@@ -85,7 +85,7 @@ def RiemannEvolutionEquationInFrameOn
 
 /-- Trace of the covariant derivative of the infinitesimal connection
 variation:
-`∇_k A^k_ij - ∇_j A^k_ik`.
+`∇_k A^k_ij - ∇_i A^k_kj`.
 
 Here `nablaGammaDt t x d k i j` denotes the fixed-frame component
 `(∇_d A)^k_ij`, where `A^k_ij = ∂_t Γ^k_ij`. -/
@@ -93,13 +93,14 @@ def ricciVariationFromConnectionRHSInFrame
     (nablaGammaDt : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (t : Real) (x : M) (i j : Idx) : Real :=
   (∑ k : Idx, nablaGammaDt t x k k i j) -
-    (∑ k : Idx, nablaGammaDt t x j k i k)
+    (∑ k : Idx, nablaGammaDt t x i k k j)
 
 /-- Ricci variation formula in a fixed frame:
-`∂_t Ric_ij = ∇_k A^k_ij - ∇_j A^k_ik`.
+`∂_t Ric_ij = ∇_k A^k_ij - ∇_i A^k_kj`.
 
 This is the realized component target obtained by differentiating the
-curvature trace of the connection. -/
+curvature trace of the connection using the current `(1,3)` convention
+`Ric(e_i,e_j) = trace (e_k ↦ R(e_k,e_i)e_j)`. -/
 def RicciVariationFormulaInFrameOn
     {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -112,6 +113,105 @@ def RicciVariationFormulaInFrameOn
         (t : Real) x i j)
       D.carrier
       (t : Real)
+
+/-- `(1,3)` Riemann variation induced by the covariant derivative of the
+connection variation:
+`δR^a_bcd = (∇_b A)^a_cd - (∇_c A)^a_bd`. -/
+def riemann13VariationFromConnectionRHSInFrame
+    (nablaA : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
+    (t : Real) (x : M) (a b c d : Idx) : Real :=
+  nablaA t x b a c d - nablaA t x c a b d
+
+/-- `(1,3)` Riemann variation formula in a fixed global frame. -/
+def Riemann13VariationFormulaInFrameOn
+    {D : Realized.RealTimeInterval}
+    (Rm13 : Real -> Realized.Tensor13Section (I := I) (M := M))
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E ∞ frame Set.univ)
+    (nablaA : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real) : Prop :=
+  forall (t : Realized.RealTimeInterval.RegularTime D) (x : M) (a b c d : Idx),
+    HasDerivWithinAt
+      (fun s : Real => Realized.rm13Comp (I := I) (Rm13 s) frame hframe x a b c d)
+      (riemann13VariationFromConnectionRHSInFrame (M := M) nablaA
+        (t : Real) x a b c d)
+      D.carrier
+      (t : Real)
+
+theorem ricciCompInFrame_eq_rm13_trace
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (Rm13 : Real -> Realized.Tensor13Section (I := I) (M := M))
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E ∞ frame Set.univ)
+    (htrace : ∀ t : Real,
+      Realized.RicciTensorRealizesRm13Trace (I := I) (S.ricci t) (Rm13 t))
+    (t : Real) (x : M) (i j : Idx) :
+    ricciCompInFrame (I := I) S frame t x i j =
+      ∑ a : Idx, Realized.rm13Comp (I := I) (Rm13 t) frame hframe x a a i j := by
+  classical
+  have hx : x ∈ (Set.univ : Set M) := Set.mem_univ x
+  unfold ricciCompInFrame
+  rw [htrace t x]
+  rw [Realized.ricciFromRm13At_apply_basis_trace
+    (I := I) (basis := hframe.toBasisAt hx) (Rm13 := Rm13 t x)
+    (Y := frame i x) (Z := frame j x)]
+  refine Finset.sum_congr rfl fun a _ => ?_
+  simp [Realized.rm13Comp, RicciFlower.Curvature.rm13Comp,
+    IsLocalFrameOn.coeff, hx, IsLocalFrameOn.toBasisAt_coe]
+
+/-- Trace a supplied `(1,3)` Riemann variation formula to the Ricci variation
+formula, using the current `Rm13` convention
+`Ric(e_i,e_j) = trace (e_k ↦ R(e_k,e_i)e_j)`. -/
+theorem ricciVariationFormulaInFrameOn_of_riemann13Variation
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (Rm13 : Real -> Realized.Tensor13Section (I := I) (M := M))
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E ∞ frame Set.univ)
+    (nablaA : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
+    (htrace : ∀ t : Real,
+      Realized.RicciTensorRealizesRm13Trace (I := I) (S.ricci t) (Rm13 t))
+    (hRm : Riemann13VariationFormulaInFrameOn
+      (I := I) (D := D) Rm13 frame hframe nablaA) :
+    RicciVariationFormulaInFrameOn (I := I) S frame nablaA := by
+  classical
+  intro t x i j
+  let traceComp : Real -> Real :=
+    fun s => ∑ a : Idx, Realized.rm13Comp (I := I) (Rm13 s) frame hframe x a a i j
+  have htraceDeriv :
+      HasDerivWithinAt traceComp
+        (∑ a : Idx,
+          riemann13VariationFromConnectionRHSInFrame (M := M) nablaA
+            (t : Real) x a a i j)
+        D.carrier
+        (t : Real) := by
+    simpa [traceComp, Finset.sum_apply] using
+      (HasDerivWithinAt.fun_sum
+        (u := (Finset.univ : Finset Idx))
+        (A := fun a s =>
+          Realized.rm13Comp (I := I) (Rm13 s) frame hframe x a a i j)
+        (A' := fun a =>
+          riemann13VariationFromConnectionRHSInFrame (M := M) nablaA
+            (t : Real) x a a i j)
+        (s := D.carrier) (x := (t : Real))
+        (fun a _ha => hRm t x a a i j))
+  have hricci :
+      HasDerivWithinAt
+        (fun s : Real => ricciCompInFrame (I := I) S frame s x i j)
+        (∑ a : Idx,
+          riemann13VariationFromConnectionRHSInFrame (M := M) nablaA
+            (t : Real) x a a i j)
+        D.carrier
+        (t : Real) := by
+    refine htraceDeriv.congr ?_ ?_
+    · intro s _hs
+      exact ricciCompInFrame_eq_rm13_trace
+        (I := I) S Rm13 frame hframe htrace s x i j
+    · exact ricciCompInFrame_eq_rm13_trace
+        (I := I) S Rm13 frame hframe htrace (t : Real) x i j
+  exact hricci.congr_deriv (by
+    simp [ricciVariationFromConnectionRHSInFrame,
+      riemann13VariationFromConnectionRHSInFrame, Finset.sum_sub_distrib])
 
 /-- The covariant derivative of the Ricci-flow connection variation after
 substituting
@@ -153,7 +253,7 @@ def Nabla2RicciTensorComponentsInFrameOn
 
 /-- The Ricci variation RHS after substituting the Ricci-flow Christoffel
 variation and expanding the trace
-`nabla_k A^k_ij - nabla_j A^k_ik`.
+`nabla_k A^k_ij - nabla_i A^k_kj`.
 
 This is the expression before the contracted-Bianchi/gauge cancellation and
 the curvature-commutator simplification. -/
@@ -168,9 +268,9 @@ def ricciVariationExpandedRHSInFrame
         nabla2Ric t x k l i j)) -
     (∑ k : Idx, ∑ l : Idx,
       gInv t x k l *
-        (-nabla2Ric t x j i k l -
-          nabla2Ric t x j k i l +
-          nabla2Ric t x j l i k))
+        (-nabla2Ric t x i k j l -
+          nabla2Ric t x i j k l +
+          nabla2Ric t x i l k j))
 
 /-- Algebraic substitution of the Ricci-flow connection variation into the
 Ricci variation formula. -/
@@ -221,34 +321,35 @@ def contractedNabla2RicRightInFrame
   ∑ k : Idx, ∑ l : Idx,
     gInv t x k l * nabla2Ric t x k j i l
 
-/-- The scalar-Hessian trace `∇_j ∇_i R` as it appears before the Hessian
+/-- The scalar-Hessian trace `∇_i ∇_j R` as it appears before the Hessian
 cancellation in the component proof. -/
 def scalarHessianFromNabla2RicInFrame
     (gInv : Real -> Realized.InverseMetricComponents M Idx)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (t : Real) (x : M) (i j : Idx) : Real :=
   ∑ k : Idx, ∑ l : Idx,
-    gInv t x k l * nabla2Ric t x j i k l
+    gInv t x k l * nabla2Ric t x i j k l
 
-/-- The dummy-index cancellation term `∇_j ∇^k Ric_ik`. -/
+/-- The divergence trace term `∇_i ∇^k Ric_jk`. -/
 def contractedNabla2RicTraceAInFrame
     (gInv : Real -> Realized.InverseMetricComponents M Idx)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (t : Real) (x : M) (i j : Idx) : Real :=
   ∑ k : Idx, ∑ l : Idx,
-    gInv t x k l * nabla2Ric t x j k i l
+    gInv t x k l * nabla2Ric t x i k j l
 
-/-- The dummy-index cancellation term `∇_j ∇^l Ric_il`. -/
+/-- The divergence trace term `∇_i ∇^l Ric_lj`. -/
 def contractedNabla2RicTraceBInFrame
     (gInv : Real -> Realized.InverseMetricComponents M Idx)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (t : Real) (x : M) (i j : Idx) : Real :=
   ∑ k : Idx, ∑ l : Idx,
-    gInv t x k l * nabla2Ric t x j l i k
+    gInv t x k l * nabla2Ric t x i l k j
 
 /-- The two contracted commutator identities used in Lemma 6.3:
 both second-derivative contractions equal
-`1/2 Hess R - R_ikjl Ric^kl + Ric_i^k Ric_kj`. -/
+`1/2 Hess R - R_ikjl Ric^kl + Ric_i^k Ric_kj`, and the two divergence trace
+terms in `∇_i A^k_kj` cancel for a symmetric Ricci tensor. -/
 def RicciContractedCommutatorsInFrame
     {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -271,30 +372,11 @@ def RicciContractedCommutatorsInFrame
             (t : Real) x i j -
         rmRicciContractionCompInFrame (I := I) S Rm04 gInv frame
           (t : Real) x i j +
-        ricciQuadraticCompInFrame (I := I) S gInv frame (t : Real) x i j
-
-private theorem contractedNabla2Ric_trace_swap
-    (gInv : Real -> Realized.InverseMetricComponents M Idx)
-    (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
-    (hInv : SymmetricInverseMetricComponentsInFrameOn gInv)
-    (t : Real) (x : M) (i j : Idx) :
-    contractedNabla2RicTraceAInFrame (M := M) gInv nabla2Ric t x i j =
-      contractedNabla2RicTraceBInFrame (M := M) gInv nabla2Ric t x i j := by
-  unfold contractedNabla2RicTraceAInFrame contractedNabla2RicTraceBInFrame
-  calc
-    (∑ k : Idx, ∑ l : Idx,
-        gInv t x k l * nabla2Ric t x j k i l)
-        = ∑ l : Idx, ∑ k : Idx,
-            gInv t x k l * nabla2Ric t x j k i l := by
-            rw [Finset.sum_comm]
-    _ = ∑ l : Idx, ∑ k : Idx,
-            gInv t x l k * nabla2Ric t x j k i l := by
-            refine Finset.sum_congr rfl fun l _ => ?_
-            refine Finset.sum_congr rfl fun k _ => ?_
-            rw [hInv t x k l]
-    _ = ∑ k : Idx, ∑ l : Idx,
-            gInv t x k l * nabla2Ric t x j l i k := by
-            rw [Finset.sum_comm]
+        ricciQuadraticCompInFrame (I := I) S gInv frame (t : Real) x i j ∧
+      contractedNabla2RicTraceAInFrame (M := M) gInv nabla2Ric
+          (t : Real) x i j =
+        contractedNabla2RicTraceBInFrame (M := M) gInv nabla2Ric
+          (t : Real) x i j
 
 private theorem ricciVariationExpandedRHSInFrame_eq_decomposed
     (gInv : Real -> Realized.InverseMetricComponents M Idx)
@@ -353,32 +435,32 @@ private theorem ricciVariationExpandedRHSInFrame_eq_decomposed
   have hsecond :
       (∑ k : Idx, ∑ l : Idx,
         gInv t x k l *
-          (-nabla2Ric t x j i k l -
-            nabla2Ric t x j k i l +
-            nabla2Ric t x j l i k)) =
-        -hess - traceA + traceB := by
+          (-nabla2Ric t x i k j l -
+            nabla2Ric t x i j k l +
+            nabla2Ric t x i l k j)) =
+        -traceA - hess + traceB := by
     dsimp [hess, traceA, traceB, scalarHessianFromNabla2RicInFrame,
       contractedNabla2RicTraceAInFrame, contractedNabla2RicTraceBInFrame]
     calc
       (∑ k : Idx, ∑ l : Idx,
         gInv t x k l *
-          (-nabla2Ric t x j i k l -
-            nabla2Ric t x j k i l +
-            nabla2Ric t x j l i k))
+          (-nabla2Ric t x i k j l -
+            nabla2Ric t x i j k l +
+            nabla2Ric t x i l k j))
           =
         ∑ k : Idx, ∑ l : Idx,
-          (-(gInv t x k l * nabla2Ric t x j i k l) -
-            gInv t x k l * nabla2Ric t x j k i l +
-            gInv t x k l * nabla2Ric t x j l i k) := by
+          (-(gInv t x k l * nabla2Ric t x i k j l) -
+            gInv t x k l * nabla2Ric t x i j k l +
+            gInv t x k l * nabla2Ric t x i l k j) := by
             refine Finset.sum_congr rfl fun k _ => ?_
             refine Finset.sum_congr rfl fun l _ => ?_
             ring
       _ = - (∑ k : Idx, ∑ l : Idx,
-            gInv t x k l * nabla2Ric t x j i k l) -
+            gInv t x k l * nabla2Ric t x i k j l) -
           (∑ k : Idx, ∑ l : Idx,
-            gInv t x k l * nabla2Ric t x j k i l) +
+            gInv t x k l * nabla2Ric t x i j k l) +
           (∑ k : Idx, ∑ l : Idx,
-            gInv t x k l * nabla2Ric t x j l i k) := by
+            gInv t x k l * nabla2Ric t x i l k j) := by
             simp [sub_eq_add_neg, Finset.sum_add_distrib,
               Finset.sum_neg_distrib]
   unfold ricciVariationExpandedRHSInFrame
@@ -395,19 +477,18 @@ theorem ricciVariationExpandedRHS_eq_evolutionRHS_of_commutators
     (gInv : Real -> Realized.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
-    (hInv : SymmetricInverseMetricComponentsInFrameOn gInv)
+    (_hInv : SymmetricInverseMetricComponentsInFrameOn gInv)
     (hcomm : RicciContractedCommutatorsInFrame
       (I := I) S Rm04 gInv frame nabla2Ric) :
     RicciVariationExpandedRHS_eq_evolutionRHS
       (I := I) S Rm04 gInv frame nabla2Ric := by
   intro t x i j
   have hleft := (hcomm t x i j).1
-  have hright := (hcomm t x i j).2
-  have hswap := contractedNabla2Ric_trace_swap
-    (M := M) gInv nabla2Ric hInv (t : Real) x i j
+  have hright := (hcomm t x i j).2.1
+  have htrace := (hcomm t x i j).2.2
   rw [ricciVariationExpandedRHSInFrame_eq_decomposed
     (M := M) gInv nabla2Ric (t : Real) x i j]
-  rw [hleft, hright, hswap]
+  rw [hleft, hright, htrace]
   simp [ricciEvolutionRHSInFrame]
   ring
 

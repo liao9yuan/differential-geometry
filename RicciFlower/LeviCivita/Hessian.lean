@@ -54,22 +54,16 @@ private theorem nabla0SFun_one_eval_smooth_slots
       extDerivFun (I := I) (fun p : M => α p (fun _ : Fin 1 => Y p)) x (X x) -
         α x (fun _ : Fin 1 => (cov (fun p : M => Y p) x) (X x)) := by
   classical
-  letI : NormedAddCommGroup (Tensor0SModel 1 Real E) := by
-    unfold Tensor0SModel
-    infer_instance
-  letI : NormedSpace Real (Tensor0SModel 1 Real E) := by
-    unfold Tensor0SModel
-    infer_instance
   let V : Fin 1 -> (p : M) -> TangentSpace I p := fun _ p => Y p
+  let Ysec : Fin 1 -> ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _) := fun _ => Y
   have hpair : MDifferentiableAt I 𝓘(Real, Real)
       (fun p : M => α p (fun a : Fin 1 => V a p)) x := by
-    have hα := α.contMDiff x
-    have hEval := TensorMultilinear.contMDiffAt_section_apply
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (n := 1) (x₀ := x)
-      (T := fun p : M => α p) hα
-      (v := V)
-      (hv := fun _ : Fin 1 => Y.contMDiff.contMDiffAt)
-    exact hEval.mdifferentiableAt (by simp)
+    have hEval := TensorMultilinear.contMDiff_tensor0SField_apply
+      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (n := 1)
+      α Ysec
+    exact (by
+      simpa [V, Ysec] using hEval.contMDiffAt.mdifferentiableAt (by simp))
   have hV : ∀ a : Fin 1, MDiffAt (T% (V a)) x := by
     intro a
     exact Y.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
@@ -132,17 +126,17 @@ private theorem leviCivita_nablaDuSec_pointwise_symm_direct
         (T% (fun p : M => X p)) x := by
     exact X.contMDiff.contMDiffAt.of_le (by
       rw [minSmoothness_of_isRCLikeNormedField]
-      norm_num)
+      exact WithTop.coe_le_coe.2 (le_top : (2 : ℕ∞) ≤ (⊤ : ℕ∞)))
   have hY2 :
       ContMDiffAt I (I.prod 𝓘(Real, E)) (minSmoothness Real 2)
         (T% (fun p : M => Y p)) x := by
     exact Y.contMDiff.contMDiffAt.of_le (by
       rw [minSmoothness_of_isRCLikeNormedField]
-      norm_num)
+      exact WithTop.coe_le_coe.2 (le_top : (2 : ℕ∞) ≤ (⊤ : ℕ∞)))
   have hu2 : ContMDiffAt I 𝓘(Real, Real) (minSmoothness Real 2) u x := by
     exact hu.contMDiffAt.of_le (by
       rw [minSmoothness_of_isRCLikeNormedField]
-      norm_num)
+      exact WithTop.coe_le_coe.2 (le_top : (2 : ℕ∞) ≤ (⊤ : ℕ∞)))
   let covYX : TangentSpace I x := (cov (fun p : M => Y p) x) (X x)
   let covXY : TangentSpace I x := (cov (fun p : M => X p) x) (Y x)
   let bracket : TangentSpace I x :=
@@ -200,7 +194,6 @@ private theorem leviCivita_nablaDuSec_pointwise_symm_direct
       duSec x (fun _ : Fin 1 => covYX) -
           duSec x (fun _ : Fin 1 => covXY) =
         extDerivFun (I := I) u x bracket := by
-    rw [hdu x]
     rw [hdu x]
     simp only [duField, differential1FormFun_apply_eq_extDerivFun]
     unfold extDerivFun
@@ -284,15 +277,21 @@ theorem oneFormLastTwoSymmAt_of_leviCivita_du
     fun y U V =>
       leviCivita_nablaDuSec_pointwise_symm
         (I := I) g u hu duSec nablaDuSec hnabla hdu y U V
-  -- The `analytic/top` obstruction has been removed: the relevant realization and
-  -- coordinate theorem now use smooth `C^∞` sections.  The remaining frontier is
-  -- different: `Nabla2OneFormRealizesAt` rewrites first slots supplied by global
-  -- smooth sections, while `OneFormLastTwoSymmAt` quantifies over arbitrary
-  -- tangent vectors.  The next lemma should either provide the local-to-point
-  -- first-slot descent for this realized tensor or a smooth-section extension at
-  -- the point; then `Coordinates.nabla0SFun_two_symm_of_symm` applies directly
-  -- using `hsymm`.
-  sorry
+  intro X Y Z
+  let cov := leviCivitaConnectionOfMetric (I := I) g
+  obtain ⟨S, hSx⟩ :=
+    ContMDiffSection.exists_eq_at
+      (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞)) x X
+  have hleft := nabla2OneFormRealizesAt_apply
+    (I := I) cov duSec nablaDuSec x nabla2Du hnabla2 S Y Z
+  have hright := nabla2OneFormRealizesAt_apply
+    (I := I) cov duSec nablaDuSec x nabla2Du hnabla2 S Z Y
+  have hs :=
+    Coordinates.nabla0SFun_two_symm_of_symm
+      (I := I) cov S nablaDuSec x hsymm Y Z
+  rw [← hSx]
+  rw [hleft, hright]
+  simpa [vec2] using hs
 
 end LeviCivita
 end RicciFlower

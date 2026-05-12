@@ -1,5 +1,3 @@
-import DifferentialGeometry.Integral.Connection.RicciIdentityCore
-import DifferentialGeometry.Synthetic.Realization.Connection
 import RicciFlower.Realized.CurvatureComponents
 
 set_option autoImplicit false
@@ -9,11 +7,9 @@ set_option linter.unusedSectionVars false
 /-!
 # Ricci Identity Bridge for Realized Connections
 
-This file exposes the RicciFlower-facing one-form Ricci identity without
-importing the upstream Levi-Civita construction.  The borrowed algebraic core
-lives in `DifferentialGeometry.Integral.Connection.RicciIdentityCore`; the
-public RicciFlower endpoint stays the realized tensor predicate
-`OneFormThirdCovDerivCommAt`.
+This file exposes the RicciFlower-facing one-form Ricci identity through the
+project's realized tensor predicates.  The proof route stays inside
+`RicciFlower`; do not import the external geometry namespace here.
 -/
 
 noncomputable section
@@ -22,7 +18,6 @@ namespace RicciFlower
 namespace Connection
 
 open Tensor0SBundle
-open SyntheticTensor
 open Realized
 open scoped Manifold ContDiff
 
@@ -32,76 +27,49 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((⊤ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-/-- Smooth-section form of the algebraic one-form Ricci identity for a concrete
-Mathlib covariant derivative and an abstract smooth-section functional.
+/-- Raw dual-connection evaluation used by the algebraic one-form Ricci
+identity.
 
-This is the direct RicciFlower access point to
-`DifferentialGeometry.Integral.Connection.ricci_identity_oneForm`: it lives at
-the level of global smooth tangent sections.  The separate bridge to
-`OneFormThirdCovDerivCommAt` must still identify a smooth one-form tensor field
-with the corresponding `C^∞(M)`-linear functional, identify
-`Nabla2OneFormRealizesAt` with this iterated `nabla_dual` expression, and then
-use torsion-freeness to remove the bracket correction. -/
-theorem oneFormRicciIdentity_smoothFunctional_apply
-    [SigmaCompactSpace M] [T2Space M] [CompleteSpace E]
-    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    [CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
-    (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯)
-    (alpha :
-      Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯
-        →ₗ[C^∞⟮I, M; Real⟯] C^∞⟮I, M; Real⟯)
-    (x : M) :
-    ((nabla_dual
-        (concreteDerivationEmbedding I M)
-        (concreteConn I M cov)
-        (concreteConn_add_right I M cov)
-        (concreteConn_leibniz I M cov)
-        X
-        (nabla_dual
-          (concreteDerivationEmbedding I M)
-          (concreteConn I M cov)
-          (concreteConn_add_right I M cov)
-          (concreteConn_leibniz I M cov)
-          Y
-          alpha)) Z) x -
-      ((nabla_dual
-        (concreteDerivationEmbedding I M)
-        (concreteConn I M cov)
-        (concreteConn_add_right I M cov)
-        (concreteConn_leibniz I M cov)
-        Y
-        (nabla_dual
-          (concreteDerivationEmbedding I M)
-          (concreteConn I M cov)
-          (concreteConn_add_right I M cov)
-          (concreteConn_leibniz I M cov)
-          X
-          alpha)) Z) x -
-      ((nabla_dual
-        (concreteDerivationEmbedding I M)
-        (concreteConn I M cov)
-        (concreteConn_add_right I M cov)
-        (concreteConn_leibniz I M cov)
-        (bracket
-          (concreteDerivationEmbedding I M)
-          X Y)
-        alpha) Z) x =
-      -(alpha
-        (Rm
-          (concreteDerivationEmbedding I M)
-          (concreteConn I M cov)
-          X Y Z)) x := by
-  let emb :=
-    concreteDerivationEmbedding I M
-  let conn := concreteConn I M cov
-  let ha := concreteConn_add_right I M cov
-  let hl := concreteConn_leibniz I M cov
-  have h :=
-    DifferentialGeometry.Integral.Connection.ricci_identity_oneForm
-      emb conn ha hl X Y Z alpha
-  exact congrArg (fun f : C^∞⟮I, M; Real⟯ => f x) h
+This is the RicciFlower-local algebraic replacement for the external
+`nabla_dual` calculation: no smooth-section or synthetic realization API is
+involved here. -/
+def nablaDualEval {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V]
+    (act : V -> R -> R) (conn : V -> V -> V)
+    (X : V) (alpha : V -> R) (Y : V) : R :=
+  act X (alpha Y) - alpha (conn X Y)
+
+/-- Raw curvature expression for a connection and bracket. -/
+def connectionRmRaw {V : Type*} [Sub V]
+    (bracket : V -> V -> V) (conn : V -> V -> V)
+    (X Y Z : V) : V :=
+  conn X (conn Y Z) - conn Y (conn X Z) - conn (bracket X Y) Z
+
+/-- Algebraic one-form Ricci identity in bracket form.
+
+This is the small calculation previously borrowed from the external
+external geometry namespace.  It only uses the commutator rule for the
+action and linearity of the one-form. -/
+theorem oneFormRicciIdentity_algebra
+    {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V]
+    (act : V -> R -> R) (bracket : V -> V -> V) (conn : V -> V -> V)
+    (hact_sub : ∀ X f g, act X (f - g) = act X f - act X g)
+    (hact_bracket : ∀ X Y f,
+      act (bracket X Y) f = act X (act Y f) - act Y (act X f))
+    (X Y Z : V) (alpha : V →ₗ[R] R) :
+    nablaDualEval act conn X
+        (fun W => nablaDualEval act conn Y (fun U => alpha U) W) Z -
+      nablaDualEval act conn Y
+        (fun W => nablaDualEval act conn X (fun U => alpha U) W) Z -
+      nablaDualEval act conn (bracket X Y) (fun U => alpha U) Z =
+        -alpha (connectionRmRaw bracket conn X Y Z) := by
+  unfold nablaDualEval connectionRmRaw
+  rw [hact_sub X (act Y (alpha Z)) (alpha (conn Y Z))]
+  rw [hact_sub Y (act X (alpha Z)) (alpha (conn X Z))]
+  rw [hact_bracket]
+  simp only [map_sub]
+  abel
 
 /-- Connection-generic one-form Ricci identity in RicciFlower's public tensor
 interface.

@@ -944,6 +944,27 @@ private theorem oneForm_eval_coordinateFrame_contMDiffAt
     (hv := fun _ : Fin 1 => hframe)
   simpa [Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply] using hEval
 
+/-- Intrinsic one-form covariant derivative formula for smooth moving slots. -/
+theorem nabla0SFun_one_eval_smooth_slots
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (X Z : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 1)
+    (x₀ : M) :
+    (nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      1 cov X α x₀) (fun _ : Fin 1 => Z x₀) =
+      extDerivFun (I := I) (fun y : M => α y (fun _ : Fin 1 => Z y)) x₀ (X x₀) -
+        α x₀ (fun _ : Fin 1 => (cov (fun y : M => Z y) x₀) (X x₀)) := by
+  rw [nabla0SFun_one_eval_coordFrame_moving
+    (I := I) cov X Z α x₀
+    (modelDeriv_eq_coordDeriv0SAt (I := I) X x₀ α)
+    (fun j =>
+      (coordinateFrame_coeff_contMDiffAt (I := I) Z x₀ j).mdifferentiableAt
+        (by simp))
+    (fun j =>
+      (oneForm_eval_coordinateFrame_contMDiffAt (I := I) α x₀ j).mdifferentiableAt
+        (by simp))]
+
 private theorem coordinateFrame_covariantDeriv_apply_contMDiffAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov

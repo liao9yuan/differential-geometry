@@ -176,8 +176,8 @@ theorem laplacianNonnegativeAtSpatialMinFamily_of_realizedMetricFamily
     (G : RealizedMetricFamily (I := I) (M := M) Time) :
     LaplacianNonnegativeAtSpatialMinFamily (I := I) G := by
   intro t
-  exact laplacianNonnegativeAtSpatialMin_of_connection (I := I)
-    (G.connection t) (G.metric t)
+  exact laplacianNonnegativeAtSpatialMin_of_metricCompatible (I := I)
+    (G.connection t) (G.metric t) (G.metricCompatible t)
 
 /-- At a spatial local minimum, `Delta f + <X, grad f>` is nonnegative. -/
 theorem heatOperatorWithDrift_at_spatial_min_nonneg
@@ -189,12 +189,13 @@ theorem heatOperatorWithDrift_at_spatial_min_nonneg
     {f : M -> Real} {x : M}
     (hmin : IsLocalMin f x)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
+    (hf_near : ∀ᶠ y in nhds x, MDifferentiableAt I 𝓘(Real, Real) f y)
     (hgrad : MDiffAt (T% fun y : M => gradientFun (I := I) (G.metric t) f y) x) :
     0 <= heatOperatorWithDrift (I := I) G t X f x := by
   unfold heatOperatorWithDrift
   rw [driftTerm_eq_zero_at_spatial_min (I := I) G t X hmin hf, add_zero]
-  exact laplacian_nonneg_at_spatial_min (I := I)
-    (G.connection t) (G.metric t) hmin hf hgrad
+  exact laplacian_nonneg_at_spatial_min_of_metricCompatible (I := I)
+    (G.connection t) (G.metric t) (G.metricCompatible t) hmin hf hf_near hgrad
 
 end
 

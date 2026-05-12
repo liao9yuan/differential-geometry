@@ -1,5 +1,6 @@
 import RicciFlower.Tensor.RSTensor.CotangentRiemannian
 import Mathlib.Analysis.InnerProductSpace.Adjoint
+import Mathlib.Analysis.InnerProductSpace.Trace
 import Mathlib.Algebra.Order.BigOperators.Group.Finset
 import Mathlib.LinearAlgebra.Trace
 import Mathlib.Topology.Algebra.Module.FiniteDimension
@@ -615,6 +616,61 @@ private theorem basis_repr_eq_sum_inv_inner
         simp [hb]
       · intro hi
         simp at hi
+
+/-- Coordinate trace formula for an endomorphism in a basis with inverse metric
+components. -/
+theorem linearMap_trace_eq_sum_inv_inner_apply
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (g : SmoothMetric I M) (x : M)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInv)
+    (A : TangentSpace I x →ₗ[Real] TangentSpace I x) :
+    LinearMap.trace Real (TangentSpace I x) A =
+      ∑ i : Idx, ∑ j : Idx, gInv i j * g.inner x (A (basis i)) (basis j) := by
+  classical
+  rw [LinearMap.trace_eq_matrix_trace Real basis A]
+  rw [Matrix.trace]
+  simp only [Matrix.diag_apply]
+  apply Finset.sum_congr rfl
+  intro i _
+  rw [LinearMap.toMatrix_apply]
+  exact basis_repr_eq_sum_inv_inner (I := I) g x basis gInv hinv (A (basis i)) i
+
+/-- Positivity of the trace of a tangent endomorphism from positivity of its
+metric quadratic form. -/
+theorem linearMap_trace_nonneg_of_metric_inner_apply_self_nonneg
+    (g : SmoothMetric I M) (x : M)
+    (A : TangentSpace I x →ₗ[Real] TangentSpace I x)
+    (hA : ∀ v : TangentSpace I x, 0 <= g.inner x (A v) v) :
+    0 <= LinearMap.trace Real (TangentSpace I x) A := by
+  classical
+  let D := (tangentMetricData (I := I) g x).metric
+  letI : InnerProductSpace.Core Real (TangentSpace I x) := D.toCore
+  letI : NormedAddCommGroup (TangentSpace I x) :=
+    @InnerProductSpace.Core.toNormedAddCommGroup Real (TangentSpace I x) _ _ _ D.toCore
+  letI : InnerProductSpace Real (TangentSpace I x) :=
+    @InnerProductSpace.ofCore Real (TangentSpace I x) _ _ _ D.toCore.toCore
+  rw [LinearMap.trace_eq_sum_inner A
+    (stdOrthonormalBasis Real (TangentSpace I x))]
+  exact Finset.sum_nonneg fun i _ => by
+    have hi := hA (stdOrthonormalBasis Real (TangentSpace I x) i)
+    have hinner :
+        Inner.inner Real
+            (A (stdOrthonormalBasis Real (TangentSpace I x) i))
+            (stdOrthonormalBasis Real (TangentSpace I x) i) =
+          g.inner x
+            (A (stdOrthonormalBasis Real (TangentSpace I x) i))
+            (stdOrthonormalBasis Real (TangentSpace I x) i) := by
+      change D.inner
+          (A (stdOrthonormalBasis Real (TangentSpace I x) i))
+          (stdOrthonormalBasis Real (TangentSpace I x) i) =
+        g.inner x
+          (A (stdOrthonormalBasis Real (TangentSpace I x) i))
+          (stdOrthonormalBasis Real (TangentSpace I x) i)
+      rfl
+    rw [real_inner_comm, hinner]
+    exact hi
 
 private theorem hom_normSq_eq_basis
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]

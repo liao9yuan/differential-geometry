@@ -1,5 +1,6 @@
 import RicciFlower.Realized.CurvatureComponents
 import RicciFlower.LeviCivita.Torsion
+import RicciFlower.Coordinates.NablaComponents.Tensor0S
 import RicciFlower.Tensor.RSTensor.NablaOnTensors.Connection
 import RicciFlower.VectorBundle.PartialMfderiv
 
@@ -23,6 +24,7 @@ namespace LeviCivita
 
 open Bundle Tensor0SBundle
 open Realized
+open Coordinates
 open scoped Topology Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -105,6 +107,103 @@ private theorem contMDiffAt_metric_inner
       (F₁ := E) (F₂ := E) hg hX hY
   rw [contMDiffAt_totalSpace] at htotal
   exact htotal.2
+
+/-- Intrinsic two-tensor derivation formula for smooth moving slots. -/
+private theorem nabla0SFun_two_eval_smooth_slots
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (X Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    (A : TwoTensorSection (I := I) (M := M)) (x : M) :
+    (nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      2 cov X A x) (vec2 (Y x) (Z x)) =
+      extDerivFun (I := I)
+          (fun p : M => A p (vec2 (Y p) (Z p))) x (X x) -
+        (A x) (vec2 ((cov (fun p : M => Y p) x) (X x)) (Z x)) -
+        (A x) (vec2 (Y x) ((cov (fun p : M => Z p) x) (X x))) := by
+  classical
+  let Vsec : Fin 2 -> ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _) :=
+    fun a => if a = 0 then Y else Z
+  let V : Fin 2 -> (p : M) -> TangentSpace I p := fun a p => Vsec a p
+  have hslots : (fun a : Fin 2 => V a x) = vec2 (Y x) (Z x) := by
+    funext a
+    fin_cases a <;> simp [V, Vsec, vec2, RicciFlower.Curvature.vec2]
+  have hpair : MDifferentiableAt I 𝓘(Real, Real)
+      (fun p : M => A p (fun a : Fin 2 => V a p)) x := by
+    have hEval := TensorMultilinear.contMDiff_tensor0SField_apply
+      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (n := 2)
+      A Vsec
+    exact (by
+      simpa [V] using hEval.contMDiffAt.mdifferentiableAt (by simp))
+  have hV : ∀ a : Fin 2, MDiffAt (T% (V a)) x := by
+    intro a
+    exact (Vsec a).contMDiff.contMDiffAt.mdifferentiableAt (by simp)
+  have hVmodel : ∀ a : Fin 2,
+      DifferentiableWithinAt Real
+        (TensorLieDeriv.tangentFieldModelInChart (𝕜 := Real) (I := I) x (V a))
+        (Set.range I) (extChartAt I x x) := by
+    intro a
+    exact
+      tangentFieldModelInChart_differentiableWithinAt_center_of_contMDiffAt
+        (I := I) (V a) x (Vsec a).contMDiff.contMDiffAt
+  have hcoord : ∀ a : Fin 2, ∀ i : Fin (Module.finrank Real E),
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun p : M =>
+          (Module.finBasis Real E).coord i
+            (TensorLieDeriv.tangentFieldModelInChart (𝕜 := Real) (I := I) x (V a)
+              (extChartAt I x p))) x := by
+    intro a i
+    exact
+      tangentFieldModelInChart_coord_mdiffAt_center_of_contMDiffAt
+        (I := I) (V a) x (Vsec a).contMDiff.contMDiffAt i
+  have h := Tensor0SBundle.nabla0SFun_eval_coordFrame_moving_raw
+    (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+    (s := 2) cov X V A x hpair hV hVmodel hcoord
+  have hsum :
+      (∑ a : Fin 2,
+          A x
+            (Function.update (fun b : Fin 2 => V b x) a
+              ((cov (V a) x) (X x)))) =
+        A x (vec2 ((cov (fun p : M => Y p) x) (X x)) (Z x)) +
+          A x (vec2 (Y x) ((cov (fun p : M => Z p) x) (X x))) := by
+    have h0 :
+        Function.update (fun b : Fin 2 => V b x) 0
+            ((cov (V 0) x) (X x)) =
+          vec2 ((cov (fun p : M => Y p) x) (X x)) (Z x) := by
+      funext q
+      fin_cases q <;> simp [V, Vsec, vec2, RicciFlower.Curvature.vec2]
+    have h1 :
+        Function.update (fun b : Fin 2 => V b x) 1
+            ((cov (V 1) x) (X x)) =
+          vec2 (Y x) ((cov (fun p : M => Z p) x) (X x)) := by
+      funext q
+      fin_cases q <;> simp [V, Vsec, vec2, RicciFlower.Curvature.vec2]
+    rw [Fin.sum_univ_two]
+    rw [h0, h1]
+  have hscalar :
+      (fun p : M => A p (fun a : Fin 2 => V a p)) =
+        fun p : M => A p (vec2 (Y p) (Z p)) := by
+    funext p
+    congr 1
+    funext a
+    fin_cases a <;> simp [V, Vsec, vec2, RicciFlower.Curvature.vec2]
+  calc
+    (nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      2 cov X A x) (vec2 (Y x) (Z x))
+        = (nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+            2 cov X A x) (fun a : Fin 2 => V a x) := by rw [hslots]
+    _ = extDerivFun (I := I) (fun p : M => A p (fun a : Fin 2 => V a p))
+          x (X x) -
+        ∑ a : Fin 2,
+          A x
+            (Function.update (fun b : Fin 2 => V b x) a
+              ((cov (V a) x) (X x))) := h
+    _ = extDerivFun (I := I)
+          (fun p : M => A p (vec2 (Y p) (Z p))) x (X x) -
+        (A x) (vec2 ((cov (fun p : M => Y p) x) (X x)) (Z x)) -
+        (A x) (vec2 (Y x) ((cov (fun p : M => Z p) x) (X x))) := by
+      rw [hscalar, hsum]
+      ring
 
 private theorem mdifferentiableAt_tangentConstAt_of_mem
     (x₀ : M) (v : TangentSpace I x₀) {p : M}
@@ -529,7 +628,7 @@ theorem rm13MetricSkewAt_of_leviCivita_realizes
     (leviCivitaConnectionOfMetric (I := I) g) Rm13 Rm04 hRm13 hRm04
     (rm04OutputSkewAt_of_leviCivita_realizes (I := I) g hcov Rm04 hRm04)
 
-private theorem oneFormThirdCovDerivCommAt_of_leviCivita_higherOrder_frontier
+private theorem oneFormThirdCovDerivCommAt_of_leviCivita_higherOrder
     (g : SmoothRiemannianMetric I M)
     (Rm13 : Tensor13Section (I := I) (M := M))
     (alphaSec : OneFormSection (I := I) (M := M))
@@ -546,10 +645,8 @@ private theorem oneFormThirdCovDerivCommAt_of_leviCivita_higherOrder_frontier
       (leviCivitaConnectionOfMetric (I := I) g) alphaSec nablaAlphaSec x
       nabla2Alpha) :
     OneFormThirdCovDerivCommAt (I := I) Rm13 alpha nabla2Alpha := by
-  -- Frontier: prove the one-form Ricci identity from the higher-order
-  -- covariant derivative API.  The existing coordinate theorem
-  -- `one_form_third_comm_of_coord_ijk` remains a possible backend once the
-  -- coordinate curvature producer is rebuilt.
+  -- Frontier: prove this one-form Ricci identity bridge inside RicciFlower,
+  -- without importing the external geometry namespace.
   sorry
 
 /-- Levi-Civita Ricci identity for the third covariant derivative of a
@@ -571,7 +668,7 @@ theorem oneFormThirdCovDerivCommAt_of_leviCivita
       (leviCivitaConnectionOfMetric (I := I) g) alphaSec nablaAlphaSec x
       nabla2Alpha) :
     OneFormThirdCovDerivCommAt (I := I) Rm13 alpha nabla2Alpha :=
-  oneFormThirdCovDerivCommAt_of_leviCivita_higherOrder_frontier
+  oneFormThirdCovDerivCommAt_of_leviCivita_higherOrder
     (I := I) g Rm13 alphaSec nablaAlphaSec alpha nabla2Alpha hRm13
     halpha hnabla2
 

@@ -1,4 +1,4 @@
-import RicciFlower.Tensor.RSTensor.NablaOnTensors.Model.Tensor0S
+import RicciFlower.Tensor.RSTensor.NablaOnTensors.Model.Christoffel
 
 /-!
 # Model-space covariant derivative for mixed tensors
@@ -197,6 +197,302 @@ theorem covariantDeriv_tensorRSModelWithin_eval_derivation {r s : ℕ}
       (fderivWithin 𝕜 (V a) u y (X y)) (ΓX y (V a y))
   rw [hβcov, hCorrS, hsum]
   abel
+
+section ChristoffelModelRS
+
+private theorem tensor0SModel_eval_update_basis_sum_modelRS {d s : ℕ}
+    (basis : Module.Basis (Fin d) 𝕜 E)
+    (α : Tensor0SModel (𝕜 := 𝕜) (E := E) s)
+    (v : Fin s → E) (i : Fin s) (w : E) :
+    α (Function.update v i w) =
+      ∑ k : Fin d, basis.coord k w *
+        α (Function.update v i (basis k)) := by
+  classical
+  have hw : w = ∑ k : Fin d, basis.coord k w • basis k := by
+    exact (basis.sum_repr w).symm
+  calc
+    α (Function.update v i w) =
+        α (Function.update v i (∑ k : Fin d, basis.coord k w • basis k)) := by
+      exact congrArg (fun z => α (Function.update v i z)) hw
+    _ = ∑ k : Fin d,
+        α (Function.update v i (basis.coord k w • basis k)) := by
+      have h := α.toMultilinearMap.map_update_sum
+        (Finset.univ : Finset (Fin d)) i (fun k : Fin d => basis.coord k w • basis k) v
+      simpa using h
+    _ = ∑ k : Fin d, basis.coord k w *
+        α (Function.update v i (basis k)) := by
+      refine Finset.sum_congr rfl fun k _ => ?_
+      rw [α.map_update_smul]
+      simp [smul_eq_mul]
+
+private theorem continuousMultilinearMap_basis_apply_basis {d s : ℕ}
+    (basis : Module.Basis (Fin d) 𝕜 E)
+    (upper lower : Fin s → Fin d) :
+    ((continuousMultilinearMap_basis (𝕜 := 𝕜) (F := E) basis s) upper)
+        (fun b : Fin s => basis (lower b)) =
+      if upper = lower then 1 else 0 := by
+  have h := continuousMultilinearMap_basis_repr
+    (𝕜 := 𝕜) (F := E) basis s
+    ((continuousMultilinearMap_basis (𝕜 := 𝕜) (F := E) basis s) upper)
+    lower
+  simpa [Module.Basis.repr_self, Finsupp.single_apply] using h.symm
+
+private theorem basis_coord_update_sum_comm {d r : ℕ}
+    (basis : Module.Basis (Fin d) 𝕜 E)
+    (ΓX : E →L[𝕜] E)
+    (upper lower : Fin r → Fin d)
+    (a : Fin r) :
+    (∑ k : Fin d,
+        basis.coord k (ΓX (basis (lower a))) *
+          (if upper = Function.update lower a k then (1 : 𝕜) else 0)) =
+      ∑ k : Fin d,
+        basis.coord (upper a) (ΓX (basis k)) *
+          (if Function.update upper a k = lower then (1 : 𝕜) else 0) := by
+  classical
+  by_cases hout : ∀ b : Fin r, b ≠ a → upper b = lower b
+  · have hleft_update : upper = Function.update lower a (upper a) := by
+      funext b
+      by_cases hb : b = a
+      · subst hb
+        simp
+      · simp [Function.update, hb, hout b hb]
+    have hright_update : Function.update upper a (lower a) = lower := by
+      funext b
+      by_cases hb : b = a
+      · subst hb
+        simp
+      · simp [Function.update, hb, hout b hb]
+    have hleft :
+        (∑ k : Fin d,
+          basis.coord k (ΓX (basis (lower a))) *
+            (if upper = Function.update lower a k then (1 : 𝕜) else 0)) =
+          basis.coord (upper a) (ΓX (basis (lower a))) := by
+      rw [Finset.sum_eq_single (upper a)]
+      · rw [if_pos hleft_update]
+        simp
+      · intro k _ hk
+        have hne : upper ≠ Function.update lower a k := by
+          intro h
+          have ha := congrFun h a
+          simp at ha
+          exact hk ha.symm
+        rw [if_neg hne]
+        simp
+      · intro hnot
+        exact False.elim (hnot (Finset.mem_univ _))
+    have hright :
+        (∑ k : Fin d,
+          basis.coord (upper a) (ΓX (basis k)) *
+            (if Function.update upper a k = lower then (1 : 𝕜) else 0)) =
+          basis.coord (upper a) (ΓX (basis (lower a))) := by
+      rw [Finset.sum_eq_single (lower a)]
+      · rw [if_pos hright_update]
+        simp
+      · intro k _ hk
+        have hne : Function.update upper a k ≠ lower := by
+          intro h
+          have ha : k = lower a := by
+            simpa using congrFun h a
+          exact hk ha
+        rw [if_neg hne]
+        simp
+      · intro hnot
+        exact False.elim (hnot (Finset.mem_univ _))
+    rw [hleft, hright]
+  · push Not at hout
+    rcases hout with ⟨b, hb, hneq⟩
+    have hleft_zero :
+        (∑ k : Fin d,
+          basis.coord k (ΓX (basis (lower a))) *
+            (if upper = Function.update lower a k then (1 : 𝕜) else 0)) = 0 := by
+      apply Finset.sum_eq_zero
+      intro k _
+      have hne : upper ≠ Function.update lower a k := by
+        intro h
+        have hb_eq : upper b = lower b := by
+          simpa [Function.update, hb] using congrFun h b
+        exact hneq hb_eq
+      simp [hne]
+    have hright_zero :
+        (∑ k : Fin d,
+          basis.coord (upper a) (ΓX (basis k)) *
+            (if Function.update upper a k = lower then (1 : 𝕜) else 0)) = 0 := by
+      apply Finset.sum_eq_zero
+      intro k _
+      have hne : Function.update upper a k ≠ lower := by
+        intro h
+        have hb_eq : upper b = lower b := by
+          simpa [Function.update, hb] using congrFun h b
+        exact hneq hb_eq
+      simp [hne]
+    rw [hleft_zero, hright_zero]
+
+/-- Lower-slot expansion of the connection correction in basis components. -/
+theorem lieDeriv_correctionL_apply_basis_slots_expanded {d s : ℕ}
+    (basis : Module.Basis (Fin d) 𝕜 E)
+    (ΓX : E →L[𝕜] E)
+    (α : Tensor0SModel (𝕜 := 𝕜) (E := E) s)
+    (lower : Fin s → Fin d) :
+    ((lieDeriv_correctionL (𝕜 := 𝕜) (E := E) s ΓX α)
+        (fun b : Fin s => basis (lower b))) =
+      ∑ b : Fin s, ∑ k : Fin d,
+        connectionEndomorphismCoeff basis ΓX (lower b) k *
+          α (Function.update
+            (fun c : Fin s => basis (lower c))
+            b
+            (basis k)) := by
+  classical
+  rw [lieDeriv_correctionL_apply_slots]
+  refine Finset.sum_congr rfl fun b _ => ?_
+  rw [tensor0SModel_eval_update_basis_sum_modelRS basis α
+    (fun c : Fin s => basis (lower c)) b (ΓX (basis (lower b)))]
+  simp [connectionEndomorphismCoeff]
+
+/-- The connection correction applied to a coordinate-basis covariant tensor.
+
+For a basis covariant tensor with index `upper`, the correction changes the
+`a`-th covariant input basis index from `upper a` to `k` with coefficient
+`Γ^(upper a)_k`.  With the project convention
+`connectionEndomorphismCoeff basis ΓX j k = Γ^k_j`, this is written as
+`connectionEndomorphismCoeff basis ΓX k (upper a)`. -/
+theorem lieDeriv_correctionL_apply_basisTensor0S {d r : ℕ}
+    (basis : Module.Basis (Fin d) 𝕜 E)
+    (ΓX : E →L[𝕜] E)
+    (upper : Fin r → Fin d) :
+    lieDeriv_correctionL (𝕜 := 𝕜) (E := E) r ΓX
+      ((continuousMultilinearMap_basis (𝕜 := 𝕜) (F := E) basis r) upper)
+    =
+      ∑ a : Fin r, ∑ k : Fin d,
+        connectionEndomorphismCoeff basis ΓX k (upper a) •
+          ((continuousMultilinearMap_basis (𝕜 := 𝕜) (F := E) basis r)
+            (Function.update upper a k)) := by
+  classical
+  apply (continuousMultilinearMap_basis (𝕜 := 𝕜) (F := E) basis r).repr.injective
+  ext lower
+  rw [continuousMultilinearMap_basis_repr]
+  simp only [map_sum, map_smul, Module.Basis.repr_self]
+  simp only [Finsupp.finset_sum_apply, Finsupp.smul_apply,
+    Finsupp.single_apply, smul_eq_mul]
+  rw [lieDeriv_correctionL_apply_slots]
+  change
+    (∑ a : Fin r,
+      ((continuousMultilinearMap_basis (𝕜 := 𝕜) (F := E) basis r) upper)
+        (Function.update (fun b : Fin r => basis (lower b)) a (ΓX (basis (lower a))))) =
+    ∑ a : Fin r,
+      ∑ k : Fin d,
+        connectionEndomorphismCoeff basis ΓX k (upper a) *
+          (if Function.update upper a k = lower then (1 : 𝕜) else 0)
+  refine Finset.sum_congr rfl fun a _ => ?_
+  rw [tensor0SModel_eval_update_basis_sum_modelRS basis
+    ((continuousMultilinearMap_basis (𝕜 := 𝕜) (F := E) basis r) upper)
+    (fun b : Fin r => basis (lower b)) a (ΓX (basis (lower a)))]
+  simp only [connectionEndomorphismCoeff]
+  trans
+      ∑ k : Fin d,
+        basis.coord k (ΓX (basis (lower a))) *
+          (if upper = Function.update lower a k then (1 : 𝕜) else 0)
+  · apply Finset.sum_congr rfl
+    intro k _
+    congr 1
+    have hslots :
+        Function.update (fun b : Fin r => basis (lower b)) a (basis k) =
+          fun b : Fin r => basis (Function.update lower a k b) := by
+      funext b
+      by_cases hb : b = a
+      · subst hb
+        simp
+      · simp [Function.update, hb]
+    rw [hslots, continuousMultilinearMap_basis_apply_basis]
+  · exact basis_coord_update_sum_comm basis ΓX upper lower a
+
+/-- Basis-slot Christoffel formula for the model covariant derivative of a
+mixed `(r,s)` tensor. -/
+theorem covariantDeriv_tensorRSModelAt_apply_basis_slots {d r s : ℕ}
+    (basis : Module.Basis (Fin d) 𝕜 E)
+    (dT_X : TensorRSModel r s 𝕜 E)
+    (ΓX : E →L[𝕜] E)
+    (T : TensorRSModel r s 𝕜 E)
+    (upper : Fin r → Fin d)
+    (lower : Fin s → Fin d) :
+    (covariantDeriv_tensorRSModelAt
+        (𝕜 := 𝕜) (E := E) r s dT_X ΓX T
+        ((continuousMultilinearMap_basis (𝕜 := 𝕜) (F := E) basis r) upper))
+      (fun b : Fin s => basis (lower b))
+    =
+      (dT_X
+        ((continuousMultilinearMap_basis (𝕜 := 𝕜) (F := E) basis r) upper))
+        (fun b : Fin s => basis (lower b))
+      +
+      ∑ a : Fin r, ∑ k : Fin d,
+        connectionEndomorphismCoeff basis ΓX k (upper a) *
+          (T
+            ((continuousMultilinearMap_basis (𝕜 := 𝕜) (F := E) basis r)
+              (Function.update upper a k)))
+            (fun b : Fin s => basis (lower b))
+      -
+      ∑ b : Fin s, ∑ k : Fin d,
+        connectionEndomorphismCoeff basis ΓX (lower b) k *
+          (T
+            ((continuousMultilinearMap_basis (𝕜 := 𝕜) (F := E) basis r) upper))
+            (Function.update
+              (fun c : Fin s => basis (lower c))
+              b
+              (basis k)) := by
+  classical
+  rw [covariantDeriv_tensorRSModelAt_eval]
+  have hupper := lieDeriv_correctionL_apply_basisTensor0S
+    (𝕜 := 𝕜) (E := E) basis ΓX upper
+  have hlower_expanded := lieDeriv_correctionL_apply_basis_slots_expanded
+    (𝕜 := 𝕜) (E := E) basis ΓX
+    (T ((continuousMultilinearMap_basis (𝕜 := 𝕜) (F := E) basis r) upper))
+    lower
+  rw [hupper, hlower_expanded]
+  simp only [map_sum, map_smul,
+    ContinuousMultilinearMap.sum_apply, ContinuousMultilinearMap.smul_apply,
+    smul_eq_mul]
+  abel
+
+/-- Within-set variant of
+`covariantDeriv_tensorRSModelAt_apply_basis_slots`. -/
+theorem covariantDeriv_tensorRSModelWithin_apply_basis_slots {d r s : ℕ}
+    (basis : Module.Basis (Fin d) 𝕜 E)
+    (X : E → E)
+    (ΓX : E → E →L[𝕜] E)
+    (T : E → TensorRSModel r s 𝕜 E)
+    (u : Set E)
+    (x : E)
+    (upper : Fin r → Fin d)
+    (lower : Fin s → Fin d) :
+    (covariantDeriv_tensorRSModelWithin
+        (𝕜 := 𝕜) (E := E) r s X ΓX T u x
+        ((continuousMultilinearMap_basis (𝕜 := 𝕜) (F := E) basis r) upper))
+      (fun b : Fin s => basis (lower b))
+    =
+      (fderivWithin 𝕜 T u x (X x)
+        ((continuousMultilinearMap_basis (𝕜 := 𝕜) (F := E) basis r) upper))
+        (fun b : Fin s => basis (lower b))
+      +
+      ∑ a : Fin r, ∑ k : Fin d,
+        connectionEndomorphismCoeff basis (ΓX x) k (upper a) *
+          (T x
+            ((continuousMultilinearMap_basis (𝕜 := 𝕜) (F := E) basis r)
+              (Function.update upper a k)))
+            (fun b : Fin s => basis (lower b))
+      -
+      ∑ b : Fin s, ∑ k : Fin d,
+        connectionEndomorphismCoeff basis (ΓX x) (lower b) k *
+          (T x
+            ((continuousMultilinearMap_basis (𝕜 := 𝕜) (F := E) basis r) upper))
+            (Function.update
+              (fun c : Fin s => basis (lower c))
+              b
+              (basis k)) := by
+  unfold covariantDeriv_tensorRSModelWithin
+  exact covariantDeriv_tensorRSModelAt_apply_basis_slots
+    (𝕜 := 𝕜) (E := E) basis
+    (fderivWithin 𝕜 T u x (X x)) (ΓX x) (T x) upper lower
+
+end ChristoffelModelRS
 
 end ModelCovariantDerivative
 

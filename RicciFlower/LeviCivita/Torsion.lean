@@ -1,6 +1,7 @@
 import RicciFlower.LeviCivita.Koszul
 import RicciFlower.Coordinates.Christoffel
 import RicciFlower.Coordinates.CoordinateFrame
+import RicciFlower.Tensor.RSTensor.CotangentRiemannian
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -19,6 +20,7 @@ namespace LeviCivita
 open Bundle
 open Realized
 open Coordinates
+open Tensor0SBundle
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -69,6 +71,76 @@ theorem torsion_free_family_apply
   torsion_free_apply (I := I) (htf t) hX hY
 
 /-! ## Coordinate proof for the Koszul connection -/
+
+private theorem coordinate_basis_coord_eq_sum_inv_metric_inner
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (g : SmoothRiemannianMetric I M) {x : M}
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInv)
+    (a : Idx) (V : TangentSpace I x) :
+    basis.coord a V =
+      ∑ k : Idx, gInv a k * g.inner x (basis k) V := by
+  symm
+  calc
+    (∑ k : Idx, gInv a k * g.inner x (basis k) V)
+        = ∑ k : Idx, gInv a k *
+            g.inner x (basis k) (∑ j : Idx, basis.coord j V • basis j) := by
+          rw [show (∑ j : Idx, basis.coord j V • basis j) = V from basis.sum_repr V]
+    _ = ∑ k : Idx, ∑ j : Idx,
+          gInv a k * (basis.coord j V * g.inner x (basis k) (basis j)) := by
+          refine Finset.sum_congr rfl fun k _ => ?_
+          rw [map_sum]
+          rw [Finset.mul_sum]
+          refine Finset.sum_congr rfl fun j _ => ?_
+          rw [map_smul]
+          simp [smul_eq_mul]
+    _ = ∑ j : Idx, basis.coord j V *
+          (∑ k : Idx, gInv a k * g.inner x (basis k) (basis j)) := by
+          rw [Finset.sum_comm]
+          refine Finset.sum_congr rfl fun j _ => ?_
+          rw [Finset.mul_sum]
+          refine Finset.sum_congr rfl fun k _ => ?_
+          ring
+    _ = ∑ j : Idx, basis.coord j V * (if a = j then 1 else 0) := by
+          refine Finset.sum_congr rfl fun j _ => ?_
+          rw [(hinv a j).1]
+    _ = basis.coord a V := by
+          simp
+
+private theorem koszulScalar_coordinateFrame_eq_metric_derivs
+    (g : SmoothRiemannianMetric I M)
+    (x0 : M) (i j l : CoordinateIdx (𝕜 := Real) E) :
+    koszulScalar (I := I) g
+        (coordinateFrameAt (I := I) x0 i)
+        (coordinateFrameAt (I := I) x0 j)
+        (coordinateFrameAt (I := I) x0 l) x0 =
+      directionalDeriv (I := I) (coordinateFrameAt (I := I) x0 i)
+        (fun y : M =>
+          g.inner y (coordinateFrameAt (I := I) x0 j y)
+            (coordinateFrameAt (I := I) x0 l y)) x0 +
+      directionalDeriv (I := I) (coordinateFrameAt (I := I) x0 j)
+        (fun y : M =>
+          g.inner y (coordinateFrameAt (I := I) x0 i y)
+            (coordinateFrameAt (I := I) x0 l y)) x0 -
+      directionalDeriv (I := I) (coordinateFrameAt (I := I) x0 l)
+        (fun y : M =>
+          g.inner y (coordinateFrameAt (I := I) x0 i y)
+            (coordinateFrameAt (I := I) x0 j y)) x0 := by
+  unfold koszulScalar
+  rw [show
+      (fun y : M =>
+        g.inner y (coordinateFrameAt (I := I) x0 l y)
+          (coordinateFrameAt (I := I) x0 i y)) =
+      (fun y : M =>
+        g.inner y (coordinateFrameAt (I := I) x0 i y)
+          (coordinateFrameAt (I := I) x0 l y)) by
+        funext y
+        exact g.symm y (coordinateFrameAt (I := I) x0 l y)
+          (coordinateFrameAt (I := I) x0 i y)]
+  simp [coordinateFrameAt_bracket_zero (I := I) x0 i j,
+    coordinateFrameAt_bracket_zero (I := I) x0 j l,
+    coordinateFrameAt_bracket_zero (I := I) x0 l i]
 
 /-- The Koszul scalar is symmetric in coordinate-frame directions at the
 coordinate base point. -/
@@ -146,6 +218,101 @@ theorem leviCivitaConnectionOfMetric_coordinate_christoffel_symm
         (coordinateFrameAt_isLocalFrame_one (I := I) x0) x0 j i k := by
   unfold christoffelSymbolInFrame
   rw [leviCivitaConnectionOfMetric_coordinateFrame_apply_symm (I := I) g x0 i j]
+
+/-- Coordinate Christoffel formula for the Koszul Levi-Civita connection.
+
+In the coordinate frame at `x0`, this is
+`Γᵏᵢⱼ = 1/2 * g^{kℓ} (∂ᵢ gⱼℓ + ∂ⱼ gᵢℓ - ∂ℓ gᵢⱼ)`, with the inverse metric
+components supplied by `gInv`. -/
+theorem leviCivitaConnectionOfMetric_coordinate_christoffel_formula
+    (g : SmoothRiemannianMetric I M) (x0 : M)
+    (gInv : CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E -> Real)
+    (hinv : MetricInverseInBasis (I := I) g x0
+      (coordinateFrameAt_toBasis (I := I) x0) gInv)
+    (i j k : CoordinateIdx (𝕜 := Real) E) :
+    christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) g)
+        (coordinateFrameAt (I := I) x0)
+        (coordinateFrameAt_isLocalFrame_one (I := I) x0) x0 i j k =
+      (1 / 2 : Real) *
+        ∑ l : CoordinateIdx (𝕜 := Real) E,
+          gInv k l *
+            (directionalDeriv (I := I) (coordinateFrameAt (I := I) x0 i)
+                (fun y : M =>
+                  g.inner y (coordinateFrameAt (I := I) x0 j y)
+                    (coordinateFrameAt (I := I) x0 l y)) x0 +
+              directionalDeriv (I := I) (coordinateFrameAt (I := I) x0 j)
+                (fun y : M =>
+                  g.inner y (coordinateFrameAt (I := I) x0 i y)
+                    (coordinateFrameAt (I := I) x0 l y)) x0 -
+              directionalDeriv (I := I) (coordinateFrameAt (I := I) x0 l)
+                (fun y : M =>
+                  g.inner y (coordinateFrameAt (I := I) x0 i y)
+                    (coordinateFrameAt (I := I) x0 j y)) x0) := by
+  classical
+  let frame := coordinateFrameAt (I := I) x0
+  let hframe := coordinateFrameAt_isLocalFrame_one (I := I) x0
+  let basis := coordinateFrameAt_toBasis (I := I) x0
+  let A : TangentSpace I x0 :=
+    (leviCivitaConnectionOfMetric (I := I) g (frame j) x0) (frame i x0)
+  have hcoeff :
+      christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) g)
+          frame hframe x0 i j k = basis.coord k A := by
+    unfold christoffelSymbolInFrame A
+    rw [coordinateFrameAt_coeff_eq_toBasis_coord (I := I) x0]
+  have hcoord :
+      basis.coord k A =
+        ∑ l : CoordinateIdx (𝕜 := Real) E, gInv k l * g.inner x0 (basis l) A :=
+    coordinate_basis_coord_eq_sum_inv_metric_inner
+      (I := I) g basis gInv hinv k A
+  have hinner :
+      ∀ l : CoordinateIdx (𝕜 := Real) E,
+        g.inner x0 (basis l) A =
+          (1 / 2 : Real) *
+            koszulScalar (I := I) g (frame i) (frame j) (frame l) x0 := by
+    intro l
+    have hKos := leviCivitaConnectionOfMetric_inner_eq_koszulScalar
+      (I := I) g (frame i) (frame j) (frame l) x0
+      (coordinateFrameAt_mdifferentiableAt (I := I) x0 i)
+      (coordinateFrameAt_mdifferentiableAt (I := I) x0 j)
+      (coordinateFrameAt_mdifferentiableAt (I := I) x0 l)
+    calc
+      g.inner x0 (basis l) A = g.inner x0 A (basis l) := by
+        exact g.symm x0 (basis l) A
+      _ = (1 / 2 : Real) *
+            koszulScalar (I := I) g (frame i) (frame j) (frame l) x0 := by
+        simpa [A, basis, frame] using hKos
+  rw [hcoeff, hcoord]
+  calc
+    (∑ l : CoordinateIdx (𝕜 := Real) E, gInv k l * g.inner x0 (basis l) A)
+        = ∑ l : CoordinateIdx (𝕜 := Real) E,
+            gInv k l * ((1 / 2 : Real) *
+              koszulScalar (I := I) g (frame i) (frame j) (frame l) x0) := by
+          refine Finset.sum_congr rfl fun l _ => ?_
+          rw [hinner l]
+    _ = (1 / 2 : Real) *
+        ∑ l : CoordinateIdx (𝕜 := Real) E,
+          gInv k l * koszulScalar (I := I) g (frame i) (frame j) (frame l) x0 := by
+          rw [Finset.mul_sum]
+          refine Finset.sum_congr rfl fun l _ => ?_
+          ring
+    _ = (1 / 2 : Real) *
+        ∑ l : CoordinateIdx (𝕜 := Real) E,
+          gInv k l *
+            (directionalDeriv (I := I) (coordinateFrameAt (I := I) x0 i)
+                (fun y : M =>
+                  g.inner y (coordinateFrameAt (I := I) x0 j y)
+                    (coordinateFrameAt (I := I) x0 l y)) x0 +
+              directionalDeriv (I := I) (coordinateFrameAt (I := I) x0 j)
+                (fun y : M =>
+                  g.inner y (coordinateFrameAt (I := I) x0 i y)
+                    (coordinateFrameAt (I := I) x0 l y)) x0 -
+              directionalDeriv (I := I) (coordinateFrameAt (I := I) x0 l)
+                (fun y : M =>
+                  g.inner y (coordinateFrameAt (I := I) x0 i y)
+                    (coordinateFrameAt (I := I) x0 j y)) x0) := by
+          congr 1
+          refine Finset.sum_congr rfl fun l _ => ?_
+          rw [koszulScalar_coordinateFrame_eq_metric_derivs (I := I) g x0 i j l]
 
 /-- The Koszul connection has zero torsion on coordinate-frame basis vectors. -/
 theorem leviCivitaConnectionOfMetric_coordinate_torsion_basis_zero

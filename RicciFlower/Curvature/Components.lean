@@ -773,7 +773,7 @@ open RicciFlower.Coordinates
 
 variable [Module.Finite Real E] [CompleteSpace Real]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((⊤ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 /-- Christoffel coefficients in the chart-induced coordinate frame at `x₀`.
 

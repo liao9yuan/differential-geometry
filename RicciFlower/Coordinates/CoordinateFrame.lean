@@ -174,6 +174,30 @@ private theorem coordinateFrame_pullback_eq_const (x₀ : M) (i : CoordinateIdx 
     (isInvertible_mfderivWithin_extChartAt_symm (I := I) hy)
     ((Module.finBasis 𝕜 E) i)
 
+private theorem coordinateFrame_pullback_eq_const_of_mem {x₀ x : M}
+    (hx : x ∈ coordinateFrameSet (I := I) x₀)
+    (i : CoordinateIdx (𝕜 := 𝕜) E) :
+    VectorField.mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm
+        (coordinateFrameAt (I := I) x₀ i) (Set.range I)
+      =ᶠ[𝓝[Set.range I] (extChartAt I x₀ x)]
+        fun _ : E => (Module.finBasis 𝕜 E i : E) := by
+  haveI : IsManifold I (1 : WithTop ℕ∞) M :=
+    IsManifold.of_le (by norm_num : (1 : WithTop ℕ∞) ≤ ∞)
+  have hx_src : x ∈ (extChartAt I x₀).source := by
+    simpa [coordinateFrameSet, coordinateTrivializationAt, extChartAt_source] using hx
+  filter_upwards [extChartAt_target_mem_nhdsWithin' (I := I) hx_src] with y hy
+  simp only [VectorField.mpullbackWithin_apply]
+  have hy_src : (extChartAt I x₀).symm y ∈ (chartAt H x₀).source := by
+    rw [← extChartAt_source (I := I)]
+    exact (extChartAt I x₀).map_target hy
+  have hy_base : (extChartAt I x₀).symm y ∈ coordinateFrameSet (I := I) x₀ := by
+    simpa [coordinateFrameSet, coordinateTrivializationAt] using hy_src
+  rw [coordinateFrameAt_apply_of_mem (I := I) hy_base i]
+  rw [(extChartAt I x₀).right_inv hy]
+  exact ContinuousLinearMap.IsInvertible.inverse_apply_self
+    (isInvertible_mfderivWithin_extChartAt_symm (I := I) hy)
+    ((Module.finBasis 𝕜 E) i)
+
 private theorem lieBracketWithin_const_const {s : Set E} {x v w : E} :
     VectorField.lieBracketWithin 𝕜 (fun _ : E => v) (fun _ : E => w) s x = 0 := by
   simp [VectorField.lieBracketWithin]
