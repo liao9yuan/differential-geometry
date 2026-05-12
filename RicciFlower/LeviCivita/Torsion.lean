@@ -1,4 +1,4 @@
-import RicciFlower.Realized.LeviCivita.Koszul
+import RicciFlower.LeviCivita.Koszul
 import RicciFlower.Coordinates.Christoffel
 import RicciFlower.Coordinates.CoordinateFrame
 
@@ -14,10 +14,10 @@ Levi-Civita packages.
 -/
 
 namespace RicciFlower
-namespace Realized
 namespace LeviCivita
 
 open Bundle
+open Realized
 open Coordinates
 open scoped Manifold ContDiff
 
@@ -198,5 +198,4 @@ theorem leviCivitaConnectionOfMetric_isLeviCivita
     (leviCivitaConnectionOfMetric_isTorsionFree (I := I) g)
 
 end LeviCivita
-end Realized
 end RicciFlower

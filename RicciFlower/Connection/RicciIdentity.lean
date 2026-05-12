@@ -19,11 +19,11 @@ public RicciFlower endpoint stays the realized tensor predicate
 noncomputable section
 
 namespace RicciFlower
-namespace Realized
 namespace Connection
 
 open Tensor0SBundle
 open SyntheticTensor
+open Realized
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -187,5 +187,4 @@ theorem oneFormRicciIdentity_of_smooth_connection_apply
       nabla2Alpha hRm hcov hcoord) X Y Z
 
 end Connection
-end Realized
 end RicciFlower

@@ -89,8 +89,8 @@ variable [FiniteDimensional 𝕜 E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I (⊤ : WithTop ℕ∞) M]
-variable [IsManifold I ((⊤ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I (∞ : WithTop ℕ∞) M]
+variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 /-- A supplied `(0,s+1)` field realizes the total covariant derivative of a
 `(0,s)` field when contraction against any smooth vector field gives the
@@ -98,10 +98,10 @@ existing directional derivative. -/
 def TotalNabla0SRealizes (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) s)
+      (n := (∞ : WithTop ℕ∞)) s)
     (nablaAlpha : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) (s + 1)) : Prop :=
-  ∀ (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+      (n := (∞ : WithTop ℕ∞)) (s + 1)) : Prop :=
+  ∀ (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
     (x : M) (slots : Fin s → TangentSpace I x),
       nablaAlpha x (Fin.cons (X x) slots) =
         nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
@@ -112,10 +112,10 @@ mixed `(r,s)` field. -/
 def TotalNablaRSRealizes (r s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) r s)
+      (n := (∞ : WithTop ℕ∞)) r s)
     (nablaT : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) r (s + 1)) : Prop :=
-  ∀ (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+      (n := (∞ : WithTop ℕ∞)) r (s + 1)) : Prop :=
+  ∀ (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
     (x : M) (β : Tensor0SSpace r I x) (slots : Fin s → TangentSpace I x),
       nablaT x β (Fin.cons (X x) slots) =
         nablaRSFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
@@ -124,12 +124,12 @@ def TotalNablaRSRealizes (r s : ℕ)
 theorem TotalNabla0SRealizes.apply {s : ℕ}
     {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
     {α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) s}
+      (n := (∞ : WithTop ℕ∞)) s}
     {nablaAlpha : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) (s + 1)}
+      (n := (∞ : WithTop ℕ∞)) (s + 1)}
     (h : TotalNabla0SRealizes (𝕜 := 𝕜) (E := E) (H := H)
       (I := I) (M := M) s cov α nablaAlpha)
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
     (x : M) (slots : Fin s → TangentSpace I x) :
     nablaAlpha x (Fin.cons (X x) slots) =
       nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
@@ -139,12 +139,12 @@ theorem TotalNabla0SRealizes.apply {s : ℕ}
 theorem TotalNablaRSRealizes.apply {r s : ℕ}
     {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
     {T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) r s}
+      (n := (∞ : WithTop ℕ∞)) r s}
     {nablaT : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) r (s + 1)}
+      (n := (∞ : WithTop ℕ∞)) r (s + 1)}
     (h : TotalNablaRSRealizes (𝕜 := 𝕜) (E := E) (H := H)
       (I := I) (M := M) r s cov T nablaT)
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
     (x : M) (β : Tensor0SSpace r I x) (slots : Fin s → TangentSpace I x) :
     nablaT x β (Fin.cons (X x) slots) =
       nablaRSFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
@@ -158,21 +158,21 @@ inductive HigherCovDeriv0SRealizes
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {s : ℕ}
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) s) :
+      (n := (∞ : WithTop ℕ∞)) s) :
     (k : ℕ) →
       Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-        (n := (⊤ : WithTop ℕ∞)) (k + s) → Prop
+        (n := (∞ : WithTop ℕ∞)) (k + s) → Prop
   | zero :
       HigherCovDeriv0SRealizes cov α 0
         (by
           simpa :
             Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-              (n := (⊤ : WithTop ℕ∞)) (0 + s))
+              (n := (∞ : WithTop ℕ∞)) (0 + s))
   | succ {k : ℕ}
       {αk : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-        (n := (⊤ : WithTop ℕ∞)) (k + s)}
+        (n := (∞ : WithTop ℕ∞)) (k + s)}
       {αk1 : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-        (n := (⊤ : WithTop ℕ∞)) ((k + s) + 1)}
+        (n := (∞ : WithTop ℕ∞)) ((k + s) + 1)}
       (hk : HigherCovDeriv0SRealizes cov α k αk)
       (hstep : TotalNabla0SRealizes (𝕜 := 𝕜) (E := E) (H := H)
         (I := I) (M := M) (k + s) cov αk αk1) :
@@ -180,7 +180,7 @@ inductive HigherCovDeriv0SRealizes
         (by
           simpa [Nat.add_assoc, Nat.succ_add, Nat.add_comm, Nat.add_left_comm] using αk1 :
             Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-              (n := (⊤ : WithTop ℕ∞)) ((k + 1) + s))
+              (n := (∞ : WithTop ℕ∞)) ((k + 1) + s))
 
 /-- Recursive realization predicate for the `k`-th covariant derivative of a
 mixed tensor field. -/
@@ -188,21 +188,21 @@ inductive HigherCovDerivRSRealizes
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {r s : ℕ}
     (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) r s) :
+      (n := (∞ : WithTop ℕ∞)) r s) :
     (k : ℕ) →
       TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-        (n := (⊤ : WithTop ℕ∞)) r (k + s) → Prop
+        (n := (∞ : WithTop ℕ∞)) r (k + s) → Prop
   | zero :
       HigherCovDerivRSRealizes cov T 0
         (by
           simpa :
             TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-              (n := (⊤ : WithTop ℕ∞)) r (0 + s))
+              (n := (∞ : WithTop ℕ∞)) r (0 + s))
   | succ {k : ℕ}
       {Tk : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-        (n := (⊤ : WithTop ℕ∞)) r (k + s)}
+        (n := (∞ : WithTop ℕ∞)) r (k + s)}
       {Tk1 : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-        (n := (⊤ : WithTop ℕ∞)) r ((k + s) + 1)}
+        (n := (∞ : WithTop ℕ∞)) r ((k + s) + 1)}
       (hk : HigherCovDerivRSRealizes cov T k Tk)
       (hstep : TotalNablaRSRealizes (𝕜 := 𝕜) (E := E) (H := H)
         (I := I) (M := M) r (k + s) cov Tk Tk1) :
@@ -210,17 +210,17 @@ inductive HigherCovDerivRSRealizes
         (by
           simpa [Nat.add_assoc, Nat.succ_add, Nat.add_comm, Nat.add_left_comm] using Tk1 :
             TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-              (n := (⊤ : WithTop ℕ∞)) r ((k + 1) + s))
+              (n := (∞ : WithTop ℕ∞)) r ((k + 1) + s))
 
 theorem higherCovDeriv0SRealizes_two_apply {s : ℕ}
     {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
     {nablaAlpha : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) (s + 1)}
+      (n := (∞ : WithTop ℕ∞)) (s + 1)}
     {nabla2Alpha : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) ((s + 1) + 1)}
+      (n := (∞ : WithTop ℕ∞)) ((s + 1) + 1)}
     (h2 : TotalNabla0SRealizes (𝕜 := 𝕜) (E := E) (H := H)
       (I := I) (M := M) (s + 1) cov nablaAlpha nabla2Alpha)
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
     (x : M) (slots : Fin (s + 1) → TangentSpace I x) :
     nabla2Alpha x (Fin.cons (X x) slots) =
       nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)

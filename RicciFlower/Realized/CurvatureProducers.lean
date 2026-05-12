@@ -1,5 +1,5 @@
 import RicciFlower.Realized.CurvatureTensor
-import RicciFlower.Realized.LeviCivita.Basic
+import RicciFlower.LeviCivita.Basic
 
 set_option autoImplicit false
 set_option linter.style.longLine false

@@ -31,8 +31,8 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
-variable [IsManifold I (⊤ : WithTop ℕ∞) M]
-variable [IsManifold I ((⊤ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I (∞ : WithTop ℕ∞) M]
+variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 /-- Directional derivative of a coordinate-frame covariant tensor component. -/
 def coordDeriv0SAt {s : ℕ}
@@ -45,7 +45,7 @@ def coordDeriv0SAt {s : ℕ}
 
 /-- The chart-model derivative term that appears definitionally in `nabla0SFun`. -/
 def modelDeriv0SAt {s : ℕ}
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (x₀ : M)
     (α : (x : M) -> Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I) s x)
     (slots : Fin s -> CoordinateIdx (𝕜 := 𝕜) E) : 𝕜 :=
@@ -63,7 +63,7 @@ def modelDeriv0SAt {s : ℕ}
 scalar directional derivative of coordinate-frame components. This is the
 remaining analytic/chart-identification bridge. -/
 def ModelDerivEqCoordDeriv0SAt {s : ℕ}
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (x₀ : M)
     (α : (x : M) -> Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I) s x) : Prop :=
   forall slots : Fin s -> CoordinateIdx (𝕜 := 𝕜) E,
@@ -147,10 +147,10 @@ compose the `fderivWithin` of the multilinear-map-valued chart field with
 evaluation at fixed basis vectors, and identify the pulled-back direction
 `mpullbackWithin (extChartAt I x₀).symm X` at the chart center with `X x₀`. -/
 theorem modelDeriv_eq_coordDeriv0SAt {s : ℕ}
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (x₀ : M)
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) s) :
+      (n := (∞ : WithTop ℕ∞)) s) :
     ModelDerivEqCoordDeriv0SAt (I := I) X x₀ (fun x => α x) := by
   classical
   letI := Tensor0SBundle.tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H)
@@ -200,15 +200,15 @@ theorem modelDeriv_eq_coordDeriv0SAt {s : ℕ}
     rw [contMDiffAt_section] at h
     simpa [tensor0SModelAt, Tensor0SModel] using h
   have hsymm :
-      ContMDiffWithinAt 𝓘(𝕜, E) I (⊤ : WithTop ℕ∞)
+      ContMDiffWithinAt 𝓘(𝕜, E) I (∞ : WithTop ℕ∞)
         (extChartAt I x₀).symm S z₀ := by
     simpa [S, z₀] using
       contMDiffWithinAt_extChartAt_symm_range_self
-        (I := I) (n := (⊤ : WithTop ℕ∞)) x₀
+        (I := I) (n := (∞ : WithTop ℕ∞)) x₀
   have hα_model_center :
       ContMDiffAt I
         𝓘(𝕜, ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜)
-        (⊤ : WithTop ℕ∞)
+        (∞ : WithTop ℕ∞)
         (fun x : M =>
           tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
             s x₀ x (α x))
@@ -271,9 +271,9 @@ formulas.  It is the preferred reusable theorem when a downstream proof only
 needs coordinate components of the canonical raw tensor derivative. -/
 theorem nabla0S_coordFrame_slots {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) s)
+      (n := (∞ : WithTop ℕ∞)) s)
     (x₀ : M) (hderiv : ModelDerivEqCoordDeriv0SAt (I := I) X x₀ (fun x => α x))
     (slots : Fin s -> CoordinateIdx (𝕜 := 𝕜) E) :
     coordComponent0SAt (I := I)
@@ -292,12 +292,12 @@ theorem nabla0S_coordFrame_slots {s : ℕ}
   rw [← tensor0SModelAt_coordComponent0SAt (I := I) x₀
     (TensorLieDeriv.mcovariantDeriv_tensor0SWithin
       (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) s X
+      (n := (∞ : WithTop ℕ∞)) s X
       (connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀)
       α Set.univ x₀) slots]
   have hmodel := TensorLieDeriv.mcovariantDeriv_tensor0SWithin_apply_basis_slots
     (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-    (n := (⊤ : WithTop ℕ∞)) (Idx := CoordinateIdx (𝕜 := 𝕜) E)
+    (n := (∞ : WithTop ℕ∞)) (Idx := CoordinateIdx (𝕜 := 𝕜) E)
     (basis := Module.finBasis 𝕜 E)
     (X := X)
     (ΓX := connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀)
@@ -342,9 +342,9 @@ valence, with the chart/model derivative bridge discharged from smoothness of
 the tensor field. -/
 theorem nabla0S_coordFrame_slots_of_smooth {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) s)
+      (n := (∞ : WithTop ℕ∞)) s)
     (x₀ : M) (slots : Fin s -> CoordinateIdx (𝕜 := 𝕜) E) :
     coordComponent0SAt (I := I)
         (nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)

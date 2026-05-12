@@ -27,16 +27,16 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
-variable [IsManifold I (⊤ : WithTop ℕ∞) M]
-variable [IsManifold I ((⊤ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I (∞ : WithTop ℕ∞) M]
+variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 /-- Coordinate-frame component formula for the covariant derivative of a one-form,
 with the derivative term kept in the chart-model form used by `nabla0SFun`. -/
 theorem nabla0S_one_model_coord
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) 1)
+      (n := (∞ : WithTop ℕ∞)) 1)
     (x₀ : M) (j : CoordinateIdx (𝕜 := 𝕜) E) :
     coordComponent0SAt (I := I)
         (nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
@@ -54,12 +54,12 @@ theorem nabla0S_one_model_coord
   rw [← tensor0SModelAt_coordComponent0SAt (I := I) x₀
     (TensorLieDeriv.mcovariantDeriv_tensor0SWithin
       (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) 1 X
+      (n := (∞ : WithTop ℕ∞)) 1 X
       (connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀)
       α Set.univ x₀) (fun _ : Fin 1 => j)]
   have hmodel := TensorLieDeriv.mcovariantDeriv_tensor0SWithin_one_apply_basis
     (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-    (n := (⊤ : WithTop ℕ∞)) (Idx := CoordinateIdx (𝕜 := 𝕜) E)
+    (n := (∞ : WithTop ℕ∞)) (Idx := CoordinateIdx (𝕜 := 𝕜) E)
     (basis := Module.finBasis 𝕜 E)
     (X := X)
     (ΓX := connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀)
@@ -76,9 +76,9 @@ theorem nabla0S_one_model_coord
 derivative-identification bridge. -/
 theorem nabla0S_one_coord
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) 1)
+      (n := (∞ : WithTop ℕ∞)) 1)
     (x₀ : M) (hderiv : ModelDerivEqCoordDeriv0SAt (I := I) X x₀ (fun x => α x))
     (j : CoordinateIdx (𝕜 := 𝕜) E) :
     coordComponent0SAt (I := I)
@@ -102,9 +102,9 @@ intrinsic moving-vector-field identity
 rule for differentiating the scalar pairing `p ↦ α p (Z p)`. -/
 theorem nabla0SFun_one_eval_coordFrame
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) 1)
+      (n := (∞ : WithTop ℕ∞)) 1)
     (x₀ : M) (hderiv : ModelDerivEqCoordDeriv0SAt (I := I) X x₀ (fun x => α x))
     (j : CoordinateIdx (𝕜 := 𝕜) E) :
     (nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
@@ -319,7 +319,7 @@ private theorem extDerivFun_congr_eventually
 private theorem oneForm_pair_coordFrame_eventually
     (Z : (x : M) -> TangentSpace I x)
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) 1)
+      (n := (∞ : WithTop ℕ∞)) 1)
     (x₀ : M) :
     (fun y : M => α y (fun _ : Fin 1 => Z y)) =ᶠ[𝓝 x₀]
       (fun y : M =>
@@ -385,10 +385,10 @@ coefficient functions and fixed-slot tensor components are differentiable at
 the base point, and identify `dz` with the directional derivatives of the
 coefficients of `Z`. -/
 theorem oneForm_pair_coordFrame_product_rule
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (Z : (x : M) -> TangentSpace I x)
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) 1)
+      (n := (∞ : WithTop ℕ∞)) 1)
     (x₀ : M) (z dz : CoordinateIdx (𝕜 := 𝕜) E -> 𝕜)
     (hz : ∀ j : CoordinateIdx (𝕜 := 𝕜) E,
       z j = (coordinateFrameAt_toBasis (I := I) x₀).coord j (Z x₀))
@@ -463,10 +463,10 @@ connection-side product rule matching `oneForm_pair_coordFrame_product_rule`.
 -/
 theorem oneForm_covariantDerivative_coordFrame_product_rule
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (Z : (x : M) -> TangentSpace I x)
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) 1)
+      (n := (∞ : WithTop ℕ∞)) 1)
     (x₀ : M) (z dz : CoordinateIdx (𝕜 := 𝕜) E -> 𝕜)
     (hz : ∀ j : CoordinateIdx (𝕜 := 𝕜) E,
       z j = (coordinateFrameAt_toBasis (I := I) x₀).coord j (Z x₀))
@@ -658,9 +658,9 @@ vector.  This is the fixed-coordinate-slot theorem plus multilinearity in the
 slot being evaluated. -/
 theorem nabla0SFun_one_eval_coordFrame_expanded
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) 1)
+      (n := (∞ : WithTop ℕ∞)) 1)
     (x₀ : M) (hderiv : ModelDerivEqCoordDeriv0SAt (I := I) X x₀ (fun x => α x))
     (Z : TangentSpace I x₀) :
     (nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
@@ -690,10 +690,10 @@ textbook evaluation formula
 `(∇_X α)(Z) = X(α Z) - α(∇_X Z)` at the base point. -/
 theorem nabla0SFun_one_eval_of_coordFrame_product
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (Z : (x : M) -> TangentSpace I x)
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) 1)
+      (n := (∞ : WithTop ℕ∞)) 1)
     (x₀ : M) (hderiv : ModelDerivEqCoordDeriv0SAt (I := I) X x₀ (fun x => α x))
     (z dz : CoordinateIdx (𝕜 := 𝕜) E -> 𝕜)
     (hz : ∀ j : CoordinateIdx (𝕜 := 𝕜) E,
@@ -732,10 +732,10 @@ theorem nabla0SFun_one_eval_of_coordFrame_product
 pairing product rule discharged by `oneForm_pair_coordFrame_product_rule`. -/
 theorem nabla0SFun_one_eval_of_coordFrame_product_rule
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (Z : (x : M) -> TangentSpace I x)
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) 1)
+      (n := (∞ : WithTop ℕ∞)) 1)
     (x₀ : M) (hderiv : ModelDerivEqCoordDeriv0SAt (I := I) X x₀ (fun x => α x))
     (z dz : CoordinateIdx (𝕜 := 𝕜) E -> 𝕜)
     (hz : ∀ j : CoordinateIdx (𝕜 := 𝕜) E,
@@ -779,10 +779,10 @@ coordinate-frame bridge toward the textbook one-form formula
 `(∇_X α)(Z) = X(α Z) - α(∇_X Z)`. -/
 theorem nabla0SFun_one_eval_of_coordFrame_product_rules
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (Z : (x : M) -> TangentSpace I x)
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) 1)
+      (n := (∞ : WithTop ℕ∞)) 1)
     (x₀ : M) (hderiv : ModelDerivEqCoordDeriv0SAt (I := I) X x₀ (fun x => α x))
     (z dz : CoordinateIdx (𝕜 := 𝕜) E -> 𝕜)
     (hz : ∀ j : CoordinateIdx (𝕜 := 𝕜) E,
@@ -818,9 +818,9 @@ are exactly the fixed-slot model-derivative bridge and the differentiability of
 the coordinate coefficient functions appearing in the two product rules. -/
 theorem nabla0SFun_one_eval_coordFrame_moving
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (X Z : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X Z : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) 1)
+      (n := (∞ : WithTop ℕ∞)) 1)
     (x₀ : M) (hderiv : ModelDerivEqCoordDeriv0SAt (I := I) X x₀ (fun x => α x))
     (hdiff_z : ∀ j : CoordinateIdx (𝕜 := 𝕜) E,
       MDifferentiableAt I 𝓘(𝕜, 𝕜)
@@ -854,10 +854,10 @@ bridge needed for coordinate-frame fields, which are naturally local rather
 than global smooth sections. -/
 theorem nabla0SFun_one_eval_coordFrame_moving_raw
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (Z : (x : M) -> TangentSpace I x)
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) 1)
+      (n := (∞ : WithTop ℕ∞)) 1)
     (x₀ : M) (hderiv : ModelDerivEqCoordDeriv0SAt (I := I) X x₀ (fun x => α x))
     (hdiff_z : ∀ j : CoordinateIdx (𝕜 := 𝕜) E,
       MDifferentiableAt I 𝓘(𝕜, 𝕜)
@@ -884,9 +884,9 @@ theorem nabla0SFun_one_eval_coordFrame_moving_raw
     hdiff_z hdiff_α hZ_diff
 
 private theorem coordinateFrame_coeff_contMDiffAt
-    (Z : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (Z : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (x₀ : M) (j : CoordinateIdx (𝕜 := 𝕜) E) :
-    ContMDiffAt I 𝓘(𝕜, 𝕜) (⊤ : WithTop ℕ∞)
+    ContMDiffAt I 𝓘(𝕜, 𝕜) (∞ : WithTop ℕ∞)
       (fun y : M =>
         (coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff j y (Z y)) x₀ := by
   let e := coordinateTrivializationAt (I := I) x₀
@@ -896,7 +896,7 @@ private theorem coordinateFrame_coeff_contMDiffAt
     contMDiffAt_localFrame_coeff
       (I := I) (V := TangentSpace I) (e := e)
       (b := Module.finBasis 𝕜 E) (s := fun y : M => Z y)
-      (k := (⊤ : WithTop ℕ∞)) hx Z.contMDiff.contMDiffAt j
+      (k := (∞ : WithTop ℕ∞)) hx Z.contMDiff.contMDiffAt j
   simpa [e, coordinateTrivializationAt, coordinateFrameAt_isLocalFrame_one,
     coordinateFrameAt] using hcoeff
 
@@ -922,13 +922,13 @@ private theorem coordinateFrame_coeff_contMDiffAt_of_contMDiffAt
 set_option backward.isDefEq.respectTransparency false in
 private theorem oneForm_eval_coordinateFrame_contMDiffAt
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) 1)
+      (n := (∞ : WithTop ℕ∞)) 1)
     (x₀ : M) (j : CoordinateIdx (𝕜 := 𝕜) E) :
     ContMDiffAt I 𝓘(𝕜, 𝕜) (∞ : WithTop ℕ∞)
       (fun y : M => α y (fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ j y)) x₀ := by
   have hα_top := α.contMDiff x₀
   have hα := hα_top.of_le
-    (by simp : (∞ : WithTop ℕ∞) ≤ (⊤ : WithTop ℕ∞))
+    (by simp : (∞ : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞))
   have hframe :
       ContMDiffAt I (I.prod 𝓘(𝕜, E)) (∞ : WithTop ℕ∞)
         (fun y : M =>
@@ -948,7 +948,7 @@ private theorem coordinateFrame_covariantDeriv_apply_contMDiffAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
       (∞ : WithTop ℕ∞))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (x₀ : M) (j : CoordinateIdx (𝕜 := 𝕜) E) :
     ContMDiffAt I (I.prod 𝓘(𝕜, E)) (∞ : WithTop ℕ∞)
       (fun p : M =>
@@ -973,7 +973,7 @@ private theorem coordinateFrame_covariantDeriv_apply_contMDiffAt
   have hX_on :
       CMDiff[u] (∞ : WithTop ℕ∞) (T% (fun p : M => X p)) :=
     (X.contMDiff.of_le (by simp :
-      (∞ : WithTop ℕ∞) ≤ (⊤ : WithTop ℕ∞))).contMDiffOn
+      (∞ : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞))).contMDiffOn
   have hW_on :
       ContMDiffOn I (I.prod 𝓘(𝕜, E)) (∞ : WithTop ℕ∞)
         (fun p : M =>
@@ -992,10 +992,10 @@ then prove smoothness of the exterior-derivative term and the correction term
 separately. -/
 theorem nabla0SFun_one_eval_contMDiff
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (hcov : CovariantDerivative.ContMDiffCovariantDerivative cov (⊤ : WithTop ℕ∞))
-    (X Z : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivative cov (∞ : WithTop ℕ∞))
+    (X Z : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) 1) :
+      (n := (∞ : WithTop ℕ∞)) 1) :
     ContMDiff I 𝓘(𝕜, 𝕜) (∞ : WithTop ℕ∞)
       (fun p : M =>
         (nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
@@ -1020,7 +1020,7 @@ theorem nabla0SFun_one_eval_contMDiff
   let W : (p : M) -> TangentSpace I p :=
     fun p : M => (cov (fun q : M => Z q) p) (X p)
   have hWtop :
-      ContMDiff I (I.prod 𝓘(𝕜, E)) (⊤ : WithTop ℕ∞)
+      ContMDiff I (I.prod 𝓘(𝕜, E)) (∞ : WithTop ℕ∞)
         (fun p : M => (⟨p, W p⟩ :
           TotalSpace E (TangentSpace I : M -> Type _))) := by
     simpa [W] using
@@ -1071,9 +1071,9 @@ theorem nabla0SFun_one_eval_coordinateFrame_contMDiffAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
       (∞ : WithTop ℕ∞))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) 1)
+      (n := (∞ : WithTop ℕ∞)) 1)
     (x₀ : M) (j : CoordinateIdx (𝕜 := 𝕜) E) :
     ContMDiffAt I 𝓘(𝕜, 𝕜) (∞ : WithTop ℕ∞)
       (fun p : M =>
@@ -1154,9 +1154,9 @@ theorem nabla0SFun_one_contMDiff
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
       (∞ : WithTop ℕ∞))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) 1) :
+      (n := (∞ : WithTop ℕ∞)) 1) :
     letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I)
       (M := M) 1
     ContMDiff I (I.prod 𝓘(𝕜, Tensor0SModel 1 𝕜 E)) (∞ : WithTop ℕ∞)

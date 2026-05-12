@@ -1,4 +1,6 @@
 import RicciFlower.Analysis.Time
+import RicciFlower.Connection.MetricCompatibility
+import RicciFlower.Metric.Basic
 import RicciFlower.Realized.TimeInterval
 import Mathlib.Analysis.Calculus.ContDiff.Basic
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
@@ -32,35 +34,6 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable {Time : Type*}
 
-/-- V2-facing alias for a smooth Riemannian metric on `TM`. -/
-abbrev SmoothRiemannianMetric
-    (I : ModelWithCorners Real E H) (M : Type*)
-    [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] : Type _ :=
-  Bundle.ContMDiffRiemannianMetric I ⊤ E (TangentSpace I : M -> Type _)
-
-/-! ## Metric-compatible connections -/
-
-/-- Metric compatibility at a point, stated on differentiable tangent fields.
-
-This is the concrete realized form of
-`X <Y,Z> = <nabla_X Y, Z> + <Y, nabla_X Z>`. -/
-def IsMetricCompatibleAt
-    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (g : SmoothRiemannianMetric I M) (x : M) : Prop :=
-  forall (X Y Z : (p : M) -> TangentSpace I p),
-    MDiffAt (T% X) x ->
-      MDiffAt (T% Y) x ->
-        MDiffAt (T% Z) x ->
-          mfderiv I 𝓘(Real, Real) (fun y : M => g.inner y (Y y) (Z y)) x (X x) =
-            g.inner x (cov Y x (X x)) (Z x) +
-              g.inner x (Y x) (cov Z x (X x))
-
-/-- Metric compatibility at every point. -/
-def IsMetricCompatible
-    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (g : SmoothRiemannianMetric I M) : Prop :=
-  forall x : M, IsMetricCompatibleAt (I := I) cov g x
-
 /-- A realized time-dependent metric and connection.
 
 It does not assert that the connection is torsion-free, that the family is
@@ -70,7 +43,7 @@ structure RealizedMetricFamily (Time : Type*) where
   metric : Time -> SmoothRiemannianMetric I M
   connection : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _)
   metricCompatible : forall t : Time,
-    IsMetricCompatible (I := I) (connection t) (metric t)
+    RicciFlower.Connection.IsMetricCompatible (I := I) (connection t) (metric t)
 
 /-- A realized metric family over a concrete real time interval.
 
@@ -80,7 +53,8 @@ structure RealizedMetricFamilyOn (D : RealTimeInterval) where
   metric : Real -> SmoothRiemannianMetric I M
   connection : Real -> CovariantDerivative I E (TangentSpace I : M -> Type _)
   metricCompatible : forall t : RealTimeInterval.FlowTime D,
-    IsMetricCompatible (I := I) (connection (t : Real)) (metric (t : Real))
+    RicciFlower.Connection.IsMetricCompatible (I := I)
+      (connection (t : Real)) (metric (t : Real))
 
 namespace RealizedMetricFamily
 
@@ -88,7 +62,7 @@ namespace RealizedMetricFamily
     (metric : Time -> SmoothRiemannianMetric I M)
     (connection : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
     (metricCompatible : forall t : Time,
-      IsMetricCompatible (I := I) (connection t) (metric t))
+      RicciFlower.Connection.IsMetricCompatible (I := I) (connection t) (metric t))
     (t : Time) :
     (RealizedMetricFamily.mk (I := I) (M := M) metric connection
       metricCompatible).metric t = metric t := by
@@ -98,7 +72,7 @@ namespace RealizedMetricFamily
     (metric : Time -> SmoothRiemannianMetric I M)
     (connection : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
     (metricCompatible : forall t : Time,
-      IsMetricCompatible (I := I) (connection t) (metric t))
+      RicciFlower.Connection.IsMetricCompatible (I := I) (connection t) (metric t))
     (t : Time) :
     (RealizedMetricFamily.mk (I := I) (M := M) metric connection
       metricCompatible).connection t =
@@ -109,7 +83,7 @@ namespace RealizedMetricFamily
     (metric : Time -> SmoothRiemannianMetric I M)
     (connection : Time -> CovariantDerivative I E (TangentSpace I : M -> Type _))
     (metricCompatible : forall t : Time,
-      IsMetricCompatible (I := I) (connection t) (metric t))
+      RicciFlower.Connection.IsMetricCompatible (I := I) (connection t) (metric t))
     (t : Time) :
     (RealizedMetricFamily.mk (I := I) (M := M) metric connection
       metricCompatible).metricCompatible t = metricCompatible t := by
@@ -172,10 +146,43 @@ theorem metricCompatibleAt
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (t : RealTimeInterval.FlowTime D) :
-    IsMetricCompatible (I := I) (G.connectionAt t) (G.metricAt t) := by
+    RicciFlower.Connection.IsMetricCompatible (I := I) (G.connectionAt t) (G.metricAt t) := by
   exact G.metricCompatible t
 
 end RealizedMetricFamilyOn
+
+section FamilyCompatibility
+
+/-- Metric compatibility for an interval metric family. -/
+def IsMetricCompatibleFamilyOn
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D) : Prop :=
+  forall t : RealTimeInterval.FlowTime D,
+    RicciFlower.Connection.IsMetricCompatible (I := I) (G.connectionAt t) (G.metricAt t)
+
+/-- The metric-family field supplies interval metric compatibility. -/
+theorem isMetricCompatibleFamilyOn
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D) :
+    IsMetricCompatibleFamilyOn (I := I) G :=
+  fun t => G.metricCompatibleAt t
+
+/-- Family metric compatibility at a flow time. -/
+theorem metric_compatible_family_apply
+    {D : RealTimeInterval}
+    {G : RealizedMetricFamilyOn (I := I) (M := M) D}
+    (hmc : IsMetricCompatibleFamilyOn (I := I) G)
+    (t : RealTimeInterval.FlowTime D)
+    {x : M}
+    (X Y Z : (p : M) -> TangentSpace I p)
+    (hX : MDiffAt (T% X) x) (hY : MDiffAt (T% Y) x) (hZ : MDiffAt (T% Z) x) :
+    mfderiv I 𝓘(Real, Real)
+        (fun y : M => (G.metricAt t).inner y (Y y) (Z y)) x (X x) =
+      (G.metricAt t).inner x ((G.connectionAt t) Y x (X x)) (Z x) +
+        (G.metricAt t).inner x (Y x) ((G.connectionAt t) Z x (X x)) :=
+  RicciFlower.Connection.metric_compatible_apply (I := I) (hmc t) X Y Z hX hY hZ
+
+end FamilyCompatibility
 
 section TimeSmoothness
 

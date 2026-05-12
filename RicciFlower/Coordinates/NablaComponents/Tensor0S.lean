@@ -29,8 +29,8 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
-variable [IsManifold I (⊤ : WithTop ℕ∞) M]
-variable [IsManifold I ((⊤ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I (∞ : WithTop ℕ∞) M]
+variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 private theorem fderivWithin_eq_sum_basis_coord
     {F : E -> E} {u : Set E} {y Xy : E}
@@ -93,7 +93,7 @@ private theorem fderivWithin_eq_sum_basis_coord
     simp at hi
 
 private theorem fderivWithin_chart_scalar_eq_extDerivFun
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (x₀ : M) (φ : E -> 𝕜) (f : M -> 𝕜)
     (hf : MDifferentiableAt I 𝓘(𝕜, 𝕜) f x₀)
     (heq :
@@ -127,7 +127,7 @@ private theorem fderivWithin_chart_scalar_eq_extDerivFun
   rfl
 
 private theorem tangentFieldModelInChart_fderivWithin_eq_sum_extDerivFun_coord
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (V : (x : M) -> TangentSpace I x) (x₀ : M)
     (hVmodel :
       DifferentiableWithinAt 𝕜
@@ -183,7 +183,7 @@ private theorem tangentFieldModelInChart_fderivWithin_eq_sum_extDerivFun_coord
 
 theorem covariantDerivative_modelInChart_center_eq_fderiv_plus_connection
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (V : (x : M) -> TangentSpace I x) (x₀ : M)
     (hV : MDiffAt (T% V) x₀)
     (hVmodel :
@@ -305,9 +305,9 @@ private theorem tensor0SModelInChart_apply_update_modelSlot_center {s : ℕ}
     exact tangentFieldModelInChart_center_symmL (I := I) (V b) x₀
 
 private theorem fderivWithin_tensor0S_eval_modelSlots_center_eq_extDerivFun {s : ℕ}
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) s)
+      (n := (∞ : WithTop ℕ∞)) s)
     (V : Fin s -> (x : M) -> TangentSpace I x) (x₀ : M)
     (hpair : MDifferentiableAt I 𝓘(𝕜, 𝕜)
       (fun p : M => α p (fun a : Fin s => V a p)) x₀) :
@@ -359,10 +359,10 @@ local: the moving slots only need the fixed-chart model differentiability needed
 by the product rule and the vector-field covariant-derivative chart formula. -/
 theorem nabla0SFun_eval_coordFrame_moving_raw {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (V : Fin s -> (x : M) -> TangentSpace I x)
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) s)
+      (n := (∞ : WithTop ℕ∞)) s)
     (x₀ : M)
     (hpair : MDifferentiableAt I 𝓘(𝕜, 𝕜)
       (fun p : M => α p (fun a : Fin s => V a p)) x₀)
@@ -401,7 +401,7 @@ theorem nabla0SFun_eval_coordFrame_moving_raw {s : ℕ}
   have hαdiff : DifferentiableWithinAt 𝕜 αm (Set.range I) y₀ := by
     have hcd := tensor0SModelInChart_contMDiffWithinAt
       (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) s x₀ α
+      (n := (∞ : WithTop ℕ∞)) s x₀ α
     have hdiff := hcd.contDiffWithinAt.differentiableWithinAt (by simp)
     simpa [αm, y₀] using hdiff
   have hprod :=
@@ -428,7 +428,7 @@ theorem nabla0SFun_eval_coordFrame_moving_raw {s : ℕ}
         (I := I) cov X (V a) x₀ (hV a) (hVmodel a) (hcoord a)
   have hfixed := fixedChartNabla0SModel_apply_slots
     (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-    (n := (⊤ : WithTop ℕ∞)) s cov X α x₀ y₀ slots
+    (n := (∞ : WithTop ℕ∞)) s cov X α x₀ y₀ slots
   have hself := nabla0SFun_apply_selfChart_slots
     (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
     s cov X α x₀ slots
@@ -462,7 +462,7 @@ theorem nabla0SFun_eval_coordFrame_moving_raw {s : ℕ}
           tangentConstInChart (𝕜 := 𝕜) (I := I) x₀ (slots a) x₀) := by
           rw [hslot]
     _ = fixedChartNabla0SModel (𝕜 := 𝕜) (E := E) (H := H)
-          (I := I) (M := M) (n := (⊤ : WithTop ℕ∞)) s cov X α x₀ y₀ slots := hself
+          (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) s cov X α x₀ y₀ slots := hself
     _ =
       fderivWithin 𝕜 αm (Set.range I) y₀ Xmodel slots -
         ∑ a : Fin s, αm y₀ (Function.update slots a (Γ (slots a))) := by
@@ -625,14 +625,14 @@ This is the all-slot version of the one-form helper
 theorem tensor0S_eval_coordinateFrame_contMDiffAt
     {s : ℕ}
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) s)
+      (n := (∞ : WithTop ℕ∞)) s)
     (x₀ : M) (slots : Fin s -> CoordinateIdx (𝕜 := 𝕜) E) :
     ContMDiffAt I 𝓘(𝕜, 𝕜) (∞ : WithTop ℕ∞)
       (fun y : M => α y (fun a : Fin s => coordinateFrameAt (I := I) x₀ (slots a) y))
       x₀ := by
   have hα_top := α.contMDiff x₀
   have hα := hα_top.of_le
-    (by simp : (∞ : WithTop ℕ∞) ≤ (⊤ : WithTop ℕ∞))
+    (by simp : (∞ : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞))
   have hframe :
       ∀ a : Fin s,
         ContMDiffAt I (I.prod 𝓘(𝕜, E)) (∞ : WithTop ℕ∞)
@@ -654,7 +654,7 @@ private theorem coordinateFrame_covariantDeriv_apply_contMDiffAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
       (∞ : WithTop ℕ∞))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (x₀ : M) (j : CoordinateIdx (𝕜 := 𝕜) E) :
     ContMDiffAt I (I.prod 𝓘(𝕜, E)) (∞ : WithTop ℕ∞)
       (fun p : M =>
@@ -679,7 +679,7 @@ private theorem coordinateFrame_covariantDeriv_apply_contMDiffAt
   have hX_on :
       CMDiff[u] (∞ : WithTop ℕ∞) (T% (fun p : M => X p)) :=
     (X.contMDiff.of_le (by simp :
-      (∞ : WithTop ℕ∞) ≤ (⊤ : WithTop ℕ∞))).contMDiffOn
+      (∞ : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞))).contMDiffOn
   have hW_on :
       ContMDiffOn I (I.prod 𝓘(𝕜, E)) (∞ : WithTop ℕ∞)
         (fun p : M =>
@@ -697,9 +697,9 @@ theorem tensor0S_eval_coordinateFrame_covariantDerivative_slot_contMDiffAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
       (∞ : WithTop ℕ∞))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) s)
+      (n := (∞ : WithTop ℕ∞)) s)
     (x₀ : M) (slots : Fin s -> CoordinateIdx (𝕜 := 𝕜) E) (a : Fin s) :
     ContMDiffAt I 𝓘(𝕜, 𝕜) (∞ : WithTop ℕ∞)
       (fun p : M =>
@@ -767,9 +767,9 @@ theorem nabla0SFun_eval_coordinateFrame_contMDiffAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
       (∞ : WithTop ℕ∞))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) s)
+      (n := (∞ : WithTop ℕ∞)) s)
     (x₀ : M) (slots : Fin s -> CoordinateIdx (𝕜 := 𝕜) E) :
     ContMDiffAt I 𝓘(𝕜, 𝕜) (∞ : WithTop ℕ∞)
       (fun p : M =>
@@ -826,7 +826,7 @@ theorem nabla0SFun_eval_coordinateFrame_contMDiffAt
     have hpair_p : ContMDiffAt I 𝓘(𝕜, 𝕜) (∞ : WithTop ℕ∞) pair p := by
       have hα_top := α.contMDiff p
       have hα := hα_top.of_le
-        (by simp : (∞ : WithTop ℕ∞) ≤ (⊤ : WithTop ℕ∞))
+        (by simp : (∞ : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞))
       have hEval := TensorMultilinear.contMDiffAt_section_apply
         (I := I) (M := M) (n := s) (x₀ := p)
         (T := fun y : M => α y) hα
@@ -866,9 +866,9 @@ smoothness supplied by a moving-slot derivation formula. -/
 theorem nabla0SFun_contMDiff_of_eval_coordinateFrame_contMDiffAt
     {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) s)
+      (n := (∞ : WithTop ℕ∞)) s)
     (hcoeff : ∀ x₀ : M, ∀ slots : Fin s -> CoordinateIdx (𝕜 := 𝕜) E,
       ContMDiffAt I 𝓘(𝕜, 𝕜) (∞ : WithTop ℕ∞)
         (fun p : M =>
@@ -941,9 +941,9 @@ theorem nabla0SFun_contMDiff
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
       (∞ : WithTop ℕ∞))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) s) :
+      (n := (∞ : WithTop ℕ∞)) s) :
     letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I)
       (M := M) s
     ContMDiff I (I.prod 𝓘(𝕜, Tensor0SModel s 𝕜 E)) (∞ : WithTop ℕ∞)
@@ -966,9 +966,9 @@ noncomputable def nabla0SCoord (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
       (∞ : WithTop ℕ∞))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) s) :
+      (n := (∞ : WithTop ℕ∞)) s) :
     Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s :=
   letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I)
@@ -983,9 +983,9 @@ set_option backward.isDefEq.respectTransparency false in
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
       (∞ : WithTop ℕ∞))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) s)
+      (n := (∞ : WithTop ℕ∞)) s)
     (p : M) :
     nabla0SCoord (I := I) s cov hcov X α p =
       nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)

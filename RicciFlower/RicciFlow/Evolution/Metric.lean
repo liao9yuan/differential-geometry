@@ -385,6 +385,35 @@ theorem inverseMetricEvolution_of_metricFrameTimeRegularity
     hreg.inverseSymmetric
     hreg.uniqueTimeDerivatives
 
+/-- LaTeX Lemma 6.1 in fixed-frame component form:
+`partial_t g^{ij} = 2 Ric^{ij}`. -/
+theorem evol_inverse_metric_inFrame
+    [DecidableEq Idx]
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (gInvDt : Real -> M -> Idx -> Idx -> Real)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    {u : Set M}
+    (hreg :
+      MetricFrameTimeRegularityInFrameOnLocal
+        (I := I) S gInv gInvDt frame u)
+    (t : Realized.RealTimeInterval.RegularTime D)
+    (x : M) (i j : Idx) :
+    HasDerivWithinAt
+      (fun s : Real => gInv s x i j)
+      (2 * raisedRicciCompInFrame (I := I) S gInv frame (t : Real) x i j)
+      D.carrier
+      (t : Real) := by
+  have hEq : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame :=
+    inverseMetricEvolution_of_metricFrameTimeRegularity
+      (I := I) S hS gInv gInvDt frame hreg
+  have h :=
+    inverseMetricEvolutionEquationInFrame_apply
+      (I := I) (S := S) (gInv := gInv) (frame := frame) hEq t x i j
+  simpa [inverseMetricEvolutionRHSInFrame] using h
+
 end Components
 
 end RicciFlow

@@ -1,4 +1,4 @@
-import RicciFlower.Tensor.RSTensor.NablaOnTensors.Regularity
+import RicciFlower.Tensor.RSTensor.NablaOnTensors.Smooth
 
 /-!
 # Raw and regular tensor covariant derivative APIs
@@ -8,4 +8,3 @@ regularity theorems.  Downstream code may continue importing
 `RicciFlower.Tensor.RSTensor.NablaOnTensors.Raw`; implementation files should prefer
 `RawDefs` or `Regularity` when they only need one layer.
 -/
-

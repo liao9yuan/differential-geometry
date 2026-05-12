@@ -203,17 +203,17 @@ theorem tensor0S_two_symm_of_coordFrame
 
 section TopRegularity
 
-variable [IsManifold I (⊤ : WithTop ℕ∞) M]
-variable [IsManifold I ((⊤ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I (∞ : WithTop ℕ∞) M]
+variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 /-- Coordinate-frame component formula for the covariant derivative of a `(0,2)`
 tensor, with the derivative term kept in the chart-model form used by
 `nabla0SFun`. -/
 theorem nabla0S_two_model_coord
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (A : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) 2)
+      (n := (∞ : WithTop ℕ∞)) 2)
     (x₀ : M) (j l : CoordinateIdx (𝕜 := 𝕜) E) :
     coordComponent0SAt (I := I)
         (nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
@@ -239,12 +239,12 @@ theorem nabla0S_two_model_coord
   rw [← tensor0SModelAt_coordComponent0SAt (I := I) x₀
     (TensorLieDeriv.mcovariantDeriv_tensor0SWithin
       (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) 2 X
+      (n := (∞ : WithTop ℕ∞)) 2 X
       (connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀)
       A Set.univ x₀) (fun q : Fin 2 => if q = 0 then j else l)]
   have hmodel := TensorLieDeriv.mcovariantDeriv_tensor0SWithin_two_apply_basis
     (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-    (n := (⊤ : WithTop ℕ∞)) (Idx := CoordinateIdx (𝕜 := 𝕜) E)
+    (n := (∞ : WithTop ℕ∞)) (Idx := CoordinateIdx (𝕜 := 𝕜) E)
     (basis := Module.finBasis 𝕜 E)
     (X := X)
     (ΓX := connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀)
@@ -264,7 +264,7 @@ theorem nabla0S_two_model_coord
             (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) 2 x₀ x₀
             (TensorLieDeriv.mcovariantDeriv_tensor0SWithin
               (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-              (n := (⊤ : WithTop ℕ∞)) 2 X
+              (n := (∞ : WithTop ℕ∞)) 2 X
               (connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov
                 (fun x => X x) x₀) A Set.univ x₀)) f)
       hslots).trans (hmodel.trans ?_)
@@ -360,9 +360,9 @@ theorem nabla0S_two_model_coord
 the derivative-identification bridge. -/
 theorem nabla0S_two_coord
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (A : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) 2)
+      (n := (∞ : WithTop ℕ∞)) 2)
     (x₀ : M) (hderiv : ModelDerivEqCoordDeriv0SAt (I := I) X x₀ (fun x => A x))
     (j l : CoordinateIdx (𝕜 := 𝕜) E) :
     coordComponent0SAt (I := I)
@@ -391,9 +391,9 @@ This is the coordinate-frame bridge from the canonical raw derivative
 `nabla0SFun` to the usual `(0,2)` Christoffel component formula. -/
 theorem nabla0SFun_two_eval_coordFrame
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (A : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) 2)
+      (n := (∞ : WithTop ℕ∞)) 2)
     (x₀ : M) (hderiv : ModelDerivEqCoordDeriv0SAt (I := I) X x₀ (fun x => A x))
     (j l : CoordinateIdx (𝕜 := 𝕜) E) :
     (nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
@@ -429,9 +429,9 @@ theorem nabla0SFun_two_eval_coordFrame
 pointwise symmetric `(0,2)` tensor field. -/
 theorem nabla0SFun_two_eval_coordFrame_symm_of_symm
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (A : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) 2)
+      (n := (∞ : WithTop ℕ∞)) 2)
     (x₀ : M) (hderiv : ModelDerivEqCoordDeriv0SAt (I := I) X x₀ (fun x => A x))
     (hsymm : ∀ y : M, ∀ U V : TangentSpace I y,
       A y (fun q : Fin 2 => if q = 0 then U else V) =
@@ -534,9 +534,9 @@ theorem nabla0SFun_two_eval_coordFrame_symm_of_symm
 `(0,2)` tensor field. -/
 theorem nabla0SFun_two_symm_of_symm
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (A : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) 2)
+      (n := (∞ : WithTop ℕ∞)) 2)
     (x₀ : M)
     (hsymm : ∀ y : M, ∀ U V : TangentSpace I y,
       A y (fun q : Fin 2 => if q = 0 then U else V) =
@@ -557,9 +557,9 @@ theorem nabla0SFun_two_symm_of_symm
 vectors, obtained from the coordinate-basis formula by multilinearity. -/
 theorem nabla0SFun_two_eval_coordFrame_expanded
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (A : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) 2)
+      (n := (∞ : WithTop ℕ∞)) 2)
     (x₀ : M) (hderiv : ModelDerivEqCoordDeriv0SAt (I := I) X x₀ (fun x => A x))
     (Y Z : TangentSpace I x₀) :
     (nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)

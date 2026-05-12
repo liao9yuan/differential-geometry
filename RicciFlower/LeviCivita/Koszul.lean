@@ -1,4 +1,4 @@
-import RicciFlower.Realized.LeviCivita.Basic
+import RicciFlower.LeviCivita.Basic
 import RicciFlower.Realized.Operators
 import RicciFlower.VectorBundle.TangentConst
 import Mathlib.Geometry.Manifold.VectorField.LieBracket
@@ -27,12 +27,12 @@ keeps the agreement with the field-first descent as an explicit proof frontier.
 -/
 
 namespace RicciFlower
-namespace Realized
 namespace LeviCivita
 
 noncomputable section
 
 open Bundle
+open Realized
 open scoped Bundle Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -1132,5 +1132,4 @@ theorem leviCivitaConnectionOfMetric_isMetricCompatible
 end
 
 end LeviCivita
-end Realized
 end RicciFlower

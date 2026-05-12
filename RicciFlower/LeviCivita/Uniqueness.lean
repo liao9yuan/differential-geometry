@@ -1,6 +1,6 @@
-import RicciFlower.Realized.LeviCivita.Koszul
-import RicciFlower.Realized.LeviCivita.MetricCompatibility
-import RicciFlower.Realized.LeviCivita.Torsion
+import RicciFlower.LeviCivita.Koszul
+import RicciFlower.Connection.MetricCompatibility
+import RicciFlower.LeviCivita.Torsion
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic
 
 set_option autoImplicit false
@@ -17,10 +17,10 @@ directions, not as literal total functions on all raw section inputs.
 -/
 
 namespace RicciFlower
-namespace Realized
 namespace LeviCivita
 
 open Bundle
+open Realized
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -59,9 +59,9 @@ theorem leviCivita_inner_eq_half_koszul
       (1 / 2 : Real) * koszulScalar (I := I) g X Y Z x := by
   have hmc := metricCompatible_of_isLeviCivita (I := I) hlc
   have htf := torsionFree_of_isLeviCivita (I := I) hlc
-  have hXYZ := metric_compatible_apply (I := I) hmc X Y Z hX hY hZ
-  have hYZX := metric_compatible_apply (I := I) hmc Y Z X hY hZ hX
-  have hZXY := metric_compatible_apply (I := I) hmc Z X Y hZ hX hY
+  have hXYZ := Connection.metric_compatible_apply (I := I) hmc X Y Z hX hY hZ
+  have hYZX := Connection.metric_compatible_apply (I := I) hmc Y Z X hY hZ hX
+  have hZXY := Connection.metric_compatible_apply (I := I) hmc Z X Y hZ hX hY
   have htYZ := torsion_free_apply (I := I) htf (X := Y) (Y := Z) hY hZ
   have htZX := torsion_free_apply (I := I) htf (X := Z) (Y := X) hZ hX
   have htXY := torsion_free_apply (I := I) htf (X := X) (Y := Y) hX hY
@@ -152,5 +152,4 @@ theorem leviCivitaConnectionUniqueOnSmooth
     hcovSmooth hcov'Smooth hcov hcov' (x := x) Y hY v
 
 end LeviCivita
-end Realized
 end RicciFlower

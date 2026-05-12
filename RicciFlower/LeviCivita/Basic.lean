@@ -1,4 +1,5 @@
-import RicciFlower.Realized.Connection.MetricCompatibility
+import RicciFlower.Connection.MetricCompatibility
+import RicciFlower.Realized.MetricFamily
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
 
 set_option autoImplicit false
@@ -9,16 +10,15 @@ set_option linter.unusedSectionVars false
 # Levi-Civita Calculus Predicates
 
 This file gives RicciFlower-facing predicates for torsion-freeness and
-Levi-Civita calculus.  Metric compatibility is part of the general realized
-metric-family layer, with compatibility aliases kept here for older
-Levi-Civita-facing imports.
+Levi-Civita calculus.  Metric compatibility is part of the general connection
+layer, with compatibility aliases kept here for Levi-Civita-facing imports.
 -/
 
 namespace RicciFlower
-namespace Realized
 namespace LeviCivita
 
 open Bundle
+open Realized
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -35,7 +35,7 @@ variable [SigmaCompactSpace M] [T2Space M]
 abbrev IsMetricCompatibleAt
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M) (x : M) : Prop :=
-  RicciFlower.Realized.IsMetricCompatibleAt (I := I) cov g x
+  RicciFlower.Connection.IsMetricCompatibleAt (I := I) cov g x
 
 /-- Torsion-freeness at a point. -/
 def IsTorsionFreeAt
@@ -52,7 +52,7 @@ def IsLeviCivitaAt
 abbrev IsMetricCompatible
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M) : Prop :=
-  RicciFlower.Realized.IsMetricCompatible (I := I) cov g
+  RicciFlower.Connection.IsMetricCompatible (I := I) cov g
 
 /-- Torsion-freeness at every point. -/
 def IsTorsionFree
@@ -130,5 +130,4 @@ theorem isLeviCivitaFamilyOn_of_calculus
 end Family
 
 end LeviCivita
-end Realized
 end RicciFlower

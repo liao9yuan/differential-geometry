@@ -27,7 +27,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 /-- Reinterpret a RicciFlower `⊤`-smooth metric as the `∞`-smooth metric expected by
 the merged measure layer. The underlying inner products are unchanged. -/
-def metricForMeasure (g : Realized.SmoothRiemannianMetric I M) :
+def metricForMeasure (g : SmoothRiemannianMetric I M) :
     DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M where
   inner := g.inner
   symm := g.symm
@@ -36,7 +36,7 @@ def metricForMeasure (g : Realized.SmoothRiemannianMetric I M) :
   contMDiff := g.contMDiff.of_le le_top
 
 @[simp]
-theorem metricForMeasure_inner (g : Realized.SmoothRiemannianMetric I M) (x : M) :
+theorem metricForMeasure_inner (g : SmoothRiemannianMetric I M) (x : M) :
     (metricForMeasure (I := I) (M := M) g).inner x = g.inner x := rfl
 
 /-- The Riemannian volume measure attached to a realized metric family at a time. -/

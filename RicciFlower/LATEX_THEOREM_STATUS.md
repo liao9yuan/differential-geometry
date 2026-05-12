@@ -19,6 +19,23 @@ Distance scale:
   old synthetic route exists.
 - `5`: deliberate black box or external-scale theorem for now.
 
+## 2026-05-11 Post-Refactor Update
+
+The refactor moved reusable math out of `RicciFlower/Realized` and into
+ordinary `RicciFlower/*` modules. In particular, the main theorem consumers now
+live in `Operators.lean`, `RoughLaplacian.lean`, `Tensor/RicciIdentity.lean`,
+`Curvature/Components.lean`, `Bianchi.lean`, `ScalarBochner.lean`,
+`Bochner.lean`, and `LeviCivita/*.lean`.
+
+This makes several LaTeX targets closer: the remaining work is now mostly
+producer proofs, not realization-folder organization. The closest targets are
+the scalar Bochner formula, the one-form Ricci identity endpoint,
+Levi-Civita Hessian symmetry, the inverse-metric evolution lemma, quotient
+evolution algebra, and finite-dimensional curvature algebra.
+
+Detailed closure order and acceptance checks are recorded in
+`RicciFlower/LATEX_THEOREM_CLOSURE_PLAN.md`.
+
 ## Main Body
 
 ### Theorem 2.1, `thm:main-hamilton-3d`
@@ -124,14 +141,14 @@ Statement:
 Along Ricci flow, partial_t g^{ij} = 2 Ric^{ij}.
 ```
 
-Status: native component interfaces exist in
-`RicciFlower/RicciFlow/Evolution/Metric.lean` and
-`RicciFlower/RicciFlow/Basic.lean`.
+Status: closed natively as `RicciFlow.evol_inverse_metric_inFrame` in
+`RicciFlower/RicciFlow/Evolution/Metric.lean`, using the existing
+inverse-identity differentiation theorem.
 
-Distance: `2`.
+Distance: `0`.
 
-Next target: expose a clean LaTeX-facing theorem over metric families and local
-frames.
+Next target: use this theorem as the inverse-metric input for later Ricci-norm
+and raised-index evolution identities.
 
 ### Lemma 6.2, `lem:evol-christoffel`
 
@@ -234,12 +251,14 @@ c' = F(c,t) preserves u >= c.
 ```
 
 Status: partially native in `RicciFlower/MaximumPrinciple/ScalarWeak.lean`;
-old synthetic wrapper exists.
+the pointwise calculus identities are native, and the remaining frontiers are
+the compact strict-barrier proof plus the uniform Lipschitz extraction.
 
-Distance: `3`.
+Distance: `2`.
 
-Next target: close the remaining analytic proof holes in the scalar weak
-maximum principle.
+Next target: prove `strict_barrier_nonnegative`, then replace the current
+locally-Lipschitz wrapper by a theorem with a hypothesis strong enough to
+produce one uniform Lipschitz constant over the compact value range.
 
 ### Theorem 7.2, `thm:scalar-wmp-sub`
 
@@ -475,11 +494,13 @@ R = lambda_1 + lambda_2 + lambda_3,
 Q = sum_{i<j} (lambda_i - lambda_j)^2 (R - 2 lambda_k)^2.
 ```
 
-Status: synthetic algebra proved as `wordly_latex_lem_Q_factorization`.
+Status: closed natively as
+`DimensionThree.hamiltonCubicQ3_factorized` in
+`RicciFlower/DimensionThree/PinchingAlgebra.lean`.
 
-Distance: `1`.
+Distance: `0`.
 
-Next target: port or re-export as native `RicciFlower` algebra.
+Next target: port the ordered-eigenvalue lower-bound algebra for Lemma 10.8.
 
 ### Lemma 10.8, `lem:Q-lower-bound`
 
@@ -892,4 +913,3 @@ Concrete next order:
 3. Promote rough Laplacian from basis-level trace predicates to an intrinsic
    tensor operation.
 4. Then mark Proposition 14.22 as distance `0`.
-

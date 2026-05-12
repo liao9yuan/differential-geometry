@@ -1,8 +1,8 @@
 import RicciFlower.RicciFlow.Evolution.Metric
 import RicciFlower.Coordinates.Christoffel
 import RicciFlower.Realized.CurvatureComponents
-import RicciFlower.Realized.LeviCivita.MetricCompatibility
-import RicciFlower.Realized.LeviCivita.Torsion
+import RicciFlower.Connection.MetricCompatibility
+import RicciFlower.LeviCivita.Torsion
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -202,10 +202,10 @@ private theorem connectionDiffVectorInFrame_symm
   have hfj : MDiffAt (T% (frame j)) x :=
     localFrame_mdiffAt (I := I) frame hframe hu hx j
   have hvar_torsion :=
-    Realized.LeviCivita.torsion_free_apply
+    RicciFlower.LeviCivita.torsion_free_apply
       (I := I) (hS.leviCivita.2 ⟨var, hvar⟩) (hX := hfi) (hY := hfj)
   have hbase_torsion :=
-    Realized.LeviCivita.torsion_free_apply
+    RicciFlower.LeviCivita.torsion_free_apply
       (I := I) (hS.leviCivita.2 ⟨base, hbase⟩) (hX := hfi) (hY := hfj)
   have hdiff :
       (S.family.connection var (frame j) x) (frame i x) -
@@ -267,7 +267,7 @@ theorem metricCovDerivCompInFrameAtBase_eq_connectionDiff
   have hfb : MDiffAt (T% (frame b)) x :=
     localFrame_mdiffAt (I := I) frame hframe hu hx b
   have hmc :=
-    Realized.LeviCivita.metric_compatible_apply
+    RicciFlower.Connection.metric_compatible_apply
       (I := I) (hS.leviCivita.1 ⟨var, hvar⟩)
       (frame d) (frame a) (frame b) hfd hfa hfb
   unfold metricCovDerivCompInFrameAtBase connectionDiffLoweredInFrame

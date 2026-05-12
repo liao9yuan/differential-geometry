@@ -1,5 +1,5 @@
 import RicciFlower.Realized.CurvatureComponents
-import RicciFlower.Realized.LeviCivita.Torsion
+import RicciFlower.LeviCivita.Torsion
 import RicciFlower.Tensor.RSTensor.NablaOnTensors.Connection
 import RicciFlower.VectorBundle.PartialMfderiv
 
@@ -19,10 +19,10 @@ Bochner.  Generic curvature realization predicates remain in
 noncomputable section
 
 namespace RicciFlower
-namespace Realized
 namespace LeviCivita
 
 open Bundle Tensor0SBundle
+open Realized
 open scoped Topology Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -31,7 +31,7 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I 3 M]
-variable [IsManifold I ((⊤ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M]
 
 private theorem directionalDeriv_congr_nhds
@@ -321,7 +321,7 @@ private theorem connectionRiemannCurvatureField_metric_skew_at_of_metricCompatib
       simpa [Zc] using mdifferentiableAt_tangentConstAt_of_mem (I := I) x Z hp
     have hWp : MDiffAt (T% Wc) p := by
       simpa [Wc] using mdifferentiableAt_tangentConstAt_of_mem (I := I) x W hp
-    have hmetric := RicciFlower.Realized.metric_compatible_apply (I := I) hmc
+    have hmetric := RicciFlower.Connection.metric_compatible_apply (I := I) hmc
       (x := p) Yc Zc Wc hYp hZp hWp
     simpa [directionalDeriv, extDerivFun, NormedSpace.fromTangentSpace, f, YZc, YWc]
       using hmetric
@@ -337,7 +337,7 @@ private theorem connectionRiemannCurvatureField_metric_skew_at_of_metricCompatib
       simpa [Zc] using mdifferentiableAt_tangentConstAt_of_mem (I := I) x Z hp
     have hWp : MDiffAt (T% Wc) p := by
       simpa [Wc] using mdifferentiableAt_tangentConstAt_of_mem (I := I) x W hp
-    have hmetric := RicciFlower.Realized.metric_compatible_apply (I := I) hmc
+    have hmetric := RicciFlower.Connection.metric_compatible_apply (I := I) hmc
       (x := p) Xc Zc Wc hXp hZp hWp
     simpa [directionalDeriv, extDerivFun, NormedSpace.fromTangentSpace, f, XZc, XWc]
       using hmetric
@@ -356,14 +356,14 @@ private theorem connectionRiemannCurvatureField_metric_skew_at_of_metricCompatib
           g.inner x (YZc x) ((cov Wc x) (Xc x))) +
         (g.inner x ((cov Zc x) (Xc x)) (YWc x) +
           g.inner x (Zc x) ((cov YWc x) (Xc x))) := by
-    have h1 := RicciFlower.Realized.metric_compatible_apply (I := I) hmc
+    have h1 := RicciFlower.Connection.metric_compatible_apply (I := I) hmc
       (x := x) Xc YZc Wc hX hYZ hW
     have h1' :
         directionalDeriv (I := I) Xc (fun p : M => g.inner p (YZc p) (Wc p)) x =
           g.inner x ((cov YZc x) (Xc x)) (Wc x) +
             g.inner x (YZc x) ((cov Wc x) (Xc x)) := by
       simpa [directionalDeriv, extDerivFun, NormedSpace.fromTangentSpace] using h1
-    have h2 := RicciFlower.Realized.metric_compatible_apply (I := I) hmc
+    have h2 := RicciFlower.Connection.metric_compatible_apply (I := I) hmc
       (x := x) Xc Zc YWc hX hZ hYW
     have h2' :
         directionalDeriv (I := I) Xc (fun p : M => g.inner p (Zc p) (YWc p)) x =
@@ -390,14 +390,14 @@ private theorem connectionRiemannCurvatureField_metric_skew_at_of_metricCompatib
           g.inner x (XZc x) ((cov Wc x) (Yc x))) +
         (g.inner x ((cov Zc x) (Yc x)) (XWc x) +
           g.inner x (Zc x) ((cov XWc x) (Yc x))) := by
-    have h1 := RicciFlower.Realized.metric_compatible_apply (I := I) hmc
+    have h1 := RicciFlower.Connection.metric_compatible_apply (I := I) hmc
       (x := x) Yc XZc Wc hY hXZ hW
     have h1' :
         directionalDeriv (I := I) Yc (fun p : M => g.inner p (XZc p) (Wc p)) x =
           g.inner x ((cov XZc x) (Yc x)) (Wc x) +
             g.inner x (XZc x) ((cov Wc x) (Yc x)) := by
       simpa [directionalDeriv, extDerivFun, NormedSpace.fromTangentSpace] using h1
-    have h2 := RicciFlower.Realized.metric_compatible_apply (I := I) hmc
+    have h2 := RicciFlower.Connection.metric_compatible_apply (I := I) hmc
       (x := x) Yc Zc XWc hY hZ hXW
     have h2' :
         directionalDeriv (I := I) Yc (fun p : M => g.inner p (Zc p) (XWc p)) x =
@@ -421,7 +421,7 @@ private theorem connectionRiemannCurvatureField_metric_skew_at_of_metricCompatib
       directionalDeriv (I := I) Bc f x =
         g.inner x ((cov Zc x) (Bc x)) (Wc x) +
           g.inner x (Zc x) ((cov Wc x) (Bc x)) := by
-    have hmetric := RicciFlower.Realized.metric_compatible_apply (I := I) hmc
+    have hmetric := RicciFlower.Connection.metric_compatible_apply (I := I) hmc
       (x := x) Bc Zc Wc hB hZ hW
     simpa [directionalDeriv, extDerivFun, NormedSpace.fromTangentSpace, f] using hmetric
   have hcomm :=
@@ -474,7 +474,8 @@ private theorem connectionRiemannCurvatureField_metric_skew_at_of_metricCompatib
     linarith
   change g.inner x W ((connectionRiemannCurvatureField (I := I) cov Xc Yc Zc) x) =
       -g.inner x Z ((connectionRiemannCurvatureField (I := I) cov Xc Yc Wc) x)
-  simpa [connectionRiemannCurvatureField, YZc, YWc, XZc, XWc, Bc,
+  simpa [connectionRiemannCurvatureField,
+    RicciFlower.Curvature.connectionRiemannCurvatureField, YZc, YWc, XZc, XWc, Bc,
     hXc_self, hYc_self] using hgoal
 
 /-- The lowered Levi-Civita curvature tensor is skew-adjoint in the output
@@ -575,5 +576,4 @@ theorem oneFormThirdCovDerivCommAt_of_leviCivita
     halpha hnabla2
 
 end LeviCivita
-end Realized
 end RicciFlower

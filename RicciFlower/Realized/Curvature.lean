@@ -1,16 +1,14 @@
-import RicciFlower.Realized.MetricFamily
-import Mathlib.Algebra.BigOperators.Group.Finset.Basic
-import Mathlib.Geometry.Manifold.VectorField.LieBracket
+import RicciFlower.Curvature.Basic
 
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
 /-!
-# Static curvature operators and coordinate traces
+# Realized curvature wrappers
 
-This file contains only static, one-manifold curvature-facing interfaces.
-Parameterized metric data and flow hypotheses belong in later modules.
+This file keeps only realization-facing wrappers and predicates.  The intrinsic
+curvature operator and trace formulas live in `RicciFlower.Curvature.Basic`.
 -/
 
 noncomputable section
@@ -26,63 +24,43 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- A static tangent field on one manifold. -/
-abbrev TangentField :=
-  (x : M) -> TangentSpace I x
+/-- Wrapper for the non-realized tangent-field alias. -/
+abbrev TangentField := RicciFlower.Curvature.TangentField (I := I) (M := M)
 
-/-- A static covariant two-tensor field, represented by pointwise evaluation. -/
-abbrev TwoTensorField :=
-  (x : M) -> TangentSpace I x -> TangentSpace I x -> Real
+/-- Wrapper for the non-realized two-tensor field alias. -/
+abbrev TwoTensorField := RicciFlower.Curvature.TwoTensorField (I := I) (M := M)
 
-/-- A static covariant four-tensor field, represented by pointwise evaluation. -/
-abbrev FourTensorField :=
-  (x : M) -> TangentSpace I x -> TangentSpace I x -> TangentSpace I x ->
-    TangentSpace I x -> Real
+/-- Wrapper for the non-realized four-tensor field alias. -/
+abbrev FourTensorField := RicciFlower.Curvature.FourTensorField (I := I) (M := M)
 
-/-- Static inverse-metric components in a chosen frame. -/
-abbrev InverseMetricComponents (M : Type*) (Idx : Type*) :=
-  M -> Idx -> Idx -> Real
+/-- Wrapper for static inverse metric components. -/
+abbrev InverseMetricComponents := RicciFlower.Curvature.InverseMetricComponents
 
-/-- The curvature operator of a realized covariant derivative, evaluated on static
-tangent fields.
-
-This is intentionally still operator-level.  The tensor-section construction
-from this operator is a separate tensoriality theorem frontier. -/
-def connectionRiemannCurvatureField
+/-- Wrapper for the non-realized curvature operator. -/
+abbrev connectionRiemannCurvatureField
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X Y Z : TangentField (I := I) (M := M)) :
     TangentField (I := I) (M := M) :=
-  fun x =>
-    (cov (fun y => (cov Z y) (Y y)) x) (X x) -
-      (cov (fun y => (cov Z y) (X y)) x) (Y x) -
-        (cov Z x) (VectorField.mlieBracket I X Y x)
+  RicciFlower.Curvature.connectionRiemannCurvatureField (I := I) cov X Y Z
+
+/-- Wrapper for inverse-metric component compatibility in a frame. -/
+abbrev InverseMetricComponentsInFrame {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (g : SmoothRiemannianMetric I M)
+    (gInv : InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x) : Prop :=
+  RicciFlower.Curvature.InverseMetricComponentsInFrame (I := I) g gInv frame
 
 section MetricTrace
 
 variable {Idx : Type*} [Fintype Idx]
 
-/-- The supplied inverse-metric components invert the metric Gram matrix of a
-static frame at every point.  This is a frame/basis hypothesis, not a theorem
-that an arbitrary family of vectors is a frame. -/
-def InverseMetricComponentsInFrame [DecidableEq Idx]
-    (g : SmoothRiemannianMetric I M)
-    (gInv : InverseMetricComponents M Idx)
-    (frame : Idx -> (x : M) -> TangentSpace I x) : Prop :=
-  forall x i j,
-    (∑ k : Idx, gInv x i k * g.inner x (frame k x) (frame j x)) =
-        (if i = j then 1 else 0) ∧
-      (∑ k : Idx, g.inner x (frame i x) (frame k x) * gInv x k j) =
-        (if i = j then 1 else 0)
-
-/-- Ricci curvature as the metric trace of lowered Riemann curvature in a static
-frame, with slot convention `Ric_ij = g^{kl} R_{k i j l}`. -/
-def ricciFromRiemann04TraceInFrame
+/-- Wrapper for the non-realized lowered-Riemann trace. -/
+abbrev ricciFromRiemann04TraceInFrame
     (Riemann04 : FourTensorField (I := I) (M := M))
     (gInv : InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x) :
     TwoTensorField (I := I) (M := M) :=
-  fun x X Y =>
-    ∑ k : Idx, ∑ l : Idx, gInv x k l * Riemann04 x (frame k x) X Y (frame l x)
+  RicciFlower.Curvature.ricciFromRiemann04TraceInFrame (I := I) Riemann04 gInv frame
 
 @[simp]
 theorem ricciFromRiemann04TraceInFrame_apply
@@ -93,7 +71,8 @@ theorem ricciFromRiemann04TraceInFrame_apply
     ricciFromRiemann04TraceInFrame (I := I) Riemann04 gInv frame x X Y =
       ∑ k : Idx, ∑ l : Idx,
         gInv x k l * Riemann04 x (frame k x) X Y (frame l x) :=
-  rfl
+  RicciFlower.Curvature.ricciFromRiemann04TraceInFrame_apply (I := I)
+    Riemann04 gInv frame x X Y
 
 /-- A pointwise Ricci field realizes the frame trace of a lowered Riemann field. -/
 def RicciRealizesRm04TraceInFrame
@@ -117,12 +96,13 @@ theorem ricci_comp_eq_trace
           (frame l x) := by
   simpa [ricciFromRiemann04TraceInFrame] using hRic x (frame i x) (frame j x)
 
-/-- Scalar curvature as the metric trace of Ricci in a static frame. -/
-def scalarFromRicciTraceInFrame
+
+/-- Wrapper for the non-realized Ricci trace. -/
+abbrev scalarFromRicciTraceInFrame
     (Ric : TwoTensorField (I := I) (M := M))
     (gInv : InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x) : M -> Real :=
-  fun x => ∑ i : Idx, ∑ j : Idx, gInv x i j * Ric x (frame i x) (frame j x)
+  RicciFlower.Curvature.scalarFromRicciTraceInFrame (I := I) Ric gInv frame
 
 @[simp]
 theorem scalarFromRicciTraceInFrame_apply
@@ -131,7 +111,7 @@ theorem scalarFromRicciTraceInFrame_apply
     (frame : Idx -> (x : M) -> TangentSpace I x) (x : M) :
     scalarFromRicciTraceInFrame (I := I) Ric gInv frame x =
       ∑ i : Idx, ∑ j : Idx, gInv x i j * Ric x (frame i x) (frame j x) :=
-  rfl
+  RicciFlower.Curvature.scalarFromRicciTraceInFrame_apply (I := I) Ric gInv frame x
 
 /-- A scalar curvature function realizes the frame trace of Ricci. -/
 def ScalarRealizesRicciTraceInFrame

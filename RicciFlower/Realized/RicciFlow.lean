@@ -1,5 +1,5 @@
-import RicciFlower.Realized.Connection
-import RicciFlower.Realized.LeviCivita.Basic
+import RicciFlower.Connection.Smoothness
+import RicciFlower.LeviCivita.Basic
 import Mathlib.Analysis.Calculus.Deriv.Basic
 
 set_option autoImplicit false
@@ -108,8 +108,8 @@ structure IsRealizedRicciFlowSolutionOn
     {D : RealTimeInterval}
     (S : RealizedRicciFlowCandidateOn (I := I) (M := M) D) : Prop where
   smoothMetric : MetricFamilySmoothOn (I := I) (M := M) D S.family
-  smoothConnection : ConnectionFamilySmoothOn (I := I) (M := M) S.family
-  leviCivita : LeviCivita.IsLeviCivitaFamilyOn (I := I) S.family
+  smoothConnection : RicciFlower.Connection.ConnectionFamilySmoothOn (I := I) (M := M) S.family
+  leviCivita : RicciFlower.LeviCivita.IsLeviCivitaFamilyOn (I := I) S.family
   equation : MetricVariationEquationOn (I := I) S.family S.ricci
 
 /-- The interval metric-evolution theorem extracted from the equation

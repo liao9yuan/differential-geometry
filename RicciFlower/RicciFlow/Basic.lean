@@ -98,8 +98,8 @@ structure IsSolutionOn
     {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) : Prop where
   smoothMetric : Realized.MetricFamilySmoothOn (I := I) (M := M) D S.family
-  smoothConnection : Realized.ConnectionFamilySmoothOn (I := I) (M := M) S.family
-  leviCivita : Realized.LeviCivita.IsLeviCivitaFamilyOn (I := I) S.family
+  smoothConnection : RicciFlower.Connection.ConnectionFamilySmoothOn (I := I) (M := M) S.family
+  leviCivita : RicciFlower.LeviCivita.IsLeviCivitaFamilyOn (I := I) S.family
   equation : MetricVariationEquationOn (I := I) S
 
 /-- Convert the folder-level solution predicate to the older realized

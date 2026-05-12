@@ -1,24 +1,24 @@
 import RicciFlower.Realized.MetricFamily
-import RicciFlower.Realized.Connection.RicciIdentity
 
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
 /-!
-# RicciFlower Realized Connection Smoothness
+# RicciFlower Connection Smoothness
 
 Connection smoothness is exposed as a predicate around realized metric-family
 data. Metric compatibility, torsion freedom, and Levi-Civita predicates live in
-`RicciFlower.Realized.LeviCivita.Basic`; the canonical metric-derived
-connection is constructed in `RicciFlower.Realized.LeviCivita.Koszul`.
+`RicciFlower.LeviCivita.Basic`; the canonical metric-derived
+connection is constructed in `RicciFlower.LeviCivita.Koszul`.
 -/
 
 namespace RicciFlower
-namespace Realized
+namespace Connection
 
 open Bundle
 open CovariantDerivative
+open Realized
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -62,5 +62,5 @@ theorem connection_smooth_at_of_connectionFamilySmoothOn
 
 end Smoothness
 
-end Realized
+end Connection
 end RicciFlower
