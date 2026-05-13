@@ -513,7 +513,7 @@ This is `ContMDiff I 𝓘(ℝ,ℝ) ∞` with `tsupport(f̃) ⊆ tsupport(ρα) �
 
 /-- The smooth manifold representative of `fHLeibnizResidualLp g α (smoothToH1Compl v)`:
 the explicit pointwise function `-2 g(∇ρα, ∇v) - Δρα · v`. -/
-private noncomputable def fHLeibnizResidualSmoothRep
+noncomputable def fHLeibnizResidualSmoothRep
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) : M → ℝ :=
   fun x : M =>
     -((2 : ℝ) * g.inner x (gradFun (I := I) g
@@ -522,7 +522,7 @@ private noncomputable def fHLeibnizResidualSmoothRep
     (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x * v.toFun x
 
 /-- `fHLeibnizResidualSmoothRep g α v` is smooth on `M`. -/
-private lemma fHLeibnizResidualSmoothRep_contMDiff
+lemma fHLeibnizResidualSmoothRep_contMDiff
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (fHLeibnizResidualSmoothRep (I := I) (M := M) g α v) := by
   classical
@@ -560,7 +560,7 @@ private lemma fHLeibnizResidualSmoothRep_contMDiff
 
 /-- The smooth representative vanishes outside `tsupport(ρα)`, hence its
 `tsupport` is contained in `tsupport(ρα) ⊆ chart α source`. -/
-private lemma fHLeibnizResidualSmoothRep_tsupport_subset
+lemma fHLeibnizResidualSmoothRep_tsupport_subset
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     tsupport (fHLeibnizResidualSmoothRep (I := I) (M := M) g α v) ⊆
       (chartAt H α).source := by

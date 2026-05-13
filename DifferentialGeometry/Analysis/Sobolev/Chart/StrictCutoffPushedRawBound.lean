@@ -828,7 +828,7 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
 
 /-- A finite-`Finset` sum of `MemWkp k p` functions on an open set is also
 `MemWkp k p`. -/
-private theorem memWkp_finset_sum
+theorem memWkp_finset_sum
     [NeZero (Module.finrank ℝ E)]
     (k : ℕ) {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     {Ω : Set EuclN} (hΩ : IsOpen Ω)
@@ -864,7 +864,7 @@ private theorem memWkp_finset_sum
 
 /-- Triangle inequality for `wkpNorm` over a finite indexed sum on the chart-α
 target. -/
-private theorem wkpNorm_finset_sum_le_chartTarget
+theorem wkpNorm_finset_sum_le_chartTarget
     [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (α : M) (k : ℕ) {p : ℝ≥0∞} (hp_one : 1 ≤ p)
