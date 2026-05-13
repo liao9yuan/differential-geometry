@@ -197,7 +197,7 @@ noncomputable def smoothFChartResidual
   DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fChartResidual
     (I := I) (M := M) g α (smoothToH1Compl (I := I) (M := M) g v)
 
-private lemma smoothFChartResidual_memW1p
+lemma smoothFChartResidual_memW1p
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
       (smoothFChartResidual (I := I) (M := M) g α v)
@@ -210,7 +210,7 @@ private lemma smoothFChartResidual_memW1p
 sequence of chart-pulled residuals `smoothFChartResidual g α (v n)`
 converges to `fChartResidual g α u_h` in `Lp 2 (chartPulledWeightedMeasure
 g α .restrict chartTargetEuclid α)`. -/
-private lemma smoothFChartResidual_tendsto_fChartResidual_lp_weighted
+lemma smoothFChartResidual_tendsto_fChartResidual_lp_weighted
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
     (v : ℕ → SmoothScalar g)
