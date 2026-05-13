@@ -60,7 +60,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 /-- For each chart point `α : M` on a closed manifold there exists a smooth
 manifold-side cutoff `b_α : M → ℝ` taking values in `[0,1]`, equal to `1` on
 `tsupport ρ_α`, and with `tsupport b_α ⊆ (chartAt H α).source`. -/
-private lemma exists_chart_cutoff_M
+lemma exists_chart_cutoff_M
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] (α : M) :
     ∃ b : M → ℝ, ContMDiff I 𝓘(ℝ, ℝ) ∞ b ∧
       Set.range b ⊆ Set.Icc (0 : ℝ) 1 ∧
@@ -86,7 +86,7 @@ pull-back extends to a globally smooth, compactly supported function on
 /-- The smooth global extension of `f : M → ℝ` to `EuclN`, equal to
 `f ((extChartAt I α).symm (toEuclidean.symm y))` on the chart-target image and
 `0` outside. -/
-private def smoothExtensionScalar (α : M) (f : M → ℝ) : EuclN → ℝ := by
+def smoothExtensionScalar (α : M) (f : M → ℝ) : EuclN → ℝ := by
   classical
   exact fun y =>
     if (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target then
@@ -226,7 +226,7 @@ private lemma image_extChartAt_tsupport_subset_chartTargetEuclid_local
 
 /-- `smoothExtensionScalar α f` is smooth on all of `EuclN` whenever `f` is
 smooth on `M` with compact support contained in `(chartAt H α).source`. -/
-private lemma contDiff_smoothExtensionScalar
+lemma contDiff_smoothExtensionScalar
     [CompactSpace M] [I.Boundaryless]
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
@@ -310,7 +310,7 @@ private lemma iteratedFDeriv_uniformBound_of_compactSupport
 
 /-- The iterated derivatives of `smoothExtensionScalar α f` are uniformly
 bounded up to any order `k`. -/
-private lemma smoothExtensionScalar_iteratedFDeriv_bound
+lemma smoothExtensionScalar_iteratedFDeriv_bound
     [CompactSpace M] [I.Boundaryless]
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     (hf_supp : tsupport f ⊆ (chartAt H α).source) (k : ℕ) :
@@ -329,7 +329,7 @@ private lemma smoothExtensionScalar_iteratedFDeriv_bound
 `tsupport ρ_α`, the chart-pushed product
 `chartPushed ρ α (φ · u)` equals `smoothExtensionScalar α (b_α · φ) · chartPushed ρ α u`
 pointwise on `chartTargetEuclid α`. -/
-private lemma chartPushed_mul_eq_smoothExtension_mul_chartPushed
+lemma chartPushed_mul_eq_smoothExtension_mul_chartPushed
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (α : M) {b φ u : M → ℝ}
     (hb_one : ∀ x ∈ tsupport ((DifferentialGeometry.Integral.Measure.chartAtlasPOU

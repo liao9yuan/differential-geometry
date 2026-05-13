@@ -341,6 +341,7 @@ import DifferentialGeometry.Analysis.Sobolev.WithBoundary.MorreyManifold
 import DifferentialGeometry.Analysis.Sobolev.Manifold.SobolevAlgebra
 import DifferentialGeometry.Analysis.Sobolev.WithBoundary.SobolevAlgebra
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothMul
+import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothMulQuant
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.Lp
 import DifferentialGeometry.Analysis.Sobolev.WithBoundary.IntrinsicLp
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceFull
