@@ -1,5 +1,37 @@
 import DifferentialGeometry.VectorBundle.VectorField
 
+-- Tensor-first realized foundation port
+import DifferentialGeometry.Analysis.Time
+import DifferentialGeometry.VectorBundle.TensorBundles
+import DifferentialGeometry.Tensor.RSTensor.CoordinateBasis
+import DifferentialGeometry.Tensor.RSTensor.Components
+import DifferentialGeometry.Tensor.RSTensor.CotangentRiemannian
+import DifferentialGeometry.Tensor.RSTensor.Tensor0SMetric
+import DifferentialGeometry.Tensor.RSTensor.TensorRSMetric
+import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors
+import DifferentialGeometry.Coordinates.Basic
+import DifferentialGeometry.Coordinates.Christoffel
+import DifferentialGeometry.Coordinates.CoordinateFrame
+import DifferentialGeometry.Coordinates.Tensor
+import DifferentialGeometry.Coordinates.NablaComponents
+import DifferentialGeometry.Realized.TimeInterval
+import DifferentialGeometry.Realized.MetricFamily
+import DifferentialGeometry.Realized.Connection
+import DifferentialGeometry.Realized.LeviCivita.Basic
+import DifferentialGeometry.Realized.LeviCivita.MetricCompatibility
+import DifferentialGeometry.Realized.LeviCivita.Torsion
+import DifferentialGeometry.Realized.LeviCivita.Uniqueness
+import DifferentialGeometry.Realized.Operators
+import DifferentialGeometry.Realized.Curvature
+import DifferentialGeometry.Realized.CurvatureTensor
+import DifferentialGeometry.Realized.RoughLaplacian
+import DifferentialGeometry.Realized.TensorRicciIdentity
+import DifferentialGeometry.Realized.CurvatureComponents
+import DifferentialGeometry.Realized.CurvatureProducers
+import DifferentialGeometry.Realized.ScalarBochner
+import DifferentialGeometry.Realized.Bochner
+import DifferentialGeometry.Realized.Bianchi
+
 -- Synthetic Algebra
 import DifferentialGeometry.Synthetic.Algebra.VectorFieldAlgebra
 import DifferentialGeometry.Synthetic.Algebra.TensorAlgebra
