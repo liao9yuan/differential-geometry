@@ -75,9 +75,9 @@ theorem tensorInnerPointwise_0s_add_left
       refine Finset.sum_congr rfl ?_
       intro j _
       have hcurry :
-          (S₁ + S₂).curryLeft ((Module.finBasis ℝ E) i) =
-            S₁.curryLeft ((Module.finBasis ℝ E) i) +
-              S₂.curryLeft ((Module.finBasis ℝ E) i) := by
+          (S₁ + S₂).curryLeft ((chartModelBasis E) i) =
+            S₁.curryLeft ((chartModelBasis E) i) +
+              S₂.curryLeft ((chartModelBasis E) i) := by
         ext m
         simp [ContinuousMultilinearMap.curryLeft_apply,
               ContinuousMultilinearMap.add_apply]
@@ -107,9 +107,9 @@ theorem tensorInnerPointwise_0s_add_right
       refine Finset.sum_congr rfl ?_
       intro j _
       have hcurry :
-          (T₁ + T₂).curryLeft ((Module.finBasis ℝ E) j) =
-            T₁.curryLeft ((Module.finBasis ℝ E) j) +
-              T₂.curryLeft ((Module.finBasis ℝ E) j) := by
+          (T₁ + T₂).curryLeft ((chartModelBasis E) j) =
+            T₁.curryLeft ((chartModelBasis E) j) +
+              T₂.curryLeft ((chartModelBasis E) j) := by
         ext m
         simp [ContinuousMultilinearMap.curryLeft_apply,
               ContinuousMultilinearMap.add_apply]
@@ -137,8 +137,8 @@ theorem tensorInnerPointwise_0s_smul_left
       refine Finset.sum_congr rfl ?_
       intro j _
       have hcurry :
-          (c • S).curryLeft ((Module.finBasis ℝ E) i) =
-            c • S.curryLeft ((Module.finBasis ℝ E) i) := by
+          (c • S).curryLeft ((chartModelBasis E) i) =
+            c • S.curryLeft ((chartModelBasis E) i) := by
         ext m
         simp [ContinuousMultilinearMap.curryLeft_apply,
               ContinuousMultilinearMap.smul_apply]
@@ -166,8 +166,8 @@ theorem tensorInnerPointwise_0s_smul_right
       refine Finset.sum_congr rfl ?_
       intro j _
       have hcurry :
-          (c • T).curryLeft ((Module.finBasis ℝ E) j) =
-            c • T.curryLeft ((Module.finBasis ℝ E) j) := by
+          (c • T).curryLeft ((chartModelBasis E) j) =
+            c • T.curryLeft ((chartModelBasis E) j) := by
         ext m
         simp [ContinuousMultilinearMap.curryLeft_apply,
               ContinuousMultilinearMap.smul_apply]
@@ -366,7 +366,7 @@ theorem tensorInnerPointwise_0s_nonneg
       have hGinv_herm : Ginv.IsHermitian := hGinv_psd.isHermitian
       -- Family `(S_i)ᵢ := (S.curryLeft eᵢ)ᵢ`.
       set Sfam : Fin n → ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ :=
-        fun i => S.curryLeft ((Module.finBasis ℝ E) i) with hSfam_def
+        fun i => S.curryLeft ((chartModelBasis E) i) with hSfam_def
       -- Apply the spectral theorem to `Ginv`.
       have hspec := hGinv_herm.spectral_theorem
       set U : Matrix (Fin n) (Fin n) ℝ :=
@@ -523,7 +523,7 @@ theorem tensorInnerPointwise_0s_eq_zero_iff
       have hGinv_herm : Ginv.IsHermitian :=
         gramMatrixAt_inv_isHermitian (I := I) (M := M) g x
       set Sfam : Fin n → ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ :=
-        fun i => S.curryLeft ((Module.finBasis ℝ E) i) with hSfam_def
+        fun i => S.curryLeft ((chartModelBasis E) i) with hSfam_def
       have hspec := hGinv_herm.spectral_theorem
       set U : Matrix (Fin n) (Fin n) ℝ :=
         (hGinv_herm.eigenvectorUnitary : Matrix (Fin n) (Fin n) ℝ) with hU_def
@@ -743,14 +743,14 @@ theorem tensorInnerPointwise_0s_eq_zero_iff
           refine ContinuousLinearMap.ext ?_
           intro v
           have hexp : v = ∑ i : Fin n,
-              ((Module.finBasis ℝ E).repr v i) • ((Module.finBasis ℝ E) i) :=
-            ((Module.finBasis ℝ E).sum_repr v).symm
+              ((chartModelBasis E).repr v i) • ((chartModelBasis E) i) :=
+            ((chartModelBasis E).sum_repr v).symm
           rw [hexp]
           rw [map_sum]
           refine Finset.sum_eq_zero ?_
           intro i _
           rw [ContinuousLinearMap.map_smul]
-          have : S.curryLeft ((Module.finBasis ℝ E) i) = 0 := by
+          have : S.curryLeft ((chartModelBasis E) i) = 0 := by
             have := hSfam_zero i
             rwa [hSfam_def] at this
           rw [this]

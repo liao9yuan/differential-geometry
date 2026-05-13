@@ -714,7 +714,7 @@ reductions as a single packaged record. -/
 This section establishes a pure linear-algebra identity: for any continuous
 bilinear form `H : T_x M →L T_x M →L ℝ` and any `g_x`-orthonormal basis
 `(B_i)` of `T_x M`, the basis-naive sum `∑ i, H (B i) (B i)` equals the
-metric trace of `H` against the model basis `(e_k) = Module.finBasis ℝ E`:
+metric trace of `H` against the model basis `(e_k) = chartModelBasis E`:
 $$
   \sum_i H(B_i, B_i) = \sum_{k l} G^{kl}(x, x) \cdot H(e_k, e_l),
 $$
@@ -732,31 +732,31 @@ section OrthonormalFrameTrace
 variable (g : SmoothRiemannianMetric I M) (x : M)
 
 /-- The change-of-basis matrix from a frame `B : Fin n → T_x M` to the model
-basis `(Module.finBasis ℝ E)`. The `(i, k)`-th entry is the `k`-th coordinate
+basis `(chartModelBasis E)`. The `(i, k)`-th entry is the `k`-th coordinate
 of `B_i` in the model basis. -/
 private noncomputable def coBchange
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x) :
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
-  Matrix.of fun i k => (Module.finBasis ℝ E).repr (B i) k
+  Matrix.of fun i k => (chartModelBasis E).repr (B i) k
 
 @[simp] private lemma coBchange_apply
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (i k : Fin (Module.finrank ℝ E)) :
     coBchange (I := I) (x := x) B i k =
-      (Module.finBasis ℝ E).repr (B i) k := rfl
+      (chartModelBasis E).repr (B i) k := rfl
 
 /-- The Gram matrix of the model basis at `x`, using `g.inner x`. By
 definition, this equals `chartGramMatrix g x x` (since `chartBasisVecFiber x i x =
-(Module.finBasis ℝ E) i`). -/
+(chartModelBasis E) i`). -/
 private noncomputable def modelGramMatrix :
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   Matrix.of fun k l =>
-    g.inner x ((Module.finBasis ℝ E) k) ((Module.finBasis ℝ E) l)
+    g.inner x ((chartModelBasis E) k) ((chartModelBasis E) l)
 
 @[simp] private lemma modelGramMatrix_apply
     (k l : Fin (Module.finrank ℝ E)) :
     modelGramMatrix (I := I) g x k l =
-      g.inner x ((Module.finBasis ℝ E) k) ((Module.finBasis ℝ E) l) := rfl
+      g.inner x ((chartModelBasis E) k) ((chartModelBasis E) l) := rfl
 
 /-- The model Gram matrix at `x` agrees with `chartGramMatrix g x x`, since the
 chart-basis fibre vectors at the chart base point equal the model basis. -/
@@ -769,16 +769,16 @@ private lemma modelGramMatrix_eq_chartGramMatrix :
   rw [chartBasisVecFiber_self (I := I) x l]
 
 /-- Each tangent vector `B_i` decomposes against the model basis as a finite
-linear combination of `(Module.finBasis ℝ E) k` with coefficients
-`a_{ik} = (Module.finBasis ℝ E).repr (B_i) k`. -/
+linear combination of `(chartModelBasis E) k` with coefficients
+`a_{ik} = (chartModelBasis E).repr (B_i) k`. -/
 private lemma decompose_in_modelBasis
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (i : Fin (Module.finrank ℝ E)) :
     B i = ∑ k : Fin (Module.finrank ℝ E),
       coBchange (I := I) (x := x) B i k •
-        ((Module.finBasis ℝ E) k : TangentSpace I x) := by
+        ((chartModelBasis E) k : TangentSpace I x) := by
   classical
-  have h := (Module.finBasis ℝ E).sum_repr (B i)
+  have h := (chartModelBasis E).sum_repr (B i)
   -- `Basis.sum_repr` gives `∑ k, b.repr (Bᵢ) k • b k = Bᵢ`.
   exact h.symm
 
@@ -791,24 +791,24 @@ private lemma bilin_expand_modelBasis
       ∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
         coBchange (I := I) (x := x) B i k *
           coBchange (I := I) (x := x) B j l *
-            Hb ((Module.finBasis ℝ E) k) ((Module.finBasis ℝ E) l) := by
+            Hb ((chartModelBasis E) k) ((chartModelBasis E) l) := by
   classical
   -- Direct approach: expand using bilinearity of Hb.
   -- Step 1: Hb (B i) = ∑ k, a_ik • Hb (e_k), as an equation in (T_x M →L ℝ).
   have hHb_first : Hb (B i) =
       ∑ k : Fin (Module.finrank ℝ E),
         coBchange (I := I) (x := x) B i k •
-          Hb ((Module.finBasis ℝ E) k) := by
+          Hb ((chartModelBasis E) k) := by
     have hi := decompose_in_modelBasis (I := I) (x := x) B i
     rw [show Hb (B i) = Hb (∑ k : Fin (Module.finrank ℝ E),
             coBchange (I := I) (x := x) B i k •
-              ((Module.finBasis ℝ E) k : TangentSpace I x))
+              ((chartModelBasis E) k : TangentSpace I x))
           from congrArg Hb hi]
     rw [map_sum]
     refine Finset.sum_congr rfl ?_
     intro k _
     exact Hb.map_smul (coBchange (I := I) (x := x) B i k)
-      ((Module.finBasis ℝ E) k : TangentSpace I x)
+      ((chartModelBasis E) k : TangentSpace I x)
   rw [hHb_first]
   -- Step 2: Apply `(∑ k, a_ik • Hb e_k)` to `B j` ⇒ ∑ k, a_ik • Hb e_k (B j).
   rw [ContinuousLinearMap.sum_apply]
@@ -817,31 +817,31 @@ private lemma bilin_expand_modelBasis
   -- Each summand: (a_ik • Hb e_k) (B j) = a_ik * Hb e_k (B j).
   rw [ContinuousLinearMap.smul_apply, smul_eq_mul]
   -- Step 3: Hb e_k (B j) = Hb e_k (∑ l, a_jl • e_l) = ∑ l, a_jl * Hb e_k e_l.
-  have hHb_second : Hb ((Module.finBasis ℝ E) k) (B j) =
+  have hHb_second : Hb ((chartModelBasis E) k) (B j) =
       ∑ l : Fin (Module.finrank ℝ E),
         coBchange (I := I) (x := x) B j l *
-          Hb ((Module.finBasis ℝ E) k) ((Module.finBasis ℝ E) l) := by
+          Hb ((chartModelBasis E) k) ((chartModelBasis E) l) := by
     have hj := decompose_in_modelBasis (I := I) (x := x) B j
-    rw [show Hb ((Module.finBasis ℝ E) k) (B j) =
-          Hb ((Module.finBasis ℝ E) k)
+    rw [show Hb ((chartModelBasis E) k) (B j) =
+          Hb ((chartModelBasis E) k)
             (∑ l : Fin (Module.finrank ℝ E),
               coBchange (I := I) (x := x) B j l •
-                ((Module.finBasis ℝ E) l : TangentSpace I x))
-        from congrArg (Hb ((Module.finBasis ℝ E) k)) hj]
+                ((chartModelBasis E) l : TangentSpace I x))
+        from congrArg (Hb ((chartModelBasis E) k)) hj]
     rw [map_sum]
     refine Finset.sum_congr rfl ?_
     intro l _
     -- Goal: (Hb e_k) (a_jl • e_l) = a_jl * (Hb e_k) e_l.
     -- Apply CLM map_smul, then `smul_eq_mul`.
-    have hsmul : Hb ((Module.finBasis ℝ E) k)
+    have hsmul : Hb ((chartModelBasis E) k)
         (coBchange (I := I) (x := x) B j l •
-          ((Module.finBasis ℝ E) l : TangentSpace I x)) =
+          ((chartModelBasis E) l : TangentSpace I x)) =
         coBchange (I := I) (x := x) B j l •
-          Hb ((Module.finBasis ℝ E) k)
-            ((Module.finBasis ℝ E) l : TangentSpace I x) :=
-      (Hb ((Module.finBasis ℝ E) k)).map_smul
+          Hb ((chartModelBasis E) k)
+            ((chartModelBasis E) l : TangentSpace I x) :=
+      (Hb ((chartModelBasis E) k)).map_smul
         (coBchange (I := I) (x := x) B j l)
-        ((Module.finBasis ℝ E) l : TangentSpace I x)
+        ((chartModelBasis E) l : TangentSpace I x)
     rw [hsmul, smul_eq_mul]
   rw [hHb_second]
   -- Final: a_ik * (∑ l, a_jl * Hb e_k e_l) = ∑ l, a_ik * a_jl * Hb e_k e_l.
@@ -870,7 +870,7 @@ private lemma gram_expand_modelBasis
   rw [modelGramMatrix_apply]
 
 /-- **Matrix form of orthonormality.** If `(B_i)` is `g_x`-orthonormal, then
-the change-of-basis matrix `A_{ik} := (Module.finBasis ℝ E).repr (B_i) k`
+the change-of-basis matrix `A_{ik} := (chartModelBasis E).repr (B_i) k`
 satisfies `A G A^T = I`, where `G = modelGramMatrix g x`. -/
 private lemma orthonormal_matrix_form
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
@@ -937,7 +937,7 @@ private lemma orthonormal_matrix_form
   ring
 
 /-- **Inverse-matrix consequence of orthonormality.** If `(B_i)` is `g_x`-orthonormal,
-then `Aᵀ * A = G⁻¹`, where `A_{ik} = (Module.finBasis ℝ E).repr (B_i) k` and
+then `Aᵀ * A = G⁻¹`, where `A_{ik} = (chartModelBasis E).repr (B_i) k` and
 `G = modelGramMatrix g x`. -/
 private lemma orthonormal_matrix_inverse
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
@@ -1023,7 +1023,7 @@ theorem orthonormal_basis_bilin_trace
     ∑ i : Fin (Module.finrank ℝ E), Hb (B i) (B i) =
       ∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
         chartInvGramMatrix (I := I) g x x k l *
-          Hb ((Module.finBasis ℝ E) k) ((Module.finBasis ℝ E) l) := by
+          Hb ((chartModelBasis E) k) ((chartModelBasis E) l) := by
   classical
   -- Step 1: expand each `Hb (B i) (B i)` as a double sum.
   have h_expand : ∀ i : Fin (Module.finrank ℝ E),
@@ -1031,7 +1031,7 @@ theorem orthonormal_basis_bilin_trace
         ∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
           coBchange (I := I) (x := x) B i k *
             coBchange (I := I) (x := x) B i l *
-              Hb ((Module.finBasis ℝ E) k) ((Module.finBasis ℝ E) l) :=
+              Hb ((chartModelBasis E) k) ((chartModelBasis E) l) :=
     fun i => bilin_expand_modelBasis (I := I) (x := x) Hb B i i
   -- Step 2: sum over i, swap the order of summation.
   rw [show ∑ i : Fin (Module.finrank ℝ E), Hb (B i) (B i) =
@@ -1039,7 +1039,7 @@ theorem orthonormal_basis_bilin_trace
         ∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
           coBchange (I := I) (x := x) B i k *
             coBchange (I := I) (x := x) B i l *
-              Hb ((Module.finBasis ℝ E) k) ((Module.finBasis ℝ E) l) from
+              Hb ((chartModelBasis E) k) ((chartModelBasis E) l) from
     Finset.sum_congr rfl (fun i _ => h_expand i)]
   -- Swap ∑ i with ∑ k ∑ l.
   rw [Finset.sum_comm]
@@ -1052,11 +1052,11 @@ theorem orthonormal_basis_bilin_trace
   rw [show (∑ i : Fin (Module.finrank ℝ E),
         coBchange (I := I) (x := x) B i k *
           coBchange (I := I) (x := x) B i l *
-            Hb ((Module.finBasis ℝ E) k) ((Module.finBasis ℝ E) l)) =
+            Hb ((chartModelBasis E) k) ((chartModelBasis E) l)) =
       (∑ i : Fin (Module.finrank ℝ E),
         coBchange (I := I) (x := x) B i k *
           coBchange (I := I) (x := x) B i l) *
-        Hb ((Module.finBasis ℝ E) k) ((Module.finBasis ℝ E) l) from by
+        Hb ((chartModelBasis E) k) ((chartModelBasis E) l) from by
     rw [Finset.sum_mul]]
   rw [sum_coBchange_eq_invGram (I := I) g x B hB k l]
 
@@ -1100,8 +1100,8 @@ theorem sum_abstractHessian_orthonormal_eq_laplacian [I.Boundaryless]
     chartHessianMatrixIdentity_holds (I := I) g hf x
   rw [show (∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
         chartInvGramMatrix (I := I) g x x k l *
-          abstractHessian (I := I) g f x ((Module.finBasis ℝ E) k)
-            ((Module.finBasis ℝ E) l)) =
+          abstractHessian (I := I) g f x ((chartModelBasis E) k)
+            ((chartModelBasis E) l)) =
       ∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
         chartInvGramMatrix (I := I) g x x k l *
           chartHessianTensor (I := I) g x f k l x from by
@@ -1604,7 +1604,7 @@ proof in the following helper lemmas:
   ℝ E) k`. This is the trace formula in the model basis weighted by the
   inverse Gram matrix.
 
-* **`finBasis_repr_eq_invGram_inner_sum`** — for `e = Module.finBasis ℝ E`
+* **`finBasis_repr_eq_invGram_inner_sum`** — for `e = chartModelBasis E`
   and `X ∈ T_x M`, `e.repr X i = ∑_l G^{il} g(X, e_l)`. The dual of the model
   basis under `g_x` factors through the inverse Gram matrix.
 
@@ -1643,7 +1643,7 @@ For a linear endomorphism `T : T_x M → T_x M`, the basis-independent
 $$
   \mathrm{tr}\,T = \sum_{k l} G^{k l}(x, x)\, g_x\bigl(T(e_k),\, e_l\bigr),
 $$
-where `G^{kl} = chartInvGramMatrix g x x k l` and `(e_k) = Module.finBasis ℝ E`
+where `G^{kl} = chartInvGramMatrix g x x k l` and `(e_k) = chartModelBasis E`
 is the model-space basis (also a basis of `T_x M = E`).
 
 The proof factors through the basis-coordinate trace formula
@@ -1666,7 +1666,7 @@ section TraceIdentity
 variable (g : SmoothRiemannianMetric I M) (x : M)
 
 /-- **Decomposition of the model basis representation against the metric.**
-For `e = Module.finBasis ℝ E` and `X ∈ T_x M`:
+For `e = chartModelBasis E` and `X ∈ T_x M`:
 $$
   (e.\mathrm{repr}\,X)_k = \sum_l G^{k l}(x, x)\, g_x(X,\, e_l),
 $$
@@ -1675,56 +1675,56 @@ expanding `X` against the model basis, evaluating `g(X, e_l)` as a linear
 combination of Gram entries, and inverting the Gram matrix. -/
 private lemma finBasis_repr_eq_invGram_inner_sum
     (X : TangentSpace I x) (k : Fin (Module.finrank ℝ E)) :
-    (Module.finBasis ℝ E).repr X k =
+    (chartModelBasis E).repr X k =
       ∑ l : Fin (Module.finrank ℝ E),
         chartInvGramMatrix (I := I) g x x k l *
-          g.inner x X ((Module.finBasis ℝ E) l) := by
+          g.inner x X ((chartModelBasis E) l) := by
   classical
   -- Expand X in the model basis: X = ∑ k, (e.repr X) k • e_k.
   have hX_decomp : X = ∑ p : Fin (Module.finrank ℝ E),
-      (Module.finBasis ℝ E).repr X p •
-        ((Module.finBasis ℝ E) p : TangentSpace I x) :=
-    ((Module.finBasis ℝ E).sum_repr X).symm
+      (chartModelBasis E).repr X p •
+        ((chartModelBasis E) p : TangentSpace I x) :=
+    ((chartModelBasis E).sum_repr X).symm
   -- Compute g(X, e_l):
   --   g(X, e_l) = g(∑ p (e.repr X) p • e_p, e_l)
   --             = ∑ p (e.repr X) p * g(e_p, e_l)
   --             = ∑ p (e.repr X) p * G_{pl}(x, x).
   have h_inner_decomp : ∀ l : Fin (Module.finrank ℝ E),
-      g.inner x X ((Module.finBasis ℝ E) l) =
+      g.inner x X ((chartModelBasis E) l) =
         ∑ p : Fin (Module.finrank ℝ E),
-          (Module.finBasis ℝ E).repr X p *
+          (chartModelBasis E).repr X p *
             chartGramMatrix (I := I) g x x p l := by
     intro l
     -- Use the symmetric form: g(X, e_l) = g(e_l, X) by g.symm.
-    rw [g.symm x X ((Module.finBasis ℝ E) l)]
+    rw [g.symm x X ((chartModelBasis E) l)]
     -- Now decompose X in the right slot.
-    rw [show g.inner x ((Module.finBasis ℝ E) l) X =
-          g.inner x ((Module.finBasis ℝ E) l) (∑ p : Fin (Module.finrank ℝ E),
-            (Module.finBasis ℝ E).repr X p •
-              ((Module.finBasis ℝ E) p : TangentSpace I x)) from
-      congrArg (g.inner x ((Module.finBasis ℝ E) l)) hX_decomp]
+    rw [show g.inner x ((chartModelBasis E) l) X =
+          g.inner x ((chartModelBasis E) l) (∑ p : Fin (Module.finrank ℝ E),
+            (chartModelBasis E).repr X p •
+              ((chartModelBasis E) p : TangentSpace I x)) from
+      congrArg (g.inner x ((chartModelBasis E) l)) hX_decomp]
     rw [map_sum]
     refine Finset.sum_congr rfl ?_
     intro p _
     -- For each p: g(e_l, c_p • e_p) = c_p * g(e_l, e_p) = c_p * g(e_p, e_l) = c_p * G_{pl}.
     -- We need: g.inner x e_l (c_p • e_p) = c_p * G_{pl}.
     -- Use the explicit smul/map_smul of the CLM (linear functional `g.inner x e_l`).
-    show g.inner x ((Module.finBasis ℝ E) l)
-        (((Module.finBasis ℝ E).repr X) p •
-          ((Module.finBasis ℝ E) p : TangentSpace I x)) =
-      ((Module.finBasis ℝ E).repr X) p *
+    show g.inner x ((chartModelBasis E) l)
+        (((chartModelBasis E).repr X) p •
+          ((chartModelBasis E) p : TangentSpace I x)) =
+      ((chartModelBasis E).repr X) p *
         chartGramMatrix (I := I) g x x p l
     -- Apply linearity in the second slot: g(a, c • b) = c * g(a, b).
-    rw [show g.inner x ((Module.finBasis ℝ E) l)
-            (((Module.finBasis ℝ E).repr X) p •
-              ((Module.finBasis ℝ E) p : TangentSpace I x)) =
-        ((Module.finBasis ℝ E).repr X) p •
-          g.inner x ((Module.finBasis ℝ E) l)
-            ((Module.finBasis ℝ E) p) from
-      ContinuousLinearMap.map_smul (g.inner x ((Module.finBasis ℝ E) l)) _ _]
+    rw [show g.inner x ((chartModelBasis E) l)
+            (((chartModelBasis E).repr X) p •
+              ((chartModelBasis E) p : TangentSpace I x)) =
+        ((chartModelBasis E).repr X) p •
+          g.inner x ((chartModelBasis E) l)
+            ((chartModelBasis E) p) from
+      ContinuousLinearMap.map_smul (g.inner x ((chartModelBasis E) l)) _ _]
     rw [smul_eq_mul]
-    rw [g.symm x ((Module.finBasis ℝ E) l) ((Module.finBasis ℝ E) p)]
-    rw [show g.inner x ((Module.finBasis ℝ E) p) ((Module.finBasis ℝ E) l) =
+    rw [g.symm x ((chartModelBasis E) l) ((chartModelBasis E) p)]
+    rw [show g.inner x ((chartModelBasis E) p) ((chartModelBasis E) l) =
           chartGramMatrix (I := I) g x x p l from by
       rw [← modelGramMatrix_apply (I := I) g x p l,
           modelGramMatrix_eq_chartGramMatrix (I := I) g x]]
@@ -1739,23 +1739,23 @@ private lemma finBasis_repr_eq_invGram_inner_sum
   -- We compute step-by-step:
   rw [show (∑ l : Fin (Module.finrank ℝ E),
         chartInvGramMatrix (I := I) g x x k l *
-          g.inner x X ((Module.finBasis ℝ E) l)) =
+          g.inner x X ((chartModelBasis E) l)) =
       ∑ l : Fin (Module.finrank ℝ E),
         chartInvGramMatrix (I := I) g x x k l *
           (∑ p : Fin (Module.finrank ℝ E),
-            (Module.finBasis ℝ E).repr X p *
+            (chartModelBasis E).repr X p *
               chartGramMatrix (I := I) g x x p l) from
     Finset.sum_congr rfl (fun l _ => by rw [h_inner_decomp])]
   -- Distribute and swap sums.
   rw [show (∑ l : Fin (Module.finrank ℝ E),
         chartInvGramMatrix (I := I) g x x k l *
           (∑ p : Fin (Module.finrank ℝ E),
-            (Module.finBasis ℝ E).repr X p *
+            (chartModelBasis E).repr X p *
               chartGramMatrix (I := I) g x x p l)) =
       ∑ l : Fin (Module.finrank ℝ E),
         ∑ p : Fin (Module.finrank ℝ E),
           chartInvGramMatrix (I := I) g x x k l *
-            ((Module.finBasis ℝ E).repr X p *
+            ((chartModelBasis E).repr X p *
               chartGramMatrix (I := I) g x x p l) from by
     refine Finset.sum_congr rfl ?_
     intro l _
@@ -1766,10 +1766,10 @@ private lemma finBasis_repr_eq_invGram_inner_sum
   rw [show (∑ p : Fin (Module.finrank ℝ E),
         ∑ l : Fin (Module.finrank ℝ E),
           chartInvGramMatrix (I := I) g x x k l *
-            ((Module.finBasis ℝ E).repr X p *
+            ((chartModelBasis E).repr X p *
               chartGramMatrix (I := I) g x x p l)) =
       ∑ p : Fin (Module.finrank ℝ E),
-        (Module.finBasis ℝ E).repr X p *
+        (chartModelBasis E).repr X p *
           ∑ l : Fin (Module.finrank ℝ E),
             chartInvGramMatrix (I := I) g x x k l *
               chartGramMatrix (I := I) g x x p l from by
@@ -1821,21 +1821,21 @@ private lemma finBasis_repr_eq_invGram_inner_sum
     rw [Matrix.mul_apply] at heval
     rw [heval, Matrix.one_apply]
   rw [show (∑ p : Fin (Module.finrank ℝ E),
-        (Module.finBasis ℝ E).repr X p *
+        (chartModelBasis E).repr X p *
           ∑ l : Fin (Module.finrank ℝ E),
             chartInvGramMatrix (I := I) g x x k l *
               chartGramMatrix (I := I) g x x p l) =
       ∑ p : Fin (Module.finrank ℝ E),
-        (Module.finBasis ℝ E).repr X p *
+        (chartModelBasis E).repr X p *
           (if k = p then (1 : ℝ) else 0) from by
     refine Finset.sum_congr rfl ?_
     intro p _
     rw [h_invGram_gram_eq]]
   -- The sum collapses: the only non-zero term is at p = k.
   rw [show (∑ p : Fin (Module.finrank ℝ E),
-        (Module.finBasis ℝ E).repr X p *
+        (chartModelBasis E).repr X p *
           (if k = p then (1 : ℝ) else 0)) =
-      (Module.finBasis ℝ E).repr X k from by
+      (chartModelBasis E).repr X k from by
     rw [Finset.sum_eq_single k]
     · simp
     · intro p _ hpk
@@ -1858,12 +1858,14 @@ private lemma linearMap_trace_eq_invGram_bilin_sum
       ∑ k : Fin (Module.finrank ℝ E),
         ∑ l : Fin (Module.finrank ℝ E),
           chartInvGramMatrix (I := I) g x x k l *
-            g.inner x (T ((Module.finBasis ℝ E) k))
-              ((Module.finBasis ℝ E) l) := by
+            g.inner x (T ((chartModelBasis E) k))
+              ((chartModelBasis E) l) := by
   classical
-  -- Use trace_eq_matrix_trace with basis e = Module.finBasis ℝ E.
+  -- Use trace_eq_matrix_trace with basis e = chartModelBasis E.
+  haveI : FiniteDimensional ℝ (TangentSpace I x) :=
+    inferInstanceAs (FiniteDimensional ℝ E)
   rw [LinearMap.trace_eq_matrix_trace ℝ
-        (Module.finBasis ℝ (TangentSpace I x)) T]
+        (chartModelBasis (TangentSpace I x)) T]
   unfold Matrix.trace
   -- Goal: ∑ i, (T_e).diag i = ∑ k l, G^{kl} g(T e_k, e_l).
   -- Apply finBasis_repr_eq_invGram_inner_sum entry by entry.
@@ -1873,7 +1875,7 @@ private lemma linearMap_trace_eq_invGram_bilin_sum
   rw [LinearMap.toMatrix_apply]
   -- Goal: e.repr (T e_k) k = ∑ l, G^{kl} g(T e_k, e_l).
   exact finBasis_repr_eq_invGram_inner_sum (I := I) g x
-    (T ((Module.finBasis ℝ E) k)) k
+    (T ((chartModelBasis E) k)) k
 
 /-- **Trace formula via orthonormal frame.** For any linear endomorphism
 `T : T_x M →ₗ[ℝ] T_x M` and any `g_x`-orthonormal basis `(B_i)` of `T_x M`,
@@ -1916,12 +1918,12 @@ private theorem linearMap_trace_eq_orthonormal_bilin_sum
   rw [show (∑ k : Fin (Module.finrank ℝ E),
         ∑ l : Fin (Module.finrank ℝ E),
           chartInvGramMatrix (I := I) g x x k l *
-            Hb ((Module.finBasis ℝ E) k) ((Module.finBasis ℝ E) l)) =
+            Hb ((chartModelBasis E) k) ((chartModelBasis E) l)) =
       ∑ k : Fin (Module.finrank ℝ E),
         ∑ l : Fin (Module.finrank ℝ E),
           chartInvGramMatrix (I := I) g x x k l *
-            g.inner x (T ((Module.finBasis ℝ E) k))
-              ((Module.finBasis ℝ E) l) from by
+            g.inner x (T ((chartModelBasis E) k))
+              ((chartModelBasis E) l) from by
     refine Finset.sum_congr rfl ?_
     intro k _
     refine Finset.sum_congr rfl ?_
@@ -2177,7 +2179,7 @@ private theorem g_inner_eq_orthonormal_parseval_sum
     rw [g.symm x Y W]
   -- The trace of T equals g(X, Y), since T(Z) = g(X, Z) • Y is rank-one with
   -- expected trace g(X, Y).
-  -- Specifically: for the basis e = Module.finBasis ℝ E, T(e_k) = g(X, e_k) • Y,
+  -- Specifically: for the basis e = chartModelBasis E, T(e_k) = g(X, e_k) • Y,
   -- and (e.repr T(e_k)) k = g(X, e_k) * (e.repr Y) k. Sum over k:
   --   tr T = ∑ k g(X, e_k) * (e.repr Y) k = ∑ k g(X, e_k) * (e.repr Y) k.
   -- We compute this via the formula linearMap_trace_eq_invGram_bilin_sum:
@@ -2210,13 +2212,13 @@ private theorem g_inner_eq_orthonormal_parseval_sum
     rw [show (∑ k : Fin (Module.finrank ℝ E),
           ∑ l : Fin (Module.finrank ℝ E),
             chartInvGramMatrix (I := I) g x x k l *
-              g.inner x (T ((Module.finBasis ℝ E) k))
-                ((Module.finBasis ℝ E) l)) =
+              g.inner x (T ((chartModelBasis E) k))
+                ((chartModelBasis E) l)) =
         ∑ k : Fin (Module.finrank ℝ E),
           ∑ l : Fin (Module.finrank ℝ E),
             chartInvGramMatrix (I := I) g x x k l *
-              (g.inner x X ((Module.finBasis ℝ E) k) *
-                g.inner x ((Module.finBasis ℝ E) l) Y) from by
+              (g.inner x X ((chartModelBasis E) k) *
+                g.inner x ((chartModelBasis E) l) Y) from by
       refine Finset.sum_congr rfl ?_
       intro k _
       refine Finset.sum_congr rfl ?_
@@ -2226,13 +2228,13 @@ private theorem g_inner_eq_orthonormal_parseval_sum
     rw [show (∑ k : Fin (Module.finrank ℝ E),
           ∑ l : Fin (Module.finrank ℝ E),
             chartInvGramMatrix (I := I) g x x k l *
-              (g.inner x X ((Module.finBasis ℝ E) k) *
-                g.inner x ((Module.finBasis ℝ E) l) Y)) =
+              (g.inner x X ((chartModelBasis E) k) *
+                g.inner x ((chartModelBasis E) l) Y)) =
         ∑ k : Fin (Module.finrank ℝ E),
-          g.inner x X ((Module.finBasis ℝ E) k) *
+          g.inner x X ((chartModelBasis E) k) *
             (∑ l : Fin (Module.finrank ℝ E),
               chartInvGramMatrix (I := I) g x x k l *
-                g.inner x ((Module.finBasis ℝ E) l) Y) from by
+                g.inner x ((chartModelBasis E) l) Y) from by
       refine Finset.sum_congr rfl ?_
       intro k _
       rw [Finset.mul_sum]
@@ -2241,53 +2243,53 @@ private theorem g_inner_eq_orthonormal_parseval_sum
       ring]
     -- ∑ l G^{kl} g(e_l, Y) = (e.repr Y) k by finBasis_repr_eq_invGram_inner_sum.
     rw [show (∑ k : Fin (Module.finrank ℝ E),
-          g.inner x X ((Module.finBasis ℝ E) k) *
+          g.inner x X ((chartModelBasis E) k) *
             (∑ l : Fin (Module.finrank ℝ E),
               chartInvGramMatrix (I := I) g x x k l *
-                g.inner x ((Module.finBasis ℝ E) l) Y)) =
+                g.inner x ((chartModelBasis E) l) Y)) =
         ∑ k : Fin (Module.finrank ℝ E),
-          g.inner x X ((Module.finBasis ℝ E) k) *
-            (Module.finBasis ℝ E).repr Y k from by
+          g.inner x X ((chartModelBasis E) k) *
+            (chartModelBasis E).repr Y k from by
       refine Finset.sum_congr rfl ?_
       intro k _
       have h := finBasis_repr_eq_invGram_inner_sum (I := I) g x Y k
       -- h : (e.repr Y) k = ∑ l, G^{kl} * g(Y, e_l).
       -- We have ∑ l G^{kl} * g(e_l, Y); by g.symm, g(Y, e_l) = g(e_l, Y).
-      have h' : (Module.finBasis ℝ E).repr Y k =
+      have h' : (chartModelBasis E).repr Y k =
           ∑ l : Fin (Module.finrank ℝ E),
             chartInvGramMatrix (I := I) g x x k l *
-              g.inner x ((Module.finBasis ℝ E) l) Y := by
+              g.inner x ((chartModelBasis E) l) Y := by
         rw [h]
         refine Finset.sum_congr rfl ?_
         intro l _
-        rw [g.symm x Y ((Module.finBasis ℝ E) l)]
+        rw [g.symm x Y ((chartModelBasis E) l)]
       rw [h']]
     -- ∑ k g(X, e_k) * (e.repr Y) k.
     -- Use Y = ∑ k (e.repr Y) k • e_k and g.inner x X linearity:
     --   g(X, Y) = g(X, ∑ k (e.repr Y) k • e_k) = ∑ k (e.repr Y) k * g(X, e_k).
     -- Rewriting: g(X, Y) = ∑ k g(X, e_k) * (e.repr Y) k.
     have hY_decomp : Y = ∑ k : Fin (Module.finrank ℝ E),
-        (Module.finBasis ℝ E).repr Y k •
-          ((Module.finBasis ℝ E) k : TangentSpace I x) :=
-      ((Module.finBasis ℝ E).sum_repr Y).symm
+        (chartModelBasis E).repr Y k •
+          ((chartModelBasis E) k : TangentSpace I x) :=
+      ((chartModelBasis E).sum_repr Y).symm
     rw [show g.inner x X Y = g.inner x X
             (∑ k : Fin (Module.finrank ℝ E),
-              (Module.finBasis ℝ E).repr Y k •
-                ((Module.finBasis ℝ E) k : TangentSpace I x)) from
+              (chartModelBasis E).repr Y k •
+                ((chartModelBasis E) k : TangentSpace I x)) from
       congrArg (g.inner x X) hY_decomp]
     rw [map_sum]
     refine Finset.sum_congr rfl ?_
     intro k _
     rw [show g.inner x X
-            ((Module.finBasis ℝ E).repr Y k •
-              ((Module.finBasis ℝ E) k : TangentSpace I x)) =
-          (Module.finBasis ℝ E).repr Y k *
-            g.inner x X ((Module.finBasis ℝ E) k) from by
+            ((chartModelBasis E).repr Y k •
+              ((chartModelBasis E) k : TangentSpace I x)) =
+          (chartModelBasis E).repr Y k *
+            g.inner x X ((chartModelBasis E) k) from by
       rw [show ((g.inner x) X)
-              (((Module.finBasis ℝ E).repr Y k) •
-                ((Module.finBasis ℝ E) k : TangentSpace I x)) =
-            ((Module.finBasis ℝ E).repr Y k) •
-              ((g.inner x) X) ((Module.finBasis ℝ E) k) from
+              (((chartModelBasis E).repr Y k) •
+                ((chartModelBasis E) k : TangentSpace I x)) =
+            ((chartModelBasis E).repr Y k) •
+              ((g.inner x) X) ((chartModelBasis E) k) from
         ContinuousLinearMap.map_smul ((g.inner x) X) _ _]
       rw [smul_eq_mul]]
     ring

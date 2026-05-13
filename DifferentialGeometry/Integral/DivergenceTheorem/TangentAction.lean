@@ -158,7 +158,7 @@ lemma mfderiv_chartBasisVecFiber (α : M)
   set L : E →L[ℝ] ℝ := fderiv ℝ (scalarOnE (I := I) α f) (φ x)
   -- The chart map `(extChartAt I α)` has `mfderiv` at `x` equal to a
   -- specific CLM; in fact, applied to `chartBasisVecFiber α i x`, the
-  -- value is `Module.finBasis ℝ E i`. This is `trivializationAt_chartBasisVec_snd`.
+  -- value is `chartModelBasis E i`. This is `trivializationAt_chartBasisVec_snd`.
   -- We derive `HasMFDerivAt` for `f` by stitching the chain.
   -- Direct path: use `MDifferentiableAt.mfderiv` formula.
   have hf_mfderiv := hf_mdiff_at.mfderiv
@@ -193,12 +193,12 @@ lemma mfderiv_chartBasisVecFiber (α : M)
   -- Now we need to identify
   --   `(fderiv (scalarOnE α f) (φ x)) (mfderiv φ x v)`
   -- with `partialDeriv i (scalarOnE α f) (φ x)`, when `v = chartBasisVecFiber α i x`.
-  -- We claim: `mfderiv (extChartAt I α) x (chartBasisVecFiber α i x) = (Module.finBasis ℝ E) i`.
+  -- We claim: `mfderiv (extChartAt I α) x (chartBasisVecFiber α i x) = (chartModelBasis E) i`.
   -- This is the key chart-basis identity.
   have hmfderiv_chartBasis :
       mfderiv I 𝓘(ℝ, E) (extChartAt I α) x
           (chartBasisVecFiber (I := I) α i x)
-        = (Module.finBasis ℝ E) i := by
+        = (chartModelBasis E) i := by
     -- `mfderiv (extChartAt I α) x = (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ x`
     -- by `TangentBundle.continuousLinearMapAt_trivializationAt`. The latter applied to
     -- `chartBasisVecFiber α i x = (triv α).symm x ((finBasis ℝ E) i)` gives
@@ -211,17 +211,17 @@ lemma mfderiv_chartBasisVecFiber (α : M)
       trivializationAt E (TangentSpace I) α
     -- `chartBasisVecFiber α i x = T.symm x ((finBasis ℝ E) i)` (definition).
     -- Then `T.continuousLinearMapAt ℝ x (T.symm x v) = v` for any `v`, on the base set.
-    have heq : chartBasisVecFiber (I := I) α i x = T.symm x ((Module.finBasis ℝ E) i) :=
+    have heq : chartBasisVecFiber (I := I) α i x = T.symm x ((chartModelBasis E) i) :=
       rfl
     rw [heq]
     -- Use `Trivialization.continuousLinearMapAt_symmL` (or analogous lemma):
     -- `T.continuousLinearMapAt ℝ x ∘ T.symmL ℝ x = id` on the base set.
     have h_apply :
-        T.continuousLinearMapAt ℝ x (T.symm x ((Module.finBasis ℝ E) i))
-          = (Module.finBasis ℝ E) i := by
+        T.continuousLinearMapAt ℝ x (T.symm x ((chartModelBasis E) i))
+          = (chartModelBasis E) i := by
       -- Convert `T.symm x` to `T.symmL ℝ x` (these agree at base-set points).
-      have : T.symm x ((Module.finBasis ℝ E) i)
-            = T.symmL ℝ x ((Module.finBasis ℝ E) i) := by
+      have : T.symm x ((chartModelBasis E) i)
+            = T.symmL ℝ x ((chartModelBasis E) i) := by
         rw [Trivialization.symmL_apply]
       rw [this, Trivialization.continuousLinearMapAt_symmL T (b := x) hbase]
     exact h_apply
@@ -230,7 +230,7 @@ lemma mfderiv_chartBasisVecFiber (α : M)
         (mfderiv I 𝓘(ℝ, E) (extChartAt I α) x (chartBasisVecFiber (I := I) α i x))
       = partialDeriv (E := E) i (scalarOnE (I := I) α f) (φ x)
   rw [hmfderiv_chartBasis]
-  -- Now goal: `fderiv (scalarOnE α f) (φ x) (Module.finBasis ℝ E i) = partialDeriv i ...`.
+  -- Now goal: `fderiv (scalarOnE α f) (φ x) (chartModelBasis E i) = partialDeriv i ...`.
   -- This is rfl from the definition of partialDeriv.
   rfl
 
@@ -334,7 +334,7 @@ private lemma partialDeriv_scalarOnE_contDiffOn_interior
   have hfderiv : ContDiffOn ℝ ∞ (fderiv ℝ (scalarOnE (I := I) α f))
       (interior (extChartAt I α).target) :=
     hbase_int.fderiv_of_isOpen isOpen_interior (by rw [ENat.coe_top_add_one])
-  have hconst : ContDiffOn ℝ ∞ (fun _ : E => (Module.finBasis ℝ E) i)
+  have hconst : ContDiffOn ℝ ∞ (fun _ : E => (chartModelBasis E) i)
       (interior (extChartAt I α).target) := contDiffOn_const
   exact hfderiv.clm_apply hconst
 

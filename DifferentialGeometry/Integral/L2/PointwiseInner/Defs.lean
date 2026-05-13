@@ -74,8 +74,8 @@ noncomputable def tensorInnerPointwise_0s :
       ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
         (gramMatrixAt (I := I) (M := M) g x)⁻¹ i j *
           tensorInnerPointwise_0s s g x
-            (S.curryLeft ((Module.finBasis ℝ E) i))
-            (T.curryLeft ((Module.finBasis ℝ E) j))
+            (S.curryLeft ((chartModelBasis E) i))
+            (T.curryLeft ((chartModelBasis E) j))
 
 lemma tensorInnerPointwise_0s_zero_arity
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -90,8 +90,8 @@ lemma tensorInnerPointwise_0s_succ
       ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
         (gramMatrixAt (I := I) (M := M) g x)⁻¹ i j *
           tensorInnerPointwise_0s (I := I) (M := M) s g x
-            (S.curryLeft ((Module.finBasis ℝ E) i))
-            (T.curryLeft ((Module.finBasis ℝ E) j)) := rfl
+            (S.curryLeft ((chartModelBasis E) i))
+            (T.curryLeft ((chartModelBasis E) j)) := rfl
 
 /-! ## Mixed `(r, s)` pointwise inner product
 

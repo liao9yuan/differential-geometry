@@ -433,11 +433,23 @@ lemma chartLocalMeasure_chart_boundary_zero
   have hsub : (extChartAt I α).symm ⁻¹' B ∩ target ⊆
       frontier (Set.range I) :=
     symm_preimage_chart_boundary_inter_target_subset_frontier (I := I) α
-  -- `modelHaar (frontier (range I)) = 0` by the typeclass field.
+  -- `modelHaar (frontier (range I)) = 0`. We derive it from the typeclass field
+  -- (which gives the `Module.finBasis ℝ E`-Haar measure of the frontier as zero)
+  -- by uniqueness of additive Haar measures: `modelHaar` and the
+  -- `Module.finBasis ℝ E`-Haar measure differ by a positive scalar.
   have h_mh_zero : (modelHaar (E := E)) (frontier (Set.range I)) = 0 := by
-    change ((Module.finBasis ℝ E).addHaar : MeasureTheory.Measure E)
-      (frontier (Set.range I)) = 0
-    exact HasSmoothBoundary.range_frontier_basisAddHaar_volume_zero (I := I)
+    letI : MeasurableSpace E := borel E
+    haveI : BorelSpace E := ⟨rfl⟩
+    -- `((Module.finBasis ℝ E).addHaar) (frontier (range I)) = 0` from typeclass.
+    have h_fb : ((Module.finBasis ℝ E).addHaar : MeasureTheory.Measure E)
+        (frontier (Set.range I)) = 0 :=
+      HasSmoothBoundary.range_frontier_basisAddHaar_volume_zero (I := I)
+    -- Both `modelHaar` and `Module.finBasis ℝ E.addHaar` are additive Haar
+    -- measures on the same finite-dim normed space, hence proportional.
+    have h_eq :=
+      (modelHaar (E := E)).isAddLeftInvariant_eq_smul
+        ((Module.finBasis ℝ E).addHaar : MeasureTheory.Measure E)
+    rw [h_eq, MeasureTheory.Measure.smul_apply, h_fb, smul_zero]
   exact MeasureTheory.measure_mono_null hsub h_mh_zero
 
 /-- For a smooth Riemannian metric `g`, smooth tangent section `X`, and any

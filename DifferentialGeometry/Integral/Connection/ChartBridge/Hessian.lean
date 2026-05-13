@@ -68,7 +68,7 @@ Frobenius bridge, Bochner identity).
   Bochner-Lichnerowicz inequality for the abstract Hessian.
 
 The chart-coordinate identification `chartHessianTensor g x f i j x` of the matrix entries
-`abstractHessianLin g f x e_i e_j` (where `e := Module.finBasis ℝ E`) requires unfolding the
+`abstractHessianLin g f x e_i e_j` (where `e := chartModelBasis E`) requires unfolding the
 chart Christoffel formula for the Levi-Civita connection at the chart base point. That deep
 chart-formula identification is the subject of a separate downstream development; this file
 provides the bridge layer that consumes it once available.
@@ -284,8 +284,8 @@ theorem abstractHessian_eq_inner_cov_gradFun_smooth [I.Boundaryless]
 /-! ## `traceFun` and `frobeniusSqFun` of the abstract-Hessian carrier
 
 We unfold the carrier-level `traceFun` and `frobeniusSqFun` for the abstract Hessian. Both
-are computed against the canonical model basis `Module.finBasis ℝ E` and consume the values
-`abstractHessian g f x e_i e_j` (with `e := Module.finBasis ℝ E`) on the diagonal and
+are computed against the canonical model basis `chartModelBasis E` and consume the values
+`abstractHessian g f x e_i e_j` (with `e := chartModelBasis E`) on the diagonal and
 off-diagonal entries respectively. -/
 
 /-- The basis-naive trace of the abstract Hessian carrier in the canonical model basis. -/
@@ -294,7 +294,7 @@ off-diagonal entries respectively. -/
     traceFun (I := I) (M := M) (abstractHessianBilin (I := I) g f) x =
       ∑ i : Fin (Module.finrank ℝ E),
         abstractHessian (I := I) g f x
-          ((Module.finBasis ℝ E) i) ((Module.finBasis ℝ E) i) := by
+          ((chartModelBasis E) i) ((chartModelBasis E) i) := by
   unfold traceFun
   rfl
 
@@ -306,7 +306,7 @@ model basis. -/
       ∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
           (abstractHessian (I := I) g f x
-            ((Module.finBasis ℝ E) i) ((Module.finBasis ℝ E) j))^2 := by
+            ((chartModelBasis E) i) ((chartModelBasis E) j))^2 := by
   unfold frobeniusSqFun
   rfl
 
@@ -376,7 +376,7 @@ def chartHessianMatrixIdentity
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) : Prop :=
   ∀ i j : Fin (Module.finrank ℝ E),
     abstractHessian (I := I) g f x
-        ((Module.finBasis ℝ E) i) ((Module.finBasis ℝ E) j) =
+        ((chartModelBasis E) i) ((chartModelBasis E) j) =
       chartHessianTensor (I := I) g x f i j x
 
 /-- Under `chartHessianMatrixIdentity g f x`, the chart Hessian carrier `hessFun g f x`
@@ -395,7 +395,7 @@ theorem hessFun_eq_abstractHessianBilin_of_matrix_identity
   -- RHS: abstractHessian g f x v w. Decompose v, w in the model basis, then expand both
   -- sides in the same way and match term-by-term using `hM`.
   rw [abstractHessianBilin_apply]
-  set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := Module.finBasis ℝ E with hb_def
+  set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := chartModelBasis E with hb_def
   -- The first slot is a continuous linear map T_x M →L[ℝ] (T_x M →L[ℝ] ℝ).
   -- The second slot is a continuous linear map T_x M →L[ℝ] ℝ. Both are linear, so the
   -- value `(absH x v) w` decomposes via the basis representations of v and w.
@@ -478,7 +478,7 @@ theorem traceFun_hessFun_eq_traceFun_abstractHessianBilin_of_matrix_identity
   refine Finset.sum_congr rfl ?_
   intro i _
   exact hessFun_eq_abstractHessianBilin_of_matrix_identity (I := I) g f x hM
-    ((Module.finBasis ℝ E) i) ((Module.finBasis ℝ E) i)
+    ((chartModelBasis E) i) ((chartModelBasis E) i)
 
 /-- Under `chartHessianMatrixIdentity g f x`, the basis-naive Frobenius squared of the
 chart Hessian carrier `frobeniusSqFun (hessFun g f) x` agrees with the basis-naive
@@ -496,7 +496,7 @@ theorem frobeniusSqFun_hessFun_eq_frobeniusSqFun_abstractHessianBilin_of_matrix_
   refine Finset.sum_congr rfl ?_
   intro j _
   rw [hessFun_eq_abstractHessianBilin_of_matrix_identity (I := I) g f x hM
-    ((Module.finBasis ℝ E) i) ((Module.finBasis ℝ E) j)]
+    ((chartModelBasis E) i) ((chartModelBasis E) j)]
 
 /-! ## Direct chart-Hessian-tensor identity from the gradient-flow form
 
@@ -515,11 +515,11 @@ theorem chartHessianTensor_eq_inner_cov_gradFun_basis_of_matrix_identity
     (i j : Fin (Module.finrank ℝ E)) :
     chartHessianTensor (I := I) g x f i j x =
       g.inner x ((LeviCivita (I := I) g).toFun
-                    (fun b => gradFun (I := I) g f b) x ((Module.finBasis ℝ E) i))
-        ((Module.finBasis ℝ E) j) := by
+                    (fun b => gradFun (I := I) g f b) x ((chartModelBasis E) i))
+        ((chartModelBasis E) j) := by
   rw [← hM i j]
   exact (abstractHessian_eq_inner_cov_gradFun_extend (I := I) g hf x
-    ((Module.finBasis ℝ E) i) ((Module.finBasis ℝ E) j)).symm
+    ((chartModelBasis E) i) ((chartModelBasis E) j)).symm
 
 /-! ## Chart-formula proof of the matrix identity
 
@@ -579,12 +579,12 @@ private lemma trivFromE_self_apply (x : M) (w : E) :
 model-space basis vector. -/
 lemma chartBasisVecFiber_self
     (x : M) (i : Fin (Module.finrank ℝ E)) :
-    chartBasisVecFiber (I := I) x i x = (Module.finBasis ℝ E) i := by
+    chartBasisVecFiber (I := I) x i x = (chartModelBasis E) i := by
   unfold chartBasisVecFiber
-  -- `chartBasisVecFiber x i x = (trivializationAt _ _ x).symm x ((Module.finBasis ℝ E) i)`,
+  -- `chartBasisVecFiber x i x = (trivializationAt _ _ x).symm x ((chartModelBasis E) i)`,
   -- and on the base set `T.symm x = T.symmL ℝ x = trivFromE x x` (definitionally).
-  change trivFromE (I := I) x x ((Module.finBasis ℝ E) i) = (Module.finBasis ℝ E) i
-  exact trivFromE_self_apply (I := I) x ((Module.finBasis ℝ E) i)
+  change trivFromE (I := I) x x ((chartModelBasis E) i) = (chartModelBasis E) i
+  exact trivFromE_self_apply (I := I) x ((chartModelBasis E) i)
 
 /-! ### `chartE_section_repr` of `chartBasisVec` is locally constant -/
 
@@ -596,18 +596,18 @@ private lemma chartE_section_repr_chartBasisVec_apply
     (hb : b ∈ (trivializationAt E (TangentSpace I) x).baseSet) :
     chartE_section_repr (I := I) x
         (fun y : M => chartBasisVecFiber (I := I) x j y) b =
-      (Module.finBasis ℝ E) j := by
+      (chartModelBasis E) j := by
   classical
   unfold chartE_section_repr
   -- `chartE_section_repr x σ b = trivToE x b (σ b)` and
-  -- `trivToE x b (chartBasisVecFiber x j b) = (Module.finBasis ℝ E) j` for `b ∈ baseSet`.
+  -- `trivToE x b (chartBasisVecFiber x j b) = (chartModelBasis E) j` for `b ∈ baseSet`.
   change trivToE (I := I) x b (chartBasisVecFiber (I := I) x j b) =
-    (Module.finBasis ℝ E) j
+    (chartModelBasis E) j
   -- The trivialization composed with its inverse on `e_j ∈ E` gives `e_j`.
-  have h := trivToE_trivFromE (I := I) x hb ((Module.finBasis ℝ E) j)
-  -- `chartBasisVecFiber x j b = trivFromE x b ((Module.finBasis ℝ E) j)` by definition.
+  have h := trivToE_trivFromE (I := I) x hb ((chartModelBasis E) j)
+  -- `chartBasisVecFiber x j b = trivFromE x b ((chartModelBasis E) j)` by definition.
   have heq : chartBasisVecFiber (I := I) x j b =
-      trivFromE (I := I) x b ((Module.finBasis ℝ E) j) := rfl
+      trivFromE (I := I) x b ((chartModelBasis E) j) := rfl
   rw [heq]
   exact h
 
@@ -620,11 +620,11 @@ private lemma chartE_section_repr_chartBasisVec_pullback_constOn
         (trivializationAt E (TangentSpace I) x).baseSet) :
     (chartE_section_repr (I := I) x
         (fun b : M => chartBasisVecFiber (I := I) x j b) ∘ (extChartAt I x).symm) y =
-      (Module.finBasis ℝ E) j := by
+      (chartModelBasis E) j := by
   classical
   change chartE_section_repr (I := I) x
       (fun b : M => chartBasisVecFiber (I := I) x j b) ((extChartAt I x).symm y) =
-    (Module.finBasis ℝ E) j
+    (chartModelBasis E) j
   exact chartE_section_repr_chartBasisVec_apply (I := I) x j hy
 
 /-! ### Smoothness of the chart-basis section at the basepoint -/
@@ -725,7 +725,7 @@ private lemma extDerivFun_pairing_chartBasisVec_apply_basis
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (x : M)
     (i j : Fin (Module.finrank ℝ E)) :
     extDerivFun (I := I) (fun b => extDerivFun (I := I) f b
-        (chartBasisVecFiber (I := I) x j b)) x ((Module.finBasis ℝ E) i) =
+        (chartBasisVecFiber (I := I) x j b)) x ((chartModelBasis E) i) =
       chartIteratedPartialDeriv (I := I) x f i j (extChartAt I x x) := by
   classical
   -- Step 1: rewrite the dual-pairing scalar via the chart-pulled-back form.
@@ -767,13 +767,13 @@ private lemma extDerivFun_pairing_chartBasisVec_apply_basis
     -- `partialDeriv j u y = fderiv u y (e_j) = (apply e_j) ∘ (fderiv u) y`.
     have hcomp_eq :
         partialDeriv (E := E) j (scalarOnE (I := I) x f) =
-          (ContinuousLinearMap.apply ℝ ℝ ((Module.finBasis ℝ E) j) :
+          (ContinuousLinearMap.apply ℝ ℝ ((chartModelBasis E) j) :
             (E →L[ℝ] ℝ) →L[ℝ] ℝ) ∘
           (fderiv ℝ (scalarOnE (I := I) x f)) := by
       funext y
       rfl
     rw [hcomp_eq]
-    exact (ContinuousLinearMap.apply ℝ ℝ ((Module.finBasis ℝ E) j)).contDiff.contDiffAt.comp
+    exact (ContinuousLinearMap.apply ℝ ℝ ((chartModelBasis E) j)).contDiff.contDiffAt.comp
       (extChartAt I x x) hfd_contDiffAt
   -- Smoothness of `extChartAt I x` at `x` (manifold-side).
   have hphi_mdiff : MDiffAt (extChartAt I x) x :=
@@ -804,12 +804,12 @@ private lemma extDerivFun_pairing_chartBasisVec_apply_basis
   -- Combined value-level computation.
   have hg_value :
       (mfderiv I 𝓘(ℝ) g x : TangentSpace I x →L[ℝ] _)
-          ((Module.finBasis ℝ E) i) =
+          ((chartModelBasis E) i) =
         chartIteratedPartialDeriv (I := I) x f i j (extChartAt I x x) := by
     rw [mfderiv_scalar_eq_chart_fderiv (I := I) x g hxsrc hxint hg_mdiff
-      ((Module.finBasis ℝ E) i)]
+      ((chartModelBasis E) i)]
     rw [hcompose_eq.fderiv_eq]
-    rw [trivToE_self_apply (I := I) x ((Module.finBasis ℝ E) i)]
+    rw [trivToE_self_apply (I := I) x ((chartModelBasis E) i)]
     rw [chartIteratedPartialDeriv_def]
     rfl
   -- Step 5: Bridge `extDerivFun (...) x e_i` to `mfderiv g x e_i` via EventuallyEq.
@@ -874,7 +874,7 @@ private lemma fderiv_chartE_chartBasisVec_self_eq_zero
   have hconstOn : ∀ y ∈ V,
       (chartE_section_repr (I := I) x
           (fun b : M => chartBasisVecFiber (I := I) x j b) ∘ (extChartAt I x).symm) y =
-        (Module.finBasis ℝ E) j := by
+        (chartModelBasis E) j := by
     intro y hy
     obtain ⟨_hy_target, hy_pre⟩ := hy
     rw [Set.mem_preimage] at hy_pre
@@ -883,12 +883,12 @@ private lemma fderiv_chartE_chartBasisVec_self_eq_zero
   have hev : (chartE_section_repr (I := I) x
       (fun b : M => chartBasisVecFiber (I := I) x j b) ∘ (extChartAt I x).symm) =ᶠ[𝓝
         (extChartAt I x x)]
-      (fun _ : E => ((Module.finBasis ℝ E) j : E)) := by
+      (fun _ : E => ((chartModelBasis E) j : E)) := by
     filter_upwards [hopen_V.mem_nhds hxV] with y hy
     exact hconstOn y hy
   rw [hev.fderiv_eq]
   -- `fderiv (fun _ => c) y = 0`.
-  exact fderiv_const_apply ((Module.finBasis ℝ E) j)
+  exact fderiv_const_apply ((chartModelBasis E) j)
 
 /-- The Christoffel correction at the basepoint `(α, x) = (x, x)` applied to the
 constant section component `e_j` and the model-basis input `e_i` collapses to the
@@ -896,36 +896,36 @@ Christoffel sum `∑_k Γ^k{}_{ij}(φ x) • e_k`. -/
 private lemma christoffelCorrection_self_basis_apply
     (g : SmoothRiemannianMetric I M) (x : M)
     (i j : Fin (Module.finrank ℝ E)) :
-    christoffelCorrection (I := I) g x x ((Module.finBasis ℝ E) j)
-        ((Module.finBasis ℝ E) i) =
+    christoffelCorrection (I := I) g x x ((chartModelBasis E) j)
+        ((chartModelBasis E) i) =
       ∑ k : Fin (Module.finrank ℝ E),
         chartChristoffel (I := I) g x i j k (extChartAt I x x) •
-          (Module.finBasis ℝ E) k := by
+          (chartModelBasis E) k := by
   classical
-  rw [christoffelCorrection_apply (I := I) g x x ((Module.finBasis ℝ E) j)
-        ((Module.finBasis ℝ E) i)]
+  rw [christoffelCorrection_apply (I := I) g x x ((chartModelBasis E) j)
+        ((chartModelBasis E) i)]
   -- Simplify the inner triple sum: `(b.repr (trivToE x x e_i)) i' = δ(i', i)`,
   -- `(b.repr e_j) j' = δ(j', j)`. Both Kronecker collapses.
-  rw [trivToE_self_apply (I := I) x ((Module.finBasis ℝ E) i)]
+  rw [trivToE_self_apply (I := I) x ((chartModelBasis E) i)]
   -- Now both `trivToE x x e_i` and `e_j` are model-basis vectors, with
   -- `b.repr (b k) = single k 1` (Finsupp).
   -- Collapse the i'-sum: `∑ i', (b.repr e_i) i' * ... = ((b.repr e_i) i) * ... = ...` at i' = i.
   rw [show (∑ i' : Fin (Module.finrank ℝ E),
         ∑ j' : Fin (Module.finrank ℝ E),
           ∑ k : Fin (Module.finrank ℝ E),
-            (((Module.finBasis ℝ E).repr ((Module.finBasis ℝ E) i)) i' *
-                ((Module.finBasis ℝ E).repr ((Module.finBasis ℝ E) j)) j' *
+            (((chartModelBasis E).repr ((chartModelBasis E) i)) i' *
+                ((chartModelBasis E).repr ((chartModelBasis E) j)) j' *
                 chartChristoffel (I := I) g x i' j' k (extChartAt I x x)) •
-              (Module.finBasis ℝ E) k) =
+              (chartModelBasis E) k) =
       ∑ k : Fin (Module.finrank ℝ E),
         chartChristoffel (I := I) g x i j k (extChartAt I x x) •
-          (Module.finBasis ℝ E) k from ?_]
+          (chartModelBasis E) k from ?_]
   -- The reduction: the only non-zero contribution is at (i', j') = (i, j).
   -- `(b.repr (b r)) s = if r = s then 1 else 0` via `Module.Basis.repr_self`.
   classical
   -- We extract the sum reduction in two steps using `Finset.sum_eq_single` on i' and j'.
   have hrepr_basis : ∀ (r s : Fin (Module.finrank ℝ E)),
-      ((Module.finBasis ℝ E).repr ((Module.finBasis ℝ E) r)) s =
+      ((chartModelBasis E).repr ((chartModelBasis E) r)) s =
         if r = s then (1 : ℝ) else 0 := by
     intro r s
     rw [Module.Basis.repr_self]
@@ -939,15 +939,15 @@ private lemma christoffelCorrection_self_basis_apply
     -- Inner sum on j': only j' = j contributes.
     rw [Finset.sum_eq_single j (fun j' _ hj'_ne_j => ?_) (fun hj_mem => ?_)]
     · -- The case (i', j') = (i, j): collapse the scalar.
-      have hrepr_ii : ((Module.finBasis ℝ E).repr ((Module.finBasis ℝ E) i)) i = 1 := by
+      have hrepr_ii : ((chartModelBasis E).repr ((chartModelBasis E) i)) i = 1 := by
         rw [hrepr_basis i i, if_pos rfl]
-      have hrepr_jj : ((Module.finBasis ℝ E).repr ((Module.finBasis ℝ E) j)) j = 1 := by
+      have hrepr_jj : ((chartModelBasis E).repr ((chartModelBasis E) j)) j = 1 := by
         rw [hrepr_basis j j, if_pos rfl]
       rw [hrepr_ii, hrepr_jj]
       refine Finset.sum_congr rfl (fun k _ => ?_)
       ring_nf
     · -- The case j' ≠ j: the j'-th entry of `b.repr e_j` is 0.
-      have hrepr_jj' : ((Module.finBasis ℝ E).repr ((Module.finBasis ℝ E) j)) j' = 0 := by
+      have hrepr_jj' : ((chartModelBasis E).repr ((chartModelBasis E) j)) j' = 0 := by
         rw [hrepr_basis j j', if_neg (fun h => hj'_ne_j h.symm)]
       refine Finset.sum_eq_zero (fun k _ => ?_)
       rw [hrepr_jj']
@@ -956,7 +956,7 @@ private lemma christoffelCorrection_self_basis_apply
   · -- The case i' ≠ i: the i'-th entry of `b.repr e_i` is 0.
     refine Finset.sum_eq_zero (fun j' _ => ?_)
     refine Finset.sum_eq_zero (fun k _ => ?_)
-    have hrepr_ii' : ((Module.finBasis ℝ E).repr ((Module.finBasis ℝ E) i)) i' = 0 := by
+    have hrepr_ii' : ((chartModelBasis E).repr ((chartModelBasis E) i)) i' = 0 := by
       rw [hrepr_basis i i', if_neg (fun h => hi'_ne_i h.symm)]
     rw [hrepr_ii']
     simp
@@ -973,27 +973,27 @@ private lemma LeviCivita_chartBasisVec_self_basis_apply
     (i j : Fin (Module.finrank ℝ E)) :
     (LeviCivita (I := I) g).toFun
         (fun b : M => chartBasisVecFiber (I := I) x j b) x
-        ((Module.finBasis ℝ E) i) =
+        ((chartModelBasis E) i) =
       ∑ k : Fin (Module.finrank ℝ E),
         chartChristoffel (I := I) g x i j k (extChartAt I x x) •
-          (Module.finBasis ℝ E) k := by
+          (chartModelBasis E) k := by
   classical
   -- Use the chart-overlap formula at `α = x` (good set: x ∈ goodSet x).
   have hx_good : x ∈ chartLeviCivitaGoodSet (I := I) x :=
     self_mem_chartLeviCivitaGoodSet (I := I) (α := x)
   have hY_at : MDiffAt (T% (fun b : M => chartBasisVecFiber (I := I) x j b)) x :=
     chartBasisVec_mdifferentiableAt_self (I := I) x j
-  rw [LeviCivita_chart_apply (I := I) g x hx_good hY_at ((Module.finBasis ℝ E) i)]
+  rw [LeviCivita_chart_apply (I := I) g x hx_good hY_at ((chartModelBasis E) i)]
   -- Apply `chartLeviCivita_apply` at `α = x`.
   rw [chartLeviCivita_apply (I := I) g x
         (fun b : M => chartBasisVecFiber (I := I) x j b) hx_good
-        ((Module.finBasis ℝ E) i)]
+        ((chartModelBasis E) i)]
   -- The fderiv piece vanishes; the Christoffel piece collapses.
   rw [fderiv_chartE_chartBasisVec_self_eq_zero (I := I) x j]
   rw [show
         chartE_section_repr (I := I) x
           (fun b : M => chartBasisVecFiber (I := I) x j b) x =
-        (Module.finBasis ℝ E) j from
+        (chartModelBasis E) j from
       chartE_section_repr_chartBasisVec_apply (I := I) x j
         (FiberBundle.mem_baseSet_trivializationAt' x)]
   rw [christoffelCorrection_self_basis_apply (I := I) g x i j]
@@ -1004,7 +1004,7 @@ private lemma LeviCivita_chartBasisVec_self_basis_apply
   rw [map_sum]
   refine Finset.sum_congr rfl (fun k _ => ?_)
   rw [(trivFromE (I := I) x x).map_smul]
-  rw [trivFromE_self_apply (I := I) x ((Module.finBasis ℝ E) k)]
+  rw [trivFromE_self_apply (I := I) x ((chartModelBasis E) k)]
   rfl
 
 /-- The cotangent-section pairing `θ x (LeviCivita g (chartBasisVec x j) x e_i)` for
@@ -1018,7 +1018,7 @@ private lemma extDerivFun_LeviCivita_chartBasisVec_self_basis
     extDerivFun (I := I) f x
         ((LeviCivita (I := I) g).toFun
           (fun b : M => chartBasisVecFiber (I := I) x j b) x
-          ((Module.finBasis ℝ E) i)) =
+          ((chartModelBasis E) i)) =
       ∑ k : Fin (Module.finrank ℝ E),
         chartChristoffel (I := I) g x i j k (extChartAt I x x) *
           partialDeriv (E := E) k (scalarOnE (I := I) x f) (extChartAt I x x) := by
@@ -1039,32 +1039,32 @@ private lemma extDerivFun_LeviCivita_chartBasisVec_self_basis
       extDerivFun (I := I) f x
           (∑ k : Fin (Module.finrank ℝ E),
             chartChristoffel (I := I) g x i j k (extChartAt I x x) •
-              (Module.finBasis ℝ E) k) =
+              (chartModelBasis E) k) =
         ∑ k : Fin (Module.finrank ℝ E),
           chartChristoffel (I := I) g x i j k (extChartAt I x x) *
-            extDerivFun (I := I) f x ((Module.finBasis ℝ E) k) := by
+            extDerivFun (I := I) f x ((chartModelBasis E) k) := by
     rw [map_sum]
     refine Finset.sum_congr rfl (fun k _ => ?_)
     -- `(extDerivFun f x) (c • v) = c • (extDerivFun f x) v = c * (extDerivFun f x) v`.
     rw [show (extDerivFun (I := I) f x)
             (chartChristoffel (I := I) g x i j k (extChartAt I x x) •
-              (Module.finBasis ℝ E) k) =
+              (chartModelBasis E) k) =
           chartChristoffel (I := I) g x i j k (extChartAt I x x) •
-            (extDerivFun (I := I) f x) ((Module.finBasis ℝ E) k) from
+            (extDerivFun (I := I) f x) ((chartModelBasis E) k) from
         (extDerivFun (I := I) f x).map_smul
           (chartChristoffel (I := I) g x i j k (extChartAt I x x))
-          ((Module.finBasis ℝ E) k)]
+          ((chartModelBasis E) k)]
     rw [smul_eq_mul]
   -- Combine `h_distribute` with the identification `(extDerivFun f x) e_k = partialDeriv k (...)`.
   have h_summand : ∀ (k : Fin (Module.finrank ℝ E)),
-      extDerivFun (I := I) f x ((Module.finBasis ℝ E) k) =
+      extDerivFun (I := I) f x ((chartModelBasis E) k) =
         partialDeriv (E := E) k (scalarOnE (I := I) x f) (extChartAt I x x) := by
     intro k
     -- `extDerivFun f x v = mfderiv f x v` (definitionally for ℝ-valued f).
-    change (mfderiv I 𝓘(ℝ, ℝ) f x : TangentSpace I x →L[ℝ] _) ((Module.finBasis ℝ E) k) = _
+    change (mfderiv I 𝓘(ℝ, ℝ) f x : TangentSpace I x →L[ℝ] _) ((chartModelBasis E) k) = _
     rw [mfderiv_scalar_eq_chart_fderiv (I := I) x f hxsrc hxint hf_at
-      ((Module.finBasis ℝ E) k)]
-    rw [trivToE_self_apply (I := I) x ((Module.finBasis ℝ E) k)]
+      ((chartModelBasis E) k)]
+    rw [trivToE_self_apply (I := I) x ((chartModelBasis E) k)]
     rfl
   -- Substitute and conclude.
   refine h_distribute.trans ?_
@@ -1103,12 +1103,12 @@ theorem chartHessianMatrixIdentity_holds [I.Boundaryless]
   have hY_at : MDiffAt (T% Y) x := chartBasisVec_mdifferentiableAt_self (I := I) x j
   -- Apply the dual-pairing identity at `v = e_i`.
   have hpair := cotangentCov_dualPairing (LeviCivita (I := I) g) hθ_at hY_at
-    ((Module.finBasis ℝ E) i)
+    ((chartModelBasis E) i)
   -- `hpair`: `extDerivFun (b ↦ θ b (Y b)) x e_i =
   --           ((cotangentCov LC) θ x e_i) (Y x) + θ x (LC Y x e_i)`.
   -- We rewrite this to isolate `((cotangentCov LC) θ x e_i) (Y x)`.
-  have hYx : Y x = (Module.finBasis ℝ E) j := by
-    -- `Y x = chartBasisVecFiber x j x = (Module.finBasis ℝ E) j`.
+  have hYx : Y x = (chartModelBasis E) j := by
+    -- `Y x = chartBasisVecFiber x j x = (chartModelBasis E) j`.
     exact chartBasisVecFiber_self (I := I) x j
   -- Substitute `Y x = e_j` in `hpair`.
   rw [hYx] at hpair
@@ -1118,16 +1118,473 @@ theorem chartHessianMatrixIdentity_holds [I.Boundaryless]
   have hRHS_2 := extDerivFun_LeviCivita_chartBasisVec_self_basis (I := I) g hf x i j
   -- Combine: `((cotangentCov LC) θ x e_i) e_j = LHS - θ x (LC Y x e_i) = chartHessianTensor`.
   have hkey :
-      ((cotangentCov (LeviCivita (I := I) g)).toFun θ x ((Module.finBasis ℝ E) i))
-          ((Module.finBasis ℝ E) j) =
-        extDerivFun (I := I) (fun b => θ b (Y b)) x ((Module.finBasis ℝ E) i) -
-          θ x ((LeviCivita (I := I) g).toFun Y x ((Module.finBasis ℝ E) i)) := by
+      ((cotangentCov (LeviCivita (I := I) g)).toFun θ x ((chartModelBasis E) i))
+          ((chartModelBasis E) j) =
+        extDerivFun (I := I) (fun b => θ b (Y b)) x ((chartModelBasis E) i) -
+          θ x ((LeviCivita (I := I) g).toFun Y x ((chartModelBasis E) i)) := by
     linarith [hpair]
   rw [hkey]
   -- Substitute the chart-pulled-back forms.
   rw [hLHS, hRHS_2]
   -- Now match with `chartHessianTensor g x f i j x`.
   rw [chartHessianTensor_def]
+
+/-! ## Chart-α matrix identity at general points in the chart-α good set
+
+We extend the chart-x version to a chart at a different base point α : M, for
+manifold points x in the chart-α good set. The chart-α tensor Hessian entries
+match the abstract Hessian evaluated on the chart-α basis pair
+`(chartBasisVecFiber α i x, chartBasisVecFiber α j x)`.
+
+This is the chart-α analog of `chartHessianMatrixIdentity_holds`. The key
+simplifications at general x in chart-α good set:
+- `trivToE α x (chartBasisVecFiber α i x) = e_i` (round-trip via `trivToE_trivFromE`).
+- `(extDerivFun f) x (chartBasisVecFiber α j x) =
+    partialDeriv j (scalarOnE α f) (extChartAt α x)` (chart pullback identification).
+- `chartE_section_repr α (chartBasisVecFiber α j ·)` is constantly `e_j` on a
+  neighborhood of x in chart-α base set, hence its fderiv vanishes. -/
+
+/-! ### Pullback identification of `(extDerivFun f) b (chartBasisVec α j b)` -/
+
+/-- For `b` in the chart-α good set, the dual-pairing scalar
+`(extDerivFun f) b (chartBasisVecFiber α j b)` equals
+`partialDeriv j (scalarOnE α f) (extChartAt α b)`. -/
+private lemma extDerivFun_chartBasisVec_alpha_apply_of_mem
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (α : M)
+    (j : Fin (Module.finrank ℝ E)) {b : M}
+    (hb : b ∈ chartLeviCivitaGoodSet (I := I) α) :
+    extDerivFun (I := I) f b
+        (chartBasisVecFiber (I := I) α j b) =
+      partialDeriv (E := E) j (scalarOnE (I := I) α f) (extChartAt I α b) := by
+  classical
+  have hf_at : MDiffAt f b := (hf b).mdifferentiableAt (by simp)
+  have hb_chart : b ∈ (chartAt H α).source :=
+    chartLeviCivitaGoodSet_mem_chartAt_source (I := I) hb
+  have hb_int : extChartAt I α b ∈ interior ((extChartAt I α).target : Set E) :=
+    chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hb
+  change (mfderiv I 𝓘(ℝ, ℝ) f b) (chartBasisVecFiber (I := I) α j b) = _
+  exact mfderiv_chartBasisVecFiber_of_mdifferentiableAt (I := I) α hf_at
+    hb_chart hb_int j
+
+/-- The function `b ↦ (extDerivFun f) b (chartBasisVecFiber α j b)` is eventually
+equal (around `x`) to `(partialDeriv j (scalarOnE α f)) ∘ (extChartAt α)` on
+the chart-α good set (an open neighborhood of `x`). -/
+private lemma extDerivFun_chartBasisVec_alpha_eventuallyEq
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (α : M)
+    (j : Fin (Module.finrank ℝ E)) {x : M}
+    (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
+    (fun b : M => extDerivFun (I := I) f b
+        (chartBasisVecFiber (I := I) α j b)) =ᶠ[𝓝 x]
+      (fun b : M =>
+        partialDeriv (E := E) j (scalarOnE (I := I) α f) (extChartAt I α b)) := by
+  classical
+  have hopen : IsOpen (chartLeviCivitaGoodSet (I := I) α) :=
+    chartLeviCivitaGoodSet_isOpen (I := I) α
+  have hnhd : chartLeviCivitaGoodSet (I := I) α ∈ 𝓝 x := hopen.mem_nhds hx
+  filter_upwards [hnhd] with b hb
+  exact extDerivFun_chartBasisVec_alpha_apply_of_mem (I := I) hf α j hb
+
+/-! ### Computing the directional derivative at the chart-α basis pair -/
+
+/-- The directional derivative of the dual-pairing scalar along
+`chartBasisVecFiber α i x`, at a chart-α good-set point `x`, equals the
+chart-iterated partial derivative. -/
+private lemma extDerivFun_pairing_chartBasisVec_alpha_apply
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (α : M)
+    (i j : Fin (Module.finrank ℝ E)) {x : M}
+    (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
+    extDerivFun (I := I) (fun b => extDerivFun (I := I) f b
+        (chartBasisVecFiber (I := I) α j b)) x
+        (chartBasisVecFiber (I := I) α i x) =
+      chartIteratedPartialDeriv (I := I) α f i j (extChartAt I α x) := by
+  classical
+  have hev := extDerivFun_chartBasisVec_alpha_eventuallyEq (I := I) hf α j hx
+  have hf_smooth_target : ContDiffOn ℝ ∞ (scalarOnE (I := I) α f)
+      (extChartAt I α).target :=
+    scalarOnE_contDiffOn (I := I) α hf
+  have hf_smooth_int : ContDiffOn ℝ ∞ (scalarOnE (I := I) α f)
+      (interior ((extChartAt I α).target : Set E)) :=
+    hf_smooth_target.mono interior_subset
+  have hopen_int : IsOpen (interior ((extChartAt I α).target : Set E)) :=
+    isOpen_interior
+  have hxchart : x ∈ (chartAt H α).source :=
+    chartLeviCivitaGoodSet_mem_chartAt_source (I := I) hx
+  have hxsrc_ext : x ∈ (extChartAt I α).source := by
+    rw [extChartAt_source_eq_chartAt_source]; exact hxchart
+  have hxint : extChartAt I α x ∈ interior ((extChartAt I α).target : Set E) :=
+    chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx
+  set g : M → ℝ :=
+    fun b => partialDeriv (E := E) j (scalarOnE (I := I) α f) (extChartAt I α b) with hg_def
+  have hu_smooth_at : ContDiffAt ℝ ∞ (scalarOnE (I := I) α f) (extChartAt I α x) :=
+    hf_smooth_int.contDiffAt (hopen_int.mem_nhds hxint)
+  have hfd_contDiffOn : ContDiffOn ℝ ∞ (fderiv ℝ (scalarOnE (I := I) α f))
+      (interior ((extChartAt I α).target : Set E)) :=
+    hf_smooth_int.fderiv_of_isOpen isOpen_interior (by rw [ENat.coe_top_add_one])
+  have hfd_contDiffAt : ContDiffAt ℝ ∞ (fderiv ℝ (scalarOnE (I := I) α f))
+      (extChartAt I α x) :=
+    hfd_contDiffOn.contDiffAt (hopen_int.mem_nhds hxint)
+  have hPD_contDiffAt : ContDiffAt ℝ ∞
+      (partialDeriv (E := E) j (scalarOnE (I := I) α f)) (extChartAt I α x) := by
+    have hcomp_eq :
+        partialDeriv (E := E) j (scalarOnE (I := I) α f) =
+          (ContinuousLinearMap.apply ℝ ℝ ((chartModelBasis E) j) :
+            (E →L[ℝ] ℝ) →L[ℝ] ℝ) ∘
+          (fderiv ℝ (scalarOnE (I := I) α f)) := by
+      funext y; rfl
+    rw [hcomp_eq]
+    exact (ContinuousLinearMap.apply ℝ ℝ ((chartModelBasis E) j)).contDiff.contDiffAt.comp
+      (extChartAt I α x) hfd_contDiffAt
+  have hphi_mdiff : MDiffAt (extChartAt I α) x :=
+    mdifferentiableAt_extChartAt (I := I) (x := α) hxchart
+  have hPD_mdiff_at : MDifferentiableAt 𝓘(ℝ, E) 𝓘(ℝ)
+      (partialDeriv (E := E) j (scalarOnE (I := I) α f)) (extChartAt I α x) := by
+    have hd : DifferentiableAt ℝ
+        (partialDeriv (E := E) j (scalarOnE (I := I) α f)) (extChartAt I α x) :=
+      hPD_contDiffAt.differentiableAt (by simp)
+    rw [mdifferentiableAt_iff_differentiableAt]
+    exact hd
+  have hg_mdiff : MDiffAt g x :=
+    hPD_mdiff_at.comp x hphi_mdiff
+  have htgt_nhds : ((extChartAt I α).target : Set E) ∈ 𝓝 (extChartAt I α x) := by
+    refine mem_nhds_iff.mpr ?_
+    refine ⟨interior ((extChartAt I α).target : Set E),
+      interior_subset, hopen_int, hxint⟩
+  -- Compute `mfderiv g x (chartBasisVecFiber α i x)` via the chart bridge.
+  have hg_value :
+      (mfderiv I 𝓘(ℝ) g x : TangentSpace I x →L[ℝ] _)
+          (chartBasisVecFiber (I := I) α i x) =
+        chartIteratedPartialDeriv (I := I) α f i j (extChartAt I α x) := by
+    rw [mfderiv_chartBasisVecFiber_of_mdifferentiableAt (I := I) α
+        hg_mdiff hxchart hxint i]
+    -- `scalarOnE α g =ᶠ[𝓝 (extChartAt α x)] partialDeriv j (scalarOnE α f)`.
+    have hscalar_eq : (scalarOnE (I := I) α g) =ᶠ[𝓝 (extChartAt I α x)]
+        (partialDeriv (E := E) j (scalarOnE (I := I) α f)) := by
+      filter_upwards [htgt_nhds] with y hy
+      change g ((extChartAt I α).symm y) =
+        partialDeriv (E := E) j (scalarOnE (I := I) α f) y
+      change partialDeriv (E := E) j (scalarOnE (I := I) α f)
+          (extChartAt I α ((extChartAt I α).symm y)) =
+        partialDeriv (E := E) j (scalarOnE (I := I) α f) y
+      rw [(extChartAt I α).right_inv hy]
+    -- Identify `partialDeriv i (scalarOnE α g) (extChartAt α x)` with
+    -- `partialDeriv i (partialDeriv j (scalarOnE α f)) (extChartAt α x)`,
+    -- then with `chartIteratedPartialDeriv α f i j (extChartAt α x)`.
+    change partialDeriv (E := E) i (scalarOnE (I := I) α g) (extChartAt I α x) =
+        chartIteratedPartialDeriv (I := I) α f i j (extChartAt I α x)
+    have h_pd : partialDeriv (E := E) i (scalarOnE (I := I) α g) (extChartAt I α x) =
+        partialDeriv (E := E) i
+          (partialDeriv (E := E) j (scalarOnE (I := I) α f))
+          (extChartAt I α x) := by
+      change (fderiv ℝ (scalarOnE (I := I) α g) (extChartAt I α x))
+          ((chartModelBasis E) i) =
+        (fderiv ℝ (partialDeriv (E := E) j (scalarOnE (I := I) α f))
+            (extChartAt I α x))
+          ((chartModelBasis E) i)
+      congr 1
+      exact Filter.EventuallyEq.fderiv_eq hscalar_eq
+    rw [h_pd]
+    rw [chartIteratedPartialDeriv_def]
+  -- Bridge `extDerivFun (...) x v` to `mfderiv g x v`.
+  have hed_to_mfderiv : ∀ (h : M → ℝ) (v : TangentSpace I x),
+      extDerivFun (I := I) h x v = (mfderiv I 𝓘(ℝ) h x : TangentSpace I x →L[ℝ] _) v := by
+    intro h v; rfl
+  rw [hed_to_mfderiv]
+  rw [Filter.EventuallyEq.mfderiv_eq hev]
+  exact hg_value
+
+/-! ### Smoothness of the chart-α basis section at a chart-α good-set point -/
+
+private lemma chartBasisVec_alpha_mdifferentiableAt
+    (α : M) (j : Fin (Module.finrank ℝ E)) {x : M}
+    (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
+    MDiffAt (T% (fun b : M => chartBasisVecFiber (I := I) α j b)) x := by
+  classical
+  have hbase : x ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
+    chartLeviCivitaGoodSet_mem_baseSet (I := I) hx
+  have hcontMDiff_on := chartBasisVec_contMDiffOn (I := I) α j
+  have hopen : IsOpen (trivializationAt E (TangentSpace I) α).baseSet :=
+    (trivializationAt E (TangentSpace I) α).open_baseSet
+  have hcontMDiff_at : ContMDiffAt I (I.prod 𝓘(ℝ, E)) ∞
+      (chartBasisVec (I := I) α j) x :=
+    (hcontMDiff_on x hbase).contMDiffAt (hopen.mem_nhds hbase)
+  exact hcontMDiff_at.mdifferentiableAt (by simp)
+
+/-! ### Vanishing of the fderiv of the chart-α basis pullback at a chart-α good-set point -/
+
+private lemma fderiv_chartE_chartBasisVec_alpha_eq_zero [I.Boundaryless]
+    (α : M) (j : Fin (Module.finrank ℝ E)) {x : M}
+    (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
+    fderiv ℝ (chartE_section_repr (I := I) α
+        (fun b : M => chartBasisVecFiber (I := I) α j b) ∘ (extChartAt I α).symm)
+        (extChartAt I α x) = 0 := by
+  classical
+  have hxchart : x ∈ (chartAt H α).source :=
+    chartLeviCivitaGoodSet_mem_chartAt_source (I := I) hx
+  have hxsrc_ext : x ∈ (extChartAt I α).source := by
+    rw [extChartAt_source_eq_chartAt_source]; exact hxchart
+  have hxtgt : extChartAt I α x ∈ (extChartAt I α).target :=
+    (extChartAt I α).map_source hxsrc_ext
+  have hxint : extChartAt I α x ∈ interior ((extChartAt I α).target : Set E) :=
+    chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx
+  have hbase : x ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
+    chartLeviCivitaGoodSet_mem_baseSet (I := I) hx
+  set V : Set E :=
+    (extChartAt I α).target ∩
+      (extChartAt I α).symm ⁻¹' (trivializationAt E (TangentSpace I) α).baseSet with hV_def
+  have hxV : extChartAt I α x ∈ V := by
+    refine ⟨hxtgt, ?_⟩
+    rw [Set.mem_preimage]
+    rw [(extChartAt I α).left_inv hxsrc_ext]
+    exact hbase
+  have hcont_symm : ContinuousOn (extChartAt I α).symm (extChartAt I α).target :=
+    continuousOn_extChartAt_symm α
+  have hopen_V : IsOpen V := by
+    refine ContinuousOn.isOpen_inter_preimage hcont_symm
+      (isOpen_extChartAt_target (I := I) α) ?_
+    exact (trivializationAt E (TangentSpace I) α).open_baseSet
+  have hconstOn : ∀ y ∈ V,
+      (chartE_section_repr (I := I) α
+          (fun b : M => chartBasisVecFiber (I := I) α j b) ∘ (extChartAt I α).symm) y =
+        (chartModelBasis E) j := by
+    intro y hy
+    obtain ⟨_hy_target, hy_pre⟩ := hy
+    rw [Set.mem_preimage] at hy_pre
+    change trivToE (I := I) α ((extChartAt I α).symm y)
+        (chartBasisVecFiber (I := I) α j ((extChartAt I α).symm y)) =
+      (chartModelBasis E) j
+    have heq : chartBasisVecFiber (I := I) α j ((extChartAt I α).symm y) =
+        trivFromE (I := I) α ((extChartAt I α).symm y) ((chartModelBasis E) j) := rfl
+    rw [heq]
+    exact trivToE_trivFromE (I := I) α hy_pre ((chartModelBasis E) j)
+  have hev : (chartE_section_repr (I := I) α
+      (fun b : M => chartBasisVecFiber (I := I) α j b) ∘ (extChartAt I α).symm) =ᶠ[𝓝
+        (extChartAt I α x)]
+      (fun _ : E => ((chartModelBasis E) j : E)) := by
+    filter_upwards [hopen_V.mem_nhds hxV] with y hy
+    exact hconstOn y hy
+  rw [hev.fderiv_eq]
+  exact fderiv_const_apply ((chartModelBasis E) j)
+
+/-! ### Constancy of the chart-trivialised representation of the basis section at chart-α good-set points -/
+
+private lemma chartE_section_repr_chartBasisVec_alpha_apply
+    (α : M) (j : Fin (Module.finrank ℝ E)) {x : M}
+    (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
+    chartE_section_repr (I := I) α
+        (fun b : M => chartBasisVecFiber (I := I) α j b) x =
+      (chartModelBasis E) j := by
+  classical
+  unfold chartE_section_repr
+  change trivToE (I := I) α x (chartBasisVecFiber (I := I) α j x) =
+    (chartModelBasis E) j
+  have heq : chartBasisVecFiber (I := I) α j x =
+      trivFromE (I := I) α x ((chartModelBasis E) j) := rfl
+  rw [heq]
+  have hbase : x ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
+    chartLeviCivitaGoodSet_mem_baseSet (I := I) hx
+  exact trivToE_trivFromE (I := I) α hbase ((chartModelBasis E) j)
+
+/-! ### Christoffel correction at a chart-α good-set point -/
+
+private lemma christoffelCorrection_alpha_basis_apply
+    (g : SmoothRiemannianMetric I M) (α : M)
+    (i j : Fin (Module.finrank ℝ E)) {x : M}
+    (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
+    christoffelCorrection (I := I) g α x ((chartModelBasis E) j)
+        (chartBasisVecFiber (I := I) α i x) =
+      ∑ k : Fin (Module.finrank ℝ E),
+        chartChristoffel (I := I) g α i j k (extChartAt I α x) •
+          (chartModelBasis E) k := by
+  classical
+  rw [christoffelCorrection_apply (I := I) g α x ((chartModelBasis E) j)
+        (chartBasisVecFiber (I := I) α i x)]
+  -- `trivToE α x (chartBasisVecFiber α i x) = e_i` (round-trip).
+  have hbase : x ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
+    chartLeviCivitaGoodSet_mem_baseSet (I := I) hx
+  have h_round : trivToE (I := I) α x (chartBasisVecFiber (I := I) α i x) =
+      (chartModelBasis E) i := by
+    have heq : chartBasisVecFiber (I := I) α i x =
+        trivFromE (I := I) α x ((chartModelBasis E) i) := rfl
+    rw [heq]
+    exact trivToE_trivFromE (I := I) α hbase ((chartModelBasis E) i)
+  rw [h_round]
+  have hrepr_basis : ∀ (r s : Fin (Module.finrank ℝ E)),
+      ((chartModelBasis E).repr ((chartModelBasis E) r)) s =
+        if r = s then (1 : ℝ) else 0 := by
+    intro r s
+    rw [Module.Basis.repr_self]
+    by_cases h : r = s
+    · subst h; simp
+    · simp [h]
+  rw [Finset.sum_eq_single i (fun i' _ hi'_ne_i => ?_) (fun hi_mem => ?_)]
+  · rw [Finset.sum_eq_single j (fun j' _ hj'_ne_j => ?_) (fun hj_mem => ?_)]
+    · have hrepr_ii : ((chartModelBasis E).repr ((chartModelBasis E) i)) i = 1 := by
+        rw [hrepr_basis i i, if_pos rfl]
+      have hrepr_jj : ((chartModelBasis E).repr ((chartModelBasis E) j)) j = 1 := by
+        rw [hrepr_basis j j, if_pos rfl]
+      rw [hrepr_ii, hrepr_jj]
+      refine Finset.sum_congr rfl (fun k _ => ?_)
+      ring_nf
+    · have hrepr_jj' : ((chartModelBasis E).repr ((chartModelBasis E) j)) j' = 0 := by
+        rw [hrepr_basis j j', if_neg (fun h => hj'_ne_j h.symm)]
+      refine Finset.sum_eq_zero (fun k _ => ?_)
+      rw [hrepr_jj']
+      simp
+    · exact (hj_mem (Finset.mem_univ j)).elim
+  · refine Finset.sum_eq_zero (fun j' _ => ?_)
+    refine Finset.sum_eq_zero (fun k _ => ?_)
+    have hrepr_ii' : ((chartModelBasis E).repr ((chartModelBasis E) i)) i' = 0 := by
+      rw [hrepr_basis i i', if_neg (fun h => hi'_ne_i h.symm)]
+    rw [hrepr_ii']
+    simp
+  · exact (hi_mem (Finset.mem_univ i)).elim
+
+/-! ### Levi-Civita on the chart-α basis section at chart-α good-set points -/
+
+private lemma LeviCivita_chartBasisVec_alpha_basis_apply [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (α : M)
+    (i j : Fin (Module.finrank ℝ E)) {x : M}
+    (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
+    (LeviCivita (I := I) g).toFun
+        (fun b : M => chartBasisVecFiber (I := I) α j b) x
+        (chartBasisVecFiber (I := I) α i x) =
+      ∑ k : Fin (Module.finrank ℝ E),
+        chartChristoffel (I := I) g α i j k (extChartAt I α x) •
+          chartBasisVecFiber (I := I) α k x := by
+  classical
+  have hY_at : MDiffAt (T% (fun b : M => chartBasisVecFiber (I := I) α j b)) x :=
+    chartBasisVec_alpha_mdifferentiableAt (I := I) α j hx
+  rw [LeviCivita_chart_apply (I := I) g α hx hY_at
+        (chartBasisVecFiber (I := I) α i x)]
+  rw [chartLeviCivita_apply (I := I) g α
+        (fun b : M => chartBasisVecFiber (I := I) α j b) hx
+        (chartBasisVecFiber (I := I) α i x)]
+  rw [fderiv_chartE_chartBasisVec_alpha_eq_zero (I := I) α j hx]
+  rw [show
+        chartE_section_repr (I := I) α
+          (fun b : M => chartBasisVecFiber (I := I) α j b) x =
+        (chartModelBasis E) j from
+      chartE_section_repr_chartBasisVec_alpha_apply (I := I) α j hx]
+  simp only [ContinuousLinearMap.zero_apply, zero_add]
+  rw [christoffelCorrection_alpha_basis_apply (I := I) g α i j hx]
+  rw [map_sum]
+  refine Finset.sum_congr rfl (fun k _ => ?_)
+  rw [(trivFromE (I := I) α x).map_smul]
+  rfl
+
+/-! ### `extDerivFun f` paired with the chart-α Levi-Civita derivative -/
+
+private lemma extDerivFun_LeviCivita_chartBasisVec_alpha_basis [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M)
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (α : M)
+    (i j : Fin (Module.finrank ℝ E)) {x : M}
+    (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
+    extDerivFun (I := I) f x
+        ((LeviCivita (I := I) g).toFun
+          (fun b : M => chartBasisVecFiber (I := I) α j b) x
+          (chartBasisVecFiber (I := I) α i x)) =
+      ∑ k : Fin (Module.finrank ℝ E),
+        chartChristoffel (I := I) g α i j k (extChartAt I α x) *
+          partialDeriv (E := E) k (scalarOnE (I := I) α f) (extChartAt I α x) := by
+  classical
+  rw [LeviCivita_chartBasisVec_alpha_basis_apply (I := I) g α i j hx]
+  have h_distribute :
+      extDerivFun (I := I) f x
+          (∑ k : Fin (Module.finrank ℝ E),
+            chartChristoffel (I := I) g α i j k (extChartAt I α x) •
+              chartBasisVecFiber (I := I) α k x) =
+        ∑ k : Fin (Module.finrank ℝ E),
+          chartChristoffel (I := I) g α i j k (extChartAt I α x) *
+            extDerivFun (I := I) f x (chartBasisVecFiber (I := I) α k x) := by
+    rw [map_sum]
+    refine Finset.sum_congr rfl (fun k _ => ?_)
+    rw [show (extDerivFun (I := I) f x)
+            (chartChristoffel (I := I) g α i j k (extChartAt I α x) •
+              chartBasisVecFiber (I := I) α k x) =
+          chartChristoffel (I := I) g α i j k (extChartAt I α x) •
+            (extDerivFun (I := I) f x) (chartBasisVecFiber (I := I) α k x) from
+        (extDerivFun (I := I) f x).map_smul
+          (chartChristoffel (I := I) g α i j k (extChartAt I α x))
+          (chartBasisVecFiber (I := I) α k x)]
+    rw [smul_eq_mul]
+  have h_summand : ∀ (k : Fin (Module.finrank ℝ E)),
+      extDerivFun (I := I) f x (chartBasisVecFiber (I := I) α k x) =
+        partialDeriv (E := E) k (scalarOnE (I := I) α f) (extChartAt I α x) := by
+    intro k
+    exact extDerivFun_chartBasisVec_alpha_apply_of_mem (I := I) hf α k hx
+  refine h_distribute.trans ?_
+  refine Finset.sum_congr rfl (fun k _ => ?_)
+  rw [h_summand k]
+
+/-! ### The chart-α matrix identity at general good-set points -/
+
+/-- **Chart-α matrix identity (unconditional, on the chart-α good set).** For
+a chart base point `α : M`, a smooth scalar `f : M → ℝ`, and a manifold point
+`x ∈ chartLeviCivitaGoodSet α`, the abstract Hessian evaluated on the chart-α
+basis pair `(chartBasisVecFiber α i x, chartBasisVecFiber α j x)` equals the
+chart-α tensor Hessian entry `chartHessianTensor g α f i j x`. -/
+theorem chartAlphaMatrixIdentity_holds_on_goodSet [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) {x : M}
+    (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
+    (i j : Fin (Module.finrank ℝ E)) :
+    abstractHessian (I := I) g f x
+        (chartBasisVecFiber (I := I) α i x)
+        (chartBasisVecFiber (I := I) α j x) =
+      chartHessianTensor (I := I) g α f i j x := by
+  classical
+  rw [abstractHessian_apply]
+  set θ : Π b : M, TangentSpace I b →L[ℝ] ℝ := extDerivFun (I := I) f with hθ_def
+  set Y : Π b : M, TangentSpace I b :=
+    fun b : M => chartBasisVecFiber (I := I) α j b with hY_def
+  have hθ_at : MDiffAtCotangent θ x := by
+    have hext_smooth := cotangentCov_extDerivFun_smooth (I := I) hf
+    exact (hext_smooth x).mdifferentiableAt (by simp)
+  have hY_at : MDiffAt (T% Y) x :=
+    chartBasisVec_alpha_mdifferentiableAt (I := I) α j hx
+  have hpair := cotangentCov_dualPairing (LeviCivita (I := I) g) hθ_at hY_at
+    (chartBasisVecFiber (I := I) α i x)
+  have hYx : Y x = chartBasisVecFiber (I := I) α j x := rfl
+  have hkey :
+      ((cotangentCov (LeviCivita (I := I) g)).toFun θ x
+            (chartBasisVecFiber (I := I) α i x))
+          (chartBasisVecFiber (I := I) α j x) =
+        extDerivFun (I := I) (fun b => θ b (Y b)) x
+            (chartBasisVecFiber (I := I) α i x) -
+          θ x ((LeviCivita (I := I) g).toFun Y x
+            (chartBasisVecFiber (I := I) α i x)) := by
+    rw [← hYx]
+    linarith [hpair]
+  rw [hkey]
+  have hLHS := extDerivFun_pairing_chartBasisVec_alpha_apply (I := I) hf α i j hx
+  have hRHS_2 := extDerivFun_LeviCivita_chartBasisVec_alpha_basis (I := I) g hf α i j hx
+  rw [hLHS, hRHS_2]
+  rw [chartHessianTensor_def]
+
+/-- **Chart-α matrix identity (unconditional, on the chart-α source).** For
+`x ∈ (chartAt H α).source`, the chart-α matrix identity holds. -/
+theorem chartAlphaMatrixIdentity_holds [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) {x : M}
+    (hx : x ∈ (chartAt H α).source)
+    (i j : Fin (Module.finrank ℝ E)) :
+    abstractHessian (I := I) g f x
+        (chartBasisVecFiber (I := I) α i x)
+        (chartBasisVecFiber (I := I) α j x) =
+      chartHessianTensor (I := I) g α f i j x := by
+  classical
+  have hx_src_ext : x ∈ (extChartAt I α).source := by
+    rwa [extChartAt_source_eq_chartAt_source]
+  have hx_tgt : extChartAt I α x ∈ (extChartAt I α).target :=
+    (extChartAt I α).map_source hx_src_ext
+  have hx_int : extChartAt I α x ∈ interior ((extChartAt I α).target : Set E) :=
+    extChartAt_target_subset_interior_of_boundaryless (I := I) α hx_tgt
+  have hbase : x ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
+    rw [trivializationAt_baseSet_eq_chartAt_source]; exact hx
+  have hx_good : x ∈ chartLeviCivitaGoodSet (I := I) α :=
+    mem_chartLeviCivitaGoodSet_iff.mpr ⟨hx_src_ext, hbase, hx_int⟩
+  exact chartAlphaMatrixIdentity_holds_on_goodSet
+    (I := I) (M := M) g α hf hx_good i j
 
 end Connection
 end Integral

@@ -293,7 +293,7 @@ lemma chartVossWeylLaplacian_expand_hypBearing
     unfold partialDeriv
     rw [fderiv_fun_mul (𝕜 := ℝ) hu hv]
     simp [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
-      smul_eq_mul, mul_comm]
+      smul_eq_mul]
   -- Rewrite the numerator using Leibniz.
   rw [show (∑ i : Fin (Module.finrank ℝ E),
             partialDeriv (E := E) i
@@ -451,7 +451,7 @@ lemma partialDeriv_gradChartCoeffOnE_expand
             partialDeriv (E := E) j (scalarOnE (I := I) α f) y') y := by
     -- LHS = `fderiv ℝ (gradChartCoeffOnE g α f i) y (e_i)`.
     -- gradChartCoeffOnE g α f i = fun y' => ∑_j G^{ij}_{y'} · ∂_j f̃(y'), definitionally.
-    change (fderiv ℝ (gradChartCoeffOnE (I := I) g α f i) y) ((Module.finBasis ℝ E) i) =
+    change (fderiv ℝ (gradChartCoeffOnE (I := I) g α f i) y) ((chartModelBasis E) i) =
         ∑ j : Fin (Module.finrank ℝ E),
           partialDeriv (E := E) i
             (fun y' : E => chartInvGramOnE (I := I) g α i j y' *
@@ -488,7 +488,7 @@ lemma partialDeriv_gradChartCoeffOnE_expand
   -- Use `fderiv_fun_mul`. Note `hF j` provides differentiability of `partialDeriv j (scalarOnE α f)`,
   -- which definitionally equals `fun y' => fderiv ℝ (scalarOnE α f) y' (e_j)`.
   have hF_unfolded : DifferentiableAt ℝ
-      (fun y' : E => fderiv ℝ (scalarOnE (I := I) α f) y' ((Module.finBasis ℝ E) j)) y :=
+      (fun y' : E => fderiv ℝ (scalarOnE (I := I) α f) y' ((chartModelBasis E) j)) y :=
     hF j
   rw [fderiv_fun_mul (𝕜 := ℝ) (hG j) hF_unfolded]
   -- `((c y · df) + ((dc) · c)) (b i) = c y · df (b i) + dc (b i) · c y`
@@ -500,14 +500,14 @@ lemma partialDeriv_gradChartCoeffOnE_expand
   -- by `partialDeriv_def`.
   change chartInvGramOnE (I := I) g α i j y *
       ((fderiv ℝ (partialDeriv (E := E) j (scalarOnE (I := I) α f)) y)
-        ((Module.finBasis ℝ E) i)) +
-      (fderiv ℝ (scalarOnE (I := I) α f) y) ((Module.finBasis ℝ E) j) *
-        (fderiv ℝ (chartInvGramOnE (I := I) g α i j) y) ((Module.finBasis ℝ E) i) =
-    (fderiv ℝ (chartInvGramOnE (I := I) g α i j) y) ((Module.finBasis ℝ E) i) *
-        (fderiv ℝ (scalarOnE (I := I) α f) y) ((Module.finBasis ℝ E) j) +
+        ((chartModelBasis E) i)) +
+      (fderiv ℝ (scalarOnE (I := I) α f) y) ((chartModelBasis E) j) *
+        (fderiv ℝ (chartInvGramOnE (I := I) g α i j) y) ((chartModelBasis E) i) =
+    (fderiv ℝ (chartInvGramOnE (I := I) g α i j) y) ((chartModelBasis E) i) *
+        (fderiv ℝ (scalarOnE (I := I) α f) y) ((chartModelBasis E) j) +
       chartInvGramOnE (I := I) g α i j y *
         ((fderiv ℝ (partialDeriv (E := E) j (scalarOnE (I := I) α f)) y)
-          ((Module.finBasis ℝ E) i))
+          ((chartModelBasis E) i))
   ring
 
 /-! ## The trace identity in chart coordinates
@@ -1465,35 +1465,35 @@ existing `Family.lean` Jacobi infrastructure applies. -/
 /-- The line through `y₀` in the direction `e_l`. Smooth (in fact affine), with
 derivative `e_l`. -/
 private noncomputable def jacobiLine (y₀ : E) (l : Fin (Module.finrank ℝ E)) :
-    ℝ → E := fun s => y₀ + s • (Module.finBasis ℝ E) l
+    ℝ → E := fun s => y₀ + s • (chartModelBasis E) l
 
 /-- The line is differentiable, with derivative `e_l`. -/
 private lemma hasDerivAt_jacobiLine (y₀ : E) (l : Fin (Module.finrank ℝ E))
     (s : ℝ) :
-    HasDerivAt (jacobiLine (E := E) y₀ l) ((Module.finBasis ℝ E) l) s := by
+    HasDerivAt (jacobiLine (E := E) y₀ l) ((chartModelBasis E) l) s := by
   -- f(s) = y₀ + s • e_l. f'(s) = e_l.
-  have h₁ : HasDerivAt (fun s : ℝ => s • (Module.finBasis ℝ E) l)
-      ((1 : ℝ) • (Module.finBasis ℝ E) l) s :=
-    (hasDerivAt_id s).smul_const ((Module.finBasis ℝ E) l)
-  have h₁' : HasDerivAt (fun s : ℝ => s • (Module.finBasis ℝ E) l)
-      ((Module.finBasis ℝ E) l) s := by
-    rw [show ((1 : ℝ) • (Module.finBasis ℝ E) l) = (Module.finBasis ℝ E) l from
+  have h₁ : HasDerivAt (fun s : ℝ => s • (chartModelBasis E) l)
+      ((1 : ℝ) • (chartModelBasis E) l) s :=
+    (hasDerivAt_id s).smul_const ((chartModelBasis E) l)
+  have h₁' : HasDerivAt (fun s : ℝ => s • (chartModelBasis E) l)
+      ((chartModelBasis E) l) s := by
+    rw [show ((1 : ℝ) • (chartModelBasis E) l) = (chartModelBasis E) l from
       one_smul ℝ _] at h₁
     exact h₁
   have h₂ : HasDerivAt (fun _ : ℝ => y₀) (0 : E) s := hasDerivAt_const s y₀
   have h := h₂.add h₁'
   -- The derivative is `0 + e_l = e_l`.
-  have hcoerce : (0 : E) + (Module.finBasis ℝ E) l = (Module.finBasis ℝ E) l := zero_add _
+  have hcoerce : (0 : E) + (chartModelBasis E) l = (chartModelBasis E) l := zero_add _
   rw [hcoerce] at h
   -- Identify `(fun _ => y₀) + (fun s => s • e_l) = jacobiLine y₀ l`.
-  have hfun_eq : (fun s : ℝ => y₀ + s • (Module.finBasis ℝ E) l) =
+  have hfun_eq : (fun s : ℝ => y₀ + s • (chartModelBasis E) l) =
       jacobiLine (E := E) y₀ l := by
     funext s; rfl
   -- The HasDerivAt above is for the sum function `(fun _ => y₀) + (fun s => s • e_l)`.
-  have h' : HasDerivAt (fun s : ℝ => y₀ + s • (Module.finBasis ℝ E) l)
-      ((Module.finBasis ℝ E) l) s := by
-    have hpoint : ((fun _ : ℝ => y₀) + fun s : ℝ => s • (Module.finBasis ℝ E) l) =
-        (fun s : ℝ => y₀ + s • (Module.finBasis ℝ E) l) := by
+  have h' : HasDerivAt (fun s : ℝ => y₀ + s • (chartModelBasis E) l)
+      ((chartModelBasis E) l) s := by
+    have hpoint : ((fun _ : ℝ => y₀) + fun s : ℝ => s • (chartModelBasis E) l) =
+        (fun s : ℝ => y₀ + s • (chartModelBasis E) l) := by
       funext s; simp [Pi.add_apply]
     rw [hpoint] at h
     exact h
@@ -2256,8 +2256,8 @@ lemma partialDeriv2_chartInvGramOnE_eq
       partialDeriv (E := E) i F y₀ := by
     change (fderiv ℝ (fun y' : E => partialDeriv (E := E) j
         (chartInvGramOnE (I := I) g α k l) y') y₀)
-        ((Module.finBasis ℝ E) i) =
-      (fderiv ℝ F y₀) ((Module.finBasis ℝ E) i)
+        ((chartModelBasis E) i) =
+      (fderiv ℝ F y₀) ((chartModelBasis E) i)
     rw [hfderiv_eq]
   rw [hpartial_eq]
   -- Differentiability hypotheses for the per-summand product rule.
@@ -2304,7 +2304,7 @@ lemma partialDeriv2_chartInvGramOnE_eq
               partialDeriv (E := E) i
                 (fun y' : E => partialDeriv (E := E) j
                   (chartGramOnE (I := I) g α p q) y') y₀) := by
-    change (fderiv ℝ F y₀) ((Module.finBasis ℝ E) i) = _
+    change (fderiv ℝ F y₀) ((chartModelBasis E) i) = _
     rw [hF_def]
     rw [show
       fderiv ℝ (fun y' : E =>

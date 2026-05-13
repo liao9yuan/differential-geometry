@@ -100,8 +100,8 @@ private theorem sum_g_inner_T_self_eq_invGram_sum
       ∑ k : Fin (Module.finrank ℝ E),
         ∑ l : Fin (Module.finrank ℝ E),
           chartInvGramMatrix (I := I) g x x k l *
-            g.inner x (T ((Module.finBasis ℝ E) k))
-              (T ((Module.finBasis ℝ E) l)) := by
+            g.inner x (T ((chartModelBasis E) k))
+              (T ((chartModelBasis E) l)) := by
   classical
   -- Define Hb(z, w) := g.inner x (T z) (T w) as a continuous bilinear form.
   set Hb : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
@@ -142,7 +142,7 @@ admits an inverse-Gram-weighted formula: `b.repr v n = ∑_m G^{nm} g.inner x v 
 private lemma g_inner_modelBasis_eq_chartGram
     (g : SmoothRiemannianMetric I M) (x : M)
     (i j : Fin (Module.finrank ℝ E)) :
-    g.inner x ((Module.finBasis ℝ E) i) ((Module.finBasis ℝ E) j) =
+    g.inner x ((chartModelBasis E) i) ((chartModelBasis E) j) =
       chartGramMatrix (I := I) g x x i j := by
   classical
   rw [chartGramMatrix_apply]
@@ -155,12 +155,12 @@ private lemma g_inner_modelBasis_eq_chartGram
 private lemma g_inner_modelBasis_first_decomp
     (g : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) (n : Fin (Module.finrank ℝ E)) :
-    g.inner x v ((Module.finBasis ℝ E) n) =
+    g.inner x v ((chartModelBasis E) n) =
       ∑ p : Fin (Module.finrank ℝ E),
-        (Module.finBasis ℝ E).repr v p *
+        (chartModelBasis E).repr v p *
           chartGramMatrix (I := I) g x x p n := by
   classical
-  set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := Module.finBasis ℝ E with hb_def
+  set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := chartModelBasis E with hb_def
   -- Decompose v in the model basis.
   have hv_eq : v = ∑ p : Fin (Module.finrank ℝ E), b.repr v p • b p :=
     (Module.Basis.sum_repr b v).symm
@@ -188,12 +188,12 @@ $$
 private lemma modelBasis_repr_eq_invGram_sum
     (g : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) (n : Fin (Module.finrank ℝ E)) :
-    (Module.finBasis ℝ E).repr v n =
+    (chartModelBasis E).repr v n =
       ∑ m : Fin (Module.finrank ℝ E),
         chartInvGramMatrix (I := I) g x x n m *
-          g.inner x v ((Module.finBasis ℝ E) m) := by
+          g.inner x v ((chartModelBasis E) m) := by
   classical
-  set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := Module.finBasis ℝ E with hb_def
+  set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := chartModelBasis E with hb_def
   -- ∑ m G^{nm} g(v, b_m) = ∑ m G^{nm} (∑ p (b.repr v p) G_{pm})
   --                     = ∑ p (b.repr v p) (∑ m G^{nm} G_{pm})
   -- Using G^{-1}: ∑ m G^{nm} G_{pm} = δ^n_p, so the result is (b.repr v n).
@@ -315,7 +315,7 @@ theorem frobeniusSq_grad_vector_eq_chartHessFrobeniusSq
         (fun b : M => gradFun (I := I) g f b) x =
       chartHessFrobeniusSq (I := I) g f x := by
   classical
-  set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := Module.finBasis ℝ E with hb_def
+  set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := chartModelBasis E with hb_def
   -- Define T : T_x M →L T_x M via T(v) := (LeviCivita g) (∇f) x v.
   set T : TangentSpace I x →L[ℝ] TangentSpace I x :=
     (LeviCivita (I := I) g).toFun

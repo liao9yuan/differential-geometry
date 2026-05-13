@@ -455,23 +455,23 @@ lemma mfderiv_chartBasisVecFiber_of_mdifferentiableAt
   rw [show mfderiv 𝓘(ℝ, E) 𝓘(ℝ, ℝ) (scalarOnE (I := I) α f) (φ x)
       = fderiv ℝ (scalarOnE (I := I) α f) (φ x) from
         mfderiv_eq_fderiv (𝕜 := ℝ) (f := scalarOnE (I := I) α f)]
-  -- Identify `mfderiv (extChartAt I α) x (chartBasisVecFiber α i x) = (Module.finBasis ℝ E) i`.
+  -- Identify `mfderiv (extChartAt I α) x (chartBasisVecFiber α i x) = (chartModelBasis E) i`.
   have hmfderiv_chartBasis :
       mfderiv I 𝓘(ℝ, E) (extChartAt I α) x
           (chartBasisVecFiber (I := I) α i x)
-        = (Module.finBasis ℝ E) i := by
+        = (chartModelBasis E) i := by
     rw [← TangentBundle.continuousLinearMapAt_trivializationAt (𝕜 := ℝ) (I := I)
       (x₀ := α) (x := x) hxchart]
     set T : Bundle.Trivialization E (π E (TangentSpace I : M → Type _)) :=
       trivializationAt E (TangentSpace I) α
-    have heq : chartBasisVecFiber (I := I) α i x = T.symm x ((Module.finBasis ℝ E) i) :=
+    have heq : chartBasisVecFiber (I := I) α i x = T.symm x ((chartModelBasis E) i) :=
       rfl
     rw [heq]
     have h_apply :
-        T.continuousLinearMapAt ℝ x (T.symm x ((Module.finBasis ℝ E) i))
-          = (Module.finBasis ℝ E) i := by
-      have heqsymm : T.symm x ((Module.finBasis ℝ E) i)
-            = T.symmL ℝ x ((Module.finBasis ℝ E) i) := by
+        T.continuousLinearMapAt ℝ x (T.symm x ((chartModelBasis E) i))
+          = (chartModelBasis E) i := by
+      have heqsymm : T.symm x ((chartModelBasis E) i)
+            = T.symmL ℝ x ((chartModelBasis E) i) := by
         rw [Trivialization.symmL_apply]
       rw [heqsymm, Trivialization.continuousLinearMapAt_symmL T (b := x) hbase]
     exact h_apply
@@ -701,7 +701,7 @@ private lemma gradChartCoeff_contMDiffOn
       have hfderiv : ContDiffOn ℝ ∞ (fderiv ℝ (scalarOnE (I := I) α f))
           (interior (extChartAt I α).target) :=
         hbase_int.fderiv_of_isOpen isOpen_interior (by rw [ENat.coe_top_add_one])
-      have hconst : ContDiffOn ℝ ∞ (fun _ : E => (Module.finBasis ℝ E) j)
+      have hconst : ContDiffOn ℝ ∞ (fun _ : E => (chartModelBasis E) j)
           (interior (extChartAt I α).target) := contDiffOn_const
       exact hfderiv.clm_apply hconst
     have hpartialM : ContMDiffOn 𝓘(ℝ, E) 𝓘(ℝ) ∞

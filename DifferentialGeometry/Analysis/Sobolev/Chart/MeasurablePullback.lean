@@ -69,21 +69,21 @@ function `extChartAtExt α` is Borel-measurable by
 
 /-- Borel-measurable extension of `extChartAt I α` to all of `M`, taking `0`
 outside the chart source. -/
-private def extChartAtExt (α : M) : M → E := by
+def extChartAtExt (α : M) : M → E := by
   classical
   exact fun x => if x ∈ (chartAt H α).source then extChartAt I α x else 0
 
-private lemma extChartAtExt_apply_of_mem (α : M)
+lemma extChartAtExt_apply_of_mem (α : M)
     {x : M} (hx : x ∈ (chartAt H α).source) :
     extChartAtExt (I := I) α x = extChartAt I α x := by
   unfold extChartAtExt; simp [hx]
 
-private lemma extChartAtExt_apply_of_notMem (α : M)
+lemma extChartAtExt_apply_of_notMem (α : M)
     {x : M} (hx : x ∉ (chartAt H α).source) :
     extChartAtExt (I := I) α x = 0 := by
   unfold extChartAtExt; simp [hx]
 
-private lemma extChartAtExt_measurable (α : M) :
+lemma extChartAtExt_measurable (α : M) :
     Measurable (extChartAtExt (I := I) (M := M) α) := by
   classical
   have h_src_open : IsOpen ((chartAt H α).source) := (chartAt H α).open_source

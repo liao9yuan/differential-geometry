@@ -347,10 +347,10 @@ private theorem ibp_per_index
     (hφ_int : tsupport φ ⊆ I.interior M)
     (i : Fin (Module.finrank ℝ E)) :
     ∫ y, vwIntegrandOnE (I := I) g α X i y *
-        fderiv ℝ (phiOnE (I := I) α φ) y ((Module.finBasis ℝ E) i)
+        fderiv ℝ (phiOnE (I := I) α φ) y ((chartModelBasis E) i)
         ∂(modelHaar (E := E)) =
       -∫ y, fderiv ℝ (vwIntegrandOnE (I := I) g α X i) y
-            ((Module.finBasis ℝ E) i) *
+            ((chartModelBasis E) i) *
           phiOnE (I := I) α φ y
         ∂(modelHaar (E := E)) := by
   have hphi_smooth : ContDiff ℝ ∞ (phiOnE (I := I) α φ) :=
@@ -400,7 +400,7 @@ private theorem ibp_per_index
     hI1_smooth.continuous.integrable_of_hasCompactSupport hI1_compactSupp
   have hI2_smooth : ContDiff ℝ ∞
       (fun y => fderiv ℝ (vwIntegrandOnE (I := I) g α X i) y
-            ((Module.finBasis ℝ E) i) * phiOnE (I := I) α φ y) := by
+            ((chartModelBasis E) i) * phiOnE (I := I) α φ y) := by
     refine contDiff_of_smooth_on_open_zero_outside
       (U := interior (extChartAt I α).target)
       isOpen_interior
@@ -412,11 +412,11 @@ private theorem ibp_per_index
           (interior (extChartAt I α).target) :=
         (vwIntegrandOnE_contDiffOn_interior_target (I := I) g α X i).fderiv_of_isOpen
           isOpen_interior (by rw [ENat.coe_top_add_one])
-      have hbasis_const : ContDiffOn ℝ ∞ (fun _ : E => (Module.finBasis ℝ E) i)
+      have hbasis_const : ContDiffOn ℝ ∞ (fun _ : E => (chartModelBasis E) i)
           (interior (extChartAt I α).target) := contDiffOn_const
       have hpartial : ContDiffOn ℝ ∞
           (fun y => fderiv ℝ (vwIntegrandOnE (I := I) g α X i) y
-              ((Module.finBasis ℝ E) i)) (interior (extChartAt I α).target) :=
+              ((chartModelBasis E) i)) (interior (extChartAt I α).target) :=
         hvw_fderiv.clm_apply hbasis_const
       exact hpartial.mul ((phiOnE_contDiff (I := I) α hφ hφ_compactSupp hφ_supp hφ_int).contDiffOn)
     · intro y hy
@@ -430,16 +430,16 @@ private theorem ibp_per_index
       rw [hphi_zero, mul_zero]
   have hI2_compactSupp : HasCompactSupport
       (fun y => fderiv ℝ (vwIntegrandOnE (I := I) g α X i) y
-            ((Module.finBasis ℝ E) i) * phiOnE (I := I) α φ y) :=
+            ((chartModelBasis E) i) * phiOnE (I := I) α φ y) :=
     hphi_compactSupp.mul_left
   have hf'g_int : Integrable
       (fun y => fderiv ℝ (vwIntegrandOnE (I := I) g α X i) y
-            ((Module.finBasis ℝ E) i) * phiOnE (I := I) α φ y)
+            ((chartModelBasis E) i) * phiOnE (I := I) α φ y)
       (modelHaar (E := E)) :=
     hI2_smooth.continuous.integrable_of_hasCompactSupport hI2_compactSupp
   have hI3_smooth : ContDiff ℝ ∞
       (fun y => vwIntegrandOnE (I := I) g α X i y *
-          fderiv ℝ (phiOnE (I := I) α φ) y ((Module.finBasis ℝ E) i)) := by
+          fderiv ℝ (phiOnE (I := I) α φ) y ((chartModelBasis E) i)) := by
     refine contDiff_of_smooth_on_open_zero_outside
       (U := interior (extChartAt I α).target)
       isOpen_interior
@@ -452,10 +452,10 @@ private theorem ibp_per_index
         exact this
       have hphi_fderiv : ContDiffOn ℝ ∞ (fderiv ℝ (phiOnE (I := I) α φ))
           (interior (extChartAt I α).target) := hphi_fderiv_total.contDiffOn
-      have hbasis_const : ContDiffOn ℝ ∞ (fun _ : E => (Module.finBasis ℝ E) i)
+      have hbasis_const : ContDiffOn ℝ ∞ (fun _ : E => (chartModelBasis E) i)
           (interior (extChartAt I α).target) := contDiffOn_const
       have hpartial : ContDiffOn ℝ ∞
-          (fun y => fderiv ℝ (phiOnE (I := I) α φ) y ((Module.finBasis ℝ E) i))
+          (fun y => fderiv ℝ (phiOnE (I := I) α φ) y ((chartModelBasis E) i))
           (interior (extChartAt I α).target) :=
         hphi_fderiv.clm_apply hbasis_const
       exact (vwIntegrandOnE_contDiffOn_interior_target (I := I) g α X i).mul hpartial
@@ -482,7 +482,7 @@ private theorem ibp_per_index
       simp
   have hI3_compactSupp : HasCompactSupport
       (fun y => vwIntegrandOnE (I := I) g α X i y *
-          fderiv ℝ (phiOnE (I := I) α φ) y ((Module.finBasis ℝ E) i)) := by
+          fderiv ℝ (phiOnE (I := I) α φ) y ((chartModelBasis E) i)) := by
     refine HasCompactSupport.intro
       (chartImageOfTsupport_isCompact (I := I) α hφ_compactSupp hφ_supp) ?_
     intro y hy
@@ -508,7 +508,7 @@ private theorem ibp_per_index
     simp
   have hfg'_int : Integrable
       (fun y => vwIntegrandOnE (I := I) g α X i y *
-          fderiv ℝ (phiOnE (I := I) α φ) y ((Module.finBasis ℝ E) i))
+          fderiv ℝ (phiOnE (I := I) α φ) y ((chartModelBasis E) i))
       (modelHaar (E := E)) :=
     hI3_smooth.continuous.integrable_of_hasCompactSupport hI3_compactSupp
   exact integral_mul_fderiv_eq_neg_fderiv_mul_of_integrable hf'g_int hfg'_int hfg_int
@@ -725,7 +725,7 @@ private lemma lhs_chart_target
     ∫ x, localDivergenceWithin (I := I) g α X x * φ x
         ∂(chartLocalMeasure (I := I) g α) =
       ∫ y, (∑ i : Fin (Module.finrank ℝ E),
-          fderiv ℝ (vwIntegrandOnE (I := I) g α X i) y ((Module.finBasis ℝ E) i)) *
+          fderiv ℝ (vwIntegrandOnE (I := I) g α X i) y ((chartModelBasis E) i)) *
             phiOnE (I := I) α φ y
         ∂(modelHaar (E := E)) := by
   classical
@@ -738,12 +738,12 @@ private lemma lhs_chart_target
   -- outside the target), then show the two integrands agree pointwise on the
   -- target via `setIntegral_congr_fun`.
   rw [show ∫ y, (∑ i : Fin (Module.finrank ℝ E),
-        fderiv ℝ (vwIntegrandOnE (I := I) g α X i) y ((Module.finBasis ℝ E) i)) *
+        fderiv ℝ (vwIntegrandOnE (I := I) g α X i) y ((chartModelBasis E) i)) *
           phiOnE (I := I) α φ y
         ∂(modelHaar (E := E)) =
       ∫ y in (extChartAt I α).target,
         (∑ i : Fin (Module.finrank ℝ E),
-          fderiv ℝ (vwIntegrandOnE (I := I) g α X i) y ((Module.finBasis ℝ E) i)) *
+          fderiv ℝ (vwIntegrandOnE (I := I) g α X i) y ((chartModelBasis E) i)) *
             phiOnE (I := I) α φ y
         ∂(modelHaar (E := E)) from ?_]
   · -- Now both sides are set integrals over target. Apply setIntegral_congr_fun.
@@ -785,7 +785,7 @@ private lemma lhs_chart_target
         rw [phiOnE_apply_of_mem (I := I) α φ hyT, hφ_zero]
       symm
       change (∑ i : Fin (Module.finrank ℝ E),
-          fderiv ℝ (vwIntegrandOnE (I := I) g α X i) y ((Module.finBasis ℝ E) i)) *
+          fderiv ℝ (vwIntegrandOnE (I := I) g α X i) y ((chartModelBasis E) i)) *
             phiOnE (I := I) α φ y = 0
       rw [hphi_zero, mul_zero]
   · -- Convert the E-integral to a target-integral using zero-outside-target.
@@ -807,7 +807,7 @@ private lemma rhs_chart_target
     ∫ x, tangentSectionAction (I := I) X φ x ∂(chartLocalMeasure (I := I) g α) =
       ∫ y, (∑ i : Fin (Module.finrank ℝ E),
           vwIntegrandOnE (I := I) g α X i y *
-            fderiv ℝ (phiOnE (I := I) α φ) y ((Module.finBasis ℝ E) i))
+            fderiv ℝ (phiOnE (I := I) α φ) y ((chartModelBasis E) i))
         ∂(modelHaar (E := E)) := by
   classical
   have htsa_meas : Measurable (tangentSectionAction (I := I) X φ) :=
@@ -818,12 +818,12 @@ private lemma rhs_chart_target
   have hT_meas := measurableSet_extChartAt_target (I := I) α
   rw [show ∫ y, (∑ i : Fin (Module.finrank ℝ E),
         vwIntegrandOnE (I := I) g α X i y *
-          fderiv ℝ (phiOnE (I := I) α φ) y ((Module.finBasis ℝ E) i))
+          fderiv ℝ (phiOnE (I := I) α φ) y ((chartModelBasis E) i))
         ∂(modelHaar (E := E)) =
       ∫ y in (extChartAt I α).target,
         (∑ i : Fin (Module.finrank ℝ E),
           vwIntegrandOnE (I := I) g α X i y *
-            fderiv ℝ (phiOnE (I := I) α φ) y ((Module.finBasis ℝ E) i))
+            fderiv ℝ (phiOnE (I := I) α φ) y ((chartModelBasis E) i))
         ∂(modelHaar (E := E)) from ?_]
   · refine setIntegral_congr_fun hT_meas ?_
     intro y hyT
@@ -867,9 +867,9 @@ private lemma rhs_chart_target
       -- Now identify chartCoeffOnE / chartDensityOnE with their underlying defs.
       change chartDensity (I := I) g α ((extChartAt I α).symm y) *
           (chartCoeff (I := I) α X i ((extChartAt I α).symm y) *
-            fderiv ℝ (scalarOnE (I := I) α φ) y ((Module.finBasis ℝ E) i))
+            fderiv ℝ (scalarOnE (I := I) α φ) y ((chartModelBasis E) i))
         = chartCoeffOnE (I := I) α X i y * chartDensityOnE (I := I) g α y *
-            fderiv ℝ (scalarOnE (I := I) α φ) y ((Module.finBasis ℝ E) i)
+            fderiv ℝ (scalarOnE (I := I) α φ) y ((chartModelBasis E) i)
       have h_coeff : chartCoeffOnE (I := I) α X i y =
           chartCoeff (I := I) α X i ((extChartAt I α).symm y) := rfl
       have h_density : chartDensityOnE (I := I) g α y =
@@ -945,7 +945,7 @@ private lemma summand_int_lhs
     (hφ_int : tsupport φ ⊆ I.interior M)
     (i : Fin (Module.finrank ℝ E)) :
     Integrable (fun y =>
-      fderiv ℝ (vwIntegrandOnE (I := I) g α X i) y ((Module.finBasis ℝ E) i) *
+      fderiv ℝ (vwIntegrandOnE (I := I) g α X i) y ((chartModelBasis E) i) *
         phiOnE (I := I) α φ y) (modelHaar (E := E)) := by
   have hphi_smooth : ContDiff ℝ ∞ (phiOnE (I := I) α φ) :=
     phiOnE_contDiff (I := I) α hφ hφ_compactSupp hφ_supp hφ_int
@@ -953,7 +953,7 @@ private lemma summand_int_lhs
     phiOnE_hasCompactSupport (I := I) α hφ_compactSupp hφ_supp
   have hI_smooth : ContDiff ℝ ∞
       (fun y => fderiv ℝ (vwIntegrandOnE (I := I) g α X i) y
-          ((Module.finBasis ℝ E) i) * phiOnE (I := I) α φ y) := by
+          ((chartModelBasis E) i) * phiOnE (I := I) α φ y) := by
     refine contDiff_of_smooth_on_open_zero_outside
       (U := interior (extChartAt I α).target)
       isOpen_interior
@@ -965,11 +965,11 @@ private lemma summand_int_lhs
           (interior (extChartAt I α).target) :=
         (vwIntegrandOnE_contDiffOn_interior_target (I := I) g α X i).fderiv_of_isOpen
           isOpen_interior (by rw [ENat.coe_top_add_one])
-      have hbasis_const : ContDiffOn ℝ ∞ (fun _ : E => (Module.finBasis ℝ E) i)
+      have hbasis_const : ContDiffOn ℝ ∞ (fun _ : E => (chartModelBasis E) i)
           (interior (extChartAt I α).target) := contDiffOn_const
       have hpartial : ContDiffOn ℝ ∞
           (fun y => fderiv ℝ (vwIntegrandOnE (I := I) g α X i) y
-              ((Module.finBasis ℝ E) i)) (interior (extChartAt I α).target) :=
+              ((chartModelBasis E) i)) (interior (extChartAt I α).target) :=
         hvw_fderiv.clm_apply hbasis_const
       exact hpartial.mul hphi_smooth.contDiffOn
     · intro y hy
@@ -983,7 +983,7 @@ private lemma summand_int_lhs
       rw [hphi_zero, mul_zero]
   have hI_compactSupp : HasCompactSupport
       (fun y => fderiv ℝ (vwIntegrandOnE (I := I) g α X i) y
-          ((Module.finBasis ℝ E) i) * phiOnE (I := I) α φ y) :=
+          ((chartModelBasis E) i) * phiOnE (I := I) α φ y) :=
     hphi_compactSupp.mul_left
   exact hI_smooth.continuous.integrable_of_hasCompactSupport hI_compactSupp
 
@@ -997,13 +997,13 @@ private lemma summand_int_rhs
     (i : Fin (Module.finrank ℝ E)) :
     Integrable (fun y =>
       vwIntegrandOnE (I := I) g α X i y *
-        fderiv ℝ (phiOnE (I := I) α φ) y ((Module.finBasis ℝ E) i))
+        fderiv ℝ (phiOnE (I := I) α φ) y ((chartModelBasis E) i))
       (modelHaar (E := E)) := by
   have hphi_smooth : ContDiff ℝ ∞ (phiOnE (I := I) α φ) :=
     phiOnE_contDiff (I := I) α hφ hφ_compactSupp hφ_supp hφ_int
   have hI_smooth : ContDiff ℝ ∞
       (fun y => vwIntegrandOnE (I := I) g α X i y *
-          fderiv ℝ (phiOnE (I := I) α φ) y ((Module.finBasis ℝ E) i)) := by
+          fderiv ℝ (phiOnE (I := I) α φ) y ((chartModelBasis E) i)) := by
     refine contDiff_of_smooth_on_open_zero_outside
       (U := interior (extChartAt I α).target)
       isOpen_interior
@@ -1013,10 +1013,10 @@ private lemma summand_int_rhs
     · have hphi_fderiv : ContDiffOn ℝ ∞ (fderiv ℝ (phiOnE (I := I) α φ))
           (interior (extChartAt I α).target) :=
         (hphi_smooth.fderiv_right (m := ∞) (by rw [ENat.coe_top_add_one])).contDiffOn
-      have hbasis_const : ContDiffOn ℝ ∞ (fun _ : E => (Module.finBasis ℝ E) i)
+      have hbasis_const : ContDiffOn ℝ ∞ (fun _ : E => (chartModelBasis E) i)
           (interior (extChartAt I α).target) := contDiffOn_const
       have hpartial : ContDiffOn ℝ ∞
-          (fun y => fderiv ℝ (phiOnE (I := I) α φ) y ((Module.finBasis ℝ E) i))
+          (fun y => fderiv ℝ (phiOnE (I := I) α φ) y ((chartModelBasis E) i))
           (interior (extChartAt I α).target) :=
         hphi_fderiv.clm_apply hbasis_const
       exact (vwIntegrandOnE_contDiffOn_interior_target (I := I) g α X i).mul hpartial
@@ -1041,7 +1041,7 @@ private lemma summand_int_rhs
       rw [hfderiv_zero]; simp
   have hI_compactSupp : HasCompactSupport
       (fun y => vwIntegrandOnE (I := I) g α X i y *
-          fderiv ℝ (phiOnE (I := I) α φ) y ((Module.finBasis ℝ E) i)) := by
+          fderiv ℝ (phiOnE (I := I) α φ) y ((chartModelBasis E) i)) := by
     refine HasCompactSupport.intro
       (chartImageOfTsupport_isCompact (I := I) α hφ_compactSupp hφ_supp) ?_
     intro y hy
@@ -1090,10 +1090,10 @@ theorem chart_local_ibp_within
   -- Step 1: Distribute the sum on LHS.
   have h_lhs_distrib :
       (fun y : E => (∑ i : Fin (Module.finrank ℝ E),
-            fderiv ℝ (vwIntegrandOnE (I := I) g α X i) y ((Module.finBasis ℝ E) i)) *
+            fderiv ℝ (vwIntegrandOnE (I := I) g α X i) y ((chartModelBasis E) i)) *
               phiOnE (I := I) α φ y) =
         (fun y : E => ∑ i : Fin (Module.finrank ℝ E),
-          fderiv ℝ (vwIntegrandOnE (I := I) g α X i) y ((Module.finBasis ℝ E) i) *
+          fderiv ℝ (vwIntegrandOnE (I := I) g α X i) y ((chartModelBasis E) i) *
             phiOnE (I := I) α φ y) := by
     funext y
     rw [Finset.sum_mul]
@@ -1103,11 +1103,11 @@ theorem chart_local_ibp_within
         (fun i _ => summand_int_lhs (I := I) g α X hφ hφ_compactSupp hφ_supp hφ_int i)]
   -- Step 3: Apply per-index IBP to each summand.
   have h_each : ∀ i : Fin (Module.finrank ℝ E),
-      ∫ y, fderiv ℝ (vwIntegrandOnE (I := I) g α X i) y ((Module.finBasis ℝ E) i) *
+      ∫ y, fderiv ℝ (vwIntegrandOnE (I := I) g α X i) y ((chartModelBasis E) i) *
           phiOnE (I := I) α φ y
         ∂(modelHaar (E := E))
       = -∫ y, vwIntegrandOnE (I := I) g α X i y *
-            fderiv ℝ (phiOnE (I := I) α φ) y ((Module.finBasis ℝ E) i)
+            fderiv ℝ (phiOnE (I := I) α φ) y ((chartModelBasis E) i)
           ∂(modelHaar (E := E)) := by
     intro i
     have h_ibp := ibp_per_index (I := I) g α X hφ hφ_compactSupp hφ_supp hφ_int i

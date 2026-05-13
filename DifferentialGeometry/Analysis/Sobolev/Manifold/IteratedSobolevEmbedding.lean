@@ -774,7 +774,7 @@ variable [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
 
 /-- For a compact manifold, the toEuclidean image of `(extChartAt I α) ''
 (tsupport ρ_α)` is compact and contained in `chartTargetEuclid α`. -/
-private lemma toEuclidean_extChartAt_tsupport_pou_compact_subset
+lemma toEuclidean_extChartAt_tsupport_pou_compact_subset
     [CompactSpace M] (α : M) :
     IsCompact (toEuclidean ''
         ((extChartAt I α) ''
@@ -808,7 +808,7 @@ private lemma toEuclidean_extChartAt_tsupport_pou_compact_subset
 
 /-- `chartPushedRaw I α (ρ_α · u)` has tsupport contained in the toEuclidean
 image of `(extChartAt I α) '' tsupport ρ_α`. -/
-private lemma tsupport_chartPushedRaw_pou_mul_subset
+lemma tsupport_chartPushedRaw_pou_mul_subset
     [CompactSpace M] (α : M) (u : M → ℝ) :
     tsupport (chartPushedRaw (I := I) (M := M) α
       (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
@@ -860,7 +860,7 @@ private lemma tsupport_chartPushedRaw_pou_mul_subset
   exact hK_closed.closure_subset_iff.mpr h_supp_sub
 
 /-- The compact support of `chartPushedRaw I α (ρ_α · u)`. -/
-private lemma hasCompactSupport_chartPushedRaw_pou_mul
+lemma hasCompactSupport_chartPushedRaw_pou_mul
     [CompactSpace M] (α : M) (u : M → ℝ) :
     HasCompactSupport (chartPushedRaw (I := I) (M := M) α
       (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
@@ -873,7 +873,7 @@ private lemma hasCompactSupport_chartPushedRaw_pou_mul
     (tsupport_chartPushedRaw_pou_mul_subset (I := I) (M := M) α u)
 
 /-- `chartPushedRaw I α (ρ_α · u)` has tsupport contained in `chartTargetEuclid α`. -/
-private lemma tsupport_chartPushedRaw_pou_mul_subset_target
+lemma tsupport_chartPushedRaw_pou_mul_subset_target
     [CompactSpace M] (α : M) (u : M → ℝ) :
     tsupport (chartPushedRaw (I := I) (M := M) α
       (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
@@ -884,7 +884,7 @@ private lemma tsupport_chartPushedRaw_pou_mul_subset_target
 
 /-- For `u ∈ MemWkpChart g k p`, the chart-pushed-raw of `ρ_α · u` is in
 `MemWkp k p` of `chartTargetEuclid α`. -/
-private lemma memWkp_chartPushedRaw_pou_mul_of_memWkpChart
+lemma memWkp_chartPushedRaw_pou_mul_of_memWkpChart
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     {k : ℕ} {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     {u : M → ℝ} (hu : MemWkpChart (I := I) (M := M) g k p u) (α : M) :

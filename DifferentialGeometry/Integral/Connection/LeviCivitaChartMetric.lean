@@ -80,7 +80,7 @@ $$
     (Y^E)_i(\varphi^{-1} y)\,(Z^E)_j(\varphi^{-1} y)\,G^E_{ij}(y),
 $$
 where `Y^E := chartE_section_repr α Y`, `Z^E := chartE_section_repr α Z`,
-`G^E_{ij} := chartGramOnE g α i j`, and `(Y^E)_i := (Module.finBasis ℝ E).repr ∘ Y^E`.
+`G^E_{ij} := chartGramOnE g α i j`, and `(Y^E)_i := (chartModelBasis E).repr ∘ Y^E`.
 This is the chart-pullback of `b ↦ g.inner b (Y b) (Z b)` to the chart target,
 expressed via `g_inner_eq_chart_sum`. -/
 
@@ -90,9 +90,9 @@ def chartInnerOnE (g : SmoothRiemannianMetric I M) (α : M)
     (Y Z : Π x : M, TangentSpace I x) (y : E) : ℝ :=
   ∑ i : Fin (Module.finrank ℝ E),
     ∑ j : Fin (Module.finrank ℝ E),
-      ((Module.finBasis ℝ E).repr
+      ((chartModelBasis E).repr
           (chartE_section_repr (I := I) α Y ((extChartAt I α).symm y))) i *
-        ((Module.finBasis ℝ E).repr
+        ((chartModelBasis E).repr
           (chartE_section_repr (I := I) α Z ((extChartAt I α).symm y))) j *
         chartGramOnE (I := I) g α i j y
 
@@ -103,9 +103,9 @@ def chartInnerOnE (g : SmoothRiemannianMetric I M) (α : M)
     chartInnerOnE (I := I) g α Y Z y =
       ∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
-          ((Module.finBasis ℝ E).repr
+          ((chartModelBasis E).repr
               (chartE_section_repr (I := I) α Y ((extChartAt I α).symm y))) i *
-            ((Module.finBasis ℝ E).repr
+            ((chartModelBasis E).repr
               (chartE_section_repr (I := I) α Z ((extChartAt I α).symm y))) j *
             chartGramOnE (I := I) g α i j y := rfl
 
@@ -149,10 +149,10 @@ linear functional `b.coord i` preserves differentiability. -/
 private lemma differentiableAt_repr_comp
     {f : E → E} {y : E} (hf : DifferentiableAt ℝ f y)
     (i : Fin (Module.finrank ℝ E)) :
-    DifferentiableAt ℝ (fun y => ((Module.finBasis ℝ E).repr (f y)) i) y := by
+    DifferentiableAt ℝ (fun y => ((chartModelBasis E).repr (f y)) i) y := by
   classical
   -- `b.repr · i = b.coord i` is a continuous linear functional on `E`.
-  set ci : E →L[ℝ] ℝ := ((Module.finBasis ℝ E).coord i).toContinuousLinearMap
+  set ci : E →L[ℝ] ℝ := ((chartModelBasis E).coord i).toContinuousLinearMap
   have hclm : DifferentiableAt ℝ ci (f y) := ci.differentiableAt
   exact hclm.comp y hf
 
@@ -201,14 +201,14 @@ private lemma chartInnerOnE_eventuallyEq
 private def chartReprComp
     (α : M) (Y : Π x : M, TangentSpace I x)
     (i : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
-  ((Module.finBasis ℝ E).repr
+  ((chartModelBasis E).repr
       (chartE_section_repr (I := I) α Y ((extChartAt I α).symm y))) i
 
 @[simp] private lemma chartReprComp_apply
     (α : M) (Y : Π x : M, TangentSpace I x)
     (i : Fin (Module.finrank ℝ E)) (y : E) :
     chartReprComp (I := I) α Y i y =
-      ((Module.finBasis ℝ E).repr
+      ((chartModelBasis E).repr
           (chartE_section_repr (I := I) α Y ((extChartAt I α).symm y))) i := rfl
 
 /-- The component function `chartReprComp α Y i` is differentiable at `φ x`
@@ -235,12 +235,12 @@ private lemma chartReprComp_fderiv_apply
     (hY : MDiffAt (T% Y) x)
     (i : Fin (Module.finrank ℝ E)) (w : E) :
     fderiv ℝ (chartReprComp (I := I) α Y i) (extChartAt I α x) w =
-      ((Module.finBasis ℝ E).repr
+      ((chartModelBasis E).repr
           (fderiv ℝ (chartE_section_repr (I := I) α Y ∘ (extChartAt I α).symm)
             (extChartAt I α x) w)) i := by
   classical
   set fE : E → E := chartE_section_repr (I := I) α Y ∘ (extChartAt I α).symm
-  set ci : E →L[ℝ] ℝ := ((Module.finBasis ℝ E).coord i).toContinuousLinearMap
+  set ci : E →L[ℝ] ℝ := ((chartModelBasis E).coord i).toContinuousLinearMap
   -- `chartReprComp α Y i = ci ∘ fE` (definitionally).
   have hfun : chartReprComp (I := I) α Y i = ci ∘ fE := rfl
   -- Apply `fderiv_comp` with the chain rule.
@@ -467,17 +467,17 @@ private lemma fderiv_chartGramOnE_apply_eq_partialDeriv_sum
     {y₀ : E} (_hy₀ : y₀ ∈ interior (extChartAt I α).target) (w : E) :
     fderiv ℝ (chartGramOnE (I := I) g α i j) y₀ w =
       ∑ k : Fin (Module.finrank ℝ E),
-        ((Module.finBasis ℝ E).repr w) k *
+        ((chartModelBasis E).repr w) k *
           partialDeriv (E := E) k (chartGramOnE (I := I) g α i j) y₀ := by
   classical
   have hw_decomp : w =
       ∑ k : Fin (Module.finrank ℝ E),
-        ((Module.finBasis ℝ E).repr w) k • (Module.finBasis ℝ E) k :=
-    (Module.Basis.sum_repr (Module.finBasis ℝ E) w).symm
+        ((chartModelBasis E).repr w) k • (chartModelBasis E) k :=
+    (Module.Basis.sum_repr (chartModelBasis E) w).symm
   rw [show (fderiv ℝ (chartGramOnE (I := I) g α i j) y₀) w =
         (fderiv ℝ (chartGramOnE (I := I) g α i j) y₀)
           (∑ k : Fin (Module.finrank ℝ E),
-            ((Module.finBasis ℝ E).repr w) k • (Module.finBasis ℝ E) k) from by
+            ((chartModelBasis E).repr w) k • (chartModelBasis E) k) from by
     rw [← hw_decomp]]
   rw [map_sum]
   refine Finset.sum_congr rfl (fun k _ => ?_)
@@ -487,16 +487,16 @@ private lemma fderiv_chartGramOnE_apply_eq_partialDeriv_sum
 /-! ## The `b.repr` of the Christoffel-correction CLM -/
 
 /-- The `i`-th component of `christoffelCorrection α x Y v` under
-`(Module.finBasis ℝ E).repr`. -/
+`(chartModelBasis E).repr`. -/
 private lemma christoffelCorrection_repr_apply
     (g : SmoothRiemannianMetric I M) (α : M) (x : M) (Y : E)
     (v : TangentSpace I x) (i : Fin (Module.finrank ℝ E)) :
-    ((Module.finBasis ℝ E).repr
+    ((chartModelBasis E).repr
         (christoffelCorrection (I := I) g α x Y v)) i =
       ∑ k : Fin (Module.finrank ℝ E),
         ∑ l : Fin (Module.finrank ℝ E),
-          ((Module.finBasis ℝ E).repr (trivToE (I := I) α x v)) k *
-            ((Module.finBasis ℝ E).repr Y) l *
+          ((chartModelBasis E).repr (trivToE (I := I) α x v)) k *
+            ((chartModelBasis E).repr Y) l *
             chartChristoffel (I := I) g α k l i (extChartAt I α x) := by
   classical
   rw [christoffelCorrection_apply]
@@ -537,26 +537,26 @@ private lemma mfderiv_g_inner_chart_expand
     (mfderiv I 𝓘(ℝ) (fun b => g.inner b (Y b) (Z b)) x) v =
       ∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
-          (((Module.finBasis ℝ E).repr
+          (((chartModelBasis E).repr
               (fderiv ℝ
                 (chartE_section_repr (I := I) α Y ∘ (extChartAt I α).symm)
                 (extChartAt I α x) (trivToE (I := I) α x v))) i *
-              ((Module.finBasis ℝ E).repr
+              ((chartModelBasis E).repr
                 (chartE_section_repr (I := I) α Z x)) j *
               chartGramOnE (I := I) g α i j (extChartAt I α x) +
-            ((Module.finBasis ℝ E).repr
+            ((chartModelBasis E).repr
               (chartE_section_repr (I := I) α Y x)) i *
-              ((Module.finBasis ℝ E).repr
+              ((chartModelBasis E).repr
                 (fderiv ℝ
                   (chartE_section_repr (I := I) α Z ∘ (extChartAt I α).symm)
                   (extChartAt I α x) (trivToE (I := I) α x v))) j *
               chartGramOnE (I := I) g α i j (extChartAt I α x) +
-            ((Module.finBasis ℝ E).repr
+            ((chartModelBasis E).repr
               (chartE_section_repr (I := I) α Y x)) i *
-              ((Module.finBasis ℝ E).repr
+              ((chartModelBasis E).repr
                 (chartE_section_repr (I := I) α Z x)) j *
               (∑ k : Fin (Module.finrank ℝ E),
-                ((Module.finBasis ℝ E).repr (trivToE (I := I) α x v)) k *
+                ((chartModelBasis E).repr (trivToE (I := I) α x v)) k *
                   ((∑ l : Fin (Module.finrank ℝ E),
                       chartChristoffel (I := I) g α k i l (extChartAt I α x) *
                         chartGramOnE (I := I) g α l j (extChartAt I α x)) +
@@ -576,17 +576,17 @@ private lemma mfderiv_g_inner_chart_expand
   refine Finset.sum_congr rfl (fun i _ => ?_)
   refine Finset.sum_congr rfl (fun j _ => ?_)
   have hreprY : chartReprComp (I := I) α Y i (extChartAt I α x) =
-      ((Module.finBasis ℝ E).repr
+      ((chartModelBasis E).repr
         (chartE_section_repr (I := I) α Y x)) i := by
     unfold chartReprComp; rw [hxinv]
   have hreprZ : chartReprComp (I := I) α Z j (extChartAt I α x) =
-      ((Module.finBasis ℝ E).repr
+      ((chartModelBasis E).repr
         (chartE_section_repr (I := I) α Z x)) j := by
     unfold chartReprComp; rw [hxinv]
   have hfderivY :
       fderiv ℝ (chartReprComp (I := I) α Y i) (extChartAt I α x)
         (trivToE (I := I) α x v) =
-      ((Module.finBasis ℝ E).repr
+      ((chartModelBasis E).repr
           (fderiv ℝ
             (chartE_section_repr (I := I) α Y ∘ (extChartAt I α).symm)
             (extChartAt I α x) (trivToE (I := I) α x v))) i :=
@@ -594,7 +594,7 @@ private lemma mfderiv_g_inner_chart_expand
   have hfderivZ :
       fderiv ℝ (chartReprComp (I := I) α Z j) (extChartAt I α x)
         (trivToE (I := I) α x v) =
-      ((Module.finBasis ℝ E).repr
+      ((chartModelBasis E).repr
           (fderiv ℝ
             (chartE_section_repr (I := I) α Z ∘ (extChartAt I α).symm)
             (extChartAt I α x) (trivToE (I := I) α x v))) j :=
@@ -603,11 +603,11 @@ private lemma mfderiv_g_inner_chart_expand
   rw [fderiv_chartGramOnE_apply_eq_partialDeriv_sum (I := I) g α i j hx_int
     (trivToE (I := I) α x v)]
   rw [show (∑ k : Fin (Module.finrank ℝ E),
-      ((Module.finBasis ℝ E).repr (trivToE (I := I) α x v)) k *
+      ((chartModelBasis E).repr (trivToE (I := I) α x v)) k *
         partialDeriv (E := E) k (chartGramOnE (I := I) g α i j)
           (extChartAt I α x)) =
     ∑ k : Fin (Module.finrank ℝ E),
-      ((Module.finBasis ℝ E).repr (trivToE (I := I) α x v)) k *
+      ((chartModelBasis E).repr (trivToE (I := I) α x v)) k *
         ((∑ l : Fin (Module.finrank ℝ E),
             chartChristoffel (I := I) g α k i l (extChartAt I α x) *
               chartGramOnE (I := I) g α l j (extChartAt I α x)) +
@@ -628,17 +628,17 @@ private lemma g_inner_chartLeviCivita_Y_Z_expand
     g.inner x (chartLeviCivita (I := I) g α Y x v) (Z x) =
       ∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
-          ( ((Module.finBasis ℝ E).repr
+          ( ((chartModelBasis E).repr
                 (fderiv ℝ
                   (chartE_section_repr (I := I) α Y ∘ (extChartAt I α).symm)
                   (extChartAt I α x) (trivToE (I := I) α x v))) i +
             ∑ k : Fin (Module.finrank ℝ E),
               ∑ l : Fin (Module.finrank ℝ E),
-                ((Module.finBasis ℝ E).repr (trivToE (I := I) α x v)) k *
-                  ((Module.finBasis ℝ E).repr
+                ((chartModelBasis E).repr (trivToE (I := I) α x v)) k *
+                  ((chartModelBasis E).repr
                     (chartE_section_repr (I := I) α Y x)) l *
                   chartChristoffel (I := I) g α k l i (extChartAt I α x) ) *
-            ((Module.finBasis ℝ E).repr
+            ((chartModelBasis E).repr
                 (chartE_section_repr (I := I) α Z x)) j *
             chartGramOnE (I := I) g α i j (extChartAt I α x) := by
   classical
@@ -677,17 +677,17 @@ private lemma g_inner_chartLeviCivita_Y_Z_expand
           christoffelCorrection (I := I) g α x
             (chartE_section_repr (I := I) α Y x) v) from
     trivToE_trivFromE (I := I) α hx_base _]
-  rw [show ((Module.finBasis ℝ E).repr
+  rw [show ((chartModelBasis E).repr
         (fderiv ℝ
           (chartE_section_repr (I := I) α Y ∘ (extChartAt I α).symm)
           (extChartAt I α x) (trivToE (I := I) α x v) +
           christoffelCorrection (I := I) g α x
             (chartE_section_repr (I := I) α Y x) v)) i =
-      ((Module.finBasis ℝ E).repr
+      ((chartModelBasis E).repr
             (fderiv ℝ
               (chartE_section_repr (I := I) α Y ∘ (extChartAt I α).symm)
               (extChartAt I α x) (trivToE (I := I) α x v))) i +
-        ((Module.finBasis ℝ E).repr
+        ((chartModelBasis E).repr
             (christoffelCorrection (I := I) g α x
               (chartE_section_repr (I := I) α Y x) v)) i from by
     rw [map_add]; rfl]
@@ -703,16 +703,16 @@ private lemma g_inner_Y_chartLeviCivita_Z_expand
     g.inner x (Y x) (chartLeviCivita (I := I) g α Z x v) =
       ∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
-          ((Module.finBasis ℝ E).repr
+          ((chartModelBasis E).repr
               (chartE_section_repr (I := I) α Y x)) i *
-            ( ((Module.finBasis ℝ E).repr
+            ( ((chartModelBasis E).repr
                   (fderiv ℝ
                     (chartE_section_repr (I := I) α Z ∘ (extChartAt I α).symm)
                     (extChartAt I α x) (trivToE (I := I) α x v))) j +
               ∑ k : Fin (Module.finrank ℝ E),
                 ∑ l : Fin (Module.finrank ℝ E),
-                  ((Module.finBasis ℝ E).repr (trivToE (I := I) α x v)) k *
-                    ((Module.finBasis ℝ E).repr
+                  ((chartModelBasis E).repr (trivToE (I := I) α x v)) k *
+                    ((chartModelBasis E).repr
                       (chartE_section_repr (I := I) α Z x)) l *
                     chartChristoffel (I := I) g α k l j (extChartAt I α x) ) *
             chartGramOnE (I := I) g α i j (extChartAt I α x) := by
@@ -752,17 +752,17 @@ private lemma g_inner_Y_chartLeviCivita_Z_expand
           christoffelCorrection (I := I) g α x
             (chartE_section_repr (I := I) α Z x) v) from
     trivToE_trivFromE (I := I) α hx_base _]
-  rw [show ((Module.finBasis ℝ E).repr
+  rw [show ((chartModelBasis E).repr
         (fderiv ℝ
           (chartE_section_repr (I := I) α Z ∘ (extChartAt I α).symm)
           (extChartAt I α x) (trivToE (I := I) α x v) +
           christoffelCorrection (I := I) g α x
             (chartE_section_repr (I := I) α Z x) v)) j =
-      ((Module.finBasis ℝ E).repr
+      ((chartModelBasis E).repr
             (fderiv ℝ
               (chartE_section_repr (I := I) α Z ∘ (extChartAt I α).symm)
               (extChartAt I α x) (trivToE (I := I) α x v))) j +
-        ((Module.finBasis ℝ E).repr
+        ((chartModelBasis E).repr
             (christoffelCorrection (I := I) g α x
               (chartE_section_repr (I := I) α Z x) v)) j from by
     rw [map_add]; rfl]
@@ -1050,34 +1050,34 @@ theorem chartLeviCivita_isMetricCompatibleOn
   -- Step (a): distribute the RHS_Y `(A_i + Christ_Y_i) * D_j * G_ij`.
   have hRHS_Y_distr :
     (∑ i : Fin n, ∑ j : Fin n,
-        ( ((Module.finBasis ℝ E).repr
+        ( ((chartModelBasis E).repr
               (fderiv ℝ
                 (chartE_section_repr (I := I) α Y ∘ (extChartAt I α).symm)
                 (extChartAt I α x) (trivToE (I := I) α x v))) i +
           ∑ k : Fin n,
             ∑ l : Fin n,
-              ((Module.finBasis ℝ E).repr (trivToE (I := I) α x v)) k *
-                ((Module.finBasis ℝ E).repr
+              ((chartModelBasis E).repr (trivToE (I := I) α x v)) k *
+                ((chartModelBasis E).repr
                   (chartE_section_repr (I := I) α Y x)) l *
                 chartChristoffel (I := I) g α k l i (extChartAt I α x) ) *
-          ((Module.finBasis ℝ E).repr
+          ((chartModelBasis E).repr
               (chartE_section_repr (I := I) α Z x)) j *
           chartGramOnE (I := I) g α i j (extChartAt I α x)) =
     (∑ i : Fin n, ∑ j : Fin n,
-        ((Module.finBasis ℝ E).repr
+        ((chartModelBasis E).repr
             (fderiv ℝ
               (chartE_section_repr (I := I) α Y ∘ (extChartAt I α).symm)
               (extChartAt I α x) (trivToE (I := I) α x v))) i *
-          ((Module.finBasis ℝ E).repr
+          ((chartModelBasis E).repr
               (chartE_section_repr (I := I) α Z x)) j *
           chartGramOnE (I := I) g α i j (extChartAt I α x)) +
     (∑ i : Fin n, ∑ j : Fin n,
         (∑ k : Fin n, ∑ l : Fin n,
-          ((Module.finBasis ℝ E).repr (trivToE (I := I) α x v)) k *
-            ((Module.finBasis ℝ E).repr
+          ((chartModelBasis E).repr (trivToE (I := I) α x v)) k *
+            ((chartModelBasis E).repr
               (chartE_section_repr (I := I) α Y x)) l *
             chartChristoffel (I := I) g α k l i (extChartAt I α x)) *
-          ((Module.finBasis ℝ E).repr
+          ((chartModelBasis E).repr
               (chartE_section_repr (I := I) α Z x)) j *
           chartGramOnE (I := I) g α i j (extChartAt I α x)) := by
     rw [← Finset.sum_add_distrib]
@@ -1088,33 +1088,33 @@ theorem chartLeviCivita_isMetricCompatibleOn
   -- Step (b): distribute the RHS_Z `B_i * (C_j + Christ_Z_j) * G_ij`.
   have hRHS_Z_distr :
     (∑ i : Fin n, ∑ j : Fin n,
-        ((Module.finBasis ℝ E).repr
+        ((chartModelBasis E).repr
             (chartE_section_repr (I := I) α Y x)) i *
-          ( ((Module.finBasis ℝ E).repr
+          ( ((chartModelBasis E).repr
                 (fderiv ℝ
                   (chartE_section_repr (I := I) α Z ∘ (extChartAt I α).symm)
                   (extChartAt I α x) (trivToE (I := I) α x v))) j +
             ∑ k : Fin n,
               ∑ l : Fin n,
-                ((Module.finBasis ℝ E).repr (trivToE (I := I) α x v)) k *
-                  ((Module.finBasis ℝ E).repr
+                ((chartModelBasis E).repr (trivToE (I := I) α x v)) k *
+                  ((chartModelBasis E).repr
                     (chartE_section_repr (I := I) α Z x)) l *
                   chartChristoffel (I := I) g α k l j (extChartAt I α x) ) *
           chartGramOnE (I := I) g α i j (extChartAt I α x)) =
     (∑ i : Fin n, ∑ j : Fin n,
-        ((Module.finBasis ℝ E).repr
+        ((chartModelBasis E).repr
             (chartE_section_repr (I := I) α Y x)) i *
-          ((Module.finBasis ℝ E).repr
+          ((chartModelBasis E).repr
             (fderiv ℝ
               (chartE_section_repr (I := I) α Z ∘ (extChartAt I α).symm)
               (extChartAt I α x) (trivToE (I := I) α x v))) j *
           chartGramOnE (I := I) g α i j (extChartAt I α x)) +
     (∑ i : Fin n, ∑ j : Fin n,
-        ((Module.finBasis ℝ E).repr
+        ((chartModelBasis E).repr
             (chartE_section_repr (I := I) α Y x)) i *
           (∑ k : Fin n, ∑ l : Fin n,
-            ((Module.finBasis ℝ E).repr (trivToE (I := I) α x v)) k *
-              ((Module.finBasis ℝ E).repr
+            ((chartModelBasis E).repr (trivToE (I := I) α x v)) k *
+              ((chartModelBasis E).repr
                 (chartE_section_repr (I := I) α Z x)) l *
               chartChristoffel (I := I) g α k l j (extChartAt I α x)) *
           chartGramOnE (I := I) g α i j (extChartAt I α x)) := by
@@ -1127,26 +1127,26 @@ theorem chartLeviCivita_isMetricCompatibleOn
   -- Step (c): split the LHS into three pieces (term_A, term_BC, term_partial_G).
   have hLHS_split :
     (∑ i : Fin n, ∑ j : Fin n,
-        (((Module.finBasis ℝ E).repr
+        (((chartModelBasis E).repr
             (fderiv ℝ
               (chartE_section_repr (I := I) α Y ∘ (extChartAt I α).symm)
               (extChartAt I α x) (trivToE (I := I) α x v))) i *
-            ((Module.finBasis ℝ E).repr
+            ((chartModelBasis E).repr
               (chartE_section_repr (I := I) α Z x)) j *
             chartGramOnE (I := I) g α i j (extChartAt I α x) +
-          ((Module.finBasis ℝ E).repr
+          ((chartModelBasis E).repr
             (chartE_section_repr (I := I) α Y x)) i *
-            ((Module.finBasis ℝ E).repr
+            ((chartModelBasis E).repr
               (fderiv ℝ
                 (chartE_section_repr (I := I) α Z ∘ (extChartAt I α).symm)
                 (extChartAt I α x) (trivToE (I := I) α x v))) j *
             chartGramOnE (I := I) g α i j (extChartAt I α x) +
-          ((Module.finBasis ℝ E).repr
+          ((chartModelBasis E).repr
             (chartE_section_repr (I := I) α Y x)) i *
-            ((Module.finBasis ℝ E).repr
+            ((chartModelBasis E).repr
               (chartE_section_repr (I := I) α Z x)) j *
             (∑ k : Fin n,
-              ((Module.finBasis ℝ E).repr (trivToE (I := I) α x v)) k *
+              ((chartModelBasis E).repr (trivToE (I := I) α x v)) k *
                 ((∑ l : Fin n,
                     chartChristoffel (I := I) g α k i l (extChartAt I α x) *
                       chartGramOnE (I := I) g α l j (extChartAt I α x)) +
@@ -1154,28 +1154,28 @@ theorem chartLeviCivita_isMetricCompatibleOn
                     chartChristoffel (I := I) g α k j l (extChartAt I α x) *
                       chartGramOnE (I := I) g α l i (extChartAt I α x)))))) =
     (∑ i : Fin n, ∑ j : Fin n,
-        ((Module.finBasis ℝ E).repr
+        ((chartModelBasis E).repr
             (fderiv ℝ
               (chartE_section_repr (I := I) α Y ∘ (extChartAt I α).symm)
               (extChartAt I α x) (trivToE (I := I) α x v))) i *
-          ((Module.finBasis ℝ E).repr
+          ((chartModelBasis E).repr
             (chartE_section_repr (I := I) α Z x)) j *
           chartGramOnE (I := I) g α i j (extChartAt I α x)) +
     (∑ i : Fin n, ∑ j : Fin n,
-        ((Module.finBasis ℝ E).repr
+        ((chartModelBasis E).repr
             (chartE_section_repr (I := I) α Y x)) i *
-          ((Module.finBasis ℝ E).repr
+          ((chartModelBasis E).repr
             (fderiv ℝ
               (chartE_section_repr (I := I) α Z ∘ (extChartAt I α).symm)
               (extChartAt I α x) (trivToE (I := I) α x v))) j *
           chartGramOnE (I := I) g α i j (extChartAt I α x)) +
     (∑ i : Fin n, ∑ j : Fin n,
-        ((Module.finBasis ℝ E).repr
+        ((chartModelBasis E).repr
             (chartE_section_repr (I := I) α Y x)) i *
-          ((Module.finBasis ℝ E).repr
+          ((chartModelBasis E).repr
             (chartE_section_repr (I := I) α Z x)) j *
           (∑ k : Fin n,
-            ((Module.finBasis ℝ E).repr (trivToE (I := I) α x v)) k *
+            ((chartModelBasis E).repr (trivToE (I := I) α x v)) k *
               ((∑ l : Fin n,
                   chartChristoffel (I := I) g α k i l (extChartAt I α x) *
                     chartGramOnE (I := I) g α l j (extChartAt I α x)) +
@@ -1210,11 +1210,11 @@ theorem chartLeviCivita_isMetricCompatibleOn
   have hmatch :=
     christoffel_match
       (n := n)
-      (B := fun i => ((Module.finBasis ℝ E).repr
+      (B := fun i => ((chartModelBasis E).repr
         (chartE_section_repr (I := I) α Y x)) i)
-      (D := fun j => ((Module.finBasis ℝ E).repr
+      (D := fun j => ((chartModelBasis E).repr
         (chartE_section_repr (I := I) α Z x)) j)
-      (w := fun k => ((Module.finBasis ℝ E).repr (trivToE (I := I) α x v)) k)
+      (w := fun k => ((chartModelBasis E).repr (trivToE (I := I) α x v)) k)
       (G := fun a b => chartGramOnE (I := I) g α a b (extChartAt I α x))
       (Γ := fun a b c => chartChristoffel (I := I) g α a b c (extChartAt I α x))
       hGsymm

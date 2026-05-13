@@ -152,7 +152,7 @@ private lemma extChartAt_mapsTo_target_chart_source (α : M) :
 
 /-- The chart-basis vector identity: `mfderiv (extChartAt I α) x` applied to
 `chartBasisVecFiber α i x` returns the constant model-basis vector
-`(Module.finBasis ℝ E) i`, for any `α : M` and any `x` in the chart base set.
+`(chartModelBasis E) i`, for any `α : M` and any `x` in the chart base set.
 
 This is the key chart-basis duality that the boundaryless `mfderiv_chartBasisVecFiber`
 proves implicitly (as `hmfderiv_chartBasis`). It is intrinsic — it does not need
@@ -162,7 +162,7 @@ private lemma mfderiv_extChartAt_chartBasisVecFiber
     (i : Fin (Module.finrank ℝ E)) :
     mfderiv I 𝓘(ℝ, E) (extChartAt I α) x
         (chartBasisVecFiber (I := I) α i x)
-      = (Module.finBasis ℝ E) i := by
+      = (chartModelBasis E) i := by
   classical
   -- We work with the abbreviation `T` for the trivialization at `α`.
   let T : Bundle.Trivialization E (π E (TangentSpace I : M → Type _)) :=
@@ -182,14 +182,14 @@ private lemma mfderiv_extChartAt_chartBasisVecFiber
       (x₀ := α) (x := x) hx).symm
   rw [hmfderiv_eq]
   -- `chartBasisVecFiber α i x = T.symm x ((finBasis ℝ E) i)` (definition).
-  change T.continuousLinearMapAt ℝ x (T.symm x ((Module.finBasis ℝ E) i))
-    = (Module.finBasis ℝ E) i
+  change T.continuousLinearMapAt ℝ x (T.symm x ((chartModelBasis E) i))
+    = (chartModelBasis E) i
   -- `T.continuousLinearMapAt ℝ x (T.symmL ℝ x v) = v` on the base set.
-  rw [show T.symm x ((Module.finBasis ℝ E) i) =
-        T.symmL ℝ x ((Module.finBasis ℝ E) i) from by
+  rw [show T.symm x ((chartModelBasis E) i) =
+        T.symmL ℝ x ((chartModelBasis E) i) from by
       rw [Trivialization.symmL_apply]]
   exact Trivialization.continuousLinearMapAt_symmL (R := ℝ) T (b := x) hbase
-    ((Module.finBasis ℝ E) i)
+    ((chartModelBasis E) i)
 
 /-- Equality of `mfderivWithin (extChartAt I α) (chart source) x` with
 `mfderiv (extChartAt I α) x`, on a chart-source point. The chart source is open,

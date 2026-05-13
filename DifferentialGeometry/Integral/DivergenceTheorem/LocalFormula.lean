@@ -102,14 +102,14 @@ trivialization at `α`. On the trivialization base set, this satisfies
 the value is given by the trivialization's junk extension. -/
 def chartCoeff (α : M) (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (i : Fin (Module.finrank ℝ E)) : M → ℝ :=
-  fun x => (Module.finBasis ℝ E).repr
+  fun x => (chartModelBasis E).repr
     ((trivializationAt E (TangentSpace I) α) ⟨x, X x⟩).2 i
 
 @[simp] lemma chartCoeff_def (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (i : Fin (Module.finrank ℝ E)) (x : M) :
     chartCoeff (I := I) α X i x =
-      (Module.finBasis ℝ E).repr
+      (chartModelBasis E).repr
         ((trivializationAt E (TangentSpace I) α) ⟨x, X x⟩).2 i := rfl
 
 /-- On the chart base set, the smooth section `X` is reconstructed from its
@@ -130,7 +130,7 @@ lemma chartCoeff_recompose (α : M)
   -- And `L.symm v = T.symm x v`.
   have hLsymm : ∀ v : E, L.symm v = T.symm x v := fun _ => rfl
   -- Decompose `(T ⟨x, X x⟩).2` in the model basis.
-  set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := Module.finBasis ℝ E
+  set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := chartModelBasis E
   have hdecomp : (T ⟨x, X x⟩).2 =
       ∑ i, b.repr ((T ⟨x, X x⟩).2) i • b i := by
     have := (Module.Basis.sum_repr b ((T ⟨x, X x⟩).2))
@@ -170,7 +170,7 @@ lemma chartCoeff_contMDiffOn (α : M)
   -- Now extract the `i`-th model-basis coordinate, which is a continuous
   -- linear functional on `E`, hence smooth (every linear map on a
   -- finite-dimensional normed space is continuous).
-  set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := Module.finBasis ℝ E
+  set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := chartModelBasis E
   set Lcoord : E →L[ℝ] ℝ := (b.coord i).toContinuousLinearMap
   have hLcoord_contDiff : ContDiff ℝ ∞ (Lcoord : E → ℝ) := Lcoord.contDiff
   have hcomp : ContMDiffOn I 𝓘(ℝ) ∞
@@ -180,7 +180,7 @@ lemma chartCoeff_contMDiffOn (α : M)
   have heq : (Lcoord : E → ℝ) ∘ (fun x : M => (T ⟨x, X x⟩).2)
       = chartCoeff (I := I) α X i := by
     funext x
-    change Lcoord ((T ⟨x, X x⟩).2) = (Module.finBasis ℝ E).repr
+    change Lcoord ((T ⟨x, X x⟩).2) = (chartModelBasis E).repr
         ((trivializationAt E (TangentSpace I) α) ⟨x, X x⟩).2 i
     change (b.coord i) ((T ⟨x, X x⟩).2) = _
     rw [Module.Basis.coord_apply]
@@ -203,8 +203,8 @@ functions
   target;
 
 and the partial derivatives are then ordinary Fréchet partial derivatives in
-`E`. We use the model-space basis `Module.finBasis ℝ E` and write
-`partialDeriv y i u := fderiv ℝ u y (Module.finBasis ℝ E i)`.
+`E`. We use the model-space basis `chartModelBasis E` and write
+`partialDeriv y i u := fderiv ℝ u y (chartModelBasis E i)`.
 
 For the chart-invariance argument we will need only the value of the chart
 formula at `x` in the chart at `x` itself; smoothness on the chart base set is
@@ -224,7 +224,7 @@ def chartDensityOnE (g : SmoothRiemannianMetric I M) (α : M) : E → ℝ :=
 /-- The partial derivative of a function `u : E → ℝ` at `y : E` in the
 direction of the `i`-th model-basis vector. -/
 def partialDeriv (i : Fin (Module.finrank ℝ E)) (u : E → ℝ) (y : E) : ℝ :=
-  fderiv ℝ u y ((Module.finBasis ℝ E) i)
+  fderiv ℝ u y ((chartModelBasis E) i)
 
 /-- The chart-local Voss–Weyl divergence in the chart at `α`, as a function
 on `M`. The defining identity:
@@ -352,7 +352,7 @@ private lemma partialDeriv_contDiffOn_interior
     hu_int.fderiv_of_isOpen isOpen_interior
       (by rw [ENat.coe_top_add_one])
   -- Constant function `y ↦ basis i` is smooth.
-  have hconst : ContDiffOn ℝ ∞ (fun _ : E => (Module.finBasis ℝ E) i)
+  have hconst : ContDiffOn ℝ ∞ (fun _ : E => (chartModelBasis E) i)
       (interior s) := contDiffOn_const
   -- Apply `ContDiffOn.clm_apply`.
   exact hfderiv.clm_apply hconst

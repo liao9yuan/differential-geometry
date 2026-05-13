@@ -72,7 +72,7 @@ lemma chartBasisVecFiber_recompose
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
     (v : TangentSpace I x) :
     v = ∑ i : Fin (Module.finrank ℝ E),
-      ((Module.finBasis ℝ E).repr
+      ((chartModelBasis E).repr
           ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ x v)) i •
         chartBasisVecFiber (I := I) α i x := by
   classical
@@ -83,7 +83,7 @@ lemma chartBasisVecFiber_recompose
       T.symmL ℝ x (T.continuousLinearMapAt ℝ x v) = v :=
     T.symmL_continuousLinearMapAt (R := ℝ) hx v
   set vE : E := T.continuousLinearMapAt ℝ x v with hvE_def
-  set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := Module.finBasis ℝ E
+  set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := chartModelBasis E
   have hdecomp : vE = ∑ i, b.repr vE i • b i :=
     (Module.Basis.sum_repr b vE).symm
   have hsymm_sum := congrArg (T.symmL ℝ x) hdecomp
@@ -108,16 +108,16 @@ theorem g_inner_eq_chart_sum
     g.inner x v w =
       ∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
-          ((Module.finBasis ℝ E).repr
+          ((chartModelBasis E).repr
               ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ x v)) i *
-            ((Module.finBasis ℝ E).repr
+            ((chartModelBasis E).repr
               ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ x w)) j *
             chartGramOnE (I := I) g α i j (extChartAt I α x) := by
   classical
   set T : Bundle.Trivialization E
       (π E (TangentSpace I : M → Type _)) :=
     trivializationAt E (TangentSpace I) α
-  set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := Module.finBasis ℝ E
+  set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := chartModelBasis E
   set vE : E := T.continuousLinearMapAt ℝ x v
   set wE : E := T.continuousLinearMapAt ℝ x w
   have hv : v = ∑ i, b.repr vE i • chartBasisVecFiber (I := I) α i x :=

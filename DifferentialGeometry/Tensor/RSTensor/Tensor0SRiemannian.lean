@@ -514,8 +514,8 @@ noncomputable def chartTensorInnerPointwise_0s :
       ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
         (chartGramMatrix g α b)⁻¹ i j *
           chartTensorInnerPointwise_0s s g α b
-            (S.curryLeft ((Module.finBasis ℝ E) i))
-            (T.curryLeft ((Module.finBasis ℝ E) j))
+            (S.curryLeft ((chartModelBasis E) i))
+            (T.curryLeft ((chartModelBasis E) j))
 
 lemma chartTensorInnerPointwise_0s_zero
     (g : SmoothRiemannianMetric I M) (α b : M)
@@ -530,8 +530,8 @@ lemma chartTensorInnerPointwise_0s_succ
       ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
         (chartGramMatrix g α b)⁻¹ i j *
           chartTensorInnerPointwise_0s (I := I) (M := M) s g α b
-            (S.curryLeft ((Module.finBasis ℝ E) i))
-            (T.curryLeft ((Module.finBasis ℝ E) j)) := rfl
+            (S.curryLeft ((chartModelBasis E) i))
+            (T.curryLeft ((chartModelBasis E) j)) := rfl
 
 /-! ### Smoothness of the chart-local inner product
 
@@ -570,8 +570,8 @@ private lemma chartTensorInnerPointwise_0s_contMDiffOn
                 ∑ j : Fin (Module.finrank ℝ E),
                   (chartGramMatrix g α b)⁻¹ i j *
                     chartTensorInnerPointwise_0s (I := I) (M := M) s g α b
-                      (S.curryLeft ((Module.finBasis ℝ E) i))
-                      (T.curryLeft ((Module.finBasis ℝ E) j)) := by
+                      (S.curryLeft ((chartModelBasis E) i))
+                      (T.curryLeft ((chartModelBasis E) j)) := by
         funext b
         rw [chartTensorInnerPointwise_0s_succ]
       rw [heq]
@@ -580,8 +580,8 @@ private lemma chartTensorInnerPointwise_0s_contMDiffOn
       refine ContMDiffOn.mul ?_ ?_
       · exact chartGramMatrix_inv_entry_contMDiffOn (I := I) g α i j
       · exact ih
-          (S.curryLeft ((Module.finBasis ℝ E) i))
-          (T.curryLeft ((Module.finBasis ℝ E) j))
+          (S.curryLeft ((chartModelBasis E) i))
+          (T.curryLeft ((chartModelBasis E) j))
 
 /-! ### Bilinearity of `chartTensorInnerPointwise_0s`
 
@@ -611,9 +611,9 @@ lemma chartTensorInnerPointwise_0s_add_left
       refine Finset.sum_congr rfl ?_
       intro j _
       have hcurry :
-          (S₁ + S₂).curryLeft ((Module.finBasis ℝ E) i) =
-            S₁.curryLeft ((Module.finBasis ℝ E) i) +
-              S₂.curryLeft ((Module.finBasis ℝ E) i) := by
+          (S₁ + S₂).curryLeft ((chartModelBasis E) i) =
+            S₁.curryLeft ((chartModelBasis E) i) +
+              S₂.curryLeft ((chartModelBasis E) i) := by
         ext m
         simp [ContinuousMultilinearMap.curryLeft_apply,
               ContinuousMultilinearMap.add_apply]
@@ -639,8 +639,8 @@ lemma chartTensorInnerPointwise_0s_smul_left
       refine Finset.sum_congr rfl ?_
       intro j _
       have hcurry :
-          (c • S).curryLeft ((Module.finBasis ℝ E) i) =
-            c • S.curryLeft ((Module.finBasis ℝ E) i) := by
+          (c • S).curryLeft ((chartModelBasis E) i) =
+            c • S.curryLeft ((chartModelBasis E) i) := by
         ext m
         simp [ContinuousMultilinearMap.curryLeft_apply,
               ContinuousMultilinearMap.smul_apply]
@@ -668,9 +668,9 @@ lemma chartTensorInnerPointwise_0s_add_right
       refine Finset.sum_congr rfl ?_
       intro j _
       have hcurry :
-          (T₁ + T₂).curryLeft ((Module.finBasis ℝ E) j) =
-            T₁.curryLeft ((Module.finBasis ℝ E) j) +
-              T₂.curryLeft ((Module.finBasis ℝ E) j) := by
+          (T₁ + T₂).curryLeft ((chartModelBasis E) j) =
+            T₁.curryLeft ((chartModelBasis E) j) +
+              T₂.curryLeft ((chartModelBasis E) j) := by
         ext m
         simp [ContinuousMultilinearMap.curryLeft_apply,
               ContinuousMultilinearMap.add_apply]
@@ -696,8 +696,8 @@ lemma chartTensorInnerPointwise_0s_smul_right
       refine Finset.sum_congr rfl ?_
       intro j _
       have hcurry :
-          (c • T).curryLeft ((Module.finBasis ℝ E) j) =
-            c • T.curryLeft ((Module.finBasis ℝ E) j) := by
+          (c • T).curryLeft ((chartModelBasis E) j) =
+            c • T.curryLeft ((chartModelBasis E) j) := by
         ext m
         simp [ContinuousMultilinearMap.curryLeft_apply,
               ContinuousMultilinearMap.smul_apply]
@@ -824,8 +824,8 @@ private noncomputable def composeCurryAtIJ (s : ℕ)
       Tensor0SModel s ℝ E →L[ℝ] ℝ) :
     ContinuousMultilinearMap ℝ (fun _ : Fin (s + 1) => E) ℝ →L[ℝ]
       ContinuousMultilinearMap ℝ (fun _ : Fin (s + 1) => E) ℝ →L[ℝ] ℝ :=
-  let CLi := curryLeftAtCLM (E := E) s ((Module.finBasis ℝ E) i)
-  let CLj := curryLeftAtCLM (E := E) s ((Module.finBasis ℝ E) j)
+  let CLi := curryLeftAtCLM (E := E) s ((chartModelBasis E) i)
+  let CLj := curryLeftAtCLM (E := E) s ((chartModelBasis E) j)
   -- For fixed `g` (here `CLj`), `f ↦ f.comp g` is a CLM `(F →L G) →L (E →L G)`.
   -- This is `(compL).flip g`.
   let postCompCLj :
@@ -842,8 +842,8 @@ private noncomputable def composeCurryAtIJ (s : ℕ)
       Tensor0SModel s ℝ E →L[ℝ] ℝ)
     (S T : ContinuousMultilinearMap ℝ (fun _ : Fin (s + 1) => E) ℝ) :
     composeCurryAtIJ (E := E) s i j B S T =
-      B (S.curryLeft ((Module.finBasis ℝ E) i))
-        (T.curryLeft ((Module.finBasis ℝ E) j)) := by
+      B (S.curryLeft ((chartModelBasis E) i))
+        (T.curryLeft ((chartModelBasis E) j)) := by
   rfl
 
 /-- The factorisation of `chartTensorInnerPointwise_0sCLM g (s+1) α b` as a
@@ -922,11 +922,11 @@ lemma chartJ_apply (α : M) (b : M) (v : E) :
     chartJ (I := I) (M := M) α b v =
       (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ b v := rfl
 
-/-- `chartJinv α b` images the model basis vector `(Module.finBasis ℝ E) i` to the
+/-- `chartJinv α b` images the model basis vector `(chartModelBasis E) i` to the
 chart-α basis vector `chartBasisVecFiber α i b`. -/
 private lemma chartJinv_basis (α : M) (b : M)
     (i : Fin (Module.finrank ℝ E)) :
-    chartJinv (I := I) (M := M) α b ((Module.finBasis ℝ E) i) =
+    chartJinv (I := I) (M := M) α b ((chartModelBasis E) i) =
       chartBasisVecFiber (I := I) α i b := by
   unfold chartBasisVecFiber chartJinv
   rfl
@@ -950,7 +950,7 @@ private lemma chartJinv_chartJ (α : M) {b : M}
 /-! ### Gram matrix relationship
 
 The chart-α Gram matrix is the Gram matrix of the metric on the
-chart-α basis vectors `chartBasisVecFiber α i b = chartJinv α b ((Module.finBasis ℝ E) i)`.
+chart-α basis vectors `chartBasisVecFiber α i b = chartJinv α b ((chartModelBasis E) i)`.
 This is equivalent to evaluating `g.inner b` on the corresponding model-basis
 vectors after applying `chartJinv α b`. -/
 
@@ -960,8 +960,8 @@ private lemma chartGramMatrix_eq_innerJinv
     (i j : Fin (Module.finrank ℝ E)) :
     chartGramMatrix g α b i j =
       g.inner b
-        (chartJinv (I := I) (M := M) α b ((Module.finBasis ℝ E) i))
-        (chartJinv (I := I) (M := M) α b ((Module.finBasis ℝ E) j)) := by
+        (chartJinv (I := I) (M := M) α b ((chartModelBasis E) i))
+        (chartJinv (I := I) (M := M) α b ((chartModelBasis E) j)) := by
   rw [chartGramMatrix_apply]
   rw [chartJinv_basis (I := I) (M := M), chartJinv_basis (I := I) (M := M)]
 
@@ -1061,7 +1061,7 @@ the basis `f` and the matrix `Ginv`. This is the same recursion as
 `tensorInnerPointwise_0s` and `chartTensorInnerPointwise_0s` with the basis
 `f` and matrix `Ginv` factored out. We prove that:
 
-* `tensorInnerOnFrame s b (Module.finBasis ℝ E) (gramMatrixAt g b)⁻¹ T S =
+* `tensorInnerOnFrame s b (chartModelBasis E) (gramMatrixAt g b)⁻¹ T S =
    tensorInnerPointwise_0s s g b T S`.
 * `tensorInnerOnFrame s b (chartBasisVecFiber α · b) (chartGramMatrix g α b)⁻¹ T S =
    tensorInnerPointwise_0s s g b T S` (basis-invariance for the same metric).
@@ -1097,13 +1097,13 @@ private lemma tensorInnerOnFrame_succ (s : ℕ)
           tensorInnerOnFrame (E := E) s f Ginv (T.curryLeft (f i)) (S.curryLeft (f j)) := rfl
 
 /-- `tensorInnerPointwise_0s s g b T S` agrees with `tensorInnerOnFrame s e G⁻¹` on
-the model basis `e = Module.finBasis ℝ E` and `G = gramMatrixAt g b`. -/
+the model basis `e = chartModelBasis E` and `G = gramMatrixAt g b`. -/
 private lemma tensorInnerPointwise_0s_eq_tensorInnerOnFrame
     (g : SmoothRiemannianMetric I M) (b : M) :
     ∀ (s : ℕ) (T S : Tensor0SModel s ℝ E),
       tensorInnerPointwise_0s (I := I) (M := M) s g b T S =
         tensorInnerOnFrame (E := E) s
-          (fun i : Fin (Module.finrank ℝ E) => (Module.finBasis ℝ E) i)
+          (fun i : Fin (Module.finrank ℝ E) => (chartModelBasis E) i)
           (gramMatrixAt (I := I) (M := M) g b)⁻¹ T S := by
   intro s
   induction s with
@@ -1115,17 +1115,17 @@ private lemma tensorInnerPointwise_0s_eq_tensorInnerOnFrame
       intro i _
       refine Finset.sum_congr rfl ?_
       intro j _
-      rw [ih (T.curryLeft ((Module.finBasis ℝ E) i))
-          (S.curryLeft ((Module.finBasis ℝ E) j))]
+      rw [ih (T.curryLeft ((chartModelBasis E) i))
+          (S.curryLeft ((chartModelBasis E) j))]
 
 /-- `chartTensorInnerPointwise_0s g α s b T S` agrees with `tensorInnerOnFrame s e G⁻¹`
-on the model basis `e = Module.finBasis ℝ E` and `G = chartGramMatrix g α b`. -/
+on the model basis `e = chartModelBasis E` and `G = chartGramMatrix g α b`. -/
 private lemma chartTensorInnerPointwise_0s_eq_tensorInnerOnFrame
     (g : SmoothRiemannianMetric I M) (α : M) (b : M) :
     ∀ (s : ℕ) (T S : Tensor0SModel s ℝ E),
       chartTensorInnerPointwise_0s (I := I) (M := M) s g α b T S =
         tensorInnerOnFrame (E := E) s
-          (fun i : Fin (Module.finrank ℝ E) => (Module.finBasis ℝ E) i)
+          (fun i : Fin (Module.finrank ℝ E) => (chartModelBasis E) i)
           (chartGramMatrix g α b)⁻¹ T S := by
   intro s
   induction s with
@@ -1137,8 +1137,8 @@ private lemma chartTensorInnerPointwise_0s_eq_tensorInnerOnFrame
       intro i _
       refine Finset.sum_congr rfl ?_
       intro j _
-      rw [ih (T.curryLeft ((Module.finBasis ℝ E) i))
-          (S.curryLeft ((Module.finBasis ℝ E) j))]
+      rw [ih (T.curryLeft ((chartModelBasis E) i))
+          (S.curryLeft ((chartModelBasis E) j))]
 
 /-! ### Basis-change for `tensorInnerOnFrame`
 
@@ -1154,7 +1154,7 @@ For a basis `f`, an alternative basis `h_i = ∑_a A_{ai} f_a` expressed via a m
 and the corresponding gram matrices `G_f` (on `f`), `G_h` (on `h`) satisfying
 `G_h = Aᵀ G_f A`, we expect `tensorInnerOnFrame s h G_h⁻¹ T S = tensorInnerOnFrame s f G_f⁻¹ T S`.
 
-We work in the special case where `f = Module.finBasis ℝ E`, `h_i = chartJinv α b (e_i)`,
+We work in the special case where `f = chartModelBasis E`, `h_i = chartJinv α b (e_i)`,
 `A = matrix of chartJinv`. Then `G_f = gramMatrixAt g b`, `G_h = chartGramMatrix g α b`.
 
 We don't prove the abstract change-of-basis at the matrix level. Instead, we prove
@@ -1168,7 +1168,7 @@ where `T_α = T.compContinuousLinearMap (fun _ => chartJinv α b)`, on `b` in th
 base set.
 
 We prove this directly by induction on `s` using the basis-change argument:
-the chart-α basis `chartBasisVecFiber α i b = chartJinv α b ((Module.finBasis ℝ E) i)`,
+the chart-α basis `chartBasisVecFiber α i b = chartJinv α b ((chartModelBasis E) i)`,
 and the chart-α gram matrix `chartGramMatrix g α b` is the gram matrix of `g.inner b`
 on this basis.
 
@@ -1223,14 +1223,14 @@ The proof uses the "compose-and-curry" identity
 `(T \circ L).curryLeft (L w) = (T.curryLeft w) \circ L` slot-by-slot. -/
 
 /-- The "compose-and-curry" relation, packaged for `chartJinv α b`:
-given an arity-(s+1) tensor `T`, currying `T` at `chartJinv α b ((Module.finBasis ℝ E) i)`
+given an arity-(s+1) tensor `T`, currying `T` at `chartJinv α b ((chartModelBasis E) i)`
 in the slot, after composing with `chartJinv α b` in the remaining slots, equals the
 result of currying first then composing with `chartJinv α b` in remaining slots. -/
 private lemma chartJinv_compose_curry_chartBasis {s : ℕ} (α : M) (b : M)
     (T : ContinuousMultilinearMap ℝ (fun _ : Fin (s + 1) => E) ℝ)
     (i : Fin (Module.finrank ℝ E)) :
     (T.compContinuousLinearMap (fun _ : Fin (s + 1) =>
-        chartJinv (I := I) (M := M) α b)).curryLeft ((Module.finBasis ℝ E) i) =
+        chartJinv (I := I) (M := M) α b)).curryLeft ((chartModelBasis E) i) =
       (T.curryLeft (chartBasisVecFiber (I := I) α i b)).compContinuousLinearMap
         (fun _ : Fin s => chartJinv (I := I) (M := M) α b) := by
   rw [compContinuousLinearMap_curryLeft]
@@ -1280,18 +1280,18 @@ the model basis.
 We approach this in stages, building up the matrix identities. -/
 
 /-- The matrix of `chartJinv α b` in the model basis: `(JinvMat α b)_{ai}`
-is the `a`-th coordinate of `chartJinv α b ((Module.finBasis ℝ E) i)` in the basis. -/
+is the `a`-th coordinate of `chartJinv α b ((chartModelBasis E) i)` in the basis. -/
 private noncomputable def chartJinvMatrix (α : M) (b : M) :
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   Matrix.of fun a i =>
-    ((Module.finBasis ℝ E).repr
-      (chartJinv (I := I) (M := M) α b ((Module.finBasis ℝ E) i))) a
+    ((chartModelBasis E).repr
+      (chartJinv (I := I) (M := M) α b ((chartModelBasis E) i))) a
 
 @[simp] private lemma chartJinvMatrix_apply (α : M) (b : M)
     (a i : Fin (Module.finrank ℝ E)) :
     chartJinvMatrix (I := I) (M := M) α b a i =
-      ((Module.finBasis ℝ E).repr
-        (chartJinv (I := I) (M := M) α b ((Module.finBasis ℝ E) i))) a := rfl
+      ((chartModelBasis E).repr
+        (chartJinv (I := I) (M := M) α b ((chartModelBasis E) i))) a := rfl
 
 /-- The chart-α basis vector `chartBasisVecFiber α i b` decomposes via `chartJinvMatrix`
 in the model basis. -/
@@ -1299,35 +1299,35 @@ private lemma chartBasisVecFiber_eq_sum (α : M) (b : M)
     (i : Fin (Module.finrank ℝ E)) :
     chartBasisVecFiber (I := I) α i b =
       ∑ a : Fin (Module.finrank ℝ E),
-        chartJinvMatrix (I := I) (M := M) α b a i • (Module.finBasis ℝ E) a := by
+        chartJinvMatrix (I := I) (M := M) α b a i • (chartModelBasis E) a := by
   rw [← chartJinv_basis (I := I) (M := M) α b i]
-  exact ((Module.finBasis ℝ E).sum_repr
-    (chartJinv (I := I) (M := M) α b ((Module.finBasis ℝ E) i))).symm
+  exact ((chartModelBasis E).sum_repr
+    (chartJinv (I := I) (M := M) α b ((chartModelBasis E) i))).symm
 
 /-- The matrix of `chartJ α b` in the model basis. -/
 private noncomputable def chartJMatrix (α : M) (b : M) :
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   Matrix.of fun a i =>
-    ((Module.finBasis ℝ E).repr
-      (chartJ (I := I) (M := M) α b ((Module.finBasis ℝ E) i))) a
+    ((chartModelBasis E).repr
+      (chartJ (I := I) (M := M) α b ((chartModelBasis E) i))) a
 
 @[simp] private lemma chartJMatrix_apply (α : M) (b : M)
     (a i : Fin (Module.finrank ℝ E)) :
     chartJMatrix (I := I) (M := M) α b a i =
-      ((Module.finBasis ℝ E).repr
-        (chartJ (I := I) (M := M) α b ((Module.finBasis ℝ E) i))) a := rfl
+      ((chartModelBasis E).repr
+        (chartJ (I := I) (M := M) α b ((chartModelBasis E) i))) a := rfl
 
 /-- For any `v : E`, `(chartJ α b v)_a = ∑_k (chartJMatrix)_{a,k} (v decomposed in basis)_k`. -/
 private lemma chartJ_apply_repr (α : M) (b : M) (v : E)
     (a : Fin (Module.finrank ℝ E)) :
-    ((Module.finBasis ℝ E).repr (chartJ (I := I) (M := M) α b v)) a =
+    ((chartModelBasis E).repr (chartJ (I := I) (M := M) α b v)) a =
       ∑ k : Fin (Module.finrank ℝ E),
         chartJMatrix (I := I) (M := M) α b a k *
-          ((Module.finBasis ℝ E).repr v) k := by
+          ((chartModelBasis E).repr v) k := by
   -- v = ∑ k v_k e_k ⟹ chartJ v = ∑ k v_k (chartJ e_k) ⟹ repr_a (chartJ v) = ∑ k v_k * (chartJMatrix)_{a,k}
   have hv : v = ∑ k : Fin (Module.finrank ℝ E),
-      ((Module.finBasis ℝ E).repr v) k • (Module.finBasis ℝ E) k :=
-    ((Module.finBasis ℝ E).sum_repr v).symm
+      ((chartModelBasis E).repr v) k • (chartModelBasis E) k :=
+    ((chartModelBasis E).sum_repr v).symm
   conv_lhs => rw [hv]
   rw [map_sum, map_sum]
   rw [Finsupp.coe_finset_sum, Finset.sum_apply]
@@ -1340,13 +1340,13 @@ private lemma chartJ_apply_repr (α : M) (b : M) (v : E)
 /-- Similarly, `(chartJinv α b v)_a = ∑_k (chartJinvMatrix)_{a,k} (v decomposed)_k`. -/
 private lemma chartJinv_apply_repr (α : M) (b : M) (v : E)
     (a : Fin (Module.finrank ℝ E)) :
-    ((Module.finBasis ℝ E).repr (chartJinv (I := I) (M := M) α b v)) a =
+    ((chartModelBasis E).repr (chartJinv (I := I) (M := M) α b v)) a =
       ∑ k : Fin (Module.finrank ℝ E),
         chartJinvMatrix (I := I) (M := M) α b a k *
-          ((Module.finBasis ℝ E).repr v) k := by
+          ((chartModelBasis E).repr v) k := by
   have hv : v = ∑ k : Fin (Module.finrank ℝ E),
-      ((Module.finBasis ℝ E).repr v) k • (Module.finBasis ℝ E) k :=
-    ((Module.finBasis ℝ E).sum_repr v).symm
+      ((chartModelBasis E).repr v) k • (chartModelBasis E) k :=
+    ((chartModelBasis E).sum_repr v).symm
   conv_lhs => rw [hv]
   rw [map_sum, map_sum]
   rw [Finsupp.coe_finset_sum, Finset.sum_apply]
@@ -1368,12 +1368,12 @@ private lemma chartGramMatrix_eq_matrix_form
   -- LHS = chartGramMatrix_{i,j} = g.inner b (chartJinv e_i) (chartJinv e_j) (chartGramMatrix_eq_innerJinv).
   rw [chartGramMatrix_eq_innerJinv]
   -- Expand chartJinv e_i and chartJinv e_j as ∑ J_{a,i} e_a, ∑ J_{b',j} e_{b'}.
-  have hi : chartJinv (I := I) (M := M) α b ((Module.finBasis ℝ E) i) =
-      ∑ a, chartJinvMatrix (I := I) (M := M) α b a i • (Module.finBasis ℝ E) a := by
+  have hi : chartJinv (I := I) (M := M) α b ((chartModelBasis E) i) =
+      ∑ a, chartJinvMatrix (I := I) (M := M) α b a i • (chartModelBasis E) a := by
     rw [chartJinv_basis (I := I) (M := M) α b i]
     exact chartBasisVecFiber_eq_sum (I := I) (M := M) α b i
-  have hj : chartJinv (I := I) (M := M) α b ((Module.finBasis ℝ E) j) =
-      ∑ b', chartJinvMatrix (I := I) (M := M) α b b' j • (Module.finBasis ℝ E) b' := by
+  have hj : chartJinv (I := I) (M := M) α b ((chartModelBasis E) j) =
+      ∑ b', chartJinvMatrix (I := I) (M := M) α b b' j • (chartModelBasis E) b' := by
     rw [chartJinv_basis (I := I) (M := M) α b j]
     exact chartBasisVecFiber_eq_sum (I := I) (M := M) α b j
   rw [hi, hj]
@@ -1386,20 +1386,20 @@ private lemma chartGramMatrix_eq_matrix_form
   -- We prove LHS = RHS by showing both equal the same double sum.
   have hLHS_eq :
       (g.inner b (∑ a : Fin (Module.finrank ℝ E),
-          chartJinvMatrix (I := I) (M := M) α b a i • (Module.finBasis ℝ E) a))
+          chartJinvMatrix (I := I) (M := M) α b a i • (chartModelBasis E) a))
         (∑ b' : Fin (Module.finrank ℝ E),
-          chartJinvMatrix (I := I) (M := M) α b b' j • (Module.finBasis ℝ E) b') =
+          chartJinvMatrix (I := I) (M := M) α b b' j • (chartModelBasis E) b') =
       ∑ a : Fin (Module.finrank ℝ E),
         ∑ b' : Fin (Module.finrank ℝ E),
           chartJinvMatrix (I := I) (M := M) α b a i *
             chartJinvMatrix (I := I) (M := M) α b b' j *
-            g.inner b ((Module.finBasis ℝ E) a) ((Module.finBasis ℝ E) b') := by
+            g.inner b ((chartModelBasis E) a) ((chartModelBasis E) b') := by
     -- Linearity of g.inner b on the first arg (sum + smul).
     have hL : g.inner b (∑ a : Fin (Module.finrank ℝ E),
-          chartJinvMatrix (I := I) (M := M) α b a i • (Module.finBasis ℝ E) a) =
+          chartJinvMatrix (I := I) (M := M) α b a i • (chartModelBasis E) a) =
         ∑ a : Fin (Module.finrank ℝ E),
           chartJinvMatrix (I := I) (M := M) α b a i •
-            g.inner b ((Module.finBasis ℝ E) a) := by
+            g.inner b ((chartModelBasis E) a) := by
       rw [map_sum]
       refine Finset.sum_congr rfl ?_
       intro a _
@@ -1409,12 +1409,12 @@ private lemma chartGramMatrix_eq_matrix_form
     intro a _
     rw [ContinuousLinearMap.smul_apply, smul_eq_mul]
     -- (J_{ai}) * (g.inner b e_a) (∑ b' J_{b'j} • e_{b'}) = ∑ b' J_{ai} J_{b'j} (g.inner b e_a e_{b'}).
-    rw [show (g.inner b ((Module.finBasis ℝ E) a))
+    rw [show (g.inner b ((chartModelBasis E) a))
         (∑ b' : Fin (Module.finrank ℝ E),
-          chartJinvMatrix (I := I) (M := M) α b b' j • (Module.finBasis ℝ E) b') =
+          chartJinvMatrix (I := I) (M := M) α b b' j • (chartModelBasis E) b') =
         ∑ b' : Fin (Module.finrank ℝ E),
           chartJinvMatrix (I := I) (M := M) α b b' j *
-            g.inner b ((Module.finBasis ℝ E) a) ((Module.finBasis ℝ E) b') from ?_]
+            g.inner b ((chartModelBasis E) a) ((chartModelBasis E) b') from ?_]
     · rw [Finset.mul_sum]
       refine Finset.sum_congr rfl ?_
       intro b' _
@@ -1422,12 +1422,12 @@ private lemma chartGramMatrix_eq_matrix_form
     · rw [map_sum]
       refine Finset.sum_congr rfl ?_
       intro b' _
-      rw [show ((g.inner b) ((Module.finBasis ℝ E) a))
-          (chartJinvMatrix (I := I) (M := M) α b b' j • (Module.finBasis ℝ E) b') =
+      rw [show ((g.inner b) ((chartModelBasis E) a))
+          (chartJinvMatrix (I := I) (M := M) α b b' j • (chartModelBasis E) b') =
           chartJinvMatrix (I := I) (M := M) α b b' j •
-            ((g.inner b) ((Module.finBasis ℝ E) a)) ((Module.finBasis ℝ E) b') from ?_]
+            ((g.inner b) ((chartModelBasis E) a)) ((chartModelBasis E) b') from ?_]
       · rw [smul_eq_mul]
-      · exact ContinuousLinearMap.map_smul ((g.inner b) ((Module.finBasis ℝ E) a)) _ _
+      · exact ContinuousLinearMap.map_smul ((g.inner b) ((chartModelBasis E) a)) _ _
   refine hLHS_eq.trans ?_
   -- RHS: (J^T G J)_{i,j} = ∑ b' (J^T G)_{i,b'} J_{b',j}, and (J^T G)_{i,b'} = ∑ a J_{a,i} G_{a,b'}.
   rw [Matrix.mul_apply]
@@ -1468,10 +1468,10 @@ private lemma chartJinvMatrix_mul_chartJMatrix (α : M) {b : M}
   -- JMat_{k,c} = repr_k (chartJ e_c) definitionally; sum = repr_a (chartJinv (chartJ e_c)).
   have hsum_eq : ∑ k, chartJinvMatrix (I := I) (M := M) α b a k *
       chartJMatrix (I := I) (M := M) α b k c =
-    ((Module.finBasis ℝ E).repr (chartJinv (I := I) (M := M) α b
-      (chartJ (I := I) (M := M) α b ((Module.finBasis ℝ E) c)))) a := by
+    ((chartModelBasis E).repr (chartJinv (I := I) (M := M) α b
+      (chartJ (I := I) (M := M) α b ((chartModelBasis E) c)))) a := by
     rw [chartJinv_apply_repr (I := I) (M := M) α b
-      (chartJ (I := I) (M := M) α b ((Module.finBasis ℝ E) c)) a]
+      (chartJ (I := I) (M := M) α b ((chartModelBasis E) c)) a]
     rfl
   rw [hsum_eq]
   rw [chartJinv_chartJ (I := I) (M := M) α hb]
@@ -1496,10 +1496,10 @@ private lemma chartJMatrix_mul_chartJinvMatrix (α : M) {b : M}
   -- Then the sum equals repr_a (chartJ (chartJinv e_c)) by chartJ_apply_repr.
   have hsum_eq : ∑ k, chartJMatrix (I := I) (M := M) α b a k *
       chartJinvMatrix (I := I) (M := M) α b k c =
-    ((Module.finBasis ℝ E).repr (chartJ (I := I) (M := M) α b
-      (chartJinv (I := I) (M := M) α b ((Module.finBasis ℝ E) c)))) a := by
+    ((chartModelBasis E).repr (chartJ (I := I) (M := M) α b
+      (chartJinv (I := I) (M := M) α b ((chartModelBasis E) c)))) a := by
     rw [chartJ_apply_repr (I := I) (M := M) α b
-      (chartJinv (I := I) (M := M) α b ((Module.finBasis ℝ E) c)) a]
+      (chartJinv (I := I) (M := M) α b ((chartModelBasis E) c)) a]
     rfl
   rw [hsum_eq]
   rw [chartJ_chartJinv (I := I) (M := M) α hb]
@@ -1710,7 +1710,7 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
           T.curryLeft (chartBasisVecFiber (I := I) α i b) =
             ∑ a : Fin (Module.finrank ℝ E),
               chartJinvMatrix (I := I) (M := M) α b a i •
-                T.curryLeft ((Module.finBasis ℝ E) a) := by
+                T.curryLeft ((chartModelBasis E) a) := by
         intro i
         rw [chartBasisVecFiber_eq_sum (I := I) (M := M) α b i]
         exact curryLeft_sum (E := E) (s := s) T _ _
@@ -1718,7 +1718,7 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
           S.curryLeft (chartBasisVecFiber (I := I) α j b) =
             ∑ b' : Fin (Module.finrank ℝ E),
               chartJinvMatrix (I := I) (M := M) α b b' j •
-                S.curryLeft ((Module.finBasis ℝ E) b') := by
+                S.curryLeft ((chartModelBasis E) b') := by
         intro j
         rw [chartBasisVecFiber_eq_sum (I := I) (M := M) α b j]
         exact curryLeft_sum (E := E) (s := s) S _ _
@@ -1732,8 +1732,8 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
                 chartJinvMatrix (I := I) (M := M) α b a i *
                   chartJinvMatrix (I := I) (M := M) α b b' j *
                 tensorInnerPointwise_0s (I := I) (M := M) s g b
-                  (T.curryLeft ((Module.finBasis ℝ E) a))
-                  (S.curryLeft ((Module.finBasis ℝ E) b')) := by
+                  (T.curryLeft ((chartModelBasis E) a))
+                  (S.curryLeft ((chartModelBasis E) b')) := by
         intro i j
         rw [step2_T i, step2_S j]
         rw [tensorInnerPointwise_0s_sum_left]
@@ -1760,8 +1760,8 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
                     (chartJinvMatrix (I := I) (M := M) α b a i *
                       chartJinvMatrix (I := I) (M := M) α b b' j) *
                     tensorInnerPointwise_0s (I := I) (M := M) s g b
-                      (T.curryLeft ((Module.finBasis ℝ E) a))
-                      (S.curryLeft ((Module.finBasis ℝ E) b')) := by
+                      (T.curryLeft ((chartModelBasis E) a))
+                      (S.curryLeft ((chartModelBasis E) b')) := by
         refine Finset.sum_congr rfl ?_
         intro i _
         refine Finset.sum_congr rfl ?_
@@ -1786,8 +1786,8 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
                     (chartJinvMatrix (I := I) (M := M) α b a i *
                       chartJinvMatrix (I := I) (M := M) α b b' j) *
                     tensorInnerPointwise_0s (I := I) (M := M) s g b
-                      (T.curryLeft ((Module.finBasis ℝ E) a))
-                      (S.curryLeft ((Module.finBasis ℝ E) b')) =
+                      (T.curryLeft ((chartModelBasis E) a))
+                      (S.curryLeft ((chartModelBasis E) b')) =
             ∑ a : Fin (Module.finrank ℝ E),
               ∑ b' : Fin (Module.finrank ℝ E),
                 ∑ j : Fin (Module.finrank ℝ E),
@@ -1795,8 +1795,8 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
                     (chartJinvMatrix (I := I) (M := M) α b a i *
                       chartJinvMatrix (I := I) (M := M) α b b' j) *
                     tensorInnerPointwise_0s (I := I) (M := M) s g b
-                      (T.curryLeft ((Module.finBasis ℝ E) a))
-                      (S.curryLeft ((Module.finBasis ℝ E) b')) := by
+                      (T.curryLeft ((chartModelBasis E) a))
+                      (S.curryLeft ((chartModelBasis E) b')) := by
         intro i
         -- Step a: swap j,a: ∑j ∑a → ∑a ∑j.
         rw [Finset.sum_comm (γ := Fin (Module.finrank ℝ E))]
@@ -1813,8 +1813,8 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
                     (chartJinvMatrix (I := I) (M := M) α b a i *
                       chartJinvMatrix (I := I) (M := M) α b b' j) *
                     tensorInnerPointwise_0s (I := I) (M := M) s g b
-                      (T.curryLeft ((Module.finBasis ℝ E) a))
-                      (S.curryLeft ((Module.finBasis ℝ E) b')) =
+                      (T.curryLeft ((chartModelBasis E) a))
+                      (S.curryLeft ((chartModelBasis E) b')) =
           ∑ i : Fin (Module.finrank ℝ E),
             ∑ a : Fin (Module.finrank ℝ E),
               ∑ b' : Fin (Module.finrank ℝ E),
@@ -1823,8 +1823,8 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
                     (chartJinvMatrix (I := I) (M := M) α b a i *
                       chartJinvMatrix (I := I) (M := M) α b b' j) *
                     tensorInnerPointwise_0s (I := I) (M := M) s g b
-                      (T.curryLeft ((Module.finBasis ℝ E) a))
-                      (S.curryLeft ((Module.finBasis ℝ E) b')) := by
+                      (T.curryLeft ((chartModelBasis E) a))
+                      (S.curryLeft ((chartModelBasis E) b')) := by
         refine Finset.sum_congr rfl ?_
         intro i _
         exact step5_0 i
@@ -1837,8 +1837,8 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
                     (chartJinvMatrix (I := I) (M := M) α b a i *
                       chartJinvMatrix (I := I) (M := M) α b b' j) *
                     tensorInnerPointwise_0s (I := I) (M := M) s g b
-                      (T.curryLeft ((Module.finBasis ℝ E) a))
-                      (S.curryLeft ((Module.finBasis ℝ E) b')) =
+                      (T.curryLeft ((chartModelBasis E) a))
+                      (S.curryLeft ((chartModelBasis E) b')) =
           ∑ a : Fin (Module.finrank ℝ E),
             ∑ b' : Fin (Module.finrank ℝ E),
               ∑ i : Fin (Module.finrank ℝ E),
@@ -1847,8 +1847,8 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
                     (chartJinvMatrix (I := I) (M := M) α b a i *
                       chartJinvMatrix (I := I) (M := M) α b b' j) *
                     tensorInnerPointwise_0s (I := I) (M := M) s g b
-                      (T.curryLeft ((Module.finBasis ℝ E) a))
-                      (S.curryLeft ((Module.finBasis ℝ E) b')) := by
+                      (T.curryLeft ((chartModelBasis E) a))
+                      (S.curryLeft ((chartModelBasis E) b')) := by
         rw [step5_1]
         -- Now: ∑i ∑a ∑b' ∑j → ∑a ∑i ∑b' ∑j → ∑a ∑b' ∑i ∑j.
         rw [Finset.sum_comm (γ := Fin (Module.finrank ℝ E))]
@@ -1866,8 +1866,8 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
                     (chartJinvMatrix (I := I) (M := M) α b a i *
                       chartJinvMatrix (I := I) (M := M) α b b' j) *
                     tensorInnerPointwise_0s (I := I) (M := M) s g b
-                      (T.curryLeft ((Module.finBasis ℝ E) a))
-                      (S.curryLeft ((Module.finBasis ℝ E) b')) =
+                      (T.curryLeft ((chartModelBasis E) a))
+                      (S.curryLeft ((chartModelBasis E) b')) =
           ∑ a : Fin (Module.finrank ℝ E),
             ∑ b' : Fin (Module.finrank ℝ E),
               (∑ i : Fin (Module.finrank ℝ E),
@@ -1876,8 +1876,8 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
                     (chartJinvMatrix (I := I) (M := M) α b a i *
                       chartJinvMatrix (I := I) (M := M) α b b' j)) *
                 tensorInnerPointwise_0s (I := I) (M := M) s g b
-                  (T.curryLeft ((Module.finBasis ℝ E) a))
-                  (S.curryLeft ((Module.finBasis ℝ E) b')) := by
+                  (T.curryLeft ((chartModelBasis E) a))
+                  (S.curryLeft ((chartModelBasis E) b')) := by
         refine Finset.sum_congr rfl ?_
         intro a _
         refine Finset.sum_congr rfl ?_
@@ -1907,14 +1907,14 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
                     (chartJinvMatrix (I := I) (M := M) α b a i *
                       chartJinvMatrix (I := I) (M := M) α b b' j)) *
                 tensorInnerPointwise_0s (I := I) (M := M) s g b
-                  (T.curryLeft ((Module.finBasis ℝ E) a))
-                  (S.curryLeft ((Module.finBasis ℝ E) b')) =
+                  (T.curryLeft ((chartModelBasis E) a))
+                  (S.curryLeft ((chartModelBasis E) b')) =
           ∑ a : Fin (Module.finrank ℝ E),
             ∑ b' : Fin (Module.finrank ℝ E),
               (gramMatrixAt (I := I) (M := M) g b)⁻¹ a b' *
                 tensorInnerPointwise_0s (I := I) (M := M) s g b
-                  (T.curryLeft ((Module.finBasis ℝ E) a))
-                  (S.curryLeft ((Module.finBasis ℝ E) b')) := by
+                  (T.curryLeft ((chartModelBasis E) a))
+                  (S.curryLeft ((chartModelBasis E) b')) := by
         refine Finset.sum_congr rfl ?_
         intro a _
         refine Finset.sum_congr rfl ?_
@@ -2007,8 +2007,8 @@ lemma chartTensorInnerPointwise_0s_continuousOn_smooth_args
               ∑ j : Fin (Module.finrank ℝ E),
                 (chartGramMatrix g α b)⁻¹ i j *
                   chartTensorInnerPointwise_0s (I := I) (M := M) s g α b
-                    ((T b).curryLeft ((Module.finBasis ℝ E) i))
-                    ((S b).curryLeft ((Module.finBasis ℝ E) j)) := by
+                    ((T b).curryLeft ((chartModelBasis E) i))
+                    ((S b).curryLeft ((chartModelBasis E) j)) := by
         funext b
         rw [chartTensorInnerPointwise_0s_succ]
       rw [heq]
@@ -2019,23 +2019,23 @@ lemma chartTensorInnerPointwise_0s_continuousOn_smooth_args
       · -- Apply ih: need continuity of the curryLeft-applied tensors as functions of b.
         -- Use the existing `curryLeftAtCLM` (a CLM) for continuity.
         have hT_curry : ContinuousOn
-            (fun b : M => (T b).curryLeft ((Module.finBasis ℝ E) i))
+            (fun b : M => (T b).curryLeft ((chartModelBasis E) i))
             (trivializationAt E (TangentSpace I) α).baseSet := by
-          have hheq : (fun b : M => (T b).curryLeft ((Module.finBasis ℝ E) i)) =
-              fun b : M => curryLeftAtCLM (E := E) s ((Module.finBasis ℝ E) i) (T b) := by
+          have hheq : (fun b : M => (T b).curryLeft ((chartModelBasis E) i)) =
+              fun b : M => curryLeftAtCLM (E := E) s ((chartModelBasis E) i) (T b) := by
             funext b
             rw [curryLeftAtCLM_apply]
           rw [hheq]
-          exact (curryLeftAtCLM (E := E) s ((Module.finBasis ℝ E) i)).continuous.comp_continuousOn hT
+          exact (curryLeftAtCLM (E := E) s ((chartModelBasis E) i)).continuous.comp_continuousOn hT
         have hS_curry : ContinuousOn
-            (fun b : M => (S b).curryLeft ((Module.finBasis ℝ E) j))
+            (fun b : M => (S b).curryLeft ((chartModelBasis E) j))
             (trivializationAt E (TangentSpace I) α).baseSet := by
-          have hheq : (fun b : M => (S b).curryLeft ((Module.finBasis ℝ E) j)) =
-              fun b : M => curryLeftAtCLM (E := E) s ((Module.finBasis ℝ E) j) (S b) := by
+          have hheq : (fun b : M => (S b).curryLeft ((chartModelBasis E) j)) =
+              fun b : M => curryLeftAtCLM (E := E) s ((chartModelBasis E) j) (S b) := by
             funext b
             rw [curryLeftAtCLM_apply]
           rw [hheq]
-          exact (curryLeftAtCLM (E := E) s ((Module.finBasis ℝ E) j)).continuous.comp_continuousOn hS
+          exact (curryLeftAtCLM (E := E) s ((chartModelBasis E) j)).continuous.comp_continuousOn hS
         exact ih _ _ hT_curry hS_curry
 
 /-! ### Public continuity theorem on each chart

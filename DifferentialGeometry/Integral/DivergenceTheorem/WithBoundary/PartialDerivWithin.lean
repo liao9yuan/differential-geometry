@@ -18,7 +18,7 @@ may have a non-trivial boundary (the chart target need not be open in `E`).
 
 The Fréchet partial derivative `partialDeriv` from
 `Integral/DivergenceTheorem/LocalFormula.lean` is defined as
-`fderiv ℝ u y (Module.finBasis ℝ E i)`. On a chart target that is not open in
+`fderiv ℝ u y (chartModelBasis E i)`. On a chart target that is not open in
 `E`, `fderiv` is the wrong notion at boundary points: a function may be smooth
 in the within-the-target sense without admitting a Fréchet derivative on a full
 ambient neighbourhood. The replacement is the `fderivWithin` evaluated against
@@ -32,7 +32,7 @@ interior.
 
 * `partialDerivWithin s i u y` : the within-derivative of `u : E → ℝ` on the
   set `s ⊆ E`, at the point `y`, evaluated against the `i`-th model-basis
-  vector `(Module.finBasis ℝ E) i`.
+  vector `(chartModelBasis E) i`.
 
 ## Main results
 
@@ -84,6 +84,8 @@ namespace Integral
 namespace DivergenceTheorem
 namespace WithBoundary
 
+open DifferentialGeometry.Integral.Measure
+
 /-! ## Definition -/
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
@@ -100,14 +102,14 @@ points of the interior of `s` it coincides with `partialDeriv`; at boundary
 points of `s` it is well-defined while `fderiv` is not. -/
 def partialDerivWithin (s : Set E) (i : Fin (Module.finrank ℝ E))
     (u : E → ℝ) (y : E) : ℝ :=
-  fderivWithin ℝ u s y ((Module.finBasis ℝ E) i)
+  fderivWithin ℝ u s y ((chartModelBasis E) i)
 
 /-- Unfolding lemma — the within-partial derivative is the within-Fréchet
 derivative evaluated on the model-basis vector. -/
 @[simp] lemma partialDerivWithin_def (s : Set E)
     (i : Fin (Module.finrank ℝ E)) (u : E → ℝ) (y : E) :
     partialDerivWithin (E := E) s i u y =
-      fderivWithin ℝ u s y ((Module.finBasis ℝ E) i) := rfl
+      fderivWithin ℝ u s y ((chartModelBasis E) i) := rfl
 
 /-! ## Block A — comparison with the Fréchet partial derivative -/
 
@@ -159,7 +161,7 @@ vector`. Useful when the goal has been unfolded part-way. -/
 lemma partialDerivWithin_eq_fderivWithin_basis
     (s : Set E) (i : Fin (Module.finrank ℝ E)) (u : E → ℝ) (y : E) :
     partialDerivWithin (E := E) s i u y =
-      fderivWithin ℝ u s y ((Module.finBasis ℝ E) i) := rfl
+      fderivWithin ℝ u s y ((chartModelBasis E) i) := rfl
 
 end ComparisonWithFDeriv
 
@@ -189,7 +191,7 @@ lemma partialDerivWithin_contDiffOn_of_uniqueDiffOn
   have hfderiv : ContDiffOn ℝ m (fderivWithin ℝ u s) s :=
     hu.fderivWithin hs hmn
   have hconst : ContDiffOn ℝ m
-      (fun _ : E => (Module.finBasis ℝ E) i) s := contDiffOn_const
+      (fun _ : E => (chartModelBasis E) i) s := contDiffOn_const
   exact hfderiv.clm_apply hconst
 
 /-- The `m = ∞` specialisation of `partialDerivWithin_contDiffOn_of_uniqueDiffOn`.

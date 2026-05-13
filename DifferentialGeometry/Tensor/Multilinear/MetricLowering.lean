@@ -87,7 +87,7 @@ and the linear "evaluation at all basis tuples" map is a bijection (hence a CLE)
 private noncomputable def evalAtBasisLinear (n : ℕ) :
     Tensor0SModel n ℝ E →ₗ[ℝ]
       ((Fin n → Fin (Module.finrank ℝ E)) → ℝ) where
-  toFun := fun Φ φ => Φ (fun k : Fin n => (Module.finBasis ℝ E) (φ k))
+  toFun := fun Φ φ => Φ (fun k : Fin n => (chartModelBasis E) (φ k))
   map_add' Φ₁ Φ₂ := by
     funext φ
     simp [ContinuousMultilinearMap.add_apply]
@@ -99,14 +99,14 @@ private noncomputable def evalAtBasisLinear (n : ℕ) :
     (Φ : Tensor0SModel n ℝ E)
     (φ : Fin n → Fin (Module.finrank ℝ E)) :
     evalAtBasisLinear (E := E) n Φ φ =
-      Φ (fun k : Fin n => (Module.finBasis ℝ E) (φ k)) := rfl
+      Φ (fun k : Fin n => (chartModelBasis E) (φ k)) := rfl
 
 /-- The "evaluation at all basis tuples" linear map is INJECTIVE. -/
 private lemma evalAtBasisLinear_injective (n : ℕ) :
     Function.Injective (evalAtBasisLinear (E := E) n) := by
   intro Φ₁ Φ₂ h
   apply ContinuousMultilinearMap.toMultilinearMap_injective
-  refine Module.Basis.ext_multilinear (e := fun _ : Fin n => Module.finBasis ℝ E) ?_
+  refine Module.Basis.ext_multilinear (e := fun _ : Fin n => chartModelBasis E) ?_
   intro v
   exact congr_fun h v
 
@@ -161,14 +161,14 @@ private noncomputable def evalAtBasisCLE (n : ℕ) :
     (Φ : Tensor0SModel n ℝ E)
     (φ : Fin n → Fin (Module.finrank ℝ E)) :
     evalAtBasisCLE (E := E) n Φ φ =
-      Φ (fun k : Fin n => (Module.finBasis ℝ E) (φ k)) := rfl
+      Φ (fun k : Fin n => (chartModelBasis E) (φ k)) := rfl
 
 /-- Continuity into `Tensor0SModel n ℝ E` from continuity of basis-tuple evaluations. -/
 private lemma continuousOn_into_tensor0SModel_of_eval_basis
     {n : ℕ} {U : Set M} (Φ : M → Tensor0SModel n ℝ E)
     (h : ∀ φ : Fin n → Fin (Module.finrank ℝ E),
       ContinuousOn (fun b : M =>
-        Φ b (fun k : Fin n => (Module.finBasis ℝ E) (φ k))) U) :
+        Φ b (fun k : Fin n => (chartModelBasis E) (φ k))) U) :
     ContinuousOn Φ U := by
   have hpi : ContinuousOn
       (fun b : M => evalAtBasisCLE (E := E) n (Φ b)) U := by
@@ -185,7 +185,7 @@ private lemma contMDiffOn_into_tensor0SModel_of_eval_basis
     {n : ℕ} {U : Set M} (Φ : M → Tensor0SModel n ℝ E)
     (h : ∀ φ : Fin n → Fin (Module.finrank ℝ E),
       ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun b : M =>
-        Φ b (fun k : Fin n => (Module.finBasis ℝ E) (φ k))) U) :
+        Φ b (fun k : Fin n => (chartModelBasis E) (φ k))) U) :
     ContMDiffOn I 𝓘(ℝ, Tensor0SModel n ℝ E) ∞ Φ U := by
   have hpi : ContMDiffOn I 𝓘(ℝ, (Fin n → Fin (Module.finrank ℝ E)) → ℝ) ∞
       (fun b : M => evalAtBasisCLE (E := E) n (Φ b)) U := by
@@ -215,7 +215,7 @@ private lemma loweredCompose_at_basis_tuple
     (T : TensorRSModel r s ℝ E)
     (φ : Fin (r + s) → Fin (Module.finrank ℝ E)) :
     loweredCompose (I := I) (M := M) g r s α b T
-        (fun i : Fin (r + s) => (Module.finBasis ℝ E) (φ i)) =
+        (fun i : Fin (r + s) => (chartModelBasis E) (φ i)) =
       lowerAllUpperIndices (I := I) (M := M) g r s b T
         (fun i : Fin (r + s) =>
           chartBasisVecFiber (I := I) α (φ i) b) := by
@@ -315,7 +315,7 @@ private theorem trivializationAt_separableFormBundleSection_eval_basis
     (trivializationAt (Tensor0SModel r ℝ E)
         (fun y : M => Tensor0SSpace r I y) α
         (separableFormBundleSection (I := I) (M := M) g r α φ_first b)).2
-        (fun k : Fin r => (Module.finBasis ℝ E) (ψ k)) =
+        (fun k : Fin r => (chartModelBasis E) (ψ k)) =
       ∏ k : Fin r,
         chartGramMatrix (I := I) g α b (φ_first k) (ψ k) := by
   rw [trivializationAt_separableFormBundleSection_eq (I := I) (M := M) g r α φ_first b]
@@ -324,7 +324,7 @@ private theorem trivializationAt_separableFormBundleSection_eval_basis
   refine Finset.prod_congr rfl ?_
   intro k _
   -- Goal: g.inner b (chartBasisVecFiber α (φ_first k) b)
-  --        ((trivializationAt E (TangentSpace I) α).symmL ℝ b ((Module.finBasis ℝ E) (ψ k)))
+  --        ((trivializationAt E (TangentSpace I) α).symmL ℝ b ((chartModelBasis E) (ψ k)))
   --     = chartGramMatrix g α b (φ_first k) (ψ k)
   rw [chartGramMatrix_apply]
   -- Now need: g.inner b vfirst (symmL e_ψ) = g.inner b vfirst (chartBasisVecFiber α (ψ k) b).
