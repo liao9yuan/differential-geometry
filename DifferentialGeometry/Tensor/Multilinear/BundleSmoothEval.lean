@@ -247,6 +247,9 @@ private theorem contMDiff_curriedSection_of_contMDiff_section {n : ℕ}
         TotalSpace.mk' (E →L[ℝ] Tensor0SModel n ℝ E)
           (E := fun y : M => TangentSpace I y →L[ℝ] Tensor0SSpace n I y) b
           (curriedSection T b)) := by
+  letI : TopologicalSpace (TotalSpace (Tensor0SModel (n + 1) ℝ E)
+      (fun y : M => Tensor0SSpace (n + 1) I y)) :=
+    tensor0SBundle_topology (n + 1)
   intro x
   rw [Bundle.contMDiffAt_section (F := E →L[ℝ] Tensor0SModel n ℝ E)
     (E := fun y : M => TangentSpace I y →L[ℝ] Tensor0SSpace n I y)]
@@ -508,6 +511,9 @@ theorem contMDiffAt_curriedSection_of_contMDiffAt_section {n : ℕ}
         TotalSpace.mk' (E →L[ℝ] Tensor0SModel n ℝ E)
           (E := fun y : M => TangentSpace I y →L[ℝ] Tensor0SSpace n I y) b
           (curriedSection T b)) x₀ := by
+  letI : TopologicalSpace (TotalSpace (Tensor0SModel (n + 1) ℝ E)
+      (fun y : M => Tensor0SSpace (n + 1) I y)) :=
+    tensor0SBundle_topology (n + 1)
   rw [Bundle.contMDiffAt_section (F := E →L[ℝ] Tensor0SModel n ℝ E)
     (E := fun y : M => TangentSpace I y →L[ℝ] Tensor0SSpace n I y)]
   have hT_at := (Bundle.contMDiffAt_section (F := Tensor0SModel (n + 1) ℝ E)

@@ -77,9 +77,9 @@ import DifferentialGeometry.Synthetic.Realization.TensorNabla
 import DifferentialGeometry.Synthetic.Realization.NablaComm
 import DifferentialGeometry.Synthetic.Realization.HomNabla
 import DifferentialGeometry.Synthetic.Realization.Tensor0SBridge
-import DifferentialGeometry.Synthetic.Realization.Tensor0SNabla
-import DifferentialGeometry.Synthetic.Realization.GenHomNabla
-import DifferentialGeometry.Synthetic.Realization.TensorRSNabla
+import DifferentialGeometry.Integral.Connection.Tensor0SNabla
+import DifferentialGeometry.Integral.Connection.HomBundleNabla
+import DifferentialGeometry.Integral.Connection.TensorRSNabla
 import DifferentialGeometry.Synthetic.Realization.TensorContract
 import DifferentialGeometry.Synthetic.Realization.NablaContractSynthetic
 import DifferentialGeometry.Synthetic.Realization.TimeDeriv
@@ -91,7 +91,7 @@ import DifferentialGeometry.Synthetic.Realization.RicciFlow
 import DifferentialGeometry.Synthetic.Realization.SmoothRicciFlow
 import DifferentialGeometry.Synthetic.Realization.RicciFlowOn
 import DifferentialGeometry.Synthetic.Realization.SmoothRicciFlowOn
-import DifferentialGeometry.Synthetic.Realization.Coordinates.Basic
+import DifferentialGeometry.Integral.Connection.LocalFrame
 import DifferentialGeometry.Synthetic.Realization.Coordinates.Christoffel
 
 -- Non-Ricci flows (plug-in demonstrations of flow-agnostic abstraction)
@@ -170,7 +170,10 @@ import DifferentialGeometry.Tensor.RSTensor.LieDerivative
 import DifferentialGeometry.Tensor.RSTensor.Metric
 import DifferentialGeometry.Tensor.RSTensor.TangentRiemannian
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian
+import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannianBundle
+import DifferentialGeometry.Tensor.RSTensor.Tensor0SInnerSectionContinuity
 import DifferentialGeometry.Tensor.RSTensor.TensorRSRiemannian
+import DifferentialGeometry.Tensor.RSTensor.TensorRSRiemannianBundle
 
 import DifferentialGeometry.Integral.Measure.ChartDensity
 import DifferentialGeometry.Integral.Measure.Glue
@@ -541,3 +544,13 @@ import DifferentialGeometry.Integral.Connection.ChartBridge.HessFrobenius
 import DifferentialGeometry.Integral.Connection.Bochner
 import DifferentialGeometry.Integral.Connection.BochnerConcrete
 import DifferentialGeometry.Integral.Connection.WithBoundary.BochnerConcrete
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.PreHilbert
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.H1Compl
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Variational
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Resolvent
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.RellichTensor
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartComponents
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ComponentSobolevBound
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ComponentL2Bound
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChristoffelBound
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartJinvContinuity

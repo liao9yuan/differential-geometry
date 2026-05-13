@@ -290,7 +290,7 @@ quadratic forms on a finite-dimensional space). -/
 -- model fibre and using the standard `ContinuousMultilinearMap` instances.
 
 /-- A general finite-dim positive-definite bilinear form has a bounded unit ball. -/
-private lemma posDef_bilin_unit_ball_isBounded
+lemma posDef_bilin_unit_ball_isBounded
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     [FiniteDimensional ℝ F] [Nontrivial F]
     (B : F →L[ℝ] F →L[ℝ] ℝ)
@@ -539,7 +539,7 @@ The chart-local inner product is smooth in `b` on the chart base set. The
 proof is by induction on `s`. The base case is constant; the inductive step
 uses smoothness of the inverse Gram matrix and the inductive hypothesis. -/
 
-private lemma chartTensorInnerPointwise_0s_contMDiffOn
+lemma chartTensorInnerPointwise_0s_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∀ (s : ℕ) (S T : Tensor0SModel s ℝ E),
       ContMDiffOn I 𝓘(ℝ) ∞
@@ -712,7 +712,7 @@ space `MLF →L MLF →L ℝ`. This is the form needed by the
 trivialisation-section iff lemma. -/
 
 /-- The bilinear `LinearMap` underlying `chartTensorInnerPointwise_0s`. -/
-private def chartTensorInnerPointwise_0sBilin
+def chartTensorInnerPointwise_0sBilin
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α b : M) :
     Tensor0SModel s ℝ E →ₗ[ℝ]
       Tensor0SModel s ℝ E →ₗ[ℝ] ℝ :=
@@ -727,7 +727,7 @@ private def chartTensorInnerPointwise_0sBilin
     (fun c S T =>
       chartTensorInnerPointwise_0s_smul_right (I := I) (M := M) g α b s c S T)
 
-@[simp] private lemma chartTensorInnerPointwise_0sBilin_apply
+@[simp] lemma chartTensorInnerPointwise_0sBilin_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α b : M)
     (S T : Tensor0SModel s ℝ E) :
     chartTensorInnerPointwise_0sBilin (I := I) (M := M) g s α b S T =
@@ -736,7 +736,7 @@ private def chartTensorInnerPointwise_0sBilin
 /-- CLM-valued chart-local inner product as a continuous bilinear pairing
 on the model fibre, indexed by `b : M`. We use that the model fibre is
 finite-dimensional, so any bilinear LinearMap is automatically continuous. -/
-private noncomputable def chartTensorInnerPointwise_0sCLM
+noncomputable def chartTensorInnerPointwise_0sCLM
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α b : M) :
     Tensor0SModel s ℝ E →L[ℝ]
       Tensor0SModel s ℝ E →L[ℝ] ℝ :=
@@ -759,7 +759,7 @@ private noncomputable def chartTensorInnerPointwise_0sCLM
         rw [chartTensorInnerPointwise_0s_smul_left]
         rfl }
 
-@[simp] private lemma chartTensorInnerPointwise_0sCLM_apply
+@[simp] lemma chartTensorInnerPointwise_0sCLM_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α b : M)
     (S T : Tensor0SModel s ℝ E) :
     chartTensorInnerPointwise_0sCLM (I := I) (M := M) g s α b S T =
@@ -932,7 +932,7 @@ private lemma chartJinv_basis (α : M) (b : M)
   rfl
 
 /-- For `b` in the chart's base set, `chartJ α b ∘ chartJinv α b = id`. -/
-private lemma chartJ_chartJinv (α : M) {b : M}
+lemma chartJ_chartJinv (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) (v : E) :
     chartJ (I := I) (M := M) α b
         (chartJinv (I := I) (M := M) α b v) = v := by

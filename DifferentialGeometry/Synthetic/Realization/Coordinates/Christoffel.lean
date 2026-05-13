@@ -1,4 +1,4 @@
-import DifferentialGeometry.Synthetic.Realization.Coordinates.Basic
+import DifferentialGeometry.Integral.Connection.LocalFrame
 import DifferentialGeometry.Synthetic.Analysis.TimeOnTensors
 
 set_option autoImplicit false

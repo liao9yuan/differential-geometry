@@ -124,7 +124,11 @@ theorem concrete_time_tr_comm :
   let hframe_tan := e_tan.isLocalFrameOn_localFrame_baseSet I (↑(⊤ : ℕ∞)) b
   obtain ⟨σ', hσ'⟩ :=
     hframe_tan.exists_contMDiffSection_eqOn_nhd e_tan.open_baseSet he_tan
-  let e_1 := trivializationAt (Tensor0SModel 1 ℝ E) (fun x => Tensor0SSpace 1 I x) x₀
+  -- Type-annotated `e_1` so typeclass synthesis can find the bundle topology against the
+  -- non-reducible `Tensor0SSpace` fiber.
+  let e_1 : Trivialization (Tensor0SModel 1 ℝ E)
+      (π (Tensor0SModel 1 ℝ E) (fun x : M => Tensor0SSpace 1 I x)) :=
+    trivializationAt (Tensor0SModel 1 ℝ E) (fun x : M => Tensor0SSpace 1 I x) x₀
   have he_1 : x₀ ∈ e_1.baseSet := mem_baseSet_trivializationAt _ _ x₀
   let hframe_1 :=
     e_1.isLocalFrameOn_localFrame_baseSet I (↑(⊤ : ℕ∞)) (dualCovectorBasis' (E := E))
@@ -273,7 +277,11 @@ theorem concrete_time_tr_commOn
   let hframe_tan := e_tan.isLocalFrameOn_localFrame_baseSet I (↑(⊤ : ℕ∞)) b
   obtain ⟨σ', hσ'⟩ :=
     hframe_tan.exists_contMDiffSection_eqOn_nhd e_tan.open_baseSet he_tan
-  let e_1 := trivializationAt (Tensor0SModel 1 ℝ E) (fun x => Tensor0SSpace 1 I x) x₀
+  -- Type-annotated `e_1` so typeclass synthesis can find the bundle topology against the
+  -- non-reducible `Tensor0SSpace` fiber.
+  let e_1 : Trivialization (Tensor0SModel 1 ℝ E)
+      (π (Tensor0SModel 1 ℝ E) (fun x : M => Tensor0SSpace 1 I x)) :=
+    trivializationAt (Tensor0SModel 1 ℝ E) (fun x : M => Tensor0SSpace 1 I x) x₀
   have he_1 : x₀ ∈ e_1.baseSet := mem_baseSet_trivializationAt _ _ x₀
   let hframe_1 :=
     e_1.isLocalFrameOn_localFrame_baseSet I (↑(⊤ : ℕ∞)) (dualCovectorBasis' (E := E))

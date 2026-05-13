@@ -1,5 +1,5 @@
-import DifferentialGeometry.Synthetic.Realization.GenHomNabla
-import DifferentialGeometry.Synthetic.Realization.Tensor0SNabla
+import DifferentialGeometry.Integral.Connection.HomBundleNabla
+import DifferentialGeometry.Integral.Connection.Tensor0SNabla
 
 /-!
 # Covariant derivative on the (r,s)-tensor bundle
@@ -108,10 +108,13 @@ theorem tensorRSCovariantDerivative_apply (r s : ℕ)
     (τ : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
     (w : Cₛ^∞⟮I; Tensor0SModel r ℝ E, (fun x : M => Tensor0SSpace r I x)⟯)
     (x : M) (v : TangentSpace I x) :
-    (tensorRSCovariantDerivative I M r s cov τ x v) (w x) =
+    (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
+        tensorRSCovariantDerivative I M r s cov τ x v) (w x) =
       Tensor0SNabla.tensor0SCovariantDerivative I M s cov
-        (fun y => τ y (w y)) x v -
-      τ x (Tensor0SNabla.tensor0SCovariantDerivative I M r cov w x v) :=
+        (fun y =>
+          (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace s I y from τ y) (w y)) x v -
+      (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from τ x)
+        (Tensor0SNabla.tensor0SCovariantDerivative I M r cov w x v) :=
   HomConnectionGen.homBundleCovariantDerivativeGen_apply I M
     (Tensor0SModel r ℝ E) (fun x : M => Tensor0SSpace r I x)
     (Tensor0SModel s ℝ E) (fun x : M => Tensor0SSpace s I x)

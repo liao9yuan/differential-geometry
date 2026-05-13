@@ -289,10 +289,16 @@ noncomputable def tensor0SCovariantDerivative_succ {s : ℕ}
     (cov_s : CovariantDerivative I (Tensor0SModel s ℝ E)
       (fun x : M => Tensor0SSpace s I x))
     [ContMDiffCovariantDerivative cov_s ∞] :
+    letI _h_top : TopologicalSpace (TotalSpace (Tensor0SModel (s + 1) ℝ E)
+        (fun x : M => Tensor0SSpace (s + 1) I x)) :=
+      tensor0SBundle_topology (s + 1)
+    letI _h_fib : FiberBundle (Tensor0SModel (s + 1) ℝ E)
+        (fun x : M => Tensor0SSpace (s + 1) I x) :=
+      tensor0SBundle_fiber (s + 1)
     CovariantDerivative I (Tensor0SModel (s+1) ℝ E)
-      (fun x : M => Tensor0SSpace (s+1) I x) where
-  toFun := tensor0SCovariantDerivative_succ_fun I M cov_TM cov_s
-  isCovariantDerivativeOnUniv := {
+      (fun x : M => Tensor0SSpace (s+1) I x) :=
+  { toFun := tensor0SCovariantDerivative_succ_fun I M cov_TM cov_s
+    isCovariantDerivativeOnUniv := {
     add := by
       intro T₁ T₂ x hT₁ hT₂ _hx
       have hC₁ := (mdifferentiableAt_curriedSection_iff_section I M T₁).mp hT₁
@@ -350,7 +356,7 @@ noncomputable def tensor0SCovariantDerivative_succ {s : ℕ}
       change (tensor0S_curry (I := I) (M := M) s x).symm
           (tensor0S_curry (I := I) (M := M) s x (T x)) = T x
       exact (tensor0S_curry (I := I) (M := M) s x).symm_apply_apply (T x)
-  }
+  } }
 
 /-- For a smooth section of the Hom-bundle, composition with `(tensor0S_curry).symm` gives a
 smooth section of `Tensor0SSpace (s+1)`. This uses the bridge `mdifferentiableAt_curriedSection_iff_section`. -/

@@ -280,7 +280,8 @@ private lemma tensorRS_centre_point_identity
   unfold ContinuousLinearMap.inCoordinates
   simp only [ContinuousLinearMap.coe_comp', Function.comp_apply]
   rw [tensor0S_symmL_self_apply (I := I) (M := M) r x v]
-  rw [tensor0S_continuousLinearMapAt_self_apply (I := I) (M := M) s x ((S.toSection x) v)]
+  rw [tensor0S_continuousLinearMapAt_self_apply (I := I) (M := M) s x
+    ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from S.toSection x) v)]
   rfl
 
 set_option linter.unusedSectionVars false in

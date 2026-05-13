@@ -928,6 +928,9 @@ noncomputable def contract_covariantField (r s : ℕ)
     TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) r s := by
   letI := tensorRSBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r (s + 1)
   letI := tensorRSBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s
+  letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r
+  letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s
+  letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (s + 1)
   refine ⟨contract_covariantField_fun r s (fun x => α x) (fun x => X x), ?_⟩
   intro x₀
   rw [contMDiffAt_section]
@@ -991,16 +994,20 @@ noncomputable def contract_covariantField (r s : ℕ)
   -- `contract_covariant ... = mip ∘ ...` and `biop = compL ∘ mib`.
   change (trivializationAt (Tensor0SModel s 𝕜 E)
       (fun x => Tensor0SSpace s I x) x₀).continuousLinearMapAt 𝕜 x
-      (model_interior_product s (X x : E) ((α x) gtilde)) w =
+      (model_interior_product s (X x : E)
+        ((show Tensor0SSpace r I x →L[𝕜] Tensor0SSpace (s + 1) I x from α x) gtilde)) w =
     (trivializationAt (Tensor0SModel (s + 1) 𝕜 E)
-      (fun x => Tensor0SSpace (s + 1) I x) x₀).continuousLinearMapAt 𝕜 x ((α x) gtilde)
+      (fun x => Tensor0SSpace (s + 1) I x) x₀).continuousLinearMapAt 𝕜 x
+      ((show Tensor0SSpace r I x →L[𝕜] Tensor0SSpace (s + 1) I x from α x) gtilde)
       (Fin.cons Xtilde w)
   rw [h_cLMAt_s, h_cLMAt_s1]
   -- After unfolding, both sides apply `(α x) gtilde` to a `Fin (s+1) → E` vector.
   -- LHS uses `Fin.cons (X x) (sL ∘ w)`, RHS uses `sL ∘ Fin.cons Xtilde w`.
-  change ((α x) gtilde : Tensor0SModel (s + 1) 𝕜 E)
+  change ((show Tensor0SSpace r I x →L[𝕜] Tensor0SSpace (s + 1) I x from α x) gtilde :
+        Tensor0SModel (s + 1) 𝕜 E)
       (@Fin.cons s (fun _ => E) (X x : E) (fun i => sL (w i))) =
-    ((α x) gtilde) (fun i => sL (@Fin.cons s (fun _ => E) Xtilde w i))
+    ((show Tensor0SSpace r I x →L[𝕜] Tensor0SSpace (s + 1) I x from α x) gtilde)
+      (fun i => sL (@Fin.cons s (fun _ => E) Xtilde w i))
   congr 1
   funext i
   refine Fin.cases ?_ ?_ i
@@ -1046,6 +1053,9 @@ noncomputable def contract_contravariantField (r s : ℕ)
   letI := tensorRSBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (r + 1) s
   letI := tensorRSBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s
   letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) 1
+  letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r
+  letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s
+  letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (r + 1)
   refine ⟨contract_contravariantField_fun r s (fun x => α x) (fun x => φ x), ?_⟩
   intro x₀
   rw [contMDiffAt_section]
@@ -1161,12 +1171,14 @@ noncomputable def contract_contravariantField (r s : ℕ)
   -- `cLMAt_s ∘ (α x) ∘ symmL_{r+1}`.
   change (trivializationAt (Tensor0SModel s 𝕜 E)
       (fun x => Tensor0SSpace s I x) x₀).continuousLinearMapAt 𝕜 x
-      ((α x) (model_tensorWithCovector r (Tensor0SSpace.toModel (φ x)) β_symm)) v =
+      ((show Tensor0SSpace (r + 1) I x →L[𝕜] Tensor0SSpace s I x from α x)
+        (model_tensorWithCovector r (Tensor0SSpace.toModel (φ x)) β_symm)) v =
     (trivializationAt (Tensor0SModel s 𝕜 E)
       (fun x => Tensor0SSpace s I x) x₀).continuousLinearMapAt 𝕜 x
-      ((α x) ((trivializationAt (Tensor0SModel (r + 1) 𝕜 E)
-        (fun x => Tensor0SSpace (r + 1) I x) x₀).symmL 𝕜 x
-        (model_tensorWithCovector r atilde_x β))) v
+      ((show Tensor0SSpace (r + 1) I x →L[𝕜] Tensor0SSpace s I x from α x)
+        ((trivializationAt (Tensor0SModel (r + 1) 𝕜 E)
+          (fun x => Tensor0SSpace (r + 1) I x) x₀).symmL 𝕜 x
+          (model_tensorWithCovector r atilde_x β))) v
   rw [h_cLMAt_s, h_cLMAt_s]
   -- Both sides are now `(α x) Y_i (fun i => sL (v i))` for some `Y_i : Tensor0SSpace (r+1) I x`.
   -- Reduce to `Y_1 = Y_2` at the `(r+1)` level (peel off the `v`-application then the `α x`).
