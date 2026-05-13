@@ -559,3 +559,6 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ComponentSobolevBo
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ComponentL2Bound
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChristoffelBound
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartJinvContinuity
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.MultiplyQuantK
+import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBoundStrictMemWkpHigherOrder
+import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseHigherOrder
