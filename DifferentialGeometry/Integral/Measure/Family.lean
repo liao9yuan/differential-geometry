@@ -904,59 +904,59 @@ lemma transitionMatrix_mul_reverse
   -- Key identity on the basis vectors: tang x₁ x₀ ∘ tang x₀ x₁ = tang x₀ x₀ = id.
   have hcomp : ∀ i : Fin (Module.finrank ℝ E),
       (tangentCoordChange I x₁ x₀ x) ((tangentCoordChange I x₀ x₁ x)
-          ((Module.finBasis ℝ E) i))
-        = (Module.finBasis ℝ E) i := by
+          ((chartModelBasis E) i))
+        = (chartModelBasis E) i := by
     intro i
     have := tangentCoordChange_comp (I := I) (𝕜 := ℝ) (E := E) (H := H) (M := M)
         (w := x₀) (x := x₁) (y := x₀) (z := x)
-        (v := (Module.finBasis ℝ E) i) hmem
+        (v := (chartModelBasis E) i) hmem
     rw [this]
     have hself := tangentCoordChange_self (I := I) (x := x₀) (z := x)
-      (v := (Module.finBasis ℝ E) i) hx0'
+      (v := (chartModelBasis E) i) hx0'
     exact hself
   -- Now compute the matrix product entry.
   change (transitionMatrix (I := I) x₀ x₁ x *
       transitionMatrix (I := I) x₁ x₀ x) i j = (1 : Matrix _ _ _) i j
   simp only [Matrix.mul_apply, transitionMatrix_apply, Matrix.one_apply]
-  -- Apply `finBasis_repr_sum` to `tangentCoordChange x₀ x₁ (e j)`, then apply
+  -- Apply `chartModelBasis_repr_sum` to `tangentCoordChange x₀ x₁ (e j)`, then apply
   -- `tangentCoordChange x₁ x₀`. The composition is `tangentCoordChange x₀ x₀ = id`,
   -- so we recover `e j = ∑ k, repr(tang x₀ x₁ (e j)) k • tang x₁ x₀ (e k)`.
   have hexp :
-      (tangentCoordChange I x₀ x₁ x) ((Module.finBasis ℝ E) j)
-        = ∑ k, (Module.finBasis ℝ E).repr
-            ((tangentCoordChange I x₀ x₁ x) ((Module.finBasis ℝ E) j)) k
-          • (Module.finBasis ℝ E) k :=
-    finBasis_repr_sum (tangentCoordChange I x₀ x₁ x) j
+      (tangentCoordChange I x₀ x₁ x) ((chartModelBasis E) j)
+        = ∑ k, (chartModelBasis E).repr
+            ((tangentCoordChange I x₀ x₁ x) ((chartModelBasis E) j)) k
+          • (chartModelBasis E) k :=
+    chartModelBasis_repr_sum (tangentCoordChange I x₀ x₁ x) j
   -- Apply `tangentCoordChange x₁ x₀` (linear).
   have hlin :
       (tangentCoordChange I x₁ x₀ x)
-          (∑ k, (Module.finBasis ℝ E).repr
-              ((tangentCoordChange I x₀ x₁ x) ((Module.finBasis ℝ E) j)) k
-            • (Module.finBasis ℝ E) k)
-        = ∑ k, (Module.finBasis ℝ E).repr
-              ((tangentCoordChange I x₀ x₁ x) ((Module.finBasis ℝ E) j)) k
-            • (tangentCoordChange I x₁ x₀ x) ((Module.finBasis ℝ E) k) := by
+          (∑ k, (chartModelBasis E).repr
+              ((tangentCoordChange I x₀ x₁ x) ((chartModelBasis E) j)) k
+            • (chartModelBasis E) k)
+        = ∑ k, (chartModelBasis E).repr
+              ((tangentCoordChange I x₀ x₁ x) ((chartModelBasis E) j)) k
+            • (tangentCoordChange I x₁ x₀ x) ((chartModelBasis E) k) := by
     rw [map_sum]
     refine Finset.sum_congr rfl (fun k _ => ?_)
     rw [ContinuousLinearMap.map_smul]
   have heval : (tangentCoordChange I x₁ x₀ x) ((tangentCoordChange I x₀ x₁ x)
-      ((Module.finBasis ℝ E) j))
-      = (Module.finBasis ℝ E) j := hcomp j
+      ((chartModelBasis E) j))
+      = (chartModelBasis E) j := hcomp j
   -- Rewrite heval using hexp and hlin.
   have heval' :
-      ∑ k, (Module.finBasis ℝ E).repr
-            ((tangentCoordChange I x₀ x₁ x) ((Module.finBasis ℝ E) j)) k
-          • (tangentCoordChange I x₁ x₀ x) ((Module.finBasis ℝ E) k)
-        = (Module.finBasis ℝ E) j := by
+      ∑ k, (chartModelBasis E).repr
+            ((tangentCoordChange I x₀ x₁ x) ((chartModelBasis E) j)) k
+          • (tangentCoordChange I x₁ x₀ x) ((chartModelBasis E) k)
+        = (chartModelBasis E) j := by
     rw [← hlin, ← hexp]; exact heval
   -- Take repr on both sides, at index i.
-  have happ := congrArg ((Module.finBasis ℝ E).repr · i) heval'
+  have happ := congrArg ((chartModelBasis E).repr · i) heval'
   simp only [map_sum, Finsupp.coe_finset_sum, Finset.sum_apply,
     map_smul, Finsupp.smul_apply, smul_eq_mul] at happ
   -- Split the conclusion by cases i = j.
-  have hrhs : ((Module.finBasis ℝ E).repr ((Module.finBasis ℝ E) j)) i
+  have hrhs : ((chartModelBasis E).repr ((chartModelBasis E) j)) i
                 = if i = j then (1 : ℝ) else 0 := by
-    rw [(Module.finBasis ℝ E).repr_self, Finsupp.single_apply]
+    rw [(chartModelBasis E).repr_self, Finsupp.single_apply]
     by_cases hij : i = j
     · simp [hij]
     · simp [hij, Ne.symm hij]

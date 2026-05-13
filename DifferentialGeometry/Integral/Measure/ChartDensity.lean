@@ -11,9 +11,13 @@ import Mathlib.Topology.Algebra.Module.Equiv
 import Mathlib.Analysis.Matrix.PosDef
 import Mathlib.Data.Matrix.Mul
 import Mathlib.Analysis.SpecialFunctions.Sqrt
+import Mathlib.Analysis.InnerProductSpace.EuclideanDist
+import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.MeasureTheory.Measure.WithDensity
 import Mathlib.MeasureTheory.Measure.Map
 import Mathlib.MeasureTheory.Measure.Haar.OfBasis
+import Mathlib.MeasureTheory.Measure.Haar.InnerProductSpace
+import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
 import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
 
 /-!
@@ -80,6 +84,41 @@ abbrev SmoothRiemannianMetric (I : ModelWithCorners ℝ E H) (M : Type*)
     [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] : Type _ :=
   Bundle.ContMDiffRiemannianMetric I ∞ E (TangentSpace I : M → Type _)
 
+/-! ## A fixed model-space basis transferred from `EuclideanSpace`
+
+The chart-local frame is built from a fixed algebraic basis of the model space `E`. We
+choose this basis to be the image of the standard `EuclideanSpace` basis under the
+canonical continuous-linear equivalence `toEuclidean.symm : EuclideanSpace ℝ (Fin n) ≃L[ℝ] E`.
+This choice (rather than a generic `Module.finBasis ℝ E`) ensures that pulling Euclidean
+partial-derivative computations through the chart consistently uses the same algebraic
+basis on both sides.
+-/
+
+/-- The fixed model-space basis used throughout the chart-local construction. It is the
+image of the standard `EuclideanSpace.basisFun` under the inverse of the canonical
+continuous-linear equivalence `toEuclidean : E ≃L[ℝ] EuclideanSpace ℝ (Fin n)`.
+
+Marked `irreducible` to avoid expensive `whnf` chains that reduce
+`(EuclideanSpace.basisFun ...).toBasis.map toEuclidean.symm.toLinearEquiv` —
+downstream proofs should rely on the simp lemma `chartModelBasis_apply` (and
+`Module.Basis.repr`-style API) rather than on definitional unfolding. -/
+@[irreducible] def chartModelBasis (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [FiniteDimensional ℝ E] :
+    Module.Basis (Fin (Module.finrank ℝ E)) ℝ E :=
+  (EuclideanSpace.basisFun (Fin (Module.finrank ℝ E)) ℝ).toBasis.map
+    (toEuclidean (E := E)).symm.toLinearEquiv
+
+@[simp] lemma chartModelBasis_apply (i : Fin (Module.finrank ℝ E)) :
+    chartModelBasis E i =
+      (toEuclidean (E := E)).symm (EuclideanSpace.single i (1 : ℝ)) := by
+  classical
+  with_unfolding_all
+    change (toEuclidean (E := E)).symm.toLinearEquiv
+        ((EuclideanSpace.basisFun (Fin (Module.finrank ℝ E)) ℝ).toBasis i) =
+      (toEuclidean (E := E)).symm (EuclideanSpace.single i (1 : ℝ))
+  simp [OrthonormalBasis.coe_toBasis,
+    EuclideanSpace.basisFun_apply (𝕜 := ℝ) (ι := Fin (Module.finrank ℝ E))]
+
 /-! ## Tangent-bundle sections from a fixed model-space basis -/
 
 /-- The `i`-th pointwise tangent vector of the chart-local frame attached to `x₀`. For `x`
@@ -88,7 +127,7 @@ under `(trivializationAt E (TangentSpace I) x₀).symm x`; off that set it is a 
 (junk) value in the fiber, still well-defined. -/
 def chartBasisVecFiber (x₀ : M) (i : Fin (Module.finrank ℝ E)) (x : M) :
     TangentSpace I x :=
-  (trivializationAt E (TangentSpace I) x₀).symm x ((Module.finBasis ℝ E) i)
+  (trivializationAt E (TangentSpace I) x₀).symm x ((chartModelBasis E) i)
 
 /-- The `i`-th pointwise tangent-bundle section of the chart-local frame attached to `x₀`.
 Smooth on `triv.baseSet`. -/
@@ -109,9 +148,9 @@ lemma trivializationAt_chartBasisVec_snd
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
     (trivializationAt E (TangentSpace I) x₀
         ⟨x, chartBasisVecFiber (I := I) x₀ i x⟩).2
-      = (Module.finBasis ℝ E) i := by
+      = (chartModelBasis E) i := by
   have h := (trivializationAt E (TangentSpace I) x₀).apply_mk_symm hx
-    ((Module.finBasis ℝ E) i)
+    ((chartModelBasis E) i)
   simpa [chartBasisVecFiber] using congrArg Prod.snd h
 
 /-- The chart-basis tangent-bundle section is smooth on the base set of the
@@ -125,7 +164,7 @@ lemma chartBasisVec_contMDiffOn
       (IB := I) (n := ∞) (s := fun x => chartBasisVecFiber (I := I) x₀ i x)
   refine hiff.mpr ?_
   have hconst : ContMDiffOn I 𝓘(ℝ, E) ∞
-      (fun _ : M => (Module.finBasis ℝ E) i)
+      (fun _ : M => (chartModelBasis E) i)
       (trivializationAt E (TangentSpace I) x₀).baseSet :=
     contMDiffOn_const
   refine hconst.congr ?_
@@ -140,7 +179,7 @@ equivalence given by the trivialization. -/
 def chartBasisFamily (x₀ : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
     Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x) :=
-  (Module.finBasis ℝ E).map
+  (chartModelBasis E).map
     (ContinuousLinearEquiv.toLinearEquiv
       ((trivializationAt E (TangentSpace I) x₀).continuousLinearEquivAt ℝ x hx).symm)
 
@@ -388,9 +427,13 @@ lemma chartDensity_contMDiffOn
 /-! ## The chart-local measure -/
 
 /-- The canonical additive Haar measure on the model space `E`, obtained from the
-canonical basis `Module.finBasis ℝ E`. Serves as the reference measure on the chart
-target. -/
-noncomputable def modelHaar : MeasureTheory.Measure E := (Module.finBasis ℝ E).addHaar
+basis `chartModelBasis E`. Serves as the reference measure on the chart target.
+
+This basis is the image of the standard `EuclideanSpace.basisFun` under the inverse
+of the canonical `toEuclidean : E ≃L[ℝ] EuclideanSpace ℝ (Fin n)`. With this choice,
+the pushforward of `modelHaar` along `toEuclidean` is the standard Lebesgue volume on
+`EuclideanSpace ℝ (Fin n)`; see `map_toEuclidean_modelHaar_eq_volume` below. -/
+noncomputable def modelHaar : MeasureTheory.Measure E := (chartModelBasis E).addHaar
 
 /-- The canonical Haar measure on `E` is an additive Haar measure. This
 instance is derived from `Module.Basis.addHaar`. -/
@@ -398,6 +441,46 @@ instance modelHaar_isAddHaarMeasure :
     MeasureTheory.Measure.IsAddHaarMeasure (modelHaar (E := E)) := by
   unfold modelHaar
   infer_instance
+
+/-- The pushforward of `modelHaar` along `toEuclidean` is the canonical Lebesgue
+volume on `EuclideanSpace ℝ (Fin (Module.finrank ℝ E))`.
+
+This is the defining property of the chosen basis: by construction
+`chartModelBasis = (EuclideanSpace.basisFun).map toEuclidean.symm`, so by
+`Module.Basis.map_addHaar` we have
+`map toEuclidean modelHaar = (EuclideanSpace.basisFun).addHaar = volume`. -/
+theorem map_toEuclidean_modelHaar_eq_volume :
+    MeasureTheory.Measure.map (toEuclidean (E := E)) (modelHaar (E := E)) =
+      (MeasureTheory.volume :
+        MeasureTheory.Measure
+          (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))) := by
+  classical
+  letI : MeasurableSpace E := borel E
+  haveI : BorelSpace E := ⟨rfl⟩
+  -- `map toEuclidean modelHaar = (chartModelBasis.map toEuclidean).addHaar`.
+  have h₁ :
+      MeasureTheory.Measure.map (toEuclidean (E := E))
+          (modelHaar (E := E)) =
+        ((chartModelBasis E).map
+            (toEuclidean (E := E)).toLinearEquiv).addHaar := by
+    unfold modelHaar
+    exact Module.Basis.map_addHaar (chartModelBasis E)
+      (toEuclidean (E := E))
+  rw [h₁]
+  -- The basis-map cancellation: `chartModelBasis.map toEuclidean = basisFun.toBasis`.
+  have hcancel :
+      (chartModelBasis E).map (toEuclidean (E := E)).toLinearEquiv
+        = (EuclideanSpace.basisFun (Fin (Module.finrank ℝ E)) ℝ).toBasis := by
+    refine Module.Basis.eq_of_apply_eq ?_
+    intro i
+    have hb_i : (EuclideanSpace.basisFun (Fin (Module.finrank ℝ E)) ℝ).toBasis i
+        = EuclideanSpace.single i (1 : ℝ) := by
+      simp [OrthonormalBasis.coe_toBasis,
+        EuclideanSpace.basisFun_apply (𝕜 := ℝ) (ι := Fin (Module.finrank ℝ E))]
+    rw [Module.Basis.map_apply, chartModelBasis_apply, hb_i]
+    simp
+  rw [hcancel]
+  exact (EuclideanSpace.basisFun (Fin (Module.finrank ℝ E)) ℝ).addHaar_eq_volume
 
 /-- Chart-local measure on `M` built from the chart-local density and the extended
 chart at `x₀`, using the canonical additive Haar measure on the model space `E`.

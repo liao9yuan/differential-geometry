@@ -154,7 +154,7 @@ lemma chartCoeff_grad_g_eq_gradChartCoeff [I.Boundaryless]
   -- Set up the trivialization at α and the model basis.
   set T : Bundle.Trivialization E (π E (TangentSpace I : M → Type _)) :=
     trivializationAt E (TangentSpace I) α
-  set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := Module.finBasis ℝ E
+  set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := chartModelBasis E
   -- The chart-source membership of `x`.
   have hxchart : x ∈ (chartAt H α).source := by
     rw [trivializationAt_baseSet_eq_chartAt_source] at hx; exact hx

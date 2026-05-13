@@ -1539,7 +1539,7 @@ private theorem chosenWeakPartial_smooth_ae_eq
     h_chosen_loc h_classical_loc
 
 /-- Smooth functions are in `MemWkp` of any open set, for `1 ≤ p`. -/
-private theorem MemWkp_of_smooth_compactSupport
+theorem MemWkp_of_smooth_compactSupport
     {Ω : Set E} (hΩ_open : IsOpen Ω)
     {ψ : E → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
     (hψ_cpt : HasCompactSupport ψ) (hψ_supp : tsupport ψ ⊆ Ω)

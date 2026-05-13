@@ -161,11 +161,11 @@ def christoffelCorrection (g : SmoothRiemannianMetric I M)
   ∑ i : Fin (Module.finrank ℝ E),
     ∑ j : Fin (Module.finrank ℝ E),
       ∑ k : Fin (Module.finrank ℝ E),
-        (((Module.finBasis ℝ E).coord i).toContinuousLinearMap.comp
+        (((chartModelBasis E).coord i).toContinuousLinearMap.comp
             (trivToE (I := I) α x)).smulRight
-          (((Module.finBasis ℝ E).repr Y j *
+          (((chartModelBasis E).repr Y j *
               chartChristoffel (I := I) g α i j k (extChartAt I α x)) •
-            (Module.finBasis ℝ E) k)
+            (chartModelBasis E) k)
 
 /-- Pointwise formula for `christoffelCorrection`. -/
 lemma christoffelCorrection_apply
@@ -175,10 +175,10 @@ lemma christoffelCorrection_apply
       ∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
           ∑ k : Fin (Module.finrank ℝ E),
-            (((Module.finBasis ℝ E).repr (trivToE (I := I) α x v)) i *
-                ((Module.finBasis ℝ E).repr Y) j *
+            (((chartModelBasis E).repr (trivToE (I := I) α x v)) i *
+                ((chartModelBasis E).repr Y) j *
                 chartChristoffel (I := I) g α i j k (extChartAt I α x)) •
-              (Module.finBasis ℝ E) k := by
+              (chartModelBasis E) k := by
   classical
   unfold christoffelCorrection
   -- Iteratively apply `ContinuousLinearMap.sum_apply` and pointwise
@@ -197,9 +197,9 @@ lemma christoffelCorrection_apply
   rw [ContinuousLinearMap.smulRight_apply]
   rw [ContinuousLinearMap.comp_apply]
   -- `((b.coord i).toContinuousLinearMap (trivToE α x v)) = (b.coord i) (trivToE α x v) = (b.repr (trivToE α x v)) i`.
-  have hcoord : ((Module.finBasis ℝ E).coord i).toContinuousLinearMap
+  have hcoord : ((chartModelBasis E).coord i).toContinuousLinearMap
       (trivToE (I := I) α x v) =
-        ((Module.finBasis ℝ E).repr (trivToE (I := I) α x v)) i := by
+        ((chartModelBasis E).repr (trivToE (I := I) α x v)) i := by
     rfl
   rw [hcoord]
   -- Now the goal is:
@@ -224,20 +224,20 @@ lemma christoffelCorrection_add
   rw [← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl (fun k _ => ?_)
   -- Linearity of `b.repr` in `Y`.
-  have hrepr : ((Module.finBasis ℝ E).repr (Y + Y')) j =
-      ((Module.finBasis ℝ E).repr Y) j +
-        ((Module.finBasis ℝ E).repr Y') j := by
+  have hrepr : ((chartModelBasis E).repr (Y + Y')) j =
+      ((chartModelBasis E).repr Y) j +
+        ((chartModelBasis E).repr Y') j := by
     rw [map_add]; rfl
   rw [hrepr]
   -- Goal: `(a * (b₁ + b₂) * c) • d = (a * b₁ * c) • d + (a * b₂ * c) • d`.
-  rw [show ((Module.finBasis ℝ E).repr (trivToE (I := I) α x v)) i *
-        (((Module.finBasis ℝ E).repr Y) j + ((Module.finBasis ℝ E).repr Y') j) *
+  rw [show ((chartModelBasis E).repr (trivToE (I := I) α x v)) i *
+        (((chartModelBasis E).repr Y) j + ((chartModelBasis E).repr Y') j) *
         chartChristoffel (I := I) g α i j k (extChartAt I α x) =
-      ((Module.finBasis ℝ E).repr (trivToE (I := I) α x v)) i *
-          ((Module.finBasis ℝ E).repr Y) j *
+      ((chartModelBasis E).repr (trivToE (I := I) α x v)) i *
+          ((chartModelBasis E).repr Y) j *
           chartChristoffel (I := I) g α i j k (extChartAt I α x) +
-        ((Module.finBasis ℝ E).repr (trivToE (I := I) α x v)) i *
-          ((Module.finBasis ℝ E).repr Y') j *
+        ((chartModelBasis E).repr (trivToE (I := I) α x v)) i *
+          ((chartModelBasis E).repr Y') j *
           chartChristoffel (I := I) g α i j k (extChartAt I α x) by ring]
   rw [add_smul]
 
@@ -256,16 +256,16 @@ lemma christoffelCorrection_smul
   refine Finset.sum_congr rfl (fun j _ => ?_)
   rw [Finset.smul_sum]
   refine Finset.sum_congr rfl (fun k _ => ?_)
-  have hrepr : ((Module.finBasis ℝ E).repr (c • Y)) j =
-      c * ((Module.finBasis ℝ E).repr Y) j := by
+  have hrepr : ((chartModelBasis E).repr (c • Y)) j =
+      c * ((chartModelBasis E).repr Y) j := by
     rw [map_smul]; rfl
   rw [hrepr]
   -- Goal: `(a * (c * b) * d) • e = c • ((a * b * d) • e)`.
-  rw [show ((Module.finBasis ℝ E).repr (trivToE (I := I) α x v)) i *
-        (c * ((Module.finBasis ℝ E).repr Y) j) *
+  rw [show ((chartModelBasis E).repr (trivToE (I := I) α x v)) i *
+        (c * ((chartModelBasis E).repr Y) j) *
         chartChristoffel (I := I) g α i j k (extChartAt I α x) =
-      c * (((Module.finBasis ℝ E).repr (trivToE (I := I) α x v)) i *
-          ((Module.finBasis ℝ E).repr Y) j *
+      c * (((chartModelBasis E).repr (trivToE (I := I) α x v)) i *
+          ((chartModelBasis E).repr Y) j *
           chartChristoffel (I := I) g α i j k (extChartAt I α x)) by ring]
   rw [← smul_smul]
 

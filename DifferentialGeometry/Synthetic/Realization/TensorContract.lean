@@ -1,4 +1,4 @@
-import DifferentialGeometry.Synthetic.Realization.TensorRSNabla
+import DifferentialGeometry.Integral.Connection.TensorRSNabla
 import DifferentialGeometry.Synthetic.Realization.NablaComm
 import DifferentialGeometry.Synthetic.Algebra.TensorAlgebra
 import DifferentialGeometry.Tensor.RSTensor.Field
@@ -152,12 +152,15 @@ private theorem covectorFieldPair_contMDiff
   refine h_combine.congr_of_eventuallyEq ?_
   have hbase_tan := (trivializationAt E (TangentSpace I : M → Type _) x₀).open_baseSet.mem_nhds
     (mem_baseSet_trivializationAt E _ x₀)
-  have hbase_1 := (trivializationAt (Tensor0SModel 1 ℝ E)
-    (fun x => Tensor0SSpace 1 I x) x₀).open_baseSet.mem_nhds
-    (mem_baseSet_trivializationAt _ _ x₀)
+  -- Type-annotated `e_1` so typeclass synthesis can find the bundle topology against the
+  -- non-reducible `Tensor0SSpace` fiber.
+  set e_1 : Trivialization (Tensor0SModel 1 ℝ E)
+      (π (Tensor0SModel 1 ℝ E) (fun x : M => Tensor0SSpace 1 I x)) :=
+    trivializationAt (Tensor0SModel 1 ℝ E) (fun x : M => Tensor0SSpace 1 I x) x₀ with he_1_def
+  have hbase_1 : e_1.baseSet ∈ nhds x₀ :=
+    e_1.open_baseSet.mem_nhds (mem_baseSet_trivializationAt _ _ x₀)
   filter_upwards [hbase_tan, hbase_1] with x hx_tan hx_1
   set e_tan := trivializationAt E (TangentSpace I : M → Type _) x₀
-  set e_1 := trivializationAt (Tensor0SModel 1 ℝ E) (fun x => Tensor0SSpace 1 I x) x₀
   change (Tensor0SSpace.toModel (α x)) (fun _ : Fin 1 => X x) =
     evalCLM ((e_1 ⟨x, α x⟩).2) ((e_tan ⟨x, X x⟩).2)
   set β : Tensor0SModel 1 ℝ E := (e_1 ⟨x, α x⟩).2 with hβ
@@ -182,8 +185,14 @@ private theorem covectorFieldPair_contMDiff
     intro G v'
     have hGfib : G = e_1.symmL ℝ x (e_1.continuousLinearMapAt ℝ x G) :=
       (e_1.symmL_continuousLinearMapAt (R := ℝ) hx_1 G).symm
-    have hsym := Bundle.continuousMultilinearMap.triv_symmL_eq_compContinuousLinearMap
-      (F := E) (E := TangentSpace I) (𝕜 := ℝ) x₀ x hx_tan (e_1.continuousLinearMapAt ℝ x G)
+    -- The bundle's lemma is stated against `trivializationAt … (Bundle.continuousMultilinearMap …)`
+    -- but we hold `e_1` whose total-space fiber is the non-reducible `Tensor0SSpace`. The two
+    -- are equal as terms; force the rewrite by reformulating `hsym` against `e_1.symmL` directly.
+    have hsym : e_1.symmL ℝ x (e_1.continuousLinearMapAt ℝ x G) =
+        (e_1.continuousLinearMapAt ℝ x G).compContinuousLinearMap
+          (fun _ : Fin 1 => e_tan.continuousLinearMapAt ℝ x) := by
+      exact Bundle.continuousMultilinearMap.triv_symmL_eq_compContinuousLinearMap
+        (F := E) (E := TangentSpace I) (𝕜 := ℝ) x₀ x hx_tan (e_1.continuousLinearMapAt ℝ x G)
     rw [hsym] at hGfib
     conv_rhs => rw [hGfib]
     rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
@@ -332,7 +341,11 @@ private noncomputable def chooseLocalFrames (x₀ : M) :
   let e_tan := trivializationAt E (TangentSpace I : M → Type _) x₀
   let b := Module.finBasis (R := ℝ) (M := E)
   let hframe_tan := e_tan.isLocalFrameOn_localFrame_baseSet I (↑(⊤ : ℕ∞)) b
-  let e_1 := trivializationAt (Tensor0SModel 1 ℝ E) (fun x => Tensor0SSpace 1 I x) x₀
+  -- Type-annotated `e_1` so typeclass synthesis can find the bundle topology against the
+  -- non-reducible `Tensor0SSpace` fiber.
+  let e_1 : Trivialization (Tensor0SModel 1 ℝ E)
+      (π (Tensor0SModel 1 ℝ E) (fun x : M => Tensor0SSpace 1 I x)) :=
+    trivializationAt (Tensor0SModel 1 ℝ E) (fun x : M => Tensor0SSpace 1 I x) x₀
   let hframe_1 := e_1.isLocalFrameOn_localFrame_baseSet I (↑(⊤ : ℕ∞))
     (dualCovectorBasis' (E := E))
   (Classical.choose (hframe_tan.exists_contMDiffSection_eqOn_nhd
@@ -355,11 +368,15 @@ private lemma chooseLocalFrames_σ_eqOn (x₀ : M) :
 /-- The dual frame chosen by `chooseLocalFrames x₀` agrees with the `(0,1)`-bundle's local
 frame for `dualCovectorBasis'` on a neighborhood of `x₀`. -/
 private lemma chooseLocalFrames_θ_eqOn (x₀ : M) :
+    letI : TopologicalSpace (TotalSpace (Tensor0SModel 1 ℝ E)
+        (fun x : M => Tensor0SSpace 1 I x)) := tensor0SBundle_topology (I := I) 1
     ∀ᶠ x in nhds x₀, ∀ i, ((chooseLocalFrames I M x₀).2 i) x =
       (trivializationAt (Tensor0SModel 1 ℝ E)
         (fun x => Tensor0SSpace 1 I x) x₀).localFrame
         (dualCovectorBasis' (E := E)) i x := by
-  let e_1 := trivializationAt (Tensor0SModel 1 ℝ E) (fun x => Tensor0SSpace 1 I x) x₀
+  let e_1 : Trivialization (Tensor0SModel 1 ℝ E)
+      (π (Tensor0SModel 1 ℝ E) (fun x : M => Tensor0SSpace 1 I x)) :=
+    trivializationAt (Tensor0SModel 1 ℝ E) (fun x : M => Tensor0SSpace 1 I x) x₀
   let hframe_1 := e_1.isLocalFrameOn_localFrame_baseSet I (↑(⊤ : ℕ∞))
     (dualCovectorBasis' (E := E))
   exact Classical.choose_spec (hframe_1.exists_contMDiffSection_eqOn_nhd
@@ -430,13 +447,15 @@ private lemma chooseLocalFrames_biorth_eventually (x₀ : M) :
   have hθ := chooseLocalFrames_θ_eqOn I M x₀
   have hbase_tan := (trivializationAt E (TangentSpace I : M → Type _) x₀).open_baseSet.mem_nhds
     (mem_baseSet_trivializationAt _ _ x₀)
-  have hbase_1 := (trivializationAt (Tensor0SModel 1 ℝ E)
-    (fun x => Tensor0SSpace 1 I x) x₀).open_baseSet.mem_nhds
-    (mem_baseSet_trivializationAt _ _ x₀)
+  -- Type-annotated `e_1` for the same instance-synthesis reason as in `covectorFieldPair_contMDiff`.
+  set e_1 : Trivialization (Tensor0SModel 1 ℝ E)
+      (π (Tensor0SModel 1 ℝ E) (fun x : M => Tensor0SSpace 1 I x)) :=
+    trivializationAt (Tensor0SModel 1 ℝ E) (fun x : M => Tensor0SSpace 1 I x) x₀ with he_1_def
+  have hbase_1 : e_1.baseSet ∈ nhds x₀ :=
+    e_1.open_baseSet.mem_nhds (mem_baseSet_trivializationAt _ _ x₀)
   filter_upwards [hσ, hθ, hbase_tan, hbase_1] with y hσy hθy hy_tan hy_1 i j
   rw [hσy j, hθy i]
   set e_tan := trivializationAt E (TangentSpace I : M → Type _) x₀
-  set e_1 := trivializationAt (Tensor0SModel 1 ℝ E) (fun x => Tensor0SSpace 1 I x) x₀
   set b := Module.finBasis (R := ℝ) (M := E)
   rw [e_1.localFrame_apply_of_mem_baseSet (hx := hy_1)]
   rw [e_tan.localFrame_apply_of_mem_baseSet (hx := hy_tan)]
@@ -450,7 +469,13 @@ private lemma chooseLocalFrames_biorth_eventually (x₀ : M) :
     have h_symm_eq : ((e_1.linearEquivAt ℝ y hy_1).symm M : Tensor0SSpace 1 I y) =
         e_1.symmL ℝ y M := by rfl
     rw [h_symm_eq]
-    rw [Bundle.continuousMultilinearMap.triv_symmL_eq_compContinuousLinearMap x₀ y hy_tan]
+    -- State the bundle lemma against `e_1.symmL` directly so the rewrite goes through
+    -- without depending on `Tensor0SSpace` unfolding (blocked by `respectTransparency false`).
+    have hsym : e_1.symmL ℝ y M = M.compContinuousLinearMap
+        (fun _ : Fin 1 => e_tan.continuousLinearMapAt ℝ y) :=
+      Bundle.continuousMultilinearMap.triv_symmL_eq_compContinuousLinearMap
+        (F := E) (E := TangentSpace I) (𝕜 := ℝ) x₀ y hy_tan M
+    rw [hsym]
     rfl
   rw [h_toModel_symm (dualCovectorBasis' i)
     (fun _ : Fin 1 => (e_tan.linearEquivAt ℝ y hy_tan).symm (b j))]
@@ -1760,7 +1785,9 @@ theorem concreteTensorContract_eq_localSum (r s : ℕ)
     (hσ' : ∀ᶠ x in nhds x₀, ∀ i, (σ' i) x =
       (trivializationAt E (TangentSpace I : M → Type _) x₀).localFrame
         (Module.finBasis ℝ E) i x)
-    (hθ' : ∀ᶠ x in nhds x₀, ∀ i, (θ_smooth i) x =
+    (hθ' : letI : TopologicalSpace (TotalSpace (Tensor0SModel 1 ℝ E)
+        (fun x : M => Tensor0SSpace 1 I x)) := tensor0SBundle_topology (I := I) 1
+      ∀ᶠ x in nhds x₀, ∀ i, (θ_smooth i) x =
       (trivializationAt (Tensor0SModel 1 ℝ E) (fun x => Tensor0SSpace 1 I x) x₀).localFrame
         (dualCovectorBasis' (E := E)) i x) :
     (concreteTensorContract I M r s T m n) x₀ =
@@ -1777,9 +1804,12 @@ theorem concreteTensorContract_eq_localSum (r s : ℕ)
   -- Biorth of (σ', θ_smooth) at x₀: follows from hσ', hθ' + trivialization biorth.
   have hbase_tan : x₀ ∈ (trivializationAt E (TangentSpace I : M → Type _) x₀).baseSet :=
     mem_baseSet_trivializationAt _ _ x₀
-  have hbase_1 : x₀ ∈ (trivializationAt (Tensor0SModel 1 ℝ E)
-    (fun x => Tensor0SSpace 1 I x) x₀).baseSet :=
-    mem_baseSet_trivializationAt _ _ x₀
+  -- Type-annotated `e_1` so its bundle topology is discoverable against the non-reducible
+  -- `Tensor0SSpace` fiber.
+  set e_1 : Trivialization (Tensor0SModel 1 ℝ E)
+      (π (Tensor0SModel 1 ℝ E) (fun x : M => Tensor0SSpace 1 I x)) :=
+    trivializationAt (Tensor0SModel 1 ℝ E) (fun x : M => Tensor0SSpace 1 I x) x₀ with he_1_def
+  have hbase_1 : x₀ ∈ e_1.baseSet := mem_baseSet_trivializationAt _ _ x₀
   have hσ'_x₀ := Filter.Eventually.self_of_nhds hσ'
   have hθ'_x₀ := Filter.Eventually.self_of_nhds hθ'
   -- Compute biorth of (σ', θ_smooth) at x₀ directly using hσ'_x₀ + hθ'_x₀ + trivialization biorth.
@@ -1791,7 +1821,6 @@ theorem concreteTensorContract_eq_localSum (r s : ℕ)
     rw [hσ'_x₀ j, hθ'_x₀ i]
     -- Inline the biorth computation (same as `chooseLocalFrames_biorth_eventually`).
     set e_tan := trivializationAt E (TangentSpace I : M → Type _) x₀
-    set e_1 := trivializationAt (Tensor0SModel 1 ℝ E) (fun x => Tensor0SSpace 1 I x) x₀
     set b := Module.finBasis (R := ℝ) (M := E)
     rw [e_1.localFrame_apply_of_mem_baseSet (hx := hbase_1)]
     rw [e_tan.localFrame_apply_of_mem_baseSet (hx := hbase_tan)]
@@ -1805,8 +1834,12 @@ theorem concreteTensorContract_eq_localSum (r s : ℕ)
       have h_symm_eq : ((e_1.linearEquivAt ℝ x₀ hbase_1).symm N : Tensor0SSpace 1 I x₀) =
           e_1.symmL ℝ x₀ N := by rfl
       rw [h_symm_eq]
-      rw [Bundle.continuousMultilinearMap.triv_symmL_eq_compContinuousLinearMap
-        (F := E) (E := TangentSpace I) (𝕜 := ℝ) x₀ x₀ hbase_tan N]
+      -- See note in `covectorFieldPair_contMDiff` — state the lemma against `e_1.symmL`.
+      have hsym : e_1.symmL ℝ x₀ N = N.compContinuousLinearMap
+          (fun _ : Fin 1 => e_tan.continuousLinearMapAt ℝ x₀) :=
+        Bundle.continuousMultilinearMap.triv_symmL_eq_compContinuousLinearMap
+          (F := E) (E := TangentSpace I) (𝕜 := ℝ) x₀ x₀ hbase_tan N
+      rw [hsym]
       rfl
     rw [h_toModel_symm (dualCovectorBasis' i)
       (fun _ : Fin 1 => (e_tan.linearEquivAt ℝ x₀ hbase_tan).symm (b j))]

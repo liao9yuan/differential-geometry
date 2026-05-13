@@ -973,6 +973,141 @@ theorem wkpNorm_const_smul
   rw [heq]
   rw [eLpNorm_const_smul]
 
+/-! ## Monotonicity in the open set `Ω` -/
+
+/-- `MemW1p` restricts to open subsets: if `u ∈ W^{1,p}(Ω)` and `Ω' ⊆ Ω` is
+open, then `u ∈ W^{1,p}(Ω')`. -/
+theorem MemW1p.mono_set
+    {p : ℝ≥0∞} {Ω Ω' : Set E}
+    (hΩ' : IsOpen Ω') (hΩΩ' : Ω' ⊆ Ω)
+    {u : E → ℝ} (hu : DeGiorgi.MemW1p p u Ω) :
+    DeGiorgi.MemW1p p u Ω' := by
+  refine ⟨?_, ?_⟩
+  · exact hu.1.mono_measure (Measure.restrict_mono_set volume hΩΩ')
+  · intro i
+    obtain ⟨g, hg_memLp, hg_weak⟩ := hu.2 i
+    refine ⟨g, ?_, ?_⟩
+    · exact hg_memLp.mono_measure (Measure.restrict_mono_set volume hΩΩ')
+    · exact DeGiorgi.HasWeakPartialDeriv.restrict hΩ' hΩΩ' hg_weak
+
+/-- The chosen weak partial on a larger open set, viewed on the smaller open
+subset, is a.e. equal to the chosen weak partial on the smaller open set. -/
+theorem chosenWeakPartial'_mono_set_ae
+    {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω Ω' : Set E}
+    (hΩ' : IsOpen Ω') (hΩΩ' : Ω' ⊆ Ω)
+    {u : E → ℝ} (hu : DeGiorgi.MemW1p p u Ω) (i : Fin d) :
+    chosenWeakPartial' p i u Ω
+      =ᵐ[volume.restrict Ω'] chosenWeakPartial' p i u Ω' := by
+  classical
+  have hu_Ω' : DeGiorgi.MemW1p p u Ω' := MemW1p.mono_set hΩ' hΩΩ' hu
+  -- Both `chosenWeakPartial' p i u Ω` (restricted to `Ω'`) and `chosenWeakPartial' p i u Ω'`
+  -- are weak `i`-partials of `u` on `Ω'`. By uniqueness up to a.e. equality on `Ω'`,
+  -- they agree a.e. on `Ω'`.
+  have hP_Ω := chosenWeakPartial'_isWeakPartial_of_mem hu i
+  have hP_Ω' := chosenWeakPartial'_isWeakPartial_of_mem hu_Ω' i
+  have hP_Ω_restricted : DeGiorgi.HasWeakPartialDeriv i
+      (chosenWeakPartial' p i u Ω) u Ω' :=
+    DeGiorgi.HasWeakPartialDeriv.restrict hΩ' hΩΩ' hP_Ω
+  have hP_Ω_loc : LocallyIntegrable (chosenWeakPartial' p i u Ω)
+      (volume.restrict Ω') := by
+    have hmem : MeasureTheory.MemLp (chosenWeakPartial' p i u Ω) p
+        (volume.restrict Ω) :=
+      chosenWeakPartial'_memLp_of_mem hu i
+    have hmem' : MeasureTheory.MemLp (chosenWeakPartial' p i u Ω) p
+        (volume.restrict Ω') :=
+      hmem.mono_measure (Measure.restrict_mono_set volume hΩΩ')
+    exact hmem'.locallyIntegrable hp
+  have hP_Ω'_loc : LocallyIntegrable (chosenWeakPartial' p i u Ω')
+      (volume.restrict Ω') :=
+    (chosenWeakPartial'_memLp_of_mem hu_Ω' i).locallyIntegrable hp
+  exact DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ' hP_Ω_restricted hP_Ω'
+    hP_Ω_loc hP_Ω'_loc
+
+/-- `MemWkp` restricts to open subsets: if `u ∈ W^{k,p}(Ω)` and `Ω' ⊆ Ω` is
+open, then `u ∈ W^{k,p}(Ω')`. -/
+theorem MemWkp.mono_set
+    {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω Ω' : Set E}
+    (_hΩ : IsOpen Ω) (hΩ' : IsOpen Ω') (hΩΩ' : Ω' ⊆ Ω)
+    {u : E → ℝ} (hu : MemWkp (d := d) k p u Ω) :
+    MemWkp (d := d) k p u Ω' := by
+  induction k generalizing u with
+  | zero =>
+      rw [MemWkp_zero] at hu ⊢
+      exact hu.mono_measure (Measure.restrict_mono_set volume hΩΩ')
+  | succ k ih =>
+      rw [MemWkp_succ] at hu ⊢
+      refine ⟨MemW1p.mono_set hΩ' hΩΩ' hu.1, ?_⟩
+      intro i
+      -- By IH, `chosenWeakPartial' p i u Ω ∈ MemWkp k p` on `Ω'`.
+      have h_partial_Ω' : MemWkp (d := d) k p (chosenWeakPartial' p i u Ω) Ω' :=
+        ih (hu.2 i)
+      -- The chosen weak partial on Ω agrees a.e. with the one on Ω' on `Ω'`.
+      have hae := chosenWeakPartial'_mono_set_ae (d := d) hp hΩ' hΩΩ' hu.1 i
+      exact (MemWkp_congr_ae (d := d) hp hΩ' hae).mp h_partial_Ω'
+
+/-- The iterated weak partial on `Ω`, viewed on `Ω' ⊆ Ω`, agrees a.e. on `Ω'`
+with the iterated weak partial on `Ω'`. -/
+theorem iterWeakPartial_mono_set_ae
+    {j : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω Ω' : Set E}
+    (hΩ' : IsOpen Ω') (hΩΩ' : Ω' ⊆ Ω) (α : Fin j → Fin d)
+    {u : E → ℝ} (hu : MemWkp (d := d) j p u Ω) :
+    iterWeakPartial (d := d) p j α u Ω
+      =ᵐ[volume.restrict Ω'] iterWeakPartial (d := d) p j α u Ω' := by
+  induction j generalizing u with
+  | zero =>
+      simp only [iterWeakPartial_zero]
+      exact Filter.EventuallyEq.rfl
+  | succ j ih =>
+      rw [iterWeakPartial_succ, iterWeakPartial_succ]
+      -- Step 1: `chosenWeakPartial' p (α 0) u Ω =ᵐ[volume.restrict Ω'] chosenWeakPartial' p (α 0) u Ω'`.
+      have h_chosen_ae :=
+        chosenWeakPartial'_mono_set_ae (d := d) hp hΩ' hΩΩ' hu.memW1p (α 0)
+      -- Step 2: `iterWeakPartial j (chosen on Ω) Ω =ᵐ iterWeakPartial j (chosen on Ω) Ω'` (by IH).
+      have h_chosen_mem_Ω : MemWkp (d := d) j p
+          (chosenWeakPartial' p (α 0) u Ω) Ω :=
+        hu.chosenWeakPartial_mem (α 0)
+      have h_iter_mono_Ω' :
+          iterWeakPartial (d := d) p j (fun i : Fin j => α i.succ)
+              (chosenWeakPartial' p (α 0) u Ω) Ω
+            =ᵐ[volume.restrict Ω']
+          iterWeakPartial (d := d) p j (fun i : Fin j => α i.succ)
+              (chosenWeakPartial' p (α 0) u Ω) Ω' :=
+        ih (fun i : Fin j => α i.succ) h_chosen_mem_Ω
+      -- Step 3: on `Ω'`, replace the input `chosenWeakPartial' p (α 0) u Ω` with
+      -- `chosenWeakPartial' p (α 0) u Ω'`, using `iterWeakPartial_ae_congr` on Ω'.
+      have h_iter_congr :
+          iterWeakPartial (d := d) p j (fun i : Fin j => α i.succ)
+              (chosenWeakPartial' p (α 0) u Ω) Ω'
+            =ᵐ[volume.restrict Ω']
+          iterWeakPartial (d := d) p j (fun i : Fin j => α i.succ)
+              (chosenWeakPartial' p (α 0) u Ω') Ω' :=
+        iterWeakPartial_ae_congr (d := d) hp hΩ' j (fun i : Fin j => α i.succ)
+          h_chosen_ae
+      exact h_iter_mono_Ω'.trans h_iter_congr
+
+/-- The iterated `W^{k,p}` norm is monotone in the open set: if `Ω' ⊆ Ω` and
+`u ∈ W^{k,p}(Ω)`, then `wkpNorm k p u Ω' ≤ wkpNorm k p u Ω`. -/
+theorem wkpNorm_mono_set
+    {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω Ω' : Set E}
+    (_hΩ : IsOpen Ω) (hΩ' : IsOpen Ω') (hΩΩ' : Ω' ⊆ Ω)
+    {u : E → ℝ} (hu : MemWkp (d := d) k p u Ω) :
+    wkpNorm (d := d) k p u Ω' ≤ wkpNorm (d := d) k p u Ω := by
+  classical
+  unfold wkpNorm
+  refine Finset.sum_le_sum ?_
+  intro j hj
+  refine Finset.sum_le_sum ?_
+  intro α _
+  have hj_le : j ≤ k := by
+    rw [Finset.mem_range] at hj; omega
+  have h_uWj : MemWkp (d := d) j p u Ω := MemWkp.le_of_le hj_le hu
+  have h_iter_ae :=
+    iterWeakPartial_mono_set_ae (d := d) hp hΩ' hΩΩ' α h_uWj
+  -- eLpNorm (iter on Ω') on Ω' = eLpNorm (iter on Ω) on Ω' (by ae-congruence)
+  --                            ≤ eLpNorm (iter on Ω) on Ω  (by mono_measure)
+  rw [← eLpNorm_congr_ae h_iter_ae]
+  exact eLpNorm_mono_measure _ (Measure.restrict_mono_set volume hΩΩ')
+
 end Euclidean
 end Sobolev
 end Analysis

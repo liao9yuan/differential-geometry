@@ -30,7 +30,7 @@ the form of a *bilinear-form* viewpoint:
   `n · |Hess f|²`);
 * a packaged `pointwiseBilin` carrier together with its Frobenius-norm-squared
   function `frobeniusSqFun` and trace function `traceFun`, both computed against
-  the canonical chosen basis `Module.finBasis ℝ E` on the model fibre, and the
+  the canonical chosen basis `chartModelBasis E` on the model fibre, and the
   pointwise bound `traceFun_sq_le_dim_mul_frobeniusSqFun` that follows
   immediately from the basis-bound above.
 
@@ -55,7 +55,7 @@ the chosen basis); both reduce to the bound proved here.
   client can plug in their concrete Hessian.
 * `frobeniusSqFun B x` : the Frobenius norm squared
   `∑ i j, (B x (b i) (b j))²` of a pointwise bilinear form `B`, computed
-  against the canonical chosen basis `b := Module.finBasis ℝ E`.
+  against the canonical chosen basis `b := chartModelBasis E`.
 * `traceFun B x` : the trace `∑ i, B x (b i) (b i)`, computed against the
   same basis.
 
@@ -176,7 +176,7 @@ def IsPointwiseSymm (B : pointwiseBilin (M := M) I) : Prop :=
 /-! ## Frobenius norm squared and trace, in the canonical basis
 
 Because `TangentSpace I x = E` definitionally, the canonical chosen finite
-basis `Module.finBasis ℝ E` is automatically a basis of `TangentSpace I x` for
+basis `chartModelBasis E` is automatically a basis of `TangentSpace I x` for
 every `x`. We use it to compute the Frobenius norm squared and the trace of a
 pointwise bilinear form `B` as scalar functions on `M`.
 
@@ -189,31 +189,31 @@ must supply an orthonormal frame under `g.inner x` and rebuild the Frobenius
 norm against that frame; the inequality is the same. -/
 
 /-- The Frobenius norm squared of a pointwise bilinear form `B`, computed
-against the canonical basis `Module.finBasis ℝ E`:
+against the canonical basis `chartModelBasis E`:
 `frobeniusSqFun B x = ∑ i, ∑ j, (B x (e i) (e j))²`
-where `e := Module.finBasis ℝ E`. -/
+where `e := chartModelBasis E`. -/
 def frobeniusSqFun (B : pointwiseBilin (M := M) I) (x : M) : ℝ :=
   ∑ i : Fin (Module.finrank ℝ E),
     ∑ j : Fin (Module.finrank ℝ E),
-      (B x ((Module.finBasis ℝ E) i) ((Module.finBasis ℝ E) j))^2
+      (B x ((chartModelBasis E) i) ((chartModelBasis E) j))^2
 
 @[simp] lemma frobeniusSqFun_def (B : pointwiseBilin (M := M) I) (x : M) :
     frobeniusSqFun (I := I) (M := M) B x =
       ∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
-          (B x ((Module.finBasis ℝ E) i) ((Module.finBasis ℝ E) j))^2 := rfl
+          (B x ((chartModelBasis E) i) ((chartModelBasis E) j))^2 := rfl
 
 /-- The trace of a pointwise bilinear form `B`, computed against the
-canonical basis `Module.finBasis ℝ E`:
-`traceFun B x = ∑ i, B x (e i) (e i)` where `e := Module.finBasis ℝ E`. -/
+canonical basis `chartModelBasis E`:
+`traceFun B x = ∑ i, B x (e i) (e i)` where `e := chartModelBasis E`. -/
 def traceFun (B : pointwiseBilin (M := M) I) (x : M) : ℝ :=
   ∑ i : Fin (Module.finrank ℝ E),
-    B x ((Module.finBasis ℝ E) i) ((Module.finBasis ℝ E) i)
+    B x ((chartModelBasis E) i) ((chartModelBasis E) i)
 
 @[simp] lemma traceFun_def (B : pointwiseBilin (M := M) I) (x : M) :
     traceFun (I := I) (M := M) B x =
       ∑ i : Fin (Module.finrank ℝ E),
-        B x ((Module.finBasis ℝ E) i) ((Module.finBasis ℝ E) i) := rfl
+        B x ((chartModelBasis E) i) ((chartModelBasis E) i) := rfl
 
 /-- The Frobenius norm squared is non-negative. -/
 lemma frobeniusSqFun_nonneg (B : pointwiseBilin (M := M) I) (x : M) :
@@ -236,7 +236,7 @@ theorem traceFun_sq_le_dim_mul_frobeniusSqFun
     (traceFun (I := I) (M := M) B x)^2 ≤
       (Module.finrank ℝ E : ℝ) * frobeniusSqFun (I := I) (M := M) B x := by
   have h := bilinForm_trace_sq_le_dim_mul_frobenius_sq
-    (V := TangentSpace I x) (B := B x) (b := Module.finBasis ℝ E)
+    (V := TangentSpace I x) (B := B x) (b := chartModelBasis E)
   simp only [traceFun_def, frobeniusSqFun_def]
   exact h
 
@@ -442,19 +442,19 @@ lemma chartIteratedPartialDeriv_symm_of_contDiff
   -- Key identity: `fderiv (fun z => fderiv f̃ z e_b) y e_a = (fderiv (fderiv f̃) y e_a) e_b`.
   have hkey : ∀ a b : Fin (Module.finrank ℝ E),
       fderiv ℝ
-          (fun z => fderiv ℝ (scalarOnE (I := I) α f) z ((Module.finBasis ℝ E) b))
-          y ((Module.finBasis ℝ E) a) =
+          (fun z => fderiv ℝ (scalarOnE (I := I) α f) z ((chartModelBasis E) b))
+          y ((chartModelBasis E) a) =
         (fderiv ℝ (fderiv ℝ (scalarOnE (I := I) α f)) y
-          ((Module.finBasis ℝ E) a)) ((Module.finBasis ℝ E) b) := by
+          ((chartModelBasis E) a)) ((chartModelBasis E) b) := by
     intro a b
     -- `(fun z => fderiv f̃ z e_b) = ((·) e_b) ∘ (fderiv f̃)`.
     -- The first map is the continuous linear evaluation `L : (E →L[ℝ] ℝ) →L[ℝ] ℝ`
     -- given by `M ↦ M e_b`.
     set L : (E →L[ℝ] ℝ) →L[ℝ] ℝ :=
-      ContinuousLinearMap.apply ℝ ℝ ((Module.finBasis ℝ E) b)
+      ContinuousLinearMap.apply ℝ ℝ ((chartModelBasis E) b)
     -- Apply the chain rule: `fderiv (L ∘ fderiv f̃) y = L.comp (fderiv (fderiv f̃) y)`.
     have hcomp_eq : (fun z : E =>
-          fderiv ℝ (scalarOnE (I := I) α f) z ((Module.finBasis ℝ E) b)) =
+          fderiv ℝ (scalarOnE (I := I) α f) z ((chartModelBasis E) b)) =
         L ∘ (fderiv ℝ (scalarOnE (I := I) α f)) := by
       funext z; rfl
     rw [hcomp_eq, fderiv_comp y L.differentiableAt hg_diff]
@@ -504,7 +504,7 @@ theorem chartHessianTensor_symm_of_boundaryless [I.Boundaryless]
 /-! ## The pointwise Hessian as a `pointwiseBilin`
 
 We define `hessFun g f : pointwiseBilin I` by writing each tangent vector
-`v : TangentSpace I x` in the model basis `Module.finBasis ℝ E` (recall
+`v : TangentSpace I x` in the model basis `chartModelBasis E` (recall
 `TangentSpace I x = E` definitionally), summing the chart Hessian matrix entries
 against the basis representation.
 
@@ -521,21 +521,21 @@ property holds because the chart Hessian matrix is symmetric in `(i, j)`. -/
 packaged as a `pointwiseBilin`. At each point `x`, the bilinear form is computed
 in the chart at `x`, using the chart-coordinate Hessian formula involving the
 chart Christoffel symbols. The basis used to read off coordinates is the
-canonical model basis `Module.finBasis ℝ E`. -/
+canonical model basis `chartModelBasis E`. -/
 def hessFun (g : SmoothRiemannianMetric I M) (f : M → ℝ) :
     pointwiseBilin (M := M) I :=
   fun x => LinearMap.mk₂ ℝ
     (fun v w =>
       ∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
-          ((Module.finBasis ℝ E).repr v) i *
-            ((Module.finBasis ℝ E).repr w) j *
+          ((chartModelBasis E).repr v) i *
+            ((chartModelBasis E).repr w) j *
             chartHessianTensor (I := I) g x f i j x)
     (fun v₁ v₂ w => by
       classical
       dsimp only
-      have hrepr : (Module.finBasis ℝ E).repr (v₁ + v₂) =
-          (Module.finBasis ℝ E).repr v₁ + (Module.finBasis ℝ E).repr v₂ := map_add _ _ _
+      have hrepr : (chartModelBasis E).repr (v₁ + v₂) =
+          (chartModelBasis E).repr v₁ + (chartModelBasis E).repr v₂ := map_add _ _ _
       rw [hrepr]
       rw [← Finset.sum_add_distrib]
       refine Finset.sum_congr rfl ?_
@@ -548,8 +548,8 @@ def hessFun (g : SmoothRiemannianMetric I M) (f : M → ℝ) :
     (fun c v w => by
       classical
       dsimp only
-      have hrepr : (Module.finBasis ℝ E).repr (c • v) =
-          c • (Module.finBasis ℝ E).repr v := map_smul _ _ _
+      have hrepr : (chartModelBasis E).repr (c • v) =
+          c • (chartModelBasis E).repr v := map_smul _ _ _
       rw [hrepr]
       simp only [smul_eq_mul, Finsupp.coe_smul, Pi.smul_apply]
       rw [Finset.mul_sum]
@@ -562,8 +562,8 @@ def hessFun (g : SmoothRiemannianMetric I M) (f : M → ℝ) :
     (fun v w₁ w₂ => by
       classical
       dsimp only
-      have hrepr : (Module.finBasis ℝ E).repr (w₁ + w₂) =
-          (Module.finBasis ℝ E).repr w₁ + (Module.finBasis ℝ E).repr w₂ := map_add _ _ _
+      have hrepr : (chartModelBasis E).repr (w₁ + w₂) =
+          (chartModelBasis E).repr w₁ + (chartModelBasis E).repr w₂ := map_add _ _ _
       rw [hrepr]
       rw [← Finset.sum_add_distrib]
       refine Finset.sum_congr rfl ?_
@@ -576,8 +576,8 @@ def hessFun (g : SmoothRiemannianMetric I M) (f : M → ℝ) :
     (fun c v w => by
       classical
       dsimp only
-      have hrepr : (Module.finBasis ℝ E).repr (c • w) =
-          c • (Module.finBasis ℝ E).repr w := map_smul _ _ _
+      have hrepr : (chartModelBasis E).repr (c • w) =
+          c • (chartModelBasis E).repr w := map_smul _ _ _
       rw [hrepr]
       simp only [smul_eq_mul, Finsupp.coe_smul, Pi.smul_apply]
       rw [Finset.mul_sum]
@@ -595,8 +595,8 @@ lemma hessFun_apply (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M)
     hessFun (I := I) g f x v w =
       ∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
-          ((Module.finBasis ℝ E).repr v) i *
-            ((Module.finBasis ℝ E).repr w) j *
+          ((chartModelBasis E).repr v) i *
+            ((chartModelBasis E).repr w) j *
             chartHessianTensor (I := I) g x f i j x := by
   rfl
 
@@ -702,7 +702,7 @@ lemma hessFun_basis_apply
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M)
     (i j : Fin (Module.finrank ℝ E)) :
     hessFun (I := I) g f x
-        ((Module.finBasis ℝ E) i) ((Module.finBasis ℝ E) j) =
+        ((chartModelBasis E) i) ((chartModelBasis E) j) =
       chartHessianTensor (I := I) g x f i j x := by
   classical
   rw [hessFun_apply]
@@ -712,8 +712,8 @@ lemma hessFun_basis_apply
   conv_lhs => rw [show
       (∑ i' : Fin (Module.finrank ℝ E),
         ∑ j' : Fin (Module.finrank ℝ E),
-          ((Module.finBasis ℝ E).repr ((Module.finBasis ℝ E) i)) i' *
-            ((Module.finBasis ℝ E).repr ((Module.finBasis ℝ E) j)) j' *
+          ((chartModelBasis E).repr ((chartModelBasis E) i)) i' *
+            ((chartModelBasis E).repr ((chartModelBasis E) j)) j' *
             chartHessianTensor (I := I) g x f i' j' x) =
       (∑ i' : Fin (Module.finrank ℝ E),
         ∑ j' : Fin (Module.finrank ℝ E),

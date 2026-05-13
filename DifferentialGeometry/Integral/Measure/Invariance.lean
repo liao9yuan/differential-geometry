@@ -190,12 +190,12 @@ lemma tangentCoordChange_hasFDerivWithinAt
 
 /-- Expansion of a linear map on `E` applied to a model-basis vector as a sum
 over the model basis with repr-coefficients. -/
-lemma finBasis_repr_sum
+lemma chartModelBasis_repr_sum
     (L : E →L[ℝ] E) (i : Fin (Module.finrank ℝ E)) :
-    L ((Module.finBasis ℝ E) i) =
-      ∑ k, ((Module.finBasis ℝ E).repr (L ((Module.finBasis ℝ E) i)) k)
-            • (Module.finBasis ℝ E) k :=
-  (((Module.finBasis ℝ E).sum_repr (L ((Module.finBasis ℝ E) i)))).symm
+    L ((chartModelBasis E) i) =
+      ∑ k, ((chartModelBasis E).repr (L ((chartModelBasis E) i)) k)
+            • (chartModelBasis E) k :=
+  (((chartModelBasis E).sum_repr (L ((chartModelBasis E) i)))).symm
 
 /-- The transition matrix of the chart bases at `x` in the model basis: entry
 `(k, i)` is the `k`-th coordinate (in the model basis) of the image of the
@@ -203,22 +203,22 @@ lemma finBasis_repr_sum
 def transitionMatrix (x₀ x₁ : M) (x : M) :
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   Matrix.of fun k i =>
-    (Module.finBasis ℝ E).repr
-      ((tangentCoordChange I x₁ x₀ x) ((Module.finBasis ℝ E) i)) k
+    (chartModelBasis E).repr
+      ((tangentCoordChange I x₁ x₀ x) ((chartModelBasis E) i)) k
 
 @[simp] lemma transitionMatrix_apply (x₀ x₁ : M) (x : M)
     (k i : Fin (Module.finrank ℝ E)) :
     transitionMatrix (I := I) x₀ x₁ x k i =
-      (Module.finBasis ℝ E).repr
-        ((tangentCoordChange I x₁ x₀ x) ((Module.finBasis ℝ E) i)) k := rfl
+      (chartModelBasis E).repr
+        ((tangentCoordChange I x₁ x₀ x) ((chartModelBasis E) i)) k := rfl
 
 /-- The `tangentCoordChange` map applied to a model-basis vector decomposes
 in the model basis via the transition matrix. -/
-lemma tangentCoordChange_finBasis_eq_sum
+lemma tangentCoordChange_chartModelBasis_eq_sum
     (x₀ x₁ : M) (x : M) (i : Fin (Module.finrank ℝ E)) :
-    (tangentCoordChange I x₁ x₀ x) ((Module.finBasis ℝ E) i) =
-      ∑ k, transitionMatrix (I := I) x₀ x₁ x k i • (Module.finBasis ℝ E) k :=
-  finBasis_repr_sum (tangentCoordChange I x₁ x₀ x) i
+    (tangentCoordChange I x₁ x₀ x) ((chartModelBasis E) i) =
+      ∑ k, transitionMatrix (I := I) x₀ x₁ x k i • (chartModelBasis E) k :=
+  chartModelBasis_repr_sum (tangentCoordChange I x₁ x₀ x) i
 
 /-- On the overlap of two chart base sets, the `x₁`-chart-basis vector at `x`
 decomposes in the `x₀`-chart-basis with coefficients given by the transition
@@ -237,10 +237,10 @@ lemma chartBasisVecFiber_pullback
     trivializationAt E (TangentSpace I) x₁
   have hx0' : x ∈ T₀.baseSet := hx0
   have hx1' : x ∈ T₁.baseSet := hx1
-  -- By definition, chartBasisVecFiber x₁ i x = T₁.symm x (finBasis i).
+  -- By definition, chartBasisVecFiber x₁ i x = T₁.symm x (chartModelBasis i).
   have hdef1 :
       chartBasisVecFiber (I := I) x₁ i x =
-        T₁.symm x ((Module.finBasis ℝ E) i) := rfl
+        T₁.symm x ((chartModelBasis E) i) := rfl
   -- Use the composition identity
   -- (T₁.cLEA x).symm.trans (T₀.cLEA x) = coordChangeL ℝ T₁ T₀ x
   -- evaluated at the model-basis vector, then apply (T₀.cLEA x).symm to both sides.
@@ -250,25 +250,25 @@ lemma chartBasisVecFiber_pullback
       T₁ T₀ (b := x) ⟨hx1', hx0'⟩
   have happ :
       (T₀.continuousLinearEquivAt ℝ x hx0')
-          ((T₁.continuousLinearEquivAt ℝ x hx1').symm ((Module.finBasis ℝ E) i))
+          ((T₁.continuousLinearEquivAt ℝ x hx1').symm ((chartModelBasis E) i))
         = (Bundle.Trivialization.coordChangeL (R := ℝ) T₁ T₀ x)
-            ((Module.finBasis ℝ E) i) := by
+            ((chartModelBasis E) i) := by
     have := congrArg
-      (fun L : E ≃L[ℝ] E => L ((Module.finBasis ℝ E) i)) hcompeq'
+      (fun L : E ≃L[ℝ] E => L ((chartModelBasis E) i)) hcompeq'
     simpa [ContinuousLinearEquiv.trans_apply] using this
   have hequiv :
-      T₁.symm x ((Module.finBasis ℝ E) i) =
+      T₁.symm x ((chartModelBasis E) i) =
         T₀.symm x
           ((Bundle.Trivialization.coordChangeL (R := ℝ) T₁ T₀ x)
-            ((Module.finBasis ℝ E) i)) := by
-    have hL : (T₁.continuousLinearEquivAt ℝ x hx1').symm ((Module.finBasis ℝ E) i) =
-              T₁.symm x ((Module.finBasis ℝ E) i) := rfl
+            ((chartModelBasis E) i)) := by
+    have hL : (T₁.continuousLinearEquivAt ℝ x hx1').symm ((chartModelBasis E) i) =
+              T₁.symm x ((chartModelBasis E) i) := rfl
     have hR : (T₀.continuousLinearEquivAt ℝ x hx0').symm
                 ((Bundle.Trivialization.coordChangeL (R := ℝ) T₁ T₀ x)
-                  ((Module.finBasis ℝ E) i)) =
+                  ((chartModelBasis E) i)) =
               T₀.symm x
                 ((Bundle.Trivialization.coordChangeL (R := ℝ) T₁ T₀ x)
-                  ((Module.finBasis ℝ E) i)) := rfl
+                  ((chartModelBasis E) i)) := rfl
     have := congrArg (T₀.continuousLinearEquivAt ℝ x hx0').symm happ
     simp only [ContinuousLinearEquiv.symm_apply_apply] at this
     rw [← hL, ← hR]
@@ -277,16 +277,16 @@ lemma chartBasisVecFiber_pullback
   -- `VectorBundleCore.localTriv_coordChange_eq` applied to the tangent bundle core.
   have hcc :
       (Bundle.Trivialization.coordChangeL (R := ℝ) T₁ T₀ x)
-          ((Module.finBasis ℝ E) i)
-        = (tangentCoordChange I x₁ x₀ x) ((Module.finBasis ℝ E) i) := by
+          ((chartModelBasis E) i)
+        = (tangentCoordChange I x₁ x₀ x) ((chartModelBasis E) i) := by
     change (Bundle.Trivialization.coordChangeL (R := ℝ)
           ((tangentBundleCore I M).localTriv (achart H x₁))
           ((tangentBundleCore I M).localTriv (achart H x₀)) x)
-        ((Module.finBasis ℝ E) i) = _
+        ((chartModelBasis E) i) = _
     exact VectorBundleCore.localTriv_coordChange_eq
         (tangentBundleCore I M) (achart H x₁) (achart H x₀) (b := x)
         ⟨hx1', hx0'⟩ _
-  rw [hdef1, hequiv, hcc, tangentCoordChange_finBasis_eq_sum (I := I) x₀ x₁ x i]
+  rw [hdef1, hequiv, hcc, tangentCoordChange_chartModelBasis_eq_sum (I := I) x₀ x₁ x i]
   -- Now use `T₀.symmL ℝ x` to apply linearity.
   have hsymmL : (T₀.symm x : E → TangentSpace I x) =
       (T₀.symmL ℝ x : E →L[ℝ] TangentSpace I x) := rfl
@@ -378,7 +378,7 @@ lemma transitionMatrix_det (x₀ x₁ : M) (x : M) :
       (tangentCoordChange I x₁ x₀ x : E →L[ℝ] E).det := by
   have hL :
       transitionMatrix (I := I) x₀ x₁ x =
-        LinearMap.toMatrix (Module.finBasis ℝ E) (Module.finBasis ℝ E)
+        LinearMap.toMatrix (chartModelBasis E) (chartModelBasis E)
           (tangentCoordChange I x₁ x₀ x : E →L[ℝ] E).toLinearMap := by
     ext k i
     simp [transitionMatrix, LinearMap.toMatrix_apply]

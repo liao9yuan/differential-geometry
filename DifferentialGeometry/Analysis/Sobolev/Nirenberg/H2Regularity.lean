@@ -56,10 +56,11 @@ theorem uniform_nirenberg_estimate
     {Ω' : Set E} (hΩ' : IsOpen Ω') (hΩ'_closure : closure Ω' ⊆ Ω)
     (hΩ'_compact : IsCompact (closure Ω'))
     (hη_in_Ω' : tsupport η ⊆ Ω')
-    (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ 1 →
+    {R₀ : ℝ}
+    (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ R₀ →
       Metric.cthickening |h| (tsupport η) ⊆ Ω')
     (k : Fin d) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ {h : ℝ}, h ≠ 0 → |h| ≤ 1 →
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
       ∫ x, (η x)^2 *
           ∑ i : Fin d,
             DifferentialGeometry.Analysis.Sobolev.diffQuot k h
@@ -283,7 +284,7 @@ theorem h2_loc_smooth_solution
   have hη_tsupport_in_Ω' : tsupport η ⊆ Ω' := by
     rw [hΩ'_def]
     exact hη_tsupport_in.trans (Metric.thickening_mono (by norm_num : (3/4 : ℝ) ≤ 2) K)
-  have hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ 1 →
+  have hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ (1 : ℝ) →
       Metric.cthickening |h| (tsupport η) ⊆ Ω' := by
     intro h hh_le
     refine subset_trans (Metric.cthickening_mono hh_le _) ?_
@@ -296,7 +297,7 @@ theorem h2_loc_smooth_solution
   obtain ⟨C₀, hC₀_nn, hC₀⟩ :=
     uniform_nirenberg_estimate (d := d) B h_weak hf_l2_loc hη_smooth hη_compact
       hη_range hN_nn h_fderiv_eta hΩ'_open hΩ'_closure_in_Ω hΩ'_closure_compact
-      hη_tsupport_in_Ω' hh_supp_in_Ω' k
+      hη_tsupport_in_Ω' (R₀ := 1) hh_supp_in_Ω' k
   -- Step 4: Provide the existential output.
   refine ⟨g, hg_memLp, h_weak_partial, Ω', hΩ'_open, ?_, hΩ'_closure_in_Ω,
     hΩ'_closure_compact, ?_⟩

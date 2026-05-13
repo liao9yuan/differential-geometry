@@ -120,10 +120,10 @@ that downstream clients can supply it without forcing this file to depend on the
 deferred deep computation. -/
 def chartRiemannBasisIdentity (g : SmoothRiemannianMetric I M) (x : M) : Prop :=
   ∀ i j k l : Fin (Module.finrank ℝ E),
-    ((Module.finBasis ℝ E).repr
+    ((chartModelBasis E).repr
         (riemannOp (cov := LeviCivita (I := I) g) x
-          ((Module.finBasis ℝ E) j) ((Module.finBasis ℝ E) k)
-          ((Module.finBasis ℝ E) i))) l =
+          ((chartModelBasis E) j) ((chartModelBasis E) k)
+          ((chartModelBasis E) i))) l =
       chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)
 
 /-- The basis-coordinate identification is equivalent to pointwise equality of
@@ -132,16 +132,16 @@ theorem chartRiemannBasisIdentity_iff (g : SmoothRiemannianMetric I M) (x : M) :
     chartRiemannBasisIdentity (I := I) g x ↔
       ∀ i j k : Fin (Module.finrank ℝ E),
         riemannOp (cov := LeviCivita (I := I) g) x
-            ((Module.finBasis ℝ E) j) ((Module.finBasis ℝ E) k)
-            ((Module.finBasis ℝ E) i) =
+            ((chartModelBasis E) j) ((chartModelBasis E) k)
+            ((chartModelBasis E) i) =
           chartRiemannCLM (I := I) g x
-            ((Module.finBasis ℝ E) j) ((Module.finBasis ℝ E) k)
-            ((Module.finBasis ℝ E) i) := by
+            ((chartModelBasis E) j) ((chartModelBasis E) k)
+            ((chartModelBasis E) i) := by
   classical
   constructor
   · intro h i j k
     -- Two vectors are equal iff their basis representations are equal.
-    apply (Module.finBasis ℝ E).repr.injective
+    apply (chartModelBasis E).repr.injective
     ext l
     rw [h i j k]
     -- RHS: compute b.repr (chartRiemannCLM x e_j e_k e_i) l via chartRiemannCLM_repr_basis.
@@ -169,7 +169,7 @@ theorem riemannOp_eq_chartRiemannCLM_apply_of_basis_identity
   classical
   -- Both sides are trilinear in (v, w, u). Decompose each input in the model basis and
   -- match term by term on the basis triple via the iff form of the hypothesis.
-  set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := Module.finBasis ℝ E with hb_def
+  set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := chartModelBasis E with hb_def
   have hbasis := (chartRiemannBasisIdentity_iff (I := I) g x).mp h
   -- Decompose v, w, u in the basis.
   have hv : v = ∑ j : Fin (Module.finrank ℝ E), b.repr v j • b j :=
@@ -338,11 +338,11 @@ theorem ricciTensor_eq_chartRicciSwap_of_basis_identity
     ricciTensor (I := I) g x v w =
       ∑ i : Fin (Module.finrank ℝ E),
         ∑ k : Fin (Module.finrank ℝ E),
-          ((Module.finBasis ℝ E).repr v) k *
-            ((Module.finBasis ℝ E).repr w) i *
+          ((chartModelBasis E).repr v) k *
+            ((chartModelBasis E).repr w) i *
             chartRicciTensor (I := I) g x i k (extChartAt I x x) := by
   classical
-  set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := Module.finBasis ℝ E with hb_def
+  set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := chartModelBasis E with hb_def
   -- Step 1: rewrite ricciTensor via the basis-sum trace formula.
   rw [ricciTensor_apply_basisSum]
   -- Step 2: each summand `b.repr (riemannOp x e_t v w) t` equals

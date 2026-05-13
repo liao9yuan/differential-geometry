@@ -116,11 +116,11 @@ correction expansion. The `j`-index of the basis vector encodes the
 section-component subscript; the contraction is built outside via the scalar
 factor `(b.repr σ̃(x))ⱼ * Γᵏᵢⱼ(φ x)`.
 
-Note: the basis vector chosen here is `(Module.finBasis ℝ E) k`, the `k`-th
+Note: the basis vector chosen here is `(chartModelBasis E) k`, the `k`-th
 target-basis element corresponding to the upper Christoffel index. -/
 def christoffelBlockCLM (i k : Fin (Module.finrank ℝ E)) : E →L[ℝ] E :=
-  (((Module.finBasis ℝ E).coord i).toContinuousLinearMap).smulRight
-    ((Module.finBasis ℝ E) k)
+  (((chartModelBasis E).coord i).toContinuousLinearMap).smulRight
+    ((chartModelBasis E) k)
 
 /-- The chart-side Christoffel correction CLM as a function of `x : M`,
 expressed as a CLM `E →L[ℝ] E`. The map sends `w ↦ ∑ᵢⱼₖ (b.repr w)ᵢ
@@ -131,7 +131,7 @@ def christoffelCorrectionCLM (g : SmoothRiemannianMetric I M)
   ∑ i : Fin (Module.finrank ℝ E),
     ∑ j : Fin (Module.finrank ℝ E),
       ∑ k : Fin (Module.finrank ℝ E),
-        (((Module.finBasis ℝ E).repr
+        (((chartModelBasis E).repr
               (chartE_section_repr (I := I) α σ x) j *
             chartChristoffel (I := I) g α i j k (extChartAt I α x)) •
           christoffelBlockCLM (E := E) i k)
@@ -144,11 +144,11 @@ lemma christoffelCorrectionCLM_apply
       ∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
           ∑ k : Fin (Module.finrank ℝ E),
-            (((Module.finBasis ℝ E).repr w) i *
-                ((Module.finBasis ℝ E).repr
+            (((chartModelBasis E).repr w) i *
+                ((chartModelBasis E).repr
                     (chartE_section_repr (I := I) α σ x)) j *
                 chartChristoffel (I := I) g α i j k (extChartAt I α x)) •
-              (Module.finBasis ℝ E) k := by
+              (chartModelBasis E) k := by
   classical
   unfold christoffelCorrectionCLM
   rw [ContinuousLinearMap.sum_apply]
@@ -160,16 +160,16 @@ lemma christoffelCorrectionCLM_apply
   -- `(scalar • Cᵢₖ) w = scalar • Cᵢₖ w = scalar • ((b.repr w)ᵢ • bₖ)`
   -- where Cᵢₖ : w ↦ (b.repr w)ᵢ • bₖ.
   rw [ContinuousLinearMap.smul_apply]
-  change ((Module.finBasis ℝ E).repr (chartE_section_repr (I := I) α σ x) j *
+  change ((chartModelBasis E).repr (chartE_section_repr (I := I) α σ x) j *
         chartChristoffel (I := I) g α i j k (extChartAt I α x)) •
       christoffelBlockCLM (E := E) i k w =
     _
   unfold christoffelBlockCLM
   rw [ContinuousLinearMap.smulRight_apply]
   -- `(b.coord i).toContinuousLinearMap w = (b.repr w) i`.
-  change ((Module.finBasis ℝ E).repr (chartE_section_repr (I := I) α σ x) j *
+  change ((chartModelBasis E).repr (chartE_section_repr (I := I) α σ x) j *
         chartChristoffel (I := I) g α i j k (extChartAt I α x)) •
-      (((Module.finBasis ℝ E).repr w) i • (Module.finBasis ℝ E) k) = _
+      (((chartModelBasis E).repr w) i • (chartModelBasis E) k) = _
   rw [smul_smul]
   -- Now: `((repr σ̃)_j * Γ * (repr w)_i) • b_k = ((repr w)_i * (repr σ̃)_j * Γ) • b_k`
   congr 1
@@ -280,7 +280,7 @@ lemma chartE_section_repr_basis_component_contMDiffOn
     (j : Fin (Module.finrank ℝ E)) :
     ContMDiffOn I 𝓘(ℝ) ∞
       (fun x : M =>
-        ((Module.finBasis ℝ E).repr (chartE_section_repr (I := I) α σ x)) j)
+        ((chartModelBasis E).repr (chartE_section_repr (I := I) α σ x)) j)
       (chartLeviCivitaGoodSet (I := I) α) := by
   classical
   have hbase :
@@ -289,8 +289,8 @@ lemma chartE_section_repr_basis_component_contMDiffOn
         (chartLeviCivitaGoodSet (I := I) α) :=
     chartE_section_repr_contMDiffOn_goodSet (I := I) α hσ
   have hcoord_clm : ContMDiff 𝓘(ℝ, E) 𝓘(ℝ) ∞
-      (((Module.finBasis ℝ E).coord j).toContinuousLinearMap) :=
-    (((Module.finBasis ℝ E).coord j).toContinuousLinearMap).contMDiff
+      (((chartModelBasis E).coord j).toContinuousLinearMap) :=
+    (((chartModelBasis E).coord j).toContinuousLinearMap).contMDiff
   intro x hx
   exact (hcoord_clm.contMDiffAt).comp_contMDiffWithinAt x (hbase x hx)
 
@@ -342,7 +342,7 @@ lemma christoffelCorrectionCLM_contMDiffOn
     chartChristoffel_contMDiffOn_goodSet (I := I) g α i j k
   have hscalar : ContMDiffOn I 𝓘(ℝ) ∞
       (fun x : M =>
-        ((Module.finBasis ℝ E).repr (chartE_section_repr (I := I) α σ x)) j *
+        ((chartModelBasis E).repr (chartE_section_repr (I := I) α σ x)) j *
         chartChristoffel (I := I) g α i j k (extChartAt I α x))
       (chartLeviCivitaGoodSet (I := I) α) :=
     hrepr_smooth.mul hΓ_smooth

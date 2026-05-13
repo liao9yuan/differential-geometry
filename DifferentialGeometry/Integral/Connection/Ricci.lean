@@ -26,8 +26,8 @@ $$
 
 * `ricciTensor_apply` — the defining trace identity at each point.
 * `ricciTensor_apply_basisSum` — the basis expansion of `ricciTensor` as a sum over the
-  canonical model basis `Module.finBasis ℝ E`:
-  `ricciTensor g x v w = ∑ i, (Module.finBasis ℝ E).repr (R(b i, v) w) i`.
+  canonical model basis `chartModelBasis E`:
+  `ricciTensor g x v w = ∑ i, (chartModelBasis E).repr (R(b i, v) w) i`.
 * `ricciTensor_apply_smooth` — the application formula on smooth tangent vector fields:
   `ricciTensor g x (Y x) (Z x) = tr (W ↦ riemannOp (LeviCivita g) x W (Y x) (Z x))`.
 * `ricciTensor_apply_smooth_basisSum` — combined with `riemannOp_apply_smooth`, the
@@ -254,23 +254,25 @@ theorem ricciTensor_apply (g : SmoothRiemannianMetric I M) (x : M)
 /-! ## Basis expansion of the trace
 
 By `LinearMap.trace_eq_matrix_trace` applied to the canonical model basis
-`Module.finBasis ℝ E` (which is also a basis of `T_x M = E`), the trace of
+`chartModelBasis E` (which is also a basis of `T_x M = E`), the trace of
 `ricciEndo g x v w` is the diagonal sum of its matrix coordinates. -/
 
 /-- **Basis expansion of `ricciTensor`.** For the canonical model basis
-`b := Module.finBasis ℝ E`, the Ricci tensor at `x` admits the coordinate sum
+`b := chartModelBasis E`, the Ricci tensor at `x` admits the coordinate sum
 `ricciTensor g x v w = ∑ i, b.repr (riemannOp (LeviCivita g) x (b i) v w) i`. -/
 theorem ricciTensor_apply_basisSum (g : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
     ricciTensor (I := I) g x v w =
       ∑ i : Fin (Module.finrank ℝ E),
-        (Module.finBasis ℝ E).repr
-          (riemannOp (LeviCivita (I := I) g) x ((Module.finBasis ℝ E) i) v w) i := by
+        (chartModelBasis E).repr
+          (riemannOp (LeviCivita (I := I) g) x ((chartModelBasis E) i) v w) i := by
   classical
   rw [ricciTensor_apply]
-  -- Use `LinearMap.trace_eq_matrix_trace` with the model basis (which is also a basis of T_x M).
+  -- Use `LinearMap.trace_eq_matrix_trace` with the chart-model basis (which is
+  -- also a basis of `T_x M = E`).
+  haveI : FiniteDimensional ℝ (TangentSpace I x) := inferInstanceAs (FiniteDimensional ℝ E)
   rw [LinearMap.trace_eq_matrix_trace ℝ
-        (Module.finBasis ℝ (TangentSpace I x)) (ricciEndo (I := I) g x v w)]
+        (chartModelBasis (TangentSpace I x)) (ricciEndo (I := I) g x v w)]
   unfold Matrix.trace
   refine Finset.sum_congr rfl ?_
   intro i _
@@ -302,10 +304,10 @@ theorem ricciTensor_apply_smooth (g : SmoothRiemannianMetric I M)
 `ricciTensor_apply_basisSum` with `riemannOp_apply_smooth`, the Ricci tensor evaluated on
 the values `(Y x, Z x)` of smooth tangent vector fields admits the expansion
 `ricciTensor g x (Y x) (Z x) = ∑ i, b.repr (riemannSec (LeviCivita g) B_i Y Z x) i` for
-any choice of smooth tangent vector fields `B_i` with `B_i x = (Module.finBasis ℝ E) i`.
+any choice of smooth tangent vector fields `B_i` with `B_i x = (chartModelBasis E) i`.
 
 This is the form used downstream by the L3.3 Ricci identity and the L4.4 Ricci bridge:
-plugging the canonical model basis `b_i = (Module.finBasis ℝ E) i` together with smooth
+plugging the canonical model basis `b_i = (chartModelBasis E) i` together with smooth
 local-frame extensions `B_i` agreeing with the canonical basis at `x`, the abstract Ricci
 contraction reduces to a finite sum of section-level Riemann curvature scalars, each
 expressible from `LeviCivita g` data alone. -/
@@ -315,16 +317,16 @@ theorem ricciTensor_apply_smooth_basisSum (g : SmoothRiemannianMetric I M)
     (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y))
     (hZ : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Z))
     (hB : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (B i)))
-    (x : M) (hBx : ∀ i, B i x = (Module.finBasis ℝ E) i) :
+    (x : M) (hBx : ∀ i, B i x = (chartModelBasis E) i) :
     ricciTensor (I := I) g x (Y x) (Z x) =
       ∑ i : Fin (Module.finrank ℝ E),
-        (Module.finBasis ℝ E).repr
+        (chartModelBasis E).repr
           (riemannSec (LeviCivita (I := I) g) (B i) Y Z x) i := by
   classical
   rw [ricciTensor_apply_basisSum]
   refine Finset.sum_congr rfl ?_
   intro i _
-  rw [show ((Module.finBasis ℝ E) i : TangentSpace I x) = B i x from (hBx i).symm,
+  rw [show ((chartModelBasis E) i : TangentSpace I x) = B i x from (hBx i).symm,
       riemannOp_apply_smooth (cov := LeviCivita (I := I) g) (hB i) hY hZ]
 
 /-! ## Algebraic skew-trace lemma
@@ -1127,7 +1129,7 @@ strategy mirrors the smoothness chain used for `tensor02Cov_isContMDiff`:
 
 2. **Local trace formula.** At each point `x ∈ M`, with the trivialisation
    `e := trivializationAt E (TangentSpace I) x`, choose smooth global tangent sections `S_i`
-   that agree with the local frame `e.localFrame (Module.finBasis ℝ E)` on a neighbourhood
+   that agree with the local frame `e.localFrame (chartModelBasis E)` on a neighbourhood
    of `x`. The trace of `Z ↦ riemannOp (LeviCivita g) b Z (Y b) (W b)` decomposes (via
    `LinearMap.trace_eq_matrix_trace` applied to the basis `chartBasisFamily x hb`) as a
    finite sum of pairings of `riemannSec (LeviCivita g) S_i Y W b` against the dual basis,
@@ -1235,7 +1237,7 @@ private lemma trace_eq_chart_sum
     (F : TangentSpace I b →L[ℝ] TangentSpace I b) :
     LinearMap.trace ℝ (TangentSpace I b) (F : TangentSpace I b →ₗ[ℝ] TangentSpace I b) =
       ∑ i : Fin (Module.finrank ℝ E),
-        ((Module.finBasis ℝ E).repr
+        ((chartModelBasis E).repr
           ((trivializationAt E (TangentSpace I : M → Type _) x).continuousLinearMapAt ℝ b
             (F (chartBasisVecFiber (I := I) x i b)))) i := by
   classical
@@ -1251,13 +1253,13 @@ private lemma trace_eq_chart_sum
   rw [LinearMap.toMatrix_apply]
   -- LHS: basisB.repr (F (basisB i)) i.
   -- basisB i = chartBasisVecFiber x i b (by `chartBasisFamily_apply`).
-  -- basisB.repr v = (Module.finBasis ℝ E).repr ((e.continuousLinearEquivAt ℝ b hb) v)
-  --              = (Module.finBasis ℝ E).repr (e.continuousLinearMapAt ℝ b v) (on baseSet).
+  -- basisB.repr v = (chartModelBasis E).repr ((e.continuousLinearEquivAt ℝ b hb) v)
+  --              = (chartModelBasis E).repr (e.continuousLinearMapAt ℝ b v) (on baseSet).
   rw [show basisB i = chartBasisVecFiber (I := I) x i b from
     chartBasisFamily_apply (I := I) x hb i]
-  -- basisB.repr v i = (Module.finBasis ℝ E).repr ((e.continuousLinearEquivAt ℝ b hb) v) i.
+  -- basisB.repr v i = (chartModelBasis E).repr ((e.continuousLinearEquivAt ℝ b hb) v) i.
   change (basisB.repr (F (chartBasisVecFiber (I := I) x i b))) i =
-      ((Module.finBasis ℝ E).repr
+      ((chartModelBasis E).repr
         (e.continuousLinearMapAt ℝ b (F (chartBasisVecFiber (I := I) x i b)))) i
   -- Unfold basisB.repr.
   rw [hbasisB_def]
@@ -1294,17 +1296,17 @@ private noncomputable def localFrameSmoothExtension
   classical
   set e := trivializationAt E (TangentSpace I : M → Type _) x with he_def
   have he : x ∈ e.baseSet := mem_baseSet_trivializationAt E (TangentSpace I) x
-  have hframe := e.isLocalFrameOn_localFrame_baseSet I (⊤ : ℕ∞) (Module.finBasis ℝ E)
+  have hframe := e.isLocalFrameOn_localFrame_baseSet I (⊤ : ℕ∞) (chartModelBasis E)
   exact (hframe.exists_contMDiffSection_eqOn_nhd e.open_baseSet he).choose
 
 private lemma localFrameSmoothExtension_eqOn_nhd (x : M) :
     let e := trivializationAt E (TangentSpace I : M → Type _) x
     ∀ᶠ b in 𝓝 x, ∀ i, (localFrameSmoothExtension (I := I) x i) b =
-      e.localFrame (Module.finBasis ℝ E) i b := by
+      e.localFrame (chartModelBasis E) i b := by
   classical
   set e := trivializationAt E (TangentSpace I : M → Type _) x with he_def
   have he : x ∈ e.baseSet := mem_baseSet_trivializationAt E (TangentSpace I) x
-  have hframe := e.isLocalFrameOn_localFrame_baseSet I (⊤ : ℕ∞) (Module.finBasis ℝ E)
+  have hframe := e.isLocalFrameOn_localFrame_baseSet I (⊤ : ℕ∞) (chartModelBasis E)
   exact (hframe.exists_contMDiffSection_eqOn_nhd e.open_baseSet he).choose_spec
 
 private lemma localFrameSmoothExtension_contMDiff (x : M)
@@ -1313,20 +1315,20 @@ private lemma localFrameSmoothExtension_contMDiff (x : M)
       (T% (fun b : M => localFrameSmoothExtension (I := I) x i b)) :=
   (localFrameSmoothExtension (I := I) x i).contMDiff
 
-/-- The linear functional `v ↦ ((Module.finBasis ℝ E).repr v) i` packaged as a continuous
+/-- The linear functional `v ↦ ((chartModelBasis E).repr v) i` packaged as a continuous
 linear map `E →L[ℝ] ℝ`. -/
 private noncomputable def finBasisReprAt (i : Fin (Module.finrank ℝ E)) :
     E →L[ℝ] ℝ :=
   haveI : T2Space E := inferInstance
   haveI : FiniteDimensional ℝ E := inferInstance
   LinearMap.toContinuousLinearMap
-    (((LinearMap.proj i).comp ((Module.finBasis ℝ E).equivFun.toLinearMap)) : E →ₗ[ℝ] ℝ)
+    (((LinearMap.proj i).comp ((chartModelBasis E).equivFun.toLinearMap)) : E →ₗ[ℝ] ℝ)
 
 @[simp] private lemma finBasisReprAt_apply (i : Fin (Module.finrank ℝ E)) (v : E) :
-    finBasisReprAt (E := E) i v = ((Module.finBasis ℝ E).repr v) i := by
+    finBasisReprAt (E := E) i v = ((chartModelBasis E).repr v) i := by
   classical
   unfold finBasisReprAt
-  change ((LinearMap.proj i).comp ((Module.finBasis ℝ E).equivFun.toLinearMap)) v = _
+  change ((LinearMap.proj i).comp ((chartModelBasis E).equivFun.toLinearMap)) v = _
   rw [LinearMap.comp_apply]
   simp [Module.Basis.equivFun]
 
@@ -1344,24 +1346,24 @@ private theorem ricciTensor_pairing_contMDiff
   -- Local trivialization at `x`.
   set e := trivializationAt E (TangentSpace I : M → Type _) x with he_def
   have hex : x ∈ e.baseSet := mem_baseSet_trivializationAt E (TangentSpace I) x
-  -- Smooth global frame `S_i` matching `e.localFrame (Module.finBasis ℝ E) i` on a nbhd of x.
+  -- Smooth global frame `S_i` matching `e.localFrame (chartModelBasis E) i` on a nbhd of x.
   set S : Fin (Module.finrank ℝ E) → Cₛ^(⊤ : ℕ∞)⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     localFrameSmoothExtension (I := I) x with hS_def
   have hS_smooth : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (T% (fun b : M => S i b)) := fun i =>
     localFrameSmoothExtension_contMDiff (I := I) x i
   have hS_eqOn_nhd : ∀ᶠ b in 𝓝 x, ∀ i,
-      S i b = e.localFrame (Module.finBasis ℝ E) i b :=
+      S i b = e.localFrame (chartModelBasis E) i b :=
     localFrameSmoothExtension_eqOn_nhd (I := I) x
   -- Smoothness of each summand.
   have hsec_smooth : ∀ i,
       ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
         (T% (fun b : M => riemannSec (LeviCivita (I := I) g) (S i) Y W b)) := fun i =>
     riemannSec_section_smooth g (hS_smooth i) hY hW
-  -- The summand: `b ↦ ((Module.finBasis ℝ E).repr (e.continuousLinearMapAt ℝ b (Z_i b))) i`.
+  -- The summand: `b ↦ ((chartModelBasis E).repr (e.continuousLinearMapAt ℝ b (Z_i b))) i`.
   have hsummand_smooth : ∀ i,
       ContMDiffAt I 𝓘(ℝ, ℝ) ∞
-        (fun b : M => ((Module.finBasis ℝ E).repr
+        (fun b : M => ((chartModelBasis E).repr
           (e.continuousLinearMapAt ℝ b (riemannSec (LeviCivita (I := I) g) (S i) Y W b))) i) x := by
     intro i
     -- The trivialized fibre is smooth at x.
@@ -1396,11 +1398,11 @@ private theorem ricciTensor_pairing_contMDiff
   have h_decomp_nhd : ∀ᶠ b in 𝓝 x,
       ricciTensor (I := I) g b (Y b) (W b) =
         ∑ i : Fin (Module.finrank ℝ E),
-          ((Module.finBasis ℝ E).repr
+          ((chartModelBasis E).repr
             (e.continuousLinearMapAt ℝ b (riemannSec (LeviCivita (I := I) g) (S i) Y W b))) i := by
     -- Use the trace identity: `ricciTensor g b (Y b) (W b) = tr_b (Z ↦ riemannOp _ b Z (Y b) (W b))`.
     -- Then apply `trace_eq_chart_sum` with `b ∈ e.baseSet` and `F = riemannOp _ b · (Y b) (W b)`.
-    -- The sum then equals `∑ᵢ ((Module.finBasis ℝ E).repr (e.continuousLinearMapAt ℝ b
+    -- The sum then equals `∑ᵢ ((chartModelBasis E).repr (e.continuousLinearMapAt ℝ b
     --                       (riemannOp _ b (chartBasisVecFiber x i b) (Y b) (W b)))) i`.
     -- And `riemannOp _ b (S i b) (Y b) (W b) = riemannSec _ (S i) Y W b` for `b` in the nbhd,
     -- which uses `S i b = chartBasisVecFiber x i b`.
@@ -1432,11 +1434,11 @@ private theorem ricciTensor_pairing_contMDiff
     rw [trace_eq_chart_sum (I := I) (x := x) (b := b) hb F]
     refine Finset.sum_congr rfl ?_
     intro i _
-    -- Each summand: `(Module.finBasis ℝ E).repr (e.continuousLinearMapAt ℝ b
+    -- Each summand: `(chartModelBasis E).repr (e.continuousLinearMapAt ℝ b
     --                  (F (chartBasisVecFiber x i b))) i`.
     -- Want to rewrite `chartBasisVecFiber x i b` as `S i b`.
     -- Note: `e.localFrame basis i b = chartBasisVecFiber x i b` on `e.baseSet`.
-    have hframe_eq : e.localFrame (Module.finBasis ℝ E) i b =
+    have hframe_eq : e.localFrame (chartModelBasis E) i b =
         chartBasisVecFiber (I := I) x i b := by
       rw [Trivialization.localFrame_apply_of_mem_baseSet (hx := hb)]
       simp only [Trivialization.basisAt, Module.Basis.map_apply,
@@ -1457,7 +1459,7 @@ private theorem ricciTensor_pairing_contMDiff
   -- Conclude by smoothness of the sum and congruence.
   have hsum_smooth : ContMDiffAt I 𝓘(ℝ, ℝ) ∞
       (fun b : M => ∑ i : Fin (Module.finrank ℝ E),
-        ((Module.finBasis ℝ E).repr
+        ((chartModelBasis E).repr
           (e.continuousLinearMapAt ℝ b (riemannSec (LeviCivita (I := I) g) (S i) Y W b))) i) x := by
     apply ContMDiffAt.sum
     intro i _

@@ -1800,7 +1800,7 @@ private lemma abs_fderiv_chartSmoothExt_apply_pou_mul_le_indicator
 chart target of the partial `e_i` of the chart-pushed function is bounded by a
 constant times the manifold L^p norm of `|u| + √g(grad u, grad u)`,
 with constant uniform in `u`. -/
-private lemma eLpNorm_fderiv_chartSmoothExt_apply_le_const_mul
+theorem eLpNorm_fderiv_chartSmoothExt_apply_le_const_mul
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     (α : M) {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ⊤) :

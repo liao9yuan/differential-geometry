@@ -38,7 +38,7 @@ basis-coordinate sum, mirroring the `ricciFun` construction in
   $$
     \sum_{i, j, k, l} u^i \cdot v^j \cdot w^k \cdot R^l{}_{ijk}(g, x)(\varphi_x x) \cdot e_l,
   $$
-  where `e_i := (Module.finBasis ℝ E) i` and `(u^i, v^j, w^k)` are the basis components
+  where `e_i := (chartModelBasis E) i` and `(u^i, v^j, w^k)` are the basis components
   of the input vectors.
 
 ## Main theorems
@@ -122,15 +122,15 @@ def chartRiemannLin (g : SmoothRiemannianMetric I M) (x : M) :
           ∑ j : Fin (Module.finrank ℝ E),
             ∑ k : Fin (Module.finrank ℝ E),
               ∑ l : Fin (Module.finrank ℝ E),
-                ((Module.finBasis ℝ E).repr u i *
-                    (Module.finBasis ℝ E).repr v j *
-                    (Module.finBasis ℝ E).repr w k *
+                ((chartModelBasis E).repr u i *
+                    (chartModelBasis E).repr v j *
+                    (chartModelBasis E).repr w k *
                     chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) •
-                  ((Module.finBasis ℝ E) l : TangentSpace I x)
+                  ((chartModelBasis E) l : TangentSpace I x)
       map_add' := fun u₁ u₂ => by
         classical
-        have hrepr : (Module.finBasis ℝ E).repr (u₁ + u₂) =
-            (Module.finBasis ℝ E).repr u₁ + (Module.finBasis ℝ E).repr u₂ := map_add _ _ _
+        have hrepr : (chartModelBasis E).repr (u₁ + u₂) =
+            (chartModelBasis E).repr u₁ + (chartModelBasis E).repr u₂ := map_add _ _ _
         simp only [hrepr]
         rw [← Finset.sum_add_distrib]
         refine Finset.sum_congr rfl (fun i _ => ?_)
@@ -143,20 +143,20 @@ def chartRiemannLin (g : SmoothRiemannianMetric I M) (x : M) :
         simp only [Finsupp.coe_add, Pi.add_apply]
         -- Goal: ((a + b) * X * Y * R) • el = (a * X * Y * R) • el + (b * X * Y * R) • el
         -- Use module.add_smul to expand.
-        rw [show ((((Module.finBasis ℝ E).repr u₁) i + ((Module.finBasis ℝ E).repr u₂) i) *
-              ((Module.finBasis ℝ E).repr v) j * ((Module.finBasis ℝ E).repr w) k *
+        rw [show ((((chartModelBasis E).repr u₁) i + ((chartModelBasis E).repr u₂) i) *
+              ((chartModelBasis E).repr v) j * ((chartModelBasis E).repr w) k *
               chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) =
-            (((Module.finBasis ℝ E).repr u₁) i * ((Module.finBasis ℝ E).repr v) j *
-                ((Module.finBasis ℝ E).repr w) k *
+            (((chartModelBasis E).repr u₁) i * ((chartModelBasis E).repr v) j *
+                ((chartModelBasis E).repr w) k *
                 chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) +
-            (((Module.finBasis ℝ E).repr u₂) i * ((Module.finBasis ℝ E).repr v) j *
-                ((Module.finBasis ℝ E).repr w) k *
+            (((chartModelBasis E).repr u₂) i * ((chartModelBasis E).repr v) j *
+                ((chartModelBasis E).repr w) k *
                 chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) from by ring]
         exact add_smul _ _ _
       map_smul' := fun c u => by
         classical
-        have hrepr : (Module.finBasis ℝ E).repr (c • u) =
-            c • (Module.finBasis ℝ E).repr u := map_smul _ _ _
+        have hrepr : (chartModelBasis E).repr (c • u) =
+            c • (chartModelBasis E).repr u := map_smul _ _ _
         simp only [hrepr]
         rw [Finset.smul_sum]
         refine Finset.sum_congr rfl (fun i _ => ?_)
@@ -168,37 +168,37 @@ def chartRiemannLin (g : SmoothRiemannianMetric I M) (x : M) :
         refine Finset.sum_congr rfl (fun l _ => ?_)
         simp only [Finsupp.coe_smul, Pi.smul_apply, smul_eq_mul]
         -- Goal: ((c * a) * X * Y * R) • el = c • ((a * X * Y * R) • el)
-        rw [show (c * ((Module.finBasis ℝ E).repr u) i * ((Module.finBasis ℝ E).repr v) j *
-                ((Module.finBasis ℝ E).repr w) k *
+        rw [show (c * ((chartModelBasis E).repr u) i * ((chartModelBasis E).repr v) j *
+                ((chartModelBasis E).repr w) k *
                 chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) =
-              c * (((Module.finBasis ℝ E).repr u) i * ((Module.finBasis ℝ E).repr v) j *
-                ((Module.finBasis ℝ E).repr w) k *
+              c * (((chartModelBasis E).repr u) i * ((chartModelBasis E).repr v) j *
+                ((chartModelBasis E).repr w) k *
                 chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) from by ring]
         exact mul_smul _ _ _
     }
     map_add' := fun w₁ w₂ => by
       classical
       ext u
-      have hrepr : (Module.finBasis ℝ E).repr (w₁ + w₂) =
-          (Module.finBasis ℝ E).repr w₁ + (Module.finBasis ℝ E).repr w₂ := map_add _ _ _
+      have hrepr : (chartModelBasis E).repr (w₁ + w₂) =
+          (chartModelBasis E).repr w₁ + (chartModelBasis E).repr w₂ := map_add _ _ _
       change (∑ i, ∑ j, ∑ k, ∑ l,
-              (((Module.finBasis ℝ E).repr u) i *
-                  ((Module.finBasis ℝ E).repr v) j *
-                  ((Module.finBasis ℝ E).repr (w₁ + w₂)) k *
+              (((chartModelBasis E).repr u) i *
+                  ((chartModelBasis E).repr v) j *
+                  ((chartModelBasis E).repr (w₁ + w₂)) k *
                   chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) •
-                ((Module.finBasis ℝ E) l : TangentSpace I x)) =
+                ((chartModelBasis E) l : TangentSpace I x)) =
           (∑ i, ∑ j, ∑ k, ∑ l,
-              (((Module.finBasis ℝ E).repr u) i *
-                  ((Module.finBasis ℝ E).repr v) j *
-                  ((Module.finBasis ℝ E).repr w₁) k *
+              (((chartModelBasis E).repr u) i *
+                  ((chartModelBasis E).repr v) j *
+                  ((chartModelBasis E).repr w₁) k *
                   chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) •
-                ((Module.finBasis ℝ E) l : TangentSpace I x)) +
+                ((chartModelBasis E) l : TangentSpace I x)) +
           (∑ i, ∑ j, ∑ k, ∑ l,
-              (((Module.finBasis ℝ E).repr u) i *
-                  ((Module.finBasis ℝ E).repr v) j *
-                  ((Module.finBasis ℝ E).repr w₂) k *
+              (((chartModelBasis E).repr u) i *
+                  ((chartModelBasis E).repr v) j *
+                  ((chartModelBasis E).repr w₂) k *
                   chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) •
-                ((Module.finBasis ℝ E) l : TangentSpace I x))
+                ((chartModelBasis E) l : TangentSpace I x))
       simp only [hrepr]
       rw [← Finset.sum_add_distrib]
       refine Finset.sum_congr rfl (fun i _ => ?_)
@@ -209,33 +209,33 @@ def chartRiemannLin (g : SmoothRiemannianMetric I M) (x : M) :
       rw [← Finset.sum_add_distrib]
       refine Finset.sum_congr rfl (fun l _ => ?_)
       simp only [Finsupp.coe_add, Pi.add_apply]
-      rw [show (((Module.finBasis ℝ E).repr u) i * ((Module.finBasis ℝ E).repr v) j *
-              (((Module.finBasis ℝ E).repr w₁) k + ((Module.finBasis ℝ E).repr w₂) k) *
+      rw [show (((chartModelBasis E).repr u) i * ((chartModelBasis E).repr v) j *
+              (((chartModelBasis E).repr w₁) k + ((chartModelBasis E).repr w₂) k) *
               chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) =
-            (((Module.finBasis ℝ E).repr u) i * ((Module.finBasis ℝ E).repr v) j *
-                ((Module.finBasis ℝ E).repr w₁) k *
+            (((chartModelBasis E).repr u) i * ((chartModelBasis E).repr v) j *
+                ((chartModelBasis E).repr w₁) k *
                 chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) +
-            (((Module.finBasis ℝ E).repr u) i * ((Module.finBasis ℝ E).repr v) j *
-                ((Module.finBasis ℝ E).repr w₂) k *
+            (((chartModelBasis E).repr u) i * ((chartModelBasis E).repr v) j *
+                ((chartModelBasis E).repr w₂) k *
                 chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) from by ring]
       exact add_smul _ _ _
     map_smul' := fun c w => by
       classical
       ext u
-      have hrepr : (Module.finBasis ℝ E).repr (c • w) =
-          c • (Module.finBasis ℝ E).repr w := map_smul _ _ _
+      have hrepr : (chartModelBasis E).repr (c • w) =
+          c • (chartModelBasis E).repr w := map_smul _ _ _
       change (∑ i, ∑ j, ∑ k, ∑ l,
-              (((Module.finBasis ℝ E).repr u) i *
-                  ((Module.finBasis ℝ E).repr v) j *
-                  ((Module.finBasis ℝ E).repr (c • w)) k *
+              (((chartModelBasis E).repr u) i *
+                  ((chartModelBasis E).repr v) j *
+                  ((chartModelBasis E).repr (c • w)) k *
                   chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) •
-                ((Module.finBasis ℝ E) l : TangentSpace I x)) =
+                ((chartModelBasis E) l : TangentSpace I x)) =
           c • (∑ i, ∑ j, ∑ k, ∑ l,
-              (((Module.finBasis ℝ E).repr u) i *
-                  ((Module.finBasis ℝ E).repr v) j *
-                  ((Module.finBasis ℝ E).repr w) k *
+              (((chartModelBasis E).repr u) i *
+                  ((chartModelBasis E).repr v) j *
+                  ((chartModelBasis E).repr w) k *
                   chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) •
-                ((Module.finBasis ℝ E) l : TangentSpace I x))
+                ((chartModelBasis E) l : TangentSpace I x))
       simp only [hrepr]
       rw [Finset.smul_sum]
       refine Finset.sum_congr rfl (fun i _ => ?_)
@@ -246,37 +246,37 @@ def chartRiemannLin (g : SmoothRiemannianMetric I M) (x : M) :
       rw [Finset.smul_sum]
       refine Finset.sum_congr rfl (fun l _ => ?_)
       simp only [Finsupp.coe_smul, Pi.smul_apply, smul_eq_mul]
-      rw [show (((Module.finBasis ℝ E).repr u) i * ((Module.finBasis ℝ E).repr v) j *
-              (c * ((Module.finBasis ℝ E).repr w) k) *
+      rw [show (((chartModelBasis E).repr u) i * ((chartModelBasis E).repr v) j *
+              (c * ((chartModelBasis E).repr w) k) *
               chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) =
-            c * (((Module.finBasis ℝ E).repr u) i * ((Module.finBasis ℝ E).repr v) j *
-                ((Module.finBasis ℝ E).repr w) k *
+            c * (((chartModelBasis E).repr u) i * ((chartModelBasis E).repr v) j *
+                ((chartModelBasis E).repr w) k *
                 chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) from by ring]
       exact mul_smul _ _ _
   }
   map_add' := fun v₁ v₂ => by
     classical
     ext w u
-    have hrepr : (Module.finBasis ℝ E).repr (v₁ + v₂) =
-        (Module.finBasis ℝ E).repr v₁ + (Module.finBasis ℝ E).repr v₂ := map_add _ _ _
+    have hrepr : (chartModelBasis E).repr (v₁ + v₂) =
+        (chartModelBasis E).repr v₁ + (chartModelBasis E).repr v₂ := map_add _ _ _
     change (∑ i, ∑ j, ∑ k, ∑ l,
-            (((Module.finBasis ℝ E).repr u) i *
-                ((Module.finBasis ℝ E).repr (v₁ + v₂)) j *
-                ((Module.finBasis ℝ E).repr w) k *
+            (((chartModelBasis E).repr u) i *
+                ((chartModelBasis E).repr (v₁ + v₂)) j *
+                ((chartModelBasis E).repr w) k *
                 chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) •
-              ((Module.finBasis ℝ E) l : TangentSpace I x)) =
+              ((chartModelBasis E) l : TangentSpace I x)) =
         (∑ i, ∑ j, ∑ k, ∑ l,
-            (((Module.finBasis ℝ E).repr u) i *
-                ((Module.finBasis ℝ E).repr v₁) j *
-                ((Module.finBasis ℝ E).repr w) k *
+            (((chartModelBasis E).repr u) i *
+                ((chartModelBasis E).repr v₁) j *
+                ((chartModelBasis E).repr w) k *
                 chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) •
-              ((Module.finBasis ℝ E) l : TangentSpace I x)) +
+              ((chartModelBasis E) l : TangentSpace I x)) +
         (∑ i, ∑ j, ∑ k, ∑ l,
-            (((Module.finBasis ℝ E).repr u) i *
-                ((Module.finBasis ℝ E).repr v₂) j *
-                ((Module.finBasis ℝ E).repr w) k *
+            (((chartModelBasis E).repr u) i *
+                ((chartModelBasis E).repr v₂) j *
+                ((chartModelBasis E).repr w) k *
                 chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) •
-              ((Module.finBasis ℝ E) l : TangentSpace I x))
+              ((chartModelBasis E) l : TangentSpace I x))
     simp only [hrepr]
     rw [← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl (fun i _ => ?_)
@@ -287,34 +287,34 @@ def chartRiemannLin (g : SmoothRiemannianMetric I M) (x : M) :
     rw [← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl (fun l _ => ?_)
     simp only [Finsupp.coe_add, Pi.add_apply]
-    rw [show (((Module.finBasis ℝ E).repr u) i *
-            (((Module.finBasis ℝ E).repr v₁) j + ((Module.finBasis ℝ E).repr v₂) j) *
-            ((Module.finBasis ℝ E).repr w) k *
+    rw [show (((chartModelBasis E).repr u) i *
+            (((chartModelBasis E).repr v₁) j + ((chartModelBasis E).repr v₂) j) *
+            ((chartModelBasis E).repr w) k *
             chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) =
-          (((Module.finBasis ℝ E).repr u) i * ((Module.finBasis ℝ E).repr v₁) j *
-              ((Module.finBasis ℝ E).repr w) k *
+          (((chartModelBasis E).repr u) i * ((chartModelBasis E).repr v₁) j *
+              ((chartModelBasis E).repr w) k *
               chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) +
-          (((Module.finBasis ℝ E).repr u) i * ((Module.finBasis ℝ E).repr v₂) j *
-              ((Module.finBasis ℝ E).repr w) k *
+          (((chartModelBasis E).repr u) i * ((chartModelBasis E).repr v₂) j *
+              ((chartModelBasis E).repr w) k *
               chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) from by ring]
     exact add_smul _ _ _
   map_smul' := fun c v => by
     classical
     ext w u
-    have hrepr : (Module.finBasis ℝ E).repr (c • v) =
-        c • (Module.finBasis ℝ E).repr v := map_smul _ _ _
+    have hrepr : (chartModelBasis E).repr (c • v) =
+        c • (chartModelBasis E).repr v := map_smul _ _ _
     change (∑ i, ∑ j, ∑ k, ∑ l,
-            (((Module.finBasis ℝ E).repr u) i *
-                ((Module.finBasis ℝ E).repr (c • v)) j *
-                ((Module.finBasis ℝ E).repr w) k *
+            (((chartModelBasis E).repr u) i *
+                ((chartModelBasis E).repr (c • v)) j *
+                ((chartModelBasis E).repr w) k *
                 chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) •
-              ((Module.finBasis ℝ E) l : TangentSpace I x)) =
+              ((chartModelBasis E) l : TangentSpace I x)) =
         c • (∑ i, ∑ j, ∑ k, ∑ l,
-            (((Module.finBasis ℝ E).repr u) i *
-                ((Module.finBasis ℝ E).repr v) j *
-                ((Module.finBasis ℝ E).repr w) k *
+            (((chartModelBasis E).repr u) i *
+                ((chartModelBasis E).repr v) j *
+                ((chartModelBasis E).repr w) k *
                 chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) •
-              ((Module.finBasis ℝ E) l : TangentSpace I x))
+              ((chartModelBasis E) l : TangentSpace I x))
     simp only [hrepr]
     rw [Finset.smul_sum]
     refine Finset.sum_congr rfl (fun i _ => ?_)
@@ -325,11 +325,11 @@ def chartRiemannLin (g : SmoothRiemannianMetric I M) (x : M) :
     rw [Finset.smul_sum]
     refine Finset.sum_congr rfl (fun l _ => ?_)
     simp only [Finsupp.coe_smul, Pi.smul_apply, smul_eq_mul]
-    rw [show (((Module.finBasis ℝ E).repr u) i * (c * ((Module.finBasis ℝ E).repr v) j) *
-            ((Module.finBasis ℝ E).repr w) k *
+    rw [show (((chartModelBasis E).repr u) i * (c * ((chartModelBasis E).repr v) j) *
+            ((chartModelBasis E).repr w) k *
             chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) =
-          c * (((Module.finBasis ℝ E).repr u) i * ((Module.finBasis ℝ E).repr v) j *
-              ((Module.finBasis ℝ E).repr w) k *
+          c * (((chartModelBasis E).repr u) i * ((chartModelBasis E).repr v) j *
+              ((chartModelBasis E).repr w) k *
               chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) from by ring]
     exact mul_smul _ _ _
 
@@ -341,11 +341,11 @@ def chartRiemannLin (g : SmoothRiemannianMetric I M) (x : M) :
         ∑ j : Fin (Module.finrank ℝ E),
           ∑ k : Fin (Module.finrank ℝ E),
             ∑ l : Fin (Module.finrank ℝ E),
-              ((Module.finBasis ℝ E).repr u i *
-                  (Module.finBasis ℝ E).repr v j *
-                  (Module.finBasis ℝ E).repr w k *
+              ((chartModelBasis E).repr u i *
+                  (chartModelBasis E).repr v j *
+                  (chartModelBasis E).repr w k *
                   chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) •
-                ((Module.finBasis ℝ E) l : TangentSpace I x) := rfl
+                ((chartModelBasis E) l : TangentSpace I x) := rfl
 
 /-- The continuous trilinear chart-Riemann CLM at `x`, packaging
 `chartRiemannLin` as a CLM via `LinearMap.toContinuousLinearMap` (using
@@ -392,11 +392,11 @@ theorem chartRiemannCLM_apply (g : SmoothRiemannianMetric I M) (x : M)
         ∑ j : Fin (Module.finrank ℝ E),
           ∑ k : Fin (Module.finrank ℝ E),
             ∑ l : Fin (Module.finrank ℝ E),
-              ((Module.finBasis ℝ E).repr u i *
-                  (Module.finBasis ℝ E).repr v j *
-                  (Module.finBasis ℝ E).repr w k *
+              ((chartModelBasis E).repr u i *
+                  (chartModelBasis E).repr v j *
+                  (chartModelBasis E).repr w k *
                   chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) •
-                ((Module.finBasis ℝ E) l : TangentSpace I x) :=
+                ((chartModelBasis E) l : TangentSpace I x) :=
   chartRiemannLin_apply (I := I) g x v w u
 
 /-! ## Basis-evaluation lemmas
@@ -404,26 +404,26 @@ theorem chartRiemannCLM_apply (g : SmoothRiemannianMetric I M) (x : M)
 When all three input vectors are basis vectors, the quadruple sum collapses to a single
 sum over `l`, with coefficients `chartRiemannTensor g x i j k l (extChartAt I x x)`. -/
 
-/-- Helper: `(Module.finBasis ℝ E).repr (b a) b' = if a = b' then 1 else 0`.
+/-- Helper: `(chartModelBasis E).repr (b a) b' = if a = b' then 1 else 0`.
 
 Mathlib's `Module.Basis.repr_self_apply` directly gives this form. -/
 private lemma repr_basis_eq_kron (a b' : Fin (Module.finrank ℝ E)) :
-    ((Module.finBasis ℝ E).repr ((Module.finBasis ℝ E) a)) b' =
+    ((chartModelBasis E).repr ((chartModelBasis E) a)) b' =
       (if a = b' then (1 : ℝ) else 0) :=
   Module.Basis.repr_self_apply _ _ _
 
 /-- **Chart-basis evaluation of `chartRiemannCLM`.** Evaluating the chart-Riemann CLM
-on the canonical basis triple `(e_j, e_k, e_i)` (with `e := Module.finBasis ℝ E`)
+on the canonical basis triple `(e_j, e_k, e_i)` (with `e := chartModelBasis E`)
 yields `∑ l, R^l{}_{ijk}(g, x)(ϕ_x x) • e_l`. The differentiation indices are the first
 two arguments `(j, k)`; the "vector" index is the third argument `i`. -/
 theorem chartRiemannCLM_basis_apply (g : SmoothRiemannianMetric I M) (x : M)
     (i j k : Fin (Module.finrank ℝ E)) :
     chartRiemannCLM (I := I) g x
-        ((Module.finBasis ℝ E) j) ((Module.finBasis ℝ E) k)
-        ((Module.finBasis ℝ E) i) =
+        ((chartModelBasis E) j) ((chartModelBasis E) k)
+        ((chartModelBasis E) i) =
       ∑ l : Fin (Module.finrank ℝ E),
         chartRiemannTensor (I := I) g x i j k l (extChartAt I x x) •
-          ((Module.finBasis ℝ E) l : TangentSpace I x) := by
+          ((chartModelBasis E) l : TangentSpace I x) := by
   classical
   rw [chartRiemannCLM_apply]
   -- Step 1: rewrite each basis-rep by the corresponding Kronecker delta.
@@ -432,11 +432,11 @@ theorem chartRiemannCLM_basis_apply (g : SmoothRiemannianMetric I M) (x : M)
         ∑ j' : Fin (Module.finrank ℝ E),
           ∑ k' : Fin (Module.finrank ℝ E),
             ∑ l : Fin (Module.finrank ℝ E),
-              (((Module.finBasis ℝ E).repr ((Module.finBasis ℝ E) i)) i' *
-                  ((Module.finBasis ℝ E).repr ((Module.finBasis ℝ E) j)) j' *
-                  ((Module.finBasis ℝ E).repr ((Module.finBasis ℝ E) k)) k' *
+              (((chartModelBasis E).repr ((chartModelBasis E) i)) i' *
+                  ((chartModelBasis E).repr ((chartModelBasis E) j)) j' *
+                  ((chartModelBasis E).repr ((chartModelBasis E) k)) k' *
                   chartRiemannTensor (I := I) g x i' j' k' l (extChartAt I x x)) •
-                ((Module.finBasis ℝ E) l : TangentSpace I x) =
+                ((chartModelBasis E) l : TangentSpace I x) =
       ∑ i' : Fin (Module.finrank ℝ E),
         ∑ j' : Fin (Module.finrank ℝ E),
           ∑ k' : Fin (Module.finrank ℝ E),
@@ -445,7 +445,7 @@ theorem chartRiemannCLM_basis_apply (g : SmoothRiemannianMetric I M) (x : M)
                   (if j = j' then (1 : ℝ) else 0) *
                   (if k = k' then (1 : ℝ) else 0) *
                   chartRiemannTensor (I := I) g x i' j' k' l (extChartAt I x x)) •
-                ((Module.finBasis ℝ E) l : TangentSpace I x) := by
+                ((chartModelBasis E) l : TangentSpace I x) := by
     refine Finset.sum_congr rfl (fun i' _ => ?_)
     refine Finset.sum_congr rfl (fun j' _ => ?_)
     refine Finset.sum_congr rfl (fun k' _ => ?_)
@@ -480,10 +480,10 @@ theorem chartRiemannCLM_basis_apply (g : SmoothRiemannianMetric I M) (x : M)
 `R^l{}_{ijk}(g, x)(ϕ_x x)`. -/
 theorem chartRiemannCLM_repr_basis (g : SmoothRiemannianMetric I M) (x : M)
     (i j k l : Fin (Module.finrank ℝ E)) :
-    ((Module.finBasis ℝ E).repr
+    ((chartModelBasis E).repr
         (chartRiemannCLM (I := I) g x
-          ((Module.finBasis ℝ E) j) ((Module.finBasis ℝ E) k)
-          ((Module.finBasis ℝ E) i))) l =
+          ((chartModelBasis E) j) ((chartModelBasis E) k)
+          ((chartModelBasis E) i))) l =
       chartRiemannTensor (I := I) g x i j k l (extChartAt I x x) := by
   classical
   rw [chartRiemannCLM_basis_apply]
@@ -535,27 +535,27 @@ theorem chartRiemannCLM_antisymm_jk (g : SmoothRiemannianMetric I M) (x : M)
   --    = -(u_i * v_j * w_k * R^l_{i,j,k}) • e_l = -f i j k l (using ring on scalars + antisymm).
   -- So RHS = -∑ -f = ∑ f = LHS. ✓
   have key : ∀ i j k l : Fin (Module.finrank ℝ E),
-      ((Module.finBasis ℝ E).repr u i *
-          (Module.finBasis ℝ E).repr w k *
-          (Module.finBasis ℝ E).repr v j *
+      ((chartModelBasis E).repr u i *
+          (chartModelBasis E).repr w k *
+          (chartModelBasis E).repr v j *
           chartRiemannTensor (I := I) g x i k j l (extChartAt I x x)) •
-        ((Module.finBasis ℝ E) l : TangentSpace I x) =
-      -(((Module.finBasis ℝ E).repr u i *
-          (Module.finBasis ℝ E).repr v j *
-          (Module.finBasis ℝ E).repr w k *
+        ((chartModelBasis E) l : TangentSpace I x) =
+      -(((chartModelBasis E).repr u i *
+          (chartModelBasis E).repr v j *
+          (chartModelBasis E).repr w k *
           chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) •
-        ((Module.finBasis ℝ E) l : TangentSpace I x)) := by
+        ((chartModelBasis E) l : TangentSpace I x)) := by
     intro i j k l
     rw [show chartRiemannTensor (I := I) g x i k j l (extChartAt I x x) =
           - chartRiemannTensor (I := I) g x i j k l (extChartAt I x x) from
         chartRiemannTensor_antisymm_jk (I := I) g x i k j l _]
-    rw [show ((Module.finBasis ℝ E).repr u i *
-            (Module.finBasis ℝ E).repr w k *
-            (Module.finBasis ℝ E).repr v j *
+    rw [show ((chartModelBasis E).repr u i *
+            (chartModelBasis E).repr w k *
+            (chartModelBasis E).repr v j *
             -chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) =
-          -((Module.finBasis ℝ E).repr u i *
-              (Module.finBasis ℝ E).repr v j *
-              (Module.finBasis ℝ E).repr w k *
+          -((chartModelBasis E).repr u i *
+              (chartModelBasis E).repr v j *
+              (chartModelBasis E).repr w k *
               chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) from by ring]
     rw [neg_smul]
   -- Compute RHS using Finset.sum_comm + the key lemma.
@@ -564,39 +564,39 @@ theorem chartRiemannCLM_antisymm_jk (g : SmoothRiemannianMetric I M) (x : M)
         ∑ j : Fin (Module.finrank ℝ E),
           ∑ k : Fin (Module.finrank ℝ E),
             ∑ l : Fin (Module.finrank ℝ E),
-              ((Module.finBasis ℝ E).repr u i *
-                  (Module.finBasis ℝ E).repr w j *
-                  (Module.finBasis ℝ E).repr v k *
+              ((chartModelBasis E).repr u i *
+                  (chartModelBasis E).repr w j *
+                  (chartModelBasis E).repr v k *
                   chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) •
-                ((Module.finBasis ℝ E) l : TangentSpace I x) =
+                ((chartModelBasis E) l : TangentSpace I x) =
       -(∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
           ∑ k : Fin (Module.finrank ℝ E),
             ∑ l : Fin (Module.finrank ℝ E),
-              ((Module.finBasis ℝ E).repr u i *
-                  (Module.finBasis ℝ E).repr v j *
-                  (Module.finBasis ℝ E).repr w k *
+              ((chartModelBasis E).repr u i *
+                  (chartModelBasis E).repr v j *
+                  (chartModelBasis E).repr w k *
                   chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) •
-                ((Module.finBasis ℝ E) l : TangentSpace I x)) := by
+                ((chartModelBasis E) l : TangentSpace I x)) := by
     -- Step: at each i, swap (j, k) on the LHS via Finset.sum_comm, then apply `key`.
     -- Use congrArg over the outer ∑ i.
     have step1 : ∀ i : Fin (Module.finrank ℝ E),
         (∑ j : Fin (Module.finrank ℝ E),
           ∑ k : Fin (Module.finrank ℝ E),
             ∑ l : Fin (Module.finrank ℝ E),
-              ((Module.finBasis ℝ E).repr u i *
-                  (Module.finBasis ℝ E).repr w j *
-                  (Module.finBasis ℝ E).repr v k *
+              ((chartModelBasis E).repr u i *
+                  (chartModelBasis E).repr w j *
+                  (chartModelBasis E).repr v k *
                   chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) •
-                ((Module.finBasis ℝ E) l : TangentSpace I x)) =
+                ((chartModelBasis E) l : TangentSpace I x)) =
         -(∑ j : Fin (Module.finrank ℝ E),
           ∑ k : Fin (Module.finrank ℝ E),
             ∑ l : Fin (Module.finrank ℝ E),
-              ((Module.finBasis ℝ E).repr u i *
-                  (Module.finBasis ℝ E).repr v j *
-                  (Module.finBasis ℝ E).repr w k *
+              ((chartModelBasis E).repr u i *
+                  (chartModelBasis E).repr v j *
+                  (chartModelBasis E).repr w k *
                   chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) •
-                ((Module.finBasis ℝ E) l : TangentSpace I x)) := by
+                ((chartModelBasis E) l : TangentSpace I x)) := by
       intro i
       -- (a) Swap (j, k) on the LHS at fixed i.
       rw [Finset.sum_comm
@@ -604,46 +604,46 @@ theorem chartRiemannCLM_antisymm_jk (g : SmoothRiemannianMetric I M) (x : M)
         (t := (Finset.univ : Finset (Fin (Module.finrank ℝ E))))
         (f := fun j k =>
           ∑ l : Fin (Module.finrank ℝ E),
-            ((Module.finBasis ℝ E).repr u i *
-                (Module.finBasis ℝ E).repr w j *
-                (Module.finBasis ℝ E).repr v k *
+            ((chartModelBasis E).repr u i *
+                (chartModelBasis E).repr w j *
+                (chartModelBasis E).repr v k *
                 chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) •
-              ((Module.finBasis ℝ E) l : TangentSpace I x))]
+              ((chartModelBasis E) l : TangentSpace I x))]
       -- (b) Apply `key` summand-wise (after relabeling outer (k, j) → (j, k) on body).
       rw [show ∑ k : Fin (Module.finrank ℝ E),
               ∑ j : Fin (Module.finrank ℝ E),
                 ∑ l : Fin (Module.finrank ℝ E),
-                  ((Module.finBasis ℝ E).repr u i *
-                      (Module.finBasis ℝ E).repr w j *
-                      (Module.finBasis ℝ E).repr v k *
+                  ((chartModelBasis E).repr u i *
+                      (chartModelBasis E).repr w j *
+                      (chartModelBasis E).repr v k *
                       chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) •
-                    ((Module.finBasis ℝ E) l : TangentSpace I x) =
+                    ((chartModelBasis E) l : TangentSpace I x) =
             ∑ j : Fin (Module.finrank ℝ E),
               ∑ k : Fin (Module.finrank ℝ E),
                 ∑ l : Fin (Module.finrank ℝ E),
-                  ((Module.finBasis ℝ E).repr u i *
-                      (Module.finBasis ℝ E).repr w k *
-                      (Module.finBasis ℝ E).repr v j *
+                  ((chartModelBasis E).repr u i *
+                      (chartModelBasis E).repr w k *
+                      (chartModelBasis E).repr v j *
                       chartRiemannTensor (I := I) g x i k j l (extChartAt I x x)) •
-                    ((Module.finBasis ℝ E) l : TangentSpace I x) from by
+                    ((chartModelBasis E) l : TangentSpace I x) from by
         rw [Finset.sum_comm]]
       -- (c) Apply `key` to flip sign per (i, j, k, l).
       rw [show ∑ j : Fin (Module.finrank ℝ E),
               ∑ k : Fin (Module.finrank ℝ E),
                 ∑ l : Fin (Module.finrank ℝ E),
-                  ((Module.finBasis ℝ E).repr u i *
-                      (Module.finBasis ℝ E).repr w k *
-                      (Module.finBasis ℝ E).repr v j *
+                  ((chartModelBasis E).repr u i *
+                      (chartModelBasis E).repr w k *
+                      (chartModelBasis E).repr v j *
                       chartRiemannTensor (I := I) g x i k j l (extChartAt I x x)) •
-                    ((Module.finBasis ℝ E) l : TangentSpace I x) =
+                    ((chartModelBasis E) l : TangentSpace I x) =
             ∑ j : Fin (Module.finrank ℝ E),
               ∑ k : Fin (Module.finrank ℝ E),
                 ∑ l : Fin (Module.finrank ℝ E),
-                  -(((Module.finBasis ℝ E).repr u i *
-                      (Module.finBasis ℝ E).repr v j *
-                      (Module.finBasis ℝ E).repr w k *
+                  -(((chartModelBasis E).repr u i *
+                      (chartModelBasis E).repr v j *
+                      (chartModelBasis E).repr w k *
                       chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) •
-                    ((Module.finBasis ℝ E) l : TangentSpace I x)) from by
+                    ((chartModelBasis E) l : TangentSpace I x)) from by
         refine Finset.sum_congr rfl (fun j _ => ?_)
         refine Finset.sum_congr rfl (fun k _ => ?_)
         refine Finset.sum_congr rfl (fun l _ => ?_)
@@ -655,20 +655,20 @@ theorem chartRiemannCLM_antisymm_jk (g : SmoothRiemannianMetric I M) (x : M)
             ∑ j : Fin (Module.finrank ℝ E),
               ∑ k : Fin (Module.finrank ℝ E),
                 ∑ l : Fin (Module.finrank ℝ E),
-                  ((Module.finBasis ℝ E).repr u i *
-                      (Module.finBasis ℝ E).repr w j *
-                      (Module.finBasis ℝ E).repr v k *
+                  ((chartModelBasis E).repr u i *
+                      (chartModelBasis E).repr w j *
+                      (chartModelBasis E).repr v k *
                       chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) •
-                    ((Module.finBasis ℝ E) l : TangentSpace I x)) =
+                    ((chartModelBasis E) l : TangentSpace I x)) =
           ∑ i : Fin (Module.finrank ℝ E),
             -(∑ j : Fin (Module.finrank ℝ E),
               ∑ k : Fin (Module.finrank ℝ E),
                 ∑ l : Fin (Module.finrank ℝ E),
-                  ((Module.finBasis ℝ E).repr u i *
-                      (Module.finBasis ℝ E).repr v j *
-                      (Module.finBasis ℝ E).repr w k *
+                  ((chartModelBasis E).repr u i *
+                      (chartModelBasis E).repr v j *
+                      (chartModelBasis E).repr w k *
                       chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) •
-                    ((Module.finBasis ℝ E) l : TangentSpace I x)) from by
+                    ((chartModelBasis E) l : TangentSpace I x)) from by
       refine Finset.sum_congr rfl (fun i _ => ?_)
       exact step1 i]
     -- Pull the outer negation out.
@@ -679,7 +679,7 @@ theorem chartRiemannCLM_antisymm_jk (g : SmoothRiemannianMetric I M) (x : M)
 
 /-! ## Specialisation to the chart-basis triple
 
-For the canonical model basis `e := Module.finBasis ℝ E`, the antisymmetry identity
+For the canonical model basis `e := chartModelBasis E`, the antisymmetry identity
 specialises to the index-level statement: swapping the two differentiation basis vectors
 flips the sign of the basis output. -/
 
@@ -687,13 +687,13 @@ flips the sign of the basis output. -/
 theorem chartRiemannCLM_basis_antisymm_jk (g : SmoothRiemannianMetric I M) (x : M)
     (i j k : Fin (Module.finrank ℝ E)) :
     chartRiemannCLM (I := I) g x
-        ((Module.finBasis ℝ E) j) ((Module.finBasis ℝ E) k)
-        ((Module.finBasis ℝ E) i) =
+        ((chartModelBasis E) j) ((chartModelBasis E) k)
+        ((chartModelBasis E) i) =
       - chartRiemannCLM (I := I) g x
-          ((Module.finBasis ℝ E) k) ((Module.finBasis ℝ E) j)
-          ((Module.finBasis ℝ E) i) :=
+          ((chartModelBasis E) k) ((chartModelBasis E) j)
+          ((chartModelBasis E) i) :=
   chartRiemannCLM_antisymm_jk (I := I) g x
-    ((Module.finBasis ℝ E) j) ((Module.finBasis ℝ E) k) ((Module.finBasis ℝ E) i)
+    ((chartModelBasis E) j) ((chartModelBasis E) k) ((chartModelBasis E) i)
 
 /-- The chart-Riemann CLM vanishes on the diagonal (when `v = w`). -/
 theorem chartRiemannCLM_diag (g : SmoothRiemannianMetric I M) (x : M)
@@ -736,7 +736,7 @@ This file delivers the section-level reduction (the "`riemannOp_apply_smooth` fo
 the bridge); the iterated chart-Christoffel identification is the deferred deep step. -/
 
 /-- **Section-level reduction of `riemannOp` on smooth basis extensions.** For any
-choice of smooth global tangent sections `X i` with `X i x = (Module.finBasis ℝ E) i`,
+choice of smooth global tangent sections `X i` with `X i x = (chartModelBasis E) i`,
 the value of the abstract Riemann operator `riemannOp (LeviCivita g) x (e_j) (e_k) (e_i)`
 equals the section-level formula `riemannSec (LeviCivita g) (X j) (X k) (X i) x`.
 
@@ -747,16 +747,16 @@ two iterations of `LeviCivita_chart_apply` to recover the chart-Riemann tensor e
 theorem riemannOp_chartBasis_via_riemannSec (g : SmoothRiemannianMetric I M) (x : M)
     {X : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b}
     (hX : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (X i)))
-    (hXx : ∀ i, X i x = (Module.finBasis ℝ E) i)
+    (hXx : ∀ i, X i x = (chartModelBasis E) i)
     (i j k : Fin (Module.finrank ℝ E)) :
     riemannOp (cov := LeviCivita (I := I) g) x
-        ((Module.finBasis ℝ E) j) ((Module.finBasis ℝ E) k)
-        ((Module.finBasis ℝ E) i) =
+        ((chartModelBasis E) j) ((chartModelBasis E) k)
+        ((chartModelBasis E) i) =
       riemannSec (LeviCivita (I := I) g) (X j) (X k) (X i) x := by
   -- Replace each basis vector by `X _ x`, then apply riemannOp_apply_smooth.
-  rw [show ((Module.finBasis ℝ E) j : TangentSpace I x) = X j x from (hXx j).symm,
-      show ((Module.finBasis ℝ E) k : TangentSpace I x) = X k x from (hXx k).symm,
-      show ((Module.finBasis ℝ E) i : TangentSpace I x) = X i x from (hXx i).symm]
+  rw [show ((chartModelBasis E) j : TangentSpace I x) = X j x from (hXx j).symm,
+      show ((chartModelBasis E) k : TangentSpace I x) = X k x from (hXx k).symm,
+      show ((chartModelBasis E) i : TangentSpace I x) = X i x from (hXx i).symm]
   exact riemannOp_apply_smooth (cov := LeviCivita (I := I) g) (hX j) (hX k) (hX i)
 
 /-- **Section-level antisymmetry transfer.** The antisymmetry of `riemannSec` in its
@@ -791,13 +791,13 @@ downstream use alongside `chartRiemannCLM_basis_antisymm_jk`. -/
 theorem riemannOp_basis_antisymm_jk (g : SmoothRiemannianMetric I M) (x : M)
     (i j k : Fin (Module.finrank ℝ E)) :
     riemannOp (cov := LeviCivita (I := I) g) x
-        ((Module.finBasis ℝ E) j) ((Module.finBasis ℝ E) k)
-        ((Module.finBasis ℝ E) i) =
+        ((chartModelBasis E) j) ((chartModelBasis E) k)
+        ((chartModelBasis E) i) =
       - riemannOp (cov := LeviCivita (I := I) g) x
-          ((Module.finBasis ℝ E) k) ((Module.finBasis ℝ E) j)
-          ((Module.finBasis ℝ E) i) :=
+          ((chartModelBasis E) k) ((chartModelBasis E) j)
+          ((chartModelBasis E) i) :=
   riemannOp_swap (cov := LeviCivita (I := I) g) x
-    ((Module.finBasis ℝ E) j) ((Module.finBasis ℝ E) k) ((Module.finBasis ℝ E) i)
+    ((chartModelBasis E) j) ((chartModelBasis E) k) ((chartModelBasis E) i)
 
 end Connection
 end Integral

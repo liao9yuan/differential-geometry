@@ -85,7 +85,11 @@ noncomputable def ncsFrames (x₀ : M) :
   let e_tan := trivializationAt E (TangentSpace I : M → Type _) x₀
   let b := Module.finBasis (R := ℝ) (M := E)
   let hframe_tan := e_tan.isLocalFrameOn_localFrame_baseSet I (↑(⊤ : ℕ∞)) b
-  let e_1 := trivializationAt (Tensor0SModel 1 ℝ E) (fun x => Tensor0SSpace 1 I x) x₀
+  -- Type-annotated `e_1` so typeclass synthesis can find the bundle topology against the
+  -- non-reducible `Tensor0SSpace` fiber.
+  let e_1 : Trivialization (Tensor0SModel 1 ℝ E)
+      (π (Tensor0SModel 1 ℝ E) (fun x : M => Tensor0SSpace 1 I x)) :=
+    trivializationAt (Tensor0SModel 1 ℝ E) (fun x : M => Tensor0SSpace 1 I x) x₀
   let hframe_1 := e_1.isLocalFrameOn_localFrame_baseSet I (↑(⊤ : ℕ∞))
     (dualCovectorBasis' (E := E))
   (Classical.choose (hframe_tan.exists_contMDiffSection_eqOn_nhd
@@ -108,11 +112,15 @@ theorem ncsFrames_sigma_eqOn_nhd (x₀ : M) :
 /-- The dual frame `(ncsFrames x₀).2` agrees with the `(0,1)`-bundle's local frame
 for `dualCovectorBasis'` on a neighborhood of `x₀`. -/
 theorem ncsFrames_theta_eqOn_nhd (x₀ : M) :
+    letI : TopologicalSpace (TotalSpace (Tensor0SModel 1 ℝ E)
+        (fun x : M => Tensor0SSpace 1 I x)) := tensor0SBundle_topology (I := I) 1
     ∀ᶠ x in nhds x₀, ∀ i, ((ncsFrames I M x₀).2 i) x =
       (trivializationAt (Tensor0SModel 1 ℝ E)
         (fun x => Tensor0SSpace 1 I x) x₀).localFrame
         (dualCovectorBasis' (E := E)) i x := by
-  let e_1 := trivializationAt (Tensor0SModel 1 ℝ E) (fun x => Tensor0SSpace 1 I x) x₀
+  let e_1 : Trivialization (Tensor0SModel 1 ℝ E)
+      (π (Tensor0SModel 1 ℝ E) (fun x : M => Tensor0SSpace 1 I x)) :=
+    trivializationAt (Tensor0SModel 1 ℝ E) (fun x : M => Tensor0SSpace 1 I x) x₀
   let hframe_1 := e_1.isLocalFrameOn_localFrame_baseSet I (↑(⊤ : ℕ∞))
     (dualCovectorBasis' (E := E))
   exact Classical.choose_spec (hframe_1.exists_contMDiffSection_eqOn_nhd
@@ -140,13 +148,15 @@ theorem ncsFrames_biorth_eventually (x₀ : M) :
   have hθ := ncsFrames_theta_eqOn_nhd I M x₀
   have hbase_tan := (trivializationAt E (TangentSpace I : M → Type _) x₀).open_baseSet.mem_nhds
     (mem_baseSet_trivializationAt E _ x₀)
-  have hbase_1 := (trivializationAt (Tensor0SModel 1 ℝ E)
-    (fun x => Tensor0SSpace 1 I x) x₀).open_baseSet.mem_nhds
-    (mem_baseSet_trivializationAt _ _ x₀)
+  -- Type-annotated `e_1` so typeclass synthesis can find the bundle topology.
+  set e_1 : Trivialization (Tensor0SModel 1 ℝ E)
+      (π (Tensor0SModel 1 ℝ E) (fun x : M => Tensor0SSpace 1 I x)) :=
+    trivializationAt (Tensor0SModel 1 ℝ E) (fun x : M => Tensor0SSpace 1 I x) x₀ with he_1_def
+  have hbase_1 : e_1.baseSet ∈ nhds x₀ :=
+    e_1.open_baseSet.mem_nhds (mem_baseSet_trivializationAt _ _ x₀)
   filter_upwards [hσ, hθ, hbase_tan, hbase_1] with y hσy hθy hy_tan hy_1 i j
   rw [hσy j, hθy i]
   set e_tan := trivializationAt E (TangentSpace I : M → Type _) x₀
-  set e_1 := trivializationAt (Tensor0SModel 1 ℝ E) (fun x => Tensor0SSpace 1 I x) x₀
   set b := Module.finBasis (R := ℝ) (M := E)
   rw [e_1.localFrame_apply_of_mem_baseSet (hx := hy_1)]
   rw [e_tan.localFrame_apply_of_mem_baseSet (hx := hy_tan)]
@@ -160,7 +170,13 @@ theorem ncsFrames_biorth_eventually (x₀ : M) :
     have h_symm_eq : ((e_1.linearEquivAt ℝ y hy_1).symm N : Tensor0SSpace 1 I y) =
         e_1.symmL ℝ y N := by rfl
     rw [h_symm_eq]
-    rw [Bundle.continuousMultilinearMap.triv_symmL_eq_compContinuousLinearMap x₀ y hy_tan]
+    -- State the bundle lemma against `e_1.symmL` directly so the rewrite goes through
+    -- without depending on `Tensor0SSpace` unfolding (blocked by `respectTransparency false`).
+    have hsym : e_1.symmL ℝ y N = N.compContinuousLinearMap
+        (fun _ : Fin 1 => e_tan.continuousLinearMapAt ℝ y) :=
+      Bundle.continuousMultilinearMap.triv_symmL_eq_compContinuousLinearMap
+        (F := E) (E := TangentSpace I) (𝕜 := ℝ) x₀ y hy_tan N
+    rw [hsym]
     rfl
   rw [h_toModel_symm (dualCovectorBasis' i)
     (fun _ : Fin 1 => (e_tan.linearEquivAt ℝ y hy_tan).symm (b j))]

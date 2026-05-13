@@ -462,6 +462,9 @@ theorem contMDiff_curriedSection_iff_section {s : ℕ}
       (fun y => TotalSpace.mk' (E →L[ℝ] Tensor0SModel s ℝ E)
         (E := fun y : M => TangentSpace I y →L[ℝ] Tensor0SSpace s I y)
         y (curriedSection I M T y)) := by
+  letI : TopologicalSpace (TotalSpace (Tensor0SModel (s + 1) ℝ E)
+      (fun x : M => Tensor0SSpace (s + 1) I x)) :=
+    tensor0SBundle_topology (s + 1)
   refine ⟨fun hT x => ?_, fun hC x => ?_⟩
   · rw [contMDiffAt_section (F := E →L[ℝ] Tensor0SModel s ℝ E)
       (E := fun y : M => TangentSpace I y →L[ℝ] Tensor0SSpace s I y)]
@@ -521,6 +524,9 @@ theorem mdifferentiableAt_curriedSection_iff_section {s : ℕ}
       (fun y => TotalSpace.mk' (E →L[ℝ] Tensor0SModel s ℝ E)
         (E := fun y : M => TangentSpace I y →L[ℝ] Tensor0SSpace s I y)
         y (curriedSection I M T y)) x := by
+  letI : TopologicalSpace (TotalSpace (Tensor0SModel (s + 1) ℝ E)
+      (fun x : M => Tensor0SSpace (s + 1) I x)) :=
+    tensor0SBundle_topology (s + 1)
   rw [mdifferentiableAt_section (F := Tensor0SModel (s+1) ℝ E)
     (E := fun x : M => Tensor0SSpace (s+1) I x)]
   rw [mdifferentiableAt_section (F := E →L[ℝ] Tensor0SModel s ℝ E)
