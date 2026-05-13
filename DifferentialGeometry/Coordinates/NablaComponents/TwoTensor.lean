@@ -68,7 +68,7 @@ theorem tensor0S_two_eval_coordFrame_sum
             · simp [pair]
       _ = ∑ i : CoordinateIdx E,
             Ax (Function.update (pair Y W) (0 : Fin 2) (b.coord i Y • b i)) := by
-            simpa using hmap
+            exact hmap
       _ = ∑ i : CoordinateIdx E, b.coord i Y * Ax (pair (b i) W) := by
             refine Finset.sum_congr rfl fun i _ => ?_
             rw [hupdate]
@@ -78,13 +78,19 @@ theorem tensor0S_two_eval_coordFrame_sum
               funext q
               fin_cases q <;> simp [pair]
             rw [hconst]
-            rw [Ax.map_update_smul]
+            have hsmul :
+                Ax (Function.update (pair (b i) W) (0 : Fin 2) (b.coord i Y • b i)) =
+                  b.coord i Y •
+                    Ax (Function.update (pair (b i) W) (0 : Fin 2) (b i)) :=
+              Ax.toMultilinearMap.map_update_smul (m := pair (b i) W)
+                (i := (0 : Fin 2)) (c := b.coord i Y) (x := b i)
+            rw [hsmul]
             have hbase :
                 Function.update (pair (b i) W) (0 : Fin 2) (b i) = pair (b i) W := by
               funext q
               fin_cases q <;> simp [pair]
             rw [hbase]
-            simp [smul_eq_mul]
+            rw [smul_eq_mul]
   have hslot1 (V : TangentSpace I x₀) :
       Ax (pair V Z) =
         ∑ j : CoordinateIdx E, b.coord j Z * Ax (pair V (b j)) := by
@@ -107,7 +113,7 @@ theorem tensor0S_two_eval_coordFrame_sum
             · exact (b.sum_repr Z).symm
       _ = ∑ j : CoordinateIdx E,
             Ax (Function.update (pair V Z) (1 : Fin 2) (b.coord j Z • b j)) := by
-            simpa using hmap
+            exact hmap
       _ = ∑ j : CoordinateIdx E, b.coord j Z * Ax (pair V (b j)) := by
             refine Finset.sum_congr rfl fun j _ => ?_
             rw [hupdate]
@@ -117,13 +123,19 @@ theorem tensor0S_two_eval_coordFrame_sum
               funext q
               fin_cases q <;> simp [pair]
             rw [hconst]
-            rw [Ax.map_update_smul]
+            have hsmul :
+                Ax (Function.update (pair V (b j)) (1 : Fin 2) (b.coord j Z • b j)) =
+                  b.coord j Z •
+                    Ax (Function.update (pair V (b j)) (1 : Fin 2) (b j)) :=
+              Ax.toMultilinearMap.map_update_smul (m := pair V (b j))
+                (i := (1 : Fin 2)) (c := b.coord j Z) (x := b j)
+            rw [hsmul]
             have hbase :
                 Function.update (pair V (b j)) (1 : Fin 2) (b j) = pair V (b j) := by
               funext q
               fin_cases q <;> simp [pair]
             rw [hbase]
-            simp [smul_eq_mul]
+            rw [smul_eq_mul]
   calc
     Ax (fun q : Fin 2 => if q = 0 then Y else Z)
         = Ax (pair Y Z) := by

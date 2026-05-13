@@ -225,6 +225,29 @@ instance tensorRSSpace_moduleFree [CompleteSpace 𝕜] (r s : ℕ) (x : M) :
     Module.Free 𝕜 (TensorRSSpace r s I x) :=
   inferInstanceAs (Module.Free 𝕜 (Tensor0SSpace r I x →L[𝕜] Tensor0SSpace s I x))
 
+/-- `FunLike` instance for `TensorRSSpace`, enabling direct function-style application of an
+`(r,s)`-tensor on a `(0,r)`-tensor to obtain a `(0,s)`-tensor. -/
+instance tensorRSSpace_instFunLike (r s : ℕ) (x : M) :
+    FunLike (TensorRSSpace r s I x) (Tensor0SSpace r I x) (Tensor0SSpace s I x) :=
+  inferInstanceAs (FunLike (Tensor0SSpace r I x →L[𝕜] Tensor0SSpace s I x) _ _)
+
+/-- `ContinuousLinearMapClass` instance for `TensorRSSpace`, providing additivity, continuity,
+and scalar-multiplicativity of the function-style application. -/
+instance tensorRSSpace_instContinuousLinearMapClass (r s : ℕ) (x : M) :
+    ContinuousLinearMapClass (TensorRSSpace r s I x) 𝕜
+      (Tensor0SSpace r I x) (Tensor0SSpace s I x) :=
+  inferInstanceAs (ContinuousLinearMapClass
+    (Tensor0SSpace r I x →L[𝕜] Tensor0SSpace s I x) 𝕜 _ _)
+
+/-- A `TensorRSSpace` element converted to a `ContinuousLinearMap`. Since the underlying
+type is `Tensor0SSpace r I x →L[𝕜] Tensor0SSpace s I x`, this is just the identity. -/
+def TensorRSSpace.toCLM {r s : ℕ} {x : M} (T : TensorRSSpace r s I x) :
+    Tensor0SSpace r I x →L[𝕜] Tensor0SSpace s I x := T
+
+/-- A `ContinuousLinearMap` converted to a `TensorRSSpace` element. -/
+def TensorRSSpace.ofCLM {r s : ℕ} {x : M}
+    (T : Tensor0SSpace r I x →L[𝕜] Tensor0SSpace s I x) : TensorRSSpace r s I x := T
+
 /-- Extensionality for `TensorRSSpace`. Since the type is a non-reducible `def`, Lean
 cannot find the underlying `ContinuousLinearMap.ext` automatically; we re-export it
 at the `TensorRSSpace` level. -/
