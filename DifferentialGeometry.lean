@@ -411,6 +411,7 @@ import DifferentialGeometry.Analysis.HeatEquation.MaximumPrinciple
 import DifferentialGeometry.Analysis.HeatEquation.Duhamel
 import DifferentialGeometry.Analysis.HeatEquation.Smoothing
 import DifferentialGeometry.Analysis.HeatEquation.HeatSemigroupIteratedDomain
+import DifferentialGeometry.Analysis.HeatEquation.SmoothingSpectralLift
 
 import DifferentialGeometry.Geometry.NormGradSq
 
@@ -507,6 +508,7 @@ import DifferentialGeometry.Analysis.Laplacian.Regularity.SmoothApproxSeqH1Compl
 import DifferentialGeometry.Analysis.Laplacian.Regularity.SmoothApproxSeqIdentification
 import DifferentialGeometry.Analysis.Laplacian.Regularity.FChartResidualMemW1pTrulyUnconditional
 import DifferentialGeometry.Analysis.Laplacian.Regularity.DiffChartBilinearH1ComplH3
+import DifferentialGeometry.Analysis.Laplacian.Regularity.DiffChartBilinearH1ComplH3Direct
 
 import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.SecondFundamentalForm
 import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.BoundaryLaplacian

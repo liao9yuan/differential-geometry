@@ -264,8 +264,12 @@ private lemma iteratedResolventL2_oneMinusLapHeat_basis
 
 set_option maxHeartbeats 800000 in
 /-- The spectral identity at the operator level (acting on a general
-`u ∈ Lp`): `(resolventL2 g)^k (oneMinusLapHeat g k t u) = heatSemigroup g t u`. -/
-private lemma iteratedResolventL2_oneMinusLapHeat_apply
+`u ∈ Lp`): `(resolventL2 g)^k (oneMinusLapHeat g k t u) = heatSemigroup g t u`.
+
+The two operators agree on every eigenbasis vector by
+`iteratedResolventL2_oneMinusLapHeat_basis`; the operator identity follows
+by Hilbert-basis density. -/
+theorem iteratedResolventL2_oneMinusLapHeat_apply
     (g : SmoothRiemannianMetric I M) (k : ℕ) {t : ℝ} (ht : 0 < t)
     (u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
     iteratedResolventL2 (I := I) (M := M) g k

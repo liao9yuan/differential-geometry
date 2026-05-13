@@ -129,7 +129,7 @@ mirror it here at a local public level so we can reason about it. -/
 
 /-- The canonical chosen first weak partial of `chartPushed POU α u_h.coeFn`
 in coordinate direction `i` on the chart target. -/
-private noncomputable def chartPushedChosenFirstPartial
+noncomputable def chartPushedChosenFirstPartial
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
     (i : Fin (Module.finrank ℝ E)) : EuclN → ℝ :=
