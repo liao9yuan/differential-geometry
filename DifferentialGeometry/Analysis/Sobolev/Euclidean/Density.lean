@@ -1512,7 +1512,7 @@ private lemma convolution_lsmul_comm
 For a smooth `ψ` viewed as an element of `W^{1,p}(Ω)`, the (chosen) weak
 partial agrees a.e. with the classical partial. -/
 
-private theorem chosenWeakPartial_smooth_ae_eq
+theorem chosenWeakPartial_smooth_ae_eq
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ_open : IsOpen Ω)
     {ψ : E → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
     (hψ_W : DeGiorgi.MemW1p p ψ Ω) (i : Fin d) :

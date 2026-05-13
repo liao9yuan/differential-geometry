@@ -156,7 +156,7 @@ theorem wkpNorm_succ_eq_eLpNorm_add_sum_partial
 
 /-- The `wkpNorm` at order `k` of a chosen weak partial is bounded by the
 `wkpNorm` at order `k+1` of the original function. -/
-private lemma wkpNorm_chosenWeakPartial_le_wkpNorm_succ
+lemma wkpNorm_chosenWeakPartial_le_wkpNorm_succ
     (k : ℕ) {p : ℝ≥0∞} {Ω : Set E} (_hΩ : IsOpen Ω) (u : E → ℝ) (i : Fin d) :
     wkpNorm (d := d) k p (chosenWeakPartial' (d := d) p i u Ω) Ω ≤
       wkpNorm (d := d) (k + 1) p u Ω := by
