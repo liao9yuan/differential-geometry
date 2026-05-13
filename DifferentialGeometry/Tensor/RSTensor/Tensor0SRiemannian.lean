@@ -459,7 +459,7 @@ private lemma chartGramMatrix_adjugate_entry_contMDiffOn
 /-- The inverse Gram matrix entries are smooth on the trivialisation base
 set. The inverse formula is `A⁻¹ = (det A)⁻¹ • adjugate A`, valid because the
 determinant is strictly positive (hence nonzero) on the chart base set. -/
-private lemma chartGramMatrix_inv_entry_contMDiffOn
+lemma chartGramMatrix_inv_entry_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
     ContMDiffOn I 𝓘(ℝ) ∞

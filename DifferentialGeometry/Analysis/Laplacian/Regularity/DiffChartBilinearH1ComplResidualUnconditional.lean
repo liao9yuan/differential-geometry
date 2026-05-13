@@ -192,7 +192,7 @@ H²-graph-norm domain. -/
 
 /-- For `v : SmoothScalar g`, the smooth-case chart-pulled residual
 function in `MemW1p 2 chartTargetEuclid α` form. -/
-private noncomputable def smoothFChartResidual
+noncomputable def smoothFChartResidual
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) : EuclN → ℝ :=
   DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fChartResidual
     (I := I) (M := M) g α (smoothToH1Compl (I := I) (M := M) g v)

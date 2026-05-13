@@ -363,7 +363,7 @@ private lemma memWkp_chartPushed_of_contMDiff
 
 /-- Every smooth function on a closed Riemannian manifold lies in the
 chart-based `W^{k,p}` space, for every order `k`. -/
-private lemma memWkpChart_of_contMDiff_k
+theorem memWkpChart_of_contMDiff_k
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (k : ℕ)
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
