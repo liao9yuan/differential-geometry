@@ -48,29 +48,14 @@ theorem nabla0S_one_model_coord
             (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
             x₀ (X x₀) j k *
             coordComponent0SAt (I := I) (α x₀) (fun _ : Fin 1 => k) := by
-  classical
-  simp only [nabla0SFun, TensorLieDeriv.mcovariantDeriv_tensor0SFromConnection,
-    TensorLieDeriv.mcovariantDeriv_tensor0SWithinFromConnection]
-  rw [← tensor0SModelAt_coordComponent0SAt (I := I) x₀
-    (TensorLieDeriv.mcovariantDeriv_tensor0SWithin
-      (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1 X
-      (connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀)
-      α Set.univ x₀) (fun _ : Fin 1 => j)]
-  have hmodel := TensorLieDeriv.mcovariantDeriv_tensor0SWithin_one_apply_basis
-    (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-    (n := (∞ : WithTop ℕ∞)) (Idx := CoordinateIdx (𝕜 := 𝕜) E)
-    (basis := Module.finBasis 𝕜 E)
-    (X := X)
-    (ΓX := connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀)
-    (α := α)
-    (u := Set.univ)
-    (x₀ := x₀)
-    (j := j)
-  refine hmodel.trans ?_
-  simp_rw [connCoeff_eq_christoffelAlong_coord (I := I) cov (fun x => X x) x₀]
-  simp only [modelDeriv0SAt]
-  simp_rw [tensor0SModelAt_coordComponent0SAt (I := I)]
+  have h := nabla0S_model_coordFrame_slots
+    (I := I) cov X α x₀ (fun _ : Fin 1 => j)
+  have hupdate (k : CoordinateIdx (𝕜 := 𝕜) E) :
+      Function.update (fun _ : Fin 1 => j) 0 k = fun _ : Fin 1 => k := by
+    funext q
+    fin_cases q
+    simp
+  simpa only [Fin.sum_univ_one, hupdate] using h
 
 /-- Coordinate-frame component formula for one-forms, after supplying the
 derivative-identification bridge. -/
@@ -91,7 +76,14 @@ theorem nabla0S_one_coord
             (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
             x₀ (X x₀) j k *
             coordComponent0SAt (I := I) (α x₀) (fun _ : Fin 1 => k) := by
-  rw [nabla0S_one_model_coord (I := I) cov X α x₀ j, hderiv]
+  have h := nabla0S_coordFrame_slots
+    (I := I) cov X α x₀ hderiv (fun _ : Fin 1 => j)
+  have hupdate (k : CoordinateIdx (𝕜 := 𝕜) E) :
+      Function.update (fun _ : Fin 1 => j) 0 k = fun _ : Fin 1 => k := by
+    funext q
+    fin_cases q
+    simp
+  simpa only [Fin.sum_univ_one, hupdate] using h
 
 /-- Evaluation form of `nabla0S_one_coord` on a coordinate-frame basis vector.
 

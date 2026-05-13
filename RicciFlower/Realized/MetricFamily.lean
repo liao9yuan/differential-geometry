@@ -149,6 +149,15 @@ theorem metricCompatibleAt
     RicciFlower.Connection.IsMetricCompatible (I := I) (G.connectionAt t) (G.metricAt t) := by
   exact G.metricCompatible t
 
+/-- Metric compatibility of the connection and metric at a regular time. -/
+theorem metricCompatibleAt_regular
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (t : RealTimeInterval.RegularTime D) :
+    RicciFlower.Connection.IsMetricCompatible (I := I)
+      (G.connection (t : Real)) (G.metric (t : Real)) := by
+  exact G.metricCompatible (RealTimeInterval.regularToFlow t)
+
 end RealizedMetricFamilyOn
 
 section FamilyCompatibility

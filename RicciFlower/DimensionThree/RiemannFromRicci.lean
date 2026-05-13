@@ -1,5 +1,6 @@
 import RicciFlower.DimensionThree.CurvatureAlgebra
 import RicciFlower.Realized.CurvatureComponents
+import RicciFlower.LeviCivita.Curvature
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -55,6 +56,108 @@ theorem standardRmCompAt_apply
     (i j k l : Fin 3) :
     standardRmCompAt basis Rm04 i j k l =
       rm04CompAt (I := I) basis Rm04 l i j k := rfl
+
+/-- Lemma 14.2 as a pointwise `Rm04` component formula with the Ricci and
+scalar terms taken to be the canonical traces of the same standard curvature
+component array.
+
+This is the assumption-free trace-data form of the realized bridge: the only
+geometric input is the algebraic curvature symmetry package for the adapted
+components `standardRmCompAt basis Rm04`. -/
+theorem rm04Comp_displayedRiemannFromRicci3D_at_of_curvature_symmetries
+    {basis : Module.Basis (Fin 3) Real (TangentSpace I x)}
+    {Rm04 : Tensor04At (I := I) (M := M) x}
+    (h : AlgebraicCurvatureSymmetries3 (standardRmCompAt basis Rm04)) :
+    forall i j k l : Fin 3,
+      rm04CompAt (I := I) basis Rm04 k i j l =
+        stdRicci3 (standardRmCompAt basis Rm04) i l * delta3 j k
+          - stdRicci3 (standardRmCompAt basis Rm04) j l * delta3 i k
+          - stdRicci3 (standardRmCompAt basis Rm04) i k * delta3 j l
+          + stdRicci3 (standardRmCompAt basis Rm04) j k * delta3 i l
+          - (1 / 2 : Real) * stdScalar3 (standardRmCompAt basis Rm04) *
+              (delta3 i l * delta3 j k - delta3 j l * delta3 i k) := by
+  intro i j k l
+  have hformula :=
+    displayedRiemannFromRicci3D_of_algebraic_curvature_symmetries
+      h i j k l
+  simpa [displayedRiemannFromRicciRhs3, standardRmCompAt_apply] using hformula
+
+/-- Local-frame wrapper for
+`rm04Comp_displayedRiemannFromRicci3D_at_of_curvature_symmetries`. -/
+theorem rm04Comp_displayedRiemannFromRicci3D_frame_of_curvature_symmetries
+    {Rm04 : Tensor04Section (I := I) (M := M)}
+    {u : Set M}
+    {frame : Fin 3 -> (x : M) -> TangentSpace I x}
+    (hframe : IsLocalFrameOn I E ∞ frame u)
+    {x : M} (hx : x ∈ u)
+    (h : AlgebraicCurvatureSymmetries3
+      (standardRmCompAt (I := I) (M := M) (hframe.toBasisAt hx) (Rm04 x))) :
+    forall i j k l : Fin 3,
+      rm04CompAt (I := I) (hframe.toBasisAt hx) (Rm04 x) k i j l =
+        stdRicci3 (standardRmCompAt (I := I) (M := M)
+          (hframe.toBasisAt hx) (Rm04 x)) i l * delta3 j k
+          - stdRicci3 (standardRmCompAt (I := I) (M := M)
+            (hframe.toBasisAt hx) (Rm04 x)) j l * delta3 i k
+          - stdRicci3 (standardRmCompAt (I := I) (M := M)
+            (hframe.toBasisAt hx) (Rm04 x)) i k * delta3 j l
+          + stdRicci3 (standardRmCompAt (I := I) (M := M)
+            (hframe.toBasisAt hx) (Rm04 x)) j k * delta3 i l
+          - (1 / 2 : Real) * stdScalar3 (standardRmCompAt (I := I) (M := M)
+            (hframe.toBasisAt hx) (Rm04 x)) *
+              (delta3 i l * delta3 j k - delta3 j l * delta3 i k) :=
+  rm04Comp_displayedRiemannFromRicci3D_at_of_curvature_symmetries
+    (I := I) h
+
+/-- Levi-Civita lowered curvature supplies the three standard algebraic
+curvature symmetries needed by the dimension-three algebra file. -/
+theorem algebraicCurvatureSymmetries3_standardRmCompAt_of_leviCivita_realizes
+    [CompleteSpace E] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I 3 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M] [SigmaCompactSpace M] [T2Space M]
+    (g : SmoothRiemannianMetric I M)
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
+      (LeviCivita.leviCivitaConnectionOfMetric (I := I) g) (1 : WithTop ℕ∞))
+    (Rm04 : Tensor04Section (I := I) (M := M))
+    (hRm04 : Rm04RealizesConnection (I := I) g
+      (LeviCivita.leviCivitaConnectionOfMetric (I := I) g) Rm04)
+    {x : M} (basis : Module.Basis (Fin 3) Real (TangentSpace I x)) :
+    AlgebraicCurvatureSymmetries3 (standardRmCompAt (I := I) basis (Rm04 x)) := by
+  refine ⟨?_, ?_, ?_⟩
+  · intro i j k l
+    simpa [standardRmCompAt_apply] using
+      (LeviCivita.rm04InputSkewAt_of_leviCivita_realizes
+        (I := I) g Rm04 hRm04 (basis l) (basis i) (basis j) (basis k))
+  · intro i j k l
+    simpa [standardRmCompAt_apply] using
+      (LeviCivita.rm04OutputSkewAt_of_leviCivita_realizes
+        (I := I) g hcov Rm04 hRm04 (basis k) (basis i) (basis j) (basis l))
+  · intro i j k l
+    simpa [standardRmCompAt_apply] using
+      (LeviCivita.rm04PairSymmAt_of_leviCivita_realizes
+        (I := I) g hcov Rm04 hRm04 (basis j) (basis k) (basis l) (basis i))
+
+/-- Lemma 14.2 for a Levi-Civita lowered curvature realization, with Ricci and
+scalar terms expressed as canonical traces of the same curvature array. -/
+theorem rm04Comp_displayedRiemannFromRicci3D_at_of_leviCivita_realizes
+    [CompleteSpace E] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I 3 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M] [SigmaCompactSpace M] [T2Space M]
+    (g : SmoothRiemannianMetric I M)
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
+      (LeviCivita.leviCivitaConnectionOfMetric (I := I) g) (1 : WithTop ℕ∞))
+    (Rm04 : Tensor04Section (I := I) (M := M))
+    (hRm04 : Rm04RealizesConnection (I := I) g
+      (LeviCivita.leviCivitaConnectionOfMetric (I := I) g) Rm04)
+    {x : M} (basis : Module.Basis (Fin 3) Real (TangentSpace I x)) :
+    forall i j k l : Fin 3,
+      rm04CompAt (I := I) basis (Rm04 x) k i j l =
+        stdRicci3 (standardRmCompAt (I := I) basis (Rm04 x)) i l * delta3 j k
+          - stdRicci3 (standardRmCompAt (I := I) basis (Rm04 x)) j l * delta3 i k
+          - stdRicci3 (standardRmCompAt (I := I) basis (Rm04 x)) i k * delta3 j l
+          + stdRicci3 (standardRmCompAt (I := I) basis (Rm04 x)) j k * delta3 i l
+          - (1 / 2 : Real) * stdScalar3 (standardRmCompAt (I := I) basis (Rm04 x)) *
+              (delta3 i l * delta3 j k - delta3 j l * delta3 i k) :=
+  rm04Comp_displayedRiemannFromRicci3D_at_of_curvature_symmetries (I := I)
+    (algebraicCurvatureSymmetries3_standardRmCompAt_of_leviCivita_realizes
+      (I := I) g hcov Rm04 hRm04 basis)
 
 /-- Pointwise data needed to feed the realized 3D bridge.
 

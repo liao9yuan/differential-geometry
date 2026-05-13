@@ -1032,6 +1032,58 @@ theorem scalar_wmp_supersolutions_of_lipschitz_on_value_set_of_regular
     hsuper hode hinit
     (scalarWMP_lipschitz_on_valueSet_bound (M := M) T u c F K hF_lip)
 
+/-- LaTeX Theorem 7.1, label `thm:scalar-wmp-super`.
+
+This is the native compact-value-set Lipschitz formulation of Hamilton's scalar
+weak maximum principle for supersolutions.  The monotonicity hypothesis is kept
+because it is part of the book statement; the proved core uses the direct
+supersolution inequality, the ODE equality, and the Lipschitz estimate on the
+compact value set of the comparison pair. -/
+theorem scalar_wmp_super_theorem_7_1
+    [I.Boundaryless]
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [CompactSpace M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (T : Real) (hT : 0 <= T)
+    (X : Real -> (x : M) -> TangentSpace I x)
+    (u : Real -> M -> Real) (c : Real -> Real)
+    (F : Real -> Real -> Real) (K : NNReal)
+    (_hF_mono : forall t : Real, t ∈ Set.Icc 0 T -> Monotone (fun a : Real => F a t))
+    (hw_cont : ContinuousOn
+      (fun p : Real × M => Real.exp (-(K : Real) * p.1) * (u p.1 p.2 - c p.1))
+      (spacetimeSlab (M := M) T))
+    (hw_mdiff : forall t : Real, t ∈ Set.Icc 0 T ->
+      forall x : M, MDifferentiableAt I 𝓘(Real, Real)
+        (fun y : M => Real.exp (-(K : Real) * t) * (u t y - c t)) x)
+    (hw_grad : forall t : Real, t ∈ Set.Icc 0 T ->
+      forall x : M, MDiffAt (T% fun y : M =>
+        gradientFun (I := I) (G.metric t)
+          (fun z : M => Real.exp (-(K : Real) * t) * (u t z - c t)) y) x)
+    (hu_time : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
+      DifferentiableWithinAt Real (fun s : Real => u s x) (Set.Icc 0 T) t)
+    (hc_time : forall t : Real, t ∈ Set.Icc 0 T ->
+      DifferentiableWithinAt Real c (Set.Icc 0 T) t)
+    (hu_space : forall t : Real, t ∈ Set.Icc 0 T ->
+      forall y : M, MDifferentiableAt I 𝓘(Real, Real) (u t) y)
+    (hv_space : forall t : Real, t ∈ Set.Icc 0 T ->
+      forall y : M, MDifferentiableAt I 𝓘(Real, Real)
+        (fun z : M => u t z - c t) y)
+    (hv_grad : forall t : Real, t ∈ Set.Icc 0 T ->
+      forall x : M, MDiffAt (T% fun y : M =>
+        gradientFun (I := I) (G.metric t) (fun z : M => u t z - c t) y) x)
+    (hsuper : forall t : Real, t ∈ Set.Icc 0 T -> forall x : M,
+      F (u t x) t <= parabolicOperatorWithDrift (I := I) G T X u t x)
+    (hode : forall t : Real, t ∈ Set.Icc 0 T ->
+      derivWithin c (Set.Icc 0 T) t = F (c t) t)
+    (hinit : forall x : M, c 0 <= u 0 x)
+    (hF_lip : forall t : Real, t ∈ Set.Icc 0 T ->
+      LipschitzOnWith K (fun a : Real => F a t)
+        (scalarWMPValueSet (M := M) T u c)) :
+    forall t : Real, t ∈ Set.Icc 0 T -> forall x : M, c t <= u t x :=
+  scalar_wmp_supersolutions_of_lipschitz_on_value_set_of_regular
+    (I := I) G T hT X u c F K hw_cont hw_mdiff hw_grad hu_time hc_time
+    hu_space hv_space hv_grad hsuper hode hinit hF_lip
+
 /-- MSM110, Chapter 4, label `thm:scalar_maximum_principle_ode`.
 
 Lower-bound half of the nonlinear reaction theorem. This is the uniform

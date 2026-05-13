@@ -52,6 +52,30 @@ theorem metric_dt_eq_neg_two_ricci_of_metricVariationEquation
     metricTimeDerivative td G t x X Y = (-2 : Real) * Ric t x X Y :=
   hEq t x X Y
 
+/-- Classical full-time Ricci-flow metric variation at a single real time.
+
+This is the `HasDerivAt` version used by volume variation, whose trace term is
+defined through Lean's classical `deriv`. -/
+def MetricVariationEquationDerivAt
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (Ric : RicciTensorField (I := I) (M := M) Real) (t : Real) : Prop :=
+  forall (x : M) (X Y : TangentSpace I x),
+    HasDerivAt
+      (fun s : Real => (G.metric s).inner x X Y)
+      ((-2 : Real) * Ric t x X Y)
+      t
+
+/-- Extract the classical derivative of a metric coefficient from the
+full-time metric variation predicate. -/
+theorem metric_deriv_eq_neg_two_ricci_of_metricVariationEquationDerivAt
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (Ric : RicciTensorField (I := I) (M := M) Real) {t : Real}
+    (hEq : MetricVariationEquationDerivAt (I := I) G Ric t)
+    (x : M) (X Y : TangentSpace I x) :
+    deriv (fun s : Real => (G.metric s).inner x X Y) t =
+      (-2 : Real) * Ric t x X Y :=
+  (hEq x X Y).deriv
+
 /-- A data-only realized Ricci-flow candidate.
 
 Being a Ricci-flow solution is expressed by `IsRealizedRicciFlow`, not by a

@@ -6,6 +6,9 @@
 !/RicciFlower/**
 !/.github
 !/Examples/
+!/BK/
+!/BK/**
+!/BK.lean
 !/DifferentialGeometry.lean
 !/RicciFlower.lean
 !/lakefile.toml
@@ -21,3 +24,5 @@
 .DS_Store
 **/.DS_Store
 *.md
+!/BK.md
+!/BK/**/*.md

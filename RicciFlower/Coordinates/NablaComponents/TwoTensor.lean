@@ -234,127 +234,20 @@ theorem nabla0S_two_model_coord
             coordComponent0SAt (I := I) (A x₀)
               (fun q : Fin 2 => if q = 0 then j else k) := by
   classical
-  simp only [nabla0SFun, TensorLieDeriv.mcovariantDeriv_tensor0SFromConnection,
-    TensorLieDeriv.mcovariantDeriv_tensor0SWithinFromConnection]
-  rw [← tensor0SModelAt_coordComponent0SAt (I := I) x₀
-    (TensorLieDeriv.mcovariantDeriv_tensor0SWithin
-      (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 2 X
-      (connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀)
-      A Set.univ x₀) (fun q : Fin 2 => if q = 0 then j else l)]
-  have hmodel := TensorLieDeriv.mcovariantDeriv_tensor0SWithin_two_apply_basis
-    (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-    (n := (∞ : WithTop ℕ∞)) (Idx := CoordinateIdx (𝕜 := 𝕜) E)
-    (basis := Module.finBasis 𝕜 E)
-    (X := X)
-    (ΓX := connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀)
-    (A := A)
-    (u := Set.univ)
-    (x₀ := x₀)
-    (j := j) (l := l)
-  have hslots :
-      (fun a : Fin 2 => (Module.finBasis 𝕜 E) (if a = 0 then j else l)) =
-        fun a : Fin 2 => if a = 0 then (Module.finBasis 𝕜 E) j
-          else (Module.finBasis 𝕜 E) l := by
-    funext a
-    by_cases ha : a = 0 <;> simp [ha]
-  refine (congrArg
-      (fun f : Fin 2 → E =>
-        (TensorLieDeriv.tensor0SModelAt
-            (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) 2 x₀ x₀
-            (TensorLieDeriv.mcovariantDeriv_tensor0SWithin
-              (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-              (n := (∞ : WithTop ℕ∞)) 2 X
-              (connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov
-                (fun x => X x) x₀) A Set.univ x₀)) f)
-      hslots).trans (hmodel.trans ?_)
-  simp_rw [connCoeff_eq_christoffelAlong_coord (I := I) cov (fun x => X x) x₀]
-  simp only [modelDeriv0SAt]
-  have hslots_left (k : CoordinateIdx (𝕜 := 𝕜) E) :
-      (fun a : Fin 2 => (Module.finBasis 𝕜 E) (if a = 0 then k else l)) =
-        fun a : Fin 2 => if a = 0 then (Module.finBasis 𝕜 E) k
-          else (Module.finBasis 𝕜 E) l := by
-    funext a
-    by_cases ha : a = 0 <;> simp [ha]
-  have hslots_right (k : CoordinateIdx (𝕜 := 𝕜) E) :
-      (fun a : Fin 2 => (Module.finBasis 𝕜 E) (if a = 0 then j else k)) =
-        fun a : Fin 2 => if a = 0 then (Module.finBasis 𝕜 E) j
-          else (Module.finBasis 𝕜 E) k := by
-    funext a
-    by_cases ha : a = 0 <;> simp [ha]
-  have hleft_model (k : CoordinateIdx (𝕜 := 𝕜) E) :
-      (tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-        2 x₀ x₀ (A x₀))
-          (fun a : Fin 2 => (Module.finBasis 𝕜 E) (if a = 0 then k else l)) =
-        coordComponent0SAt (I := I) (A x₀)
-          (fun q : Fin 2 => if q = 0 then k else l) := by
-    exact tensor0SModelAt_coordComponent0SAt (I := I) x₀ (A x₀)
-      (fun q : Fin 2 => if q = 0 then k else l)
-  have hright_model (k : CoordinateIdx (𝕜 := 𝕜) E) :
-      (tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-        2 x₀ x₀ (A x₀))
-          (fun a : Fin 2 => (Module.finBasis 𝕜 E) (if a = 0 then j else k)) =
-        coordComponent0SAt (I := I) (A x₀)
-          (fun q : Fin 2 => if q = 0 then j else k) := by
-    exact tensor0SModelAt_coordComponent0SAt (I := I) x₀ (A x₀)
-      (fun q : Fin 2 => if q = 0 then j else k)
-  have hleft_eval (k : CoordinateIdx (𝕜 := 𝕜) E) :
-      (tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-        2 x₀ x₀ (A x₀))
-          (fun a : Fin 2 => (Module.finBasis 𝕜 E) (if a = 0 then k else l)) =
-        (A x₀) (fun a : Fin 2 =>
-          coordinateFrameAt (I := I) x₀ (if a = 0 then k else l) x₀) := by
-    rw [hleft_model k]
-    simp [coordComponent0SAt, component0S]
-  have hright_eval (k : CoordinateIdx (𝕜 := 𝕜) E) :
-      (tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-        2 x₀ x₀ (A x₀))
-          (fun a : Fin 2 => (Module.finBasis 𝕜 E) (if a = 0 then j else k)) =
-        (A x₀) (fun a : Fin 2 =>
-          coordinateFrameAt (I := I) x₀ (if a = 0 then j else k) x₀) := by
-    rw [hright_model k]
-    simp [coordComponent0SAt, component0S]
-  rw [show
-      (∑ x : CoordinateIdx (𝕜 := 𝕜) E,
-        christoffelAlongInFrame cov (coordinateFrameAt (I := I) x₀)
-          (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
-          x₀ (X x₀) j x *
-          (tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-            2 x₀ x₀ (A x₀))
-            (fun q : Fin 2 =>
-              if q = 0 then (Module.finBasis 𝕜 E) x else (Module.finBasis 𝕜 E) l)) =
-        ∑ k : CoordinateIdx (𝕜 := 𝕜) E,
-          christoffelAlongInFrame cov (coordinateFrameAt (I := I) x₀)
-            (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
-            x₀ (X x₀) j k *
-            coordComponent0SAt (I := I) (A x₀)
-              (fun q : Fin 2 => if q = 0 then k else l) from by
-        apply Finset.sum_congr rfl
-        intro k _
-        congr 1
-        rw [← hslots_left k]
-        exact hleft_model k]
-  rw [show
-      (∑ x : CoordinateIdx (𝕜 := 𝕜) E,
-        christoffelAlongInFrame cov (coordinateFrameAt (I := I) x₀)
-          (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
-          x₀ (X x₀) l x *
-          (tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-            2 x₀ x₀ (A x₀))
-            (fun q : Fin 2 =>
-              if q = 0 then (Module.finBasis 𝕜 E) j else (Module.finBasis 𝕜 E) x)) =
-        ∑ k : CoordinateIdx (𝕜 := 𝕜) E,
-          christoffelAlongInFrame cov (coordinateFrameAt (I := I) x₀)
-            (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
-            x₀ (X x₀) l k *
-            coordComponent0SAt (I := I) (A x₀)
-              (fun q : Fin 2 => if q = 0 then j else k) from by
-        apply Finset.sum_congr rfl
-        intro k _
-        congr 1
-        rw [← hslots_right k]
-        exact hright_model k]
-  rw [← hslots]
+  let slots : Fin 2 -> CoordinateIdx (𝕜 := 𝕜) E := fun q => if q = 0 then j else l
+  have h := nabla0S_model_coordFrame_slots
+    (I := I) cov X A x₀ slots
+  have hupdate0 (k : CoordinateIdx (𝕜 := 𝕜) E) :
+      Function.update slots 0 k = (fun q : Fin 2 => if q = 0 then k else l) := by
+    funext q
+    fin_cases q <;> simp [slots]
+  have hupdate1 (k : CoordinateIdx (𝕜 := 𝕜) E) :
+      Function.update slots 1 k = (fun q : Fin 2 => if q = 0 then j else k) := by
+    funext q
+    fin_cases q <;> simp [slots]
+  rw [h]
+  simp [slots, Fin.sum_univ_two, hupdate0, hupdate1]
+  ring_nf
 
 /-- Coordinate-frame component formula for `(0,2)` tensors, after supplying
 the derivative-identification bridge. -/
@@ -383,7 +276,21 @@ theorem nabla0S_two_coord
             x₀ (X x₀) l k *
           coordComponent0SAt (I := I) (A x₀)
               (fun q : Fin 2 => if q = 0 then j else k) := by
-  rw [nabla0S_two_model_coord (I := I) cov X A x₀ j l, hderiv]
+  classical
+  let slots : Fin 2 -> CoordinateIdx (𝕜 := 𝕜) E := fun q => if q = 0 then j else l
+  have h := nabla0S_coordFrame_slots
+    (I := I) cov X A x₀ hderiv slots
+  have hupdate0 (k : CoordinateIdx (𝕜 := 𝕜) E) :
+      Function.update slots 0 k = (fun q : Fin 2 => if q = 0 then k else l) := by
+    funext q
+    fin_cases q <;> simp [slots]
+  have hupdate1 (k : CoordinateIdx (𝕜 := 𝕜) E) :
+      Function.update slots 1 k = (fun q : Fin 2 => if q = 0 then j else k) := by
+    funext q
+    fin_cases q <;> simp [slots]
+  rw [h]
+  simp [slots, Fin.sum_univ_two, hupdate0, hupdate1]
+  ring_nf
 
 /-- Evaluation form of `nabla0S_two_coord` on coordinate-frame basis vectors.
 

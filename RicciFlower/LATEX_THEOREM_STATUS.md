@@ -36,6 +36,49 @@ evolution algebra, and finite-dimensional curvature algebra.
 Detailed closure order and acceptance checks are recorded in
 `RicciFlower/LATEX_THEOREM_CLOSURE_PLAN.md`.
 
+## 2026-05-12 Local Closure Update
+
+The scalar weak maximum-principle core is farther along than the earlier status
+recorded: `strict_barrier_nonnegative`, the operator Laplacian-minimum input,
+the Hessian-trace bridge, and the uniform/weighted value-set Lipschitz cores are
+now native. The remaining scalar WMP work is presentation/interface packaging
+for the exact LaTeX locally-Lipschitz phrasing.
+
+The dimension-three algebra file now also closes the native eigenvalue form of
+Lemma 10.8, `lem:Q-lower-bound`.  New scalar and volume evolution files are
+present in the checkout.  The volume-evolution path has now been focused
+checked and is recorded in the 2026-05-13 update below.
+
+## 2026-05-13 Volume Evolution Update
+
+The local RicciFlower volume stack now proves the measure/density route needed
+for Ricci-flow volume evolution.  The checked native pieces include:
+
+- `Analysis.Volume.FunctionRegularAt_const` and
+  `Analysis.Volume.FunctionRegularAt_one`;
+- `Analysis.Volume.MetricFamilyRegularAt.of_chartGram_timeDeriv`, the
+  explicit `C^1_t C^0_x` chart-Gram bridge;
+- `Realized.scalarCurvatureFromRicciTraceInFrame_realizes`;
+- `RicciFlow.Evolution.Volume.volume_variation_ricciFlow_at_of_metricDeriv_canonicalScalar`;
+- `RicciFlow.Evolution.Volume.total_volume_variation_ricciFlow_at_of_metricDeriv`.
+
+Thus the formal statement
+
+```text
+d/dt int_M 1 dmu_g(t) = - int_M R dmu_g(t)
+```
+
+is native, assuming the supplied metric family satisfies the classical
+Ricci-flow metric derivative equation and `MetricFamilyRegularAt`.  The latter
+can now be produced from explicit continuous time derivatives of chart Gram
+entries, so short-time existence and Ricci-flow analytic improvement are not
+part of this volume bridge.
+
+Remaining volume-side work is an optional convenience theorem deriving the
+explicit chart-Gram derivative hypothesis from a stronger spacetime `C^1`,
+smooth, or analytic metric-family predicate, plus separate maximal-interval
+and extinction infrastructure.
+
 ## Main Body
 
 ### Theorem 2.1, `thm:main-hamilton-3d`
@@ -160,15 +203,14 @@ partial_t Gamma^k_ij =
 - g^{kl} (nabla_i Ric_jl + nabla_j Ric_il - nabla_l Ric_ij).
 ```
 
-Status: coordinate equation consumers exist in
-`RicciFlower/Coordinates/Christoffel.lean`; interval wrappers exist in
-`RicciFlower/RicciFlow/Evolution/Connection.lean`.  The old synthetic file has
-an invariant proof core through `connection_evolution`.
+Status: closed in native fixed-frame component form by
+`RicciFlow.evol_christoffel_inFrame`, which projects the checked
+spacetime-smooth Christoffel evolution producer to the displayed Ricci-flow RHS.
 
-Distance: `3`.
+Distance: `0`.
 
-Next target: prove the realized producer from metric variation and component
-raising/lowering.
+Next target: use this as the Christoffel-variation input for Ricci and
+curvature evolution identities.
 
 ### Lemma 6.3, `lem:evol-ricci`
 
@@ -182,13 +224,20 @@ Equivalently,
 (partial_t - Delta) Ric_ij = 2 R_ikjl Ric^{kl} - 2 Ric_i^k Ric_kj.
 ```
 
-Status: component consumer infrastructure exists in
-`RicciFlower/RicciFlow/Evolution/Ricci.lean`.
+Status: native algebraic core and display projection are proved in
+`RicciFlower/RicciFlow/Evolution/Ricci.lean` by
+`RicciFlow.evol_ricci_inFrame_of_variation_commutators`.  The local
+coordinate-frame Ricci variation producer from Christoffel evolution is checked
+by `RicciFlow.ricciVariationFormulaInCoordFrameAt_of_christoffelEvolution`.
+The remaining producer inputs are the substitution
+`nabla A = nablaGammaDtFromNabla2RicInFrame` and the contracted
+commutator/Bianchi reduction.
 
-Distance: `3`.
+Distance: `2`.
 
-Next target: close the geometric producer from Christoffel variation, curvature
-variation, commutators, and Bianchi reductions.
+Next target: prove the component substitution
+`nabla A = nablaGammaDtFromNabla2RicInFrame`, then prove the contracted
+commutator/Bianchi reduction.
 
 ### Corollary 6.5, `cor:ricci-lichnerowicz`
 
@@ -250,15 +299,19 @@ with F locally Lipschitz and nondecreasing in u, comparison with the ODE
 c' = F(c,t) preserves u >= c.
 ```
 
-Status: partially native in `RicciFlower/MaximumPrinciple/ScalarWeak.lean`;
-the pointwise calculus identities are native, and the remaining frontiers are
-the compact strict-barrier proof plus the uniform Lipschitz extraction.
+Status: closed natively as
+`Realized.scalar_wmp_super_theorem_7_1` in
+`RicciFlower/MaximumPrinciple/ScalarWeak.lean`.  The theorem uses the compact
+value-set Lipschitz formulation; the book's monotonicity hypothesis is retained
+as a book-facing input.  The pointwise calculus identities, compact
+strict-barrier argument, operator Laplacian-minimum input, Hessian-trace
+bridge, and uniform/weighted value-set Lipschitz variants are proved.
 
-Distance: `2`.
+Distance: `0`.
 
-Next target: prove `strict_barrier_nonnegative`, then replace the current
-locally-Lipschitz wrapper by a theorem with a hypothesis strong enough to
-produce one uniform Lipschitz constant over the compact value range.
+Next target: optional interface refinement from pointwise locally-Lipschitz
+time slices to a compact-value or weighted Lipschitz hypothesis.  No active
+closure work remains for the proved compact-value theorem.
 
 ### Theorem 7.2, `thm:scalar-wmp-sub`
 
@@ -511,12 +564,15 @@ If R > 0 and Ric >= delta R g with delta > 0, then
 Q >= 2 delta^2 |Ric|^2 |Ric^o|^2.
 ```
 
-Status: synthetic ordered-eigenvalue algebra proved as
-`wordly_latex_lem_Q_lower_bound`.
+Status: closed natively in eigenvalue form as
+`DimensionThree.hamiltonCubicQ3_lower_bound_ordered_nonnegative_eigenvalues`
+in `RicciFlower/DimensionThree/PinchingAlgebra.lean`.
 
-Distance: `1`.
+Distance: `0`.
 
-Next target: port to native algebra namespace.
+Next target: add the geometric bridge from a Ricci eigenframe and
+`Ric >= delta R g` to the ordered-eigenvalue hypotheses, when the downstream
+pinching package needs the geometric statement.
 
 ### Corollary 10.9, `cor:improved-ricci-pinching`
 
@@ -881,7 +937,9 @@ Status: no native target yet.
 
 Distance: `4`.
 
-Next target: volume form/evolution and maximal interval infrastructure.
+Next target: maximal interval infrastructure plus a bridge from the real-valued
+`int_M 1 dmu_g(t)` volume evolution theorem to the book's volume-extinction
+predicate.
 
 ### Lemma 14.30, unlabeled
 
@@ -896,8 +954,9 @@ Status: no native target yet.
 
 Distance: `4`.
 
-Next target: volume evolution, scalar curvature bounds, and singular/maximal
-bridge.
+Next target: scalar curvature bounds, the volume-extinction-to-blow-up
+argument, and the singular/maximal bridge.  The basic total-volume evolution
+identity is now native.
 
 ## Immediate Native Priority
 

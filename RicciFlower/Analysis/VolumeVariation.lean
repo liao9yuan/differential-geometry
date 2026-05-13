@@ -1,5 +1,5 @@
 import RicciFlower.Analysis.Measure
-import DifferentialGeometry.Integral.Measure.Family
+import RicciFlower.Analysis.Volume.Family
 
 set_option autoImplicit false
 set_option linter.unusedSectionVars false
@@ -11,7 +11,7 @@ namespace VolumeVariation
 noncomputable section
 
 open MeasureTheory
-open DifferentialGeometry.Integral.Measure
+open RicciFlower.Analysis.Volume
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -27,15 +27,15 @@ private local instance : BorelSpace M := ⟨rfl⟩
 /-- The measure-layer metric family associated to a realized metric family. -/
 abbrev metricFamilyForMeasure
     (G : Realized.RealizedMetricFamily (I := I) (M := M) Real) :
-    Real → DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M :=
-  fun t => Measure.metricForMeasure (I := I) (M := M) (G.metric t)
+    Real → Volume.SmoothRiemannianMetric I M :=
+  fun t => G.metric t
 
 /-- The measure-layer metric family associated to an interval realized metric family. -/
 abbrev metricFamilyForMeasureOn
     {D : Realized.RealTimeInterval}
     (G : Realized.RealizedMetricFamilyOn (I := I) (M := M) D) :
-    Real → DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M :=
-  fun t => Measure.metricForMeasure (I := I) (M := M) (G.metric t)
+    Real → Volume.SmoothRiemannianMetric I M :=
+  fun t => G.metric t
 
 /-- The time-dependent Riemannian measure family for a realized metric family. -/
 abbrev volumeMeasureFamily [T2Space M] [SigmaCompactSpace M]
@@ -62,7 +62,7 @@ theorem volumeMeasureFamilyOn_eq [T2Space M] [SigmaCompactSpace M]
     (G : Realized.RealizedMetricFamilyOn (I := I) (M := M) D) (t : Real) :
     volumeMeasureFamilyOn (I := I) (M := M) G t =
       riemannianVolumeMeasure (I := I) (M := M)
-        (Measure.metricForMeasure (I := I) (M := M) (G.metric t)) := rfl
+        (G.metric t) := rfl
 
 @[simp]
 theorem volumeMeasureFamilyOn_eq_volumeMeasureOn [T2Space M] [SigmaCompactSpace M]

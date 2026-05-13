@@ -444,6 +444,48 @@ def NablaRicciComponentsByConnectionInFrameOn
       nablaRic t x d a b =
         ricciCovDerivCompInFrame (I := I) S frame t x d a b
 
+/-- Fixed-frame components of the second covariant derivative of the Ricci
+tensor, computed from supplied first covariant derivative components.
+
+The slot order is `(nabla_d nabla_a Ric)_{ij}`. -/
+def ricciSecondCovDerivCompInFrame
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
+    (t : Real) (x : M) (d a i j : Idx) : Real :=
+  extDerivFun (I := I) (fun y : M => nablaRic t y a i j) x
+      (frame d x) -
+    (∑ p : Idx,
+      RicciFlower.Coordinates.christoffelSymbolInFrame
+          (S.family.connection t) frame hframe x d a p *
+        nablaRic t x p i j) -
+    (∑ p : Idx,
+      RicciFlower.Coordinates.christoffelSymbolInFrame
+          (S.family.connection t) frame hframe x d i p *
+        nablaRic t x a p j) -
+    (∑ p : Idx,
+      RicciFlower.Coordinates.christoffelSymbolInFrame
+          (S.family.connection t) frame hframe x d j p *
+        nablaRic t x a i p)
+
+/-- A supplied component family is the second covariant derivative of Ricci in
+the chosen local frame. -/
+def Nabla2RicciComponentsByConnectionInFrameOn
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (u : Set M)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
+    (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real) : Prop :=
+  forall (t : Real) (x : M), x ∈ u ->
+    forall d a i j : Idx,
+      nabla2Ric t x d a i j =
+        ricciSecondCovDerivCompInFrame
+          (I := I) S frame hframe nablaRic t x d a i j
+
 theorem metricCovDerivDerivativeIsRicciFlowInFrame_neg_two
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real) :
     MetricCovDerivDerivativeIsRicciFlowInFrame
@@ -1172,6 +1214,48 @@ theorem christoffelEvolution_of_spacetimeSmoothMetric
       (I := I) S hS gInv gInvDt frame hreg nablaRic hnabla)
     (metricCovDerivDerivativeIsRicciFlowInFrame_neg_two
       (M := M) (Idx := Idx) nablaRic)
+
+/-- LaTeX Lemma 6.2, `lem:evol-christoffel`, in fixed-frame component form:
+along Ricci flow,
+`partial_t Gamma^k_ij =
+  -g^{kl} nabla_i Ric_jl - g^{kl} nabla_j Ric_il
+    + g^{kl} nabla_l Ric_ij`. -/
+theorem evol_christoffel_inFrame
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (gInvDt : Real -> M -> Idx -> Idx -> Real)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (hu : IsOpen u)
+    (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
+    (hreg :
+      MetricFrameSpacetimeRegularityInFrameOnLocal
+        (I := I) S gInv gInvDt frame u)
+    (hnabla :
+      NablaRicciComponentsByConnectionInFrameOn
+        (I := I) S frame u nablaRic)
+    (t : Realized.RealTimeInterval.RegularTime D) (x : M) (hx : x ∈ u)
+    (i j k : Idx) :
+    HasDerivWithinAt
+      (fun s : Real =>
+        RicciFlower.Coordinates.christoffelSymbolInFrame
+          (S.family.connection s) frame hframe x i j k)
+      (RicciFlower.Coordinates.ricciFlowChristoffelEvolutionRHSInFrame
+        (nablaRicLastRaisedInFrame (M := M) gInv nablaRic)
+        (nablaRicDirectionRaisedInFrame (M := M) gInv nablaRic)
+        (t : Real) x i j k)
+      D.carrier
+      (t : Real) := by
+  have hEvol :
+      ChristoffelEvolutionEquationInFrameOn
+        (I := I) S gInv frame hframe nablaRic :=
+    christoffelEvolution_of_spacetimeSmoothMetric
+      (I := I) S hS gInv gInvDt frame hframe hu nablaRic hreg hnabla
+  exact (hEvol t x hx i j k).congr_deriv
+    (christoffelEvolutionRHSInFrame_eq_coordinates_rhs
+      (M := M) gInv nablaRic (t : Real) x i j k)
 
 /-- Lemma 6.2 in raised Christoffel-component form, from the proved
 finite-difference Koszul computation plus the remaining time-regularity

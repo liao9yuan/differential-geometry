@@ -50,7 +50,7 @@ commutator of the vector-field action:
 
 This is the local RicciFlower form of the standard chart-transfer identity
 `VectorField.fderivWithin_apply_lieBracket`. -/
-set_option maxHeartbeats 4000000 in
+set_option maxHeartbeats 250000 in
 set_option backward.isDefEq.respectTransparency false in
 theorem vderiv_mlieBracket
     {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -683,6 +683,51 @@ theorem fixedBaseFDerivTimeDerivativeWithinAt_of_contDiff
 
 end ModelMixed
 
+/-- For real-valued scalar functions, `extDerivFun` is just `mfderiv` applied to
+the supplied tangent vector. -/
+theorem extDerivFun_real_eq_mfderiv
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+    {H : Type*} [TopologicalSpace H] (I : ModelWithCorners Real E H)
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    (f : M -> Real) (x : M) (V : TangentSpace I x) :
+    extDerivFun (I := I) f x V =
+      mfderiv I 𝓘(Real, Real) f x V := by
+  simp [extDerivFun, NormedSpace.fromTangentSpace]
+
+/-- If a scalar function has a chart representative near the base point, then
+its exterior derivative at the base point is the model `fderiv` of that
+representative. -/
+theorem extDerivFun_eq_fderiv_of_writtenInExtChartAt_eventuallyEq
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
+    [I.Boundaryless]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    {f : M -> Real} {φ : E -> Real} {x : M}
+    (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
+    (hφ :
+      writtenInExtChartAt I 𝓘(Real, Real) x f
+        =ᶠ[nhds (extChartAt I x x)] φ)
+    (V : TangentSpace I x) :
+    extDerivFun (I := I) f x V =
+      fderiv Real φ (extChartAt I x x) V := by
+  let z₀ : E := extChartAt I x x
+  have hrange : Set.range I ∈ nhds z₀ := by
+    rw [ModelWithCorners.Boundaryless.range_eq_univ (I := I)]
+    exact Filter.univ_mem
+  calc
+    extDerivFun (I := I) f x V =
+        mfderiv I 𝓘(Real, Real) f x V := by
+          rw [extDerivFun_real_eq_mfderiv]
+    _ = fderivWithin Real
+          (writtenInExtChartAt I 𝓘(Real, Real) x f)
+          (Set.range I) z₀ V := by
+          simpa [z₀] using congrArg (fun L => L V) hf.mfderiv
+    _ = fderiv Real
+          (writtenInExtChartAt I 𝓘(Real, Real) x f) z₀ V := by
+          rw [fderivWithin_of_mem_nhds hrange]
+    _ = fderiv Real φ z₀ V := by
+          rw [hφ.fderiv_eq]
+
 /-- Fixed-base time derivative of a spatial exterior derivative.
 
 This is the scalar mixed-partial frontier used by the Ricci-flow Christoffel
@@ -721,5 +766,67 @@ theorem fixedBaseExtDerivTimeDerivativeOn_apply
       timeSet
       t :=
   h t x hx V
+
+/-- Chart-level constructor for fixed-base mixed derivatives on a singleton.
+
+The model-space scalar family `Φ` supplies the jointly `C²` chart expression.
+The two eventual-equality hypotheses identify the manifold scalar families
+`F` and `Ft` with `Φ` and with the time derivative of `Φ`, respectively, near
+the chart center. -/
+theorem fixedBaseExtDerivTimeDerivativeOn_singleton_of_chart_contDiff
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
+    [I.Boundaryless]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    {timeSet : Set Real} {x₀ : M}
+    {F Ft : Real -> M -> Real} {Φ : Real -> E -> Real}
+    (hΦ : ContDiff Real 2 (fun p : Real × E => Φ p.1 p.2))
+    (hFdiff :
+      ∀ s : Real, MDifferentiableAt I 𝓘(Real, Real) (F s) x₀)
+    (hFchart :
+      ∀ s : Real,
+        writtenInExtChartAt I 𝓘(Real, Real) x₀ (F s)
+          =ᶠ[nhds (extChartAt I x₀ x₀)] Φ s)
+    (hFtdiff :
+      ∀ t : Real, MDifferentiableAt I 𝓘(Real, Real) (Ft t) x₀)
+    (hFtchart :
+      ∀ t : Real,
+        writtenInExtChartAt I 𝓘(Real, Real) x₀ (Ft t)
+          =ᶠ[nhds (extChartAt I x₀ x₀)]
+            fun y : E =>
+              (fderiv Real (fun p : Real × E => Φ p.1 p.2) (t, y)) (1, 0)) :
+    FixedBaseExtDerivTimeDerivativeOn (I := I) timeSet ({x₀} : Set M) F Ft := by
+  intro t x hx V
+  rw [Set.mem_singleton_iff] at hx
+  subst x
+  let z₀ : E := extChartAt I x₀ x₀
+  have hmodel :=
+    fixedBaseFDerivTimeDerivativeWithinAt_of_contDiff
+      (E := E) Φ hΦ (timeSet := timeSet) (t := t) z₀ V
+  have hleft :
+      ∀ s : Real,
+        extDerivFun (I := I) (F s) x₀ V =
+          fderiv Real (Φ s) z₀ V := by
+    intro s
+    exact
+      extDerivFun_eq_fderiv_of_writtenInExtChartAt_eventuallyEq
+        (I := I) (x := x₀) (f := F s) (φ := Φ s)
+        (hFdiff s) (hFchart s) V
+  have hright :
+      extDerivFun (I := I) (Ft t) x₀ V =
+        fderiv Real
+          (fun y : E =>
+            (fderiv Real (fun p : Real × E => Φ p.1 p.2) (t, y)) (1, 0))
+          z₀ V := by
+    exact
+      extDerivFun_eq_fderiv_of_writtenInExtChartAt_eventuallyEq
+        (I := I) (x := x₀) (f := Ft t)
+        (φ := fun y : E =>
+          (fderiv Real (fun p : Real × E => Φ p.1 p.2) (t, y)) (1, 0))
+        (hFtdiff t) (hFtchart t) V
+  exact
+    (hmodel.congr
+      (fun s _hs => hleft s)
+      (hleft t)).congr_deriv hright.symm
 
 end RicciFlower

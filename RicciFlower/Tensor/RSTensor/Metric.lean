@@ -50,7 +50,6 @@ private noncomputable def to02Tensor_uCLM :
       ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) ℝ :=
   (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin 2 => E) ℝ).symm.toContinuousLinearMap
 
-set_option maxHeartbeats 800000 in
 /-- In local coordinates at `x₀`, the `(0,2)`-tensor obtained from a Riemannian metric is
 `uCLM` applied to the local coordinates of the curried inner product section. -/
 private lemma to02Tensor_trivialization_eq {x₀ x : M}

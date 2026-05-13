@@ -1,5 +1,5 @@
 import RicciFlower.Realized.MetricFamily
-import DifferentialGeometry.Integral.Measure.Properties
+import RicciFlower.Analysis.Volume.Properties
 
 set_option autoImplicit false
 set_option linter.unusedSectionVars false
@@ -11,7 +11,7 @@ namespace Measure
 noncomputable section
 
 open MeasureTheory
-open DifferentialGeometry.Integral.Measure
+open RicciFlower.Analysis.Volume
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -25,15 +25,11 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Reinterpret a RicciFlower `⊤`-smooth metric as the `∞`-smooth metric expected by
-the merged measure layer. The underlying inner products are unchanged. -/
-def metricForMeasure (g : SmoothRiemannianMetric I M) :
-    DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M where
-  inner := g.inner
-  symm := g.symm
-  pos := g.pos
-  isVonNBounded := g.isVonNBounded
-  contMDiff := g.contMDiff.of_le le_top
+/-- Compatibility spelling for the metric type used by the local volume layer.
+This is now the identity on RicciFlower analytic metrics, not a forgetful map. -/
+abbrev metricForMeasure (g : SmoothRiemannianMetric I M) :
+    Volume.SmoothRiemannianMetric I M :=
+  g
 
 @[simp]
 theorem metricForMeasure_inner (g : SmoothRiemannianMetric I M) (x : M) :
@@ -43,23 +39,21 @@ theorem metricForMeasure_inner (g : SmoothRiemannianMetric I M) (x : M) :
 abbrev volumeMeasureAt [T2Space M] [SigmaCompactSpace M]
     (G : Realized.RealizedMetricFamily (I := I) (M := M) Time) (t : Time) :
     MeasureTheory.Measure M :=
-  riemannianVolumeMeasure (I := I) (M := M) (metricForMeasure (I := I) (M := M) (G.metric t))
+  riemannianVolumeMeasure (I := I) (M := M) (G.metric t)
 
 @[simp]
 theorem volumeMeasureAt_eq [T2Space M] [SigmaCompactSpace M]
     (G : Realized.RealizedMetricFamily (I := I) (M := M) Time) (t : Time) :
     volumeMeasureAt (I := I) (M := M) G t =
-      riemannianVolumeMeasure (I := I) (M := M)
-        (metricForMeasure (I := I) (M := M) (G.metric t)) := rfl
+      riemannianVolumeMeasure (I := I) (M := M) (G.metric t) := rfl
 
 /-- The Riemannian volume measure attached to an interval-indexed realized family. -/
 abbrev volumeMeasureOn [T2Space M] [SigmaCompactSpace M]
     {D : Realized.RealTimeInterval}
     (G : Realized.RealizedMetricFamilyOn (I := I) (M := M) D)
     (t : Realized.RealTimeInterval.FlowTime D) :
-    MeasureTheory.Measure M :=
-  riemannianVolumeMeasure (I := I) (M := M)
-    (metricForMeasure (I := I) (M := M) (G.metricAt t))
+  MeasureTheory.Measure M :=
+  riemannianVolumeMeasure (I := I) (M := M) (G.metricAt t)
 
 @[simp]
 theorem volumeMeasureOn_eq [T2Space M] [SigmaCompactSpace M]
@@ -67,8 +61,7 @@ theorem volumeMeasureOn_eq [T2Space M] [SigmaCompactSpace M]
     (G : Realized.RealizedMetricFamilyOn (I := I) (M := M) D)
     (t : Realized.RealTimeInterval.FlowTime D) :
     volumeMeasureOn (I := I) (M := M) G t =
-      riemannianVolumeMeasure (I := I) (M := M)
-        (metricForMeasure (I := I) (M := M) (G.metricAt t)) := rfl
+      riemannianVolumeMeasure (I := I) (M := M) (G.metricAt t) := rfl
 
 @[simp]
 theorem volumeMeasureOn_eq_metric [T2Space M] [SigmaCompactSpace M]
@@ -76,27 +69,26 @@ theorem volumeMeasureOn_eq_metric [T2Space M] [SigmaCompactSpace M]
     (G : Realized.RealizedMetricFamilyOn (I := I) (M := M) D)
     (t : Realized.RealTimeInterval.FlowTime D) :
     volumeMeasureOn (I := I) (M := M) G t =
-      riemannianVolumeMeasure (I := I) (M := M)
-        (metricForMeasure (I := I) (M := M) (G.metric (t : Real))) := rfl
+      riemannianVolumeMeasure (I := I) (M := M) (G.metric (t : Real)) := rfl
 
 theorem volumeMeasureAt_isLocallyFiniteMeasure [T2Space M] [SigmaCompactSpace M]
     (G : Realized.RealizedMetricFamily (I := I) (M := M) Time) (t : Time) :
     IsLocallyFiniteMeasure (volumeMeasureAt (I := I) (M := M) G t) := by
   exact riemannianVolumeMeasure_isLocallyFiniteMeasure (I := I) (M := M)
-    (metricForMeasure (I := I) (M := M) (G.metric t))
+    (G.metric t)
 
 theorem volumeMeasureAt_sigmaFinite [T2Space M] [SigmaCompactSpace M]
     (G : Realized.RealizedMetricFamily (I := I) (M := M) Time) (t : Time) :
     SigmaFinite (volumeMeasureAt (I := I) (M := M) G t) := by
   exact riemannianVolumeMeasure_sigmaFinite (I := I) (M := M)
-    (metricForMeasure (I := I) (M := M) (G.metric t))
+    (G.metric t)
 
 theorem volumeMeasureAt_isFiniteMeasure_of_compactSpace
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (G : Realized.RealizedMetricFamily (I := I) (M := M) Time) (t : Time) :
     IsFiniteMeasure (volumeMeasureAt (I := I) (M := M) G t) := by
   exact riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
-    (I := I) (M := M) (metricForMeasure (I := I) (M := M) (G.metric t))
+    (I := I) (M := M) (G.metric t)
 
 theorem volumeMeasureOn_isLocallyFiniteMeasure [T2Space M] [SigmaCompactSpace M]
     {D : Realized.RealTimeInterval}
@@ -104,7 +96,7 @@ theorem volumeMeasureOn_isLocallyFiniteMeasure [T2Space M] [SigmaCompactSpace M]
     (t : Realized.RealTimeInterval.FlowTime D) :
     IsLocallyFiniteMeasure (volumeMeasureOn (I := I) (M := M) G t) := by
   exact riemannianVolumeMeasure_isLocallyFiniteMeasure (I := I) (M := M)
-    (metricForMeasure (I := I) (M := M) (G.metricAt t))
+    (G.metricAt t)
 
 theorem volumeMeasureOn_sigmaFinite [T2Space M] [SigmaCompactSpace M]
     {D : Realized.RealTimeInterval}
@@ -112,7 +104,7 @@ theorem volumeMeasureOn_sigmaFinite [T2Space M] [SigmaCompactSpace M]
     (t : Realized.RealTimeInterval.FlowTime D) :
     SigmaFinite (volumeMeasureOn (I := I) (M := M) G t) := by
   exact riemannianVolumeMeasure_sigmaFinite (I := I) (M := M)
-    (metricForMeasure (I := I) (M := M) (G.metricAt t))
+    (G.metricAt t)
 
 theorem volumeMeasureOn_isFiniteMeasure_of_compactSpace
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -121,7 +113,7 @@ theorem volumeMeasureOn_isFiniteMeasure_of_compactSpace
     (t : Realized.RealTimeInterval.FlowTime D) :
     IsFiniteMeasure (volumeMeasureOn (I := I) (M := M) G t) := by
   exact riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
-    (I := I) (M := M) (metricForMeasure (I := I) (M := M) (G.metricAt t))
+    (I := I) (M := M) (G.metricAt t)
 
 end
 

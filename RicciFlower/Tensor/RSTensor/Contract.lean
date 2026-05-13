@@ -911,7 +911,7 @@ noncomputable def contract_covariantField_fun (r s : ℕ)
     (x : M) → TensorRSSpace r s I x :=
   fun x => contract_covariant r s x (X x) (α x)
 
-set_option maxHeartbeats 800000 in
+set_option maxHeartbeats 400000 in
 -- The `change` reductions through the hom-bundle trivialization and id-equiv currying
 -- are heavy; we raise the heartbeat limit accordingly.
 /-- Contraction of a smooth (r, s+1)-tensor field with a smooth vector field, yielding

@@ -58,6 +58,17 @@ def connectionRiemannCurvatureField
       (cov (fun y => (cov Z y) (X y)) x) (Y x) -
         (cov Z x) (VectorField.mlieBracket I X Y x)
 
+/-- The connection curvature operator is skew in its two direction slots. -/
+theorem connectionRiemannCurvatureField_swap
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (X Y Z : TangentField (I := I) (M := M)) (x : M) :
+    connectionRiemannCurvatureField (I := I) cov Y X Z x =
+      -connectionRiemannCurvatureField (I := I) cov X Y Z x := by
+  unfold connectionRiemannCurvatureField
+  rw [VectorField.mlieBracket_swap_apply (I := I) (V := Y) (W := X) (x := x)]
+  simp [map_neg, sub_eq_add_neg]
+  abel
+
 section MetricTrace
 
 variable {Idx : Type*} [Fintype Idx]

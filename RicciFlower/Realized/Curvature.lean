@@ -113,6 +113,22 @@ theorem scalarFromRicciTraceInFrame_apply
       ∑ i : Idx, ∑ j : Idx, gInv x i j * Ric x (frame i x) (frame j x) :=
   RicciFlower.Curvature.scalarFromRicciTraceInFrame_apply (I := I) Ric gInv frame x
 
+/-- Canonical scalar curvature obtained by tracing Ricci in a supplied frame. -/
+abbrev scalarCurvatureFromRicciTraceInFrame
+    (Ric : TwoTensorField (I := I) (M := M))
+    (gInv : InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x) : M -> Real :=
+  scalarFromRicciTraceInFrame (I := I) Ric gInv frame
+
+@[simp]
+theorem scalarCurvatureFromRicciTraceInFrame_apply
+    (Ric : TwoTensorField (I := I) (M := M))
+    (gInv : InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x) (x : M) :
+    scalarCurvatureFromRicciTraceInFrame (I := I) Ric gInv frame x =
+      ∑ i : Idx, ∑ j : Idx, gInv x i j * Ric x (frame i x) (frame j x) := by
+  exact scalarFromRicciTraceInFrame_apply (I := I) Ric gInv frame x
+
 /-- A scalar curvature function realizes the frame trace of Ricci. -/
 def ScalarRealizesRicciTraceInFrame
     (scalar : M -> Real)
@@ -131,6 +147,17 @@ theorem scalar_eq_trace
     scalar x =
       ∑ i : Idx, ∑ j : Idx, gInv x i j * Ric x (frame i x) (frame j x) := by
   simpa [scalarFromRicciTraceInFrame] using hScalar x
+
+/-- The canonical scalar curvature trace realizes the scalar trace predicate. -/
+theorem scalarCurvatureFromRicciTraceInFrame_realizes
+    (Ric : TwoTensorField (I := I) (M := M))
+    (gInv : InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x) :
+    ScalarRealizesRicciTraceInFrame (I := I)
+      (scalarCurvatureFromRicciTraceInFrame (I := I) Ric gInv frame)
+      Ric gInv frame := by
+  intro x
+  rfl
 
 end MetricTrace
 

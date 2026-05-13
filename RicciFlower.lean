@@ -31,6 +31,8 @@ import RicciFlower.Bochner
 import RicciFlower.Realized.RicciFlow
 import RicciFlower.RicciFlow.Basic
 import RicciFlower.RicciFlow.Evolution.Ricci
+import RicciFlower.RicciFlow.Evolution.Scalar
+import RicciFlower.RicciFlow.Evolution.Volume
 import RicciFlower.RicciFlow.Evolution.RiemannNorm
 import RicciFlower.RicciFlow.Evolution.BlackBox
 import RicciFlower.Realized.Curvature

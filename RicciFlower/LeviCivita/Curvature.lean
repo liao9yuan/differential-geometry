@@ -1,4 +1,5 @@
 import RicciFlower.Realized.CurvatureComponents
+import RicciFlower.Bianchi
 import RicciFlower.LeviCivita.Torsion
 import RicciFlower.Coordinates.NablaComponents.Tensor0S
 import RicciFlower.Tensor.RSTensor.NablaOnTensors.Connection
@@ -577,6 +578,108 @@ private theorem connectionRiemannCurvatureField_metric_skew_at_of_metricCompatib
     RicciFlower.Curvature.connectionRiemannCurvatureField, YZc, YWc, XZc, XWc, Bc,
     hXc_self, hYc_self] using hgoal
 
+/-- The lowered Levi-Civita curvature tensor is skew in the two curvature-input
+slots. -/
+theorem rm04InputSkewAt_of_leviCivita_realizes
+    (g : SmoothRiemannianMetric I M)
+    (Rm04 : Tensor04Section (I := I) (M := M))
+    (hRm04 : Rm04RealizesConnection (I := I) g
+      (leviCivitaConnectionOfMetric (I := I) g) Rm04)
+    {x : M} :
+    forall W X Y Z : TangentSpace I x,
+      Rm04 x (vec4 W Y X Z) = -Rm04 x (vec4 W X Y Z) := by
+  intro W X Y Z
+  let Wsec : (p : M) -> TangentSpace I p := tangentConstAt (I := I) x W
+  let Xsec : (p : M) -> TangentSpace I p := tangentConstAt (I := I) x X
+  let Ysec : (p : M) -> TangentSpace I p := tangentConstAt (I := I) x Y
+  let Zsec : (p : M) -> TangentSpace I p := tangentConstAt (I := I) x Z
+  have hleft := hRm04 Wsec Ysec Xsec Zsec x
+  have hright := hRm04 Wsec Xsec Ysec Zsec x
+  have hswap :=
+    RicciFlower.Curvature.connectionRiemannCurvatureField_swap
+      (I := I) (leviCivitaConnectionOfMetric (I := I) g)
+      Xsec Ysec Zsec x
+  have hinner :=
+    congrArg (fun V : TangentSpace I x => g.inner x W V) hswap
+  dsimp [Wsec, Xsec, Ysec, Zsec] at hleft hright hinner
+  rw [tangentConstAt_self] at hleft
+  rw [tangentConstAt_self] at hleft
+  rw [tangentConstAt_self] at hleft
+  rw [tangentConstAt_self] at hleft
+  rw [tangentConstAt_self] at hright
+  rw [tangentConstAt_self] at hright
+  rw [tangentConstAt_self] at hright
+  rw [tangentConstAt_self] at hright
+  rw [map_neg] at hinner
+  exact hleft.trans (hinner.trans (congrArg Neg.neg hright.symm))
+
+/-- First Bianchi identity for a lowered Levi-Civita curvature realization. -/
+theorem firstBianchiAt_of_leviCivita_realizes
+    (g : SmoothRiemannianMetric I M)
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
+      (leviCivitaConnectionOfMetric (I := I) g) (1 : WithTop ℕ∞))
+    (Rm04 : Tensor04Section (I := I) (M := M))
+    (hRm04 : Rm04RealizesConnection (I := I) g
+      (leviCivitaConnectionOfMetric (I := I) g) Rm04)
+    {x : M} :
+    FirstBianchiAt (I := I) (Rm04 x) := by
+  intro W X Y Z
+  let Wsec : (p : M) -> TangentSpace I p := tangentConstAt (I := I) x W
+  let Xsec : (p : M) -> TangentSpace I p := tangentConstAt (I := I) x X
+  let Ysec : (p : M) -> TangentSpace I p := tangentConstAt (I := I) x Y
+  let Zsec : (p : M) -> TangentSpace I p := tangentConstAt (I := I) x Z
+  have hXYZ := hRm04 Wsec Xsec Ysec Zsec x
+  have hYZX := hRm04 Wsec Ysec Zsec Xsec x
+  have hZXY := hRm04 Wsec Zsec Xsec Ysec x
+  have hBianchi :=
+    Realized.connectionRiemannCurvatureField_tangentConst_first_bianchi_of_torsionFree
+      (I := I) (leviCivitaConnectionOfMetric (I := I) g) hcov
+      (leviCivitaConnectionOfMetric_isTorsionFree (I := I) g) x X Y Z
+  have hinner :=
+    congrArg (fun V : TangentSpace I x => g.inner x W V) hBianchi
+  dsimp [Wsec, Xsec, Ysec, Zsec] at hXYZ hYZX hZXY hinner
+  rw [tangentConstAt_self] at hXYZ
+  rw [tangentConstAt_self] at hXYZ
+  rw [tangentConstAt_self] at hXYZ
+  rw [tangentConstAt_self] at hXYZ
+  rw [tangentConstAt_self] at hYZX
+  rw [tangentConstAt_self] at hYZX
+  rw [tangentConstAt_self] at hYZX
+  rw [tangentConstAt_self] at hYZX
+  rw [tangentConstAt_self] at hZXY
+  rw [tangentConstAt_self] at hZXY
+  rw [tangentConstAt_self] at hZXY
+  rw [tangentConstAt_self] at hZXY
+  rw [hXYZ, hYZX, hZXY]
+  simpa [map_add, map_zero] using hinner
+
+private theorem rm04_pair_symm_of_input_output_first
+    {x : M}
+    {Rm04 : Tensor04At (I := I) (M := M) x}
+    (hinput : forall W X Y Z : TangentSpace I x,
+      Rm04 (vec4 W Y X Z) = -Rm04 (vec4 W X Y Z))
+    (houtput : Rm04OutputSkewAt (I := I) Rm04)
+    (hfirst : FirstBianchiAt (I := I) Rm04) :
+    forall W X Y Z : TangentSpace I x,
+      Rm04 (vec4 W X Y Z) = Rm04 (vec4 Y Z W X) := by
+  intro W X Y Z
+  have hB0 := hfirst Z W X Y
+  have hB1 := hfirst W X Y Z
+  have hB2 := hfirst W X Z Y
+  have hB3 := hfirst Y W X Z
+  have hB4 := hfirst X W Y Z
+  have hO1 := houtput W X Y Z
+  have hO2 := houtput Y W X Z
+  have hO3 := houtput X W Y Z
+  have hO4 := houtput X W Z Y
+  have hO5 := houtput W X Z Y
+  have hO6 := houtput W Y Z X
+  have hI1 := hinput Z W Y X
+  have hI2 := hinput Y W Z X
+  have hI3 := hinput X W Z Y
+  have hI4 := hinput W X Z Y
+  linarith
+
 /-- The lowered Levi-Civita curvature tensor is skew-adjoint in the output
 slot. -/
 theorem rm04OutputSkewAt_of_leviCivita_realizes
@@ -609,6 +712,22 @@ theorem rm04OutputSkewAt_of_leviCivita_realizes
   rw [tangentConstAt_self] at hright
   rw [tangentConstAt_self] at hright
   exact hleft.trans (hskew.trans (congrArg (fun r : Real => -r) hright.symm))
+
+/-- The lowered Levi-Civita curvature tensor has block/pair symmetry. -/
+theorem rm04PairSymmAt_of_leviCivita_realizes
+    (g : SmoothRiemannianMetric I M)
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
+      (leviCivitaConnectionOfMetric (I := I) g) (1 : WithTop ℕ∞))
+    (Rm04 : Tensor04Section (I := I) (M := M))
+    (hRm04 : Rm04RealizesConnection (I := I) g
+      (leviCivitaConnectionOfMetric (I := I) g) Rm04)
+    {x : M} :
+    forall W X Y Z : TangentSpace I x,
+      Rm04 x (vec4 W X Y Z) = Rm04 x (vec4 Y Z W X) :=
+  rm04_pair_symm_of_input_output_first (I := I)
+    (rm04InputSkewAt_of_leviCivita_realizes (I := I) g Rm04 hRm04)
+    (rm04OutputSkewAt_of_leviCivita_realizes (I := I) g hcov Rm04 hRm04)
+    (firstBianchiAt_of_leviCivita_realizes (I := I) g hcov Rm04 hRm04)
 
 /-- The `(1,3)` Levi-Civita curvature tensor is metric-skew in the output
 slot. -/

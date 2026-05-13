@@ -264,23 +264,23 @@ theorem modelDeriv_eq_coordDeriv0SAt {s : ℕ}
   rfl
 
 /-- Coordinate-frame component formula for `nabla0SFun` in arbitrary covariant
-valence.
+valence, with the derivative term kept in the chart-model form used by
+`nabla0SFun`.
 
-This is the all-slot version of the one-form and `(0,2)` Christoffel component
-formulas.  It is the preferred reusable theorem when a downstream proof only
-needs coordinate components of the canonical raw tensor derivative. -/
-theorem nabla0S_coordFrame_slots {s : ℕ}
+This is the rank-generic source for the one-form and `(0,2)` model-coordinate
+component formulas.  Rank-specific files should specialize this theorem rather
+than re-proving the model algebra. -/
+theorem nabla0S_model_coordFrame_slots {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) s)
-    (x₀ : M) (hderiv : ModelDerivEqCoordDeriv0SAt (I := I) X x₀ (fun x => α x))
-    (slots : Fin s -> CoordinateIdx (𝕜 := 𝕜) E) :
+    (x₀ : M) (slots : Fin s -> CoordinateIdx (𝕜 := 𝕜) E) :
     coordComponent0SAt (I := I)
         (nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
           s cov X α x₀)
         slots =
-      coordDeriv0SAt (I := I) (fun x => X x) x₀ (fun x => α x) slots -
+      modelDeriv0SAt (I := I) X x₀ (fun x => α x) slots -
         ∑ a : Fin s, ∑ k : CoordinateIdx (𝕜 := 𝕜) E,
           christoffelAlongInFrame cov (coordinateFrameAt (I := I) x₀)
             (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
@@ -317,13 +317,12 @@ theorem nabla0S_coordFrame_slots {s : ℕ}
               s x₀ x₀ (α x₀))
               (Function.update (fun b : Fin s => (Module.finBasis 𝕜 E) (slots b))
                 a ((Module.finBasis 𝕜 E) k))) =
-      coordDeriv0SAt (I := I) (fun x => X x) x₀ (fun x => α x) slots -
+      modelDeriv0SAt (I := I) X x₀ (fun x => α x) slots -
         ∑ a : Fin s, ∑ k : CoordinateIdx (𝕜 := 𝕜) E,
           christoffelAlongInFrame cov (coordinateFrameAt (I := I) x₀)
             (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
             x₀ (X x₀) (slots a) k *
             coordComponent0SAt (I := I) (α x₀) (Function.update slots a k)
-  rw [hderiv slots]
   congr 1
   refine Finset.sum_congr rfl fun a _ => ?_
   refine Finset.sum_congr rfl fun k _ => ?_
@@ -336,6 +335,31 @@ theorem nabla0S_coordFrame_slots {s : ℕ}
   · subst hb
     simp
   · simp [Function.update, hb]
+
+/-- Coordinate-frame component formula for `nabla0SFun` in arbitrary covariant
+valence.
+
+This is the all-slot version of the one-form and `(0,2)` Christoffel component
+formulas.  It is the preferred reusable theorem when a downstream proof only
+needs coordinate components of the canonical raw tensor derivative. -/
+theorem nabla0S_coordFrame_slots {s : ℕ}
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) s)
+    (x₀ : M) (hderiv : ModelDerivEqCoordDeriv0SAt (I := I) X x₀ (fun x => α x))
+    (slots : Fin s -> CoordinateIdx (𝕜 := 𝕜) E) :
+    coordComponent0SAt (I := I)
+        (nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+          s cov X α x₀)
+        slots =
+      coordDeriv0SAt (I := I) (fun x => X x) x₀ (fun x => α x) slots -
+        ∑ a : Fin s, ∑ k : CoordinateIdx (𝕜 := 𝕜) E,
+          christoffelAlongInFrame cov (coordinateFrameAt (I := I) x₀)
+            (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
+            x₀ (X x₀) (slots a) k *
+            coordComponent0SAt (I := I) (α x₀) (Function.update slots a k) := by
+  rw [nabla0S_model_coordFrame_slots (I := I) cov X α x₀ slots, hderiv slots]
 
 /-- Coordinate-frame component formula for `nabla0SFun` in arbitrary covariant
 valence, with the chart/model derivative bridge discharged from smoothness of
