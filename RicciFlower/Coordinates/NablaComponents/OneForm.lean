@@ -912,7 +912,7 @@ private theorem coordinateFrame_coeff_contMDiffAt_of_contMDiffAt
     coordinateFrameAt] using hcoeff
 
 set_option backward.isDefEq.respectTransparency false in
-private theorem oneForm_eval_coordinateFrame_contMDiffAt
+theorem oneForm_eval_coordinateFrame_contMDiffAt
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 1)
     (x₀ : M) (j : CoordinateIdx (𝕜 := 𝕜) E) :

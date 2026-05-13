@@ -930,11 +930,11 @@ theorem christoffelVariationCovDerivCoordAt_eq_nablaGammaDtFromNabla2RicInFrame
         (t : Real) x₀ d k i j := by
   classical
   /-
-  The direct unfolding reduces to the derivative of
-  `fun y => ∑ l, gInv t y k l * B_l y`. Closing this requires the public
-  spatial inverse-metric compatibility component theorem
-  `∇_d gInv^{kl} = 0`, or equivalently the finite-dimensional smooth inverse
-  matrix bridge for the supplied `gInv` components.
+  `Metric.lean` now proves the coordinate identity `nabla_d gInv^{kl} = 0`.
+  The remaining work here is to thread the regularity needed by the product
+  rule: fixed-time differentiability of the supplied `gInv` components and
+  differentiability of the supplied first Ricci-derivative components
+  `nablaRic t · a i j`.
   -/
   sorry
 
