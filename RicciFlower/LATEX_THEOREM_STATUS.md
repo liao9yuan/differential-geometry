@@ -79,6 +79,27 @@ explicit chart-Gram derivative hypothesis from a stronger spacetime `C^1`,
 smooth, or analytic metric-family predicate, plus separate maximal-interval
 and extinction infrastructure.
 
+## 2026-05-13 One-Form Ricci Identity Update
+
+The Levi-Civita one-form Ricci identity endpoint is now closed natively.  The
+checked path is:
+
+- `Connection.oneFormRicciIdentity_algebra`, the RicciFlower-local algebraic
+  bracket-form identity;
+- `LeviCivita.oneFormThirdCovDerivCommAt_of_leviCivita`, the intrinsic
+  Levi-Civita endpoint used by scalar Bochner;
+- `Tensor.oneForm_ricci_trace_comm_of_third_comm`, the trace bridge consumed by
+  the rough-Laplacian/Bochner interface.
+
+The proof does not import external `DifferentialGeometry` or synthetic modules.
+It uses smooth vector-field extensions, the realized moving-slot formula for
+one-forms, Levi-Civita torsion-freeness, curvature realization, and one-form
+linearity through `cotangentToDual`.
+
+This closes the one-form Ricci identity producer for the Levi-Civita scalar
+Bochner path.  The separate Ricci-tensor contracted commutator/Bianchi package
+needed for Chapter 6.1 Ricci evolution remains a different frontier.
+
 ## Main Body
 
 ### Theorem 2.1, `thm:main-hamilton-3d`
@@ -427,12 +448,16 @@ If Ric has eigenvalues lambda_1, lambda_2, lambda_3, then
 K_ij = (lambda_i + lambda_j - lambda_k)/2.
 ```
 
-Status: old synthetic P2 route; native curvature component trace bridges exist.
+Status: native dimension-three component algebra is closed in
+`DimensionThree.CurvatureAlgebra`, and the realized Levi-Civita component
+wrapper is closed in `DimensionThree.RiemannFromRicci` as
+`rm04Comp_displayedRiemannFromRicci3D_at_of_leviCivita_realizes`.
 
-Distance: `3`.
+Distance: `0` for the Riemann-from-Ricci component identity.  The sectional
+curvature eigenvalue presentation is still a separate wrapper/API task.
 
-Next target: prove native 3D algebra over bundled `Tensor04Section` and
-`Tensor02Section`.
+Next target: add the sectional-curvature/eigenvalue wrapper if needed by the
+pinching chapter.
 
 ### Lemma 9.1, `lem:preserve-ricci-nonnegative`
 
@@ -774,11 +799,16 @@ R_ijkl = R_il g_jk - R_jl g_ik - R_ik g_jl + R_jk g_il
   - (1/2) R (g_il g_jk - g_jl g_ik).
 ```
 
-Status: same target as Lemma 8.1.
+Status: closed in native component form.  The algebraic heart is
+`DimensionThree.displayedRiemannFromRicci3D_of_algebraic_curvature_symmetries`;
+the realized Levi-Civita wrapper is
+`DimensionThree.rm04Comp_displayedRiemannFromRicci3D_at_of_leviCivita_realizes`.
 
-Distance: `3`.
+Distance: `0` for the pointwise Levi-Civita component statement.
 
-Next target: native 3D tensor algebra for `Tensor04Section`.
+Next target: only presentation wrappers remain, such as replacing the canonical
+trace terms by separately supplied Ricci/scalar realization data in a chosen
+frame if a downstream theorem needs that exact interface.
 
 ### Lemma 14.10, `lem:curvature_on_1forms`
 
@@ -789,14 +819,15 @@ Statement:
   - (nabla_[X,Y] omega)(Z) = - omega(R(X,Y)Z).
 ```
 
-Status: represented by the current Bochner frontier
-`oneForm_ricci_identity_components`, but not proved as a standalone native
-theorem.
+Status: closed for the Levi-Civita/RicciFlower scalar-Bochner path by
+`LeviCivita.oneFormThirdCovDerivCommAt_of_leviCivita`, backed by the local
+algebraic identity `Connection.oneFormRicciIdentity_algebra`.
 
-Distance: `3`.
+Distance: `0` for the Levi-Civita endpoint.
 
-Next target: prove from `nabla0SFun`, connection curvature realization, and
-tensor extensionality.
+Next target: if needed, generalize the closed Levi-Civita moving-slot proof to
+a public smooth-connection theorem with the same explicit
+`ContMDiffCovariantDerivativeLocally` hypothesis.
 
 ### Theorem 14.12, `thm:ricci_identity`
 
@@ -809,12 +840,30 @@ nabla_i nabla_j alpha_{k_1 ... k_s}
     alpha_{k_1 ... k_{q-1} m k_{q+1} ... k_s}.
 ```
 
-Status: interface only; `NablaOnTensors.lean` has the section-level derivative
-backend.
+Status: invariant interface now stated in `RicciFlower/Tensor/RicciIdentity.lean`.
+The file exposes the slot-freezing one-form `oneFormAtSlot0S`, the slotwise
+curvature action `curvatureAction0SAt`, the pointwise theorem shape
+`Tensor0SRicciIdentityAt`, and the torsion-corrected frontier
+`tensor0S_ricciIdentity_with_torsion`.  The `s = 1` specialization is checked by
+`tensor0S_ricciIdentity_one`, which is equivalent to the closed one-form
+identity `OneFormThirdCovDerivCommAt`.
 
-Distance: `3`.
+The Levi-Civita-facing wrapper
+`LeviCivita.tensor0S_ricciIdentity_of_leviCivita` is also present; it removes the
+torsion term using `leviCivitaConnectionOfMetric_isTorsionFree`.
 
-Next target: prove tensor commutator for `(0,s)` tensors, starting with `s=1`.
+The coordinate component specialization following the displayed proof is now
+stated and checked as
+`Realized.tensor0S_ricciIdentity_coordFrame_of_christoffelCurv` in
+`RicciFlower/Curvature/Components.lean`.  It evaluates the invariant identity
+on the coordinate frame and expands each curvature action by the existing
+Christoffel curvature coefficient theorem.
+
+Distance: `1`.
+
+Next target: prove `tensor0S_ricciIdentity_with_torsion` by the invariant
+moving-slot expansion.  Do not switch to a coordinate-Christoffel proof for this
+producer.
 
 ### Lemma 14.18, `ex:laplace_u_squared`
 
@@ -842,14 +891,19 @@ Delta(du) = d(Delta u) + Ric(du),
 where Ric acts on 1-forms by (Ric(alpha))(W) = alpha(Ric(W)).
 ```
 
-Status: native consumer interface exists:
-`OneFormCommutatorEvalAt`, `oneForm_commutator_pair_of_eval`,
-`roughLap_du_eq_d_lap_add_ric`.  The actual geometric producer
-`oneForm_ricci_identity_components` still has the controlled frontier proof.
+Status: the one-form Ricci identity producer behind this calculation is closed
+for the Levi-Civita path by
+`LeviCivita.oneFormThirdCovDerivCommAt_of_leviCivita`.  The generic consumer
+interface still exists as `OneFormCommutatorEvalAt`,
+`oneForm_commutator_pair_of_eval`, and `roughLap_du_eq_d_lap_add_ric`; the
+generic theorem `oneForm_ricci_identity_components` remains a broader
+connection-level wrapper.
 
-Distance: `3`.
+Distance: `1`.
 
-Next target: close `oneForm_ricci_identity_components`.
+Next target: connect the closed Levi-Civita endpoint directly to the exact
+rough-Laplacian commutator wrapper needed by the final public Bochner theorem,
+or generalize the proof to close `oneForm_ricci_identity_components`.
 
 ### Proposition 14.22, `prop:FundBochnerFormNormSq`
 
@@ -868,12 +922,15 @@ Equivalently,
 Status: native consumer theorem exists:
 `fundamental_bochner`, with stronger wrappers
 `fundamental_bochner_of_terms` and `fundamental_bochner_of_components` in
-`RicciFlower/Realized/ScalarBochner.lean`.
+`RicciFlower/ScalarBochner.lean`.  The Levi-Civita scalar-Bochner wrappers now
+consume the closed endpoint
+`LeviCivita.oneFormThirdCovDerivCommAt_of_leviCivita`.
 
-Distance: `3`.
+Distance: `1`.
 
-Next target: the final theorem is assembled; the missing geometric proof is
-exactly Lemma 14.19's producer `oneForm_ricci_identity_components`.
+Next target: discharge the remaining top-level scalar Bochner wrapper frontier
+in `LeviCivita/ScalarBochner.lean`, then mark the Levi-Civita Bochner theorem
+as closed.
 
 ### Lemma 14.23, `lem:christoffel_evolution`
 
@@ -960,15 +1017,17 @@ identity is now native.
 
 ## Immediate Native Priority
 
-The nearest high-value theorem is Proposition 14.22.  In Lean it is already a
-clean consumer theorem, but it is not yet a fully geometric proof because it
-depends on Lemma 14.19 through the frontier
+The nearest high-value theorem remains Proposition 14.22.  The one-form Ricci
+identity producer for the Levi-Civita route is now closed, so the remaining
+work is no longer Lemma 14.10 itself but the final scalar-Bochner wrapper and
+any desired genericization from the Levi-Civita endpoint to
 `oneForm_ricci_identity_components`.
 
 Concrete next order:
 
-1. Prove Lemma 14.10 for one-forms in the realized tensor setting.
-2. Use it to prove Lemma 14.19, i.e. close `oneForm_ricci_identity_components`.
+1. Finish the remaining `LeviCivita/ScalarBochner.lean` wrapper frontier.
+2. Decide whether to generalize the closed Levi-Civita one-form Ricci identity
+   proof into `oneForm_ricci_identity_components`.
 3. Promote rough Laplacian from basis-level trace predicates to an intrinsic
    tensor operation.
 4. Then mark Proposition 14.22 as distance `0`.

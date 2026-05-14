@@ -220,6 +220,177 @@ noncomputable def connectionEndomorphismInChart
     else 0) = 0
   rw [if_neg hy]
 
+/-- Local connection endomorphism in a chart, linear in the derivative vector.
+
+At a chart point `y`, with `p = (extChartAt I x₀).symm y`, this is the map
+`X ↦ (v ↦ trivialize_x₀ ((∇_{symmL X} tangentConstInChart(x₀,v)) p))`.
+It is set to zero off the chart target. -/
+noncomputable def connectionEndomorphismInChartL
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (x₀ : M) (y : E) : E →L[𝕜] E →L[𝕜] E := by
+  classical
+  let e := trivializationAt E (TangentSpace I) x₀
+  let p := (extChartAt I x₀).symm y
+  refine LinearMap.toContinuousLinearMap ?_
+  refine
+    { toFun := fun X =>
+        LinearMap.toContinuousLinearMap
+          { toFun := fun v =>
+              if y ∈ (extChartAt I x₀).target then
+                e.continuousLinearMapAt 𝕜 p
+                  ((cov (tangentConstInChart x₀ v) p) (e.symmL 𝕜 p X))
+              else
+                0
+            map_add' := ?_
+            map_smul' := ?_ }
+      map_add' := ?_
+      map_smul' := ?_ }
+  · intro v w
+    by_cases hy : y ∈ (extChartAt I x₀).target
+    · have hp_source : p ∈ (extChartAt I x₀).source := (extChartAt I x₀).map_target hy
+      have hp_base : p ∈ e.baseSet := by
+        simpa [e, p, TangentBundle.trivializationAt_baseSet, extChartAt_source] using hp_source
+      have hv : MDiffAt
+          (T% (tangentConstInChart x₀ v : (p : M) → TangentSpace I p)) p :=
+        mdifferentiableAt_tangentConstInChart_of_mem
+          (x₀ := x₀) (p := p) v hp_base
+      have hw : MDiffAt
+          (T% (tangentConstInChart x₀ w : (p : M) → TangentSpace I p)) p :=
+        mdifferentiableAt_tangentConstInChart_of_mem
+          (x₀ := x₀) (p := p) w hp_base
+      have hsection :
+          (tangentConstInChart x₀ (v + w) : (p : M) → TangentSpace I p) =
+            (tangentConstInChart x₀ v : (p : M) → TangentSpace I p) +
+              tangentConstInChart x₀ w :=
+        tangentConstInChart_add x₀ v w
+      have hcov :
+          cov ((tangentConstInChart x₀ v : (p : M) → TangentSpace I p) +
+              tangentConstInChart x₀ w) p =
+            cov (tangentConstInChart x₀ v) p +
+              cov (tangentConstInChart x₀ w) p :=
+        cov.isCovariantDerivativeOnUniv.add hv hw
+      rw [if_pos hy, if_pos hy, if_pos hy]
+      rw [hsection, hcov]
+      simp [map_add]
+    · rw [if_neg hy, if_neg hy, if_neg hy]
+      simp
+  · intro a v
+    by_cases hy : y ∈ (extChartAt I x₀).target
+    · have hp_source : p ∈ (extChartAt I x₀).source := (extChartAt I x₀).map_target hy
+      have hp_base : p ∈ e.baseSet := by
+        simpa [e, p, TangentBundle.trivializationAt_baseSet, extChartAt_source] using hp_source
+      have hv : MDiffAt
+          (T% (tangentConstInChart x₀ v : (p : M) → TangentSpace I p)) p :=
+        mdifferentiableAt_tangentConstInChart_of_mem
+          (x₀ := x₀) (p := p) v hp_base
+      have hsection :
+          (tangentConstInChart x₀ (a • v) : (p : M) → TangentSpace I p) =
+            a • (tangentConstInChart x₀ v : (p : M) → TangentSpace I p) :=
+        tangentConstInChart_smul x₀ a v
+      have hcov :
+          cov (a • (tangentConstInChart x₀ v : (p : M) → TangentSpace I p)) p =
+            a • cov (tangentConstInChart x₀ v) p :=
+        cov.isCovariantDerivativeOnUniv.smul_const a hv
+      rw [if_pos hy, if_pos hy]
+      rw [hsection, hcov]
+      simp [map_smul]
+    · rw [if_neg hy, if_neg hy]
+      simp
+  · intro X Y
+    ext v
+    change (if y ∈ (extChartAt I x₀).target then
+        e.continuousLinearMapAt 𝕜 p
+          ((cov (tangentConstInChart x₀ v) p) (e.symmL 𝕜 p (X + Y)))
+      else 0) =
+      (if y ∈ (extChartAt I x₀).target then
+        e.continuousLinearMapAt 𝕜 p
+          ((cov (tangentConstInChart x₀ v) p) (e.symmL 𝕜 p X))
+      else 0) +
+      (if y ∈ (extChartAt I x₀).target then
+        e.continuousLinearMapAt 𝕜 p
+          ((cov (tangentConstInChart x₀ v) p) (e.symmL 𝕜 p Y))
+      else 0)
+    by_cases hy : y ∈ (extChartAt I x₀).target
+    · rw [if_pos hy, if_pos hy, if_pos hy]
+      simp [map_add]
+    · rw [if_neg hy, if_neg hy, if_neg hy]
+      simp
+  · intro a X
+    ext v
+    change (if y ∈ (extChartAt I x₀).target then
+        e.continuousLinearMapAt 𝕜 p
+          ((cov (tangentConstInChart x₀ v) p) (e.symmL 𝕜 p (a • X)))
+      else 0) =
+      a •
+        (if y ∈ (extChartAt I x₀).target then
+          e.continuousLinearMapAt 𝕜 p
+            ((cov (tangentConstInChart x₀ v) p) (e.symmL 𝕜 p X))
+        else 0)
+    by_cases hy : y ∈ (extChartAt I x₀).target
+    · rw [if_pos hy, if_pos hy]
+      simp [map_smul]
+    · rw [if_neg hy, if_neg hy]
+      simp
+
+@[simp] lemma connectionEndomorphismInChartL_apply_of_mem
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (x₀ : M) {y : E}
+    (hy : y ∈ (extChartAt I x₀).target) (X v : E) :
+    connectionEndomorphismInChartL (𝕜 := 𝕜) (I := I) cov x₀ y X v =
+      (trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt 𝕜
+        ((extChartAt I x₀).symm y)
+        ((cov (tangentConstInChart x₀ v)
+          ((extChartAt I x₀).symm y))
+          ((trivializationAt E (TangentSpace I) x₀).symmL 𝕜
+            ((extChartAt I x₀).symm y) X)) := by
+  classical
+  change (if y ∈ (extChartAt I x₀).target then
+      (trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt 𝕜
+        ((extChartAt I x₀).symm y)
+        ((cov (tangentConstInChart x₀ v) ((extChartAt I x₀).symm y))
+          ((trivializationAt E (TangentSpace I) x₀).symmL 𝕜
+            ((extChartAt I x₀).symm y) X))
+    else 0) =
+      (trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt 𝕜
+        ((extChartAt I x₀).symm y)
+        ((cov (tangentConstInChart x₀ v) ((extChartAt I x₀).symm y))
+          ((trivializationAt E (TangentSpace I) x₀).symmL 𝕜
+            ((extChartAt I x₀).symm y) X))
+  rw [if_pos hy]
+
+@[simp] lemma connectionEndomorphismInChartL_apply_of_notMem
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (x₀ : M) {y : E}
+    (hy : y ∉ (extChartAt I x₀).target) (X v : E) :
+    connectionEndomorphismInChartL (𝕜 := 𝕜) (I := I) cov x₀ y X v = 0 := by
+  classical
+  change (if y ∈ (extChartAt I x₀).target then
+      (trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt 𝕜
+        ((extChartAt I x₀).symm y)
+        ((cov (tangentConstInChart x₀ v) ((extChartAt I x₀).symm y))
+          ((trivializationAt E (TangentSpace I) x₀).symmL 𝕜
+            ((extChartAt I x₀).symm y) X))
+    else 0) = 0
+  rw [if_neg hy]
+
+lemma connectionEndomorphismInChartL_apply_modelVector
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (X : (x : M) → TangentSpace I x) (x₀ : M) {y : E}
+    (hy : y ∈ (extChartAt I x₀).target) (v : E) :
+    connectionEndomorphismInChartL (𝕜 := 𝕜) (I := I) cov x₀ y
+        ((trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt 𝕜
+          ((extChartAt I x₀).symm y) (X ((extChartAt I x₀).symm y))) v =
+      connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov X x₀ y v := by
+  rw [connectionEndomorphismInChartL_apply_of_mem (𝕜 := 𝕜) (I := I) cov x₀ hy]
+  rw [connectionEndomorphismInChart_apply_of_mem (𝕜 := 𝕜) (I := I) cov X x₀ hy]
+  rw [(trivializationAt E (TangentSpace I) x₀).symmL_continuousLinearMapAt
+      (R := 𝕜)
+      (by
+        have hp_source : (extChartAt I x₀).symm y ∈ (extChartAt I x₀).source :=
+          (extChartAt I x₀).map_target hy
+        simpa [TangentBundle.trivializationAt_baseSet, extChartAt_source] using hp_source)
+      (X ((extChartAt I x₀).symm y))]
+
 /-- Centered fixed-chart formula for the covariant derivative of a tangent
 field, written in finite basis coordinates of the fixed tangent trivialization.
 

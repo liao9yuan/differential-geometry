@@ -1174,6 +1174,114 @@ theorem rm13_eval_eq_christoffelCurvCoord
   refine Finset.sum_congr rfl fun m _ => ?_
   simp [cotangentToDual_apply, smul_eq_mul]
 
+/-- Coordinate inputs for the textbook `(0,s)` Ricci-identity component
+commutator. The first two slots are the derivative slots. -/
+def tensor0SRicciIdentityCoordInput {s : ℕ}
+    (i j : CoordinateIdx (𝕜 := Real) E)
+    (ks : Fin s -> CoordinateIdx (𝕜 := Real) E) :
+    Fin (s + 2) -> CoordinateIdx (𝕜 := Real) E :=
+  Fin.cases i (Fin.cases j ks)
+
+/-- Coordinate-frame component form of the invariant `(0,s)` Ricci identity.
+
+This is the book-facing specialization: evaluate the invariant identity on
+coordinate vector fields and expand each curvature action in the replaced
+slot through the coordinate curvature coefficients. -/
+theorem tensor0S_ricciIdentity_coordFrame_of_christoffelCurv
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (Rm13 : Tensor13Section (I := I) (M := M))
+    (x0 : M) {s : ℕ}
+    (alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x0)
+    (nabla2Alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        (s + 2) x0)
+    (hRm : Rm13RealizesConnection (I := I) cov Rm13)
+    (hcurv : ConnectionCurvatureCoordAt (I := I) cov x0)
+    (hRicci : Tensor0SRicciIdentityAt (I := I) Rm13 alpha nabla2Alpha)
+    (i j : CoordinateIdx (𝕜 := Real) E)
+    (ks : Fin s -> CoordinateIdx (𝕜 := Real) E) :
+    coordComponent0SAt (I := I) nabla2Alpha
+        (tensor0SRicciIdentityCoordInput (E := E) i j ks) -
+      coordComponent0SAt (I := I) nabla2Alpha
+        (tensor0SRicciIdentityCoordInput (E := E) j i ks)
+      =
+        -∑ q : Fin s, ∑ m : CoordinateIdx (𝕜 := Real) E,
+          christoffelCurvCoeffAt (I := I) cov x0 i j (ks q) m *
+            coordComponent0SAt (I := I) alpha (Function.update ks q m) := by
+  classical
+  let slots : Fin s -> TangentSpace I x0 :=
+    fun q => coordinateFrameAt (I := I) x0 (ks q) x0
+  have hleft :
+      coordComponent0SAt (I := I) nabla2Alpha
+          (tensor0SRicciIdentityCoordInput (E := E) i j ks) =
+        nabla2Alpha
+          (metricTraceInput (I := I) (coordinateFrameAt (I := I) x0 i x0)
+            (coordinateFrameAt (I := I) x0 j x0) slots) := by
+    rw [coordComponent0SAt_apply]
+    congr 1
+    funext a
+    refine Fin.cases ?_ ?_ a
+    · simp [tensor0SRicciIdentityCoordInput, metricTraceInput, slots]
+    · intro a
+      refine Fin.cases ?_ ?_ a
+      · change (coordinateFrameAt_toBasis (I := I) x0) j =
+          coordinateFrameAt (I := I) x0 j x0
+        rw [coordinateFrameAt_toBasis_apply]
+      · intro a
+        simp [tensor0SRicciIdentityCoordInput, metricTraceInput, slots]
+  have hright :
+      coordComponent0SAt (I := I) nabla2Alpha
+          (tensor0SRicciIdentityCoordInput (E := E) j i ks) =
+        nabla2Alpha
+          (metricTraceInput (I := I) (coordinateFrameAt (I := I) x0 j x0)
+            (coordinateFrameAt (I := I) x0 i x0) slots) := by
+    rw [coordComponent0SAt_apply]
+    congr 1
+    funext a
+    refine Fin.cases ?_ ?_ a
+    · simp [tensor0SRicciIdentityCoordInput, metricTraceInput, slots]
+    · intro a
+      refine Fin.cases ?_ ?_ a
+      · change (coordinateFrameAt_toBasis (I := I) x0) i =
+          coordinateFrameAt (I := I) x0 i x0
+        rw [coordinateFrameAt_toBasis_apply]
+      · intro a
+        simp [tensor0SRicciIdentityCoordInput, metricTraceInput, slots]
+  have hslot (q : Fin s) (m : CoordinateIdx (𝕜 := Real) E) :
+      oneFormAtSlot0S (I := I) alpha slots q
+          (fun _ : Fin 1 => coordinateFrameAt (I := I) x0 m x0) =
+        coordComponent0SAt (I := I) alpha (Function.update ks q m) := by
+    rw [oneFormAtSlot0S_apply, coordComponent0SAt_apply]
+    congr 1
+    funext a
+    by_cases ha : a = q
+    · subst ha
+      simp [slots]
+    · simp [slots, Function.update, ha]
+  calc
+    coordComponent0SAt (I := I) nabla2Alpha
+        (tensor0SRicciIdentityCoordInput (E := E) i j ks) -
+      coordComponent0SAt (I := I) nabla2Alpha
+        (tensor0SRicciIdentityCoordInput (E := E) j i ks)
+        = curvatureAction0SAt (I := I) Rm13 alpha
+            (coordinateFrameAt (I := I) x0 i x0)
+            (coordinateFrameAt (I := I) x0 j x0) slots := by
+          rw [hleft, hright]
+          exact hRicci (coordinateFrameAt (I := I) x0 i x0)
+            (coordinateFrameAt (I := I) x0 j x0) slots
+    _ = -∑ q : Fin s, ∑ m : CoordinateIdx (𝕜 := Real) E,
+          christoffelCurvCoeffAt (I := I) cov x0 i j (ks q) m *
+            coordComponent0SAt (I := I) alpha (Function.update ks q m) := by
+          unfold curvatureAction0SAt
+          congr 1
+          refine Finset.sum_congr rfl fun q _ => ?_
+          rw [rm13_eval_eq_christoffelCurvCoord
+            (I := I) cov Rm13 x0 (oneFormAtSlot0S (I := I) alpha slots q)
+            hRm hcurv i j (ks q)]
+          refine Finset.sum_congr rfl fun m _ => ?_
+          rw [hslot q m]
+
 /-- Coordinate Christoffel-form one-form Ricci identity.
 
 This is the scalar-coordinate producer that should be discharged by expanding

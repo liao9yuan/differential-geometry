@@ -34,6 +34,15 @@ import RicciFlower.RicciFlow.Evolution.Ricci
 import RicciFlower.RicciFlow.Evolution.Scalar
 import RicciFlower.RicciFlow.Evolution.Volume
 import RicciFlower.RicciFlow.Evolution.RiemannNorm
+import RicciFlower.RicciFlow.Evolution.Uhlenbeck
+import RicciFlower.RicciFlow.Evolution.CurvatureOperator
+import RicciFlower.RicciFlow.Evolution.OdeReduction
+import RicciFlower.RicciFlow.Evolution.LocalPinching
+import RicciFlower.RicciFlow.Evolution.ScalarGradient
+import RicciFlower.RicciFlow.Evolution.LongTimeExistence
+import RicciFlower.RicciFlow.Evolution.FiniteTimeBlowup
+import RicciFlower.RicciFlow.Evolution.NormalizedFlow
+import RicciFlower.RicciFlow.Evolution.ExponentialConvergence
 import RicciFlower.RicciFlow.Evolution.BlackBox
 import RicciFlower.Realized.Curvature
 import RicciFlower.Realized.CurvatureTensor

@@ -444,6 +444,26 @@ def NablaRicciComponentsByConnectionInFrameOn
       nablaRic t x d a b =
         ricciCovDerivCompInFrame (I := I) S frame t x d a b
 
+/-- Regular component package for fixed-frame components of `∇ Ric`.
+
+The raw predicate `NablaRicciComponentsByConnectionInFrameOn` is intentionally
+pointwise-only.  This package is for coordinate calculus that differentiates
+the supplied component functions. -/
+structure NablaRicciComponentsRegularInFrameOnLocal
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (u : Set M)
+    (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real) : Prop where
+  realizes :
+    NablaRicciComponentsByConnectionInFrameOn
+      (I := I) S frame u nablaRic
+  mdiffAt :
+    forall (t : Real) (x : M), x ∈ u ->
+      forall d i j : Idx,
+        MDifferentiableAt I 𝓘(Real, Real)
+          (fun y : M => nablaRic t y d i j) x
+
 /-- Fixed-frame components of the second covariant derivative of the Ricci
 tensor, computed from supplied first covariant derivative components.
 
@@ -485,6 +505,25 @@ def Nabla2RicciComponentsByConnectionInFrameOn
       nabla2Ric t x d a i j =
         ricciSecondCovDerivCompInFrame
           (I := I) S frame hframe nablaRic t x d a i j
+
+/-- Regular component package for fixed-frame components of `∇² Ric`.
+
+This bundles the regular first-derivative component package with the existing
+pointwise second-derivative realization. -/
+structure Nabla2RicciComponentsRegularInFrameOnLocal
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (u : Set M)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
+    (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real) : Prop where
+  first :
+    NablaRicciComponentsRegularInFrameOnLocal
+      (I := I) S frame u nablaRic
+  second :
+    Nabla2RicciComponentsByConnectionInFrameOn
+      (I := I) S frame u hframe nablaRic nabla2Ric
 
 theorem metricCovDerivDerivativeIsRicciFlowInFrame_neg_two
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real) :

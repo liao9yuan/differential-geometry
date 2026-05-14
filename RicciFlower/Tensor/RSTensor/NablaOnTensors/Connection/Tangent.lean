@@ -185,6 +185,53 @@ namespace CovariantDerivative
 open Bundle
 open scoped Manifold ContDiff
 
+/-- Local `C¹` regularity of the covariant derivative of two smooth vector
+field sections under a locally `C¹` connection. -/
+theorem smoothSections_cov_contMDiffAt_one
+    {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [IsManifold I 1 M] [IsManifold I 2 M]
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (hcov : ContMDiffCovariantDerivativeLocally cov (1 : WithTop ℕ∞))
+    (X Y : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _))
+    (x : M) :
+    ContMDiffAt I (I.prod 𝓘(𝕜, E)) (1 : WithTop ℕ∞)
+      (fun p : M =>
+        (⟨p, (cov (fun q : M => Y q) p) (X p)⟩ :
+          TotalSpace E (TangentSpace I : M → Type _))) x := by
+  haveI : IsManifold I ((1 : WithTop ℕ∞) + 1) M := by
+    have h : ((1 : WithTop ℕ∞) + 1) = (2 : WithTop ℕ∞) := by
+      norm_num
+    exact h.symm ▸ (inferInstance : IsManifold I 2 M)
+  have hY :
+      ContMDiffOn I (I.prod 𝓘(𝕜, E)) ((1 : WithTop ℕ∞) + 1)
+        (fun p : M =>
+          (⟨p, Y p⟩ : TotalSpace E (TangentSpace I : M → Type _))) Set.univ :=
+    (Y.contMDiff.of_le
+      (by
+        change ((2 : ℕ∞) : WithTop ℕ∞) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞)
+        exact WithTop.coe_le_coe.2 le_top)).contMDiffOn
+  have hcovY :
+      ContMDiffOn I (I.prod 𝓘(𝕜, E →L[𝕜] E)) (1 : WithTop ℕ∞)
+        (fun p : M =>
+          (⟨p, cov (fun q : M => Y q) p⟩ :
+            TotalSpace (E →L[𝕜] E)
+              (fun p : M =>
+                TangentSpace I p →L[𝕜] TangentSpace I p))) Set.univ :=
+    (hcov isOpen_univ).contMDiff hY
+  have hX :
+      ContMDiffOn I (I.prod 𝓘(𝕜, E)) (1 : WithTop ℕ∞)
+        (fun p : M =>
+          (⟨p, X p⟩ : TotalSpace E (TangentSpace I : M → Type _))) Set.univ :=
+    (X.contMDiff.of_le
+      (by
+        change ((1 : ℕ∞) : WithTop ℕ∞) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞)
+        exact WithTop.coe_le_coe.2 le_top)).contMDiffOn
+  exact (hcovY.clm_bundle_apply hX).contMDiffAt (by simp)
+
 /-- Local smoothness of the covariant derivative of two chart-constant tangent
 fields.
 

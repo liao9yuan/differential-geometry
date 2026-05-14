@@ -125,8 +125,21 @@ theorem nablaDu_eq_hessian
   (hHess X Y).symm
 
 /-- A supplied scalar second-derivative tensor realizes the scalar Laplacian
-as its basis-level metric trace at `x`. -/
+as its intrinsic metric trace at `x`. -/
 def ScalarLaplacianRealizesTraceAt
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    {x : M}
+    (f : M -> Real)
+    (hessF :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x) :
+    Prop :=
+  laplacian (I := I) cov g f x =
+    metricTraceFirstTwo0SAt (I := I) g hessF Fin.elim0
+
+/-- Basis-coordinate compatibility version of
+`ScalarLaplacianRealizesTraceAt`. -/
+def ScalarLaplacianRealizesTraceAtInBasis
     {Idx : Type*} [Fintype Idx]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
@@ -139,23 +152,36 @@ def ScalarLaplacianRealizesTraceAt
   laplacian (I := I) cov g f x =
     metricTrace0S2InBasis (I := I) basis gInv hessF Fin.elim0
 
-/-- Convert an explicit scalar Hessian trace equality into the scalar
-Laplacian trace realization predicate. The actual analytic work is the supplied
-trace equality. -/
+/-- Convert an explicit intrinsic scalar Hessian trace equality into the scalar
+Laplacian trace realization predicate. -/
 theorem scalar_laplacian_trace_of_hessian
-    {Idx : Type*} [Fintype Idx]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
-    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
-    (gInv : Idx -> Idx -> Real)
+    {x : M}
     (f : M -> Real)
     (hessF :
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
     (htrace :
       laplacian (I := I) cov g f x =
-        metricTrace0S2InBasis (I := I) basis gInv hessF Fin.elim0) :
-    ScalarLaplacianRealizesTraceAt (I := I) cov g basis gInv f hessF :=
+        metricTraceFirstTwo0SAt (I := I) g hessF Fin.elim0) :
+    ScalarLaplacianRealizesTraceAt (I := I) cov g f hessF :=
   htrace
+
+/-- A basis-coordinate scalar trace realization follows from the intrinsic one. -/
+theorem ScalarLaplacianRealizesTraceAt.toInBasis
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInv)
+    (f : M -> Real)
+    (hessF :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
+    (h : ScalarLaplacianRealizesTraceAt (I := I) cov g f hessF) :
+    ScalarLaplacianRealizesTraceAtInBasis (I := I) cov g basis gInv f hessF := by
+  unfold ScalarLaplacianRealizesTraceAtInBasis
+  rw [h, metricTrace0S2InBasis_eq_metricTrace (I := I) g basis gInv hinv hessF Fin.elim0]
 
 /-- A chosen family of smooth vector fields realizes a pointwise tangent basis
 at `x`. -/
@@ -266,9 +292,12 @@ theorem scalarLaplacianRealizesTraceAt_of_nablaDu
     (hdu : DuFieldRealizes (I := I) f duSec)
     (hHess : HessianRealizesNablaDuAt (I := I) cov duSec hessF x)
     (hgrad : MDiffAt (T% fun y : M => gradientFun (I := I) g f y) x) :
-    ScalarLaplacianRealizesTraceAt (I := I) cov g basis gInv f (hessF x) := by
+    ScalarLaplacianRealizesTraceAt (I := I) cov g f (hessF x) := by
   classical
-  unfold ScalarLaplacianRealizesTraceAt laplacian divergence metricTrace0S2InBasis
+  unfold ScalarLaplacianRealizesTraceAt
+  rw [← metricTrace0S2InBasis_eq_metricTrace (I := I) g basis gInv hinv
+    (hessF x) Fin.elim0]
+  unfold laplacian divergence metricTrace0S2InBasis
   rw [linearMap_trace_eq_sum_inv_inner_apply (I := I) g x basis gInv hinv
     (cov (fun y : M => gradientFun (I := I) g f y) x).toLinearMap]
   apply Finset.sum_congr rfl

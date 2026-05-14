@@ -1,4 +1,5 @@
 import RicciFlower.Tensor.RSTensor.NablaOnTensors.Raw
+import RicciFlower.Tensor.RSTensor.NablaOnTensors.Connection.Endomorphism
 
 /-!
 # Higher-order covariant derivative interfaces
@@ -7,8 +8,6 @@ This module adds a small total-derivative interface on top of the existing
 directional `nabla0SFun` / `nablaRSFun` API.  The analytic regularity of the
 resulting fields is kept explicit through realization predicates.
 -/
-
-suppress_compilation
 
 namespace TensorLieDeriv
 
@@ -92,6 +91,134 @@ variable [IsManifold I 1 M] [IsManifold I 2 M]
 variable [IsManifold I (∞ : WithTop ℕ∞) M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
+/-- Canonical pointwise total covariant derivative of a covariant tensor field.
+
+The output has one leading derivative slot.  This is the tensor-level analogue
+of `nabla0SFun`; evaluating the first slot should recover the old directional
+API.  The bundled version below keeps smoothness of this new field explicit. -/
+noncomputable def totalNabla0SFun (s : ℕ)
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) s)
+    (x₀ : M) : Tensor0SSpace (s + 1) I x₀ :=
+  (trivializationAt (Tensor0SModel (s + 1) 𝕜 E)
+    (fun x : M => Tensor0SSpace (s + 1) I x) x₀).symm x₀
+    (totalCovDeriv_tensor0SModelAt (𝕜 := 𝕜) (E := E) s
+      (fderivWithin 𝕜
+        (tensor0SModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+          s x₀ (fun x => α x))
+        (Set.range I) (extChartAt I x₀ x₀))
+      (connectionEndomorphismInChartL (𝕜 := 𝕜) (I := I) cov x₀
+        (extChartAt I x₀ x₀))
+      (tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        s x₀ x₀ (α x₀)))
+
+/-- Regularity predicate for the canonical total covariant derivative.
+
+This is explicit for the same reason as `Nabla0SRegular`: the construction is
+pointwise canonical, while smoothness of the resulting field is an analytic
+input or separate theorem. -/
+abbrev TotalNabla0SRegular (s : ℕ)
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) s) : Prop :=
+  letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+    (s + 1)
+  ContMDiff I (I.prod 𝓘(𝕜, Tensor0SModel (s + 1) 𝕜 E)) (∞ : WithTop ℕ∞)
+    (fun x : M =>
+      (⟨x, totalNabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        s cov α x⟩ :
+        TotalSpace (Tensor0SModel (s + 1) 𝕜 E)
+          (fun x : M => Tensor0SSpace (s + 1) I x)))
+
+/-- Bundled total covariant derivative of a covariant tensor field. -/
+noncomputable def totalNabla0S (s : ℕ)
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) s)
+    (hreg : TotalNabla0SRegular (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      s cov α) :
+    Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (s + 1) :=
+  letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+    (s + 1)
+  ⟨totalNabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+    s cov α, hreg⟩
+
+@[simp] theorem totalNabla0S_apply (s : ℕ)
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) s)
+    (hreg : TotalNabla0SRegular (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      s cov α)
+    (x : M) :
+    totalNabla0S (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        s cov α hreg x =
+      totalNabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        s cov α x := rfl
+
+/-- Model-slot evaluation of the canonical total covariant derivative at the
+center of the fixed chart. -/
+theorem totalNabla0SFun_apply_tangentConstInChart (s : ℕ)
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) s)
+    (x₀ : M) (X : E) (slots : Fin s → E) :
+    totalNabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        s cov α x₀
+        (Fin.cons (tangentConstInChart (𝕜 := 𝕜) (I := I) x₀ X x₀)
+          (fun a : Fin s => tangentConstInChart (𝕜 := 𝕜) (I := I) x₀ (slots a) x₀))
+      =
+    covariantDeriv_tensor0SModelAt (𝕜 := 𝕜) (E := E) s
+      (fderivWithin 𝕜
+        (tensor0SModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+          s x₀ (fun x => α x))
+        (Set.range I) (extChartAt I x₀ x₀) X)
+      (connectionEndomorphismInChartL (𝕜 := 𝕜) (I := I) cov x₀
+        (extChartAt I x₀ x₀) X)
+      (tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        s x₀ x₀ (α x₀))
+      slots := by
+  simp only [tangentConstInChart_apply]
+  have hslots :
+      Fin.cons
+          ((trivializationAt E (TangentSpace I : M → Type _) x₀).symmL 𝕜 x₀ X)
+          (fun a : Fin s =>
+            (trivializationAt E (TangentSpace I : M → Type _) x₀).symmL 𝕜 x₀
+              (slots a))
+        =
+      (fun a : Fin (s + 1) =>
+        (trivializationAt E (TangentSpace I : M → Type _) x₀).symmL 𝕜 x₀
+          ((Fin.cons X slots : Fin (s + 1) → E) a)) := by
+    funext a
+    cases a using Fin.cases <;> simp
+  rw [hslots]
+  rw [← tensor0SModelAt_apply (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+    (s + 1) x₀ x₀
+    (totalNabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      s cov α x₀) (Fin.cons X slots)]
+  unfold totalNabla0SFun
+  rw [tensor0SModelAt_trivializationAt_symm]
+  rw [totalCovDeriv_tensor0SModelAt_apply_cons]
+
+/-- Certification frontier for the canonical total covariant derivative.
+
+Contracting the new leading derivative slot against a smooth vector field
+recovers the existing directional derivative.  This is the tensor-level
+agreement theorem needed before using `totalNabla0SFun` as the canonical
+`∇α`. -/
+theorem totalNabla0SFun_apply_section (s : ℕ)
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) s)
+    (x : M) (slots : Fin s → TangentSpace I x) :
+    totalNabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        s cov α x (Fin.cons (X x) slots) =
+      nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        s cov X α x slots := by
+  sorry
+
 /-- A supplied `(0,s+1)` field realizes the total covariant derivative of a
 `(0,s)` field when contraction against any smooth vector field gives the
 existing directional derivative. -/
@@ -132,9 +259,63 @@ theorem TotalNabla0SRealizes.apply {s : ℕ}
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
     (x : M) (slots : Fin s → TangentSpace I x) :
     nablaAlpha x (Fin.cons (X x) slots) =
-      nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+    nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
         s cov X α x slots :=
   h X x slots
+
+/-- The canonical bundled total derivative realizes the total-nabla predicate,
+modulo the single contraction-agreement certification theorem above. -/
+theorem totalNabla0S_realizes (s : ℕ)
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) s)
+    (hreg : TotalNabla0SRegular (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      s cov α) :
+    TotalNabla0SRealizes (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      s cov α
+      (totalNabla0S (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        s cov α hreg) := by
+  intro X x slots
+  rw [totalNabla0S_apply]
+  exact totalNabla0SFun_apply_section
+    (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s cov X α x slots
+
+/-- Definition 14.5 for any supplied total covariant derivative realization:
+evaluating the total derivative on smooth moving slots agrees with the usual
+tensorial derivation rule. -/
+theorem TotalNabla0SRealizes.eval_smooth_slots {s : ℕ}
+    {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
+    {α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) s}
+    {nablaAlpha : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) (s + 1)}
+    (h : TotalNabla0SRealizes (𝕜 := 𝕜) (E := E) (H := H)
+      (I := I) (M := M) s cov α nablaAlpha)
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (V : Fin s → ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _))
+    (x₀ : M) :
+    nablaAlpha x₀ (Fin.cons (X x₀) (fun a : Fin s => V a x₀)) =
+      extDerivFun (I := I) (fun p : M => α p (fun a : Fin s => V a p))
+        x₀ (X x₀) -
+        ∑ a : Fin s,
+          α x₀
+            (Function.update (fun b : Fin s => V b x₀) a
+              ((cov (fun p : M => V a p) x₀) (X x₀))) := by
+  calc
+    nablaAlpha x₀ (Fin.cons (X x₀) (fun a : Fin s => V a x₀))
+        = nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+            s cov X α x₀ (fun a : Fin s => V a x₀) := by
+          exact h.apply X x₀ (fun a : Fin s => V a x₀)
+    _ = extDerivFun (I := I) (fun p : M => α p (fun a : Fin s => V a p))
+          x₀ (X x₀) -
+          ∑ a : Fin s,
+            α x₀
+              (Function.update (fun b : Fin s => V b x₀) a
+                ((cov (fun p : M => V a p) x₀) (X x₀))) := by
+          exact nabla0SFun_eval_smooth_slots
+            (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+            cov X V α x₀
 
 theorem TotalNablaRSRealizes.apply {r s : ℕ}
     {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
@@ -150,6 +331,44 @@ theorem TotalNablaRSRealizes.apply {r s : ℕ}
       nablaRSFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
         r s cov X T x β slots :=
   h X x β slots
+
+/-- Second total covariant derivative of a covariant tensor, defined by
+iteration.  Internally the output valence is `(s + 1) + 1`, with derivative
+slots first. -/
+noncomputable def totalNabla20S (s : ℕ)
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) s)
+    (hreg1 : TotalNabla0SRegular (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      s cov α)
+    (hreg2 : TotalNabla0SRegular (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (s + 1) cov
+      (totalNabla0S (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        s cov α hreg1)) :
+    Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) ((s + 1) + 1) :=
+  totalNabla0S (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+    (s + 1) cov
+    (totalNabla0S (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      s cov α hreg1)
+    hreg2
+
+/-- Same second derivative, normalized for consumers that state the output
+valence as `s + 2`. -/
+noncomputable def totalNabla20S_succSucc (s : ℕ)
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) s)
+    (hreg1 : TotalNabla0SRegular (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      s cov α)
+    (hreg2 : TotalNabla0SRegular (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (s + 1) cov
+      (totalNabla0S (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        s cov α hreg1)) :
+    Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (s + 2) :=
+  totalNabla20S (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+    s cov α hreg1 hreg2
 
 /-- Recursive realization predicate for the `k`-th covariant derivative of a
 covariant tensor field.  The derivative slots are placed first; the Lean valence

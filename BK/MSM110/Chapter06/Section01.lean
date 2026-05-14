@@ -100,82 +100,6 @@ theorem eq_christoffel_symbols_ricci_flow
   RicciFlower.RicciFlow.evol_christoffel_inFrame
     (I := I) S hS gInv gInvDt frame hframe hu nablaRic hreg hnabla t x hx i j k
 
-/-- MSM110 Chapter 6.1, local coordinate-frame form of
-`eq:riemann_curvature_three_one_ricci_flow_one`. -/
-theorem eq_riemann_curvature_three_one_ricci_flow_one_local
-    {D : RicciFlower.Realized.RealTimeInterval}
-    (S : SolutionOn (I := I) (M := M) D)
-    (Rm13 : Real -> RicciFlower.Realized.Tensor13Section (I := I) (M := M))
-    (gInv : Real -> RicciFlower.Realized.InverseMetricComponents M (CoordinateIdx (𝕜 := Real) E))
-    (nablaRic :
-      Real -> M -> CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
-        CoordinateIdx (𝕜 := Real) E -> Real)
-    (x₀ : M)
-    (hRm : ∀ t : Real,
-      RicciFlower.Realized.Rm13RealizesConnection
-        (I := I) (S.family.connection t) (Rm13 t))
-    (hcov : ∀ t : Real,
-      CovariantDerivative.ContMDiffCovariantDerivativeLocally
-        (S.family.connection t) (∞ : WithTop ℕ∞))
-    (htf : ∀ t : RicciFlower.Realized.RealTimeInterval.RegularTime D,
-      RicciFlower.LeviCivita.IsTorsionFree (I := I) (S.family.connection (t : Real)))
-    (hEvol : ChristoffelEvolutionEquationInFrameOn
-      (I := I) S gInv (RicciFlower.Coordinates.coordinateFrameAt (I := I) x₀)
-      (RicciFlower.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀)
-      nablaRic)
-    (hmixed : RicciFlower.RicciFlow.ChristoffelCoordMixedDerivativeInFrameOn
-      (I := I) S gInv nablaRic x₀ D.carrier ({x₀} : Set M)) :
-    Riemann13VariationFormulaInFrameOnLocal
-      (I := I) (D := D) Rm13
-      (RicciFlower.Coordinates.coordinateFrameAt (I := I) x₀)
-      (RicciFlower.RicciFlow.coordinateFrameAt_isLocalFrame_singleton (I := I) x₀)
-      (fun τ x d out l₁ l₂ =>
-        christoffelVariationCovDerivCoordAt (I := I)
-          (S.family.connection τ)
-          (christoffelEvolutionRHSInFrame (M := M) gInv nablaRic)
-          τ x d out l₁ l₂) :=
-  RicciFlower.RicciFlow.riemann13VariationFormulaInFrameOnLocal_of_christoffelEvolution
-    (I := I) S Rm13 gInv nablaRic x₀ hRm hcov htf hEvol hmixed
-
-/-- MSM110 Chapter 6.1, local coordinate-frame Ricci variation obtained from
-Christoffel evolution and the local Riemann trace. -/
-theorem eq_ricci_tensor_ricci_flow_one_local_from_christoffel
-    {D : RicciFlower.Realized.RealTimeInterval}
-    (S : SolutionOn (I := I) (M := M) D)
-    (Rm13 : Real -> RicciFlower.Realized.Tensor13Section (I := I) (M := M))
-    (gInv : Real -> RicciFlower.Realized.InverseMetricComponents M (CoordinateIdx (𝕜 := Real) E))
-    (nablaRic :
-      Real -> M -> CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
-        CoordinateIdx (𝕜 := Real) E -> Real)
-    (x₀ : M)
-    (htrace : ∀ t : Real,
-      RicciFlower.Realized.RicciTensorRealizesRm13Trace
-        (I := I) (S.ricci t) (Rm13 t))
-    (hRm : ∀ t : Real,
-      RicciFlower.Realized.Rm13RealizesConnection
-        (I := I) (S.family.connection t) (Rm13 t))
-    (hcov : ∀ t : Real,
-      CovariantDerivative.ContMDiffCovariantDerivativeLocally
-        (S.family.connection t) (∞ : WithTop ℕ∞))
-    (htf : ∀ t : RicciFlower.Realized.RealTimeInterval.RegularTime D,
-      RicciFlower.LeviCivita.IsTorsionFree (I := I) (S.family.connection (t : Real)))
-    (hEvol : ChristoffelEvolutionEquationInFrameOn
-      (I := I) S gInv (RicciFlower.Coordinates.coordinateFrameAt (I := I) x₀)
-      (RicciFlower.Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀)
-      nablaRic)
-    (hmixed : RicciFlower.RicciFlow.ChristoffelCoordMixedDerivativeInFrameOn
-      (I := I) S gInv nablaRic x₀ D.carrier ({x₀} : Set M)) :
-    RicciVariationFormulaInFrameOnLocal
-      (I := I) S (RicciFlower.Coordinates.coordinateFrameAt (I := I) x₀)
-      ({x₀} : Set M)
-      (fun τ x d out l₁ l₂ =>
-        christoffelVariationCovDerivCoordAt (I := I)
-          (S.family.connection τ)
-          (christoffelEvolutionRHSInFrame (M := M) gInv nablaRic)
-          τ x d out l₁ l₂) :=
-  RicciFlower.RicciFlow.ricciVariationFormulaInCoordFrameAt_of_christoffelEvolution
-    (I := I) S Rm13 gInv nablaRic x₀ htrace hRm hcov htf hEvol hmixed
-
 /-- MSM110 Chapter 6.1, local fixed-frame Ricci evolution from local variation
 and the contracted commutator package. -/
 theorem eq_ricci_tensor_ricci_flow_two_local
@@ -287,6 +211,473 @@ theorem total_volume_evolution_ricci_flow
       t₀ :=
   RicciFlower.RicciFlow.Evolution.Volume.total_volume_variation_ricciFlow_at_of_metricDeriv
     (I := I) (M := M) G Ric hEq hg
+
+/-! ## Remaining Chapter 6.1 statement scaffold
+
+The declarations below are intentionally book-facing component statements.
+They make the remaining Section 6.1 implementation targets visible without
+moving the core RicciFlower APIs.  Proofs marked `sorry` are the actual future
+producer frontiers.
+-/
+
+/-- General metric-variation RHS for
+`partial_t Gamma^k_ij = 1/2 g^kl (nabla_i h_jl + nabla_j h_il - nabla_l h_ij)`. -/
+def generalChristoffelVariationRHSInFrame
+    (gInv : Real -> M -> Idx -> Idx -> Real)
+    (nablaH : Real -> M -> Idx -> Idx -> Idx -> Real)
+    (t : Real) (x : M) (i j k : Idx) : Real :=
+  (1 / 2 : Real) *
+    ∑ l : Idx,
+      gInv t x k l *
+        (nablaH t x i j l + nablaH t x j i l - nablaH t x l i j)
+
+/-- General metric-variation RHS for the first displayed `(3,1)` Riemann
+variation formula in Lemma `lem:general_evolution_revisited`.  Here
+`nabla2H t x a b c d` means `(nabla_a nabla_b h)_cd`. -/
+def generalRiemann13VariationFirstRHSInFrame
+    (gInv : Real -> M -> Idx -> Idx -> Real)
+    (nabla2H : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
+    (t : Real) (x : M) (i j k l : Idx) : Real :=
+  (1 / 2 : Real) *
+    ∑ p : Idx,
+      gInv t x l p *
+        (nabla2H t x i j k p + nabla2H t x i k j p -
+          nabla2H t x i p j k - nabla2H t x j i k p -
+          nabla2H t x j k i p + nabla2H t x j p i k)
+
+/-- General metric-variation RHS for the commuted second displayed `(3,1)`
+Riemann variation formula in Lemma `lem:general_evolution_revisited`. -/
+def generalRiemann13VariationSecondRHSInFrame
+    (gInv : Real -> M -> Idx -> Idx -> Real)
+    (Rm13 : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
+    (hComp : Real -> M -> Idx -> Idx -> Real)
+    (nabla2H : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
+    (t : Real) (x : M) (i j k l : Idx) : Real :=
+  (1 / 2 : Real) *
+    ∑ p : Idx,
+      gInv t x l p *
+        (nabla2H t x i k j p + nabla2H t x j p i k -
+          nabla2H t x i p j k - nabla2H t x j k i p -
+          (∑ q : Idx, Rm13 t x i j k q * hComp t x q p) -
+          (∑ q : Idx, Rm13 t x i j p q * hComp t x k q))
+
+/-- General metric-variation RHS for the first displayed Ricci variation
+formula in Lemma `lem:general_evolution_revisited`. -/
+def generalRicciVariationFirstRHSInFrame
+    (gInv : Real -> M -> Idx -> Idx -> Real)
+    (nabla2H : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
+    (t : Real) (x : M) (j k : Idx) : Real :=
+  (1 / 2 : Real) *
+    ∑ p : Idx, ∑ q : Idx,
+      gInv t x p q *
+        (nabla2H t x q j k p + nabla2H t x q k j p -
+          nabla2H t x q p j k - nabla2H t x j k q p)
+
+/-- General metric-variation RHS for the scalar variation formula before the
+divergence rewrite. -/
+def generalScalarVariationRHSInFrame
+    (gInv : Real -> M -> Idx -> Idx -> Real)
+    (hComp Ric : Real -> M -> Idx -> Idx -> Real)
+    (nabla2H : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
+    (t : Real) (x : M) : Real :=
+  ∑ i : Idx, ∑ j : Idx, ∑ k : Idx, ∑ l : Idx,
+    gInv t x i j * gInv t x k l *
+      (-nabla2H t x i j k l + nabla2H t x i k j l -
+        hComp t x i k * Ric t x j l)
+
+/-- General metric-variation RHS for the pointwise volume-density trace term. -/
+def generalVolumeTraceRHSInFrame
+    (gInv : Real -> M -> Idx -> Idx -> Real)
+    (hComp : Real -> M -> Idx -> Idx -> Real)
+    (t : Real) (x : M) : Real :=
+  (1 / 2 : Real) * ∑ i : Idx, ∑ j : Idx, gInv t x i j * hComp t x i j
+
+/-- Book scaffold for Lemma `lem:general_evolution_revisited`, item 1. -/
+theorem lem_general_evolution_revisited_christoffel_inFrame
+    {D : RicciFlower.Realized.RealTimeInterval}
+    (Gamma : Real -> M -> Idx -> Idx -> Idx -> Real)
+    (gInv : Real -> M -> Idx -> Idx -> Real)
+    (nablaH : Real -> M -> Idx -> Idx -> Idx -> Real) :
+    ∀ (t : RicciFlower.Realized.RealTimeInterval.RegularTime D) (x : M)
+      (i j k : Idx),
+      HasDerivWithinAt
+        (fun s : Real => Gamma s x i j k)
+        (generalChristoffelVariationRHSInFrame gInv nablaH (t : Real) x i j k)
+        D.carrier
+        (t : Real) := by
+  sorry
+
+/-- Book scaffold for Lemma `lem:general_evolution_revisited`, item 2, first
+displayed `(3,1)` Riemann variation formula. -/
+theorem lem_general_evolution_revisited_riemann13_first_inFrame
+    {D : RicciFlower.Realized.RealTimeInterval}
+    (Rm13 : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
+    (gInv : Real -> M -> Idx -> Idx -> Real)
+    (nabla2H : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real) :
+    ∀ (t : RicciFlower.Realized.RealTimeInterval.RegularTime D) (x : M)
+      (i j k l : Idx),
+      HasDerivWithinAt
+        (fun s : Real => Rm13 s x i j k l)
+        (generalRiemann13VariationFirstRHSInFrame gInv nabla2H
+          (t : Real) x i j k l)
+        D.carrier
+        (t : Real) := by
+  sorry
+
+/-- Book scaffold for Lemma `lem:general_evolution_revisited`, item 2,
+commuted `(3,1)` Riemann variation formula. -/
+theorem lem_general_evolution_revisited_riemann13_second_inFrame
+    {D : RicciFlower.Realized.RealTimeInterval}
+    (Rm13 : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
+    (gInv : Real -> M -> Idx -> Idx -> Real)
+    (hComp : Real -> M -> Idx -> Idx -> Real)
+    (nabla2H : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real) :
+    ∀ (t : RicciFlower.Realized.RealTimeInterval.RegularTime D) (x : M)
+      (i j k l : Idx),
+      HasDerivWithinAt
+        (fun s : Real => Rm13 s x i j k l)
+        (generalRiemann13VariationSecondRHSInFrame gInv Rm13 hComp nabla2H
+          (t : Real) x i j k l)
+        D.carrier
+        (t : Real) := by
+  sorry
+
+/-- Book scaffold for Lemma `lem:general_evolution_revisited`, item 3, first
+Ricci variation formula. -/
+theorem lem_general_evolution_revisited_ricci_first_inFrame
+    {D : RicciFlower.Realized.RealTimeInterval}
+    (Ric : Real -> M -> Idx -> Idx -> Real)
+    (gInv : Real -> M -> Idx -> Idx -> Real)
+    (nabla2H : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real) :
+    ∀ (t : RicciFlower.Realized.RealTimeInterval.RegularTime D) (x : M)
+      (j k : Idx),
+      HasDerivWithinAt
+        (fun s : Real => Ric s x j k)
+        (generalRicciVariationFirstRHSInFrame gInv nabla2H (t : Real) x j k)
+        D.carrier
+        (t : Real) := by
+  sorry
+
+/-- Book scaffold for Lemma `lem:general_evolution_revisited`, item 4, first
+scalar variation formula. -/
+theorem lem_general_evolution_revisited_scalar_first_inFrame
+    {D : RicciFlower.Realized.RealTimeInterval}
+    (scalar : Real -> M -> Real)
+    (gInv : Real -> M -> Idx -> Idx -> Real)
+    (hComp Ric : Real -> M -> Idx -> Idx -> Real)
+    (nabla2H : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real) :
+    ∀ (t : RicciFlower.Realized.RealTimeInterval.RegularTime D) (x : M),
+      HasDerivWithinAt
+        (fun s : Real => scalar s x)
+        (generalScalarVariationRHSInFrame gInv hComp Ric nabla2H (t : Real) x)
+        D.carrier
+        (t : Real) := by
+  sorry
+
+/-- Ricci-flow RHS for
+`eq:riemann_curvature_three_one_ricci_flow_one`. -/
+def riemann13RicciFlowOneRHSInFrame
+    (gInv : Real -> M -> Idx -> Idx -> Real)
+    (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
+    (t : Real) (x : M) (i j k l : Idx) : Real :=
+  ∑ p : Idx,
+    gInv t x l p *
+      (-nabla2Ric t x i j k p - nabla2Ric t x i k j p +
+        nabla2Ric t x i p j k + nabla2Ric t x j i k p +
+        nabla2Ric t x j k i p - nabla2Ric t x j p i k)
+
+/-- MSM110 Chapter 6.1, equation
+`eq:riemann_curvature_three_one_ricci_flow_one`, stated as a future
+book-facing `(3,1)` component theorem. -/
+theorem eq_riemann_curvature_three_one_ricci_flow_one
+    {D : RicciFlower.Realized.RealTimeInterval}
+    (Rm13 : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
+    (gInv : Real -> M -> Idx -> Idx -> Real)
+    (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real) :
+    ∀ (t : RicciFlower.Realized.RealTimeInterval.RegularTime D) (x : M)
+      (i j k l : Idx),
+      HasDerivWithinAt
+        (fun s : Real => Rm13 s x i j k l)
+        (riemann13RicciFlowOneRHSInFrame gInv nabla2Ric (t : Real) x i j k l)
+        D.carrier
+        (t : Real) := by
+  sorry
+
+/-- RHS for `eq:ricci_tensor_ricci_flow_one`. -/
+def ricciTensorRicciFlowOneRHSInFrame
+    (gInv : Real -> M -> Idx -> Idx -> Real)
+    (roughLapRic scalarHessian :
+      Real -> M -> Idx -> Idx -> Real)
+    (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
+    (t : Real) (x : M) (j k : Idx) : Real :=
+  roughLapRic t x j k + scalarHessian t x j k -
+    ∑ p : Idx, ∑ q : Idx,
+      gInv t x p q *
+        (nabla2Ric t x q j k p + nabla2Ric t x q k j p)
+
+/-- MSM110 Chapter 6.1, equation `eq:ricci_tensor_ricci_flow_one`. -/
+theorem eq_ricci_tensor_ricci_flow_one
+    {D : RicciFlower.Realized.RealTimeInterval}
+    (Ric : Real -> M -> Idx -> Idx -> Real)
+    (gInv : Real -> M -> Idx -> Idx -> Real)
+    (roughLapRic scalarHessian :
+      Real -> M -> Idx -> Idx -> Real)
+    (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real) :
+    ∀ (t : RicciFlower.Realized.RealTimeInterval.RegularTime D) (x : M)
+      (j k : Idx),
+      HasDerivWithinAt
+        (fun s : Real => Ric s x j k)
+        (ricciTensorRicciFlowOneRHSInFrame
+          gInv roughLapRic scalarHessian nabla2Ric (t : Real) x j k)
+        D.carrier
+        (t : Real) := by
+  sorry
+
+/-- Component lower-bound predicate used by the book-facing scalar maximum
+principle statement. -/
+def ScalarLowerBoundOn
+    {D : RicciFlower.Realized.RealTimeInterval}
+    (scalar : Real -> M -> Real) (rho : Real) : Prop :=
+  ∀ (t : RicciFlower.Realized.RealTimeInterval.RegularTime D) (x : M),
+    rho <= scalar (t : Real) x
+
+/-- MSM110 Chapter 6.1, Lemma `lem:scalar_positivity_is_preserved`. -/
+theorem lem_scalar_positivity_is_preserved
+    {D : RicciFlower.Realized.RealTimeInterval}
+    (scalar scalarLap ricciNormSq : Real -> M -> Real)
+    (rho : Real)
+    (hinit : ∀ x : M, rho <= scalar 0 x)
+    (hevol : ScalarEvolutionEquationOn (D := D) scalar scalarLap ricciNormSq)
+    (hnonneg :
+      ∀ (t : RicciFlower.Realized.RealTimeInterval.RegularTime D) (x : M),
+        0 <= ricciNormSq (t : Real) x) :
+    ScalarLowerBoundOn (D := D) scalar rho := by
+  sorry
+
+/-- RHS for the dimension-three Ricci tensor evolution formula. -/
+def ricciTensorRicciFlowDimensionThreeRHSInFrame
+    (metricComp gInv : Real -> M -> Fin 3 -> Fin 3 -> Real)
+    (Ric : Real -> M -> Fin 3 -> Fin 3 -> Real)
+    (scalar ricciNormSq : Real -> M -> Real)
+    (roughLapRic : Real -> M -> Fin 3 -> Fin 3 -> Real)
+    (t : Real) (x : M) (j k : Fin 3) : Real :=
+  roughLapRic t x j k + 3 * scalar t x * Ric t x j k -
+    6 * (∑ p : Fin 3, ∑ q : Fin 3,
+      gInv t x p q * Ric t x j p * Ric t x q k) +
+    (2 * ricciNormSq t x - scalar t x ^ 2) * metricComp t x j k
+
+/-- MSM110 Chapter 6.1, equation
+`eq:orthogonal_decomposition_of_riemann_three_d`. -/
+theorem eq_orthogonal_decomposition_of_riemann_three_d
+    (Rm04 : Real -> M -> Fin 3 -> Fin 3 -> Fin 3 -> Fin 3 -> Real)
+    (metricComp Ric : Real -> M -> Fin 3 -> Fin 3 -> Real)
+    (scalar : Real -> M -> Real) :
+    ∀ (t : Real) (x : M) (i j k l : Fin 3),
+      Rm04 t x i j k l =
+        Ric t x i l * metricComp t x j k +
+          Ric t x j k * metricComp t x i l -
+          Ric t x i k * metricComp t x j l -
+          Ric t x j l * metricComp t x i k -
+          (1 / 2 : Real) * scalar t x *
+            (metricComp t x i l * metricComp t x j k -
+              metricComp t x i k * metricComp t x j l) := by
+  sorry
+
+/-- MSM110 Chapter 6.1, equation
+`eq:ricci_tensor_ricci_flow_dimension_three`. -/
+theorem eq_ricci_tensor_ricci_flow_dimension_three
+    {D : RicciFlower.Realized.RealTimeInterval}
+    (Ric : Real -> M -> Fin 3 -> Fin 3 -> Real)
+    (metricComp gInv : Real -> M -> Fin 3 -> Fin 3 -> Real)
+    (scalar ricciNormSq : Real -> M -> Real)
+    (roughLapRic : Real -> M -> Fin 3 -> Fin 3 -> Real) :
+    ∀ (t : RicciFlower.Realized.RealTimeInterval.RegularTime D) (x : M)
+      (j k : Fin 3),
+      HasDerivWithinAt
+        (fun s : Real => Ric s x j k)
+        (ricciTensorRicciFlowDimensionThreeRHSInFrame
+          metricComp gInv Ric scalar ricciNormSq roughLapRic (t : Real) x j k)
+        D.carrier
+        (t : Real) := by
+  sorry
+
+/-- Quadratic-form nonnegativity for a symmetric two-tensor in a fixed frame. -/
+def TwoTensorNonnegativeInFrame
+    (T : Real -> M -> Idx -> Idx -> Real) (t : Real) (x : M) : Prop :=
+  ∀ v : Idx -> Real,
+    0 <= ∑ i : Idx, ∑ j : Idx, v i * v j * T t x i j
+
+/-- Quadratic-form positivity for a symmetric two-tensor in a fixed frame. -/
+def TwoTensorPositiveInFrame
+    (T : Real -> M -> Idx -> Idx -> Real) (t : Real) (x : M) : Prop :=
+  ∀ v : Idx -> Real,
+    (∃ i : Idx, v i ≠ 0) ->
+      0 < ∑ i : Idx, ∑ j : Idx, v i * v j * T t x i j
+
+/-- MSM110 Chapter 6.1, Corollary `cor:ricci_positivity_is_preserved`,
+nonnegative form. -/
+theorem cor_ricci_nonnegativity_is_preserved
+    {D : RicciFlower.Realized.RealTimeInterval}
+    (Ric : Real -> M -> Fin 3 -> Fin 3 -> Real)
+    (metricComp gInv : Real -> M -> Fin 3 -> Fin 3 -> Real)
+    (scalar ricciNormSq : Real -> M -> Real)
+    (roughLapRic : Real -> M -> Fin 3 -> Fin 3 -> Real)
+    (hevol :
+      ∀ (t : RicciFlower.Realized.RealTimeInterval.RegularTime D) (x : M)
+        (j k : Fin 3),
+        HasDerivWithinAt (fun s : Real => Ric s x j k)
+          (ricciTensorRicciFlowDimensionThreeRHSInFrame
+            metricComp gInv Ric scalar ricciNormSq roughLapRic (t : Real) x j k)
+          D.carrier (t : Real))
+    (hinit : ∀ x : M, TwoTensorNonnegativeInFrame Ric 0 x) :
+    ∀ (t : RicciFlower.Realized.RealTimeInterval.RegularTime D) (x : M),
+      TwoTensorNonnegativeInFrame Ric (t : Real) x := by
+  sorry
+
+/-- MSM110 Chapter 6.1, Corollary `cor:ricci_positivity_is_preserved`,
+positive form. -/
+theorem cor_ricci_positivity_is_preserved
+    {D : RicciFlower.Realized.RealTimeInterval}
+    (Ric : Real -> M -> Fin 3 -> Fin 3 -> Real)
+    (metricComp gInv : Real -> M -> Fin 3 -> Fin 3 -> Real)
+    (scalar ricciNormSq : Real -> M -> Real)
+    (roughLapRic : Real -> M -> Fin 3 -> Fin 3 -> Real)
+    (hevol :
+      ∀ (t : RicciFlower.Realized.RealTimeInterval.RegularTime D) (x : M)
+        (j k : Fin 3),
+        HasDerivWithinAt (fun s : Real => Ric s x j k)
+          (ricciTensorRicciFlowDimensionThreeRHSInFrame
+            metricComp gInv Ric scalar ricciNormSq roughLapRic (t : Real) x j k)
+          D.carrier (t : Real))
+    (hinit : ∀ x : M, TwoTensorPositiveInFrame Ric 0 x) :
+    ∀ (t : RicciFlower.Realized.RealTimeInterval.RegularTime D) (x : M),
+      TwoTensorPositiveInFrame Ric (t : Real) x := by
+  sorry
+
+/-- RHS for the `(3,1)` Riemann heat equation
+`eq:riemann_curvature_three_one_ricci_flow`. -/
+def riemann13HeatRHSInFrame
+    (Rm13 : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
+    (gInv ricciOneUp : Real -> M -> Idx -> Idx -> Real)
+    (roughLapRm13 : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
+    (t : Real) (x : M) (i j k l : Idx) : Real :=
+  roughLapRm13 t x i j k l +
+    (∑ p : Idx, ∑ q : Idx, ∑ r : Idx,
+      gInv t x p q *
+        (Rm13 t x i j p r * Rm13 t x r q k l -
+          2 * Rm13 t x p i k r * Rm13 t x j q r l +
+          2 * Rm13 t x p i r l * Rm13 t x j q k r)) -
+    ((∑ p : Idx, ricciOneUp t x i p * Rm13 t x p j k l) +
+      (∑ p : Idx, ricciOneUp t x j p * Rm13 t x i p k l) +
+      (∑ p : Idx, ricciOneUp t x k p * Rm13 t x i j p l)) +
+    (∑ p : Idx, ricciOneUp t x p l * Rm13 t x i j k p)
+
+/-- MSM110 Chapter 6.1, equation
+`eq:riemann_curvature_three_one_ricci_flow`. -/
+theorem eq_riemann_curvature_three_one_ricci_flow
+    {D : RicciFlower.Realized.RealTimeInterval}
+    (Rm13 : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
+    (gInv ricciOneUp : Real -> M -> Idx -> Idx -> Real)
+    (roughLapRm13 : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real) :
+    ∀ (t : RicciFlower.Realized.RealTimeInterval.RegularTime D) (x : M)
+      (i j k l : Idx),
+      HasDerivWithinAt
+        (fun s : Real => Rm13 s x i j k l)
+        (riemann13HeatRHSInFrame Rm13 gInv ricciOneUp roughLapRm13
+          (t : Real) x i j k l)
+        D.carrier
+        (t : Real) := by
+  sorry
+
+/-- RHS for the lowered `(4,0)` Riemann heat equation
+`eq:riemann_curvature_four_zero_ricci_flow`. -/
+def riemann04HeatRHSInFrame
+    (Rm13 Rm04 : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
+    (gInv ricciOneUp : Real -> M -> Idx -> Idx -> Real)
+    (roughLapRm04 : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
+    (t : Real) (x : M) (i j k l : Idx) : Real :=
+  roughLapRm04 t x i j k l +
+    (∑ p : Idx, ∑ q : Idx, ∑ r : Idx,
+      gInv t x p q *
+        (Rm13 t x i j p r * Rm04 t x r q k l -
+          2 * Rm13 t x p i k r * Rm04 t x j q r l +
+          2 * Rm04 t x p i r l * Rm13 t x j q k r)) -
+    ((∑ p : Idx, ricciOneUp t x i p * Rm04 t x p j k l) +
+      (∑ p : Idx, ricciOneUp t x j p * Rm04 t x i p k l) +
+      (∑ p : Idx, ricciOneUp t x k p * Rm04 t x i j p l) +
+      (∑ p : Idx, ricciOneUp t x l p * Rm04 t x i j k p))
+
+/-- MSM110 Chapter 6.1, equation
+`eq:riemann_curvature_four_zero_ricci_flow`. -/
+theorem eq_riemann_curvature_four_zero_ricci_flow
+    {D : RicciFlower.Realized.RealTimeInterval}
+    (Rm13 Rm04 : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
+    (gInv ricciOneUp : Real -> M -> Idx -> Idx -> Real)
+    (roughLapRm04 : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real) :
+    ∀ (t : RicciFlower.Realized.RealTimeInterval.RegularTime D) (x : M)
+      (i j k l : Idx),
+      HasDerivWithinAt
+        (fun s : Real => Rm04 s x i j k l)
+        (riemann04HeatRHSInFrame Rm13 Rm04 gInv ricciOneUp roughLapRm04
+          (t : Real) x i j k l)
+        D.carrier
+        (t : Real) := by
+  sorry
+
+/-- The quadratic tensor `B_ijkl` from equation `eq:define_bijkl`. -/
+def bTensorInFrame
+    (gInv : Real -> M -> Idx -> Idx -> Real)
+    (Rm04 : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
+    (t : Real) (x : M) (i j k l : Idx) : Real :=
+  -∑ p : Idx, ∑ r : Idx, ∑ q : Idx, ∑ s : Idx,
+    gInv t x p r * gInv t x q s *
+      Rm04 t x i p j q * Rm04 t x k r l s
+
+/-- Algebraic identities `B_ijkl = B_jilk = B_klij`. -/
+def BTensorAlgebraicIdentitiesInFrame
+    (B : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real) : Prop :=
+  ∀ (t : Real) (x : M) (i j k l : Idx),
+    B t x i j k l = B t x j i l k ∧
+      B t x i j k l = B t x k l i j
+
+/-- MSM110 Chapter 6.1, equation `eq:bijkl_algebraic_identities`. -/
+theorem eq_bijkl_algebraic_identities
+    (gInv : Real -> M -> Idx -> Idx -> Real)
+    (Rm04 : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real) :
+    BTensorAlgebraicIdentitiesInFrame
+      (bTensorInFrame (M := M) gInv Rm04) := by
+  sorry
+
+/-- RHS for equation `eq:rm_minus_evolution_minus_in_minus_terms_minus_of_minus_bs`. -/
+def riemann04BTensorRHSInFrame
+    (Rm04 B : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
+    (ricciOneUp : Real -> M -> Idx -> Idx -> Real)
+    (roughLapRm04 : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
+    (t : Real) (x : M) (i j k l : Idx) : Real :=
+  roughLapRm04 t x i j k l +
+    2 * (B t x i j k l - B t x i j l k +
+      B t x i k j l - B t x i l j k) -
+    ((∑ p : Idx, ricciOneUp t x i p * Rm04 t x p j k l) +
+      (∑ p : Idx, ricciOneUp t x j p * Rm04 t x i p k l) +
+      (∑ p : Idx, ricciOneUp t x k p * Rm04 t x i j p l) +
+      (∑ p : Idx, ricciOneUp t x l p * Rm04 t x i j k p))
+
+/-- MSM110 Chapter 6.1, equation
+`eq:rm_minus_evolution_minus_in_minus_terms_minus_of_minus_bs`. -/
+theorem eq_rm_evolution_in_terms_of_bs
+    {D : RicciFlower.Realized.RealTimeInterval}
+    (Rm04 B : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
+    (ricciOneUp : Real -> M -> Idx -> Idx -> Real)
+    (roughLapRm04 : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real) :
+    ∀ (t : RicciFlower.Realized.RealTimeInterval.RegularTime D) (x : M)
+      (i j k l : Idx),
+      HasDerivWithinAt
+        (fun s : Real => Rm04 s x i j k l)
+        (riemann04BTensorRHSInFrame Rm04 B ricciOneUp roughLapRm04
+          (t : Real) x i j k l)
+        D.carrier
+        (t : Real) := by
+  sorry
 
 end
 

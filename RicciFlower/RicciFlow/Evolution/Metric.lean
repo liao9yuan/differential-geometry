@@ -491,6 +491,72 @@ theorem gInv_spacetimeSmooth
   simpa using
     (sum_mul_pi_single (Idx := Idx) (fun k => gInv p.1 p.2 i k) j).symm
 
+/-- Fixed-time spatial differentiability of inverse metric components, extracted
+from the spacetime metric regularity package. -/
+theorem MetricFrameSpacetimeRegularityInFrameOnLocal.gInv_mdiffAt
+    [DecidableEq Idx]
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (gInvDt : Real -> M -> Idx -> Idx -> Real)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    {u : Set M}
+    (hreg :
+      MetricFrameSpacetimeRegularityInFrameOnLocal
+        (I := I) S gInv gInvDt frame u)
+    (t : Realized.RealTimeInterval.RegularTime D)
+    (hu : IsOpen u) {x : M} (hx : x ∈ u) (i j : Idx) :
+    MDifferentiableAt I 𝓘(Real, Real)
+      (fun y : M => gInv (t : Real) y i j) x := by
+  have ht : (t : Real) ∈ D.carrier := D.regular_subset t.2
+  have hslice :
+      ContMDiffOn I (𝓘(Real, Real).prod I) ⊤
+        (fun y : M => ((t : Real), y)) u := by
+    exact (contMDiffOn_const (c := (t : Real))).prodMk contMDiffOn_id
+  have hsmooth :=
+    gInv_spacetimeSmooth (I := I) S gInv gInvDt frame hreg i j
+  have hcomp :
+      ContMDiffOn I 𝓘(Real, Real) ⊤
+        ((fun p : Real × M => gInv p.1 p.2 i j) ∘
+          fun y : M => ((t : Real), y)) u := by
+    exact hsmooth.comp hslice (by
+      intro y hy
+      exact ⟨ht, hy⟩)
+  exact (hcomp.contMDiffAt (hu.mem_nhds hx)).mdifferentiableAt (by simp)
+
+/-- Fixed-time spatial differentiability of metric frame components, extracted
+from the spacetime metric regularity package. -/
+theorem MetricFrameSpacetimeRegularityInFrameOnLocal.metricComp_mdiffAt
+    [DecidableEq Idx]
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (gInvDt : Real -> M -> Idx -> Idx -> Real)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    {u : Set M}
+    (hreg :
+      MetricFrameSpacetimeRegularityInFrameOnLocal
+        (I := I) S gInv gInvDt frame u)
+    (t : Realized.RealTimeInterval.RegularTime D)
+    (hu : IsOpen u) {x : M} (hx : x ∈ u) (i j : Idx) :
+    MDifferentiableAt I 𝓘(Real, Real)
+      (fun y : M => metricCompInFrame (I := I) S frame (t : Real) y i j) x := by
+  have ht : (t : Real) ∈ D.carrier := D.regular_subset t.2
+  have hslice :
+      ContMDiffOn I (𝓘(Real, Real).prod I) ⊤
+        (fun y : M => ((t : Real), y)) u := by
+    exact (contMDiffOn_const (c := (t : Real))).prodMk contMDiffOn_id
+  have hsmooth := hreg.frameMetricSpacetimeSmooth i j
+  have hcomp :
+      ContMDiffOn I 𝓘(Real, Real) ⊤
+        ((fun p : Real × M =>
+            metricCompInFrame (I := I) S frame p.1 p.2 i j) ∘
+          fun y : M => ((t : Real), y)) u := by
+    exact hsmooth.comp hslice (by
+      intro y hy
+      exact ⟨ht, hy⟩)
+  exact (hcomp.contMDiffAt (hu.mem_nhds hx)).mdifferentiableAt (by simp)
+
 /-- Covariant derivative components of the inverse metric in a local frame.
 
 For a metric-compatible connection these components vanish:

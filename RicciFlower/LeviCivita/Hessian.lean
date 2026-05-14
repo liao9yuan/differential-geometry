@@ -1,4 +1,4 @@
-import RicciFlower.Realized.ScalarBochner
+import RicciFlower.ScalarBochner
 import RicciFlower.LeviCivita.Torsion
 import RicciFlower.Coordinates.NablaComponents.OneForm
 import RicciFlower.Coordinates.NablaComponents.TwoTensor

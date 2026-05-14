@@ -163,8 +163,18 @@ def OneFormCommutatorEvalAt
           (fun _ : Fin 1 => Y) +
         Ric x (vec2 Y (gradientFun (I := I) g u x))
 
-/-- The traced Hessian-derivative term that should realize `d (Delta u)`. -/
+/-- Intrinsic traced Hessian-derivative term that should realize
+`d (Delta u)`. -/
 def traceNablaHessianForDLap
+    (g : SmoothRiemannianMetric I M)
+    {x : M}
+    (nabla2Du :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (Y : TangentSpace I x) : Real :=
+  metricTraceLastTwo0SAt3 (I := I) g nabla2Du Y
+
+/-- Basis-coordinate version of `traceNablaHessianForDLap`. -/
+def traceNablaHessianForDLapInBasis
     {Idx : Type*} [Fintype Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
     (gInv : Idx -> Idx -> Real)
@@ -175,6 +185,21 @@ def traceNablaHessianForDLap
 
 /-- Pointwise producer saying that the traced Hessian derivative is `d(Delta u)`. -/
 def TraceNablaHessianRealizesDLapAt
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    {x : M}
+    (u : M -> Real)
+    (nabla2Du :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x) :
+    Prop :=
+  ∀ Y : TangentSpace I x,
+    traceNablaHessianForDLap (I := I) g nabla2Du Y =
+      differential1FormFun (I := I) (laplacian (I := I) cov g u) x
+        (fun _ : Fin 1 => Y)
+
+/-- Basis-coordinate compatibility version of
+`TraceNablaHessianRealizesDLapAt`. -/
+def TraceNablaHessianRealizesDLapAtInBasis
     {Idx : Type*} [Fintype Idx]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (g : SmoothRiemannianMetric I M)
@@ -185,9 +210,30 @@ def TraceNablaHessianRealizesDLapAt
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x) :
     Prop :=
   ∀ Y : TangentSpace I x,
-    traceNablaHessianForDLap (I := I) basis gInv nabla2Du Y =
+    traceNablaHessianForDLapInBasis (I := I) basis gInv nabla2Du Y =
       differential1FormFun (I := I) (laplacian (I := I) cov g u) x
         (fun _ : Fin 1 => Y)
+
+/-- A basis-coordinate `d(Delta u)` trace realization follows from the
+intrinsic one. -/
+theorem TraceNablaHessianRealizesDLapAt.toInBasis
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInv)
+    (u : M -> Real)
+    (nabla2Du :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (h : TraceNablaHessianRealizesDLapAt (I := I) cov g u nabla2Du) :
+    TraceNablaHessianRealizesDLapAtInBasis (I := I) cov g basis gInv u nabla2Du := by
+  intro Y
+  unfold traceNablaHessianForDLapInBasis traceNablaOneFormAt
+  rw [← h Y]
+  unfold traceNablaHessianForDLap
+  exact (metricTraceLastTwo0SAt3_eq_sum_basis (I := I) g basis gInv hinv
+    nabla2Du Y).symm
 
 /-- Pointwise producer for the Ricci commutator trace term:
 `tr_g ∇²du(.,.,Y) = tr_g ∇²du(Y,.,.) + Ric(Y, grad u)`. -/
@@ -592,7 +638,7 @@ theorem rough_inner_eq_coord_of_trace
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
     (nabla2Alpha : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       3 x)
-    (hrough : RoughLap0SRealizesMetricTrace (I := I) basis gInv
+    (hrough : RoughLap0SRealizesMetricTraceInBasis (I := I) basis gInv
       (s := 1) roughAlphaX nabla2Alpha) :
     inner0S (I := I) g x 1 roughAlphaX αx =
       oneFormRoughInnerCoord (I := I) basis gInv αx nabla2Alpha := by
@@ -644,13 +690,13 @@ theorem oneForm_norm_product_rule_of_trace
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
     (normSecond :
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
-    (hlap : ScalarLaplacianRealizesTraceAt (I := I) cov g basis gInv
+    (hlap : ScalarLaplacianRealizesTraceAtInBasis (I := I) cov g basis gInv
       (fun y : M => inner0S (I := I) g y 1 (alphaRaw y) (alphaRaw y)) normSecond)
     (htrace : MetricTraceInnerProductRuleAt (I := I) basis gInv
       (alphaRaw x) (nablaAlpha x) nabla2Alpha normSecond) :
     OneFormNormProductRuleInBasis (I := I) cov g basis gInv
       alphaRaw nablaAlpha nabla2Alpha := by
-  unfold OneFormNormProductRuleInBasis ScalarLaplacianRealizesTraceAt at *
+  unfold OneFormNormProductRuleInBasis ScalarLaplacianRealizesTraceAtInBasis at *
   rw [hlap, htrace]
   ring
 
@@ -675,7 +721,7 @@ theorem oneForm_norm_product_rule_of_metric_compatible
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
     (normSecond :
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
-    (hlap : ScalarLaplacianRealizesTraceAt (I := I) cov g basis gInv
+    (hlap : ScalarLaplacianRealizesTraceAtInBasis (I := I) cov g basis gInv
       (fun y : M => inner0S (I := I) g y 1 (alphaRaw y) (alphaRaw y)) normSecond)
     (htrace : MetricTraceInnerProductRuleAt (I := I) basis gInv
       (alphaRaw x) (nablaAlpha x) nabla2Alpha normSecond) :
@@ -728,7 +774,7 @@ theorem oneForm_norm_bochner_coord
       3 x)
     (hprod : OneFormNormProductRuleInBasis (I := I) cov g basis gInv
       α nablaAlpha nabla2Alpha)
-    (_hrough : RoughLap0SRealizesMetricTrace (I := I) basis gInv
+    (_hrough : RoughLap0SRealizesMetricTraceInBasis (I := I) basis gInv
       (s := 1) (roughAlpha x) nabla2Alpha) :
     OneFormNormBochnerAt (I := I) cov g α roughAlpha nablaAlpha x := by
   unfold OneFormNormBochnerAt
@@ -753,7 +799,7 @@ theorem oneForm_norm_bochner_at
       3 x)
     (hprod : OneFormNormProductRuleInBasis (I := I) cov g basis gInv
       α nablaAlpha nabla2Alpha)
-    (hrough : RoughLap0SRealizesMetricTrace (I := I) basis gInv
+    (hrough : RoughLap0SRealizesMetricTraceInBasis (I := I) basis gInv
       (s := 1) (roughAlpha x) nabla2Alpha) :
     OneFormNormBochnerAt (I := I) cov g α roughAlpha nablaAlpha x :=
   oneForm_norm_bochner_coord (I := I) cov g basis gInv hinv
@@ -863,26 +909,33 @@ theorem oneForm_ricci_identity_components
     (_hdu : DuFieldRealizes (I := I) u duSec)
     (_hnabla : NablaOneFormRealizesAt (I := I) cov duSec nablaDu x)
     (_hnabla2 : Nabla2OneFormRealizesAt (I := I) cov duSec nablaDuSec x nabla2Du)
-    (hrough : RoughLap0SRealizesMetricTrace (I := I) basis gInv
-      (s := 1) (roughDu x) nabla2Du)
-    (hdlap : TraceNablaHessianRealizesDLapAt (I := I) cov g basis gInv u nabla2Du)
+    (hrough : RoughLap0SRealizesMetricTrace (I := I) g (s := 1) (roughDu x) nabla2Du)
+    (hdlap : TraceNablaHessianRealizesDLapAt (I := I) cov g u nabla2Du)
     (hcomm : OneFormRicciTraceCommAt (I := I) g Ric u basis gInv nabla2Du) :
     OneFormCommutatorEvalAt (I := I) cov g Ric u roughDu x := by
+  have hroughBasis : RoughLap0SRealizesMetricTraceInBasis (I := I) basis gInv
+      (s := 1) (roughDu x) nabla2Du :=
+    rough_lap_one_form_realizes_metric_trace (I := I) g basis gInv
+      nabla2Du (roughDu x) hrough _hinv
+  have hdlapBasis : TraceNablaHessianRealizesDLapAtInBasis (I := I)
+      cov g basis gInv u nabla2Du :=
+    TraceNablaHessianRealizesDLapAt.toInBasis (I := I) cov g basis gInv
+      _hinv u nabla2Du hdlap
   intro Y
   calc
     roughDu x (fun _ : Fin 1 => Y)
         = roughLap1FormAt (I := I) basis gInv nabla2Du Y := by
           exact roughLap1FormAt_eq_of_realizes (I := I) basis gInv (roughDu x)
-            nabla2Du hrough Y
-    _ = traceNablaHessianForDLap (I := I) basis gInv nabla2Du Y +
+            nabla2Du hroughBasis Y
+    _ = traceNablaHessianForDLapInBasis (I := I) basis gInv nabla2Du Y +
           Ric x (vec2 Y (gradientFun (I := I) g u x)) := by
-          simpa [OneFormRicciTraceCommAt, traceNablaHessianForDLap] using
+          simpa [OneFormRicciTraceCommAt, traceNablaHessianForDLapInBasis] using
             (show OneFormRicciTraceCommWithVectorAt (I := I) Ric basis gInv
               (gradientFun (I := I) g u x) nabla2Du from hcomm) Y
     _ = differential1FormFun (I := I) (laplacian (I := I) cov g u) x
             (fun _ : Fin 1 => Y) +
           Ric x (vec2 Y (gradientFun (I := I) g u x)) := by
-          rw [hdlap Y]
+          rw [hdlapBasis Y]
 
 /-- Ricci trace commutator from the three geometric one-form inputs.
 
@@ -951,9 +1004,8 @@ theorem oneForm_commutator_eval_of_components
     (hdu : DuFieldRealizes (I := I) u duSec)
     (hnabla : NablaOneFormRealizesAt (I := I) cov duSec nablaDu x)
     (hnabla2 : Nabla2OneFormRealizesAt (I := I) cov duSec nablaDuSec x nabla2Du)
-    (hrough : RoughLap0SRealizesMetricTrace (I := I) basis gInv
-      (s := 1) (roughDu x) nabla2Du)
-    (hdlap : TraceNablaHessianRealizesDLapAt (I := I) cov g basis gInv u nabla2Du)
+    (hrough : RoughLap0SRealizesMetricTrace (I := I) g (s := 1) (roughDu x) nabla2Du)
+    (hdlap : TraceNablaHessianRealizesDLapAt (I := I) cov g u nabla2Du)
     (hcomm : OneFormRicciTraceCommAt (I := I) g Ric u basis gInv nabla2Du) :
     OneFormCommutatorEvalAt (I := I) cov g Ric u roughDu x :=
   oneForm_ricci_identity_components (I := I) cov g Ric Rm13 u roughDu
@@ -989,9 +1041,8 @@ theorem oneForm_commutator_eval_of_lc
     (hthird : OneFormThirdCovDerivCommAt (I := I) Rm13
       (differential1FormFun (I := I) u x) nabla2Du)
     (hSkew : Rm13MetricSkewAt (I := I) g x (Rm13 x))
-    (hrough : RoughLap0SRealizesMetricTrace (I := I) basis gInv
-      (s := 1) (roughDu x) nabla2Du)
-    (hdlap : TraceNablaHessianRealizesDLapAt (I := I) cov g basis gInv u nabla2Du) :
+    (hrough : RoughLap0SRealizesMetricTrace (I := I) g (s := 1) (roughDu x) nabla2Du)
+    (hdlap : TraceNablaHessianRealizesDLapAt (I := I) cov g u nabla2Du) :
     OneFormCommutatorEvalAt (I := I) cov g Ric u roughDu x :=
   oneForm_commutator_eval_of_components (I := I) cov g Ric Rm13 u roughDu
     basis gInv duSec nablaDu nablaDuSec nabla2Du
@@ -1084,15 +1135,14 @@ theorem fundamental_bochner
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
     (normSecond :
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x)
-    (hlap : ScalarLaplacianRealizesTraceAt (I := I) cov g basis gInvAt
+    (hlap : ScalarLaplacianRealizesTraceAt (I := I) cov g
       (fun y : M =>
         inner0S (I := I) g y 1
           (differential1FormFun (I := I) u y)
           (differential1FormFun (I := I) u y)) normSecond)
     (htrace : MetricTraceInnerProductRuleAt (I := I) basis gInvAt
       (differential1FormFun (I := I) u x) (nablaDu x) nabla2Du normSecond)
-    (hrough : RoughLap0SRealizesMetricTrace (I := I) basis gInvAt
-      (s := 1) (roughDu x) nabla2Du)
+    (hrough : RoughLap0SRealizesMetricTrace (I := I) g (s := 1) (roughDu x) nabla2Du)
     (hcomm : OneFormCommutatorEvalAt (I := I) cov g Ric u roughDu x)
     (hHessComp : ∀ slots : Fin 2 -> Idx,
       component0S (I := I) basis (nablaDu x) slots =
@@ -1103,13 +1153,28 @@ theorem fundamental_bochner
           (gradientFun (I := I) g u x) +
         hessianNormSq (I := I) g Hess x +
           ricciGradGrad (I := I) Ric g u x := by
+  have hlapBasis : ScalarLaplacianRealizesTraceAtInBasis (I := I) cov g basis gInvAt
+      (fun y : M =>
+        inner0S (I := I) g y 1
+          (differential1FormFun (I := I) u y)
+          (differential1FormFun (I := I) u y)) normSecond :=
+    ScalarLaplacianRealizesTraceAt.toInBasis (I := I) cov g basis gInvAt
+      hinv
+      (fun y : M =>
+        inner0S (I := I) g y 1
+          (differential1FormFun (I := I) u y)
+          (differential1FormFun (I := I) u y)) normSecond hlap
+  have hroughBasis : RoughLap0SRealizesMetricTraceInBasis (I := I) basis gInvAt
+      (s := 1) (roughDu x) nabla2Du :=
+    rough_lap_one_form_realizes_metric_trace (I := I) g basis gInvAt
+      nabla2Du (roughDu x) hrough hinv
   refine half_laplacian_gradNormSq_eq (I := I) cov g Ric Rm04 gInvFrame frame
     hRic04 u Hess nablaDu roughDu x ?_ ?_ ?_
   · exact oneForm_norm_bochner_at (I := I) cov g basis gInvAt hinv
       (differential1FormFun (I := I) u) roughDu nablaDu nabla2Du
       (oneForm_norm_product_rule_of_trace (I := I) cov g basis gInvAt
-        (differential1FormFun (I := I) u) nablaDu nabla2Du normSecond hlap htrace)
-      hrough
+        (differential1FormFun (I := I) u) nablaDu nabla2Du normSecond hlapBasis htrace)
+      hroughBasis
   · exact oneForm_commutator_pair_of_eval (I := I) cov g Ric u roughDu x hcomm
   · exact hessian_norm_realizes_of_nabla_du (I := I) g basis Hess nablaDu hHessComp
 
@@ -1154,8 +1219,7 @@ theorem fundamental_bochner_of_terms
         metricTrace0S2InBasis (I := I) basis gInvAt normSecond Fin.elim0)
     (hsecond : OneFormNormSecondProductInBasis (I := I) basis gInvAt
       (differential1FormFun (I := I) u x) (nablaDu x) nabla2Du normSecond)
-    (hrough : RoughLap0SRealizesMetricTrace (I := I) basis gInvAt
-      (s := 1) (roughDu x) nabla2Du)
+    (hrough : RoughLap0SRealizesMetricTrace (I := I) g (s := 1) (roughDu x) nabla2Du)
     (hcomm : OneFormCommutatorEvalAt (I := I) cov g Ric u roughDu x) :
     (1 / 2 : Real) * laplacian (I := I) cov g (gradNormSq (I := I) g u) x =
       g.inner x
@@ -1166,11 +1230,15 @@ theorem fundamental_bochner_of_terms
   refine fundamental_bochner (I := I) cov g Ric Rm04 gInvFrame frame
     hRic04 u Hess nablaDu roughDu basis gInvAt hinv nabla2Du normSecond
     ?_ ?_ hrough hcomm ?_
-  · exact scalar_laplacian_trace_of_hessian (I := I) cov g basis gInvAt
+  · exact scalar_laplacian_trace_of_hessian (I := I) cov g
       (fun y : M =>
         inner0S (I := I) g y 1
           (differential1FormFun (I := I) u y)
-          (differential1FormFun (I := I) u y)) normSecond hlapTrace
+          (differential1FormFun (I := I) u y)) normSecond
+      (by
+        rw [hlapTrace]
+        exact metricTrace0S2InBasis_eq_metricTrace (I := I) g basis gInvAt
+          hinv normSecond Fin.elim0)
   · exact oneForm_norm_second_product_of_metric_compatible (I := I) cov g
       basis gInvAt duSec (differential1FormFun (I := I) u) nablaDu
       nablaDuSec nabla2Du normSecond hsecond
@@ -1230,8 +1298,7 @@ theorem fundamental_bochner_of_terms_of_normSecond_realizes
             (differential1FormFun (I := I) u z)) y) x)
     (hsecond : OneFormNormSecondProductInBasis (I := I) basis gInvAt
       (differential1FormFun (I := I) u x) (nablaDu x) nabla2Du normSecond)
-    (hrough : RoughLap0SRealizesMetricTrace (I := I) basis gInvAt
-      (s := 1) (roughDu x) nabla2Du)
+    (hrough : RoughLap0SRealizesMetricTrace (I := I) g (s := 1) (roughDu x) nabla2Du)
     (hcomm : OneFormCommutatorEvalAt (I := I) cov g Ric u roughDu x) :
     (1 / 2 : Real) * laplacian (I := I) cov g (gradNormSq (I := I) g u) x =
       g.inner x
@@ -1239,7 +1306,7 @@ theorem fundamental_bochner_of_terms_of_normSecond_realizes
           (gradientFun (I := I) g u x) +
         hessianNormSq (I := I) g Hess x +
           ricciGradGrad (I := I) Ric g u x := by
-  have hlap : ScalarLaplacianRealizesTraceAt (I := I) cov g basis gInvAt
+  have hlapIntrinsic : ScalarLaplacianRealizesTraceAt (I := I) cov g
       (fun y : M =>
         inner0S (I := I) g y 1
           (differential1FormFun (I := I) u y)
@@ -1254,7 +1321,7 @@ theorem fundamental_bochner_of_terms_of_normSecond_realizes
         normDuSec normSecondSec X hfields hnormDu hnormHess hnormGrad
   refine fundamental_bochner (I := I) cov g Ric Rm04 gInvFrame frame
     hRic04 u Hess nablaDu roughDu basis gInvAt hinv nabla2Du normSecond
-    hlap ?_ hrough hcomm ?_
+    hlapIntrinsic ?_ hrough hcomm ?_
   · exact oneForm_norm_second_product_of_metric_compatible (I := I) cov g
       basis gInvAt duSec (differential1FormFun (I := I) u) nablaDu
       nablaDuSec nabla2Du normSecond hsecond
@@ -1292,16 +1359,15 @@ theorem fundamental_bochner_of_components
     (hdu : DuFieldRealizes (I := I) u duSec)
     (hnabla : NablaOneFormRealizesAt (I := I) cov duSec nablaDu x)
     (hnabla2 : Nabla2OneFormRealizesAt (I := I) cov duSec nablaDuSec x nabla2Du)
-    (hlap : ScalarLaplacianRealizesTraceAt (I := I) cov g basis gInvAt
+    (hlap : ScalarLaplacianRealizesTraceAt (I := I) cov g
       (fun y : M =>
         inner0S (I := I) g y 1
           (differential1FormFun (I := I) u y)
           (differential1FormFun (I := I) u y)) normSecond)
     (htrace : MetricTraceInnerProductRuleAt (I := I) basis gInvAt
       (differential1FormFun (I := I) u x) (nablaDu x) nabla2Du normSecond)
-    (hrough : RoughLap0SRealizesMetricTrace (I := I) basis gInvAt
-      (s := 1) (roughDu x) nabla2Du)
-    (hdlap : TraceNablaHessianRealizesDLapAt (I := I) cov g basis gInvAt u nabla2Du)
+    (hrough : RoughLap0SRealizesMetricTrace (I := I) g (s := 1) (roughDu x) nabla2Du)
+    (hdlap : TraceNablaHessianRealizesDLapAt (I := I) cov g u nabla2Du)
     (hricciComm : OneFormRicciTraceCommAt (I := I) g Ric u basis gInvAt nabla2Du)
     (hHessComp : ∀ slots : Fin 2 -> Idx,
       component0S (I := I) basis (nablaDu x) slots =
@@ -1358,17 +1424,16 @@ theorem fundamental_bochner_of_lc
     (hnabla2 : Nabla2OneFormRealizesAt (I := I)
       (RicciFlower.LeviCivita.leviCivitaConnectionOfMetric (I := I) g) duSec nablaDuSec x nabla2Du)
     (hlap : ScalarLaplacianRealizesTraceAt (I := I)
-      (RicciFlower.LeviCivita.leviCivitaConnectionOfMetric (I := I) g) g basis gInvAt
+      (RicciFlower.LeviCivita.leviCivitaConnectionOfMetric (I := I) g) g
       (fun y : M =>
         inner0S (I := I) g y 1
           (differential1FormFun (I := I) u y)
           (differential1FormFun (I := I) u y)) normSecond)
     (htrace : MetricTraceInnerProductRuleAt (I := I) basis gInvAt
       (differential1FormFun (I := I) u x) (nablaDu x) nabla2Du normSecond)
-    (hrough : RoughLap0SRealizesMetricTrace (I := I) basis gInvAt
-      (s := 1) (roughDu x) nabla2Du)
+    (hrough : RoughLap0SRealizesMetricTrace (I := I) g (s := 1) (roughDu x) nabla2Du)
     (hdlap : TraceNablaHessianRealizesDLapAt (I := I)
-      (RicciFlower.LeviCivita.leviCivitaConnectionOfMetric (I := I) g) g basis gInvAt u nabla2Du)
+      (RicciFlower.LeviCivita.leviCivitaConnectionOfMetric (I := I) g) g u nabla2Du)
     (hsymm : OneFormLastTwoSymmAt (I := I) nabla2Du)
     (hthird : OneFormThirdCovDerivCommAt (I := I) Rm13
       (differential1FormFun (I := I) u x) nabla2Du)
@@ -1446,10 +1511,9 @@ theorem fundamental_bochner_of_lc_terms
         metricTrace0S2InBasis (I := I) basis gInvAt normSecond Fin.elim0)
     (hsecond : OneFormNormSecondProductInBasis (I := I) basis gInvAt
       (differential1FormFun (I := I) u x) (nablaDu x) nabla2Du normSecond)
-    (hrough : RoughLap0SRealizesMetricTrace (I := I) basis gInvAt
-      (s := 1) (roughDu x) nabla2Du)
+    (hrough : RoughLap0SRealizesMetricTrace (I := I) g (s := 1) (roughDu x) nabla2Du)
     (hdlap : TraceNablaHessianRealizesDLapAt (I := I)
-      (RicciFlower.LeviCivita.leviCivitaConnectionOfMetric (I := I) g) g basis gInvAt u nabla2Du)
+      (RicciFlower.LeviCivita.leviCivitaConnectionOfMetric (I := I) g) g u nabla2Du)
     (hsymm : OneFormLastTwoSymmAt (I := I) nabla2Du)
     (hthird : OneFormThirdCovDerivCommAt (I := I) Rm13
       (differential1FormFun (I := I) u x) nabla2Du)
@@ -1469,11 +1533,15 @@ theorem fundamental_bochner_of_lc_terms
     basis gInvAt hinv duSec nablaDuSec nabla2Du normSecond
     hdu hnabla hnabla2 ?_ ?_ hrough hdlap hsymm hthird hSkew ?_
   · exact scalar_laplacian_trace_of_hessian (I := I)
-      (RicciFlower.LeviCivita.leviCivitaConnectionOfMetric (I := I) g) g basis gInvAt
+      (RicciFlower.LeviCivita.leviCivitaConnectionOfMetric (I := I) g) g
       (fun y : M =>
         inner0S (I := I) g y 1
           (differential1FormFun (I := I) u y)
-          (differential1FormFun (I := I) u y)) normSecond hlapTrace
+          (differential1FormFun (I := I) u y)) normSecond
+      (by
+        rw [hlapTrace]
+        exact metricTrace0S2InBasis_eq_metricTrace (I := I) g basis gInvAt
+          hinv normSecond Fin.elim0)
   · exact oneForm_norm_second_product_of_metric_compatible (I := I)
       (RicciFlower.LeviCivita.leviCivitaConnectionOfMetric (I := I) g) g
       basis gInvAt duSec (differential1FormFun (I := I) u) nablaDu
@@ -1541,10 +1609,9 @@ theorem fundamental_bochner_of_lc_terms_of_normSecond_realizes
             (differential1FormFun (I := I) u z)) y) x)
     (hsecond : OneFormNormSecondProductInBasis (I := I) basis gInvAt
       (differential1FormFun (I := I) u x) (nablaDu x) nabla2Du normSecond)
-    (hrough : RoughLap0SRealizesMetricTrace (I := I) basis gInvAt
-      (s := 1) (roughDu x) nabla2Du)
+    (hrough : RoughLap0SRealizesMetricTrace (I := I) g (s := 1) (roughDu x) nabla2Du)
     (hdlap : TraceNablaHessianRealizesDLapAt (I := I)
-      (RicciFlower.LeviCivita.leviCivitaConnectionOfMetric (I := I) g) g basis gInvAt u nabla2Du)
+      (RicciFlower.LeviCivita.leviCivitaConnectionOfMetric (I := I) g) g u nabla2Du)
     (hsymm : OneFormLastTwoSymmAt (I := I) nabla2Du)
     (hthird : OneFormThirdCovDerivCommAt (I := I) Rm13
       (differential1FormFun (I := I) u x) nabla2Du)
@@ -1559,8 +1626,8 @@ theorem fundamental_bochner_of_lc_terms_of_normSecond_realizes
           (gradientFun (I := I) g u x) +
         hessianNormSq (I := I) g Hess x +
           ricciGradGrad (I := I) Ric g u x := by
-  have hlap : ScalarLaplacianRealizesTraceAt (I := I)
-      (RicciFlower.LeviCivita.leviCivitaConnectionOfMetric (I := I) g) g basis gInvAt
+  have hlapIntrinsic : ScalarLaplacianRealizesTraceAt (I := I)
+      (RicciFlower.LeviCivita.leviCivitaConnectionOfMetric (I := I) g) g
       (fun y : M =>
         inner0S (I := I) g y 1
           (differential1FormFun (I := I) u y)
@@ -1578,7 +1645,7 @@ theorem fundamental_bochner_of_lc_terms_of_normSecond_realizes
   refine fundamental_bochner_of_lc (I := I) g Ric Rm13 Rm04
     gInvFrame frame hRm13 hRic13 hRic04 u Hess nablaDu roughDu
     basis gInvAt hinv duSec nablaDuSec nabla2Du normSecond
-    hdu hnabla hnabla2 hlap ?_ hrough hdlap hsymm hthird hSkew ?_
+    hdu hnabla hnabla2 hlapIntrinsic ?_ hrough hdlap hsymm hthird hSkew ?_
   · exact oneForm_norm_second_product_of_metric_compatible (I := I)
       (RicciFlower.LeviCivita.leviCivitaConnectionOfMetric (I := I) g) g
       basis gInvAt duSec (differential1FormFun (I := I) u) nablaDu
@@ -1638,10 +1705,9 @@ theorem fundamental_bochner_of_lc_terms_of_rm04_skew
         metricTrace0S2InBasis (I := I) basis gInvAt normSecond Fin.elim0)
     (hsecond : OneFormNormSecondProductInBasis (I := I) basis gInvAt
       (differential1FormFun (I := I) u x) (nablaDu x) nabla2Du normSecond)
-    (hrough : RoughLap0SRealizesMetricTrace (I := I) basis gInvAt
-      (s := 1) (roughDu x) nabla2Du)
+    (hrough : RoughLap0SRealizesMetricTrace (I := I) g (s := 1) (roughDu x) nabla2Du)
     (hdlap : TraceNablaHessianRealizesDLapAt (I := I)
-      (RicciFlower.LeviCivita.leviCivitaConnectionOfMetric (I := I) g) g basis gInvAt u nabla2Du)
+      (RicciFlower.LeviCivita.leviCivitaConnectionOfMetric (I := I) g) g u nabla2Du)
     (hsymm : OneFormLastTwoSymmAt (I := I) nabla2Du)
     (hthird : OneFormThirdCovDerivCommAt (I := I) Rm13
       (differential1FormFun (I := I) u x) nabla2Du)

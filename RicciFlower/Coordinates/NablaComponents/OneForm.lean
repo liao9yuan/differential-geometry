@@ -308,7 +308,7 @@ private theorem extDerivFun_congr_eventually
   unfold extDerivFun
   rw [hmf, hx]
 
-private theorem oneForm_pair_coordFrame_eventually
+theorem oneForm_pair_coordFrame_eventually
     (Z : (x : M) -> TangentSpace I x)
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 1)

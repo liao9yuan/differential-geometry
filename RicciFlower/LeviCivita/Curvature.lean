@@ -1,6 +1,7 @@
 import RicciFlower.Realized.CurvatureComponents
 import RicciFlower.Bianchi
 import RicciFlower.LeviCivita.Torsion
+import RicciFlower.Coordinates.NablaComponents.OneForm
 import RicciFlower.Coordinates.NablaComponents.Tensor0S
 import RicciFlower.Tensor.RSTensor.NablaOnTensors.Connection
 import RicciFlower.VectorBundle.PartialMfderiv
@@ -35,6 +36,7 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I 3 M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [Module.Finite Real E]
 variable [SigmaCompactSpace M] [T2Space M]
 
 private theorem directionalDeriv_congr_nhds
@@ -58,6 +60,77 @@ private theorem directionalDeriv_add_fun
     (extDerivFun (I := I) f x) (X x) + (extDerivFun (I := I) h x) (X x)
   rw [extDerivFun_add hf hh]
   rw [ContinuousLinearMap.add_apply]
+
+private theorem directionalDeriv_sub_fun
+    (X : (p : M) -> TangentSpace I p) {f h : M -> Real} (x : M)
+    (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
+    (hh : MDifferentiableAt I 𝓘(Real, Real) h x) :
+    directionalDeriv (I := I) X (fun y : M => f y - h y) x =
+        directionalDeriv (I := I) X f x -
+        directionalDeriv (I := I) X h x := by
+  unfold directionalDeriv
+  change (extDerivFun (I := I) (f - h) x) (X x) =
+    (extDerivFun (I := I) f x) (X x) - (extDerivFun (I := I) h x) (X x)
+  have hsub :
+      extDerivFun (I := I) (f - h) x =
+        extDerivFun (I := I) f x - extDerivFun (I := I) h x := by
+    unfold extDerivFun
+    ext v
+    simp [mfderiv_sub hf hh, NormedSpace.fromTangentSpace]
+    rfl
+  rw [hsub]
+  rw [ContinuousLinearMap.sub_apply]
+
+private theorem oneForm_eval_const_add {x : M}
+    (alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
+    (A B : TangentSpace I x) :
+    alpha (fun _ : Fin 1 => A + B) =
+      alpha (fun _ : Fin 1 => A) + alpha (fun _ : Fin 1 => B) := by
+  rw [← cotangentToDual_apply (I := I) alpha (A + B)]
+  rw [← cotangentToDual_apply (I := I) alpha A]
+  rw [← cotangentToDual_apply (I := I) alpha B]
+  exact map_add (cotangentToDual (I := I) alpha) A B
+
+private theorem oneForm_eval_const_sub {x : M}
+    (alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
+    (A B : TangentSpace I x) :
+    alpha (fun _ : Fin 1 => A - B) =
+      alpha (fun _ : Fin 1 => A) - alpha (fun _ : Fin 1 => B) := by
+  rw [← cotangentToDual_apply (I := I) alpha (A - B)]
+  rw [← cotangentToDual_apply (I := I) alpha A]
+  rw [← cotangentToDual_apply (I := I) alpha B]
+  exact map_sub (cotangentToDual (I := I) alpha) A B
+
+private theorem oneForm_eval_const_neg {x : M}
+    (alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
+    (A : TangentSpace I x) :
+    alpha (fun _ : Fin 1 => -A) = -alpha (fun _ : Fin 1 => A) := by
+  rw [← cotangentToDual_apply (I := I) alpha (-A)]
+  rw [← cotangentToDual_apply (I := I) alpha A]
+  exact map_neg (cotangentToDual (I := I) alpha) A
+
+private theorem oneForm_eval_const_smul {x : M}
+    (alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
+    (c : Real) (A : TangentSpace I x) :
+    alpha (fun _ : Fin 1 => c • A) = c * alpha (fun _ : Fin 1 => A) := by
+  rw [← cotangentToDual_apply (I := I) alpha (c • A)]
+  rw [← cotangentToDual_apply (I := I) alpha A]
+  simp [smul_eq_mul]
+
+private theorem oneForm_eval_const_sub_add_sub {x : M}
+    (alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
+    (A B C D : TangentSpace I x) :
+    alpha (fun _ : Fin 1 => A - B + C - D) =
+      alpha (fun _ : Fin 1 => A) - alpha (fun _ : Fin 1 => B) +
+        alpha (fun _ : Fin 1 => C) - alpha (fun _ : Fin 1 => D) := by
+  rw [oneForm_eval_const_sub (I := I) alpha (A - B + C) D]
+  rw [oneForm_eval_const_add (I := I) alpha (A - B) C]
+  rw [oneForm_eval_const_sub (I := I) alpha A B]
 
 private theorem mdifferentiableAt_metric_inner
     (g : SmoothRiemannianMetric I M)
@@ -205,6 +278,145 @@ private theorem nabla0SFun_two_eval_smooth_slots
         (A x) (vec2 (Y x) ((cov (fun p : M => Z p) x) (X x))) := by
       rw [hscalar, hsum]
       ring
+
+private theorem cov_smoothSections_apply_contMDiffAt_one
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
+      (1 : WithTop ℕ∞))
+    (X Y : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    (x : M) :
+    ContMDiffAt I (I.prod 𝓘(Real, E)) (1 : WithTop ℕ∞)
+      (fun p : M =>
+        (⟨p, (cov (fun q : M => Y q) p) (X p)⟩ :
+          TotalSpace E (TangentSpace I : M -> Type _))) x := by
+  haveI : IsManifold I ((1 : WithTop ℕ∞) + 1) M := by
+    have h : ((1 : WithTop ℕ∞) + 1) = (2 : WithTop ℕ∞) := by
+      norm_num
+    exact h.symm ▸ (inferInstance : IsManifold I 2 M)
+  have hY :
+      ContMDiffOn I (I.prod 𝓘(Real, E)) ((1 : WithTop ℕ∞) + 1)
+        (fun p : M =>
+          (⟨p, Y p⟩ : TotalSpace E (TangentSpace I : M -> Type _))) Set.univ :=
+    (Y.contMDiff.of_le
+      (by
+        change ((2 : ℕ∞) : WithTop ℕ∞) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞)
+        exact WithTop.coe_le_coe.2 le_top)).contMDiffOn
+  have hcovY :
+      ContMDiffOn I (I.prod 𝓘(Real, E →L[Real] E)) (1 : WithTop ℕ∞)
+        (fun p : M =>
+          (⟨p, cov (fun q : M => Y q) p⟩ :
+            TotalSpace (E →L[Real] E)
+              (fun p : M =>
+                TangentSpace I p →L[Real] TangentSpace I p))) Set.univ :=
+    (hcov isOpen_univ).contMDiff hY
+  have hX :
+      ContMDiffOn I (I.prod 𝓘(Real, E)) (1 : WithTop ℕ∞)
+        (fun p : M =>
+          (⟨p, X p⟩ : TotalSpace E (TangentSpace I : M -> Type _))) Set.univ :=
+    (X.contMDiff.of_le
+      (by
+        change ((1 : ℕ∞) : WithTop ℕ∞) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞)
+        exact WithTop.coe_le_coe.2 le_top)).contMDiffOn
+  exact (hcovY.clm_bundle_apply hX).contMDiffAt (by simp)
+
+private theorem coordinateFrame_coeff_mdiffAt_of_contMDiffAt_one
+    (Z : (x : M) -> TangentSpace I x) {x₀ : M}
+    (hZ : ContMDiffAt I (I.prod 𝓘(Real, E)) (1 : WithTop ℕ∞)
+      (fun y : M => (⟨y, Z y⟩ :
+        TotalSpace E (TangentSpace I : M -> Type _))) x₀)
+    (j : CoordinateIdx (𝕜 := Real) E) :
+    MDifferentiableAt I 𝓘(Real, Real)
+      (fun y : M =>
+        (coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff j y (Z y)) x₀ := by
+  let e := coordinateTrivializationAt (I := I) x₀
+  have hx : x₀ ∈ e.baseSet := by
+    simp [e, coordinateTrivializationAt]
+  have hcoeff :
+      ContMDiffAt I 𝓘(Real, Real) (1 : WithTop ℕ∞)
+        (fun y : M =>
+          (coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff j y (Z y)) x₀ := by
+    have hraw :=
+      contMDiffAt_localFrame_coeff
+        (I := I) (V := TangentSpace I) (e := e)
+        (b := Module.finBasis Real E) (s := Z)
+        (k := (1 : WithTop ℕ∞)) hx hZ j
+    simpa [e, coordinateTrivializationAt, coordinateFrameAt_isLocalFrame_one,
+      coordinateFrameAt] using hraw
+  exact hcoeff.mdifferentiableAt (by norm_num : (1 : WithTop ℕ∞) ≠ 0)
+
+private theorem oneForm_eval_moving_C1_slot_mdiffAt
+    (alpha : OneFormSection (I := I) (M := M))
+    (Z : (x : M) -> TangentSpace I x) {x₀ : M}
+    (hZ : ContMDiffAt I (I.prod 𝓘(Real, E)) (1 : WithTop ℕ∞)
+      (fun y : M =>
+        (⟨y, Z y⟩ : TotalSpace E (TangentSpace I : M -> Type _))) x₀) :
+    MDifferentiableAt I 𝓘(Real, Real)
+      (fun y : M => alpha y (fun _ : Fin 1 => Z y)) x₀ := by
+  classical
+  let hframe := coordinateFrameAt_isLocalFrame_one (I := I) x₀
+  let zfun : CoordinateIdx (𝕜 := Real) E -> M -> Real :=
+    fun j y => hframe.coeff j y (Z y)
+  let afun : CoordinateIdx (𝕜 := Real) E -> M -> Real :=
+    fun j y => alpha y (fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ j y)
+  have hsum :
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun y : M =>
+          ∑ j : CoordinateIdx (𝕜 := Real) E, zfun j y * afun j y) x₀ := by
+    have hraw :=
+      (MDifferentiableAt.sum (t := Finset.univ)
+        (f := fun j : CoordinateIdx (𝕜 := Real) E =>
+          fun y : M => zfun j y * afun j y)
+        (fun j _ =>
+          (coordinateFrame_coeff_mdiffAt_of_contMDiffAt_one (I := I) Z hZ j).mul
+            ((RicciFlower.Coordinates.oneForm_eval_coordinateFrame_contMDiffAt
+              (I := I) alpha x₀ j).mdifferentiableAt (by simp))))
+    have hfun :
+        (fun y : M =>
+          ∑ j : CoordinateIdx (𝕜 := Real) E, zfun j y * afun j y) =
+        Finset.univ.sum (fun j : CoordinateIdx (𝕜 := Real) E =>
+          fun y : M => zfun j y * afun j y) := by
+      funext y
+      simp
+    rw [hfun]
+    exact hraw
+  refine hsum.congr_of_eventuallyEq ?_
+  simpa [zfun, afun, hframe] using
+    (RicciFlower.Coordinates.oneForm_pair_coordFrame_eventually
+      (I := I) Z alpha x₀)
+
+private theorem nablaOneFormSectionRealizes_eval_moving_C1_slot
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    (alpha : OneFormSection (I := I) (M := M))
+    (nablaAlpha : TwoTensorSection (I := I) (M := M))
+    (hnabla : NablaOneFormSectionRealizes (I := I) cov alpha nablaAlpha)
+    (Z : (x : M) -> TangentSpace I x)
+    (x : M)
+    (hZ : ContMDiffAt I (I.prod 𝓘(Real, E)) (1 : WithTop ℕ∞)
+      (fun y : M =>
+        (⟨y, Z y⟩ : TotalSpace E (TangentSpace I : M -> Type _))) x) :
+    nablaAlpha x (vec2 (X x) (Z x)) =
+      extDerivFun (I := I) (fun y : M => alpha y (fun _ : Fin 1 => Z y)) x (X x) -
+        alpha x (fun _ : Fin 1 => (cov Z x) (X x)) := by
+  have hraw := nabla0SFun_one_eval_coordFrame_moving_raw
+    (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+    cov X Z alpha x
+    (modelDeriv_eq_coordDeriv0SAt (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) X x alpha)
+    (fun j => coordinateFrame_coeff_mdiffAt_of_contMDiffAt_one
+      (I := I) Z hZ j)
+    (fun j => (RicciFlower.Coordinates.oneForm_eval_coordinateFrame_contMDiffAt
+      (I := I) alpha x j).mdifferentiableAt (by simp))
+    (hZ.mdifferentiableAt (by norm_num : (1 : WithTop ℕ∞) ≠ 0))
+  have hreal := hnabla x X (Z x)
+  calc
+    nablaAlpha x (vec2 (X x) (Z x))
+        = (nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+            1 cov X alpha x) (fun _ : Fin 1 => Z x) := hreal
+    _ = extDerivFun (I := I) (fun y : M => alpha y (fun _ : Fin 1 => Z y)) x (X x) -
+        alpha x (fun _ : Fin 1 => (cov Z x) (X x)) := hraw
 
 private theorem mdifferentiableAt_tangentConstAt_of_mem
     (x₀ : M) (v : TangentSpace I x₀) {p : M}
@@ -749,6 +961,8 @@ theorem rm13MetricSkewAt_of_leviCivita_realizes
 
 private theorem oneFormThirdCovDerivCommAt_of_leviCivita_higherOrder
     (g : SmoothRiemannianMetric I M)
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
+      (leviCivitaConnectionOfMetric (I := I) g) (1 : WithTop ℕ∞))
     (Rm13 : Tensor13Section (I := I) (M := M))
     (alphaSec : OneFormSection (I := I) (M := M))
     (nablaAlphaSec : TwoTensorSection (I := I) (M := M))
@@ -764,14 +978,286 @@ private theorem oneFormThirdCovDerivCommAt_of_leviCivita_higherOrder
       (leviCivitaConnectionOfMetric (I := I) g) alphaSec nablaAlphaSec x
       nabla2Alpha) :
     OneFormThirdCovDerivCommAt (I := I) Rm13 alpha nabla2Alpha := by
-  -- Frontier: prove this one-form Ricci identity bridge inside RicciFlower,
-  -- without importing the external geometry namespace.
-  sorry
+  classical
+  intro X Y Z
+  let cov := leviCivitaConnectionOfMetric (I := I) g
+  obtain ⟨Xsec, hXx⟩ :=
+    ContMDiffSection.exists_eq_at
+      (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞)) x X
+  obtain ⟨Ysec, hYx⟩ :=
+    ContMDiffSection.exists_eq_at
+      (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞)) x Y
+  obtain ⟨Zsec, hZx⟩ :=
+    ContMDiffSection.exists_eq_at
+      (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞)) x Z
+  let Xf : (p : M) -> TangentSpace I p := fun p => Xsec p
+  let Yf : (p : M) -> TangentSpace I p := fun p => Ysec p
+  let Zf : (p : M) -> TangentSpace I p := fun p => Zsec p
+  let YZc : (p : M) -> TangentSpace I p := fun p => (cov Zf p) (Yf p)
+  let XZc : (p : M) -> TangentSpace I p := fun p => (cov Zf p) (Xf p)
+  let XYv : TangentSpace I x := (cov Yf x) (Xf x)
+  let YXv : TangentSpace I x := (cov Xf x) (Yf x)
+  let bracket : TangentSpace I x := VectorField.mlieBracket I Xf Yf x
+  let f : M -> Real := fun p => alphaSec p (fun _ : Fin 1 => Zf p)
+  let gYZ : M -> Real := fun p => alphaSec p (fun _ : Fin 1 => YZc p)
+  let gXZ : M -> Real := fun p => alphaSec p (fun _ : Fin 1 => XZc p)
+  have hnabla := nabla2OneFormRealizesAt_first (I := I) cov alphaSec
+    nablaAlphaSec x nabla2Alpha hnabla2
+  have hXmd : MDiffAt (T% Xf) x :=
+    Xsec.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
+  have hYmd : MDiffAt (T% Yf) x :=
+    Ysec.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
+  have hX2 :
+      ContMDiffAt I (I.prod 𝓘(Real, E)) (minSmoothness Real 2)
+        (T% Xf) x := by
+    exact Xsec.contMDiff.contMDiffAt.of_le (by
+      rw [minSmoothness_of_isRCLikeNormedField]
+      exact WithTop.coe_le_coe.2 (le_top : (2 : ℕ∞) ≤ (⊤ : ℕ∞)))
+  have hY2 :
+      ContMDiffAt I (I.prod 𝓘(Real, E)) (minSmoothness Real 2)
+        (T% Yf) x := by
+    exact Ysec.contMDiff.contMDiffAt.of_le (by
+      rw [minSmoothness_of_isRCLikeNormedField]
+      exact WithTop.coe_le_coe.2 (le_top : (2 : ℕ∞) ≤ (⊤ : ℕ∞)))
+  have hZ1_at (p : M) :
+      ContMDiffAt I (I.prod 𝓘(Real, E)) (1 : WithTop ℕ∞)
+        (fun y : M =>
+          (⟨y, Zf y⟩ : TotalSpace E (TangentSpace I : M -> Type _))) p := by
+    exact Zsec.contMDiff.contMDiffAt.of_le (by
+      change ((1 : ℕ∞) : WithTop ℕ∞) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞)
+      exact WithTop.coe_le_coe.2 le_top)
+  have hYZc1 :
+      ContMDiffAt I (I.prod 𝓘(Real, E)) (1 : WithTop ℕ∞)
+        (fun p : M =>
+          (⟨p, YZc p⟩ : TotalSpace E (TangentSpace I : M -> Type _))) x := by
+    simpa [YZc, cov, Yf, Zf] using
+      cov_smoothSections_apply_contMDiffAt_one (I := I) cov hcov Ysec Zsec x
+  have hXZc1 :
+      ContMDiffAt I (I.prod 𝓘(Real, E)) (1 : WithTop ℕ∞)
+        (fun p : M =>
+          (⟨p, XZc p⟩ : TotalSpace E (TangentSpace I : M -> Type _))) x := by
+    simpa [XZc, cov, Xf, Zf] using
+      cov_smoothSections_apply_contMDiffAt_one (I := I) cov hcov Xsec Zsec x
+  have hf_smooth : ContMDiff I 𝓘(Real, Real) ∞ f := by
+    let Zslot : Fin 1 -> ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M -> Type _) := fun _ => Zsec
+    simpa [f, Zf, Zslot] using
+      TensorMultilinear.contMDiff_tensor0SField_apply
+        (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        (n := 1) alphaSec Zslot
+  have hf2 : ContMDiffAt I 𝓘(Real, Real) (minSmoothness Real 2) f x := by
+    exact hf_smooth.contMDiffAt.of_le (by
+      rw [minSmoothness_of_isRCLikeNormedField]
+      exact WithTop.coe_le_coe.2 (le_top : (2 : ℕ∞) ≤ (⊤ : ℕ∞)))
+  have hYf_mdiff :
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun p : M => directionalDeriv (I := I) Yf f p) x := by
+    simpa [directionalDeriv, Yf] using
+      (extDerivFun_apply_contMDiffAt I hf_smooth.contMDiffAt Ysec).mdifferentiableAt
+        (by simp)
+  have hXf_mdiff :
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun p : M => directionalDeriv (I := I) Xf f p) x := by
+    simpa [directionalDeriv, Xf] using
+      (extDerivFun_apply_contMDiffAt I hf_smooth.contMDiffAt Xsec).mdifferentiableAt
+        (by simp)
+  have hgYZ_mdiff : MDifferentiableAt I 𝓘(Real, Real) gYZ x := by
+    simpa [gYZ] using
+      oneForm_eval_moving_C1_slot_mdiffAt (I := I) alphaSec YZc hYZc1
+  have hgXZ_mdiff : MDifferentiableAt I 𝓘(Real, Real) gXZ x := by
+    simpa [gXZ] using
+      oneForm_eval_moving_C1_slot_mdiffAt (I := I) alphaSec XZc hXZc1
+  have hFYZ :
+      (fun p : M => nablaAlphaSec p (vec2 (I := I) (Yf p) (Zf p))) =
+        fun p : M => directionalDeriv (I := I) Yf f p - gYZ p := by
+    funext p
+    have h := nablaOneFormSectionRealizes_eval_moving_C1_slot
+      (I := I) cov Ysec alphaSec nablaAlphaSec hnabla Zf p (hZ1_at p)
+    simpa [directionalDeriv, f, gYZ, YZc, Yf, Zf, cov] using h
+  have hFXZ :
+      (fun p : M => nablaAlphaSec p (vec2 (I := I) (Xf p) (Zf p))) =
+        fun p : M => directionalDeriv (I := I) Xf f p - gXZ p := by
+    funext p
+    have h := nablaOneFormSectionRealizes_eval_moving_C1_slot
+      (I := I) cov Xsec alphaSec nablaAlphaSec hnabla Zf p (hZ1_at p)
+    simpa [directionalDeriv, f, gXZ, XZc, Xf, Zf, cov] using h
+  have hDX_FYZ :
+      directionalDeriv (I := I) Xf
+          (fun p : M => nablaAlphaSec p (vec2 (I := I) (Yf p) (Zf p))) x =
+        directionalDeriv (I := I) Xf
+          (fun p : M => directionalDeriv (I := I) Yf f p) x -
+          directionalDeriv (I := I) Xf gYZ x := by
+    rw [hFYZ]
+    exact directionalDeriv_sub_fun (I := I) Xf x hYf_mdiff hgYZ_mdiff
+  have hDY_FXZ :
+      directionalDeriv (I := I) Yf
+          (fun p : M => nablaAlphaSec p (vec2 (I := I) (Xf p) (Zf p))) x =
+        directionalDeriv (I := I) Yf
+          (fun p : M => directionalDeriv (I := I) Xf f p) x -
+          directionalDeriv (I := I) Yf gXZ x := by
+    rw [hFXZ]
+    exact directionalDeriv_sub_fun (I := I) Yf x hXf_mdiff hgXZ_mdiff
+  have hA_X_YZ :
+      nablaAlphaSec x (vec2 (I := I) (Xf x) (YZc x)) =
+        directionalDeriv (I := I) Xf gYZ x -
+          alphaSec x (fun _ : Fin 1 => (cov YZc x) (Xf x)) := by
+    simpa [directionalDeriv, gYZ, Xf, cov] using
+      nablaOneFormSectionRealizes_eval_moving_C1_slot
+        (I := I) cov Xsec alphaSec nablaAlphaSec hnabla YZc x hYZc1
+  have hA_Y_XZ :
+      nablaAlphaSec x (vec2 (I := I) (Yf x) (XZc x)) =
+        directionalDeriv (I := I) Yf gXZ x -
+          alphaSec x (fun _ : Fin 1 => (cov XZc x) (Yf x)) := by
+    simpa [directionalDeriv, gXZ, Yf, cov] using
+      nablaOneFormSectionRealizes_eval_moving_C1_slot
+        (I := I) cov Ysec alphaSec nablaAlphaSec hnabla XZc x hXZc1
+  obtain ⟨XYsec, hXYsecx⟩ :=
+    ContMDiffSection.exists_eq_at
+      (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞)) x XYv
+  obtain ⟨YXsec, hYXsecx⟩ :=
+    ContMDiffSection.exists_eq_at
+      (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞)) x YXv
+  let XYf : (p : M) -> TangentSpace I p := fun p => XYsec p
+  let YXf : (p : M) -> TangentSpace I p := fun p => YXsec p
+  have hA_XY_Z :
+      nablaAlphaSec x (vec2 (I := I) XYv (Zf x)) =
+        directionalDeriv (I := I) XYf f x -
+          alphaSec x (fun _ : Fin 1 => (cov Zf x) (XYf x)) := by
+    have h := nablaOneFormSectionRealizes_eval_moving_C1_slot
+      (I := I) cov XYsec alphaSec nablaAlphaSec hnabla Zf x (hZ1_at x)
+    simpa [directionalDeriv, f, XYf, Zf, cov, hXYsecx] using h
+  have hA_YX_Z :
+      nablaAlphaSec x (vec2 (I := I) YXv (Zf x)) =
+        directionalDeriv (I := I) YXf f x -
+          alphaSec x (fun _ : Fin 1 => (cov Zf x) (YXf x)) := by
+    have h := nablaOneFormSectionRealizes_eval_moving_C1_slot
+      (I := I) cov YXsec alphaSec nablaAlphaSec hnabla Zf x (hZ1_at x)
+    simpa [directionalDeriv, f, YXf, Zf, cov, hYXsecx] using h
+  have hXYZ :
+      nabla2Alpha (vec3 (I := I) X Y Z) =
+        directionalDeriv (I := I) Xf
+            (fun p : M => nablaAlphaSec p (vec2 (I := I) (Yf p) (Zf p))) x -
+          nablaAlphaSec x (vec2 (I := I) XYv (Zf x)) -
+          nablaAlphaSec x (vec2 (I := I) (Yf x) (XZc x)) := by
+    have h2 := nabla2OneFormRealizesAt_apply (I := I) cov alphaSec
+      nablaAlphaSec x nabla2Alpha hnabla2 Xsec Y Z
+    have hraw := nabla0SFun_two_eval_smooth_slots
+      (I := I) cov Xsec Ysec Zsec nablaAlphaSec x
+    calc
+      nabla2Alpha (vec3 (I := I) X Y Z)
+          = nabla2Alpha (vec3 (I := I) (Xsec x) Y Z) := by
+              simp [hXx]
+      _ = directionalDeriv (I := I) Xf
+              (fun p : M => nablaAlphaSec p (vec2 (I := I) (Yf p) (Zf p))) x -
+            nablaAlphaSec x (vec2 (I := I) XYv (Zf x)) -
+            nablaAlphaSec x (vec2 (I := I) (Yf x) (XZc x)) := by
+              rw [h2]
+              simpa [directionalDeriv, Xf, Yf, Zf, XZc, XYv, hYx, hZx, cov] using hraw
+  have hYXZ :
+      nabla2Alpha (vec3 (I := I) Y X Z) =
+        directionalDeriv (I := I) Yf
+            (fun p : M => nablaAlphaSec p (vec2 (I := I) (Xf p) (Zf p))) x -
+          nablaAlphaSec x (vec2 (I := I) YXv (Zf x)) -
+          nablaAlphaSec x (vec2 (I := I) (Xf x) (YZc x)) := by
+    have h2 := nabla2OneFormRealizesAt_apply (I := I) cov alphaSec
+      nablaAlphaSec x nabla2Alpha hnabla2 Ysec X Z
+    have hraw := nabla0SFun_two_eval_smooth_slots
+      (I := I) cov Ysec Xsec Zsec nablaAlphaSec x
+    calc
+      nabla2Alpha (vec3 (I := I) Y X Z)
+          = nabla2Alpha (vec3 (I := I) (Ysec x) X Z) := by
+              simp [hYx]
+      _ = directionalDeriv (I := I) Yf
+              (fun p : M => nablaAlphaSec p (vec2 (I := I) (Xf p) (Zf p))) x -
+            nablaAlphaSec x (vec2 (I := I) YXv (Zf x)) -
+            nablaAlphaSec x (vec2 (I := I) (Xf x) (YZc x)) := by
+              rw [h2]
+              simpa [directionalDeriv, Xf, Yf, Zf, YZc, YXv, hXx, hZx, cov] using hraw
+  have hcomm :=
+    directionalDeriv_directionalDeriv_sub_commutator
+      (I := I) Xf Yf f x hX2 hY2 hf2
+  have htf := leviCivitaConnectionOfMetric_isTorsionFree (I := I) g
+  have htorsion : XYv - YXv = bracket := by
+    simpa [cov, XYv, YXv, bracket, Xf, Yf] using
+      torsion_free_apply (I := I) htf (x := x) (X := Xf) (Y := Yf)
+        hXmd hYmd
+  have hdir_XY_YX :
+      directionalDeriv (I := I) XYf f x -
+          directionalDeriv (I := I) YXf f x =
+        directionalDeriv (I := I)
+          (fun p : M => VectorField.mlieBracket I Xf Yf p) f x := by
+    change (extDerivFun (I := I) f x) (XYf x) -
+        (extDerivFun (I := I) f x) (YXf x) =
+      (extDerivFun (I := I) f x) (VectorField.mlieBracket I Xf Yf x)
+    change (extDerivFun (I := I) f x) (XYsec x) -
+        (extDerivFun (I := I) f x) (YXsec x) =
+      (extDerivFun (I := I) f x) (VectorField.mlieBracket I Xf Yf x)
+    rw [hXYsecx, hYXsecx]
+    rw [← map_sub (extDerivFun (I := I) f x) XYv YXv]
+    rw [htorsion]
+  have hcurv :
+      connectionRiemannCurvatureField (I := I) cov Xf Yf Zf x =
+        (cov YZc x) (Xf x) - (cov XZc x) (Yf x) - (cov Zf x) bracket := by
+    rfl
+  have hcurv_alpha :
+      alphaSec x (fun _ : Fin 1 => (cov Zf x) (XYf x)) -
+          alphaSec x (fun _ : Fin 1 => (cov Zf x) (YXf x)) +
+          alphaSec x (fun _ : Fin 1 => (cov XZc x) (Yf x)) -
+          alphaSec x (fun _ : Fin 1 => (cov YZc x) (Xf x)) =
+        -Rm13 x alpha (vec3 (I := I) X Y Z) := by
+    let A : TangentSpace I x := (cov Zf x) (XYf x)
+    let B : TangentSpace I x := (cov Zf x) (YXf x)
+    let C : TangentSpace I x := (cov XZc x) (Yf x)
+    let D : TangentSpace I x := (cov YZc x) (Xf x)
+    let R : TangentSpace I x :=
+      connectionRiemannCurvatureField (I := I) cov Xf Yf Zf x
+    have hfour :
+        alphaSec x (fun _ : Fin 1 => A - B + C - D) =
+          alphaSec x (fun _ : Fin 1 => A) - alphaSec x (fun _ : Fin 1 => B) +
+            alphaSec x (fun _ : Fin 1 => C) - alphaSec x (fun _ : Fin 1 => D) := by
+      rw [halpha]
+      exact oneForm_eval_const_sub_add_sub (I := I) alpha A B C D
+    have hAB : A - B = (cov Zf x) bracket := by
+      dsimp [A, B, XYf, YXf]
+      rw [hXYsecx, hYXsecx, ← map_sub, htorsion]
+    have hnegR : A - B + C - D = -R := by
+      dsimp [R, A, B, C, D]
+      rw [hcurv]
+      dsimp [A, B, C, D] at hAB
+      rw [hAB]
+      abel
+    have hRm := hRm13 Xf Yf Zf x alpha
+    calc
+      alphaSec x (fun _ : Fin 1 => A) - alphaSec x (fun _ : Fin 1 => B) +
+          alphaSec x (fun _ : Fin 1 => C) - alphaSec x (fun _ : Fin 1 => D)
+          = alphaSec x (fun _ : Fin 1 => A - B + C - D) := hfour.symm
+      _ = alpha (fun _ : Fin 1 => -R) := by
+            rw [hnegR]
+            rw [halpha]
+      _ = -cotangentToDual (I := I) alpha R := by
+            rw [oneForm_eval_const_neg (I := I) alpha R]
+            rw [← cotangentToDual_apply (I := I) alpha R]
+      _ = -Rm13 x alpha (vec3 (I := I) X Y Z) := by
+            simpa [R, cov, Xf, Yf, Zf, hXx, hYx, hZx] using
+              congrArg Neg.neg hRm.symm
+  rw [hXYZ, hYXZ, hDX_FYZ, hDY_FXZ, hA_XY_Z, hA_YX_Z,
+    hA_Y_XZ, hA_X_YZ]
+  have hcomm' :
+      directionalDeriv (I := I) Xf
+          (fun y : M => directionalDeriv (I := I) Yf f y) x -
+        directionalDeriv (I := I) Yf
+          (fun y : M => directionalDeriv (I := I) Xf f y) x =
+        directionalDeriv (I := I)
+          (fun p : M => VectorField.mlieBracket I Xf Yf p) f x := by
+    linarith
+  linarith
 
 /-- Levi-Civita Ricci identity for the third covariant derivative of a
 one-form. -/
 theorem oneFormThirdCovDerivCommAt_of_leviCivita
     (g : SmoothRiemannianMetric I M)
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
+      (leviCivitaConnectionOfMetric (I := I) g) (1 : WithTop ℕ∞))
     (Rm13 : Tensor13Section (I := I) (M := M))
     (alphaSec : OneFormSection (I := I) (M := M))
     (nablaAlphaSec : TwoTensorSection (I := I) (M := M))
@@ -788,8 +1274,42 @@ theorem oneFormThirdCovDerivCommAt_of_leviCivita
       nabla2Alpha) :
     OneFormThirdCovDerivCommAt (I := I) Rm13 alpha nabla2Alpha :=
   oneFormThirdCovDerivCommAt_of_leviCivita_higherOrder
-    (I := I) g Rm13 alphaSec nablaAlphaSec alpha nabla2Alpha hRm13
+    (I := I) g hcov Rm13 alphaSec nablaAlphaSec alpha nabla2Alpha hRm13
     halpha hnabla2
+
+/-- Levi-Civita specialization of the invariant `(0,s)` Ricci identity.  The
+generic torsion-corrected producer lives in `RicciFlower.Tensor.RicciIdentity`;
+this wrapper only removes the torsion term using the constructed
+Levi-Civita connection's torsion-freeness. -/
+theorem tensor0S_ricciIdentity_of_leviCivita
+    (g : SmoothRiemannianMetric I M)
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
+      (leviCivitaConnectionOfMetric (I := I) g) (1 : WithTop ℕ∞))
+    (Rm13 : Tensor13Section (I := I) (M := M))
+    {s : ℕ}
+    (alphaSec : Tensor0SSection (I := I) (M := M) s)
+    (nablaAlphaSec : Tensor0SSection (I := I) (M := M) (s + 1))
+    {x : M}
+    (alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x)
+    (nablaAlpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (s + 1) x)
+    (nabla2Alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (s + 2) x)
+    (hRm13 : Rm13RealizesConnection (I := I)
+      (leviCivitaConnectionOfMetric (I := I) g) Rm13)
+    (halpha : alphaSec x = alpha)
+    (hnablaAlpha : nablaAlphaSec x = nablaAlpha)
+    (hnabla2 : Nabla20SRealizesAt (I := I) s
+      (leviCivitaConnectionOfMetric (I := I) g) alphaSec nablaAlphaSec x
+      nabla2Alpha) :
+    Tensor0SRicciIdentityAt (I := I) Rm13 alpha nabla2Alpha := by
+  refine tensor0S_ricciIdentity_of_torsionFree
+    (I := I) (leviCivitaConnectionOfMetric (I := I) g) hcov Rm13
+    alphaSec nablaAlphaSec alpha nablaAlpha nabla2Alpha hRm13 halpha
+    hnablaAlpha hnabla2 ?_
+  have htf := leviCivitaConnectionOfMetric_isTorsionFree (I := I) g
+  simpa [IsTorsionFreeAt] using htf x
 
 end LeviCivita
 end RicciFlower
