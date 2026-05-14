@@ -115,34 +115,34 @@ that equals `v.toFun` on `tsupport ρ_α` and has tsupport in
 
 /-- The pointwise product `chartStrictCutoff α · v.toFun` as a function on
 `M`. -/
-private noncomputable def etaTimesV (α : M) (v : M → ℝ) : M → ℝ :=
+noncomputable def etaTimesV (α : M) (v : M → ℝ) : M → ℝ :=
   fun x => chartStrictCutoff (I := I) (M := M) α x * v x
 
-private lemma etaTimesV_apply (α : M) (v : M → ℝ) (x : M) :
+lemma etaTimesV_apply (α : M) (v : M → ℝ) (x : M) :
     etaTimesV (I := I) (M := M) α v x =
       chartStrictCutoff (I := I) (M := M) α x * v x := rfl
 
-private lemma etaTimesV_smooth (α : M) {v : M → ℝ}
+lemma etaTimesV_smooth (α : M) {v : M → ℝ}
     (hv : ContMDiff I 𝓘(ℝ, ℝ) ∞ v) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (etaTimesV (I := I) (M := M) α v) := by
   unfold etaTimesV
   exact (chartStrictCutoff_contMDiff (I := I) (M := M) α).mul hv
 
 /-- Package `etaTimesV α v.toFun` as a `SmoothScalar g`. -/
-private noncomputable def etaTimesVScalar
+noncomputable def etaTimesVScalar
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     SmoothScalar g where
   toFun := etaTimesV (I := I) (M := M) α v.toFun
   smooth := etaTimesV_smooth (I := I) (M := M) α v.smooth
 
-@[simp] private lemma etaTimesVScalar_toFun (g : SmoothRiemannianMetric I M)
+@[simp] lemma etaTimesVScalar_toFun (g : SmoothRiemannianMetric I M)
     (α : M) (v : SmoothScalar g) :
     (etaTimesVScalar (I := I) (M := M) g α v).toFun =
       etaTimesV (I := I) (M := M) α v.toFun := rfl
 
 /-- The tsupport of `etaTimesV α v` is contained in `tsupport (chartStrictCutoff α)`,
 which is contained in `(chartAt H α).source`. -/
-private lemma tsupport_etaTimesV_subset (α : M) (v : M → ℝ) :
+lemma tsupport_etaTimesV_subset (α : M) (v : M → ℝ) :
     tsupport (etaTimesV (I := I) (M := M) α v) ⊆ (chartAt H α).source := by
   have h_supp_subset : Function.support (etaTimesV (I := I) (M := M) α v) ⊆
       Function.support (chartStrictCutoff (I := I) (M := M) α) := by
@@ -168,7 +168,7 @@ function `-2 g(∇ρα, ∇v) - Δρα · v` on `M`. -/
 
 /-- The smooth manifold representative of `fHLeibnizResidualLp g α
 (smoothToH1Compl v)`: the explicit pointwise function `-2 g(∇ρα, ∇v) - Δρα · v`. -/
-private noncomputable def smoothRep
+noncomputable def smoothRep
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) : M → ℝ :=
   fun x : M =>
     -((2 : ℝ) * g.inner x (gradFun (I := I) g
@@ -332,13 +332,13 @@ The functional identity `fHLeibnizResidualSmoothRep g α v = F_grad - F_lap` on
 both with tsupport in `(chartAt H α).source`. -/
 
 /-- The gradient-inner-product piece `2 g(∇ρα, ∇(η_α · v))` as a function on `M`. -/
-private noncomputable def gradInnerPiece
+noncomputable def gradInnerPiece
     (g : SmoothRiemannianMetric I M) (α : M) (v : M → ℝ) : M → ℝ :=
   fun x => (2 : ℝ) * g.inner x
       (gradFun (I := I) g ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
       (gradFun (I := I) g (etaTimesV (I := I) (M := M) α v) x)
 
-private lemma gradInnerPiece_apply (g : SmoothRiemannianMetric I M) (α : M)
+lemma gradInnerPiece_apply (g : SmoothRiemannianMetric I M) (α : M)
     (v : M → ℝ) (x : M) :
     gradInnerPiece (I := I) (M := M) g α v x =
       (2 : ℝ) * g.inner x
@@ -346,19 +346,19 @@ private lemma gradInnerPiece_apply (g : SmoothRiemannianMetric I M) (α : M)
         (gradFun (I := I) g (etaTimesV (I := I) (M := M) α v) x) := rfl
 
 /-- The Laplacian-product piece `Δρα · (η_α · v)` as a function on `M`. -/
-private noncomputable def lapPiece
+noncomputable def lapPiece
     (g : SmoothRiemannianMetric I M) (α : M) (v : M → ℝ) : M → ℝ :=
   fun x => (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x *
     etaTimesV (I := I) (M := M) α v x
 
-private lemma lapPiece_apply (g : SmoothRiemannianMetric I M) (α : M)
+lemma lapPiece_apply (g : SmoothRiemannianMetric I M) (α : M)
     (v : M → ℝ) (x : M) :
     lapPiece (I := I) (M := M) g α v x =
       (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x *
         etaTimesV (I := I) (M := M) α v x := rfl
 
 /-- The functional identity: `smoothRep g α v = -gradInnerPiece - lapPiece`. -/
-private lemma smoothRep_eq_pieces
+lemma smoothRep_eq_pieces
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     smoothRep (I := I) (M := M) g α v =
       fun x => -gradInnerPiece (I := I) (M := M) g α v.toFun x -
@@ -369,7 +369,7 @@ private lemma smoothRep_eq_pieces
 
 /-! ## Smoothness and support of the two pieces -/
 
-private lemma gradInnerPiece_smooth (g : SmoothRiemannianMetric I M) (α : M)
+lemma gradInnerPiece_smooth (g : SmoothRiemannianMetric I M) (α : M)
     (v : SmoothScalar g) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞
       (gradInnerPiece (I := I) (M := M) g α v.toFun) := by
@@ -396,7 +396,7 @@ private lemma gradInnerPiece_smooth (g : SmoothRiemannianMetric I M) (α : M)
         DifferentialGeometry.Integral.DivergenceTheorem.grad_g_apply]
   exact (contMDiff_const : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun _ : M => (2 : ℝ))).mul h_inner
 
-private lemma lapPiece_smooth (g : SmoothRiemannianMetric I M) (α : M)
+lemma lapPiece_smooth (g : SmoothRiemannianMetric I M) (α : M)
     (v : SmoothScalar g) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞
       (lapPiece (I := I) (M := M) g α v.toFun) := by
@@ -433,7 +433,7 @@ private lemma tsupport_gradInnerPiece_subset
     simp
   exact closure_minimal h_supp_subset (isClosed_tsupport _)
 
-private lemma tsupport_gradInnerPiece_subset_source
+lemma tsupport_gradInnerPiece_subset_source
     (g : SmoothRiemannianMetric I M) (α : M) (v : M → ℝ) :
     tsupport (gradInnerPiece (I := I) (M := M) g α v) ⊆ (chartAt H α).source :=
   (tsupport_gradInnerPiece_subset (I := I) (M := M) g α v).trans
@@ -456,7 +456,7 @@ private lemma tsupport_lapPiece_subset
   exact closure_minimal (h_supp_subset.trans (subset_tsupport _))
     (isClosed_tsupport _)
 
-private lemma tsupport_lapPiece_subset_source
+lemma tsupport_lapPiece_subset_source
     (g : SmoothRiemannianMetric I M) (α : M) (v : M → ℝ) :
     tsupport (lapPiece (I := I) (M := M) g α v) ⊆ (chartAt H α).source :=
   (tsupport_lapPiece_subset (I := I) (M := M) g α v).trans
@@ -514,7 +514,7 @@ product as a smooth-coefficient times the chart-pushed-raw of `η · v`. -/
 /-- The chart-pushed-raw `lapPiece` agrees on `chartTargetEuclid α` with the
 product of `smoothExtensionScalar α (b · Δρα)` and `chartPushedRaw α (η · v)`,
 where `b` is any chart-cutoff equal to `1` on `tsupport ρ_α`. -/
-private lemma chartPushedRaw_lapPiece_factor
+lemma chartPushedRaw_lapPiece_factor
     (g : SmoothRiemannianMetric I M) (α : M) (v : M → ℝ)
     {b : M → ℝ}
     (hb_one : ∀ x ∈ tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ),
@@ -943,7 +943,7 @@ times chart-pulled partials of `η · v.toFun`. -/
 
 /-- The `i`-th chart-α coefficient for the gradient inner product `g(∇ρα, ∇·)`,
 multiplied by the strict cutoff. Smooth on `M` with `tsupport` in chart α source. -/
-private noncomputable def gradInnerCoefI_M
+noncomputable def gradInnerCoefI_M
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) : M → ℝ :=
   fun x : M =>
@@ -968,7 +968,7 @@ private lemma gradInnerCoefI_M_eq_zero_of_cutoff_zero
   rw [hx]; ring
 
 /-- `gradInnerCoefI_M g α i` is smooth on M. -/
-private lemma gradInnerCoefI_M_smooth
+lemma gradInnerCoefI_M_smooth
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (gradInnerCoefI_M (I := I) (M := M) g α i) := by
@@ -1071,7 +1071,7 @@ private lemma gradInnerCoefI_M_smooth
       contMDiffAt_const
     exact h_const.congr_of_eventuallyEq h_ev_zero_coef
 
-private lemma tsupport_gradInnerCoefI_M_subset
+lemma tsupport_gradInnerCoefI_M_subset
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) :
     tsupport (gradInnerCoefI_M (I := I) (M := M) g α i) ⊆ (chartAt H α).source := by
@@ -1100,13 +1100,13 @@ Pointwise identity on `chartTargetEuclid α`:
 /-- The smooth Euclidean coefficient `Λ_i` := `smoothExtensionScalar α (gradInnerCoefI_M g α i)`.
 This is `ContDiff ℝ ∞` on `EuclN` with compact support contained in
 `chartTargetEuclid α`. -/
-private noncomputable def Λgrad
+noncomputable def Λgrad
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) : EuclN → ℝ :=
   smoothExtensionScalar (I := I) (M := M) α
     (gradInnerCoefI_M (I := I) (M := M) g α i)
 
-private lemma Λgrad_contDiff
+lemma Λgrad_contDiff
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) :
     ContDiff ℝ (⊤ : ℕ∞) (Λgrad (I := I) (M := M) g α i) := by
@@ -1153,7 +1153,7 @@ The chart-pushed-raw of `gradInnerPiece` has a pointwise sum expansion on
 /-- Pointwise identity: on `chartTargetEuclid α`,
 `chartPushedRaw α (gradInnerPiece g α v.toFun) y =
   2 · ∑_i Λgrad g α i y · partialDerivOnEuclid α i (η · v.toFun) y`. -/
-private lemma chartPushedRaw_gradInnerPiece_eq_sum
+lemma chartPushedRaw_gradInnerPiece_eq_sum
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
     chartPushedRaw (I := I) (M := M) α
@@ -1476,7 +1476,7 @@ private lemma chartPushedRaw_eq_zero_off_euclSupp {α : M} {u : M → ℝ}
       (I := I) (M := M) (u := u) α hy_target hy
   · exact chartPushedRaw_apply_of_notMem (I := I) (M := M) α u hy_target
 
-private lemma chartPushedRaw_smooth_hasCompactSupport_local
+lemma chartPushedRaw_smooth_hasCompactSupport_local
     {α : M} {u : M → ℝ} (hu_supp : tsupport u ⊆ (chartAt H α).source) :
     HasCompactSupport (chartPushedRaw (I := I) (M := M) α u) := by
   classical
@@ -1488,7 +1488,7 @@ private lemma chartPushedRaw_smooth_hasCompactSupport_local
     (chartPushedRaw_eq_zero_off_euclSupp (I := I) (M := M)
       (α := α) (u := u) hy_off)
 
-private lemma tsupport_chartPushedRaw_subset_chartTargetEuclid
+lemma tsupport_chartPushedRaw_subset_chartTargetEuclid
     {α : M} {u : M → ℝ} (hu_supp : tsupport u ⊆ (chartAt H α).source) :
     tsupport (chartPushedRaw (I := I) (M := M) α u) ⊆
       chartTargetEuclid (I := I) (M := M) α := by
@@ -1510,7 +1510,7 @@ private lemma tsupport_chartPushedRaw_subset_chartTargetEuclid
 
 /-- For smooth `u : M → ℝ` with `tsupport u ⊆ (chartAt H α).source`, the chart-
 pulled raw function `chartPushedRaw I α u` is `ContDiff ℝ ∞` on all of `EuclN`. -/
-private lemma chartPushedRaw_contDiff
+lemma chartPushedRaw_contDiff
     {α : M} {u : M → ℝ}
     (hu_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
     (hu_supp : tsupport u ⊆ (chartAt H α).source) :
@@ -1654,7 +1654,7 @@ weak partial of `chartPushedRaw I α u` on the chart target.
 and so is the chosen weak partial `chosenWeakPartial' p i (chartPushedRaw I α u)
 (chartTargetEuclid α)`. By uniqueness of weak partials, they agree a.e. -/
 
-private lemma partialDerivOnEuclid_ae_eq_chosenWeakPartial
+lemma partialDerivOnEuclid_ae_eq_chosenWeakPartial
     {α : M} (i : Fin (Module.finrank ℝ E))
     {u : M → ℝ} (hu_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
     (hu_supp : tsupport u ⊆ (chartAt H α).source)
@@ -1765,7 +1765,7 @@ section HeadlineAssembly
 
 /-- Smoothness of `smoothRep g α v`: it equals `-gradInnerPiece - lapPiece`,
 both smooth. -/
-private lemma smoothRep_contMDiff (g : SmoothRiemannianMetric I M) (α : M)
+lemma smoothRep_contMDiff (g : SmoothRiemannianMetric I M) (α : M)
     (v : SmoothScalar g) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (smoothRep (I := I) (M := M) g α v) := by
   rw [smoothRep_eq_pieces (I := I) (M := M) g α v]
@@ -1773,7 +1773,7 @@ private lemma smoothRep_contMDiff (g : SmoothRiemannianMetric I M) (α : M)
     (lapPiece_smooth (I := I) (M := M) g α v)
 
 /-- The tsupport of `smoothRep g α v` is contained in `(chartAt H α).source`. -/
-private lemma tsupport_smoothRep_subset_source
+lemma tsupport_smoothRep_subset_source
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     tsupport (smoothRep (I := I) (M := M) g α v) ⊆ (chartAt H α).source := by
   classical
@@ -1813,7 +1813,7 @@ private lemma tsupport_smoothRep_subset_source
 on volume.restrict (chartTargetEuclid α). This connects the public
 `smoothFChartResidual` (the Lp coeFn) with the file-local smooth representative
 `smoothRep`. -/
-private lemma smoothFChartResidual_ae_eq_chartPushedRaw_smoothRep
+lemma smoothFChartResidual_ae_eq_chartPushedRaw_smoothRep
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional.smoothFChartResidual
         (I := I) (M := M) g α v =ᵐ[
@@ -1920,7 +1920,7 @@ private lemma memWkp_chartPushedRaw_smoothRep
 /-- The pointwise identity on `EuclN`:
 `chartPushedRaw α (smoothRep g α v) y = -chartPushedRaw α (gradInnerPiece) y -
   chartPushedRaw α (lapPiece) y`. -/
-private lemma chartPushedRaw_smoothRep_eq
+lemma chartPushedRaw_smoothRep_eq
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) (y : EuclN) :
     chartPushedRaw (I := I) (M := M) α
         (smoothRep (I := I) (M := M) g α v) y =

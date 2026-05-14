@@ -550,7 +550,7 @@ in `chartTargetEuclid α \ K_α`. The LHS vanishes (since `D.u_chart` and
 `D.weak_partial i` are ae zero there), so `∫ c · D.f_chart · ψ = 0` for all
 such ψ. Since `c > 0` on the chart target, this forces `D.f_chart` ae zero on
 the open set via the standard fundamental-lemma argument. -/
-private lemma base_f_chart_ae_zero_off_K_α
+lemma base_f_chart_ae_zero_off_K_α
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g) :
@@ -1306,6 +1306,27 @@ noncomputable def derivedChartBilinearH1ComplDataUnconditional
       derived_variational_identity_holds (I := I) (M := M) g α l hu_h
         hψ hψ_cs hψ_supp)
 
+/-! ## Public-facing ae-zero of the chosen second mixed partial -/
+
+/-- **Public reformulation: `chosenSecondPartialChartPushedU` vanishes ae on the
+chart-target complement of `chartImagePOUTsupport α`.**
+
+The chosen second mixed weak partial of the canonical chart-pushed
+representative of `u_h ∈ laplacianDomainPow g 2` is ae zero on the open
+subset where the chart-pushed function itself vanishes (everything off the
+POU support). -/
+lemma chosenSecondPartialChartPushedU_ae_zero_off_chartImagePOUTsupport
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {u_h : H1Compl (I := I) (M := M) g}
+    (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
+    (i j : Fin (Module.finrank ℝ E)) :
+    ∀ᵐ y ∂((volume : Measure EuclN).restrict
+      (chartTargetEuclid (I := I) (M := M) α \
+        chartImagePOUTsupport (I := I) (M := M) α)),
+      chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i j y = 0 :=
+  chosenSecondPartialChartPushedU_ae_zero_off_K_α
+    (I := I) (M := M) g α hu_h i j
+
 end DerivedChartBilinearH1ComplDataUnconditional
 end Laplacian
 end Analysis
@@ -1321,5 +1342,7 @@ section Sanity
   DifferentialGeometry.Analysis.Laplacian.DerivedChartBilinearH1ComplDataUnconditional.derived_variational_identity_holds
 #print axioms
   DifferentialGeometry.Analysis.Laplacian.DerivedChartBilinearH1ComplDataUnconditional.derivedChartBilinearH1ComplDataUnconditional
+#print axioms
+  DifferentialGeometry.Analysis.Laplacian.DerivedChartBilinearH1ComplDataUnconditional.chosenSecondPartialChartPushedU_ae_zero_off_chartImagePOUTsupport
 
 end Sanity

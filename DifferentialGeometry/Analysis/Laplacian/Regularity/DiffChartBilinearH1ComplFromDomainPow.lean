@@ -876,7 +876,7 @@ of the first piece follows from `laplacianDomainPow_two_preimage_chartPushed_mem
 /-- The canonical chart-pushed function associated with the `(1-Δ_g)`-preimage
 piece of `fHLeibniz`: `chartPushed POU α (laplacianDomain.preimage u_h).coeFn`.
 This is the chart-pullback of `ρα · (1-Δ_g) u_h`. -/
-private noncomputable def fChartPiecePreimage
+noncomputable def fChartPiecePreimage
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2) : EuclN → ℝ :=
@@ -889,7 +889,7 @@ private noncomputable def fChartPiecePreimage
 
 /-- `fChartPiecePreimage` lies in `MemWkp 2 2` on the chart target,
 unconditionally for `u_h ∈ laplacianDomainPow g 2`. -/
-private lemma fChartPiecePreimage_memWkp_two_two
+lemma fChartPiecePreimage_memWkp_two_two
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2) :
@@ -1251,7 +1251,7 @@ private lemma vol_abs_chartPulledWeighted_on_chartTarget
 /-- `base.f_chart` equals `fChartPiecePreimage + (chartPushedRawLpFromLp
 fHLeibnizResidualLp).coeFn` ae with respect to plain volume restricted to
 `chartTarget`. -/
-private lemma base_f_chart_ae_eq_piecePreimage_add_residual_chartPulled_on_vol
+lemma base_f_chart_ae_eq_piecePreimage_add_residual_chartPulled_on_vol
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2) :

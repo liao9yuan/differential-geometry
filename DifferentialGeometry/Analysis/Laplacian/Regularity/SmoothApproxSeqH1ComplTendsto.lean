@@ -258,7 +258,7 @@ private lemma eLpNorm_gNormGrad_sq_toReal_eq_integral_inner_grad
 
 /-- The bound `‖f‖_{SmoothScalar g} ≤ C * (wkpNormChart g 1 2 f.toFun).toReal`
 for smooth `f`. -/
-private lemma norm_smoothScalar_le_const_mul_wkpNormChart_one
+lemma norm_smoothScalar_le_const_mul_wkpNormChart_one
     (g : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ f : SmoothScalar g,
@@ -343,7 +343,7 @@ private lemma norm_smoothScalar_le_const_mul_wkpNormChart_one
 
 /-- For any smooth scalars `v, w : SmoothScalar g`, the chart-W^{1,2} norm of
 their difference is finite. -/
-private lemma wkpNormChart_one_two_smoothScalar_diff_ne_top
+lemma wkpNormChart_one_two_smoothScalar_diff_ne_top
     (g : SmoothRiemannianMetric I M)
     (v w : SmoothScalar g) :
     wkpNormChart (I := I) (M := M) g 1 2
@@ -728,7 +728,7 @@ We use the variational identity for smooth lifts and density. -/
 
 /-- For smooth `v, f : SmoothScalar g`, the H¹ inner product satisfies
 `smoothScalarH1Inner v f = ⟨smoothToLp(f.oneSubLapClassical), smoothToLp v⟩_{Lp}`. -/
-private lemma smoothScalarH1Inner_eq_lpInner_oneSubLap_right
+lemma smoothScalarH1Inner_eq_lpInner_oneSubLap_right
     (g : SmoothRiemannianMetric I M) (v f : SmoothScalar g) :
     smoothScalarH1Inner (I := I) (M := M) v f =
       ⟪smoothToLp (I := I) (M := M) g f.oneSubLapClassical,
@@ -738,7 +738,7 @@ private lemma smoothScalarH1Inner_eq_lpInner_oneSubLap_right
 
 /-- For any `u_h ∈ H1Compl g` and smooth `f : SmoothScalar g`, the inner product
 `⟨u_h, smoothToH1Compl f⟩` equals `⟨smoothToLp(f.oneSubLapClassical), H1ComplToLp u_h⟩_{Lp}`. -/
-private lemma inner_h1Compl_smoothToH1Compl_eq_lpInner
+lemma inner_h1Compl_smoothToH1Compl_eq_lpInner
     (g : SmoothRiemannianMetric I M)
     (u_h : H1Compl (I := I) (M := M) g) (f : SmoothScalar g) :
     ⟪u_h, smoothToH1Compl (I := I) (M := M) g f⟫_ℝ =
