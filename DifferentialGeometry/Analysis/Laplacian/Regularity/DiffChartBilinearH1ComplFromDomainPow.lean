@@ -167,7 +167,7 @@ private lemma chosenSecondPartialChartPushedU_memLp_two
 
 /-- Local-`L²` regularity: the canonical chosen second weak partial lies in
 `MemLp 2` of `volume.restrict K` for every compact `K ⊆ chartTargetEuclid α`. -/
-private lemma chosenSecondPartialChartPushedU_locally_memLp
+theorem chosenSecondPartialChartPushedU_locally_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
@@ -428,11 +428,11 @@ private lemma chartPushedWeakPartialLp_ae_eq_chosenInner_on_open
     h_chartPushed_restr h_chosenInner_restr
     h_chartPushed_locInt h_chosenInner_locInt
 
-/-- **D-3 ae-uniqueness bridge**: the canonical second chosen weak partial is
-a weak `k`-partial of `(chartPushedWeakPartialLp g α i _ u_h).coeFn` (=
+/-- The canonical second chosen weak partial is a weak `k`-partial of
+`(chartPushedWeakPartialLp g α i _ u_h).coeFn` (=
 `(chartBilinearH1ComplData_of_laplacianDomain ..).weak_partial i`) on
 `chartTargetEuclid α`, unconditionally. -/
-private theorem hasWeakPartialDeriv_chosenSecond_of_chartPushedWeakPartialLp
+theorem hasWeakPartialDeriv_chosenSecond_of_chartPushedWeakPartialLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
@@ -672,7 +672,7 @@ noncomputable def chosenFChartDeriv
 /-- Given a `MemW1p 2` witness for `D.base.f_chart` on `chartTargetEuclid α`,
 the canonical chart-side derivative is a weak `direction`-partial of
 `D.base.f_chart` on `chartTargetEuclid α`. -/
-private lemma chosenFChartDeriv_isWeakPartial
+lemma chosenFChartDeriv_isWeakPartial
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
@@ -1291,7 +1291,7 @@ noncomputable def fChartResidual
 
 /-- **Reduction lemma**: given `MemW1p 2 fChartResidual chartTarget`, we get
 `MemW1p 2 base.f_chart chartTarget`. -/
-private lemma base_f_chart_memW1p_from_residual_memW1p
+lemma base_f_chart_memW1p_from_residual_memW1p
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
