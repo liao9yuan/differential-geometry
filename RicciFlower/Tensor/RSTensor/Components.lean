@@ -84,7 +84,9 @@ theorem componentRS_apply
         (fun a => basis (lower a)) :=
   rfl
 
-private theorem componentRS_expand_input
+/-- Expanding the Hom input of a mixed tensor in a basis gives the usual
+component contraction formula. -/
+theorem componentRS_apply_input_eq_sum
     (T : TensorRSSpace r s I x) (input : Tensor0SSpace r I x)
     (lower : Fin s -> Idx) :
     component0S (I := I) basis (T input) lower =
@@ -130,8 +132,8 @@ theorem extRS_basis
   intro input
   apply ext0S_basis (I := I) basis
   intro lower
-  rw [componentRS_expand_input (I := I) basis A input lower,
-    componentRS_expand_input (I := I) basis B input lower]
+  rw [componentRS_apply_input_eq_sum (I := I) basis A input lower,
+    componentRS_apply_input_eq_sum (I := I) basis B input lower]
   refine Finset.sum_congr rfl fun upper _ => ?_
   rw [h upper lower]
 

@@ -1,6 +1,7 @@
 import RicciFlower.RoughLaplacian
 import RicciFlower.Realized.CurvatureTensor
-import RicciFlower.Tensor.RSTensor.CoordinateBasis
+import RicciFlower.Coordinates.NablaComponents.TensorRS
+import RicciFlower.Tensor.RSTensor.Components
 import RicciFlower.Tensor.RSTensor.NablaOnTensors
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
 
@@ -249,6 +250,23 @@ def covariantCurvAction {Idx : Type*} [Fintype Idx] {n : ℕ}
     (A : (Fin n -> Idx) -> Real) (K : Fin n -> Idx) : Real :=
   -∑ q : Fin n, ∑ m : Idx,
     R i j m (K q) * A (Function.update K q m)
+
+/-- Pointwise component expansion of mixed-tensor evaluation, in the
+`contractUpper` notation used by the mixed Ricci-identity algebra. -/
+theorem contractUpper_components_eq_component_applyInput
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {r s : ℕ} {x : M}
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (T : TensorRSSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) r s x)
+    (theta :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) r x)
+    (K : Fin s -> Idx) :
+    contractUpper
+        (fun L : Fin r -> Idx => component0S (I := I) basis theta L)
+        (fun L : Fin r -> Idx => fun K : Fin s -> Idx =>
+          componentRS (I := I) basis T L K) K =
+      component0S (I := I) basis (T theta) K := by
+  rw [Tensor0SBundle.componentRS_apply_input_eq_sum (I := I) basis T theta K]
+  rfl
 
 @[simp] theorem deltaMulti_self {Idx : Type*} {r : ℕ} [DecidableEq Idx]
     (L : Fin r -> Idx) :
@@ -645,6 +663,238 @@ theorem mixedRicciIdentityCoord_of_second_product_identities
           unfold contractUpper
           refine Finset.sum_congr rfl fun A _ => ?_
           rw [hcommProbe L A]
+
+/-- Build a second-product-rule expansion for an upper-slot contraction from
+the first-product-rule expansions of its two differentiated summands.
+
+The intended coordinate reading is:
+`contract_j = theta_j ⋅ beta + theta ⋅ beta_j`; differentiating this in the
+`i` direction gives the two summands `left` and `right`, and their first
+product rules combine into the four-term second-product formula. -/
+theorem contractUpper_second_product_of_first_product_rules
+    {Idx : Type*} [Fintype Idx] {r s : ℕ}
+    (theta theta_i theta_j theta_ij : (Fin r -> Idx) -> Real)
+    (beta beta_i beta_j beta_ij :
+      (Fin r -> Idx) -> (Fin s -> Idx) -> Real)
+    (contract_ij left right : (Fin s -> Idx) -> Real)
+    (hcontract : ∀ K, contract_ij K = left K + right K)
+    (hleft : ∀ K,
+      left K =
+        contractUpper theta_ij beta K +
+          contractUpper theta_j beta_i K)
+    (hright : ∀ K,
+      right K =
+        contractUpper theta_i beta_j K +
+          contractUpper theta beta_ij K)
+    (K : Fin s -> Idx) :
+    contract_ij K =
+      contractUpper theta_ij beta K +
+        contractUpper theta_j beta_i K +
+        contractUpper theta_i beta_j K +
+        contractUpper theta beta_ij K := by
+  rw [hcontract K, hleft K, hright K]
+  ring
+
+/-- Localized first-product rule for `contractUpper`.
+
+Unlike `contractUpper_first_product_of_scalar_derivation`, this theorem only
+asks for the finite-sum and product derivative identities that occur in this
+single contraction component.  This is the right algebraic shape for the
+coordinate producer: the geometric layer should supply these hypotheses from
+the concrete coordinate derivative, without pretending that the derivative is
+available as a derivation on all scalar functions. -/
+theorem contractUpper_first_product_of_local_rules
+    {Ω Idx : Type*} [Fintype Idx] {r s : ℕ}
+    (D : (Ω -> Real) -> Real) (z₀ : Ω)
+    (theta : Ω -> (Fin r -> Idx) -> Real)
+    (beta : Ω -> (Fin r -> Idx) -> (Fin s -> Idx) -> Real)
+    (thetaD : (Fin r -> Idx) -> Real)
+    (betaD : (Fin r -> Idx) -> (Fin s -> Idx) -> Real)
+    (K : Fin s -> Idx)
+    (hDsum :
+      D (fun z => ∑ A : Fin r -> Idx, theta z A * beta z A K) =
+        ∑ A : Fin r -> Idx, D (fun z => theta z A * beta z A K))
+    (hDmul : ∀ A : Fin r -> Idx,
+      D (fun z => theta z A * beta z A K) =
+        thetaD A * beta z₀ A K + theta z₀ A * betaD A K) :
+    D (fun z => contractUpper (theta z) (beta z) K) =
+      contractUpper thetaD (fun A K => beta z₀ A K) K +
+        contractUpper (theta z₀) betaD K := by
+  classical
+  calc
+    D (fun z => contractUpper (theta z) (beta z) K)
+        = D (fun z => ∑ A : Fin r -> Idx, theta z A * beta z A K) := by
+            rfl
+    _ = ∑ A : Fin r -> Idx, D (fun z => theta z A * beta z A K) := hDsum
+    _ = ∑ A : Fin r -> Idx,
+          (thetaD A * beta z₀ A K + theta z₀ A * betaD A K) := by
+            refine Finset.sum_congr rfl fun A _ => ?_
+            rw [hDmul A]
+    _ = (∑ A : Fin r -> Idx, thetaD A * beta z₀ A K) +
+          ∑ A : Fin r -> Idx, theta z₀ A * betaD A K := by
+            rw [Finset.sum_add_distrib]
+    _ = contractUpper thetaD (fun A K => beta z₀ A K) K +
+          contractUpper (theta z₀) betaD K := by
+            rfl
+
+/-- Coordinate first-product rule for upper-slot contraction in the
+`contractUpper` notation used by the mixed Ricci-identity component algebra. -/
+theorem coordDeriv_applyInput_eq_contractUpper
+    [IsManifold I 1 M] [IsManifold I 2 M]
+    [IsManifold I (∞ : WithTop ℕ∞) M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    {r s : ℕ}
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (T : TensorRSField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) r s)
+    (theta : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) r)
+    (x₀ : M) (K : Fin s -> Coordinates.CoordinateIdx (𝕜 := Real) E) :
+    Coordinates.coordDeriv0SAt (I := I) (fun x => X x) x₀
+        (fun y : M =>
+          tensorRSField_applyInput (𝕜 := Real) (E := E) (H := H) (I := I)
+            (M := M) (∞ : WithTop ℕ∞) T theta y)
+        K =
+      contractUpper
+        (fun L : Fin r -> Coordinates.CoordinateIdx (𝕜 := Real) E =>
+          Coordinates.coordDeriv0SAt (I := I) (fun x => X x) x₀
+            (fun x => theta x) L)
+        (fun L : Fin r -> Coordinates.CoordinateIdx (𝕜 := Real) E =>
+          fun K : Fin s -> Coordinates.CoordinateIdx (𝕜 := Real) E =>
+            Coordinates.coordComponentRSAt (I := I) (T x₀) L K)
+        K +
+      contractUpper
+        (fun L : Fin r -> Coordinates.CoordinateIdx (𝕜 := Real) E =>
+          Coordinates.coordComponent0SAt (I := I) (theta x₀) L)
+        (fun L : Fin r -> Coordinates.CoordinateIdx (𝕜 := Real) E =>
+          fun K : Fin s -> Coordinates.CoordinateIdx (𝕜 := Real) E =>
+            Coordinates.coordDerivRSAt (I := I) (fun x => X x) x₀
+              (fun x => T x) L K)
+        K := by
+  rw [Coordinates.coordDeriv0SAt_applyInput_eq_sum (I := I) X T theta x₀ K]
+  rfl
+
+/-- First-product rule for `contractUpper` with respect to an abstract scalar
+derivation `D`.
+
+This is deliberately independent of manifolds.  It is the finite-sum algebra
+needed to instantiate coordinate derivatives later: once `D` is a coordinate
+directional derivative and `thetaD`/`betaD` are the corresponding component
+derivatives, the contraction derivative is the expected Leibniz sum. -/
+theorem contractUpper_first_product_of_scalar_derivation
+    {Ω Idx : Type*} [Fintype Idx] {r s : ℕ}
+    (D : (Ω -> Real) -> Real) (z₀ : Ω)
+    (theta : Ω -> (Fin r -> Idx) -> Real)
+    (beta : Ω -> (Fin r -> Idx) -> (Fin s -> Idx) -> Real)
+    (thetaD : (Fin r -> Idx) -> Real)
+    (betaD : (Fin r -> Idx) -> (Fin s -> Idx) -> Real)
+    (hDsum : ∀ f : (Fin r -> Idx) -> Ω -> Real,
+      D (fun z => ∑ A : Fin r -> Idx, f A z) =
+        ∑ A : Fin r -> Idx, D (f A))
+    (hDmul : ∀ f g : Ω -> Real,
+      D (fun z => f z * g z) = D f * g z₀ + f z₀ * D g)
+    (hthetaD : ∀ A, D (fun z => theta z A) = thetaD A)
+    (hbetaD : ∀ A K, D (fun z => beta z A K) = betaD A K)
+    (K : Fin s -> Idx) :
+    D (fun z => contractUpper (theta z) (beta z) K) =
+      contractUpper thetaD (fun A K => beta z₀ A K) K +
+        contractUpper (theta z₀) betaD K := by
+  exact contractUpper_first_product_of_local_rules
+    (Idx := Idx) (r := r) (s := s) D z₀ theta beta thetaD betaD K
+    (hDsum (fun A z => theta z A * beta z A K))
+    (fun A => by rw [hDmul, hthetaD A, hbetaD A K])
+
+/-- Component-level mixed Ricci identity from coordinate second-product data.
+
+This is the next producer after
+`mixedRicciIdentityCoord_of_second_product_identities`: instead of asking for
+the four-term second-product formulas directly, it asks for the two
+first-product-rule pieces that arise after differentiating
+`theta_j ⋅ beta + theta ⋅ beta_j`, and similarly in the swapped order.  The
+remaining geometric frontier is to prove these first-product pieces from the
+actual coordinate derivative API for tensor evaluation/contraction. -/
+theorem mixedRicciIdentityCoord_of_coordinate_second_product
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {r s : ℕ}
+    (R : Idx -> Idx -> Idx -> Idx -> Real) (i j : Idx)
+    (commBeta beta beta_i beta_j beta_ij beta_ji :
+      (Fin r -> Idx) -> (Fin s -> Idx) -> Real)
+    (commContract contract_ij contract_ji :
+      (Fin r -> Idx) -> (Fin s -> Idx) -> Real)
+    (commProbe probe_i probe_j probe_ij probe_ji :
+      (Fin r -> Idx) -> (Fin r -> Idx) -> Real)
+    (prod_ij_left prod_ij_right prod_ji_left prod_ji_right :
+      (Fin r -> Idx) -> (Fin s -> Idx) -> Real)
+    (hcommBeta : ∀ L K, commBeta L K = beta_ij L K - beta_ji L K)
+    (hcommContract : ∀ L K, commContract L K = contract_ij L K - contract_ji L K)
+    (hcommProbe : ∀ L A, commProbe L A = probe_ij L A - probe_ji L A)
+    (hcontract_ij : ∀ L K,
+      contract_ij L K = prod_ij_left L K + prod_ij_right L K)
+    (hprod_ij_left : ∀ L K,
+      prod_ij_left L K =
+        contractUpper (probe_ij L) beta K +
+          contractUpper (probe_j L) beta_i K)
+    (hprod_ij_right : ∀ L K,
+      prod_ij_right L K =
+        contractUpper (probe_i L) beta_j K +
+          contractUpper (deltaMulti L) beta_ij K)
+    (hcontract_ji : ∀ L K,
+      contract_ji L K = prod_ji_left L K + prod_ji_right L K)
+    (hprod_ji_left : ∀ L K,
+      prod_ji_left L K =
+        contractUpper (probe_ji L) beta K +
+          contractUpper (probe_i L) beta_j K)
+    (hprod_ji_right : ∀ L K,
+      prod_ji_right L K =
+        contractUpper (probe_j L) beta_i K +
+          contractUpper (deltaMulti L) beta_ji K)
+    (hcontractCov : ∀ L K,
+      commContract L K =
+        covariantCurvAction R i j (contractUpper (deltaMulti L) beta) K)
+    (hprobeCov : ∀ L A,
+      commProbe L A = covariantCurvAction R i j (deltaMulti L) A) :
+    MixedRicciIdentityCoord R i j commBeta beta := by
+  classical
+  refine mixedRicciIdentityCoord_of_second_product_identities
+    R i j commBeta beta beta_i beta_j beta_ij beta_ji
+    commContract contract_ij contract_ji
+    commProbe probe_i probe_j probe_ij probe_ji
+    hcommBeta hcommContract hcommProbe ?_ ?_ hcontractCov hprobeCov
+  · intro L K
+    exact contractUpper_second_product_of_first_product_rules
+      (Idx := Idx) (r := r) (s := s)
+      (theta := deltaMulti L)
+      (theta_i := probe_i L)
+      (theta_j := probe_j L)
+      (theta_ij := probe_ij L)
+      (beta := beta)
+      (beta_i := beta_i)
+      (beta_j := beta_j)
+      (beta_ij := beta_ij)
+      (contract_ij := contract_ij L)
+      (left := prod_ij_left L)
+      (right := prod_ij_right L)
+      (hcontract := hcontract_ij L)
+      (hleft := hprod_ij_left L)
+      (hright := hprod_ij_right L)
+      K
+  · intro L K
+    exact contractUpper_second_product_of_first_product_rules
+      (Idx := Idx) (r := r) (s := s)
+      (theta := deltaMulti L)
+      (theta_i := probe_j L)
+      (theta_j := probe_i L)
+      (theta_ij := probe_ji L)
+      (beta := beta)
+      (beta_i := beta_j)
+      (beta_j := beta_i)
+      (beta_ij := beta_ji)
+      (contract_ij := contract_ji L)
+      (left := prod_ji_left L)
+      (right := prod_ji_right L)
+      (hcontract := hcontract_ji L)
+      (hleft := hprod_ji_left L)
+      (hright := hprod_ji_right L)
+      K
 
 end MixedComponentAlgebra
 
