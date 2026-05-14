@@ -539,7 +539,7 @@ private lemma tensorTrivProj_contMDiffOn_chart_source
   rw [Bundle.Trivialization.linearMapAt_apply, if_pos hx_base]
 
 /-- The raw chart-frame scalar component is smooth on the chart source. -/
-private lemma tensorChartComponentRaw_contMDiffOn_chart_source
+lemma tensorChartComponentRaw_contMDiffOn_chart_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))

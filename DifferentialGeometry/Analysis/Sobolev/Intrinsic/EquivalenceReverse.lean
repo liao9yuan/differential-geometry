@@ -1001,7 +1001,7 @@ private lemma sqrt_g_inner_gradFun_pou_mul_le
 
 /-- `chartSmoothExt α (ρ_α u) y` agrees with `chartPushed (chartAtlasPOU) α u y` on
 the chart target. -/
-private lemma chartSmoothExt_eq_chartPushed_pou_on_target
+lemma chartSmoothExt_eq_chartPushed_pou_on_target
     [T2Space M] [SigmaCompactSpace M] (α : M) (u : M → ℝ)
     {y : EuclN_E}
     (hy : y ∈ DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
@@ -1031,7 +1031,7 @@ private lemma chartSmoothExt_eq_chartPushed_pou_on_target
       u ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
   rw [if_pos hsymm_target]
 
-private lemma chartSmoothExt_eq_chartPushed_pou_ae
+lemma chartSmoothExt_eq_chartPushed_pou_ae
     [T2Space M] [SigmaCompactSpace M] (α : M) (u : M → ℝ) :
     DifferentialGeometry.Analysis.Sobolev.Chart.chartSmoothExt
         (I := I) (M := M) α
@@ -1052,7 +1052,7 @@ private lemma chartSmoothExt_eq_chartPushed_pou_ae
 
 /-- For closed manifolds and smooth `u`, the function
 `chartSmoothExt α (ρ_α u)` is C^∞ on EuclN. -/
-private lemma contDiff_chartSmoothExt_pou_mul_local_reverse
+lemma contDiff_chartSmoothExt_pou_mul_local_reverse
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (α : M) {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
     ContDiff ℝ ∞
@@ -1991,7 +1991,7 @@ theorem eLpNorm_fderiv_chartSmoothExt_apply_le_const_mul
 
 /-- The classical partial of `chartSmoothExt α (ρ_α u)` agrees a.e. on
 `volume.restrict ChTE` with `chosenWeakPartial' p i (chartPushed ρ α u) ChTE`. -/
-private lemma chosenWeakPartial_chartPushed_ae_eq_fderiv
+lemma chosenWeakPartial_chartPushed_ae_eq_fderiv
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (α : M) {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)

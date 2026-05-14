@@ -122,6 +122,45 @@ theorem tensorRSCovariantDerivative_apply (r s : ℕ)
     (Tensor0SNabla.tensor0SCovariantDerivative I M s cov)
     τ w x v
 
+/-- Pointwise apply for `tensorRSCovariantDerivative`: with raw `(r, s)`-tensor
+section `τ` and raw `(0, r)`-tensor section `w`, both manifold-differentiable
+at `x` in total-space form, plus a tangent vector field `V_field`
+manifold-differentiable at `x`, the value of the bundled `(r, s)`-tensor
+covariant derivative applied bilinearly at `x` decomposes as the standard
+product-rule formula. -/
+theorem tensorRSCovariantDerivative_apply_of_mdifferentiableAt (r s : ℕ)
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    [ContMDiffCovariantDerivative cov ∞]
+    (τ : Π x : M, TensorRSSpace r s I x)
+    (w : Π x : M, Tensor0SSpace r I x)
+    (V_field : Π x : M, TangentSpace I x)
+    {x : M}
+    (hτ : MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y (τ y)) x)
+    (hw : MDifferentiableAt I (I.prod 𝓘(ℝ, Tensor0SModel r ℝ E))
+      (fun y : M => TotalSpace.mk' (Tensor0SModel r ℝ E)
+        (E := fun z : M => Tensor0SSpace r I z) y (w y)) x)
+    (hV : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun y : M => TotalSpace.mk' E
+        (E := fun z : M => TangentSpace I z) y (V_field y)) x) :
+    (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
+        tensorRSCovariantDerivative I M r s cov τ x (V_field x)) (w x) =
+      Tensor0SNabla.tensor0SCovariantDerivative I M s cov
+        (fun y =>
+          (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace s I y from τ y) (w y))
+          x (V_field x) -
+      (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from τ x)
+        (Tensor0SNabla.tensor0SCovariantDerivative I M r cov w x (V_field x)) := by
+  -- `tensorRSCovariantDerivative` is `homBundleCovariantDerivativeGen` specialised
+  -- to source `Tensor0SSpace r` and target `Tensor0SSpace s`.
+  exact HomConnectionGen.homBundleCovariantDerivativeGen_apply_of_mdifferentiableAt
+    I M (Tensor0SModel r ℝ E) (fun y : M => Tensor0SSpace r I y)
+    (Tensor0SModel s ℝ E) (fun y : M => Tensor0SSpace s I y)
+    (Tensor0SNabla.tensor0SCovariantDerivative I M r cov)
+    (Tensor0SNabla.tensor0SCovariantDerivative I M s cov)
+    τ hτ hV hw
+
 /-! ### Compile-time sanity checks
 
 Given a `C^∞` covariant derivative on `TM`, the specialization produces a `C^∞`
