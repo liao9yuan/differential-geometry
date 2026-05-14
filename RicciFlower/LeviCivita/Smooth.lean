@@ -1,4 +1,6 @@
 import RicciFlower.LeviCivita.Torsion
+import RicciFlower.Tensor.RSTensor.Basis
+import Mathlib.Geometry.Manifold.VectorBundle.Hom
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -189,6 +191,153 @@ private theorem covariantDerivative_localFrame_coeff_eq
   rw [hderiv_sum, hchristoffel_sum]
   rfl
 
+/-! ## Hom-bundle coefficient identification
+
+The next smoothness step treats `x ↦ cov σ x` as a section of the Hom-bundle
+`TangentSpace I x →L[Real] TangentSpace I x`.  The scalar coefficient below is
+the `(k,i)` matrix entry after trivializing this Hom-bundle by the same tangent
+trivialization on source and target.  The lemma says that this Hom coefficient
+is exactly obtained by applying the endomorphism to the `i`-th domain local
+frame vector and then taking the `k`-th target local-frame coefficient.
+-/
+
+private noncomputable def homModelCoeff
+    {ι : Type*} (b : Module.Basis ι Real E) (i k : ι) :
+    (E →L[Real] E) →ₗ[Real] Real where
+  toFun A := b.coord k (A (b i))
+  map_add' A B := by simp
+  map_smul' c A := by simp
+
+private noncomputable def localHomCoeff
+    {ι : Type*}
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
+    [MemTrivializationAtlas e] (b : Module.Basis ι Real E) (i k : ι) (x : M) :
+    (TangentSpace I x →L[Real] TangentSpace I x) →ₗ[Real] Real :=
+  (homModelCoeff (E := E) b i k).comp
+    ((e.continuousLinearMap (RingHom.id Real) e).linearMapAt Real x)
+
+private theorem localHomCoeff_apply
+    {ι : Type*}
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
+    [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
+    {x : M} (hx : x ∈ e.baseSet)
+    (A : TangentSpace I x →L[Real] TangentSpace I x) (i k : ι) :
+    localHomCoeff (I := I) e b i k x A =
+      e.localFrame_coeff I b k x (A (e.localFrame b i x)) := by
+  rw [e.localFrame_apply_of_mem_baseSet (b := b) hx]
+  have hbasis :
+      e.basisAt b hx =
+        (e.isLocalFrameOn_localFrame_baseSet I 1 b).toBasisAt hx := by
+    ext j
+    simp [IsLocalFrameOn.toBasisAt, Bundle.Trivialization.localFrame,
+      Bundle.Trivialization.basisAt, hx]
+  have hhom : x ∈ (e.continuousLinearMap (RingHom.id Real) e).baseSet := by
+    simp [hx]
+  simp only [localHomCoeff, homModelCoeff, LinearMap.coe_comp, Function.comp_apply]
+  simp only [Bundle.Trivialization.localFrame_coeff, IsLocalFrameOn.coeff, hx, ↓reduceDIte]
+  rw [← hbasis]
+  rw [((e.continuousLinearMap (RingHom.id Real) e).coe_linearMapAt_of_mem hhom)]
+  change
+    b.coord k (((e.continuousLinearMap (RingHom.id Real) e) ⟨x, A⟩).2 (b i)) =
+      (e.basisAt b hx).coord k (A ((e.basisAt b hx) i))
+  rw [Bundle.Trivialization.continuousLinearMap_apply]
+  simp [Bundle.Trivialization.basisAt, Bundle.Trivialization.continuousLinearMapAt_apply,
+    e.coe_linearMapAt_of_mem hx]
+
+private theorem homLocalFrameCoeff_eq_localHomCoeff
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
+    [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
+    {x : M} (hx : x ∈ e.baseSet)
+    (A : TangentSpace I x →L[Real] TangentSpace I x) (i k : ι) :
+    (e.continuousLinearMap (RingHom.id Real) e).localFrame_coeff I
+        (continuousLinearMap_homBasis (𝕜 := Real) b b) (k, i) x A =
+      localHomCoeff (I := I) e b i k x A := by
+  let eHom := e.continuousLinearMap (RingHom.id Real) e
+  let bHom := continuousLinearMap_homBasis (𝕜 := Real) b b
+  have hhom : x ∈ eHom.baseSet := by
+    simp [eHom, hx]
+  classical
+  let s : (y : M) → TangentSpace I y →L[Real] TangentSpace I y :=
+    fun y => if h : x = y then h ▸ A else 0
+  have hsx : s x = A := by
+    simp [s]
+  rw [← hsx]
+  rw [eHom.localFrame_coeff_apply_of_mem_baseSet bHom hhom s (k, i)]
+  simp only [eHom, bHom, hsx]
+  simp [Bundle.Trivialization.basisAt, localHomCoeff, homModelCoeff,
+    continuousLinearMap_homBasis_repr]
+  rw [((e.continuousLinearMap (RingHom.id Real) e).coe_linearMapAt_of_mem hhom)]
+
+private theorem covariantDerivative_localHomCoeff_eq
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
+    [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
+    {σ : (x : M) → TangentSpace I x} {x : M}
+    (hx : x ∈ e.baseSet) (hσ : MDiffAt (T% σ) x) (i k : ι) :
+    localHomCoeff (I := I) e b i k x (cov σ x) =
+      extDerivFun (I := I) ((LinearMap.piApply (e.localFrame_coeff I b k)) σ)
+        x (e.localFrame b i x) +
+        ∑ j : ι,
+          e.localFrame_coeff I b j x (σ x) *
+            e.localFrame_coeff I b k x
+              ((cov (e.localFrame b j) x) (e.localFrame b i x)) := by
+  rw [localHomCoeff_apply (I := I) e b hx (cov σ x) i k]
+  exact covariantDerivative_localFrame_coeff_eq (I := I) cov e b hx hσ i k
+
+private theorem covariantDerivative_localHomCoeff_eventuallyEq
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
+    [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
+    {σ : (x : M) → TangentSpace I x} {x : M}
+    (hx : x ∈ e.baseSet) (hσ : ∀ᶠ y in 𝓝 x, MDiffAt (T% σ) y) (i k : ι) :
+    (fun y : M => localHomCoeff (I := I) e b i k y (cov σ y)) =ᶠ[𝓝 x]
+      fun y : M =>
+        extDerivFun (I := I) ((LinearMap.piApply (e.localFrame_coeff I b k)) σ)
+          y (e.localFrame b i y) +
+          ∑ j : ι,
+            e.localFrame_coeff I b j y (σ y) *
+              e.localFrame_coeff I b k y
+                ((cov (e.localFrame b j) y) (e.localFrame b i y)) := by
+  filter_upwards [e.open_baseSet.mem_nhds hx, hσ] with y hy hσy
+  exact covariantDerivative_localHomCoeff_eq (I := I) cov e b hy hσy i k
+
+private theorem covariantDerivative_localHomCoeff_contMDiffAt
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
+    [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
+    {σ : (x : M) → TangentSpace I x} {x : M}
+    (hx : x ∈ e.baseSet) (hσ : ∀ᶠ y in 𝓝 x, MDiffAt (T% σ) y)
+    (i k : ι)
+    (hderiv : ContMDiffAt I 𝓘(Real, Real) ∞
+      (fun y : M =>
+        extDerivFun (I := I) ((LinearMap.piApply (e.localFrame_coeff I b k)) σ)
+          y (e.localFrame b i y)) x)
+    (hcoeff : ∀ j : ι, ContMDiffAt I 𝓘(Real, Real) ∞
+      (fun y : M => e.localFrame_coeff I b j y (σ y)) x)
+    (hchristoffel : ∀ j : ι, ContMDiffAt I 𝓘(Real, Real) ∞
+      (fun y : M =>
+        e.localFrame_coeff I b k y
+          ((cov (e.localFrame b j) y) (e.localFrame b i y))) x) :
+    ContMDiffAt I 𝓘(Real, Real) ∞
+      (fun y : M => localHomCoeff (I := I) e b i k y (cov σ y)) x := by
+  have hEq :=
+    covariantDerivative_localHomCoeff_eventuallyEq (I := I) cov e b hx hσ i k
+  have hRhs : ContMDiffAt I 𝓘(Real, Real) ∞
+      (fun y : M =>
+        extDerivFun (I := I) ((LinearMap.piApply (e.localFrame_coeff I b k)) σ)
+          y (e.localFrame b i y) +
+          ∑ j : ι,
+            e.localFrame_coeff I b j y (σ y) *
+              e.localFrame_coeff I b k y
+                ((cov (e.localFrame b j) y) (e.localFrame b i y))) x := by
+    refine hderiv.add ?_
+    exact ContMDiffAt.sum fun j _ => (hcoeff j).mul (hchristoffel j)
+  exact hRhs.congr_of_eventuallyEq hEq
+
 /-! ## Metric coordinate smoothness
 
 The Christoffel formula in `Torsion.lean` reduces smoothness of the
@@ -274,6 +423,98 @@ private theorem extDerivFun_apply_contMDiffAt_of_section
   change (mfderiv I 𝓘(Real, Real) f p) (X p) =
     (mfderiv I 𝓘(Real, Real) f p) (e.symmL Real p (Xcoord p))
   rw [hcancel]
+
+private theorem localFrameCoeff_extDeriv_contMDiffAt
+    {ι : Type*}
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
+    [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
+    {σ : (x : M) → TangentSpace I x} {x : M}
+    (hx : x ∈ e.baseSet)
+    (hσ : ContMDiffAt I (I.prod 𝓘(Real, E)) ∞ (T% σ) x)
+    (i k : ι) :
+    ContMDiffAt I 𝓘(Real, Real) ∞
+      (fun y : M =>
+        extDerivFun (I := I) ((LinearMap.piApply (e.localFrame_coeff I b k)) σ)
+          y (e.localFrame b i y)) x := by
+  have hcoeff :
+      ContMDiffAt I 𝓘(Real, Real) ∞
+        ((LinearMap.piApply (e.localFrame_coeff I b k)) σ) x :=
+    contMDiffAt_localFrame_coeff
+      (I := I) (V := TangentSpace I) (e := e) (b := b) (s := σ)
+      (k := (∞ : WithTop ℕ∞)) hx hσ k
+  have hframe :
+      ContMDiffAt I (I.prod 𝓘(Real, E)) ∞
+        (T% (e.localFrame b i)) x :=
+    (e.isLocalFrameOn_localFrame_baseSet I ∞ b).contMDiffAt
+      e.open_baseSet hx i
+  exact extDerivFun_apply_contMDiffAt_of_section
+    (I := I)
+    (f := (LinearMap.piApply (e.localFrame_coeff I b k)) σ)
+    (X := e.localFrame b i) hcoeff hframe
+
+private theorem covariantDerivative_localHomCoeff_contMDiffAt_of_section
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
+    [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
+    {σ : (x : M) → TangentSpace I x} {x : M}
+    (hx : x ∈ e.baseSet)
+    (hσdiff : ∀ᶠ y in 𝓝 x, MDiffAt (T% σ) y)
+    (hσ : ContMDiffAt I (I.prod 𝓘(Real, E)) ∞ (T% σ) x)
+    (i k : ι)
+    (hchristoffel : ∀ j : ι, ContMDiffAt I 𝓘(Real, Real) ∞
+      (fun y : M =>
+        e.localFrame_coeff I b k y
+          ((cov (e.localFrame b j) y) (e.localFrame b i y))) x) :
+    ContMDiffAt I 𝓘(Real, Real) ∞
+      (fun y : M => localHomCoeff (I := I) e b i k y (cov σ y)) x := by
+  refine covariantDerivative_localHomCoeff_contMDiffAt
+    (I := I) cov e b hx hσdiff i k ?_ ?_ hchristoffel
+  · exact localFrameCoeff_extDeriv_contMDiffAt (I := I) e b hx hσ i k
+  · intro j
+    exact contMDiffAt_localFrame_coeff
+      (I := I) (V := TangentSpace I) (e := e) (b := b) (s := σ)
+      (k := (∞ : WithTop ℕ∞)) hx hσ j
+
+private theorem covariantDerivative_homSection_contMDiffAt_of_coeff
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
+    [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
+    {σ : (x : M) → TangentSpace I x} {x : M}
+    (hx : x ∈ e.baseSet)
+    (hσdiff : ∀ᶠ y in 𝓝 x, MDiffAt (T% σ) y)
+    (hσ : ContMDiffAt I (I.prod 𝓘(Real, E)) ∞ (T% σ) x)
+    (hchristoffel : ∀ i k j : ι, ContMDiffAt I 𝓘(Real, Real) ∞
+      (fun y : M =>
+        e.localFrame_coeff I b k y
+          ((cov (e.localFrame b j) y) (e.localFrame b i y))) x) :
+    ContMDiffAt I (I.prod 𝓘(Real, E →L[Real] E)) ∞
+      (fun y : M =>
+        (⟨y, cov σ y⟩ :
+          TotalSpace (E →L[Real] E)
+            (fun y : M => TangentSpace I y →L[Real] TangentSpace I y))) x := by
+  classical
+  let eHom := e.continuousLinearMap (RingHom.id Real) e
+  let bHom := continuousLinearMap_homBasis (𝕜 := Real) b b
+  have hhom : x ∈ eHom.baseSet := by
+    simp [eHom, hx]
+  refine
+    (contMDiffAt_iff_localFrame_coeff (I := I) (e := eHom) bHom
+      (s := fun y : M => cov σ y) (k := (∞ : WithTop ℕ∞)) hhom).mpr ?_
+  rintro ⟨k, i⟩
+  have hlocal :
+      ContMDiffAt I 𝓘(Real, Real) ∞
+        (fun y : M => localHomCoeff (I := I) e b i k y (cov σ y)) x :=
+    covariantDerivative_localHomCoeff_contMDiffAt_of_section
+      (I := I) cov e b hx hσdiff hσ i k (fun j => hchristoffel i k j)
+  have heq :
+      (fun y : M =>
+          (eHom.localFrame_coeff I bHom (k, i) y) (cov σ y)) =ᶠ[𝓝 x]
+        fun y : M => localHomCoeff (I := I) e b i k y (cov σ y) := by
+    filter_upwards [e.open_baseSet.mem_nhds hx] with y hy
+    exact homLocalFrameCoeff_eq_localHomCoeff (I := I) e b hy (cov σ y) i k
+  exact hlocal.congr_of_eventuallyEq heq
 
 /-- Coordinate-frame metric components are smooth at the chart center. -/
 theorem metric_coordinateFrame_component_contMDiffAt

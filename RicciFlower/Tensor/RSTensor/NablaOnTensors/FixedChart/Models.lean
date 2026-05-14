@@ -90,6 +90,18 @@ noncomputable def tensor0SModelInChart (s : ℕ) (x₀ : M)
   tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
     s x₀ ((extChartAt I x₀).symm y) (A ((extChartAt I x₀).symm y))
 
+/-- At the center of the fixed chart, the chart-local tensor model is the
+fiber model at that center. -/
+theorem tensor0SModelInChart_center_eq_tensor0SModelAt (s : ℕ) (x₀ : M)
+    (A : (x : M) →
+      Tensor0SSpace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s x) :
+    tensor0SModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        s x₀ A (extChartAt I x₀ x₀) =
+      tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        s x₀ x₀ (A x₀) := by
+  unfold tensor0SModelInChart
+  rw [extChartAt_to_inv]
+
 /-- Slot evaluation form of `tensor0SModelInChart`. -/
 theorem tensor0SModelInChart_apply (s : ℕ) (x₀ : M)
     (A : (x : M) →

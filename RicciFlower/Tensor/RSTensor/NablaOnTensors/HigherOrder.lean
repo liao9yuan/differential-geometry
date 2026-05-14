@@ -217,7 +217,117 @@ theorem totalNabla0SFun_apply_section (s : ℕ)
         s cov α x (Fin.cons (X x) slots) =
       nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
         s cov X α x slots := by
-  sorry
+  classical
+  let e := trivializationAt E (TangentSpace I : M → Type _) x
+  let y₀ : E := extChartAt I x x
+  let Xmodel : E := e.continuousLinearMapAt 𝕜 x (X x)
+  let slotsModel : Fin s → E := fun a => e.continuousLinearMapAt 𝕜 x (slots a)
+  have hXinput :
+      tangentConstInChart (𝕜 := 𝕜) (I := I) x Xmodel x = X x := by
+    change
+      tangentConstInChart (𝕜 := 𝕜) (I := I) x
+          ((trivializationAt E (TangentSpace I : M → Type _) x).continuousLinearMapAt
+            𝕜 x (X x)) x =
+        X x
+    exact tangentConstInChart_self_continuousLinearMapAt
+      (𝕜 := 𝕜) (I := I) x (X x)
+  have hslotsInput :
+      (fun a : Fin s =>
+        tangentConstInChart (𝕜 := 𝕜) (I := I) x (slotsModel a) x) = slots := by
+    funext a
+    change
+      tangentConstInChart (𝕜 := 𝕜) (I := I) x
+          ((trivializationAt E (TangentSpace I : M → Type _) x).continuousLinearMapAt
+            𝕜 x (slots a)) x =
+        slots a
+    exact tangentConstInChart_self_continuousLinearMapAt
+      (𝕜 := 𝕜) (I := I) x (slots a)
+  have hinput :
+      Fin.cons
+          (tangentConstInChart (𝕜 := 𝕜) (I := I) x Xmodel x)
+          (fun a : Fin s =>
+            tangentConstInChart (𝕜 := 𝕜) (I := I) x (slotsModel a) x)
+        =
+      (Fin.cons (X x) slots : Fin (s + 1) → TangentSpace I x) := by
+    funext a
+    cases a using Fin.cases with
+    | zero => exact hXinput
+    | succ a => exact congrFun hslotsInput a
+  have hmpull :
+      VectorField.mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x).symm
+          (fun y : M => X y) (Set.range I) y₀ =
+        Xmodel := by
+    simp only [y₀, Xmodel, e, VectorField.mpullbackWithin_apply]
+    rw [extChartAt_to_inv]
+    rw [TangentBundle.continuousLinearMapAt_trivializationAt
+      (I := I) (x₀ := x) (x := x) (mem_chart_source H x)]
+    rw [mfderiv_extChartAt_self]
+    exact mfderivWithin_extChartAt_symm_inverse_apply (I := I) (x := x) (X x)
+  have htotal := totalNabla0SFun_apply_tangentConstInChart
+    (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+    s cov α x Xmodel slotsModel
+  have hself := nabla0SFun_apply_selfChart_slots
+    (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+    s cov X α x slotsModel
+  have hfixed := fixedChartNabla0SModel_apply_slots
+    (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+    (n := (∞ : WithTop ℕ∞)) s cov X α x y₀ slotsModel
+  calc
+    totalNabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        s cov α x (Fin.cons (X x) slots)
+        =
+      totalNabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        s cov α x
+        (Fin.cons
+          (tangentConstInChart (𝕜 := 𝕜) (I := I) x Xmodel x)
+          (fun a : Fin s =>
+            tangentConstInChart (𝕜 := 𝕜) (I := I) x (slotsModel a) x)) := by
+          rw [hinput]
+    _ =
+      covariantDeriv_tensor0SModelAt (𝕜 := 𝕜) (E := E) s
+        (fderivWithin 𝕜
+          (tensor0SModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+            s x (fun x => α x))
+          (Set.range I) (extChartAt I x x) Xmodel)
+        (connectionEndomorphismInChartL (𝕜 := 𝕜) (I := I) cov x
+          (extChartAt I x x) Xmodel)
+        (tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+          s x x (α x))
+        slotsModel := htotal
+    _ =
+      fixedChartNabla0SModel (𝕜 := 𝕜) (E := E) (H := H)
+        (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) s cov X α x y₀ slotsModel := by
+          rw [hfixed]
+          rw [covariantDeriv_tensor0SModelAt_apply_slots]
+          rw [hmpull]
+          have hΓ (v : E) :
+              connectionEndomorphismInChartL (𝕜 := 𝕜) (I := I) cov x
+                  (extChartAt I x x) Xmodel v =
+                connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov
+                  (fun x => X x) x (extChartAt I x x) v := by
+            change
+              connectionEndomorphismInChartL (𝕜 := 𝕜) (I := I) cov x
+                  (extChartAt I x x)
+                  ((trivializationAt E (TangentSpace I : M → Type _)
+                    x).continuousLinearMapAt 𝕜 x (X x)) v =
+                connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov
+                  (fun x => X x) x (extChartAt I x x) v
+            exact connectionEndomorphismInChartL_apply_center_modelVector
+              (𝕜 := 𝕜) (I := I) cov (fun x => X x) x v
+          simp_rw [hΓ]
+          rw [tensor0SModelInChart_center_eq_tensor0SModelAt
+            (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+            s x (fun y => α y)]
+    _ =
+      (nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        s cov X α x)
+        (fun a : Fin s =>
+          tangentConstInChart (𝕜 := 𝕜) (I := I) x (slotsModel a) x) := by
+          exact hself.symm
+    _ =
+      nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        s cov X α x slots := by
+          rw [hslotsInput]
 
 /-- A supplied `(0,s+1)` field realizes the total covariant derivative of a
 `(0,s)` field when contraction against any smooth vector field gives the

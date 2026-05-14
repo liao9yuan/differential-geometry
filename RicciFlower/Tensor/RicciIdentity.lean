@@ -227,6 +227,427 @@ theorem oneFormRicciTraceCommCoord_of_identities {Idx : Type*} [Fintype Idx]
     _ = (∑ i : Idx, ∑ j : Idx, gInv i j * U k i j) + ricGrad k := by
           rw [h_trace k]
 
+section MixedComponentAlgebra
+
+/-- Elementary multi-index probe.  It is the Kronecker delta at `L`. -/
+def deltaMulti {Idx : Type*} {r : ℕ} [DecidableEq Idx]
+    (L A : Fin r -> Idx) : Real :=
+  if A = L then 1 else 0
+
+/-- Contract the upper multi-index of a mixed component array against a
+covariant probe component array. -/
+def contractUpper {Idx : Type*} [Fintype Idx] {r s : ℕ}
+    (theta : (Fin r -> Idx) -> Real)
+    (beta : (Fin r -> Idx) -> (Fin s -> Idx) -> Real)
+    (K : Fin s -> Idx) : Real :=
+  ∑ L : Fin r -> Idx, theta L * beta L K
+
+/-- Covariant curvature action on a component array.  The convention is
+`R i j a b = R^a_{ijb}`, so covariant slots carry the negative sign. -/
+def covariantCurvAction {Idx : Type*} [Fintype Idx] {n : ℕ}
+    (R : Idx -> Idx -> Idx -> Idx -> Real) (i j : Idx)
+    (A : (Fin n -> Idx) -> Real) (K : Fin n -> Idx) : Real :=
+  -∑ q : Fin n, ∑ m : Idx,
+    R i j m (K q) * A (Function.update K q m)
+
+@[simp] theorem deltaMulti_self {Idx : Type*} {r : ℕ} [DecidableEq Idx]
+    (L : Fin r -> Idx) :
+    deltaMulti L L = 1 := by
+  simp [deltaMulti]
+
+theorem deltaMulti_eq_zero_of_ne {Idx : Type*} {r : ℕ} [DecidableEq Idx]
+    {L A : Fin r -> Idx} (h : A ≠ L) :
+    deltaMulti L A = 0 := by
+  simp [deltaMulti, h]
+
+@[simp] theorem contractUpper_deltaMulti {Idx : Type*}
+    [Fintype Idx] [DecidableEq Idx] {r s : ℕ}
+    (L : Fin r -> Idx)
+    (beta : (Fin r -> Idx) -> (Fin s -> Idx) -> Real)
+    (K : Fin s -> Idx) :
+    contractUpper (deltaMulti L) beta K = beta L K := by
+  classical
+  unfold contractUpper
+  change (∑ A : Fin r -> Idx, deltaMulti L A * beta A K) = beta L K
+  calc
+    (∑ A : Fin r -> Idx, deltaMulti L A * beta A K)
+        = deltaMulti L L * beta L K := by
+          exact Fintype.sum_eq_single (α := Fin r -> Idx) (M := Real)
+            (f := fun A : Fin r -> Idx => deltaMulti L A * beta A K) L
+            (by
+              intro A hA
+              simp [deltaMulti, hA])
+    _ = beta L K := by
+          simp [deltaMulti]
+
+private lemma deltaMulti_update_eq_one_iff {Idx : Type*}
+    [DecidableEq Idx] {r : ℕ}
+    (L A : Fin r -> Idx) (p : Fin r) (m : Idx) :
+    deltaMulti L (Function.update A p m) = 1 ↔
+      Function.update A p m = L := by
+  by_cases h : Function.update A p m = L
+  · simp [deltaMulti, h]
+  · simp [deltaMulti, h]
+
+private lemma update_eq_of_update_eq {Idx : Type*}
+    [DecidableEq Idx] {r : ℕ}
+    {L A : Fin r -> Idx} {p : Fin r} {m : Idx}
+    (h : Function.update A p m = L) :
+    A = Function.update L p (A p) := by
+  funext q
+  by_cases hpq : q = p
+  · subst hpq
+    simp
+  · have hq := congrFun h q
+    simpa [Function.update, hpq] using hq
+
+private lemma update_value_eq_of_update_eq {Idx : Type*}
+    [DecidableEq Idx] {r : ℕ}
+    {L A : Fin r -> Idx} {p : Fin r} {m : Idx}
+    (h : Function.update A p m = L) :
+    m = L p := by
+  have hp := congrFun h p
+  simpa using hp
+
+private lemma update_update_same_apply {Idx : Type*}
+    [DecidableEq Idx] {r : ℕ}
+    (L : Fin r -> Idx) (p : Fin r) (m : Idx) :
+    Function.update (Function.update L p m) p (L p) = L := by
+  funext q
+  by_cases hpq : q = p
+  · subst hpq
+    simp
+  · simp [Function.update, hpq]
+
+private def updateSwapEquiv {Idx : Type*} [DecidableEq Idx] {r : ℕ}
+    (p : Fin r) : ((Fin r -> Idx) × Idx) ≃ ((Fin r -> Idx) × Idx) where
+  toFun Am := (Function.update Am.1 p Am.2, Am.1 p)
+  invFun Am := (Function.update Am.1 p Am.2, Am.1 p)
+  left_inv := by
+    intro Am
+    cases Am with
+    | mk A m =>
+        ext q <;> simp
+  right_inv := by
+    intro Am
+    cases Am with
+    | mk A m =>
+        ext q <;> simp
+
+private lemma sum_delta_update_pair {Idx : Type*}
+    [Fintype Idx] [DecidableEq Idx] {r s : ℕ}
+    (R : Idx -> Idx -> Idx -> Idx -> Real) (i j : Idx)
+    (L : Fin r -> Idx) (p : Fin r)
+    (beta : (Fin r -> Idx) -> (Fin s -> Idx) -> Real)
+    (K : Fin s -> Idx) :
+    (∑ A : Fin r -> Idx, ∑ m : Idx,
+      R i j m (A p) * deltaMulti L (Function.update A p m) * beta A K)
+      =
+    ∑ m : Idx, R i j (L p) m *
+      beta (Function.update L p m) K := by
+  classical
+  let F : ((Fin r -> Idx) × Idx) -> Real := fun Am =>
+    R i j Am.2 (Am.1 p) *
+      deltaMulti L (Function.update Am.1 p Am.2) * beta Am.1 K
+  let G : ((Fin r -> Idx) × Idx) -> Real := fun Bm =>
+    R i j (Bm.1 p) Bm.2 * deltaMulti L Bm.1 *
+      beta (Function.update Bm.1 p Bm.2) K
+  have hFG : ∑ Am, F Am = ∑ Bm, G Bm := by
+    refine Fintype.sum_equiv (updateSwapEquiv (Idx := Idx) p) F G ?_
+    intro Am
+    cases Am with
+    | mk A m =>
+        simp [F, G, updateSwapEquiv]
+  have hG :
+      (∑ Bm, G Bm) =
+        ∑ m : Idx, R i j (L p) m *
+          beta (Function.update L p m) K := by
+    calc
+      (∑ Bm : (Fin r -> Idx) × Idx, G Bm)
+          = ∑ B : Fin r -> Idx, ∑ m : Idx, G (B, m) := by
+              rw [Fintype.sum_prod_type]
+      _ = ∑ B : Fin r -> Idx,
+            (if B = L then
+              ∑ m : Idx, R i j (L p) m *
+                beta (Function.update L p m) K
+            else 0) := by
+              refine Fintype.sum_congr _ _ ?_
+              intro B
+              by_cases hB : B = L
+              · subst hB
+                simp [G, deltaMulti]
+              · simp [G, deltaMulti, hB]
+      _ = ∑ m : Idx, R i j (L p) m *
+            beta (Function.update L p m) K := by
+              let S : Real := ∑ m : Idx, R i j (L p) m *
+                beta (Function.update L p m) K
+              change (∑ B : Fin r -> Idx,
+                (if B = L then S else 0)) = S
+              calc
+                (∑ B : Fin r -> Idx, (if B = L then S else 0))
+                    = (if L = L then S else 0) := by
+                      refine Fintype.sum_eq_single
+                        (α := Fin r -> Idx) (M := Real)
+                        (f := fun B : Fin r -> Idx =>
+                          if B = L then S else 0) L ?_
+                      intro B hB
+                      simp [hB]
+                _ = S := by simp
+  calc
+    (∑ A : Fin r -> Idx, ∑ m : Idx,
+      R i j m (A p) * deltaMulti L (Function.update A p m) * beta A K)
+        = ∑ Am : (Fin r -> Idx) × Idx, F Am := by
+            rw [Fintype.sum_prod_type]
+    _ = ∑ Bm : (Fin r -> Idx) × Idx, G Bm := hFG
+    _ = ∑ m : Idx, R i j (L p) m *
+          beta (Function.update L p m) K := hG
+
+private lemma contractUpper_covariantCurvAction_deltaMulti
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {r s : ℕ}
+    (R : Idx -> Idx -> Idx -> Idx -> Real) (i j : Idx)
+    (L : Fin r -> Idx)
+    (beta : (Fin r -> Idx) -> (Fin s -> Idx) -> Real)
+    (K : Fin s -> Idx) :
+    contractUpper (covariantCurvAction R i j (deltaMulti L)) beta K =
+      -∑ p : Fin r, ∑ m : Idx,
+        R i j (L p) m * beta (Function.update L p m) K := by
+  classical
+  unfold contractUpper covariantCurvAction
+  simp_rw [neg_mul]
+  calc
+    (∑ A : Fin r -> Idx,
+      -((∑ q : Fin r, ∑ m : Idx,
+          R i j m (A q) * deltaMulti L (Function.update A q m)) *
+        beta A K))
+        = -∑ A : Fin r -> Idx, (∑ q : Fin r, ∑ m : Idx,
+          R i j m (A q) * deltaMulti L (Function.update A q m)) *
+            beta A K := by
+            simp [Finset.sum_neg_distrib]
+    _ = -∑ A : Fin r -> Idx, ∑ q : Fin r, ∑ m : Idx,
+          R i j m (A q) * deltaMulti L (Function.update A q m) *
+            beta A K := by
+            congr 1
+            refine Fintype.sum_congr _ _ ?_
+            intro A
+            simp [Finset.sum_mul, mul_assoc]
+    _ = -∑ q : Fin r, ∑ A : Fin r -> Idx, ∑ m : Idx,
+          R i j m (A q) * deltaMulti L (Function.update A q m) *
+            beta A K := by
+            rw [Finset.sum_comm]
+    _ = -∑ q : Fin r, ∑ m : Idx,
+          R i j (L q) m * beta (Function.update L q m) K := by
+            congr 1
+            refine Fintype.sum_congr _ _ ?_
+            intro q
+            exact sum_delta_update_pair R i j L q beta K
+
+/-- Pure component algebra behind Remark 14.13.  Contract a mixed tensor
+against an elementary covariant probe, use the covariant curvature action on
+the contraction and on the probe, and the upper-slot curvature terms appear
+with the opposite sign. -/
+theorem contract_covariantCurvAction_deltaMulti_eq_mixedCurvAction
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {r s : ℕ}
+    (R : Idx -> Idx -> Idx -> Idx -> Real) (i j : Idx)
+    (L : Fin r -> Idx) (K : Fin s -> Idx)
+    (beta : (Fin r -> Idx) -> (Fin s -> Idx) -> Real) :
+    covariantCurvAction R i j
+        (contractUpper (deltaMulti L) beta) K -
+      contractUpper
+        (covariantCurvAction R i j (deltaMulti L)) beta K
+      =
+        (∑ p : Fin r, ∑ m : Idx,
+          R i j (L p) m * beta (Function.update L p m) K) -
+        (∑ q : Fin s, ∑ m : Idx,
+          R i j m (K q) * beta L (Function.update K q m)) := by
+  classical
+  rw [contractUpper_covariantCurvAction_deltaMulti]
+  unfold covariantCurvAction
+  simp_rw [contractUpper_deltaMulti]
+  ring
+
+/-- Curvature action on mixed `(r,s)` components.  The convention is
+`R i j a b = R^a_{ijb}`.  Upper slots have the positive sign and lower slots
+have the covariant negative sign. -/
+def mixedCurvAction {Idx : Type*} [Fintype Idx] {r s : ℕ}
+    (R : Idx -> Idx -> Idx -> Idx -> Real) (i j : Idx)
+    (beta : (Fin r -> Idx) -> (Fin s -> Idx) -> Real)
+    (L : Fin r -> Idx) (K : Fin s -> Idx) : Real :=
+  (∑ p : Fin r, ∑ m : Idx,
+    R i j (L p) m * beta (Function.update L p m) K) -
+  (∑ q : Fin s, ∑ m : Idx,
+    R i j m (K q) * beta L (Function.update K q m))
+
+/-- Component form of the mixed `(r,s)` Ricci identity for a precomputed
+commutator component array. -/
+def MixedRicciIdentityCoord {Idx : Type*} [Fintype Idx] {r s : ℕ}
+    (R : Idx -> Idx -> Idx -> Idx -> Real) (i j : Idx)
+    (commBeta beta : (Fin r -> Idx) -> (Fin s -> Idx) -> Real) : Prop :=
+  ∀ L K, commBeta L K = mixedCurvAction R i j beta L K
+
+/-- Derive the mixed component Ricci identity from the covariant identity
+applied to an elementary probe contraction and to the probe itself.
+
+The input `hcontract` is the product rule for the commutator acting on
+`contractUpper (deltaMulti L) beta`; `hcontractCov` and `hprobeCov` are the
+already-known covariant Ricci identities for the contracted `(0,s)` tensor and
+the probe `(0,r)` tensor. -/
+theorem mixedRicciIdentityCoord_of_contract_probe_identities
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {r s : ℕ}
+    (R : Idx -> Idx -> Idx -> Idx -> Real) (i j : Idx)
+    (commBeta beta : (Fin r -> Idx) -> (Fin s -> Idx) -> Real)
+    (commContract : (Fin r -> Idx) -> (Fin s -> Idx) -> Real)
+    (commProbe : (Fin r -> Idx) -> (Fin r -> Idx) -> Real)
+    (hcontract : ∀ L K,
+      contractUpper (deltaMulti L) commBeta K =
+        commContract L K - contractUpper (commProbe L) beta K)
+    (hcontractCov : ∀ L K,
+      commContract L K =
+        covariantCurvAction R i j (contractUpper (deltaMulti L) beta) K)
+    (hprobeCov : ∀ L A,
+      commProbe L A = covariantCurvAction R i j (deltaMulti L) A) :
+    MixedRicciIdentityCoord R i j commBeta beta := by
+  classical
+  intro L K
+  have hprobeContract :
+      contractUpper (commProbe L) beta K =
+        contractUpper (covariantCurvAction R i j (deltaMulti L)) beta K := by
+    unfold contractUpper
+    refine Finset.sum_congr rfl fun A _ => ?_
+    rw [hprobeCov L A]
+  have hcomm :
+      commBeta L K =
+        covariantCurvAction R i j (contractUpper (deltaMulti L) beta) K -
+          contractUpper (covariantCurvAction R i j (deltaMulti L)) beta K := by
+    calc
+      commBeta L K = contractUpper (deltaMulti L) commBeta K := by
+          rw [contractUpper_deltaMulti]
+      _ = commContract L K - contractUpper (commProbe L) beta K := hcontract L K
+      _ = covariantCurvAction R i j (contractUpper (deltaMulti L) beta) K -
+            contractUpper (covariantCurvAction R i j (deltaMulti L)) beta K := by
+          rw [hcontractCov L K, hprobeContract]
+  rw [hcomm, mixedCurvAction]
+  exact contract_covariantCurvAction_deltaMulti_eq_mixedCurvAction R i j L K beta
+
+/-- Algebraic cancellation behind the commutator product rule for an
+upper-slot contraction.
+
+The hypotheses are the two second-product-rule expansions for derivative
+orders `ij` and `ji`.  The conclusion is the commutator form:
+`theta ⋅ commBeta = commContract - commTheta ⋅ beta`. -/
+theorem contractUpper_commutator_of_second_product_rules
+    {Idx : Type*} [Fintype Idx] {r s : ℕ}
+    (theta theta_i theta_j theta_ij theta_ji : (Fin r -> Idx) -> Real)
+    (beta beta_i beta_j beta_ij beta_ji :
+      (Fin r -> Idx) -> (Fin s -> Idx) -> Real)
+    (contract_ij contract_ji : (Fin s -> Idx) -> Real)
+    (hij : ∀ K,
+      contract_ij K =
+        contractUpper theta_ij beta K +
+          contractUpper theta_j beta_i K +
+          contractUpper theta_i beta_j K +
+          contractUpper theta beta_ij K)
+    (hji : ∀ K,
+      contract_ji K =
+        contractUpper theta_ji beta K +
+          contractUpper theta_i beta_j K +
+          contractUpper theta_j beta_i K +
+          contractUpper theta beta_ji K)
+    (K : Fin s -> Idx) :
+    contractUpper theta (fun L K => beta_ij L K - beta_ji L K) K =
+      (contract_ij K - contract_ji K) -
+        contractUpper (fun L => theta_ij L - theta_ji L) beta K := by
+  classical
+  have hright :
+      contractUpper theta (fun L K => beta_ij L K - beta_ji L K) K =
+        contractUpper theta beta_ij K - contractUpper theta beta_ji K := by
+    unfold contractUpper
+    simp_rw [mul_sub]
+    rw [Finset.sum_sub_distrib]
+  have hleft :
+      contractUpper (fun L => theta_ij L - theta_ji L) beta K =
+        contractUpper theta_ij beta K - contractUpper theta_ji beta K := by
+    unfold contractUpper
+    simp_rw [sub_mul]
+    rw [Finset.sum_sub_distrib]
+  rw [hright, hleft, hij K, hji K]
+  ring
+
+/-- Component-level mixed Ricci identity from second-product-rule identities.
+
+This packages the previous theorem into the input shape expected by
+`mixedRicciIdentityCoord_of_contract_probe_identities`.  The remaining
+geometric frontier is to supply the second-product-rule expansions for the
+actual contraction of a probe tensor against a mixed tensor. -/
+theorem mixedRicciIdentityCoord_of_second_product_identities
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {r s : ℕ}
+    (R : Idx -> Idx -> Idx -> Idx -> Real) (i j : Idx)
+    (commBeta beta beta_i beta_j beta_ij beta_ji :
+      (Fin r -> Idx) -> (Fin s -> Idx) -> Real)
+    (commContract contract_ij contract_ji :
+      (Fin r -> Idx) -> (Fin s -> Idx) -> Real)
+    (commProbe probe_i probe_j probe_ij probe_ji :
+      (Fin r -> Idx) -> (Fin r -> Idx) -> Real)
+    (hcommBeta : ∀ L K, commBeta L K = beta_ij L K - beta_ji L K)
+    (hcommContract : ∀ L K, commContract L K = contract_ij L K - contract_ji L K)
+    (hcommProbe : ∀ L A, commProbe L A = probe_ij L A - probe_ji L A)
+    (hprod_ij : ∀ L K,
+      contract_ij L K =
+        contractUpper (probe_ij L) beta K +
+          contractUpper (probe_j L) beta_i K +
+          contractUpper (probe_i L) beta_j K +
+          contractUpper (deltaMulti L) beta_ij K)
+    (hprod_ji : ∀ L K,
+      contract_ji L K =
+        contractUpper (probe_ji L) beta K +
+          contractUpper (probe_i L) beta_j K +
+          contractUpper (probe_j L) beta_i K +
+          contractUpper (deltaMulti L) beta_ji K)
+    (hcontractCov : ∀ L K,
+      commContract L K =
+        covariantCurvAction R i j (contractUpper (deltaMulti L) beta) K)
+    (hprobeCov : ∀ L A,
+      commProbe L A = covariantCurvAction R i j (deltaMulti L) A) :
+    MixedRicciIdentityCoord R i j commBeta beta := by
+  classical
+  refine mixedRicciIdentityCoord_of_contract_probe_identities
+    R i j commBeta beta commContract commProbe ?_ hcontractCov hprobeCov
+  intro L K
+  have hprod :=
+    contractUpper_commutator_of_second_product_rules
+      (Idx := Idx) (r := r) (s := s)
+      (theta := deltaMulti L)
+      (theta_i := probe_i L)
+      (theta_j := probe_j L)
+      (theta_ij := probe_ij L)
+      (theta_ji := probe_ji L)
+      (beta := beta)
+      (beta_i := beta_i)
+      (beta_j := beta_j)
+      (beta_ij := beta_ij)
+      (beta_ji := beta_ji)
+      (contract_ij := contract_ij L)
+      (contract_ji := contract_ji L)
+      (hij := hprod_ij L)
+      (hji := hprod_ji L)
+      K
+  calc
+    contractUpper (deltaMulti L) commBeta K =
+        contractUpper (deltaMulti L)
+          (fun A K => beta_ij A K - beta_ji A K) K := by
+          unfold contractUpper
+          refine Finset.sum_congr rfl fun A _ => ?_
+          rw [hcommBeta A K]
+    _ = (contract_ij L K - contract_ji L K) -
+        contractUpper (fun A => probe_ij L A - probe_ji L A) beta K := hprod
+    _ = commContract L K - contractUpper (commProbe L) beta K := by
+          rw [hcommContract L K]
+          congr 1
+          unfold contractUpper
+          refine Finset.sum_congr rfl fun A _ => ?_
+          rw [hcommProbe L A]
+
+end MixedComponentAlgebra
+
 /-- Pointwise Ricci identity for the third covariant derivative of a one-form.
 
 With the realized convention `Rm13 alpha X Y Z = alpha (R(X,Y)Z)`, the
@@ -1182,6 +1603,13 @@ private lemma update_finCons_succ
       simp
     · simp [hrq]
 
+private lemma finCons_update_tail_eq_update_finCons_succ
+    {s : ℕ} {V : Type*}
+    (head : V) (tail : Fin s → V) (q : Fin s) (newTail : V) :
+    (Fin.cons head (Function.update tail q newTail) : Fin (s + 1) → V) =
+      Function.update (Fin.cons head tail : Fin (s + 1) → V) q.succ newTail :=
+  (update_finCons_succ head tail q newTail).symm
+
 private lemma sum_update_finCons
     {s : ℕ} {V A : Type*} [AddCommMonoid A]
     (F : (Fin (s + 1) → V) → A)
@@ -1939,9 +2367,195 @@ private theorem tensor0S_commutator_expansion_from_realizes
     rw [hbaseComm_left]
     simp_rw [hDX_corrY, hDY_corrX]
     rw [hnablaAlpha, halpha]
-    simp [Xf, Yf, slots, VYq, VXq, Vfield, XV, YV,
-      connectionRiemannCurvatureField]
-    sorry
+    have hVYq_at (q : Fin s) :
+        (fun a : Fin s => VYq q a x) =
+          Function.update slots q (YV q x) := by
+      funext a
+      by_cases ha : a = q
+      · subst a
+        simp [VYq, Vfield, slots]
+      · simp [VYq, Vfield, slots, ha]
+    have hVXq_at (q : Fin s) :
+        (fun a : Fin s => VXq q a x) =
+          Function.update slots q (XV q x) := by
+      funext a
+      by_cases ha : a = q
+      · subst a
+        simp [VXq, Vfield, slots]
+      · simp [VXq, Vfield, slots, ha]
+    have hFinConsVY (q : Fin s) :
+        (Fin.cons (Xsec x) (fun a : Fin s => VYq q a x) :
+            Fin (s + 1) → TangentSpace I x) =
+          Function.update
+            (Fin.cons (Xsec x) slots : Fin (s + 1) → TangentSpace I x)
+            q.succ (YV q x) := by
+      rw [hVYq_at q]
+      exact finCons_update_tail_eq_update_finCons_succ
+        (Xsec x) slots q (YV q x)
+    have hFinConsVX (q : Fin s) :
+        (Fin.cons (Ysec x) (fun a : Fin s => VXq q a x) :
+            Fin (s + 1) → TangentSpace I x) =
+          Function.update
+            (Fin.cons (Ysec x) slots : Fin (s + 1) → TangentSpace I x)
+            q.succ (XV q x) := by
+      rw [hVXq_at q]
+      exact finCons_update_tail_eq_update_finCons_succ
+        (Ysec x) slots q (XV q x)
+    have hDoubleY :
+        (∑ q : Fin s, ∑ a : Fin s,
+          alpha
+            (Function.update (fun b : Fin s => VYq q b x) a
+              ((cov (fun p : M => VYq q a p) x) (Xsec x)))) =
+        ∑ q : Fin s, ∑ a : Fin s,
+          alpha
+            (Function.update (Function.update slots q (YV q x)) a
+              (if a = q then
+                (cov (fun p : M => YV q p) x) (Xsec x)
+              else
+                XV a x)) := by
+      refine Finset.sum_congr rfl ?_
+      intro q hq
+      refine Finset.sum_congr rfl ?_
+      intro a ha
+      have hderiv :
+          ((cov (fun p : M => VYq q a p) x) (Xsec x)) =
+            (if a = q then
+              (cov (fun p : M => YV q p) x) (Xsec x)
+            else
+              XV a x) := by
+        by_cases haq : a = q
+        · subst a
+          simp [VYq, Vfield, YV, XV]
+        · simp [VYq, Vfield, YV, XV, haq]
+      rw [hVYq_at q, hderiv]
+    have hDoubleX :
+        (∑ q : Fin s, ∑ a : Fin s,
+          alpha
+            (Function.update (fun b : Fin s => VXq q b x) a
+              ((cov (fun p : M => VXq q a p) x) (Ysec x)))) =
+        ∑ q : Fin s, ∑ a : Fin s,
+          alpha
+            (Function.update (Function.update slots q (XV q x)) a
+              (if a = q then
+                (cov (fun p : M => XV q p) x) (Ysec x)
+              else
+                YV a x)) := by
+      refine Finset.sum_congr rfl ?_
+      intro q hq
+      refine Finset.sum_congr rfl ?_
+      intro a ha
+      have hderiv :
+          ((cov (fun p : M => VXq q a p) x) (Ysec x)) =
+            (if a = q then
+              (cov (fun p : M => XV q p) x) (Ysec x)
+            else
+              YV a x) := by
+        by_cases haq : a = q
+        · subst a
+          simp [VXq, Vfield, YV, XV]
+        · simp [VXq, Vfield, YV, XV, haq]
+      rw [hVXq_at q, hderiv]
+    have hDoubleCancel :
+        - (∑ q : Fin s, ∑ a : Fin s,
+          alpha
+            (Function.update (fun b : Fin s => VYq q b x) a
+              ((cov (fun p : M => VYq q a p) x) (Xsec x)))) +
+          (∑ q : Fin s, ∑ a : Fin s,
+            alpha
+              (Function.update (fun b : Fin s => VXq q b x) a
+                ((cov (fun p : M => VXq q a p) x) (Ysec x)))) =
+        - (∑ q : Fin s,
+          alpha
+            (Function.update slots q
+              ((cov (fun p : M => YV q p) x) (Xsec x)))) +
+          (∑ q : Fin s,
+            alpha
+              (Function.update slots q
+                ((cov (fun p : M => XV q p) x) (Ysec x)))) := by
+      rw [hDoubleY, hDoubleX]
+      exact double_update_sum_cancel_diag
+        (eval := fun slots' : Fin s → TangentSpace I x => alpha slots')
+        (slots := slots)
+        (X := fun q : Fin s => XV q x)
+        (Y := fun q : Fin s => YV q x)
+        (XY := fun q : Fin s => (cov (fun p : M => YV q p) x) (Xsec x))
+        (YX := fun q : Fin s => (cov (fun p : M => XV q p) x) (Ysec x))
+    have hDiagCurv :
+        - (∑ q : Fin s,
+          alpha
+            (Function.update slots q
+              ((cov (fun p : M => YV q p) x) (Xsec x)))) +
+          (∑ q : Fin s,
+            alpha
+              (Function.update slots q
+                ((cov (fun p : M => XV q p) x) (Ysec x)))) +
+          (∑ q : Fin s,
+            alpha
+              (Function.update slots q
+                ((cov (fun y : M => Vsec q y) x)
+                  (VectorField.mlieBracket I Xf Yf x)))) =
+        -∑ q : Fin s,
+          alpha
+            (Function.update slots q
+              ((connectionRiemannCurvatureField (I := I) cov Xf Yf
+                (fun p : M => Vsec q p)) x)) := by
+      let A : Fin s → Real := fun q =>
+        alpha (Function.update slots q
+          ((cov (fun p : M => YV q p) x) (Xsec x)))
+      let B : Fin s → Real := fun q =>
+        alpha (Function.update slots q
+          ((cov (fun p : M => XV q p) x) (Ysec x)))
+      let C : Fin s → Real := fun q =>
+        alpha (Function.update slots q
+          ((cov (fun y : M => Vsec q y) x)
+            (VectorField.mlieBracket I Xf Yf x)))
+      let D : Fin s → Real := fun q =>
+        alpha (Function.update slots q
+          ((connectionRiemannCurvatureField (I := I) cov Xf Yf
+            (fun p : M => Vsec q p)) x))
+      change - (∑ q : Fin s, A q) + (∑ q : Fin s, B q) +
+          (∑ q : Fin s, C q) = -∑ q : Fin s, D q
+      calc
+        - (∑ q : Fin s, A q) + (∑ q : Fin s, B q) +
+            (∑ q : Fin s, C q)
+            = ∑ q : Fin s, (-A q + B q + C q) := by
+              simp [Finset.sum_neg_distrib, Finset.sum_add_distrib]
+        _ = ∑ q : Fin s, -D q := by
+              refine Finset.sum_congr rfl ?_
+              intro q hq
+              have hdiag :=
+                tensor0S_update_curvature_diag
+                  (I := I) alpha slots q
+                  ((cov (fun p : M => YV q p) x) (Xsec x))
+                  ((cov (fun p : M => XV q p) x) (Ysec x))
+                  ((cov (fun y : M => Vsec q y) x)
+                    (VectorField.mlieBracket I Xf Yf x))
+              calc
+                -A q + B q + C q =
+                    -alpha
+                      (Function.update slots q
+                        (((cov (fun p : M => YV q p) x) (Xsec x)) -
+                          ((cov (fun p : M => XV q p) x) (Ysec x)) -
+                          ((cov (fun y : M => Vsec q y) x)
+                            (VectorField.mlieBracket I Xf Yf x)))) := by
+                  simpa [A, B, C] using hdiag
+                _ = -D q := by
+                  have hvec :
+                      ((cov (fun p : M => YV q p) x) (Xsec x)) -
+                          ((cov (fun p : M => XV q p) x) (Ysec x)) -
+                          ((cov (fun y : M => Vsec q y) x)
+                            (VectorField.mlieBracket I Xf Yf x)) =
+                        (connectionRiemannCurvatureField (I := I) cov Xf Yf
+                          (fun p : M => Vsec q p)) x := by
+                    rfl
+                  dsimp [D]
+                  rw [hvec]
+        _ = -∑ q : Fin s, D q := by
+              simp [Finset.sum_neg_distrib]
+    simp_rw [hFinConsVY, hFinConsVX]
+    simp_rw [finCons_update_tail_eq_update_finCons_succ]
+    repeat rw [Finset.sum_add_distrib]
+    linarith [hDoubleCancel, hDiagCurv]
 
   calc
     nabla2Alpha

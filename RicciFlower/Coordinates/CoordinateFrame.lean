@@ -230,6 +230,89 @@ theorem coordinateFrameAt_bracket_zero (x₀ : M) (i j : CoordinateIdx (𝕜 := 
   rw [lieBracketWithin_const_const]
   exact ContinuousLinearMap.map_zero _
 
+/-- Fixed coordinate-frame bracket vanishing on the whole coordinate-frame
+domain.
+
+This is the chart-coordinate statement `[∂ᵢ, ∂ⱼ](x) = 0` for every point `x`
+where the chart-induced frame centered at `x₀` is defined. -/
+theorem coordinateFrameAt_bracket_zero_of_mem [IsRCLikeNormedField 𝕜] {x₀ x : M}
+    (hx : x ∈ coordinateFrameSet (I := I) x₀)
+    (i j : CoordinateIdx (𝕜 := 𝕜) E) :
+    VectorField.mlieBracket I
+      (coordinateFrameAt (I := I) x₀ i)
+      (coordinateFrameAt (I := I) x₀ j) x = 0 := by
+  haveI : IsManifold I (minSmoothness 𝕜 2) M :=
+    by
+      rw [minSmoothness_of_isRCLikeNormedField]
+      exact IsManifold.of_le (I := I) (M := M) (n := ∞) (by
+        exact WithTop.coe_le_coe.2 (le_top : (2 : ℕ∞) ≤ (⊤ : ℕ∞)))
+  haveI : CompleteSpace E := FiniteDimensional.complete 𝕜 E
+  let V : (x : M) → TangentSpace I x := coordinateFrameAt (I := I) x₀ i
+  let W : (x : M) → TangentSpace I x := coordinateFrameAt (I := I) x₀ j
+  let z : E := extChartAt I x₀ x
+  let f : E → M := (extChartAt I x₀).symm
+  have hx_src : x ∈ (extChartAt I x₀).source := by
+    simpa [coordinateFrameSet, coordinateTrivializationAt, extChartAt_source] using hx
+  have hz_target : z ∈ (extChartAt I x₀).target := by
+    exact (extChartAt I x₀).map_source hx_src
+  have hz_range : z ∈ Set.range I :=
+    extChartAt_target_subset_range x₀ hz_target
+  have hfz : f z = x := by
+    exact (extChartAt I x₀).left_inv hx_src
+  have hVdiff : MDiffAt[Set.univ] (T% V) (f z) := by
+    rw [hfz]
+    exact (((coordinateFrameAt_isLocalFrame (I := I) x₀).contMDiffAt
+      (coordinateFrameSet_open (I := I) x₀) hx i).mdifferentiableAt
+        (by simp)).mdifferentiableWithinAt
+  have hWdiff : MDiffAt[Set.univ] (T% W) (f z) := by
+    rw [hfz]
+    exact (((coordinateFrameAt_isLocalFrame (I := I) x₀).contMDiffAt
+      (coordinateFrameSet_open (I := I) x₀) hx j).mdifferentiableAt
+        (by simp)).mdifferentiableWithinAt
+  have hf :
+      ContMDiffWithinAt 𝓘(𝕜, E) I (∞ : WithTop ℕ∞) f (Set.range I) z :=
+    contMDiffWithinAt_extChartAt_symm_range (I := I) (x := x₀) hz_target
+  have hpb :=
+    VectorField.mpullbackWithin_mlieBracketWithin
+      (I := 𝓘(𝕜, E)) (I' := I) (n := (∞ : WithTop ℕ∞))
+      (f := f) (V := V) (W := W) (x₀ := z)
+      (s := Set.range I) (t := Set.univ)
+      hVdiff hWdiff I.uniqueMDiffOn hf hz_range
+      (by
+        rw [minSmoothness_of_isRCLikeNormedField]
+        exact WithTop.coe_le_coe.2 (le_top : (2 : ℕ∞) ≤ (⊤ : ℕ∞)))
+      (by simp only [Set.preimage_univ]; exact Filter.univ_mem)
+      (by
+        simpa [z] using I.range_subset_closure_interior hz_range)
+  have hleft :
+      VectorField.mpullbackWithin 𝓘(𝕜, E) I f V (Set.range I)
+        =ᶠ[𝓝[Set.range I] z]
+          fun _ : E => (Module.finBasis 𝕜 E i : E) := by
+    simpa [f, V, z] using coordinateFrame_pullback_eq_const_of_mem (I := I) hx i
+  have hright :
+      VectorField.mpullbackWithin 𝓘(𝕜, E) I f W (Set.range I)
+        =ᶠ[𝓝[Set.range I] z]
+          fun _ : E => (Module.finBasis 𝕜 E j : E) := by
+    simpa [f, W, z] using coordinateFrame_pullback_eq_const_of_mem (I := I) hx j
+  have hrhs :
+      VectorField.mlieBracketWithin 𝓘(𝕜, E)
+          (VectorField.mpullbackWithin 𝓘(𝕜, E) I f V (Set.range I))
+          (VectorField.mpullbackWithin 𝓘(𝕜, E) I f W (Set.range I))
+          (Set.range I) z = 0 := by
+    rw [VectorField.mlieBracketWithin_eq_lieBracketWithin]
+    rw [Filter.EventuallyEq.lieBracketWithin_vectorField_eq_of_mem hleft hright hz_range]
+    exact lieBracketWithin_const_const
+  rw [hrhs] at hpb
+  rw [VectorField.mlieBracketWithin_univ] at hpb
+  simp only [VectorField.mpullbackWithin_apply] at hpb
+  have hInv :
+      (mfderiv[Set.range I] f z).IsInvertible := by
+    simpa [f, z] using isInvertible_mfderivWithin_extChartAt_symm (I := I) hz_target
+  have hzero := congrArg (fun v => (mfderiv[Set.range I] f z) v) hpb
+  change VectorField.mlieBracket I V W x = 0
+  rw [← hfz]
+  simpa [ContinuousLinearMap.IsInvertible.self_apply_inverse hInv] using hzero
+
 /-- A packaged chart-induced coordinate frame at one point. -/
 structure CoordinateFrameAt (x₀ : M) where
   u : Set M

@@ -60,6 +60,54 @@ def metricTracePair0SAt (g : SmoothRiemannianMetric I M)
     Real :=
   inner0S (I := I) g x 2 (metricTensor0S (I := I) g x) B
 
+private theorem tensor0S_curry_apply_cons_local
+    {x : M} (s : ℕ)
+    (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (s + 1) x)
+    (X : TangentSpace I x) (tail : Fin s -> TangentSpace I x) :
+    (tensor0S_curry (I := I) (𝕜 := Real) (M := M) s x A X) tail =
+      A (Fin.cons X tail) := by
+  change
+    (((continuousMultilinearCurryLeftEquiv Real
+        (fun _ : Fin (s + 1) => E) Real)
+        ((tensor0SSpace_continuousLinearEquiv (I := I) (M := M) (s + 1) x) A)
+        X)
+        tail) =
+      ((tensor0SSpace_continuousLinearEquiv (I := I) (M := M) (s + 1) x) A)
+        (Fin.cons X tail)
+  rw [continuousMultilinearCurryLeftEquiv_apply]
+
+private theorem metricTraceInput_update_first {x : M} {s : ℕ}
+    (v : Fin 2 -> TangentSpace I x) (tail : Fin s -> TangentSpace I x)
+    (X : TangentSpace I x) :
+    metricTraceInput (I := I) X (v 1) tail =
+      Function.update (metricTraceInput (I := I) (v 0) (v 1) tail)
+        (0 : Fin (s + 2)) X := by
+  funext a
+  rcases Fin.eq_zero_or_eq_succ a with h | ⟨b, rfl⟩
+  · subst h
+    simp [metricTraceInput, Function.update]
+  · simp [metricTraceInput, Function.update]
+
+private theorem metricTraceInput_update_second {x : M} {s : ℕ}
+    (v : Fin 2 -> TangentSpace I x) (tail : Fin s -> TangentSpace I x)
+    (Y : TangentSpace I x) :
+    metricTraceInput (I := I) (v 0) Y tail =
+      Function.update (metricTraceInput (I := I) (v 0) (v 1) tail)
+        (1 : Fin (s + 2)) Y := by
+  funext a
+  rcases Fin.eq_zero_or_eq_succ a with h | ⟨b, rfl⟩
+  · subst h
+    simp [metricTraceInput, Function.update]
+  · rcases Fin.eq_zero_or_eq_succ b with hb | ⟨c, rfl⟩
+    · subst hb
+      exact rfl
+    · have hne : (c.succ.succ : Fin (s + 2)) ≠ (1 : Fin (s + 2)) := by
+        intro h
+        have hv := congrArg Fin.val h
+        simp at hv
+      simp [metricTraceInput, Function.update, hne]
+
 /-- Construction frontier for freezing all but the first two slots of a
 covariant tensor.  This is mathematically just partial evaluation of a
 continuous multilinear map; the remaining work is bundled-continuity
@@ -71,8 +119,76 @@ theorem exists_freezeFirstTwo0S {x : M} {s : ℕ}
     ∃ B : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x,
       ∀ X Y : TangentSpace I x,
         B (vec2 (I := I) X Y) = T (metricTraceInput (I := I) X Y tail) := by
-  -- Frontier: bundle partial evaluation of a continuous multilinear map.
-  sorry
+  classical
+  let Traw :
+      ContinuousMultilinearMap Real (fun _ : Fin (s + 2) => TangentSpace I x) Real :=
+    (tensor0SSpace_continuousLinearEquiv (I := I) (M := M) (s + 2) x) T
+  let L : MultilinearMap Real (fun _ : Fin 2 => TangentSpace I x) Real :=
+    { toFun := fun v => Traw (metricTraceInput (I := I) (v 0) (v 1) tail)
+      map_update_add' := by
+        intro _ v i X Y
+        fin_cases i
+        · have h :=
+            Traw.map_update_add (metricTraceInput (I := I) (v 0) (v 1) tail)
+              (0 : Fin (s + 2)) X Y
+          rw [← metricTraceInput_update_first (I := I) v tail (X + Y),
+            ← metricTraceInput_update_first (I := I) v tail X,
+            ← metricTraceInput_update_first (I := I) v tail Y] at h
+          simpa [Function.update] using h
+        · have h :=
+            Traw.map_update_add (metricTraceInput (I := I) (v 0) (v 1) tail)
+              (1 : Fin (s + 2)) X Y
+          rw [← metricTraceInput_update_second (I := I) v tail (X + Y),
+            ← metricTraceInput_update_second (I := I) v tail X,
+            ← metricTraceInput_update_second (I := I) v tail Y] at h
+          simpa [Function.update] using h
+      map_update_smul' := by
+        intro _ v i c X
+        fin_cases i
+        · have h :=
+            Traw.map_update_smul (metricTraceInput (I := I) (v 0) (v 1) tail)
+              (0 : Fin (s + 2)) c X
+          rw [← metricTraceInput_update_first (I := I) v tail (c • X),
+            ← metricTraceInput_update_first (I := I) v tail X] at h
+          simpa [Function.update] using h
+        · have h :=
+            Traw.map_update_smul (metricTraceInput (I := I) (v 0) (v 1) tail)
+              (1 : Fin (s + 2)) c X
+          rw [← metricTraceInput_update_second (I := I) v tail (c • X),
+            ← metricTraceInput_update_second (I := I) v tail X] at h
+          simpa [Function.update] using h }
+  let C : Real := ‖Traw‖ * ∏ a : Fin s, ‖tail a‖
+  have hbound :
+      ∀ v : Fin 2 -> TangentSpace I x, ‖L v‖ ≤ C * ∏ i : Fin 2, ‖v i‖ := by
+    intro v
+    have hT := Traw.le_opNorm (metricTraceInput (I := I) (v 0) (v 1) tail)
+    have hprod :
+        (∏ a : Fin (s + 2), ‖metricTraceInput (I := I) (v 0) (v 1) tail a‖)
+          = ‖v 0‖ * ‖v 1‖ * ∏ a : Fin s, ‖tail a‖ := by
+      rw [Fin.prod_univ_succ, Fin.prod_univ_succ]
+      simp only [metricTraceInput, Fin.cases_zero, Fin.cases_succ]
+      ring
+    have hprod2 : (∏ i : Fin 2, ‖v i‖) = ‖v 0‖ * ‖v 1‖ := by
+      rw [Fin.prod_univ_succ, Fin.prod_univ_succ]
+      simp
+    calc
+      ‖L v‖
+          ≤ ‖Traw‖ * (∏ a : Fin (s + 2),
+              ‖metricTraceInput (I := I) (v 0) (v 1) tail a‖) := hT
+      _ = C * ∏ i : Fin 2, ‖v i‖ := by
+        rw [hprod, hprod2]
+        simp [C]
+        ring
+  let Braw : ContinuousMultilinearMap Real (fun _ : Fin 2 => TangentSpace I x) Real :=
+    L.mkContinuous C hbound
+  refine ⟨(tensor0SSpace_continuousLinearEquiv (I := I) (M := M) 2 x).symm
+    Braw, ?_⟩
+  intro X Y
+  change Braw (vec2 (I := I) X Y) =
+    Traw (metricTraceInput (I := I) X Y tail)
+  change L (vec2 (I := I) X Y) =
+    Traw (metricTraceInput (I := I) X Y tail)
+  simp [L, RicciFlower.Curvature.vec2]
 
 /-- Freeze all but the first two slots of a covariant tensor. -/
 def freezeFirstTwo0S {x : M} {s : ℕ}
@@ -99,8 +215,16 @@ theorem exists_freezeLastTwo0S3 {x : M}
     ∃ B : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x,
       ∀ X Z : TangentSpace I x,
         B (vec2 (I := I) X Z) = T (vec3 (I := I) Y X Z) := by
-  -- Frontier: bundle partial evaluation of a continuous multilinear map.
-  sorry
+  refine ⟨tensor0S_curry (I := I) (𝕜 := Real) (M := M) 2 x T Y, ?_⟩
+  intro X Z
+  rw [tensor0S_curry_apply_cons_local]
+  congr 1
+  funext a
+  fin_cases a
+  · norm_num [RicciFlower.Curvature.vec2, RicciFlower.Curvature.vec3]
+  · norm_num [RicciFlower.Curvature.vec2, RicciFlower.Curvature.vec3]
+  · change (vec2 (I := I) X Z) 1 = Z
+    norm_num [RicciFlower.Curvature.vec2]
 
 /-- Freeze the first slot of a `(0,3)` tensor and trace the last two slots. -/
 def freezeLastTwo0S3 {x : M}
@@ -146,6 +270,59 @@ def metricTrace0S2InBasis
   ∑ i : Idx, ∑ j : Idx,
     gInv i j * T (metricTraceInput (I := I) (basis i) (basis j) tail)
 
+private theorem metricInverseInBasis_contract_left
+    (g : SmoothRiemannianMetric I M)
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInv)
+    (j k : Idx) :
+    (∑ i : Idx, gInv i k * g.inner x (basis i) (basis j)) =
+      (if j = k then 1 else 0) := by
+  calc
+    (∑ i : Idx, gInv i k * g.inner x (basis i) (basis j))
+        = ∑ i : Idx, g.inner x (basis j) (basis i) * gInv i k := by
+          apply Finset.sum_congr rfl
+          intro i _
+          rw [g.symm x (basis i) (basis j)]
+          ring
+    _ = (if j = k then 1 else 0) := (hinv j k).2
+
+private theorem metricInverseInBasis_contract_metric
+    (g : SmoothRiemannianMetric I M)
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInv)
+    (k l : Idx) :
+    (∑ i : Idx, ∑ j : Idx,
+      gInv i k * gInv j l * g.inner x (basis i) (basis j)) =
+        gInv k l := by
+  calc
+    (∑ i : Idx, ∑ j : Idx,
+      gInv i k * gInv j l * g.inner x (basis i) (basis j))
+        = ∑ j : Idx,
+            (∑ i : Idx, gInv i k * g.inner x (basis i) (basis j)) *
+              gInv j l := by
+          rw [Finset.sum_comm]
+          apply Finset.sum_congr rfl
+          intro j _
+          rw [Finset.sum_mul]
+          apply Finset.sum_congr rfl
+          intro i _
+          ring
+    _ = ∑ j : Idx, (if j = k then 1 else 0) * gInv j l := by
+          apply Finset.sum_congr rfl
+          intro j _
+          rw [metricInverseInBasis_contract_left (I := I) g basis gInv hinv j k]
+    _ = gInv k l := by
+          rw [Finset.sum_eq_single k]
+          · simp
+          · intro b _ hb
+            simp [hb]
+          · intro hk
+            simp at hk
+
 /-- Coordinate formula for the intrinsic trace of a `(0,2)` tensor. -/
 theorem metricTracePair0SAt_eq_sum_basis
     (g : SmoothRiemannianMetric I M)
@@ -157,9 +334,70 @@ theorem metricTracePair0SAt_eq_sum_basis
     metricTracePair0SAt (I := I) g B =
       ∑ i : Idx, ∑ j : Idx,
         gInv i j * B (vec2 (I := I) (basis i) (basis j)) := by
-  -- Frontier: finite-sum contraction of `inner0S_two_eq_coord_direct`
-  -- with the metric tensor.
-  sorry
+  classical
+  rw [metricTracePair0SAt]
+  rw [inner0S_two_eq_coord_direct (I := I) g x basis gInv hinv
+    (metricTensor0S (I := I) g x) B]
+  simp only [metricTensor0S_apply]
+  calc
+    (∑ i : Idx, ∑ j : Idx, ∑ k : Idx, ∑ l : Idx,
+      gInv i k * gInv j l * g.inner x (basis i) (basis j) *
+        B (fun a : Fin 2 => if a = 0 then basis k else basis l))
+        =
+      ∑ i : Idx, ∑ k : Idx, ∑ j : Idx, ∑ l : Idx,
+        gInv i k * gInv j l * g.inner x (basis i) (basis j) *
+          B (fun a : Fin 2 => if a = 0 then basis k else basis l) := by
+          apply Finset.sum_congr rfl
+          intro i _
+          rw [Finset.sum_comm]
+    _ =
+      ∑ k : Idx, ∑ i : Idx, ∑ j : Idx, ∑ l : Idx,
+        gInv i k * gInv j l * g.inner x (basis i) (basis j) *
+          B (fun a : Fin 2 => if a = 0 then basis k else basis l) := by
+          rw [Finset.sum_comm]
+    _ =
+      ∑ k : Idx, ∑ i : Idx, ∑ l : Idx, ∑ j : Idx,
+        gInv i k * gInv j l * g.inner x (basis i) (basis j) *
+          B (fun a : Fin 2 => if a = 0 then basis k else basis l) := by
+          apply Finset.sum_congr rfl
+          intro k _
+          apply Finset.sum_congr rfl
+          intro i _
+          rw [Finset.sum_comm]
+    _ =
+      ∑ k : Idx, ∑ l : Idx, ∑ i : Idx, ∑ j : Idx,
+        gInv i k * gInv j l * g.inner x (basis i) (basis j) *
+          B (fun a : Fin 2 => if a = 0 then basis k else basis l) := by
+          apply Finset.sum_congr rfl
+          intro k _
+          rw [Finset.sum_comm]
+    _ =
+      ∑ k : Idx, ∑ l : Idx,
+        (∑ i : Idx, ∑ j : Idx,
+          gInv i k * gInv j l * g.inner x (basis i) (basis j)) *
+          B (fun a : Fin 2 => if a = 0 then basis k else basis l) := by
+          apply Finset.sum_congr rfl
+          intro k _
+          apply Finset.sum_congr rfl
+          intro l _
+          rw [Finset.sum_mul]
+          apply Finset.sum_congr rfl
+          intro i _
+          rw [Finset.sum_mul]
+    _ = ∑ k : Idx, ∑ l : Idx,
+        gInv k l * B (fun a : Fin 2 => if a = 0 then basis k else basis l) := by
+          apply Finset.sum_congr rfl
+          intro k _
+          apply Finset.sum_congr rfl
+          intro l _
+          rw [metricInverseInBasis_contract_metric (I := I) g basis gInv hinv k l]
+    _ = ∑ k : Idx, ∑ l : Idx,
+        gInv k l * B (vec2 (I := I) (basis k) (basis l)) := by
+          apply Finset.sum_congr rfl
+          intro k _
+          apply Finset.sum_congr rfl
+          intro l _
+          congr 1
 
 /-- Coordinate formula for the intrinsic trace of the first two slots. -/
 theorem metricTraceFirstTwo0SAt_eq_sum_basis
@@ -351,7 +589,7 @@ def rough_lap_one_form
 
 theorem metric_trace_0s_apply_basis
     (g : SmoothRiemannianMetric I M)
-    {Idx : Type} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {x : M} {s : ℕ}
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (gInv : Idx -> Idx -> Real)
@@ -369,7 +607,7 @@ theorem metric_trace_0s_apply_basis
 
 theorem rough_lap_0s_apply_basis
     (g : SmoothRiemannianMetric I M)
-    {Idx : Type} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {x : M} {s : ℕ}
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (gInv : Idx -> Idx -> Real)
@@ -387,7 +625,7 @@ theorem rough_lap_0s_apply_basis
 
 theorem rough_lap_one_form_apply_basis
     (g : SmoothRiemannianMetric I M)
-    {Idx : Type} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (gInv : Idx -> Idx -> Real)
@@ -409,7 +647,7 @@ theorem rough_lap_one_form_apply_basis
 Laplacian interface. -/
 theorem rough_lap_one_form_realizes_metric_trace
     (g : SmoothRiemannianMetric I M)
-    {Idx : Type} [Fintype Idx] [DecidableEq Idx]
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {x : M}
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (gInv : Idx -> Idx -> Real)

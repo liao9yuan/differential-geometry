@@ -391,6 +391,44 @@ lemma connectionEndomorphismInChartL_apply_modelVector
         simpa [TangentBundle.trivializationAt_baseSet, extChartAt_source] using hp_source)
       (X ((extChartAt I x₀).symm y))]
 
+/-- Centered specialization of `connectionEndomorphismInChartL_apply_modelVector`.
+
+At the self-chart point, the model direction is the tangent-trivialization
+coordinate of the actual tangent vector.  This is the normalization needed to
+compare the tensor-level total-nabla constructor with the older fixed-chart
+directional implementation. -/
+lemma connectionEndomorphismInChartL_apply_center_modelVector
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (X : (x : M) → TangentSpace I x) (x : M) (v : E) :
+    connectionEndomorphismInChartL (𝕜 := 𝕜) (I := I) cov x (extChartAt I x x)
+        ((trivializationAt E (TangentSpace I) x).continuousLinearMapAt 𝕜
+          x (X x)) v =
+      connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov X x
+        (extChartAt I x x) v := by
+  have h :=
+    connectionEndomorphismInChartL_apply_modelVector
+      (𝕜 := 𝕜) (I := I) cov X x (mem_extChartAt_target (I := I) x) v
+  rw [extChartAt_to_inv] at h
+  simpa using h
+
+/-- Centered comparison with the derivative direction written in the self-chart
+model coordinate.  This is a convenience wrapper around
+`connectionEndomorphismInChartL_apply_center_modelVector`. -/
+lemma connectionEndomorphismInChartL_apply_center
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (X : (x : M) → TangentSpace I x) (x : M) (v : E) :
+    connectionEndomorphismInChartL (𝕜 := 𝕜) (I := I) cov x (extChartAt I x x)
+        (X x) v =
+      connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov X x
+        (extChartAt I x x) v := by
+  have h :=
+    connectionEndomorphismInChartL_apply_center_modelVector
+      (𝕜 := 𝕜) (I := I) cov X x v
+  rw [TangentBundle.continuousLinearMapAt_trivializationAt
+    (I := I) (x₀ := x) (x := x) (mem_chart_source H x)] at h
+  rw [mfderiv_extChartAt_self] at h
+  simpa using h
+
 /-- Centered fixed-chart formula for the covariant derivative of a tangent
 field, written in finite basis coordinates of the fixed tangent trivialization.
 

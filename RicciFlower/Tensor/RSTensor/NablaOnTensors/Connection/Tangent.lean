@@ -85,6 +85,20 @@ theorem tangentFieldModelInChart_tangentConstInChart_apply_of_mem
   unfold tangentFieldModelInChart tangentConstInChart
   exact e.continuousLinearMapAt_symmL (R := 𝕜) hp_base v
 
+/-- A chart-constant tangent field built from the tangent-trivialization
+coordinate of a vector at the chart center evaluates back to that vector at the
+center. -/
+theorem tangentConstInChart_self_continuousLinearMapAt
+    (x : M) (v : TangentSpace I x) :
+    tangentConstInChart (𝕜 := 𝕜) (I := I) x
+        ((trivializationAt E (TangentSpace I : M → Type _) x).continuousLinearMapAt
+          𝕜 x v) x =
+      v := by
+  let e := trivializationAt E (TangentSpace I : M → Type _) x
+  have hx : x ∈ e.baseSet := FiberBundle.mem_baseSet_trivializationAt' x
+  rw [tangentConstInChart_apply]
+  exact e.symmL_continuousLinearMapAt (R := 𝕜) hx v
+
 /-- In a fixed tangent-bundle trivialization, every tangent field is locally the
 finite sum of its model-coordinate coefficients times the chart-constant
 fields around any point in the fixed chart domain. -/
