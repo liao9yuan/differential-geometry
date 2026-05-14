@@ -729,7 +729,7 @@ private lemma trace_invariance_under_change_of_basis
 /-- The integrand `tensorCovDerivPointwiseInner g r s S T b` rewritten using the
 chart-α basis `chartBasisVecFiber α i b` instead of `chartModelBasis E i`. The
 expression involves the chart-α Gram matrix `chartGramMatrix g α b`. -/
-private noncomputable def chartTensorCovDerivPointwiseInner
+noncomputable def chartTensorCovDerivPointwiseInner
     (g : SmoothRiemannianMetric I M) (α : M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (b : M) : ℝ :=
   ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
@@ -870,7 +870,7 @@ private lemma chartGramMatrix_eq_transition
   ring
 
 /-- Bilinearity of `tensorInnerPointwise` in the left argument over a finite sum. -/
-private lemma tensorInnerPointwise_sum_left
+lemma tensorInnerPointwise_sum_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     {ι : Type*} (s' : Finset ι) (A : ι → TensorRSModel r s ℝ E)
     (c : ι → ℝ) (B : TensorRSModel r s ℝ E) :
@@ -886,7 +886,7 @@ private lemma tensorInnerPointwise_sum_left
           tensorInnerPointwise_smul_left, ih, Finset.sum_insert hi₀]
 
 /-- Bilinearity of `tensorInnerPointwise` in the right argument over a finite sum. -/
-private lemma tensorInnerPointwise_sum_right
+lemma tensorInnerPointwise_sum_right
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     {ι : Type*} (s' : Finset ι) (A : TensorRSModel r s ℝ E)
     (B : ι → TensorRSModel r s ℝ E) (c : ι → ℝ) :
@@ -1000,7 +1000,7 @@ private lemma chartTensorCovDeriv_innerMatrix_eq_transition
 
 /-- **The coordinate-invariance identity**: on the chart base set,
 the chart-α-frame integrand equals the model-basis integrand. -/
-private lemma chartTensorCovDerivPointwiseInner_eq_tensorCovDerivPointwiseInner
+lemma chartTensorCovDerivPointwiseInner_eq_tensorCovDerivPointwiseInner
     (g : SmoothRiemannianMetric I M) (α : M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :

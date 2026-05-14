@@ -400,6 +400,32 @@ noncomputable def homBundleCovariantDerivativeGen
   isCovariantDerivativeOnUniv :=
     homBundleCovariantDerivativeGenFun_isCovOn I M E_U U F V cov_U cov_V
 
+/-- Public function-level apply: when `τ`, `V_field`, `Y` are all
+manifold-differentiable at `x` (in total-space form), the value of
+`homBundleCovariantDerivativeGen` applied bilinearly to `V_field x` and `Y x`
+equals the product-rule expression
+`cov_V (fun y => τ y (Y y)) x (V_field x) − τ x (cov_U Y x (V_field x))`. -/
+theorem homBundleCovariantDerivativeGen_apply_of_mdifferentiableAt
+    (cov_U : CovariantDerivative I E_U U)
+    (cov_V : CovariantDerivative I F V)
+    (τ : Π x : M, (U x →L[ℝ] V x))
+    {x : M}
+    (hτ : MDifferentiableAt I (I.prod 𝓘(ℝ, E_U →L[ℝ] F))
+      (fun y : M => TotalSpace.mk' (E_U →L[ℝ] F)
+        (E := fun x : M => (U x →L[ℝ] V x)) y (τ y)) x)
+    {V_field : Π x : M, TangentSpace I x}
+    {Y : Π x : M, U x}
+    (hV : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun y => TotalSpace.mk' E (E := TangentSpace I) y (V_field y)) x)
+    (hY : MDifferentiableAt I (I.prod 𝓘(ℝ, E_U))
+      (fun y => TotalSpace.mk' E_U (E := U) y (Y y)) x) :
+    (homBundleCovariantDerivativeGen I M E_U U F V cov_U cov_V τ x (V_field x)) (Y x) =
+      cov_V (fun y => τ y (Y y)) x (V_field x) - τ x (cov_U Y x (V_field x)) := by
+  change homBundleCovariantDerivativeGenFun I M E_U U F V cov_U cov_V τ x
+      (V_field x) (Y x) = _
+  exact homBundleCovariantDerivativeGenFun_apply I M E_U U F V cov_U cov_V τ
+    hτ hV hY
+
 /-! ### ContMDiffCovariantDerivative instance (smoothness) -/
 
 /-- For a smooth Hom-bundle section τ and a smooth `U`-section Y, the V-valued section

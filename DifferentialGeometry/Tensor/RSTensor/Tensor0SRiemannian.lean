@@ -940,12 +940,21 @@ lemma chartJ_chartJinv (α : M) {b : M}
   exact (trivializationAt E (TangentSpace I) α).continuousLinearMapAt_symmL hb v
 
 /-- For `b` in the chart's base set, `chartJinv α b ∘ chartJ α b = id` on `TangentSpace I b`. -/
-private lemma chartJinv_chartJ (α : M) {b : M}
+lemma chartJinv_chartJ (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) (v : TangentSpace I b) :
     chartJinv (I := I) (M := M) α b
         (chartJ (I := I) (M := M) α b v) = v := by
   unfold chartJ chartJinv
   exact (trivializationAt E (TangentSpace I) α).symmL_continuousLinearMapAt hb v
+
+/-- Alias for `chartJinv_chartJ`: useful as a rewrite target when the
+type-synonym `TangentSpace I b = E` needs to be matched against `E` directly
+in downstream files. -/
+lemma chartJinv_chartJ_self (α : M) {b : M}
+    (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) (v : E) :
+    chartJinv (I := I) (M := M) α b
+        (chartJ (I := I) (M := M) α b v) = v :=
+  chartJinv_chartJ (I := I) (M := M) α hb v
 
 /-! ### Gram matrix relationship
 
@@ -955,7 +964,7 @@ This is equivalent to evaluating `g.inner b` on the corresponding model-basis
 vectors after applying `chartJinv α b`. -/
 
 /-- The chart-α Gram matrix entry expressed via `chartJinv α b`. -/
-private lemma chartGramMatrix_eq_innerJinv
+lemma chartGramMatrix_eq_innerJinv
     (g : SmoothRiemannianMetric I M) (α b : M)
     (i j : Fin (Module.finrank ℝ E)) :
     chartGramMatrix g α b i j =
@@ -1963,6 +1972,7 @@ private instance tensor0SModelNormedSpace_local {s : ℕ} :
 private instance tensor0SModelNormedAddCommGroup_local {s : ℕ} :
     NormedAddCommGroup (Tensor0SModel s ℝ E) := inferInstance
 
+
 /-! ### Continuity of `chartTensorInnerPointwise_0s` with smooth tensor arguments
 
 We extend the smoothness lemma `chartTensorInnerPointwise_0s_contMDiffOn` (for fixed
@@ -2037,6 +2047,158 @@ lemma chartTensorInnerPointwise_0s_continuousOn_smooth_args
           rw [hheq]
           exact (curryLeftAtCLM (E := E) s ((chartModelBasis E) j)).continuous.comp_continuousOn hS
         exact ih _ _ hT_curry hS_curry
+
+/-- The chart-local inner product is smooth in `b` on the chart base set when
+each basis-tuple evaluation of the two tensor arguments is a smooth scalar
+function of `b`. This is the smoothness analog of
+`chartTensorInnerPointwise_0s_continuousOn_smooth_args`. The hypothesis form
+(scalar smoothness of every basis-tuple evaluation) is used directly because
+the diamond between `ContinuousMultilinearMap.instModule` and
+`NormedSpace.toModule` on `Tensor0SModel` makes a direct `ContMDiffOn`
+hypothesis on a `Tensor0SModel`-valued function awkward. The proof is by
+induction on `s`. -/
+lemma chartTensorInnerPointwise_0s_contMDiffOn_smooth_args
+    (g : SmoothRiemannianMetric I M) (α : M) :
+    ∀ (s : ℕ)
+    (T S : M → ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ)
+    (_hT : ∀ φ : Fin s → Fin (Module.finrank ℝ E),
+      ContMDiffOn I 𝓘(ℝ) ∞
+        (fun b : M => (T b) (fun k : Fin s => (chartModelBasis E) (φ k)))
+        (trivializationAt E (TangentSpace I) α).baseSet)
+    (_hS : ∀ φ : Fin s → Fin (Module.finrank ℝ E),
+      ContMDiffOn I 𝓘(ℝ) ∞
+        (fun b : M => (S b) (fun k : Fin s => (chartModelBasis E) (φ k)))
+        (trivializationAt E (TangentSpace I) α).baseSet),
+      ContMDiffOn I 𝓘(ℝ) ∞
+        (fun b : M =>
+          chartTensorInnerPointwise_0s (I := I) (M := M) s g α b (T b) (S b))
+        (trivializationAt E (TangentSpace I) α).baseSet := by
+  intro s
+  induction s with
+  | zero =>
+      intro T S hT hS
+      have heq : (fun b : M =>
+          chartTensorInnerPointwise_0s (I := I) (M := M) 0 g α b (T b) (S b)) =
+          fun b : M =>
+            ((T b) (fun i => Fin.elim0 i)) * ((S b) (fun i => Fin.elim0 i)) := by
+        funext b
+        rw [chartTensorInnerPointwise_0s_zero]
+      rw [heq]
+      have hT0 := hT (fun i : Fin 0 => Fin.elim0 i)
+      have hS0 := hS (fun i : Fin 0 => Fin.elim0 i)
+      -- The two-tuple shapes `fun i => Fin.elim0 i` and the one used by `hT0`
+      -- agree as functions on `Fin 0`.
+      have hempty :
+          (fun k : Fin 0 => (chartModelBasis E) ((fun i : Fin 0 => Fin.elim0 i) k))
+            = (fun i : Fin 0 => (Fin.elim0 i : E)) := by
+        funext i
+        exact Fin.elim0 i
+      have hT_smooth :
+          ContMDiffOn I 𝓘(ℝ) ∞
+            (fun b : M => (T b) (fun i => Fin.elim0 i))
+            (trivializationAt E (TangentSpace I) α).baseSet := by
+        have : (fun b : M => (T b) (fun i : Fin 0 => Fin.elim0 i)) =
+            (fun b : M => (T b)
+              (fun k : Fin 0 =>
+                (chartModelBasis E) ((fun i : Fin 0 => Fin.elim0 i) k))) := by
+          funext b
+          congr 1
+          rw [hempty]
+        rw [this]
+        exact hT0
+      have hS_smooth :
+          ContMDiffOn I 𝓘(ℝ) ∞
+            (fun b : M => (S b) (fun i => Fin.elim0 i))
+            (trivializationAt E (TangentSpace I) α).baseSet := by
+        have : (fun b : M => (S b) (fun i : Fin 0 => Fin.elim0 i)) =
+            (fun b : M => (S b)
+              (fun k : Fin 0 =>
+                (chartModelBasis E) ((fun i : Fin 0 => Fin.elim0 i) k))) := by
+          funext b
+          congr 1
+          rw [hempty]
+        rw [this]
+        exact hS0
+      exact hT_smooth.mul hS_smooth
+  | succ s ih =>
+      intro T S hT hS
+      have heq : (fun b : M =>
+          chartTensorInnerPointwise_0s (I := I) (M := M) (s + 1) g α b (T b) (S b)) =
+          fun b : M =>
+            ∑ i : Fin (Module.finrank ℝ E),
+              ∑ j : Fin (Module.finrank ℝ E),
+                (chartGramMatrix g α b)⁻¹ i j *
+                  chartTensorInnerPointwise_0s (I := I) (M := M) s g α b
+                    ((T b).curryLeft ((chartModelBasis E) i))
+                    ((S b).curryLeft ((chartModelBasis E) j)) := by
+        funext b
+        rw [chartTensorInnerPointwise_0s_succ]
+      rw [heq]
+      refine contMDiffOn_finset_sum (fun i _ => ?_)
+      refine contMDiffOn_finset_sum (fun j _ => ?_)
+      refine ContMDiffOn.mul ?_ ?_
+      · exact chartGramMatrix_inv_entry_contMDiffOn (I := I) g α i j
+      · -- Apply the inductive hypothesis to the curryLeft-applied tensors.
+        -- Each basis evaluation of the curryLeft tensor unfolds to a basis
+        -- evaluation of the original tensor on the extended `Fin.cons`-tuple.
+        refine ih
+            (fun b : M => (T b).curryLeft ((chartModelBasis E) i))
+            (fun b : M => (S b).curryLeft ((chartModelBasis E) j))
+            ?_ ?_
+        · intro ψ
+          -- The cons-extended index tuple at the basis level.
+          set ψ' : Fin (s + 1) → Fin (Module.finrank ℝ E) :=
+            Fin.cons (α := fun _ => Fin (Module.finrank ℝ E)) i ψ with hψ'
+          have hψ'_zero : ψ' 0 = i := by
+            simp [hψ']
+          have hψ'_succ : ∀ k : Fin s, ψ' k.succ = ψ k := by
+            intro k
+            simp [hψ']
+          have heq' :
+              (fun b : M => ((T b).curryLeft ((chartModelBasis E) i))
+                  (fun k : Fin s => (chartModelBasis E) (ψ k)))
+                = fun b : M =>
+                    (T b) (fun k : Fin (s + 1) =>
+                      (chartModelBasis E) (ψ' k)) := by
+            funext b
+            rw [ContinuousMultilinearMap.curryLeft_apply]
+            congr 1
+            funext k
+            refine Fin.cases ?_ ?_ k
+            · -- At k = 0: cons is i; on the LHS, this is i (since Fin.cons at 0)
+              rw [hψ'_zero]
+              -- The LHS at 0 is `Fin.cons ((chartModelBasis E) i) (fun k =>
+              -- (chartModelBasis E) (ψ k)) 0 = (chartModelBasis E) i`.
+              simp
+            · intro k'
+              rw [hψ'_succ k']
+              simp
+          rw [heq']
+          exact hT ψ'
+        · intro ψ
+          set ψ' : Fin (s + 1) → Fin (Module.finrank ℝ E) :=
+            Fin.cons (α := fun _ => Fin (Module.finrank ℝ E)) j ψ with hψ'
+          have hψ'_zero : ψ' 0 = j := by
+            simp [hψ']
+          have hψ'_succ : ∀ k : Fin s, ψ' k.succ = ψ k := by
+            intro k
+            simp [hψ']
+          have heq' :
+              (fun b : M => ((S b).curryLeft ((chartModelBasis E) j))
+                  (fun k : Fin s => (chartModelBasis E) (ψ k)))
+                = fun b : M =>
+                    (S b) (fun k : Fin (s + 1) =>
+                      (chartModelBasis E) (ψ' k)) := by
+            funext b
+            rw [ContinuousMultilinearMap.curryLeft_apply]
+            congr 1
+            funext k
+            refine Fin.cases ?_ ?_ k
+            · rw [hψ'_zero]; simp
+            · intro k'
+              rw [hψ'_succ k']; simp
+          rw [heq']
+          exact hS ψ'
 
 /-! ### Public continuity theorem on each chart
 

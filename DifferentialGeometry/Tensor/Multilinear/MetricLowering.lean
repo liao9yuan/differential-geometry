@@ -385,13 +385,22 @@ private lemma contMDiffOn_separableFormBundleSection
   exact trivializationAt_separableFormBundleSection_eval_basis
     (I := I) (M := M) g r α φ_first hb ψ
 
-/-- Auxiliary: smoothness of `b ↦ lowerAllUpperIndices g r s b (toModel (S b))
-(chartBasisVec α (φ ·) b)` on the chart base set. -/
-private lemma contMDiffOn_lower_at_chartBasis_aux
+/-- Auxiliary general form: smoothness of
+`b ↦ lowerAllUpperIndices g r s b (toModel (S b)) (chartBasisVec α (φ ·) b)`
+on the chart base set, given that the bundle section `b ↦ ⟨b, S b⟩` is smooth
+on the chart base set (rather than globally smooth).
+
+This generalises `contMDiffOn_lower_at_chartBasis_aux` to support sections that
+are only chart-locally smooth, which is needed when `S b` is built from a fixed
+model tensor `T` via the algebraic identification `TensorRSSpace.ofModel`. -/
+private lemma contMDiffOn_lower_at_chartBasis_aux_general
     (r s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
-    (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
-      (fun x : M => TensorRSSpace r s I x)⟯)
+    (S : ∀ b : M, TensorRSSpace r s I b)
+    (hS : ContMDiffOn I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun b : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun y : M => TensorRSSpace r s I y) b (S b))
+      (trivializationAt E (TangentSpace I) α).baseSet)
     (φ : Fin (r + s) → Fin (Module.finrank ℝ E)) :
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞
       (fun b : M => lowerAllUpperIndices (I := I) (M := M) g r s b
@@ -411,13 +420,14 @@ private lemma contMDiffOn_lower_at_chartBasis_aux
     (contMDiffOn_separableFormBundleSection (I := I) (M := M) g r α
       (fun k : Fin r => φ (Fin.castAdd s k))).contMDiffAt
       ((trivializationAt E (TangentSpace I) α).open_baseSet.mem_nhds hx₀)
-  -- Step 2: The smooth section S is globally smooth, hence ContMDiffAt at x₀.
+  -- Step 2: The section S is smooth on the chart base set, hence `ContMDiffAt` at `x₀`.
   have h_S_smooth_at :
       ContMDiffAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
         (fun b : M =>
           TotalSpace.mk' (TensorRSModel r s ℝ E)
             (E := fun y : M => TensorRSSpace r s I y) b (S b)) x₀ :=
-    (S.contMDiff x₀)
+    hS.contMDiffAt
+      ((trivializationAt E (TangentSpace I) α).open_baseSet.mem_nhds hx₀)
   -- Step 3: Apply S via clm_bundle_apply, getting smoothness of the (0, s) bundle section.
   have h_applied : ContMDiffAt I (I.prod 𝓘(ℝ, Tensor0SModel s ℝ E)) ∞
       (fun b : M =>
@@ -470,6 +480,26 @@ private lemma contMDiffOn_lower_at_chartBasis_aux
   filter_upwards with b
   rw [lowerAllUpperIndices_apply]
   rfl
+
+/-- Auxiliary: smoothness of `b ↦ lowerAllUpperIndices g r s b (toModel (S b))
+(chartBasisVec α (φ ·) b)` on the chart base set. Wrapper around
+`contMDiffOn_lower_at_chartBasis_aux_general` for the case of a globally smooth section. -/
+private lemma contMDiffOn_lower_at_chartBasis_aux
+    (r s : ℕ)
+    (g : SmoothRiemannianMetric I M) (α : M)
+    (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
+      (fun x : M => TensorRSSpace r s I x)⟯)
+    (φ : Fin (r + s) → Fin (Module.finrank ℝ E)) :
+    ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+      (fun b : M => lowerAllUpperIndices (I := I) (M := M) g r s b
+        (TensorRSSpace.toModel (S b))
+        (fun i : Fin (r + s) =>
+          chartBasisVecFiber (I := I) α (φ i) b))
+      (trivializationAt E (TangentSpace I) α).baseSet :=
+  contMDiffOn_lower_at_chartBasis_aux_general (I := I) (M := M) r s g α
+    (fun b : M => S b)
+    (S.contMDiff.contMDiffOn)
+    φ
 
 /-!
 ## Public theorem: chart-local smoothness of `loweredCompose ... toModel (S ·)`

@@ -349,6 +349,51 @@ lemma chartInvGramMatrix_entry_contMDiffOn
     exact hsmooth_inv.contMDiffAt.comp_contMDiffWithinAt x h_at
   · exact chartGramMatrix_adjugate_entry_contMDiffOn (I := I) g α i j
 
+/-! ## `L¹` entry sum of the inverse Gram matrix
+
+The pointwise sum of absolute values of all entries of the chart-`α` inverse
+Gram matrix. This is a non-negative real-valued function on `M`, continuous on
+the chart-`α` source. It plays the role of a pointwise operator-norm proxy in
+chart-bridge estimates for the gradient. -/
+
+/-- The chart-`α` inverse-Gram-matrix `L¹` entry sum at `x : M`. This is the
+sum of absolute values of all entries of the inverse Gram matrix. -/
+noncomputable def chartInvGramMatrix_l1Sum
+    (g : SmoothRiemannianMetric I M) (α : M) (x : M) : ℝ :=
+  ∑ ij : (Fin (Module.finrank ℝ E)) × (Fin (Module.finrank ℝ E)),
+    |chartInvGramMatrix (I := I) g α x ij.1 ij.2|
+
+/-- `chartInvGramMatrix_l1Sum` is non-negative pointwise. -/
+lemma chartInvGramMatrix_l1Sum_nonneg
+    (g : SmoothRiemannianMetric I M) (α : M) (x : M) :
+    0 ≤ chartInvGramMatrix_l1Sum (I := I) (M := M) g α x := by
+  unfold chartInvGramMatrix_l1Sum
+  exact Finset.sum_nonneg (fun _ _ => abs_nonneg _)
+
+/-- `chartInvGramMatrix_l1Sum g α` is continuous on `(chartAt H α).source`. -/
+lemma chartInvGramMatrix_l1Sum_continuousOn
+    (g : SmoothRiemannianMetric I M) (α : M) :
+    ContinuousOn (chartInvGramMatrix_l1Sum (I := I) (M := M) g α)
+      (chartAt H α).source := by
+  classical
+  unfold chartInvGramMatrix_l1Sum
+  refine continuousOn_finset_sum _ (fun ij _ => ?_)
+  -- The trivialization base set coincides with the chart source definitionally.
+  have h_base_eq :
+      (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source := rfl
+  have h1 :
+      ContMDiffOn I 𝓘(ℝ) ∞
+        (fun x : M => chartInvGramMatrix (I := I) g α x ij.1 ij.2)
+        (trivializationAt E (TangentSpace I) α).baseSet :=
+    chartInvGramMatrix_entry_contMDiffOn (I := I) g α ij.1 ij.2
+  have h_cont : ContinuousOn
+      (fun x : M => chartInvGramMatrix (I := I) g α x ij.1 ij.2)
+      (chartAt H α).source := by
+    have := h1.continuousOn
+    rw [h_base_eq] at this
+    exact this
+  exact h_cont.abs
+
 /-! ## Chart-local representation of the gradient -/
 
 /-- The `i`-th chart-basis component of the gradient at `x`, in the chart at `α`.
@@ -663,6 +708,202 @@ lemma gradChartLocal_eq_gradFun
   intro k _
   congr 1
   rw [inner_gradChartLocal_chartBasis (I := I) g α f hx k, hmfderiv_basis k]
+
+/-! ## Pointwise grad-norm chart bound
+
+A pointwise upper bound for `g.inner x (gradFun g f x) (gradFun g f x)` in
+terms of the chart-`α` inverse-Gram-matrix `L¹` entry sum and the sum of squares
+of the chart-pullback partial derivatives of `f`. On a boundaryless model this
+public bound only requires `hx ∈ (chartAt H α).source` and pointwise
+differentiability of `f` at `x`. -/
+
+/-- The pointwise `g`-norm bound on the gradient: for `f` differentiable at `x`
+and `x` in the chart-`α` source on a boundaryless model,
+`‖gradFun g f x‖_g² ≤ chartInvGramMatrix_l1Sum α x · (∑ k, |∂_k f̃(φ x)|²)`,
+where `f̃ = f ∘ (extChartAt I α).symm` is the chart pullback of `f` and `φ` is
+the extended chart. -/
+theorem g_inner_gradFun_le_chartInvGramMatrix_l1Sum_mul_sum_sq_partials
+    (g : SmoothRiemannianMetric I M) [I.Boundaryless]
+    (α : M) {f : M → ℝ} {x : M}
+    (hf : MDifferentiableAt I 𝓘(ℝ, ℝ) f x)
+    (hx : x ∈ (chartAt H α).source) :
+    g.inner x (gradFun (I := I) g f x) (gradFun (I := I) g f x) ≤
+      chartInvGramMatrix_l1Sum (I := I) (M := M) g α x *
+        ∑ k : Fin (Module.finrank ℝ E),
+          (partialDeriv (E := E) k (scalarOnE (I := I) α f)
+            (extChartAt I α x)) ^ 2 := by
+  classical
+  -- Derive the trivialization-base-set membership and the chart-target
+  -- interior membership from `hx` and the boundaryless assumption.
+  have hbase : x ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
+    rw [trivializationAt_baseSet_eq_chartAt_source]; exact hx
+  have hx_int : extChartAt I α x ∈ interior (extChartAt I α).target := by
+    have hxsrc : x ∈ (extChartAt I α).source := by
+      rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hx
+    have hxtgt : extChartAt I α x ∈ (extChartAt I α).target :=
+      (extChartAt I α).map_source hxsrc
+    exact extChartAt_target_subset_interior_of_boundaryless (I := I) α hxtgt
+  -- Step 1: identify `gradFun` with `gradChartLocal` at `x`.
+  have hgrad_eq :
+      gradFun (I := I) g f x = gradChartLocal (I := I) g α f x :=
+    (gradChartLocal_eq_gradFun (I := I) g α hf hbase hx_int).symm
+  rw [hgrad_eq]
+  -- Step 2: write `gradChartLocal = ∑ i, c i • e_i x` with `c i = gradChartCoeff i x`.
+  set c : Fin (Module.finrank ℝ E) → ℝ := fun i =>
+    gradChartCoeff (I := I) g α f i x with hc_def
+  have hgcl_eq :
+      gradChartLocal (I := I) g α f x =
+        ∑ i, c i • chartBasisVecFiber (I := I) α i x := by
+    unfold gradChartLocal
+    rfl
+  rw [hgcl_eq]
+  -- Step 3: `g.inner = cᵀ G c` via `chartGramMatrix_dotProduct_mulVec`.
+  set Gmat : Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
+    chartGramMatrix (I := I) g α x with hGmat_def
+  have hG_form : g.inner x
+        (∑ i, c i • chartBasisVecFiber (I := I) α i x)
+        (∑ j, c j • chartBasisVecFiber (I := I) α j x)
+      = dotProduct (star c) (Matrix.mulVec Gmat c) :=
+    (chartGramMatrix_dotProduct_mulVec (I := I) g α x c).symm
+  rw [hG_form]
+  -- Step 4: `c = G⁻¹ d`, where `d j = partialDeriv j (scalarOnE α f) (φ x)`.
+  set d : Fin (Module.finrank ℝ E) → ℝ := fun j =>
+    partialDeriv (E := E) j (scalarOnE (I := I) α f) (extChartAt I α x)
+    with hd_def
+  set Ginv : Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
+    chartInvGramMatrix (I := I) g α x with hGinv_def
+  have hc_eq : ∀ i, c i = ∑ j, Ginv i j * d j := by
+    intro i
+    rfl
+  -- Expand `cᵀ G c = ∑_{ij} c_i G_{ij} c_j`.
+  have hcGc_expand :
+      dotProduct (star c) (Matrix.mulVec Gmat c) =
+        ∑ i, ∑ j, c i * c j * Gmat i j := by
+    simp only [dotProduct, Matrix.mulVec, Pi.star_apply, star_trivial]
+    refine Finset.sum_congr rfl ?_
+    intro i _
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl ?_
+    intro j _
+    have h_dot : dotProduct (Gmat i) c =
+        ∑ j', Gmat i j' * c j' := rfl
+    ring
+  rw [hcGc_expand]
+  -- Reduction `∑_{ij} c_i G_{ij} c_j = ∑_{jk} G⁻¹_{jk} d_j d_k`.
+  have h_cGc_eq_dGd :
+      (∑ i, ∑ j, c i * c j * Gmat i j) =
+        ∑ j, ∑ k, Ginv j k * d j * d k := by
+    -- Rearrange: `∑_{ij} c_i c_j G_{ij} = ∑_j c_j (∑_i c_i G_{ij})`.
+    have hstep1 :
+        (∑ i, ∑ j, c i * c j * Gmat i j) =
+          ∑ j, c j * (∑ i, c i * Gmat i j) := by
+      rw [Finset.sum_comm]
+      refine Finset.sum_congr rfl ?_
+      intro j _
+      rw [Finset.mul_sum]
+      refine Finset.sum_congr rfl ?_
+      intro i _
+      ring
+    rw [hstep1]
+    -- `∑_i c_i G_{ij} = (G c)_j = d_j` (since `c = G⁻¹ d`).
+    have h_dot_sum : ∀ j, (∑ i, c i * Gmat i j) = d j := by
+      intro j
+      have hsym : ∀ i, Gmat i j = Gmat j i := fun i => g.symm x _ _
+      have h_step :
+          (∑ i, c i * Gmat i j) =
+            (∑ i, ∑ k, Ginv i k * d k * Gmat j i) := by
+        refine Finset.sum_congr rfl ?_
+        intro i _
+        rw [hc_eq i]
+        rw [hsym i]
+        rw [Finset.sum_mul]
+      rw [h_step]
+      have h_swap : (∑ i, ∑ k, Ginv i k * d k * Gmat j i) =
+          ∑ k, d k * (∑ i, Gmat j i * Ginv i k) := by
+        rw [Finset.sum_comm]
+        refine Finset.sum_congr rfl ?_
+        intro k _
+        rw [Finset.mul_sum]
+        refine Finset.sum_congr rfl ?_
+        intro i _
+        ring
+      rw [h_swap]
+      have h_id : ∀ k, (∑ i, Gmat j i * Ginv i k) =
+          (Gmat * Ginv) j k := by
+        intro k
+        rfl
+      have h_id_eq_one : ∀ k, (∑ i, Gmat j i * Ginv i k) =
+          if j = k then (1 : ℝ) else 0 := by
+        intro k
+        rw [h_id k, hGmat_def, hGinv_def]
+        rw [chartGramMatrix_mul_chartInvGramMatrix (I := I) g α hbase]
+        rw [Matrix.one_apply]
+      rw [show (∑ k, d k * (∑ i, Gmat j i * Ginv i k)) =
+            ∑ k, d k * (if j = k then (1 : ℝ) else 0) from
+        Finset.sum_congr rfl (fun k _ => by rw [h_id_eq_one k])]
+      rw [Finset.sum_eq_single j]
+      · simp
+      · intro k _ hjk
+        rw [if_neg (Ne.symm hjk), mul_zero]
+      · intro hk
+        exact absurd (Finset.mem_univ j) hk
+    have hstep2 :
+        (∑ j, c j * (∑ i, c i * Gmat i j)) =
+          ∑ j, c j * d j := by
+      refine Finset.sum_congr rfl ?_
+      intro j _
+      rw [h_dot_sum j]
+    rw [hstep2]
+    refine Finset.sum_congr rfl ?_
+    intro j _
+    rw [hc_eq j]
+    rw [Finset.sum_mul]
+    refine Finset.sum_congr rfl ?_
+    intro k _
+    ring
+  rw [h_cGc_eq_dGd]
+  -- Bound `∑_{jk} G⁻¹_{jk} d_j d_k ≤ (∑_{jk} |G⁻¹_{jk}|) · (∑ k, d_k²)`.
+  -- Use `|d_j| ≤ √D` and `|d_k| ≤ √D`, so `|d_j d_k| ≤ D` with `D := ∑ k, d_k²`.
+  set D : ℝ := ∑ k, (d k) ^ 2 with hD_def
+  have hD_nn : 0 ≤ D := Finset.sum_nonneg (fun _ _ => sq_nonneg _)
+  have hd_sq_le : ∀ j, (d j) ^ 2 ≤ D := by
+    intro j
+    rw [hD_def]
+    refine Finset.single_le_sum (f := fun k => (d k) ^ 2)
+      (fun k _ => sq_nonneg _) (Finset.mem_univ j)
+  have hd_abs_le_sqrtD : ∀ j, |d j| ≤ Real.sqrt D := by
+    intro j
+    rw [show |d j| = Real.sqrt ((d j) ^ 2) by rw [Real.sqrt_sq_eq_abs]]
+    exact Real.sqrt_le_sqrt (hd_sq_le j)
+  have h_dj_dk_le_D : ∀ j k, |d j * d k| ≤ D := by
+    intro j k
+    rw [abs_mul]
+    have h := mul_le_mul (hd_abs_le_sqrtD j) (hd_abs_le_sqrtD k)
+      (abs_nonneg _) (Real.sqrt_nonneg _)
+    rw [Real.mul_self_sqrt hD_nn] at h
+    exact h
+  have h_main_le :
+      (∑ j, ∑ k, Ginv j k * d j * d k) ≤
+        chartInvGramMatrix_l1Sum (I := I) (M := M) g α x * D := by
+    unfold chartInvGramMatrix_l1Sum
+    rw [Finset.sum_mul]
+    rw [show (∑ ij : Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E),
+            |chartInvGramMatrix (I := I) g α x ij.1 ij.2| * D) =
+          ∑ j, ∑ k, |Ginv j k| * D from ?_]
+    swap
+    · rw [← Finset.sum_product']
+      rfl
+    refine Finset.sum_le_sum (fun j _ => ?_)
+    refine Finset.sum_le_sum (fun k _ => ?_)
+    have h1 : Ginv j k * d j * d k ≤ |Ginv j k * (d j * d k)| := by
+      have h := le_abs_self (Ginv j k * (d j * d k))
+      have heq : Ginv j k * d j * d k = Ginv j k * (d j * d k) := by ring
+      rw [heq]
+      exact h
+    refine h1.trans ?_
+    rw [abs_mul]
+    exact mul_le_mul_of_nonneg_left (h_dj_dk_le_D j k) (abs_nonneg _)
+  exact h_main_le
 
 /-! ## Smoothness of `gradFun` -/
 
