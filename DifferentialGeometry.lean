@@ -632,6 +632,10 @@ import DifferentialGeometry.Integral.Connection.ChartBridge.HessFrobenius
 import DifferentialGeometry.Integral.Connection.Bochner
 import DifferentialGeometry.Integral.Connection.BochnerConcrete
 import DifferentialGeometry.Integral.Connection.WithBoundary.BochnerConcrete
+import DifferentialGeometry.PDE.DeTurck.ConnectionDifference
+import DifferentialGeometry.PDE.DeTurck.MetricTrace
+import DifferentialGeometry.PDE.DeTurck.VectorFieldSmooth
+import DifferentialGeometry.PDE.DeTurck.VectorField
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.PreHilbert
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.H1Compl
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Variational
