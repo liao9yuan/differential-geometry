@@ -434,8 +434,11 @@ import DifferentialGeometry.Geometry.NormGradSq
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Equation
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Existence
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.MaximalInterval
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.SmoothFlow
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Smoothness
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Uniqueness
+import DifferentialGeometry.Geometry.Riemannian.Exponential.Bridge
+import DifferentialGeometry.Geometry.Riemannian.Exponential.Definition
 
 import DifferentialGeometry.Analysis.Sobolev.Solutions.FriedrichsCommutator
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.NonSmooth
@@ -689,3 +692,12 @@ import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SpectralBounds
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SpectralBoundsCalculus
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SemigroupTimeRegularity
 import DifferentialGeometry.Analysis.Parabolic.TensorLinearParabolic
+
+import DifferentialGeometry.Analysis.ODE.Variational
+import DifferentialGeometry.Analysis.ODE.FlowC1
+import DifferentialGeometry.Analysis.ODE.FlowC1Bridge
+import DifferentialGeometry.Analysis.ODE.FlowC1Frechet
+import DifferentialGeometry.Analysis.ODE.FlowC1Joint
+import DifferentialGeometry.Analysis.ODE.FlowC1Continuous
+import DifferentialGeometry.Analysis.ODE.FlowCk
+import DifferentialGeometry.Analysis.ODE.FlowCkVariational
