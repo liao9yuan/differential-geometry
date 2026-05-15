@@ -10,7 +10,7 @@ import DifferentialGeometry.Analysis.Laplacian.Regularity.H1ComplGradientH1Lipsc
 import DifferentialGeometry.Analysis.Laplacian.Regularity.ChartPushedWeakPartialOnVolume
 import DifferentialGeometry.Analysis.Laplacian.Operator.Operator
 import DifferentialGeometry.Analysis.Laplacian.Operator.SmoothBridge
-import DifferentialGeometry.Analysis.Laplacian.Variational
+import DifferentialGeometry.Analysis.Laplacian.Operator.Variational
 import DifferentialGeometry.Geometry.NormGradSq
 
 /-!
@@ -1389,10 +1389,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainVariationalIdentity.chartPulledIntegralCLM_smoothMulLp_oneSubLap_tendsto
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainVariationalIdentity.laplacianDomain_variational_identity_clm_form
-end Sanity

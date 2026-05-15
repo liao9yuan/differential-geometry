@@ -483,18 +483,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartSideH2kBridgeUnconditional.chartPushed_memWkp_two_k_of_laplacianDomainPow
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartSideH2kBridgeUnconditional.memWkpChart_two_k_of_laplacianDomainPow_unconditional
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartSideH2kBridgeUnconditional.chartSideH2kBridge_of_laplacianDomainPow_unconditional
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartSideH2kBridgeUnconditional.laplacianDomainPow_memWkpChart_two_k_unconditional_arbitrary_k
-
-end Sanity

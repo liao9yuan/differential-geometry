@@ -305,18 +305,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChosenFirstPartialChartH2TrulyUnconditional.target_iff_per_direction
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChosenFirstPartialChartH2TrulyUnconditional.chosenMixedSecondPartial_memW1p_of_chartPushed_memWkp_three
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChosenFirstPartialChartH2TrulyUnconditional.chartPushedChosenFirstPartial_memWkp_two_of_chartPushed_memWkp_three
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChosenFirstPartialChartH2TrulyUnconditional.chartPushed_chosenFirstPartial_memWkp_two_two_of_laplacianDomainPow_two_via_chartPushed_memWkp_three
-
-end Sanity

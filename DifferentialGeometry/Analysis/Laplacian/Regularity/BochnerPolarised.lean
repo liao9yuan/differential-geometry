@@ -731,32 +731,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.BochnerPolarised.grad_g_congr
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.BochnerPolarised.Δ_g_congr_func
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.BochnerPolarised.gradFun_neg
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.BochnerPolarised.gradFun_sub
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.BochnerPolarised.Δ_g_neg
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.BochnerPolarised.Δ_g_sub
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.BochnerPolarised.normGradSqFun_polar
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.BochnerPolarised.ricciTensor_grad_polar
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.BochnerPolarised.g_inner_grad_lap_polar
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.BochnerPolarised.bochner_polarised_pointwise
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.BochnerPolarised.bochner_polarised_pointwise_oneSubLap
-
-end Sanity

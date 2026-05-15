@@ -275,16 +275,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.iteratedH2Regularity_zero
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.iteratedH2Regularity_one
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.laplacianDomainPow_memWkpChart_two_k_le_one
-
-end Sanity

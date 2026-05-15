@@ -1088,12 +1088,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DifferentiatedVariationalIdentityUnconditional.differentiated_variational_identity_holds
-
-end Sanity

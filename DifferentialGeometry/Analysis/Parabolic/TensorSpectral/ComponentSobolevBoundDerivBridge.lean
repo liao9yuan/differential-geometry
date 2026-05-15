@@ -542,16 +542,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartPushed_memW1p_two_of_contMDiff
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_lt_top
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.wkpNorm_chartPushed_tensorChartComponentScalar_le
-
-end Sanity

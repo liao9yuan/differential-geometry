@@ -146,12 +146,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorResolventL2
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorResolventL2_symm
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorResolventL2_isSelfAdjoint
-end Sanity

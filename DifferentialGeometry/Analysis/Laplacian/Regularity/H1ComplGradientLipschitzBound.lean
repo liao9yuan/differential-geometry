@@ -581,11 +581,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms DifferentialGeometry.Analysis.Laplacian.H1ComplGradientLipschitzBound.kPouCompact_isCompact
-#print axioms DifferentialGeometry.Analysis.Laplacian.H1ComplGradientLipschitzBound.smoothChartExt_tsupport_subset_kPouCompact
-#print axioms DifferentialGeometry.Analysis.Laplacian.H1ComplGradientLipschitzBound.chartPulledWeightedMeasure_kPouCompact_lt_top
-#print axioms DifferentialGeometry.Analysis.Laplacian.H1ComplGradientLipschitzBound.chartPushedPartialLpLin
-#print axioms DifferentialGeometry.Analysis.Laplacian.H1ComplGradientLipschitzBound.chartPushedPartial_lipschitz_uniform_support
-end Sanity

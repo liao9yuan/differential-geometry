@@ -301,9 +301,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms DifferentialGeometry.Analysis.Laplacian.H1ComplGradientChartBridge.cauchy_in_Lp_of_h1Compl_cauchy_with_extension
-#print axioms DifferentialGeometry.Analysis.Laplacian.H1ComplGradientChartBridge.cauchy_in_Lp_of_chartPushed_partial_smoothApprox_with_extension
-#print axioms DifferentialGeometry.Analysis.Laplacian.H1ComplGradientChartBridge.cauchy_eLpNorm_diff_chartPushedPartial_with_extension
-end Sanity

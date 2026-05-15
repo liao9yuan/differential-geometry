@@ -224,14 +224,3 @@ end LaplacianDomainH2
 end Laplacian
 end Analysis
 end DifferentialGeometry
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainH2.laplacianDomain_memWkpChart_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainH2.exists_laplacianDomain_memWkpChart_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainH2.laplacianDomain_memWkpChart_two_bridgeData
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainH2.laplacianDomain_memWkpChart_one
-end Sanity

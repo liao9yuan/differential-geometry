@@ -187,14 +187,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianChartAlphaLp.smoothTensorPairing_eq_hessPairingChart_on_chartSource
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianChartAlphaLp.pou_weighted_tensor_pairing_eq_hessPairingChart_pointwise
-
-end Sanity

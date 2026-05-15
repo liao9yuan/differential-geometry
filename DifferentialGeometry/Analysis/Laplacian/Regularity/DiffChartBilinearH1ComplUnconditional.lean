@@ -273,16 +273,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.memWkpChart_two_two_smooth_mul_laplacianDomain
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.memWkpChart_two_two_smoothMulLp_laplacianDomain_coeFn
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.memWkpChart_two_two_smoothMulLp_preimage_coeFn
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.diffChartBilinearH1ComplData_of_laplacianDomainPow_two_unconditional
-end Sanity

@@ -1386,16 +1386,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.TwiceDerivedChartBilinearH1ComplData.chosenWeakPartial'_swap_ae_of_memWkp_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.TwiceDerivedChartBilinearH1ComplData.chosenThirdMixedPartialChartPushedU_eq_chosenWeakPartial_uChart_ae
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.TwiceDerivedChartBilinearH1ComplData.twiceDerivedChartBilinearH1ComplData
-
-end Sanity

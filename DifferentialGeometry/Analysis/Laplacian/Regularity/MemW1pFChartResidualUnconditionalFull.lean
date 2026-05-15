@@ -298,16 +298,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.MemW1pFChartResidualUnconditionalFull.exists_smoothApprox_chartW22
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.MemW1pFChartResidualUnconditionalFull.smoothApproxSeq_wkpNormChart_diff_le
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.MemW1pFChartResidualUnconditionalFull.fChartResidual_memW1p_unconditional
-
-end Sanity

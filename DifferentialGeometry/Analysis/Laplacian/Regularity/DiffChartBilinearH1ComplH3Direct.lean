@@ -253,14 +253,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplH3Direct.chartPushedChosenFirstPartial_memWkp_two_of_memWkp_three
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplH3Direct.diffChartBilinearH1Compl_u_chart_deriv_memWkp_two
-
-end Sanity

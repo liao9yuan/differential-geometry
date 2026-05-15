@@ -478,13 +478,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentScalar_sub
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorH1Compl_to_tensorL2_relatively_compact
-
-end Sanity

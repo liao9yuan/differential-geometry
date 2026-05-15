@@ -562,36 +562,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapStrongInduction.chartSideH2kBridge_mono_of_le
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapStrongInduction.chartPushed_memWkp_j_of_chartSideH2kBridge_at
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapStrongInduction.chosenMthMixed_memWkp_two_two_of_chartSideH2kBridge
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapStrongInduction.chartPushed_memWkp_two_k_of_laplacianDomainPow_bridge
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapStrongInduction.chartPushed_memWkp_two_k_of_laplacianDomainPow
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapStrongInduction.memWkpChart_two_k_of_laplacianDomainPow_bridge
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapStrongInduction.chartPushed_memWkp_two_k_unconditional_of_le_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapStrongInduction.memWkpChart_two_k_unconditional_of_le_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapStrongInduction.chartPushed_memWkp_two_min_k_two_unconditional
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapStrongInduction.memWkpChart_two_min_k_two_unconditional
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapStrongInduction.chartPushed_memWkp_succ_step_of_chartSideH2kBridge
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapStrongInduction.chartPushed_memWkp_two_k_plus_two_two_sided_of_chartSideBridges
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapStrongInduction.memWkpChart_two_k_of_preimage_chartSideBridge
-
-end Sanity

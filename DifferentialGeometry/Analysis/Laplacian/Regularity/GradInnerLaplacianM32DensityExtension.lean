@@ -351,20 +351,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32DensityExtension.gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_via_density
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32DensityExtension.gradInnerCLM_mem_image_laplacianDomain_via_density
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32DensityExtension.smoothMulHC_mem_pow_two_via_density
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32DensityExtension.gradInnerCLM_smoothSeq_conv
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32DensityExtension.ricciPairingCLM_smoothSeq_conv
-
-end Sanity

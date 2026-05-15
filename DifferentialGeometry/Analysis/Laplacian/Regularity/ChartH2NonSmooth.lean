@@ -184,7 +184,3 @@ end ChartH2NonSmooth
 end Laplacian
 end Analysis
 end DifferentialGeometry
-
-section Sanity
-#print axioms DifferentialGeometry.Analysis.Laplacian.ChartH2NonSmooth.h2_chart_loc_of_uniform_bound
-end Sanity

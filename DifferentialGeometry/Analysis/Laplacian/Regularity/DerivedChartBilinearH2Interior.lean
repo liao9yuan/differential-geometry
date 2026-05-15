@@ -383,8 +383,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DerivedChartBilinearH2Interior.derivedChartBilinear_memWkp_two_two_interior
-end Sanity

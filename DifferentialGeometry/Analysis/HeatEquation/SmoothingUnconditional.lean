@@ -180,16 +180,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.HeatEquation.chartSideH2kBridge_heat_unconditional
-#print axioms
-  DifferentialGeometry.Analysis.HeatEquation.heatSemigroup_smooth_representative_unconditional
-#print axioms
-  DifferentialGeometry.Analysis.HeatEquation.heatSemigroup_smooth_in_space_and_time_unconditional
-
-end Sanity

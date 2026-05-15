@@ -538,20 +538,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrap.MemWkp_extend_via_cutoff_poly
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrap.chartPushed_memWkp_m_plus_two_of_mthMixed_chart_H_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrap.chartPushed_memWkp_two_of_laplacianDomainPow_one
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrap.chartPushed_memWkp_m_plus_two_step
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrap.memWkpChart_m_plus_two_of_chartPushed_memWkp_m_plus_two
-
-end Sanity

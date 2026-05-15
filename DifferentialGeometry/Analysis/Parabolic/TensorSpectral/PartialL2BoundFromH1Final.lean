@@ -371,10 +371,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_le_const_mul_h1Norm
-
-end Sanity

@@ -4039,18 +4039,3 @@ end ChartBilinearUniformDiffQuotBoundUnconditional
 end Laplacian
 end Analysis
 end DifferentialGeometry
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartBilinearUniformDiffQuotBoundUnconditional.exists_cutoff_around_tsupport
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartBilinearUniformDiffQuotBoundUnconditional.cutoff_fChart_memLp_two_univ
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartBilinearUniformDiffQuotBoundUnconditional.chartBilinearFK_diffQuot_u_discharge
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartBilinearUniformDiffQuotBoundUnconditional.chartBilinear_v_test_sq_discharge
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartBilinearUniformDiffQuotBoundUnconditional.chartBilinear_master_nonsmooth_discharge
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartBilinearUniformDiffQuotBoundUnconditional.chartBilinearH1Compl_uniform_diffQuot_bound_of_data
-end Sanity

@@ -220,18 +220,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32SmoothFull.gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_smooth_of_hessHypothesis
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32SmoothFull.smoothCase_M32_full_unconditional_of_hessHypothesis
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32SmoothFull.smoothMulHC_smoothToH1Compl_mem_laplacianDomainPow_two_via_candidate
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32SmoothFull.smoothCase_variational_identity_of_hessHypothesis
-
-end Sanity

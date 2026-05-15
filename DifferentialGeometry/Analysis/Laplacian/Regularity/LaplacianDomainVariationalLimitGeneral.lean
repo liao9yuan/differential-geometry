@@ -459,12 +459,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainVariationalLimitGeneral.Δ_g_smul_eq
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainVariationalLimitGeneral.pouScalar_oneSubLapClassical_pointwise_leibniz
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainVariationalLimitGeneral.pouScalar_oneSubLap_aeEq_fHLeibniz_smooth
-end Sanity

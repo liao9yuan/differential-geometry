@@ -408,12 +408,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.SmoothApproxSeqIdentification.smoothApproxSeq_smoothFChartResidual_limit_eq_fChartResidual
-
-end Sanity

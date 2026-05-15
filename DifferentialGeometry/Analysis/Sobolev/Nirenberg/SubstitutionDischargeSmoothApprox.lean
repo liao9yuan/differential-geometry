@@ -1126,7 +1126,6 @@ private lemma eLpNorm_diffQuot_le_local
         congr 1
         rw [ENNReal.div_eq_inv_mul]
 
-
 /-- Linearity of the standard Nirenberg test function in its `u`-argument:
 
   `standardNirenbergTest k h η (u₁ - u₂) =
@@ -1516,11 +1515,3 @@ end SubstitutionDischargeSmoothApprox
 end Sobolev
 end Analysis
 end DifferentialGeometry
-
-section Sanity
-#print axioms DifferentialGeometry.Analysis.Sobolev.SubstitutionDischargeSmoothApprox.exists_chart_target_cutoff
-#print axioms DifferentialGeometry.Analysis.Sobolev.SubstitutionDischargeSmoothApprox.cutoff_uChart_w1p_witness
-#print axioms DifferentialGeometry.Analysis.Sobolev.SubstitutionDischargeSmoothApprox.exists_smooth_uChart_approx
-#print axioms DifferentialGeometry.Analysis.Sobolev.SubstitutionDischargeSmoothApprox.standardNirenbergTest_smooth_seq
-#print axioms DifferentialGeometry.Analysis.Sobolev.SubstitutionDischargeSmoothApprox.standardNirenbergTest_seq_tendsto_eLpNorm
-end Sanity

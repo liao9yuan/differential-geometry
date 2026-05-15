@@ -231,10 +231,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorResolvent
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorResolvent_inner_eq_lpFunctional
-end Sanity

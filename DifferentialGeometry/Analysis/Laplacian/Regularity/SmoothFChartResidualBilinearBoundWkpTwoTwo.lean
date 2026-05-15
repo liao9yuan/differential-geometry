@@ -984,12 +984,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBoundWkpTwoTwo.wkpNorm_smoothFChartResidual_le_wkpNormChart_wkpTwoTwo
-
-end Sanity

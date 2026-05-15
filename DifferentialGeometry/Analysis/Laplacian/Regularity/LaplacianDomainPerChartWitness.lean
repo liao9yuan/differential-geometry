@@ -638,10 +638,3 @@ end LaplacianDomainPerChartWitness
 end Laplacian
 end Analysis
 end DifferentialGeometry
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainPerChartWitness.chartH2NonSmoothPOUWitness_of_laplacianDomain
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainPerChartWitness.laplacianDomain_memWkpChart_two_unconditional
-end Sanity

@@ -461,14 +461,3 @@ end DiffChartBilinearH1Compl
 end Laplacian
 end Analysis
 end DifferentialGeometry
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.differentiated_chart_bilinear_identity
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.base_chart_bilinear_identity
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.weightedInvGramDerivOnEuclid_contDiffOn
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.densityDerivOnEuclid_contDiffOn
-end Sanity

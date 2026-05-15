@@ -637,27 +637,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerCLMLeibniz.gradInner_leibniz_pointwise
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerCLMLeibniz.gradInner_leibniz_smooth_Lp
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerCLMLeibniz.leibnizLhsCLM_eq_leibnizRhsCLM
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerCLMLeibniz.gradInner_leibniz_H1Compl
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerCLMLeibniz.chartPushedRawLpFromLp_gradInner_leibniz_H1Compl
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerCLMLeibniz.chartPushedRawLpFromLp_gradInner_leibniz_smoothToH1Compl
-
-end Sanity

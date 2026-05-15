@@ -412,18 +412,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartPushedRawWeakPartialOnVolume.chartPushedRawPartial
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartPushedRawWeakPartialOnVolume.chartPushedRawPartialLpLin
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartPushedRawWeakPartialOnVolume.chartPushedRawPartialCLM
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartPushedRawWeakPartialOnVolume.chartPushedRawWeakPartialLp
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartPushedRawWeakPartialOnVolume.chartPushedRawWeakPartialLp_smoothToH1Compl
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartPushedRawWeakPartialOnVolume.chartPushedRawWeakPartialLp_continuous
-end Sanity

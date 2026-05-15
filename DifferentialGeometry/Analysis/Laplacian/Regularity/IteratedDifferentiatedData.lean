@@ -701,18 +701,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedDifferentiatedData.IteratedDiffChartBilinearData.mk_from_hypotheses
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedDifferentiatedData.IteratedDiffChartBilinearData.ofBase
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedDifferentiatedData.IteratedDiffChartBilinearData.ofDiff
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedDifferentiatedData.IteratedDiffChartBilinearData.ofDiffTwice
-
-end Sanity

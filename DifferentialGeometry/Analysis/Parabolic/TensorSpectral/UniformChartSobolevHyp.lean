@@ -59,10 +59,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.uniformTensorChartSobolevBound
-
-end Sanity

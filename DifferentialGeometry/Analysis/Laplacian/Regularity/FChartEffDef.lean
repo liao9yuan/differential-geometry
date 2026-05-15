@@ -677,14 +677,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.FChartEffDef.fChartEff_supported_in_chartImagePOUTsupport
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.FChartEffDef.fChartEff_memLp_two_weighted
-
-end Sanity

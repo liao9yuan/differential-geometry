@@ -588,16 +588,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorResolventEigenbasisVec_orthonormal
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorResolventEigenbasisVec_span_orthogonal_eq_bot
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorResolventHilbertEigenbasisSigma
-
-end Sanity

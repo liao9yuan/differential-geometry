@@ -1333,16 +1333,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DerivedChartBilinearH1ComplDataUnconditional.derived_variational_identity_holds
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DerivedChartBilinearH1ComplDataUnconditional.derivedChartBilinearH1ComplDataUnconditional
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DerivedChartBilinearH1ComplDataUnconditional.chosenSecondPartialChartPushedU_ae_zero_off_chartImagePOUTsupport
-
-end Sanity

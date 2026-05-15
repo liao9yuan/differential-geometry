@@ -725,38 +725,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianBridge.chartPushed_smoothToH1Compl_coeFn_aeEq_chartPushed_v
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianBridge.laplacianDomainHessianChart_smooth_aeEq
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianBridge.chartPushedEuclidHessian
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianBridge.laplacianDomainHessianChart_eq_chartPushedEuclidHessian_aeEq
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianBridge.smoothEuclidHessianPairingChart
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianBridge.hessPairingChartLocal_smoothCase_aeEq_smoothEuclidPairing
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianBridge.hessPairingSmoothOnEuclid
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianBridge.hessPairingChartLocal_smoothCase_aeEq_smoothOnEuclid_of_pointwise
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianBridge.hessPairingLpOnLapDom_eq_hessPairingSmoothLp_of_globalHypothesis
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianBridge.hessPairingLpOnLapDom_eq_hessPairingSmoothLp_of_chart_global
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianBridge.hessPairingMOnLapDom_eq_hessPairingChart_of_per_chart
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianBridge.hessPairingLpOnLapDom_eq_hessPairingSmoothLp_of_per_chart_pointwise
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianBridge.hessPairingLpOnLapDom_eq_hessPairingSmoothLp_of_per_chart_ae
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianBridge.hessPairingLpOnLapDom_eq_hessPairingSmoothLp_connector
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianBridge.hessPairingLpOnLapDom_eq_hessPairingSmoothLp_connector_perChart_ae
-end Sanity

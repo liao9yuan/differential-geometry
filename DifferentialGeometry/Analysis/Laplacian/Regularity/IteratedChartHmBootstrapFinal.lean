@@ -362,28 +362,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapFinal.chartPushed_memWkp_unconditional_of_laplacianDomainPow_le_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapFinal.chartSideH2kBridge_unconditional_of_laplacianDomainPow_le_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapFinal.memWkpChart_unconditional_of_laplacianDomainPow_le_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapFinal.chartPushed_memWkp_unconditional_of_laplacianDomainPow
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapFinal.chartPushed_memWkp_j_of_chartSideH2kBridge
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapFinal.chartPushed_memWkp_succ_step
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapFinal.memWkpChart_2k_of_chartSideH2kBridge_polymorphic
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapFinal.chartPushed_memWkp_two_sided_succ_le_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapFinal.chartPushed_memWkp_of_laplacianDomainPow_via_bridge
-
-end Sanity

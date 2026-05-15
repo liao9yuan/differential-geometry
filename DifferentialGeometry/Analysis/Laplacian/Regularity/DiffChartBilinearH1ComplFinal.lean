@@ -486,24 +486,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplFinal.gradInnerCLM_mem_image_smooth
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplFinal.gradInnerCLM_mem_image_density
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplFinal.smoothMulHC_mem_pow_two_smooth
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplFinal.smoothMulHC_mem_pow_two_density
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplFinal.fHLeibnizResidualLp_coeFn_memWkpChart_two_two_of_M6
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplFinal.fHLeibnizResidualLp_coeFn_memWkpChart_two_two_density
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplFinal.diffChartBilinearH1ComplData_of_laplacianDomainPow_two_density
-
-end Sanity

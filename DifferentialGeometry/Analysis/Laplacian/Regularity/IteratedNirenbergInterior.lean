@@ -1250,16 +1250,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedNirenbergInterior.chosenMthMixedPartialChartPushedU_cons_eq_chosenWeakPartial_chosenMthMixed_ae
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedNirenbergInterior.iteratedChartBilinearH1ComplData
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedNirenbergInterior.iteratedDerivedChartBilinear_memWkp_two_two_interior
-
-end Sanity

@@ -1453,20 +1453,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.diffChartBilinearH1ComplData_of_laplacianDomainPow_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.diffChartBilinearH1ComplData_of_laplacianDomainPow_two_via_residual
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.laplacianDomainPow_two_chartPushed_memWkp_two_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.laplacianDomainPow_two_preimage_chartPushed_memWkp_two_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.hasWeakPartialDeriv_chosenSecond_of_chartPushedWeakPartialLp
-
-end Sanity

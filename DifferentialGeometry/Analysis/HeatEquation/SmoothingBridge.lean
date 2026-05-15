@@ -302,24 +302,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.HeatEquation.chartSideH2kBridge_iff_memWkpChart_two_k
-#print axioms
-  DifferentialGeometry.Analysis.HeatEquation.heatSemigroup_smooth_representative_of_chartSideBridges
-#print axioms
-  DifferentialGeometry.Analysis.HeatEquation.heatSemigroup_smooth_in_space_and_time_of_chartSideBridges
-#print axioms
-  DifferentialGeometry.Analysis.HeatEquation.chartSideH2kBridge_heat_implies_chartSideH2kBridge_lifts
-#print axioms
-  DifferentialGeometry.Analysis.HeatEquation.laplacianDomainPow_memWkpChart_2k_of_chartSideBridges_heat
-#print axioms
-  DifferentialGeometry.Analysis.HeatEquation.chartSideH2kBridge_heat_zero
-#print axioms
-  DifferentialGeometry.Analysis.HeatEquation.chartSideH2kBridge_heat_one
-
-end Sanity

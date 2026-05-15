@@ -243,16 +243,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChosenFChartDerivMemW1pTrulyUnconditional.chosenFChartDeriv_memW1p_of_base_memWkp22
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChosenFChartDerivMemW1pTrulyUnconditional.chosenFChartDeriv_memW1p_truly_unconditional
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChosenFChartDerivMemW1pTrulyUnconditional.chosenFChartDeriv_memW1p_of_base_f_chart_memWkp22
-
-end Sanity

@@ -193,20 +193,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainSmoothMul.fHLeibnizResidualCLM
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainSmoothMul.fHLeibnizResidualCLM_smoothToH1Compl
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainSmoothMul.phiMulU_h
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainSmoothMul.phiMulU_h_mem_laplacianDomain
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainSmoothMul.laplacianDomain_preimage_phiMulU_h
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainSmoothMul.phiMulU_h_smoothToH1Compl
-end Sanity

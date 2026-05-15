@@ -878,14 +878,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DifferentiatedCrossTermIBP.chosenSecondPartialChartPushedU_isWeakPartial_of_chartPushedWeakPartialLp
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DifferentiatedCrossTermIBP.cross_derivative_term_ibp
-
-end Sanity

@@ -828,11 +828,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms DifferentialGeometry.Analysis.Laplacian.H1ComplGradientLipschitz.smoothChartExt_contDiff
-#print axioms DifferentialGeometry.Analysis.Laplacian.H1ComplGradientLipschitz.smoothChartExt_hasCompactSupport
-#print axioms DifferentialGeometry.Analysis.Laplacian.H1ComplGradientLipschitz.smoothChartExtPartial_memLp_chartWeighted_restrict
-#print axioms DifferentialGeometry.Analysis.Laplacian.H1ComplGradientLipschitz.chartPushedPartial_memLp
-#print axioms DifferentialGeometry.Analysis.Laplacian.H1ComplGradientLipschitz.chartPushedPartial_diff_memLp
-end Sanity

@@ -442,12 +442,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms DifferentialGeometry.Analysis.HeatEquation.mildSolution_inner_basis
-#print axioms DifferentialGeometry.Analysis.HeatEquation.hasDerivAt_mildSolution_inner_basis
-
-end Sanity

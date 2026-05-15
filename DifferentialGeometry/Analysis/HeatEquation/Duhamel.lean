@@ -822,12 +822,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms DifferentialGeometry.Analysis.HeatEquation.mildSolution_zero
-#print axioms DifferentialGeometry.Analysis.HeatEquation.mildSolution_continuous
-
-end Sanity

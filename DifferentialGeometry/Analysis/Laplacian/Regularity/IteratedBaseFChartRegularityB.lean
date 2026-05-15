@@ -1456,22 +1456,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedBaseFChartRegularityB.smoothApproxSeqWkpM_wkpNormChart_diff_le
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedBaseFChartRegularityB.smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy_wkpM
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedBaseFChartRegularityB.smoothApproxSeqWkpM_tendsto_h1Compl
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedBaseFChartRegularityB.smoothApproxSeqWkpM_smoothFChartResidual_limit_eq_fChartResidual_wkpM
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedBaseFChartRegularityB.fChartResidual_memWkp_m_truly_unconditional
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedBaseFChartRegularityB.base_f_chart_memWkp_m_truly_unconditional
-
-end Sanity

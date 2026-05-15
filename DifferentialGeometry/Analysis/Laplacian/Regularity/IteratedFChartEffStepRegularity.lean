@@ -1398,14 +1398,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedFChartEffStepRegularity.fChartEffStep_memWkp_K_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedFChartEffStepRegularity.fChartEffStep_memW1p_two
-
-end Sanity

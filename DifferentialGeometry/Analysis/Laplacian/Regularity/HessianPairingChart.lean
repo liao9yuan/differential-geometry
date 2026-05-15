@@ -164,20 +164,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianPairingChart.hessPairingChart
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianPairingChart.hessPairingChart_continuous
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianPairingChart.hessPairingChart_memLp_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianPairingChart.smoothScalarToContMDiffMap
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianPairingChart.hessPairingSmoothLp
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianPairingChart.hessPairingSmoothLp_coeFn
-end Sanity

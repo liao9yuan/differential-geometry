@@ -1832,8 +1832,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainVariationalIdentityFormB.laplacianDomain_variational_identity_general
-end Sanity

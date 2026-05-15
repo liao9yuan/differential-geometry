@@ -558,12 +558,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerCLMChartFormula.gradInner_eq_chart_formula
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerCLMChartFormula.chartPushedRawLpFromLp_gradInnerSmooth_aeEq
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerCLMChartFormula.chartPushedRawLpFromLp_gradInnerCLM_smoothToH1Compl_aeEq
-end Sanity

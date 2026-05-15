@@ -161,14 +161,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorResolventL2_eq_comp
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorResolventL2_apply_eq_comp
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorResolventL2_isCompactOperator_of_isCompactOperator
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorResolventL2_isCompactOperator_and_isSelfAdjoint
-end Sanity

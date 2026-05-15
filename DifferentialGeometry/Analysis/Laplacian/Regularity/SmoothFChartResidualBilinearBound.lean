@@ -2765,14 +2765,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.wkpNorm_partialDerivOnEuclid_le_wkpNorm_chartPushedRaw_succ
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.wkpNorm_smoothFChartResidual_le_wkpNormChart
-
-end Sanity

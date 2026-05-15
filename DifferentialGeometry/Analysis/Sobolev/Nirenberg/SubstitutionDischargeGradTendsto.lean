@@ -1227,7 +1227,3 @@ end SubstitutionDischargeGradTendsto
 end Sobolev
 end Analysis
 end DifferentialGeometry
-
-section Sanity
-#print axioms DifferentialGeometry.Analysis.Sobolev.SubstitutionDischargeGradTendsto.standardNirenbergTest_seq_grad_tendsto_eLpNorm
-end Sanity

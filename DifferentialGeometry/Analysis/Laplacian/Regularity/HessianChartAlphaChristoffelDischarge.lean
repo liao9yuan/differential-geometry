@@ -245,20 +245,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianChartAlphaChristoffelDischarge.christoffelDischargeSmoothCase
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianChartAlphaChristoffelDischarge.smoothEuclidHessianPairingChart_at_chartAt_eq_tensor_plus_diff
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianChartAlphaChristoffelDischarge.pou_weighted_euclid_pairing_decompose
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianChartAlphaChristoffelDischarge.pou_weighted_euclid_pairing_eq_hessPairingChart_pointwise_of_discharge
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianChartAlphaChristoffelDischarge.hessPairingMChartContribution_smoothCase_eq_weighted_chartLocal
-
-end Sanity

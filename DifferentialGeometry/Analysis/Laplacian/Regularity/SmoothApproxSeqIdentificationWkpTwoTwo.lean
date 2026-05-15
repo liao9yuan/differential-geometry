@@ -830,14 +830,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.SmoothApproxSeqIdentificationWkpTwoTwo.smoothApproxSeqWkpThree_tendsto_h1Compl
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.SmoothApproxSeqIdentificationWkpTwoTwo.smoothApproxSeqWkpThree_smoothFChartResidual_limit_eq_fChartResidual_wkpTwoTwo
-
-end Sanity

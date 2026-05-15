@@ -168,8 +168,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.norm_sq_triv_christoffel_correction_le_const_mul_tensorInnerPointwise_on_pouTsupport
-end Sanity

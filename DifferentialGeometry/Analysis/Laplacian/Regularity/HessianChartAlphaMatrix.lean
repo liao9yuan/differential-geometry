@@ -195,14 +195,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianChartAlphaMatrix.chartAlphaMatrixIdentity_holds_chartSource
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianChartAlphaMatrix.chartAlpha_swap_aux_holds
-
-end Sanity

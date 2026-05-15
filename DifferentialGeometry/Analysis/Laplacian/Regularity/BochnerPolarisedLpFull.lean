@@ -710,26 +710,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.BochnerPolarisedLpFull.H1ComplToLp_injOn_laplacianDomain
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.BochnerPolarisedLpFull.preimageLift_smoothCase
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.BochnerPolarisedLpFull.gradInnerLapU_smoothCase
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.BochnerPolarisedLpFull.v_sub_oneSubLap_eq_lap
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.BochnerPolarisedLpFull.gradInnerSmoothBundle_sub_oneSubLap_apply
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.BochnerPolarisedLpFull.oneSubLapClassical_gradInner_apply
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.BochnerPolarisedLpFull.gradInnerLaplacianCandidateUnconditional_smoothCase_of_hessHypothesis
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.BochnerPolarisedLpFull.smoothCandidate_identification_target_of_hessHypothesis
-
-end Sanity

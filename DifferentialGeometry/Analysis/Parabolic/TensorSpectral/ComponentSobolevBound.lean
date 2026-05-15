@@ -325,10 +325,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponent_memWkpChart_one_two
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponent_wkpNormChart_le
-end Sanity

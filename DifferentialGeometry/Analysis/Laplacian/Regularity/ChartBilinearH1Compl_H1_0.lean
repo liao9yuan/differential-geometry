@@ -940,7 +940,3 @@ end ChartBilinearH1Compl
 end Laplacian
 end Analysis
 end DifferentialGeometry
-
-section Sanity
-#print axioms DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl.chart_bilinear_identity_h1_0
-end Sanity

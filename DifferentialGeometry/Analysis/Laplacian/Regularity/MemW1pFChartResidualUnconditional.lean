@@ -511,12 +511,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.MemW1pFChartResidualUnconditional.fChartResidual_memW1p_of_iteratedClosure
-
-end Sanity

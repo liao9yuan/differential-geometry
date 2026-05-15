@@ -194,10 +194,3 @@ end LaplacianDomainH2Unconditional
 end Laplacian
 end Analysis
 end DifferentialGeometry
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainH2Unconditional.chartH2_localBound_of_laplacianDomain
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainH2Unconditional.laplacianDomain_memWkpChart_two_chartBilinearRoute
-end Sanity

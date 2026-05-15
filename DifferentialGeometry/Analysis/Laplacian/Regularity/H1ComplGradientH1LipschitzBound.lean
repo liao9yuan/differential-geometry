@@ -695,8 +695,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms DifferentialGeometry.Analysis.Laplacian.H1ComplGradientH1LipschitzBound.chartPushedPartial_h1_lipschitz
-#print axioms DifferentialGeometry.Analysis.Laplacian.H1ComplGradientH1LipschitzBound.chartPushedPartialLipschitz_canonical
-end Sanity

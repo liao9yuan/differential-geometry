@@ -475,18 +475,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.nonzeroLaplacianEigenvalueSet_finite_below
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.laplacianEigenvalueAscending_strictMono_of_infinite
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.tendsto_laplacianEigenvalueAscending_atTop
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.laplacianEigenvalueAscending_zero_eq_sInf
-
-end Sanity

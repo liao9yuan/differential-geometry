@@ -688,14 +688,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DerivedChartBilinearH1ComplData.chosenSecondPartialChartPushedU_swap_ae
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DerivedChartBilinearH1ComplData.derivedChartBilinearH1ComplData
-
-end Sanity

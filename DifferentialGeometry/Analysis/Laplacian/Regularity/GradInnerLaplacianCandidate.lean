@@ -525,28 +525,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianCandidate.smoothRicciPairing_contMDiff
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianCandidate.smoothRicciPairingBundle
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianCandidate.smoothRicciPairingLp
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianCandidate.gradInnerLaplacianCandidate
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianCandidate.gradInnerLaplacianCandidate_def
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianCandidate.gradInnerLaplacianCandidate_ricci_add
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianCandidate.gradInnerLaplacianCandidate_hess_add
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianCandidate.gradInnerLaplacianCandidate_norm_lt_top
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianCandidate.gradInnerLaplacianCandidate_norm_le
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianCandidate.smoothRicciPairingLp_coeFn
-end Sanity

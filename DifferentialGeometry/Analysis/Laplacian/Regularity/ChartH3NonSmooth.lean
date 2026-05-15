@@ -235,10 +235,3 @@ end ChartH3NonSmooth
 end Laplacian
 end Analysis
 end DifferentialGeometry
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartH3NonSmooth.h3_chart_loc_of_diff_data_and_uniform_bound
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartH3NonSmooth.h3_chart_loc_weak_partial_deriv_of_diff_data_and_uniform_bound
-end Sanity

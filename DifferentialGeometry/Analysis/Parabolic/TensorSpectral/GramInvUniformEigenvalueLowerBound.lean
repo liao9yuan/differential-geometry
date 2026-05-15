@@ -319,8 +319,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_chartInvGramMatrix_quadForm_lower_bound_on_pouTsupport
-end Sanity

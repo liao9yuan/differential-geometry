@@ -1646,32 +1646,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainSmoothMul.smoothScalarMulFun
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainSmoothMul.smoothScalarMul
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainSmoothMul.smoothMulHC
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainSmoothMul.smoothMulHC_smoothToH1Compl
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainSmoothMul.H1ComplToLp_smoothMulHC_eq_smoothMulLp_H1ComplToLp
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainSmoothMul.H1ComplToLp_smoothMulHC
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainSmoothMul.smoothLaplacianBundle
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainSmoothMul.fHLeibnizGeneralResidualCLM
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainSmoothMul.fHLeibnizGeneral
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainSmoothMul.smoothMulHC_eq_resolvent_fHLeibnizGeneral
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainSmoothMul.smoothMulHC_mem_laplacianDomain
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainSmoothMul.laplacianDomain_preimage_smoothMulHC
-end Sanity

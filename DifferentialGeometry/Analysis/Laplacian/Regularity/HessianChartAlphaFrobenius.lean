@@ -1074,16 +1074,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianChartAlphaFrobenius.chartFrobeniusInvariance_holds
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianChartAlphaFrobenius.chartFrobeniusSqHSBridge_holds
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianChartAlphaFrobenius.smoothTensorPairingChart_eq_hessPairingChart_pullback
-
-end Sanity

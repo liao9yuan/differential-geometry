@@ -375,16 +375,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_const_eLpNorm_chosenWeakPartial'_chartPushed_le_uniform_indices
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_const_sum_eLpNorm_chosenWeakPartial'_chartPushed_le_uniform_indices
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_const_eLpNorm_chosenWeakPartial'_chartPushed_le_uniform_indices_single_chart
-
-end Sanity

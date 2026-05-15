@@ -1047,24 +1047,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartPulledIntegralContinuity.chartPulledIntegralCLM
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartPulledIntegralContinuity.chartPulledIntegralCLM_norm_le
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartPulledIntegralContinuity.chartPulledIntegralCLM_smoothToLp
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartPulledIntegralContinuity.chartPulledIntegralCLM_tendsto
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartPulledIntegralContinuity.smoothToLp_pouScalar_oneSubLap_eq_fHLeibniz
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartPulledIntegralContinuity.chartPulledIntegralCLM_pouScalar_oneSubLap_eq_fHLeibniz_smooth
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartPulledIntegralContinuity.chartPulledIntegralCLM_RHS_tendsto_of_fHLeibniz_tendsto
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartPulledIntegralContinuity.rhs_integral_smooth_tendsto_chartPulledIntegralCLM_fHLeibniz
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartPulledIntegralContinuity.laplacianDomain_variational_identity_general_partial
-end Sanity

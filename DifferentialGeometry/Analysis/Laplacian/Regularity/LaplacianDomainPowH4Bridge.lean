@@ -247,20 +247,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainPowH4Bridge.chartH4NonSmoothPOUWitness_of_memWkp_four
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainPowH4Bridge.chartH4NonSmoothPOUWitness_iff_memWkp_four
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainPowH4Bridge.chartH4NonSmoothPOUWitness_of_chartSideH4Bridge
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainPowH4Bridge.laplacianDomainPow_memWkpChart_four_of_chartSideH4Bridge
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainPowH4Bridge.laplacianDomainPow_memWkpChart_four_two_sided_of_chartSideBridges
-
-end Sanity

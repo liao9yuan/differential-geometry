@@ -434,16 +434,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.norm_TensorH1ComplToTensorL2_apply_le
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.denseRange_smoothToTensorH1Compl
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TensorH1ComplToTensorL2_isCompactOperator
-
-end Sanity

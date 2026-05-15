@@ -4081,8 +4081,6 @@ theorem twice_differentiated_variational_identity_holds
   -- h_once now is a linear equation in the named atoms. Solve.
   linarith
   -- end of theorem
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.TwiceDifferentiatedVariationalIdentityUnconditional.twice_differentiated_variational_identity_holds
 
 end TwiceDifferentiatedVariationalIdentityUnconditional
 end Laplacian
@@ -4090,12 +4088,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.TwiceDifferentiatedVariationalIdentityUnconditional.integral_chosenWeakPartial_base_eq_integral_chosenSecond
-
-end Sanity

@@ -689,37 +689,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.tensor_lambda_nonneg
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.tensor_heat_coeff_mem_unit_interval
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.tensorSummable_basis_coeff_sq
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.tensorParseval_norm_sq
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.tensorSummable_heatTerm
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.tensorHeatSemigroup
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.tensorHeatSemigroup_apply_of_nonneg
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.tensorHeatSemigroup_of_neg
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.tensorHeatSemigroup_opNorm_le_one
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.tensorHeatSemigroup_apply_basis
-
-end Sanity

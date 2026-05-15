@@ -308,12 +308,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualLinearity.smoothFChartResidual_ae_sub
-
-end Sanity

@@ -195,7 +195,7 @@ import DifferentialGeometry.Integral.Measure.Glue
 import DifferentialGeometry.Integral.Measure.Invariance
 import DifferentialGeometry.Integral.Measure.Properties
 import DifferentialGeometry.Integral.Measure.Family
-import DifferentialGeometry.Integral.SmoothFamily
+import DifferentialGeometry.Integral.SyntheticBridge.SmoothFamily
 import DifferentialGeometry.Integral.L2.Basic
 import DifferentialGeometry.Integral.L2.CompactSupport
 import DifferentialGeometry.Integral.L2.PointwiseInner.DualMetric
@@ -376,7 +376,7 @@ import DifferentialGeometry.Analysis.Laplacian.Regularity.H1Compl
 import DifferentialGeometry.Analysis.Laplacian.Regularity.L2Inclusion
 import DifferentialGeometry.Analysis.Laplacian.Regularity.GradInnerCLM
 import DifferentialGeometry.Analysis.Laplacian.Regularity.SmoothMulLp
-import DifferentialGeometry.Analysis.Laplacian.Variational
+import DifferentialGeometry.Analysis.Laplacian.Operator.Variational
 import DifferentialGeometry.Analysis.Laplacian.Operator.SmoothDenseLp
 import DifferentialGeometry.Analysis.Laplacian.Operator.Operator
 import DifferentialGeometry.Analysis.Laplacian.Spectral.Resolvent
@@ -394,7 +394,7 @@ import DifferentialGeometry.Analysis.Laplacian.WithBoundary.Neumann.FullSmoothBr
 import DifferentialGeometry.Analysis.Laplacian.WithBoundary.Neumann.FullSmoothBridgeNeumann
 import DifferentialGeometry.Analysis.Laplacian.WithBoundary.Dirichlet.H1Compl
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceReverse
-import DifferentialGeometry.Analysis.Laplacian.Compactness
+import DifferentialGeometry.Analysis.Laplacian.Spectral.Compactness
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2
 import DifferentialGeometry.Analysis.Sobolev.Tools.DifferenceQuotientWeakLimit
 import DifferentialGeometry.Analysis.Sobolev.Tools.DifferenceQuotientWeakLimitLoc

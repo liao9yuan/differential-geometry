@@ -485,8 +485,3 @@ end ChartBilinearUniformDiffQuotBound
 end Laplacian
 end Analysis
 end DifferentialGeometry
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartBilinearUniformDiffQuotBound.chartBilinearH1Compl_uniform_diffQuot_bound
-end Sanity

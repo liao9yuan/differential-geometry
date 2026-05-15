@@ -547,28 +547,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.tensorMildSolution
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.tensorMildSolution_zero
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.tensorMildSolution_add_initial
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.tensorMildSolution_smul_initial
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.tensorMildSolution_add_forcing
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.tensorMildSolution_continuous
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.tensor_linear_parabolic_existence
-
-end Sanity

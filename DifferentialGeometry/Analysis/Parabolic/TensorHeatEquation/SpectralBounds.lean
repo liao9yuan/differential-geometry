@@ -780,15 +780,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-
-#print axioms DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.tensorHeatPower
-#print axioms DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.tensorHeatPower_zero
-#print axioms DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.tensorHeatPower_apply_of_pos_one_le
-#print axioms DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.tensorHeatPower_eq_zero_of_one_le_of_nonpos
-#print axioms DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.tensorHeatPower_opNorm_le
-#print axioms DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.tensorHeatPower_apply_basis_pos
-#print axioms DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.tensorHeatPower_isSelfAdjoint
-
-end Sanity

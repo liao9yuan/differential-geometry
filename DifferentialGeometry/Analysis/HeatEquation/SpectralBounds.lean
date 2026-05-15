@@ -1479,12 +1479,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms DifferentialGeometry.Analysis.HeatEquation.hasDerivAt_heatPower
-#print axioms DifferentialGeometry.Analysis.HeatEquation.contDiffOn_heatSemigroup_Ioi
-
-end Sanity

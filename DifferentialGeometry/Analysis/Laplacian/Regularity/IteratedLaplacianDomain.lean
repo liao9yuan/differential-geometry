@@ -251,15 +251,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms DifferentialGeometry.Analysis.Laplacian.iteratedResolventL2
-#print axioms DifferentialGeometry.Analysis.Laplacian.laplacianDomainPow
-#print axioms DifferentialGeometry.Analysis.Laplacian.laplacianDomainPow_one
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.laplacianDomainPow_succ_subset_laplacianDomain
-
-end Sanity

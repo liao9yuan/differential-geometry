@@ -711,9 +711,3 @@ end H1ComplToLpChartBridge
 end Laplacian
 end Analysis
 end DifferentialGeometry
-
-section Sanity
-#print axioms DifferentialGeometry.Analysis.Laplacian.H1ComplToLpChartBridge.eLpNorm_chartPushed_chartPulledWeightedMeasure_restrict_le
-#print axioms DifferentialGeometry.Analysis.Laplacian.H1ComplToLpChartBridge.chartPushed_memLp_chartPulledWeightedMeasure_restrict_of_memLp
-#print axioms DifferentialGeometry.Analysis.Laplacian.H1ComplToLpChartBridge.chartPushed_tendsto_chartPulledWeightedMeasure
-end Sanity

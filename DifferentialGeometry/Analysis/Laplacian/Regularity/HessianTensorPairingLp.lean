@@ -1470,32 +1470,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianTensorPairingLp.chartTensorPairingLocal
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianTensorPairingLp.chartTensorPairingLocal_memLp_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianTensorPairingLp.chartTensorPairingLocalLp
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianTensorPairingLp.tensorHessPairingMChartContribution
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianTensorPairingLp.tensorHessPairingMChartContribution_memLp_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianTensorPairingLp.tensorHessPairingFunc
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianTensorPairingLp.tensorHessPairingFunc_memLp_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianTensorPairingLp.tensorHessPairingLp
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianTensorPairingLp.tensorHessPairingLp_coeFn
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianTensorPairingLp.tensorHessPairingFunc_aeEq_pou_weighted_chartLocal_smoothCase
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianTensorPairingLp.tensorHessPairingLp_smoothCase_of_discharge
-
-end Sanity

@@ -370,10 +370,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Sobolev.Chart.wkpNormChart_smooth_mul_le
-end Sanity

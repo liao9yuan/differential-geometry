@@ -292,8 +292,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_sum_tensorInnerPointwise_cov_chartBasis_diagonal_le_const_mul_tensorCovDerivPointwiseInner_on_pouTsupport
-end Sanity

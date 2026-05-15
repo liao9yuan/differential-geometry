@@ -737,16 +737,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedFChartEffRegularity.iteratedDiffChartBilinearData_canonical
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedFChartEffRegularity.fChartEff_at_level_ae_zero_off_K_alpha
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedFChartEffRegularity.fChartEff_at_level_memWkp_K
-
-end Sanity

@@ -446,32 +446,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianBridgeSmoothLp.perChartAeTransferableSmoothCase
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianBridgeSmoothLp.hessPairingMOnLapDom_aeEq_pou_weighted_euclid_pairing_smoothCase_of_transferable
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianBridgeSmoothLp.hessPairingMOnLapDom_aeEq_hessPairingChart_smoothCase_of_both
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianBridgeSmoothLp.hessPairingLpOnLapDom_eq_hessPairingSmoothLp_smoothCase_of_both
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianBridgeSmoothLp.hessPairingLpOnLapDom_eq_hessPairingSmoothLp_smoothCase_connector
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianBridgeSmoothLp.perChartAeTransferable_smoothCase
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianBridgeSmoothLp.perChartAeTransferableSmoothCase_holds
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianBridgeSmoothLp.hessPairingMOnLapDom_aeEq_pou_weighted_euclid_pairing_smoothCase
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianBridgeSmoothLp.hessPairingMOnLapDom_aeEq_hessPairingChart_smoothCase_of_discharge
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianBridgeSmoothLp.hessPairingLpOnLapDom_eq_hessPairingSmoothLp_smoothCase_of_discharge
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianBridgeSmoothLp.hessPairingLpOnLapDom_eq_hessPairingSmoothLp_smoothCase_connector_of_discharge
-
-end Sanity

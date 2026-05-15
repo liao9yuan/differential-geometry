@@ -349,18 +349,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.BaseFChartMemWkpTwoTwoTrulyUnconditional.smoothFChartResidual_memWkp_two_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.BaseFChartMemWkpTwoTwoTrulyUnconditional.memWkp_fChartResidual_of_wkpNorm_cauchy_identification_wkpTwoTwo
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.BaseFChartMemWkpTwoTwoTrulyUnconditional.fChartResidual_memWkp_two_two_truly_unconditional
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.BaseFChartMemWkpTwoTwoTrulyUnconditional.base_f_chart_memWkp_two_two_truly_unconditional
-
-end Sanity

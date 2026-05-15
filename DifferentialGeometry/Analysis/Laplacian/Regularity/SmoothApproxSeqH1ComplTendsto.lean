@@ -881,12 +881,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.SmoothApproxSeqH1ComplTendsto.smoothApproxSeq_tendsto_h1Compl
-
-end Sanity

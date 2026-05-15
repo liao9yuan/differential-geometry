@@ -296,13 +296,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms DifferentialGeometry.Analysis.HeatEquation.heatSemigroup_smooth_representative
-#print axioms DifferentialGeometry.Analysis.HeatEquation.heatSemigroup_contMDiff_in_time
-#print axioms DifferentialGeometry.Analysis.HeatEquation.heatSemigroup_smooth_in_space_and_time
-
-end Sanity

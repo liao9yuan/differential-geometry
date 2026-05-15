@@ -229,14 +229,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.laplacianDomainPow_two_h2_plus_rhs_h2
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.laplacianDomainPow_two_iterated_h2
-
-end Sanity

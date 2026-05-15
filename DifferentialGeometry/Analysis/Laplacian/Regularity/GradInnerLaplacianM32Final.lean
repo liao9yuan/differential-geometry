@@ -369,36 +369,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32Final.gradInnerCLM_imageLap_witness
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32Final.gradInnerCLM_imageLap_witness_mem_laplacianDomain
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32Final.gradInnerCLM_mem_image_laplacianDomain_of_variational
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32Final.gradInnerCLM_imageLap_witness_eq_resolvent_candidate
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32Final.variational_identity_implies_mem_image
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32Final.gradInnerCLM_smoothCase_eq_resolventL2_candidate
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32Final.gradInnerCLM_smoothCase_mem_image_laplacianDomain_via_candidate
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32Final.gradInnerCLM_smoothCase_mem_image_laplacianDomain_unconditional
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32Final.smoothMulHC_smoothToH1Compl_mem_laplacianDomainPow_two_unconditional
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32Final.mem_image_laplacianDomain_iff_smoothMulHC_mem_pow_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32Final.gradInnerCLM_mem_image_laplacianDomain_of_iteratedClosure
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32Final.smoothMulHC_mem_pow_two_iff_via_candidate_resolvent
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32Final.smoothMulHC_mem_pow_two_of_variational_identity
-
-end Sanity

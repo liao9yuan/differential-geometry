@@ -656,18 +656,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional.diffChartBilinearH1ComplData_of_smoothToH1Compl_unconditional
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional.memW1p_fChartResidual_of_wkpNorm_cauchy_and_lim_eq
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional.memW1p_fChartResidual_of_wkpNorm_cauchy_identification
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional.diffChartBilinearH1ComplData_of_laplacianDomainPow_two_via_density
-
-end Sanity

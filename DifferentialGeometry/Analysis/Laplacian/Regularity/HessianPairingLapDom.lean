@@ -1441,30 +1441,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianPairingLapDom.chartHessianPhiOnEuclid
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianPairingLapDom.chartHessianPhiOnEuclid_continuousOn
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianPairingLapDom.hessPairingChartLocal
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianPairingLapDom.hessPairingChartLocal_memLp_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianPairingLapDom.hessPairingChartLocalLp
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianPairingLapDom.hessPairingMChartContribution
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianPairingLapDom.hessPairingMOnLapDom
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianPairingLapDom.hessPairingMChartContribution_memLp_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianPairingLapDom.hessPairingMOnLapDom_memLp_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianPairingLapDom.hessPairingLpOnLapDom
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianPairingLapDom.hessPairingLpOnLapDom_coeFn
-end Sanity

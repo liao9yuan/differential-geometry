@@ -1236,28 +1236,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffTwiceChartBilinearH1Compl.twice_differentiated_chart_bilinear_identity
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffTwiceChartBilinearH1Compl.differentiated_chart_bilinear_identity_via_base1
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffTwiceChartBilinearH1Compl.base_chart_bilinear_identity_via_base1
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffTwiceChartBilinearH1Compl.weightedInvGramSecondDerivOnEuclid_contDiffOn
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffTwiceChartBilinearH1Compl.densitySecondDerivOnEuclid_contDiffOn
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffTwiceChartBilinearH1Compl.u_chart_second_deriv_isMixedWeakPartial
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffTwiceChartBilinearH1Compl.weak_partial_second_deriv_isMixedWeakPartial
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffTwiceChartBilinearH1Compl.diffTwiceChartBilinearH1ComplData_of_diff
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffTwiceChartBilinearH1Compl.diffTwiceChartBilinearH1ComplData_of_laplacianDomainPow_two
-
-end Sanity

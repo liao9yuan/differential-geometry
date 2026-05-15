@@ -215,10 +215,3 @@ end ChartH4NonSmooth
 end Laplacian
 end Analysis
 end DifferentialGeometry
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartH4NonSmooth.h4_chart_loc_of_iterated_diff_data_and_uniform_bound
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartH4NonSmooth.h4_chart_loc_explicit_iterated
-end Sanity

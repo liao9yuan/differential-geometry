@@ -241,16 +241,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.fderiv_chartPushed_tensorChartComponentScalar_eq_leibniz_on_target
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.fderiv_chartPushed_tensorChartComponentScalar_eventuallyEq_leibniz
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.fderiv_chartPushed_tensorChartComponentPou_eq_leibniz_on_target
-
-end Sanity

@@ -560,12 +560,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmJump.chartPushed_memWkp_succ_jump
-
-end Sanity

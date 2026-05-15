@@ -887,34 +887,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.RicciDualNorm.ricciCovectorChartCoord
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.RicciDualNorm.ricciCovectorChartCoord_contMDiffOn
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.RicciDualNorm.chartRicciDualNormSq
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.RicciDualNorm.chartRicciDualNormSq_contMDiffOn
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.RicciDualNorm.chartRicciDualNormSq_continuousOn
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.RicciDualNorm.chartRicciDualNormSq_bdd_on_compact
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.RicciDualNorm.ricciSharp
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.RicciDualNorm.inner_ricciSharp
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.RicciDualNorm.chartRicciDualNormSq_eq_inner_ricciSharp
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.RicciDualNorm.chartRicciDualNormSq_nonneg
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.RicciDualNorm.ricciPairing_cs_sq
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.RicciDualNorm.ricciPairing_cs_sq_chartLocal
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.RicciDualNorm.exists_global_ricci_dual_normSq_bound
-end Sanity

@@ -453,12 +453,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms DifferentialGeometry.Analysis.Laplacian.laplacianEigenfunction_smooth_representative
-#print axioms DifferentialGeometry.Analysis.Laplacian.lichnerowicz_spectral_unconditional
-
-end Sanity

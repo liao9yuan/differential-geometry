@@ -246,16 +246,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentScalar_wkpNormChart_le_per_section_improved
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentScalar_wkpNormChart_le_per_section_improved_forall
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.sum_tensorChartComponentScalar_wkpNormChart_le_per_section
-
-end Sanity

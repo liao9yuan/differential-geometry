@@ -206,9 +206,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms DifferentialGeometry.Analysis.Laplacian.H1ComplWeakPartialLimit.chartPushedWeakPartialLp
-#print axioms DifferentialGeometry.Analysis.Laplacian.H1ComplWeakPartialLimit.chartPushedWeakPartialLp_smoothToH1Compl
-#print axioms DifferentialGeometry.Analysis.Laplacian.H1ComplWeakPartialLimit.chartPushedWeakPartialLp_continuous
-end Sanity

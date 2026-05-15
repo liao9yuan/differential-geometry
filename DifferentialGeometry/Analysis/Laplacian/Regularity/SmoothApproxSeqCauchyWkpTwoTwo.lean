@@ -400,16 +400,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.SmoothApproxSeqCauchyWkpTwoTwo.exists_smoothApprox_chartW32
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.SmoothApproxSeqCauchyWkpTwoTwo.smoothApproxSeqWkpThree_wkpNormChart_diff_le
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.SmoothApproxSeqCauchyWkpTwoTwo.smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy_wkpTwoTwo
-
-end Sanity

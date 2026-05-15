@@ -353,7 +353,6 @@ theorem chosenMthMixedPartialChartPushedU_memLp_two
   -- `MemWkp 0 2 _ _ ↔ MemLp 2 _ (volume.restrict _)` definitionally.
   exact h_memWkp_0
 
-
 /-- **`k = 1` corollary.** From chart-`H^{m+1}` of the chart-pushed parent,
 every `m`-fold chosen mixed weak partial is `MemW1p 2` on the chart target.
 This is the headline `H¹` regularity needed for downstream weak-form
@@ -439,28 +438,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedMixedPartials.chosenMthMixedPartialChartPushedU_zero
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedMixedPartials.chosenMthMixedPartialChartPushedU_succ
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedMixedPartials.chosenMthMixedPartialChartPushedU_one_eq_chosenFirstPartial
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedMixedPartials.chosenMthMixedPartialChartPushedU_two_eq_chosenSecondPartialChartPushedU
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedMixedPartials.chosenMthMixedPartialChartPushedU_three_eq_chosenThirdMixedPartialChartPushedU
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedMixedPartials.chosenMthMixedPartialChartPushedU_memWkp_of_chartPushed_memWkp
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedMixedPartials.chosenMthMixedPartialChartPushedU_memLp_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedMixedPartials.chosenMthMixedPartialChartPushedU_memW1p_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedMixedPartials.chosenMthMixedPartialChartPushedU_locally_memLp
-
-end Sanity

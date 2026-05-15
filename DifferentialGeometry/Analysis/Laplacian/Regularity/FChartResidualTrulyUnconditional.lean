@@ -185,16 +185,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.FChartResidualTrulyUnconditional.smoothApproxSeq_smoothFChartResidual_memW1p
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.FChartResidualTrulyUnconditional.smoothApproxSeq_smoothFChartResidual_memWkp
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.FChartResidualTrulyUnconditional.fChartResidual_memW1p_from_smoothApprox_cauchy_identification
-
-end Sanity

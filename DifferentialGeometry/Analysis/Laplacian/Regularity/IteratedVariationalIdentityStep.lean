@@ -1376,12 +1376,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedVariationalIdentityStep.iteratedDiffChartBilinearData_step
-
-end Sanity

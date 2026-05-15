@@ -364,22 +364,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpThreeTrulyUnconditional.chartPushed_memW1p_two_of_laplacianDomainPow_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpThreeTrulyUnconditional.chosenFirstPartial_memWkp_one_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpThreeTrulyUnconditional.chartPushed_memWkp_three_two_iff
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpThreeTrulyUnconditional.chartPushed_memWkp_three_two_of_chosen_partials_memWkp_two_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpThreeTrulyUnconditional.chosen_partials_memWkp_two_two_of_chartPushed_memWkp_three_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpThreeTrulyUnconditional.chartPushed_memWkp_three_two_of_laplacianDomainPow_two
-
-end Sanity

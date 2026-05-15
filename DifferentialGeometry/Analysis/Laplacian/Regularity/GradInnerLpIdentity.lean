@@ -640,28 +640,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLpIdentity.gradInnerCLM_eq_two_inv_preimageDiff
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLpIdentity.smoothMulLp_preimage_in_image_laplacianDomain
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLpIdentity.smoothMulLp_DeltaPhi_in_image_laplacianDomain
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLpIdentity.smoothMulHC_mem_pow_two_of_gradInnerCLM_mem_image
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLpIdentity.gradInnerCLM_mem_image_of_smoothMulHC_mem_pow_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLpIdentity.smoothMulHC_mem_pow_two_iff_gradInnerCLM_mem_image
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLpIdentity.gradInnerSmooth_eq_smoothToLp_bundle
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLpIdentity.gradInnerCLM_smoothToH1Compl_mem_image_laplacianDomain
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLpIdentity.smoothToH1Compl_mem_laplacianDomainPow_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.GradInnerLpIdentity.smoothMulHC_smoothToH1Compl_mem_laplacianDomainPow_two
-end Sanity

@@ -89,12 +89,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.FChartResidualMemW1pTrulyUnconditional.fChartResidual_memW1p_truly_unconditional
-
-end Sanity

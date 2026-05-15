@@ -420,24 +420,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.memWkpChart_four_of_chartPOUWitnesses
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.wkpNormChart_four_lt_top_of_chartPOUWitnesses
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.laplacianDomainPow_memWkpChart_four
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.exists_laplacianDomainPow_memWkpChart_four
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.laplacianDomainPow_memWkpChart_four_two_sided
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.memWkpChart_two_of_h4_witnesses_laplacianDomainPow_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.laplacianDomainPow_two_h2_via_h4_witnesses
-
-end Sanity

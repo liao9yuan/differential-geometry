@@ -259,7 +259,3 @@ end NirenbergCrossBound
 end Laplacian
 end Analysis
 end DifferentialGeometry
-
-section Sanity
-#print axioms DifferentialGeometry.Analysis.Laplacian.NirenbergCrossBound.eLpNorm_diffQuot_restrict_le_of_cthickening
-end Sanity

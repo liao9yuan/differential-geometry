@@ -410,8 +410,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.TwiceDerivedChartBilinearH2Interior.twiceDerivedChartBilinear_memWkp_two_two_interior
-end Sanity

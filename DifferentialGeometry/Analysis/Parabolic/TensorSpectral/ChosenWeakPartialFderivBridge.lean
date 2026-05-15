@@ -378,16 +378,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chosenWeakPartial'_chartPushed_ae_eq_fderiv_chartSmoothExt
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chosenWeakPartial'_chartPushed_ae_eq_fderiv_chartPushed
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chosenWeakPartial'_chartPushed_tensorChartComponentScalar_ae_eq_fderiv_chartPushed
-
-end Sanity

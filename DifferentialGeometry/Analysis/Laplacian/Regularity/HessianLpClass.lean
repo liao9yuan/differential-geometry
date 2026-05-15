@@ -1183,16 +1183,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianLpClass.laplacianDomainHessianChart_memLp_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianLpClass.laplacianDomainHessFrobeniusSqChart_memLp_one
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianLpClass.laplacianDomainHessianChart_smooth_case
-
-end Sanity

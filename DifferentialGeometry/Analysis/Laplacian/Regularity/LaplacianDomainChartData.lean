@@ -712,7 +712,6 @@ lemma chartPushedRawLpFromLp_tendsto
     simpa using h_comp
   exact h_toReal_tendsto
 
-
 /-! ## The integral identity: chart-pulled CLM in setIntegral form
 
 The crucial identity bridging the form-B headline's RHS to a setIntegral form:
@@ -1674,16 +1673,3 @@ end LaplacianDomainChartData
 end Laplacian
 end Analysis
 end DifferentialGeometry
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData.chartPulledIntegralCLM_density_ψ_eq_setIntegral
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData.chartBilinearH1ComplData_of_laplacianDomain
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData.chartBilinearH1ComplData_of_laplacianDomain_u_chart_def
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData.chartBilinearH1ComplData_of_laplacianDomain_weak_partial_def
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData.chartBilinearH1ComplData_of_laplacianDomain_f_chart_def
-end Sanity

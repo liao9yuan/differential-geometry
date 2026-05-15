@@ -475,19 +475,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentScalar_measurable
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponent_rellich_extraction_of_uniform_bound
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponent_rellich_extraction
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponent_rellich_extraction_restricted
-
-end Sanity

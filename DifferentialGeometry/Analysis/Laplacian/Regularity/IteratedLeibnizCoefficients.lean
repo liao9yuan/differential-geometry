@@ -439,38 +439,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedLeibnizCoefficients.weightedInvGramMthDerivOnEuclid_zero
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedLeibnizCoefficients.weightedInvGramMthDerivOnEuclid_succ
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedLeibnizCoefficients.densityMthDerivOnEuclid_zero
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedLeibnizCoefficients.densityMthDerivOnEuclid_succ
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedLeibnizCoefficients.weightedInvGramMthDerivOnEuclid_one_eq_weightedInvGramDerivOnEuclid
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedLeibnizCoefficients.densityMthDerivOnEuclid_one_eq_densityDerivOnEuclid
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedLeibnizCoefficients.weightedInvGramMthDerivOnEuclid_two_eq_weightedInvGramSecondDerivOnEuclid
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedLeibnizCoefficients.densityMthDerivOnEuclid_two_eq_densitySecondDerivOnEuclid
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedLeibnizCoefficients.weightedInvGramMthDerivOnEuclid_contDiffOn
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedLeibnizCoefficients.densityMthDerivOnEuclid_contDiffOn
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedLeibnizCoefficients.weightedInvGramMthDerivOnEuclid_continuousOn
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedLeibnizCoefficients.densityMthDerivOnEuclid_continuousOn
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedLeibnizCoefficients.weightedInvGramMthDerivOnEuclid_bounded_on_compact
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.IteratedLeibnizCoefficients.densityMthDerivOnEuclid_bounded_on_compact
-
-end Sanity

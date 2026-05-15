@@ -411,16 +411,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.eLpNorm_chartPushed_le_const_mul_eLpNorm_riemannianVolumeMeasure_uniform
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.eLpNorm_chartPushed_tensorChartComponentScalar_le_const_mul_h1Norm
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.eLpNorm_chartPushed_tensorChartComponentScalar_le_const_mul_h1Norm_single_chart
-
-end Sanity

@@ -894,18 +894,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualMemW1p.memW1p_chartPushedRaw_of_contMDiff_tsupport
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualMemW1p.memW1p_fChartResidual_smooth_aux
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualMemW1p.fHLeibnizResidualLp_smoothToH1Compl_coeFn_ae
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualMemW1p.memW1p_fChartResidual_smoothToH1Compl
-
-end Sanity

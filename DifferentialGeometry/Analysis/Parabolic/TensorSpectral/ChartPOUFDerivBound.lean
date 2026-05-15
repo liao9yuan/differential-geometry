@@ -367,13 +367,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.fderiv_chartPushed_pou_eq_leibniz_on_target
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_fderiv_chartPushed_pou_uniform_bound
-
-end Sanity

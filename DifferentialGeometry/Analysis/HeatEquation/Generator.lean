@@ -283,16 +283,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.HeatEquation.laplacianOp_heatSemigroupExplicitLift_zero_eq_neg_heatPower_one
-#print axioms
-  DifferentialGeometry.Analysis.HeatEquation.hasDerivAt_heatSemigroup_eq_laplacianOp
-#print axioms
-  DifferentialGeometry.Analysis.HeatEquation.laplacianOp_heatSemigroupSpectralLift_one_eq_neg_heatPower_one
-
-end Sanity

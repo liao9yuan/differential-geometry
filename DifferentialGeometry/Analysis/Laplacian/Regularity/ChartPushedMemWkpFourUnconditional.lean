@@ -587,20 +587,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpFourUnconditional.chosenSecondPartialChartPushedU_memWkp_two_two_of_twice_diff_identity
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpFourUnconditional.chartPushedChosenFirstPartial_memWkp_three_two_of_twice_diff_identities
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpFourUnconditional.chartPushed_memWkp_four_two_of_laplacianDomainPow_two_of_twice_diff_identities
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpFourUnconditional.chartSideH2kBridge_two_of_twice_diff_identities
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpFourUnconditional.laplacianDomainPow_memWkpChart_four_two_of_twice_diff_identities
-
-end Sanity

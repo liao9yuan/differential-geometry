@@ -217,12 +217,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ResidualLpDecomposition.preimage_smoothMulHC_eq_smoothMulLp_preimage_add_residual
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ResidualLpDecomposition.fHLeibnizGeneralResidualCLM_eq_preimageDiff
-end Sanity

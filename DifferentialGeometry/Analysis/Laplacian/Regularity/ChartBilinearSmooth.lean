@@ -1248,7 +1248,3 @@ end ChartBilinearSmooth
 end Laplacian
 end Analysis
 end DifferentialGeometry
-
-section Sanity
-#print axioms DifferentialGeometry.Analysis.Laplacian.ChartBilinearSmooth.chart_pulled_smooth_weak_solution
-end Sanity

@@ -200,24 +200,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.BochnerPolarisedLpSmooth.contMDiff_phi_add_v
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.BochnerPolarisedLpSmooth.contMDiff_phi_sub_v
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.BochnerPolarisedLpSmooth.contMDiff_g_inner_grad_phi_grad_v
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.BochnerPolarisedLpSmooth.bochner_polarised_pointwise_smoothCase
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.BochnerPolarisedLpSmooth.bochner_polarised_pointwise_oneSubLap_smoothCase
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.BochnerPolarisedLpSmooth.gradInnerSmoothBundle_toFun
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.BochnerPolarisedLpSmooth.Δ_g_gradInnerSmoothBundle_eq_contMDiff_g_inner
-
-end Sanity

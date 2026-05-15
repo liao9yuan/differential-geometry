@@ -883,22 +883,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChosenThirdMixedPartialChartPushed.chosenSecondPartialChartPushedU_memW1p_two_of_laplacianDomainPow_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChosenThirdMixedPartialChartPushed.chosenThirdMixedPartialChartPushedU_isWeakPartial
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChosenThirdMixedPartialChartPushed.chosenThirdMixedPartialChartPushedU_memLp_two
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChosenThirdMixedPartialChartPushed.chosenThirdMixedPartialChartPushedU_locally_memLp
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChosenThirdMixedPartialChartPushed.cross_derivative_term_ibp_second_order_single
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.ChosenThirdMixedPartialChartPushed.cross_derivative_term_ibp_second_order
-
-end Sanity

@@ -875,9 +875,4 @@ end Laplacian
 end Analysis
 end DifferentialGeometry
 
-section Sanity
-#print axioms DifferentialGeometry.Analysis.Laplacian.LaplacianDomainVariationalLimit.smooth_full_identity
-#print axioms DifferentialGeometry.Analysis.Laplacian.LaplacianDomainVariationalLimit.laplacianDomain_variational_identity_smooth_case
-end Sanity
-
 end

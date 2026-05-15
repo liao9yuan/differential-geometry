@@ -125,8 +125,3 @@ end ChartBilinearH1ComplFromDom
 end Laplacian
 end Analysis
 end DifferentialGeometry
-
-section Sanity
-#print axioms DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1ComplFromDom.exists_smooth_approx_seq
-#print axioms DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1ComplFromDom.exists_smooth_approx_seq_lp
-end Sanity

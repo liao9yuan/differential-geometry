@@ -407,12 +407,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.HeatEquation.heatSemigroup_mem_laplacianDomainPow_all
-
-end Sanity

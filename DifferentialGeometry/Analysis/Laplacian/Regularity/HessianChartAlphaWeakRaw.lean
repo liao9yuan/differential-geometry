@@ -550,14 +550,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianChartAlphaWeakRaw.chosenChartFirstWeakPartial_memLp_chartTarget
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianChartAlphaWeakRaw.chosenChartSecondWeakPartial_memLp_chartTarget
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianChartAlphaWeakRaw.chartChristoffelCorrectionWeak_memLp_chartTarget_compact
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.HessianChartAlphaWeakRaw.chartTensorWeakHessianRaw_memLp_chartTarget_compact
-end Sanity

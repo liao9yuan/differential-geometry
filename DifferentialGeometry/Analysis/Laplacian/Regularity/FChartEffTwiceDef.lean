@@ -1052,18 +1052,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.FChartEffTwiceDef.fChartEffTwice_supported_in_chartImagePOUTsupport
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.FChartEffTwiceDef.fChartEffTwice_def_unfold
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.FChartEffTwiceDef.density_mul_fChartEffTwice_eq_indicator_numerator
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.FChartEffTwiceDef.fChartEffTwice_memLp_two_weighted
-
-end Sanity

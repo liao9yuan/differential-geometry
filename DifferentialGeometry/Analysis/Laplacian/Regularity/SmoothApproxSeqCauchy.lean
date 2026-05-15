@@ -275,12 +275,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Laplacian.SmoothApproxSeqCauchy.smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy
-
-end Sanity

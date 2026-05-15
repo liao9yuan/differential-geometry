@@ -871,12 +871,6 @@ theorem heat_max_principle_weak_closed
 
 end MaxPrinciple
 
-section Sanity
-
-#print axioms heat_max_principle_weak_closed
-
-end Sanity
-
 end HeatEquation
 end Analysis
 end DifferentialGeometry
