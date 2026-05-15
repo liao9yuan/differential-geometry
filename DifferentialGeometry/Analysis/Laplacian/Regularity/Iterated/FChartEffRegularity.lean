@@ -677,7 +677,7 @@ regularity provided:
   data invariants);
 * `MemWkp (K + m) 2` of `base.f_chart` (the base-level regularity at the
   highest needed rank, recovered from
-  `base_f_chart_memWkp_m_truly_unconditional` by the caller);
+  `base_f_chart_memWkp_m` by the caller);
 * chart-`H` regularity of `u_h.coeFn` up to chart-`H^{m + 2}` (needed for the
   inductive steps);
 * a per-step `W^{1,2}` propagator (for assembling the canonical bundle);

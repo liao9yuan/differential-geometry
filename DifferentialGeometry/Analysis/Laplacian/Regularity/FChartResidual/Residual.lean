@@ -6,7 +6,7 @@ import DifferentialGeometry.Analysis.Laplacian.Regularity.FChartResidual.MemW1pR
 For a closed Riemannian manifold `(M, g)`, chart point `α : M`, and an element
 `u_h ∈ laplacianDomainPow g 2`, this module packages alternative
 reformulations of the chart-target `MemW1p 2` discharge of `fChartResidual
-g α u_h` from `MemW1pFChartResidualUnconditionalFull`.
+g α u_h` from `MemW1pFChartResidualFull`.
 
 The reformulations expose the chart-bilinear analytical content of the
 discharge in a single packaged form, parametrized by the chart-W^{1,2}-
@@ -52,7 +52,7 @@ open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
 namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
-namespace FChartResidualTrulyUnconditional
+namespace FChartResidual
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -68,8 +68,8 @@ open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainSmoothMul
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualMemW1p
-open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional
-open DifferentialGeometry.Analysis.Laplacian.MemW1pFChartResidualUnconditionalFull
+open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual
+open DifferentialGeometry.Analysis.Laplacian.MemW1pFChartResidualFull
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
 /-! ## File-local Borel-space instances -/
@@ -179,7 +179,7 @@ theorem fChartResidual_memW1p_from_smoothApprox_cauchy_identification
   fChartResidual_memW1p_unconditional (I := I) (M := M) g α hu_h
     h_cauchy h_identification
 
-end FChartResidualTrulyUnconditional
+end FChartResidual
 end Laplacian
 end Analysis
 end DifferentialGeometry

@@ -79,7 +79,7 @@ open DifferentialGeometry.Analysis.Laplacian.H1ComplGradientH1LipschitzBound
 open DifferentialGeometry.Analysis.Laplacian.H1ComplWeakPartialLimit
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl
-open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpThreeUnconditional
+open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpThreeSmooth
 open DifferentialGeometry.Analysis.Laplacian.DifferentiatedCrossTermIBP
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean

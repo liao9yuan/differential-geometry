@@ -50,14 +50,14 @@ infrastructure (the chart-`H³` campaign supplies the chart-`H³` step
 unconditionally via `chartPushed_memWkp_three_two_of_laplacianDomainPow_two`;
 the chart-`H⁴` step is the standard parallel follow-up piece, exposed
 hypothesis-bearing via `LaplacianDomainPowH4` and
-`ChartPushedMemWkpFourUnconditional`). The headline theorem of this module
+`ChartPushedMemWkpFourSmooth`). The headline theorem of this module
 therefore exposes the bulk chart-`H²` membership of `base.f_chart` as a
 single residual hypothesis, in the exact same ergonomic style as the
 chart-`H³` headline `chartPushed_memWkp_three_two_of_laplacianDomainPow_two`
-in `ChartPushedMemWkpThreeTrulyUnconditional`. Downstream consumers that
+in `ChartPushedMemWkpThree`. Downstream consumers that
 already package the bulk chart-`H²` regularity (e.g. via the
 twice-differentiated chart-bilinear identity discharge in
-`ChartPushedMemWkpFourUnconditional`) can apply the headline directly.
+`ChartPushedMemWkpFourSmooth`) can apply the headline directly.
 
 ## Main results
 
@@ -81,7 +81,7 @@ open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
 namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
-namespace ChosenFChartDerivMemW1pTrulyUnconditional
+namespace ChosenFChartDerivMemW1p
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -174,10 +174,10 @@ from the standard Nirenberg–Schauder bootstrap of the two-sided chart-`H²`
 regularity of `(u_h.coeFn, (1-Δ_g) u_h.coeFn)` (already unconditional via
 `laplacianDomainPow_two_h2_plus_rhs_h2`). The skeleton of this bootstrap
 is exposed in `LaplacianDomainPowH4`, with the per-chart discharge supplied
-by `ChartPushedMemWkpFourUnconditional`.
+by `ChartPushedMemWkpFourSmooth`.
 
 This headline matches the style of
-`ChartPushedMemWkpThreeTrulyUnconditional.chartPushed_memWkp_three_two_of_laplacianDomainPow_two`,
+`ChartPushedMemWkpThree.chartPushed_memWkp_three_two_of_laplacianDomainPow_two`,
 which exposes the bulk chart-`H³` regularity as input. -/
 theorem chosenFChartDeriv_memW1p_truly_unconditional
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -208,7 +208,7 @@ the right-hand side `base.f_chart`.
 The equivalence between the two hypotheses is the structural content of the
 chart-bilinear bootstrap: it is not unfolded here, but downstream consumers
 that have the chart-`H⁴` regularity of `chartPushed POU α u_h.coeFn` in
-hand (via, e.g., `ChartPushedMemWkpFourUnconditional`) can supply the
+hand (via, e.g., `ChartPushedMemWkpFourSmooth`) can supply the
 `MemWkp 2 2 base.f_chart` hypothesis from the chart-`H⁴` regularity by
 following the bootstrap chain through the chart-bilinear elliptic identity. -/
 
@@ -237,7 +237,7 @@ theorem chosenFChartDeriv_memW1p_of_base_f_chart_memWkp22
   chosenFChartDeriv_memW1p_truly_unconditional (I := I) (M := M) g α hu_h l₁
     h_base_f_chart_memWkp22
 
-end ChosenFChartDerivMemW1pTrulyUnconditional
+end ChosenFChartDerivMemW1p
 end Laplacian
 end Analysis
 end DifferentialGeometry

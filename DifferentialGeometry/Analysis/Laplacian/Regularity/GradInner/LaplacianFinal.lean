@@ -63,7 +63,7 @@ The result is delivered in several layered forms:
   smooth-case conclusion via the unconditional candidate's resolvent,
   conditional on `smoothCandidate_identification_target`.
 
-* `gradInnerCLM_smoothCase_mem_image_laplacianDomain_unconditional` — the
+* `gradInnerCLM_smoothCase_mem_image_laplacianDomain` — the
   smooth-case conclusion, **unconditional**, repackaging the existing
   smooth-case discharge from `GradInnerLpIdentity`.
 
@@ -255,7 +255,7 @@ theorem gradInnerCLM_smoothCase_mem_image_laplacianDomain_via_candidate
 
 /-- The smooth-case conclusion (unconditional, no auxiliary hypothesis).
 Re-export of `gradInnerCLM_mem_image_laplacianDomain_smooth`. -/
-theorem gradInnerCLM_smoothCase_mem_image_laplacianDomain_unconditional
+theorem gradInnerCLM_smoothCase_mem_image_laplacianDomain
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     gradInnerCLM (I := I) (M := M) g φ
         (smoothToH1Compl (I := I) (M := M) g v) ∈

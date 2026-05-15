@@ -72,7 +72,7 @@ open scoped Manifold Topology ContDiff ENNReal BigOperators
 namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
-namespace ChartSideH2kBridgeUnconditional
+namespace ChartSideH2kBridge
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -83,8 +83,8 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.IteratedChartHmJump
-open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpFourTrulyUnconditional
-open DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapUnconditional
+open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpFour
+open DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapCanonical
 open DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapFinal
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainPowH2kBridge
 
@@ -477,7 +477,7 @@ theorem laplacianDomainPow_memWkpChart_two_k_unconditional_arbitrary_k
   exact DifferentialGeometry.Analysis.Sobolev.Chart.wkpNormChart_lt_top_of_memWkpChart
     (I := I) (M := M) g (k := 2 * k) (p := 2) (by norm_num) h_mem
 
-end ChartSideH2kBridgeUnconditional
+end ChartSideH2kBridge
 end Laplacian
 end Analysis
 end DifferentialGeometry

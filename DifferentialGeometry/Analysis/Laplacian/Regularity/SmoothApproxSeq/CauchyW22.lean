@@ -69,10 +69,10 @@ open DifferentialGeometry.Analysis.Laplacian.MetricExtension
 open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl
-open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional
+open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual
 open DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBoundW22
 open DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualLinearity
-open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpThreeUnconditional
+open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpThreeSmooth
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
 /-! ## File-local Borel-space instances -/
@@ -257,10 +257,10 @@ theorem smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy_w22
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := Module.finrank ℝ E) 2 2
         (fun y =>
-          DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional.smoothFChartResidual
+          DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
             (I := I) (M := M) g α
             (smoothApproxSeqWkpThree (I := I) (M := M) g hu_h m) y -
-          DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional.smoothFChartResidual
+          DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
             (I := I) (M := M) g α
             (smoothApproxSeqWkpThree (I := I) (M := M) g hu_h n) y)
         (chartTargetEuclid (I := I) (M := M) α) ≤ ENNReal.ofReal ε := by
@@ -298,14 +298,14 @@ theorem smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy_w22
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := Module.finrank ℝ E) 2 2
         (fun y =>
-          DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional.smoothFChartResidual
+          DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
             (I := I) (M := M) g α vm y -
-          DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional.smoothFChartResidual
+          DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
             (I := I) (M := M) g α vn y)
         (chartTargetEuclid (I := I) (M := M) α) =
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := Module.finrank ℝ E) 2 2
-        (DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional.smoothFChartResidual
+        (DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
           (I := I) (M := M) g α vdiff)
         (chartTargetEuclid (I := I) (M := M) α) := by
     refine DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_congr_ae
@@ -326,7 +326,7 @@ theorem smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy_w22
   have h_step :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := Module.finrank ℝ E) 2 2
-        (DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional.smoothFChartResidual
+        (DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
           (I := I) (M := M) g α vdiff)
         (chartTargetEuclid (I := I) (M := M) α) ≤
       ENNReal.ofReal C *

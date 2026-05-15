@@ -27,7 +27,7 @@ For each `m`-direction multi-index `dirs : Fin m → Fin n`, we:
    Each step requires `MemW1p 2` of the previous-level effective source on
    the chart target plus ae-vanishing of it off `chartImagePOUTsupport α`,
    both threaded inductively through a `MemWkp (m - j) 2` rank invariant
-   (anchored at level `0` by `base_f_chart_memWkp_m_truly_unconditional`).
+   (anchored at level `0` by `base_f_chart_memWkp_m`).
 
 2. Apply the weakened polymorphic Nirenberg interior regularity
    `iteratedDerivedChartBilinear_memWkp_two_two_interior_weakened` to the
@@ -78,7 +78,7 @@ open DifferentialGeometry.Analysis.Laplacian.IteratedNirenbergInteriorWeakened
 open DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrap
 open DifferentialGeometry.Analysis.Laplacian.IteratedVariationalIdentityStepScaffold
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData
-open DifferentialGeometry.Analysis.Laplacian.DerivedChartBilinearH1ComplDataUnconditional
+open DifferentialGeometry.Analysis.Laplacian.DerivedChartBilinearH1ComplDataCanonical
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
@@ -155,7 +155,7 @@ The bundle at level `j` carries:
   agreement with the user-supplied prefix.
 * `fChartEff_memWkp : MemWkp (m - j) 2 data.fChartEff chartTarget` — the
   rank invariant, anchored at `j = 0` by
-  `base_f_chart_memWkp_m_truly_unconditional` at order `m`.
+  `base_f_chart_memWkp_m` at order `m`.
 * `fChartEff_ae_zero_off_K` — the ae-vanishing structural invariant
   (definitional at `j ≥ 1` from `fChartEffStep`'s indicator structure;
   supplied at `j = 0` by `base_f_chart_ae_zero_off_K_α`).
@@ -189,11 +189,11 @@ private structure LevelBundle
 /-- The level-`0` `LevelBundle`. The level-`0` data is
 `IteratedDiffChartBilinearData.ofBase`. The rank invariant
 `MemWkp m 2 base.f_chart` is discharged by
-`base_f_chart_memWkp_m_truly_unconditional` at order `m`, consuming
+`base_f_chart_memWkp_m` at order `m`, consuming
 manifold-side chart-`H^{m+1}` of `u_h.coeFn` and manifold-side chart-`H^m`
 of the `(1-Δ_g)` preimage. The ae-vanishing is the public
 `base_f_chart_ae_zero_off_K_α` (in
-`DerivedChartBilinearH1ComplDataUnconditional`). -/
+`DerivedChartBilinearH1ComplDataCanonical`). -/
 private def buildLevelZero
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -228,8 +228,8 @@ private def buildLevelZero
             (I := I) (M := M) g 1 hu_h)).f_chart
         (chartTargetEuclid (I := I) (M := M) α)
       rw [Nat.sub_zero]
-      -- Apply base_f_chart_memWkp_m_truly_unconditional at order m.
-      exact base_f_chart_memWkp_m_truly_unconditional
+      -- Apply base_f_chart_memWkp_m at order m.
+      exact base_f_chart_memWkp_m
         (I := I) (M := M) g α m
         (laplacianDomainPow_succ_subset_laplacianDomain
           (I := I) (M := M) g 1 hu_h)

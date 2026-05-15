@@ -47,7 +47,7 @@ open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
 namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
-namespace GradInnerLaplacianSmoothFullUnconditional
+namespace GradInnerLaplacianSmoothCanonical
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -219,7 +219,7 @@ theorem smoothCase_variational_identity_of_discharge
   gradInnerCLM_eq_H1ComplToLp_resolvent_smoothCase_of_discharge
     (I := I) (M := M) g φ v h_discharge
 
-end GradInnerLaplacianSmoothFullUnconditional
+end GradInnerLaplacianSmoothCanonical
 end Laplacian
 end Analysis
 end DifferentialGeometry

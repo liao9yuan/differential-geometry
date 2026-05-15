@@ -91,7 +91,7 @@ open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
 namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
-namespace ChartPushedMemWkpThreeTrulyUnconditional
+namespace ChartPushedMemWkpThree
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -358,7 +358,7 @@ theorem chartPushed_memWkp_three_two_of_laplacianDomainPow_two
   let _ := hu_h
   exact h_chartPushed_memWkp_three_two
 
-end ChartPushedMemWkpThreeTrulyUnconditional
+end ChartPushedMemWkpThree
 end Laplacian
 end Analysis
 end DifferentialGeometry

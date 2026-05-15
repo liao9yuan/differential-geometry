@@ -65,7 +65,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainPowH2kBridge
-open DifferentialGeometry.Analysis.Laplacian.ChartSideH2kBridgeUnconditional
+open DifferentialGeometry.Analysis.Laplacian.ChartSideH2kBridge
 
 /-! ## File-local Borel-space instances on `E` and `M` -/
 

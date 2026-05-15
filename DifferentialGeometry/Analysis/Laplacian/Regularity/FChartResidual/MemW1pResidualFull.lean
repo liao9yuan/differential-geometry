@@ -22,7 +22,7 @@ of the smooth-residual operator from chart-W^{2,2} to chart-target W^{1,2}.
   `u : M → ℝ` in `MemWkpChart g k p`, the smooth functions are `wkpNormChart`-
   dense.
 * `memW1p_fChartResidual_of_wkpNorm_cauchy_identification` (from
-  `DiffChartBilinearH1ComplResidualUnconditional`): for a smooth approximator
+  `DiffChartBilinearH1ComplResidual`): for a smooth approximator
   sequence satisfying the chart-W^{1,2}-Cauchy + identification hypothesis,
   the residual is in `MemW1p 2 chartTargetEuclid α`.
 * `memW1p_fChartResidual_smoothToH1Compl` (from
@@ -53,7 +53,7 @@ open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
 namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
-namespace MemW1pFChartResidualUnconditionalFull
+namespace MemW1pFChartResidualFull
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -69,7 +69,7 @@ open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainSmoothMul
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualMemW1p
-open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional
+open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
 /-! ## File-local Borel-space instances -/
@@ -263,9 +263,9 @@ theorem fChartResidual_memW1p_unconditional
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := Module.finrank ℝ E) 1 2
         (fun y =>
-          DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional.smoothFChartResidual
+          DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
             (I := I) (M := M) g α (smoothApproxSeq (I := I) (M := M) g hu_h m) y -
-          DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional.smoothFChartResidual
+          DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
             (I := I) (M := M) g α (smoothApproxSeq (I := I) (M := M) g hu_h n) y)
         (chartTargetEuclid (I := I) (M := M) α) ≤ ENNReal.ofReal ε)
     (h_identification : ∀ F_lim : EuclN → ℝ,
@@ -275,7 +275,7 @@ theorem fChartResidual_memW1p_unconditional
         DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
           (d := Module.finrank ℝ E) 1 2
           (fun y =>
-            DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional.smoothFChartResidual
+            DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
               (I := I) (M := M) g α (smoothApproxSeq (I := I) (M := M) g hu_h n) y -
             F_lim y)
           (chartTargetEuclid (I := I) (M := M) α))
@@ -288,11 +288,11 @@ theorem fChartResidual_memW1p_unconditional
       (DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fChartResidual
         (I := I) (M := M) g α u_h)
       (chartTargetEuclid (I := I) (M := M) α) :=
-  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional.memW1p_fChartResidual_of_wkpNorm_cauchy_identification
+  DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.memW1p_fChartResidual_of_wkpNorm_cauchy_identification
     (I := I) (M := M) g α hu_h (smoothApproxSeq (I := I) (M := M) g hu_h)
     h_cauchy h_identification
 
-end MemW1pFChartResidualUnconditionalFull
+end MemW1pFChartResidualFull
 end Laplacian
 end Analysis
 end DifferentialGeometry

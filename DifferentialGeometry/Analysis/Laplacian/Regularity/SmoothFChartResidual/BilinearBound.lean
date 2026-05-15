@@ -91,7 +91,7 @@ open DifferentialGeometry.Analysis.Laplacian.MetricExtension
   hiding chartTargetEuclid chartTargetEuclid_isOpen
 open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData
-open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional
+open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual
 open DifferentialGeometry.Analysis.Laplacian.GradInnerCLMChartFormula
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
@@ -1815,7 +1815,7 @@ on volume.restrict (chartTargetEuclid α). This connects the public
 `smoothRep`. -/
 lemma smoothFChartResidual_ae_eq_chartPushedRaw_smoothRep
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
-    DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional.smoothFChartResidual
+    DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
         (I := I) (M := M) g α v =ᵐ[
         (volume : Measure EuclN).restrict
           (chartTargetEuclid (I := I) (M := M) α)]
@@ -1828,7 +1828,7 @@ lemma smoothFChartResidual_ae_eq_chartPushedRaw_smoothRep
   -- 3. chartPushedRaw_aeEq_of_aeEq combines steps 1, 2
   -- 4. fHLeibnizResidualSmoothRep = smoothRep (textually identical)
   -- 5. Transfer to volume via absolute continuity
-  unfold DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional.smoothFChartResidual
+  unfold DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
   unfold DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fChartResidual
   -- Step 1: Lp coeFn ae-equality
   have h_lp_ae := DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualMemW1p.fHLeibnizResidualLp_smoothToH1Compl_coeFn_ae
@@ -2611,7 +2611,7 @@ theorem wkpNorm_smoothFChartResidual_le_wkpNormChart
     ∃ C : ℝ, 0 < C ∧ ∀ v : SmoothScalar g,
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := Module.finrank ℝ E) 1 2
-        (DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional.smoothFChartResidual
+        (DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
           (I := I) (M := M) g α v)
         (chartTargetEuclid (I := I) (M := M) α)
       ≤ ENNReal.ofReal C * wkpNormChart (I := I) (M := M) g 2 2 v.toFun := by

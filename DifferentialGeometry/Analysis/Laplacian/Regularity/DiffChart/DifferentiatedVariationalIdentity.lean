@@ -46,7 +46,7 @@ open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
 namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
-namespace DifferentiatedVariationalIdentityUnconditional
+namespace DifferentiatedVariationalIdentity
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -64,7 +64,7 @@ open DifferentialGeometry.Analysis.Laplacian.H1ComplWeakPartialLimit
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.DifferentiatedCrossTermIBP
-open DifferentialGeometry.Analysis.Laplacian.FChartResidualMemW1pTrulyUnconditional
+open DifferentialGeometry.Analysis.Laplacian.FChartResidualMemW1p
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
 /-! ## File-local Borel-space instances -/
@@ -1082,7 +1082,7 @@ theorem differentiated_variational_identity_holds
     linarith
   exact h_combined
 
-end DifferentiatedVariationalIdentityUnconditional
+end DifferentiatedVariationalIdentity
 end Laplacian
 end Analysis
 end DifferentialGeometry

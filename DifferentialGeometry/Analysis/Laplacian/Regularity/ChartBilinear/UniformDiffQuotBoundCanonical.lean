@@ -92,7 +92,7 @@ open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
 namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
-namespace ChartBilinearUniformDiffQuotBoundUnconditional
+namespace ChartBilinearUniformDiffQuotBoundCanonical
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -4034,7 +4034,7 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound_of_data
   rw [h_eLp_eq]
   exact hM_bound i k h hh_pos hh_le
 
-end ChartBilinearUniformDiffQuotBoundUnconditional
+end ChartBilinearUniformDiffQuotBoundCanonical
 
 end Laplacian
 end Analysis

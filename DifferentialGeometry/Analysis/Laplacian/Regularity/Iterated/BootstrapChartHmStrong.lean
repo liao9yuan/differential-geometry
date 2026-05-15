@@ -98,9 +98,9 @@ open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Laplacian.IteratedMixedPartials
 open DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrap
 open DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapFinal
-open DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapUnconditional
+open DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapCanonical
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainPowH2kBridge
-open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpFourTrulyUnconditional
+open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpFour
 
 /-! ## File-local Borel-space instances -/
 
@@ -353,7 +353,7 @@ for `k ≥ 3`. -/
 /-- **Polymorphic-in-`k` chart-`H^{2 · min(k, 2)}` of the chart-pushed parent
 for arbitrary `k`, unconditional.** Combines the strong-induction synthesis
 with the downward monotonicity of `laplacianDomainPow`. -/
-theorem chartPushed_memWkp_two_min_k_two_unconditional
+theorem chartPushed_memWkp_two_min_k_two
     (g : SmoothRiemannianMetric I M) (α : M) (k : ℕ)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g k) :
@@ -374,7 +374,7 @@ theorem chartPushed_memWkp_two_min_k_two_unconditional
 
 /-- **Polymorphic-in-`k` manifold-level `MemWkpChart g (2 · min(k, 2)) 2`
 for arbitrary `k`, unconditional.** -/
-theorem memWkpChart_two_min_k_two_unconditional
+theorem memWkpChart_two_min_k_two
     (g : SmoothRiemannianMetric I M) (k : ℕ)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g k) :
@@ -383,7 +383,7 @@ theorem memWkpChart_two_min_k_two_unconditional
       ((H1ComplToLp (I := I) (M := M) g u_h :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) := by
   intro α
-  exact chartPushed_memWkp_two_min_k_two_unconditional
+  exact chartPushed_memWkp_two_min_k_two
     (I := I) (M := M) g α k hu_h
 
 /-! ## Per-step propagator: from the bridge at level `k`, the chart-`H^{m+2}`

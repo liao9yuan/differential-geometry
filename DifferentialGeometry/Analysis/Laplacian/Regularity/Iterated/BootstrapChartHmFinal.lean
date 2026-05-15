@@ -89,7 +89,7 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrap
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainPowH2kBridge
-open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpFourTrulyUnconditional
+open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpFour
 
 /-! ## File-local Borel-space instances -/
 

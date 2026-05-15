@@ -41,7 +41,7 @@ open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
 namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
-namespace DiffChartBilinearH1ComplResidualUnconditional
+namespace DiffChartBilinearH1ComplResidual
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -650,7 +650,7 @@ noncomputable def diffChartBilinearH1ComplData_of_laplacianDomainPow_two_via_den
       (I := I) (M := M) g α hu_h v h_cauchy h_identification)
     h_identity
 
-end DiffChartBilinearH1ComplResidualUnconditional
+end DiffChartBilinearH1ComplResidual
 end Laplacian
 end Analysis
 end DifferentialGeometry

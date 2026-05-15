@@ -63,7 +63,7 @@ natural shape consumed by the downstream heat-semigroup smoothing.
   `MemWkpChart g (2k) 2`.
 * `chartSideH2kBridge_of_laplacianDomainPow` — the per-chart
   `ChartSideH2kBridge g k` predicate.
-* `laplacianDomainPow_memWkpChart_two_k_unconditional` — manifold-level
+* `laplacianDomainPow_memWkpChart_two_k` — manifold-level
   `MemWkpChart g (2k) 2` together with finite chart-based norm.
 
 ## Sign convention
@@ -80,7 +80,7 @@ open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
 namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
-namespace IteratedChartHmBootstrapUnconditional
+namespace IteratedChartHmBootstrapCanonical
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -97,7 +97,7 @@ open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrap
 open DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapFinal
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainPowH2kBridge
-open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpFourTrulyUnconditional
+open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpFour
 
 /-! ## File-local Borel-space instances -/
 
@@ -309,7 +309,7 @@ theorem memWkpChart_two_k_of_laplacianDomainPow_min_two
 
 /-- **Manifold-level `MemWkpChart g (2 · min(k, 2)) 2` together with finite
 chart-based norm** for `u_h ∈ laplacianDomainPow g k`. -/
-theorem laplacianDomainPow_memWkpChart_two_k_unconditional
+theorem laplacianDomainPow_memWkpChart_two_k
     (g : SmoothRiemannianMetric I M) (k : ℕ)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g k) :
@@ -394,7 +394,7 @@ theorem chartSideH2kBridge_of_laplacianDomainPow
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ)) :=
   h_bridge
 
-end IteratedChartHmBootstrapUnconditional
+end IteratedChartHmBootstrapCanonical
 end Laplacian
 end Analysis
 end DifferentialGeometry

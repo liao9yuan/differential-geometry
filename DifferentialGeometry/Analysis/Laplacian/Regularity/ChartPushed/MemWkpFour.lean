@@ -19,11 +19,11 @@ headlines follow.
 
 The chart-`H⁴` discharge factors through the twice-differentiated
 chart-bilinear variational identity. The hypothesis-bearing assemblies
-in `ChartPushedMemWkpFourUnconditional` expose the family of those
+in `ChartPushedMemWkpFourSmooth` expose the family of those
 identities as a per-pair (or per-α-per-pair) hypothesis; this file
 assembles that family by composing three unconditional ingredients:
 
-1. `base_f_chart_memWkp_two_two_truly_unconditional` — unconditional
+1. `base_f_chart_memWkp_two_two` — unconditional
    chart-`H²` of `base.f_chart` on the chart target.
 2. `chosenFChartDeriv_memW1p_truly_unconditional` — unconditional
    `MemW1p 2` of the chart-side once-differentiated derivative,
@@ -32,7 +32,7 @@ assembles that family by composing three unconditional ingredients:
    differentiated chart-bilinear variational identity, given step 2.
 
 Step 3 produces the exact per-pair hypothesis required by the
-`ChartPushedMemWkpFourUnconditional` constructors; composing through
+`ChartPushedMemWkpFourSmooth` constructors; composing through
 the chain yields the truly unconditional headlines.
 
 ## Main results
@@ -58,7 +58,7 @@ open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
 namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
-namespace ChartPushedMemWkpFourTrulyUnconditional
+namespace ChartPushedMemWkpFour
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -73,10 +73,10 @@ open DifferentialGeometry.Analysis.Laplacian.MetricExtension
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.ChosenThirdMixedPartialChartPushed
 open DifferentialGeometry.Analysis.Laplacian.FChartEffTwiceDef
-open DifferentialGeometry.Analysis.Laplacian.BaseFChartMemW22TrulyUnconditional
-open DifferentialGeometry.Analysis.Laplacian.ChosenFChartDerivMemW1pTrulyUnconditional
-open DifferentialGeometry.Analysis.Laplacian.TwiceDifferentiatedVariationalIdentityUnconditional
-open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpFourUnconditional
+open DifferentialGeometry.Analysis.Laplacian.BaseFChartMemW22
+open DifferentialGeometry.Analysis.Laplacian.ChosenFChartDerivMemW1p
+open DifferentialGeometry.Analysis.Laplacian.TwiceDifferentiatedVariationalIdentity
+open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpFourSmooth
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainPowH2kBridge
 
 /-! ## File-local Borel-space instances -/
@@ -97,7 +97,7 @@ of `twice_differentiated_variational_identity_holds` is the
 `MemW1p 2` membership of `chosenFChartDeriv g α hu_h l₁`, discharged
 unconditionally via `chosenFChartDeriv_memW1p_truly_unconditional` from
 the chart-`H²` of `base.f_chart` (itself unconditional via
-`base_f_chart_memWkp_two_two_truly_unconditional`). -/
+`base_f_chart_memWkp_two_two`). -/
 
 /-- The family of twice-differentiated chart-bilinear variational identities
 for `u_h ∈ laplacianDomainPow g 2` at a fixed chart point `α : M`. Indexed
@@ -129,7 +129,7 @@ private lemma twice_diff_identities_at
   intro l₁ l₂ ψ hψ_smooth hψ_cs hψ_supp
   -- Step 1: chart-`H²` of `base.f_chart` (unconditional).
   have h_base_f_chart_memWkp22 :=
-    base_f_chart_memWkp_two_two_truly_unconditional
+    base_f_chart_memWkp_two_two
       (I := I) (M := M) g α hu_h
   -- Step 2: `chosenFChartDeriv g α hu_h l₁ ∈ MemW1p 2` (from step 1).
   have h_chosenFChartDeriv_memW1p :=
@@ -255,7 +255,7 @@ theorem chartSideH4Bridge_of_laplacianDomainPow_two
     (chartSideH2kBridge_two_of_laplacianDomainPow_two
       (I := I) (M := M) g hu_h)
 
-end ChartPushedMemWkpFourTrulyUnconditional
+end ChartPushedMemWkpFour
 end Laplacian
 end Analysis
 end DifferentialGeometry

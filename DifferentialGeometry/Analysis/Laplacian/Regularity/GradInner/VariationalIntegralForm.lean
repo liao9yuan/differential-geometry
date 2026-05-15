@@ -117,7 +117,7 @@ open DifferentialGeometry.Analysis.Laplacian.HessianChartAlphaChristoffelDischar
 open DifferentialGeometry.Analysis.Laplacian.HessianBridgeSmoothLp
 open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianFinal
 open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianSmoothFull
-open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianSmoothFullUnconditional
+open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianSmoothCanonical
 open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianDensityExtension
 
 /-! ## File-local Borel-space instances -/
@@ -465,7 +465,7 @@ The integral identity then takes the form
 The right-hand side is the integral against the smooth Lp class of
 `(gradInnerSmoothBundle g φ v).oneSubLapClassical`, i.e. the classical
 `(1 - Δ_g)(g(∇φ, ∇v))`. -/
-theorem integral_gradInner_oneSubLap_smooth_eq_integral_smoothCase_unconditional
+theorem integral_gradInner_oneSubLap_smooth_eq_integral_smoothCase
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (w : SmoothScalar g) :
     ∫ x, ((gradInnerCLM (I := I) (M := M) g φ
@@ -599,7 +599,7 @@ theorem integral_gradInner_oneSubLap_smooth_eq_integral_candidate_of_variational
 /-! ## Section F — Smooth-case unconditional form (conditional on Christoffel discharge)
 
 Combining Section D with the smooth-case unconditional regularity form from
-`GradInnerLaplacianSmoothFullUnconditional`, the integral form for the
+`GradInnerLaplacianSmoothCanonical`, the integral form for the
 unconditional candidate holds for smooth `v` under the Christoffel discharge
 hypothesis. -/
 
@@ -769,7 +769,7 @@ theorem integral_grad_inner_oneSubLap_smooth_pointwise
   classical
   -- Start from the Lp-coercion form.
   have h_main :=
-    integral_gradInner_oneSubLap_smooth_eq_integral_smoothCase_unconditional
+    integral_gradInner_oneSubLap_smooth_eq_integral_smoothCase
       (I := I) (M := M) g φ v w
   -- LHS pointwise rewrite: (gradInnerCLM g φ (smoothToH1Compl v) : Lp)(x)
   -- =ᵐ g.inner x (∇φ x) (∇v x), since gradInnerCLM g φ (smoothToH1Compl v)
@@ -950,7 +950,7 @@ example (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v w : Smoo
                 (gradInnerSmoothBundle (I := I) (M := M) g φ v).oneSubLapClassical :
                 Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) x
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
-  integral_gradInner_oneSubLap_smooth_eq_integral_smoothCase_unconditional
+  integral_gradInner_oneSubLap_smooth_eq_integral_smoothCase
     (I := I) (M := M) g φ v w
 
 end SanityTests

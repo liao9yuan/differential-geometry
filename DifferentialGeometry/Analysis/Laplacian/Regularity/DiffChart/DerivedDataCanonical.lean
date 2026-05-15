@@ -57,7 +57,7 @@ open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
 namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
-namespace DerivedChartBilinearH1ComplDataUnconditional
+namespace DerivedChartBilinearH1ComplDataCanonical
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -75,11 +75,11 @@ open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainVariationalIdentityIntegralForm
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.DifferentiatedCrossTermIBP
-open DifferentialGeometry.Analysis.Laplacian.DifferentiatedVariationalIdentityUnconditional
+open DifferentialGeometry.Analysis.Laplacian.DifferentiatedVariationalIdentity
 open DifferentialGeometry.Analysis.Laplacian.FChartEffDef
 open DifferentialGeometry.Analysis.Laplacian.DerivedChartBilinearH1ComplData
-open DifferentialGeometry.Analysis.Laplacian.FChartResidualMemW1pTrulyUnconditional
-open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpThreeTrulyUnconditional
+open DifferentialGeometry.Analysis.Laplacian.FChartResidualMemW1p
+open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpThree
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
@@ -1327,7 +1327,7 @@ lemma chosenSecondPartialChartPushedU_ae_zero_off_chartImagePOUTsupport
   chosenSecondPartialChartPushedU_ae_zero_off_K_α
     (I := I) (M := M) g α hu_h i j
 
-end DerivedChartBilinearH1ComplDataUnconditional
+end DerivedChartBilinearH1ComplDataCanonical
 end Laplacian
 end Analysis
 end DifferentialGeometry

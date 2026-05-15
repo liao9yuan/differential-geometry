@@ -85,7 +85,7 @@ open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
 namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
-namespace ChartPushedMemWkpThreeUnconditional
+namespace ChartPushedMemWkpThreeSmooth
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -96,9 +96,9 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
-open DifferentialGeometry.Analysis.Laplacian.DerivedChartBilinearH1ComplDataUnconditional
+open DifferentialGeometry.Analysis.Laplacian.DerivedChartBilinearH1ComplDataCanonical
 open DifferentialGeometry.Analysis.Laplacian.DerivedChartBilinearH2Interior
-open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpThreeTrulyUnconditional
+open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpThree
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplH3
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData
 open DifferentialGeometry.Analysis.Laplacian.H1ComplWeakPartialLimit
@@ -422,7 +422,7 @@ theorem chartPushed_memWkp_three_two_of_laplacianDomainPow_two'
   chartPushed_memWkp_three_two_of_laplacianDomainPow_two
     (I := I) (M := M) g α hu_h
 
-end ChartPushedMemWkpThreeUnconditional
+end ChartPushedMemWkpThreeSmooth
 end Laplacian
 end Analysis
 end DifferentialGeometry

@@ -72,7 +72,7 @@ open DifferentialGeometry.Analysis.Laplacian.MetricExtension
 open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl
-open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional
+open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual
 open DifferentialGeometry.Analysis.Laplacian.GradInnerCLMLeibniz
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
@@ -212,14 +212,14 @@ theorem smoothFChartResidual_ae_sub
     (g : SmoothRiemannianMetric I M) (α : M)
     (v₁ v₂ v_diff : SmoothScalar g)
     (h_diff : v_diff.toFun = fun x => v₁.toFun x - v₂.toFun x) :
-    DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional.smoothFChartResidual
+    DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
         (I := I) (M := M) g α v_diff
       =ᵐ[(volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)]
     fun y =>
-      DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional.smoothFChartResidual
+      DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
           (I := I) (M := M) g α v₁ y -
-        DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional.smoothFChartResidual
+        DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
           (I := I) (M := M) g α v₂ y := by
   classical
   -- Step 1: smoothToH1Compl g v_diff = smoothToH1Compl g v₁ - smoothToH1Compl g v₂.
@@ -298,7 +298,7 @@ theorem smoothFChartResidual_ae_sub
   -- Step 6: Unfold smoothFChartResidual and fChartResidual on each side to
   -- match the chart-pulled Lp coeFn shape.
   unfold
-    DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional.smoothFChartResidual
+    DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
     DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fChartResidual
   exact h_vol_abs.ae_le h_residual_ae_weighted
 

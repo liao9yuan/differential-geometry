@@ -95,7 +95,7 @@ open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainSmoothMul
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl
-open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional
+open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual
 open DifferentialGeometry.Analysis.Laplacian.GradInnerCLMChartFormula
 open DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound
 open DifferentialGeometry.Analysis.Sobolev.Chart
@@ -834,7 +834,7 @@ theorem wkpNorm_smoothFChartResidual_le_wkpNormChart_wkpM
     ∃ C : ℝ, 0 < C ∧ ∀ v : SmoothScalar g,
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
         (d := Module.finrank ℝ E) m 2
-        (DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional.smoothFChartResidual
+        (DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
           (I := I) (M := M) g α v)
         (chartTargetEuclid (I := I) (M := M) α)
       ≤ ENNReal.ofReal C * wkpNormChart (I := I) (M := M) g (m + 1) 2 v.toFun := by

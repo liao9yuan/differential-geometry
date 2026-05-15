@@ -36,7 +36,7 @@ By definition of `MemWkp 2 2` (`MemWkp_succ`), the target decomposes into:
 The second conjunct, integrated over all `i`, is structurally equivalent to
 chart-`H³` of the chart-pushed POU-cut representative
 `chartPushed POU α u_h.coeFn` (by `chartPushed_memWkp_three_two_iff` in
-`ChartPushedMemWkpThreeTrulyUnconditional`). For a single fixed direction
+`ChartPushedMemWkpThree`). For a single fixed direction
 `l`, the per-direction `MemW1p 2` of the chosen mixed second partials in
 directions `(l, i)` is a single instance of this conjunction.
 
@@ -75,7 +75,7 @@ open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
 namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
-namespace ChosenFirstPartialChartH2TrulyUnconditional
+namespace ChosenFirstPartialChartH2
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -92,7 +92,7 @@ open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplH3
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplH3Direct
-open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpThreeTrulyUnconditional
+open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpThree
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
 /-! ## File-local Borel-space instances -/
@@ -299,7 +299,7 @@ theorem chartPushed_chosenFirstPartial_memWkp_two_two_of_laplacianDomainPow_two_
   exact chartPushedChosenFirstPartial_memWkp_two_of_chartPushed_memWkp_three
     (I := I) (M := M) g α hu_h h_chartPushed_memWkp_three l
 
-end ChosenFirstPartialChartH2TrulyUnconditional
+end ChosenFirstPartialChartH2
 end Laplacian
 end Analysis
 end DifferentialGeometry

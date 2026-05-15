@@ -57,7 +57,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Sobolev.Chart
-open DifferentialGeometry.Analysis.Laplacian.MemW1pFChartResidualUnconditionalFull
+open DifferentialGeometry.Analysis.Laplacian.MemW1pFChartResidualFull
 
 /-! ## File-local Borel-space instances -/
 
@@ -845,7 +845,7 @@ theorem smoothApproxSeq_tendsto_h1Compl
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2) :
     Tendsto (fun n =>
       smoothToH1Compl (I := I) (M := M) g
-        (MemW1pFChartResidualUnconditionalFull.smoothApproxSeq
+        (MemW1pFChartResidualFull.smoothApproxSeq
           (I := I) (M := M) g hu_h n))
       atTop (𝓝 u_h) := by
   classical

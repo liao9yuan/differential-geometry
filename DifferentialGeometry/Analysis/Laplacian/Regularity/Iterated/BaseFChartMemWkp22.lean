@@ -31,9 +31,9 @@ decomposition `base.f_chart =ᵐ fChartPiecePreimage + fChartResidual`, gives
   smooth chart-pulled residual, for any `v : SmoothScalar g`.
 * `memWkp_fChartResidual_of_wkpNorm_cauchy_identification_w22` —
   hypothesis-bearing constructor.
-* `fChartResidual_memWkp_two_two_truly_unconditional` —
+* `fChartResidual_memWkp_two_two` —
   `fChartResidual g α u_h ∈ MemWkp 2 2 chartTargetEuclid α` unconditionally.
-* `base_f_chart_memWkp_two_two_truly_unconditional` — headline:
+* `base_f_chart_memWkp_two_two` — headline:
   `base.f_chart ∈ MemWkp 2 2 chartTargetEuclid α` unconditionally.
 -/
 
@@ -46,7 +46,7 @@ open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
 namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
-namespace BaseFChartMemW22TrulyUnconditional
+namespace BaseFChartMemW22
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -61,7 +61,7 @@ open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainSmoothMul
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl
-open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional
+open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual
 open DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound
 open DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBoundW22
 open DifferentialGeometry.Analysis.Laplacian.SmoothApproxSeqCauchyW22
@@ -273,7 +273,7 @@ theorem memWkp_fChartResidual_of_wkpNorm_cauchy_identification_w22
 For any `u_h ∈ laplacianDomainPow g 2` and any chart base point `α : M`, the
 chart-pulled residual `fChartResidual g α u_h` is in
 `MemWkp 2 2 (chartTargetEuclid α)`, with no further hypotheses. -/
-theorem fChartResidual_memWkp_two_two_truly_unconditional
+theorem fChartResidual_memWkp_two_two
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2) :
@@ -304,10 +304,10 @@ chartTargetEuclid α`) as the chart-pushed partition-of-unity weighted
 `(1 - Δ_g) u_h` (`fChartPiecePreimage`, unconditionally in `MemWkp 2 2`
 via `laplacianDomainPow_two_h2_plus_rhs_h2`) plus the chart-pulled
 two-Leibniz-cross-term residual `fChartResidual` (unconditionally in
-`MemWkp 2 2` via `fChartResidual_memWkp_two_two_truly_unconditional`).
+`MemWkp 2 2` via `fChartResidual_memWkp_two_two`).
 Closure of `MemWkp 2 2` under addition then transfer via a.e. equality
 yields the headline. -/
-theorem base_f_chart_memWkp_two_two_truly_unconditional
+theorem base_f_chart_memWkp_two_two
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2) :
@@ -325,7 +325,7 @@ theorem base_f_chart_memWkp_two_two_truly_unconditional
   have h_piece1_memWkp := fChartPiecePreimage_memWkp_two_two
     (I := I) (M := M) g α hu_h
   -- Step 3: fChartResidual ∈ MemWkp 2 2 unconditionally.
-  have h_residual_memWkp := fChartResidual_memWkp_two_two_truly_unconditional
+  have h_residual_memWkp := fChartResidual_memWkp_two_two
     (I := I) (M := M) g α hu_h
   -- Step 4: sum is in MemWkp 2 2.
   have hΩ_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
@@ -343,7 +343,7 @@ theorem base_f_chart_memWkp_two_two_truly_unconditional
   exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_congr_ae
     hp_one hΩ_open h_decomp.symm).mp h_sum_memWkp
 
-end BaseFChartMemW22TrulyUnconditional
+end BaseFChartMemW22
 end Laplacian
 end Analysis
 end DifferentialGeometry

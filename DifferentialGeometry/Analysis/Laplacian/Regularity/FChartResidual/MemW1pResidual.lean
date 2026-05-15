@@ -64,7 +64,7 @@ open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
 namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
-namespace MemW1pFChartResidualUnconditional
+namespace MemW1pFChartResidual
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -505,7 +505,7 @@ theorem fChartResidual_memW1p_of_iteratedClosure
   exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemW1p_congr_ae
     (d := Module.finrank ℝ E) (p := 2) hΩ h_residual_rewritten_vol.symm).mp h_diff
 
-end MemW1pFChartResidualUnconditional
+end MemW1pFChartResidual
 end Laplacian
 end Analysis
 end DifferentialGeometry

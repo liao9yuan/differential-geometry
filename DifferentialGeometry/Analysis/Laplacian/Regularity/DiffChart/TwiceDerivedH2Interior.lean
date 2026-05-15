@@ -64,7 +64,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension
   hiding chartTargetEuclid
 open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
-open DifferentialGeometry.Analysis.Laplacian.ChartBilinearUniformDiffQuotBoundUnconditional
+open DifferentialGeometry.Analysis.Laplacian.ChartBilinearUniformDiffQuotBoundCanonical
 open DifferentialGeometry.Analysis.Laplacian.ChartH2NonSmooth
 open DifferentialGeometry.Analysis.Laplacian.TwiceDerivedChartBilinearH1ComplData
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl

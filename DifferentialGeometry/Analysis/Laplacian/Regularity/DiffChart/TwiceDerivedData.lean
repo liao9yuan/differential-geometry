@@ -76,8 +76,8 @@ open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.ChartPushedWeakPartialOnVolume
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl
-open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpThreeUnconditional
-open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpThreeTrulyUnconditional
+open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpThreeSmooth
+open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpThree
 open DifferentialGeometry.Analysis.Laplacian.ChosenThirdMixedPartialChartPushed
 open DifferentialGeometry.Analysis.Laplacian.FChartEffTwiceDef
 open DifferentialGeometry.Analysis.Laplacian.DerivedChartBilinearH1ComplData
@@ -594,7 +594,7 @@ private lemma chartPushedFirstPartial_memWkp_two_two
         (chartTargetEuclid (I := I) (M := M) α))
       (chartTargetEuclid (I := I) (M := M) α) := by
   have h3 :=
-    ChartPushedMemWkpThreeUnconditional.chartPushed_memWkp_three_two_of_laplacianDomainPow_two
+    ChartPushedMemWkpThreeSmooth.chartPushed_memWkp_three_two_of_laplacianDomainPow_two
       (I := I) (M := M) g α hu_h
   exact h3.chosenWeakPartial_mem l₁
 

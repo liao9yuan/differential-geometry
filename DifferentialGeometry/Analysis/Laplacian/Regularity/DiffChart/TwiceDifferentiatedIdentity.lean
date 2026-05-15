@@ -86,7 +86,7 @@ open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
 namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
-namespace TwiceDifferentiatedVariationalIdentityUnconditional
+namespace TwiceDifferentiatedVariationalIdentity
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -105,10 +105,10 @@ open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.DiffTwiceChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.DifferentiatedCrossTermIBP
-open DifferentialGeometry.Analysis.Laplacian.DifferentiatedVariationalIdentityUnconditional
+open DifferentialGeometry.Analysis.Laplacian.DifferentiatedVariationalIdentity
 open DifferentialGeometry.Analysis.Laplacian.ChosenThirdMixedPartialChartPushed
 open DifferentialGeometry.Analysis.Laplacian.FChartEffTwiceDef
-open DifferentialGeometry.Analysis.Laplacian.FChartResidualMemW1pTrulyUnconditional
+open DifferentialGeometry.Analysis.Laplacian.FChartResidualMemW1p
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
@@ -1256,7 +1256,7 @@ private lemma chosenWeakPartial_chartPushed_u_h_ae_zero_off_K_α
         (chartTargetEuclid (I := I) (M := M) α \ K_α (I := I) (M := M) α)]
         (fun _ : EuclN => (0 : ℝ)) := by
   have h_w1p :=
-    DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpThreeTrulyUnconditional.chartPushed_memW1p_two_of_laplacianDomainPow_two
+    DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpThree.chartPushed_memW1p_two_of_laplacianDomainPow_two
       (I := I) (M := M) g α hu_h
   exact chosenWeakPartial'_ae_zero_on_open_subset_of_ae_zero
     (p := 2) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
@@ -4082,7 +4082,7 @@ theorem twice_differentiated_variational_identity_holds
   linarith
   -- end of theorem
 
-end TwiceDifferentiatedVariationalIdentityUnconditional
+end TwiceDifferentiatedVariationalIdentity
 end Laplacian
 end Analysis
 end DifferentialGeometry

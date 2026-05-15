@@ -55,8 +55,8 @@ open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainSmoothMul
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl
-open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional
-open DifferentialGeometry.Analysis.Laplacian.MemW1pFChartResidualUnconditionalFull
+open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual
+open DifferentialGeometry.Analysis.Laplacian.MemW1pFChartResidualFull
 open DifferentialGeometry.Analysis.Laplacian.SmoothApproxSeqH1ComplTendsto
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
@@ -123,7 +123,7 @@ private lemma eLpNorm_tendsto_zero_of_wkpNorm_one_two_tendsto_zero
 
 /-- The plain volume restricted to `chartTargetEuclid α` is absolutely continuous
 w.r.t. the chart-pulled weighted measure restricted to `chartTargetEuclid α`.
-This is the same fact used in `MemW1pFChartResidualUnconditional`; restated here
+This is the same fact used in `MemW1pFChartResidual`; restated here
 in convenient form. -/
 private lemma volume_restrict_chartTarget_absolutelyContinuous_weighted
     (g : SmoothRiemannianMetric I M) (α : M) :

@@ -34,7 +34,7 @@ chosen partial is supplied.
 
 This module also provides a polymorphic cutoff-based support-aware extension
 of `MemWkp k 2` from a precompact open subdomain to the full chart target,
-generalising the bespoke `m = 2` version in `ChartPushedMemWkpFourUnconditional`.
+generalising the bespoke `m = 2` version in `ChartPushedMemWkpFourSmooth`.
 
 ## Main results
 

@@ -63,7 +63,7 @@ open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
 namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
-namespace LaplacianDomainH2
+namespace LaplacianDomainH2FromSmooth
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -220,7 +220,7 @@ theorem laplacianDomain_memWkpChart_one
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ)) :=
   (laplacianDomain_memWkpChart_two (I := I) (M := M) g hu_h h_witness).1.le_succ
 
-end LaplacianDomainH2
+end LaplacianDomainH2FromSmooth
 end Laplacian
 end Analysis
 end DifferentialGeometry

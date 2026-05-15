@@ -7,7 +7,7 @@ import DifferentialGeometry.Analysis.Laplacian.Regularity.SmoothApproxSeq.Identi
 `u_h ∈ laplacianDomainPow g 2`
 
 The hypothesis-bearing constructor
-`MemW1pFChartResidualUnconditionalFull.fChartResidual_memW1p_unconditional`
+`MemW1pFChartResidualFull.fChartResidual_memW1p_unconditional`
 reduces the chart-target `MemW1p 2` discharge of `fChartResidual g α u_h` to
 two analytical hypotheses on the smooth approximator sequence:
 
@@ -34,7 +34,7 @@ open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
 namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
-namespace FChartResidualMemW1pTrulyUnconditional
+namespace FChartResidualMemW1p
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -46,7 +46,7 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian.MetricExtension
   hiding chartTargetEuclid chartTargetEuclid_isOpen
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl
-open DifferentialGeometry.Analysis.Laplacian.MemW1pFChartResidualUnconditionalFull
+open DifferentialGeometry.Analysis.Laplacian.MemW1pFChartResidualFull
 open DifferentialGeometry.Analysis.Laplacian.SmoothApproxSeqCauchy
 open DifferentialGeometry.Analysis.Laplacian.SmoothApproxSeqIdentification
 
@@ -83,7 +83,7 @@ theorem fChartResidual_memW1p_truly_unconditional
     (smoothApproxSeq_smoothFChartResidual_limit_eq_fChartResidual
       (I := I) (M := M) g α hu_h)
 
-end FChartResidualMemW1pTrulyUnconditional
+end FChartResidualMemW1p
 end Laplacian
 end Analysis
 end DifferentialGeometry

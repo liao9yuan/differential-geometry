@@ -71,7 +71,7 @@ open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
 namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
-namespace ChartPushedMemWkpFourUnconditional
+namespace ChartPushedMemWkpFourSmooth
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -86,10 +86,10 @@ open DifferentialGeometry.Analysis.Laplacian.MetricExtension
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.ChosenThirdMixedPartialChartPushed
 open DifferentialGeometry.Analysis.Laplacian.FChartEffTwiceDef
-open DifferentialGeometry.Analysis.Laplacian.DerivedChartBilinearH1ComplDataUnconditional
+open DifferentialGeometry.Analysis.Laplacian.DerivedChartBilinearH1ComplDataCanonical
 open DifferentialGeometry.Analysis.Laplacian.TwiceDerivedChartBilinearH2Interior
-open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpThreeUnconditional
-open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpThreeTrulyUnconditional
+open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpThreeSmooth
+open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpThree
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainPowH2kBridge
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplH3
 
@@ -107,7 +107,7 @@ variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 /-! ## Support-aware `MemWkp` extension from a precompact open subdomain
 
 The cutoff-based extension lemma below mirrors `MemWkp_two_extend_via_cutoff`
-from `ChartPushedMemWkpThreeUnconditional.lean`. It promotes a `MemWkp k 2`
+from `ChartPushedMemWkpThreeSmooth.lean`. It promotes a `MemWkp k 2`
 membership on a precompact open subdomain `Ω' ⊆ Ω` to the entire ambient
 open set `Ω`, provided the function vanishes a.e. on `Ω \ K` for some
 compact `K ⊆ Ω'`. The cutoff `η` is smooth, equals `1` on a neighborhood
@@ -581,7 +581,7 @@ theorem laplacianDomainPow_memWkpChart_four_two_of_twice_diff_identities
   rw [h_eq] at h
   exact h
 
-end ChartPushedMemWkpFourUnconditional
+end ChartPushedMemWkpFourSmooth
 end Laplacian
 end Analysis
 end DifferentialGeometry

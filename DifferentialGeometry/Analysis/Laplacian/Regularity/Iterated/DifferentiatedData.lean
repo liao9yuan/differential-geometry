@@ -85,10 +85,10 @@ open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData
 open DifferentialGeometry.Analysis.Laplacian.IteratedMixedPartials
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplH3
-open DifferentialGeometry.Analysis.Laplacian.DerivedChartBilinearH1ComplDataUnconditional
-open DifferentialGeometry.Analysis.Laplacian.TwiceDifferentiatedVariationalIdentityUnconditional
-open DifferentialGeometry.Analysis.Laplacian.ChosenFChartDerivMemW1pTrulyUnconditional
-open DifferentialGeometry.Analysis.Laplacian.BaseFChartMemW22TrulyUnconditional
+open DifferentialGeometry.Analysis.Laplacian.DerivedChartBilinearH1ComplDataCanonical
+open DifferentialGeometry.Analysis.Laplacian.TwiceDifferentiatedVariationalIdentity
+open DifferentialGeometry.Analysis.Laplacian.ChosenFChartDerivMemW1p
+open DifferentialGeometry.Analysis.Laplacian.BaseFChartMemW22
 open DifferentialGeometry.Analysis.Laplacian.FChartEffDef
 open DifferentialGeometry.Analysis.Laplacian.FChartEffTwiceDef
 open DifferentialGeometry.Analysis.Laplacian.ChosenThirdMixedPartialChartPushed
@@ -614,7 +614,7 @@ is `fChartEffTwice g α l₁ l₂ hu_h`. The chart-`H³` conjunct (`MemW1p 2
 chosenFChartDeriv`) is discharged unconditionally via
 `chosenFChartDeriv_memW1p_truly_unconditional` from the unconditional
 chart-`H²` of `base.f_chart` provided by
-`base_f_chart_memWkp_two_two_truly_unconditional`. -/
+`base_f_chart_memWkp_two_two`. -/
 def ofDiffTwice
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -633,7 +633,7 @@ def ofDiffTwice
     intro ψ hψ_smooth hψ_cs hψ_supp
     -- Discharge the chart-`H³` conjunct unconditionally.
     have h_base_f_chart_memWkp22 :=
-      base_f_chart_memWkp_two_two_truly_unconditional
+      base_f_chart_memWkp_two_two
         (I := I) (M := M) g α hu_h
     have h_chosenFChartDeriv_memW1p :=
       chosenFChartDeriv_memW1p_truly_unconditional

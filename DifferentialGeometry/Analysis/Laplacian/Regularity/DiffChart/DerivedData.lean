@@ -86,7 +86,7 @@ open DifferentialGeometry.Analysis.Laplacian.H1ComplWeakPartialLimit
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.DifferentiatedCrossTermIBP
-open DifferentialGeometry.Analysis.Laplacian.DifferentiatedVariationalIdentityUnconditional
+open DifferentialGeometry.Analysis.Laplacian.DifferentiatedVariationalIdentity
 open DifferentialGeometry.Analysis.Laplacian.FChartEffDef
 open DifferentialGeometry.Analysis.Sobolev.Chart
 

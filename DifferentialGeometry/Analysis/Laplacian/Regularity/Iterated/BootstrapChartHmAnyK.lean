@@ -118,10 +118,10 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 open DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrap
 open DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapFinal
-open DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapUnconditional
+open DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapCanonical
 open DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapStrongInduction
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainPowH2kBridge
-open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpFourTrulyUnconditional
+open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpFour
 
 /-! ## File-local Borel-space instances -/
 
@@ -200,7 +200,7 @@ exact `H^{2k}` regularity. For `k ≥ 3`, this falls back to chart-`H⁴`.
 
 This headline composes the downward monotonicity of `laplacianDomainPow` with
 the unconditional chart-`H^{2k}` discharge for `k ≤ 2`. -/
-theorem chartPushed_memWkp_two_min_k_two_unconditional
+theorem chartPushed_memWkp_two_min_k_two
     (g : SmoothRiemannianMetric I M) (α : M) (k : ℕ)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g k) :
@@ -212,7 +212,7 @@ theorem chartPushed_memWkp_two_min_k_two_unconditional
           Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ))
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α) :=
-  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapUnconditional.chartPushed_memWkp_two_k_of_laplacianDomainPow_min_two
+  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapCanonical.chartPushed_memWkp_two_k_of_laplacianDomainPow_min_two
     (I := I) (M := M) g α k hu_h
 
 /-! ## Bridge-driven polymorphic chart-`H^{2k}` at the exact order `2k`
@@ -271,7 +271,7 @@ theorem laplacianDomainPow_le_of_le_aux
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g k) :
     u_h ∈ laplacianDomainPow (I := I) (M := M) g j :=
-  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapUnconditional.laplacianDomainPow_le_of_le
+  DifferentialGeometry.Analysis.Laplacian.IteratedChartHmBootstrapCanonical.laplacianDomainPow_le_of_le
     (I := I) (M := M) g hjk hu_h
 
 /-! ## Polymorphic-in-`k` `ChartSideH2kBridge` discharge (unconditional)
@@ -295,7 +295,7 @@ theorem chartSideH2kBridge_min_two_unconditional
 
 /-- **Polymorphic manifold-level `MemWkpChart g (2 · min(k, 2)) 2`
 (unconditional).** -/
-theorem memWkpChart_two_min_k_two_unconditional
+theorem memWkpChart_two_min_k_two
     (g : SmoothRiemannianMetric I M) (k : ℕ)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g k) :
@@ -457,7 +457,7 @@ theorem laplacianDomainPow_memWkpChart_two_k_unconditional_min_two
       (I := I) (M := M) g (2 * min k 2) 2
       ((H1ComplToLp (I := I) (M := M) g u_h :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) < ⊤ :=
-  laplacianDomainPow_memWkpChart_two_k_unconditional
+  laplacianDomainPow_memWkpChart_two_k
     (I := I) (M := M) g k hu_h
 
 end IteratedChartHmBootstrapAnyK

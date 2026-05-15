@@ -53,7 +53,7 @@ open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
 namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
-namespace LaplacianDomainH2Unconditional
+namespace LaplacianDomainH2
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -67,10 +67,10 @@ open DifferentialGeometry.Analysis.Laplacian.MetricExtension
 open DifferentialGeometry.Analysis.Laplacian.ChartLocalLaplacian
 open DifferentialGeometry.Analysis.Laplacian.ChartMeasureEquiv
 open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
-open DifferentialGeometry.Analysis.Laplacian.ChartBilinearUniformDiffQuotBoundUnconditional
+open DifferentialGeometry.Analysis.Laplacian.ChartBilinearUniformDiffQuotBoundCanonical
 open DifferentialGeometry.Analysis.Laplacian.ChartH2NonSmooth
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData
-open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainH2
+open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainH2FromSmooth
 open DifferentialGeometry.Analysis.Laplacian.ManifoldH2NonSmooth
 open DifferentialGeometry.Analysis.Sobolev
 open DifferentialGeometry.Analysis.Sobolev.Chart
@@ -190,7 +190,7 @@ theorem laplacianDomain_memWkpChart_two_chartBilinearRoute
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ)) < ⊤ :=
   laplacianDomain_memWkpChart_two (I := I) (M := M) g hu_h h_witness
 
-end LaplacianDomainH2Unconditional
+end LaplacianDomainH2
 end Laplacian
 end Analysis
 end DifferentialGeometry
