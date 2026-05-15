@@ -573,6 +573,7 @@ import DifferentialGeometry.Analysis.Laplacian.Regularity.IteratedChartHmJump
 import DifferentialGeometry.Analysis.Laplacian.Regularity.ChartSideH2kBridgeUnconditional
 import DifferentialGeometry.Analysis.HeatEquation.SmoothingUnconditional
 import DifferentialGeometry.Analysis.Laplacian.LichnerowiczSpectral
+import DifferentialGeometry.Analysis.HeatEquation.Generator
 
 import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.SecondFundamentalForm
 import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.BoundaryLaplacian

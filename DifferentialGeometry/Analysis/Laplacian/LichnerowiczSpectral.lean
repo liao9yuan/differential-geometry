@@ -82,7 +82,7 @@ image of its unique preimage, and the composition
 
 set_option maxHeartbeats 6400000 in
 /-- `H1ComplToLp` is injective on the variational-Laplacian domain. -/
-private theorem H1ComplToLp_inj_on_laplacianDomain
+theorem H1ComplToLp_inj_on_laplacianDomain
     (g : SmoothRiemannianMetric I M)
     {u v : laplacianDomain (I := I) (M := M) g}
     (h_eq : H1ComplToLp (I := I) (M := M) g (u : H1Compl g) =
