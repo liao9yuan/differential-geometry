@@ -1427,6 +1427,87 @@ private lemma chartGramOnE_differentiableAt_interior
   have hy_nhd : interior (extChartAt I α).target ∈ 𝓝 y := hop_int.mem_nhds hy
   exact (hcd_int.contDiffAt hy_nhd).differentiableAt (by simp)
 
+/-! ### Smoothness of the chart Christoffel symbol
+
+The chart Christoffel symbol `chartChristoffel g α i j k` is the half-times-
+inverse-Gram-times-bracket scalar. The inverse Gram entries and the partial
+derivatives of the Gram entries are smooth on the interior of the chart target,
+and a finite sum of products of smooth functions is smooth. -/
+
+/-- **Smoothness of `chartChristoffel`.** The chart Christoffel symbol is `C^∞`
+on the interior of the chart target. -/
+theorem chartChristoffel_contDiffOn_interior
+    (g : SmoothRiemannianMetric I M) (α : M)
+    (i j k : Fin (Module.finrank ℝ E)) :
+    ContDiffOn ℝ ∞ (chartChristoffel (I := I) g α i j k)
+      (interior (extChartAt I α).target) := by
+  classical
+  -- Rewrite the chart Christoffel symbol as a sum of products in terms of
+  -- `chartInvGramOnE` (smooth on the chart target, hence on its interior) and
+  -- partial derivatives of `chartGramOnE` (smooth on the interior).
+  have hrewrite : (chartChristoffel (I := I) g α i j k) =
+      fun y : E =>
+        (1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
+          chartInvGramOnE (I := I) g α k l y *
+            (partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) y +
+             partialDeriv (E := E) j (chartGramOnE (I := I) g α l i) y -
+             partialDeriv (E := E) l (chartGramOnE (I := I) g α i j) y) := by
+    funext y
+    rw [chartChristoffel_def]
+    refine congrArg (fun t => (1 / 2 : ℝ) * t) ?_
+    refine Finset.sum_congr rfl (fun l _ => ?_)
+    rfl
+  rw [hrewrite]
+  have hsum_smooth :
+      ContDiffOn ℝ ∞
+        (fun y : E => ∑ l : Fin (Module.finrank ℝ E),
+          chartInvGramOnE (I := I) g α k l y *
+            (partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) y +
+             partialDeriv (E := E) j (chartGramOnE (I := I) g α l i) y -
+             partialDeriv (E := E) l (chartGramOnE (I := I) g α i j) y))
+        (interior (extChartAt I α).target) := by
+    refine ContDiffOn.sum (fun l _ => ?_)
+    refine ContDiffOn.mul ?_ ?_
+    · exact (chartInvGramOnE_contDiffOn (I := I) g α k l).mono interior_subset
+    · have hi : ContDiffOn ℝ ∞
+          (partialDeriv (E := E) i (chartGramOnE (I := I) g α l j))
+          (interior (extChartAt I α).target) := by
+        unfold partialDeriv
+        have hG : ContDiffOn ℝ ∞ (chartGramOnE (I := I) g α l j)
+            (interior (extChartAt I α).target) :=
+          (chartGramOnE_contDiffOn (I := I) g α l j).mono interior_subset
+        have hfderiv : ContDiffOn ℝ ∞
+            (fderiv ℝ (chartGramOnE (I := I) g α l j))
+            (interior (extChartAt I α).target) :=
+          hG.fderiv_of_isOpen isOpen_interior (by rw [ENat.coe_top_add_one])
+        exact hfderiv.clm_apply contDiffOn_const
+      have hj : ContDiffOn ℝ ∞
+          (partialDeriv (E := E) j (chartGramOnE (I := I) g α l i))
+          (interior (extChartAt I α).target) := by
+        unfold partialDeriv
+        have hG : ContDiffOn ℝ ∞ (chartGramOnE (I := I) g α l i)
+            (interior (extChartAt I α).target) :=
+          (chartGramOnE_contDiffOn (I := I) g α l i).mono interior_subset
+        have hfderiv : ContDiffOn ℝ ∞
+            (fderiv ℝ (chartGramOnE (I := I) g α l i))
+            (interior (extChartAt I α).target) :=
+          hG.fderiv_of_isOpen isOpen_interior (by rw [ENat.coe_top_add_one])
+        exact hfderiv.clm_apply contDiffOn_const
+      have hl : ContDiffOn ℝ ∞
+          (partialDeriv (E := E) l (chartGramOnE (I := I) g α i j))
+          (interior (extChartAt I α).target) := by
+        unfold partialDeriv
+        have hG : ContDiffOn ℝ ∞ (chartGramOnE (I := I) g α i j)
+            (interior (extChartAt I α).target) :=
+          (chartGramOnE_contDiffOn (I := I) g α i j).mono interior_subset
+        have hfderiv : ContDiffOn ℝ ∞
+            (fderiv ℝ (chartGramOnE (I := I) g α i j))
+            (interior (extChartAt I α).target) :=
+          hG.fderiv_of_isOpen isOpen_interior (by rw [ENat.coe_top_add_one])
+        exact hfderiv.clm_apply contDiffOn_const
+      exact (hi.add hj).sub hl
+  exact (contDiffOn_const (c := (1 / 2 : ℝ))).mul hsum_smooth
+
 /-- The chart inverse Gram entry is differentiable at any point in the interior
 of the chart target. -/
 private lemma chartInvGramOnE_differentiableAt_interior
