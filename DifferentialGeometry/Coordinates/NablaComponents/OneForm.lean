@@ -150,7 +150,7 @@ theorem tensor0S_one_eval_coordFrame_sum
     _ = ∑ j : CoordinateIdx E,
           αx (Function.update (fun _ : Fin 1 => Z) (0 : Fin 1)
             (b.coord j Z • b j)) := by
-          simpa using hmap
+          exact hmap
     _ = ∑ j : CoordinateIdx E,
           b.coord j Z * αx (fun _ : Fin 1 => b j) := by
           refine Finset.sum_congr rfl fun j _ => ?_
@@ -163,8 +163,19 @@ theorem tensor0S_one_eval_coordFrame_sum
             fin_cases q
             simp
           rw [hconst]
-          rw [αx.map_update_smul]
-          simp [smul_eq_mul]
+          have hsmul :
+              αx (Function.update (fun _ : Fin 1 => b j) (0 : Fin 1)
+                  (b.coord j Z • b j)) =
+                b.coord j Z •
+                  αx (Function.update (fun _ : Fin 1 => b j) (0 : Fin 1) (b j)) :=
+            αx.toMultilinearMap.map_update_smul
+              (m := fun _ : Fin 1 => b j) (i := (0 : Fin 1))
+              (c := b.coord j Z) (x := b j)
+          rw [hsmul]
+          have hbase : Function.update (fun _ : Fin 1 => b j) (0 : Fin 1) (b j) =
+              fun _ : Fin 1 => b j := by
+            funext q; fin_cases q; simp
+          rw [hbase, smul_eq_mul]
     _ = ∑ j : CoordinateIdx E,
           (coordinateFrameAt_toBasis (I := I) x₀).coord j Z *
             αx (fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ j x₀) := by
@@ -357,7 +368,7 @@ private theorem oneForm_pair_coordFrame_eventually
     _ = ∑ j : CoordinateIdx E,
           α y (Function.update (fun _ : Fin 1 => Z y) (0 : Fin 1)
             (hframe.coeff j y (Z y) • coordinateFrameAt (I := I) x₀ j y)) := by
-          simpa using hmap
+          exact hmap
     _ = ∑ j : CoordinateIdx E,
           hframe.coeff j y (Z y) *
             α y (fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ j y) := by
@@ -374,8 +385,28 @@ private theorem oneForm_pair_coordFrame_eventually
             fin_cases q
             simp
           rw [hconst]
-          rw [(α y).map_update_smul]
-          simp [smul_eq_mul]
+          have hsmul :
+              α y (Function.update
+                  (fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ j y)
+                  (0 : Fin 1)
+                  (hframe.coeff j y (Z y) • coordinateFrameAt (I := I) x₀ j y)) =
+                hframe.coeff j y (Z y) •
+                  α y (Function.update
+                    (fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ j y)
+                    (0 : Fin 1) (coordinateFrameAt (I := I) x₀ j y)) :=
+            (α y).toMultilinearMap.map_update_smul
+              (m := fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ j y)
+              (i := (0 : Fin 1))
+              (c := hframe.coeff j y (Z y))
+              (x := coordinateFrameAt (I := I) x₀ j y)
+          rw [hsmul]
+          have hbase :
+              Function.update
+                  (fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ j y) (0 : Fin 1)
+                  (coordinateFrameAt (I := I) x₀ j y) =
+                (fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ j y) := by
+            funext q; fin_cases q; simp
+          rw [hbase, smul_eq_mul]
 
 /-- Product rule for the scalar pairing `p ↦ α_p (Z_p)` in the coordinate
 frame.  This is the previously external `hpair` input for the moving-slot
@@ -573,7 +604,18 @@ theorem oneForm_covariantDerivative_coordFrame_product_rule
       funext q
       fin_cases q
       simp
-    rw [hupdate, (α x₀).map_update_smul]
+    rw [hupdate]
+    have hsmul :
+        α x₀ (Function.update (fun _ : Fin 1 => frame k x₀) (0 : Fin 1)
+            (christoffelAlongInFrame cov frame hframe x₀ (X x₀) j k • frame k x₀)) =
+          christoffelAlongInFrame cov frame hframe x₀ (X x₀) j k •
+            α x₀ (Function.update (fun _ : Fin 1 => frame k x₀)
+              (0 : Fin 1) (frame k x₀)) :=
+      (α x₀).toMultilinearMap.map_update_smul
+        (m := fun _ : Fin 1 => frame k x₀) (i := (0 : Fin 1))
+        (c := christoffelAlongInFrame cov frame hframe x₀ (X x₀) j k)
+        (x := frame k x₀)
+    rw [hsmul]
     have hframe_eval :
         α x₀ (fun _ : Fin 1 => frame k x₀) =
           coordComponent0SAt (I := I) (α x₀) (fun _ : Fin 1 => k) := by
@@ -584,8 +626,7 @@ theorem oneForm_covariantDerivative_coordFrame_product_rule
       funext q
       fin_cases q
       simp
-    rw [hupdate0, hframe_eval]
-    simp [smul_eq_mul]
+    rw [hupdate0, hframe_eval, smul_eq_mul]
   have h_eval_frame :
       α x₀ (fun _ : Fin 1 => frame j x₀) =
         coordComponent0SAt (I := I) (α x₀) (fun _ : Fin 1 => j) := by
@@ -606,7 +647,23 @@ theorem oneForm_covariantDerivative_coordFrame_product_rule
     fin_cases q
     simp
   rw [hconst_add]
-  rw [(α x₀).map_update_add]
+  have hadd :
+      α x₀ (Function.update
+            (fun _ : Fin 1 => dz j • frame j x₀ + z j • (cov (frame j) x₀) (X x₀))
+            (0 : Fin 1)
+            (dz j • frame j x₀ + z j • (cov (frame j) x₀) (X x₀))) =
+        α x₀ (Function.update
+            (fun _ : Fin 1 => dz j • frame j x₀ + z j • (cov (frame j) x₀) (X x₀))
+            (0 : Fin 1) (dz j • frame j x₀)) +
+          α x₀ (Function.update
+            (fun _ : Fin 1 => dz j • frame j x₀ + z j • (cov (frame j) x₀) (X x₀))
+            (0 : Fin 1) (z j • (cov (frame j) x₀) (X x₀))) :=
+    (α x₀).toMultilinearMap.map_update_add
+      (m := fun _ : Fin 1 => dz j • frame j x₀ + z j • (cov (frame j) x₀) (X x₀))
+      (i := (0 : Fin 1))
+      (x := dz j • frame j x₀)
+      (y := z j • (cov (frame j) x₀) (X x₀))
+  rw [hadd]
   have h_up1 :
       Function.update
         (fun _ : Fin 1 => dz j • frame j x₀ + z j • (cov (frame j) x₀) (X x₀))
@@ -633,7 +690,16 @@ theorem oneForm_covariantDerivative_coordFrame_product_rule
       funext q
       fin_cases q
       simp
-    rw [hupdate, (α x₀).map_update_smul]
+    rw [hupdate]
+    have hsmul1 :
+        α x₀ (Function.update (fun _ : Fin 1 => frame j x₀) (0 : Fin 1)
+            (dz j • frame j x₀)) =
+          dz j • α x₀ (Function.update (fun _ : Fin 1 => frame j x₀) (0 : Fin 1)
+            (frame j x₀)) :=
+      (α x₀).toMultilinearMap.map_update_smul
+        (m := fun _ : Fin 1 => frame j x₀) (i := (0 : Fin 1))
+        (c := dz j) (x := frame j x₀)
+    rw [hsmul1]
     simp [h_eval_frame, smul_eq_mul]]
   rw [show α x₀ (fun _ : Fin 1 => z j • (cov (frame j) x₀) (X x₀)) =
       z j * (∑ k : CoordinateIdx E,
@@ -648,7 +714,16 @@ theorem oneForm_covariantDerivative_coordFrame_product_rule
       funext q
       fin_cases q
       simp
-    rw [hupdate, (α x₀).map_update_smul]
+    rw [hupdate]
+    have hsmul2 :
+        α x₀ (Function.update (fun _ : Fin 1 => (cov (frame j) x₀) (X x₀))
+            (0 : Fin 1) (z j • (cov (frame j) x₀) (X x₀))) =
+          z j • α x₀ (Function.update (fun _ : Fin 1 => (cov (frame j) x₀) (X x₀))
+            (0 : Fin 1) ((cov (frame j) x₀) (X x₀))) :=
+      (α x₀).toMultilinearMap.map_update_smul
+        (m := fun _ : Fin 1 => (cov (frame j) x₀) (X x₀)) (i := (0 : Fin 1))
+        (c := z j) (x := (cov (frame j) x₀) (X x₀))
+    rw [hsmul2]
     simp [h_eval_cov, smul_eq_mul]]
 
 /-- Coordinate expansion of `nabla0SFun 1` evaluated on an arbitrary tangent

@@ -186,6 +186,13 @@ private lemma contMDiffOn_trivProj
         (fun x : M => TensorRSSpace r s I x) α
           ⟨x, S.toSection x⟩).2)
       ((chartAt H α).source) := by
+  letI : IsManifold I (∞ + 1) M := by
+    have : ((∞ : WithTop ℕ∞) + 1) = ∞ := by
+      simp
+    rw [this]; infer_instance
+  letI : ContMDiffVectorBundle ∞ (TensorRSModel r s ℝ E)
+      (fun x : M => TensorRSSpace r s I x) I :=
+    tensorRSBundle_smooth (n := ∞) r s
   have hbase := rs_baseSet_eq_chart_source' (I := I) (M := M) α r s
   have hsmooth_total :
       ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
@@ -356,7 +363,7 @@ private lemma tensorRS_levelSet_identity
   simp only [ContinuousLinearMap.coe_comp', Function.comp_apply]
   rw [tensor0S_symmL_levelSet_apply (I := I) (M := M) r α x hx v]
   rw [tensor0S_continuousLinearMapAt_levelSet_apply (I := I) (M := M) s α x hx
-    ((S.toSection x) v)]
+    ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from S.toSection x) v)]
   rfl
 
 /-! ## Borel-measurability of `SmoothCcTensor.toFun`

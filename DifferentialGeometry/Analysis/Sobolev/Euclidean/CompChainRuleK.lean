@@ -868,7 +868,7 @@ private lemma eLpNorm_iteratedFDeriv_le_sum_iterClassicalPartial
 For smooth + compactly supported ψ with `tsupport ψ ⊆ Ω'`, the L^p norm
 of `‖iteratedFDeriv ℝ n ψ‖` over `Ω'` is bounded by `wkpNorm k p ψ Ω'`. -/
 
-private lemma eLpNorm_iteratedFDeriv_le_wkpNorm
+lemma eLpNorm_iteratedFDeriv_le_wkpNorm
     {Ω : Set E} (hΩ_open : IsOpen Ω)
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     (k : ℕ)

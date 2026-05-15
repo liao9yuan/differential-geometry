@@ -441,7 +441,7 @@ lemma localConnLap_vector_def
 /-- **Trace identity at the heart of Bochner.** Let `g` be a smooth Riemannian metric on
 `M`, let `f : M → ℝ` be a smooth scalar, let `w : M → TangentSpace I` be a smooth tangent
 vector field, and let `B : Fin n → Π b, TangentSpace I b` be a smooth global tangent
-frame agreeing with the canonical model basis `Module.finBasis ℝ E` at the point `x`.
+frame agreeing with the canonical model basis `chartModelBasis E` at the point `x`.
 Then the Ricci tensor at `(∇f, w)` admits the model-basis representation
 $$
   \mathrm{Ric}_x\bigl(\nabla f,\, w\bigr) =
@@ -463,10 +463,10 @@ theorem connection_laplacian_grad_commutator [I.Boundaryless]
     (hw : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% w))
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
     (hB : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (B i)))
-    (x : M) (hBx : ∀ i, B i x = (Module.finBasis ℝ E) i) :
+    (x : M) (hBx : ∀ i, B i x = (chartModelBasis E) i) :
     ricciTensor (I := I) g x (gradFun (I := I) g f x) (w x) =
       ∑ i : Fin (Module.finrank ℝ E),
-        (Module.finBasis ℝ E).repr
+        (chartModelBasis E).repr
           (riemannSec (LeviCivita (I := I) g) (B i) w
             (fun y => gradFun (I := I) g f y) x) i := by
   classical

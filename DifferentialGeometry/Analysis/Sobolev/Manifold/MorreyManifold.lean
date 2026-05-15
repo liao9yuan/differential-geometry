@@ -326,7 +326,7 @@ private lemma tsupport_pou_mul_subset_chart_source
       (f := fun x : M => ((ρ α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) (g := u)
   exact h1.trans (hρ α)
 
-private lemma contDiff_chartSmoothExt_pou_mul
+lemma contDiff_chartSmoothExt_pou_mul
     [CompactSpace M] [I.Boundaryless]
     (α : M) (ρ : SmoothPartitionOfUnity M I M Set.univ)
     (hρ : ρ.IsSubordinate (fun β : M => (chartAt H β).source))
@@ -341,7 +341,7 @@ private lemma contDiff_chartSmoothExt_pou_mul
   have hf_compact : IsCompact (tsupport f) := (isClosed_tsupport _).isCompact
   exact contDiff_chartSmoothExt (I := I) (M := M) α hf_smooth hf_supp hf_compact
 
-private lemma hasCompactSupport_chartSmoothExt_pou_mul
+lemma hasCompactSupport_chartSmoothExt_pou_mul
     [CompactSpace M] (α : M) (ρ : SmoothPartitionOfUnity M I M Set.univ)
     (hρ : ρ.IsSubordinate (fun β : M => (chartAt H β).source)) (u : M → ℝ) :
     HasCompactSupport (chartSmoothExt (I := I) (M := M) α
@@ -382,13 +382,13 @@ variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
 /-- The compact support carrier in the chart-target Euclidean image: the
 toEuclidean image of `(extChartAt I α) '' tsupport ρ_α` for the canonical POU
 weight `ρ_α`. -/
-private def chartCarrier (α : M) : Set EuclN :=
+def chartCarrier (α : M) : Set EuclN :=
   (toEuclidean (E := E)) ''
     ((extChartAt I α) ''
       (tsupport ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
         : C^∞⟮I, M; ℝ⟯) : M → ℝ)))
 
-private lemma chartCarrier_isCompact (α : M) :
+lemma chartCarrier_isCompact (α : M) :
     IsCompact (chartCarrier (I := I) (M := M) α) := by
   unfold chartCarrier
   set Tα : Set M := tsupport
@@ -408,7 +408,7 @@ private lemma chartCarrier_isCompact (α : M) :
     hTα_compact.image_of_continuousOn hcont_ext
   exact hImg_ext_compact.image (toEuclidean (E := E)).continuous
 
-private lemma chartCarrier_subset_chartTargetEuclid (α : M) :
+lemma chartCarrier_subset_chartTargetEuclid (α : M) :
     chartCarrier (I := I) (M := M) α ⊆ chartTargetEuclid (I := I) (M := M) α := by
   unfold chartCarrier
   set Tα : Set M := tsupport
@@ -428,17 +428,17 @@ private lemma chartCarrier_subset_chartTargetEuclid (α : M) :
 
 /-- A radius `R_α` such that `chartCarrier α ⊆ Metric.ball 0 (R_α / 2)` and
 `R_α > 0`. -/
-private noncomputable def chartRadius (α : M) : ℝ :=
+noncomputable def chartRadius (α : M) : ℝ :=
   (((chartCarrier_isCompact (I := I) (M := M) α).isBounded.subset_ball_lt
       0 (0 : EuclN)).choose) * 2 + 1
 
-private lemma chartRadius_pos (α : M) : 0 < chartRadius (I := I) (M := M) α := by
+lemma chartRadius_pos (α : M) : 0 < chartRadius (I := I) (M := M) α := by
   unfold chartRadius
   have h := ((chartCarrier_isCompact (I := I) (M := M) α).isBounded.subset_ball_lt
     0 (0 : EuclN)).choose_spec
   linarith [h.1]
 
-private lemma chartCarrier_subset_half_ball (α : M) :
+lemma chartCarrier_subset_half_ball (α : M) :
     chartCarrier (I := I) (M := M) α ⊆
       Metric.ball (0 : EuclN) (chartRadius (I := I) (M := M) α / 2) := by
   unfold chartRadius
@@ -460,7 +460,7 @@ private lemma chartCarrier_subset_half_ball (α : M) :
     linarith
   linarith
 
-private lemma chartCarrier_subset_full_ball (α : M) :
+lemma chartCarrier_subset_full_ball (α : M) :
     chartCarrier (I := I) (M := M) α ⊆
       Metric.ball (0 : EuclN) (chartRadius (I := I) (M := M) α) := by
   refine (chartCarrier_subset_half_ball (I := I) (M := M) α).trans ?_
@@ -473,7 +473,7 @@ private lemma chartCarrier_subset_full_ball (α : M) :
 
 /-- For smooth `u : M → ℝ`, `chartSmoothExt α (ρ_α · u)` is supported in
 `chartCarrier α`. -/
-private lemma tsupport_chartSmoothExt_pou_mul_subset_chartCarrier
+lemma tsupport_chartSmoothExt_pou_mul_subset_chartCarrier
     (α : M) (u : M → ℝ) :
     tsupport (chartSmoothExt (I := I) (M := M) α
       (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
@@ -782,7 +782,7 @@ private lemma eLpNorm_norm_fderiv_chartSmoothExt_pou_mul_restrict_ball_eq_restri
 omit [I.Boundaryless] in
 /-- `chartSmoothExt α (ρ_α · u)` and `chartPushed ρ α u` agree a.e. on
 `volume.restrict (chartTargetEuclid α)`. -/
-private lemma chartSmoothExt_ae_eq_chartPushed
+lemma chartSmoothExt_ae_eq_chartPushed
     (α : M) (u : M → ℝ) :
     chartSmoothExt (I := I) (M := M) α
         (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α

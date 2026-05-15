@@ -188,7 +188,7 @@ private lemma mfderiv_extChartAt_chartBasisVecFiber'
     (i : Fin (Module.finrank ℝ E)) :
     mfderiv I 𝓘(ℝ, E) (extChartAt I α) x
         (chartBasisVecFiber (I := I) α i x)
-      = (Module.finBasis ℝ E) i := by
+      = (chartModelBasis E) i := by
   classical
   let T : Bundle.Trivialization E (π E (TangentSpace I : M → Type _)) :=
     trivializationAt E (TangentSpace I) α
@@ -205,13 +205,13 @@ private lemma mfderiv_extChartAt_chartBasisVecFiber'
     exact (TangentBundle.continuousLinearMapAt_trivializationAt (𝕜 := ℝ) (I := I)
       (x₀ := α) (x := x) hx).symm
   rw [hmfderiv_eq]
-  change T.continuousLinearMapAt ℝ x (T.symm x ((Module.finBasis ℝ E) i))
-    = (Module.finBasis ℝ E) i
-  rw [show T.symm x ((Module.finBasis ℝ E) i) =
-        T.symmL ℝ x ((Module.finBasis ℝ E) i) from by
+  change T.continuousLinearMapAt ℝ x (T.symm x ((chartModelBasis E) i))
+    = (chartModelBasis E) i
+  rw [show T.symm x ((chartModelBasis E) i) =
+        T.symmL ℝ x ((chartModelBasis E) i) from by
       rw [Trivialization.symmL_apply]]
   exact Trivialization.continuousLinearMapAt_symmL (R := ℝ) T (b := x) hbase
-    ((Module.finBasis ℝ E) i)
+    ((chartModelBasis E) i)
 
 /-- Auxiliary: equality of `mfderivWithin` on an open set with `mfderiv`. -/
 private lemma mfderivWithin_extChartAt_open (α : M) {x : M}

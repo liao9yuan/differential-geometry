@@ -21,7 +21,7 @@ dual-metric / index-lowering layer:
   tangent space, packaged from `Bundle.ContMDiffRiemannianMetric.inner`,
   together with symmetry, positive-definiteness and zero-iff lemmas.
 * `gramMatrixAt g x` — the Gram matrix of `g(x)` on the fixed model-space
-  basis `Module.finBasis ℝ E`, with Hermitian / positive-definite
+  basis `chartModelBasis E`, with Hermitian / positive-definite
   properties of itself and of its inverse.
 * `lowerAllUpperIndices g r s x` — the continuous-linear index-lowering
   map sending a mixed `(r, s)`-tensor to the covariant `(0, r + s)`-tensor
@@ -104,21 +104,21 @@ lemma modelInnerAt_eq_zero_iff
 
 The pointwise inner product on `(0, s)`-tensors is defined via the
 Gram-matrix inverse of `g(x)` evaluated on the fixed model-space basis
-`Module.finBasis ℝ E`. The Gram matrix is always symmetric positive
+`chartModelBasis E`. The Gram matrix is always symmetric positive
 definite, hence invertible, and its inverse is again symmetric positive
 definite. -/
 
 /-- The Gram matrix of `g(x)` on the fixed model-space basis
-`Module.finBasis ℝ E`. Exposed for use in boundedness lemmas. -/
+`chartModelBasis E`. Exposed for use in boundedness lemmas. -/
 def gramMatrixAt (g : SmoothRiemannianMetric I M) (x : M) :
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   Matrix.of fun i j =>
-    g.inner x ((Module.finBasis ℝ E) i) ((Module.finBasis ℝ E) j)
+    g.inner x ((chartModelBasis E) i) ((chartModelBasis E) j)
 
 @[simp] lemma gramMatrixAt_apply (g : SmoothRiemannianMetric I M) (x : M)
     (i j : Fin (Module.finrank ℝ E)) :
     gramMatrixAt (I := I) (M := M) g x i j =
-      g.inner x ((Module.finBasis ℝ E) i) ((Module.finBasis ℝ E) j) := rfl
+      g.inner x ((chartModelBasis E) i) ((chartModelBasis E) j) := rfl
 
 /-- The Gram matrix of `g(x)` on the fixed model-space basis is Hermitian
 (symmetric, in the real case). -/
@@ -141,7 +141,7 @@ lemma gramMatrixAt_inv_isHermitian
 /-- The Gram matrix of `g(x)` on the fixed model-space basis is positive
 definite: for any `v : Fin n → ℝ` with `v ≠ 0`, the quadratic form
 `vᵀ G(x) v = g(x)(w, w)` is strictly positive, where
-`w = ∑ᵢ vᵢ • eᵢ` and `eᵢ = (Module.finBasis ℝ E) i`. -/
+`w = ∑ᵢ vᵢ • eᵢ` and `eᵢ = (chartModelBasis E) i`. -/
 private lemma gramMatrixAt_posDef
     (g : SmoothRiemannianMetric I M) (x : M) :
     (gramMatrixAt (I := I) (M := M) g x).PosDef := by
@@ -150,11 +150,11 @@ private lemma gramMatrixAt_posDef
   intro v hv
   -- The quadratic form equals `g.inner x w w` where `w = ∑ᵢ vᵢ • eᵢ`.
   let w : E := ∑ i : Fin (Module.finrank ℝ E),
-    v i • (Module.finBasis ℝ E) i
+    v i • (chartModelBasis E) i
   have hw_ne : w ≠ 0 := by
     intro h
-    have hlin : LinearIndependent ℝ ((Module.finBasis ℝ E) : Fin _ → E) :=
-      (Module.finBasis ℝ E).linearIndependent
+    have hlin : LinearIndependent ℝ ((chartModelBasis E) : Fin _ → E) :=
+      (chartModelBasis E).linearIndependent
     rw [Fintype.linearIndependent_iff] at hlin
     exact hv (funext (hlin v h))
   have hquad : star v ⬝ᵥ (gramMatrixAt (I := I) (M := M) g x) *ᵥ v =
@@ -164,28 +164,28 @@ private lemma gramMatrixAt_posDef
         g.inner x w w =
           ∑ j : Fin (Module.finrank ℝ E),
             v j * ∑ i : Fin (Module.finrank ℝ E),
-              v i * g.inner x ((Module.finBasis ℝ E) i)
-                ((Module.finBasis ℝ E) j) := by
+              v i * g.inner x ((chartModelBasis E) i)
+                ((chartModelBasis E) j) := by
       -- Expand using linearity of `g.inner x` twice.
-      change g.inner x (∑ i, v i • (Module.finBasis ℝ E) i)
-          (∑ j, v j • (Module.finBasis ℝ E) j) = _
+      change g.inner x (∑ i, v i • (chartModelBasis E) i)
+          (∑ j, v j • (chartModelBasis E) j) = _
       -- Expand `g.inner x A (∑_j v_j • e_j) = ∑_j v_j * (g.inner x A e_j)`.
       rw [map_sum]
       refine Finset.sum_congr rfl ?_
       intro j _
       -- Use the `map_smul` property of the CLM `g.inner x A`.
       have hsm1 :
-          (g.inner x (∑ i, v i • (Module.finBasis ℝ E) i))
-              (v j • (Module.finBasis ℝ E) j)
-            = v j * (g.inner x (∑ i, v i • (Module.finBasis ℝ E) i))
-              ((Module.finBasis ℝ E) j) := by
-        have hh : (g.inner x (∑ i, v i • (Module.finBasis ℝ E) i))
-              (v j • (Module.finBasis ℝ E) j)
-            = v j • (g.inner x (∑ i, v i • (Module.finBasis ℝ E) i))
-              ((Module.finBasis ℝ E) j) :=
+          (g.inner x (∑ i, v i • (chartModelBasis E) i))
+              (v j • (chartModelBasis E) j)
+            = v j * (g.inner x (∑ i, v i • (chartModelBasis E) i))
+              ((chartModelBasis E) j) := by
+        have hh : (g.inner x (∑ i, v i • (chartModelBasis E) i))
+              (v j • (chartModelBasis E) j)
+            = v j • (g.inner x (∑ i, v i • (chartModelBasis E) i))
+              ((chartModelBasis E) j) :=
           ContinuousLinearMap.map_smul
-            (g.inner x (∑ i, v i • (Module.finBasis ℝ E) i))
-            (v j) ((Module.finBasis ℝ E) j)
+            (g.inner x (∑ i, v i • (chartModelBasis E) i))
+            (v j) ((chartModelBasis E) j)
         rw [hh, smul_eq_mul]
       rw [hsm1]
       congr 1
@@ -194,12 +194,12 @@ private lemma gramMatrixAt_posDef
       refine Finset.sum_congr rfl ?_
       intro i _
       have hsm2 :
-          (g.inner x (v i • (Module.finBasis ℝ E) i))
-              ((Module.finBasis ℝ E) j) =
-            v i * (g.inner x ((Module.finBasis ℝ E) i)) ((Module.finBasis ℝ E) j) := by
-        have hh : g.inner x (v i • (Module.finBasis ℝ E) i) =
-            v i • g.inner x ((Module.finBasis ℝ E) i) :=
-          ContinuousLinearMap.map_smul (g.inner x) (v i) ((Module.finBasis ℝ E) i)
+          (g.inner x (v i • (chartModelBasis E) i))
+              ((chartModelBasis E) j) =
+            v i * (g.inner x ((chartModelBasis E) i)) ((chartModelBasis E) j) := by
+        have hh : g.inner x (v i • (chartModelBasis E) i) =
+            v i • g.inner x ((chartModelBasis E) i) :=
+          ContinuousLinearMap.map_smul (g.inner x) (v i) ((chartModelBasis E) i)
         rw [hh, ContinuousLinearMap.smul_apply, smul_eq_mul]
       exact hsm2
     rw [hbilin]
@@ -213,8 +213,8 @@ private lemma gramMatrixAt_posDef
             star (v i) * (gramMatrixAt (I := I) (M := M) g x *ᵥ v) i =
           ∑ i : Fin (Module.finrank ℝ E),
             ∑ j : Fin (Module.finrank ℝ E),
-              v i * v j * g.inner x ((Module.finBasis ℝ E) i)
-                ((Module.finBasis ℝ E) j) := by
+              v i * v j * g.inner x ((chartModelBasis E) i)
+                ((chartModelBasis E) j) := by
       refine Finset.sum_congr rfl ?_
       intro i _
       rw [star_trivial]
@@ -235,12 +235,12 @@ private lemma gramMatrixAt_posDef
     have hRHS :
         ∑ j : Fin (Module.finrank ℝ E),
             v j * ∑ i : Fin (Module.finrank ℝ E),
-              v i * g.inner x ((Module.finBasis ℝ E) i)
-                ((Module.finBasis ℝ E) j) =
+              v i * g.inner x ((chartModelBasis E) i)
+                ((chartModelBasis E) j) =
           ∑ i : Fin (Module.finrank ℝ E),
             ∑ j : Fin (Module.finrank ℝ E),
-              v i * v j * g.inner x ((Module.finBasis ℝ E) i)
-                ((Module.finBasis ℝ E) j) := by
+              v i * v j * g.inner x ((chartModelBasis E) i)
+                ((chartModelBasis E) j) := by
       rw [Finset.sum_comm]
       refine Finset.sum_congr rfl ?_
       intro i _
@@ -697,8 +697,8 @@ private lemma separableFormAt_basis_apply
     (g : SmoothRiemannianMetric I M) (x : M) (r : ℕ)
     (idx jdx : Fin r → Fin (Module.finrank ℝ E)) :
     separableFormAt (I := I) (M := M) g x r
-        (fun k : Fin r => (Module.finBasis ℝ E) (idx k))
-        (fun k : Fin r => (Module.finBasis ℝ E) (jdx k)) =
+        (fun k : Fin r => (chartModelBasis E) (idx k))
+        (fun k : Fin r => (chartModelBasis E) (jdx k)) =
       ∏ k : Fin r,
         gramMatrixAt (I := I) (M := M) g x (idx k) (jdx k) := by
   rw [separableFormAt_apply]
@@ -716,34 +716,34 @@ private lemma lower_at_basis_pair_zero_of_lower_zero
     (idx : Fin r → Fin (Module.finrank ℝ E))
     (jdx : Fin s → Fin (Module.finrank ℝ E)) :
     (T (separableFormAt (I := I) (M := M) g x r
-          (fun k : Fin r => (Module.finBasis ℝ E) (idx k))))
-        (fun j : Fin s => (Module.finBasis ℝ E) (jdx j)) = 0 := by
+          (fun k : Fin r => (chartModelBasis E) (idx k))))
+        (fun j : Fin s => (chartModelBasis E) (jdx j)) = 0 := by
   -- The hypothesis gives `lowerAllUpperIndices T = 0` as a CMLM, so
   -- evaluation at `Fin.append (e ∘ idx) (e ∘ jdx)` is zero.
   have hzero :
       lowerAllUpperIndices (I := I) (M := M) g r s x T
           (Fin.append
-            (fun k : Fin r => (Module.finBasis ℝ E) (idx k))
-            (fun j : Fin s => (Module.finBasis ℝ E) (jdx j))) = 0 := by
+            (fun k : Fin r => (chartModelBasis E) (idx k))
+            (fun j : Fin s => (chartModelBasis E) (jdx j))) = 0 := by
     rw [hT]
     rfl
   rw [lowerAllUpperIndices_apply] at hzero
   have hcast :
       (fun k : Fin r =>
           Fin.append
-            (fun k' : Fin r => (Module.finBasis ℝ E) (idx k'))
-            (fun j' : Fin s => (Module.finBasis ℝ E) (jdx j'))
+            (fun k' : Fin r => (chartModelBasis E) (idx k'))
+            (fun j' : Fin s => (chartModelBasis E) (jdx j'))
             (Fin.castAdd s k)) =
-        (fun k : Fin r => (Module.finBasis ℝ E) (idx k)) := by
+        (fun k : Fin r => (chartModelBasis E) (idx k)) := by
     funext k
     exact Fin.append_left _ _ k
   have hnat :
       (fun j : Fin s =>
           Fin.append
-            (fun k' : Fin r => (Module.finBasis ℝ E) (idx k'))
-            (fun j' : Fin s => (Module.finBasis ℝ E) (jdx j'))
+            (fun k' : Fin r => (chartModelBasis E) (idx k'))
+            (fun j' : Fin s => (chartModelBasis E) (jdx j'))
             (Fin.natAdd r j)) =
-        (fun j : Fin s => (Module.finBasis ℝ E) (jdx j)) := by
+        (fun j : Fin s => (chartModelBasis E) (jdx j)) := by
     funext j
     exact Fin.append_right _ _ j
   rw [hcast, hnat] at hzero
@@ -754,11 +754,11 @@ model basis are all zero. -/
 private lemma cmlm_eq_zero_of_basis_zero
     {p : ℕ} (S : ContinuousMultilinearMap ℝ (fun _ : Fin p => E) ℝ)
     (h : ∀ φ : Fin p → Fin (Module.finrank ℝ E),
-      S (fun k : Fin p => (Module.finBasis ℝ E) (φ k)) = 0) :
+      S (fun k : Fin p => (chartModelBasis E) (φ k)) = 0) :
     S = 0 := by
   apply ContinuousMultilinearMap.toMultilinearMap_injective
   refine Module.Basis.ext_multilinear
-    (e := fun _ : Fin p => Module.finBasis ℝ E) ?_
+    (e := fun _ : Fin p => chartModelBasis E) ?_
   intro v
   rw [ContinuousMultilinearMap.toMultilinearMap_zero,
     MultilinearMap.zero_apply]
@@ -770,12 +770,12 @@ follows from agreement on every model-basis tuple. This is
 private lemma tensor0SModel_ext_basis
     {p : ℕ} (S₁ S₂ : ContinuousMultilinearMap ℝ (fun _ : Fin p => E) ℝ)
     (h : ∀ φ : Fin p → Fin (Module.finrank ℝ E),
-      S₁ (fun k : Fin p => (Module.finBasis ℝ E) (φ k)) =
-        S₂ (fun k : Fin p => (Module.finBasis ℝ E) (φ k))) :
+      S₁ (fun k : Fin p => (chartModelBasis E) (φ k)) =
+        S₂ (fun k : Fin p => (chartModelBasis E) (φ k))) :
     S₁ = S₂ := by
   apply ContinuousMultilinearMap.toMultilinearMap_injective
   refine Module.Basis.ext_multilinear
-    (e := fun _ : Fin p => Module.finBasis ℝ E) ?_
+    (e := fun _ : Fin p => chartModelBasis E) ?_
   intro v
   exact h v
 
@@ -803,8 +803,8 @@ theorem lowerAllUpperIndices_injective
   -- For each `idx : Fin r → Fin n`, the value `T (β_idx) (e_kdx) = 0`.
   have hTβ : ∀ idx : Fin r → Fin n,
       (T (separableFormAt (I := I) (M := M) g x r
-            (fun k : Fin r => (Module.finBasis ℝ E) (idx k))))
-          (fun j : Fin s => (Module.finBasis ℝ E) (kdx j)) = 0 :=
+            (fun k : Fin r => (chartModelBasis E) (idx k))))
+          (fun j : Fin s => (chartModelBasis E) (kdx j)) = 0 :=
     fun idx => lower_at_basis_pair_zero_of_lower_zero
       (I := I) (M := M) g r s x T hT idx kdx
   -- The spanning argument: express `α` via the inverse Gram matrix.
@@ -820,13 +820,13 @@ theorem lowerAllUpperIndices_injective
     exact gramMatrixAt_inv_mul_self (I := I) (M := M) g x
   let c : (Fin r → Fin n) → ℝ := fun idx =>
     ∑ jdx : Fin r → Fin n,
-      α (fun k : Fin r => (Module.finBasis ℝ E) (jdx k)) *
+      α (fun k : Fin r => (chartModelBasis E) (jdx k)) *
         ∏ k : Fin r, Ginv (jdx k) (idx k)
   -- Spanning: `α = ∑ idx, c idx • β_idx` as a CMLM.
   have hspan :
       α = ∑ idx : Fin r → Fin n, c idx •
         separableFormAt (I := I) (M := M) g x r
-          (fun k : Fin r => (Module.finBasis ℝ E) (idx k)) := by
+          (fun k : Fin r => (chartModelBasis E) (idx k)) := by
     refine tensor0SModel_ext_basis _ _ ?_
     intro kdx'
     -- Evaluate both sides on `e_kdx'` and match.
@@ -836,8 +836,8 @@ theorem lowerAllUpperIndices_injective
     have hRHS_step :
         (∑ idx : Fin r → Fin n,
           (c idx • separableFormAt (I := I) (M := M) g x r
-            (fun k : Fin r => (Module.finBasis ℝ E) (idx k)))
-            (fun k : Fin r => (Module.finBasis ℝ E) (kdx' k)))
+            (fun k : Fin r => (chartModelBasis E) (idx k)))
+            (fun k : Fin r => (chartModelBasis E) (kdx' k)))
           = ∑ idx : Fin r → Fin n,
             c idx * ∏ k : Fin r, G (idx k) (kdx' k) := by
       refine Finset.sum_congr rfl ?_
@@ -850,7 +850,7 @@ theorem lowerAllUpperIndices_injective
         ∑ idx : Fin r → Fin n,
             c idx * ∏ k : Fin r, G (idx k) (kdx' k)
           = ∑ jdx : Fin r → Fin n,
-            α (fun k : Fin r => (Module.finBasis ℝ E) (jdx k)) *
+            α (fun k : Fin r => (chartModelBasis E) (jdx k)) *
               ∑ idx : Fin r → Fin n,
                 (∏ k : Fin r, Ginv (jdx k) (idx k)) *
                   ∏ k : Fin r, G (idx k) (kdx' k) := by
@@ -858,12 +858,12 @@ theorem lowerAllUpperIndices_injective
       have h1 : ∀ idx : Fin r → Fin n,
           c idx * ∏ k : Fin r, G (idx k) (kdx' k)
             = ∑ jdx : Fin r → Fin n,
-              α (fun k : Fin r => (Module.finBasis ℝ E) (jdx k)) *
+              α (fun k : Fin r => (chartModelBasis E) (jdx k)) *
                 ((∏ k : Fin r, Ginv (jdx k) (idx k)) *
                   ∏ k : Fin r, G (idx k) (kdx' k)) := by
         intro idx
         change (∑ jdx : Fin r → Fin n,
-              α (fun k : Fin r => (Module.finBasis ℝ E) (jdx k)) *
+              α (fun k : Fin r => (chartModelBasis E) (jdx k)) *
                 ∏ k : Fin r, Ginv (jdx k) (idx k)) *
               ∏ k : Fin r, G (idx k) (kdx' k) = _
         rw [Finset.sum_mul]
@@ -921,17 +921,17 @@ theorem lowerAllUpperIndices_injective
         rw [if_neg hk₀]
     have hsimplify :
         ∑ jdx : Fin r → Fin n,
-            α (fun k : Fin r => (Module.finBasis ℝ E) (jdx k)) *
+            α (fun k : Fin r => (chartModelBasis E) (jdx k)) *
               ∑ idx : Fin r → Fin n,
                 (∏ k : Fin r, Ginv (jdx k) (idx k)) *
                   ∏ k : Fin r, G (idx k) (kdx' k)
-          = α (fun k : Fin r => (Module.finBasis ℝ E) (kdx' k)) := by
+          = α (fun k : Fin r => (chartModelBasis E) (kdx' k)) := by
       have hrewrite : ∀ jdx : Fin r → Fin n,
-          α (fun k : Fin r => (Module.finBasis ℝ E) (jdx k)) *
+          α (fun k : Fin r => (chartModelBasis E) (jdx k)) *
               ∑ idx : Fin r → Fin n,
                 (∏ k : Fin r, Ginv (jdx k) (idx k)) *
                   ∏ k : Fin r, G (idx k) (kdx' k)
-            = α (fun k : Fin r => (Module.finBasis ℝ E) (jdx k)) *
+            = α (fun k : Fin r => (chartModelBasis E) (jdx k)) *
               if jdx = kdx' then (1 : ℝ) else 0 := by
         intro jdx
         rw [hcombine jdx, hfubini jdx]
@@ -941,11 +941,11 @@ theorem lowerAllUpperIndices_injective
       rw [Finset.sum_congr rfl (fun jdx _ => hrewrite jdx)]
       have hsum :
           ∑ jdx : Fin r → Fin n,
-              α (fun k : Fin r => (Module.finBasis ℝ E) (jdx k)) *
+              α (fun k : Fin r => (chartModelBasis E) (jdx k)) *
                 (if jdx = kdx' then (1 : ℝ) else 0)
             = ∑ jdx : Fin r → Fin n,
               if jdx = kdx' then
-                α (fun k : Fin r => (Module.finBasis ℝ E) (jdx k))
+                α (fun k : Fin r => (chartModelBasis E) (jdx k))
               else 0 := by
         refine Finset.sum_congr rfl ?_
         intro jdx _
@@ -954,7 +954,7 @@ theorem lowerAllUpperIndices_injective
         · simp [hjk]
       rw [hsum]
       have h := Finset.sum_ite_eq' Finset.univ kdx'
-        (fun jdx => α (fun k : Fin r => (Module.finBasis ℝ E) (jdx k)))
+        (fun jdx => α (fun k : Fin r => (chartModelBasis E) (jdx k)))
       rw [h, if_pos (Finset.mem_univ _)]
     rw [hsimplify]
   -- Apply `T` linearly to the spanning equation.

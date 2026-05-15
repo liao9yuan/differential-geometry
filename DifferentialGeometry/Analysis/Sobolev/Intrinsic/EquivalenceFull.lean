@@ -1285,7 +1285,7 @@ private lemma sq_partials_scalarOnE_le_norm_fderiv_scalarOnE_sq
             (DifferentialGeometry.Integral.DivergenceTheorem.scalarOnE
               (I := I) α f) y)^2) ≤
       (∑ k : Fin (Module.finrank ℝ E),
-        ‖(Module.finBasis ℝ E) k‖^2) *
+        ‖(chartModelBasis E) k‖^2) *
           ‖fderiv ℝ
             (DifferentialGeometry.Integral.DivergenceTheorem.scalarOnE
               (I := I) α f) y‖^2 := by
@@ -1297,14 +1297,14 @@ private lemma sq_partials_scalarOnE_le_norm_fderiv_scalarOnE_sq
           (E := E) k
           (DifferentialGeometry.Integral.DivergenceTheorem.scalarOnE
             (I := I) α f) y)^2 ≤
-        ‖(Module.finBasis ℝ E) k‖^2 *
+        ‖(chartModelBasis E) k‖^2 *
           ‖fderiv ℝ
             (DifferentialGeometry.Integral.DivergenceTheorem.scalarOnE
               (I := I) α f) y‖^2 := by
     intro k
     have hop_le := (fderiv ℝ
         (DifferentialGeometry.Integral.DivergenceTheorem.scalarOnE
-          (I := I) α f) y).le_opNorm ((Module.finBasis ℝ E) k)
+          (I := I) α f) y).le_opNorm ((chartModelBasis E) k)
     -- |fderiv ℝ u y v| ≤ ‖fderiv ℝ u y‖ * ‖v‖.
     have hsq_le : (DifferentialGeometry.Integral.DivergenceTheorem.partialDeriv
             (E := E) k
@@ -1312,38 +1312,38 @@ private lemma sq_partials_scalarOnE_le_norm_fderiv_scalarOnE_sq
               (I := I) α f) y)^2 ≤
           (‖fderiv ℝ
             (DifferentialGeometry.Integral.DivergenceTheorem.scalarOnE
-              (I := I) α f) y‖ * ‖(Module.finBasis ℝ E) k‖)^2 := by
+              (I := I) α f) y‖ * ‖(chartModelBasis E) k‖)^2 := by
       unfold DifferentialGeometry.Integral.DivergenceTheorem.partialDeriv
       have habs : |(fderiv ℝ
             (DifferentialGeometry.Integral.DivergenceTheorem.scalarOnE
-              (I := I) α f) y) ((Module.finBasis ℝ E) k)| ≤
+              (I := I) α f) y) ((chartModelBasis E) k)| ≤
           ‖fderiv ℝ
             (DifferentialGeometry.Integral.DivergenceTheorem.scalarOnE
-              (I := I) α f) y‖ * ‖(Module.finBasis ℝ E) k‖ := by
+              (I := I) α f) y‖ * ‖(chartModelBasis E) k‖ := by
         have h_norm_eq : ‖(fderiv ℝ
             (DifferentialGeometry.Integral.DivergenceTheorem.scalarOnE
-              (I := I) α f) y) ((Module.finBasis ℝ E) k)‖ =
+              (I := I) α f) y) ((chartModelBasis E) k)‖ =
             |(fderiv ℝ
               (DifferentialGeometry.Integral.DivergenceTheorem.scalarOnE
-                (I := I) α f) y) ((Module.finBasis ℝ E) k)| :=
+                (I := I) α f) y) ((chartModelBasis E) k)| :=
           Real.norm_eq_abs _
         rw [← h_norm_eq]
         exact hop_le
       have h_sq_abs :
           ((fderiv ℝ
               (DifferentialGeometry.Integral.DivergenceTheorem.scalarOnE
-                (I := I) α f) y) ((Module.finBasis ℝ E) k))^2 =
+                (I := I) α f) y) ((chartModelBasis E) k))^2 =
           |(fderiv ℝ
               (DifferentialGeometry.Integral.DivergenceTheorem.scalarOnE
-                (I := I) α f) y) ((Module.finBasis ℝ E) k)|^2 := by
+                (I := I) α f) y) ((chartModelBasis E) k)|^2 := by
         rw [sq_abs]
       rw [h_sq_abs]
       have hABS_nn : 0 ≤ |(fderiv ℝ
             (DifferentialGeometry.Integral.DivergenceTheorem.scalarOnE
-              (I := I) α f) y) ((Module.finBasis ℝ E) k)| := abs_nonneg _
+              (I := I) α f) y) ((chartModelBasis E) k)| := abs_nonneg _
       have hRHS_nn : 0 ≤ ‖fderiv ℝ
           (DifferentialGeometry.Integral.DivergenceTheorem.scalarOnE
-            (I := I) α f) y‖ * ‖(Module.finBasis ℝ E) k‖ :=
+            (I := I) α f) y‖ * ‖(chartModelBasis E) k‖ :=
         mul_nonneg (norm_nonneg _) (norm_nonneg _)
       exact pow_le_pow_left₀ hABS_nn habs 2
     refine hsq_le.trans ?_
@@ -1362,7 +1362,7 @@ at `y` and the `EuclN`-coordinate partial derivatives of
 `chartSmoothExt α f` at `toEuclidean y`. -/
 private noncomputable def toEuclideanBasisSqSum : ℝ :=
   ∑ k : Fin (Module.finrank ℝ E),
-    ‖(toEuclidean (E := E) : E ≃L[ℝ] EuclN_E) ((Module.finBasis ℝ E) k)‖^2
+    ‖(toEuclidean (E := E) : E ≃L[ℝ] EuclN_E) ((chartModelBasis E) k)‖^2
 
 private lemma toEuclideanBasisSqSum_nonneg :
     (0 : ℝ) ≤ toEuclideanBasisSqSum (E := E) :=
@@ -1478,7 +1478,7 @@ private lemma sq_partials_scalarOnE_le_chartSmoothExt_fderiv
           (DifferentialGeometry.Analysis.Sobolev.Chart.chartSmoothExt
             (I := I) (M := M) α f)
           ((toEuclidean (E := E) : E ≃L[ℝ] EuclN_E) y)‖^2 *
-        ‖(toEuclidean (E := E) : E ≃L[ℝ] EuclN_E) ((Module.finBasis ℝ E) k)‖^2 := by
+        ‖(toEuclidean (E := E) : E ≃L[ℝ] EuclN_E) ((chartModelBasis E) k)‖^2 := by
     intro k
     -- Use the formula: partial k = fderiv (scalarOnE) y (basis k).
     -- = fderiv (chartSmoothExt) (toEuclidean y) ∘L (toEuclidean) (basis k).
@@ -1493,7 +1493,7 @@ private lemma sq_partials_scalarOnE_le_chartSmoothExt_fderiv
               (I := I) (M := M) α f)
             ((toEuclidean (E := E) : E ≃L[ℝ] EuclN_E) y))
               ((toEuclidean (E := E) : E ≃L[ℝ] EuclN_E)
-                ((Module.finBasis ℝ E) k)) := by
+                ((chartModelBasis E) k)) := by
       unfold DifferentialGeometry.Integral.DivergenceTheorem.partialDeriv
       rw [h_fderiv_eq, h_fderiv_comp]
       rfl
@@ -1505,13 +1505,13 @@ private lemma sq_partials_scalarOnE_le_chartSmoothExt_fderiv
               (I := I) (M := M) α f)
             ((toEuclidean (E := E) : E ≃L[ℝ] EuclN_E) y))
             ((toEuclidean (E := E) : E ≃L[ℝ] EuclN_E)
-              ((Module.finBasis ℝ E) k))‖ ≤
+              ((chartModelBasis E) k))‖ ≤
           ‖fderiv ℝ
             (DifferentialGeometry.Analysis.Sobolev.Chart.chartSmoothExt
               (I := I) (M := M) α f)
             ((toEuclidean (E := E) : E ≃L[ℝ] EuclN_E) y)‖ *
           ‖(toEuclidean (E := E) : E ≃L[ℝ] EuclN_E)
-            ((Module.finBasis ℝ E) k)‖ :=
+            ((chartModelBasis E) k)‖ :=
       (fderiv ℝ
         (DifferentialGeometry.Analysis.Sobolev.Chart.chartSmoothExt
           (I := I) (M := M) α f)
@@ -1522,13 +1522,13 @@ private lemma sq_partials_scalarOnE_le_chartSmoothExt_fderiv
           (I := I) (M := M) α f)
         ((toEuclidean (E := E) : E ≃L[ℝ] EuclN_E) y))
         ((toEuclidean (E := E) : E ≃L[ℝ] EuclN_E)
-          ((Module.finBasis ℝ E) k))‖ =
+          ((chartModelBasis E) k))‖ =
         |((fderiv ℝ
           (DifferentialGeometry.Analysis.Sobolev.Chart.chartSmoothExt
             (I := I) (M := M) α f)
           ((toEuclidean (E := E) : E ≃L[ℝ] EuclN_E) y))
           ((toEuclidean (E := E) : E ≃L[ℝ] EuclN_E)
-            ((Module.finBasis ℝ E) k)))| :=
+            ((chartModelBasis E) k)))| :=
       Real.norm_eq_abs _
     rw [h_lhs_norm] at h_op_bound
     have h_sq_abs :
@@ -1537,13 +1537,13 @@ private lemma sq_partials_scalarOnE_le_chartSmoothExt_fderiv
             (I := I) (M := M) α f)
           ((toEuclidean (E := E) : E ≃L[ℝ] EuclN_E) y))
             ((toEuclidean (E := E) : E ≃L[ℝ] EuclN_E)
-              ((Module.finBasis ℝ E) k)))^2 =
+              ((chartModelBasis E) k)))^2 =
         |((fderiv ℝ
             (DifferentialGeometry.Analysis.Sobolev.Chart.chartSmoothExt
               (I := I) (M := M) α f)
             ((toEuclidean (E := E) : E ≃L[ℝ] EuclN_E) y))
             ((toEuclidean (E := E) : E ≃L[ℝ] EuclN_E)
-              ((Module.finBasis ℝ E) k)))|^2 :=
+              ((chartModelBasis E) k)))|^2 :=
       (sq_abs _).symm
     rw [h_sq_abs]
     have h_op_nn : 0 ≤ ‖fderiv ℝ
@@ -1551,7 +1551,7 @@ private lemma sq_partials_scalarOnE_le_chartSmoothExt_fderiv
           (I := I) (M := M) α f)
         ((toEuclidean (E := E) : E ≃L[ℝ] EuclN_E) y)‖ *
         ‖(toEuclidean (E := E) : E ≃L[ℝ] EuclN_E)
-          ((Module.finBasis ℝ E) k)‖ :=
+          ((chartModelBasis E) k)‖ :=
       mul_nonneg (norm_nonneg _) (norm_nonneg _)
     have h_abs_nn :
         0 ≤ |((fderiv ℝ
@@ -1559,7 +1559,7 @@ private lemma sq_partials_scalarOnE_le_chartSmoothExt_fderiv
                 (I := I) (M := M) α f)
               ((toEuclidean (E := E) : E ≃L[ℝ] EuclN_E) y))
               ((toEuclidean (E := E) : E ≃L[ℝ] EuclN_E)
-                ((Module.finBasis ℝ E) k)))| :=
+                ((chartModelBasis E) k)))| :=
       abs_nonneg _
     have h_pow_le := pow_le_pow_left₀ h_abs_nn h_op_bound 2
     refine h_pow_le.trans ?_

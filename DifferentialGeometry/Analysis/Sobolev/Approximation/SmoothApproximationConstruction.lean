@@ -8,32 +8,26 @@ hypothesis-bearing structure
 `DifferentialGeometry.Analysis.Sobolev.NirenbergNonSmooth.SmoothApproximation`,
 which packages a smooth approximating sequence to a (potentially non-smooth)
 weak solution of an elliptic divergence-form equation `B(u, ·) = ⟨f, ·⟩` on
-Euclidean space, together with uniform pointwise sup-norm bounds on `u_n`,
-its first partials, and the data sequence `f_n`.
+Euclidean space, together with a uniform-in-`n` integrated `L²(Ω')` bound on
+the combined `H¹`+data energy over every precompact open `Ω'`.
 
-## Realisability of the uniform sup-norm bounds
+## The integrated-bound formulation
 
-`SmoothApproximation` requires three uniform-in-`n` pointwise sup-norm bounds
-(for `u_n`, each component of `∇u_n`, and `f_n`). For a generic
-`H¹`-only weak solution `u`, the natural mollification
-`u_n := u ⋆ mollifierEps ε_n` does not satisfy a uniform sup-norm bound
-(the mollifier scaling factor `‖mollifierEps_ε‖_∞` blows up as `ε → 0`).
-The structure is therefore only directly realisable by mollification when
-`u` is itself in `L^∞ ∩ H¹` with bounded weak gradient, in which case
-`‖u ⋆ φ_ε‖_∞ ≤ ‖u‖_∞ · ‖φ_ε‖_{L¹} = ‖u‖_∞`, and the same for `∇u`.
+For a generic `H¹`-only weak solution `u`, the natural mollification
+`u_n := u ⋆ mollifierEps ε_n` does not satisfy a uniform pointwise sup-norm
+bound (the mollifier scaling factor `‖mollifierEps_ε‖_∞` blows up as `ε → 0`).
+The structure therefore exposes only an integrated `L²` bound on the
+energy `∑_j (∂_j u_n)² + (u_n)² + (f_n)²`, which is realisable for
+mollified `H¹` data.
 
-To keep the construction self-contained and dependence-free, this file
-delivers the construction in the "best-case" setting that already produces
-a `SmoothApproximation` in one shot: when the data `(u, f)` is itself
-smooth, compactly supported, and admits classical sup-norm bounds for
-`u`, `∇u`, and `f`. In this setting the constant sequence `u_n := u`,
-`f_n := f` already satisfies every clause of `SmoothApproximation`.
-
-This reduction-to-trivial-sequence form is precisely the entry point used
-downstream by interior-regularity machinery: any `H¹` weak solution that
-arises from a more general setting (e.g. mollification of a less regular
-input, or a member of a `W^{1,∞}` class) ultimately reduces to invoking
-the regularity engine on a representative with these standard properties.
+For the smooth-input baseline case captured here, both formulations are
+available: a smooth compactly-supported `u` admits sup-norm bounds on
+itself, on its first partials, and on the data `f`; the integrated
+`L²(Ω')` energy is then simply controlled by the sum of the squared
+sup-norms times the (finite) volume of `Ω'`. This yields the simplest
+possible `SmoothApproximation`, the constant approximating sequence
+`u_n := u`, `f_n := f`, with a `data_bound` derived from the squared
+sup-norms.
 
 ## Main theorem
 
@@ -143,14 +137,15 @@ in which the approximating sequence is the constant sequence `u_n := u`,
 Each clause of `SmoothApproximation` is then immediate:
 
 * smoothness and the smooth weak-solution identity hold by hypothesis;
-* `f_seq_l2_loc` follows from continuity of `f` and compact support;
-* the three uniform pointwise sup-norm bounds (`u_seq_sup_le`,
-  `grad_seq_sup_le`, `f_seq_sup_le`) follow from continuity and compact
-  support of `u`, each component of `∇u`, and `f`.
+* `f_seq_l2_loc`, `u_seq_l2_loc`, `grad_seq_l2_loc` follow from
+  continuity and compact support;
+* the integrated `H¹`+data bound follows from continuous sup-norm bounds
+  on `u`, `∇u`, `f` combined with finite measure of `Ω'`.
 
-This is the realisable special case of a `SmoothApproximation`. The
-caveat about generic `H¹` `u` (where mollifier scaling defeats the
-uniform sup-norm bound) is documented in the module docstring. -/
+The `data_bound` produced is `M_u² + d · N_grad² + M_f²`, the squared
+sum of the sup-norms — a single nonneg scalar that, combined with the
+`Ω'`-dependent factor `(volume Ω').toReal`, controls the integrated
+energy on every precompact open `Ω'`. -/
 theorem exists_smoothApproximation_of_smooth_compactSupport
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u f : E → ℝ}
@@ -174,6 +169,22 @@ theorem exists_smoothApproximation_of_smooth_compactSupport
   obtain ⟨M_f, hM_f_nn, hM_f_le⟩ :=
     exists_abs_bound_of_continuous_compactSupport
       (h_cont := hf_cont) (h_cs := hf_cs)
+  -- The master `data_bound`: combined squared sup-norms.
+  set D : ℝ := M_u ^ 2 + (Fintype.card (Fin d) : ℝ) * N_grad ^ 2 + M_f ^ 2
+    with hD_def
+  have hD_nn : 0 ≤ D := by
+    refine add_nonneg (add_nonneg (sq_nonneg _) ?_) (sq_nonneg _)
+    exact mul_nonneg (by exact_mod_cast Nat.zero_le _) (sq_nonneg _)
+  -- Continuity of `u`, `f`, and each gradient component.
+  have hu_cont : Continuous u := hu_smooth.continuous
+  have h_grad_cont : ∀ j : Fin d, Continuous
+      (fun x : E => (fderiv ℝ u x) (EuclideanSpace.single j 1)) := by
+    intro j
+    exact (hu_smooth.continuous_fderiv (by simp)).clm_apply continuous_const
+  have hu_grad_cs : ∀ j : Fin d, HasCompactSupport
+      (fun x : E => (fderiv ℝ u x) (EuclideanSpace.single j 1)) := by
+    intro j
+    exact hu_cs.fderiv_apply (𝕜 := ℝ) (EuclideanSpace.single j 1)
   -- Build the structure with the constant sequence.
   refine ⟨{
     u_seq := fun _ => u
@@ -182,20 +193,197 @@ theorem exists_smoothApproximation_of_smooth_compactSupport
     is_smooth_weak_sol := fun _ => ?_
     f_seq_l2_loc := fun _ {S} _hS_cc =>
       memLp_two_restrict_of_continuous_compactSupport hf_cont hf_cs S
-    u_seq_sup_bound := M_u
-    u_seq_sup_bound_nn := hM_u_nn
-    u_seq_sup_le := fun _ x => hM_u_le x
-    grad_seq_sup_bound := N_grad
-    grad_seq_sup_bound_nn := hN_grad_nn
-    grad_seq_sup_le := fun _ j x => hN_grad_le j x
-    f_seq_sup_bound := M_f
-    f_seq_sup_bound_nn := hM_f_nn
-    f_seq_sup_le := fun _ x => hM_f_le x
+    u_seq_l2_loc := fun _ {S} _hS_cc =>
+      memLp_two_restrict_of_continuous_compactSupport hu_cont hu_cs S
+    grad_seq_l2_loc := fun _ {S} _hS_cc j =>
+      memLp_two_restrict_of_continuous_compactSupport
+        (h_grad_cont j) (hu_grad_cs j) S
+    data_bound := D
+    data_bound_nn := hD_nn
+    data_integrated_bound := ?_
   }⟩
-  -- Smooth-weak-solution clause expanded.
-  refine ⟨hu_smooth, ?_⟩
-  intro φ hφ_smooth hφ_cs hφ_supp
-  exact h_weak φ hφ_smooth hφ_cs hφ_supp
+  · -- Smooth-weak-solution clause expanded.
+    refine ⟨hu_smooth, ?_⟩
+    intro φ hφ_smooth hφ_cs hφ_supp
+    exact h_weak φ hφ_smooth hφ_cs hφ_supp
+  · -- Integrated energy bound on a precompact open `Ω'`.
+    intro Ω' hΩ'_open hΩ'_cc
+    -- Volume of `Ω'` is finite.
+    have h_volume_lt_top : volume Ω' < ⊤ :=
+      lt_of_le_of_lt (measure_mono subset_closure) hΩ'_cc.measure_lt_top
+    set V : ℝ := (volume Ω').toReal with hV_def
+    have hV_nn : 0 ≤ V := ENNReal.toReal_nonneg
+    haveI : IsFiniteMeasure (volume.restrict Ω') := by
+      refine ⟨?_⟩
+      rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter]
+      exact h_volume_lt_top
+    -- Integrals of constant functions on `Ω'` are `c · V`.
+    have h_const_int : ∀ c : ℝ,
+        ∫ _x in Ω', c ∂(volume : Measure E) = c * V := by
+      intro c
+      rw [setIntegral_const, smul_eq_mul, mul_comm, hV_def]
+      rfl
+    refine ⟨V, hV_nn, fun _ => ?_⟩
+    -- Each piece is bounded pointwise; integrate.
+    -- ∫ ∑_j (∂_j u)² ≤ d · N_grad² · V
+    have h_grad_each_int : ∀ j : Fin d,
+        ∫ y in Ω', ((fderiv ℝ u y) (EuclideanSpace.single j 1)) ^ 2
+            ∂(volume : Measure E) ≤ N_grad ^ 2 * V := by
+      intro j
+      -- (∂_j u y)² ≤ N_grad² pointwise.
+      have h_pt : ∀ y : E,
+          ((fderiv ℝ u y) (EuclideanSpace.single j 1)) ^ 2 ≤ N_grad ^ 2 := by
+        intro y
+        have h_abs := hN_grad_le j y
+        rw [show ((fderiv ℝ u y) (EuclideanSpace.single j 1)) ^ 2 =
+              |(fderiv ℝ u y) (EuclideanSpace.single j 1)| ^ 2 from (sq_abs _).symm]
+        exact pow_le_pow_left₀ (abs_nonneg _) h_abs 2
+      -- Integrability of (∂_j u)² on Ω': bounded by N_grad², integrable as constant.
+      have h_int_lhs : Integrable
+          (fun y : E => ((fderiv ℝ u y) (EuclideanSpace.single j 1)) ^ 2)
+          (volume.restrict Ω') := by
+        have h_cont_sq : Continuous
+            (fun y : E => ((fderiv ℝ u y) (EuclideanSpace.single j 1)) ^ 2) :=
+          (h_grad_cont j).pow 2
+        refine MemLp.integrable (le_refl 1) ?_
+        refine MemLp.of_bound h_cont_sq.aestronglyMeasurable (N_grad ^ 2) ?_
+        rw [ae_restrict_iff' hΩ'_open.measurableSet]
+        refine Filter.Eventually.of_forall ?_
+        intro y _
+        rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _)]
+        exact h_pt y
+      have h_int_rhs : Integrable (fun _ : E => N_grad ^ 2)
+          (volume.restrict Ω') := integrable_const _
+      have h_le_int :
+          ∫ y in Ω', ((fderiv ℝ u y) (EuclideanSpace.single j 1)) ^ 2
+              ∂(volume : Measure E) ≤
+          ∫ _y in Ω', N_grad ^ 2 ∂(volume : Measure E) := by
+        refine integral_mono_ae h_int_lhs h_int_rhs ?_
+        refine Filter.Eventually.of_forall ?_; exact h_pt
+      rw [h_const_int (N_grad ^ 2)] at h_le_int
+      exact h_le_int
+    -- ∫ u² ≤ M_u² · V
+    have h_u_sq_int : ∫ y in Ω', (u y) ^ 2 ∂(volume : Measure E) ≤ M_u ^ 2 * V := by
+      have h_pt : ∀ y : E, (u y) ^ 2 ≤ M_u ^ 2 := by
+        intro y
+        have h_abs := hM_u_le y
+        rw [show (u y) ^ 2 = |u y| ^ 2 from (sq_abs _).symm]
+        exact pow_le_pow_left₀ (abs_nonneg _) h_abs 2
+      have h_int_lhs : Integrable (fun y : E => (u y) ^ 2)
+          (volume.restrict Ω') := by
+        have h_cont_sq : Continuous (fun y : E => (u y) ^ 2) :=
+          hu_cont.pow 2
+        refine MemLp.integrable (le_refl 1) ?_
+        refine MemLp.of_bound h_cont_sq.aestronglyMeasurable (M_u ^ 2) ?_
+        rw [ae_restrict_iff' hΩ'_open.measurableSet]
+        refine Filter.Eventually.of_forall ?_
+        intro y _
+        rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _)]
+        exact h_pt y
+      have h_int_rhs : Integrable (fun _ : E => M_u ^ 2)
+          (volume.restrict Ω') := integrable_const _
+      have h_le_int :
+          ∫ y in Ω', (u y) ^ 2 ∂(volume : Measure E) ≤
+          ∫ _y in Ω', M_u ^ 2 ∂(volume : Measure E) := by
+        refine integral_mono_ae h_int_lhs h_int_rhs ?_
+        refine Filter.Eventually.of_forall ?_; exact h_pt
+      rw [h_const_int (M_u ^ 2)] at h_le_int
+      exact h_le_int
+    -- ∫ f² ≤ M_f² · V
+    have h_f_sq_int : ∫ y in Ω', (f y) ^ 2 ∂(volume : Measure E) ≤ M_f ^ 2 * V := by
+      have h_pt : ∀ y : E, (f y) ^ 2 ≤ M_f ^ 2 := by
+        intro y
+        have h_abs := hM_f_le y
+        rw [show (f y) ^ 2 = |f y| ^ 2 from (sq_abs _).symm]
+        exact pow_le_pow_left₀ (abs_nonneg _) h_abs 2
+      have h_int_lhs : Integrable (fun y : E => (f y) ^ 2)
+          (volume.restrict Ω') := by
+        have h_cont_sq : Continuous (fun y : E => (f y) ^ 2) :=
+          hf_cont.pow 2
+        refine MemLp.integrable (le_refl 1) ?_
+        refine MemLp.of_bound h_cont_sq.aestronglyMeasurable (M_f ^ 2) ?_
+        rw [ae_restrict_iff' hΩ'_open.measurableSet]
+        refine Filter.Eventually.of_forall ?_
+        intro y _
+        rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _)]
+        exact h_pt y
+      have h_int_rhs : Integrable (fun _ : E => M_f ^ 2)
+          (volume.restrict Ω') := integrable_const _
+      have h_le_int :
+          ∫ y in Ω', (f y) ^ 2 ∂(volume : Measure E) ≤
+          ∫ _y in Ω', M_f ^ 2 ∂(volume : Measure E) := by
+        refine integral_mono_ae h_int_lhs h_int_rhs ?_
+        refine Filter.Eventually.of_forall ?_; exact h_pt
+      rw [h_const_int (M_f ^ 2)] at h_le_int
+      exact h_le_int
+    -- ∫ ∑_j (∂_j u)² ≤ d · N_grad² · V via summing the per-j bounds.
+    have h_grad_sum_int :
+        ∫ y in Ω', ∑ j : Fin d,
+            ((fderiv ℝ u y) (EuclideanSpace.single j 1)) ^ 2
+          ∂(volume : Measure E) ≤
+          (Fintype.card (Fin d) : ℝ) * N_grad ^ 2 * V := by
+      -- Move sum outside the integral.
+      have h_sum_swap :
+          ∫ y in Ω', ∑ j : Fin d,
+              ((fderiv ℝ u y) (EuclideanSpace.single j 1)) ^ 2
+            ∂(volume : Measure E) =
+          ∑ j : Fin d, ∫ y in Ω',
+              ((fderiv ℝ u y) (EuclideanSpace.single j 1)) ^ 2
+            ∂(volume : Measure E) := by
+        refine integral_finset_sum (μ := volume.restrict Ω') Finset.univ ?_
+        intro j _
+        have h_cont_sq : Continuous
+            (fun y : E => ((fderiv ℝ u y) (EuclideanSpace.single j 1)) ^ 2) :=
+          (h_grad_cont j).pow 2
+        have h_pt : ∀ y : E,
+            ((fderiv ℝ u y) (EuclideanSpace.single j 1)) ^ 2 ≤ N_grad ^ 2 := by
+          intro y
+          have h_abs := hN_grad_le j y
+          rw [show ((fderiv ℝ u y) (EuclideanSpace.single j 1)) ^ 2 =
+                |(fderiv ℝ u y) (EuclideanSpace.single j 1)| ^ 2 from (sq_abs _).symm]
+          exact pow_le_pow_left₀ (abs_nonneg _) h_abs 2
+        refine MemLp.integrable (le_refl 1) ?_
+        refine MemLp.of_bound h_cont_sq.aestronglyMeasurable (N_grad ^ 2) ?_
+        rw [ae_restrict_iff' hΩ'_open.measurableSet]
+        refine Filter.Eventually.of_forall ?_
+        intro y _
+        rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _)]
+        exact h_pt y
+      rw [h_sum_swap]
+      -- Sum of per-j bounds.
+      have h_sum_le :
+          ∑ j : Fin d, ∫ y in Ω',
+              ((fderiv ℝ u y) (EuclideanSpace.single j 1)) ^ 2
+            ∂(volume : Measure E) ≤
+          ∑ _j : Fin d, N_grad ^ 2 * V :=
+        Finset.sum_le_sum (fun j _ => h_grad_each_int j)
+      have h_const_sum :
+          ∑ _j : Fin d, N_grad ^ 2 * V =
+            (Fintype.card (Fin d) : ℝ) * N_grad ^ 2 * V := by
+        rw [Finset.sum_const, Finset.card_univ]
+        ring
+      rw [h_const_sum] at h_sum_le
+      exact h_sum_le
+    -- Combine: total ≤ V · D.
+    -- D = M_u² + d · N_grad² + M_f²; total ≤ d·N_grad²·V + M_u²·V + M_f²·V = V·D.
+    have h_combined :
+        (∫ y in Ω',
+            ∑ j : Fin d,
+              ((fderiv ℝ u y) (EuclideanSpace.single j 1)) ^ 2
+          ∂(volume : Measure E)) +
+        (∫ y in Ω', (u y) ^ 2 ∂(volume : Measure E)) +
+        (∫ y in Ω', (f y) ^ 2 ∂(volume : Measure E)) ≤
+          (Fintype.card (Fin d) : ℝ) * N_grad ^ 2 * V + M_u ^ 2 * V + M_f ^ 2 * V := by
+      have h1 := h_grad_sum_int
+      have h2 := h_u_sq_int
+      have h3 := h_f_sq_int
+      linarith
+    have h_combine_eq :
+        (Fintype.card (Fin d) : ℝ) * N_grad ^ 2 * V + M_u ^ 2 * V + M_f ^ 2 * V =
+          V * D := by
+      rw [hD_def]; ring
+    rw [h_combine_eq] at h_combined
+    exact h_combined
 
 /-- **Convenience form: construction from an `IsSmoothWeakSolution`.**
 

@@ -207,7 +207,7 @@ Euclidean pullback of a manifold cutoff supported inside `K_α` and `≡ 1` on
   vanishes off this set on the chart target).
 
 This makes `tightenedChartPushed - χ_α` ready as input to the cross-chart bound. -/
-private def tightenedChartPushed
+def tightenedChartPushed
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (α : M) (η_M : M → ℝ) (u : M → ℝ) : EuclN → ℝ :=
   fun y =>
@@ -217,7 +217,7 @@ private def tightenedChartPushed
 
 /-- The chart-pullback of `tightenedChartPushed` agrees with the chart-pullback
 of `chartPushed g α u` on `M`. -/
-private lemma chartPullback_tightenedChartPushed_eq
+lemma chartPullback_tightenedChartPushed_eq
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (α : M) {η_M : M → ℝ}
     (hη_one_on_tsupport :
@@ -301,7 +301,7 @@ private lemma chartPullback_tightenedChartPushed_eq
 
 /-- The closed support of `tightenedChartPushed` lies inside the chart-α image
 of `K_α^M`, when the underlying manifold cutoff `η_M` has `tsupport η_M ⊆ K_α`. -/
-private lemma tsupport_tightenedChartPushed_subset
+lemma tsupport_tightenedChartPushed_subset
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (α : M) {η_M : M → ℝ}
     (hη_cpt : HasCompactSupport η_M)
@@ -341,7 +341,7 @@ private lemma tsupport_tightenedChartPushed_subset
 
 /-- `tightenedChartPushed` agrees with `chartPushed g α u` pointwise on the chart
 target `chartTargetEuclid α`, when `η_M ≡ 1` on `tsupport ρ_α`. -/
-private lemma tightenedChartPushed_eq_chartPushed_on_target
+lemma tightenedChartPushed_eq_chartPushed_on_target
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (α : M) {η_M : M → ℝ}
     (hη_one_on_tsupport :

@@ -50,11 +50,15 @@ theorem component0S_product
     (A : Tensor0SSpace s I x) (B : Tensor0SSpace q I x)
     (slots : Fin (s + q) -> Idx) :
     component0S (I := I) basis
-        (Bundle.continuousMultilinearMap.product_fun A B) slots =
+        (Bundle.continuousMultilinearMap.product_fun
+          (𝕜 := Real) (F := E) (E := TangentSpace I) A B) slots =
       component0S (I := I) basis A (slots ∘ Fin.castAdd q) *
         component0S (I := I) basis B (slots ∘ Fin.natAdd s) := by
-  rw [component0S_apply, Bundle.continuousMultilinearMap.product_fun_apply]
-  rfl
+  have hP := Bundle.continuousMultilinearMap.product_fun_apply
+    (𝕜 := Real) (F := E) (E := TangentSpace I) A B
+    (fun a => basis (slots a))
+  simp only [component0S_apply]
+  exact hP
 
 end Covariant
 
@@ -123,14 +127,16 @@ theorem extRS_basis
       componentRS (I := I) basis A upper lower =
         componentRS (I := I) basis B upper lower) :
     A = B := by
-  apply ContinuousLinearMap.ext
-  intro input
-  apply ext0S_basis (I := I) basis
-  intro lower
-  rw [componentRS_expand_input (I := I) basis A input lower,
-    componentRS_expand_input (I := I) basis B input lower]
-  refine Finset.sum_congr rfl fun upper _ => ?_
-  rw [h upper lower]
+  -- Show that A input = B input for every input via the basis decomposition
+  have key : ∀ input : Tensor0SSpace r I x, A input = B input := by
+    intro input
+    apply ext0S_basis (I := I) basis
+    intro lower
+    rw [componentRS_expand_input (I := I) basis A input lower,
+      componentRS_expand_input (I := I) basis B input lower]
+    refine Finset.sum_congr rfl fun upper _ => ?_
+    rw [h upper lower]
+  exact ContinuousLinearMap.ext (f := A) (g := B) key
 
 end Mixed
 

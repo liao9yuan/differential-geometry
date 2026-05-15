@@ -179,7 +179,7 @@ private instance modelHaar_map_toEuclidean_isAddHaarMeasure :
 
 /-- The Haar scaling constant: a positive `ℝ≥0` such that
 `Measure.map toEuclidean modelHaar = c • volume` on Euclidean space. -/
-private noncomputable def euclideanHaarFactor (E : Type*)
+noncomputable def euclideanHaarFactor (E : Type*)
     [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] :
     ℝ≥0 :=
   letI : MeasurableSpace E := borel E
@@ -190,22 +190,22 @@ private noncomputable def euclideanHaarFactor (E : Type*)
     (volume : Measure (EuclN E))
 
 /-- The Haar scaling constant is positive. -/
-private lemma euclideanHaarFactor_pos :
+lemma euclideanHaarFactor_pos :
     0 < euclideanHaarFactor E :=
   MeasureTheory.Measure.addHaarScalarFactor_pos_of_isAddHaarMeasure _ _
 
 /-- The Haar scaling constant is nonzero (as `ℝ≥0`). -/
-private lemma euclideanHaarFactor_ne_zero :
+lemma euclideanHaarFactor_ne_zero :
     euclideanHaarFactor E ≠ 0 :=
   ne_of_gt euclideanHaarFactor_pos
 
 /-- The Haar scaling constant viewed as `ℝ≥0∞` is nonzero. -/
-private lemma euclideanHaarFactor_ennreal_ne_zero :
+lemma euclideanHaarFactor_ennreal_ne_zero :
     (euclideanHaarFactor E : ℝ≥0∞) ≠ 0 := by
   exact_mod_cast euclideanHaarFactor_ne_zero
 
 /-- The Haar scaling constant viewed as `ℝ≥0∞` is finite. -/
-private lemma euclideanHaarFactor_ennreal_ne_top :
+lemma euclideanHaarFactor_ennreal_ne_top :
     (euclideanHaarFactor E : ℝ≥0∞) ≠ ⊤ := ENNReal.coe_ne_top
 
 /-- The pushforward equation: `Measure.map toEuclidean modelHaar = c_E • volume`
@@ -1466,6 +1466,363 @@ theorem eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform
   rw [eLpNorm_eq_lintegral_rpow_enorm_toReal hp_ne_zero hp_top]
   gcongr
   rw [← ENNReal.ofReal_rpow_of_pos hC_pos]
+
+/-! ## A.e. equality transfer from the Riemannian measure to the chart-target volume
+
+For two measurable functions `u, v : M → ℝ` that agree almost everywhere with
+respect to the global Riemannian measure `μ_g = riemannianMeasure g (chartAtlasPOU I M)`,
+their chart-pushed images `chartPushedRaw I α u` and `chartPushedRaw I α v` agree
+almost everywhere with respect to the Euclidean volume measure restricted to
+`chartTargetEuclid α`. This is the null-set transfer underlying chart-based
+Sobolev arguments on closed manifolds. -/
+
+/-- Global Borel-measurable extension of `(extChartAt I α).symm` taking the
+fixed default value `α : M` outside the chart target. -/
+private noncomputable def extChartAtSymmGlobal (α : M) : E → M := by
+  classical
+  exact (extChartAt I α).target.piecewise
+    (fun y : E => (extChartAt I α).symm y)
+    (fun _ : E => α)
+
+private lemma extChartAtSymmGlobal_eq_on_target (α : M) {y : E}
+    (hy : y ∈ (extChartAt I α).target) :
+    extChartAtSymmGlobal (I := I) (M := M) α y = (extChartAt I α).symm y := by
+  classical
+  change (extChartAt I α).target.piecewise
+    (fun y : E => (extChartAt I α).symm y)
+    (fun _ : E => α) y = _
+  rw [Set.piecewise_eq_of_mem _ _ _ hy]
+
+private lemma extChartAtSymmGlobal_measurable (α : M) :
+    Measurable (extChartAtSymmGlobal (I := I) (M := M) α) := by
+  classical
+  unfold extChartAtSymmGlobal
+  exact ContinuousOn.measurable_piecewise
+    (continuousOn_extChartAt_symm (I := I) α)
+    continuousOn_const
+    (extChartAt_target_measurableSet (I := I) (M := M) α)
+
+/-- Measurability of `chartPushedRaw I α F` for measurable `F`. -/
+lemma chartPushedRaw_measurable (α : M) {F : M → ℝ}
+    (hF_meas : Measurable F) :
+    Measurable (chartPushedRaw I α F) := by
+  classical
+  have h_extSymm_meas : Measurable (extChartAtSymmGlobal (I := I) (M := M) α) :=
+    extChartAtSymmGlobal_measurable (I := I) (M := M) α
+  have h_comp : Measurable
+      (fun y : EuclN E =>
+        F (extChartAtSymmGlobal (I := I) (M := M) α
+          ((toEuclidean (E := E)).symm y))) :=
+    hF_meas.comp (h_extSymm_meas.comp
+      (toEuclidean (E := E)).symm.continuous.measurable)
+  have hCT_meas : MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
+    chartTargetEuclid_measurableSet (I := I) (M := M) α
+  have h_piecewise :
+      chartPushedRaw I α F =
+        (chartTargetEuclid (I := I) (M := M) α).piecewise
+          (fun y : EuclN E =>
+            F (extChartAtSymmGlobal (I := I) (M := M) α
+              ((toEuclidean (E := E)).symm y)))
+          (fun _ : EuclN E => (0 : ℝ)) := by
+    funext y
+    by_cases hy : y ∈ chartTargetEuclid (I := I) (M := M) α
+    · rw [Set.piecewise_eq_of_mem _ _ _ hy]
+      rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α F hy]
+      have h_toE_symm_in : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target := by
+        rcases hy with ⟨w, hw_target, hwy⟩
+        have h_eq : (toEuclidean (E := E)).symm y = w := by
+          rw [← hwy]; exact (toEuclidean (E := E)).symm_apply_apply w
+        rw [h_eq]; exact hw_target
+      rw [extChartAtSymmGlobal_eq_on_target (I := I) (M := M) α h_toE_symm_in]
+    · rw [Set.piecewise_eq_of_notMem _ _ _ hy]
+      rw [chartPushedRaw_apply_of_notMem (I := I) (M := M) α F hy]
+  rw [h_piecewise]
+  exact Measurable.piecewise hCT_meas h_comp measurable_const
+
+/-- Helper: `toEuclidean.symm` of a point in `chartTargetEuclid α` lies in the
+chart target. -/
+private lemma toEuclidean_symm_target_of_mem (α : M) {y : EuclN E}
+    (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
+    (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target := by
+  rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
+  exact hy
+
+/-- Pointwise on `chartTargetEuclid α`, the chart-pushed difference equals the
+difference of the chart-pushed components. -/
+private lemma chartPushedRaw_sub_pointwise (α : M) (u v : M → ℝ)
+    {y : EuclN E} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
+    chartPushedRaw I α (fun x => u x - v x) y =
+      chartPushedRaw I α u y - chartPushedRaw I α v y := by
+  classical
+  rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α (fun x => u x - v x) hy]
+  rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α u hy]
+  rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α v hy]
+
+/-- Chart-pushed image of an a.e.-zero function (under the global Riemannian
+measure on a closed manifold) is a.e. zero with respect to the Euclidean
+volume measure restricted to the chart-target image.
+
+This is the engine for transferring a.e. equality between `u, v : M → ℝ` to
+a.e. equality of their chart pushforwards on `chartTargetEuclid α`. -/
+private lemma chartPushedRaw_aeEq_zero_of_ae_zero_riemannianMeasure
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
+    {d : M → ℝ} (hd_meas : Measurable d)
+    (hd_ae : d =ᵐ[DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
+        (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)] (fun _ => (0 : ℝ))) :
+    chartPushedRaw I α d =ᵐ[
+        (volume : Measure (EuclN E)).restrict
+          (chartTargetEuclid (I := I) (M := M) α)]
+      (fun _ => (0 : ℝ)) := by
+  classical
+  -- Step 1: a.e. equality gives ∫⁻ ‖d‖² · indicator(chart src) dμ_g = 0.
+  have h_chartSrc_meas : MeasurableSet (chartAt H α).source :=
+    (chartAt H α).open_source.measurableSet
+  set F : M → ℝ≥0∞ := fun x =>
+    (chartAt H α).source.indicator (fun x => ‖d x‖ₑ ^ (2 : ℝ)) x with hF_def
+  have hF_meas : Measurable F :=
+    ((hd_meas.enorm).pow_const _).indicator h_chartSrc_meas
+  have hF_zero_off : ∀ x, x ∉ (chartAt H α).source → F x = 0 := fun x hx =>
+    Set.indicator_of_notMem hx _
+  have h_lint_F_riemannian_zero :
+      ∫⁻ x, F x ∂(DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
+        (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)) = 0 := by
+    have h_F_ae_zero : F =ᵐ[DifferentialGeometry.Integral.Measure.riemannianMeasure
+        (I := I) g (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)]
+        (fun _ : M => (0 : ℝ≥0∞)) := by
+      filter_upwards [hd_ae] with x hx
+      have hxz : d x = 0 := hx
+      change (chartAt H α).source.indicator (fun x => ‖d x‖ₑ ^ (2 : ℝ)) x = 0
+      by_cases hxsrc : x ∈ (chartAt H α).source
+      · rw [Set.indicator_of_mem hxsrc]
+        rw [hxz, enorm_zero, ENNReal.zero_rpow_of_pos (by norm_num : (0 : ℝ) < 2)]
+      · rw [Set.indicator_of_notMem hxsrc]
+    rw [MeasureTheory.lintegral_congr_ae h_F_ae_zero]
+    simp
+  -- Step 2: F is supported in chart α source, so ∫⁻ F dμ_g = ∫⁻ F d(chartLocalMeasure α).
+  have h_lint_F_chartLocal_eq :
+      ∫⁻ x, F x ∂(DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
+          (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)) =
+        ∫⁻ x, F x ∂(DifferentialGeometry.Integral.Measure.chartLocalMeasure (I := I) g α) :=
+    riemannianMeasure_lintegral_eq_chartLocalMeasure_of_supportIn
+      (I := I) (M := M) g α hF_meas hF_zero_off
+  have h_lint_F_chartLocal_zero :
+      ∫⁻ x, F x ∂(DifferentialGeometry.Integral.Measure.chartLocalMeasure (I := I) g α) = 0 := by
+    rw [← h_lint_F_chartLocal_eq]; exact h_lint_F_riemannian_zero
+  -- Step 3: F = ‖d‖² on chart source. So ∫⁻ ‖d‖² d(chartLocalMeasure α) = 0 too,
+  -- since chartLocalMeasure α vanishes off chart α source.
+  have h_chartLocal_offSrc_zero :
+      (DifferentialGeometry.Integral.Measure.chartLocalMeasure (I := I) g α)
+          ((chartAt H α).source)ᶜ = 0 :=
+    DifferentialGeometry.Integral.Measure.chartLocalMeasure_apply_of_disjoint_source
+      (I := I) g α h_chartSrc_meas.compl disjoint_compl_left
+  have h_F_eq_norm_sq_ae :
+      F =ᵐ[DifferentialGeometry.Integral.Measure.chartLocalMeasure (I := I) g α]
+        (fun x => ‖d x‖ₑ ^ (2 : ℝ)) := by
+    rw [Filter.EventuallyEq, MeasureTheory.ae_iff]
+    refine MeasureTheory.measure_mono_null ?_ h_chartLocal_offSrc_zero
+    intro x hx
+    simp only [Set.mem_setOf_eq] at hx
+    by_cases hxsrc : x ∈ (chartAt H α).source
+    · exfalso
+      apply hx
+      change (chartAt H α).source.indicator (fun x => ‖d x‖ₑ ^ (2 : ℝ)) x =
+        ‖d x‖ₑ ^ (2 : ℝ)
+      rw [Set.indicator_of_mem hxsrc]
+    · exact hxsrc
+  have h_lint_d_chartLocal_zero :
+      ∫⁻ x, ‖d x‖ₑ ^ (2 : ℝ)
+          ∂(DifferentialGeometry.Integral.Measure.chartLocalMeasure (I := I) g α) = 0 := by
+    rw [← MeasureTheory.lintegral_congr_ae h_F_eq_norm_sq_ae]
+    exact h_lint_F_chartLocal_zero
+  -- Step 4: Use chartLocalMeasure_lintegral_via_chartTargetEuclid for ‖d‖².
+  have h_norm_sq_meas : Measurable (fun x : M => ‖d x‖ₑ ^ (2 : ℝ)) :=
+    (hd_meas.enorm).pow_const _
+  have h_bridge :=
+    chartLocalMeasure_lintegral_via_chartTargetEuclid (I := I) (M := M) g α h_norm_sq_meas
+  rw [h_lint_d_chartLocal_zero] at h_bridge
+  set GG : EuclN E → ℝ≥0∞ := fun y =>
+    ENNReal.ofReal
+        (DifferentialGeometry.Integral.Measure.chartDensity g α
+          ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+      ‖d ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))‖ₑ ^ (2 : ℝ) with hGG_def
+  have hbr2 :
+      (euclideanHaarFactor E : ℝ≥0∞) *
+        ∫⁻ y in chartTargetEuclid (I := I) (M := M) α, GG y
+          ∂(volume : Measure (EuclN E)) = 0 :=
+    h_bridge.symm
+  -- The Haar factor is positive (as ENNReal), so the inner integral is 0.
+  have h_c_E_ne_zero : (euclideanHaarFactor E : ℝ≥0∞) ≠ 0 := euclideanHaarFactor_ennreal_ne_zero
+  have h_inner_zero :
+      ∫⁻ y in chartTargetEuclid (I := I) (M := M) α, GG y
+        ∂(volume : Measure (EuclN E)) = 0 := by
+    rcases mul_eq_zero.mp hbr2 with h | h
+    · exact absurd h h_c_E_ne_zero
+    · exact h
+  -- Step 5: From the inner integral being 0, deduce GG = 0 a.e. on volume.restrict chartTarget.
+  have h_chartTarget_meas :
+      MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
+    chartTargetEuclid_measurableSet (I := I) (M := M) α
+  -- Measurability of GG against volume.restrict.
+  have hGG_aem : AEMeasurable GG
+      ((volume : Measure (EuclN E)).restrict
+        (chartTargetEuclid (I := I) (M := M) α)) := by
+    -- density ∘ symm ∘ toE.symm is continuous on chartTargetEuclid α.
+    have h_density_contOn : ContinuousOn
+        (fun y : EuclN E =>
+          DifferentialGeometry.Integral.Measure.chartDensity g α
+            ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))
+        (chartTargetEuclid (I := I) (M := M) α) := by
+      refine (DifferentialGeometry.Integral.Measure.chartDensity_continuousOn
+        (I := I) (M := M) g α).comp
+          (continuousOn_symm_toEuclideanSymm (I := I) (M := M) α) ?_
+      intro y hy
+      exact symm_toEuclidean_symm_mem_chartAtSource (I := I) (M := M) α hy
+    have h_density_aem : AEMeasurable
+        (fun y : EuclN E =>
+          DifferentialGeometry.Integral.Measure.chartDensity g α
+            ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))
+        ((volume : Measure (EuclN E)).restrict
+          (chartTargetEuclid (I := I) (M := M) α)) :=
+      h_density_contOn.aemeasurable h_chartTarget_meas
+    have h_ofReal_dens_aem : AEMeasurable
+        (fun y : EuclN E => ENNReal.ofReal
+          (DifferentialGeometry.Integral.Measure.chartDensity g α
+            ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))))
+        ((volume : Measure (EuclN E)).restrict
+          (chartTargetEuclid (I := I) (M := M) α)) :=
+      ENNReal.measurable_ofReal.comp_aemeasurable h_density_aem
+    have h_d_symm_meas : Measurable (fun y : EuclN E =>
+        d (extChartAtSymmGlobal (I := I) (M := M) α ((toEuclidean (E := E)).symm y))) :=
+      hd_meas.comp ((extChartAtSymmGlobal_measurable (I := I) (M := M) α).comp
+        (toEuclidean (E := E)).symm.continuous.measurable)
+    have h_d_global_aem : AEMeasurable (fun y : EuclN E =>
+        ‖d (extChartAtSymmGlobal (I := I) (M := M) α ((toEuclidean (E := E)).symm y))‖ₑ
+          ^ (2 : ℝ)) := (h_d_symm_meas.enorm.pow_const _).aemeasurable
+    -- On chartTargetEuclid α, d (extChartAtSymmGlobal α (toE.symm y)) = d (symm (toE.symm y)).
+    have h_d_norm_aem : AEMeasurable
+        (fun y : EuclN E => ‖d ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))‖ₑ
+          ^ (2 : ℝ))
+        ((volume : Measure (EuclN E)).restrict
+          (chartTargetEuclid (I := I) (M := M) α)) := by
+      refine AEMeasurable.congr (h_d_global_aem.mono_measure ?_) ?_
+      · exact MeasureTheory.Measure.restrict_le_self
+      · rw [Filter.EventuallyEq, MeasureTheory.ae_restrict_iff' h_chartTarget_meas]
+        refine Filter.Eventually.of_forall (fun y hy => ?_)
+        congr 1
+        congr 1
+        rw [extChartAtSymmGlobal_eq_on_target (I := I) (M := M) α
+          (toEuclidean_symm_target_of_mem (I := I) (M := M) α hy)]
+    exact h_ofReal_dens_aem.mul h_d_norm_aem
+  have h_GG_ae_zero : ∀ᵐ y ∂((volume : Measure (EuclN E)).restrict
+      (chartTargetEuclid (I := I) (M := M) α)), GG y = 0 :=
+    (MeasureTheory.lintegral_eq_zero_iff' hGG_aem).mp h_inner_zero
+  -- Step 6: density > 0 on chartTarget, so ‖d ∘ symm ∘ toE.symm y‖ ^ 2 = 0 a.e., so d = 0 a.e.
+  have h_density_pos_ae :
+      ∀ᵐ y ∂((volume : Measure (EuclN E)).restrict
+        (chartTargetEuclid (I := I) (M := M) α)),
+        (0 : ℝ≥0∞) < ENNReal.ofReal
+          (DifferentialGeometry.Integral.Measure.chartDensity g α
+            ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) := by
+    rw [MeasureTheory.ae_restrict_iff' h_chartTarget_meas]
+    refine Filter.Eventually.of_forall fun y hy => ?_
+    refine ENNReal.ofReal_pos.mpr ?_
+    refine chartDensity_pos_on_target (I := I) (M := M) g α ?_
+    exact toEuclidean_symm_target_of_mem (I := I) (M := M) α hy
+  have h_d_norm_ae_zero : ∀ᵐ y ∂((volume : Measure (EuclN E)).restrict
+      (chartTargetEuclid (I := I) (M := M) α)),
+      ‖d ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))‖ₑ ^ (2 : ℝ) = 0 := by
+    filter_upwards [h_GG_ae_zero, h_density_pos_ae] with y hy h_pos
+    rcases mul_eq_zero.mp hy with h | h
+    · exact absurd h h_pos.ne'
+    · exact h
+  -- Step 7: a.e. ‖d (symm (toE.symm y))‖ = 0, so d (symm (toE.symm y)) = 0 a.e.
+  have h_d_zero_ae : ∀ᵐ y ∂((volume : Measure (EuclN E)).restrict
+      (chartTargetEuclid (I := I) (M := M) α)),
+      d ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) = 0 := by
+    filter_upwards [h_d_norm_ae_zero] with y hy
+    have h_pow := ENNReal.rpow_eq_zero_iff.mp hy
+    rcases h_pow with ⟨h1, _⟩ | ⟨_, h2⟩
+    · exact (enorm_eq_zero (a :=
+        d ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))).mp h1
+    · exact absurd h2 (by norm_num)
+  -- Step 8: combine with the chartTarget restriction to conclude.
+  rw [Filter.EventuallyEq, MeasureTheory.ae_restrict_iff' h_chartTarget_meas]
+  rw [MeasureTheory.ae_restrict_iff' h_chartTarget_meas] at h_d_zero_ae
+  filter_upwards [h_d_zero_ae] with y hy hy_in
+  -- Goal: chartPushedRaw I α d y = 0 (here `(fun _ => (0 : ℝ)) y = 0`).
+  -- We have d (symm (toE.symm y)) = 0 from hy applied at hy_in.
+  rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α d hy_in]
+  exact hy hy_in
+
+/-- The main null-set transfer: for measurable `u, v : M → ℝ` with
+`u =ᵐ[μ_g] v`, their chart-pushed raw images agree a.e. with respect to the
+Euclidean volume measure restricted to `chartTargetEuclid α`. -/
+theorem chartPushedRaw_aeEq_of_ae_eq_riemannianMeasure
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
+    {u v : M → ℝ}
+    (h_meas_u : Measurable u) (h_meas_v : Measurable v)
+    (h_ae : u =ᵐ[DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
+        (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)] v) :
+    chartPushedRaw I α u =ᵐ[
+        (volume : Measure (EuclN E)).restrict
+          (chartTargetEuclid (I := I) (M := M) α)]
+      chartPushedRaw I α v := by
+  classical
+  set d : M → ℝ := fun x => u x - v x with hd_def
+  have hd_meas : Measurable d := h_meas_u.sub h_meas_v
+  have hd_ae_zero : d =ᵐ[DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
+      (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)] (fun _ => (0 : ℝ)) := by
+    filter_upwards [h_ae] with x hx
+    change u x - v x = 0
+    rw [hx, sub_self]
+  have h_main :=
+    chartPushedRaw_aeEq_zero_of_ae_zero_riemannianMeasure
+      (I := I) (M := M) g α hd_meas hd_ae_zero
+  have h_chartTarget_meas :
+      MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
+    chartTargetEuclid_measurableSet (I := I) (M := M) α
+  rw [Filter.EventuallyEq, MeasureTheory.ae_restrict_iff' h_chartTarget_meas]
+  rw [Filter.EventuallyEq, MeasureTheory.ae_restrict_iff' h_chartTarget_meas] at h_main
+  filter_upwards [h_main] with y hy hy_in
+  -- Goal: chartPushedRaw I α u y = chartPushedRaw I α v y.
+  -- We have chartPushedRaw I α d y = 0 from `hy hy_in`.
+  rw [chartPushedRaw_sub_pointwise (I := I) (M := M) α u v hy_in] at hy
+  have hyz := hy hy_in
+  linarith [sub_eq_zero.mp hyz]
+
+/-- The POU-weighted version: a.e. equality on `M` lifts to a.e. equality of
+`chartPushed` (with partition-of-unity weight) on the chart target. -/
+theorem chartPushed_aeEq_of_ae_eq_riemannianMeasure
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
+    {u v : M → ℝ}
+    (h_meas_u : Measurable u) (h_meas_v : Measurable v)
+    (h_ae : u =ᵐ[DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
+        (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)] v) :
+    chartPushed (I := I) (M := M)
+        (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u =ᵐ[
+      (volume : Measure (EuclN E)).restrict
+        (chartTargetEuclid (I := I) (M := M) α)]
+      chartPushed (I := I) (M := M)
+        (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α v := by
+  classical
+  have h_raw := chartPushedRaw_aeEq_of_ae_eq_riemannianMeasure (I := I) (M := M)
+    g α h_meas_u h_meas_v h_ae
+  have h_chartTarget_meas :
+      MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
+    chartTargetEuclid_measurableSet (I := I) (M := M) α
+  rw [Filter.EventuallyEq, MeasureTheory.ae_restrict_iff' h_chartTarget_meas]
+  rw [Filter.EventuallyEq, MeasureTheory.ae_restrict_iff' h_chartTarget_meas] at h_raw
+  filter_upwards [h_raw] with y hy hy_in
+  -- chartPushed ρ α u y = ρ α (symm (toE.symm y)) * u (symm (toE.symm y)).
+  -- On chartTargetEuclid α, chartPushedRaw u y = u (symm (toE.symm y)).
+  unfold chartPushed
+  have huv := hy hy_in
+  rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α u hy_in] at huv
+  rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α v hy_in] at huv
+  rw [huv]
 
 end Chart
 end Sobolev

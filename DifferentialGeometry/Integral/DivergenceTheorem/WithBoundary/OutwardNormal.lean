@@ -1283,7 +1283,7 @@ private noncomputable def boundaryFunOfInwardCLM
 
 /-! ### Continuity of the outward normal as a section
 
-The Tier-1 deliverable: continuity of the section
+The deliverable here: continuity of the section
 `b ↦ TotalSpace.mk' E (boundaryInclusion I M b) (outwardNormal g b)`.
 
 We use `FiberBundle.continuousAt_totalSpace` to reduce continuity of the section

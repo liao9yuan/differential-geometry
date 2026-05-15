@@ -90,11 +90,13 @@ private theorem tensor0SSpace_sum_apply {ι : Type*} [Fintype ι] {s : ℕ}
       simp
   | insert a S ha ih =>
       rw [Finset.sum_insert ha, Finset.sum_insert ha]
-      change (((T a : ContinuousMultilinearMap Real (fun _ : Fin s => E) Real) +
-          (∑ i ∈ S, (T i : ContinuousMultilinearMap Real (fun _ : Fin s => E) Real))) v) =
-        (T a : ContinuousMultilinearMap Real (fun _ : Fin s => E) Real) v +
-          ∑ i ∈ S, (T i : ContinuousMultilinearMap Real (fun _ : Fin s => E) Real) v
-      rw [ContinuousMultilinearMap.add_apply, ih]
+      have hadd : (T a + ∑ i ∈ S, T i) v = (T a) v + (∑ i ∈ S, T i) v :=
+        ContinuousMultilinearMap.add_apply
+          (f := (show ContinuousMultilinearMap Real (fun _ : Fin s => E) Real
+            from T a))
+          (f' := (show ContinuousMultilinearMap Real (fun _ : Fin s => E) Real
+            from ∑ i ∈ S, T i)) v
+      rw [hadd, ih]
 
 private theorem basisTensor0S_empty_eq_scalarOne
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -413,7 +415,16 @@ theorem rm13_dualCoord_apply_eq_sum_inv_flat
   rw [tensor0SSpace_sum_apply]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [map_smul]
-  rw [ContinuousMultilinearMap.smul_apply]
+  have hsmul :
+      (gInv a k • Rm13 (dualToCotangent ((tangentFlatLinear g x) (basis k))))
+          (vec3 X Y Z) =
+        gInv a k •
+          (Rm13 (dualToCotangent ((tangentFlatLinear g x) (basis k)))) (vec3 X Y Z) :=
+    ContinuousMultilinearMap.smul_apply
+      (f := (show ContinuousMultilinearMap _ (fun _ : Fin 3 => _) _ from
+        Rm13 (dualToCotangent ((tangentFlatLinear g x) (basis k)))))
+      (c := gInv a k) (m := vec3 X Y Z)
+  rw [hsmul]
   simp [smul_eq_mul]
 
 theorem curvatureTraceOneFormEqRicVectorAt_of_metric_dual
@@ -512,7 +523,17 @@ theorem ricciFromRm13_comp_eq_rm04_trace
   rw [tensor0SSpace_sum_apply]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [map_smul]
-  rw [ContinuousMultilinearMap.smul_apply]
+  have hsmul :
+      (gInv a k • Rm13 (dualToCotangent ((tangentFlatLinear g x) (basis k))))
+          (vec3 (basis a) (basis i) (basis j)) =
+        gInv a k •
+          (Rm13 (dualToCotangent ((tangentFlatLinear g x) (basis k))))
+            (vec3 (basis a) (basis i) (basis j)) :=
+    ContinuousMultilinearMap.smul_apply
+      (f := (show ContinuousMultilinearMap _ (fun _ : Fin 3 => _) _ from
+        Rm13 (dualToCotangent ((tangentFlatLinear g x) (basis k)))))
+      (c := gInv a k) (m := vec3 (basis a) (basis i) (basis j))
+  rw [hsmul]
   simp only [smul_eq_mul]
   rw [← hLower (basis k) (basis a) (basis i) (basis j)]
   rw [rm04CompAt_apply]

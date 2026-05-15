@@ -433,7 +433,7 @@ omit [NeZero d] in
 /-- For smooth coefficient `a` and `x` in a compact set whose
 `|h|`-thickening lies in `K`, the absolute value of `D_h^k a(x)` is bounded
 by the supremum of `|∂_k a|` on `K`. -/
-private theorem abs_diffQuot_a_le_of_bound_on_set
+theorem abs_diffQuot_a_le_of_bound_on_set
     {a : E → ℝ} (ha : ContDiff ℝ 1 a) (k : Fin d) (h : ℝ)
     {K : Set E} {M : ℝ}
     (hM : ∀ y ∈ K, |(fderiv ℝ a y) (EuclideanSpace.single k 1)| ≤ M)
@@ -479,7 +479,7 @@ private theorem shift_in_omega'
 omit [NeZero d] in
 /-- The cthickening of a singleton `{x}` is contained in any `K ⊇ Ω'`
 provided `x ∈ tsupport η` and `Metric.cthickening h₀ (tsupport η) ⊆ Ω'`. -/
-private theorem singleton_cthick_subset
+theorem singleton_cthick_subset
     (η : E → ℝ) {h h₀ : ℝ}
     {Ω' : Set E}
     (hh_supp_in_Ω' : Metric.cthickening h₀ (tsupport η) ⊆ Ω')
@@ -729,7 +729,7 @@ private theorem cross_1_pointwise_bound
 /-! ## Integrability infrastructure -/
 
 /-- Continuity of `D_h^k u` for smooth `u` (h ≠ 0). -/
-private lemma continuous_diffQuot_smooth
+lemma continuous_diffQuot_smooth
     {v : E → ℝ} (hv : ContDiff ℝ (⊤ : ℕ∞) v) (k : Fin d) {h : ℝ} (hh : h ≠ 0) :
     Continuous (diffQuot k h v) :=
   (contDiff_diffQuot_of_contDiff (d := d) hv k hh).continuous
@@ -1140,10 +1140,11 @@ theorem cross_1_bound
     {N : ℝ} (hN : 0 ≤ N) (h_fderiv_eta : ∀ x : E, ‖fderiv ℝ η x‖ ≤ N)
     {Ω' : Set E} (hΩ' : IsOpen Ω') (hΩ'_closure : closure Ω' ⊆ Ω)
     (hΩ'_compact : IsCompact (closure Ω'))
-    (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ 1 →
+    {R₀ : ℝ}
+    (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ R₀ →
       Metric.cthickening |h| (tsupport η) ⊆ Ω')
     (k : Fin d) (ε : ℝ) (hε : 0 < ε) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ {h : ℝ}, h ≠ 0 → |h| ≤ 1 →
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
       |- ∑ i : Fin d, ∑ j : Fin d, ∫ x, 2 *
             (DifferentialGeometry.Analysis.Sobolev.translate k h
               (fun y : E => B.a y i j)) x *
@@ -1690,10 +1691,11 @@ theorem cross_2_bound
     (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1)
     {Ω' : Set E} (hΩ' : IsOpen Ω') (hΩ'_closure : closure Ω' ⊆ Ω)
     (hΩ'_compact : IsCompact (closure Ω'))
-    (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ 1 →
+    {R₀ : ℝ}
+    (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ R₀ →
       Metric.cthickening |h| (tsupport η) ⊆ Ω')
     (k : Fin d) (ε : ℝ) (hε : 0 < ε) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ {h : ℝ}, h ≠ 0 → |h| ≤ 1 →
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
       |- ∑ i : Fin d, ∑ j : Fin d, ∫ x,
             DifferentialGeometry.Analysis.Sobolev.diffQuot k h
               (fun y : E => B.a y i j) x *
@@ -2537,10 +2539,11 @@ theorem cross_3_bound
     {N : ℝ} (hN : 0 ≤ N) (h_fderiv_eta : ∀ x : E, ‖fderiv ℝ η x‖ ≤ N)
     {Ω' : Set E} (hΩ' : IsOpen Ω') (hΩ'_closure : closure Ω' ⊆ Ω)
     (hΩ'_compact : IsCompact (closure Ω'))
-    (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ 1 →
+    {R₀ : ℝ}
+    (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ R₀ →
       Metric.cthickening |h| (tsupport η) ⊆ Ω')
     (k : Fin d) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ {h : ℝ}, h ≠ 0 → |h| ≤ 1 →
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
       |- ∑ i : Fin d, ∑ j : Fin d, ∫ x, 2 *
             DifferentialGeometry.Analysis.Sobolev.diffQuot k h
               (fun y : E => B.a y i j) x *
@@ -3255,9 +3258,10 @@ private lemma v_test_supported_in_Ω'
     {u : E → ℝ}
     {η : E → ℝ}
     {Ω' : Set E}
-    (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ 1 →
+    {R₀ : ℝ}
+    (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ R₀ →
       Metric.cthickening |h| (tsupport η) ⊆ Ω')
-    (k : Fin d) {h : ℝ} (hh_le : |h| ≤ 1) :
+    (k : Fin d) {h : ℝ} (hh_le : |h| ≤ R₀) :
     tsupport (DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction
       k h η u) ⊆ Ω' :=
   (DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.tsupport_nirenbergTestFunction_subset
@@ -3294,10 +3298,11 @@ theorem c_term_bound
     {Ω' : Set E} (hΩ' : IsOpen Ω') (hΩ'_closure : closure Ω' ⊆ Ω)
     (hΩ'_compact : IsCompact (closure Ω'))
     (hη_in_Ω' : tsupport η ⊆ Ω')
-    (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ 1 →
+    {R₀ : ℝ}
+    (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ R₀ →
       Metric.cthickening |h| (tsupport η) ⊆ Ω')
     (k : Fin d) (ε : ℝ) (hε : 0 < ε) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ {h : ℝ}, h ≠ 0 → |h| ≤ 1 →
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
       |∫ x in Ω, B.c x * u x *
           DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction
             k h η u x| ≤
@@ -3624,10 +3629,11 @@ theorem f_term_bound
     {Ω' : Set E} (hΩ' : IsOpen Ω') (hΩ'_closure : closure Ω' ⊆ Ω)
     (hΩ'_compact : IsCompact (closure Ω'))
     (hη_in_Ω' : tsupport η ⊆ Ω')
-    (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ 1 →
+    {R₀ : ℝ}
+    (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ R₀ →
       Metric.cthickening |h| (tsupport η) ⊆ Ω')
     (k : Fin d) (ε : ℝ) (hε : 0 < ε) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ {h : ℝ}, h ≠ 0 → |h| ≤ 1 →
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
       |∫ x in Ω, f x *
           DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction
             k h η u x| ≤
@@ -3907,10 +3913,11 @@ theorem nirenberg_master_inequality_after_young
     {Ω' : Set E} (hΩ' : IsOpen Ω') (hΩ'_closure : closure Ω' ⊆ Ω)
     (hΩ'_compact : IsCompact (closure Ω'))
     (hη_in_Ω' : tsupport η ⊆ Ω')
-    (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ 1 →
+    {R₀ : ℝ}
+    (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ R₀ →
       Metric.cthickening |h| (tsupport η) ⊆ Ω')
     (k : Fin d) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ {h : ℝ}, h ≠ 0 → |h| ≤ 1 →
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
       B.lam * ∫ x, (η x)^2 *
           ∑ i : Fin d, DifferentialGeometry.Analysis.Sobolev.diffQuot k h
             (fun y : E => (fderiv ℝ u y) (EuclideanSpace.single i 1)) x ^ 2

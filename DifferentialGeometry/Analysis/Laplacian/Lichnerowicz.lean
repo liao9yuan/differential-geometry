@@ -772,7 +772,7 @@ Derived algebraically from the unconditional Bochner identity by isolating
 `chartHessFrobeniusSq` and using continuity of the other three terms. -/
 
 /-- Continuity of `b ↦ chartHessFrobeniusSq g f b`. -/
-private theorem chartHessFrobeniusSq_continuous
+theorem chartHessFrobeniusSq_continuous
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :

@@ -46,7 +46,7 @@ theorem eLpNorm_weakGrad_component_le
   filter_upwards with x
   exact euclidean_component_norm_le (hw.weakGrad x) i
 
-/-! ## Phase B: translation estimate for `MemW01p` functions -/
+/-! ## Translation estimate for `MemW01p` functions -/
 
 omit [NeZero d] in
 /-- Pointwise bound: the operator norm of `fderiv ℝ φ x` (a continuous linear
@@ -223,8 +223,8 @@ private lemma eLpNorm_translate_sub_le_sum_components
         ∑ i : Fin d,
           eLpNorm (fun x => (fderiv ℝ φ x) (EuclideanSpace.single i 1)) p volume := by
   classical
-  -- Phase A: Translation difference bound by `|h| * ‖fderiv φ‖_{L^p}`
-  have hPhaseA :
+  -- Smooth-case translation estimate: difference bound by `|h| * ‖fderiv φ‖_{L^p}`
+  have hStepA :
       eLpNorm (fun x => φ x - φ (x - h)) p volume ≤
         ENNReal.ofReal ‖h‖ * eLpNorm (fun x => ‖fderiv ℝ φ x‖) p volume :=
     eLpNorm_translate_sub_le_smul_eLpNorm_fderiv (d := d) hp_one hp_top hφ h
@@ -242,7 +242,7 @@ private lemma eLpNorm_translate_sub_le_sum_components
     exact eLpNorm_sub_comm (μ := volume) (p := p)
       (f := fun x => φ (x - h)) (g := fun x => φ x)
   rw [hSym]
-  refine hPhaseA.trans ?_
+  refine hStepA.trans ?_
   -- Multiply the bound from `eLpNorm_fderiv_le_sum_components`
   have hgrad_bound :
       eLpNorm (fun x => ‖fderiv ℝ φ x‖) p volume ≤
@@ -299,7 +299,7 @@ private lemma eLpNorm_phi_sub_indicator_eq
   exact MeasureTheory.eLpNorm_indicator_eq_eLpNorm_restrict
     (μ := volume) (s := Ω) (p := p) (f := fun x => φ x - u x) hΩ_meas
 
-/-- Phase B: translation estimate for `MemW01p` functions.
+/-- Translation estimate for `MemW01p` functions.
 
 For a `W^{1,p}_0` function `u` on an open set `Ω`, with `1 ≤ p < ∞`, the
 zero-extension `Ω.indicator u` to all of `ℝ^d` satisfies the translation
@@ -464,8 +464,8 @@ theorem eLpNorm_translate_sub_le_of_memW01p
         (fun n => eLpNorm (fun x => φ n x - Ω.indicator u x) p volume)
       from funext hEq_each]
     exact hφ_to_uExt
-  -- Phase A bound for each n
-  have hPhaseA : ∀ n,
+  -- Smooth-case translation bound for each n
+  have hStepA : ∀ n,
       eLpNorm (fun x => φ n (x - h) - φ n x) p volume ≤
         ENNReal.ofReal ‖h‖ *
           ∑ i : Fin d,
@@ -518,7 +518,7 @@ theorem eLpNorm_translate_sub_le_of_memW01p
       eLpNorm (fun x => φ n (x - h) - φ n x) p volume ≤
         ENNReal.ofReal ‖h‖ * (Dseq n + S) := by
     intro n
-    refine (hPhaseA n).trans ?_
+    refine (hStepA n).trans ?_
     have hEq_sum :
         ∑ i : Fin d,
             eLpNorm (fun x => (fderiv ℝ (φ n) x) (EuclideanSpace.single i 1))
@@ -679,17 +679,18 @@ theorem rellich_kondrachov_W01p_seq
     intro n
     rw [hu_ext_eLp n]
     exact hu_bdd_fun n
-  -- Translation continuity for u_ext n: from Phase B (eLpNorm_translate_sub_le_of_memW01p).
+  -- Translation continuity for u_ext n: from the `MemW01p` translation
+  -- estimate (eLpNorm_translate_sub_le_of_memW01p).
   -- For each n, we have:
   --   ‖τ_h u_ext n - u_ext n‖_{L^p(volume)} ≤ ‖h‖ * Σ_i ‖∂_i u_n‖_{L^p(Ω)} ≤ ‖h‖ * R.
-  -- Note Phase B states ‖u_ext (· - h) - u_ext‖, our requirement is the same.
+  -- Note that estimate states ‖u_ext (· - h) - u_ext‖, our requirement is the same.
   have hu_ext_translation :
       ∀ ε > 0, ∃ δ > 0, ∀ n, ∀ h : E, ‖h‖ < δ →
         eLpNorm (fun x => u_ext n (x - h) - u_ext n x) p volume ≤
           ENNReal.ofReal ε := by
     intro ε hε
     -- Choose δ := ε / (R + 1) (ensures bound).
-    -- The phase B bound: eLpNorm ≤ ofReal ‖h‖ * grad_sum ≤ ofReal ‖h‖ * ofReal R.
+    -- The translation estimate: eLpNorm ≤ ofReal ‖h‖ * grad_sum ≤ ofReal ‖h‖ * ofReal R.
     -- We want this ≤ ofReal ε. So need ‖h‖ * R ≤ ε, i.e., ‖h‖ ≤ ε / R (for R > 0; for R ≤ 0 the bound is 0).
     -- But R might be negative or zero. Let R' := max R 0; then R' ≥ 0 and R ≤ R'.
     -- Then eLpNorm ≤ ofReal ‖h‖ * ofReal R ≤ ofReal ‖h‖ * ofReal R'.
@@ -700,7 +701,7 @@ theorem rellich_kondrachov_W01p_seq
     refine ⟨ε / (max R 0 + 1), ?_, ?_⟩
     · positivity
     intro n h hh
-    -- Phase B bound:
+    -- The `MemW01p` translation estimate:
     have hPhB := eLpNorm_translate_sub_le_of_memW01p (d := d) hp_one hp_top
       hΩ_open (hu_mem n) h
     -- hPhB : eLpNorm (Ω.indicator u_n (· - h) - Ω.indicator u_n) p vol ≤

@@ -53,7 +53,7 @@ lemma metric_inner_self_nonneg
 
 /-- Cauchy–Schwarz inequality for the metric inner product (squared form):
 $(g(v, w))^2 \le g(v, v) \cdot g(w, w)$. -/
-private lemma metric_inner_cauchy_schwarz_sq
+lemma metric_inner_cauchy_schwarz_sq
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     (g.inner x v w) ^ 2 ≤ g.inner x v v * g.inner x w w := by
   classical

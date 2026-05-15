@@ -247,7 +247,7 @@ noncomputable def homBundleCovariantDerivativeFun
 /-- Specification: when `τ`, `V_field`, `Y` are all differentiable at `x`, the Hom-bundle
 covariant derivative applied bilinearly to `V_field x` and `Y x` returns
 `Psi cov_TM cov_V τ V_field Y x`. -/
-private theorem homBundleCovariantDerivativeFun_apply
+theorem homBundleCovariantDerivativeFun_apply
     (cov_TM : CovariantDerivative I E (TangentSpace I : M → Type _))
     (cov_V : CovariantDerivative I F V)
     (τ : Π x : M, (TangentSpace I x →L[ℝ] V x))

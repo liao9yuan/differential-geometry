@@ -8,7 +8,7 @@ Rellich–Kondrachov compactness argument:
 
   ‖τ_h u − u‖_{L^p} ≤ ‖h‖ · ‖∇u‖_{L^p}
 
-for `u` smooth and compactly supported (Phase A).
+for `u` smooth and compactly supported.
 -/
 
 noncomputable section
@@ -22,7 +22,7 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Phase A: translation estimate for smooth compactly supported functions -/
+/-! ## Translation estimate for smooth compactly supported functions -/
 
 omit [NeZero d] in
 /-- Pointwise representation of `φ x − φ (x − h)` as the integral over `s ∈ [0,1]`

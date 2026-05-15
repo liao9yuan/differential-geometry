@@ -72,7 +72,7 @@ lemma chartBasisVecFiber_recompose
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
     (v : TangentSpace I x) :
     v = ∑ i : Fin (Module.finrank ℝ E),
-      ((Module.finBasis ℝ E).repr
+      ((chartModelBasis E).repr
           ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ x v)) i •
         chartBasisVecFiber (I := I) α i x := by
   classical
@@ -83,7 +83,7 @@ lemma chartBasisVecFiber_recompose
       T.symmL ℝ x (T.continuousLinearMapAt ℝ x v) = v :=
     T.symmL_continuousLinearMapAt (R := ℝ) hx v
   set vE : E := T.continuousLinearMapAt ℝ x v with hvE_def
-  set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := Module.finBasis ℝ E
+  set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := chartModelBasis E
   have hdecomp : vE = ∑ i, b.repr vE i • b i :=
     (Module.Basis.sum_repr b vE).symm
   have hsymm_sum := congrArg (T.symmL ℝ x) hdecomp
@@ -108,16 +108,16 @@ theorem g_inner_eq_chart_sum
     g.inner x v w =
       ∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
-          ((Module.finBasis ℝ E).repr
+          ((chartModelBasis E).repr
               ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ x v)) i *
-            ((Module.finBasis ℝ E).repr
+            ((chartModelBasis E).repr
               ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ x w)) j *
             chartGramOnE (I := I) g α i j (extChartAt I α x) := by
   classical
   set T : Bundle.Trivialization E
       (π E (TangentSpace I : M → Type _)) :=
     trivializationAt E (TangentSpace I) α
-  set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := Module.finBasis ℝ E
+  set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := chartModelBasis E
   set vE : E := T.continuousLinearMapAt ℝ x v
   set wE : E := T.continuousLinearMapAt ℝ x w
   have hv : v = ∑ i, b.repr vE i • chartBasisVecFiber (I := I) α i x :=
@@ -420,94 +420,6 @@ theorem partialDeriv_chartGramOnE_eq_chartChristoffel_sum
       partialDeriv_chartGramOnE_swap_indices (I := I) g α j i k y,
       partialDeriv_chartGramOnE_swap_indices (I := I) g α i k j y]
   ring
-
-/-! ## (C) Smoothness of the chart Christoffel symbol
-
-The chart Christoffel symbol `chartChristoffel g α i j k` is the half-times-
-inverse-Gram-times-bracket scalar; the inverse Gram entries and the partial
-derivatives of the Gram entries are smooth on the interior of the chart target,
-and a finite sum of products of smooth functions is smooth. -/
-
-/-- **Smoothness of `chartChristoffel`.** The chart Christoffel symbol is `C^∞`
-on the interior of the chart target. -/
-theorem chartChristoffel_contDiffOn_interior
-    (g : SmoothRiemannianMetric I M) (α : M)
-    (i j k : Fin (Module.finrank ℝ E)) :
-    ContDiffOn ℝ ∞ (chartChristoffel (I := I) g α i j k)
-      (interior (extChartAt I α).target) := by
-  classical
-  -- Rewrite the chart Christoffel symbol as a sum of products in terms of
-  -- `chartInvGramOnE` (smooth on the chart target, hence on its interior) and
-  -- partial derivatives of `chartGramOnE` (smooth on the interior).
-  have hrewrite : (chartChristoffel (I := I) g α i j k) =
-      fun y : E =>
-        (1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
-          chartInvGramOnE (I := I) g α k l y *
-            (partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) y +
-             partialDeriv (E := E) j (chartGramOnE (I := I) g α l i) y -
-             partialDeriv (E := E) l (chartGramOnE (I := I) g α i j) y) := by
-    funext y
-    rw [chartChristoffel_def]
-    refine congrArg (fun t => (1 / 2 : ℝ) * t) ?_
-    refine Finset.sum_congr rfl (fun l _ => ?_)
-    rfl
-  rw [hrewrite]
-  -- The constant `(1/2)` factor: pull out via `ContDiffOn.const_mul` (which
-  -- mathlib provides as `ContDiffOn.smul` with a constant scalar wrapper).
-  -- We instead show the sum is smooth, then multiply.
-  have hsum_smooth :
-      ContDiffOn ℝ ∞
-        (fun y : E => ∑ l : Fin (Module.finrank ℝ E),
-          chartInvGramOnE (I := I) g α k l y *
-            (partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) y +
-             partialDeriv (E := E) j (chartGramOnE (I := I) g α l i) y -
-             partialDeriv (E := E) l (chartGramOnE (I := I) g α i j) y))
-        (interior (extChartAt I α).target) := by
-    refine ContDiffOn.sum (fun l _ => ?_)
-    refine ContDiffOn.mul ?_ ?_
-    · -- `chartInvGramOnE g α k l` is smooth on the chart target, hence on its interior.
-      exact (chartInvGramOnE_contDiffOn (I := I) g α k l).mono interior_subset
-    · -- The bracket is a sum/difference of partial derivatives of `chartGramOnE`.
-      -- Each partial derivative is smooth on the interior.
-      have hi : ContDiffOn ℝ ∞
-          (partialDeriv (E := E) i (chartGramOnE (I := I) g α l j))
-          (interior (extChartAt I α).target) := by
-        unfold partialDeriv
-        have hG : ContDiffOn ℝ ∞ (chartGramOnE (I := I) g α l j)
-            (interior (extChartAt I α).target) :=
-          (chartGramOnE_contDiffOn (I := I) g α l j).mono interior_subset
-        have hfderiv : ContDiffOn ℝ ∞
-            (fderiv ℝ (chartGramOnE (I := I) g α l j))
-            (interior (extChartAt I α).target) :=
-          hG.fderiv_of_isOpen isOpen_interior (by rw [ENat.coe_top_add_one])
-        exact hfderiv.clm_apply contDiffOn_const
-      have hj : ContDiffOn ℝ ∞
-          (partialDeriv (E := E) j (chartGramOnE (I := I) g α l i))
-          (interior (extChartAt I α).target) := by
-        unfold partialDeriv
-        have hG : ContDiffOn ℝ ∞ (chartGramOnE (I := I) g α l i)
-            (interior (extChartAt I α).target) :=
-          (chartGramOnE_contDiffOn (I := I) g α l i).mono interior_subset
-        have hfderiv : ContDiffOn ℝ ∞
-            (fderiv ℝ (chartGramOnE (I := I) g α l i))
-            (interior (extChartAt I α).target) :=
-          hG.fderiv_of_isOpen isOpen_interior (by rw [ENat.coe_top_add_one])
-        exact hfderiv.clm_apply contDiffOn_const
-      have hl : ContDiffOn ℝ ∞
-          (partialDeriv (E := E) l (chartGramOnE (I := I) g α i j))
-          (interior (extChartAt I α).target) := by
-        unfold partialDeriv
-        have hG : ContDiffOn ℝ ∞ (chartGramOnE (I := I) g α i j)
-            (interior (extChartAt I α).target) :=
-          (chartGramOnE_contDiffOn (I := I) g α i j).mono interior_subset
-        have hfderiv : ContDiffOn ℝ ∞
-            (fderiv ℝ (chartGramOnE (I := I) g α i j))
-            (interior (extChartAt I α).target) :=
-          hG.fderiv_of_isOpen isOpen_interior (by rw [ENat.coe_top_add_one])
-        exact hfderiv.clm_apply contDiffOn_const
-      exact (hi.add hj).sub hl
-  -- Multiply by the constant `(1/2)`.
-  exact (contDiffOn_const (c := (1 / 2 : ℝ))).mul hsum_smooth
 
 end Connection
 end Integral

@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Laplacian.Operator.DirichletForm
 import DifferentialGeometry.Analysis.Laplacian.MetricBounds
 import DifferentialGeometry.Geometry.Gradient
-import DifferentialGeometry.Analysis.Laplacian.Variational
+import DifferentialGeometry.Analysis.Laplacian.Operator.Variational
 
 /-!
 # Smooth-function inclusion into the intrinsic `H¹` space

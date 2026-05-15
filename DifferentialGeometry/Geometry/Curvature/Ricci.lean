@@ -139,15 +139,15 @@ lemma partialDeriv_partialDeriv_chartGramOnE_swap
   have hkey : ∀ p q : Fin (Module.finrank ℝ E),
       fderiv ℝ
           (fun z =>
-            fderiv ℝ (chartGramOnE (I := I) g α l j) z ((Module.finBasis ℝ E) q))
-          y ((Module.finBasis ℝ E) p) =
+            fderiv ℝ (chartGramOnE (I := I) g α l j) z ((chartModelBasis E) q))
+          y ((chartModelBasis E) p) =
         (fderiv ℝ (fderiv ℝ (chartGramOnE (I := I) g α l j)) y
-          ((Module.finBasis ℝ E) p)) ((Module.finBasis ℝ E) q) := by
+          ((chartModelBasis E) p)) ((chartModelBasis E) q) := by
     intro p q
     set L : (E →L[ℝ] ℝ) →L[ℝ] ℝ :=
-      ContinuousLinearMap.apply ℝ ℝ ((Module.finBasis ℝ E) q)
+      ContinuousLinearMap.apply ℝ ℝ ((chartModelBasis E) q)
     have hcomp_eq : (fun z : E =>
-          fderiv ℝ (chartGramOnE (I := I) g α l j) z ((Module.finBasis ℝ E) q)) =
+          fderiv ℝ (chartGramOnE (I := I) g α l j) z ((chartModelBasis E) q)) =
         L ∘ (fderiv ℝ (chartGramOnE (I := I) g α l j)) := by
       funext z; rfl
     rw [hcomp_eq, fderiv_comp y L.differentiableAt hg_diff]
@@ -626,13 +626,13 @@ private lemma partialDeriv_doubleSum_invGram_partialGram
           ∑ l : Fin (Module.finrank ℝ E),
             chartInvGramOnE (I := I) g α j l y' *
               partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) y') y
-        ((Module.finBasis ℝ E) k) =
+        ((chartModelBasis E) k) =
       ∑ j : Fin (Module.finrank ℝ E),
         fderiv ℝ
           (fun y' : E => ∑ l : Fin (Module.finrank ℝ E),
             chartInvGramOnE (I := I) g α j l y' *
               partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) y') y
-          ((Module.finBasis ℝ E) k)
+          ((chartModelBasis E) k)
     rw [fderiv_fun_sum (fun j _ => hdiff_inner j)]
     rw [ContinuousLinearMap.coe_sum', Finset.sum_apply]
   rw [hsum_outer]
@@ -650,12 +650,12 @@ private lemma partialDeriv_doubleSum_invGram_partialGram
         (fun y' : E => ∑ l : Fin (Module.finrank ℝ E),
           chartInvGramOnE (I := I) g α j l y' *
             partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) y') y
-        ((Module.finBasis ℝ E) k) =
+        ((chartModelBasis E) k) =
       ∑ l : Fin (Module.finrank ℝ E),
         fderiv ℝ
           (fun y' : E => chartInvGramOnE (I := I) g α j l y' *
             partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) y') y
-          ((Module.finBasis ℝ E) k)
+          ((chartModelBasis E) k)
     rw [fderiv_fun_sum (fun l _ => hdiff_innermost j l)]
     rw [ContinuousLinearMap.coe_sum', Finset.sum_apply]
   rw [hsum_inner]
@@ -670,7 +670,7 @@ private lemma partialDeriv_doubleSum_invGram_partialGram
   change fderiv ℝ
       (fun y' : E => chartInvGramOnE (I := I) g α j l y' *
         partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) y') y
-      ((Module.finBasis ℝ E) k) =
+      ((chartModelBasis E) k) =
     partialDeriv (E := E) k (chartInvGramOnE (I := I) g α j l) y *
         partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) y +
       chartInvGramOnE (I := I) g α j l y *
@@ -762,14 +762,14 @@ theorem partialDeriv_contractedChristoffel_swap
             ∑ l : Fin (Module.finrank ℝ E),
               chartInvGramOnE (I := I) g α j l y' *
                 partialDeriv (E := E) ν (chartGramOnE (I := I) g α l j) y') y
-        ((Module.finBasis ℝ E) μ) =
+        ((chartModelBasis E) μ) =
       (1 / 2 : ℝ) *
         fderiv ℝ
           (fun y' : E => ∑ j : Fin (Module.finrank ℝ E),
             ∑ l : Fin (Module.finrank ℝ E),
               chartInvGramOnE (I := I) g α j l y' *
                 partialDeriv (E := E) ν (chartGramOnE (I := I) g α l j) y') y
-          ((Module.finBasis ℝ E) μ)
+          ((chartModelBasis E) μ)
     -- Rewrite (1/2) * X as (1/2) • X to use fderiv_const_smul.
     set F : E → ℝ := fun y' : E => ∑ j : Fin (Module.finrank ℝ E),
           ∑ l : Fin (Module.finrank ℝ E),
@@ -778,8 +778,8 @@ theorem partialDeriv_contractedChristoffel_swap
     have hfn_eq : (fun y' : E => (1 / 2 : ℝ) * F y') = (1 / 2 : ℝ) • F := by
       funext y'; rw [Pi.smul_apply, smul_eq_mul]
     change fderiv ℝ (fun y' : E => (1 / 2 : ℝ) * F y') y
-        ((Module.finBasis ℝ E) μ) =
-      (1 / 2 : ℝ) * fderiv ℝ F y ((Module.finBasis ℝ E) μ)
+        ((chartModelBasis E) μ) =
+      (1 / 2 : ℝ) * fderiv ℝ F y ((chartModelBasis E) μ)
     rw [hfn_eq]
     rw [fderiv_const_smul hdiff]
     simp [smul_eq_mul]

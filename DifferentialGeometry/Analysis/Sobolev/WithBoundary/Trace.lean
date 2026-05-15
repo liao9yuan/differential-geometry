@@ -629,8 +629,7 @@ extension would proceed by:
    reproducing the classical inequality uniformly for the `MemWkp k p` /
    `MemWkpHalfSpace` predicates would significantly enlarge the scope.
 2. **Smooth-density extension** using density of `C^\infty(M) \cap W^{1,p}(M)`
-   in `W^{1,p}(M)`, which is established in part by Phase 4 of the present
-   project for compact `M`.
+   in `W^{1,p}(M)`, established elsewhere in this development for compact `M`.
 
 For Dirichlet (interior-supported) `MemWkpChart` inputs — the predicate that
 the chart-based half-space Sobolev API uses by default — the boundary trace

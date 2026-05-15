@@ -133,7 +133,7 @@ private theorem chartPushed_cauchy_of_wkpNormChart_cauchy
     ENNReal.le_tsum α
   exact le_trans h_summand_le_tsum h_le
 
-/-! ## Step 3: For each chart, get a `wkpNorm`-limit (Phase A) -/
+/-! ## Step 3: For each chart, get a `wkpNorm`-limit -/
 
 /-- For each chart `α`, the chart-pushed sequence has a `wkpNorm`-limit which
 is itself in `MemWkp k p` of `chartTargetEuclid α`. -/
