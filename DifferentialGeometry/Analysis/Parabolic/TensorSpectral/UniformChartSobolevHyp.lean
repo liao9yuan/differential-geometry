@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ComponentWkpNormBoundFromH1
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.ComponentWkpNormBoundFromH1
 
 /-!
 # Uniform-in-`(S, α, Idx, Jdx)` chart-Sobolev `W^{1,2}` hypothesis Prop

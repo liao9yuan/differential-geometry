@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensorInnerLowerBound
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.InnerLowerBound
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.NormComparison
 import DifferentialGeometry.Integral.L2.PointwiseInner.DualMetric
 import Mathlib.Analysis.Normed.Module.FiniteDimension

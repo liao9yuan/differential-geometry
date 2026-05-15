@@ -1,8 +1,8 @@
 import DifferentialGeometry.Geometry.Gradient
 import DifferentialGeometry.Integral.Measure.Glue
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ComponentSobolevBound
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ComponentSobolevPointwise
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartGoodSetMeasure
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.ComponentSobolevBound
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.ComponentSobolevPointwise
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.GoodSetMeasure
 
 /-!
 # Per-chart sup bound for the inverse-Gram-matrix `L¹` entry sum

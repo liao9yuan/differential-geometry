@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.CompactInclusion
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.RellichTensor
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Rellich.Tensor
 
 /-!
 # Compactness of the L²-side tensor resolvent

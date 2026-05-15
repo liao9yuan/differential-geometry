@@ -1,5 +1,5 @@
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartJinvContinuity
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensorInnerLowerBound
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.JinvContinuity
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.InnerLowerBound
 import DifferentialGeometry.Tensor.RSTensor.Defs
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian
 import DifferentialGeometry.Tensor.RSTensor.TangentRiemannian
