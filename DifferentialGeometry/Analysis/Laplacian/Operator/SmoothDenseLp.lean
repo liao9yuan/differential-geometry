@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Laplacian.Regularity.L2Inclusion
+import DifferentialGeometry.Analysis.Laplacian.Regularity.LaplacianDomain.L2Inclusion
 import Mathlib.MeasureTheory.Function.ContinuousMapDense
 import Mathlib.Topology.ContinuousMap.StoneWeierstrass
 import Mathlib.Geometry.Manifold.BumpFunction
