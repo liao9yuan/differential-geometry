@@ -1,7 +1,6 @@
 /*
 
 # whitelist
-!/DifferentialGeometry/
 !/RicciFlower/
 !/RicciFlower/**
 !/.github
@@ -9,7 +8,6 @@
 !/BK/
 !/BK/**
 !/BK.lean
-!/DifferentialGeometry.lean
 !/RicciFlower.lean
 !/lakefile.toml
 !/lean-toolchain
@@ -17,7 +15,7 @@
 !/.gitignore
 # end of whitelist
 
-/DifferentialGeometry/Analysis/
+/DGreference/
 
 .lake/
 
@@ -26,3 +24,5 @@
 *.md
 !/BK.md
 !/BK/**/*.md
+/DifferentialGeometry
+/DifferentialGeometry
