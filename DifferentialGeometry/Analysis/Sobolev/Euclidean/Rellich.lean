@@ -224,7 +224,7 @@ private lemma eLpNorm_translate_sub_le_sum_components
           eLpNorm (fun x => (fderiv ℝ φ x) (EuclideanSpace.single i 1)) p volume := by
   classical
   -- Smooth-case translation estimate: difference bound by `|h| * ‖fderiv φ‖_{L^p}`
-  have hPhaseA :
+  have hStepA :
       eLpNorm (fun x => φ x - φ (x - h)) p volume ≤
         ENNReal.ofReal ‖h‖ * eLpNorm (fun x => ‖fderiv ℝ φ x‖) p volume :=
     eLpNorm_translate_sub_le_smul_eLpNorm_fderiv (d := d) hp_one hp_top hφ h
@@ -242,7 +242,7 @@ private lemma eLpNorm_translate_sub_le_sum_components
     exact eLpNorm_sub_comm (μ := volume) (p := p)
       (f := fun x => φ (x - h)) (g := fun x => φ x)
   rw [hSym]
-  refine hPhaseA.trans ?_
+  refine hStepA.trans ?_
   -- Multiply the bound from `eLpNorm_fderiv_le_sum_components`
   have hgrad_bound :
       eLpNorm (fun x => ‖fderiv ℝ φ x‖) p volume ≤
@@ -465,7 +465,7 @@ theorem eLpNorm_translate_sub_le_of_memW01p
       from funext hEq_each]
     exact hφ_to_uExt
   -- Smooth-case translation bound for each n
-  have hPhaseA : ∀ n,
+  have hStepA : ∀ n,
       eLpNorm (fun x => φ n (x - h) - φ n x) p volume ≤
         ENNReal.ofReal ‖h‖ *
           ∑ i : Fin d,
@@ -518,7 +518,7 @@ theorem eLpNorm_translate_sub_le_of_memW01p
       eLpNorm (fun x => φ n (x - h) - φ n x) p volume ≤
         ENNReal.ofReal ‖h‖ * (Dseq n + S) := by
     intro n
-    refine (hPhaseA n).trans ?_
+    refine (hStepA n).trans ?_
     have hEq_sum :
         ∑ i : Fin d,
             eLpNorm (fun x => (fderiv ℝ (φ n) x) (EuclideanSpace.single i 1))

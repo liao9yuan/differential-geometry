@@ -81,7 +81,7 @@ The chain has four logical steps:
 
 * `gradInnerCLM_mem_image_density` — image-membership with density hypotheses.
 * `smoothMulH1Compl_mem_pow_two_density` — iterated closure with density hypotheses.
-* `fHLeibnizResidualLp_coeFn_memWkpChart_two_two_of_M6` — residual
+* `fHLeibnizResidualLp_coeFn_memWkpChart_two_two_of_mem` — residual
   regularity given the iterated closure: the manifold-side function
   corresponding to `fHLeibnizResidualLp.coeFn` lies in `MemWkpChart g 2 2`.
 * `fHLeibnizResidualLp_coeFn_memWkpChart_two_two_density` — residual
@@ -287,11 +287,11 @@ The statement is in *function* form rather than `Lp`-class form because
 representative differs from `(fHLeibnizResidualLp).coeFn` only by an
 ae-equality; `MemWkpChart` is closed under ae-equality (via
 chart-pulled-raw ae transfer). -/
-theorem fHLeibnizResidualLp_coeFn_memWkpChart_two_two_of_M6
+theorem fHLeibnizResidualLp_coeFn_memWkpChart_two_two_of_mem
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
-    (h_M6 : smoothMulH1Compl (I := I) (M := M) g
+    (h_mem : smoothMulH1Compl (I := I) (M := M) g
         (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) u_h ∈
       laplacianDomainPow (I := I) (M := M) g 2) :
     DifferentialGeometry.Analysis.Sobolev.Chart.MemWkpChart
@@ -314,9 +314,9 @@ theorem fHLeibnizResidualLp_coeFn_memWkpChart_two_two_of_M6
   -- Step 1: H² regularity of `preimage⟨smoothMulH1Compl ρα u_h⟩.coeFn`
   -- from the iterated closure via `laplacianDomainPow_two_h2_plus_rhs_h2`.
   have h_smHC_h2 := (laplacianDomainPow_two_h2_plus_rhs_h2
-    (I := I) (M := M) g h_M6).2.1
+    (I := I) (M := M) g h_mem).2.1
   -- Note: h_smHC_h2 is the MemWkpChart for `preimage⟨smoothMulH1Compl ρα u_h, _⟩.coeFn`,
-  -- using the membership `laplacianDomainPow_succ_subset_laplacianDomain g 1 h_M6`.
+  -- using the membership `laplacianDomainPow_succ_subset_laplacianDomain g 1 h_mem`.
   -- We need the same `preimage` but with the `smoothMulH1Compl_mem_laplacianDomain`-derived
   -- membership proof. These are equal since `preimage` depends only on the
   -- H1Compl element, not on the membership proof.
@@ -338,7 +338,7 @@ theorem fHLeibnizResidualLp_coeFn_memWkpChart_two_two_of_M6
         ⟨smoothMulH1Compl (I := I) (M := M) g
             (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) u_h,
           laplacianDomainPow_succ_subset_laplacianDomain
-            (I := I) (M := M) g 1 h_M6⟩ := rfl
+            (I := I) (M := M) g 1 h_mem⟩ := rfl
   rw [h_preimage_eq]
   exact DifferentialGeometry.Analysis.Sobolev.Chart.MemWkpChart_sub
     (I := I) (M := M) g (by norm_num : (1 : ℝ≥0∞) ≤ 2)
@@ -384,11 +384,11 @@ theorem fHLeibnizResidualLp_coeFn_memWkpChart_two_two_density
                 (I := I) (M := M) g 1 hu_h⟩ :
             Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) x) := by
   classical
-  have h_M6 := smoothMulH1Compl_mem_pow_two_density
+  have h_mem := smoothMulH1Compl_mem_pow_two_density
     (I := I) (M := M) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) hu_h
     h_smooth_seq h_conv_H1Compl h_conv_candidate h_smooth_identity
-  exact fHLeibnizResidualLp_coeFn_memWkpChart_two_two_of_M6
-    (I := I) (M := M) g α hu_h h_M6
+  exact fHLeibnizResidualLp_coeFn_memWkpChart_two_two_of_mem
+    (I := I) (M := M) g α hu_h h_mem
 
 /-! ## The constructor packaged with density hypotheses
 

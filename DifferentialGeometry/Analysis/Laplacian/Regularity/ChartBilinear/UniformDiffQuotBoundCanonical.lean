@@ -2545,7 +2545,7 @@ theorem chartBilinear_master_nonsmooth_discharge
     have h_cthick_h_K_0_meas : MeasurableSet (Metric.cthickening |h| K_0) :=
       Metric.isClosed_cthickening.measurableSet
     -- The master integrand vanishes outside cthickening |h| K_0.
-    have h_F_A5_zero_off : ∀ x ∉ Metric.cthickening |h| K_0,
+    have h_F_zero_off : ∀ x ∉ Metric.cthickening |h| K_0,
         B.c x * D.u_chart x *
           (DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction
             (d := Module.finrank ℝ E) k h η D.u_chart x) = 0 := by
@@ -2580,7 +2580,7 @@ theorem chartBilinear_master_nonsmooth_discharge
     -- Step (b): ∫_{cthickening |h| K_0} (B.c · D.u_chart · nirenbergTestFunction)
     --         = ∫_{Set.univ} (B.c · D.u_chart · nirenbergTestFunction)
     -- since the integrand vanishes outside cthickening |h| K_0.
-    rw [setIntegral_eq_integral_of_forall_compl_eq_zero h_F_A5_zero_off,
+    rw [setIntegral_eq_integral_of_forall_compl_eq_zero h_F_zero_off,
         ← MeasureTheory.setIntegral_univ]
   -- f_term_chartBilinear similar bridge.
   have h_f_term_eq :
@@ -2604,7 +2604,7 @@ theorem chartBilinear_master_nonsmooth_discharge
           (d := Module.finrank ℝ E) k h η D.u_chart) := rfl
     have h_cthick_h_K_0_meas : MeasurableSet (Metric.cthickening |h| K_0) :=
       Metric.isClosed_cthickening.measurableSet
-    have h_F_A5_zero_off : ∀ x ∉ Metric.cthickening |h| K_0,
+    have h_F_zero_off : ∀ x ∉ Metric.cthickening |h| K_0,
         (densityOnEuclid (I := I) g α x * D.f_chart x) *
           (DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction
             (d := Module.finrank ℝ E) k h η D.u_chart x) = 0 := by
@@ -2632,7 +2632,7 @@ theorem chartBilinear_master_nonsmooth_discharge
       simp only
       rw [h_test_eq]
     rw [h_step_a]
-    rw [setIntegral_eq_integral_of_forall_compl_eq_zero h_F_A5_zero_off,
+    rw [setIntegral_eq_integral_of_forall_compl_eq_zero h_F_zero_off,
         ← MeasureTheory.setIntegral_univ]
   -- cross_1_term_chartBilinear bridge:
   -- chart-bilinear cross_1: ∑∑ ∫_{K_0} 2·(τ_h weightedInvGram)·η·∂_j η·D_h^k weak_partial_i·D_h^k u_chart.
@@ -3345,7 +3345,7 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound_of_data
   have hΩ'_meas : MeasurableSet Ω' := hΩ'.measurableSet
   have h_tsupp_meas : MeasurableSet (tsupport η) :=
     (isClosed_tsupport η).measurableSet
-  have h_FK_A5 :
+  have h_FK :
       ∀ (k : Fin (Module.finrank ℝ E)),
       ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
         ∫ x in tsupport η,
@@ -3427,7 +3427,7 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound_of_data
         (d := Module.finrank ℝ E) k hnh]
     rw [h_pt_inner (x + (-h) • EuclideanSpace.single k 1), h_pt_inner x]
   -- Bridge 2 (continued): translate the existing v_test_sq discharge.
-  have h_v_test_sq_A5 :
+  have h_v_test_sq :
       ∀ (k : Fin (Module.finrank ℝ E)),
       ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
         ∫ x, (DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction
@@ -3488,7 +3488,7 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound_of_data
     rw [h_LHS_eq, h_RHS_1_eq, h_RHS_2_eq]
     exact h_v_test_sq_bound k hh hh_le
   -- Bridge 3: h_master_nonsmooth for u_g/g_g/f_g/B.
-  have h_master_A5 :
+  have h_master :
       ∀ (k : Fin (Module.finrank ℝ E)),
       ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
       B.lam * ∫ x, (η x)^2 *
@@ -3996,7 +3996,7 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound_of_data
       D B hu_g_l2 hf_g_l2_loc hg_g_l2 hg_g_isWP hη hη_supp hη_range hN
       h_fderiv_eta hΩ' (by intro x _; exact Set.mem_univ _) hΩ'_compact
       hη_in_Ω' hh_supp_in_Ω' hη_one_on_Ω'' hΩ''_meas
-      h_FK_A5 h_v_test_sq_A5 h_master_A5
+      h_FK h_v_test_sq h_master
   -- Step 8: Translate the bound on g_g to a bound on D.weak_partial.
   -- On Ω'' ⊆ tsupport η ⊆ closure Ω', g_g i = D.weak_partial i, and similarly for shifts.
   refine ⟨M_bound, hM_bound_nn, ?_⟩

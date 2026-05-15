@@ -1360,7 +1360,7 @@ private lemma smoothMulH1ComplInner_eq_rewrittenRHS_smoothToH1Compl
   -- We want: smoothMulLp g φ (smoothToLp vT) = H1ComplToLp (smoothMulH1Compl g φ (smoothToH1Compl vT)).
   -- Apply with u = smoothToH1Compl vT; H1ComplToLp(smoothToH1Compl vT) = smoothToLp vT.
   -- So: H1ComplToLp (smoothMulH1Compl g φ (smoothToH1Compl vT)) = smoothMulLp g φ (smoothToLp vT). ✓
-  have h_Phase2 : smoothMulLp (I := I) (M := M) g φ
+  have h_lpCompat : smoothMulLp (I := I) (M := M) g φ
       (smoothToLp (I := I) (M := M) g vT) =
     H1ComplToLp (I := I) (M := M) g
       (smoothMulH1Compl (I := I) (M := M) g φ
@@ -1428,7 +1428,7 @@ private lemma smoothMulH1ComplInner_eq_rewrittenRHS_smoothToH1Compl
   --   ⟪smoothToLp vT, fHLeibnizGeneralResidualCLM g φ (smoothToH1Compl uT)⟫_ℝ.
   -- It suffices to show the first summand equality.
   congr 1
-  rw [h_Phase2, h_oneSubLap_smooth]
+  rw [h_lpCompat, h_oneSubLap_smooth]
   -- Goal: ⟪H1ComplToLp (smoothMulH1Compl g φ (smoothToH1Compl vT)),
   --         laplacianDomain.preimage ⟨smoothToH1Compl uT, _⟩⟫_L² =
   --       ⟪smoothToH1Compl uT, smoothMulH1Compl g φ (smoothToH1Compl vT)⟫_H1Compl.
@@ -1513,13 +1513,13 @@ private lemma rewrittenRHS_eq_original_RHS_on_laplacianDomain
     (I := I) (M := M) g φ (smoothToLp (I := I) (M := M) g vT)
     (laplacianDomain.preimage (I := I) (M := M) g ⟨u_h, hu_h⟩)]
   -- Now LHS: ⟪smoothMulLp φ (smoothToLp vT), preimage⟫.
-  have h_Phase2 : smoothMulLp (I := I) (M := M) g φ
+  have h_lpCompat : smoothMulLp (I := I) (M := M) g φ
       (smoothToLp (I := I) (M := M) g vT) =
     H1ComplToLp (I := I) (M := M) g
       (smoothMulH1Compl (I := I) (M := M) g φ
         (smoothToH1Compl (I := I) (M := M) g vT)) := by
     rw [H1ComplToLp_smoothMulH1Compl, H1ComplToLp_smoothToH1Compl]
-  rw [h_Phase2]
+  rw [h_lpCompat]
   -- Apply variational ID for u_h.
   have h_resolvent_eq :
       resolvent (I := I) (M := M) g

@@ -169,7 +169,7 @@ private lemma memW1p_chartPushedRaw_rhoAlpha_mul_preimage_smoothMulH1Compl
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
-    (h_M6 : smoothMulH1Compl (I := I) (M := M) g
+    (h_mem : smoothMulH1Compl (I := I) (M := M) g
         (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) u_h ∈
       laplacianDomainPow (I := I) (M := M) g 2) :
     DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
@@ -179,18 +179,18 @@ private lemma memW1p_chartPushedRaw_rhoAlpha_mul_preimage_smoothMulH1Compl
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
   -- The preimage of `smoothMulH1Compl ρα u_h` with two different membership proofs is the same.
-  have h_M6_dom : smoothMulH1Compl (I := I) (M := M) g
+  have h_mem_dom : smoothMulH1Compl (I := I) (M := M) g
       (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) u_h ∈
         laplacianDomain (I := I) (M := M) g :=
-    laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 h_M6
+    laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 h_mem
   have h_smHC_h2 : MemWkpChart (I := I) (M := M) g 2 2
       (preimageSmoothMulH1ComplFun (I := I) (M := M) g α hu_h) := by
     -- The preimage Lp class depends only on the H1Compl element, not on membership proof.
-    -- So we can use the membership proof from h_M6.
+    -- So we can use the membership proof from h_mem.
     have h := (laplacianDomainPow_two_h2_plus_rhs_h2
-      (I := I) (M := M) g h_M6).2.1
+      (I := I) (M := M) g h_mem).2.1
     -- h : MemWkpChart g 2 2 ((preimage ⟨smoothMulH1Compl ρα u_h, ...⟩).coeFn).
-    -- The membership in h's preimage is `laplacianDomainPow_succ_subset_laplacianDomain g 1 h_M6`.
+    -- The membership in h's preimage is `laplacianDomainPow_succ_subset_laplacianDomain g 1 h_mem`.
     -- preimageSmoothMulH1ComplFun uses `smoothMulH1Compl_mem_laplacianDomain ... (laplacianDomainPow_succ_subset_laplacianDomain g 1 hu_h)`.
     -- These are different membership proofs to the same set, so the preimage Lp class
     -- is definitionally equal.
@@ -368,7 +368,7 @@ theorem fChartResidual_memW1p_of_iteratedClosure
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
-    (h_M6 : smoothMulH1Compl (I := I) (M := M) g
+    (h_mem : smoothMulH1Compl (I := I) (M := M) g
         (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) u_h ∈
       laplacianDomainPow (I := I) (M := M) g 2)
     (h_support : preimageSmoothMulH1ComplFun (I := I) (M := M) g α hu_h =ᵐ[
@@ -458,7 +458,7 @@ theorem fChartResidual_memW1p_of_iteratedClosure
     h_vol_abs.ae_le h_residual_rewritten
   -- Step 5: Both pieces are MemW1p 2 chartTarget via the bridge.
   have h_piece1 := memW1p_chartPushedRaw_rhoAlpha_mul_preimage_smoothMulH1Compl
-    (I := I) (M := M) g α hu_h h_M6
+    (I := I) (M := M) g α hu_h h_mem
   have h_piece2 := memW1p_chartPushedRaw_rhoAlpha_mul_preimage
     (I := I) (M := M) g α hu_h
   -- Step 6: Difference is MemW1p 2 via add + const_smul (-1).
