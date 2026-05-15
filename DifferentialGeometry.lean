@@ -433,6 +433,8 @@ import DifferentialGeometry.Analysis.HeatEquation.SmoothingSpectralLift
 import DifferentialGeometry.Geometry.NormGradSq
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Equation
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Existence
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.MaximalInterval
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.Smoothness
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Uniqueness
 
 import DifferentialGeometry.Analysis.Sobolev.Solutions.FriedrichsCommutator
