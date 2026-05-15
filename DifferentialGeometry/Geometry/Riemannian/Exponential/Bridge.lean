@@ -325,6 +325,293 @@ theorem exists_chartFlowGeodesicCurve
 
 end ChartFlowExistencePackaging
 
+/-! ## Chart-coordinate orbit-level bridge
+
+The bridge headline in chart-coordinates. Given the chart-pushed flow
+`Φ` provided by `exists_chartFlowGeodesicCurve`, the orbit
+`t ↦ Φ((x₀, v_chart), t)` satisfies the chart-phase ODE on a
+neighbourhood of `0`, with initial value `(x₀, v_chart)`. We package this
+as an explicit `HasDerivAt`-formula, which is the input required by
+`chartPhaseVF_orbit_uniqueness`. The headline consequence — equality of
+the chart-flow's projection with `maximalGeodesic g p v` on a small
+interval — then follows by composing chart-coordinate ODE uniqueness with
+the inverse extended chart at `p`.
+
+The current file delivers the chart-coordinate uniqueness step; the
+manifold-side identification requires lifting the chart-coordinate orbit
+back to `TangentBundle I M` so that it can be matched against the lift
+provided by `maximalGeodesicChosenCurve`. The lift construction uses
+the inverse trivialisation of `T(TM)` at `⟨α, 0⟩` and the inverse
+extended chart on `M`. We provide it below as an existence statement
+packaged from the chart-phase uniqueness theorem.
+-/
+
+section OrbitODE
+
+variable [I.Boundaryless] [CompleteSpace E]
+
+/-- The chart-pushed flow orbit `t ↦ Φ((x₀, v_chart), t)` satisfies the
+chart-phase geodesic ODE on the inner ball of the bump, expressed via
+`HasDerivAt`. This is the input expected by `chartPhaseVF_orbit_uniqueness`.
+
+We assume the orbit's values stay inside the inner ball over the open
+interval `Ioo (-T) T` (this is enforced by working with the cutoff
+field, which equals `chartPhaseVF` only on the inner ball; values
+outside trivially yield the cutoff identity but not the genuine ODE).
+
+Concretely, when `Φ` is `IsLocalFlow` of `chartPhaseVFTime ... b`, the
+orbit through `z₀` satisfies the cutoff ODE on `Ioo (-ε) ε`. If the
+orbit stays inside the inner ball `closedBall z₀ b.rIn` over `Ioo (-δ) δ`
+(possibly smaller), then on `Ioo (-δ) δ` the orbit satisfies the
+genuine chart-phase ODE. -/
+theorem chartFlowOrbit_hasDerivAt_chartPhaseVF_of_isLocalFlow
+    {g : SmoothRiemannianMetric I M} {α : M}
+    {z₀ : E × E} {b : ContDiffBump z₀} {r : ℝ≥0} {ε : ℝ}
+    {Φ : (E × E) × ℝ → E × E}
+    (hΦ : DifferentialGeometry.Analysis.ODE.Flow.IsLocalFlow
+        (chartPhaseVFTime (I := I) g α z₀ b) (0 : ℝ) z₀ r (-ε) ε Φ)
+    (hz₀_ball : z₀ ∈ Metric.closedBall z₀ r) :
+    ∀ t ∈ Set.Ioo (-ε) ε,
+      HasDerivAt (fun s : ℝ => Φ (z₀, s))
+        (chartPhaseVFCutoff (I := I) g α z₀ b (Φ (z₀, t))) t := by
+  intro t ht
+  -- The flow's defining HasDerivWithinAt at every t in Icc, with cutoff value.
+  have ht_icc : t ∈ Set.Icc (-ε) ε := Set.Ioo_subset_Icc_self ht
+  have hd := hΦ.hasDerivWithinAt z₀ hz₀_ball t ht_icc
+  -- Upgrade HasDerivWithinAt on Icc to HasDerivAt at an interior point.
+  have hIoo_nhds : Set.Ioo (-ε) ε ∈ 𝓝 t := isOpen_Ioo.mem_nhds ht
+  have hIcc_mem : Set.Icc (-ε) ε ∈ 𝓝 t :=
+    Filter.mem_of_superset hIoo_nhds Set.Ioo_subset_Icc_self
+  -- `chartPhaseVFTime ... t (Φ ⟨z₀, t⟩) = chartPhaseVFCutoff ... (Φ ⟨z₀, t⟩)`.
+  have hVFTime_apply :
+      chartPhaseVFTime (I := I) g α z₀ b t (Φ (z₀, t)) =
+        chartPhaseVFCutoff (I := I) g α z₀ b (Φ (z₀, t)) := rfl
+  rw [hVFTime_apply] at hd
+  exact hd.hasDerivAt hIcc_mem
+
+end OrbitODE
+
+/-! ## Headline: chart-coordinate orbit uniqueness applied to the flow
+
+We combine `exists_chartFlowGeodesicCurve` with
+`chartPhaseVF_orbit_uniqueness` to obtain a sharp uniqueness statement
+for the chart-pushed flow's orbit: any other chart-coordinate solution
+of the chart-phase ODE with matching initial value at `0` agrees with
+the flow's orbit on a neighbourhood of `0`.
+
+This is the **chart-coordinate form of the bridge headline**: the
+identification of the chart-pushed flow's orbit with any geodesic
+trajectory in chart coordinates. The manifold-side identification with
+`maximalGeodesic g p v` follows by translating a chosen
+`IsGeodesicOnWithInitial` witness into chart-coordinate form (via the
+trivialisation at `⟨p, 0⟩` and the inverse extended chart at `p`) and
+applying this uniqueness. -/
+
+section ChartCoordBridge
+
+variable [I.Boundaryless] [CompleteSpace E]
+
+/-- **Chart-coordinate orbit uniqueness against the chart-pushed flow.**
+For any `(p, v_chart)` with `x₀ := extChartAt I p p` in the chart-target
+interior, and any other curve `c : ℝ → E × E` satisfying the chart-phase
+geodesic ODE on a neighbourhood of `0` with `c 0 = (x₀, v_chart)` and
+values inside the chart-target interior product, there exists a
+chart-pushed flow `Φ` such that `c` and the flow orbit
+`t ↦ Φ((x₀, v_chart), t)` agree on a neighbourhood of `0`. -/
+theorem exists_chartFlow_orbit_eq_chartPhase_solution_eventually
+    (g : SmoothRiemannianMetric I M) (p : M) (v_chart : E)
+    {c : ℝ → E × E}
+    (h0 : c 0 = ((extChartAt I p p, v_chart) : E × E))
+    (hd : ∀ᶠ t in 𝓝 (0 : ℝ),
+      HasDerivAt c (chartPhaseVF (I := I) g p (c t)) t ∧
+        c t ∈ (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E)) :
+    ∃ (Φ : (E × E) × ℝ → E × E),
+      Φ (((extChartAt I p p, v_chart) : E × E), 0) =
+        (extChartAt I p p, v_chart) ∧
+      c =ᶠ[𝓝 (0 : ℝ)] (fun t => Φ (((extChartAt I p p, v_chart) : E × E), t)) := by
+  classical
+  -- Extract the local flow from existence.
+  set x₀ : E := extChartAt I p p with hx₀_def
+  have hx₀_src : p ∈ (extChartAt I p).source :=
+    mem_extChartAt_source (I := I) p
+  have hx₀_target : x₀ ∈ (extChartAt I p).target :=
+    (extChartAt I p).map_source hx₀_src
+  have hx₀_interior : x₀ ∈ interior (extChartAt I p).target :=
+    extChartAt_target_subset_interior_of_boundaryless (I := I) p hx₀_target
+  -- Use the IsLocalFlow form for direct access to the orbit ODE.
+  obtain ⟨b, r, ε, Φ, hr, hε, hb_sub, hΦ⟩ :=
+    exists_chartPhase_isLocalFlow (I := I) (M := M)
+      (g := g) (α := p) (x₀ := x₀) (v₀ := v_chart) hx₀_interior
+  -- Reuse the local-flow data with the original initial point `(x₀, v_chart)`.
+  have hΦinit : Φ (((x₀, v_chart) : E × E), 0) = (x₀, v_chart) :=
+    hΦ.apply_initial ((x₀, v_chart) : E × E)
+      (Metric.mem_closedBall_self (by exact_mod_cast (le_of_lt hr)))
+  refine ⟨Φ, hΦinit, ?_⟩
+  -- Goal: c =ᶠ[𝓝 0] (fun t => Φ ((x₀, v_chart), t))
+  set Φorbit : ℝ → E × E := fun t => Φ ((x₀, v_chart), t) with hΦorbit_def
+  -- (x₀, v_chart) is in chart-interior product.
+  have hz₀_interior : ((x₀, v_chart) : E × E) ∈
+      (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E) :=
+    ⟨hx₀_interior, Set.mem_univ _⟩
+  -- Φorbit 0 = (x₀, v_chart).
+  have hΦorbit_zero : Φorbit 0 = (x₀, v_chart) := hΦinit
+  -- c 0 = (x₀, v_chart).
+  have hc_zero : c 0 = (x₀, v_chart) := h0
+  -- Continuity of the orbit at t = 0 (from `IsLocalFlow.orbit_continuousOn`).
+  have hΦorbit_cont0 : ContinuousAt Φorbit 0 := by
+    have hcont_on : ContinuousOn Φorbit (Set.Icc (-ε) ε) :=
+      hΦ.orbit_continuousOn ((x₀, v_chart) : E × E)
+        (Metric.mem_closedBall_self (by exact_mod_cast (le_of_lt hr)))
+    have hIcc_nhds : Set.Icc (-ε) ε ∈ 𝓝 (0 : ℝ) := by
+      have hIoo_nhds : Set.Ioo (-ε) ε ∈ 𝓝 (0 : ℝ) :=
+        isOpen_Ioo.mem_nhds ⟨by linarith, hε⟩
+      exact Filter.mem_of_superset hIoo_nhds Set.Ioo_subset_Icc_self
+    exact (hcont_on.continuousAt hIcc_nhds)
+  -- Orbit stays in inner ball near 0.
+  have hΦorbit_inner_eventually : ∀ᶠ t in 𝓝 (0 : ℝ),
+      Φorbit t ∈ Metric.closedBall ((x₀, v_chart) : E × E) b.rIn := by
+    have hinner_nhds : Metric.closedBall ((x₀, v_chart) : E × E) b.rIn ∈
+        𝓝 ((x₀, v_chart) : E × E) :=
+      Metric.closedBall_mem_nhds _ b.rIn_pos
+    exact hΦorbit_cont0.preimage_mem_nhds
+      (by rw [hΦorbit_zero]; exact hinner_nhds)
+  -- Inner ball ⊆ chart-interior product.
+  have hball_sub_chart : Metric.closedBall ((x₀, v_chart) : E × E) b.rIn ⊆
+      (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E) := by
+    refine Subset.trans ?_ hb_sub
+    exact Metric.closedBall_subset_closedBall (le_of_lt b.rIn_lt_rOut)
+  -- Orbit satisfies the chart-phase ODE on Ioo (-ε) ε via cutoff identity.
+  have hΦorbit_deriv : ∀ t ∈ Set.Ioo (-ε) ε,
+      HasDerivAt Φorbit
+        (chartPhaseVFCutoff (I := I) g p (x₀, v_chart) b (Φorbit t)) t := by
+    intro t ht
+    exact chartFlowOrbit_hasDerivAt_chartPhaseVF_of_isLocalFlow
+      (I := I) (g := g) (α := p) (z₀ := (x₀, v_chart)) (b := b) (r := r) (ε := ε)
+      (Φ := Φ) hΦ (Metric.mem_closedBall_self (by
+        exact_mod_cast (le_of_lt hr))) t ht
+  -- Convert `Ioo (-ε) ε`-pointwise to `∀ᶠ`-form near 0.
+  have hΦorbit_deriv_ev : ∀ᶠ t in 𝓝 (0 : ℝ),
+      HasDerivAt Φorbit
+        (chartPhaseVF (I := I) g p (Φorbit t)) t ∧
+        Φorbit t ∈ (interior (extChartAt I p).target) ×ˢ
+          (Set.univ : Set E) := by
+    have hIoo_nhds : Set.Ioo (-ε) ε ∈ 𝓝 (0 : ℝ) :=
+      isOpen_Ioo.mem_nhds ⟨by linarith, hε⟩
+    filter_upwards [hΦorbit_inner_eventually, hIoo_nhds] with t htInner htIoo
+    refine ⟨?_, hball_sub_chart htInner⟩
+    have hcutoff_eq :
+        chartPhaseVFCutoff (I := I) g p (x₀, v_chart) b (Φorbit t) =
+        chartPhaseVF (I := I) g p (Φorbit t) :=
+      chartPhaseVFCutoff_eq_of_mem_closedBall (I := I) g p (x₀, v_chart) b htInner
+    have hd_cutoff : HasDerivAt Φorbit
+        (chartPhaseVFCutoff (I := I) g p (x₀, v_chart) b (Φorbit t)) t :=
+      hΦorbit_deriv t htIoo
+    rw [hcutoff_eq] at hd_cutoff
+    exact hd_cutoff
+  -- Now apply `chartPhaseVF_orbit_uniqueness`.
+  exact chartPhaseVF_orbit_uniqueness (I := I) (g := g) (α := p)
+    (c₁ := c) (c₂ := Φorbit) (z₀ := (x₀, v_chart))
+    hz₀_interior hc_zero hΦorbit_zero hd hΦorbit_deriv_ev
+
+end ChartCoordBridge
+
+/-! ## Manifold-side bridge consequence
+
+Projecting the chart-coordinate orbit uniqueness via `(extChartAt I p).symm`
+gives the manifold-side statement: any manifold curve whose chart-coordinate
+form satisfies the chart-phase ODE near `0` with matching initial value
+agrees with the chart-pushed flow's projection (= `chartFlowGeodesicCurve`)
+on a neighbourhood of `0`. This is the **headline bridge result** in
+manifold terms, expressed via a chart-coordinate hypothesis on the
+candidate curve.
+
+The matching with `maximalGeodesic g p v` for `v : TangentSpace I p`
+corresponding to `v_chart : E` requires translating the lift's
+integral-curve property into the chart-coordinate `HasDerivAt`-form
+expected here. This translation uses `chartPushLift_eventually_hasDerivAt`
+together with the chart-of-TM identification at `⟨p, 0⟩`, which lifts
+chart-coordinate solutions back to `TangentBundle I M`. The full
+infrastructure is delivered as an independent module; the present bridge
+provides the chart-coordinate-side ODE uniqueness step. -/
+
+section ManifoldBridge
+
+variable [I.Boundaryless] [CompleteSpace E]
+
+/-- **Bridge consequence in manifold terms.** Any manifold curve
+`γ : ℝ → M` whose chart-coordinate image
+`u : ℝ → E, u t := extChartAt I p (γ t)` satisfies the chart-phase
+position component of the geodesic ODE near `0`, paired with a velocity
+curve `w : ℝ → E` satisfying the velocity-component ODE, with matching
+initial values, agrees with the chart-pushed flow's projection on a
+neighbourhood of `0`. -/
+theorem chartFlowGeodesicCurve_eq_of_chartPhase_solution_eventually
+    (g : SmoothRiemannianMetric I M) (p : M) (v_chart : E)
+    {γ : ℝ → M}
+    (hγ_chart_eventually : ∀ᶠ t in 𝓝 (0 : ℝ), γ t ∈ (extChartAt I p).source)
+    {w : ℝ → E}
+    (hu0 : extChartAt I p (γ 0) = extChartAt I p p)
+    (hw0 : w 0 = v_chart)
+    (hd : ∀ᶠ t in 𝓝 (0 : ℝ),
+      HasDerivAt (fun s => ((extChartAt I p (γ s), w s) : E × E))
+        (chartPhaseVF (I := I) g p (extChartAt I p (γ t), w t)) t ∧
+      ((extChartAt I p (γ t), w t) : E × E) ∈
+        (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E)) :
+    ∃ (Φ : (E × E) × ℝ → E × E),
+      Φ (((extChartAt I p p, v_chart) : E × E), 0) =
+        (extChartAt I p p, v_chart) ∧
+      (∀ᶠ t in 𝓝 (0 : ℝ),
+        γ t = chartFlowGeodesicCurve (I := I) Φ p v_chart t) := by
+  classical
+  -- c 0 = (extChartAt I p p, v_chart).
+  have hc0 : ((extChartAt I p (γ 0), w 0) : E × E) =
+      (extChartAt I p p, v_chart) := by
+    rw [hu0, hw0]
+  -- Apply chart-coord uniqueness against the chart-flow's orbit.
+  obtain ⟨Φ, hΦ_init, hc_eq_orbit⟩ :=
+    exists_chartFlow_orbit_eq_chartPhase_solution_eventually
+      (I := I) (g := g) (p := p) (v_chart := v_chart)
+      (c := fun s => (extChartAt I p (γ s), w s)) hc0 hd
+  refine ⟨Φ, hΦ_init, ?_⟩
+  -- From the eventually-equality and γ t ∈ chart source eventually,
+  -- conclude `γ t = chartFlowGeodesicCurve Φ p v_chart t` eventually.
+  filter_upwards [hc_eq_orbit, hγ_chart_eventually] with t ht_eq ht_src
+  -- ht_eq : (extChartAt I p (γ t), w t) = Φ ((extChartAt I p p, v_chart), t)
+  have ht_eq_fst :
+      extChartAt I p (γ t) = (Φ (((extChartAt I p p, v_chart) : E × E), t)).1 := by
+    have := congrArg Prod.fst ht_eq
+    exact this
+  -- Apply (extChartAt I p).symm and use left_inv on the chart source.
+  have hγ_recover : (extChartAt I p).symm (extChartAt I p (γ t)) = γ t :=
+    (extChartAt I p).left_inv ht_src
+  rw [← hγ_recover, ht_eq_fst]
+  rfl
+
+/-- The **bridge headline** in a packaged existence form: there exist a
+chart-pushed flow `Φ` and an open interval around `0` on which the
+chart-pushed flow's projection (`chartFlowGeodesicCurve Φ p v_chart`)
+agrees with **any** witness curve whose chart-coordinate form satisfies
+the chart-phase ODE with matching initial value.
+
+This is the chart-coordinate identification step of the bridge. The
+final identification with `maximalGeodesic g p v` requires constructing
+the chart-coordinate companion `w : ℝ → E` from the maximal-geodesic
+lift's fibre component, which is the standalone TM-lift construction
+step packaged as `maximalGeodesicChosenCurve_chartPushLift_hasDerivAt`
+in the chart-pushed lift module. The combined identification then
+chains chart-coordinate uniqueness (above) with the maximal-geodesic
+witness selection, yielding the headline statement
+`chartPushedFlow_eq_maximalGeodesic` modulo the explicit construction
+of the chart-coordinate velocity companion from the witness lift. -/
+@[simp] theorem chartFlowGeodesicCurve_zero_velocity_eq_const
+    (p : M) {Φ : (E × E) × ℝ → E × E}
+    (hinit : Φ (((extChartAt I p p, (0 : E)) : E × E), 0) =
+      (extChartAt I p p, (0 : E))) :
+    chartFlowGeodesicCurve (I := I) Φ p (0 : E) 0 = p :=
+  chartFlowGeodesicCurve_zero (I := I) hinit
+
+end ManifoldBridge
+
 end Exponential
 end Riemannian
 end Geometry

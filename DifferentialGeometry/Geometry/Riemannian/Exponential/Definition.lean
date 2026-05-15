@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Riemannian.Geodesic.Equation
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Existence
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.MaximalInterval
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Uniqueness
+import Mathlib.Topology.Connected.Clopen
 
 set_option linter.unusedSectionVars false
 
@@ -102,23 +103,16 @@ section StationaryWitness
 variable [I.Boundaryless] [CompleteSpace E]
 
 /-- For the zero initial velocity, the constant geodesic at `p` is a
-`MaximalGeodesicWitness` at every time. -/
+`MaximalGeodesicWitness` at every time, witnessed on the preconnected set
+`Set.univ`. -/
 theorem maximalGeodesicWitness_zero_all_times
     (g : SmoothRiemannianMetric I M) (p : M) (t : ℝ) :
     MaximalGeodesicWitness (I := I) g p (0 : TangentSpace I p) t := by
   classical
-  -- The constant geodesic `fun _ => p` is global, witnessing the predicate
-  -- on `Set.univ` (which contains every `t`).
-  have hconst : IsGeodesic (I := I) g (fun _ : ℝ => p) :=
-    isGeodesic_const (I := I) g p
-  obtain ⟨α, f, hproj, hf⟩ := hconst
-  -- We need to upgrade to `IsGeodesicOnWithInitial` with `f 0 = ⟨p, 0⟩`.
-  -- The constructor of `isGeodesic_const` uses `α = p`, lift
-  -- `fun _ => ⟨p, 0⟩`, but this is opaque after destructuring. So we
-  -- construct the witness from scratch with explicit data.
-  refine ⟨fun _ : ℝ => p, Set.univ, isOpen_univ, Set.mem_univ _, Set.mem_univ _, ?_⟩
-  -- Manual witness: α = p, f := fun _ => ⟨p, 0⟩, hf below.
-  refine ⟨p, fun _ : ℝ => (⟨p, (0 : E)⟩ : TangentBundle I M), ?_, rfl, ?_⟩
+  refine ⟨fun _ : ℝ => p, Set.univ, isOpen_univ, isPreconnected_univ,
+    Set.mem_univ _, Set.mem_univ _, ?_⟩
+  -- Manual witness: lift `f := fun _ => ⟨p, 0⟩`, chart basepoint `p`.
+  refine ⟨fun _ : ℝ => (⟨p, (0 : E)⟩ : TangentBundle I M), ?_, rfl, ?_⟩
   · intro _; rfl
   · -- Constant lift is an integral curve of the chart-fixed VF on `Set.univ`,
     -- because the VF vanishes at `⟨p, 0⟩` (chart-fixed at α = p, zero section).
@@ -164,16 +158,7 @@ end JunkValue
 
 For `v = 0`, the natural witness is the constant geodesic. The value
 `expMap g p 0 = maximalGeodesic g p 0 1` equals the value at `t = 1`
-of the `Classical.choose`-chosen geodesic witness. We package this
-witness-level identification.
-
-The stronger statement `expMap g p 0 = p` requires propagating local
-geodesic uniqueness along the connected maximal interval. The chart-fixed
-geodesic vector field is only `C^∞` on the chart-domain preimage, so the
-propagation must change chart basepoint along the curve — a moving-chart
-construction that the architecture explicitly defers. The witness-level
-identification below is the cleanest unconditional statement available
-at this layer. -/
+of the `Classical.choose`-chosen geodesic witness. -/
 
 section ExpMapZeroWitnessLevel
 
@@ -186,12 +171,193 @@ theorem maximalGeodesicChosenCurve_zero_start_eq
     (g : SmoothRiemannianMetric I M) (p : M) :
     maximalGeodesicChosenCurve (I := I) g p (0 : TangentSpace I p)
       (maximalGeodesicWitness_zero_all_times (I := I) g p 1) 0 = p := by
-  obtain ⟨J, _hJ_open, _h0J, _h1J, hγ⟩ :=
+  obtain ⟨_J, _hJ_open, _hJ_conn, _h0J, _h1J, hγ⟩ :=
     maximalGeodesicChosenCurve_spec (I := I) g p (0 : TangentSpace I p)
       (maximalGeodesicWitness_zero_all_times (I := I) g p 1)
   exact hγ.start_eq
 
 end ExpMapZeroWitnessLevel
+
+/-! ## Zero-velocity propagation
+
+For the zero-velocity initial datum `(p, 0)`, the constant curve
+`fun _ => p` is the unique solution of the geodesic equation. We show
+that any witness curve for the maximal interval with this initial datum
+must equal `p` at every point of its (connected) witness interval. This
+yields the unconditional identity `expMap g p 0 = p`.
+
+The argument is a standard connectedness propagation: the set of times
+`t ∈ J` at which the lifted curve `f` equals `⟨p, 0⟩` is non-empty
+(contains `0`), is closed in `J` (by continuity of `f` on `J` together
+with Hausdorffness of `TangentBundle I M`), and is open in `J` (by local
+uniqueness of integral curves of the chart-fixed geodesic vector field at
+`p`, applied to the constant lift `fun _ => ⟨p, 0⟩`). Preconnectedness of
+the witness interval `J` then forces the set to be all of `J`. -/
+
+section ZeroVelocityPropagation
+
+variable [I.Boundaryless] [CompleteSpace E]
+  [T2Space (TangentBundle I M)]
+
+/-- The constant lift `fun _ : ℝ => ⟨p, 0⟩` is a global integral curve
+of `geodesicVectorFieldChart g p`, since the vector field vanishes at the
+zero section over the chart basepoint. -/
+private lemma isMIntegralCurve_const_zero_section
+    (g : SmoothRiemannianMetric I M) (p : M) :
+    IsMIntegralCurve (fun _ : ℝ => (⟨p, (0 : E)⟩ : TangentBundle I M))
+      (geodesicVectorFieldChart (I := I) g p) :=
+  isMIntegralCurve_const (geodesicVectorFieldChart_zero_section (I := I) g p)
+
+/-- **Zero-velocity propagation.** If `f : ℝ → TangentBundle I M` is an
+integral curve of `geodesicVectorFieldChart g p` on a preconnected open
+set `J ∋ 0` and satisfies the initial condition `f 0 = ⟨p, 0⟩`, then
+`f t = ⟨p, 0⟩` for every `t ∈ J`.
+
+This is the manifold-level form of the local ODE uniqueness statement
+applied along the connected witness interval. -/
+theorem isMIntegralCurveOn_zero_section_eq_const
+    (g : SmoothRiemannianMetric I M) (p : M)
+    {f : ℝ → TangentBundle I M} {J : Set ℝ}
+    (hJ_open : IsOpen J) (hJ_conn : IsPreconnected J) (h0J : (0 : ℝ) ∈ J)
+    (hf : IsMIntegralCurveOn f (geodesicVectorFieldChart (I := I) g p) J)
+    (hf0 : f 0 = (⟨p, (0 : E)⟩ : TangentBundle I M)) :
+    ∀ t ∈ J, f t = (⟨p, (0 : E)⟩ : TangentBundle I M) := by
+  classical
+  -- The constant lift is a global integral curve of the same vector field.
+  set c : ℝ → TangentBundle I M :=
+    fun _ : ℝ => (⟨p, (0 : E)⟩ : TangentBundle I M) with hc_def
+  have hc_int : IsMIntegralCurve c (geodesicVectorFieldChart (I := I) g p) :=
+    isMIntegralCurve_const_zero_section (I := I) g p
+  -- Pass to the subtype: J with the subspace topology is preconnected.
+  haveI : PreconnectedSpace (↥J) :=
+    isPreconnected_iff_preconnectedSpace.mp hJ_conn
+  -- The set of subtype points where `f` and `c` agree.
+  set Tsub : Set (↥J) := {t : ↥J | f (t : ℝ) = c (t : ℝ)} with hTsub_def
+  -- Goal: every t ∈ J satisfies f t = ⟨p, 0⟩.
+  suffices hTsub_univ : Tsub = Set.univ by
+    intro t ht
+    have ht_sub : (⟨t, ht⟩ : ↥J) ∈ Tsub := by
+      have hu : (⟨t, ht⟩ : ↥J) ∈ (Set.univ : Set ↥J) := Set.mem_univ _
+      rw [← hTsub_univ] at hu
+      exact hu
+    -- `Tsub` membership unfolds to `f t = c t = ⟨p, 0⟩`.
+    have hft : f t = c t := ht_sub
+    simpa [hc_def] using hft
+  -- Show Tsub is clopen and nonempty, then conclude by PreconnectedSpace.
+  -- Nonempty: 0 is in J and f 0 = c 0.
+  have h0_mem : (⟨0, h0J⟩ : ↥J) ∈ Tsub := by
+    change f 0 = c 0
+    rw [hf0, hc_def]
+  -- Continuity of f and c restricted to the subtype.
+  have hf_cont : ContinuousOn f J := hf.continuousOn
+  have hc_cont : Continuous c := continuous_const
+  have hf_sub_cont : Continuous (fun t : ↥J => f (t : ℝ)) := by
+    refine continuousOn_iff_continuous_restrict.mp ?_
+    -- `Set.restrict J f` is `fun t : ↥J => f t.val`.
+    exact hf_cont
+  have hc_sub_cont : Continuous (fun t : ↥J => c (t : ℝ)) :=
+    hc_cont.comp continuous_subtype_val
+  -- Closed: Tsub = (fun t => (f t.val, c t.val))⁻¹ (diagonal), closed under T2.
+  haveI : T2Space (TangentBundle I M) := inferInstance
+  have hTsub_closed : IsClosed Tsub := by
+    -- {(x, y) | x = y} is closed in TM × TM.
+    have hdiag : IsClosed {p : TangentBundle I M × TangentBundle I M | p.1 = p.2} :=
+      isClosed_diagonal
+    have hpair_cont : Continuous
+        (fun t : ↥J => (f (t : ℝ), c (t : ℝ))) :=
+      hf_sub_cont.prodMk hc_sub_cont
+    -- Tsub = preimage of diagonal.
+    have : Tsub = (fun t : ↥J => (f (t : ℝ), c (t : ℝ))) ⁻¹'
+        {p : TangentBundle I M × TangentBundle I M | p.1 = p.2} := by
+      ext t; rfl
+    rw [this]
+    exact hdiag.preimage hpair_cont
+  -- Open: at every t₀ ∈ Tsub, ODE uniqueness gives a nbhd in J where
+  -- f = c, hence a nbhd in ↥J inside Tsub.
+  have hTsub_open : IsOpen Tsub := by
+    rw [isOpen_iff_mem_nhds]
+    intro t₀ ht₀
+    -- t₀ : ↥J, ht₀ : f t₀.val = c t₀.val = ⟨p, 0⟩.
+    have hft₀ : f (t₀ : ℝ) = (⟨p, (0 : E)⟩ : TangentBundle I M) := ht₀
+    -- The base point f(t₀).proj = p lies in chartAt H p.source.
+    have hp_src : (f (t₀ : ℝ)).proj ∈ (chartAt H p).source := by
+      rw [hft₀]
+      exact mem_chart_source H p
+    -- Both f and c are local integral curves at t₀.
+    have hf_at : IsMIntegralCurveAt f (geodesicVectorFieldChart (I := I) g p)
+        (t₀ : ℝ) :=
+      hf.isMIntegralCurveAt (hJ_open.mem_nhds t₀.2)
+    have hc_at : IsMIntegralCurveAt c (geodesicVectorFieldChart (I := I) g p)
+        (t₀ : ℝ) := hc_int.isMIntegralCurveAt _
+    -- Apply local uniqueness at t₀ (matching at t₀ via hft₀).
+    have hfc_eq : f (t₀ : ℝ) = c (t₀ : ℝ) := hft₀
+    have hf_eq_c : f =ᶠ[𝓝 (t₀ : ℝ)] c :=
+      isMIntegralCurveAt_geodesicVectorFieldChart_eventuallyEq
+        (I := I) (g := g) (α := p) (t₀ := (t₀ : ℝ))
+        (f₁ := f) (f₂ := c) hp_src hf_at hc_at hfc_eq
+    -- Pull back to a nbhd of t₀ in the subtype.
+    rcases Filter.eventually_iff_exists_mem.mp hf_eq_c with ⟨U, hU_nhds, hU_eq⟩
+    rcases mem_nhds_iff.mp hU_nhds with ⟨V, hVU, hV_open, hV_mem⟩
+    -- V is open in ℝ, contains t₀, and ∀ s ∈ V, f s = c s.
+    refine Filter.mem_of_superset (hV_open.preimage continuous_subtype_val
+      |>.mem_nhds hV_mem) ?_
+    intro s hs
+    change f (s : ℝ) = c (s : ℝ)
+    exact hU_eq _ (hVU hs)
+  -- Combine: Tsub is clopen and nonempty.
+  have hTsub_clopen : IsClopen Tsub := ⟨hTsub_closed, hTsub_open⟩
+  exact hTsub_clopen.eq_univ ⟨_, h0_mem⟩
+
+end ZeroVelocityPropagation
+
+/-! ## Unconditional `expMap g p 0 = p`
+
+Combining the propagation lemma above with the constant-curve witness
+gives the unconditional identity `expMap g p 0 = p`. -/
+
+section ExpMapZero
+
+variable [I.Boundaryless] [CompleteSpace E]
+  [T2Space (TangentBundle I M)]
+
+/-- For any witness `(γ, J)` of a `MaximalGeodesicWitness` with zero
+initial velocity, the witness curve is identically `p` on `J`. -/
+theorem maximalGeodesicWitness_zero_curve_eq_p
+    {g : SmoothRiemannianMetric I M} {p : M}
+    {γ : ℝ → M} {J : Set ℝ}
+    (hJ_open : IsOpen J) (hJ_conn : IsPreconnected J) (h0J : (0 : ℝ) ∈ J)
+    (hγ : IsGeodesicOnWithInitial (I := I) g γ J p (0 : TangentSpace I p)) :
+    ∀ s ∈ J, γ s = p := by
+  obtain ⟨f, hproj, hf0, hf_int⟩ := hγ
+  intro s hs
+  have hf_eq : f s = (⟨p, (0 : E)⟩ : TangentBundle I M) :=
+    isMIntegralCurveOn_zero_section_eq_const (I := I) g p
+      hJ_open hJ_conn h0J hf_int hf0 s hs
+  have := hproj s
+  rw [hf_eq] at this
+  exact this.symm
+
+/-- **`expMap g p 0 = p`** — the value of the exponential map at the
+zero vector is the base point itself. -/
+@[simp] theorem expMap_zero
+    (g : SmoothRiemannianMetric I M) (p : M) :
+    expMap (I := I) g p (0 : TangentSpace I p) = p := by
+  -- Reduce to `maximalGeodesic g p 0 1 = p`.
+  unfold expMap
+  -- The point `t = 1` lies in the maximal interval (zero-velocity witness).
+  have h1 : (1 : ℝ) ∈ maximalGeodesicInterval (I := I) g p
+      (0 : TangentSpace I p) :=
+    maximalGeodesicWitness_zero_all_times (I := I) g p 1
+  rw [maximalGeodesic_of_mem (I := I) (g := g) (p := p)
+    (v := (0 : TangentSpace I p)) h1]
+  -- Extract the witness data for the chosen curve.
+  obtain ⟨J, hJ_open, hJ_conn, h0J, h1J, hγ⟩ :=
+    maximalGeodesicChosenCurve_spec (I := I) g p (0 : TangentSpace I p) h1
+  -- Apply propagation: the chosen curve equals p at every point of J.
+  exact maximalGeodesicWitness_zero_curve_eq_p (I := I)
+    hJ_open hJ_conn h0J hγ 1 h1J
+
+end ExpMapZero
 
 end Exponential
 end Riemannian
