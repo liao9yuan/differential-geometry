@@ -439,10 +439,12 @@ import DifferentialGeometry.Geometry.Riemannian.Geodesic.SmoothFlow
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Smoothness
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Uniqueness
 import DifferentialGeometry.Geometry.Riemannian.Exponential.Bridge
+import DifferentialGeometry.Geometry.Riemannian.Exponential.ChartFlowToTangentLift
 import DifferentialGeometry.Geometry.Riemannian.Exponential.ChartIdentification
 import DifferentialGeometry.Geometry.Riemannian.Exponential.ChartPushVFEq
 import DifferentialGeometry.Geometry.Riemannian.Exponential.Definition
 import DifferentialGeometry.Geometry.Riemannian.Exponential.Final
+import DifferentialGeometry.Geometry.Riemannian.Exponential.PreconnectedPropagation
 import DifferentialGeometry.Geometry.Riemannian.Exponential.Smoothness
 import DifferentialGeometry.Geometry.Riemannian.Exponential.SmoothnessClose
 import DifferentialGeometry.Geometry.Riemannian.Exponential.SmoothnessUnconditional
