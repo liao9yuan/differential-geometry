@@ -73,6 +73,14 @@ def christoffelEvolutionRHSInFrame
   ∑ l : Idx,
     gInv t x k l * christoffelVariationLoweredRHSInFrame nablaRic t x i j l
 
+/-- Raise an arbitrary lowered connection-variation RHS to Christoffel
+components using the inverse metric in the chosen frame. -/
+def christoffelVariationRHSFromLoweredInFrame
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (loweredRHS : Real -> M -> Idx -> Idx -> Idx -> Real)
+    (t : Real) (x : M) (i j k : Idx) : Real :=
+  ∑ l : Idx, gInv t x k l * loweredRHS t x i j l
+
 theorem christoffelEvolutionRHSInFrame_eq_coordinates_rhs
     (gInv : Real -> Realized.InverseMetricComponents M Idx)
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
@@ -402,6 +410,16 @@ def connectionVariationLoweredRHSFromMetricVariationInFrame
   (1 / 2 : Real) *
     (metricCovDerivDt t x i j l + metricCovDerivDt t x j i l -
       metricCovDerivDt t x l i j)
+
+/-- General metric-variation Christoffel RHS:
+`1/2 g^{kl} (nabla_i h_jl + nabla_j h_il - nabla_l h_ij)`. -/
+def christoffelVariationRHSFromMetricVariationInFrame
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (metricCovDerivDt : Real -> M -> Idx -> Idx -> Idx -> Real)
+    (t : Real) (x : M) (i j k : Idx) : Real :=
+  christoffelVariationRHSFromLoweredInFrame (M := M) gInv
+    (connectionVariationLoweredRHSFromMetricVariationInFrame metricCovDerivDt)
+    t x i j k
 
 /-- The metric-variation components are the covariant derivative of
 `h = partial_t g = -2 Ric`. -/
@@ -921,6 +939,57 @@ theorem connectionVariationPairing_of_koszul
   exact (hdt t x i j l).congr_deriv (hkoszul (t : Real) x i j l)
 
 /-- Interval Christoffel component evolution in a local frame. -/
+def ChristoffelVariationEquationInFrameOn
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (rhs : Real -> M -> Idx -> Idx -> Idx -> Real) : Prop :=
+  forall (t : Realized.RealTimeInterval.RegularTime D) (x : M), x ∈ u ->
+    forall i j k : Idx,
+      HasDerivWithinAt
+        (fun s : Real =>
+          RicciFlower.Coordinates.christoffelSymbolInFrame
+            (S.family.connection s) frame hframe x i j k)
+        (rhs (t : Real) x i j k)
+        D.carrier
+        (t : Real)
+
+/-- General metric-variation Christoffel component formula in a local frame. -/
+def ChristoffelMetricVariationEquationInFrameOn
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (metricCovDerivDt : Real -> M -> Idx -> Idx -> Idx -> Real) : Prop :=
+  ChristoffelVariationEquationInFrameOn (I := I) S frame hframe
+    (christoffelVariationRHSFromMetricVariationInFrame (M := M) gInv metricCovDerivDt)
+
+/-- Pointwise use of `ChristoffelMetricVariationEquationInFrameOn`. -/
+theorem christoffelMetricVariation_hasDerivWithinAt
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (metricCovDerivDt : Real -> M -> Idx -> Idx -> Idx -> Real)
+    (h :
+      ChristoffelMetricVariationEquationInFrameOn
+        (I := I) S gInv frame hframe metricCovDerivDt)
+    (t : Realized.RealTimeInterval.RegularTime D) (x : M) (hx : x ∈ u)
+    (i j k : Idx) :
+    HasDerivWithinAt
+      (fun s : Real =>
+        RicciFlower.Coordinates.christoffelSymbolInFrame
+          (S.family.connection s) frame hframe x i j k)
+      (christoffelVariationRHSFromMetricVariationInFrame
+        (M := M) gInv metricCovDerivDt (t : Real) x i j k)
+      D.carrier
+      (t : Real) :=
+  h t x hx i j k
+
+/-- Ricci-flow-specific Christoffel component evolution in a local frame. -/
 def ChristoffelEvolutionEquationInFrameOn
     {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -966,6 +1035,63 @@ theorem frameCoeff_eq_sum_inv_metricPairing
           Realized.basis_coord_eq_sum_inv_inner
             (I := I) (M := M) (S.family.metric t) (hframe.toBasisAt hx)
             (fun i j : Idx => gInv t x i j) hinvAt k V
+
+/-- Raise a supplied lowered connection-variation pairing formula to
+Christoffel components. -/
+theorem christoffelVariationEquationInFrameOn_of_pairing_local
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (loweredRHS : Real -> M -> Idx -> Idx -> Idx -> Real)
+    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
+    (hpair :
+      forall (t : Realized.RealTimeInterval.RegularTime D) (x : M), x ∈ u ->
+        forall i j l : Idx,
+          HasDerivWithinAt
+            (fun s : Real =>
+              (S.family.metric (t : Real)).inner x (frame l x)
+                ((S.family.connection s (frame j) x) (frame i x)))
+            (loweredRHS (t : Real) x i j l)
+            D.carrier
+            (t : Real)) :
+    ChristoffelVariationEquationInFrameOn
+      (I := I) S frame hframe
+      (christoffelVariationRHSFromLoweredInFrame (M := M) gInv loweredRHS) := by
+  intro t x hx i j k
+  let pair : Idx -> Real -> Real :=
+    fun l s =>
+      (S.family.metric (t : Real)).inner x (frame l x)
+        ((S.family.connection s (frame j) x) (frame i x))
+  have hsum :
+      HasDerivWithinAt
+        (fun s : Real => ∑ l : Idx, gInv (t : Real) x k l * pair l s)
+        (∑ l : Idx, gInv (t : Real) x k l *
+          loweredRHS (t : Real) x i j l)
+        D.carrier
+        (t : Real) := by
+    simpa [pair, Finset.sum_apply] using
+      (HasDerivWithinAt.fun_sum
+        (u := (Finset.univ : Finset Idx))
+        (A := fun l s => gInv (t : Real) x k l * pair l s)
+        (A' := fun l =>
+          gInv (t : Real) x k l * loweredRHS (t : Real) x i j l)
+        (s := D.carrier) (x := (t : Real))
+        (fun l _hl =>
+          by
+            exact HasDerivWithinAt.const_mul
+              (gInv (t : Real) x k l) (hpair t x hx i j l)))
+  refine hsum.congr ?_ ?_
+  · intro s _hs
+    symm
+    exact (frameCoeff_eq_sum_inv_metricPairing
+      (I := I) S gInv frame hframe hinv (t : Real) hx k
+      ((S.family.connection s (frame j) x) (frame i x))).symm
+  · symm
+    exact (frameCoeff_eq_sum_inv_metricPairing
+      (I := I) S gInv frame hframe hinv (t : Real) hx k
+      ((S.family.connection (t : Real) (frame j) x) (frame i x))).symm
 
 /-- Difference of Christoffel components expressed through the variable-time
 metric pairing with the connection-difference tensor. -/
@@ -1125,6 +1251,38 @@ theorem christoffelEvolutionEquationInFrameOn_of_pairing_local
     exact (frameCoeff_eq_sum_inv_metricPairing
       (I := I) S gInv frame hframe hinv (t : Real) hx k
       ((S.family.connection (t : Real) (frame j) x) (frame i x))).symm
+
+/-- General metric-variation Christoffel formula in raised component form. -/
+theorem christoffelMetricVariationEquationInFrameOn_of_metricVariation
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (hu : IsOpen u)
+    (pairDt metricCovDerivDt : Real -> M -> Idx -> Idx -> Idx -> Real)
+    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
+    (hpair :
+      ConnectionPairingDerivativeInFrameOnLocal
+        (I := I) S frame u pairDt)
+    (hvarDiff :
+      VariableMetricConnectionDiffDerivativeInFrameOnLocal
+        (I := I) S frame u pairDt)
+    (hmetric :
+      MetricCovDerivDerivativeComponentsInFrameOnLocal
+        (I := I) S frame u metricCovDerivDt)
+    (hunique : forall t : Realized.RealTimeInterval.RegularTime D,
+      UniqueDiffWithinAt Real D.carrier (t : Real)) :
+    ChristoffelMetricVariationEquationInFrameOn
+      (I := I) S gInv frame hframe metricCovDerivDt :=
+  christoffelVariationEquationInFrameOn_of_pairing_local
+    (I := I) S gInv frame hframe
+    (connectionVariationLoweredRHSFromMetricVariationInFrame metricCovDerivDt)
+    hinv
+    (connectionVariationPairing_of_metricVariation
+      (I := I) S hS frame hframe hu pairDt metricCovDerivDt
+      hpair hvarDiff hmetric hunique)
 
 /-- Lemma 6.2 from metric-frame regularity plus the fixed-base metric
 covariant-derivative frontier.

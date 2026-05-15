@@ -1,5 +1,6 @@
 import RicciFlower.RicciFlow.Evolution.Connection
 import RicciFlower.VectorBundle.PartialMfderiv
+import RicciFlower.Curvature.Contractions
 import Mathlib.Tactic.Ring
 
 set_option autoImplicit false
@@ -50,6 +51,32 @@ def RicciTensorRealizesRm04TraceInFrameOn
     Realized.RicciTensorRealizesRm04TraceInFrame
       (I := I) (S.ricci t) (Rm04 t) (gInv t) frame
 
+/-- A time-indexed Ricci tensor realizes the convention-correct lowered Riemann
+first trace in a fixed frame at every time:
+`Ric_ij = g^{kl} Rm04(e_k,e_l,e_i,e_j)`. -/
+def RicciTensorRealizesRm04FirstTraceInFrameOn
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (Rm04 : Real -> Realized.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x) : Prop :=
+  forall t : Real,
+    Realized.RicciTensorRealizesRm04FirstTraceInFrame
+      (I := I) (S.ricci t) (Rm04 t) (gInv t) frame
+
+/-- Regular-time version of the convention-correct lowered Riemann first
+trace.  Lemma 6.3 only differentiates at regular times, so this is the natural
+producer target for Ricci evolution. -/
+def RicciTensorRealizesRm04FirstTraceInFrameOnRegular
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (Rm04 : Real -> Realized.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x) : Prop :=
+  forall t : Realized.RealTimeInterval.RegularTime D,
+    Realized.RicciTensorRealizesRm04FirstTraceInFrame
+      (I := I) (S.ricci (t : Real)) (Rm04 (t : Real)) (gInv (t : Real)) frame
+
 theorem ricciCompInFrame_eq_rm04_trace
     {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -66,6 +93,67 @@ theorem ricciCompInFrame_eq_rm04_trace
   simpa [ricciCompInFrame] using
     Realized.ricciComp_eq_trace (I := I)
       (S.ricci t) (Rm04 t) (gInv t) frame (htrace t) x i j
+
+/-- A local frame turns the Ricci-flow inverse-component predicate into the
+basis-level inverse predicate used by pointwise tensor contraction lemmas. -/
+private theorem metricInverseInBasis_of_solution_frame
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
+    (t : Real) {x : M} (hx : x ∈ u) :
+    Tensor0SBundle.MetricInverseInBasis
+      (I := I) (M := M) (S.family.metric t) x
+      (hframe.toBasisAt hx) (fun i j : Idx => gInv t x i j) := by
+  intro i j
+  constructor
+  · simpa [metricCompInFrame, IsLocalFrameOn.toBasisAt_coe] using
+      (hinv t x i j).1
+  · simpa [metricCompInFrame, IsLocalFrameOn.toBasisAt_coe] using
+      (hinv t x i j).2
+
+/-- Produce the convention-correct lowered Riemann first-trace realization of
+the bundled Ricci tensor from the intrinsic `(1,3)` Ricci trace and lowering.
+
+This is the separate trace-realization bridge used by the Ricci-evolution
+commutator proof. -/
+theorem ricciTensorRealizesRm04FirstTraceInFrameOnRegular_of_rm13Trace
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (Rm13 : Real -> Realized.Tensor13Section (I := I) (M := M))
+    (Rm04 : Real -> Realized.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame Set.univ)
+    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
+    (hRicTrace13 : forall t : Realized.RealTimeInterval.RegularTime D,
+      Realized.RicciTensorRealizesRm13Trace (I := I)
+        (S.ricci (t : Real)) (Rm13 (t : Real)))
+    (hLower : forall (t : Realized.RealTimeInterval.RegularTime D) (x : M),
+      Realized.Rm04LowersRm13At (I := I) (S.family.metric (t : Real)) x
+        (Rm13 (t : Real) x) (Rm04 (t : Real) x))
+    (hInv : SymmetricInverseMetricComponentsInFrameOn gInv) :
+    RicciTensorRealizesRm04FirstTraceInFrameOnRegular
+      (I := I) S Rm04 gInv frame := by
+  intro t x i j
+  have hx : x ∈ (Set.univ : Set M) := Set.mem_univ x
+  have hinvAt :
+      Tensor0SBundle.MetricInverseInBasis
+        (I := I) (M := M) (S.family.metric (t : Real)) x
+        (hframe.toBasisAt hx)
+        (fun a b : Idx => gInv (t : Real) x a b) :=
+    metricInverseInBasis_of_solution_frame
+      (I := I) S gInv frame hframe hinv (t : Real) hx
+  have hAt :=
+    Realized.ricciFirstTraceAt_of_rm13_section
+      (I := I) (S.family.metric (t : Real)) (hframe.toBasisAt hx)
+      (fun a b : Idx => gInv (t : Real) x a b) hinvAt
+      (S.ricci (t : Real)) (Rm13 (t : Real)) (Rm04 (t : Real))
+      (hRicTrace13 t) (hLower t x) (hInv (t : Real) x)
+  simpa [Realized.RicciTensorRealizesRm04FirstTraceInFrame,
+    IsLocalFrameOn.toBasisAt_coe] using hAt i j
 
 /-- Component form of a lowered Riemann evolution equation.  The future
 producer is the realized analogue of synthetic `RiemannVariation.lean` plus
@@ -1301,7 +1389,8 @@ theorem ricciVariationFromConnectionRHSInFrame_nablaGammaDtFromNabla2Ric
 This is exactly the textbook contracted-Bianchi plus covariant-derivative
 commutator calculation: the gauge/scalar-Hessian terms cancel, and the
 remaining commutator terms become
-`2 R_ikjl Ric^kl - 2 Ric_i^k Ric_kj`. -/
+`-2 * rmRicciContractionCompInFrame - 2 Ric_i^k Ric_kj` in the project
+lowered-curvature convention. -/
 def RicciVariationExpandedRHS_eq_evolutionRHS
     {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1357,6 +1446,15 @@ def contractedNabla2RicTraceBInFrame
   ∑ k : Idx, ∑ l : Idx,
     gInv t x k l * nabla2Ric t x i l k j
 
+/-- The natural right trace produced directly by commuting
+`∇^k ∇_j Ric_il` with the Ricci identity: `∇_j ∇^k Ric_ik`. -/
+def contractedNabla2RicTraceRightNaturalInFrame
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
+    (t : Real) (x : M) (i j : Idx) : Real :=
+  ∑ k : Idx, ∑ l : Idx,
+    gInv t x k l * nabla2Ric t x j k i l
+
 /-- Pointwise contracted Bianchi in the two trace orientations used by the
 differentiated Lemma 6.3 calculation.
 
@@ -1398,8 +1496,53 @@ def DifferentiatedContractedBianchiInFrame
     contractedNabla2RicTraceBInFrame (M := M) gInv nabla2Ric
         (t : Real) x i j =
       (1 / 2 : Real) *
-        scalarHessianFromNabla2RicInFrame (M := M) gInv nabla2Ric
+          scalarHessianFromNabla2RicInFrame (M := M) gInv nabla2Ric
           (t : Real) x i j
+
+/-- Symmetry of the scalar Hessian represented by `nabla2Ric`.  This is the
+trace-level scalar Hessian symmetry needed to compare the natural right trace
+with the `traceB` orientation. -/
+def ScalarHessianFromNabla2RicSymmetricInFrame
+    {D : Realized.RealTimeInterval}
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real) : Prop :=
+  forall (t : Realized.RealTimeInterval.RegularTime D) (x : M) (i j : Idx),
+    scalarHessianFromNabla2RicInFrame (M := M) gInv nabla2Ric
+        (t : Real) x i j =
+      scalarHessianFromNabla2RicInFrame (M := M) gInv nabla2Ric
+        (t : Real) x j i
+
+/-- Differentiated contracted Bianchi plus scalar-Hessian symmetry converts the
+natural right trace to the `traceB` orientation used in the expanded Ricci
+variation formula. -/
+theorem contractedNabla2RicTraceRightNatural_eq_traceB
+    {D : Realized.RealTimeInterval}
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
+    (hbianchi : DifferentiatedContractedBianchiInFrame
+      (D := D) (M := M) gInv nabla2Ric)
+    (hHessSymm : ScalarHessianFromNabla2RicSymmetricInFrame
+      (D := D) (M := M) gInv nabla2Ric)
+    (t : Realized.RealTimeInterval.RegularTime D) (x : M) (i j : Idx) :
+    contractedNabla2RicTraceRightNaturalInFrame (M := M) gInv nabla2Ric
+        (t : Real) x i j =
+      contractedNabla2RicTraceBInFrame (M := M) gInv nabla2Ric
+        (t : Real) x i j := by
+  have hA := (hbianchi t x j i).1
+  have hB := (hbianchi t x i j).2
+  calc
+    contractedNabla2RicTraceRightNaturalInFrame (M := M) gInv nabla2Ric
+        (t : Real) x i j
+        = contractedNabla2RicTraceAInFrame (M := M) gInv nabla2Ric
+            (t : Real) x j i := rfl
+    _ = (1 / 2 : Real) *
+          scalarHessianFromNabla2RicInFrame (M := M) gInv nabla2Ric
+            (t : Real) x j i := hA
+    _ = (1 / 2 : Real) *
+          scalarHessianFromNabla2RicInFrame (M := M) gInv nabla2Ric
+            (t : Real) x i j := by rw [← hHessSymm t x i j]
+    _ = contractedNabla2RicTraceBInFrame (M := M) gInv nabla2Ric
+          (t : Real) x i j := hB.symm
 
 /-- Local differentiated contracted Bianchi, for use with local frames. -/
 def DifferentiatedContractedBianchiInFrameOnLocal
@@ -1696,14 +1839,14 @@ def RicciSecondDerivativeCommutatorsInFrame
   forall (t : Realized.RealTimeInterval.RegularTime D) (x : M) (i j : Idx),
     contractedNabla2RicLeftInFrame (M := M) gInv nabla2Ric (t : Real) x i j =
         contractedNabla2RicTraceAInFrame (M := M) gInv nabla2Ric
-          (t : Real) x i j -
+          (t : Real) x i j +
         rmRicciContractionCompInFrame (I := I) S Rm04 gInv frame
           (t : Real) x i j +
         ricciQuadraticCompInFrame (I := I) S gInv frame (t : Real) x i j ∧
       contractedNabla2RicRightInFrame (M := M) gInv nabla2Ric
           (t : Real) x i j =
-        contractedNabla2RicTraceBInFrame (M := M) gInv nabla2Ric
-          (t : Real) x i j -
+        contractedNabla2RicTraceRightNaturalInFrame (M := M) gInv nabla2Ric
+          (t : Real) x i j +
         rmRicciContractionCompInFrame (I := I) S Rm04 gInv frame
           (t : Real) x i j +
         ricciQuadraticCompInFrame (I := I) S gInv frame (t : Real) x i j
@@ -1721,7 +1864,7 @@ def RicciCurvatureCommutatorsInFrame
     contractedNabla2RicLeftInFrame (M := M) gInv nabla2Ric (t : Real) x i j =
         (1 / 2 : Real) *
           scalarHessianFromNabla2RicInFrame (M := M) gInv nabla2Ric
-            (t : Real) x i j -
+            (t : Real) x i j +
         rmRicciContractionCompInFrame (I := I) S Rm04 gInv frame
           (t : Real) x i j +
         ricciQuadraticCompInFrame (I := I) S gInv frame (t : Real) x i j ∧
@@ -1729,7 +1872,7 @@ def RicciCurvatureCommutatorsInFrame
           (t : Real) x i j =
         (1 / 2 : Real) *
           scalarHessianFromNabla2RicInFrame (M := M) gInv nabla2Ric
-          (t : Real) x i j -
+          (t : Real) x i j +
         rmRicciContractionCompInFrame (I := I) S Rm04 gInv frame
           (t : Real) x i j +
         ricciQuadraticCompInFrame (I := I) S gInv frame (t : Real) x i j
@@ -1746,6 +1889,8 @@ theorem RicciCurvatureCommutatorsInFrame_of_differentiatedBianchi_and_secondComm
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (hbianchi : DifferentiatedContractedBianchiInFrame
       (D := D) (M := M) gInv nabla2Ric)
+    (hHessSymm : ScalarHessianFromNabla2RicSymmetricInFrame
+      (D := D) (M := M) gInv nabla2Ric)
     (hsecond : RicciSecondDerivativeCommutatorsInFrame
       (I := I) S Rm04 gInv frame nabla2Ric) :
     RicciCurvatureCommutatorsInFrame
@@ -1754,15 +1899,178 @@ theorem RicciCurvatureCommutatorsInFrame_of_differentiatedBianchi_and_secondComm
   have hleft := (hsecond t x i j).1
   have hright := (hsecond t x i j).2
   have hA := (hbianchi t x i j).1
-  have hB := (hbianchi t x i j).2
+  have hB := contractedNabla2RicTraceRightNatural_eq_traceB
+    (M := M) gInv nabla2Ric hbianchi hHessSymm t x i j
+  have hB' := (hbianchi t x i j).2
   constructor
   · rw [hleft, hA]
-  · rw [hright, hB]
+  · rw [hright, hB, hB']
+
+/-- Curvature action on a two-tensor, expanded into the two affected slots.
+This keeps the Ricci-evolution contraction proof from unfolding the general
+slot-sum definition repeatedly. -/
+private theorem curvatureAction0SAt_vec2_eq
+    (Rm13 : Realized.Tensor13Section (I := I) (M := M))
+    {x : M}
+    (Ric : Realized.Tensor02At (I := I) (M := M) x)
+    (X Y U V : TangentSpace I x) :
+    Realized.curvatureAction0SAt (I := I) Rm13 Ric X Y
+        (Realized.vec2 U V) =
+      - (Rm13 x
+            (Realized.oneFormAtSlot0S (I := I) Ric (Realized.vec2 U V) 0)
+            (Realized.vec3 X Y U) +
+          Rm13 x
+            (Realized.oneFormAtSlot0S (I := I) Ric (Realized.vec2 U V) 1)
+            (Realized.vec3 X Y V)) := by
+  rw [Realized.curvatureAction0SAt]
+  simp [Fin.sum_univ_two, Realized.vec2, RicciFlower.Curvature.vec2]
+
+/-- Contract the first curvature-action identity obtained from the `(0,2)`
+Ricci identity.  This is the convention-correct finite-index curvature algebra
+`R_ikjl Ric^kl + Ric_i^k Ric_kj` for `Rm04(W,X,Y,Z)=g(W,R(X,Y)Z)`. -/
+private theorem contractedCurvatureAction_left_eq
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (Rm13 : Real -> Realized.Tensor13Section (I := I) (M := M))
+    (Rm04 : Real -> Realized.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    {g : SmoothRiemannianMetric I M} {x : M}
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInvAt : Idx -> Idx -> Real)
+    (hinvAt :
+      Tensor0SBundle.MetricInverseInBasis
+        (I := I) (M := M) g x basis gInvAt)
+    (t : Real) (i j : Idx)
+    (hLower : Realized.Rm04LowersRm13At (I := I) g x (Rm13 t x) (Rm04 t x))
+    (hTraceAt : Realized.RicciRealizesRm04FirstTraceAt (I := I)
+      (S.ricci t x) (Rm04 t x) gInvAt basis)
+    (hPair : forall W X Y Z : TangentSpace I x,
+      Rm04 t x (Realized.vec4 W X Y Z) =
+        Rm04 t x (Realized.vec4 Y Z W X))
+    (hOutput : Realized.Rm04OutputSkewAt (I := I) (Rm04 t x))
+    (hFirst : Realized.FirstBianchiAt (I := I) (Rm04 t x))
+    (hRic : forall t x i j,
+      ricciCompInFrame (I := I) S frame t x i j =
+        ricciCompInFrame (I := I) S frame t x j i)
+    (hInv : SymmetricInverseMetricComponentsInFrameOn gInv)
+    (hgInvAt : forall a b : Idx, gInvAt a b = gInv t x a b)
+    (hbasis : forall a : Idx, basis a = frame a x) :
+    (∑ k : Idx, ∑ l : Idx,
+        gInv t x k l *
+          Realized.curvatureAction0SAt (I := I) (Rm13 t)
+            (S.ricci t x) (frame k x) (frame i x)
+            (Realized.vec2 (frame j x) (frame l x))) =
+      rmRicciContractionCompInFrame (I := I) S
+        Rm04 gInv frame t x i j +
+        ricciQuadraticCompInFrame (I := I) S gInv frame t x i j := by
+  have hRicAt :
+      forall a b : Idx,
+        (S.ricci t x) (Realized.vec2 (basis a) (basis b)) =
+          (S.ricci t x) (Realized.vec2 (basis b) (basis a)) := by
+    intro a b
+    simpa [hbasis] using hRic t x a b
+  have hInvAt : forall a b : Idx, gInvAt a b = gInvAt b a := by
+    intro a b
+    rw [hgInvAt a b, hgInvAt b a]
+    exact hInv t x a b
+  have hmain :=
+    Realized.contracted_curvatureAction0SAt_vec2_eq
+      (I := I) g basis gInvAt hinvAt (Rm13 t) (Rm04 t x) (S.ricci t x)
+      hLower hTraceAt hPair hOutput hFirst hRicAt hInvAt i j
+  simpa [Realized.rm04RicciContractionAt, Realized.raised02CompAt,
+    Realized.ricciQuadraticAt, Realized.oneUp02CompAt,
+    rmRicciContractionCompInFrame, raisedRicciCompInFrame, ricciOneUpCompInFrame,
+    ricciQuadraticCompInFrame, Realized.rm04Comp, RicciFlower.Curvature.rm04Comp,
+    hgInvAt, hbasis] using hmain
+
+/-- Contract the natural right curvature-action identity obtained from the
+`(0,2)` Ricci identity. -/
+private theorem contractedCurvatureAction_right_eq
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (Rm13 : Real -> Realized.Tensor13Section (I := I) (M := M))
+    (Rm04 : Real -> Realized.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    {g : SmoothRiemannianMetric I M} {x : M}
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInvAt : Idx -> Idx -> Real)
+    (hinvAt :
+      Tensor0SBundle.MetricInverseInBasis
+        (I := I) (M := M) g x basis gInvAt)
+    (t : Real) (i j : Idx)
+    (hLower : Realized.Rm04LowersRm13At (I := I) g x (Rm13 t x) (Rm04 t x))
+    (hTraceAt : Realized.RicciRealizesRm04FirstTraceAt (I := I)
+      (S.ricci t x) (Rm04 t x) gInvAt basis)
+    (hPair : forall W X Y Z : TangentSpace I x,
+      Rm04 t x (Realized.vec4 W X Y Z) =
+        Rm04 t x (Realized.vec4 Y Z W X))
+    (hOutput : Realized.Rm04OutputSkewAt (I := I) (Rm04 t x))
+    (hFirst : Realized.FirstBianchiAt (I := I) (Rm04 t x))
+    (hRic : forall t x i j,
+      ricciCompInFrame (I := I) S frame t x i j =
+        ricciCompInFrame (I := I) S frame t x j i)
+    (hInv : SymmetricInverseMetricComponentsInFrameOn gInv)
+    (hgInvAt : forall a b : Idx, gInvAt a b = gInv t x a b)
+    (hbasis : forall a : Idx, basis a = frame a x) :
+    (∑ k : Idx, ∑ l : Idx,
+        gInv t x k l *
+          Realized.curvatureAction0SAt (I := I) (Rm13 t)
+            (S.ricci t x) (frame k x) (frame j x)
+            (Realized.vec2 (frame i x) (frame l x))) =
+      rmRicciContractionCompInFrame (I := I) S
+        Rm04 gInv frame t x i j +
+        ricciQuadraticCompInFrame (I := I) S gInv frame t x i j := by
+  have hRicAt :
+      forall a b : Idx,
+        (S.ricci t x) (Realized.vec2 (basis a) (basis b)) =
+          (S.ricci t x) (Realized.vec2 (basis b) (basis a)) := by
+    intro a b
+    simpa [hbasis] using hRic t x a b
+  have hInvAt : forall a b : Idx, gInvAt a b = gInvAt b a := by
+    intro a b
+    rw [hgInvAt a b, hgInvAt b a]
+    exact hInv t x a b
+  have hmain :=
+    Realized.contracted_curvatureAction0SAt_vec2_eq
+      (I := I) g basis gInvAt hinvAt (Rm13 t) (Rm04 t x) (S.ricci t x)
+      hLower hTraceAt hPair hOutput hFirst hRicAt hInvAt j i
+  have hsym :=
+    Realized.curvature_ricci_rhs_symm
+      (I := I) basis (Rm04 t x) gInvAt (S.ricci t x)
+      hPair hRicAt hInvAt j i
+  calc
+    (∑ k : Idx, ∑ l : Idx,
+        gInv t x k l *
+          Realized.curvatureAction0SAt (I := I) (Rm13 t)
+            (S.ricci t x) (frame k x) (frame j x)
+            (Realized.vec2 (frame i x) (frame l x)))
+        =
+          Realized.rm04RicciContractionAt (I := I) basis (Rm04 t x) gInvAt
+              (S.ricci t x) j i +
+            Realized.ricciQuadraticAt (I := I) basis gInvAt
+              (S.ricci t x) j i := by
+          simpa [hgInvAt, hbasis] using hmain
+    _ =
+          Realized.rm04RicciContractionAt (I := I) basis (Rm04 t x) gInvAt
+              (S.ricci t x) i j +
+            Realized.ricciQuadraticAt (I := I) basis gInvAt
+              (S.ricci t x) i j := hsym
+    _ =
+      rmRicciContractionCompInFrame (I := I) S
+        Rm04 gInv frame t x i j +
+        ricciQuadraticCompInFrame (I := I) S gInv frame t x i j := by
+          simp [Realized.rm04RicciContractionAt, Realized.raised02CompAt,
+            Realized.ricciQuadraticAt, Realized.oneUp02CompAt,
+            rmRicciContractionCompInFrame, raisedRicciCompInFrame, ricciOneUpCompInFrame,
+            ricciQuadraticCompInFrame, Realized.rm04Comp, RicciFlower.Curvature.rm04Comp,
+            hgInvAt, hbasis]
 
 /-- Produce the raw second-derivative commutator identities from the invariant
 `(0,2)` tensor Ricci identity.  The curvature-action contraction is the only
 nontrivial finite-index algebra left here: it converts the two slot actions on
-`Ric` into `- R_ikjl Ric^kl + Ric_i^k Ric_kj`. -/
+`Ric` into `R_ikjl Ric^kl + Ric_i^k Ric_kj` in the project curvature convention. -/
 theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
     {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1770,6 +2078,8 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
     (Rm04 : Real -> Realized.Tensor04Section (I := I) (M := M))
     (gInv : Real -> Realized.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame Set.univ)
+    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
     (nabla2RicTensor : Real -> Realized.Tensor04Section (I := I) (M := M))
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (hNabla2 : Nabla2RicciTensorComponentsInFrameOn
@@ -1777,17 +2087,20 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
     (hRicciId : forall (t : Realized.RealTimeInterval.RegularTime D) (x : M),
       Realized.Tensor0SRicciIdentityAt (I := I) (Rm13 (t : Real))
         (S.ricci (t : Real) x) (nabla2RicTensor (t : Real) x))
+    (hRicTrace13 : forall t : Realized.RealTimeInterval.RegularTime D,
+      Realized.RicciTensorRealizesRm13Trace (I := I)
+        (S.ricci (t : Real)) (Rm13 (t : Real)))
     (hLower : forall (t : Realized.RealTimeInterval.RegularTime D) (x : M),
       Realized.Rm04LowersRm13At (I := I) (S.family.metric (t : Real)) x
         (Rm13 (t : Real) x) (Rm04 (t : Real) x))
-    (hTrace : RicciTensorRealizesRm04TraceInFrameOn
-      (I := I) S Rm04 gInv frame)
     (hPair : forall (t : Realized.RealTimeInterval.RegularTime D) (x : M),
       forall W X Y Z : TangentSpace I x,
         Rm04 (t : Real) x (Realized.vec4 W X Y Z) =
           Rm04 (t : Real) x (Realized.vec4 Y Z W X))
     (hOutput : forall (t : Realized.RealTimeInterval.RegularTime D) (x : M),
       Realized.Rm04OutputSkewAt (I := I) (Rm04 (t : Real) x))
+    (hFirst : forall (t : Realized.RealTimeInterval.RegularTime D) (x : M),
+      Realized.FirstBianchiAt (I := I) (Rm04 (t : Real) x))
     (hRic : forall t x i j,
       ricciCompInFrame (I := I) S frame t x i j =
         ricciCompInFrame (I := I) S frame t x j i)
@@ -1796,15 +2109,233 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
       (I := I) S Rm04 gInv frame nabla2Ric := by
   classical
   intro t x i j
-  -- This is the real component calculation still to close: evaluate
-  -- `Tensor0SRicciIdentityAt` on the two frame slots, contract by `gInv`, and
-  -- use lowering, Ricci trace, pair/output symmetries, Ricci symmetry, and
-  -- inverse-metric symmetry to normalize the curvature action.
-  sorry
+  have hinvAt :
+      Tensor0SBundle.MetricInverseInBasis
+        (I := I) (M := M) (S.family.metric (t : Real)) x
+        (hframe.toBasisAt (by simp : x ∈ (Set.univ : Set M)))
+        (fun a b : Idx => gInv (t : Real) x a b) :=
+    metricInverseInBasis_of_solution_frame
+      (I := I) S gInv frame hframe hinv (t : Real) (by simp)
+  have hTraceReg :
+      RicciTensorRealizesRm04FirstTraceInFrameOnRegular
+        (I := I) S Rm04 gInv frame :=
+    ricciTensorRealizesRm04FirstTraceInFrameOnRegular_of_rm13Trace
+      (I := I) S Rm13 Rm04 gInv frame hframe hinv hRicTrace13 hLower hInv
+  have hTraceFrame := hTraceReg t
+  have hTraceAt :
+      Realized.RicciRealizesRm04FirstTraceAt (I := I)
+        (S.ricci (t : Real) x) (Rm04 (t : Real) x)
+        (fun a b : Idx => gInv (t : Real) x a b)
+        (hframe.toBasisAt (by simp : x ∈ (Set.univ : Set M))) := by
+    intro a b
+    have h := hTraceFrame x a b
+    simpa [Realized.RicciTensorRealizesRm04FirstTraceInFrame,
+      IsLocalFrameOn.toBasisAt_coe] using h
+  have hIdComp :
+      forall k l : Idx,
+        nabla2Ric (t : Real) x k i j l -
+            nabla2Ric (t : Real) x i k j l =
+          Realized.curvatureAction0SAt (I := I) (Rm13 (t : Real))
+            (S.ricci (t : Real) x)
+            (frame k x) (frame i x)
+            (Realized.vec2 (frame j x) (frame l x)) := by
+    intro k l
+    have h := hRicciId t x (frame k x) (frame i x)
+      (Realized.vec2 (frame j x) (frame l x))
+    have hinput₁ :
+        Realized.metricTraceInput (I := I) (frame k x) (frame i x)
+            (Realized.vec2 (frame j x) (frame l x)) =
+          Realized.vec4 (frame k x) (frame i x) (frame j x) (frame l x) := by
+      funext q
+      fin_cases q <;> rfl
+    have hinput₂ :
+        Realized.metricTraceInput (I := I) (frame i x) (frame k x)
+            (Realized.vec2 (frame j x) (frame l x)) =
+          Realized.vec4 (frame i x) (frame k x) (frame j x) (frame l x) := by
+      funext q
+      fin_cases q <;> rfl
+    rw [hinput₁, hinput₂] at h
+    rw [hNabla2 (t : Real) x k i j l, hNabla2 (t : Real) x i k j l]
+    simpa [Realized.rm04Comp, RicciFlower.Curvature.rm04Comp] using h
+  have hIdCompRight :
+      forall k l : Idx,
+        nabla2Ric (t : Real) x k j i l -
+            nabla2Ric (t : Real) x j k i l =
+          Realized.curvatureAction0SAt (I := I) (Rm13 (t : Real))
+            (S.ricci (t : Real) x)
+            (frame k x) (frame j x)
+            (Realized.vec2 (frame i x) (frame l x)) := by
+    intro k l
+    have h := hRicciId t x (frame k x) (frame j x)
+      (Realized.vec2 (frame i x) (frame l x))
+    have hinput₁ :
+        Realized.metricTraceInput (I := I) (frame k x) (frame j x)
+            (Realized.vec2 (frame i x) (frame l x)) =
+          Realized.vec4 (frame k x) (frame j x) (frame i x) (frame l x) := by
+      funext q
+      fin_cases q <;> rfl
+    have hinput₂ :
+        Realized.metricTraceInput (I := I) (frame j x) (frame k x)
+            (Realized.vec2 (frame i x) (frame l x)) =
+          Realized.vec4 (frame j x) (frame k x) (frame i x) (frame l x) := by
+      funext q
+      fin_cases q <;> rfl
+    rw [hinput₁, hinput₂] at h
+    rw [hNabla2 (t : Real) x k j i l, hNabla2 (t : Real) x j k i l]
+    simpa [Realized.rm04Comp, RicciFlower.Curvature.rm04Comp] using h
+  have hleftCurv :
+      contractedNabla2RicLeftInFrame (M := M) gInv nabla2Ric
+          (t : Real) x i j =
+        contractedNabla2RicTraceAInFrame (M := M) gInv nabla2Ric
+          (t : Real) x i j +
+        (∑ k : Idx, ∑ l : Idx,
+          gInv (t : Real) x k l *
+            Realized.curvatureAction0SAt (I := I) (Rm13 (t : Real))
+              (S.ricci (t : Real) x)
+              (frame k x) (frame i x)
+              (Realized.vec2 (frame j x) (frame l x))) := by
+    unfold contractedNabla2RicLeftInFrame contractedNabla2RicTraceAInFrame
+    calc
+      (∑ k : Idx, ∑ l : Idx,
+          gInv (t : Real) x k l * nabla2Ric (t : Real) x k i j l)
+          =
+        ∑ k : Idx, ∑ l : Idx,
+          gInv (t : Real) x k l *
+            (nabla2Ric (t : Real) x i k j l +
+              Realized.curvatureAction0SAt (I := I) (Rm13 (t : Real))
+                (S.ricci (t : Real) x)
+                (frame k x) (frame i x)
+                (Realized.vec2 (frame j x) (frame l x))) := by
+            refine Finset.sum_congr rfl fun k _ => ?_
+            refine Finset.sum_congr rfl fun l _ => ?_
+            have h := hIdComp k l
+            rw [sub_eq_iff_eq_add] at h
+            rw [h]
+            ring
+      _ =
+        (∑ k : Idx, ∑ l : Idx,
+            gInv (t : Real) x k l * nabla2Ric (t : Real) x i k j l) +
+          (∑ k : Idx, ∑ l : Idx,
+            gInv (t : Real) x k l *
+              Realized.curvatureAction0SAt (I := I) (Rm13 (t : Real))
+                (S.ricci (t : Real) x)
+                (frame k x) (frame i x)
+                (Realized.vec2 (frame j x) (frame l x))) := by
+            simp [mul_add, Finset.sum_add_distrib]
+  have hrightCurvNatural :
+      contractedNabla2RicRightInFrame (M := M) gInv nabla2Ric
+          (t : Real) x i j =
+        (∑ k : Idx, ∑ l : Idx,
+          gInv (t : Real) x k l * nabla2Ric (t : Real) x j k i l) +
+        (∑ k : Idx, ∑ l : Idx,
+          gInv (t : Real) x k l *
+            Realized.curvatureAction0SAt (I := I) (Rm13 (t : Real))
+              (S.ricci (t : Real) x)
+              (frame k x) (frame j x)
+              (Realized.vec2 (frame i x) (frame l x))) := by
+    unfold contractedNabla2RicRightInFrame
+    calc
+      (∑ k : Idx, ∑ l : Idx,
+          gInv (t : Real) x k l * nabla2Ric (t : Real) x k j i l)
+          =
+        ∑ k : Idx, ∑ l : Idx,
+          gInv (t : Real) x k l *
+            (nabla2Ric (t : Real) x j k i l +
+              Realized.curvatureAction0SAt (I := I) (Rm13 (t : Real))
+                (S.ricci (t : Real) x)
+                (frame k x) (frame j x)
+                (Realized.vec2 (frame i x) (frame l x))) := by
+            refine Finset.sum_congr rfl fun k _ => ?_
+            refine Finset.sum_congr rfl fun l _ => ?_
+            have h := hIdCompRight k l
+            rw [sub_eq_iff_eq_add] at h
+            rw [h]
+            ring
+      _ =
+        (∑ k : Idx, ∑ l : Idx,
+            gInv (t : Real) x k l * nabla2Ric (t : Real) x j k i l) +
+          (∑ k : Idx, ∑ l : Idx,
+            gInv (t : Real) x k l *
+              Realized.curvatureAction0SAt (I := I) (Rm13 (t : Real))
+                (S.ricci (t : Real) x)
+                (frame k x) (frame j x)
+                (Realized.vec2 (frame i x) (frame l x))) := by
+            simp [mul_add, Finset.sum_add_distrib]
+  have hgInvAt :
+      forall a b : Idx,
+        (fun a b : Idx => gInv (t : Real) x a b) a b =
+          gInv (t : Real) x a b := by
+    intro a b
+    rfl
+  have hbasis :
+      forall a : Idx,
+        hframe.toBasisAt (by simp : x ∈ (Set.univ : Set M)) a =
+          frame a x := by
+    intro a
+    simp [IsLocalFrameOn.toBasisAt_coe]
+  have hleftAction :=
+    contractedCurvatureAction_left_eq
+      (I := I) S Rm13 Rm04 gInv frame
+      (hframe.toBasisAt (by simp : x ∈ (Set.univ : Set M)))
+      (fun a b : Idx => gInv (t : Real) x a b) hinvAt
+      (t : Real) i j
+      (hLower t x) hTraceAt (hPair t x) (hOutput t x) (hFirst t x) hRic hInv
+      hgInvAt hbasis
+  have hrightAction :=
+    contractedCurvatureAction_right_eq
+      (I := I) S Rm13 Rm04 gInv frame
+      (hframe.toBasisAt (by simp : x ∈ (Set.univ : Set M)))
+      (fun a b : Idx => gInv (t : Real) x a b) hinvAt
+      (t : Real) i j
+      (hLower t x) hTraceAt (hPair t x) (hOutput t x) (hFirst t x) hRic hInv
+      hgInvAt hbasis
+  constructor
+  · calc
+      contractedNabla2RicLeftInFrame (M := M) gInv nabla2Ric
+          (t : Real) x i j
+          =
+        contractedNabla2RicTraceAInFrame (M := M) gInv nabla2Ric
+          (t : Real) x i j +
+        (∑ k : Idx, ∑ l : Idx,
+          gInv (t : Real) x k l *
+            Realized.curvatureAction0SAt (I := I) (Rm13 (t : Real))
+              (S.ricci (t : Real) x)
+              (frame k x) (frame i x)
+              (Realized.vec2 (frame j x) (frame l x))) := hleftCurv
+      _ =
+        contractedNabla2RicTraceAInFrame (M := M) gInv nabla2Ric
+          (t : Real) x i j +
+        rmRicciContractionCompInFrame (I := I) S Rm04 gInv frame
+          (t : Real) x i j +
+        ricciQuadraticCompInFrame (I := I) S gInv frame
+          (t : Real) x i j := by
+            rw [hleftAction]
+            ring
+  · calc
+      contractedNabla2RicRightInFrame (M := M) gInv nabla2Ric
+          (t : Real) x i j
+          =
+        contractedNabla2RicTraceRightNaturalInFrame (M := M) gInv nabla2Ric
+          (t : Real) x i j +
+        (∑ k : Idx, ∑ l : Idx,
+          gInv (t : Real) x k l *
+            Realized.curvatureAction0SAt (I := I) (Rm13 (t : Real))
+              (S.ricci (t : Real) x)
+              (frame k x) (frame j x)
+              (Realized.vec2 (frame i x) (frame l x))) := hrightCurvNatural
+      _ =
+        contractedNabla2RicTraceRightNaturalInFrame (M := M) gInv nabla2Ric
+          (t : Real) x i j +
+        rmRicciContractionCompInFrame (I := I) S Rm04 gInv frame
+          (t : Real) x i j +
+        ricciQuadraticCompInFrame (I := I) S gInv frame
+          (t : Real) x i j := by
+            rw [hrightAction]
+            ring
 
 /-- The two contracted commutator identities used in Lemma 6.3:
 both second-derivative contractions equal
-`1/2 Hess R - R_ikjl Ric^kl + Ric_i^k Ric_kj`, and the two divergence trace
+`1/2 Hess R + R_ikjl Ric^kl + Ric_i^k Ric_kj`, and the two divergence trace
 terms in `∇_i A^k_kj` cancel for a symmetric Ricci tensor. -/
 def RicciContractedCommutatorsInFrame
     {D : Realized.RealTimeInterval}
@@ -1817,7 +2348,7 @@ def RicciContractedCommutatorsInFrame
     contractedNabla2RicLeftInFrame (M := M) gInv nabla2Ric (t : Real) x i j =
         (1 / 2 : Real) *
           scalarHessianFromNabla2RicInFrame (M := M) gInv nabla2Ric
-            (t : Real) x i j -
+            (t : Real) x i j +
         rmRicciContractionCompInFrame (I := I) S Rm04 gInv frame
           (t : Real) x i j +
         ricciQuadraticCompInFrame (I := I) S gInv frame (t : Real) x i j ∧
@@ -1825,7 +2356,7 @@ def RicciContractedCommutatorsInFrame
           (t : Real) x i j =
         (1 / 2 : Real) *
           scalarHessianFromNabla2RicInFrame (M := M) gInv nabla2Ric
-            (t : Real) x i j -
+            (t : Real) x i j +
         rmRicciContractionCompInFrame (I := I) S Rm04 gInv frame
           (t : Real) x i j +
         ricciQuadraticCompInFrame (I := I) S gInv frame (t : Real) x i j ∧
@@ -1876,26 +2407,33 @@ theorem RicciContractedCommutatorsInFrame_of_differentiatedBianchi_and_tensor0S_
     (Rm04 : Real -> Realized.Tensor04Section (I := I) (M := M))
     (gInv : Real -> Realized.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame Set.univ)
+    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
     (nabla2RicTensor : Real -> Realized.Tensor04Section (I := I) (M := M))
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (hbianchi : DifferentiatedContractedBianchiInFrame
+      (D := D) (M := M) gInv nabla2Ric)
+    (hHessSymm : ScalarHessianFromNabla2RicSymmetricInFrame
       (D := D) (M := M) gInv nabla2Ric)
     (hNabla2 : Nabla2RicciTensorComponentsInFrameOn
       (I := I) frame nabla2RicTensor nabla2Ric)
     (hRicciId : forall (t : Realized.RealTimeInterval.RegularTime D) (x : M),
       Realized.Tensor0SRicciIdentityAt (I := I) (Rm13 (t : Real))
         (S.ricci (t : Real) x) (nabla2RicTensor (t : Real) x))
+    (hRicTrace13 : forall t : Realized.RealTimeInterval.RegularTime D,
+      Realized.RicciTensorRealizesRm13Trace (I := I)
+        (S.ricci (t : Real)) (Rm13 (t : Real)))
     (hLower : forall (t : Realized.RealTimeInterval.RegularTime D) (x : M),
       Realized.Rm04LowersRm13At (I := I) (S.family.metric (t : Real)) x
         (Rm13 (t : Real) x) (Rm04 (t : Real) x))
-    (hTrace : RicciTensorRealizesRm04TraceInFrameOn
-      (I := I) S Rm04 gInv frame)
     (hPair : forall (t : Realized.RealTimeInterval.RegularTime D) (x : M),
       forall W X Y Z : TangentSpace I x,
         Rm04 (t : Real) x (Realized.vec4 W X Y Z) =
           Rm04 (t : Real) x (Realized.vec4 Y Z W X))
     (hOutput : forall (t : Realized.RealTimeInterval.RegularTime D) (x : M),
       Realized.Rm04OutputSkewAt (I := I) (Rm04 (t : Real) x))
+    (hFirst : forall (t : Realized.RealTimeInterval.RegularTime D) (x : M),
+      Realized.FirstBianchiAt (I := I) (Rm04 (t : Real) x))
     (hRic : forall t x i j,
       ricciCompInFrame (I := I) S frame t x i j =
         ricciCompInFrame (I := I) S frame t x j i)
@@ -1905,10 +2443,11 @@ theorem RicciContractedCommutatorsInFrame_of_differentiatedBianchi_and_tensor0S_
   RicciContractedCommutatorsInFrame_of_differentiatedBianchi_and_commutators
     (I := I) S Rm04 gInv frame nabla2Ric hbianchi
     (RicciCurvatureCommutatorsInFrame_of_differentiatedBianchi_and_secondCommutators
-      (I := I) S Rm04 gInv frame nabla2Ric hbianchi
+      (I := I) S Rm04 gInv frame nabla2Ric hbianchi hHessSymm
       (ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
-        (I := I) S Rm13 Rm04 gInv frame nabla2RicTensor nabla2Ric
-        hNabla2 hRicciId hLower hTrace hPair hOutput hRic hInv))
+        (I := I) S Rm13 Rm04 gInv frame hframe hinv
+        nabla2RicTensor nabla2Ric
+        hNabla2 hRicciId hRicTrace13 hLower hPair hOutput hFirst hRic hInv))
 
 private theorem ricciVariationExpandedRHSInFrame_eq_decomposed
     (gInv : Real -> Realized.InverseMetricComponents M Idx)
@@ -2050,7 +2589,8 @@ def ricciVariationGaugeTerms_cancel
 
 /-- Curvature commutator reduction in Lemma 6.3:
 the remaining commutator terms are exactly
-`2 R_ikjℓ Ric^{kℓ} - 2 Ric_i^k Ric_kj`. -/
+`-2 * rmRicciContractionCompInFrame - 2 Ric_i^k Ric_kj` in the project
+lowered-curvature convention. -/
 def ricciCurvatureTerms_eq
     {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -2169,7 +2709,7 @@ theorem evol_ricci_inFrame_of_variation_commutators
     (t : Realized.RealTimeInterval.RegularTime D) (x : M) (i j : Idx) :
     HasDerivWithinAt
       (fun s : Real => ricciCompInFrame (I := I) S frame s x i j)
-      (roughLapRicInFrame (M := M) gInv nabla2Ric (t : Real) x i j +
+      (roughLapRicInFrame (M := M) gInv nabla2Ric (t : Real) x i j -
         2 * rmRicciContractionCompInFrame (I := I) S Rm04 gInv frame
           (t : Real) x i j -
         2 * ricciQuadraticCompInFrame (I := I) S gInv frame
@@ -2326,9 +2866,11 @@ def ricciRightActionCompInFrame
       h t x k i
 
 /-- Ricci-specialized Lichnerowicz RHS in fixed-frame components:
-`Δ h_ij + 2 R_ikjℓ h^{kℓ} - Ric_i^k h_kj - Ric_j^k h_ki`.
+`Delta h_ij - 2 * curvature-action contraction - Ric_i^k h_kj - Ric_j^k h_ki`.
 
 For Corollary 6.5, `h` is the Ricci tensor. -/
+-- Convention note: this uses the same curvature-action contraction sign as
+-- `ricciEvolutionRHSInFrame`.
 def lichnerowiczRHSInFrame
     {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -2337,7 +2879,7 @@ def lichnerowiczRHSInFrame
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (roughLapH h hRaised : Real -> M -> Idx -> Idx -> Real)
     (t : Real) (x : M) (i j : Idx) : Real :=
-  roughLapH t x i j +
+  roughLapH t x i j -
     2 * (∑ k : Idx, ∑ l : Idx,
       Realized.rm04Comp (I := I) (Rm04 t) frame x i k j l *
         hRaised t x k l) -

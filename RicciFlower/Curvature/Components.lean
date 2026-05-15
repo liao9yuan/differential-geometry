@@ -631,8 +631,76 @@ theorem ricciCompAt_eq_contractTrace_of_realizes
   rw [hRic x]
   exact ricciCompAt_eq_contractTrace (I := I) basis (Rm13 x) i j
 
-/-- Pointwise trace realization of Ricci from a lowered Riemann tensor in a
-tangent basis. -/
+/-- Convention-correct pointwise Ricci trace from a lowered Riemann tensor.
+
+This is the lowered form of the intrinsic `Rm13` trace:
+`Ric_ab = g^{kl} Rm04(e_k,e_l,e_a,e_b)`.  It is the convention used by
+`ricciFromRm13_comp_eq_rm04_trace`. -/
+def RicciRealizesRm04FirstTraceAt
+    (Ric : Tensor02At (I := I) (M := M) x)
+    (Rm04 : Tensor04At (I := I) (M := M) x)
+    (gInv : Idx -> Idx -> Real)
+    (basis : Module.Basis Idx Real (TangentSpace I x)) : Prop :=
+  forall a b : Idx,
+    Ric (vec2 (basis a) (basis b)) =
+      ∑ k : Idx, ∑ l : Idx,
+        gInv k l * Rm04 (vec4 (basis k) (basis l) (basis a) (basis b))
+
+/-- The intrinsic `Rm13` trace plus output lowering realizes the
+convention-correct lowered `Rm04` first trace. -/
+theorem ricciFirstTraceAt_of_rm13
+    (g : SmoothRiemannianMetric I M)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInv)
+    (Ric : Tensor02At (I := I) (M := M) x)
+    (Rm13 : Tensor13At (I := I) (M := M) x)
+    (Rm04 : Tensor04At (I := I) (M := M) x)
+    (hRic : Ric = ricciFromRm13At (I := I) (M := M) Rm13)
+    (hLower : Rm04LowersRm13At (I := I) g x Rm13 Rm04)
+    (hInvSym : forall i j : Idx, gInv i j = gInv j i) :
+    RicciRealizesRm04FirstTraceAt (I := I) Ric Rm04 gInv basis := by
+  intro i j
+  have hcomp := ricciComp_eq_rm04_trace_of_rm13
+    (I := I) g basis gInv hinv Ric Rm13 Rm04 hRic hLower i j
+  rw [ricciCompAt_apply] at hcomp
+  rw [hcomp]
+  calc
+    (∑ a : Idx, ∑ k : Idx,
+        gInv a k * rm04CompAt (I := I) basis Rm04 k a i j)
+        =
+      ∑ k : Idx, ∑ a : Idx,
+        gInv a k * rm04CompAt (I := I) basis Rm04 k a i j := by
+        rw [Finset.sum_comm]
+    _ =
+      ∑ k : Idx, ∑ l : Idx,
+        gInv k l * Rm04 (vec4 (basis k) (basis l) (basis i) (basis j)) := by
+        refine Finset.sum_congr rfl fun k _ => ?_
+        refine Finset.sum_congr rfl fun l _ => ?_
+        rw [hInvSym l k, rm04CompAt_apply]
+
+/-- Section form of `ricciFirstTraceAt_of_rm13`. -/
+theorem ricciFirstTraceAt_of_rm13_section
+    (g : SmoothRiemannianMetric I M)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInv)
+    (Ric : Tensor02Section (I := I) (M := M))
+    (Rm13 : Tensor13Section (I := I) (M := M))
+    (Rm04 : Tensor04Section (I := I) (M := M))
+    (hRic : RicciTensorRealizesRm13Trace (I := I) Ric Rm13)
+    (hLower : Rm04LowersRm13At (I := I) g x (Rm13 x) (Rm04 x))
+    (hInvSym : forall i j : Idx, gInv i j = gInv j i) :
+    RicciRealizesRm04FirstTraceAt (I := I) (Ric x) (Rm04 x) gInv basis := by
+  exact ricciFirstTraceAt_of_rm13 (I := I) g basis gInv hinv
+    (Ric x) (Rm13 x) (Rm04 x) (hRic x) hLower hInvSym
+
+/-- Legacy pointwise trace realization of Ricci from a lowered Riemann tensor
+in a tangent basis.
+
+This traces the last lowered slot, `Rm04(e_k,X,Y,e_l)`.  It is kept for
+compatibility with older wrappers; new curvature/Ricci-flow convention work
+should use `RicciRealizesRm04FirstTraceAt`. -/
 def RicciRealizesRm04TraceAt
     (Ric : Tensor02At (I := I) (M := M) x)
     (Rm04 : Tensor04At (I := I) (M := M) x)
@@ -722,6 +790,53 @@ theorem ricciTraceAt_of_frame
   intro X Y
   simpa [RicciTensorRealizesRm04TraceInFrame, tensor02ToField, tensor04ToField,
     IsLocalFrameOn.toBasisAt_coe] using hRic x X Y
+
+/-- Convention-correct frame Ricci trace:
+`Ric_ij = g^{kl} Rm04(e_k,e_l,e_i,e_j)`. -/
+def RicciTensorRealizesRm04FirstTraceInFrame
+    (Ric : Tensor02Section (I := I) (M := M))
+    (Rm04 : Tensor04Section (I := I) (M := M))
+    (gInv : InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x) : Prop :=
+  forall x i j,
+    Ric x (vec2 (frame i x) (frame j x)) =
+      ∑ k : Idx, ∑ l : Idx,
+        gInv x k l * Rm04 x (vec4 (frame k x) (frame l x) (frame i x) (frame j x))
+
+/-- A local frame turns the convention-correct frame trace into the pointwise
+basis trace. -/
+theorem ricciFirstTraceAt_of_frame
+    (Ric : Tensor02Section (I := I) (M := M))
+    (Rm04 : Tensor04Section (I := I) (M := M))
+    (gInv : InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E ∞ frame u)
+    (hRic : RicciTensorRealizesRm04FirstTraceInFrame (I := I) Ric Rm04 gInv frame)
+    {x : M} (hx : x ∈ u) :
+    RicciRealizesRm04FirstTraceAt (I := I) (Ric x) (Rm04 x) (gInv x)
+      (hframe.toBasisAt hx) := by
+  intro i j
+  simpa [RicciTensorRealizesRm04FirstTraceInFrame, IsLocalFrameOn.toBasisAt_coe]
+    using hRic x i j
+
+/-- Component form of the convention-correct frame Ricci trace. -/
+theorem ricciComp_eq_firstTrace_rm04_frame
+    (Ric : Tensor02Section (I := I) (M := M))
+    (Rm04 : Tensor04Section (I := I) (M := M))
+    (gInv : InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E ∞ frame u)
+    (hRic : RicciTensorRealizesRm04FirstTraceInFrame (I := I) Ric Rm04 gInv frame)
+    {x : M} (hx : x ∈ u) (i j : Idx) :
+    ricciCompAt (I := I) (hframe.toBasisAt hx) (Ric x) i j =
+      ∑ k : Idx, ∑ l : Idx,
+        gInv x k l *
+          rm04CompAt (I := I) (hframe.toBasisAt hx) (Rm04 x) k l i j := by
+  have hAt := ricciFirstTraceAt_of_frame
+    (I := I) Ric Rm04 gInv frame hframe hRic hx
+  rw [ricciCompAt_apply]
+  simp_rw [rm04CompAt_apply]
+  exact hAt i j
 
 theorem scalarTraceAt_of_frame
     (scalar : M -> Real)
@@ -1182,6 +1297,59 @@ def tensor0SRicciIdentityCoordInput {s : ℕ}
     Fin (s + 2) -> CoordinateIdx (𝕜 := Real) E :=
   Fin.cases i (Fin.cases j ks)
 
+/-- Coordinate projection of the invariant `(0,s)` curvature action.
+
+This is the coordinate layer's only expansion of the slotwise curvature action
+into Christoffel curvature components. -/
+theorem curvatureAction0SAt_coordFrame_of_christoffelCurv
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (Rm13 : Tensor13Section (I := I) (M := M))
+    (x0 : M) {s : ℕ}
+    (alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x0)
+    (hRm : Rm13RealizesConnection (I := I) cov Rm13)
+    (hcurv : ConnectionCurvatureCoordAt (I := I) cov x0)
+    (i j : CoordinateIdx (𝕜 := Real) E)
+    (ks : Fin s -> CoordinateIdx (𝕜 := Real) E) :
+    curvatureAction0SAt (I := I) Rm13 alpha
+        (coordinateFrameAt (I := I) x0 i x0)
+        (coordinateFrameAt (I := I) x0 j x0)
+        (fun q : Fin s => coordinateFrameAt (I := I) x0 (ks q) x0)
+      =
+        -∑ q : Fin s, ∑ m : CoordinateIdx (𝕜 := Real) E,
+          christoffelCurvCoeffAt (I := I) cov x0 i j (ks q) m *
+            coordComponent0SAt (I := I) alpha (Function.update ks q m) := by
+  classical
+  let slots : Fin s -> TangentSpace I x0 :=
+    fun q => coordinateFrameAt (I := I) x0 (ks q) x0
+  have hslot (q : Fin s) (m : CoordinateIdx (𝕜 := Real) E) :
+      oneFormAtSlot0S (I := I) alpha slots q
+          (fun _ : Fin 1 => coordinateFrameAt (I := I) x0 m x0) =
+        coordComponent0SAt (I := I) alpha (Function.update ks q m) := by
+    rw [oneFormAtSlot0S_apply, coordComponent0SAt_apply]
+    congr 1
+    funext a
+    by_cases ha : a = q
+    · subst ha
+      simp [slots]
+    · simp [slots, Function.update, ha]
+  change
+    -∑ q : Fin s,
+      Rm13 x0 (oneFormAtSlot0S (I := I) alpha slots q)
+        (vec3 (coordinateFrameAt (I := I) x0 i x0)
+          (coordinateFrameAt (I := I) x0 j x0) (slots q))
+      =
+        -∑ q : Fin s, ∑ m : CoordinateIdx (𝕜 := Real) E,
+          christoffelCurvCoeffAt (I := I) cov x0 i j (ks q) m *
+            coordComponent0SAt (I := I) alpha (Function.update ks q m)
+  congr 1
+  refine Finset.sum_congr rfl fun q _ => ?_
+  rw [rm13_eval_eq_christoffelCurvCoord
+    (I := I) cov Rm13 x0 (oneFormAtSlot0S (I := I) alpha slots q)
+    hRm hcurv i j (ks q)]
+  refine Finset.sum_congr rfl fun m _ => ?_
+  rw [hslot q m]
+
 /-- Coordinate-frame component form of the invariant `(0,s)` Ricci identity.
 
 This is the book-facing specialization: evaluate the invariant identity on
@@ -1248,17 +1416,6 @@ theorem tensor0S_ricciIdentity_coordFrame_of_christoffelCurv
         rw [coordinateFrameAt_toBasis_apply]
       · intro a
         simp [tensor0SRicciIdentityCoordInput, metricTraceInput, slots]
-  have hslot (q : Fin s) (m : CoordinateIdx (𝕜 := Real) E) :
-      oneFormAtSlot0S (I := I) alpha slots q
-          (fun _ : Fin 1 => coordinateFrameAt (I := I) x0 m x0) =
-        coordComponent0SAt (I := I) alpha (Function.update ks q m) := by
-    rw [oneFormAtSlot0S_apply, coordComponent0SAt_apply]
-    congr 1
-    funext a
-    by_cases ha : a = q
-    · subst ha
-      simp [slots]
-    · simp [slots, Function.update, ha]
   calc
     coordComponent0SAt (I := I) nabla2Alpha
         (tensor0SRicciIdentityCoordInput (E := E) i j ks) -
@@ -1273,14 +1430,9 @@ theorem tensor0S_ricciIdentity_coordFrame_of_christoffelCurv
     _ = -∑ q : Fin s, ∑ m : CoordinateIdx (𝕜 := Real) E,
           christoffelCurvCoeffAt (I := I) cov x0 i j (ks q) m *
             coordComponent0SAt (I := I) alpha (Function.update ks q m) := by
-          unfold curvatureAction0SAt
-          congr 1
-          refine Finset.sum_congr rfl fun q _ => ?_
-          rw [rm13_eval_eq_christoffelCurvCoord
-            (I := I) cov Rm13 x0 (oneFormAtSlot0S (I := I) alpha slots q)
-            hRm hcurv i j (ks q)]
-          refine Finset.sum_congr rfl fun m _ => ?_
-          rw [hslot q m]
+          simpa [slots] using
+            curvatureAction0SAt_coordFrame_of_christoffelCurv
+              (I := I) cov Rm13 x0 alpha hRm hcurv i j ks
 
 /-- Coordinate Christoffel-form one-form Ricci identity.
 

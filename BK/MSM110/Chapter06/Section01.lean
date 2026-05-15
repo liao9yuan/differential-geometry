@@ -138,7 +138,7 @@ theorem eq_ricci_tensor_ricci_flow_two
     (x : M) (i j : Idx) :
     HasDerivWithinAt
       (fun s : Real => ricciCompInFrame (I := I) S frame s x i j)
-      (roughLapRicInFrame (M := M) gInv nabla2Ric (t : Real) x i j +
+      (roughLapRicInFrame (M := M) gInv nabla2Ric (t : Real) x i j -
         2 * rmRicciContractionCompInFrame (I := I) S Rm04 gInv frame
           (t : Real) x i j -
         2 * ricciQuadraticCompInFrame (I := I) S gInv frame
@@ -170,6 +170,29 @@ theorem eq_scalar_curv_evolu
     ScalarEvolutionEquationOn (D := D) scalar scalarLap ricciNormSq :=
   RicciFlower.RicciFlow.msm110_ch6_1_scalar_curvature_evolution
     (M := M) scalar scalarLap contractedRicciHessian ricciNormSq hpre hbianchi
+
+/-- MSM110 Chapter 6.1, equation `eq:scalar_curv_evolu`, traced from the
+Ricci evolution equation. -/
+theorem eq_scalar_curv_evolu_of_ricci_evolution
+    {D : RicciFlower.Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (scalar scalarLap : Real -> M -> Real)
+    (Rm04 : Real -> RicciFlower.Realized.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> RicciFlower.Realized.InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (roughLapRic : Real -> M -> Idx -> Idx -> Real)
+    (hScalar : ∀ t x,
+      scalar t x = scalarTraceInFrame (I := I) S gInv frame t x)
+    (h_lap : ScalarLaplacianTraceInFrame (M := M) gInv roughLapRic scalarLap)
+    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame)
+    (h_ricci : RicciEvolutionEquationInFrame
+      (I := I) S Rm04 gInv frame roughLapRic)
+    (h_alg : ScalarTraceAlgebraInFrame (I := I) S Rm04 gInv frame) :
+    ScalarEvolutionEquationOn (D := D) scalar scalarLap
+      (ricciNormSqInFrame (I := I) S gInv frame) :=
+  RicciFlower.RicciFlow.scalarEvolutionEquationOn_of_ricciEvolution_and_traceAlgebra
+    (I := I) S scalar scalarLap Rm04 gInv frame roughLapRic
+    hScalar h_lap h_inv h_ricci h_alg
 
 /-- MSM110 Chapter 6.1, equation `eq:evolution_of_volume_element`, in the
 integrated moving-measure form used by the current volume API. -/

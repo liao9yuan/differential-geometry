@@ -12,8 +12,9 @@ set_option linter.unusedFintypeInType false
 
 This file is the forward-facing Ricci-flow API.  The older
 `RicciFlower.Realized.RicciFlow` module remains as a compatibility layer; this
-folder-level module packages a solution as a realized metric family together
-with bundled Ricci tensor sections.
+folder-level module packages a solution as a real-time metric family together
+with bundled Ricci tensor sections, then records interval-local validity as a
+separate layer.
 
 The Section 6.2 evolution identities are introduced as explicit equation
 predicates.  The current file records the interfaces and the algebraic
@@ -60,15 +61,66 @@ end RicciSectionFamily
 
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-/-- A data-only Ricci-flow solution candidate on a real interval.
-
-The solution is primarily a `RealizedMetricFamilyOn`; the bundled Ricci section
-family is the right-hand side of the metric evolution equation. -/
-structure SolutionOn (D : Realized.RealTimeInterval) where
-  family : Realized.RealizedMetricFamilyOn (I := I) (M := M) D
+/-- A data-only real-time Ricci-flow family, independent of a chosen interval. -/
+structure SolutionFamily where
+  metric : Real -> SmoothRiemannianMetric I M
+  connection : Real -> CovariantDerivative I E (TangentSpace I : M -> Type _)
   ricci : RicciSectionFamily (I := I) (M := M)
 
+namespace SolutionFamily
+
+/-- The metric and connection are compatible at every flow time of `D`. -/
+def MetricCompatibleOn
+    (G : SolutionFamily (I := I) (M := M))
+    (D : Realized.RealTimeInterval) : Prop :=
+  forall t : Realized.RealTimeInterval.FlowTime D,
+    RicciFlower.Connection.IsMetricCompatible (I := I)
+      (G.connection (t : Real)) (G.metric (t : Real))
+
+end SolutionFamily
+
+/-- A Ricci-flow candidate on a real interval.
+
+The underlying metric, connection, and Ricci data are a real-time family; this
+wrapper records that the metric and connection are compatible on the chosen
+interval.  This keeps extension/maximality statements from needing to compare
+families with different interval indices. -/
+structure SolutionOn (D : Realized.RealTimeInterval) where
+  base : SolutionFamily (I := I) (M := M)
+  metricCompatible : base.MetricCompatibleOn D
+
 namespace SolutionOn
+
+/-- The interval-indexed realized metric family associated to a solution
+candidate.  This preserves the previous `S.family` API. -/
+def family {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) :
+    Realized.RealizedMetricFamilyOn (I := I) (M := M) D where
+  metric := S.base.metric
+  connection := S.base.connection
+  metricCompatible := S.metricCompatible
+
+/-- The bundled Ricci tensor section family.  This preserves the previous
+`S.ricci` API. -/
+def ricci {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) :
+    RicciSectionFamily (I := I) (M := M) :=
+  S.base.ricci
+
+@[simp] theorem family_metric {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) :
+    S.family.metric = S.base.metric := by
+  rfl
+
+@[simp] theorem family_connection {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) :
+    S.family.connection = S.base.connection := by
+  rfl
+
+@[simp] theorem ricci_eq {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) :
+    S.ricci = S.base.ricci := by
+  rfl
 
 /-- Compatibility view as the older realized Ricci-flow candidate. -/
 def toRealizedCandidate {D : Realized.RealTimeInterval}
@@ -261,8 +313,10 @@ def rmRicciContractionCompInFrame
           raisedRicciCompInFrame (I := I) S gInv frame t x k l := by
   rfl
 
-/-- Component RHS for Lemma 6.3:
-`Δ Ric_ij + 2 R_ikjl Ric^{kl} - 2 Ric_i^k Ric_kj`. -/
+/-- Component RHS for Lemma 6.3 in the project lowered-curvature convention:
+`Delta Ric_ij - 2 * rmRicciContractionCompInFrame - 2 Ric_i^k Ric_kj`. -/
+-- Convention note: in this file's `Rm04(W,X,Y,Z) = g(W,R(X,Y)Z)` slot order,
+-- the implementation below has a minus sign on `rmRicciContractionCompInFrame`.
 def ricciEvolutionRHSInFrame
     {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -271,7 +325,7 @@ def ricciEvolutionRHSInFrame
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
     (t : Real) (x : M) (i j : Idx) : Real :=
-  roughLapRic t x i j +
+  roughLapRic t x i j -
     2 * rmRicciContractionCompInFrame (I := I) S Rm04 gInv frame t x i j -
       2 * ricciQuadraticCompInFrame (I := I) S gInv frame t x i j
 
@@ -284,7 +338,7 @@ def ricciEvolutionRHSInFrame
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
     (t : Real) (x : M) (i j : Idx) :
     ricciEvolutionRHSInFrame (I := I) S Rm04 gInv frame roughLapRic t x i j =
-      roughLapRic t x i j +
+      roughLapRic t x i j -
         2 * rmRicciContractionCompInFrame (I := I) S Rm04 gInv frame t x i j -
           2 * ricciQuadraticCompInFrame (I := I) S gInv frame t x i j := by
   rfl

@@ -74,3 +74,18 @@ New scaffold covers:
   Riemann evolution formula in terms of `B`.
 
 Verification passed with the expected scaffold `sorry` warnings.
+
+## 2026-05-14 scalar trace route wrapper
+
+Added `eq_scalar_curv_evolu_of_ricci_evolution`, a book-facing wrapper for the
+new trace route in `RicciFlower.RicciFlow.Evolution.Scalar`.
+
+The old pre-Bianchi wrapper remains for compatibility.  The new wrapper exposes
+the preferred route from inverse-metric evolution plus Lemma 6.3, with the
+finite-index `ScalarTraceAlgebraInFrame` package still explicit.
+
+Verification passed.
+
+Remaining frontier: discharge `ScalarTraceAlgebraInFrame` in the RicciFlow
+scalar layer.  This should be routine finite-sum/convention algebra rather than
+a new geometric input.

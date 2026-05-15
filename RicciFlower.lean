@@ -15,7 +15,6 @@ import RicciFlower.Realized.TimeInterval
 import RicciFlower.Realized.MetricFamily
 import RicciFlower.Analysis.Measure
 import RicciFlower.Analysis.VolumeVariation
-import RicciFlower.Analysis.Green
 import RicciFlower.Metric
 import RicciFlower.Connection
 import RicciFlower.LeviCivita
@@ -30,6 +29,7 @@ import RicciFlower.ScalarBochner
 import RicciFlower.Bochner
 import RicciFlower.Realized.RicciFlow
 import RicciFlower.RicciFlow.Basic
+import RicciFlower.RicciFlow.MaximalTime
 import RicciFlower.RicciFlow.Evolution.Ricci
 import RicciFlower.RicciFlow.Evolution.Scalar
 import RicciFlower.RicciFlow.Evolution.Volume
