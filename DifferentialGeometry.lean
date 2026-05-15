@@ -441,6 +441,10 @@ import DifferentialGeometry.Geometry.Riemannian.Exponential.Bridge
 import DifferentialGeometry.Geometry.Riemannian.Exponential.ChartIdentification
 import DifferentialGeometry.Geometry.Riemannian.Exponential.ChartPushVFEq
 import DifferentialGeometry.Geometry.Riemannian.Exponential.Definition
+import DifferentialGeometry.Geometry.Riemannian.Exponential.Smoothness
+import DifferentialGeometry.Geometry.Riemannian.Exponential.SmoothnessClose
+import DifferentialGeometry.Geometry.Riemannian.Exponential.SmoothnessUnconditional
+import DifferentialGeometry.Geometry.Riemannian.Exponential.Unconditional
 
 import DifferentialGeometry.Analysis.Sobolev.Solutions.FriedrichsCommutator
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.NonSmooth

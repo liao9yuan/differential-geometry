@@ -627,6 +627,164 @@ theorem exists_chartPhase_contDiffOn_isLocalFlow
       exact_mod_cast (le_of_lt hrN)))
   refine ⟨b, (ρ : ℝ), T, Φ, hρ_pos, hT_pos, hb_sub, hCDOn, hinitial⟩
 
+/-! ## Sibling: combined joint `C^1` and `IsLocalFlow` packaging
+
+The proof of `exists_chartPhase_contDiffOn_isLocalFlow` constructs `Φ`
+via `exists_isLocalFlow_of_contDiffOn_univ`, so the same `Φ` is both a
+Picard–Lindelöf local flow on a larger radius `(rN, εN)` and jointly
+`C^1` on a strict open neighbourhood `ball ρ × Ioo (-T) T` of
+`((x₀, v₀), 0)`. We expose both predicates on the same `Φ`. -/
+
+/-- **Combined joint-`C^1` and `IsLocalFlow` packaging.** For every base
+phase-space point `(x₀, v₀)` with `x₀` in the chart-target interior,
+there exist a `ContDiffBump` `b`, Picard–Lindelöf radii `(r, ε)`, a
+joint-`C^1` radius `(ρ, T)`, and a map `Φ : (E × E) × ℝ → E × E` that is
+both an `IsLocalFlow` of the time-padded cutoff field
+`chartPhaseVFTime g α (x₀, v₀) b` (on the larger Picard radius) and
+jointly `C^1` on `ball ((x₀, v₀)) ρ × Ioo (-T) T`. -/
+theorem exists_chartPhase_contDiffOn_isLocalFlow_combined
+    [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M) (α : M) {x₀ v₀ : E}
+    (hx₀ : x₀ ∈ interior (extChartAt I α).target) :
+    ∃ (b : ContDiffBump ((x₀, v₀) : E × E))
+      (r : ℝ≥0) (ε : ℝ) (ρ T : ℝ)
+      (Φ : (E × E) × ℝ → E × E),
+      0 < r ∧ 0 < ε ∧ 0 < ρ ∧ 0 < T ∧
+      Metric.closedBall ((x₀, v₀) : E × E) b.rOut ⊆
+        (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E) ∧
+      DifferentialGeometry.Analysis.ODE.Flow.IsLocalFlow
+        (chartPhaseVFTime (I := I) g α (x₀, v₀) b)
+        (0 : ℝ) (x₀, v₀) r (-ε) ε Φ ∧
+      ContDiffOn ℝ 1 Φ
+        ((Metric.ball ((x₀, v₀) : E × E) ρ) ×ˢ Set.Ioo (-T) T) ∧
+      Φ (((x₀, v₀) : E × E), 0) = (x₀, v₀) := by
+  classical
+  -- Mirror the proof of `exists_chartPhase_contDiffOn_isLocalFlow` but
+  -- expose the IsLocalFlow predicate as well.
+  obtain ⟨b, hb_sub⟩ :=
+    exists_contDiffBump_subset_chart_interior (I := I) (α := α)
+      (x₀ := x₀) (v₀ := v₀) hx₀
+  have hC1 :
+      ContDiffOn ℝ 1
+        (Function.uncurry (chartPhaseVFTime (I := I) g α (x₀, v₀) b))
+        (Set.univ : Set (ℝ × (E × E))) :=
+    chartPhaseVFTime_uncurry_contDiffOn_univ_one (I := I) g α (x₀, v₀) b hb_sub
+  obtain ⟨rN, εN, hrN, hεN, Φ, hΦ⟩ :=
+    DifferentialGeometry.Analysis.ODE.Flow.exists_isLocalFlow_of_contDiffOn_univ
+      (E := E × E) (chartPhaseVFTime (I := I) g α (x₀, v₀) b) hC1 0 (x₀, v₀)
+  obtain ⟨Mglob, hMglob_nn, hMglob_bound⟩ :=
+    exists_bound_fderiv_chartPhaseVFCutoff (I := I) g α (x₀, v₀) b hb_sub
+  have hfderiv_eq : ∀ (τ : ℝ) (z : E × E),
+      fderiv ℝ (chartPhaseVFTime (I := I) g α (x₀, v₀) b τ) z =
+        fderiv ℝ (chartPhaseVFCutoff (I := I) g α (x₀, v₀) b) z := by
+    intro τ z; rfl
+  set Tcap : ℝ := min εN (1 / (2 * (Mglob + 1))) with hTcap_def
+  have hTcap_pos : 0 < Tcap := by
+    apply lt_min hεN
+    apply div_pos one_pos
+    positivity
+  set T_out : ℝ := Tcap / 2 with hT_out_def
+  set T_mid : ℝ := Tcap / 4 with hT_mid_def
+  set T : ℝ := Tcap / 8 with hT_def
+  have hT_pos : 0 < T := by positivity
+  have hT_lt_mid : T < T_mid := by
+    have : (0 : ℝ) < Tcap := hTcap_pos
+    change Tcap / 8 < Tcap / 4; linarith
+  have hT_mid_lt_out : T_mid < T_out := by
+    have : (0 : ℝ) < Tcap := hTcap_pos
+    change Tcap / 4 < Tcap / 2; linarith
+  have hT_out_le_eps : T_out ≤ εN := by
+    have hpos : 0 < εN := hεN
+    have hcap_le : Tcap ≤ εN := min_le_left _ _
+    change Tcap / 2 ≤ εN; linarith
+  have hMT_mid_lt_one : Mglob * T_mid < 1 := by
+    have h_cap_le : Tcap ≤ 1 / (2 * (Mglob + 1)) := min_le_right _ _
+    have hT_mid_le : T_mid ≤ 1 / (8 * (Mglob + 1)) := by
+      change Tcap / 4 ≤ 1 / (8 * (Mglob + 1))
+      have hpos_den : (0 : ℝ) < 2 * (Mglob + 1) := by positivity
+      have hstep : Tcap / 4 ≤ (1 / (2 * (Mglob + 1))) / 4 := by linarith
+      have heq : (1 / (2 * (Mglob + 1))) / 4 = 1 / (8 * (Mglob + 1)) := by
+        field_simp; ring
+      linarith [heq ▸ hstep]
+    have hMplus_pos : (0 : ℝ) < Mglob + 1 := by linarith
+    have hMplus8_pos : (0 : ℝ) < 8 * (Mglob + 1) := by positivity
+    have hbound_aux : Mglob / (8 * (Mglob + 1)) ≤ 1 / 8 := by
+      rw [div_le_iff₀ hMplus8_pos, div_mul_eq_mul_div,
+          le_div_iff₀ (by norm_num : (0 : ℝ) < 8)]
+      nlinarith [hMglob_nn]
+    calc Mglob * T_mid ≤ Mglob * (1 / (8 * (Mglob + 1))) := by
+            apply mul_le_mul_of_nonneg_left hT_mid_le hMglob_nn
+      _ = Mglob / (8 * (Mglob + 1)) := by ring
+      _ ≤ 1 / 8 := hbound_aux
+      _ < 1 := by norm_num
+  have hsub_T_out : Set.Icc ((0 : ℝ) - T_out) (0 + T_out) ⊆
+      Set.Icc ((0 : ℝ) - εN) (0 + εN) := by
+    intro t ht
+    refine ⟨?_, ?_⟩
+    · linarith [ht.1, hT_out_le_eps]
+    · linarith [ht.2, hT_out_le_eps]
+  set ρ_out : ℝ≥0 := ⟨(rN : ℝ) / 2, by positivity⟩ with hρ_out_def
+  set ρ_mid : ℝ≥0 := ⟨(rN : ℝ) / 4, by positivity⟩ with hρ_mid_def
+  set ρ : ℝ≥0 := ⟨(rN : ℝ) / 8, by positivity⟩ with hρ_def
+  set r' : ℝ≥0 := ⟨(rN : ℝ) / 8, by positivity⟩ with hr'_def
+  have hr'_pos : 0 < r' := by
+    change (0 : ℝ) < (rN : ℝ) / 8
+    have : (0 : ℝ) < rN := hrN
+    linarith
+  have hρ_pos : (0 : ℝ) < (ρ : ℝ) := by
+    change (0 : ℝ) < (rN : ℝ) / 8
+    have : (0 : ℝ) < rN := hrN
+    linarith
+  have hρ_lt_mid : (ρ : ℝ) < (ρ_mid : ℝ) := by
+    change (rN : ℝ) / 8 < (rN : ℝ) / 4
+    have : (0 : ℝ) < rN := hrN
+    linarith
+  have hρ_mid_lt_out : (ρ_mid : ℝ) < (ρ_out : ℝ) := by
+    change (rN : ℝ) / 4 < (rN : ℝ) / 2
+    have : (0 : ℝ) < rN := hrN
+    linarith
+  have hρρ' : (ρ_mid : ℝ) + (r' : ℝ) ≤ (rN : ℝ) := by
+    change (rN : ℝ) / 4 + (rN : ℝ) / 8 ≤ (rN : ℝ)
+    have : (0 : ℝ) ≤ rN := le_of_lt hrN
+    linarith
+  have hρ_out_le_r : (ρ_out : ℝ) ≤ (rN : ℝ) := by
+    change (rN : ℝ) / 2 ≤ (rN : ℝ)
+    have : (0 : ℝ) ≤ rN := le_of_lt hrN
+    linarith
+  have hA_bd : ∀ x ∈ Metric.closedBall ((x₀, v₀) : E × E) (ρ_out : ℝ),
+      ∀ τ ∈ Set.Icc (0 - T_out) (0 + T_out),
+      ‖fderiv ℝ (chartPhaseVFTime (I := I) g α (x₀, v₀) b τ) (Φ ⟨x, τ⟩)‖
+        ≤ Mglob := by
+    intro x _ τ _
+    rw [hfderiv_eq]
+    exact hMglob_bound _
+  have hCDOn :=
+    DifferentialGeometry.Analysis.ODE.Flow.contDiffOn_flow_of_isLocalFlow
+      hΦ hC1 hT_pos hT_lt_mid hT_mid_lt_out hMglob_nn hMT_mid_lt_one hsub_T_out
+      hr'_pos hρ_lt_mid hρ_mid_lt_out hρρ' hρ_out_le_r hA_bd
+  have hball_eq : (Metric.ball ((x₀, v₀) : E × E) ((ρ : ℝ))) ×ˢ
+      Set.Ioo (0 - T) (0 + T) =
+      (Metric.ball ((x₀, v₀) : E × E) ((ρ : ℝ))) ×ˢ
+      Set.Ioo (-T) T := by
+    congr 1
+    ext t
+    simp only [Set.mem_Ioo, zero_sub, zero_add]
+  rw [hball_eq] at hCDOn
+  -- IsLocalFlow's `tmin = 0 - εN = -εN` after rewriting; match the
+  -- `(-ε) ε` form by rewriting the IsLocalFlow time parameters.
+  have heq1 : (0 : ℝ) - εN = -εN := by ring
+  have heq2 : (0 : ℝ) + εN = εN := by ring
+  have hΦ' : DifferentialGeometry.Analysis.ODE.Flow.IsLocalFlow
+        (chartPhaseVFTime (I := I) g α (x₀, v₀) b)
+        (0 : ℝ) (x₀, v₀) rN (-εN) εN Φ := by
+    have := hΦ
+    rw [heq1, heq2] at this
+    exact this
+  have hinitial : Φ (((x₀, v₀) : E × E), 0) = (x₀, v₀) :=
+    hΦ'.apply_initial (x₀, v₀) (Metric.mem_closedBall_self (by
+      exact_mod_cast (le_of_lt hrN)))
+  exact ⟨b, rN, εN, (ρ : ℝ), T, Φ, hrN, hεN, hρ_pos, hT_pos, hb_sub, hΦ', hCDOn, hinitial⟩
+
 end Geodesic
 end Riemannian
 end Geometry
