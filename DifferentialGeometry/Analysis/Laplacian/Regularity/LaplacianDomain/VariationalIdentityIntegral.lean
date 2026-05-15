@@ -50,7 +50,7 @@ open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
 namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
-namespace LaplacianDomainVariationalIdentityFormB
+namespace LaplacianDomainVariationalIdentityIntegralForm
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -1826,7 +1826,7 @@ theorem laplacianDomain_variational_identity_general
     general_lhs_mass_eq_inner (I := I) (M := M) g α hψ hψ_cs hψ_supp u_h]
   exact h_LHS_eq_RHS_lim
 
-end LaplacianDomainVariationalIdentityFormB
+end LaplacianDomainVariationalIdentityIntegralForm
 end Laplacian
 end Analysis
 end DifferentialGeometry

@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Laplacian.Regularity.DiffChart.BilinearH1ComplFromDomainPow
-import DifferentialGeometry.Analysis.Laplacian.Regularity.LaplacianDomain.SmoothMulCompactSupport
+import DifferentialGeometry.Analysis.Laplacian.Regularity.LaplacianDomain.SmoothMulH1Compl
 import DifferentialGeometry.Analysis.Laplacian.Regularity.LaplacianDomain.PerChartWitness
 
 /-!
@@ -15,7 +15,7 @@ fHLeibnizResidualLp g α u_h = -2 g(∇ρα, ∇u_h) - Δρα · u_h
 in terms of `(1-Δ_g)`-preimage data: namely
 
 ```
-fHLeibnizResidualLp = preimage⟨smoothMulHC ρα u_h⟩
+fHLeibnizResidualLp = preimage⟨smoothMulH1Compl ρα u_h⟩
                        - smoothMulLp ρα (preimage⟨u_h⟩).
 ```
 
@@ -23,8 +23,8 @@ The identity packages the manifold-side Leibniz rule
 `Δ_g(ρα u_h) = ρα Δ_g u_h + 2 g(∇ρα, ∇u_h) + u_h Δ_g ρα` at the `Lp` class
 level, using
 
-* `laplacianDomain_preimage_smoothMulHC` — the Phase 3 preimage identity
-  `preimage⟨smoothMulHC ρα u_h⟩ = fHLeibnizGeneral g ρα u_h hu_dom`.
+* `laplacianDomain_preimage_smoothMulH1Compl` — the Phase 3 preimage identity
+  `preimage⟨smoothMulH1Compl ρα u_h⟩ = fHLeibnizGeneral g ρα u_h hu_dom`.
 
 * `fHLeibnizGeneral` definitional unfolding into
   `smoothMulLp ρα (preimage⟨u_h⟩) + fHLeibnizGeneralResidualCLM g ρα u_h`.
@@ -40,7 +40,7 @@ level, using
 
   ```
   fHLeibnizResidualLp g α u_h
-    = preimage⟨smoothMulHC ρα u_h, smoothMulHC_mem_laplacianDomain⟩
+    = preimage⟨smoothMulH1Compl ρα u_h, smoothMulH1Compl_mem_laplacianDomain⟩
        - smoothMulLp ρα (preimage⟨u_h, hu_dom⟩).
   ```
 
@@ -53,7 +53,7 @@ level (in `DiffChartBilinearH1ComplFromDomainPow.lean`),
 
 ```
 fChartResidual =ᵃᵉ
-    chartPushedRawLpFromLp(preimage⟨smoothMulHC ρα u_h⟩).coeFn
+    chartPushedRawLpFromLp(preimage⟨smoothMulH1Compl ρα u_h⟩).coeFn
        - chartPushedRawLpFromLp(smoothMulLp ρα (preimage⟨u_h⟩)).coeFn.
 ```
 
@@ -69,9 +69,9 @@ The second summand has `MemW1p 2 chartTarget` regularity for
 * `memW1p_chartPushedRaw_pou_mul_of_memWkpChart` (the existing chart-pulled
   weighted bridge to `MemW1p 2 chartTarget`).
 
-The first summand `chartPushedRawLpFromLp(preimage⟨smoothMulHC ρα u_h⟩)`
-would require `preimage⟨smoothMulHC ρα u_h⟩.coeFn ∈ MemWkpChart g 1 2`, which
-in turn requires `smoothMulHC ρα u_h ∈ laplacianDomainPow g 2` (iterated
+The first summand `chartPushedRawLpFromLp(preimage⟨smoothMulH1Compl ρα u_h⟩)`
+would require `preimage⟨smoothMulH1Compl ρα u_h⟩.coeFn ∈ MemWkpChart g 1 2`, which
+in turn requires `smoothMulH1Compl ρα u_h ∈ laplacianDomainPow g 2` (iterated
 closure of the Laplacian domain). This iterated closure is not automatic
 from `u_h ∈ laplacianDomainPow g 2` alone: it requires the chart-Sobolev
 third-order control on `u_h` arising from differentiating the Leibniz
@@ -144,21 +144,21 @@ lemma fHLeibnizGeneralResidualCLM_eq_fHLeibnizResidualLp
 For `u_h ∈ laplacianDomain g`,
 
 ```
-preimage⟨smoothMulHC ρα u_h⟩
+preimage⟨smoothMulH1Compl ρα u_h⟩
   = smoothMulLp ρα (preimage⟨u_h⟩) + fHLeibnizGeneralResidualCLM g ρα u_h.
 ```
 
 This is the Phase 3 preimage identity unfolded; it underlies the
 identification of `fHLeibnizResidualLp` with the difference of two
 `(1-Δ_g)`-preimages. -/
-theorem preimage_smoothMulHC_eq_smoothMulLp_preimage_add_residual
+theorem preimage_smoothMulH1Compl_eq_smoothMulLp_preimage_add_residual
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_dom : u_h ∈ laplacianDomain (I := I) (M := M) g) :
     laplacianDomain.preimage (I := I) (M := M) g
-        ⟨smoothMulHC (I := I) (M := M) g
+        ⟨smoothMulH1Compl (I := I) (M := M) g
             (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) u_h,
-          smoothMulHC_mem_laplacianDomain (I := I) (M := M) g
+          smoothMulH1Compl_mem_laplacianDomain (I := I) (M := M) g
             (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) hu_dom⟩ =
       smoothMulLp (I := I) (M := M) g
           (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
@@ -166,12 +166,12 @@ theorem preimage_smoothMulHC_eq_smoothMulLp_preimage_add_residual
         fHLeibnizGeneralResidualCLM (I := I) (M := M) g
           (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) u_h := by
   classical
-  -- Step 1: `preimage⟨smoothMulHC ρα u_h⟩ = fHLeibnizGeneral g ρα u_h hu_dom`.
-  have h_preimage_smoothMulHC :=
-    laplacianDomain_preimage_smoothMulHC (I := I) (M := M) g
+  -- Step 1: `preimage⟨smoothMulH1Compl ρα u_h⟩ = fHLeibnizGeneral g ρα u_h hu_dom`.
+  have h_preimage_smoothMulH1Compl :=
+    laplacianDomain_preimage_smoothMulH1Compl (I := I) (M := M) g
       (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) hu_dom
   -- Step 2: Unfold `fHLeibnizGeneral`.
-  unfold fHLeibnizGeneral at h_preimage_smoothMulHC
+  unfold fHLeibnizGeneral at h_preimage_smoothMulH1Compl
   -- Step 3: Identify `H1ComplToLp u_h - laplacianOp ⟨u_h, hu_dom⟩` with `preimage⟨u_h, hu_dom⟩`.
   have h_diff_eq :
       H1ComplToLp (I := I) (M := M) g u_h -
@@ -179,14 +179,14 @@ theorem preimage_smoothMulHC_eq_smoothMulLp_preimage_add_residual
       laplacianDomain.preimage (I := I) (M := M) g ⟨u_h, hu_dom⟩ := by
     rw [laplacianOp_apply]
     abel
-  rw [h_diff_eq] at h_preimage_smoothMulHC
-  exact h_preimage_smoothMulHC
+  rw [h_diff_eq] at h_preimage_smoothMulH1Compl
+  exact h_preimage_smoothMulH1Compl
 
 /-- **Rearranged form of the decomposition**: for `u_h ∈ laplacianDomain g`,
 
 ```
 fHLeibnizGeneralResidualCLM g (chartAtlasPOU I M α) u_h
-  = preimage⟨smoothMulHC ρα u_h⟩ - smoothMulLp ρα (preimage⟨u_h⟩).
+  = preimage⟨smoothMulH1Compl ρα u_h⟩ - smoothMulLp ρα (preimage⟨u_h⟩).
 ```
 -/
 theorem fHLeibnizGeneralResidualCLM_eq_preimageDiff
@@ -196,17 +196,17 @@ theorem fHLeibnizGeneralResidualCLM_eq_preimageDiff
     fHLeibnizGeneralResidualCLM (I := I) (M := M) g
         (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) u_h =
       laplacianDomain.preimage (I := I) (M := M) g
-          ⟨smoothMulHC (I := I) (M := M) g
+          ⟨smoothMulH1Compl (I := I) (M := M) g
               (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) u_h,
-            smoothMulHC_mem_laplacianDomain (I := I) (M := M) g
+            smoothMulH1Compl_mem_laplacianDomain (I := I) (M := M) g
               (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) hu_dom⟩ -
         smoothMulLp (I := I) (M := M) g
           (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
           (laplacianDomain.preimage (I := I) (M := M) g ⟨u_h, hu_dom⟩) := by
   classical
-  have h := preimage_smoothMulHC_eq_smoothMulLp_preimage_add_residual
+  have h := preimage_smoothMulH1Compl_eq_smoothMulLp_preimage_add_residual
     (I := I) (M := M) g α hu_dom
-  -- h: preimage⟨smoothMulHC ρα u_h⟩ = smoothMulLp ρα (preimage⟨u_h⟩) + fHLeibnizGeneralResidualCLM g ρα u_h.
+  -- h: preimage⟨smoothMulH1Compl ρα u_h⟩ = smoothMulLp ρα (preimage⟨u_h⟩) + fHLeibnizGeneralResidualCLM g ρα u_h.
   -- Subtract smoothMulLp ρα (preimage⟨u_h⟩) from both sides.
   rw [h]
   abel

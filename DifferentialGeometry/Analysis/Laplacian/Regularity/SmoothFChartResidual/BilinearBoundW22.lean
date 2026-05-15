@@ -41,7 +41,7 @@ The proof mirrors the order-`(1, 2)` argument:
 
 ## Main result
 
-* `wkpNorm_smoothFChartResidual_le_wkpNormChart_wkpTwoTwo` — the headline
+* `wkpNorm_smoothFChartResidual_le_wkpNormChart_w22` — the headline
   `W^{2,2}` bilinear bound.
 -/
 
@@ -54,7 +54,7 @@ open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
 namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
-namespace SmoothFChartResidualBilinearBoundWkpTwoTwo
+namespace SmoothFChartResidualBilinearBoundW22
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -802,7 +802,7 @@ private lemma wkpNorm_chartPushedRaw_lapPiece_le_two
 residual `smoothFChartResidual g α v` satisfies a quantitative `W^{2,2}` bound
 on `chartTargetEuclid α` in terms of the chart-based `W^{3,2}` norm of
 `v.toFun`. -/
-theorem wkpNorm_smoothFChartResidual_le_wkpNormChart_wkpTwoTwo
+theorem wkpNorm_smoothFChartResidual_le_wkpNormChart_w22
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     (α : M) :
     ∃ C : ℝ, 0 < C ∧ ∀ v : SmoothScalar g,
@@ -978,7 +978,7 @@ theorem wkpNorm_smoothFChartResidual_le_wkpNormChart_wkpTwoTwo
         wkpNormChart (I := I) (M := M) g 3 2 v.toFun := by
             rw [ENNReal.ofReal_add hC_grad_pos.le hC_lap_pos.le]
 
-end SmoothFChartResidualBilinearBoundWkpTwoTwo
+end SmoothFChartResidualBilinearBoundW22
 end Laplacian
 end Analysis
 end DifferentialGeometry

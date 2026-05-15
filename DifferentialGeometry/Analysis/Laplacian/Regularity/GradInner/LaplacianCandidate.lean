@@ -116,8 +116,8 @@ The downstream substeps will:
 
 * **M3.3**: combine M3.2 with `laplacianDomain_mem_iff` to conclude
   `gradInnerCLM g φ u_h ∈ H1ComplToLp '' laplacianDomain g`, which by the
-  equivalence `smoothMulHC_mem_pow_two_iff_gradInnerCLM_mem_image` (in
-  `GradInnerLpIdentity.lean`) gives `smoothMulHC g φ u_h ∈
+  equivalence `smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image` (in
+  `GradInnerLpIdentity.lean`) gives `smoothMulH1Compl g φ u_h ∈
   laplacianDomainPow g 2` — the iterated-closure property that discharges
   the `MemW1p 2 fChartResidual` hypothesis.
 

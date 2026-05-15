@@ -101,7 +101,7 @@ open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianVariational
 open DifferentialGeometry.Analysis.Laplacian.RicciPairingCLM
 open DifferentialGeometry.Analysis.Laplacian.BochnerPolarised
 open DifferentialGeometry.Analysis.Laplacian.BochnerPolarisedLpSmooth
-open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32Final
+open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianFinal
 
 /-! ## File-local Borel-space instances -/
 

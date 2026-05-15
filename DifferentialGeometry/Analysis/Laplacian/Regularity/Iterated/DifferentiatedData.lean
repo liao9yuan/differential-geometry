@@ -88,7 +88,7 @@ open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplH3
 open DifferentialGeometry.Analysis.Laplacian.DerivedChartBilinearH1ComplDataUnconditional
 open DifferentialGeometry.Analysis.Laplacian.TwiceDifferentiatedVariationalIdentityUnconditional
 open DifferentialGeometry.Analysis.Laplacian.ChosenFChartDerivMemW1pTrulyUnconditional
-open DifferentialGeometry.Analysis.Laplacian.BaseFChartMemWkpTwoTwoTrulyUnconditional
+open DifferentialGeometry.Analysis.Laplacian.BaseFChartMemW22TrulyUnconditional
 open DifferentialGeometry.Analysis.Laplacian.FChartEffDef
 open DifferentialGeometry.Analysis.Laplacian.FChartEffTwiceDef
 open DifferentialGeometry.Analysis.Laplacian.ChosenThirdMixedPartialChartPushed
@@ -275,7 +275,7 @@ private lemma base_u_chart_ae_eq_chartPushed
         ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ) := by
   classical
   have h_coeFn :=
-    DifferentialGeometry.Analysis.Laplacian.LaplacianDomainVariationalIdentityFormB.chartPushedLpFromLp_coeFn
+    DifferentialGeometry.Analysis.Laplacian.LaplacianDomainVariationalIdentityIntegralForm.chartPushedLpFromLp_coeFn
       (I := I) (M := M) g α (H1ComplToLp (I := I) (M := M) g u_h)
   -- `h_coeFn`: ae on (chartPulledWeighted).restrict chartTarget.
   -- Goal: ae on volume.restrict chartTarget.

@@ -11,7 +11,7 @@ import DifferentialGeometry.Analysis.Laplacian.Regularity.Iterated.H2RegularityS
 for `u_h ∈ laplacianDomainPow g 2`
 
 The hypothesis-bearing residual constructor
-`memWkp_fChartResidual_of_wkpNorm_cauchy_identification_wkpTwoTwo` mirrors the
+`memWkp_fChartResidual_of_wkpNorm_cauchy_identification_w22` mirrors the
 order-`(1, 2)` constructor and reduces the chart-target `MemWkp 2 2` discharge
 of `fChartResidual g α u_h` to the chart-`W^{2,2}`-Cauchy + identification
 hypotheses on the smooth-approximator chart-pulled residuals. Both hypotheses
@@ -29,7 +29,7 @@ decomposition `base.f_chart =ᵐ fChartPiecePreimage + fChartResidual`, gives
 
 * `smoothFChartResidual_memWkp_two_two` — chart-target `MemWkp 2 2` of the
   smooth chart-pulled residual, for any `v : SmoothScalar g`.
-* `memWkp_fChartResidual_of_wkpNorm_cauchy_identification_wkpTwoTwo` —
+* `memWkp_fChartResidual_of_wkpNorm_cauchy_identification_w22` —
   hypothesis-bearing constructor.
 * `fChartResidual_memWkp_two_two_truly_unconditional` —
   `fChartResidual g α u_h ∈ MemWkp 2 2 chartTargetEuclid α` unconditionally.
@@ -46,7 +46,7 @@ open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
 namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
-namespace BaseFChartMemWkpTwoTwoTrulyUnconditional
+namespace BaseFChartMemW22TrulyUnconditional
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -63,9 +63,9 @@ open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainSmoothMul
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional
 open DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound
-open DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBoundWkpTwoTwo
-open DifferentialGeometry.Analysis.Laplacian.SmoothApproxSeqCauchyWkpTwoTwo
-open DifferentialGeometry.Analysis.Laplacian.SmoothApproxSeqIdentificationWkpTwoTwo
+open DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBoundW22
+open DifferentialGeometry.Analysis.Laplacian.SmoothApproxSeqCauchyW22
+open DifferentialGeometry.Analysis.Laplacian.SmoothApproxSeqIdentificationW22
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
 /-! ## File-local Borel-space instances -/
@@ -213,7 +213,7 @@ chart-target `wkpNorm 2 2`-Cauchy property and the ae-identification of the
 `wkpNorm 2 2`-limit with `fChartResidual g α u_h` on `volume.restrict
 chartTargetEuclid α`, the chart-pulled residual `fChartResidual g α u_h` is
 in `MemWkp 2 2 chartTargetEuclid α`. -/
-theorem memWkp_fChartResidual_of_wkpNorm_cauchy_identification_wkpTwoTwo
+theorem memWkp_fChartResidual_of_wkpNorm_cauchy_identification_w22
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
     (_hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
@@ -281,12 +281,12 @@ theorem fChartResidual_memWkp_two_two_truly_unconditional
       (d := Module.finrank ℝ E) 2 2
       (fChartResidual (I := I) (M := M) g α u_h)
       (chartTargetEuclid (I := I) (M := M) α) :=
-  memWkp_fChartResidual_of_wkpNorm_cauchy_identification_wkpTwoTwo
+  memWkp_fChartResidual_of_wkpNorm_cauchy_identification_w22
     (I := I) (M := M) g α hu_h
     (smoothApproxSeqWkpThree (I := I) (M := M) g hu_h)
-    (smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy_wkpTwoTwo
+    (smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy_w22
       (I := I) (M := M) g α hu_h)
-    (smoothApproxSeqWkpThree_smoothFChartResidual_limit_eq_fChartResidual_wkpTwoTwo
+    (smoothApproxSeqWkpThree_smoothFChartResidual_limit_eq_fChartResidual_w22
       (I := I) (M := M) g α hu_h)
 
 /-! ## Headline: truly unconditional `MemWkp 2 2` of `base.f_chart` -/
@@ -343,7 +343,7 @@ theorem base_f_chart_memWkp_two_two_truly_unconditional
   exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_congr_ae
     hp_one hΩ_open h_decomp.symm).mp h_sum_memWkp
 
-end BaseFChartMemWkpTwoTwoTrulyUnconditional
+end BaseFChartMemW22TrulyUnconditional
 end Laplacian
 end Analysis
 end DifferentialGeometry

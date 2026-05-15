@@ -1058,7 +1058,7 @@ A linearity-only rewriting of the chart-pulled integral CLM applied to
 `chartPulledIntegralCLM`-pieces. The substantive form-B headline (matching
 the smooth-case integral shape, with weak partials in the principal LHS
 and chart-pushed Lp class in the mass LHS) is in
-`LaplacianDomainVariationalIdentityFormB.lean`. -/
+`LaplacianDomainVariationalIdentityIntegralForm.lean`. -/
 
 /-- **CLM-form chart-pulled rewriting of `chartPulledIntegralCLM ∘ fHLeibniz`.**
 

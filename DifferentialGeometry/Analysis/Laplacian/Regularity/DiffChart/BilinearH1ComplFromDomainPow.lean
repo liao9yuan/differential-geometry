@@ -84,7 +84,7 @@ open DifferentialGeometry.Analysis.Laplacian.ChartPushedWeakPartialOnVolume
 open DifferentialGeometry.Analysis.Laplacian.H1ComplGradientH1LipschitzBound
 open DifferentialGeometry.Analysis.Laplacian.H1ComplWeakPartialLimit
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData
-open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainVariationalIdentityFormB
+open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainVariationalIdentityIntegralForm
 open DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean
 
 /-! ## File-local Borel-space instances -/

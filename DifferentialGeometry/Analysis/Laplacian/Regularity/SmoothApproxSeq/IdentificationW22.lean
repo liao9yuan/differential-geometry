@@ -33,7 +33,7 @@ argument identifies the two limits.
 
 ## Main result
 
-* `smoothApproxSeqWkpThree_smoothFChartResidual_limit_eq_fChartResidual_wkpTwoTwo`
+* `smoothApproxSeqWkpThree_smoothFChartResidual_limit_eq_fChartResidual_w22`
   — for every candidate `F_lim` in `MemWkp 2 2 chartTargetEuclid α` whose
   chart-target `wkpNorm 2 2`-distance to
   `smoothFChartResidual (smoothApproxSeqWkpThree n)` tends to zero, `F_lim`
@@ -50,7 +50,7 @@ open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
 namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
-namespace SmoothApproxSeqIdentificationWkpTwoTwo
+namespace SmoothApproxSeqIdentificationW22
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -66,7 +66,7 @@ open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainSmoothMul
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional
-open DifferentialGeometry.Analysis.Laplacian.SmoothApproxSeqCauchyWkpTwoTwo
+open DifferentialGeometry.Analysis.Laplacian.SmoothApproxSeqCauchyW22
 open DifferentialGeometry.Analysis.Laplacian.SmoothApproxSeqH1ComplTendsto
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
@@ -697,7 +697,7 @@ For `u_h ∈ laplacianDomainPow g 2`, suppose `F_lim : EuclN → ℝ` is in
 `smoothFChartResidual g α (smoothApproxSeqWkpThree g hu_h n)` is
 `wkpNorm 2 2`-convergent to `F_lim` on `chartTargetEuclid α`. Then `F_lim`
 equals `fChartResidual g α u_h` a.e. on `volume.restrict chartTargetEuclid α`. -/
-theorem smoothApproxSeqWkpThree_smoothFChartResidual_limit_eq_fChartResidual_wkpTwoTwo
+theorem smoothApproxSeqWkpThree_smoothFChartResidual_limit_eq_fChartResidual_w22
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2) :
@@ -824,7 +824,7 @@ theorem smoothApproxSeqWkpThree_smoothFChartResidual_limit_eq_fChartResidual_wkp
     with y h_to_Flim h_to_fChart
   exact tendsto_nhds_unique h_to_Flim h_to_fChart
 
-end SmoothApproxSeqIdentificationWkpTwoTwo
+end SmoothApproxSeqIdentificationW22
 end Laplacian
 end Analysis
 end DifferentialGeometry

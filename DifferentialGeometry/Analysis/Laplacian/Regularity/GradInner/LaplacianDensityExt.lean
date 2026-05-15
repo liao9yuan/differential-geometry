@@ -6,7 +6,7 @@ import DifferentialGeometry.Analysis.Laplacian.Regularity.GradInner.LaplacianSmo
 For a closed Riemannian manifold `(M, g)`, a smooth scalar
 `φ : C^∞⟮I, M; ℝ⟯`, and an arbitrary `u_h ∈ laplacianDomainPow g 2`, this
 module packages the **density-based extension** of the smooth-case M3.2
-final theorem (delivered in `GradInnerLaplacianM32SmoothFull.lean`) to the
+final theorem (delivered in `GradInnerLaplacianSmoothFull.lean`) to the
 non-smooth case.
 
 The extension strategy is:
@@ -46,7 +46,7 @@ hypotheses:
 * `h_density`: an approximating sequence of smooth scalars `v_n`
   approximating `u_h` in the H¹Compl topology, with iterated preimages
   converging in Lp.
-* `h_smooth_M32`: the smooth-case M3.2 identity holds for each `v_n`.
+* `h_smooth`: the smooth-case M3.2 identity holds for each `v_n`.
 * `h_candidate_conv`: the Bochner candidate evaluated at `v_n`'s
   membership in `laplacianDomainPow g 2` converges to the candidate at
   the limit point `hu_h` (in `Lp`).
@@ -63,7 +63,7 @@ sides.
 * `gradInnerCLM_mem_image_laplacianDomain_via_density` — the image
   membership form via density.
 
-* `smoothMulHC_mem_pow_two_via_density` — the iterated-closure form
+* `smoothMulH1Compl_mem_pow_two_via_density` — the iterated-closure form
   via density.
 
 ## Note on the full unconditional discharge
@@ -100,7 +100,7 @@ open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
 namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
-namespace GradInnerLaplacianM32DensityExtension
+namespace GradInnerLaplacianDensityExtension
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -118,8 +118,8 @@ open DifferentialGeometry.Analysis.Laplacian.HessianPairingLapDom
 open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianCandidate
 open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianVariational
 open DifferentialGeometry.Analysis.Laplacian.RicciPairingCLM
-open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32Final
-open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32SmoothFull
+open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianFinal
+open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianSmoothFull
 
 /-! ## File-local Borel-space instances -/
 
@@ -180,7 +180,7 @@ theorem gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_via_density
   --   gradInnerLaplacianCandidateUnconditional ... → gradInnerLaplacianCandidateUnconditional g φ hu_h (in Lp),
   --   compose with resolvent (continuous Lp → H¹Compl),
   --   compose with H1ComplToLp (continuous H¹Compl → Lp).
-  -- On the smooth-approximation subsequence, the identity holds by smoothCase_M32_via_candidate_identification.
+  -- On the smooth-approximation subsequence, the identity holds by smoothCase_via_candidate_identification.
 
   -- Step 1: convergence of LHS.
   have h_LHS_conv : Tendsto
@@ -225,7 +225,7 @@ theorem gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_via_density
           (gradInnerLaplacianCandidateUnconditional (I := I) (M := M) g φ
             (smoothToH1Compl_mem_laplacianDomainPow_two
               (I := I) (M := M) g (h_smooth_seq n)))) := fun n =>
-    smoothCase_M32_via_candidate_identification
+    smoothCase_via_candidate_identification
       (I := I) (M := M) g φ (h_smooth_seq n) (h_smooth_identity n)
 
   -- Step 4: pass to the limit.
@@ -282,7 +282,7 @@ theorem gradInnerCLM_mem_image_laplacianDomain_via_density
       h_conv_candidate h_smooth_identity).symm
 
 /-- **Density-extension M3.2 final theorem, iterated-closure form**. -/
-theorem smoothMulHC_mem_pow_two_via_density
+theorem smoothMulH1Compl_mem_pow_two_via_density
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
@@ -299,10 +299,10 @@ theorem smoothMulHC_mem_pow_two_via_density
     (h_smooth_identity : ∀ n,
       smoothCandidate_identification_target (I := I) (M := M) g φ
         (h_smooth_seq n)) :
-    smoothMulHC (I := I) (M := M) g φ u_h ∈
+    smoothMulH1Compl (I := I) (M := M) g φ u_h ∈
       laplacianDomainPow (I := I) (M := M) g 2 := by
   classical
-  rw [smoothMulHC_mem_pow_two_iff_gradInnerCLM_mem_image
+  rw [smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image
     (I := I) (M := M) g φ hu_h]
   exact gradInnerCLM_mem_image_laplacianDomain_via_density
     (I := I) (M := M) g φ hu_h h_smooth_seq h_conv_H1Compl
@@ -345,7 +345,7 @@ theorem ricciPairingCLM_smoothSeq_conv
       atTop (𝓝 (ricciPairingCLM (I := I) (M := M) g φ u_h)) :=
   ((ricciPairingCLM (I := I) (M := M) g φ).continuous.tendsto _).comp h_conv_H1Compl
 
-end GradInnerLaplacianM32DensityExtension
+end GradInnerLaplacianDensityExtension
 end Laplacian
 end Analysis
 end DifferentialGeometry

@@ -19,7 +19,7 @@ By the manifold-side `Lp` identity (rearranged from
 
 ```
 fHLeibnizResidualLp g α u_h
-  = preimage⟨smoothMulHC ρα u_h⟩
+  = preimage⟨smoothMulH1Compl ρα u_h⟩
      - smoothMulLp ρα (preimage⟨u_h⟩),
 ```
 
@@ -28,13 +28,13 @@ the residual decomposes as a difference of two `Lp` pieces, each in
 membership holds. Under the iterated-closure hypothesis
 
 ```
-smoothMulHC (chartAtlasPOU I M α) u_h ∈ laplacianDomainPow g 2,
+smoothMulH1Compl (chartAtlasPOU I M α) u_h ∈ laplacianDomainPow g 2,
 ```
 
 both pieces have manifold-side function representatives in
 `MemWkpChart g 2 2` (the `Lp`-side preimage piece by
 `laplacianDomainPow_two_h2_plus_rhs_h2` applied to
-`smoothMulHC ρα u_h`; the smooth-multiplied preimage piece by
+`smoothMulH1Compl ρα u_h`; the smooth-multiplied preimage piece by
 `MemWkpChart_smooth_mul` applied to the `Lp`-side preimage of `u_h`).
 
 The chart-pulled `MemW1p 2` regularity of each piece is delivered via
@@ -52,7 +52,7 @@ from the iterated-closure hypothesis.
 * `fChartResidual_memW1p_of_iteratedClosure` — the `MemW1p 2` discharge
   of `fChartResidual g α u_h` from `u_h ∈ laplacianDomainPow g 2` and the
   iterated-closure hypothesis
-  `smoothMulHC (chartAtlasPOU I M α) u_h ∈ laplacianDomainPow g 2`.
+  `smoothMulH1Compl (chartAtlasPOU I M α) u_h ∈ laplacianDomainPow g 2`.
 -/
 
 noncomputable section
@@ -109,16 +109,16 @@ private noncomputable def preimageFun
       Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) x
 
 /-- The `M → ℝ` function representative of the `(1 - Δ_g)`-preimage of
-`smoothMulHC ρα u_h`. -/
-private noncomputable def preimageSmoothMulHCFun
+`smoothMulH1Compl ρα u_h`. -/
+private noncomputable def preimageSmoothMulH1ComplFun
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2) : M → ℝ :=
   fun x =>
     ((laplacianDomain.preimage (I := I) (M := M) g
-        ⟨smoothMulHC (I := I) (M := M) g
+        ⟨smoothMulH1Compl (I := I) (M := M) g
             (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) u_h,
-          smoothMulHC_mem_laplacianDomain (I := I) (M := M) g
+          smoothMulH1Compl_mem_laplacianDomain (I := I) (M := M) g
             (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
             (laplacianDomainPow_succ_subset_laplacianDomain
               (I := I) (M := M) g 1 hu_h)⟩ :
@@ -160,44 +160,44 @@ private lemma memW1p_chartPushedRaw_rhoAlpha_mul_preimage
   -- Identify rhoAlphaFun α x with (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) x.
   convert h_bridge using 1
 
-/-! ## `MemW1p 2` discharge of the `Lp`-side preimage of `smoothMulHC ρα u_h` -/
+/-! ## `MemW1p 2` discharge of the `Lp`-side preimage of `smoothMulH1Compl ρα u_h` -/
 
 /-- Under the iterated-closure hypothesis, the chart-pulled raw function
-`chartPushedRaw α (ρα · preimage⟨smoothMulHC ρα u_h⟩.coeFn)` is in
+`chartPushedRaw α (ρα · preimage⟨smoothMulH1Compl ρα u_h⟩.coeFn)` is in
 `MemW1p 2 chartTargetEuclid α`. -/
-private lemma memW1p_chartPushedRaw_rhoAlpha_mul_preimage_smoothMulHC
+private lemma memW1p_chartPushedRaw_rhoAlpha_mul_preimage_smoothMulH1Compl
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
-    (h_M6 : smoothMulHC (I := I) (M := M) g
+    (h_M6 : smoothMulH1Compl (I := I) (M := M) g
         (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) u_h ∈
       laplacianDomainPow (I := I) (M := M) g 2) :
     DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
       (chartPushedRaw (I := I) (M := M) α
         (fun x : M => rhoAlphaFun (I := I) (M := M) α x *
-          preimageSmoothMulHCFun (I := I) (M := M) g α hu_h x))
+          preimageSmoothMulH1ComplFun (I := I) (M := M) g α hu_h x))
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- The preimage of `smoothMulHC ρα u_h` with two different membership proofs is the same.
-  have h_M6_dom : smoothMulHC (I := I) (M := M) g
+  -- The preimage of `smoothMulH1Compl ρα u_h` with two different membership proofs is the same.
+  have h_M6_dom : smoothMulH1Compl (I := I) (M := M) g
       (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) u_h ∈
         laplacianDomain (I := I) (M := M) g :=
     laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 h_M6
   have h_smHC_h2 : MemWkpChart (I := I) (M := M) g 2 2
-      (preimageSmoothMulHCFun (I := I) (M := M) g α hu_h) := by
+      (preimageSmoothMulH1ComplFun (I := I) (M := M) g α hu_h) := by
     -- The preimage Lp class depends only on the H1Compl element, not on membership proof.
     -- So we can use the membership proof from h_M6.
     have h := (laplacianDomainPow_two_h2_plus_rhs_h2
       (I := I) (M := M) g h_M6).2.1
-    -- h : MemWkpChart g 2 2 ((preimage ⟨smoothMulHC ρα u_h, ...⟩).coeFn).
+    -- h : MemWkpChart g 2 2 ((preimage ⟨smoothMulH1Compl ρα u_h, ...⟩).coeFn).
     -- The membership in h's preimage is `laplacianDomainPow_succ_subset_laplacianDomain g 1 h_M6`.
-    -- preimageSmoothMulHCFun uses `smoothMulHC_mem_laplacianDomain ... (laplacianDomainPow_succ_subset_laplacianDomain g 1 hu_h)`.
+    -- preimageSmoothMulH1ComplFun uses `smoothMulH1Compl_mem_laplacianDomain ... (laplacianDomainPow_succ_subset_laplacianDomain g 1 hu_h)`.
     -- These are different membership proofs to the same set, so the preimage Lp class
     -- is definitionally equal.
-    unfold preimageSmoothMulHCFun
+    unfold preimageSmoothMulH1ComplFun
     convert h using 0
   have h_smHC_h1 : MemWkpChart (I := I) (M := M) g 1 2
-      (preimageSmoothMulHCFun (I := I) (M := M) g α hu_h) := by
+      (preimageSmoothMulH1ComplFun (I := I) (M := M) g α hu_h) := by
     intro β
     have h_β := h_smHC_h2 β
     exact DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.le_of_le
@@ -205,7 +205,7 @@ private lemma memW1p_chartPushedRaw_rhoAlpha_mul_preimage_smoothMulHC
   have h_bridge :=
     DifferentialGeometry.Analysis.Sobolev.Chart.memW1p_chartPushedRaw_pou_mul_of_memWkpChart
       (I := I) (M := M) g (p := 2)
-      (u := preimageSmoothMulHCFun (I := I) (M := M) g α hu_h) h_smHC_h1 α
+      (u := preimageSmoothMulH1ComplFun (I := I) (M := M) g α hu_h) h_smHC_h1 α
   convert h_bridge using 1
 
 /-! ## Chart-pulled identification of the residual `Lp`-class via the
@@ -217,7 +217,7 @@ of the manifold-side decomposition. Specifically, on the chart-pulled
 weighted measure restricted to `chartTargetEuclid α`,
 
 ```
-fChartResidual y =ᵃᵉ chartPushedRaw α (preimage⟨smoothMulHC ρα u_h⟩.coeFn) y
+fChartResidual y =ᵃᵉ chartPushedRaw α (preimage⟨smoothMulH1Compl ρα u_h⟩.coeFn) y
                   - chartPushedRaw α (ρα · preimage⟨u_h⟩.coeFn) y.
 ```
 -/
@@ -230,7 +230,7 @@ private lemma fChartResidual_aeEq_chartPushedRaw_diff
           (chartTargetEuclid (I := I) (M := M) α)]
       fun y =>
         chartPushedRaw (I := I) α
-          (preimageSmoothMulHCFun (I := I) (M := M) g α hu_h) y -
+          (preimageSmoothMulH1ComplFun (I := I) (M := M) g α hu_h) y -
         chartPushedRaw (I := I) α
           (fun x : M => rhoAlphaFun (I := I) (M := M) α x *
             preimageFun (I := I) (M := M) g hu_h x) y := by
@@ -244,13 +244,13 @@ private lemma fChartResidual_aeEq_chartPushedRaw_diff
   -- Identify fHLeibnizGeneralResidualCLM with fHLeibnizResidualLp.
   have h_clm_eq := fHLeibnizGeneralResidualCLM_eq_fHLeibnizResidualLp
     (I := I) (M := M) g α u_h
-  -- Combine: fHLeibnizResidualLp = preimage⟨smoothMulHC ρα u_h⟩ - smoothMulLp ρα (preimage⟨u_h⟩).
+  -- Combine: fHLeibnizResidualLp = preimage⟨smoothMulH1Compl ρα u_h⟩ - smoothMulLp ρα (preimage⟨u_h⟩).
   set ρα : C^∞⟮I, M; ℝ⟯ := chartAtlasPOU I M α with hρα_def
   have h_residual_eq :
       fHLeibnizResidualLp (I := I) (M := M) g α u_h =
         laplacianDomain.preimage (I := I) (M := M) g
-            ⟨smoothMulHC (I := I) (M := M) g ρα u_h,
-              smoothMulHC_mem_laplacianDomain (I := I) (M := M) g ρα hu_dom⟩ -
+            ⟨smoothMulH1Compl (I := I) (M := M) g ρα u_h,
+              smoothMulH1Compl_mem_laplacianDomain (I := I) (M := M) g ρα hu_dom⟩ -
           smoothMulLp (I := I) (M := M) g ρα
             (laplacianDomain.preimage (I := I) (M := M) g ⟨u_h, hu_dom⟩) := by
     have h_def : fHLeibnizResidualLp (I := I) (M := M) g α u_h =
@@ -262,8 +262,8 @@ private lemma fChartResidual_aeEq_chartPushedRaw_diff
   set preimage_smHC_Lp :
       Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
     laplacianDomain.preimage (I := I) (M := M) g
-      ⟨smoothMulHC (I := I) (M := M) g ρα u_h,
-        smoothMulHC_mem_laplacianDomain (I := I) (M := M) g ρα hu_dom⟩
+      ⟨smoothMulH1Compl (I := I) (M := M) g ρα u_h,
+        smoothMulH1Compl_mem_laplacianDomain (I := I) (M := M) g ρα hu_dom⟩
     with hpreimage_smHC_def
   set preimage_Lp : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
     laplacianDomain.preimage (I := I) (M := M) g ⟨u_h, hu_dom⟩
@@ -298,7 +298,7 @@ private lemma fChartResidual_aeEq_chartPushedRaw_diff
                 (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y := by
     rw [h_chartPushed_eq]
     exact h_coeFn_sub
-  -- Identify the chart-pulled raw of preimage⟨smoothMulHC ρα u_h⟩ with chartPushedRaw α (preimageSmoothMulHCFun).
+  -- Identify the chart-pulled raw of preimage⟨smoothMulH1Compl ρα u_h⟩ with chartPushedRaw α (preimageSmoothMulH1ComplFun).
   have h_preimage_smHC_aeEq :=
     chartPushedRawLpFromLp_coeFn (I := I) (M := M) g α preimage_smHC_Lp
   -- For the second piece, transfer to chartPushedRaw α (ρα · preimageFun) via smoothMulLp coeFn.
@@ -327,14 +327,14 @@ private lemma fChartResidual_aeEq_chartPushedRaw_diff
   -- h_smMul_coeFn : smoothMul.coeFn y = chartPushedRaw α (smoothMul_Lp.coeFn) y.
   -- h_smMul_aeEq : chartPushedRaw α (smoothMul_Lp.coeFn) y =
   --                  chartPushedRaw α (ρα · preimage_Lp.coeFn) y.
-  -- Goal: LHS = chartPushedRaw α (preimageSmoothMulHCFun) y
+  -- Goal: LHS = chartPushedRaw α (preimageSmoothMulH1ComplFun) y
   --             - chartPushedRaw α (ρα · preimageFun) y.
-  -- preimageSmoothMulHCFun coincides definitionally with preimage_smHC_Lp.coeFn.
+  -- preimageSmoothMulH1ComplFun coincides definitionally with preimage_smHC_Lp.coeFn.
   -- preimageFun coincides definitionally with preimage_Lp.coeFn.
   rw [h_lhs, h_pre_smHC, h_smMul_coeFn, h_smMul_aeEq]
   -- Now the goal is:
   --   chartPushedRaw α (preimage_smHC_Lp.coeFn) y - chartPushedRaw α (ρα · preimage_Lp.coeFn) y
-  --     = chartPushedRaw α (preimageSmoothMulHCFun) y - chartPushedRaw α (ρα · preimageFun) y.
+  --     = chartPushedRaw α (preimageSmoothMulH1ComplFun) y - chartPushedRaw α (ρα · preimageFun) y.
   rfl
 
 /-! ## Main theorem -/
@@ -343,18 +343,18 @@ private lemma fChartResidual_aeEq_chartPushedRaw_diff
 closure**.
 
 For `u_h ∈ laplacianDomainPow g 2` and the iterated-closure hypothesis
-`smoothMulHC (chartAtlasPOU I M α) u_h ∈ laplacianDomainPow g 2`, **given**
+`smoothMulH1Compl (chartAtlasPOU I M α) u_h ∈ laplacianDomainPow g 2`, **given**
 the additional support hypothesis that the function representative of
-`preimage⟨smoothMulHC ρα u_h⟩` is ae-equal to its product with `ρα` on
+`preimage⟨smoothMulH1Compl ρα u_h⟩` is ae-equal to its product with `ρα` on
 `riemannianVolumeMeasure g`, the chart-pulled residual `fChartResidual g α
 u_h` is in `MemW1p 2 chartTargetEuclid α`.
 
 The support hypothesis captures the property that
-`preimage⟨smoothMulHC ρα u_h⟩` is supported (a.e.) in `tsupport(ρα) ⊆
+`preimage⟨smoothMulH1Compl ρα u_h⟩` is supported (a.e.) in `tsupport(ρα) ⊆
 chart α source`. This property follows from the manifold-side `Lp` identity
 
 ```
-preimage⟨smoothMulHC ρα u_h⟩ = smoothMulLp ρα (preimage⟨u_h⟩)
+preimage⟨smoothMulH1Compl ρα u_h⟩ = smoothMulLp ρα (preimage⟨u_h⟩)
                                 + fHLeibnizGeneralResidualCLM g ρα u_h
 ```
 
@@ -368,27 +368,27 @@ theorem fChartResidual_memW1p_of_iteratedClosure
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
-    (h_M6 : smoothMulHC (I := I) (M := M) g
+    (h_M6 : smoothMulH1Compl (I := I) (M := M) g
         (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) u_h ∈
       laplacianDomainPow (I := I) (M := M) g 2)
-    (h_support : preimageSmoothMulHCFun (I := I) (M := M) g α hu_h =ᵐ[
+    (h_support : preimageSmoothMulH1ComplFun (I := I) (M := M) g α hu_h =ᵐ[
         riemannianVolumeMeasure (I := I) (M := M) g]
       fun x => rhoAlphaFun (I := I) (M := M) α x *
-        preimageSmoothMulHCFun (I := I) (M := M) g α hu_h x) :
+        preimageSmoothMulH1ComplFun (I := I) (M := M) g α hu_h x) :
     DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
       (fChartResidual (I := I) (M := M) g α u_h)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- Step 1: The chart-pulled raw of `preimageSmoothMulHCFun` agrees with the
-  -- chart-pulled raw of `ρα · preimageSmoothMulHCFun` ae on chartPulledWeighted
+  -- Step 1: The chart-pulled raw of `preimageSmoothMulH1ComplFun` agrees with the
+  -- chart-pulled raw of `ρα · preimageSmoothMulH1ComplFun` ae on chartPulledWeighted
   -- via h_support and chartPushedRaw_aeEq_of_aeEq.
   have h_preimage_meas : Measurable
-      (preimageSmoothMulHCFun (I := I) (M := M) g α hu_h) := by
-    unfold preimageSmoothMulHCFun
+      (preimageSmoothMulH1ComplFun (I := I) (M := M) g α hu_h) := by
+    unfold preimageSmoothMulH1ComplFun
     exact (Lp.stronglyMeasurable _).measurable
   have h_prod_meas : Measurable
       (fun x => rhoAlphaFun (I := I) (M := M) α x *
-        preimageSmoothMulHCFun (I := I) (M := M) g α hu_h x) := by
+        preimageSmoothMulH1ComplFun (I := I) (M := M) g α hu_h x) := by
     refine Measurable.mul ?_ h_preimage_meas
     exact ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff.continuous).measurable
   have h_chartPushed_aeEq :=
@@ -405,7 +405,7 @@ theorem fChartResidual_memW1p_of_iteratedClosure
       fun y =>
         chartPushedRaw (I := I) α
           (fun x => rhoAlphaFun (I := I) (M := M) α x *
-            preimageSmoothMulHCFun (I := I) (M := M) g α hu_h x) y -
+            preimageSmoothMulH1ComplFun (I := I) (M := M) g α hu_h x) y -
         chartPushedRaw (I := I) α
           (fun x : M => rhoAlphaFun (I := I) (M := M) α x *
             preimageFun (I := I) (M := M) g hu_h x) y := by
@@ -451,13 +451,13 @@ theorem fChartResidual_memW1p_of_iteratedClosure
       fun y =>
         chartPushedRaw (I := I) α
           (fun x => rhoAlphaFun (I := I) (M := M) α x *
-            preimageSmoothMulHCFun (I := I) (M := M) g α hu_h x) y -
+            preimageSmoothMulH1ComplFun (I := I) (M := M) g α hu_h x) y -
         chartPushedRaw (I := I) α
           (fun x : M => rhoAlphaFun (I := I) (M := M) α x *
             preimageFun (I := I) (M := M) g hu_h x) y :=
     h_vol_abs.ae_le h_residual_rewritten
   -- Step 5: Both pieces are MemW1p 2 chartTarget via the bridge.
-  have h_piece1 := memW1p_chartPushedRaw_rhoAlpha_mul_preimage_smoothMulHC
+  have h_piece1 := memW1p_chartPushedRaw_rhoAlpha_mul_preimage_smoothMulH1Compl
     (I := I) (M := M) g α hu_h h_M6
   have h_piece2 := memW1p_chartPushedRaw_rhoAlpha_mul_preimage
     (I := I) (M := M) g α hu_h
@@ -474,7 +474,7 @@ theorem fChartResidual_memW1p_of_iteratedClosure
       (fun y =>
         chartPushedRaw (I := I) α
           (fun x => rhoAlphaFun (I := I) (M := M) α x *
-            preimageSmoothMulHCFun (I := I) (M := M) g α hu_h x) y -
+            preimageSmoothMulH1ComplFun (I := I) (M := M) g α hu_h x) y -
         chartPushedRaw (I := I) α
           (fun x : M => rhoAlphaFun (I := I) (M := M) α x *
             preimageFun (I := I) (M := M) g hu_h x) y)
@@ -485,14 +485,14 @@ theorem fChartResidual_memW1p_of_iteratedClosure
     have h_eq : (fun y =>
         chartPushedRaw (I := I) α
           (fun x => rhoAlphaFun (I := I) (M := M) α x *
-            preimageSmoothMulHCFun (I := I) (M := M) g α hu_h x) y +
+            preimageSmoothMulH1ComplFun (I := I) (M := M) g α hu_h x) y +
         (-1 : ℝ) * chartPushedRaw (I := I) α
           (fun x : M => rhoAlphaFun (I := I) (M := M) α x *
             preimageFun (I := I) (M := M) g hu_h x) y) =
       (fun y =>
         chartPushedRaw (I := I) α
           (fun x => rhoAlphaFun (I := I) (M := M) α x *
-            preimageSmoothMulHCFun (I := I) (M := M) g α hu_h x) y -
+            preimageSmoothMulH1ComplFun (I := I) (M := M) g α hu_h x) y -
         chartPushedRaw (I := I) α
           (fun x : M => rhoAlphaFun (I := I) (M := M) α x *
             preimageFun (I := I) (M := M) g hu_h x) y) := by

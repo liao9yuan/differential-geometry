@@ -70,7 +70,7 @@ open DifferentialGeometry.Analysis.Laplacian.H1ComplGradientH1LipschitzBound
 open DifferentialGeometry.Analysis.Laplacian.H1ComplToLpChartBridge
 open DifferentialGeometry.Analysis.Laplacian.H1ComplWeakPartialLimit
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainVariationalIdentity
-open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainVariationalIdentityFormB
+open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainVariationalIdentityIntegralForm
 open DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
@@ -1564,9 +1564,9 @@ noncomputable def chartBilinearH1ComplData_of_laplacianDomain
   variational_identity := by
     -- Apply the form-B headline; convert RHS via Part A.
     intro ψ hψ hψ_cs hψ_supp
-    have h_formB := laplacianDomain_variational_identity_general
+    have h_integralForm := laplacianDomain_variational_identity_general
       (I := I) (M := M) g α hu_h hψ hψ_cs hψ_supp
-    -- h_formB: LHS_principal + LHS_mass = chartPulledIntegralCLM (density·ψ) (fHLeibniz)
+    -- h_integralForm: LHS_principal + LHS_mass = chartPulledIntegralCLM (density·ψ) (fHLeibniz)
     --   where:
     --     LHS_principal: ∫_{chartTarget} ∑_{i,j} weightedInvGram · chartPushedWeakPartialLp(u_h) i · ∂_j ψ ∂vol
     --     LHS_mass: ∫_{chartTarget} density · chartPushed POU (H1ComplToLp u_h) · ψ ∂vol
@@ -1577,7 +1577,7 @@ noncomputable def chartBilinearH1ComplData_of_laplacianDomain
     -- h_partA: chartPulledIntegralCLM... fHLeibniz = ∫_{chartTarget} density · chartPushedRawLpFromLp(fHLeibniz).coeFn · ψ ∂vol
     -- The form-B LHS mass uses chartPushed POU α (H1ComplToLp u_h).coeFn directly; we use u_chart = chartPushedLpFromLp(...).coeFn.
     -- These agree a.e. by chartPushedLpFromLp_coeFn.
-    rw [h_partA] at h_formB
+    rw [h_partA] at h_integralForm
     -- Now rewrite the form-B LHS mass using u_chart, then we're done.
     -- u_chart = chartPushedLpFromLp(H1ComplToLp u_h) .coeFn =ᵐ chartPushed POU α (H1ComplToLp u_h).coeFn.
     have h_u_chart_ae := chartPushedLpFromLp_coeFn (I := I) (M := M) g α
@@ -1591,8 +1591,8 @@ noncomputable def chartBilinearH1ComplData_of_laplacianDomain
     rw [setIntegral_density_eq_integral_weighted (I := I) (M := M) g α
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed (I := I) (M := M)
         (chartAtlasPOU I M) α
-        ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ)) ψ] at h_formB
-    -- Now h_formB has LHS_mass: ∫_{chartTarget} chartPushed POU · ψ ∂(weighted).
+        ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ)) ψ] at h_integralForm
+    -- Now h_integralForm has LHS_mass: ∫_{chartTarget} chartPushed POU · ψ ∂(weighted).
     -- We want to rewrite to ∫_{chartTarget} u_chart · ψ ∂(weighted) via ae.
     -- This needs setIntegral_congr_ae against the restricted measure.
     have h_LHS_mass_eq :
@@ -1617,15 +1617,15 @@ noncomputable def chartBilinearH1ComplData_of_laplacianDomain
       -- h_u_chart_ae is on weighted.restrict chartTarget.
       filter_upwards [h_u_chart_ae] with y hy
       rw [hy]
-    rw [h_LHS_mass_eq] at h_formB
+    rw [h_LHS_mass_eq] at h_integralForm
     -- Convert back to the vol form.
     rw [← setIntegral_density_eq_integral_weighted (I := I) (M := M) g α
       ((chartPushedLpFromLp (I := I) (M := M) g α
         (H1ComplToLp (I := I) (M := M) g u_h) :
         Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
           (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
-            (I := I) (M := M) α))) : EuclN → ℝ) ψ] at h_formB
-    exact h_formB
+            (I := I) (M := M) α))) : EuclN → ℝ) ψ] at h_integralForm
+    exact h_integralForm
 
 /-! ## Convenience accessors for the constructor output -/
 

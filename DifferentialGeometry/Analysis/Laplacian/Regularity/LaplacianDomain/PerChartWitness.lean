@@ -80,7 +80,7 @@ open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.ChartBilinearUniformDiffQuotBoundUnconditional
 open DifferentialGeometry.Analysis.Laplacian.ChartH2NonSmooth
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData
-open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainVariationalIdentityFormB
+open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainVariationalIdentityIntegralForm
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainH2
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainH2Unconditional
 open DifferentialGeometry.Analysis.Laplacian.ManifoldH2NonSmooth
@@ -435,7 +435,7 @@ theorem chartH2NonSmoothPOUWitness_of_laplacianDomain
     -- D.u_chart = chartPushedLpFromLp.coeFn (by chartBilinearH1ComplData_of_laplacianDomain_u_chart_def).
     -- chartPushedLpFromLp.coeFn =ᵐ chartPushed POU α u on weighted.restrict chartTarget.
     -- We need it on vol.restrict chartTarget. Use the fact that vol.restrict chartTarget ≪ weighted.restrict chartTarget.
-    have h_coeFn := DifferentialGeometry.Analysis.Laplacian.LaplacianDomainVariationalIdentityFormB.chartPushedLpFromLp_coeFn
+    have h_coeFn := DifferentialGeometry.Analysis.Laplacian.LaplacianDomainVariationalIdentityIntegralForm.chartPushedLpFromLp_coeFn
       (I := I) (M := M) g α (H1ComplToLp (I := I) (M := M) g u_h)
     -- We need volume.restrict chartTarget ≪ weighted.restrict chartTarget.
     have h_v_abs_w :

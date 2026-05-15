@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Laplacian.Regularity.DiffChart.BilinearH1ComplFromDomainPow
 import DifferentialGeometry.Analysis.Laplacian.Regularity.GradInner.CLMLeibniz
 import DifferentialGeometry.Analysis.Laplacian.Regularity.LaplacianDomain.PerChartWitness
-import DifferentialGeometry.Analysis.Laplacian.Regularity.LaplacianDomain.SmoothMulCompactSupport
+import DifferentialGeometry.Analysis.Laplacian.Regularity.LaplacianDomain.SmoothMulH1Compl
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothMul
 
 /-!
@@ -20,9 +20,9 @@ For `u_h ∈ laplacianDomainPow g 2`:
   witness `laplacianDomain_memWkpChart_two_unconditional`).
 * `laplacianDomain.preimage u_h .coeFn ∈ MemWkpChart g 2 2` (same C-step
   applied to the `Lp`-side preimage element of `laplacianDomainPow g 2`).
-* `smoothMulHC g ρα u_h ∈ laplacianDomain g` (Phase 3 of `smoothMulHC`),
+* `smoothMulH1Compl g ρα u_h ∈ laplacianDomain g` (Phase 3 of `smoothMulH1Compl`),
   yielding `(ρα · u_h.coeFn) ∈ MemWkpChart g 2 2` (same C-step).
-* `smoothMulHC g (Δρα) u_h ∈ laplacianDomain g` (Phase 3 with `φ = Δρα`),
+* `smoothMulH1Compl g (Δρα) u_h ∈ laplacianDomain g` (Phase 3 with `φ = Δρα`),
   yielding `(Δρα · u_h.coeFn) ∈ MemWkpChart g 2 2`.
 * By `MemWkpChart_smooth_mul` (Q1), `MemWkpChart` is closed under multiplication
   by smooth bounded functions; in particular, `|∇ρα|² · u_h.coeFn ∈ MemWkpChart
@@ -33,8 +33,8 @@ The chart-pulled Leibniz identity
 `GradInnerCLMLeibniz.lean`) provides the bridge that expresses
 `chartPushed POU α (gradInnerCLM ρα u_h).coeFn` (with the chart-α POU weight
 brought inside as `smoothMulLp ρα`) in terms of the chart-pull of
-`gradInnerCLM ρα (smoothMulHC ρα u_h)` and a smooth-coefficient multiple of
-the chart-pull of `H1ComplToLp u_h`. For `smoothMulHC ρα u_h ∈ laplacianDomain
+`gradInnerCLM ρα (smoothMulH1Compl ρα u_h)` and a smooth-coefficient multiple of
+the chart-pull of `H1ComplToLp u_h`. For `smoothMulH1Compl ρα u_h ∈ laplacianDomain
 g`, the unconditional C-step gives `MemWkpChart g 2 2` for its coefficient
 function.
 
@@ -76,7 +76,7 @@ open DifferentialGeometry.Analysis.Laplacian.ChartPushedWeakPartialOnVolume
 open DifferentialGeometry.Analysis.Laplacian.H1ComplGradientH1LipschitzBound
 open DifferentialGeometry.Analysis.Laplacian.H1ComplWeakPartialLimit
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData
-open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainVariationalIdentityFormB
+open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainVariationalIdentityIntegralForm
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainSmoothMul
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainPerChartWitness
 open DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean
@@ -95,7 +95,7 @@ variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 /-! ## Unconditional MemWkpChart witnesses derived from Phase 3 + C-step
 
 These witnesses package the standard "smooth bounded multiplication preserves
-MemWkpChart" closure with Phase 3 (`smoothMulHC g φ`) and the unconditional
+MemWkpChart" closure with Phase 3 (`smoothMulH1Compl g φ`) and the unconditional
 C-step (`laplacianDomain_memWkpChart_two_unconditional`).
 
 For `u_h ∈ laplacianDomain g` and smooth `φ : C^∞⟮I, M; ℝ⟯`, the smooth-times
@@ -104,10 +104,10 @@ function `φ · u_h.coeFn` lies in `MemWkpChart g 2 2` by *two* routes:
 1. Direct: `u_h.coeFn ∈ MemWkpChart g 2 2` (C-step) and `MemWkpChart_smooth_mul`
    (Q1) yields `φ · u_h.coeFn ∈ MemWkpChart g 2 2`.
 
-2. Via Phase 3: `smoothMulHC g φ u_h ∈ laplacianDomain g` (Phase 3), then
-   `H1ComplToLp(smoothMulHC g φ u_h).coeFn ∈ MemWkpChart g 2 2` (C-step);
+2. Via Phase 3: `smoothMulH1Compl g φ u_h ∈ laplacianDomain g` (Phase 3), then
+   `H1ComplToLp(smoothMulH1Compl g φ u_h).coeFn ∈ MemWkpChart g 2 2` (C-step);
    identify the function as `φ · u_h.coeFn` via Phase 2
-   (`H1ComplToLp_smoothMulHC`).
+   (`H1ComplToLp_smoothMulH1Compl`).
 
 We use route 1 below for clarity; route 2 is documented for reference. -/
 
@@ -139,16 +139,16 @@ theorem memWkpChart_two_two_smoothMulLp_laplacianDomain_coeFn
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) := by
   classical
   -- Strategy via Phase 3 + Phase 2 + C-step:
-  -- smoothMulHC g φ u_h ∈ laplacianDomain g (Phase 3); its H1ComplToLp coeFn
+  -- smoothMulH1Compl g φ u_h ∈ laplacianDomain g (Phase 3); its H1ComplToLp coeFn
   -- is ae-equal to `φ · u_h.coeFn` (the smoothMulLp coeFn). Its MemWkpChart
   -- regularity follows from C-step, and the regularity transfers via the
   -- ae-equality.
-  have h_phase3 := smoothMulHC_mem_laplacianDomain
+  have h_phase3 := smoothMulH1Compl_mem_laplacianDomain
     (I := I) (M := M) g φ hu_h
   have h_cstep := (laplacianDomain_memWkpChart_two_unconditional
     (I := I) (M := M) g h_phase3).1
-  -- Identify H1ComplToLp(smoothMulHC g φ u_h) = smoothMulLp g φ (H1ComplToLp u_h).
-  have h_phase2 := H1ComplToLp_smoothMulHC (I := I) (M := M) g φ u_h
+  -- Identify H1ComplToLp(smoothMulH1Compl g φ u_h) = smoothMulLp g φ (H1ComplToLp u_h).
+  have h_phase2 := H1ComplToLp_smoothMulH1Compl (I := I) (M := M) g φ u_h
   rw [h_phase2] at h_cstep
   exact h_cstep
 
@@ -174,13 +174,13 @@ theorem memWkpChart_two_two_smoothMulLp_preimage_coeFn
   obtain ⟨w_h, hw_h_dom, hw_h_eq⟩ :=
     laplacianDomainPow_two_preimage_eq (I := I) (M := M) g hu_h
   -- Step 2: Apply Phase 3 to w_h ∈ laplacianDomain g with φ:
-  have h_phase3 := smoothMulHC_mem_laplacianDomain
+  have h_phase3 := smoothMulH1Compl_mem_laplacianDomain
     (I := I) (M := M) g φ hw_h_dom
-  -- Step 3: C-step on smoothMulHC g φ w_h ∈ laplacianDomain g.
+  -- Step 3: C-step on smoothMulH1Compl g φ w_h ∈ laplacianDomain g.
   have h_cstep := (laplacianDomain_memWkpChart_two_unconditional
     (I := I) (M := M) g h_phase3).1
-  -- Step 4: Identify H1ComplToLp(smoothMulHC g φ w_h) = smoothMulLp g φ (H1ComplToLp w_h).
-  have h_phase2 := H1ComplToLp_smoothMulHC (I := I) (M := M) g φ w_h
+  -- Step 4: Identify H1ComplToLp(smoothMulH1Compl g φ w_h) = smoothMulLp g φ (H1ComplToLp w_h).
+  have h_phase2 := H1ComplToLp_smoothMulH1Compl (I := I) (M := M) g φ w_h
   -- Step 5: Substitute H1ComplToLp w_h = laplacianDomain.preimage u_h via hw_h_eq.
   rw [h_phase2, hw_h_eq] at h_cstep
   exact h_cstep
@@ -192,7 +192,7 @@ remaining `MemW1p 2 fChartResidual chartTarget` regularity assertion requires
 a chart-side weak-partial `L²` machinery without the partition-of-unity
 multiplier (the `chartPushedRawLpFromLp(gradInnerCLM ρα u_h).coeFn` term in the
 residual decomposes via the chart-pulled Leibniz identity into a chart-pull
-of `gradInnerCLM ρα (smoothMulHC ρα u_h)` for `smoothMulHC ρα u_h ∈
+of `gradInnerCLM ρα (smoothMulH1Compl ρα u_h)` for `smoothMulH1Compl ρα u_h ∈
 laplacianDomain g`, plus a smooth-coefficient multiple of the chart-pull of
 `u_h.coeFn`; both pieces require chart-side `MemW1p` arguments combining the
 existing `memW1p_chartPushedRaw_pou_mul_of_memWkpChart` bridge with an

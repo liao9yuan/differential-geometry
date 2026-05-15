@@ -10,7 +10,7 @@ For a closed Riemannian manifold `(M, g)`, a smooth scalar
 combines the smooth-case Lp-class Hessian bridge (delivered conditional on
 `christoffelDischargeSmoothCase` + `perChartAeTransferableSmoothCase` in
 `HessianBridgeSmoothLp`) with the existing M3.2 smooth-case theorem
-(conditional on the Hessian bridge in `GradInnerLaplacianM32SmoothFull`)
+(conditional on the Hessian bridge in `GradInnerLaplacianSmoothFull`)
 to deliver the **full smooth-case M3.2 final theorem** conditional only on
 the two clean hypotheses.
 
@@ -31,10 +31,10 @@ hypotheses (replacing the broader Hessian-bridge hypothesis):
   — the smooth-case M3.2 final theorem in resolvent-of-candidate form,
   conditional on both hypotheses.
 
-* `smoothCase_M32_full_unconditional_of_christoffel_discharge`
+* `smoothCase_full_unconditional_of_christoffel_discharge`
   — the smooth-case M3.2 image-membership form, conditional on both.
 
-* `smoothMulHC_smoothToH1Compl_mem_laplacianDomainPow_two_unconditional_of_christoffel_discharge`
+* `smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_unconditional_of_christoffel_discharge`
   — the iterated-closure form, conditional on both.
 -/
 
@@ -47,7 +47,7 @@ open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
 namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
-namespace GradInnerLaplacianM32SmoothFullUnconditional
+namespace GradInnerLaplacianSmoothFullUnconditional
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -67,9 +67,9 @@ open DifferentialGeometry.Analysis.Laplacian.HessianChartAlphaChristoffelDischar
 open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianCandidate
 open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianVariational
 open DifferentialGeometry.Analysis.Laplacian.RicciPairingCLM
-open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32Final
+open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianFinal
 open DifferentialGeometry.Analysis.Laplacian.BochnerPolarisedLpFull
-open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32SmoothFull
+open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianSmoothFull
 
 /-! ## File-local Borel-space instances -/
 
@@ -82,7 +82,7 @@ variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 /-! ## The smooth-case M3.2 final theorem with the cleaner hypothesis pair
 
-The Hessian bridge hypothesis in `GradInnerLaplacianM32SmoothFull` is
+The Hessian bridge hypothesis in `GradInnerLaplacianSmoothFull` is
 discharged via `HessianBridgeSmoothLp` under the two cleaner hypotheses. -/
 
 /-- **Smooth-case M3.2 final theorem, resolvent-of-candidate form, conditional
@@ -107,7 +107,7 @@ theorem gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_smooth_of_christoffe
 
 /-- **Smooth-case M3.2 conclusion (image-membership form) via the unconditional
 candidate, conditional on Christoffel discharge and per-chart transferability.** -/
-theorem smoothCase_M32_full_unconditional_of_christoffel_discharge
+theorem smoothCase_full_unconditional_of_christoffel_discharge
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (h_transfer : perChartAeTransferableSmoothCase (I := I) (M := M) g φ v)
     (h_discharge : christoffelDischargeSmoothCase (I := I) (M := M) g φ v) :
@@ -115,7 +115,7 @@ theorem smoothCase_M32_full_unconditional_of_christoffel_discharge
         (smoothToH1Compl (I := I) (M := M) g v) ∈
       Set.image (H1ComplToLp (I := I) (M := M) g)
         (laplacianDomain (I := I) (M := M) g : Set (H1Compl g)) :=
-  smoothCase_M32_full_unconditional_of_hessHypothesis
+  smoothCase_full_unconditional_of_hessHypothesis
     (I := I) (M := M) g φ v
     (hessPairingLpOnLapDom_eq_hessPairingSmoothLp_smoothCase_connector
       (I := I) (M := M) g φ v h_transfer h_discharge)
@@ -124,14 +124,14 @@ theorem smoothCase_M32_full_unconditional_of_christoffel_discharge
 
 /-- **Smooth-case iterated-closure form via the unconditional candidate,
 conditional on Christoffel discharge and per-chart transferability.** -/
-theorem smoothMulHC_smoothToH1Compl_mem_laplacianDomainPow_two_unconditional_of_christoffel_discharge
+theorem smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_unconditional_of_christoffel_discharge
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (h_transfer : perChartAeTransferableSmoothCase (I := I) (M := M) g φ v)
     (h_discharge : christoffelDischargeSmoothCase (I := I) (M := M) g φ v) :
-    smoothMulHC (I := I) (M := M) g φ
+    smoothMulH1Compl (I := I) (M := M) g φ
         (smoothToH1Compl (I := I) (M := M) g v) ∈
       laplacianDomainPow (I := I) (M := M) g 2 :=
-  smoothMulHC_smoothToH1Compl_mem_laplacianDomainPow_two_via_candidate
+  smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_via_candidate
     (I := I) (M := M) g φ v
     (hessPairingLpOnLapDom_eq_hessPairingSmoothLp_smoothCase_connector
       (I := I) (M := M) g φ v h_transfer h_discharge)
@@ -181,26 +181,26 @@ theorem gradInnerCLM_eq_H1ComplToLp_resolvent_smoothCase_of_discharge
 
 /-- **Smooth-case M3.2 conclusion (image-membership form), conditional only on
 the Christoffel discharge.** -/
-theorem smoothCase_M32_full_of_discharge
+theorem smoothCase_full_of_discharge
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (h_discharge : christoffelDischargeSmoothCase (I := I) (M := M) g φ v) :
     gradInnerCLM (I := I) (M := M) g φ
         (smoothToH1Compl (I := I) (M := M) g v) ∈
       Set.image (H1ComplToLp (I := I) (M := M) g)
         (laplacianDomain (I := I) (M := M) g : Set (H1Compl g)) :=
-  smoothCase_M32_full_unconditional_of_christoffel_discharge
+  smoothCase_full_unconditional_of_christoffel_discharge
     (I := I) (M := M) g φ v
     (perChartAeTransferableSmoothCase_holds (I := I) (M := M) g φ v) h_discharge
 
 /-- **Smooth-case iterated-closure form, conditional only on the Christoffel
 discharge.** -/
-theorem smoothMulHC_smoothToH1Compl_mem_laplacianDomainPow_two_of_discharge
+theorem smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_of_discharge
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (h_discharge : christoffelDischargeSmoothCase (I := I) (M := M) g φ v) :
-    smoothMulHC (I := I) (M := M) g φ
+    smoothMulH1Compl (I := I) (M := M) g φ
         (smoothToH1Compl (I := I) (M := M) g v) ∈
       laplacianDomainPow (I := I) (M := M) g 2 :=
-  smoothMulHC_smoothToH1Compl_mem_laplacianDomainPow_two_unconditional_of_christoffel_discharge
+  smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_unconditional_of_christoffel_discharge
     (I := I) (M := M) g φ v
     (perChartAeTransferableSmoothCase_holds (I := I) (M := M) g φ v) h_discharge
 
@@ -219,7 +219,7 @@ theorem smoothCase_variational_identity_of_discharge
   gradInnerCLM_eq_H1ComplToLp_resolvent_smoothCase_of_discharge
     (I := I) (M := M) g φ v h_discharge
 
-end GradInnerLaplacianM32SmoothFullUnconditional
+end GradInnerLaplacianSmoothFullUnconditional
 end Laplacian
 end Analysis
 end DifferentialGeometry

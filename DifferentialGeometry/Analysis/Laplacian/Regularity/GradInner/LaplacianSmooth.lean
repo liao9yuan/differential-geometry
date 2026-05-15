@@ -28,11 +28,11 @@ pairing with the smooth Hessian pairing for `smoothToH1Compl v`.
   — the smooth-case M3.2 final theorem in resolvent-of-candidate form,
   conditional on the Hessian-bridge hypothesis.
 
-* `smoothCase_M32_full_unconditional_of_hessHypothesis` — the smooth-case
+* `smoothCase_full_unconditional_of_hessHypothesis` — the smooth-case
   M3.2 final theorem (image membership form), conditional on the
   Hessian-bridge hypothesis.
 
-* `smoothMulHC_smoothToH1Compl_mem_laplacianDomainPow_two_via_candidate` —
+* `smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_via_candidate` —
   the iterated-closure form of the smooth-case M3.2 conclusion via the
   unconditional candidate's resolvent (conditional on the Hessian-bridge
   hypothesis).
@@ -62,7 +62,7 @@ open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
 namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
-namespace GradInnerLaplacianM32SmoothFull
+namespace GradInnerLaplacianSmoothFull
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -80,7 +80,7 @@ open DifferentialGeometry.Analysis.Laplacian.HessianPairingLapDom
 open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianCandidate
 open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianVariational
 open DifferentialGeometry.Analysis.Laplacian.RicciPairingCLM
-open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32Final
+open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianFinal
 open DifferentialGeometry.Analysis.Laplacian.BochnerPolarisedLpFull
 
 /-! ## File-local Borel-space instances -/
@@ -103,7 +103,7 @@ gradInnerCLM g φ (smoothToH1Compl v) =
   H1ComplToLp(resolvent g (gradInnerLaplacianCandidateUnconditional g φ hu_h))
 ```
 
-follows from `smoothCase_M32_via_candidate_identification` once the
+follows from `smoothCase_via_candidate_identification` once the
 smooth-case candidate identification is discharged. The latter is provided
 by `smoothCandidate_identification_target_of_hessHypothesis`. -/
 
@@ -127,7 +127,7 @@ theorem gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_smooth_of_hessHypoth
           (gradInnerLaplacianCandidateUnconditional (I := I) (M := M) g φ
             (smoothToH1Compl_mem_laplacianDomainPow_two
               (I := I) (M := M) g v))) :=
-  smoothCase_M32_via_candidate_identification (I := I) (M := M) g φ v
+  smoothCase_via_candidate_identification (I := I) (M := M) g φ v
     (smoothCandidate_identification_target_of_hessHypothesis
       (I := I) (M := M) g φ v h_hess)
 
@@ -138,7 +138,7 @@ resolvent, conditional on the Hessian-bridge hypothesis**. For smooth `v`,
 `gradInnerCLM g φ (smoothToH1Compl v)` lies in `H1ComplToLp ''
 laplacianDomain g`, with the witness being the resolvent of the
 unconditional Bochner candidate. -/
-theorem smoothCase_M32_full_unconditional_of_hessHypothesis
+theorem smoothCase_full_unconditional_of_hessHypothesis
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (h_hess :
       hessPairingLpOnLapDom (I := I) (M := M) g φ
@@ -159,11 +159,11 @@ theorem smoothCase_M32_full_unconditional_of_hessHypothesis
 /-! ## The iterated-closure form of the smooth-case M3.2 conclusion -/
 
 /-- **Smooth-case iterated closure via the unconditional candidate**.
-For smooth `v`, `smoothMulHC g φ (smoothToH1Compl v) ∈
+For smooth `v`, `smoothMulH1Compl g φ (smoothToH1Compl v) ∈
 laplacianDomainPow g 2`, with the witness construction going through the
 resolvent of the unconditional Bochner candidate (conditional on the
 Hessian-bridge hypothesis). -/
-theorem smoothMulHC_smoothToH1Compl_mem_laplacianDomainPow_two_via_candidate
+theorem smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_via_candidate
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (h_hess :
       hessPairingLpOnLapDom (I := I) (M := M) g φ
@@ -172,10 +172,10 @@ theorem smoothMulHC_smoothToH1Compl_mem_laplacianDomainPow_two_via_candidate
             (smoothToH1Compl_mem_laplacianDomainPow_two
               (I := I) (M := M) g v)) =
         hessPairingSmoothLp (I := I) (M := M) g φ v) :
-    smoothMulHC (I := I) (M := M) g φ
+    smoothMulH1Compl (I := I) (M := M) g φ
         (smoothToH1Compl (I := I) (M := M) g v) ∈
       laplacianDomainPow (I := I) (M := M) g 2 :=
-  smoothMulHC_mem_pow_two_of_variational_identity
+  smoothMulH1Compl_mem_pow_two_of_variational_identity
     (I := I) (M := M) g φ
     (smoothToH1Compl_mem_laplacianDomainPow_two (I := I) (M := M) g v)
     (gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_smooth_of_hessHypothesis
@@ -214,7 +214,7 @@ theorem smoothCase_variational_identity_of_hessHypothesis
   gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_smooth_of_hessHypothesis
     (I := I) (M := M) g φ v h_hess
 
-end GradInnerLaplacianM32SmoothFull
+end GradInnerLaplacianSmoothFull
 end Laplacian
 end Analysis
 end DifferentialGeometry

@@ -122,7 +122,7 @@ term.
   `smoothToLp((1-Δ_classical)(g(∇φ, ∇v)))`. Required for the bridge to
   the non-smooth case.
 
-* `smoothCase_M32_via_candidate_identification` — proves the smooth
+* `smoothCase_via_candidate_identification` — proves the smooth
   case of M3.2 via the resolvent of the unconditional candidate, assuming
   the smooth-case identification holds.
 
@@ -317,8 +317,8 @@ theorem gradInnerLaplacianCandidateUnconditional_explicit
 /-! ## Reverse implication for the unconditional candidate
 
 If `gradInnerCLM g φ u_h ∈ H1ComplToLp '' laplacianDomain g`, then by the
-`smoothMulHC_mem_pow_two_iff_gradInnerCLM_mem_image` equivalence,
-`smoothMulHC g φ u_h ∈ laplacianDomainPow g 2`. This is the standalone
+`smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image` equivalence,
+`smoothMulH1Compl g φ u_h ∈ laplacianDomainPow g 2`. This is the standalone
 direction not depending on the candidate construction. -/
 
 /-! ## Reformulation of the smooth-case M3.2 theorem -/
@@ -510,22 +510,22 @@ theorem gradInnerCLM_eq_H1ComplToLp_smoothWitness
 /-! ## Linkage to the iterated-closure equivalence
 
 The headline M3.2 theorem is part of an equivalence with the iterated-
-closure property `smoothMulHC g φ u_h ∈ laplacianDomainPow g 2`, mediated
-by `GradInnerLpIdentity.smoothMulHC_mem_pow_two_iff_gradInnerCLM_mem_image`.
+closure property `smoothMulH1Compl g φ u_h ∈ laplacianDomainPow g 2`, mediated
+by `GradInnerLpIdentity.smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image`.
 We use this equivalence to package the smooth-case M3.2 result as the
 iterated-closure property for the smooth case. -/
 
 /-- **Smooth-case iterated closure**: for smooth `v ∈ SmoothScalar g`,
-`smoothMulHC g φ (smoothToH1Compl v) ∈ laplacianDomainPow g 2`. This is
+`smoothMulH1Compl g φ (smoothToH1Compl v) ∈ laplacianDomainPow g 2`. This is
 the iterated-closure form of the M3.2 final theorem on the smooth subspace,
 equivalent to `gradInnerCLM_mem_image_laplacianDomain_smooth` by
-`GradInnerLpIdentity.smoothMulHC_mem_pow_two_iff_gradInnerCLM_mem_image`. -/
-theorem smoothMulHC_smoothToH1Compl_mem_laplacianDomainPow_two_via_M32
+`GradInnerLpIdentity.smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image`. -/
+theorem smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_via
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
-    smoothMulHC (I := I) (M := M) g φ
+    smoothMulH1Compl (I := I) (M := M) g φ
         (smoothToH1Compl (I := I) (M := M) g v) ∈
       laplacianDomainPow (I := I) (M := M) g 2 := by
-  rw [smoothMulHC_mem_pow_two_iff_gradInnerCLM_mem_image
+  rw [smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image
     (I := I) (M := M) g φ
     (smoothToH1Compl_mem_laplacianDomainPow_two (I := I) (M := M) g v)]
   exact gradInnerCLM_mem_image_laplacianDomain_smooth
@@ -826,7 +826,7 @@ def smoothCandidate_identification_target
 /-- The smooth-case identification target, if proved, gives an
 alternative smooth-case discharge of M3.2 via the unconditional
 candidate's resolvent. -/
-theorem smoothCase_M32_via_candidate_identification
+theorem smoothCase_via_candidate_identification
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (h_identify : smoothCandidate_identification_target
       (I := I) (M := M) g φ v) :

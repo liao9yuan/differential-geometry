@@ -35,25 +35,25 @@ The chain has four logical steps:
      each approximator. Re-export of
      `gradInnerCLM_mem_image_laplacianDomain_via_density`.
 
-2. **(M6) Iterated closure of `smoothMulHC g ρα u_h`**: under the same
+2. **(M6) Iterated closure of `smoothMulH1Compl g ρα u_h`**: under the same
    hypotheses,
    ```
-   smoothMulHC g ρα u_h ∈ laplacianDomainPow g 2.
+   smoothMulH1Compl g ρα u_h ∈ laplacianDomainPow g 2.
    ```
    This is the iterated closure of the Laplacian domain under smooth
    multiplication: starting from `u_h ∈ laplacianDomainPow g 2`, the
    product `ρα · u_h` (as an `H1Compl` element) remains in
    `laplacianDomainPow g 2` (so its `(1-Δ_g)`-preimage is again in
    `laplacianDomain g`, recursively). Membership follows from M5 via the
-   equivalence `smoothMulHC_mem_pow_two_iff_gradInnerCLM_mem_image`.
+   equivalence `smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image`.
 
 3. **(M7) `MemWkpChart g 2 2` regularity of the Leibniz residual Lp class**:
    given M6, the Lp class `fHLeibnizResidualLp g α u_h` (≡
-   `preimage⟨smoothMulHC ρα u_h⟩ - smoothMulLp ρα (preimage u_h)`) has
+   `preimage⟨smoothMulH1Compl ρα u_h⟩ - smoothMulLp ρα (preimage u_h)`) has
    its function representative in `MemWkpChart g 2 2`. This follows from
    closure of `MemWkpChart g 2 2` under subtraction, together with the
    two-sided `H²` regularity `laplacianDomainPow_two_h2_plus_rhs_h2`
-   applied to `smoothMulHC ρα u_h ∈ laplacianDomainPow g 2` (M6) and to
+   applied to `smoothMulH1Compl ρα u_h ∈ laplacianDomainPow g 2` (M6) and to
    `u_h ∈ laplacianDomainPow g 2`.
 
 4. **(M8) The constructor**: the existing `_unconditional` constructor
@@ -73,12 +73,12 @@ The chain has four logical steps:
 ### Unconditional (smooth case)
 
 * `gradInnerCLM_mem_image_smooth` — M5 smooth-case (re-export).
-* `smoothMulHC_mem_pow_two_smooth` — M6 smooth-case (re-export).
+* `smoothMulH1Compl_mem_pow_two_smooth` — M6 smooth-case (re-export).
 
 ### Density-bearing (general case)
 
 * `gradInnerCLM_mem_image_density` — M5 with density hypotheses.
-* `smoothMulHC_mem_pow_two_density` — M6 with density hypotheses.
+* `smoothMulH1Compl_mem_pow_two_density` — M6 with density hypotheses.
 * `fHLeibnizResidualLp_coeFn_memWkpChart_two_two_of_M6` — M7 with M6
   hypothesis: the manifold-side function corresponding to
   `fHLeibnizResidualLp.coeFn` lies in `MemWkpChart g 2 2`.
@@ -131,7 +131,7 @@ open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainSmoothMul
 open DifferentialGeometry.Analysis.Laplacian.GradInnerLpIdentity
 open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianVariational
-open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32DensityExtension
+open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianDensityExtension
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
@@ -191,24 +191,24 @@ theorem gradInnerCLM_mem_image_density
     (I := I) (M := M) g φ hu_h h_smooth_seq h_conv_H1Compl
     h_conv_candidate h_smooth_identity
 
-/-! ## M6: Iterated closure of `smoothMulHC g φ u_h` -/
+/-! ## M6: Iterated closure of `smoothMulH1Compl g φ u_h` -/
 
 /-- **M6 smooth-case (unconditional).** For smooth `v : SmoothScalar g`,
-`smoothMulHC g φ (smoothToH1Compl v) ∈ laplacianDomainPow g 2`. Re-export
-of `smoothMulHC_smoothToH1Compl_mem_laplacianDomainPow_two`. -/
-theorem smoothMulHC_mem_pow_two_smooth
+`smoothMulH1Compl g φ (smoothToH1Compl v) ∈ laplacianDomainPow g 2`. Re-export
+of `smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two`. -/
+theorem smoothMulH1Compl_mem_pow_two_smooth
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
-    smoothMulHC (I := I) (M := M) g φ
+    smoothMulH1Compl (I := I) (M := M) g φ
         (smoothToH1Compl (I := I) (M := M) g v) ∈
       laplacianDomainPow (I := I) (M := M) g 2 :=
-  smoothMulHC_smoothToH1Compl_mem_laplacianDomainPow_two
+  smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two
     (I := I) (M := M) g φ v
 
 /-- **M6 general case (density-bearing).** For arbitrary
 `u_h ∈ laplacianDomainPow g 2` and given density hypotheses, the
-iterated closure `smoothMulHC g φ u_h ∈ laplacianDomainPow g 2` holds.
-Re-export of `smoothMulHC_mem_pow_two_via_density`. -/
-theorem smoothMulHC_mem_pow_two_density
+iterated closure `smoothMulH1Compl g φ u_h ∈ laplacianDomainPow g 2` holds.
+Re-export of `smoothMulH1Compl_mem_pow_two_via_density`. -/
+theorem smoothMulH1Compl_mem_pow_two_density
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
@@ -225,9 +225,9 @@ theorem smoothMulHC_mem_pow_two_density
     (h_smooth_identity : ∀ n,
       smoothCandidate_identification_target (I := I) (M := M) g φ
         (h_smooth_seq n)) :
-    smoothMulHC (I := I) (M := M) g φ u_h ∈
+    smoothMulH1Compl (I := I) (M := M) g φ u_h ∈
       laplacianDomainPow (I := I) (M := M) g 2 :=
-  smoothMulHC_mem_pow_two_via_density
+  smoothMulH1Compl_mem_pow_two_via_density
     (I := I) (M := M) g φ hu_h h_smooth_seq h_conv_H1Compl
     h_conv_candidate h_smooth_identity
 
@@ -240,13 +240,13 @@ the identity `fHLeibnizGeneralResidualCLM_eq_preimageDiff` in
 `ResidualLpDecomposition`, this Lp class also equals
 
 ```
-preimage⟨smoothMulHC ρα u_h⟩ - smoothMulLp ρα (preimage u_h)
+preimage⟨smoothMulH1Compl ρα u_h⟩ - smoothMulLp ρα (preimage u_h)
 ```
 
 as an `Lp` class. For `u_h ∈ laplacianDomainPow g 2`, M6 gives
-`smoothMulHC ρα u_h ∈ laplacianDomainPow g 2`, so by
+`smoothMulH1Compl ρα u_h ∈ laplacianDomainPow g 2`, so by
 `laplacianDomainPow_two_h2_plus_rhs_h2` the function representative
-`preimage⟨smoothMulHC ρα u_h⟩.coeFn` is in `MemWkpChart g 2 2`. The other
+`preimage⟨smoothMulH1Compl ρα u_h⟩.coeFn` is in `MemWkpChart g 2 2`. The other
 summand `(smoothMulLp ρα (preimage u_h)).coeFn` is in `MemWkpChart g 2 2`
 via `MemWkpChart_smooth_mul` (smooth `ρα` times a `MemWkpChart g 2 2`
 function). Closure under subtraction yields the conclusion. -/
@@ -273,7 +273,7 @@ private lemma rhoAlpha_mul_preimage_coeFn_memWkpChart_two_two
     (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) h_preimage_h2
 
 /-- **M7 with M6 hypothesis (function form).** Given `u_h ∈ laplacianDomainPow g 2`
-and the M6 iterated closure `smoothMulHC ρα u_h ∈ laplacianDomainPow g 2`,
+and the M6 iterated closure `smoothMulH1Compl ρα u_h ∈ laplacianDomainPow g 2`,
 the manifold-side function `-2 g(∇ρα, ∇u_h) - Δρα · u_h` (equal a.e. to
 the `fHLeibnizResidualLp` function representative) is in `MemWkpChart g 2 2`.
 
@@ -286,16 +286,16 @@ theorem fHLeibnizResidualLp_coeFn_memWkpChart_two_two_of_M6
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
-    (h_M6 : smoothMulHC (I := I) (M := M) g
+    (h_M6 : smoothMulH1Compl (I := I) (M := M) g
         (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) u_h ∈
       laplacianDomainPow (I := I) (M := M) g 2) :
     DifferentialGeometry.Analysis.Sobolev.Chart.MemWkpChart
       (I := I) (M := M) g 2 2
       (fun x : M =>
         ((laplacianDomain.preimage (I := I) (M := M) g
-            ⟨smoothMulHC (I := I) (M := M) g
+            ⟨smoothMulH1Compl (I := I) (M := M) g
                 (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) u_h,
-              smoothMulHC_mem_laplacianDomain (I := I) (M := M) g
+              smoothMulH1Compl_mem_laplacianDomain (I := I) (M := M) g
                 (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
                 (laplacianDomainPow_succ_subset_laplacianDomain
                   (I := I) (M := M) g 1 hu_h)⟩ :
@@ -306,31 +306,31 @@ theorem fHLeibnizResidualLp_coeFn_memWkpChart_two_two_of_M6
                 (I := I) (M := M) g 1 hu_h⟩ :
             Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) x) := by
   classical
-  -- Step 1: H² regularity of `preimage⟨smoothMulHC ρα u_h⟩.coeFn`
+  -- Step 1: H² regularity of `preimage⟨smoothMulH1Compl ρα u_h⟩.coeFn`
   -- from M6 via `laplacianDomainPow_two_h2_plus_rhs_h2`.
   have h_smHC_h2 := (laplacianDomainPow_two_h2_plus_rhs_h2
     (I := I) (M := M) g h_M6).2.1
-  -- Note: h_smHC_h2 is the MemWkpChart for `preimage⟨smoothMulHC ρα u_h, _⟩.coeFn`,
+  -- Note: h_smHC_h2 is the MemWkpChart for `preimage⟨smoothMulH1Compl ρα u_h, _⟩.coeFn`,
   -- using the membership `laplacianDomainPow_succ_subset_laplacianDomain g 1 h_M6`.
-  -- We need the same `preimage` but with the `smoothMulHC_mem_laplacianDomain`-derived
+  -- We need the same `preimage` but with the `smoothMulH1Compl_mem_laplacianDomain`-derived
   -- membership proof. These are equal since `preimage` depends only on the
   -- H1Compl element, not on the membership proof.
   -- Step 2: `MemWkpChart g 2 2` of `ρα · preimage u_h.coeFn` via M_W mul.
   have h_smoothMul_h2 := rhoAlpha_mul_preimage_coeFn_memWkpChart_two_two
     (I := I) (M := M) g α hu_h
   -- Step 3: Closure under subtraction.
-  -- Note: the preimage with the `smoothMulHC_mem_laplacianDomain` proof equals
+  -- Note: the preimage with the `smoothMulH1Compl_mem_laplacianDomain` proof equals
   -- the one with the `laplacianDomainPow_succ_subset_laplacianDomain` proof.
   have h_preimage_eq :
       laplacianDomain.preimage (I := I) (M := M) g
-          ⟨smoothMulHC (I := I) (M := M) g
+          ⟨smoothMulH1Compl (I := I) (M := M) g
               (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) u_h,
-            smoothMulHC_mem_laplacianDomain (I := I) (M := M) g
+            smoothMulH1Compl_mem_laplacianDomain (I := I) (M := M) g
               (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
               (laplacianDomainPow_succ_subset_laplacianDomain
                 (I := I) (M := M) g 1 hu_h)⟩ =
       laplacianDomain.preimage (I := I) (M := M) g
-        ⟨smoothMulHC (I := I) (M := M) g
+        ⟨smoothMulH1Compl (I := I) (M := M) g
             (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) u_h,
           laplacianDomainPow_succ_subset_laplacianDomain
             (I := I) (M := M) g 1 h_M6⟩ := rfl
@@ -365,9 +365,9 @@ theorem fHLeibnizResidualLp_coeFn_memWkpChart_two_two_density
       (I := I) (M := M) g 2 2
       (fun x : M =>
         ((laplacianDomain.preimage (I := I) (M := M) g
-            ⟨smoothMulHC (I := I) (M := M) g
+            ⟨smoothMulH1Compl (I := I) (M := M) g
                 (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) u_h,
-              smoothMulHC_mem_laplacianDomain (I := I) (M := M) g
+              smoothMulH1Compl_mem_laplacianDomain (I := I) (M := M) g
                 (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
                 (laplacianDomainPow_succ_subset_laplacianDomain
                   (I := I) (M := M) g 1 hu_h)⟩ :
@@ -378,7 +378,7 @@ theorem fHLeibnizResidualLp_coeFn_memWkpChart_two_two_density
                 (I := I) (M := M) g 1 hu_h⟩ :
             Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) x) := by
   classical
-  have h_M6 := smoothMulHC_mem_pow_two_density
+  have h_M6 := smoothMulH1Compl_mem_pow_two_density
     (I := I) (M := M) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) hu_h
     h_smooth_seq h_conv_H1Compl h_conv_candidate h_smooth_identity
   exact fHLeibnizResidualLp_coeFn_memWkpChart_two_two_of_M6

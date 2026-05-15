@@ -486,7 +486,7 @@ import DifferentialGeometry.Analysis.Laplacian.Regularity.LaplacianDomain.PowH4B
 import DifferentialGeometry.Analysis.Laplacian.Regularity.LaplacianDomain.PowH2kBridge
 import DifferentialGeometry.Analysis.HeatEquation.SmoothingBridge
 import DifferentialGeometry.Analysis.Laplacian.Regularity.LaplacianDomain.SmoothMul
-import DifferentialGeometry.Analysis.Laplacian.Regularity.LaplacianDomain.SmoothMulCompactSupport
+import DifferentialGeometry.Analysis.Laplacian.Regularity.LaplacianDomain.SmoothMulH1Compl
 import DifferentialGeometry.Analysis.Laplacian.Regularity.GradInner.CLMLeibniz
 import DifferentialGeometry.Analysis.Laplacian.Regularity.DiffChart.BilinearH1ComplFromDomainPow
 import DifferentialGeometry.Analysis.Laplacian.Regularity.DiffChart.TwiceBilinearH1Compl

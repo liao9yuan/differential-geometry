@@ -21,7 +21,7 @@ The proof composes three ingredients:
 2. The chart-target `W^{2,2}` bilinear continuity bound of
    `smoothFChartResidual` in the chart-`W^{3,2}` norm of the underlying
    smooth scalar
-   (`wkpNorm_smoothFChartResidual_le_wkpNormChart_wkpTwoTwo`).
+   (`wkpNorm_smoothFChartResidual_le_wkpNormChart_w22`).
 3. The chart-`W^{3,2}`-Cauchy property of the new approximator sequence
    (`smoothApproxSeqWkpThree_wkpNormChart_diff_le`).
 
@@ -42,7 +42,7 @@ sequence.
 * `smoothApproxSeqWkpThree` — chosen sequence at rate `1 / (n + 1)`.
 * `smoothApproxSeqWkpThree_wkpNormChart_le` — per-`n` approximation bound.
 * `smoothApproxSeqWkpThree_wkpNormChart_diff_le` — chart-`W^{3,2}`-Cauchy.
-* `smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy_wkpTwoTwo` —
+* `smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy_w22` —
   chart-target `W^{2,2}`-Cauchy property of the smooth residuals along
   `smoothApproxSeqWkpThree`.
 -/
@@ -56,7 +56,7 @@ open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
 namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
-namespace SmoothApproxSeqCauchyWkpTwoTwo
+namespace SmoothApproxSeqCauchyW22
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -70,7 +70,7 @@ open DifferentialGeometry.Analysis.Laplacian.ChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainChartData
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl
 open DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidualUnconditional
-open DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBoundWkpTwoTwo
+open DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBoundW22
 open DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualLinearity
 open DifferentialGeometry.Analysis.Laplacian.ChartPushedMemWkpThreeUnconditional
 open DifferentialGeometry.Analysis.Sobolev.Chart
@@ -249,7 +249,7 @@ chart-`W^{3,2}`-Cauchy. Pushing through the chart-target `W^{2,2}` bilinear
 continuity bound of `smoothFChartResidual` (a.e. linearity + quantitative
 bilinear bound) yields the chart-target `W^{2,2}`-Cauchy property of
 `smoothFChartResidual g α (smoothApproxSeqWkpThree g hu_h n)` in `n`. -/
-theorem smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy_wkpTwoTwo
+theorem smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy_w22
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2) :
@@ -267,7 +267,7 @@ theorem smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy_wkpTwoTwo
   classical
   intro ε hε
   obtain ⟨C, hC_pos, hC_bound⟩ :=
-    wkpNorm_smoothFChartResidual_le_wkpNormChart_wkpTwoTwo (I := I) (M := M) g α
+    wkpNorm_smoothFChartResidual_le_wkpNormChart_w22 (I := I) (M := M) g α
   have hε_C_pos : 0 < ε / (2 * C) := by positivity
   obtain ⟨N0, hN0_real⟩ := exists_nat_gt (1 / (ε / (2 * C)) - 1)
   have hN1_pos : (0 : ℝ) < (N0 : ℝ) + 1 := by
@@ -394,7 +394,7 @@ theorem smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy_wkpTwoTwo
     field_simp
   rw [h_simp]
 
-end SmoothApproxSeqCauchyWkpTwoTwo
+end SmoothApproxSeqCauchyW22
 end Laplacian
 end Analysis
 end DifferentialGeometry

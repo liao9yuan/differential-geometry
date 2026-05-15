@@ -35,8 +35,8 @@ The result is delivered in several layered forms:
     H1Compl-graph-norm continuity of each candidate summand.
 
 * **Alternative equivalence form**: the membership statement is equivalent to
-  the iterated-closure statement `smoothMulHC g φ u_h ∈ laplacianDomainPow g 2`
-  (already in `GradInnerLpIdentity.smoothMulHC_mem_pow_two_iff_gradInnerCLM_mem_image`).
+  the iterated-closure statement `smoothMulH1Compl g φ u_h ∈ laplacianDomainPow g 2`
+  (already in `GradInnerLpIdentity.smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image`).
   We restate this equivalence as a headline tool.
 
 ## Main definitions
@@ -67,11 +67,11 @@ The result is delivered in several layered forms:
   smooth-case M3.2 conclusion, **unconditional**, repackaging the existing
   smooth-case discharge from `GradInnerLpIdentity`.
 
-* `smoothMulHC_mem_pow_two_iff_via_candidate_resolvent` — the headline
+* `smoothMulH1Compl_mem_pow_two_iff_via_candidate_resolvent` — the headline
   equivalence connecting the iterated-closure question to the variational
   identity for the candidate.
 
-* `gradInnerCLM_mem_image_laplacianDomain_iff_smoothMulHC_mem_pow_two` —
+* `gradInnerCLM_mem_image_laplacianDomain_iff_smoothMulH1Compl_mem_pow_two` —
   re-export of the existing equivalence (forward + reverse, in the standard
   direction "image membership ↔ iterated closure").
 
@@ -79,12 +79,12 @@ The result is delivered in several layered forms:
 
 The headline conclusion `gradInnerCLM g φ u_h ∈ H1ComplToLp '' laplacianDomain g`
 for `u_h ∈ laplacianDomainPow g 2` is equivalent (by the existing equivalence
-theorem) to the iterated closure `smoothMulHC g φ u_h ∈ laplacianDomainPow g 2`.
+theorem) to the iterated closure `smoothMulH1Compl g φ u_h ∈ laplacianDomainPow g 2`.
 
 This equivalence locates the M3.2 deliverable in one of two equivalent forms:
 
 * **Image form**: `gradInnerCLM g φ u_h ∈ H1ComplToLp '' laplacianDomain g`.
-* **Iterated-closure form**: `smoothMulHC g φ u_h ∈ laplacianDomainPow g 2`.
+* **Iterated-closure form**: `smoothMulH1Compl g φ u_h ∈ laplacianDomainPow g 2`.
 
 This file makes both forms available, plus the conditional-on-variational-identity
 form, plus the smooth-case unconditional discharge in both forms.
@@ -99,7 +99,7 @@ open scoped Manifold Topology ContDiff Matrix InnerProductSpace BigOperators
 namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
-namespace GradInnerLaplacianM32Final
+namespace GradInnerLaplacianFinal
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -235,7 +235,7 @@ theorem gradInnerCLM_smoothCase_eq_resolventL2_candidate
           (gradInnerLaplacianCandidateUnconditional (I := I) (M := M) g φ
             (smoothToH1Compl_mem_laplacianDomainPow_two
               (I := I) (M := M) g v))) :=
-  smoothCase_M32_via_candidate_identification
+  smoothCase_via_candidate_identification
     (I := I) (M := M) g φ v h_identify
 
 /-- The smooth-case M3.2 conclusion via the unconditional candidate's resolvent,
@@ -266,56 +266,56 @@ theorem gradInnerCLM_smoothCase_mem_image_laplacianDomain_unconditional
 /-! ## Iterated-closure form of the smooth-case M3.2 final theorem
 
 The image membership statement is equivalent (by the established
-`smoothMulHC_mem_pow_two_iff_gradInnerCLM_mem_image`) to the iterated-closure
-statement `smoothMulHC g φ u_h ∈ laplacianDomainPow g 2`. We re-export the
+`smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image`) to the iterated-closure
+statement `smoothMulH1Compl g φ u_h ∈ laplacianDomainPow g 2`. We re-export the
 smooth-case form. -/
 
 /-- **Smooth-case iterated closure** (unconditional). For smooth `v`,
-`smoothMulHC g φ (smoothToH1Compl v) ∈ laplacianDomainPow g 2`. -/
-theorem smoothMulHC_smoothToH1Compl_mem_laplacianDomainPow_two_unconditional
+`smoothMulH1Compl g φ (smoothToH1Compl v) ∈ laplacianDomainPow g 2`. -/
+theorem smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_unconditional
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
-    smoothMulHC (I := I) (M := M) g φ
+    smoothMulH1Compl (I := I) (M := M) g φ
         (smoothToH1Compl (I := I) (M := M) g v) ∈
       laplacianDomainPow (I := I) (M := M) g 2 :=
-  smoothMulHC_smoothToH1Compl_mem_laplacianDomainPow_two
+  smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two
     (I := I) (M := M) g φ v
 
 /-! ## Equivalence: image membership ↔ iterated closure
 
 The two forms of the M3.2 statement are equivalent via the
-`smoothMulHC_mem_pow_two_iff_gradInnerCLM_mem_image` equivalence. We re-export. -/
+`smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image` equivalence. We re-export. -/
 
 /-- **The iterated-closure ↔ image-membership equivalence** for
 `u_h ∈ laplacianDomainPow g 2`. -/
-theorem mem_image_laplacianDomain_iff_smoothMulHC_mem_pow_two
+theorem mem_image_laplacianDomain_iff_smoothMulH1Compl_mem_pow_two
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2) :
     gradInnerCLM (I := I) (M := M) g φ u_h ∈
       Set.image (H1ComplToLp (I := I) (M := M) g)
         (laplacianDomain (I := I) (M := M) g : Set (H1Compl g)) ↔
-      smoothMulHC (I := I) (M := M) g φ u_h ∈
+      smoothMulH1Compl (I := I) (M := M) g φ u_h ∈
         laplacianDomainPow (I := I) (M := M) g 2 := by
-  rw [← smoothMulHC_mem_pow_two_iff_gradInnerCLM_mem_image
+  rw [← smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image
     (I := I) (M := M) g φ hu_h]
 
 /-! ## The iterated-closure-conditional headline theorem
 
-Given the iterated closure `smoothMulHC g φ u_h ∈ laplacianDomainPow g 2`,
+Given the iterated closure `smoothMulH1Compl g φ u_h ∈ laplacianDomainPow g 2`,
 the image membership follows directly. -/
 
 /-- **The headline M3.2 final theorem, iterated-closure form**. Given
-`smoothMulHC g φ u_h ∈ laplacianDomainPow g 2`, the image membership follows. -/
+`smoothMulH1Compl g φ u_h ∈ laplacianDomainPow g 2`, the image membership follows. -/
 theorem gradInnerCLM_mem_image_laplacianDomain_of_iteratedClosure
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
-    (h_sM : smoothMulHC (I := I) (M := M) g φ u_h ∈
+    (h_sM : smoothMulH1Compl (I := I) (M := M) g φ u_h ∈
       laplacianDomainPow (I := I) (M := M) g 2) :
     gradInnerCLM (I := I) (M := M) g φ u_h ∈
       Set.image (H1ComplToLp (I := I) (M := M) g)
         (laplacianDomain (I := I) (M := M) g : Set (H1Compl g)) :=
-  gradInnerCLM_mem_image_of_smoothMulHC_mem_pow_two
+  gradInnerCLM_mem_image_of_smoothMulH1Compl_mem_pow_two
     (I := I) (M := M) g φ hu_h h_sM
 
 /-! ## Headline equivalence form connecting to candidate's resolvent
@@ -329,16 +329,16 @@ chain "variational identity → image-membership → iterated-closure". -/
 
 /-- **The headline equivalence**, packaging the iterated-closure ↔ image-membership
 identification with the variational-identity-conditional consequence. -/
-theorem smoothMulHC_mem_pow_two_iff_via_candidate_resolvent
+theorem smoothMulH1Compl_mem_pow_two_iff_via_candidate_resolvent
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2) :
-    smoothMulHC (I := I) (M := M) g φ u_h ∈
+    smoothMulH1Compl (I := I) (M := M) g φ u_h ∈
       laplacianDomainPow (I := I) (M := M) g 2 ↔
     gradInnerCLM (I := I) (M := M) g φ u_h ∈
       Set.image (H1ComplToLp (I := I) (M := M) g)
         (laplacianDomain (I := I) (M := M) g : Set (H1Compl g)) :=
-  smoothMulHC_mem_pow_two_iff_gradInnerCLM_mem_image
+  smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image
     (I := I) (M := M) g φ hu_h
 
 /-! ## Hypothesis-bearing form of the iterated-closure conclusion -/
@@ -346,7 +346,7 @@ theorem smoothMulHC_mem_pow_two_iff_via_candidate_resolvent
 /-- **The iterated-closure conclusion, variational-identity form**. Given the
 variational identity for the unconditional candidate, conclude the iterated
 closure. -/
-theorem smoothMulHC_mem_pow_two_of_variational_identity
+theorem smoothMulH1Compl_mem_pow_two_of_variational_identity
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
@@ -356,14 +356,14 @@ theorem smoothMulHC_mem_pow_two_of_variational_identity
           (resolvent (I := I) (M := M) g
             (gradInnerLaplacianCandidateUnconditional
               (I := I) (M := M) g φ hu_h))) :
-    smoothMulHC (I := I) (M := M) g φ u_h ∈
+    smoothMulH1Compl (I := I) (M := M) g φ u_h ∈
       laplacianDomainPow (I := I) (M := M) g 2 := by
   have h_image := variational_identity_implies_mem_image
     (I := I) (M := M) g φ hu_h hvar_id
-  exact (smoothMulHC_mem_pow_two_iff_via_candidate_resolvent
+  exact (smoothMulH1Compl_mem_pow_two_iff_via_candidate_resolvent
     (I := I) (M := M) g φ hu_h).mpr h_image
 
-end GradInnerLaplacianM32Final
+end GradInnerLaplacianFinal
 end Laplacian
 end Analysis
 end DifferentialGeometry

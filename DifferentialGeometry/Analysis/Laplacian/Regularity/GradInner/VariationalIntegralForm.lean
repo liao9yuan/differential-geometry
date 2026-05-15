@@ -72,7 +72,7 @@ producing the asserted integral.
 
 * `integral_gradInner_oneSubLap_smooth_eq_integral_preimage_smooth_density` —
   the integral identity for `u_h ∈ laplacianDomainPow g 2` under the density
-  hypotheses from `GradInnerLaplacianM32DensityExtension`.
+  hypotheses from `GradInnerLaplacianDensityExtension`.
 
 ## Connection to the Bochner cross-term identity
 
@@ -115,10 +115,10 @@ open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianCandidate
 open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianVariational
 open DifferentialGeometry.Analysis.Laplacian.HessianChartAlphaChristoffelDischarge
 open DifferentialGeometry.Analysis.Laplacian.HessianBridgeSmoothLp
-open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32Final
-open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32SmoothFull
-open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32SmoothFullUnconditional
-open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianM32DensityExtension
+open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianFinal
+open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianSmoothFull
+open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianSmoothFullUnconditional
+open DifferentialGeometry.Analysis.Laplacian.GradInnerLaplacianDensityExtension
 
 /-! ## File-local Borel-space instances -/
 
@@ -599,7 +599,7 @@ theorem integral_gradInner_oneSubLap_smooth_eq_integral_candidate_of_variational
 /-! ## Section F — Smooth-case unconditional form (conditional on Christoffel discharge)
 
 Combining Section D with the M3.2 smooth-case unconditional form from
-`GradInnerLaplacianM32SmoothFullUnconditional`, the integral form for the
+`GradInnerLaplacianSmoothFullUnconditional`, the integral form for the
 unconditional candidate holds for smooth `v` under the Christoffel discharge
 hypothesis. -/
 
@@ -631,7 +631,7 @@ theorem integral_gradInner_oneSubLap_smooth_eq_integral_candidate_smoothCase_of_
                 Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) x
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
   classical
-  -- Use the variational identity from M32SmoothFullUnconditional.
+  -- Use the variational identity from SmoothFullUnconditional.
   have hvar_id :=
     gradInnerCLM_eq_H1ComplToLp_resolvent_smoothCase_of_discharge
       (I := I) (M := M) g φ v h_discharge
@@ -644,7 +644,7 @@ theorem integral_gradInner_oneSubLap_smooth_eq_integral_candidate_smoothCase_of_
 /-! ## Section G — Density-extension form
 
 The density-extension form combines the smooth-case identity with the
-density argument from `GradInnerLaplacianM32DensityExtension`. -/
+density argument from `GradInnerLaplacianDensityExtension`. -/
 
 /-- **Integral form for `u_h ∈ laplacianDomainPow g 2`, density-extension form**.
 Given an approximating sequence of smooth scalars `v_n` with H¹Compl

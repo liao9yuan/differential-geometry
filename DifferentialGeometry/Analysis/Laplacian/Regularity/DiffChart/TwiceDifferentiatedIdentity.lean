@@ -1503,7 +1503,7 @@ private lemma base_u_chart_ae_eq_chartPushed_on_vol
         (chartAtlasPOU I M) α
         ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ) := by
   have h_coeFn :=
-    DifferentialGeometry.Analysis.Laplacian.LaplacianDomainVariationalIdentityFormB.chartPushedLpFromLp_coeFn
+    DifferentialGeometry.Analysis.Laplacian.LaplacianDomainVariationalIdentityIntegralForm.chartPushedLpFromLp_coeFn
       (I := I) (M := M) g α (H1ComplToLp (I := I) (M := M) g u_h)
   have h_v_abs_w := vol_restrict_chart_target_absCont_weighted (I := I) (M := M)
     (α := α) g

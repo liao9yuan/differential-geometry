@@ -1111,7 +1111,7 @@ lemma smoothFChartResidual_memWkp_m
 
 /-! ## Phase D: Hypothesis-bearing `MemWkp m 2` discharge of `fChartResidual`
 
-The constructor mirrors `memWkp_fChartResidual_of_wkpNorm_cauchy_identification_wkpTwoTwo`
+The constructor mirrors `memWkp_fChartResidual_of_wkpNorm_cauchy_identification_w22`
 at level `m`: given a smooth approximator sequence with chart-target
 `W^{m,2}`-Cauchy + identification properties, the chart-pulled residual lies in
 `MemWkp m 2 chartTargetEuclid α`. -/
