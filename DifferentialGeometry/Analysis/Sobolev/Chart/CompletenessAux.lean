@@ -13,11 +13,11 @@ Banach-completeness program
 
 This file collects auxiliary lemmas tying together the chart-pushed scalar
 function machinery, the partition-of-unity-weighted bridge to the Riemannian
-measure, and the per-chart Phase A iterated-Sobolev limit. These structural
+measure, and the per-chart Euclidean iterated-Sobolev limit. These structural
 lemmas form the bridge layer that connects:
 
 * the chart-by-chart Cauchy property of the chart-Sobolev seminorm
-  (Phase A and Steps 1–5 of `Completeness`), and
+  (the per-chart Euclidean Sobolev limit and Steps 1–5 of `Completeness`), and
 * the manifold-side Riemannian-measure `L^p` inner product / convergence
   framework (the `MeasureBridge` lemmas).
 

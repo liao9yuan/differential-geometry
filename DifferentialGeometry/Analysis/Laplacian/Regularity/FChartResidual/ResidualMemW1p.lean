@@ -63,7 +63,7 @@ For any `u_h ∈ laplacianDomainPow g 2` and any chart base point `α : M`, the
 chart-pulled residual `fChartResidual g α u_h` is in `MemW1p 2
 (chartTargetEuclid α)`, **with no further hypotheses**.
 
-This is the unconditional discharge of the Phase 6.2 D-3 residual `MemW1p 2`
+This is the unconditional discharge of the chart-pulled residual `MemW1p 2`
 requirement.
 
 Proof: composes the existing hypothesis-bearing constructor

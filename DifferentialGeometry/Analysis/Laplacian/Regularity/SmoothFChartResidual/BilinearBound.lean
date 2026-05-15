@@ -58,7 +58,7 @@ for a manifold-side smooth function `B_α_ij` whose tsupport is contained in
 `chartTargetEuclid α`, and the Euclidean quantitative Leibniz bound
 `wkpNorm_smul_smooth_bounded_le` controls its `W^{1,2}` product with
 `∂_j (chartPushedRaw α H)`, which lies in `W^{1,2}` because
-`chartPushedRaw α H` lies in `W^{2,2}` (by `T1.2`).
+`chartPushedRaw α H` lies in `W^{2,2}` (by the strict-cutoff multiplication bound).
 
 The second piece `chartPushedRaw α (Δρα · H)` similarly reduces to a
 smooth-coefficient product with `chartPushedRaw α H ∈ W^{1,2}`.
@@ -2010,8 +2010,9 @@ private lemma memWkp_partialDerivOnEuclid_etaTimesV
     (d := Module.finrank ℝ E) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
     (chartTargetEuclid_isOpen (I := I) (M := M) α) h_ae).mpr h_chosen_mem
 
-/-- The bound on `wkpNorm 2 2 (chartPushedRaw α (η · v.toFun))` via T1.2:
-there exists `C > 0` such that for every smooth `v`,
+/-- The bound on `wkpNorm 2 2 (chartPushedRaw α (η · v.toFun))` via the
+strict-cutoff multiplication bound: there exists `C > 0` such that for every
+smooth `v`,
 `wkpNorm 2 2 (chartPushedRaw α (η · v.toFun)) ≤ C · wkpNormChart g 2 2 v.toFun`. -/
 private lemma wkpNorm_chartPushedRaw_etaTimesV_le
     (g : SmoothRiemannianMetric I M) (α : M) :
@@ -2039,7 +2040,8 @@ private lemma wkpNorm_chartPushedRaw_etaTimesV_le
   exact hC_bound h_v_MemWkpChart
 
 /-- The bound on `wkpNorm 1 2 (partialDerivOnEuclid α i (η · v.toFun))`
-via T1.3.b composed with T1.2. -/
+via the partial-derivative bound composed with the strict-cutoff
+multiplication bound. -/
 private lemma wkpNorm_partialDerivOnEuclid_etaTimesV_le
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∃ C : ℝ, 0 < C ∧ ∀ v : SmoothScalar g,
@@ -2052,8 +2054,8 @@ private lemma wkpNorm_partialDerivOnEuclid_etaTimesV_le
         ENNReal.ofReal C * wkpNormChart (I := I) (M := M) g 2 2
           (fun x : M => v.toFun x) := by
   classical
-  -- Combine T1.3.b and T1.2.
-  -- T1.3.b at k=1, p=2: ∃ C_p > 0, for smooth η · v with tsupport in chart source,
+  -- Combine the partial-derivative bound and the strict-cutoff multiplication bound.
+  -- Partial-derivative bound at k=1, p=2: ∃ C_p > 0, for smooth η · v with tsupport in chart source,
   --   wkpNorm 1 2 (partialDerivOnEuclid α i (η · v)) ≤ C_p · wkpNorm 2 2 (chartPushedRaw α (η · v)).
   -- The C_p depends on i but is uniform (in fact = 1 from the proof).
   -- We need a single C across all i. We'll build a finite max.
@@ -2084,7 +2086,7 @@ private lemma wkpNorm_partialDerivOnEuclid_etaTimesV_le
             (chartPushedRaw (I := I) (M := M) α u)
             (chartTargetEuclid (I := I) (M := M) α) := fun i =>
     (h_per_i_partial i).choose_spec.2
-  -- Combine with T1.2.
+  -- Combine with the strict-cutoff multiplication bound.
   obtain ⟨C_strict, hC_strict_pos, hC_strict_bound⟩ :=
     wkpNorm_chartPushedRaw_etaTimesV_le (I := I) (M := M) g α
   -- Max over i.
@@ -2107,9 +2109,9 @@ private lemma wkpNorm_partialDerivOnEuclid_etaTimesV_le
   have hηv_supp : tsupport (etaTimesV (I := I) (M := M) α v.toFun) ⊆
       (chartAt H α).source :=
     tsupport_etaTimesV_subset (I := I) (M := M) α v.toFun
-  -- T1.3.b for i:
+  -- Partial-derivative bound for i:
   have h_partial_bound := hCp_bound i hηv_smooth hηv_supp
-  -- T1.2:
+  -- Strict-cutoff multiplication bound:
   have h_strict_bound := hC_strict_bound v
   -- Chain:
   calc DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
@@ -2143,8 +2145,8 @@ in `W^{1,2}` on `chartTargetEuclid α` by a constant times `wkpNormChart g 2 2 v
 
 The proof uses the chart formula
 `chartPushedRaw α (gradInnerPiece) = 2 · ∑_i Λgrad_i · partialDerivOnEuclid α i (η · v)`
-on `chartTargetEuclid α`, then bounds each term via Euclidean smooth-mul Leibniz and
-T1.3.b/T1.2. -/
+on `chartTargetEuclid α`, then bounds each term via Euclidean smooth-mul Leibniz,
+the partial-derivative bound, and the strict-cutoff multiplication bound. -/
 private lemma wkpNorm_chartPushedRaw_gradInnerPiece_le
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∃ C : ℝ, 0 < C ∧ ∀ v : SmoothScalar g,

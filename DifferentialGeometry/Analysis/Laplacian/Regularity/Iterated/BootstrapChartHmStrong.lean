@@ -263,9 +263,7 @@ theorem chartPushed_memWkp_two_k_of_laplacianDomainPow_bridge
 
 For any `k : ℕ` and any `u_h ∈ laplacianDomainPow g k`, given the chart-side
 `H^{2k}` bridge for the canonical function representative, the chart-pushed
-POU-cut representative lies in `MemWkp (2 * k) 2` at every chart point.
-
-This matches the requested headline signature in the synthesis dispatch. -/
+POU-cut representative lies in `MemWkp (2 * k) 2` at every chart point. -/
 theorem chartPushed_memWkp_two_k_of_laplacianDomainPow
     (g : SmoothRiemannianMetric I M) (α : M) (k : ℕ)
     {u_h : H1Compl (I := I) (M := M) g}

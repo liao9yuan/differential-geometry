@@ -13,8 +13,8 @@ import Mathlib.Topology.UniformSpace.UniformEmbedding
 # Manifold-side scaffolding for the Banach completeness of `W^{k,p}_chart(M)`
 
 This file collects scaffolding lemmas tying together the existing chart-target
-Phase-A Sobolev infrastructure (per-chart Banach completeness on Euclidean chart
-targets, in `EuclideanIteratedSobolevBanach.lean`) and the manifold-side
+Euclidean Sobolev infrastructure (per-chart Banach completeness on Euclidean
+chart targets, in `EuclideanIteratedSobolevBanach.lean`) and the manifold-side
 pullback construction (`pullbackToManifold` in `MeasurablePullback.lean`),
 needed to assemble a manifold limit for a Cauchy sequence in the chart-based
 Sobolev space `WkpChart`.
@@ -24,8 +24,9 @@ The pieces developed here are:
 1. The εδ-Cauchy condition on `wkpNormChart` derived from a Mathlib `CauchySeq`
    in the seminormed `WkpChart`.
 2. The per-chart Cauchy property in Euclidean `wkpNorm` on each chart target.
-3. The Phase-A application yielding, for each chart `α`, a Sobolev limit
-   `chartLimit α : EuclN → ℝ` in `MemWkp k p (chartTargetEuclid α)`.
+3. The per-chart Euclidean Banach completeness application yielding, for each
+   chart `α`, a Sobolev limit `chartLimit α : EuclN → ℝ` in
+   `MemWkp k p (chartTargetEuclid α)`.
 4. The manifold-side candidate limit
    `manifoldLimitFun(x) := Σ_{β ∈ chartAtlasPOU_finset} pullbackToManifold β
    (chartLimit β) (x)`,
@@ -166,7 +167,7 @@ theorem chartPushed_cauchy_of_wkpNormChart_cauchy
     ENNReal.le_tsum α
   exact le_trans h_summand_le_tsum h_le
 
-/-! ## Step 3: Phase-A application — per-chart Sobolev limit -/
+/-! ## Step 3: Euclidean Banach completeness application — per-chart Sobolev limit -/
 
 /-- For each chart `α`, the chart-pushed sequence has a `wkpNorm`-limit which
 is itself in `MemWkp k p` of the chart target. -/
@@ -210,7 +211,7 @@ theorem exists_chart_limit
 
 /-! ## Step 4: Choice of per-chart limits -/
 
-/-- A choice of per-chart Phase-A limit for a given Cauchy sequence. -/
+/-- A choice of per-chart Euclidean Sobolev limit for a given Cauchy sequence. -/
 noncomputable def chartLimit
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     {g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M}
@@ -270,8 +271,8 @@ lemma chartLimit_tendsto
 /-! ## Step 5: Manifold pre-limit candidate -/
 
 /-- The candidate manifold limit, defined as the finite POU-pulled-back sum of
-the per-chart Phase-A limits. The sum is over `chartAtlasPOU_finset`, a finite
-set on a compact manifold. -/
+the per-chart Euclidean Sobolev limits. The sum is over `chartAtlasPOU_finset`,
+a finite set on a compact manifold. -/
 noncomputable def manifoldLimitFun
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     {g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M}

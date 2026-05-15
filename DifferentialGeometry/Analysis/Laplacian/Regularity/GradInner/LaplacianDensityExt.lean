@@ -1,13 +1,13 @@
 import DifferentialGeometry.Analysis.Laplacian.Regularity.GradInner.LaplacianSmooth
 
 /-!
-# Density-based extension of the smooth-case M3.2 final theorem
+# Density-based extension of the smooth-case gradient-inner-Laplacian regularity theorem
 
 For a closed Riemannian manifold `(M, g)`, a smooth scalar
 `φ : C^∞⟮I, M; ℝ⟯`, and an arbitrary `u_h ∈ laplacianDomainPow g 2`, this
-module packages the **density-based extension** of the smooth-case M3.2
-final theorem (delivered in `GradInnerLaplacianSmoothFull.lean`) to the
-non-smooth case.
+module packages the **density-based extension** of the smooth-case
+gradient-inner-Laplacian regularity theorem (delivered in
+`GradInnerLaplacianSmoothFull.lean`) to the non-smooth case.
 
 The extension strategy is:
 
@@ -17,7 +17,7 @@ The extension strategy is:
    u_h` (in `H1Compl`) and the corresponding iterated preimages converging
    in `Lp`.
 
-2. **H¹Compl-continuity of both sides** of the M3.2 final identity.
+2. **H¹Compl-continuity of both sides** of the regularity identity.
    The LHS `gradInnerCLM g φ u_h` is H¹Compl-continuous in `u_h` (as a
    CLM). The RHS `H1ComplToLp(resolvent g (Bochner candidate))` is
    H¹Compl-continuous via the resolvent's continuity, provided the
@@ -31,8 +31,8 @@ The extension strategy is:
      provided `preimageLift` is continuous wrt the graph norm.
    - `ricciPairingCLM g φ u_h` — `Lp`-continuous via CLM property.
    - `hessPairingLpOnLapDom g φ hu_dom` — **the key obstruction**;
-     requires `H²`-graph-norm continuity, which is the subject of a
-     follow-up dispatch.
+     requires `H²`-graph-norm continuity, which is the subject of
+     follow-up work.
 
 4. **Smooth-case identity** (Step 2) on the dense subset.
 
@@ -46,18 +46,18 @@ hypotheses:
 * `h_density`: an approximating sequence of smooth scalars `v_n`
   approximating `u_h` in the H¹Compl topology, with iterated preimages
   converging in Lp.
-* `h_smooth`: the smooth-case M3.2 identity holds for each `v_n`.
+* `h_smooth`: the smooth-case regularity identity holds for each `v_n`.
 * `h_candidate_conv`: the Bochner candidate evaluated at `v_n`'s
   membership in `laplacianDomainPow g 2` converges to the candidate at
   the limit point `hu_h` (in `Lp`).
 
-Given these hypotheses, the M3.2 identity extends by continuity of both
-sides.
+Given these hypotheses, the regularity identity extends by continuity of
+both sides.
 
 ## Main results
 
 * `gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_via_density` —
-  the density-extension form of the M3.2 final theorem, with the
+  the density-extension form of the regularity theorem, with the
   approximating-sequence hypotheses exposed.
 
 * `gradInnerCLM_mem_image_laplacianDomain_via_density` — the image
@@ -68,7 +68,7 @@ sides.
 
 ## Note on the full unconditional discharge
 
-The full unconditional M3.2 final theorem requires:
+The full unconditional regularity theorem requires:
 
 1. **Construction of the approximating sequence**: given
    `u_h ∈ laplacianDomainPow g 2`, construct smooth `v_n : SmoothScalar g`
@@ -87,7 +87,7 @@ The full unconditional M3.2 final theorem requires:
 3. **Continuity of `hessPairingLpOnLapDom` in graph norm**: requires
    chart-side analysis and quantitative continuity bounds.
 
-All three are substantial follow-up dispatches and are the subject of
+All three are substantial follow-up items and are the subject of
 future work.
 -/
 
@@ -132,8 +132,9 @@ variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 /-! ## Density-extension hypotheses
 
-For the density extension of the smooth-case M3.2 to non-smooth
-`u_h ∈ laplacianDomainPow g 2`, we expose the following hypotheses:
+For the density extension of the smooth-case regularity result to
+non-smooth `u_h ∈ laplacianDomainPow g 2`, we expose the following
+hypotheses:
 
 * `h_smooth_seq : ℕ → SmoothScalar g` — a sequence of smooth scalars.
 * `h_smooth_mem : ∀ n, smoothToH1Compl (h_smooth_seq n) ∈ laplacianDomainPow g 2` —
@@ -147,9 +148,9 @@ For the density extension of the smooth-case M3.2 to non-smooth
 * `h_smooth_identity : ∀ n, smoothCandidate_identification_target g φ (h_smooth_seq n)` —
   the smooth-case identification holds for each approximator. -/
 
-/-- **Density-extension M3.2 final theorem, hypothesis-bearing**. Given
-the density-extension hypotheses, the M3.2 identity holds for arbitrary
-`u_h ∈ laplacianDomainPow g 2`. -/
+/-- **Density-extension regularity theorem, hypothesis-bearing**. Given
+the density-extension hypotheses, the regularity identity holds for
+arbitrary `u_h ∈ laplacianDomainPow g 2`. -/
 theorem gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_via_density
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -248,7 +249,7 @@ theorem gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_via_density
   -- Uniqueness of limits: LHS = RHS.
   exact tendsto_nhds_unique h_LHS_conv h_RHS_conv
 
-/-- **Density-extension M3.2 final theorem, image-membership form**. -/
+/-- **Density-extension regularity theorem, image-membership form**. -/
 theorem gradInnerCLM_mem_image_laplacianDomain_via_density
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -281,7 +282,7 @@ theorem gradInnerCLM_mem_image_laplacianDomain_via_density
       (I := I) (M := M) g φ hu_h h_smooth_seq h_conv_H1Compl
       h_conv_candidate h_smooth_identity).symm
 
-/-- **Density-extension M3.2 final theorem, iterated-closure form**. -/
+/-- **Density-extension regularity theorem, iterated-closure form**. -/
 theorem smoothMulH1Compl_mem_pow_two_via_density
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}

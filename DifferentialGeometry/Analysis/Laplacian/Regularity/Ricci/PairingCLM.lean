@@ -301,9 +301,9 @@ Constructing the constant `M_g(φ)` rigorously requires the Riesz dual of
 the compact manifold. This is substantial (~500-1000 lines of bundle
 infrastructure for the metric Riesz dual at the section level).
 
-For this dispatch, we expose `ricciPairingCLMOfBound` as the
+In the present module, we expose `ricciPairingCLMOfBound` as the
 hypothesis-bearing CLM constructor, taking the Lipschitz constant `C` and
-the corresponding bound as explicit inputs. A follow-up dispatch will
+the corresponding bound as explicit inputs. Follow-up work will
 construct `C` unconditionally via the section-level metric Riesz dual
 infrastructure. -/
 

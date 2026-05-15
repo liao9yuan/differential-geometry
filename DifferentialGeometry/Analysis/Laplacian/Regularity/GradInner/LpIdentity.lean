@@ -10,7 +10,7 @@ For a closed Riemannian manifold `(M, g)` and an arbitrary smooth scalar
 twice the gradient inner product `2 · gradInnerCLM g φ u_h` valid for every
 `u_h ∈ laplacianDomain g`.
 
-The identity follows from the Phase 3 `(1-Δ)`-preimage formula
+The identity follows from the `(1-Δ)`-preimage formula
 `laplacianDomain.preimage⟨smoothMulH1Compl g φ u_h⟩ = fHLeibnizGeneral g φ u_h hu_h`
 combined with the definitional unfolding of `fHLeibnizGeneral` and
 `fHLeibnizGeneralResidualCLM`.
@@ -26,7 +26,7 @@ combined with the definitional unfolding of `fHLeibnizGeneral` and
       − smoothMulLp g (Δφ) (H1ComplToLp u_h).
   ```
 
-  This rearranges the existing Phase 3 preimage decomposition; for
+  This rearranges the existing preimage decomposition; for
   `φ := chartAtlasPOU I M α` it specialises to (and is mathematically
   equivalent to) `ResidualLpDecomposition.fHLeibnizGeneralResidualCLM_eq_preimageDiff`.
 
@@ -116,7 +116,7 @@ private lemma add_sub_rearrange {α : Type*} [AddCommGroup α] {a b c d : α}
 
 /-! ## Step 1: the general `Lp`-class identity for `2 • gradInnerCLM g φ u_h`
 
-We rearrange the Phase 3 preimage decomposition
+We rearrange the preimage decomposition
 `preimage⟨smoothMulH1Compl g φ u_h⟩ = smoothMulLp g φ (preimage⟨u_h⟩) +
     fHLeibnizGeneralResidualCLM g φ u_h`
 together with the unfolding
@@ -153,7 +153,7 @@ theorem gradInnerCLM_eq_two_inv_preimageDiff
           (smoothLaplacianBundle (I := I) (M := M) g φ)
           (H1ComplToLp (I := I) (M := M) g u_h) := by
   classical
-  -- Step 1: Phase 3 preimage identity:
+  -- Step 1: preimage identity:
   --   preimage⟨smoothMulH1Compl φ u_h⟩ = fHLeibnizGeneral g φ u_h hu_dom.
   have h_preimage :=
     laplacianDomain_preimage_smoothMulH1Compl (I := I) (M := M) g φ hu_dom
@@ -256,7 +256,7 @@ theorem smoothMulLp_preimage_in_image_laplacianDomain
   classical
   -- Lift preimage⟨u_h⟩ to vH ∈ laplacianDomain g via `preimageLift`.
   have hvH_mem := preimageLift_mem_laplacianDomain (I := I) (M := M) g hu_h
-  -- smoothMulH1Compl g φ vH ∈ laplacianDomain g (Phase 3).
+  -- smoothMulH1Compl g φ vH ∈ laplacianDomain g.
   have h_sM_mem := smoothMulH1Compl_mem_laplacianDomain
     (I := I) (M := M) g φ hvH_mem
   -- H1ComplToLp (smoothMulH1Compl φ vH) = smoothMulLp φ (H1ComplToLp vH) = smoothMulLp φ (preimage⟨u_h⟩).
@@ -269,7 +269,7 @@ theorem smoothMulLp_preimage_in_image_laplacianDomain
 /-- For any `u_h ∈ H1Compl g`, the `Lp`-class
 `smoothMulLp g (Δφ) (H1ComplToLp u_h)` lifts to `H1Compl` when
 `u_h ∈ laplacianDomain g`: it equals `H1ComplToLp(smoothMulH1Compl g (Δφ) u_h)`
-with `smoothMulH1Compl g (Δφ) u_h ∈ laplacianDomain g` (Phase 3). -/
+with `smoothMulH1Compl g (Δφ) u_h ∈ laplacianDomain g`. -/
 theorem smoothMulLp_DeltaPhi_in_image_laplacianDomain
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}

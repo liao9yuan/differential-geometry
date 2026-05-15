@@ -2,21 +2,21 @@ import DifferentialGeometry.Analysis.Laplacian.Regularity.Hessian.BridgeSmoothLp
 import DifferentialGeometry.Analysis.Laplacian.Regularity.GradInner.LaplacianSmooth
 
 /-!
-# Full smooth-case M3.2 final theorem (unconditional on the Christoffel
-discharge + per-chart transferability hypotheses)
+# Full smooth-case gradient-inner-Laplacian regularity theorem (unconditional on
+the Christoffel discharge + per-chart transferability hypotheses)
 
 For a closed Riemannian manifold `(M, g)`, a smooth scalar
 `φ : C^∞⟮I, M; ℝ⟯`, and a smooth scalar `v : SmoothScalar g`, this module
 combines the smooth-case Lp-class Hessian bridge (delivered conditional on
 `christoffelDischargeSmoothCase` + `perChartAeTransferableSmoothCase` in
-`HessianBridgeSmoothLp`) with the existing M3.2 smooth-case theorem
+`HessianBridgeSmoothLp`) with the existing smooth-case regularity theorem
 (conditional on the Hessian bridge in `GradInnerLaplacianSmoothFull`)
-to deliver the **full smooth-case M3.2 final theorem** conditional only on
+to deliver the **full smooth-case regularity theorem** conditional only on
 the two clean hypotheses.
 
 ## Hypotheses
 
-The M3.2 smooth-case final theorem is now conditional on two clean
+The smooth-case regularity theorem is now conditional on two clean
 hypotheses (replacing the broader Hessian-bridge hypothesis):
 
 1. **Christoffel discharge** (`christoffelDischargeSmoothCase g φ v`):
@@ -28,11 +28,11 @@ hypotheses (replacing the broader Hessian-bridge hypothesis):
 ## Main results
 
 * `gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_smooth_of_christoffel_discharge`
-  — the smooth-case M3.2 final theorem in resolvent-of-candidate form,
+  — the smooth-case regularity theorem in resolvent-of-candidate form,
   conditional on both hypotheses.
 
 * `smoothCase_full_unconditional_of_christoffel_discharge`
-  — the smooth-case M3.2 image-membership form, conditional on both.
+  — the smooth-case image-membership form, conditional on both.
 
 * `smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_unconditional_of_christoffel_discharge`
   — the iterated-closure form, conditional on both.
@@ -80,12 +80,12 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## The smooth-case M3.2 final theorem with the cleaner hypothesis pair
+/-! ## The smooth-case regularity theorem with the cleaner hypothesis pair
 
 The Hessian bridge hypothesis in `GradInnerLaplacianSmoothFull` is
 discharged via `HessianBridgeSmoothLp` under the two cleaner hypotheses. -/
 
-/-- **Smooth-case M3.2 final theorem, resolvent-of-candidate form, conditional
+/-- **Smooth-case regularity theorem, resolvent-of-candidate form, conditional
 on Christoffel discharge and per-chart transferability.** -/
 theorem gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_smooth_of_christoffel_discharge
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
@@ -105,7 +105,7 @@ theorem gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_smooth_of_christoffe
 
 /-! ## The image-membership form -/
 
-/-- **Smooth-case M3.2 conclusion (image-membership form) via the unconditional
+/-- **Smooth-case conclusion (image-membership form) via the unconditional
 candidate, conditional on Christoffel discharge and per-chart transferability.** -/
 theorem smoothCase_full_unconditional_of_christoffel_discharge
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
@@ -158,11 +158,11 @@ theorem smoothCase_variational_identity_unconditional_of_christoffel_discharge
 /-! ## Theorems conditional only on the Christoffel discharge
 
 Since per-chart ae-transferability is discharged unconditionally in
-`HessianBridgeSmoothLp.perChartAeTransferableSmoothCase_holds`, the M3.2
-smooth-case theorems can be restated to require only the Christoffel
-discharge hypothesis. -/
+`HessianBridgeSmoothLp.perChartAeTransferableSmoothCase_holds`, the
+smooth-case regularity theorems can be restated to require only the
+Christoffel discharge hypothesis. -/
 
-/-- **Smooth-case M3.2 final theorem, resolvent-of-candidate form, conditional
+/-- **Smooth-case regularity theorem, resolvent-of-candidate form, conditional
 only on the Christoffel discharge.** Per-chart ae-transferability is discharged
 unconditionally upstream. -/
 theorem gradInnerCLM_eq_H1ComplToLp_resolvent_smoothCase_of_discharge
@@ -179,7 +179,7 @@ theorem gradInnerCLM_eq_H1ComplToLp_resolvent_smoothCase_of_discharge
     (I := I) (M := M) g φ v
     (perChartAeTransferableSmoothCase_holds (I := I) (M := M) g φ v) h_discharge
 
-/-- **Smooth-case M3.2 conclusion (image-membership form), conditional only on
+/-- **Smooth-case conclusion (image-membership form), conditional only on
 the Christoffel discharge.** -/
 theorem smoothCase_full_of_discharge
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)

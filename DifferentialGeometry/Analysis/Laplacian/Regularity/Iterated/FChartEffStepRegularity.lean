@@ -53,7 +53,7 @@ For the `MemWkp K 2` regularity of `numerator / density`, we exploit:
 * Multiplication by a smooth, bounded function preserves `MemWkp K 2` via
   `MemWkp.smul_smooth_bounded`.
 
-After dispatching each layer as `MemWkp K 2`, sum them up via `MemWkp.add`
+After handling each layer as `MemWkp K 2`, sum them up via `MemWkp.add`
 / `MemWkp.sub`, then divide by the density via the cutoff-extension of
 `1 / densityOnEuclid g α`.
 

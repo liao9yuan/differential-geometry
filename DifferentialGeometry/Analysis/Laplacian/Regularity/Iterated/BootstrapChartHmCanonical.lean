@@ -48,7 +48,7 @@ discharge is fully unconditional via the existing infrastructure:
 * `k = 2`: chart-`H⁴` (via
   `chartPushed_memWkp_four_two_of_laplacianDomainPow_two`).
 
-The polymorphic-in-`k` headline below dispatches through the `k ≤ 2`
+The polymorphic-in-`k` headline below routes through the `k ≤ 2`
 discharge directly. For `k ≥ 3`, the chart-`H⁴` anchor provides the
 strongest currently-deliverable unconditional chart-Sobolev regularity at
 the chart level; the polymorphic-in-`k` chart-`H^{2k}` headline is the

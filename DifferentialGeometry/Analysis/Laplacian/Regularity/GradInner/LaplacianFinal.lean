@@ -1,11 +1,11 @@
 import DifferentialGeometry.Analysis.Laplacian.Regularity.GradInner.LaplacianVariational
 
 /-!
-# The M3.2 final theorem: `gradInnerCLM g φ u_h ∈ H1ComplToLp '' laplacianDomain g`
+# The gradient-inner-Laplacian regularity theorem: `gradInnerCLM g φ u_h ∈ H1ComplToLp '' laplacianDomain g`
 
-This module delivers the M3.2 headline result for `u_h ∈ laplacianDomainPow g 2`,
-on a closed Riemannian manifold `(M, g)` with an arbitrary smooth scalar
-`φ : C^∞⟮I, M; ℝ⟯`:
+This module delivers the headline regularity result for
+`u_h ∈ laplacianDomainPow g 2`, on a closed Riemannian manifold `(M, g)`
+with an arbitrary smooth scalar `φ : C^∞⟮I, M; ℝ⟯`:
 
 ```
 gradInnerCLM g φ u_h ∈ Set.image (H1ComplToLp g) (laplacianDomain g : Set (H1Compl g)).
@@ -47,7 +47,7 @@ The result is delivered in several layered forms:
 
 ## Main results
 
-* `gradInnerCLM_mem_image_laplacianDomain_of_variational` — the headline M3.2
+* `gradInnerCLM_mem_image_laplacianDomain_of_variational` — the headline
   membership theorem, given the variational identity as a hypothesis.
 
 * `gradInnerCLM_eq_resolventL2_candidate_iff_mem_image` — the variational
@@ -56,15 +56,15 @@ The result is delivered in several layered forms:
 * `gradInnerCLM_smoothCase_eq_resolventL2_candidate` — for smooth `v` and
   `u_h := smoothToH1Compl v`, the variational identity holds **conditionally on
   `smoothCandidate_identification_target g φ v`**. Once the smooth-case
-  candidate identification is proved, the smooth-case M3.2 conclusion via the
+  candidate identification is proved, the smooth-case conclusion via the
   candidate's resolvent is immediate.
 
 * `gradInnerCLM_smoothCase_mem_image_laplacianDomain_via_candidate` — the
-  smooth-case M3.2 conclusion via the unconditional candidate's resolvent,
+  smooth-case conclusion via the unconditional candidate's resolvent,
   conditional on `smoothCandidate_identification_target`.
 
 * `gradInnerCLM_smoothCase_mem_image_laplacianDomain_unconditional` — the
-  smooth-case M3.2 conclusion, **unconditional**, repackaging the existing
+  smooth-case conclusion, **unconditional**, repackaging the existing
   smooth-case discharge from `GradInnerLpIdentity`.
 
 * `smoothMulH1Compl_mem_pow_two_iff_via_candidate_resolvent` — the headline
@@ -81,7 +81,7 @@ The headline conclusion `gradInnerCLM g φ u_h ∈ H1ComplToLp '' laplacianDomai
 for `u_h ∈ laplacianDomainPow g 2` is equivalent (by the existing equivalence
 theorem) to the iterated closure `smoothMulH1Compl g φ u_h ∈ laplacianDomainPow g 2`.
 
-This equivalence locates the M3.2 deliverable in one of two equivalent forms:
+This equivalence locates the regularity result in one of two equivalent forms:
 
 * **Image form**: `gradInnerCLM g φ u_h ∈ H1ComplToLp '' laplacianDomain g`.
 * **Iterated-closure form**: `smoothMulH1Compl g φ u_h ∈ laplacianDomainPow g 2`.
@@ -127,9 +127,9 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## The variational-identity-conditional M3.2 final theorem
+/-! ## The variational-identity-conditional regularity theorem
 
-The cleanest packaging of the M3.2 final result for arbitrary
+The cleanest packaging of the regularity result for arbitrary
 `u_h ∈ laplacianDomainPow g 2` is the variational-identity-conditional form:
 given that `gradInnerCLM g φ u_h` agrees with `H1ComplToLp(resolvent g (Bochner candidate))`
 as an `Lp 2`-class, the membership conclusion follows. -/
@@ -156,7 +156,7 @@ theorem gradInnerCLM_imageLap_witness_mem_laplacianDomain
   exact (laplacianDomain_mem_iff (I := I) (M := M) g).mpr
     ⟨gradInnerLaplacianCandidateUnconditional (I := I) (M := M) g φ hu_h, rfl⟩
 
-/-- **The headline M3.2 final theorem, variational-identity form**. Given the
+/-- **The headline regularity theorem, variational-identity form**. Given the
 Lp-class equality `gradInnerCLM g φ u_h = H1ComplToLp(resolvent g (Bochner candidate))`,
 the membership conclusion follows by exhibiting the resolvent witness. -/
 theorem gradInnerCLM_mem_image_laplacianDomain_of_variational
@@ -209,7 +209,7 @@ theorem variational_identity_implies_mem_image
   gradInnerCLM_eq_H1ComplToLp_resolvent_of_variational
     (I := I) (M := M) g φ hu_h hvar_id
 
-/-! ## The smooth-case M3.2 final theorem via the unconditional candidate
+/-! ## The smooth-case regularity theorem via the unconditional candidate
 
 For smooth `v ∈ SmoothScalar g`, with `u_h := smoothToH1Compl v` and
 `hu_h := smoothToH1Compl_mem_laplacianDomainPow_two g v`, the smooth-case
@@ -220,7 +220,7 @@ holds unconditionally (via the smooth bridge for smoothToH1Compl).
 
 To bridge to the unconditional candidate's resolvent, we need
 `smoothCandidate_identification_target g φ v`, which equates the two Lp
-classes. The smooth-case M3.2 final theorem then follows directly. -/
+classes. The smooth-case regularity theorem then follows directly. -/
 
 /-- The smooth-case variational identity, given the smooth-case candidate
 identification. -/
@@ -238,7 +238,7 @@ theorem gradInnerCLM_smoothCase_eq_resolventL2_candidate
   smoothCase_via_candidate_identification
     (I := I) (M := M) g φ v h_identify
 
-/-- The smooth-case M3.2 conclusion via the unconditional candidate's resolvent,
+/-- The smooth-case conclusion via the unconditional candidate's resolvent,
 conditional on `smoothCandidate_identification_target`. -/
 theorem gradInnerCLM_smoothCase_mem_image_laplacianDomain_via_candidate
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
@@ -253,7 +253,7 @@ theorem gradInnerCLM_smoothCase_mem_image_laplacianDomain_via_candidate
     (gradInnerCLM_smoothCase_eq_resolventL2_candidate
       (I := I) (M := M) g φ v h_identify)
 
-/-- The smooth-case M3.2 conclusion (unconditional, no auxiliary hypothesis).
+/-- The smooth-case conclusion (unconditional, no auxiliary hypothesis).
 Re-export of `gradInnerCLM_mem_image_laplacianDomain_smooth`. -/
 theorem gradInnerCLM_smoothCase_mem_image_laplacianDomain_unconditional
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
@@ -263,7 +263,7 @@ theorem gradInnerCLM_smoothCase_mem_image_laplacianDomain_unconditional
         (laplacianDomain (I := I) (M := M) g : Set (H1Compl g)) :=
   gradInnerCLM_mem_image_laplacianDomain_smooth (I := I) (M := M) g φ v
 
-/-! ## Iterated-closure form of the smooth-case M3.2 final theorem
+/-! ## Iterated-closure form of the smooth-case regularity theorem
 
 The image membership statement is equivalent (by the established
 `smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image`) to the iterated-closure
@@ -282,7 +282,7 @@ theorem smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_unconditiona
 
 /-! ## Equivalence: image membership ↔ iterated closure
 
-The two forms of the M3.2 statement are equivalent via the
+The two forms of the regularity statement are equivalent via the
 `smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image` equivalence. We re-export. -/
 
 /-- **The iterated-closure ↔ image-membership equivalence** for
@@ -304,7 +304,7 @@ theorem mem_image_laplacianDomain_iff_smoothMulH1Compl_mem_pow_two
 Given the iterated closure `smoothMulH1Compl g φ u_h ∈ laplacianDomainPow g 2`,
 the image membership follows directly. -/
 
-/-- **The headline M3.2 final theorem, iterated-closure form**. Given
+/-- **The headline regularity theorem, iterated-closure form**. Given
 `smoothMulH1Compl g φ u_h ∈ laplacianDomainPow g 2`, the image membership follows. -/
 theorem gradInnerCLM_mem_image_laplacianDomain_of_iteratedClosure
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)

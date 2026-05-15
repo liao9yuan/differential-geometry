@@ -144,7 +144,7 @@ theorem exists_sum_chartRSTwistInv_cov_sq_norm_le_const_mul_tensorCovDerivPointw
   obtain ⟨K, hK_nn, h_per⟩ :=
     chartRSTwistInv_sq_norm_le_const_mul_tensorInnerPointwise_on_pouTsupport
       (I := I) (M := M) g r s α
-  -- Diagonal-sum bound (constant `C'`, from sub-substep 3.b).
+  -- Diagonal-sum bound (constant `C'`).
   obtain ⟨C', hC'_nn, h_diag⟩ :=
     exists_sum_tensorInnerPointwise_cov_chartBasis_diagonal_le_const_mul_tensorCovDerivPointwiseInner_on_pouTsupport
       (I := I) (M := M) g r s α

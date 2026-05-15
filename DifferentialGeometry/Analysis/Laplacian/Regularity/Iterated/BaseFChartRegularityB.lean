@@ -7,8 +7,9 @@ import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseHigherO
 /-!
 # Polymorphic-in-`m` chart-target `MemWkp m 2` of `base.f_chart`
 
-Building on `IteratedBaseFChartRegularity.lean` (Phase A polymorphic bilinear
-bound and Phase D hypothesis-bearing entry), this file delivers Phases B + C +
+Building on `IteratedBaseFChartRegularity.lean` (the polymorphic bilinear
+bound and the hypothesis-bearing entry point), this file delivers the
+density approximator, the Cauchy property and limit identification, and
 the final unconditional wiring at arbitrary order `m : ℕ`.
 
 For a closed Riemannian manifold `(M, g)`, a chart base point `α : M`, a
@@ -21,21 +22,21 @@ hu_h_lapdom).f_chart` lies in `MemWkp m 2 chartTargetEuclid α` provided:
 * the canonical chart-pushed representative of the `Lp`-side preimage
   `(1 - Δ_g) u_h` lies in `MemWkpChart g m 2`.
 
-## Phase structure
+## Structure
 
-* **Phase B** — polymorphic chart-`W^{m+1,2}` smooth-density approximator
-  `smoothApproxSeqWkpM g hu_chart_W m_succ n : SmoothScalar g`, converging to
-  `u_h.coeFn` at chart-`W^{m+1,2}` rate `1/(n+1)`.
+* **Density approximator** — polymorphic chart-`W^{m+1,2}` smooth-density
+  approximator `smoothApproxSeqWkpM g hu_chart_W m_succ n : SmoothScalar g`,
+  converging to `u_h.coeFn` at chart-`W^{m+1,2}` rate `1/(n+1)`.
 
-* **Phase C1** — chart-target `wkpNorm m 2`-Cauchy property of
-  `smoothFChartResidual g α (smoothApproxSeqWkpM n)` (Phase A polymorphic
+* **Cauchy property** — chart-target `wkpNorm m 2`-Cauchy property of
+  `smoothFChartResidual g α (smoothApproxSeqWkpM n)` (the polymorphic
   bilinear bound + chart-`W^{m+1,2}` Cauchy property of the approximator +
   a.e. linearity of `smoothFChartResidual`).
 
-* **Phase C2** — identification of the chart-target `wkpNorm m 2`-limit with
-  `fChartResidual g α u_h` (manifold-side `H1Compl`-tendsto via chart-`W^{1,2}`
-  monotonicity + `wkpNorm m 2 ≥ eLpNorm 2` bridge + subsequence extraction +
-  mutual absolute continuity).
+* **Limit identification** — identification of the chart-target
+  `wkpNorm m 2`-limit with `fChartResidual g α u_h` (manifold-side
+  `H1Compl`-tendsto via chart-`W^{1,2}` monotonicity + `wkpNorm m 2 ≥
+  eLpNorm 2` bridge + subsequence extraction + mutual absolute continuity).
 
 * **Final headline** — polymorphic unconditional `MemWkp m 2` of `base.f_chart`,
   using the a.e. decomposition `base.f_chart =ᵐ fChartPiecePreimageGeneral +
@@ -45,9 +46,9 @@ hu_h_lapdom).f_chart` lies in `MemWkp m 2 chartTargetEuclid α` provided:
 ## Main results
 
 * `smoothApproxSeqWkpM` — polymorphic chart-`W^{m+1,2}` approximator.
-* `smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy_wkpM` — Phase C1.
+* `smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy_wkpM` — the Cauchy property.
 * `smoothApproxSeqWkpM_smoothFChartResidual_limit_eq_fChartResidual_wkpM`
-  — Phase C2 identification.
+  — the limit identification.
 * `fChartResidual_memWkp_m_truly_unconditional` — chart-target `MemWkp m 2` of
   `fChartResidual` unconditionally, given chart-`H^{m+1}` of `u_h.coeFn`.
 * `base_f_chart_memWkp_m_truly_unconditional` — headline polymorphic
@@ -125,7 +126,7 @@ private lemma wkpNormChart_one_le_succ
         wkpNormChart_le_succ (I := I) (M := M) g (k + 1) 2 u
       exact ih.trans h_step
 
-/-! ## Phase B: polymorphic chart-`W^{m+1,2}` smooth-density approximator -/
+/-! ## Polymorphic chart-`W^{m+1,2}` smooth-density approximator -/
 
 /-- For a function `u : M → ℝ` in `MemWkpChart g (m+1) 2`, there is a smooth
 approximator at any chart-`W^{m+1,2}` rate `ε > 0`. -/
@@ -232,7 +233,7 @@ theorem smoothApproxSeqWkpM_wkpNormChart_diff_le
     rw [add_comm]
   exact le_trans h_add (le_of_le_of_eq h_bound1 h_comm)
 
-/-! ## Phase C1: chart-target `wkpNorm m 2`-Cauchy property of the smooth residual -/
+/-! ## Chart-target `wkpNorm m 2`-Cauchy property of the smooth residual -/
 
 /-- **Chart-target `wkpNorm m 2`-Cauchy property of `smoothFChartResidual` along
 the chart-`W^{m+1,2}` smooth approximator sequence.** -/
@@ -979,7 +980,7 @@ private lemma exists_subseq_ae_weighted_restrict
       h_aesm_n hF_aesm h_tendsto
   exact h_tim.exists_seq_tendsto_ae
 
-/-! ## Phase C2: identification of the chart-target `wkpNorm m 2`-limit -/
+/-! ## Identification of the chart-target `wkpNorm m 2`-limit -/
 
 /-- **Identification of the chart-target `wkpNorm m 2`-limit with `fChartResidual`.** -/
 theorem smoothApproxSeqWkpM_smoothFChartResidual_limit_eq_fChartResidual_wkpM
@@ -1111,7 +1112,7 @@ theorem smoothApproxSeqWkpM_smoothFChartResidual_limit_eq_fChartResidual_wkpM
     with y h_to_Flim h_to_fChart
   exact tendsto_nhds_unique h_to_Flim h_to_fChart
 
-/-! ## Phase D: chart-target `MemWkp m 2` of `fChartResidual` unconditionally -/
+/-! ## Chart-target `MemWkp m 2` of `fChartResidual` unconditionally -/
 
 /-- **Unconditional `MemWkp m 2` of `fChartResidual`** given chart-`H^{m+1}` of
 `u_h.coeFn`. -/

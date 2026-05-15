@@ -16,7 +16,8 @@ equality of the chart-local LapDom pairing with the chart-α Euclidean
 pairing to a manifold-side ae equality.
 
 The two hypotheses, when combined, yield the unconditional smooth-case
-Hessian bridge needed for the M3.2 unconditional smooth case.
+Hessian bridge needed for the unconditional smooth-case Laplacian
+regularity theorem.
 
 ## Hypotheses
 

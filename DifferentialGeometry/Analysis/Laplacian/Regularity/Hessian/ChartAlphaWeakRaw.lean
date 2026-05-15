@@ -182,7 +182,7 @@ private lemma chartPushedPouFun_memW1p
   have h := chartPushedPouFun_memWkp_two_two (I := I) (M := M) g α hu_h
   exact h.memW1p
 
-/-! ## M1.1 — Chart-α first weak partial of the POU-cut chart pull-back
+/-! ## Chart-α first weak partial of the POU-cut chart pull-back
 
 The chart-α first weak partial is the canonical `chosenWeakPartial' 2 j` of
 `chartPushedPouFun`. For `u_h ∈ laplacianDomain g`, the resulting function is
@@ -263,7 +263,7 @@ theorem chosenChartFirstWeakPartial_locally_memLp
   rw [← h_eq]
   exact h_global.restrict K
 
-/-! ## M1.2 — Chart-α second weak partial of the POU-cut chart pull-back
+/-! ## Chart-α second weak partial of the POU-cut chart pull-back
 
 The chart-α second weak partial is the canonical
 `chosenWeakPartial' 2 l (chosenWeakPartial' 2 k _ _) _`. For
@@ -350,7 +350,7 @@ theorem chosenChartSecondWeakPartial_locally_memLp
   rw [← h_eq]
   exact h_global.restrict K
 
-/-! ## M1.3 — Chart-α Christoffel correction term (weak version)
+/-! ## Chart-α Christoffel correction term (weak version)
 
 The chart-α Christoffel correction is the finite sum
 `Σ_m Γ^m_{kl}(α, toE.symm y) · chosenChartFirstWeakPartial g α hu_h m y`.
@@ -506,7 +506,7 @@ theorem chartChristoffelCorrectionWeak_memLp_chartTarget_compact
     (fun m _ => chartChristoffelCorrectionWeak_summand_memLp
       (I := I) (M := M) g α hu_h k l m hK_compact hK_in)
 
-/-! ## M1.4 — Chart-α tensor-corrected weak Hessian -/
+/-! ## Chart-α tensor-corrected weak Hessian -/
 
 /-- The chart-α tensor-corrected weak Hessian of the POU-cut chart pull-back:
 `chosenSecondPartial - Σ_m Γ^m_{kl} · chosenFirstPartial_m`. -/

@@ -1340,7 +1340,7 @@ theorem tendsto_eLpNorm_translate_sub_of_memLp
   -- We want: ∀ h ∈ 𝓝 0, eLpNorm (τ_h f - f) p ≤ ε.
   -- Decompose τ_h f - f = (τ_h f - τ_h g) + (τ_h g - g) + (g - f).
   -- ‖τ_h f - τ_h g‖_p = ‖f - g‖_p (translation-invariance) ≤ εR/4.
-  -- ‖τ_h g - g‖_p ≤ ‖h‖ · ‖∇g‖_p (Phase A).
+  -- ‖τ_h g - g‖_p ≤ ‖h‖ · ‖∇g‖_p (smooth-case translation estimate).
   -- ‖g - f‖_p ≤ εR/4.
   -- Sum: ≤ 2 · εR/4 + ‖h‖ · ‖∇g‖_p = εR/2 + ‖h‖ · ‖∇g‖_p.
   -- Choose δ such that ‖h‖ ≤ δ ⟹ ‖h‖ · ‖∇g‖_p ≤ εR/2.
@@ -1478,7 +1478,7 @@ theorem tendsto_eLpNorm_translate_sub_of_memLp
     exact hg_diff
   -- ‖B‖_p ≤ ‖h‖ · Cgrad.
   have hB_le : eLpNorm B p volume ≤ ENNReal.ofReal ‖h‖ * Cgrad := by
-    -- Phase A: eLpNorm (φ x - φ (x - h)) p ≤ ‖h‖ · eLpNorm (‖∇φ‖) p.
+    -- Smooth-case translation estimate: eLpNorm (φ x - φ (x - h)) p ≤ ‖h‖ · eLpNorm (‖∇φ‖) p.
     -- Our B is φ(x-h) - φ(x), the negation.
     have hBA : B = -(fun x => g x - g (x - h)) := by
       funext x; simp only [B, Pi.neg_apply]; ring

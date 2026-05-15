@@ -19,7 +19,7 @@ regularity used by the differentiated chart-bilinear data constructor.
 
 The chain has four logical steps:
 
-1. **(M5) Image-membership of `gradInnerCLM g ρα u_h`**: for
+1. **Image-membership of `gradInnerCLM g ρα u_h`**: for
    `u_h ∈ laplacianDomainPow g 2`,
    ```
    gradInnerCLM g ρα u_h ∈ H1ComplToLp '' (laplacianDomain g).
@@ -35,7 +35,7 @@ The chain has four logical steps:
      each approximator. Re-export of
      `gradInnerCLM_mem_image_laplacianDomain_via_density`.
 
-2. **(M6) Iterated closure of `smoothMulH1Compl g ρα u_h`**: under the same
+2. **Iterated closure of `smoothMulH1Compl g ρα u_h`**: under the same
    hypotheses,
    ```
    smoothMulH1Compl g ρα u_h ∈ laplacianDomainPow g 2.
@@ -44,53 +44,57 @@ The chain has four logical steps:
    multiplication: starting from `u_h ∈ laplacianDomainPow g 2`, the
    product `ρα · u_h` (as an `H1Compl` element) remains in
    `laplacianDomainPow g 2` (so its `(1-Δ_g)`-preimage is again in
-   `laplacianDomain g`, recursively). Membership follows from M5 via the
-   equivalence `smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image`.
+   `laplacianDomain g`, recursively). Membership follows from the
+   image-membership step via the equivalence
+   `smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image`.
 
-3. **(M7) `MemWkpChart g 2 2` regularity of the Leibniz residual Lp class**:
-   given M6, the Lp class `fHLeibnizResidualLp g α u_h` (≡
+3. **`MemWkpChart g 2 2` regularity of the Leibniz residual Lp class**:
+   given the iterated closure, the Lp class `fHLeibnizResidualLp g α u_h` (≡
    `preimage⟨smoothMulH1Compl ρα u_h⟩ - smoothMulLp ρα (preimage u_h)`) has
    its function representative in `MemWkpChart g 2 2`. This follows from
    closure of `MemWkpChart g 2 2` under subtraction, together with the
    two-sided `H²` regularity `laplacianDomainPow_two_h2_plus_rhs_h2`
-   applied to `smoothMulH1Compl ρα u_h ∈ laplacianDomainPow g 2` (M6) and to
-   `u_h ∈ laplacianDomainPow g 2`.
+   applied to `smoothMulH1Compl ρα u_h ∈ laplacianDomainPow g 2` (the
+   iterated closure) and to `u_h ∈ laplacianDomainPow g 2`.
 
-4. **(M8) The constructor**: the existing `_unconditional` constructor
+4. **The constructor**: the existing `_unconditional` constructor
    `diffChartBilinearH1ComplData_of_laplacianDomainPow_two_unconditional`
    takes `MemW1p 2 fChartResidual` as a hypothesis. The discharge of this
-   hypothesis from M7 requires an additional chart-side support bridge
-   (the "raw chart-pull MemW1p" piece): for `F : M → ℝ` with `F ∈
-   MemWkpChart g 1 p` and `tsupport(F)` contained in `(chartAt H α).source`,
-   the raw chart-pull `chartPushedRaw α F` is in
+   hypothesis from the residual regularity step requires an additional
+   chart-side support bridge (the "raw chart-pull MemW1p" piece): for
+   `F : M → ℝ` with `F ∈ MemWkpChart g 1 p` and `tsupport(F)` contained in
+   `(chartAt H α).source`, the raw chart-pull `chartPushedRaw α F` is in
    `MemW1p p chartTargetEuclid α`. This bridge is currently a follow-up
    piece. The constructor here exposes the residual `MemW1p` hypothesis
    in the same form as the `_unconditional` constructor, packaged with
-   the density hypotheses needed for M5/M6.
+   the density hypotheses needed for the image-membership and
+   iterated-closure steps.
 
 ## Main results
 
 ### Unconditional (smooth case)
 
-* `gradInnerCLM_mem_image_smooth` — M5 smooth-case (re-export).
-* `smoothMulH1Compl_mem_pow_two_smooth` — M6 smooth-case (re-export).
+* `gradInnerCLM_mem_image_smooth` — image-membership, smooth case (re-export).
+* `smoothMulH1Compl_mem_pow_two_smooth` — iterated closure, smooth case (re-export).
 
 ### Density-bearing (general case)
 
-* `gradInnerCLM_mem_image_density` — M5 with density hypotheses.
-* `smoothMulH1Compl_mem_pow_two_density` — M6 with density hypotheses.
-* `fHLeibnizResidualLp_coeFn_memWkpChart_two_two_of_M6` — M7 with M6
-  hypothesis: the manifold-side function corresponding to
-  `fHLeibnizResidualLp.coeFn` lies in `MemWkpChart g 2 2`.
-* `fHLeibnizResidualLp_coeFn_memWkpChart_two_two_density` — M7 with
-  density hypotheses (discharges M6 internally).
+* `gradInnerCLM_mem_image_density` — image-membership with density hypotheses.
+* `smoothMulH1Compl_mem_pow_two_density` — iterated closure with density hypotheses.
+* `fHLeibnizResidualLp_coeFn_memWkpChart_two_two_of_M6` — residual
+  regularity given the iterated closure: the manifold-side function
+  corresponding to `fHLeibnizResidualLp.coeFn` lies in `MemWkpChart g 2 2`.
+* `fHLeibnizResidualLp_coeFn_memWkpChart_two_two_density` — residual
+  regularity with density hypotheses (discharges the iterated closure
+  internally).
 
 ### The constructor
 
 * `diffChartBilinearH1ComplData_of_laplacianDomainPow_two_density` — the
-  M8 constructor packaged with the density hypotheses for M5/M6, plus the
-  residual `MemW1p 2 fChartResidual` hypothesis (matching the shape of
-  the existing `_unconditional` constructor).
+  constructor packaged with the density hypotheses for the image-membership
+  and iterated-closure steps, plus the residual `MemW1p 2 fChartResidual`
+  hypothesis (matching the shape of the existing `_unconditional`
+  constructor).
 
 ## Note on the chart-side support bridge
 
@@ -146,9 +150,9 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## M5: Image-membership of `gradInnerCLM g φ u_h` -/
+/-! ## Image-membership of `gradInnerCLM g φ u_h` -/
 
-/-- **M5 smooth-case (unconditional).** For smooth `v : SmoothScalar g`,
+/-- **Image-membership, smooth case (unconditional).** For smooth `v : SmoothScalar g`,
 the gradient inner product `gradInnerCLM g φ (smoothToH1Compl v)` lifts to
 an `H1Compl` element in `laplacianDomain g`. Re-export of
 `gradInnerCLM_smoothToH1Compl_mem_image_laplacianDomain`. -/
@@ -161,7 +165,7 @@ theorem gradInnerCLM_mem_image_smooth
   gradInnerCLM_smoothToH1Compl_mem_image_laplacianDomain
     (I := I) (M := M) g φ v
 
-/-- **M5 general case (density-bearing).** For arbitrary
+/-- **Image-membership, general case (density-bearing).** For arbitrary
 `u_h ∈ laplacianDomainPow g 2` and given a smooth approximating sequence
 with `H1Compl` convergence and Bochner-candidate `Lp` convergence plus the
 smooth-case identification target for each approximator,
@@ -191,9 +195,9 @@ theorem gradInnerCLM_mem_image_density
     (I := I) (M := M) g φ hu_h h_smooth_seq h_conv_H1Compl
     h_conv_candidate h_smooth_identity
 
-/-! ## M6: Iterated closure of `smoothMulH1Compl g φ u_h` -/
+/-! ## Iterated closure of `smoothMulH1Compl g φ u_h` -/
 
-/-- **M6 smooth-case (unconditional).** For smooth `v : SmoothScalar g`,
+/-- **Iterated closure, smooth case (unconditional).** For smooth `v : SmoothScalar g`,
 `smoothMulH1Compl g φ (smoothToH1Compl v) ∈ laplacianDomainPow g 2`. Re-export
 of `smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two`. -/
 theorem smoothMulH1Compl_mem_pow_two_smooth
@@ -204,7 +208,7 @@ theorem smoothMulH1Compl_mem_pow_two_smooth
   smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two
     (I := I) (M := M) g φ v
 
-/-- **M6 general case (density-bearing).** For arbitrary
+/-- **Iterated closure, general case (density-bearing).** For arbitrary
 `u_h ∈ laplacianDomainPow g 2` and given density hypotheses, the
 iterated closure `smoothMulH1Compl g φ u_h ∈ laplacianDomainPow g 2` holds.
 Re-export of `smoothMulH1Compl_mem_pow_two_via_density`. -/
@@ -231,7 +235,7 @@ theorem smoothMulH1Compl_mem_pow_two_density
     (I := I) (M := M) g φ hu_h h_smooth_seq h_conv_H1Compl
     h_conv_candidate h_smooth_identity
 
-/-! ## M7: `MemWkpChart g 2 2` regularity of the Leibniz residual Lp class
+/-! ## `MemWkpChart g 2 2` regularity of the Leibniz residual Lp class
 
 The Leibniz residual Lp class `fHLeibnizResidualLp g α u_h` (defined in
 `DiffChartBilinearH1ComplFromDomainPow.lean`) equals
@@ -243,8 +247,8 @@ the identity `fHLeibnizGeneralResidualCLM_eq_preimageDiff` in
 preimage⟨smoothMulH1Compl ρα u_h⟩ - smoothMulLp ρα (preimage u_h)
 ```
 
-as an `Lp` class. For `u_h ∈ laplacianDomainPow g 2`, M6 gives
-`smoothMulH1Compl ρα u_h ∈ laplacianDomainPow g 2`, so by
+as an `Lp` class. For `u_h ∈ laplacianDomainPow g 2`, the iterated closure
+gives `smoothMulH1Compl ρα u_h ∈ laplacianDomainPow g 2`, so by
 `laplacianDomainPow_two_h2_plus_rhs_h2` the function representative
 `preimage⟨smoothMulH1Compl ρα u_h⟩.coeFn` is in `MemWkpChart g 2 2`. The other
 summand `(smoothMulLp ρα (preimage u_h)).coeFn` is in `MemWkpChart g 2 2`
@@ -272,10 +276,11 @@ private lemma rhoAlpha_mul_preimage_coeFn_memWkpChart_two_two
     (I := I) (M := M) g (by norm_num : (1 : ℝ≥0∞) ≤ 2)
     (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) h_preimage_h2
 
-/-- **M7 with M6 hypothesis (function form).** Given `u_h ∈ laplacianDomainPow g 2`
-and the M6 iterated closure `smoothMulH1Compl ρα u_h ∈ laplacianDomainPow g 2`,
-the manifold-side function `-2 g(∇ρα, ∇u_h) - Δρα · u_h` (equal a.e. to
-the `fHLeibnizResidualLp` function representative) is in `MemWkpChart g 2 2`.
+/-- **Residual regularity given the iterated closure (function form).** Given
+`u_h ∈ laplacianDomainPow g 2` and the iterated closure
+`smoothMulH1Compl ρα u_h ∈ laplacianDomainPow g 2`, the manifold-side function
+`-2 g(∇ρα, ∇u_h) - Δρα · u_h` (equal a.e. to the `fHLeibnizResidualLp`
+function representative) is in `MemWkpChart g 2 2`.
 
 The statement is in *function* form rather than `Lp`-class form because
 `MemWkpChart` is a predicate on `M → ℝ` rather than `Lp ℝ 2`. The function
@@ -307,7 +312,7 @@ theorem fHLeibnizResidualLp_coeFn_memWkpChart_two_two_of_M6
             Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) x) := by
   classical
   -- Step 1: H² regularity of `preimage⟨smoothMulH1Compl ρα u_h⟩.coeFn`
-  -- from M6 via `laplacianDomainPow_two_h2_plus_rhs_h2`.
+  -- from the iterated closure via `laplacianDomainPow_two_h2_plus_rhs_h2`.
   have h_smHC_h2 := (laplacianDomainPow_two_h2_plus_rhs_h2
     (I := I) (M := M) g h_M6).2.1
   -- Note: h_smHC_h2 is the MemWkpChart for `preimage⟨smoothMulH1Compl ρα u_h, _⟩.coeFn`,
@@ -315,7 +320,7 @@ theorem fHLeibnizResidualLp_coeFn_memWkpChart_two_two_of_M6
   -- We need the same `preimage` but with the `smoothMulH1Compl_mem_laplacianDomain`-derived
   -- membership proof. These are equal since `preimage` depends only on the
   -- H1Compl element, not on the membership proof.
-  -- Step 2: `MemWkpChart g 2 2` of `ρα · preimage u_h.coeFn` via M_W mul.
+  -- Step 2: `MemWkpChart g 2 2` of `ρα · preimage u_h.coeFn` via smooth multiplication.
   have h_smoothMul_h2 := rhoAlpha_mul_preimage_coeFn_memWkpChart_two_two
     (I := I) (M := M) g α hu_h
   -- Step 3: Closure under subtraction.
@@ -339,9 +344,10 @@ theorem fHLeibnizResidualLp_coeFn_memWkpChart_two_two_of_M6
     (I := I) (M := M) g (by norm_num : (1 : ℝ≥0∞) ≤ 2)
     h_smHC_h2 h_smoothMul_h2
 
-/-- **M7 in density form.** Combines M6's density-form with M7's
-`MemWkpChart g 2 2` regularity, giving the conclusion in terms of the
-density hypotheses for arbitrary `u_h ∈ laplacianDomainPow g 2`. -/
+/-- **Residual regularity in density form.** Combines the density-form
+iterated closure with the `MemWkpChart g 2 2` residual regularity, giving
+the conclusion in terms of the density hypotheses for arbitrary
+`u_h ∈ laplacianDomainPow g 2`. -/
 theorem fHLeibnizResidualLp_coeFn_memWkpChart_two_two_density
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -384,30 +390,32 @@ theorem fHLeibnizResidualLp_coeFn_memWkpChart_two_two_density
   exact fHLeibnizResidualLp_coeFn_memWkpChart_two_two_of_M6
     (I := I) (M := M) g α hu_h h_M6
 
-/-! ## M8: The constructor packaged with density hypotheses
+/-! ## The constructor packaged with density hypotheses
 
 The constructor below combines:
 
-* The density hypotheses for M5/M6 (smooth approximator sequence with the
-  required `H1Compl`, Bochner-candidate, and identification-target
-  convergences).
+* The density hypotheses for the image-membership and iterated-closure
+  steps (smooth approximator sequence with the required `H1Compl`,
+  Bochner-candidate, and identification-target convergences).
 * The residual `MemW1p 2 fChartResidual chartTargetEuclid α` hypothesis
   (in the same shape as the existing `_unconditional` constructor).
 * The differentiated variational identity (same shape as
   `_unconditional`).
 
 The middle hypothesis (`MemW1p 2 fChartResidual`) corresponds to the
-chart-side support bridge "raw chart-pull MemW1p" that converts M7's
-`MemWkpChart g 2 2` regularity of `fHLeibnizResidualLp.coeFn` into the
-chart-target `MemW1p 2`. This bridge is a follow-up infrastructure piece;
-the present constructor exposes the bridge as a residual hypothesis. -/
+chart-side support bridge "raw chart-pull MemW1p" that converts the
+`MemWkpChart g 2 2` residual regularity of `fHLeibnizResidualLp.coeFn`
+into the chart-target `MemW1p 2`. This bridge is a follow-up
+infrastructure piece; the present constructor exposes the bridge as a
+residual hypothesis. -/
 
 /-- **Constructor for `DiffChartBilinearH1ComplData g α` from density
 hypotheses, residual `MemW1p` hypothesis, and the differentiated
 variational identity.**
 
-This packages the density-bearing form of M5/M6 with the residual
-`MemW1p 2 fChartResidual` hypothesis and the differentiated identity.
+This packages the density-bearing form of the image-membership and
+iterated-closure steps with the residual `MemW1p 2 fChartResidual`
+hypothesis and the differentiated identity.
 The downstream pipeline can supply the density approximator sequence
 once it is constructed; the residual `MemW1p 2 fChartResidual` is the
 final remaining piece that the chart-side support bridge would discharge

@@ -34,9 +34,9 @@ The integral form follows from the abstract Lax–Milgram variational identity
 ## Strategy
 
 For `u_h ∈ H1Compl g`, assume there exists `w_lift ∈ laplacianDomain g` with
-`H1ComplToLp w_lift = gradInnerCLM g φ u_h` (this is the M3.2 image-membership
-form, conditional in general on the Bochner discharge hypotheses, but
-unconditional in the smooth case).
+`H1ComplToLp w_lift = gradInnerCLM g φ u_h` (this is the regularity theorem's
+image-membership form, conditional in general on the Bochner discharge
+hypotheses, but unconditional in the smooth case).
 
 The integral identity follows from two evaluations of the abstract
 inner-product identity:
@@ -226,7 +226,7 @@ theorem lpInner_H1ComplToLp_oneSubLap_eq_lpInner_smooth_preimage
 
 /-! ## Section B — Specialisation to `gradInnerCLM g φ u_h`
 
-When the M3.2 hypothesis holds — i.e., when `gradInnerCLM g φ u_h ∈
+When the image-membership hypothesis holds — i.e., when `gradInnerCLM g φ u_h ∈
 H1ComplToLp '' laplacianDomain g` — the abstract identity above specialises
 to give the variational identity for `gradInnerCLM g φ u_h`. -/
 
@@ -437,7 +437,7 @@ theorem integral_gradInner_oneSubLap_smooth_eq_integral_preimage_smooth
   exact integral_H1ComplToLp_oneSubLap_eq_integral_preimage_smooth
     (I := I) (M := M) g hw_lift w
 
-/-! ## Section D — Specialisation to the M3.2 candidate (smooth case)
+/-! ## Section D — Specialisation to the Bochner candidate (smooth case)
 
 For smooth `v : SmoothScalar g` with `u_h := smoothToH1Compl v` and
 `hu_h := smoothToH1Compl_mem_laplacianDomainPow_two g v`, the witness
@@ -525,7 +525,7 @@ theorem integral_gradInner_oneSubLap_smooth_eq_integral_smoothCase_unconditional
   rw [h_preimage_eq] at h_main
   exact h_main
 
-/-! ## Section E — Specialisation to `u_h ∈ laplacianDomainPow g 2` via M3.2
+/-! ## Section E — Specialisation to `u_h ∈ laplacianDomainPow g 2` via the regularity theorem
 
 For arbitrary `u_h ∈ laplacianDomainPow g 2`, the witness is the resolvent
 of `gradInnerLaplacianCandidateUnconditional g φ hu_h`, and the
@@ -598,7 +598,7 @@ theorem integral_gradInner_oneSubLap_smooth_eq_integral_candidate_of_variational
 
 /-! ## Section F — Smooth-case unconditional form (conditional on Christoffel discharge)
 
-Combining Section D with the M3.2 smooth-case unconditional form from
+Combining Section D with the smooth-case unconditional regularity form from
 `GradInnerLaplacianSmoothFullUnconditional`, the integral form for the
 unconditional candidate holds for smooth `v` under the Christoffel discharge
 hypothesis. -/
@@ -885,8 +885,8 @@ theorem integral_gradInner_oneSubLap_contMDiffMap_eq_integral_preimage
 
 The integral-form identity is the **weak-Laplacian transfer** characterizing
 when `A := gradInnerCLM g φ u_h ∈ Lp 2` has a Hilbert lift in
-`laplacianDomain g`. This is a corollary of the resolvent-form M3.2
-deliverables.
+`laplacianDomain g`. This is a corollary of the resolvent-form regularity
+results.
 
 Specifically, when the integral identity holds for some explicit Lp 2 class
 `F`, the function `A` has weak `(1 - Δ_g) A = F` in the sense that

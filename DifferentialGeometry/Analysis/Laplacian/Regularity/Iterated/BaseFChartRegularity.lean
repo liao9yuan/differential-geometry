@@ -40,18 +40,18 @@ on `volume.restrict chartTargetEuclid α` reduces the chart-target
   polymorphic `W^{m,2}` bilinear continuity bound for
   `smoothFChartResidual g α v` in terms of `wkpNormChart g (m+1) 2 v.toFun`.
 
-## Phase structure
+## Structure
 
 The file delivers two ingredients:
 
-* **Phase A** (polymorphic bilinear bound):
+* **Bilinear bound** (polymorphic):
   `wkpNorm_smoothFChartResidual_le_wkpNormChart_wkpM` — for every `m : ℕ`
   there is a positive constant `C = C(g, α, m)` such that for every smooth
   scalar `v : SmoothScalar g`,
   `wkpNorm m 2 (smoothFChartResidual g α v) chartTargetEuclid α
     ≤ C · wkpNormChart g (m+1) 2 v.toFun`.
 
-* **Phase D** (hypothesis-bearing entry point):
+* **Hypothesis-bearing entry point**:
   `memWkp_fChartResidual_of_wkpNorm_cauchy_identification_wkpM` —
   given a smooth approximator sequence with the chart-target `W^{m,2}`-Cauchy
   + identification properties, the chart-pulled residual lies in `MemWkp m 2`.
@@ -60,11 +60,11 @@ The file delivers two ingredients:
 
 ## Main results
 
-* `wkpNorm_smoothFChartResidual_le_wkpNormChart_wkpM` — polymorphic Phase A
+* `wkpNorm_smoothFChartResidual_le_wkpNormChart_wkpM` — polymorphic
   bilinear bound.
 * `smoothFChartResidual_memWkp_m` — for every `m : ℕ` and every smooth scalar
   `v : SmoothScalar g`, `smoothFChartResidual g α v ∈ MemWkp m 2 chartTargetEuclid α`.
-* `memWkp_fChartResidual_of_wkpNorm_cauchy_identification_wkpM` — Phase D
+* `memWkp_fChartResidual_of_wkpNorm_cauchy_identification_wkpM` —
   hypothesis-bearing discharge of `MemWkp m 2 fChartResidual`.
 * `base_f_chart_memWkp_m_of_hypotheses` — headline entry point: from
   Cauchy + identification + RHS Piece 1, derive
@@ -821,7 +821,7 @@ private lemma wkpNorm_chartPushedRaw_lapPiece_le
             wkpNormChart (I := I) (M := M) g (m + 1) 2 v.toFun := by
           rw [hCfinal_def]
 
-/-! ## Headline Phase A: polymorphic `W^{m,2}` bilinear bound -/
+/-! ## Headline: polymorphic `W^{m,2}` bilinear bound -/
 
 /-- **Polymorphic `W^{m,2}` bilinear bound**. For a closed Riemannian manifold
 `(M, g)` and a chart-atlas index `α : M`, the smooth chart-pulled Leibniz
@@ -1109,7 +1109,7 @@ lemma smoothFChartResidual_memWkp_m
   exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_congr_ae
     hp_one hΩ_open h_ae.symm).mp hP_sum
 
-/-! ## Phase D: Hypothesis-bearing `MemWkp m 2` discharge of `fChartResidual`
+/-! ## Hypothesis-bearing `MemWkp m 2` discharge of `fChartResidual`
 
 The constructor mirrors `memWkp_fChartResidual_of_wkpNorm_cauchy_identification_w22`
 at level `m`: given a smooth approximator sequence with chart-target
@@ -1183,8 +1183,8 @@ on `volume.restrict chartTargetEuclid α` reduces the chart-target
 
 * `fChartPiecePreimage` — provided by the chart-`H^m` hypothesis on the
   partition-of-unity-weighted `(1-Δ_g)u_h` representative.
-* `fChartResidual` — provided by Phase D applied to a chart-target
-  `W^{m,2}`-Cauchy + identification approximator sequence.
+* `fChartResidual` — provided by the hypothesis-bearing discharge applied
+  to a chart-target `W^{m,2}`-Cauchy + identification approximator sequence.
 -/
 
 /-- **Hypothesis-bearing chart-target `MemWkp m 2` of `base.f_chart`** (general
@@ -1202,10 +1202,10 @@ For any `u_h : H1Compl g` and chart base point `α : M`, the chart-pulled functi
 * an a.e. decomposition `F_base =ᵐ f_piece1 + fChartResidual g α u_h` on
   `volume.restrict chartTargetEuclid α`.
 
-This is the polymorphic Phase D entry point: it isolates the chart-target
-`MemWkp m 2`-recovery from the structural a.e. decomposition, which in concrete
-applications comes from the chart-bilinear data structure attached to a
-`laplacianDomain g` element. -/
+This is the polymorphic hypothesis-bearing entry point: it isolates the
+chart-target `MemWkp m 2`-recovery from the structural a.e. decomposition,
+which in concrete applications comes from the chart-bilinear data structure
+attached to a `laplacianDomain g` element. -/
 theorem base_f_chart_memWkp_m_of_hypotheses
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -1244,7 +1244,7 @@ theorem base_f_chart_memWkp_m_of_hypotheses
       (d := Module.finrank ℝ E) m 2 F_base
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- Step 1: fChartResidual ∈ MemWkp m 2 via Phase D.
+  -- Step 1: fChartResidual ∈ MemWkp m 2 via the hypothesis-bearing discharge.
   have h_residual_memWkp :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) m 2

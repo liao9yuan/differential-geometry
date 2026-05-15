@@ -19,8 +19,8 @@ import Mathlib.Topology.UniformSpace.UniformEmbedding
 # Chart-side measurable pullback infrastructure for the chart-based Sobolev space
 
 This file provides Borel-measurable pullback constructions on the manifold
-side, used in the assembly of a manifold-side limit from chart-target Phase-A
-limits. Specifically:
+side, used in the assembly of a manifold-side limit from chart-target
+Euclidean Sobolev limits. Specifically:
 
 * `extChartAtExt α : M → E` — the Borel-measurable extension of `extChartAt I α`,
   taking `0` outside the chart source.
@@ -32,9 +32,9 @@ limits. Specifically:
 
 These are foundational for the Banach-completeness program of
 `WkpChartQuot g k p hp`. The completeness instance combines this pullback
-infrastructure with the chart-target Phase-A convergence (existing) and the
-manifold-side measure bridge `MeasureBridgeUniform`; that final assembly is
-the subject of follow-up work.
+infrastructure with the chart-target Euclidean Sobolev convergence (existing)
+and the manifold-side measure bridge `MeasureBridgeUniform`; that final
+assembly is the subject of follow-up work.
 -/
 
 noncomputable section
@@ -185,7 +185,7 @@ The chart-pushed function `chartPushed α u(y) = ρ_α(chartSymm y) · u(chartSy
 so pulling it back via `pullbackToManifold α` recovers `ρ_α · u` on the chart
 source (and zero off the chart source, where `ρ_α` vanishes by POU
 subordination). This identity is the fundamental link between the chart-target
-Phase-A limits and the manifold-side limit construction. -/
+Euclidean Sobolev limits and the manifold-side limit construction. -/
 
 lemma pullbackToManifold_chartPushed_apply_of_mem
     [T2Space M] [SigmaCompactSpace M]

@@ -1,15 +1,16 @@
 import DifferentialGeometry.Analysis.Laplacian.Regularity.Bochner.PolarisedLpFull
 
 /-!
-# Full smooth-case discharge of the M3.2 theorem via the unconditional candidate
+# Full smooth-case discharge of the gradient-inner-Laplacian regularity theorem via the unconditional candidate
 
 For a closed Riemannian manifold `(M, g)`, a smooth scalar
 `φ : C^∞⟮I, M; ℝ⟯`, and a smooth scalar `v : SmoothScalar g`, this module
-combines the smooth-case `smoothCandidate_identification_target` (Step 1 in
-`BochnerPolarisedLpFull.lean`, conditional on the Hessian-bridge
-hypothesis) with the existing variational identity infrastructure
+combines the smooth-case `smoothCandidate_identification_target`
+(established in `BochnerPolarisedLpFull.lean`, conditional on the
+Hessian-bridge hypothesis) with the existing variational identity
+infrastructure
 (`gradInnerCLM_smoothToH1Compl_eq_H1ComplToLp_resolvent_smoothCandidate`)
-to deliver the full smooth-case M3.2 final theorem via the unconditional
+to deliver the full smooth-case regularity theorem via the unconditional
 Bochner candidate's resolvent:
 
 ```
@@ -18,22 +19,22 @@ gradInnerCLM g φ (smoothToH1Compl v) =
                               (smoothToH1Compl_mem_laplacianDomainPow_two g v)))
 ```
 
-This is the **conditional** smooth-case M3.2 final theorem: conditional
+This is the **conditional** smooth-case regularity theorem: conditional
 on the Hessian-bridge hypothesis identifying the chart-side Hessian
 pairing with the smooth Hessian pairing for `smoothToH1Compl v`.
 
 ## Main results
 
 * `gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_smooth_of_hessHypothesis`
-  — the smooth-case M3.2 final theorem in resolvent-of-candidate form,
+  — the smooth-case regularity theorem in resolvent-of-candidate form,
   conditional on the Hessian-bridge hypothesis.
 
 * `smoothCase_full_unconditional_of_hessHypothesis` — the smooth-case
-  M3.2 final theorem (image membership form), conditional on the
+  regularity theorem (image membership form), conditional on the
   Hessian-bridge hypothesis.
 
 * `smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_via_candidate` —
-  the iterated-closure form of the smooth-case M3.2 conclusion via the
+  the iterated-closure form of the smooth-case conclusion via the
   unconditional candidate's resolvent (conditional on the Hessian-bridge
   hypothesis).
 
@@ -50,7 +51,7 @@ where the LHS uses the chart-side weak Hessian of `smoothToH1Compl v`
 chart Hessian of `v` directly. The two are pointwise equal on smooth
 inputs (by `laplacianDomainHessianChart_smooth_case` and chart-pullback
 identifications), but bridging at the `Lp 2` class level requires
-substantial chart machinery and is reserved for a follow-up dispatch.
+substantial chart machinery and is reserved for follow-up work.
 -/
 
 noncomputable section
@@ -92,7 +93,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## The smooth-case M3.2 final theorem in resolvent-of-candidate form
+/-! ## The smooth-case regularity theorem in resolvent-of-candidate form
 
 For smooth `v` with `u_h := smoothToH1Compl v` and
 `hu_h := smoothToH1Compl_mem_laplacianDomainPow_two g v`, the variational
@@ -107,7 +108,7 @@ follows from `smoothCase_via_candidate_identification` once the
 smooth-case candidate identification is discharged. The latter is provided
 by `smoothCandidate_identification_target_of_hessHypothesis`. -/
 
-/-- **The smooth-case M3.2 final theorem, resolvent-of-candidate form,
+/-- **The smooth-case regularity theorem, resolvent-of-candidate form,
 conditional on the Hessian-bridge hypothesis.** For smooth `v`, the
 gradient inner product `gradInnerCLM g φ (smoothToH1Compl v)` equals
 `H1ComplToLp` of the resolvent of the unconditional Bochner candidate. -/
@@ -131,9 +132,9 @@ theorem gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_smooth_of_hessHypoth
     (smoothCandidate_identification_target_of_hessHypothesis
       (I := I) (M := M) g φ v h_hess)
 
-/-! ## The smooth-case M3.2 image-membership form via the unconditional candidate -/
+/-! ## The smooth-case image-membership form via the unconditional candidate -/
 
-/-- **The smooth-case M3.2 conclusion via the unconditional candidate's
+/-- **The smooth-case conclusion via the unconditional candidate's
 resolvent, conditional on the Hessian-bridge hypothesis**. For smooth `v`,
 `gradInnerCLM g φ (smoothToH1Compl v)` lies in `H1ComplToLp ''
 laplacianDomain g`, with the witness being the resolvent of the
@@ -156,7 +157,7 @@ theorem smoothCase_full_unconditional_of_hessHypothesis
     (smoothCandidate_identification_target_of_hessHypothesis
       (I := I) (M := M) g φ v h_hess)
 
-/-! ## The iterated-closure form of the smooth-case M3.2 conclusion -/
+/-! ## The iterated-closure form of the smooth-case conclusion -/
 
 /-- **Smooth-case iterated closure via the unconditional candidate**.
 For smooth `v`, `smoothMulH1Compl g φ (smoothToH1Compl v) ∈
@@ -181,9 +182,9 @@ theorem smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_via_candidat
     (gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_smooth_of_hessHypothesis
       (I := I) (M := M) g φ v h_hess)
 
-/-! ## Headline M3.2 final theorem packagings
+/-! ## Headline regularity theorem packagings
 
-The full M3.2 final theorem in the smooth case is delivered in three
+The full regularity theorem in the smooth case is delivered in three
 equivalent forms:
 
 * **Resolvent-of-candidate form**: the canonical formulation.

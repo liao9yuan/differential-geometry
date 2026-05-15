@@ -367,7 +367,7 @@ in the chart-α tensor Hessian of `v`).
 We expose the per-chart pointwise pairing reconciliation between the
 chart-α-pulled smooth pairing function and the smooth Euclidean pairing
 function as an explicit hypothesis. Discharging it requires the Christoffel
-reconciliation infrastructure that is built in a follow-up dispatch.
+reconciliation infrastructure that is built by follow-up work.
 
 The hypothesis form is: for each chart `α`, the chart-α smooth Euclidean
 pairing function `smoothEuclidHessianPairingChart g α φ v` ae-equals the

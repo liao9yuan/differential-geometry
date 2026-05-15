@@ -2,7 +2,7 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Resolvent
 import Mathlib.Analysis.Normed.Operator.Compact
 
 /-!
-# Tensor Rellich-Kondrachov compactness: chart-frame component reduction (Phase 1)
+# Tensor Rellich-Kondrachov compactness: chart-frame component reduction
 
 For a closed Riemannian manifold `(M, g)`, the natural inclusion
 `TensorH1ComplToTensorL2 g r s : TensorH1Compl g r s →L[ℝ] TensorL2 r s g`
@@ -27,7 +27,7 @@ set yields a single subsequence, and a partition-of-unity reassembly
 yields a tensor L²-convergent subsequence.
 
 The chart-frame component infrastructure used in the reduction is built
-in subsequent files (continuation phases). The present file isolates the
+in subsequent files. The present file isolates the
 trivial compositional reduction step so that downstream consumers
 (eigenbasis construction, discrete spectrum) can be wired to the L²-side
 resolvent as soon as the H¹→L² compactness is in place.

@@ -23,7 +23,7 @@ The identity packages the manifold-side Leibniz rule
 `Δ_g(ρα u_h) = ρα Δ_g u_h + 2 g(∇ρα, ∇u_h) + u_h Δ_g ρα` at the `Lp` class
 level, using
 
-* `laplacianDomain_preimage_smoothMulH1Compl` — the Phase 3 preimage identity
+* `laplacianDomain_preimage_smoothMulH1Compl` — the preimage identity
   `preimage⟨smoothMulH1Compl ρα u_h⟩ = fHLeibnizGeneral g ρα u_h hu_dom`.
 
 * `fHLeibnizGeneral` definitional unfolding into
@@ -148,7 +148,7 @@ preimage⟨smoothMulH1Compl ρα u_h⟩
   = smoothMulLp ρα (preimage⟨u_h⟩) + fHLeibnizGeneralResidualCLM g ρα u_h.
 ```
 
-This is the Phase 3 preimage identity unfolded; it underlies the
+This is the preimage identity unfolded; it underlies the
 identification of `fHLeibnizResidualLp` with the difference of two
 `(1-Δ_g)`-preimages. -/
 theorem preimage_smoothMulH1Compl_eq_smoothMulLp_preimage_add_residual

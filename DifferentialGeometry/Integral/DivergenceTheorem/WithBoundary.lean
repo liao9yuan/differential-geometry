@@ -23,10 +23,11 @@ boundary integral term consistent with Stokes' theorem.
 
 ## Layered build-up
 
-The sub-files are organised in five tiers, each independent of the boundaryless
-API. The layers are loaded in order; later layers depend on earlier ones.
+The sub-files are organised in successive layers, each independent of the
+boundaryless API. The layers are loaded in order; later layers depend on
+earlier ones.
 
-### Tier 1 — Interior-supported integration by parts
+### Interior-supported integration by parts
 
 For an ambient manifold whose model `I` may have a boundary, but for inputs
 whose support lies in `I.interior M`:
@@ -44,7 +45,7 @@ whose support lies in `I.interior M`:
 * `WithBoundary/InteriorIBP.lean` — integration by parts and Green's identities
   for inputs supported in `I.interior M`.
 
-### Tier 2 — Boundary as a manifold
+### Boundary as a manifold
 
 Equips `boundary I M` with a smooth `(n-1)`-dimensional manifold structure when
 the model `I` admits a smooth boundary, defines the induced Riemannian metric,
@@ -61,7 +62,7 @@ and constructs the surface measure.
 * `WithBoundary/EuclideanHalfSpaceInstance.lean` — `EuclideanHalfSpace n` as a
   `HasSmoothBoundary` instance.
 
-### Tier 3 — Stokes' theorem and Green's identities
+### Stokes' theorem and Green's identities
 
 * `WithBoundary/OutwardNormal.lean` — outward unit normal vector field on the
   boundary, defined intrinsically via Riesz duality applied to a chart-local
@@ -70,7 +71,7 @@ and constructs the surface measure.
 * `WithBoundary/GreenWithBoundary.lean` — Green's first and second identities
   with boundary terms.
 
-### Tier 4 — Time-dependent versions
+### Time-dependent versions
 
 * `WithBoundary/Family.lean` — pointwise-in-time wrappers and time-derivative
   identities for time-parameterised metric families.

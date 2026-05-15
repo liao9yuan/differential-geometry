@@ -9,8 +9,8 @@ This module assembles the per-chart non-smooth `H²` witness from an element
 `u_h ∈ laplacianDomain g`, with **no additional hypotheses**. The radius
 `R₀ > 0` of the difference-quotient regime, the precompact subdomain
 `Ω''` of the chart target, the smooth Nirenberg cutoff `η`, and the
-parameters needed to invoke the unconditional A.5 bound are all chosen
-internally per chart.
+parameters needed to invoke the unconditional uniform difference-quotient
+bound are all chosen internally per chart.
 
 The headline `chartH2NonSmoothPOUWitness_of_laplacianDomain` builds the
 per-chart `ChartH2NonSmoothPOUWitness g (H1ComplToLp u_h).coeFn α` for every
@@ -37,7 +37,7 @@ For each `α : M`:
    `tsupport η ⊆ cthickening (4 ε) K_α`. Hence
    `Metric.cthickening R₀ (tsupport η) ⊆ Metric.cthickening (5 ε) K_α
      ⊆ Metric.thickening (8 ε) K_α = Ω'`.
-6. Apply the unconditional A.5
+6. Apply the unconditional uniform difference-quotient bound
    (`chartBilinearH1Compl_uniform_diffQuot_bound_of_data`) with `R₀`,
    `Ω'`, `Ω''`, `η` to obtain a uniform-in-`h` bound on the difference
    quotients of `D.weak_partial i`.
@@ -336,7 +336,7 @@ theorem chartH2NonSmoothPOUWitness_of_laplacianDomain
         rw [hΩ'_def]
         exact Metric.cthickening_subset_thickening' (by linarith) h_le K_α
       exact (h1.trans h2).trans h3
-  -- Step 8: Apply the unconditional A.5 bound.
+  -- Step 8: Apply the unconditional uniform difference-quotient bound.
   obtain ⟨M_bound, hM_nn, h_uniform_bd⟩ :=
     chartBilinearH1Compl_uniform_diffQuot_bound_of_data
       (I := I) (M := M) (g := g) (α := α) D

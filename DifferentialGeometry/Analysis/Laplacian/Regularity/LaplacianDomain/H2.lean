@@ -85,10 +85,10 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 /-! ## Chart-local `H²` regularity bound from chart-bilinear data and the
-unconditional A.5 difference-quotient bound -/
+unconditional uniform difference-quotient bound -/
 
 /-- **Chart-local `H²` regularity from chart-bilinear data and the
-unconditional A.5 difference-quotient bound.**
+unconditional uniform difference-quotient bound.**
 
 For a closed Riemannian manifold `(M, g)`, chart point `α : M`, and an element
 `u_h ∈ laplacianDomain g`, plus a smooth Nirenberg cutoff `η` satisfying the
@@ -134,7 +134,7 @@ theorem chartH2_localBound_of_laplacianDomain
   classical
   set D := chartBilinearH1ComplData_of_laplacianDomain
     (I := I) (M := M) g α hu_h with hD_def
-  -- Step 1: Apply the unconditional A.5 to get the uniform diff-quotient bound.
+  -- Step 1: Apply the unconditional uniform difference-quotient bound.
   obtain ⟨M_bound, hM_nn, h_uniform_bd⟩ :=
     chartBilinearH1Compl_uniform_diffQuot_bound_of_data
       (I := I) (M := M) (g := g) (α := α) D

@@ -89,7 +89,7 @@ deliver the full chart-invariant identification chain conditional on it.
   of the chart-α image of `x`.
 
 The chart-α matrix identity `chartAlphaMatrixIdentity` is left as an explicit
-hypothesis to be discharged in a follow-up dispatch via the chart-α analog of
+hypothesis to be discharged by follow-up work via the chart-α analog of
 `chartHessianMatrixIdentity_holds`.
 -/
 

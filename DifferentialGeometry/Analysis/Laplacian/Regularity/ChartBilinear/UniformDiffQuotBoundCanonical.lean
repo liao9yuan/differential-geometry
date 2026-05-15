@@ -1864,8 +1864,8 @@ set_option linter.unusedVariables false in
 /-- Discharge of `h_master_nonsmooth` from the chart-bilinear data `D` with an
 externally supplied elliptic bilinear form `B`. The hypotheses
 `h_B_a_match` and `h_B_c_match` connect `B` to the chart data on
-`cthickening R₀ (tsupport η)`. The output instantiates A.5's
-`h_master_nonsmooth` shape with `u_g := D.u_chart`,
+`cthickening R₀ (tsupport η)`. The output instantiates the conditional
+wrapper's `h_master_nonsmooth` shape with `u_g := D.u_chart`,
 `f_g := densityOnEuclid g α · D.f_chart`, and `g_g i := D.weak_partial i`.
 The radius `R₀ > 0` is the diff-quotient bound; the proof works uniformly
 in `R₀`. -/
@@ -2431,19 +2431,19 @@ theorem chartBilinear_master_nonsmooth_discharge
           - cross_3_term_chartBilinear (I := I) (M := M) D K_0 η k h
           - f_term_chartBilinear (I := I) (M := M) D K_0 η k h := by
     linarith
-  -- (Step 10) Express each chart-bilinear named piece in A.5-master form.
+  -- (Step 10) Express each chart-bilinear named piece in master form.
   -- We need to match:
   --   c_term_chartBilinear ↔ |∫_{Set.univ} B.c · D.u_chart · nirenberg|.
   --   f_term_chartBilinear ↔ |∫_{Set.univ} (densityOnEuclid · D.f_chart) · nirenberg|.
-  --   cross_1_term_chartBilinear ↔ |A.5 cross_1| (with B.a replacing weightedInvGram).
-  --   cross_2_term_chartBilinear ↔ |A.5 cross_2|.
-  --   cross_3_term_chartBilinear ↔ |A.5 cross_3|.
+  --   cross_1_term_chartBilinear ↔ |master cross_1| (with B.a replacing weightedInvGram).
+  --   cross_2_term_chartBilinear ↔ |master cross_2|.
+  --   cross_3_term_chartBilinear ↔ |master cross_3|.
   --
   -- Strategy: each chart-bilinear piece integrates over K_0 (or cthickening |h| K_0
   -- for f / c). The integrand vanishes outside tsupport η (cross / principal) or
   -- outside support of the nirenberg test (f / c). On the support, B.a and B.c
   -- match weightedInvGram and densityOnEuclid respectively. So each chart-bilinear
-  -- piece equals the corresponding A.5 expression (without the absolute value).
+  -- piece equals the corresponding master expression (without the absolute value).
 
   -- Helper: support of `standardNirenbergTest k h η D.u_chart` is contained in
   -- `cthickening |h| (tsupport η)`.
@@ -2544,7 +2544,7 @@ theorem chartBilinear_master_nonsmooth_discharge
       h_B_c_match x (h_cthick_h_K_0_subset_cthick1 hx)
     have h_cthick_h_K_0_meas : MeasurableSet (Metric.cthickening |h| K_0) :=
       Metric.isClosed_cthickening.measurableSet
-    -- A.5's integrand vanishes outside cthickening |h| K_0.
+    -- The master integrand vanishes outside cthickening |h| K_0.
     have h_F_A5_zero_off : ∀ x ∉ Metric.cthickening |h| K_0,
         B.c x * D.u_chart x *
           (DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction
@@ -2556,7 +2556,7 @@ theorem chartBilinear_master_nonsmooth_discharge
         by_contra h_ne
         exact hx (h_supp_in_cthick_h_K_0 h_ne)
       rw [h_test_zero, mul_zero]
-    -- Strategy: Convert chart-bilinear integral to A.5-form on cthickening |h| K_0
+    -- Strategy: Convert chart-bilinear integral to master form on cthickening |h| K_0
     -- (matching coefficients), then extend to Set.univ via vanishing outside.
     -- Step (a): chart-bilinear integral equals
     --   ∫_{cthickening |h| K_0} B.c · D.u_chart · nirenbergTestFunction
@@ -2615,7 +2615,7 @@ theorem chartBilinear_master_nonsmooth_discharge
         by_contra h_ne
         exact hx (h_supp_in_cthick_h_K_0 h_ne)
       rw [h_test_zero, mul_zero]
-    -- Step (a): chart-bilinear integral = A.5 integrand on cthickening |h| K_0.
+    -- Step (a): chart-bilinear integral = master integrand on cthickening |h| K_0.
     have h_step_a :
         (∫ x in Metric.cthickening |h| K_0,
           densityOnEuclid (I := I) g α x * D.f_chart x *
@@ -2636,8 +2636,8 @@ theorem chartBilinear_master_nonsmooth_discharge
         ← MeasureTheory.setIntegral_univ]
   -- cross_1_term_chartBilinear bridge:
   -- chart-bilinear cross_1: ∑∑ ∫_{K_0} 2·(τ_h weightedInvGram)·η·∂_j η·D_h^k weak_partial_i·D_h^k u_chart.
-  -- A.5 cross_1: ∑∑ ∫_{Set.univ} 2·(τ_h B.a)·η·∂_j η·D_h^k D.weak_partial_i·D_h^k D.u_chart.
-  -- (We use u_g := D.u_chart, g_g i := D.weak_partial i in A.5's master.)
+  -- master cross_1: ∑∑ ∫_{Set.univ} 2·(τ_h B.a)·η·∂_j η·D_h^k D.weak_partial_i·D_h^k D.u_chart.
+  -- (We use u_g := D.u_chart, g_g i := D.weak_partial i in the master estimate.)
   -- Both have an η factor that vanishes outside tsupport η.
   have h_cross_1_eq :
       cross_1_term_chartBilinear (I := I) (M := M) D K_0 η k h =
@@ -2763,14 +2763,14 @@ theorem chartBilinear_master_nonsmooth_discharge
   -- By triangle inequality:
   --   ... ≤ |c_term| + |-cross_1| + |-cross_2| + |-cross_3| + |-f_term|
   --        = |c_term| + |cross_1| + |cross_2| + |cross_3| + |f_term|.
-  -- After matching pieces to A.5 form, done.
+  -- After matching pieces to master form, done.
   --
   -- Naming:
-  --   A_1 := A.5 cross_1 sum-integral, B_1 := cross_1_term_chartBilinear.
-  --   A_2 := A.5 cross_2 sum-integral, B_2 := cross_2_term_chartBilinear.
-  --   A_3 := A.5 cross_3 sum-integral, B_3 := cross_3_term_chartBilinear.
-  --   A_f := A.5 f-term, B_f := f_term_chartBilinear.
-  --   A_c := A.5 c-term, B_c := c_term_chartBilinear.
+  --   A_1 := master cross_1 sum-integral, B_1 := cross_1_term_chartBilinear.
+  --   A_2 := master cross_2 sum-integral, B_2 := cross_2_term_chartBilinear.
+  --   A_3 := master cross_3 sum-integral, B_3 := cross_3_term_chartBilinear.
+  --   A_f := master f-term, B_f := f_term_chartBilinear.
+  --   A_c := master c-term, B_c := c_term_chartBilinear.
   set A_1 : ℝ :=
     ∑ i : Fin (Module.finrank ℝ E),
       ∑ j : Fin (Module.finrank ℝ E), ∫ x,
@@ -3013,7 +3013,7 @@ private theorem exists_smooth_metric_extension_with_density
     exact extendedDensity_eq_density_of_chi_one (I := I) g α (hχ_one y hy)
   exact ⟨B, h_agree_a, h_agree_c⟩
 
-/-! ## Section 7: Headline — full A.5 erasure for chart-bilinear data
+/-! ## Section 7: Headline — full master-estimate erasure for chart-bilinear data
 
 Combining all three discharges, the bilinear-form extension, and a single
 shared compactly-supported cutoff `χ` that is identically `1` on an open
@@ -3340,7 +3340,7 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound_of_data
         (d := Module.finrank ℝ E) k hh,
       hg_g_eq_on_closure x hx_in_closure i,
       hg_g_eq_on_closure _ h_shift_in_closure i]
-  -- Step 6: Construct A.5's three hypotheses for (u_g, g_g, f_g, B).
+  -- Step 6: Construct the conditional wrapper's three hypotheses for (u_g, g_g, f_g, B).
   -- Bridge 1: h_FK_diffQuot_u_bound for u_g/g_g.
   have hΩ'_meas : MeasurableSet Ω' := hΩ'.measurableSet
   have h_tsupp_meas : MeasurableSet (tsupport η) :=
@@ -3989,7 +3989,7 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound_of_data
       exact h_A3_eq i j
     rw [h_A1_sum_eq, h_A2_sum_eq, h_A3_sum_eq, h_f_term_eq, h_c_term_eq]
     exact h_master_nonsmooth k hh hh_le
-  -- Step 7: Apply A.5 with u_g, f_g, g_g, B, and the three bridged hypotheses.
+  -- Step 7: Apply the conditional wrapper with u_g, f_g, g_g, B, and the three bridged hypotheses.
   obtain ⟨M_bound, hM_bound_nn, hM_bound⟩ :=
     chartBilinearH1Compl_uniform_diffQuot_bound
       (I := I) (M := M) (E := E) (H := H) (g := g) (α := α)

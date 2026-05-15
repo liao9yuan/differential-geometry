@@ -27,7 +27,7 @@ direction `w = e_κ`, its image in `TensorRSModel r s ℝ E` is the natural
 Christoffel-style contraction extending the tangent-bundle `christoffelCorrection`
 of `LeviCivitaChartLocal.lean` to the multi-slot `(r, s)`-tensor setting.
 
-The current substep delivers the **algebraic** decomposition framework: it
+The present file delivers the **algebraic** decomposition framework: it
 defines the chart Christoffel bilinear operator on `E`, packages the
 correction CLM, and proves the headline decomposition equality together with
 its linearity in `S`. The identification of the residue
@@ -196,11 +196,11 @@ contributions from each of the `r + s` index slots of the
 basepoint-dependent chart trivialisation produces a Christoffel-style term;
 the total Christoffel correction is the sum over all `r + s` slots.
 
-To make the decomposition headline available at the present substep without
+To make the decomposition headline available in the present file without
 committing to per-slot bookkeeping, we **define** the total Christoffel
 correction as a placeholder zero CLM. The headline decomposition becomes the
-tautological identity `fderiv = (fderiv − 0) + 0`. In a follow-up substep we
-replace the placeholder with the genuine per-slot construction:
+tautological identity `fderiv = (fderiv − 0) + 0`. Follow-up work replaces
+the placeholder with the genuine per-slot construction:
 
 ```
 tensorChristoffelCorrection g r s α b w =
@@ -208,7 +208,7 @@ tensorChristoffelCorrection g r s α b w =
   − Σ_{lower slot k} (slot-k Γ-action on tensorTrivProj S α b at w).
 ```
 
-The follow-up identifies this concrete Christoffel correction with the
+The follow-up work identifies this concrete Christoffel correction with the
 abstract `tensorRSCovariantDerivative` of `S` at `b` (via a chart-coordinate
 formula for `tensorRSCovariantDerivative` that is itself a non-trivial piece
 of work). Once that identification is in place, every theorem in the present
@@ -220,8 +220,8 @@ chain-rule combination with the scalar-component projection) are content
 that survives unchanged across the placeholder/concrete choice. -/
 
 /-- The total chart Christoffel correction operator
-`E →L[ℝ] TensorRSModel r s ℝ E`. Placeholder definition: the zero CLM. A
-follow-up substep replaces this with the per-slot Christoffel construction,
+`E →L[ℝ] TensorRSModel r s ℝ E`. Placeholder definition: the zero CLM.
+Follow-up work replaces this with the per-slot Christoffel construction,
 once a chart-coordinate formula for `tensorRSCovariantDerivative` is
 available to anchor the identification. -/
 noncomputable def tensorChristoffelCorrection
@@ -232,7 +232,7 @@ noncomputable def tensorChristoffelCorrection
 
 /-- The intrinsic Fréchet-derivative piece: defined as the residue of
 `fderiv (tensorTrivProj ∘ φ⁻¹)(φ b)` after subtracting the Christoffel
-correction. In the present substep, since the Christoffel correction is the
+correction. In the present file, since the Christoffel correction is the
 placeholder zero, this is simply the full Fréchet derivative. -/
 noncomputable def tensorIntrinsicFDeriv
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -272,8 +272,8 @@ fderiv (tensorTrivProj ∘ φ⁻¹)(φ b) =
   tensorIntrinsicFDeriv b + tensorChristoffelCorrection b.
 ```
 
-The decomposition is a structural identity in the present substep (the
-Christoffel correction is the placeholder zero CLM). The follow-up substep
+The decomposition is a structural identity in the present file (the
+Christoffel correction is the placeholder zero CLM). Follow-up work
 replaces the placeholder with its concrete per-slot form, leaving the
 headline statement unchanged. -/
 theorem tensorTrivProj_chart_pullback_fderiv_decomp
@@ -308,8 +308,8 @@ Both the intrinsic piece and the Christoffel correction are additive and
 scalar-homogeneous in `S`. The intrinsic piece is the Fréchet derivative of
 `tensorTrivProj S α ∘ φ⁻¹`, which is linear in `S` because `tensorTrivProj`
 is fibrewise linear in the underlying section value (and the chart pull-back
-is functorial). The Christoffel correction is identically zero in the current
-substep. The follow-up replaces the Christoffel correction with a per-slot
+is functorial). The Christoffel correction is identically zero in the present
+file. The follow-up work replaces the Christoffel correction with a per-slot
 construction that is *also* linear in `S` (through `tensorTrivProj`), so the
 present linearity lemmas survive the upgrade. -/
 
@@ -361,7 +361,7 @@ private lemma tensorTrivProj_smul_section
   exact map_smul _ _ _
 
 /-- **Additivity of the Christoffel correction in `S`.** Trivial in the
-present substep (the correction is the zero CLM, independent of `S`). -/
+present file (the correction is the zero CLM, independent of `S`). -/
 theorem tensorChristoffelCorrection_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ : SmoothCcTensor g r s) (α : M) (b : M) :
@@ -372,7 +372,7 @@ theorem tensorChristoffelCorrection_add
   simp [tensorChristoffelCorrection_zero]
 
 /-- **Scalar homogeneity of the Christoffel correction in `S`.** Trivial in
-the present substep. -/
+the present file. -/
 theorem tensorChristoffelCorrection_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (c : ℝ)
     (S : SmoothCcTensor g r s) (α : M) (b : M) :

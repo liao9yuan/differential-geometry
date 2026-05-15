@@ -36,7 +36,7 @@ This file establishes:
   `g_b(R(b), R(b))` for `b` on the chart base set.
 
 The eventual goal is to assemble a finite chart cover into a global sup
-bound, but that piece is deferred to a follow-up dispatch.
+bound, but that piece is deferred to follow-up work.
 -/
 
 noncomputable section

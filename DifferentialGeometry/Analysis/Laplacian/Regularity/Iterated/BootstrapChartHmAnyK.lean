@@ -308,8 +308,8 @@ theorem memWkpChart_two_min_k_two_unconditional
 
 /-! ## Headline truly-unconditional chart-`H^{2k}` (signature form)
 
-The headline signature requested by the dispatch matches the bridge-driven
-polymorphic-in-`k` chart-`H^{2k}` chart membership. For `k ≤ 2`, the bridge
+The headline signature is the bridge-driven polymorphic-in-`k`
+chart-`H^{2k}` chart membership. For `k ≤ 2`, the bridge
 is unconditional via the existing infrastructure; for `k ≥ 3`, the bridge
 must be supplied externally (this is the residual content of the coupled
 inductive descent on `(1-Δ_g)`-preimages).

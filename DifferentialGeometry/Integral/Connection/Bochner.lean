@@ -279,7 +279,7 @@ is the connection-Laplacian Frobenius norm of `∇f`,
 The identity below is conditional on **both** `hLeibniz` (the trace reduction in
 B2) and `hInner` (the heart-of-Bochner reduction in B3). The downstream consumer
 (typically a chart-Christoffel calculation or a Realization bridge) supplies both
-hypotheses; the orchestrator combines them via the algebraic Bochner identity. -/
+hypotheses, which are combined via the algebraic Bochner identity. -/
 
 /-- **B4 — Bochner main identity (conditional).** For a smooth scalar `f : M → ℝ`,
 conditional on the trace reduction `hLeibniz` (B2 hypothesis) and the inner-product

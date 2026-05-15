@@ -329,8 +329,8 @@ theorem smoothApproxSeq_smoothFChartResidual_limit_eq_fChartResidual
       smoothToH1Compl (I := I) (M := M) g (v n))
       atTop (𝓝 u_h) :=
     smoothApproxSeq_tendsto_h1Compl (I := I) (M := M) g hu_h
-  -- Step 3: Apply the existing T1.4 lemma to get `eLpNorm 2`-tendsto on
-  -- `weighted.restrict chartTarget`.
+  -- Step 3: Apply the weighted-Lp residual-convergence lemma to get
+  -- `eLpNorm 2`-tendsto on `weighted.restrict chartTarget`.
   have h_eLpNorm_weighted_tendsto :
       Tendsto (fun n =>
         eLpNorm (fun y =>

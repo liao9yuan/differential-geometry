@@ -98,12 +98,12 @@ term.
   laplacianDomain g`.)
 
 * `gradInnerCLM_mem_image_laplacianDomain_from_witness` — the
-  hypothesis-bearing form of the M3.2 final theorem: given a witness Lp
+  hypothesis-bearing form of the regularity theorem: given a witness Lp
   class `w_lift : laplacianDomain g` and an Lp-class equality
   `H1ComplToLp w_lift = gradInnerCLM g φ u_h`, conclude `gradInnerCLM g φ
   u_h ∈ H1ComplToLp '' laplacianDomain g`.
 
-* `gradInnerCLM_eq_H1ComplToLp_resolvent_of_variational` — the M3.2
+* `gradInnerCLM_eq_H1ComplToLp_resolvent_of_variational` — the regularity
   theorem packaged as a consequence of the variational identity
   hypothesis: given the Lp-class equality
   `gradInnerCLM g φ u_h = H1ComplToLp(resolvent g
@@ -123,8 +123,8 @@ term.
   the non-smooth case.
 
 * `smoothCase_via_candidate_identification` — proves the smooth
-  case of M3.2 via the resolvent of the unconditional candidate, assuming
-  the smooth-case identification holds.
+  case of the regularity theorem via the resolvent of the unconditional
+  candidate, assuming the smooth-case identification holds.
 
 * `hessPairingChart_polar`, `chartHessFrobeniusSq_polar_eq_hessPairing`
   — polarisation identity for the chart Hessian Frobenius squared:
@@ -138,9 +138,9 @@ term.
   vectors (using bilinearity + Ricci symmetry):
   `Ric(u+w, u+w) - Ric(u-w, u-w) = 4 Ric(u, w)`.
 
-## Connection to the M3.2 final theorem
+## Connection to the regularity theorem
 
-The headline M3.2 result is
+The headline regularity result is
 
 ```
 gradInnerCLM g φ u_h ∈ Set.image (H1ComplToLp g) (laplacianDomain g)
@@ -151,7 +151,7 @@ discharged here; for general `u_h ∈ laplacianDomainPow g 2` the result
 follows from a density argument combining the smooth case with continuity
 of every factor in the candidate's construction. The density argument
 relies on H²-graph-norm continuity of `hessPairingLpOnLapDom` which is
-the subject of a follow-up dispatch.
+the subject of follow-up work.
 
 The smooth-case discharge here suffices for the iterated-closure
 bottleneck (`MemW1p 2 fChartResidual`) on the smooth subspace, and the
@@ -321,9 +321,9 @@ If `gradInnerCLM g φ u_h ∈ H1ComplToLp '' laplacianDomain g`, then by the
 `smoothMulH1Compl g φ u_h ∈ laplacianDomainPow g 2`. This is the standalone
 direction not depending on the candidate construction. -/
 
-/-! ## Reformulation of the smooth-case M3.2 theorem -/
+/-! ## Reformulation of the smooth-case regularity theorem -/
 
-/-- **Smooth-case M3.2 (repackaged)**: for smooth `v ∈ SmoothScalar g`,
+/-- **Smooth-case regularity (repackaged)**: for smooth `v ∈ SmoothScalar g`,
 the gradient inner product `gradInnerCLM g φ (smoothToH1Compl v)` lies in
 the image `H1ComplToLp '' laplacianDomain g`. This repackages
 `GradInnerLpIdentity.gradInnerCLM_smoothToH1Compl_mem_image_laplacianDomain`. -/
@@ -336,14 +336,14 @@ theorem gradInnerCLM_mem_image_laplacianDomain_smooth
   gradInnerCLM_smoothToH1Compl_mem_image_laplacianDomain
     (I := I) (M := M) g φ v
 
-/-! ## Hypothesis-bearing form of the M3.2 final theorem
+/-! ## Hypothesis-bearing form of the regularity theorem
 
-We expose the M3.2 deliverable in hypothesis-bearing form: given a witness
+We expose the regularity result in hypothesis-bearing form: given a witness
 `w_lift ∈ laplacianDomain g` whose `H1ComplToLp` equals `gradInnerCLM g φ
 u_h`, conclude the membership. This is the canonical form of "the
 gradient inner product has an H¹Compl-lift in `laplacianDomain g`". -/
 
-/-- **Hypothesis-bearing M3.2 final theorem.** Given `w_lift ∈ H1Compl g`
+/-- **Hypothesis-bearing regularity theorem.** Given `w_lift ∈ H1Compl g`
 in `laplacianDomain g` whose `H1ComplToLp` equals `gradInnerCLM g φ u_h`,
 the membership `gradInnerCLM g φ u_h ∈ H1ComplToLp '' laplacianDomain g`
 follows directly. -/
@@ -457,12 +457,12 @@ lemma ricciPairingCLM_smoothToH1Compl_eq_smoothToLp
 
 /-! ## The witness construction in the smooth case
 
-For smooth `v ∈ SmoothScalar g`, the M3.2 final theorem's witness `w_lift`
+For smooth `v ∈ SmoothScalar g`, the regularity theorem's witness `w_lift`
 is `smoothToH1Compl(gradInnerSmoothBundle g φ v) ∈ laplacianDomain g`. The
 key identity `H1ComplToLp w_lift = gradInnerCLM g φ u_h` follows from
 `H1ComplToLp_smoothToH1Compl` and the smooth-case identification above. -/
 
-/-- The smooth witness for the M3.2 theorem at `u_h := smoothToH1Compl v`:
+/-- The smooth witness for the regularity theorem at `u_h := smoothToH1Compl v`:
 the H¹Compl-lift of the smooth scalar `gradInnerSmoothBundle g φ v`. -/
 noncomputable def smoothGradInnerWitness
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
@@ -492,9 +492,9 @@ theorem H1ComplToLp_smoothGradInnerWitness
   rw [H1ComplToLp_smoothToH1Compl]
   rw [gradInnerCLM_smoothToH1Compl_eq_smoothToLp]
 
-/-! ## Repackaging the smooth-case M3.2 theorem via the explicit witness -/
+/-! ## Repackaging the smooth-case regularity theorem via the explicit witness -/
 
-/-- **Smooth-case M3.2 with explicit witness**: for smooth
+/-- **Smooth-case regularity with explicit witness**: for smooth
 `v ∈ SmoothScalar g`, the gradient inner product
 `gradInnerCLM g φ (smoothToH1Compl v)` is the `H1ComplToLp` image of the
 explicit smooth witness `smoothGradInnerWitness g φ v`, which lies in
@@ -509,15 +509,16 @@ theorem gradInnerCLM_eq_H1ComplToLp_smoothWitness
 
 /-! ## Linkage to the iterated-closure equivalence
 
-The headline M3.2 theorem is part of an equivalence with the iterated-
-closure property `smoothMulH1Compl g φ u_h ∈ laplacianDomainPow g 2`, mediated
-by `GradInnerLpIdentity.smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image`.
-We use this equivalence to package the smooth-case M3.2 result as the
+The headline regularity theorem is part of an equivalence with the
+iterated-closure property `smoothMulH1Compl g φ u_h ∈ laplacianDomainPow g 2`,
+mediated by
+`GradInnerLpIdentity.smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image`.
+We use this equivalence to package the smooth-case result as the
 iterated-closure property for the smooth case. -/
 
 /-- **Smooth-case iterated closure**: for smooth `v ∈ SmoothScalar g`,
 `smoothMulH1Compl g φ (smoothToH1Compl v) ∈ laplacianDomainPow g 2`. This is
-the iterated-closure form of the M3.2 final theorem on the smooth subspace,
+the iterated-closure form of the regularity theorem on the smooth subspace,
 equivalent to `gradInnerCLM_mem_image_laplacianDomain_smooth` by
 `GradInnerLpIdentity.smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image`. -/
 theorem smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_via
@@ -531,14 +532,14 @@ theorem smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_via
   exact gradInnerCLM_mem_image_laplacianDomain_smooth
     (I := I) (M := M) g φ v
 
-/-! ## The headline M3.2 theorem for `u_h ∈ laplacianDomainPow g 2`
+/-! ## The headline regularity theorem for `u_h ∈ laplacianDomainPow g 2`
 
-We expose the headline form of the M3.2 final theorem with the
+We expose the headline form of the regularity theorem with the
 non-smooth case handled hypothetically: given a witness construction for
 arbitrary `u_h ∈ laplacianDomainPow g 2`, conclude the membership. The
 smooth case is fully discharged below. -/
 
-/-- **M3.2 final theorem, hypothesis-bearing form.** Given a witness
+/-- **Regularity theorem, hypothesis-bearing form.** Given a witness
 construction `mkWitness` producing an H¹Compl-lift in `laplacianDomain g`
 with the correct `H1ComplToLp`, conclude the membership. Stated without
 the iterated-domain hypothesis since the result holds for any `u_h`
@@ -574,7 +575,7 @@ theorem exists_witness_smoothToH1Compl
 The variational identity for the unconditional candidate states that the
 Lp class `gradInnerCLM g φ u_h` is the `H1ComplToLp` image of the resolvent
 of `gradInnerLaplacianCandidateUnconditional g φ hu_h`. This is the
-canonical form of the M3.2 final theorem at the resolvent level. -/
+canonical form of the regularity theorem at the resolvent level. -/
 
 /-- **The unconditional candidate's resolvent image equals `gradInnerCLM g φ u_h`,
 given the variational identity hypothesis.** When the Lp-class variational
@@ -608,7 +609,7 @@ For smooth `v`, the variational identity is verified by an explicit
 construction. For general `u_h ∈ laplacianDomainPow g 2`, the identity is
 exposed as a hypothesis (`hvar_id` in
 `gradInnerCLM_eq_H1ComplToLp_resolvent_of_variational`). The non-smooth
-case will be discharged in a follow-up dispatch via the polarised
+case will be discharged by follow-up work via the polarised
 Bochner-Weitzenböck identity at the pointwise level, lifted to an Lp
 identity via the smoothToLp linear map, and extended to non-smooth `u_h`
 by density of smooth scalars in `H1Compl g`. -/
@@ -644,13 +645,13 @@ gradInnerCLM g φ (smoothToH1Compl v) =
   resolventL2(smoothToLp((gradInnerSmoothBundle g φ v).oneSubLapClassical)).
 ```
 
-This is the smooth-case form of the M3.2 final theorem at the resolvent
-level. For the full M3.2 theorem to follow (in the non-smooth case), we
-need the polarised Bochner-Weitzenböck identity to identify
+This is the smooth-case form of the regularity theorem at the resolvent
+level. For the full regularity theorem to follow (in the non-smooth case),
+we need the polarised Bochner-Weitzenböck identity to identify
 `smoothToLp((gradInnerSmoothBundle g φ v).oneSubLapClassical)` with the
 unconditional candidate `gradInnerLaplacianCandidateUnconditional g φ
 hu_h` (where `hu_h` is the smooth membership in `laplacianDomainPow g 2`).
-That identification is the subject of a follow-up dispatch. -/
+That identification is the subject of follow-up work. -/
 theorem gradInnerCLM_smoothToH1Compl_eq_H1ComplToLp_resolvent_smoothCandidate
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     gradInnerCLM (I := I) (M := M) g φ
@@ -790,13 +791,12 @@ theorem ricciTensor_polar
 
 /-! ## The unconditional smooth-case candidate identification target
 
-The non-smooth case M3.2 final theorem needs the unconditional candidate
-to identify with `smoothToLp((1-Δ_classical)(g(∇φ, ∇v)))` in the smooth
-case. This is the smooth case of the polarised Bochner-Weitzenböck
+The non-smooth case of the regularity theorem needs the unconditional
+candidate to identify with `smoothToLp((1-Δ_classical)(g(∇φ, ∇v)))` in the
+smooth case. This is the smooth case of the polarised Bochner-Weitzenböck
 identity.
 
-We package the target statement here (without proof) for the future
-dispatch. -/
+We package the target statement here (without proof) for later use. -/
 
 /-- **Smooth-case candidate target** (to be proved). For smooth `v` with
 `u_h := smoothToH1Compl v` and `hu_h :=
@@ -806,11 +806,11 @@ candidate's Lp class is equal to
 
 This identity, combined with
 `gradInnerCLM_smoothToH1Compl_eq_resolventL2_smoothCandidate`, completes
-the M3.2 final theorem in the smooth case. The proof goes through the
+the regularity theorem in the smooth case. The proof goes through the
 polarised Bochner-Weitzenböck identity applied at the pointwise level,
 lifted to the smooth-scalar level, and pushed through `smoothToLp`.
 
-For the headline smooth-case M3.2 final theorem, this identification is
+For the headline smooth-case regularity theorem, this identification is
 **not strictly required**: we already have a direct discharge via
 `gradInnerCLM_mem_image_laplacianDomain_smooth`. The identification is
 needed only to bridge the smooth case to the non-smooth case via
@@ -824,8 +824,8 @@ def smoothCandidate_identification_target
       (gradInnerSmoothBundle (I := I) (M := M) g φ v).oneSubLapClassical
 
 /-- The smooth-case identification target, if proved, gives an
-alternative smooth-case discharge of M3.2 via the unconditional
-candidate's resolvent. -/
+alternative smooth-case discharge of the regularity theorem via the
+unconditional candidate's resolvent. -/
 theorem smoothCase_via_candidate_identification
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (h_identify : smoothCandidate_identification_target

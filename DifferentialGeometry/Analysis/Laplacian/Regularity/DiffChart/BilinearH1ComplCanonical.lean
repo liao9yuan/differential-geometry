@@ -20,11 +20,12 @@ For `u_h ∈ laplacianDomainPow g 2`:
   witness `laplacianDomain_memWkpChart_two_unconditional`).
 * `laplacianDomain.preimage u_h .coeFn ∈ MemWkpChart g 2 2` (same C-step
   applied to the `Lp`-side preimage element of `laplacianDomainPow g 2`).
-* `smoothMulH1Compl g ρα u_h ∈ laplacianDomain g` (Phase 3 of `smoothMulH1Compl`),
-  yielding `(ρα · u_h.coeFn) ∈ MemWkpChart g 2 2` (same C-step).
-* `smoothMulH1Compl g (Δρα) u_h ∈ laplacianDomain g` (Phase 3 with `φ = Δρα`),
-  yielding `(Δρα · u_h.coeFn) ∈ MemWkpChart g 2 2`.
-* By `MemWkpChart_smooth_mul` (Q1), `MemWkpChart` is closed under multiplication
+* `smoothMulH1Compl g ρα u_h ∈ laplacianDomain g` (Laplacian-domain membership
+  for `smoothMulH1Compl`), yielding `(ρα · u_h.coeFn) ∈ MemWkpChart g 2 2`
+  (same C-step).
+* `smoothMulH1Compl g (Δρα) u_h ∈ laplacianDomain g` (Laplacian-domain
+  membership with `φ = Δρα`), yielding `(Δρα · u_h.coeFn) ∈ MemWkpChart g 2 2`.
+* By `MemWkpChart_smooth_mul`, `MemWkpChart` is closed under multiplication
   by smooth bounded functions; in particular, `|∇ρα|² · u_h.coeFn ∈ MemWkpChart
   g 2 2`.
 
@@ -92,22 +93,23 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## Unconditional MemWkpChart witnesses derived from Phase 3 + C-step
+/-! ## Unconditional MemWkpChart witnesses derived from Laplacian-domain membership + C-step
 
 These witnesses package the standard "smooth bounded multiplication preserves
-MemWkpChart" closure with Phase 3 (`smoothMulH1Compl g φ`) and the unconditional
-C-step (`laplacianDomain_memWkpChart_two_unconditional`).
+MemWkpChart" closure with the Laplacian-domain membership of
+`smoothMulH1Compl g φ` and the unconditional C-step
+(`laplacianDomain_memWkpChart_two_unconditional`).
 
 For `u_h ∈ laplacianDomain g` and smooth `φ : C^∞⟮I, M; ℝ⟯`, the smooth-times
 function `φ · u_h.coeFn` lies in `MemWkpChart g 2 2` by *two* routes:
 
 1. Direct: `u_h.coeFn ∈ MemWkpChart g 2 2` (C-step) and `MemWkpChart_smooth_mul`
-   (Q1) yields `φ · u_h.coeFn ∈ MemWkpChart g 2 2`.
+   yield `φ · u_h.coeFn ∈ MemWkpChart g 2 2`.
 
-2. Via Phase 3: `smoothMulH1Compl g φ u_h ∈ laplacianDomain g` (Phase 3), then
-   `H1ComplToLp(smoothMulH1Compl g φ u_h).coeFn ∈ MemWkpChart g 2 2` (C-step);
-   identify the function as `φ · u_h.coeFn` via Phase 2
-   (`H1ComplToLp_smoothMulH1Compl`).
+2. Via Laplacian-domain membership: `smoothMulH1Compl g φ u_h ∈ laplacianDomain g`,
+   then `H1ComplToLp(smoothMulH1Compl g φ u_h).coeFn ∈ MemWkpChart g 2 2`
+   (C-step); identify the function as `φ · u_h.coeFn` via the
+   Lp-compatibility identity (`H1ComplToLp_smoothMulH1Compl`).
 
 We use route 1 below for clarity; route 2 is documented for reference. -/
 
@@ -128,7 +130,7 @@ theorem memWkpChart_two_two_smooth_mul_laplacianDomain
 
 /-- For `u_h ∈ laplacianDomain g` and smooth `φ : C^∞⟮I, M; ℝ⟯`, the Lp-class
 function `(smoothMulLp g φ (H1ComplToLp u_h)).coeFn` lies in `MemWkpChart g 2 2`
-(via Phase 3 + Phase 2 + C-step). -/
+(via Laplacian-domain membership + the Lp-compatibility identity + C-step). -/
 theorem memWkpChart_two_two_smoothMulLp_laplacianDomain_coeFn
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g) :
@@ -138,8 +140,8 @@ theorem memWkpChart_two_two_smoothMulLp_laplacianDomain_coeFn
         (H1ComplToLp (I := I) (M := M) g u_h) :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) := by
   classical
-  -- Strategy via Phase 3 + Phase 2 + C-step:
-  -- smoothMulH1Compl g φ u_h ∈ laplacianDomain g (Phase 3); its H1ComplToLp coeFn
+  -- Strategy via Laplacian-domain membership + the Lp-compatibility identity + C-step:
+  -- smoothMulH1Compl g φ u_h ∈ laplacianDomain g; its H1ComplToLp coeFn
   -- is ae-equal to `φ · u_h.coeFn` (the smoothMulLp coeFn). Its MemWkpChart
   -- regularity follows from C-step, and the regularity transfers via the
   -- ae-equality.
@@ -156,8 +158,9 @@ theorem memWkpChart_two_two_smoothMulLp_laplacianDomain_coeFn
 Lp-class function `(smoothMulLp g φ (laplacianDomain.preimage u_h)).coeFn`
 lies in `MemWkpChart g 2 2`. The `laplacianDomain.preimage u_h` lifts via
 `laplacianDomainPow_succ_preimage_in_range` to an element of `laplacianDomain g`
-(in the range of `iteratedResolventL2 g 1`); applying Phase 3 with that lift,
-then Phase 2 and the C-step gives the conclusion. -/
+(in the range of `iteratedResolventL2 g 1`); applying the Laplacian-domain
+membership with that lift, then the Lp-compatibility identity and the C-step
+gives the conclusion. -/
 theorem memWkpChart_two_two_smoothMulLp_preimage_coeFn
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2) :
@@ -173,7 +176,7 @@ theorem memWkpChart_two_two_smoothMulLp_preimage_coeFn
   -- via the second-floor structure of `laplacianDomainPow g 2`.
   obtain ⟨w_h, hw_h_dom, hw_h_eq⟩ :=
     laplacianDomainPow_two_preimage_eq (I := I) (M := M) g hu_h
-  -- Step 2: Apply Phase 3 to w_h ∈ laplacianDomain g with φ:
+  -- Step 2: Apply the Laplacian-domain membership to w_h ∈ laplacianDomain g with φ:
   have h_phase3 := smoothMulH1Compl_mem_laplacianDomain
     (I := I) (M := M) g φ hw_h_dom
   -- Step 3: C-step on smoothMulH1Compl g φ w_h ∈ laplacianDomain g.

@@ -43,7 +43,7 @@ Mathematically, this follows from `∑_α POU(α) = 1`, hence `∑_α ∂POU(α)
 and `∑_α ∂²POU(α) = 0`, combined with chart-α Leibniz expansion of the second
 weak partial of `chartPushed POU·v.toFun` and the chart-α Christoffel
 correction structure. The proof requires careful chart-α calculus tracking
-POU derivatives, and is reserved for a follow-up dispatch.
+POU derivatives, and is reserved for follow-up work.
 
 ## Main results
 

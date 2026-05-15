@@ -60,7 +60,7 @@ chart-Hessian Frobenius cross-term is naturally a globally well-defined
 * `g(∇²φ, ∇²u_h)`: **the chart-Hessian Frobenius cross-term.** Defined
   chart-wise via `HessianLpClass`'s `laplacianDomainHessianChart`
   composed with the smooth chart-Hessian of `φ`. Its global `Lp 2`
-  packaging is deferred to a follow-up substep — see the documentation
+  packaging is deferred to follow-up work — see the documentation
   at the end of this file.
 
 This file delivers the **smooth-piece candidate**:
@@ -79,7 +79,7 @@ this means `gradInnerLaplacianCandidateSmoothPart` represents the
 combination with a future chart-Hessian Lp class.
 
 The chart-Hessian piece is encapsulated as a hypothesis `h_hess_part` on
-the headline `gradInnerLaplacianCandidate`; once a downstream substep
+the headline `gradInnerLaplacianCandidate`; once downstream work
 discharges it (constructing a global `Lp 2`-class representing
 `2 · g(∇²φ, ∇²u_h)`), the candidate becomes fully concrete.
 
@@ -105,16 +105,17 @@ discharges it (constructing a global `Lp 2`-class representing
 * `gradInnerLaplacianCandidate_memLp_two` — the full candidate is in `Lp 2`
   (definitionally; it is by construction an element of `Lp 2`).
 
-## Connection to M3.2/M3.3
+## Downstream use of the candidate
 
-The downstream substeps will:
+The candidate constructed here feeds two downstream results:
 
-* **M3.2**: prove that `gradInnerLaplacianCandidate g φ u_h hu_h h_hess_part`
-  represents `(1-Δ_g)(g(∇φ, ∇u_h))` weakly, i.e. that
+* a regularity identity: `gradInnerLaplacianCandidate g φ u_h hu_h h_hess_part`
+  represents `(1-Δ_g)(g(∇φ, ∇u_h))` weakly, i.e.
   `gradInnerCLM g φ u_h = resolvent g (gradInnerLaplacianCandidate ...)`
   in `H1Compl g`.
 
-* **M3.3**: combine M3.2 with `laplacianDomain_mem_iff` to conclude
+* an image-membership corollary: combining the regularity identity with
+  `laplacianDomain_mem_iff` yields
   `gradInnerCLM g φ u_h ∈ H1ComplToLp '' laplacianDomain g`, which by the
   equivalence `smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image` (in
   `GradInnerLpIdentity.lean`) gives `smoothMulH1Compl g φ u_h ∈
@@ -133,8 +134,8 @@ is `Lp 2` chart-wise per `HessianLpClass.laplacianDomainHessianChart_memLp_two`)
 Globalisation requires partition-of-unity weighting plus chart-pulling,
 which is similar in structure to the existing `chartPushedRawLpFromLp`
 machinery (in `LaplacianDomainChartData.lean`). The construction is
-non-trivial (~500-1000 lines on its own) and is reserved for a follow-up
-substep.
+non-trivial (~500-1000 lines on its own) and is reserved for follow-up
+work.
 -/
 
 noncomputable section
@@ -265,8 +266,8 @@ where `C(φ, g)` depends on the supremum of `‖Ric‖_g · ‖∇φ‖_g` on co
 overall Lipschitz structure follows the `gradInnerCLM` pattern, this CLM
 is constructible with ~300-500 lines of analogous infrastructure.
 
-For M3.1's scope, we instead expose the chart-pieces explicitly and
-defer the CLM packaging to a future substep. The candidate
+Within the present module's scope, we instead expose the chart-pieces
+explicitly and defer the CLM packaging to later work. The candidate
 `gradInnerLaplacianCandidate` uses the bundled `smoothRicciPairingLp` for
 smooth inputs and treats the general H¹Compl extension as an external
 package.
@@ -301,7 +302,7 @@ where:
   `u_h ∈ laplacianDomainPow g 2`, the chart-side Hessian is in `Lp 2`
   chart-wise (via `HessianLpClass.laplacianDomainHessianChart_memLp_two`).
   Globalising this into an Lp 2 element of `Lp ℝ 2 μ_g` is the subject
-  of a follow-up substep.
+  of follow-up work.
 
 This definition is fully concrete: the candidate is in `Lp 2` by
 construction (every summand is in `Lp 2`, and `Lp 2` is closed under
@@ -355,9 +356,9 @@ noncomputable def gradInnerLaplacianCandidate
 /-! ## Linearity of the candidate in `(h_ricci_part, h_hess_part)`
 
 The candidate depends linearly on the supplied Ricci and Hessian
-auxiliary Lp classes. This is structurally useful for downstream M3.2
-work, where the auxiliary classes will be constructed via dense extension
-or direct chart-side aggregation. -/
+auxiliary Lp classes. This is structurally useful for the downstream
+regularity work, where the auxiliary classes will be constructed via
+dense extension or direct chart-side aggregation. -/
 
 /-- Linearity in `h_ricci_part`: the candidate is affine in the Ricci
 piece. (We state additivity; smul follows similarly.) -/
