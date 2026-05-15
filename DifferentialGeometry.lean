@@ -434,6 +434,9 @@ import DifferentialGeometry.Geometry.NormGradSq
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Equation
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Existence
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.MaximalInterval
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.Rescaling
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.Rescaling.BundleDerivative
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.Rescaling.Manifold
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.SmoothFlow
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Smoothness
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Uniqueness
