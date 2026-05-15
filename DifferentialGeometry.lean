@@ -434,6 +434,7 @@ import DifferentialGeometry.Geometry.NormGradSq
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.ChristoffelTransform
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Equation
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Existence
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.GeodesicEquationBridge
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.MaximalInterval
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Rescaling
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Rescaling.BundleDerivative

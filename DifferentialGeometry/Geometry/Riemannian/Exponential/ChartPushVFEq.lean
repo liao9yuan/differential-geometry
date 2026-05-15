@@ -308,6 +308,90 @@ theorem chartPushVF_eq_chartPhaseVF
   exact geodesicVectorFieldChartFiber_eq_chartPhaseVF (I := I) g α
     hf0_proj t ht
 
+/-! ### Generalisation to an arbitrary base time `t₀`
+
+The chart-pushed/chart-phase identification packaged in
+`chartPushVF_eq_chartPhaseVF` is autonomous in the sense that nothing
+above singles out `t = 0`: the base time `0` appears only as the index
+into the curve `f` chosen to align with the basepoint `α`. We mirror the
+lemma chain with an arbitrary base time `t₀`, using `(f t₀).proj = α` as
+the alignment hypothesis. The proofs are identical to the `t₀ = 0` case,
+because every intermediate identity is itself base-time-free up to the
+projection-equality hypothesis. -/
+
+/-- When `(f t₀).proj = α`, the achart of `TM` at `f t₀` equals the
+achart at `⟨α, 0⟩`. -/
+lemma achart_modelProd_ft₀_eq
+    {f : ℝ → TangentBundle I M} {α : M} {t₀ : ℝ}
+    (hft₀_proj : (f t₀).proj = α) :
+    achart (ModelProd H E) (f t₀) =
+      achart (ModelProd H E) (⟨α, (0 : E)⟩ : TangentBundle I M) := by
+  apply achart_modelProd_eq_of_proj_eq (I := I)
+  exact hft₀_proj
+
+/-- When `(f t₀).proj = α`, `tangentCoordChange I.tangent q (f t₀) q`
+coincides with `tangentCoordChange I.tangent q ⟨α, 0⟩ q`. -/
+lemma tangentCoordChange_tangent_ft₀_eq
+    {f : ℝ → TangentBundle I M} {α : M} {t₀ : ℝ}
+    (hft₀_proj : (f t₀).proj = α) (q : TangentBundle I M) :
+    tangentCoordChange I.tangent q (f t₀) q =
+      tangentCoordChange I.tangent q (⟨α, (0 : E)⟩ : TangentBundle I M) q := by
+  change (tangentBundleCore I.tangent (TangentBundle I M)).coordChange
+      (achart (ModelProd H E) q) (achart (ModelProd H E) (f t₀)) q =
+    (tangentBundleCore I.tangent (TangentBundle I M)).coordChange
+      (achart (ModelProd H E) q)
+      (achart (ModelProd H E) (⟨α, (0 : E)⟩ : TangentBundle I M)) q
+  rw [achart_modelProd_ft₀_eq (I := I) (f := f) (α := α) (t₀ := t₀) hft₀_proj]
+
+/-- **`chartPushVF` in terms of `geodesicVectorFieldChartFiber`, general
+base time.** When `(f t₀).proj = α` and `(f s).proj ∈ (chartAt H α).source`,
+`chartPushVF g α f t₀ s = geodesicVectorFieldChartFiber g α (f s)`. -/
+theorem chartPushVF_eq_geodesicVectorFieldChartFiber_at
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {f : ℝ → TangentBundle I M} {t₀ : ℝ} (hft₀_proj : (f t₀).proj = α)
+    (s : ℝ) (hs : (f s).proj ∈ (chartAt H α).source) :
+    chartPushVF (I := I) g α f t₀ s =
+      geodesicVectorFieldChartFiber (I := I) g α (f s) := by
+  unfold chartPushVF
+  rw [tangentCoordChange_tangent_ft₀_eq (I := I) (t₀ := t₀) hft₀_proj (f s)]
+  exact tangentCoordChange_tangent_geodesicVF (I := I) g α (f s) hs
+
+/-- The chart-α fibre form of the geodesic vector field at `f s` matches
+the chart-phase vector field evaluated at the chart-pushed lift's
+current position, at a general base time `t₀`. -/
+theorem geodesicVectorFieldChartFiber_eq_chartPhaseVF_at
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {f : ℝ → TangentBundle I M} {t₀ : ℝ} (hft₀_proj : (f t₀).proj = α)
+    (s : ℝ) (hs : (f s).proj ∈ (chartAt H α).source) :
+    geodesicVectorFieldChartFiber (I := I) g α (f s) =
+      chartPhaseVF (I := I) g α (chartPushLift (I := I) f t₀ s) := by
+  classical
+  have hpair : chartPushLift (I := I) f t₀ s =
+      (extChartAt I α (f s).proj, chartFiberCoord (I := I) α (f s)) := by
+    have h_eq := chartPushLift_eq_pair (I := I) (f := f) (t₀ := t₀) (t := s) ?_
+    · rw [h_eq]
+      rw [hft₀_proj]
+    · rw [hft₀_proj]; exact hs
+  rw [hpair]
+  rfl
+
+/-- **Headline identification, general base time.** When
+`(f t₀).proj = α` and `(f s).proj ∈ (chartAt H α).source`, the
+chart-pushed vector field `chartPushVF g α f t₀ s` agrees with the
+chart-phase vector field evaluated at the chart-pushed lift's current
+position. This is the autonomous generalisation of
+`chartPushVF_eq_chartPhaseVF` to an arbitrary base time. -/
+theorem chartPushVF_eq_chartPhaseVF_at
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {f : ℝ → TangentBundle I M} {t₀ : ℝ} (hft₀_proj : (f t₀).proj = α)
+    (s : ℝ) (hs : (f s).proj ∈ (chartAt H α).source) :
+    chartPushVF (I := I) g α f t₀ s =
+      chartPhaseVF (I := I) g α (chartPushLift (I := I) f t₀ s) := by
+  rw [chartPushVF_eq_geodesicVectorFieldChartFiber_at (I := I) g α
+        hft₀_proj s hs]
+  exact geodesicVectorFieldChartFiber_eq_chartPhaseVF_at (I := I) g α
+    hft₀_proj s hs
+
 end ChartPushVFEq
 
 /-! ## Eventual chart-phase form of the chart-pushed derivative
