@@ -431,14 +431,10 @@ import DifferentialGeometry.Analysis.HeatEquation.HeatSemigroupIteratedDomain
 import DifferentialGeometry.Analysis.HeatEquation.SmoothingSpectralLift
 
 import DifferentialGeometry.Geometry.NormGradSq
-import DifferentialGeometry.Geometry.Riemannian.Geodesic.ChristoffelTransform
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Equation
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Existence
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.GeodesicEquationBridge
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.MaximalInterval
-import DifferentialGeometry.Geometry.Riemannian.Geodesic.Rescaling
-import DifferentialGeometry.Geometry.Riemannian.Geodesic.Rescaling.BundleDerivative
-import DifferentialGeometry.Geometry.Riemannian.Geodesic.Rescaling.Manifold
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.SmoothFlow
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Smoothness
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Uniqueness
@@ -446,10 +442,14 @@ import DifferentialGeometry.Geometry.Riemannian.Exponential.Bridge
 import DifferentialGeometry.Geometry.Riemannian.Exponential.ChartIdentification
 import DifferentialGeometry.Geometry.Riemannian.Exponential.ChartPushVFEq
 import DifferentialGeometry.Geometry.Riemannian.Exponential.Definition
+import DifferentialGeometry.Geometry.Riemannian.Exponential.Final
 import DifferentialGeometry.Geometry.Riemannian.Exponential.Smoothness
 import DifferentialGeometry.Geometry.Riemannian.Exponential.SmoothnessClose
 import DifferentialGeometry.Geometry.Riemannian.Exponential.SmoothnessUnconditional
 import DifferentialGeometry.Geometry.Riemannian.Exponential.Unconditional
+import DifferentialGeometry.Geometry.Riemannian.Exponential.UniformUniqueness
+import DifferentialGeometry.Geometry.Riemannian.Exponential.UniformExistence
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.MaximalRescaling
 
 import DifferentialGeometry.Analysis.Sobolev.Solutions.FriedrichsCommutator
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.NonSmooth
