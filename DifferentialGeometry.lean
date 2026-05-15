@@ -693,3 +693,8 @@ import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SpectralBounds
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SpectralBoundsCalculus
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SemigroupTimeRegularity
 import DifferentialGeometry.Analysis.Parabolic.TensorLinearParabolic
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.AbstractSemigroup
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.DuhamelMap
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Contraction
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Existence
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorInstance
