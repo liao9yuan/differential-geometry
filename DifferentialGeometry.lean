@@ -574,6 +574,7 @@ import DifferentialGeometry.Analysis.Laplacian.Regularity.ChartSideH2kBridgeUnco
 import DifferentialGeometry.Analysis.HeatEquation.SmoothingUnconditional
 import DifferentialGeometry.Analysis.Laplacian.LichnerowiczSpectral
 import DifferentialGeometry.Analysis.HeatEquation.Generator
+import DifferentialGeometry.Analysis.HeatEquation.MildSolutionPDE
 
 import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.SecondFundamentalForm
 import DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.BoundaryLaplacian
