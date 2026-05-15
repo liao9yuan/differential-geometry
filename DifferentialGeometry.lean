@@ -431,6 +431,7 @@ import DifferentialGeometry.Analysis.HeatEquation.HeatSemigroupIteratedDomain
 import DifferentialGeometry.Analysis.HeatEquation.SmoothingSpectralLift
 
 import DifferentialGeometry.Geometry.NormGradSq
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.ChristoffelTransform
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Equation
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Existence
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.MaximalInterval
