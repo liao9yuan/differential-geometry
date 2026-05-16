@@ -565,7 +565,7 @@ theorem bochner_polarised_pointwise
     rw [hΔ_const_4]
     -- LHS: (fun _ => 4) x * Δ_g h x + 2 * (0 (∇v)) + (g.inner (∇φ) (∇v)) x * 0 = 4 * Δ_g h x.
     -- The `(0 : CLM)` applied to vectors yields 0; simp resolves this.
-    simp only [ContinuousLinearMap.zero_apply, mul_zero, add_zero, zero_mul]
+    simp only [ContinuousLinearMap.zero_apply, mul_zero, add_zero]
 
   -- Combine: 4 * Δ_g(g.inner(∇φ, ∇v))(x) = Δ_g N1 x - Δ_g N2 x.
   have h_Δ_4ginner_eq_sub :

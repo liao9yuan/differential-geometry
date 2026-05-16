@@ -1276,7 +1276,7 @@ lemma chartPushedRaw_gradInnerPiece_eq_sum
     rw [hL_def]
     exact h_mfderiv_apply i
   -- The goal mentions `mfderiv` rather than `L`. Convert.
-  show (2 : ℝ) * L _ = _
+  change (2 : ℝ) * L _ = _
   rw [h_LHS_eq]
   simp_rw [h_mfderiv_apply_L]
   -- We need to match coefficients:
