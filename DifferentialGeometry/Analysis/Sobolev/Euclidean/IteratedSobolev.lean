@@ -1108,6 +1108,22 @@ theorem wkpNorm_mono_set
   rw [← eLpNorm_congr_ae h_iter_ae]
   exact eLpNorm_mono_measure _ (Measure.restrict_mono_set volume hΩΩ')
 
+/-- The iterated `W^{k,p}` norm is monotone in the regularity order: if
+`k ≤ k'`, then `wkpNorm k p u Ω ≤ wkpNorm k' p u Ω`. The lower-order norm sums
+over a sub-range of orders `j`, and every summand is a non-negative element of
+`ℝ≥0∞`. -/
+theorem wkpNorm_mono_order
+    {k k' : ℕ} (hk : k ≤ k') {p : ℝ≥0∞} (u : E → ℝ) (Ω : Set E) :
+    wkpNorm (d := d) k p u Ω ≤ wkpNorm (d := d) k' p u Ω := by
+  classical
+  unfold wkpNorm
+  refine Finset.sum_le_sum_of_subset_of_nonneg ?_ ?_
+  · intro j hj
+    rw [Finset.mem_range] at hj ⊢
+    omega
+  · intro j _ _
+    exact zero_le _
+
 end Euclidean
 end Sobolev
 end Analysis

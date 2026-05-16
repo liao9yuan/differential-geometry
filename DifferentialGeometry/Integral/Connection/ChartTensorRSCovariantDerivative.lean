@@ -260,20 +260,23 @@ We mirror the `slotCLM` substitution introduced in
 
 /-- Tangent-slot substitution: identity on every coordinate except slot `k`,
 where it places the given CLM `Φ`. Identical to the helper in
-`ChartTensor0SCovariantDerivative.lean`; re-declared here as a private alias
-to keep the construction self-contained. -/
-private def tangentSlotCLM (n : ℕ) {b : M}
+`ChartTensor0SCovariantDerivative.lean`; re-declared here to keep the
+construction self-contained. -/
+def tangentSlotCLM (n : ℕ) {b : M}
     (k : Fin n) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b)
     (i : Fin n) : TangentSpace I b →L[ℝ] TangentSpace I b :=
   if i = k then Φ else ContinuousLinearMap.id ℝ (TangentSpace I b)
 
-private lemma tangentSlotCLM_self (n : ℕ) {b : M}
+/-- The slot-substitution family at the substituted slot `k` is `Φ`. -/
+lemma tangentSlotCLM_self (n : ℕ) {b : M}
     (k : Fin n) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b) :
     tangentSlotCLM (I := I) n k Φ k = Φ := by
   unfold tangentSlotCLM
   simp
 
-private lemma tangentSlotCLM_other (n : ℕ) {b : M}
+/-- The slot-substitution family at a non-substituted slot `i ≠ k` is the
+identity CLM. -/
+lemma tangentSlotCLM_other (n : ℕ) {b : M}
     (k : Fin n) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b)
     {i : Fin n} (h : i ≠ k) :
     tangentSlotCLM (I := I) n k Φ i = ContinuousLinearMap.id ℝ (TangentSpace I b) := by
