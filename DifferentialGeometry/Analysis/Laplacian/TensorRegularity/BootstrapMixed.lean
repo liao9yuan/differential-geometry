@@ -365,35 +365,72 @@ set_option maxHeartbeats 1600000 in
 /-- **Sobolev-order arithmetic for the perturbed source.**
 
 For a `SmoothEllipticBilinearForm B` over `EuclideanSpace ℝ (Fin d)`, an order
-`m`, a smooth `u` with `MemWkp (m+2) 2 u Ω` and compact support, a smooth `f`
-with `MemWkp (m+1) 2 f Ω`, and a precompact open `Ω`, the perturbed source
-`perturbedSource B u f l` lies in `W^{m,2}(Ω)`, and there is an explicit
-constant `K ≥ 0` with
+`m`, a precompact open `Ω`, and a direction `l`, there is a constant `K ≥ 0` —
+depending only on `B`, `m`, `Ω`, `l` — such that for **every** smooth compactly
+supported `u` with `MemWkp (m+2) 2 u Ω` and smooth `f` with `MemWkp (m+1) 2 f
+Ω`, the perturbed source `perturbedSource B u f l` lies in `W^{m,2}(Ω)` and
+satisfies
 
 `wkpNorm m 2 (perturbedSource B u f l) Ω ≤
   ENNReal.ofReal K · (wkpNorm (m+1) 2 f Ω + wkpNorm (m+2) 2 u Ω)`.
 
-The quantitative constant `K` is retained so that the outer bootstrap induction
-can carry an explicit budget. The compact-support hypothesis on `u` is part of
-the bootstrap interface but is not load-bearing for this arithmetic step: the
-coefficient bounds of `B` come from the precompactness of `Ω`, not from the
-support of `u`. -/
+The quantitative constant `K` is quantified before `u` and `f`: it is uniform in
+the solution and the source, depending only on the coefficients of `B` (which
+are bounded on the precompact `closure Ω`) and the order `m`. The
+compact-support hypothesis on `u` is part of the bootstrap interface but is not
+load-bearing for this arithmetic step: the coefficient bounds of `B` come from
+the precompactness of `Ω`, not from the support of `u`. -/
 theorem perturbedSource_memWkp_of_source_memWkp
-    (B : SmoothEllipticBilinearForm d (Set.univ : Set EE))
-    (m : ℕ) {u f : EE → ℝ}
-    (hu_smooth : ContDiff ℝ (⊤ : ℕ∞) u) (_hu_cpt : HasCompactSupport u)
-    (hf_smooth : ContDiff ℝ (⊤ : ℕ∞) f)
+    (B : SmoothEllipticBilinearForm d (Set.univ : Set EE)) (m : ℕ)
     {Ω : Set EE} (hΩ_open : IsOpen Ω) (hΩ_compact_closure : IsCompact (closure Ω))
-    (hu_memWkp : MemWkp (d := d) (m + 2) 2 u Ω)
-    (hf_memWkp : MemWkp (d := d) (m + 1) 2 f Ω)
     (l : Fin d) :
-    MemWkp (d := d) m 2 (perturbedSource (d := d) B u f l) Ω ∧
-      ∃ K : ℝ, 0 ≤ K ∧
+    ∃ K : ℝ, 0 ≤ K ∧ ∀ {u f : EE → ℝ},
+      ContDiff ℝ (⊤ : ℕ∞) u → HasCompactSupport u →
+      ContDiff ℝ (⊤ : ℕ∞) f →
+      MemWkp (d := d) (m + 2) 2 u Ω → MemWkp (d := d) (m + 1) 2 f Ω →
+      MemWkp (d := d) m 2 (perturbedSource (d := d) B u f l) Ω ∧
         wkpNorm (d := d) m 2 (perturbedSource (d := d) B u f l) Ω ≤
           ENNReal.ofReal K *
             (wkpNorm (d := d) (m + 1) 2 f Ω +
               wkpNorm (d := d) (m + 2) 2 u Ω) := by
   classical
+  -- ===== The location-uniform multiplier constants. =====
+  -- The smooth zeroth-order coefficient `∂_l B.c`.
+  set dlc : EE → ℝ :=
+    fun x => (fderiv ℝ B.c x) (EuclideanSpace.single l 1) with hdlc_def
+  have hdlc_smooth : ContDiff ℝ (⊤ : ℕ∞) dlc :=
+    contDiff_partial_eta (d := d) B.smooth_c l
+  -- The multiplier constant for `∂_l B.c` at order `m`, uniform in `u`.
+  obtain ⟨K_c, hK_c_nn, hK_c_bound⟩ :=
+    exists_wkpNorm_smul_smooth_le_on_precompact (d := d) m hΩ_open
+      hΩ_compact_closure hdlc_smooth
+  -- The smooth coefficient `∂_l a^{ij}`.
+  have h_dla_smooth : ∀ i j : Fin d, ContDiff ℝ (⊤ : ℕ∞)
+      (fun y : EE =>
+        (fderiv ℝ (fun z : EE => B.a z i j) y) (EuclideanSpace.single l 1)) :=
+    fun i j => contDiff_partial_eta (d := d) (B.contDiff_a i j) l
+  -- The multiplier constant for `∂_l a^{ij}` at order `m+1`, uniform in `u`,
+  -- extracted as a per-pair family.
+  have h_pair_data : ∀ i j : Fin d, ∃ K' : ℝ, 0 ≤ K' ∧
+      ∀ {w : EE → ℝ}, MemWkp (d := d) (m + 1) 2 w Ω →
+        MemWkp (d := d) (m + 1) 2
+            (fun y : EE => (fderiv ℝ (fun z : EE => B.a z i j) y)
+              (EuclideanSpace.single l 1) * w y) Ω ∧
+          wkpNorm (d := d) (m + 1) 2
+              (fun y : EE => (fderiv ℝ (fun z : EE => B.a z i j) y)
+                (EuclideanSpace.single l 1) * w y) Ω ≤
+            ENNReal.ofReal K' * wkpNorm (d := d) (m + 1) 2 w Ω := fun i j =>
+    exists_wkpNorm_smul_smooth_le_on_precompact (d := d) (m + 1) hΩ_open
+      hΩ_compact_closure (h_dla_smooth i j)
+  choose K_pair hK_pair_nn hK_pair_bound using h_pair_data
+  -- The aggregate divergence constant, uniform in `u` and `f`.
+  set K_div : ℝ := ∑ i : Fin d, ∑ j : Fin d, K_pair i j with hKdiv_def
+  have hK_div_nn : 0 ≤ K_div :=
+    Finset.sum_nonneg
+      (fun i _ => Finset.sum_nonneg (fun j _ => hK_pair_nn i j))
+  -- The aggregate constant: `K_c + K_div + 1`.
+  refine ⟨K_c + K_div + 1, by positivity, ?_⟩
+  intro u f hu_smooth _hu_cpt hf_smooth hu_memWkp hf_memWkp
   -- The data norms, as a single `ℝ≥0∞` quantity.
   set D : ℝ≥0∞ :=
     wkpNorm (d := d) (m + 1) 2 f Ω + wkpNorm (d := d) (m + 2) 2 u Ω with hD_def
@@ -407,17 +444,10 @@ theorem perturbedSource_memWkp_of_source_memWkp
     have h := wkpNorm_classicalPartial_le (d := d) hΩ_open hf_smooth hf_memWkp l
     exact h.trans le_self_add
   -- ===== Group B: the zeroth-order term `(∂_l B.c) · u`. =====
-  set dlc : EE → ℝ :=
-    fun x => (fderiv ℝ B.c x) (EuclideanSpace.single l 1) with hdlc_def
-  have hdlc_smooth : ContDiff ℝ (⊤ : ℕ∞) dlc :=
-    contDiff_partial_eta (d := d) B.smooth_c l
   set termB : EE → ℝ := fun x => dlc x * u x with hB_def
   -- `u ∈ W^{m,2}` (dropping two orders from `W^{m+2,2}`).
   have hu_m : MemWkp (d := d) m 2 u Ω :=
     MemWkp.le_of_le (by omega) hu_memWkp
-  obtain ⟨K_c, hK_c_nn, hK_c_bound⟩ :=
-    exists_wkpNorm_smul_smooth_le_on_precompact (d := d) m hΩ_open
-      hΩ_compact_closure hdlc_smooth
   have hB_mem : MemWkp (d := d) m 2 termB Ω := (hK_c_bound hu_m).1
   have hB_norm :
       wkpNorm (d := d) m 2 termB Ω ≤ ENNReal.ofReal K_c * D := by
@@ -428,8 +458,6 @@ theorem perturbedSource_memWkp_of_source_memWkp
       wkpNorm_mono_order (d := d) (by omega) u Ω
     exact h_mono.trans le_add_self
   -- ===== Group C: the divergence term `∑_{i,j} ∂_j[(∂_l a^{ij})(∂_i u)]`. =====
-  -- For each `(i, j)`, the inner function `(∂_l a^{ij}) · (∂_i u)`.
-  -- `∂_l a^{ij}` is smooth; `∂_i u` is one order below `u`.
   -- `∂_i u ∈ W^{m+1,2}(Ω)` (dropping one order from `W^{m+2,2}`).
   have h_diu_mem : ∀ i : Fin d, MemWkp (d := d) (m + 1) 2
       (fun x => (fderiv ℝ u x) (EuclideanSpace.single i 1)) Ω := fun i =>
@@ -440,33 +468,22 @@ theorem perturbedSource_memWkp_of_source_memWkp
           (fun x => (fderiv ℝ u x) (EuclideanSpace.single i 1)) Ω ≤
         wkpNorm (d := d) (m + 2) 2 u Ω := fun i =>
     wkpNorm_classicalPartial_le (d := d) hΩ_open hu_smooth hu_memWkp i
-  -- The smooth coefficient `∂_l a^{ij}` and its multiplier constant at order `m+1`.
-  have h_dla_smooth : ∀ i j : Fin d, ContDiff ℝ (⊤ : ℕ∞)
+  -- For each `(i, j)`, the membership of the inner product and the norm bound.
+  have h_pair_mem : ∀ i j : Fin d, MemWkp (d := d) (m + 1) 2
       (fun y : EE =>
-        (fderiv ℝ (fun z : EE => B.a z i j) y) (EuclideanSpace.single l 1)) :=
-    fun i j => contDiff_partial_eta (d := d) (B.contDiff_a i j) l
-  -- For each `(i, j)`, the constant for multiplication by `∂_l a^{ij}` at order
-  -- `m+1`, the membership of the inner product, and the inner-product norm bound.
-  have h_inner_data : ∀ i j : Fin d, ∃ K' : ℝ, 0 ≤ K' ∧
-      MemWkp (d := d) (m + 1) 2
-        (fun y : EE =>
-          (fderiv ℝ (fun z : EE => B.a z i j) y) (EuclideanSpace.single l 1) *
-            (fderiv ℝ u y) (EuclideanSpace.single i 1)) Ω ∧
+        (fderiv ℝ (fun z : EE => B.a z i j) y) (EuclideanSpace.single l 1) *
+          (fderiv ℝ u y) (EuclideanSpace.single i 1)) Ω :=
+    fun i j => (hK_pair_bound i j (h_diu_mem i)).1
+  have h_pair_norm : ∀ i j : Fin d,
       wkpNorm (d := d) (m + 1) 2
           (fun y : EE =>
             (fderiv ℝ (fun z : EE => B.a z i j) y)
                 (EuclideanSpace.single l 1) *
               (fderiv ℝ u y) (EuclideanSpace.single i 1)) Ω ≤
-        ENNReal.ofReal K' * wkpNorm (d := d) (m + 2) 2 u Ω := by
+        ENNReal.ofReal (K_pair i j) * wkpNorm (d := d) (m + 2) 2 u Ω := by
     intro i j
-    obtain ⟨K', hK'_nn, hK'_bound⟩ :=
-      exists_wkpNorm_smul_smooth_le_on_precompact (d := d) (m + 1) hΩ_open
-        hΩ_compact_closure (h_dla_smooth i j)
-    refine ⟨K', hK'_nn, (hK'_bound (h_diu_mem i)).1, ?_⟩
-    refine (hK'_bound (h_diu_mem i)).2.trans ?_
+    refine (hK_pair_bound i j (h_diu_mem i)).2.trans ?_
     exact mul_le_mul_of_nonneg_left (h_diu_norm i) (by positivity)
-  -- Choose the per-pair data.
-  choose K_pair hK_pair_nn h_pair_mem h_pair_norm using h_inner_data
   -- The single divergence summand `∂_j[(∂_l a^{ij})(∂_i u)]` at order `m`.
   set termC_summand : Fin d → Fin d → EE → ℝ :=
     fun i j x =>
@@ -516,11 +533,6 @@ theorem perturbedSource_memWkp_of_source_memWkp
   have hC_mem : MemWkp (d := d) m 2 termC Ω :=
     memWkp_finset_sum (d := d) hΩ_open Finset.univ termC_row
       (fun i _ => hCrow_mem i)
-  -- The aggregate divergence constant.
-  set K_div : ℝ := ∑ i : Fin d, ∑ j : Fin d, K_pair i j with hKdiv_def
-  have hK_div_nn : 0 ≤ K_div :=
-    Finset.sum_nonneg
-      (fun i _ => Finset.sum_nonneg (fun j _ => hK_pair_nn i j))
   have hC_norm :
       wkpNorm (d := d) m 2 termC Ω ≤
         ENNReal.ofReal K_div * wkpNorm (d := d) (m + 2) 2 u Ω := by
@@ -544,8 +556,7 @@ theorem perturbedSource_memWkp_of_source_memWkp
     exact MemWkp.add (d := d) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_AB_mem
       hC_mem
   refine ⟨h_pert_mem, ?_⟩
-  -- The aggregate constant: `K_c + K_div + 1`.
-  refine ⟨K_c + K_div + 1, by positivity, ?_⟩
+  -- The aggregate constant `K_c + K_div + 1` is already fixed.
   rw [h_pert_eq]
   -- Triangle: `wkpNorm ((A−B)+C) ≤ wkpNorm (A−B) + wkpNorm C`.
   have h_tri₁ :=
@@ -671,7 +682,7 @@ therefore `C^∞` whenever `u` and `f` are. -/
 
 /-- For smooth `u` and `f`, the perturbed source `perturbedSource B u f l` is
 `C^∞` (the coefficients of `B` are smooth by hypothesis). -/
-private theorem contDiff_perturbedSource'
+theorem contDiff_perturbedSource'
     (B : SmoothEllipticBilinearForm d (Set.univ : Set EE))
     {u f : EE → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) (hf : ContDiff ℝ (⊤ : ℕ∞) f)
     (l : Fin d) :

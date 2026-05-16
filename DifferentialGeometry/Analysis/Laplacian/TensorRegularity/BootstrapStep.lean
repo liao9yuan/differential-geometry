@@ -392,7 +392,7 @@ private theorem iterWeakPartial_smooth_ae_eq_iterClassical_anyOpen
 omit [NeZero d] in
 /-- The pointwise square of a compactly supported real function is compactly
 supported. -/
-private lemma hasCompactSupport_sq {h : EE → ℝ} (hh : HasCompactSupport h) :
+lemma hasCompactSupport_sq {h : EE → ℝ} (hh : HasCompactSupport h) :
     HasCompactSupport (fun x => h x ^ 2) := by
   have h_eq : (fun x => h x ^ 2) = h * h := by funext x; rw [Pi.mul_apply, sq]
   rw [h_eq]
@@ -408,7 +408,7 @@ private lemma le_rpow_half_of_sq_le {x y : ℝ≥0∞} (h : x ^ 2 ≤ y) :
   exact ENNReal.rpow_le_rpow h (by norm_num)
 
 /-- For `S ≥ 0`, `(ENNReal.ofReal S) ^ (1/2) = ENNReal.ofReal (Real.sqrt S)`. -/
-private lemma rpow_half_ofReal_eq_ofReal_sqrt {S : ℝ} (hS : 0 ≤ S) :
+lemma rpow_half_ofReal_eq_ofReal_sqrt {S : ℝ} (hS : 0 ≤ S) :
     (ENNReal.ofReal S) ^ ((1 : ℝ) / 2) = ENNReal.ofReal (Real.sqrt S) := by
   rw [show S = Real.sqrt S * Real.sqrt S from (Real.mul_self_sqrt hS).symm,
     ENNReal.ofReal_mul (Real.sqrt_nonneg _),
