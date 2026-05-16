@@ -446,6 +446,7 @@ import DifferentialGeometry.Geometry.Riemannian.Exponential.Definition
 import DifferentialGeometry.Geometry.Riemannian.Exponential.Final
 import DifferentialGeometry.Geometry.Riemannian.Exponential.FinalClosure
 import DifferentialGeometry.Geometry.Riemannian.Exponential.InverseManifoldChain
+import DifferentialGeometry.Geometry.Riemannian.Exponential.MfderivAtZero
 import DifferentialGeometry.Geometry.Riemannian.Exponential.PreconnectedPropagation
 import DifferentialGeometry.Geometry.Riemannian.Exponential.RescaledLift
 import DifferentialGeometry.Geometry.Riemannian.Exponential.Smoothness
