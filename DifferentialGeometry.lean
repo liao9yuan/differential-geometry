@@ -458,6 +458,7 @@ import DifferentialGeometry.Geometry.Riemannian.Exponential.UnifiedPackaging
 import DifferentialGeometry.Geometry.Riemannian.Exponential.UniformUniqueness
 import DifferentialGeometry.Geometry.Riemannian.Exponential.UniformExistence
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.MaximalRescaling
+import DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 
 import DifferentialGeometry.Analysis.Sobolev.Solutions.FriedrichsCommutator
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.NonSmooth
