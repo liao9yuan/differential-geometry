@@ -1,4 +1,5 @@
 -- Modified 2026-04-28: updated internal import paths for project namespace
+-- Modified 2026-05-16: style-warning cleanup
 import DifferentialGeometry.External.DeGiorgi.MoserIteration.CutoffPrep.Basics
 
 /-!
@@ -104,7 +105,7 @@ theorem moserSmoothClip_deriv_bounded
           exact moserSmoothClip_eq_top_of_top_le (ε := ε) (N := N) hy.le
         rw [hloc.deriv_eq, deriv_const, norm_zero]
         exact norm_nonneg _
-      · push_neg at ht0 ht1
+      · push Not at ht0 ht1
         exact Filter.eventually_principal.mp hM_max t (Set.mem_Icc.2 ⟨ht0, ht1⟩)
   refine ⟨‖deriv (moserSmoothClip ε N) M‖, ?_⟩
   intro t
@@ -178,7 +179,7 @@ theorem moserRegPow_deriv_bounded
           rw [moserRegPow, moserSmoothClip_eq_top_of_top_le (ε := ε) (N := N) hy.le]
         rw [hconst.deriv_eq, deriv_const, norm_zero]
         exact norm_nonneg _
-      · push_neg at ht0 ht1
+      · push Not at ht0 ht1
         exact Filter.eventually_principal.mp hM_max t (Set.mem_Icc.2 ⟨ht0, ht1⟩)
   refine ⟨‖deriv (moserRegPow ε N p) M‖, ?_⟩
   intro t
@@ -252,7 +253,7 @@ theorem moserRegTestPow_deriv_bounded
           rw [moserRegTestPow, moserSmoothClip_eq_top_of_top_le (ε := ε) (N := N) hy.le]
         rw [hconst.deriv_eq, deriv_const, norm_zero]
         exact norm_nonneg _
-      · push_neg at ht0 ht1
+      · push Not at ht0 ht1
         exact Filter.eventually_principal.mp hM_max t (Set.mem_Icc.2 ⟨ht0, ht1⟩)
   refine ⟨‖deriv (moserRegTestPow ε N p) M‖, ?_⟩
   intro t
@@ -504,7 +505,7 @@ theorem moserExactRegPow_deriv_bounded
           rw [moserExactRegPow, moserExactInput_eq_top_of_top_le (ε := ε) (N := N) hy.le]
         rw [hconst.deriv_eq, deriv_const, norm_zero]
         exact norm_nonneg _
-      · push_neg at ht0 ht1
+      · push Not at ht0 ht1
         exact Filter.eventually_principal.mp hM_max t (Set.mem_Icc.2 ⟨ht0, ht1⟩)
   refine ⟨‖deriv (moserExactRegPow ε N p) M‖, ?_⟩
   intro t
@@ -551,7 +552,7 @@ theorem moserExactRegTestPow_deriv_bounded
           rw [moserExactRegTestPow, moserExactInput_eq_top_of_top_le (ε := ε) (N := N) hy.le]
         rw [hconst.deriv_eq, deriv_const, norm_zero]
         exact norm_nonneg _
-      · push_neg at ht0 ht1
+      · push Not at ht0 ht1
         exact Filter.eventually_principal.mp hM_max t (Set.mem_Icc.2 ⟨ht0, ht1⟩)
   refine ⟨‖deriv (moserExactRegTestPow ε N p) M‖, ?_⟩
   intro t

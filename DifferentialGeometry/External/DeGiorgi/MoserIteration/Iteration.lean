@@ -1,4 +1,5 @@
 -- Modified 2026-04-28: updated internal import paths for project namespace
+-- Modified 2026-05-16: style-warning cleanup
 import DifferentialGeometry.External.DeGiorgi.MoserIteration.CutoffPrep.PreEstimate
 import Mathlib.Topology.MetricSpace.Thickening
 
@@ -32,7 +33,7 @@ noncomputable def C_weakHarnack0 (d : ℕ) [NeZero d] : ℝ :=
 theorem C_Moser_le_C_weakHarnack0 :
     C_Moser d ≤ C_weakHarnack0 d := by
   by_cases hd : 2 < (d : ℝ)
-  · simp [C_weakHarnack0, hd]
+  · simp only [C_weakHarnack0, hd, dif_pos]
     have hq_nonneg : 0 ≤ moserDecayRatio d :=
       moserDecayRatio_nonneg (d := d) hd
     have hq_lt_one : moserDecayRatio d < 1 :=
@@ -53,7 +54,8 @@ theorem C_Moser_le_C_weakHarnack0 :
       C_Moser d = C_Moser d * 1 := by ring
       _ ≤ C_Moser d * (moserChi d ^ 2) ^ (∑' n : ℕ, (n : ℝ) * moserDecayRatio d ^ n) := by
           exact mul_le_mul_of_nonneg_left hfactor_ge_one hCMoser_nonneg
-  · simp [C_weakHarnack0, hd]
+  · simp only [C_weakHarnack0, hd, dif_neg, not_false_eq_true]
+    exact le_refl _
 
 theorem one_le_C_weakHarnack0 :
     1 ≤ C_weakHarnack0 d := by

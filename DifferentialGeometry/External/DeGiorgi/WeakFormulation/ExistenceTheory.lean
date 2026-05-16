@@ -1,4 +1,5 @@
 -- Modified 2026-04-28: updated internal import paths for project namespace
+-- Modified 2026-05-16: style-warning cleanup
 import DifferentialGeometry.External.DeGiorgi.WeakFormulation.CoefficientOperator
 import Mathlib.Analysis.InnerProductSpace.LaxMilgram
 import Mathlib.Analysis.Normed.Operator.Extend
@@ -22,11 +23,11 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => AmbientSpace d
 
-set_option maxHeartbeats 800000
-set_option synthInstance.maxHeartbeats 100000
-
 /-! ## Weak Problem Existence (Lax-Milgram) -/
 
+set_option maxHeartbeats 800000 in
+set_option synthInstance.maxHeartbeats 100000 in
+-- Lax-Milgram existence assembly with instance synthesis
 /-- Existence of weak solutions via Lax-Milgram.
 The bilinear form `bilinFormOfCoeff` is bounded and coercive on `H₀¹(Ω)`
 (proved above), and the RHS is a bounded linear functional, so Lax-Milgram

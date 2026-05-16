@@ -1,4 +1,5 @@
 -- Modified 2026-04-28: updated internal import paths for project namespace
+-- Modified 2026-05-16: style-warning cleanup
 import DifferentialGeometry.External.DeGiorgi.MoserIteration.CutoffPrep.ExactRegularization
 
 /-!
@@ -180,7 +181,6 @@ lemma moserRegPowerCutoffWitness_grad
   -- moserRegPowerCutoffWitness = hwComp.mul_smooth_bounded η
   -- mul_smooth_bounded.weakGrad x i = η x * hw.weakGrad x i + ∂ᵢη(x) * u(x)
   -- This is definitionally true by the construction.
-  set_option maxHeartbeats 400000 in
   simp only [moserRegPowerCutoffWitness, MemW1pWitness.mul_smooth_bounded,
     moserRegClippedPosPartWitness, WithLp.ofLp_add, WithLp.ofLp_smul,
     smul_eq_mul, Pi.add_apply, Pi.smul_apply]

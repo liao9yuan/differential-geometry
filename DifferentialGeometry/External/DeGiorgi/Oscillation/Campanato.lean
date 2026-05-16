@@ -1,4 +1,5 @@
 -- Modified 2026-04-28: updated internal import paths for project namespace
+-- Modified 2026-05-16: style-warning cleanup
 import DifferentialGeometry.External.DeGiorgi.Oscillation.BMO
 
 /-!
@@ -1120,7 +1121,7 @@ lemma holder_hasCampanatoBound
   have hBmeas : MeasurableSet B := by
     simpa [B] using (Metric.isOpen_ball.measurableSet : MeasurableSet (Metric.ball y r))
   have hyB : y ∈ B := by
-    show y ∈ Metric.ball y r
+    change y ∈ Metric.ball y r
     exact Metric.mem_ball_self hr
   have hyR : y ∈ Metric.ball x₀ R := hsub hyB
   have hBfin : volume B ≠ ∞ := by

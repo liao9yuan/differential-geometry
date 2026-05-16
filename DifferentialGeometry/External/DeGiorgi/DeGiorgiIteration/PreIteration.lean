@@ -1,4 +1,5 @@
 -- Modified 2026-04-28: updated internal import paths for project namespace
+-- Modified 2026-05-16: style-warning cleanup
 import DifferentialGeometry.External.DeGiorgi.DeGiorgiIteration.Energy
 
 /-!
@@ -411,15 +412,17 @@ private theorem deGiorgi_cutoffSobolev_superlevelStep
         have hux : u x - lam ≤ 0 := by linarith
         simp [positivePartSub, max_eq_right hux]
       by_cases hxT : x ∈ T
-      · simp [g, hxT, hzero]
-        exact sq_nonneg (v x)
-      · simp [g, hxT, hzero]
+      · simp only [g, hxT, hzero, Set.indicator_of_mem, abs_zero,
+          ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow]
+        positivity
+      · simp only [g, hxT, hzero, Set.indicator_of_notMem,
+          not_false_eq_true, abs_zero, ne_eq, OfNat.ofNat_ne_zero, zero_pow, le_refl]
   have hT_nonneg : ∀ x, 0 ≤ T.indicator g x := by
     intro x
     by_cases hxT : x ∈ T
-    · simp [g, hxT]
-      exact sq_nonneg (v x)
-    · simp [g, hxT]
+    · simp only [g, hxT, Set.indicator_of_mem]
+      positivity
+    · simp only [g, hxT, Set.indicator_of_notMem, not_false_eq_true, le_refl]
   have hleft_le_T :
       ∫ x in B, |positivePartSub u lam x| ^ 2 ∂volume ≤
         ∫ x in Ω, T.indicator g x ∂volume := by

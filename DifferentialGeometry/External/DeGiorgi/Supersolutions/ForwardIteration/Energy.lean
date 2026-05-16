@@ -1,4 +1,5 @@
 -- Modified 2026-04-28: updated internal import paths for project namespace
+-- Modified 2026-05-16: style-warning cleanup
 import DifferentialGeometry.External.DeGiorgi.Supersolutions.ForwardIteration.Basics
 
 /-!
@@ -19,8 +20,8 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => AmbientSpace d
 local notation "μhalf" => (volume.restrict (Metric.ball (0 : E) (1 / 2 : ℝ)))
 
-set_option maxHeartbeats 1000000
-
+set_option maxHeartbeats 1000000 in
+-- forward energy bound assembly
 theorem superPowerCutoffFwd_energy_bound_reg
     (_hd : 2 < (d : ℝ))
     (A : NormalizedEllipticCoeff d (Metric.ball (0 : E) 1))
@@ -976,7 +977,7 @@ theorem superPowerCutoffFwd_memW1p_energy_of_supersolution_core
             hu.weakGrad x i := by
     intro n i x
     dsimp [AsingSeq, Gn, Bn, wfn, wfnBig, hu]
-    simp [MemW1pWitness.restrict]
+    simp only [MemW1pWitness.restrict]
     rw [superExactPowerCutoffWitness_grad
       (d := d) (u := u) (η := η) (ε := superEpsSeq n) (a := p / 2)
       (s := s) (Cη := Cη) (superEpsSeq_pos n) ha_pow hu1 hη hη_bound hη_grad_bound

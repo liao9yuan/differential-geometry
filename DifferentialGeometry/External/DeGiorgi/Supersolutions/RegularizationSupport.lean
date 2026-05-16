@@ -1,4 +1,5 @@
 -- Modified 2026-04-28: updated internal import paths for project namespace
+-- Modified 2026-05-16: style-warning cleanup
 import DifferentialGeometry.External.DeGiorgi.Supersolutions.TestFunctions
 
 /-!
@@ -18,8 +19,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => AmbientSpace d
 local notation "μhalf" => (volume.restrict (Metric.ball (0 : E) (1 / 2 : ℝ)))
-
-set_option maxHeartbeats 200000
 
 def superEpsSeq (n : ℕ) : ℝ := (((n : ℝ) + 1) : ℝ)⁻¹
 
