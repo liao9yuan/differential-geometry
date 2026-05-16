@@ -140,8 +140,10 @@ measure, so `Lp ℝ 2 (volume.restrict (chartTargetEuclid α))` is a real Banach
 space. -/
 
 /-- The Euclidean `L²` reference measure of the chart at `α`: the Lebesgue
-volume restricted to the Euclidean chart target. -/
-private def chartL2Measure (α : M) : Measure EuclN :=
+volume restricted to the Euclidean chart target. This is a complete, σ-finite
+measure, so `Lp ℝ 2 (chartL2Measure α)` is a real Banach space; it is the
+reference measure carried by every canonical Euclidean chart component. -/
+def chartL2Measure (α : M) : Measure EuclN :=
   (volume : Measure EuclN).restrict (chartTargetEuclid (I := I) (M := M) α)
 
 /-! ## Support of the chart component inside the canonical compact kernel
@@ -399,7 +401,7 @@ together with strong measurability this is `MemLp`. -/
 
 /-- The Euclidean chart component is in `MemLp 2` of the Euclidean `L²`
 reference measure of the chart. -/
-private theorem tensorChartComponent_memLp
+theorem tensorChartComponent_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
