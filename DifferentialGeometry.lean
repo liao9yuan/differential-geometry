@@ -753,3 +753,6 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Existence
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorInstance
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.MaxRegSpace
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.MaxRegFixedPoint
+
+-- Public consumption-facing facade
+import DifferentialGeometry.Interface
