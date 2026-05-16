@@ -94,7 +94,7 @@ is finite. -/
 
 /-- On a compact manifold, only finitely many partition-of-unity centres
 have non-empty support. We package the set of such centres as a `Finset M`. -/
-private noncomputable def chartAtlasPOU_activeFinset
+noncomputable def chartAtlasPOU_activeFinset
     (I : ModelWithCorners ℝ E H)
     (M : Type*) [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] : Finset M :=
@@ -102,7 +102,7 @@ private noncomputable def chartAtlasPOU_activeFinset
 
 /-- An index `α : M` belongs to the active finset iff its partition-of-unity
 support is non-empty. -/
-private lemma mem_chartAtlasPOU_activeFinset_iff (α : M) :
+lemma mem_chartAtlasPOU_activeFinset_iff (α : M) :
     α ∈ chartAtlasPOU_activeFinset I M ↔
       (Function.support (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)).Nonempty := by
@@ -111,7 +111,7 @@ private lemma mem_chartAtlasPOU_activeFinset_iff (α : M) :
   exact Set.Finite.mem_toFinset _
 
 /-- If `α : M` is NOT in the active finset, then `POU_α` is identically zero. -/
-private lemma chartAtlasPOU_eq_zero_of_notMem_activeFinset
+lemma chartAtlasPOU_eq_zero_of_notMem_activeFinset
     {α : M} (hα : α ∉ chartAtlasPOU_activeFinset I M) :
     ∀ x : M, ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = 0 := by
   classical
@@ -131,7 +131,7 @@ private lemma chartAtlasPOU_eq_zero_of_notMem_activeFinset
 The POU-weighted scalar component is the product of `POU_α` and the raw
 chart-frame scalar, so it vanishes pointwise as soon as `POU_α` does. -/
 
-private lemma tensorChartComponentScalar_eq_zero_of_pou_zero
+lemma tensorChartComponentScalar_eq_zero_of_pou_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (h_zero : ∀ x : M, ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = 0)
     (S : SmoothCcTensor g r s)
