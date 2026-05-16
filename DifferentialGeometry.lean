@@ -190,6 +190,7 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannianBundle
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SInnerSectionContinuity
 import DifferentialGeometry.Tensor.RSTensor.TensorRSRiemannian
 import DifferentialGeometry.Tensor.RSTensor.TensorRSRiemannianBundle
+import DifferentialGeometry.Tensor.RSTensor.TensorRSSpaceNormBridge
 
 import DifferentialGeometry.Integral.Measure.ChartDensity
 import DifferentialGeometry.Integral.Measure.Glue
