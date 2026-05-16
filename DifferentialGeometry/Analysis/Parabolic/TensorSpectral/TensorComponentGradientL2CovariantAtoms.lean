@@ -167,7 +167,7 @@ require global smoothness of `X`: at any chart-`α` source point, the chart-
 frame covariant derivative of a smooth `(r, s)`-tensor section equals the
 bundled directional covariant derivative, evaluated at the value `X b`. -/
 
-private lemma chartTensorRSCovariantDerivative_eq_tensorCovDerivAt_at
+lemma chartTensorRSCovariantDerivative_eq_tensorCovDerivAt_at
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) (X : Π b' : M, TangentSpace I b')
     {b : M} (hb : b ∈ (chartAt H α).source) :
