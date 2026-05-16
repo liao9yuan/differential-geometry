@@ -45,10 +45,10 @@ compact `K ⊆ chartTargetEuclid α`. Its zeroth-order coefficient vanishes, and
 * `tensorComponentEuclid_tsupport_subset` — for a chart-supported section the
   push-forward has compact support inside a compact subset of the Euclidean
   chart target.
-* `tensorComponent_isSmoothWeakSolution` — the headline (hypothesis-bearing
-  form): given the chart-pulled scalar bilinear identity for the
-  principal-part form `tensorPrincipalForm`, the Euclidean chart component
-  `tensorComponentEuclid g r s T α P₀` is a smooth weak solution of
+* `tensorComponent_isSmoothWeakSolution_of_chartIdentity` — the headline
+  (hypothesis-bearing form): given the chart-pulled scalar bilinear identity
+  for the principal-part form `tensorPrincipalForm`, the Euclidean chart
+  component `tensorComponentEuclid g r s T α P₀` is a smooth weak solution of
   `tensorPrincipalForm` with the supplied right-hand side.
 -/
 
@@ -206,7 +206,7 @@ private lemma tensorChartComponentRaw_eq_zero_of_section_eq_zero
 /-- The topological support of the raw chart-frame scalar component is contained
 in the topological support of `T.toFun`: the component vanishes wherever
 `T.toSection` (equivalently `T.toFun`) vanishes. -/
-private lemma tensorChartComponentRaw_tsupport_subset
+lemma tensorChartComponentRaw_tsupport_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -413,7 +413,7 @@ substituted; the principal part collapses (`covPrincipalIntegrand_rotated_collap
 to the scalar elliptic principal integrand of `tensorPrincipalForm`
 (`weightedInvGram_principalIntegrand_eq`), and the lower-order remainder and
 the source pairing are collected into the right-hand side `f`. -/
-theorem tensorComponent_isSmoothWeakSolution
+theorem tensorComponent_isSmoothWeakSolution_of_chartIdentity
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
     {K : Set EuclN} (hK : IsCompact K)

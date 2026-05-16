@@ -215,7 +215,7 @@ product rule for `euclidPartial`. -/
 `h : EuclideanSpace ℝ (Fin n) → ℝ` both differentiable at `y`, the `l`-th
 chart-Euclidean partial derivative of the product `f · h` satisfies
 `∂_l (f · h) = (∂_l f) · h + f · (∂_l h)` at `y`. -/
-private lemma euclidPartial_mul
+lemma euclidPartial_mul
     (l : Fin (Module.finrank ℝ E))
     {f h : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
     {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
@@ -284,7 +284,7 @@ component agrees there with the product of the inverse-Gram entry
 
 /-- The inverse-Gram column entry `covChartMetricGramInv g r s α · Q P₀` as a
 function on the Euclidean chart target. -/
-private noncomputable def gramInvEntry
+noncomputable def gramInvEntry
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Q P₀ : CompIdx E r s) :
     EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
@@ -292,7 +292,7 @@ private noncomputable def gramInvEntry
 
 /-- The inverse-Gram column entry `gramInvEntry g r s α Q P₀` is `C^∞` on the
 Euclidean chart target — a restatement of `covChartMetricGramInv_entry_contDiffOn`. -/
-private lemma gramInvEntry_contDiffOn
+lemma gramInvEntry_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Q P₀ : CompIdx E r s) :
     ContDiffOn ℝ ∞ (gramInvEntry (I := I) (M := M) g r s α Q P₀)
@@ -303,7 +303,7 @@ private lemma gramInvEntry_contDiffOn
 component of `rotatedTestSection g r s α P₀ χ` at the multi-index `Q` agrees
 with the product of the inverse-Gram column entry `gramInvEntry g r s α Q P₀`
 and the chart-pushed bump `chartPushedRaw I α χ`. -/
-private lemma chartPushedRaw_rotatedTestSection_eqOn
+lemma chartPushedRaw_rotatedTestSection_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : CompIdx E r s)
     {χ : M → ℝ} (hχs : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ χ (chartAt H α).source)
@@ -548,7 +548,7 @@ rotated test section is collapsed in four steps.
 the Euclidean push-forward of the rotated test section's raw chart component
 splits, by the Leibniz rule, into the inverse-Gram-coefficient term and the
 chart-pushed-bump term. -/
-private lemma euclidPartial_chartPushedRaw_rotatedTestSection_eqOn
+lemma euclidPartial_chartPushedRaw_rotatedTestSection_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : CompIdx E r s)
     {χ : M → ℝ} (hχs : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ χ (chartAt H α).source)
