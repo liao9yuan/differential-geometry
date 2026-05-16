@@ -584,6 +584,8 @@ import DifferentialGeometry.Analysis.Sobolev.Solutions.SobolevToCinftyRep
 
 import DifferentialGeometry.Geometry.Curvature.Ricci
 
+import DifferentialGeometry.Geometry.MetricCompatibility
+
 import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothApproximationConstruction
 
 import DifferentialGeometry.Analysis.Sobolev.Solutions.H2NonSmoothDirect
@@ -732,6 +734,7 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.CompactInclusion
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.CompactResolvent
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Spectrum
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EigenBasis
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.CanonicalTensorRepr
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.Semigroup
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.Defs
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.Inclusion
