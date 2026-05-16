@@ -312,7 +312,7 @@ private theorem memW1p_of_smooth_compactSupport_anyOpen
 
 /-- For smooth, compactly supported `ψ` and **any** open `Ω`, `ψ ∈ W^{k,p}(Ω)`
 for `1 ≤ p`: no `tsupport ψ ⊆ Ω` hypothesis is needed. -/
-private theorem memWkp_of_smooth_compactSupport_anyOpen
+theorem memWkp_of_smooth_compactSupport_anyOpen
     {Ω : Set EE} (hΩ_open : IsOpen Ω)
     {ψ : EE → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
     (hψ_cpt : HasCompactSupport ψ) {p : ℝ≥0∞} (hp : 1 ≤ p) (k : ℕ) :

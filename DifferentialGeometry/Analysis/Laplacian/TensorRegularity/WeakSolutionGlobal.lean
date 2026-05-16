@@ -147,7 +147,7 @@ divided by the chart-pushed bump. By `covDerivLowerOrderTerm_def` and the rotate
 test section's raw-component identity it is the finite sum over component
 multi-index pairs `p` of `covDerivLowerOrderCoeff` against the inverse-Gram entry
 `covChartMetricGramInv g r s α · p P₀`. -/
-private noncomputable def lowerOrderRotationLOCoeff
+noncomputable def lowerOrderRotationLOCoeff
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : CompIdx E r s)
     (l : Fin (Module.finrank ℝ E)) (Q : CompIdx E r s) :
@@ -531,7 +531,7 @@ chart-Euclidean partial of the inverse-Gram entry. A finite sum and product of
 
 /-- The `l`-th chart-Euclidean partial derivative of a function `C^∞` on the
 Euclidean chart target is again `C^∞` on the chart target. -/
-private lemma euclidPartial_contDiffOn_target
+lemma euclidPartial_contDiffOn_target
     (α : M) (l : Fin (Module.finrank ℝ E))
     {u : EuclN → ℝ}
     (hu : ContDiffOn ℝ ∞ u (chartTargetEuclid (I := I) (M := M) α)) :
@@ -563,7 +563,7 @@ private lemma euclidPartial_contDiffOn_target
 
 /-- The collapsed Christoffel coefficient `lowerOrderRotationLOCoeff` is `C^∞`
 on the Euclidean chart target. -/
-private lemma lowerOrderRotationLOCoeff_contDiffOn
+lemma lowerOrderRotationLOCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : CompIdx E r s)
     (l : Fin (Module.finrank ℝ E)) (Q : CompIdx E r s) :

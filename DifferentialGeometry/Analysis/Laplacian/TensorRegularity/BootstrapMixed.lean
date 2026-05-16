@@ -183,7 +183,7 @@ that gap by induction on the index finset. -/
 
 omit [NeZero d] in
 /-- A finite sum of `W^{k,2}` functions is again in `W^{k,2}`. -/
-private theorem memWkp_finset_sum
+theorem memWkp_finset_sum
     {k : ℕ} {Ω : Set EE} (hΩ : IsOpen Ω)
     {ι : Type*} (S : Finset ι) (F : ι → EE → ℝ)
     (hF : ∀ a ∈ S, MemWkp (d := d) k 2 (F a) Ω) :
@@ -212,7 +212,7 @@ omit [NeZero d] in
 /-- The `W^{k,2}` triangle inequality for a finite sum: if each summand obeys
 `wkpNorm k 2 (F a) Ω ≤ ENNReal.ofReal (κ a) · D`, then the sum obeys
 `wkpNorm k 2 (∑ F) Ω ≤ ENNReal.ofReal (∑ κ) · D`. -/
-private theorem wkpNorm_finset_sum_le
+theorem wkpNorm_finset_sum_le
     {k : ℕ} {Ω : Set EE} (hΩ : IsOpen Ω)
     {ι : Type*} (S : Finset ι) (F : ι → EE → ℝ)
     (hF : ∀ a ∈ S, MemWkp (d := d) k 2 (F a) Ω)
@@ -272,7 +272,7 @@ The two lemmas below transfer those facts to the classical partial. -/
 
 /-- For a smooth `ψ` with `ψ ∈ W^{k+1,2}(Ω)` on an open `Ω`, the classical
 partial `∂_l ψ` lies in `W^{k,2}(Ω)`. -/
-private theorem classicalPartial_memWkp_of_memWkp_succ
+theorem classicalPartial_memWkp_of_memWkp_succ
     {k : ℕ} {Ω : Set EE} (hΩ : IsOpen Ω)
     {ψ : EE → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
     (hψ : MemWkp (d := d) (k + 1) 2 ψ Ω) (l : Fin d) :
@@ -291,7 +291,7 @@ private theorem classicalPartial_memWkp_of_memWkp_succ
 
 /-- For a smooth `ψ` with `ψ ∈ W^{k+1,2}(Ω)` on an open `Ω`, the `W^{k,2}` norm
 of the classical partial `∂_l ψ` is bounded by the `W^{k+1,2}` norm of `ψ`. -/
-private theorem wkpNorm_classicalPartial_le
+theorem wkpNorm_classicalPartial_le
     {k : ℕ} {Ω : Set EE} (hΩ : IsOpen Ω)
     {ψ : EE → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
     (hψ : MemWkp (d := d) (k + 1) 2 ψ Ω) (l : Fin d) :
