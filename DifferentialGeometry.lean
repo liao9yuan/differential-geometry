@@ -183,6 +183,7 @@ import DifferentialGeometry.Tensor.RSTensor.Defs
 import DifferentialGeometry.Tensor.RSTensor.Field
 import DifferentialGeometry.Tensor.RSTensor.LieDerivative
 import DifferentialGeometry.Tensor.RSTensor.Metric
+import DifferentialGeometry.Tensor.RSTensor.TangentContinuousRiemannianMetric
 import DifferentialGeometry.Tensor.RSTensor.TangentRiemannian
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannianBundle
@@ -462,6 +463,7 @@ import DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 import DifferentialGeometry.Geometry.Riemannian.InjectivityRadius
 import DifferentialGeometry.Geometry.Riemannian.SectionalCurvature
 import DifferentialGeometry.Geometry.Riemannian.AlongCurve
+import DifferentialGeometry.Geometry.Riemannian.JacobiField
 
 import DifferentialGeometry.Analysis.Sobolev.Solutions.FriedrichsCommutator
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.NonSmooth
