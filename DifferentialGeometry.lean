@@ -707,6 +707,18 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.CompactResolvent
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Spectrum
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EigenBasis
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.Semigroup
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.Defs
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.Inclusion
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.FractionalPower
+import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SmoothingHs
+import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.BochnerL2
+import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeH1
+import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.PerMode
+import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.PerModeL2
+import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Plancherel
+import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Synthesis
+import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Operator
+import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.OperatorEquation
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SemigroupLaw
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SpectralBounds
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SpectralBoundsCalculus
@@ -717,3 +729,5 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.DuhamelMap
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Contraction
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Existence
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorInstance
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.MaxRegSpace
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.MaxRegFixedPoint
