@@ -616,14 +616,16 @@ theorem leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
     (leviCivitaConnectionOfMetric_homSection_contMDiffAt
       (I := I) e b g hxBase hσdiff hσAt).contMDiffWithinAt
 
-/-- Coordinate-frame metric components are smooth at the chart center. -/
-theorem metric_coordinateFrame_component_contMDiffAt
-    (g : SmoothRiemannianMetric I M) (x₀ : M)
+/-- Fixed-coordinate-frame metric components are smooth throughout the
+coordinate-frame domain. -/
+theorem metric_coordinateFrame_component_contMDiffAt_of_mem
+    (g : SmoothRiemannianMetric I M) (x₀ : M) {x : M}
+    (hx : x ∈ coordinateFrameSet (I := I) x₀)
     (i j : CoordinateIdx (𝕜 := Real) E) :
     ContMDiffAt I 𝓘(Real, Real) ∞
       (fun p : M =>
         g.inner p (coordinateFrameAt (I := I) x₀ i p)
-          (coordinateFrameAt (I := I) x₀ j p)) x₀ := by
+          (coordinateFrameAt (I := I) x₀ j p)) x := by
   have hg :
       ContMDiffAt I
         (I.prod 𝓘(Real, E →L[Real] E →L[Real] Real)) ∞
@@ -632,34 +634,45 @@ theorem metric_coordinateFrame_component_contMDiffAt
             TotalSpace (E →L[Real] E →L[Real] Real)
               (fun p : M =>
                 TangentSpace I p →L[Real] TangentSpace I p →L[Real] Real)))
-        x₀ :=
-    (g.contMDiff.contMDiffAt (x := x₀)).of_le (by simp)
+        x :=
+    (g.contMDiff.contMDiffAt (x := x)).of_le (by simp)
   have hi :
       ContMDiffAt I (I.prod 𝓘(Real, E)) ∞
         (fun p : M =>
           (⟨p, coordinateFrameAt (I := I) x₀ i p⟩ :
-            TotalSpace E (TangentSpace I : M -> Type _))) x₀ :=
+            TotalSpace E (TangentSpace I : M -> Type _))) x :=
     (coordinateFrameAt_isLocalFrame (I := I) x₀).contMDiffAt
       (coordinateFrameSet_open (I := I) x₀)
-      (coordinateFrameAt_mem (I := I) x₀) i
+      hx i
   have hj :
       ContMDiffAt I (I.prod 𝓘(Real, E)) ∞
         (fun p : M =>
           (⟨p, coordinateFrameAt (I := I) x₀ j p⟩ :
-            TotalSpace E (TangentSpace I : M -> Type _))) x₀ :=
+            TotalSpace E (TangentSpace I : M -> Type _))) x :=
     (coordinateFrameAt_isLocalFrame (I := I) x₀).contMDiffAt
       (coordinateFrameSet_open (I := I) x₀)
-      (coordinateFrameAt_mem (I := I) x₀) j
+      hx j
   have htotal :
       ContMDiffAt I (I.prod 𝓘(Real, Real)) ∞
         (fun p : M =>
           (⟨p,
             g.inner p (coordinateFrameAt (I := I) x₀ i p)
               (coordinateFrameAt (I := I) x₀ j p)⟩ :
-            TotalSpace Real (Bundle.Trivial M Real))) x₀ :=
+            TotalSpace Real (Bundle.Trivial M Real))) x :=
     ContMDiffAt.clm_bundle_apply₂ (F₁ := E) (F₂ := E) hg hi hj
   rw [contMDiffAt_totalSpace] at htotal
   exact htotal.2
+
+/-- Coordinate-frame metric components are smooth at the chart center. -/
+theorem metric_coordinateFrame_component_contMDiffAt
+    (g : SmoothRiemannianMetric I M) (x₀ : M)
+    (i j : CoordinateIdx (𝕜 := Real) E) :
+    ContMDiffAt I 𝓘(Real, Real) ∞
+      (fun p : M =>
+        g.inner p (coordinateFrameAt (I := I) x₀ i p)
+          (coordinateFrameAt (I := I) x₀ j p)) x₀ :=
+  metric_coordinateFrame_component_contMDiffAt_of_mem
+    (I := I) g x₀ (coordinateFrameAt_mem (I := I) x₀) i j
 
 /-- Coordinate directional derivatives of metric components are smooth at the
 chart center. -/
@@ -1046,16 +1059,17 @@ theorem metricFlatModelInChart_component_center
     rfl
   rw [hi, hj]
 
-private theorem metricFlatModelInChart_component_eq_coord_component_comp_eventually
+private theorem metricFlatModelInChart_component_eq_coord_component_comp_eventually_of_mem
     (g : SmoothRiemannianMetric I M) (x₀ : M)
-    (i j : CoordinateIdx (𝕜 := Real) E) :
+    (i j : CoordinateIdx (𝕜 := Real) E) {y₀ : E}
+    (hy₀ : y₀ ∈ (extChartAt I x₀).target) :
     metricFlatModelInChart_component (I := I) g x₀ i j
-      =ᶠ[𝓝[Set.range I] (extChartAt I x₀ x₀)]
+      =ᶠ[𝓝[Set.range I] y₀]
       fun y : E =>
         g.inner ((extChartAt I x₀).symm y)
           (coordinateFrameAt (I := I) x₀ i ((extChartAt I x₀).symm y))
           (coordinateFrameAt (I := I) x₀ j ((extChartAt I x₀).symm y)) := by
-  filter_upwards [extChartAt_target_mem_nhdsWithin (I := I) x₀] with y hy
+  filter_upwards [extChartAt_target_mem_nhdsWithin_of_mem (I := I) hy₀] with y hy
   unfold metricFlatModelInChart_component metricFlatModelInChart
   rw [hom_trivializationAt_apply]
   change
@@ -1199,8 +1213,8 @@ theorem metricFlatModelInChart_component_deriv_center
         =ᶠ[𝓝[Set.range I] z₀]
         writtenInExtChartAt I 𝓘(Real, Real) x₀ f := by
     simpa [z₀, f, writtenInExtChartAt] using
-      metricFlatModelInChart_component_eq_coord_component_comp_eventually
-        (I := I) g x₀ i j
+      metricFlatModelInChart_component_eq_coord_component_comp_eventually_of_mem
+        (I := I) g x₀ i j (mem_extChartAt_target (I := I) x₀)
   have hfd :
       fderivWithin Real
           (metricFlatModelInChart_component (I := I) g x₀ i j)

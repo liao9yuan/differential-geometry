@@ -3,6 +3,7 @@ import RicciFlower.Coordinates.Christoffel
 import RicciFlower.Realized.CurvatureComponents
 import RicciFlower.Connection.MetricCompatibility
 import RicciFlower.LeviCivita.Torsion
+import RicciFlower.VectorBundle.PartialMfderiv
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -954,6 +955,61 @@ def ChristoffelVariationEquationInFrameOn
         (rhs (t : Real) x i j k)
         D.carrier
         (t : Real)
+
+/-- Mixed time/spatial derivative regularity for a Christoffel component
+variation formula.
+
+For fixed frame components, this says that differentiating
+`Γ^k_{ij}(s, -)` spatially at a fixed base point and then in time gives the
+spatial derivative of the supplied variation RHS. This is the exact regularity
+needed to differentiate the coordinate curvature formula. -/
+def ChristoffelVariationMixedDerivativeInFrameOn
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (rhs : Real -> M -> Idx -> Idx -> Idx -> Real) : Prop :=
+  forall i j k : Idx,
+    FixedBaseExtDerivTimeDerivativeOn (I := I) D.carrier u
+      (fun s x =>
+        RicciFlower.Coordinates.christoffelSymbolInFrame
+          (S.family.connection s) frame hframe x i j k)
+      (fun s x => rhs s x i j k)
+
+/-- Regular-time version of
+`ChristoffelVariationMixedDerivativeInFrameOn`.
+
+Ricci-flow evolution identities are only stated at regular times of the time
+interval, while the derivative remains a derivative within the full carrier. -/
+def ChristoffelVariationMixedDerivativeInFrameOnRegular
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (rhs : Real -> M -> Idx -> Idx -> Idx -> Real) : Prop :=
+  forall i j k : Idx,
+    FixedBaseExtDerivTimeDerivativeOnRegular (I := I)
+      D.carrier D.regular u
+      (fun s x =>
+        RicciFlower.Coordinates.christoffelSymbolInFrame
+          (S.family.connection s) frame hframe x i j k)
+      (fun s x => rhs s x i j k)
+
+/-- The old all-times mixed-Christoffel predicate implies the regular-time
+predicate used by Ricci-flow evolution statements. -/
+theorem ChristoffelVariationMixedDerivativeInFrameOn.toRegular
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (rhs : Real -> M -> Idx -> Idx -> Idx -> Real)
+    (h :
+      ChristoffelVariationMixedDerivativeInFrameOn
+        (I := I) S frame hframe rhs) :
+    ChristoffelVariationMixedDerivativeInFrameOnRegular
+      (I := I) S frame hframe rhs := by
+  intro i j k
+  exact (h i j k).toRegular (I := I) (regularSet := D.regular)
 
 /-- General metric-variation Christoffel component formula in a local frame. -/
 def ChristoffelMetricVariationEquationInFrameOn

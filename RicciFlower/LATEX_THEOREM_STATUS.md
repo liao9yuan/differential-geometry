@@ -26,10 +26,10 @@ the full statements, theorem names, and file locations.
 
 | Distance | Count | Current interpretation |
 | --- | ---: | --- |
-| `0` | 17 | Native theorem closed; only presentation wrappers or downstream use remain. |
-| `1` | 1 | A checked consumer route remains one finite-sum/convention producer away. |
-| `2` | 2 | In-tree component or finite-sum producer work remains. |
-| `3` | 6 | A real geometric producer is still missing. |
+| `0` | 21 | Native theorem closed; only presentation wrappers or downstream use remain. |
+| `1` | 0 | A checked consumer route remains one finite-sum/convention producer away. |
+| `2` | 1 | In-tree component or finite-sum producer work remains. |
+| `3` | 4 | A real geometric producer is still missing. |
 | `4` | 16 | Major analytic/global Ricci-flow infrastructure or old synthetic route remains. |
 | `5` | 11 | Deliberate black box or external-scale theorem for now. |
 
@@ -37,8 +37,8 @@ the full statements, theorem names, and file locations.
 
 | Area | Closed targets |
 | --- | --- |
-| Chapter 6 evolution inputs | Lemma 6.1 inverse metric; Lemma 6.2 Christoffel variation. |
-| Maximum principle and 3D algebra | Theorem 7.1 scalar supersolution WMP; Lemma 8.1 Riemann-from-Ricci component identity. |
+| Hamilton Section 6 evolution inputs | Lemma 6.1 inverse metric; Lemma 6.2 Christoffel variation; Lemma 6.3 Ricci evolution in local coordinate-frame component form; Corollary 6.5 Lichnerowicz form; Lemma 6.6 scalar evolution traced from Ricci evolution. |
+| Maximum principle and 3D algebra | Theorem 7.1 scalar supersolution WMP; Theorem 7.2 scalar subsolution WMP wrapper; Lemma 8.1 Riemann-from-Ricci component identity. |
 | Pinching algebra | Lemma 10.7 Q factorization; Lemma 10.8 eigenvalue lower bound. |
 | Appendix tensor/calculus | Lemma 14.2; Lemma 14.10; Theorem 14.12; Remark 14.13; Lemma 14.18; Lemma 14.19; Proposition 14.22. |
 | Appendix Ricci-flow variation | Lemma 14.23; Corollary 14.24; Definitions 14.25-14.26. |
@@ -47,12 +47,10 @@ the full statements, theorem names, and file locations.
 
 | Target | Distance | Smallest next step |
 | --- | ---: | --- |
-| Lemma 6.3 Ricci evolution | `2` | Prove the remaining Ricci variation producer; the `nabla A` substitution and contracted commutator/Bianchi reduction now check. |
+| Hamilton Section 6 remainder | `2` | Next local target is Lemma 6.7 / trace-free Ricci norm evolution; arbitrary-frame packaging of Lemma 6.3 is optional polish. |
 | Lemma 10.5 quotient evolution | `2` | Port the pure scalar quotient algebra to `RicciFlower` if it is still needed by the pinching route. |
 | Assumption 3.1 calculus package | `3` | Continue native Bianchi, contracted Bianchi, tensor commutator, and trace/norm infrastructure. |
-| Corollaries 6.5 and 6.7 | `3` | Package Lemma 6.3 through Lichnerowicz and Ricci-norm evolution. |
-| Lemma 6.6 scalar evolution | `1` | Prove the remaining finite-sum `ScalarTraceAlgebraInFrame` producer. |
-| Theorem 7.2 scalar subsolution WMP | `3` | Derive from the supersolution theorem or close the symmetric scalar WMP wrapper. |
+| Lemma 6.7 | `3` | Prove the pointwise `(0,2)` tensor norm Hessian product rule `Tensor02NormHessianProductInBasis` from metric compatibility; the trace bridge to `Tensor02NormSecondProductInBasis` is now checked. |
 | Corollary 11.4 and Lemma 11.15 | `3` | Finish the native 3D curvature/norm comparison and Einstein-space-form bridge. |
 
 ### Section 14 Snapshot
@@ -152,7 +150,8 @@ linearity through `cotangentToDual`.
 
 This closes the one-form Ricci identity producer for the Levi-Civita scalar
 Bochner path.  The separate Ricci-tensor contracted commutator/Bianchi package
-needed for Chapter 6.1 Ricci evolution remains a different frontier.
+needed for Hamilton Section 6 Ricci evolution is now closed along the local
+coordinate-frame Lemma 6.3 route.
 
 ## Detailed Ledger
 
@@ -302,21 +301,28 @@ Equivalently,
 (partial_t - Delta) Ric_ij = 2 R_ikjl Ric^{kl} - 2 Ric_i^k Ric_kj.
 ```
 
-Status: native algebraic core and display projection are proved in
+Status: closed in local coordinate-frame component form in
 `RicciFlower/RicciFlow/Evolution/Ricci.lean` by
-`RicciFlow.evol_ricci_inFrame_of_variation_commutators`.  The component
-substitution
+`RicciFlow.evol_ricci_coordFrameAt_of_christoffelEvolution_nabla2_commutators`.
+The older fixed-frame consumer
+`RicciFlow.evol_ricci_inFrame_of_variation_commutators` remains available for
+compatibility when the Ricci variation formula is supplied directly.  The
+component substitution
 `christoffelVariationCovDerivCoordAt_eq_nablaGammaDtFromNabla2RicInFrame`
 checks, and the contracted commutator/Bianchi producer now checks through
 `RicciFlow.RicciContractedCommutatorsInFrame_of_differentiatedBianchi_and_tensor0S_ricciIdentity`.
-The remaining native producer is the Ricci variation formula input
-`RicciVariationFormulaInFrameOn`.
+The singleton coordinate-frame Ricci variation producer now checks through
+`RicciFlow.ricciVariationFormulaInCoordFrameAt_of_christoffelEvolution_nabla2`,
+which differentiates the Christoffel Ricci trace formula, consumes Lemma 6.2
+Christoffel evolution, and substitutes `nabla A = nabla^2 Ric`.
 
-Distance: `2`.
+Distance: `0`.
 
-Next target: prove the Ricci variation formula producer, most likely by a
-curvature-variation theorem from connection/Christoffel variation plus the
-regularity needed to differentiate the spatial connection coefficients in time.
+Optional follow-up: package the singleton coordinate-frame producer into a
+fully arbitrary-frame interface.  If that route must produce the mixed
+Christoffel regularity input rather than assume it, derive
+`ChristoffelVariationMixedDerivativeInFrameOn` from a spacetime-smooth
+Christoffel or metric regularity package.
 
 ### Corollary 6.5, `cor:ricci-lichnerowicz`
 
@@ -326,11 +332,20 @@ Statement:
 Along Ricci flow, partial_t Ric = Delta_L Ric.
 ```
 
-Status: component consumer/interface in `RicciFlower/RicciFlow/Evolution/Ricci.lean`.
+Status: closed in fixed-frame component form in
+`RicciFlower/RicciFlow/Evolution/Ricci.lean` by
+`RicciFlow.ricciLichnerowiczEquationInFrame_of_ricciEvolution_and_symm`.
+The file defines the Ricci-specialized Lichnerowicz RHS, proves the two Ricci
+action terms specialize to the quadratic term using Ricci symmetry and inverse
+metric symmetry, and rewrites the closed component Ricci evolution theorem into
+`RicciLichnerowiczEquationInFrame`.  The coordinate-frame display wrapper
+`RicciFlow.evol_ricci_lichnerowicz_coordFrameAt_of_christoffelEvolution_nabla2_commutators`
+exposes the same result directly from the native coordinate-frame Lemma 6.3
+producer.
 
-Distance: `3`.
+Distance: `0`.
 
-Next target: package Lemma 6.3 through the Lichnerowicz definition.
+Next target: no active Corollary 6.5 work remains.
 
 ### Lemma 6.6, `lem:evol-scalar`
 
@@ -341,21 +356,23 @@ Along Ricci flow, partial_t R = Delta R + 2 |Ric|^2.
 Equivalently, (partial_t - Delta) R = 2 |Ric|^2.
 ```
 
-Status: trace-route consumer is proved in
+Status: closed as a trace-route theorem from Ricci evolution in
 `RicciFlower/RicciFlow/Evolution/Scalar.lean`.  The theorem
-`RicciFlow.scalarEvolutionEquationOn_of_ricciEvolution_and_traceAlgebra`
+`RicciFlow.scalarEvolutionEquationOn_of_ricciEvolution`
 differentiates `R = g^{ij} Ric_ij`, consumes inverse-metric evolution and
-Lemma 6.3 as `RicciEvolutionEquationInFrame`, and returns
-`ScalarEvolutionEquationOn` once the scalar trace, scalar Laplacian trace, and
-finite-sum package `ScalarTraceAlgebraInFrame` are supplied.  The BK wrapper is
-`BK.MSM110.Chapter06.Section01.eq_scalar_curv_evolu_of_ricci_evolution`.
+Ricci evolution as `RicciEvolutionEquationInFrame`, and returns
+`ScalarEvolutionEquationOn` for the canonical scalar trace and canonical traced
+rough-Ricci Laplacian.  The separate scalar-trace, scalar-Laplacian-trace, and
+curvature-trace inputs are discharged: `ScalarRmRicciTraceInFrame` is produced
+internally by `RicciFlow.scalarRmRicciTraceInFrame_of_rm04_first_trace`, using
+the curvature-layer identity
+`Realized.metricTrace_rm04RicciContractionAt_eq_neg_inner`.
 
-Distance: `1`.
+Distance: `0`.
 
-Next target: prove `ScalarTraceAlgebraInFrame` from inverse-metric/Ricci
-symmetry and the convention-correct traced curvature contractions.  This should
-be a routine finite-index convention-algebra proof, not a new geometric
-producer.
+Next target: no scalar trace algebra remains.  Optional polish is a convenience
+wrapper that feeds the local coordinate-frame Lemma 6.3 theorem directly into
+the scalar evolution route.
 
 ### Lemma 6.7, `lem:evol-ricci-norm`
 
@@ -367,14 +384,37 @@ Along Ricci flow,
 -2 |nabla Ric|^2 + 4 R_ikjl Ric^{ij} Ric^{kl}.
 ```
 
-Status: finite-sum consumer theorem exists as
-`RicciFlower.Realized.ricci_norm_heat_eq_of_bochner_components` in
-`RicciFlower/Realized/Bochner.lean`.
+Status: the time-derivative side is closed canonically in
+`RicciFlow.ricciNormTimeDerivativeComponentsOn_of_ricciEvolution_canonical`.
+The Laplacian side now has the exact coordinate expansion frontier
+`Realized.RicciNormScalarLaplacianExpansionInFrame` and the producer
+`Realized.ricciNormLaplacianComponentsInFrame_of_normSq_laplacian_expansion`.
+The realized Bochner layer also has
+`Realized.ricciNormScalarLaplacianExpansionInFrame_of_tensor02_product_rule`,
+which reduces that exact expansion to the named `(0,2)` tensor norm product
+rule `Realized.Tensor02NormSecondProductInBasis`.
+The trace bridge
+`Realized.Tensor02NormSecondProductInBasis.of_hessian_product` is checked: it
+traces the pointwise `(0,2)` Hessian product rule and uses
+`RoughLap0SRealizesMetricTraceInBasis` to replace the traced second derivative
+by the supplied rough tensor.
+The folder-level consumer
+`RicciFlow.ricciNormHeatEquationOn_of_solution_canonical_laplacian` assembles
+Lemma 6.7 from the closed time side and that exact Bochner expansion.
 
 Distance: `3`.
 
-Next target: supply the real Ricci time-derivative producer and the tensor
-Bochner/Laplacian producer.
+Next target: prove `Tensor02NormHessianProductInBasis` from metric
+compatibility.  The missing local API is the `(0,2)` tensor inner-product
+derivative rule
+`X <A,B> = <nabla_X A,B> + <A,nabla_X B>`, followed by one more derivative and
+the Hessian correction.  The exact helper is now stated in
+`Bochner.lean` as `Realized.tensor02_inner_extDerivFun_eq_inner_nabla`; its
+proof is the remaining frontier.  This is a real tensor Bochner producer/API
+theorem, not finite-sum algebra or Ricci-evolution work.  After it closes, feed
+it through the existing trace bridge, mark Lemma 6.7 distance `0`, and then
+repeat the pattern for the trace-free Ricci norm evolution needed by Hamilton's
+pinching argument.
 
 ### Theorem 7.1, `thm:scalar-wmp-super`
 
@@ -411,13 +451,19 @@ partial_t u <= Delta_g(t) u + <X, grad u> + F(u,t),
 comparison with c' = F(c,t) preserves u <= c.
 ```
 
-Status: partially native in `RicciFlower/MaximumPrinciple/ScalarWeak.lean`;
-old synthetic wrapper exists.
+Status: closed natively in `RicciFlower/MaximumPrinciple/ScalarWeak.lean` as
+`Realized.scalar_wmp_sub_theorem_7_2`.  The theorem applies the closed
+supersolution theorem `scalar_wmp_super_theorem_7_1` to the sign-changed data
+`-u`, `-c`, and `fun a t => -F (-a) t`, then translates the conclusion back to
+`u <= c`.  Its regularity, parabolic-operator, and Lipschitz hypotheses are
+stated for the sign-changed data rather than re-proving those transport lemmas
+inside the wrapper.
 
-Distance: `3`.
+Distance: `0`.
 
-Next target: derive cleanly from the supersolution theorem or duplicate the
-barrier proof.
+Next target: optional convenience wrapper transporting the regularity,
+operator-linearity, and Lipschitz assumptions from the original `u`, `c`, and
+`F` statements automatically.
 
 ### Corollary 7.3, `cor:scalar-lower-bound`
 
@@ -430,11 +476,20 @@ while the denominator is positive. In particular, positive initial scalar
 curvature remains positive.
 ```
 
-Status: not native; synthetic/GOALS route only.
+Status: ODE-comparison layer native in
+`RicciFlower/RicciFlow/Evolution/ScalarLowerBound.lean` as
+`RicciFlow.scalar_curvature_lower_bound_of_parabolic_inequality`.  The theorem
+uses the compact value-set scalar WMP directly, because the square reaction is
+not globally monotone on negative scalar values.  The file also records the
+all-times scalar-evolution bridge
+`RicciFlow.scalar_parabolic_inequality_of_scalarEvolution_allTimes`.
 
-Distance: `4`.
+Distance: `2`.
 
-Next target: combine scalar evolution, |Ric|^2 >= R^2/n, and scalar WMP.
+Next target: produce the bundled WMP regularity hypotheses from the eventual
+Ricci-flow smoothness API.  Scalar evolution, heat realization, trace/norm
+Cauchy-Schwarz, and the compact initial minimum wrapper are now native
+producer inputs.
 
 ### Corollary 7.4, `cor:positive-scalar-finite-time`
 
@@ -445,12 +500,17 @@ If R(g(0)) > 0 on a closed n-manifold, then the maximal existence time
 satisfies Tmax <= n / (2 min_M R(g(0))) < infinity.
 ```
 
-Status: synthetic wrapper `wordly_latex_cor_positive_scalar_finite_time`.
+Status: native conditional endpoint theorem in
+`RicciFlower/RicciFlow/Evolution/ScalarFiniteTime.lean` as
+`RicciFlow.positive_scalar_finite_time_of_scalarEvolution_closedOpen`.  The
+real-analysis core proves that the Corollary 7.3 lower barrier is unbounded
+before its pole, while scalar continuity bounds the scalar on the compact pole
+slab.
 
-Distance: `4`.
+Distance: `2`.
 
-Next target: port the finite-time ODE comparison and positive-Ricci-to-positive
-scalar bridge.
+Next target: supply the remaining WMP regularity producer from geometric
+smoothness data, then add a thin maximal-time compatibility wrapper if desired.
 
 ### Theorem 7.5, `thm:hamilton-tensor-wmp`
 
@@ -462,12 +522,13 @@ For a symmetric 2-tensor S satisfying
 if the null-eigenvector condition holds and S(0) >= 0, then S(t) >= 0.
 ```
 
-Status: synthetic `TensorWeakMaximumPrinciple` interface.
+Status: detailed LaTeX proof; RicciFlower-native
+`Realized.hamilton_tensor_wmp` interface with one explicit analytic frontier.
 
-Distance: `5`.
+Distance: `4`.
 
-Next target: keep as analytic tensor maximum-principle input until scalar and
-evolution layers are stable.
+Next target: prove the analytic tensor maximum-principle frontier, or first
+factor it through a general convex-cone/vector-bundle maximum-principle API.
 
 ### Black Box 7.6, `bb:scalar-strong-mp`
 
@@ -1161,14 +1222,16 @@ identity is now native.
 ## Near-Term Work Queue
 
 Section 14 is no longer a tensor-calculation blocker.  The remaining useful
-work is either presentation packaging for already-closed results or a move back
-to the Chapter 6 Ricci-evolution producer chain.
+work is either presentation packaging for already-closed results or the
+Hamilton Section 6 norm/pinching evolution pipeline.
 
 1. Add book-facing wrappers for Lemma 14.19 and Proposition 14.22 if the
    current realized statements are too verbose for the companion text.
 2. Optionally add a stronger public mixed `(r,s)` coordinate Ricci identity
    wrapper from the existing Remark 14.13 component algebra.  Keep the proof at
    the coordinate/local-frame layer; do not reopen lower-level tensor algebra.
-3. Resume Lemma 6.3 by proving the remaining Ricci variation formula producer.
+3. Work on Lemma 6.7 and the trace-free Ricci norm evolution by connecting the
+   closed Ricci and inverse-metric evolution producers to the finite-sum
+   Bochner/Ricci-norm algebra.
 4. Treat 14.27, 14.29, and 14.30 as maximal-time or singular-time
    infrastructure, not appendix tensor-calculus cleanup.

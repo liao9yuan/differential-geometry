@@ -32,6 +32,9 @@ import RicciFlower.RicciFlow.Basic
 import RicciFlower.RicciFlow.MaximalTime
 import RicciFlower.RicciFlow.Evolution.Ricci
 import RicciFlower.RicciFlow.Evolution.Scalar
+import RicciFlower.RicciFlow.Evolution.ScalarRicci
+import RicciFlower.RicciFlow.Evolution.ScalarLowerBound
+import RicciFlower.RicciFlow.Evolution.ScalarFiniteTime
 import RicciFlower.RicciFlow.Evolution.Volume
 import RicciFlower.RicciFlow.Evolution.RiemannNorm
 import RicciFlower.RicciFlow.Evolution.Uhlenbeck
@@ -44,6 +47,7 @@ import RicciFlower.RicciFlow.Evolution.FiniteTimeBlowup
 import RicciFlower.RicciFlow.Evolution.NormalizedFlow
 import RicciFlower.RicciFlow.Evolution.ExponentialConvergence
 import RicciFlower.RicciFlow.Evolution.BlackBox
+import RicciFlower.RicciFlow.Perelman
 import RicciFlower.Realized.Curvature
 import RicciFlower.Realized.CurvatureTensor
 import RicciFlower.Realized.CurvatureComponents
@@ -51,5 +55,7 @@ import RicciFlower.DimensionThree.CurvatureAlgebra
 import RicciFlower.DimensionThree.RiemannFromRicci
 import RicciFlower.DimensionThree.PinchingAlgebra
 import RicciFlower.MaximumPrinciple.ScalarWeak
+import RicciFlower.MaximumPrinciple.TensorWeak
 import RicciFlower.Coordinates.Christoffel
+import RicciFlower.Coordinates.MetricCompatibility
 import RicciFlower.Coordinates.NablaComponents

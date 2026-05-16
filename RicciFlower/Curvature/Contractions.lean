@@ -311,6 +311,81 @@ private theorem rm04_slot1_trace_eq_neg_ricci
     _ = -A (vec2 (basis p) (basis a)) := by
           rw [hTrace p a]
 
+/-- The first/third metric trace of `Rm04` is the negative Ricci component in
+the project slot convention.  This is the scalar-trace convention behind the
+curvature term in the scalar-curvature evolution equation. -/
+theorem rm04_trace_first_third_eq_neg_ricci
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (Rm04 : Tensor04At (I := I) (M := M) x)
+    (gInv : Idx -> Idx -> Real)
+    (A : Tensor02At (I := I) (M := M) x)
+    (hTrace : RicciRealizesRm04FirstTraceAt (I := I) A Rm04 gInv basis)
+    (hOutput : Rm04OutputSkewAt (I := I) Rm04)
+    (hFirst : FirstBianchiAt (I := I) Rm04)
+    (hA : forall i j : Idx, A (vec2 (basis i) (basis j)) =
+      A (vec2 (basis j) (basis i)))
+    (hInv : forall i j : Idx, gInv i j = gInv j i)
+    (k l : Idx) :
+    (∑ a : Idx, ∑ b : Idx,
+        gInv a b * Rm04 (vec4 (basis a) (basis k) (basis b) (basis l))) =
+      -A (vec2 (basis k) (basis l)) := by
+  classical
+  let T : Real :=
+    ∑ a : Idx, ∑ b : Idx,
+      gInv a b * Rm04 (vec4 (basis a) (basis l) (basis k) (basis b))
+  have hTzero : T = 0 := by
+    have hTneg : T = -T := by
+      calc
+        T =
+          ∑ b : Idx, ∑ a : Idx,
+            gInv a b * Rm04 (vec4 (basis a) (basis l) (basis k) (basis b)) := by
+            dsimp [T]
+            rw [Finset.sum_comm]
+        _ =
+          ∑ a : Idx, ∑ b : Idx,
+            gInv b a * Rm04 (vec4 (basis b) (basis l) (basis k) (basis a)) := by
+            rfl
+        _ =
+          ∑ a : Idx, ∑ b : Idx,
+            gInv a b * (-Rm04 (vec4 (basis a) (basis l) (basis k) (basis b))) := by
+            refine Finset.sum_congr rfl fun a _ => ?_
+            refine Finset.sum_congr rfl fun b _ => ?_
+            rw [hInv b a, hOutput (basis b) (basis l) (basis k) (basis a)]
+        _ = -T := by
+            dsimp [T]
+            simp [Finset.sum_neg_distrib]
+    linarith
+  calc
+    (∑ a : Idx, ∑ b : Idx,
+        gInv a b * Rm04 (vec4 (basis a) (basis k) (basis b) (basis l)))
+        =
+      ∑ a : Idx, ∑ b : Idx,
+        gInv a b *
+          (-Rm04 (vec4 (basis a) (basis b) (basis l) (basis k)) -
+            Rm04 (vec4 (basis a) (basis l) (basis k) (basis b))) := by
+        refine Finset.sum_congr rfl fun a _ => ?_
+        refine Finset.sum_congr rfl fun b _ => ?_
+        have hb := hFirst (basis a) (basis k) (basis b) (basis l)
+        have hrew :
+            Rm04 (vec4 (basis a) (basis k) (basis b) (basis l)) =
+              -Rm04 (vec4 (basis a) (basis b) (basis l) (basis k)) -
+                Rm04 (vec4 (basis a) (basis l) (basis k) (basis b)) := by
+          linarith
+        rw [hrew]
+    _ =
+      - (∑ a : Idx, ∑ b : Idx,
+          gInv a b * Rm04 (vec4 (basis a) (basis b) (basis l) (basis k))) -
+        (∑ a : Idx, ∑ b : Idx,
+          gInv a b * Rm04 (vec4 (basis a) (basis l) (basis k) (basis b))) := by
+        simp [Finset.sum_add_distrib, Finset.sum_neg_distrib, mul_add, mul_neg,
+          sub_eq_add_neg]
+    _ =
+      -A (vec2 (basis l) (basis k)) - T := by
+        rw [hTrace l k]
+    _ = -A (vec2 (basis k) (basis l)) := by
+        rw [hTzero, hA l k]
+        ring
+
 /-- The second slot contribution to the covariant two-tensor curvature action
 contracts to the Ricci quadratic term. -/
 private theorem contracted_slot1_eq_quadratic
@@ -590,6 +665,125 @@ private theorem contracted_slot0_eq_neg_rm04RicciContraction
     _ = -rm04RicciContractionAt (I := I) basis Rm04 gInv A a b := by
           dsimp [B]
           simp [rm04RicciContractionAt, mul_comm]
+
+/-- The metric trace of `R_akbl A^{kl}` is `- <A,A>` in the same inverse
+metric components.  This is the pointwise finite-index contraction used when
+tracing the Ricci evolution equation to scalar curvature. -/
+theorem metricTrace_rm04RicciContractionAt_eq_neg_inner
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (Rm04 : Tensor04At (I := I) (M := M) x)
+    (gInv : Idx -> Idx -> Real)
+    (A : Tensor02At (I := I) (M := M) x)
+    (hTrace : RicciRealizesRm04FirstTraceAt (I := I) A Rm04 gInv basis)
+    (hOutput : Rm04OutputSkewAt (I := I) Rm04)
+    (hFirst : FirstBianchiAt (I := I) Rm04)
+    (hA : forall i j : Idx, A (vec2 (basis i) (basis j)) =
+      A (vec2 (basis j) (basis i)))
+    (hInv : forall i j : Idx, gInv i j = gInv j i) :
+    (∑ a : Idx, ∑ b : Idx,
+      gInv a b * rm04RicciContractionAt (I := I) basis Rm04 gInv A a b) =
+      -(∑ k : Idx, ∑ l : Idx,
+        A (vec2 (basis k) (basis l)) *
+          raised02CompAt (I := I) basis gInv A k l) := by
+  classical
+  calc
+    (∑ a : Idx, ∑ b : Idx,
+      gInv a b * rm04RicciContractionAt (I := I) basis Rm04 gInv A a b)
+        =
+      ∑ k : Idx, ∑ l : Idx,
+        raised02CompAt (I := I) basis gInv A k l *
+          (∑ a : Idx, ∑ b : Idx,
+            gInv a b * Rm04 (vec4 (basis a) (basis k) (basis b) (basis l))) := by
+        unfold rm04RicciContractionAt
+        calc
+          (∑ a : Idx, ∑ b : Idx,
+            gInv a b *
+              (∑ k : Idx, ∑ l : Idx,
+                Rm04 (vec4 (basis a) (basis k) (basis b) (basis l)) *
+                  raised02CompAt (I := I) basis gInv A k l))
+              =
+            ∑ a : Idx, ∑ b : Idx, ∑ k : Idx, ∑ l : Idx,
+              gInv a b *
+                (Rm04 (vec4 (basis a) (basis k) (basis b) (basis l)) *
+                  raised02CompAt (I := I) basis gInv A k l) := by
+              refine Finset.sum_congr rfl fun a _ => ?_
+              refine Finset.sum_congr rfl fun b _ => ?_
+              rw [Finset.mul_sum]
+              refine Finset.sum_congr rfl fun k _ => ?_
+              rw [Finset.mul_sum]
+          _ =
+            ∑ k : Idx, ∑ l : Idx, ∑ a : Idx, ∑ b : Idx,
+              raised02CompAt (I := I) basis gInv A k l *
+                (gInv a b *
+                  Rm04 (vec4 (basis a) (basis k) (basis b) (basis l))) := by
+              calc
+                (∑ a : Idx, ∑ b : Idx, ∑ k : Idx, ∑ l : Idx,
+                  gInv a b *
+                    (Rm04 (vec4 (basis a) (basis k) (basis b) (basis l)) *
+                      raised02CompAt (I := I) basis gInv A k l))
+                    =
+                  ∑ a : Idx, ∑ k : Idx, ∑ b : Idx, ∑ l : Idx,
+                    gInv a b *
+                      (Rm04 (vec4 (basis a) (basis k) (basis b) (basis l)) *
+                        raised02CompAt (I := I) basis gInv A k l) := by
+                    refine Finset.sum_congr rfl fun a _ => ?_
+                    rw [Finset.sum_comm]
+                _ =
+                  ∑ k : Idx, ∑ a : Idx, ∑ b : Idx, ∑ l : Idx,
+                    gInv a b *
+                      (Rm04 (vec4 (basis a) (basis k) (basis b) (basis l)) *
+                        raised02CompAt (I := I) basis gInv A k l) := by
+                    rw [Finset.sum_comm]
+                _ =
+                  ∑ k : Idx, ∑ a : Idx, ∑ l : Idx, ∑ b : Idx,
+                    gInv a b *
+                      (Rm04 (vec4 (basis a) (basis k) (basis b) (basis l)) *
+                        raised02CompAt (I := I) basis gInv A k l) := by
+                    refine Finset.sum_congr rfl fun k _ => ?_
+                    refine Finset.sum_congr rfl fun a _ => ?_
+                    rw [Finset.sum_comm]
+                _ =
+                  ∑ k : Idx, ∑ l : Idx, ∑ a : Idx, ∑ b : Idx,
+                    gInv a b *
+                      (Rm04 (vec4 (basis a) (basis k) (basis b) (basis l)) *
+                        raised02CompAt (I := I) basis gInv A k l) := by
+                    refine Finset.sum_congr rfl fun k _ => ?_
+                    rw [Finset.sum_comm]
+                _ =
+                  ∑ k : Idx, ∑ l : Idx, ∑ a : Idx, ∑ b : Idx,
+                    raised02CompAt (I := I) basis gInv A k l *
+                      (gInv a b *
+                        Rm04 (vec4 (basis a) (basis k) (basis b) (basis l))) := by
+                    refine Finset.sum_congr rfl fun k _ => ?_
+                    refine Finset.sum_congr rfl fun l _ => ?_
+                    refine Finset.sum_congr rfl fun a _ => ?_
+                    refine Finset.sum_congr rfl fun b _ => ?_
+                    ring
+          _ =
+            ∑ k : Idx, ∑ l : Idx,
+              raised02CompAt (I := I) basis gInv A k l *
+                (∑ a : Idx, ∑ b : Idx,
+                  gInv a b *
+                    Rm04 (vec4 (basis a) (basis k) (basis b) (basis l))) := by
+              refine Finset.sum_congr rfl fun k _ => ?_
+              refine Finset.sum_congr rfl fun l _ => ?_
+              simp [Finset.mul_sum]
+    _ =
+      ∑ k : Idx, ∑ l : Idx,
+        raised02CompAt (I := I) basis gInv A k l *
+          (-A (vec2 (basis k) (basis l))) := by
+        refine Finset.sum_congr rfl fun k _ => ?_
+        refine Finset.sum_congr rfl fun l _ => ?_
+        rw [rm04_trace_first_third_eq_neg_ricci
+          (I := I) basis Rm04 gInv A hTrace hOutput hFirst hA hInv k l]
+    _ =
+      -(∑ k : Idx, ∑ l : Idx,
+        A (vec2 (basis k) (basis l)) *
+          raised02CompAt (I := I) basis gInv A k l) := by
+        simp only [mul_neg, Finset.sum_neg_distrib, neg_inj]
+        refine Finset.sum_congr rfl fun k _ => ?_
+        refine Finset.sum_congr rfl fun l _ => ?_
+        ring
 
 /-- Curvature-action contraction on a symmetric two-tensor, with the
 convention-correct lowered Ricci trace.

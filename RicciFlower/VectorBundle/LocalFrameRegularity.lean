@@ -173,6 +173,46 @@ theorem covariantDerivative_localFrame_coeff_eq
   rw [hderiv_sum, hchristoffel_sum]
   rfl
 
+/-- Arbitrary-direction version of
+`covariantDerivative_localFrame_coeff_eq`.
+
+The proof keeps the local-frame API high-level: both sides are continuous
+linear maps in the tangent input, and the existing basis-direction formula
+proves equality on the local-frame basis. -/
+theorem covariantDerivative_localFrame_coeff_eq_along
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
+    [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
+    {σ : (x : M) → TangentSpace I x} {x : M}
+    (hx : x ∈ e.baseSet) (hσ : MDiffAt (T% σ) x)
+    (v : TangentSpace I x) (k : ι) :
+    e.localFrame_coeff I b k x ((cov σ x) v) =
+      extDerivFun (I := I) ((LinearMap.piApply (e.localFrame_coeff I b k)) σ) x v +
+        ∑ j : ι,
+          e.localFrame_coeff I b j x (σ x) *
+            e.localFrame_coeff I b k x
+              ((cov (e.localFrame b j) x) v) := by
+  classical
+  let f : M → Real := (LinearMap.piApply (e.localFrame_coeff I b k)) σ
+  let lhs : TangentSpace I x →ₗ[Real] Real :=
+    (e.localFrame_coeff I b k x).comp (cov σ x).toLinearMap
+  let rhs : TangentSpace I x →ₗ[Real] Real :=
+    (extDerivFun (I := I) f x).toLinearMap +
+      ∑ j : ι,
+        e.localFrame_coeff I b j x (σ x) •
+          ((e.localFrame_coeff I b k x).comp (cov (e.localFrame b j) x).toLinearMap)
+  have hlin : lhs = rhs := by
+    apply (e.basisAt b hx).ext
+    intro i
+    have hframe : e.basisAt b hx i = e.localFrame b i x := by
+      exact (e.localFrame_apply_of_mem_baseSet (b := b) (i := i) hx).symm
+    have hbase :=
+      covariantDerivative_localFrame_coeff_eq (I := I) cov e b hx hσ i k
+    simpa [lhs, rhs, f, hframe, Finset.sum_apply] using hbase
+  have happly := congrArg (fun L : TangentSpace I x →ₗ[Real] Real => L v) hlin
+  simpa [lhs, rhs, f, Finset.sum_apply] using happly
+
 /-! ## Hom-bundle coefficient identification
 
 The next smoothness step treats `x ↦ cov σ x` as a section of the Hom-bundle

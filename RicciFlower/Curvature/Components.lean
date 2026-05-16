@@ -931,6 +931,45 @@ def christoffelCurvCoeffAt
       christoffelCoordAt (I := I) cov x₀ i j a *
         christoffelCoordAt (I := I) cov x₀ k a m)
 
+/-- Coordinate Ricci coefficient obtained by tracing the output of
+`R(∂ₖ, ∂ᵢ) ∂ⱼ` against the first input.
+
+With RicciFlower's convention this is the coordinate trace
+`Ricᵢⱼ = ∑ₖ Rᵏ{}_{j k i}`. This is the first-input trace compatible with
+`ricciFromRm13At`; alternate displays that use `R(∂ₖ, ∂ⱼ) ∂ᵢ` have the last two
+Ricci slots swapped before any Levi-Civita symmetry is applied. -/
+def christoffelRicciCoeffAt
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (x₀ : M) (i j : CoordinateIdx (𝕜 := Real) E) : Real :=
+  ∑ k : CoordinateIdx (𝕜 := Real) E,
+    christoffelCurvCoeffAt (I := I) cov x₀ k i j k
+
+/-- Expanded local-coordinate Ricci formula in RicciFlower's curvature
+convention.
+
+This is the trace of the coordinate curvature formula for `R(∂ₖ, ∂ᵢ) ∂ⱼ`:
+`Ricᵢⱼ = ∂ₖ Γᵏᵢⱼ - ∂ᵢ Γᵏₖⱼ + Γᵃᵢⱼ Γᵏₖₐ - Γᵃₖⱼ Γᵏᵢₐ`, summed over the
+repeated indices. -/
+theorem christoffelRicciCoeffAt_eq
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (x₀ : M) (i j : CoordinateIdx (𝕜 := Real) E) :
+    christoffelRicciCoeffAt (I := I) cov x₀ i j =
+      (∑ k : CoordinateIdx (𝕜 := Real) E,
+        christoffelCoordDerivAt (I := I) cov x₀ k i j k) -
+      (∑ k : CoordinateIdx (𝕜 := Real) E,
+        christoffelCoordDerivAt (I := I) cov x₀ i k j k) +
+      (∑ k : CoordinateIdx (𝕜 := Real) E,
+        ∑ a : CoordinateIdx (𝕜 := Real) E,
+          christoffelCoordAt (I := I) cov x₀ i j a *
+            christoffelCoordAt (I := I) cov x₀ k a k) -
+      (∑ k : CoordinateIdx (𝕜 := Real) E,
+        ∑ a : CoordinateIdx (𝕜 := Real) E,
+          christoffelCoordAt (I := I) cov x₀ k j a *
+            christoffelCoordAt (I := I) cov x₀ i a k) := by
+  classical
+  simp [christoffelRicciCoeffAt, christoffelCurvCoeffAt,
+    Finset.sum_add_distrib, Finset.sum_sub_distrib]
+
 /-- Coordinate-frame expansion of the connection curvature vector.
 
 This is the geometric Christoffel-expansion frontier: it is where the product
@@ -1288,6 +1327,77 @@ theorem rm13_eval_eq_christoffelCurvCoord
   rw [map_sum]
   refine Finset.sum_congr rfl fun m _ => ?_
   simp [cotangentToDual_apply, smul_eq_mul]
+
+/-- The intrinsic Ricci trace of a realized `(1,3)` curvature tensor is the
+coordinate Christoffel trace in the chart-induced coordinate frame. -/
+theorem ricciFromRm13At_coordFrame_eq_christoffelRicciCoeffAt
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (Rm13 : Tensor13Section (I := I) (M := M))
+    (x₀ : M)
+    (hRm : Rm13RealizesConnection (I := I) cov Rm13)
+    (hcurv : ConnectionCurvatureCoordAt (I := I) cov x₀)
+    (i j : CoordinateIdx (𝕜 := Real) E) :
+    ricciFromRm13At (I := I) (M := M) (Rm13 x₀)
+        (vec2 (coordinateFrameAt (I := I) x₀ i x₀)
+          (coordinateFrameAt (I := I) x₀ j x₀)) =
+      christoffelRicciCoeffAt (I := I) cov x₀ i j := by
+  classical
+  let basis := coordinateFrameAt_toBasis (I := I) x₀
+  rw [show coordinateFrameAt (I := I) x₀ i x₀ = basis i by
+    simp [basis, coordinateFrameAt_toBasis_apply]]
+  rw [show coordinateFrameAt (I := I) x₀ j x₀ = basis j by
+    simp [basis, coordinateFrameAt_toBasis_apply]]
+  rw [ricciFromRm13At_apply_basis_trace (I := I) basis (Rm13 x₀) (basis i) (basis j)]
+  unfold christoffelRicciCoeffAt
+  refine Finset.sum_congr rfl fun a _ => ?_
+  have h := rm13_eval_eq_christoffelCurvCoord (I := I) cov Rm13 x₀
+    (dualToCotangent (I := I) (basis.coord a)) hRm hcurv a i j
+  have hcoord (m : CoordinateIdx (𝕜 := Real) E) :
+      ((coordinateFrameAt_toBasis (I := I) x₀).repr
+          (coordinateFrameAt (I := I) x₀ m x₀)) a =
+        if m = a then 1 else 0 := by
+    rw [show coordinateFrameAt (I := I) x₀ m x₀ =
+        (coordinateFrameAt_toBasis (I := I) x₀) m by
+      simp [coordinateFrameAt_toBasis_apply]]
+    by_cases hma : m = a
+    · rw [hma]
+      have hb := congrArg (fun f => f a)
+        (Module.Basis.repr_self (coordinateFrameAt_toBasis (I := I) x₀) a)
+      simpa [coordinateFrameAt_toBasis_apply] using hb
+    · have hb := congrArg (fun f => f a)
+        (Module.Basis.repr_self (coordinateFrameAt_toBasis (I := I) x₀) m)
+      simpa [coordinateFrameAt_toBasis_apply, Finsupp.single_apply, hma] using hb
+  have hsum :
+      (∑ m : CoordinateIdx (𝕜 := Real) E,
+          christoffelCurvCoeffAt (I := I) cov x₀ a i j m *
+            ((coordinateFrameAt_toBasis (I := I) x₀).repr
+              (coordinateFrameAt (I := I) x₀ m x₀)) a) =
+        christoffelCurvCoeffAt (I := I) cov x₀ a i j a := by
+    rw [show
+        (∑ m : CoordinateIdx (𝕜 := Real) E,
+            christoffelCurvCoeffAt (I := I) cov x₀ a i j m *
+              ((coordinateFrameAt_toBasis (I := I) x₀).repr
+                (coordinateFrameAt (I := I) x₀ m x₀)) a) =
+          ∑ m : CoordinateIdx (𝕜 := Real) E,
+            (if m = a then christoffelCurvCoeffAt (I := I) cov x₀ a i j a
+              else 0) by
+      refine Finset.sum_congr rfl fun m _ => ?_
+      rw [hcoord m]
+      by_cases hma : m = a
+      · subst hma
+        simp
+      · simp [hma]]
+    simp
+  have h' :
+      ((Rm13 x₀) (dualToCotangent (I := I) (basis.coord a)))
+          (vec3 (basis a) (basis i) (basis j)) =
+        ∑ m : CoordinateIdx (𝕜 := Real) E,
+          christoffelCurvCoeffAt (I := I) cov x₀ a i j m *
+            ((coordinateFrameAt_toBasis (I := I) x₀).repr
+              (coordinateFrameAt (I := I) x₀ m x₀)) a := by
+    simpa [basis, coordinateFrameAt_toBasis_apply, dualToCotangent_apply] using h
+  rw [h']
+  exact hsum
 
 /-- Coordinate inputs for the textbook `(0,s)` Ricci-identity component
 commutator. The first two slots are the derivative slots. -/
