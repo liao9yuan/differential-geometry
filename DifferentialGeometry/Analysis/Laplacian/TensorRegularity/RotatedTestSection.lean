@@ -120,7 +120,7 @@ fiber value, which never matters once cut by a bump supported in the chart. -/
 
 /-- The chart-`α`-frame constant basis fiber section: the fibrewise inverse of
 the constant model tensor `tensorChartBasisElement r s Q.1 Q.2`. -/
-private noncomputable def chartBasisFiberSection (r s : ℕ) (α : M)
+noncomputable def chartBasisFiberSection (r s : ℕ) (α : M)
     (Q : CompIdx E r s) :
     (b : M) → TensorRSSpace r s I b :=
   fun b => (rsTriv (I := I) (M := M) r s α).symmL ℝ b
@@ -214,7 +214,7 @@ noncomputable def chartBasisTensorSection
 
 /-- The underlying section of `chartBasisTensorSection` evaluated at `b` is
 `χ b • chartBasisFiberSection r s α Q b`. -/
-private lemma chartBasisTensorSection_toSection_apply
+lemma chartBasisTensorSection_toSection_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {χ : M → ℝ} (hχs : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ χ (chartAt H α).source)
     (hχt : tsupport χ ⊆ (chartAt H α).source)
@@ -330,7 +330,7 @@ is `C^∞` on the chart-`α` source. -/
 `covChartMetricGramInv g r s α y Q P₀` of the inverse Gram, read at the
 chart-Euclidean image `y = toEuclidean (extChartAt I α b)` of the base point
 `b`. -/
-private noncomputable def gramInvWeight
+noncomputable def gramInvWeight
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : CompIdx E r s) (Q : CompIdx E r s) (b : M) : ℝ :=
   covChartMetricGramInv (I := I) (M := M) g r s α
@@ -383,7 +383,7 @@ private lemma gramInvWeight_contMDiffOn
 
 /-- The chart-pulled-back inverse-Gram column entry times the bump is `C^∞` on
 the chart-`α` source. -/
-private lemma gramInvWeight_mul_bump_contMDiffOn
+lemma gramInvWeight_mul_bump_contMDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ Q : CompIdx E r s)
     {χ : M → ℝ} (hχs : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ χ (chartAt H α).source) :
@@ -394,7 +394,7 @@ private lemma gramInvWeight_mul_bump_contMDiffOn
 
 /-- The chart-pulled-back inverse-Gram column entry times the bump has closed
 support inside the chart-`α` source. -/
-private lemma gramInvWeight_mul_bump_tsupport
+lemma gramInvWeight_mul_bump_tsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ Q : CompIdx E r s)
     {χ : M → ℝ} (hχt : tsupport χ ⊆ (chartAt H α).source) :

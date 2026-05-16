@@ -391,7 +391,7 @@ private lemma tensorInnerPointwise_toModel_eq_chart
 elements expands as a finite component-coupled sum: the chart-frame
 tensor-metric Gram on the chart-frame basis times the product of the wrapped
 raw-component projections. -/
-private lemma tensorInnerPointwise_toModel_eq_component_sum
+lemma tensorInnerPointwise_toModel_eq_component_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) {b : M}
     (hb : b ∈ (chartAt H α).source)
     (X Y : TensorRSSpace r s I b) :
