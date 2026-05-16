@@ -70,7 +70,7 @@ sending `Φ` to the function `φ ↦ Φ (chartModelBasis E ∘ φ)`.
 This is the same map as `evalAtBasisLinearLocal` of
 `PreHilbert.lean` and the `MetricLowering` sister; re-stated here so the
 present file is self-contained. -/
-private noncomputable def eval0SLinear (n : ℕ) :
+noncomputable def eval0SLinear (n : ℕ) :
     Tensor0SModel n ℝ E →ₗ[ℝ]
       ((Fin n → Fin (Module.finrank ℝ E)) → ℝ) where
   toFun := fun Φ φ => Φ (fun k : Fin n => (chartModelBasis E) (φ k))
@@ -81,7 +81,7 @@ private noncomputable def eval0SLinear (n : ℕ) :
     funext φ
     simp [ContinuousMultilinearMap.smul_apply]
 
-@[simp] private lemma eval0SLinear_apply (n : ℕ)
+@[simp] lemma eval0SLinear_apply (n : ℕ)
     (Φ : Tensor0SModel n ℝ E)
     (φ : Fin n → Fin (Module.finrank ℝ E)) :
     eval0SLinear (E := E) n Φ φ =
@@ -137,7 +137,7 @@ private lemma eval0SLinear_bijective (n : ℕ) :
 
 /-- Linear equivalence between `Tensor0SModel n ℝ E` and the Pi-type of
 its scalar components against the model basis. -/
-private noncomputable def eval0SLinearEquiv (n : ℕ) :
+noncomputable def eval0SLinearEquiv (n : ℕ) :
     Tensor0SModel n ℝ E ≃ₗ[ℝ]
       ((Fin n → Fin (Module.finrank ℝ E)) → ℝ) :=
   LinearEquiv.ofBijective (eval0SLinear (E := E) n)
@@ -152,12 +152,12 @@ private noncomputable def eval0SLinearEquiv (n : ℕ) :
 /-- The continuous-linear version of `eval0SLinearEquiv`: since both
 modules are finite-dimensional Hausdorff TVS, every linear equivalence is
 already a topological isomorphism. -/
-private noncomputable def eval0SCLE (n : ℕ) :
+noncomputable def eval0SCLE (n : ℕ) :
     Tensor0SModel n ℝ E ≃L[ℝ]
       ((Fin n → Fin (Module.finrank ℝ E)) → ℝ) :=
   (eval0SLinearEquiv (E := E) n).toContinuousLinearEquiv
 
-@[simp] private lemma eval0SCLE_apply (n : ℕ)
+@[simp] lemma eval0SCLE_apply (n : ℕ)
     (Φ : Tensor0SModel n ℝ E)
     (φ : Fin n → Fin (Module.finrank ℝ E)) :
     eval0SCLE (E := E) n Φ φ =
