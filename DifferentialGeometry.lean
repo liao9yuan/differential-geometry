@@ -729,6 +729,7 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.CompactInclusion
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.CompactResolvent
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Spectrum
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EigenBasis
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TensorRSModelEvalBasis
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.Semigroup
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SemigroupLaw
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SpectralBounds
