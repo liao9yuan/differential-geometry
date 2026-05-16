@@ -155,9 +155,16 @@ theorem h2_loc_chart_pulled
   have h_closure_in :
       closure Ω'' ⊆ (Set.univ : Set EuclN) := by
     intro y _; exact Set.mem_univ _
-  exact h2_loc_smooth_solution
+  -- The engine produces a constant independent of the solution data;
+  -- specialise it to `(w, F)` and the direction pair.
+  obtain ⟨C, hC_nn, h_eng⟩ := h2_loc_smooth_solution
     (d := Module.finrank ℝ E)
-    B h_weak hF_l2_loc hΩ'' hΩ''_compact_closure h_closure_in h_room
+    B hΩ'' hΩ''_compact_closure h_closure_in h_room
+  intro i k
+  obtain ⟨g, hg_memLp, hg_weak, Ω', hΩ'_open, hΩ''_in_Ω', hΩ'_in,
+    hΩ'_compact, hbound⟩ := h_eng h_weak hF_l2_loc i k
+  exact ⟨g, hg_memLp, hg_weak, Ω', hΩ'_open, hΩ''_in_Ω', hΩ'_in,
+    hΩ'_compact, C, hC_nn, hbound⟩
 
 /-! ## `L²`-locality of the chart-pulled negative density-weighted Laplacian
 

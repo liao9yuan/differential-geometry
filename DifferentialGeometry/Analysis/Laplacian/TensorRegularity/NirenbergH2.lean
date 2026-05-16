@@ -228,10 +228,17 @@ theorem tensor_h2_loc_chartComp
       Metric.cthickening 2 (closure Ω'') ⊆ (Set.univ : Set EuclN) :=
     fun y _ => Set.mem_univ y
   -- Step 4: apply the Euclidean interior `H²` regularity engine.
-  exact h2_loc_smooth_solution
+  -- The engine produces a constant independent of the solution data; specialise
+  -- it to the principal-part weak solution and the direction pair.
+  obtain ⟨C, hC_nn, h_eng⟩ := h2_loc_smooth_solution
     (d := Module.finrank ℝ E)
     (tensorPrincipalForm (I := I) (M := M) g α hK hK_target)
-    h_weak hf_l2_loc hΩ'' hΩ''_compact_closure h_closure_in h_room
+    hΩ'' hΩ''_compact_closure h_closure_in h_room
+  intro i k
+  obtain ⟨g_ik, hg_memLp, hg_weak, Ω', hΩ'_open, hΩ''_in_Ω', hΩ'_in,
+    hΩ'_compact, hbound⟩ := h_eng h_weak hf_l2_loc i k
+  exact ⟨g_ik, hg_memLp, hg_weak, Ω', hΩ'_open, hΩ''_in_Ω', hΩ'_in,
+    hΩ'_compact, C, hC_nn, hbound⟩
 
 /-! ## Packaged corollary over all component multi-indices
 

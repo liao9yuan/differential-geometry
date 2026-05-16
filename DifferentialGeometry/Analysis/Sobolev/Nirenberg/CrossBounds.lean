@@ -1134,7 +1134,6 @@ set_option linter.unusedVariables false in
 gradient piece localised on `Ω'`. -/
 theorem cross_1_bound
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
-    {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
     (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1)
     {N : ℝ} (hN : 0 ≤ N) (h_fderiv_eta : ∀ x : E, ‖fderiv ℝ η x‖ ≤ N)
@@ -1144,7 +1143,8 @@ theorem cross_1_bound
     (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ R₀ →
       Metric.cthickening |h| (tsupport η) ⊆ Ω')
     (k : Fin d) (ε : ℝ) (hε : 0 < ε) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ {u : E → ℝ}, ContDiff ℝ (⊤ : ℕ∞) u →
+      ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
       |- ∑ i : Fin d, ∑ j : Fin d, ∫ x, 2 *
             (DifferentialGeometry.Analysis.Sobolev.translate k h
               (fun y : E => B.a y i j)) x *
@@ -1175,7 +1175,7 @@ theorem cross_1_bound
     refine mul_nonneg (mul_nonneg (mul_nonneg ?_ (sq_nonneg _)) (sq_nonneg _)) (sq_nonneg _)
     exact (one_div_pos.mpr hε'_pos).le
   refine ⟨C, hC_nn, ?_⟩
-  intro h hh hh_le
+  intro u hu h hh hh_le
   have h_thick_in_Ω' : Metric.cthickening |h| (tsupport η) ⊆ Ω' := hh_supp_in_Ω' hh_le
   have h_each_pointwise := fun (i j : Fin d) (x : E) =>
     cross_1_pointwise_bound (d := d) B hu hη hη_range h_fderiv_eta
@@ -1686,7 +1686,6 @@ set_option linter.unusedVariables false in
 gradient piece localised on `Ω'`. -/
 theorem cross_2_bound
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
-    {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
     (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1)
     {Ω' : Set E} (hΩ' : IsOpen Ω') (hΩ'_closure : closure Ω' ⊆ Ω)
@@ -1695,7 +1694,8 @@ theorem cross_2_bound
     (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ R₀ →
       Metric.cthickening |h| (tsupport η) ⊆ Ω')
     (k : Fin d) (ε : ℝ) (hε : 0 < ε) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ {u : E → ℝ}, ContDiff ℝ (⊤ : ℕ∞) u →
+      ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
       |- ∑ i : Fin d, ∑ j : Fin d, ∫ x,
             DifferentialGeometry.Analysis.Sobolev.diffQuot k h
               (fun y : E => B.a y i j) x *
@@ -1726,7 +1726,7 @@ theorem cross_2_bound
     refine mul_nonneg (sq_nonneg _) ?_
     refine inv_nonneg.mpr (by linarith [hε'_pos])
   refine ⟨C, hC_nn, ?_⟩
-  intro h hh hh_le
+  intro u hu h hh hh_le
   have h_thick_in_Ω' : Metric.cthickening |h| (tsupport η) ⊆ Ω' := hh_supp_in_Ω' hh_le
   -- Pointwise per (i, j) bound (with effective ε' = ε/d_real).
   have h_each_pointwise := fun (i j : Fin d) (x : E) =>
@@ -2533,7 +2533,6 @@ set_option linter.unusedVariables false in
 /-- The third cross term is bounded by `C · ‖∇u‖²_{L²(Ω')}`. -/
 theorem cross_3_bound
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
-    {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
     (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1)
     {N : ℝ} (hN : 0 ≤ N) (h_fderiv_eta : ∀ x : E, ‖fderiv ℝ η x‖ ≤ N)
@@ -2543,7 +2542,8 @@ theorem cross_3_bound
     (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ R₀ →
       Metric.cthickening |h| (tsupport η) ⊆ Ω')
     (k : Fin d) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ {u : E → ℝ}, ContDiff ℝ (⊤ : ℕ∞) u →
+      ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
       |- ∑ i : Fin d, ∑ j : Fin d, ∫ x, 2 *
             DifferentialGeometry.Analysis.Sobolev.diffQuot k h
               (fun y : E => B.a y i j) x *
@@ -2572,7 +2572,7 @@ theorem cross_3_bound
     refine mul_nonneg ?_ hN
     exact mul_nonneg (by linarith) hM_nn
   refine ⟨C, hC_nn, ?_⟩
-  intro h hh hh_le
+  intro u hu h hh hh_le
   have h_thick_in_Ω' : Metric.cthickening |h| (tsupport η) ⊆ Ω' := hh_supp_in_Ω' hh_le
   -- Pointwise bound.
   have h_each_pointwise := fun (i j : Fin d) (x : E) =>
@@ -3291,7 +3291,6 @@ set_option linter.unusedVariables false in
 `C · (‖∇u‖²_{L²(Ω')} + ‖u‖²_{L²(Ω')})`. -/
 theorem c_term_bound
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
-    {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
     (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1)
     {N : ℝ} (hN : 0 ≤ N) (h_fderiv_eta : ∀ x : E, ‖fderiv ℝ η x‖ ≤ N)
@@ -3302,7 +3301,8 @@ theorem c_term_bound
     (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ R₀ →
       Metric.cthickening |h| (tsupport η) ⊆ Ω')
     (k : Fin d) (ε : ℝ) (hε : 0 < ε) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ {u : E → ℝ}, ContDiff ℝ (⊤ : ℕ∞) u →
+      ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
       |∫ x in Ω, B.c x * u x *
           DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction
             k h η u x| ≤
@@ -3334,7 +3334,7 @@ theorem c_term_bound
     refine mul_nonneg ?_ (sq_nonneg _)
     exact mul_nonneg (by linarith) hε.le
   refine ⟨C, hC_nn, ?_⟩
-  intro h hh hh_le
+  intro u hu h hh hh_le
   have h_thick_in_Ω' : Metric.cthickening |h| (tsupport η) ⊆ Ω' := hh_supp_in_Ω' hh_le
   set v_test : E → ℝ :=
     DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction
@@ -3620,9 +3620,6 @@ set_option linter.unusedVariables false in
 `C · (‖∇u‖²_{L²(Ω')} + ‖f‖²_{L²(Ω')})`. -/
 theorem f_term_bound
     {Ω : Set E}
-    {f : E → ℝ} (hf_l2_loc : ∀ {Ω' : Set E}, IsCompact (closure Ω') →
-      MemLp f 2 (volume.restrict Ω'))
-    {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
     (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1)
     {N : ℝ} (hN : 0 ≤ N) (h_fderiv_eta : ∀ x : E, ‖fderiv ℝ η x‖ ≤ N)
@@ -3633,7 +3630,11 @@ theorem f_term_bound
     (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ R₀ →
       Metric.cthickening |h| (tsupport η) ⊆ Ω')
     (k : Fin d) (ε : ℝ) (hε : 0 < ε) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ {f : E → ℝ}, (∀ {Ω' : Set E}, IsCompact (closure Ω') →
+        MemLp f 2 (volume.restrict Ω')) →
+      ∀ {u : E → ℝ}, ContDiff ℝ (⊤ : ℕ∞) u →
+      ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
       |∫ x in Ω, f x *
           DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction
             k h η u x| ≤
@@ -3660,7 +3661,7 @@ theorem f_term_bound
     refine mul_nonneg ?_ (sq_nonneg _)
     exact mul_nonneg (by linarith) hε.le
   refine ⟨C, hC_nn, ?_⟩
-  intro h hh hh_le
+  intro f hf_l2_loc u hu h hh hh_le
   have h_thick_in_Ω' : Metric.cthickening |h| (tsupport η) ⊆ Ω' := hh_supp_in_Ω' hh_le
   set v_test : E → ℝ :=
     DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction
@@ -3903,10 +3904,6 @@ choosing `ε := λ/8` so that the four absorbing pieces sum to at most
     C · (‖∇u‖²_{L²(Ω')} + ‖u‖²_{L²(Ω')} + ‖f‖²_{L²(Ω')}).` -/
 theorem nirenberg_master_inequality_after_young
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
-    {u f : E → ℝ}
-    (h_weak : B.IsSmoothWeakSolution u f)
-    (hf_l2_loc : ∀ {Ω' : Set E}, IsCompact (closure Ω') →
-      MemLp f 2 (volume.restrict Ω'))
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
     (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1)
     {N : ℝ} (hN : 0 ≤ N) (h_fderiv_eta : ∀ x : E, ‖fderiv ℝ η x‖ ≤ N)
@@ -3917,7 +3914,11 @@ theorem nirenberg_master_inequality_after_young
     (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ R₀ →
       Metric.cthickening |h| (tsupport η) ⊆ Ω')
     (k : Fin d) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ {u f : E → ℝ}, B.IsSmoothWeakSolution u f →
+        (∀ {Ω' : Set E}, IsCompact (closure Ω') →
+          MemLp f 2 (volume.restrict Ω')) →
+      ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
       B.lam * ∫ x, (η x)^2 *
           ∑ i : Fin d, DifferentialGeometry.Analysis.Sobolev.diffQuot k h
             (fun y : E => (fderiv ℝ u y) (EuclideanSpace.single i 1)) x ^ 2
@@ -3932,7 +3933,6 @@ theorem nirenberg_master_inequality_after_young
           ∫ x in Ω', (u x)^2 ∂(volume : Measure E) +
           ∫ x in Ω', (f x)^2 ∂(volume : Measure E)) := by
   classical
-  have hu : ContDiff ℝ (⊤ : ℕ∞) u := h_weak.1
   -- Strategy: choose ε := λ/8 in the four absorbing-term bounds (cross_1, cross_2, c, f).
   -- Cross_3 doesn't have an absorbing piece. Sum:
   -- λ · I ≤ |C1| + |C2| + |C3| + |R| + |Q|
@@ -3943,16 +3943,17 @@ theorem nirenberg_master_inequality_after_young
   set ε_eff : ℝ := B.lam / 8 with hε_eff_def
   have hε_eff_pos : 0 < ε_eff := by
     rw [hε_eff_def]; exact div_pos B.hlam_pos (by norm_num)
-  -- Apply the five bounds.
-  obtain ⟨C1, hC1_nn, hC1⟩ := cross_1_bound (d := d) B hu hη hη_supp hη_range hN
+  -- Apply the five bounds. Each produces a constant independent of the
+  -- solution data `(u, f)`, so the constants can be assembled up front.
+  obtain ⟨C1, hC1_nn, hC1⟩ := cross_1_bound (d := d) B hη hη_supp hη_range hN
     h_fderiv_eta hΩ' hΩ'_closure hΩ'_compact hh_supp_in_Ω' k ε_eff hε_eff_pos
-  obtain ⟨C2, hC2_nn, hC2⟩ := cross_2_bound (d := d) B hu hη hη_supp hη_range
+  obtain ⟨C2, hC2_nn, hC2⟩ := cross_2_bound (d := d) B hη hη_supp hη_range
     hΩ' hΩ'_closure hΩ'_compact hh_supp_in_Ω' k ε_eff hε_eff_pos
-  obtain ⟨C3, hC3_nn, hC3⟩ := cross_3_bound (d := d) B hu hη hη_supp hη_range hN
+  obtain ⟨C3, hC3_nn, hC3⟩ := cross_3_bound (d := d) B hη hη_supp hη_range hN
     h_fderiv_eta hΩ' hΩ'_closure hΩ'_compact hh_supp_in_Ω' k
-  obtain ⟨Cc, hCc_nn, hCc⟩ := c_term_bound (d := d) B hu hη hη_supp hη_range hN
+  obtain ⟨Cc, hCc_nn, hCc⟩ := c_term_bound (d := d) B hη hη_supp hη_range hN
     h_fderiv_eta hΩ' hΩ'_closure hΩ'_compact hη_in_Ω' hh_supp_in_Ω' k ε_eff hε_eff_pos
-  obtain ⟨Cf, hCf_nn, hCf⟩ := f_term_bound (d := d) hf_l2_loc hu hη hη_supp hη_range hN
+  obtain ⟨Cf, hCf_nn, hCf⟩ := f_term_bound (d := d) hη hη_supp hη_range hN
     h_fderiv_eta hΩ' hΩ'_closure hΩ'_compact hη_in_Ω' hh_supp_in_Ω' k ε_eff hε_eff_pos
   -- The final constant.
   set C : ℝ := max (C1 + C2 + C3 + Cc + Cf) (max Cc Cf) with hC_def
@@ -3961,7 +3962,8 @@ theorem nirenberg_master_inequality_after_young
     refine le_max_of_le_left ?_
     refine add_nonneg (add_nonneg (add_nonneg (add_nonneg hC1_nn hC2_nn) hC3_nn) hCc_nn) hCf_nn
   refine ⟨C, hC_nn, ?_⟩
-  intro h hh hh_le
+  intro u f h_weak hf_l2_loc h hh hh_le
+  have hu : ContDiff ℝ (⊤ : ℕ∞) u := h_weak.1
   -- Set up notation for the integrals.
   set I : ℝ := ∫ x, (η x)^2 *
       ∑ i : Fin d, DifferentialGeometry.Analysis.Sobolev.diffQuot k h
@@ -3983,11 +3985,11 @@ theorem nirenberg_master_inequality_after_young
   have h_master := nirenberg_master_inequality (d := d) B h_weak hη hη_supp k hh h_thick_in_Ω
   -- h_master: B.lam * I ≤ |C1_sum| + |C2_sum| + |C3_sum| + |R| + |Q|.
   -- Substitute the specific bounds.
-  have hC1_h := hC1 hh hh_le
-  have hC2_h := hC2 hh hh_le
-  have hC3_h := hC3 hh hh_le
-  have hCc_h := hCc hh hh_le
-  have hCf_h := hCf hh hh_le
+  have hC1_h := hC1 hu hh hh_le
+  have hC2_h := hC2 hu hh hh_le
+  have hC3_h := hC3 hu hh hh_le
+  have hCc_h := hCc hu hh hh_le
+  have hCf_h := hCf hf_l2_loc hu hh hh_le
   -- Combine: λ · I ≤ |C1| + |C2| + |C3| + |R| + |Q|
   --              ≤ (ε_eff · I + C1 · G) + (ε_eff · I + C2 · G) + (C3 · G) +
   --                (ε_eff · I + Cc · (G + U)) + (ε_eff · I + Cf · (G + F))

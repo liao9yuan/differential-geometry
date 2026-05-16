@@ -1546,11 +1546,17 @@ theorem partial_u_in_h2_loc
     have h := hM (Set.mem_image_of_mem _ hx_closure)
     rw [Real.norm_eq_abs]
     exact h.trans (le_max_left _ _)
-  -- Apply h2_loc_smooth_solution to (∂_l u, perturbedSource).
-  have h_h2 := h2_loc_smooth_solution (d := d) B h_part_weak h_pert_l2
+  -- Apply h2_loc_smooth_solution to (∂_l u, perturbedSource). The engine's
+  -- constant is independent of the solution data; specialise it to the
+  -- partial-derivative weak solution and the direction pair.
+  obtain ⟨C, hC_nn, h_eng⟩ := h2_loc_smooth_solution (d := d) B
     hΩ'' hΩ''_compact_closure hΩ''_in_Ω h_room
+  intro i k
+  obtain ⟨g, hg_memLp, hg_weak, Ω', hΩ'_open, hΩ''_in_Ω', hΩ'_in,
+    hΩ'_compact, hbound⟩ := h_eng h_part_weak h_pert_l2 i k
   -- Translate the conclusion: ∂_i (∂_l u) is the same as
   -- (fderiv (∂_l u) y) (e_i) by definition.
-  exact h_h2
+  exact ⟨g, hg_memLp, hg_weak, Ω', hΩ'_open, hΩ''_in_Ω', hΩ'_in,
+    hΩ'_compact, C, hC_nn, hbound⟩
 
 end DifferentialGeometry.Analysis.Sobolev.NirenbergIteration

@@ -46,10 +46,6 @@ by a constant times the `H¹` norm of `u` plus the `L²` norm of `f`, all on
 the slightly enlarged set `Ω'`. -/
 theorem uniform_nirenberg_estimate
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
-    {u f : E → ℝ}
-    (h_weak : B.IsSmoothWeakSolution u f)
-    (hf_l2_loc : ∀ {Ω' : Set E}, IsCompact (closure Ω') →
-      MemLp f 2 (volume.restrict Ω'))
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
     (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1)
     {N : ℝ} (hN : 0 ≤ N) (h_fderiv_eta : ∀ x : E, ‖fderiv ℝ η x‖ ≤ N)
@@ -60,7 +56,11 @@ theorem uniform_nirenberg_estimate
     (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ R₀ →
       Metric.cthickening |h| (tsupport η) ⊆ Ω')
     (k : Fin d) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ {u f : E → ℝ}, B.IsSmoothWeakSolution u f →
+        (∀ {Ω' : Set E}, IsCompact (closure Ω') →
+          MemLp f 2 (volume.restrict Ω')) →
+      ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
       ∫ x, (η x)^2 *
           ∑ i : Fin d,
             DifferentialGeometry.Analysis.Sobolev.diffQuot k h
@@ -73,7 +73,7 @@ theorem uniform_nirenberg_estimate
           ∫ x in Ω', (f x)^2 ∂(volume : Measure E)) := by
   classical
   obtain ⟨C₀, hC₀_nn, hC₀⟩ :=
-    nirenberg_master_inequality_after_young (d := d) B h_weak hf_l2_loc
+    nirenberg_master_inequality_after_young (d := d) B
       hη hη_supp hη_range hN h_fderiv_eta hΩ' hΩ'_closure hΩ'_compact
       hη_in_Ω' hh_supp_in_Ω' k
   set C : ℝ := (2 / B.lam) * C₀ with hC_def
@@ -81,7 +81,7 @@ theorem uniform_nirenberg_estimate
   have hC_nn : 0 ≤ C := by
     rw [hC_def]; exact mul_nonneg (by positivity) hC₀_nn
   refine ⟨C, hC_nn, ?_⟩
-  intro h hh hh_le
+  intro u f h_weak hf_l2_loc h hh hh_le
   set I : ℝ := ∫ x, (η x)^2 *
       ∑ i : Fin d, DifferentialGeometry.Analysis.Sobolev.diffQuot k h
         (fun y : E => (fderiv ℝ u y) (EuclideanSpace.single i 1)) x ^ 2
@@ -91,7 +91,7 @@ theorem uniform_nirenberg_estimate
     ∂(volume : Measure E) +
     ∫ x in Ω', (u x)^2 ∂(volume : Measure E) +
     ∫ x in Ω', (f x)^2 ∂(volume : Measure E) with hR_def
-  have hY : B.lam * I ≤ (B.lam / 2) * I + C₀ * R := hC₀ hh hh_le
+  have hY : B.lam * I ≤ (B.lam / 2) * I + C₀ * R := hC₀ h_weak hf_l2_loc hh hh_le
   have h_step1 : (B.lam / 2) * I ≤ C₀ * R := by linarith
   have h_two_lam : (0 : ℝ) ≤ 2 / B.lam := by positivity
   have h_mul : (2 / B.lam) * ((B.lam / 2) * I) ≤ (2 / B.lam) * (C₀ * R) :=
@@ -211,21 +211,20 @@ the difference-quotient method yields an uniform `L²` bound on
 classical limit `g = ∂_k ∂_i u`. -/
 theorem h2_loc_smooth_solution
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
-    {u f : E → ℝ}
-    (h_weak : B.IsSmoothWeakSolution u f)
-    (hf_l2_loc : ∀ {Ω' : Set E}, IsCompact (closure Ω') →
-      MemLp f 2 (volume.restrict Ω'))
     {Ω'' : Set E} (hΩ'' : IsOpen Ω'')
     (hΩ''_compact_closure : IsCompact (closure Ω''))
     (_hΩ''_in_Ω : closure Ω'' ⊆ Ω)
     (h_room : Metric.cthickening 2 (closure Ω'') ⊆ Ω) :
-    ∀ i k : Fin d, ∃ g : E → ℝ,
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ {u f : E → ℝ}, B.IsSmoothWeakSolution u f →
+        (∀ {Ω' : Set E}, IsCompact (closure Ω') →
+          MemLp f 2 (volume.restrict Ω')) →
+      ∀ i k : Fin d, ∃ g : E → ℝ,
       MemLp g 2 (volume.restrict Ω'') ∧
       DeGiorgi.HasWeakPartialDeriv (d := d) k g
         (fun y : E => (fderiv ℝ u y) (EuclideanSpace.single i 1)) Ω'' ∧
       ∃ Ω' : Set E, IsOpen Ω' ∧ closure Ω'' ⊆ Ω' ∧ closure Ω' ⊆ Ω ∧
         IsCompact (closure Ω') ∧
-        ∃ C : ℝ, 0 ≤ C ∧
           ∫ x in Ω'', g x ^ 2 ∂(volume : Measure E) ≤
             C * (∫ x in Ω',
                   ∑ j : Fin d, ((fderiv ℝ u x) (EuclideanSpace.single j 1))^2
@@ -233,25 +232,8 @@ theorem h2_loc_smooth_solution
               ∫ x in Ω', (u x)^2 ∂(volume : Measure E) +
               ∫ x in Ω', (f x)^2 ∂(volume : Measure E)) := by
   classical
-  intro i k
-  -- Step 1: The classical k-partial of ∂_i u serves as the weak partial.
-  have hu : ContDiff ℝ (⊤ : ℕ∞) u := h_weak.1
-  set g : E → ℝ := fun y =>
-    (fderiv ℝ
-      (fun z : E => (fderiv ℝ u z) (EuclideanSpace.single i 1)) y)
-      (EuclideanSpace.single k 1) with hg_def
-  have h_weak_partial :
-      DeGiorgi.HasWeakPartialDeriv (d := d) k g
-        (fun y : E => (fderiv ℝ u y) (EuclideanSpace.single i 1)) Ω'' :=
-    weak_kdi_partial_of_smooth (d := d) hu hΩ'' i k
-  -- g is smooth.
-  have hg_smooth : ContDiff ℝ (⊤ : ℕ∞) g := contDiff_kdi_partial (d := d) hu i k
-  have hg_cont : Continuous g := hg_smooth.continuous
-  -- g ∈ L²(volume.restrict Ω'') via continuity + compact closure.
-  have hg_memLp : MemLp g 2 (volume.restrict Ω'') :=
-    memLp_two_continuous_compact_closure (d := d) hg_cont hΩ''
-      hΩ''_compact_closure
-  -- Step 2: Geometric setup. K := closure Ω''.
+  -- Step 1: Geometric setup, independent of the solution data and the
+  -- direction pair. `K := closure Ω''`.
   set K : Set E := closure Ω'' with hK_def
   have hK_compact : IsCompact K := hΩ''_compact_closure
   -- η : ≡ 1 on K, supp η ⊆ thickening (3/4) K.
@@ -293,19 +275,70 @@ theorem h2_loc_smooth_solution
     -- cthickening (1 + 3/4) K ⊆ thickening 2 K = Ω'.
     rw [hΩ'_def]
     exact Metric.cthickening_subset_thickening' (by norm_num) (by norm_num) K
-  -- Step 3: Apply Part A.
-  obtain ⟨C₀, hC₀_nn, hC₀⟩ :=
-    uniform_nirenberg_estimate (d := d) B h_weak hf_l2_loc hη_smooth hη_compact
+  -- Step 2: For every direction `k'`, the uniform Nirenberg estimate produces a
+  -- constant that does not depend on the solution data `(u, f)`. Assemble these
+  -- finitely many constants into a single one valid for every direction.
+  have h_unif : ∀ k' : Fin d, ∃ C : ℝ, 0 ≤ C ∧
+      ∀ {u f : E → ℝ}, B.IsSmoothWeakSolution u f →
+        (∀ {Ω' : Set E}, IsCompact (closure Ω') →
+          MemLp f 2 (volume.restrict Ω')) →
+      ∀ {h : ℝ}, h ≠ 0 → |h| ≤ (1 : ℝ) →
+        ∫ x, (η x)^2 *
+            ∑ i : Fin d,
+              DifferentialGeometry.Analysis.Sobolev.diffQuot k' h
+                (fun y : E => (fderiv ℝ u y) (EuclideanSpace.single i 1)) x ^ 2
+          ∂(volume : Measure E) ≤
+          C * (∫ x in Ω',
+                ∑ i : Fin d, ((fderiv ℝ u x) (EuclideanSpace.single i 1)) ^ 2
+              ∂(volume : Measure E) +
+            ∫ x in Ω', (u x)^2 ∂(volume : Measure E) +
+            ∫ x in Ω', (f x)^2 ∂(volume : Measure E)) :=
+    fun k' => uniform_nirenberg_estimate (d := d) B hη_smooth hη_compact
       hη_range hN_nn h_fderiv_eta hΩ'_open hΩ'_closure_in_Ω hΩ'_closure_compact
-      hη_tsupport_in_Ω' (R₀ := 1) hh_supp_in_Ω' k
-  -- Step 4: Provide the existential output.
+      hη_tsupport_in_Ω' (R₀ := 1) hh_supp_in_Ω' k'
+  choose Cfun hCfun_nn hCfun using h_unif
+  -- The single constant: the sum over all directions. It dominates each
+  -- per-direction constant and is nonnegative.
+  set C : ℝ := ∑ k' : Fin d, Cfun k' with hC_def
+  have hC_nn : 0 ≤ C := by
+    rw [hC_def]
+    exact Finset.sum_nonneg (fun k' _ => hCfun_nn k')
+  have hCfun_le_C : ∀ k' : Fin d, Cfun k' ≤ C := by
+    intro k'
+    rw [hC_def]
+    exact Finset.single_le_sum (f := fun k' => Cfun k')
+      (fun k' _ => hCfun_nn k') (Finset.mem_univ k')
+  refine ⟨C, hC_nn, ?_⟩
+  intro u f h_weak hf_l2_loc i k
+  -- The classical k-partial of ∂_i u serves as the weak partial.
+  have hu : ContDiff ℝ (⊤ : ℕ∞) u := h_weak.1
+  set g : E → ℝ := fun y =>
+    (fderiv ℝ
+      (fun z : E => (fderiv ℝ u z) (EuclideanSpace.single i 1)) y)
+      (EuclideanSpace.single k 1) with hg_def
+  have h_weak_partial :
+      DeGiorgi.HasWeakPartialDeriv (d := d) k g
+        (fun y : E => (fderiv ℝ u y) (EuclideanSpace.single i 1)) Ω'' :=
+    weak_kdi_partial_of_smooth (d := d) hu hΩ'' i k
+  -- g is smooth.
+  have hg_smooth : ContDiff ℝ (⊤ : ℕ∞) g := contDiff_kdi_partial (d := d) hu i k
+  have hg_cont : Continuous g := hg_smooth.continuous
+  -- g ∈ L²(volume.restrict Ω'') via continuity + compact closure.
+  have hg_memLp : MemLp g 2 (volume.restrict Ω'') :=
+    memLp_two_continuous_compact_closure (d := d) hg_cont hΩ''
+      hΩ''_compact_closure
+  -- The per-direction uniform Nirenberg estimate, specialised to `(u, f)`.
+  -- Abbreviate the per-direction constant; it is dominated by `C`.
+  set C₀ : ℝ := Cfun k with hC₀_def
+  have hC₀_nn : 0 ≤ C₀ := hCfun_nn k
+  have hC₀_le_C : C₀ ≤ C := hCfun_le_C k
+  -- Provide the existential output.
   refine ⟨g, hg_memLp, h_weak_partial, Ω', hΩ'_open, ?_, hΩ'_closure_in_Ω,
     hΩ'_closure_compact, ?_⟩
   · -- closure Ω'' ⊆ Ω'.
     -- We have hΩ'_K_subset : K ⊆ Ω' and K := closure Ω'' (by definition).
     exact hΩ'_K_subset
-  -- Step 5: Construct the bound via Fatou.
-  refine ⟨C₀, hC₀_nn, ?_⟩
+  -- Construct the bound via Fatou.
   -- Plan: ∫_{Ω''} g² ≤ ∫ η² · ∑_j (∂_k ∂_j u)² (since η ≡ 1 on K ⊇ Ω'')
   -- = limit_{h→0} ∫ η² · ∑_j (D_h^k ∂_j u)²  (DCT or similar)
   -- ≤ liminf_n  via Fatou (lower semicontinuity)
@@ -405,7 +438,7 @@ theorem h2_loc_smooth_solution
     ∂(volume : Measure E) ≤ C₀ * RHS_real := by
     intro n
     rw [hRHS_real_def]
-    exact hC₀ (h_seq n) (h_seq_abs_le_one n)
+    exact hCfun k h_weak hf_l2_loc (h_seq n) (h_seq_abs_le_one n)
   -- Pointwise: 1_{Ω''}(x) ≤ η²(x) for all x ∈ E.
   -- For x ∈ Ω''  ⊆ closure Ω'' = K, η(x) = 1. So η²(x) = 1 = 1_{Ω''}(x).
   -- For x ∉ Ω'', 1_{Ω''}(x) = 0 ≤ η²(x).
@@ -739,6 +772,9 @@ theorem h2_loc_smooth_solution
   rw [h_int_eq] at h_lint_g_sq_le
   -- Convert ENNReal.ofReal a ≤ ENNReal.ofReal b → a ≤ b (for nonneg b).
   have hC₀_RHS_nn : 0 ≤ C₀ * RHS_real := mul_nonneg hC₀_nn hRHS_real_nn
-  exact (ENNReal.ofReal_le_ofReal_iff hC₀_RHS_nn).mp h_lint_g_sq_le
+  have h_int_le_C₀ : ∫ x in Ω'', g x ^ 2 ∂(volume : Measure E) ≤ C₀ * RHS_real :=
+    (ENNReal.ofReal_le_ofReal_iff hC₀_RHS_nn).mp h_lint_g_sq_le
+  -- Upgrade the per-direction constant `C₀` to the global constant `C`.
+  exact h_int_le_C₀.trans (mul_le_mul_of_nonneg_right hC₀_le_C hRHS_real_nn)
 
 end DifferentialGeometry.Analysis.Sobolev.NirenbergCrossBounds

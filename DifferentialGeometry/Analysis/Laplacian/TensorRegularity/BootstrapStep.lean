@@ -481,15 +481,12 @@ The constant `C` is retained so that a later bootstrap step can iterate the
 estimate with an explicit budget. -/
 theorem smooth_cc_h2_loc_memWkp_two
     (B : SmoothEllipticBilinearForm d (Set.univ : Set EE))
-    {u f : EE → ℝ}
-    (h_weak : B.IsSmoothWeakSolution u f)
-    (hu_cpt : HasCompactSupport u)
-    (hf_cd : ContDiff ℝ (⊤ : ℕ∞) f)
-    (hf_cpt : HasCompactSupport f)
     {Ω'' : Set EE} (hΩ'' : IsOpen Ω'')
     (hΩ''_compact_closure : IsCompact (closure Ω'')) :
-    MemWkp (d := d) 2 2 u Ω'' ∧
-      ∃ C : ℝ, 0 ≤ C ∧
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ {u f : EE → ℝ}, B.IsSmoothWeakSolution u f →
+        HasCompactSupport u → ContDiff ℝ (⊤ : ℕ∞) f → HasCompactSupport f →
+      MemWkp (d := d) 2 2 u Ω'' ∧
         wkpNorm (d := d) 2 2 u Ω'' ≤
           ENNReal.ofReal
             (C * Real.sqrt
@@ -499,6 +496,53 @@ theorem smooth_cc_h2_loc_memWkp_two
                 (∫ x, (u x) ^ 2 ∂(volume : Measure EE)) +
                 (∫ x, (f x) ^ 2 ∂(volume : Measure EE)))) := by
   classical
+  -- The interior-`H²` engine output. Geometric room is trivial since the
+  -- domain is `Set.univ`. The engine constant `C_engine` is independent of
+  -- the solution data `(u, f)`.
+  have h_room :
+      Metric.cthickening 2 (closure Ω'') ⊆ (Set.univ : Set EE) :=
+    fun y _ => Set.mem_univ y
+  have h_closure_in :
+      closure Ω'' ⊆ (Set.univ : Set EE) := fun y _ => Set.mem_univ y
+  obtain ⟨C_engine, hC_engine_nn, h_engine⟩ :=
+    h2_loc_smooth_solution (d := d) B hΩ'' hΩ''_compact_closure
+      h_closure_in h_room
+  -- The aggregate elliptic-regularity constant: it dominates the engine
+  -- constant for every direction pair and stays bounded below by `1`.
+  set C₀ : ℝ :=
+    ((Fintype.card (Fin d) : ℝ) * (Fintype.card (Fin d) : ℝ)) * C_engine + 1
+    with hC₀_def
+  have hC₀_nn : 0 ≤ C₀ := by
+    rw [hC₀_def]
+    have : 0 ≤ ((Fintype.card (Fin d) : ℝ) * (Fintype.card (Fin d) : ℝ))
+        * C_engine :=
+      mul_nonneg (mul_nonneg (Nat.cast_nonneg _) (Nat.cast_nonneg _))
+        hC_engine_nn
+    linarith
+  have h_one_le_C₀ : (1 : ℝ) ≤ C₀ := by
+    rw [hC₀_def]
+    have : 0 ≤ ((Fintype.card (Fin d) : ℝ) * (Fintype.card (Fin d) : ℝ))
+        * C_engine :=
+      mul_nonneg (mul_nonneg (Nat.cast_nonneg _) (Nat.cast_nonneg _))
+        hC_engine_nn
+    linarith
+  have hC_engine_le_C₀ : C_engine ≤ C₀ := by
+    rw [hC₀_def]
+    have h_card_pos : (1 : ℝ) ≤ (Fintype.card (Fin d) : ℝ) := by
+      have := Fintype.card_pos (α := Fin d)
+      exact_mod_cast this
+    have h_le : C_engine ≤
+        ((Fintype.card (Fin d) : ℝ) * (Fintype.card (Fin d) : ℝ)) * C_engine := by
+      have h_one_le : (1 : ℝ) ≤
+          (Fintype.card (Fin d) : ℝ) * (Fintype.card (Fin d) : ℝ) := by
+        nlinarith [h_card_pos]
+      nlinarith [h_one_le, hC_engine_nn]
+    linarith
+  -- The natural-number count of iterated-partial terms, `∑_{j ∈ range 3} d^j`.
+  set Nterms : ℕ := ∑ j ∈ Finset.range 3, (d ^ j : ℕ) with hN_def
+  have hNterms_real_nn : (0 : ℝ) ≤ (Nterms : ℝ) := Nat.cast_nonneg _
+  refine ⟨(Nterms : ℝ) * Real.sqrt C₀, by positivity, ?_⟩
+  intro u f h_weak hu_cpt hf_cd hf_cpt
   have hu_cd : ContDiff ℝ (⊤ : ℕ∞) u := h_weak.1
   -- Abbreviations for the smooth iterated partials of `u`.
   have hu_partial_smooth : ∀ j : Fin d, ContDiff ℝ (⊤ : ℕ∞)
@@ -535,30 +579,24 @@ theorem smooth_cc_h2_loc_memWkp_two
     memWkp_of_smooth_compactSupport_anyOpen (d := d) hΩ'' hu_cd hu_cpt
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) 2
   refine ⟨h_memWkp, ?_⟩
-  -- The interior-`H²` engine output for `(u, f)`. Geometric room is trivial
-  -- since the domain is `Set.univ`.
+  -- `f ∈ L²` locally, used to feed the interior-`H²` engine.
   have hf_l2_loc : ∀ {Ω' : Set EE}, IsCompact (closure Ω') →
       MemLp f 2 (volume.restrict Ω') := by
     intro Ω' _
     exact (hf_cd.continuous.memLp_of_hasCompactSupport
       (μ := (volume : Measure EE)) (p := 2) hf_cpt).restrict _
-  have h_room :
-      Metric.cthickening 2 (closure Ω'') ⊆ (Set.univ : Set EE) :=
-    fun y _ => Set.mem_univ y
-  have h_closure_in :
-      closure Ω'' ⊆ (Set.univ : Set EE) := fun y _ => Set.mem_univ y
-  have h_engine := h2_loc_smooth_solution (d := d) B h_weak hf_l2_loc
-    hΩ'' hΩ''_compact_closure h_closure_in h_room
-  -- Extract a quantitative constant `C_pair i k ≥ 0` for every direction pair,
-  -- together with the engine's `∫ g²`-bound, by choice.
-  have h_engine_choice : ∀ i k : Fin d, ∃ C : ℝ, 0 ≤ C ∧
+  -- Specialise the interior-`H²` engine to the solution data `(u, f)`.
+  have h_engine_inst := h_engine h_weak hf_l2_loc
+  -- The engine's `∫ g²`-bound, transferred to the classical second partial,
+  -- holds for every direction pair with the uniform engine constant.
+  have h_engine_bound : ∀ i k : Fin d,
       ∫ x in Ω'',
           ((fderiv ℝ (fun z : EE => (fderiv ℝ u z) (EuclideanSpace.single i 1)) x)
-            (EuclideanSpace.single k 1)) ^ 2 ∂(volume : Measure EE) ≤ C * D := by
+            (EuclideanSpace.single k 1)) ^ 2 ∂(volume : Measure EE) ≤
+        C_engine * D := by
     intro i k
     obtain ⟨g_ik, hg_memLp, hg_weak, Ω', _hΩ'_open, _hΩ''_in_Ω', _hΩ'_in,
-      _hΩ'_compact, C, hC_nn, hC_bound⟩ := h_engine i k
-    refine ⟨C, hC_nn, ?_⟩
+      _hΩ'_compact, hC_bound⟩ := h_engine_inst i k
     -- The engine's `g_ik` agrees a.e. on `Ω''` with the classical `∂_k ∂_i u`.
     have h_classical_weak :
         DeGiorgi.HasWeakPartialDeriv (d := d) k
@@ -655,32 +693,11 @@ theorem smooth_cc_h2_loc_memWkp_two
       exact add_le_add (add_le_add h_grad_le h_u_le) h_f_le
     -- Chain the engine bound with the globalisation.
     have hC_bound' :
-        ∫ x in Ω'', g_ik x ^ 2 ∂(volume : Measure EE) ≤ C * D := by
+        ∫ x in Ω'', g_ik x ^ 2 ∂(volume : Measure EE) ≤ C_engine * D := by
       refine hC_bound.trans ?_
-      exact mul_le_mul_of_nonneg_left h_data_le hC_nn
+      exact mul_le_mul_of_nonneg_left h_data_le hC_engine_nn
     rw [← h_int_eq]
     exact hC_bound'
-  -- Choose the per-pair constants as a function.
-  choose C_pair hC_pair_nn hC_pair_bound using h_engine_choice
-  -- The aggregate constant: sum over all direction pairs, plus one.
-  set C₀ : ℝ := (∑ i : Fin d, ∑ k : Fin d, C_pair i k) + 1 with hC₀_def
-  have hC₀_nn : 0 ≤ C₀ := by
-    have h_sum_nn : 0 ≤ ∑ i : Fin d, ∑ k : Fin d, C_pair i k :=
-      Finset.sum_nonneg (fun i _ => Finset.sum_nonneg (fun k _ => hC_pair_nn i k))
-    rw [hC₀_def]; linarith
-  have hC_pair_le_C₀ : ∀ i k : Fin d, C_pair i k ≤ C₀ := by
-    intro i k
-    have h_le_sum : C_pair i k ≤ ∑ i : Fin d, ∑ k : Fin d, C_pair i k := by
-      have h_inner : C_pair i k ≤ ∑ k' : Fin d, C_pair i k' :=
-        Finset.single_le_sum (f := fun k' => C_pair i k')
-          (fun k' _ => hC_pair_nn i k') (Finset.mem_univ k)
-      have h_outer : (∑ k' : Fin d, C_pair i k') ≤
-          ∑ i' : Fin d, ∑ k' : Fin d, C_pair i' k' :=
-        Finset.single_le_sum (f := fun i' => ∑ k' : Fin d, C_pair i' k')
-          (fun i' _ => Finset.sum_nonneg (fun k' _ => hC_pair_nn i' k'))
-          (Finset.mem_univ i)
-      exact h_inner.trans h_outer
-    rw [hC₀_def]; linarith
   -- The order-`≤ 2` integral bound: for every `j ≤ 2` and every multi-index
   -- `β : Fin j → Fin d`, `∫_{Ω''} (iterClassicalPartial j β u)² ≤ C₀ · D`.
   have h_iter_classical_bound : ∀ (j : ℕ), j ≤ 2 → ∀ β : Fin j → Fin d,
@@ -713,11 +730,7 @@ theorem smooth_cc_h2_loc_memWkp_two
         have h3 : 0 ≤ ∫ x, (f x) ^ 2 ∂(volume : Measure EE) :=
           integral_nonneg (fun x => sq_nonneg _)
         rw [hD_def]; linarith
-      have h_one_le_C₀ : (1 : ℝ) ≤ C₀ := by
-        have h_sum_nn : 0 ≤ ∑ i : Fin d, ∑ k : Fin d, C_pair i k :=
-          Finset.sum_nonneg
-            (fun i _ => Finset.sum_nonneg (fun k _ => hC_pair_nn i k))
-        rw [hC₀_def]; linarith
+      -- `1 ≤ C₀` is established up front, independently of `(u, f)`.
       calc ∫ x in Ω'', (u x) ^ 2 ∂(volume : Measure EE)
           ≤ ∫ x, (u x) ^ 2 ∂(volume : Measure EE) := h_le
         _ ≤ D := h_le_D
@@ -776,11 +789,7 @@ theorem smooth_cc_h2_loc_memWkp_two
         have h3 : 0 ≤ ∫ x, (f x) ^ 2 ∂(volume : Measure EE) :=
           integral_nonneg (fun x => sq_nonneg _)
         rw [hD_def]; linarith
-      have h_one_le_C₀ : (1 : ℝ) ≤ C₀ := by
-        have h_sum_nn : 0 ≤ ∑ i : Fin d, ∑ k : Fin d, C_pair i k :=
-          Finset.sum_nonneg
-            (fun i _ => Finset.sum_nonneg (fun k _ => hC_pair_nn i k))
-        rw [hC₀_def]; linarith
+      -- `1 ≤ C₀` is established up front, independently of `(u, f)`.
       calc ∫ x in Ω'', ((fderiv ℝ u x) (EuclideanSpace.single (β 0) 1)) ^ 2
               ∂(volume : Measure EE)
           ≤ ∫ x in Ω'', ∑ j : Fin d,
@@ -801,10 +810,10 @@ theorem smooth_cc_h2_loc_memWkp_two
         simp [iterClassicalPartial_zero]
       rw [h_eq]
       -- This is exactly the engine's order-`2` term for `(i, k) = (β 0, β 1)`.
-      have h_engine_term := hC_pair_bound (β 0) (β 1)
+      have h_engine_term := h_engine_bound (β 0) (β 1)
       have h_pair_le :
-          C_pair (β 0) (β 1) * D ≤ C₀ * D :=
-        mul_le_mul_of_nonneg_right (hC_pair_le_C₀ (β 0) (β 1)) hD_nn
+          C_engine * D ≤ C₀ * D :=
+        mul_le_mul_of_nonneg_right hC_engine_le_C₀ hD_nn
       exact h_engine_term.trans h_pair_le
   -- Convert each iterated-classical integral bound into an `eLpNorm` bound.
   -- `wkpNorm 2 2 u Ω'' = ∑_{j ∈ range 3} ∑_{α} eLpNorm (iterWeakPartial …) 2 …`.
@@ -858,8 +867,6 @@ theorem smooth_cc_h2_loc_memWkp_two
     refine Finset.sum_le_sum ?_
     intro β _
     exact h_term_bound j hj β
-  -- The natural-number count of iterated-partial terms, `∑_{j ∈ range 3} d^j`.
-  set Nterms : ℕ := ∑ j ∈ Finset.range 3, (d ^ j : ℕ) with hN_def
   -- Evaluate the constant sum: it is `Nterms` copies of `ofReal (√(C₀·D))`.
   have h_const_sum :
       ∑ j ∈ Finset.range 3, ∑ _β : Fin j → Fin d,
@@ -870,18 +877,14 @@ theorem smooth_cc_h2_loc_memWkp_two
     intro j _
     rw [Finset.sum_const, Finset.card_univ, Fintype.card_fun, Fintype.card_fin,
       Fintype.card_fin, nsmul_eq_mul]
-  -- The final constant: the term count times `√C₀`.
-  have hNterms_real_nn : (0 : ℝ) ≤ (Nterms : ℝ) := Nat.cast_nonneg _
-  refine ⟨(Nterms : ℝ) * Real.sqrt C₀, ?_, ?_⟩
-  · positivity
-  · -- Assemble: `wkpNorm ≤ ↑Nterms * ofReal(√(C₀·D)) = ofReal(↑Nterms·√(C₀·D))`.
-    refine h_wkp_le.trans ?_
-    rw [h_const_sum, ← ENNReal.ofReal_natCast Nterms,
-      ← ENNReal.ofReal_mul hNterms_real_nn]
-    -- `↑Nterms · √(C₀·D) = (↑Nterms · √C₀) · √D`.
-    refine ENNReal.ofReal_le_ofReal ?_
-    rw [Real.sqrt_mul hC₀_nn]
-    exact le_of_eq (by ring)
+  -- Assemble: `wkpNorm ≤ ↑Nterms * ofReal(√(C₀·D)) = ofReal(↑Nterms·√(C₀·D))`.
+  refine h_wkp_le.trans ?_
+  rw [h_const_sum, ← ENNReal.ofReal_natCast Nterms,
+    ← ENNReal.ofReal_mul hNterms_real_nn]
+  -- `↑Nterms · √(C₀·D) = (↑Nterms · √C₀) · √D`.
+  refine ENNReal.ofReal_le_ofReal ?_
+  rw [Real.sqrt_mul hC₀_nn]
+  exact le_of_eq (by ring)
 
 end GenericAdapter
 
