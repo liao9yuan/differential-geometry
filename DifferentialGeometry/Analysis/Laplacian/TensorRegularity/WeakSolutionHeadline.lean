@@ -1246,6 +1246,42 @@ theorem tensorComponentWeakRHS_tsupport_subset
   · exact hy (tensorComponentWeakRHS_apply_of_notMem (I := I) (M := M)
       g r s T F α hK hK_target P₀ hyT)
 
+/-- **Compact support of the explicit right-hand side.** Under the global `H^1`
+weak equation of the connection Laplacian, the explicit right-hand side
+`tensorComponentWeakRHS g r s T F α hK hK_target P₀` has compact support: its
+topological support is contained in that of the Euclidean chart component
+`tensorComponentEuclid g r s T α P₀`, which has compact support for a
+chart-supported section. -/
+theorem tensorComponentWeakRHS_hasCompactSupport
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T F : SmoothCcTensor g r s) (α : M)
+    {K : Set EuclN} (hK : IsCompact K)
+    (hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α)
+    (P₀ : CompIdx E r s)
+    (hT_supp : tsupport T.toFun ⊆ (chartAt H α).source)
+    (hF_supp : tsupport F.toFun ⊆ (chartAt H α).source)
+    (hT_K : tsupport (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) ⊆ K)
+    (hweak : ∀ v : SmoothCcTensor g r s,
+      ∫ x, tensorCovDerivPointwiseInner (I := I) (M := M) g r s T v x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
+        tensorL2Inner (I := I) (M := M) g r s F.toFun v.toFun) :
+    HasCompactSupport
+      (tensorComponentWeakRHS (I := I) (M := M) g r s T F α hK hK_target P₀) := by
+  classical
+  -- The chart component has compact support for a chart-supported section.
+  have hcomp_cs : HasCompactSupport
+      (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) :=
+    tensorComponentEuclid_hasCompactSupport (I := I) (M := M)
+      g r s T α P₀ hT_supp
+  -- The right-hand side is supported inside the chart component's support.
+  have hRHS_supp : tsupport (tensorComponentWeakRHS (I := I) (M := M)
+      g r s T F α hK hK_target P₀) ⊆
+      tsupport (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) :=
+    tensorComponentWeakRHS_tsupport_subset (I := I) (M := M) g r s T F α hK
+      hK_target P₀ hT_supp hF_supp hT_K hweak
+  exact HasCompactSupport.of_support_subset_isCompact hcomp_cs
+    (subset_trans (subset_tsupport _) hRHS_supp)
+
 /-! ## The unconditional headline
 
 Routing the chart bilinear identity through the hypothesis-bearing form

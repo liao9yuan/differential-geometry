@@ -352,6 +352,51 @@ theorem tensorComponentEuclid_tsupport_subset
         (I := I) (M := M) g r s T α P₀ hyT)
   exact (closure_minimal hsupp hK_compact.isClosed).trans hK_target
 
+/-- For a section `T` supported inside the chart source, the Euclidean chart
+component `tensorComponentEuclid g r s T α P₀` has compact support: its
+`Function.support` is contained in the compact Euclidean image of the raw chart
+component's support. -/
+theorem tensorComponentEuclid_hasCompactSupport
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T : SmoothCcTensor g r s) (α : M)
+    (P₀ : CompIdx E r s)
+    (hT_supp : tsupport T.toFun ⊆ (chartAt H α).source) :
+    HasCompactSupport (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) := by
+  classical
+  have hraw_supp : tsupport
+      (tensorChartComponentRaw (I := I) (M := M) g r s T α P₀.1 P₀.2) ⊆
+      (chartAt H α).source :=
+    tensorChartComponentRaw_tsupport_subset_chart_source
+      (I := I) (M := M) g r s T α P₀.1 P₀.2 hT_supp
+  set K : Set EuclN :=
+    toEuclidean '' ((extChartAt I α) ''
+      (tsupport (tensorChartComponentRaw (I := I) (M := M)
+        g r s T α P₀.1 P₀.2))) with hK_def
+  have hK_compact : IsCompact K :=
+    image_toEuclidean_extChartAt_tsupport_compact
+      (I := I) (M := M)
+      (u := tensorChartComponentRaw (I := I) (M := M) g r s T α P₀.1 P₀.2)
+      (α := α) hraw_supp
+  have hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α :=
+    image_toEuclidean_extChartAt_tsupport_subset_chartTargetEuclid
+      (I := I) (M := M)
+      (u := tensorChartComponentRaw (I := I) (M := M) g r s T α P₀.1 P₀.2)
+      (α := α) hraw_supp
+  -- `support (tensorComponentEuclid …) ⊆ K`, and `K` is compact.
+  have hsupp : Function.support
+      (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) ⊆ K := by
+    intro y hy
+    rw [Function.mem_support] at hy
+    by_contra hyK
+    by_cases hyT : y ∈ chartTargetEuclid (I := I) (M := M) α
+    · exact hy (chartPushedRaw_eq_zero_off_image_tsupport
+        (I := I) (M := M)
+        (u := tensorChartComponentRaw (I := I) (M := M) g r s T α P₀.1 P₀.2)
+        α hyT hyK)
+    · exact hy (tensorComponentEuclid_apply_of_notMem
+        (I := I) (M := M) g r s T α P₀ hyT)
+  exact HasCompactSupport.of_support_subset_isCompact hK_compact hsupp
+
 /-! ## The headline: per-component scalar weak solution (hypothesis-bearing form)
 
 The headline result is stated in **hypothesis-bearing form**, matching the
