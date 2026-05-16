@@ -778,13 +778,40 @@ it is `0`. -/
 /-- The chart-density-weighted lower-order gradient coefficient in chart direction
 `l`: the coefficient whose chart-Euclidean divergence is the integration-by-parts
 contribution of the lower-order gradient term. -/
-private noncomputable def weightedGradCoeff
+noncomputable def weightedGradCoeff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
     (P₀ : CompIdx E r s)
     (l : Fin (Module.finrank ℝ E)) : EuclN → ℝ :=
   fun y => densityOnEuclid (I := I) g α y *
     covLowerOrderRotationGradCoeff (I := I) (M := M) g r s T α P₀ l y
+
+/-- Unfolding lemma for `weightedGradCoeff`: it is the chart density times the
+lower-order rotation gradient coefficient. -/
+lemma weightedGradCoeff_eq
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T : SmoothCcTensor g r s) (α : M)
+    (P₀ : CompIdx E r s)
+    (l : Fin (Module.finrank ℝ E)) :
+    weightedGradCoeff (I := I) (M := M) g r s T α P₀ l =
+      (fun y => densityOnEuclid (I := I) g α y *
+        covLowerOrderRotationGradCoeff (I := I) (M := M) g r s T α P₀ l y) :=
+  rfl
+
+/-- The chart-density-weighted lower-order gradient coefficient `weightedGradCoeff`
+is `C^∞` on the Euclidean chart target: it is the product of the `C^∞` chart
+density `densityOnEuclid` and the `C^∞` lower-order rotation gradient
+coefficient `covLowerOrderRotationGradCoeff`. -/
+theorem weightedGradCoeff_contDiffOn
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T : SmoothCcTensor g r s) (α : M)
+    (P₀ : CompIdx E r s)
+    (l : Fin (Module.finrank ℝ E)) :
+    ContDiffOn ℝ ∞ (weightedGradCoeff (I := I) (M := M) g r s T α P₀ l)
+      (chartTargetEuclid (I := I) (M := M) α) := by
+  rw [weightedGradCoeff_eq]
+  exact (densityOnEuclid_contDiffOn (I := I) g α).mul
+    (covLowerOrderRotationGradCoeff_contDiffOn (I := I) (M := M) g r s T α P₀ l)
 
 /-- **The explicit test-function-independent right-hand side of the per-component
 scalar weak equation.**
