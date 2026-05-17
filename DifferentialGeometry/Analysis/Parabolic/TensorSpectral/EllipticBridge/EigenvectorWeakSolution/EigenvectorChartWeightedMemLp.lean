@@ -270,7 +270,7 @@ smooth sequence converging to `u` and propagating the support through the
 /-- For any abstract `L²` element `u`, the canonical Euclidean chart component
 `tensorL2ChartComponent g r s u α P₀` vanishes almost everywhere off the compact
 partition-of-unity kernel `chartPouKernel α`. -/
-private lemma tensorL2ChartComponent_ae_zero_off_chartPouKernel
+lemma tensorL2ChartComponent_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (u : TensorL2 r s g) (α : M) (P₀ : TensorCompIdx (E := E) r s) :
     ∀ᵐ y ∂(chartL2Measure (I := I) (M := M) α),
@@ -367,19 +367,19 @@ therefore vanishes off the `toEuclidean`-image of that kernel. -/
 /-- The `toEuclidean`-image of the compact chart-kernel-cutoff kernel: the
 compact subset of the Euclidean chart target in which every cutoff Euclidean
 chart component is supported. -/
-private def cutoffChartKernelEuclid (α : M) : Set EuclN :=
+def cutoffChartKernelEuclid (α : M) : Set EuclN :=
   toEuclidean '' (cutoffChartKernel (I := I) (M := M) α)
 
-private lemma cutoffChartKernelEuclid_isCompact (α : M) :
+lemma cutoffChartKernelEuclid_isCompact (α : M) :
     IsCompact (cutoffChartKernelEuclid (I := I) (M := M) α) :=
   (cutoffChartKernel_isCompact (I := I) (M := M) α).image
     (toEuclidean (E := E)).continuous
 
-private lemma cutoffChartKernelEuclid_measurableSet (α : M) :
+lemma cutoffChartKernelEuclid_measurableSet (α : M) :
     MeasurableSet (cutoffChartKernelEuclid (I := I) (M := M) α) :=
   (cutoffChartKernelEuclid_isCompact (I := I) (M := M) α).isClosed.measurableSet
 
-private lemma cutoffChartKernelEuclid_subset_chartTargetEuclid (α : M) :
+lemma cutoffChartKernelEuclid_subset_chartTargetEuclid (α : M) :
     cutoffChartKernelEuclid (I := I) (M := M) α ⊆
       chartTargetEuclid (I := I) (M := M) α := by
   classical
@@ -426,7 +426,7 @@ private lemma cutoffComponentEuclid_eq_zero_off_cutoffChartKernelEuclid
 /-- For any abstract `L²` element `u`, the cutoff Euclidean chart component
 `tensorL2ChartComponentCutoff g r s u α P₀` vanishes almost everywhere off the
 compact cutoff kernel `cutoffChartKernelEuclid α`. -/
-private lemma tensorL2ChartComponentCutoff_ae_zero_off_cutoffChartKernelEuclid
+lemma tensorL2ChartComponentCutoff_ae_zero_off_cutoffChartKernelEuclid
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (u : TensorL2 r s g) (α : M) (P₀ : TensorCompIdx (E := E) r s) :
     ∀ᵐ y ∂(chartL2Measure (I := I) (M := M) α),
@@ -553,7 +553,7 @@ the general upgrade lemma yields weighted-`L²` membership. -/
 /-- The principal rotation coefficient limit vanishes pointwise off the compact
 partition-of-unity kernel `chartPouKernel α`: every summand carries an
 `indicator (chartPouKernel α)` factor. -/
-private lemma covPrincipalRotationCoeffLimit_eq_zero_off_chartPouKernel
+lemma covPrincipalRotationCoeffLimit_eq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_uniform : uniformTensorChartSobolevBound g r s)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -569,7 +569,7 @@ private lemma covPrincipalRotationCoeffLimit_eq_zero_off_chartPouKernel
 
 /-- The lower-order rotation value coefficient limit vanishes pointwise off the
 compact partition-of-unity kernel `chartPouKernel α`. -/
-private lemma covLowerOrderRotationValueCoeffLimit_eq_zero_off_chartPouKernel
+lemma covLowerOrderRotationValueCoeffLimit_eq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_uniform : uniformTensorChartSobolevBound g r s)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -594,7 +594,7 @@ private lemma covLowerOrderRotationValueCoeffLimit_eq_zero_off_chartPouKernel
 /-- The chart-density-weighted lower-order gradient divergence coefficient limit
 vanishes pointwise off the compact partition-of-unity kernel
 `chartPouKernel α`. -/
-private lemma weightedGradCoeffDivLimit_eq_zero_off_chartPouKernel
+lemma weightedGradCoeffDivLimit_eq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_uniform : uniformTensorChartSobolevBound g r s)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -705,6 +705,153 @@ theorem weightedGradCoeffDivLimit_memLp_weighted
       weightedGradCoeffDivLimit_eq_zero_off_chartPouKernel
         (I := I) (M := M) g r s h_uniform i α P₀ l hy))
     h_plain
+
+/-! ## Weighted-`L²` closure under a `C^∞`-coefficient product
+
+The chart-Euclidean right-hand side of the eigenvector weak-solution assembly is
+a finite sum of products of a `C^∞`-on-the-chart-target coefficient and a
+chart-component limit object. The lemma below closes weighted `L²` under such a
+product: if the second factor is weighted-`MemLp` and (almost everywhere, for
+the weighted measure) vanishes off a compact subset of the chart target, then
+the `C^∞`-coefficient product is again weighted-`MemLp`. On the compact subset
+the `C^∞` coefficient is bounded; off it the product vanishes a.e. -/
+
+/-- **Weighted-`L²` closure under a `C^∞`-coefficient product.** Let
+`c : EuclN → ℝ` be `C^∞` on the open chart target `chartTargetEuclid α`, let
+`w : EuclN → ℝ` be `MemLp 2` with respect to the chart-pulled weighted measure
+restricted to `chartTargetEuclid α`, and suppose `w` vanishes almost everywhere
+(with respect to that weighted restricted measure) off a compact subset
+`K ⊆ chartTargetEuclid α`. Then the product `fun y => c y * w y` is `MemLp 2`
+with respect to the chart-pulled weighted measure restricted to
+`chartTargetEuclid α`.
+
+On the compact set `K` the `C^∞` coefficient `c` is bounded; the product
+`c * w` agrees almost everywhere (for the weighted restricted measure) with
+`(K.indicator c) * w`, a bounded-`AEStronglyMeasurable`-factor times a weighted
+`L²` function — hence weighted `MemLp`. -/
+theorem memLp_weighted_contDiffOn_mul
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {c : EuclN → ℝ}
+    (hc : ContDiffOn ℝ ∞ c (chartTargetEuclid (I := I) (M := M) α))
+    {K : Set EuclN} (hK_compact : IsCompact K) (hK_meas : MeasurableSet K)
+    (hK_in : K ⊆ chartTargetEuclid (I := I) (M := M) α)
+    {w : EuclN → ℝ}
+    (hw : MemLp w 2
+      ((chartPulledWeightedMeasure (I := I) g α).restrict
+        (chartTargetEuclid (I := I) (M := M) α)))
+    (hw_zero : ∀ᵐ y ∂((chartPulledWeightedMeasure (I := I) g α).restrict
+        (chartTargetEuclid (I := I) (M := M) α)),
+      y ∉ K → w y = 0) :
+    MemLp (fun y => c y * w y) 2
+      ((chartPulledWeightedMeasure (I := I) g α).restrict
+        (chartTargetEuclid (I := I) (M := M) α)) := by
+  classical
+  set μw : Measure EuclN :=
+    (chartPulledWeightedMeasure (I := I) g α).restrict
+      (chartTargetEuclid (I := I) (M := M) α) with hμw_def
+  -- The `C^∞` coefficient is bounded on the compact `K` by a nonnegative `C`.
+  have hcontOn_K : ContinuousOn c K := hc.continuousOn.mono hK_in
+  have hbdd : ∃ C : ℝ, 0 ≤ C ∧ ∀ y ∈ K, ‖c y‖ ≤ C := by
+    by_cases hK_empty : K = ∅
+    · exact ⟨0, le_refl _, fun y hy => absurd (hK_empty ▸ hy) (Set.notMem_empty y)⟩
+    · obtain ⟨C₀, hC₀⟩ := hK_compact.bddAbove_image
+        (hcontOn_K.norm)
+      exact ⟨max C₀ 0, le_max_right _ _,
+        fun y hy => (hC₀ ⟨y, hy, rfl⟩).trans (le_max_left _ _)⟩
+  obtain ⟨C, hC_nn, hC_bd⟩ := hbdd
+  -- `K.indicator c` is globally bounded by `C`.
+  have hci_bd : ∀ y : EuclN, ‖K.indicator c y‖ ≤ C := by
+    intro y
+    by_cases hy : y ∈ K
+    · rw [Set.indicator_of_mem hy]; exact hC_bd y hy
+    · rw [Set.indicator_of_notMem hy, norm_zero]; exact hC_nn
+  -- `K.indicator c` is `AEStronglyMeasurable` for the weighted restricted measure.
+  have hc_meas : AEStronglyMeasurable (K.indicator c) μw := by
+    have hmeas_restr : AEStronglyMeasurable c (μw.restrict K) := by
+      rw [hμw_def, Measure.restrict_restrict hK_meas,
+        Set.inter_eq_self_of_subset_left hK_in]
+      -- Restrict the chart-pulled weighted measure to `K`, then read `c`'s
+      -- continuity on `K` as `AEStronglyMeasurable`.
+      exact hcontOn_K.aestronglyMeasurable hK_meas
+    exact (aestronglyMeasurable_indicator_iff hK_meas).mpr hmeas_restr
+  -- `c * w` agrees a.e. (weighted) with `(K.indicator c) * w`.
+  have h_prod_eq : (fun y => c y * w y) =ᵐ[μw]
+      (fun y => K.indicator c y * w y) := by
+    filter_upwards [hw_zero] with y hy
+    by_cases hyK : y ∈ K
+    · rw [Set.indicator_of_mem hyK]
+    · rw [Set.indicator_of_notMem hyK, hy hyK, mul_zero, mul_zero]
+  -- `(K.indicator c) * w` is weighted-`MemLp`: bounded measurable × `L²`.
+  have h_bdd_mul : MemLp (fun y => K.indicator c y * w y) 2 μw := by
+    refine ⟨hc_meas.mul hw.1, ?_⟩
+    have hpt : ∀ y : EuclN, ‖K.indicator c y * w y‖ ≤ ‖(C : ℝ) • w y‖ := by
+      intro y
+      have hlhs : ‖K.indicator c y * w y‖ = ‖K.indicator c y‖ * ‖w y‖ :=
+        norm_mul _ _
+      have hrhs : ‖(C : ℝ) • w y‖ = C * ‖w y‖ := by
+        rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg hC_nn]
+      rw [hlhs, hrhs]
+      exact mul_le_mul_of_nonneg_right (hci_bd y) (norm_nonneg _)
+    exact lt_of_le_of_lt (eLpNorm_mono (μ := μw) hpt) (hw.const_smul (C : ℝ)).2
+  exact MemLp.ae_eq h_prod_eq.symm h_bdd_mul
+
+/-! ## Weighted a.e.-vanishing of the chart-component limit objects
+
+Each chart-component limit object building the chart-Euclidean right-hand side
+of the eigenvector weak-solution assembly vanishes — almost everywhere with
+respect to the chart-pulled weighted measure restricted to `chartTargetEuclid α`
+— off a compact subset of the chart target. For the canonical / cutoff Euclidean
+chart components this is the weighted-measure transfer of the plain-volume
+a.e.-vanishing established above (the weighted restricted measure is absolutely
+continuous with respect to the plain restricted volume); for the three
+lower-order coefficient limits it is the weighted-measure form of the pointwise
+vanishing established above. -/
+
+/-- The chart-pulled weighted measure restricted to `chartTargetEuclid α` is
+absolutely continuous with respect to the plain Lebesgue volume restricted to
+`chartTargetEuclid α`. -/
+lemma chartPulledWeightedMeasure_restrict_absolutelyContinuous
+    (g : SmoothRiemannianMetric I M) (α : M) :
+    (chartPulledWeightedMeasure (I := I) g α).restrict
+        (chartTargetEuclid (I := I) (M := M) α) ≪
+      (volume : Measure EuclN).restrict
+        (chartTargetEuclid (I := I) (M := M) α) := by
+  unfold chartPulledWeightedMeasure
+  exact (withDensity_absolutelyContinuous (volume : Measure EuclN) _).restrict _
+
+/-- The canonical Euclidean chart component `tensorL2ChartComponent g r s u α P₀`
+vanishes almost everywhere — for the chart-pulled weighted measure restricted to
+`chartTargetEuclid α` — off the compact partition-of-unity kernel
+`chartPouKernel α`. -/
+lemma tensorL2ChartComponent_ae_zero_off_chartPouKernel_weighted
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (u : TensorL2 r s g) (α : M) (P₀ : TensorCompIdx (E := E) r s) :
+    ∀ᵐ y ∂((chartPulledWeightedMeasure (I := I) g α).restrict
+        (chartTargetEuclid (I := I) (M := M) α)),
+      y ∉ chartPouKernel (I := I) (M := M) α →
+        (tensorL2ChartComponent (I := I) (M := M) g r s u α P₀ :
+          EuclN → ℝ) y = 0 :=
+  (chartPulledWeightedMeasure_restrict_absolutelyContinuous (I := I) (M := M)
+    g α).ae_le
+    (tensorL2ChartComponent_ae_zero_off_chartPouKernel
+      (I := I) (M := M) g r s u α P₀)
+
+/-- The cutoff Euclidean chart component `tensorL2ChartComponentCutoff g r s u α
+P₀` vanishes almost everywhere — for the chart-pulled weighted measure restricted
+to `chartTargetEuclid α` — off the compact cutoff kernel
+`cutoffChartKernelEuclid α`. -/
+lemma tensorL2ChartComponentCutoff_ae_zero_off_cutoffChartKernelEuclid_weighted
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (u : TensorL2 r s g) (α : M) (P₀ : TensorCompIdx (E := E) r s) :
+    ∀ᵐ y ∂((chartPulledWeightedMeasure (I := I) g α).restrict
+        (chartTargetEuclid (I := I) (M := M) α)),
+      y ∉ cutoffChartKernelEuclid (I := I) (M := M) α →
+        (tensorL2ChartComponentCutoff (I := I) (M := M) g r s u α P₀ :
+          EuclN → ℝ) y = 0 :=
+  (chartPulledWeightedMeasure_restrict_absolutelyContinuous (I := I) (M := M)
+    g α).ae_le
+    (tensorL2ChartComponentCutoff_ae_zero_off_cutoffChartKernelEuclid
+      (I := I) (M := M) g r s u α P₀)
 
 /-! ## Sanity tests -/
 

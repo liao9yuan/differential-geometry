@@ -216,7 +216,7 @@ private lemma contDiff_coeff_mul_partial_test
 
 /-- The product of the chart-Euclidean partial of the coefficient and the test
 function is globally `C^∞`. -/
-private lemma contDiff_partial_coeff_mul_test
+lemma contDiff_partial_coeff_mul_test
     (α : M) (l : Fin (Module.finrank ℝ E))
     {f g : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
     (hf : ContDiffOn ℝ ∞ f (chartTargetEuclid (I := I) (M := M) α))
@@ -261,7 +261,7 @@ private lemma hasCompactSupport_coeff_mul_partial_test
 
 /-- The product of the chart-Euclidean partial of the coefficient and the test
 function has compact support. -/
-private lemma hasCompactSupport_partial_coeff_mul_test
+lemma hasCompactSupport_partial_coeff_mul_test
     (l : Fin (Module.finrank ℝ E))
     {f g : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
     (hg_supp : HasCompactSupport g) :
