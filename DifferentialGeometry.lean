@@ -622,6 +622,7 @@ import DifferentialGeometry.Integral.Connection.CotangentExtension
 import DifferentialGeometry.Integral.Connection.TensorExtension
 import DifferentialGeometry.Integral.Connection.TensorMetricCompatible
 import DifferentialGeometry.Integral.Connection.TensorRSMetricCompatible
+import DifferentialGeometry.Integral.Connection.TensorLoweringParallel
 import DifferentialGeometry.Integral.Connection.CovariantIntegrationByParts
 import DifferentialGeometry.Integral.Connection.Curvature
 import DifferentialGeometry.Integral.Connection.CurvatureBundling
