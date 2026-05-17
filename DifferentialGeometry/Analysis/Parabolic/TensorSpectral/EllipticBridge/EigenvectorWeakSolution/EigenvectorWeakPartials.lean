@@ -203,7 +203,7 @@ bridges. -/
 almost everywhere with respect to `chartL2Measure α`, with `μ⁻¹` times the
 concrete chosen weak `k`-th chart partial of the Euclidean chart component of
 the smooth section `(eigenvectorSmoothApprox … n).toCcTensor`. -/
-private lemma eigenvectorChartPartialLp_approx_coeFn
+lemma eigenvectorChartPartialLp_approx_coeFn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_uniform : uniformTensorChartSobolevBound g r s)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
