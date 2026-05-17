@@ -1,6 +1,7 @@
 import RicciFlower.Connection.MetricCompatibility
 import RicciFlower.Coordinates.Christoffel
 import RicciFlower.Coordinates.CoordinateFrame
+import RicciFlower.Curvature.Basic
 import RicciFlower.Operators
 import RicciFlower.Tensor.RSTensor.CotangentRiemannian
 import RicciFlower.VectorBundle.PartialMfderiv
@@ -673,6 +674,21 @@ def InverseMetricComponentsForMetricInFrameOn [DecidableEq Idx]
       (∑ k : Idx, metricCompForMetricInFrame (I := I) g frame x i k * gInv x k j) =
         (if i = j then 1 else 0)
 
+/-- A supplied two-sided inverse of a metric frame Gram matrix is symmetric. -/
+theorem gInvForMetric_symm [DecidableEq Idx]
+    (g : SmoothRiemannianMetric I M)
+    (gInv : M -> Idx -> Idx -> Real)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hinv : InverseMetricComponentsForMetricInFrameOn (I := I) g gInv frame) :
+    forall x i j, gInv x i j = gInv x j i := by
+  intro x i j
+  exact Curvature.invComp_symm
+    (I := I) (g := g) (gInv := gInv) frame
+    (by
+      intro y a b
+      simpa [metricCompForMetricInFrame] using hinv y a b)
+    x i j
+
 /-- Covariant derivative components of the inverse metric in a local frame. -/
 def inverseMetricCovDerivForMetricCompInFrame
     (gInv : M -> Idx -> Idx -> Real)
@@ -900,12 +916,42 @@ private theorem inverseMetric_derivative_solve
     (hrow : forall j : Idx,
       (∑ a : Idx,
         (gInvDt i a * metric a j + gInv i a * ((-2 : Real) * ric a j))) = 0)
+    (hleft : forall a b : Idx,
+      (∑ k : Idx, gInv a k * metric k b) = (if a = b then 1 else 0))
     (hright : forall a b : Idx,
       (∑ k : Idx, metric a k * gInv k b) = (if a = b then 1 else 0))
-    (hsymm : forall a b : Idx, gInv a b = gInv b a)
+    (hmetric_symm : forall a b : Idx, metric a b = metric b a)
     (j : Idx) :
     gInvDt i j =
       2 * (∑ a : Idx, ∑ b : Idx, gInv i a * gInv j b * ric a b) := by
+  classical
+  have hsymm : forall a b : Idx, gInv a b = gInv b a := by
+    intro a b
+    let A : Matrix Idx Idx Real := fun i j => gInv i j
+    let G : Matrix Idx Idx Real := fun i j => metric i j
+    have hAG : A * G = 1 := by
+      ext p q
+      simpa [A, G, Matrix.mul_apply] using hleft p q
+    have hGA : G * A = 1 := by
+      ext p q
+      simpa [A, G, Matrix.mul_apply] using hright p q
+    have hGt : Matrix.transpose G = G := by
+      ext p q
+      simpa [G] using hmetric_symm q p
+    have hAtG : Matrix.transpose A * G = 1 := by
+      calc
+        Matrix.transpose A * G = Matrix.transpose A * Matrix.transpose G := by rw [hGt]
+        _ = Matrix.transpose (G * A) := by rw [Matrix.transpose_mul]
+        _ = 1 := by rw [hGA]; simp
+    have hAt : Matrix.transpose A = A := by
+      calc
+        Matrix.transpose A = Matrix.transpose A * 1 := by simp
+        _ = Matrix.transpose A * (G * A) := by rw [hGA]
+        _ = (Matrix.transpose A * G) * A := by rw [← Matrix.mul_assoc]
+        _ = 1 * A := by rw [hAtG]
+        _ = A := by simp
+    have hentry := congrArg (fun B : Matrix Idx Idx Real => B b a) hAt
+    simpa [A] using hentry
   have hrow' : forall m : Idx,
       (∑ a : Idx, gInvDt i a * metric a m) =
         2 * (∑ a : Idx, gInv i a * ric a m) := by
@@ -982,7 +1028,6 @@ theorem inverseMetricCovDerivForMetricCompInFrame_eq_zero
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (hinv : InverseMetricComponentsForMetricInFrameOn (I := I) g gInv frame)
-    (hsymm : forall x i j, gInv x i j = gInv x j i)
     (hmc : RicciFlower.Connection.IsMetricCompatible (I := I) cov g)
     (hu : IsOpen u) {x : M} (hx : x ∈ u)
     (hginv_mdiff : ∀ a b : Idx,
@@ -1004,6 +1049,8 @@ theorem inverseMetricCovDerivForMetricCompInFrame_eq_zero
     extDerivFun (I := I) (fun y : M => gInv y a b) x (frame d x)
   let Γ : Idx -> Idx -> Real := fun a b =>
     christoffelSymbolInFrame cov frame hframe x d a b
+  have hsymm : forall x i j, gInv x i j = gInv x j i :=
+    gInvForMetric_symm (I := I) g gInv frame hinv
   have hDG : ∀ a b : Idx,
       DG a b =
         (∑ p : Idx, Γ a p * G p b) +
@@ -1084,10 +1131,13 @@ theorem inverseMetricCovDerivForMetricCompInFrame_eq_zero
         _ = 0 := hrow m)
     (by
       intro a b
+      simpa [G, U] using (hinv x a b).1)
+    (by
+      intro a b
       simpa [G, U] using (hinv x a b).2)
     (by
       intro a b
-      simpa [U] using hsymm x a b)
+      simpa [G, metricCompForMetricInFrame] using g.symm x (frame a x) (frame b x))
     l
   have hUG_left : ∀ p : Idx,
       (∑ a : Idx, U k a * G a p) = (if k = p then 1 else 0) := by
@@ -1260,7 +1310,6 @@ theorem inverseMetricCovDerivForMetricCompAlongInFrame_eq_zero
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (hinv : InverseMetricComponentsForMetricInFrameOn (I := I) g gInv frame)
-    (hsymm : forall x i j, gInv x i j = gInv x j i)
     (hmc : RicciFlower.Connection.IsMetricCompatible (I := I) cov g)
     (hu : IsOpen u) {x : M} (hx : x ∈ u)
     (hginv_mdiff : ∀ a b : Idx,
@@ -1283,6 +1332,8 @@ theorem inverseMetricCovDerivForMetricCompAlongInFrame_eq_zero
     extDerivFun (I := I) (fun y : M => gInv y a b) x (X x)
   let Γ : Idx -> Idx -> Real := fun a b =>
     christoffelAlongInFrame cov frame hframe x (X x) a b
+  have hsymm : forall x i j, gInv x i j = gInv x j i :=
+    gInvForMetric_symm (I := I) g gInv frame hinv
   have hDG : ∀ a b : Idx,
       DG a b =
         (∑ p : Idx, Γ a p * G p b) +
@@ -1363,10 +1414,13 @@ theorem inverseMetricCovDerivForMetricCompAlongInFrame_eq_zero
         _ = 0 := hrow m)
     (by
       intro a b
+      simpa [G, U] using (hinv x a b).1)
+    (by
+      intro a b
       simpa [G, U] using (hinv x a b).2)
     (by
       intro a b
-      simpa [U] using hsymm x a b)
+      simpa [G, metricCompForMetricInFrame] using g.symm x (frame a x) (frame b x))
     l
   have hUG_left : ∀ p : Idx,
       (∑ a : Idx, U k a * G a p) = (if k = p then 1 else 0) := by
@@ -1548,7 +1602,6 @@ theorem invCovZeroLocal
       (fun y : M => ∑ k : Idx,
           gInv y i k * metricCompForMetricInFrame (I := I) g frame y k j) =ᶠ[𝓝 x]
         fun _ : M => if i = j then 1 else 0)
-    (hsymmX : ∀ i j : Idx, gInv x i j = gInv x j i)
     (hmc : RicciFlower.Connection.IsMetricCompatible (I := I) cov g)
     (hu : IsOpen u) (hx : x ∈ u)
     (hginv_mdiff : ∀ a b : Idx,
@@ -1571,6 +1624,35 @@ theorem invCovZeroLocal
     extDerivFun (I := I) (fun y : M => gInv y a b) x (X x)
   let Γ : Idx -> Idx -> Real := fun a b =>
     christoffelAlongInFrame cov frame hframe x (X x) a b
+  have hsymmX : forall i j : Idx, gInv x i j = gInv x j i := by
+    intro i j
+    let A : Matrix Idx Idx Real := fun i j => gInv x i j
+    let G : Matrix Idx Idx Real := fun i j =>
+      metricCompForMetricInFrame (I := I) g frame x i j
+    have hAG : A * G = 1 := by
+      ext a b
+      simpa [A, G, Matrix.mul_apply] using (hinvX a b).1
+    have hGA : G * A = 1 := by
+      ext a b
+      simpa [A, G, Matrix.mul_apply] using (hinvX a b).2
+    have hGt : Matrix.transpose G = G := by
+      ext a b
+      simpa [G, metricCompForMetricInFrame] using
+        g.symm x (frame b x) (frame a x)
+    have hAtG : Matrix.transpose A * G = 1 := by
+      calc
+        Matrix.transpose A * G = Matrix.transpose A * Matrix.transpose G := by rw [hGt]
+        _ = Matrix.transpose (G * A) := by rw [Matrix.transpose_mul]
+        _ = 1 := by rw [hGA]; simp
+    have hAt : Matrix.transpose A = A := by
+      calc
+        Matrix.transpose A = Matrix.transpose A * 1 := by simp
+        _ = Matrix.transpose A * (G * A) := by rw [hGA]
+        _ = (Matrix.transpose A * G) * A := by rw [← Matrix.mul_assoc]
+        _ = 1 * A := by rw [hAtG]
+        _ = A := by simp
+    have hentry := congrArg (fun B : Matrix Idx Idx Real => B j i) hAt
+    simpa [A] using hentry
   have hDG : ∀ a b : Idx,
       DG a b =
         (∑ p : Idx, Γ a p * G p b) +
@@ -1652,10 +1734,13 @@ theorem invCovZeroLocal
         _ = 0 := hrow m)
     (by
       intro a b
+      simpa [G, U] using (hinvX a b).1)
+    (by
+      intro a b
       simpa [G, U] using (hinvX a b).2)
     (by
       intro a b
-      simpa [U] using hsymmX a b)
+      simpa [G, metricCompForMetricInFrame] using g.symm x (frame a x) (frame b x))
     l
   have hUG_left : ∀ p : Idx,
       (∑ a : Idx, U k a * G a p) = (if k = p then 1 else 0) := by
@@ -1858,10 +1943,6 @@ theorem gInvCovZeroAt
         fun _ : M => if i = j then 1 else 0 := by
     intro i j
     simpa [gInv] using gInvBasisNhds (I := I) g x₀ i j
-  have hsymmX : ∀ i j : CoordinateIdx (𝕜 := Real) E, gInv x₀ i j = gInv x₀ j i := by
-    intro i j
-    simpa [gInv] using
-      inverseMetricFlatModelInChart_component_center_eq_symm (I := I) g x₀ i j
   have hginv_mdiff : ∀ a b : CoordinateIdx (𝕜 := Real) E,
       MDifferentiableAt I 𝓘(Real, Real) (fun y : M => gInv y a b) x₀ := by
     intro a b
@@ -1881,7 +1962,7 @@ theorem gInvCovZeroAt
     invCovZeroLocal (I := I) g gInv cov X
       (coordinateFrameAt (I := I) x₀)
       (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
-      hinvX hinvN hsymmX hmc
+      hinvX hinvN hmc
       (coordinateFrameSet_open (I := I) x₀)
       (coordinateFrameAt_mem (I := I) x₀)
       hginv_mdiff hmetric_mdiff k l

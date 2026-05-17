@@ -739,6 +739,35 @@ theorem inner02_symm
     (Tensor0SBundle.MetricFiberData.inner_comm
       (Tensor0SBundle.tensor0SMetricData (I := I) g x 2) A B)
 
+private theorem inner02_mdiff
+    (g : SmoothRiemannianMetric I M)
+    (A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2)
+    (x : M) :
+    MDifferentiableAt I 𝓘(Real, Real)
+      (fun y : M => inner02 (I := I) g y (A y) (B y)) x := by
+  simpa [inner02] using
+    Tensor0SBundle.inner0S_two_mdiff (I := I) g A B x
+
+private theorem inner02_nablaFun
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    (hmc : RicciFlower.Connection.IsMetricCompatible (I := I) cov g)
+    (A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2)
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (x : M) :
+    extDerivFun (I := I)
+        (fun y : M => inner02 (I := I) g y (A y) (B y)) x (X x) =
+      inner02 (I := I) g x
+        (nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+          2 cov X A x) (B x) +
+        inner02 (I := I) g x (A x)
+          (nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+            2 cov X B x) := by
+  simpa [inner02] using
+    Tensor0SBundle.inner0S_two_nabla (I := I) cov g hmc A B X x
+
 private theorem eval_pt0S
     [T2Space M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -845,6 +874,7 @@ def tensor02FreezeNabla2
   congr 1
   exact fin_cons_vec3_eq_vec4 (I := I) X Y Z W
 
+set_option linter.flexible false in
 /-- Derivative of the frozen first covariant derivative paired with `A`.
 
 This is the only nontrivial tensor-realization step in the `(0,2)` norm
@@ -886,12 +916,230 @@ theorem freeze02_deriv
           inner02 (I := I) g x
             (tensor02FreezeNabla (I := I) (nablaA x) (Y x))
             (tensor02FreezeNabla (I := I) (nablaA x) (X x))) := by
-  /- The frozen field is now bundled by `freeze02Field`.  The remaining local
-  API gap is the directional version of tensor metric compatibility stated
-  with `nabla0SFun`; after that, `h2.eval_smooth_slots` identifies
-  `nabla0SFun cov X (freeze02Field nablaA Y)` with the two displayed
-  `nabla2A` and `nablaA (∇_X Y)` terms. -/
-  sorry
+  let B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2 :=
+    freeze02Field (I := I) nablaA Y
+  have hf :
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun y : M => inner02 (I := I) g y (B y) (A y)) x :=
+    inner02_mdiff (I := I) g B A x
+  have hscale := congrArg (fun L => L (X x))
+    (extDerivFun_const_mul I (2 : Real) hf)
+  have hinner := inner02_nablaFun (I := I) cov g hmc B A X x
+  have hAderiv :
+      nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+          2 cov X A x =
+        tensor02FreezeNabla (I := I) (nablaA x) (X x) := by
+    ext v
+    calc
+      (nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+          2 cov X A x) v =
+          nablaA x (Fin.cons (X x) v) := by
+            exact (TotalNabla0SRealizes.apply (I := I) hA X x v).symm
+      _ = tensor02FreezeNabla (I := I) (nablaA x) (X x) v := by
+            rw [tensor02FreezeNabla_eq_curry]
+            simp [tensor0S_curry_apply_cons_local]
+  have hBderiv :
+      nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+          2 cov X B x =
+        tensor02FreezeNabla2 (I := I) (nabla2A x) (X x) (Y x) +
+          tensor02FreezeNabla (I := I) (nablaA x)
+            ((cov (fun y : M => Y y) x) (X x)) := by
+    ext v
+    have hv : v = vec2 (I := I) (v 0) (v 1) := by
+      funext a
+      fin_cases a <;> rfl
+    obtain ⟨Z, hZ⟩ :=
+      ContMDiffSection.exists_eq_at
+        (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞)) x (v 0)
+    obtain ⟨W, hW⟩ :=
+      ContMDiffSection.exists_eq_at
+        (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞)) x (v 1)
+    let V2 : Fin 2 -> ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M -> Type _) :=
+      fun a => if a = 0 then Z else W
+    let V3 : Fin 3 -> ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M -> Type _) :=
+      Fin.cons Y V2
+    have hV2x : (fun a : Fin 2 => V2 a x) = v := by
+      funext a
+      fin_cases a <;> simp [V2, hZ, hW]
+    have hfree_raw :=
+      Tensor0SBundle.nabla0SFun_eval_smooth_slots
+        (I := I) cov X V2 B x
+    have htot_raw :=
+      TotalNabla0SRealizes.eval_smooth_slots
+        (I := I) h2 X V3 x
+    let D : Real :=
+      extDerivFun (I := I)
+        (fun p : M => nablaA p (fun a : Fin 3 => V3 a p)) x (X x)
+    let CY : Real :=
+      nablaA x
+        (vec3 (I := I) ((cov (fun y : M => Y y) x) (X x)) (v 0) (v 1))
+    let CZ : Real :=
+      nablaA x
+        (vec3 (I := I) (Y x) ((cov (fun y : M => Z y) x) (X x)) (v 1))
+    let CW : Real :=
+      nablaA x
+        (vec3 (I := I) (Y x) (v 0) ((cov (fun y : M => W y) x) (X x)))
+    have hDfree :
+        extDerivFun (I := I)
+            (fun p : M => B p (fun a : Fin 2 => V2 a p)) x (X x) = D := by
+      exact RicciFlower.Coordinates.deriv_congr_nhds
+        (I := I) (X x)
+        (by
+          filter_upwards with p
+          dsimp [B, D, V3, freeze02Field_apply]
+          rw [freeze02Field_apply]
+          rw [tensor02FreezeNabla_eq_curry, tensor0S_curry_apply_cons_local]
+          congr 1
+          funext a
+          cases a using Fin.cases <;> simp [Fin.cons_zero, Fin.cons_succ])
+    have hV3x :
+        (fun a : Fin 3 => V3 a x) = vec3 (I := I) (Y x) (v 0) (v 1) := by
+      have hcons :
+          (fun a : Fin 3 => V3 a x) =
+            Fin.cons (Y x) (fun a : Fin 2 => V2 a x) := by
+        funext a
+        fin_cases a <;> rfl
+      calc
+        (fun a : Fin 3 => V3 a x) =
+            Fin.cons (Y x) (fun a : Fin 2 => V2 a x) := hcons
+        _ = Fin.cons (Y x) v := by rw [hV2x]
+        _ = Fin.cons (Y x) (vec2 (I := I) (v 0) (v 1)) := by
+              funext a
+              fin_cases a <;> rfl
+        _ = vec3 (I := I) (Y x) (v 0) (v 1) :=
+              fin_cons_vec2_eq_vec3 (I := I) (Y x) (v 0) (v 1)
+    have h4 :
+        Fin.cons (X x) (fun a : Fin 3 => V3 a x) =
+          vec4 (I := I) (X x) (Y x) (v 0) (v 1) := by
+      rw [hV3x]
+      exact fin_cons_vec3_eq_vec4 (I := I) (X x) (Y x) (v 0) (v 1)
+    have hfree :
+        (nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+            2 cov X B x) v = D - (CZ + CW) := by
+      rw [← hV2x]
+      have h := hfree_raw
+      rw [hDfree] at h
+      simp [B, freeze02Field_apply,
+        tensor02FreezeNabla_eq_curry, tensor0S_curry_apply_cons_local,
+        Fin.sum_univ_two, V2] at h
+      have hZupd :
+          Function.update
+              (Fin.cons (Y x) (fun a : Fin 2 => (if a = 0 then Z else W) x)) 1
+              ((cov (fun p : M => Z p) x) (X x)) =
+            vec3 (I := I) (Y x) ((cov (fun y : M => Z y) x) (X x)) (v 1) := by
+        funext a
+        fin_cases a
+        · simp [Function.update, RicciFlower.Curvature.vec3]
+        · simp [Function.update, RicciFlower.Curvature.vec3]
+        · simpa [Function.update, RicciFlower.Curvature.vec3] using hW
+      have hWupd :
+          Function.update
+              (Fin.cons (Y x) (fun a : Fin 2 => (if a = 0 then Z else W) x)) 2
+              ((cov (fun p : M => W p) x) (X x)) =
+            vec3 (I := I) (Y x) (v 0) ((cov (fun y : M => W y) x) (X x)) := by
+        funext a
+        fin_cases a
+        · simp [Function.update, RicciFlower.Curvature.vec3]
+        · simpa [Function.update, RicciFlower.Curvature.vec3] using hZ
+        · simp [Function.update, RicciFlower.Curvature.vec3]
+      rw [hZupd, hWupd] at h
+      simpa [CZ, CW] using h
+    have htot :
+        tensor02FreezeNabla2 (I := I) (nabla2A x) (X x) (Y x) v =
+          D - (CY + CZ + CW) := by
+      rw [hv]
+      have h := htot_raw
+      rw [h4] at h
+      rw [hV3x] at h
+      have hYupd :
+          Function.update (vec3 (I := I) (Y x) (v 0) (v 1)) 0
+              ((cov (fun p : M => Y p) x) (X x)) =
+            vec3 (I := I) ((cov (fun y : M => Y y) x) (X x)) (v 0) (v 1) := by
+        funext a
+        fin_cases a <;> simp [Function.update, RicciFlower.Curvature.vec3]
+      have hZupd3 :
+          Function.update (vec3 (I := I) (Y x) (v 0) (v 1)) 1
+              ((cov (fun p : M => Z p) x) (X x)) =
+            vec3 (I := I) (Y x) ((cov (fun y : M => Z y) x) (X x)) (v 1) := by
+        funext a
+        fin_cases a <;> simp [Function.update, RicciFlower.Curvature.vec3]
+      have hWupd3 :
+          Function.update (vec3 (I := I) (Y x) (v 0) (v 1)) 2
+              ((cov (fun p : M => W p) x) (X x)) =
+            vec3 (I := I) (Y x) (v 0) ((cov (fun y : M => W y) x) (X x)) := by
+        funext a
+        fin_cases a <;> simp [Function.update, RicciFlower.Curvature.vec3]
+      simp [Fin.sum_univ_succ, V3, V2] at h
+      rw [hYupd, hZupd3, hWupd3] at h
+      have h' :
+          (nabla2A x) (vec4 (I := I) (X x) (Y x) (v 0) (v 1)) =
+            D - (CY + (CZ + CW)) := by
+        simpa [D, CY, CZ, CW, V2, V3, hZ, hW,
+          RicciFlower.Curvature.vec2, RicciFlower.Curvature.vec3,
+          RicciFlower.Curvature.vec4, Fin.sum_univ_succ, Fin.sum_univ_two,
+          Function.update, Fin.cons_zero, Fin.cons_succ]
+          using h
+      calc
+        tensor02FreezeNabla2 (I := I) (nabla2A x) (X x) (Y x)
+            (vec2 (I := I) (v 0) (v 1)) =
+          (nabla2A x) (vec4 (I := I) (X x) (Y x) (v 0) (v 1)) := by
+            rw [tensor02FreezeNabla2_apply]
+        _ = D - (CY + (CZ + CW)) := h'
+        _ = D - (CY + CZ + CW) := by ring
+    have hCY :
+        tensor02FreezeNabla (I := I) (nablaA x)
+            ((cov (fun y : M => Y y) x) (X x)) v = CY := by
+      rw [hv]
+      rw [tensor02FreezeNabla_eq_curry, tensor0S_curry_apply_cons_local]
+      change
+        nablaA x
+            (Fin.cons ((cov (fun y : M => Y y) x) (X x))
+              (vec2 (I := I) (v 0) (v 1))) = CY
+      rw [fin_cons_vec2_eq_vec3]
+    calc
+      (nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+          2 cov X B x) v = D - (CZ + CW) := hfree
+      _ =
+          tensor02FreezeNabla2 (I := I) (nabla2A x) (X x) (Y x) v +
+          tensor02FreezeNabla (I := I) (nablaA x)
+              ((cov (fun y : M => Y y) x) (X x)) v := by
+          rw [htot, hCY]
+          ring
+  calc
+    extDerivFun (I := I)
+        (fun y : M =>
+          2 * inner02 (I := I) g y
+            (tensor02FreezeNabla (I := I) (nablaA y) (Y y)) (A y))
+        x (X x)
+        =
+      2 * extDerivFun (I := I)
+        (fun y : M => inner02 (I := I) g y (B y) (A y)) x (X x) := by
+        simpa [B, Pi.smul_apply, smul_eq_mul] using hscale
+    _ =
+      2 *
+        (inner02 (I := I) g x
+            (nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+              2 cov X B x) (A x) +
+          inner02 (I := I) g x (B x)
+            (nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+              2 cov X A x)) := by
+        rw [hinner]
+    _ =
+      2 *
+        (inner02 (I := I) g x
+            (tensor02FreezeNabla2 (I := I) (nabla2A x) (X x) (Y x))
+            (A x) +
+          inner02 (I := I) g x
+            (tensor02FreezeNabla (I := I) (nablaA x)
+              ((cov (fun y : M => Y y) x) (X x))) (A x) +
+          inner02 (I := I) g x
+            (tensor02FreezeNabla (I := I) (nablaA x) (Y x))
+            (tensor02FreezeNabla (I := I) (nablaA x) (X x))) := by
+        rw [hAderiv, hBderiv]
+        simp [B, inner02, Tensor0SBundle.inner0S, map_add]
 
 /-- Pointwise Hessian product rule for the norm square of a `(0,2)` tensor,
 evaluated on a basis. -/

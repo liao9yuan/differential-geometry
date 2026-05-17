@@ -5,6 +5,7 @@ Authors: RicciFlower contributors
 -/
 
 import RicciFlower.Analysis.Green
+import RicciFlower.LeviCivita.Variation
 import RicciFlower.RicciFlow.Perelman.Variation
 
 set_option autoImplicit false

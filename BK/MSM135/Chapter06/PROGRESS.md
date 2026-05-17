@@ -127,6 +127,7 @@ RicciFlower.RicciFlow.Perelman.expNegPotentialDensity_hasDerivAt
 RicciFlower.RicciFlow.Perelman.expWeightedMeasureIntegral_hasDerivAt_at
 RicciFlower.RicciFlow.Perelman.FFunctionalHasFirstVariationAt_of_volumeVariation
 RicciFlower.RicciFlow.Perelman.weightedIBP
+RicciFlower.LeviCivita.lcGammaVar
 RicciFlower.RicciFlow.Perelman.MetricVariationChristoffelInFrame
 RicciFlower.RicciFlow.Perelman.MetricVariationChristoffelTraceInFrame
 RicciFlower.RicciFlow.Perelman.RicciVariationByChristoffelInFrame
@@ -136,8 +137,8 @@ RicciFlower.RicciFlow.Perelman.FFunctionalFormula510
 ```
 
 The remaining formula 5.10 geometry frontier is not Ricci-flow specialized:
-derive arbitrary metric-variation Christoffel, Ricci variation, Hessian
-variation, and closed-manifold divergence cancellation.  The weighted
+Ricci variation, Hessian variation, contraction, and closed-manifold
+divergence cancellation still need producers.  The weighted
 integration-by-parts interface now exists as
 `BK.MSM135.Chapter06.Section01.lbl552_weighted_ibp`, aliasing
 `RicciFlower.RicciFlow.Perelman.weightedIBP`.
@@ -149,8 +150,26 @@ integral_M (Delta_g f - |grad_g f|^2) d(e^{-f} mu_g) = 0.
 ```
 
 It is not yet a completely closed smooth-compact corollary: it keeps the
-weighted-density measurability and two base integrability hypotheses explicit,
-and it depends on the named analysis-layer frontier `gradFun_exp_neg`.
+weighted-density measurability and two base integrability hypotheses explicit.
+The previous analysis-layer frontier `gradFun_exp_neg` has been proved.
+
+The first formula 5.10 geometry producer is now proved as the arbitrary
+Levi-Civita metric-variation Christoffel formula:
+
+```text
+delta Gamma^k_ij =
+  1/2 g^{kl} (nabla_i v_jl + nabla_j v_il - nabla_l v_ij).
+```
+
+Current Lean handle:
+
+```text
+RicciFlower.LeviCivita.lcGammaVar
+```
+
+It assumes raw metric component derivatives, fixed-base covariant metric
+derivatives, Christoffel component derivatives, and inverse metric components
+at the base time.
 
 The monotonicity display is represented abstractly as:
 

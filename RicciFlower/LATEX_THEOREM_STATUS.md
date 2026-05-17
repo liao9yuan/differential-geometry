@@ -47,10 +47,10 @@ the full statements, theorem names, and file locations.
 
 | Target | Distance | Smallest next step |
 | --- | ---: | --- |
-| Hamilton Section 6 remainder | `2` | Next local target is Lemma 6.7 / trace-free Ricci norm evolution; arbitrary-frame packaging of Lemma 6.3 is optional polish. |
+| Hamilton Section 6 remainder | `1` | Next local target is the trace-free Ricci norm evolution; arbitrary-frame packaging of Lemma 6.3 is optional polish. |
 | Lemma 10.5 quotient evolution | `2` | Port the pure scalar quotient algebra to `RicciFlower` if it is still needed by the pinching route. |
 | Assumption 3.1 calculus package | `3` | Continue native Bianchi, contracted Bianchi, tensor commutator, and trace/norm infrastructure. |
-| Lemma 6.7 | `3` | Prove the pointwise `(0,2)` tensor norm Hessian product rule `Tensor02NormHessianProductInBasis` from metric compatibility; the trace bridge to `Tensor02NormSecondProductInBasis` is now checked. |
+| Lemma 6.7 | `0` | Closed canonically through the `(0,2)` tensor Bochner product rule and `ricci_heat_mc`. |
 | Corollary 11.4 and Lemma 11.15 | `3` | Finish the native 3D curvature/norm comparison and Einstein-space-form bridge. |
 
 ### Section 14 Snapshot
@@ -384,37 +384,18 @@ Along Ricci flow,
 -2 |nabla Ric|^2 + 4 R_ikjl Ric^{ij} Ric^{kl}.
 ```
 
-Status: the time-derivative side is closed canonically in
+Status: closed canonically.  The time-derivative side is closed in
 `RicciFlow.ricciNormTimeDerivativeComponentsOn_of_ricciEvolution_canonical`.
-The Laplacian side now has the exact coordinate expansion frontier
-`Realized.RicciNormScalarLaplacianExpansionInFrame` and the producer
-`Realized.ricciNormLaplacianComponentsInFrame_of_normSq_laplacian_expansion`.
-The realized Bochner layer also has
-`Realized.ricciNormScalarLaplacianExpansionInFrame_of_tensor02_product_rule`,
-which reduces that exact expansion to the named `(0,2)` tensor norm product
-rule `Realized.Tensor02NormSecondProductInBasis`.
-The trace bridge
-`Realized.Tensor02NormSecondProductInBasis.of_hessian_product` is checked: it
-traces the pointwise `(0,2)` Hessian product rule and uses
-`RoughLap0SRealizesMetricTraceInBasis` to replace the traced second derivative
-by the supplied rough tensor.
-The folder-level consumer
-`RicciFlow.ricciNormHeatEquationOn_of_solution_canonical_laplacian` assembles
-Lemma 6.7 from the closed time side and that exact Bochner expansion.
+The Laplacian side is supplied by the proved `(0,2)` tensor Bochner chain in
+`Bochner.lean`: `freeze02_deriv`, `hess_norm02`, `second_norm02_mc`, and
+`ricci_lap_mc`.  The folder-level consumer `RicciFlow.ricci_heat_mc` assembles
+Lemma 6.7 without asking callers for a separate
+`RicciNormScalarLaplacianExpansionInFrame` hypothesis.
 
-Distance: `3`.
+Distance: `0`.
 
-Next target: prove `Tensor02NormHessianProductInBasis` from metric
-compatibility.  The missing local API is the `(0,2)` tensor inner-product
-derivative rule
-`X <A,B> = <nabla_X A,B> + <A,nabla_X B>`, followed by one more derivative and
-the Hessian correction.  The exact helper is now stated in
-`Bochner.lean` as `Realized.tensor02_inner_extDerivFun_eq_inner_nabla`; its
-proof is the remaining frontier.  This is a real tensor Bochner producer/API
-theorem, not finite-sum algebra or Ricci-evolution work.  After it closes, feed
-it through the existing trace bridge, mark Lemma 6.7 distance `0`, and then
-repeat the pattern for the trace-free Ricci norm evolution needed by Hamilton's
-pinching argument.
+Next target: repeat the trace/norm pattern for the trace-free Ricci norm
+evolution needed by Hamilton's pinching argument.
 
 ### Theorem 7.1, `thm:scalar-wmp-super`
 
@@ -1230,8 +1211,9 @@ Hamilton Section 6 norm/pinching evolution pipeline.
 2. Optionally add a stronger public mixed `(r,s)` coordinate Ricci identity
    wrapper from the existing Remark 14.13 component algebra.  Keep the proof at
    the coordinate/local-frame layer; do not reopen lower-level tensor algebra.
-3. Work on Lemma 6.7 and the trace-free Ricci norm evolution by connecting the
-   closed Ricci and inverse-metric evolution producers to the finite-sum
-   Bochner/Ricci-norm algebra.
+3. Continue from the now-closed Lemma 6.7 toward the trace-free Ricci norm
+   evolution and Hamilton pinching pipeline.  The remaining work should reuse
+   the proved Ricci-norm time derivative and `(0,2)` tensor Bochner product
+   rule rather than reopening the Ricci norm calculation.
 4. Treat 14.27, 14.29, and 14.30 as maximal-time or singular-time
    infrastructure, not appendix tensor-calculus cleanup.

@@ -136,7 +136,7 @@ theorem ricciTensorRealizesRm04FirstTraceInFrameOnRegular_of_rm13Trace
     (hLower : forall (t : Realized.RealTimeInterval.RegularTime D) (x : M),
       Realized.Rm04LowersRm13At (I := I) (S.family.metric (t : Real)) x
         (Rm13 (t : Real) x) (Rm04 (t : Real) x))
-    (hInv : SymmetricInverseMetricComponentsInFrameOn gInv) :
+    :
     RicciTensorRealizesRm04FirstTraceInFrameOnRegular
       (I := I) S Rm04 gInv frame := by
   intro t x i j
@@ -153,7 +153,10 @@ theorem ricciTensorRealizesRm04FirstTraceInFrameOnRegular_of_rm13Trace
       (I := I) (S.family.metric (t : Real)) (hframe.toBasisAt hx)
       (fun a b : Idx => gInv (t : Real) x a b) hinvAt
       (S.ricci (t : Real)) (Rm13 (t : Real)) (Rm04 (t : Real))
-      (hRicTrace13 t) (hLower t x) (hInv (t : Real) x)
+      (hRicTrace13 t) (hLower t x)
+      (Tensor0SBundle.invMetric_symm
+        (I := I) (M := M) (S.family.metric (t : Real)) x
+        (hframe.toBasisAt hx) (fun a b : Idx => gInv (t : Real) x a b) hinvAt)
   simpa [Realized.RicciTensorRealizesRm04FirstTraceInFrame,
     IsLocalFrameOn.toBasisAt_coe] using hAt i j
 
@@ -1511,7 +1514,7 @@ theorem christoffelVariationCovDerivCoordAt_eq_nablaGammaDtFromNabla2RicInFrame
     intro k l
     exact inverseMetricCovDerivCompInFrame_eq_zero
       (I := I) S gInv (S.family.connection (t : Real)) frame hframe
-      hmetricReg.nondegenerateGram hmetricReg.inverseSymmetric (t : Real)
+      hmetricReg.nondegenerateGram (t : Real)
       hmc hu hx₀ hginv_mdiff hmetric_mdiff d k l
   have hcalc :
       christoffelVariationCovDerivCoordAt (I := I)
@@ -2126,7 +2129,7 @@ theorem differentiatedContractedBianchiInFrameOnLocal_of_regular
     intro k l
     exact inverseMetricCovDerivCompInFrame_eq_zero
       (I := I) S gInv (S.family.connection (t : Real)) frame hframe
-      hmetricReg.nondegenerateGram hmetricReg.inverseSymmetric (t : Real)
+      hmetricReg.nondegenerateGram (t : Real)
       hmc hu hx hginv_mdiff hmetric_mdiff i k l
   have hnabla2_at := hnablaReg.second (t : Real) x hx
   have hscalar_mdiff :
@@ -2436,7 +2439,6 @@ private theorem contractedCurvatureAction_left_eq
     (hRic : forall t x i j,
       ricciCompInFrame (I := I) S frame t x i j =
         ricciCompInFrame (I := I) S frame t x j i)
-    (hInv : SymmetricInverseMetricComponentsInFrameOn gInv)
     (hgInvAt : forall a b : Idx, gInvAt a b = gInv t x a b)
     (hbasis : forall a : Idx, basis a = frame a x) :
     (∑ k : Idx, ∑ l : Idx,
@@ -2454,9 +2456,7 @@ private theorem contractedCurvatureAction_left_eq
     intro a b
     simpa [hbasis] using hRic t x a b
   have hInvAt : forall a b : Idx, gInvAt a b = gInvAt b a := by
-    intro a b
-    rw [hgInvAt a b, hgInvAt b a]
-    exact hInv t x a b
+    exact Tensor0SBundle.invMetric_symm (I := I) (M := M) g x basis gInvAt hinvAt
   have hmain :=
     Realized.contracted_curvatureAction0SAt_vec2_eq
       (I := I) g basis gInvAt hinvAt (Rm13 t) (Rm04 t x) (S.ricci t x)
@@ -2494,7 +2494,6 @@ private theorem contractedCurvatureAction_right_eq
     (hRic : forall t x i j,
       ricciCompInFrame (I := I) S frame t x i j =
         ricciCompInFrame (I := I) S frame t x j i)
-    (hInv : SymmetricInverseMetricComponentsInFrameOn gInv)
     (hgInvAt : forall a b : Idx, gInvAt a b = gInv t x a b)
     (hbasis : forall a : Idx, basis a = frame a x) :
     (∑ k : Idx, ∑ l : Idx,
@@ -2512,9 +2511,7 @@ private theorem contractedCurvatureAction_right_eq
     intro a b
     simpa [hbasis] using hRic t x a b
   have hInvAt : forall a b : Idx, gInvAt a b = gInvAt b a := by
-    intro a b
-    rw [hgInvAt a b, hgInvAt b a]
-    exact hInv t x a b
+    exact Tensor0SBundle.invMetric_symm (I := I) (M := M) g x basis gInvAt hinvAt
   have hmain :=
     Realized.contracted_curvatureAction0SAt_vec2_eq
       (I := I) g basis gInvAt hinvAt (Rm13 t) (Rm04 t x) (S.ricci t x)
@@ -2587,7 +2584,7 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
     (hRic : forall t x i j,
       ricciCompInFrame (I := I) S frame t x i j =
         ricciCompInFrame (I := I) S frame t x j i)
-    (hInv : SymmetricInverseMetricComponentsInFrameOn gInv) :
+    :
     RicciSecondDerivativeCommutatorsInFrame
       (I := I) S Rm04 gInv frame nabla2Ric := by
   classical
@@ -2603,7 +2600,7 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
       RicciTensorRealizesRm04FirstTraceInFrameOnRegular
         (I := I) S Rm04 gInv frame :=
     ricciTensorRealizesRm04FirstTraceInFrameOnRegular_of_rm13Trace
-      (I := I) S Rm13 Rm04 gInv frame hframe hinv hRicTrace13 hLower hInv
+      (I := I) S Rm13 Rm04 gInv frame hframe hinv hRicTrace13 hLower
   have hTraceFrame := hTraceReg t
   have hTraceAt :
       Realized.RicciRealizesRm04FirstTraceAt (I := I)
@@ -2762,7 +2759,7 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
       (hframe.toBasisAt (by simp : x ∈ (Set.univ : Set M)))
       (fun a b : Idx => gInv (t : Real) x a b) hinvAt
       (t : Real) i j
-      (hLower t x) hTraceAt (hPair t x) (hOutput t x) (hFirst t x) hRic hInv
+      (hLower t x) hTraceAt (hPair t x) (hOutput t x) (hFirst t x) hRic
       hgInvAt hbasis
   have hrightAction :=
     contractedCurvatureAction_right_eq
@@ -2770,7 +2767,7 @@ theorem ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
       (hframe.toBasisAt (by simp : x ∈ (Set.univ : Set M)))
       (fun a b : Idx => gInv (t : Real) x a b) hinvAt
       (t : Real) i j
-      (hLower t x) hTraceAt (hPair t x) (hOutput t x) (hFirst t x) hRic hInv
+      (hLower t x) hTraceAt (hPair t x) (hOutput t x) (hFirst t x) hRic
       hgInvAt hbasis
   constructor
   · calc
@@ -2920,7 +2917,7 @@ theorem RicciContractedCommutatorsInFrame_of_differentiatedBianchi_and_tensor0S_
     (hRic : forall t x i j,
       ricciCompInFrame (I := I) S frame t x i j =
         ricciCompInFrame (I := I) S frame t x j i)
-    (hInv : SymmetricInverseMetricComponentsInFrameOn gInv) :
+    :
     RicciContractedCommutatorsInFrame
       (I := I) S Rm04 gInv frame nabla2Ric :=
   RicciContractedCommutatorsInFrame_of_differentiatedBianchi_and_commutators
@@ -2930,7 +2927,7 @@ theorem RicciContractedCommutatorsInFrame_of_differentiatedBianchi_and_tensor0S_
       (ricciSecondDerivativeCommutatorsInFrame_of_tensor0S_ricciIdentity
         (I := I) S Rm13 Rm04 gInv frame hframe hinv
         nabla2RicTensor nabla2Ric
-        hNabla2 hRicciId hRicTrace13 hLower hPair hOutput hFirst hRic hInv))
+        hNabla2 hRicciId hRicTrace13 hLower hPair hOutput hFirst hRic))
 
 private theorem ricciVariationExpandedRHSInFrame_eq_decomposed
     (gInv : Real -> Realized.InverseMetricComponents M Idx)
@@ -3031,7 +3028,6 @@ theorem ricciVariationExpandedRHS_eq_evolutionRHS_of_commutators
     (gInv : Real -> Realized.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
-    (_hInv : SymmetricInverseMetricComponentsInFrameOn gInv)
     (hcomm : RicciContractedCommutatorsInFrame
       (I := I) S Rm04 gInv frame nabla2Ric) :
     RicciVariationExpandedRHS_eq_evolutionRHS
@@ -3140,7 +3136,6 @@ theorem ricciEvolution_of_variation_commutators
     (gInv : Real -> Realized.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
-    (hInv : SymmetricInverseMetricComponentsInFrameOn gInv)
     (h_var : RicciVariationFormulaInFrameOn (I := I) S frame
       (nablaGammaDtFromNabla2RicInFrame (M := M) gInv nabla2Ric))
     (hcomm : RicciContractedCommutatorsInFrame
@@ -3150,7 +3145,7 @@ theorem ricciEvolution_of_variation_commutators
   ricciEvolutionEquationInFrame_of_variation_expanded
     (I := I) S Rm04 gInv frame nabla2Ric h_var
     (ricciVariationExpandedRHS_eq_evolutionRHS_of_commutators
-      (I := I) S Rm04 gInv frame nabla2Ric hInv hcomm)
+      (I := I) S Rm04 gInv frame nabla2Ric hcomm)
 
 /-- Local Lemma 6.3 producer from the local Ricci variation formula and the
 contracted commutator identities in the textbook proof. -/
@@ -3162,7 +3157,6 @@ theorem ricciEvolutionEquationInFrameOnLocal_of_variation_commutators
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (u : Set M)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
-    (hInv : SymmetricInverseMetricComponentsInFrameOn gInv)
     (h_var : RicciVariationFormulaInFrameOnLocal (I := I) S frame u
       (nablaGammaDtFromNabla2RicInFrame (M := M) gInv nabla2Ric))
     (hcomm : RicciContractedCommutatorsInFrame
@@ -3173,7 +3167,7 @@ theorem ricciEvolutionEquationInFrameOnLocal_of_variation_commutators
   ricciEvolutionEquationInFrameOnLocal_of_variation_expanded
     (I := I) S Rm04 gInv frame u nabla2Ric h_var
     (ricciVariationExpandedRHS_eq_evolutionRHS_of_commutators
-      (I := I) S Rm04 gInv frame nabla2Ric hInv hcomm)
+      (I := I) S Rm04 gInv frame nabla2Ric hcomm)
 
 section CoordinateFrameRicciEvolution
 
@@ -3224,7 +3218,6 @@ theorem ricciEvolutionEquationInCoordFrameAt_of_christoffelEvolution_nabla2_comm
         (coordinateFrameAt (I := I) x₀)
         (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
         (christoffelEvolutionRHSInFrame (M := M) gInv nablaRic))
-    (hInv : SymmetricInverseMetricComponentsInFrameOn gInv)
     (hcomm : RicciContractedCommutatorsInFrame
       (I := I) S Rm04 gInv (coordinateFrameAt (I := I) x₀) nabla2Ric) :
     RicciEvolutionEquationInFrameOnLocal (I := I) S Rm04 gInv
@@ -3232,7 +3225,7 @@ theorem ricciEvolutionEquationInCoordFrameAt_of_christoffelEvolution_nabla2_comm
       (roughLapRicInFrame (M := M) gInv nabla2Ric) :=
   ricciEvolutionEquationInFrameOnLocal_of_variation_commutators
     (I := I) S Rm04 gInv (coordinateFrameAt (I := I) x₀) ({x₀} : Set M)
-    nabla2Ric hInv
+    nabla2Ric
     (ricciVariationFormulaInCoordFrameAt_of_christoffelEvolution_nabla2
       (I := I) S hS gInv gInvDt nablaRic nabla2Ric Rm13 x₀ hmetricReg
       hnablaReg hRicTrace hRm hcurv hmix)
@@ -3278,7 +3271,6 @@ theorem evol_ricci_coordFrameAt_of_christoffelEvolution_nabla2_commutators
         (coordinateFrameAt (I := I) x₀)
         (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
         (christoffelEvolutionRHSInFrame (M := M) gInv nablaRic))
-    (hInv : SymmetricInverseMetricComponentsInFrameOn gInv)
     (hcomm : RicciContractedCommutatorsInFrame
       (I := I) S Rm04 gInv (coordinateFrameAt (I := I) x₀) nabla2Ric)
     (t : Realized.RealTimeInterval.RegularTime D)
@@ -3296,7 +3288,7 @@ theorem evol_ricci_coordFrameAt_of_christoffelEvolution_nabla2_commutators
   have h :=
     ricciEvolutionEquationInCoordFrameAt_of_christoffelEvolution_nabla2_commutators
       (I := I) S hS Rm13 Rm04 gInv gInvDt nablaRic nabla2Ric x₀ hmetricReg
-      hnablaReg hRicTrace hRm hcurv hmix hInv hcomm
+      hnablaReg hRicTrace hRm hcurv hmix hcomm
   have hAt := h t x₀ (by simp) i j
   simpa [ricciEvolutionRHSInFrame] using hAt
 
@@ -3311,7 +3303,6 @@ theorem evol_ricci_inFrame_of_variation_commutators
     (gInv : Real -> Realized.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (nabla2Ric : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
-    (hInv : SymmetricInverseMetricComponentsInFrameOn gInv)
     (h_var : RicciVariationFormulaInFrameOn (I := I) S frame
       (nablaGammaDtFromNabla2RicInFrame (M := M) gInv nabla2Ric))
     (hcomm : RicciContractedCommutatorsInFrame
@@ -3331,7 +3322,7 @@ theorem evol_ricci_inFrame_of_variation_commutators
       (I := I)
       (h :=
         ricciEvolution_of_variation_commutators
-          (I := I) S Rm04 gInv frame nabla2Ric hInv h_var hcomm)
+          (I := I) S Rm04 gInv frame nabla2Ric h_var hcomm)
       t x i j
   simpa [ricciEvolutionRHSInFrame] using h
 
@@ -3516,8 +3507,8 @@ def RicciLichnerowiczEquationInFrame
 
 /-- The finite component specialization of the Lichnerowicz RHS to `h = Ric`.
 For a realized Levi-Civita Ricci tensor this follows from Ricci symmetry and
-inverse-metric symmetry; it is kept explicit here as the small algebra frontier
-for Corollary 6.5. -/
+the frame inverse-metric identities, whose symmetry consequence is now proved
+in the metric layer. -/
 def RicciLichnerowiczSpecializesInFrame
     {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -3556,19 +3547,21 @@ theorem ricciLeftActionCompInFrame_eq_quadratic
   rfl
 
 /-- The right Ricci action on `Ric` is the same quadratic term, using Ricci
-symmetry and inverse-metric symmetry. -/
+symmetry and the frame inverse-metric identities. -/
 theorem ricciRightActionCompInFrame_eq_quadratic_of_symm
     {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (gInv : Real -> Realized.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hRic : RicciSymmetricInFrameOn (I := I) S frame)
-    (hInv : SymmetricInverseMetricComponentsInFrameOn gInv)
+    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
     (t : Real) (x : M) (i j : Idx) :
     ricciRightActionCompInFrame (I := I) S gInv frame
         (ricciCompInFrame (I := I) S frame) t x i j =
       ricciQuadraticCompInFrame (I := I) S gInv frame t x i j := by
   unfold ricciRightActionCompInFrame ricciQuadraticCompInFrame ricciOneUpCompInFrame
+  have hInv : SymmetricInverseMetricComponentsInFrameOn gInv :=
+    gInv_symm (I := I) S gInv frame hinv
   calc
     (∑ k : Idx,
         (∑ a : Idx,
@@ -3635,7 +3628,7 @@ theorem ricciLichnerowiczSpecializesInFrame_of_actions
   ring
 
 /-- Lichnerowicz specialization for `h = Ric`, produced from Ricci symmetry
-and inverse-metric symmetry. -/
+and the frame inverse-metric identities. -/
 theorem ricciLichnerowiczSpecializesInFrame_of_symm
     {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -3644,7 +3637,7 @@ theorem ricciLichnerowiczSpecializesInFrame_of_symm
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
     (hRic : RicciSymmetricInFrameOn (I := I) S frame)
-    (hInv : SymmetricInverseMetricComponentsInFrameOn gInv) :
+    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame) :
     RicciLichnerowiczSpecializesInFrame
       (I := I) S Rm04 gInv frame roughLapRic :=
   ricciLichnerowiczSpecializesInFrame_of_actions
@@ -3654,7 +3647,7 @@ theorem ricciLichnerowiczSpecializesInFrame_of_symm
         (I := I) S gInv frame (t : Real) x i j)
     (fun t x i j =>
       ricciRightActionCompInFrame_eq_quadratic_of_symm
-        (I := I) S gInv frame hRic hInv (t : Real) x i j)
+        (I := I) S gInv frame hRic hinv (t : Real) x i j)
 
 /-- Corollary 6.5: Lemma 6.3 implies the Ricci tensor evolves by the
 Lichnerowicz heat equation. -/
@@ -3674,8 +3667,8 @@ theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution
   intro t x i j
   exact (h_ricci t x i j).congr_deriv (h_spec t x i j).symm
 
-/-- Corollary 6.5 with the standard symmetry inputs: Lemma 6.3 plus Ricci
-symmetry and inverse-metric symmetry imply the Ricci-specialized
+/-- Corollary 6.5 with the standard inputs: Lemma 6.3 plus Ricci symmetry and
+the frame inverse-metric identities imply the Ricci-specialized
 Lichnerowicz heat equation. -/
 theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution_and_symm
     {D : Realized.RealTimeInterval}
@@ -3687,13 +3680,13 @@ theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution_and_symm
     (h_ricci : RicciEvolutionEquationInFrame
       (I := I) S Rm04 gInv frame roughLapRic)
     (hRic : RicciSymmetricInFrameOn (I := I) S frame)
-    (hInv : SymmetricInverseMetricComponentsInFrameOn gInv) :
+    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame) :
     RicciLichnerowiczEquationInFrame
       (I := I) S Rm04 gInv frame roughLapRic :=
   ricciLichnerowiczEquationInFrame_of_ricciEvolution
     (I := I) S Rm04 gInv frame roughLapRic h_ricci
     (ricciLichnerowiczSpecializesInFrame_of_symm
-      (I := I) S Rm04 gInv frame roughLapRic hRic hInv)
+      (I := I) S Rm04 gInv frame roughLapRic hRic hinv)
 
 /-- Corollary 6.5 in the coordinate-frame display form used by the native
 Lemma 6.3 producer.  This is only an exposure wrapper: the Ricci evolution
@@ -3738,7 +3731,6 @@ theorem evol_ricci_lichnerowicz_coordFrameAt_of_christoffelEvolution_nabla2_comm
         (coordinateFrameAt (I := I) x₀)
         (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
         (christoffelEvolutionRHSInFrame (M := M) gInv nablaRic))
-    (hInv : SymmetricInverseMetricComponentsInFrameOn gInv)
     (hcomm : RicciContractedCommutatorsInFrame
       (I := I) S Rm04 gInv (coordinateFrameAt (I := I) x₀) nabla2Ric)
     (hRic : RicciSymmetricInFrameOn (I := I) S (coordinateFrameAt (I := I) x₀))
@@ -3757,14 +3749,14 @@ theorem evol_ricci_lichnerowicz_coordFrameAt_of_christoffelEvolution_nabla2_comm
   have hRicci :=
     evol_ricci_coordFrameAt_of_christoffelEvolution_nabla2_commutators
       (I := I) S hS Rm13 Rm04 gInv gInvDt nablaRic nabla2Ric x₀ hmetricReg
-      hnablaReg hRicTrace hRm hcurv hmix hInv hcomm t i j
+      hnablaReg hRicTrace hRm hcurv hmix hcomm t i j
   have hSpec :
       RicciLichnerowiczSpecializesInFrame
         (I := I) S Rm04 gInv (coordinateFrameAt (I := I) x₀)
         (roughLapRicInFrame (M := M) gInv nabla2Ric) :=
     ricciLichnerowiczSpecializesInFrame_of_symm
       (I := I) S Rm04 gInv (coordinateFrameAt (I := I) x₀)
-      (roughLapRicInFrame (M := M) gInv nabla2Ric) hRic hInv
+      (roughLapRicInFrame (M := M) gInv nabla2Ric) hRic hmetricReg.nondegenerateGram
   exact hRicci.congr_deriv (hSpec t x₀ i j).symm
 
 end Components

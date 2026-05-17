@@ -100,3 +100,12 @@ Christoffel-coordinate variation producer in `RicciFlow/Evolution/Ricci.lean`.
 
 Verification passed.  Existing later scaffold declarations in this companion
 file still contain their planned `sorry`s; they are unrelated to Lemma 6.3.
+
+## 2026-05-16 inverse symmetry assumptions removed
+
+The Chapter 6.1 Ricci evolution wrappers no longer expose a separate
+`SymmetricInverseMetricComponentsInFrameOn` assumption. The RicciFlower metric
+layer now proves inverse-metric symmetry from the supplied two-sided inverse
+identities, so BK stays label-facing.
+
+Verification passed. The existing Section 6.1 scaffold `sorry`s are unchanged.

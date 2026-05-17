@@ -1,10 +1,12 @@
 import RicciFlower.Realized.Curvature
+import RicciFlower.Realized.TensorOperators
 import RicciFlower.Metric.Basic
 import Mathlib.Analysis.Calculus.Deriv.Basic
 
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedVariables false
+set_option linter.unusedSectionVars false
 
 /-!
 # Hamilton Weak Maximum Principle For Symmetric Two-Tensors
@@ -20,10 +22,12 @@ namespace Realized
 
 noncomputable section
 
-open Set
+open Bundle Tensor0SBundle Set
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+variable [Module.Finite Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -39,6 +43,16 @@ abbrev TimeDependentVectorField : Type _ :=
 /-- A time-dependent quadratic-form evaluation on tangent vectors. -/
 abbrev TensorQuadraticFormFamily : Type _ :=
   Real -> (x : M) -> TangentSpace I x -> Real
+
+/-- Supplied first covariant derivative tensors for a time-dependent two-tensor. -/
+abbrev TensorNabla1Family : Type _ :=
+  Real -> (x : M) ->
+    Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x
+
+/-- Supplied second covariant derivative tensors for a time-dependent two-tensor. -/
+abbrev TensorNabla2Family : Type _ :=
+  Real -> (x : M) ->
+    Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 4 x
 
 /-- A fiberwise algebraic reaction term for the tensor maximum principle. -/
 abbrev TwoTensorReaction : Type _ :=
@@ -161,29 +175,30 @@ structure TensorBarrierRegularityOn
 Analytic predicate for the evaluated drifted parabolic supersolution
 inequality.
 
-`parabolicValue` is the quadratic-form value of
-`(partial_t - Delta - X · nabla) S`, and `heatWithDriftValue` is the supplied
-quadratic-form value of `(Delta + X · nabla) S`.  A future tensor heat-operator
-API should produce the heat-with-drift value; this predicate already records
-the time-derivative realization and the reaction lower bound.
+The heat-with-drift term is evaluated by the direct tensor operator
+`tensorHeatWithDrift2QuadMetricAt` from supplied first and second covariant
+derivative tensors.
 -/
 def TensorParabolicInequalityWithDriftOn
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
     (X : TimeDependentVectorField (I := I) (M := M))
     (N : TwoTensorReaction (I := I) (M := M))
+    (nabla2S : TensorNabla2Family (I := I) (M := M))
+    (nablaS : TensorNabla1Family (I := I) (M := M))
     (T : Real) : Prop :=
-  ∃ parabolicValue heatWithDriftValue :
-      TensorQuadraticFormFamily (I := I) (M := M),
+  ∃ timeDeriv : TensorQuadraticFormFamily (I := I) (M := M),
     (∀ t, t ∈ Set.Icc 0 T ->
       ∀ x, ∀ v : TangentSpace I x,
         HasDerivWithinAt
           (fun s : Real => S s x v v)
-          (parabolicValue t x v + heatWithDriftValue t x v)
+          (timeDeriv t x v)
           (Set.Icc 0 T) t) ∧
     (∀ t, t ∈ Set.Icc 0 T ->
       ∀ x, ∀ v : TangentSpace I x,
-        N t (G t) (S t) x v v ≤ parabolicValue t x v)
+        tensorHeatWithDrift2QuadMetricAt (I := I) (G t) (X t)
+            (nabla2S t x) (nablaS t x) v +
+          N t (G t) (S t) x v v ≤ timeDeriv t x v)
 
 /-- Strict evaluated drifted parabolic inequality for the positive barrier on a time set. -/
 def TensorParabolicStrictInequalityWithDriftOn
@@ -191,19 +206,22 @@ def TensorParabolicStrictInequalityWithDriftOn
     (S : TwoTensorFamily (I := I) (M := M))
     (X : TimeDependentVectorField (I := I) (M := M))
     (N : TwoTensorReaction (I := I) (M := M))
+    (nabla2S : TensorNabla2Family (I := I) (M := M))
+    (nablaS : TensorNabla1Family (I := I) (M := M))
     (U : Set Real) : Prop :=
-  ∃ parabolicValue heatWithDriftValue :
-      TensorQuadraticFormFamily (I := I) (M := M),
+  ∃ timeDeriv : TensorQuadraticFormFamily (I := I) (M := M),
     (∀ t, t ∈ U ->
       ∀ x, ∀ v : TangentSpace I x,
         HasDerivWithinAt
           (fun s : Real => S s x v v)
-          (parabolicValue t x v + heatWithDriftValue t x v)
+          (timeDeriv t x v)
           U t) ∧
     (∀ t, t ∈ U ->
       ∀ x, ∀ v : TangentSpace I x,
         v ≠ 0 ->
-        N t (G t) (S t) x v v < parabolicValue t x v)
+        tensorHeatWithDrift2QuadMetricAt (I := I) (G t) (X t)
+            (nabla2S t x) (nablaS t x) v +
+          N t (G t) (S t) x v v < timeDeriv t x v)
 
 /--
 Data at the first point where the positive barrier develops a null vector.
@@ -260,9 +278,12 @@ def TensorBarrierStrictSupersolutionOn
     (S : TwoTensorFamily (I := I) (M := M))
     (X : TimeDependentVectorField (I := I) (M := M))
     (N : TwoTensorReaction (I := I) (M := M))
+    (nabla2Barrier : TensorNabla2Family (I := I) (M := M))
+    (nablaBarrier : TensorNabla1Family (I := I) (M := M))
     (epsilon delta t0 : Real) : Prop :=
   TensorParabolicStrictInequalityWithDriftOn (I := I) (M := M) G
     (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0) X N
+    nabla2Barrier nablaBarrier
     (Set.Icc t0 (t0 + delta))
 
 /--
@@ -278,8 +299,10 @@ def TensorBarrierUniformStrictOnSlab
     (N : TwoTensorReaction (I := I) (M := M))
     (delta t0 : Real) : Prop :=
   ∀ epsilon : Real, SmallBarrierEps epsilon ->
-    TensorBarrierStrictSupersolutionOn (I := I) (M := M) G S X N
-      epsilon delta t0
+    ∃ nabla2Barrier : TensorNabla2Family (I := I) (M := M),
+    ∃ nablaBarrier : TensorNabla1Family (I := I) (M := M),
+      TensorBarrierStrictSupersolutionOn (I := I) (M := M) G S X N
+        nabla2Barrier nablaBarrier epsilon delta t0
 
 /--
 Scalar signs obtained by testing the tensor barrier on a locally parallel
@@ -408,7 +431,7 @@ Regularity package needed for Hamilton's tensor weak maximum principle.
 
 The first field is a concrete algebraic side condition used by downstream
 callers.  The remaining field intentionally names the analytic regularity
-content still to be produced from a future tensor heat-operator API: smoothness
+content still to be produced around the tensor heat-operator API: smoothness
 on compact slabs, compact first-null setup, and the local barrier estimates.
 -/
 structure TensorWMPRegularityOn
@@ -431,8 +454,10 @@ structure TensorWMPRegularityOn
       0 < epsilon ->
       0 < delta ->
       Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+      ∀ (nabla2Barrier : TensorNabla2Family (I := I) (M := M))
+        (nablaBarrier : TensorNabla1Family (I := I) (M := M)),
       (hstrict : TensorBarrierStrictSupersolutionOn (I := I) (M := M)
-        G S X N epsilon delta t0) ->
+        G S X N nabla2Barrier nablaBarrier epsilon delta t0) ->
       (hnull : TensorNullEigenvectorCondition (I := I) (M := M)
         G N (Set.Icc t0 (t0 + delta))) ->
       (d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0) ->
@@ -441,7 +466,10 @@ structure TensorWMPRegularityOn
     ∀ t0 : Real,
       t0 ∈ Set.Icc 0 T ->
       t0 < T ->
-      TensorParabolicInequalityWithDriftOn (I := I) (M := M) G S X N T ->
+      ∀ {nabla2S : TensorNabla2Family (I := I) (M := M)}
+        {nablaS : TensorNabla1Family (I := I) (M := M)},
+      TensorParabolicInequalityWithDriftOn (I := I) (M := M) G S X N
+        nabla2S nablaS T ->
       ∃ delta0 K : Real,
         0 < delta0 ∧ 0 ≤ K ∧ t0 + delta0 ≤ T ∧
           ∀ delta : Real,
@@ -458,17 +486,20 @@ Parabolic supersolution package for the drifted tensor inequality
 `(partial_t - Delta) S >= X^k nabla_k S + N(S,g,t)`.
 
 The evaluated inequality is kept as an analytic predicate in this first
-interface pass, because RicciFlower does not yet have the full tensor
-heat-operator realization needed to state it intrinsically.
+interface pass, but its spatial part is the direct tensor heat-with-drift
+operator evaluated on supplied first and second covariant derivative tensors.
 -/
 structure TensorParabolicSupersolutionWithDriftOn
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
     (X : TimeDependentVectorField (I := I) (M := M))
     (N : TwoTensorReaction (I := I) (M := M))
+    (nabla2S : TensorNabla2Family (I := I) (M := M))
+    (nablaS : TensorNabla1Family (I := I) (M := M))
     (T : Real) : Prop where
   evaluatedInequality :
-    TensorParabolicInequalityWithDriftOn (I := I) (M := M) G S X N T
+    TensorParabolicInequalityWithDriftOn (I := I) (M := M) G S X N
+      nabla2S nablaS T
 
 /-! ## Barrier proof blocks -/
 
@@ -547,12 +578,14 @@ theorem tensorBarrier_strict_supersolution
     {S : TwoTensorFamily (I := I) (M := M)}
     {X : TimeDependentVectorField (I := I) (M := M)}
     {N : TwoTensorReaction (I := I) (M := M)}
+    {nabla2S : TensorNabla2Family (I := I) (M := M)}
+    {nablaS : TensorNabla1Family (I := I) (M := M)}
     {t0 T : Real}
     (ht0 : t0 ∈ Set.Icc 0 T)
     (ht0T : t0 < T)
     (hreg : TensorWMPRegularityOn (I := I) (M := M) G S X N T)
     (hparabolic : TensorParabolicSupersolutionWithDriftOn
-      (I := I) (M := M) G S X N T) :
+      (I := I) (M := M) G S X N nabla2S nablaS T) :
     ∃ delta : Real, 0 < delta ∧ t0 + delta ≤ T ∧
       TensorBarrierUniformStrictOnSlab (I := I) (M := M) G S X N
         delta t0 := by
@@ -613,23 +646,27 @@ theorem tensor_first_null_contradiction
     {S : TwoTensorFamily (I := I) (M := M)}
     {X : TimeDependentVectorField (I := I) (M := M)}
     {N : TwoTensorReaction (I := I) (M := M)}
+    {nabla2Barrier : TensorNabla2Family (I := I) (M := M)}
+    {nablaBarrier : TensorNabla1Family (I := I) (M := M)}
     {epsilon delta t0 : Real}
     (hstrict : TensorBarrierStrictSupersolutionOn (I := I) (M := M)
-      G S X N epsilon delta t0)
+      G S X N nabla2Barrier nablaBarrier epsilon delta t0)
     (_hnull : TensorNullEigenvectorCondition (I := I) (M := M) G
       N (Set.Icc t0 (t0 + delta)))
     (d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0)
     (hsigns : TensorFirstNullScalarSigns (I := I) (M := M)
       G S X N epsilon delta t0 d) :
     False := by
-  rcases hstrict with ⟨parabolicValue, _heatWithDriftValue, _hderiv, hstrict_eval⟩
+  rcases hstrict with ⟨timeDeriv, _hderiv, hstrict_eval⟩
   have ht1_mem_slab : d.t1 ∈ Set.Icc t0 (t0 + delta) :=
     ⟨le_of_lt d.t1_mem.1, d.t1_mem.2⟩
   have _hstrict_at_first_null :
-      N d.t1 (G d.t1)
-          (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 d.t1)
-          d.x1 d.v d.v <
-        parabolicValue d.t1 d.x1 d.v := by
+      tensorHeatWithDrift2QuadMetricAt (I := I) (G d.t1) (X d.t1)
+          (nabla2Barrier d.t1 d.x1) (nablaBarrier d.t1 d.x1) d.v +
+        N d.t1 (G d.t1)
+            (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 d.t1)
+            d.x1 d.v d.v <
+        timeDeriv d.t1 d.x1 d.v := by
     exact hstrict_eval d.t1 ht1_mem_slab d.x1 d.v d.v_ne_zero
   have ht1_mem_until : d.t1 ∈ Set.Icc t0 d.t1 :=
     ⟨le_of_lt d.t1_mem.1, le_rfl⟩
@@ -660,12 +697,14 @@ theorem tensorBarrier_nonnegative_on_short_slab
     {S : TwoTensorFamily (I := I) (M := M)}
     {X : TimeDependentVectorField (I := I) (M := M)}
     {N : TwoTensorReaction (I := I) (M := M)}
+    {nabla2S : TensorNabla2Family (I := I) (M := M)}
+    {nablaS : TensorNabla1Family (I := I) (M := M)}
     {t0 T : Real}
     (ht0 : t0 ∈ Set.Icc 0 T)
     (ht0T : t0 < T)
     (hreg : TensorWMPRegularityOn (I := I) (M := M) G S X N T)
     (hparabolic : TensorParabolicSupersolutionWithDriftOn
-      (I := I) (M := M) G S X N T)
+      (I := I) (M := M) G S X N nabla2S nablaS T)
     (hnull : TensorNullEigenvectorCondition (I := I) (M := M) G
       N (Set.Icc 0 T))
     (hinit : TwoTensorFamilyNonnegativeAtTime (I := I) (M := M) S t0) :
@@ -677,8 +716,7 @@ theorem tensorBarrier_nonnegative_on_short_slab
       (G := G) (S := S) (X := X) (N := N) ht0 ht0T hreg hparabolic
   refine ⟨delta, hdelta, hdeltaT, ?_⟩
   intro epsilon hepsilon
-  have hstrict : TensorBarrierStrictSupersolutionOn (I := I) (M := M)
-      G S X N epsilon delta t0 :=
+  obtain ⟨nabla2Barrier, nablaBarrier, hstrict⟩ :=
     hstrict_uniform epsilon hepsilon
   by_contra hfail
   have hinit_pos : ∀ x, TwoTensorPositiveDefiniteAt (I := I) (M := M)
@@ -700,9 +738,11 @@ theorem tensorBarrier_nonnegative_on_short_slab
     intro t ht A x hA v hv
     exact hnull t (hsub ht) A x hA v hv
   exact tensor_first_null_contradiction (I := I) (M := M)
-    (G := G) (S := S) (X := X) (N := N) hstrict hnull_slab d
+    (G := G) (S := S) (X := X) (N := N)
+    (nabla2Barrier := nabla2Barrier) (nablaBarrier := nablaBarrier)
+    hstrict hnull_slab d
     (hreg.firstNullScalarSigns epsilon delta t0 hepsilon.1 hdelta hsub
-      hstrict hnull_slab d)
+      nabla2Barrier nablaBarrier hstrict hnull_slab d)
 
 /--
 Step 6: iterate short slabs and let `epsilon -> 0`.
@@ -712,11 +752,13 @@ theorem tensor_wmp_of_barrier_limit
     {S : TwoTensorFamily (I := I) (M := M)}
     {X : TimeDependentVectorField (I := I) (M := M)}
     {N : TwoTensorReaction (I := I) (M := M)}
+    {nabla2S : TensorNabla2Family (I := I) (M := M)}
+    {nablaS : TensorNabla1Family (I := I) (M := M)}
     {T : Real}
     (_hT : 0 ≤ T)
     (hreg : TensorWMPRegularityOn (I := I) (M := M) G S X N T)
     (hparabolic : TensorParabolicSupersolutionWithDriftOn
-      (I := I) (M := M) G S X N T)
+      (I := I) (M := M) G S X N nabla2S nablaS T)
     (hnull : TensorNullEigenvectorCondition (I := I) (M := M) G N (Set.Icc 0 T))
     (hinit : TwoTensorFamilyNonnegativeAtTime (I := I) (M := M) S 0) :
     TwoTensorFamilyNonnegativeOn (I := I) (M := M) S (Set.Icc 0 T) := by
@@ -736,10 +778,13 @@ theorem hamilton_tensor_wmp
     {S : TwoTensorFamily (I := I) (M := M)}
     {X : TimeDependentVectorField (I := I) (M := M)}
     {N : TwoTensorReaction (I := I) (M := M)}
+    {nabla2S : TensorNabla2Family (I := I) (M := M)}
+    {nablaS : TensorNabla1Family (I := I) (M := M)}
     {T : Real}
     (_hT : 0 ≤ T)
     (hreg : TensorWMPRegularityOn (I := I) (M := M) G S X N T)
-    (_hparabolic : TensorParabolicSupersolutionWithDriftOn (I := I) (M := M) G S X N T)
+    (_hparabolic : TensorParabolicSupersolutionWithDriftOn
+      (I := I) (M := M) G S X N nabla2S nablaS T)
     (_hnull : TensorNullEigenvectorCondition (I := I) (M := M) G N (Set.Icc 0 T))
     (_hinit : TwoTensorFamilyNonnegativeAtTime (I := I) (M := M) S 0) :
     TwoTensorFamilyNonnegativeOn (I := I) (M := M) S (Set.Icc 0 T) := by

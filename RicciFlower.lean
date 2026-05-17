@@ -22,6 +22,7 @@ import RicciFlower.Curvature
 import RicciFlower.Riemann
 import RicciFlower.Operators
 import RicciFlower.RoughLaplacian
+import RicciFlower.Realized.TensorOperators
 import RicciFlower.Tensor.RicciIdentity
 import RicciFlower.Curvature.Components
 import RicciFlower.Bianchi
