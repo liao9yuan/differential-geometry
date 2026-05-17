@@ -982,6 +982,43 @@ lemma eigenvectorChartRHSDiffNumerator_div_density_memWkp
     (one_div_densityOnEuclid_contDiffOn (I := I) (M := M) g α)
     h_num_memWkp h_num_ae_zero
 
+/-- **Public restatement: the chart-density-divided differentiated numerator
+ae-vanishes off the partition-of-unity kernel.** Since the differentiated
+numerator ae-vanishes on `chartTargetEuclid α \ chartPouKernel α`
+(`eigenvectorChartRHSDiffNumerator_ae_zero_off_Kα`), so does the quotient
+`numerator / densityOnEuclid g α`: dividing the constant `0` by the density
+gives `0`.
+
+This is the public form consumed by the per-step iterated regularity wrapper,
+which uses it to strip the `indicator (chartPouKernel α)` from the standalone
+inductive step. -/
+lemma eigenvectorChartRHSDiffNumerator_div_density_ae_zero_off_chartPouKernel
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
+    (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
+    {fChartEffPrev : EuclN → ℝ}
+    (h_prev_ae_zero : fChartEffPrev =ᵐ[(volume : Measure EuclN).restrict
+      (chartTargetEuclid (I := I) (M := M) α \
+        chartPouKernel (I := I) (M := M) α)]
+      (fun _ => (0 : ℝ))) :
+    (fun y =>
+        eigenvectorChartRHSDiffNumerator (I := I) (M := M)
+          g r s h_uniform i α P₀ m l fChartEffPrev y /
+        densityOnEuclid (I := I) g α y)
+      =ᵐ[(volume : Measure EuclN).restrict
+        (chartTargetEuclid (I := I) (M := M) α \
+          chartPouKernel (I := I) (M := M) α)]
+      (fun _ : EuclN => (0 : ℝ)) := by
+  have h_num_ae_zero := eigenvectorChartRHSDiffNumerator_ae_zero_off_Kα
+    (I := I) (M := M) g r s h_uniform i α P₀ m l h_prev_ae_zero
+  filter_upwards [h_num_ae_zero] with y hy
+  show eigenvectorChartRHSDiffNumerator (I := I) (M := M)
+      g r s h_uniform i α P₀ m l fChartEffPrev y /
+    densityOnEuclid (I := I) g α y = 0
+  rw [hy]; simp
+
 /-! ## Sanity tests -/
 
 section ElaborationTests
