@@ -531,7 +531,7 @@ therefore `C^∞` on the open Euclidean chart target. -/
 
 /-- The chart density times the cross-right gradient-term coefficient `c[S,l]`
 is `C^∞` on the Euclidean chart target. -/
-private lemma densityOnEuclid_mul_crossRightTestGradTerm_contDiffOn
+lemma densityOnEuclid_mul_crossRightTestGradTerm_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
