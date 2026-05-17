@@ -123,23 +123,23 @@ supported. -/
 /-- The compact partition-of-unity kernel of the chart at `α`, transferred to
 the Euclidean model space: the `toEuclidean`-image of the chart image of the
 closed support of the chart-atlas partition-of-unity weight. -/
-private def chartPouKernel (α : M) : Set EuclN :=
+def chartPouKernel (α : M) : Set EuclN :=
   toEuclidean '' ((extChartAt I α) ''
     (tsupport (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)))
 
 /-- The partition-of-unity kernel is compact. -/
-private lemma chartPouKernel_isCompact (α : M) :
+lemma chartPouKernel_isCompact (α : M) :
     IsCompact (chartPouKernel (I := I) (M := M) α) :=
   (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartImage_pouTsupport_isCompact
     (I := I) (M := M) α).image (toEuclidean (E := E)).continuous
 
 /-- The partition-of-unity kernel is a measurable set. -/
-private lemma chartPouKernel_measurableSet (α : M) :
+lemma chartPouKernel_measurableSet (α : M) :
     MeasurableSet (chartPouKernel (I := I) (M := M) α) :=
   (chartPouKernel_isCompact (I := I) (M := M) α).isClosed.measurableSet
 
 /-- The partition-of-unity kernel is contained in the Euclidean chart target. -/
-private lemma chartPouKernel_subset_chartTargetEuclid (α : M) :
+lemma chartPouKernel_subset_chartTargetEuclid (α : M) :
     chartPouKernel (I := I) (M := M) α ⊆
       chartTargetEuclid (I := I) (M := M) α := by
   classical
@@ -178,7 +178,7 @@ partition-of-unity kernel. -/
 
 /-- The Euclidean chart component vanishes outside the partition-of-unity
 kernel. -/
-private lemma tensorChartComponent_eq_zero_off_chartPouKernel
+lemma tensorChartComponent_eq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))

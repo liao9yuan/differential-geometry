@@ -261,7 +261,7 @@ partition-of-unity weight. -/
 
 /-- The cutoff-weighted raw chart-frame scalar component on `M`: the chart-kernel
 cutoff times the raw chart-frame scalar component. -/
-private def cutoffComponentScalar
+def cutoffComponentScalar
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -272,7 +272,7 @@ private def cutoffComponentScalar
 
 /-- The cutoff-weighted chart-frame scalar component, chart-pushed to Euclidean
 space. -/
-private def cutoffComponentEuclid
+def cutoffComponentEuclid
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -392,7 +392,7 @@ private lemma cutoffComponentEuclid_eq_chartPushedRaw
 
 /-- On the chart target the cutoff Euclidean chart component reads the cutoff
 scalar at the chart-source preimage. -/
-private lemma cutoffComponentEuclid_apply_of_mem
+lemma cutoffComponentEuclid_apply_of_mem
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -405,7 +405,7 @@ private lemma cutoffComponentEuclid_apply_of_mem
   exact chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy
 
 /-- Off the chart target the cutoff Euclidean chart component vanishes. -/
-private lemma cutoffComponentEuclid_apply_of_notMem
+lemma cutoffComponentEuclid_apply_of_notMem
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -922,12 +922,12 @@ component is identically zero and the bound is immediate. -/
 
 /-- The chart image of the compact support of the chart-kernel cutoff: the
 compact kernel in which every cutoff Euclidean chart component is supported. -/
-private def cutoffChartKernel (α : M) : Set E :=
+def cutoffChartKernel (α : M) : Set E :=
   (extChartAt I α) ''
     (tsupport
       ((chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯) : M → ℝ))
 
-private lemma cutoffChartKernel_isCompact (α : M) :
+lemma cutoffChartKernel_isCompact (α : M) :
     IsCompact (cutoffChartKernel (I := I) (M := M) α) := by
   classical
   refine (chartKernelCutoff_tsupport_isCompact (I := I) (M := M) α).image_of_continuousOn ?_
@@ -936,7 +936,7 @@ private lemma cutoffChartKernel_isCompact (α : M) :
   rw [extChartAt_source]
   exact chartKernelCutoff_tsupport_subset_source (I := I) (M := M) α hx
 
-private lemma cutoffChartKernel_subset_target (α : M) :
+lemma cutoffChartKernel_subset_target (α : M) :
     cutoffChartKernel (I := I) (M := M) α ⊆ (extChartAt I α).target := by
   classical
   rintro y ⟨x, hx, rfl⟩
@@ -947,7 +947,7 @@ private lemma cutoffChartKernel_subset_target (α : M) :
 
 /-- The cutoff scalar component has chart image of its support inside the
 compact kernel `cutoffChartKernel α`. -/
-private lemma cutoffComponentScalar_chartImage_subset_kernel
+lemma cutoffComponentScalar_chartImage_subset_kernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -1399,7 +1399,7 @@ private lemma tensorL2ChartComponentCutoff_smoothToTensorL2_eq
 
 /-- On a smooth compactly-supported tensor section, the cutoff chart component
 agrees almost everywhere with the concrete cutoff Euclidean chart component. -/
-private lemma tensorL2ChartComponentCutoff_smoothToTensorL2_coeFn
+lemma tensorL2ChartComponentCutoff_smoothToTensorL2_coeFn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (P₀ : TensorCompIdx (E := E) r s) :
