@@ -1,31 +1,41 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartJUniformBoundLocallyConstant
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChristoffelCorrectionUniformBound
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChristoffelBound
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.CovTrivProjNormBound
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TensorChartTwistUniformBound
+import DifferentialGeometry.Integral.Connection.LeviCivitaChartLocal
 import DifferentialGeometry.Integral.Connection.ChartTensor0SCovariantDerivative
 import DifferentialGeometry.Integral.Connection.ChartTensorRSCovariantDerivative
 import DifferentialGeometry.Tensor.RSTensor.TensorRSSpaceNormBridge
+import Mathlib.Analysis.Normed.Operator.Bilinear
 
 /-!
-# Uniform operator-norm bound for the chart Levi-Civita parallel CLM
+# Uniform operator-norm bounds for slot-correction infrastructure
 
-For a closed Riemannian manifold `(M, g)` admitting a locally constant chart
-selection, the chart Levi-Civita parallel CLM
-`chartLeviCivitaParallelCLM g α b (chartBasisVecFiber α j)` has a uniform
-operator-norm bound on `tsupport (chartAtlasPOU I M α)`, with constant
-depending only on `g`, the chart at `α`, and the model space `E`.
+Consolidated uniform operator-norm bounds used throughout the chart-spectral
+machinery on a closed Riemannian manifold `(M, g)` with a locally constant
+chart selection (`HasLocallyConstantChartAt H M`):
 
-This bound is the natural composition of:
-
-* γ2.1 (`chartJ_opNorm_isBounded_on_compact` and the inverse-side counterpart)
-  giving uniform op-norm bounds on `chartJ α b` and `chartJinv α b` over any
-  compact subset of `(chartAt H α).source`.
-* γ2.5.A.a (`christoffelCorrection_opNorm_isBounded_on_pouTsupport`) giving a
-  uniform op-norm bound on the Christoffel correction CLM.
-* The model-space basis vectors `(chartModelBasis E) j` being finite in
-  number, hence admitting a uniform-norm sup.
-
-The chart Levi-Civita parallel CLM is the composition
-`(trivFromE α b) ∘ (christoffelCorrection g α b (trivToE α b (X b)))`. Op-norm
-submultiplicativity reduces the bound to bounding each factor.
+1. **Section-fibre norm comparison** — for a chart base point `α` and ranks
+   `(r, s)`, the bundle-fibre norm `‖S.toSection b‖` of a smooth
+   compactly-supported `(r, s)`-tensor section `S` is bounded squared by the
+   pointwise tensor inner product on the closed support of the chart-atlas
+   partition-of-unity weight at `α`:
+   `‖S.toSection b‖² ≤ K_S · tensorInnerPointwise g r s b (S.toFun b) (S.toFun b)`.
+2. **Christoffel-correction uniform op-norm bound** — the chart-local
+   Christoffel-correction CLM `christoffelCorrection g α b Y` is uniformly
+   operator-norm bounded over `b ∈ tsupport (chartAtlasPOU I M α)` by a
+   constant (depending on `g` and the chart at `α`, independent of `b, Y`)
+   times `‖Y‖`.
+3. **Chart Levi-Civita parallel CLM op-norm bound** — the chart Levi-Civita
+   parallel CLM `chartLeviCivitaParallelCLM g α b (chartBasisVecFiber α j)`
+   has a uniform operator-norm bound on the closed support of the
+   chart-atlas POU weight at `α`.
+4. **Input / output slot-correction headline bounds** — the chart-frame
+   input / output slot corrections satisfy
+   `‖chartTensorRSInputSlotCorrection r s g α T (chartBasisVecFiber α j) b k‖
+       ≤ M_F · ‖T b‖`
+   (and the analogous output-slot bound), uniformly on
+   `tsupport (chartAtlasPOU I M α)`.
 -/
 
 noncomputable section
@@ -35,35 +45,545 @@ set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
-open Bundle Manifold Set Filter Finset
-open scoped Manifold Topology ContDiff BigOperators
+open Bundle Manifold MeasureTheory Set Filter Finset Tensor0SBundle
+open scoped Manifold Topology ContDiff ENNReal BigOperators Matrix
+  RealInnerProductSpace InnerProductSpace
 
 namespace DifferentialGeometry
 namespace Analysis
 namespace Parabolic
 namespace TensorSpectral
 
-open DifferentialGeometry.Geometry
+open DifferentialGeometry.Integral.Measure
+open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.DivergenceTheorem
-open DifferentialGeometry.Integral.Measure
+open DifferentialGeometry.Geometry
 open DifferentialGeometry.Tensor
 open DifferentialGeometry.Tensor.Tensor0SRiemannian
-open Tensor0SBundle
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
-  [NeZero (Module.finrank ℝ E)]
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-  [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
+  [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- A finite-dimensional inner-product space is automatically complete; we
+/-! ## Bundle-fibre norm identification
+
+The `TensorRSSpace r s I b` normed-group instance is induced from the model
+norm along `tensorRSSpace_continuousLinearEquiv`; hence `‖S.toSection b‖`
+coincides definitionally with `‖TensorRSSpace.toModel (S.toSection b)‖ =
+‖S.toFun b‖`. -/
+
+private lemma section_norm_eq_toFun_norm
+    {g : SmoothRiemannianMetric I M} {r s : ℕ}
+    (S : SmoothCcTensor g r s) (b : M) :
+    ‖S.toSection b‖ = ‖S.toFun b‖ := rfl
+
+/-! ## The POU-`tsupport` lies in the chart source
+
+We restate this auxiliary inclusion locally for use with the chart-twist
+uniform op-norm bound, whose hypothesis is phrased on a compact subset of
+`(chartAt H α).source`. -/
+
+private lemma pouTsupport_subset_chartAt_source_secNorm (α : M) :
+    tsupport (fun x : M =>
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
+      (chartAt H α).source := by
+  intro b hb
+  have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
+    pouTsupport_subset_baseSet (I := I) (M := M) α hb
+  rw [trivializationAt_baseSet_eq_chartAt_source (I := I)] at hb_base
+  exact hb_base
+
+/-! ## Headline: section-fibre norm squared bounded by the tensor inner product
+
+The headline result discharges the `K_S` parameter of downstream
+`tensorInnerPointwise`-quadratic bounds: there is a uniform `K_S ≥ 0` such
+that for every smooth compactly-supported `(r, s)`-tensor section `S` and
+every `b` in the closed support of the chart-`α` partition-of-unity weight,
+`‖S.toSection b‖^2 ≤ K_S * tensorInnerPointwise g r s b (S.toFun b) (S.toFun b)`. -/
+
+/-- **Section-fibre norm comparison by the pointwise tensor inner product.**
+
+For a closed Riemannian manifold `(M, g)`, a chart base point `α`, and ranks
+`(r, s)`, under the locality hypothesis `HasLocallyConstantChartAt H M` on
+the chart-selection function, there is a non-negative constant `K_S` such
+that for every smooth compactly-supported `(r, s)`-tensor section `S` and
+every base point `b` in the closed support of the chart-atlas
+partition-of-unity weight at `α`,
+`‖S.toSection b‖² ≤ K_S · tensorInnerPointwise g r s b (S.toFun b) (S.toFun b)`.
+
+The constant `K_S` depends only on `(g, r, s, α)` and on the locality
+hypothesis; it is independent of `S`. -/
+theorem norm_section_sq_le_const_mul_tensorInnerPointwise_on_pouTsupport
+    (h_atlas : HasLocallyConstantChartAt H M)
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
+    ∃ K_S : ℝ, 0 ≤ K_S ∧
+      ∀ (S : SmoothCcTensor g r s) {b : M},
+        b ∈ tsupport (fun x : M =>
+            ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
+        ‖S.toSection b‖ ^ 2 ≤
+          K_S * tensorInnerPointwise (I := I) (M := M) g r s b
+            (S.toFun b) (S.toFun b) := by
+  classical
+  -- Compact closed-support set `K := tsupport(ρ_α) ⊆ (chartAt H α).source`.
+  set Kα : Set M := tsupport (fun x : M =>
+      ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) with hKα_def
+  have hKα_compact : IsCompact Kα :=
+    pouTsupport_isCompact (I := I) (M := M) α
+  have hKα_sub_source : Kα ⊆ (chartAt H α).source :=
+    pouTsupport_subset_chartAt_source_secNorm (I := I) (M := M) α
+  -- Step 1: chart-trivialisation-inverse norm bound on `Kα`.
+  obtain ⟨K, hK_nn, hK_le⟩ :=
+    chartRSTwistInv_sq_norm_le_const_mul_tensorInnerPointwise_on_pouTsupport
+      (I := I) (M := M) g r s α
+  -- Step 2: uniform chart-twist op-norm bound on `Kα` (uses locality).
+  obtain ⟨M_tw, hM_tw_pos, hM_tw_le⟩ :=
+    chartRSTwist_pointwise_opNorm_isBounded_on_compact
+      (I := I) (M := M) (E := E) h_atlas α hKα_compact hKα_sub_source r s
+  -- Assemble `K_S := M_tw^2 * K`.
+  refine ⟨M_tw ^ 2 * K, by positivity, ?_⟩
+  intro S b hb
+  -- `b ∈ baseSet` for the round-trip identity.
+  have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
+    pouTsupport_subset_baseSet (I := I) (M := M) α hb
+  -- Abbreviate `Y := chartRSTwistInv α b r s (S.toFun b)`.
+  set Y : TensorRSModel r s ℝ E :=
+    chartRSTwistInv (I := I) (M := M) α b r s (S.toFun b) with hY_def
+  -- Round-trip: `chartRSTwist α b r s Y = S.toFun b` on `baseSet`.
+  have h_round : chartRSTwist (I := I) (M := M) α b r s Y = S.toFun b := by
+    rw [hY_def]
+    exact chartRSTwist_chartRSTwistInv (I := I) (M := M) α hb_base r s (S.toFun b)
+  -- Chart-twist op-norm at `Y`: `‖chartRSTwist α b r s Y‖ ≤ M_tw * ‖Y‖`.
+  have h_tw_Y : ‖chartRSTwist (I := I) (M := M) α b r s Y‖ ≤ M_tw * ‖Y‖ :=
+    hM_tw_le b hb Y
+  -- Rewrite using the round-trip on the LHS.
+  rw [h_round] at h_tw_Y
+  -- Inverse-twist norm bound at `S.toFun b`:
+  -- `‖chartRSTwistInv α b r s (S.toFun b)‖^2 ≤ K * tensorInnerPointwise g r s b (S.toFun b) (S.toFun b)`.
+  have h_inv : ‖Y‖ ^ 2 ≤
+      K * tensorInnerPointwise (I := I) (M := M) g r s b
+        (S.toFun b) (S.toFun b) := by
+    rw [hY_def]
+    exact hK_le hb (S.toFun b)
+  -- Square the chart-twist bound: `‖S.toFun b‖^2 ≤ (M_tw * ‖Y‖)^2 = M_tw^2 * ‖Y‖^2`.
+  have h_lhs_nn : 0 ≤ ‖S.toFun b‖ := norm_nonneg _
+  have h_Y_nn : 0 ≤ ‖Y‖ := norm_nonneg _
+  have h_M_tw_nn : 0 ≤ M_tw := le_of_lt hM_tw_pos
+  have h_rhs_nn : 0 ≤ M_tw * ‖Y‖ := mul_nonneg h_M_tw_nn h_Y_nn
+  have h_sq : ‖S.toFun b‖ ^ 2 ≤ (M_tw * ‖Y‖) ^ 2 := by
+    have := mul_self_le_mul_self h_lhs_nn h_tw_Y
+    have h_lhs_sq : ‖S.toFun b‖ * ‖S.toFun b‖ = ‖S.toFun b‖ ^ 2 := by rw [sq]
+    have h_rhs_sq : (M_tw * ‖Y‖) * (M_tw * ‖Y‖) = (M_tw * ‖Y‖) ^ 2 := by rw [sq]
+    linarith
+  have h_expand : (M_tw * ‖Y‖) ^ 2 = M_tw ^ 2 * ‖Y‖ ^ 2 := by ring
+  -- Chain: ‖S.toFun b‖^2 ≤ M_tw^2 * ‖Y‖^2 ≤ M_tw^2 * (K * tensorInnerPointwise ...).
+  have h_chain : ‖S.toFun b‖ ^ 2 ≤
+      M_tw ^ 2 * (K * tensorInnerPointwise (I := I) (M := M) g r s b
+        (S.toFun b) (S.toFun b)) := by
+    have h_M_tw_sq_nn : 0 ≤ M_tw ^ 2 := sq_nonneg _
+    have h_step1 : ‖S.toFun b‖ ^ 2 ≤ M_tw ^ 2 * ‖Y‖ ^ 2 := by
+      calc ‖S.toFun b‖ ^ 2 ≤ (M_tw * ‖Y‖) ^ 2 := h_sq
+        _ = M_tw ^ 2 * ‖Y‖ ^ 2 := h_expand
+    have h_step2 : M_tw ^ 2 * ‖Y‖ ^ 2 ≤
+        M_tw ^ 2 * (K * tensorInnerPointwise (I := I) (M := M) g r s b
+          (S.toFun b) (S.toFun b)) :=
+      mul_le_mul_of_nonneg_left h_inv h_M_tw_sq_nn
+    exact h_step1.trans h_step2
+  -- Reassociate `M_tw^2 * (K * X) = (M_tw^2 * K) * X`.
+  have h_assoc :
+      M_tw ^ 2 * (K * tensorInnerPointwise (I := I) (M := M) g r s b
+        (S.toFun b) (S.toFun b)) =
+      M_tw ^ 2 * K * tensorInnerPointwise (I := I) (M := M) g r s b
+        (S.toFun b) (S.toFun b) := by ring
+  -- Apply the definitional identification `‖S.toSection b‖ = ‖S.toFun b‖`.
+  rw [section_norm_eq_toFun_norm S b]
+  linarith
+
+/-! ## Compactness and chart-source containment of `tsupport (POU α)`
+
+We restate compactness as a private alias to keep proof scripts mechanical;
+the public `pouTsupport_isCompact` is also available transitively. -/
+
+/-- The closed support of the canonical POU weight at `α` is contained in the
+chart source at `α` by subordinacy of the chart-atlas partition of unity. -/
+private theorem pouTsupport_subset_chartAt_source_chrCorr (α : M) :
+    tsupport (fun x : M =>
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
+      (chartAt H α).source :=
+  (chartAtlasPOU_isSubordinate I M) α
+
+/-! ## Finite suprema of model-side constants -/
+
+/-- The model-space coordinate functional sup. This is a positive constant
+depending only on the dimension and the model space `E`. -/
+private noncomputable def chartModelBasisCoordSup (E : Type*) [NormedAddCommGroup E]
+    [NormedSpace ℝ E] [FiniteDimensional ℝ E]
+    [NeZero (Module.finrank ℝ E)] : ℝ :=
+  (Finset.univ : Finset (Fin (Module.finrank ℝ E))).sup'
+    (by
+      refine Finset.univ_nonempty_iff.mpr ?_
+      exact ⟨⟨0, Nat.pos_of_ne_zero (NeZero.ne _)⟩⟩)
+    (fun i => ‖((chartModelBasis E).coord i).toContinuousLinearMap‖)
+
+/-- The model-space basis vector norm sup. -/
+private noncomputable def chartModelBasisVecSup (E : Type*) [NormedAddCommGroup E]
+    [NormedSpace ℝ E] [FiniteDimensional ℝ E]
+    [NeZero (Module.finrank ℝ E)] : ℝ :=
+  (Finset.univ : Finset (Fin (Module.finrank ℝ E))).sup'
+    (by
+      refine Finset.univ_nonempty_iff.mpr ?_
+      exact ⟨⟨0, Nat.pos_of_ne_zero (NeZero.ne _)⟩⟩)
+    (fun k => ‖(chartModelBasis E) k‖)
+
+private lemma chartModelBasisCoordSup_nonneg :
+    0 ≤ chartModelBasisCoordSup E := by
+  classical
+  unfold chartModelBasisCoordSup
+  have hne : (Finset.univ : Finset (Fin (Module.finrank ℝ E))).Nonempty := by
+    refine Finset.univ_nonempty_iff.mpr ?_
+    exact ⟨⟨0, Nat.pos_of_ne_zero (NeZero.ne _)⟩⟩
+  obtain ⟨i₀, hi₀⟩ := hne
+  have h_nn : (0 : ℝ) ≤ ‖((chartModelBasis E).coord i₀).toContinuousLinearMap‖ :=
+    norm_nonneg _
+  exact h_nn.trans (Finset.le_sup'
+    (f := fun i => ‖((chartModelBasis E).coord i).toContinuousLinearMap‖) hi₀)
+
+private lemma chartModelBasisVecSup_nonneg :
+    0 ≤ chartModelBasisVecSup E := by
+  classical
+  unfold chartModelBasisVecSup
+  have hne : (Finset.univ : Finset (Fin (Module.finrank ℝ E))).Nonempty := by
+    refine Finset.univ_nonempty_iff.mpr ?_
+    exact ⟨⟨0, Nat.pos_of_ne_zero (NeZero.ne _)⟩⟩
+  obtain ⟨k₀, hk₀⟩ := hne
+  have h_nn : (0 : ℝ) ≤ ‖(chartModelBasis E) k₀‖ := norm_nonneg _
+  exact h_nn.trans (Finset.le_sup'
+    (f := fun k => ‖(chartModelBasis E) k‖) hk₀)
+
+private lemma norm_coord_le_chartModelBasisCoordSup
+    (i : Fin (Module.finrank ℝ E)) :
+    ‖((chartModelBasis E).coord i).toContinuousLinearMap‖ ≤
+      chartModelBasisCoordSup E := by
+  classical
+  unfold chartModelBasisCoordSup
+  exact Finset.le_sup'
+    (f := fun i => ‖((chartModelBasis E).coord i).toContinuousLinearMap‖)
+    (Finset.mem_univ _)
+
+private lemma norm_basis_le_chartModelBasisVecSup
+    (k : Fin (Module.finrank ℝ E)) :
+    ‖(chartModelBasis E) k‖ ≤ chartModelBasisVecSup E := by
+  classical
+  unfold chartModelBasisVecSup
+  exact Finset.le_sup'
+    (f := fun k => ‖(chartModelBasis E) k‖)
+    (Finset.mem_univ _)
+
+/-! ## Per-summand operator-norm bound -/
+
+/-- Operator-norm bound on a single summand of the triple sum defining
+`christoffelCorrection`, at a point `b` of the tangent-trivialisation
+neighbourhood, with all geometric / model-side constants exposed. -/
+private lemma christoffelCorrection_summand_opNorm_le
+    (g : SmoothRiemannianMetric I M) (α : M) (b : M) (Y : E)
+    (i j k : Fin (Module.finrank ℝ E))
+    (C_J : ℝ) (hCJ : ‖chartJ (I := I) (M := M) α b‖ ≤ C_J)
+    (hCJ_nn : 0 ≤ C_J)
+    (C_Γ : ℝ) (hCΓ : |chartChristoffel (I := I) g α i j k (extChartAt I α b)| ≤ C_Γ)
+    (hCΓ_nn : 0 ≤ C_Γ) :
+    ‖(((chartModelBasis E).coord i).toContinuousLinearMap.comp
+          (trivToE (I := I) α b)).smulRight
+        (((chartModelBasis E).repr Y j *
+            chartChristoffel (I := I) g α i j k (extChartAt I α b)) •
+          (chartModelBasis E) k)‖ ≤
+      chartModelBasisCoordSup E * C_J *
+        (chartModelBasisCoordSup E * ‖Y‖ * C_Γ) *
+        chartModelBasisVecSup E := by
+  classical
+  -- Abbreviations.
+  set L_i : E →L[ℝ] ℝ := ((chartModelBasis E).coord i).toContinuousLinearMap
+  set L_j : E →L[ℝ] ℝ := ((chartModelBasis E).coord j).toContinuousLinearMap
+  set Γijk : ℝ := chartChristoffel (I := I) g α i j k (extChartAt I α b)
+  -- Step 1: `‖smulRight L v‖ = ‖L‖ * ‖v‖`.
+  rw [ContinuousLinearMap.norm_smulRight_apply]
+  -- Step 2: `‖L_i.comp (trivToE α b)‖ ≤ ‖L_i‖ * ‖trivToE α b‖`.
+  have hcomp_le :
+      ‖L_i.comp (trivToE (I := I) α b)‖ ≤
+        ‖L_i‖ * ‖trivToE (I := I) α b‖ :=
+    ContinuousLinearMap.opNorm_comp_le L_i (trivToE (I := I) α b)
+  -- `trivToE α b` is definitionally `chartJ α b`, hence the same norm.
+  have h_triv_eq_chartJ :
+      ‖trivToE (I := I) α b‖ = ‖chartJ (I := I) (M := M) α b‖ := rfl
+  rw [h_triv_eq_chartJ] at hcomp_le
+  -- Step 3: bound the scalar part `‖(b.repr Y j) * Γijk • e_k‖ = |(b.repr Y j) * Γijk| * ‖e_k‖`.
+  have h_scalar_norm :
+      ‖((chartModelBasis E).repr Y j * Γijk) • (chartModelBasis E) k‖ =
+        |(chartModelBasis E).repr Y j * Γijk| * ‖(chartModelBasis E) k‖ := by
+    rw [norm_smul, Real.norm_eq_abs]
+  rw [h_scalar_norm]
+  -- Step 4: bound `|(b.repr Y j) * Γijk|` by `(‖L_j‖ * ‖Y‖) * C_Γ`.
+  have h_repr_eq : (chartModelBasis E).repr Y j = L_j Y := rfl
+  have h_repr_bound : |(chartModelBasis E).repr Y j| ≤ ‖L_j‖ * ‖Y‖ := by
+    rw [h_repr_eq]
+    have := L_j.le_opNorm Y
+    have h_abs : ‖L_j Y‖ = |L_j Y| := Real.norm_eq_abs _
+    rw [h_abs] at this
+    exact this
+  have h_abs_mul : |(chartModelBasis E).repr Y j * Γijk| =
+      |(chartModelBasis E).repr Y j| * |Γijk| := abs_mul _ _
+  have h_Lj_le : ‖L_j‖ ≤ chartModelBasisCoordSup E :=
+    norm_coord_le_chartModelBasisCoordSup (E := E) j
+  have h_Lj_nn : 0 ≤ ‖L_j‖ := norm_nonneg _
+  have h_Y_nn : 0 ≤ ‖Y‖ := norm_nonneg _
+  have h_abs_Γ_nn : 0 ≤ |Γijk| := abs_nonneg _
+  -- `|b.repr Y j| * |Γijk| ≤ (‖L_j‖ * ‖Y‖) * C_Γ`.
+  have h_scalar_bound :
+      |(chartModelBasis E).repr Y j * Γijk| ≤
+        chartModelBasisCoordSup E * ‖Y‖ * C_Γ := by
+    rw [h_abs_mul]
+    -- `|repr| * |Γ| ≤ (‖L_j‖ * ‖Y‖) * C_Γ`.
+    have h1 : |(chartModelBasis E).repr Y j| * |Γijk| ≤
+        (‖L_j‖ * ‖Y‖) * C_Γ := by
+      have hpos : 0 ≤ ‖L_j‖ * ‖Y‖ := by positivity
+      have h_mid : |(chartModelBasis E).repr Y j| * |Γijk| ≤
+          (‖L_j‖ * ‖Y‖) * |Γijk| :=
+        mul_le_mul_of_nonneg_right h_repr_bound h_abs_Γ_nn
+      have h_end : (‖L_j‖ * ‖Y‖) * |Γijk| ≤ (‖L_j‖ * ‖Y‖) * C_Γ :=
+        mul_le_mul_of_nonneg_left hCΓ hpos
+      linarith
+    -- Now upgrade `‖L_j‖` to `chartModelBasisCoordSup`.
+    have hΓ_nn : 0 ≤ C_Γ := hCΓ_nn
+    have h_step : (‖L_j‖ * ‖Y‖) * C_Γ ≤
+        (chartModelBasisCoordSup E * ‖Y‖) * C_Γ := by
+      have h_left : ‖L_j‖ * ‖Y‖ ≤ chartModelBasisCoordSup E * ‖Y‖ :=
+        mul_le_mul_of_nonneg_right h_Lj_le h_Y_nn
+      exact mul_le_mul_of_nonneg_right h_left hΓ_nn
+    have h_eq : (chartModelBasisCoordSup E * ‖Y‖) * C_Γ =
+        chartModelBasisCoordSup E * ‖Y‖ * C_Γ := by ring
+    linarith
+  -- Step 5: bound `‖e_k‖` by `chartModelBasisVecSup E`.
+  have h_ek_le : ‖(chartModelBasis E) k‖ ≤ chartModelBasisVecSup E :=
+    norm_basis_le_chartModelBasisVecSup (E := E) k
+  have h_ek_nn : 0 ≤ ‖(chartModelBasis E) k‖ := norm_nonneg _
+  -- Step 6: bound `‖L_i‖` by `chartModelBasisCoordSup E`.
+  have h_Li_le : ‖L_i‖ ≤ chartModelBasisCoordSup E :=
+    norm_coord_le_chartModelBasisCoordSup (E := E) i
+  have h_Li_nn : 0 ≤ ‖L_i‖ := norm_nonneg _
+  have h_J_nn : 0 ≤ ‖chartJ (I := I) (M := M) α b‖ := norm_nonneg _
+  have h_coord_nn : 0 ≤ chartModelBasisCoordSup E := chartModelBasisCoordSup_nonneg
+  have h_vec_nn : 0 ≤ chartModelBasisVecSup E := chartModelBasisVecSup_nonneg
+  -- Combine: `‖L_i.comp triv‖ * (|.| * ‖e_k‖) ≤ (C_coord * C_J) * ((C_coord * ‖Y‖ * C_Γ) * C_vec)`.
+  set A : ℝ := ‖L_i.comp (trivToE (I := I) α b)‖
+  set B : ℝ := |(chartModelBasis E).repr Y j * Γijk| * ‖(chartModelBasis E) k‖
+  -- Goal: `A * B ≤ C_coord * C_J * (C_coord * ‖Y‖ * C_Γ) * C_vec`.
+  have hA_nn : 0 ≤ A := norm_nonneg _
+  have hB_nn : 0 ≤ B := by
+    refine mul_nonneg ?_ h_ek_nn
+    exact abs_nonneg _
+  -- `A ≤ ‖L_i‖ * ‖chartJ α b‖ ≤ C_coord * C_J`.
+  have hA_le : A ≤ chartModelBasisCoordSup E * C_J := by
+    refine hcomp_le.trans ?_
+    have h_first : ‖L_i‖ * ‖chartJ (I := I) (M := M) α b‖ ≤
+        chartModelBasisCoordSup E * ‖chartJ (I := I) (M := M) α b‖ :=
+      mul_le_mul_of_nonneg_right h_Li_le h_J_nn
+    have h_second :
+        chartModelBasisCoordSup E * ‖chartJ (I := I) (M := M) α b‖ ≤
+          chartModelBasisCoordSup E * C_J :=
+      mul_le_mul_of_nonneg_left hCJ h_coord_nn
+    linarith
+  -- `B ≤ (C_coord * ‖Y‖ * C_Γ) * C_vec`.
+  have hB_le : B ≤ (chartModelBasisCoordSup E * ‖Y‖ * C_Γ) *
+      chartModelBasisVecSup E := by
+    have h_first :
+        |(chartModelBasis E).repr Y j * Γijk| * ‖(chartModelBasis E) k‖ ≤
+          (chartModelBasisCoordSup E * ‖Y‖ * C_Γ) *
+            ‖(chartModelBasis E) k‖ :=
+      mul_le_mul_of_nonneg_right h_scalar_bound h_ek_nn
+    have h_second :
+        (chartModelBasisCoordSup E * ‖Y‖ * C_Γ) * ‖(chartModelBasis E) k‖ ≤
+          (chartModelBasisCoordSup E * ‖Y‖ * C_Γ) *
+            chartModelBasisVecSup E := by
+      have h_left_nn : 0 ≤ chartModelBasisCoordSup E * ‖Y‖ * C_Γ := by positivity
+      exact mul_le_mul_of_nonneg_left h_ek_le h_left_nn
+    linarith
+  -- Multiply: `A * B ≤ (C_coord * C_J) * ((C_coord * ‖Y‖ * C_Γ) * C_vec)`.
+  have hRHS_nn : 0 ≤ (chartModelBasisCoordSup E * ‖Y‖ * C_Γ) *
+      chartModelBasisVecSup E := by positivity
+  have h_AB_le :
+      A * B ≤ (chartModelBasisCoordSup E * C_J) *
+        ((chartModelBasisCoordSup E * ‖Y‖ * C_Γ) * chartModelBasisVecSup E) := by
+    have h_lhs : A * B ≤ (chartModelBasisCoordSup E * C_J) * B :=
+      mul_le_mul_of_nonneg_right hA_le hB_nn
+    have h_lhs2_nn : 0 ≤ chartModelBasisCoordSup E * C_J := by positivity
+    have h_rhs : (chartModelBasisCoordSup E * C_J) * B ≤
+        (chartModelBasisCoordSup E * C_J) *
+          ((chartModelBasisCoordSup E * ‖Y‖ * C_Γ) * chartModelBasisVecSup E) :=
+      mul_le_mul_of_nonneg_left hB_le h_lhs2_nn
+    linarith
+  -- Rearrange RHS into the form requested.
+  have h_rearrange :
+      (chartModelBasisCoordSup E * C_J) *
+        ((chartModelBasisCoordSup E * ‖Y‖ * C_Γ) * chartModelBasisVecSup E) =
+      chartModelBasisCoordSup E * C_J *
+        (chartModelBasisCoordSup E * ‖Y‖ * C_Γ) *
+        chartModelBasisVecSup E := by ring
+  linarith
+
+/-! ## Headline uniform op-norm bound on `christoffelCorrection` -/
+
+/-- **Uniform operator-norm bound for `christoffelCorrection g α b` on
+`tsupport (chartAtlasPOU I M α)`.**
+
+For a closed Riemannian manifold `(M, g)` with a locally constant chart
+selection at the model, there exists a non-negative constant `C` depending
+only on `g`, the chart at `α`, and the model space `E`, such that for every
+`b` in the closed support of the canonical chart-atlas partition-of-unity
+weight at `α`, the Christoffel-correction CLM satisfies
+
+  `‖christoffelCorrection g α b Y‖ ≤ C * ‖Y‖`
+
+for every `Y : E`. The constant `C` is independent of `b` and `Y`. -/
+theorem christoffelCorrection_opNorm_isBounded_on_pouTsupport
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    (g : SmoothRiemannianMetric I M) (α : M) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ {b : M}, b ∈ tsupport (fun x : M =>
+          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
+        ∀ Y : E, ‖christoffelCorrection (I := I) g α b Y‖ ≤ C * ‖Y‖ := by
+  classical
+  -- Notation for the compact base set.
+  set K : Set M := tsupport (fun x : M =>
+    ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) with hK_def
+  have hK_compact : IsCompact K := pouTsupport_isCompact (I := I) (M := M) α
+  have hK_sub : K ⊆ (chartAt H α).source :=
+    pouTsupport_subset_chartAt_source_chrCorr (I := I) (M := M) α
+  -- γ2.1: uniform bound on `‖chartJ α b‖`.
+  obtain ⟨C_J, hCJ_pos, hCJ_bound⟩ :=
+    chartJ_opNorm_isBounded_on_compact (I := I) (M := M) h_atlas α hK_compact hK_sub
+  have hCJ_nn : 0 ≤ C_J := le_of_lt hCJ_pos
+  -- Christoffel sup bound on the chart image.
+  obtain ⟨C_Γ, hCΓ_nn, hCΓ_bound⟩ :=
+    chartChristoffel_bdd_on_pou_tsupport (I := I) (M := M) g α
+  -- Set the headline constant.
+  set n : ℕ := Module.finrank ℝ E with hn_def
+  set C_coord : ℝ := chartModelBasisCoordSup E with hC_coord_def
+  set C_vec : ℝ := chartModelBasisVecSup E with hC_vec_def
+  set C : ℝ := (n : ℝ) ^ 3 *
+    (C_coord * C_J * (C_coord * C_Γ) * C_vec) with hC_def
+  have hC_coord_nn : 0 ≤ C_coord := chartModelBasisCoordSup_nonneg
+  have hC_vec_nn : 0 ≤ C_vec := chartModelBasisVecSup_nonneg
+  have hC_nn : 0 ≤ C := by
+    have hn_nn : (0 : ℝ) ≤ (n : ℝ) := by positivity
+    have : (0 : ℝ) ≤ (n : ℝ) ^ 3 := by positivity
+    have hrest_nn : 0 ≤ C_coord * C_J * (C_coord * C_Γ) * C_vec := by positivity
+    exact mul_nonneg this hrest_nn
+  refine ⟨C, hC_nn, ?_⟩
+  intro b hb Y
+  -- Pointwise op-norm of the triple sum bounded by sum of op-norms.
+  -- Unfold the definition.
+  have hb_chartJ : ‖chartJ (I := I) (M := M) α b‖ ≤ C_J := hCJ_bound b hb
+  -- Translate `b ∈ K` to `extChartAt I α b ∈ extChartAt I α '' K`.
+  have hb_extImg : extChartAt I α b ∈
+      (extChartAt I α) ''
+        (tsupport (fun x : M =>
+          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) := by
+    exact ⟨b, hb, rfl⟩
+  have hb_Γ : ∀ i j k : Fin (Module.finrank ℝ E),
+      |chartChristoffel (I := I) g α i j k (extChartAt I α b)| ≤ C_Γ := by
+    intro i j k
+    exact hCΓ_bound (extChartAt I α b) hb_extImg i j k
+  -- Set the per-summand bound `D := C_coord * C_J * (C_coord * ‖Y‖ * C_Γ) * C_vec`.
+  set D : ℝ := C_coord * C_J * (C_coord * ‖Y‖ * C_Γ) * C_vec with hD_def
+  have hD_nn : 0 ≤ D := by
+    have : 0 ≤ C_coord * ‖Y‖ * C_Γ := by positivity
+    have : 0 ≤ C_coord * C_J := by positivity
+    positivity
+  -- For each summand `(i, j, k)`, the op-norm is ≤ D.
+  have h_per : ∀ i j k : Fin (Module.finrank ℝ E),
+      ‖(((chartModelBasis E).coord i).toContinuousLinearMap.comp
+            (trivToE (I := I) α b)).smulRight
+          (((chartModelBasis E).repr Y j *
+              chartChristoffel (I := I) g α i j k (extChartAt I α b)) •
+            (chartModelBasis E) k)‖ ≤ D := by
+    intro i j k
+    exact christoffelCorrection_summand_opNorm_le (I := I)
+      g α b Y i j k C_J hb_chartJ hCJ_nn C_Γ (hb_Γ i j k) hCΓ_nn
+  -- Triangle inequality on the triple sum.
+  unfold christoffelCorrection
+  -- Step a: opNorm of `∑_i (· · ·) ≤ ∑_i ‖· · ·‖`.
+  have h_outer_norm :
+      ‖∑ i : Fin (Module.finrank ℝ E),
+          ∑ j : Fin (Module.finrank ℝ E),
+            ∑ k : Fin (Module.finrank ℝ E),
+              (((chartModelBasis E).coord i).toContinuousLinearMap.comp
+                  (trivToE (I := I) α b)).smulRight
+                (((chartModelBasis E).repr Y j *
+                    chartChristoffel (I := I) g α i j k (extChartAt I α b)) •
+                  (chartModelBasis E) k)‖ ≤
+        ∑ i : Fin (Module.finrank ℝ E),
+          ∑ j : Fin (Module.finrank ℝ E),
+            ∑ k : Fin (Module.finrank ℝ E), D := by
+    refine (norm_sum_le _ _).trans ?_
+    refine Finset.sum_le_sum (fun i _ => ?_)
+    refine (norm_sum_le _ _).trans ?_
+    refine Finset.sum_le_sum (fun j _ => ?_)
+    refine (norm_sum_le _ _).trans ?_
+    refine Finset.sum_le_sum (fun k _ => ?_)
+    exact h_per i j k
+  -- Step b: collapse the triple sum-of-constant.
+  have h_sum_const :
+      ∑ i : Fin (Module.finrank ℝ E),
+        ∑ j : Fin (Module.finrank ℝ E),
+          ∑ k : Fin (Module.finrank ℝ E), D = (n : ℝ) ^ 3 * D := by
+    have h_inner :
+        ∀ i j : Fin (Module.finrank ℝ E),
+          (∑ _k : Fin (Module.finrank ℝ E), D) = (n : ℝ) * D := by
+      intro i j
+      rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin]
+      simp [nsmul_eq_mul, hn_def]
+    have h_middle :
+        ∀ i : Fin (Module.finrank ℝ E),
+          (∑ _j : Fin (Module.finrank ℝ E),
+            (∑ _k : Fin (Module.finrank ℝ E), D)) = (n : ℝ) ^ 2 * D := by
+      intro i
+      calc (∑ _j : Fin (Module.finrank ℝ E),
+              (∑ _k : Fin (Module.finrank ℝ E), D))
+            = ∑ _j : Fin (Module.finrank ℝ E), (n : ℝ) * D := by
+              refine Finset.sum_congr rfl (fun j _ => ?_)
+              exact h_inner i j
+          _ = (n : ℝ) * ((n : ℝ) * D) := by
+              rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin]
+              simp [nsmul_eq_mul, hn_def]
+          _ = (n : ℝ) ^ 2 * D := by ring
+    calc (∑ i : Fin (Module.finrank ℝ E),
+            (∑ _j : Fin (Module.finrank ℝ E),
+              (∑ _k : Fin (Module.finrank ℝ E), D)))
+          = ∑ i : Fin (Module.finrank ℝ E), (n : ℝ) ^ 2 * D := by
+            refine Finset.sum_congr rfl (fun i _ => ?_)
+            exact h_middle i
+        _ = (n : ℝ) * ((n : ℝ) ^ 2 * D) := by
+            rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin]
+            simp [nsmul_eq_mul, hn_def]
+        _ = (n : ℝ) ^ 3 * D := by ring
+  rw [h_sum_const] at h_outer_norm
+  -- Step c: rewrite `(n : ℝ)^3 * D = C * ‖Y‖`.
+  have h_C_eq : (n : ℝ) ^ 3 * D = C * ‖Y‖ := by
+    rw [hC_def, hD_def]
+    ring
+  rw [h_C_eq] at h_outer_norm
+  exact h_outer_norm
+
+/-! ## Chart Levi-Civita parallel CLM uniform op-norm bound
+
+A finite-dimensional inner-product space is automatically complete; we
 package it as a local instance so that the `chartLeviCivitaParallelCLM`
 infrastructure (which requires `[CompleteSpace E]`) is usable here. -/
+
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Abbreviations -/
+/-! ### Abbreviations -/
 
 /-- The closed support of the canonical POU weight at `α` (a compact subset of
 `(chartAt H α).source` on a closed manifold). -/
@@ -79,10 +599,10 @@ private theorem pouTsupportSet_subset_chartAt_source (α : M) :
     pouTsupportSet (I := I) (M := M) α ⊆ (chartAt H α).source :=
   (chartAtlasPOU_isSubordinate I M) α
 
-/-! ## Model-side basis sup -/
+/-! ### Model-side basis sup -/
 
-/-- The model-space basis vector norm sup. Local copy since the one in
-`ChristoffelCorrectionUniformBound.lean` is private to that file. -/
+/-- The model-space basis vector norm sup. Local copy used by the chart
+Levi-Civita parallel CLM bound below. -/
 private noncomputable def chartModelBasisVecSup' (E : Type*) [NormedAddCommGroup E]
     [NormedSpace ℝ E] [FiniteDimensional ℝ E]
     [NeZero (Module.finrank ℝ E)] : ℝ :=
@@ -113,7 +633,7 @@ private lemma norm_basis_le_chartModelBasisVecSup'
     (f := fun k => ‖(chartModelBasis E) k‖)
     (Finset.mem_univ _)
 
-/-! ## Part B: uniform op-norm bound on
+/-! ### Part B: uniform op-norm bound on
 `chartLeviCivitaParallelCLM g α b (chartBasisVecFiber α j)` -/
 
 /-- The chart Levi-Civita parallel CLM at `b`, applied to the vector field
@@ -351,7 +871,8 @@ The proof factors the slot correction CLM as a composition
   `‖id‖ ≤ 1` for non-slot entries.
 
 The norm `‖Φ‖ = ‖chartLeviCivitaParallelCLM g α b (chartBasisVecFiber α j)‖`
-is bounded uniformly on `tsupport (chartAtlasPOU I M α)` by Part B above.
+is bounded uniformly on `tsupport (chartAtlasPOU I M α)` by the Levi-Civita
+parallel CLM bound above.
 -/
 
 /-! ### Slot-substitution pointwise bound -/
@@ -691,6 +1212,10 @@ end DifferentialGeometry
 end
 
 section Sanity
+#print axioms
+  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.norm_section_sq_le_const_mul_tensorInnerPointwise_on_pouTsupport
+#print axioms
+  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.christoffelCorrection_opNorm_isBounded_on_pouTsupport
 #print axioms
   DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartLeviCivitaParallelCLM_chartBasisVec_opNorm_isBounded_on_pouTsupport
 #print axioms
