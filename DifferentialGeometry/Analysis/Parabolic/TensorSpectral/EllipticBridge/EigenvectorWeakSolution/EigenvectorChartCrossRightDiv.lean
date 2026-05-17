@@ -349,7 +349,7 @@ factor `crossRightDivFactor` vanish off `chartPouKernel α`. -/
 
 /-- The chart push-forward of the chart-atlas partition-of-unity weight vanishes
 outside the compact partition-of-unity kernel `chartPouKernel α`. -/
-private lemma chartPushedRaw_pou_eq_zero_off_chartPouKernel
+lemma chartPushedRaw_pou_eq_zero_off_chartPouKernel
     (α : M) {y : EuclN} (hy : y ∉ chartPouKernel (I := I) (M := M) α) :
     chartPushedRaw I α ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) y = 0 := by
   classical
@@ -384,7 +384,7 @@ private lemma chartPushedRaw_pou_eq_zero_off_chartPouKernel
 /-- The chart-Euclidean partial of the chart push-forward of the chart-atlas
 partition-of-unity weight vanishes outside the partition-of-unity kernel
 `chartPouKernel α`. -/
-private lemma euclidPartial_chartPushedRaw_pou_eq_zero_off_chartPouKernel
+lemma euclidPartial_chartPushedRaw_pou_eq_zero_off_chartPouKernel
     (α : M) (j : Fin (Module.finrank ℝ E)) {y : EuclN}
     (hy : y ∉ chartPouKernel (I := I) (M := M) α) :
     euclidPartial (E := E) j

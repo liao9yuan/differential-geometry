@@ -123,7 +123,7 @@ support of the continuous-linear-map-extended chart components, which are
 /-- **Almost-everywhere support of an `L²`-limit.** If `F n → glim` in
 `Lp ℝ 2 μ` and each `F n` vanishes almost everywhere off a closed set `K`, then
 `glim` vanishes almost everywhere off `K`. -/
-private lemma ae_eq_zero_off_of_tendsto_Lp
+lemma ae_eq_zero_off_of_tendsto_Lp
     {μ : Measure EuclN} {K : Set EuclN} {F : ℕ → Lp ℝ 2 μ} {glim : Lp ℝ 2 μ}
     (hF : ∀ n, ∀ᵐ y ∂μ, y ∉ K → (F n : EuclN → ℝ) y = 0)
     (h_tendsto : Filter.Tendsto F atTop (𝓝 glim)) :

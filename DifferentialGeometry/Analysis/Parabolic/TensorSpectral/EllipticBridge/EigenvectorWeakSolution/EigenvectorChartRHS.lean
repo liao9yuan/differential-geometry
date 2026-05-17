@@ -398,7 +398,7 @@ private lemma one_div_densityOnEuclid_contDiffOn
 vanishes pointwise off the compact partition-of-unity kernel `chartPouKernel α`:
 every summand of its explicit finite-sum definition carries an
 `indicator (chartPouKernel α)` factor. -/
-private lemma crossRightGradCoeffDivLimit_eq_zero_off_chartPouKernel
+lemma crossRightGradCoeffDivLimit_eq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_uniform : uniformTensorChartSobolevBound g r s)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
