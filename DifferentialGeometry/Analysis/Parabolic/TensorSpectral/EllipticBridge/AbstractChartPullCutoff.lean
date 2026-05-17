@@ -195,7 +195,7 @@ private lemma chartKernelCutoff_zero_off_cutoffKernelSet (α : M) :
     (pouWeightTsupport_subset_interior_cutoffKernelSet
       (I := I) (M := M) α)).choose_spec.2.1
 
-private lemma chartKernelCutoff_mem_Icc (α : M) :
+lemma chartKernelCutoff_mem_Icc (α : M) :
     ∀ x, (chartKernelCutoff (I := I) (M := M) α : M → ℝ) x ∈ Set.Icc (0 : ℝ) 1 :=
   (exists_contMDiffMap_one_nhds_of_subset_interior (n := (⊤ : ℕ∞)) I
     (isClosed_tsupport
@@ -222,7 +222,7 @@ theorem chartKernelCutoff_abs_le_one (α : M) (x : M) :
 
 /-- The chart-kernel cutoff has topological support inside the chart-`α`
 source. -/
-private lemma chartKernelCutoff_tsupport_subset_source (α : M) :
+lemma chartKernelCutoff_tsupport_subset_source (α : M) :
     tsupport ((chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯) : M → ℝ) ⊆
       (chartAt H α).source := by
   refine Subset.trans ?_ (cutoffKernelSet_subset_source (I := I) (M := M) α)
@@ -284,7 +284,7 @@ def cutoffComponentEuclid
 /-- The cutoff-weighted chart-frame scalar component has support inside the
 chart-`α` source: it vanishes wherever the chart-kernel cutoff does, and the
 cutoff is supported inside the chart source. -/
-private lemma cutoffComponentScalar_tsupport_subset_source
+lemma cutoffComponentScalar_tsupport_subset_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -300,7 +300,7 @@ private lemma cutoffComponentScalar_tsupport_subset_source
 
 /-- The cutoff-weighted chart-frame scalar component has compact support: its
 support sits inside the compact support of the chart-kernel cutoff. -/
-private lemma cutoffComponentScalar_hasCompactSupport
+lemma cutoffComponentScalar_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -317,7 +317,7 @@ private lemma cutoffComponentScalar_hasCompactSupport
 
 /-- The raw chart-frame scalar component is smooth on the chart source. This is
 `tensorChartComponentRaw_contMDiffOn_chart_source`. -/
-private lemma cutoffComponentScalar_contMDiff
+lemma cutoffComponentScalar_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -367,7 +367,7 @@ private lemma cutoffComponentScalar_continuous
   (cutoffComponentScalar_contMDiff (I := I) (M := M) g r s S α Idx Jdx).continuous
 
 /-- The cutoff-weighted chart-frame scalar component is Borel measurable. -/
-private lemma cutoffComponentScalar_measurable
+lemma cutoffComponentScalar_measurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -381,7 +381,7 @@ By definition the cutoff Euclidean chart component is the chart-pushforward of
 the manifold-side cutoff scalar field; this routes the chart-pushforward `L²`
 bridge directly to it. -/
 
-private lemma cutoffComponentEuclid_eq_chartPushedRaw
+lemma cutoffComponentEuclid_eq_chartPushedRaw
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -497,7 +497,7 @@ chart base set.** For a compact `K_M` contained in the chart-`α` base set, ther
 is a non-negative constant `K` such that
 `‖T‖² ≤ K · chartTensorInnerPointwise_rs_model g r s α b T T` for every base
 point `b ∈ K_M` and every `(r, s)`-model tensor `T`. -/
-private lemma sq_norm_le_const_mul_chartTensorInner_on_compact
+lemma sq_norm_le_const_mul_chartTensorInner_on_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {K_M : Set M} (hK_M_compact : IsCompact K_M)
     (hK_M_sub : K_M ⊆ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -631,7 +631,7 @@ cutoff is `[0, 1]`-valued. -/
 /-- On the chart base set, the chart-frame diagonal quadratic form on
 `tensorTrivProj S α b` folds back to the bundle-fibre diagonal pairing on
 `S.toFun b`. -/
-private lemma chartTensorInner_tensorTrivProj_eq_tensorInner
+lemma chartTensorInner_tensorTrivProj_eq_tensorInner
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -650,7 +650,7 @@ chart center `α` there is a non-negative constant `C` — depending only on
 `(g, r, s, α)` — such that for every smooth section `S` and every multi-index
 pair `(Idx, Jdx)`, the square of the cutoff scalar component at `b` is bounded
 by `C` times the bundle-fibre diagonal pairing of `S` at `b`. -/
-private lemma cutoffComponentScalar_sq_le_const_mul_tensorInner
+lemma cutoffComponentScalar_sq_le_const_mul_tensorInner
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (S : SmoothCcTensor g r s)
@@ -970,7 +970,7 @@ center `α` there is a non-negative constant `C` such that for every smooth
 section `S` and every multi-index pair `(Idx, Jdx)`, the `L²` norm of the cutoff
 Euclidean chart component against the chart's Euclidean `L²` reference measure
 is bounded by `ENNReal.ofReal C` times `ENNReal.ofReal ‖S‖`. -/
-private lemma cutoffComponentEuclid_eLpNorm_le_uniform
+lemma cutoffComponentEuclid_eLpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (S : SmoothCcTensor g r s)
@@ -1110,7 +1110,7 @@ private lemma cutoffComponentScalar_smul
       rw [SmoothCcTensor.toSection_smul]; rfl, map_smul, map_smul]
   rw [hraw_smul, smul_eq_mul, smul_eq_mul]; ring
 
-private lemma cutoffComponentEuclid_add
+lemma cutoffComponentEuclid_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -1131,7 +1131,7 @@ private lemma cutoffComponentEuclid_add
       cutoffComponentEuclid_apply_of_notMem
         (I := I) (M := M) g r s S₂ α Idx Jdx hy, add_zero]
 
-private lemma cutoffComponentEuclid_smul
+lemma cutoffComponentEuclid_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))

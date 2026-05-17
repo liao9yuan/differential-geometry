@@ -98,11 +98,16 @@ integration over all of `M`, we multiply the LHS by `ρ_α(b)`: inside
 `tsupport ρ_α` we use `0 ≤ ρ_α ≤ 1`; outside, `ρ_α(b) = 0` makes the LHS
 vanish, while the RHS remains non-negative. -/
 
-private lemma chartPou_mul_sum_chartRSTwistInv_cov_sq_norm_le_const_mul_tensorCovDerivPointwiseInner
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
+private lemma chartWeight_mul_sum_chartRSTwistInv_cov_sq_norm_le_const_mul_tensorCovDerivPointwiseInner
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
+    (w : M → ℝ) (hw_nn : ∀ x, 0 ≤ w x) (hw_le_one : ∀ x, w x ≤ 1)
+    {K_M : Set M} (hK_M_compact : IsCompact K_M)
+    (hK_M_sub_baseSet :
+      K_M ⊆ (trivializationAt E (TangentSpace I) α).baseSet)
+    (hw_supp : tsupport w ⊆ K_M) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (S : SmoothCcTensor g r s) (b : M),
-        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b ^ 2 *
+        w b ^ 2 *
             (∑ i : Fin (Module.finrank ℝ E),
               ‖chartRSTwistInv (I := I) (M := M) α b r s
                   (TensorRSSpace.toModel
@@ -111,12 +116,10 @@ private lemma chartPou_mul_sum_chartRSTwistInv_cov_sq_norm_le_const_mul_tensorCo
           C * tensorCovDerivPointwiseInner (I := I) (M := M) g r s S S b := by
   classical
   obtain ⟨C, hC_nn, h_sum⟩ :=
-    exists_sum_chartRSTwistInv_cov_sq_norm_le_const_mul_tensorCovDerivPointwiseInner_on_pouTsupport
-      (I := I) (M := M) g r s α
+    exists_sum_chartRSTwistInv_cov_sq_norm_le_const_mul_tensorCovDerivPointwiseInner_on_compact
+      (I := I) (M := M) g r s α hK_M_compact hK_M_sub_baseSet
   refine ⟨C, hC_nn, ?_⟩
   intro S b
-  set ρ : M → ℝ := fun x : M =>
-    ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x with hρ_def
   set SqSum : ℝ :=
     ∑ i : Fin (Module.finrank ℝ E),
       ‖chartRSTwistInv (I := I) (M := M) α b r s
@@ -133,30 +136,30 @@ private lemma chartPou_mul_sum_chartRSTwistInv_cov_sq_norm_le_const_mul_tensorCo
   have hQ_nn : 0 ≤ Q := by
     rw [hQ_def]
     exact tensorCovDerivPointwiseInner_nonneg (I := I) (M := M) g r s S b
-  by_cases hb : b ∈ tsupport ρ
-  · -- Inside the support: chain `SqSum ≤ C · Q` from the headline with
-    -- `ρ b ^ 2 ≤ 1` from `0 ≤ ρ b ≤ 1`.
-    have hρ_nn : 0 ≤ ρ b := (chartAtlasPOU I M).nonneg α b
-    have hρ_le_one : ρ b ≤ 1 := (chartAtlasPOU I M).le_one α b
-    have hρ_sq_le_one : ρ b ^ 2 ≤ 1 := by
-      have hsq : ρ b * ρ b ≤ 1 * 1 :=
-        mul_le_mul hρ_le_one hρ_le_one hρ_nn (by linarith)
-      have hsq' : ρ b * ρ b ≤ 1 := by linarith
+  by_cases hb : b ∈ K_M
+  · -- Inside `K_M`: chain `SqSum ≤ C · Q` from the headline with
+    -- `w b ^ 2 ≤ 1` from `0 ≤ w b ≤ 1`.
+    have hw_b_nn : 0 ≤ w b := hw_nn b
+    have hw_b_le_one : w b ≤ 1 := hw_le_one b
+    have hw_sq_le_one : w b ^ 2 ≤ 1 := by
+      have hsq : w b * w b ≤ 1 * 1 :=
+        mul_le_mul hw_b_le_one hw_b_le_one hw_b_nn (by linarith)
+      have hsq' : w b * w b ≤ 1 := by linarith
       rw [sq]; exact hsq'
     have hSqSum_le : SqSum ≤ C * Q := by
       rw [hSqSum_def, hQ_def]
       exact h_sum S hb
     have hCQ_nn : 0 ≤ C * Q := mul_nonneg hC_nn hQ_nn
-    calc ρ b ^ 2 * SqSum
+    calc w b ^ 2 * SqSum
         ≤ 1 * (C * Q) :=
-          mul_le_mul hρ_sq_le_one hSqSum_le hSqSum_nn (by linarith)
+          mul_le_mul hw_sq_le_one hSqSum_le hSqSum_nn (by linarith)
       _ = C * Q := one_mul _
-  · -- Outside the support: `ρ b = 0`, so LHS = 0.
-    have hρ_zero : ρ b = 0 := by
+  · -- Outside `K_M`: `b ∉ tsupport w`, so `w b = 0` and LHS = 0.
+    have hw_zero : w b = 0 := by
       by_contra hne
-      exact hb (subset_tsupport _ hne)
-    have hLHS_zero : ρ b ^ 2 * SqSum = 0 := by
-      rw [hρ_zero]; ring
+      exact hb (hw_supp (subset_tsupport _ hne))
+    have hLHS_zero : w b ^ 2 * SqSum = 0 := by
+      rw [hw_zero]; ring
     rw [hLHS_zero]
     exact mul_nonneg hC_nn hQ_nn
 
@@ -248,13 +251,18 @@ The squared `L^2(volume)` seminorm of the partition-of-unity-weighted
 Euclidean norm of the sum-over-directions of the chart-twist-inverted
 covariant derivative is controlled by `C · ‖S‖^2`. -/
 
-private lemma sq_eLpNorm_chartPou_mul_sqrt_sum_le_const_mul_h1NormSq
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
+private lemma sq_eLpNorm_chartWeight_mul_sqrt_sum_le_const_mul_h1NormSq
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
+    (w : M → ℝ) (hw_nn : ∀ x, 0 ≤ w x) (hw_le_one : ∀ x, w x ≤ 1)
+    {K_M : Set M} (hK_M_compact : IsCompact K_M)
+    (hK_M_sub_baseSet :
+      K_M ⊆ (trivializationAt E (TangentSpace I) α).baseSet)
+    (hw_supp : tsupport w ⊆ K_M) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (S : SmoothCcTensorH1 g r s),
         (eLpNorm
             (fun b : M =>
-              ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b *
+              w b *
                 Real.sqrt
                   (∑ i : Fin (Module.finrank ℝ E),
                     ‖chartRSTwistInv (I := I) (M := M) α b r s
@@ -266,13 +274,13 @@ private lemma sq_eLpNorm_chartPou_mul_sqrt_sum_le_const_mul_h1NormSq
           ENNReal.ofReal (C * ‖S‖ ^ 2) := by
   classical
   obtain ⟨C, hC_nn, h_pt⟩ :=
-    chartPou_mul_sum_chartRSTwistInv_cov_sq_norm_le_const_mul_tensorCovDerivPointwiseInner
-      (I := I) (M := M) g r s α
+    chartWeight_mul_sum_chartRSTwistInv_cov_sq_norm_le_const_mul_tensorCovDerivPointwiseInner
+      (I := I) (M := M) g r s α w hw_nn hw_le_one hK_M_compact hK_M_sub_baseSet
+      hw_supp
   refine ⟨C, hC_nn, ?_⟩
   intro S
   -- Set notation for the integrand and the measure.
-  set ρ : M → ℝ := fun x : M =>
-    ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x with hρ_def
+  set ρ : M → ℝ := w with hρ_def
   set SqSum : M → ℝ := fun b : M =>
     ∑ i : Fin (Module.finrank ℝ E),
       ‖chartRSTwistInv (I := I) (M := M) α b r s
@@ -378,29 +386,36 @@ times the `H^1` seminorm of `S`, for a constant `C` depending only on
 `(g, r, s, α)`. -/
 
 /-- **Headline `L²` integration of the chart-twist-inverted covariant
-derivative norm sum.** For a closed Riemannian manifold `(M, g)`, ranks
-`(r, s)`, and a chart base point `α : M`, there is a non-negative real
-constant `C` (depending only on `(g, r, s, α)`) such that for every smooth
-compactly-supported `H^1` tensor section `S : SmoothCcTensorH1 g r s`,
+derivative norm sum, for an arbitrary `[0, 1]`-valued chart-supported weight.**
+For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a chart base point
+`α : M`, and a `[0, 1]`-valued weight `w : M → ℝ` whose topological support is
+contained in a compact subset `K_M` of the chart-`α` base set, there is a
+non-negative real constant `C` (depending only on `(g, r, s, α, w, K_M)`) such
+that for every smooth compactly-supported `H^1` tensor section
+`S : SmoothCcTensorH1 g r s`,
 
 ```
 eLpNorm
-    (fun b => ρ_α(b) * √(∑_i ‖chartRSTwistInv α b r s
+    (fun b => w(b) * √(∑_i ‖chartRSTwistInv α b r s
                           (toModel (∇S(b)(e_i' b)))‖²))
     2 (riemannianVolumeMeasure g) ≤
   ENNReal.ofReal C * ‖S‖₊,
 ```
 
 where `e_i' b := chartBasisVecFiber α i b` is the chart-`α` basis fibre at
-`b` and `ρ_α` is the chart-atlas partition-of-unity weight at `α`. The
-constant `C` is independent of `S`. -/
-theorem exists_eLpNorm_chartPou_mul_sqrt_sum_chartRSTwistInv_cov_norm_sq_le_const_mul_h1Norm
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
+`b`. The constant `C` is independent of `S`. -/
+theorem exists_eLpNorm_chartWeight_mul_sqrt_sum_chartRSTwistInv_cov_norm_sq_le_const_mul_h1Norm
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
+    (w : M → ℝ) (hw_nn : ∀ x, 0 ≤ w x) (hw_le_one : ∀ x, w x ≤ 1)
+    {K_M : Set M} (hK_M_compact : IsCompact K_M)
+    (hK_M_sub_baseSet :
+      K_M ⊆ (trivializationAt E (TangentSpace I) α).baseSet)
+    (hw_supp : tsupport w ⊆ K_M) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (S : SmoothCcTensorH1 g r s),
         eLpNorm
             (fun b : M =>
-              ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b *
+              w b *
                 Real.sqrt
                   (∑ i : Fin (Module.finrank ℝ E),
                     ‖chartRSTwistInv (I := I) (M := M) α b r s
@@ -412,8 +427,9 @@ theorem exists_eLpNorm_chartPou_mul_sqrt_sum_chartRSTwistInv_cov_norm_sq_le_cons
           ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞) := by
   classical
   obtain ⟨C, hC_nn, h_sq⟩ :=
-    sq_eLpNorm_chartPou_mul_sqrt_sum_le_const_mul_h1NormSq
-      (I := I) (M := M) g r s α
+    sq_eLpNorm_chartWeight_mul_sqrt_sum_le_const_mul_h1NormSq
+      (I := I) (M := M) g r s α w hw_nn hw_le_one hK_M_compact hK_M_sub_baseSet
+      hw_supp
   refine ⟨Real.sqrt C, Real.sqrt_nonneg _, ?_⟩
   intro S
   -- `C · ‖S‖^2 ≥ 0`; take sqrt-form of the squared bound.
@@ -434,6 +450,55 @@ theorem exists_eLpNorm_chartPou_mul_sqrt_sum_chartRSTwistInv_cov_norm_sq_le_cons
   rw [show ENNReal.ofReal ‖S‖ = (‖S‖₊ : ℝ≥0∞) from
     (coe_nnnorm_eq_ofReal_norm S).symm] at h_eLpNorm_le
   exact h_eLpNorm_le
+
+/-- **Headline `L²` integration of the chart-twist-inverted covariant
+derivative norm sum.** For a closed Riemannian manifold `(M, g)`, ranks
+`(r, s)`, and a chart base point `α : M`, there is a non-negative real
+constant `C` (depending only on `(g, r, s, α)`) such that for every smooth
+compactly-supported `H^1` tensor section `S : SmoothCcTensorH1 g r s`,
+
+```
+eLpNorm
+    (fun b => ρ_α(b) * √(∑_i ‖chartRSTwistInv α b r s
+                          (toModel (∇S(b)(e_i' b)))‖²))
+    2 (riemannianVolumeMeasure g) ≤
+  ENNReal.ofReal C * ‖S‖₊,
+```
+
+where `e_i' b := chartBasisVecFiber α i b` is the chart-`α` basis fibre at
+`b` and `ρ_α` is the chart-atlas partition-of-unity weight at `α`. The
+constant `C` is independent of `S`.
+
+This is the specialisation of
+`exists_eLpNorm_chartWeight_mul_sqrt_sum_chartRSTwistInv_cov_norm_sq_le_const_mul_h1Norm`
+to the chart-atlas partition-of-unity weight at `α`. -/
+theorem exists_eLpNorm_chartPou_mul_sqrt_sum_chartRSTwistInv_cov_norm_sq_le_const_mul_h1Norm
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (S : SmoothCcTensorH1 g r s),
+        eLpNorm
+            (fun b : M =>
+              ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b *
+                Real.sqrt
+                  (∑ i : Fin (Module.finrank ℝ E),
+                    ‖chartRSTwistInv (I := I) (M := M) α b r s
+                        (TensorRSSpace.toModel
+                          (tensorCovDerivAt (I := I) (M := M) g r s
+                            S.toCcTensor b
+                            (chartBasisVecFiber (I := I) α i b)))‖ ^ 2))
+            2 (riemannianVolumeMeasure (I := I) (M := M) g) ≤
+          ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞) :=
+  exists_eLpNorm_chartWeight_mul_sqrt_sum_chartRSTwistInv_cov_norm_sq_le_const_mul_h1Norm
+    (I := I) (M := M) g r s α
+    (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
+    (fun x => (chartAtlasPOU I M).nonneg α x)
+    (fun x => (chartAtlasPOU I M).le_one α x)
+    ((isClosed_tsupport _).isCompact)
+    (by
+      intro x hx
+      rw [DifferentialGeometry.Integral.Measure.trivializationAt_baseSet_eq_chartAt_source]
+      exact (DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M) α hx)
+    (subset_rfl)
 
 end TensorSpectral
 end Parabolic

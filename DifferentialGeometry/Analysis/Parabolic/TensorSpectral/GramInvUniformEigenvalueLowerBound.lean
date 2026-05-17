@@ -97,42 +97,32 @@ private lemma sphere_isCompact :
 /-! ## Headline result: uniform lower bound on the inverse chart-frame Gram -/
 
 /-- **Uniform Rayleigh-quotient lower bound for the chart-frame inverse Gram
-matrix on the compact closed support of the chart-atlas partition-of-unity
-weight at `α`.**
+matrix on an arbitrary compact subset `Kα` of the chart base set.**
 
-For a closed Riemannian manifold `(M, g)` and any chart base point `α`,
-there exists `c > 0` such that for every `b` in the closed support of the
-chart-atlas partition-of-unity weight at `α` and every coefficient vector
+For a closed Riemannian manifold `(M, g)`, any chart base point `α`, and a
+compact set `Kα` contained in the chart-`α` base set, there exists `c > 0`
+such that for every `b ∈ Kα` and every coefficient vector
 `ξ : Fin (Module.finrank ℝ E) → ℝ`,
 `c * (∑ i, ξ i ^ 2) ≤ ∑ i j, (chartInvGramMatrix g α b)_{ij} * ξ i * ξ j`.
 
 The Gram matrix is built from the chart-`α`-trivialised model basis at every
-base-set point; on the compact closed support of the partition-of-unity
-weight at `α`, which is contained in the chart base set, the inverse is
+base-set point; on a compact subset of the chart base set the inverse is
 positive-definite with continuous entries, and the extreme-value theorem
 produces a strictly positive minimum. -/
-theorem exists_chartInvGramMatrix_quadForm_lower_bound_on_pouTsupport
+theorem exists_chartInvGramMatrix_quadForm_lower_bound_on_compact
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
-    (g : SmoothRiemannianMetric I M) (α : M) :
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {Kα : Set M} (hKα_compact : IsCompact Kα)
+    (hKα_sub_baseSet :
+      Kα ⊆ (trivializationAt E (TangentSpace I) α).baseSet) :
     ∃ c : ℝ, 0 < c ∧
-      ∀ b : M, b ∈ tsupport
-          ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
-            : C^∞⟮I, M; ℝ⟯) : M → ℝ) →
+      ∀ b : M, b ∈ Kα →
         ∀ ξ : Fin (Module.finrank ℝ E) → ℝ,
           c * (∑ i : Fin (Module.finrank ℝ E), ξ i ^ 2) ≤
             ∑ i : Fin (Module.finrank ℝ E),
               ∑ j : Fin (Module.finrank ℝ E),
                 chartInvGramMatrix (I := I) g α b i j * ξ i * ξ j := by
   classical
-  -- Compact set `Kα := tsupport(POU_α) ⊆ baseSet`.
-  set Kα : Set M := tsupport
-    ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
-      : C^∞⟮I, M; ℝ⟯) : M → ℝ) with hKα_def
-  have hKα_compact : IsCompact Kα :=
-    pouTsupport_isCompact (I := I) (M := M) α
-  have hKα_sub_baseSet :
-      Kα ⊆ (trivializationAt E (TangentSpace I) α).baseSet :=
-    pouTsupport_subset_baseSet (I := I) (M := M) α
   -- Rayleigh quadratic form `Q(b, ξ) := ξᵀ chartInvGram(b) ξ`.
   set Q : M × (Fin (Module.finrank ℝ E) → ℝ) → ℝ := fun p =>
     ∑ i : Fin (Module.finrank ℝ E),
@@ -312,6 +302,36 @@ theorem exists_chartInvGramMatrix_quadForm_lower_bound_on_pouTsupport
         exact le_of_eq (hsum_empty _).symm
     · -- Kα is empty, so the hypothesis `b ∈ Kα` is impossible.
       exact absurd ⟨b, hb⟩ hKα_ne
+
+/-- **Uniform Rayleigh-quotient lower bound for the chart-frame inverse Gram
+matrix on the compact closed support of the chart-atlas partition-of-unity
+weight at `α`.**
+
+For a closed Riemannian manifold `(M, g)` and any chart base point `α`,
+there exists `c > 0` such that for every `b` in the closed support of the
+chart-atlas partition-of-unity weight at `α` and every coefficient vector
+`ξ : Fin (Module.finrank ℝ E) → ℝ`,
+`c * (∑ i, ξ i ^ 2) ≤ ∑ i j, (chartInvGramMatrix g α b)_{ij} * ξ i * ξ j`.
+
+This is the specialisation of
+`exists_chartInvGramMatrix_quadForm_lower_bound_on_compact` to the compact
+closed support of the chart-atlas partition-of-unity weight. -/
+theorem exists_chartInvGramMatrix_quadForm_lower_bound_on_pouTsupport
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (α : M) :
+    ∃ c : ℝ, 0 < c ∧
+      ∀ b : M, b ∈ tsupport
+          ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
+            : C^∞⟮I, M; ℝ⟯) : M → ℝ) →
+        ∀ ξ : Fin (Module.finrank ℝ E) → ℝ,
+          c * (∑ i : Fin (Module.finrank ℝ E), ξ i ^ 2) ≤
+            ∑ i : Fin (Module.finrank ℝ E),
+              ∑ j : Fin (Module.finrank ℝ E),
+                chartInvGramMatrix (I := I) g α b i j * ξ i * ξ j :=
+  exists_chartInvGramMatrix_quadForm_lower_bound_on_compact
+    (I := I) (M := M) g α
+    (pouTsupport_isCompact (I := I) (M := M) α)
+    (pouTsupport_subset_baseSet (I := I) (M := M) α)
 
 end TensorSpectral
 end Parabolic

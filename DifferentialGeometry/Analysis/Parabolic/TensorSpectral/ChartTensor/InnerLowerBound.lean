@@ -318,19 +318,20 @@ variable [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
 
 /-- **Uniform positive lower bound for the chart-frame `(r, s)`-diagonal
-quadratic form on `tsupport(POU_α) × unit sphere`.**
+quadratic form on `K_M × unit sphere`, for an arbitrary compact subset `K_M`
+of the chart base set.**
 
-For a closed Riemannian manifold `(M, g)`, a chart base point `α`, and ranks
-`(r, s)`, there is `ε > 0` such that
-`chartTensorInnerPointwise_rs_model g r s α b T T ≥ ε`
-for every `b` in the closed support of the chart-atlas partition-of-unity
-weight at `α` and every unit `(r, s)`-model tensor `T`. -/
-theorem exists_chartTensorInnerPointwise_rs_model_lower_bound_on_pouTsupport
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
+For a closed Riemannian manifold `(M, g)`, a chart base point `α`, ranks
+`(r, s)`, and a compact set `K_M` contained in the chart-`α` base set, there is
+`ε > 0` such that `chartTensorInnerPointwise_rs_model g r s α b T T ≥ ε` for
+every `b ∈ K_M` and every unit `(r, s)`-model tensor `T`. -/
+theorem exists_chartTensorInnerPointwise_rs_model_lower_bound_on_compact
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
+    {K_M : Set M} (hK_M_compact : IsCompact K_M)
+    (hK_M_sub_baseSet :
+      K_M ⊆ (trivializationAt E (TangentSpace I) α).baseSet) :
     ∃ ε : ℝ, 0 < ε ∧
-      ∀ b : M, b ∈ tsupport (fun x : M =>
-          ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
-            : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
+      ∀ b : M, b ∈ K_M →
         ∀ T : TensorRSModel r s ℝ E, ‖T‖ = 1 →
           ε ≤ chartTensorInnerPointwise_rs_model (I := I) (M := M)
             g r s α b T T := by
@@ -338,14 +339,6 @@ theorem exists_chartTensorInnerPointwise_rs_model_lower_bound_on_pouTsupport
   -- Provide the proper-space instance needed for compactness of the sphere.
   haveI : ProperSpace (TensorRSModel r s ℝ E) :=
     FiniteDimensional.proper_real (TensorRSModel r s ℝ E)
-  -- Compact set `tsupport(POU_α) ⊆ M`.
-  set K_M : Set M := tsupport (fun x : M =>
-    ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) with hK_M_def
-  have hK_M_compact : IsCompact K_M :=
-    pouTsupport_isCompact (I := I) (M := M) α
-  have hK_M_sub_baseSet :
-      K_M ⊆ (trivializationAt E (TangentSpace I) α).baseSet :=
-    pouTsupport_subset_baseSet (I := I) (M := M) α
   -- Compact set `S = unit sphere ⊆ TensorRSModel r s ℝ E`.
   set S_T : Set (TensorRSModel r s ℝ E) := Metric.sphere (0 : TensorRSModel r s ℝ E) 1
     with hS_T_def
@@ -414,6 +407,32 @@ theorem exists_chartTensorInnerPointwise_rs_model_lower_bound_on_pouTsupport
       exact hT_norm
     have hp_mem : (b, T) ∈ K := ⟨hb, hT_mem⟩
     exact absurd ⟨(b, T), hp_mem⟩ hK_ne
+
+/-- **Uniform positive lower bound for the chart-frame `(r, s)`-diagonal
+quadratic form on `tsupport(POU_α) × unit sphere`.**
+
+For a closed Riemannian manifold `(M, g)`, a chart base point `α`, and ranks
+`(r, s)`, there is `ε > 0` such that
+`chartTensorInnerPointwise_rs_model g r s α b T T ≥ ε`
+for every `b` in the closed support of the chart-atlas partition-of-unity
+weight at `α` and every unit `(r, s)`-model tensor `T`.
+
+This is the specialisation of
+`exists_chartTensorInnerPointwise_rs_model_lower_bound_on_compact` to the
+compact closed support of the chart-atlas partition-of-unity weight. -/
+theorem exists_chartTensorInnerPointwise_rs_model_lower_bound_on_pouTsupport
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
+    ∃ ε : ℝ, 0 < ε ∧
+      ∀ b : M, b ∈ tsupport (fun x : M =>
+          ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
+            : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
+        ∀ T : TensorRSModel r s ℝ E, ‖T‖ = 1 →
+          ε ≤ chartTensorInnerPointwise_rs_model (I := I) (M := M)
+            g r s α b T T :=
+  exists_chartTensorInnerPointwise_rs_model_lower_bound_on_compact
+    (I := I) (M := M) g r s α
+    (pouTsupport_isCompact (I := I) (M := M) α)
+    (pouTsupport_subset_baseSet (I := I) (M := M) α)
 
 end LowerBound
 

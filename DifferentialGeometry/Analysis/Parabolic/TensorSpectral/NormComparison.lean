@@ -351,32 +351,31 @@ section HeadlineNormComparison
 variable [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
 
-/-- Rescaling form of the uniform lower bound: on `tsupport(POU_α)`,
-`‖T‖² ≤ ε⁻¹ · chartTensorInnerPointwise_rs_model g r s α b T T` for every
-`T : TensorRSModel r s ℝ E`, with the same `ε > 0` produced by the unit-sphere
-lower bound. The case `T = 0` is handled separately; the non-zero case rescales
-by `‖T‖` and uses bilinearity of the chart-frame quadratic form together with
-the unit-sphere bound on the unit vector `‖T‖⁻¹ • T`. -/
-lemma sq_norm_le_inv_eps_mul_chartTensorInnerPointwise_rs_model_on_pouTsupport
+/-- Rescaling form of the uniform lower bound: on a compact subset `K_M` of the
+chart base set, `‖T‖² ≤ ε⁻¹ · chartTensorInnerPointwise_rs_model g r s α b T T`
+for every `T : TensorRSModel r s ℝ E`, with the same `ε > 0` produced by the
+unit-sphere lower bound. The case `T = 0` is handled separately; the non-zero
+case rescales by `‖T‖` and uses bilinearity of the chart-frame quadratic form
+together with the unit-sphere bound on the unit vector `‖T‖⁻¹ • T`. -/
+lemma sq_norm_le_inv_eps_mul_chartTensorInnerPointwise_rs_model_on_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
+    {K_M : Set M}
+    (hK_M_sub_baseSet :
+      K_M ⊆ (trivializationAt E (TangentSpace I) α).baseSet)
     {ε : ℝ} (hε : 0 < ε)
-    (h_lb : ∀ b : M, b ∈ tsupport (fun x : M =>
-        ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
-          : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
+    (h_lb : ∀ b : M, b ∈ K_M →
       ∀ T : TensorRSModel r s ℝ E, ‖T‖ = 1 →
         ε ≤ chartTensorInnerPointwise_rs_model (I := I) (M := M)
           g r s α b T T) :
-    ∀ b : M, b ∈ tsupport (fun x : M =>
-        ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
-          : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
+    ∀ b : M, b ∈ K_M →
       ∀ T : TensorRSModel r s ℝ E,
         ‖T‖ ^ 2 ≤ ε⁻¹ *
           chartTensorInnerPointwise_rs_model (I := I) (M := M) g r s α b T T := by
   classical
   intro b hb T
-  -- `tsupport ⊆ baseSet`: gives non-negativity of the diagonal.
+  -- `K_M ⊆ baseSet`: gives non-negativity of the diagonal.
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
-    pouTsupport_subset_baseSet (I := I) (M := M) α hb
+    hK_M_sub_baseSet hb
   have hQ_nn : 0 ≤ chartTensorInnerPointwise_rs_model
       (I := I) (M := M) g r s α b T T :=
     chartTensorInnerPointwise_rs_model_nonneg
@@ -476,13 +475,45 @@ lemma sq_norm_le_inv_eps_mul_chartTensorInnerPointwise_rs_model_on_pouTsupport
       rw [div_eq_inv_mul]]
     exact (le_div_iff₀ hε).mpr (by linarith [h_mul])
 
+/-- **Headline pointwise norm comparison (chart-frame form) on an arbitrary
+compact subset of the chart base set.**
+
+For a closed Riemannian manifold `(M, g)`, a chart base point `α`, ranks
+`(r, s)`, and a compact set `K_M` contained in the chart-`α` base set, there is
+a non-negative constant `K` such that the Euclidean square norm of a model
+`(r, s)`-tensor is bounded above by `K` times the chart-frame diagonal
+quadratic form, uniformly on `K_M`. -/
+theorem chartTrivializationNorm_le_const_mul_chartTensorInnerPointwise_rs_model_on_compact
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
+    {K_M : Set M} (hK_M_compact : IsCompact K_M)
+    (hK_M_sub_baseSet :
+      K_M ⊆ (trivializationAt E (TangentSpace I) α).baseSet) :
+    ∃ K : ℝ, 0 ≤ K ∧
+      ∀ b : M, b ∈ K_M →
+        ∀ T : TensorRSModel r s ℝ E,
+          ‖T‖ ^ 2 ≤ K * chartTensorInnerPointwise_rs_model
+            (I := I) (M := M) g r s α b T T := by
+  classical
+  -- Extract the uniform positive lower bound on the unit sphere.
+  obtain ⟨ε, hε_pos, h_lb⟩ :=
+    exists_chartTensorInnerPointwise_rs_model_lower_bound_on_compact
+      (I := I) (M := M) g r s α hK_M_compact hK_M_sub_baseSet
+  refine ⟨ε⁻¹, le_of_lt (inv_pos.mpr hε_pos), ?_⟩
+  -- Apply the rescaling lemma.
+  exact sq_norm_le_inv_eps_mul_chartTensorInnerPointwise_rs_model_on_compact
+    (I := I) (M := M) g r s α hK_M_sub_baseSet hε_pos h_lb
+
 /-- **Headline pointwise norm comparison (chart-frame form).**
 
 For a closed Riemannian manifold `(M, g)`, a chart base point `α`, and ranks
 `(r, s)`, there is a non-negative constant `K` such that the Euclidean square
 norm of a model `(r, s)`-tensor is bounded above by `K` times the chart-frame
 diagonal quadratic form, uniformly on the closed support of the chart-atlas
-partition-of-unity weight at `α`. -/
+partition-of-unity weight at `α`.
+
+This is the specialisation of
+`chartTrivializationNorm_le_const_mul_chartTensorInnerPointwise_rs_model_on_compact`
+to the compact closed support of the chart-atlas partition-of-unity weight. -/
 theorem chartTrivializationNorm_le_const_mul_chartTensorInnerPointwise_rs_model_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧
@@ -491,23 +522,55 @@ theorem chartTrivializationNorm_le_const_mul_chartTensorInnerPointwise_rs_model_
             : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
         ∀ T : TensorRSModel r s ℝ E,
           ‖T‖ ^ 2 ≤ K * chartTensorInnerPointwise_rs_model
-            (I := I) (M := M) g r s α b T T := by
+            (I := I) (M := M) g r s α b T T :=
+  chartTrivializationNorm_le_const_mul_chartTensorInnerPointwise_rs_model_on_compact
+    (I := I) (M := M) g r s α
+    (pouTsupport_isCompact (I := I) (M := M) α)
+    (pouTsupport_subset_baseSet (I := I) (M := M) α)
+
+/-- **Headline pointwise norm comparison (bundle-inner form, via the twist) on
+an arbitrary compact subset of the chart base set.**
+
+For a compact set `K_M` contained in the chart-`α` base set, the model-tensor
+Euclidean square norm is bounded by `K` times the bundle-fibre
+`(r, s)`-inner product on the chart-`(α, b)`-twisted tensor, uniformly on
+`K_M`. This is the chart-frame form composed with the bridge identity
+`chartTensorInnerPointwise_rs_model_eq_tensorInnerPointwise`. -/
+theorem chartTrivializationNorm_le_const_mul_tensorInnerPointwise_chartRSTwist_on_compact
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
+    {K_M : Set M} (hK_M_compact : IsCompact K_M)
+    (hK_M_sub_baseSet :
+      K_M ⊆ (trivializationAt E (TangentSpace I) α).baseSet) :
+    ∃ K : ℝ, 0 ≤ K ∧
+      ∀ b : M, b ∈ K_M →
+        ∀ T : TensorRSModel r s ℝ E,
+          ‖T‖ ^ 2 ≤ K * tensorInnerPointwise (I := I) (M := M) g r s b
+            (chartRSTwist (I := I) (M := M) α b r s T)
+            (chartRSTwist (I := I) (M := M) α b r s T) := by
   classical
-  -- Extract the uniform positive lower bound on the unit sphere.
-  obtain ⟨ε, hε_pos, h_lb⟩ :=
-    exists_chartTensorInnerPointwise_rs_model_lower_bound_on_pouTsupport
-      (I := I) (M := M) g r s α
-  refine ⟨ε⁻¹, le_of_lt (inv_pos.mpr hε_pos), ?_⟩
-  -- Apply the rescaling lemma.
-  exact sq_norm_le_inv_eps_mul_chartTensorInnerPointwise_rs_model_on_pouTsupport
-    (I := I) (M := M) g r s α hε_pos h_lb
+  -- Reduce to the chart-frame form and rewrite via the bridge identity.
+  obtain ⟨K, hK_nn, h_chart⟩ :=
+    chartTrivializationNorm_le_const_mul_chartTensorInnerPointwise_rs_model_on_compact
+      (I := I) (M := M) g r s α hK_M_compact hK_M_sub_baseSet
+  refine ⟨K, hK_nn, ?_⟩
+  intro b hb T
+  have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
+    hK_M_sub_baseSet hb
+  have h := h_chart b hb T
+  rw [chartTensorInnerPointwise_rs_model_eq_tensorInnerPointwise
+      (I := I) (M := M) g r s α hb_base T T] at h
+  exact h
 
 /-- **Headline pointwise norm comparison (bundle-inner form, via the twist).**
 
 The model-tensor Euclidean square norm is bounded by `K` times the
 bundle-fibre `(r, s)`-inner product on the chart-`(α, b)`-twisted tensor,
 uniformly on `tsupport(POU_α)`. This is the chart-frame form composed with
-the bridge identity `chartTensorInnerPointwise_rs_model_eq_tensorInnerPointwise`. -/
+the bridge identity `chartTensorInnerPointwise_rs_model_eq_tensorInnerPointwise`.
+
+This is the specialisation of
+`chartTrivializationNorm_le_const_mul_tensorInnerPointwise_chartRSTwist_on_compact`
+to the compact closed support of the chart-atlas partition-of-unity weight. -/
 theorem chartTrivializationNorm_le_const_mul_tensorInnerPointwise_chartRSTwist_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧
@@ -517,20 +580,11 @@ theorem chartTrivializationNorm_le_const_mul_tensorInnerPointwise_chartRSTwist_o
         ∀ T : TensorRSModel r s ℝ E,
           ‖T‖ ^ 2 ≤ K * tensorInnerPointwise (I := I) (M := M) g r s b
             (chartRSTwist (I := I) (M := M) α b r s T)
-            (chartRSTwist (I := I) (M := M) α b r s T) := by
-  classical
-  -- Reduce to the chart-frame form and rewrite via the bridge identity.
-  obtain ⟨K, hK_nn, h_chart⟩ :=
-    chartTrivializationNorm_le_const_mul_chartTensorInnerPointwise_rs_model_on_pouTsupport
-      (I := I) (M := M) g r s α
-  refine ⟨K, hK_nn, ?_⟩
-  intro b hb T
-  have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
-    pouTsupport_subset_baseSet (I := I) (M := M) α hb
-  have h := h_chart b hb T
-  rw [chartTensorInnerPointwise_rs_model_eq_tensorInnerPointwise
-      (I := I) (M := M) g r s α hb_base T T] at h
-  exact h
+            (chartRSTwist (I := I) (M := M) α b r s T) :=
+  chartTrivializationNorm_le_const_mul_tensorInnerPointwise_chartRSTwist_on_compact
+    (I := I) (M := M) g r s α
+    (pouTsupport_isCompact (I := I) (M := M) α)
+    (pouTsupport_subset_baseSet (I := I) (M := M) α)
 
 end HeadlineNormComparison
 
