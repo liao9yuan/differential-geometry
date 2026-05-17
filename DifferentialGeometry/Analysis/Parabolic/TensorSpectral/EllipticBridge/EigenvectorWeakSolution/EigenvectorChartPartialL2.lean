@@ -181,7 +181,7 @@ private lemma tensorChartComponent_tsupport_subset'
 
 /-- The Euclidean chart component of a smooth compactly-supported `H¹` section
 lies in `W^{1,2}` of the Euclidean chart target. -/
-private lemma tensorChartComponent_memW1p
+lemma tensorChartComponent_memW1p
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -214,7 +214,7 @@ element `smoothChartPartialLp g r s S α P₀ k`. -/
 
 /-- The chosen weak `k`-th chart partial of the Euclidean chart component is in
 `MemLp 2` of the Euclidean `L²` reference measure of the chart. -/
-private lemma chosenWeakPartial'_tensorChartComponent_memLp
+lemma chosenWeakPartial'_tensorChartComponent_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
