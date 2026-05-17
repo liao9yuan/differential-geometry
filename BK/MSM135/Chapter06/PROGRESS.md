@@ -126,6 +126,7 @@ RicciFlower.RicciFlow.Perelman.fFunctional
 RicciFlower.RicciFlow.Perelman.expNegPotentialDensity_hasDerivAt
 RicciFlower.RicciFlow.Perelman.expWeightedMeasureIntegral_hasDerivAt_at
 RicciFlower.RicciFlow.Perelman.FFunctionalHasFirstVariationAt_of_volumeVariation
+RicciFlower.RicciFlow.Perelman.weightedIBP
 RicciFlower.RicciFlow.Perelman.MetricVariationChristoffelInFrame
 RicciFlower.RicciFlow.Perelman.MetricVariationChristoffelTraceInFrame
 RicciFlower.RicciFlow.Perelman.RicciVariationByChristoffelInFrame
@@ -136,8 +137,20 @@ RicciFlower.RicciFlow.Perelman.FFunctionalFormula510
 
 The remaining formula 5.10 geometry frontier is not Ricci-flow specialized:
 derive arbitrary metric-variation Christoffel, Ricci variation, Hessian
-variation, closed-manifold divergence cancellation, weighted integration by
-parts, and `Delta(exp(-f)) = (-Delta f + |grad f|^2)exp(-f)`.
+variation, and closed-manifold divergence cancellation.  The weighted
+integration-by-parts interface now exists as
+`BK.MSM135.Chapter06.Section01.lbl552_weighted_ibp`, aliasing
+`RicciFlower.RicciFlow.Perelman.weightedIBP`.
+
+The weighted IBP statement is:
+
+```text
+integral_M (Delta_g f - |grad_g f|^2) d(e^{-f} mu_g) = 0.
+```
+
+It is not yet a completely closed smooth-compact corollary: it keeps the
+weighted-density measurability and two base integrability hypotheses explicit,
+and it depends on the named analysis-layer frontier `gradFun_exp_neg`.
 
 The monotonicity display is represented abstractly as:
 

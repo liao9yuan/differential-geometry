@@ -27,7 +27,7 @@ noncomputable section
 namespace RicciFlower
 namespace RicciFlow
 
-open Bundle
+open Bundle Tensor0SBundle
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -1492,6 +1492,95 @@ theorem ricciNormHeatEquationOn_of_solution_canonical_laplacian
       h_inv h_ricci hInvSym hRicSym
       (ricciNormLaplacianComponentsOn_of_normSq_laplacian_expansion
         (I := I) S gInv frame roughLapRic ricciNormLap nablaRic h_lap)
+
+/-- Canonical Lemma 6.7 consumer from the metric-compatible `(0,2)` tensor
+Bochner producer, without asking callers for a prepackaged Laplacian
+expansion predicate. -/
+theorem ricci_heat_mc
+    {D : Realized.RealTimeInterval}
+    [DecidableEq Idx]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (S : SolutionOn (I := I) (M := M) D)
+    (Rm04 : Real -> Realized.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (roughLapRic : Real -> M -> Idx -> Idx -> Real)
+    (ricciNormLap : Real -> M -> Real)
+    (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
+    (basis : (x : M) -> Module.Basis Idx Real (TangentSpace I x))
+    (X : (x : M) -> Idx -> ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    (A : Real -> Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
+    (roughA : Real -> (x : M) -> Realized.Tensor02At (I := I) x)
+    (nablaA : Real -> Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 3)
+    (nabla2A : Real -> Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 4)
+    (du : Real -> Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1)
+    (normSecond : Real -> (y : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 y)
+    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame)
+    (h_ricci : RicciEvolutionEquationInFrame (I := I) S Rm04 gInv frame roughLapRic)
+    (hInvSym : forall t x i j, gInv t x i j = gInv t x j i)
+    (hRicSym : forall t x i j,
+      ricciCompInFrame (I := I) S frame t x i j =
+        ricciCompInFrame (I := I) S frame t x j i)
+    (hmc : forall t : Real,
+      RicciFlower.Connection.IsMetricCompatible (I := I)
+        (S.base.connection t) (S.base.metric t))
+    (hframe : forall x i, basis x i = frame i x)
+    (hinv : forall t x,
+      Tensor0SBundle.MetricInverseInBasis (I := I) (M := M) (S.base.metric t) x
+        (basis x) (gInv t x))
+    (hfields : forall x, Realized.SmoothBasisFieldsAt (I := I) (basis x) (X x))
+    (hlapTrace : forall t x,
+      ricciNormLap t x =
+        Realized.metricTrace0S2InBasis (I := I) (basis x) (gInv t x)
+          (normSecond t x) Fin.elim0)
+    (hA : forall t,
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I)
+        (M := M) 2 (S.base.connection t) (A t) (nablaA t))
+    (h2 : forall t,
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I)
+        (M := M) 3 (S.base.connection t) (nablaA t) (nabla2A t))
+    (hdu : forall t,
+      Realized.DuFieldRealizes (I := I)
+        (fun y : M => Realized.normSq02 (I := I) (S.base.metric t) y (A t y))
+        (du t))
+    (hHess : forall t x,
+      Realized.HessianRealizesNablaDuAt (I := I) (S.base.connection t) (du t)
+        (normSecond t) x)
+    (hrough : forall t x,
+      Realized.RoughLap0SRealizesMetricTraceInBasis (I := I)
+        (basis x) (gInv t x) (s := 2) (roughA t x) (nabla2A t x))
+    (hAComp : forall t x i j,
+      A t x (Realized.vec2 (I := I) (frame i x) (frame j x)) =
+        ricciTwoTensorField (I := I) S t x (frame i x) (frame j x))
+    (hroughComp : forall t x i j,
+      roughA t x (Realized.vec2 (I := I) (frame i x) (frame j x)) =
+        roughLapRic t x i j)
+    (hnablaComp : forall t x a i j,
+      nablaA t x (Realized.vec3 (I := I) (frame a x) (frame i x) (frame j x)) =
+        nablaRic t x a i j) :
+    RicciNormHeatEquationOn
+      (D := D) (ricciNormSqInFrame (I := I) S gInv frame)
+      ricciNormLap (nablaRicciNormSqInFrame (M := M) nablaRic gInv)
+      (ricciNormCurvatureReactionInFrame (I := I) S Rm04 gInv frame) := by
+  let G : Realized.RealizedMetricFamily (I := I) (M := M) Real :=
+    { metric := S.base.metric
+      connection := S.base.connection
+      metricCompatible := hmc }
+  exact
+    ricciNormHeatEquationOn_of_solution_canonical_laplacian
+      (I := I) S Rm04 gInv frame roughLapRic ricciNormLap nablaRic
+      h_inv h_ricci hInvSym hRicSym
+      (Realized.ricci_lap_mc (I := I) (Time := Real) G
+        ricciNormLap roughLapRic (ricciTwoTensorField (I := I) S)
+        gInv frame nablaRic basis X A roughA nablaA nabla2A du normSecond
+        hframe hinv hfields hlapTrace hA h2 hdu hHess hrough
+        hAComp hroughComp hnablaComp)
 
 end RicciNormAssembly
 

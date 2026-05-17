@@ -6,6 +6,7 @@ import RicciFlower.Tensor.Multilinear.BundleSmoothEval
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
+set_option backward.isDefEq.respectTransparency false
 
 /-!
 # RicciFlower Coordinate Bochner Formulae
@@ -582,6 +583,27 @@ def tensor02NablaNormCoord
       nablaA (vec3 (I := I) (basis a) (basis i) (basis j)) *
         nablaA (vec3 (I := I) (basis b) (basis k) (basis l))
 
+/-- The `tensor02RoughInnerCoord` contraction is the intrinsic `(0,2)` inner
+product with the rough tensor in the first slot. -/
+theorem inner02_rough
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (g : SmoothRiemannianMetric I M)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (hinv : Tensor0SBundle.MetricInverseInBasis (I := I) (M := M) g x basis gInv)
+    (A B : Tensor02At (I := I) x) :
+    inner02 (I := I) g x B A =
+      tensor02RoughInnerCoord (I := I) basis gInv A B := by
+  classical
+  rw [inner02_eq_coord_direct (I := I) g x basis gInv hinv B A]
+  unfold tensor02RoughInnerCoord
+  simp_rw [Finset.mul_sum]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  refine Finset.sum_congr rfl fun j _ => ?_
+  refine Finset.sum_congr rfl fun k _ => ?_
+  refine Finset.sum_congr rfl fun l _ => ?_
+  ring
+
 /-- Freeze the derivative slot of a `(0,3)` tensor, leaving a `(0,2)` tensor. -/
 def tensor02FreezeNabla
     {x : M}
@@ -610,6 +632,61 @@ private theorem tensor02FreezeNabla_eq_curry
   rw [hv, tensor02FreezeNabla_apply, tensor0S_curry_apply_cons_local]
   congr 1
   exact (fin_cons_vec2_eq_vec3 (I := I) X (v 0) (v 1)).symm
+
+/-- Freeze the first slot of a smooth `(0,3)` tensor field against a smooth
+tangent field, producing a smooth `(0,2)` tensor field. -/
+noncomputable def freeze02Field
+    (nablaA :
+      Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        (n := (∞ : WithTop ℕ∞)) 3)
+    (Y : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _)) :
+    Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2 := by
+  letI := tensor0SBundle_topology (𝕜 := Real) (E := E) (H := H)
+    (I := I) (M := M) 2
+  refine ⟨fun y : M => tensor02FreezeNabla (I := I) (nablaA y) (Y y), ?_⟩
+  intro x₀
+  have hnabla := nablaA.contMDiff x₀
+  have hcurry :=
+    TensorMultilinear.contMDiffAt_curriedSection_of_contMDiffAt_section
+      (𝕜 := Real) (I := I) (M := M)
+      (T := fun y : M => nablaA y) x₀ hnabla
+  have hY := Y.contMDiff x₀
+  have happ : ContMDiffAt I
+      (I.prod 𝓘(Real, Tensor0SModel 2 Real E)) (∞ : WithTop ℕ∞)
+      (fun y : M =>
+        TotalSpace.mk' (Tensor0SModel 2 Real E)
+          (E := fun x : M => Tensor0SSpace 2 I x) y
+          ((TensorMultilinear.curriedSection (𝕜 := Real) (I := I) (M := M)
+            (fun z : M => nablaA z) y) (Y y))) x₀ :=
+    ContMDiffAt.clm_bundle_apply (𝕜 := Real) (n := (∞ : WithTop ℕ∞))
+      (F₁ := E) (F₂ := Tensor0SModel 2 Real E)
+      (E₁ := fun x : M => TangentSpace I x)
+      (E₂ := fun x : M => Tensor0SSpace 2 I x)
+      (IM := I) (IB := I)
+      (b := id)
+      (ϕ := fun y : M =>
+        TensorMultilinear.curriedSection (𝕜 := Real) (I := I) (M := M)
+          (fun z : M => nablaA z) y)
+      (v := fun y : M => Y y) hcurry hY
+  refine happ.congr_of_eventuallyEq ?_
+  filter_upwards with y
+  simpa [TensorMultilinear.curriedSection] using
+    tensor02FreezeNabla_eq_curry (I := I) (nablaA y) (Y y)
+
+@[simp] theorem freeze02Field_apply
+    (nablaA :
+      Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        (n := (∞ : WithTop ℕ∞)) 3)
+    (Y : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    (x : M) :
+    freeze02Field (I := I) nablaA Y x =
+      tensor02FreezeNabla (I := I) (nablaA x) (Y x) := by
+  change (fun y : M => tensor02FreezeNabla (I := I) (nablaA y) (Y y)) x =
+    tensor02FreezeNabla (I := I) (nablaA x) (Y x)
+  rfl
 
 /-- Metric compatibility lifted to the induced inner product on `(0,2)` tensor
 fibers.
@@ -768,6 +845,54 @@ def tensor02FreezeNabla2
   congr 1
   exact fin_cons_vec3_eq_vec4 (I := I) X Y Z W
 
+/-- Derivative of the frozen first covariant derivative paired with `A`.
+
+This is the only nontrivial tensor-realization step in the `(0,2)` norm
+Bochner producer: differentiating `∇A` with a moving frozen vector contributes
+both `∇²A(X,Y)` and the correction `∇A(∇_X Y)`. -/
+theorem freeze02_deriv
+    [T2Space M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    (hmc : RicciFlower.Connection.IsMetricCompatible (I := I) cov g)
+    (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2)
+    (nablaA :
+      Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        (n := (∞ : WithTop ℕ∞)) 3)
+    (nabla2A :
+      Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        (n := (∞ : WithTop ℕ∞)) 4)
+    (hA : TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) 2 cov A nablaA)
+    (h2 : TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) 3 cov nablaA nabla2A)
+    (X Y : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    (x : M) :
+    extDerivFun (I := I)
+        (fun y : M =>
+          2 * inner02 (I := I) g y
+            (tensor02FreezeNabla (I := I) (nablaA y) (Y y)) (A y))
+        x (X x) =
+      2 *
+        (inner02 (I := I) g x
+            (tensor02FreezeNabla2 (I := I) (nabla2A x) (X x) (Y x))
+            (A x) +
+          inner02 (I := I) g x
+            (tensor02FreezeNabla (I := I) (nablaA x)
+              ((cov (fun y : M => Y y) x) (X x))) (A x) +
+          inner02 (I := I) g x
+            (tensor02FreezeNabla (I := I) (nablaA x) (Y x))
+            (tensor02FreezeNabla (I := I) (nablaA x) (X x))) := by
+  /- The frozen field is now bundled by `freeze02Field`.  The remaining local
+  API gap is the directional version of tensor metric compatibility stated
+  with `nabla0SFun`; after that, `h2.eval_smooth_slots` identifies
+  `nabla0SFun cov X (freeze02Field nablaA Y)` with the two displayed
+  `nabla2A` and `nablaA (∇_X Y)` terms. -/
+  sorry
+
 /-- Pointwise Hessian product rule for the norm square of a `(0,2)` tensor,
 evaluated on a basis. -/
 def Tensor02NormHessianProductInBasis
@@ -786,6 +911,127 @@ def Tensor02NormHessianProductInBasis
           tensor02RoughInnerCoord (I := I) basis gInv
             (tensor02FreezeNabla (I := I) nablaA (basis j))
             (tensor02FreezeNabla (I := I) nablaA (basis i)))
+
+/-- Pointwise Hessian product rule for the norm square of a `(0,2)` tensor,
+from metric compatibility and the frozen-derivative rule. -/
+theorem hess_norm02
+    [T2Space M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    (hmc : RicciFlower.Connection.IsMetricCompatible (I := I) cov g)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (hinv : Tensor0SBundle.MetricInverseInBasis (I := I) (M := M) g x basis gInv)
+    (X : Idx -> ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    (hfields : SmoothBasisFieldsAt (I := I) basis X)
+    (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2)
+    (nablaA :
+      Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        (n := (∞ : WithTop ℕ∞)) 3)
+    (nabla2A :
+      Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        (n := (∞ : WithTop ℕ∞)) 4)
+    (hA : TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) 2 cov A nablaA)
+    (h2 : TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) 3 cov nablaA nabla2A)
+    (du : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 1)
+    (normSecond : (y : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 y)
+    (hdu : DuFieldRealizes (I := I)
+      (fun y : M => normSq02 (I := I) g y (A y)) du)
+    (hHess : HessianRealizesNablaDuAt (I := I) cov du normSecond x) :
+    Tensor02NormHessianProductInBasis (I := I) basis gInv (A x) (nablaA x)
+      (nabla2A x) (normSecond x) := by
+  classical
+  intro i j
+  have hfun :
+      (fun y : M => du y (fun _ : Fin 1 => X j y)) =
+        fun y : M =>
+          2 * inner02 (I := I) g y
+            (tensor02FreezeNabla (I := I) (nablaA y) (X j y)) (A y) := by
+    funext y
+    exact du_norm02 (I := I) cov g hmc A nablaA hA du hdu (X j y)
+  have hnablaDu :
+      nablaDuAt (I := I) cov (X i) du x (fun _ : Fin 1 => basis j) =
+        extDerivFun (I := I) (fun y : M => du y (fun _ : Fin 1 => X j y))
+          x (X i x) -
+        du x (fun _ : Fin 1 => (cov (fun y : M => X j y) x) (X i x)) := by
+    have h := RicciFlower.Coordinates.nabla0SFun_one_eval_smooth_slots
+      (I := I) cov (X i) (X j) du x
+    simpa [nablaDuAt, hfields j] using h
+  have hder := freeze02_deriv (I := I) cov g hmc A nablaA nabla2A hA h2
+    (X i) (X j) x
+  have hcorr := du_norm02 (I := I) cov g hmc A nablaA hA du hdu
+    ((cov (fun y : M => X j y) x) (X i x))
+  have hraw :
+      normSecond x (vec2 (I := I) (basis i) (basis j)) =
+        2 *
+          (inner02 (I := I) g x
+              (tensor02FreezeNabla2 (I := I) (nabla2A x) (basis i) (basis j))
+              (A x) +
+            inner02 (I := I) g x
+              (tensor02FreezeNabla (I := I) (nablaA x) (basis j))
+              (tensor02FreezeNabla (I := I) (nablaA x) (basis i))) := by
+    calc
+      normSecond x (vec2 (I := I) (basis i) (basis j))
+          = normSecond x (vec2 (I := I) (X i x) (basis j)) := by
+              rw [hfields i]
+      _ = nablaDuAt (I := I) cov (X i) du x (fun _ : Fin 1 => basis j) := by
+              exact hHess (X i) (basis j)
+      _ =
+          extDerivFun (I := I) (fun y : M => du y (fun _ : Fin 1 => X j y))
+            x (X i x) -
+          du x (fun _ : Fin 1 => (cov (fun y : M => X j y) x) (X i x)) := hnablaDu
+      _ =
+          extDerivFun (I := I)
+            (fun y : M =>
+              2 * inner02 (I := I) g y
+                (tensor02FreezeNabla (I := I) (nablaA y) (X j y)) (A y))
+            x (X i x) -
+          du x (fun _ : Fin 1 => (cov (fun y : M => X j y) x) (X i x)) := by
+            rw [hfun]
+      _ =
+          2 *
+            (inner02 (I := I) g x
+                (tensor02FreezeNabla2 (I := I) (nabla2A x) (basis i) (basis j))
+                (A x) +
+              inner02 (I := I) g x
+                (tensor02FreezeNabla (I := I) (nablaA x) (basis j))
+                (tensor02FreezeNabla (I := I) (nablaA x) (basis i))) := by
+            rw [hder, hcorr, hfields i, hfields j]
+            ring
+  calc
+    normSecond x (vec2 (I := I) (basis i) (basis j))
+        =
+      2 *
+        (inner02 (I := I) g x
+            (tensor02FreezeNabla2 (I := I) (nabla2A x) (basis i) (basis j))
+            (A x) +
+          inner02 (I := I) g x
+            (tensor02FreezeNabla (I := I) (nablaA x) (basis j))
+            (tensor02FreezeNabla (I := I) (nablaA x) (basis i))) := hraw
+    _ =
+      (2 : Real) *
+        (tensor02RoughInnerCoord (I := I) basis gInv (A x)
+            (tensor02FreezeNabla2 (I := I) (nabla2A x) (basis i) (basis j)) +
+          tensor02RoughInnerCoord (I := I) basis gInv
+            (tensor02FreezeNabla (I := I) (nablaA x) (basis j))
+            (tensor02FreezeNabla (I := I) (nablaA x) (basis i))) := by
+          rw [inner02_rough (I := I) g basis gInv hinv
+            (A x)
+            (tensor02FreezeNabla2 (I := I) (nabla2A x) (basis i) (basis j))]
+          rw [inner02_symm (I := I) g x
+            (tensor02FreezeNabla (I := I) (nablaA x) (basis j))
+            (tensor02FreezeNabla (I := I) (nablaA x) (basis i))]
+          rw [inner02_rough (I := I) g basis gInv hinv
+            (tensor02FreezeNabla (I := I) (nablaA x) (basis j))
+            (tensor02FreezeNabla (I := I) (nablaA x) (basis i))]
 
 /-- The traced second-product rule for the norm of a `(0,2)` tensor.
 
@@ -917,10 +1163,55 @@ theorem Tensor02NormSecondProductInBasis.of_hessian_product
                   unfold R N
                   simp_rw [mul_add, Finset.sum_add_distrib]
                   simp [Finset.mul_sum, mul_left_comm]
-            _ = (2 : Real) *
+    _ = (2 : Real) *
                 (tensor02RoughInnerCoord (I := I) basis gInv A roughA +
                   tensor02NablaNormCoord (I := I) basis gInv nablaA) := by
                   rw [hR, hN]
+
+/-- Metric-compatible producer for the traced `(0,2)` norm product rule. -/
+theorem second_norm02_mc
+    [T2Space M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    (hmc : RicciFlower.Connection.IsMetricCompatible (I := I) cov g)
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (hinv : Tensor0SBundle.MetricInverseInBasis (I := I) (M := M) g x basis gInv)
+    (X : Idx -> ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    (hfields : SmoothBasisFieldsAt (I := I) basis X)
+    (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2)
+    (roughA : Tensor02At (I := I) x)
+    (nablaA :
+      Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        (n := (∞ : WithTop ℕ∞)) 3)
+    (nabla2A :
+      Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        (n := (∞ : WithTop ℕ∞)) 4)
+    (hA : TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) 2 cov A nablaA)
+    (h2 : TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) 3 cov nablaA nabla2A)
+    (du : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 1)
+    (normSecond : (y : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 y)
+    (hdu : DuFieldRealizes (I := I)
+      (fun y : M => normSq02 (I := I) g y (A y)) du)
+    (hHess : HessianRealizesNablaDuAt (I := I) cov du normSecond x)
+    (hrough : RoughLap0SRealizesMetricTraceInBasis (I := I) basis gInv
+      (s := 2) roughA (nabla2A x)) :
+    Tensor02NormSecondProductInBasis (I := I) basis gInv (A x) roughA
+      (nablaA x) (normSecond x) := by
+  exact
+    Tensor02NormSecondProductInBasis.of_hessian_product (I := I) basis gInv
+      (A x) roughA (nablaA x) (nabla2A x) (normSecond x)
+      (hess_norm02 (I := I) cov g hmc basis gInv hinv X hfields A
+        nablaA nabla2A hA h2 du normSecond hdu hHess)
+      hrough
 
 /-- Product-rule conclusion for the scalar Laplacian of a `(0,2)` tensor norm. -/
 def Tensor02NormProductRuleInBasis
@@ -999,10 +1290,10 @@ theorem ricciNormScalarLaplacianExpansionInFrame_of_tensor02_product_rule
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (nablaRic : Time -> M -> Idx -> Idx -> Idx -> Real)
     (basis : (x : M) -> Module.Basis Idx Real (TangentSpace I x))
-    (A roughA : Tensor02Field (I := I) (M := M) Time)
+    (A roughA : Time -> (x : M) -> Tensor02At (I := I) x)
     (nablaA : Time -> (x : M) ->
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
-    (normSecond : Tensor02Field (I := I) (M := M) Time)
+    (normSecond : Time -> (x : M) -> Tensor02At (I := I) x)
     (hframe : forall x i, basis x i = frame i x)
     (hlapTrace : forall t x,
       ricciNormLap t x =
@@ -1052,6 +1343,81 @@ theorem ricciNormScalarLaplacianExpansionInFrame_of_tensor02_product_rule
     simp_rw [hframe]
     simp_rw [hnablaComp]
   rw [hprod, hrough, hnabla]
+
+/-- Canonical Ricci-norm scalar-Laplacian expansion from metric compatibility
+and the `(0,2)` tensor norm product rule. -/
+theorem ricci_lap_mc
+    [T2Space M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (ricciNormLap : Time -> M -> Real)
+    (roughLapRic : Time -> M -> Idx -> Idx -> Real)
+    (Ric : Time -> TwoTensorField (I := I) (M := M))
+    (gInv : Time -> InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (nablaRic : Time -> M -> Idx -> Idx -> Idx -> Real)
+    (basis : (x : M) -> Module.Basis Idx Real (TangentSpace I x))
+    (X : (x : M) -> Idx -> ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    (A : Time -> Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
+    (roughA : Time -> (x : M) -> Tensor02At (I := I) x)
+    (nablaA : Time -> Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 3)
+    (nabla2A : Time -> Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 4)
+    (du : Time -> Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1)
+    (normSecond : Time -> (y : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 y)
+    (hframe : forall x i, basis x i = frame i x)
+    (hinv : forall t x,
+      Tensor0SBundle.MetricInverseInBasis (I := I) (M := M) (G.metric t) x
+        (basis x) (gInv t x))
+    (hfields : forall x, SmoothBasisFieldsAt (I := I) (basis x) (X x))
+    (hlapTrace : forall t x,
+      ricciNormLap t x =
+        metricTrace0S2InBasis (I := I) (basis x) (gInv t x)
+          (normSecond t x) Fin.elim0)
+    (hA : forall t,
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I)
+        (M := M) 2 (G.connection t) (A t) (nablaA t))
+    (h2 : forall t,
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I)
+        (M := M) 3 (G.connection t) (nablaA t) (nabla2A t))
+    (hdu : forall t,
+      DuFieldRealizes (I := I)
+        (fun y : M => normSq02 (I := I) (G.metric t) y (A t y)) (du t))
+    (hHess : forall t x,
+      HessianRealizesNablaDuAt (I := I) (G.connection t) (du t)
+        (normSecond t) x)
+    (hrough : forall t x,
+      RoughLap0SRealizesMetricTraceInBasis (I := I) (basis x) (gInv t x)
+        (s := 2) (roughA t x) (nabla2A t x))
+    (hAComp : forall t x i j,
+      A t x (vec2 (I := I) (frame i x) (frame j x)) =
+        Ric t x (frame i x) (frame j x))
+    (hroughComp : forall t x i j,
+      roughA t x (vec2 (I := I) (frame i x) (frame j x)) =
+        roughLapRic t x i j)
+    (hnablaComp : forall t x a i j,
+      nablaA t x (vec3 (I := I) (frame a x) (frame i x) (frame j x)) =
+        nablaRic t x a i j) :
+    RicciNormScalarLaplacianExpansionInFrame
+      (I := I) ricciNormLap roughLapRic Ric gInv frame nablaRic := by
+  refine
+    ricciNormScalarLaplacianExpansionInFrame_of_tensor02_product_rule
+      (I := I) ricciNormLap roughLapRic Ric gInv frame nablaRic basis
+      (fun t x => A t x) roughA (fun t x => nablaA t x) normSecond
+      hframe hlapTrace ?_ hAComp hroughComp hnablaComp
+  intro t x
+  exact
+    second_norm02_mc (I := I) (G.connection t) (G.metric t)
+      (G.metricCompatible t) (basis x) (gInv t x) (hinv t x)
+      (X x) (hfields x) (A t) (roughA t x) (nablaA t) (nabla2A t)
+      (hA t) (h2 t) (du t) (normSecond t) (hdu t) (hHess t x)
+      (hrough t x)
 
 end Tensor02ProductProducer
 

@@ -3,6 +3,7 @@ import RicciFlower.Analysis.DivergenceTheorem.TangentAction
 import RicciFlower.Analysis.Volume.ChartDensity
 import Mathlib.Analysis.Calculus.FDeriv.Basic
 import Mathlib.Analysis.Calculus.FDeriv.Equiv
+import Mathlib.Analysis.SpecialFunctions.ExpDeriv
 import Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
@@ -228,54 +229,43 @@ lemma gradFun_eq_zero_of_mfderiv_eq_zero
   rw [htoLM]
   exact LinearEquiv.map_zero _
 
+/-- Manifold chain rule for the real exponential target. -/
+private lemma hasMFDerivAt_rexp
+    {f : M → ℝ} {x : M} {f' : TangentSpace I x →L[ℝ] ℝ}
+    (hf : HasMFDerivAt I 𝓘(ℝ, ℝ) f x f') :
+    HasMFDerivAt I 𝓘(ℝ, ℝ) (fun y : M => Real.exp (f y)) x
+      (Real.exp (f x) • f') := by
+  refine ⟨Real.continuous_exp.continuousAt.comp hf.1, ?_⟩
+  simpa [writtenInExtChartAt, Function.comp_def] using hf.2.exp
+
+/-- Chain rule for the linear map underlying `d(exp(-f))`. -/
+lemma mfderiv_exp_neg_toLinearMap
+    {f : M → ℝ} {x : M}
+    (hf : MDifferentiableAt I 𝓘(ℝ, ℝ) f x) :
+    (mfderiv I 𝓘(ℝ, ℝ) (fun y : M => Real.exp (-(f y))) x).toLinearMap =
+      (-Real.exp (-(f x))) •
+        (mfderiv I 𝓘(ℝ, ℝ) f x).toLinearMap := by
+  have hmf :
+      mfderiv I 𝓘(ℝ, ℝ) (fun y : M => Real.exp (-(f y))) x =
+        (-Real.exp (-(f x))) • mfderiv I 𝓘(ℝ, ℝ) f x := by
+    simpa [Pi.neg_apply, neg_smul] using
+      (hasMFDerivAt_rexp (I := I) hf.hasMFDerivAt.neg).mfderiv
+  rw [hmf]
+  ext v
+  rfl
+
 /-- Pointwise chain rule for the gradient of `exp(-f)`. -/
 lemma gradFun_exp_neg
     (g : SmoothRiemannianMetric I M) {f : M → ℝ} {x : M}
     (hf : MDifferentiableAt I 𝓘(ℝ, ℝ) f x) :
     gradFun (I := I) g (fun y : M => Real.exp (-(f y))) x =
       (-Real.exp (-(f x))) • gradFun (I := I) g f x := by
-  apply metricFlatLinear_injective (I := I) g x
-  ext v
-  change
-    g.inner x (gradFun (I := I) g (fun y : M => Real.exp (-(f y))) x) v =
-      g.inner x ((-Real.exp (-(f x))) • gradFun (I := I) g f x) v
-  rw [inner_gradFun (I := I) g (fun y : M => Real.exp (-(f y))) x v]
-  have hright :
-      g.inner x ((-Real.exp (-(f x))) • gradFun (I := I) g f x) v =
-        (-Real.exp (-(f x))) *
-          g.inner x (gradFun (I := I) g f x) v := by
-    rw [map_smul]
-    rfl
-  rw [hright]
-  set d : TangentSpace I x →L[ℝ] ℝ := mfderiv I 𝓘(ℝ, ℝ) f x with hd_def
-  rw [inner_gradFun (I := I) g f x v]
-  change
-    (mfderiv I 𝓘(ℝ, ℝ) (fun y : M => Real.exp (-(f y))) x) v =
-      (-Real.exp (-(f x))) * d v
-  have hneg :
-      HasMFDerivAt I 𝓘(ℝ, ℝ) (fun y : M => -(f y)) x
-        (-d) := by
-    simpa [hd_def] using hf.hasMFDerivAt.neg
-  have hexp :
-      HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) Real.exp (-(f x))
-        (ContinuousLinearMap.toSpanSingleton ℝ (Real.exp (-(f x)))) := by
-    exact ((Real.hasDerivAt_exp (-(f x))).hasFDerivAt).hasMFDerivAt
-  have hcomp :
-      HasMFDerivAt I 𝓘(ℝ, ℝ) (fun y : M => Real.exp (-(f y))) x
-        ((ContinuousLinearMap.toSpanSingleton ℝ (Real.exp (-(f x)))).comp
-          (-d)) := by
-    simpa [Function.comp_def] using hexp.comp x hneg
-  have hmf := hcomp.mfderiv
-  rw [hmf]
-  change
-    (ContinuousLinearMap.toSpanSingleton ℝ (Real.exp (-(f x))))
-      ((-d) v) =
-        -(Real.exp (-(f x)) * d v)
-  rw [ContinuousLinearMap.toSpanSingleton_apply, ContinuousLinearMap.neg_apply]
-  change
-    (-d v) * Real.exp (-(f x)) =
-      -(Real.exp (-(f x)) * d v)
-  ring
+  unfold gradFun metricSharp
+  rw [mfderiv_exp_neg_toLinearMap (I := I) hf]
+  exact LinearEquiv.map_smul
+    (metricFlatMap (I := I) g x).symm
+    (-Real.exp (-(f x)))
+    (mfderiv I 𝓘(ℝ, ℝ) f x).toLinearMap
 
 /-! ## Inverse Gram matrix and its smoothness -/
 

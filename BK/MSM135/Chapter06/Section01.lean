@@ -257,6 +257,14 @@ data and moving-volume differentiation. -/
 abbrev lbl453_f_first_variation_producer_of_volumeVariation :=
   @FFunctionalHasFirstVariationAt_of_volumeVariation
 
+/-- MSM135 Chapter 6.1, weighted integration-by-parts identity used in
+Lemma 6.1.
+
+Book-facing alias for
+`integral (Delta f - |grad f|^2) d(e^{-f}mu_g) = 0`. -/
+abbrev lbl552_weighted_ibp :=
+  @weightedIBP
+
 /-- MSM135 Chapter 5, formula 5.10, used in Chapter 6.1 Lemma 6.1.
 
 Book-facing alias for the final integral statement of formula 5.10. -/

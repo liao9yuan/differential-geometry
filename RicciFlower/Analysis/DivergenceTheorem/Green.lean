@@ -260,7 +260,7 @@ theorem expNegLap_eq_gradSq
   classical
   let expNeg : M → ℝ := fun x => Real.exp (-(f x))
   have hexp : ContMDiff I 𝓘(ℝ, ℝ) ∞ expNeg := by
-    simpa [expNeg] using hf.neg.exp
+    simpa [expNeg] using Real.contDiff_exp.contMDiff.comp hf.neg
   have hgreen :=
     integral_inner_grad_eq_neg_integral_smul_laplacian
       (I := I) g (f := expNeg) (h := f) hexp hf
@@ -282,7 +282,18 @@ theorem expNegLap_eq_gradSq
     intro x
     have hfx : MDifferentiableAt I 𝓘(ℝ, ℝ) f x :=
       hf.mdifferentiable (by simp) x
+    change
+      g.inner x ((grad_g (I := I) g hexp :
+          Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
+        ((grad_g (I := I) g hf :
+          Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x) =
+        -(Real.exp (-(f x)) *
+          g.inner x ((grad_g (I := I) g hf :
+              Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
+            ((grad_g (I := I) g hf :
+              Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x))
     rw [grad_g_apply (I := I) g hexp x, grad_g_apply (I := I) g hf x]
+    dsimp [expNeg]
     change
       g.inner x (gradFun (I := I) g (fun y : M => Real.exp (-(f y))) x)
           (gradFun (I := I) g f x) =
@@ -291,7 +302,9 @@ theorem expNegLap_eq_gradSq
             (gradFun (I := I) g f x))
     rw [gradFun_exp_neg (I := I) g hfx]
     rw [map_smul]
-    ring
+    rw [ContinuousLinearMap.smul_apply]
+    rw [smul_eq_mul]
+    ring_nf
   have hneg :
       -∫ x, Real.exp (-(f x)) *
           g.inner x ((grad_g (I := I) g hf :
@@ -338,7 +351,7 @@ theorem expNegIBP
             g.inner x ((grad_g (I := I) g hf :
                 Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
               ((grad_g (I := I) g hf :
-                Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)) =
+                Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x))) =
       fun x : M =>
         Real.exp (-(f x)) * Δ_g (I := I) g hf x -
           Real.exp (-(f x)) *

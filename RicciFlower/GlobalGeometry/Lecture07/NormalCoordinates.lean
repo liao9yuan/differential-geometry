@@ -69,7 +69,7 @@ def CoordExpRelAtTime
     (g : SmoothRiemannianMetric I M)
     (x : M) (v : TangentSpace I x) (tau : Real) (y : M) : Prop :=
   ∃ s : Set Real,
-    0 ∈ s ∧ tau ∈ s ∧
+    Set.uIcc 0 tau ⊆ s ∧
       ∃ gamma : Curve M,
         IsCoordGeodesicSegment (I := I) g x v gamma s ∧
           gamma tau = y
@@ -103,10 +103,10 @@ theorem expAt_of_segment
     {g : SmoothRiemannianMetric I M}
     {x : M} {v : TangentSpace I x}
     {gamma : Curve M} {s : Set Real}
-    (h0 : 0 ∈ s) (h1 : 1 ∈ s)
+    (hs : Set.uIcc 0 1 ⊆ s)
     (hseg : IsCoordGeodesicSegment (I := I) g x v gamma s) :
     expAt (I := I) g x v (gamma 1) := by
-  exact ⟨s, h0, h1, gamma, hseg, rfl⟩
+  exact ⟨s, hs, gamma, hseg, rfl⟩
 
 /-- Constant curves have zero coordinate-defined covariant acceleration in any
 valid `extChartAt` coordinate package.
@@ -160,7 +160,7 @@ theorem expAt_zero
   let gamma : Curve M := fun _ : Real => x
   refine expAt_of_segment (I := I) (g := g) (x := x)
     (v := (0 : TangentSpace I x)) (gamma := gamma)
-    (s := Set.univ) (by simp) (by simp) ?_
+    (s := Set.univ) (by intro t ht; simp) ?_
   refine ⟨?_, ?_, ?_⟩
   · rfl
   · simp [gamma, zeroInitialVelocity]
@@ -194,6 +194,242 @@ private def modelSpray
   let q : TangentBundle I M := phaseOfModel (I := I) x z
   tangentCoordChange I.tangent q (phaseZero (I := I) x) q
     (leviCivitaGeodesicSprayChart (I := I) g x q)
+
+/-- The tangent-bundle chart inverse centered at `0_x` is smooth at the chart
+coordinate of `0_x`. -/
+private theorem phaseOfModel_cdAt
+    [I.Boundaryless] (x : M) :
+    ContMDiffAt 𝓘(Real, E × E) I.tangent 1
+      (phaseOfModel (I := I) x)
+      (extChartAt I.tangent (phaseZero (I := I) x)
+        (phaseZero (I := I) x)) := by
+  have hwithin :
+      ContMDiffWithinAt 𝓘(Real, E × E) I.tangent 1
+        (extChartAt I.tangent (phaseZero (I := I) x)).symm
+        (Set.range I.tangent)
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) :=
+    contMDiffWithinAt_extChartAt_symm_range_self
+      (I := I.tangent) (x := phaseZero (I := I) x) (n := (1 : WithTop ℕ∞))
+  have hrange :
+      Set.range I.tangent ∈
+        𝓝 (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) := by
+    rw [ModelWithCorners.Boundaryless.range_eq_univ (I := I.tangent)]
+    exact Filter.univ_mem
+  simpa [phaseOfModel] using hwithin.contMDiffAt hrange
+
+/-- In the fixed tangent-bundle chart, the model vector field is locally the
+chart-fiber RHS used to define the spray. -/
+private theorem modelSpray_eq_fiber
+    (g : SmoothRiemannianMetric I M) (x : M) {z : E × E}
+    (hsrc : (phaseOfModel (I := I) x z).proj ∈ (extChartAt I x).source) :
+    modelSpray (I := I) g x z =
+      leviCivitaGeodesicSprayChartFiber (I := I) g x
+        (phaseOfModel (I := I) x z) := by
+  classical
+  let q : TangentBundle I M := phaseOfModel (I := I) x z
+  let lift : Real -> TangentBundle I M :=
+    fun t : Real => if t = 0 then phaseZero (I := I) x else q
+  have hlift0 :
+      lift 0 = (⟨x, (0 : E)⟩ : TangentBundle I M) := by
+    simp [lift, phaseZero]
+  have hsrc1 : (lift 1).proj ∈ (extChartAt I x).source := by
+    simpa [lift, q] using hsrc
+  have h :=
+    chartVF_eq_fiber (I := I) (g := g) (x := x)
+      (v0 := (0 : TangentSpace I x)) (lift := lift)
+      (t0 := 0) (t := 1) hlift0 hsrc1
+  have hone : (1 : Real) ≠ 0 := one_ne_zero
+  have hlift1 : lift 1 = q := by
+    simp [lift, hone]
+  change
+    tangentCoordChange I.tangent (lift 1) (lift 0) (lift 1)
+        (leviCivitaGeodesicSprayChart (I := I) g x (lift 1)) =
+      leviCivitaGeodesicSprayChartFiber (I := I) g x (lift 1) at h
+  rw [hlift1, hlift0] at h
+  simpa [modelSpray, q, phaseZero] using h
+
+/-- The chart-fiber RHS, pulled back to the fixed model chart, is smooth at
+`0_x`. -/
+private theorem sprayFiber_cdAt
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    ContDiffAt Real 1
+      (fun z : E × E =>
+        leviCivitaGeodesicSprayChartFiber (I := I) g x
+          (phaseOfModel (I := I) x z))
+      (extChartAt I.tangent (phaseZero (I := I) x)
+        (phaseZero (I := I) x)) := by
+  have hfiber :
+      ContMDiffAt I.tangent 𝓘(Real, E × E) 1
+        (leviCivitaGeodesicSprayChartFiber (I := I) g x)
+        (phaseZero (I := I) x) := by
+    have htop :=
+      leviCivitaGeodesicSprayChartFiber_contMDiffAt_self
+        (I := I) g x (0 : TangentSpace I x)
+    simpa [phaseZero] using
+      htop.of_le (by exact_mod_cast (le_top : (1 : ℕ∞) ≤ ⊤))
+  have hphase := phaseOfModel_cdAt (I := I) x
+  let z0 : E × E :=
+    extChartAt I.tangent (phaseZero (I := I) x)
+      (phaseZero (I := I) x)
+  have hphase_self :
+      phaseOfModel (I := I) x z0 = phaseZero (I := I) x := by
+    exact PartialEquiv.left_inv _ (mem_extChartAt_source (I := I.tangent)
+      (phaseZero (I := I) x))
+  have hfiber' :
+      ContMDiffAt I.tangent 𝓘(Real, E × E) 1
+        (leviCivitaGeodesicSprayChartFiber (I := I) g x)
+        (phaseOfModel (I := I) x z0) := by
+    simpa [hphase_self] using hfiber
+  have hcomp :
+      ContMDiffAt 𝓘(Real, E × E) 𝓘(Real, E × E) 1
+        ((leviCivitaGeodesicSprayChartFiber (I := I) g x) ∘
+          phaseOfModel (I := I) x)
+        z0 :=
+    hfiber'.comp
+      (x := z0)
+      hphase
+  simpa [Function.comp_def, z0] using hcomp.contDiffAt
+
+/-- The fixed-chart model spray is `C^1` at the zero phase point. -/
+private theorem modelSpray_cdAt
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    ContDiffAt Real 1 (modelSpray (I := I) g x)
+      (extChartAt I.tangent (phaseZero (I := I) x)
+        (phaseZero (I := I) x)) := by
+  let z0 : E × E :=
+    extChartAt I.tangent (phaseZero (I := I) x)
+      (phaseZero (I := I) x)
+  have hfiber := sprayFiber_cdAt (I := I) g x
+  have hsrc_nhds :
+      {q : TangentBundle I M | q.proj ∈ (extChartAt I x).source} ∈
+        𝓝 (phaseZero (I := I) x) := by
+    have hproj :
+        ContinuousAt
+          (fun q : TangentBundle I M => q.proj)
+          (phaseZero (I := I) x) :=
+      (FiberBundle.continuous_proj E
+        (TangentSpace I : M -> Type _)).continuousAt
+    have hxsrc :
+        (phaseZero (I := I) x).proj ∈ (extChartAt I x).source := by
+      simp [phaseZero]
+    exact hproj.preimage_mem_nhds
+      (by
+        simpa [extChartAt_source] using
+          extChartAt_source_mem_nhds (I := I) x)
+  have hphase_self :
+      phaseOfModel (I := I) x z0 = phaseZero (I := I) x := by
+    exact PartialEquiv.left_inv _ (mem_extChartAt_source (I := I.tangent)
+      (phaseZero (I := I) x))
+  have hsrc_nhds' :
+      {q : TangentBundle I M | q.proj ∈ (extChartAt I x).source} ∈
+        𝓝 (phaseOfModel (I := I) x z0) := by
+    simpa [hphase_self] using hsrc_nhds
+  have hsrc_event :
+      ∀ᶠ z in 𝓝 z0,
+        (phaseOfModel (I := I) x z).proj ∈ (extChartAt I x).source := by
+    have hphase_cont := (phaseOfModel_cdAt (I := I) x).continuousAt
+    simpa [z0] using hphase_cont.preimage_mem_nhds hsrc_nhds'
+  refine hfiber.congr_of_eventuallyEq ?_
+  filter_upwards [hsrc_event] with z hz
+  exact modelSpray_eq_fiber (I := I) g x hz
+
+/-- The zero phase point is an equilibrium of the fixed-chart model spray. -/
+private theorem modelSpray_zero
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    modelSpray (I := I) g x
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) = 0 := by
+  have hq :
+      phaseOfModel (I := I) x
+          (extChartAt I.tangent (phaseZero (I := I) x)
+            (phaseZero (I := I) x)) =
+        phaseZero (I := I) x := by
+    exact PartialEquiv.left_inv _ (mem_extChartAt_source (I := I.tangent)
+      (phaseZero (I := I) x))
+  have hsrc :
+      (phaseOfModel (I := I) x
+          (extChartAt I.tangent (phaseZero (I := I) x)
+            (phaseZero (I := I) x))).proj ∈
+        (extChartAt I x).source := by
+    rw [hq]
+    simp [phaseZero]
+  rw [modelSpray_eq_fiber (I := I) g x hsrc, hq]
+  have hv :
+      chartFiberCoordAt (I := I) x (phaseZero (I := I) x) = 0 := by
+    simp [phaseZero]
+    simpa [phaseZero] using
+      chartFiberCoordAt_self (I := I)
+        (u := (phaseZero (I := I) x))
+  change
+    (chartFiberCoordAt (I := I) x (phaseZero (I := I) x),
+      leviCivitaGeodesicSprayAcceleration (I := I) g x
+        (extChartAt I x (phaseZero (I := I) x).proj)
+        (chartFiberCoordAt (I := I) x (phaseZero (I := I) x))) = (0, 0)
+  rw [hv]
+  simp [leviCivitaGeodesicSprayAcceleration,
+    leviCivitaGeodesicSprayQuadratic, modelCoord]
+
+/-- Local Picard-Lindelof data for the fixed-chart model spray near the zero
+phase point.
+
+This is uniform for initial phase points in a small closed model ball, but only
+on a short time interval.  Extending this checked local flow to time `1` is the
+remaining continuation argument for `exists_exp_one`. -/
+private theorem modelSpray_pl
+    [I.Boundaryless] [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    ∃ (ε : Real), ∃ (hε : 0 < ε), ∃ (a r L K : NNReal), ∃ (_hr : 0 < r),
+        ∀ t0 : Real,
+          IsPicardLindelof
+            (fun _ : Real => modelSpray (I := I) g x)
+            (tmin := t0 - ε) (tmax := t0 + ε)
+            ⟨t0, by simp [le_of_lt hε]⟩
+            (extChartAt I.tangent (phaseZero (I := I) x)
+              (phaseZero (I := I) x))
+            a r L K := by
+  obtain ⟨ε, hε, a, r, L, K, hr, hpl⟩ :=
+    IsPicardLindelof.of_contDiffAt_one
+      (modelSpray_cdAt (I := I) g x)
+  exact ⟨ε, hε, a, r, L, K, hr, hpl⟩
+
+/-- Short-time model flow produced by the local Picard-Lindelof package.
+
+This is still a short-time statement.  It is the checked analytic producer
+that should feed either a continuation argument or the homogeneous rescaling
+argument for `exists_exp_one`. -/
+private theorem modelFlow_short
+    [I.Boundaryless] [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    ∃ (ε : Real), ∃ (_hε : 0 < ε), ∃ (r : NNReal), ∃ (_hr : 0 < r),
+      ∀ z ∈ Metric.closedBall
+          (extChartAt I.tangent (phaseZero (I := I) x)
+            (phaseZero (I := I) x)) r,
+        ∃ α : Real -> E × E,
+          α 0 = z ∧
+            ∀ t ∈ Set.Icc (-ε) ε,
+              HasDerivWithinAt α
+                (modelSpray (I := I) g x (α t))
+                (Set.Icc (-ε) ε) t := by
+  obtain ⟨ε, hε, _a, r, _L, _K, hr, hpl⟩ :=
+    modelSpray_pl (I := I) g x
+  let z0 : E × E :=
+    extChartAt I.tangent (phaseZero (I := I) x)
+      (phaseZero (I := I) x)
+  refine ⟨ε, hε, r, hr, ?_⟩
+  intro z hz
+  obtain ⟨α, hα0, hαderiv⟩ :=
+    (hpl 0).exists_eq_forall_mem_Icc_hasDerivWithinAt
+      (x := z) (by simpa [z0] using hz)
+  refine ⟨α, hα0, ?_⟩
+  intro t ht
+  have ht' : t ∈ Set.Icc (0 - ε) (0 + ε) := by
+    simpa using ht
+  simpa using hαderiv t ht'
 
 /-- Uniform time-one local existence of the relation-valued coordinate
 exponential near zero velocity.
@@ -266,9 +502,9 @@ theorem coordExp_zero
     CoordExpRelAtTime (I := I) g x v 0 x := by
   obtain ⟨gamma, hgamma0, hvel, hgeo⟩ :=
     exists_coordGeoAt (I := I) g x v
-  refine ⟨({0} : Set Real), ?_, ?_, gamma, ?_, ?_⟩
-  · simp
-  · simp
+  refine ⟨({0} : Set Real), ?_, gamma, ?_, ?_⟩
+  · intro t ht
+    simpa using ht
   · exact ⟨hgamma0, hvel, hgeo⟩
   · simp [hgamma0]
 
@@ -362,9 +598,17 @@ theorem exists_coordExpTime
     exists_coordGeoOn (I := I) g x v
   refine ⟨epsilon, hepsilon, ?_⟩
   intro tau htau
-  refine ⟨gamma tau, Metric.ball (0 : Real) epsilon, ?_, htau,
+  refine ⟨gamma tau, Metric.ball (0 : Real) epsilon, ?_,
     gamma, ?_, rfl⟩
-  · exact Metric.mem_ball_self hepsilon
+  · intro s hs
+    rw [Metric.mem_ball]
+    have hdist : dist (0 : Real) s ≤ dist (0 : Real) tau :=
+      Real.dist_left_le_of_mem_uIcc hs
+    have htau' : dist (0 : Real) tau < epsilon := by
+      simpa [Metric.mem_ball, dist_comm] using htau
+    have hdist' : dist s (0 : Real) ≤ dist (0 : Real) tau := by
+      simpa [dist_comm] using hdist
+    exact hdist'.trans_lt htau'
   · exact ⟨hgamma0, hvel, hgeo⟩
 
 /-! ## Future normal-coordinate package -/

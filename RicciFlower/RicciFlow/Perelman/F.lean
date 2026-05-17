@@ -189,6 +189,7 @@ def expWeightedIntegralVariationIntegrand
 section Geometry
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+variable [InnerProductSpace Real E]
 variable [Module.Finite Real E] [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
