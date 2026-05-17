@@ -142,7 +142,7 @@ lemma gramMatrixAt_inv_isHermitian
 definite: for any `v : Fin n → ℝ` with `v ≠ 0`, the quadratic form
 `vᵀ G(x) v = g(x)(w, w)` is strictly positive, where
 `w = ∑ᵢ vᵢ • eᵢ` and `eᵢ = (chartModelBasis E) i`. -/
-private lemma gramMatrixAt_posDef
+lemma gramMatrixAt_posDef
     (g : SmoothRiemannianMetric I M) (x : M) :
     (gramMatrixAt (I := I) (M := M) g x).PosDef := by
   refine Matrix.PosDef.of_dotProduct_mulVec_pos
@@ -270,13 +270,13 @@ lemma gramMatrixAt_inv_eigenvalues_pos
 
 /-- The Gram matrix `G(x)` is invertible: as a positive-definite matrix it is
 a unit. -/
-private lemma gramMatrixAt_isUnit
+lemma gramMatrixAt_isUnit
     (g : SmoothRiemannianMetric I M) (x : M) :
     IsUnit (gramMatrixAt (I := I) (M := M) g x) :=
   (gramMatrixAt_posDef (I := I) (M := M) g x).isUnit
 
 /-- `(G(x))⁻¹ * G(x) = 1`. -/
-private lemma gramMatrixAt_inv_mul_self
+lemma gramMatrixAt_inv_mul_self
     (g : SmoothRiemannianMetric I M) (x : M) :
     (gramMatrixAt (I := I) (M := M) g x)⁻¹ *
         gramMatrixAt (I := I) (M := M) g x = 1 := by
