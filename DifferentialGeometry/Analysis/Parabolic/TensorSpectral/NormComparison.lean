@@ -1,5 +1,5 @@
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartJinvContinuity
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensorInnerLowerBound
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.JinvContinuity
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.InnerLowerBound
 import DifferentialGeometry.Tensor.RSTensor.Defs
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian
 import DifferentialGeometry.Tensor.RSTensor.TangentRiemannian
@@ -18,9 +18,8 @@ import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 For a smooth manifold `M` modelled on `(E, H)` with model `I` and a smooth
 Riemannian metric `g`, this file packages a partial proof tree towards
 pointwise basepoint continuity of the `(r, s)`-tensor inner product. The
-deliverables are the early building blocks (Steps 2 and 3 in the
-dispatch's framing); they appear as named theorems usable directly by
-downstream chart-local arguments.
+deliverables are the early chart-Jacobian building blocks; they appear as
+named theorems usable directly by downstream chart-local arguments.
 
 ## Delivered results
 

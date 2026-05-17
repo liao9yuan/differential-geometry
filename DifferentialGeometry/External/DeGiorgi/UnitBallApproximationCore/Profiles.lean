@@ -1,4 +1,5 @@
 -- Modified 2026-04-28: updated internal import paths for project namespace
+-- Modified 2026-05-16: style-warning cleanup
 import DifferentialGeometry.External.DeGiorgi.SobolevSpace
 import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
 
@@ -61,7 +62,7 @@ private lemma smoothTransition_nnnorm_deriv_bounded :
     · by_cases hx1 : 1 < x
       · rw [st_deriv_zero_gt hx1, norm_zero]
         exact norm_nonneg _
-      · push_neg at hx0 hx1
+      · push Not at hx0 hx1
         exact Filter.eventually_principal.mp hM_max x (Set.mem_Icc.2 ⟨hx0, hx1⟩)
   refine ⟨⟨‖deriv smoothTransition M‖, norm_nonneg _⟩, fun x => ?_⟩
   rw [← NNReal.coe_le_coe, NNReal.coe_mk, coe_nnnorm]
@@ -137,7 +138,7 @@ lemma myCutoff_contDiff {x₀ : E} {r R : ℝ} (hr : 0 < r) (hrR : r < R) :
       · exact continuousAt_const
       · exact hRr.ne'
     have hgt : 1 < (fun y : E => (R - ‖y - x₀‖) / (R - r)) x₀ := by
-      simp
+      simp only [sub_self, norm_zero, sub_zero]
       rw [one_lt_div hRr]
       linarith
     have hge1 : ∀ᶠ y in 𝓝 x₀, 1 ≤ (R - ‖y - x₀‖) / (R - r) :=

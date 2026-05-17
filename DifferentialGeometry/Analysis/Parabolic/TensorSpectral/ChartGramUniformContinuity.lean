@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensorInnerLowerBound
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.InnerLowerBound
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.GramInvUniformEigenvalueLowerBound
 import DifferentialGeometry.Geometry.LocalChartConsistency
 import DifferentialGeometry.Geometry.Gradient

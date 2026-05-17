@@ -533,21 +533,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.tensorHeatSemigroup_isSelfAdjoint
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.tensorHeatSemigroup_zero
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.tensorHeatSemigroup_add
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.tensorHeatSemigroup_continuous_at_zero
-
-end Sanity

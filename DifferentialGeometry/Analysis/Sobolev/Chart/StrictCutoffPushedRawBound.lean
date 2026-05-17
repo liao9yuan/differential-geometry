@@ -1101,10 +1101,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Sobolev.Chart.wkpNorm_chartPushedRaw_strictCutoff_mul_le
-end Sanity

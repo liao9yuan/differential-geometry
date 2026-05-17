@@ -981,11 +981,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms DifferentialGeometry.Analysis.HeatEquation.heatSemigroup_add
-
-end Sanity

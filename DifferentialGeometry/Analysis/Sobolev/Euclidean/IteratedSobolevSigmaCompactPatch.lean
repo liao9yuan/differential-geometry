@@ -370,11 +370,6 @@ theorem MemWkp_of_sigma_compact_cover_and_globalLp_zero
   rw [MemWkp_zero]
   exact h_globalLp
 
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_of_sigma_compact_cover_and_globalLp_zero
-end Sanity
-
 end Euclidean
 end Sobolev
 end Analysis

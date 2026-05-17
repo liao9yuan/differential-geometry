@@ -825,11 +825,3 @@ end SubstitutionDischargeIBPExpand
 end Sobolev
 end Analysis
 end DifferentialGeometry
-
-section Sanity
-#print axioms DifferentialGeometry.Analysis.Sobolev.SubstitutionDischargeIBPExpand.chart_bilinear_identity_h1_0_smooth_seq
-#print axioms DifferentialGeometry.Analysis.Sobolev.SubstitutionDischargeIBPExpand.variational_identity_at_v_h
-#print axioms DifferentialGeometry.Analysis.Sobolev.SubstitutionDischargeIBPExpand.variational_identity_v_h_expanded
-#print axioms DifferentialGeometry.Analysis.Sobolev.SubstitutionDischargeIBPExpand.variational_identity_after_ibp
-#print axioms DifferentialGeometry.Analysis.Sobolev.SubstitutionDischargeIBPExpand.variational_identity_after_product_rule
-end Sanity

@@ -268,12 +268,15 @@ def tangentSlotCLM (n : ℕ) {b : M}
     (i : Fin n) : TangentSpace I b →L[ℝ] TangentSpace I b :=
   if i = k then Φ else ContinuousLinearMap.id ℝ (TangentSpace I b)
 
+/-- The slot-substitution family at the substituted slot `k` is `Φ`. -/
 lemma tangentSlotCLM_self (n : ℕ) {b : M}
     (k : Fin n) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b) :
     tangentSlotCLM (I := I) n k Φ k = Φ := by
   unfold tangentSlotCLM
   simp
 
+/-- The slot-substitution family at a non-substituted slot `i ≠ k` is the
+identity CLM. -/
 lemma tangentSlotCLM_other (n : ℕ) {b : M}
     (k : Fin n) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b)
     {i : Fin n} (h : i ≠ k) :

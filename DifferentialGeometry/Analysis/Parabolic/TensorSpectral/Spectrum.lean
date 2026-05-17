@@ -731,28 +731,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorResolventEigenspace_finiteDim
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorResolventEigenspaces_iSup_orthogonal_eq_bot
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorResolvent_eigenvalues_finite_above
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorResolventEigenspace_zero_eq_bot
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorResolvent_eigenvalue_mem_unit_interval
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorLaplacianEigenvalueOf
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorLaplacianEigenvalueOf_nonneg_of_resolventEigenvalue
-
-end Sanity

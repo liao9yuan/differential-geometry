@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.CompactInclusion
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.RellichTensor
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Rellich.Tensor
 
 /-!
 # Compactness of the L²-side tensor resolvent
@@ -100,13 +100,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorResolventL2_isCompactOperator
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorResolventL2_isCompactOperator_and_isSelfAdjoint_of_uniform
-
-end Sanity

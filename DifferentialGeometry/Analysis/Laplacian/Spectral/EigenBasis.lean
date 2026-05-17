@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Laplacian.Compactness
+import DifferentialGeometry.Analysis.Laplacian.Spectral.Compactness
 import Mathlib.Analysis.InnerProductSpace.l2Space
 import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Analysis.InnerProductSpace.Spectrum
@@ -744,11 +744,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms DifferentialGeometry.Analysis.Laplacian.resolventL2_apply_resolventEigenbasisSigma
-
-end Sanity

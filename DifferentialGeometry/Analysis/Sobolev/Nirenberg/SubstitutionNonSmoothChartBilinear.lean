@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Laplacian.Regularity.ChartBilinearH1Compl_H1_0
+import DifferentialGeometry.Analysis.Laplacian.Regularity.ChartBilinear.H1Compl_H1_0
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.StandardNirenbergTest
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionNonSmooth
 
@@ -1425,10 +1425,3 @@ end SubstitutionNonSmoothChartBilinear
 end Sobolev
 end Analysis
 end DifferentialGeometry
-
-section Sanity
-#print axioms DifferentialGeometry.Analysis.Sobolev.SubstitutionNonSmoothChartBilinear.nirenberg_substitution_identity_chartBilinear
-#print axioms DifferentialGeometry.Analysis.Sobolev.SubstitutionNonSmoothChartBilinear.nirenberg_substitution_identity_chartBilinear_symbolic
-#print axioms DifferentialGeometry.Analysis.Sobolev.SubstitutionNonSmoothChartBilinear.nirenberg_substitution_identity_chartBilinear_compact
-#print axioms DifferentialGeometry.Analysis.Sobolev.SubstitutionNonSmoothChartBilinear.nirenberg_substitution_identity_chartBilinear_final
-end Sanity

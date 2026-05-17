@@ -413,7 +413,7 @@ private theorem subseq_limit_memWkp_and_wkpNorm_tendsto
         (fun i => wkpNorm (d := d) k p (fun x => u (φ i) x - u_lim x) Ω)
         atTop (𝓝 0) := by
   classical
-  -- Get the L^p limits via Phase A's structural lemma.
+  -- Get the L^p limits via the subsequence-limit structural lemma.
   obtain ⟨v, hv_lp, h_v_tendsto⟩ :=
     exists_iter_limits_subseq (d := d) hp_one hΩ hu_mem hφ_strict h_geom
   -- Apply MemWkp_of_iter_tendsto_eLpNorm.

@@ -1,4 +1,5 @@
 -- Modified 2026-04-28: updated internal import paths for project namespace
+-- Modified 2026-05-16: style-warning cleanup
 import DifferentialGeometry.External.DeGiorgi.DeGiorgiIteration.Recurrence
 
 /-!
@@ -1029,7 +1030,7 @@ theorem linfty_subsolution_DeGiorgi_ae_zero_of_smallness
       positivePartSub u lamStar x = 0 := by
   have hA_nonneg : ∀ n, 0 ≤ deGiorgiEnergySeq u x₀ lamStar n := by
     intro n
-    simp [deGiorgiEnergySeq]
+    simp only [deGiorgiEnergySeq]
     refine integral_nonneg ?_
     intro x
     positivity

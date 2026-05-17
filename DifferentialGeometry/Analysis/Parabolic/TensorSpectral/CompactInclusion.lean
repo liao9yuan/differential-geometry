@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.RellichAssembly
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Rellich.Assembly
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TensorChartComponentSobolevBound
 import Mathlib.Analysis.Normed.Operator.Compact
 import Mathlib.Topology.Sequences

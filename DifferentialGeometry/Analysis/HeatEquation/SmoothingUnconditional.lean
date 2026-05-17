@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.HeatEquation.SmoothingBridge
 import DifferentialGeometry.Analysis.HeatEquation.HeatSemigroupIteratedDomain
-import DifferentialGeometry.Analysis.Laplacian.Regularity.ChartSideH2kBridgeUnconditional
+import DifferentialGeometry.Analysis.Laplacian.Regularity.ChartPushed.SideH2kBridge
 
 /-!
 # Truly unconditional smoothing of the heat semigroup
@@ -65,7 +65,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Laplacian.LaplacianDomainPowH2kBridge
-open DifferentialGeometry.Analysis.Laplacian.ChartSideH2kBridgeUnconditional
+open DifferentialGeometry.Analysis.Laplacian.ChartSideH2kBridge
 
 /-! ## File-local Borel-space instances on `E` and `M` -/
 
@@ -180,16 +180,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.HeatEquation.chartSideH2kBridge_heat_unconditional
-#print axioms
-  DifferentialGeometry.Analysis.HeatEquation.heatSemigroup_smooth_representative_unconditional
-#print axioms
-  DifferentialGeometry.Analysis.HeatEquation.heatSemigroup_smooth_in_space_and_time_unconditional
-
-end Sanity

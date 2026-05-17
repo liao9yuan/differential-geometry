@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.HeatEquation.SpectralBounds
-import DifferentialGeometry.Analysis.Laplacian.Regularity.IteratedLaplacianDomain
+import DifferentialGeometry.Analysis.Laplacian.Regularity.Iterated.LaplacianDomain
 import Mathlib.Data.Nat.Choose.Sum
 
 /-!
@@ -407,12 +407,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.HeatEquation.heatSemigroup_mem_laplacianDomainPow_all
-
-end Sanity

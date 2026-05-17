@@ -431,11 +431,3 @@ end SubstitutionDischargeFinal
 end Sobolev
 end Analysis
 end DifferentialGeometry
-
-section Sanity
-#print axioms DifferentialGeometry.Analysis.Sobolev.SubstitutionDischargeFinal.chartBilinear_substitution_identity_with_hypothesis
-#print axioms DifferentialGeometry.Analysis.Sobolev.SubstitutionDischargeFinal.chartBilinear_substitution_identity_holds_composite
-#print axioms DifferentialGeometry.Analysis.Sobolev.SubstitutionDischargeFinal.chartBilinear_substitution_identity_zero_h_unconditional
-#print axioms DifferentialGeometry.Analysis.Sobolev.SubstitutionDischargeFinal.chartBilinear_substitution_identity_K_0_empty_unconditional
-end Sanity
-

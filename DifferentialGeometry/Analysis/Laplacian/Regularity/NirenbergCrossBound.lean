@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Laplacian.Regularity.ChartBilinearH1Compl_H1_0
+import DifferentialGeometry.Analysis.Laplacian.Regularity.ChartBilinear.H1Compl_H1_0
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.StandardNirenbergTest
 import DifferentialGeometry.Analysis.Sobolev.Tools.DifferenceQuotient
 import DifferentialGeometry.Analysis.Sobolev.Solutions.H2NonSmoothDirect
@@ -259,7 +259,3 @@ end NirenbergCrossBound
 end Laplacian
 end Analysis
 end DifferentialGeometry
-
-section Sanity
-#print axioms DifferentialGeometry.Analysis.Laplacian.NirenbergCrossBound.eLpNorm_diffQuot_restrict_le_of_cthickening
-end Sanity

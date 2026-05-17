@@ -1387,10 +1387,3 @@ end SubstitutionDischargeIBP
 end Sobolev
 end Analysis
 end DifferentialGeometry
-
-section Sanity
-#print axioms DifferentialGeometry.Analysis.Sobolev.SubstitutionDischargeIBP.chartBilinear_factor_integrable
-#print axioms DifferentialGeometry.Analysis.Sobolev.SubstitutionDischargeIBP.chartBilinear_factor_integrable_after
-#print axioms DifferentialGeometry.Analysis.Sobolev.SubstitutionDischargeIBP.chartBilinear_diffQuot_ibp_per_ij
-#print axioms DifferentialGeometry.Analysis.Sobolev.SubstitutionDischargeIBP.variational_identity_after_ibp_unconditional
-end Sanity

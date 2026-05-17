@@ -1,4 +1,5 @@
 -- Modified 2026-04-28: updated internal import paths for project namespace
+-- Modified 2026-05-16: style-warning cleanup
 import DifferentialGeometry.External.DeGiorgi.Supersolutions
 import DifferentialGeometry.External.DeGiorgi.Crossover
 import DifferentialGeometry.External.DeGiorgi.Support.MeasureBounds
@@ -799,10 +800,9 @@ private theorem weak_harnack_forward_factor_bound
     _ = (c_crossover' d ^ 2 + 1) ^ β * (1 - q) ^ (-((d : ℝ) * moserChi d)) := by
           rw [hden_rw]
 
-set_option maxHeartbeats 755000
-
 /-! ### Three-stage chain -/
 
+set_option maxHeartbeats 755000 in -- three-stage weak Harnack chain assembly
 /-- Shifted `p₀ < q` branch of the three-stage weak-Harnack chain. -/
 private theorem weak_harnack_chain_shifted
     (hd : 2 < (d : ℝ))
@@ -831,7 +831,7 @@ private theorem weak_harnack_chain_shifted
   -- === Prerequisites: v is a positive supersolution on B_1 for A' ===
   have hv_pos : ∀ x ∈ ball (0 : E) 1, 0 < v x := by
     intro z hz
-    show 0 < u ((1 / 2 : ℝ) • z)
+    change 0 < u ((1 / 2 : ℝ) • z)
     apply hu_pos
     rw [Metric.mem_ball, dist_zero_right] at hz ⊢
     rw [norm_smul, Real.norm_of_nonneg (by norm_num : (0 : ℝ) ≤ 1 / 2)]
@@ -847,11 +847,11 @@ private theorem weak_harnack_chain_shifted
     have hrescale :=
       rescaleToUnitBall_isSupersolution (d := d) (x₀ := (0 : E)) hR _ hsuper_half
     convert hrescale using 2
-    ext z; show v z = u (0 + (1 / 2) • z); simp [v, zero_add]
+    ext z; change v z = u (0 + (1 / 2) • z); simp [v, zero_add]
   -- A' has the same Λ as A, so the same p₀.
   have hΛ_eq : A'.1.Λ = A.1.Λ := rescaledCoeff_Λ_eq A
   have hp₀_eq : weakHarnackP0 A' = p₀ := by
-    show weakHarnackP0 A' = weakHarnackP0 A
+    change weakHarnackP0 A' = weakHarnackP0 A
     unfold weakHarnackP0; rw [hΛ_eq]
   have hp₀_def : p₀ = weakHarnackP0 A := by rfl
   -- Key arithmetic: Λ·p₀² = c'² (dimension-only constant).
@@ -872,7 +872,7 @@ private theorem weak_harnack_chain_shifted
       ∫ z in ball (0 : E) 1, |v z| ^ p₀ ∂volume =
         ((1 / 2 : ℝ) ^ Module.finrank ℝ E)⁻¹ *
           ∫ x in ball (0 : E) (1 / 2 : ℝ), |u x| ^ p₀ ∂volume := by
-    show ∫ z in ball (0 : E) 1, |u ((1 / 2 : ℝ) • z)| ^ p₀ ∂volume = _
+    change ∫ z in ball (0 : E) 1, |u ((1 / 2 : ℝ) • z)| ^ p₀ ∂volume = _
     exact integral_rescale_ball (by norm_num : (0 : ℝ) < 1 / 2)
       (fun x => |u x| ^ p₀)
   -- ∫_{B_{1/2}} |v z|^{q*} dz = (1/2)^{-d} · ∫_{B_{1/4}} |u x|^{q*} dx
@@ -882,7 +882,7 @@ private theorem weak_harnack_chain_shifted
       ∫ z in ball (0 : E) (1 / 2 : ℝ), |v z| ^ q_star ∂volume =
         ((1 / 2 : ℝ) ^ Module.finrank ℝ E)⁻¹ *
           ∫ x in ball (0 : E) (1 / 4 : ℝ), |u x| ^ q_star ∂volume := by
-    show ∫ z in ball (0 : E) (1 / 2 : ℝ), |u ((1 / 2 : ℝ) • z)| ^ q_star ∂volume = _
+    change ∫ z in ball (0 : E) (1 / 2 : ℝ), |u ((1 / 2 : ℝ) • z)| ^ q_star ∂volume = _
     have h14 : (1 / 2 : ℝ) * (1 / 2 : ℝ) = 1 / 4 := by norm_num
     rw [← h14]
     exact integral_rescale_ball_general (by norm_num : (0 : ℝ) < 1 / 2)
@@ -905,7 +905,7 @@ private theorem weak_harnack_chain_shifted
       ∫ z in ball (0 : E) 1, |(v z)⁻¹| ^ p₀ ∂volume =
         ((1 / 2 : ℝ) ^ Module.finrank ℝ E)⁻¹ *
           ∫ x in ball (0 : E) (1 / 2 : ℝ), |(u x)⁻¹| ^ p₀ ∂volume := by
-    show ∫ z in ball (0 : E) 1, |(u ((1 / 2 : ℝ) • z))⁻¹| ^ p₀ ∂volume = _
+    change ∫ z in ball (0 : E) 1, |(u ((1 / 2 : ℝ) • z))⁻¹| ^ p₀ ∂volume = _
     exact integral_rescale_ball (by norm_num : (0 : ℝ) < 1 / 2)
       (fun x => |(u x)⁻¹| ^ p₀)
   -- Substitute COV into hinv so its integral term matches I_neg:
@@ -947,7 +947,7 @@ private theorem weak_harnack_chain_shifted
   -- Note: |u x|^{-p₀} = |(u x)⁻¹|^{p₀} for u x > 0, so ∫|u|^{-p₀} = I_neg.
 
   -- The chain in calc form:
-  show I_fwd ^ (p₀ * (((d : ℝ) - 2) / (q * (d : ℝ)))) ≤
+  change I_fwd ^ (p₀ * (((d : ℝ) - 2) / (q * (d : ℝ)))) ≤
     C_chainMain (d := d) hd / (1 - q) ^ ((d : ℝ) * moserChi d) *
       (inf_u + δ) ^ p₀
   have hμhalf_le :
@@ -1440,6 +1440,7 @@ private theorem weak_harnack_chain_shifted
                 exact mul_le_mul_of_nonneg_right hconst_bound hshift_nonneg
   simpa [I_fwd, inf_u, q_star] using hbound_shift
 
+set_option maxHeartbeats 755000 in -- main shifted weak Harnack chain branch
 /-- Main `p₀ < q` branch of the three-stage weak-Harnack chain. -/
 private theorem weak_harnack_chain_main
     (hd : 2 < (d : ℝ))
@@ -1496,6 +1497,7 @@ private theorem weak_harnack_chain_main
     exact le_of_tendsto_of_tendsto' tendsto_const_nhds hrhs_tendsto hbound_n
   simpa [I_fwd, inf_u] using hlimit
 
+set_option maxHeartbeats 755000 in -- combined weak Harnack chain endpoint
 /-- **Three-stage chain** at the `p₀`-power level, on `B_{1/4}`.
 
 Uses the un-powered constant `C_chain` (not `C_weakHarnack`). The `1/c'`
@@ -1552,7 +1554,7 @@ theorem weak_harnack_chain
           (essInf u (volume.restrict (ball (0 : E) (1 / 4 : ℝ)))) ^ p₀ := by
       exact mul_le_mul_of_nonneg_right hC_le hpow_nonneg
     exact le_trans hmain hfinal
-  · push_neg at hpq
+  · push Not at hpq
     let q' : ℝ := (p₀ + 1) / 2
     let q_star : ℝ := q * (d : ℝ) / ((d : ℝ) - 2)
     let q'_star : ℝ := q' * (d : ℝ) / ((d : ℝ) - 2)
@@ -1769,6 +1771,7 @@ private theorem rpow_le_rpow_of_exponent
 
 /-! ### Main theorem -/
 
+set_option maxHeartbeats 755000 in -- packaged weak Harnack endpoint
 /-- **Weak Harnack inequality** for positive supersolutions on `B₁`.
 
 For `u > 0` with `-∇·(A∇u) ≥ 0` on `B₁`, and `0 < q < 1`:

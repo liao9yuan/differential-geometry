@@ -540,18 +540,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.tensorHeatSemigroup_continuous_at_pos
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.tensorHeatSemigroup_continuous_on_nonneg
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.tensorHeatSemigroup_apply_F_continuous
-
-end Sanity

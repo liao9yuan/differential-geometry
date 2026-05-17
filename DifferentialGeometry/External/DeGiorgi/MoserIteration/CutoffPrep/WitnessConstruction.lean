@@ -1,4 +1,5 @@
 -- Modified 2026-04-28: updated internal import paths for project namespace
+-- Modified 2026-05-16: style-warning cleanup
 import DifferentialGeometry.External.DeGiorgi.MoserIteration.CutoffPrep.RegularizedEnergy
 
 /-!
@@ -546,7 +547,7 @@ theorem moserPowerCutoff_memW1pWitness
             hwPos.weakGrad x i := by
     intro n i x
     dsimp [AsingSeq, Gn, Bn, wfn, wfnBig, hwPos]
-    simp [MemW1pWitness.restrict]
+    simp only [MemW1pWitness.restrict]
     rw [moserExactRegPowerCutoffWitness_grad (d := d) (u := u) (η := η) (ε := moserEpsSeq n)
       (N := N) (p := p) (Cη := Cη) (moserEpsSeq_pos n) hN hu1 hη hη_bound
       hη_grad_bound x i]

@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensorInnerLowerBound
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.InnerLowerBound
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.NormComparison
 import DifferentialGeometry.Integral.L2.PointwiseInner.DualMetric
 import Mathlib.Analysis.Normed.Module.FiniteDimension
@@ -319,8 +319,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_chartInvGramMatrix_quadForm_lower_bound_on_pouTsupport
-end Sanity

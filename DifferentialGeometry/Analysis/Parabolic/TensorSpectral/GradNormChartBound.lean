@@ -1,8 +1,8 @@
 import DifferentialGeometry.Geometry.Gradient
 import DifferentialGeometry.Integral.Measure.Glue
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ComponentSobolevBound
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ComponentSobolevPointwise
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartGoodSetMeasure
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.ComponentSobolevBound
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.ComponentSobolevPointwise
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.GoodSetMeasure
 
 /-!
 # Per-chart sup bound for the inverse-Gram-matrix `L¹` entry sum
@@ -1085,16 +1085,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_chartInvGramMatrix_l1Sum_sup_on_pouTsupport
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.sqrt_g_inner_gradFun_tensorChartComponentScalar_eq_zero_outside_pouTsupport
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.partialDeriv_scalarOnE_tensorChartComponentScalar_leibniz
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.g_inner_gradFun_tensorChartComponentScalar_le_const_on_pouTsupport
-end Sanity

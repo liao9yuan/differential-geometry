@@ -1,4 +1,5 @@
 -- Modified 2026-04-28: updated internal import paths for project namespace
+-- Modified 2026-05-16: style-warning cleanup
 import DifferentialGeometry.External.DeGiorgi.MoserIteration.CutoffPrep.RegularizedWitnesses
 
 /-!
@@ -64,7 +65,6 @@ lemma moserRegPowerCutoffWitness_norm_sq_le
     have hcomp : (moserRegClippedPosPartWitness (d := d) (u := u) (p := p)
         hs hs1 hε hN hu1).weakGrad x i =
       deriv (moserRegPow ε N p) (min (max (u x) 0) N) * hwClip.weakGrad x i := by
-      set_option maxHeartbeats 400000 in
       simp only [moserRegClippedPosPartWitness, MemW1pWitness.comp_smooth_bounded]
       ring
     rw [hgi, hcomp]
@@ -120,7 +120,7 @@ theorem moserSmoothClip_le_of_nonneg_le_N
   have hσ₁ : Real.smoothTransition (N + 1 - t) = 1 := by
     apply Real.smoothTransition.one_of_one_le
     linarith
-  simp [moserSmoothClip, hσ₁]
+  simp only [moserSmoothClip, hσ₁, mul_one, sub_self, mul_zero, add_zero]
   exact mul_le_of_le_one_right ht0 (Real.smoothTransition.le_one _)
 
 /-- For `0 ≤ t ≤ N`, the smooth clip is nonneg. -/
@@ -129,7 +129,7 @@ theorem moserSmoothClip_nonneg_of_nonneg_le_N
     0 ≤ moserSmoothClip ε N t := by
   have hσ₁ : Real.smoothTransition (N + 1 - t) = 1 := by
     apply Real.smoothTransition.one_of_one_le; linarith
-  simp [moserSmoothClip, hσ₁]
+  simp only [moserSmoothClip, hσ₁, mul_one, sub_self, mul_zero, add_zero]
   exact mul_nonneg ht0 (Real.smoothTransition.nonneg _)
 
 /-- `moserRegPow ε N p t` is nonneg for `0 ≤ t ≤ N` and `0 ≤ p`. -/

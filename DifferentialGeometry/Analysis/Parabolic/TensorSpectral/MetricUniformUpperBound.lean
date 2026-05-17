@@ -1,6 +1,6 @@
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensorInnerBridge
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartLowerAllUpperIndices
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartJinvContinuity
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.InnerBridge
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.LowerAllUpperIndices
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.JinvContinuity
 import DifferentialGeometry.Analysis.Laplacian.MetricBounds
 import DifferentialGeometry.Geometry.LocalChartConsistency
 import DifferentialGeometry.Integral.Measure.ChartDensity

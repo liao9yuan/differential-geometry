@@ -625,6 +625,38 @@ theorem tensorCovDerivPointwiseInner_hasCompactSupport
   exact hx (tensorCovDerivPointwiseInner_eq_zero_off_tsupport
     (I := I) (M := M) g r s S T hx_notsupp)
 
+/-- The topological support of the integrand `tensorCovDerivPointwiseInner g r s
+S T` is contained in the topological support of `S.toFun`: the integrand
+vanishes wherever the first section vanishes. -/
+theorem tensorCovDerivPointwiseInner_tsupport_subset_left
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (S T : SmoothCcTensor g r s) :
+    tsupport (tensorCovDerivPointwiseInner (I := I) (M := M) g r s S T) ⊆
+      tsupport S.toFun := by
+  -- `tsupport F = closure (support F)`; `tsupport S.toFun` is closed.
+  refine closure_minimal ?_ (isClosed_tsupport _)
+  intro x hx
+  by_contra hx_notsupp
+  exact hx (tensorCovDerivPointwiseInner_eq_zero_off_tsupport
+    (I := I) (M := M) g r s S T hx_notsupp)
+
+/-- The topological support of the integrand `tensorCovDerivPointwiseInner g r s
+S T` is contained in the topological support of `T.toFun`: the integrand
+vanishes wherever the second section vanishes. -/
+theorem tensorCovDerivPointwiseInner_tsupport_subset_right
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (S T : SmoothCcTensor g r s) :
+    tsupport (tensorCovDerivPointwiseInner (I := I) (M := M) g r s S T) ⊆
+      tsupport T.toFun := by
+  -- Swap the section pair: `⟨∇S, ∇T⟩ = ⟨∇T, ∇S⟩`.
+  have hswap : tensorCovDerivPointwiseInner (I := I) (M := M) g r s S T =
+      tensorCovDerivPointwiseInner (I := I) (M := M) g r s T S := by
+    funext x
+    exact tensorCovDerivPointwiseInner_symm (I := I) (M := M) g r s S T x
+  rw [hswap]
+  exact tensorCovDerivPointwiseInner_tsupport_subset_left
+    (I := I) (M := M) g r s T S
+
 /-! ## Coordinate-invariance of the trace expression
 
 The integrand `tensorCovDerivPointwiseInner` is the metric-induced trace of the

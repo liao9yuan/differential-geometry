@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.GradNormChartBoundPouWeighted
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TensorComponentGradientL2Atoms
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TrivProjBridge
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TrivProj.Bridge
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TensorChartTwistUniformBound
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.GradNormChartBound
 import DifferentialGeometry.Analysis.Laplacian.MetricBounds

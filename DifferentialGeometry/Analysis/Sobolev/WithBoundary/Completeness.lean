@@ -24,7 +24,7 @@ structural lemmas needed to study sequential completeness of the corresponding
 4. *In-measure convergence on each chart target.*
 5. *A.e. pointwise convergence along a subsequence on each chart target.*
 
-These are the same milestones as the boundaryless case; assembling them into a
+These are the same steps as the boundaryless case; assembling them into a
 `CompleteSpace (WkpChartQuot …)` instance requires the same chart-density /
 Haar-bridge step the boundaryless module is currently missing, and is therefore
 not delivered here. The structural lemmas alone are useful for downstream
@@ -161,7 +161,7 @@ theorem chartPushed_cauchy_of_wkpNormChart_cauchy
     ENNReal.le_tsum α
   exact le_trans h_summand_le_tsum h_le
 
-/-! ## Step 3: For each chart, get a `wkpNormHalfSpace`-limit (Phase A) -/
+/-! ## Step 3: For each chart, get a `wkpNormHalfSpace`-limit -/
 
 /-- For each chart `α`, the chart-pushed sequence has a `wkpNormHalfSpace`-limit
 which is itself in `MemWkpHalfSpace k p` of `chartTargetEuclid α`. -/
@@ -204,7 +204,7 @@ theorem exists_chart_limit
           (wkpChartFun (f N)))
         (chartTargetEuclid (n := n) (M := M) α) := fun N =>
     (wkpChartFun_memWkpChart (f N)) α
-  -- Apply Phase A: half-space Banach completeness.
+  -- Apply half-space Banach completeness.
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkpHalfSpace.exists_limit_of_wkpNormHalfSpace_cauchy
     (chartTargetEuclid_isHalfSpaceRelOpen (n := n) (M := M) α)
     k p hp_one hp_top h_chart_mem h_chart_cauchy

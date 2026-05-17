@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Laplacian.Regularity.H1Intrinsic
+import DifferentialGeometry.Analysis.Laplacian.Regularity.H1Compl.Intrinsic
 import DifferentialGeometry.Integral.L2.Pairing.Defs
 import DifferentialGeometry.Analysis.Laplacian.MetricBounds
 

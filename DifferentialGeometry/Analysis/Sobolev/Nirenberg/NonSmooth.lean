@@ -184,9 +184,13 @@ private lemma h2_loc_per_n_smooth_bound
                 ∂(volume : Measure E) +
               ∫ x in Ω', (S.u_seq n x) ^ 2 ∂(volume : Measure E) +
               ∫ x in Ω', (S.f_seq n x) ^ 2 ∂(volume : Measure E)) := by
-  exact h2_loc_smooth_solution (d := d) B
-    (S.is_smooth_weak_sol n) (S.f_seq_l2_loc n) hΩ'' hΩ''_compact_closure
-    hΩ''_in_Ω h_room i k
+  obtain ⟨C, hC_nn, h_eng⟩ := h2_loc_smooth_solution (d := d) B
+    hΩ'' hΩ''_compact_closure hΩ''_in_Ω h_room
+  obtain ⟨g, hg_memLp, hg_weak, Ω', hΩ'_open, hΩ''_in_Ω', hΩ'_in,
+    hΩ'_compact, hbound⟩ :=
+    h_eng (S.is_smooth_weak_sol n) (S.f_seq_l2_loc n) i k
+  exact ⟨g, hg_memLp, hg_weak, Ω', hΩ'_open, hΩ''_in_Ω', hΩ'_in,
+    hΩ'_compact, C, hC_nn, hbound⟩
 
 /-! ## Public per-`n` headline theorem -/
 

@@ -1,4 +1,5 @@
 -- Modified 2026-04-28: updated internal import paths for project namespace
+-- Modified 2026-05-16: style-warning cleanup
 import DifferentialGeometry.External.DeGiorgi.Supersolutions.RegularizationSupport
 
 /-!
@@ -121,8 +122,5 @@ theorem superPowerCutoffFwd_tsupport_subset
     tsupport (superPowerCutoffFwd (d := d) η u p) ⊆ Metric.ball (0 : E) s :=
   (tsupport_mul_subset_left
     (f := η) (g := fun x => |u x| ^ (p / 2))).trans hη_sub_ball
-
-set_option maxHeartbeats 1000000
-
 
 end DeGiorgi

@@ -916,30 +916,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.tensorHeatPower_comp_tensorHeatSemigroup
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.tensorHeatSemigroup_comp_tensorHeatPower
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.hasDerivAt_tensorHeatPower
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.hasDerivAt_tensorHeatSemigroup
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.iteratedDerivWithin_tensorHeatSemigroup_Ioi
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.contDiffOn_tensorHeatPower_Ioi
-
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.contDiffOn_tensorHeatSemigroup_Ioi
-
-end Sanity

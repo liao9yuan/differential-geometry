@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SlotUniformBound
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TensorRSModelEvalBasis
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TrivProjBridge
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TrivProj.Bridge
 import DifferentialGeometry.Integral.Connection.ChartLeviCivitaParallelExtend
 import DifferentialGeometry.Integral.Connection.ChartTensor0SCovariantDerivative
 import DifferentialGeometry.Integral.Connection.ChartTensorRSCovariantDerivative

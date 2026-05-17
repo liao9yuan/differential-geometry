@@ -257,26 +257,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-
-#print axioms
-  DifferentialGeometry.Analysis.HeatEquation.heatSemigroup_in_laplacianDomainPow
-#print axioms
-  DifferentialGeometry.Analysis.HeatEquation.heatSemigroupSpectralLift
-#print axioms
-  DifferentialGeometry.Analysis.HeatEquation.heatSemigroupSpectralLift_mem
-#print axioms
-  DifferentialGeometry.Analysis.HeatEquation.H1ComplToLp_heatSemigroupSpectralLift
-#print axioms
-  DifferentialGeometry.Analysis.HeatEquation.heatSemigroupExplicitLift
-#print axioms
-  DifferentialGeometry.Analysis.HeatEquation.heatSemigroupExplicitLift_mem
-#print axioms
-  DifferentialGeometry.Analysis.HeatEquation.H1ComplToLp_heatSemigroupExplicitLift
-#print axioms
-  DifferentialGeometry.Analysis.HeatEquation.heatSemigroup_in_laplacianDomainPow_succ_explicit
-
-end Sanity

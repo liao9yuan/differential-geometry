@@ -307,11 +307,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms DifferentialGeometry.Analysis.Parabolic.TensorSpectral.smoothToTensorH1Compl
-#print axioms DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TensorH1ComplToTensorL2
-#print axioms DifferentialGeometry.Analysis.Parabolic.TensorSpectral.smoothCcTensorH1ToTensorL2
-#print axioms DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TensorH1ComplToTensorL2_smoothToTensorH1Compl
-#print axioms DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TensorH1ComplToTensorL2_smoothToTensorH1Compl_eq_coe
-end Sanity

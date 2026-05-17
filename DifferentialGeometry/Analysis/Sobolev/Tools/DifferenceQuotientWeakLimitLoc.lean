@@ -1568,12 +1568,6 @@ theorem hasWeakPartialDeriv_of_diffQuot_uniform_bound_loc
     rw [← h_enorm_eq]
     exact h_enorm_le
 
-/-! ## Sanity check -/
-
-section Sanity
-#print axioms hasWeakPartialDeriv_of_diffQuot_uniform_bound_loc
-end Sanity
-
 end Sobolev
 end Analysis
 end DifferentialGeometry

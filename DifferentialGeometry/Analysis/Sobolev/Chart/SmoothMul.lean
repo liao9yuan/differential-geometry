@@ -454,10 +454,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-/-! ## Axiom audit -/
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Sobolev.Chart.MemWkpChart_smooth_mul
-end Sanity
