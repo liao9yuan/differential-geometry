@@ -122,12 +122,12 @@ compact set inside the open chart source. -/
 /-- The chart-source lift of `tsupport φ`: the `(extChartAt I α).symm`-image of
 the `toEuclidean.symm`-image of `tsupport φ`. It is compact and contained in the
 chart-`α` source. -/
-private def euclTestLift (α : M) (φ : EuclN → ℝ) : Set M :=
+def euclTestLift (α : M) (φ : EuclN → ℝ) : Set M :=
   (extChartAt I α).symm '' ((toEuclidean (E := E)).symm '' tsupport φ)
 
 /-- The chart-source lift `euclTestLift α φ` is compact whenever `φ` is
 compactly supported and `tsupport φ ⊆ chartTargetEuclid α`. -/
-private lemma euclTestLift_isCompact (α : M)
+lemma euclTestLift_isCompact (α : M)
     {φ : EuclN → ℝ} (hφ_cs : HasCompactSupport φ)
     (hφ_supp : tsupport φ ⊆ chartTargetEuclid (I := I) (M := M) α) :
     IsCompact (euclTestLift (I := I) (M := M) α φ) := by
@@ -149,7 +149,7 @@ private lemma euclTestLift_isCompact (α : M)
 
 /-- The chart-source lift `euclTestLift α φ` is contained in the chart-`α`
 source. -/
-private lemma euclTestLift_subset_source (α : M) (φ : EuclN → ℝ)
+lemma euclTestLift_subset_source (α : M) (φ : EuclN → ℝ)
     (hφ_supp : tsupport φ ⊆ chartTargetEuclid (I := I) (M := M) α) :
     euclTestLift (I := I) (M := M) α φ ⊆ (chartAt H α).source := by
   intro x hx
@@ -167,7 +167,7 @@ private lemma euclTestLift_subset_source (α : M) (φ : EuclN → ℝ)
 
 /-- The support of `chartTestPullback I α φ` is contained in the chart-source
 lift `euclTestLift α φ`. -/
-private lemma chartTestPullback_support_subset (α : M) (φ : EuclN → ℝ) :
+lemma chartTestPullback_support_subset (α : M) (φ : EuclN → ℝ) :
     Function.support (chartTestPullback (I := I) (M := M) α φ) ⊆
       euclTestLift (I := I) (M := M) α φ := by
   intro x hx
@@ -187,7 +187,7 @@ private lemma chartTestPullback_support_subset (α : M) (φ : EuclN → ℝ) :
 /-- The topological support of `chartTestPullback I α φ` is contained in the
 chart-`α` source whenever `φ` is compactly supported with
 `tsupport φ ⊆ chartTargetEuclid α`. -/
-private lemma chartTestPullback_tsupport_subset_source (α : M)
+lemma chartTestPullback_tsupport_subset_source (α : M)
     {φ : EuclN → ℝ} (hφ_cs : HasCompactSupport φ)
     (hφ_supp : tsupport φ ⊆ chartTargetEuclid (I := I) (M := M) α) :
     tsupport (chartTestPullback (I := I) (M := M) α φ) ⊆ (chartAt H α).source :=
@@ -198,7 +198,7 @@ private lemma chartTestPullback_tsupport_subset_source (α : M)
 /-- The manifold-side chart bump `chartTestPullback I α φ` is `C^∞` on the
 chart-`α` source whenever `φ` is `C^∞`: on the chart source it is the
 composition `φ ∘ toEuclidean ∘ extChartAt I α` of smooth maps. -/
-private lemma chartTestPullback_contMDiffOn (α : M)
+lemma chartTestPullback_contMDiffOn (α : M)
     {φ : EuclN → ℝ} (hφ : ContDiff ℝ (⊤ : ℕ∞) φ) :
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (chartTestPullback (I := I) (M := M) α φ)
       (chartAt H α).source := by
@@ -230,7 +230,7 @@ test-weighted chart coefficients. -/
 
 /-- A function that is `C^∞` on the open Euclidean chart target and vanishes off
 a closed set inside the chart target is globally `C^∞`. -/
-private lemma contDiff_of_contDiffOn_chartTarget_zero_off
+lemma contDiff_of_contDiffOn_chartTarget_zero_off
     (α : M) {P : EuclN → ℝ} {C : Set EuclN}
     (hC : IsClosed C) (hC_target : C ⊆ chartTargetEuclid (I := I) (M := M) α)
     (hP : ContDiffOn ℝ ∞ P (chartTargetEuclid (I := I) (M := M) α))
@@ -252,7 +252,7 @@ private lemma contDiff_of_contDiffOn_chartTarget_zero_off
 function whose topological support is inside the chart target is globally
 `C^∞`. The product vanishes off `tsupport φ`, a closed set inside the open
 chart target. -/
-private lemma contDiff_mul_chartTest
+lemma contDiff_mul_chartTest
     (α : M) {h φ : EuclN → ℝ}
     (hh : ContDiffOn ℝ ∞ h (chartTargetEuclid (I := I) (M := M) α))
     (hφ : ContDiff ℝ ∞ φ)
@@ -266,14 +266,14 @@ private lemma contDiff_mul_chartTest
 /-- The product of a function `C^∞` on the chart target and a globally `C^∞`
 function whose topological support is inside the chart target has compact
 support: it vanishes off `tsupport φ`. -/
-private lemma hasCompactSupport_mul_chartTest
+lemma hasCompactSupport_mul_chartTest
     {h φ : EuclN → ℝ} (hφ_cs : HasCompactSupport φ) :
     HasCompactSupport (fun y => h y * φ y) :=
   hφ_cs.mul_left
 
 /-- The chart-Euclidean partial derivative of a function `C^∞` on the chart
 target is again `C^∞` on the chart target. -/
-private lemma euclidPartial_contDiffOn_chartTarget
+lemma euclidPartial_contDiffOn_chartTarget
     (α : M) (l : Fin (Module.finrank ℝ E))
     {u : EuclN → ℝ}
     (hu : ContDiffOn ℝ ∞ u (chartTargetEuclid (I := I) (M := M) α)) :
@@ -313,7 +313,7 @@ the Lebesgue measure `volume`. -/
 
 /-- A globally `C^∞` compactly-supported function on the Euclidean model space is
 Bochner-integrable against `volume`. -/
-private lemma integrable_of_contDiff_hasCompactSupport
+lemma integrable_of_contDiff_hasCompactSupport
     {P : EuclN → ℝ} (hP : ContDiff ℝ ∞ P) (hP_cs : HasCompactSupport P) :
     Integrable P (volume : Measure EuclN) :=
   hP.continuous.integrable_of_hasCompactSupport hP_cs
@@ -328,7 +328,7 @@ the open chart target. -/
 
 /-- On the Euclidean chart target the push-forward `chartPushedRaw I α
 (chartTestPullback I α φ)` of the manifold-side chart bump agrees with `φ`. -/
-private lemma chartPushedRaw_chartTestPullback_eqOn (α : M) (φ : EuclN → ℝ) :
+lemma chartPushedRaw_chartTestPullback_eqOn (α : M) (φ : EuclN → ℝ) :
     Set.EqOn (chartPushedRaw I α (chartTestPullback (I := I) (M := M) α φ)) φ
       (chartTargetEuclid (I := I) (M := M) α) := by
   intro y hy
@@ -349,7 +349,7 @@ private lemma chartPushedRaw_chartTestPullback_eqOn (α : M) (φ : EuclN → ℝ
 /-- On the open Euclidean chart target the chart-Euclidean partial derivative of
 the push-forward `chartPushedRaw I α (chartTestPullback I α φ)` agrees with the
 chart-Euclidean partial derivative of `φ`. -/
-private lemma euclidPartial_chartPushedRaw_chartTestPullback_eqOn
+lemma euclidPartial_chartPushedRaw_chartTestPullback_eqOn
     (α : M) (φ : EuclN → ℝ) (l : Fin (Module.finrank ℝ E)) :
     Set.EqOn
       (euclidPartial (E := E) l
@@ -399,7 +399,7 @@ On `K` the density-weighted inverse-Gram pairing is the `principalIntegrand`
 (`weightedInvGram_principalIntegrand_eq`); off the topological support of `u`
 both sides vanish (the chart-Euclidean partial of `u` is zero there); the support
 hypothesis `hu_K` places that support inside `K`. -/
-private lemma density_scalarPrincipal_eq_principalIntegrand
+lemma density_scalarPrincipal_eq_principalIntegrand
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK : IsCompact K)
     (hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α)
