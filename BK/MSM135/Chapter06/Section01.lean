@@ -1,4 +1,4 @@
-import RicciFlower.RicciFlow.Perelman.Variation
+import RicciFlower.RicciFlow.Perelman.F
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -230,6 +230,45 @@ Book-facing alias for the moving-volume producer that turns the scalar
 derivative data into `WEntropyHasFirstVariationAt`. -/
 abbrev lbl551_entropy_first_variation_producer_of_volumeVariation :=
   @WEntropyHasFirstVariationAt_of_volumeVariation
+
+/-- MSM135 Chapter 5, formula 5.10, used in Chapter 6.1 Lemma 6.1.
+
+Book-facing alias for the concrete measure-theoretic `F` functional. -/
+abbrev lbl453_f_functional := @fFunctional
+
+/-- MSM135 Chapter 5, formula 5.10, used in Chapter 6.1 Lemma 6.1.
+
+Book-facing alias for the tau-free density derivative
+`d(e^{-f_s})/ds = -h e^{-f}`. -/
+abbrev lbl453_exp_density_variation_producer :=
+  @expNegPotentialDensity_hasDerivAt
+
+/-- MSM135 Chapter 5, formula 5.10, used in Chapter 6.1 Lemma 6.1.
+
+Book-facing alias for the tau-free moving-volume producer
+`delta(e^{-f} dmu) = (V/2 - h)e^{-f} dmu`. -/
+abbrev lbl453_exp_weighted_measure_variation_producer :=
+  @expWeightedMeasureIntegral_hasDerivAt_at
+
+/-- MSM135 Chapter 5, formula 5.10, used in Chapter 6.1 Lemma 6.1.
+
+Book-facing alias for the `F` first-variation producer from scalar derivative
+data and moving-volume differentiation. -/
+abbrev lbl453_f_first_variation_producer_of_volumeVariation :=
+  @FFunctionalHasFirstVariationAt_of_volumeVariation
+
+/-- MSM135 Chapter 5, formula 5.10, used in Chapter 6.1 Lemma 6.1.
+
+Book-facing alias for the final integral statement of formula 5.10. -/
+abbrev lbl453_f_formula510_statement :=
+  @FFunctionalFormula510
+
+/-- MSM135 Chapter 5, formula 5.10, used in Chapter 6.1 Lemma 6.1.
+
+Book-facing alias converting a proved formula 5.10 identity for the derivative
+value into an identity for the `deriv`-based first variation. -/
+abbrev lbl453_f_formula510_final :=
+  @fFunctionalFirstVariation_eq_formula510_of_hasFirstVariationAt
 
 /-- MSM135 Chapter 6, labels `notes_and_commentary:lbl551` and
 `notes_and_commentary:lbl552`. -/

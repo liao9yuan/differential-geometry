@@ -60,3 +60,21 @@ producer without moving proof work into BK.  Formula 5.10 remains a later
 RicciFlower-native `F` first-variation producer.
 
 Verification: passed for this file and the targeted BK Section 6.1 module.
+
+## 2026-05-16 Formula 5.10 F-functional aliases
+
+Switched the Section 6.1 import to the RicciFlower `F` module and added
+book-facing aliases for Chapter 5 formula 5.10 as it is used by Lemma 6.1:
+
+- `lbl453_f_functional`
+- `lbl453_exp_density_variation_producer`
+- `lbl453_exp_weighted_measure_variation_producer`
+- `lbl453_f_first_variation_producer_of_volumeVariation`
+- `lbl453_f_formula510_statement`
+- `lbl453_f_formula510_final`
+
+These expose the concrete `F` functional, the tau-free `e^{-f}dmu` variation
+producer, and the final formula 5.10 statement layer.  The geometric producer
+for arbitrary metric variation of `Ric + Hess f` remains in RicciFlower.
+
+Verification: passed for this file and the targeted BK Section 6.1 module.

@@ -103,6 +103,42 @@ variation producer for `W`.  The remaining bridge to the full Lemma 6.1
 pre-IBP expression is formula 5.10, the first variation of Perelman's
 `F` functional.
 
+The formula 5.10 route now has a RicciFlower statement layer:
+
+```text
+F(mu,R,G,f) = integral_M (R + G) e^{-f} dmu
+
+d/ds [exp(-f_s)] = -h exp(-f)
+
+d/ds integral_M exp(-f_s) phi_s dmu_s
+  = integral_M exp(-f) * (phiDot + phi*(V/2 - h)) dmu
+
+delta F =
+  - integral_M v_ij (Ric_ij + Hess_ij f) e^{-f} dmu
+  + integral_M (V/2 - h)
+      (R + 2 Delta f - |grad f|^2) e^{-f} dmu
+```
+
+Current Lean handles:
+
+```text
+RicciFlower.RicciFlow.Perelman.fFunctional
+RicciFlower.RicciFlow.Perelman.expNegPotentialDensity_hasDerivAt
+RicciFlower.RicciFlow.Perelman.expWeightedMeasureIntegral_hasDerivAt_at
+RicciFlower.RicciFlow.Perelman.FFunctionalHasFirstVariationAt_of_volumeVariation
+RicciFlower.RicciFlow.Perelman.MetricVariationChristoffelInFrame
+RicciFlower.RicciFlow.Perelman.MetricVariationChristoffelTraceInFrame
+RicciFlower.RicciFlow.Perelman.RicciVariationByChristoffelInFrame
+RicciFlower.RicciFlow.Perelman.HessianPotentialVariationByChristoffelInFrame
+RicciFlower.RicciFlow.Perelman.RicciHessianWeightedDensityVariationInFrame
+RicciFlower.RicciFlow.Perelman.FFunctionalFormula510
+```
+
+The remaining formula 5.10 geometry frontier is not Ricci-flow specialized:
+derive arbitrary metric-variation Christoffel, Ricci variation, Hessian
+variation, closed-manifold divergence cancellation, weighted integration by
+parts, and `Delta(exp(-f)) = (-Delta f + |grad f|^2)exp(-f)`.
+
 The monotonicity display is represented abstractly as:
 
 ```text

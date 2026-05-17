@@ -1,5 +1,6 @@
 import RicciFlower.Realized.Curvature
 import RicciFlower.Metric.Basic
+import Mathlib.Analysis.Calculus.Deriv.Basic
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -34,6 +35,10 @@ abbrev TwoTensorFamily : Type _ :=
 /-- A time-dependent vector field used for drift terms. -/
 abbrev TimeDependentVectorField : Type _ :=
   Real -> (x : M) -> TangentSpace I x
+
+/-- A time-dependent quadratic-form evaluation on tangent vectors. -/
+abbrev TensorQuadraticFormFamily : Type _ :=
+  Real -> (x : M) -> TangentSpace I x -> Real
 
 /-- A fiberwise algebraic reaction term for the tensor maximum principle. -/
 abbrev TwoTensorReaction : Type _ :=
@@ -106,23 +111,53 @@ def TensorNullEigenvectorCondition
 /--
 Analytic regularity predicate for the tensor WMP barrier argument.
 
-Future producer work should replace this placeholder by concrete smoothness and
-compactness hypotheses for the tensor, metric, drift, and reaction data.
+This records the concrete scalar-evaluation regularity and local reaction
+Lipschitz control needed by the barrier estimate.  The compact first-null
+extraction and tensor heat-operator realization remain separate frontiers.
 -/
-def TensorBarrierRegularityOn
+structure TensorBarrierRegularityOn
     (G : Real -> SmoothRiemannianMetric I M)
     (S : TwoTensorFamily (I := I) (M := M))
     (X : TimeDependentVectorField (I := I) (M := M))
     (N : TwoTensorReaction (I := I) (M := M))
-    (T : Real) : Prop :=
-  True
+    (T : Real) : Prop where
+  tensor_eval_continuous :
+    ∀ x, ∀ v w : TangentSpace I x,
+      ContinuousOn (fun t : Real => S t x v w) (Set.Icc 0 T)
+  metric_eval_continuous :
+    ∀ x, ∀ v w : TangentSpace I x,
+      ContinuousOn (fun t : Real => (G t).inner x v w) (Set.Icc 0 T)
+  barrier_eval_continuous :
+    ∀ epsilon delta t0 : Real,
+      Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+      ∀ x, ∀ v w : TangentSpace I x,
+        ContinuousOn
+          (fun t : Real =>
+            tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t x v w)
+          (Set.Icc t0 (t0 + delta))
+  reaction_lipschitz_on_barriers :
+    ∀ epsilon delta t0 : Real,
+      0 < epsilon ->
+      0 < delta ->
+      Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+      ∃ K : Real, 0 ≤ K ∧
+        ∀ t, t ∈ Set.Icc t0 (t0 + delta) ->
+          ∀ x, ∀ v : TangentSpace I x,
+            |N t (G t) (S t) x v v -
+              N t (G t)
+                (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t)
+                x v v| ≤
+            K * |epsilon * (delta + t - t0) * (G t).inner x v v|
 
 /--
 Analytic predicate for the evaluated drifted parabolic supersolution
 inequality.
 
-This is the hook for a future tensor heat-operator realization of
-`(partial_t - Delta) S >= X^k nabla_k S + N(S,g,t)`.
+`parabolicValue` is the quadratic-form value of
+`(partial_t - Delta - X · nabla) S`, and `heatWithDriftValue` is the supplied
+quadratic-form value of `(Delta + X · nabla) S`.  A future tensor heat-operator
+API should produce the heat-with-drift value; this predicate already records
+the time-derivative realization and the reaction lower bound.
 -/
 def TensorParabolicInequalityWithDriftOn
     (G : Real -> SmoothRiemannianMetric I M)
@@ -130,7 +165,221 @@ def TensorParabolicInequalityWithDriftOn
     (X : TimeDependentVectorField (I := I) (M := M))
     (N : TwoTensorReaction (I := I) (M := M))
     (T : Real) : Prop :=
-  True
+  ∃ parabolicValue heatWithDriftValue :
+      TensorQuadraticFormFamily (I := I) (M := M),
+    (∀ t, t ∈ Set.Icc 0 T ->
+      ∀ x, ∀ v : TangentSpace I x,
+        HasDerivWithinAt
+          (fun s : Real => S s x v v)
+          (parabolicValue t x v + heatWithDriftValue t x v)
+          (Set.Icc 0 T) t) ∧
+    (∀ t, t ∈ Set.Icc 0 T ->
+      ∀ x, ∀ v : TangentSpace I x,
+        N t (G t) (S t) x v v ≤ parabolicValue t x v)
+
+/-- Strict evaluated drifted parabolic inequality for the positive barrier. -/
+def TensorParabolicStrictInequalityWithDriftOn
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorFamily (I := I) (M := M))
+    (X : TimeDependentVectorField (I := I) (M := M))
+    (N : TwoTensorReaction (I := I) (M := M))
+    (T : Real) : Prop :=
+  ∃ parabolicValue heatWithDriftValue :
+      TensorQuadraticFormFamily (I := I) (M := M),
+    (∀ t, t ∈ Set.Icc 0 T ->
+      ∀ x, ∀ v : TangentSpace I x,
+        HasDerivWithinAt
+          (fun s : Real => S s x v v)
+          (parabolicValue t x v + heatWithDriftValue t x v)
+          (Set.Icc 0 T) t) ∧
+    (∀ t, t ∈ Set.Icc 0 T ->
+      ∀ x, ∀ v : TangentSpace I x,
+        v ≠ 0 ->
+        N t (G t) (S t) x v v < parabolicValue t x v)
+
+/--
+Data at the first point where the positive barrier develops a null vector.
+
+The vector is normalized with respect to the metric at the first null time.
+This is the shape supplied by compactness of the unit tangent bundle.
+-/
+structure TensorFirstNullData
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorFamily (I := I) (M := M))
+    (epsilon delta t0 : Real) : Type _ where
+  t1 : Real
+  x1 : M
+  v : TangentSpace I x1
+  t1_mem : t1 ∈ Set.Ioc t0 (t0 + delta)
+  v_ne_zero : v ≠ 0
+  unit : (G t1).inner x1 v v = 1
+  nonnegative_until :
+    ∀ t, t ∈ Set.Icc t0 t1 ->
+      ∀ x, TwoTensorNonnegativeAt (I := I) (M := M)
+        (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t) x
+  null :
+    tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t1 x1 v v = 0
+
+/--
+Compactness and continuity package for extracting the first null vector of the
+positive tensor barrier.
+
+This is the analytic unit-tangent-bundle compactness input: it should be
+produced from compactness of `M`, compactness of the unit tangent bundle for the
+metric at the first time, and continuity of the barrier quadratic form.
+-/
+structure TensorFirstNullCompactnessOn
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorFamily (I := I) (M := M))
+    (epsilon delta t0 : Real) : Prop where
+  firstNull_of_failure :
+    (∀ x, TwoTensorPositiveDefiniteAt (I := I) (M := M)
+      (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t0) x) ->
+    (¬ TwoTensorFamilyNonnegativeOn (I := I) (M := M)
+      (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0)
+      (Set.Icc t0 (t0 + delta))) ->
+    Nonempty (TensorFirstNullData (I := I) (M := M) G S epsilon delta t0)
+
+/--
+The strict barrier supersolution inequality produced after adding
+`epsilon * (delta + t - t0) * g`.
+
+This is the named target for the estimate that absorbs metric variation and
+the local Lipschitz error in `N`.
+-/
+def TensorBarrierStrictSupersolutionOn
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorFamily (I := I) (M := M))
+    (X : TimeDependentVectorField (I := I) (M := M))
+    (N : TwoTensorReaction (I := I) (M := M))
+    (epsilon delta t0 : Real) : Prop :=
+  TensorParabolicStrictInequalityWithDriftOn (I := I) (M := M) G
+    (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0) X N (t0 + delta)
+
+/--
+Uniform strict barrier supersolution on a fixed short slab.
+
+The time slab is fixed before `epsilon` varies.  This is the mathematically
+usable local estimate for the final `epsilon -> 0` argument.
+-/
+def TensorBarrierUniformStrictOnSlab
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorFamily (I := I) (M := M))
+    (X : TimeDependentVectorField (I := I) (M := M))
+    (N : TwoTensorReaction (I := I) (M := M))
+    (delta t0 : Real) : Prop :=
+  ∀ epsilon : Real, 0 < epsilon ->
+    TensorBarrierStrictSupersolutionOn (I := I) (M := M) G S X N
+      epsilon delta t0
+
+/--
+Scalar signs obtained by testing the tensor barrier on a locally parallel
+extension of the first-null vector.
+
+This is an existential `Prop`, rather than a `Prop` structure with `Real`
+fields, because Lean does not generate projections for data fields in
+proof-irrelevant structures.
+-/
+def TensorFirstNullScalarSigns
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorFamily (I := I) (M := M))
+    (X : TimeDependentVectorField (I := I) (M := M))
+    (N : TwoTensorReaction (I := I) (M := M))
+    (epsilon delta t0 : Real)
+    (d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0) : Prop :=
+  ∃ timeDeriv laplacian drift reaction : Real,
+    timeDeriv ≤ 0 ∧
+    0 ≤ laplacian ∧
+    drift = 0 ∧
+    0 ≤ reaction ∧
+    drift + reaction < timeDeriv - laplacian
+
+/--
+Uniform barrier nonnegativity on a fixed short slab.
+
+The time slab is fixed before `epsilon` varies; this is the form needed for the
+local `epsilon -> 0` argument.
+-/
+def TensorBarrierUniformOnSlab
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorFamily (I := I) (M := M))
+    (delta t0 : Real) : Prop :=
+  ∀ epsilon : Real, 0 < epsilon ->
+    TwoTensorFamilyNonnegativeOn (I := I) (M := M)
+      (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0)
+      (Set.Icc t0 (t0 + delta))
+
+/--
+On a fixed short slab, uniform nonnegativity of all positive barriers implies
+nonnegativity of the unperturbed tensor.
+-/
+theorem tensorBarrier_limit_on_fixed_slab
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorFamily (I := I) (M := M)}
+    {delta t0 : Real}
+    (hdelta : 0 < delta)
+    (hbarrier : TensorBarrierUniformOnSlab (I := I) (M := M) G S delta t0) :
+    TwoTensorFamilyNonnegativeOn (I := I) (M := M) S
+      (Set.Icc t0 (t0 + delta)) := by
+  intro t ht x v
+  let q : Real := S t x v v
+  let c : Real := (delta + t - t0) * (G t).inner x v v
+  have htime_nonneg : 0 ≤ delta + t - t0 := by
+    have ht_sub : 0 ≤ t - t0 := sub_nonneg.mpr ht.1
+    have hsum : 0 ≤ delta + (t - t0) :=
+      add_nonneg (le_of_lt hdelta) ht_sub
+    simpa [sub_eq_add_neg, add_assoc, add_comm, add_left_comm] using hsum
+  have hmetric_nonneg : 0 ≤ (G t).inner x v v := by
+    by_cases hv : v = 0
+    · subst v
+      simp
+    · exact le_of_lt ((G t).pos x v hv)
+  have hc_nonneg : 0 ≤ c := by
+    simpa [c] using mul_nonneg htime_nonneg hmetric_nonneg
+  have hforall : ∀ e : Real, 0 < e -> 0 ≤ q + e := by
+    intro e he
+    let eta : Real := e / (c + 1)
+    have hden_pos : 0 < c + 1 :=
+      add_pos_of_nonneg_of_pos hc_nonneg zero_lt_one
+    have heta_pos : 0 < eta := by
+      exact div_pos he hden_pos
+    have hbar_eta :
+        0 ≤
+          tensorBarrierFamily (I := I) (M := M) G S eta delta t0 t x v v :=
+      hbarrier eta heta_pos t ht x v
+    have hbar_q : 0 ≤ q + eta * c := by
+      simpa [tensorBarrierFamily, q, c, mul_assoc] using hbar_eta
+    have heta_nonneg : 0 ≤ eta := le_of_lt heta_pos
+    have hcoeff_le : c ≤ c + 1 := le_add_of_nonneg_right zero_le_one
+    have hprod_le : eta * c ≤ eta * (c + 1) :=
+      mul_le_mul_of_nonneg_left hcoeff_le heta_nonneg
+    have hden_ne : c + 1 ≠ 0 := ne_of_gt hden_pos
+    have heta_mul_den : eta * (c + 1) = e := by
+      dsimp [eta]
+      field_simp [hden_ne]
+    have heta_c_le : eta * c ≤ e := by
+      simpa [heta_mul_den] using hprod_le
+    exact le_trans hbar_q (by
+      simpa [add_comm, add_left_comm, add_assoc] using add_le_add_left heta_c_le q)
+  have hq_nonneg : 0 ≤ q := le_of_forall_pos_le_add hforall
+  simpa [q] using hq_nonneg
+
+/--
+Global finite-subinterval continuation for the tensor barrier.
+
+The local input is already uniform in `epsilon`; the fixed-slab epsilon limit is
+therefore separated from the global reachability/closedness argument.
+-/
+def TensorBarrierLimitClosureOn
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorFamily (I := I) (M := M))
+    (T : Real) : Prop :=
+  TwoTensorFamilyNonnegativeAtTime (I := I) (M := M) S 0 ->
+  (∀ t0 : Real, t0 ∈ Set.Icc 0 T -> t0 < T ->
+    TwoTensorFamilyNonnegativeAtTime (I := I) (M := M) S t0 ->
+    ∃ delta : Real, 0 < delta ∧ t0 + delta ≤ T ∧
+      TensorBarrierUniformOnSlab (I := I) (M := M) G S delta t0) ->
+  TwoTensorFamilyNonnegativeOn (I := I) (M := M) S (Set.Icc 0 T)
 
 /--
 Regularity package needed for Hamilton's tensor weak maximum principle.
@@ -149,6 +398,32 @@ structure TensorWMPRegularityOn
   symmetric : TwoTensorFamilySymmetricOn (I := I) (M := M) S (Set.Icc 0 T)
   barrierRegularity :
     TensorBarrierRegularityOn (I := I) (M := M) G S X N T
+  firstNullCompactness :
+    ∀ epsilon delta t0 : Real,
+      0 < epsilon ->
+      0 < delta ->
+      Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+      TensorFirstNullCompactnessOn (I := I) (M := M) G S epsilon delta t0
+  firstNullScalarSigns :
+    ∀ epsilon delta t0 : Real,
+      0 < epsilon ->
+      0 < delta ->
+      Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+      (hstrict : TensorBarrierStrictSupersolutionOn (I := I) (M := M)
+        G S X N epsilon delta t0) ->
+      (hnull : TensorNullEigenvectorCondition (I := I) (M := M)
+        G N (Set.Icc t0 (t0 + delta))) ->
+      (d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0) ->
+      TensorFirstNullScalarSigns (I := I) (M := M) G S X N epsilon delta t0 d
+  strictBarrierEstimate :
+    ∀ t0 : Real,
+      t0 ∈ Set.Icc 0 T ->
+      t0 < T ->
+      TensorParabolicInequalityWithDriftOn (I := I) (M := M) G S X N T ->
+      ∃ delta : Real, 0 < delta ∧ t0 + delta ≤ T ∧
+        TensorBarrierUniformStrictOnSlab (I := I) (M := M) G S X N delta t0
+  barrierLimitClosure :
+    TensorBarrierLimitClosureOn (I := I) (M := M) G S T
 
 /--
 Parabolic supersolution package for the drifted tensor inequality
@@ -169,41 +444,6 @@ structure TensorParabolicSupersolutionWithDriftOn
     TensorParabolicInequalityWithDriftOn (I := I) (M := M) G S X N T
 
 /-! ## Barrier proof blocks -/
-
-/--
-The strict barrier supersolution inequality produced after adding
-`epsilon * (delta + t - t0) * g`.
-
-This is the named target for the estimate that absorbs metric variation and
-the local Lipschitz error in `N`.
--/
-def TensorBarrierStrictSupersolutionOn
-    (G : Real -> SmoothRiemannianMetric I M)
-    (S : TwoTensorFamily (I := I) (M := M))
-    (X : TimeDependentVectorField (I := I) (M := M))
-    (N : TwoTensorReaction (I := I) (M := M))
-    (epsilon delta t0 : Real) : Prop :=
-  TensorParabolicInequalityWithDriftOn (I := I) (M := M) G
-    (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0) X N (t0 + delta)
-
-/--
-Data at the first point where the positive barrier develops a null vector.
--/
-structure TensorFirstNullData
-    (G : Real -> SmoothRiemannianMetric I M)
-    (S : TwoTensorFamily (I := I) (M := M))
-    (epsilon delta t0 : Real) : Type _ where
-  t1 : Real
-  x1 : M
-  v : TangentSpace I x1
-  t1_mem : t1 ∈ Set.Ioc t0 (t0 + delta)
-  v_ne_zero : v ≠ 0
-  nonnegative_until :
-    ∀ t, t ∈ Set.Icc t0 t1 ->
-      ∀ x, TwoTensorNonnegativeAt (I := I) (M := M)
-        (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t) x
-  null :
-    tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t1 x1 v v = 0
 
 /--
 Step 1: the barrier is initially positive definite.
@@ -232,24 +472,23 @@ theorem tensorBarrier_initial_positive
 
 /--
 Step 2: the metric-variation and Lipschitz estimates make the barrier a strict
-supersolution on a short slab.
+supersolution on a sufficiently short slab.
 -/
 theorem tensorBarrier_strict_supersolution
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
     {X : TimeDependentVectorField (I := I) (M := M)}
     {N : TwoTensorReaction (I := I) (M := M)}
-    {epsilon delta t0 T : Real}
-    (_hepsilon : 0 < epsilon)
-    (_hdelta : 0 < delta)
-    (_hT : t0 + delta ≤ T)
-    (_hreg : TensorWMPRegularityOn (I := I) (M := M) G S X N T)
-    (_hparabolic : TensorParabolicSupersolutionWithDriftOn
+    {t0 T : Real}
+    (ht0 : t0 ∈ Set.Icc 0 T)
+    (ht0T : t0 < T)
+    (hreg : TensorWMPRegularityOn (I := I) (M := M) G S X N T)
+    (hparabolic : TensorParabolicSupersolutionWithDriftOn
       (I := I) (M := M) G S X N T) :
-    TensorBarrierStrictSupersolutionOn (I := I) (M := M) G S X N
-      epsilon delta t0 := by
-  -- Frontier block: barrier differential inequality.
-  sorry
+    ∃ delta : Real, 0 < delta ∧ t0 + delta ≤ T ∧
+      TensorBarrierUniformStrictOnSlab (I := I) (M := M) G S X N
+        delta t0 := by
+  exact hreg.strictBarrierEstimate t0 ht0 ht0T hparabolic.evaluatedInequality
 
 /--
 Step 3: if the barrier fails to stay positive, compactness gives first-null
@@ -259,14 +498,37 @@ theorem tensorBarrier_first_null_of_failure
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
     {epsilon delta t0 : Real}
-    (_hinit_pos : ∀ x, TwoTensorPositiveDefiniteAt (I := I) (M := M)
+    (hcompact : TensorFirstNullCompactnessOn (I := I) (M := M)
+      G S epsilon delta t0)
+    (hinit_pos : ∀ x, TwoTensorPositiveDefiniteAt (I := I) (M := M)
       (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t0) x)
-    (_hfail : ¬ TwoTensorFamilyNonnegativeOn (I := I) (M := M)
+    (hfail : ¬ TwoTensorFamilyNonnegativeOn (I := I) (M := M)
       (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0)
       (Set.Icc t0 (t0 + delta))) :
     Nonempty (TensorFirstNullData (I := I) (M := M) G S epsilon delta t0) := by
-  -- Frontier block: compact first-null-vector extraction.
-  sorry
+  exact hcompact.firstNull_of_failure hinit_pos hfail
+
+/--
+Pure scalar order contradiction used at a first null vector.
+
+Here `timeDeriv` is `partial_t phi`, `laplacian` is `Delta phi`, `drift`
+is `X · nabla phi`, and `reaction` is the evaluated reaction term.
+-/
+private theorem firstNullOrder
+    {timeDeriv laplacian drift reaction : Real}
+    (htime : timeDeriv ≤ 0)
+    (hlap : 0 ≤ laplacian)
+    (hdrift : drift = 0)
+    (hreaction : 0 ≤ reaction)
+    (hstrict : drift + reaction < timeDeriv - laplacian) :
+    False := by
+  have hsource_nonneg : 0 ≤ drift + reaction := by
+    simpa [hdrift] using hreaction
+  have htarget_pos : 0 < timeDeriv - laplacian :=
+    lt_of_le_of_lt hsource_nonneg hstrict
+  have htarget_nonpos : timeDeriv - laplacian ≤ 0 := by
+    simpa [sub_eq_add_neg] using add_nonpos htime (neg_nonpos.mpr hlap)
+  exact (not_lt_of_ge htarget_nonpos) htarget_pos
 
 /--
 Step 4: evaluating the strict inequality at the first null vector contradicts
@@ -278,14 +540,46 @@ theorem tensor_first_null_contradiction
     {X : TimeDependentVectorField (I := I) (M := M)}
     {N : TwoTensorReaction (I := I) (M := M)}
     {epsilon delta t0 : Real}
-    (_hstrict : TensorBarrierStrictSupersolutionOn (I := I) (M := M)
+    (ht0_nonneg : 0 ≤ t0)
+    (hstrict : TensorBarrierStrictSupersolutionOn (I := I) (M := M)
       G S X N epsilon delta t0)
     (_hnull : TensorNullEigenvectorCondition (I := I) (M := M) G
       N (Set.Icc t0 (t0 + delta)))
-    (_d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0) :
+    (d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0)
+    (hsigns : TensorFirstNullScalarSigns (I := I) (M := M)
+      G S X N epsilon delta t0 d) :
     False := by
-  -- Frontier block: first-null scalar test-function contradiction.
-  sorry
+  rcases hstrict with ⟨parabolicValue, _heatWithDriftValue, _hderiv, hstrict_eval⟩
+  have ht1_mem_strict : d.t1 ∈ Set.Icc 0 (t0 + delta) := by
+    exact ⟨le_trans ht0_nonneg (le_of_lt d.t1_mem.1), d.t1_mem.2⟩
+  have _hstrict_at_first_null :
+      N d.t1 (G d.t1)
+          (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 d.t1)
+          d.x1 d.v d.v <
+        parabolicValue d.t1 d.x1 d.v := by
+    exact hstrict_eval d.t1 ht1_mem_strict d.x1 d.v d.v_ne_zero
+  have ht1_mem_slab : d.t1 ∈ Set.Icc t0 (t0 + delta) :=
+    ⟨le_of_lt d.t1_mem.1, d.t1_mem.2⟩
+  have ht1_mem_until : d.t1 ∈ Set.Icc t0 d.t1 :=
+    ⟨le_of_lt d.t1_mem.1, le_rfl⟩
+  have hbarrier_nonnegative :
+      TwoTensorNonnegativeAt (I := I) (M := M)
+        (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 d.t1)
+        d.x1 :=
+    d.nonnegative_until d.t1 ht1_mem_until d.x1
+  have _hreaction_nonnegative :
+      0 ≤
+        N d.t1 (G d.t1)
+          (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 d.t1)
+          d.x1 d.v d.v := by
+    exact _hnull d.t1 ht1_mem_slab
+      (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 d.t1)
+      d.x1 hbarrier_nonnegative d.v d.null
+  rcases hsigns with
+    ⟨timeDeriv, laplacian, drift, reaction,
+      htime_nonpos, hlaplacian_nonneg, hdrift_zero, hreaction_nonneg, hstrict_ineq⟩
+  exact firstNullOrder htime_nonpos hlaplacian_nonneg hdrift_zero
+    hreaction_nonneg hstrict_ineq
 
 /--
 Step 5: the strict barrier remains nonnegative on the short slab.
@@ -295,35 +589,49 @@ theorem tensorBarrier_nonnegative_on_short_slab
     {S : TwoTensorFamily (I := I) (M := M)}
     {X : TimeDependentVectorField (I := I) (M := M)}
     {N : TwoTensorReaction (I := I) (M := M)}
-    {epsilon delta t0 T : Real}
-    (hepsilon : 0 < epsilon)
-    (hdelta : 0 < delta)
-    (hT : t0 + delta ≤ T)
+    {t0 T : Real}
+    (ht0 : t0 ∈ Set.Icc 0 T)
+    (ht0T : t0 < T)
     (hreg : TensorWMPRegularityOn (I := I) (M := M) G S X N T)
     (hparabolic : TensorParabolicSupersolutionWithDriftOn
       (I := I) (M := M) G S X N T)
     (hnull : TensorNullEigenvectorCondition (I := I) (M := M) G
-      N (Set.Icc t0 (t0 + delta)))
+      N (Set.Icc 0 T))
     (hinit : TwoTensorFamilyNonnegativeAtTime (I := I) (M := M) S t0) :
-    TwoTensorFamilyNonnegativeOn (I := I) (M := M)
-      (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0)
-      (Set.Icc t0 (t0 + delta)) := by
+    ∃ delta : Real, 0 < delta ∧ t0 + delta ≤ T ∧
+      TensorBarrierUniformOnSlab (I := I) (M := M) G S delta t0 := by
   classical
+  obtain ⟨delta, hdelta, hdeltaT, hstrict_uniform⟩ :=
+    tensorBarrier_strict_supersolution (I := I) (M := M)
+      (G := G) (S := S) (X := X) (N := N) ht0 ht0T hreg hparabolic
+  refine ⟨delta, hdelta, hdeltaT, ?_⟩
+  intro epsilon hepsilon
+  have hstrict : TensorBarrierStrictSupersolutionOn (I := I) (M := M)
+      G S X N epsilon delta t0 :=
+    hstrict_uniform epsilon hepsilon
   by_contra hfail
   have hinit_pos : ∀ x, TwoTensorPositiveDefiniteAt (I := I) (M := M)
       (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t0) x :=
     tensorBarrier_initial_positive (I := I) (M := M)
       (G := G) (S := S) hepsilon hdelta hinit
+  have hsub : Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T := by
+    intro t ht
+    exact ⟨le_trans ht0.1 ht.1, le_trans ht.2 hdeltaT⟩
+  have hcompact : TensorFirstNullCompactnessOn (I := I) (M := M)
+      G S epsilon delta t0 :=
+    hreg.firstNullCompactness epsilon delta t0 hepsilon hdelta hsub
   obtain ⟨d⟩ :=
     tensorBarrier_first_null_of_failure (I := I) (M := M)
       (G := G) (S := S) (epsilon := epsilon) (delta := delta) (t0 := t0)
-      hinit_pos hfail
-  have hstrict : TensorBarrierStrictSupersolutionOn (I := I) (M := M)
-      G S X N epsilon delta t0 :=
-    tensorBarrier_strict_supersolution (I := I) (M := M)
-      (G := G) (S := S) (X := X) (N := N) hepsilon hdelta hT hreg hparabolic
+      hcompact hinit_pos hfail
+  have hnull_slab : TensorNullEigenvectorCondition (I := I) (M := M) G
+      N (Set.Icc t0 (t0 + delta)) := by
+    intro t ht A x hA v hv
+    exact hnull t (hsub ht) A x hA v hv
   exact tensor_first_null_contradiction (I := I) (M := M)
-    (G := G) (S := S) (X := X) (N := N) hstrict hnull d
+    (G := G) (S := S) (X := X) (N := N) ht0.1 hstrict hnull_slab d
+    (hreg.firstNullScalarSigns epsilon delta t0 hepsilon hdelta hsub
+      hstrict hnull_slab d)
 
 /--
 Step 6: iterate short slabs and let `epsilon -> 0`.
@@ -335,14 +643,17 @@ theorem tensor_wmp_of_barrier_limit
     {N : TwoTensorReaction (I := I) (M := M)}
     {T : Real}
     (_hT : 0 ≤ T)
-    (_hreg : TensorWMPRegularityOn (I := I) (M := M) G S X N T)
-    (_hparabolic : TensorParabolicSupersolutionWithDriftOn
+    (hreg : TensorWMPRegularityOn (I := I) (M := M) G S X N T)
+    (hparabolic : TensorParabolicSupersolutionWithDriftOn
       (I := I) (M := M) G S X N T)
-    (_hnull : TensorNullEigenvectorCondition (I := I) (M := M) G N (Set.Icc 0 T))
-    (_hinit : TwoTensorFamilyNonnegativeAtTime (I := I) (M := M) S 0) :
+    (hnull : TensorNullEigenvectorCondition (I := I) (M := M) G N (Set.Icc 0 T))
+    (hinit : TwoTensorFamilyNonnegativeAtTime (I := I) (M := M) S 0) :
     TwoTensorFamilyNonnegativeOn (I := I) (M := M) S (Set.Icc 0 T) := by
-  -- Frontier block: finite subinterval iteration and epsilon-limit closure.
-  sorry
+  exact hreg.barrierLimitClosure hinit
+    (fun t0 ht0 ht0T hinit_t0 =>
+      tensorBarrier_nonnegative_on_short_slab (I := I) (M := M)
+        (G := G) (S := S) (X := X) (N := N)
+        ht0 ht0T hreg hparabolic hnull hinit_t0)
 
 /--
 Hamilton's weak maximum principle for symmetric two-tensors.

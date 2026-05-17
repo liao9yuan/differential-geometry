@@ -653,6 +653,97 @@ theorem tensor02_inner_extDerivFun_eq_inner_nabla
     tensor02FreezeNabla_eq_curry (I := I) (nablaB x) (X x)
   simpa [inner02, hfreezeA, hfreezeB] using h
 
+/-- Symmetry of the induced inner product on `(0,2)` tensors. -/
+theorem inner02_symm
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (A B : Tensor02At (I := I) x) :
+    inner02 (I := I) g x A B = inner02 (I := I) g x B A := by
+  simpa [inner02, Tensor0SBundle.inner0S] using
+    (Tensor0SBundle.MetricFiberData.inner_comm
+      (Tensor0SBundle.tensor0SMetricData (I := I) g x 2) A B)
+
+private theorem eval_pt0S
+    [T2Space M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    {s : Nat} {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) s}
+    {nablaA : Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) (s + 1)}
+    (hA : TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) s cov A nablaA)
+    {x : M} (W : TangentSpace I x)
+    (V : Fin s -> ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _)) :
+    nablaA x (Fin.cons W (fun q : Fin s => V q x)) =
+      extDerivFun (I := I)
+        (fun y : M => A y (fun q : Fin s => V q y)) x W -
+      ∑ q : Fin s,
+        A x
+          (Function.update (fun r : Fin s => V r x) q
+            ((cov (fun y : M => V q y) x) W)) := by
+  obtain ⟨Wsec, hWsec⟩ :=
+    ContMDiffSection.exists_eq_at
+      (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞)) x W
+  have h0 := TotalNabla0SRealizes.eval_smooth_slots
+    (I := I) hA Wsec V x
+  simpa [hWsec] using h0
+
+/-- Differential of the norm square of a `(0,2)` tensor, evaluated on an
+arbitrary tangent vector. -/
+theorem du_norm02
+    [T2Space M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : SmoothRiemannianMetric I M)
+    (hmc : RicciFlower.Connection.IsMetricCompatible (I := I) cov g)
+    (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2)
+    (nablaA :
+      Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        (n := (∞ : WithTop ℕ∞)) 3)
+    (hA : TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) 2 cov A nablaA)
+    (du : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 1)
+    (hdu : DuFieldRealizes (I := I)
+      (fun y : M => normSq02 (I := I) g y (A y)) du)
+    {x : M} (W : TangentSpace I x) :
+    du x (fun _ : Fin 1 => W) =
+      2 * inner02 (I := I) g x
+        (tensor02FreezeNabla (I := I) (nablaA x) W) (A x) := by
+  obtain ⟨Wsec, hWsec⟩ :=
+    ContMDiffSection.exists_eq_at
+      (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞)) x W
+  have hinner :=
+    tensor02_inner_extDerivFun_eq_inner_nabla
+      (I := I) cov g hmc A A nablaA nablaA hA hA Wsec x
+  calc
+    du x (fun _ : Fin 1 => W)
+        = differential1FormFun (I := I)
+            (fun y : M => normSq02 (I := I) g y (A y)) x
+            (fun _ : Fin 1 => W) := by
+              rw [hdu x]
+              rfl
+    _ = extDerivFun (I := I)
+          (fun y : M => normSq02 (I := I) g y (A y)) x W := by
+          exact differential1FormFun_apply_eq_extDerivFun
+            (I := I) (fun y : M => normSq02 (I := I) g y (A y)) x W
+    _ = extDerivFun (I := I)
+          (fun y : M => inner02 (I := I) g y (A y) (A y)) x (Wsec x) := by
+          simp [normSq02, hWsec]
+    _ =
+      inner02 (I := I) g x
+        (tensor02FreezeNabla (I := I) (nablaA x) (Wsec x)) (A x) +
+      inner02 (I := I) g x (A x)
+        (tensor02FreezeNabla (I := I) (nablaA x) (Wsec x)) := hinner
+    _ = 2 * inner02 (I := I) g x
+        (tensor02FreezeNabla (I := I) (nablaA x) W) (A x) := by
+          rw [hWsec]
+          rw [inner02_symm (I := I) g x (A x)
+            (tensor02FreezeNabla (I := I) (nablaA x) W)]
+          ring
+
 /-- Freeze the two derivative slots of a `(0,4)` tensor, leaving a `(0,2)` tensor. -/
 def tensor02FreezeNabla2
     {x : M}

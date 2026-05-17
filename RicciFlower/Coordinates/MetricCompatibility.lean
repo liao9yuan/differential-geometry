@@ -28,7 +28,7 @@ noncomputable section
 open Bundle
 open RicciFlower.Realized
 open Tensor0SBundle
-open scoped Manifold ContDiff BigOperators
+open scoped Manifold ContDiff BigOperators Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E]
@@ -91,8 +91,16 @@ theorem metricFlatModelInChart_center_eq
     rw [hom_trivializationAt_baseSet]
     exact ⟨hxT, by simp⟩
   rw [ContinuousLinearMap.inCoordinates_eq hxT hxDual]
-  simp [metricFlatContinuousEquiv, hom_trivializationAt,
-    Trivialization.continuousLinearMap_apply]
+  rw [metricFlatContinuousEquiv_apply]
+  simp only [hom_trivializationAt, Trivialization.continuousLinearMap_apply,
+    ContinuousLinearMap.coe_comp', ContinuousLinearEquiv.coe_coe,
+    Trivialization.continuousLinearEquivAt_apply,
+    Trivialization.continuousLinearEquivAt_symm_apply, Function.comp_apply]
+  have hxR : x₀ ∈ (trivializationAt Real (fun _ : M => Real) x₀).baseSet := by
+    simp
+  rw [Trivialization.continuousLinearMapAt_apply]
+  rw [(trivializationAt Real (fun _ : M => Real) x₀).coe_linearMapAt_of_mem
+    (R := Real) hxR]
   have hL :
       (trivializationAt E (TangentSpace I) x₀).symmL Real x₀ =
         (1 : E →L[Real] E) := by
@@ -106,8 +114,128 @@ theorem metricFlatModelInChart_center_eq
     change (trivializationAt E (TangentSpace I) x₀).symmL Real x₀ z = z
     rw [hL]
     rfl
-  rw [hsymm v, hsymm w]
-  rfl
+  have hsymmL (z : E) :
+      (trivializationAt E (TangentSpace I) x₀).symmL Real x₀ z = z := by
+    rw [hL]
+    rfl
+  change g.inner x₀ ((trivializationAt E (TangentSpace I) x₀).symm x₀ v)
+      ((trivializationAt E (TangentSpace I) x₀).symmL Real x₀ w) = g.inner x₀ v w
+  calc
+    g.inner x₀ ((trivializationAt E (TangentSpace I) x₀).symm x₀ v)
+        ((trivializationAt E (TangentSpace I) x₀).symmL Real x₀ w)
+        = g.inner x₀ v ((trivializationAt E (TangentSpace I) x₀).symmL Real x₀ w) := by
+          exact congrArg
+            (fun z => g.inner x₀ z ((trivializationAt E (TangentSpace I) x₀).symmL Real x₀ w))
+            (hsymm v)
+    _ = g.inner x₀ v w := by
+          exact congrArg (fun z => g.inner x₀ v z) (hsymmL w)
+
+theorem flatChart_apply
+    (g : SmoothRiemannianMetric I M) (x₀ : M) {x : M}
+    (hx : x ∈ coordinateFrameSet (I := I) x₀) (v w : E) :
+    metricFlatModelInChart (I := I) g x₀ (extChartAt I x₀ x) v w =
+      g.inner x
+        ((trivializationAt E (TangentSpace I : M -> Type _) x₀).symmL Real x v)
+        ((trivializationAt E (TangentSpace I : M -> Type _) x₀).symmL Real x w) := by
+  have hx_src : x ∈ (extChartAt I x₀).source := by
+    simpa [coordinateFrameSet, coordinateTrivializationAt, extChartAt_source] using hx
+  have hcenter :
+      (extChartAt I x₀).symm (extChartAt I x₀ x) = x :=
+    (extChartAt I x₀).left_inv hx_src
+  simp only [metricFlatModelInChart]
+  rw [hom_trivializationAt_apply]
+  rw [hcenter]
+  have hxT :
+      x ∈ (trivializationAt E (TangentSpace I : M -> Type _) x₀).baseSet := by
+    simpa [coordinateFrameSet, coordinateTrivializationAt] using hx
+  have hxDual :
+      x ∈ (trivializationAt (E →L[Real] Real)
+          (fun p : M => TangentSpace I p →L[Real] Real) x₀).baseSet := by
+    rw [hom_trivializationAt_baseSet]
+    exact ⟨hxT, by simp⟩
+  rw [ContinuousLinearMap.inCoordinates_eq hxT hxDual]
+  simp [hom_trivializationAt, Trivialization.continuousLinearMap_apply]
+
+theorem flatChart_inv
+    (g : SmoothRiemannianMetric I M) (x₀ : M) {x : M}
+    (hx : x ∈ coordinateFrameSet (I := I) x₀) :
+    (metricFlatModelInChart (I := I) g x₀ (extChartAt I x₀ x)).IsInvertible := by
+  haveI : CompleteSpace (E →L[Real] Real) := inferInstance
+  let A : E →ₗ[Real] (E →L[Real] Real) :=
+    (metricFlatModelInChart (I := I) g x₀ (extChartAt I x₀ x)).toLinearMap
+  have hxT :
+      x ∈ (trivializationAt E (TangentSpace I : M -> Type _) x₀).baseSet := by
+    simpa [coordinateFrameSet, coordinateTrivializationAt] using hx
+  have hker : LinearMap.ker A = ⊥ := by
+    ext v
+    constructor
+    · intro hv
+      change A v = 0 at hv
+      have hself :
+          metricFlatModelInChart (I := I) g x₀ (extChartAt I x₀ x) v v = 0 := by
+        exact congrArg (fun L : E →L[Real] Real => L v) hv
+      have hinner :
+          g.inner x
+            ((trivializationAt E (TangentSpace I : M -> Type _) x₀).symmL Real x v)
+            ((trivializationAt E (TangentSpace I : M -> Type _) x₀).symmL Real x v) = 0 := by
+        rw [← flatChart_apply (I := I) g x₀ hx v v]
+        exact hself
+      by_contra hvne
+      have hsymm_ne :
+          (trivializationAt E (TangentSpace I : M -> Type _) x₀).symmL Real x v ≠ 0 := by
+        intro hzero
+        have hmap := congrArg
+          ((trivializationAt E (TangentSpace I : M -> Type _) x₀).continuousLinearMapAt
+            Real x) hzero
+        have hcancel :
+            (trivializationAt E (TangentSpace I : M -> Type _) x₀).continuousLinearMapAt
+                Real x
+              ((trivializationAt E (TangentSpace I : M -> Type _) x₀).symmL Real x v) = v :=
+          (trivializationAt E (TangentSpace I : M -> Type _) x₀).continuousLinearMapAt_symmL
+            (R := Real) hxT v
+        rw [hcancel] at hmap
+        exact hvne (by simpa using hmap)
+      exact False.elim ((ne_of_gt (g.pos x
+        ((trivializationAt E (TangentSpace I : M -> Type _) x₀).symmL Real x v)
+        hsymm_ne)) hinner)
+    · intro hv
+      have hv0 : v = 0 := by simpa using hv
+      simp [A, hv0]
+  have hdim :
+      Module.finrank Real E = Module.finrank Real (E →L[Real] Real) := by
+    calc
+      Module.finrank Real E = Module.finrank Real (Module.Dual Real E) :=
+        Subspace.dual_finrank_eq.symm
+      _ = Module.finrank Real (E →L[Real] Real) :=
+        (LinearMap.toContinuousLinearMap :
+          (E →ₗ[Real] Real) ≃ₗ[Real] (E →L[Real] Real)).finrank_eq
+  let Aequiv : E ≃ₗ[Real] (E →L[Real] Real) :=
+    A.linearEquivOfInjective (LinearMap.ker_eq_bot.mp hker) hdim
+  let Acle : E ≃L[Real] (E →L[Real] Real) :=
+    Aequiv.toContinuousLinearEquiv
+  have hA : (Acle : E →L[Real] E →L[Real] Real) =
+      metricFlatModelInChart (I := I) g x₀ (extChartAt I x₀ x) := by
+    ext v w
+    change Aequiv v w =
+      metricFlatModelInChart (I := I) g x₀ (extChartAt I x₀ x) v w
+    rw [LinearMap.linearEquivOfInjective_apply]
+    rfl
+  rw [← hA]
+  exact ContinuousLinearMap.isInvertible_equiv
+
+theorem coordBasis_model
+    (x₀ : M) {x : M} (hx : x ∈ coordinateFrameSet (I := I) x₀)
+    (i : CoordinateIdx (𝕜 := Real) E) :
+    coordinateFrameAt_basis (I := I) x₀ hx i =
+      (trivializationAt E (TangentSpace I : M -> Type _) x₀).symmL Real x
+        ((Module.finBasis Real E) i) := by
+  rw [coordinateFrameAt_basis_apply]
+  rw [coordinateFrameAt_apply_of_mem (I := I) hx i]
+  have hx_src : x ∈ (chartAt H x₀).source := by
+    simpa [coordinateFrameSet, coordinateTrivializationAt] using hx
+  simpa [Trivialization.symmL_apply, extChartAt] using
+    (congrArg (fun L : E →L[Real] TangentSpace I x => L ((Module.finBasis Real E) i))
+      (TangentBundle.symmL_trivializationAt (I := I) (𝕜 := Real) hx_src)).symm
 
 theorem metricFlatModelInChart_center_isInvertible
     (g : SmoothRiemannianMetric I M) (x₀ : M) :
@@ -208,6 +336,35 @@ theorem inverseMetricFlatModelInChart_component_contDiffWithinAt
   simpa [inverseMetricFlatModelInChart_component, εk, εl] using
     (contDiffWithinAt_const (c := εk)).clm_apply happ
 
+theorem gInvComp_mdiffAt
+    (g : SmoothRiemannianMetric I M) (x₀ : M)
+    (k l : CoordinateIdx (𝕜 := Real) E) :
+    MDifferentiableAt I 𝓘(Real, Real)
+      (fun y : M =>
+        inverseMetricFlatModelInChart_component (I := I) g x₀ k l
+          (extChartAt I x₀ y)) x₀ := by
+  haveI : CompleteSpace E := FiniteDimensional.complete Real E
+  let f : E -> Real :=
+    inverseMetricFlatModelInChart_component (I := I) g x₀ k l
+  have hf :
+      ContDiffWithinAt Real ∞ f (Set.range I) (extChartAt I x₀ x₀) :=
+    inverseMetricFlatModelInChart_component_contDiffWithinAt (I := I) g x₀ k l
+  have hchart :
+      ContMDiffWithinAt I 𝓘(Real, E) ∞ (extChartAt I x₀)
+        (extChartAt I x₀).source x₀ :=
+    (contMDiffAt_extChartAt (I := I) (x := x₀)).contMDiffWithinAt
+  have hcomp :
+      ContMDiffWithinAt I 𝓘(Real, Real) ∞ (f ∘ extChartAt I x₀)
+        (extChartAt I x₀).source x₀ := by
+    exact hf.comp_contMDiffWithinAt hchart (by
+      intro y hy
+      exact extChartAt_target_subset_range x₀ ((extChartAt I x₀).map_source hy))
+  have hcompAt :
+      ContMDiffAt I 𝓘(Real, Real) ∞ (f ∘ extChartAt I x₀) x₀ :=
+    hcomp.contMDiffAt ((isOpen_extChartAt_source (I := I) x₀).mem_nhds
+      (mem_extChartAt_source (I := I) x₀))
+  simpa [f, Function.comp_def] using hcompAt.mdifferentiableAt (by simp)
+
 theorem inverseMetricFlatModelInChart_component_center_eq_symm
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (i j : CoordinateIdx (𝕜 := Real) E) :
@@ -240,6 +397,131 @@ theorem inverseMetricFlatModelInChart_component_center_eq_symm
     _ = (ε j) (A.symm (ε i)) := by
           rw [A.apply_symm_apply]
     _ = (Module.finBasis Real E).coord j (A.symm (ε i)) := rfl
+
+theorem gInvBasisAt
+    (g : SmoothRiemannianMetric I M) (x₀ : M) {x : M}
+    (hx : x ∈ coordinateFrameSet (I := I) x₀) :
+    MetricInverseInBasis (I := I) g x (coordinateFrameAt_basis (I := I) x₀ hx)
+      (fun k l : CoordinateIdx (𝕜 := Real) E =>
+        inverseMetricFlatModelInChart_component (I := I) g x₀ k l
+          (extChartAt I x₀ x)) := by
+  classical
+  let A : E →L[Real] (E →L[Real] Real) :=
+    metricFlatModelInChart (I := I) g x₀ (extChartAt I x₀ x)
+  let ε : CoordinateIdx (𝕜 := Real) E -> E →L[Real] Real :=
+    fun a => LinearMap.toContinuousLinearMap ((Module.finBasis Real E).coord a)
+  let gInv : CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E -> Real :=
+    fun k l => inverseMetricFlatModelInChart_component (I := I) g x₀ k l
+      (extChartAt I x₀ x)
+  have hInv : A.IsInvertible := flatChart_inv (I := I) g x₀ hx
+  have hginv (k l : CoordinateIdx (𝕜 := Real) E) :
+      gInv k l = (Module.finBasis Real E).coord k (A.inverse (ε l)) := by
+    rfl
+  have hA_sym (v w : E) : A v w = A w v := by
+    calc
+      A v w =
+          g.inner x
+            ((trivializationAt E (TangentSpace I : M -> Type _) x₀).symmL Real x v)
+            ((trivializationAt E (TangentSpace I : M -> Type _) x₀).symmL Real x w) := by
+            exact flatChart_apply (I := I) g x₀ hx v w
+      _ =
+          g.inner x
+            ((trivializationAt E (TangentSpace I : M -> Type _) x₀).symmL Real x w)
+            ((trivializationAt E (TangentSpace I : M -> Type _) x₀).symmL Real x v) := by
+            exact g.symm x _ _
+      _ = A w v := by
+            rw [flatChart_apply (I := I) g x₀ hx w v]
+  have hmetric (i j : CoordinateIdx (𝕜 := Real) E) :
+      g.inner x ((coordinateFrameAt_basis (I := I) x₀ hx) i)
+          ((coordinateFrameAt_basis (I := I) x₀ hx) j) =
+        A ((Module.finBasis Real E) i) ((Module.finBasis Real E) j) := by
+    rw [coordBasis_model (I := I) x₀ hx i]
+    rw [coordBasis_model (I := I) x₀ hx j]
+    rw [flatChart_apply (I := I) g x₀ hx]
+  have hsym (k l : CoordinateIdx (𝕜 := Real) E) : gInv k l = gInv l k := by
+    simp only [hginv]
+    calc
+      (Module.finBasis Real E).coord k (A.inverse (ε l))
+          = (ε k) (A.inverse (ε l)) := rfl
+      _ = (A (A.inverse (ε k))) (A.inverse (ε l)) := by
+            rw [hInv.self_apply_inverse]
+      _ = (A (A.inverse (ε l))) (A.inverse (ε k)) := by
+            exact hA_sym (A.inverse (ε k)) (A.inverse (ε l))
+      _ = (ε l) (A.inverse (ε k)) := by
+            rw [hInv.self_apply_inverse]
+      _ = (Module.finBasis Real E).coord l (A.inverse (ε k)) := rfl
+  have hsecond (i j : CoordinateIdx (𝕜 := Real) E) :
+      (∑ k : CoordinateIdx (𝕜 := Real) E,
+          g.inner x ((coordinateFrameAt_basis (I := I) x₀ hx) i)
+            ((coordinateFrameAt_basis (I := I) x₀ hx) k) * gInv k j) =
+        (if i = j then 1 else 0) := by
+    simp only [hmetric, hginv]
+    calc
+      (∑ k : CoordinateIdx (𝕜 := Real) E,
+          A ((Module.finBasis Real E) i) ((Module.finBasis Real E) k) *
+            (Module.finBasis Real E).coord k (A.inverse (ε j)))
+          = A ((Module.finBasis Real E) i)
+              (∑ k : CoordinateIdx (𝕜 := Real) E,
+                (Module.finBasis Real E).coord k (A.inverse (ε j)) •
+                  (Module.finBasis Real E) k) := by
+            rw [map_sum]
+            refine Finset.sum_congr rfl fun k _ => ?_
+            have hmap :=
+              map_smul (A ((Module.finBasis Real E) i))
+                ((Module.finBasis Real E).coord k (A.inverse (ε j)))
+                ((Module.finBasis Real E) k)
+            calc
+              A ((Module.finBasis Real E) i) ((Module.finBasis Real E) k) *
+                  (Module.finBasis Real E).coord k (A.inverse (ε j))
+                  =
+                (Module.finBasis Real E).coord k (A.inverse (ε j)) *
+                  A ((Module.finBasis Real E) i) ((Module.finBasis Real E) k) := by ring
+              _ =
+                (Module.finBasis Real E).coord k (A.inverse (ε j)) •
+                  A ((Module.finBasis Real E) i) ((Module.finBasis Real E) k) := by simp
+              _ =
+                A ((Module.finBasis Real E) i)
+                  ((Module.finBasis Real E).coord k (A.inverse (ε j)) •
+                    (Module.finBasis Real E) k) := hmap.symm
+      _ = A ((Module.finBasis Real E) i) (A.inverse (ε j)) := by
+            have hsum :
+                (∑ k : CoordinateIdx (𝕜 := Real) E,
+                  (Module.finBasis Real E).coord k (A.inverse (ε j)) •
+                    (Module.finBasis Real E) k) = A.inverse (ε j) := by
+              exact (Module.finBasis Real E).sum_repr (A.inverse (ε j))
+            exact congrArg (fun v => A ((Module.finBasis Real E) i) v) hsum
+      _ = (A (A.inverse (ε j))) ((Module.finBasis Real E) i) := by
+            exact hA_sym ((Module.finBasis Real E) i) (A.inverse (ε j))
+      _ = (ε j) ((Module.finBasis Real E) i) := by
+            rw [hInv.self_apply_inverse]
+      _ = (if i = j then 1 else 0) := by
+            by_cases hij : i = j
+            · subst hij
+              simp [ε]
+            · have hji : j ≠ i := fun h => hij h.symm
+              simp [ε, hij, hji]
+  intro i j
+  constructor
+  · calc
+      (∑ k : CoordinateIdx (𝕜 := Real) E,
+          gInv i k * g.inner x ((coordinateFrameAt_basis (I := I) x₀ hx) k)
+            ((coordinateFrameAt_basis (I := I) x₀ hx) j))
+          =
+        ∑ k : CoordinateIdx (𝕜 := Real) E,
+          g.inner x ((coordinateFrameAt_basis (I := I) x₀ hx) j)
+            ((coordinateFrameAt_basis (I := I) x₀ hx) k) * gInv k i := by
+            refine Finset.sum_congr rfl fun k _ => ?_
+            rw [hsym i k, g.symm x ((coordinateFrameAt_basis (I := I) x₀ hx) k)
+              ((coordinateFrameAt_basis (I := I) x₀ hx) j)]
+            ring
+      _ = (if j = i then 1 else 0) := hsecond j i
+      _ = (if i = j then 1 else 0) := by
+            by_cases hij : i = j
+            · subst hij
+              simp
+            · have hji : j ≠ i := fun h => hij h.symm
+              simp [hij, hji]
+  · exact hsecond i j
 
 theorem inverseMetricFlatModelInChart_metricInverseInBasis_center
     (g : SmoothRiemannianMetric I M) (x₀ : M) :
@@ -366,6 +648,20 @@ def metricCompForMetricInFrame
     (x : M) (i j : Idx) : Real :=
   g.inner x (frame i x) (frame j x)
 
+theorem gInvBasisNhds
+    (g : SmoothRiemannianMetric I M) (x₀ : M)
+    (i j : CoordinateIdx (𝕜 := Real) E) :
+    (fun y : M => ∑ k : CoordinateIdx (𝕜 := Real) E,
+        inverseMetricFlatModelInChart_component (I := I) g x₀ i k
+          (extChartAt I x₀ y) *
+          metricCompForMetricInFrame (I := I) g
+            (coordinateFrameAt (I := I) x₀) y k j) =ᶠ[𝓝 x₀]
+      fun _ : M => if i = j then 1 else 0 := by
+  filter_upwards [(coordinateFrameSet_open (I := I) x₀).mem_nhds
+    (coordinateFrameAt_mem (I := I) x₀)] with y hy
+  have h := (gInvBasisAt (I := I) g x₀ hy i j).1
+  simpa [metricCompForMetricInFrame, coordinateFrameAt_basis_apply] using h
+
 /-- Inverse-metric components for a fixed metric and local frame. -/
 def InverseMetricComponentsForMetricInFrameOn [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
@@ -408,6 +704,34 @@ private theorem metric_localFrame_mdiffAt
     (hu : IsOpen u) {x : M} (hx : x ∈ u) (i : Idx) :
     MDiffAt (T% (frame i)) x :=
   (hframe.contMDiffAt hu hx i).mdifferentiableAt one_ne_zero
+
+theorem metricComp_mdiffAt
+    (g : SmoothRiemannianMetric I M)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (hu : IsOpen u) {x : M} (hx : x ∈ u) (i j : Idx) :
+    MDifferentiableAt I 𝓘(Real, Real)
+      (fun y : M => metricCompForMetricInFrame (I := I) g frame y i j) x := by
+  have hg :
+      MDifferentiableAt I
+        (I.prod 𝓘(Real, E →L[Real] E →L[Real] Real))
+        (fun y : M =>
+          TotalSpace.mk' (E →L[Real] E →L[Real] Real)
+            (E := fun y : M =>
+              TangentSpace I y →L[Real] TangentSpace I y →L[Real] Real)
+            y (g.inner y)) x :=
+    g.contMDiff.mdifferentiableAt (by simp)
+  have hi := metric_localFrame_mdiffAt (I := I) frame hframe hu hx i
+  have hj := metric_localFrame_mdiffAt (I := I) frame hframe hu hx j
+  have htotal :
+      MDifferentiableAt I (I.prod 𝓘(Real, Real))
+        (fun y : M =>
+          TotalSpace.mk' Real (E := Bundle.Trivial M Real) y
+            (g.inner y (frame i y) (frame j y))) x := by
+    exact MDifferentiableAt.clm_bundle_apply₂
+      (F₁ := E) (F₂ := E) hg hi hj
+  rw [mdifferentiableAt_totalSpace] at htotal
+  simpa [metricCompForMetricInFrame] using htotal.2
 
 /-- Metric compatibility in a local frame:
 the directional derivative of the metric components is the Christoffel
@@ -559,6 +883,15 @@ theorem extDerivFun_mul_real
     (I := I) (f := f) (g := g) hf hg v
   simpa [extDerivFun, Pi.smul_apply, smul_eq_mul, mul_comm, mul_left_comm, mul_assoc]
     using hprod
+
+theorem deriv_congr_nhds
+    {f g : M -> Real} {x : M} (v : TangentSpace I x)
+    (h : f =ᶠ[𝓝 x] g) :
+    extDerivFun (I := I) f x v = extDerivFun (I := I) g x v := by
+  have hmf := Filter.EventuallyEq.mfderiv_eq (I := I) (I' := 𝓘(Real, Real)) h
+  have hx : f x = g x := h.eq_of_nhds
+  unfold extDerivFun
+  rw [hmf, hx]
 
 private theorem inverseMetric_derivative_solve
     [DecidableEq Idx]
@@ -1196,6 +1529,362 @@ theorem inverseMetricCovDerivForMetricCompAlongInFrame_eq_zero
       (∑ a : Idx, Γ a l * U k a) = 0
   rw [hDU]
   ring
+
+theorem invCovZeroLocal
+    [DecidableEq Idx]
+    (g : SmoothRiemannianMetric I M)
+    (gInv : M -> Idx -> Idx -> Real)
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    {x : M}
+    (hinvX : ∀ i j : Idx,
+      (∑ k : Idx, gInv x i k * metricCompForMetricInFrame (I := I) g frame x k j) =
+          (if i = j then 1 else 0) ∧
+        (∑ k : Idx, metricCompForMetricInFrame (I := I) g frame x i k * gInv x k j) =
+          (if i = j then 1 else 0))
+    (hinvN : ∀ i j : Idx,
+      (fun y : M => ∑ k : Idx,
+          gInv y i k * metricCompForMetricInFrame (I := I) g frame y k j) =ᶠ[𝓝 x]
+        fun _ : M => if i = j then 1 else 0)
+    (hsymmX : ∀ i j : Idx, gInv x i j = gInv x j i)
+    (hmc : RicciFlower.Connection.IsMetricCompatible (I := I) cov g)
+    (hu : IsOpen u) (hx : x ∈ u)
+    (hginv_mdiff : ∀ a b : Idx,
+      MDifferentiableAt I 𝓘(Real, Real) (fun y : M => gInv y a b) x)
+    (hmetric_mdiff : ∀ a b : Idx,
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun y : M => metricCompForMetricInFrame (I := I) g frame y a b) x)
+    (k l : Idx) :
+    inverseMetricCovDerivForMetricCompAlongInFrame
+        (I := I) gInv cov frame hframe x (X x) k l = 0 := by
+  classical
+  let G : Idx -> Idx -> Real := fun a b =>
+    metricCompForMetricInFrame (I := I) g frame x a b
+  let U : Idx -> Idx -> Real := fun a b => gInv x a b
+  let DG : Idx -> Idx -> Real := fun a b =>
+    extDerivFun (I := I)
+      (fun y : M => metricCompForMetricInFrame (I := I) g frame y a b)
+      x (X x)
+  let DU : Idx -> Idx -> Real := fun a b =>
+    extDerivFun (I := I) (fun y : M => gInv y a b) x (X x)
+  let Γ : Idx -> Idx -> Real := fun a b =>
+    christoffelAlongInFrame cov frame hframe x (X x) a b
+  have hDG : ∀ a b : Idx,
+      DG a b =
+        (∑ p : Idx, Γ a p * G p b) +
+          (∑ p : Idx, Γ b p * G a p) := by
+    intro a b
+    simpa [DG, G, Γ] using
+      metricCompForMetricInFrame_extDerivFun_eq_christoffelAlong
+        (I := I) g cov hmc X frame hframe hu hx a b
+  have hrow : ∀ m : Idx,
+      (∑ a : Idx, (DU k a * G a m + U k a * DG a m)) = 0 := by
+    intro m
+    let F : Idx -> M -> Real := fun a y =>
+      gInv y k a * metricCompForMetricInFrame (I := I) g frame y a m
+    have hF_mdiff : ∀ a ∈ (Finset.univ : Finset Idx),
+        MDifferentiableAt I 𝓘(Real, Real) (F a) x := by
+      intro a _ha
+      exact (hginv_mdiff k a).mul (hmetric_mdiff a m)
+    have hsum :
+        extDerivFun (I := I) ((Finset.univ : Finset Idx).sum F) x (X x) =
+          ∑ a : Idx, extDerivFun (I := I) (F a) x (X x) := by
+      simpa using extDerivFun_finset_sum_real
+        (I := I) (t := (Finset.univ : Finset Idx)) F (X x) hF_mdiff
+    have hprod : ∀ a : Idx,
+        extDerivFun (I := I) (F a) x (X x) =
+          gInv x k a * DG a m + DU k a * G a m := by
+      intro a
+      simpa [F, DG, DU, G, mul_comm, mul_left_comm, mul_assoc] using
+        extDerivFun_mul_real (I := I) (x := x) (X x)
+          (hginv_mdiff k a) (hmetric_mdiff a m)
+    have hzero_raw :
+        extDerivFun (I := I)
+          (fun y : M => ∑ a : Idx,
+            gInv y k a * metricCompForMetricInFrame (I := I) g frame y a m)
+          x (X x) = 0 := by
+      calc
+        extDerivFun (I := I)
+            (fun y : M => ∑ a : Idx,
+              gInv y k a * metricCompForMetricInFrame (I := I) g frame y a m)
+            x (X x)
+            =
+          extDerivFun (I := I) (fun _ : M => if k = m then 1 else 0) x (X x) :=
+            deriv_congr_nhds (I := I) (X x) (hinvN k m)
+        _ = 0 := by
+            simp [extDerivFun]
+    have hF_eq :
+        ((Finset.univ : Finset Idx).sum F) =
+          (fun y : M => ∑ a : Idx,
+            gInv y k a * metricCompForMetricInFrame (I := I) g frame y a m) := by
+      funext y
+      simp [F]
+    have hzero :
+        extDerivFun (I := I) ((Finset.univ : Finset Idx).sum F) x (X x) = 0 := by
+      rw [hF_eq]
+      exact hzero_raw
+    calc
+      (∑ a : Idx, (DU k a * G a m + U k a * DG a m))
+          = ∑ a : Idx, (gInv x k a * DG a m + DU k a * G a m) := by
+              simp [U, add_comm]
+      _ = ∑ a : Idx, extDerivFun (I := I) (F a) x (X x) := by
+              refine Finset.sum_congr rfl fun a _ha => ?_
+              rw [hprod a]
+      _ = extDerivFun (I := I) ((Finset.univ : Finset Idx).sum F) x (X x) := hsum.symm
+      _ = 0 := hzero
+  have hsolve := inverseMetric_derivative_solve
+    (metric := G)
+    (ric := fun a b : Idx => (-1 / 2 : Real) * DG a b)
+    (gInv := U)
+    (gInvDt := DU)
+    k
+    (by
+      intro m
+      calc
+        (∑ a : Idx,
+            (DU k a * G a m +
+              U k a * ((-2 : Real) * ((-1 / 2 : Real) * DG a m)))) =
+            ∑ a : Idx, (DU k a * G a m + U k a * DG a m) := by
+              refine Finset.sum_congr rfl fun a _ha => ?_
+              ring
+        _ = 0 := hrow m)
+    (by
+      intro a b
+      simpa [G, U] using (hinvX a b).2)
+    (by
+      intro a b
+      simpa [U] using hsymmX a b)
+    l
+  have hUG_left : ∀ p : Idx,
+      (∑ a : Idx, U k a * G a p) = (if k = p then 1 else 0) := by
+    intro p
+    simpa [U, G] using (hinvX k p).1
+  have hUG_right_sym : ∀ p : Idx,
+      (∑ b : Idx, U l b * G p b) = (if p = l then 1 else 0) := by
+    intro p
+    calc
+      (∑ b : Idx, U l b * G p b)
+          = ∑ b : Idx, G p b * U b l := by
+              refine Finset.sum_congr rfl fun b _hb => ?_
+              change gInv x l b * G p b = G p b * gInv x b l
+              rw [hsymmX l b]
+              ring
+      _ = (if p = l then 1 else 0) := by
+              simpa [U, G] using (hinvX p l).2
+  have hterm1 :
+      (∑ a : Idx, ∑ b : Idx,
+        U k a * U l b * (∑ p : Idx, Γ a p * G p b)) =
+        ∑ a : Idx, Γ a l * U k a := by
+    calc
+      (∑ a : Idx, ∑ b : Idx,
+        U k a * U l b * (∑ p : Idx, Γ a p * G p b))
+          =
+        ∑ a : Idx, ∑ p : Idx, U k a * Γ a p *
+          (∑ b : Idx, U l b * G p b) := by
+            refine Finset.sum_congr rfl fun a _ha => ?_
+            calc
+              (∑ b : Idx, U k a * U l b *
+                (∑ p : Idx, Γ a p * G p b))
+                  =
+                ∑ b : Idx, ∑ p : Idx,
+                  U k a * U l b * (Γ a p * G p b) := by
+                    refine Finset.sum_congr rfl fun b _hb => ?_
+                    rw [Finset.mul_sum]
+              _ = ∑ p : Idx, ∑ b : Idx,
+                  U k a * U l b * (Γ a p * G p b) := by
+                    rw [Finset.sum_comm]
+              _ = ∑ p : Idx, U k a * Γ a p *
+                  (∑ b : Idx, U l b * G p b) := by
+                    refine Finset.sum_congr rfl fun p _hp => ?_
+                    rw [Finset.mul_sum]
+                    refine Finset.sum_congr rfl fun b _hb => ?_
+                    ring
+      _ = ∑ a : Idx, ∑ p : Idx,
+          U k a * Γ a p * (if p = l then 1 else 0) := by
+            refine Finset.sum_congr rfl fun a _ha => ?_
+            refine Finset.sum_congr rfl fun p _hp => ?_
+            rw [hUG_right_sym p]
+      _ = ∑ a : Idx, U k a * Γ a l := by
+            refine Finset.sum_congr rfl fun a _ha => ?_
+            simp
+      _ = ∑ a : Idx, Γ a l * U k a := by
+            refine Finset.sum_congr rfl fun a _ha => ?_
+            ring
+  have hterm2 :
+      (∑ a : Idx, ∑ b : Idx,
+        U k a * U l b * (∑ p : Idx, Γ b p * G a p)) =
+        ∑ a : Idx, Γ a k * U a l := by
+    calc
+      (∑ a : Idx, ∑ b : Idx,
+        U k a * U l b * (∑ p : Idx, Γ b p * G a p))
+          =
+        ∑ b : Idx, ∑ p : Idx, U l b * Γ b p *
+          (∑ a : Idx, U k a * G a p) := by
+            calc
+              (∑ a : Idx, ∑ b : Idx,
+                U k a * U l b * (∑ p : Idx, Γ b p * G a p))
+                  =
+                ∑ b : Idx, ∑ a : Idx,
+                  U k a * U l b * (∑ p : Idx, Γ b p * G a p) := by
+                    rw [Finset.sum_comm]
+              _ = ∑ b : Idx, ∑ p : Idx, U l b * Γ b p *
+                  (∑ a : Idx, U k a * G a p) := by
+                    refine Finset.sum_congr rfl fun b _hb => ?_
+                    calc
+                      (∑ a : Idx, U k a * U l b *
+                        (∑ p : Idx, Γ b p * G a p))
+                          =
+                        ∑ a : Idx, ∑ p : Idx,
+                          U k a * U l b * (Γ b p * G a p) := by
+                            refine Finset.sum_congr rfl fun a _ha => ?_
+                            rw [Finset.mul_sum]
+                      _ = ∑ p : Idx, ∑ a : Idx,
+                          U k a * U l b * (Γ b p * G a p) := by
+                            rw [Finset.sum_comm]
+                      _ = ∑ p : Idx, U l b * Γ b p *
+                          (∑ a : Idx, U k a * G a p) := by
+                            refine Finset.sum_congr rfl fun p _hp => ?_
+                            rw [Finset.mul_sum]
+                            refine Finset.sum_congr rfl fun a _ha => ?_
+                            ring
+      _ = ∑ b : Idx, ∑ p : Idx,
+          U l b * Γ b p * (if k = p then 1 else 0) := by
+            refine Finset.sum_congr rfl fun b _hb => ?_
+            refine Finset.sum_congr rfl fun p _hp => ?_
+            rw [hUG_left p]
+      _ = ∑ b : Idx, U l b * Γ b k := by
+            refine Finset.sum_congr rfl fun b _ha => ?_
+            simp
+      _ = ∑ a : Idx, Γ a k * U a l := by
+            refine Finset.sum_congr rfl fun a _ha => ?_
+            change gInv x l a * Γ a k = Γ a k * gInv x a l
+            rw [hsymmX l a]
+            ring
+  have htrace :
+      (∑ a : Idx, ∑ b : Idx, U k a * U l b * DG a b) =
+        (∑ a : Idx, Γ a l * U k a) + (∑ a : Idx, Γ a k * U a l) := by
+    calc
+      (∑ a : Idx, ∑ b : Idx, U k a * U l b * DG a b)
+          =
+        ∑ a : Idx, ∑ b : Idx,
+          U k a * U l b *
+            ((∑ p : Idx, Γ a p * G p b) +
+              (∑ p : Idx, Γ b p * G a p)) := by
+            refine Finset.sum_congr rfl fun a _ha => ?_
+            refine Finset.sum_congr rfl fun b _hb => ?_
+            rw [hDG a b]
+      _ =
+        (∑ a : Idx, ∑ b : Idx,
+          U k a * U l b * (∑ p : Idx, Γ a p * G p b)) +
+        (∑ a : Idx, ∑ b : Idx,
+          U k a * U l b * (∑ p : Idx, Γ b p * G a p)) := by
+            simp [mul_add, Finset.sum_add_distrib]
+      _ = (∑ a : Idx, Γ a l * U k a) +
+          (∑ a : Idx, Γ a k * U a l) := by
+            rw [hterm1, hterm2]
+  have hDU :
+      DU k l =
+        - ((∑ a : Idx, Γ a l * U k a) + (∑ a : Idx, Γ a k * U a l)) := by
+    calc
+      DU k l =
+          2 * (∑ a : Idx, ∑ b : Idx,
+            U k a * U l b * ((-1 / 2 : Real) * DG a b)) := hsolve
+      _ = - (∑ a : Idx, ∑ b : Idx, U k a * U l b * DG a b) := by
+            calc
+              2 * (∑ a : Idx, ∑ b : Idx,
+                U k a * U l b * ((-1 / 2 : Real) * DG a b))
+                  =
+                ∑ a : Idx, ∑ b : Idx,
+                  2 * (U k a * U l b * ((-1 / 2 : Real) * DG a b)) := by
+                    rw [Finset.mul_sum]
+                    refine Finset.sum_congr rfl fun a _ha => ?_
+                    rw [Finset.mul_sum]
+              _ = ∑ a : Idx, ∑ b : Idx,
+                  -(U k a * U l b * DG a b) := by
+                    refine Finset.sum_congr rfl fun a _ha => ?_
+                    refine Finset.sum_congr rfl fun b _hb => ?_
+                    ring
+              _ = - (∑ a : Idx, ∑ b : Idx, U k a * U l b * DG a b) := by
+                    rw [← Finset.sum_neg_distrib]
+                    refine Finset.sum_congr rfl fun a _ha => ?_
+                    rw [← Finset.sum_neg_distrib]
+      _ = - ((∑ a : Idx, Γ a l * U k a) +
+          (∑ a : Idx, Γ a k * U a l)) := by
+            rw [htrace]
+  unfold inverseMetricCovDerivForMetricCompAlongInFrame
+  change DU k l + (∑ a : Idx, Γ a k * U a l) +
+      (∑ a : Idx, Γ a l * U k a) = 0
+  rw [hDU]
+  ring
+
+theorem gInvCovZeroAt
+    (g : SmoothRiemannianMetric I M)
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (hmc : RicciFlower.Connection.IsMetricCompatible (I := I) cov g)
+    (x₀ : M) (k l : CoordinateIdx (𝕜 := Real) E) :
+    inverseMetricCovDerivForMetricCompAlongInFrame
+        (I := I)
+        (fun y : M => fun a b : CoordinateIdx (𝕜 := Real) E =>
+          inverseMetricFlatModelInChart_component (I := I) g x₀ a b
+            (extChartAt I x₀ y))
+        cov (coordinateFrameAt (I := I) x₀)
+        (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
+        x₀ (X x₀) k l = 0 := by
+  classical
+  let gInv : M -> CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E -> Real :=
+    fun y a b => inverseMetricFlatModelInChart_component (I := I) g x₀ a b
+      (extChartAt I x₀ y)
+  have hinvX : ∀ i j : CoordinateIdx (𝕜 := Real) E,
+      (∑ r : CoordinateIdx (𝕜 := Real) E,
+        gInv x₀ i r *
+          metricCompForMetricInFrame (I := I) g
+            (coordinateFrameAt (I := I) x₀) x₀ r j) =
+          (if i = j then 1 else 0) ∧
+        (∑ r : CoordinateIdx (𝕜 := Real) E,
+          metricCompForMetricInFrame (I := I) g
+            (coordinateFrameAt (I := I) x₀) x₀ i r * gInv x₀ r j) =
+          (if i = j then 1 else 0) := by
+    intro i j
+    have h := gInvBasisAt (I := I) g x₀ (coordinateFrameAt_mem (I := I) x₀) i j
+    simpa [gInv, metricCompForMetricInFrame, coordinateFrameAt_basis_apply] using h
+  have hinvN : ∀ i j : CoordinateIdx (𝕜 := Real) E,
+      (fun y : M => ∑ r : CoordinateIdx (𝕜 := Real) E,
+          gInv y i r *
+            metricCompForMetricInFrame (I := I) g
+              (coordinateFrameAt (I := I) x₀) y r j) =ᶠ[𝓝 x₀]
+        fun _ : M => if i = j then 1 else 0 := by
+    intro i j
+    simpa [gInv] using gInvBasisNhds (I := I) g x₀ i j
+  have hsymmX : ∀ i j : CoordinateIdx (𝕜 := Real) E, gInv x₀ i j = gInv x₀ j i := by
+    intro i j
+    simpa [gInv] using
+      inverseMetricFlatModelInChart_component_center_eq_symm (I := I) g x₀ i j
+  have hginv_mdiff : ∀ a b : CoordinateIdx (𝕜 := Real) E,
+      MDifferentiableAt I 𝓘(Real, Real) (fun y : M => gInv y a b) x₀ := by
+    intro a b
+    simpa [gInv] using gInvComp_mdiffAt (I := I) g x₀ a b
+  have hmetric_mdiff : ∀ a b : CoordinateIdx (𝕜 := Real) E,
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun y : M =>
+          metricCompForMetricInFrame (I := I) g
+            (coordinateFrameAt (I := I) x₀) y a b) x₀ := by
+    intro a b
+    exact metricComp_mdiffAt (I := I) g
+      (coordinateFrameAt (I := I) x₀)
+      (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
+      (coordinateFrameSet_open (I := I) x₀)
+      (coordinateFrameAt_mem (I := I) x₀) a b
+  simpa [gInv] using
+    invCovZeroLocal (I := I) g gInv cov X
+      (coordinateFrameAt (I := I) x₀)
+      (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
+      hinvX hinvN hsymmX hmc
+      (coordinateFrameSet_open (I := I) x₀)
+      (coordinateFrameAt_mem (I := I) x₀)
+      hginv_mdiff hmetric_mdiff k l
 
 end Components
 
