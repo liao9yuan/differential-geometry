@@ -14,9 +14,9 @@ assembles the spectral eigenbasis of the compact self-adjoint resolvent
 into a `HilbertBasis` of `TensorL2 r s g`, indexed by the disjoint union
 of finite-dimensional bases of every nonzero-eigenvalue eigenspace.
 
-All results are stated under the uniform-in-`(S, α, Idx, Jdx)` chart-
-Sobolev hypothesis `uniformTensorChartSobolevBound g r s`, which makes
-`R` a compact self-adjoint operator on the Hilbert space `TensorL2 r s g`.
+All results are stated under the locally-constant chart hypothesis
+`HasLocallyConstantChartAt H M`, which makes `R` a compact self-adjoint
+operator on the Hilbert space `TensorL2 r s g`.
 
 ## Main definitions
 
@@ -63,6 +63,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
+open DifferentialGeometry.Geometry
 
 /-! ## File-local Borel-space instances on `E` and `M` -/
 
@@ -176,7 +177,7 @@ eigenvalues of `R = tensorResolventL2 g r s` is countable: a countable
 union of finite sets. -/
 theorem nonzero_tensor_resolvent_eigenvalues_set_countable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s) :
+    (h_atlas : HasLocallyConstantChartAt H M) :
     Set.Countable
       { μ : ℝ |
         tensorResolventEigenspace (I := I) (M := M) g r s μ ≠ ⊥ ∧
@@ -186,17 +187,17 @@ theorem nonzero_tensor_resolvent_eigenvalues_set_countable
   intro n
   have h_pos : (0 : ℝ) < 1 / (n + 1) := by positivity
   exact (tensorResolvent_eigenvalues_finite_above
-    (I := I) (M := M) g r s h_uniform h_pos).countable
+    (I := I) (M := M) g r s h_atlas h_pos).countable
 
 /-- Under the uniform chart-Sobolev hypothesis, the subtype
 `TensorNonzeroResolventEigenvalue g r s` is countable. -/
 theorem TensorNonzeroResolventEigenvalue.countable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s) :
+    (h_atlas : HasLocallyConstantChartAt H M) :
     Countable (TensorNonzeroResolventEigenvalue (I := I) (M := M) g r s) := by
   unfold TensorNonzeroResolventEigenvalue
   exact (nonzero_tensor_resolvent_eigenvalues_set_countable
-    (I := I) (M := M) g r s h_uniform).to_subtype
+    (I := I) (M := M) g r s h_atlas).to_subtype
 
 /-! ## Per-eigenspace finite-dimensionality -/
 
@@ -206,12 +207,12 @@ dimensional. -/
 @[reducible]
 def TensorNonzeroResolventEigenvalue.finiteDimensional
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : HasLocallyConstantChartAt H M)
     (μ : TensorNonzeroResolventEigenvalue (I := I) (M := M) g r s) :
     FiniteDimensional ℝ
       (tensorResolventEigenspace (I := I) (M := M) g r s μ.val) :=
   tensorResolventEigenspace_finiteDim
-    (I := I) (M := M) g r s h_uniform μ.val_ne_zero
+    (I := I) (M := M) g r s h_atlas μ.val_ne_zero
 
 /-! ## Per-eigenspace orthonormal basis -/
 
@@ -220,7 +221,7 @@ of `R = tensorResolventL2 g r s` at a nonzero eigenvalue, indexed by
 `Fin (finrank ℝ ↥(tensorResolventEigenspace g r s μ.val))`. -/
 noncomputable def tensorResolventEigenspaceONB
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : HasLocallyConstantChartAt H M)
     (μ : TensorNonzeroResolventEigenvalue (I := I) (M := M) g r s) :
     OrthonormalBasis
       (Fin (Module.finrank ℝ
@@ -228,7 +229,7 @@ noncomputable def tensorResolventEigenspaceONB
       ℝ (tensorResolventEigenspace (I := I) (M := M) g r s μ.val) :=
   letI : FiniteDimensional ℝ
       (tensorResolventEigenspace (I := I) (M := M) g r s μ.val) :=
-    μ.finiteDimensional h_uniform
+    μ.finiteDimensional h_atlas
   stdOrthonormalBasis ℝ
     (tensorResolventEigenspace (I := I) (M := M) g r s μ.val)
 
@@ -273,7 +274,7 @@ theorem tensorResolventEigenspace_orthogonalFamily_nonzero
 `TensorL2 r s g`. -/
 noncomputable def tensorResolventEigenbasisVec
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : HasLocallyConstantChartAt H M)
     (i : Σ μ : TensorNonzeroResolventEigenvalue
             (I := I) (M := M) g r s,
           Fin (Module.finrank ℝ
@@ -281,32 +282,32 @@ noncomputable def tensorResolventEigenbasisVec
               (I := I) (M := M) g r s μ.val))) :
     TensorL2 r s g :=
   ((tensorResolventEigenspaceONB
-        (I := I) (M := M) h_uniform i.1 i.2 :
+        (I := I) (M := M) h_atlas i.1 i.2 :
       tensorResolventEigenspace (I := I) (M := M) g r s i.1.val) :
     TensorL2 r s g)
 
 /-- Each eigenbasis vector lies in its eigenspace. -/
 theorem tensorResolventEigenbasisVec_mem
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : HasLocallyConstantChartAt H M)
     (i : Σ μ : TensorNonzeroResolventEigenvalue
             (I := I) (M := M) g r s,
           Fin (Module.finrank ℝ
             (tensorResolventEigenspace
               (I := I) (M := M) g r s μ.val))) :
-    tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i ∈
+    tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i ∈
       tensorResolventEigenspace (I := I) (M := M) g r s i.1.val := by
   unfold tensorResolventEigenbasisVec
   exact (tensorResolventEigenspaceONB
-    (I := I) (M := M) h_uniform i.1 i.2).property
+    (I := I) (M := M) h_atlas i.1 i.2).property
 
 /-- The eigenbasis family is orthonormal. -/
 theorem tensorResolventEigenbasisVec_orthonormal
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s) :
+    (h_atlas : HasLocallyConstantChartAt H M) :
     Orthonormal ℝ
       (tensorResolventEigenbasisVec (I := I) (M := M) (g := g) (r := r)
-        (s := s) h_uniform) := by
+        (s := s) h_atlas) := by
   have h_fam :=
     tensorResolventEigenspace_orthogonalFamily_nonzero
       (I := I) (M := M) g r s
@@ -314,10 +315,10 @@ theorem tensorResolventEigenbasisVec_orthonormal
         (I := I) (M := M) g r s,
       Orthonormal ℝ
         (tensorResolventEigenspaceONB
-          (I := I) (M := M) h_uniform μ) :=
+          (I := I) (M := M) h_atlas μ) :=
     fun μ =>
       (tensorResolventEigenspaceONB
-        (I := I) (M := M) h_uniform μ).orthonormal
+        (I := I) (M := M) h_atlas μ).orthonormal
   have h_sig := h_fam.orthonormal_sigma_orthonormal h_each
   convert h_sig using 1
 
@@ -325,10 +326,10 @@ theorem tensorResolventEigenbasisVec_orthonormal
 eigenvalues) of the eigenspaces. -/
 private lemma span_tensorResolventEigenbasisVec_le_iSup_eigenspace
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s) :
+    (h_atlas : HasLocallyConstantChartAt H M) :
     Submodule.span ℝ (Set.range
         (tensorResolventEigenbasisVec
-          (I := I) (M := M) (g := g) (r := r) (s := s) h_uniform)) ≤
+          (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas)) ≤
       ⨆ μ : TensorNonzeroResolventEigenvalue
               (I := I) (M := M) g r s,
         tensorResolventEigenspace (I := I) (M := M) g r s μ.val := by
@@ -337,25 +338,25 @@ private lemma span_tensorResolventEigenbasisVec_le_iSup_eigenspace
   refine SetLike.mem_coe.mpr ?_
   refine Submodule.mem_iSup_of_mem i.1 ?_
   exact tensorResolventEigenbasisVec_mem
-    (I := I) (M := M) h_uniform i
+    (I := I) (M := M) h_atlas i
 
 /-- For each nonzero eigenvalue, its eigenspace is contained in the span
 of the eigenbasis vectors (because the per-eigenspace basis already spans
 the eigenspace). -/
 private lemma tensorResolventEigenspace_le_span_tensorResolventEigenbasisVec
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : HasLocallyConstantChartAt H M)
     (μ : TensorNonzeroResolventEigenvalue (I := I) (M := M) g r s) :
     tensorResolventEigenspace (I := I) (M := M) g r s μ.val ≤
       Submodule.span ℝ (Set.range
         (tensorResolventEigenbasisVec
-          (I := I) (M := M) (g := g) (r := r) (s := s) h_uniform)) := by
+          (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas)) := by
   intro x hx
   letI : FiniteDimensional ℝ
       (tensorResolventEigenspace (I := I) (M := M) g r s μ.val) :=
-    μ.finiteDimensional h_uniform
+    μ.finiteDimensional h_atlas
   set b := tensorResolventEigenspaceONB
-    (I := I) (M := M) h_uniform μ
+    (I := I) (M := M) h_atlas μ
   have h_basis_span : Submodule.span ℝ
       (Set.range (b.toBasis :
         Fin (Module.finrank ℝ
@@ -382,7 +383,7 @@ private lemma tensorResolventEigenspace_le_span_tensorResolventEigenbasisVec
             TensorL2 r s g) ∈
       Set.range
         (tensorResolventEigenbasisVec
-          (I := I) (M := M) (g := g) (r := r) (s := s) h_uniform) := by
+          (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas) := by
     intro k
     refine ⟨⟨μ, k⟩, ?_⟩
     rfl
@@ -392,7 +393,7 @@ private lemma tensorResolventEigenspace_le_span_tensorResolventEigenbasisVec
             TensorL2 r s g)) ⊆
       Set.range
         (tensorResolventEigenbasisVec
-          (I := I) (M := M) (g := g) (r := r) (s := s) h_uniform) := by
+          (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas) := by
     rintro y ⟨k, rfl⟩
     exact h_in_basis_set k
   have hx_subtype : x =
@@ -434,19 +435,19 @@ private lemma tensorResolventEigenspace_le_span_tensorResolventEigenbasisVec
 supremum over nonzero eigenvalues of the resolvent eigenspaces. -/
 theorem span_tensorResolventEigenbasisVec_eq_iSup_eigenspace
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s) :
+    (h_atlas : HasLocallyConstantChartAt H M) :
     Submodule.span ℝ (Set.range
         (tensorResolventEigenbasisVec
-          (I := I) (M := M) (g := g) (r := r) (s := s) h_uniform)) =
+          (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas)) =
       ⨆ μ : TensorNonzeroResolventEigenvalue
               (I := I) (M := M) g r s,
         tensorResolventEigenspace (I := I) (M := M) g r s μ.val := by
   refine le_antisymm
     (span_tensorResolventEigenbasisVec_le_iSup_eigenspace
-      (I := I) (M := M) h_uniform) ?_
+      (I := I) (M := M) h_atlas) ?_
   exact iSup_le
     (tensorResolventEigenspace_le_span_tensorResolventEigenbasisVec
-      (I := I) (M := M) h_uniform)
+      (I := I) (M := M) h_atlas)
 
 /-! ## Density: the orthogonal complement of the eigenbasis span is `⊥`
 
@@ -460,7 +461,7 @@ of the supremum (over nonzero eigenvalues) of the resolvent eigenspaces
 is `⊥`. -/
 theorem nonzero_iSup_tensorResolventEigenspace_orthogonal_eq_bot
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s) :
+    (h_atlas : HasLocallyConstantChartAt H M) :
     (⨆ μ : TensorNonzeroResolventEigenvalue
               (I := I) (M := M) g r s,
         tensorResolventEigenspace (I := I) (M := M) g r s μ.val)ᗮ = ⊥ := by
@@ -472,7 +473,7 @@ theorem nonzero_iSup_tensorResolventEigenspace_orthogonal_eq_bot
                   (I := I) (M := M) g r s μ) by
     rw [h_iSup_eq]
     exact tensorResolventEigenspaces_iSup_orthogonal_eq_bot
-      (I := I) (M := M) g r s h_uniform
+      (I := I) (M := M) g r s h_atlas
   refine le_antisymm ?_ ?_
   · refine iSup_le (fun μ => ?_)
     exact le_iSup
@@ -482,7 +483,7 @@ theorem nonzero_iSup_tensorResolventEigenspace_orthogonal_eq_bot
     by_cases hν : ν = 0
     · rw [hν,
           tensorResolventEigenspace_zero_eq_bot
-            (I := I) (M := M) g r s h_uniform]
+            (I := I) (M := M) g r s h_atlas]
       exact bot_le
     · by_cases h_eig_bot :
           tensorResolventEigenspace (I := I) (M := M) g r s ν = ⊥
@@ -512,14 +513,14 @@ theorem nonzero_iSup_tensorResolventEigenspace_orthogonal_eq_bot
 `⊥`. -/
 theorem tensorResolventEigenbasisVec_span_orthogonal_eq_bot
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s) :
+    (h_atlas : HasLocallyConstantChartAt H M) :
     (Submodule.span ℝ (Set.range
         (tensorResolventEigenbasisVec
-          (I := I) (M := M) (g := g) (r := r) (s := s) h_uniform)))ᗮ =
+          (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas)))ᗮ =
       ⊥ := by
   rw [span_tensorResolventEigenbasisVec_eq_iSup_eigenspace]
   exact nonzero_iSup_tensorResolventEigenspace_orthogonal_eq_bot
-    (I := I) (M := M) h_uniform
+    (I := I) (M := M) h_atlas
 
 /-! ## The sigma-indexed eigenbasis as a `HilbertBasis` -/
 
@@ -533,7 +534,7 @@ This is built via `HilbertBasis.mkOfOrthogonalEqBot` from the eigenbasis
 family and the trivial-orthogonal-complement theorem. -/
 noncomputable def tensorResolventHilbertEigenbasisSigma
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s) :
+    (h_atlas : HasLocallyConstantChartAt H M) :
     HilbertBasis
       (Σ μ : TensorNonzeroResolventEigenvalue
               (I := I) (M := M) g r s,
@@ -543,35 +544,35 @@ noncomputable def tensorResolventHilbertEigenbasisSigma
       ℝ (TensorL2 r s g) :=
   HilbertBasis.mkOfOrthogonalEqBot
     (tensorResolventEigenbasisVec_orthonormal
-      (I := I) (M := M) h_uniform)
+      (I := I) (M := M) h_atlas)
     (tensorResolventEigenbasisVec_span_orthogonal_eq_bot
-      (I := I) (M := M) h_uniform)
+      (I := I) (M := M) h_atlas)
 
 @[simp] lemma tensorResolventHilbertEigenbasisSigma_apply
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : HasLocallyConstantChartAt H M)
     (i : Σ μ : TensorNonzeroResolventEigenvalue
               (I := I) (M := M) g r s,
           Fin (Module.finrank ℝ
             (tensorResolventEigenspace
               (I := I) (M := M) g r s μ.val))) :
     tensorResolventHilbertEigenbasisSigma
-        (I := I) (M := M) h_uniform i =
+        (I := I) (M := M) h_atlas i =
       tensorResolventEigenbasisVec
-        (I := I) (M := M) h_uniform i := by
+        (I := I) (M := M) h_atlas i := by
   unfold tensorResolventHilbertEigenbasisSigma
   exact congr_fun
     (HilbertBasis.coe_mkOfOrthogonalEqBot
       (tensorResolventEigenbasisVec_orthonormal
-        (I := I) (M := M) h_uniform)
+        (I := I) (M := M) h_atlas)
       (tensorResolventEigenbasisVec_span_orthogonal_eq_bot
-        (I := I) (M := M) h_uniform))
+        (I := I) (M := M) h_atlas))
     i
 
 /-! ## Sanity tests -/
 
 example {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s) :
+    (h_atlas : HasLocallyConstantChartAt H M) :
     HilbertBasis
       (Σ μ : TensorNonzeroResolventEigenvalue
               (I := I) (M := M) g r s,
@@ -580,7 +581,7 @@ example {g : SmoothRiemannianMetric I M} {r s : ℕ}
             (I := I) (M := M) g r s μ.val)))
       ℝ (TensorL2 r s g) :=
   tensorResolventHilbertEigenbasisSigma
-    (I := I) (M := M) h_uniform
+    (I := I) (M := M) h_atlas
 
 end TensorSpectral
 end Parabolic

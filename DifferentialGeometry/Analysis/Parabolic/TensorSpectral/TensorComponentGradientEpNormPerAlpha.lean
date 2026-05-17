@@ -52,7 +52,7 @@ The complete proof combines:
   square-of-sum bound;
 * `AEStronglyMeasurable` of each summand from the atom measurability
   headlines (`aestronglyMeasurable_pou_mul_sqrt_sum_triv_chart_cov`,
-  `aestronglyMeasurable_pou_mul_sqrt_sum_christoffel_correction_per_k`,
+  `aestronglyMeasurable_pou_mul_sqrt_sum_christoffel_correction`,
   `aestronglyMeasurable_indicator_tsupp_abs_raw`).
 
 Three Minkowski applications (`eLpNorm_add_le`) glue the three `eLpNorm`

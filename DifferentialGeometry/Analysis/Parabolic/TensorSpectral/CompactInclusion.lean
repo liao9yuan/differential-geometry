@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.RellichAssembly
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.UniformChartSobolevHyp
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.UniformChartSobolevBoundProof
 import Mathlib.Analysis.Normed.Operator.Compact
 import Mathlib.Topology.Sequences
 
@@ -11,8 +11,8 @@ establishes that the bounded operator
 
   `TensorH1ComplToTensorL2 g r s : TensorH1Compl g r s →L[ℝ] TensorL2 r s g`
 
-is a compact operator, conditional on the uniform-in-`(S, α, Idx, Jdx)`
-chart-Sobolev `W^{1,2}` envelope `uniformTensorChartSobolevBound g r s`.
+is a compact operator, given a locally-constant chart selection
+`HasLocallyConstantChartAt H M`.
 
 The argument:
 
@@ -45,6 +45,7 @@ namespace TensorSpectral
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Chart
+open DifferentialGeometry.Geometry
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -153,9 +154,9 @@ private lemma exists_smooth_close_to_TensorH1
 
 set_option maxHeartbeats 4000000 in
 set_option linter.unusedSectionVars false in
-/-- **Conditional compactness of the tensor H¹ → L² inclusion.** Under the
-uniform-in-`(S, α, Idx, Jdx)` chart-Sobolev `W^{1,2}` envelope
-`uniformTensorChartSobolevBound g r s`, the bounded operator
+/-- **Compactness of the tensor H¹ → L² inclusion.** Given a locally-
+constant chart selection `HasLocallyConstantChartAt H M`, the bounded
+operator
 `TensorH1ComplToTensorL2 g r s : TensorH1Compl g r s →L[ℝ] TensorL2 r s g`
 is a compact operator.
 
@@ -171,9 +172,11 @@ controlled by the operator bound
 subsequence also converges in `L²`. -/
 theorem TensorH1ComplToTensorL2_isCompactOperator
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s) :
+    (h_atlas : HasLocallyConstantChartAt H M) :
     IsCompactOperator (TensorH1ComplToTensorL2 (I := I) (M := M) g r s) := by
   classical
+  have h_uniform :=
+    tensorChartComponent_wkpNormChart_le (I := I) (M := M) h_atlas g r s
   -- Reduce to: the closure of the image of the closed unit ball is compact.
   have h_iff := isCompactOperator_iff_isCompact_closure_image_closedBall
       (TensorH1ComplToTensorL2 (I := I) (M := M) g r s :

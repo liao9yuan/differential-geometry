@@ -48,7 +48,7 @@ single non-negative constant `C_grad` that dominates each `C(α)`.
 
 ## Public theorem
 
-* `tensorChartComponentScalar_grad_eLpNorm_le_uniform_all_alpha` — the
+* `tensorChartComponentScalar_grad_eLpNorm_le` — the
   headline `α`-uniform `L²` bound on the square-root inner product of the
   gradient of the chart-frame scalar component, for a smooth compactly-
   supported `H¹` tensor section, on a closed Riemannian manifold (assuming
@@ -263,7 +263,7 @@ square-root of the gradient of
 `ENNReal.ofReal C_grad · ‖S‖₊`.
 
 The constant `C_grad` is independent of `α`, `(Idx, Jdx)`, and `S`. -/
-theorem tensorChartComponentScalar_grad_eLpNorm_le_uniform_all_alpha
+theorem tensorChartComponentScalar_grad_eLpNorm_le
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C_grad : ℝ, 0 ≤ C_grad ∧
@@ -334,6 +334,6 @@ end
 section Sanity
 
 #print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentScalar_grad_eLpNorm_le_uniform_all_alpha
+  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentScalar_grad_eLpNorm_le
 
 end Sanity

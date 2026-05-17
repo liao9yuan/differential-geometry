@@ -47,7 +47,7 @@ desired `α`-uniform bound `ENNReal.ofReal C_total · ‖S‖₊`.
 
 ## Public theorem
 
-* `tensorChartComponentScalar_eLpNorm_le_uniform_α_uniform` — the headline
+* `tensorChartComponentScalar_eLpNorm_le` — the headline
   `α`-uniform `L²` bound on the chart-frame scalar component, for a
   smooth compactly-supported `H¹` tensor section, on a closed Riemannian
   manifold (assuming `[CompactSpace M]` for the finite-cover argument).
@@ -247,7 +247,7 @@ private lemma perAlphaConstant_le_totalActiveConstant
 The intermediate `α`-uniform bound, stated for `SmoothCcTensor`, using
 `tensorL2Norm` on the right-hand side. -/
 
-private theorem tensorChartComponentScalar_eLpNorm_le_uniform_α_uniform_smoothCcTensor
+private theorem tensorChartComponentScalar_eLpNorm_le_smoothCcTensor
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C₀ : ℝ, 0 ≤ C₀ ∧
       ∀ (S : SmoothCcTensor g r s) (α : M)
@@ -364,7 +364,7 @@ every chart point `α : M`, and every multi-index pair `(Idx, Jdx)`, the
 `ENNReal.ofReal C₀ · ‖S‖₊`.
 
 The constant `C₀` is independent of `α`, `(Idx, Jdx)`, and `S`. -/
-theorem tensorChartComponentScalar_eLpNorm_le_uniform_α_uniform
+theorem tensorChartComponentScalar_eLpNorm_le
     (_h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C₀ : ℝ, 0 ≤ C₀ ∧
@@ -377,7 +377,7 @@ theorem tensorChartComponentScalar_eLpNorm_le_uniform_α_uniform
           ENNReal.ofReal C₀ * (‖S‖₊ : ℝ≥0∞) := by
   classical
   obtain ⟨C₀, hC₀_nn, h_smoothCc⟩ :=
-    tensorChartComponentScalar_eLpNorm_le_uniform_α_uniform_smoothCcTensor
+    tensorChartComponentScalar_eLpNorm_le_smoothCcTensor
       (I := I) (M := M) g r s
   refine ⟨C₀, hC₀_nn, ?_⟩
   intro S α Idx Jdx
@@ -403,7 +403,7 @@ theorem tensorChartComponentScalar_eLpNorm_le_uniform_α_uniform
 /-! ## Functional packaging: `∀ S, ∃ C₀, ...` is implied by `∃ C₀, ∀ S, ...`. -/
 
 /-- Functional packaging of the headline `α`-uniform bound. -/
-theorem tensorChartComponentScalar_eLpNorm_le_uniform_α_uniform_forall
+theorem tensorChartComponentScalar_eLpNorm_le_forall
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C₀ : ℝ, 0 ≤ C₀ ∧
@@ -414,7 +414,7 @@ theorem tensorChartComponentScalar_eLpNorm_le_uniform_α_uniform_forall
             g r s S.toCcTensor α Idx Jdx) 2
           (riemannianVolumeMeasure (I := I) (M := M) g) ≤
           ENNReal.ofReal C₀ * (‖S‖₊ : ℝ≥0∞) :=
-  tensorChartComponentScalar_eLpNorm_le_uniform_α_uniform
+  tensorChartComponentScalar_eLpNorm_le
     (I := I) (M := M) h_atlas g r s
 
 end TensorSpectral
@@ -427,9 +427,9 @@ end
 section Sanity
 
 #print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentScalar_eLpNorm_le_uniform_α_uniform
+  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentScalar_eLpNorm_le
 
 #print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentScalar_eLpNorm_le_uniform_α_uniform_forall
+  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentScalar_eLpNorm_le_forall
 
 end Sanity

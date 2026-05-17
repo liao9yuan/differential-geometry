@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.UniformChartSobolevHyp
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ComponentWkpNormBoundFromH1
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TensorComponentEpNormUniform
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TensorComponentGradientEpNormUniform
 
@@ -6,11 +6,11 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TensorComponentGra
 # Unconditional uniform chart-Sobolev `W^{1,2}` bound
 
 For a closed Riemannian manifold `(M, g)` with locally constant chart
-selection, this file delivers the unconditional version of
-`uniformTensorChartSobolevBound g r s`, i.e. a single non-negative real
-constant `C` such that for every smooth compactly-supported `H¹` tensor
-section `S : SmoothCcTensorH1 g r s`, every chart base point `α : M`, and
-every chart-frame multi-index pair `(Idx, Jdx)`, the chart-based Sobolev
+selection, this file delivers the unconditional uniform chart-Sobolev
+`W^{1,2}` bound: a single non-negative real constant `C` such that for
+every smooth compactly-supported `H¹` tensor section
+`S : SmoothCcTensorH1 g r s`, every chart base point `α : M`, and every
+chart-frame multi-index pair `(Idx, Jdx)`, the chart-based Sobolev
 `W^{1,2}` norm of the chart-frame scalar component
 `tensorChartComponentScalar g r s S.toCcTensor α Idx Jdx` is bounded by
 `ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞)`.
@@ -21,7 +21,7 @@ We invoke the per-`α` headline
 `tensorChartComponentScalar_wkpNormChart_le_const_mul_h1Norm`
 (in `ComponentWkpNormBoundFromH1.lean`) for each `α` in the active
 partition-of-unity finset, feeding in the `α`-uniform gradient `L²` bound
-from `tensorChartComponentScalar_grad_eLpNorm_le_uniform_all_alpha`
+from `tensorChartComponentScalar_grad_eLpNorm_le`
 (`TensorComponentGradientEpNormUniform.lean`, γ2.5.D). This gives, for each
 active `α`, a per-`α` constant `Cα` such that the chart-Sobolev `W^{1,2}`
 norm of the scalar component is bounded by `ENNReal.ofReal Cα * ‖S‖₊`.
@@ -93,7 +93,7 @@ private lemma exists_perAlphaSobolevConstant
   haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
   -- Extract the `α`-uniform gradient `L²` constant (γ2.5.D).
   obtain ⟨C_grad, hC_grad_nn, hC_grad_bound⟩ :=
-    tensorChartComponentScalar_grad_eLpNorm_le_uniform_all_alpha
+    tensorChartComponentScalar_grad_eLpNorm_le
       (I := I) (M := M) h_atlas g r s
   -- Specialise to the fixed `α`.
   exact tensorChartComponentScalar_wkpNormChart_le_const_mul_h1Norm
@@ -205,13 +205,18 @@ such that for every smooth compactly-supported `H¹` tensor section
 chart-frame multi-index pair `(Idx, Jdx)`, the chart-based Sobolev `W^{1,2}`
 norm of the chart-frame scalar component
 `tensorChartComponentScalar g r s S.toCcTensor α Idx Jdx` is bounded by
-`ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞)`.
-
-This discharges the `uniformTensorChartSobolevBound g r s` predicate. -/
-theorem uniformTensorChartSobolevBound_holds
+`ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞)`. -/
+theorem tensorChartComponent_wkpNormChart_le
     (h_atlas : HasLocallyConstantChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
-    uniformTensorChartSobolevBound (I := I) (M := M) g r s := by
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (S : SmoothCcTensorH1 g r s) (α : M)
+        (Idx : Fin r → Fin (Module.finrank ℝ E))
+        (Jdx : Fin s → Fin (Module.finrank ℝ E)),
+        wkpNormChart (I := I) (M := M) g 1 2
+            (tensorChartComponentScalar (I := I) (M := M)
+              g r s S.toCcTensor α Idx Jdx) ≤
+          ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞) := by
   classical
   refine ⟨totalActiveSobolevConstant (I := I) (M := M) h_atlas g r s,
     totalActiveSobolevConstant_nonneg (I := I) (M := M) h_atlas g r s, ?_⟩
@@ -259,6 +264,6 @@ end
 section Sanity
 
 #print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.uniformTensorChartSobolevBound_holds
+  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponent_wkpNormChart_le
 
 end Sanity

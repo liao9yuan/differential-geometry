@@ -68,7 +68,7 @@ the square root, and multiply by the globally smooth POU weight.
 * `aestronglyMeasurable_indicator_tsupp_abs_raw` — the raw-component
   indicator atom is `AEStronglyMeasurable` against the Riemannian volume
   measure.
-* `aestronglyMeasurable_pou_mul_sqrt_sum_christoffel_correction_per_k` —
+* `aestronglyMeasurable_pou_mul_sqrt_sum_christoffel_correction` —
   the per-direction Christoffel slot-correction atom integrand is
   `AEStronglyMeasurable` against the Riemannian volume measure.
 -/
@@ -547,7 +547,7 @@ b ↦ ρ_α(b) *
 ```
 
 is `AEStronglyMeasurable` with respect to `riemannianVolumeMeasure g`. -/
-theorem aestronglyMeasurable_pou_mul_sqrt_sum_christoffel_correction_per_k
+theorem aestronglyMeasurable_pou_mul_sqrt_sum_christoffel_correction
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (j : Fin (Module.finrank ℝ E))
     (S : SmoothCcTensorH1 g r s) :
@@ -599,6 +599,6 @@ section Sanity
   DifferentialGeometry.Analysis.Parabolic.TensorSpectral.aestronglyMeasurable_indicator_tsupp_abs_raw
 
 #print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.aestronglyMeasurable_pou_mul_sqrt_sum_christoffel_correction_per_k
+  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.aestronglyMeasurable_pou_mul_sqrt_sum_christoffel_correction
 
 end Sanity

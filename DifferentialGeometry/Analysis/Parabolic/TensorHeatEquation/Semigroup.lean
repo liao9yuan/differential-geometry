@@ -64,6 +64,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open DifferentialGeometry.Geometry
 
 /-! ## File-local Borel-space instances on `E` and `M` -/
 
@@ -133,12 +134,12 @@ lemma tensor_heat_coeff_sq_le_one
 /-- Parseval-type square-summability of the tensor basis coefficients. -/
 lemma tensorSummable_basis_coeff_sq
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s) (T : TensorL2 r s g) :
+    (h_atlas : HasLocallyConstantChartAt H M) (T : TensorL2 r s g) :
     Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
       ‖⟪tensorResolventHilbertEigenbasisSigma
-            (I := I) (M := M) h_uniform i, T⟫_ℝ‖ ^ 2) := by
+            (I := I) (M := M) h_atlas i, T⟫_ℝ‖ ^ 2) := by
   set b := tensorResolventHilbertEigenbasisSigma
-    (I := I) (M := M) (g := g) (r := r) (s := s) h_uniform
+    (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas
   have h_orthonormal : Orthonormal ℝ b := b.orthonormal
   have h_orthFam :
       OrthogonalFamily ℝ
@@ -171,13 +172,13 @@ lemma tensorSummable_basis_coeff_sq
 `T` equals the sum of the squared basis coefficients. -/
 lemma tensorParseval_norm_sq
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s) (T : TensorL2 r s g) :
+    (h_atlas : HasLocallyConstantChartAt H M) (T : TensorL2 r s g) :
     ‖T‖ ^ 2 =
       ∑' i : TensorEigenIdx (I := I) (M := M) g r s,
         ‖⟪tensorResolventHilbertEigenbasisSigma
-            (I := I) (M := M) h_uniform i, T⟫_ℝ‖ ^ 2 := by
+            (I := I) (M := M) h_atlas i, T⟫_ℝ‖ ^ 2 := by
   set b := tensorResolventHilbertEigenbasisSigma
-    (I := I) (M := M) (g := g) (r := r) (s := s) h_uniform
+    (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas
   have h_par := b.tsum_inner_mul_inner T T
   have h_sq : ⟪T, T⟫_ℝ = ‖T‖ ^ 2 := real_inner_self_eq_norm_sq T
   have h_eq : (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
@@ -195,16 +196,16 @@ lemma tensorParseval_norm_sq
 terms is summable in `TensorL2 r s g`. -/
 lemma tensorSummable_heatTerm
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : HasLocallyConstantChartAt H M)
     {t : ℝ} (ht : 0 ≤ t) (T : TensorL2 r s g) :
     Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
       Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) •
         ⟪tensorResolventHilbertEigenbasisSigma
-            (I := I) (M := M) h_uniform i, T⟫_ℝ •
+            (I := I) (M := M) h_atlas i, T⟫_ℝ •
         tensorResolventHilbertEigenbasisSigma
-          (I := I) (M := M) h_uniform i) := by
+          (I := I) (M := M) h_atlas i) := by
   set b := tensorResolventHilbertEigenbasisSigma
-    (I := I) (M := M) (g := g) (r := r) (s := s) h_uniform
+    (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas
   have h_orthonormal : Orthonormal ℝ b := b.orthonormal
   have h_orthFam :
       OrthogonalFamily ℝ
@@ -221,7 +222,7 @@ lemma tensorSummable_heatTerm
           (⟪b i, T⟫_ℝ) ^ 2) := by
       have h_norm_sq_summable :=
         tensorSummable_basis_coeff_sq
-          (I := I) (M := M) h_uniform T
+          (I := I) (M := M) h_atlas T
       have h_eq : (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
             ‖⟪b i, T⟫_ℝ‖ ^ 2) =
           (fun i => (⟪b i, T⟫_ℝ) ^ 2) := by
@@ -289,15 +290,15 @@ lemma tensorSummable_heatTerm
 to `∑' i, (f i)²`. -/
 lemma tensorOrthonormal_norm_sq_eq_tsum_sq
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : HasLocallyConstantChartAt H M)
     (f : TensorEigenIdx (I := I) (M := M) g r s → ℝ)
     (h_summable : Summable (fun i => (f i) ^ 2)) :
     ‖∑' i : TensorEigenIdx (I := I) (M := M) g r s, f i •
         tensorResolventHilbertEigenbasisSigma
-          (I := I) (M := M) h_uniform i‖ ^ 2 =
+          (I := I) (M := M) h_atlas i‖ ^ 2 =
       ∑' i, (f i) ^ 2 := by
   set b := tensorResolventHilbertEigenbasisSigma
-    (I := I) (M := M) (g := g) (r := r) (s := s) h_uniform
+    (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas
   have h_orthonormal : Orthonormal ℝ b := b.orthonormal
   have h_orthFam :
       OrthogonalFamily ℝ
@@ -363,17 +364,17 @@ lemma tensorOrthonormal_norm_sq_eq_tsum_sq
 bounded by `‖T‖²`. -/
 private lemma tensorNorm_sq_heatTerm_sum_le
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : HasLocallyConstantChartAt H M)
     {t : ℝ} (ht : 0 ≤ t) (T : TensorL2 r s g) :
     ‖∑' i : TensorEigenIdx (I := I) (M := M) g r s,
         Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) •
           ⟪tensorResolventHilbertEigenbasisSigma
-              (I := I) (M := M) h_uniform i, T⟫_ℝ •
+              (I := I) (M := M) h_atlas i, T⟫_ℝ •
           tensorResolventHilbertEigenbasisSigma
-            (I := I) (M := M) h_uniform i‖ ^ 2 ≤
+            (I := I) (M := M) h_atlas i‖ ^ 2 ≤
       ‖T‖ ^ 2 := by
   set b := tensorResolventHilbertEigenbasisSigma
-    (I := I) (M := M) (g := g) (r := r) (s := s) h_uniform
+    (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas
   -- Reform the summand: smul-smul folds into a single scalar smul.
   have h_summand_eq :
       (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
@@ -393,7 +394,7 @@ private lemma tensorNorm_sq_heatTerm_sum_le
       Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
         (⟪b i, T⟫_ℝ) ^ 2) := by
     have h_norm_sq_summable :=
-      tensorSummable_basis_coeff_sq (I := I) (M := M) h_uniform T
+      tensorSummable_basis_coeff_sq (I := I) (M := M) h_atlas T
     have h_eq :
         (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
           ‖⟪b i, T⟫_ℝ‖ ^ 2) =
@@ -434,7 +435,7 @@ private lemma tensorNorm_sq_heatTerm_sum_le
   -- Apply the orthonormal `‖·‖² = ∑ (f i)²` formula and bound the tsum.
   have h_norm_sq_eq :=
     tensorOrthonormal_norm_sq_eq_tsum_sq
-      (I := I) (M := M) h_uniform f h_summable_f_sq
+      (I := I) (M := M) h_atlas f h_summable_f_sq
   change ‖∑' i, f i • b i‖ ^ 2 ≤ ‖T‖ ^ 2
   rw [h_norm_sq_eq]
   have h_dom : ∑' i : TensorEigenIdx (I := I) (M := M) g r s,
@@ -444,7 +445,7 @@ private lemma tensorNorm_sq_heatTerm_sum_le
   refine le_trans h_dom ?_
   -- Use Parseval to close.
   have h_parseval :=
-    tensorParseval_norm_sq (I := I) (M := M) h_uniform T
+    tensorParseval_norm_sq (I := I) (M := M) h_atlas T
   have h_eq : (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
         ‖⟪b i, T⟫_ℝ‖ ^ 2) =
       (fun i => (⟪b i, T⟫_ℝ) ^ 2) := by
@@ -456,16 +457,16 @@ private lemma tensorNorm_sq_heatTerm_sum_le
 /-- For `t ≥ 0`, the operator-norm bound `‖tensorHeatSemigroupFun T‖ ≤ ‖T‖`. -/
 private lemma tensorNorm_heatTerm_sum_le
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : HasLocallyConstantChartAt H M)
     {t : ℝ} (ht : 0 ≤ t) (T : TensorL2 r s g) :
     ‖∑' i : TensorEigenIdx (I := I) (M := M) g r s,
         Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) •
           ⟪tensorResolventHilbertEigenbasisSigma
-              (I := I) (M := M) h_uniform i, T⟫_ℝ •
+              (I := I) (M := M) h_atlas i, T⟫_ℝ •
           tensorResolventHilbertEigenbasisSigma
-            (I := I) (M := M) h_uniform i‖ ≤ ‖T‖ := by
+            (I := I) (M := M) h_atlas i‖ ≤ ‖T‖ := by
   have h_sq :=
-    tensorNorm_sq_heatTerm_sum_le (I := I) (M := M) h_uniform ht T
+    tensorNorm_sq_heatTerm_sum_le (I := I) (M := M) h_atlas ht T
   have h_rhs_nn : 0 ≤ ‖T‖ := norm_nonneg _
   exact (abs_le_of_sq_le_sq' h_sq h_rhs_nn).2
 
@@ -474,26 +475,26 @@ private lemma tensorNorm_heatTerm_sum_le
 /-- The underlying function of the tensor heat semigroup at time `t`. -/
 private noncomputable def tensorHeatSemigroupFun
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s) (t : ℝ)
+    (h_atlas : HasLocallyConstantChartAt H M) (t : ℝ)
     (T : TensorL2 r s g) : TensorL2 r s g :=
   ∑' i : TensorEigenIdx (I := I) (M := M) g r s,
     Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) •
       ⟪tensorResolventHilbertEigenbasisSigma
-          (I := I) (M := M) h_uniform i, T⟫_ℝ •
+          (I := I) (M := M) h_atlas i, T⟫_ℝ •
       tensorResolventHilbertEigenbasisSigma
-        (I := I) (M := M) h_uniform i
+        (I := I) (M := M) h_atlas i
 
 /-- Additivity of `tensorHeatSemigroupFun` in the argument (for `t ≥ 0`). -/
 private lemma tensorHeatSemigroupFun_add
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : HasLocallyConstantChartAt H M)
     {t : ℝ} (ht : 0 ≤ t) (T₁ T₂ : TensorL2 r s g) :
-    tensorHeatSemigroupFun (I := I) (M := M) h_uniform t (T₁ + T₂) =
-      tensorHeatSemigroupFun (I := I) (M := M) h_uniform t T₁ +
-        tensorHeatSemigroupFun (I := I) (M := M) h_uniform t T₂ := by
+    tensorHeatSemigroupFun (I := I) (M := M) h_atlas t (T₁ + T₂) =
+      tensorHeatSemigroupFun (I := I) (M := M) h_atlas t T₁ +
+        tensorHeatSemigroupFun (I := I) (M := M) h_atlas t T₂ := by
   unfold tensorHeatSemigroupFun
   set b := tensorResolventHilbertEigenbasisSigma
-    (I := I) (M := M) (g := g) (r := r) (s := s) h_uniform
+    (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas
   have h_summand_eq :
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
         Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) •
@@ -516,19 +517,19 @@ private lemma tensorHeatSemigroupFun_add
     funext i; exact h_summand_eq i
   rw [h_sum_eq]
   rw [Summable.tsum_add
-    (tensorSummable_heatTerm (I := I) (M := M) h_uniform ht T₁)
-    (tensorSummable_heatTerm (I := I) (M := M) h_uniform ht T₂)]
+    (tensorSummable_heatTerm (I := I) (M := M) h_atlas ht T₁)
+    (tensorSummable_heatTerm (I := I) (M := M) h_atlas ht T₂)]
 
 /-- Scalar-homogeneity of `tensorHeatSemigroupFun` (for `t ≥ 0`). -/
 private lemma tensorHeatSemigroupFun_smul
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : HasLocallyConstantChartAt H M)
     {t : ℝ} (ht : 0 ≤ t) (c : ℝ) (T : TensorL2 r s g) :
-    tensorHeatSemigroupFun (I := I) (M := M) h_uniform t (c • T) =
-      c • tensorHeatSemigroupFun (I := I) (M := M) h_uniform t T := by
+    tensorHeatSemigroupFun (I := I) (M := M) h_atlas t (c • T) =
+      c • tensorHeatSemigroupFun (I := I) (M := M) h_atlas t T := by
   unfold tensorHeatSemigroupFun
   set b := tensorResolventHilbertEigenbasisSigma
-    (I := I) (M := M) (g := g) (r := r) (s := s) h_uniform
+    (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas
   have h_summand_eq :
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
         Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) •
@@ -550,7 +551,7 @@ private lemma tensorHeatSemigroupFun_smul
           ⟪b i, T⟫_ℝ • b i)) := by
     funext i; exact h_summand_eq i
   rw [h_sum_eq]
-  exact (tensorSummable_heatTerm (I := I) (M := M) h_uniform ht T).tsum_const_smul c
+  exact (tensorSummable_heatTerm (I := I) (M := M) h_atlas ht T).tsum_const_smul c
 
 /-! ## The tensor heat semigroup CLM -/
 
@@ -564,34 +565,34 @@ For `t < 0`: the operator is set to `0` (junk; downstream consumers should
 always supply `0 ≤ t`). -/
 noncomputable def tensorHeatSemigroup
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s) (t : ℝ) :
+    (h_atlas : HasLocallyConstantChartAt H M) (t : ℝ) :
     TensorL2 r s g →L[ℝ] TensorL2 r s g := by
   by_cases ht : 0 ≤ t
   · refine LinearMap.mkContinuous
-      { toFun := tensorHeatSemigroupFun (I := I) (M := M) h_uniform t
+      { toFun := tensorHeatSemigroupFun (I := I) (M := M) h_atlas t
         map_add' :=
-          tensorHeatSemigroupFun_add (I := I) (M := M) h_uniform ht
+          tensorHeatSemigroupFun_add (I := I) (M := M) h_atlas ht
         map_smul' := fun c T =>
-          tensorHeatSemigroupFun_smul (I := I) (M := M) h_uniform ht c T } 1 ?_
+          tensorHeatSemigroupFun_smul (I := I) (M := M) h_atlas ht c T } 1 ?_
     intro T
-    change ‖tensorHeatSemigroupFun (I := I) (M := M) h_uniform t T‖ ≤ 1 * ‖T‖
+    change ‖tensorHeatSemigroupFun (I := I) (M := M) h_atlas t T‖ ≤ 1 * ‖T‖
     rw [one_mul]
-    exact tensorNorm_heatTerm_sum_le (I := I) (M := M) h_uniform ht T
+    exact tensorNorm_heatTerm_sum_le (I := I) (M := M) h_atlas ht T
   · exact 0
 
-/-- Application formula for `tensorHeatSemigroup g r s h_uniform t T` when
+/-- Application formula for `tensorHeatSemigroup g r s h_atlas t T` when
 `t ≥ 0`: it equals the explicit eigenbasis sum. -/
 theorem tensorHeatSemigroup_apply_of_nonneg
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    {h_uniform : uniformTensorChartSobolevBound g r s}
+    (h_atlas : HasLocallyConstantChartAt H M)
     {t : ℝ} (ht : 0 ≤ t) (T : TensorL2 r s g) :
-    tensorHeatSemigroup (I := I) (M := M) g r s h_uniform t T =
+    tensorHeatSemigroup (I := I) (M := M) g r s h_atlas t T =
       ∑' i : TensorEigenIdx (I := I) (M := M) g r s,
         Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) •
           ⟪tensorResolventHilbertEigenbasisSigma
-              (I := I) (M := M) h_uniform i, T⟫_ℝ •
+              (I := I) (M := M) h_atlas i, T⟫_ℝ •
           tensorResolventHilbertEigenbasisSigma
-            (I := I) (M := M) h_uniform i := by
+            (I := I) (M := M) h_atlas i := by
   unfold tensorHeatSemigroup
   rw [dif_pos ht]
   rfl
@@ -599,19 +600,19 @@ theorem tensorHeatSemigroup_apply_of_nonneg
 /-- For `t < 0`, the tensor heat semigroup is the zero map. -/
 theorem tensorHeatSemigroup_of_neg
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    {h_uniform : uniformTensorChartSobolevBound g r s}
+    (h_atlas : HasLocallyConstantChartAt H M)
     {t : ℝ} (ht : t < 0) :
-    tensorHeatSemigroup (I := I) (M := M) g r s h_uniform t = 0 := by
+    tensorHeatSemigroup (I := I) (M := M) g r s h_atlas t = 0 := by
   unfold tensorHeatSemigroup
   rw [dif_neg (not_le.mpr ht)]
 
-/-- The operator norm of `tensorHeatSemigroup g r s h_uniform t` is at most
+/-- The operator norm of `tensorHeatSemigroup g r s h_atlas t` is at most
 `1` for every `t : ℝ`. For `t ≥ 0` this is the spectral-series contraction
 bound; for `t < 0` the operator is zero. -/
 theorem tensorHeatSemigroup_opNorm_le_one
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    {h_uniform : uniformTensorChartSobolevBound g r s} (t : ℝ) :
-    ‖tensorHeatSemigroup (I := I) (M := M) g r s h_uniform t‖ ≤ 1 := by
+    (h_atlas : HasLocallyConstantChartAt H M) (t : ℝ) :
+    ‖tensorHeatSemigroup (I := I) (M := M) g r s h_atlas t‖ ≤ 1 := by
   unfold tensorHeatSemigroup
   by_cases ht : 0 ≤ t
   · rw [dif_pos ht]
@@ -626,19 +627,19 @@ theorem tensorHeatSemigroup_opNorm_le_one
 `e^{t Δ_∇} (b i) = exp(-λ_i t) • b i`. -/
 theorem tensorHeatSemigroup_apply_basis
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    {h_uniform : uniformTensorChartSobolevBound g r s}
+    (h_atlas : HasLocallyConstantChartAt H M)
     {t : ℝ} (ht : 0 ≤ t)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    tensorHeatSemigroup (I := I) (M := M) g r s h_uniform t
+    tensorHeatSemigroup (I := I) (M := M) g r s h_atlas t
         (tensorResolventHilbertEigenbasisSigma
-          (I := I) (M := M) h_uniform i) =
+          (I := I) (M := M) h_atlas i) =
       Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) •
         tensorResolventHilbertEigenbasisSigma
-          (I := I) (M := M) h_uniform i := by
+          (I := I) (M := M) h_atlas i := by
   classical
   set b := tensorResolventHilbertEigenbasisSigma
-    (I := I) (M := M) (g := g) (r := r) (s := s) h_uniform
-  rw [tensorHeatSemigroup_apply_of_nonneg (I := I) (M := M) ht (b i)]
+    (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas
+  rw [tensorHeatSemigroup_apply_of_nonneg (I := I) (M := M) h_atlas ht (b i)]
   have h_orthonormal : Orthonormal ℝ b := b.orthonormal
   have h_inner_eq :
       ∀ j : TensorEigenIdx (I := I) (M := M) g r s,
@@ -679,9 +680,9 @@ example {g : SmoothRiemannianMetric I M} {r s : ℕ}
   TensorEigenIdx.lambda (I := I) (M := M) i
 
 example {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s) (t : ℝ) :
+    (h_atlas : HasLocallyConstantChartAt H M) (t : ℝ) :
     TensorL2 r s g →L[ℝ] TensorL2 r s g :=
-  tensorHeatSemigroup (I := I) (M := M) g r s h_uniform t
+  tensorHeatSemigroup (I := I) (M := M) g r s h_atlas t
 
 end TensorHeatEquation
 end Parabolic
