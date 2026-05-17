@@ -711,6 +711,7 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.Christof
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.GoodSetMeasure
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.JinvContinuity
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.MultiplyQuantK
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSupportPromotion
 import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBoundStrictMemWkpHigherOrder
 import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseHigherOrder
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.NormComparison
