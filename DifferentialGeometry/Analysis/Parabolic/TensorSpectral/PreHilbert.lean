@@ -551,7 +551,7 @@ private lemma tensorCovDerivAt_eq_zero_of_eventuallyEq_zero
 
 /-- If `x ∉ tsupport S.toFun`, then the directional covariant derivative of `S` at `x`
 vanishes in every direction. -/
-private lemma tensorCovDerivAt_eq_zero_off_tsupport
+lemma tensorCovDerivAt_eq_zero_off_tsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) {x : M} (hx : x ∉ tsupport S.toFun) (v : E) :
     tensorCovDerivAt (I := I) (M := M) g r s S x v = 0 := by
