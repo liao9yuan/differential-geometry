@@ -658,6 +658,7 @@ import DifferentialGeometry.PDE.DeTurck.StrictParabolicity
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.PreHilbert
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.CovariantLeibniz
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.CovGrad
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.CovGradMetricBridge
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.H1Compl
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Variational
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Resolvent
