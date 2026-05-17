@@ -309,7 +309,7 @@ component is identically zero and the bound is immediate. -/
 compactly-supported `(r, s)`-tensor section `S` and every component
 multi-index `(Idx, Jdx)`, the `L²` norm of the Euclidean chart component is
 bounded by `ENNReal.ofReal C` times `ENNReal.ofReal ‖S‖`. -/
-private theorem tensorChartComponent_eLpNorm_le_uniform
+theorem tensorChartComponent_eLpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (S : SmoothCcTensor g r s)

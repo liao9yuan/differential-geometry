@@ -1240,7 +1240,7 @@ private lemma tensorCovDeriv_chartBasis_contMDiffOn
 /-- The trivialization-α-image of `cov_S b · chartBasisVecFiber α i b` is smooth on
 chart α base set. By bundle smoothness of the section, the chart-α trivialization
 image is smooth in `b`. -/
-private lemma tensorCovDeriv_chartBasis_trivImage_contMDiffOn
+lemma tensorCovDeriv_chartBasis_trivImage_contMDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (i : Fin (Module.finrank ℝ E)) :

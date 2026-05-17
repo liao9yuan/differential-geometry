@@ -475,7 +475,7 @@ along the chart-coordinate basis direction `chartBasisVecFiber α m b`, equals
 the chart-coordinate covariant derivative
 `chartTensorRSCovariantDerivative r s g α S.toSection (chartBasisVecFiber α m)`
 at `b`. -/
-private lemma tensorCovDerivAt_eq_chartTensorRSCovariantDerivative
+lemma tensorCovDerivAt_eq_chartTensorRSCovariantDerivative
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (m : Fin (Module.finrank ℝ E)) {b : M}
