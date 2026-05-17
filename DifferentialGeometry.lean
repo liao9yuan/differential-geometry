@@ -620,6 +620,7 @@ import DifferentialGeometry.Integral.Connection.LeviCivitaChartSmooth
 import DifferentialGeometry.Integral.Connection.LeviCivita
 import DifferentialGeometry.Integral.Connection.CotangentExtension
 import DifferentialGeometry.Integral.Connection.TensorExtension
+import DifferentialGeometry.Integral.Connection.TensorMetricCompatible
 import DifferentialGeometry.Integral.Connection.Curvature
 import DifferentialGeometry.Integral.Connection.CurvatureBundling
 import DifferentialGeometry.Integral.Connection.Ricci

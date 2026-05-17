@@ -263,6 +263,22 @@ theorem homBundleCovariantDerivativeFun_apply
     (fun Y _ => Psi_tensorialAt_left I M F V cov_TM cov_V τ Y)
     (fun V_field _ => Psi_tensorialAt_right I M F V cov_TM cov_V τ hτ V_field) hV hY
 
+/-- Unfolded specification: when `τ`, `V_field`, `Y` are all differentiable at `x`, the
+Hom-bundle covariant derivative applied bilinearly to `V_field x` and `Y x` equals the
+explicit product-rule difference
+`cov_V (τ·Y) x (V_field x) − τ x (cov_TM Y x (V_field x))`. -/
+theorem homBundleCovariantDerivativeFun_apply_eq
+    (cov_TM : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (cov_V : CovariantDerivative I F V)
+    (τ : Π x : M, (TangentSpace I x →L[ℝ] V x))
+    {x : M} (hτ : MDiffAtHom I M F V τ x)
+    {V_field Y : Π x : M, TangentSpace I x}
+    (hV : MDiffAtVec I M V_field x) (hY : MDiffAtVec I M Y x) :
+    homBundleCovariantDerivativeFun I M F V cov_TM cov_V τ x (V_field x) (Y x) =
+      cov_V (fun y => τ y (Y y)) x (V_field x) - τ x (cov_TM Y x (V_field x)) := by
+  rw [homBundleCovariantDerivativeFun_apply I M F V cov_TM cov_V τ hτ hV hY]
+  rfl
+
 /-- Junk: when τ is not differentiable at x, the Hom-bundle covariant derivative is zero. -/
 private theorem homBundleCovariantDerivativeFun_of_not_mdiff
     (cov_TM : CovariantDerivative I E (TangentSpace I : M → Type _))
