@@ -85,7 +85,7 @@ private theorem compContinuousLinearMap_isEmpty
 
 /-- At `n + 1`, the `(0, n + 1)`-tensor bundle trivialization fibre at `⟨b, T b⟩` equals
 `(T b).compContinuousLinearMap (fun _ => e_TM.symmL ℝ b)`. -/
-private theorem trivializationAt_tensor0SBundle_succ_fibre {n : ℕ}
+theorem trivializationAt_tensor0SBundle_succ_fibre {n : ℕ}
     (T : ∀ b : M, Tensor0SSpace (n + 1) I b) (x₀ b : M) :
     (trivializationAt (Tensor0SModel (n + 1) ℝ E)
       (fun x : M => Tensor0SSpace (n + 1) I x) x₀ ⟨b, T b⟩).2 =
@@ -106,7 +106,7 @@ theorem trivializationAt_tensor0SBundle_zero_fibre
   rw [compContinuousLinearMap_isEmpty]
 
 /-- The `Hom(TM, Tensor0SSpace n)` bundle trivialization fibre at `⟨b, ϕ b⟩`. -/
-private theorem trivializationAt_homBundle_fibre {n : ℕ}
+theorem trivializationAt_homBundle_fibre {n : ℕ}
     (ϕ : ∀ b : M, TangentSpace I b →L[ℝ] Tensor0SSpace n I b) (x₀ b : M) :
     (trivializationAt (E →L[ℝ] Tensor0SModel n ℝ E)
       (fun y : M => TangentSpace I y →L[ℝ] Tensor0SSpace n I y) x₀
@@ -119,7 +119,7 @@ private theorem trivializationAt_homBundle_fibre {n : ℕ}
 /-- Applying the linear-map-at component of the `(0, n)`-tensor trivialization to the
 inverse-CLE-coerced model element equals composing with `symmL`, on the trivialization base
 set. -/
-private theorem tensor0SBundle_linearMapAt_apply_of_mem {n : ℕ} (x₀ b : M)
+theorem tensor0SBundle_linearMapAt_apply_of_mem {n : ℕ} (x₀ b : M)
     (hb : b ∈ (trivializationAt (Tensor0SModel n ℝ E)
       (fun x : M => Tensor0SSpace n I x) x₀).baseSet)
     (f : ContinuousMultilinearMap ℝ (fun _ : Fin n => E) ℝ) (v : Fin n → E) :

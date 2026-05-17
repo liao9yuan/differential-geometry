@@ -201,6 +201,7 @@ import DifferentialGeometry.Integral.L2.CompactSupport
 import DifferentialGeometry.Integral.L2.PointwiseInner.DualMetric
 import DifferentialGeometry.Integral.L2.PointwiseInner.Defs
 import DifferentialGeometry.Integral.L2.PointwiseInner.Algebra
+import DifferentialGeometry.Integral.L2.PointwiseInner.SlotPermutation
 import DifferentialGeometry.Integral.L2.Pairing.Defs
 import DifferentialGeometry.Integral.L2.Pairing.Algebra
 import DifferentialGeometry.Integral.L2.Pairing.CauchySchwarz
@@ -209,6 +210,7 @@ import DifferentialGeometry.Integral.L2.SmoothSections.PreHilbert
 import DifferentialGeometry.Integral.L2.SmoothSections.Integrability
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEval
 import DifferentialGeometry.Tensor.Multilinear.MetricLowering
+import DifferentialGeometry.Tensor.RSTensor.GradientBundleEquiv
 
 import DifferentialGeometry.Integral.Measure.BorelManifold.Defs
 import DifferentialGeometry.Integral.Measure.BorelManifold.Derived
