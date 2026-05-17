@@ -267,9 +267,35 @@ abbrev lbl552_weighted_ibp :=
 
 /-- MSM135 Chapter 5, formula 5.10, used in Chapter 6.1 Lemma 6.1.
 
+Book-facing alias for the arbitrary-test weighted Green identity against
+`e^{-f} dmu_g`. -/
+abbrev lbl453_weighted_green :=
+  @weightedGreen
+
+/-- MSM135 Chapter 5, formula 5.10, used in Chapter 6.1 Lemma 6.1.
+
+Book-facing alias for canceling the closed density-weighted divergence term. -/
+abbrev lbl453_weighted_divergence_zero :=
+  @weightedDivZero
+
+/-- MSM135 Chapter 5, formula 5.10, used in Chapter 6.1 Lemma 6.1.
+
+Book-facing alias for the shifted Hessian trace integral identity. -/
+abbrev lbl453_shifted_trace_green :=
+  @shiftIntEq
+
+/-- MSM135 Chapter 5, formula 5.10, used in Chapter 6.1 Lemma 6.1.
+
 Book-facing alias for the final integral statement of formula 5.10. -/
 abbrev lbl453_f_formula510_statement :=
   @FFunctionalFormula510
+
+/-- MSM135 Chapter 5, formula 5.10, used in Chapter 6.1 Lemma 6.1.
+
+Book-facing alias for assembling formula 5.10 from divergence cancellation
+and the shifted-trace Green identity. -/
+abbrev lbl453_f_formula510_assembly :=
+  @formula510_of_ints
 
 /-- MSM135 Chapter 5, formula 5.10, used in Chapter 6.1 Lemma 6.1.
 

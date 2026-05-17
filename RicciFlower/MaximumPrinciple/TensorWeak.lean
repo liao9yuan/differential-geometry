@@ -224,6 +224,77 @@ def TensorParabolicStrictInequalityWithDriftOn
           N t (G t) (S t) x v v < timeDeriv t x v)
 
 /--
+Local comparison estimates that turn the base parabolic inequality for `S`
+into the strict parabolic inequality for the positive barrier.
+
+The analytic work is concentrated in producing these estimates.  The order
+argument consuming them is `strictBarrier_of_est` below.
+-/
+def TensorBarrierLocalEst
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorFamily (I := I) (M := M))
+    (X : TimeDependentVectorField (I := I) (M := M))
+    (N : TwoTensorReaction (I := I) (M := M))
+    (nabla2S : TensorNabla2Family (I := I) (M := M))
+    (nablaS : TensorNabla1Family (I := I) (M := M))
+    (nabla2Barrier : TensorNabla2Family (I := I) (M := M))
+    (nablaBarrier : TensorNabla1Family (I := I) (M := M))
+    (epsilon delta t0 : Real)
+    (U : Set Real)
+    (timeDerivS timeDerivBarrier :
+      TensorQuadraticFormFamily (I := I) (M := M)) : Prop :=
+  (∀ t, t ∈ U ->
+    ∀ x, ∀ v : TangentSpace I x,
+      HasDerivWithinAt
+        (fun s : Real =>
+          tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 s x v v)
+        (timeDerivBarrier t x v) U t) ∧
+  (∀ t, t ∈ U ->
+    ∀ x, ∀ v : TangentSpace I x,
+      ∃ heatErr reactionErr metricGain : Real,
+        timeDerivS t x v + metricGain ≤ timeDerivBarrier t x v ∧
+        tensorHeatWithDrift2QuadMetricAt (I := I) (G t) (X t)
+            (nabla2Barrier t x) (nablaBarrier t x) v ≤
+          tensorHeatWithDrift2QuadMetricAt (I := I) (G t) (X t)
+              (nabla2S t x) (nablaS t x) v + heatErr ∧
+        N t (G t)
+            (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t)
+            x v v ≤
+          N t (G t) (S t) x v v + reactionErr ∧
+        (v ≠ 0 -> heatErr + reactionErr < metricGain))
+
+theorem strictParabolic_of_est
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {nabla2S : TensorNabla2Family (I := I) (M := M)}
+    {nablaS : TensorNabla1Family (I := I) (M := M)}
+    {nabla2Barrier : TensorNabla2Family (I := I) (M := M)}
+    {nablaBarrier : TensorNabla1Family (I := I) (M := M)}
+    {epsilon delta t0 T : Real} {U : Set Real}
+    (hsub : U ⊆ Set.Icc 0 T)
+    (hbase : TensorParabolicInequalityWithDriftOn (I := I) (M := M)
+      G S X N nabla2S nablaS T)
+    (hest : ∀ timeDerivS : TensorQuadraticFormFamily (I := I) (M := M),
+      ∃ timeDerivBarrier : TensorQuadraticFormFamily (I := I) (M := M),
+        TensorBarrierLocalEst (I := I) (M := M) G S X N
+          nabla2S nablaS nabla2Barrier nablaBarrier epsilon delta t0 U
+          timeDerivS timeDerivBarrier) :
+    TensorParabolicStrictInequalityWithDriftOn (I := I) (M := M) G
+      (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0) X N
+      nabla2Barrier nablaBarrier U := by
+  rcases hbase with ⟨timeDerivS, _hbase_deriv, hbase_ineq⟩
+  rcases hest timeDerivS with ⟨timeDerivBarrier, hbarrier_deriv, hcompare⟩
+  refine ⟨timeDerivBarrier, hbarrier_deriv, ?_⟩
+  intro t ht x v hv
+  rcases hcompare t ht x v with
+    ⟨heatErr, reactionErr, metricGain, htime, hheat, hreaction, hmargin⟩
+  have hbase_t := hbase_ineq t (hsub ht) x v
+  have hmargin_t := hmargin hv
+  linarith
+
+/--
 Data at the first point where the positive barrier develops a null vector.
 
 The vector is normalized with respect to the metric at the first null time.
@@ -285,6 +356,33 @@ def TensorBarrierStrictSupersolutionOn
     (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0) X N
     nabla2Barrier nablaBarrier
     (Set.Icc t0 (t0 + delta))
+
+theorem strictBarrier_of_est
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {nabla2S : TensorNabla2Family (I := I) (M := M)}
+    {nablaS : TensorNabla1Family (I := I) (M := M)}
+    {nabla2Barrier : TensorNabla2Family (I := I) (M := M)}
+    {nablaBarrier : TensorNabla1Family (I := I) (M := M)}
+    {epsilon delta t0 T : Real}
+    (hsub : Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T)
+    (hbase : TensorParabolicInequalityWithDriftOn (I := I) (M := M)
+      G S X N nabla2S nablaS T)
+    (hest : ∀ timeDerivS : TensorQuadraticFormFamily (I := I) (M := M),
+      ∃ timeDerivBarrier : TensorQuadraticFormFamily (I := I) (M := M),
+        TensorBarrierLocalEst (I := I) (M := M) G S X N
+          nabla2S nablaS nabla2Barrier nablaBarrier epsilon delta t0
+          (Set.Icc t0 (t0 + delta)) timeDerivS timeDerivBarrier) :
+    TensorBarrierStrictSupersolutionOn (I := I) (M := M) G S X N
+      nabla2Barrier nablaBarrier epsilon delta t0 := by
+  exact strictParabolic_of_est (I := I) (M := M)
+    (G := G) (S := S) (X := X) (N := N)
+    (nabla2S := nabla2S) (nablaS := nablaS)
+    (nabla2Barrier := nabla2Barrier) (nablaBarrier := nablaBarrier)
+    (epsilon := epsilon) (delta := delta) (t0 := t0) (T := T)
+    (U := Set.Icc t0 (t0 + delta)) hsub hbase hest
 
 /--
 Uniform strict barrier supersolution on a fixed short slab for small barriers.
@@ -476,7 +574,17 @@ structure TensorWMPRegularityOn
             0 < delta ->
             delta ≤ delta0 ->
             4 * K * delta < 1 ->
-            TensorBarrierUniformStrictOnSlab (I := I) (M := M) G S X N delta t0
+            ∀ epsilon : Real,
+              SmallBarrierEps epsilon ->
+              ∃ nabla2Barrier : TensorNabla2Family (I := I) (M := M),
+              ∃ nablaBarrier : TensorNabla1Family (I := I) (M := M),
+                ∀ timeDerivS : TensorQuadraticFormFamily (I := I) (M := M),
+                  ∃ timeDerivBarrier :
+                    TensorQuadraticFormFamily (I := I) (M := M),
+                    TensorBarrierLocalEst (I := I) (M := M) G S X N
+                      nabla2S nablaS nabla2Barrier nablaBarrier
+                      epsilon delta t0 (Set.Icc t0 (t0 + delta))
+                      timeDerivS timeDerivBarrier
   barrierLimitClosure :
     TensorBarrierLimitClosureOn (I := I) (M := M) G S T
 
@@ -594,8 +702,20 @@ theorem tensorBarrier_strict_supersolution
   obtain ⟨delta, hdelta, hdelta_le_delta0, hdeltaT, hsmall⟩ :=
     exists_small_delta (t0 := t0) (T := T) (delta0 := delta0) (K := K)
       ht0T hdelta0 hK
-  exact ⟨delta, hdelta, hdeltaT,
-    hstrict_bounds delta hdelta hdelta_le_delta0 hsmall⟩
+  refine ⟨delta, hdelta, hdeltaT, ?_⟩
+  intro epsilon hepsilon
+  obtain ⟨nabla2Barrier, nablaBarrier, hest⟩ :=
+    hstrict_bounds delta hdelta hdelta_le_delta0 hsmall epsilon hepsilon
+  refine ⟨nabla2Barrier, nablaBarrier, ?_⟩
+  have hsub : Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T := by
+    intro t ht
+    exact ⟨le_trans ht0.1 ht.1, le_trans ht.2 hdeltaT⟩
+  exact strictBarrier_of_est (I := I) (M := M)
+    (G := G) (S := S) (X := X) (N := N)
+    (nabla2S := nabla2S) (nablaS := nablaS)
+    (nabla2Barrier := nabla2Barrier) (nablaBarrier := nablaBarrier)
+    (epsilon := epsilon) (delta := delta) (t0 := t0) (T := T)
+    hsub hparabolic.evaluatedInequality hest
 
 /--
 Step 3: if the barrier fails to stay positive, compactness gives first-null

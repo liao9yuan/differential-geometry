@@ -16,6 +16,96 @@ two-sided evolution identities are stated.
 namespace RicciFlower
 namespace Realized
 
+/-! ## Endpoint-general intervals -/
+
+/-- Endpoint for a real time interval, allowing infinite endpoints. -/
+inductive TimeEndpoint where
+  | negInf
+  | finite (t : Real)
+  | posInf
+
+namespace TimeEndpoint
+
+/-- Strict lower-bound relation `a < t`, with `-infinity < t` always true
+and `+infinity < t` always false. -/
+def lowerLt (a : TimeEndpoint) (t : Real) : Prop :=
+  match a with
+  | negInf => True
+  | finite s => s < t
+  | posInf => False
+
+/-- Closed lower-bound relation `a <= t`, with `-infinity <= t` always true
+and `+infinity <= t` always false. -/
+def lowerLe (a : TimeEndpoint) (t : Real) : Prop :=
+  match a with
+  | negInf => True
+  | finite s => s <= t
+  | posInf => False
+
+/-- Strict upper-bound relation `t < b`, with `t < +infinity` always true
+and `t < -infinity` always false. -/
+def upperLt (t : Real) (b : TimeEndpoint) : Prop :=
+  match b with
+  | negInf => False
+  | finite s => t < s
+  | posInf => True
+
+/-- Closed upper-bound relation `t <= b`, with `t <= +infinity` always true
+and `t <= -infinity` always false. -/
+def upperLe (t : Real) (b : TimeEndpoint) : Prop :=
+  match b with
+  | negInf => False
+  | finite s => t <= s
+  | posInf => True
+
+/-- Lower endpoint membership, controlled by whether the finite lower endpoint
+is closed.  Infinite lower endpoints ignore the closure flag. -/
+def lowerMem (closed : Bool) (a : TimeEndpoint) (t : Real) : Prop :=
+  match closed, a with
+  | _, negInf => True
+  | true, finite s => s <= t
+  | false, finite s => s < t
+  | _, posInf => False
+
+/-- Upper endpoint membership, controlled by whether the finite upper endpoint
+is closed.  Infinite upper endpoints ignore the closure flag. -/
+def upperMem (closed : Bool) (t : Real) (b : TimeEndpoint) : Prop :=
+  match closed, b with
+  | _, negInf => False
+  | true, finite s => t <= s
+  | false, finite s => t < s
+  | _, posInf => True
+
+theorem lowerLt_to_mem (closed : Bool) {a : TimeEndpoint} {t : Real}
+    (h : lowerLt a t) :
+  lowerMem closed a t := by
+  cases closed
+  · cases a with
+    | negInf => simp [lowerMem]
+    | finite s => exact h
+    | posInf => simp [lowerLt] at h
+  · cases a with
+    | negInf => simp [lowerMem]
+    | finite s =>
+        exact le_of_lt h
+    | posInf => simp [lowerLt] at h
+
+theorem upperLt_to_mem (closed : Bool) {b : TimeEndpoint} {t : Real}
+    (h : upperLt t b) :
+  upperMem closed t b := by
+  cases closed
+  · cases b with
+    | negInf => simp [upperLt] at h
+    | finite s => exact h
+    | posInf => simp [upperMem]
+  · cases b with
+    | negInf => simp [upperLt] at h
+    | finite s =>
+        exact le_of_lt h
+    | posInf => simp [upperMem]
+
+end TimeEndpoint
+
 /-- A real time interval with a distinguished initial time and a regular
 subdomain for evolution equations. -/
 structure RealTimeInterval where
@@ -49,6 +139,29 @@ def regularToFlow {D : RealTimeInterval} (t : D.RegularTime) : D.FlowTime :=
     (D.regularToFlow t : Real) = (t : Real) := by
   rfl
 
+/-- Endpoint-general interval constructor.
+
+The two Boolean flags control whether finite endpoints are included in the
+carrier.  The regular set is always the open interior between the endpoints.
+For infinite endpoints the corresponding closure flag has no effect. -/
+def ofEndpoints
+    (a b : TimeEndpoint) (lowerClosed upperClosed : Bool)
+    (initial : Real)
+    (hinit :
+      TimeEndpoint.lowerMem lowerClosed a initial ∧
+        TimeEndpoint.upperMem upperClosed initial b) : RealTimeInterval where
+  carrier := {t : Real |
+    TimeEndpoint.lowerMem lowerClosed a t ∧
+      TimeEndpoint.upperMem upperClosed t b}
+  regular := {t : Real | TimeEndpoint.lowerLt a t ∧ TimeEndpoint.upperLt t b}
+  initial := initial
+  initial_mem := hinit
+  regular_subset := by
+    intro t ht
+    exact
+      ⟨TimeEndpoint.lowerLt_to_mem lowerClosed ht.1,
+        TimeEndpoint.upperLt_to_mem upperClosed ht.2⟩
+
 /-- Closed interval `[a,b]`, with regular times `(a,b)`. -/
 def closed (a b : Real) (hab : a ≤ b) : RealTimeInterval where
   carrier := Set.Icc a b
@@ -79,6 +192,16 @@ def openInterval (a b t₀ : Real) (ht₀ : t₀ ∈ Set.Ioo a b) : RealTimeInte
     intro t ht
     exact ht
 
+/-- Open-closed interval `(a,b]`, with a chosen initial time inside it. -/
+def openClosed (a b t₀ : Real) (ht₀ : t₀ ∈ Set.Ioc a b) : RealTimeInterval where
+  carrier := Set.Ioc a b
+  regular := Set.Ioo a b
+  initial := t₀
+  initial_mem := ht₀
+  regular_subset := by
+    intro t ht
+    exact ⟨ht.1, le_of_lt ht.2⟩
+
 /-- Infinite interval `[a,∞)`, with regular times `(a,∞)`. -/
 def closedInfinite (a : Real) : RealTimeInterval where
   carrier := Set.Ici a
@@ -89,6 +212,46 @@ def closedInfinite (a : Real) : RealTimeInterval where
   regular_subset := by
     intro t ht
     exact Set.mem_Ici.mpr (le_of_lt (Set.mem_Ioi.mp ht))
+
+/-- Infinite interval `(a,∞)`, with a chosen initial time inside it. -/
+def openInfinite (a t₀ : Real) (ht₀ : a < t₀) : RealTimeInterval where
+  carrier := Set.Ioi a
+  regular := Set.Ioi a
+  initial := t₀
+  initial_mem := ht₀
+  regular_subset := by
+    intro t ht
+    exact ht
+
+/-- Infinite interval `(-∞,b]`, with a chosen initial time inside it. -/
+def infiniteClosed (b t₀ : Real) (ht₀ : t₀ ≤ b) : RealTimeInterval where
+  carrier := Set.Iic b
+  regular := Set.Iio b
+  initial := t₀
+  initial_mem := ht₀
+  regular_subset := by
+    intro t ht
+    exact Set.mem_Iic.mpr (le_of_lt (Set.mem_Iio.mp ht))
+
+/-- Infinite interval `(-∞,b)`, with a chosen initial time inside it. -/
+def infiniteOpen (b t₀ : Real) (ht₀ : t₀ < b) : RealTimeInterval where
+  carrier := Set.Iio b
+  regular := Set.Iio b
+  initial := t₀
+  initial_mem := ht₀
+  regular_subset := by
+    intro t ht
+    exact ht
+
+/-- Whole real line, with a chosen reference initial time. -/
+def univ (t₀ : Real) : RealTimeInterval where
+  carrier := Set.univ
+  regular := Set.univ
+  initial := t₀
+  initial_mem := trivial
+  regular_subset := by
+    intro t ht
+    exact ht
 
 end RealTimeInterval
 

@@ -831,6 +831,73 @@ private theorem plSol_bounded
   · intro t
     exact α.compProj_mem_closedBall hf.mul_max_le
 
+/-- Functional Picard-Lindelof flow with both Lipschitz dependence on the
+initial condition and the closed-ball bound for the same chosen flow. -/
+private theorem plFlow_bound
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace Real F] [CompleteSpace F]
+    {f : Real -> F -> F} {tmin tmax : Real}
+    {t0 : Set.Icc tmin tmax} {x0 : F} {a r L K : NNReal}
+    (hf : IsPicardLindelof f t0 x0 a r L K) :
+    ∃ α : F -> Real -> F,
+      (∀ x ∈ Metric.closedBall x0 r, α x t0 = x ∧
+        ∀ t ∈ Set.Icc tmin tmax,
+          HasDerivWithinAt (α x) (f t (α x t)) (Set.Icc tmin tmax) t) ∧
+      (∀ x ∈ Metric.closedBall x0 r, ∀ t : Real,
+        α x t ∈ Metric.closedBall x0 a) ∧
+      ∃ L' : NNReal, ∀ t ∈ Set.Icc tmin tmax,
+        LipschitzOnWith L' (fun x => α x t) (Metric.closedBall x0 r) := by
+  classical
+  have hfixed (x : F) (hx : x ∈ Metric.closedBall x0 r) :=
+    ODE.FunSpace.exists_isFixedPt_next hf hx
+  choose β hβ using hfixed
+  let α : F -> Real -> F := fun x =>
+    if hx : x ∈ Metric.closedBall x0 r then (β x hx).compProj else 0
+  refine ⟨α, ?_, ?_, ?_⟩
+  · intro x hx
+    constructor
+    · change (if hx' : x ∈ Metric.closedBall x0 r then
+          (β x hx').compProj else 0) t0 = x
+      rw [dif_pos hx, ODE.FunSpace.compProj_val, ← hβ x hx,
+        ODE.FunSpace.next_apply₀]
+    · intro t ht
+      change HasDerivWithinAt
+        (if hx' : x ∈ Metric.closedBall x0 r then
+          (β x hx').compProj else 0)
+        (f t ((if hx' : x ∈ Metric.closedBall x0 r then
+          (β x hx').compProj else 0) t))
+        (Set.Icc tmin tmax) t
+      rw [dif_pos hx]
+      apply (ODE.hasDerivWithinAt_picard_Icc t0.2 hf.continuousOn_uncurry
+        (β x hx).continuous_compProj.continuousOn
+        (fun _ _ => (β x hx).compProj_mem_closedBall hf.mul_max_le)
+        x ht).congr_of_mem _ ht
+      intro t' ht'
+      nth_rw 1 [← hβ x hx]
+      rw [ODE.FunSpace.compProj_of_mem ht', ODE.FunSpace.next_apply]
+  · intro x hx t
+    change (if hx' : x ∈ Metric.closedBall x0 r then
+        (β x hx').compProj else 0) t ∈ Metric.closedBall x0 a
+    rw [dif_pos hx]
+    exact (β x hx).compProj_mem_closedBall hf.mul_max_le
+  · obtain ⟨L', hL'⟩ :=
+      ODE.FunSpace.exists_forall_closedBall_funSpace_dist_le_mul hf
+    refine ⟨L', fun t ht => LipschitzOnWith.of_dist_le_mul fun x hx y hy => ?_⟩
+    have : Nonempty (Set.Icc tmin tmax) := ⟨t0⟩
+    have hdist :=
+      hL' x y hx hy (β x hx) (β y hy) (hβ x hx) (hβ y hy)
+    have hpoint :=
+      (ContinuousMap.dist_le_iff_of_nonempty.mp hdist)
+        (⟨t, ht⟩ : Set.Icc tmin tmax)
+    change dist
+        ((if hx' : x ∈ Metric.closedBall x0 r then
+          (β x hx').compProj else 0) t)
+        ((if hy' : y ∈ Metric.closedBall x0 r then
+          (β y hy').compProj else 0) t) ≤
+      ↑L' * dist x y
+    rw [dif_pos hx, dif_pos hy]
+    rw [ODE.FunSpace.compProj_of_mem ht, ODE.FunSpace.compProj_of_mem ht]
+    simpa [ODE.FunSpace.toContinuousMap_apply_eq_apply] using hpoint
+
 /-- A Picard-Lindelof solution whose controlling ball lies in the fixed chart
 source gives an ordinary model ODE solution on the open time interval, with
 source control for `phaseOfModel`. -/
@@ -1015,6 +1082,109 @@ private theorem modelFlow_src
   intro z hz
   exact modelFlow_src_of_pl (I := I) g x hε hpl hsrc hz
 
+/-- Uniform short-time model flow with Lipschitz dependence on the initial
+phase point.
+
+This is the first analytic upgrade beyond relation-valued endpoint existence:
+the Picard-Lindelof package supplies a single local flow `α z t` and a
+Lipschitz estimate in the initial model phase `z`.  It does not yet assert
+source control or strict differentiability of the endpoint map. -/
+private theorem modelFlow_lipschitz
+    [I.Boundaryless] [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    ∃ (ε : Real), ∃ (_hε : 0 < ε), ∃ (r : NNReal), ∃ (_hr : 0 < r),
+      ∃ α : E × E -> Real -> E × E,
+        (∀ z ∈ Metric.closedBall
+            (extChartAt I.tangent (phaseZero (I := I) x)
+              (phaseZero (I := I) x)) r,
+          α z 0 = z ∧
+            ∀ t ∈ Set.Icc (-ε) ε,
+              HasDerivWithinAt (α z)
+                (modelSpray (I := I) g x (α z t))
+                (Set.Icc (-ε) ε) t) ∧
+          ∃ L' : NNReal,
+            ∀ t ∈ Set.Icc (-ε) ε,
+              LipschitzOnWith L'
+                (fun z => α z t)
+                (Metric.closedBall
+                  (extChartAt I.tangent (phaseZero (I := I) x)
+                    (phaseZero (I := I) x)) r) := by
+  obtain ⟨ε, hε, _a, r, _L, _K, hr, hpl⟩ :=
+    modelSpray_pl (I := I) g x
+  let z0 : E × E :=
+    extChartAt I.tangent (phaseZero (I := I) x)
+      (phaseZero (I := I) x)
+  obtain ⟨α, hα, L', hLip⟩ :=
+    (hpl 0).exists_forall_mem_closedBall_eq_hasDerivWithinAt_lipschitzOnWith
+  refine ⟨ε, hε, r, hr, α, ?_, L', ?_⟩
+  · intro z hz
+    have hz' : z ∈ Metric.closedBall z0 r := by
+      simpa [z0] using hz
+    refine ⟨(hα z hz').1, ?_⟩
+    intro t ht
+    have ht' : t ∈ Set.Icc (0 - ε) (0 + ε) := by
+      simpa using ht
+    simpa using (hα z hz').2 t ht'
+  · intro t ht
+    have ht' : t ∈ Set.Icc (0 - ε) (0 + ε) := by
+      simpa using ht
+    simpa [z0] using hLip t ht'
+
+/-- Uniform short-time model flow with source control and Lipschitz dependence
+for the same chosen functional flow. -/
+private theorem modelFlow_srcLip
+    [I.Boundaryless] [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    ∃ (ε : Real), ∃ (_hε : 0 < ε), ∃ (r : NNReal), ∃ (_hr : 0 < r),
+      ∃ α : E × E -> Real -> E × E,
+        (∀ z ∈ Metric.closedBall
+            (extChartAt I.tangent (phaseZero (I := I) x)
+              (phaseZero (I := I) x)) r,
+          α z 0 = z ∧
+            ∀ t ∈ Set.Icc (-ε) ε,
+              HasDerivWithinAt (α z)
+                (modelSpray (I := I) g x (α z t))
+                (Set.Icc (-ε) ε) t) ∧
+        (∀ z ∈ Metric.closedBall
+            (extChartAt I.tangent (phaseZero (I := I) x)
+              (phaseZero (I := I) x)) r,
+          ∀ t ∈ Set.Icc (-ε) ε,
+            α z t ∈ (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+              (phaseOfModel (I := I) x (α z t)).proj ∈
+                (extChartAt I x).source) ∧
+        ∃ L' : NNReal,
+          ∀ t ∈ Set.Icc (-ε) ε,
+            LipschitzOnWith L'
+              (fun z => α z t)
+              (Metric.closedBall
+                (extChartAt I.tangent (phaseZero (I := I) x)
+                  (phaseZero (I := I) x)) r) := by
+  obtain ⟨ε, hε, a, r, L, K, hr, hsrc, hpl⟩ :=
+    modelSpray_pl0_src (I := I) g x
+  let z0 : E × E :=
+    extChartAt I.tangent (phaseZero (I := I) x)
+      (phaseZero (I := I) x)
+  obtain ⟨α, hα, hbound, L', hLip⟩ :=
+    plFlow_bound (F := E × E) (f := fun _ : Real =>
+      modelSpray (I := I) g x) hpl
+  refine ⟨ε, hε, r, hr, α, ?_, ?_, L', ?_⟩
+  · intro z hz
+    have hz' : z ∈ Metric.closedBall z0 r := by
+      simpa [z0] using hz
+    refine ⟨(hα z hz').1, ?_⟩
+    intro t ht
+    have ht' : t ∈ Set.Icc (0 - ε) (0 + ε) := by
+      simpa using ht
+    simpa using (hα z hz').2 t ht'
+  · intro z hz t ht
+    have hz' : z ∈ Metric.closedBall z0 r := by
+      simpa [z0] using hz
+    exact hsrc (hbound z hz' t)
+  · intro t ht
+    have ht' : t ∈ Set.Icc (0 - ε) (0 + ε) := by
+      simpa using ht
+    simpa [z0] using hLip t ht'
+
 /-- Short-time model flow produced by the local Picard-Lindelof package.
 
 This is still a short-time statement.  It is the checked analytic producer
@@ -1048,6 +1218,168 @@ private theorem modelFlow_short
   have ht' : t ∈ Set.Icc (0 - ε) (0 + ε) := by
     simpa using ht
   simpa using hαderiv t ht'
+
+/-- Chart coordinate of the time-one endpoint produced from a fixed functional
+model flow and the homogeneous time rescaling. -/
+private def chartEnd
+    (α : E × E -> Real -> E × E) (τ : Real) (x : M)
+    (v : TangentSpace I x) : E :=
+  (α (initPhase (I := I) x (τ⁻¹ • v)) τ).1
+
+/-- Manifold endpoint produced from a fixed functional model flow and the
+homogeneous time rescaling. -/
+private def manifoldEnd
+    (α : E × E -> Real -> E × E) (τ : Real) (x : M)
+    (v : TangentSpace I x) : M :=
+  (phaseOfModel (I := I) x
+    (chartEnd (I := I) α τ x v,
+      τ • (α (initPhase (I := I) x (τ⁻¹ • v)) τ).2)).proj
+
+/-- The functional model endpoint realizes the relation-valued exponential
+wherever the rescaled initial phase lies in the Picard-Lindelof ball. -/
+private theorem end_expAt
+    [I.Boundaryless] [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M) (x : M)
+    {ε : Real} (hε : 0 < ε) {r : NNReal}
+    {α : E × E -> Real -> E × E}
+    (hflow : ∀ z ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r,
+      α z 0 = z ∧
+        ∀ t ∈ Set.Icc (-ε) ε,
+          HasDerivWithinAt (α z)
+            (modelSpray (I := I) g x (α z t))
+            (Set.Icc (-ε) ε) t)
+    (hsrc : ∀ z ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r,
+      ∀ t ∈ Set.Icc (-ε) ε,
+        α z t ∈ (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+          (phaseOfModel (I := I) x (α z t)).proj ∈
+            (extChartAt I x).source)
+    {v : TangentSpace I x}
+    (hv : initPhase (I := I) x ((ε / 2)⁻¹ • v) ∈
+      Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r) :
+    expAt (I := I) g x v (manifoldEnd (I := I) α (ε / 2) x v) := by
+  classical
+  let τ : Real := ε / 2
+  let u : TangentSpace I x := τ⁻¹ • v
+  let z : E × E := initPhase (I := I) x u
+  have hz : z ∈ Metric.closedBall
+      (extChartAt I.tangent (phaseZero (I := I) x)
+        (phaseZero (I := I) x)) r := by
+    simpa [z, u, τ] using hv
+  have hτ : 0 < τ := by
+    exact half_pos hε
+  have hα0 : α z 0 = z := (hflow z hz).1
+  have hαderiv : ∀ t ∈ Set.Ioo (-ε) ε,
+      HasDerivAt (α z) (modelSpray (I := I) g x (α z t)) t := by
+    intro t ht
+    have hwithin := (hflow z hz).2 t (Set.Ioo_subset_Icc_self ht)
+    have hIcc_mem : Set.Icc (-ε) ε ∈ 𝓝 t := by
+      simpa using Icc_mem_nhds ht.1 ht.2
+    exact hwithin.hasDerivAt hIcc_mem
+  have hαsrc : ∀ t ∈ Set.Icc (-ε) ε,
+      α z t ∈ (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+        (phaseOfModel (I := I) x (α z t)).proj ∈
+          (extChartAt I x).source := hsrc z hz
+  let β : Real -> E × E := modelRescale (α z) τ
+  let lift : Real -> TangentBundle I M :=
+    fun s : Real => phaseOfModel (I := I) x (β s)
+  let gamma : Curve M := projectCurve (I := I) lift
+  have hτu : τ • u = v := by
+    change τ • (τ⁻¹ • v) = v
+    rw [smul_smul, mul_inv_cancel₀ hτ.ne', one_smul]
+  have hβ0 : β 0 = initPhase (I := I) x v := by
+    calc
+      β 0 = ((α z 0).1, τ • (α z 0).2) := by
+        simp [β]
+      _ = ((initPhase (I := I) x u).1,
+            τ • (initPhase (I := I) x u).2) := by
+        rw [hα0]
+      _ = initPhase (I := I) x (τ • u) :=
+        initPhase_smul (I := I) x τ u
+      _ = initPhase (I := I) x v := by
+        rw [hτu]
+  have hqsrc :
+      (⟨x, v⟩ : TangentBundle I M) ∈
+        (extChartAt I.tangent (phaseZero (I := I) x)).source := by
+    rw [extChartAt_source, TangentBundle.mem_chart_source_iff]
+    simp [phaseZero]
+  have hlift0 : lift 0 = (⟨x, v⟩ : TangentBundle I M) := by
+    change phaseOfModel (I := I) x (β 0) =
+      (⟨x, v⟩ : TangentBundle I M)
+    rw [hβ0]
+    simpa [initPhase] using
+      PartialEquiv.left_inv
+        (extChartAt I.tangent (phaseZero (I := I) x)) hqsrc
+  have hβderiv : ∀ s ∈ Metric.ball (0 : Real) 2,
+      HasDerivAt β (modelSpray (I := I) g x (β s)) s := by
+    intro s hs
+    exact modelRescale_deriv (I := I) g x hαderiv hαsrc
+      (by simpa [τ] using half_mul_mem_Ioo hε hs)
+  have hβsrc : ∀ s ∈ Metric.ball (0 : Real) 2,
+      β s ∈ (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+        (phaseOfModel (I := I) x (β s)).proj ∈
+          (extChartAt I x).source := by
+    intro s hs
+    have htIoo : τ * s ∈ Set.Ioo (-ε) ε := by
+      simpa [τ] using half_mul_mem_Ioo hε hs
+    have htIcc : τ * s ∈ Set.Icc (-ε) ε :=
+      Set.Ioo_subset_Icc_self htIoo
+    have hαtarget :
+        α z (τ * s) ∈
+          (extChartAt I.tangent (phaseZero (I := I) x)).target :=
+      (hαsrc (τ * s) htIcc).1
+    constructor
+    · simpa [β, modelRescale] using
+        phaseTarget_smul (I := I) x (z := α z (τ * s)) (a := τ)
+          hαtarget
+    · simpa [β, modelRescale] using
+        phaseSrc_smul (I := I) x (z := α z (τ * s)) (a := τ)
+          hαtarget
+  have hspray : IsMIntegralCurveOn lift
+      (leviCivitaGeodesicSprayChart (I := I) g x)
+      (Metric.ball (0 : Real) 2) := by
+    simpa [lift, β] using
+      modelSol_integralOn (I := I) g x hβderiv hβsrc
+  have hspray0 : IsMIntegralCurveAt lift
+      (leviCivitaGeodesicSprayChart (I := I) g x) 0 :=
+    hspray.isMIntegralCurveAt
+      (Metric.ball_mem_nhds (0 : Real) (by norm_num : (0 : Real) < 2))
+  have hsrcBall : ∀ s ∈ Metric.ball (0 : Real) 2,
+      projectCurve (I := I) lift s ∈
+        (extChartAtCoordinateData (I := I) x).domain := by
+    intro s hs
+    simpa [projectCurve, lift, extChartAtCoordinateData, coordinateFrameSet,
+      coordinateTrivializationAt, extChartAt_source] using (hβsrc s hs).2
+  have hy : gamma 1 = manifoldEnd (I := I) α τ x v := by
+    simp [gamma, lift, β, manifoldEnd, chartEnd, modelRescale, z, u, τ]
+  rw [← hy]
+  refine expAt_of_segment (I := I) (g := g)
+    (x := x) (v := v) (gamma := gamma) (s := Set.uIcc 0 1)
+    (by intro t ht; exact ht) ?_
+  refine ⟨?_, ?_, ?_⟩
+  · simpa [gamma] using
+      projectCurve_zero_of_lift (I := I)
+        (u := (⟨x, v⟩ : TangentBundle I M)) hlift0
+  · simpa [gamma] using
+      projectCurve_initialVelocity_of_geodesicSprayIntegral
+        (I := I) (g := g) (u := (⟨x, v⟩ : TangentBundle I M))
+        (f := lift) hlift0 hspray0
+  · constructor
+    · intro t ht
+      exact hsrcBall t (uIcc01_mem_ball_two ht)
+    · intro t ht
+      have htball : t ∈ Metric.ball (0 : Real) 2 :=
+        uIcc01_mem_ball_two ht
+      have hode := coordSprayODEOn
+        (I := I) (g := g) (x := x) (v := v)
+        (lift := lift) (epsilon := (2 : Real)) (t := t)
+        hlift0 hspray htball hsrcBall
+      exact hode.zeroAccel
 
 /-- Uniform time-one local existence of the relation-valued coordinate
 exponential near zero velocity.

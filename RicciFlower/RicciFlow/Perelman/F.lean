@@ -258,6 +258,316 @@ theorem weightedIBP
       RicciFlower.Analysis.DivergenceTheorem.expNegIBP
         (I := I) g hpotential hlap hgrad
 
+/-- Arbitrary-test weighted Green identity transported to the weighted measure
+`e^{-f} dmu_g`. -/
+theorem weightedGreen
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    (g : SmoothRiemannianMetric I M)
+    {potential q : M -> Real}
+    (hpotential : ContMDiff I 𝓘(Real, Real) ∞ potential)
+    (hq : ContMDiff I 𝓘(Real, Real) ∞ q)
+    (hmeas :
+      AEMeasurable
+        (fun x : M => ENNReal.ofReal (expNegPotentialDensity potential x))
+        (riemannianVolumeMeasure (I := I) (M := M) g)) :
+    ∫ x,
+        RicciFlower.Analysis.DivergenceTheorem.Δ_g
+          (I := I) g hq x
+      ∂(expNegPotentialWeightedMeasure
+          (riemannianVolumeMeasure (I := I) (M := M) g) potential) =
+      ∫ x,
+        q x *
+          (-RicciFlower.Analysis.DivergenceTheorem.Δ_g
+              (I := I) g hpotential x +
+            g.inner x
+              ((RicciFlower.Analysis.DivergenceTheorem.grad_g
+                (I := I) g hpotential :
+                Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
+              ((RicciFlower.Analysis.DivergenceTheorem.grad_g
+                (I := I) g hpotential :
+                Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x))
+      ∂(expNegPotentialWeightedMeasure
+          (riemannianVolumeMeasure (I := I) (M := M) g) potential) := by
+  classical
+  let μ := riemannianVolumeMeasure (I := I) (M := M) g
+  let gradSq : M -> Real := fun x =>
+    g.inner x
+      ((RicciFlower.Analysis.DivergenceTheorem.grad_g
+        (I := I) g hpotential :
+        Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
+      ((RicciFlower.Analysis.DivergenceTheorem.grad_g
+        (I := I) g hpotential :
+        Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
+  rw [expNegPotentialWeightedMeasure_integral_eq_base
+    (mu := μ) (potential := potential)
+    (integrand := fun x : M =>
+      RicciFlower.Analysis.DivergenceTheorem.Δ_g (I := I) g hq x)
+    hmeas]
+  rw [expNegPotentialWeightedMeasure_integral_eq_base
+    (mu := μ) (potential := potential)
+    (integrand := fun x : M =>
+      q x *
+        (-RicciFlower.Analysis.DivergenceTheorem.Δ_g
+            (I := I) g hpotential x + gradSq x))
+    hmeas]
+  calc
+    ∫ x,
+        expNegPotentialDensity potential x *
+          RicciFlower.Analysis.DivergenceTheorem.Δ_g (I := I) g hq x ∂μ =
+      ∫ x,
+        q x *
+          (expNegPotentialDensity potential x *
+            (-RicciFlower.Analysis.DivergenceTheorem.Δ_g
+                (I := I) g hpotential x + gradSq x)) ∂μ := by
+      simpa [μ, expNegPotentialDensity, gradSq] using
+        RicciFlower.Analysis.DivergenceTheorem.expNegGreen
+          (I := I) g hpotential hq
+    _ =
+      ∫ x,
+        expNegPotentialDensity potential x *
+          (q x *
+            (-RicciFlower.Analysis.DivergenceTheorem.Δ_g
+                (I := I) g hpotential x + gradSq x)) ∂μ := by
+      apply integral_congr_ae
+      refine Filter.Eventually.of_forall ?_
+      intro x
+      ring
+
+/-- Closed weighted-divergence cancellation.  If a scalar term becomes the
+ordinary divergence after multiplying by `e^{-f}`, then its weighted integral
+vanishes. -/
+theorem weightedDivZero
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    (g : SmoothRiemannianMetric I M)
+    {potential weightedDivergenceTrace : M -> Real}
+    (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
+    (hmeas :
+      AEMeasurable
+        (fun x : M => ENNReal.ofReal (expNegPotentialDensity potential x))
+        (riemannianVolumeMeasure (I := I) (M := M) g))
+    (hdiv :
+      ∀ x : M,
+        RicciFlower.Analysis.DivergenceTheorem.divergence_g
+            (I := I) g X x =
+          expNegPotentialDensity potential x * weightedDivergenceTrace x) :
+    ∫ x, weightedDivergenceTrace x
+      ∂(expNegPotentialWeightedMeasure
+          (riemannianVolumeMeasure (I := I) (M := M) g) potential) = 0 := by
+  classical
+  let μ := riemannianVolumeMeasure (I := I) (M := M) g
+  rw [expNegPotentialWeightedMeasure_integral_eq_base
+    (mu := μ) (potential := potential)
+    (integrand := weightedDivergenceTrace) hmeas]
+  calc
+    ∫ x, expNegPotentialDensity potential x * weightedDivergenceTrace x ∂μ =
+        ∫ x, RicciFlower.Analysis.DivergenceTheorem.divergence_g
+          (I := I) g X x ∂μ := by
+      apply integral_congr_ae
+      exact Filter.Eventually.of_forall fun x => (hdiv x).symm
+    _ = 0 := by
+      simpa [μ] using
+        RicciFlower.Analysis.DivergenceTheorem.integral_divergence_eq_zero_of_compact
+          (I := I) g X
+
+/-- Smoothness of Perelman's density `e^{-f}`. -/
+theorem expNegPotentialDensity_contMDiff
+    {potential : M -> Real}
+    (hpotential : ContMDiff I 𝓘(Real, Real) ∞ potential) :
+    ContMDiff I 𝓘(Real, Real) ∞ (expNegPotentialDensity potential) := by
+  simpa [expNegPotentialDensity] using
+    Real.contDiff_exp.contMDiff.comp hpotential.neg
+
+/-- Tangent-action chain rule for `e^{-f}`. -/
+theorem tangentSectionAction_expNeg
+    (X : Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯)
+    {potential : M -> Real}
+    (hpotential : ContMDiff I 𝓘(Real, Real) ∞ potential) (x : M) :
+    RicciFlower.Analysis.DivergenceTheorem.tangentSectionAction
+        (I := I) X (expNegPotentialDensity potential) x =
+      -expNegPotentialDensity potential x *
+        RicciFlower.Analysis.DivergenceTheorem.tangentSectionAction
+          (I := I) X potential x := by
+  have hmf :=
+    RicciFlower.Analysis.DivergenceTheorem.mfderiv_exp_neg_toLinearMap
+      (I := I) (f := potential) (x := x)
+      (hpotential.mdifferentiableAt (by simp))
+  unfold RicciFlower.Analysis.DivergenceTheorem.tangentSectionAction
+    expNegPotentialDensity
+  change
+    extDerivFun (I := I) (fun y : M => Real.exp (-(potential y))) x (X x) =
+      -Real.exp (-(potential x)) *
+        extDerivFun (I := I) potential x (X x)
+  rw [extDerivFun, extDerivFun]
+  simp only [NormedSpace.fromTangentSpace, ContinuousLinearMap.comp_apply]
+  have happly := congrArg (fun L => L (X x)) hmf
+  simpa [smul_eq_mul] using happly
+
+/-- The global divergence field used to cancel the connection-variation term in
+formula 5.10, once the metric trace of the connection variation has already
+been constructed as a smooth tangent section.  If `traceVec = tr_g A`, then
+this is the book's vector field `X = e^{-f} tr_g A`. -/
+def connTraceVec
+    {potential : M -> Real}
+    (hpotential : ContMDiff I 𝓘(Real, Real) ∞ potential)
+    (traceVec : Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) :
+    Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯ :=
+  RicciFlower.Analysis.DivergenceTheorem.smoothSmul
+    (I := I) (expNegPotentialDensity potential)
+    (expNegPotentialDensity_contMDiff (I := I) hpotential) traceVec
+
+/-- Divergence of `connTraceVec`.  This is the global smooth-section version of
+`div(e^{-f} tr_g A) = e^{-f}(div(tr_g A) - tr_g A(f))`. -/
+theorem connTraceDivEq
+    [I.Boundaryless] [T2Space M]
+    (g : SmoothRiemannianMetric I M)
+    {potential weightedDivergenceTrace rawTrace actionTrace : M -> Real}
+    (hpotential : ContMDiff I 𝓘(Real, Real) ∞ potential)
+    (traceVec : Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯)
+    (hdivTrace :
+      ∀ x : M,
+        RicciFlower.Analysis.DivergenceTheorem.divergence_g
+            (I := I) g traceVec x =
+          rawTrace x)
+    (hactionTrace :
+      ∀ x : M,
+        RicciFlower.Analysis.DivergenceTheorem.tangentSectionAction
+            (I := I) traceVec potential x =
+          actionTrace x)
+    (hweighted :
+      ∀ x : M,
+        weightedDivergenceTrace x = rawTrace x - actionTrace x) :
+    ∀ x : M,
+      RicciFlower.Analysis.DivergenceTheorem.divergence_g
+          (I := I) g
+          (connTraceVec (I := I) hpotential traceVec) x =
+        expNegPotentialDensity potential x * weightedDivergenceTrace x := by
+  intro x
+  rw [connTraceVec]
+  rw [RicciFlower.Analysis.DivergenceTheorem.divergence_g_smoothSmul
+    (I := I) g (expNegPotentialDensity potential)
+    (expNegPotentialDensity_contMDiff (I := I) hpotential) traceVec x]
+  rw [hdivTrace x]
+  rw [tangentSectionAction_expNeg (I := I) traceVec hpotential x]
+  rw [hactionTrace x, hweighted x]
+  ring
+
+/-- Closed weighted-divergence cancellation when the divergence field is the
+actual section `connTraceVec = e^{-f} tr_g A`. -/
+theorem weightedDivZero_of_connTrace
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    (g : SmoothRiemannianMetric I M)
+    {potential weightedDivergenceTrace rawTrace actionTrace : M -> Real}
+    (hpotential : ContMDiff I 𝓘(Real, Real) ∞ potential)
+    (traceVec : Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯)
+    (hmeas :
+      AEMeasurable
+        (fun x : M => ENNReal.ofReal (expNegPotentialDensity potential x))
+        (riemannianVolumeMeasure (I := I) (M := M) g))
+    (hdivTrace :
+      ∀ x : M,
+        RicciFlower.Analysis.DivergenceTheorem.divergence_g
+            (I := I) g traceVec x =
+          rawTrace x)
+    (hactionTrace :
+      ∀ x : M,
+        RicciFlower.Analysis.DivergenceTheorem.tangentSectionAction
+            (I := I) traceVec potential x =
+          actionTrace x)
+    (hweighted :
+      ∀ x : M,
+        weightedDivergenceTrace x = rawTrace x - actionTrace x) :
+    ∫ x, weightedDivergenceTrace x
+      ∂(expNegPotentialWeightedMeasure
+          (riemannianVolumeMeasure (I := I) (M := M) g) potential) = 0 := by
+  exact weightedDivZero (I := I) g
+    (connTraceVec (I := I) hpotential traceVec) hmeas
+    (connTraceDivEq (I := I) g hpotential traceVec hdivTrace
+      hactionTrace hweighted)
+
+/-- Weighted Green in the exact scalar form used by formula 5.10 for the
+shifted Hessian trace `Delta(h - V/2)`. -/
+theorem shiftIntEq
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    (g : SmoothRiemannianMetric I M)
+    {potential q shiftedTrace potentialVariation metricVariationTrace :
+      M -> Real}
+    (hpotential : ContMDiff I 𝓘(Real, Real) ∞ potential)
+    (hq : ContMDiff I 𝓘(Real, Real) ∞ q)
+    (hmeas :
+      AEMeasurable
+        (fun x : M => ENNReal.ofReal (expNegPotentialDensity potential x))
+        (riemannianVolumeMeasure (I := I) (M := M) g))
+    (hshift :
+      ∀ x : M,
+        shiftedTrace x =
+          RicciFlower.Analysis.DivergenceTheorem.Δ_g
+            (I := I) g hq x)
+    (hqeq :
+      ∀ x : M,
+        q x = potentialVariation x - metricVariationTrace x / 2) :
+    ∫ x, shiftedTrace x
+      ∂(expNegPotentialWeightedMeasure
+          (riemannianVolumeMeasure (I := I) (M := M) g) potential) =
+      ∫ x,
+        expWeightedMeasureVariationFactor potentialVariation
+          metricVariationTrace x *
+          (RicciFlower.Analysis.DivergenceTheorem.Δ_g
+              (I := I) g hpotential x -
+            g.inner x
+              ((RicciFlower.Analysis.DivergenceTheorem.grad_g
+                (I := I) g hpotential :
+                Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
+              ((RicciFlower.Analysis.DivergenceTheorem.grad_g
+                (I := I) g hpotential :
+                Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x))
+      ∂(expNegPotentialWeightedMeasure
+          (riemannianVolumeMeasure (I := I) (M := M) g) potential) := by
+  calc
+    ∫ x, shiftedTrace x
+      ∂(expNegPotentialWeightedMeasure
+          (riemannianVolumeMeasure (I := I) (M := M) g) potential) =
+        ∫ x,
+          RicciFlower.Analysis.DivergenceTheorem.Δ_g (I := I) g hq x
+        ∂(expNegPotentialWeightedMeasure
+            (riemannianVolumeMeasure (I := I) (M := M) g) potential) := by
+      apply integral_congr_ae
+      exact Filter.Eventually.of_forall hshift
+    _ = ∫ x,
+        q x *
+          (-RicciFlower.Analysis.DivergenceTheorem.Δ_g
+              (I := I) g hpotential x +
+            g.inner x
+              ((RicciFlower.Analysis.DivergenceTheorem.grad_g
+                (I := I) g hpotential :
+                Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
+              ((RicciFlower.Analysis.DivergenceTheorem.grad_g
+                (I := I) g hpotential :
+                Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x))
+        ∂(expNegPotentialWeightedMeasure
+            (riemannianVolumeMeasure (I := I) (M := M) g) potential) := by
+      exact weightedGreen (I := I) g hpotential hq hmeas
+    _ = ∫ x,
+        expWeightedMeasureVariationFactor potentialVariation
+          metricVariationTrace x *
+          (RicciFlower.Analysis.DivergenceTheorem.Δ_g
+              (I := I) g hpotential x -
+            g.inner x
+              ((RicciFlower.Analysis.DivergenceTheorem.grad_g
+                (I := I) g hpotential :
+                Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
+              ((RicciFlower.Analysis.DivergenceTheorem.grad_g
+                (I := I) g hpotential :
+                Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x))
+        ∂(expNegPotentialWeightedMeasure
+            (riemannianVolumeMeasure (I := I) (M := M) g) potential) := by
+      apply integral_congr_ae
+      refine Filter.Eventually.of_forall ?_
+      intro x
+      dsimp
+      rw [hqeq x]
+      unfold expWeightedMeasureVariationFactor
+      ring
+
 /-- Moving-volume derivative for integrals against `e^{-f_s} dmu_s`. -/
 theorem expWeightedMeasureIntegral_hasDerivAt_at
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -600,6 +910,63 @@ def RicciHessianVariationWeightedDivergenceInFrame
     ricciHessianVariation x i j =
       weightedDivergenceTerm x i j + shiftedHessianTerm x i j
 
+/-- Sum of Ricci and Hessian variations in a fixed frame. -/
+def ricciHessianVariationInFrame
+    (ricciVariation hessianVariation : M -> Idx -> Idx -> Real) :
+    M -> Idx -> Idx -> Real :=
+  fun x i j => ricciVariation x i j + hessianVariation x i j
+
+/-- Coordinate expression for
+`e^f nabla_p(e^{-f} A^p_ij) = nabla_p A^p_ij - A^p_ij partial_p f`. -/
+def christoffelWeightedDivergenceInFrame
+    (nablaChristoffelVariation : M -> Idx -> Idx -> Idx -> Idx -> Real)
+    (christoffelVariation : M -> Idx -> Idx -> Idx -> Real)
+    (gradPotential : M -> Idx -> Real) :
+    M -> Idx -> Idx -> Real :=
+  fun x i j =>
+    (∑ p : Idx, nablaChristoffelVariation x p p i j) -
+      ∑ p : Idx, christoffelVariation x p i j * gradPotential x p
+
+/-- Shifted Hessian term `Hess h - Hess(V/2)` in formula 5.10. -/
+def shiftedHessianInFrame
+    (hessianPotentialVariationDirection metricTraceHessianHalf :
+      M -> Idx -> Idx -> Real) :
+    M -> Idx -> Idx -> Real :=
+  fun x i j =>
+    hessianPotentialVariationDirection x i j -
+      metricTraceHessianHalf x i j
+
+/-- Pointwise assembly of the already separated Ricci and Hessian variation
+formulas into the weighted-divergence form used before contraction. -/
+theorem ricciHessianWeightedDivergence_of_ricci_hessian
+    (ricciVariation hessianVariation hessianPotentialVariationDirection :
+      M -> Idx -> Idx -> Real)
+    (christoffelVariation : M -> Idx -> Idx -> Idx -> Real)
+    (nablaChristoffelVariation : M -> Idx -> Idx -> Idx -> Idx -> Real)
+    (nablaChristoffelTraceVariation metricTraceHessianHalf :
+      M -> Idx -> Idx -> Real)
+    (gradPotential : M -> Idx -> Real)
+    (hRic :
+      RicciVariationByChristoffelInFrame ricciVariation
+        nablaChristoffelVariation nablaChristoffelTraceVariation)
+    (hHess :
+      HessianPotentialVariationByChristoffelInFrame hessianVariation
+        hessianPotentialVariationDirection christoffelVariation gradPotential)
+    (hTrace :
+      ∀ x : M, ∀ i j : Idx,
+        nablaChristoffelTraceVariation x i j =
+          metricTraceHessianHalf x i j) :
+    RicciHessianVariationWeightedDivergenceInFrame
+      (ricciHessianVariationInFrame ricciVariation hessianVariation)
+      (christoffelWeightedDivergenceInFrame nablaChristoffelVariation
+        christoffelVariation gradPotential)
+      (shiftedHessianInFrame hessianPotentialVariationDirection
+        metricTraceHessianHalf) := by
+  intro x i j
+  rw [ricciHessianVariationInFrame, hRic x i j, hHess x i j, hTrace x i j]
+  simp [christoffelWeightedDivergenceInFrame, shiftedHessianInFrame,
+    sub_eq_add_neg, add_comm, add_left_comm, add_assoc]
+
 /-- Variation of `(Ric_ij + Hess_ij f)e^{-f}dmu` before contraction. -/
 def RicciHessianWeightedDensityVariationInFrame
     (weightedVariation weightedDivergenceTerm shiftedHessianTerm
@@ -612,6 +979,54 @@ def RicciHessianWeightedDensityVariationInFrame
           ricciHessian x i j * density x *
             expWeightedMeasureVariationFactor potentialVariation
               metricVariationTrace x
+
+/-- The density-weighted divergence term
+`nabla_p(e^{-f} A^p_ij)` when
+`weightedDivergenceTerm = e^f nabla_p(e^{-f} A^p_ij)`. -/
+def densityWeightedDivergenceInFrame
+    (density : M -> Real) (weightedDivergenceTerm : M -> Idx -> Idx -> Real) :
+    M -> Idx -> Idx -> Real :=
+  fun x i j => density x * weightedDivergenceTerm x i j
+
+omit [Fintype Idx] in
+/-- Pointwise density variation bridge for
+`(Ric_ij + Hess_ij f)e^{-f} dmu`. -/
+theorem ricciHessianWeightedDensity_of_divergence
+    (weightedDivergenceTerm shiftedHessianTerm ricciHessian :
+      M -> Idx -> Idx -> Real)
+    (density potentialVariation metricVariationTrace : M -> Real) :
+    RicciHessianWeightedDensityVariationInFrame
+      (fun x i j =>
+        densityWeightedDivergenceInFrame density weightedDivergenceTerm x i j +
+          density x * shiftedHessianTerm x i j +
+            ricciHessian x i j * density x *
+              expWeightedMeasureVariationFactor potentialVariation
+                metricVariationTrace x)
+      (densityWeightedDivergenceInFrame density weightedDivergenceTerm)
+      shiftedHessianTerm ricciHessian potentialVariation metricVariationTrace
+      density := by
+  intro x i j
+  rfl
+
+/-- Frame contraction of a metric variation against `Ric + Hess f`. -/
+def metricVariationRicciHessContractInFrame
+    (metricVariation ricciHessian : M -> Idx -> Idx -> Real) : M -> Real :=
+  fun x =>
+    ∑ i : Idx, ∑ j : Idx,
+      metricVariation x i j * ricciHessian x i j
+
+/-- Inverse-metric variation contribution in formula 5.10:
+`delta g^{ij}(Ric_ij + Hess_ij f) = -v_ij(Ric_ij + Hess_ij f)`. -/
+def inverseMetricVariationContractionTermInFrame
+    (metricVariation ricciHessian : M -> Idx -> Idx -> Real) : M -> Real :=
+  fun x => -metricVariationRicciHessContractInFrame metricVariation ricciHessian x
+
+/-- Public bridge naming the inverse-metric contraction contribution. -/
+theorem inverseMetricVariationContractionTerm_eq_neg
+    (metricVariation ricciHessian : M -> Idx -> Idx -> Real) :
+    inverseMetricVariationContractionTermInFrame metricVariation ricciHessian =
+      fun x => -metricVariationRicciHessContractInFrame metricVariation
+        ricciHessian x := rfl
 
 end Formula510
 
@@ -637,6 +1052,428 @@ def FFunctionalFormula510 [MeasurableSpace M] (weightedMeasure : Measure M)
         gradPotentialNormSq potentialVariation metricVariationTrace
         metricVariationRicciHess x
       ∂weightedMeasure
+
+/-- Pre-cancellation scalar integrand for the closed-manifold formula 5.10
+assembly.  It is the contracted first-variation integrand before the closed
+weighted-divergence term and weighted Green term are canceled. -/
+def fFunctionalPre510Integrand
+    (scalarCurvature lapPotential _gradPotentialNormSq
+      potentialVariation metricVariationTrace metricVariationRicciHess
+      weightedDivergenceTrace shiftedTrace : M -> Real) :
+    M -> Real :=
+  fun x =>
+    -metricVariationRicciHess x +
+      weightedDivergenceTrace x + shiftedTrace x +
+        (scalarCurvature x + lapPotential x) *
+          expWeightedMeasureVariationFactor potentialVariation
+            metricVariationTrace x
+
+/-- The remainder canceled by closed divergence plus weighted Green in formula
+5.10. -/
+def fFunctional510Remainder
+    (lapPotential gradPotentialNormSq potentialVariation metricVariationTrace
+      weightedDivergenceTrace shiftedTrace : M -> Real) :
+    M -> Real :=
+  fun x =>
+    weightedDivergenceTrace x +
+      (shiftedTrace x -
+        expWeightedMeasureVariationFactor potentialVariation
+          metricVariationTrace x *
+          (lapPotential x - gradPotentialNormSq x))
+
+/-- Pointwise scalar algebra behind formula 5.10 after the geometric producers
+have produced the pre-cancellation integrand. -/
+theorem pre510_eq_final_add_rem
+    (scalarCurvature lapPotential gradPotentialNormSq
+      potentialVariation metricVariationTrace metricVariationRicciHess
+      weightedDivergenceTrace shiftedTrace : M -> Real) :
+    fFunctionalPre510Integrand scalarCurvature lapPotential
+        gradPotentialNormSq potentialVariation metricVariationTrace
+        metricVariationRicciHess weightedDivergenceTrace shiftedTrace =
+      fun x : M =>
+        fFunctionalFormula510Integrand scalarCurvature lapPotential
+          gradPotentialNormSq potentialVariation metricVariationTrace
+          metricVariationRicciHess x +
+        fFunctional510Remainder lapPotential gradPotentialNormSq
+          potentialVariation metricVariationTrace weightedDivergenceTrace
+          shiftedTrace x := by
+  funext x
+  unfold fFunctionalPre510Integrand fFunctionalFormula510Integrand
+    fFunctional510Remainder expWeightedMeasureVariationFactor
+  ring
+
+/-- The formula 5.10 remainder has zero integral once the closed divergence
+term vanishes and weighted Green identifies the shifted Hessian trace. -/
+theorem rem510_integral_zero [MeasurableSpace M]
+    {weightedMeasure : Measure M}
+    {lapPotential gradPotentialNormSq potentialVariation metricVariationTrace
+      weightedDivergenceTrace shiftedTrace : M -> Real}
+    (hdiv_int : Integrable weightedDivergenceTrace weightedMeasure)
+    (hshift_int : Integrable shiftedTrace weightedMeasure)
+    (hcorr_int :
+      Integrable
+        (fun x : M =>
+          expWeightedMeasureVariationFactor potentialVariation
+            metricVariationTrace x *
+            (lapPotential x - gradPotentialNormSq x))
+        weightedMeasure)
+    (hdiv_zero :
+      ∫ x, weightedDivergenceTrace x ∂weightedMeasure = 0)
+    (hshift :
+      ∫ x, shiftedTrace x ∂weightedMeasure =
+        ∫ x,
+          expWeightedMeasureVariationFactor potentialVariation
+            metricVariationTrace x *
+            (lapPotential x - gradPotentialNormSq x)
+          ∂weightedMeasure) :
+    ∫ x,
+      fFunctional510Remainder lapPotential gradPotentialNormSq
+        potentialVariation metricVariationTrace weightedDivergenceTrace
+        shiftedTrace x
+      ∂weightedMeasure = 0 := by
+  let corr : M -> Real := fun x =>
+    expWeightedMeasureVariationFactor potentialVariation
+      metricVariationTrace x *
+      (lapPotential x - gradPotentialNormSq x)
+  have hcorr_int' : Integrable corr weightedMeasure := by
+    simpa [corr] using hcorr_int
+  have hshift' :
+      ∫ x, shiftedTrace x ∂weightedMeasure =
+        ∫ x, corr x ∂weightedMeasure := by
+    simpa [corr] using hshift
+  unfold fFunctional510Remainder
+  change
+    ∫ x, weightedDivergenceTrace x + (shiftedTrace - corr) x
+      ∂weightedMeasure = 0
+  rw [integral_add hdiv_int (hshift_int.sub hcorr_int')]
+  change
+    ∫ x, weightedDivergenceTrace x ∂weightedMeasure +
+      ∫ x, shiftedTrace x - corr x ∂weightedMeasure = 0
+  rw [integral_sub hshift_int hcorr_int']
+  rw [hdiv_zero, hshift']
+  ring
+
+/-- Formula 5.10 from the pre-cancellation scalar integrand and a zero
+remainder. -/
+theorem formula510_of_rem_zero [MeasurableSpace M]
+    {weightedMeasure : Measure M}
+    {firstVariation : Real}
+    {scalarCurvature lapPotential gradPotentialNormSq potentialVariation
+      metricVariationTrace metricVariationRicciHess weightedDivergenceTrace
+      shiftedTrace : M -> Real}
+    (hfirst :
+      firstVariation =
+        ∫ x,
+          fFunctionalPre510Integrand scalarCurvature lapPotential
+            gradPotentialNormSq potentialVariation metricVariationTrace
+            metricVariationRicciHess weightedDivergenceTrace shiftedTrace x
+          ∂weightedMeasure)
+    (hfinal_int :
+      Integrable
+        (fFunctionalFormula510Integrand scalarCurvature lapPotential
+          gradPotentialNormSq potentialVariation metricVariationTrace
+          metricVariationRicciHess)
+        weightedMeasure)
+    (hrem_int :
+      Integrable
+        (fFunctional510Remainder lapPotential gradPotentialNormSq
+          potentialVariation metricVariationTrace weightedDivergenceTrace
+          shiftedTrace)
+        weightedMeasure)
+    (hrem_zero :
+      ∫ x,
+        fFunctional510Remainder lapPotential gradPotentialNormSq
+          potentialVariation metricVariationTrace weightedDivergenceTrace
+          shiftedTrace x
+        ∂weightedMeasure = 0) :
+    FFunctionalFormula510 weightedMeasure firstVariation scalarCurvature
+      lapPotential gradPotentialNormSq potentialVariation metricVariationTrace
+      metricVariationRicciHess := by
+  unfold FFunctionalFormula510
+  rw [hfirst]
+  calc
+    ∫ x,
+        fFunctionalPre510Integrand scalarCurvature lapPotential
+          gradPotentialNormSq potentialVariation metricVariationTrace
+          metricVariationRicciHess weightedDivergenceTrace shiftedTrace x
+        ∂weightedMeasure =
+      ∫ x,
+        (fFunctionalFormula510Integrand scalarCurvature lapPotential
+            gradPotentialNormSq potentialVariation metricVariationTrace
+            metricVariationRicciHess x +
+          fFunctional510Remainder lapPotential gradPotentialNormSq
+            potentialVariation metricVariationTrace weightedDivergenceTrace
+            shiftedTrace x)
+        ∂weightedMeasure := by
+      apply integral_congr_ae
+      refine Filter.Eventually.of_forall ?_
+      intro x
+      rw [pre510_eq_final_add_rem]
+    _ =
+      ∫ x,
+        fFunctionalFormula510Integrand scalarCurvature lapPotential
+          gradPotentialNormSq potentialVariation metricVariationTrace
+          metricVariationRicciHess x
+        ∂weightedMeasure +
+      ∫ x,
+        fFunctional510Remainder lapPotential gradPotentialNormSq
+          potentialVariation metricVariationTrace weightedDivergenceTrace
+          shiftedTrace x
+        ∂weightedMeasure := by
+      rw [integral_add hfinal_int hrem_int]
+    _ =
+      ∫ x,
+        fFunctionalFormula510Integrand scalarCurvature lapPotential
+          gradPotentialNormSq potentialVariation metricVariationTrace
+          metricVariationRicciHess x
+        ∂weightedMeasure := by
+      rw [hrem_zero, add_zero]
+
+/-- Formula 5.10 from the closed divergence cancellation and weighted Green
+identification of the shifted Hessian trace. -/
+theorem formula510_of_ints [MeasurableSpace M]
+    {weightedMeasure : Measure M}
+    {firstVariation : Real}
+    {scalarCurvature lapPotential gradPotentialNormSq potentialVariation
+      metricVariationTrace metricVariationRicciHess weightedDivergenceTrace
+      shiftedTrace : M -> Real}
+    (hfirst :
+      firstVariation =
+        ∫ x,
+          fFunctionalPre510Integrand scalarCurvature lapPotential
+            gradPotentialNormSq potentialVariation metricVariationTrace
+            metricVariationRicciHess weightedDivergenceTrace shiftedTrace x
+          ∂weightedMeasure)
+    (hfinal_int :
+      Integrable
+        (fFunctionalFormula510Integrand scalarCurvature lapPotential
+          gradPotentialNormSq potentialVariation metricVariationTrace
+          metricVariationRicciHess)
+        weightedMeasure)
+    (hdiv_int : Integrable weightedDivergenceTrace weightedMeasure)
+    (hshift_int : Integrable shiftedTrace weightedMeasure)
+    (hcorr_int :
+      Integrable
+        (fun x : M =>
+          expWeightedMeasureVariationFactor potentialVariation
+            metricVariationTrace x *
+            (lapPotential x - gradPotentialNormSq x))
+        weightedMeasure)
+    (hdiv_zero :
+      ∫ x, weightedDivergenceTrace x ∂weightedMeasure = 0)
+    (hshift :
+      ∫ x, shiftedTrace x ∂weightedMeasure =
+        ∫ x,
+          expWeightedMeasureVariationFactor potentialVariation
+            metricVariationTrace x *
+            (lapPotential x - gradPotentialNormSq x)
+          ∂weightedMeasure) :
+    FFunctionalFormula510 weightedMeasure firstVariation scalarCurvature
+      lapPotential gradPotentialNormSq potentialVariation metricVariationTrace
+      metricVariationRicciHess := by
+  apply formula510_of_rem_zero
+    (weightedDivergenceTrace := weightedDivergenceTrace)
+    (shiftedTrace := shiftedTrace)
+    hfirst hfinal_int
+  · unfold fFunctional510Remainder
+    exact hdiv_int.add (hshift_int.sub hcorr_int)
+  · exact rem510_integral_zero hdiv_int hshift_int hcorr_int
+      hdiv_zero hshift
+
+section GeometryFormula510
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+variable [InnerProductSpace Real E]
+variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+
+private local instance : MeasurableSpace M := borel M
+private local instance : BorelSpace M := ⟨rfl⟩
+
+/-- Formula 5.10 from the geometric connection-trace divergence field and the
+weighted Green shift identity.  This is the assembly form matching the book's
+step where `∇_p(e^{-f} g^{ij} A^p_{ij})` integrates to zero. -/
+theorem formula510_of_connTrace
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    (g : SmoothRiemannianMetric I M)
+    {firstVariation : Real}
+    {scalarCurvature lapPotential gradPotentialNormSq potential
+      potentialVariation metricVariationTrace metricVariationRicciHess
+      weightedDivergenceTrace shiftedTrace rawTrace actionTrace q : M -> Real}
+    (hpotential : ContMDiff I 𝓘(Real, Real) ∞ potential)
+    (hq : ContMDiff I 𝓘(Real, Real) ∞ q)
+    (traceVec : Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯)
+    (hmeas :
+      AEMeasurable
+        (fun x : M => ENNReal.ofReal (expNegPotentialDensity potential x))
+        (riemannianVolumeMeasure (I := I) (M := M) g))
+    (hfirst :
+      firstVariation =
+        ∫ x,
+          fFunctionalPre510Integrand scalarCurvature lapPotential
+            gradPotentialNormSq potentialVariation metricVariationTrace
+            metricVariationRicciHess weightedDivergenceTrace shiftedTrace x
+          ∂(expNegPotentialWeightedMeasure
+              (riemannianVolumeMeasure (I := I) (M := M) g) potential))
+    (hfinal_int :
+      Integrable
+        (fFunctionalFormula510Integrand scalarCurvature lapPotential
+          gradPotentialNormSq potentialVariation metricVariationTrace
+          metricVariationRicciHess)
+        (expNegPotentialWeightedMeasure
+          (riemannianVolumeMeasure (I := I) (M := M) g) potential))
+    (hdiv_int :
+      Integrable weightedDivergenceTrace
+        (expNegPotentialWeightedMeasure
+          (riemannianVolumeMeasure (I := I) (M := M) g) potential))
+    (hshift_int :
+      Integrable shiftedTrace
+        (expNegPotentialWeightedMeasure
+          (riemannianVolumeMeasure (I := I) (M := M) g) potential))
+    (hcorr_int :
+      Integrable
+        (fun x : M =>
+          expWeightedMeasureVariationFactor potentialVariation
+            metricVariationTrace x *
+            (lapPotential x - gradPotentialNormSq x))
+        (expNegPotentialWeightedMeasure
+          (riemannianVolumeMeasure (I := I) (M := M) g) potential))
+    (hdivTrace :
+      ∀ x : M,
+        RicciFlower.Analysis.DivergenceTheorem.divergence_g
+            (I := I) g traceVec x =
+          rawTrace x)
+    (hactionTrace :
+      ∀ x : M,
+        RicciFlower.Analysis.DivergenceTheorem.tangentSectionAction
+            (I := I) traceVec potential x =
+          actionTrace x)
+    (hweighted :
+      ∀ x : M,
+        weightedDivergenceTrace x = rawTrace x - actionTrace x)
+    (hlap :
+      ∀ x : M,
+        lapPotential x =
+          RicciFlower.Analysis.DivergenceTheorem.Δ_g
+            (I := I) g hpotential x)
+    (hgradSq :
+      ∀ x : M,
+        gradPotentialNormSq x =
+          g.inner x
+            ((RicciFlower.Analysis.DivergenceTheorem.grad_g
+              (I := I) g hpotential :
+              Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x)
+            ((RicciFlower.Analysis.DivergenceTheorem.grad_g
+              (I := I) g hpotential :
+              Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x))
+    (hshift :
+      ∀ x : M,
+        shiftedTrace x =
+          RicciFlower.Analysis.DivergenceTheorem.Δ_g
+            (I := I) g hq x)
+    (hqeq :
+      ∀ x : M,
+        q x = potentialVariation x - metricVariationTrace x / 2) :
+    FFunctionalFormula510
+      (expNegPotentialWeightedMeasure
+        (riemannianVolumeMeasure (I := I) (M := M) g) potential)
+      firstVariation scalarCurvature lapPotential gradPotentialNormSq
+      potentialVariation metricVariationTrace metricVariationRicciHess := by
+  have hdiv_zero :
+      ∫ x, weightedDivergenceTrace x
+        ∂(expNegPotentialWeightedMeasure
+            (riemannianVolumeMeasure (I := I) (M := M) g) potential) = 0 :=
+    weightedDivZero_of_connTrace (I := I) g hpotential traceVec hmeas
+      hdivTrace hactionTrace hweighted
+  have hshift_eq :
+      ∫ x, shiftedTrace x
+        ∂(expNegPotentialWeightedMeasure
+            (riemannianVolumeMeasure (I := I) (M := M) g) potential) =
+        ∫ x,
+          expWeightedMeasureVariationFactor potentialVariation
+            metricVariationTrace x *
+            (RicciFlower.Analysis.DivergenceTheorem.Δ_g
+                (I := I) g hpotential x -
+              g.inner x
+                ((RicciFlower.Analysis.DivergenceTheorem.grad_g
+                  (I := I) g hpotential :
+                  Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x)
+                ((RicciFlower.Analysis.DivergenceTheorem.grad_g
+                  (I := I) g hpotential :
+                  Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x))
+        ∂(expNegPotentialWeightedMeasure
+            (riemannianVolumeMeasure (I := I) (M := M) g) potential) :=
+    shiftIntEq (I := I) g hpotential hq hmeas hshift hqeq
+  have hshift_final :
+      ∫ x, shiftedTrace x
+        ∂(expNegPotentialWeightedMeasure
+            (riemannianVolumeMeasure (I := I) (M := M) g) potential) =
+        ∫ x,
+          expWeightedMeasureVariationFactor potentialVariation
+            metricVariationTrace x *
+            (lapPotential x - gradPotentialNormSq x)
+        ∂(expNegPotentialWeightedMeasure
+            (riemannianVolumeMeasure (I := I) (M := M) g) potential) := by
+    calc
+      ∫ x, shiftedTrace x
+        ∂(expNegPotentialWeightedMeasure
+            (riemannianVolumeMeasure (I := I) (M := M) g) potential) =
+        ∫ x,
+          expWeightedMeasureVariationFactor potentialVariation
+            metricVariationTrace x *
+            (RicciFlower.Analysis.DivergenceTheorem.Δ_g
+                (I := I) g hpotential x -
+              g.inner x
+                ((RicciFlower.Analysis.DivergenceTheorem.grad_g
+                  (I := I) g hpotential :
+                  Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x)
+                ((RicciFlower.Analysis.DivergenceTheorem.grad_g
+                  (I := I) g hpotential :
+                  Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x))
+        ∂(expNegPotentialWeightedMeasure
+            (riemannianVolumeMeasure (I := I) (M := M) g) potential) := hshift_eq
+      _ = ∫ x,
+          expWeightedMeasureVariationFactor potentialVariation
+            metricVariationTrace x *
+            (lapPotential x - gradPotentialNormSq x)
+        ∂(expNegPotentialWeightedMeasure
+            (riemannianVolumeMeasure (I := I) (M := M) g) potential) := by
+        apply integral_congr_ae
+        refine Filter.Eventually.of_forall ?_
+        intro x
+        simp [hlap x, hgradSq x]
+  exact formula510_of_ints
+    (weightedMeasure :=
+      expNegPotentialWeightedMeasure
+        (riemannianVolumeMeasure (I := I) (M := M) g) potential)
+    hfirst hfinal_int hdiv_int hshift_int hcorr_int hdiv_zero hshift_final
+
+end GeometryFormula510
+
+/-- Final assembly adapter for formula 5.10 once the previous producer chain has
+identified the first-variation integrand pointwise. -/
+theorem formula510_of_steps [MeasurableSpace M]
+    {weightedMeasure : Measure M}
+    {firstVariation : Real}
+    {preIntegrand scalarCurvature lapPotential gradPotentialNormSq
+      potentialVariation metricVariationTrace metricVariationRicciHess :
+      M -> Real}
+    (hfirst :
+      firstVariation = ∫ x, preIntegrand x ∂weightedMeasure)
+    (hpoint :
+      ∀ x : M,
+        preIntegrand x =
+          fFunctionalFormula510Integrand scalarCurvature lapPotential
+            gradPotentialNormSq potentialVariation metricVariationTrace
+            metricVariationRicciHess x) :
+    FFunctionalFormula510 weightedMeasure firstVariation scalarCurvature
+      lapPotential gradPotentialNormSq potentialVariation metricVariationTrace
+      metricVariationRicciHess := by
+  unfold FFunctionalFormula510
+  rw [hfirst]
+  apply integral_congr_ae
+  exact Filter.Eventually.of_forall hpoint
 
 /-- If formula 5.10 has been proved for the first variation value, then the
 `deriv`-based first variation agrees with the formula 5.10 integral. -/

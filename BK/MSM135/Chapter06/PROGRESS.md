@@ -128,18 +128,51 @@ RicciFlower.RicciFlow.Perelman.expWeightedMeasureIntegral_hasDerivAt_at
 RicciFlower.RicciFlow.Perelman.FFunctionalHasFirstVariationAt_of_volumeVariation
 RicciFlower.RicciFlow.Perelman.weightedIBP
 RicciFlower.LeviCivita.lcGammaVar
+RicciFlower.LeviCivita.lcRicciVarCoord
+RicciFlower.LeviCivita.lcHessVarCoord
+RicciFlower.LeviCivita.lcRicciHessVarCoord
+RicciFlower.LeviCivita.lcRicciHessVarShifted
+RicciFlower.LeviCivita.gammaTraceVar_of_lcGammaVar
+RicciFlower.LeviCivita.gammaTraceCovVar
+RicciFlower.Analysis.DivergenceTheorem.expNegWeightedGreen
+RicciFlower.Analysis.DivergenceTheorem.expNegLap
+RicciFlower.Analysis.DivergenceTheorem.expNegGreen
 RicciFlower.RicciFlow.Perelman.MetricVariationChristoffelInFrame
 RicciFlower.RicciFlow.Perelman.MetricVariationChristoffelTraceInFrame
 RicciFlower.RicciFlow.Perelman.RicciVariationByChristoffelInFrame
 RicciFlower.RicciFlow.Perelman.HessianPotentialVariationByChristoffelInFrame
+RicciFlower.RicciFlow.Perelman.ricciHessianWeightedDivergence_of_ricci_hessian
+RicciFlower.RicciFlow.Perelman.ricciHessianWeightedDensity_of_divergence
+RicciFlower.RicciFlow.Perelman.inverseMetricVariationContractionTermInFrame
 RicciFlower.RicciFlow.Perelman.RicciHessianWeightedDensityVariationInFrame
 RicciFlower.RicciFlow.Perelman.FFunctionalFormula510
+RicciFlower.RicciFlow.Perelman.formula510_of_steps
+RicciFlower.RicciFlow.Perelman.weightedGreen
+RicciFlower.RicciFlow.Perelman.weightedDivZero
+RicciFlower.RicciFlow.Perelman.connTraceVec
+RicciFlower.RicciFlow.Perelman.connTraceDivEq
+RicciFlower.RicciFlow.Perelman.weightedDivZero_of_connTrace
+RicciFlower.RicciFlow.Perelman.shiftIntEq
+RicciFlower.RicciFlow.Perelman.formula510_of_ints
+RicciFlower.RicciFlow.Perelman.formula510_of_connTrace
 ```
 
-The remaining formula 5.10 geometry frontier is not Ricci-flow specialized:
-Ricci variation, Hessian variation, contraction, and closed-manifold
-divergence cancellation still need producers.  The weighted
-integration-by-parts interface now exists as
+The remaining formula 5.10 frontier is no longer the local `delta Ric` or
+`delta Hess f` calculation, and the arbitrary-test `Delta(exp(-f))` expansion
+is now proved.  The metric-trace derivative bridge is also now produced by
+`RicciFlower.LeviCivita.lcTraceShifted`.  The actual smooth divergence field
+used by the closed divergence theorem is now constructed in the form:
+
+```text
+X = e^{-f} traceVec
+div X = e^{-f} * (div traceVec - traceVec(f)).
+```
+
+The current gap is now one layer lower: construct the smooth trace vector
+`traceVec = g^{ij} A^p_ij` directly from the global `(1,2)` connection
+variation tensor `A = delta nabla`, and feed the produced pre-cancellation
+first variation into `formula510_of_connTrace`.
+The weighted integration-by-parts interface exists as
 `BK.MSM135.Chapter06.Section01.lbl552_weighted_ibp`, aliasing
 `RicciFlower.RicciFlow.Perelman.weightedIBP`.
 
@@ -170,6 +203,124 @@ RicciFlower.LeviCivita.lcGammaVar
 It assumes raw metric component derivatives, fixed-base covariant metric
 derivatives, Christoffel component derivatives, and inverse metric components
 at the base time.
+
+The next geometry producer is also now proved in coordinate-frame form:
+
+```text
+d/ds Ric_ij(g_s)|base =
+  nabla_p(delta Gamma^p_ij) - nabla_i(delta Gamma^p_pj).
+```
+
+Current Lean handle:
+
+```text
+RicciFlower.LeviCivita.lcRicciVarCoord
+```
+
+This is the right local-coordinate shape for formula 5.10.  It assumes the
+Christoffel component derivative and mixed time/spatial derivative packages
+rather than deriving them from metric regularity in this pass.
+
+The scalar-potential Hessian variation producer is also now proved in
+coordinate-frame form:
+
+```text
+d/ds Hess_ij(f_s)|base =
+  Hess_ij(h) - (delta Gamma^p_ij) partial_p f.
+```
+
+Current Lean handle:
+
+```text
+RicciFlower.LeviCivita.lcHessVarCoord
+```
+
+It consumes explicit scalar first- and second-coordinate derivative variation
+packages.
+
+The combined coordinate producer is now also proved:
+
+```text
+delta(Ric_ij + Hess_ij f)
+  =
+  nabla_p A^p_ij - A^p_ij partial_p f
+  + Hess_ij h - nabla_i A^p_pj.
+```
+
+Current Lean handle:
+
+```text
+RicciFlower.LeviCivita.lcRicciHessVarCoord
+```
+
+After supplying the trace bridge
+`nabla_i A^p_pj = (1/2) Hess_ij V`, the shifted book form is:
+
+```text
+delta(Ric_ij + Hess_ij f)
+  =
+  nabla_p A^p_ij - A^p_ij partial_p f
+  + Hess_ij(h - V/2).
+```
+
+Current Lean handle:
+
+```text
+RicciFlower.LeviCivita.lcRicciHessVarShifted
+```
+
+The Perelman-facing algebra bridges now package this into the density and
+contraction interfaces:
+
+```text
+RicciFlower.RicciFlow.Perelman.ricciHessianWeightedDivergence_of_ricci_hessian
+RicciFlower.RicciFlow.Perelman.ricciHessianWeightedDensity_of_divergence
+RicciFlower.RicciFlow.Perelman.inverseMetricVariationContractionTermInFrame
+```
+
+The Green layer also has the arbitrary-test pre-expansion identity:
+
+```text
+integral e^{-f} Delta q dmu =
+  integral q Delta(e^{-f}) dmu.
+```
+
+Current Lean handle:
+
+```text
+RicciFlower.Analysis.DivergenceTheorem.expNegWeightedGreen
+```
+
+The Green layer now also has the expanded arbitrary-test identity:
+
+```text
+Delta(exp(-f)) = exp(-f) * (-Delta f + |grad f|^2)
+
+integral e^{-f} Delta q dmu =
+  integral q * e^{-f} * (-Delta f + |grad f|^2) dmu.
+```
+
+Current Lean handles:
+
+```text
+RicciFlower.Analysis.DivergenceTheorem.expNegLap
+RicciFlower.Analysis.DivergenceTheorem.expNegGreen
+```
+
+The remaining formula 5.10 bridge is no longer this exponential expansion, nor
+the metric-trace derivative input to `gammaTraceCovVar`.  The final scalar
+integral assembly is now represented by:
+
+```text
+RicciFlower.RicciFlow.Perelman.weightedGreen
+RicciFlower.RicciFlow.Perelman.weightedDivZero
+RicciFlower.RicciFlow.Perelman.shiftIntEq
+RicciFlower.RicciFlow.Perelman.formula510_of_ints
+```
+
+What remains is the geometric realization of the divergence field in the
+contracted Christoffel term, plus connecting the produced pre-cancellation
+first variation to `formula510_of_ints`.
 
 The monotonicity display is represented abstractly as:
 

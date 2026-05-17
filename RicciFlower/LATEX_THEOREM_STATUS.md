@@ -26,12 +26,12 @@ the full statements, theorem names, and file locations.
 
 | Distance | Count | Current interpretation |
 | --- | ---: | --- |
-| `0` | 21 | Native theorem closed; only presentation wrappers or downstream use remain. |
-| `1` | 0 | A checked consumer route remains one finite-sum/convention producer away. |
-| `2` | 1 | In-tree component or finite-sum producer work remains. |
-| `3` | 4 | A real geometric producer is still missing. |
-| `4` | 16 | Major analytic/global Ricci-flow infrastructure or old synthetic route remains. |
-| `5` | 11 | Deliberate black box or external-scale theorem for now. |
+| `0` | 22 | Native theorem closed; only presentation wrappers or downstream use remain. |
+| `1` | 1 | A checked consumer route remains one packaging or compatibility wrapper away. |
+| `2` | 2 | In-tree component or finite-sum producer work remains. |
+| `3` | 3 | A real geometric producer is still missing. |
+| `4` | 15 | Major analytic/global Ricci-flow infrastructure or old synthetic route remains. |
+| `5` | 10 | Deliberate black box or external-scale theorem for now. |
 
 ### Closed Native Results
 
@@ -48,10 +48,12 @@ the full statements, theorem names, and file locations.
 | Target | Distance | Smallest next step |
 | --- | ---: | --- |
 | Hamilton Section 6 remainder | `1` | Next local target is the trace-free Ricci norm evolution; arbitrary-frame packaging of Lemma 6.3 is optional polish. |
+| Lemma 11.1 finite time | `1` | Prove the scalar-package producer `HamiltonPositiveRicci.ham3_scalar74`; `ham3_finite_time` now delegates to `finiteTime3D`. |
 | Lemma 10.5 quotient evolution | `2` | Port the pure scalar quotient algebra to `RicciFlower` if it is still needed by the pinching route. |
 | Assumption 3.1 calculus package | `3` | Continue native Bianchi, contracted Bianchi, tensor commutator, and trace/norm infrastructure. |
 | Lemma 6.7 | `0` | Closed canonically through the `(0,2)` tensor Bochner product rule and `ricci_heat_mc`. |
-| Corollary 11.4 and Lemma 11.15 | `3` | Finish the native 3D curvature/norm comparison and Einstein-space-form bridge. |
+| Corollary 11.4 | `2` | Bridge the checked eigenvalue/sectional norm estimate to the geometric `Rm04` norm in an orthonormal frame. |
+| Lemma 11.15 | `3` | Finish the native Einstein-space-form bridge from contracted Bianchi and the 3D Riemann-from-Ricci formula. |
 
 ### Section 14 Snapshot
 
@@ -168,14 +170,22 @@ g0 with Ric(g0) > 0, then M admits a metric of constant positive sectional
 curvature. Equivalently, M is diffeomorphic to a spherical space form.
 ```
 
-Status: old synthetic assembly exists as `wordly_latex_thm_main_hamilton_3d`.
-There is no native unconditional `RicciFlower` theorem yet.
+Status: native theorem-shaped endpoint now exists as
+`RicciFlower.HamiltonPositiveRicci.thm_2_1`.  It uses the current
+`SmoothRiemannianMetric`, Levi-Civita curvature-producer, `SolutionOn`, and
+`IsSolutionOn` structures.  The final Section 12 assembly is now represented
+natively in `ham3_const_metric`: finite time, point selection/rescaling,
+Ricci-nonnegative preservation, the coarse `|Rm| <= 100` bound, the
+`r0 = 1/10` window, noncollapsing, CGH compactness, constant-curvature limit,
+and pullback to `M` are separate named endpoints.  The remaining `sorry`s are
+deliberately global analytic or topology inputs, not local tensor algebra.
 
-Distance: `5`.
+Distance: `4`.
 
-Next target: replace the typed synthetic assembly by concrete Ricci-flow
-solution data, analytic inputs, realized curvature, and pinching/convergence
-theorems.
+Next target: replace the Section 12 endpoint `sorry`s one at a time with the
+native finite-time, point-selection, noncollapsing, compactness, and
+three-dimensional limit-curvature producers already tracked in Section 11.
+Do not collapse these back into a single final convergence black box.
 
 ### Assumption 3.1, `ass:riemannian-calculus`
 
@@ -732,11 +742,21 @@ The maximal Ricci flow starting from a closed 3-manifold with R(g0) > 0 has
 finite maximal time, bounded by data from g0.
 ```
 
-Status: synthetic finite-time wrapper.
+Status: native normalized scalar-evolution wrapper closed as
+`RicciFlow.finiteTime3D` in
+`RicciFlower/RicciFlow/Evolution/ScalarFiniteTime.lean`.  The Section 12
+endpoint `HamiltonPositiveRicci.ham3_finite_time` now calls this theorem and
+is no longer a direct finite-time black box.  It is exactly Corollary 7.4 with
+dimension parameter `3`, proving `omega <= 3 / (2 * c0)` from a positive
+initial scalar minimum and the scalar evolution/WMP package.
 
-Distance: `4`.
+Distance: `1`.
 
-Next target: follows natively after Corollary 7.4 and maximal interval API.
+Next target: prove `HamiltonPositiveRicci.ham3_scalar74`, the scalar-package
+producer that extracts the normalized `[0,omega)` scalar evolution, scalar
+Laplacian realization, WMP regularity, Ricci-norm lower bound, and Lipschitz
+reaction input from the maximal-flow package.  Arbitrary initial time should be
+handled later by a time-shift wrapper.
 
 ### Black Box 11.2, `bb:rf-extension-criterion`
 
@@ -747,11 +767,16 @@ If a closed-manifold Ricci flow on [0,T) has sup_{M x [0,T)} |Rm| < infinity,
 then it extends smoothly to [0,T+eta).
 ```
 
-Status: synthetic/global interface.
+Status: native black-box interface exists as
+`RicciFlow.extends_of_rmBounded` in
+`RicciFlower/RicciFlow/MaximalTime.lean`.  It takes a realizing lowered
+Riemann tensor and a metric-induced squared-curvature bound and returns
+`ExtendsPastEndpoint`.
 
 Distance: `5`.
 
-Next target: keep as global analytic black box.
+Next target: keep as global analytic black box unless explicitly working on
+Ricci-flow PDE extension theory.
 
 ### Lemma 11.3, `lem:finite-time-curvature-blow-up`
 
@@ -762,12 +787,18 @@ For a maximal Ricci flow with finite maximal time Tmax,
 sup_{M x [0,Tmax)} |Rm| = infinity.
 ```
 
-Status: synthetic wrapper around extension criterion.
+Status: native consumer theorem closed as
+`RicciFlow.rmUnbounded_of_maximal` in
+`RicciFlower/RicciFlow/MaximalTime.lean`.  The existential wrapper
+`RicciFlow.formsSing_of_maximal` matches the current `FormsSingularityAt`
+definition once a curvature realization producer supplies a lowered Riemann
+tensor family.
 
-Distance: `4`.
+Distance: `0`.
 
-Next target: native wrapper once maximal interval and extension criterion APIs
-are concrete.
+Next target: wire `formsSing_of_maximal` into the Section 12
+point-selection/singularity package.  The analytic extension theorem remains
+Black Box 11.2.
 
 ### Corollary 11.4, `cor:ricci-controls-rm`
 
@@ -778,11 +809,16 @@ There exists a universal constant C3 such that on any 3D Riemannian manifold
 with Ric >= 0, |Rm| <= C3 R.
 ```
 
-Status: synthetic curvature algebra route.
+Status: native eigenvalue/sectional algebra is now in
+`RicciFlower.DimensionThree.RicciControlsRm`.  It proves that nonnegative
+Ricci eigenvalues give `|K_ij| <= R / 2` and the coarse squared sectional-model
+bound with constant `100`.
 
-Distance: `3`.
+Distance: `2`.
 
-Next target: port 3D sectional-curvature algebra and norm comparison.
+Next target: prove the realization bridge identifying the geometric `Rm04`
+norm in an orthonormal `Fin 3` frame with the sectional norm model, then route
+that bound into `HamiltonPositiveRicci.ham3_rm_bound`.
 
 ### Lemma 11.6, `lem:point-selection-rescaling`
 

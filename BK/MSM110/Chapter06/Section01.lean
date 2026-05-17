@@ -235,36 +235,39 @@ theorem eq_scalar_curv_evolu
 /-- MSM110 Chapter 6.1, equation `eq:scalar_curv_evolu`, traced from the
 Ricci evolution equation. -/
 theorem eq_scalar_curv_evolu_of_ricci_evolution
+    [IsManifold I (∞ + 1) M]
     {D : RicciFlower.Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (Rm13 : Real -> RicciFlower.Realized.Tensor13Section (I := I) (M := M))
     (Rm04 : Real -> RicciFlower.Realized.Tensor04Section (I := I) (M := M))
     (gInv : Real -> RicciFlower.Realized.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
+    (hcov : ConnectionLocallySmoothOn (I := I) S)
     (hframe : IsLocalFrameOn I E 1 frame Set.univ)
     (hTrace : forall (t : RicciFlower.Realized.RealTimeInterval.RegularTime D) (x : M),
       RicciFlower.Realized.RicciRealizesRm04FirstTraceAt (I := I)
         (S.ricci (t : Real) x) (Rm04 (t : Real) x)
         (gInv (t : Real) x)
         (hframe.toBasisAt (by simp : x ∈ (Set.univ : Set M))))
-    (hOutput : forall (t : RicciFlower.Realized.RealTimeInterval.RegularTime D) (x : M),
-      RicciFlower.Realized.Rm04OutputSkewAt (I := I) (Rm04 (t : Real) x))
-    (hFirst : forall (t : RicciFlower.Realized.RealTimeInterval.RegularTime D) (x : M),
-      RicciFlower.Realized.FirstBianchiAt (I := I) (Rm04 (t : Real) x))
+    (hRm13 : forall t : RicciFlower.Realized.RealTimeInterval.RegularTime D,
+      RicciFlower.Realized.Rm13RealizesConnection (I := I)
+        (S.family.connection (t : Real)) (Rm13 (t : Real)))
+    (hLower : forall (t : RicciFlower.Realized.RealTimeInterval.RegularTime D) (x : M),
+      RicciFlower.Realized.Rm04LowersRm13At (I := I) (S.family.metric (t : Real)) x
+        (Rm13 (t : Real) x) (Rm04 (t : Real) x))
     (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame)
     (h_ricci : RicciEvolutionEquationInFrame
       (I := I) S Rm04 gInv frame roughLapRic)
-    (hInvSym : ∀ t x i j, gInv t x i j = gInv t x j i)
-    (hRicSym : ∀ t x i j,
-      ricciCompInFrame (I := I) S frame t x i j =
-        ricciCompInFrame (I := I) S frame t x j i) :
+    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame) :
     ScalarEvolutionEquationOn (D := D)
       (scalarTraceInFrame (I := I) S gInv frame)
       (scalarLaplacianTraceInFrame (M := M) gInv roughLapRic)
       (ricciNormSqInFrame (I := I) S gInv frame) :=
-  RicciFlower.RicciFlow.scalarEvolutionEquationOn_of_ricciEvolution
-    (I := I) S Rm04 gInv frame roughLapRic
-    hframe hTrace hOutput hFirst h_inv h_ricci hInvSym hRicSym
+  RicciFlower.RicciFlow.scalarEvolutionEquationOn_of_ricciEvolution_lc
+    (I := I) S hS Rm13 Rm04 gInv frame roughLapRic
+    hcov hframe hTrace hRm13 hLower h_inv h_ricci hinv
 
 /-- MSM110 Chapter 6.1, equation `eq:evolution_of_volume_element`, in the
 integrated moving-measure form used by the current volume API. -/

@@ -9,6 +9,7 @@ import RicciFlower.Operators.HessianTrace
 import RicciFlower.Realized.Operators
 import RicciFlower.RicciFlow.Basic
 import RicciFlower.RicciFlow.Evolution.Metric
+import RicciFlower.RicciFlow.Evolution.Ricci
 import Mathlib.Algebra.Order.Chebyshev
 
 set_option autoImplicit false
@@ -620,6 +621,7 @@ def ScalarRmRicciTraceInFrame
 /-- Produce the remaining scalar-trace curvature contraction from the
 convention-correct first trace of `Rm04`. -/
 theorem scalarRmRicciTraceInFrame_of_rm04_first_trace
+    [DecidableEq Idx]
     {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (Rm04 : Real -> Realized.Tensor04Section (I := I) (M := M))
@@ -635,7 +637,7 @@ theorem scalarRmRicciTraceInFrame_of_rm04_first_trace
       Realized.Rm04OutputSkewAt (I := I) (Rm04 (t : Real) x))
     (hFirst : forall (t : Realized.RealTimeInterval.RegularTime D) (x : M),
       Realized.FirstBianchiAt (I := I) (Rm04 (t : Real) x))
-    (hInvSym : forall t x i j, gInv t x i j = gInv t x j i)
+    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
     (hRicSym : forall t x i j,
       ricciCompInFrame (I := I) S frame t x i j =
         ricciCompInFrame (I := I) S frame t x j i) :
@@ -650,11 +652,73 @@ theorem scalarRmRicciTraceInFrame_of_rm04_first_trace
     simpa [basis, ricciCompInFrame, Realized.ricciComp,
       RicciFlower.Curvature.ricciComp, IsLocalFrameOn.toBasisAt_coe] using
       hRicSym (t : Real) x i j
+  have hinvAt :
+      MetricInverseInBasis
+        (I := I) (M := M) (S.family.metric (t : Real)) x
+        basis (fun i j : Idx => gInv (t : Real) x i j) :=
+    metricInverseInBasis_of_solution_frame
+      (I := I) S gInv frame hframe hinv (t : Real)
+      (by simp : x ∈ (Set.univ : Set M))
   have hmain :=
     Realized.metricTrace_rm04RicciContractionAt_eq_neg_inner
       (I := I) basis (Rm04 (t : Real) x) (gInv (t : Real) x)
       (S.ricci (t : Real) x) (hTrace t x) (hOutput t x) (hFirst t x)
-      hRicAt (hInvSym (t : Real) x)
+      hRicAt (invMetric_symm (I := I) (M := M)
+        (S.family.metric (t : Real)) x basis
+        (fun i j : Idx => gInv (t : Real) x i j) hinvAt)
+  simpa [basis, Realized.rm04RicciContractionAt, Realized.raised02CompAt,
+    rmRicciContractionCompInFrame, raisedRicciCompInFrame,
+    ricciNormSqInFrame, Realized.rm04Comp, RicciFlower.Curvature.rm04Comp,
+    ricciCompInFrame, Realized.ricciComp, RicciFlower.Curvature.ricciComp,
+    IsLocalFrameOn.toBasisAt_coe] using hmain
+
+/-- Regular-time version of
+`scalarRmRicciTraceInFrame_of_rm04_first_trace`, using the Ricci symmetry
+producer instead of an all-real-times symmetry assumption. -/
+theorem scalarRmRicciTraceInFrame_of_rm04_first_trace_regular
+    [DecidableEq Idx]
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (Rm04 : Real -> Realized.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame Set.univ)
+    (hTrace : forall (t : Realized.RealTimeInterval.RegularTime D) (x : M),
+      Realized.RicciRealizesRm04FirstTraceAt (I := I)
+        (S.ricci (t : Real) x) (Rm04 (t : Real) x)
+        (gInv (t : Real) x)
+        (hframe.toBasisAt (by simp : x ∈ (Set.univ : Set M))))
+    (hOutput : forall (t : Realized.RealTimeInterval.RegularTime D) (x : M),
+      Realized.Rm04OutputSkewAt (I := I) (Rm04 (t : Real) x))
+    (hFirst : forall (t : Realized.RealTimeInterval.RegularTime D) (x : M),
+      Realized.FirstBianchiAt (I := I) (Rm04 (t : Real) x))
+    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
+    (hRicSym : RicciSymmetricInFrameOnRegular (I := I) S frame) :
+    ScalarRmRicciTraceInFrame (I := I) S Rm04 gInv frame := by
+  classical
+  intro t x
+  let basis := hframe.toBasisAt (by simp : x ∈ (Set.univ : Set M))
+  have hRicAt : forall i j : Idx,
+      (S.ricci (t : Real) x) (Realized.vec2 (basis i) (basis j)) =
+        (S.ricci (t : Real) x) (Realized.vec2 (basis j) (basis i)) := by
+    intro i j
+    simpa [basis, ricciCompInFrame, Realized.ricciComp,
+      RicciFlower.Curvature.ricciComp, IsLocalFrameOn.toBasisAt_coe] using
+      hRicSym t x i j
+  have hinvAt :
+      MetricInverseInBasis
+        (I := I) (M := M) (S.family.metric (t : Real)) x
+        basis (fun i j : Idx => gInv (t : Real) x i j) :=
+    metricInverseInBasis_of_solution_frame
+      (I := I) S gInv frame hframe hinv (t : Real)
+      (by simp : x ∈ (Set.univ : Set M))
+  have hmain :=
+    Realized.metricTrace_rm04RicciContractionAt_eq_neg_inner
+      (I := I) basis (Rm04 (t : Real) x) (gInv (t : Real) x)
+      (S.ricci (t : Real) x) (hTrace t x) (hOutput t x) (hFirst t x)
+      hRicAt (invMetric_symm (I := I) (M := M)
+        (S.family.metric (t : Real)) x basis
+        (fun i j : Idx => gInv (t : Real) x i j) hinvAt)
   simpa [basis, Realized.rm04RicciContractionAt, Realized.raised02CompAt,
     rmRicciContractionCompInFrame, raisedRicciCompInFrame,
     ricciNormSqInFrame, Realized.rm04Comp, RicciFlower.Curvature.rm04Comp,
@@ -694,11 +758,12 @@ theorem scalarTrace_inverseMetricEvolutionTerm_eq_two_ricciNormSq
 /-- The metric trace of the Ricci-quadratic term `Ric_i^k Ric_kj` is
 `|Ric|^2`. -/
 theorem scalarTrace_ricciQuadraticTerm_eq_ricciNormSq_of_symm
+    [DecidableEq Idx]
     {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (gInv : Real -> Realized.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
-    (hInvSym : ∀ t x i j, gInv t x i j = gInv t x j i)
+    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
     (hRicSym : ∀ t x i j,
       ricciCompInFrame (I := I) S frame t x i j =
         ricciCompInFrame (I := I) S frame t x j i)
@@ -708,6 +773,8 @@ theorem scalarTrace_ricciQuadraticTerm_eq_ricciNormSq_of_symm
         ricciQuadraticCompInFrame (I := I) S gInv frame t x i j) =
       ricciNormSqInFrame (I := I) S gInv frame t x := by
   classical
+  have hInvSym : ∀ t x i j, gInv t x i j = gInv t x j i :=
+    gInv_symm (I := I) S gInv frame hinv
   unfold ricciQuadraticCompInFrame ricciOneUpCompInFrame
     ricciNormSqInFrame raisedRicciCompInFrame
   calc
@@ -768,9 +835,91 @@ theorem scalarTrace_ricciQuadraticTerm_eq_ricciNormSq_of_symm
           refine Finset.sum_congr rfl fun a _ => ?_
           simp [Finset.mul_sum, mul_assoc, mul_left_comm, mul_comm]
 
+/-- Pointwise version of
+`scalarTrace_ricciQuadraticTerm_eq_ricciNormSq_of_symm`, requiring Ricci
+symmetry only at the time and point being traced. -/
+theorem scalarTrace_ricciQuadraticTerm_eq_ricciNormSq_at
+    [DecidableEq Idx]
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
+    (t : Real) (x : M)
+    (hRicSym : ∀ i j,
+      ricciCompInFrame (I := I) S frame t x i j =
+        ricciCompInFrame (I := I) S frame t x j i) :
+    (∑ i : Idx, ∑ j : Idx,
+      gInv t x i j *
+        ricciQuadraticCompInFrame (I := I) S gInv frame t x i j) =
+      ricciNormSqInFrame (I := I) S gInv frame t x := by
+  classical
+  have hInvSym : ∀ t x i j, gInv t x i j = gInv t x j i :=
+    gInv_symm (I := I) S gInv frame hinv
+  unfold ricciQuadraticCompInFrame ricciOneUpCompInFrame
+    ricciNormSqInFrame raisedRicciCompInFrame
+  calc
+    (∑ i : Idx, ∑ j : Idx,
+      gInv t x i j *
+        (∑ k : Idx,
+          (∑ a : Idx,
+            gInv t x k a * ricciCompInFrame (I := I) S frame t x i a) *
+          ricciCompInFrame (I := I) S frame t x k j))
+        =
+      ∑ i : Idx, ∑ j : Idx, ∑ k : Idx, ∑ a : Idx,
+        gInv t x i j * gInv t x k a *
+          ricciCompInFrame (I := I) S frame t x i a *
+          ricciCompInFrame (I := I) S frame t x k j := by
+          simp [Finset.mul_sum, Finset.sum_mul, mul_assoc]
+    _ =
+      ∑ i : Idx, ∑ a : Idx, ∑ j : Idx, ∑ k : Idx,
+        gInv t x i j * gInv t x k a *
+          ricciCompInFrame (I := I) S frame t x i a *
+          ricciCompInFrame (I := I) S frame t x k j := by
+          refine Finset.sum_congr rfl fun i _ => ?_
+          calc
+            (∑ j : Idx, ∑ k : Idx, ∑ a : Idx,
+              gInv t x i j * gInv t x k a *
+                ricciCompInFrame (I := I) S frame t x i a *
+                ricciCompInFrame (I := I) S frame t x k j)
+                =
+              ∑ j : Idx, ∑ a : Idx, ∑ k : Idx,
+                gInv t x i j * gInv t x k a *
+                  ricciCompInFrame (I := I) S frame t x i a *
+                  ricciCompInFrame (I := I) S frame t x k j := by
+                  refine Finset.sum_congr rfl fun j _ => ?_
+                  rw [Finset.sum_comm]
+            _ =
+              ∑ a : Idx, ∑ j : Idx, ∑ k : Idx,
+                gInv t x i j * gInv t x k a *
+                  ricciCompInFrame (I := I) S frame t x i a *
+                  ricciCompInFrame (I := I) S frame t x k j := by
+                  rw [Finset.sum_comm]
+    _ =
+      ∑ i : Idx, ∑ a : Idx, ∑ j : Idx, ∑ k : Idx,
+        ricciCompInFrame (I := I) S frame t x i a *
+          gInv t x i j * gInv t x a k *
+          ricciCompInFrame (I := I) S frame t x j k := by
+          refine Finset.sum_congr rfl fun i _ => ?_
+          refine Finset.sum_congr rfl fun a _ => ?_
+          refine Finset.sum_congr rfl fun j _ => ?_
+          refine Finset.sum_congr rfl fun k _ => ?_
+          rw [hInvSym t x k a, hRicSym k j]
+          ring
+    _ =
+      ∑ i : Idx, ∑ a : Idx,
+        ricciCompInFrame (I := I) S frame t x i a *
+          (∑ j : Idx, ∑ k : Idx,
+            gInv t x i j * gInv t x a k *
+              ricciCompInFrame (I := I) S frame t x j k) := by
+          refine Finset.sum_congr rfl fun i _ => ?_
+          refine Finset.sum_congr rfl fun a _ => ?_
+          simp [Finset.mul_sum, mul_assoc, mul_left_comm, mul_comm]
+
 /-- The trace algebra and scalar-Laplacian trace identify the derivative RHS
 of `g^{ij} Ric_ij` with `Delta R + 2 |Ric|^2`. -/
 theorem scalarTraceDerivRHSInFrame_eq_scalarEvolutionRHS
+    [DecidableEq Idx]
     {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (Rm04 : Real -> Realized.Tensor04Section (I := I) (M := M))
@@ -779,7 +928,7 @@ theorem scalarTraceDerivRHSInFrame_eq_scalarEvolutionRHS
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
     (scalarLap : Real -> M -> Real)
     (h_lap : ScalarLaplacianTraceInFrame (M := M) gInv roughLapRic scalarLap)
-    (hInvSym : ∀ t x i j, gInv t x i j = gInv t x j i)
+    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
     (hRicSym : ∀ t x i j,
       ricciCompInFrame (I := I) S frame t x i j =
         ricciCompInFrame (I := I) S frame t x j i)
@@ -795,7 +944,62 @@ theorem scalarTraceDerivRHSInFrame_eq_scalarEvolutionRHS
   have hrm := hRmTrace t x
   have hquad :=
     scalarTrace_ricciQuadraticTerm_eq_ricciNormSq_of_symm
-      (I := I) S gInv frame hInvSym hRicSym (t : Real) x
+      (I := I) S gInv frame hinv hRicSym (t : Real) x
+  unfold scalarTraceDerivRHSInFrame
+  rw [h_lap (t : Real) x]
+  have hsplit :
+      (∑ i : Idx, ∑ j : Idx,
+        (inverseMetricEvolutionRHSInFrame (I := I) S gInv frame (t : Real) x i j *
+            ricciCompInFrame (I := I) S frame (t : Real) x i j +
+          gInv (t : Real) x i j *
+            ricciEvolutionRHSInFrame (I := I) S Rm04 gInv frame roughLapRic
+              (t : Real) x i j)) =
+        (∑ i : Idx, ∑ j : Idx,
+          inverseMetricEvolutionRHSInFrame (I := I) S gInv frame (t : Real) x i j *
+            ricciCompInFrame (I := I) S frame (t : Real) x i j) +
+        (∑ i : Idx, ∑ j : Idx,
+          gInv (t : Real) x i j * roughLapRic (t : Real) x i j) -
+        2 * (∑ i : Idx, ∑ j : Idx,
+          gInv (t : Real) x i j *
+            rmRicciContractionCompInFrame (I := I) S Rm04 gInv frame
+              (t : Real) x i j) -
+        2 * (∑ i : Idx, ∑ j : Idx,
+          gInv (t : Real) x i j *
+            ricciQuadraticCompInFrame (I := I) S gInv frame (t : Real) x i j) := by
+    simp [ricciEvolutionRHSInFrame, sub_eq_add_neg, mul_add,
+      Finset.sum_add_distrib, Finset.sum_neg_distrib, Finset.mul_sum,
+      Finset.sum_mul]
+    ring_nf
+  rw [hsplit, hdt, hrm, hquad]
+  ring
+
+/-- Regular-time Ricci-symmetry version of
+`scalarTraceDerivRHSInFrame_eq_scalarEvolutionRHS`. -/
+theorem scalarTraceDerivRHSInFrame_eq_scalarEvolutionRHS_regular
+    [DecidableEq Idx]
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (Rm04 : Real -> Realized.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (roughLapRic : Real -> M -> Idx -> Idx -> Real)
+    (scalarLap : Real -> M -> Real)
+    (h_lap : ScalarLaplacianTraceInFrame (M := M) gInv roughLapRic scalarLap)
+    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
+    (hRicSym : RicciSymmetricInFrameOnRegular (I := I) S frame)
+    (hRmTrace : ScalarRmRicciTraceInFrame (I := I) S Rm04 gInv frame)
+    (t : Realized.RealTimeInterval.RegularTime D) (x : M) :
+    scalarTraceDerivRHSInFrame (I := I) S Rm04 gInv frame roughLapRic
+        (t : Real) x =
+      scalarLap (t : Real) x +
+        2 * ricciNormSqInFrame (I := I) S gInv frame (t : Real) x := by
+  have hdt :=
+    scalarTrace_inverseMetricEvolutionTerm_eq_two_ricciNormSq
+      (I := I) S gInv frame (t : Real) x
+  have hrm := hRmTrace t x
+  have hquad :=
+    scalarTrace_ricciQuadraticTerm_eq_ricciNormSq_at
+      (I := I) S gInv frame hinv (t : Real) x (hRicSym t x)
   unfold scalarTraceDerivRHSInFrame
   rw [h_lap (t : Real) x]
   have hsplit :
@@ -880,6 +1084,7 @@ theorem scalarTraceInFrame_hasDerivWithinAt
 
 /-- Lemma 6.6 from Lemma 6.3 by tracing the Ricci equation. -/
 theorem scalarEvolutionEquationOn_of_ricciEvolution
+    [DecidableEq Idx]
     {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (Rm04 : Real -> Realized.Tensor04Section (I := I) (M := M))
@@ -898,7 +1103,7 @@ theorem scalarEvolutionEquationOn_of_ricciEvolution
       Realized.FirstBianchiAt (I := I) (Rm04 (t : Real) x))
     (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame)
     (h_ricci : RicciEvolutionEquationInFrame (I := I) S Rm04 gInv frame roughLapRic)
-    (hInvSym : ∀ t x i j, gInv t x i j = gInv t x j i)
+    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
     (hRicSym : ∀ t x i j,
       ricciCompInFrame (I := I) S frame t x i j =
         ricciCompInFrame (I := I) S frame t x j i) :
@@ -912,13 +1117,103 @@ theorem scalarEvolutionEquationOn_of_ricciEvolution
       (I := I) S Rm04 gInv frame roughLapRic h_inv h_ricci t x
   have hRmTrace : ScalarRmRicciTraceInFrame (I := I) S Rm04 gInv frame :=
     scalarRmRicciTraceInFrame_of_rm04_first_trace
-      (I := I) S Rm04 gInv frame hframe hTrace hOutput hFirst hInvSym hRicSym
+      (I := I) S Rm04 gInv frame hframe hTrace hOutput hFirst hinv hRicSym
   exact htrace.congr_deriv
     (scalarTraceDerivRHSInFrame_eq_scalarEvolutionRHS
       (I := I) S Rm04 gInv frame roughLapRic
       (scalarLaplacianTraceInFrame (M := M) gInv roughLapRic)
       (scalarLaplacianTraceInFrame_realizes (M := M) gInv roughLapRic)
-      hInvSym hRicSym hRmTrace t x)
+      hinv hRicSym hRmTrace t x)
+
+/-- Lemma 6.6 from Lemma 6.3 by tracing the Ricci equation, with Ricci
+symmetry required only at regular flow times. -/
+theorem scalarEvolutionEquationOn_of_ricciEvolution_regular
+    [DecidableEq Idx]
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (Rm04 : Real -> Realized.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (roughLapRic : Real -> M -> Idx -> Idx -> Real)
+    (hframe : IsLocalFrameOn I E 1 frame Set.univ)
+    (hTrace : forall (t : Realized.RealTimeInterval.RegularTime D) (x : M),
+      Realized.RicciRealizesRm04FirstTraceAt (I := I)
+        (S.ricci (t : Real) x) (Rm04 (t : Real) x)
+        (gInv (t : Real) x)
+        (hframe.toBasisAt (by simp : x ∈ (Set.univ : Set M))))
+    (hOutput : forall (t : Realized.RealTimeInterval.RegularTime D) (x : M),
+      Realized.Rm04OutputSkewAt (I := I) (Rm04 (t : Real) x))
+    (hFirst : forall (t : Realized.RealTimeInterval.RegularTime D) (x : M),
+      Realized.FirstBianchiAt (I := I) (Rm04 (t : Real) x))
+    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame)
+    (h_ricci : RicciEvolutionEquationInFrame (I := I) S Rm04 gInv frame roughLapRic)
+    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
+    (hRicSym : RicciSymmetricInFrameOnRegular (I := I) S frame) :
+    ScalarEvolutionEquationOn (D := D)
+      (scalarTraceInFrame (I := I) S gInv frame)
+      (scalarLaplacianTraceInFrame (M := M) gInv roughLapRic)
+      (ricciNormSqInFrame (I := I) S gInv frame) := by
+  intro t x
+  have htrace :=
+    scalarTraceInFrame_hasDerivWithinAt
+      (I := I) S Rm04 gInv frame roughLapRic h_inv h_ricci t x
+  have hRmTrace : ScalarRmRicciTraceInFrame (I := I) S Rm04 gInv frame :=
+    scalarRmRicciTraceInFrame_of_rm04_first_trace_regular
+      (I := I) S Rm04 gInv frame hframe hTrace hOutput hFirst hinv hRicSym
+  exact htrace.congr_deriv
+    (scalarTraceDerivRHSInFrame_eq_scalarEvolutionRHS_regular
+      (I := I) S Rm04 gInv frame roughLapRic
+      (scalarLaplacianTraceInFrame (M := M) gInv roughLapRic)
+      (scalarLaplacianTraceInFrame_realizes (M := M) gInv roughLapRic)
+      hinv hRicSym hRmTrace t x)
+
+/-- Scalar-curvature evolution with Rm04 and Ricci symmetries produced from
+regular Levi-Civita curvature data. -/
+theorem scalarEvolutionEquationOn_of_ricciEvolution_lc
+    [DecidableEq Idx]
+    [IsManifold I (∞ + 1) M]
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (Rm13 : Real -> Realized.Tensor13Section (I := I) (M := M))
+    (Rm04 : Real -> Realized.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (roughLapRic : Real -> M -> Idx -> Idx -> Real)
+    (hcov : ConnectionLocallySmoothOn (I := I) S)
+    (hframe : IsLocalFrameOn I E 1 frame Set.univ)
+    (hTrace : forall (t : Realized.RealTimeInterval.RegularTime D) (x : M),
+      Realized.RicciRealizesRm04FirstTraceAt (I := I)
+        (S.ricci (t : Real) x) (Rm04 (t : Real) x)
+        (gInv (t : Real) x)
+        (hframe.toBasisAt (by simp : x ∈ (Set.univ : Set M))))
+    (hRm13 : forall t : Realized.RealTimeInterval.RegularTime D,
+      Realized.Rm13RealizesConnection (I := I)
+        (S.family.connection (t : Real)) (Rm13 (t : Real)))
+    (hLower : forall (t : Realized.RealTimeInterval.RegularTime D) (x : M),
+      Realized.Rm04LowersRm13At (I := I) (S.family.metric (t : Real)) x
+        (Rm13 (t : Real) x) (Rm04 (t : Real) x))
+    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame)
+    (h_ricci : RicciEvolutionEquationInFrame (I := I) S Rm04 gInv frame roughLapRic)
+    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame) :
+    ScalarEvolutionEquationOn (D := D)
+      (scalarTraceInFrame (I := I) S gInv frame)
+      (scalarLaplacianTraceInFrame (M := M) gInv roughLapRic)
+      (ricciNormSqInFrame (I := I) S gInv frame) := by
+  have hOutput :=
+    rm04OutputSkew_regular (I := I) S hS Rm13 Rm04 hcov hRm13 hLower
+  have hFirst :=
+    rm04FirstBianchi_regular (I := I) S hS Rm13 Rm04 hcov hRm13 hLower
+  have hPair :=
+    rm04PairSymm_regular (I := I) S hS Rm13 Rm04 hcov hRm13 hLower
+  have hInput :=
+    rm04InputSkew_regular (I := I) S Rm13 Rm04 hRm13 hLower
+  have hRicSym : RicciSymmetricInFrameOnRegular (I := I) S frame :=
+    ricciSymm_regular (I := I) S Rm04 gInv frame hframe hinv
+      hTrace hPair hOutput hInput
+  exact scalarEvolutionEquationOn_of_ricciEvolution_regular
+    (I := I) S Rm04 gInv frame roughLapRic hframe hTrace hOutput hFirst
+    h_inv h_ricci hinv hRicSym
 
 end TraceRoute
 

@@ -99,6 +99,64 @@ def Rm04NormSqUnboundedAt
   forall K : Real, ∃ t : Real, ∃ x : M,
     alpha <= t ∧ t < omega ∧ K < curvatureNormSq (I := I) S Rm04 t x
 
+/-- The metric-induced squared norm of a supplied lowered Riemann tensor is
+bounded above on `M × [alpha, omega)`. -/
+def Rm04NormSqBoundedAt
+    {alpha omega : Real} {hαω : alpha < omega}
+    (S : SolutionOn (I := I) (M := M)
+      (Realized.RealTimeInterval.closedOpen alpha omega hαω))
+    (Rm04 : Real -> Realized.Tensor04Section (I := I) (M := M)) : Prop :=
+  ∃ K : Real, forall t : Real, forall x : M,
+    alpha <= t -> t < omega ->
+      curvatureNormSq (I := I) S Rm04 t x <= K
+
+/-- Failure of unboundedness gives a finite bound.  This is just classical
+logic for the chosen squared-norm formulation. -/
+theorem rmBounded_of_not_unbounded
+    {alpha omega : Real} {hαω : alpha < omega}
+    {S : SolutionOn (I := I) (M := M)
+      (Realized.RealTimeInterval.closedOpen alpha omega hαω)}
+    {Rm04 : Real -> Realized.Tensor04Section (I := I) (M := M)}
+    (hnot : ¬ Rm04NormSqUnboundedAt (I := I) S Rm04) :
+    Rm04NormSqBoundedAt (I := I) S Rm04 := by
+  classical
+  unfold Rm04NormSqUnboundedAt at hnot
+  simp only [not_forall, not_exists, not_and, not_lt] at hnot
+  rcases hnot with ⟨K, hK⟩
+  refine ⟨K, ?_⟩
+  intro t x ht hT
+  exact hK t x ht hT
+
+/-- Black Box 11.2: bounded curvature on a closed finite-endpoint Ricci flow
+lets the flow extend smoothly past the endpoint.  This is global PDE theory,
+not local tensor algebra. -/
+theorem extends_of_rmBounded
+    {alpha omega : Real} {hαω : alpha < omega}
+    {S : SolutionOn (I := I) (M := M)
+      (Realized.RealTimeInterval.closedOpen alpha omega hαω)}
+    {Rm04 : Real -> Realized.Tensor04Section (I := I) (M := M)}
+    (_hRm : Rm04RealizesSolutionConnectionOn (I := I) S Rm04)
+    (_hbound : Rm04NormSqBoundedAt (I := I) S Rm04) :
+    ExtendsPastEndpoint (I := I) hαω S := by
+  sorry
+
+/-- Lemma 11.3: a maximal finite-endpoint Ricci flow has unbounded curvature.
+
+This is the consumer proof from Black Box 11.2: if curvature were bounded, the
+extension criterion would extend the solution past the endpoint, contradicting
+maximality. -/
+theorem rmUnbounded_of_maximal
+    {alpha omega : Real} {hαω : alpha < omega}
+    {S : SolutionOn (I := I) (M := M)
+      (Realized.RealTimeInterval.closedOpen alpha omega hαω)}
+    {Rm04 : Real -> Realized.Tensor04Section (I := I) (M := M)}
+    (hmax : IsMaximalAtEndpoint (I := I) hαω S)
+    (hRm : Rm04RealizesSolutionConnectionOn (I := I) S Rm04) :
+    Rm04NormSqUnboundedAt (I := I) S Rm04 := by
+  by_contra hnot
+  exact hmax (extends_of_rmBounded (I := I) hRm
+    (rmBounded_of_not_unbounded (I := I) hnot))
+
 /-- A Ricci flow forms a singularity at the finite endpoint when some lowered
 Riemann tensor realizing the solution curvature has metric-induced squared
 norm unbounded on `M × [alpha, omega)`. -/
@@ -109,6 +167,20 @@ def FormsSingularityAt
   ∃ Rm04 : Real -> Realized.Tensor04Section (I := I) (M := M),
     Rm04RealizesSolutionConnectionOn (I := I) S Rm04 ∧
       Rm04NormSqUnboundedAt (I := I) S Rm04
+
+/-- Existential version of Lemma 11.3 matching `FormsSingularityAt`.  A
+separate curvature-realization producer supplies the realizing `Rm04`. -/
+theorem formsSing_of_maximal
+    {alpha omega : Real} {hαω : alpha < omega}
+    {S : SolutionOn (I := I) (M := M)
+      (Realized.RealTimeInterval.closedOpen alpha omega hαω)}
+    (hmax : IsMaximalAtEndpoint (I := I) hαω S)
+    (hRmEx :
+      ∃ Rm04 : Real -> Realized.Tensor04Section (I := I) (M := M),
+        Rm04RealizesSolutionConnectionOn (I := I) S Rm04) :
+    FormsSingularityAt (I := I) S := by
+  rcases hRmEx with ⟨Rm04, hRm⟩
+  exact ⟨Rm04, hRm, rmUnbounded_of_maximal (I := I) hmax hRm⟩
 
 /-- Interface for Lemma 14.27.  Proving this requires the global extension
 criterion and compactness/regularity inputs; this file only exposes the target

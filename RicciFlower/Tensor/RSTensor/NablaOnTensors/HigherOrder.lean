@@ -1,5 +1,6 @@
-import RicciFlower.Tensor.RSTensor.NablaOnTensors.Raw
+import RicciFlower.Tensor.RSTensor.NablaOnTensors.RawDefs
 import RicciFlower.Tensor.RSTensor.NablaOnTensors.Connection.Endomorphism
+import RicciFlower.Tensor.RSTensor.NablaOnTensors.Regularity.Tensor0S
 
 /-!
 # Higher-order covariant derivative interfaces

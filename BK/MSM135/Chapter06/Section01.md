@@ -61,6 +61,40 @@ RicciFlower-native `F` first-variation producer.
 
 Verification: passed for this file and the targeted BK Section 6.1 module.
 
+## 2026-05-17 Formula 5.10 assembly aliases
+
+Added BK-facing aliases for the new RicciFlower integral assembly handles:
+
+- `lbl453_weighted_green`
+- `lbl453_weighted_divergence_zero`
+- `lbl453_shifted_trace_green`
+- `lbl453_f_formula510_assembly`
+
+These expose the proved scalar assembly route: arbitrary-test weighted Green,
+closed weighted-divergence cancellation from an actual divergence field,
+shifted-trace Green, and the final `formula510_of_ints` theorem.
+
+Verification passed for this file and the targeted BK Section 6.1 module.  The
+broader `BK.MSM135.Chapter06` aggregate build failed in an existing tensor
+regularity import cycle, not in this wrapper.
+
+## 2026-05-17 Formula 5.10 divergence field
+
+RicciFlower now has the checked divergence-field construction used by the
+formula 5.10 assembly:
+
+- `connTraceVec`
+- `connTraceDivEq`
+- `weightedDivZero_of_connTrace`
+- `formula510_of_connTrace`
+
+No new BK alias was added in this pass; the public Section 6.1 wrappers remain
+stable and continue to expose the existing formula 5.10 assembly handles.  The
+remaining mathematical bridge is to construct the global smooth trace vector
+`traceVec = g^{ij} A^p_ij` from the connection-variation tensor `A`.
+
+Verification passed for the targeted BK Section 6.1 module.
+
 ## 2026-05-16 Formula 5.10 F-functional aliases
 
 Switched the Section 6.1 import to the RicciFlower `F` module and added

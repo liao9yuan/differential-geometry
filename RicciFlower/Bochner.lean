@@ -1474,8 +1474,8 @@ def Tensor02NormProductRuleInBasis
     2 * tensor02RoughInnerCoord (I := I) basis gInv A roughA +
       2 * tensor02NablaNormCoord (I := I) basis gInv nablaA
 
-/-- The scalar trace realization and the traced second-product rule imply the
-coordinate product-rule conclusion for a `(0,2)` tensor norm. -/
+/-- The direct scalar trace identity and the traced second-product rule imply
+the coordinate product-rule conclusion for a `(0,2)` tensor norm. -/
 theorem tensor02_norm_product_rule_of_second_product
     {Idx : Type*} [Fintype Idx]
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -1486,14 +1486,17 @@ theorem tensor02_norm_product_rule_of_second_product
     (A roughA : Tensor02At (I := I) x)
     (nablaA : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
     (normSecond : Tensor02At (I := I) x)
-    (hlap : ScalarLaplacianRealizesTraceAtInBasis (I := I) cov g basis gInv f normSecond)
+    (hlap :
+      laplacian (I := I) cov g f x =
+        metricTrace0S2InBasis (I := I) basis gInv normSecond Fin.elim0)
     (hsecond : Tensor02NormSecondProductInBasis (I := I) basis gInv A roughA
       nablaA normSecond) :
     Tensor02NormProductRuleInBasis (I := I) basis gInv
       (laplacian (I := I) cov g f x) A roughA nablaA := by
-  unfold Tensor02NormProductRuleInBasis Tensor02NormSecondProductInBasis
-    ScalarLaplacianRealizesTraceAtInBasis at *
-  rw [hlap, hsecond]
+  unfold Tensor02NormProductRuleInBasis
+  rw [hlap]
+  unfold Tensor02NormSecondProductInBasis at hsecond
+  rw [hsecond]
   ring
 
 end Tensor02Product

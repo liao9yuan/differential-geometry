@@ -8,6 +8,7 @@ import RicciFlower.Tensor.RSTensor.CoordinateBasis
 import RicciFlower.Tensor.RSTensor.Components
 import RicciFlower.Tensor.RSTensor.Tensoriality
 import RicciFlower.Tensor.RSTensor.NablaOnTensors
+import RicciFlower.Tensor.RSTensor.MetricCompatibility
 import RicciFlower.Coordinates.Tensor
 import RicciFlower.Coordinates.CoordinateFrame
 import RicciFlower.Tensor.Section12Interface
@@ -48,6 +49,7 @@ import RicciFlower.RicciFlow.Evolution.FiniteTimeBlowup
 import RicciFlower.RicciFlow.Evolution.NormalizedFlow
 import RicciFlower.RicciFlow.Evolution.ExponentialConvergence
 import RicciFlower.RicciFlow.Evolution.BlackBox
+import RicciFlower.HamiltonPositiveRicci
 import RicciFlower.RicciFlow.Perelman
 import RicciFlower.Realized.Curvature
 import RicciFlower.Realized.CurvatureTensor
@@ -55,6 +57,7 @@ import RicciFlower.Realized.CurvatureComponents
 import RicciFlower.DimensionThree.CurvatureAlgebra
 import RicciFlower.DimensionThree.RiemannFromRicci
 import RicciFlower.DimensionThree.PinchingAlgebra
+import RicciFlower.DimensionThree.RicciControlsRm
 import RicciFlower.MaximumPrinciple.ScalarWeak
 import RicciFlower.MaximumPrinciple.TensorWeak
 import RicciFlower.Coordinates.Christoffel

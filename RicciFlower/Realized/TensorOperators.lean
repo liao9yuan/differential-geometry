@@ -30,6 +30,25 @@ variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable {Time : Type*}
 
+private theorem metricTraceFirstTwo0SAt_zero
+    (g : SmoothRiemannianMetric I M)
+    {x : M} {s : ℕ}
+    (tail : Fin s -> TangentSpace I x) :
+    metricTraceFirstTwo0SAt (I := I) g
+        (0 : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+          (s + 2) x)
+        tail = 0 := by
+  rw [metricTraceFirstTwo0SAt_eq_sum_basis (I := I) g
+    (Coordinates.coordinateFrameAt_toBasis (I := I) x)
+    (fun k l : Coordinates.CoordinateIdx (𝕜 := Real) E =>
+      Coordinates.inverseMetricFlatModelInChart_component (I := I) g x k l
+        (extChartAt I x x))
+    (Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center (I := I) g x)
+    (0 : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (s + 2) x)
+    tail]
+  simp [metricTrace0S2InBasis]
+
 /-- Tensor-valued heat operator from a supplied second covariant derivative
 and a single Riemannian metric.
 
@@ -246,6 +265,21 @@ theorem tensorHeatWithDrift2QuadMetricAt_eq
         nablaA (Fin.cons (X x) (vec2 v v)) := by
   simp [tensorHeatWithDrift2QuadMetricAt]
 
+@[simp]
+theorem tensorHeatWithDrift2QuadMetricAt_zero
+    (g : SmoothRiemannianMetric I M)
+    (X : (x : M) -> TangentSpace I x)
+    {x : M} (v : TangentSpace I x) :
+    tensorHeatWithDrift2QuadMetricAt (I := I) g X
+        (0 : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+          4 x)
+        (0 : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+          3 x)
+        v = 0 := by
+  rw [tensorHeatWithDrift2QuadMetricAt_eq]
+  rw [metricTraceFirstTwo0SAt_zero]
+  simp
+
 /-- Quadratic evaluation of the two-tensor heat-with-drift operator. -/
 def tensorHeatWithDrift2QuadAt
     (G : RealizedMetricFamily (I := I) (M := M) Time)
@@ -272,6 +306,21 @@ theorem tensorHeatWithDrift2QuadAt_eq
       metricTraceFirstTwo0SAt (I := I) (G.metric t) nabla2A (vec2 v v) +
         nablaA (Fin.cons (X x) (vec2 v v)) := by
   exact tensorHeatWithDrift2QuadMetricAt_eq (I := I) (G.metric t) X nabla2A nablaA v
+
+@[simp]
+theorem tensorHeatWithDrift2QuadAt_zero
+    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (t : Time) (X : (x : M) -> TangentSpace I x)
+    {x : M} (v : TangentSpace I x) :
+    tensorHeatWithDrift2QuadAt (I := I) G t X
+        (0 : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+          4 x)
+        (0 : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+          3 x)
+        v = 0 := by
+  rw [tensorHeatWithDrift2QuadAt_eq]
+  rw [metricTraceFirstTwo0SAt_zero]
+  simp
 
 end
 
