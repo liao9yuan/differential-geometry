@@ -284,8 +284,12 @@ by parts in direction `l` against a smooth compactly supported test function
 
 The smooth coefficient `φ` is only required to be `ContDiffOn` on the open
 chart target; it is extended to a globally smooth representative agreeing with
-`φ` on a neighbourhood of `tsupport ψ` via `exists_smooth_global_extension`. -/
-private theorem generic_per_pair_ibp
+`φ` on a neighbourhood of `tsupport ψ` via `exists_smooth_global_extension`.
+
+This is a reusable per-pair integration-by-parts engine: it is consumed by the
+iterated divergence-form scaffold for the once-more directional integration by
+parts of an arbitrary `W^{1,2}` weakly differentiable factor. -/
+theorem generic_per_pair_ibp
     (α : M)
     {v : EuclN → ℝ}
     (hv : DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 v

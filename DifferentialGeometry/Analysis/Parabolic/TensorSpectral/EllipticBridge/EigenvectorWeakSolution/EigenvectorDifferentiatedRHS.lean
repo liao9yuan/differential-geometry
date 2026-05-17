@@ -503,8 +503,11 @@ omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
 /-- Multiplication of a `MemLp 2 (volume.restrict K)` factor (on a compact
 `K ⊆ chartTargetEuclid α`) by a `C^∞`-on-the-chart-target coefficient stays in
 `MemLp 2 (volume.restrict K)`: the coefficient is continuous on the chart target,
-hence bounded on the compact `K`, and bounded-measurable × `L²` is `L²`. -/
-private lemma memLp_volume_compact_contDiffOn_mul
+hence bounded on the compact `K`, and bounded-measurable × `L²` is `L²`.
+
+This is a reusable building block, consumed by the iterated divergence-form
+scaffold for the chart-density-divided differentiated numerator. -/
+lemma memLp_volume_compact_contDiffOn_mul
     (α : M)
     {c : EuclN → ℝ}
     (hc : ContDiffOn ℝ ∞ c (chartTargetEuclid (I := I) (M := M) α))
@@ -555,8 +558,12 @@ weak partials are `MemLp 2 (volume.restrict K)` with no `W^{1,2}` hypothesis
 (`eigenvectorChartIteratedPartial_memLp_volume_compact`,
 `chosenWeakPartial'_memLp_volume_unconditional`), and `fChartEffPrev` transfers
 from weighted-`MemLp 2` to `MemLp 2 (volume.restrict K)` on the compact `K` by
-`memLp_volume_restrict_of_memLp_chartPulledWeightedMeasure`. -/
-private lemma eigenvectorChartRHSDiffNumerator_memLp_volume_compact
+`memLp_volume_restrict_of_memLp_chartPulledWeightedMeasure`.
+
+This is a reusable building block, consumed by the iterated divergence-form
+scaffold for the weighted-`L²` regularity of the standalone-step effective
+source. -/
+lemma eigenvectorChartRHSDiffNumerator_memLp_volume_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_uniform : uniformTensorChartSobolevBound g r s)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
