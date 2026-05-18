@@ -354,6 +354,7 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.MorreyManifoldHigherOrder
 import DifferentialGeometry.Analysis.Sobolev.WithBoundary.EuclideanMorrey
 import DifferentialGeometry.Analysis.Sobolev.WithBoundary.EmbeddingSubcritical
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevEmbedding
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbeddingCInfty
 import DifferentialGeometry.Analysis.Sobolev.WithBoundary.IteratedSobolevEmbedding
 import DifferentialGeometry.Analysis.Sobolev.WithBoundary.MorreyManifold
