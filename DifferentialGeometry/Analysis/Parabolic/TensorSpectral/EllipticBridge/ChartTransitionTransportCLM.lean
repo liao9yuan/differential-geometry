@@ -1017,6 +1017,34 @@ lemma chartTransitionTransportCLM_coeFn
   exact transportLp_coeFn (I := I) (M := M) g r s β α P₀ Q
     (transportDiffeoData (I := I) (M := M) g r s β α P₀ Q) f
 
+/-- **General underlying-function description of the transport operator.** For
+an arbitrary `L²` class `f` on the chart-`β` Euclidean target, the transport
+operator value agrees almost everywhere on the chart-`α` Euclidean target with
+the pointwise product of the chart-`α` pushforward of the transport coefficient
+and the chart-transition precomposition of `f`.
+
+Unlike `chartTransitionTransportCLM_coeFn_smooth`, this holds for every `L²`
+argument — not only the chart components of smooth sections — and the
+right-hand side is expressed entirely through publicly available data: the
+chart pushforward `chartPushedRaw`, the transport coefficient
+`transportCoeffManifold`, and the chart-transition diffeomorphism
+`chartTransitionEuclid`. -/
+theorem chartTransitionTransportCLM_coeFn_aeEq
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
+    (P₀ Q : TensorCompIdx (E := E) r s)
+    (f : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
+    ((chartTransitionTransportCLM (I := I) (M := M) g r s β α P₀ Q f :
+        Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) =ᵐ[
+        chartL2Measure (I := I) (M := M) α]
+      (fun y => chartPushedRaw (I := I) (M := M) α
+          (transportCoeffManifold (I := I) (M := M) g r s β α P₀ Q) y *
+        (f : EuclN → ℝ) (chartTransitionEuclid (I := I) (M := M) α β y)) := by
+  refine (chartTransitionTransportCLM_coeFn
+    (I := I) (M := M) g r s β α P₀ Q f).trans ?_
+  refine Filter.EventuallyEq.of_eq ?_
+  funext y
+  rfl
+
 /-! ## Compatibility with the chart component of a smooth section
 
 On the canonical chart component of a smooth section, the transport operator
