@@ -143,7 +143,7 @@ private lemma chartPushedPouWeight_norm_le_one (α : M) (y : EuclN) :
 /-- The chart-pushed partition-of-unity weight is Borel measurable: the
 partition-of-unity weight is `C^∞` hence measurable, and the chart pushforward
 of a measurable function is measurable. -/
-private lemma chartPushedPouWeight_measurable (α : M) :
+lemma chartPushedPouWeight_measurable (α : M) :
     Measurable (chartPushedPouWeight (I := I) (M := M) α) := by
   classical
   unfold chartPushedPouWeight
