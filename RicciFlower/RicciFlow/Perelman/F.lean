@@ -1525,6 +1525,170 @@ def connTraceAction
         extDerivFun (I := I) potential x
           (coordinateFrameAt (I := I) x p x)
 
+/-- Coordinate action trace written directly from Christoffel-variation
+components and potential-gradient components.  The finite-sum order matches
+`connTraceAction`, so the bridge is only component substitution. -/
+def gammaActionTrace
+    (g : SmoothRiemannianMetric I M)
+    (christoffelVariation :
+      M -> CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
+        CoordinateIdx (𝕜 := Real) E -> Real)
+    (gradPotential : M -> CoordinateIdx (𝕜 := Real) E -> Real) :
+    M -> Real :=
+  fun x =>
+    ∑ p : CoordinateIdx (𝕜 := Real) E,
+      (∑ i : CoordinateIdx (𝕜 := Real) E,
+        ∑ j : CoordinateIdx (𝕜 := Real) E,
+          inverseMetricFlatModelInChart_component (I := I) g x i j
+              (extChartAt I x x) *
+            christoffelVariation x p i j) *
+        gradPotential x p
+
+/-- The raw scalar trace of `nabla_p A^p_ij`, contracted with the inverse
+metric in the point-centered coordinate frame. -/
+def gammaRawDivergenceTrace
+    (g : SmoothRiemannianMetric I M)
+    (nablaChristoffelVariation :
+      M -> CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
+        CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E -> Real) :
+    M -> Real :=
+  fun x =>
+    ∑ i : CoordinateIdx (𝕜 := Real) E,
+      ∑ j : CoordinateIdx (𝕜 := Real) E,
+        inverseMetricFlatModelInChart_component (I := I) g x i j
+            (extChartAt I x x) *
+          (∑ p : CoordinateIdx (𝕜 := Real) E,
+            nablaChristoffelVariation x p p i j)
+
+/-- Scalar contraction of the weighted Christoffel-divergence tensor
+`nabla_p A^p_ij - A^p_ij partial_p f`. -/
+def christoffelWeightedDivergenceTrace
+    (g : SmoothRiemannianMetric I M)
+    (nablaChristoffelVariation :
+      M -> CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
+        CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E -> Real)
+    (christoffelVariation :
+      M -> CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
+        CoordinateIdx (𝕜 := Real) E -> Real)
+    (gradPotential : M -> CoordinateIdx (𝕜 := Real) E -> Real) :
+    M -> Real :=
+  fun x =>
+    ∑ i : CoordinateIdx (𝕜 := Real) E,
+      ∑ j : CoordinateIdx (𝕜 := Real) E,
+        inverseMetricFlatModelInChart_component (I := I) g x i j
+            (extChartAt I x x) *
+          christoffelWeightedDivergenceInFrame nablaChristoffelVariation
+            christoffelVariation gradPotential x i j
+
+/-- The scalar contraction of
+`nabla_p A^p_ij - A^p_ij partial_p f` is the raw divergence trace minus the
+trace-field action term.  This is only finite-sum algebra; the geometric
+frontier remains identifying `gammaRawDivergenceTrace` with
+`divergence_g(tr_g A)`. -/
+theorem weightedTrace_eq
+    (g : SmoothRiemannianMetric I M)
+    (nablaChristoffelVariation :
+      M -> CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
+        CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E -> Real)
+    (christoffelVariation :
+      M -> CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
+        CoordinateIdx (𝕜 := Real) E -> Real)
+    (gradPotential : M -> CoordinateIdx (𝕜 := Real) E -> Real) :
+    christoffelWeightedDivergenceTrace (I := I) g
+        nablaChristoffelVariation christoffelVariation gradPotential =
+      fun x =>
+        gammaRawDivergenceTrace (I := I) g nablaChristoffelVariation x -
+          gammaActionTrace (I := I) g christoffelVariation gradPotential x := by
+  classical
+  funext x
+  unfold christoffelWeightedDivergenceTrace gammaRawDivergenceTrace
+    gammaActionTrace christoffelWeightedDivergenceInFrame
+  rw [show
+      (∑ i : CoordinateIdx (𝕜 := Real) E,
+        ∑ j : CoordinateIdx (𝕜 := Real) E,
+          inverseMetricFlatModelInChart_component (I := I) g x i j
+              (extChartAt I x x) *
+            ((∑ p : CoordinateIdx (𝕜 := Real) E,
+                nablaChristoffelVariation x p p i j) -
+              ∑ p : CoordinateIdx (𝕜 := Real) E,
+                christoffelVariation x p i j * gradPotential x p)) =
+        (∑ i : CoordinateIdx (𝕜 := Real) E,
+          ∑ j : CoordinateIdx (𝕜 := Real) E,
+            inverseMetricFlatModelInChart_component (I := I) g x i j
+                (extChartAt I x x) *
+              (∑ p : CoordinateIdx (𝕜 := Real) E,
+                nablaChristoffelVariation x p p i j)) -
+          (∑ i : CoordinateIdx (𝕜 := Real) E,
+            ∑ j : CoordinateIdx (𝕜 := Real) E,
+              inverseMetricFlatModelInChart_component (I := I) g x i j
+                  (extChartAt I x x) *
+                (∑ p : CoordinateIdx (𝕜 := Real) E,
+                  christoffelVariation x p i j * gradPotential x p)) by
+      simp only [mul_sub, Finset.sum_sub_distrib]]
+  congr 1
+  calc
+    (∑ i : CoordinateIdx (𝕜 := Real) E,
+      ∑ j : CoordinateIdx (𝕜 := Real) E,
+        inverseMetricFlatModelInChart_component (I := I) g x i j
+            (extChartAt I x x) *
+          (∑ p : CoordinateIdx (𝕜 := Real) E,
+            christoffelVariation x p i j * gradPotential x p))
+        =
+      ∑ i : CoordinateIdx (𝕜 := Real) E,
+        ∑ j : CoordinateIdx (𝕜 := Real) E,
+          ∑ p : CoordinateIdx (𝕜 := Real) E,
+            inverseMetricFlatModelInChart_component (I := I) g x i j
+                (extChartAt I x x) *
+              christoffelVariation x p i j * gradPotential x p := by
+        refine Finset.sum_congr rfl fun i _ => ?_
+        refine Finset.sum_congr rfl fun j _ => ?_
+        rw [Finset.mul_sum]
+        refine Finset.sum_congr rfl fun p _ => ?_
+        ring
+    _ =
+      ∑ p : CoordinateIdx (𝕜 := Real) E,
+        ∑ i : CoordinateIdx (𝕜 := Real) E,
+          ∑ j : CoordinateIdx (𝕜 := Real) E,
+            inverseMetricFlatModelInChart_component (I := I) g x i j
+                (extChartAt I x x) *
+              christoffelVariation x p i j * gradPotential x p := by
+        calc
+          (∑ i : CoordinateIdx (𝕜 := Real) E,
+            ∑ j : CoordinateIdx (𝕜 := Real) E,
+              ∑ p : CoordinateIdx (𝕜 := Real) E,
+                inverseMetricFlatModelInChart_component (I := I) g x i j
+                    (extChartAt I x x) *
+                  christoffelVariation x p i j * gradPotential x p)
+              =
+            ∑ i : CoordinateIdx (𝕜 := Real) E,
+              ∑ p : CoordinateIdx (𝕜 := Real) E,
+                ∑ j : CoordinateIdx (𝕜 := Real) E,
+                  inverseMetricFlatModelInChart_component (I := I) g x i j
+                      (extChartAt I x x) *
+                    christoffelVariation x p i j * gradPotential x p := by
+              refine Finset.sum_congr rfl fun i _ => ?_
+              rw [Finset.sum_comm]
+          _ =
+            ∑ p : CoordinateIdx (𝕜 := Real) E,
+              ∑ i : CoordinateIdx (𝕜 := Real) E,
+                ∑ j : CoordinateIdx (𝕜 := Real) E,
+                  inverseMetricFlatModelInChart_component (I := I) g x i j
+                      (extChartAt I x x) *
+                    christoffelVariation x p i j * gradPotential x p := by
+              rw [Finset.sum_comm]
+    _ =
+      ∑ p : CoordinateIdx (𝕜 := Real) E,
+        (∑ i : CoordinateIdx (𝕜 := Real) E,
+          ∑ j : CoordinateIdx (𝕜 := Real) E,
+            inverseMetricFlatModelInChart_component (I := I) g x i j
+                (extChartAt I x x) *
+              christoffelVariation x p i j) *
+          gradPotential x p := by
+        refine Finset.sum_congr rfl fun p _ => ?_
+        rw [Finset.sum_mul]
+        refine Finset.sum_congr rfl fun i _ => ?_
+        rw [Finset.sum_mul]
+
 /-- The coordinate-centered `connTraceAction` is the intrinsic tangent action
 of the constructed field. -/
 theorem connTraceAction_eq
@@ -1539,6 +1703,454 @@ theorem connTraceAction_eq
   simpa [connTraceAction] using
     connTraceAction_coord (I := I) g A potential x
       (coordinateFrameAt_mem (I := I) x)
+
+/-- Component bridge for the action term: once `A` realizes the Christoffel
+variation tensor and `gradPotential` realizes the coordinate directional
+derivatives of the potential, the intrinsic action trace is the corresponding
+finite component contraction. -/
+theorem connTraceAction_eq_gamma
+    (g : SmoothRiemannianMetric I M)
+    (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1 2)
+    (potential : M -> Real)
+    (christoffelVariation :
+      M -> CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
+        CoordinateIdx (𝕜 := Real) E -> Real)
+    (gradPotential : M -> CoordinateIdx (𝕜 := Real) E -> Real)
+    (hA :
+      ∀ x : M, ∀ p i j : CoordinateIdx (𝕜 := Real) E,
+        componentRS (I := I)
+            (coordinateFrameAt_basis (I := I) x (coordinateFrameAt_mem (I := I) x))
+            (A x) (fun _ : Fin 1 => p)
+            (fun q : Fin 2 => if q = 0 then i else j) =
+          christoffelVariation x p i j)
+    (hgrad :
+      ∀ x : M, ∀ p : CoordinateIdx (𝕜 := Real) E,
+        extDerivFun (I := I) potential x (coordinateFrameAt (I := I) x p x) =
+          gradPotential x p) :
+    connTraceAction (I := I) g A potential =
+      gammaActionTrace (I := I) g christoffelVariation gradPotential := by
+  funext x
+  unfold connTraceAction gammaActionTrace
+  refine Finset.sum_congr rfl ?_
+  intro p _
+  rw [hgrad x p]
+  congr 1
+  refine Finset.sum_congr rfl ?_
+  intro i _
+  refine Finset.sum_congr rfl ?_
+  intro j _
+  rw [hA x p i j]
+
+/-- Once the raw divergence of `tr_g A` has been identified with
+`gammaRawDivergenceTrace`, the weighted scalar trace is automatically
+`div(tr_g A) - (tr_g A)(f)`. -/
+theorem weightedTrace_of_raw
+    (g : SmoothRiemannianMetric I M)
+    (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1 2)
+    (potential : M -> Real)
+    (nablaChristoffelVariation :
+      M -> CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
+        CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E -> Real)
+    (christoffelVariation :
+      M -> CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
+        CoordinateIdx (𝕜 := Real) E -> Real)
+    (gradPotential : M -> CoordinateIdx (𝕜 := Real) E -> Real)
+    (hraw :
+      ∀ x : M,
+        connTraceRawDiv (I := I) g A x =
+          gammaRawDivergenceTrace (I := I) g nablaChristoffelVariation x)
+    (hA :
+      ∀ x : M, ∀ p i j : CoordinateIdx (𝕜 := Real) E,
+        componentRS (I := I)
+            (coordinateFrameAt_basis (I := I) x (coordinateFrameAt_mem (I := I) x))
+            (A x) (fun _ : Fin 1 => p)
+            (fun q : Fin 2 => if q = 0 then i else j) =
+          christoffelVariation x p i j)
+    (hgrad :
+      ∀ x : M, ∀ p : CoordinateIdx (𝕜 := Real) E,
+        extDerivFun (I := I) potential x (coordinateFrameAt (I := I) x p x) =
+          gradPotential x p) :
+    ∀ x : M,
+      christoffelWeightedDivergenceTrace (I := I) g
+          nablaChristoffelVariation christoffelVariation gradPotential x =
+        connTraceRawDiv (I := I) g A x -
+          connTraceAction (I := I) g A potential x := by
+  intro x
+  have hweighted :=
+    congrFun
+      (weightedTrace_eq (I := I) g nablaChristoffelVariation
+        christoffelVariation gradPotential) x
+  have haction :=
+    congrFun
+      (connTraceAction_eq_gamma (I := I) g A potential
+        christoffelVariation gradPotential hA hgrad) x
+  calc
+    christoffelWeightedDivergenceTrace (I := I) g
+        nablaChristoffelVariation christoffelVariation gradPotential x =
+      gammaRawDivergenceTrace (I := I) g nablaChristoffelVariation x -
+        gammaActionTrace (I := I) g christoffelVariation gradPotential x := hweighted
+    _ = connTraceRawDiv (I := I) g A x -
+          connTraceAction (I := I) g A potential x := by
+        rw [← hraw x, ← haction]
+
+/-- On the coordinate-frame domain, the divergence theorem's chart coefficient
+is the same coefficient as the `coordinateFrameAt` local-frame coefficient. -/
+private theorem chartCoeff_eq_coordinateFrame_coeff
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (x₀ : M) {x : M} (hx : x ∈ coordinateFrameSet (I := I) x₀)
+    (p : CoordinateIdx (𝕜 := Real) E) :
+    RicciFlower.Analysis.DivergenceTheorem.chartCoeff (I := I) x₀ X p x =
+      (coordinateFrameAt_isLocalFrame (I := I) x₀).coeff p x (X x) := by
+  classical
+  let e := coordinateTrivializationAt (I := I) x₀
+  let b : Module.Basis (CoordinateIdx (𝕜 := Real) E) Real E := Module.finBasis Real E
+  have hxE : x ∈ e.baseSet := by
+    simpa [e, coordinateFrameSet] using hx
+  have hcoeff :=
+    Bundle.Trivialization.localFrame_coeff_apply_of_mem_baseSet
+      (I := I) (e := e) (b := b) (x := x) hxE
+      (fun y : M => X y) p
+  have hchart :=
+    Bundle.Trivialization.localFrame_coeff_eq_coeff
+      (I := I) (e := e) (b := b) (s := fun y : M => X y)
+      (x := x) (i := p) hxE
+  have hbasis :
+      (coordinateFrameAt_isLocalFrame (I := I) x₀).toBasisAt hx =
+        e.basisAt b hxE := by
+    ext j
+    rw [IsLocalFrameOn.toBasisAt_coe]
+    simpa [e, b, coordinateFrameAt] using
+      (Bundle.Trivialization.localFrame_apply_of_mem_baseSet
+        (e := e) (b := b) (i := j) hxE)
+  rw [(coordinateFrameAt_isLocalFrame (I := I) x₀).coeff_apply_of_mem
+    hx (fun y : M => X y) p]
+  rw [hbasis]
+  rw [← hcoeff]
+  simpa [RicciFlower.Analysis.DivergenceTheorem.chartCoeff, e, b] using hchart.symm
+
+/-- Local coordinate expression for the chart coefficient of the constructed
+trace field.  This is the coefficient bridge needed before differentiating the
+Voss-Weyl divergence formula. -/
+theorem connTraceChartCoeff_eventually
+    (g : SmoothRiemannianMetric I M)
+    (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1 2)
+    (x₀ : M) (p : CoordinateIdx (𝕜 := Real) E) :
+    (fun y : M =>
+        RicciFlower.Analysis.DivergenceTheorem.chartCoeff (I := I) x₀
+          (RicciFlower.Realized.connTraceField (I := I) g A) p y)
+      =ᶠ[nhds x₀]
+      fun y : M =>
+        ∑ i : CoordinateIdx (𝕜 := Real) E,
+          ∑ j : CoordinateIdx (𝕜 := Real) E,
+            inverseMetricFlatModelInChart_component (I := I) g x₀ i j
+                (extChartAt I x₀ y) *
+              (A y
+                (Tensor0SSpace.constInChart (𝕜 := Real) (E := E) (H := H)
+                  (I := I) (M := M) 1 x₀
+                  ((continuousMultilinearMap_basis
+                    (𝕜 := Real) (F := E) (Module.finBasis Real E) 1)
+                    (fun _ : Fin 1 => p)) y))
+                (fun q : Fin 2 =>
+                  coordinateFrameAt (I := I) x₀ (if q = 0 then i else j) y) := by
+  classical
+  have hcoeff :=
+    RicciFlower.Realized.connTraceCoeff_eventually (I := I) g A x₀ p
+  filter_upwards
+    [(coordinateFrameSet_open (I := I) x₀).mem_nhds
+      (coordinateFrameAt_mem (I := I) x₀), hcoeff] with y hy hcoeff_y
+  rw [chartCoeff_eq_coordinateFrame_coeff
+    (I := I) (RicciFlower.Realized.connTraceField (I := I) g A)
+    x₀ hy p]
+  exact hcoeff_y
+
+/-- Model-chart version of `connTraceChartCoeff_eventually`.
+
+This is the bridge needed before differentiating the Voss-Weyl expression:
+near the chart center, the pulled-back chart coefficient of `tr_g A` is the
+finite inverse-metric contraction of the pulled-back `(1,2)` tensor
+components. -/
+theorem connTraceChartCoeffOnE_eventually
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M)
+    (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1 2)
+    (x₀ : M) (p : CoordinateIdx (𝕜 := Real) E) :
+    (fun y : E =>
+        RicciFlower.Analysis.DivergenceTheorem.chartCoeffOnE (I := I) x₀
+          (RicciFlower.Realized.connTraceField (I := I) g A) p y)
+      =ᶠ[nhds (extChartAt I x₀ x₀)]
+      fun y : E =>
+        ∑ i : CoordinateIdx (𝕜 := Real) E,
+          ∑ j : CoordinateIdx (𝕜 := Real) E,
+            inverseMetricFlatModelInChart_component (I := I) g x₀ i j y *
+              (A ((extChartAt I x₀).symm y)
+                (Tensor0SSpace.constInChart (𝕜 := Real) (E := E) (H := H)
+                  (I := I) (M := M) 1 x₀
+                  ((continuousMultilinearMap_basis
+                    (𝕜 := Real) (F := E) (Module.finBasis Real E) 1)
+                    (fun _ : Fin 1 => p)) ((extChartAt I x₀).symm y)))
+                (fun q : Fin 2 =>
+                  coordinateFrameAt (I := I) x₀ (if q = 0 then i else j)
+                    ((extChartAt I x₀).symm y)) := by
+  classical
+  have hM := connTraceChartCoeff_eventually (I := I) g A x₀ p
+  let z₀ : E := extChartAt I x₀ x₀
+  have hsymm_tend :
+      Filter.Tendsto (fun z : E => (extChartAt I x₀).symm z) (nhds z₀) (nhds x₀) := by
+    have hleft : (extChartAt I x₀).symm ((extChartAt I x₀) x₀) = x₀ :=
+      (extChartAt I x₀).left_inv (mem_extChartAt_source (I := I) x₀)
+    simpa only [ContinuousAt, z₀, hleft, Function.comp_def] using
+      continuousAt_extChartAt_symm (I := I) x₀
+  have hcomp := hM.comp_tendsto hsymm_tend
+  filter_upwards [hcomp, extChartAt_target_mem_nhds' (I := I)
+      (x := x₀) (y := z₀) (by simp [z₀])] with y hcoeff hy_target
+  have hright : extChartAt I x₀ ((extChartAt I x₀).symm y) = y :=
+    (extChartAt I x₀).right_inv hy_target
+  have hcoeff' :
+      RicciFlower.Analysis.DivergenceTheorem.chartCoeff (I := I) x₀
+          (RicciFlower.Realized.connTraceField (I := I) g A) p
+          ((extChartAt I x₀).symm y) =
+        ∑ i : CoordinateIdx (𝕜 := Real) E,
+          ∑ j : CoordinateIdx (𝕜 := Real) E,
+            inverseMetricFlatModelInChart_component (I := I) g x₀ i j
+                (extChartAt I x₀ ((extChartAt I x₀).symm y)) *
+              (A ((extChartAt I x₀).symm y)
+                (Tensor0SSpace.constInChart (𝕜 := Real) (E := E) (H := H)
+                  (I := I) (M := M) 1 x₀
+                  ((continuousMultilinearMap_basis
+                    (𝕜 := Real) (F := E) (Module.finBasis Real E) 1)
+                    (fun _ : Fin 1 => p)) ((extChartAt I x₀).symm y)))
+                (fun q : Fin 2 =>
+                  coordinateFrameAt (I := I) x₀ (if q = 0 then i else j)
+                    ((extChartAt I x₀).symm y)) := by
+    simpa [Function.comp_def] using hcoeff
+  rw [show
+      RicciFlower.Analysis.DivergenceTheorem.chartCoeffOnE (I := I) x₀
+          (RicciFlower.Realized.connTraceField (I := I) g A) p y =
+        RicciFlower.Analysis.DivergenceTheorem.chartCoeff (I := I) x₀
+          (RicciFlower.Realized.connTraceField (I := I) g A) p
+          ((extChartAt I x₀).symm y) by rfl]
+  rw [hcoeff']
+  rw [hright]
+
+/-- Partial-derivative form of `connTraceChartCoeffOnE_eventually`.
+
+This lets the Voss-Weyl raw divergence formula differentiate the explicit
+inverse-metric contraction instead of the abstract chart coefficient. -/
+theorem connTraceChartCoeff_partial
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M)
+    (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1 2)
+    (x : M) (p : CoordinateIdx (𝕜 := Real) E) :
+    RicciFlower.Analysis.DivergenceTheorem.partialDeriv (E := E) p
+        (RicciFlower.Analysis.DivergenceTheorem.chartCoeffOnE (I := I) x
+          (RicciFlower.Realized.connTraceField (I := I) g A) p)
+        (extChartAt I x x)
+      =
+    RicciFlower.Analysis.DivergenceTheorem.partialDeriv (E := E) p
+      (fun y : E =>
+        ∑ i : CoordinateIdx (𝕜 := Real) E,
+          ∑ j : CoordinateIdx (𝕜 := Real) E,
+            inverseMetricFlatModelInChart_component (I := I) g x i j y *
+              (A ((extChartAt I x).symm y)
+                (Tensor0SSpace.constInChart (𝕜 := Real) (E := E) (H := H)
+                  (I := I) (M := M) 1 x
+                  ((continuousMultilinearMap_basis
+                    (𝕜 := Real) (F := E) (Module.finBasis Real E) 1)
+                    (fun _ : Fin 1 => p)) ((extChartAt I x).symm y)))
+                (fun q : Fin 2 =>
+                  coordinateFrameAt (I := I) x (if q = 0 then i else j)
+                    ((extChartAt I x).symm y)))
+      (extChartAt I x x) := by
+  have h :=
+    connTraceChartCoeffOnE_eventually (I := I) g A x p
+  unfold RicciFlower.Analysis.DivergenceTheorem.partialDeriv
+  rw [Filter.EventuallyEq.fderiv_eq h]
+
+/-- Center value of the chart coefficient of `tr_g A` in the point-centered
+coordinate frame. -/
+theorem connTraceChartCoeff_center
+    (g : SmoothRiemannianMetric I M)
+    (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1 2)
+    (x : M) (p : CoordinateIdx (𝕜 := Real) E) :
+    RicciFlower.Analysis.DivergenceTheorem.chartCoeffOnE (I := I) x
+        (RicciFlower.Realized.connTraceField (I := I) g A) p
+        (extChartAt I x x)
+      =
+    ∑ i : CoordinateIdx (𝕜 := Real) E,
+      ∑ j : CoordinateIdx (𝕜 := Real) E,
+        inverseMetricFlatModelInChart_component (I := I) g x i j
+            (extChartAt I x x) *
+          componentRS (I := I)
+            (coordinateFrameAt_basis (I := I) x (coordinateFrameAt_mem (I := I) x))
+            (A x) (fun _ : Fin 1 => p)
+            (fun q : Fin 2 => if q = 0 then i else j) := by
+  classical
+  have hcoeff :=
+    connTraceChartCoeff_eventually (I := I) g A x p
+  have hcenter := hcoeff.eq_of_nhds
+  have hsymm : (extChartAt I x).symm (extChartAt I x x) = x :=
+    (extChartAt I x).left_inv (mem_extChartAt_source (I := I) x)
+  have hxmem : x ∈ coordinateFrameSet (I := I) x :=
+    coordinateFrameAt_mem (I := I) x
+  haveI : IsManifold I ((∞ : WithTop ℕ∞) + 1) M := by
+    change IsManifold I ∞ M
+    infer_instance
+  have hconst :
+      Tensor0SSpace.constInChart (𝕜 := Real) (E := E) (H := H)
+          (I := I) (M := M) 1 x
+          ((continuousMultilinearMap_basis
+            (𝕜 := Real) (F := E) (Module.finBasis Real E) 1)
+            (fun _ : Fin 1 => p)) x =
+        basisTensor0S (I := I)
+          (coordinateFrameAt_basis (I := I) x hxmem)
+          (fun _ : Fin 1 => p) := by
+    simpa using
+      (RicciFlower.Coordinates.constInChart_basisTensor0S_coordFrame
+        (𝕜 := Real) (I := I) (x₀ := x) (x := x) hxmem
+        (fun _ : Fin 1 => p))
+  calc
+    RicciFlower.Analysis.DivergenceTheorem.chartCoeffOnE (I := I) x
+        (RicciFlower.Realized.connTraceField (I := I) g A) p
+        (extChartAt I x x)
+        =
+      RicciFlower.Analysis.DivergenceTheorem.chartCoeff (I := I) x
+        (RicciFlower.Realized.connTraceField (I := I) g A) p x := by
+        simp [RicciFlower.Analysis.DivergenceTheorem.chartCoeffOnE]
+    _ =
+      ∑ i : CoordinateIdx (𝕜 := Real) E,
+        ∑ j : CoordinateIdx (𝕜 := Real) E,
+          inverseMetricFlatModelInChart_component (I := I) g x i j
+              (extChartAt I x x) *
+            (A x
+              (Tensor0SSpace.constInChart (𝕜 := Real) (E := E) (H := H)
+                (I := I) (M := M) 1 x
+                ((continuousMultilinearMap_basis
+                  (𝕜 := Real) (F := E) (Module.finBasis Real E) 1)
+                  (fun _ : Fin 1 => p)) x))
+              (fun q : Fin 2 =>
+                coordinateFrameAt (I := I) x (if q = 0 then i else j) x) := hcenter
+    _ =
+      ∑ i : CoordinateIdx (𝕜 := Real) E,
+        ∑ j : CoordinateIdx (𝕜 := Real) E,
+          inverseMetricFlatModelInChart_component (I := I) g x i j
+              (extChartAt I x x) *
+            componentRS (I := I)
+              (coordinateFrameAt_basis (I := I) x hxmem)
+              (A x) (fun _ : Fin 1 => p)
+              (fun q : Fin 2 => if q = 0 then i else j) := by
+        refine Finset.sum_congr rfl fun i _ => ?_
+        refine Finset.sum_congr rfl fun j _ => ?_
+        congr 1
+        rw [componentRS]
+        simp [hconst, component0S, coordinateFrameAt_basis_apply]
+
+/-- Voss-Weyl expansion of the raw divergence of the constructed trace field.
+The remaining formula 5.10 geometric work is to rewrite this expression into
+the Levi-Civita covariant trace of the connection-variation tensor. -/
+theorem connTraceRawDiv_voss
+    (g : SmoothRiemannianMetric I M)
+    (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1 2)
+    (x : M) :
+    connTraceRawDiv (I := I) g A x =
+      (∑ p : CoordinateIdx (𝕜 := Real) E,
+          RicciFlower.Analysis.DivergenceTheorem.partialDeriv (E := E) p
+            (fun y : E =>
+              RicciFlower.Analysis.DivergenceTheorem.chartCoeffOnE
+                  (I := I) x
+                  (RicciFlower.Realized.connTraceField (I := I) g A) p y *
+                RicciFlower.Analysis.DivergenceTheorem.chartDensityOnE
+                  (I := I) g x y)
+            (extChartAt I x x)) /
+        RicciFlower.Analysis.Volume.chartDensity (I := I) g x x := by
+  rfl
+
+/-- Product-rule expansion of the raw divergence of the constructed trace
+field.  This is the next normalization after the Voss-Weyl chart expression:
+the raw divergence is split into a derivative of the trace-field coordinate
+coefficient and the chart-density derivative correction. -/
+theorem connTraceRawDiv_chart_product
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M)
+    (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1 2)
+    (x : M) :
+    connTraceRawDiv (I := I) g A x =
+      (∑ p : CoordinateIdx (𝕜 := Real) E,
+        RicciFlower.Analysis.DivergenceTheorem.partialDeriv (E := E) p
+          (RicciFlower.Analysis.DivergenceTheorem.chartCoeffOnE
+            (I := I) x (RicciFlower.Realized.connTraceField (I := I) g A) p)
+          (extChartAt I x x)) +
+        (∑ p : CoordinateIdx (𝕜 := Real) E,
+          RicciFlower.Analysis.DivergenceTheorem.chartCoeffOnE
+              (I := I) x (RicciFlower.Realized.connTraceField (I := I) g A) p
+              (extChartAt I x x) *
+            RicciFlower.Analysis.DivergenceTheorem.partialDeriv (E := E) p
+              (RicciFlower.Analysis.DivergenceTheorem.chartDensityOnE
+                (I := I) g x) (extChartAt I x x)) /
+          RicciFlower.Analysis.Volume.chartDensity (I := I) g x x := by
+  simpa [connTraceRawDiv] using
+    RicciFlower.Analysis.DivergenceTheorem.divergence_g_chart_product
+      (I := I) g (RicciFlower.Realized.connTraceField (I := I) g A) x
+
+/-- Voss-Weyl product expansion with the constructed trace field's chart
+coefficients replaced by the explicit finite contraction
+`g^{ij} A^p_ij`.
+
+The remaining conversion to `gammaRawDivergenceTrace` is the standard
+Levi-Civita coordinate-divergence algebra: combine the density derivative with
+the Christoffel trace and use `∇g^{-1}=0`. -/
+theorem connTraceRawDiv_chart_explicit
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M)
+    (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1 2)
+    (x : M) :
+    connTraceRawDiv (I := I) g A x =
+      (∑ p : CoordinateIdx (𝕜 := Real) E,
+        RicciFlower.Analysis.DivergenceTheorem.partialDeriv (E := E) p
+          (fun y : E =>
+            ∑ i : CoordinateIdx (𝕜 := Real) E,
+              ∑ j : CoordinateIdx (𝕜 := Real) E,
+                inverseMetricFlatModelInChart_component (I := I) g x i j y *
+                  (A ((extChartAt I x).symm y)
+                    (Tensor0SSpace.constInChart (𝕜 := Real) (E := E) (H := H)
+                      (I := I) (M := M) 1 x
+                      ((continuousMultilinearMap_basis
+                        (𝕜 := Real) (F := E) (Module.finBasis Real E) 1)
+                        (fun _ : Fin 1 => p)) ((extChartAt I x).symm y)))
+                    (fun q : Fin 2 =>
+                      coordinateFrameAt (I := I) x (if q = 0 then i else j)
+                        ((extChartAt I x).symm y)))
+          (extChartAt I x x)) +
+        (∑ p : CoordinateIdx (𝕜 := Real) E,
+          (∑ i : CoordinateIdx (𝕜 := Real) E,
+            ∑ j : CoordinateIdx (𝕜 := Real) E,
+              inverseMetricFlatModelInChart_component (I := I) g x i j
+                  (extChartAt I x x) *
+                componentRS (I := I)
+                  (coordinateFrameAt_basis (I := I) x
+                    (coordinateFrameAt_mem (I := I) x))
+                  (A x) (fun _ : Fin 1 => p)
+                  (fun q : Fin 2 => if q = 0 then i else j)) *
+            RicciFlower.Analysis.DivergenceTheorem.partialDeriv (E := E) p
+              (RicciFlower.Analysis.DivergenceTheorem.chartDensityOnE
+                (I := I) g x) (extChartAt I x x)) /
+          RicciFlower.Analysis.Volume.chartDensity (I := I) g x x := by
+  classical
+  rw [connTraceRawDiv_chart_product (I := I) g A x]
+  congr 1
+  · refine Finset.sum_congr rfl fun p _ => ?_
+    exact connTraceChartCoeff_partial (I := I) g A x p
+  · congr 1
+    refine Finset.sum_congr rfl fun p _ => ?_
+    rw [connTraceChartCoeff_center (I := I) g A x p]
 
 /-- Formula 5.10 using the intrinsic metric trace field `tr_g A` of a smooth
 connection-variation tensor.  This specializes `formula510_of_connTrace` with

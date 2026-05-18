@@ -2,6 +2,7 @@ import RicciFlower.DimensionThree.RicciControlsRm
 import RicciFlower.MaximumPrinciple.TensorWeak
 import RicciFlower.Realized.CurvatureProducers
 import RicciFlower.LeviCivita.Koszul
+import RicciFlower.Tensor.RSTensor.QuadraticBounds
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -23,6 +24,7 @@ namespace RicciFlower
 namespace RicciFlow
 
 open Realized
+open Tensor0SBundle
 open scoped BigOperators Manifold ContDiff
 
 /-! ## Pure three-dimensional reaction algebra -/
@@ -224,6 +226,260 @@ def MetricRicciMin
     (∀ x v,
       ricMin x * (G 0).inner x v v <=
         D.K.ricci x (Curvature.vec2 (I := I) v v))
+
+/-- The unit tangent bundle of one metric as a subtype of the actual tangent
+bundle.  This is the compactness-facing interface for the 9.3 selector. -/
+abbrev UnitTangent (g : SmoothRiemannianMetric I M) : Type _ :=
+  MetricUnitTangent (I := I) (M := M) g
+
+namespace UnitTangent
+
+/-- Base point of a unit tangent vector. -/
+def base {g : SmoothRiemannianMetric I M}
+    (p : UnitTangent (I := I) (M := M) g) : M :=
+  p.1.1
+
+/-- Fiber vector of a unit tangent vector. -/
+def vec {g : SmoothRiemannianMetric I M}
+    (p : UnitTangent (I := I) (M := M) g) :
+    TangentSpace I (base (I := I) (M := M) p) :=
+  p.1.2
+
+@[simp]
+theorem unit {g : SmoothRiemannianMetric I M}
+    (p : UnitTangent (I := I) (M := M) g) :
+    g.inner (base (I := I) (M := M) p)
+      (vec (I := I) (M := M) p) (vec (I := I) (M := M) p) = 1 :=
+  p.2
+
+@[simp]
+theorem base_mk {g : SmoothRiemannianMetric I M} {x : M}
+    {v : TangentSpace I x} {hunit : g.inner x v v = 1} :
+    base (I := I) (M := M)
+      (⟨(⟨x, v⟩ : TangentBundle I M), hunit⟩ :
+        UnitTangent (I := I) (M := M) g) = x :=
+  rfl
+
+@[simp]
+theorem vec_mk {g : SmoothRiemannianMetric I M} {x : M}
+    {v : TangentSpace I x} {hunit : g.inner x v v = 1} :
+    vec (I := I) (M := M)
+      (⟨(⟨x, v⟩ : TangentBundle I M), hunit⟩ :
+        UnitTangent (I := I) (M := M) g) = v :=
+  rfl
+
+end UnitTangent
+
+/-- Uniform initial Ricci lower bound on `g_0`-unit vectors. -/
+def UnitRicciLower
+    [SigmaCompactSpace M] [T2Space M]
+    {G : Real -> SmoothRiemannianMetric I M}
+    {Ric : TwoTensorFamily (I := I) (M := M)}
+    (D : MetricRicciData (I := I) (M := M) G Ric) (c : Real) : Prop :=
+  0 < c ∧
+    ∀ x (v : TangentSpace I x), (G 0).inner x v v = 1 ->
+      c <= D.K.ricci x (Curvature.vec2 (I := I) v v)
+
+/-- Ricci quadratic evaluation on the initial unit tangent bundle. -/
+def unitRicEval
+    [SigmaCompactSpace M] [T2Space M]
+    {G : Real -> SmoothRiemannianMetric I M}
+    {Ric : TwoTensorFamily (I := I) (M := M)}
+    (D : MetricRicciData (I := I) (M := M) G Ric)
+    (p : UnitTangent (I := I) (M := M) (G 0)) : Real :=
+  D.K.ricci (UnitTangent.base (I := I) (M := M) p)
+    (Curvature.vec2 (I := I)
+      (UnitTangent.vec (I := I) (M := M) p)
+      (UnitTangent.vec (I := I) (M := M) p))
+
+/-- A unit-vector Ricci lower bound gives a constant base lower-bound
+function. -/
+theorem metricMin_unit
+    [SigmaCompactSpace M] [T2Space M]
+    {G : Real -> SmoothRiemannianMetric I M}
+    {Ric : TwoTensorFamily (I := I) (M := M)}
+    {c : Real}
+    (D : MetricRicciData (I := I) (M := M) G Ric)
+    (hlower : UnitRicciLower (I := I) (M := M) D c) :
+    MetricRicciMin (I := I) (M := M) D (fun _ : M => c) := by
+  rcases hlower with ⟨hc, hlower⟩
+  refine ⟨continuous_const, fun _ => hc, ?_⟩
+  intro x v
+  by_cases hv : v = 0
+  · subst v
+    have hzero :
+        D.K.ricci x (Curvature.vec2 (I := I)
+          (0 : TangentSpace I x) (0 : TangentSpace I x)) = 0 := by
+      have hzero' :
+          D.K.ricci x (fun _ : Fin 2 => (0 : TangentSpace I x)) = 0 := by
+        simpa [quad02] using
+          RicciFlower.tensor02_smul2 (I := I) (M := M) (D.K.ricci x)
+            0 (0 : TangentSpace I x)
+      have hvec :
+          Curvature.vec2 (I := I) (0 : TangentSpace I x) (0 : TangentSpace I x) =
+            (fun _ : Fin 2 => (0 : TangentSpace I x)) := by
+        funext i
+        simp [Curvature.vec2]
+      simpa [hvec] using hzero'
+    simp [hzero]
+  let r : Real := (G 0).inner x v v
+  have hrpos : 0 < r := by
+    exact (G 0).pos x v hv
+  let s : Real := Real.sqrt r
+  have hspos : 0 < s := Real.sqrt_pos.mpr hrpos
+  have hsne : s ≠ 0 := ne_of_gt hspos
+  let a : Real := s⁻¹
+  let u : TangentSpace I x := a • v
+  have hss : s * s = r := by
+    simpa [sq] using (Real.sq_sqrt (le_of_lt hrpos))
+  have haa : a * a * r = 1 := by
+    have hmul : (s * s) * (s⁻¹ * s⁻¹) = 1 := by
+      field_simp [hsne]
+    calc
+      a * a * r = (s⁻¹ * s⁻¹) * (s * s) := by
+        rw [hss]
+      _ = (s * s) * (s⁻¹ * s⁻¹) := by ring
+      _ = 1 := hmul
+  have hunit : (G 0).inner x u u = 1 := by
+    calc
+      (G 0).inner x u u = a * a * r := by
+        simpa [u, r] using RicciFlower.metric_smul2 (I := I) (M := M) (G 0) a v
+      _ = 1 := haa
+  have hRic_unit := hlower x u hunit
+  have hRic_scale :
+      D.K.ricci x (Curvature.vec2 (I := I) u u) =
+        a * a * D.K.ricci x (Curvature.vec2 (I := I) v v) := by
+    have hscale' :
+        D.K.ricci x (fun _ : Fin 2 => a • v) =
+          a * a * D.K.ricci x (fun _ : Fin 2 => v) := by
+      simpa [quad02] using
+        RicciFlower.tensor02_smul2 (I := I) (M := M)
+          (D.K.ricci x) a v
+    have hvecu :
+        Curvature.vec2 (I := I) u u = (fun _ : Fin 2 => u) := by
+      funext i
+      simp [Curvature.vec2]
+    have hvecv :
+        Curvature.vec2 (I := I) v v = (fun _ : Fin 2 => v) := by
+      funext i
+      simp [Curvature.vec2]
+    simpa [hvecu, hvecv, u] using hscale'
+  have hineq :
+      c <= a * a * D.K.ricci x (Curvature.vec2 (I := I) v v) := by
+    simpa [hRic_scale] using hRic_unit
+  have hs2_nonneg : 0 <= s * s := mul_nonneg (le_of_lt hspos) (le_of_lt hspos)
+  have hmul := mul_le_mul_of_nonneg_left hineq hs2_nonneg
+  have hcancel : (s * s) * (a * a *
+        D.K.ricci x (Curvature.vec2 (I := I) v v)) =
+      D.K.ricci x (Curvature.vec2 (I := I) v v) := by
+    have hmul : (s * s) * (a * a) = 1 := by
+      have hsa : s * a = 1 := by
+        simp [a, hsne]
+      calc
+        (s * s) * (a * a) = (s * a) * (s * a) := by ring
+        _ = 1 := by rw [hsa]; ring
+    calc
+      (s * s) * (a * a *
+          D.K.ricci x (Curvature.vec2 (I := I) v v)) =
+          ((s * s) * (a * a)) *
+            D.K.ricci x (Curvature.vec2 (I := I) v v) := by ring
+      _ = D.K.ricci x (Curvature.vec2 (I := I) v v) := by
+        rw [hmul]
+        ring
+  have hleft : (s * s) * c = c * (G 0).inner x v v := by
+    rw [hss]
+    ring
+  rwa [hcancel, hleft] at hmul
+
+/-- Compactness of the initial unit tangent bundle gives a uniform positive
+Ricci lower bound on unit vectors.  The remaining geometry outside this file is
+to supply the compactness and continuity inputs for the canonical unit tangent
+bundle. -/
+theorem unitLower_raw
+    [SigmaCompactSpace M] [T2Space M]
+    {G : Real -> SmoothRiemannianMetric I M}
+    {Ric : TwoTensorFamily (I := I) (M := M)}
+    (D : MetricRicciData (I := I) (M := M) G Ric)
+    (hpos : MetricRicciPos (I := I) (M := M) D)
+    (hcompact : IsCompact (Set.univ : Set (UnitTangent (I := I) (M := M) (G 0))))
+    (hcont : Continuous (unitRicEval (I := I) (M := M) D)) :
+    ∃ c : Real, UnitRicciLower (I := I) (M := M) D c := by
+  classical
+  by_cases hne : (Set.univ : Set (UnitTangent (I := I) (M := M) (G 0))).Nonempty
+  · obtain ⟨p0, _hp0, hmin⟩ :=
+      hcompact.exists_isMinOn hne hcont.continuousOn
+    let c : Real :=
+      unitRicEval (I := I) (M := M) D p0
+    have hc : 0 < c := by
+      let x0 := UnitTangent.base (I := I) (M := M) p0
+      let v0 := UnitTangent.vec (I := I) (M := M) p0
+      have hunit0 : (G 0).inner x0 v0 v0 = 1 := by
+        simpa [x0, v0] using UnitTangent.unit (I := I) (M := M) p0
+      have hv0 : v0 ≠ 0 := by
+        intro hz
+        have hbad : (0 : Real) = 1 := by
+          simpa [hz] using hunit0
+        norm_num at hbad
+      exact hpos x0 v0 hv0
+    refine ⟨c, hc, ?_⟩
+    intro x v hunit
+    let p : UnitTangent (I := I) (M := M) (G 0) :=
+      ⟨(⟨x, v⟩ : TangentBundle I M), hunit⟩
+    exact (isMinOn_iff.mp hmin) p (Set.mem_univ p)
+  · refine ⟨1, zero_lt_one, ?_⟩
+    intro x v hunit
+    exfalso
+    exact hne ⟨⟨(⟨x, v⟩ : TangentBundle I M), hunit⟩, Set.mem_univ _⟩
+
+/-- Compactness of the unit tangent bundle of a compact base.  This is the
+remaining vector-bundle topology producer: prove it by local trivializations,
+compact model spheres, and a finite subcover of the base. -/
+theorem unitTan_compact
+    [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
+    (g : SmoothRiemannianMetric I M) :
+    IsCompact (Set.univ : Set (UnitTangent (I := I) (M := M) g)) := by
+  exact metricUnit_compact (I := I) (M := M) g
+
+/-- Continuity of the Ricci quadratic form on the initial unit tangent bundle. -/
+theorem unitRic_cont
+    [SigmaCompactSpace M] [T2Space M]
+    {G : Real -> SmoothRiemannianMetric I M}
+    {Ric : TwoTensorFamily (I := I) (M := M)}
+    (D : MetricRicciData (I := I) (M := M) G Ric) :
+    Continuous (unitRicEval (I := I) (M := M) D) := by
+  refine (metricUnit_quadCont (I := I) (M := M) (G 0) D.K.ricci).congr ?_
+  intro p
+  dsimp [unitRicEval, quad02, UnitTangent.base, UnitTangent.vec,
+    MetricUnitTangent.base, MetricUnitTangent.vec]
+  congr 1
+  funext i
+  fin_cases i <;> simp [Curvature.vec2]
+
+/-- Unit tangent compactness and unit Ricci positivity produce a uniform
+positive Ricci lower bound on unit vectors. -/
+theorem unitLower_pos
+    [CompactSpace M] [SigmaCompactSpace M] [T2Space M] [Nonempty M]
+    {G : Real -> SmoothRiemannianMetric I M}
+    {Ric : TwoTensorFamily (I := I) (M := M)}
+    (D : MetricRicciData (I := I) (M := M) G Ric)
+    (hpos : MetricRicciPos (I := I) (M := M) D) :
+    ∃ c : Real, UnitRicciLower (I := I) (M := M) D c := by
+  exact unitLower_raw (I := I) (M := M) D hpos
+    (unitTan_compact (I := I) (M := M) (G 0))
+    (unitRic_cont (I := I) (M := M) D)
+
+/-- Unit tangent compactness and unit Ricci positivity produce a constant
+metric/Ricci lower-bound function. -/
+theorem metricMin_pos
+    [CompactSpace M] [SigmaCompactSpace M] [T2Space M] [Nonempty M]
+    {G : Real -> SmoothRiemannianMetric I M}
+    {Ric : TwoTensorFamily (I := I) (M := M)}
+    (D : MetricRicciData (I := I) (M := M) G Ric)
+    (hpos : MetricRicciPos (I := I) (M := M) D) :
+    ∃ ricMin : M -> Real,
+      MetricRicciMin (I := I) (M := M) D ricMin := by
+  rcases unitLower_pos (I := I) (M := M) D hpos with ⟨c, hc⟩
+  exact ⟨fun _ : M => c, metricMin_unit (I := I) (M := M) D hc⟩
 
 /-- Canonical Ricci positivity implies the legacy pointwise positivity
 predicate for the supplied Ricci family. -/
@@ -436,6 +692,21 @@ theorem pinchInit_metric
     (scalar := scalar) (ricMin := ricMin)
     (ricMin_of_metric (I := I) (M := M) D hmin) hscalar
 
+/-- Metric/Ricci-native initial pinching selector from the unit tangent compact
+minimum route. -/
+theorem pinchInit_pos
+    [CompactSpace M] [SigmaCompactSpace M] [T2Space M] [Nonempty M]
+    {G : Real -> SmoothRiemannianMetric I M}
+    {Ric : TwoTensorFamily (I := I) (M := M)}
+    {scalar : Real -> M -> Real}
+    (D : MetricRicciData (I := I) (M := M) G Ric)
+    (hpos : MetricRicciPos (I := I) (M := M) D)
+    (hscalar : Continuous (fun x : M => scalar 0 x)) :
+    PinchInit (I := I) (M := M) G Ric scalar := by
+  rcases metricMin_pos (I := I) (M := M) D hpos with ⟨ricMin, hmin⟩
+  exact pinchInit_metric (I := I) (M := M) (G := G) (Ric := Ric)
+    (scalar := scalar) (ricMin := ricMin) D hmin hscalar
+
 /-- Preserved pinching conclusion for a fixed `delta`. -/
 def PinchPres
     (G : Real -> SmoothRiemannianMetric I M)
@@ -603,6 +874,30 @@ theorem strict_pinch_metric
     (scalar := scalar) (T := T) hT
     (pinchInit_metric (I := I) (M := M) (G := G) (Ric := Ric)
       (scalar := scalar) (ricMin := ricMin) D hmin hscalar)
+    hdata
+
+/-- Corollary 9.3 conditional form using the unit tangent compact-minimum
+selector. -/
+theorem strict_pinch_pos
+    [CompactSpace M] [SigmaCompactSpace M] [T2Space M] [Nonempty M]
+    {G : Real -> SmoothRiemannianMetric I M}
+    {Ric : TwoTensorFamily (I := I) (M := M)}
+    {scalar : Real -> M -> Real}
+    {T : Real}
+    (hT : 0 <= T)
+    (D : MetricRicciData (I := I) (M := M) G Ric)
+    (hpos : MetricRicciPos (I := I) (M := M) D)
+    (hscalar : Continuous (fun x : M => scalar 0 x))
+    (hdata :
+      ∀ delta : Real, 0 < delta -> delta <= (1 : Real) / 3 ->
+        PinchWMPData (I := I) (M := M) G Ric scalar T delta) :
+    ∃ delta : Real,
+      0 < delta ∧ delta <= (1 : Real) / 3 ∧
+        PinchPres (I := I) (M := M) G Ric scalar T delta := by
+  exact pinch_init_wmp (I := I) (M := M) (G := G) (Ric := Ric)
+    (scalar := scalar) (T := T) hT
+    (pinchInit_pos (I := I) (M := M) (G := G) (Ric := Ric)
+      (scalar := scalar) D hpos hscalar)
     hdata
 
 end RicciFlow

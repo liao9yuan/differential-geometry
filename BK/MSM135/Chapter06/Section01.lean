@@ -306,6 +306,84 @@ abbrev lbl453_f_formula510_trace_field :=
 
 /-- MSM135 Chapter 5, formula 5.10, used in Chapter 6.1 Lemma 6.1.
 
+Book-facing alias for the intrinsic trace-field assembly after replacing the
+abstract `rawTrace` and `actionTrace` inputs by the constructed field's own
+divergence and action. -/
+abbrev lbl453_f_formula510_trace_intrinsic :=
+  @formula510_of_trace
+
+/-- MSM135 Chapter 5, formula 5.10, used in Chapter 6.1 Lemma 6.1.
+
+Book-facing alias for the coordinate realization of `(tr_g A)(f)`. -/
+abbrev lbl453_f_formula510_trace_action :=
+  @connTraceAction_eq_gamma
+
+/-- MSM135 Chapter 5, formula 5.10, used in Chapter 6.1 Lemma 6.1.
+
+Book-facing alias for the finite-sum algebra contracting
+`nabla_p A^p_ij - A^p_ij partial_p f` by `g^{ij}`. -/
+abbrev lbl453_f_formula510_weighted_trace :=
+  @weightedTrace_eq
+
+/-- MSM135 Chapter 5, formula 5.10, used in Chapter 6.1 Lemma 6.1.
+
+Book-facing alias for reducing the final weighted-divergence trace to the
+single raw divergence bridge for `tr_g A`. -/
+abbrev lbl453_f_formula510_weighted_trace_raw :=
+  @weightedTrace_of_raw
+
+/-- MSM135 Chapter 5, formula 5.10, used in Chapter 6.1 Lemma 6.1.
+
+Book-facing alias for the fixed-chart coefficient of the constructed trace
+field `tr_g A`. -/
+abbrev lbl453_f_formula510_trace_chart :=
+  @connTraceChartCoeff_eventually
+
+/-- MSM135 Chapter 5, formula 5.10, used in Chapter 6.1 Lemma 6.1.
+
+Book-facing alias for the Voss-Weyl chart expansion of
+`divergence_g(tr_g A)`. -/
+abbrev lbl453_f_formula510_trace_voss :=
+  @connTraceRawDiv_voss
+
+/-- MSM135 Chapter 5, formula 5.10, used in Chapter 6.1 Lemma 6.1.
+
+Book-facing alias for the product-rule split of the Voss-Weyl chart expansion
+of `divergence_g(tr_g A)`. -/
+abbrev lbl453_f_formula510_trace_product :=
+  @connTraceRawDiv_chart_product
+
+/-- MSM135 Chapter 5, formula 5.10, used in Chapter 6.1 Lemma 6.1.
+
+Book-facing alias for the model-chart coefficient identity of the constructed
+trace field `tr_g A`. -/
+abbrev lbl453_f_formula510_trace_chart_onE :=
+  @connTraceChartCoeffOnE_eventually
+
+/-- MSM135 Chapter 5, formula 5.10, used in Chapter 6.1 Lemma 6.1.
+
+Book-facing alias for differentiating the explicit chart coefficient of
+`tr_g A`. -/
+abbrev lbl453_f_formula510_trace_chart_partial :=
+  @connTraceChartCoeff_partial
+
+/-- MSM135 Chapter 5, formula 5.10, used in Chapter 6.1 Lemma 6.1.
+
+Book-facing alias for the center value of the constructed trace-field chart
+coefficient. -/
+abbrev lbl453_f_formula510_trace_chart_center :=
+  @connTraceChartCoeff_center
+
+/-- MSM135 Chapter 5, formula 5.10, used in Chapter 6.1 Lemma 6.1.
+
+Book-facing alias for the explicit Voss-Weyl expansion of
+`div(tr_g A)`, with chart coefficients replaced by
+`g^{ij} A^p_ij`. -/
+abbrev lbl453_f_formula510_trace_explicit :=
+  @connTraceRawDiv_chart_explicit
+
+/-- MSM135 Chapter 5, formula 5.10, used in Chapter 6.1 Lemma 6.1.
+
 Book-facing alias converting a proved formula 5.10 identity for the derivative
 value into an identity for the `deriv`-based first variation. -/
 abbrev lbl453_f_formula510_final :=

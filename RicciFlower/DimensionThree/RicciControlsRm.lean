@@ -125,10 +125,7 @@ def RicciDiagAt
       ricciCompAt (I := I) basis Ric i j = ricciDiag3 l1 l2 l3 i j
 
 /-- Spectral-theorem package for a nonnegative symmetric Ricci tensor on a
-three-dimensional tangent fiber.
-
-This is the single intended frontier for Corollary 11.4 packaging if the local
-metric inner-product instance bridge needs more API work. -/
+three-dimensional tangent fiber. -/
 theorem ricciEigenBasis3
     (g : SmoothRiemannianMetric I M)
     (Ric : Tensor02At (I := I) (M := M) x)

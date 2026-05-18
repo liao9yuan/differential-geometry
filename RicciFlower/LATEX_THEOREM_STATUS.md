@@ -52,7 +52,7 @@ the full statements, theorem names, and file locations.
 | Lemma 10.5 quotient evolution | `2` | Port the pure scalar quotient algebra to `RicciFlower` if it is still needed by the pinching route. |
 | Assumption 3.1 calculus package | `3` | Continue native Bianchi, contracted Bianchi, tensor commutator, and trace/norm infrastructure. |
 | Lemma 6.7 | `0` | Closed canonically through the `(0,2)` tensor Bochner product rule and `ricci_heat_mc`. |
-| Corollary 11.4 | `1` | Intrinsic norm bridge, spectral Ricci eigenbasis, Section 12 `ham3_rm_bound`, and the signed first-trace trace-data producer are in place; remaining work is the positive-Ricci-facing wrapper from the signed package. |
+| Corollary 11.4 | `0` | Closed at the pointwise first-trace realization layer by `DimensionThree.normSqLeOfFirstData`; remaining work belongs to Section 12 geometry packaging, not the local inequality. |
 | Lemma 11.15 | `3` | Finish the native Einstein-space-form bridge from contracted Bianchi and the 3D Riemann-from-Ricci formula. |
 
 ### Section 14 Snapshot
@@ -645,17 +645,27 @@ and scalar continuity into `InitBounds`, `boundsPos_ricMin` feeds the older
 `MetricRicciData` records that the supplied initial Ricci tensor is realized by
 the Levi-Civita Ricci tensor of `G 0`, `MetricRicciMin` is the corresponding
 canonical lower-bound function data, and `strict_pinch_metric` is the
-book-facing conditional route.
+book-facing conditional route.  The unit tangent route is now checked:
+`UnitRicciLower` records a uniform positive lower bound on `g_0`-unit tangent
+vectors, `metricMin_unit` rescales that bound to a constant `MetricRicciMin`,
+and `unitLower_pos` / `metricMin_pos` extract such a bound from compactness of
+`UnitTangent (G 0)` plus continuity of the unit Ricci quadratic form.  The
+unit tangent type is now routed through the actual tangent-bundle subtype, and
+the high-level `pinchInit_pos` / `strict_pinch_pos` wrappers now use checked
+producers: `unitTan_compact` delegates to the lower `metricUnit_compact`, and
+`unitRic_cont` delegates to `metricUnit_quadCont`.  The unit-tangent compactness
+and tensor-evaluation continuity frontiers are closed in
+`RicciFlower.Tensor.RSTensor.QuadraticBounds`.
 
-Distance: `2`.
+Distance: `1`.
 
-Next target: prove the metric-native lower-bound producer
-`MetricRicciData + MetricRicciPos -> ∃ ricMin, MetricRicciMin ... ricMin`,
-using smoothness/continuity of the initial Levi-Civita Ricci tensor and compact
-unit-tangent or equivalent spectral compactness.  The bare implication from the
-current `RicciPosInit` predicate is not valid without that extra regularity.
-After that, reuse `pinchInit_metric` / `strict_pinch_metric` and the Lemma 9.2
-WMP regularity/null-eigenvector-condition producers once Theorem 7.5 is ready.
+Next target: discharge the remaining Lemma 9.2/Theorem 7.5 dependencies:
+the shifted evolution equation for `S = Ric - delta R g`, the bridge from the
+local diagonal reaction algebra to `TensorNullEigenvectorCondition`, and the
+analytic `TensorWMPRegularityOn` producers.  The bare implication from the
+current `RicciPosInit` predicate is still not valid without continuity or
+metric-Ricci realization data, so the preferred 9.3 route remains
+`strict_pinch_pos`.
 
 ### Lemma 10.4, `lem:evol-tracefree-ricci-norm`
 
@@ -841,18 +851,20 @@ There exists a universal constant C3 such that on any 3D Riemannian manifold
 with Ric >= 0, |Rm| <= C3 R.
 ```
 
-Status: native eigenvalue/sectional algebra is now in
+Status: native pointwise theorem closed.  The eigenvalue/sectional algebra is in
 `RicciFlower.DimensionThree.RicciControlsRm`.  It proves that nonnegative
 Ricci eigenvalues give `|K_ij| <= R / 2` and the coarse squared sectional-model
 bound with constant `100`.  The file also has a checked pointwise bridge from a
 realized three-dimensional `Rm04` tensor with diagonal Ricci components to the
 standard orthonormal-frame component norm estimate, plus the intrinsic
 `normSq0S` identity for `(0,4)` tensors in an orthonormal `Fin 3` frame.
-The packaging theorem `DimensionThree.normSqLeOfRicNonneg` now assembles a
-nonnegative symmetric Ricci tensor, the spectral Ricci eigenbasis producer, a
-basis-indexed trace-data producer, and the intrinsic norm estimate.
+The packaging theorems `DimensionThree.normSqLeOfRicNonneg`,
+`DimensionThree.normSqLeOfFirstTrace`, and
+`DimensionThree.normSqLeOfFirstData` assemble a nonnegative symmetric Ricci
+tensor, the spectral Ricci eigenbasis producer, first-trace curvature data, and
+the intrinsic norm estimate.
 
-Distance: `1`.
+Distance: `0` for the pointwise first-trace realized statement.
 
 Section 12 routing: `HamiltonPositiveRicci.ham3_point_select` now returns
 `Ham3EigenModel`, and `HamiltonPositiveRicci.ham3_rm_bound` is proved from
@@ -863,9 +875,30 @@ metric inner product.  The concrete first-trace producer is also checked:
 `DimensionThree.traceDataOfFirst` turns convention-correct Ricci/Rm04 trace
 data into `RiemannFromRicci3DTraceDataAt` for `-Ric` and `-scalar`, which is
 the necessary sign bridge because the finite 3D algebra uses the displayed-slot
-`stdRicci3` convention.  The remaining local packaging frontier is the
-positive-Ricci-facing wrapper that feeds this signed package into the existing
-norm estimate.
+`stdRicci3` convention.  `DimensionThree.normSqLeOfFirstData` now hides that
+sign bookkeeping from consumers by building the signed package internally from
+the convention-correct first-trace data.
+
+### Definition 11.5, `def:parabolic-rescaling`
+
+Statement:
+
+```text
+For R > 0 and center time τ, set g^R(s) = R g(τ + s/R), defined on the
+pulled-back interval.  The scalar curvature rescales by R^-1, and the
+trace-free Ricci ratio |Ric°|^2/R^2 is invariant.
+```
+
+Status: native RicciFlower rescaling layer closed in
+`RicciFlow.ParabolicRescaling`.  The checked layer includes `paraTime`,
+`paraBack`, `paraInterval`, the closed-open display interval formulas, rescaled
+solution-family data, inverse field laws, and scalar/trace-free display
+statements.  The solution theorem `paraSol` is checked: affine pullback of
+metric-family smoothness and the metric variation chain rule are both proved.
+
+Distance: `0`.
+
+Next target: use `paraSol` in the Lemma 11.6 point-selection/rescaling package.
 
 ### Lemma 11.6, `lem:point-selection-rescaling`
 

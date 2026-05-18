@@ -269,6 +269,14 @@ private def modelSprayLin : (E × E) →L[Real] (E × E) :=
   (ContinuousLinearMap.snd Real E E).prod
     (0 : (E × E) →L[Real] E)
 
+@[simp] private theorem modelSprayLin_fst (z : E × E) :
+    (modelSprayLin (E := E) z).1 = z.2 := by
+  rfl
+
+@[simp] private theorem modelSprayLin_snd (z : E × E) :
+    (modelSprayLin (E := E) z).2 = 0 := by
+  rfl
+
 /-- Homogeneity of the quadratic Christoffel velocity term. -/
 private theorem sprayQuad_smul
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -665,6 +673,22 @@ private theorem initPhase_smul
   rw [initPhase_eq_pair, initPhase_eq_pair]
   rfl
 
+private theorem initPhase_sub
+    (x : M) (v w : TangentSpace I x) :
+    initPhase (I := I) x v - initPhase (I := I) x w =
+      (0, v - w) := by
+  rw [initPhase_eq_pair, initPhase_eq_pair]
+  ext <;> simp
+  rfl
+
+private theorem norm_initPhase_sub
+    (x : M) (v w : TangentSpace I x) :
+    ‖initPhase (I := I) x v - initPhase (I := I) x w‖ =
+      ‖v - w‖ := by
+  rw [initPhase_sub]
+  change max ‖(0 : E)‖ ‖v - w‖ = ‖v - w‖
+  simp [norm_nonneg]
+
 private theorem phaseZero_pair (x : M) :
     extChartAt I.tangent (phaseZero (I := I) x)
         (phaseZero (I := I) x) =
@@ -675,6 +699,14 @@ private theorem phaseZero_pair (x : M) :
       (initPhase_zero (I := I) x).symm
     _ = (extChartAt I x x, (0 : E)) := by
       exact initPhase_eq_pair (I := I) x (0 : TangentSpace I x)
+
+private theorem norm_initPhase_zero
+    (x : M) (v : TangentSpace I x) :
+    ‖initPhase (I := I) x v -
+        extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)‖ = ‖v‖ := by
+  rw [← initPhase_zero (I := I) x]
+  simpa using norm_initPhase_sub (I := I) x v (0 : TangentSpace I x)
 
 private theorem half_mul_mem_Ioo
     {ε s : Real} (hε : 0 < ε)
@@ -1033,6 +1065,280 @@ private theorem spray_o
         fun p : (E × E) × (E × E) => p.1 - p.2 :=
   (spray_strict_zero (I := I) g x).isLittleO
 
+/-- A uniformly small integrand has a small interval integral.
+
+This is an analytic bookkeeping lemma for the strict endpoint proof: once a
+residual term is `o(g p)` uniformly in time, integration over a fixed bounded
+interval preserves the little-o estimate. -/
+private lemma isLittleO_intervalIntegral_of_uniform_bound
+    {P V W : Type*}
+    [NormedAddCommGroup V] [NormedSpace Real V] [SeminormedAddCommGroup W]
+    {l : Filter P} {a b : Real}
+    {r : P -> Real -> V} {g : P -> W}
+    (hr : ∀ c > 0, ∀ᶠ p in l,
+      ∀ t ∈ Set.uIoc a b, ‖r p t‖ ≤ c * ‖g p‖) :
+    (fun p => ∫ t in a..b, r p t) =o[l] g := by
+  refine Asymptotics.IsLittleO.of_bound ?_
+  intro c hc
+  let c' : Real := c / (|b - a| + 1)
+  have hc' : 0 < c' := by
+    dsimp [c']
+    positivity
+  filter_upwards [hr c' hc'] with p hp
+  have hbound : ∀ t ∈ Set.uIoc a b, ‖r p t‖ ≤ c' * ‖g p‖ := hp
+  calc
+    ‖∫ t in a..b, r p t‖
+        ≤ (c' * ‖g p‖) * |b - a| := by
+          exact intervalIntegral.norm_integral_le_of_norm_le_const hbound
+    _ ≤ c * ‖g p‖ := by
+      have hnorm : 0 ≤ ‖g p‖ := norm_nonneg _
+      have habs : 0 ≤ |b - a| := abs_nonneg _
+      have hden : 0 < |b - a| + 1 := by positivity
+      have hcle : c' * |b - a| ≤ c := by
+        dsimp [c']
+        field_simp [hden.ne']
+        have hA : |b - a| ≤ |b - a| + 1 := by linarith
+        nlinarith [mul_le_mul_of_nonneg_left hA hc.le]
+      rw [show (c' * ‖g p‖) * |b - a| =
+          (c' * |b - a|) * ‖g p‖ by ring]
+      exact mul_le_mul_of_nonneg_right hcle hnorm
+
+/-- Uniform smallness on `[0,b]` survives integration over every subinterval
+`0..t`, uniformly in `t`.
+
+This is the estimate needed for the velocity error before integrating once
+more to control the endpoint error. -/
+private lemma eventually_norm_integral_zero_to_t_le
+    {P V W : Type*}
+    [NormedAddCommGroup V] [NormedSpace Real V] [SeminormedAddCommGroup W]
+    {l : Filter P} {b : Real} (hb : 0 ≤ b)
+    {r : P -> Real -> V} {g : P -> W}
+    (hr : ∀ c > 0, ∀ᶠ p in l,
+      ∀ s ∈ Set.Icc (0 : Real) b, ‖r p s‖ ≤ c * ‖g p‖) :
+    ∀ c > 0, ∀ᶠ p in l,
+      ∀ t ∈ Set.Icc (0 : Real) b,
+        ‖∫ s in (0 : Real)..t, r p s‖ ≤ c * ‖g p‖ := by
+  intro c hc
+  let c' : Real := c / (b + 1)
+  have hc' : 0 < c' := by
+    dsimp [c']
+    positivity
+  filter_upwards [hr c' hc'] with p hp t ht
+  have hbound : ∀ s ∈ Set.uIoc (0 : Real) t,
+      ‖r p s‖ ≤ c' * ‖g p‖ := by
+    intro s hs
+    have hsIcc : s ∈ Set.Icc (0 : Real) b := by
+      rcases ht with ⟨h0t, htb⟩
+      rw [Set.mem_uIoc] at hs
+      rcases hs with hs | hs
+      · exact ⟨hs.1.le, le_trans hs.2 htb⟩
+      · have hlt : s < s := lt_of_le_of_lt (le_trans hs.2 h0t) hs.1
+        exact (lt_irrefl s hlt).elim
+    exact hp s hsIcc
+  calc
+    ‖∫ s in (0 : Real)..t, r p s‖
+        ≤ (c' * ‖g p‖) * |t - 0| := by
+          exact intervalIntegral.norm_integral_le_of_norm_le_const hbound
+    _ ≤ c * ‖g p‖ := by
+      have htb : |t - 0| ≤ b := by
+        rcases ht with ⟨h0t, htb⟩
+        rw [sub_zero, abs_of_nonneg h0t]
+        exact htb
+      have hnorm : 0 ≤ ‖g p‖ := norm_nonneg _
+      have htabs : 0 ≤ |t - 0| := abs_nonneg _
+      have hcle : c' * |t - 0| ≤ c := by
+        dsimp [c']
+        have hden : 0 < b + 1 := by positivity
+        field_simp [hden.ne']
+        have hb1 : |t - 0| ≤ b + 1 := by linarith
+        nlinarith [mul_le_mul_of_nonneg_left hb1 hc.le]
+      rw [show (c' * ‖g p‖) * |t - 0| =
+          (c' * |t - 0|) * ‖g p‖ by ring]
+      exact mul_le_mul_of_nonneg_right hcle hnorm
+
+/-- Normed-space form of a Lipschitz-on estimate. -/
+private lemma lip_norm_sub_le
+    {X Y : Type*} [NormedAddCommGroup X] [NormedAddCommGroup Y]
+    {K : NNReal} {s : Set X} {f : X -> Y}
+    (h : LipschitzOnWith K f s) {x y : X} (hx : x ∈ s) (hy : y ∈ s) :
+    ‖f x - f y‖ ≤ (K : Real) * ‖x - y‖ := by
+  simpa [dist_eq_norm] using h.dist_le_mul x hx y hy
+
+/-- The model-spray nonlinear residual is uniformly little-o along the chosen
+Picard trajectories, on any time interval where the flow is controlled.
+
+This is the first real propagation step from the strict linearization of the
+spray to the endpoint estimate. -/
+private lemma sprayRem_uniform
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M)
+    {ε τ ρ : Real} {rModel : NNReal} {L' : NNReal}
+    {α : E × E -> Real -> E × E}
+    (hρ : 0 < ρ)
+    (hτ : 0 < τ)
+    (hsub : Set.Icc (0 : Real) τ ⊆ Set.Icc (-ε) ε)
+    (hsmall : ∀ v ∈ Metric.ball (0 : TangentSpace I x) ρ,
+      initPhase (I := I) x v ∈
+        Metric.closedBall
+          (extChartAt I.tangent (phaseZero (I := I) x)
+            (phaseZero (I := I) x)) rModel)
+    (hzero : ∀ t ∈ Set.Icc (-ε) ε,
+      α (extChartAt I.tangent (phaseZero (I := I) x)
+        (phaseZero (I := I) x)) t =
+        extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x))
+    (hLip : ∀ t ∈ Set.Icc (-ε) ε,
+      LipschitzOnWith L' (fun z => α z t)
+        (Metric.closedBall
+          (extChartAt I.tangent (phaseZero (I := I) x)
+            (phaseZero (I := I) x)) rModel)) :
+    ∀ c > 0, ∀ᶠ p : TangentSpace I x × TangentSpace I x in
+      𝓝 ((0, 0) : TangentSpace I x × TangentSpace I x),
+      ∀ t ∈ Set.Icc (0 : Real) τ,
+        ‖modelSpray (I := I) g x
+            (α (initPhase (I := I) x (τ⁻¹ • p.1)) t) -
+          modelSpray (I := I) g x
+            (α (initPhase (I := I) x (τ⁻¹ • p.2)) t) -
+          modelSprayLin (E := E)
+            (α (initPhase (I := I) x (τ⁻¹ • p.1)) t -
+              α (initPhase (I := I) x (τ⁻¹ • p.2)) t)‖
+          ≤ c * ‖p.1 - p.2‖ := by
+  intro c hc
+  let z0 : E × E :=
+    extChartAt I.tangent (phaseZero (I := I) x)
+      (phaseZero (I := I) x)
+  let rem : (E × E) × (E × E) -> E × E := fun q =>
+    modelSpray (I := I) g x q.1 -
+      modelSpray (I := I) g x q.2 -
+      modelSprayLin (E := E) (q.1 - q.2)
+  let Csep : Real := (L' : Real) * ‖τ⁻¹‖
+  let η : Real := c / (Csep + 1)
+  have hCsep_nonneg : 0 ≤ Csep := by
+    dsimp [Csep]
+    positivity
+  have hdenη : 0 < Csep + 1 := by positivity
+  have hη : 0 < η := by
+    dsimp [η]
+    positivity
+  have hremEvt :
+      {q : (E × E) × (E × E) |
+        ‖rem q‖ ≤ η * ‖q.1 - q.2‖} ∈ 𝓝 (z0, z0) := by
+    simpa [rem, z0, η] using
+      (spray_o (I := I) g x).bound hη
+  obtain ⟨δ, hδ, hδsub⟩ := Metric.mem_nhds_iff.mp hremEvt
+  let Clip : Real := (L' : Real) + 1
+  have hClip : 0 < Clip := by
+    dsimp [Clip]
+    positivity
+  let σ : Real := min ρ (δ / Clip)
+  have hσ : 0 < σ := by
+    dsimp [σ]
+    exact lt_min hρ (div_pos hδ hClip)
+  have hcont1 :
+      ContinuousAt
+        (fun p : TangentSpace I x × TangentSpace I x => τ⁻¹ • p.1)
+        ((0, 0) : TangentSpace I x × TangentSpace I x) := by
+    fun_prop
+  have hcont2 :
+      ContinuousAt
+        (fun p : TangentSpace I x × TangentSpace I x => τ⁻¹ • p.2)
+        ((0, 0) : TangentSpace I x × TangentSpace I x) := by
+    fun_prop
+  have hnear1 := hcont1.preimage_mem_nhds (Metric.ball_mem_nhds _ hσ)
+  have hnear2 := hcont2.preimage_mem_nhds (Metric.ball_mem_nhds _ hσ)
+  filter_upwards [hnear1, hnear2] with p hp1 hp2 t ht
+  let z1 : E × E := initPhase (I := I) x (τ⁻¹ • p.1)
+  let z2 : E × E := initPhase (I := I) x (τ⁻¹ • p.2)
+  have htE : t ∈ Set.Icc (-ε) ε := hsub ht
+  have hp1ball : τ⁻¹ • p.1 ∈ Metric.ball (0 : TangentSpace I x) σ := by
+    simpa using hp1
+  have hp2ball : τ⁻¹ • p.2 ∈ Metric.ball (0 : TangentSpace I x) σ := by
+    simpa using hp2
+  have hp1ρ : τ⁻¹ • p.1 ∈ Metric.ball (0 : TangentSpace I x) ρ := by
+    rw [Metric.mem_ball] at hp1ball ⊢
+    exact lt_of_lt_of_le hp1ball (min_le_left _ _)
+  have hp2ρ : τ⁻¹ • p.2 ∈ Metric.ball (0 : TangentSpace I x) ρ := by
+    rw [Metric.mem_ball] at hp2ball ⊢
+    exact lt_of_lt_of_le hp2ball (min_le_left _ _)
+  have hz1 : z1 ∈ Metric.closedBall z0 rModel := by
+    simpa [z1, z0] using hsmall (τ⁻¹ • p.1) hp1ρ
+  have hz2 : z2 ∈ Metric.closedBall z0 rModel := by
+    simpa [z2, z0] using hsmall (τ⁻¹ • p.2) hp2ρ
+  have hz0 : z0 ∈ Metric.closedBall z0 rModel :=
+    Metric.mem_closedBall_self (NNReal.coe_nonneg rModel)
+  have hp1δ : ‖τ⁻¹ • p.1‖ < δ / Clip := by
+    rw [Metric.mem_ball, dist_zero_right] at hp1ball
+    exact lt_of_lt_of_le hp1ball (min_le_right _ _)
+  have hp2δ : ‖τ⁻¹ • p.2‖ < δ / Clip := by
+    rw [Metric.mem_ball, dist_zero_right] at hp2ball
+    exact lt_of_lt_of_le hp2ball (min_le_right _ _)
+  have hLδ : (L' : Real) * (δ / Clip) < δ := by
+    have hLlt : (L' : Real) < Clip := by
+      dsimp [Clip]
+      linarith [NNReal.coe_nonneg L']
+    have hδdiv : 0 < δ / Clip := div_pos hδ hClip
+    calc
+      (L' : Real) * (δ / Clip) < Clip * (δ / Clip) :=
+        mul_lt_mul_of_pos_right hLlt hδdiv
+      _ = δ := by
+        field_simp [hClip.ne']
+  have hclose1 : ‖α z1 t - z0‖ < δ := by
+    have hle := lip_norm_sub_le (hLip t htE) hz1 hz0
+    have hz := hzero t htE
+    dsimp [z1] at hle
+    rw [hz] at hle
+    have hinit : ‖z1 - z0‖ < δ / Clip := by
+      simpa [z1, z0] using
+        (norm_initPhase_zero (I := I) x (τ⁻¹ • p.1)).trans_lt hp1δ
+    exact lt_of_le_of_lt hle
+      (lt_of_le_of_lt
+        (mul_le_mul_of_nonneg_left hinit.le (NNReal.coe_nonneg L'))
+        hLδ)
+  have hclose2 : ‖α z2 t - z0‖ < δ := by
+    have hle := lip_norm_sub_le (hLip t htE) hz2 hz0
+    have hz := hzero t htE
+    dsimp [z2] at hle
+    rw [hz] at hle
+    have hinit : ‖z2 - z0‖ < δ / Clip := by
+      simpa [z2, z0] using
+        (norm_initPhase_zero (I := I) x (τ⁻¹ • p.2)).trans_lt hp2δ
+    exact lt_of_le_of_lt hle
+      (lt_of_le_of_lt
+        (mul_le_mul_of_nonneg_left hinit.le (NNReal.coe_nonneg L'))
+        hLδ)
+  have hqball : (α z1 t, α z2 t) ∈ Metric.ball (z0, z0) δ := by
+    rw [Metric.mem_ball, dist_eq_norm]
+    change ‖(α z1 t - z0, α z2 t - z0)‖ < δ
+    change max ‖α z1 t - z0‖ ‖α z2 t - z0‖ < δ
+    exact max_lt hclose1 hclose2
+  have hrem := hδsub hqball
+  have hsep : ‖α z1 t - α z2 t‖ ≤ Csep * ‖p.1 - p.2‖ := by
+    have hle := lip_norm_sub_le (hLip t htE) hz1 hz2
+    have hinit : ‖z1 - z2‖ = ‖τ⁻¹ • (p.1 - p.2)‖ := by
+      simp [z1, z2, norm_initPhase_sub, smul_sub]
+    calc
+      ‖α z1 t - α z2 t‖ ≤ (L' : Real) * ‖z1 - z2‖ := hle
+      _ = (L' : Real) * ‖τ⁻¹ • (p.1 - p.2)‖ := by rw [hinit]
+      _ = Csep * ‖p.1 - p.2‖ := by
+        simp [Csep, norm_smul, mul_assoc, mul_comm, mul_left_comm]
+  have hηC : η * Csep ≤ c := by
+    dsimp [η]
+    field_simp [hdenη.ne']
+    nlinarith [mul_le_mul_of_nonneg_left
+      (show Csep ≤ Csep + 1 by linarith) hc.le]
+  calc
+    ‖modelSpray (I := I) g x (α z1 t) -
+          modelSpray (I := I) g x (α z2 t) -
+          modelSprayLin (E := E) (α z1 t - α z2 t)‖
+        = ‖rem (α z1 t, α z2 t)‖ := by rfl
+    _ ≤ η * ‖α z1 t - α z2 t‖ := by
+      simpa [rem] using hrem
+    _ ≤ η * (Csep * ‖p.1 - p.2‖) :=
+      mul_le_mul_of_nonneg_left hsep hη.le
+    _ = (η * Csep) * ‖p.1 - p.2‖ := by ring
+    _ ≤ c * ‖p.1 - p.2‖ :=
+      mul_le_mul_of_nonneg_right hηC (norm_nonneg _)
+
 /-- The zero phase point is an equilibrium of the fixed-chart model spray. -/
 private theorem modelSpray_zero
     [I.Boundaryless]
@@ -1200,6 +1506,31 @@ private theorem plFlow_bound
     rw [dif_pos hx, dif_pos hy]
     rw [ODE.FunSpace.compProj_of_mem ht, ODE.FunSpace.compProj_of_mem ht]
     simpa [ODE.FunSpace.toContinuousMap_apply_eq_apply] using hpoint
+
+/-- Picard-Lindelof vector fields are interval-integrable along a controlled
+continuous trajectory. -/
+private lemma pl_int
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace Real F] [CompleteSpace F]
+    {f : Real -> F -> F} {tmin tmax : Real}
+    {t0 : Set.Icc tmin tmax} {x0 : F} {a r L K : NNReal}
+    (hf : IsPicardLindelof f t0 x0 a r L K)
+    {α : Real -> F}
+    (hα : ContinuousOn α (Set.Icc tmin tmax))
+    (hbound : ∀ s : Real, α s ∈ Metric.closedBall x0 a)
+    {t : Real} (ht : t ∈ Set.Icc tmin tmax) :
+    IntervalIntegrable (fun s : Real => f s (α s))
+      MeasureTheory.volume (t0 : Real) t := by
+  have hpair :
+      ContinuousOn (fun s : Real => (s, α s)) (Set.Icc tmin tmax) :=
+    continuousOn_id.prodMk hα
+  have hF :
+      ContinuousOn (fun s : Real => f s (α s)) (Set.Icc tmin tmax) := by
+    refine hf.continuousOn_uncurry.comp hpair ?_
+    intro s hs
+    exact ⟨hs, hbound s⟩
+  have hsub : Set.uIcc (t0 : Real) t ⊆ Set.Icc tmin tmax :=
+    Set.uIcc_subset_Icc t0.2 ht
+  exact (hF.mono hsub).intervalIntegrable
 
 /-- A Picard-Lindelof solution whose controlling ball lies in the fixed chart
 source gives an ordinary model ODE solution on the open time interval, with
@@ -1853,6 +2184,56 @@ private theorem manifoldEnd_chart
   have hchart := phaseOfModel_chart (I := I) x hzβtarget hzβsrc
   simpa [manifoldEnd, chartEnd, z, zβ] using hchart
 
+/-- Near zero, the manifold-valued functional endpoint has chart coordinate
+`chartEnd`, provided the model flow stays in the fixed tangent-bundle chart
+target. -/
+private theorem chartEnd_eventually_eq
+    [I.Boundaryless]
+    {α : E × E -> Real -> E × E} {ε τ ρ : Real} {rModel : NNReal}
+    (x : M) (hτ : 0 < τ) (hρ : 0 < ρ)
+    (hsmall : ∀ v ∈ Metric.ball (0 : TangentSpace I x) ρ,
+      initPhase (I := I) x v ∈
+        Metric.closedBall
+          (extChartAt I.tangent (phaseZero (I := I) x)
+            (phaseZero (I := I) x)) rModel)
+    (hsrc : ∀ z ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) rModel,
+      ∀ t ∈ Set.Icc (-ε) ε,
+        α z t ∈ (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+          (phaseOfModel (I := I) x (α z t)).proj ∈
+            (extChartAt I x).source)
+    (hτmem : τ ∈ Set.Icc (-ε) ε) :
+    chartEnd (I := I) α τ x =ᶠ[𝓝 (0 : TangentSpace I x)]
+      fun v : TangentSpace I x =>
+        extChartAt I x (manifoldEnd (I := I) α τ x v) := by
+  let R : Real := τ * ρ
+  have hR : 0 < R := mul_pos hτ hρ
+  have hball : Metric.ball (0 : TangentSpace I x) R ∈
+      𝓝 (0 : TangentSpace I x) :=
+    Metric.ball_mem_nhds _ hR
+  filter_upwards [hball] with v hv
+  let u : TangentSpace I x := τ⁻¹ • v
+  let z : E × E := initPhase (I := I) x u
+  have hu : u ∈ Metric.ball (0 : TangentSpace I x) ρ := by
+    rw [Metric.mem_ball] at hv ⊢
+    have hvnorm : ‖v‖ < τ * ρ := by
+      simpa [R, dist_zero_right] using hv
+    have hscale := mul_lt_mul_of_pos_left hvnorm (inv_pos.mpr hτ)
+    have hnormu : ‖τ⁻¹ • v‖ < ρ := by
+      rw [norm_smul, Real.norm_eq_abs, abs_of_pos (inv_pos.mpr hτ)]
+      rw [← mul_assoc, inv_mul_cancel₀ hτ.ne', one_mul] at hscale
+      simpa [mul_comm, mul_left_comm, mul_assoc] using hscale
+    simpa [u, dist_zero_right] using hnormu
+  have hz : z ∈ Metric.closedBall
+      (extChartAt I.tangent (phaseZero (I := I) x)
+        (phaseZero (I := I) x)) rModel := by
+    exact hsmall u hu
+  have htarget := (hsrc z hz τ hτmem).1
+  have hchart := manifoldEnd_chart (I := I) (α := α) (τ := τ) x
+    (v := v) htarget
+  simpa [z, u] using hchart.symm
+
 /-- First-coordinate Picard integral equation for the fixed chart endpoint. -/
 private theorem chartEnd_picard
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -2223,41 +2604,439 @@ theorem expAt_strict
             (chartEnd (I := I) α τ x)
             (ContinuousLinearMap.id Real (TangentSpace I x)) 0 := by
         rw [hasStrictFDerivAt_iff_isLittleO]
-        /- Remaining analytic step: use `chartEnd_picard`, `hzero`,
-        `hbound`, `hLip`, and `spray_o` to prove the pairwise endpoint
-        little-o estimate directly here. -/
-        sorry
+        have hsub0τ : Set.Icc (0 : Real) τ ⊆ Set.Icc (-ε) ε := by
+          intro t ht
+          constructor
+          · linarith [hε, ht.1]
+          · exact le_trans ht.2 hτmem.2
+        have hres_uniform :
+            ∀ c > 0, ∀ᶠ p : TangentSpace I x × TangentSpace I x in
+              𝓝 ((0, 0) : TangentSpace I x × TangentSpace I x),
+              ∀ t ∈ Set.Icc (0 : Real) τ,
+                ‖modelSpray (I := I) g x
+                    (α (initPhase (I := I) x (τ⁻¹ • p.1)) t) -
+                  modelSpray (I := I) g x
+                    (α (initPhase (I := I) x (τ⁻¹ • p.2)) t) -
+                  modelSprayLin (E := E)
+                    (α (initPhase (I := I) x (τ⁻¹ • p.1)) t -
+                      α (initPhase (I := I) x (τ⁻¹ • p.2)) t)‖
+                  ≤ c * ‖p.1 - p.2‖ :=
+          sprayRem_uniform (I := I) g x
+            (ε := ε) (τ := τ) (ρ := ρ) (rModel := rModel)
+            (L' := L') (α := α) hρ hτ hsub0τ hsmall hzero hLip
+        let res : (TangentSpace I x × TangentSpace I x) -> Real -> E × E :=
+          fun p t =>
+            modelSpray (I := I) g x
+                (α (initPhase (I := I) x (τ⁻¹ • p.1)) t) -
+              modelSpray (I := I) g x
+                (α (initPhase (I := I) x (τ⁻¹ • p.2)) t) -
+              modelSprayLin (E := E)
+                (α (initPhase (I := I) x (τ⁻¹ • p.1)) t -
+                  α (initPhase (I := I) x (τ⁻¹ • p.2)) t)
+        have hres_snd :
+            ∀ c > 0, ∀ᶠ p : TangentSpace I x × TangentSpace I x in
+              𝓝 ((0, 0) : TangentSpace I x × TangentSpace I x),
+              ∀ s ∈ Set.Icc (0 : Real) τ,
+                ‖(res p s).2‖ ≤ c * ‖p.1 - p.2‖ := by
+          intro c hc
+          filter_upwards [hres_uniform c hc] with p hp s hs
+          exact (norm_snd_le (res p s)).trans (hp s hs)
+        have hvel_int :
+            ∀ c > 0, ∀ᶠ p : TangentSpace I x × TangentSpace I x in
+              𝓝 ((0, 0) : TangentSpace I x × TangentSpace I x),
+              ∀ t ∈ Set.Icc (0 : Real) τ,
+                ‖∫ s in (0 : Real)..t, (res p s).2‖ ≤
+                  c * ‖p.1 - p.2‖ :=
+          eventually_norm_integral_zero_to_t_le (b := τ) hτ.le hres_snd
+        have hdouble_int :
+            (fun p : TangentSpace I x × TangentSpace I x =>
+              ∫ t in (0 : Real)..τ,
+                ∫ s in (0 : Real)..t, (res p s).2)
+              =o[𝓝 ((0, 0) : TangentSpace I x × TangentSpace I x)]
+                fun p => p.1 - p.2 := by
+          apply isLittleO_intervalIntegral_of_uniform_bound
+          intro c hc
+          filter_upwards [hvel_int c hc] with p hp t ht
+          have htIcc : t ∈ Set.Icc (0 : Real) τ := by
+            rw [Set.mem_uIoc] at ht
+            rcases ht with ht | ht
+            · exact ⟨ht.1.le, ht.2⟩
+            · have hlt : t < t := lt_of_le_of_lt (le_trans ht.2 hτ.le) ht.1
+              exact (lt_irrefl t hlt).elim
+          exact hp t htIcc
+        have hvel_formula :
+            ∀ᶠ p : TangentSpace I x × TangentSpace I x in
+              𝓝 ((0, 0) : TangentSpace I x × TangentSpace I x),
+              ∀ t ∈ Set.Icc (0 : Real) τ,
+                (α (initPhase (I := I) x (τ⁻¹ • p.1)) t -
+                    α (initPhase (I := I) x (τ⁻¹ • p.2)) t).2 =
+                  (initPhase (I := I) x (τ⁻¹ • p.1) -
+                    initPhase (I := I) x (τ⁻¹ • p.2)).2 +
+                    ∫ s in (0 : Real)..t, (res p s).2 := by
+          have hcont1 :
+              ContinuousAt
+                (fun p : TangentSpace I x × TangentSpace I x => τ⁻¹ • p.1)
+                ((0, 0) : TangentSpace I x × TangentSpace I x) := by
+            exact (continuous_const.smul continuous_fst).continuousAt
+          have hcont2 :
+              ContinuousAt
+                (fun p : TangentSpace I x × TangentSpace I x => τ⁻¹ • p.2)
+                ((0, 0) : TangentSpace I x × TangentSpace I x) := by
+            exact (continuous_const.smul continuous_snd).continuousAt
+          have hnear1 := hcont1.preimage_mem_nhds (Metric.ball_mem_nhds _ hρ)
+          have hnear2 := hcont2.preimage_mem_nhds (Metric.ball_mem_nhds _ hρ)
+          filter_upwards [hnear1, hnear2] with p hp1 hp2 t ht
+          let z1 : E × E := initPhase (I := I) x (τ⁻¹ • p.1)
+          let z2 : E × E := initPhase (I := I) x (τ⁻¹ • p.2)
+          have hp1ball : τ⁻¹ • p.1 ∈ Metric.ball (0 : TangentSpace I x) ρ := by
+            simpa using hp1
+          have hp2ball : τ⁻¹ • p.2 ∈ Metric.ball (0 : TangentSpace I x) ρ := by
+            simpa using hp2
+          have hz1 : z1 ∈ Metric.closedBall
+              (extChartAt I.tangent (phaseZero (I := I) x)
+                (phaseZero (I := I) x)) rModel := by
+            simpa [z1] using hsmall (τ⁻¹ • p.1) hp1ball
+          have hz2 : z2 ∈ Metric.closedBall
+              (extChartAt I.tangent (phaseZero (I := I) x)
+                (phaseZero (I := I) x)) rModel := by
+            simpa [z2] using hsmall (τ⁻¹ • p.2) hp2ball
+          have htE : t ∈ Set.Icc (-ε) ε := hsub0τ ht
+          have hp1pic := hpicard z1 hz1 t htE
+          have hp2pic := hpicard z2 hz2 t htE
+          have hsnd1 :
+              (α z1 t).2 =
+                z1.2 +
+                  (∫ s in (0 : Real)..t,
+                    modelSpray (I := I) g x (α z1 s)).2 := by
+            have h := congrArg Prod.snd hp1pic
+            simpa [z1, ODE.picard_apply] using h
+          have hsnd2 :
+              (α z2 t).2 =
+                z2.2 +
+                  (∫ s in (0 : Real)..t,
+                    modelSpray (I := I) g x (α z2 s)).2 := by
+            have h := congrArg Prod.snd hp2pic
+            simpa [z2, ODE.picard_apply] using h
+          have hres_snd_point :
+              (fun s : Real => (res p s).2) =
+                (fun s : Real =>
+                  (modelSpray (I := I) g x (α z1 s) -
+                    modelSpray (I := I) g x (α z2 s)).2) := by
+            funext s
+            simp [res, z1, z2, modelSprayLin_snd]
+          calc
+            (α (initPhase (I := I) x (τ⁻¹ • p.1)) t -
+                α (initPhase (I := I) x (τ⁻¹ • p.2)) t).2
+                = (α z1 t - α z2 t).2 := by rfl
+            _ = (α z1 t).2 - (α z2 t).2 := by rfl
+            _ = (z1.2 +
+                    (∫ s in (0 : Real)..t,
+                      modelSpray (I := I) g x (α z1 s)).2) -
+                  (z2.2 +
+                    (∫ s in (0 : Real)..t,
+                      modelSpray (I := I) g x (α z2 s)).2) := by
+              rw [hsnd1, hsnd2]
+            _ = (z1 - z2).2 +
+                  ((∫ s in (0 : Real)..t,
+                      modelSpray (I := I) g x (α z1 s)).2 -
+                    (∫ s in (0 : Real)..t,
+                      modelSpray (I := I) g x (α z2 s)).2) := by
+              simp [sub_eq_add_neg, add_comm, add_left_comm, add_assoc]
+            _ = (initPhase (I := I) x (τ⁻¹ • p.1) -
+                    initPhase (I := I) x (τ⁻¹ • p.2)).2 +
+                  ∫ s in (0 : Real)..t, (res p s).2 := by
+              change (z1 - z2).2 +
+                    ((∫ s in (0 : Real)..t,
+                        modelSpray (I := I) g x (α z1 s)).2 -
+                      (∫ s in (0 : Real)..t,
+                        modelSpray (I := I) g x (α z2 s)).2) =
+                  (z1 - z2).2 + ∫ s in (0 : Real)..t, (res p s).2
+              rw [hres_snd_point]
+              have hα1cont :
+                  ContinuousOn (α z1) (Set.Icc (0 - ε) (0 + ε)) := by
+                simpa using HasDerivWithinAt.continuousOn
+                  (fun s hs => (hflow z1 hz1).2 s (by simpa using hs))
+              have hα2cont :
+                  ContinuousOn (α z2) (Set.Icc (0 - ε) (0 + ε)) := by
+                simpa using HasDerivWithinAt.continuousOn
+                  (fun s hs => (hflow z2 hz2).2 s (by simpa using hs))
+              have htE' : t ∈ Set.Icc (0 - ε) (0 + ε) := by
+                simpa using htE
+              have hint1 :
+                  IntervalIntegrable
+                    (fun s : Real =>
+                      modelSpray (I := I) g x (α z1 s))
+                    MeasureTheory.volume (0 : Real) t := by
+                exact pl_int (hf := hpl) hα1cont
+                  (fun s => hbound z1 hz1 s) htE'
+              have hint2 :
+                  IntervalIntegrable
+                    (fun s : Real =>
+                      modelSpray (I := I) g x (α z2 s))
+                    MeasureTheory.volume (0 : Real) t := by
+                exact pl_int (hf := hpl) hα2cont
+                  (fun s => hbound z2 hz2 s) htE'
+              have hsubint :
+                  ((∫ s in (0 : Real)..t,
+                      modelSpray (I := I) g x (α z1 s)).2 -
+                    (∫ s in (0 : Real)..t,
+                      modelSpray (I := I) g x (α z2 s)).2) =
+                    ∫ s in (0 : Real)..t,
+                      (modelSpray (I := I) g x (α z1 s) -
+                        modelSpray (I := I) g x (α z2 s)).2 := by
+                calc
+                  ((∫ s in (0 : Real)..t,
+                      modelSpray (I := I) g x (α z1 s)).2 -
+                    (∫ s in (0 : Real)..t,
+                      modelSpray (I := I) g x (α z2 s)).2)
+                      =
+                    ((∫ s in (0 : Real)..t,
+                      modelSpray (I := I) g x (α z1 s)) -
+                    (∫ s in (0 : Real)..t,
+                      modelSpray (I := I) g x (α z2 s))).2 := by
+                    rfl
+                  _ = (∫ s in (0 : Real)..t,
+                      modelSpray (I := I) g x (α z1 s) -
+                        modelSpray (I := I) g x (α z2 s)).2 := by
+                    rw [intervalIntegral.integral_sub hint1 hint2]
+                  _ = ∫ s in (0 : Real)..t,
+                      (modelSpray (I := I) g x (α z1 s) -
+                        modelSpray (I := I) g x (α z2 s)).2 := by
+                    exact ((ContinuousLinearMap.snd Real E E).intervalIntegral_comp_comm
+                      (hint1.sub hint2)).symm
+              rw [hsubint]
+        have hendpoint :
+          (fun p : TangentSpace I x × TangentSpace I x =>
+            chartEnd (I := I) α τ x p.1 -
+              chartEnd (I := I) α τ x p.2 -
+              (p.1 - p.2))
+            =ᶠ[𝓝 ((0, 0) : TangentSpace I x × TangentSpace I x)]
+          (fun p : TangentSpace I x × TangentSpace I x =>
+            ∫ t in (0 : Real)..τ,
+              ∫ s in (0 : Real)..t, (res p s).2) := by
+          have hcont1 :
+              ContinuousAt
+                (fun p : TangentSpace I x × TangentSpace I x => τ⁻¹ • p.1)
+                ((0, 0) : TangentSpace I x × TangentSpace I x) := by
+            exact (continuous_const.smul continuous_fst).continuousAt
+          have hcont2 :
+              ContinuousAt
+                (fun p : TangentSpace I x × TangentSpace I x => τ⁻¹ • p.2)
+                ((0, 0) : TangentSpace I x × TangentSpace I x) := by
+            exact (continuous_const.smul continuous_snd).continuousAt
+          have hnear1 := hcont1.preimage_mem_nhds (Metric.ball_mem_nhds _ hρ)
+          have hnear2 := hcont2.preimage_mem_nhds (Metric.ball_mem_nhds _ hρ)
+          filter_upwards [hnear1, hnear2, hvel_formula] with p hp1 hp2 hpvel
+          let z1 : E × E := initPhase (I := I) x (τ⁻¹ • p.1)
+          let z2 : E × E := initPhase (I := I) x (τ⁻¹ • p.2)
+          have hp1ball : τ⁻¹ • p.1 ∈ Metric.ball (0 : TangentSpace I x) ρ := by
+            simpa using hp1
+          have hp2ball : τ⁻¹ • p.2 ∈ Metric.ball (0 : TangentSpace I x) ρ := by
+            simpa using hp2
+          have hz1 : z1 ∈ Metric.closedBall
+              (extChartAt I.tangent (phaseZero (I := I) x)
+                (phaseZero (I := I) x)) rModel := by
+            simpa [z1] using hsmall (τ⁻¹ • p.1) hp1ball
+          have hz2 : z2 ∈ Metric.closedBall
+              (extChartAt I.tangent (phaseZero (I := I) x)
+                (phaseZero (I := I) x)) rModel := by
+            simpa [z2] using hsmall (τ⁻¹ • p.2) hp2ball
+          have hchart1 :
+              chartEnd (I := I) α τ x p.1 =
+                z1.1 +
+                  (∫ s in (0 : Real)..τ,
+                    modelSpray (I := I) g x (α z1 s)).1 := by
+            simpa [z1] using
+              chartEnd_picard (I := I) (g := g) (x := x)
+                (ε := ε) (τ := τ) hε (r := rModel)
+                (α := α) hpicard (v := p.1) hz1 hτmem
+          have hchart2 :
+              chartEnd (I := I) α τ x p.2 =
+                z2.1 +
+                  (∫ s in (0 : Real)..τ,
+                    modelSpray (I := I) g x (α z2 s)).1 := by
+            simpa [z2] using
+              chartEnd_picard (I := I) (g := g) (x := x)
+                (ε := ε) (τ := τ) hε (r := rModel)
+                (α := α) hpicard (v := p.2) hz2 hτmem
+          have hfst_eq : z1.1 = z2.1 := by
+            have h1 := congrArg Prod.fst
+              (initPhase_eq_pair (I := I) x (τ⁻¹ • p.1))
+            have h2 := congrArg Prod.fst
+              (initPhase_eq_pair (I := I) x (τ⁻¹ • p.2))
+            calc
+              z1.1 = extChartAt I x x := by simpa [z1] using h1
+              _ = z2.1 := by simpa [z2] using h2.symm
+          have hα1cont :
+              ContinuousOn (α z1) (Set.Icc (0 - ε) (0 + ε)) := by
+            simpa using HasDerivWithinAt.continuousOn
+              (fun s hs => (hflow z1 hz1).2 s (by simpa using hs))
+          have hα2cont :
+              ContinuousOn (α z2) (Set.Icc (0 - ε) (0 + ε)) := by
+            simpa using HasDerivWithinAt.continuousOn
+              (fun s hs => (hflow z2 hz2).2 s (by simpa using hs))
+          have hτmem' : τ ∈ Set.Icc (0 - ε) (0 + ε) := by
+            simpa using hτmem
+          have hint1 :
+              IntervalIntegrable
+                (fun s : Real =>
+                  modelSpray (I := I) g x (α z1 s))
+                MeasureTheory.volume (0 : Real) τ := by
+            exact pl_int (hf := hpl) hα1cont
+              (fun s => hbound z1 hz1 s) hτmem'
+          have hint2 :
+              IntervalIntegrable
+                (fun s : Real =>
+                  modelSpray (I := I) g x (α z2 s))
+                MeasureTheory.volume (0 : Real) τ := by
+            exact pl_int (hf := hpl) hα2cont
+              (fun s => hbound z2 hz2 s) hτmem'
+          have hmodel_fst :
+              ((∫ s in (0 : Real)..τ,
+                  modelSpray (I := I) g x (α z1 s)).1 -
+                (∫ s in (0 : Real)..τ,
+                  modelSpray (I := I) g x (α z2 s)).1) =
+                ∫ s in (0 : Real)..τ, (α z1 s - α z2 s).2 := by
+            have hsubint :
+                ((∫ s in (0 : Real)..τ,
+                    modelSpray (I := I) g x (α z1 s)).1 -
+                  (∫ s in (0 : Real)..τ,
+                    modelSpray (I := I) g x (α z2 s)).1) =
+                  ∫ s in (0 : Real)..τ,
+                    (modelSpray (I := I) g x (α z1 s) -
+                      modelSpray (I := I) g x (α z2 s)).1 := by
+              calc
+                ((∫ s in (0 : Real)..τ,
+                    modelSpray (I := I) g x (α z1 s)).1 -
+                  (∫ s in (0 : Real)..τ,
+                    modelSpray (I := I) g x (α z2 s)).1)
+                    =
+                  ((∫ s in (0 : Real)..τ,
+                    modelSpray (I := I) g x (α z1 s)) -
+                  (∫ s in (0 : Real)..τ,
+                    modelSpray (I := I) g x (α z2 s))).1 := by
+                  rfl
+                _ = (∫ s in (0 : Real)..τ,
+                    modelSpray (I := I) g x (α z1 s) -
+                      modelSpray (I := I) g x (α z2 s)).1 := by
+                  rw [intervalIntegral.integral_sub hint1 hint2]
+                _ = ∫ s in (0 : Real)..τ,
+                    (modelSpray (I := I) g x (α z1 s) -
+                      modelSpray (I := I) g x (α z2 s)).1 := by
+                  exact ((ContinuousLinearMap.fst Real E E).intervalIntegral_comp_comm
+                    (hint1.sub hint2)).symm
+            rw [hsubint]
+            apply intervalIntegral.integral_congr
+            intro s hs
+            have hsIcc : s ∈ Set.Icc (0 : Real) τ := by
+              simpa [uIcc_of_le hτ.le] using hs
+            have hsE : s ∈ Set.Icc (-ε) ε := hsub0τ hsIcc
+            have hpair1 := modelSpray_eq_pair (I := I) g x
+              (z := α z1 s) (hsrcFlow z1 hz1 s hsE).1 (hsrcFlow z1 hz1 s hsE).2
+            have hpair2 := modelSpray_eq_pair (I := I) g x
+              (z := α z2 s) (hsrcFlow z2 hz2 s hsE).1 (hsrcFlow z2 hz2 s hsE).2
+            simp [hpair1, hpair2]
+          have hα1contτ : ContinuousOn (α z1) [[(0 : Real), τ]] :=
+            hα1cont.mono (by
+              intro s hs
+              have hsIcc : s ∈ Set.Icc (0 : Real) τ := by
+                simpa [uIcc_of_le hτ.le] using hs
+              simpa using hsub0τ hsIcc)
+          have hα2contτ : ContinuousOn (α z2) [[(0 : Real), τ]] :=
+            hα2cont.mono (by
+              intro s hs
+              have hsIcc : s ∈ Set.Icc (0 : Real) τ := by
+                simpa [uIcc_of_le hτ.le] using hs
+              simpa using hsub0τ hsIcc)
+          have hvelCont :
+              ContinuousOn (fun s : Real => (α z1 s - α z2 s).2)
+                [[(0 : Real), τ]] :=
+            (hα1contτ.sub hα2contτ).snd
+          have hvelInt :
+              IntervalIntegrable
+                (fun s : Real => (α z1 s - α z2 s).2)
+                MeasureTheory.volume (0 : Real) τ :=
+            hvelCont.intervalIntegrable
+          have hconstInt :
+              IntervalIntegrable
+                (fun _ : Real => (z1 - z2).2)
+                MeasureTheory.volume (0 : Real) τ :=
+            continuousOn_const.intervalIntegrable
+          have hconst_integral :
+              (∫ _s in (0 : Real)..τ, (z1 - z2).2) =
+                (p.1 - p.2) := by
+            rw [intervalIntegral.integral_const]
+            have hsnd :
+                (z1 - z2).2 = τ⁻¹ • p.1 - τ⁻¹ • p.2 := by
+              have h := congrArg Prod.snd
+                (initPhase_sub (I := I) x (τ⁻¹ • p.1) (τ⁻¹ • p.2))
+              simpa [z1, z2] using h
+            calc
+              (τ - 0) • (z1 - z2).2
+                  = τ • (τ⁻¹ • p.1 - τ⁻¹ • p.2) := by
+                simp [hsnd]
+              _ = p.1 - p.2 := by
+                change τ • (τ⁻¹ • p.1 - τ⁻¹ • p.2) = p.1 - p.2
+                rw [smul_sub, smul_smul, smul_smul,
+                  mul_inv_cancel₀ hτ.ne', one_smul, one_smul]
+          have hvel_to_res :
+              (∫ s in (0 : Real)..τ, (α z1 s - α z2 s).2) -
+                (p.1 - p.2) =
+                ∫ t in (0 : Real)..τ,
+                  ∫ s in (0 : Real)..t, (res p s).2 := by
+            calc
+              (∫ s in (0 : Real)..τ, (α z1 s - α z2 s).2) -
+                  (p.1 - p.2)
+                  =
+                (∫ s in (0 : Real)..τ, (α z1 s - α z2 s).2) -
+                  ∫ _s in (0 : Real)..τ, (z1 - z2).2 := by
+                rw [hconst_integral]
+              _ = ∫ t in (0 : Real)..τ,
+                    ((α z1 t - α z2 t).2 - (z1 - z2).2) := by
+                rw [intervalIntegral.integral_sub hvelInt hconstInt]
+              _ = ∫ t in (0 : Real)..τ,
+                    ∫ s in (0 : Real)..t, (res p s).2 := by
+                apply intervalIntegral.integral_congr
+                intro t ht
+                have htIcc : t ∈ Set.Icc (0 : Real) τ := by
+                  simpa [uIcc_of_le hτ.le] using ht
+                have hvelf := hpvel t htIcc
+                rw [hvelf]
+                simp [sub_eq_add_neg, add_comm, add_left_comm, add_assoc]
+          calc
+            chartEnd (I := I) α τ x p.1 -
+                chartEnd (I := I) α τ x p.2 -
+                (p.1 - p.2)
+                =
+              ((z1.1 +
+                  (∫ s in (0 : Real)..τ,
+                    modelSpray (I := I) g x (α z1 s)).1) -
+                (z2.1 +
+                  (∫ s in (0 : Real)..τ,
+                    modelSpray (I := I) g x (α z2 s)).1) -
+                (p.1 - p.2)) := by
+              rw [hchart1, hchart2]
+            _ =
+              (((∫ s in (0 : Real)..τ,
+                    modelSpray (I := I) g x (α z1 s)).1 -
+                  (∫ s in (0 : Real)..τ,
+                    modelSpray (I := I) g x (α z2 s)).1) -
+                (p.1 - p.2)) := by
+              rw [hfst_eq]
+              simp [sub_eq_add_neg, add_comm, add_left_comm, add_assoc]
+            _ =
+              (∫ s in (0 : Real)..τ, (α z1 s - α z2 s).2) -
+                (p.1 - p.2) := by
+              rw [hmodel_fst]
+            _ = ∫ t in (0 : Real)..τ,
+                  ∫ s in (0 : Real)..t, (res p s).2 := hvel_to_res
+        simpa using hdouble_int.congr' hendpoint.symm EventuallyEq.rfl
       have hEq :
           chartEnd (I := I) α τ x =ᶠ[𝓝 (0 : TangentSpace I x)]
             fun v : TangentSpace I x =>
-              extChartAt I x (manifoldEnd (I := I) α τ x v) := by
-        have hball : Metric.ball (0 : TangentSpace I x) R ∈
-            𝓝 (0 : TangentSpace I x) :=
-          Metric.ball_mem_nhds _ hR
-        filter_upwards [hball] with v hv
-        let u : TangentSpace I x := τ⁻¹ • v
-        have hu : u ∈ Metric.ball (0 : TangentSpace I x) ρ := by
-          rw [Metric.mem_ball] at hv ⊢
-          have hvnorm : ‖v‖ < τ * ρ := by
-            simpa [R, dist_zero_right] using hv
-          have hscale :=
-            mul_lt_mul_of_pos_left hvnorm (inv_pos.mpr hτ)
-          have hnormu : ‖τ⁻¹ • v‖ < ρ := by
-            rw [norm_smul, Real.norm_eq_abs, abs_of_pos (inv_pos.mpr hτ)]
-            rw [← mul_assoc, inv_mul_cancel₀ hτ.ne', one_mul] at hscale
-            simpa [mul_comm, mul_left_comm, mul_assoc] using hscale
-          simpa [u, dist_zero_right] using hnormu
-        have hvsmall : initPhase (I := I) x (τ⁻¹ • v) ∈
-            Metric.closedBall
-              (extChartAt I.tangent (phaseZero (I := I) x)
-                (phaseZero (I := I) x)) rModel := by
-          simpa [u] using hsmall u hu
-        have htarget :
-            α (initPhase (I := I) x (τ⁻¹ • v)) τ ∈
-              (extChartAt I.tangent (phaseZero (I := I) x)).target :=
-          (hsrcFlow (initPhase (I := I) x (τ⁻¹ • v)) hvsmall τ hτmem).1
-        exact (manifoldEnd_chart (I := I) (α := α) (τ := τ) x
-          (v := v) htarget).symm
+              extChartAt I x (manifoldEnd (I := I) α τ x v) :=
+        chartEnd_eventually_eq (I := I) (α := α) (ε := ε) (τ := τ)
+          (ρ := ρ) (rModel := rModel) x hτ hρ hsmall hsrcFlow hτmem
       exact hchartStrict.congr_of_eventuallyEq hEq
     simpa using hstrict
 

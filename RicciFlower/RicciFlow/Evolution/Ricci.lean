@@ -313,17 +313,19 @@ theorem rm04InputSkew_regular
 trace and Levi-Civita curvature symmetries. -/
 theorem ricciSymm_regular
     {D : Realized.RealTimeInterval}
+    {u : Set M}
     (S : SolutionOn (I := I) (M := M) D)
     (Rm04 : Real -> Realized.Tensor04Section (I := I) (M := M))
     (gInv : Real -> Realized.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
-    (hframe : IsLocalFrameOn I E 1 frame Set.univ)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (hcover : forall x : M, x ∈ u)
     (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
     (hTrace : forall (t : Realized.RealTimeInterval.RegularTime D) (x : M),
       Realized.RicciRealizesRm04FirstTraceAt (I := I)
         (S.ricci (t : Real) x) (Rm04 (t : Real) x)
         (gInv (t : Real) x)
-        (hframe.toBasisAt (by simp : x ∈ (Set.univ : Set M))))
+        (hframe.toBasisAt (hcover x)))
     (hPair : forall (t : Realized.RealTimeInterval.RegularTime D) (x : M),
       forall W X Y Z : TangentSpace I x,
         Rm04 (t : Real) x (Realized.vec4 W X Y Z) =
@@ -336,14 +338,14 @@ theorem ricciSymm_regular
           -Rm04 (t : Real) x (Realized.vec4 W X Y Z)) :
     RicciSymmetricInFrameOnRegular (I := I) S frame := by
   intro t x i j
-  let basis := hframe.toBasisAt (by simp : x ∈ (Set.univ : Set M))
+  let basis := hframe.toBasisAt (hcover x)
   have hinvAt :
       Tensor0SBundle.MetricInverseInBasis
         (I := I) (M := M) (S.family.metric (t : Real)) x
         basis (fun a b : Idx => gInv (t : Real) x a b) :=
     metricInverseInBasis_of_solution_frame
       (I := I) S gInv frame hframe hinv (t : Real)
-      (by simp : x ∈ (Set.univ : Set M))
+      (hcover x)
   have hsym :=
     Realized.ricciSymm_of_rm04 (I := I) basis
       (fun a b : Idx => gInv (t : Real) x a b)
@@ -3181,7 +3183,8 @@ theorem RicciContractedCommutatorsInFrame_of_tensor0S_ricciIdentity_lc
     simpa [Realized.RicciTensorRealizesRm04FirstTraceInFrame,
       IsLocalFrameOn.toBasisAt_coe] using h
   have hRic : RicciSymmetricInFrameOnRegular (I := I) S frame :=
-    ricciSymm_regular (I := I) S Rm04 gInv frame hframe hinv
+    ricciSymm_regular (I := I) S Rm04 gInv frame hframe
+      (fun x : M => by simp) hinv
       hTrace hPair hOutput hInput
   exact
     RicciContractedCommutatorsInFrame_of_differentiatedBianchi_and_tensor0S_ricciIdentity
@@ -4024,7 +4027,8 @@ theorem ricciLichnerowiczSpecializesInFrame_lc
   have hInput :=
     rm04InputSkew_regular (I := I) S Rm13 Rm04 hRm13 hLower
   have hRic : RicciSymmetricInFrameOnRegular (I := I) S frame :=
-    ricciSymm_regular (I := I) S Rm04 gInv frame hframe hinv
+    ricciSymm_regular (I := I) S Rm04 gInv frame hframe
+      (fun x : M => by simp) hinv
       hTrace hPair hOutput hInput
   exact ricciLichnerowiczSpecializesInFrame_regular
     (I := I) S Rm04 gInv frame roughLapRic hRic hinv

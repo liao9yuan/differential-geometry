@@ -31,6 +31,7 @@ import RicciFlower.ScalarBochner
 import RicciFlower.Bochner
 import RicciFlower.Realized.RicciFlow
 import RicciFlower.RicciFlow.Basic
+import RicciFlower.RicciFlow.ParabolicRescaling
 import RicciFlower.RicciFlow.MaximalTime
 import RicciFlower.RicciFlow.Evolution.Ricci
 import RicciFlower.RicciFlow.Evolution.RicciPreservation

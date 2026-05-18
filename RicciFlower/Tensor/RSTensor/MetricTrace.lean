@@ -425,7 +425,7 @@ private theorem gInvComp_contMDiffAt
       (mem_extChartAt_source (I := I) x₀))
   simpa [f, Function.comp_def] using hcompAt
 
-private theorem connTraceCoeff_eventually
+theorem connTraceCoeff_eventually
     (g : SmoothRiemannianMetric I M)
     (A : TensorRSField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 1 2)
