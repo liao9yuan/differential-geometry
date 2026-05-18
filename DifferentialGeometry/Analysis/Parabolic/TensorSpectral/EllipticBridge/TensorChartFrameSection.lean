@@ -254,6 +254,57 @@ private lemma tensorBundleSectionOfChartComponents_eq
   classical
   rfl
 
+/-- **The assembled section is supported in its chart.** The underlying section
+of `tensorBundleSectionOfChartComponents g r s α u hu hsupp` vanishes off the
+chart-`α` source: each summand is a chart-`α`-frame basis section cut off by the
+chart-`α` pull-back of a component function, and the pull-back is zero off the
+chart source. -/
+theorem tensorBundleSectionOfChartComponents_toSection_eq_zero_off_source
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
+    (u : TensorCompIdx (E := E) r s → EuclN → ℝ)
+    (hu : ∀ P, ContDiffOn ℝ ∞ (u P)
+      (chartTargetEuclid (I := I) (M := M) α))
+    (hsupp : ∀ P, HasCompactSupport (u P) ∧
+      tsupport (u P) ⊆ chartTargetEuclid (I := I) (M := M) α)
+    {x : M} (hx : x ∉ (chartAt H α).source) :
+    (tensorBundleSectionOfChartComponents (I := I) (M := M) g r s α
+        u hu hsupp).toSection x = 0 := by
+  classical
+  -- Unfold into the finite sum of chart-basis sections.
+  rw [tensorBundleSectionOfChartComponents_eq (I := I) (M := M) g r s α u hu hsupp]
+  -- Abbreviate the summand sections.
+  set S : TensorCompIdx (E := E) r s → SmoothCcTensor g r s :=
+    fun P => chartBasisTensorSection (I := I) (M := M) g r s α
+      (chartTestPullback (I := I) α (u P))
+      (componentBump_contMDiffOn (I := I) (M := M) α (hu P) (hsupp P).2)
+      (componentBump_tsupport_subset (I := I) (M := M) α
+        (hsupp P).1 (hsupp P).2) P with hS_def
+  -- The underlying section of the finite sum is the finite sum of the sections.
+  have h_sum_section :
+      (∑ P : TensorCompIdx (E := E) r s, S P).toSection =
+        ∑ P : TensorCompIdx (E := E) r s, (S P).toSection :=
+    map_sum (SmoothCcTensor.toSectionAddHom (I := I) (M := M) (g := g)
+      (r := r) (s := s)) _ _
+  -- Evaluating the finite sum of sections at `x` is the finite sum of values.
+  have h_coe : ⇑(∑ P : TensorCompIdx (E := E) r s, (S P).toSection) =
+      ∑ P : TensorCompIdx (E := E) r s, ⇑(S P).toSection :=
+    map_sum (ContMDiffSection.coeAddHom I (TensorRSModel r s ℝ E) ∞
+      (fun b : M => TensorRSSpace r s I b)) _ _
+  have h_eval : (∑ P : TensorCompIdx (E := E) r s, S P).toSection x =
+      ∑ P : TensorCompIdx (E := E) r s, (S P).toSection x := by
+    rw [h_sum_section]
+    have := congrFun h_coe x
+    rw [Finset.sum_apply] at this
+    exact this
+  rw [h_eval]
+  -- Each summand section vanishes at `x`: the chart-pull bump is `0` there.
+  refine Finset.sum_eq_zero (fun P _ => ?_)
+  rw [hS_def, chartBasisTensorSection_toSection_apply (I := I) (M := M) g r s α
+    (componentBump_contMDiffOn (I := I) (M := M) α (hu P) (hsupp P).2)
+    (componentBump_tsupport_subset (I := I) (M := M) α
+      (hsupp P).1 (hsupp P).2) P x,
+    chartTestPullback_apply_of_notMem (I := I) α _ hx, zero_smul]
+
 /-! ## Recovery of the prescribed chart-frame components
 
 The raw chart-`α` frame scalar component of the assembled section recovers, on
