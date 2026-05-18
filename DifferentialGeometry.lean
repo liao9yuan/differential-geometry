@@ -334,6 +334,7 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.RellichOnM
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.CompChainRuleK
 import DifferentialGeometry.Analysis.Sobolev.Chart.TransitionDiffeo
 import DifferentialGeometry.Analysis.Sobolev.Chart.TransitionPipeline
+import DifferentialGeometry.Analysis.Sobolev.Chart.TransitionQMP
 import DifferentialGeometry.Analysis.Sobolev.Chart.Transition
 import DifferentialGeometry.Analysis.Sobolev.Chart.AtlasIndependence
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity
