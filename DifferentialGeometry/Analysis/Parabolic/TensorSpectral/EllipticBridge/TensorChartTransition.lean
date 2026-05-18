@@ -232,7 +232,7 @@ scalar function `M → ℝ`. -/
 /-- The transition-coefficient function: the `P₀`-component of the bundle
 coordinate-change image of the `Q`-th chart-frame basis element of
 `TensorRSModel r s ℝ E`, as a scalar function of the base point. -/
-private def transitionCoeff
+def transitionCoeff
     (r s : ℕ) (γ α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) (x : M) : ℝ :=
   letI : NormedAddCommGroup (TensorRSModel r s ℝ E) :=
@@ -298,7 +298,7 @@ the transition coefficient `transitionCoeff r s γ α P₀ Q` is `C^∞` on the
 chart overlap. It is the composition of the smooth bundle coordinate change
 with a constant chart-frame basis element and a constant component projection,
 all `C^∞`. -/
-private lemma contMDiffOn_transitionCoeff
+lemma contMDiffOn_transitionCoeff
     (r s : ℕ) (γ α : M) (P₀ Q : TensorCompIdx (E := E) r s) :
     ContMDiffOn I (modelWithCornersSelf ℝ ℝ) ∞
       (transitionCoeff (E := E) (I := I) (M := M) r s γ α P₀ Q)
