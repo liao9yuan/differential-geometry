@@ -173,7 +173,7 @@ omit [CompleteSpace E] in
 /-- The eigenvector chart component is `MemLp 2` of the plain Lebesgue volume
 restricted to the chart target: it is the coercion of an `Lp` element of
 `chartL2Measure α = volume.restrict (chartTargetEuclid α)`. -/
-private lemma eigenvectorChartComponentFun_memLp_volume
+lemma eigenvectorChartComponentFun_memLp_volume
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_uniform : uniformTensorChartSobolevBound g r s)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
