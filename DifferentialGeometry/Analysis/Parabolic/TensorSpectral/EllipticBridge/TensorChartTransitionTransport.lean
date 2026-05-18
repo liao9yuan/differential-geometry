@@ -98,7 +98,7 @@ with the finite sum of the underlying functions. -/
 
 /-- The function underlying a finite sum of `L²` classes agrees almost
 everywhere with the finite sum of the underlying functions. -/
-private lemma coeFn_finsetSum_chartL2
+lemma coeFn_finsetSum_chartL2
     (α : M) {ι : Type*} (s : Finset ι)
     (G : ι → Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
     (((∑ a ∈ s, G a) : Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
@@ -163,7 +163,7 @@ def transportChartCenters (α : M) : Finset M :=
 /-- Membership in `transportChartCenters α`: a chart centre `β` belongs to it
 exactly when its partition-of-unity weight has support meeting the chart-`α`
 cutoff support. -/
-private lemma mem_transportChartCenters (α β : M) :
+lemma mem_transportChartCenters (α β : M) :
     β ∈ transportChartCenters (I := I) (M := M) α ↔
       (Function.support
           (fun x : M => ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
@@ -176,7 +176,7 @@ private lemma mem_transportChartCenters (α β : M) :
 
 /-- If the partition-of-unity weight at `β` and the chart-kernel cutoff at `α`
 are both nonzero at a common point `x`, then `β` is a transport chart centre. -/
-private lemma mem_transportChartCenters_of_pou_cutoff_ne
+lemma mem_transportChartCenters_of_pou_cutoff_ne
     (α β : M) {x : M}
     (hβ : ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ) x ≠ 0)
     (hα : ((chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x ≠ 0) :
@@ -369,7 +369,7 @@ vanishes. -/
 /-- The chart-`α` pushforward of a finite sum of manifold functions equals,
 pointwise on the Euclidean model space, the finite sum of the chart-`α`
 pushforwards of the summands. -/
-private lemma chartPushedRaw_finsetSum
+lemma chartPushedRaw_finsetSum
     (α : M) {ι : Type*} (s : Finset ι) (F : ι → M → ℝ) (y : EuclN) :
     chartPushedRaw I α (fun x : M => ∑ a ∈ s, F a x) y =
       ∑ a ∈ s, chartPushedRaw I α (F a) y := by
@@ -435,7 +435,7 @@ almost everywhere with the corresponding finite sum of the other summands. -/
 
 /-- If finitely many summands agree almost everywhere, then so do their finite
 sums. -/
-private lemma finsetSum_ae_eq
+lemma finsetSum_ae_eq
     (α : M) {ι : Type*} (s : Finset ι) {f h : ι → EuclN → ℝ}
     (hfh : ∀ a ∈ s,
       f a =ᵐ[chartL2Measure (I := I) (M := M) α] h a) :

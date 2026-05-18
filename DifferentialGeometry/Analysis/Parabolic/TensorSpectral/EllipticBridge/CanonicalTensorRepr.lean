@@ -587,11 +587,11 @@ dense range and is uniform-inducing — the data required for
 `ContinuousLinearMap.extend`. -/
 
 /-- The canonical embedding `SmoothCcTensor g r s →L[ℝ] TensorL2 r s g`. -/
-private def smoothToTensorL2 (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+def smoothToTensorL2 (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     SmoothCcTensor g r s →L[ℝ] TensorL2 r s g :=
   UniformSpace.Completion.toComplL
 
-@[simp] private lemma smoothToTensorL2_apply
+@[simp] lemma smoothToTensorL2_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) :
     smoothToTensorL2 (I := I) (M := M) g r s S = (S : TensorL2 r s g) := rfl

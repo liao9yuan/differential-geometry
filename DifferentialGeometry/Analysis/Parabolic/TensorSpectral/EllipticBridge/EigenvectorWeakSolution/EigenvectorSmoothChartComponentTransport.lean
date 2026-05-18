@@ -149,7 +149,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
 /-- A Euclidean chart-target point `y` of `β` lies in the chart overlap
 `chartOverlapEuclid β γ` exactly when its chart-`β` inverse image lies in the
 chart-`γ` source. -/
-private lemma mem_chartOverlapEuclid_iff_of_mem_chartTargetEuclid
+lemma mem_chartOverlapEuclid_iff_of_mem_chartTargetEuclid
     (β γ : M) {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) β) :
     y ∈ chartOverlapEuclid (I := I) (M := M) β γ ↔

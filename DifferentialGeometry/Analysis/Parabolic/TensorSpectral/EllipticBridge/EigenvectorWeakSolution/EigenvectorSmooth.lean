@@ -254,7 +254,7 @@ noncomputable def eigenvectorSmooth : SmoothCcTensor g r s :=
 
 /-- The smooth representative unfolds to the finite sum of the per-chart
 sections. -/
-private lemma eigenvectorSmooth_eq :
+lemma eigenvectorSmooth_eq :
     eigenvectorSmooth (I := I) (M := M) g r s h_uniform i =
       ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
         eigenvectorSmoothChart (I := I) (M := M) g r s h_uniform i α := rfl
