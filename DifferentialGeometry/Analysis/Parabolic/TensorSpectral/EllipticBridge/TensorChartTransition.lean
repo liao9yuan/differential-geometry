@@ -333,6 +333,81 @@ The headline. On the chart overlap, the raw component in the chart at `α` is a
 finite linear combination, with coefficients smooth on the overlap, of the raw
 components in the chart at `γ`. -/
 
+/-- **Tensor transformation law for raw chart-frame components, with explicit
+coefficients.** For a smooth compactly-supported `(r, s)`-tensor section `S`,
+two chart base points `γ` and `α`, and a component multi-index `P₀`, on the
+overlap of the chart sources at `γ` and `α` the raw chart-frame component of `S`
+in the chart at `α` equals the finite sum over component multi-indices `Q` of
+`transitionCoeff r s γ α P₀ Q · (raw component of S in the chart at γ)`.
+
+This is the transformation law with the coefficient family pinned down to the
+explicit smooth transition coefficient `transitionCoeff`. -/
+theorem tensorChartComponentRaw_eq_transitionCoeff_sum
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (S : SmoothCcTensor g r s) (γ α : M)
+    (P₀ : TensorCompIdx (E := E) r s)
+    {x : M} (hx : x ∈ (chartAt H γ).source ∩ (chartAt H α).source) :
+    tensorChartComponentRaw (I := I) (M := M) g r s S α P₀.1 P₀.2 x =
+      ∑ Q : TensorCompIdx (E := E) r s,
+        transitionCoeff (E := E) (I := I) (M := M) r s γ α P₀ Q x *
+          tensorChartComponentRaw (I := I) (M := M) g r s S γ Q.1 Q.2 x := by
+  classical
+  letI : NormedAddCommGroup (TensorRSModel r s ℝ E) :=
+    tensorRSModel_normedAddCommGroup r s
+  letI : NormedSpace ℝ (TensorRSModel r s ℝ E) :=
+    tensorRSModel_normedSpace r s
+  obtain ⟨hxγ, hxα⟩ := hx
+  -- The raw `α`-component is the projection of the `α`-trivialisation image.
+  rw [tensorChartComponentRaw_def (I := I) (M := M) g r s S α P₀.1 P₀.2]
+  -- The `α`-trivialisation image is the coordinate-change image of the
+  -- `γ`-trivialisation image (bundle transformation law).
+  rw [tensorTrivProj_chartTransition (E := E) (I := I) (M := M)
+    g r s S γ α hxγ hxα]
+  -- Abbreviate the bundle coordinate-change continuous linear equivalence.
+  set L : TensorRSModel r s ℝ E ≃L[ℝ] TensorRSModel r s ℝ E :=
+    (rsTriv (E := E) (I := I) (M := M) r s γ).coordChangeL ℝ
+      (rsTriv (E := E) (I := I) (M := M) r s α) x with hL_def
+  -- Expand the `γ`-trivialisation image in the chart-frame basis.
+  have hsum := tensorRSModel_eq_sum_basis (E := E) r s
+    (tensorTrivProj (I := I) (M := M) g r s S γ x)
+  -- Rewrite the argument of `L` by the basis expansion, then push `L`
+  -- and the projection through the finite double sum by linearity.
+  conv_lhs => rw [hsum]
+  -- The double sum over `(Idx, Jdx)` is reindexed as a single sum over the
+  -- multi-index pair type `TensorCompIdx r s`.
+  rw [show (∑ Idx : Fin r → Fin (Module.finrank ℝ E),
+            ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
+              tensorChartComponentProjection (E := E) r s Idx Jdx
+                  (tensorTrivProj (I := I) (M := M) g r s S γ x) •
+                tensorChartBasisElement (E := E) r s Idx Jdx) =
+        ∑ Q : TensorCompIdx (E := E) r s,
+          tensorChartComponentProjection (E := E) r s Q.1 Q.2
+              (tensorTrivProj (I := I) (M := M) g r s S γ x) •
+            tensorChartBasisElement (E := E) r s Q.1 Q.2 from
+    (Finset.sum_product'
+      (s := (Finset.univ : Finset (Fin r → Fin (Module.finrank ℝ E))))
+      (t := (Finset.univ : Finset (Fin s → Fin (Module.finrank ℝ E))))
+      (f := fun Idx Jdx =>
+        tensorChartComponentProjection (E := E) r s Idx Jdx
+            (tensorTrivProj (I := I) (M := M) g r s S γ x) •
+          tensorChartBasisElement (E := E) r s Idx Jdx)).symm]
+  -- Push `L` (a continuous linear equivalence) through the finite sum, then
+  -- push the component projection through, and identify each summand.
+  rw [map_sum L, map_sum (tensorChartComponentProjection (E := E) r s P₀.1 P₀.2)]
+  refine Finset.sum_congr rfl ?_
+  intro Q _
+  -- Push `L` and the projection through the scalar multiplication.
+  rw [map_smul L, map_smul (tensorChartComponentProjection (E := E) r s P₀.1 P₀.2),
+    smul_eq_mul]
+  -- Identify the projection of the `L`-image of the `Q`-th basis element with
+  -- the transition coefficient, and the scalar with the raw `γ`-component.
+  rw [show tensorChartComponentProjection (E := E) r s P₀.1 P₀.2
+          (L (tensorChartBasisElement (E := E) r s Q.1 Q.2)) =
+        transitionCoeff (E := E) (I := I) (M := M) r s γ α P₀ Q x from by
+      rw [hL_def]; rfl]
+  rw [tensorChartComponentRaw_def (I := I) (M := M) g r s S γ Q.1 Q.2]
+  ring
+
 /-- **Tensor transformation law for raw chart-frame components.** For a smooth
 compactly-supported `(r, s)`-tensor section `S`, two chart base points `γ` and
 `α`, and a component multi-index `P₀`, there is a family of coefficient
@@ -360,67 +435,14 @@ theorem tensorChartComponentRaw_chartTransition_decomp
             c Q x *
               tensorChartComponentRaw (I := I) (M := M) g r s S γ Q.1 Q.2 x := by
   classical
-  letI : NormedAddCommGroup (TensorRSModel r s ℝ E) :=
-    tensorRSModel_normedAddCommGroup r s
-  letI : NormedSpace ℝ (TensorRSModel r s ℝ E) :=
-    tensorRSModel_normedSpace r s
   refine ⟨transitionCoeff (E := E) (I := I) (M := M) r s γ α P₀, ?_, ?_⟩
   · -- Smoothness of every coefficient.
     intro Q
     exact contMDiffOn_transitionCoeff (E := E) (I := I) (M := M) r s γ α P₀ Q
   · -- The pointwise decomposition on the chart overlap.
     intro x hx
-    obtain ⟨hxγ, hxα⟩ := hx
-    -- The raw `α`-component is the projection of the `α`-trivialisation image.
-    rw [tensorChartComponentRaw_def (I := I) (M := M) g r s S α P₀.1 P₀.2]
-    -- The `α`-trivialisation image is the coordinate-change image of the
-    -- `γ`-trivialisation image (bundle transformation law).
-    rw [tensorTrivProj_chartTransition (E := E) (I := I) (M := M)
-      g r s S γ α hxγ hxα]
-    -- Abbreviate the bundle coordinate-change continuous linear equivalence.
-    set L : TensorRSModel r s ℝ E ≃L[ℝ] TensorRSModel r s ℝ E :=
-      (rsTriv (E := E) (I := I) (M := M) r s γ).coordChangeL ℝ
-        (rsTriv (E := E) (I := I) (M := M) r s α) x with hL_def
-    -- Expand the `γ`-trivialisation image in the chart-frame basis.
-    have hsum := tensorRSModel_eq_sum_basis (E := E) r s
-      (tensorTrivProj (I := I) (M := M) g r s S γ x)
-    -- Rewrite the argument of `L` by the basis expansion, then push `L`
-    -- and the projection through the finite double sum by linearity.
-    conv_lhs => rw [hsum]
-    -- The double sum over `(Idx, Jdx)` is reindexed as a single sum over the
-    -- multi-index pair type `TensorCompIdx r s`.
-    rw [show (∑ Idx : Fin r → Fin (Module.finrank ℝ E),
-              ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-                tensorChartComponentProjection (E := E) r s Idx Jdx
-                    (tensorTrivProj (I := I) (M := M) g r s S γ x) •
-                  tensorChartBasisElement (E := E) r s Idx Jdx) =
-          ∑ Q : TensorCompIdx (E := E) r s,
-            tensorChartComponentProjection (E := E) r s Q.1 Q.2
-                (tensorTrivProj (I := I) (M := M) g r s S γ x) •
-              tensorChartBasisElement (E := E) r s Q.1 Q.2 from
-      (Finset.sum_product'
-        (s := (Finset.univ : Finset (Fin r → Fin (Module.finrank ℝ E))))
-        (t := (Finset.univ : Finset (Fin s → Fin (Module.finrank ℝ E))))
-        (f := fun Idx Jdx =>
-          tensorChartComponentProjection (E := E) r s Idx Jdx
-              (tensorTrivProj (I := I) (M := M) g r s S γ x) •
-            tensorChartBasisElement (E := E) r s Idx Jdx)).symm]
-    -- Push `L` (a continuous linear equivalence) through the finite sum, then
-    -- push the component projection through, and identify each summand.
-    rw [map_sum L, map_sum (tensorChartComponentProjection (E := E) r s P₀.1 P₀.2)]
-    refine Finset.sum_congr rfl ?_
-    intro Q _
-    -- Push `L` and the projection through the scalar multiplication.
-    rw [map_smul L, map_smul (tensorChartComponentProjection (E := E) r s P₀.1 P₀.2),
-      smul_eq_mul]
-    -- Identify the projection of the `L`-image of the `Q`-th basis element with
-    -- the transition coefficient, and the scalar with the raw `γ`-component.
-    rw [show tensorChartComponentProjection (E := E) r s P₀.1 P₀.2
-            (L (tensorChartBasisElement (E := E) r s Q.1 Q.2)) =
-          transitionCoeff (E := E) (I := I) (M := M) r s γ α P₀ Q x from by
-        rw [hL_def]; rfl]
-    rw [tensorChartComponentRaw_def (I := I) (M := M) g r s S γ Q.1 Q.2]
-    ring
+    exact tensorChartComponentRaw_eq_transitionCoeff_sum
+      (E := E) (I := I) (M := M) g r s S γ α P₀ hx
 
 end TensorSpectral
 end Parabolic
