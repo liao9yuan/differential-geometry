@@ -209,7 +209,7 @@ section whose raw chart-`α` frame is that family. -/
 
 /-- The per-chart smooth section at `α`: the chart-frame tensor section assembled
 from the chosen chart-`α` smooth component family. -/
-private def eigenvectorSmoothChart (α : M) : SmoothCcTensor g r s :=
+def eigenvectorSmoothChart (α : M) : SmoothCcTensor g r s :=
   tensorBundleSectionOfChartComponents (I := I) (M := M) g r s α
     (chosenComp (I := I) (M := M) g r s h_uniform i α)
     (chosenComp_hu (I := I) (M := M) g r s h_uniform i α)
@@ -218,7 +218,7 @@ private def eigenvectorSmoothChart (α : M) : SmoothCcTensor g r s :=
 /-- The raw chart-`α` frame component of the per-chart section `eigenvectorSmoothChart α`,
 read at the chart-source preimage of a chart-target point `y`, recovers the
 chosen chart-`α` component `chosenComp α P y`. -/
-private lemma tensorChartComponentRaw_eigenvectorSmoothChart_self
+lemma tensorChartComponentRaw_eigenvectorSmoothChart_self
     (α : M) (P : TensorCompIdx (E := E) r s)
     {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
     tensorChartComponentRaw (I := I) (M := M) g r s
@@ -308,7 +308,7 @@ private lemma eigenvectorSmoothChart_toSection_eq_zero_off_source
 /-- The raw chart-`β` frame component of the per-chart section
 `eigenvectorSmoothChart α` vanishes off the chart-`α` source: the section value
 itself is zero there, and the trivialisation projection of zero is zero. -/
-private lemma tensorChartComponentRaw_eigenvectorSmoothChart_eq_zero_off_source
+lemma tensorChartComponentRaw_eigenvectorSmoothChart_eq_zero_off_source
     (α β : M) (P : TensorCompIdx (E := E) r s) {x : M}
     (hx : x ∉ (chartAt H α).source) :
     tensorChartComponentRaw (I := I) (M := M) g r s
