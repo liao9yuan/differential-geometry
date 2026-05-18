@@ -1114,7 +1114,7 @@ limit is `partialLpLimit`. -/
 principal rotation coefficient: the chart-frame tensor-metric Gram, the
 unweighted inverse Gram, and the chart-Euclidean partial of the inverse-Gram
 column entry. -/
-private def principalRotationFactor
+def principalRotationFactor
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
     (P Q : TensorCompIdx (E := E) r s)
@@ -1126,7 +1126,7 @@ private def principalRotationFactor
 
 /-- The `T`-independent factor of the principal rotation coefficient is `C^∞` on
 the Euclidean chart target. -/
-private lemma principalRotationFactor_contDiffOn
+lemma principalRotationFactor_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ P Q : TensorCompIdx (E := E) r s)
     (k l : Fin (Module.finrank ℝ E)) :
@@ -1390,7 +1390,7 @@ the bare chart-component atom of `wₙ.toCcTensor`, whose `L²` limit is
 
 /-- The `T`-independent `C^∞` factor of the `(P, Q, k, p)`-summand of the
 chart-density-weighted lower-order gradient coefficient. -/
-private def weightedGradFactor
+def weightedGradFactor
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
     (l : Fin (Module.finrank ℝ E))
@@ -1406,7 +1406,7 @@ private def weightedGradFactor
 
 /-- The `T`-independent factor of the chart-density-weighted lower-order gradient
 coefficient is `C^∞` on the Euclidean chart target. -/
-private lemma weightedGradFactor_contDiffOn
+lemma weightedGradFactor_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
     (l : Fin (Module.finrank ℝ E))
@@ -1959,7 +1959,7 @@ private lemma euclidPartial_weightedGradCoeff_pouSmul_eqOn
 
 /-- The chart-Euclidean partial of the `T`-independent `C^∞` factor
 `weightedGradFactor` is `C^∞` on the Euclidean chart target. -/
-private lemma euclidPartial_weightedGradFactor_contDiffOn
+lemma euclidPartial_weightedGradFactor_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
     (l : Fin (Module.finrank ℝ E))
@@ -2334,7 +2334,7 @@ component-atom sum. -/
 /-- The `T`-independent `C^∞` factor of the chart-partial-atom summand of the
 lower-order rotation value coefficient: the chart-frame tensor-metric Gram, the
 unweighted inverse Gram, and the collapsed Christoffel coefficient. -/
-private def valuePartialFactor
+def valuePartialFactor
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
     (P Q : TensorCompIdx (E := E) r s)
@@ -2346,7 +2346,7 @@ private def valuePartialFactor
 
 /-- The `T`-independent `C^∞` factor of the chart-partial-atom summand is `C^∞`
 on the Euclidean chart target. -/
-private lemma valuePartialFactor_contDiffOn
+lemma valuePartialFactor_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ P Q : TensorCompIdx (E := E) r s)
     (k l : Fin (Module.finrank ℝ E)) :
@@ -2361,7 +2361,7 @@ lower-order rotation value coefficient: the chart-frame tensor-metric Gram, the
 unweighted inverse Gram, the sum of the chart-Euclidean partial of the
 inverse-Gram entry and the collapsed Christoffel coefficient, and the lower-order
 correction coefficient. -/
-private def valueComponentFactor
+def valueComponentFactor
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
     (P Q : TensorCompIdx (E := E) r s)
@@ -2377,7 +2377,7 @@ private def valueComponentFactor
 
 /-- The `T`-independent `C^∞` factor of the component-atom summand is `C^∞` on
 the Euclidean chart target. -/
-private lemma valueComponentFactor_contDiffOn
+lemma valueComponentFactor_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ P Q : TensorCompIdx (E := E) r s)
     (k l : Fin (Module.finrank ℝ E))

@@ -298,7 +298,7 @@ chart-atlas partition-of-unity weight inside `crossRightTestGradCoeff` does. -/
 /-- The `T`-independent factor of the `(P, Q, l)`-summand of the density-weighted
 cross-right gradient-term coefficient: the chart density, the chart-frame
 tensor-metric Gram, and the cross-right test-decoupling gradient coefficient. -/
-private def crossRightDivFactor
+def crossRightDivFactor
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
     (l : Fin (Module.finrank ℝ E))
@@ -310,7 +310,7 @@ private def crossRightDivFactor
 
 /-- The `T`-independent factor of the density-weighted cross-right gradient-term
 coefficient is `C^∞` on the Euclidean chart target. -/
-private lemma crossRightDivFactor_contDiffOn
+lemma crossRightDivFactor_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
     (l : Fin (Module.finrank ℝ E))
@@ -323,7 +323,7 @@ private lemma crossRightDivFactor_contDiffOn
 
 /-- The chart-Euclidean partial of the `T`-independent `C^∞` factor
 `crossRightDivFactor` is `C^∞` on the Euclidean chart target. -/
-private lemma euclidPartial_crossRightDivFactor_contDiffOn
+lemma euclidPartial_crossRightDivFactor_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
     (l : Fin (Module.finrank ℝ E))
@@ -441,7 +441,7 @@ private lemma crossRightTestGradCoeff_eq_zero_off_chartPouKernel
 /-- The `T`-independent factor `crossRightDivFactor` vanishes outside the
 partition-of-unity kernel `chartPouKernel α`: it is a product carrying the
 cross-right test-decoupling gradient coefficient `crossRightTestGradCoeff`. -/
-private lemma crossRightDivFactor_eq_zero_off_chartPouKernel
+lemma crossRightDivFactor_eq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
     (l : Fin (Module.finrank ℝ E))
@@ -456,7 +456,7 @@ private lemma crossRightDivFactor_eq_zero_off_chartPouKernel
 `crossRightDivFactor` vanishes outside the partition-of-unity kernel
 `chartPouKernel α`: the factor vanishes off the compact kernel, hence on an open
 neighbourhood of any point outside it, and so does its Fréchet derivative. -/
-private lemma euclidPartial_crossRightDivFactor_eq_zero_off_chartPouKernel
+lemma euclidPartial_crossRightDivFactor_eq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
     (l : Fin (Module.finrank ℝ E))
@@ -931,7 +931,7 @@ private def approxCutoffPartialLp
 
 /-- The `L²`-limit of the cutoff chart-partial atom: `μ := i.fst.val` times the
 committed cutoff chart-partial limit object `eigenvectorCutoffChartPartialLp`. -/
-private def cutoffPartialLpLimit
+def cutoffPartialLpLimit
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_uniform : uniformTensorChartSobolevBound g r s)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
