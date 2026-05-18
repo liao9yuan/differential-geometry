@@ -299,6 +299,13 @@ abbrev lbl453_f_formula510_assembly :=
 
 /-- MSM135 Chapter 5, formula 5.10, used in Chapter 6.1 Lemma 6.1.
 
+Book-facing alias for the same assembly after the connection-trace vector field
+has been constructed as `tr_g A`. -/
+abbrev lbl453_f_formula510_trace_field :=
+  @formula510_of_connTraceField
+
+/-- MSM135 Chapter 5, formula 5.10, used in Chapter 6.1 Lemma 6.1.
+
 Book-facing alias converting a proved formula 5.10 identity for the derivative
 value into an identity for the `deriv`-based first variation. -/
 abbrev lbl453_f_formula510_final :=

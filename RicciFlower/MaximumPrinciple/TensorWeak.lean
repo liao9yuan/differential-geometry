@@ -1,5 +1,6 @@
 import RicciFlower.Realized.Curvature
 import RicciFlower.Realized.TensorOperators
+import RicciFlower.Tensor.RSTensor.MetricCompatibility
 import RicciFlower.Metric.Basic
 import Mathlib.Analysis.Calculus.Deriv.Basic
 
@@ -7,6 +8,7 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedVariables false
 set_option linter.unusedSectionVars false
+set_option backward.isDefEq.respectTransparency false
 
 /-!
 # Hamilton Weak Maximum Principle For Symmetric Two-Tensors
@@ -31,6 +33,8 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+variable [IsManifold I 1 M] [IsManifold I 2 M]
+variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 /-- A time-dependent covariant two-tensor field. -/
 abbrev TwoTensorFamily : Type _ :=
@@ -104,6 +108,138 @@ def tensorBarrierFamily
       S t x v w + epsilon * (delta + t - t0) * (G t).inner x v w := by
   rfl
 
+/-- A time-dependent smooth covariant two-tensor section. -/
+abbrev TwoTensorSecFamily : Type _ :=
+  Real -> Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+    (n := (∞ : WithTop ℕ∞)) 2
+
+/-- A time-dependent smooth covariant three-tensor section used as `∇S`. -/
+abbrev TensorNabla1SecFamily : Type _ :=
+  Real -> Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+    (n := (∞ : WithTop ℕ∞)) 3
+
+/-- A time-dependent smooth covariant four-tensor section used as `∇²S`. -/
+abbrev TensorNabla2SecFamily : Type _ :=
+  Real -> Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+    (n := (∞ : WithTop ℕ∞)) 4
+
+/-- Convert a section-backed two-tensor family to the pointwise quadratic-form
+style used by the tensor WMP statement. -/
+def twoTensorSecToFamily
+    (S : TwoTensorSecFamily (I := I) (M := M)) :
+    TwoTensorFamily (I := I) (M := M) :=
+  fun t x v w => S t x (vec2 (I := I) v w)
+
+@[simp]
+theorem twoTensorSecToFamily_apply
+    (S : TwoTensorSecFamily (I := I) (M := M))
+    (t : Real) (x : M) (v w : TangentSpace I x) :
+    twoTensorSecToFamily (I := I) (M := M) S t x v w =
+      S t x (vec2 (I := I) v w) := by
+  rfl
+
+/-- Section-backed positive barrier.  This is the smooth-section version of
+`tensorBarrierFamily`; it is used only as a producer bridge for spatial
+covariant derivative data. -/
+noncomputable def tensorBarrierSecFamily
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorSecFamily (I := I) (M := M))
+    (epsilon delta t0 : Real) :
+    TwoTensorSecFamily (I := I) (M := M) :=
+  fun t =>
+    letI := tensor0SBundle_topology (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2
+    S t + (epsilon * (delta + t - t0)) •
+      Tensor0SBundle.metricTensorField (I := I) (G t)
+
+@[simp]
+theorem tensorBarrierSec_apply
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorSecFamily (I := I) (M := M))
+    (epsilon delta t0 t : Real) (x : M) (v w : TangentSpace I x) :
+    twoTensorSecToFamily (I := I) (M := M)
+        (tensorBarrierSecFamily (I := I) (M := M) G S epsilon delta t0)
+        t x v w =
+      tensorBarrierFamily (I := I) (M := M) G
+        (twoTensorSecToFamily (I := I) (M := M) S)
+        epsilon delta t0 t x v w := by
+  simp only [twoTensorSecToFamily, tensorBarrierSecFamily, tensorBarrierFamily,
+    ContMDiffSection.coe_add, Pi.add_apply, ContMDiffSection.coe_smul,
+    Pi.smul_apply]
+  change
+    (S t x (vec2 (I := I) v w) +
+        (epsilon * (delta + t - t0)) *
+          (Tensor0SBundle.metricTensorField (I := I) (G t) x)
+            (vec2 (I := I) v w)) =
+      S t x (vec2 (I := I) v w) +
+        epsilon * (delta + t - t0) * (G t).inner x v w
+  rw [Tensor0SBundle.metricTensorField_apply]
+  have h0 : vec2 (I := I) v w 0 = v := by
+    unfold vec2 Curvature.vec2
+    simp
+  have h1 : vec2 (I := I) v w 1 = w := by
+    unfold vec2 Curvature.vec2
+    norm_num
+  rw [h0, h1]
+
+/-- Spatial first and second covariant derivative realizations for a
+section-backed two-tensor family. -/
+structure TensorSpatialDerivs
+    (cov : Real -> CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (S : TwoTensorSecFamily (I := I) (M := M))
+    (nablaS : TensorNabla1SecFamily (I := I) (M := M))
+    (nabla2S : TensorNabla2SecFamily (I := I) (M := M)) : Prop where
+  first :
+    ∀ t : Real,
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 (cov t) (S t) (nablaS t)
+  second :
+    ∀ t : Real,
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        3 (cov t) (nablaS t) (nabla2S t)
+
+/-- The section-backed barrier has the same spatial covariant derivative data
+as `S`, because the metric addend has zero covariant derivative for a
+metric-compatible connection. -/
+theorem barrierDerivs
+    [T2Space M]
+    (cov : Real -> CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorSecFamily (I := I) (M := M))
+    (nablaS : TensorNabla1SecFamily (I := I) (M := M))
+    (nabla2S : TensorNabla2SecFamily (I := I) (M := M))
+    (epsilon delta t0 : Real)
+    (hmc : ∀ t : Real,
+      RicciFlower.Connection.IsMetricCompatible (I := I) (cov t) (G t))
+    (hS : TensorSpatialDerivs (I := I) (M := M) cov S nablaS nabla2S) :
+    TensorSpatialDerivs (I := I) (M := M) cov
+      (tensorBarrierSecFamily (I := I) (M := M) G S epsilon delta t0)
+      nablaS nabla2S := by
+  constructor
+  · intro t
+    letI := tensor0SBundle_topology (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2
+    letI := tensor0SBundle_topology (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3
+    have hmetric :
+        TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+          2 (cov t) (Tensor0SBundle.metricTensorField (I := I) (G t))
+          (0 : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+            (n := (∞ : WithTop ℕ∞)) 3) :=
+      Tensor0SBundle.zero_realizes_metric (I := I) (cov t) (G t) (hmc t)
+    have hscaled :
+        TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+          2 (cov t)
+          ((epsilon * (delta + t - t0)) •
+            Tensor0SBundle.metricTensorField (I := I) (G t))
+          ((epsilon * (delta + t - t0)) •
+            (0 : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+              (n := (∞ : WithTop ℕ∞)) 3)) :=
+      TotalNabla0SRealizes.smul (I := I) (M := M)
+        (epsilon * (delta + t - t0)) hmetric
+    have hadd := TotalNabla0SRealizes.add (I := I) (M := M)
+      (hS.first t) hscaled
+    simpa [tensorBarrierSecFamily] using hadd
+  · intro t
+    exact hS.second t
+
 /-- Barrier sizes used in the final tensor-WMP epsilon limit. -/
 def SmallBarrierEps (epsilon : Real) : Prop :=
   0 < epsilon ∧ epsilon ≤ 1
@@ -154,6 +290,23 @@ structure TensorBarrierRegularityOn
           (fun t : Real =>
             tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t x v w)
           (Set.Icc t0 (t0 + delta))
+  metricDerivBound :
+    ∀ t0 : Real,
+      t0 ∈ Set.Icc 0 T ->
+      t0 < T ->
+      ∃ deltaRaw C : Real,
+        0 < deltaRaw ∧ 0 ≤ C ∧ t0 + deltaRaw ≤ T ∧
+          ∀ delta : Real,
+            0 < delta ->
+            delta ≤ deltaRaw ->
+            ∃ metricDeriv : TensorQuadraticFormFamily (I := I) (M := M),
+              (∀ t, t ∈ Set.Icc t0 (t0 + delta) ->
+                ∀ x, ∀ v : TangentSpace I x,
+                  HasDerivWithinAt (fun s : Real => (G s).inner x v v)
+                    (metricDeriv t x v) (Set.Icc t0 (t0 + delta)) t) ∧
+              (∀ t, t ∈ Set.Icc t0 (t0 + delta) ->
+                ∀ x, ∀ v : TangentSpace I x,
+                  |metricDeriv t x v| ≤ C * (G t).inner x v v)
   smallBarrierLip :
     ∀ delta0 t0 : Real,
       0 < delta0 ->
@@ -260,8 +413,317 @@ def TensorBarrierLocalEst
         N t (G t)
             (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t)
             x v v ≤
-          N t (G t) (S t) x v v + reactionErr ∧
+        N t (G t) (S t) x v v + reactionErr ∧
         (v ≠ 0 -> heatErr + reactionErr < metricGain))
+
+/-- Reduced local estimate when the barrier spatial derivative tensors are the
+same supplied tensors as for `S`.  The remaining analytic inputs are the
+barrier time derivative, the positive metric gain, and the reaction error. -/
+def BarrierLocalCore
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorFamily (I := I) (M := M))
+    (N : TwoTensorReaction (I := I) (M := M))
+    (epsilon delta t0 : Real)
+    (U : Set Real)
+    (timeDerivS timeDerivBarrier :
+      TensorQuadraticFormFamily (I := I) (M := M)) : Prop :=
+  (∀ t, t ∈ U ->
+    ∀ x, ∀ v : TangentSpace I x,
+      HasDerivWithinAt
+        (fun s : Real =>
+          tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 s x v v)
+        (timeDerivBarrier t x v) U t) ∧
+  (∀ t, t ∈ U ->
+    ∀ x, ∀ v : TangentSpace I x,
+      ∃ reactionErr metricGain : Real,
+        timeDerivS t x v + metricGain ≤ timeDerivBarrier t x v ∧
+        N t (G t)
+            (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t)
+            x v v ≤
+        N t (G t) (S t) x v v + reactionErr ∧
+        (v ≠ 0 -> reactionErr < metricGain))
+
+/-- Product rule for the pointwise time derivative of the barrier quadratic
+form.  The derivative of the metric quadratic form is still supplied by the
+caller; this lemma only packages the affine barrier coefficient calculation. -/
+theorem hasDerivWithinAt_barrier_quad
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorFamily (I := I) (M := M)}
+    {epsilon delta t0 t dS dg : Real} {U : Set Real}
+    {x : M} {v : TangentSpace I x}
+    (hS : HasDerivWithinAt (fun s : Real => S s x v v) dS U t)
+    (hG : HasDerivWithinAt (fun s : Real => (G s).inner x v v) dg U t) :
+    HasDerivWithinAt
+      (fun s : Real =>
+        tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 s x v v)
+      (dS + epsilon * ((G t).inner x v v + (delta + t - t0) * dg))
+      U t := by
+  have hid : HasDerivWithinAt (fun s : Real => s) 1 U t := by
+    simpa using (hasDerivWithinAt_id t U)
+  have hlin : HasDerivWithinAt (fun s : Real => delta + s - t0) 1 U t := by
+    simpa [sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using
+      ((hid.const_add delta).sub_const t0)
+  have hprod :
+      HasDerivWithinAt
+        (fun s : Real => (delta + s - t0) * (G s).inner x v v)
+        ((G t).inner x v v + (delta + t - t0) * dg)
+        U t := by
+    have h := hlin.mul hG
+    simpa [one_mul, add_comm, add_left_comm, add_assoc,
+      mul_comm, mul_left_comm, mul_assoc] using h
+  have hmetric :
+      HasDerivWithinAt
+        (fun s : Real => epsilon * ((delta + s - t0) * (G s).inner x v v))
+        (epsilon * ((G t).inner x v v + (delta + t - t0) * dg))
+        U t := by
+    exact hprod.const_mul epsilon
+  have htotal := hS.add hmetric
+  simpa [tensorBarrierFamily, add_comm, add_left_comm, add_assoc,
+    mul_comm, mul_left_comm, mul_assoc] using htotal
+
+/-- Build the reduced barrier core from the time derivatives of `S(t)(v,v)`
+and `g(t)(v,v)`.  The remaining hypotheses are exactly the local gain,
+reaction-error, and positive-margin estimates. -/
+theorem barrierCore_deriv
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorFamily (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {epsilon delta t0 : Real} {U : Set Real}
+    {timeDerivS metricDeriv reactionErr metricGain :
+      TensorQuadraticFormFamily (I := I) (M := M)}
+    (hS :
+      ∀ t, t ∈ U ->
+        ∀ x, ∀ v : TangentSpace I x,
+          HasDerivWithinAt (fun s : Real => S s x v v)
+            (timeDerivS t x v) U t)
+    (hG :
+      ∀ t, t ∈ U ->
+        ∀ x, ∀ v : TangentSpace I x,
+          HasDerivWithinAt (fun s : Real => (G s).inner x v v)
+            (metricDeriv t x v) U t)
+    (hGain :
+      ∀ t, t ∈ U ->
+        ∀ x, ∀ v : TangentSpace I x,
+          metricGain t x v ≤
+            epsilon * ((G t).inner x v v +
+              (delta + t - t0) * metricDeriv t x v))
+    (hReaction :
+      ∀ t, t ∈ U ->
+        ∀ x, ∀ v : TangentSpace I x,
+          N t (G t)
+              (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t)
+              x v v ≤
+            N t (G t) (S t) x v v + reactionErr t x v)
+    (hMargin :
+      ∀ t, t ∈ U ->
+        ∀ x, ∀ v : TangentSpace I x,
+          v ≠ 0 -> reactionErr t x v < metricGain t x v) :
+    BarrierLocalCore (I := I) (M := M) G S N epsilon delta t0 U
+      timeDerivS
+      (fun t x v =>
+        timeDerivS t x v +
+          epsilon * ((G t).inner x v v +
+            (delta + t - t0) * metricDeriv t x v)) := by
+  constructor
+  · intro t ht x v
+    exact hasDerivWithinAt_barrier_quad
+      (I := I) (M := M) (hS t ht x v) (hG t ht x v)
+  · intro t ht x v
+    refine ⟨reactionErr t x v, metricGain t x v, ?_, hReaction t ht x v,
+      hMargin t ht x v⟩
+    have h := hGain t ht x v
+    linarith
+
+/-- Direct constructor for the reduced local barrier estimate from pointwise
+time-derivative, reaction-error, and margin inequalities. -/
+theorem barrierCore_of_pt
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorFamily (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {epsilon delta t0 : Real} {U : Set Real}
+    {timeDerivS timeDerivBarrier :
+      TensorQuadraticFormFamily (I := I) (M := M)}
+    (reactionErr metricGain : TensorQuadraticFormFamily (I := I) (M := M))
+    (hDerivB :
+      ∀ t, t ∈ U ->
+        ∀ x, ∀ v : TangentSpace I x,
+          HasDerivWithinAt
+            (fun s : Real =>
+              tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 s x v v)
+            (timeDerivBarrier t x v) U t)
+    (hTime :
+      ∀ t, t ∈ U ->
+        ∀ x, ∀ v : TangentSpace I x,
+          timeDerivS t x v + metricGain t x v ≤ timeDerivBarrier t x v)
+    (hReaction :
+      ∀ t, t ∈ U ->
+        ∀ x, ∀ v : TangentSpace I x,
+          N t (G t)
+              (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t)
+              x v v ≤
+            N t (G t) (S t) x v v + reactionErr t x v)
+    (hMargin :
+      ∀ t, t ∈ U ->
+        ∀ x, ∀ v : TangentSpace I x,
+          v ≠ 0 -> reactionErr t x v < metricGain t x v) :
+    BarrierLocalCore (I := I) (M := M) G S N epsilon delta t0 U
+      timeDerivS timeDerivBarrier := by
+  constructor
+  · exact hDerivB
+  · intro t ht x v
+    exact ⟨reactionErr t x v, metricGain t x v,
+      hTime t ht x v, hReaction t ht x v, hMargin t ht x v⟩
+
+/-- If the metric barrier contributes no spatial heat-with-drift error, the
+reduced time/reaction estimates produce the full local estimate expected by the
+strict-barrier theorem. -/
+theorem localEst_of_core
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {nabla2S : TensorNabla2Family (I := I) (M := M)}
+    {nablaS : TensorNabla1Family (I := I) (M := M)}
+    {epsilon delta t0 : Real} {U : Set Real}
+    {timeDerivS timeDerivBarrier :
+      TensorQuadraticFormFamily (I := I) (M := M)}
+    (hcore : BarrierLocalCore (I := I) (M := M) G S N epsilon delta t0 U
+      timeDerivS timeDerivBarrier) :
+    TensorBarrierLocalEst (I := I) (M := M) G S X N
+      nabla2S nablaS nabla2S nablaS epsilon delta t0 U
+      timeDerivS timeDerivBarrier := by
+  constructor
+  · exact hcore.1
+  · intro t ht x v
+    rcases hcore.2 t ht x v with
+      ⟨reactionErr, metricGain, htime, hreaction, hmargin⟩
+    refine ⟨0, reactionErr, metricGain, htime, ?_, hreaction, ?_⟩
+    · linarith
+    · intro hv
+      have h := hmargin hv
+      linarith
+
+/-- Full local barrier estimate from pointwise time derivatives of `S` and
+the metric quadratic form, when the metric barrier has already been eliminated
+from the spatial heat term. -/
+theorem localEst_deriv
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {nabla2S : TensorNabla2Family (I := I) (M := M)}
+    {nablaS : TensorNabla1Family (I := I) (M := M)}
+    {epsilon delta t0 : Real} {U : Set Real}
+    {timeDerivS metricDeriv reactionErr metricGain :
+      TensorQuadraticFormFamily (I := I) (M := M)}
+    (hS :
+      ∀ t, t ∈ U ->
+        ∀ x, ∀ v : TangentSpace I x,
+          HasDerivWithinAt (fun s : Real => S s x v v)
+            (timeDerivS t x v) U t)
+    (hG :
+      ∀ t, t ∈ U ->
+        ∀ x, ∀ v : TangentSpace I x,
+          HasDerivWithinAt (fun s : Real => (G s).inner x v v)
+            (metricDeriv t x v) U t)
+    (hGain :
+      ∀ t, t ∈ U ->
+        ∀ x, ∀ v : TangentSpace I x,
+          metricGain t x v ≤
+            epsilon * ((G t).inner x v v +
+              (delta + t - t0) * metricDeriv t x v))
+    (hReaction :
+      ∀ t, t ∈ U ->
+        ∀ x, ∀ v : TangentSpace I x,
+          N t (G t)
+              (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t)
+              x v v ≤
+            N t (G t) (S t) x v v + reactionErr t x v)
+    (hMargin :
+      ∀ t, t ∈ U ->
+        ∀ x, ∀ v : TangentSpace I x,
+          v ≠ 0 -> reactionErr t x v < metricGain t x v) :
+    TensorBarrierLocalEst (I := I) (M := M) G S X N
+      nabla2S nablaS nabla2S nablaS epsilon delta t0 U
+      timeDerivS
+      (fun t x v =>
+        timeDerivS t x v +
+          epsilon * ((G t).inner x v v +
+            (delta + t - t0) * metricDeriv t x v)) :=
+  localEst_of_core (I := I) (M := M)
+    (barrierCore_deriv (I := I) (M := M)
+      hS hG hGain hReaction hMargin)
+
+theorem strictBarrier_of_derivEst
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {nabla2S : TensorNabla2Family (I := I) (M := M)}
+    {nablaS : TensorNabla1Family (I := I) (M := M)}
+    {epsilon delta t0 T : Real}
+    (hsub : Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T)
+    (hbase : TensorParabolicInequalityWithDriftOn (I := I) (M := M)
+      G S X N nabla2S nablaS T)
+    (metricDeriv reactionErr metricGain :
+      TensorQuadraticFormFamily (I := I) (M := M))
+    (hG :
+      ∀ t, t ∈ Set.Icc t0 (t0 + delta) ->
+        ∀ x, ∀ v : TangentSpace I x,
+          HasDerivWithinAt (fun s : Real => (G s).inner x v v)
+            (metricDeriv t x v) (Set.Icc t0 (t0 + delta)) t)
+    (hGain :
+      ∀ t, t ∈ Set.Icc t0 (t0 + delta) ->
+        ∀ x, ∀ v : TangentSpace I x,
+          metricGain t x v ≤
+            epsilon * ((G t).inner x v v +
+              (delta + t - t0) * metricDeriv t x v))
+    (hReaction :
+      ∀ t, t ∈ Set.Icc t0 (t0 + delta) ->
+        ∀ x, ∀ v : TangentSpace I x,
+          N t (G t)
+              (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t)
+              x v v ≤
+            N t (G t) (S t) x v v + reactionErr t x v)
+    (hMargin :
+      ∀ t, t ∈ Set.Icc t0 (t0 + delta) ->
+        ∀ x, ∀ v : TangentSpace I x,
+          v ≠ 0 -> reactionErr t x v < metricGain t x v) :
+    TensorParabolicStrictInequalityWithDriftOn (I := I) (M := M) G
+      (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0) X N
+      nabla2S nablaS (Set.Icc t0 (t0 + delta)) := by
+  rcases hbase with ⟨timeDerivS, hSbase, hbase_ineq⟩
+  let timeDerivBarrier : TensorQuadraticFormFamily (I := I) (M := M) :=
+    fun t x v =>
+      timeDerivS t x v +
+        epsilon * ((G t).inner x v v +
+          (delta + t - t0) * metricDeriv t x v)
+  have hSlocal :
+      ∀ t, t ∈ Set.Icc t0 (t0 + delta) ->
+        ∀ x, ∀ v : TangentSpace I x,
+          HasDerivWithinAt (fun s : Real => S s x v v)
+            (timeDerivS t x v) (Set.Icc t0 (t0 + delta)) t := by
+    intro t ht x v
+    exact (hSbase t (hsub ht) x v).mono hsub
+  have hest :
+      TensorBarrierLocalEst (I := I) (M := M) G S X N
+        nabla2S nablaS nabla2S nablaS epsilon delta t0
+        (Set.Icc t0 (t0 + delta)) timeDerivS timeDerivBarrier :=
+    localEst_deriv (I := I) (M := M)
+      (G := G) (S := S) (X := X) (N := N)
+      (nabla2S := nabla2S) (nablaS := nablaS)
+      (epsilon := epsilon) (delta := delta) (t0 := t0)
+      (U := Set.Icc t0 (t0 + delta))
+      (timeDerivS := timeDerivS) (metricDeriv := metricDeriv)
+      (reactionErr := reactionErr) (metricGain := metricGain)
+      hSlocal hG hGain hReaction hMargin
+  refine ⟨timeDerivBarrier, hest.1, ?_⟩
+  intro t ht x v hv
+  rcases hest.2 t ht x v with
+    ⟨heatErr, reactionErr', metricGain', htime, hheat, hreaction, hmargin⟩
+  have hbase_t := hbase_ineq t (hsub ht) x v
+  have hmargin_t := hmargin hv
+  linarith
 
 theorem strictParabolic_of_est
     {G : Real -> SmoothRiemannianMetric I M}
@@ -560,33 +1022,233 @@ structure TensorWMPRegularityOn
         G N (Set.Icc t0 (t0 + delta))) ->
       (d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0) ->
       TensorFirstNullScalarSigns (I := I) (M := M) G S X N epsilon delta t0 d
-  strictBarrierBounds :
-    ∀ t0 : Real,
-      t0 ∈ Set.Icc 0 T ->
-      t0 < T ->
-      ∀ {nabla2S : TensorNabla2Family (I := I) (M := M)}
-        {nablaS : TensorNabla1Family (I := I) (M := M)},
-      TensorParabolicInequalityWithDriftOn (I := I) (M := M) G S X N
-        nabla2S nablaS T ->
-      ∃ delta0 K : Real,
-        0 < delta0 ∧ 0 ≤ K ∧ t0 + delta0 ≤ T ∧
-          ∀ delta : Real,
-            0 < delta ->
-            delta ≤ delta0 ->
-            4 * K * delta < 1 ->
-            ∀ epsilon : Real,
-              SmallBarrierEps epsilon ->
-              ∃ nabla2Barrier : TensorNabla2Family (I := I) (M := M),
-              ∃ nablaBarrier : TensorNabla1Family (I := I) (M := M),
-                ∀ timeDerivS : TensorQuadraticFormFamily (I := I) (M := M),
-                  ∃ timeDerivBarrier :
-                    TensorQuadraticFormFamily (I := I) (M := M),
-                    TensorBarrierLocalEst (I := I) (M := M) G S X N
-                      nabla2S nablaS nabla2Barrier nablaBarrier
-                      epsilon delta t0 (Set.Icc t0 (t0 + delta))
-                      timeDerivS timeDerivBarrier
   barrierLimitClosure :
     TensorBarrierLimitClosureOn (I := I) (M := M) G S T
+
+/-- Convert an absolute-value reaction estimate into the one-sided upper bound
+needed in the strict-barrier local estimate. -/
+private theorem reaction_bound_of_abs {a b R : Real}
+    (h : |a - b| ≤ R) : b ≤ a + R := by
+  have hnegR : -R ≤ -|a - b| := neg_le_neg h
+  have hnegabs : -|a - b| ≤ a - b := neg_abs_le (a - b)
+  have hle : -R ≤ a - b := le_trans hnegR hnegabs
+  linarith
+
+/-- The smallness condition `4 K delta < 1` makes the Lipschitz reaction error
+smaller than the half-metric gain on nonzero tangent vectors. -/
+private theorem reactionErr_lt_gain
+    {K epsilon delta c g : Real}
+    (hK : 0 ≤ K)
+    (hepsilon : 0 < epsilon)
+    (hdelta : 0 < delta)
+    (hc_nonneg : 0 ≤ c)
+    (hc_le : c ≤ 2 * delta)
+    (hsmall : 4 * K * delta < 1)
+    (hg : 0 < g) :
+    K * |epsilon * c * g| < (epsilon / 2) * g := by
+  have harg_nonneg : 0 ≤ epsilon * c * g := by
+    exact mul_nonneg (mul_nonneg (le_of_lt hepsilon) hc_nonneg) (le_of_lt hg)
+  rw [abs_of_nonneg harg_nonneg]
+  have hkc_le : K * c ≤ K * (2 * delta) :=
+    mul_le_mul_of_nonneg_left hc_le hK
+  have htwo : K * (2 * delta) < 1 / 2 := by
+    nlinarith
+  have hkc_lt : K * c < 1 / 2 := lt_of_le_of_lt hkc_le htwo
+  have hepsg_pos : 0 < epsilon * g := mul_pos hepsilon hg
+  have hmul := mul_lt_mul_of_pos_right hkc_lt hepsg_pos
+  nlinarith
+
+/-- A uniform bound on the metric time derivative gives the half-metric gain
+used in Hamilton's short-time barrier estimate. -/
+private theorem metric_gain_of_deriv_bound
+    {epsilon delta c C g dg : Real}
+    (hepsilon : 0 < epsilon)
+    (hC : 0 ≤ C)
+    (hdelta_le : delta ≤ 1 / (4 * C + 1))
+    (hc_nonneg : 0 ≤ c)
+    (hc_le : c ≤ 2 * delta)
+    (hg : 0 ≤ g)
+    (hdg : |dg| ≤ C * g) :
+    (epsilon / 2) * g ≤ epsilon * (g + c * dg) := by
+  have hden_pos : 0 < 4 * C + 1 := by nlinarith
+  have hCdelta_le : C * delta ≤ C * (1 / (4 * C + 1)) :=
+    mul_le_mul_of_nonneg_left hdelta_le hC
+  have hCfrac_le : C * (1 / (4 * C + 1)) ≤ 1 / 4 := by
+    field_simp [hden_pos.ne']
+    nlinarith [hC]
+  have hCdelta_quarter : C * delta ≤ 1 / 4 :=
+    le_trans hCdelta_le hCfrac_le
+  have hCc_le : C * c ≤ 1 / 2 := by
+    have h := mul_le_mul_of_nonneg_left hc_le hC
+    nlinarith [h, hCdelta_quarter]
+  have hCc_g_le : (C * c) * g ≤ (1 / 2) * g :=
+    mul_le_mul_of_nonneg_right hCc_le hg
+  have hdg_lower : -(C * g) ≤ dg := (abs_le.mp hdg).1
+  have hc_dg_lower : c * (-(C * g)) ≤ c * dg :=
+    mul_le_mul_of_nonneg_left hdg_lower hc_nonneg
+  have hinside : (1 / 2) * g ≤ g + c * dg := by
+    nlinarith [hCc_g_le, hc_dg_lower]
+  have hmul := mul_le_mul_of_nonneg_left hinside (le_of_lt hepsilon)
+  nlinarith
+
+/-- Recover the half-metric-gain package from a uniform bound on the metric
+time derivative. -/
+theorem metricGainControl_of_bound
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {T t0 : Real}
+    (hreg : TensorBarrierRegularityOn (I := I) (M := M) G S X N T)
+    (ht0 : t0 ∈ Set.Icc 0 T)
+    (ht0T : t0 < T) :
+    ∃ delta0 : Real,
+      0 < delta0 ∧ t0 + delta0 ≤ T ∧
+        ∀ delta : Real,
+          0 < delta ->
+          delta ≤ delta0 ->
+          ∀ epsilon : Real,
+            SmallBarrierEps epsilon ->
+            ∃ metricDeriv : TensorQuadraticFormFamily (I := I) (M := M),
+              (∀ t, t ∈ Set.Icc t0 (t0 + delta) ->
+                ∀ x, ∀ v : TangentSpace I x,
+                  HasDerivWithinAt (fun s : Real => (G s).inner x v v)
+                    (metricDeriv t x v) (Set.Icc t0 (t0 + delta)) t) ∧
+              (∀ t, t ∈ Set.Icc t0 (t0 + delta) ->
+                ∀ x, ∀ v : TangentSpace I x,
+                  (epsilon / 2) * (G t).inner x v v ≤
+                    epsilon * ((G t).inner x v v +
+                      (delta + t - t0) * metricDeriv t x v)) := by
+  obtain ⟨deltaRaw, C, hdeltaRaw, hC, hdeltaRawT, hbound⟩ :=
+    hreg.metricDerivBound t0 ht0 ht0T
+  let delta0 : Real := min deltaRaw (1 / (4 * C + 1))
+  have hden_pos : 0 < 4 * C + 1 := by nlinarith
+  have hrecip_pos : 0 < 1 / (4 * C + 1) := by positivity
+  have hdelta0_pos : 0 < delta0 := by
+    dsimp [delta0]
+    exact lt_min hdeltaRaw hrecip_pos
+  have hdelta0_le_raw : delta0 ≤ deltaRaw := by
+    dsimp [delta0]
+    exact min_le_left _ _
+  have hdelta0_le_recip : delta0 ≤ 1 / (4 * C + 1) := by
+    dsimp [delta0]
+    exact min_le_right _ _
+  have hdelta0T : t0 + delta0 ≤ T := by
+    have hle : delta0 ≤ deltaRaw := hdelta0_le_raw
+    linarith
+  refine ⟨delta0, hdelta0_pos, hdelta0T, ?_⟩
+  intro delta hdelta hdelta_le epsilon hepsilon
+  have hdelta_le_raw : delta ≤ deltaRaw := le_trans hdelta_le hdelta0_le_raw
+  have hdelta_le_recip : delta ≤ 1 / (4 * C + 1) :=
+    le_trans hdelta_le hdelta0_le_recip
+  obtain ⟨metricDeriv, hmetric_deriv, hmetric_bound⟩ :=
+    hbound delta hdelta hdelta_le_raw
+  refine ⟨metricDeriv, hmetric_deriv, ?_⟩
+  intro t ht x v
+  have htime_nonneg : 0 ≤ delta + t - t0 := by
+    have ht_sub : 0 ≤ t - t0 := sub_nonneg.mpr ht.1
+    have hsum : 0 ≤ delta + (t - t0) :=
+      add_nonneg (le_of_lt hdelta) ht_sub
+    simpa [sub_eq_add_neg, add_assoc, add_comm, add_left_comm] using hsum
+  have htime_le : delta + t - t0 ≤ 2 * delta := by
+    have ht_le : t - t0 ≤ delta := by linarith [ht.2]
+    linarith
+  have hmetric_nonneg : 0 ≤ (G t).inner x v v := by
+    by_cases hv : v = 0
+    · subst v
+      simp
+    · exact le_of_lt ((G t).pos x v hv)
+  exact metric_gain_of_deriv_bound
+    (epsilon := epsilon) (delta := delta) (c := delta + t - t0)
+    (C := C) (g := (G t).inner x v v) (dg := metricDeriv t x v)
+    hepsilon.1 hC hdelta_le_recip htime_nonneg htime_le hmetric_nonneg
+    (hmetric_bound t ht x v)
+
+/-- Produce the strict-barrier constants and pointwise estimates from the
+metric time-gain control and the uniform small-barrier reaction Lipschitz
+bound. -/
+theorem strictBarrierBounds
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {T t0 : Real}
+    (hreg : TensorWMPRegularityOn (I := I) (M := M) G S X N T)
+    (ht0 : t0 ∈ Set.Icc 0 T)
+    (ht0T : t0 < T)
+    {nabla2S : TensorNabla2Family (I := I) (M := M)}
+    {nablaS : TensorNabla1Family (I := I) (M := M)}
+    (_hbase : TensorParabolicInequalityWithDriftOn (I := I) (M := M)
+      G S X N nabla2S nablaS T) :
+    ∃ delta0 K : Real,
+      0 < delta0 ∧ 0 ≤ K ∧ t0 + delta0 ≤ T ∧
+        ∀ delta : Real,
+          0 < delta ->
+          delta ≤ delta0 ->
+          4 * K * delta < 1 ->
+          ∀ epsilon : Real,
+            SmallBarrierEps epsilon ->
+            ∃ metricDeriv : TensorQuadraticFormFamily (I := I) (M := M),
+            ∃ reactionErr : TensorQuadraticFormFamily (I := I) (M := M),
+            ∃ metricGain : TensorQuadraticFormFamily (I := I) (M := M),
+              (∀ t, t ∈ Set.Icc t0 (t0 + delta) ->
+                ∀ x, ∀ v : TangentSpace I x,
+                  HasDerivWithinAt (fun s : Real => (G s).inner x v v)
+                    (metricDeriv t x v) (Set.Icc t0 (t0 + delta)) t) ∧
+              (∀ t, t ∈ Set.Icc t0 (t0 + delta) ->
+                ∀ x, ∀ v : TangentSpace I x,
+                  metricGain t x v ≤
+                    epsilon * ((G t).inner x v v +
+                      (delta + t - t0) * metricDeriv t x v)) ∧
+              (∀ t, t ∈ Set.Icc t0 (t0 + delta) ->
+                ∀ x, ∀ v : TangentSpace I x,
+                  N t (G t)
+                      (tensorBarrierFamily (I := I) (M := M)
+                        G S epsilon delta t0 t) x v v ≤
+                    N t (G t) (S t) x v v + reactionErr t x v) ∧
+              (∀ t, t ∈ Set.Icc t0 (t0 + delta) ->
+                ∀ x, ∀ v : TangentSpace I x,
+                  v ≠ 0 -> reactionErr t x v < metricGain t x v) := by
+  obtain ⟨delta0, hdelta0, hdelta0T, hmetric⟩ :=
+    metricGainControl_of_bound (I := I) (M := M)
+      hreg.barrierRegularity ht0 ht0T
+  have hsub0 : Set.Icc t0 (t0 + delta0) ⊆ Set.Icc 0 T := by
+    intro t ht
+    exact ⟨le_trans ht0.1 ht.1, le_trans ht.2 hdelta0T⟩
+  obtain ⟨K, hK, hLip⟩ :=
+    hreg.barrierRegularity.smallBarrierLip delta0 t0 hdelta0 hsub0
+  refine ⟨delta0, K, hdelta0, hK, hdelta0T, ?_⟩
+  intro delta hdelta hdelta_le hsmall epsilon hepsilon
+  obtain ⟨metricDeriv, hmetric_deriv, hmetric_gain⟩ :=
+    hmetric delta hdelta hdelta_le epsilon hepsilon
+  let reactionErr : TensorQuadraticFormFamily (I := I) (M := M) :=
+    fun t x v =>
+      K * |epsilon * (delta + t - t0) * (G t).inner x v v|
+  let metricGain : TensorQuadraticFormFamily (I := I) (M := M) :=
+    fun t x v => (epsilon / 2) * (G t).inner x v v
+  refine ⟨metricDeriv, reactionErr, metricGain, hmetric_deriv, ?_, ?_, ?_⟩
+  · intro t ht x v
+    exact hmetric_gain t ht x v
+  · intro t ht x v
+    have hLip_t := hLip epsilon delta hepsilon hdelta hdelta_le t ht x v
+    dsimp [reactionErr]
+    exact reaction_bound_of_abs (a := N t (G t) (S t) x v v)
+      (b := N t (G t)
+        (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t) x v v)
+      hLip_t
+  · intro t ht x v hv
+    dsimp [reactionErr, metricGain]
+    have htime_nonneg : 0 ≤ delta + t - t0 := by
+      have ht_sub : 0 ≤ t - t0 := sub_nonneg.mpr ht.1
+      have hsum : 0 ≤ delta + (t - t0) :=
+        add_nonneg (le_of_lt hdelta) ht_sub
+      simpa [sub_eq_add_neg, add_assoc, add_comm, add_left_comm] using hsum
+    have htime_le : delta + t - t0 ≤ 2 * delta := by
+      have ht_le : t - t0 ≤ delta := by linarith [ht.2]
+      linarith
+    exact reactionErr_lt_gain (K := K) (epsilon := epsilon) (delta := delta)
+      (c := delta + t - t0) (g := (G t).inner x v v)
+      hK hepsilon.1 hdelta htime_nonneg htime_le hsmall ((G t).pos x v hv)
 
 /--
 Parabolic supersolution package for the drifted tensor inequality
@@ -698,24 +1360,26 @@ theorem tensorBarrier_strict_supersolution
       TensorBarrierUniformStrictOnSlab (I := I) (M := M) G S X N
         delta t0 := by
   obtain ⟨delta0, K, hdelta0, hK, _hdelta0T, hstrict_bounds⟩ :=
-    hreg.strictBarrierBounds t0 ht0 ht0T hparabolic.evaluatedInequality
+    strictBarrierBounds (I := I) (M := M)
+      hreg ht0 ht0T hparabolic.evaluatedInequality
   obtain ⟨delta, hdelta, hdelta_le_delta0, hdeltaT, hsmall⟩ :=
     exists_small_delta (t0 := t0) (T := T) (delta0 := delta0) (K := K)
       ht0T hdelta0 hK
   refine ⟨delta, hdelta, hdeltaT, ?_⟩
   intro epsilon hepsilon
-  obtain ⟨nabla2Barrier, nablaBarrier, hest⟩ :=
+  obtain ⟨metricDeriv, reactionErr, metricGain,
+      hmetric_deriv, hgain, hreaction, hmargin⟩ :=
     hstrict_bounds delta hdelta hdelta_le_delta0 hsmall epsilon hepsilon
-  refine ⟨nabla2Barrier, nablaBarrier, ?_⟩
+  refine ⟨nabla2S, nablaS, ?_⟩
   have hsub : Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T := by
     intro t ht
     exact ⟨le_trans ht0.1 ht.1, le_trans ht.2 hdeltaT⟩
-  exact strictBarrier_of_est (I := I) (M := M)
+  exact strictBarrier_of_derivEst (I := I) (M := M)
     (G := G) (S := S) (X := X) (N := N)
     (nabla2S := nabla2S) (nablaS := nablaS)
-    (nabla2Barrier := nabla2Barrier) (nablaBarrier := nablaBarrier)
     (epsilon := epsilon) (delta := delta) (t0 := t0) (T := T)
-    hsub hparabolic.evaluatedInequality hest
+    hsub hparabolic.evaluatedInequality
+    metricDeriv reactionErr metricGain hmetric_deriv hgain hreaction hmargin
 
 /--
 Step 3: if the barrier fails to stay positive, compactness gives first-null

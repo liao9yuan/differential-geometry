@@ -82,6 +82,25 @@ def dualToCotangent {x : M} (α : Module.Dual Real (TangentSpace I x)) :
     ((continuousMultilinearCurryFin1 Real (TangentSpace I x) Real).symm
       (LinearMap.toContinuousLinearMap α))
 
+def dualToCotangentLinear {x : M} :
+    Module.Dual Real (TangentSpace I x) →ₗ[Real] Tensor0SSpace 1 I x where
+  toFun := dualToCotangent (I := I)
+  map_add' α β := by
+    apply cotangentToDualLinear_injective (I := I) (x := x)
+    ext X
+    change (α + β) X = α X + β X
+    rfl
+  map_smul' c α := by
+    apply cotangentToDualLinear_injective (I := I) (x := x)
+    ext X
+    change (c • α) X = c * α X
+    rfl
+
+@[simp] theorem dualToCotangentLinear_apply {x : M}
+    (α : Module.Dual Real (TangentSpace I x)) :
+    dualToCotangentLinear (I := I) α = dualToCotangent (I := I) α := by
+  rfl
+
 @[simp] theorem dualToCotangent_apply {x : M}
     (α : Module.Dual Real (TangentSpace I x)) (X : TangentSpace I x) :
     dualToCotangent (I := I) α (fun _ : Fin 1 => X) = α X := by

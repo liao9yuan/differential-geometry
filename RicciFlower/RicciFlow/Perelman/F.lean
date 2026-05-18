@@ -7,6 +7,7 @@ Authors: RicciFlower contributors
 import RicciFlower.Analysis.Green
 import RicciFlower.LeviCivita.Variation
 import RicciFlower.RicciFlow.Perelman.Variation
+import RicciFlower.Tensor.RSTensor.MetricTrace
 
 set_option autoImplicit false
 set_option linter.unusedSectionVars false
@@ -30,6 +31,8 @@ noncomputable section
 open Filter MeasureTheory
 open RicciFlower.Analysis.Volume
 open RicciFlower.Analysis.VolumeVariation
+open RicciFlower.Coordinates
+open Tensor0SBundle
 open scoped Manifold ContDiff
 
 variable {M : Type*}
@@ -1448,6 +1451,280 @@ theorem formula510_of_connTrace
       expNegPotentialWeightedMeasure
         (riemannianVolumeMeasure (I := I) (M := M) g) potential)
     hfirst hfinal_int hdiv_int hshift_int hcorr_int hdiv_zero hshift_final
+
+/-- Coordinate-frame action formula for the constructed connection-trace field.
+This is the first local realization needed to identify the book's
+`g^{ij} A^p_{ij} ∂_p f` term with the intrinsic tangent-section action. -/
+theorem connTraceAction_coord
+    (g : SmoothRiemannianMetric I M)
+    (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1 2)
+    (potential : M -> Real)
+    (x₀ : M) {x : M} (hx : x ∈ coordinateFrameSet (I := I) x₀) :
+    RicciFlower.Analysis.DivergenceTheorem.tangentSectionAction
+        (I := I) (RicciFlower.Realized.connTraceField (I := I) g A)
+        potential x =
+      ∑ p : CoordinateIdx (𝕜 := Real) E,
+        (∑ i : CoordinateIdx (𝕜 := Real) E,
+          ∑ j : CoordinateIdx (𝕜 := Real) E,
+            inverseMetricFlatModelInChart_component (I := I) g x₀ i j
+                (extChartAt I x₀ x) *
+              componentRS (I := I) (coordinateFrameAt_basis (I := I) x₀ hx)
+                (A x) (fun _ : Fin 1 => p)
+                (fun q : Fin 2 => if q = 0 then i else j)) *
+          extDerivFun (I := I) potential x
+            (coordinateFrameAt (I := I) x₀ p x) := by
+  classical
+  let X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
+    RicciFlower.Realized.connTraceField (I := I) g A
+  let frame := coordinateFrameAt (I := I) x₀
+  let hframe := coordinateFrameAt_isLocalFrame (I := I) x₀
+  have hX :
+      X x = ∑ p : CoordinateIdx (𝕜 := Real) E,
+        hframe.coeff p x (X x) • frame p x := by
+    simpa [X, frame, hframe] using hframe.coeff_sum_eq (fun y : M => X y) hx
+  rw [RicciFlower.Analysis.DivergenceTheorem.tangentSectionAction_def]
+  rw [← RicciFlower.extDerivFun_real_eq_mfderiv I potential x (X x)]
+  change extDerivFun (I := I) potential x (X x) = _
+  rw [hX, map_sum]
+  refine Finset.sum_congr rfl ?_
+  intro p _
+  rw [map_smul]
+  have hcoeff :=
+    RicciFlower.Realized.connTraceField_coord (I := I) g A x₀ hx p
+  rw [hcoeff]
+  exact smul_eq_mul ..
+
+/-- Intrinsic raw divergence trace of the constructed field `tr_g A`. -/
+def connTraceRawDiv
+    (g : SmoothRiemannianMetric I M)
+    (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1 2) : M -> Real :=
+  fun x =>
+    RicciFlower.Analysis.DivergenceTheorem.divergence_g
+      (I := I) g (RicciFlower.Realized.connTraceField (I := I) g A) x
+
+/-- Pointwise coordinate-centered action trace of `tr_g A` on a scalar
+potential.  The chart is centered at the point being evaluated, so this is a
+global scalar function without choosing a fixed chart. -/
+def connTraceAction
+    (g : SmoothRiemannianMetric I M)
+    (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1 2)
+    (potential : M -> Real) : M -> Real :=
+  fun x =>
+    ∑ p : CoordinateIdx (𝕜 := Real) E,
+      (∑ i : CoordinateIdx (𝕜 := Real) E,
+        ∑ j : CoordinateIdx (𝕜 := Real) E,
+          inverseMetricFlatModelInChart_component (I := I) g x i j
+              (extChartAt I x x) *
+            componentRS (I := I)
+              (coordinateFrameAt_basis (I := I) x (coordinateFrameAt_mem (I := I) x))
+              (A x) (fun _ : Fin 1 => p)
+              (fun q : Fin 2 => if q = 0 then i else j)) *
+        extDerivFun (I := I) potential x
+          (coordinateFrameAt (I := I) x p x)
+
+/-- The coordinate-centered `connTraceAction` is the intrinsic tangent action
+of the constructed field. -/
+theorem connTraceAction_eq
+    (g : SmoothRiemannianMetric I M)
+    (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1 2)
+    (potential : M -> Real) (x : M) :
+    RicciFlower.Analysis.DivergenceTheorem.tangentSectionAction
+        (I := I) (RicciFlower.Realized.connTraceField (I := I) g A)
+        potential x =
+      connTraceAction (I := I) g A potential x := by
+  simpa [connTraceAction] using
+    connTraceAction_coord (I := I) g A potential x
+      (coordinateFrameAt_mem (I := I) x)
+
+/-- Formula 5.10 using the intrinsic metric trace field `tr_g A` of a smooth
+connection-variation tensor.  This specializes `formula510_of_connTrace` with
+the smooth section constructed in `Tensor.RSTensor.MetricTrace`. -/
+theorem formula510_of_connTraceField
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    (g : SmoothRiemannianMetric I M)
+    (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1 2)
+    {firstVariation : Real}
+    {scalarCurvature lapPotential gradPotentialNormSq potential
+      potentialVariation metricVariationTrace metricVariationRicciHess
+      weightedDivergenceTrace shiftedTrace rawTrace actionTrace q : M -> Real}
+    (hpotential : ContMDiff I 𝓘(Real, Real) ∞ potential)
+    (hq : ContMDiff I 𝓘(Real, Real) ∞ q)
+    (hmeas :
+      AEMeasurable
+        (fun x : M => ENNReal.ofReal (expNegPotentialDensity potential x))
+        (riemannianVolumeMeasure (I := I) (M := M) g))
+    (hfirst :
+      firstVariation =
+        ∫ x,
+          fFunctionalPre510Integrand scalarCurvature lapPotential
+            gradPotentialNormSq potentialVariation metricVariationTrace
+            metricVariationRicciHess weightedDivergenceTrace shiftedTrace x
+          ∂(expNegPotentialWeightedMeasure
+              (riemannianVolumeMeasure (I := I) (M := M) g) potential))
+    (hfinal_int :
+      Integrable
+        (fFunctionalFormula510Integrand scalarCurvature lapPotential
+          gradPotentialNormSq potentialVariation metricVariationTrace
+          metricVariationRicciHess)
+        (expNegPotentialWeightedMeasure
+          (riemannianVolumeMeasure (I := I) (M := M) g) potential))
+    (hdiv_int :
+      Integrable weightedDivergenceTrace
+        (expNegPotentialWeightedMeasure
+          (riemannianVolumeMeasure (I := I) (M := M) g) potential))
+    (hshift_int :
+      Integrable shiftedTrace
+        (expNegPotentialWeightedMeasure
+          (riemannianVolumeMeasure (I := I) (M := M) g) potential))
+    (hcorr_int :
+      Integrable
+        (fun x : M =>
+          expWeightedMeasureVariationFactor potentialVariation
+            metricVariationTrace x *
+            (lapPotential x - gradPotentialNormSq x))
+        (expNegPotentialWeightedMeasure
+          (riemannianVolumeMeasure (I := I) (M := M) g) potential))
+    (hdivTrace :
+      ∀ x : M,
+        RicciFlower.Analysis.DivergenceTheorem.divergence_g
+            (I := I) g (RicciFlower.Realized.connTraceField (I := I) g A) x =
+          rawTrace x)
+    (hactionTrace :
+      ∀ x : M,
+        RicciFlower.Analysis.DivergenceTheorem.tangentSectionAction
+            (I := I) (RicciFlower.Realized.connTraceField (I := I) g A) potential x =
+          actionTrace x)
+    (hweighted :
+      ∀ x : M,
+        weightedDivergenceTrace x = rawTrace x - actionTrace x)
+    (hlap :
+      ∀ x : M,
+        lapPotential x =
+          RicciFlower.Analysis.DivergenceTheorem.Δ_g
+            (I := I) g hpotential x)
+    (hgradSq :
+      ∀ x : M,
+        gradPotentialNormSq x =
+          g.inner x
+            ((RicciFlower.Analysis.DivergenceTheorem.grad_g
+              (I := I) g hpotential :
+              Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x)
+            ((RicciFlower.Analysis.DivergenceTheorem.grad_g
+              (I := I) g hpotential :
+              Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x))
+    (hshift :
+      ∀ x : M,
+        shiftedTrace x =
+          RicciFlower.Analysis.DivergenceTheorem.Δ_g
+            (I := I) g hq x)
+    (hqeq :
+      ∀ x : M,
+        q x = potentialVariation x - metricVariationTrace x / 2) :
+    FFunctionalFormula510
+      (expNegPotentialWeightedMeasure
+        (riemannianVolumeMeasure (I := I) (M := M) g) potential)
+      firstVariation scalarCurvature lapPotential gradPotentialNormSq
+      potentialVariation metricVariationTrace metricVariationRicciHess :=
+  formula510_of_connTrace (I := I) g hpotential hq
+    (RicciFlower.Realized.connTraceField (I := I) g A)
+    hmeas hfirst hfinal_int hdiv_int hshift_int hcorr_int
+    hdivTrace hactionTrace hweighted hlap hgradSq hshift hqeq
+
+/-- Formula 5.10 assembly with the raw divergence and action trace supplied by
+the constructed field `tr_g A` itself.  The remaining geometric bridge is the
+single pointwise identity saying the weighted-divergence component produced by
+the `δ(Ric + Hess f)` calculation is `div(tr_g A) - (tr_g A)(f)`. -/
+theorem formula510_of_trace
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    (g : SmoothRiemannianMetric I M)
+    (A : Tensor0SBundle.TensorRSField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 1 2)
+    {firstVariation : Real}
+    {scalarCurvature lapPotential gradPotentialNormSq potential
+      potentialVariation metricVariationTrace metricVariationRicciHess
+      weightedDivergenceTrace shiftedTrace q : M -> Real}
+    (hpotential : ContMDiff I 𝓘(Real, Real) ∞ potential)
+    (hq : ContMDiff I 𝓘(Real, Real) ∞ q)
+    (hmeas :
+      AEMeasurable
+        (fun x : M => ENNReal.ofReal (expNegPotentialDensity potential x))
+        (riemannianVolumeMeasure (I := I) (M := M) g))
+    (hfirst :
+      firstVariation =
+        ∫ x,
+          fFunctionalPre510Integrand scalarCurvature lapPotential
+            gradPotentialNormSq potentialVariation metricVariationTrace
+            metricVariationRicciHess weightedDivergenceTrace shiftedTrace x
+          ∂(expNegPotentialWeightedMeasure
+              (riemannianVolumeMeasure (I := I) (M := M) g) potential))
+    (hfinal_int :
+      Integrable
+        (fFunctionalFormula510Integrand scalarCurvature lapPotential
+          gradPotentialNormSq potentialVariation metricVariationTrace
+          metricVariationRicciHess)
+        (expNegPotentialWeightedMeasure
+          (riemannianVolumeMeasure (I := I) (M := M) g) potential))
+    (hdiv_int :
+      Integrable weightedDivergenceTrace
+        (expNegPotentialWeightedMeasure
+          (riemannianVolumeMeasure (I := I) (M := M) g) potential))
+    (hshift_int :
+      Integrable shiftedTrace
+        (expNegPotentialWeightedMeasure
+          (riemannianVolumeMeasure (I := I) (M := M) g) potential))
+    (hcorr_int :
+      Integrable
+        (fun x : M =>
+          expWeightedMeasureVariationFactor potentialVariation
+            metricVariationTrace x *
+            (lapPotential x - gradPotentialNormSq x))
+        (expNegPotentialWeightedMeasure
+          (riemannianVolumeMeasure (I := I) (M := M) g) potential))
+    (hweighted :
+      ∀ x : M,
+        weightedDivergenceTrace x =
+          connTraceRawDiv (I := I) g A x -
+            connTraceAction (I := I) g A potential x)
+    (hlap :
+      ∀ x : M,
+        lapPotential x =
+          RicciFlower.Analysis.DivergenceTheorem.Δ_g
+            (I := I) g hpotential x)
+    (hgradSq :
+      ∀ x : M,
+        gradPotentialNormSq x =
+          g.inner x
+            ((RicciFlower.Analysis.DivergenceTheorem.grad_g
+              (I := I) g hpotential :
+              Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x)
+            ((RicciFlower.Analysis.DivergenceTheorem.grad_g
+              (I := I) g hpotential :
+              Cₛ^∞⟮I; E, (TangentSpace I : M -> Type _)⟯) x))
+    (hshift :
+      ∀ x : M,
+        shiftedTrace x =
+          RicciFlower.Analysis.DivergenceTheorem.Δ_g
+            (I := I) g hq x)
+    (hqeq :
+      ∀ x : M,
+        q x = potentialVariation x - metricVariationTrace x / 2) :
+    FFunctionalFormula510
+      (expNegPotentialWeightedMeasure
+        (riemannianVolumeMeasure (I := I) (M := M) g) potential)
+      firstVariation scalarCurvature lapPotential gradPotentialNormSq
+      potentialVariation metricVariationTrace metricVariationRicciHess := by
+  exact formula510_of_connTraceField (I := I) g A hpotential hq hmeas
+    hfirst hfinal_int hdiv_int hshift_int hcorr_int
+    (rawTrace := connTraceRawDiv (I := I) g A)
+    (actionTrace := connTraceAction (I := I) g A potential)
+    (fun x => rfl)
+    (connTraceAction_eq (I := I) g A potential)
+    hweighted hlap hgradSq hshift hqeq
 
 end GeometryFormula510
 

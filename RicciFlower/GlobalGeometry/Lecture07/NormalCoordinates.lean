@@ -1,5 +1,6 @@
 import RicciFlower.GlobalGeometry.Lecture07.SprayChartPush
 import Mathlib.Analysis.Calculus.FDeriv.Basic
+import Mathlib.Analysis.ODE.Gronwall
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -262,6 +263,12 @@ private def modelSpray
   tangentCoordChange I.tangent q (phaseZero (I := I) x) q
     (leviCivitaGeodesicSprayChart (I := I) g x q)
 
+/-- Linearization of the fixed-chart model spray at the zero phase:
+`(δx, δv) ↦ (δv, 0)`. -/
+private def modelSprayLin : (E × E) →L[Real] (E × E) :=
+  (ContinuousLinearMap.snd Real E E).prod
+    (0 : (E × E) →L[Real] E)
+
 /-- Homogeneity of the quadratic Christoffel velocity term. -/
 private theorem sprayQuad_smul
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -371,6 +378,38 @@ private theorem chartPushLift_fst_eq_extChartAt_proj
   rcases hq : lift t with ⟨y, w⟩
   simp [chartPushLift, hlift0, hq, TangentBundle.chartAt, extChartAt]
 
+/-- In the fixed tangent-bundle chart target, the first model coordinate is
+the base `extChartAt x` coordinate of the reconstructed tangent vector. -/
+private theorem phaseOfModel_chart
+    (x : M) {z : E × E}
+    (hztarget : z ∈ (extChartAt I.tangent (phaseZero (I := I) x)).target)
+    (hsrc : (phaseOfModel (I := I) x z).proj ∈ (extChartAt I x).source) :
+    extChartAt I x (phaseOfModel (I := I) x z).proj = z.1 := by
+  let q : TangentBundle I M := phaseOfModel (I := I) x z
+  let lift : Real -> TangentBundle I M :=
+    fun t : Real => if t = 0 then phaseZero (I := I) x else q
+  have hlift0 :
+      lift 0 = (⟨x, (0 : E)⟩ : TangentBundle I M) := by
+    simp [lift, phaseZero]
+  have hqz :
+      extChartAt I.tangent (phaseZero (I := I) x) q = z := by
+    exact PartialEquiv.right_inv _ hztarget
+  have hone : (1 : Real) ≠ 0 := one_ne_zero
+  have hlift1 : lift 1 = q := by
+    simp [lift, hone]
+  have hchart :
+      chartPushLift (I := I) lift 0 1 = z := by
+    simpa [chartPushLift, hlift0, hlift1, q, phaseZero] using hqz
+  have hsrc1 : (lift 1).proj ∈ (extChartAt I x).source := by
+    simpa [hlift1, q] using hsrc
+  have hfst :=
+    chartPushLift_fst_eq_extChartAt_proj
+      (I := I) (lift := lift) (t0 := 0) (t := 1)
+      hlift0 hsrc1
+  have hz := congrArg Prod.fst hchart
+  rw [hfst] at hz
+  simpa [hlift1, q] using hz
+
 /-- On the fixed tangent-bundle chart target, the model spray is the explicit
 first-order system `(x', v') = (v, -Γ(v,v))`. -/
 private theorem modelSpray_eq_pair
@@ -399,13 +438,7 @@ private theorem modelSpray_eq_pair
     simpa [chartPushLift, hlift0, hlift1, q, phaseZero] using hqz
   have hfst :
       z.1 = extChartAt I x q.proj := by
-    have h :=
-      chartPushLift_fst_eq_extChartAt_proj
-        (I := I) (lift := lift) (t0 := 0) (t := 1)
-        hlift0 hsrc1
-    have hz := congrArg Prod.fst hchart
-    rw [h] at hz
-    simpa [hlift1, q] using hz.symm
+    exact (phaseOfModel_chart (I := I) x hztarget hsrc).symm
   have hsnd :
       z.2 = chartFiberCoordAt (I := I) x q := by
     have h :=
@@ -632,6 +665,17 @@ private theorem initPhase_smul
   rw [initPhase_eq_pair, initPhase_eq_pair]
   rfl
 
+private theorem phaseZero_pair (x : M) :
+    extChartAt I.tangent (phaseZero (I := I) x)
+        (phaseZero (I := I) x) =
+      (extChartAt I x x, (0 : E)) := by
+  calc
+    extChartAt I.tangent (phaseZero (I := I) x) (phaseZero (I := I) x)
+        = initPhase (I := I) x (0 : TangentSpace I x) :=
+      (initPhase_zero (I := I) x).symm
+    _ = (extChartAt I x x, (0 : E)) := by
+      exact initPhase_eq_pair (I := I) x (0 : TangentSpace I x)
+
 private theorem half_mul_mem_Ioo
     {ε s : Real} (hε : 0 < ε)
     (hs : s ∈ Metric.ball (0 : Real) 2) :
@@ -742,6 +786,253 @@ private theorem modelSpray_cdAt
   filter_upwards [hsrc_event] with z hz
   exact modelSpray_eq_fiber (I := I) g x hz
 
+/-- The fixed-chart model spray is strictly differentiable at the zero phase.
+
+This is the direct consequence of `C¹` regularity, keeping Mathlib's `fderiv`
+as the derivative.  `spray_strict_zero` below identifies this derivative with
+the explicit linearization `modelSprayLin`. -/
+private theorem modelSpray_strictAt
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    HasStrictFDerivAt
+      (modelSpray (I := I) g x)
+      (fderiv Real (modelSpray (I := I) g x)
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)))
+      (extChartAt I.tangent (phaseZero (I := I) x)
+        (phaseZero (I := I) x)) :=
+  (modelSpray_cdAt (I := I) g x).hasStrictFDerivAt one_ne_zero
+
+/-- The Christoffel quadratic term has zero first derivative at the zero
+fiber. -/
+private theorem quad_fderiv_zero
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (k : CoordinateIdx (𝕜 := Real) E) :
+    HasFDerivAt
+      (fun z : E × E =>
+        leviCivitaGeodesicSprayQuadratic (I := I) g x z.1 z.2 k)
+      (0 : (E × E) →L[Real] Real)
+      (extChartAt I.tangent (phaseZero (I := I) x)
+        (phaseZero (I := I) x)) := by
+  classical
+  let y0 : E := extChartAt I x x
+  let z0 : E × E :=
+    extChartAt I.tangent (phaseZero (I := I) x)
+      (phaseZero (I := I) x)
+  have hz0 : z0 = (y0, (0 : E)) := by
+    simpa [z0, y0] using phaseZero_pair (I := I) x
+  change HasFDerivAt
+    (fun z : E × E =>
+      ∑ i : CoordinateIdx (𝕜 := Real) E,
+        ∑ j : CoordinateIdx (𝕜 := Real) E,
+          LeviCivita.leviCivitaChristoffelModelRHS
+              (I := I) g x i j k z.1 *
+            modelCoord i z.2 * modelCoord j z.2)
+    (0 : (E × E) →L[Real] Real) z0
+  convert (HasFDerivAt.fun_sum (𝕜 := Real) (E := E × E) (F := Real)
+    (u := (Finset.univ : Finset (CoordinateIdx (𝕜 := Real) E)))
+    (A := fun i (z : E × E) =>
+      ∑ j : CoordinateIdx (𝕜 := Real) E,
+        LeviCivita.leviCivitaChristoffelModelRHS
+            (I := I) g x i j k z.1 *
+          modelCoord i z.2 * modelCoord j z.2)
+    (A' := fun _ => (0 : (E × E) →L[Real] Real))
+    (x := z0) fun i _hi => by
+      convert (HasFDerivAt.fun_sum (𝕜 := Real) (E := E × E) (F := Real)
+        (u := (Finset.univ : Finset (CoordinateIdx (𝕜 := Real) E)))
+        (A := fun j (z : E × E) =>
+          LeviCivita.leviCivitaChristoffelModelRHS
+              (I := I) g x i j k z.1 *
+            modelCoord i z.2 * modelCoord j z.2)
+        (A' := fun _ => (0 : (E × E) →L[Real] Real))
+        (x := z0) fun j _hj => by
+          let Γ : E → Real :=
+            LeviCivita.leviCivitaChristoffelModelRHS
+              (I := I) g x i j k
+          have hΓWithin :=
+            LeviCivita.leviCivitaChristoffelModelRHS_contDiffWithinAt
+              (I := I) g x i j k
+          have hRange : Set.range I ∈ 𝓝 y0 := by
+            exact Filter.mem_of_superset (extChartAt_target_mem_nhds (I := I) x)
+              (extChartAt_target_subset_range (I := I) x)
+          have hΓAt : ContDiffAt Real ∞ Γ y0 := by
+            simpa [Γ, y0] using hΓWithin.contDiffAt hRange
+          have hΓ :
+              HasFDerivAt
+                (fun z : E × E => Γ z.1)
+                ((fderiv Real Γ y0).comp (ContinuousLinearMap.fst Real E E))
+                z0 := by
+            exact (hΓAt.differentiableAt (by simp)).hasFDerivAt.comp z0
+              (hasFDerivAt_fst (𝕜 := Real) (E := E) (F := E) (p := z0))
+          have hi :
+              HasFDerivAt
+                (fun z : E × E => modelCoord i z.2)
+                (((Module.finBasis Real E).coord i).toContinuousLinearMap.comp
+                  (ContinuousLinearMap.snd Real E E))
+                z0 := by
+            simpa [modelCoord] using
+              (((Module.finBasis Real E).coord i).toContinuousLinearMap.hasFDerivAt.comp z0
+                (hasFDerivAt_snd (𝕜 := Real) (E := E) (F := E) (p := z0)))
+          have hj :
+              HasFDerivAt
+                (fun z : E × E => modelCoord j z.2)
+                (((Module.finBasis Real E).coord j).toContinuousLinearMap.comp
+                  (ContinuousLinearMap.snd Real E E))
+                z0 := by
+            simpa [modelCoord] using
+              (((Module.finBasis Real E).coord j).toContinuousLinearMap.hasFDerivAt.comp z0
+                (hasFDerivAt_snd (𝕜 := Real) (E := E) (F := E) (p := z0)))
+          have hprod := (hΓ.mul hi).mul hj
+          simpa [Γ, z0, hz0, y0, modelCoord, ContinuousLinearMap.zero_apply] using hprod) using 1
+      · simp
+      ) using 1
+  · simp
+
+/-- The model acceleration `-Γ(v,v)` has zero first derivative at the zero
+fiber. -/
+private theorem accel_fderiv_zero
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    HasFDerivAt
+      (fun z : E × E =>
+        leviCivitaGeodesicSprayAcceleration (I := I) g x z.1 z.2)
+      (0 : (E × E) →L[Real] E)
+      (extChartAt I.tangent (phaseZero (I := I) x)
+        (phaseZero (I := I) x)) := by
+  classical
+  let z0 : E × E :=
+    extChartAt I.tangent (phaseZero (I := I) x)
+      (phaseZero (I := I) x)
+  change HasFDerivAt
+    (fun z : E × E =>
+      ∑ k : CoordinateIdx (𝕜 := Real) E,
+        (-leviCivitaGeodesicSprayQuadratic (I := I) g x z.1 z.2 k) •
+          (Module.finBasis Real E k))
+    (0 : (E × E) →L[Real] E) z0
+  convert (HasFDerivAt.fun_sum (𝕜 := Real) (E := E × E) (F := E)
+    (u := (Finset.univ : Finset (CoordinateIdx (𝕜 := Real) E)))
+    (A := fun k (z : E × E) =>
+      (-leviCivitaGeodesicSprayQuadratic (I := I) g x z.1 z.2 k) •
+        (Module.finBasis Real E k))
+    (A' := fun _ => (0 : (E × E) →L[Real] E))
+    (x := z0) fun k _hk => by
+      have hq := (quad_fderiv_zero (I := I) g x k).neg
+      simpa [z0, ContinuousLinearMap.zero_smulRight] using
+        hq.smul_const (Module.finBasis Real E k)) using 1
+  · simp
+
+/-- The explicit model pair `(v, -Γ(v,v))` linearizes to `(δx, δv) ↦
+ (δv, 0)`. -/
+private theorem sprayPair_fderiv
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    HasFDerivAt
+      (fun z : E × E =>
+        (z.2, leviCivitaGeodesicSprayAcceleration (I := I) g x z.1 z.2))
+      (modelSprayLin (E := E))
+      (extChartAt I.tangent (phaseZero (I := I) x)
+        (phaseZero (I := I) x)) := by
+  have hfst :
+      HasFDerivAt (fun z : E × E => z.2)
+        (ContinuousLinearMap.snd Real E E)
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) :=
+    hasFDerivAt_snd (𝕜 := Real) (E := E) (F := E)
+      (p := extChartAt I.tangent (phaseZero (I := I) x)
+        (phaseZero (I := I) x))
+  have hsnd := accel_fderiv_zero (I := I) g x
+  simpa [modelSprayLin] using hfst.prodMk hsnd
+
+/-- The fixed-chart model spray has derivative `modelSprayLin` at the zero
+phase. -/
+private theorem spray_fderiv_zero
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    HasFDerivAt
+      (modelSpray (I := I) g x)
+      (modelSprayLin (E := E))
+      (extChartAt I.tangent (phaseZero (I := I) x)
+        (phaseZero (I := I) x)) := by
+  let z0 : E × E :=
+    extChartAt I.tangent (phaseZero (I := I) x)
+      (phaseZero (I := I) x)
+  have htarget :
+      (extChartAt I.tangent (phaseZero (I := I) x)).target ∈ 𝓝 z0 := by
+    have hzsrc :
+        phaseZero (I := I) x ∈
+          (extChartAt I.tangent (phaseZero (I := I) x)).source :=
+      mem_extChartAt_source (I := I.tangent) (phaseZero (I := I) x)
+    simpa [z0] using
+      (isOpen_extChartAt_target (I := I.tangent)
+        (phaseZero (I := I) x)).mem_nhds
+        ((extChartAt I.tangent (phaseZero (I := I) x)).map_source hzsrc)
+  have hsrc_nhds :
+      {q : TangentBundle I M | q.proj ∈ (extChartAt I x).source} ∈
+        𝓝 (phaseZero (I := I) x) := by
+    have hproj :
+        ContinuousAt
+          (fun q : TangentBundle I M => q.proj)
+          (phaseZero (I := I) x) :=
+      (FiberBundle.continuous_proj E
+        (TangentSpace I : M -> Type _)).continuousAt
+    have hxsrc :
+        (phaseZero (I := I) x).proj ∈ (extChartAt I x).source := by
+      simp [phaseZero]
+    exact hproj.preimage_mem_nhds
+      (by
+        simpa [extChartAt_source] using
+          extChartAt_source_mem_nhds (I := I) x)
+  have hphase_self :
+      phaseOfModel (I := I) x z0 = phaseZero (I := I) x := by
+    exact PartialEquiv.left_inv _ (mem_extChartAt_source (I := I.tangent)
+      (phaseZero (I := I) x))
+  have hsrc_event :
+      ∀ᶠ z in 𝓝 z0,
+        (phaseOfModel (I := I) x z).proj ∈ (extChartAt I x).source := by
+    have hphase_cont := (phaseOfModel_cdAt (I := I) x).continuousAt
+    have hsrc_nhds' :
+        {q : TangentBundle I M | q.proj ∈ (extChartAt I x).source} ∈
+          𝓝 (phaseOfModel (I := I) x z0) := by
+      simpa [hphase_self] using hsrc_nhds
+    simpa [z0] using hphase_cont.preimage_mem_nhds hsrc_nhds'
+  have hev :
+      modelSpray (I := I) g x =ᶠ[𝓝 z0]
+        fun z : E × E =>
+          (z.2, leviCivitaGeodesicSprayAcceleration (I := I) g x z.1 z.2) := by
+    filter_upwards [htarget, hsrc_event] with z hztarget hzsrc
+    exact modelSpray_eq_pair (I := I) g x hztarget hzsrc
+  exact (hev.hasFDerivAt_iff).2 (sprayPair_fderiv (I := I) g x)
+
+/-- Strict differentiability of the fixed-chart model spray with the explicit
+linearization `(δx, δv) ↦ (δv, 0)`. -/
+private theorem spray_strict_zero
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    HasStrictFDerivAt
+      (modelSpray (I := I) g x)
+      (modelSprayLin (E := E))
+      (extChartAt I.tangent (phaseZero (I := I) x)
+        (phaseZero (I := I) x)) :=
+  (modelSpray_strictAt (I := I) g x).congr_fderiv
+    (spray_fderiv_zero (I := I) g x).fderiv
+
+/-- Pairwise little-o form of the strict linearization of the fixed-chart
+model spray at the zero phase. -/
+private theorem spray_o
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    (fun p : (E × E) × (E × E) =>
+      modelSpray (I := I) g x p.1 -
+        modelSpray (I := I) g x p.2 -
+        modelSprayLin (E := E) (p.1 - p.2))
+      =o[𝓝 ((extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x),
+        extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)))]
+        fun p : (E × E) × (E × E) => p.1 - p.2 :=
+  (spray_strict_zero (I := I) g x).isLittleO
+
 /-- The zero phase point is an equilibrium of the fixed-chart model spray. -/
 private theorem modelSpray_zero
     [I.Boundaryless]
@@ -844,6 +1135,8 @@ private theorem plFlow_bound
           HasDerivWithinAt (α x) (f t (α x t)) (Set.Icc tmin tmax) t) ∧
       (∀ x ∈ Metric.closedBall x0 r, ∀ t : Real,
         α x t ∈ Metric.closedBall x0 a) ∧
+      (∀ x ∈ Metric.closedBall x0 r, ∀ t ∈ Set.Icc tmin tmax,
+        α x t = ODE.picard f t0 x (α x) t) ∧
       ∃ L' : NNReal, ∀ t ∈ Set.Icc tmin tmax,
         LipschitzOnWith L' (fun x => α x t) (Metric.closedBall x0 r) := by
   classical
@@ -852,7 +1145,7 @@ private theorem plFlow_bound
   choose β hβ using hfixed
   let α : F -> Real -> F := fun x =>
     if hx : x ∈ Metric.closedBall x0 r then (β x hx).compProj else 0
-  refine ⟨α, ?_, ?_, ?_⟩
+  refine ⟨α, ?_, ?_, ?_, ?_⟩
   · intro x hx
     constructor
     · change (if hx' : x ∈ Metric.closedBall x0 r then
@@ -879,6 +1172,16 @@ private theorem plFlow_bound
         (β x hx').compProj else 0) t ∈ Metric.closedBall x0 a
     rw [dif_pos hx]
     exact (β x hx).compProj_mem_closedBall hf.mul_max_le
+  · intro x hx t ht
+    change (if hx' : x ∈ Metric.closedBall x0 r then
+        (β x hx').compProj else 0) t =
+      ODE.picard f t0 x
+        (if hx' : x ∈ Metric.closedBall x0 r then
+          (β x hx').compProj else 0) t
+    rw [dif_pos hx, ODE.FunSpace.compProj_of_mem ht]
+    have hfixed :=
+      (ODE.FunSpace.isFixedPt_next_iff hf hx).mp (hβ x hx)
+    simpa [dif_pos hx] using hfixed (⟨t, ht⟩ : Set.Icc tmin tmax)
   · obtain ⟨L', hL'⟩ :=
       ODE.FunSpace.exists_forall_closedBall_funSpace_dist_le_mul hf
     refine ⟨L', fun t ht => LipschitzOnWith.of_dist_le_mul fun x hx y hy => ?_⟩
@@ -1164,7 +1467,7 @@ private theorem modelFlow_srcLip
   let z0 : E × E :=
     extChartAt I.tangent (phaseZero (I := I) x)
       (phaseZero (I := I) x)
-  obtain ⟨α, hα, hbound, L', hLip⟩ :=
+  obtain ⟨α, hα, hbound, _hpicard, L', hLip⟩ :=
     plFlow_bound (F := E × E) (f := fun _ : Real =>
       modelSpray (I := I) g x) hpl
   refine ⟨ε, hε, r, hr, α, ?_, ?_, L', ?_⟩
@@ -1184,6 +1487,227 @@ private theorem modelFlow_srcLip
     have ht' : t ∈ Set.Icc (0 - ε) (0 + ε) := by
       simpa using ht
     simpa [z0] using hLip t ht'
+
+/-- Functional Picard-Lindelof flow with all raw data retained.
+
+This is the package needed for the strict endpoint frontier: the same chosen
+flow carries the derivative equation, the Picard-Lindelof vector-field
+Lipschitz bound, the closed-ball bound, chart-source control, and Lipschitz
+dependence on the initial phase. -/
+private theorem modelFlow_pack
+    [I.Boundaryless] [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    ∃ (ε : Real), ∃ (hε : 0 < ε), ∃ (a r L K : NNReal),
+      0 < r ∧
+        Metric.closedBall
+          (extChartAt I.tangent (phaseZero (I := I) x)
+            (phaseZero (I := I) x)) a ⊆
+          {z : E × E |
+            z ∈ (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+              (phaseOfModel (I := I) x z).proj ∈
+                (extChartAt I x).source} ∧
+        IsPicardLindelof
+          (fun _ : Real => modelSpray (I := I) g x)
+          (tmin := 0 - ε) (tmax := 0 + ε)
+          ⟨0, by simp [le_of_lt hε]⟩
+          (extChartAt I.tangent (phaseZero (I := I) x)
+            (phaseZero (I := I) x))
+          a r L K ∧
+        ∃ α : E × E -> Real -> E × E,
+          (∀ z ∈ Metric.closedBall
+              (extChartAt I.tangent (phaseZero (I := I) x)
+                (phaseZero (I := I) x)) r,
+            α z 0 = z ∧
+              ∀ t ∈ Set.Icc (-ε) ε,
+                HasDerivWithinAt (α z)
+                  (modelSpray (I := I) g x (α z t))
+                  (Set.Icc (-ε) ε) t) ∧
+          (∀ z ∈ Metric.closedBall
+              (extChartAt I.tangent (phaseZero (I := I) x)
+                (phaseZero (I := I) x)) r,
+            ∀ t : Real,
+              α z t ∈ Metric.closedBall
+                (extChartAt I.tangent (phaseZero (I := I) x)
+                  (phaseZero (I := I) x)) a) ∧
+          (∀ z ∈ Metric.closedBall
+              (extChartAt I.tangent (phaseZero (I := I) x)
+                (phaseZero (I := I) x)) r,
+            ∀ t ∈ Set.Icc (-ε) ε,
+              α z t =
+                ODE.picard (fun _ : Real => modelSpray (I := I) g x)
+                  (⟨0, by simp [le_of_lt hε]⟩ :
+                    Set.Icc (0 - ε) (0 + ε)) z (α z) t) ∧
+          (∀ z ∈ Metric.closedBall
+              (extChartAt I.tangent (phaseZero (I := I) x)
+                (phaseZero (I := I) x)) r,
+            ∀ t ∈ Set.Icc (-ε) ε,
+              α z t ∈ (extChartAt I.tangent
+                (phaseZero (I := I) x)).target ∧
+                (phaseOfModel (I := I) x (α z t)).proj ∈
+                  (extChartAt I x).source) ∧
+          ∃ L' : NNReal,
+            ∀ t ∈ Set.Icc (-ε) ε,
+              LipschitzOnWith L'
+                (fun z => α z t)
+                (Metric.closedBall
+                  (extChartAt I.tangent (phaseZero (I := I) x)
+                    (phaseZero (I := I) x)) r) := by
+  obtain ⟨ε, hε, a, r, L, K, hr, hsrc, hpl⟩ :=
+    modelSpray_pl0_src (I := I) g x
+  let z0 : E × E :=
+    extChartAt I.tangent (phaseZero (I := I) x)
+      (phaseZero (I := I) x)
+  obtain ⟨α, hα, hbound, hpicard, L', hLip⟩ :=
+    plFlow_bound (F := E × E) (f := fun _ : Real =>
+      modelSpray (I := I) g x) hpl
+  refine ⟨ε, hε, a, r, L, K, hr, hsrc, hpl, α, ?_, ?_, ?_, ?_, L', ?_⟩
+  · intro z hz
+    have hz' : z ∈ Metric.closedBall z0 r := by
+      simpa [z0] using hz
+    refine ⟨(hα z hz').1, ?_⟩
+    intro t ht
+    have ht' : t ∈ Set.Icc (0 - ε) (0 + ε) := by
+      simpa using ht
+    simpa using (hα z hz').2 t ht'
+  · intro z hz t
+    have hz' : z ∈ Metric.closedBall z0 r := by
+      simpa [z0] using hz
+    simpa [z0] using hbound z hz' t
+  · intro z hz t ht
+    have hz' : z ∈ Metric.closedBall z0 r := by
+      simpa [z0] using hz
+    have ht' : t ∈ Set.Icc (0 - ε) (0 + ε) := by
+      simpa using ht
+    simpa [z0] using hpicard z hz' t ht'
+  · intro z hz t ht
+    have hz' : z ∈ Metric.closedBall z0 r := by
+      simpa [z0] using hz
+    exact hsrc (hbound z hz' t)
+  · intro t ht
+    have ht' : t ∈ Set.Icc (0 - ε) (0 + ε) := by
+      simpa using ht
+    simpa [z0] using hLip t ht'
+
+/-- The functional Picard-Lindelof flow fixes an equilibrium point.
+
+This is a generic ODE uniqueness wrapper for the exact flow returned by the
+Picard-Lindelof package.  In the normal-coordinate application the equilibrium
+is the zero phase coordinate and the zero vector-field fact is
+`modelSpray_zero`. -/
+private theorem plFlow_zero
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace Real F] [CompleteSpace F]
+    {f : Real -> F -> F} {tmin tmax : Real}
+    {t0 : Set.Icc tmin tmax} {x0 : F} {a r L K : NNReal}
+    (hf : IsPicardLindelof f t0 x0 a r L K)
+    (ht0 : (t0 : Real) ∈ Set.Ioo tmin tmax)
+    {α : F -> Real -> F}
+    (hflow : ∀ x ∈ Metric.closedBall x0 r,
+      α x t0 = x ∧
+        ∀ t ∈ Set.Icc tmin tmax,
+          HasDerivWithinAt (α x) (f t (α x t))
+            (Set.Icc tmin tmax) t)
+    (hbound : ∀ x ∈ Metric.closedBall x0 r, ∀ t : Real,
+      α x t ∈ Metric.closedBall x0 a)
+    (hzero : ∀ t ∈ Set.Ioo tmin tmax, f t x0 = 0) :
+    ∀ t ∈ Set.Icc tmin tmax, α x0 t = x0 := by
+  have hx0r : x0 ∈ Metric.closedBall x0 r :=
+    Metric.mem_closedBall_self (NNReal.coe_nonneg r)
+  have hαcont : ContinuousOn (α x0) (Set.Icc tmin tmax) := by
+    exact HasDerivWithinAt.continuousOn
+      (fun t ht => (hflow x0 hx0r).2 t ht)
+  have hαderiv : ∀ t ∈ Set.Ioo tmin tmax,
+      HasDerivAt (α x0) (f t (α x0 t)) t := by
+    intro t ht
+    have hwithin := (hflow x0 hx0r).2 t (Set.Ioo_subset_Icc_self ht)
+    have hIcc_mem : Set.Icc tmin tmax ∈ 𝓝 t := by
+      simpa using Icc_mem_nhds ht.1 ht.2
+    exact hwithin.hasDerivAt hIcc_mem
+  have hconstcont :
+      ContinuousOn (fun _ : Real => x0) (Set.Icc tmin tmax) :=
+    continuous_const.continuousOn
+  have hconstderiv : ∀ t ∈ Set.Ioo tmin tmax,
+      HasDerivAt (fun _ : Real => x0)
+        (f t ((fun _ : Real => x0) t)) t := by
+    intro t ht
+    simpa [hzero t ht] using
+      (hasDerivAt_const (x := t) (c := x0))
+  have hEq : Set.EqOn (α x0) (fun _ : Real => x0)
+      (Set.Icc tmin tmax) := by
+    exact ODE_solution_unique_of_mem_Icc
+      (v := f) (s := fun _ : Real => Metric.closedBall x0 a)
+      (K := K) (t₀ := (t0 : Real)) (a := tmin) (b := tmax)
+      (fun t ht => hf.lipschitzOnWith t (Set.Ioo_subset_Icc_self ht))
+      ht0 hαcont hαderiv
+      (fun _ _ => hbound x0 hx0r _)
+      hconstcont hconstderiv
+      (fun _ _ => Metric.mem_closedBall_self (NNReal.coe_nonneg a))
+      (hflow x0 hx0r).1
+  intro t ht
+  exact hEq ht
+
+/-- The model flow produced at the zero phase keeps the zero phase fixed. -/
+private theorem modelFlow_zero
+    [I.Boundaryless] [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M) (x : M)
+    {ε : Real} (hε : 0 < ε) {a r L K : NNReal}
+    (hpl : IsPicardLindelof
+      (fun _ : Real => modelSpray (I := I) g x)
+      (tmin := 0 - ε) (tmax := 0 + ε)
+      ⟨0, by simp [le_of_lt hε]⟩
+      (extChartAt I.tangent (phaseZero (I := I) x)
+        (phaseZero (I := I) x))
+      a r L K)
+    {α : E × E -> Real -> E × E}
+    (hflow : ∀ z ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r,
+      α z 0 = z ∧
+        ∀ t ∈ Set.Icc (-ε) ε,
+          HasDerivWithinAt (α z)
+            (modelSpray (I := I) g x (α z t))
+            (Set.Icc (-ε) ε) t)
+    (hbound : ∀ z ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r,
+      ∀ t : Real,
+        α z t ∈ Metric.closedBall
+          (extChartAt I.tangent (phaseZero (I := I) x)
+            (phaseZero (I := I) x)) a) :
+    ∀ t ∈ Set.Icc (-ε) ε,
+      α (extChartAt I.tangent (phaseZero (I := I) x)
+        (phaseZero (I := I) x)) t =
+        extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x) := by
+  let z0 : E × E :=
+    extChartAt I.tangent (phaseZero (I := I) x)
+      (phaseZero (I := I) x)
+  have ht0 : ((⟨0, by simp [le_of_lt hε]⟩ :
+      Set.Icc (0 - ε) (0 + ε)) : Real) ∈
+      Set.Ioo (0 - ε) (0 + ε) := by
+    simpa using hε
+  have hzero : ∀ t ∈ Set.Ioo (0 - ε) (0 + ε),
+      (fun _ : Real => modelSpray (I := I) g x) t z0 = 0 := by
+    intro t ht
+    simpa [z0] using modelSpray_zero (I := I) g x
+  have hfix := plFlow_zero
+    (F := E × E)
+    (f := fun _ : Real => modelSpray (I := I) g x)
+    (tmin := 0 - ε) (tmax := 0 + ε)
+    (t0 := ⟨0, by simp [le_of_lt hε]⟩)
+    (x0 := z0) (a := a) (r := r) (L := L) (K := K)
+    hpl ht0
+    (α := α)
+    (by
+      intro z hz
+      simpa [z0] using hflow z hz)
+    (by
+      intro z hz t
+      simpa [z0] using hbound z hz t)
+    hzero
+  intro t ht
+  have ht' : t ∈ Set.Icc (0 - ε) (0 + ε) := by
+    simpa using ht
+  simpa [z0] using hfix t ht'
 
 /-- Short-time model flow produced by the local Picard-Lindelof package.
 
@@ -1234,6 +1758,129 @@ private def manifoldEnd
   (phaseOfModel (I := I) x
     (chartEnd (I := I) α τ x v,
       τ • (α (initPhase (I := I) x (τ⁻¹ • v)) τ).2)).proj
+
+/-- Zero initial velocity has zero chart endpoint for a functional model flow
+that fixes the zero phase. -/
+private theorem chartEnd_zero
+    {α : E × E -> Real -> E × E} {ε τ : Real} (x : M)
+    (hτ : τ ∈ Set.Icc (-ε) ε)
+    (hzero : ∀ t ∈ Set.Icc (-ε) ε,
+      α (extChartAt I.tangent (phaseZero (I := I) x)
+        (phaseZero (I := I) x)) t =
+        extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) :
+    chartEnd (I := I) α τ x (0 : TangentSpace I x) =
+      extChartAt I x x := by
+  let z0 : E × E :=
+    extChartAt I.tangent (phaseZero (I := I) x)
+      (phaseZero (I := I) x)
+  have hinit :
+      initPhase (I := I) x (τ⁻¹ • (0 : TangentSpace I x)) = z0 := by
+    simp [z0]
+  have hz : α z0 τ = z0 := by
+    simpa [z0] using hzero τ hτ
+  calc
+    chartEnd (I := I) α τ x (0 : TangentSpace I x)
+        = (α z0 τ).1 := by
+          simp [chartEnd, z0]
+    _ = z0.1 := by rw [hz]
+    _ = extChartAt I x x := by
+      simpa [z0] using congrArg Prod.fst (phaseZero_pair (I := I) x)
+
+/-- Zero initial velocity gives the base point for a functional model flow
+that fixes the zero phase. -/
+private theorem manifoldEnd_zero
+    {α : E × E -> Real -> E × E} {ε τ : Real} (x : M)
+    (hτ : τ ∈ Set.Icc (-ε) ε)
+    (hzero : ∀ t ∈ Set.Icc (-ε) ε,
+      α (extChartAt I.tangent (phaseZero (I := I) x)
+        (phaseZero (I := I) x)) t =
+        extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) :
+    manifoldEnd (I := I) α τ x (0 : TangentSpace I x) = x := by
+  let z0 : E × E :=
+    extChartAt I.tangent (phaseZero (I := I) x)
+      (phaseZero (I := I) x)
+  have hτzero : α z0 τ = z0 := by
+    simpa [z0] using hzero τ hτ
+  have hfst := chartEnd_zero (I := I) (α := α) (ε := ε)
+    (τ := τ) x hτ hzero
+  have hpair :
+      (chartEnd (I := I) α τ x (0 : TangentSpace I x),
+        τ • (α (initPhase (I := I) x
+          (τ⁻¹ • (0 : TangentSpace I x))) τ).2) = z0 := by
+    have hinit :
+        initPhase (I := I) x (τ⁻¹ • (0 : TangentSpace I x)) = z0 := by
+      simp [z0]
+    rw [hfst, hinit, hτzero]
+    apply Prod.ext
+    · simpa [z0] using congrArg Prod.fst (phaseZero_pair (I := I) x)
+    · have hsnd : z0.2 = (0 : E) := by
+        simpa [z0] using congrArg Prod.snd (phaseZero_pair (I := I) x)
+      rw [hsnd, smul_zero]
+  have hphase :
+      phaseOfModel (I := I) x z0 = phaseZero (I := I) x := by
+    exact PartialEquiv.left_inv _ (mem_extChartAt_source (I := I.tangent)
+      (phaseZero (I := I) x))
+  change (phaseOfModel (I := I) x
+    (chartEnd (I := I) α τ x (0 : TangentSpace I x),
+      τ • (α (initPhase (I := I) x
+        (τ⁻¹ • (0 : TangentSpace I x))) τ).2)).proj = x
+  rw [hpair]
+  simpa [z0, phaseZero] using congrArg Bundle.TotalSpace.proj hphase
+
+/-- In the fixed base chart, the manifold endpoint has coordinate
+`chartEnd` whenever the underlying model phase is in the fixed tangent-bundle
+chart target. -/
+private theorem manifoldEnd_chart
+    [I.Boundaryless]
+    {α : E × E -> Real -> E × E} {τ : Real} (x : M)
+    {v : TangentSpace I x}
+    (htarget : α (initPhase (I := I) x (τ⁻¹ • v)) τ ∈
+      (extChartAt I.tangent (phaseZero (I := I) x)).target) :
+    extChartAt I x (manifoldEnd (I := I) α τ x v) =
+      chartEnd (I := I) α τ x v := by
+  let z : E × E := α (initPhase (I := I) x (τ⁻¹ • v)) τ
+  let zβ : E × E := (z.1, τ • z.2)
+  have hzβtarget :
+      zβ ∈ (extChartAt I.tangent (phaseZero (I := I) x)).target := by
+    simpa [zβ] using
+      phaseTarget_smul (I := I) x (z := z) (a := τ) (by simpa [z] using htarget)
+  have hzβsrc :
+      (phaseOfModel (I := I) x zβ).proj ∈ (extChartAt I x).source := by
+    simpa [zβ] using
+      phaseSrc_smul (I := I) x (z := z) (a := τ) (by simpa [z] using htarget)
+  have hchart := phaseOfModel_chart (I := I) x hzβtarget hzβsrc
+  simpa [manifoldEnd, chartEnd, z, zβ] using hchart
+
+/-- First-coordinate Picard integral equation for the fixed chart endpoint. -/
+private theorem chartEnd_picard
+    (g : SmoothRiemannianMetric I M) (x : M)
+    {ε τ : Real} (hε : 0 < ε) {r : NNReal}
+    {α : E × E -> Real -> E × E}
+    (hpicard : ∀ z ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r,
+      ∀ t ∈ Set.Icc (-ε) ε,
+        α z t =
+          ODE.picard (fun _ : Real => modelSpray (I := I) g x)
+            (⟨0, by simp [le_of_lt hε]⟩ :
+              Set.Icc (0 - ε) (0 + ε)) z (α z) t)
+    {v : TangentSpace I x}
+    (hv : initPhase (I := I) x (τ⁻¹ • v) ∈
+      Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r)
+    (hτmem : τ ∈ Set.Icc (-ε) ε) :
+    chartEnd (I := I) α τ x v =
+      (initPhase (I := I) x (τ⁻¹ • v)).1 +
+        (∫ s in (0 : Real)..τ,
+          modelSpray (I := I) g x
+            (α (initPhase (I := I) x (τ⁻¹ • v)) s)).1 := by
+  let z : E × E := initPhase (I := I) x (τ⁻¹ • v)
+  have hp := hpicard z (by simpa [z] using hv) τ hτmem
+  have hpfst := congrArg Prod.fst hp
+  simpa [chartEnd, z, ODE.picard_apply] using hpfst
 
 /-- The functional model endpoint realizes the relation-valued exponential
 wherever the rescaled initial phase lies in the Picard-Lindelof ball. -/
@@ -1529,7 +2176,90 @@ theorem expAt_strict
         HasStrictFDerivAt
           (fun v : TangentSpace I x => extChartAt I x (exp v))
           (ContinuousLinearMap.id Real (TangentSpace I x)) 0 := by
-  sorry
+  classical
+  obtain ⟨ε, hε, a, rModel, _L, _K, hrModel, _hsrc, hpl,
+    α, hflow, hbound, hpicard, hsrcFlow, L', hLip⟩ :=
+    modelFlow_pack (I := I) g x
+  obtain ⟨ρ, hρ, hsmall⟩ := initPhase_small (I := I) x hrModel
+  let τ : Real := ε / 2
+  have hτ : 0 < τ := half_pos hε
+  have hτmem : τ ∈ Set.Icc (-ε) ε := by
+    constructor <;> dsimp [τ] <;> linarith
+  have hzero := modelFlow_zero (I := I) g x hε hpl hflow hbound
+  let R : Real := τ * ρ
+  have hR : 0 < R := mul_pos hτ hρ
+  refine ⟨R, hR, manifoldEnd (I := I) α τ x, ?_, ?_, ?_⟩
+  · exact manifoldEnd_zero (I := I) (α := α) (ε := ε) (τ := τ)
+      x hτmem hzero
+  · intro v hv
+    let u : TangentSpace I x := τ⁻¹ • v
+    have hu : u ∈ Metric.ball (0 : TangentSpace I x) ρ := by
+      rw [Metric.mem_ball] at hv ⊢
+      have hvnorm : ‖v‖ < τ * ρ := by
+        simpa [R, dist_zero_right] using hv
+      have hscale :=
+        mul_lt_mul_of_pos_left hvnorm (inv_pos.mpr hτ)
+      have hnormu : ‖τ⁻¹ • v‖ < ρ := by
+        rw [norm_smul, Real.norm_eq_abs, abs_of_pos (inv_pos.mpr hτ)]
+        rw [← mul_assoc, inv_mul_cancel₀ hτ.ne', one_mul] at hscale
+        simpa [mul_comm, mul_left_comm, mul_assoc] using hscale
+      simpa [u, dist_zero_right] using hnormu
+    have hvsmall : initPhase (I := I) x ((ε / 2)⁻¹ • v) ∈
+        Metric.closedBall
+          (extChartAt I.tangent (phaseZero (I := I) x)
+            (phaseZero (I := I) x)) rModel := by
+      simpa [τ, u] using hsmall u hu
+    simpa [τ] using
+      end_expAt (I := I) (g := g) (x := x)
+        (ε := ε) hε (r := rModel) (α := α)
+        hflow hsrcFlow hvsmall
+  · have hstrict :
+        HasStrictFDerivAt
+          (fun v : TangentSpace I x =>
+            extChartAt I x (manifoldEnd (I := I) α τ x v))
+          (ContinuousLinearMap.id Real (TangentSpace I x)) 0 := by
+      have hchartStrict :
+          HasStrictFDerivAt
+            (chartEnd (I := I) α τ x)
+            (ContinuousLinearMap.id Real (TangentSpace I x)) 0 := by
+        rw [hasStrictFDerivAt_iff_isLittleO]
+        /- Remaining analytic step: use `chartEnd_picard`, `hzero`,
+        `hbound`, `hLip`, and `spray_o` to prove the pairwise endpoint
+        little-o estimate directly here. -/
+        sorry
+      have hEq :
+          chartEnd (I := I) α τ x =ᶠ[𝓝 (0 : TangentSpace I x)]
+            fun v : TangentSpace I x =>
+              extChartAt I x (manifoldEnd (I := I) α τ x v) := by
+        have hball : Metric.ball (0 : TangentSpace I x) R ∈
+            𝓝 (0 : TangentSpace I x) :=
+          Metric.ball_mem_nhds _ hR
+        filter_upwards [hball] with v hv
+        let u : TangentSpace I x := τ⁻¹ • v
+        have hu : u ∈ Metric.ball (0 : TangentSpace I x) ρ := by
+          rw [Metric.mem_ball] at hv ⊢
+          have hvnorm : ‖v‖ < τ * ρ := by
+            simpa [R, dist_zero_right] using hv
+          have hscale :=
+            mul_lt_mul_of_pos_left hvnorm (inv_pos.mpr hτ)
+          have hnormu : ‖τ⁻¹ • v‖ < ρ := by
+            rw [norm_smul, Real.norm_eq_abs, abs_of_pos (inv_pos.mpr hτ)]
+            rw [← mul_assoc, inv_mul_cancel₀ hτ.ne', one_mul] at hscale
+            simpa [mul_comm, mul_left_comm, mul_assoc] using hscale
+          simpa [u, dist_zero_right] using hnormu
+        have hvsmall : initPhase (I := I) x (τ⁻¹ • v) ∈
+            Metric.closedBall
+              (extChartAt I.tangent (phaseZero (I := I) x)
+                (phaseZero (I := I) x)) rModel := by
+          simpa [u] using hsmall u hu
+        have htarget :
+            α (initPhase (I := I) x (τ⁻¹ • v)) τ ∈
+              (extChartAt I.tangent (phaseZero (I := I) x)).target :=
+          (hsrcFlow (initPhase (I := I) x (τ⁻¹ • v)) hvsmall τ hτmem).1
+        exact (manifoldEnd_chart (I := I) (α := α) (τ := τ) x
+          (v := v) htarget).symm
+      exact hchartStrict.congr_of_eventuallyEq hEq
+    simpa using hstrict
 
 /-! ## What the current spray package proves -/
 

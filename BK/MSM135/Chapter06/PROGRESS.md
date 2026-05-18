@@ -155,6 +155,8 @@ RicciFlower.RicciFlow.Perelman.weightedDivZero_of_connTrace
 RicciFlower.RicciFlow.Perelman.shiftIntEq
 RicciFlower.RicciFlow.Perelman.formula510_of_ints
 RicciFlower.RicciFlow.Perelman.formula510_of_connTrace
+RicciFlower.Realized.connTraceField
+RicciFlower.RicciFlow.Perelman.formula510_of_connTraceField
 ```
 
 The remaining formula 5.10 frontier is no longer the local `delta Ric` or
@@ -168,10 +170,19 @@ X = e^{-f} traceVec
 div X = e^{-f} * (div traceVec - traceVec(f)).
 ```
 
-The current gap is now one layer lower: construct the smooth trace vector
-`traceVec = g^{ij} A^p_ij` directly from the global `(1,2)` connection
-variation tensor `A = delta nabla`, and feed the produced pre-cancellation
-first variation into `formula510_of_connTrace`.
+The smooth trace vector is now constructed intrinsically as
+`RicciFlower.Realized.connTraceField`, with coordinate formula
+`(tr_g A)^p = sum_i sum_j g^{ij} A^p_ij`.  The current gap is now the
+divergence/action realization for that constructed field:
+
+```text
+div_g(tr_g A) = rawTrace
+tr_g A acting on f = actionTrace
+```
+
+Once those component identities are available, applications can feed the
+produced pre-cancellation first variation into
+`formula510_of_connTraceField`.
 The weighted integration-by-parts interface exists as
 `BK.MSM135.Chapter06.Section01.lbl552_weighted_ibp`, aliasing
 `RicciFlower.RicciFlow.Perelman.weightedIBP`.

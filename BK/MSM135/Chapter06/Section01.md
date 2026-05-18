@@ -95,6 +95,19 @@ remaining mathematical bridge is to construct the global smooth trace vector
 
 Verification passed for the targeted BK Section 6.1 module.
 
+## 2026-05-17 Formula 5.10 trace-field alias
+
+Added the BK-facing alias:
+
+- `lbl453_f_formula510_trace_field`
+
+This exposes the RicciFlower specialization where the divergence-field input is
+the constructed smooth metric trace field `tr_g A`.  BK remains wrapper-only;
+the remaining proof bridge is the coordinate/component realization of the
+divergence and action of this field.
+
+Verification passed for this file.
+
 ## 2026-05-16 Formula 5.10 F-functional aliases
 
 Switched the Section 6.1 import to the RicciFlower `F` module and added

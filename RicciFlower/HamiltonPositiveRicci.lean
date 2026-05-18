@@ -5,6 +5,7 @@ import RicciFlower.Realized.CurvatureProducers
 import RicciFlower.RicciFlow.Basic
 import RicciFlower.RicciFlow.Evolution.LocalPinching
 import RicciFlower.RicciFlow.Evolution.ScalarFiniteTime
+import RicciFlower.DimensionThree.RicciControlsRm
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -175,6 +176,28 @@ def Ham3RicNonneg (Q : Ham3BlowupData M) : Prop :=
   forall (i : Nat) (s : Real) (x : M),
     -(Q.scale i * Q.time i) <= s -> s <= 0 -> 0 <= Q.ricMin i s x
 
+/-- Eigenvalue/sectional model carried by the rescaled blow-up sequence.
+
+This is the component realization data needed by Corollary 11.4: the scalar is
+the trace of three Ricci eigenvalues, `ricMin` is a lower bound for each
+eigenvalue, and `rmNorm` is the nonnegative norm whose square is the 3D
+sectional norm model. -/
+def Ham3EigenModel (Q : Ham3BlowupData M) : Prop :=
+  forall (i : Nat) (s : Real) (x : M),
+    -(Q.scale i * Q.time i) <= s -> s <= 0 ->
+      exists l1 l2 l3 : Real,
+        Q.scalar i s x =
+          DimensionThree.ricciEigenScalar3 l1 l2 l3 /\
+        Q.ricMin i s x <= l1 /\
+        Q.ricMin i s x <= l2 /\
+        Q.ricMin i s x <= l3 /\
+        0 <= Q.rmNorm i s x /\
+        (Q.rmNorm i s x) ^ 2 =
+          DimensionThree.rmSecNormSq3
+            (DimensionThree.sec12Ric3 l1 l2 l3)
+            (DimensionThree.sec13Ric3 l1 l2 l3)
+            (DimensionThree.sec23Ric3 l1 l2 l3)
+
 /-- Coarse curvature bound on the rescaled flow slabs. -/
 def Ham3RmBound (Q : Ham3BlowupData M) (C : Real) : Prop :=
   forall (i : Nat) (s : Real) (x : M),
@@ -324,7 +347,7 @@ theorem ham3_point_select
     (hpos : PosRicciMetric (I := I) (M := M) g0)
     (P : Ham3FlowPackage (I := I) (M := M) g0)
     (_hfinite : Ham3Finite (I := I) (M := M) P) :
-    exists Q : Ham3BlowupData M, Ham3PointSel Q := by
+    exists Q : Ham3BlowupData M, Ham3PointSel Q /\ Ham3EigenModel Q := by
   sorry
 
 /-- Lemma 9.1-style input: nonnegative Ricci curvature persists on the
@@ -356,15 +379,47 @@ theorem ham3_pinch_imp
 /-- Corollary 11.4-style input: nonnegative Ricci controls the full curvature
 tensor, coarsened to the constant `100` used in Section 12. -/
 theorem ham3_rm_bound
-    (hM : Closed3Manifold (I := I) (M := M))
+    (_hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M)
-    (hpos : PosRicciMetric (I := I) (M := M) g0)
-    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (_hpos : PosRicciMetric (I := I) (M := M) g0)
+    (_P : Ham3FlowPackage (I := I) (M := M) g0)
     (Q : Ham3BlowupData M)
-    (_hsel : Ham3PointSel Q)
-    (_hric : Ham3RicNonneg Q) :
+    (hsel : Ham3PointSel Q)
+    (hric : Ham3RicNonneg Q)
+    (heigen : Ham3EigenModel Q) :
     Ham3RmBound Q 100 := by
-  sorry
+  rcases hsel with ⟨_hscale, _htime, _hprod, _hbase, hscalarMax⟩
+  intro i s x hsleft hsright
+  rcases heigen i s x hsleft hsright with
+    ⟨l1, l2, l3, hscalar, hmin1, hmin2, hmin3, hrm_nonneg, hrm_sq⟩
+  have hric_here : 0 <= Q.ricMin i s x := hric i s x hsleft hsright
+  have h1 : 0 <= l1 := le_trans hric_here hmin1
+  have h2 : 0 <= l2 := le_trans hric_here hmin2
+  have h3 : 0 <= l3 := le_trans hric_here hmin3
+  have hmodel :
+      (Q.rmNorm i s x) ^ 2 <=
+        (100 : Real) ^ 2 * (DimensionThree.ricciEigenScalar3 l1 l2 l3) ^ 2 := by
+    simpa [hrm_sq] using
+      DimensionThree.rmSqLe100ScalSq3 l1 l2 l3 h1 h2 h3
+  have hmodel_scalar :
+      (Q.rmNorm i s x) ^ 2 <=
+        (100 : Real) ^ 2 * (Q.scalar i s x) ^ 2 := by
+    simpa [hscalar] using hmodel
+  have hscalar_nonneg : 0 <= Q.scalar i s x := by
+    rw [hscalar]
+    unfold DimensionThree.ricciEigenScalar3
+    nlinarith
+  have hscalar_le : Q.scalar i s x <= 1 :=
+    hscalarMax i s x hsleft hsright
+  have hscalar_sq_le : (Q.scalar i s x) ^ 2 <= (1 : Real) ^ 2 := by
+    exact sq_le_sq.mpr (by simpa [abs_of_nonneg hscalar_nonneg] using hscalar_le)
+  have hrm_sq_le : (Q.rmNorm i s x) ^ 2 <= (100 : Real) ^ 2 := by
+    nlinarith [hmodel_scalar, hscalar_sq_le, sq_nonneg (Q.scalar i s x)]
+  have habs : |Q.rmNorm i s x| <= |(100 : Real)| :=
+    sq_le_sq.mp hrm_sq_le
+  rw [abs_of_nonneg hrm_nonneg] at habs
+  norm_num at habs
+  exact habs
 
 /-- The fixed window `[-r0^2,0]` eventually lies inside each selected rescaled
 time interval.  This is just the arithmetic part of the Section 12 argument. -/
@@ -459,7 +514,7 @@ theorem ham3_const_metric
   have hfinite : Ham3Finite (I := I) (M := M) P :=
     ham3_finite_time (I := I) (M := M) hM g0 hg0 P
   rcases ham3_point_select (I := I) (M := M) hM g0 hg0 P hfinite with
-    ⟨Q, hsel⟩
+    ⟨Q, hsel, heigen⟩
   have hric : Ham3RicNonneg Q :=
     ham3_ric_nonneg (I := I) (M := M) hM g0 hg0 P Q hsel
   have hpinch :
@@ -468,7 +523,7 @@ theorem ham3_const_metric
           tracefreeRmNormSq scalar weight C :=
     ham3_pinch_imp (I := I) (M := M) hM g0 hg0 P Q hsel hric
   have hrm : Ham3RmBound Q 100 :=
-    ham3_rm_bound (I := I) (M := M) hM g0 hg0 P Q hsel hric
+    ham3_rm_bound (I := I) (M := M) hM g0 hg0 P Q hsel hric heigen
   have hwindow : Ham3Window Q ham3_r0 :=
     ham3_r0_window (M := M) Q hsel
   rcases ham3_noncollapse (I := I) (M := M) hM g0 hg0 P Q hsel hrm hwindow with

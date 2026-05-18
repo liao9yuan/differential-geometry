@@ -52,7 +52,7 @@ the full statements, theorem names, and file locations.
 | Lemma 10.5 quotient evolution | `2` | Port the pure scalar quotient algebra to `RicciFlower` if it is still needed by the pinching route. |
 | Assumption 3.1 calculus package | `3` | Continue native Bianchi, contracted Bianchi, tensor commutator, and trace/norm infrastructure. |
 | Lemma 6.7 | `0` | Closed canonically through the `(0,2)` tensor Bochner product rule and `ricci_heat_mc`. |
-| Corollary 11.4 | `2` | Bridge the checked eigenvalue/sectional norm estimate to the geometric `Rm04` norm in an orthonormal frame. |
+| Corollary 11.4 | `1` | Intrinsic norm bridge, spectral Ricci eigenbasis, Section 12 `ham3_rm_bound`, and the signed first-trace trace-data producer are in place; remaining work is the positive-Ricci-facing wrapper from the signed package. |
 | Lemma 11.15 | `3` | Finish the native Einstein-space-form bridge from contracted Bianchi and the 3D Riemann-from-Ricci formula. |
 
 ### Section 14 Snapshot
@@ -586,12 +586,18 @@ Statement:
 For a closed 3D Ricci flow, Ric(g(0)) >= 0 implies Ric(g(t)) >= 0.
 ```
 
-Status: synthetic tensor-WMP consumer.
+Status: Ricci-flow conditional WMP consumer layer added in
+`RicciFlower.RicciFlow.Evolution.RicciPreservation`.  The local three-dimensional
+reaction algebra includes the null-eigenvector identity
+`N_11 = (lambda_2 - lambda_3)^2`, and `ricci_nonneg_wmp` packages the existing
+Hamilton tensor WMP once Ricci evolution, regularity, and the null-eigenvector
+condition are supplied.
 
-Distance: `4`.
+Distance: `2`.
 
-Next target: combine native Ricci evolution, 3D curvature algebra, and tensor
-WMP.
+Remaining frontier: produce the geometric `TensorNullEigenvectorCondition` from
+the component reaction algebra and close the analytic `TensorWMPRegularityOn`
+inputs from Theorem 7.5.
 
 ### Lemma 9.2, `lem:preserve-ricci-pinching`
 
@@ -602,11 +608,18 @@ For 0 <= delta <= 1/3, if Ric(g(0)) >= delta R(g(0)) g(0), then
 Ric(g(t)) >= delta R(g(t)) g(t).
 ```
 
-Status: synthetic tensor-WMP consumer.
+Status: shifted Ricci pinching reaction algebra and conditional WMP consumer
+added in `RicciFlower.RicciFlow.Evolution.RicciPreservation`.  The checked local
+algebra gives the null-direction expression
+`delta^2 (1 - 3 delta) R^2 + (1 - delta) (lambda_2 - lambda_3)^2`, and
+`ricci_pinch_wmp` packages Hamilton tensor WMP for
+`S = Ric - delta R g`.
 
-Distance: `4`.
+Distance: `2`.
 
-Next target: prove shifted tensor reaction algebra and feed tensor WMP.
+Remaining frontier: prove the shifted tensor evolution for
+`S = Ric - delta R g`, bridge the local algebra to the null-eigenvector
+condition, and close the same tensor-WMP regularity producers.
 
 ### Corollary 9.3, `cor:strict-positive-gives-pinching`
 
@@ -618,12 +631,31 @@ on g0, such that Ric(g0) >= delta R(g0) g0. Consequently the same pinching
 holds along the Ricci flow from g0.
 ```
 
-Status: not native.
+Status: conditional native setup added in
+`RicciFlower.RicciFlow.Evolution.RicciPreservation`.  The file now records
+`RicciPosInit`, the selected-initial-pinching predicate `PinchInit`, and the
+book-facing conditional consequence `strict_pinch_wmp`.  The local selector
+algebra is also checked: `InitBounds` gives uniform initial lower Ricci and
+upper scalar bounds, and `pinchInit_of_bounds` selects a valid `delta`.
+The base compactness selector is now checked as well: `RicMinData` packages a
+continuous positive Ricci lower-bound function on `M`, `bounds_ricMin` turns it
+and scalar continuity into `InitBounds`, `boundsPos_ricMin` feeds the older
+`BoundsOfPosRic` path, and `strict_pinch_min` gives the conditional Corollary
+9.3 route from that data.  The preferred entrypoint is now metric/Ricci-native:
+`MetricRicciData` records that the supplied initial Ricci tensor is realized by
+the Levi-Civita Ricci tensor of `G 0`, `MetricRicciMin` is the corresponding
+canonical lower-bound function data, and `strict_pinch_metric` is the
+book-facing conditional route.
 
-Distance: `4`.
+Distance: `2`.
 
-Next target: compactness of the unit tangent bundle/continuous eigenvalue
-minimum plus Lemma 9.2.
+Next target: prove the metric-native lower-bound producer
+`MetricRicciData + MetricRicciPos -> ∃ ricMin, MetricRicciMin ... ricMin`,
+using smoothness/continuity of the initial Levi-Civita Ricci tensor and compact
+unit-tangent or equivalent spectral compactness.  The bare implication from the
+current `RicciPosInit` predicate is not valid without that extra regularity.
+After that, reuse `pinchInit_metric` / `strict_pinch_metric` and the Lemma 9.2
+WMP regularity/null-eigenvector-condition producers once Theorem 7.5 is ready.
 
 ### Lemma 10.4, `lem:evol-tracefree-ricci-norm`
 
@@ -812,13 +844,28 @@ with Ric >= 0, |Rm| <= C3 R.
 Status: native eigenvalue/sectional algebra is now in
 `RicciFlower.DimensionThree.RicciControlsRm`.  It proves that nonnegative
 Ricci eigenvalues give `|K_ij| <= R / 2` and the coarse squared sectional-model
-bound with constant `100`.
+bound with constant `100`.  The file also has a checked pointwise bridge from a
+realized three-dimensional `Rm04` tensor with diagonal Ricci components to the
+standard orthonormal-frame component norm estimate, plus the intrinsic
+`normSq0S` identity for `(0,4)` tensors in an orthonormal `Fin 3` frame.
+The packaging theorem `DimensionThree.normSqLeOfRicNonneg` now assembles a
+nonnegative symmetric Ricci tensor, the spectral Ricci eigenbasis producer, a
+basis-indexed trace-data producer, and the intrinsic norm estimate.
 
-Distance: `2`.
+Distance: `1`.
 
-Next target: prove the realization bridge identifying the geometric `Rm04`
-norm in an orthonormal `Fin 3` frame with the sectional norm model, then route
-that bound into `HamiltonPositiveRicci.ham3_rm_bound`.
+Section 12 routing: `HamiltonPositiveRicci.ham3_point_select` now returns
+`Ham3EigenModel`, and `HamiltonPositiveRicci.ham3_rm_bound` is proved from
+point selection, Ricci nonnegativity, and that eigenmodel.  The spectral bridge
+`DimensionThree.ricciEigenBasis3` is checked: it turns `Ric >= 0` into an
+orthonormal Ricci eigenbasis and diagonal component data using the pointwise
+metric inner product.  The concrete first-trace producer is also checked:
+`DimensionThree.traceDataOfFirst` turns convention-correct Ricci/Rm04 trace
+data into `RiemannFromRicci3DTraceDataAt` for `-Ric` and `-scalar`, which is
+the necessary sign bridge because the finite 3D algebra uses the displayed-slot
+`stdRicci3` convention.  The remaining local packaging frontier is the
+positive-Ricci-facing wrapper that feeds this signed package into the existing
+norm estimate.
 
 ### Lemma 11.6, `lem:point-selection-rescaling`
 

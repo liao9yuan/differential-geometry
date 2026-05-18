@@ -33,6 +33,7 @@ import RicciFlower.Realized.RicciFlow
 import RicciFlower.RicciFlow.Basic
 import RicciFlower.RicciFlow.MaximalTime
 import RicciFlower.RicciFlow.Evolution.Ricci
+import RicciFlower.RicciFlow.Evolution.RicciPreservation
 import RicciFlower.RicciFlow.Evolution.Scalar
 import RicciFlower.RicciFlow.Evolution.ScalarRicci
 import RicciFlower.RicciFlow.Evolution.ScalarLowerBound
