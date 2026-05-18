@@ -140,7 +140,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
 /-- The chosen smooth chart-`α` `P`-component representative of the eigenvector:
 the witness of `eigenvectorChartComponent_exists_smooth_representative`. -/
-private def chosenComp (α : M) (P : TensorCompIdx (E := E) r s) : EuclN → ℝ :=
+def chosenComp (α : M) (P : TensorCompIdx (E := E) r s) : EuclN → ℝ :=
   Classical.choose
     (eigenvectorChartComponent_exists_smooth_representative
       (I := I) (M := M) g r s h_uniform i α P)
@@ -174,7 +174,7 @@ private lemma chosenComp_tsupport (α : M) (P : TensorCompIdx (E := E) r s) :
 /-- The chosen chart-`α` `P`-component representative agrees almost everywhere
 with the eigenvector chart component, for the Lebesgue measure restricted to the
 chart target. -/
-private lemma chosenComp_ae_eq (α : M) (P : TensorCompIdx (E := E) r s) :
+lemma chosenComp_ae_eq (α : M) (P : TensorCompIdx (E := E) r s) :
     chosenComp (I := I) (M := M) g r s h_uniform i α P
       =ᵐ[(volume : Measure EuclN).restrict
           (chartTargetEuclid (I := I) (M := M) α)]
@@ -267,7 +267,7 @@ inverse pull-back `(extChartAt I α).symm (toEuclidean.symm ·)` recovers `x`. -
 
 /-- For a point `x` of the chart-`α` source, the chart Euclidean image lies in
 the Euclidean chart target. -/
-private lemma toEuclidean_extChartAt_mem_chartTargetEuclid
+lemma toEuclidean_extChartAt_mem_chartTargetEuclid
     (α : M) {x : M} (hx : x ∈ (chartAt H α).source) :
     (toEuclidean (E := E)) (extChartAt I α x) ∈
       chartTargetEuclid (I := I) (M := M) α := by
@@ -277,7 +277,7 @@ private lemma toEuclidean_extChartAt_mem_chartTargetEuclid
 
 /-- For a point `x` of the chart-`α` source, the inverse pull-back of the chart
 Euclidean image of `x` recovers `x`. -/
-private lemma symm_toEuclidean_symm_toEuclidean_extChartAt
+lemma symm_toEuclidean_symm_toEuclidean_extChartAt
     (α : M) {x : M} (hx : x ∈ (chartAt H α).source) :
     (extChartAt I α).symm
         ((toEuclidean (E := E)).symm
