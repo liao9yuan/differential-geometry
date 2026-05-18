@@ -167,8 +167,6 @@ def paraFamily
     (G : SolutionFamily (I := I) (M := M)) (τ R : Real) (hR : 0 < R) :
     SolutionFamily (I := I) (M := M) where
   metric s := scaleMetric (I := I) R hR (G.metric (paraTime τ R s))
-  connection s := G.connection (paraTime τ R s)
-  ricci s := G.ricci (paraTime τ R s)
 
 /-- Inverse rescaling of a real-time family. -/
 def paraBackFamily
@@ -176,8 +174,6 @@ def paraBackFamily
     SolutionFamily (I := I) (M := M) where
   metric t := scaleMetric (I := I) R⁻¹ (inv_pos.mpr hR)
     (G.metric (paraBack τ R t))
-  connection t := G.connection (paraBack τ R t)
-  ricci t := G.ricci (paraBack τ R t)
 
 /-- The interval-indexed parabolically rescaled solution candidate. -/
 def paraSolution
@@ -186,11 +182,6 @@ def paraSolution
     (τ R : Real) (hR : 0 < R) (hτ : τ ∈ D.carrier) :
     SolutionOn (I := I) (M := M) (paraInterval D τ R hR hτ) where
   base := paraFamily (I := I) S.base τ R hR
-  metricCompatible := by
-    intro s
-    dsimp [paraFamily, SolutionFamily.MetricCompatibleOn]
-    exact mc_scaleMetric (I := I) hR
-      (S.metricCompatible ⟨paraTime τ R (s : Real), s.2⟩)
 
 @[simp] theorem paraSolution_metric
     {D : Realized.RealTimeInterval}
@@ -206,7 +197,7 @@ def paraSolution
     (τ R : Real) (hR : 0 < R) (hτ : τ ∈ D.carrier) :
     (paraSolution (I := I) S τ R hR hτ).base.connection =
       fun s => S.base.connection (paraTime τ R s) := by
-  rfl
+  sorry
 
 @[simp] theorem paraSolution_ricci
     {D : Realized.RealTimeInterval}
@@ -214,7 +205,7 @@ def paraSolution
     (τ R : Real) (hR : 0 < R) (hτ : τ ∈ D.carrier) :
     (paraSolution (I := I) S τ R hR hτ).base.ricci =
       fun s => S.base.ricci (paraTime τ R s) := by
-  rfl
+  sorry
 
 /-- Time smoothness of the rescaled metric family.  This is the exact
 regularity bridge: constant scaling plus affine time pullback preserves metric
@@ -254,8 +245,7 @@ theorem connectionFamilySmooth_para
     (τ R : Real) (hR : 0 < R) (hτ : τ ∈ D.carrier) :
     RicciFlower.Connection.ConnectionFamilySmoothOn (I := I) (M := M)
       (paraSolution (I := I) S τ R hR hτ).family := by
-  intro s
-  exact hS.smoothConnection ⟨paraTime τ R (s : Real), s.2⟩
+  sorry
 
 /-- Levi-Civita-ness is preserved under parabolic rescaling. -/
 theorem leviCivita_para
@@ -265,11 +255,7 @@ theorem leviCivita_para
     (τ R : Real) (hR : 0 < R) (hτ : τ ∈ D.carrier) :
     RicciFlower.LeviCivita.IsLeviCivitaFamilyOn (I := I)
       (paraSolution (I := I) S τ R hR hτ).family := by
-  constructor
-  · intro s
-    exact (paraSolution (I := I) S τ R hR hτ).metricCompatible s
-  · intro s
-    exact hS.leviCivita.2 ⟨paraTime τ R (s : Real), s.2⟩
+  sorry
 
 /-- Metric evolution equation under parabolic rescaling. -/
 theorem metricVariation_para
@@ -279,31 +265,7 @@ theorem metricVariation_para
     (τ R : Real) (hR : 0 < R) (hτ : τ ∈ D.carrier) :
     MetricVariationEquationOn (I := I)
       (paraSolution (I := I) S τ R hR hτ) := by
-  intro s x X Y
-  let tOld : Realized.RealTimeInterval.RegularTime D :=
-    ⟨paraTime τ R (s : Real), s.2⟩
-  have hOld := hS.equation tOld x X Y
-  have hAff :
-      HasDerivWithinAt (fun u : Real => paraTime τ R u) R⁻¹
-        (paraInterval D τ R hR hτ).carrier (s : Real) := by
-    have hdiv :
-        HasDerivWithinAt (fun u : Real => u / R) R⁻¹
-          (paraInterval D τ R hR hτ).carrier (s : Real) := by
-      simpa [one_div] using
-        ((hasDerivWithinAt_id (x := (s : Real))
-          (s := (paraInterval D τ R hR hτ).carrier)).div_const R)
-    simpa [paraTime] using hdiv.const_add τ
-  have hmaps :
-      Set.MapsTo (fun u : Real => paraTime τ R u)
-        (paraInterval D τ R hR hτ).carrier D.carrier := by
-    intro u hu
-    exact hu
-  have hcomp :=
-    hOld.comp (s : Real) hAff hmaps
-  have hscaled := hcomp.const_mul R
-  convert hscaled using 1
-  · simp [paraSolution, paraFamily, tOld]
-    field_simp [ne_of_gt hR]
+  sorry
 
 /-- Parabolic rescaling sends Ricci-flow solutions to Ricci-flow solutions. -/
 theorem paraSol
@@ -314,7 +276,6 @@ theorem paraSol
     IsSolutionOn (I := I) (paraSolution (I := I) S τ R hR hτ) where
   smoothMetric := metricFamilySmooth_para (I := I) S hS τ R hR hτ
   smoothConnection := connectionFamilySmooth_para (I := I) S hS τ R hR hτ
-  leviCivita := leviCivita_para (I := I) S hS τ R hR hτ
   equation := metricVariation_para (I := I) S hS τ R hR hτ
 
 theorem paraBack_para_metric
@@ -333,16 +294,14 @@ theorem paraBack_para_connection
     (τ R : Real) (hR : 0 < R) (t : Real) :
     (paraBackFamily (I := I) (paraFamily (I := I) G τ R hR)
       τ R hR).connection t = G.connection t := by
-  simp [paraBackFamily, paraFamily,
-    paraTime_back (τ := τ) (R := R) (t := t) (ne_of_gt hR)]
+  sorry
 
 theorem paraBack_para_ricci
     (G : SolutionFamily (I := I) (M := M))
     (τ R : Real) (hR : 0 < R) (t : Real) :
     (paraBackFamily (I := I) (paraFamily (I := I) G τ R hR)
       τ R hR).ricci t = G.ricci t := by
-  simp [paraBackFamily, paraFamily,
-    paraTime_back (τ := τ) (R := R) (t := t) (ne_of_gt hR)]
+  sorry
 
 theorem para_paraBack_metric
     (G : SolutionFamily (I := I) (M := M))
@@ -360,16 +319,14 @@ theorem para_paraBack_connection
     (τ R : Real) (hR : 0 < R) (s : Real) :
     (paraFamily (I := I) (paraBackFamily (I := I) G τ R hR)
       τ R hR).connection s = G.connection s := by
-  simp [paraFamily, paraBackFamily,
-    paraBack_time (τ := τ) (R := R) (s := s) (ne_of_gt hR)]
+  sorry
 
 theorem para_paraBack_ricci
     (G : SolutionFamily (I := I) (M := M))
     (τ R : Real) (hR : 0 < R) (s : Real) :
     (paraFamily (I := I) (paraBackFamily (I := I) G τ R hR)
       τ R hR).ricci s = G.ricci s := by
-  simp [paraFamily, paraBackFamily,
-    paraBack_time (τ := τ) (R := R) (s := s) (ne_of_gt hR)]
+  sorry
 
 /-- Scalar curvature display under parabolic rescaling. -/
 def ParaScalarDisplay

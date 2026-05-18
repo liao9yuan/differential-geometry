@@ -110,6 +110,16 @@ identities, so BK stays label-facing.
 
 Verification passed. The existing Section 6.1 scaffold `sorry`s are unchanged.
 
+## 2026-05-18 local frame domains
+
+The scalar evolution exposure wrapper now takes an arbitrary local frame domain
+`u` plus a cover proof, instead of requiring `IsLocalFrameOn ... Set.univ`.
+This mirrors the RicciFlower scalar route: frame components remain a local
+tool, while the global theorem conclusion is justified by the supplied cover.
+
+Verification passed for this file. The existing Section 6.1 scaffold `sorry`s
+are unchanged.
+
 ## 2026-05-17 scalar wrapper uses produced curvature symmetries
 
 Updated the Chapter 6.1 scalar evolution wrapper to call the RicciFlower

@@ -46,6 +46,7 @@ import RicciFlower.RicciFlow.Evolution.CurvatureOperator
 import RicciFlower.RicciFlow.Evolution.OdeReduction
 import RicciFlower.RicciFlow.Evolution.LocalPinching
 import RicciFlower.RicciFlow.Evolution.ScalarGradient
+import RicciFlower.RicciFlow.Evolution.ImprovedPinching
 import RicciFlower.RicciFlow.Evolution.LongTimeExistence
 import RicciFlower.RicciFlow.Evolution.FiniteTimeBlowup
 import RicciFlower.RicciFlow.Evolution.NormalizedFlow

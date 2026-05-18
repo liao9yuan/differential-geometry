@@ -788,6 +788,123 @@ theorem metricCompForMetricInFrame_extDerivFun_eq_christoffel
   rw [covariantDerivative_eq_sum_christoffel (I := I) cov frame hframe hx d b]
   simp [metricCompForMetricInFrame, map_sum]
 
+/-- Metric-compatibility derivative formula in an arbitrary tangent
+direction. -/
+theorem metricComp_extDeriv_tangent
+    (g : SmoothRiemannianMetric I M)
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (hmc : RicciFlower.Connection.IsMetricCompatible (I := I) cov g)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (hu : IsOpen u) {x : M} (hx : x ∈ u)
+    (X : TangentSpace I x) (a b : Idx) :
+    extDerivFun (I := I)
+        (fun y : M => metricCompForMetricInFrame (I := I) g frame y a b)
+        x X =
+      (∑ p : Idx,
+        christoffelAlongInFrame cov frame hframe x X a p *
+          metricCompForMetricInFrame (I := I) g frame x p b) +
+      (∑ p : Idx,
+        christoffelAlongInFrame cov frame hframe x X b p *
+          metricCompForMetricInFrame (I := I) g frame x a p) := by
+  classical
+  let c : Idx -> Real := fun d => hframe.coeff d x X
+  let G : Idx -> Idx -> Real := fun i j =>
+    metricCompForMetricInFrame (I := I) g frame x i j
+  let Γ : Idx -> Idx -> Idx -> Real := fun d i j =>
+    christoffelSymbolInFrame cov frame hframe x d i j
+  have hX : X = ∑ d : Idx, c d • frame d x := by
+    simpa [c, IsLocalFrameOn.coeff, hx, IsLocalFrameOn.toBasisAt_coe] using
+      ((hframe.toBasisAt hx).sum_repr X).symm
+  have hbasis (d : Idx) :
+      extDerivFun (I := I)
+          (fun y : M => metricCompForMetricInFrame (I := I) g frame y a b)
+          x (frame d x) =
+        (∑ p : Idx, Γ d a p * G p b) +
+          (∑ p : Idx, Γ d b p * G a p) := by
+    simpa [Γ, G] using
+      metricCompForMetricInFrame_extDerivFun_eq_christoffel
+        (I := I) g cov hmc frame hframe hu hx d a b
+  have hAlongA (p : Idx) :
+      christoffelAlongInFrame cov frame hframe x X a p =
+        ∑ d : Idx, c d * Γ d a p := by
+    simpa [c, Γ] using
+      christoffelAlongInFrame_eq_sum_coeff
+        (I := I) cov frame hframe hx X a p
+  have hAlongB (p : Idx) :
+      christoffelAlongInFrame cov frame hframe x X b p =
+        ∑ d : Idx, c d * Γ d b p := by
+    simpa [c, Γ] using
+      christoffelAlongInFrame_eq_sum_coeff
+        (I := I) cov frame hframe hx X b p
+  have htermA :
+      (∑ d : Idx, c d * (∑ p : Idx, Γ d a p * G p b)) =
+        ∑ p : Idx, (∑ d : Idx, c d * Γ d a p) * G p b := by
+    calc
+      (∑ d : Idx, c d * (∑ p : Idx, Γ d a p * G p b))
+          = ∑ d : Idx, ∑ p : Idx, c d * (Γ d a p * G p b) := by
+              refine Finset.sum_congr rfl fun d _ => ?_
+              rw [Finset.mul_sum]
+      _ = ∑ p : Idx, ∑ d : Idx, c d * (Γ d a p * G p b) := by
+              rw [Finset.sum_comm]
+      _ = ∑ p : Idx, (∑ d : Idx, c d * Γ d a p) * G p b := by
+              refine Finset.sum_congr rfl fun p _ => ?_
+              rw [Finset.sum_mul]
+              refine Finset.sum_congr rfl fun d _ => ?_
+              ring
+  have htermB :
+      (∑ d : Idx, c d * (∑ p : Idx, Γ d b p * G a p)) =
+        ∑ p : Idx, (∑ d : Idx, c d * Γ d b p) * G a p := by
+    calc
+      (∑ d : Idx, c d * (∑ p : Idx, Γ d b p * G a p))
+          = ∑ d : Idx, ∑ p : Idx, c d * (Γ d b p * G a p) := by
+              refine Finset.sum_congr rfl fun d _ => ?_
+              rw [Finset.mul_sum]
+      _ = ∑ p : Idx, ∑ d : Idx, c d * (Γ d b p * G a p) := by
+              rw [Finset.sum_comm]
+      _ = ∑ p : Idx, (∑ d : Idx, c d * Γ d b p) * G a p := by
+              refine Finset.sum_congr rfl fun p _ => ?_
+              rw [Finset.sum_mul]
+              refine Finset.sum_congr rfl fun d _ => ?_
+              ring
+  calc
+    extDerivFun (I := I)
+        (fun y : M => metricCompForMetricInFrame (I := I) g frame y a b)
+        x X
+        =
+      extDerivFun (I := I)
+        (fun y : M => metricCompForMetricInFrame (I := I) g frame y a b)
+        x (∑ d : Idx, c d • frame d x) := by
+          rw [hX]
+    _ = ∑ d : Idx,
+          c d *
+            extDerivFun (I := I)
+              (fun y : M => metricCompForMetricInFrame (I := I) g frame y a b)
+              x (frame d x) := by
+          simp [map_sum, map_smul]
+    _ = ∑ d : Idx,
+          c d * ((∑ p : Idx, Γ d a p * G p b) +
+            (∑ p : Idx, Γ d b p * G a p)) := by
+          refine Finset.sum_congr rfl fun d _ => ?_
+          rw [hbasis d]
+    _ = (∑ p : Idx, (∑ d : Idx, c d * Γ d a p) * G p b) +
+        (∑ p : Idx, (∑ d : Idx, c d * Γ d b p) * G a p) := by
+          rw [← htermA, ← htermB]
+          rw [← Finset.sum_add_distrib]
+          refine Finset.sum_congr rfl fun d _ => ?_
+          ring
+    _ = (∑ p : Idx,
+          christoffelAlongInFrame cov frame hframe x X a p *
+            metricCompForMetricInFrame (I := I) g frame x p b) +
+        (∑ p : Idx,
+          christoffelAlongInFrame cov frame hframe x X b p *
+            metricCompForMetricInFrame (I := I) g frame x a p) := by
+          congr 1
+          · refine Finset.sum_congr rfl fun p _ => ?_
+            rw [hAlongA p]
+          · refine Finset.sum_congr rfl fun p _ => ?_
+            rw [hAlongB p]
+
 theorem metricCompForMetricInFrame_extDerivFun_eq_christoffelAlong
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))

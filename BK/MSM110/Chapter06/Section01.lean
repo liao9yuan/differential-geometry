@@ -245,12 +245,14 @@ theorem eq_scalar_curv_evolu_of_ricci_evolution
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
     (hcov : ConnectionLocallySmoothOn (I := I) S)
-    (hframe : IsLocalFrameOn I E 1 frame Set.univ)
+    {u : Set M}
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (hcover : forall x : M, x ∈ u)
     (hTrace : forall (t : RicciFlower.Realized.RealTimeInterval.RegularTime D) (x : M),
       RicciFlower.Realized.RicciRealizesRm04FirstTraceAt (I := I)
         (S.ricci (t : Real) x) (Rm04 (t : Real) x)
         (gInv (t : Real) x)
-        (hframe.toBasisAt (by simp : x ∈ (Set.univ : Set M))))
+        (hframe.toBasisAt (hcover x)))
     (hRm13 : forall t : RicciFlower.Realized.RealTimeInterval.RegularTime D,
       RicciFlower.Realized.Rm13RealizesConnection (I := I)
         (S.family.connection (t : Real)) (Rm13 (t : Real)))
@@ -267,7 +269,7 @@ theorem eq_scalar_curv_evolu_of_ricci_evolution
       (ricciNormSqInFrame (I := I) S gInv frame) :=
   RicciFlower.RicciFlow.scalarEvolutionEquationOn_of_ricciEvolution_lc
     (I := I) S hS Rm13 Rm04 gInv frame roughLapRic
-    hcov hframe hTrace hRm13 hLower h_inv h_ricci hinv
+    hcov hframe hcover hTrace hRm13 hLower h_inv h_ricci hinv
 
 /-- MSM110 Chapter 6.1, equation `eq:evolution_of_volume_element`, in the
 integrated moving-measure form used by the current volume API. -/

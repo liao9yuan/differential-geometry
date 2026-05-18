@@ -1,6 +1,10 @@
 import RicciFlower.Realized.RicciFlow
 import RicciFlower.Realized.Bochner
 import RicciFlower.Realized.CurvatureTensor
+import RicciFlower.Realized.CurvatureProducers
+import RicciFlower.Riemann.Basic
+import RicciFlower.LeviCivita.Smooth
+import RicciFlower.LeviCivita.Torsion
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -42,6 +46,32 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 abbrev RicciSectionFamily : Type _ :=
   Real -> Realized.Tensor02Section (I := I) (M := M)
 
+/-- A time-dependent pointwise Ricci tensor family.
+
+This is the canonical Ricci-flow-facing shape: a metric determines the Ricci
+tensor pointwise through its Levi-Civita curvature.  Bundled tensor sections are
+kept as compatibility/realization data, not as the source of the metric Ricci
+definition. -/
+abbrev RicciAtFamily : Type _ :=
+  Real -> (x : M) -> Curvature.Tensor02At (I := I) (M := M) x
+
+namespace RicciAtFamily
+
+/-- View a pointwise Ricci family as the tensor field expected by the older
+realized Ricci-flow API. -/
+def toTensorField (Ric : RicciAtFamily (I := I) (M := M)) :
+    Realized.RicciTensorField (I := I) (M := M) Real :=
+  fun t x X Y => Ric t x (Realized.vec2 X Y)
+
+@[simp] theorem toTensorField_apply
+    (Ric : RicciAtFamily (I := I) (M := M))
+    (t : Real) (x : M) (X Y : TangentSpace I x) :
+    toTensorField (I := I) Ric t x X Y =
+      Ric t x (Realized.vec2 X Y) := by
+  rfl
+
+end RicciAtFamily
+
 namespace RicciSectionFamily
 
 /-- View a bundled Ricci section family as the pointwise tensor field expected
@@ -61,13 +91,201 @@ end RicciSectionFamily
 
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
-/-- A data-only real-time Ricci-flow family, independent of a chosen interval. -/
+/-- The canonical connection associated to a metric: its Levi-Civita connection. -/
+noncomputable def metricCov (g : SmoothRiemannianMetric I M) :
+    CovariantDerivative I E (TangentSpace I : M -> Type _) :=
+  LeviCivita.leviCivitaConnectionOfMetric (I := I) g
+
+/-- The Levi-Civita connection of a smooth metric is locally smooth, so it can
+feed the pointwise Riemann/Ricci tensor constructors. -/
+theorem metricCov_smooth (g : SmoothRiemannianMetric I M) :
+    CovariantDerivative.ContMDiffCovariantDerivativeLocally
+      (I := I) (E := E) (M := M) (metricCov (I := I) (M := M) g) ∞ := by
+  simpa [metricCov] using
+    LeviCivita.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      (I := I) (M := M) g
+
+/-- The pointwise `(1,3)` Riemann tensor canonically associated to a metric. -/
+noncomputable def metricRm13At (g : SmoothRiemannianMetric I M) (x : M) :
+    Curvature.Tensor13At (I := I) (M := M) x :=
+  Riemann.CovariantDerivative.riemannCurvatureAt
+    (metricCov (I := I) (M := M) g)
+    (metricCov_smooth (I := I) (M := M) g) x
+
+/-- The pointwise lowered `(0,4)` Riemann tensor canonically associated to a metric. -/
+noncomputable def metricRm04At (g : SmoothRiemannianMetric I M) (x : M) :
+    Curvature.Tensor04At (I := I) (M := M) x :=
+  Riemann.CovariantDerivative.riemannCurvature04At
+    (I := I) g
+    (metricCov (I := I) (M := M) g)
+    (metricCov_smooth (I := I) (M := M) g) x
+
+/-- The pointwise Ricci tensor canonically associated to a metric. -/
+noncomputable def metricRicciAt (g : SmoothRiemannianMetric I M) (x : M) :
+    Curvature.Tensor02At (I := I) (M := M) x :=
+  Riemann.CovariantDerivative.ricciCurvatureAt
+    (I := I)
+    (metricCov (I := I) (M := M) g)
+    (metricCov_smooth (I := I) (M := M) g) x
+
+/-- The scalar curvature canonically associated to a metric. -/
+noncomputable def metricScalarAt (g : SmoothRiemannianMetric I M) (x : M) :
+    Real :=
+  Realized.metricTracePair0SAt (I := I) g (metricRicciAt (I := I) (M := M) g x)
+
+/-- The lowered Riemann tensor section canonically associated to a metric.
+
+The bundled section is produced in the Riemann layer from the intrinsic
+curvature operator `R(X,Y)Z`; this flow-facing definition is only the metric
+specialization. -/
+noncomputable def metricRm04 (g : SmoothRiemannianMetric I M) :
+    Realized.Tensor04Section (I := I) (M := M) :=
+  Riemann.CovariantDerivative.rm04Section
+    (I := I) g (metricCov (I := I) (M := M) g)
+    (metricCov_smooth (I := I) (M := M) g)
+
+/-- The `(1,3)` Riemann tensor section canonically associated to a metric. -/
+noncomputable def metricRm13 (g : SmoothRiemannianMetric I M) :
+    Realized.Tensor13Section (I := I) (M := M) :=
+  Riemann.CovariantDerivative.rm13Section
+    (I := I) (M := M) (metricCov (I := I) (M := M) g)
+    (metricCov_smooth (I := I) (M := M) g)
+
+/-- The Ricci tensor section canonically associated to a metric. -/
+noncomputable def metricRicci (g : SmoothRiemannianMetric I M) :
+    Realized.Tensor02Section (I := I) (M := M) :=
+  Riemann.CovariantDerivative.ricciSection
+    (I := I) (M := M) (metricCov (I := I) (M := M) g)
+    (metricCov_smooth (I := I) (M := M) g)
+
+@[simp] theorem metricRm04_apply
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    metricRm04 (I := I) (M := M) g x =
+      metricRm04At (I := I) (M := M) g x := by
+  simp [metricRm04, metricRm04At]
+
+@[simp] theorem metricRm13_apply
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    metricRm13 (I := I) (M := M) g x =
+      metricRm13At (I := I) (M := M) g x := by
+  simp [metricRm13, metricRm13At]
+
+@[simp] theorem metricRicci_apply
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    metricRicci (I := I) (M := M) g x =
+      metricRicciAt (I := I) (M := M) g x := by
+  simp [metricRicci, metricRicciAt]
+
+/-- Canonical curvature producer attached to a metric.
+
+This is now a compatibility package built from the direct metric curvature
+sections above, not the source from which those sections are chosen. -/
+noncomputable def metricCurvData
+    (g : SmoothRiemannianMetric I M) :
+    Realized.CurvatureSectionProducerData (I := I)
+      (LeviCivita.leviCivitaConnectionOfMetric (I := I) g) g where
+  rm13 := metricRm13 (I := I) (M := M) g
+  rm04 := metricRm04 (I := I) (M := M) g
+  ricci := metricRicci (I := I) (M := M) g
+  h_rm13 := by
+    simpa [metricRm13, metricCov] using
+      (Realized.rm13Section_realizes (I := I) (M := M)
+        (cov := metricCov (I := I) (M := M) g)
+        (hcov := metricCov_smooth (I := I) (M := M) g))
+  h_rm04 := by
+    simpa [metricRm04, metricCov] using
+      (Realized.rm04Section_realizes (I := I) (M := M) g
+        (cov := metricCov (I := I) (M := M) g)
+        (hcov := metricCov_smooth (I := I) (M := M) g))
+  h_ricci13 := by
+    intro x
+    simp [metricRicci, metricRm13]
+
+/-- Compatibility nonempty form of the metric curvature producer. -/
+theorem metricCurvData_exists
+    (g : SmoothRiemannianMetric I M) :
+    Nonempty (Realized.CurvatureSectionProducerData (I := I)
+      (LeviCivita.leviCivitaConnectionOfMetric (I := I) g) g) :=
+  ⟨metricCurvData (I := I) (M := M) g⟩
+
+/-- A data-only real-time Ricci-flow family, independent of a chosen interval.
+
+The connection and Ricci tensor are intentionally not fields: they are the
+Levi-Civita connection and Ricci tensor of the metric at that time, exposed
+below as accessors for compatibility with the old API. -/
 structure SolutionFamily where
   metric : Real -> SmoothRiemannianMetric I M
-  connection : Real -> CovariantDerivative I E (TangentSpace I : M -> Type _)
-  ricci : RicciSectionFamily (I := I) (M := M)
 
 namespace SolutionFamily
+
+/-- Time translation of a real-time metric family.
+
+The shifted time `s` corresponds to the original time `s + τ`. -/
+def timeShift
+    (G : SolutionFamily (I := I) (M := M)) (τ : Real) :
+    SolutionFamily (I := I) (M := M) where
+  metric := fun s => G.metric (s + τ)
+
+@[simp] theorem timeShift_metric
+    (G : SolutionFamily (I := I) (M := M)) (τ s : Real) :
+    (G.timeShift τ).metric s = G.metric (s + τ) := by
+  rfl
+
+/-- The Levi-Civita connection of the family metric at time `t`. -/
+noncomputable def connection
+    (G : SolutionFamily (I := I) (M := M)) :
+    Real -> CovariantDerivative I E (TangentSpace I : M -> Type _) :=
+  fun t => LeviCivita.leviCivitaConnectionOfMetric (I := I) (G.metric t)
+
+/-- The `(1,3)` Riemann tensor of the family metric at time `t`. -/
+noncomputable def rm13At
+    (G : SolutionFamily (I := I) (M := M)) :
+    Real -> (x : M) -> Curvature.Tensor13At (I := I) (M := M) x :=
+  fun t x => metricRm13At (I := I) (M := M) (G.metric t) x
+
+/-- The lowered pointwise Riemann tensor of the family metric at time `t`. -/
+noncomputable def rm04At
+    (G : SolutionFamily (I := I) (M := M)) :
+    Real -> (x : M) -> Curvature.Tensor04At (I := I) (M := M) x :=
+  fun t x => metricRm04At (I := I) (M := M) (G.metric t) x
+
+/-- The pointwise Ricci tensor of the family metric at time `t`. -/
+noncomputable def ricciAt
+    (G : SolutionFamily (I := I) (M := M)) :
+    RicciAtFamily (I := I) (M := M) :=
+  fun t x => metricRicciAt (I := I) (M := M) (G.metric t) x
+
+/-- Compatibility bundled `(1,3)` Riemann tensor of the family metric.
+
+This remains a realization-section API.  The canonical metric curvature used by
+the flow core is `rm13At`; this bundled section should be replaced by a real
+tensoriality/smoothness producer when downstream code is migrated. -/
+noncomputable def rm13
+    (G : SolutionFamily (I := I) (M := M)) :
+    Real -> Realized.Tensor13Section (I := I) (M := M) :=
+  fun t => metricRm13 (I := I) (M := M) (G.metric t)
+
+/-- Compatibility bundled lowered Riemann tensor of the family metric. -/
+noncomputable def rm04
+    (G : SolutionFamily (I := I) (M := M)) :
+    Real -> Realized.Tensor04Section (I := I) (M := M) :=
+  fun t => metricRm04 (I := I) (M := M) (G.metric t)
+
+/-- Compatibility bundled Ricci tensor of the family metric.
+
+Core Ricci-flow definitions use `ricciAt`; this bundled section is kept for
+legacy component/evolution consumers until their realization inputs are
+migrated. -/
+noncomputable def ricci
+    (G : SolutionFamily (I := I) (M := M)) :
+    RicciSectionFamily (I := I) (M := M) :=
+  fun t => metricRicci (I := I) (M := M) (G.metric t)
+
+@[simp] theorem ricci_apply
+    (G : SolutionFamily (I := I) (M := M))
+    (t : Real) (x : M) :
+    G.ricci t x = G.ricciAt t x := by
+  simp [ricci, ricciAt]
 
 /-- The metric and connection are compatible at every flow time of `D`. -/
 def MetricCompatibleOn
@@ -81,15 +299,40 @@ end SolutionFamily
 
 /-- A Ricci-flow candidate on a real interval.
 
-The underlying metric, connection, and Ricci data are a real-time family; this
-wrapper records that the metric and connection are compatible on the chosen
-interval.  This keeps extension/maximality statements from needing to compare
-families with different interval indices. -/
+The only underlying data is the real-time metric family.  The connection and
+Ricci tensor are metric-derived accessors on `SolutionFamily`. -/
 structure SolutionOn (D : Realized.RealTimeInterval) where
   base : SolutionFamily (I := I) (M := M)
-  metricCompatible : base.MetricCompatibleOn D
 
 namespace SolutionOn
+
+/-- Time translation of a solution candidate.
+
+The shifted candidate lives on `D.timeShift τ`, and its time `s` metric is the
+original metric at time `s + τ`. -/
+def timeShift {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (τ : Real) :
+    SolutionOn (I := I) (M := M) (D.timeShift τ) where
+  base := S.base.timeShift τ
+
+@[simp] theorem timeShift_base {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (τ : Real) :
+    (S.timeShift τ).base = S.base.timeShift τ := by
+  rfl
+
+@[simp] theorem timeShift_base_metric {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (τ s : Real) :
+    (S.timeShift τ).base.metric s = S.base.metric (s + τ) := by
+  rfl
+
+/-- Metric compatibility is automatic because `S.family.connection` is the
+Levi-Civita connection of `S.family.metric`. -/
+theorem metricCompatible {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) :
+    S.base.MetricCompatibleOn D := by
+  intro t
+  exact LeviCivita.leviCivitaConnectionOfMetric_isMetricCompatible
+    (I := I) (S.base.metric (t : Real))
 
 /-- The interval-indexed realized metric family associated to a solution
 candidate.  This preserves the previous `S.family` API. -/
@@ -107,6 +350,12 @@ def ricci {D : Realized.RealTimeInterval}
     RicciSectionFamily (I := I) (M := M) :=
   S.base.ricci
 
+/-- The canonical pointwise Ricci tensor family of a solution candidate. -/
+def ricciAt {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) :
+    RicciAtFamily (I := I) (M := M) :=
+  S.base.ricciAt
+
 @[simp] theorem family_metric {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
     S.family.metric = S.base.metric := by
@@ -122,12 +371,45 @@ def ricci {D : Realized.RealTimeInterval}
     S.ricci = S.base.ricci := by
   rfl
 
+@[simp] theorem ricciAt_eq {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) :
+    S.ricciAt = S.base.ricciAt := by
+  rfl
+
+@[simp] theorem timeShift_family_metric {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (τ s : Real) :
+    (S.timeShift τ).family.metric s = S.family.metric (s + τ) := by
+  rfl
+
+@[simp] theorem timeShift_ricci {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (τ s : Real) :
+    (S.timeShift τ).ricci s = S.ricci (s + τ) := by
+  rfl
+
+@[simp] theorem timeShift_ricciAt {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (τ s : Real) :
+    (S.timeShift τ).ricciAt s = S.ricciAt (s + τ) := by
+  rfl
+
+/-- The shifted solution has the same initial metric, evaluated at the shifted
+interval's distinguished initial time. -/
+theorem timeShift_initial_metric {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (τ : Real) :
+    (S.timeShift τ).family.metric ((D.timeShift τ).initial) =
+      S.family.metric D.initial := by
+  simp [Realized.RealTimeInterval.timeShift, sub_add_cancel]
+
+@[simp] theorem timeShift_self_initial_metric {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) :
+    (S.timeShift D.initial).family.metric 0 = S.family.metric D.initial := by
+  simp
+
 /-- Compatibility view as the older realized Ricci-flow candidate. -/
 def toRealizedCandidate {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
     Realized.RealizedRicciFlowCandidateOn (I := I) (M := M) D where
   family := S.family
-  ricci := RicciSectionFamily.toTensorField (I := I) S.ricci
+  ricci := RicciAtFamily.toTensorField (I := I) S.ricciAt
 
 @[simp] theorem toRealizedCandidate_family {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
@@ -142,7 +424,7 @@ def MetricVariationEquationOn
     {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) : Prop :=
   Realized.MetricVariationEquationOn (I := I) S.family
-    (RicciSectionFamily.toTensorField (I := I) S.ricci)
+    (RicciAtFamily.toTensorField (I := I) S.ricciAt)
 
 /-- Predicate package saying the folder-level candidate is a Ricci-flow
 solution. -/
@@ -151,8 +433,73 @@ structure IsSolutionOn
     (S : SolutionOn (I := I) (M := M) D) : Prop where
   smoothMetric : Realized.MetricFamilySmoothOn (I := I) (M := M) D S.family
   smoothConnection : RicciFlower.Connection.ConnectionFamilySmoothOn (I := I) (M := M) S.family
-  leviCivita : RicciFlower.LeviCivita.IsLeviCivitaFamilyOn (I := I) S.family
   equation : MetricVariationEquationOn (I := I) S
+
+namespace IsSolutionOn
+
+/-- Levi-Civita-ness is automatic in the metric-only solution model. -/
+theorem leviCivita
+    {D : Realized.RealTimeInterval}
+    {S : SolutionOn (I := I) (M := M) D}
+    (_hS : IsSolutionOn (I := I) S) :
+    RicciFlower.LeviCivita.IsLeviCivitaFamilyOn (I := I) S.family := by
+  constructor
+  · intro t
+    exact S.metricCompatible t
+  · intro t
+    exact LeviCivita.leviCivitaConnectionOfMetric_isTorsionFree
+      (I := I) (S.base.metric (t : Real))
+
+end IsSolutionOn
+
+/-- Time translation preserves the Ricci-flow solution predicate.
+
+This is the analytic chain-rule bridge for `HasDerivWithinAt` on translated
+time carriers, together with the corresponding smoothness pullback statements.
+It is the right place to discharge the future time-shift normalization used by
+Hamilton's Section 11/12 package. -/
+theorem isSolutionOn_timeShift
+    {D : Realized.RealTimeInterval}
+    {S : SolutionOn (I := I) (M := M) D}
+    (hS : IsSolutionOn (I := I) S) (τ : Real) :
+    IsSolutionOn (I := I) (S.timeShift τ) where
+  smoothMetric := by
+    intro x X Y
+    have hOld := hS.smoothMetric x X Y
+    have haff : ContDiff Real ⊤ (fun s : Real => s + τ) :=
+      contDiff_id.add contDiff_const
+    have hmaps :
+        Set.MapsTo (fun s : Real => s + τ) (D.timeShift τ).carrier D.carrier := by
+      intro s hs
+      exact hs
+    have hcomp :
+        ContDiffOn Real ⊤
+          (fun s : Real => (S.family.metric (s + τ)).inner x X Y)
+          (D.timeShift τ).carrier := by
+      simpa [Function.comp_def] using hOld.comp haff.contDiffOn hmaps
+    simpa [SolutionOn.family, SolutionOn.timeShift, SolutionFamily.timeShift] using hcomp
+  smoothConnection := by
+    intro t
+    let t' : Realized.RealTimeInterval.FlowTime D := ⟨(t : Real) + τ, t.2⟩
+    have hOld := hS.smoothConnection t'
+    simpa [t', SolutionOn.family, SolutionOn.timeShift, SolutionFamily.timeShift,
+      Realized.RealizedMetricFamilyOn.connectionAt, SolutionFamily.connection] using hOld
+  equation := by
+    intro t x X Y
+    let t' : Realized.RealTimeInterval.RegularTime D := ⟨(t : Real) + τ, t.2⟩
+    have hOld := hS.equation t' x X Y
+    have hshift :
+        HasDerivWithinAt (fun s : Real => s + τ) 1
+          (D.timeShift τ).carrier (t : Real) := by
+      simpa using
+        ((hasDerivWithinAt_id (t : Real) (D.timeShift τ).carrier).add_const τ)
+    have hmaps :
+        Set.MapsTo (fun s : Real => s + τ) (D.timeShift τ).carrier D.carrier := by
+      intro s hs
+      exact hs
+    have hcomp := hOld.comp (x := (t : Real)) hshift hmaps
+    simpa [MetricVariationEquationOn, SolutionOn.family, SolutionOn.timeShift,
+      SolutionFamily.timeShift, RicciAtFamily.toTensorField, Function.comp_def] using hcomp
 
 /-- Convert the folder-level solution predicate to the older realized
 compatibility predicate. -/
@@ -176,10 +523,10 @@ theorem metric_derivWithin_eq_neg_two_ricci
     (x : M) (X Y : TangentSpace I x) :
     HasDerivWithinAt
       (fun s : Real => (S.family.metric s).inner x X Y)
-      ((-2 : Real) * S.ricci (t : Real) x (Realized.vec2 X Y))
+      ((-2 : Real) * S.ricciAt (t : Real) x (Realized.vec2 X Y))
       D.carrier
       (t : Real) := by
-  simpa [MetricVariationEquationOn, RicciSectionFamily.toTensorField] using
+  simpa [MetricVariationEquationOn, RicciAtFamily.toTensorField] using
     hS.equation t x X Y
 
 /-! ## Section 6.2: Ricci and scalar evolution interfaces -/
@@ -599,29 +946,29 @@ private theorem ricciNormDerivativeSimplifies_pure
               (Q := quadraticBy G A)
               (R := raise2By G A)
 
-/-- Interpret the bundled Ricci section family as the pointwise two-tensor
-field used by the coordinate Bochner layer. -/
+/-- Interpret the canonical pointwise Ricci family as the two-tensor field used
+by the coordinate Bochner layer. -/
 def ricciTwoTensorField
     {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
     Real -> Realized.TwoTensorField (I := I) (M := M) :=
-  fun t x X Y => S.ricci t x (Realized.vec2 X Y)
+  fun t x X Y => S.ricciAt t x (Realized.vec2 X Y)
 
 @[simp] theorem ricciTwoTensorField_apply
     {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (t : Real) (x : M) (X Y : TangentSpace I x) :
     ricciTwoTensorField (I := I) S t x X Y =
-      S.ricci t x (Realized.vec2 X Y) := by
+      S.ricciAt t x (Realized.vec2 X Y) := by
   rfl
 
-/-- Ricci component in a time-dependent frame. -/
+/-- Canonical Ricci component in a time-dependent frame. -/
 def ricciCompInFrame
     {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (t : Real) (x : M) (i j : Idx) : Real :=
-  S.ricci t x (Realized.vec2 (frame i x) (frame j x))
+  S.ricciAt t x (Realized.vec2 (frame i x) (frame j x))
 
 @[simp] theorem ricciCompInFrame_apply
     {D : Realized.RealTimeInterval}
@@ -629,7 +976,7 @@ def ricciCompInFrame
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (t : Real) (x : M) (i j : Idx) :
     ricciCompInFrame (I := I) S frame t x i j =
-      S.ricci t x (Realized.vec2 (frame i x) (frame j x)) := by
+      S.ricciAt t x (Realized.vec2 (frame i x) (frame j x)) := by
   rfl
 
 /-- Ricci with both indices raised:

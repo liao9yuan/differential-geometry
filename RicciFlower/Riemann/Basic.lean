@@ -833,6 +833,126 @@ theorem riemannCurvature04At_eq_lower_riemannCurvatureAt
   rw [riemannCurvature04At_apply_const, riemannCurvatureAt_apply_const]
   simp [tangentFlatLinear_apply]
 
+set_option backward.isDefEq.respectTransparency false in
+/-- The bundled `(1,3)` Riemann tensor section of a locally smooth connection.
+
+The value is the intrinsic curvature tensor `R(X,Y)Z` packaged pointwise.  The
+smooth-section proof is the single section-assembly frontier: it should be
+proved from smoothness and tensoriality of `connectionRiemannCurvatureField`,
+not by a coordinate definition. -/
+noncomputable def rm13Section
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞) :
+    Tensor13Section (I := I) (M := M) :=
+  ⟨fun x => riemannCurvatureAt cov hcov x, by
+    sorry⟩
+
+@[simp]
+theorem rm13Section_apply
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞)
+    (x : M) :
+    rm13Section (I := I) (M := M) cov hcov x =
+      riemannCurvatureAt cov hcov x := by
+  rfl
+
+@[simp]
+theorem rm13Section_apply_const
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞)
+    {x : M}
+    (α : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
+    (X Y Z : TangentSpace I x) :
+    rm13Section (I := I) (M := M) cov hcov x α (vec3 X Y Z) =
+      cotangentToDual α
+        (connectionRiemannCurvatureField cov
+          (tangentConstAt (I := I) x X) (tangentConstAt (I := I) x Y)
+          (tangentConstAt (I := I) x Z) x) := by
+  rw [rm13Section_apply, riemannCurvatureAt_apply_const]
+  rfl
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The bundled lowered `(0,4)` Riemann tensor section of a locally smooth
+connection and a metric. -/
+noncomputable def rm04Section
+    (g : SmoothRiemannianMetric I M)
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞) :
+    Tensor04Section (I := I) (M := M) :=
+  ⟨fun x => riemannCurvature04At g cov hcov x, by
+    sorry⟩
+
+@[simp]
+theorem rm04Section_apply
+    (g : SmoothRiemannianMetric I M)
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞)
+    (x : M) :
+    rm04Section (I := I) (M := M) g cov hcov x =
+      riemannCurvature04At g cov hcov x := by
+  rfl
+
+@[simp]
+theorem rm04Section_apply_const
+    (g : SmoothRiemannianMetric I M)
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞)
+    {x : M}
+    (W X Y Z : TangentSpace I x) :
+    rm04Section (I := I) (M := M) g cov hcov x (vec4 W X Y Z) =
+      g.inner x W
+        (connectionRiemannCurvatureField cov
+          (tangentConstAt (I := I) x X) (tangentConstAt (I := I) x Y)
+          (tangentConstAt (I := I) x Z) x) := by
+  rw [rm04Section_apply, riemannCurvature04At_apply_const]
+  rfl
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The bundled Ricci tensor section of a locally smooth connection. -/
+noncomputable def ricciSection
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞) :
+    Tensor02Section (I := I) (M := M) :=
+  by
+    haveI : IsManifold I ((∞ : WithTop ℕ∞) + 1) M := by
+      simpa using (inferInstance : IsManifold I ∞ M)
+    exact tensorRSField_applyInput (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) ∞
+      (contract_TensorRSField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        (n := ∞) 0 2 (rm13Section (I := I) (M := M) cov hcov))
+      (Tensor0SField.one0 (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) ∞)
+
+@[simp]
+theorem ricciSection_apply
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞)
+    (x : M) :
+    ricciSection (I := I) (M := M) cov hcov x =
+      ricciCurvatureAt cov hcov x := by
+  haveI : IsManifold I ((∞ : WithTop ℕ∞) + 1) M := by
+    simpa using (inferInstance : IsManifold I ∞ M)
+  have hone :
+      Tensor0SField.one0 (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) ∞ x =
+        scalarOne0S (I := I) x := by
+    apply Tensor0SSpace.toModel_injective
+    refine ContinuousMultilinearMap.ext fun v => ?_
+    rw [Tensor0SField.one0_apply (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := ∞) x v]
+    change (1 : Real) =
+      (ContinuousMultilinearMap.constOfIsEmpty Real (fun _ : Fin 0 => E) 1) v
+    simp
+  simp [ricciSection, ricciCurvatureAt, ricciFromRm13At, contract_TensorRSField,
+    contract_TensorRSField_fun, hone]
+
+@[simp]
+theorem ricciSection_eq_trace
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞)
+    (x : M) :
+    ricciSection (I := I) (M := M) cov hcov x =
+      ricciFromRm13At (I := I) (M := M)
+        (rm13Section (I := I) (M := M) cov hcov x) := by
+  rw [ricciSection_apply, rm13Section_apply, ricciCurvatureAt_eq_trace]
+
 end CovariantDerivative
 
 end RicciFlower.Riemann

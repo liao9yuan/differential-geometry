@@ -1,5 +1,6 @@
 import RicciFlower.Realized.CurvatureTensor
 import RicciFlower.LeviCivita.Basic
+import RicciFlower.Riemann.Basic
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -67,6 +68,44 @@ theorem ricci_from_rm13
   K.h_ricci13
 
 end CurvatureSectionProducerData
+
+/-! ## Intrinsic Riemann-section producers
+
+The intrinsic Riemann layer constructs pointwise tensors and bundled sections
+from a locally smooth connection.  The realization statements below are the
+remaining tensoriality frontiers: they say that those bundled sections evaluate
+on arbitrary smooth vector-field slots as the curvature operator
+`R(X,Y)Z`, not only on the tangent-constant representatives used in the
+pointwise constructor.
+-/
+
+/-- The intrinsic `(1,3)` Riemann section realizes connection curvature. -/
+theorem rm13Section_realizes
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞) :
+    Rm13RealizesConnection (I := I) cov
+      (Riemann.CovariantDerivative.rm13Section (I := I) (M := M) cov hcov) := by
+  intro X Y Z x alpha
+  -- Real frontier: tensoriality of `connectionRiemannCurvatureField` in all
+  -- smooth vector-field slots, reducing arbitrary fields to tangent-constant
+  -- representatives at `x`.
+  sorry
+
+/-- The intrinsic lowered `(0,4)` Riemann section realizes metric-lowered
+connection curvature. -/
+theorem rm04Section_realizes
+    (g : SmoothRiemannianMetric I M)
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞) :
+    Rm04RealizesConnection (I := I) g cov
+      (Riemann.CovariantDerivative.rm04Section (I := I) g cov hcov) := by
+  intro W X Y Z x
+  have h13 :=
+    rm13Section_realizes (I := I) (M := M) cov hcov X Y Z x
+      (dualToCotangent (I := I) ((tangentFlatLinear (I := I) g x) (W x)))
+  rw [Riemann.CovariantDerivative.rm04Section_apply,
+    Riemann.CovariantDerivative.riemannCurvature04At_eq_lower_riemannCurvatureAt]
+  simpa [Riemann.CovariantDerivative.rm13Section_apply, tangentFlatLinear_apply] using h13
 
 end Realized
 end RicciFlower

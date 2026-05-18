@@ -1,5 +1,6 @@
 import Mathlib.Data.Real.Basic
 import Mathlib.Order.Interval.Set.Basic
+import Mathlib.Tactic.Linarith
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -139,6 +140,44 @@ def regularToFlow {D : RealTimeInterval} (t : D.RegularTime) : D.FlowTime :=
     (D.regularToFlow t : Real) = (t : Real) := by
   rfl
 
+/-- Time translation of an interval.
+
+The shifted time `s` corresponds to the original time `s + τ`.  Thus shifting by
+`τ = D.initial` normalizes the distinguished initial time to `0`. -/
+def timeShift (D : RealTimeInterval) (τ : Real) : RealTimeInterval where
+  carrier := {s : Real | s + τ ∈ D.carrier}
+  regular := {s : Real | s + τ ∈ D.regular}
+  initial := D.initial - τ
+  initial_mem := by
+    simpa [sub_add_cancel] using D.initial_mem
+  regular_subset := by
+    intro s hs
+    exact D.regular_subset hs
+
+@[simp] theorem timeShift_carrier (D : RealTimeInterval) (τ : Real) :
+    (D.timeShift τ).carrier = {s : Real | s + τ ∈ D.carrier} := by
+  rfl
+
+@[simp] theorem timeShift_regular (D : RealTimeInterval) (τ : Real) :
+    (D.timeShift τ).regular = {s : Real | s + τ ∈ D.regular} := by
+  rfl
+
+@[simp] theorem timeShift_initial (D : RealTimeInterval) (τ : Real) :
+    (D.timeShift τ).initial = D.initial - τ := by
+  rfl
+
+@[simp] theorem timeShift_initial_self (D : RealTimeInterval) :
+    (D.timeShift D.initial).initial = 0 := by
+  simp [timeShift]
+
+@[simp] theorem timeShift_initialTime_val (D : RealTimeInterval) (τ : Real) :
+    ((D.timeShift τ).initialTime : Real) = D.initial - τ := by
+  rfl
+
+@[simp] theorem timeShift_initialTime_self_val (D : RealTimeInterval) :
+    ((D.timeShift D.initial).initialTime : Real) = 0 := by
+  simp [timeShift]
+
 /-- Endpoint-general interval constructor.
 
 The two Boolean flags control whether finite endpoints are included in the
@@ -181,6 +220,34 @@ def closedOpen (a b : Real) (hab : a < b) : RealTimeInterval where
   regular_subset := by
     intro t ht
     exact ⟨le_of_lt ht.1, ht.2⟩
+
+/-- Carrier of a half-open interval after shifting its initial endpoint to
+zero. -/
+theorem timeShift_closedOpen_carrier
+    {a b : Real} (hab : a < b) :
+    ((closedOpen a b hab).timeShift a).carrier = Set.Ico 0 (b - a) := by
+  ext s
+  constructor
+  · intro hs
+    rcases hs with ⟨hleft, hright⟩
+    exact ⟨by linarith, by linarith⟩
+  · intro hs
+    rcases hs with ⟨hleft, hright⟩
+    exact ⟨by linarith, by linarith⟩
+
+/-- Regular times of a half-open interval after shifting its initial endpoint
+to zero. -/
+theorem timeShift_closedOpen_regular
+    {a b : Real} (hab : a < b) :
+    ((closedOpen a b hab).timeShift a).regular = Set.Ioo 0 (b - a) := by
+  ext s
+  constructor
+  · intro hs
+    rcases hs with ⟨hleft, hright⟩
+    exact ⟨by linarith, by linarith⟩
+  · intro hs
+    rcases hs with ⟨hleft, hright⟩
+    exact ⟨by linarith, by linarith⟩
 
 /-- Open interval `(a,b)`, with a chosen initial time inside it. -/
 def openInterval (a b t₀ : Real) (ht₀ : t₀ ∈ Set.Ioo a b) : RealTimeInterval where

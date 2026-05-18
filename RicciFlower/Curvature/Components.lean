@@ -296,10 +296,22 @@ theorem rm04LowersRm13At_of_realizes
     (x : M) :
     Rm04LowersRm13At (I := I) g x (Rm13 x) (Rm04 x) := by
   intro W X Y Z
-  let Wsec : (p : M) -> TangentSpace I p := RicciFlower.LeviCivita.tangentConstAt (I := I) x W
-  let Xsec : (p : M) -> TangentSpace I p := RicciFlower.LeviCivita.tangentConstAt (I := I) x X
-  let Ysec : (p : M) -> TangentSpace I p := RicciFlower.LeviCivita.tangentConstAt (I := I) x Y
-  let Zsec : (p : M) -> TangentSpace I p := RicciFlower.LeviCivita.tangentConstAt (I := I) x Z
+  obtain ⟨Wsec, hWsec⟩ :=
+    ContMDiffSection.exists_eq_at
+      (I := I) (F := E) (V := (TangentSpace I : M -> Type _))
+      (n := (⊤ : ℕ∞)) x W
+  obtain ⟨Xsec, hXsec⟩ :=
+    ContMDiffSection.exists_eq_at
+      (I := I) (F := E) (V := (TangentSpace I : M -> Type _))
+      (n := (⊤ : ℕ∞)) x X
+  obtain ⟨Ysec, hYsec⟩ :=
+    ContMDiffSection.exists_eq_at
+      (I := I) (F := E) (V := (TangentSpace I : M -> Type _))
+      (n := (⊤ : ℕ∞)) x Y
+  obtain ⟨Zsec, hZsec⟩ :=
+    ContMDiffSection.exists_eq_at
+      (I := I) (F := E) (V := (TangentSpace I : M -> Type _))
+      (n := (⊤ : ℕ∞)) x Z
   let alpha : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x :=
     dualToCotangent (I := I) ((tangentFlatLinear (I := I) g x) W)
   have h04 := hRm04 Wsec Xsec Ysec Zsec x
@@ -307,24 +319,17 @@ theorem rm04LowersRm13At_of_realizes
   have h04' :
       Rm04 x (vec4 W X Y Z) =
         g.inner x W
-          ((connectionRiemannCurvatureField (I := I) cov Xsec Ysec Zsec) x) := by
-    dsimp [Wsec, Xsec, Ysec, Zsec] at h04
-    rw [RicciFlower.LeviCivita.tangentConstAt_self] at h04
-    rw [RicciFlower.LeviCivita.tangentConstAt_self] at h04
-    rw [RicciFlower.LeviCivita.tangentConstAt_self] at h04
-    rw [RicciFlower.LeviCivita.tangentConstAt_self] at h04
-    exact h04
+          ((connectionRiemannCurvatureField (I := I) cov
+            (fun p : M => Xsec p) (fun p : M => Ysec p) (fun p : M => Zsec p)) x) := by
+    simpa [hWsec, hXsec, hYsec, hZsec] using h04
   have h13' :
       Rm13 x
           (dualToCotangent (I := I) ((tangentFlatLinear (I := I) g x) W))
           (vec3 X Y Z) =
         g.inner x W
-          ((connectionRiemannCurvatureField (I := I) cov Xsec Ysec Zsec) x) := by
-    dsimp [Xsec, Ysec, Zsec, alpha] at h13
-    rw [RicciFlower.LeviCivita.tangentConstAt_self] at h13
-    rw [RicciFlower.LeviCivita.tangentConstAt_self] at h13
-    rw [RicciFlower.LeviCivita.tangentConstAt_self] at h13
-    simpa [tangentFlatLinear_apply, cotangentToDual_apply] using h13
+          ((connectionRiemannCurvatureField (I := I) cov
+            (fun p : M => Xsec p) (fun p : M => Ysec p) (fun p : M => Zsec p)) x) := by
+    simpa [alpha, hXsec, hYsec, hZsec, tangentFlatLinear_apply, cotangentToDual_apply] using h13
   exact h04'.trans h13'.symm
 
 /-- Metric skew-adjointness of the curvature endomorphism in `(1,3)` form:
@@ -1379,20 +1384,12 @@ theorem rm13_eval_eq_christoffelCurvCoord
       ∑ m : CoordinateIdx (𝕜 := Real) E,
         christoffelCurvCoeffAt (I := I) cov x₀ i k j m *
           alpha (fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ m x₀) := by
-  rw [hRm (coordinateFrameAt (I := I) x₀ i)
-    (coordinateFrameAt (I := I) x₀ k) (coordinateFrameAt (I := I) x₀ j)
-    x₀ alpha]
-  rw [hcurv i k j]
-  change cotangentToDual (I := I) alpha
-      (∑ m : CoordinateIdx (𝕜 := Real) E,
-        christoffelCurvCoeffAt (I := I) cov x₀ i k j m •
-          coordinateFrameAt (I := I) x₀ m x₀) =
-    ∑ m : CoordinateIdx (𝕜 := Real) E,
-      christoffelCurvCoeffAt (I := I) cov x₀ i k j m *
-        alpha (fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ m x₀)
-  rw [map_sum]
-  refine Finset.sum_congr rfl fun m _ => ?_
-  simp [cotangentToDual_apply, smul_eq_mul]
+  -- Real frontier after the realization interface was corrected to smooth
+  -- sections: coordinate-frame fields are local sections.  This needs the
+  -- local-frame-to-global smooth-extension tensoriality theorem for
+  -- `connectionRiemannCurvatureField`, not the raw arbitrary-field realization
+  -- predicate that used to hide that issue.
+  sorry
 
 /-- The intrinsic Ricci trace of a realized `(1,3)` curvature tensor is the
 coordinate Christoffel trace in the chart-induced coordinate frame. -/

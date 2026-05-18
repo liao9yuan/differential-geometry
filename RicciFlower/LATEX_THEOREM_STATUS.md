@@ -678,12 +678,35 @@ In dimension 3, along Ricci flow and wherever R > 0,
   + (4 |Ric|^2 |Ric^o|^2 - 2 Q) / R.
 ```
 
-Status: synthetic P3/P4 route.
+Status: native Section 10 definitions and algebraic assembly interface added in
+`RicciFlower/RicciFlow/Evolution/ImprovedPinching.lean`.  The file now contains
+`metric02`, `tfRic`, `tfRicNormSq`, `pinchP`, and `cubicQ`, with `cubicQ_eigen`
+linking the definition of `Q` to the existing eigenvalue polynomial
+`DimensionThree.hamiltonCubicQ3`.  The book-facing heat predicate
+`tfRicHeatOn` and the assembly theorem `tfRicHeat_alg` reduce Lemma 10.4 to the
+scalar-square heat product rule and the reaction relation `tfRicReactRel`.
+The native scalar-square time product rule is closed as `sqHeat_of_scalar`, and
+the spatial scalar-square Laplacian producer is closed as `sqLap_realizes`
+using the existing scalar operator identity `(1/2) Delta(f^2)=f Delta f+
+|grad f|^2`.  The pointwise three-dimensional eigenvalue reaction algebra is
+closed as `tfRel_eigen` / `tfRel_from_eigen`, with `curv3_diag_eq` recording the
+formal plus-sign standard-component contraction in the Section 6
+curvature-contraction slot order.  A convention audit confirmed that
+RicciFlower's `Rm04(W,X,Y,Z)` lowers the output slot first, so the actual
+3D Riemann-from-Ricci bridge for realized Ricci eigenvalues uses
+`stdRmDiag3 (-l1) (-l2) (-l3)`.  The new `curv3_frame_neg` /
+`canon3_frame_neg` bridge records the corrected result: the canonical
+Section 6 reaction agrees with `+ricciReact3`, matching `tfRel_eigen`.
+The theorem `tfHeat_sec6` now consumes the canonical Section 6 Ricci-norm heat
+equation directly; the heat equation and reaction relation are conditional on
+nonzero scalar curvature, matching the book's `R > 0` domain.
 
-Distance: `4`.
+Distance: `2`.
 
-Next target: port trace-free decomposition, scalar evolution, Ricci norm
-evolution, and the algebraic reaction reduction.
+Next target: feed `canon3_frame_neg` into the Section 10 heat-equation wrapper
+by producing the actual eigenframe and Riemann-from-Ricci component hypotheses.
+The scalar-square Laplacian, diagonal finite sums, sign bridge, and Section 6
+heat-equation assembly are no longer expected frontiers.
 
 ### Lemma 10.5, `lem:quotient-evolution`
 

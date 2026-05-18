@@ -1,6 +1,7 @@
 import RicciFlower.Analysis.DivergenceTheorem.LocalFormula
 import RicciFlower.Analysis.DivergenceTheorem.TangentAction
 import RicciFlower.Analysis.Volume.ChartDensity
+import RicciFlower.Analysis.Volume.Family
 import Mathlib.Analysis.Calculus.FDeriv.Basic
 import Mathlib.Analysis.Calculus.FDeriv.Equiv
 import Mathlib.Analysis.SpecialFunctions.ExpDeriv
@@ -387,6 +388,234 @@ lemma chartInvGramMatrix_entry_contMDiffOn
     have h_at := hdet_smooth x hx
     exact hsmooth_inv.contMDiffAt.comp_contMDiffWithinAt x h_at
   · exact chartGramMatrix_adjugate_entry_contMDiffOn (I := I) g α i j
+
+private lemma chartGramMatrixOnE_entry_contDiffOn
+    (g : SmoothRiemannianMetric I M) (α : M)
+    (i j : Fin (Module.finrank ℝ E)) :
+    ContDiffOn ℝ ∞
+      (fun y : E =>
+        chartGramMatrix (I := I) g α ((extChartAt I α).symm y) i j)
+      (extChartAt I α).target := by
+  have hbase : ContMDiffOn I 𝓘(ℝ) ∞
+      (fun x : M => chartGramMatrix (I := I) g α x i j)
+      (trivializationAt E (TangentSpace I) α).baseSet :=
+    chartGramMatrix_entry_contMDiffOn (I := I) g α i j
+  have hsymm : ContMDiffOn 𝓘(ℝ, E) I ∞ (extChartAt I α).symm
+      (extChartAt I α).target := contMDiffOn_extChartAt_symm (I := I) α
+  have hsubset : (extChartAt I α).target ⊆
+      (extChartAt I α).symm ⁻¹'
+        (trivializationAt E (TangentSpace I) α).baseSet := by
+    intro y hy
+    have hsource : (extChartAt I α).symm y ∈ (extChartAt I α).source :=
+      (extChartAt I α).map_target hy
+    rw [extChartAt_source_eq_chartAt_source (I := I)] at hsource
+    rw [trivializationAt_baseSet_eq_chartAt_source]
+    exact hsource
+  have hcomp : ContMDiffOn 𝓘(ℝ, E) 𝓘(ℝ) ∞
+      ((fun x : M => chartGramMatrix (I := I) g α x i j) ∘
+        (extChartAt I α).symm)
+      (extChartAt I α).target := hbase.comp hsymm hsubset
+  exact hcomp.contDiffOn
+
+private lemma hasDerivAt_line_of_differentiableAt
+    {F : E → ℝ} {y₀ : E} (v : E)
+    (hF : DifferentiableAt ℝ F y₀) :
+    HasDerivAt (fun t : ℝ => F (y₀ + t • v))
+      (fderiv ℝ F y₀ v) 0 := by
+  have hline : HasDerivAt (fun t : ℝ => y₀ + t • v) v 0 := by
+    have hscale : HasDerivAt (fun t : ℝ => t • v) v 0 := by
+      simpa using (hasDerivAt_id' (x := (0 : ℝ))).smul_const v
+    have hsum : HasDerivAt (fun t : ℝ => y₀ + t • v) (0 + v) 0 :=
+      (hasDerivAt_const (x := (0 : ℝ)) (c := y₀)).add hscale
+    simpa using hsum
+  have hcomp :=
+    hF.hasFDerivAt.comp_hasDerivAt_of_eq (x := (0 : ℝ)) hline (by simp)
+  simpa [Function.comp] using hcomp
+
+lemma chartInvGramMatrix_symm
+    (g : SmoothRiemannianMetric I M) (α x : M)
+    (i j : Fin (Module.finrank ℝ E)) :
+    chartInvGramMatrix (I := I) g α x j i =
+      chartInvGramMatrix (I := I) g α x i j := by
+  have hherm :
+      (chartInvGramMatrix (I := I) g α x).IsHermitian := by
+    unfold chartInvGramMatrix
+    exact (chartGramMatrix_isHermitian (I := I) g α x).inv
+  simpa using hherm.apply i j
+
+private lemma chartGramMatrixOnE_partial_symm
+    (g : SmoothRiemannianMetric I M) (α : M)
+    (p i j : Fin (Module.finrank ℝ E)) (y : E) :
+    partialDeriv (E := E) p
+        (fun z : E =>
+          chartGramMatrix (I := I) g α ((extChartAt I α).symm z) j i) y =
+      partialDeriv (E := E) p
+        (fun z : E =>
+          chartGramMatrix (I := I) g α ((extChartAt I α).symm z) i j) y := by
+  congr 2
+  funext z
+  have h := chartGramMatrix_isHermitian (I := I) g α ((extChartAt I α).symm z)
+  simpa using h.apply i j
+
+private lemma trace_invGram_mul_partialGram
+    (g : SmoothRiemannianMetric I M) (α x : M)
+    (p : Fin (Module.finrank ℝ E)) (y : E) :
+    Matrix.trace
+        (chartInvGramMatrix (I := I) g α x *
+          Matrix.of (fun i j : Fin (Module.finrank ℝ E) =>
+            partialDeriv (E := E) p
+              (fun z : E =>
+                chartGramMatrix (I := I) g α ((extChartAt I α).symm z) i j) y))
+      =
+    ∑ i : Fin (Module.finrank ℝ E),
+      ∑ j : Fin (Module.finrank ℝ E),
+        chartInvGramMatrix (I := I) g α x i j *
+          partialDeriv (E := E) p
+            (fun z : E =>
+              chartGramMatrix (I := I) g α ((extChartAt I α).symm z) i j) y := by
+  classical
+  simp only [Matrix.trace, Matrix.diag, Matrix.mul_apply, Matrix.of_apply]
+  calc
+    (∑ i : Fin (Module.finrank ℝ E),
+        ∑ j : Fin (Module.finrank ℝ E),
+          chartInvGramMatrix (I := I) g α x i j *
+            partialDeriv (E := E) p
+              (fun z : E =>
+                chartGramMatrix (I := I) g α ((extChartAt I α).symm z) j i) y)
+        =
+      ∑ i : Fin (Module.finrank ℝ E),
+        ∑ j : Fin (Module.finrank ℝ E),
+          chartInvGramMatrix (I := I) g α x i j *
+            partialDeriv (E := E) p
+              (fun z : E =>
+                chartGramMatrix (I := I) g α ((extChartAt I α).symm z) i j) y := by
+      refine Finset.sum_congr rfl ?_
+      intro i _
+      refine Finset.sum_congr rfl ?_
+      intro j _
+      rw [chartGramMatrixOnE_partial_symm (I := I) g α p i j y]
+    _ = _ := rfl
+
+/-- Point-centered chart-density logarithmic derivative in matrix form. This is
+the density side of the later density/Christoffel-trace bridge. -/
+theorem chartDensityOnE_partial_div_eq_half_trace_invGram_partialGram
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (p : Fin (Module.finrank ℝ E)) :
+    partialDeriv (E := E) p (chartDensityOnE (I := I) g x) (extChartAt I x x) /
+        chartDensityOnE (I := I) g x (extChartAt I x x)
+      =
+    (1 / 2 : ℝ) *
+      ∑ i : Fin (Module.finrank ℝ E),
+        ∑ j : Fin (Module.finrank ℝ E),
+          chartInvGramMatrix (I := I) g x x i j *
+            partialDeriv (E := E) p
+              (fun y : E =>
+                chartGramMatrix (I := I) g x ((extChartAt I x).symm y) i j)
+              (extChartAt I x x) := by
+  classical
+  let y₀ : E := extChartAt I x x
+  let v : E := (Module.finBasis ℝ E) p
+  let Gline : ℝ → Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
+    fun t => chartGramMatrix (I := I) g x ((extChartAt I x).symm (y₀ + t • v))
+  let Gprime : Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
+    Matrix.of fun i j =>
+      partialDeriv (E := E) p
+        (fun y : E => chartGramMatrix (I := I) g x ((extChartAt I x).symm y) i j) y₀
+  have hxsrc : x ∈ (extChartAt I x).source := by
+    rw [extChartAt_source_eq_chartAt_source (I := I)]
+    exact mem_chart_source H x
+  have hy₀_target : y₀ ∈ (extChartAt I x).target := by
+    simpa [y₀] using (extChartAt I x).map_source hxsrc
+  have htarget_nhd : (extChartAt I x).target ∈ 𝓝 y₀ :=
+    (isOpen_extChartAt_target (I := I) x).mem_nhds hy₀_target
+  have hsymm_y₀ : (extChartAt I x).symm y₀ = x := by
+    simpa [y₀] using (extChartAt I x).left_inv hxsrc
+  have hxbase : x ∈ (trivializationAt E (TangentSpace I) x).baseSet := by
+    rw [trivializationAt_baseSet_eq_chartAt_source]
+    exact mem_chart_source H x
+  have hρ_pos : 0 < chartDensityOnE (I := I) g x y₀ := by
+    simpa [chartDensityOnE, y₀, hsymm_y₀] using
+      chartDensity_pos (I := I) g x hxbase
+  have hρ_ne : chartDensityOnE (I := I) g x y₀ ≠ 0 := ne_of_gt hρ_pos
+  have hρ_diff : DifferentiableAt ℝ (chartDensityOnE (I := I) g x) y₀ := by
+    have hsmooth : ContDiffOn ℝ ∞ (chartDensityOnE (I := I) g x)
+        (extChartAt I x).target :=
+      chartDensityOnE_contDiffOn (I := I) g x
+    exact ((hsmooth y₀ hy₀_target).contDiffAt htarget_nhd).differentiableAt
+      (by simp)
+  have hρ_line : HasDerivAt
+      (fun t : ℝ => chartDensityOnE (I := I) g x (y₀ + t • v))
+      (partialDeriv (E := E) p (chartDensityOnE (I := I) g x) y₀) 0 := by
+    simpa [partialDeriv, v] using
+      hasDerivAt_line_of_differentiableAt (E := E)
+        (F := chartDensityOnE (I := I) g x) (y₀ := y₀) v hρ_diff
+  have hEntries : ∀ i j : Fin (Module.finrank ℝ E),
+      HasDerivAt (fun t : ℝ => Gline t i j) (Gprime i j) 0 := by
+    intro i j
+    have hentry_diff : DifferentiableAt ℝ
+        (fun y : E => chartGramMatrix (I := I) g x ((extChartAt I x).symm y) i j)
+        y₀ := by
+      have hsmooth : ContDiffOn ℝ ∞
+          (fun y : E => chartGramMatrix (I := I) g x ((extChartAt I x).symm y) i j)
+          (extChartAt I x).target :=
+        chartGramMatrixOnE_entry_contDiffOn (I := I) g x i j
+      exact ((hsmooth y₀ hy₀_target).contDiffAt htarget_nhd).differentiableAt
+        (by simp)
+    simpa [Gline, Gprime, partialDeriv, v] using
+      hasDerivAt_line_of_differentiableAt (E := E)
+        (F := fun y : E =>
+          chartGramMatrix (I := I) g x ((extChartAt I x).symm y) i j)
+        (y₀ := y₀) v hentry_diff
+  have hpos_det : 0 < (Gline 0).det := by
+    simpa [Gline, y₀, v, hsymm_y₀] using
+      chartGramMatrix_det_pos (I := I) g x hxbase
+  have hjac := hasDerivAt_sqrt_det_eq_half_trace_inv_mul
+    (G := Gline) (G' := Gprime) (t := (0 : ℝ)) hEntries hpos_det
+  have hjacρ : HasDerivAt
+      (fun t : ℝ => chartDensityOnE (I := I) g x (y₀ + t • v))
+      ((1 / 2 : ℝ) *
+        Matrix.trace ((chartGramMatrix (I := I) g x x)⁻¹ * Gprime) *
+          chartDensityOnE (I := I) g x y₀) 0 := by
+    simpa [Gline, Gprime, chartDensityOnE, chartDensity, y₀, v, hsymm_y₀] using hjac
+  have hderiv :
+      partialDeriv (E := E) p (chartDensityOnE (I := I) g x) y₀ =
+        ((1 / 2 : ℝ) *
+          Matrix.trace ((chartGramMatrix (I := I) g x x)⁻¹ * Gprime) *
+            chartDensityOnE (I := I) g x y₀) :=
+    hρ_line.unique hjacρ
+  have htrace :
+      Matrix.trace ((chartGramMatrix (I := I) g x x)⁻¹ * Gprime) =
+        ∑ i : Fin (Module.finrank ℝ E),
+          ∑ j : Fin (Module.finrank ℝ E),
+            chartInvGramMatrix (I := I) g x x i j *
+              partialDeriv (E := E) p
+                (fun y : E =>
+                  chartGramMatrix (I := I) g x ((extChartAt I x).symm y) i j)
+                y₀ := by
+    simpa [Gprime, chartInvGramMatrix] using
+      trace_invGram_mul_partialGram (I := I) (M := M) g x x p y₀
+  calc
+    partialDeriv (E := E) p (chartDensityOnE (I := I) g x) (extChartAt I x x) /
+        chartDensityOnE (I := I) g x (extChartAt I x x)
+        = partialDeriv (E := E) p (chartDensityOnE (I := I) g x) y₀ /
+            chartDensityOnE (I := I) g x y₀ := by rfl
+    _ = ((1 / 2 : ℝ) *
+          Matrix.trace ((chartGramMatrix (I := I) g x x)⁻¹ * Gprime) *
+            chartDensityOnE (I := I) g x y₀) /
+          chartDensityOnE (I := I) g x y₀ := by rw [hderiv]
+    _ = (1 / 2 : ℝ) *
+          Matrix.trace ((chartGramMatrix (I := I) g x x)⁻¹ * Gprime) := by
+      field_simp [hρ_ne]
+    _ = (1 / 2 : ℝ) *
+        ∑ i : Fin (Module.finrank ℝ E),
+          ∑ j : Fin (Module.finrank ℝ E),
+            chartInvGramMatrix (I := I) g x x i j *
+              partialDeriv (E := E) p
+                (fun y : E =>
+                  chartGramMatrix (I := I) g x ((extChartAt I x).symm y) i j)
+                (extChartAt I x x) := by
+      rw [htrace]
 
 /-! ## `L¹` entry sum of the inverse Gram matrix
 
