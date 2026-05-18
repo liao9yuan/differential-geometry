@@ -621,7 +621,7 @@ The order-2 engine `tensor_h2_chart_loc_of_uniform_bound`, fed the discharged
 uniform difference-quotient bound, produces a weak `H¹` partial of every
 `D.weak_partial j` on `Ω''`; the chart component lies in `W^{1,2}(Ω'')` because
 its weak partials `D.weak_partial j` are themselves `L²(Ω'')`. -/
-private lemma tensorChartBilinear_chartComponent_regularity_of_data
+lemma tensorChartBilinear_chartComponent_regularity_of_data
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {α : M}
     {P₀ : TensorCompIdx (E := E) r s}
     (D : TensorChartBilinearH1ComplData (I := I) (M := M) g r s α P₀)
