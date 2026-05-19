@@ -193,6 +193,85 @@ theorem eLpNorm_weighted_contDiffOn_mul_le
         ≤ eLpNorm (fun y => (C : ℝ) • w y) 2 μw := h_mono
     _ = ENNReal.ofReal C * eLpNorm w 2 μw := h_smul
 
+/-- **Uniform-constant explicit-norm bound for a `C^∞`-coefficient weighted-`L²`
+product.** Let `c : EuclN → ℝ` be `C^∞` on the open chart target
+`chartTargetEuclid α` and let `K ⊆ chartTargetEuclid α` be compact. Then there is
+a single nonnegative constant `C` — the sup of `‖c‖` over `K`, depending only on
+`c` and `K` — such that for *every* `w : EuclN → ℝ` that is `MemLp 2` with
+respect to the chart-pulled weighted measure restricted to `chartTargetEuclid α`
+and vanishes almost everywhere (for that measure) off `K`,
+
+```
+eLpNorm (fun y => c y * w y) 2 μw ≤ ENNReal.ofReal C * eLpNorm w 2 μw,
+```
+
+where `μw = (chartPulledWeightedMeasure g α).restrict (chartTargetEuclid α)`.
+
+This is the constant-uniform form of `eLpNorm_weighted_contDiffOn_mul_le`: the
+constant of that per-`w` bound is the coefficient's sup over the compact set `K`,
+which does not depend on `w`, so it can be exhibited once, before the
+universally quantified `w`. -/
+theorem eLpNorm_weighted_contDiffOn_mul_le_uniform
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {c : EuclN → ℝ}
+    (hc : ContDiffOn ℝ ∞ c (chartTargetEuclid (I := I) (M := M) α))
+    {K : Set EuclN} (hK_compact : IsCompact K) (hK_meas : MeasurableSet K)
+    (hK_in : K ⊆ chartTargetEuclid (I := I) (M := M) α) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ w : EuclN → ℝ,
+        MemLp w 2
+            ((chartPulledWeightedMeasure (I := I) g α).restrict
+              (chartTargetEuclid (I := I) (M := M) α)) →
+        (∀ᵐ y ∂((chartPulledWeightedMeasure (I := I) g α).restrict
+            (chartTargetEuclid (I := I) (M := M) α)), y ∉ K → w y = 0) →
+        eLpNorm (fun y => c y * w y) 2
+            ((chartPulledWeightedMeasure (I := I) g α).restrict
+              (chartTargetEuclid (I := I) (M := M) α))
+          ≤ ENNReal.ofReal C *
+            eLpNorm w 2
+              ((chartPulledWeightedMeasure (I := I) g α).restrict
+                (chartTargetEuclid (I := I) (M := M) α)) := by
+  classical
+  set μw : Measure EuclN :=
+    (chartPulledWeightedMeasure (I := I) g α).restrict
+      (chartTargetEuclid (I := I) (M := M) α) with hμw_def
+  -- The `C^∞` coefficient is bounded on the compact `K` by a nonnegative `C`;
+  -- this sup constant does not depend on `w`.
+  have hcontOn_K : ContinuousOn c K := hc.continuousOn.mono hK_in
+  have hbdd : ∃ C : ℝ, 0 ≤ C ∧ ∀ y ∈ K, ‖c y‖ ≤ C := by
+    by_cases hK_empty : K = ∅
+    · exact ⟨0, le_refl _, fun y hy => absurd (hK_empty ▸ hy) (Set.notMem_empty y)⟩
+    · obtain ⟨C₀, hC₀⟩ := hK_compact.bddAbove_image hcontOn_K.norm
+      exact ⟨max C₀ 0, le_max_right _ _,
+        fun y hy => (hC₀ ⟨y, hy, rfl⟩).trans (le_max_left _ _)⟩
+  obtain ⟨C, hC_nn, hC_bd⟩ := hbdd
+  refine ⟨C, hC_nn, fun w hw hw_zero => ?_⟩
+  -- Pointwise almost-everywhere norm domination `‖c · w‖ ≤ ‖C • w‖`.
+  have h_dom : ∀ᵐ y ∂μw, ‖c y * w y‖ ≤ ‖(C : ℝ) • w y‖ := by
+    filter_upwards [hw_zero] with y hy
+    by_cases hyK : y ∈ K
+    · have hlhs : ‖c y * w y‖ = ‖c y‖ * ‖w y‖ := norm_mul _ _
+      have hrhs : ‖(C : ℝ) • w y‖ = C * ‖w y‖ := by
+        rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg hC_nn]
+      rw [hlhs, hrhs]
+      exact mul_le_mul_of_nonneg_right (hC_bd y hyK) (norm_nonneg _)
+    · rw [hy hyK, mul_zero, smul_zero, norm_zero]
+  -- Monotonicity of `eLpNorm` under the a.e. norm domination.
+  have h_mono :
+      eLpNorm (fun y => c y * w y) 2 μw ≤ eLpNorm (fun y => (C : ℝ) • w y) 2 μw :=
+    eLpNorm_mono_ae (μ := μw) h_dom
+  -- Homogeneity of `eLpNorm` under scalar multiplication.
+  have h_smul :
+      eLpNorm (fun y => (C : ℝ) • w y) 2 μw
+        = ENNReal.ofReal C * eLpNorm w 2 μw := by
+    have h := eLpNorm_const_smul (μ := μw) (p := 2) (C : ℝ) w
+    rw [Real.enorm_of_nonneg hC_nn] at h
+    simpa only [Pi.smul_apply] using h
+  calc
+    eLpNorm (fun y => c y * w y) 2 μw
+        ≤ eLpNorm (fun y => (C : ℝ) • w y) 2 μw := h_mono
+    _ = ENNReal.ofReal C * eLpNorm w 2 μw := h_smul
+
 end ExplicitNormBound
 
 /-! ## Sanity test -/

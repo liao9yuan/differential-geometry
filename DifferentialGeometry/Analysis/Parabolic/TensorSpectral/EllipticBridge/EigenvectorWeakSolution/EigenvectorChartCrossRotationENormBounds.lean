@@ -689,6 +689,285 @@ theorem eLpNorm_covPrincipalRotationCoeffLimit_le
 
 end CrossRotationENormBounds
 
+/-! ## Uniform-constant restatements
+
+The three headline bounds above produce, per eigenbasis index `i`, a nonnegative
+constant `C`. A downstream bounded-operator argument over the whole eigenbasis
+needs the constant *uniform* — one `C` serving every `i`. The constants are
+geometric (chart-transition / density / dimension / operator-norm data) and do
+not depend on `i`, so the uniform restatement is provable: the witness
+construction is hoisted before the `∀ i`.
+
+The eigenvector index `i` is **not** a section variable here, so each restatement
+carries its own `∀ i`. -/
+
+section CrossRotationENormBoundsUniform
+
+variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
+  (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+
+/-- **Uniform-constant `eLpNorm` bound for the cross-left limit object.** The
+constant-uniform form of `eLpNorm_crossLeftLimitComponent_le`: a single
+nonnegative constant `C` serves every eigenbasis index `i`. The per-`i` bound
+delegates to `eLpNorm_tensorL2ChartComponentCutoff_le`, whose constant does not
+depend on the abstract `L²` element it is applied to; its uniform form
+`eLpNorm_tensorL2ChartComponentCutoff_le_uniform` exhibits that constant once. -/
+theorem eLpNorm_crossLeftLimitComponent_le_uniform
+    (α : M) (P : TensorCompIdx (E := E) r (s + 1)) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        eLpNorm ((crossLeftLimitComponent (I := I) (M := M)
+            g r s h_atlas i α P :
+            Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) 2
+            ((chartPulledWeightedMeasure (I := I) g α).restrict
+              (chartTargetEuclid (I := I) (M := M) α))
+          ≤ ENNReal.ofReal C *
+            ENNReal.ofReal ‖tensorCovGradL2Compl (I := I) (M := M) g r s
+              (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i)‖ := by
+  obtain ⟨C, hC_nn, hC_bd⟩ := eLpNorm_tensorL2ChartComponentCutoff_le_uniform
+    (I := I) (M := M) g r (s + 1) α P
+  refine ⟨C, hC_nn, fun i => ?_⟩
+  rw [crossLeftLimitComponent]
+  exact hC_bd (tensorCovGradL2Compl (I := I) (M := M) g r s
+    (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
+
+/-- **Uniform-constant `eLpNorm` bound for the cross-right limit object.** The
+constant-uniform form of `eLpNorm_crossRightLimitComponent_le`: a single
+nonnegative constant `C` serves every eigenbasis index `i`. The per-`i` bound
+delegates to `eLpNorm_tensorL2ChartComponentCutoff_le`, whose constant does not
+depend on the abstract `L²` element it is applied to; its uniform form
+`eLpNorm_tensorL2ChartComponentCutoff_le_uniform` exhibits that constant once. -/
+theorem eLpNorm_crossRightLimitComponent_le_uniform
+    (α : M) (P : TensorCompIdx (E := E) r s) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        eLpNorm ((crossRightLimitComponent (I := I) (M := M)
+            g r s h_atlas i α P :
+            Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) 2
+            ((chartPulledWeightedMeasure (I := I) g α).restrict
+              (chartTargetEuclid (I := I) (M := M) α))
+          ≤ ENNReal.ofReal C *
+            ENNReal.ofReal ‖TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+              (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i)‖ := by
+  obtain ⟨C, hC_nn, hC_bd⟩ := eLpNorm_tensorL2ChartComponentCutoff_le_uniform
+    (I := I) (M := M) g r s α P
+  refine ⟨C, hC_nn, fun i => ?_⟩
+  rw [crossRightLimitComponent]
+  exact hC_bd (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+    (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
+
+/-- A constant-uniform form of the per-summand bound: for a `C^∞`-on-the-chart-
+target coefficient `c`, a single nonnegative constant `C` controls the
+`eLpNorm` of the indicator-cut product `(chartPouKernel α).indicator c · G` for
+*every* weighted-`MemLp` function `G` that vanishes almost everywhere (weighted)
+off the compact partition-of-unity kernel. The constant is the coefficient's
+sup over the kernel, independent of `G`. -/
+private lemma eLpNorm_indicatorFactor_mul_atom_le_uniform
+    (g : SmoothRiemannianMetric I M) (α : M) {c : EuclN → ℝ}
+    (hc : ContDiffOn ℝ ∞ c (chartTargetEuclid (I := I) (M := M) α)) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ G : EuclN → ℝ,
+        MemLp G 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
+          (chartTargetEuclid (I := I) (M := M) α)) →
+        (∀ᵐ y ∂((chartPulledWeightedMeasure (I := I) g α).restrict
+            (chartTargetEuclid (I := I) (M := M) α)),
+          y ∉ chartPouKernel (I := I) (M := M) α → G y = 0) →
+        MemLp (fun y => Set.indicator (chartPouKernel (I := I) (M := M) α) c y *
+            G y) 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
+            (chartTargetEuclid (I := I) (M := M) α)) ∧
+          eLpNorm (fun y => Set.indicator (chartPouKernel (I := I) (M := M) α)
+              c y * G y) 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
+              (chartTargetEuclid (I := I) (M := M) α))
+            ≤ ENNReal.ofReal C *
+              eLpNorm G 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
+                (chartTargetEuclid (I := I) (M := M) α)) := by
+  classical
+  obtain ⟨C, hC_nn, hC_bd⟩ := eLpNorm_weighted_contDiffOn_mul_le_uniform
+    (I := I) (M := M) g α hc
+    (chartPouKernel_isCompact (I := I) (M := M) α)
+    (chartPouKernel_measurableSet (I := I) (M := M) α)
+    (chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α)
+  refine ⟨C, hC_nn, fun G hG hG_zero => ?_⟩
+  -- Off the kernel `G` vanishes a.e., so the indicator-cut coefficient agrees
+  -- a.e. (weighted) with the uncut `C^∞` coefficient.
+  have h_prod_eq : (fun y => Set.indicator (chartPouKernel (I := I) (M := M) α)
+        c y * G y) =ᵐ[(chartPulledWeightedMeasure (I := I) g α).restrict
+        (chartTargetEuclid (I := I) (M := M) α)] (fun y => c y * G y) := by
+    filter_upwards [hG_zero] with y hy
+    by_cases hyK : y ∈ chartPouKernel (I := I) (M := M) α
+    · rw [Set.indicator_of_mem hyK]
+    · rw [Set.indicator_of_notMem hyK, hy hyK, mul_zero, mul_zero]
+  have h_mul_memLp : MemLp (fun y => c y * G y) 2
+      ((chartPulledWeightedMeasure (I := I) g α).restrict
+        (chartTargetEuclid (I := I) (M := M) α)) :=
+    memLp_weighted_contDiffOn_mul (I := I) (M := M) g α hc
+      (chartPouKernel_isCompact (I := I) (M := M) α)
+      (chartPouKernel_measurableSet (I := I) (M := M) α)
+      (chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α)
+      hG hG_zero
+  refine ⟨h_mul_memLp.ae_eq h_prod_eq.symm, ?_⟩
+  rw [eLpNorm_congr_ae h_prod_eq]
+  exact hC_bd G hG hG_zero
+
+/-- **Uniform-constant `eLpNorm` bound for the principal rotation coefficient
+limit.** The constant-uniform form of `eLpNorm_covPrincipalRotationCoeffLimit_le`:
+a single nonnegative constant `C` serves every eigenbasis index `i`. The per-`i`
+bound's constant is a finite sum, over the four-fold summation index, of the
+per-summand sup constants of the `i`-free `C^∞` factor `principalRotationFactor`
+over the compact partition-of-unity kernel; that constant does not depend on `i`
+and is hoisted before the `∀ i`. -/
+theorem eLpNorm_covPrincipalRotationCoeffLimit_le_uniform
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        eLpNorm (covPrincipalRotationCoeffLimit (I := I) (M := M)
+            g r s h_atlas i α P₀ : EuclN → ℝ) 2
+            ((chartPulledWeightedMeasure (I := I) g α).restrict
+              (chartTargetEuclid (I := I) (M := M) α))
+          ≤ ENNReal.ofReal C *
+            (∑ P : TensorCompIdx (E := E) r s,
+              ∑ k : Fin (Module.finrank ℝ E),
+                eLpNorm ((partialLpLimit (I := I) (M := M)
+                    g r s h_atlas i α P k :
+                  Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) 2
+                  ((chartPulledWeightedMeasure (I := I) g α).restrict
+                    (chartTargetEuclid (I := I) (M := M) α))) := by
+  classical
+  set μw : Measure EuclN :=
+    (chartPulledWeightedMeasure (I := I) g α).restrict
+      (chartTargetEuclid (I := I) (M := M) α) with hμw_def
+  -- A per-summand uniform constant for every four-fold index `x`, `i`-free:
+  -- the per-summand `C^∞` factor `principalRotationFactor` does not depend on
+  -- `i`, so its kernel-sup constant does not either.
+  have h_factor_data : ∀ x : TensorCompIdx (E := E) r s
+      × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
+      × Fin (Module.finrank ℝ E), ∃ C : ℝ, 0 ≤ C ∧
+      ∀ G : EuclN → ℝ, MemLp G 2 μw →
+        (∀ᵐ y ∂μw, y ∉ chartPouKernel (I := I) (M := M) α → G y = 0) →
+        MemLp (fun y => Set.indicator (chartPouKernel (I := I) (M := M) α)
+            (principalRotationFactor (I := I) (M := M)
+              g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2) y * G y) 2 μw ∧
+          eLpNorm (fun y => Set.indicator (chartPouKernel (I := I) (M := M) α)
+              (principalRotationFactor (I := I) (M := M)
+                g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2) y * G y) 2 μw
+            ≤ ENNReal.ofReal C * eLpNorm G 2 μw := by
+    intro x
+    rw [hμw_def]
+    exact eLpNorm_indicatorFactor_mul_atom_le_uniform (I := I) (M := M) g α
+      (principalRotationFactor_contDiffOn (I := I) (M := M)
+        g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2)
+  choose CF hCF_nn hCF using h_factor_data
+  -- The uniform headline constant — `i`-free.
+  refine ⟨(∑ x : TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
+      × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E), CF x)
+    * (Finset.univ : Finset (TensorCompIdx (E := E) r s
+        × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
+        × Fin (Module.finrank ℝ E))).card,
+    mul_nonneg (Finset.sum_nonneg (fun x _ => hCF_nn x))
+      (by positivity), fun i => ?_⟩
+  -- Abbreviation for the chart-partial atom family, indexed by `(P, k)`.
+  set partAtom : (TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E))
+      → EuclN → ℝ := fun pk y =>
+    ((partialLpLimit (I := I) (M := M) g r s h_atlas i α pk.1 pk.2 :
+      Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
+    with hpartAtom_def
+  -- The four-fold sum, as a single sum over `(P, Q, k, l)`.
+  set F : (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
+      × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)) → EuclN → ℝ :=
+    fun x y =>
+      Set.indicator (chartPouKernel (I := I) (M := M) α)
+          (principalRotationFactor (I := I) (M := M)
+            g r s α P₀ x.1 x.2.1 x.2.2.1 x.2.2.2) y *
+        ((partialLpLimit (I := I) (M := M) g r s h_atlas i α x.1 x.2.2.1 :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
+    with hF_def
+  -- The per-summand weighted-`MemLp` membership and explicit-norm bound, for
+  -- this `i`, with the uniform constant `CF x`.
+  have h_data : ∀ x : TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
+      × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E),
+      MemLp (F x) 2 μw ∧
+      eLpNorm (F x) 2 μw ≤ ENNReal.ofReal (CF x) *
+        eLpNorm (partAtom (x.1, x.2.2.1)) 2 μw := by
+    intro x
+    exact hCF x _ (partialLpLimit_memLp_weighted (I := I) (M := M)
+        g r s h_atlas i α x.1 x.2.2.1)
+      (partialLpLimit_ae_zero_off_chartPouKernel_weighted (I := I) (M := M)
+        g r s h_atlas i α x.1 x.2.2.1)
+  -- Every per-summand constant `CF x` is dominated by their sum.
+  have hCsum_bd : ∀ x : TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
+      × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E),
+      eLpNorm (F x) 2 μw
+      ≤ ENNReal.ofReal (∑ x : TensorCompIdx (E := E) r s
+          × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
+          × Fin (Module.finrank ℝ E), CF x) *
+        eLpNorm (partAtom (x.1, x.2.2.1)) 2 μw := by
+    intro x
+    refine (h_data x).2.trans ?_
+    gcongr
+    exact Finset.single_le_sum (fun x _ => hCF_nn x) (Finset.mem_univ x)
+  -- Bound on the four-fold-sum `eLpNorm`, via the aggregation lemma.
+  have h_bound :
+      eLpNorm (fun y => ∑ x : TensorCompIdx (E := E) r s
+          × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
+          × Fin (Module.finrank ℝ E), F x y) 2 μw
+        ≤ ENNReal.ofReal ((∑ x : TensorCompIdx (E := E) r s
+            × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
+            × Fin (Module.finrank ℝ E), CF x) * (Finset.univ :
+            Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
+              × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E))).card)
+          * ∑ pk : TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E),
+              eLpNorm (partAtom pk) 2 μw := by
+    rw [hμw_def]
+    exact eLpNorm_finsetSum_le_const_mul_atomSum (I := I) (M := M) g α
+      Finset.univ Finset.univ F partAtom
+      (fun x => (x.1, x.2.2.1)) (fun x _ => Finset.mem_univ _)
+      (∑ x : TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s
+        × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E), CF x)
+      (fun x _ => by rw [← hμw_def]; exact (h_data x).1)
+      (fun x _ => by rw [← hμw_def]; exact hCsum_bd x)
+  -- Identify the single-product sum with the nested four-fold sum.
+  have h_eq : (fun y => ∑ x : TensorCompIdx (E := E) r s
+      × TensorCompIdx (E := E) r s × Fin (Module.finrank ℝ E)
+      × Fin (Module.finrank ℝ E), F x y)
+      = (fun y => ∑ P : TensorCompIdx (E := E) r s,
+          ∑ Q : TensorCompIdx (E := E) r s,
+            ∑ k : Fin (Module.finrank ℝ E),
+              ∑ l : Fin (Module.finrank ℝ E),
+                Set.indicator (chartPouKernel (I := I) (M := M) α)
+                    (principalRotationFactor (I := I) (M := M)
+                      g r s α P₀ P Q k l) y *
+                  (partialLpLimit (I := I) (M := M) g r s h_atlas i α P k :
+                    EuclN → ℝ) y) := by
+    funext y
+    rw [hF_def]
+    simp only [Fintype.sum_prod_type]
+  -- The chart-partial index sum is the chart-partial atom family.
+  have h_atom_eq : ∑ pk : TensorCompIdx (E := E) r s
+      × Fin (Module.finrank ℝ E), eLpNorm (partAtom pk) 2 μw
+      = ∑ P : TensorCompIdx (E := E) r s,
+          ∑ k : Fin (Module.finrank ℝ E),
+            eLpNorm ((partialLpLimit (I := I) (M := M)
+                g r s h_atlas i α P k :
+              Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) 2
+              μw := by
+    rw [Fintype.sum_prod_type]
+  -- Unfold the limit object and assemble the bound.
+  rw [show (covPrincipalRotationCoeffLimit (I := I) (M := M)
+        g r s h_atlas i α P₀ : EuclN → ℝ)
+      = (fun y => ∑ P : TensorCompIdx (E := E) r s,
+          ∑ Q : TensorCompIdx (E := E) r s,
+            ∑ k : Fin (Module.finrank ℝ E),
+              ∑ l : Fin (Module.finrank ℝ E),
+                Set.indicator (chartPouKernel (I := I) (M := M) α)
+                    (principalRotationFactor (I := I) (M := M)
+                      g r s α P₀ P Q k l) y *
+                  (partialLpLimit (I := I) (M := M) g r s h_atlas i α P k :
+                    EuclN → ℝ) y) from rfl]
+  rw [← h_eq, hμw_def, ← h_atom_eq]
+  exact h_bound
+
+end CrossRotationENormBoundsUniform
+
 /-! ## Sanity tests -/
 
 section ElaborationTests

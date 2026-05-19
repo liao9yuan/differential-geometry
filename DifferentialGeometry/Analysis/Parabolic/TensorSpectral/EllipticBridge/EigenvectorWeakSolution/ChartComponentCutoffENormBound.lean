@@ -563,6 +563,136 @@ theorem eLpNorm_tensorL2ChartComponentCutoff_le
         rw [ENNReal.ofReal_mul hCop_nn,
           ENNReal.ofReal_mul (Real.rpow_nonneg hc_max_pos.le _), mul_assoc]
 
+/-- **Uniform-constant explicit-norm `eLpNorm` bound for the cutoff Euclidean
+chart component.** For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a
+chart center `α : M`, and a component multi-index `P₀`, there is a single
+nonnegative constant `C` — depending only on `g, r, s, α, P₀` — with
+
+```
+∀ u : TensorL2 r s g,
+  eLpNorm (tensorL2ChartComponentCutoff g r s u α P₀) 2 μw
+    ≤ ENNReal.ofReal C * ENNReal.ofReal ‖u‖,
+```
+
+where `μw = (chartPulledWeightedMeasure g α).restrict (chartTargetEuclid α)`.
+
+This is the constant-uniform form of `eLpNorm_tensorL2ChartComponentCutoff_le`:
+the constant of that per-`u` bound — the product of the square root of an upper
+bound for the chart-density on the compact cutoff kernel with the operator norm
+of the cutoff-chart-component continuous linear map — does not depend on `u`, so
+it can be exhibited once, before the universally quantified `u`. -/
+theorem eLpNorm_tensorL2ChartComponentCutoff_le_uniform
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ u : TensorL2 r s g,
+        eLpNorm ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s u α P₀ :
+            Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) 2
+            ((chartPulledWeightedMeasure (I := I) g α).restrict
+              (chartTargetEuclid (I := I) (M := M) α))
+          ≤ ENNReal.ofReal C * ENNReal.ofReal ‖u‖ := by
+  classical
+  set K : Set EuclN := cutoffKernelEuclid (I := I) (M := M) α with hK_def
+  have hK_compact : IsCompact K :=
+    cutoffKernelEuclid_isCompact (I := I) (M := M) α
+  have hK_meas : MeasurableSet K :=
+    cutoffKernelEuclid_measurableSet (I := I) (M := M) α
+  have hK_in : K ⊆ chartTargetEuclid (I := I) (M := M) α :=
+    cutoffKernelEuclid_subset_chartTargetEuclid (I := I) (M := M) α
+  -- An upper bound for the chart-density on the compact cutoff kernel.
+  obtain ⟨_c_min, c_max, _hc_min_pos, hc_le, h_dens_bd⟩ :=
+    densityOnEuclid_bounded_on_compact (I := I) (M := M) g α hK_compact hK_in
+  have hc_max_pos : 0 < c_max := lt_of_lt_of_le _hc_min_pos hc_le
+  -- The operator norm of the cutoff-chart-component continuous linear map.
+  set Cop : ℝ := ‖tensorL2ChartComponentCutoffCLM (I := I) (M := M) g r s α P₀‖
+    with hCop_def
+  have hCop_nn : 0 ≤ Cop :=
+    norm_nonneg (tensorL2ChartComponentCutoffCLM (I := I) (M := M) g r s α P₀)
+  -- The uniform headline constant — extracted before the universally
+  -- quantified `u`.
+  refine ⟨c_max ^ (1 / (2 : ℝ)) * Cop,
+    mul_nonneg (Real.rpow_nonneg hc_max_pos.le _) hCop_nn, fun u => ?_⟩
+  -- Abbreviations: the chart component's `Lp` class and its representative.
+  set w : Lp ℝ 2 (chartL2Measure (I := I) (M := M) α) :=
+    tensorL2ChartComponentCutoff (I := I) (M := M) g r s u α P₀ with hw_def
+  set f : EuclN → ℝ := (w : EuclN → ℝ) with hf_def
+  -- Replace `f` by its kernel-indicator: they agree a.e. on `chartL2Measure α`.
+  set fK : EuclN → ℝ := K.indicator f with hfK_def
+  have h_off : f =ᵐ[(chartL2Measure (I := I) (M := M) α).restrict Kᶜ] 0 :=
+    tensorL2ChartComponentCutoff_aeEq_zero_off_cutoffKernel
+      (I := I) (M := M) g r s u α P₀
+  have hf_aeEq_fK : f =ᵐ[chartL2Measure (I := I) (M := M) α] fK := by
+    rw [hfK_def]
+    have hKcompl_meas : MeasurableSet Kᶜ := hK_meas.compl
+    have h_off' : ∀ᵐ y ∂(chartL2Measure (I := I) (M := M) α),
+        y ∈ Kᶜ → f y = 0 := by
+      rw [← MeasureTheory.ae_restrict_iff' hKcompl_meas]
+      filter_upwards [h_off] with y hy using hy
+    filter_upwards [h_off'] with y hy
+    by_cases hyK : y ∈ K
+    · rw [Set.indicator_of_mem hyK]
+    · rw [Set.indicator_of_notMem hyK, hy (by simpa using hyK)]
+  have hfK_supp : Function.support fK ⊆ K := by
+    rw [hfK_def]; exact Set.support_indicator_subset
+  -- The weighted `eLpNorm` of `f` equals that of `fK`.
+  have h_wabs : (chartPulledWeightedMeasure (I := I) g α).restrict
+      (chartTargetEuclid (I := I) (M := M) α) ≪
+        chartL2Measure (I := I) (M := M) α := by
+    have h_cl2 : chartL2Measure (I := I) (M := M) α =
+        (volume : Measure EuclN).restrict
+          (chartTargetEuclid (I := I) (M := M) α) := rfl
+    rw [h_cl2]
+    have h_base : (chartPulledWeightedMeasure (I := I) g α) ≪
+        (volume : Measure EuclN) := by
+      unfold chartPulledWeightedMeasure
+      exact MeasureTheory.withDensity_absolutelyContinuous _ _
+    exact h_base.restrict (chartTargetEuclid (I := I) (M := M) α)
+  have hf_aeEq_fK_w : f =ᵐ[(chartPulledWeightedMeasure (I := I) g α).restrict
+      (chartTargetEuclid (I := I) (M := M) α)] fK :=
+    h_wabs.ae_eq hf_aeEq_fK
+  have hf_aeEq_fK_v : f =ᵐ[(volume : Measure EuclN).restrict
+      (chartTargetEuclid (I := I) (M := M) α)] fK := hf_aeEq_fK
+  have hf_eLpNorm_eq : eLpNorm f 2 (chartL2Measure (I := I) (M := M) α) =
+      ‖w‖ₑ := by
+    rw [hf_def, Lp.enorm_def]
+  -- Operator-norm bound on the chart component.
+  have hw_op : ‖w‖ ≤ Cop * ‖u‖ := by
+    rw [hw_def, hCop_def,
+      ← tensorL2ChartComponentCutoffCLM_apply (I := I) (M := M) g r s α P₀ u]
+    exact (tensorL2ChartComponentCutoffCLM
+      (I := I) (M := M) g r s α P₀).le_opNorm u
+  -- Assemble the bound.
+  calc eLpNorm f 2
+          ((chartPulledWeightedMeasure (I := I) g α).restrict
+            (chartTargetEuclid (I := I) (M := M) α))
+      = eLpNorm fK 2
+          ((chartPulledWeightedMeasure (I := I) g α).restrict
+            (chartTargetEuclid (I := I) (M := M) α)) :=
+        eLpNorm_congr_ae hf_aeEq_fK_w
+    _ ≤ ENNReal.ofReal (c_max ^ (1 / (2 : ℝ))) *
+          eLpNorm fK 2
+            ((volume : Measure EuclN).restrict
+              (chartTargetEuclid (I := I) (M := M) α)) :=
+        eLpNorm_chartPulledWeighted_restrict_le_of_support_subset
+          (I := I) (M := M) g α c_max hc_max_pos
+          (fun y hy => (h_dens_bd y hy).2) hfK_supp
+    _ = ENNReal.ofReal (c_max ^ (1 / (2 : ℝ))) *
+          eLpNorm f 2 (chartL2Measure (I := I) (M := M) α) := by
+        rw [show chartL2Measure (I := I) (M := M) α =
+            (volume : Measure EuclN).restrict
+              (chartTargetEuclid (I := I) (M := M) α) from rfl,
+          eLpNorm_congr_ae hf_aeEq_fK_v.symm]
+    _ = ENNReal.ofReal (c_max ^ (1 / (2 : ℝ))) * ‖w‖ₑ := by
+        rw [hf_eLpNorm_eq]
+    _ ≤ ENNReal.ofReal (c_max ^ (1 / (2 : ℝ))) *
+          ENNReal.ofReal (Cop * ‖u‖) := by
+        gcongr
+        rw [← ofReal_norm_eq_enorm w]
+        exact ENNReal.ofReal_le_ofReal hw_op
+    _ = ENNReal.ofReal (c_max ^ (1 / (2 : ℝ)) * Cop) * ENNReal.ofReal ‖u‖ := by
+        rw [ENNReal.ofReal_mul hCop_nn,
+          ENNReal.ofReal_mul (Real.rpow_nonneg hc_max_pos.le _), mul_assoc]
+
 end TensorSpectral
 end Parabolic
 end Analysis
