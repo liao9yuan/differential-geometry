@@ -966,7 +966,7 @@ partition-of-unity kernel. -/
 /-- The component atom `componentLpLimit g r s h_atlas i α P` — `μ` times the
 canonical eigenvector chart component — is `MemWkp K 2` on the chart-`α` target,
 given the order-`(K + 1)` partition-of-unity regularity input `h_pou`. -/
-private lemma componentLpLimit_memWkp
+lemma componentLpLimit_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1062,7 +1062,7 @@ The canonical eigenvector chart component is `W^{K+1,2}` (the Summand-1 route at
 order `K + 1`), and the eigenvector weak chart partial is a genuine weak partial
 of it (`eigenvectorChartWeakPartial_hasWeakPartialDeriv`); a weak partial of a
 `W^{K+1,2}` function is `W^{K,2}`. The `μ` rescaling preserves `MemWkp`. -/
-private lemma partialLpLimit_memWkp
+lemma partialLpLimit_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

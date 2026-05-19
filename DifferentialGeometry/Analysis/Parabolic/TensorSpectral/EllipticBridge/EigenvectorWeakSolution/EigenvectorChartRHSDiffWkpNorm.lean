@@ -310,7 +310,7 @@ omit [CompleteSpace E] in
 /-- The level-`m` differentiated chart right-hand side `eigenvectorChartRHSDiff g
 r s h_atlas i α P₀ m l` is almost everywhere zero on the open complement of the
 compact partition-of-unity kernel `chartPouKernel α` inside the chart target. -/
-private lemma rhsDiff_ae_zero_off_chartPouKernel
+lemma rhsDiff_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
