@@ -86,10 +86,9 @@ theorem rm13Section_realizes
     Rm13RealizesConnection (I := I) cov
       (Riemann.CovariantDerivative.rm13Section (I := I) (M := M) cov hcov) := by
   intro X Y Z x alpha
-  -- Real frontier: tensoriality of `connectionRiemannCurvatureField` in all
-  -- smooth vector-field slots, reducing arbitrary fields to tangent-constant
-  -- representatives at `x`.
-  sorry
+  exact
+    Riemann.CovariantDerivative.rm13Section_apply_smooth
+      (I := I) (M := M) cov hcov X Y Z alpha
 
 /-- The intrinsic lowered `(0,4)` Riemann section realizes metric-lowered
 connection curvature. -/
@@ -100,9 +99,6 @@ theorem rm04Section_realizes
     Rm04RealizesConnection (I := I) g cov
       (Riemann.CovariantDerivative.rm04Section (I := I) g cov hcov) := by
   intro W X Y Z x
-  have h13 :=
-    rm13Section_realizes (I := I) (M := M) cov hcov X Y Z x
-      (dualToCotangent (I := I) ((tangentFlatLinear (I := I) g x) (W x)))
   exact
     Riemann.CovariantDerivative.rm04Section_apply_smooth
       (I := I) (M := M) g cov hcov W X Y Z x
