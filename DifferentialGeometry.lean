@@ -389,6 +389,13 @@ import DifferentialGeometry.Analysis.Laplacian.Operator.Operator
 import DifferentialGeometry.Analysis.Laplacian.Spectral.Resolvent
 import DifferentialGeometry.Analysis.Laplacian.Spectral.Spectrum
 import DifferentialGeometry.Analysis.Laplacian.Spectral.EigenBasis
+import DifferentialGeometry.Analysis.Laplacian.Spectral.EigenIdx
+import DifferentialGeometry.Analysis.Sobolev.Hs.SpectralDefs
+import DifferentialGeometry.Analysis.Sobolev.Hs.Inclusion
+import DifferentialGeometry.Analysis.Sobolev.Hs.HeatSemigroupHs
+import DifferentialGeometry.Analysis.Sobolev.Hs.HeatSemigroupHsExt
+import DifferentialGeometry.Analysis.Sobolev.Hs.FiniteSupport
+import DifferentialGeometry.Analysis.Sobolev.Hs.HeatSemigroupContinuity
 import DifferentialGeometry.Analysis.Laplacian.Spectral.Enumeration
 import DifferentialGeometry.Analysis.Laplacian.WithBoundary.InteriorSmoothScalarPreH1
 import DifferentialGeometry.Analysis.Laplacian.WithBoundary.InteriorH1Compl
@@ -884,6 +891,7 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.Defs
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.Inclusion
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.FractionalPower
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SmoothingHs
+import DifferentialGeometry.Analysis.SpectralBounds.SmoothingConst
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.BochnerL2
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeH1
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.PerMode
@@ -898,6 +906,7 @@ import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SpectralBounds
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SemigroupTimeRegularity
 import DifferentialGeometry.Analysis.Parabolic.TensorLinearParabolic
 
+import DifferentialGeometry.Analysis.ODE.IntegralGronwall
 import DifferentialGeometry.Analysis.ODE.Variational
 import DifferentialGeometry.Analysis.ODE.FlowC1
 import DifferentialGeometry.Analysis.ODE.FlowC1Bridge
@@ -911,8 +920,11 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.DuhamelMap
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Contraction
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Existence
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorInstance
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.ScalarInstance
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Scalar
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.MaxRegSpace
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.MaxRegFixedPoint
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.EnergyEstimates
 
 -- Public consumption-facing facade
 import DifferentialGeometry.Interface
