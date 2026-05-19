@@ -470,7 +470,36 @@ import DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 import DifferentialGeometry.Geometry.Riemannian.InjectivityRadius
 import DifferentialGeometry.Geometry.Riemannian.SectionalCurvature
 import DifferentialGeometry.Geometry.Riemannian.AlongCurve
-import DifferentialGeometry.Geometry.Riemannian.JacobiField
+
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.Velocity
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.VelocityChart
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.ChartTransitionTTM
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.ChartChristoffelTransform
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.ChartInvariance
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.Intrinsic
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.ConstantSpeed
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.Homogeneity
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.AffineReparam
+import DifferentialGeometry.Geometry.Riemannian.Exp.Basic
+import DifferentialGeometry.Geometry.Riemannian.Length.LengthFunctional
+import DifferentialGeometry.Geometry.Riemannian.Length.EnergyFunctional
+import DifferentialGeometry.Geometry.Riemannian.Distance.Basic
+import DifferentialGeometry.Geometry.Riemannian.Curve.CovDerivAlong
+import DifferentialGeometry.Geometry.Riemannian.Curve.CovDerivAlongMetric
+import DifferentialGeometry.Geometry.Riemannian.ParallelTransport.Defs
+import DifferentialGeometry.Geometry.Riemannian.ParallelTransport.Existence
+import DifferentialGeometry.Geometry.Riemannian.Symmetry.KillingField
+import DifferentialGeometry.Geometry.Riemannian.Symmetry.Conformal
+import DifferentialGeometry.Geometry.Riemannian.Variation.Defs
+import DifferentialGeometry.Geometry.Riemannian.Curvature.Intrinsic
+import DifferentialGeometry.Geometry.Riemannian.Curvature.Sectional
+import DifferentialGeometry.Geometry.Riemannian.Curvature.Einstein
+import DifferentialGeometry.Geometry.Riemannian.Curvature.ConstantSectional
+import DifferentialGeometry.Geometry.Riemannian.Curvature.Bounds
+import DifferentialGeometry.Geometry.Riemannian.Curvature.Bridges
+import DifferentialGeometry.Geometry.Riemannian.Completeness.Defs
+import DifferentialGeometry.Geometry.Riemannian.Exp.CompleteDomain
+import DifferentialGeometry.Geometry.Riemannian.Exp.NormalNeighborhood
 
 import DifferentialGeometry.Analysis.Sobolev.Solutions.FriedrichsCommutator
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.NonSmooth
