@@ -795,6 +795,101 @@ theorem eigenvectorChartComponent_wkpNorm_m_plus_two_of_iterated_le
     rw [h_cast]
     exact h_gap_norm
 
+omit [CompleteSpace E] in
+/-- **Eigenbasis-uniform quantitative order-raiser: chart-`H^{m+2}`-norm of the
+eigenvector chart component.**
+
+For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a chart center
+`α : M`, a component multi-index `P₀`, and an order `m : ℕ`, there is a single
+constant `C > 0` — depending only on the manifold dimension and `m`, never on
+the eigenbasis index — such that, for *every* eigenbasis index `i` for which:
+
+* chart-`H¹` holds for every chosen `j`-fold mixed weak partial (`j ≤ m`);
+* chart-`H²` holds for every chosen `m`-fold mixed weak partial;
+
+the eigenvector chart component lies in chart-`H^{m+2}` on the chart target and
+its chart-`H^{m+2}`-norm is bounded by `ENNReal.ofReal C` times the sum of the
+two aggregates `eigenvectorIteratedW1Aggregate` and
+`eigenvectorIteratedW2Aggregate`.
+
+This is the eigenbasis-uniform companion of
+`eigenvectorChartComponent_wkpNorm_m_plus_two_of_iterated_le`. The per-`i`
+statement carries an existential constant *after* the index `i`, hence a
+potentially `i`-dependent constant; here the geometric constant
+`C := (n + 1)^m` (`n := Module.finrank ℝ E`) is hoisted in front of the index
+quantifier. The proof fixes that explicit `i`-free witness, then introduces `i`
+together with its regularity hypotheses and threads the bound through the
+gap-induction engine `eigenvectorIteratedPartial_wkpNorm_gapInduction` exactly
+as in the per-`i` proof — the engine's per-gap accumulation constant `(n + 1)^m`
+is itself eigenbasis-uniform. -/
+theorem eigenvectorChartComponent_wkpNorm_m_plus_two_of_iterated_le_uniform
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ) :
+    ∃ C : ℝ, 0 < C ∧
+      ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
+        (_h_intermediate_w1p :
+          ∀ (j : ℕ), j ≤ m → ∀ (idx : Fin j → Fin (Module.finrank ℝ E)),
+            DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
+              (d := Module.finrank ℝ E) 1 2
+              (eigenvectorChartIteratedPartial (I := I) (M := M)
+                g r s h_atlas i α P₀ j idx)
+              (chartTargetEuclid (I := I) (M := M) α))
+        (_h_top_memWkp_two :
+          ∀ (idx : Fin m → Fin (Module.finrank ℝ E)),
+            DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
+              (d := Module.finrank ℝ E) 2 2
+              (eigenvectorChartIteratedPartial (I := I) (M := M)
+                g r s h_atlas i α P₀ m idx)
+              (chartTargetEuclid (I := I) (M := M) α)),
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
+          (d := Module.finrank ℝ E) (m + 2) 2
+          (eigenvectorChartComponentFun (I := I) (M := M) g r s h_atlas i α P₀)
+          (chartTargetEuclid (I := I) (M := M) α)
+        ∧ DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+            (d := Module.finrank ℝ E) (m + 2) 2
+            (eigenvectorChartComponentFun (I := I) (M := M) g r s h_atlas i α P₀)
+            (chartTargetEuclid (I := I) (M := M) α)
+          ≤ ENNReal.ofReal C *
+              (eigenvectorIteratedW1Aggregate (I := I) (M := M)
+                  g r s h_atlas i α P₀ m
+                + eigenvectorIteratedW2Aggregate (I := I) (M := M)
+                  g r s h_atlas i α P₀ m) := by
+  classical
+  -- The eigenbasis-free geometric constant `C := (n + 1)^m`, positive.
+  refine ⟨((Module.finrank ℝ E : ℝ) + 1) ^ m, ?_, ?_⟩
+  · -- `0 < (n + 1)^m`.
+    have h_base : (0 : ℝ) < (Module.finrank ℝ E : ℝ) + 1 := by positivity
+    exact pow_pos h_base m
+  -- Witness fixed; now introduce the eigenbasis index and its hypotheses.
+  intro i h_intermediate_w1p h_top_memWkp_two
+  -- The first conjunct is the qualitative order-assembly headline.
+  have h_first :
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
+        (d := Module.finrank ℝ E) (m + 2) 2
+        (eigenvectorChartComponentFun (I := I) (M := M) g r s h_atlas i α P₀)
+        (chartTargetEuclid (I := I) (M := M) α) :=
+    eigenvectorChartComponent_memWkp_m_plus_two_of_iterated
+      g r s h_atlas i α P₀ m h_intermediate_w1p h_top_memWkp_two
+  refine ⟨h_first, ?_⟩
+  -- The gap-induction engine at `gap = m`, `j = 0`.
+  have h_gap := eigenvectorIteratedPartial_wkpNorm_gapInduction
+    (I := I) (M := M) g r s h_atlas i α P₀ m h_intermediate_w1p h_top_memWkp_two
+    m 0 (by omega) Fin.elim0
+  -- At `j = 0`, the `0`-fold mixed weak partial is the chart component.
+  obtain ⟨_, h_gap_norm⟩ := h_gap
+  rw [eigenvectorChartIteratedPartial_zero] at h_gap_norm
+  -- `ENNReal.ofReal ((n + 1)^m) = ((n : ℝ≥0∞) + 1)^m`; match the gap bound.
+  have h_cast :
+      ENNReal.ofReal (((Module.finrank ℝ E : ℝ) + 1) ^ m)
+        = ((Module.finrank ℝ E : ℝ≥0∞) + 1) ^ m := by
+    rw [ENNReal.ofReal_pow (by positivity)]
+    congr 1
+    rw [ENNReal.ofReal_add (by positivity) (by norm_num),
+      ENNReal.ofReal_natCast, ENNReal.ofReal_one]
+  rw [h_cast]
+  exact h_gap_norm
+
 /-! ## Sanity tests -/
 
 section ElaborationTests

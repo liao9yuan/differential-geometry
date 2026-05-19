@@ -1170,6 +1170,187 @@ theorem wkpNorm_tensorL2ChartComponentCutoff_le_of_pou
     rw [Finset.mul_sum]
   rw [Finset.sum_congr rfl h_inner_factor, ← Finset.mul_sum]
 
+/-! ## The input-uniform cutoff chart-component norm bound
+
+`wkpNorm_tensorL2ChartComponentCutoff_le_of_pou` produces, for each `L²` tensor
+element `u`, a constant `C` with the cutoff norm bound. The per-summand constants
+of that proof come from `wkpNorm_chartTransitionTransportCLM_le`, whose explicit
+constant depends only on the chart-transition geometry `(g, r, s, β, α, P₀, Q,
+k)` and not on the transported function. Hence a *single* constant `C` — built
+from those geometric per-transport constants and the multiplicity of the double
+sum — serves the cutoff bound for *every* `u` simultaneously. The
+input-uniform restatement hoists that constant before the `∀ u`. -/
+
+/-- **Input-uniform explicit norm bound for the cutoff tensor `L²` chart
+component.** A single nonnegative constant `C` — chart-transition geometric data,
+independent of the `L²` tensor element — works for *every* `u : TensorL2 r s g`:
+whenever all partition-of-unity Euclidean chart components of `u` are iterated
+Sobolev regular of order `k`, the order-`k` iterated Euclidean Sobolev norm of the
+cutoff-weighted chart `P₀`-component of `u` is bounded by `C` times the sum, over
+the transport chart centres `β` of `α` and the component multi-indices `Q`, of the
+order-`k` norms of the partition-of-unity `Q`-components of `u`.
+
+This is the input-uniform companion of `wkpNorm_tensorL2ChartComponentCutoff_le_of_pou`:
+the per-transport constants of that bound stem from
+`wkpNorm_chartTransitionTransportCLM_le`, whose explicit constant is already
+quantified uniformly over the transported function; collecting them — flooring at
+`1` — yields the single `u`-independent constant. -/
+theorem wkpNorm_tensorL2ChartComponentCutoff_le_of_pou_uniform
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) (k : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ u : TensorL2 r s g,
+        (∀ (β : M) (Q : TensorCompIdx (E := E) r s),
+          MemWkp (d := Module.finrank ℝ E) k 2
+            (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s u β Q :
+              Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+            (chartTargetEuclid (I := I) (M := M) β)) →
+        wkpNorm (d := Module.finrank ℝ E) k 2
+            (fun y => ((tensorL2ChartComponentCutoff (I := I) (M := M)
+                g r s u α P₀ :
+              Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
+            (chartTargetEuclid (I := I) (M := M) α)
+          ≤ ENNReal.ofReal C *
+            (∑ β ∈ transportChartCenters (I := I) (M := M) α,
+              ∑ Q : TensorCompIdx (E := E) r s,
+                wkpNorm (d := Module.finrank ℝ E) k 2
+                  (fun y => ((tensorL2ChartComponent (I := I) (M := M)
+                      g r s u β Q :
+                    Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
+                    EuclN → ℝ) y)
+                  (chartTargetEuclid (I := I) (M := M) β)) := by
+  classical
+  set d : ℕ := Module.finrank ℝ E with hd_def
+  set Tα : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hTα_def
+  have hTα_open : IsOpen Tα := chartTargetEuclid_isOpen (I := I) (M := M) α
+  set S : Finset M := transportChartCenters (I := I) (M := M) α with hS_def
+  -- The chart-transition transport family — `u`-independent.
+  set F : TensorL2 r s g → M → TensorCompIdx (E := E) r s → EuclN → ℝ :=
+    fun u β Q y =>
+      ((chartTransitionTransportCLM (I := I) (M := M) g r s β α P₀ Q
+          (tensorL2ChartComponent (I := I) (M := M) g r s u β Q) :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
+    with hF_def
+  -- The per-transport constant of `wkpNorm_chartTransitionTransportCLM_le` is
+  -- quantified uniformly over the transported function, so its `Classical.choice`
+  -- witness depends only on `(β, Q)` — not on the `L²` tensor element.
+  set Cfun : M → TensorCompIdx (E := E) r s → ℝ :=
+    fun β Q =>
+      (wkpNorm_chartTransitionTransportCLM_le (I := I) (M := M)
+        g r s β α P₀ Q k).choose
+    with hCfun_def
+  have hCfun_spec : ∀ β Q,
+      0 ≤ Cfun β Q ∧
+        ∀ f : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β),
+          MemWkp (d := d) k 2 (fun y => (f : EuclN → ℝ) y)
+            (chartTargetEuclid (I := I) (M := M) β) →
+          MemWkp (d := d) k 2
+              (fun y => ((chartTransitionTransportCLM (I := I) (M := M)
+                  g r s β α P₀ Q f :
+                Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
+              Tα ∧
+            wkpNorm (d := d) k 2
+                (fun y => ((chartTransitionTransportCLM (I := I) (M := M)
+                    g r s β α P₀ Q f :
+                  Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
+                Tα ≤
+              ENNReal.ofReal (Cfun β Q) *
+                wkpNorm (d := d) k 2 (fun y => (f : EuclN → ℝ) y)
+                  (chartTargetEuclid (I := I) (M := M) β) := fun β Q =>
+    (wkpNorm_chartTransitionTransportCLM_le (I := I) (M := M)
+      g r s β α P₀ Q k).choose_spec
+  have hCfun_nn : ∀ β Q, 0 ≤ Cfun β Q := fun β Q => (hCfun_spec β Q).1
+  -- The single global constant: the double sum of the per-transport constants
+  -- over the finite transport index set, floored at `1`.
+  set C : ℝ := 1 + ∑ β ∈ S, ∑ Q : TensorCompIdx (E := E) r s, Cfun β Q
+    with hC_def
+  have hC_nn : 0 ≤ C := by
+    rw [hC_def]
+    have h_sum_nn : 0 ≤ ∑ β ∈ S, ∑ Q : TensorCompIdx (E := E) r s, Cfun β Q :=
+      Finset.sum_nonneg (fun β _ =>
+        Finset.sum_nonneg (fun Q _ => hCfun_nn β Q))
+    linarith
+  have hCfun_le_C : ∀ β ∈ S, ∀ Q : TensorCompIdx (E := E) r s, Cfun β Q ≤ C := by
+    intro β hβ Q
+    rw [hC_def]
+    have h_inner : Cfun β Q ≤ ∑ Q' : TensorCompIdx (E := E) r s, Cfun β Q' :=
+      Finset.single_le_sum (f := fun Q' => Cfun β Q')
+        (fun Q' _ => hCfun_nn β Q') (Finset.mem_univ Q)
+    have h_outer :
+        (∑ Q' : TensorCompIdx (E := E) r s, Cfun β Q') ≤
+          ∑ β' ∈ S, ∑ Q' : TensorCompIdx (E := E) r s, Cfun β' Q' :=
+      Finset.single_le_sum
+        (f := fun β' => ∑ Q' : TensorCompIdx (E := E) r s, Cfun β' Q')
+        (fun β' _ => Finset.sum_nonneg (fun Q' _ => hCfun_nn β' Q')) hβ
+    linarith [h_inner.trans h_outer]
+  refine ⟨C, hC_nn, fun u h_pou => ?_⟩
+  -- For each `u`, the per-transport summand is `W^{k,2}` with the geometric
+  -- per-transport norm bound.
+  have hF_spec : ∀ β Q,
+      MemWkp (d := d) k 2 (F u β Q) Tα ∧
+        wkpNorm (d := d) k 2 (F u β Q) Tα ≤
+          ENNReal.ofReal (Cfun β Q) *
+            wkpNorm (d := d) k 2
+              (fun y => ((tensorL2ChartComponent (I := I) (M := M)
+                  g r s u β Q :
+                Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+              (chartTargetEuclid (I := I) (M := M) β) := fun β Q =>
+    (hCfun_spec β Q).2 (tensorL2ChartComponent (I := I) (M := M) g r s u β Q)
+      (h_pou β Q)
+  have hF_mem : ∀ β Q, MemWkp (d := d) k 2 (F u β Q) Tα :=
+    fun β Q => (hF_spec β Q).1
+  -- The cutoff component equals, a.e. on `Tα`, the finite double sum of the
+  -- chart-transition transports of the partition-of-unity components.
+  have h_decomp : (fun y => ((tensorL2ChartComponentCutoff
+        (I := I) (M := M) g r s u α P₀ :
+        Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
+      =ᵐ[(volume : Measure EuclN).restrict Tα]
+      (fun y => ∑ β ∈ S, ∑ Q : TensorCompIdx (E := E) r s, F u β Q y) :=
+    tensorL2ChartComponentCutoff_ae_eq_pou_transport_sum
+      (I := I) (M := M) g r s u α P₀
+  rw [wkpNorm_congr_ae (d := d) (by norm_num) hTα_open h_decomp]
+  -- Subadditivity over the finite double sum.
+  have h_double_le :
+      wkpNorm (d := d) k 2
+          (fun y => ∑ β ∈ S, ∑ Q : TensorCompIdx (E := E) r s, F u β Q y) Tα ≤
+        ∑ β ∈ S, ∑ Q : TensorCompIdx (E := E) r s,
+          wkpNorm (d := d) k 2 (F u β Q) Tα :=
+    wkpNorm_double_sum_le (d := d) (by norm_num) hTα_open S (F u)
+      (fun β _ Q => hF_mem β Q)
+  refine h_double_le.trans ?_
+  -- Bound each transported-summand norm by `C` times the partition-of-unity
+  -- component norm.
+  have h_each_le : ∀ β ∈ S, ∀ Q : TensorCompIdx (E := E) r s,
+      wkpNorm (d := d) k 2 (F u β Q) Tα ≤
+        ENNReal.ofReal C *
+          wkpNorm (d := d) k 2
+            (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s u β Q :
+              Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+            (chartTargetEuclid (I := I) (M := M) β) := by
+    intro β hβ Q
+    refine (hF_spec β Q).2.trans ?_
+    exact mul_le_mul_of_nonneg_right
+      (ENNReal.ofReal_le_ofReal (hCfun_le_C β hβ Q)) (zero_le _)
+  refine (Finset.sum_le_sum (fun β hβ =>
+    Finset.sum_le_sum (fun Q _ => h_each_le β hβ Q))).trans ?_
+  refine le_of_eq ?_
+  have h_inner_factor : ∀ β ∈ S,
+      (∑ Q : TensorCompIdx (E := E) r s,
+        ENNReal.ofReal C *
+          wkpNorm (d := d) k 2
+            (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s u β Q :
+              Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+            (chartTargetEuclid (I := I) (M := M) β)) =
+        ENNReal.ofReal C *
+          ∑ Q : TensorCompIdx (E := E) r s,
+            wkpNorm (d := d) k 2
+              (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s u β Q :
+                Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+              (chartTargetEuclid (I := I) (M := M) β) := by
+    intro β _
+    rw [Finset.mul_sum]
+  rw [Finset.sum_congr rfl h_inner_factor, ← Finset.mul_sum]
+
 end TensorSpectral
 end Parabolic
 end Analysis
