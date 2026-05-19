@@ -1685,7 +1685,7 @@ partition-of-unity bridge `tensorL2ChartComponentCutoff_memWkp_of_pou` at order
 partial of it (`eigenvectorCutoffChartPartialLp_hasWeakPartialDeriv`); a weak
 partial of a `W^{K+1,2}` function is `W^{K,2}`. The `μ` rescaling preserves
 `MemWkp`. -/
-private lemma cutoffPartialLpLimit_memWkp
+theorem cutoffPartialLpLimit_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
