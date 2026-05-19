@@ -372,6 +372,88 @@ theorem tensorCovGradL2Compl_smoothToTensorH1Compl_eq_coe
   rw [tensorCovGradL2Compl_smoothToTensorH1Compl (I := I) (M := M) g r s w,
     tensorCovGradL2_apply]
 
+/-! ## The operator-norm bound `‖·‖ ≤ 1`
+
+The covariant-gradient operator on smooth sections is assembled by
+`LinearMap.mkContinuous` with bound `1`; hence its operator norm is `≤ 1`.
+Its continuous linear extension to the `H¹` completion satisfies the same
+pointwise bound `‖tensorCovGradL2Compl g r s x‖ ≤ ‖x‖`: the bound holds on the
+dense range of the completion embedding (where the extended operator recovers
+`tensorCovGradL2 g r s`), and the inequality is a closed condition. -/
+
+set_option linter.unusedSectionVars false in
+/-- **The operator-norm bound for the covariant-gradient operator.** The
+bounded covariant-gradient operator `tensorCovGradL2 g r s` on smooth
+compactly-supported `H¹` tensor sections has operator norm at most `1`. -/
+theorem tensorCovGradL2_opNorm_le_one
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+    ‖tensorCovGradL2 (I := I) (M := M) g r s‖ ≤ 1 :=
+  LinearMap.mkContinuous_norm_le (covGradL2Lin (I := I) (M := M) g r s)
+    zero_le_one (fun w => covGradL2Lin_norm_le (I := I) (M := M) g r s w)
+
+set_option linter.unusedSectionVars false in
+/-- **The pointwise bound for the completion-extended covariant-gradient
+operator.** For every element `x` of the `H¹` completion `TensorH1Compl g r s`,
+the metric `L²` norm of `tensorCovGradL2Compl g r s x` is bounded by the `H¹`
+norm of `x`.
+
+The bound holds on the dense range of the completion embedding
+`smoothToTensorH1Compl g r s` — there the extended operator recovers
+`tensorCovGradL2 g r s`, and the metric `L²` norm of the covariant gradient is
+bounded by the `H¹` norm by `covGrad_l2Norm_le_h1Norm` — and the inequality is
+a closed condition, so it extends to the whole completion. -/
+theorem tensorCovGradL2Compl_apply_norm_le
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (x : TensorH1Compl g r s) :
+    ‖tensorCovGradL2Compl (I := I) (M := M) g r s x‖ ≤ ‖x‖ := by
+  -- The bound is a closed condition in `x`.
+  have h_closed :
+      IsClosed {y : TensorH1Compl g r s |
+        ‖tensorCovGradL2Compl (I := I) (M := M) g r s y‖ ≤ ‖y‖} :=
+    isClosed_le
+      ((tensorCovGradL2Compl (I := I) (M := M) g r s).continuous.norm)
+      continuous_norm
+  -- The bound holds on the dense range of the completion embedding.
+  have h_dense :
+      ∀ w : SmoothCcTensorH1 g r s,
+        ‖tensorCovGradL2Compl (I := I) (M := M) g r s
+            (smoothToTensorH1Compl (I := I) (M := M) g r s w)‖ ≤
+          ‖smoothToTensorH1Compl (I := I) (M := M) g r s w‖ := by
+    intro w
+    -- The completion embedding preserves the `H¹` norm.
+    have h_rhs :
+        ‖smoothToTensorH1Compl (I := I) (M := M) g r s w‖ = ‖w‖ := by
+      rw [smoothToTensorH1Compl_apply, UniformSpace.Completion.norm_coe]
+    -- On a smooth section the extended operator recovers `tensorCovGradL2`.
+    have h_lhs :
+        tensorCovGradL2Compl (I := I) (M := M) g r s
+            (smoothToTensorH1Compl (I := I) (M := M) g r s w) =
+          ((covGrad (I := I) (M := M) g r s w.toCcTensor :
+            SmoothCcTensor g r (s + 1)) : TensorL2 r (s + 1) g) :=
+      tensorCovGradL2Compl_smoothToTensorH1Compl_eq_coe (I := I) (M := M)
+        g r s w
+    rw [h_lhs, h_rhs]
+    exact covGrad_l2Norm_le_h1Norm (I := I) (M := M) g r s w
+  -- A closed set containing a dense subset is everything.
+  exact (denseRange_smoothToTensorH1Compl (I := I) (M := M) g r s).induction_on
+    x h_closed h_dense
+
+set_option linter.unusedSectionVars false in
+/-- **The operator-norm bound for the completion-extended covariant-gradient
+operator.** The continuous linear extension `tensorCovGradL2Compl g r s` of the
+covariant-gradient operator to the `H¹` completion `TensorH1Compl g r s` has
+operator norm at most `1`.
+
+This is `tensorCovGradL2Compl_apply_norm_le` repackaged through
+`ContinuousLinearMap.opNorm_le_bound`. -/
+theorem tensorCovGradL2Compl_opNorm_le_one
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+    ‖tensorCovGradL2Compl (I := I) (M := M) g r s‖ ≤ 1 :=
+  ContinuousLinearMap.opNorm_le_bound _ zero_le_one
+    (fun x => by
+      rw [one_mul]
+      exact tensorCovGradL2Compl_apply_norm_le (I := I) (M := M) g r s x)
+
 /-! ## The smooth-case pairing formula
 
 For a fixed smooth compactly-supported `(r, s + 1)`-tensor section `T`, the
