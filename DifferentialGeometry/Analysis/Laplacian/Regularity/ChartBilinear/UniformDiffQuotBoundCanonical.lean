@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Laplacian.Regularity.ChartBilinear.UniformDiffQuotBound
+import DifferentialGeometry.Analysis.Laplacian.Regularity.ChartBilinear.UniformDiffQuotGTotalBound
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionDischargeAssembly
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionNonSmooth
 
@@ -115,6 +116,7 @@ open DifferentialGeometry.Analysis.Sobolev.SubstitutionDischargeSmoothApprox
 open DifferentialGeometry.Analysis.Sobolev.SubstitutionDischargeAssembly
 open DifferentialGeometry.Analysis.Sobolev.SubstitutionNonSmoothChartBilinear
 open DifferentialGeometry.Analysis.Sobolev.NirenbergSubstitutionNonSmooth
+open DifferentialGeometry.Analysis.Sobolev.NirenbergCrossBoundsNonSmooth
 
 /-! ## File-local Borel-space instances -/
 
@@ -3024,24 +3026,34 @@ to the original `D.weak_partial`. -/
 
 set_option maxHeartbeats 8000000 in
 set_option linter.unusedVariables false in
-/-- **Final assembly**: the unconditional uniform-in-`h` per-`(i, k)`
-`L²(Ω'')` bound on the difference quotient of the chart-bilinear data's
-weak partial derivatives.
+/-- **Quantitative final assembly**: the unconditional uniform-in-`h`
+per-`(i, k)` `L²(Ω'')` bound on the difference quotient of the
+chart-bilinear data's weak partial derivatives, with an *explicit
+chart-geometric constant* `C_geom` that is **uniform over the bilinear
+data `D`**.
 
-Given a chart-bilinear data structure `D`, a standard Nirenberg cutoff `η`
-on the Euclidean chart space with a precompact target Ω' inside the chart
-target and Ω'' ⊆ Ω' on which `η ≡ 1`, the wrapper produces a constant
-`M_bound i k ≥ 0` such that for every `0 < |h| ≤ R₀`:
+Given a standard Nirenberg cutoff `η` on the Euclidean chart space with a
+precompact target `Ω'` inside the chart target and `Ω'' ⊆ Ω'` on which
+`η ≡ 1`, there is a constant `C_geom i k ≥ 0` — built purely from the
+chart geometry (a smooth elliptic extension `B` of the metric and a
+master cutoff `χ`, neither depending on `D`) — such that **for every**
+`ChartBilinearH1ComplData D` and every `0 < |h| ≤ R₀`:
 
-  `‖D_h^k (D.weak_partial i)‖_{L²(Ω'')} ≤ ENNReal.ofReal (M_bound i k)`.
+  `‖D_h^k (D.weak_partial i)‖_{L²(Ω'')} ≤`
+  `  ENNReal.ofReal (C_geom i k · √(∑_l ‖D.weak_partial l‖²_{L²(closure Ω')}`
+  `    + ‖D.u_chart‖²_{L²(closure Ω')} + ‖D.f_chart‖²_{L²(closure Ω')}))`.
 
-The conclusion is the uniform-in-`h` bound consumed by
-`h2_chart_loc_of_uniform_bound` to extract `H²` regularity. The radius
-`R₀ > 0` is the diff-quotient bound; the proof works uniformly in `R₀`. -/
-theorem chartBilinearH1Compl_uniform_diffQuot_bound_of_data
+Because `C_geom` is quantified **before** `D`, the statement asserts the
+constant is uniform over all bilinear data — which is the whole point: the
+chart-localising cutoff `χ` and the smooth elliptic extension `B` depend
+only on `g`, `α`, `Ω'`, `η`, never on `D`.
+
+The radius `R₀ > 0` is the diff-quotient bound; the proof works uniformly
+in `R₀`. The existential headline `chartBilinearH1Compl_uniform_diffQuot_bound_of_data`
+is a thin wrapper around this theorem. -/
+theorem chartBilinearH1Compl_uniform_diffQuot_bound_of_data_quantitative
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
-    (D : ChartBilinearH1ComplData (I := I) (M := M) g α)
     {η : EuclN → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η)
     (hη_supp : HasCompactSupport η)
     (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1)
@@ -3055,18 +3067,28 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound_of_data
       Metric.cthickening |h| (tsupport η) ⊆ Ω')
     (hη_one_on_Ω'' : ∀ x ∈ Ω'', η x = 1)
     (hΩ''_meas : MeasurableSet Ω'') :
-    ∃ M_bound : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ,
-      (∀ i k, 0 ≤ M_bound i k) ∧
-      (∀ (i k : Fin (Module.finrank ℝ E)) (h : ℝ),
+    ∃ C_geom : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ,
+      (∀ i k, 0 ≤ C_geom i k) ∧
+      ∀ (D : ChartBilinearH1ComplData (I := I) (M := M) g α)
+        ⦃i k : Fin (Module.finrank ℝ E)⦄ ⦃h : ℝ⦄,
         0 < |h| → |h| ≤ R₀ →
           eLpNorm
             (DifferentialGeometry.Analysis.Sobolev.diffQuot
               (d := Module.finrank ℝ E) k h (D.weak_partial i)) 2
             ((volume : Measure EuclN).restrict Ω'')
-          ≤ ENNReal.ofReal (M_bound i k)) := by
+          ≤ ENNReal.ofReal (C_geom i k * Real.sqrt (
+              (∑ l : Fin (Module.finrank ℝ E),
+                (eLpNorm (D.weak_partial l) 2
+                  ((volume : Measure EuclN).restrict (closure Ω'))).toReal ^ 2)
+              + (eLpNorm D.u_chart 2
+                  ((volume : Measure EuclN).restrict (closure Ω'))).toReal ^ 2
+              + (eLpNorm D.f_chart 2
+                  ((volume : Measure EuclN).restrict (closure Ω'))).toReal ^ 2)) := by
   classical
-  -- Step 1: Build the bilinear form B matching weightedInvGram and density on
-  -- cthickening R₀ (tsupport η).
+  -- ====================================================================
+  -- Step 1: Build the bilinear form B matching weightedInvGram and density
+  -- on cthickening R₀ (tsupport η). This does NOT use `D`.
+  -- ====================================================================
   have hη_tsupp_compact : IsCompact (tsupport η) := hη_supp
   have h_cthickR0_compact : IsCompact (Metric.cthickening R₀ (tsupport η)) :=
     hη_tsupp_compact.cthickening
@@ -3081,24 +3103,14 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound_of_data
   obtain ⟨B, hB_a_match, hB_c_match⟩ :=
     exists_smooth_metric_extension_with_density (I := I) (M := M) g α
       h_cthickR0_compact h_cthickR0_in_chart
-  -- Step 2: Apply the 3 existing discharges.
-  have h_FK_diffQuot_u_bound :=
-    chartBilinearFK_diffQuot_u_discharge (I := I) (M := M) D hη_supp
-      hΩ' hΩ'_chart hΩ'_compact hη_in_Ω' hR₀_pos hh_supp_in_Ω'
-  have h_v_test_sq_bound :=
-    chartBilinear_v_test_sq_discharge (I := I) (M := M) D hη hη_supp hη_range
-      hN h_fderiv_eta hΩ' hΩ'_chart hΩ'_compact hη_in_Ω' hR₀_pos hh_supp_in_Ω'
-  have h_master_nonsmooth :=
-    chartBilinear_master_nonsmooth_discharge (I := I) (M := M) D B hη hη_supp
-      hη_range hΩ' hΩ'_chart hΩ'_compact hη_in_Ω' hR₀_pos hh_supp_in_Ω'
-      hB_a_match hB_c_match
+  -- ====================================================================
   -- Step 3: Build the master cutoff χ ≡ 1 on a NEIGHBORHOOD of `closure Ω'`.
+  -- This does NOT use `D` either.
+  -- ====================================================================
   have h_chart_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
   obtain ⟨δ, hδ_pos, hδ_in_chart⟩ :=
     hΩ'_compact.exists_cthickening_subset_open h_chart_open hΩ'_chart
-  -- Build K_χ := cthickening (δ/2) (closure Ω') ⊆ thickening δ (closure Ω')
-  -- ⊆ cthickening δ (closure Ω') ⊆ chartTargetEuclid α.
   set K_χ : Set EuclN := Metric.cthickening (δ / 2) (closure Ω') with hK_χ_def
   have hδ_half_pos : 0 < δ / 2 := by linarith
   have hδ_half_lt_δ : δ / 2 < δ := by linarith
@@ -3131,7 +3143,122 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound_of_data
     intro x
     have hx_range : χ x ∈ Set.range χ := Set.mem_range_self x
     exact ⟨(hχ_range hx_range).1, (hχ_range hx_range).2⟩
+  have hχ_cont : Continuous χ := hχ_smooth.continuous
+  -- ====================================================================
+  -- Sup bounds for `χ` and its directional partials. Both `χ` and
+  -- `∂_l χ` are continuous with compact support, hence globally bounded.
+  -- This does NOT use `D`.
+  -- ====================================================================
+  -- `M_χ` : a global sup bound for `|χ|`.
+  obtain ⟨M_χ, hM_χ_nn, hM_χ_bd⟩ : ∃ M_χ : ℝ, 0 ≤ M_χ ∧ ∀ x, |χ x| ≤ M_χ := by
+    by_cases hSupp_empty : (tsupport χ).Nonempty
+    · obtain ⟨xMax, _, hxMax_max⟩ :=
+        hχ_cs.exists_isMaxOn hSupp_empty hχ_cont.abs.continuousOn
+      refine ⟨|χ xMax|, abs_nonneg _, ?_⟩
+      intro x
+      by_cases hx : x ∈ tsupport χ
+      · exact hxMax_max hx
+      · have hχx : χ x = 0 := image_eq_zero_of_notMem_tsupport hx
+        rw [hχx, abs_zero]; exact abs_nonneg _
+    · refine ⟨0, le_refl _, ?_⟩
+      intro x
+      by_cases hx : x ∈ tsupport χ
+      · exact absurd ⟨x, hx⟩ hSupp_empty
+      · have hχx : χ x = 0 := image_eq_zero_of_notMem_tsupport hx
+        rw [hχx, abs_zero]
+  -- `M_dχ` : a global sup bound for every directional partial `|∂_l χ|`.
+  -- `fderiv ℝ χ` has compact support (`χ` does), hence so does each
+  -- `x ↦ (fderiv ℝ χ x) (single l 1)`; a continuous compactly-supported
+  -- function attains a global max.
+  have hχ_fderiv_cont : Continuous (fderiv ℝ χ) :=
+    hχ_smooth.continuous_fderiv (by decide : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)
+  have hχ_partial_cont : ∀ l : Fin (Module.finrank ℝ E), Continuous
+      (fun x => (fderiv ℝ χ x) (EuclideanSpace.single l 1)) := fun l =>
+    hχ_fderiv_cont.clm_apply continuous_const
+  obtain ⟨M_dχ, hM_dχ_nn, hM_dχ_bd⟩ :
+      ∃ M_dχ : ℝ, 0 ≤ M_dχ ∧ ∀ (l : Fin (Module.finrank ℝ E)) (x : EuclN),
+        |(fderiv ℝ χ x) (EuclideanSpace.single l 1)| ≤ M_dχ := by
+    -- For each `l`, extract a sup bound; then take the maximum over the
+    -- finitely many directions.
+    have h_per_l : ∀ l : Fin (Module.finrank ℝ E),
+        ∃ M : ℝ, 0 ≤ M ∧ ∀ x : EuclN,
+          |(fderiv ℝ χ x) (EuclideanSpace.single l 1)| ≤ M := by
+      intro l
+      have h_cs_l : HasCompactSupport
+          (fun x => (fderiv ℝ χ x) (EuclideanSpace.single l 1)) :=
+        hχ_cs.fderiv_apply (𝕜 := ℝ) (EuclideanSpace.single l 1)
+      have h_cont_abs : Continuous
+          (fun x => |(fderiv ℝ χ x) (EuclideanSpace.single l 1)|) :=
+        (hχ_partial_cont l).abs
+      by_cases hSupp_empty :
+          (tsupport (fun x => (fderiv ℝ χ x) (EuclideanSpace.single l 1))).Nonempty
+      · obtain ⟨xMax, _, hxMax_max⟩ :=
+          h_cs_l.exists_isMaxOn hSupp_empty h_cont_abs.continuousOn
+        refine ⟨|(fderiv ℝ χ xMax) (EuclideanSpace.single l 1)|,
+          abs_nonneg _, fun x => ?_⟩
+        by_cases hx : x ∈ tsupport
+            (fun x => (fderiv ℝ χ x) (EuclideanSpace.single l 1))
+        · exact hxMax_max hx
+        · -- Outside `tsupport`, the partial vanishes. Pass `f` explicitly
+          -- to the `tsupport`-vanishing lemma to avoid higher-order
+          -- unification of the implicit function argument.
+          have hχx : (fderiv ℝ χ x) (EuclideanSpace.single l 1) = 0 :=
+            image_eq_zero_of_notMem_tsupport
+              (f := fun x => (fderiv ℝ χ x) (EuclideanSpace.single l 1)) hx
+          rw [hχx, abs_zero]; exact abs_nonneg _
+      · refine ⟨0, le_refl _, fun x => ?_⟩
+        by_cases hx : x ∈ tsupport
+            (fun x => (fderiv ℝ χ x) (EuclideanSpace.single l 1))
+        · exact absurd ⟨x, hx⟩ hSupp_empty
+        · have hχx : (fderiv ℝ χ x) (EuclideanSpace.single l 1) = 0 :=
+            image_eq_zero_of_notMem_tsupport
+              (f := fun x => (fderiv ℝ χ x) (EuclideanSpace.single l 1)) hx
+          rw [hχx, abs_zero]
+    -- Choose, per `l`, the bound; take the finite maximum.
+    choose Mfun hMfun_nn hMfun_bd using h_per_l
+    set M_dχ : ℝ :=
+      (Finset.univ : Finset (Fin (Module.finrank ℝ E))).sup' Finset.univ_nonempty
+        Mfun with hM_dχ_def
+    have hM_dχ_nn : 0 ≤ M_dχ := by
+      obtain ⟨l₀⟩ : Nonempty (Fin (Module.finrank ℝ E)) :=
+        ⟨⟨0, Nat.pos_of_ne_zero (NeZero.ne _)⟩⟩
+      exact le_trans (hMfun_nn l₀)
+        (Finset.le_sup' Mfun (Finset.mem_univ l₀))
+    refine ⟨M_dχ, hM_dχ_nn, ?_⟩
+    intro l x
+    exact le_trans (hMfun_bd l x)
+      (Finset.le_sup' Mfun (Finset.mem_univ l))
+  -- ====================================================================
+  -- The explicit chart-geometric constant `C_geom`. It depends only on
+  -- `B.lam`, `nirenbergMasterYoungConstant`, the cutoff sup bounds
+  -- `M_χ`, `M_dχ`, the dimension, and `chartDensitySup g α Ω'` — **never
+  -- on `D`**.
+  -- ====================================================================
+  set C_geom : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
+    fun i k => Real.sqrt ((2 / B.lam) *
+      nirenbergMasterYoungConstant B N hΩ'_compact k *
+      (2 * ((Module.finrank ℝ E : ℝ) + 1) * (M_χ ^ 2 + M_dχ ^ 2 + 1)) *
+      max 1 ((chartDensitySup (I := I) (M := M) g α Ω') ^ 2))
+    with hC_geom_def
+  refine ⟨C_geom, fun i k => Real.sqrt_nonneg _, ?_⟩
+  intro D i k h hh_pos hh_le
+  -- ====================================================================
+  -- Step 2: Apply the 3 existing discharges. These depend on `D` (and on
+  -- the already-built `B`).
+  -- ====================================================================
+  have h_FK_diffQuot_u_bound :=
+    chartBilinearFK_diffQuot_u_discharge (I := I) (M := M) D hη_supp
+      hΩ' hΩ'_chart hΩ'_compact hη_in_Ω' hR₀_pos hh_supp_in_Ω'
+  have h_v_test_sq_bound :=
+    chartBilinear_v_test_sq_discharge (I := I) (M := M) D hη hη_supp hη_range
+      hN h_fderiv_eta hΩ' hΩ'_chart hΩ'_compact hη_in_Ω' hR₀_pos hh_supp_in_Ω'
+  have h_master_nonsmooth :=
+    chartBilinear_master_nonsmooth_discharge (I := I) (M := M) D B hη hη_supp
+      hη_range hΩ' hΩ'_chart hΩ'_compact hη_in_Ω' hR₀_pos hh_supp_in_Ω'
+      hB_a_match hB_c_match
+  -- ====================================================================
   -- Step 4: Define cutoff extensions u_g, g_g i, f_g.
+  -- ====================================================================
   set u_g : EuclN → ℝ := fun x => χ x * D.u_chart x with hu_g_def
   set g_g : Fin (Module.finrank ℝ E) → EuclN → ℝ := fun i x =>
     (fderiv ℝ χ x) (EuclideanSpace.single i 1) * D.u_chart x +
@@ -3989,26 +4116,207 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound_of_data
       exact h_A3_eq i j
     rw [h_A1_sum_eq, h_A2_sum_eq, h_A3_sum_eq, h_f_term_eq, h_c_term_eq]
     exact h_master_nonsmooth k hh hh_le
-  -- Step 7: Apply the conditional wrapper with u_g, f_g, g_g, B, and the three bridged hypotheses.
-  obtain ⟨M_bound, hM_bound_nn, hM_bound⟩ :=
-    chartBilinearH1Compl_uniform_diffQuot_bound
+  -- ====================================================================
+  -- Step 7': Apply the *quantitative* conditional wrapper with u_g, f_g,
+  -- g_g, B, and the three bridged hypotheses. It yields the explicit
+  -- closed-form bound on `D_h^k (g_g i)` through the energy quantity
+  -- `G_total`.
+  -- ====================================================================
+  have h_g_g_quant :
+      eLpNorm
+        (DifferentialGeometry.Analysis.Sobolev.diffQuot
+          (d := Module.finrank ℝ E) k h (g_g i)) 2
+        ((volume : Measure EuclN).restrict Ω'')
+      ≤ ENNReal.ofReal (Real.sqrt ((2 / B.lam) *
+          nirenbergMasterYoungConstant B N hΩ'_compact k *
+          (∫ x in Ω', ∑ l : Fin (Module.finrank ℝ E), ((g_g l) x) ^ 2
+              ∂(volume : Measure EuclN) +
+            ∫ x in Ω', (u_g x)^2 ∂(volume : Measure EuclN) +
+            ∫ x in Ω', (f_g x)^2 ∂(volume : Measure EuclN)))) :=
+    chartBilinearH1Compl_uniform_diffQuot_bound_quantitative
       (I := I) (M := M) (E := E) (H := H) (g := g) (α := α)
       D B hu_g_l2 hf_g_l2_loc hg_g_l2 hg_g_isWP hη hη_supp hη_range hN
       h_fderiv_eta hΩ' (by intro x _; exact Set.mem_univ _) hΩ'_compact
       hη_in_Ω' hh_supp_in_Ω' hη_one_on_Ω'' hΩ''_meas
-      h_FK h_v_test_sq h_master
+      h_FK h_v_test_sq h_master hh_pos hh_le
+  -- ====================================================================
+  -- Chaining: bound `G_total` by the divergence-form data's own `L²`
+  -- norms, then chain through `√` and `ENNReal.ofReal`.
+  -- ====================================================================
+  -- Closure measurability + `D.f_chart ∈ L²(closure Ω')`.
+  have hΩ'_closure_meas : MeasurableSet (closure Ω') :=
+    isClosed_closure.measurableSet
+  have hf_chart_l2_closure : MemLp D.f_chart 2
+      ((volume : Measure EuclN).restrict (closure Ω')) :=
+    memLp_volume_restrict_of_memLp_chartPulledWeightedMeasure (I := I) (M := M)
+      D.f_chart_memLp_weighted hΩ'_compact hΩ'_closure_meas hΩ'_chart
+  -- The free source: the density-weighted right-hand side.
+  set fSrc : EuclN → ℝ := fun x => densityOnEuclid (I := I) g α x * D.f_chart x
+    with hfSrc_def
+  have hfSrc_l2_closure : MemLp fSrc 2
+      ((volume : Measure EuclN).restrict (closure Ω')) :=
+    densityWeightedSource_memLp (I := I) (M := M) (g := g) (α := α)
+      hΩ'_compact hΩ'_chart hf_chart_l2_closure
+  -- The three squared-`L²(closure Ω')`-norm quantities.
+  set Sw : ℝ := ∑ l : Fin (Module.finrank ℝ E),
+      (eLpNorm (D.weak_partial l) 2
+        ((volume : Measure EuclN).restrict (closure Ω'))).toReal ^ 2 with hSw_def
+  set Su : ℝ := (eLpNorm D.u_chart 2
+      ((volume : Measure EuclN).restrict (closure Ω'))).toReal ^ 2 with hSu_def
+  set Sf : ℝ := (eLpNorm D.f_chart 2
+      ((volume : Measure EuclN).restrict (closure Ω'))).toReal ^ 2 with hSf_def
+  have hSw_nn : 0 ≤ Sw := by
+    rw [hSw_def]; exact Finset.sum_nonneg (fun _ _ => sq_nonneg _)
+  have hSu_nn : 0 ≤ Su := by rw [hSu_def]; exact sq_nonneg _
+  have hSf_nn : 0 ≤ Sf := by rw [hSf_def]; exact sq_nonneg _
+  -- `G_total`, abbreviated; nonnegative.
+  set G_total : ℝ :=
+    (∫ x in Ω', ∑ l : Fin (Module.finrank ℝ E), ((g_g l) x) ^ 2
+        ∂(volume : Measure EuclN) +
+      ∫ x in Ω', (u_g x)^2 ∂(volume : Measure EuclN) +
+      ∫ x in Ω', (f_g x)^2 ∂(volume : Measure EuclN)) with hG_total_def
+  have hG_total_nn : 0 ≤ G_total := by
+    rw [hG_total_def]
+    refine add_nonneg (add_nonneg ?_ ?_) ?_
+    · exact integral_nonneg (fun x => Finset.sum_nonneg (fun _ _ => sq_nonneg _))
+    · exact integral_nonneg (fun x => sq_nonneg _)
+    · exact integral_nonneg (fun x => sq_nonneg _)
+  -- The cutoff geometric constant `C_χ`.
+  set Cχ : ℝ :=
+    2 * ((Module.finrank ℝ E : ℝ) + 1) * (M_χ ^ 2 + M_dχ ^ 2 + 1) with hCχ_def
+  have hCχ_nn : 0 ≤ Cχ := by
+    rw [hCχ_def]
+    have hn_nn : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) := Nat.cast_nonneg _
+    positivity
+  -- `densityWeightedSource_eLpNorm_sq_le`: trade the `fSrc` norm for the
+  -- `D.f_chart` norm at the cost of `chartDensitySup²`.
+  have h_Sf'_le :
+      (eLpNorm fSrc 2
+        ((volume : Measure EuclN).restrict (closure Ω'))).toReal ^ 2 ≤
+        (chartDensitySup (I := I) (M := M) g α Ω') ^ 2 * Sf := by
+    have h := densityWeightedSource_eLpNorm_sq_le (I := I) (M := M)
+      (g := g) (α := α) hΩ'_compact hΩ'_chart hf_chart_l2_closure
+    rw [hfSrc_def, hSf_def]
+    exact h
+  -- `gTotal_le_data_eLpNorm`: bound `G_total` by `Cχ · (Sw + Su + Sf')`.
+  have h_gTotal_data : G_total ≤
+      Cχ * (Sw + Su +
+        (eLpNorm fSrc 2
+          ((volume : Measure EuclN).restrict (closure Ω'))).toReal ^ 2) := by
+    have h := gTotal_le_data_eLpNorm (I := I) (M := M) (g := g) (α := α)
+      hχ_smooth hM_χ_bd hM_dχ_bd hΩ'_compact hΩ'_chart hfSrc_l2_closure D
+    -- The LHS of `h` is syntactically `G_total` (after unfolding the
+    -- `set` bodies of `g_g`, `u_g`, `f_g` and `fSrc`), and the RHS is
+    -- `Cχ · (Sw + Su + Sf')`.
+    rw [hG_total_def, hCχ_def, hSw_def, hSu_def]
+    -- Unfold `g_g`, `u_g`, `f_g`, `fSrc` to match `h`'s statement.
+    simp only [hg_g_def, hu_g_def, hf_g_def, hfSrc_def] at h ⊢
+    convert h using 2
+  -- Chain: `G_total ≤ Cχ · max 1 (chartDensitySup²) · (Sw + Su + Sf)`.
+  set Mden2 : ℝ := max 1 ((chartDensitySup (I := I) (M := M) g α Ω') ^ 2)
+    with hMden2_def
+  have hMden2_one_le : (1 : ℝ) ≤ Mden2 := le_max_left _ _
+  have hMden2_dens_le : (chartDensitySup (I := I) (M := M) g α Ω') ^ 2 ≤ Mden2 :=
+    le_max_right _ _
+  have hMden2_nn : 0 ≤ Mden2 := le_trans zero_le_one hMden2_one_le
+  have h_gTotal_max : G_total ≤ Cχ * Mden2 * (Sw + Su + Sf) := by
+    refine le_trans h_gTotal_data ?_
+    -- `Cχ · (Sw + Su + Sf') ≤ Cχ · (Mden2 · (Sw + Su + Sf))`.
+    have h_inner :
+        Sw + Su +
+          (eLpNorm fSrc 2
+            ((volume : Measure EuclN).restrict (closure Ω'))).toReal ^ 2 ≤
+          Mden2 * (Sw + Su + Sf) := by
+      have h_w : Sw ≤ Mden2 * Sw :=
+        le_mul_of_one_le_left hSw_nn hMden2_one_le
+      have h_u : Su ≤ Mden2 * Su :=
+        le_mul_of_one_le_left hSu_nn hMden2_one_le
+      have h_f :
+          (eLpNorm fSrc 2
+            ((volume : Measure EuclN).restrict (closure Ω'))).toReal ^ 2 ≤
+            Mden2 * Sf := by
+        refine le_trans h_Sf'_le ?_
+        exact mul_le_mul_of_nonneg_right hMden2_dens_le hSf_nn
+      have h_expand : Mden2 * (Sw + Su + Sf) =
+          Mden2 * Sw + Mden2 * Su + Mden2 * Sf := by ring
+      linarith [h_w, h_u, h_f, h_expand]
+    calc Cχ * (Sw + Su +
+            (eLpNorm fSrc 2
+              ((volume : Measure EuclN).restrict (closure Ω'))).toReal ^ 2)
+        ≤ Cχ * (Mden2 * (Sw + Su + Sf)) :=
+          mul_le_mul_of_nonneg_left h_inner hCχ_nn
+      _ = Cχ * Mden2 * (Sw + Su + Sf) := by ring
+  -- ====================================================================
+  -- Pass the `G_total` bound through `√` and `ENNReal.ofReal`, exhibiting
+  -- the explicit witness `C_geom i k`.
+  -- ====================================================================
+  have hlam_pos : 0 < B.lam := B.hlam_pos
+  have h_two_lam_nn : (0 : ℝ) ≤ 2 / B.lam := by positivity
+  have hC_young_nn : 0 ≤ nirenbergMasterYoungConstant B N hΩ'_compact k :=
+    nirenbergMasterYoungConstant_nonneg B hN hΩ'_compact k
+  -- The coefficient `(2/B.lam) · C_young · Cχ · Mden2` is nonnegative.
+  have h_coeff_nn : 0 ≤ (2 / B.lam) *
+      nirenbergMasterYoungConstant B N hΩ'_compact k * Cχ * Mden2 :=
+    mul_nonneg (mul_nonneg (mul_nonneg h_two_lam_nn hC_young_nn) hCχ_nn) hMden2_nn
+  -- Step A: the `√`-argument bound.
+  have h_sqrt_arg_le :
+      (2 / B.lam) * nirenbergMasterYoungConstant B N hΩ'_compact k * G_total ≤
+        ((2 / B.lam) * nirenbergMasterYoungConstant B N hΩ'_compact k *
+          Cχ * Mden2) * (Sw + Su + Sf) := by
+    have h_pre_nn : 0 ≤ (2 / B.lam) *
+        nirenbergMasterYoungConstant B N hΩ'_compact k :=
+      mul_nonneg h_two_lam_nn hC_young_nn
+    calc (2 / B.lam) * nirenbergMasterYoungConstant B N hΩ'_compact k * G_total
+        ≤ (2 / B.lam) * nirenbergMasterYoungConstant B N hΩ'_compact k *
+            (Cχ * Mden2 * (Sw + Su + Sf)) :=
+          mul_le_mul_of_nonneg_left h_gTotal_max h_pre_nn
+      _ = ((2 / B.lam) * nirenbergMasterYoungConstant B N hΩ'_compact k *
+            Cχ * Mden2) * (Sw + Su + Sf) := by ring
+  -- `C_geom i k` is, by definition, `√((2/B.lam)·C_young·Cχ·Mden2)`;
+  -- unfolding the three `set` abbreviations exhibits both sides as the
+  -- same raw real expression.
+  have hC_geom_eq : C_geom i k =
+      Real.sqrt ((2 / B.lam) *
+        nirenbergMasterYoungConstant B N hΩ'_compact k * Cχ * Mden2) := by
+    simp only [hC_geom_def, hCχ_def, hMden2_def]
+  -- Step B: `√` is monotone, then `Real.sqrt_mul` splits the product.
+  have h_sqrt_le :
+      Real.sqrt ((2 / B.lam) *
+        nirenbergMasterYoungConstant B N hΩ'_compact k * G_total) ≤
+        C_geom i k * Real.sqrt (Sw + Su + Sf) := by
+    have h_mono := Real.sqrt_le_sqrt h_sqrt_arg_le
+    have h_split :
+        Real.sqrt (((2 / B.lam) *
+          nirenbergMasterYoungConstant B N hΩ'_compact k * Cχ * Mden2) *
+            (Sw + Su + Sf)) =
+          C_geom i k * Real.sqrt (Sw + Su + Sf) := by
+      rw [Real.sqrt_mul h_coeff_nn, hC_geom_eq]
+    calc Real.sqrt ((2 / B.lam) *
+            nirenbergMasterYoungConstant B N hΩ'_compact k * G_total)
+        ≤ Real.sqrt (((2 / B.lam) *
+            nirenbergMasterYoungConstant B N hΩ'_compact k * Cχ * Mden2) *
+              (Sw + Su + Sf)) := h_mono
+      _ = C_geom i k * Real.sqrt (Sw + Su + Sf) := h_split
+  -- Step C: `ENNReal.ofReal` is monotone.
+  have h_g_g_bd :
+      eLpNorm
+        (DifferentialGeometry.Analysis.Sobolev.diffQuot
+          (d := Module.finrank ℝ E) k h (g_g i)) 2
+        ((volume : Measure EuclN).restrict Ω'')
+      ≤ ENNReal.ofReal (C_geom i k * Real.sqrt (Sw + Su + Sf)) := by
+    refine le_trans h_g_g_quant ?_
+    exact ENNReal.ofReal_le_ofReal h_sqrt_le
+  -- ====================================================================
   -- Step 8: Translate the bound on g_g to a bound on D.weak_partial.
-  -- On Ω'' ⊆ tsupport η ⊆ closure Ω', g_g i = D.weak_partial i, and similarly for shifts.
-  refine ⟨M_bound, hM_bound_nn, ?_⟩
-  intro i k h hh_pos hh_le
+  -- On Ω'' ⊆ tsupport η ⊆ closure Ω', g_g i = D.weak_partial i, and
+  -- similarly for shifts.
+  -- ====================================================================
   have hh_ne : h ≠ 0 := abs_ne_zero.mp (ne_of_gt hh_pos)
-  -- Ω'' ⊆ tsupport η: from hη_one_on_Ω''.
   have hΩ''_subset_tsupp : Ω'' ⊆ tsupport η := by
     intro x hx
     have hη_x_eq_one : η x = 1 := hη_one_on_Ω'' x hx
     have hη_x_ne : η x ≠ 0 := by rw [hη_x_eq_one]; norm_num
     exact subset_tsupport η (Function.mem_support.mpr hη_x_ne)
-  -- On Ω'', diffQuot k h (g_g i) = diffQuot k h (D.weak_partial i).
   have h_eq_on_Ω'' : ∀ x ∈ Ω'',
       DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k h (g_g i) x =
@@ -4016,7 +4324,6 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound_of_data
         (d := Module.finrank ℝ E) k h (D.weak_partial i) x := by
     intro x hx
     exact h_diffQuot_g_g_eq_on_tsupport hh_ne hh_le k i x (hΩ''_subset_tsupp hx)
-  -- eLpNorm equality from a.e. agreement on Ω''.
   have h_eLp_eq :
       eLpNorm
         (DifferentialGeometry.Analysis.Sobolev.diffQuot
@@ -4032,7 +4339,81 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound_of_data
     intro x hx
     exact (h_eq_on_Ω'' x hx).symm
   rw [h_eLp_eq]
-  exact hM_bound i k h hh_pos hh_le
+  -- The goal's data expression is exactly `Sw + Su + Sf`.
+  rw [show (∑ l : Fin (Module.finrank ℝ E),
+        (eLpNorm (D.weak_partial l) 2
+          ((volume : Measure EuclN).restrict (closure Ω'))).toReal ^ 2)
+      + (eLpNorm D.u_chart 2
+          ((volume : Measure EuclN).restrict (closure Ω'))).toReal ^ 2
+      + (eLpNorm D.f_chart 2
+          ((volume : Measure EuclN).restrict (closure Ω'))).toReal ^ 2
+      = Sw + Su + Sf from by rw [hSw_def, hSu_def, hSf_def]]
+  exact h_g_g_bd
+
+set_option maxHeartbeats 1600000 in
+set_option linter.unusedVariables false in
+/-- **Final assembly**: the unconditional uniform-in-`h` per-`(i, k)`
+`L²(Ω'')` bound on the difference quotient of the chart-bilinear data's
+weak partial derivatives.
+
+Given a chart-bilinear data structure `D`, a standard Nirenberg cutoff `η`
+on the Euclidean chart space with a precompact target Ω' inside the chart
+target and Ω'' ⊆ Ω' on which `η ≡ 1`, the wrapper produces a constant
+`M_bound i k ≥ 0` such that for every `0 < |h| ≤ R₀`:
+
+  `‖D_h^k (D.weak_partial i)‖_{L²(Ω'')} ≤ ENNReal.ofReal (M_bound i k)`.
+
+The conclusion is the uniform-in-`h` bound consumed by
+`h2_chart_loc_of_uniform_bound` to extract `H²` regularity. The radius
+`R₀ > 0` is the diff-quotient bound; the proof works uniformly in `R₀`.
+
+This is a thin wrapper around the quantitative theorem
+`chartBilinearH1Compl_uniform_diffQuot_bound_of_data_quantitative`: the
+existential witness `M_bound i k` is the quantitative theorem's explicit
+chart-geometric constant `C_geom i k` multiplied by the (data-dependent)
+square root of the `L²` energy of `D`. -/
+theorem chartBilinearH1Compl_uniform_diffQuot_bound_of_data
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    {g : SmoothRiemannianMetric I M} {α : M}
+    (D : ChartBilinearH1ComplData (I := I) (M := M) g α)
+    {η : EuclN → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η)
+    (hη_supp : HasCompactSupport η)
+    (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1)
+    {N : ℝ} (hN : 0 ≤ N) (h_fderiv_eta : ∀ x : EuclN, ‖fderiv ℝ η x‖ ≤ N)
+    {Ω' Ω'' : Set EuclN} (hΩ' : IsOpen Ω')
+    (hΩ'_chart : closure Ω' ⊆ chartTargetEuclid (I := I) (M := M) α)
+    (hΩ'_compact : IsCompact (closure Ω'))
+    (hη_in_Ω' : tsupport η ⊆ Ω')
+    {R₀ : ℝ} (hR₀_pos : 0 < R₀)
+    (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ R₀ →
+      Metric.cthickening |h| (tsupport η) ⊆ Ω')
+    (hη_one_on_Ω'' : ∀ x ∈ Ω'', η x = 1)
+    (hΩ''_meas : MeasurableSet Ω'') :
+    ∃ M_bound : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ,
+      (∀ i k, 0 ≤ M_bound i k) ∧
+      (∀ (i k : Fin (Module.finrank ℝ E)) (h : ℝ),
+        0 < |h| → |h| ≤ R₀ →
+          eLpNorm
+            (DifferentialGeometry.Analysis.Sobolev.diffQuot
+              (d := Module.finrank ℝ E) k h (D.weak_partial i)) 2
+            ((volume : Measure EuclN).restrict Ω'')
+          ≤ ENNReal.ofReal (M_bound i k)) := by
+  classical
+  obtain ⟨C_geom, hC_geom_nn, hC_geom⟩ :=
+    chartBilinearH1Compl_uniform_diffQuot_bound_of_data_quantitative
+      (I := I) (M := M) (E := E) (H := H) (g := g) (α := α)
+      hη hη_supp hη_range hN h_fderiv_eta hΩ' hΩ'_chart hΩ'_compact
+      hη_in_Ω' hR₀_pos hh_supp_in_Ω' hη_one_on_Ω'' hΩ''_meas
+  refine ⟨fun i k => C_geom i k * Real.sqrt (
+      (∑ l : Fin (Module.finrank ℝ E),
+        (eLpNorm (D.weak_partial l) 2
+          ((volume : Measure EuclN).restrict (closure Ω'))).toReal ^ 2)
+      + (eLpNorm D.u_chart 2
+          ((volume : Measure EuclN).restrict (closure Ω'))).toReal ^ 2
+      + (eLpNorm D.f_chart 2
+          ((volume : Measure EuclN).restrict (closure Ω'))).toReal ^ 2),
+    fun i k => mul_nonneg (hC_geom_nn i k) (Real.sqrt_nonneg _),
+    fun i k h hpos hle => hC_geom D hpos hle⟩
 
 end ChartBilinearUniformDiffQuotBoundCanonical
 
