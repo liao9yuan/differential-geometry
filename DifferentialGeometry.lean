@@ -459,6 +459,7 @@ import DifferentialGeometry.Analysis.Laplacian.Regularity.NirenbergCrossBound
 import DifferentialGeometry.Analysis.Laplacian.Regularity.ChartHk.H2NonSmooth
 import DifferentialGeometry.Analysis.Laplacian.Regularity.ChartBilinear.UniformDiffQuotBound
 import DifferentialGeometry.Analysis.Laplacian.Regularity.ChartBilinear.UniformDiffQuotBoundCanonical
+import DifferentialGeometry.Analysis.Laplacian.Regularity.ChartBilinear.UniformDiffQuotGTotalBound
 import DifferentialGeometry.Analysis.Laplacian.Regularity.H1Compl.ToLpChartBridge
 import DifferentialGeometry.Analysis.Laplacian.Regularity.H1Compl.GradientChartBridge
 import DifferentialGeometry.Analysis.Laplacian.Regularity.H1Compl.GradientLipschitz
