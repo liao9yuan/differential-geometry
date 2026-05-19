@@ -2,13 +2,14 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.Eig
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.TensorNonSmoothDiffQuot
 import DifferentialGeometry.Analysis.Laplacian.Regularity.ChartBilinear.UniformDiffQuotBoundCanonical
 import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
+import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # Interior `H²`/`W^{2,2}_loc` regularity of the eigenvector chart component
 
 For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, the chart
 `P₀`-component of a resolvent eigenvector of the connection Laplacian `Δ_∇` —
-`tensorL2ChartComponent g r s (tensorResolventEigenbasisVec h_uniform i) α P₀` —
+`tensorL2ChartComponent g r s (tensorResolventEigenbasisVec h_atlas i) α P₀` —
 satisfies a *scalar* divergence-form weak-elliptic identity with principal
 symbol `weightedInvGramOnEuclid g α` (`= √(det g) · gⁱʲ`), the same principal
 symbol as the scalar Laplace–Beltrami operator. That per-component data is
@@ -54,7 +55,7 @@ hypotheses `Ω''` and the difference-quotient room radius `R₀`.
 ## Main result
 
 * `eigenvector_chartComponent_memWkp` — for the eigenvector chart-bilinear data
-  parameters `(g, r, s, h_uniform, i, α, P₀)`, an interior subdomain `Ω''`
+  parameters `(g, r, s, h_atlas, i, α, P₀)`, an interior subdomain `Ω''`
   (open, relatively compact closure) and a difference-quotient room radius
   `R₀ > 0` with `Metric.cthickening R₀ (closure Ω'') ⊆ chartTargetEuclid α`,
   the eigenvector chart component lies in `MemWkp 2 2 … Ω''`.
@@ -144,7 +145,7 @@ interior-regularity engine is invoked with the bound proved. -/
 
 /-- **Uniform-in-`h` difference-quotient bound for the eigenvector chart
 component.** For the eigenvector chart-bilinear data
-`D := eigenvectorTensorChartBilinearData g r s h_uniform i α P₀`, an interior
+`D := eigenvectorTensorChartBilinearData g r s h_atlas i α P₀`, an interior
 subdomain `Ω''` (open, relatively compact closure) and a room radius `R₀ > 0`
 with `Metric.cthickening R₀ (closure Ω'') ⊆ chartTargetEuclid α`, there is a
 nonnegative bound `M_bound i k` such that, at the difference-quotient sub-radius
@@ -163,7 +164,7 @@ sub-radius `R₀ / 16` leaves room for the cutoff support to sit strictly inside
 `Ω' ⊆ chartTargetEuclid α`. -/
 private lemma eigenvectorTensorChartBilinear_uniform_diffQuot_bound
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     {Ω'' : Set EuclN} (hΩ''_open : IsOpen Ω'')
@@ -179,13 +180,13 @@ private lemma eigenvectorTensorChartBilinear_uniform_diffQuot_bound
             (DifferentialGeometry.Analysis.Sobolev.diffQuot
               (d := Module.finrank ℝ E) k h
               ((eigenvectorTensorChartBilinearData (I := I) (M := M)
-                g r s h_uniform i α P₀).weak_partial j)) 2
+                g r s h_atlas i α P₀).weak_partial j)) 2
             ((volume : Measure EuclN).restrict Ω'')
           ≤ ENNReal.ofReal (M_bound j k)) := by
   classical
   -- The underlying scalar chart-bilinear divergence-form data.
   set D : TensorChartBilinearH1ComplData (I := I) (M := M) g r s α P₀ :=
-    eigenvectorTensorChartBilinearData (I := I) (M := M) g r s h_uniform i α P₀
+    eigenvectorTensorChartBilinearData (I := I) (M := M) g r s h_atlas i α P₀
     with hD_def
   -- The interior compact set and its enclosing open chart target.
   set K_α : Set EuclN := closure Ω'' with hK_α_def
@@ -294,19 +295,19 @@ set_option linter.unusedVariables false in
 component.**
 
 For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, the uniform-Sobolev
-hypothesis `h_uniform`, an eigenbasis index `i`, a chart center `α : M`, a
+hypothesis `h_atlas`, an eigenbasis index `i`, a chart center `α : M`, a
 component multi-index `P₀`, an interior subdomain `Ω''` (open, with relatively
 compact closure) and a difference-quotient room radius `R₀ > 0` with
 `Metric.cthickening R₀ (closure Ω'') ⊆ chartTargetEuclid α`, the chart
 `P₀`-component
 
 ```
-tensorL2ChartComponent g r s (tensorResolventEigenbasisVec h_uniform i) α P₀
+tensorL2ChartComponent g r s (tensorResolventEigenbasisVec h_atlas i) α P₀
 ```
 
 of the resolvent eigenvector lies in `MemWkp 2 2 … Ω''` — it has interior
 `W^{2,2}` regularity on `Ω''`. Equivalently, the explicit weak chart partials
-`eigenvectorChartWeakPartial g r s h_uniform i α P₀` of the chart component
+`eigenvectorChartWeakPartial g r s h_atlas i α P₀` of the chart component
 themselves admit interior weak partial derivatives in `L²(Ω'')`.
 
 The uniform difference-quotient bound consumed by the interior-regularity
@@ -318,7 +319,7 @@ The interior `H²` extraction is then the tensor non-smooth Nirenberg engine
 `tensor_h2_chart_loc_of_uniform_bound`. -/
 theorem eigenvector_chartComponent_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     {Ω'' : Set EuclN} (hΩ''_open : IsOpen Ω'')
@@ -329,12 +330,12 @@ theorem eigenvector_chartComponent_memWkp
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) 2 2
       (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-        (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) α P₀ :
+        (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) α P₀ :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) Ω'' := by
   classical
   -- The eigenvector chart-bilinear divergence-form data.
   set D : TensorChartBilinearH1ComplData (I := I) (M := M) g r s α P₀ :=
-    eigenvectorTensorChartBilinearData (I := I) (M := M) g r s h_uniform i α P₀
+    eigenvectorTensorChartBilinearData (I := I) (M := M) g r s h_atlas i α P₀
     with hD_def
   -- `closure Ω''` is a compact subset of the chart target.
   have h_closureΩ''_in_chart :
@@ -352,16 +353,16 @@ theorem eigenvector_chartComponent_memWkp
     refine subset_trans ?_ h_room
     exact Metric.cthickening_mono (by rw [hR_dq_def]; linarith) (closure Ω'')
   -- Step 1: discharge the uniform-in-`h` difference-quotient bound.
-  obtain ⟨M_bound, hM_nn, h_uniform_bd⟩ :=
+  obtain ⟨M_bound, hM_nn, h_diffQuot_bd⟩ :=
     eigenvectorTensorChartBilinear_uniform_diffQuot_bound
-      (I := I) (M := M) (g := g) (r := r) (s := s) h_uniform i α P₀
+      (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas i α P₀
       hΩ''_open hΩ''_compact_closure hR₀_pos h_room
   -- Step 2: apply the tensor non-smooth interior-regularity engine at the
   -- sub-radius `R_dq`. The uniform bound is supplied proved.
   have h_h2 :=
     tensor_h2_chart_loc_of_uniform_bound (I := I) (M := M)
       (g := g) (r := r) (s := s) (α := α) (P₀ := P₀) D
-      hΩ''_open hΩ''_compact_closure hR_dq_pos h_room_dq hM_nn h_uniform_bd
+      hΩ''_open hΩ''_compact_closure hR_dq_pos h_room_dq hM_nn h_diffQuot_bd
   -- Step 3: assemble `MemWkp 2 2` of the chart component on `Ω''`.
   -- The chart component is `D.u_chart` (definitionally).
   have h_uChart_memLp_vol_Ω'' :
@@ -437,7 +438,7 @@ theorem eigenvector_chartComponent_memWkp
 section ElaborationTests
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
-  (h_uniform : uniformTensorChartSobolevBound g r s)
+  (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
 
 /-- The headline produces interior `MemWkp 2 2` regularity of the eigenvector
@@ -451,9 +452,9 @@ example (α : M) (P₀ : TensorCompIdx (E := E) r s)
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) 2 2
       (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-        (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) α P₀ :
+        (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) α P₀ :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) Ω'' :=
-  eigenvector_chartComponent_memWkp g r s h_uniform i α P₀
+  eigenvector_chartComponent_memWkp g r s h_atlas i α P₀
     hΩ''_open hΩ''_compact_closure hR₀_pos h_room
 
 end ElaborationTests

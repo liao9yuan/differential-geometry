@@ -10,7 +10,7 @@ index `i : TensorEigenIdx g r s` with nonzero resolvent eigenvalue
 the candidate weak chart partials of the eigenvector chart component, weighted
 by the chart-atlas partition-of-unity function, as the `n → ∞` `L²`-limit of
 the chosen weak chart partials of the smooth approximating sequence
-`eigenvectorSmoothApprox g r s h_uniform i : ℕ → SmoothCcTensorH1 g r s`.
+`eigenvectorSmoothApprox g r s h_atlas i : ℕ → SmoothCcTensorH1 g r s`.
 
 This file produces the corresponding limit for the **cutoff**-weighted chart
 component `cutoffComponentEuclid g r s S α P` — the chart push-forward of the
@@ -49,7 +49,7 @@ completion.
 * `eigenvectorCutoffChartPartialCLM g r s α P₀ k` — the continuous linear map on
   the `H¹` completion `TensorH1Compl g r s` sending a class to the `L²` class of
   the chosen weak `k`-th chart partial of its cutoff `(α, P₀)`-chart component.
-* `eigenvectorCutoffChartPartialLp g r s h_uniform i α P₀ k` — the candidate
+* `eigenvectorCutoffChartPartialLp g r s h_atlas i α P₀ k` — the candidate
   weak `k`-th chart partial of the cutoff eigenvector chart component: `μ⁻¹`
   times the value of `eigenvectorCutoffChartPartialCLM` on the eigenvector
   resolvent.
@@ -61,7 +61,7 @@ completion.
   chart partial of `cutoffComponentEuclid g r s (eigenvectorSmoothApprox … n).toCcTensor α P₀.1 P₀.2`.
 * `eigenvectorCutoffChartPartialLp_tendsto` — **the headline**: those
   approximant cutoff chart partials converge, in `Lp ℝ 2 (chartL2Measure α)`, to
-  `eigenvectorCutoffChartPartialLp g r s h_uniform i α P₀ k`.
+  `eigenvectorCutoffChartPartialLp g r s h_atlas i α P₀ k`.
 
 ## Sign convention
 
@@ -545,7 +545,7 @@ theorem eigenvectorCutoffChartPartialCLM_smoothToTensorH1Compl
 
 The candidate weak `k`-th cutoff chart partial of the eigenvector chart
 component is `μ⁻¹` times the value of `eigenvectorCutoffChartPartialCLM` on the
-eigenvector resolvent `eigenvectorResolvent g r s h_uniform i`, where
+eigenvector resolvent `eigenvectorResolvent g r s h_atlas i`, where
 `μ := i.fst.val` is the associated nonzero resolvent eigenvalue. -/
 
 /-- **The candidate weak `k`-th cutoff chart partial of an eigenvector chart
@@ -554,56 +554,56 @@ eigenbasis index `i` with nonzero resolvent eigenvalue `μ := i.fst.val`, a char
 center `α : M`, a component multi-index `P₀`, and a chart-coordinate direction
 `k`, this is `μ⁻¹` times the value of the canonical cutoff chart-partial
 continuous linear map on the eigenvector resolvent
-`eigenvectorResolvent g r s h_uniform i`.
+`eigenvectorResolvent g r s h_atlas i`.
 
 It is the `L²`-limit of the chosen weak `k`-th chart partials of the
 `μ⁻¹`-rescaled cutoff chart components of the smooth approximants
-`eigenvectorSmoothApprox g r s h_uniform i n`
+`eigenvectorSmoothApprox g r s h_atlas i n`
 (`eigenvectorCutoffChartPartialLp_tendsto`). -/
 def eigenvectorCutoffChartPartialLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) :
     Lp ℝ 2 (chartL2Measure (I := I) (M := M) α) :=
   (i.fst.val)⁻¹ •
     eigenvectorCutoffChartPartialCLM (I := I) (M := M) g r s α P₀ k
-      (eigenvectorResolvent (I := I) (M := M) g r s h_uniform i)
+      (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i)
 
 /-! ## The concrete characterisation of the approximant cutoff chart partial -/
 
 /-- **The concrete characterisation of the approximant cutoff chart partial.**
 For each `n`, the `μ⁻¹`-rescaled value of the canonical cutoff chart-partial
 continuous linear map on the completion embedding of the smooth section
-`eigenvectorSmoothApprox g r s h_uniform i n` equals `μ⁻¹` times the `L²` class
+`eigenvectorSmoothApprox g r s h_atlas i n` equals `μ⁻¹` times the `L²` class
 of the concrete chosen weak `k`-th chart partial of the cutoff Euclidean chart
 component `cutoffComponentEuclid g r s (eigenvectorSmoothApprox … n).toCcTensor α
 P₀.1 P₀.2`, where `μ := i.fst.val` is the associated nonzero resolvent
 eigenvalue. -/
 theorem eigenvectorCutoffChartPartialLp_approx_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) (n : ℕ) :
     (i.fst.val)⁻¹ •
         eigenvectorCutoffChartPartialCLM (I := I) (M := M) g r s α P₀ k
           (smoothToTensorH1Compl (I := I) (M := M) g r s
-            (eigenvectorSmoothApprox (I := I) (M := M) g r s h_uniform i n)) =
+            (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n)) =
       (i.fst.val)⁻¹ •
         (chosenWeakPartial'_cutoffComponentEuclid_memLp (I := I) (M := M)
           g r s
-          (eigenvectorSmoothApprox (I := I) (M := M) g r s h_uniform i n)
+          (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n)
           α P₀.1 P₀.2 k).toLp
           (chosenWeakPartial' (d := Module.finrank ℝ E) 2 k
             (cutoffComponentEuclid (I := I) (M := M) g r s
               (eigenvectorSmoothApprox (I := I) (M := M)
-                g r s h_uniform i n).toCcTensor α P₀.1 P₀.2)
+                g r s h_atlas i n).toCcTensor α P₀.1 P₀.2)
             (chartTargetEuclid (I := I) (M := M) α)) := by
   rw [eigenvectorCutoffChartPartialCLM_smoothToTensorH1Compl
     (I := I) (M := M) g r s
-    (eigenvectorSmoothApprox (I := I) (M := M) g r s h_uniform i n) α P₀ k]
+    (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n) α P₀ k]
   rfl
 
 /-! ## The headline `L²`-convergence
@@ -619,20 +619,20 @@ the continuous map `μ⁻¹ • ·`, produces the headline. -/
 eigenvalue `μ := i.fst.val`, a chart center `α : M`, a component multi-index
 `P₀`, and a chart-coordinate direction `k`, the `μ⁻¹`-rescaled values of the
 canonical cutoff chart-partial continuous linear map on the completion
-embeddings of the smooth approximants `eigenvectorSmoothApprox g r s h_uniform i
+embeddings of the smooth approximants `eigenvectorSmoothApprox g r s h_atlas i
 n` converge, as `n → ∞` and in `Lp ℝ 2 (chartL2Measure α)`, to the candidate
 weak `k`-th cutoff chart partial
-`eigenvectorCutoffChartPartialLp g r s h_uniform i α P₀ k`.
+`eigenvectorCutoffChartPartialLp g r s h_atlas i α P₀ k`.
 
 The `n`-th term is identified concretely by
 `eigenvectorCutoffChartPartialLp_approx_eq`: it is `μ⁻¹` times the `L²` class of
 the concrete chosen weak `k`-th chart partial `chosenWeakPartial' 2 k
 (cutoffComponentEuclid g r s (eigenvectorSmoothApprox … n).toCcTensor α P₀.1
 P₀.2) (chartTargetEuclid α)` of the smooth section
-`(eigenvectorSmoothApprox g r s h_uniform i n).toCcTensor`. -/
+`(eigenvectorSmoothApprox g r s h_atlas i n).toCcTensor`. -/
 theorem eigenvectorCutoffChartPartialLp_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) :
@@ -640,15 +640,15 @@ theorem eigenvectorCutoffChartPartialLp_tendsto
       (fun n => (i.fst.val)⁻¹ •
         eigenvectorCutoffChartPartialCLM (I := I) (M := M) g r s α P₀ k
           (smoothToTensorH1Compl (I := I) (M := M) g r s
-            (eigenvectorSmoothApprox (I := I) (M := M) g r s h_uniform i n)))
+            (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n)))
       atTop
       (𝓝 (eigenvectorCutoffChartPartialLp (I := I) (M := M)
-        g r s h_uniform i α P₀ k)) := by
+        g r s h_atlas i α P₀ k)) := by
   -- Apply the canonical cutoff chart-partial CLM to the `H¹`-convergence.
   have h_clm :=
     ((eigenvectorCutoffChartPartialCLM
         (I := I) (M := M) g r s α P₀ k).continuous.tendsto _).comp
-      (eigenvectorSmoothApprox_tendsto (I := I) (M := M) g r s h_uniform i)
+      (eigenvectorSmoothApprox_tendsto (I := I) (M := M) g r s h_atlas i)
   -- Rescale by the continuous map `μ⁻¹ • ·`.
   have h_smul := h_clm.const_smul (i.fst.val)⁻¹
   simp only [Function.comp_def] at h_smul
@@ -657,15 +657,15 @@ theorem eigenvectorCutoffChartPartialLp_tendsto
 /-! ## Sanity tests -/
 
 example (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) :
     Lp ℝ 2 (chartL2Measure (I := I) (M := M) α) :=
-  eigenvectorCutoffChartPartialLp (I := I) (M := M) g r s h_uniform i α P₀ k
+  eigenvectorCutoffChartPartialLp (I := I) (M := M) g r s h_atlas i α P₀ k
 
 example (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) :
@@ -673,11 +673,11 @@ example (g : SmoothRiemannianMetric I M) (r s : ℕ)
       (fun n => (i.fst.val)⁻¹ •
         eigenvectorCutoffChartPartialCLM (I := I) (M := M) g r s α P₀ k
           (smoothToTensorH1Compl (I := I) (M := M) g r s
-            (eigenvectorSmoothApprox (I := I) (M := M) g r s h_uniform i n)))
+            (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n)))
       atTop
       (𝓝 (eigenvectorCutoffChartPartialLp (I := I) (M := M)
-        g r s h_uniform i α P₀ k)) :=
-  eigenvectorCutoffChartPartialLp_tendsto (I := I) (M := M) g r s h_uniform i α P₀ k
+        g r s h_atlas i α P₀ k)) :=
+  eigenvectorCutoffChartPartialLp_tendsto (I := I) (M := M) g r s h_atlas i α P₀ k
 
 end TensorSpectral
 end Parabolic

@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorChartCrossRightLimit
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorChartLowerOrderLimits
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.TensorChartBilinearData
+import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # Weighted-`L²` membership of the eigenvector chart-component limit objects
@@ -506,40 +507,40 @@ membership is the corresponding instance of
 `tensorL2ChartComponentCutoff_memLp_weighted`. -/
 
 /-- **Weighted-`L²` membership of the cross-left limit object.** The cross-left
-limit `crossLeftLimitComponent g r s h_uniform i α P` is `MemLp 2` with respect
+limit `crossLeftLimitComponent g r s h_atlas i α P` is `MemLp 2` with respect
 to the chart-pulled weighted measure restricted to `chartTargetEuclid α`. -/
 theorem crossLeftLimitComponent_memLp_weighted
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P : TensorCompIdx (E := E) r (s + 1)) :
     MemLp (fun y => (crossLeftLimitComponent (I := I) (M := M)
-        g r s h_uniform i α P : EuclN → ℝ) y) 2
+        g r s h_atlas i α P : EuclN → ℝ) y) 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α)) := by
   rw [crossLeftLimitComponent]
   exact tensorL2ChartComponentCutoff_memLp_weighted (I := I) (M := M)
     g r (s + 1)
     (tensorCovGradL2Compl (I := I) (M := M) g r s
-      (eigenvectorResolvent (I := I) (M := M) g r s h_uniform i))
+      (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
     α P
 
 /-- **Weighted-`L²` membership of the cross-right limit object.** The cross-right
-limit `crossRightLimitComponent g r s h_uniform i α P` is `MemLp 2` with respect
+limit `crossRightLimitComponent g r s h_atlas i α P` is `MemLp 2` with respect
 to the chart-pulled weighted measure restricted to `chartTargetEuclid α`. -/
 theorem crossRightLimitComponent_memLp_weighted
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P : TensorCompIdx (E := E) r s) :
     MemLp (fun y => (crossRightLimitComponent (I := I) (M := M)
-        g r s h_uniform i α P : EuclN → ℝ) y) 2
+        g r s h_atlas i α P : EuclN → ℝ) y) 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α)) := by
   rw [crossRightLimitComponent]
   exact tensorL2ChartComponentCutoff_memLp_weighted (I := I) (M := M) g r s
     (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-      (eigenvectorResolvent (I := I) (M := M) g r s h_uniform i))
+      (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
     α P
 
 /-! ## Weighted-`L²` membership of the three lower-order coefficient limits
@@ -555,12 +556,12 @@ partition-of-unity kernel `chartPouKernel α`: every summand carries an
 `indicator (chartPouKernel α)` factor. -/
 lemma covPrincipalRotationCoeffLimit_eq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     {y : EuclN} (hy : y ∉ chartPouKernel (I := I) (M := M) α) :
     covPrincipalRotationCoeffLimit (I := I) (M := M)
-        g r s h_uniform i α P₀ y = 0 := by
+        g r s h_atlas i α P₀ y = 0 := by
   classical
   rw [covPrincipalRotationCoeffLimit]
   refine Finset.sum_eq_zero (fun P _ => Finset.sum_eq_zero (fun Q _ =>
@@ -571,12 +572,12 @@ lemma covPrincipalRotationCoeffLimit_eq_zero_off_chartPouKernel
 compact partition-of-unity kernel `chartPouKernel α`. -/
 lemma covLowerOrderRotationValueCoeffLimit_eq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     {y : EuclN} (hy : y ∉ chartPouKernel (I := I) (M := M) α) :
     covLowerOrderRotationValueCoeffLimit (I := I) (M := M)
-        g r s h_uniform i α P₀ y = 0 := by
+        g r s h_atlas i α P₀ y = 0 := by
   classical
   -- `covLowerOrderRotationValueCoeffLimit` is a sum of two finite multiple sums;
   -- each summand carries an `indicator (chartPouKernel α)` factor that vanishes
@@ -596,13 +597,13 @@ vanishes pointwise off the compact partition-of-unity kernel
 `chartPouKernel α`. -/
 lemma weightedGradCoeffDivLimit_eq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (l : Fin (Module.finrank ℝ E))
     {y : EuclN} (hy : y ∉ chartPouKernel (I := I) (M := M) α) :
     weightedGradCoeffDivLimit (I := I) (M := M)
-        g r s h_uniform i α P₀ l y = 0 := by
+        g r s h_atlas i α P₀ l y = 0 := by
   classical
   -- `weightedGradCoeffDivLimit` is a sum of two finite multiple sums; each
   -- summand carries an `indicator (chartPouKernel α)` factor that vanishes at
@@ -617,24 +618,24 @@ lemma weightedGradCoeffDivLimit_eq_zero_off_chartPouKernel
     add_zero]
 
 /-- **Weighted-`L²` membership of the principal rotation coefficient limit.**
-`covPrincipalRotationCoeffLimit g r s h_uniform i α P₀` is `MemLp 2` with respect
+`covPrincipalRotationCoeffLimit g r s h_atlas i α P₀` is `MemLp 2` with respect
 to the chart-pulled weighted measure restricted to `chartTargetEuclid α`. -/
 theorem covPrincipalRotationCoeffLimit_memLp_weighted
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
     MemLp (covPrincipalRotationCoeffLimit (I := I) (M := M)
-        g r s h_uniform i α P₀) 2
+        g r s h_atlas i α P₀) 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α)) := by
   classical
   -- The limit is `MemLp 2 (chartL2Measure α) = MemLp 2 (volume.restrict Ω)`.
   have h_plain : MemLp (covPrincipalRotationCoeffLimit (I := I) (M := M)
-      g r s h_uniform i α P₀) 2
+      g r s h_atlas i α P₀) 2
       ((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)) :=
-    covPrincipalRotationCoeffLimit_memLp (I := I) (M := M) g r s h_uniform i α P₀
+    covPrincipalRotationCoeffLimit_memLp (I := I) (M := M) g r s h_atlas i α P₀
   -- It vanishes pointwise — hence a.e. — off the compact kernel.
   exact memLp_chartPulledWeightedMeasure_of_memLp_volume_of_ae_zero_off_compact
     (I := I) (M := M) g α
@@ -643,29 +644,29 @@ theorem covPrincipalRotationCoeffLimit_memLp_weighted
     (chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α)
     (Filter.Eventually.of_forall (fun y hy =>
       covPrincipalRotationCoeffLimit_eq_zero_off_chartPouKernel
-        (I := I) (M := M) g r s h_uniform i α P₀ hy))
+        (I := I) (M := M) g r s h_atlas i α P₀ hy))
     h_plain
 
 /-- **Weighted-`L²` membership of the lower-order rotation value coefficient
-limit.** `covLowerOrderRotationValueCoeffLimit g r s h_uniform i α P₀` is
+limit.** `covLowerOrderRotationValueCoeffLimit g r s h_atlas i α P₀` is
 `MemLp 2` with respect to the chart-pulled weighted measure restricted to
 `chartTargetEuclid α`. -/
 theorem covLowerOrderRotationValueCoeffLimit_memLp_weighted
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
     MemLp (covLowerOrderRotationValueCoeffLimit (I := I) (M := M)
-        g r s h_uniform i α P₀) 2
+        g r s h_atlas i α P₀) 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α)) := by
   classical
   have h_plain : MemLp (covLowerOrderRotationValueCoeffLimit (I := I) (M := M)
-      g r s h_uniform i α P₀) 2
+      g r s h_atlas i α P₀) 2
       ((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)) :=
     covLowerOrderRotationValueCoeffLimit_memLp (I := I) (M := M)
-      g r s h_uniform i α P₀
+      g r s h_atlas i α P₀
   exact memLp_chartPulledWeightedMeasure_of_memLp_volume_of_ae_zero_off_compact
     (I := I) (M := M) g α
     (chartPouKernel_isCompact (I := I) (M := M) α)
@@ -673,29 +674,29 @@ theorem covLowerOrderRotationValueCoeffLimit_memLp_weighted
     (chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α)
     (Filter.Eventually.of_forall (fun y hy =>
       covLowerOrderRotationValueCoeffLimit_eq_zero_off_chartPouKernel
-        (I := I) (M := M) g r s h_uniform i α P₀ hy))
+        (I := I) (M := M) g r s h_atlas i α P₀ hy))
     h_plain
 
 /-- **Weighted-`L²` membership of the chart-density-weighted lower-order gradient
-divergence coefficient limit.** `weightedGradCoeffDivLimit g r s h_uniform i α P₀
+divergence coefficient limit.** `weightedGradCoeffDivLimit g r s h_atlas i α P₀
 l` is `MemLp 2` with respect to the chart-pulled weighted measure restricted to
 `chartTargetEuclid α`. -/
 theorem weightedGradCoeffDivLimit_memLp_weighted
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (l : Fin (Module.finrank ℝ E)) :
     MemLp (weightedGradCoeffDivLimit (I := I) (M := M)
-        g r s h_uniform i α P₀ l) 2
+        g r s h_atlas i α P₀ l) 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α)) := by
   classical
   have h_plain : MemLp (weightedGradCoeffDivLimit (I := I) (M := M)
-      g r s h_uniform i α P₀ l) 2
+      g r s h_atlas i α P₀ l) 2
       ((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)) :=
-    weightedGradCoeffDivLimit_memLp (I := I) (M := M) g r s h_uniform i α P₀ l
+    weightedGradCoeffDivLimit_memLp (I := I) (M := M) g r s h_atlas i α P₀ l
   exact memLp_chartPulledWeightedMeasure_of_memLp_volume_of_ae_zero_off_compact
     (I := I) (M := M) g α
     (chartPouKernel_isCompact (I := I) (M := M) α)
@@ -703,7 +704,7 @@ theorem weightedGradCoeffDivLimit_memLp_weighted
     (chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α)
     (Filter.Eventually.of_forall (fun y hy =>
       weightedGradCoeffDivLimit_eq_zero_off_chartPouKernel
-        (I := I) (M := M) g r s h_uniform i α P₀ l hy))
+        (I := I) (M := M) g r s h_atlas i α P₀ l hy))
     h_plain
 
 /-! ## Weighted-`L²` closure under a `C^∞`-coefficient product
@@ -866,15 +867,15 @@ example (u : TensorL2 r s g) (α : M) (P₀ : TensorCompIdx (E := E) r s) :
         (chartTargetEuclid (I := I) (M := M) α)) :=
   tensorL2ChartComponent_memLp_weighted (I := I) (M := M) g r s u α P₀
 
-example (h_uniform : uniformTensorChartSobolevBound g r s)
+example (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
     MemLp (covPrincipalRotationCoeffLimit (I := I) (M := M)
-        g r s h_uniform i α P₀) 2
+        g r s h_atlas i α P₀) 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α)) :=
   covPrincipalRotationCoeffLimit_memLp_weighted (I := I) (M := M)
-    g r s h_uniform i α P₀
+    g r s h_atlas i α P₀
 
 end ElaborationTests
 

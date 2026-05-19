@@ -1,14 +1,15 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorArbitraryKRegularity
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorIteratedData
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevEmbedding
+import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # A compactly-supported smooth representative of the eigenvector chart component
 
 For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, the uniform-Sobolev
-hypothesis `h_uniform`, an eigenbasis index `i`, a chart center `α : M`, and a
+hypothesis `h_atlas`, an eigenbasis index `i`, a chart center `α : M`, and a
 component multi-index `P₀`, the eigenvector chart component
-`eigenvectorChartComponentFun g r s h_uniform i α P₀ : EuclN → ℝ` — the chart
+`eigenvectorChartComponentFun g r s h_atlas i α P₀ : EuclN → ℝ` — the chart
 `P₀`-component of a resolvent eigenvector of the connection Laplacian `Δ_∇` —
 has been shown to lie in the iterated Euclidean Sobolev space `MemWkp k 2` on
 the whole chart target, for *every* order `k`
@@ -22,7 +23,7 @@ component:
       there is `u_smooth : EuclN → ℝ`, smooth on the chart target, compactly
       supported with `tsupport u_smooth ⊆ chartTargetEuclid α`, and almost
       everywhere equal — for the Lebesgue measure restricted to the chart
-      target — to `eigenvectorChartComponentFun g r s h_uniform i α P₀`.
+      target — to `eigenvectorChartComponentFun g r s h_atlas i α P₀`.
 
 ## Route
 
@@ -94,9 +95,9 @@ localised by a smooth cutoff adapted to the compact partition-of-unity kernel.
 component.**
 
 For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, the uniform-Sobolev
-hypothesis `h_uniform`, an eigenbasis index `i`, a chart center `α : M`, and a
+hypothesis `h_atlas`, an eigenbasis index `i`, a chart center `α : M`, and a
 component multi-index `P₀`, the eigenvector chart component
-`eigenvectorChartComponentFun g r s h_uniform i α P₀` has a representative
+`eigenvectorChartComponentFun g r s h_atlas i α P₀` has a representative
 `u_smooth : EuclN → ℝ` that is `C^∞` on the Euclidean chart target, has compact
 support contained in the chart target, and agrees with the chart component
 almost everywhere for the Lebesgue measure restricted to the chart target.
@@ -111,7 +112,7 @@ the chart target localises the representative to compact support without
 disturbing the almost-everywhere identity. -/
 theorem eigenvectorChartComponent_exists_smooth_representative
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
     ∃ u_smooth : EuclN → ℝ,
@@ -121,12 +122,12 @@ theorem eigenvectorChartComponent_exists_smooth_representative
       tsupport u_smooth ⊆ chartTargetEuclid (I := I) (M := M) α ∧
       u_smooth =ᵐ[(volume : Measure EuclN).restrict
           (chartTargetEuclid (I := I) (M := M) α)]
-        eigenvectorChartComponentFun (I := I) (M := M) g r s h_uniform i α P₀ := by
+        eigenvectorChartComponentFun (I := I) (M := M) g r s h_atlas i α P₀ := by
   classical
   -- Abbreviations for the chart target, the chart component and the kernel.
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
   set u : EuclN → ℝ :=
-    eigenvectorChartComponentFun (I := I) (M := M) g r s h_uniform i α P₀
+    eigenvectorChartComponentFun (I := I) (M := M) g r s h_atlas i α P₀
     with hu_def
   set K : Set EuclN := chartPouKernel (I := I) (M := M) α with hK_def
   have hΩ_open : IsOpen Ω :=
@@ -138,7 +139,7 @@ theorem eigenvectorChartComponent_exists_smooth_representative
   -- `u ∈ MemWkp k 2` on the chart target for every order `k`.
   have hu_memWkp : ∀ k : ℕ,
       MemWkp (d := Module.finrank ℝ E) k 2 u Ω := fun k =>
-    eigenvector_chartComponent_memWkp_arbitrary g r s h_uniform i k α P₀
+    eigenvector_chartComponent_memWkp_arbitrary g r s h_atlas i k α P₀
   -- The iterated-Sobolev embedding: a `C^∞` representative `u₀` on the
   -- open chart target, almost everywhere equal to `u`.
   obtain ⟨u₀, hu₀_cdiff, hu_ae_u₀⟩ :=
@@ -170,7 +171,7 @@ theorem eigenvectorChartComponent_exists_smooth_representative
       u =ᵐ[(volume : Measure EuclN).restrict (Ω \ K)]
         (fun _ : EuclN => (0 : ℝ)) :=
     eigenvectorChartComponentFun_ae_zero_off_chartPouKernel
-      g r s h_uniform i α P₀
+      g r s h_atlas i α P₀
   -- `u₀ =ᵐ u` on `Ω` (the embedding), hence on the open subset `Ω \ K`.
   have hK_closed : IsClosed K := hK_compact.isClosed
   have hΩK_open : IsOpen (Ω \ K) := hΩ_open.sdiff hK_closed

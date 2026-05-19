@@ -6,13 +6,14 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.Pou
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.TensorChartTransition
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.TensorChartTransitionTransport
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.ChartTransitionTransportCLM
+import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # A smooth representative of a connection-Laplacian resolvent eigenvector
 
 For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, the uniform-Sobolev
-hypothesis `h_uniform` and an eigenbasis index `i`, the eigenvector
-`tensorResolventEigenbasisVec h_uniform i` of the `L²`-side tensor resolvent is
+hypothesis `h_atlas` and an eigenbasis index `i`, the eigenvector
+`tensorResolventEigenbasisVec h_atlas i` of the `L²`-side tensor resolvent is
 an abstract element of the metric `L²` Hilbert space `TensorL2 r s g`: it
 carries no concrete tensor section.
 
@@ -35,18 +36,18 @@ family of component functions to the chart-frame section constructor
 `tensorBundleSectionOfChartComponents` yields a smooth compactly-supported
 `(r, s)`-tensor section whose raw chart-`α` frame *is* the family.
 
-`eigenvectorSmooth g r s h_uniform i` is the finite sum, over the chart centres
+`eigenvectorSmooth g r s h_atlas i` is the finite sum, over the chart centres
 `α`, of those per-chart sections.
 
 ## Main definitions
 
-* `eigenvectorSmooth g r s h_uniform i` — the smooth compactly-supported
+* `eigenvectorSmooth g r s h_atlas i` — the smooth compactly-supported
   `(r, s)`-tensor section realising the eigenvector.
 
 ## Main results
 
 * `eigenvectorSmooth_toL2` — the image of `eigenvectorSmooth` in the metric `L²`
-  Hilbert space equals the eigenvector `tensorResolventEigenbasisVec h_uniform i`.
+  Hilbert space equals the eigenvector `tensorResolventEigenbasisVec h_atlas i`.
 * `tensorEigenvector_contMDiff` — the eigenvector has a `C^∞` representative.
 * `eigenvectorSmooth_weak_eigen` — the smooth weak eigen-equation: testing
   `eigenvectorResolvent` against a smooth compactly-supported `H¹` section `S`
@@ -135,7 +136,7 @@ compactly-supported chart-`α` Euclidean component function. We pick one with
 `Classical.choose` and record its three defining properties. -/
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
-  (h_uniform : uniformTensorChartSobolevBound g r s)
+  (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
 
 /-- The chosen smooth chart-`α` `P`-component representative of the eigenvector:
@@ -143,63 +144,63 @@ the witness of `eigenvectorChartComponent_exists_smooth_representative`. -/
 def chosenComp (α : M) (P : TensorCompIdx (E := E) r s) : EuclN → ℝ :=
   Classical.choose
     (eigenvectorChartComponent_exists_smooth_representative
-      (I := I) (M := M) g r s h_uniform i α P)
+      (I := I) (M := M) g r s h_atlas i α P)
 
 /-- The chosen chart-`α` `P`-component representative is `C^∞` on the chart
 target. -/
 private lemma chosenComp_contDiffOn (α : M) (P : TensorCompIdx (E := E) r s) :
-    ContDiffOn ℝ ∞ (chosenComp (I := I) (M := M) g r s h_uniform i α P)
+    ContDiffOn ℝ ∞ (chosenComp (I := I) (M := M) g r s h_atlas i α P)
       (chartTargetEuclid (I := I) (M := M) α) :=
   (Classical.choose_spec
     (eigenvectorChartComponent_exists_smooth_representative
-      (I := I) (M := M) g r s h_uniform i α P)).1
+      (I := I) (M := M) g r s h_atlas i α P)).1
 
 /-- The chosen chart-`α` `P`-component representative has compact support. -/
 private lemma chosenComp_hasCompactSupport
     (α : M) (P : TensorCompIdx (E := E) r s) :
-    HasCompactSupport (chosenComp (I := I) (M := M) g r s h_uniform i α P) :=
+    HasCompactSupport (chosenComp (I := I) (M := M) g r s h_atlas i α P) :=
   (Classical.choose_spec
     (eigenvectorChartComponent_exists_smooth_representative
-      (I := I) (M := M) g r s h_uniform i α P)).2.1
+      (I := I) (M := M) g r s h_atlas i α P)).2.1
 
 /-- The chosen chart-`α` `P`-component representative is topologically supported
 inside the chart target. -/
 private lemma chosenComp_tsupport (α : M) (P : TensorCompIdx (E := E) r s) :
-    tsupport (chosenComp (I := I) (M := M) g r s h_uniform i α P) ⊆
+    tsupport (chosenComp (I := I) (M := M) g r s h_atlas i α P) ⊆
       chartTargetEuclid (I := I) (M := M) α :=
   (Classical.choose_spec
     (eigenvectorChartComponent_exists_smooth_representative
-      (I := I) (M := M) g r s h_uniform i α P)).2.2.1
+      (I := I) (M := M) g r s h_atlas i α P)).2.2.1
 
 /-- The chosen chart-`α` `P`-component representative agrees almost everywhere
 with the eigenvector chart component, for the Lebesgue measure restricted to the
 chart target. -/
 lemma chosenComp_ae_eq (α : M) (P : TensorCompIdx (E := E) r s) :
-    chosenComp (I := I) (M := M) g r s h_uniform i α P
+    chosenComp (I := I) (M := M) g r s h_atlas i α P
       =ᵐ[(volume : Measure EuclN).restrict
           (chartTargetEuclid (I := I) (M := M) α)]
-      eigenvectorChartComponentFun (I := I) (M := M) g r s h_uniform i α P :=
+      eigenvectorChartComponentFun (I := I) (M := M) g r s h_atlas i α P :=
   (Classical.choose_spec
     (eigenvectorChartComponent_exists_smooth_representative
-      (I := I) (M := M) g r s h_uniform i α P)).2.2.2
+      (I := I) (M := M) g r s h_atlas i α P)).2.2.2
 
 /-- The smoothness/support data of the chosen chart-`α` component family, in the
 shape required by `tensorBundleSectionOfChartComponents`. -/
 private lemma chosenComp_hu (α : M) :
     ∀ P : TensorCompIdx (E := E) r s,
-      ContDiffOn ℝ ∞ (chosenComp (I := I) (M := M) g r s h_uniform i α P)
+      ContDiffOn ℝ ∞ (chosenComp (I := I) (M := M) g r s h_atlas i α P)
         (chartTargetEuclid (I := I) (M := M) α) :=
-  fun P => chosenComp_contDiffOn (I := I) (M := M) g r s h_uniform i α P
+  fun P => chosenComp_contDiffOn (I := I) (M := M) g r s h_atlas i α P
 
 /-- The compact-support/topological-support data of the chosen chart-`α`
 component family, in the shape required by `tensorBundleSectionOfChartComponents`. -/
 private lemma chosenComp_hsupp (α : M) :
     ∀ P : TensorCompIdx (E := E) r s,
-      HasCompactSupport (chosenComp (I := I) (M := M) g r s h_uniform i α P) ∧
-        tsupport (chosenComp (I := I) (M := M) g r s h_uniform i α P) ⊆
+      HasCompactSupport (chosenComp (I := I) (M := M) g r s h_atlas i α P) ∧
+        tsupport (chosenComp (I := I) (M := M) g r s h_atlas i α P) ⊆
           chartTargetEuclid (I := I) (M := M) α :=
-  fun P => ⟨chosenComp_hasCompactSupport (I := I) (M := M) g r s h_uniform i α P,
-    chosenComp_tsupport (I := I) (M := M) g r s h_uniform i α P⟩
+  fun P => ⟨chosenComp_hasCompactSupport (I := I) (M := M) g r s h_atlas i α P,
+    chosenComp_tsupport (I := I) (M := M) g r s h_atlas i α P⟩
 
 /-! ## The per-chart smooth section
 
@@ -211,9 +212,9 @@ section whose raw chart-`α` frame is that family. -/
 from the chosen chart-`α` smooth component family. -/
 def eigenvectorSmoothChart (α : M) : SmoothCcTensor g r s :=
   tensorBundleSectionOfChartComponents (I := I) (M := M) g r s α
-    (chosenComp (I := I) (M := M) g r s h_uniform i α)
-    (chosenComp_hu (I := I) (M := M) g r s h_uniform i α)
-    (chosenComp_hsupp (I := I) (M := M) g r s h_uniform i α)
+    (chosenComp (I := I) (M := M) g r s h_atlas i α)
+    (chosenComp_hu (I := I) (M := M) g r s h_atlas i α)
+    (chosenComp_hsupp (I := I) (M := M) g r s h_atlas i α)
 
 /-- The raw chart-`α` frame component of the per-chart section `eigenvectorSmoothChart α`,
 read at the chart-source preimage of a chart-target point `y`, recovers the
@@ -222,14 +223,14 @@ lemma tensorChartComponentRaw_eigenvectorSmoothChart_self
     (α : M) (P : TensorCompIdx (E := E) r s)
     {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
     tensorChartComponentRaw (I := I) (M := M) g r s
-        (eigenvectorSmoothChart (I := I) (M := M) g r s h_uniform i α)
+        (eigenvectorSmoothChart (I := I) (M := M) g r s h_atlas i α)
         α P.1 P.2 ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) =
-      chosenComp (I := I) (M := M) g r s h_uniform i α P y :=
+      chosenComp (I := I) (M := M) g r s h_atlas i α P y :=
   tensorChartComponentRaw_tensorBundleSectionOfChartComponents
     (I := I) (M := M) g r s α
-    (chosenComp (I := I) (M := M) g r s h_uniform i α)
-    (chosenComp_hu (I := I) (M := M) g r s h_uniform i α)
-    (chosenComp_hsupp (I := I) (M := M) g r s h_uniform i α) P hy
+    (chosenComp (I := I) (M := M) g r s h_atlas i α)
+    (chosenComp_hu (I := I) (M := M) g r s h_atlas i α)
+    (chosenComp_hsupp (I := I) (M := M) g r s h_atlas i α) P hy
 
 /-! ## The smooth representative of the eigenvector
 
@@ -239,10 +240,10 @@ summands lie in the `ℝ`-module `SmoothCcTensor g r s`, so the finite sum stays
 inside it. -/
 
 /-- **The smooth representative of the eigenvector.** For a closed Riemannian
-manifold `(M, g)`, ranks `(r, s)`, the uniform-Sobolev hypothesis `h_uniform`
+manifold `(M, g)`, ranks `(r, s)`, the uniform-Sobolev hypothesis `h_atlas`
 and an eigenbasis index `i`, this is the smooth compactly-supported
 `(r, s)`-tensor section realising the connection-Laplacian resolvent eigenvector
-`tensorResolventEigenbasisVec h_uniform i`.
+`tensorResolventEigenbasisVec h_atlas i`.
 
 It is the finite sum, over the chart centres `α` in the partition-of-unity
 support set `chartAtlasPOU_finset`, of the chart-frame tensor sections assembled
@@ -250,14 +251,14 @@ from the chosen chart-`α` smooth component families. Its image in the metric
 `L²` Hilbert space equals the eigenvector (`eigenvectorSmooth_toL2`). -/
 noncomputable def eigenvectorSmooth : SmoothCcTensor g r s :=
   ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
-    eigenvectorSmoothChart (I := I) (M := M) g r s h_uniform i α
+    eigenvectorSmoothChart (I := I) (M := M) g r s h_atlas i α
 
 /-- The smooth representative unfolds to the finite sum of the per-chart
 sections. -/
 lemma eigenvectorSmooth_eq :
-    eigenvectorSmooth (I := I) (M := M) g r s h_uniform i =
+    eigenvectorSmooth (I := I) (M := M) g r s h_atlas i =
       ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
-        eigenvectorSmoothChart (I := I) (M := M) g r s h_uniform i α := rfl
+        eigenvectorSmoothChart (I := I) (M := M) g r s h_atlas i α := rfl
 
 /-! ## Chart round-trip helpers
 
@@ -297,13 +298,13 @@ value vanishes there. -/
 chart-`α` source. -/
 private lemma eigenvectorSmoothChart_toSection_eq_zero_off_source
     (α : M) {x : M} (hx : x ∉ (chartAt H α).source) :
-    (eigenvectorSmoothChart (I := I) (M := M) g r s h_uniform i α).toSection x =
+    (eigenvectorSmoothChart (I := I) (M := M) g r s h_atlas i α).toSection x =
       0 :=
   tensorBundleSectionOfChartComponents_toSection_eq_zero_off_source
     (I := I) (M := M) g r s α
-    (chosenComp (I := I) (M := M) g r s h_uniform i α)
-    (chosenComp_hu (I := I) (M := M) g r s h_uniform i α)
-    (chosenComp_hsupp (I := I) (M := M) g r s h_uniform i α) hx
+    (chosenComp (I := I) (M := M) g r s h_atlas i α)
+    (chosenComp_hu (I := I) (M := M) g r s h_atlas i α)
+    (chosenComp_hsupp (I := I) (M := M) g r s h_atlas i α) hx
 
 /-- The raw chart-`β` frame component of the per-chart section
 `eigenvectorSmoothChart α` vanishes off the chart-`α` source: the section value
@@ -312,17 +313,17 @@ lemma tensorChartComponentRaw_eigenvectorSmoothChart_eq_zero_off_source
     (α β : M) (P : TensorCompIdx (E := E) r s) {x : M}
     (hx : x ∉ (chartAt H α).source) :
     tensorChartComponentRaw (I := I) (M := M) g r s
-        (eigenvectorSmoothChart (I := I) (M := M) g r s h_uniform i α)
+        (eigenvectorSmoothChart (I := I) (M := M) g r s h_atlas i α)
         β P.1 P.2 x = 0 := by
   rw [tensorChartComponentRaw_def]
-  have hsec : (eigenvectorSmoothChart (I := I) (M := M) g r s h_uniform i α).toSection x = 0 :=
+  have hsec : (eigenvectorSmoothChart (I := I) (M := M) g r s h_atlas i α).toSection x = 0 :=
     eigenvectorSmoothChart_toSection_eq_zero_off_source
-      (I := I) (M := M) g r s h_uniform i α hx
+      (I := I) (M := M) g r s h_atlas i α hx
   rw [show tensorTrivProj (I := I) (M := M) g r s
-        (eigenvectorSmoothChart (I := I) (M := M) g r s h_uniform i α) β x =
+        (eigenvectorSmoothChart (I := I) (M := M) g r s h_atlas i α) β x =
       (trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) β).continuousLinearMapAt ℝ x
-        ((eigenvectorSmoothChart (I := I) (M := M) g r s h_uniform i α).toSection x)
+        ((eigenvectorSmoothChart (I := I) (M := M) g r s h_atlas i α).toSection x)
       from rfl, hsec, map_zero, map_zero]
 
 end TensorSpectral

@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.Eig
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.AbstractChartPullCutoff
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.CovGradCrossBridge
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.CovGradL2
+import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # The covariant-Leibniz cross terms of an eigenvector approximant as `n → ∞`
@@ -11,7 +12,7 @@ For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, fix an eigenbasis
 index `i` with nonzero resolvent eigenvalue `μ := i.fst.val`, a chart center
 `α : M`, and a fixed smooth compactly-supported `(r, s)`-tensor *test section*
 `S`. Write `ζ_α := chartAtlasPOU I M α` for the chart-atlas partition-of-unity
-weight and `wₙ := eigenvectorSmoothApprox g r s h_uniform i n` for the canonical
+weight and `wₙ := eigenvectorSmoothApprox g r s h_atlas i n` for the canonical
 smooth `H¹`-approximating sequence of the eigenvector resolvent.
 
 The variational-identity assembly that promotes the abstract eigenvector to a
@@ -40,7 +41,7 @@ chart component `tensorL2ChartComponentCutoff` of the abstract `L²` element
 As `n → ∞`, `tensorCovGradL2 g r s wₙ =
 tensorCovGradL2Compl g r s (smoothToTensorH1Compl g r s wₙ)` converges, by
 `eigenvectorSmoothApprox_tendsto` and continuity of `tensorCovGradL2Compl`, to
-`tensorCovGradL2Compl g r s (eigenvectorResolvent g r s h_uniform i)`. Since
+`tensorCovGradL2Compl g r s (eigenvectorResolvent g r s h_atlas i)`. Since
 `tensorL2ChartComponentCutoff` is the coercion of a continuous linear map, the
 chart integrand converges in `Lp ℝ 2 (chartL2Measure α)`, and the cross-left
 integral converges to the chart-Euclidean integral built from that abstract
@@ -59,10 +60,10 @@ cross-right integral as the genuine `(r, s + 1)`-tensor `L²` pairing
 
 ## Main definitions
 
-* `crossLeftLimitComponent g r s h_uniform i α P` — the `n → ∞` limit of the
+* `crossLeftLimitComponent g r s h_atlas i α P` — the `n → ∞` limit of the
   cutoff chart component of `tensorCovGradL2 g r s wₙ`: the cutoff chart
   component of the abstract `L²` limit `tensorCovGradL2Compl g r s
-  (eigenvectorResolvent g r s h_uniform i)`.
+  (eigenvectorResolvent g r s h_atlas i)`.
 
 ## Main results
 
@@ -332,42 +333,42 @@ theorem tensorCovDerivCrossLeft_integral_eq_chartPull
 /-! ## The `n → ∞` abstract `L²` limit of the cross-left operator value
 
 Threading the canonical smooth `H¹`-approximating sequence `wₙ :=
-eigenvectorSmoothApprox g r s h_uniform i n` through the covariant-gradient
+eigenvectorSmoothApprox g r s h_atlas i n` through the covariant-gradient
 operator: the bounded operator `tensorCovGradL2 g r s` recovers, on each smooth
 section, the completion-extended operator `tensorCovGradL2Compl g r s` evaluated
 on the `H¹`-completion embedding (`tensorCovGradL2Compl_smoothToTensorH1Compl`).
-The `H¹`-completion embeddings converge to `eigenvectorResolvent g r s h_uniform
+The `H¹`-completion embeddings converge to `eigenvectorResolvent g r s h_atlas
 i` (`eigenvectorSmoothApprox_tendsto`), and `tensorCovGradL2Compl` is continuous,
 so the covariant-gradient operator values converge in `TensorL2 r (s + 1) g`. -/
 
 /-- **The `n → ∞` abstract `L²` limit of the cross-left operator value.** For an
 eigenbasis index `i`, the covariant-gradient operator values
-`tensorCovGradL2 g r s (eigenvectorSmoothApprox g r s h_uniform i n)` converge,
+`tensorCovGradL2 g r s (eigenvectorSmoothApprox g r s h_atlas i n)` converge,
 as `n → ∞` and in `TensorL2 r (s + 1) g`, to the completion-extended covariant
 gradient `tensorCovGradL2Compl g r s` applied to the eigenvector resolvent
-`eigenvectorResolvent g r s h_uniform i`. -/
+`eigenvectorResolvent g r s h_atlas i`. -/
 theorem tensorCovGradL2_eigenvectorSmoothApprox_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     Filter.Tendsto
       (fun n => tensorCovGradL2 (I := I) (M := M) g r s
-        (eigenvectorSmoothApprox (I := I) (M := M) g r s h_uniform i n))
+        (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n))
       atTop
       (𝓝 (tensorCovGradL2Compl (I := I) (M := M) g r s
-        (eigenvectorResolvent (I := I) (M := M) g r s h_uniform i))) := by
+        (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))) := by
   -- Compose the `H¹`-convergence with the continuous completion-extended
   -- covariant-gradient operator.
   have h_clm :=
     ((tensorCovGradL2Compl (I := I) (M := M) g r s).continuous.tendsto _).comp
-      (eigenvectorSmoothApprox_tendsto (I := I) (M := M) g r s h_uniform i)
+      (eigenvectorSmoothApprox_tendsto (I := I) (M := M) g r s h_atlas i)
   -- The `n`-th term `tensorCovGradL2Compl (smoothToTensorH1Compl (wₙ))` is
   -- `tensorCovGradL2 (wₙ)` by the compatibility identity on smooth sections.
   refine h_clm.congr ?_
   intro n
   rw [Function.comp_apply,
     tensorCovGradL2Compl_smoothToTensorH1Compl (I := I) (M := M) g r s
-      (eigenvectorSmoothApprox (I := I) (M := M) g r s h_uniform i n)]
+      (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n)]
 
 /-! ## The `n → ∞` limit object of the cross-left chart component
 
@@ -376,58 +377,58 @@ coercion of the continuous linear map `tensorL2ChartComponentCutoffCLM`, so it i
 a continuous `ℝ`-linear function of its abstract `L²` argument. Applied to the
 convergent covariant-gradient operator values, it produces the `n → ∞` limit
 object below: the cutoff chart component of the fixed abstract `L²` limit
-`tensorCovGradL2Compl g r s (eigenvectorResolvent g r s h_uniform i)`. -/
+`tensorCovGradL2Compl g r s (eigenvectorResolvent g r s h_atlas i)`. -/
 
 /-- **The `n → ∞` limit object of the cross-left chart component.** For an
 eigenbasis index `i`, a chart center `α : M`, and a component multi-index
 `P : CompIdx E r (s + 1)`, this is the cutoff Euclidean chart component, at
 `(α, P)`, of the completion-extended covariant gradient
 `tensorCovGradL2Compl g r s` applied to the eigenvector resolvent
-`eigenvectorResolvent g r s h_uniform i`.
+`eigenvectorResolvent g r s h_atlas i`.
 
 It is the `Lp ℝ 2 (chartL2Measure α)` limit of the cutoff chart components of the
 cross-left operator values `tensorCovGradL2 g r s (eigenvectorSmoothApprox g r s
-h_uniform i n)` (`crossLeftComponent_tendsto`). -/
+h_atlas i n)` (`crossLeftComponent_tendsto`). -/
 def crossLeftLimitComponent
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P : CompIdx E r (s + 1)) :
     Lp ℝ 2 (chartL2Measure (I := I) (M := M) α) :=
   tensorL2ChartComponentCutoff (I := I) (M := M) g r (s + 1)
     (tensorCovGradL2Compl (I := I) (M := M) g r s
-      (eigenvectorResolvent (I := I) (M := M) g r s h_uniform i))
+      (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
     α P
 
 /-- **The `n → ∞` `L²`-convergence of the cross-left chart component.** For an
 eigenbasis index `i`, a chart center `α : M`, and a component multi-index `P`,
 the cutoff Euclidean chart components of the cross-left operator values
-`tensorCovGradL2 g r s (eigenvectorSmoothApprox g r s h_uniform i n)` converge,
+`tensorCovGradL2 g r s (eigenvectorSmoothApprox g r s h_atlas i n)` converge,
 as `n → ∞` and in `Lp ℝ 2 (chartL2Measure α)`, to the limit object
-`crossLeftLimitComponent g r s h_uniform i α P`.
+`crossLeftLimitComponent g r s h_atlas i α P`.
 
 The cutoff chart component is the coercion of the continuous linear map
 `tensorL2ChartComponentCutoffCLM`; applying it to the abstract `L²` convergence
 `tensorCovGradL2_eigenvectorSmoothApprox_tendsto` gives the stated `L²`-limit. -/
 theorem crossLeftComponent_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P : CompIdx E r (s + 1)) :
     Filter.Tendsto
       (fun n => tensorL2ChartComponentCutoff (I := I) (M := M) g r (s + 1)
         (tensorCovGradL2 (I := I) (M := M) g r s
-          (eigenvectorSmoothApprox (I := I) (M := M) g r s h_uniform i n))
+          (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n))
         α P)
       atTop
-      (𝓝 (crossLeftLimitComponent (I := I) (M := M) g r s h_uniform i α P)) := by
+      (𝓝 (crossLeftLimitComponent (I := I) (M := M) g r s h_atlas i α P)) := by
   -- Apply the cutoff chart-component continuous linear map to the abstract `L²`
   -- convergence of the covariant-gradient operator values.
   have h_clm :=
     ((tensorL2ChartComponentCutoffCLM (I := I) (M := M) g r (s + 1)
         α P).continuous.tendsto _).comp
       (tensorCovGradL2_eigenvectorSmoothApprox_tendsto
-        (I := I) (M := M) g r s h_uniform i)
+        (I := I) (M := M) g r s h_atlas i)
   -- Unfold the composition and rewrite `…CutoffCLM _ u` as `…Cutoff _ u`.
   simp only [Function.comp_def, tensorL2ChartComponentCutoffCLM_apply] at h_clm
   exact h_clm
@@ -446,24 +447,24 @@ the abstract `L²` limit `tensorCovGradL2Compl g r s (eigenvectorResolvent …)`
 an eigenbasis index `i`, and a fixed smooth compactly-supported `(r, s)`-tensor
 test section `S`, the cross-left integrals
 `∫ tensorCovDerivCrossLeft g r s (chartAtlasPOU I M α) (eigenvectorSmoothApprox g
-r s h_uniform i n).toCcTensor S` converge, as `n → ∞`, to the metric `L²` inner
+r s h_atlas i n).toCcTensor S` converge, as `n → ∞`, to the metric `L²` inner
 product of the fixed abstract limit `tensorCovGradL2Compl g r s
-(eigenvectorResolvent g r s h_uniform i)` against the `L²`-coercion of the
+(eigenvectorResolvent g r s h_atlas i)` against the `L²`-coercion of the
 covector-prepend section `prependCovGradSlot g r s (chartAtlasPOU I M α) S`. -/
 theorem tensorCovDerivCrossLeft_integral_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (S : SmoothCcTensor g r s) :
     Filter.Tendsto
       (fun n => ∫ x, tensorCovDerivCrossLeft (I := I) (M := M) g r s
           (chartAtlasPOU I M α)
-          (eigenvectorSmoothApprox (I := I) (M := M) g r s h_uniform i n).toCcTensor
+          (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n).toCcTensor
           S x
         ∂(riemannianVolumeMeasure (I := I) (M := M) g))
       atTop
       (𝓝 (⟪tensorCovGradL2Compl (I := I) (M := M) g r s
-            (eigenvectorResolvent (I := I) (M := M) g r s h_uniform i),
+            (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i),
           ((prependCovGradSlot (I := I) (M := M) g r s (chartAtlasPOU I M α) S :
             SmoothCcTensor g r (s + 1)) : TensorL2 r (s + 1) g)⟫_ℝ)) := by
   -- The `L²` inner product against the fixed covector-prepend section is
@@ -476,7 +477,7 @@ theorem tensorCovDerivCrossLeft_integral_tendsto
           SmoothCcTensor g r (s + 1)) :
           TensorL2 r (s + 1) g)).continuous.tendsto _).comp
       (tensorCovGradL2_eigenvectorSmoothApprox_tendsto
-        (I := I) (M := M) g r s h_uniform i)
+        (I := I) (M := M) g r s h_atlas i)
   simp only [Function.comp_def, innerSL_apply_apply] at h_clm
   -- Flip the goal's limit inner product into the order `innerSL` produces.
   rw [real_inner_comm]
@@ -487,7 +488,7 @@ theorem tensorCovDerivCrossLeft_integral_tendsto
   intro n
   rw [tensorCovDerivCrossLeft_integral_eq_inner (I := I) (M := M) g r s
     (chartAtlasPOU I M α)
-    (eigenvectorSmoothApprox (I := I) (M := M) g r s h_uniform i n) S,
+    (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n) S,
     real_inner_comm]
 
 /-! ## The cross-right / cross-left symmetry
@@ -606,36 +607,36 @@ theorem tensorCovDerivCrossRight_integral_eq_inner
 section ElaborationTests
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
-  (h_uniform : uniformTensorChartSobolevBound g r s)
+  (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
 
 example (α : M) (P : CompIdx E r (s + 1)) :
     Lp ℝ 2 (chartL2Measure (I := I) (M := M) α) :=
-  crossLeftLimitComponent (I := I) (M := M) g r s h_uniform i α P
+  crossLeftLimitComponent (I := I) (M := M) g r s h_atlas i α P
 
 example (α : M) (P : CompIdx E r (s + 1)) :
     Filter.Tendsto
       (fun n => tensorL2ChartComponentCutoff (I := I) (M := M) g r (s + 1)
         (tensorCovGradL2 (I := I) (M := M) g r s
-          (eigenvectorSmoothApprox (I := I) (M := M) g r s h_uniform i n))
+          (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n))
         α P)
       atTop
-      (𝓝 (crossLeftLimitComponent (I := I) (M := M) g r s h_uniform i α P)) :=
-  crossLeftComponent_tendsto (I := I) (M := M) g r s h_uniform i α P
+      (𝓝 (crossLeftLimitComponent (I := I) (M := M) g r s h_atlas i α P)) :=
+  crossLeftComponent_tendsto (I := I) (M := M) g r s h_atlas i α P
 
 example (α : M) (S : SmoothCcTensor g r s) :
     Filter.Tendsto
       (fun n => ∫ x, tensorCovDerivCrossLeft (I := I) (M := M) g r s
           (chartAtlasPOU I M α)
-          (eigenvectorSmoothApprox (I := I) (M := M) g r s h_uniform i n).toCcTensor
+          (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n).toCcTensor
           S x
         ∂(riemannianVolumeMeasure (I := I) (M := M) g))
       atTop
       (𝓝 (⟪tensorCovGradL2Compl (I := I) (M := M) g r s
-            (eigenvectorResolvent (I := I) (M := M) g r s h_uniform i),
+            (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i),
           ((prependCovGradSlot (I := I) (M := M) g r s (chartAtlasPOU I M α) S :
             SmoothCcTensor g r (s + 1)) : TensorL2 r (s + 1) g)⟫_ℝ)) :=
-  tensorCovDerivCrossLeft_integral_tendsto (I := I) (M := M) g r s h_uniform i α S
+  tensorCovDerivCrossLeft_integral_tendsto (I := I) (M := M) g r s h_atlas i α S
 
 example (ζ : C^∞⟮I, M; ℝ⟯) (w S : SmoothCcTensor g r s) (x : M) :
     tensorCovDerivCrossRight (I := I) (M := M) g r s ζ w S x =

@@ -1,16 +1,17 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorSmoothChartComponent
+import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # The smooth representative *is* the connection-Laplacian resolvent eigenvector
 
 For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, the uniform-Sobolev
-hypothesis `h_uniform` and an eigenbasis index `i`, the smooth representative
-`eigenvectorSmooth g r s h_uniform i` is a genuine smooth compactly-supported
+hypothesis `h_atlas` and an eigenbasis index `i`, the smooth representative
+`eigenvectorSmooth g r s h_atlas i` is a genuine smooth compactly-supported
 `(r, s)`-tensor section. The chart-component analysis has shown that, at every
 chart centre `β` and component multi-index `P₀`, its canonical Euclidean chart
 component agrees — as an element of the chart `L²` space — with the chart
 component of the abstract connection-Laplacian resolvent eigenvector
-`tensorResolventEigenbasisVec h_uniform i`.
+`tensorResolventEigenbasisVec h_atlas i`.
 
 This file is the thin assembly that converts that chart-by-chart agreement into
 the headline identifications.
@@ -19,14 +20,14 @@ the headline identifications.
 
 * `eigenvectorSmooth_toL2` — the image of `eigenvectorSmooth` in the metric `L²`
   Hilbert space `TensorL2 r s g` equals the eigenvector
-  `tensorResolventEigenbasisVec h_uniform i`. The chart-component separation
+  `tensorResolventEigenbasisVec h_atlas i`. The chart-component separation
   theorem `tensorL2_eq_of_chartComponent_eq` reduces the equality to the
   chart-component agreement `eigenvectorSmooth_tensorL2ChartComponent_eq`, which
   supplies exactly the `∀ β P₀` family of chart-component equalities the
   separation theorem demands.
 
 * `tensorEigenvector_exists_smooth` — the abstract eigenvector
-  `tensorResolventEigenbasisVec h_uniform i` is the `L²`-coercion of a smooth
+  `tensorResolventEigenbasisVec h_atlas i` is the `L²`-coercion of a smooth
   compactly-supported tensor section. The witness is `eigenvectorSmooth`, whose
   `SmoothCcTensor` type is exactly the type of smooth compactly-supported
   `(r, s)`-tensor sections.
@@ -36,10 +37,10 @@ the headline identifications.
   structure, made explicit.
 
 * `eigenvectorSmooth_weak_eigen` — the smooth weak eigen-equation: testing the
-  eigenvector resolvent `eigenvectorResolvent g r s h_uniform i` against a smooth
+  eigenvector resolvent `eigenvectorResolvent g r s h_atlas i` against a smooth
   compactly-supported `H¹` section `S`, its `H¹` pairing with the completion
   embedding of `S` equals the `L²` pairing of the underlying smooth `L²` section
-  of `S` with the smooth representative `eigenvectorSmooth g r s h_uniform i`.
+  of `S` with the smooth representative `eigenvectorSmooth g r s h_atlas i`.
   This is the eigenvector weak equation `eigenWeakEquation`, transported across
   `eigenvectorSmooth_toL2`.
 
@@ -91,7 +92,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
-  (h_uniform : uniformTensorChartSobolevBound g r s)
+  (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
 
 /-! ## The smooth representative realises the eigenvector
@@ -104,105 +105,105 @@ exactly that family of equalities for the `L²`-coercion of `eigenvectorSmooth`
 and the resolvent eigenvector. -/
 
 /-- **The smooth representative is the eigenvector.** For a closed Riemannian
-manifold `(M, g)`, ranks `(r, s)`, the uniform-Sobolev hypothesis `h_uniform`
+manifold `(M, g)`, ranks `(r, s)`, the uniform-Sobolev hypothesis `h_atlas`
 and an eigenbasis index `i`, the image of the smooth compactly-supported tensor
-section `eigenvectorSmooth g r s h_uniform i` in the metric `L²` Hilbert space
+section `eigenvectorSmooth g r s h_atlas i` in the metric `L²` Hilbert space
 `TensorL2 r s g` equals the abstract connection-Laplacian resolvent eigenvector
-`tensorResolventEigenbasisVec h_uniform i`.
+`tensorResolventEigenbasisVec h_atlas i`.
 
 By the chart-component separation theorem `tensorL2_eq_of_chartComponent_eq`, it
 suffices to match the canonical Euclidean chart components of the two `L²`
 elements at every chart centre `β` and component multi-index `P₀`; that match is
 exactly `eigenvectorSmooth_tensorL2ChartComponent_eq`. -/
 theorem eigenvectorSmooth_toL2 :
-    (eigenvectorSmooth (I := I) (M := M) g r s h_uniform i : TensorL2 r s g) =
-      tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i :=
+    (eigenvectorSmooth (I := I) (M := M) g r s h_atlas i : TensorL2 r s g) =
+      tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i :=
   tensorL2_eq_of_chartComponent_eq (I := I) (M := M) g r s
-    (eigenvectorSmooth (I := I) (M := M) g r s h_uniform i : TensorL2 r s g)
-    (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i)
+    (eigenvectorSmooth (I := I) (M := M) g r s h_atlas i : TensorL2 r s g)
+    (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i)
     (fun β P₀ => eigenvectorSmooth_tensorL2ChartComponent_eq
-      (I := I) (M := M) g r s h_uniform i β P₀)
+      (I := I) (M := M) g r s h_atlas i β P₀)
 
 /-! ## The eigenvector has a smooth representative
 
-The element `eigenvectorSmooth g r s h_uniform i` lives in `SmoothCcTensor g r s`
+The element `eigenvectorSmooth g r s h_atlas i` lives in `SmoothCcTensor g r s`
 — the type of smooth compactly-supported `(r, s)`-tensor sections — and, by
 `eigenvectorSmooth_toL2`, its `L²`-coercion is the eigenvector. So the abstract
 eigenvector has a genuine smooth compactly-supported representative. -/
 
 /-- **The eigenvector has a smooth representative.** The abstract
 connection-Laplacian resolvent eigenvector `tensorResolventEigenbasisVec
-h_uniform i` is the metric-`L²` coercion of a smooth compactly-supported
-`(r, s)`-tensor section. The witness is `eigenvectorSmooth g r s h_uniform i`. -/
+h_atlas i` is the metric-`L²` coercion of a smooth compactly-supported
+`(r, s)`-tensor section. The witness is `eigenvectorSmooth g r s h_atlas i`. -/
 theorem tensorEigenvector_exists_smooth :
     ∃ T : SmoothCcTensor g r s,
       (T : TensorL2 r s g) =
-        tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i :=
-  ⟨eigenvectorSmooth (I := I) (M := M) g r s h_uniform i,
-    eigenvectorSmooth_toL2 (I := I) (M := M) g r s h_uniform i⟩
+        tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i :=
+  ⟨eigenvectorSmooth (I := I) (M := M) g r s h_atlas i,
+    eigenvectorSmooth_toL2 (I := I) (M := M) g r s h_atlas i⟩
 
 /-- **The smooth representative is `C^∞`.** The underlying tensor section of the
-smooth representative `eigenvectorSmooth g r s h_uniform i` is a `C^∞` section of
+smooth representative `eigenvectorSmooth g r s h_atlas i` is a `C^∞` section of
 the `(r, s)`-tensor bundle. This is the smoothness datum carried by the
 `SmoothCcTensor` structure, made explicit. -/
 theorem eigenvectorSmooth_contMDiff :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
       (fun x : M =>
         TotalSpace.mk' (TensorRSModel r s ℝ E) x
-          ((eigenvectorSmooth (I := I) (M := M) g r s h_uniform i).toSection x)) :=
-  (eigenvectorSmooth (I := I) (M := M) g r s h_uniform i).toSection.contMDiff
+          ((eigenvectorSmooth (I := I) (M := M) g r s h_atlas i).toSection x)) :=
+  (eigenvectorSmooth (I := I) (M := M) g r s h_atlas i).toSection.contMDiff
 
 /-! ## The smooth weak eigen-equation
 
 The eigenvector weak equation `eigenWeakEquation` pairs the eigenvector
-resolvent `eigenvectorResolvent g r s h_uniform i` against the completion
+resolvent `eigenvectorResolvent g r s h_atlas i` against the completion
 embedding of a smooth compactly-supported `H¹` section `S`: the `H¹` pairing
 equals the `L²` pairing of the underlying smooth `L²` section of `S` with the
 abstract eigenvector. Rewriting that abstract eigenvector by
 `eigenvectorSmooth_toL2` restates the equation for the smooth representative. -/
 
 /-- **The smooth weak eigen-equation.** For a closed Riemannian manifold
-`(M, g)`, ranks `(r, s)`, the uniform-Sobolev hypothesis `h_uniform`, an
+`(M, g)`, ranks `(r, s)`, the uniform-Sobolev hypothesis `h_atlas`, an
 eigenbasis index `i` and a smooth compactly-supported `H¹` tensor section `S`,
 the `H¹` pairing of the eigenvector resolvent `eigenvectorResolvent g r s
-h_uniform i` with the completion embedding of `S` equals the `L²` pairing of the
+h_atlas i` with the completion embedding of `S` equals the `L²` pairing of the
 underlying smooth `L²` section of `S` with the smooth representative
-`eigenvectorSmooth g r s h_uniform i`.
+`eigenvectorSmooth g r s h_atlas i`.
 
 This is the eigenvector weak equation `eigenWeakEquation`, transported across the
 identification `eigenvectorSmooth_toL2` of the smooth representative with the
 abstract eigenvector. -/
 theorem eigenvectorSmooth_weak_eigen (S : SmoothCcTensorH1 g r s) :
-    ⟪eigenvectorResolvent (I := I) (M := M) g r s h_uniform i,
+    ⟪eigenvectorResolvent (I := I) (M := M) g r s h_atlas i,
         (smoothToTensorH1Compl (I := I) (M := M) g r s S)⟫_ℝ =
       ⟪(S.toCcTensor : TensorL2 r s g),
-        (eigenvectorSmooth (I := I) (M := M) g r s h_uniform i :
+        (eigenvectorSmooth (I := I) (M := M) g r s h_atlas i :
           TensorL2 r s g)⟫_ℝ := by
-  rw [eigenvectorSmooth_toL2 (I := I) (M := M) g r s h_uniform i]
-  exact eigenWeakEquation (I := I) (M := M) g r s h_uniform i S
+  rw [eigenvectorSmooth_toL2 (I := I) (M := M) g r s h_atlas i]
+  exact eigenWeakEquation (I := I) (M := M) g r s h_atlas i S
 
 /-! ## Sanity tests -/
 
 section ElaborationTests
 
 example :
-    (eigenvectorSmooth (I := I) (M := M) g r s h_uniform i : TensorL2 r s g) =
-      tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i :=
-  eigenvectorSmooth_toL2 (I := I) (M := M) g r s h_uniform i
+    (eigenvectorSmooth (I := I) (M := M) g r s h_atlas i : TensorL2 r s g) =
+      tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i :=
+  eigenvectorSmooth_toL2 (I := I) (M := M) g r s h_atlas i
 
 example :
     ∃ T : SmoothCcTensor g r s,
       (T : TensorL2 r s g) =
-        tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i :=
-  tensorEigenvector_exists_smooth (I := I) (M := M) g r s h_uniform i
+        tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i :=
+  tensorEigenvector_exists_smooth (I := I) (M := M) g r s h_atlas i
 
 example (S : SmoothCcTensorH1 g r s) :
-    ⟪eigenvectorResolvent (I := I) (M := M) g r s h_uniform i,
+    ⟪eigenvectorResolvent (I := I) (M := M) g r s h_atlas i,
         (smoothToTensorH1Compl (I := I) (M := M) g r s S)⟫_ℝ =
       ⟪(S.toCcTensor : TensorL2 r s g),
-        (eigenvectorSmooth (I := I) (M := M) g r s h_uniform i :
+        (eigenvectorSmooth (I := I) (M := M) g r s h_atlas i :
           TensorL2 r s g)⟫_ℝ :=
-  eigenvectorSmooth_weak_eigen (I := I) (M := M) g r s h_uniform i S
+  eigenvectorSmooth_weak_eigen (I := I) (M := M) g r s h_atlas i S
 
 end ElaborationTests
 

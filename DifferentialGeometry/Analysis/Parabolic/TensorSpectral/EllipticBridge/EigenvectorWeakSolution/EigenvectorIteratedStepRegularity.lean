@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorDifferentiatedRHSWkp
+import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # Polymorphic-in-`K` `W^{k,2}` regularity of the per-step effective source
@@ -131,14 +132,14 @@ the existing weighted-`L²` regularity to arbitrary chart-Sobolev regularity. It
 is the tensor analogue of the scalar campaign's `fChartEffStep_memWkp_K_two`. -/
 theorem eigenvectorChartIteratedStep_memWkp_K_two
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
     (dirs : Fin m → Fin (Module.finrank ℝ E))
     {fChartEffPrev : EuclN → ℝ}
     (l : Fin (Module.finrank ℝ E))
     (h_comp : MemWkp (d := Module.finrank ℝ E) (m + 2 + K) 2
-      (eigenvectorChartComponentFun (I := I) (M := M) g r s h_uniform i α P₀)
+      (eigenvectorChartComponentFun (I := I) (M := M) g r s h_atlas i α P₀)
       (chartTargetEuclid (I := I) (M := M) α))
     (h_prev_memWkp_succ :
       MemWkp (d := Module.finrank ℝ E) (K + 1) 2 fChartEffPrev
@@ -149,23 +150,23 @@ theorem eigenvectorChartIteratedStep_memWkp_K_two
       (fun _ => (0 : ℝ))) :
     MemWkp (d := Module.finrank ℝ E) K 2
       (eigenvectorChartIteratedStep (I := I) (M := M)
-        g r s h_uniform i α P₀ m dirs fChartEffPrev l)
+        g r s h_atlas i α P₀ m dirs fChartEffPrev l)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
   -- `eigenvectorChartIteratedStep = indicator (chartPouKernel α) Q`, where
   -- `Q = eigenvectorChartRHSDiffNumerator … (Fin.snoc dirs l) / density`.
   set Q : EuclN → ℝ := fun y =>
     eigenvectorChartRHSDiffNumerator (I := I) (M := M)
-      g r s h_uniform i α P₀ m (Fin.snoc dirs l) fChartEffPrev y /
+      g r s h_atlas i α P₀ m (Fin.snoc dirs l) fChartEffPrev y /
     densityOnEuclid (I := I) g α y with hQ_def
   -- The standalone step is the indicator of the kernel applied to `Q`.
   have h_step_eq :
       eigenvectorChartIteratedStep (I := I) (M := M)
-        g r s h_uniform i α P₀ m dirs fChartEffPrev l =
+        g r s h_atlas i α P₀ m dirs fChartEffPrev l =
       Set.indicator (chartPouKernel (I := I) (M := M) α) Q := by
     unfold eigenvectorChartIteratedStep
     have h_num := eigenvectorChartIteratedStepNumerator_eq_rhsDiffNumerator
-      (I := I) (M := M) g r s h_uniform i α P₀ m dirs fChartEffPrev l
+      (I := I) (M := M) g r s h_atlas i α P₀ m dirs fChartEffPrev l
     funext y
     simp only [hQ_def]
     rw [h_num]
@@ -173,7 +174,7 @@ theorem eigenvectorChartIteratedStep_memWkp_K_two
   have hQ_memWkp : MemWkp (d := Module.finrank ℝ E) K 2 Q
       (chartTargetEuclid (I := I) (M := M) α) :=
     eigenvectorChartRHSDiffNumerator_div_density_memWkp (I := I) (M := M)
-      g r s h_uniform i α P₀ m K (Fin.snoc dirs l)
+      g r s h_atlas i α P₀ m K (Fin.snoc dirs l)
       h_comp h_prev_memWkp_succ h_prev_ae_zero
   -- `Q` ae-vanishes off the partition-of-unity kernel — the public restatement.
   have hQ_ae_zero : Q =ᵐ[(volume : Measure EuclN).restrict
@@ -181,7 +182,7 @@ theorem eigenvectorChartIteratedStep_memWkp_K_two
         chartPouKernel (I := I) (M := M) α)]
       (fun _ : EuclN => (0 : ℝ)) :=
     eigenvectorChartRHSDiffNumerator_div_density_ae_zero_off_chartPouKernel
-      (I := I) (M := M) g r s h_uniform i α P₀ m (Fin.snoc dirs l)
+      (I := I) (M := M) g r s h_atlas i α P₀ m (Fin.snoc dirs l)
       h_prev_ae_zero
   -- `indicator (chartPouKernel α) Q =ᵐ Q` on the open chart target.
   -- Split `chartTargetEuclid α = (chartTargetEuclid α ∩ chartPouKernel α) ∪
@@ -256,14 +257,14 @@ previous-level source, plus its ae-vanishing off the partition-of-unity kernel. 
 This is the tensor analogue of the scalar campaign's `fChartEffStep_memW1p_two`. -/
 theorem eigenvectorChartIteratedStep_memW1p_two
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
     (dirs : Fin m → Fin (Module.finrank ℝ E))
     {fChartEffPrev : EuclN → ℝ}
     (l : Fin (Module.finrank ℝ E))
     (h_comp : MemWkp (d := Module.finrank ℝ E) (m + 3) 2
-      (eigenvectorChartComponentFun (I := I) (M := M) g r s h_uniform i α P₀)
+      (eigenvectorChartComponentFun (I := I) (M := M) g r s h_atlas i α P₀)
       (chartTargetEuclid (I := I) (M := M) α))
     (h_prev_memWkp_two :
       MemWkp (d := Module.finrank ℝ E) 2 2 fChartEffPrev
@@ -274,7 +275,7 @@ theorem eigenvectorChartIteratedStep_memW1p_two
       (fun _ => (0 : ℝ))) :
     DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
       (eigenvectorChartIteratedStep (I := I) (M := M)
-        g r s h_uniform i α P₀ m dirs fChartEffPrev l)
+        g r s h_atlas i α P₀ m dirs fChartEffPrev l)
       (chartTargetEuclid (I := I) (M := M) α) := by
   -- `MemWkp 2 2 = MemWkp (1 + 1) 2` and `m + 3 = m + 2 + 1` realign the indices.
   have h_prev_memWkp_succ : MemWkp (d := Module.finrank ℝ E) (1 + 1) 2
@@ -282,12 +283,12 @@ theorem eigenvectorChartIteratedStep_memW1p_two
     have h_eq : (1 + 1 : ℕ) = 2 := by norm_num
     rw [h_eq]; exact h_prev_memWkp_two
   have h_comp' : MemWkp (d := Module.finrank ℝ E) (m + 2 + 1) 2
-      (eigenvectorChartComponentFun (I := I) (M := M) g r s h_uniform i α P₀)
+      (eigenvectorChartComponentFun (I := I) (M := M) g r s h_atlas i α P₀)
       (chartTargetEuclid (I := I) (M := M) α) := by
     have h_eq : m + 2 + 1 = m + 3 := by ring
     rw [h_eq]; exact h_comp
   have h_mem := eigenvectorChartIteratedStep_memWkp_K_two (I := I) (M := M)
-    g r s h_uniform i α P₀ m 1 dirs (fChartEffPrev := fChartEffPrev) l
+    g r s h_atlas i α P₀ m 1 dirs (fChartEffPrev := fChartEffPrev) l
     h_comp' h_prev_memWkp_succ h_prev_ae_zero
   rw [MemWkp.one_iff_memW1p] at h_mem
   exact h_mem

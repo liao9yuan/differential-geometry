@@ -6,19 +6,19 @@ import DifferentialGeometry.Analysis.Sobolev.Tools.WeakPartialLimit
 
 For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, fix an eigenbasis
 index `i : TensorEigenIdx g r s` with nonzero resolvent eigenvalue
-`μ := i.fst.val`. The eigenvector `φ := tensorResolventEigenbasisVec h_uniform i`
+`μ := i.fst.val`. The eigenvector `φ := tensorResolventEigenbasisVec h_atlas i`
 is an abstract element of the `L²` Hilbert space `TensorL2 r s g`, with canonical
 cutoff Euclidean chart component `u := tensorL2ChartComponentCutoff g r s φ α P₀`.
 
 Two companion files established, for the canonical smooth `H¹`-approximating
-sequence `eigenvectorSmoothApprox g r s h_uniform i : ℕ → SmoothCcTensorH1 g r s`:
+sequence `eigenvectorSmoothApprox g r s h_atlas i : ℕ → SmoothCcTensorH1 g r s`:
 
 * `EigenvectorChartComponentL2.lean`: the `μ⁻¹`-rescaled `L²`-coercions of the
   smooth approximants converge, in `TensorL2 r s g`, to the eigenvector `φ`;
 * `EigenvectorCutoffChartPartialL2.lean`: for each chart-coordinate direction
   `k`, the chosen weak `k`-th cutoff chart partials of those `μ⁻¹`-rescaled
   approximants converge, in `Lp ℝ 2 (chartL2Measure α)`, to
-  `eigenvectorCutoffChartPartialLp g r s h_uniform i α P₀ k` — the candidate weak
+  `eigenvectorCutoffChartPartialLp g r s h_atlas i α P₀ k` — the candidate weak
   `k`-th cutoff chart partial of `u`.
 
 This file closes the loop: it names `eigenvectorCutoffChartWeakPartial` as the
@@ -52,9 +52,9 @@ Euclidean chart target, matching the open-set hypothesis of the closure theorem.
 
 ## Main definitions
 
-* `eigenvectorCutoffChartWeakPartial g r s h_uniform i α P₀ k` — the weak `k`-th
+* `eigenvectorCutoffChartWeakPartial g r s h_atlas i α P₀ k` — the weak `k`-th
   cutoff chart partial of the eigenvector cutoff chart component: the
-  coercion-to-function of `eigenvectorCutoffChartPartialLp g r s h_uniform i α
+  coercion-to-function of `eigenvectorCutoffChartPartialLp g r s h_atlas i α
   P₀ k`.
 
 ## Main results
@@ -173,7 +173,7 @@ private lemma hasWeakPartialDeriv_const_smul
 /-! ## The weak cutoff chart partial of the eigenvector cutoff chart component
 
 `eigenvectorCutoffChartWeakPartial` is the coercion-to-function of the `Lp ℝ 2
-(chartL2Measure α)` class `eigenvectorCutoffChartPartialLp g r s h_uniform i α
+(chartL2Measure α)` class `eigenvectorCutoffChartPartialLp g r s h_atlas i α
 P₀ k`. It is the candidate, and — by the headline below — genuine, weak `k`-th
 cutoff chart partial of the eigenvector cutoff chart component. -/
 
@@ -182,24 +182,24 @@ component.** For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an
 eigenbasis index `i`, a chart center `α : M`, a component multi-index `P₀`, and
 a chart-coordinate direction `k`, this is the coercion-to-function of the
 `Lp ℝ 2 (chartL2Measure α)` class `eigenvectorCutoffChartPartialLp g r s
-h_uniform i α P₀ k`.
+h_atlas i α P₀ k`.
 
 `eigenvectorCutoffChartPartialLp_hasWeakPartialDeriv` shows it is a genuine
 `DeGiorgi.HasWeakPartialDeriv` of the eigenvector cutoff chart component
-`tensorL2ChartComponentCutoff g r s (tensorResolventEigenbasisVec h_uniform i) α
+`tensorL2ChartComponentCutoff g r s (tensorResolventEigenbasisVec h_atlas i) α
 P₀` on the Euclidean chart target. -/
 def eigenvectorCutoffChartWeakPartial
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) : EuclN → ℝ :=
-  (eigenvectorCutoffChartPartialLp (I := I) (M := M) g r s h_uniform i α P₀ k :
+  (eigenvectorCutoffChartPartialLp (I := I) (M := M) g r s h_atlas i α P₀ k :
     Lp ℝ 2 (chartL2Measure (I := I) (M := M) α))
 
 /-! ## The `μ⁻¹`-rescaled `L²`-coercion of the approximating sequence
 
-The eigenbasis vector `φ := tensorResolventEigenbasisVec h_uniform i` satisfies
+The eigenbasis vector `φ := tensorResolventEigenbasisVec h_atlas i` satisfies
 `TensorH1ComplToTensorL2 (eigenvectorResolvent …) = μ • φ`
 (`eigenvector_eq_resolvent_smul`, multiplied through by the nonzero scalar `μ`).
 Composing the `H¹`-convergence `eigenvectorSmoothApprox_tendsto` with the
@@ -211,48 +211,48 @@ converge, in `TensorL2 r s g`, to the eigenvector `φ`. -/
 
 /-- The `μ⁻¹`-rescaled `L²`-coercions of the underlying smooth `L²` sections of
 the canonical approximating sequence converge, in `TensorL2 r s g`, to the
-eigenvector `φ := tensorResolventEigenbasisVec h_uniform i`, where
+eigenvector `φ := tensorResolventEigenbasisVec h_atlas i`, where
 `μ := i.fst.val`. -/
 private lemma cutoff_smoothApprox_smul_coe_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     Filter.Tendsto
       (fun n => (i.fst.val)⁻¹ •
         (((eigenvectorSmoothApprox (I := I) (M := M)
-            g r s h_uniform i n).toCcTensor) : TensorL2 r s g))
+            g r s h_atlas i n).toCcTensor) : TensorL2 r s g))
       atTop
-      (𝓝 (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i)) := by
+      (𝓝 (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i)) := by
   -- Apply the continuous map `TensorH1ComplToTensorL2` to the `H¹`-convergence.
   have h_l2 :
       Filter.Tendsto
         (fun n => TensorH1ComplToTensorL2 (I := I) (M := M) g r s
           (smoothToTensorH1Compl (I := I) (M := M) g r s
-            (eigenvectorSmoothApprox (I := I) (M := M) g r s h_uniform i n)))
+            (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n)))
         atTop
         (𝓝 (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-          (eigenvectorResolvent (I := I) (M := M) g r s h_uniform i))) :=
+          (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))) :=
     ((TensorH1ComplToTensorL2 (I := I) (M := M) g r s).continuous.tendsto _).comp
-      (eigenvectorSmoothApprox_tendsto (I := I) (M := M) g r s h_uniform i)
+      (eigenvectorSmoothApprox_tendsto (I := I) (M := M) g r s h_atlas i)
   -- Rewrite the `n`-th term to the `L²`-coercion of the smooth `L²` section.
   have h_term :
       (fun n => TensorH1ComplToTensorL2 (I := I) (M := M) g r s
           (smoothToTensorH1Compl (I := I) (M := M) g r s
-            (eigenvectorSmoothApprox (I := I) (M := M) g r s h_uniform i n))) =
+            (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n))) =
         fun n => (((eigenvectorSmoothApprox (I := I) (M := M)
-          g r s h_uniform i n).toCcTensor) : TensorL2 r s g) := by
+          g r s h_atlas i n).toCcTensor) : TensorL2 r s g) := by
     funext n
     exact TensorH1ComplToTensorL2_smoothToTensorH1Compl_eq_coe
       (I := I) (M := M) g r s
-      (eigenvectorSmoothApprox (I := I) (M := M) g r s h_uniform i n)
+      (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n)
   -- `TensorH1ComplToTensorL2 (eigenvectorResolvent …) = μ • φ`.
   have hμ_ne : i.fst.val ≠ 0 := i.fst.val_ne_zero
   have h_shadow :
       TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-          (eigenvectorResolvent (I := I) (M := M) g r s h_uniform i) =
+          (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i) =
         i.fst.val •
-          tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i := by
-    have h_eq := eigenvector_eq_resolvent_smul (I := I) (M := M) g r s h_uniform i
+          tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i := by
+    have h_eq := eigenvector_eq_resolvent_smul (I := I) (M := M) g r s h_atlas i
     rw [h_eq, smul_smul, mul_inv_cancel₀ hμ_ne, one_smul]
   rw [h_term, h_shadow] at h_l2
   -- Scalar multiplication by `μ⁻¹` is continuous; `μ⁻¹ • (μ • φ) = φ`.
@@ -276,39 +276,39 @@ the concrete cutoff Euclidean chart component `cutoffComponentEuclid g r s
 (eigenvectorSmoothApprox … n).toCcTensor α P₀.1 P₀.2`. -/
 lemma eigenvectorCutoffChartComponentL2_approx_coeFn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (n : ℕ) :
     ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
         ((i.fst.val)⁻¹ •
           (((eigenvectorSmoothApprox (I := I) (M := M)
-              g r s h_uniform i n).toCcTensor) : TensorL2 r s g)) α P₀ :
+              g r s h_atlas i n).toCcTensor) : TensorL2 r s g)) α P₀ :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) =ᵐ[
         chartL2Measure (I := I) (M := M) α]
       fun y => (i.fst.val)⁻¹ •
         cutoffComponentEuclid (I := I) (M := M) g r s
           (eigenvectorSmoothApprox (I := I) (M := M)
-            g r s h_uniform i n).toCcTensor α P₀.1 P₀.2 y := by
+            g r s h_atlas i n).toCcTensor α P₀.1 P₀.2 y := by
   classical
   -- The cutoff chart component is `ℝ`-homogeneous in the abstract `L²` element.
   rw [show tensorL2ChartComponentCutoff (I := I) (M := M) g r s
         ((i.fst.val)⁻¹ •
           (((eigenvectorSmoothApprox (I := I) (M := M)
-              g r s h_uniform i n).toCcTensor) : TensorL2 r s g)) α P₀ =
+              g r s h_atlas i n).toCcTensor) : TensorL2 r s g)) α P₀ =
       (i.fst.val)⁻¹ •
         tensorL2ChartComponentCutoff (I := I) (M := M) g r s
           (((eigenvectorSmoothApprox (I := I) (M := M)
-            g r s h_uniform i n).toCcTensor) : TensorL2 r s g) α P₀ from by
+            g r s h_atlas i n).toCcTensor) : TensorL2 r s g) α P₀ from by
     rw [← tensorL2ChartComponentCutoffCLM_apply, map_smul,
       tensorL2ChartComponentCutoffCLM_apply]]
   -- `coeFn` of a scalar multiple is the scalar multiple of `coeFn`.
   refine (Lp.coeFn_smul (i.fst.val)⁻¹
     (tensorL2ChartComponentCutoff (I := I) (M := M) g r s
       (((eigenvectorSmoothApprox (I := I) (M := M)
-        g r s h_uniform i n).toCcTensor) : TensorL2 r s g) α P₀)).trans ?_
+        g r s h_atlas i n).toCcTensor) : TensorL2 r s g) α P₀)).trans ?_
   -- The unscaled cutoff chart component agrees a.e. with the concrete one.
   exact (tensorL2ChartComponentCutoff_smoothToTensorL2_coeFn (I := I) (M := M)
-    g r s (eigenvectorSmoothApprox (I := I) (M := M) g r s h_uniform i n).toCcTensor
+    g r s (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n).toCcTensor
     α P₀).const_smul (i.fst.val)⁻¹
 
 /-- The coercion-to-function of the `n`-th approximant cutoff chart partial
@@ -317,7 +317,7 @@ the concrete chosen weak `k`-th cutoff chart partial of the cutoff Euclidean
 chart component of the smooth section `(eigenvectorSmoothApprox … n).toCcTensor`. -/
 lemma eigenvectorCutoffChartPartialLp_approx_coeFn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) (n : ℕ) :
@@ -325,28 +325,28 @@ lemma eigenvectorCutoffChartPartialLp_approx_coeFn
         eigenvectorCutoffChartPartialCLM (I := I) (M := M) g r s α P₀ k
           (smoothToTensorH1Compl (I := I) (M := M) g r s
             (eigenvectorSmoothApprox (I := I) (M := M)
-              g r s h_uniform i n)) :
+              g r s h_atlas i n)) :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) =ᵐ[
         chartL2Measure (I := I) (M := M) α]
       fun y => (i.fst.val)⁻¹ •
         chosenWeakPartial' (d := Module.finrank ℝ E) 2 k
           (cutoffComponentEuclid (I := I) (M := M) g r s
             (eigenvectorSmoothApprox (I := I) (M := M)
-              g r s h_uniform i n).toCcTensor α P₀.1 P₀.2)
+              g r s h_atlas i n).toCcTensor α P₀.1 P₀.2)
           (chartTargetEuclid (I := I) (M := M) α) y := by
   classical
   -- Rewrite the `Lp` class via the concrete characterisation of the approximant.
   rw [eigenvectorCutoffChartPartialLp_approx_eq (I := I) (M := M)
-    g r s h_uniform i α P₀ k n]
+    g r s h_atlas i α P₀ k n]
   -- `coeFn` of a scalar multiple is the scalar multiple of `coeFn`.
   refine (Lp.coeFn_smul (i.fst.val)⁻¹
     ((chosenWeakPartial'_cutoffComponentEuclid_memLp (I := I) (M := M) g r s
-      (eigenvectorSmoothApprox (I := I) (M := M) g r s h_uniform i n)
+      (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n)
       α P₀.1 P₀.2 k).toLp
       (chosenWeakPartial' (d := Module.finrank ℝ E) 2 k
         (cutoffComponentEuclid (I := I) (M := M) g r s
           (eigenvectorSmoothApprox (I := I) (M := M)
-            g r s h_uniform i n).toCcTensor α P₀.1 P₀.2)
+            g r s h_atlas i n).toCcTensor α P₀.1 P₀.2)
         (chartTargetEuclid (I := I) (M := M) α)))).trans ?_
   -- The unscaled `L²` class agrees almost everywhere with the concrete partial.
   exact (MemLp.coeFn_toLp _).const_smul (i.fst.val)⁻¹
@@ -368,7 +368,7 @@ chart-coordinate direction `k` — of the coercion-to-function of the `n`-th
 approximant cutoff chart component, on the Euclidean chart target. -/
 private lemma eigenvectorCutoffChartWeakPartial_approx_hasWeakPartialDeriv
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) (n : ℕ) :
@@ -377,12 +377,12 @@ private lemma eigenvectorCutoffChartWeakPartial_approx_hasWeakPartialDeriv
           eigenvectorCutoffChartPartialCLM (I := I) (M := M) g r s α P₀ k
             (smoothToTensorH1Compl (I := I) (M := M) g r s
               (eigenvectorSmoothApprox (I := I) (M := M)
-                g r s h_uniform i n)) :
+                g r s h_atlas i n)) :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ)
       ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
           ((i.fst.val)⁻¹ •
             (((eigenvectorSmoothApprox (I := I) (M := M)
-                g r s h_uniform i n).toCcTensor) : TensorL2 r s g)) α P₀ :
+                g r s h_atlas i n).toCcTensor) : TensorL2 r s g)) α P₀ :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
@@ -391,10 +391,10 @@ private lemma eigenvectorCutoffChartWeakPartial_approx_hasWeakPartialDeriv
       DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
         (cutoffComponentEuclid (I := I) (M := M) g r s
           (eigenvectorSmoothApprox (I := I) (M := M)
-            g r s h_uniform i n).toCcTensor α P₀.1 P₀.2)
+            g r s h_atlas i n).toCcTensor α P₀.1 P₀.2)
         (chartTargetEuclid (I := I) (M := M) α) :=
     cutoffComponentEuclid_memW1p (I := I) (M := M) g r s
-      (eigenvectorSmoothApprox (I := I) (M := M) g r s h_uniform i n)
+      (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n)
       α P₀.1 P₀.2
   -- Hence its `chosenWeakPartial'` is a genuine weak `k`-th cutoff chart partial.
   have h_weak :
@@ -402,11 +402,11 @@ private lemma eigenvectorCutoffChartWeakPartial_approx_hasWeakPartialDeriv
         (chosenWeakPartial' (d := Module.finrank ℝ E) 2 k
           (cutoffComponentEuclid (I := I) (M := M) g r s
             (eigenvectorSmoothApprox (I := I) (M := M)
-              g r s h_uniform i n).toCcTensor α P₀.1 P₀.2)
+              g r s h_atlas i n).toCcTensor α P₀.1 P₀.2)
           (chartTargetEuclid (I := I) (M := M) α))
         (cutoffComponentEuclid (I := I) (M := M) g r s
           (eigenvectorSmoothApprox (I := I) (M := M)
-            g r s h_uniform i n).toCcTensor α P₀.1 P₀.2)
+            g r s h_atlas i n).toCcTensor α P₀.1 P₀.2)
         (chartTargetEuclid (I := I) (M := M) α) :=
     chosenWeakPartial'_isWeakPartial_of_mem h_w1p k
   -- Scaling by `μ⁻¹` keeps it a weak partial.
@@ -416,12 +416,12 @@ private lemma eigenvectorCutoffChartWeakPartial_approx_hasWeakPartialDeriv
           chosenWeakPartial' (d := Module.finrank ℝ E) 2 k
             (cutoffComponentEuclid (I := I) (M := M) g r s
               (eigenvectorSmoothApprox (I := I) (M := M)
-                g r s h_uniform i n).toCcTensor α P₀.1 P₀.2)
+                g r s h_atlas i n).toCcTensor α P₀.1 P₀.2)
             (chartTargetEuclid (I := I) (M := M) α) y)
         (fun y => (i.fst.val)⁻¹ •
           cutoffComponentEuclid (I := I) (M := M) g r s
             (eigenvectorSmoothApprox (I := I) (M := M)
-              g r s h_uniform i n).toCcTensor α P₀.1 P₀.2 y)
+              g r s h_atlas i n).toCcTensor α P₀.1 P₀.2 y)
         (chartTargetEuclid (I := I) (M := M) α) :=
     hasWeakPartialDeriv_const_smul (i.fst.val)⁻¹ h_weak
   -- Transfer both arguments to the `Lp`-class presentation. The reference
@@ -430,9 +430,9 @@ private lemma eigenvectorCutoffChartWeakPartial_approx_hasWeakPartialDeriv
   -- directly.
   refine hasWeakPartialDeriv_congr_ae ?_ ?_ h_weak_smul
   · exact (eigenvectorCutoffChartComponentL2_approx_coeFn (I := I) (M := M)
-      g r s h_uniform i α P₀ n).symm
+      g r s h_atlas i α P₀ n).symm
   · exact (eigenvectorCutoffChartPartialLp_approx_coeFn (I := I) (M := M)
-      g r s h_uniform i α P₀ k n).symm
+      g r s h_atlas i α P₀ k n).symm
 
 /-! ## The `n → ∞` `L²`-convergence of the abstract cutoff chart component
 
@@ -444,25 +444,25 @@ approximants to the cutoff chart component of the eigenvector. -/
 
 /-- The cutoff Euclidean chart components of the `μ⁻¹`-rescaled smooth
 approximants converge, in `Lp ℝ 2 (chartL2Measure α)`, to the cutoff chart
-component of the eigenvector `φ := tensorResolventEigenbasisVec h_uniform i`. -/
+component of the eigenvector `φ := tensorResolventEigenbasisVec h_atlas i`. -/
 private lemma eigenvectorCutoffChartComponentL2_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
     Filter.Tendsto
       (fun n => tensorL2ChartComponentCutoff (I := I) (M := M) g r s
         ((i.fst.val)⁻¹ •
           (((eigenvectorSmoothApprox (I := I) (M := M)
-              g r s h_uniform i n).toCcTensor) : TensorL2 r s g)) α P₀)
+              g r s h_atlas i n).toCcTensor) : TensorL2 r s g)) α P₀)
       atTop
       (𝓝 (tensorL2ChartComponentCutoff (I := I) (M := M) g r s
-        (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) α P₀)) := by
+        (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) α P₀)) := by
   -- Apply the cutoff chart-component continuous linear map to the convergence.
   have h_clm :=
     ((tensorL2ChartComponentCutoffCLM (I := I) (M := M) g r s α P₀).continuous.tendsto
       _).comp
-      (cutoff_smoothApprox_smul_coe_tendsto (I := I) (M := M) g r s h_uniform i)
+      (cutoff_smoothApprox_smul_coe_tendsto (I := I) (M := M) g r s h_atlas i)
   -- Unfold the composition and rewrite `…CLM _ u` as `tensorL2ChartComponentCutoff
   -- _ u`, at the `n`-th term and at the limit.
   simp only [Function.comp_def, tensorL2ChartComponentCutoffCLM_apply] at h_clm
@@ -483,7 +483,7 @@ converge to the coercion-to-function of the eigenvector cutoff chart component,
 measured by the `eLpNorm` of the difference against `chartL2Measure α`. -/
 private lemma eigenvectorCutoffChartComponent_eLpNorm_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
     Filter.Tendsto
@@ -491,10 +491,10 @@ private lemma eigenvectorCutoffChartComponent_eLpNorm_tendsto
         (((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
             ((i.fst.val)⁻¹ •
               (((eigenvectorSmoothApprox (I := I) (M := M)
-                  g r s h_uniform i n).toCcTensor) : TensorL2 r s g)) α P₀ :
+                  g r s h_atlas i n).toCcTensor) : TensorL2 r s g)) α P₀ :
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) -
           ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
-            (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i)
+            (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i)
             α P₀ :
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ)) 2
         (chartL2Measure (I := I) (M := M) α))
@@ -503,19 +503,19 @@ private lemma eigenvectorCutoffChartComponent_eLpNorm_tendsto
     (fun n => tensorL2ChartComponentCutoff (I := I) (M := M) g r s
       ((i.fst.val)⁻¹ •
         (((eigenvectorSmoothApprox (I := I) (M := M)
-            g r s h_uniform i n).toCcTensor) : TensorL2 r s g)) α P₀)
+            g r s h_atlas i n).toCcTensor) : TensorL2 r s g)) α P₀)
     (tensorL2ChartComponentCutoff (I := I) (M := M) g r s
-      (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i)
+      (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i)
       α P₀)).mp
     (eigenvectorCutoffChartComponentL2_tendsto (I := I) (M := M)
-      g r s h_uniform i α P₀)
+      g r s h_atlas i α P₀)
 
 /-- The coercions-to-functions of the approximant cutoff chart partials converge
 to the coercion-to-function of the candidate eigenvector cutoff chart partial,
 measured by the `eLpNorm` of the difference against `chartL2Measure α`. -/
 private lemma eigenvectorCutoffChartPartial_eLpNorm_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) :
@@ -525,10 +525,10 @@ private lemma eigenvectorCutoffChartPartial_eLpNorm_tendsto
             eigenvectorCutoffChartPartialCLM (I := I) (M := M) g r s α P₀ k
               (smoothToTensorH1Compl (I := I) (M := M) g r s
                 (eigenvectorSmoothApprox (I := I) (M := M)
-                  g r s h_uniform i n)) :
+                  g r s h_atlas i n)) :
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) -
           ((eigenvectorCutoffChartPartialLp (I := I) (M := M)
-            g r s h_uniform i α P₀ k :
+            g r s h_atlas i α P₀ k :
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ)) 2
         (chartL2Measure (I := I) (M := M) α))
       atTop (𝓝 0) :=
@@ -536,11 +536,11 @@ private lemma eigenvectorCutoffChartPartial_eLpNorm_tendsto
     (fun n => (i.fst.val)⁻¹ •
       eigenvectorCutoffChartPartialCLM (I := I) (M := M) g r s α P₀ k
         (smoothToTensorH1Compl (I := I) (M := M) g r s
-          (eigenvectorSmoothApprox (I := I) (M := M) g r s h_uniform i n)))
+          (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n)))
     (eigenvectorCutoffChartPartialLp (I := I) (M := M)
-      g r s h_uniform i α P₀ k)).mp
+      g r s h_atlas i α P₀ k)).mp
     (eigenvectorCutoffChartPartialLp_tendsto (I := I) (M := M)
-      g r s h_uniform i α P₀ k)
+      g r s h_atlas i α P₀ k)
 
 /-! ## The headline: the eigenvector cutoff chart partial is a genuine weak
 cutoff chart partial
@@ -555,7 +555,7 @@ Feeding into the `L²`-closure theorem `hasWeakPartialDeriv_of_tendsto_eLpNorm`:
   (`eigenvectorCutoffChartPartial_eLpNorm_tendsto`);
 * `MemLp` membership of all `Lp` classes involved (automatic from `Lp.memLp`),
 
-establishes that `eigenvectorCutoffChartWeakPartial g r s h_uniform i α P₀ k` is
+establishes that `eigenvectorCutoffChartWeakPartial g r s h_atlas i α P₀ k` is
 a genuine `DeGiorgi.HasWeakPartialDeriv` — with respect to the chart-coordinate
 direction `k` — of the eigenvector cutoff chart component, on the Euclidean
 chart target. -/
@@ -564,9 +564,9 @@ chart target. -/
 partial.** For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an
 eigenbasis index `i`, a chart center `α : M`, a component multi-index `P₀`, and
 a chart-coordinate direction `k`, the weak `k`-th cutoff chart partial
-`eigenvectorCutoffChartPartialLp g r s h_uniform i α P₀ k` is a genuine
+`eigenvectorCutoffChartPartialLp g r s h_atlas i α P₀ k` is a genuine
 `DeGiorgi.HasWeakPartialDeriv` of the canonical cutoff Euclidean chart component
-`tensorL2ChartComponentCutoff g r s (tensorResolventEigenbasisVec h_uniform i) α
+`tensorL2ChartComponentCutoff g r s (tensorResolventEigenbasisVec h_atlas i) α
 P₀` of the eigenvector, on the Euclidean chart target `chartTargetEuclid α`.
 
 This is the verbatim cutoff-weight analogue of the partition-of-unity-weighted
@@ -574,22 +574,22 @@ headline `eigenvectorChartWeakPartial_hasWeakPartialDeriv`: both `eigenvector`
 chart-partial objects of this campaign are `μ⁻¹`-rescaled values of a chart-partial
 continuous linear map on the eigenvector resolvent, and both eigenvector
 chart-component objects are the chart component of the eigenvector
-`tensorResolventEigenbasisVec h_uniform i`; the `μ⁻¹`-rescaling of the partial
+`tensorResolventEigenbasisVec h_atlas i`; the `μ⁻¹`-rescaling of the partial
 matches the chart component being that of the eigenvector itself rather than of
 its `μ`-scaled resolvent `L²`-coercion `TensorH1ComplToTensorL2 (eigenvectorResolvent
 …)`. -/
 theorem eigenvectorCutoffChartPartialLp_hasWeakPartialDeriv
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) :
     DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k
       ((eigenvectorCutoffChartPartialLp (I := I) (M := M)
-          g r s h_uniform i α P₀ k :
+          g r s h_atlas i α P₀ k :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ)
       ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
-          (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) α P₀ :
+          (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) α P₀ :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
@@ -602,7 +602,7 @@ theorem eigenvectorCutoffChartPartialLp_hasWeakPartialDeriv
     ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
         ((i.fst.val)⁻¹ •
           (((eigenvectorSmoothApprox (I := I) (M := M)
-              g r s h_uniform i n).toCcTensor) : TensorL2 r s g)) α P₀ :
+              g r s h_atlas i n).toCcTensor) : TensorL2 r s g)) α P₀ :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ)
     with huApprox_def
   set gApprox : ℕ → EuclN → ℝ := fun n =>
@@ -610,17 +610,17 @@ theorem eigenvectorCutoffChartPartialLp_hasWeakPartialDeriv
         eigenvectorCutoffChartPartialCLM (I := I) (M := M) g r s α P₀ k
           (smoothToTensorH1Compl (I := I) (M := M) g r s
             (eigenvectorSmoothApprox (I := I) (M := M)
-              g r s h_uniform i n)) :
+              g r s h_atlas i n)) :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ)
     with hgApprox_def
   set uLim : EuclN → ℝ :=
     ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
-        (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) α P₀ :
+        (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) α P₀ :
       Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ)
     with huLim_def
   set gLim : EuclN → ℝ :=
     ((eigenvectorCutoffChartPartialLp (I := I) (M := M)
-        g r s h_uniform i α P₀ k :
+        g r s h_atlas i α P₀ k :
       Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ)
     with hgLim_def
   -- `MemLp 2` for the four families. The reference measure `chartL2Measure α`
@@ -655,7 +655,7 @@ theorem eigenvectorCutoffChartPartialLp_hasWeakPartialDeriv
     intro n
     simp only [hgApprox_def, huApprox_def]
     exact eigenvectorCutoffChartWeakPartial_approx_hasWeakPartialDeriv
-      (I := I) (M := M) g r s h_uniform i α P₀ k n
+      (I := I) (M := M) g r s h_atlas i α P₀ k n
   -- `eLpNorm`-convergence of the cutoff chart components. Convergence against
   -- `chartL2Measure α` is, definitionally, convergence against
   -- `volume.restrict (chartTarget α)`.
@@ -666,7 +666,7 @@ theorem eigenvectorCutoffChartPartialLp_hasWeakPartialDeriv
             (chartTargetEuclid (I := I) (M := M) α)))
         atTop (𝓝 0) := by
     have h := eigenvectorCutoffChartComponent_eLpNorm_tendsto (I := I) (M := M)
-      g r s h_uniform i α P₀
+      g r s h_atlas i α P₀
     simp only [huApprox_def, huLim_def]
     exact h
   -- `eLpNorm`-convergence of the cutoff chart partials.
@@ -677,7 +677,7 @@ theorem eigenvectorCutoffChartPartialLp_hasWeakPartialDeriv
             (chartTargetEuclid (I := I) (M := M) α)))
         atTop (𝓝 0) := by
     have h := eigenvectorCutoffChartPartial_eLpNorm_tendsto (I := I) (M := M)
-      g r s h_uniform i α P₀ k
+      g r s h_atlas i α P₀ k
     simp only [hgApprox_def, hgLim_def]
     exact h
   -- Assemble via the `L²`-closure theorem.
@@ -702,24 +702,24 @@ inherited. -/
 
 /-- **Local `L²`-integrability of the eigenvector cutoff chart partial.** For any
 compact subset `K` of the Euclidean chart target, the weak `k`-th cutoff chart
-partial `eigenvectorCutoffChartWeakPartial g r s h_uniform i α P₀ k` lies in
+partial `eigenvectorCutoffChartWeakPartial g r s h_atlas i α P₀ k` lies in
 `MemLp 2` of the Lebesgue volume restricted to `K`. -/
 theorem eigenvectorCutoffChartWeakPartial_locally_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E))
     {K : Set EuclN} (hK : IsCompact K)
     (hK_in : K ⊆ chartTargetEuclid (I := I) (M := M) α) :
     MemLp (eigenvectorCutoffChartWeakPartial (I := I) (M := M)
-        g r s h_uniform i α P₀ k) 2
+        g r s h_atlas i α P₀ k) 2
       ((volume : Measure EuclN).restrict K) := by
   classical
   let _ := hK
   -- The coercion-to-function is in `MemLp 2` of the chart's `L²` measure.
   have h_memLp : MemLp (eigenvectorCutoffChartWeakPartial (I := I) (M := M)
-      g r s h_uniform i α P₀ k) 2
+      g r s h_atlas i α P₀ k) 2
       (chartL2Measure (I := I) (M := M) α) := by
     rw [eigenvectorCutoffChartWeakPartial]
     exact Lp.memLp _
@@ -733,27 +733,27 @@ theorem eigenvectorCutoffChartWeakPartial_locally_memLp
 /-! ## Sanity tests -/
 
 example (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) : EuclN → ℝ :=
-  eigenvectorCutoffChartWeakPartial (I := I) (M := M) g r s h_uniform i α P₀ k
+  eigenvectorCutoffChartWeakPartial (I := I) (M := M) g r s h_atlas i α P₀ k
 
 example (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) :
     DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k
       ((eigenvectorCutoffChartPartialLp (I := I) (M := M)
-          g r s h_uniform i α P₀ k :
+          g r s h_atlas i α P₀ k :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ)
       ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
-          (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) α P₀ :
+          (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) α P₀ :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ)
       (chartTargetEuclid (I := I) (M := M) α) :=
   eigenvectorCutoffChartPartialLp_hasWeakPartialDeriv
-    (I := I) (M := M) g r s h_uniform i α P₀ k
+    (I := I) (M := M) g r s h_atlas i α P₀ k
 
 end TensorSpectral
 end Parabolic

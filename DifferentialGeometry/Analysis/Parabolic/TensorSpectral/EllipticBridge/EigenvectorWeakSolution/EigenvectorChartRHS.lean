@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.Eig
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorChartWeightedMemLp
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorChartTestDecoupling
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorChartCrossRightDiv
+import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # The main-Dirichlet limit and the chart right-hand side of the eigenvector
@@ -15,7 +16,7 @@ connection-Laplacian eigenvector as a chart-local weak elliptic solution.
 
 The variational-identity assembly applies the source-free per-approximant chart
 bilinear identity to the partition-of-unity-weighted smooth approximants
-`Tₙ := pouSmul g r s α wₙ`, with `wₙ := eigenvectorSmoothApprox g r s h_uniform i n`
+`Tₙ := pouSmul g r s α wₙ`, with `wₙ := eigenvectorSmoothApprox g r s h_atlas i n`
 the canonical smooth `H¹`-approximating sequence of the eigenvector resolvent.
 Its Dirichlet term splits, by the covariant Leibniz rule, into the
 genuine-gradient **main-Dirichlet** term
@@ -49,13 +50,13 @@ main-Dirichlet limit is the closed-form `(1 − μ) · ⟪S'.toCcTensor, φ⟫`.
 
 ## The chart right-hand side
 
-`eigenvectorChartRHS g r s h_uniform i α P₀` is the chart-Euclidean right-hand
+`eigenvectorChartRHS g r s h_atlas i α P₀` is the chart-Euclidean right-hand
 side of the limiting per-component variational identity: the explicit
 `densityOnEuclid`-and-`C^∞`-coefficient-weighted finite combination of the
 chart-component limit objects produced by the companion files of this campaign —
 
 * the canonical eigenvector chart component `u_chart` (the chart `P₀`-component
-  of the eigenvector `tensorResolventEigenbasisVec h_uniform i`);
+  of the eigenvector `tensorResolventEigenbasisVec h_atlas i`);
 * the cross-Leibniz limit objects `crossLeftLimitComponent`,
   `crossRightLimitComponent`;
 * the three lower-order coefficient limits `covPrincipalRotationCoeffLimit`,
@@ -126,7 +127,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 /-! ## The `L²`-coercion of the eigenvector resolvent
 
-The eigenbasis vector `φ := tensorResolventEigenbasisVec h_uniform i` satisfies,
+The eigenbasis vector `φ := tensorResolventEigenbasisVec h_atlas i` satisfies,
 by `eigenvector_eq_resolvent_smul`, the identity
 `φ = μ⁻¹ • TensorH1ComplToTensorL2 (eigenvectorResolvent …)`; multiplying through
 by the nonzero scalar `μ := i.fst.val` rearranges this to express the
@@ -139,14 +140,14 @@ eigenvalue `μ := i.fst.val` rearranges `φ = μ⁻¹ • TensorH1ComplToTensorL
 = μ • φ`. -/
 private lemma resolventL2_eq_mul_eigenvector
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-        (eigenvectorResolvent (I := I) (M := M) g r s h_uniform i) =
+        (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i) =
       i.fst.val •
-        tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i := by
+        tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i := by
   have hμ_ne : i.fst.val ≠ 0 := i.fst.val_ne_zero
-  rw [eigenvector_eq_resolvent_smul (I := I) (M := M) g r s h_uniform i,
+  rw [eigenvector_eq_resolvent_smul (I := I) (M := M) g r s h_atlas i,
     smul_smul, mul_inv_cancel₀ hμ_ne, one_smul]
 
 /-! ## The main-Dirichlet limit
@@ -165,13 +166,13 @@ For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
 compactly-supported `(r, s)`-tensor section `S'`, the main-Dirichlet pairings
 
 ```
-∫_M ⟨∇(eigenvectorSmoothApprox g r s h_uniform i n).toCcTensor, ∇S'⟩ dμ_g
+∫_M ⟨∇(eigenvectorSmoothApprox g r s h_atlas i n).toCcTensor, ∇S'⟩ dμ_g
 ```
 
 converge, as `n → ∞`, to the closed-form
 
 ```
-(1 − μ) · ⟪(S' : TensorL2 r s g), tensorResolventEigenbasisVec h_uniform i⟫_{L²}.
+(1 − μ) · ⟪(S' : TensorL2 r s g), tensorResolventEigenbasisVec h_atlas i⟫_{L²}.
 ```
 
 The proof feeds the canonical-approximant Dirichlet-convergence theorem
@@ -187,18 +188,18 @@ those, it furnishes the full limit of the source-free per-approximant chart
 bilinear identity. -/
 theorem mainDir_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (S' : SmoothCcTensor g r s) :
     Filter.Tendsto
       (fun n => ∫ x, tensorCovDerivPointwiseInner (I := I) (M := M) g r s
-          (eigenvectorSmoothApprox (I := I) (M := M) g r s h_uniform i n).toCcTensor
+          (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n).toCcTensor
           S' x
         ∂(riemannianVolumeMeasure (I := I) (M := M) g))
       atTop
       (𝓝 ((1 - i.fst.val) *
         ⟪(S' : TensorL2 r s g),
-          tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i⟫_ℝ)) := by
+          tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i⟫_ℝ)) := by
   classical
   -- View the fixed test section as a smooth compactly-supported `H¹` section.
   set Sh1 : SmoothCcTensorH1 g r s := ⟨S'⟩ with hSh1_def
@@ -207,42 +208,42 @@ theorem mainDir_tendsto
   have hw_tendsto :
       Filter.Tendsto
         (fun n => smoothToTensorH1Compl (I := I) (M := M) g r s
-          (eigenvectorSmoothApprox (I := I) (M := M) g r s h_uniform i n))
+          (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n))
         atTop
-        (𝓝 (eigenvectorResolvent (I := I) (M := M) g r s h_uniform i)) :=
-    eigenvectorSmoothApprox_tendsto (I := I) (M := M) g r s h_uniform i
+        (𝓝 (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i)) :=
+    eigenvectorSmoothApprox_tendsto (I := I) (M := M) g r s h_atlas i
   -- The Dirichlet-convergence theorem of the canonical approximating sequence.
   have h_dir :=
-    smoothApprox_dirichlet_tendsto (I := I) (M := M) g r s h_uniform i Sh1
+    smoothApprox_dirichlet_tendsto (I := I) (M := M) g r s h_atlas i Sh1
       hw_tendsto
   -- `⟪R, sToH1 Sh1⟫ = ⟪Sh1.toCcTensor, φ⟫` by the eigenvector weak equation.
   have h_weak :
-      ⟪eigenvectorResolvent (I := I) (M := M) g r s h_uniform i,
+      ⟪eigenvectorResolvent (I := I) (M := M) g r s h_atlas i,
           smoothToTensorH1Compl (I := I) (M := M) g r s Sh1⟫_ℝ =
         ⟪(Sh1.toCcTensor : TensorL2 r s g),
-          tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i⟫_ℝ :=
-    eigenWeakEquation (I := I) (M := M) g r s h_uniform i Sh1
+          tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i⟫_ℝ :=
+    eigenWeakEquation (I := I) (M := M) g r s h_atlas i Sh1
   -- `TensorH1ComplToTensorL2 R = μ • φ`, so the `L²` part is
   -- `μ • ⟪φ, Sh1.toCcTensor⟫ = μ • ⟪Sh1.toCcTensor, φ⟫`.
   have h_l2part :
       ⟪TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-            (eigenvectorResolvent (I := I) (M := M) g r s h_uniform i),
+            (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i),
           (Sh1.toCcTensor : TensorL2 r s g)⟫_ℝ =
         i.fst.val *
           ⟪(Sh1.toCcTensor : TensorL2 r s g),
-            tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i⟫_ℝ := by
-    rw [resolventL2_eq_mul_eigenvector (I := I) (M := M) g r s h_uniform i,
+            tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i⟫_ℝ := by
+    rw [resolventL2_eq_mul_eigenvector (I := I) (M := M) g r s h_atlas i,
       inner_smul_left, starRingEnd_apply, star_trivial, real_inner_comm]
   -- Assemble the closed-form limit.
   have h_limit_eq :
-      ⟪eigenvectorResolvent (I := I) (M := M) g r s h_uniform i,
+      ⟪eigenvectorResolvent (I := I) (M := M) g r s h_atlas i,
             smoothToTensorH1Compl (I := I) (M := M) g r s Sh1⟫_ℝ -
           ⟪TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-              (eigenvectorResolvent (I := I) (M := M) g r s h_uniform i),
+              (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i),
             (Sh1.toCcTensor : TensorL2 r s g)⟫_ℝ =
         (1 - i.fst.val) *
           ⟪(S' : TensorL2 r s g),
-            tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i⟫_ℝ := by
+            tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i⟫_ℝ := by
     rw [h_weak, h_l2part, hSh1_to]; ring
   rw [h_limit_eq] at h_dir
   exact h_dir
@@ -262,7 +263,7 @@ inverse `μ⁻¹` of the resolvent eigenvalue. Concretely the bracketed combinat
 collects:
 
 * the canonical eigenvector chart component
-  `tensorL2ChartComponent g r s (tensorResolventEigenbasisVec h_uniform i) α P₀`;
+  `tensorL2ChartComponent g r s (tensorResolventEigenbasisVec h_atlas i) α P₀`;
 * the cross-Leibniz limit objects `crossLeftLimitComponent`,
   `crossRightLimitComponent`, each contracted by the chart-frame tensor-metric
   Gram and the test-decoupling coefficient;
@@ -302,7 +303,7 @@ chart-component limit objects of the eigenvector weak-solution assembly,
 collected into a bracketed seven-term combination scaled overall by `μ⁻¹`:
 
 * the canonical eigenvector chart component
-  `tensorL2ChartComponent g r s (tensorResolventEigenbasisVec h_uniform i) α P₀`;
+  `tensorL2ChartComponent g r s (tensorResolventEigenbasisVec h_atlas i) α P₀`;
 * the cross-left limit object `crossLeftLimitComponent`, contracted by the
   rank-`(r, s + 1)` chart-frame tensor-metric Gram and the cross-left
   test-decoupling coefficient `crossLeftTestCoeff` (with the cross-left sign of
@@ -321,7 +322,7 @@ collected into a bracketed seven-term combination scaled overall by `μ⁻¹`:
 
 The overall `μ⁻¹` factor is the residue of the chart-component-rescaling: the
 per-approximant chart-bilinear identity is taken at the canonical smooth
-approximants `Tₙ := pouSmul g r s α (eigenvectorSmoothApprox g r s h_uniform i
+approximants `Tₙ := pouSmul g r s α (eigenvectorSmoothApprox g r s h_atlas i
 n).toCcTensor`, whose chart `P₀`-component converges to `μ` times the eigenvector
 chart component `u_chart`, so the limit of the principal Dirichlet integrand
 carries a `μ` that, after the rearrangement isolating
@@ -333,44 +334,44 @@ It is the `f_chart` field of the chart-bilinear divergence-form data structure
 `TensorChartBilinearH1ComplData g r s α P₀`. -/
 def eigenvectorChartRHS
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) : EuclN → ℝ :=
   fun y =>
     (i.fst.val)⁻¹ *
       (-- The canonical eigenvector chart component.
         ((tensorL2ChartComponent (I := I) (M := M) g r s
-            (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) α P₀ :
+            (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) α P₀ :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
         -- The cross-left limit contribution (with the cross-left sign).
         - (∑ P : TensorCompIdx (E := E) r (s + 1),
             ∑ Q : TensorCompIdx (E := E) r (s + 1),
               (covChartMetricGram (I := I) (M := M) g r (s + 1) α P Q y *
                   crossLeftTestCoeff (I := I) (M := M) g r s α P₀ Q y) *
-                ((crossLeftLimitComponent (I := I) (M := M) g r s h_uniform i α P :
+                ((crossLeftLimitComponent (I := I) (M := M) g r s h_atlas i α P :
                   Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
         -- The cross-right value-coefficient contribution.
         + (∑ P : TensorCompIdx (E := E) r s,
             ∑ Q : TensorCompIdx (E := E) r s,
               (covChartMetricGram (I := I) (M := M) g r s α P Q y *
                   crossRightTestValueCoeff (I := I) (M := M) g r s α P₀ Q y) *
-                ((crossRightLimitComponent (I := I) (M := M) g r s h_uniform i α P :
+                ((crossRightLimitComponent (I := I) (M := M) g r s h_atlas i α P :
                   Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
         -- The principal rotation coefficient limit (with the source sign).
         - covPrincipalRotationCoeffLimit (I := I) (M := M)
-            g r s h_uniform i α P₀ y
+            g r s h_atlas i α P₀ y
         -- The lower-order rotation value coefficient limit (with the source sign).
         - covLowerOrderRotationValueCoeffLimit (I := I) (M := M)
-            g r s h_uniform i α P₀ y
+            g r s h_atlas i α P₀ y
         -- The lower-order gradient divergence limit, divided by the chart density.
         + (1 / densityOnEuclid (I := I) g α y) *
             (∑ l : Fin (Module.finrank ℝ E),
               weightedGradCoeffDivLimit (I := I) (M := M)
-                g r s h_uniform i α P₀ l y)
+                g r s h_atlas i α P₀ l y)
         -- The cross-right gradient divergence limit, divided by the chart density.
         - (1 / densityOnEuclid (I := I) g α y) *
             crossRightGradCoeffDivLimit (I := I) (M := M)
-              g r s h_uniform i α P₀ y)
+              g r s h_atlas i α P₀ y)
 
 /-! ## Auxiliary facts about the chart density and the divergence limits
 
@@ -400,12 +401,12 @@ every summand of its explicit finite-sum definition carries an
 `indicator (chartPouKernel α)` factor. -/
 lemma crossRightGradCoeffDivLimit_eq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     {y : EuclN} (hy : y ∉ chartPouKernel (I := I) (M := M) α) :
     crossRightGradCoeffDivLimit (I := I) (M := M)
-        g r s h_uniform i α P₀ y = 0 := by
+        g r s h_atlas i α P₀ y = 0 := by
   classical
   -- `crossRightGradCoeffDivLimit` is a sum of two triple finite sums; each
   -- summand carries an `indicator (chartPouKernel α)` factor that vanishes at
@@ -420,7 +421,7 @@ lemma crossRightGradCoeffDivLimit_eq_zero_off_chartPouKernel
     add_zero]
 
 /-- **Weighted-`L²` membership of the cross-right gradient-divergence limit.**
-`crossRightGradCoeffDivLimit g r s h_uniform i α P₀` is `MemLp 2` with respect to
+`crossRightGradCoeffDivLimit g r s h_atlas i α P₀` is `MemLp 2` with respect to
 the chart-pulled weighted measure restricted to `chartTargetEuclid α`.
 
 The limit is `MemLp 2 (chartL2Measure α) = MemLp 2 (volume.restrict (chartTarget
@@ -430,19 +431,19 @@ off the compact partition-of-unity kernel; the weighted-measure upgrade lemma
 delivers weighted `MemLp`. -/
 private lemma crossRightGradCoeffDivLimit_memLp_weighted
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
     MemLp (crossRightGradCoeffDivLimit (I := I) (M := M)
-        g r s h_uniform i α P₀) 2
+        g r s h_atlas i α P₀) 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α)) := by
   classical
   have h_plain : MemLp (crossRightGradCoeffDivLimit (I := I) (M := M)
-      g r s h_uniform i α P₀) 2
+      g r s h_atlas i α P₀) 2
       ((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)) :=
-    crossRightGradCoeffDivLimit_memLp (I := I) (M := M) g r s h_uniform i α P₀
+    crossRightGradCoeffDivLimit_memLp (I := I) (M := M) g r s h_atlas i α P₀
   exact memLp_chartPulledWeightedMeasure_of_memLp_volume_of_ae_zero_off_compact
     (I := I) (M := M) g α
     (chartPouKernel_isCompact (I := I) (M := M) α)
@@ -450,7 +451,7 @@ private lemma crossRightGradCoeffDivLimit_memLp_weighted
     (chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α)
     (Filter.Eventually.of_forall (fun y hy =>
       crossRightGradCoeffDivLimit_eq_zero_off_chartPouKernel
-        (I := I) (M := M) g r s h_uniform i α P₀ hy))
+        (I := I) (M := M) g r s h_atlas i α P₀ hy))
     h_plain
 
 /-! ## Weighted-`L²` membership of the chart-Euclidean right-hand side
@@ -466,7 +467,7 @@ weighted-`L²` membership. -/
 
 For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
 `i`, a chart center `α : M`, and a component multi-index `P₀`, the chart-Euclidean
-right-hand side `eigenvectorChartRHS g r s h_uniform i α P₀` is `MemLp 2` with
+right-hand side `eigenvectorChartRHS g r s h_atlas i α P₀` is `MemLp 2` with
 respect to the chart-pulled weighted measure
 `(chartPulledWeightedMeasure g α).restrict (chartTargetEuclid α)`.
 
@@ -481,10 +482,10 @@ chart-bilinear divergence-form data structure
 `TensorChartBilinearH1ComplData g r s α P₀`. -/
 theorem eigenvectorChartRHS_memLp_weighted
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
-    MemLp (eigenvectorChartRHS (I := I) (M := M) g r s h_uniform i α P₀) 2
+    MemLp (eigenvectorChartRHS (I := I) (M := M) g r s h_atlas i α P₀) 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α)) := by
   classical
@@ -496,11 +497,11 @@ theorem eigenvectorChartRHS_memLp_weighted
   have h_uchart : MemLp
       (fun y =>
         ((tensorL2ChartComponent (I := I) (M := M) g r s
-            (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) α P₀ :
+            (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) α P₀ :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) 2 μw := by
     rw [hμw_def]
     exact tensorL2ChartComponent_memLp_weighted (I := I) (M := M) g r s
-      (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) α P₀
+      (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) α P₀
   -- (2) The cross-left limit contribution: a finite double sum. The `C^∞`
   -- coefficient is `covChartMetricGram · crossLeftTestCoeff`; the cross-left
   -- limit is a.e. supported in the compact cutoff kernel.
@@ -508,7 +509,7 @@ theorem eigenvectorChartRHS_memLp_weighted
       MemLp
         (fun y => (covChartMetricGram (I := I) (M := M) g r (s + 1) α P Q y *
             crossLeftTestCoeff (I := I) (M := M) g r s α P₀ Q y) *
-          ((crossLeftLimitComponent (I := I) (M := M) g r s h_uniform i α P :
+          ((crossLeftLimitComponent (I := I) (M := M) g r s h_atlas i α P :
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) 2 μw := by
     intro P Q
     rw [hμw_def]
@@ -516,13 +517,13 @@ theorem eigenvectorChartRHS_memLp_weighted
         ∀ᵐ y ∂((chartPulledWeightedMeasure (I := I) g α).restrict
             (chartTargetEuclid (I := I) (M := M) α)),
           y ∉ cutoffChartKernelEuclid (I := I) (M := M) α →
-            ((crossLeftLimitComponent (I := I) (M := M) g r s h_uniform i α P :
+            ((crossLeftLimitComponent (I := I) (M := M) g r s h_atlas i α P :
               Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y = 0 := by
       rw [crossLeftLimitComponent]
       exact tensorL2ChartComponentCutoff_ae_zero_off_cutoffChartKernelEuclid_weighted
         (I := I) (M := M) g r (s + 1)
         (tensorCovGradL2Compl (I := I) (M := M) g r s
-          (eigenvectorResolvent (I := I) (M := M) g r s h_uniform i)) α P
+          (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i)) α P
     exact memLp_weighted_contDiffOn_mul (I := I) (M := M) g α
       ((covChartMetricGram_contDiffOn (I := I) (M := M) g r (s + 1) α P Q).mul
         (crossLeftTestCoeff_contDiffOn (I := I) (M := M) g r s α P₀ Q))
@@ -530,14 +531,14 @@ theorem eigenvectorChartRHS_memLp_weighted
       (cutoffChartKernelEuclid_measurableSet (I := I) (M := M) α)
       (cutoffChartKernelEuclid_subset_chartTargetEuclid (I := I) (M := M) α)
       (crossLeftLimitComponent_memLp_weighted (I := I) (M := M)
-        g r s h_uniform i α P)
+        g r s h_atlas i α P)
       h_aezero
   -- (3) The cross-right value-coefficient contribution: a finite double sum.
   have h_crossRight : ∀ (P Q : TensorCompIdx (E := E) r s),
       MemLp
         (fun y => (covChartMetricGram (I := I) (M := M) g r s α P Q y *
             crossRightTestValueCoeff (I := I) (M := M) g r s α P₀ Q y) *
-          ((crossRightLimitComponent (I := I) (M := M) g r s h_uniform i α P :
+          ((crossRightLimitComponent (I := I) (M := M) g r s h_atlas i α P :
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) 2 μw := by
     intro P Q
     rw [hμw_def]
@@ -545,13 +546,13 @@ theorem eigenvectorChartRHS_memLp_weighted
         ∀ᵐ y ∂((chartPulledWeightedMeasure (I := I) g α).restrict
             (chartTargetEuclid (I := I) (M := M) α)),
           y ∉ cutoffChartKernelEuclid (I := I) (M := M) α →
-            ((crossRightLimitComponent (I := I) (M := M) g r s h_uniform i α P :
+            ((crossRightLimitComponent (I := I) (M := M) g r s h_atlas i α P :
               Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y = 0 := by
       rw [crossRightLimitComponent]
       exact tensorL2ChartComponentCutoff_ae_zero_off_cutoffChartKernelEuclid_weighted
         (I := I) (M := M) g r s
         (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-          (eigenvectorResolvent (I := I) (M := M) g r s h_uniform i)) α P
+          (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i)) α P
     exact memLp_weighted_contDiffOn_mul (I := I) (M := M) g α
       ((covChartMetricGram_contDiffOn (I := I) (M := M) g r s α P Q).mul
         (crossRightTestValueCoeff_contDiffOn (I := I) (M := M) g r s α P₀ Q))
@@ -559,20 +560,20 @@ theorem eigenvectorChartRHS_memLp_weighted
       (cutoffChartKernelEuclid_measurableSet (I := I) (M := M) α)
       (cutoffChartKernelEuclid_subset_chartTargetEuclid (I := I) (M := M) α)
       (crossRightLimitComponent_memLp_weighted (I := I) (M := M)
-        g r s h_uniform i α P)
+        g r s h_atlas i α P)
       h_aezero
   -- (4) The principal rotation coefficient limit.
   have h_prc : MemLp (covPrincipalRotationCoeffLimit (I := I) (M := M)
-      g r s h_uniform i α P₀) 2 μw := by
+      g r s h_atlas i α P₀) 2 μw := by
     rw [hμw_def]
     exact covPrincipalRotationCoeffLimit_memLp_weighted (I := I) (M := M)
-      g r s h_uniform i α P₀
+      g r s h_atlas i α P₀
   -- (5) The lower-order rotation value coefficient limit.
   have h_lov : MemLp (covLowerOrderRotationValueCoeffLimit (I := I) (M := M)
-      g r s h_uniform i α P₀) 2 μw := by
+      g r s h_atlas i α P₀) 2 μw := by
     rw [hμw_def]
     exact covLowerOrderRotationValueCoeffLimit_memLp_weighted (I := I) (M := M)
-      g r s h_uniform i α P₀
+      g r s h_atlas i α P₀
   -- (6) The chart-density-weighted lower-order gradient divergence limit,
   -- divided by the chart density. The reciprocal `1 / densityOnEuclid g α` is
   -- the `C^∞` coefficient; the finite sum over chart directions of
@@ -582,30 +583,30 @@ theorem eigenvectorChartRHS_memLp_weighted
       (fun y => (1 / densityOnEuclid (I := I) g α y) *
         (∑ l : Fin (Module.finrank ℝ E),
           weightedGradCoeffDivLimit (I := I) (M := M)
-            g r s h_uniform i α P₀ l y)) 2 μw := by
+            g r s h_atlas i α P₀ l y)) 2 μw := by
     rw [hμw_def]
     have h_div_sum : MemLp
         (fun y => ∑ l : Fin (Module.finrank ℝ E),
           weightedGradCoeffDivLimit (I := I) (M := M)
-            g r s h_uniform i α P₀ l y) 2
+            g r s h_atlas i α P₀ l y) 2
         ((chartPulledWeightedMeasure (I := I) g α).restrict
           (chartTargetEuclid (I := I) (M := M) α)) :=
       memLp_finset_sum (μ := (chartPulledWeightedMeasure (I := I) g α).restrict
           (chartTargetEuclid (I := I) (M := M) α))
         (Finset.univ : Finset (Fin (Module.finrank ℝ E)))
         (fun l _ => weightedGradCoeffDivLimit_memLp_weighted (I := I) (M := M)
-          g r s h_uniform i α P₀ l)
+          g r s h_atlas i α P₀ l)
     have h_aezero :
         ∀ᵐ y ∂((chartPulledWeightedMeasure (I := I) g α).restrict
             (chartTargetEuclid (I := I) (M := M) α)),
           y ∉ chartPouKernel (I := I) (M := M) α →
             (∑ l : Fin (Module.finrank ℝ E),
               weightedGradCoeffDivLimit (I := I) (M := M)
-                g r s h_uniform i α P₀ l y) = 0 :=
+                g r s h_atlas i α P₀ l y) = 0 :=
       Filter.Eventually.of_forall (fun y hy =>
         Finset.sum_eq_zero (fun l _ =>
           weightedGradCoeffDivLimit_eq_zero_off_chartPouKernel
-            (I := I) (M := M) g r s h_uniform i α P₀ l hy))
+            (I := I) (M := M) g r s h_atlas i α P₀ l hy))
     exact memLp_weighted_contDiffOn_mul (I := I) (M := M) g α
       (one_div_densityOnEuclid_contDiffOn (I := I) (M := M) g α)
       (chartPouKernel_isCompact (I := I) (M := M) α)
@@ -619,24 +620,24 @@ theorem eigenvectorChartRHS_memLp_weighted
   have h_crossRightDiv : MemLp
       (fun y => (1 / densityOnEuclid (I := I) g α y) *
         crossRightGradCoeffDivLimit (I := I) (M := M)
-          g r s h_uniform i α P₀ y) 2 μw := by
+          g r s h_atlas i α P₀ y) 2 μw := by
     rw [hμw_def]
     have h_aezero :
         ∀ᵐ y ∂((chartPulledWeightedMeasure (I := I) g α).restrict
             (chartTargetEuclid (I := I) (M := M) α)),
           y ∉ chartPouKernel (I := I) (M := M) α →
             crossRightGradCoeffDivLimit (I := I) (M := M)
-              g r s h_uniform i α P₀ y = 0 :=
+              g r s h_atlas i α P₀ y = 0 :=
       Filter.Eventually.of_forall (fun y hy =>
         crossRightGradCoeffDivLimit_eq_zero_off_chartPouKernel
-          (I := I) (M := M) g r s h_uniform i α P₀ hy)
+          (I := I) (M := M) g r s h_atlas i α P₀ hy)
     exact memLp_weighted_contDiffOn_mul (I := I) (M := M) g α
       (one_div_densityOnEuclid_contDiffOn (I := I) (M := M) g α)
       (chartPouKernel_isCompact (I := I) (M := M) α)
       (chartPouKernel_measurableSet (I := I) (M := M) α)
       (chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α)
       (crossRightGradCoeffDivLimit_memLp_weighted (I := I) (M := M)
-        g r s h_uniform i α P₀)
+        g r s h_atlas i α P₀)
       h_aezero
   -- The cross-left and cross-right finite double sums.
   have h_crossLeft_sum : MemLp
@@ -644,7 +645,7 @@ theorem eigenvectorChartRHS_memLp_weighted
         ∑ Q : TensorCompIdx (E := E) r (s + 1),
           (covChartMetricGram (I := I) (M := M) g r (s + 1) α P Q y *
               crossLeftTestCoeff (I := I) (M := M) g r s α P₀ Q y) *
-            ((crossLeftLimitComponent (I := I) (M := M) g r s h_uniform i α P :
+            ((crossLeftLimitComponent (I := I) (M := M) g r s h_atlas i α P :
               Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
       2 μw :=
     memLp_finset_sum (μ := μw)
@@ -657,7 +658,7 @@ theorem eigenvectorChartRHS_memLp_weighted
         ∑ Q : TensorCompIdx (E := E) r s,
           (covChartMetricGram (I := I) (M := M) g r s α P Q y *
               crossRightTestValueCoeff (I := I) (M := M) g r s α P₀ Q y) *
-            ((crossRightLimitComponent (I := I) (M := M) g r s h_uniform i α P :
+            ((crossRightLimitComponent (I := I) (M := M) g r s h_atlas i α P :
               Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
       2 μw :=
     memLp_finset_sum (μ := μw)
@@ -668,7 +669,7 @@ theorem eigenvectorChartRHS_memLp_weighted
   -- Assemble: the bracket `(1) − (2) + (3) − (4) − (5) + (6) − (7)` is weighted
   -- `MemLp`; the global `μ⁻¹` factor preserves weighted `MemLp`.
   have h_total :
-      MemLp (eigenvectorChartRHS (I := I) (M := M) g r s h_uniform i α P₀) 2
+      MemLp (eigenvectorChartRHS (I := I) (M := M) g r s h_atlas i α P₀) 2
         μw := by
     have h_bracket :=
       ((((((h_uchart.sub h_crossLeft_sum).add h_crossRight_sum).sub h_prc).sub
@@ -685,29 +686,29 @@ theorem eigenvectorChartRHS_memLp_weighted
 section ElaborationTests
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
-  (h_uniform : uniformTensorChartSobolevBound g r s)
+  (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
 
 example (S' : SmoothCcTensor g r s) :
     Filter.Tendsto
       (fun n => ∫ x, tensorCovDerivPointwiseInner (I := I) (M := M) g r s
-          (eigenvectorSmoothApprox (I := I) (M := M) g r s h_uniform i n).toCcTensor
+          (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n).toCcTensor
           S' x
         ∂(riemannianVolumeMeasure (I := I) (M := M) g))
       atTop
       (𝓝 ((1 - i.fst.val) *
         ⟪(S' : TensorL2 r s g),
-          tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i⟫_ℝ)) :=
-  mainDir_tendsto (I := I) (M := M) g r s h_uniform i S'
+          tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i⟫_ℝ)) :=
+  mainDir_tendsto (I := I) (M := M) g r s h_atlas i S'
 
 example (α : M) (P₀ : TensorCompIdx (E := E) r s) : EuclN → ℝ :=
-  eigenvectorChartRHS (I := I) (M := M) g r s h_uniform i α P₀
+  eigenvectorChartRHS (I := I) (M := M) g r s h_atlas i α P₀
 
 example (α : M) (P₀ : TensorCompIdx (E := E) r s) :
-    MemLp (eigenvectorChartRHS (I := I) (M := M) g r s h_uniform i α P₀) 2
+    MemLp (eigenvectorChartRHS (I := I) (M := M) g r s h_atlas i α P₀) 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α)) :=
-  eigenvectorChartRHS_memLp_weighted (I := I) (M := M) g r s h_uniform i α P₀
+  eigenvectorChartRHS_memLp_weighted (I := I) (M := M) g r s h_atlas i α P₀
 
 end ElaborationTests
 

@@ -1,23 +1,24 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorChartPartialL2
 import DifferentialGeometry.Analysis.Sobolev.Tools.WeakPartialLimit
+import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # The eigenvector chart partial is a genuine weak chart partial
 
 For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, fix an eigenbasis
 index `i : TensorEigenIdx g r s` with nonzero resolvent eigenvalue
-`μ := i.fst.val`. The eigenvector `φ := tensorResolventEigenbasisVec h_uniform i`
+`μ := i.fst.val`. The eigenvector `φ := tensorResolventEigenbasisVec h_atlas i`
 is an abstract element of the `L²` Hilbert space `TensorL2 r s g`, with canonical
 Euclidean chart component `u := tensorL2ChartComponent g r s φ α P₀`.
 
 Two companion files established, for the canonical smooth `H¹`-approximating
-sequence `eigenvectorSmoothApprox g r s h_uniform i : ℕ → SmoothCcTensorH1 g r s`:
+sequence `eigenvectorSmoothApprox g r s h_atlas i : ℕ → SmoothCcTensorH1 g r s`:
 
 * `EigenvectorChartComponentL2.lean`: the canonical chart component `u` is the
   `L²`-limit of the chart components of the `μ⁻¹`-rescaled smooth approximants;
 * `EigenvectorChartPartialL2.lean`: for each chart-coordinate direction `k`, the
   chosen weak `k`-th chart partials of those rescaled approximants converge, in
-  `Lp ℝ 2 (chartL2Measure α)`, to `eigenvectorChartPartialLp g r s h_uniform i α
+  `Lp ℝ 2 (chartL2Measure α)`, to `eigenvectorChartPartialLp g r s h_atlas i α
   P₀ k` — the candidate weak `k`-th chart partial of `u`.
 
 This file closes the loop: it names `eigenvectorChartWeakPartial` as the
@@ -48,9 +49,9 @@ Euclidean chart target, matching the open-set hypothesis of the closure theorem.
 
 ## Main definitions
 
-* `eigenvectorChartWeakPartial g r s h_uniform i α P₀ k` — the weak `k`-th chart
+* `eigenvectorChartWeakPartial g r s h_atlas i α P₀ k` — the weak `k`-th chart
   partial of the eigenvector chart component: the coercion-to-function of
-  `eigenvectorChartPartialLp g r s h_uniform i α P₀ k`.
+  `eigenvectorChartPartialLp g r s h_atlas i α P₀ k`.
 
 ## Main results
 
@@ -166,7 +167,7 @@ private lemma hasWeakPartialDeriv_const_smul
 /-! ## The weak chart partial of the eigenvector chart component
 
 `eigenvectorChartWeakPartial` is the coercion-to-function of the `Lp ℝ 2
-(chartL2Measure α)` class `eigenvectorChartPartialLp g r s h_uniform i α P₀ k`.
+(chartL2Measure α)` class `eigenvectorChartPartialLp g r s h_atlas i α P₀ k`.
 It is the candidate, and — by the headline below — genuine, weak `k`-th chart
 partial of the eigenvector chart component. -/
 
@@ -174,19 +175,19 @@ partial of the eigenvector chart component. -/
 closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index `i`, a
 chart center `α : M`, a component multi-index `P₀`, and a chart-coordinate
 direction `k`, this is the coercion-to-function of the `Lp ℝ 2 (chartL2Measure
-α)` class `eigenvectorChartPartialLp g r s h_uniform i α P₀ k`.
+α)` class `eigenvectorChartPartialLp g r s h_atlas i α P₀ k`.
 
 `eigenvectorChartWeakPartial_hasWeakPartialDeriv` shows it is a genuine
 `DeGiorgi.HasWeakPartialDeriv` of the eigenvector chart component
-`tensorL2ChartComponent g r s (tensorResolventEigenbasisVec h_uniform i) α P₀`
+`tensorL2ChartComponent g r s (tensorResolventEigenbasisVec h_atlas i) α P₀`
 on the Euclidean chart target. -/
 def eigenvectorChartWeakPartial
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) : EuclN → ℝ :=
-  (eigenvectorChartPartialLp (I := I) (M := M) g r s h_uniform i α P₀ k :
+  (eigenvectorChartPartialLp (I := I) (M := M) g r s h_atlas i α P₀ k :
     Lp ℝ 2 (chartL2Measure (I := I) (M := M) α))
 
 /-! ## The almost-everywhere descriptions of the approximant chart data
@@ -205,7 +206,7 @@ concrete chosen weak `k`-th chart partial of the Euclidean chart component of
 the smooth section `(eigenvectorSmoothApprox … n).toCcTensor`. -/
 lemma eigenvectorChartPartialLp_approx_coeFn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) (n : ℕ) :
@@ -213,28 +214,28 @@ lemma eigenvectorChartPartialLp_approx_coeFn
         eigenvectorChartPartialCLM (I := I) (M := M) g r s α P₀ k
           (smoothToTensorH1Compl (I := I) (M := M) g r s
             (eigenvectorSmoothApprox (I := I) (M := M)
-              g r s h_uniform i n)) :
+              g r s h_atlas i n)) :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) =ᵐ[
         chartL2Measure (I := I) (M := M) α]
       fun y => (i.fst.val)⁻¹ •
         chosenWeakPartial' (d := Module.finrank ℝ E) 2 k
           (tensorChartComponent (I := I) (M := M) g r s
             (eigenvectorSmoothApprox (I := I) (M := M)
-              g r s h_uniform i n).toCcTensor α P₀.1 P₀.2)
+              g r s h_atlas i n).toCcTensor α P₀.1 P₀.2)
           (chartTargetEuclid (I := I) (M := M) α) y := by
   classical
   -- Rewrite the `Lp` class via the concrete characterisation of the approximant.
   rw [eigenvectorChartPartialLp_approx_eq (I := I) (M := M)
-    g r s h_uniform i α P₀ k n]
+    g r s h_atlas i α P₀ k n]
   -- `coeFn` of a scalar multiple is the scalar multiple of `coeFn`.
   refine (Lp.coeFn_smul (i.fst.val)⁻¹
     ((chosenWeakPartial'_tensorChartComponent_memLp (I := I) (M := M) g r s
-      (eigenvectorSmoothApprox (I := I) (M := M) g r s h_uniform i n)
+      (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n)
       α P₀.1 P₀.2 k).toLp
       (chosenWeakPartial' (d := Module.finrank ℝ E) 2 k
         (tensorChartComponent (I := I) (M := M) g r s
           (eigenvectorSmoothApprox (I := I) (M := M)
-            g r s h_uniform i n).toCcTensor α P₀.1 P₀.2)
+            g r s h_atlas i n).toCcTensor α P₀.1 P₀.2)
         (chartTargetEuclid (I := I) (M := M) α)))).trans ?_
   -- The unscaled `L²` class agrees almost everywhere with the concrete partial.
   exact (MemLp.coeFn_toLp _).const_smul (i.fst.val)⁻¹
@@ -256,7 +257,7 @@ chart-coordinate direction `k` — of the coercion-to-function of the `n`-th
 approximant chart component, on the Euclidean chart target. -/
 private lemma eigenvectorChartWeakPartial_approx_hasWeakPartialDeriv
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) (n : ℕ) :
@@ -265,12 +266,12 @@ private lemma eigenvectorChartWeakPartial_approx_hasWeakPartialDeriv
           eigenvectorChartPartialCLM (I := I) (M := M) g r s α P₀ k
             (smoothToTensorH1Compl (I := I) (M := M) g r s
               (eigenvectorSmoothApprox (I := I) (M := M)
-                g r s h_uniform i n)) :
+                g r s h_atlas i n)) :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ)
       ((tensorL2ChartComponent (I := I) (M := M) g r s
           ((i.fst.val)⁻¹ •
             (((eigenvectorSmoothApprox (I := I) (M := M)
-                g r s h_uniform i n).toCcTensor) : TensorL2 r s g)) α P₀ :
+                g r s h_atlas i n).toCcTensor) : TensorL2 r s g)) α P₀ :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
@@ -279,10 +280,10 @@ private lemma eigenvectorChartWeakPartial_approx_hasWeakPartialDeriv
       DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
         (tensorChartComponent (I := I) (M := M) g r s
           (eigenvectorSmoothApprox (I := I) (M := M)
-            g r s h_uniform i n).toCcTensor α P₀.1 P₀.2)
+            g r s h_atlas i n).toCcTensor α P₀.1 P₀.2)
         (chartTargetEuclid (I := I) (M := M) α) :=
     tensorChartComponent_memW1p (I := I) (M := M) g r s
-      (eigenvectorSmoothApprox (I := I) (M := M) g r s h_uniform i n)
+      (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n)
       α P₀.1 P₀.2
   -- Hence its `chosenWeakPartial'` is a genuine weak `k`-th chart partial.
   have h_weak :
@@ -290,11 +291,11 @@ private lemma eigenvectorChartWeakPartial_approx_hasWeakPartialDeriv
         (chosenWeakPartial' (d := Module.finrank ℝ E) 2 k
           (tensorChartComponent (I := I) (M := M) g r s
             (eigenvectorSmoothApprox (I := I) (M := M)
-              g r s h_uniform i n).toCcTensor α P₀.1 P₀.2)
+              g r s h_atlas i n).toCcTensor α P₀.1 P₀.2)
           (chartTargetEuclid (I := I) (M := M) α))
         (tensorChartComponent (I := I) (M := M) g r s
           (eigenvectorSmoothApprox (I := I) (M := M)
-            g r s h_uniform i n).toCcTensor α P₀.1 P₀.2)
+            g r s h_atlas i n).toCcTensor α P₀.1 P₀.2)
         (chartTargetEuclid (I := I) (M := M) α) :=
     chosenWeakPartial'_isWeakPartial_of_mem h_w1p k
   -- Scaling by `μ⁻¹` keeps it a weak partial.
@@ -304,12 +305,12 @@ private lemma eigenvectorChartWeakPartial_approx_hasWeakPartialDeriv
           chosenWeakPartial' (d := Module.finrank ℝ E) 2 k
             (tensorChartComponent (I := I) (M := M) g r s
               (eigenvectorSmoothApprox (I := I) (M := M)
-                g r s h_uniform i n).toCcTensor α P₀.1 P₀.2)
+                g r s h_atlas i n).toCcTensor α P₀.1 P₀.2)
             (chartTargetEuclid (I := I) (M := M) α) y)
         (fun y => (i.fst.val)⁻¹ •
           tensorChartComponent (I := I) (M := M) g r s
             (eigenvectorSmoothApprox (I := I) (M := M)
-              g r s h_uniform i n).toCcTensor α P₀.1 P₀.2 y)
+              g r s h_atlas i n).toCcTensor α P₀.1 P₀.2 y)
         (chartTargetEuclid (I := I) (M := M) α) :=
     hasWeakPartialDeriv_const_smul (i.fst.val)⁻¹ h_weak
   -- Transfer both arguments to the `Lp`-class presentation. The reference
@@ -318,9 +319,9 @@ private lemma eigenvectorChartWeakPartial_approx_hasWeakPartialDeriv
   -- directly.
   refine hasWeakPartialDeriv_congr_ae ?_ ?_ h_weak_smul
   · exact (eigenvectorChartComponentL2_approx_coeFn (I := I) (M := M)
-      g r s h_uniform i α P₀ n).symm
+      g r s h_atlas i α P₀ n).symm
   · exact (eigenvectorChartPartialLp_approx_coeFn (I := I) (M := M)
-      g r s h_uniform i α P₀ k n).symm
+      g r s h_atlas i α P₀ k n).symm
 
 /-! ## The `eLpNorm`-convergence bridges
 
@@ -336,7 +337,7 @@ the coercion-to-function of the eigenvector chart component, measured by the
 `eLpNorm` of the difference against `chartL2Measure α`. -/
 private lemma eigenvectorChartComponent_eLpNorm_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
     Filter.Tendsto
@@ -344,10 +345,10 @@ private lemma eigenvectorChartComponent_eLpNorm_tendsto
         (((tensorL2ChartComponent (I := I) (M := M) g r s
             ((i.fst.val)⁻¹ •
               (((eigenvectorSmoothApprox (I := I) (M := M)
-                  g r s h_uniform i n).toCcTensor) : TensorL2 r s g)) α P₀ :
+                  g r s h_atlas i n).toCcTensor) : TensorL2 r s g)) α P₀ :
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) -
           ((tensorL2ChartComponent (I := I) (M := M) g r s
-            (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i)
+            (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i)
             α P₀ :
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ)) 2
         (chartL2Measure (I := I) (M := M) α))
@@ -356,19 +357,19 @@ private lemma eigenvectorChartComponent_eLpNorm_tendsto
     (fun n => tensorL2ChartComponent (I := I) (M := M) g r s
       ((i.fst.val)⁻¹ •
         (((eigenvectorSmoothApprox (I := I) (M := M)
-            g r s h_uniform i n).toCcTensor) : TensorL2 r s g)) α P₀)
+            g r s h_atlas i n).toCcTensor) : TensorL2 r s g)) α P₀)
     (tensorL2ChartComponent (I := I) (M := M) g r s
-      (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i)
+      (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i)
       α P₀)).mp
     (eigenvectorChartComponentL2_tendsto (I := I) (M := M)
-      g r s h_uniform i α P₀)
+      g r s h_atlas i α P₀)
 
 /-- The coercions-to-functions of the approximant chart partials converge to
 the coercion-to-function of the candidate eigenvector chart partial, measured by
 the `eLpNorm` of the difference against `chartL2Measure α`. -/
 private lemma eigenvectorChartPartial_eLpNorm_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) :
@@ -378,10 +379,10 @@ private lemma eigenvectorChartPartial_eLpNorm_tendsto
             eigenvectorChartPartialCLM (I := I) (M := M) g r s α P₀ k
               (smoothToTensorH1Compl (I := I) (M := M) g r s
                 (eigenvectorSmoothApprox (I := I) (M := M)
-                  g r s h_uniform i n)) :
+                  g r s h_atlas i n)) :
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) -
           ((eigenvectorChartPartialLp (I := I) (M := M)
-            g r s h_uniform i α P₀ k :
+            g r s h_atlas i α P₀ k :
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ)) 2
         (chartL2Measure (I := I) (M := M) α))
       atTop (𝓝 0) :=
@@ -389,11 +390,11 @@ private lemma eigenvectorChartPartial_eLpNorm_tendsto
     (fun n => (i.fst.val)⁻¹ •
       eigenvectorChartPartialCLM (I := I) (M := M) g r s α P₀ k
         (smoothToTensorH1Compl (I := I) (M := M) g r s
-          (eigenvectorSmoothApprox (I := I) (M := M) g r s h_uniform i n)))
+          (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n)))
     (eigenvectorChartPartialLp (I := I) (M := M)
-      g r s h_uniform i α P₀ k)).mp
+      g r s h_atlas i α P₀ k)).mp
     (eigenvectorChartPartialLp_tendsto (I := I) (M := M)
-      g r s h_uniform i α P₀ k)
+      g r s h_atlas i α P₀ k)
 
 /-! ## The headline: the eigenvector chart partial is a genuine weak chart
 partial
@@ -408,7 +409,7 @@ Feeding into the `L²`-closure theorem `hasWeakPartialDeriv_of_tendsto_eLpNorm`:
   (`eigenvectorChartPartial_eLpNorm_tendsto`);
 * `MemLp` membership of all `Lp` classes involved (automatic from `Lp.memLp`),
 
-establishes that `eigenvectorChartWeakPartial g r s h_uniform i α P₀ k` is a
+establishes that `eigenvectorChartWeakPartial g r s h_atlas i α P₀ k` is a
 genuine `DeGiorgi.HasWeakPartialDeriv` — with respect to the chart-coordinate
 direction `k` — of the eigenvector chart component, on the Euclidean chart
 target. -/
@@ -417,21 +418,21 @@ target. -/
 closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index `i`, a
 chart center `α : M`, a component multi-index `P₀`, and a chart-coordinate
 direction `k`, the weak `k`-th chart partial `eigenvectorChartWeakPartial g r s
-h_uniform i α P₀ k` is a genuine `DeGiorgi.HasWeakPartialDeriv` of the canonical
+h_atlas i α P₀ k` is a genuine `DeGiorgi.HasWeakPartialDeriv` of the canonical
 Euclidean chart component `tensorL2ChartComponent g r s
-(tensorResolventEigenbasisVec h_uniform i) α P₀` of the eigenvector, on the
+(tensorResolventEigenbasisVec h_atlas i) α P₀` of the eigenvector, on the
 Euclidean chart target `chartTargetEuclid α`. -/
 theorem eigenvectorChartWeakPartial_hasWeakPartialDeriv
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) :
     DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k
       (eigenvectorChartWeakPartial (I := I) (M := M)
-        g r s h_uniform i α P₀ k)
+        g r s h_atlas i α P₀ k)
       ((tensorL2ChartComponent (I := I) (M := M) g r s
-          (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) α P₀ :
+          (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) α P₀ :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
@@ -444,7 +445,7 @@ theorem eigenvectorChartWeakPartial_hasWeakPartialDeriv
     ((tensorL2ChartComponent (I := I) (M := M) g r s
         ((i.fst.val)⁻¹ •
           (((eigenvectorSmoothApprox (I := I) (M := M)
-              g r s h_uniform i n).toCcTensor) : TensorL2 r s g)) α P₀ :
+              g r s h_atlas i n).toCcTensor) : TensorL2 r s g)) α P₀ :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ)
     with huApprox_def
   set gApprox : ℕ → EuclN → ℝ := fun n =>
@@ -452,17 +453,17 @@ theorem eigenvectorChartWeakPartial_hasWeakPartialDeriv
         eigenvectorChartPartialCLM (I := I) (M := M) g r s α P₀ k
           (smoothToTensorH1Compl (I := I) (M := M) g r s
             (eigenvectorSmoothApprox (I := I) (M := M)
-              g r s h_uniform i n)) :
+              g r s h_atlas i n)) :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ)
     with hgApprox_def
   set uLim : EuclN → ℝ :=
     ((tensorL2ChartComponent (I := I) (M := M) g r s
-        (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) α P₀ :
+        (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) α P₀ :
       Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ)
     with huLim_def
   set gLim : EuclN → ℝ :=
     ((eigenvectorChartPartialLp (I := I) (M := M)
-        g r s h_uniform i α P₀ k :
+        g r s h_atlas i α P₀ k :
       Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ)
     with hgLim_def
   -- `MemLp 2` for the four families. The reference measure `chartL2Measure α`
@@ -497,7 +498,7 @@ theorem eigenvectorChartWeakPartial_hasWeakPartialDeriv
     intro n
     simp only [hgApprox_def, huApprox_def]
     exact eigenvectorChartWeakPartial_approx_hasWeakPartialDeriv
-      (I := I) (M := M) g r s h_uniform i α P₀ k n
+      (I := I) (M := M) g r s h_atlas i α P₀ k n
   -- `eLpNorm`-convergence of the chart components. Convergence against
   -- `chartL2Measure α` is, definitionally, convergence against
   -- `volume.restrict (chartTarget α)`.
@@ -508,7 +509,7 @@ theorem eigenvectorChartWeakPartial_hasWeakPartialDeriv
             (chartTargetEuclid (I := I) (M := M) α)))
         atTop (𝓝 0) := by
     have h := eigenvectorChartComponent_eLpNorm_tendsto (I := I) (M := M)
-      g r s h_uniform i α P₀
+      g r s h_atlas i α P₀
     simp only [huApprox_def, huLim_def]
     exact h
   -- `eLpNorm`-convergence of the chart partials.
@@ -519,7 +520,7 @@ theorem eigenvectorChartWeakPartial_hasWeakPartialDeriv
             (chartTargetEuclid (I := I) (M := M) α)))
         atTop (𝓝 0) := by
     have h := eigenvectorChartPartial_eLpNorm_tendsto (I := I) (M := M)
-      g r s h_uniform i α P₀ k
+      g r s h_atlas i α P₀ k
     simp only [hgApprox_def, hgLim_def]
     exact h
   -- Assemble via the `L²`-closure theorem.
@@ -544,24 +545,24 @@ inherited. -/
 
 /-- **Local `L²`-integrability of the eigenvector chart partial.** For any
 compact subset `K` of the Euclidean chart target, the weak `k`-th chart partial
-`eigenvectorChartWeakPartial g r s h_uniform i α P₀ k` lies in `MemLp 2` of the
+`eigenvectorChartWeakPartial g r s h_atlas i α P₀ k` lies in `MemLp 2` of the
 Lebesgue volume restricted to `K`. -/
 theorem eigenvectorChartWeakPartial_locally_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E))
     {K : Set EuclN} (hK : IsCompact K)
     (hK_in : K ⊆ chartTargetEuclid (I := I) (M := M) α) :
     MemLp (eigenvectorChartWeakPartial (I := I) (M := M)
-        g r s h_uniform i α P₀ k) 2
+        g r s h_atlas i α P₀ k) 2
       ((volume : Measure EuclN).restrict K) := by
   classical
   let _ := hK
   -- The coercion-to-function is in `MemLp 2` of the chart's `L²` measure.
   have h_memLp : MemLp (eigenvectorChartWeakPartial (I := I) (M := M)
-      g r s h_uniform i α P₀ k) 2
+      g r s h_atlas i α P₀ k) 2
       (chartL2Measure (I := I) (M := M) α) := by
     rw [eigenvectorChartWeakPartial]
     exact Lp.memLp _
@@ -575,26 +576,26 @@ theorem eigenvectorChartWeakPartial_locally_memLp
 /-! ## Sanity tests -/
 
 example (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) : EuclN → ℝ :=
-  eigenvectorChartWeakPartial (I := I) (M := M) g r s h_uniform i α P₀ k
+  eigenvectorChartWeakPartial (I := I) (M := M) g r s h_atlas i α P₀ k
 
 example (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) :
     DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k
       (eigenvectorChartWeakPartial (I := I) (M := M)
-        g r s h_uniform i α P₀ k)
+        g r s h_atlas i α P₀ k)
       ((tensorL2ChartComponent (I := I) (M := M) g r s
-          (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) α P₀ :
+          (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) α P₀ :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ)
       (chartTargetEuclid (I := I) (M := M) α) :=
   eigenvectorChartWeakPartial_hasWeakPartialDeriv
-    (I := I) (M := M) g r s h_uniform i α P₀ k
+    (I := I) (M := M) g r s h_atlas i α P₀ k
 
 end TensorSpectral
 end Parabolic

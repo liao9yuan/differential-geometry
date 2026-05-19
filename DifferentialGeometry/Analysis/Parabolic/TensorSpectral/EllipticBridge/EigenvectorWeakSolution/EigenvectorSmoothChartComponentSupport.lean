@@ -1,15 +1,16 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorDifferentiatedRHS
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.PouCutoffComponentBridge
+import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # Off-support vanishing of the eigenvector partition-of-unity chart component
 
 For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
 `i`, a chart center `α : M`, and a component multi-index `Q`, the chart
-`Q`-component `eigenvectorChartComponentFun g r s h_uniform i α Q` of the
+`Q`-component `eigenvectorChartComponentFun g r s h_atlas i α Q` of the
 resolvent eigenvector of the connection Laplacian is the function-coercion of the
 abstract partition-of-unity chart component
-`tensorL2ChartComponent g r s (tensorResolventEigenbasisVec h_uniform i) α Q`.
+`tensorL2ChartComponent g r s (tensorResolventEigenbasisVec h_atlas i) α Q`.
 
 The committed off-kernel vanishing
 `eigenvectorChartComponentFun_ae_zero_off_chartPouKernel` is keyed on the
@@ -28,10 +29,10 @@ eigenvector chart `Q`-component.
 
 The mechanism is the committed partition-of-unity ↔ cutoff chart-component bridge
 `tensorL2ChartComponent_eq_chartPushedPou_mul_cutoff` ("D.a"). Applied at the
-abstract `L²` element `u := tensorResolventEigenbasisVec h_uniform i`, the bridge
+abstract `L²` element `u := tensorResolventEigenbasisVec h_atlas i`, the bridge
 gives, almost everywhere on the chart `L²` measure,
 
-`eigenvectorChartComponentFun g r s h_uniform i α Q
+`eigenvectorChartComponentFun g r s h_atlas i α Q
    =ᵐ fun y => chartPushedPouWeight α y * (cutoff chart component) y`,
 
 since `chartPushedPouWeight α` is by definition the chart pushforward
@@ -90,7 +91,7 @@ component
 
 Specialising the committed partition-of-unity ↔ cutoff bridge
 `tensorL2ChartComponent_eq_chartPushedPou_mul_cutoff` at the abstract `L²`
-element `tensorResolventEigenbasisVec h_uniform i` rewrites the eigenvector chart
+element `tensorResolventEigenbasisVec h_atlas i` rewrites the eigenvector chart
 component, almost everywhere, as the pushed partition-of-unity weight
 `chartPushedPouWeight α` times the cutoff chart component. -/
 
@@ -100,20 +101,20 @@ the cutoff chart `Q`-component of the resolvent eigenvector.
 
 This is the partition-of-unity ↔ cutoff bridge
 `tensorL2ChartComponent_eq_chartPushedPou_mul_cutoff` specialised at the abstract
-`L²` element `tensorResolventEigenbasisVec h_uniform i`; the pushed
+`L²` element `tensorResolventEigenbasisVec h_atlas i`; the pushed
 partition-of-unity weight `chartPushedPouWeight α` is, by definition, the chart
 pushforward `chartPushedRaw α (chartAtlasPOU α)` appearing on the right of the
 bridge. -/
 private lemma eigenvectorChartComponentFun_ae_eq_chartPushedPouWeight_mul_cutoff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (Q : TensorCompIdx (E := E) r s) :
-    eigenvectorChartComponentFun (I := I) (M := M) g r s h_uniform i α Q
+    eigenvectorChartComponentFun (I := I) (M := M) g r s h_atlas i α Q
       =ᵐ[chartL2Measure (I := I) (M := M) α]
       (fun y => chartPushedPouWeight (I := I) (M := M) α y *
         ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
-            (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) α Q :
+            (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) α Q :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) := by
   -- `eigenvectorChartComponentFun` is the function-coercion of the abstract
   -- partition-of-unity chart component of the resolvent eigenvector; the D.a
@@ -122,7 +123,7 @@ private lemma eigenvectorChartComponentFun_ae_eq_chartPushedPouWeight_mul_cutoff
   -- `chartPushedPouWeight α` is by definition that chart pushforward.
   exact tensorL2ChartComponent_eq_chartPushedPou_mul_cutoff
     (I := I) (M := M) g r s
-    (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) α Q
+    (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) α Q
 
 /-! ## The support-version off-support vanishing -/
 
@@ -133,7 +134,7 @@ For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
 `i`, a chart center `α : M`, and a component multi-index `Q`, almost everywhere
 on the chart `L²` measure `chartL2Measure α`, wherever the pushed
 partition-of-unity weight `chartPushedPouWeight α` vanishes the eigenvector chart
-`Q`-component `eigenvectorChartComponentFun g r s h_uniform i α Q` vanishes too.
+`Q`-component `eigenvectorChartComponentFun g r s h_atlas i α Q` vanishes too.
 
 Unlike the committed `eigenvectorChartComponentFun_ae_zero_off_chartPouKernel`,
 which is keyed on the **closed** partition-of-unity kernel `chartPouKernel α`,
@@ -143,30 +144,30 @@ chart-component-matching argument consumes.
 
 The proof specialises the committed partition-of-unity ↔ cutoff chart-component
 bridge `tensorL2ChartComponent_eq_chartPushedPou_mul_cutoff` at the abstract `L²`
-element `tensorResolventEigenbasisVec h_uniform i`: the eigenvector chart
+element `tensorResolventEigenbasisVec h_atlas i`: the eigenvector chart
 component equals, almost everywhere, the pushed partition-of-unity weight times
 the cutoff chart component, so wherever the first factor is zero the product —
 hence the eigenvector chart component — vanishes. -/
 theorem eigenvectorChartComponentFun_ae_zero_where_chartPushedPouWeight_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (Q : TensorCompIdx (E := E) r s) :
     ∀ᵐ y ∂(chartL2Measure (I := I) (M := M) α),
       chartPushedPouWeight (I := I) (M := M) α y = 0 →
         eigenvectorChartComponentFun (I := I) (M := M)
-          g r s h_uniform i α Q y = 0 := by
+          g r s h_atlas i α Q y = 0 := by
   -- The eigenvector chart component is, almost everywhere, the pushed
   -- partition-of-unity weight times the cutoff chart component.
   filter_upwards [eigenvectorChartComponentFun_ae_eq_chartPushedPouWeight_mul_cutoff
-    (I := I) (M := M) g r s h_uniform i α Q] with y hy hy_zero
+    (I := I) (M := M) g r s h_atlas i α Q] with y hy hy_zero
   -- Where the weight is zero the product is zero.
   rw [hy, hy_zero, zero_mul]
 
 /-- **Off-support vanishing of the eigenvector partition-of-unity chart component
 (restricted-measure version).**
 
-The eigenvector chart `Q`-component `eigenvectorChartComponentFun g r s h_uniform
+The eigenvector chart `Q`-component `eigenvectorChartComponentFun g r s h_atlas
 i α Q` is, almost everywhere on the chart `L²` measure restricted to the zero
 locus `{y | chartPushedPouWeight α y = 0}` of the pushed partition-of-unity
 weight, equal to the zero function.
@@ -178,10 +179,10 @@ equivalent to the almost-everywhere vanishing on the measure restricted to the
 zero locus of the pushed partition-of-unity weight. -/
 theorem eigenvectorChartComponentFun_ae_eq_zero_on_chartPushedPouWeight_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (Q : TensorCompIdx (E := E) r s) :
-    eigenvectorChartComponentFun (I := I) (M := M) g r s h_uniform i α Q
+    eigenvectorChartComponentFun (I := I) (M := M) g r s h_atlas i α Q
       =ᵐ[(chartL2Measure (I := I) (M := M) α).restrict
         {y : EuclN | chartPushedPouWeight (I := I) (M := M) α y = 0}]
       (fun _ : EuclN => (0 : ℝ)) := by
@@ -197,7 +198,7 @@ theorem eigenvectorChartComponentFun_ae_eq_zero_on_chartPushedPouWeight_zero
   -- identity on the measure restricted to the zero locus.
   rw [Filter.EventuallyEq, ae_restrict_iff' h_meas]
   filter_upwards [eigenvectorChartComponentFun_ae_zero_where_chartPushedPouWeight_zero
-    (I := I) (M := M) g r s h_uniform i α Q] with y hy hy_zero
+    (I := I) (M := M) g r s h_atlas i α Q] with y hy hy_zero
   exact hy hy_zero
 
 /-! ## Sanity tests -/
@@ -205,24 +206,24 @@ theorem eigenvectorChartComponentFun_ae_eq_zero_on_chartPushedPouWeight_zero
 section ElaborationTests
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
-  (h_uniform : uniformTensorChartSobolevBound g r s)
+  (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
 
 example (α : M) (Q : TensorCompIdx (E := E) r s) :
     ∀ᵐ y ∂(chartL2Measure (I := I) (M := M) α),
       chartPushedPouWeight (I := I) (M := M) α y = 0 →
         eigenvectorChartComponentFun (I := I) (M := M)
-          g r s h_uniform i α Q y = 0 :=
+          g r s h_atlas i α Q y = 0 :=
   eigenvectorChartComponentFun_ae_zero_where_chartPushedPouWeight_zero
-    (I := I) (M := M) g r s h_uniform i α Q
+    (I := I) (M := M) g r s h_atlas i α Q
 
 example (α : M) (Q : TensorCompIdx (E := E) r s) :
-    eigenvectorChartComponentFun (I := I) (M := M) g r s h_uniform i α Q
+    eigenvectorChartComponentFun (I := I) (M := M) g r s h_atlas i α Q
       =ᵐ[(chartL2Measure (I := I) (M := M) α).restrict
         {y : EuclN | chartPushedPouWeight (I := I) (M := M) α y = 0}]
       (fun _ : EuclN => (0 : ℝ)) :=
   eigenvectorChartComponentFun_ae_eq_zero_on_chartPushedPouWeight_zero
-    (I := I) (M := M) g r s h_uniform i α Q
+    (I := I) (M := M) g r s h_atlas i α Q
 
 end ElaborationTests
 

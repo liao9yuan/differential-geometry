@@ -1,12 +1,13 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorSmooth
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorCovGradLeibniz
+import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # The chart-`β` component of the per-chart smooth eigenvector section
 
 For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, the uniform-Sobolev
-hypothesis `h_uniform` and an eigenbasis index `i`, the per-chart smooth section
-`eigenvectorSmoothChart g r s h_uniform i α` is a genuine smooth
+hypothesis `h_atlas` and an eigenbasis index `i`, the per-chart smooth section
+`eigenvectorSmoothChart g r s h_atlas i α` is a genuine smooth
 compactly-supported `(r, s)`-tensor section: it is built from the chosen smooth
 chart-`α` component representatives of the connection-Laplacian resolvent
 eigenvector and is supported inside the chart-`α` source.
@@ -94,7 +95,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
-  (h_uniform : uniformTensorChartSobolevBound g r s)
+  (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
 
 /-! ## The raw chart-`β` frame component of the per-chart section
@@ -117,13 +118,13 @@ private lemma raw_eigenvectorSmoothChart_eq_ite
     (α β : M) (P₀ : TensorCompIdx (E := E) r s)
     {x : M} (hxβ : x ∈ (chartAt H β).source) :
     tensorChartComponentRaw (I := I) (M := M) g r s
-        (eigenvectorSmoothChart (I := I) (M := M) g r s h_uniform i α)
+        (eigenvectorSmoothChart (I := I) (M := M) g r s h_atlas i α)
         β P₀.1 P₀.2 x =
       (if x ∈ (chartAt H α).source then
         ∑ Q : TensorCompIdx (E := E) r s,
           transitionCoeff (E := E) (I := I) (M := M) r s α β P₀ Q x *
             tensorChartComponentRaw (I := I) (M := M) g r s
-              (eigenvectorSmoothChart (I := I) (M := M) g r s h_uniform i α)
+              (eigenvectorSmoothChart (I := I) (M := M) g r s h_atlas i α)
               α Q.1 Q.2 x
         else 0) := by
   classical
@@ -133,12 +134,12 @@ private lemma raw_eigenvectorSmoothChart_eq_ite
     rw [if_pos hxα]
     exact tensorChartComponentRaw_eq_transitionCoeff_sum
       (E := E) (I := I) (M := M) g r s
-      (eigenvectorSmoothChart (I := I) (M := M) g r s h_uniform i α)
+      (eigenvectorSmoothChart (I := I) (M := M) g r s h_atlas i α)
       α β P₀ ⟨hxα, hxβ⟩
   · -- Off the chart-`α` source: the per-chart section vanishes there.
     rw [if_neg hxα]
     exact tensorChartComponentRaw_eigenvectorSmoothChart_eq_zero_off_source
-      (I := I) (M := M) g r s h_uniform i α β P₀ hxα
+      (I := I) (M := M) g r s h_atlas i α β P₀ hxα
 
 /-! ## The chart-`β` component of the per-chart section
 
@@ -152,10 +153,10 @@ the chart-pushed raw component, and the raw component is rewritten through
 open Classical in
 /-- **The canonical Euclidean chart-`β` component of the per-chart smooth
 eigenvector section.** For a closed Riemannian manifold `(M, g)`, ranks
-`(r, s)`, the uniform-Sobolev hypothesis `h_uniform`, an eigenbasis index `i`,
+`(r, s)`, the uniform-Sobolev hypothesis `h_atlas`, an eigenbasis index `i`,
 chart base points `α` and `β`, and a component multi-index `P₀`, the canonical
 Euclidean chart-`β` component of the per-chart smooth section
-`eigenvectorSmoothChart g r s h_uniform i α`, viewed as a function on the
+`eigenvectorSmoothChart g r s h_atlas i α`, viewed as a function on the
 Euclidean chart target of `β`, equals almost everywhere — for the Euclidean
 `L²` reference measure `chartL2Measure β` — the chart-pushed
 partition-of-unity weight of `β` times the chart-`β` push of the function which
@@ -164,11 +165,11 @@ is, on the chart-`α` source, the `(r, s)`-tensor transformation-law sum
 chart-`α` source, zero. -/
 theorem eigenvectorSmoothChart_tensorL2ChartComponent_coeFn_aeEq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (α β : M)
     (P₀ : TensorCompIdx (E := E) r s) :
     ((tensorL2ChartComponent (I := I) (M := M) g r s
-        (eigenvectorSmoothChart (I := I) (M := M) g r s h_uniform i α :
+        (eigenvectorSmoothChart (I := I) (M := M) g r s h_atlas i α :
           TensorL2 r s g) β P₀ :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ)
       =ᵐ[chartL2Measure (I := I) (M := M) β]
@@ -179,7 +180,7 @@ theorem eigenvectorSmoothChart_tensorL2ChartComponent_coeFn_aeEq
             ∑ Q : TensorCompIdx (E := E) r s,
               transitionCoeff (E := E) (I := I) (M := M) r s α β P₀ Q x *
                 tensorChartComponentRaw (I := I) (M := M) g r s
-                  (eigenvectorSmoothChart (I := I) (M := M) g r s h_uniform i α)
+                  (eigenvectorSmoothChart (I := I) (M := M) g r s h_atlas i α)
                   α Q.1 Q.2 x
             else 0) y) := by
   classical
@@ -188,7 +189,7 @@ theorem eigenvectorSmoothChart_tensorL2ChartComponent_coeFn_aeEq
   -- component `tensorChartComponent g r s (eigenvectorSmoothChart α) β P₀`.
   have h_coeFn :=
     tensorL2ChartComponent_smoothToTensorL2_coeFn (I := I) (M := M) g r s
-      (eigenvectorSmoothChart (I := I) (M := M) g r s h_uniform i α) β P₀
+      (eigenvectorSmoothChart (I := I) (M := M) g r s h_atlas i α) β P₀
   -- Chart-target membership holds almost everywhere for the restricted chart
   -- `L²` measure.
   have h_mem : ∀ᵐ y ∂(chartL2Measure (I := I) (M := M) β),
@@ -203,7 +204,7 @@ theorem eigenvectorSmoothChart_tensorL2ChartComponent_coeFn_aeEq
   -- chart-`β` component.
   rw [tensorChartComponent_eq_chartPushedRaw_pou_mul_chartPushedRaw_raw_on_target
     (I := I) (M := M) g r s
-    (eigenvectorSmoothChart (I := I) (M := M) g r s h_uniform i α)
+    (eigenvectorSmoothChart (I := I) (M := M) g r s h_atlas i α)
     β P₀.1 P₀.2 hy]
   -- The first factor already matches; rewrite the second factor by the
   -- transformation-law / off-source identity for the raw chart-`β` component.
@@ -211,19 +212,19 @@ theorem eigenvectorSmoothChart_tensorL2ChartComponent_coeFn_aeEq
   -- Both chart pushes are precomposition with the inverse chart on the target.
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) β
       (tensorChartComponentRaw (I := I) (M := M) g r s
-        (eigenvectorSmoothChart (I := I) (M := M) g r s h_uniform i α)
+        (eigenvectorSmoothChart (I := I) (M := M) g r s h_atlas i α)
         β P₀.1 P₀.2) hy,
     chartPushedRaw_apply_of_mem (I := I) (M := M) β
       (fun x => if x ∈ (chartAt H α).source then
         ∑ Q : TensorCompIdx (E := E) r s,
           transitionCoeff (E := E) (I := I) (M := M) r s α β P₀ Q x *
             tensorChartComponentRaw (I := I) (M := M) g r s
-              (eigenvectorSmoothChart (I := I) (M := M) g r s h_uniform i α)
+              (eigenvectorSmoothChart (I := I) (M := M) g r s h_atlas i α)
               α Q.1 Q.2 x
         else 0) hy]
   -- The inverse-chart image of a chart-target point lies in the chart-`β`
   -- source; apply the raw-component identity.
-  exact raw_eigenvectorSmoothChart_eq_ite (I := I) (M := M) g r s h_uniform i α β
+  exact raw_eigenvectorSmoothChart_eq_ite (I := I) (M := M) g r s h_atlas i α β
     P₀ (symm_toEuclidean_symm_mem_chartAtSource (I := I) (M := M) β hy)
 
 end TensorSpectral

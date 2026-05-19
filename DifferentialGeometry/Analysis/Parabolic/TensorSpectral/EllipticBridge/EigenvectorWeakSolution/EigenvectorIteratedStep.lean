@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorIteratedScaffold
+import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # The iterated divergence-form step for the eigenvector chart component
@@ -18,7 +19,7 @@ resulting Leibniz commutator into the standalone-step effective source
 It is the eigenvector/tensor mirror of the scalar campaign's
 `iteratedDiffChartBilinearData_step`. The new direction multi-index is
 `Fin.snoc D_m.directions l`; the new effective `L²` source is
-`eigenvectorChartIteratedStep g r s h_uniform i α P₀ m D_m.directions
+`eigenvectorChartIteratedStep g r s h_atlas i α P₀ m D_m.directions
 D_m.fChartEff l`, whose weighted-`L²` regularity is the unconditional committed
 fact `eigenvectorChartIteratedStep_memLp_two_weighted`.
 
@@ -210,7 +211,7 @@ The reciprocal cancels because the chart density is strictly positive on the
 chart target. -/
 private lemma density_mul_eigenvectorChartIteratedStep_eq_indicator_numerator
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
     (dirs : Fin m → Fin (Module.finrank ℝ E))
@@ -219,10 +220,10 @@ private lemma density_mul_eigenvectorChartIteratedStep_eq_indicator_numerator
     (y : EuclN) (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
     densityOnEuclid (I := I) g α y *
         eigenvectorChartIteratedStep (I := I) (M := M)
-          g r s h_uniform i α P₀ m dirs fChartEffPrev l y =
+          g r s h_atlas i α P₀ m dirs fChartEffPrev l y =
       Set.indicator (chartPouKernel (I := I) (M := M) α)
         (fun z => eigenvectorChartIteratedStepNumerator (I := I) (M := M)
-          g r s h_uniform i α P₀ m dirs fChartEffPrev l z) y := by
+          g r s h_atlas i α P₀ m dirs fChartEffPrev l z) y := by
   classical
   rw [eigenvectorChartIteratedStep]
   by_cases hy_K : y ∈ chartPouKernel (I := I) (M := M) α
@@ -278,14 +279,14 @@ Combines:
 
 private theorem ibp_principal_pair
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
     (dirs : Fin m → Fin (Module.finrank ℝ E))
     (h_chart_H_m_plus_2 :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) (m + 2) 2
-        (eigenvectorChartComponentFun (I := I) (M := M) g r s h_uniform i α P₀)
+        (eigenvectorChartComponentFun (I := I) (M := M) g r s h_atlas i α P₀)
         (chartTargetEuclid (I := I) (M := M) α))
     (l : Fin (Module.finrank ℝ E))
     (a j : Fin (Module.finrank ℝ E))
@@ -294,7 +295,7 @@ private theorem ibp_principal_pair
     (hψ_supp : tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α) :
     (∫ y in chartTargetEuclid (I := I) (M := M) α,
         weightedInvGramOnEuclid (I := I) g α a j y *
-          eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_uniform i α P₀
+          eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_atlas i α P₀
             (m + 1) (Fin.cons a dirs) y *
           (fderiv ℝ (fun z : EuclN =>
             (fderiv ℝ ψ z) (EuclideanSpace.single l 1)) y)
@@ -303,13 +304,13 @@ private theorem ibp_principal_pair
     = -((∫ y in chartTargetEuclid (I := I) (M := M) α,
           (fderiv ℝ (weightedInvGramOnEuclid (I := I) g α a j) y)
               (EuclideanSpace.single l 1) *
-            eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_uniform i α P₀
+            eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_atlas i α P₀
               (m + 1) (Fin.cons a dirs) y *
             (fderiv ℝ ψ y) (EuclideanSpace.single j 1)
           ∂(volume : Measure EuclN))
       + (∫ y in chartTargetEuclid (I := I) (M := M) α,
           weightedInvGramOnEuclid (I := I) g α a j y *
-            eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_uniform i α P₀
+            eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_atlas i α P₀
               (m + 2) (Fin.cons a (Fin.snoc dirs l)) y *
             (fderiv ℝ ψ y) (EuclideanSpace.single j 1)
           ∂(volume : Measure EuclN))) := by
@@ -338,7 +339,7 @@ private theorem ibp_principal_pair
   have h_lhs_schwarz :
       (∫ y in chartTargetEuclid (I := I) (M := M) α,
           weightedInvGramOnEuclid (I := I) g α a j y *
-            eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_uniform i α P₀
+            eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_atlas i α P₀
               (m + 1) (Fin.cons a dirs) y *
             (fderiv ℝ (fun z : EuclN =>
               (fderiv ℝ ψ z) (EuclideanSpace.single l 1)) y)
@@ -346,7 +347,7 @@ private theorem ibp_principal_pair
           ∂(volume : Measure EuclN)) =
       (∫ y in chartTargetEuclid (I := I) (M := M) α,
           weightedInvGramOnEuclid (I := I) g α a j y *
-            eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_uniform i α P₀
+            eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_atlas i α P₀
               (m + 1) (Fin.cons a dirs) y *
             (fderiv ℝ ψ_j y) (EuclideanSpace.single l 1)
           ∂(volume : Measure EuclN)) := by
@@ -356,7 +357,7 @@ private theorem ibp_principal_pair
     rw [h_schwarz y]
   rw [h_lhs_schwarz]
   have h_ibp := eigenvector_per_pair_ibp
-    (I := I) (M := M) g r s h_uniform i α P₀ (m + 1) (Fin.cons a dirs)
+    (I := I) (M := M) g r s h_atlas i α P₀ (m + 1) (Fin.cons a dirs)
     h_chart_H_m_plus_2
     (weightedInvGramOnEuclid_contDiffOn (I := I) g α a j)
     hψ_j_smooth hψ_j_cs hψ_j_supp l
@@ -371,14 +372,14 @@ private theorem ibp_principal_pair
 
 private theorem ibp_mass
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
     (dirs : Fin m → Fin (Module.finrank ℝ E))
     (h_chart_H_m_plus_1 :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) (m + 1) 2
-        (eigenvectorChartComponentFun (I := I) (M := M) g r s h_uniform i α P₀)
+        (eigenvectorChartComponentFun (I := I) (M := M) g r s h_atlas i α P₀)
         (chartTargetEuclid (I := I) (M := M) α))
     (l : Fin (Module.finrank ℝ E))
     {ψ : EuclN → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -386,24 +387,24 @@ private theorem ibp_mass
     (hψ_supp : tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α) :
     (∫ y in chartTargetEuclid (I := I) (M := M) α,
         densityOnEuclid (I := I) g α y *
-          eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_uniform i α P₀
+          eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_atlas i α P₀
             m dirs y *
           (fderiv ℝ ψ y) (EuclideanSpace.single l 1)
         ∂(volume : Measure EuclN))
     = -((∫ y in chartTargetEuclid (I := I) (M := M) α,
           (fderiv ℝ (densityOnEuclid (I := I) g α) y)
               (EuclideanSpace.single l 1) *
-            eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_uniform i α P₀
+            eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_atlas i α P₀
               m dirs y *
             ψ y
           ∂(volume : Measure EuclN))
       + (∫ y in chartTargetEuclid (I := I) (M := M) α,
           densityOnEuclid (I := I) g α y *
-            eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_uniform i α P₀
+            eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_atlas i α P₀
               (m + 1) (Fin.snoc dirs l) y *
             ψ y
           ∂(volume : Measure EuclN))) :=
-  eigenvector_per_pair_ibp (I := I) (M := M) g r s h_uniform i α P₀ m dirs
+  eigenvector_per_pair_ibp (I := I) (M := M) g r s h_atlas i α P₀ m dirs
     h_chart_H_m_plus_1 (densityOnEuclid_contDiffOn (I := I) g α)
     hψ_smooth hψ_cs hψ_supp l
 
@@ -411,14 +412,14 @@ private theorem ibp_mass
 
 private theorem ibp_inner_j
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
     (dirs : Fin m → Fin (Module.finrank ℝ E))
     (h_chart_H_m_plus_2 :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) (m + 2) 2
-        (eigenvectorChartComponentFun (I := I) (M := M) g r s h_uniform i α P₀)
+        (eigenvectorChartComponentFun (I := I) (M := M) g r s h_atlas i α P₀)
         (chartTargetEuclid (I := I) (M := M) α))
     (l : Fin (Module.finrank ℝ E))
     (a j : Fin (Module.finrank ℝ E))
@@ -427,26 +428,26 @@ private theorem ibp_inner_j
     (hψ_supp : tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α) :
     (∫ y in chartTargetEuclid (I := I) (M := M) α,
         weightedInvGramDerivOnEuclid (I := I) g α a j l y *
-          eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_uniform i α P₀
+          eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_atlas i α P₀
             (m + 1) (Fin.cons a dirs) y *
           (fderiv ℝ ψ y) (EuclideanSpace.single j 1)
         ∂(volume : Measure EuclN))
     = -((∫ y in chartTargetEuclid (I := I) (M := M) α,
           (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a j l) y)
               (EuclideanSpace.single j 1) *
-            eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_uniform i α P₀
+            eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_atlas i α P₀
               (m + 1) (Fin.cons a dirs) y *
             ψ y
           ∂(volume : Measure EuclN))
       + (∫ y in chartTargetEuclid (I := I) (M := M) α,
           weightedInvGramDerivOnEuclid (I := I) g α a j l y *
-            eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_uniform i α P₀
+            eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_atlas i α P₀
               (m + 2) (Fin.cons a (Fin.snoc dirs j)) y *
             ψ y
           ∂(volume : Measure EuclN))) := by
   classical
   have h_ibp := eigenvector_per_pair_ibp
-    (I := I) (M := M) g r s h_uniform i α P₀ (m + 1) (Fin.cons a dirs)
+    (I := I) (M := M) g r s h_atlas i α P₀ (m + 1) (Fin.cons a dirs)
     h_chart_H_m_plus_2
     (weightedInvGramDerivOnEuclid_contDiffOn (I := I) g α a j l)
     hψ_smooth hψ_cs hψ_supp j
@@ -535,35 +536,35 @@ set_option maxHeartbeats 4000000 in
 /-- **Iterated step for the standalone iterated divergence-form datum.**
 
 Given a level-`m` datum `D_m : eigenvectorIteratedTensorChartBilinearData g r s
-h_uniform i α P₀ m`, a new direction `l`, the chart-component regularity inputs
+h_atlas i α P₀ m`, a new direction `l`, the chart-component regularity inputs
 `MemWkp (m + 1) 2` and `MemWkp (m + 2) 2` of the eigenvector chart component on
 the chart target, the `MemW1p 2` regularity of the level-`m` effective source
 `D_m.fChartEff`, and the a.e.-vanishing of `D_m.fChartEff` off the compact
 partition-of-unity kernel, this constructs the level-`(m + 1)` datum.
 
 The new direction multi-index is `Fin.snoc D_m.directions l`; the new effective
-`L²` source is `eigenvectorChartIteratedStep g r s h_uniform i α P₀ m
+`L²` source is `eigenvectorChartIteratedStep g r s h_atlas i α P₀ m
 D_m.directions D_m.fChartEff l`, whose weighted-`L²` regularity is the
 unconditional committed fact `eigenvectorChartIteratedStep_memLp_two_weighted`.
 
 This is the eigenvector/tensor mirror of the scalar `iteratedDiffChartBilinearData_step`. -/
 noncomputable def eigenvectorIteratedTensorChartBilinearData_step
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) {m : ℕ}
     (D_m : eigenvectorIteratedTensorChartBilinearData (I := I) (M := M)
-      g r s h_uniform i α P₀ m)
+      g r s h_atlas i α P₀ m)
     (l : Fin (Module.finrank ℝ E))
     (h_chart_H_m_plus_1 :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) (m + 1) 2
-        (eigenvectorChartComponentFun (I := I) (M := M) g r s h_uniform i α P₀)
+        (eigenvectorChartComponentFun (I := I) (M := M) g r s h_atlas i α P₀)
         (chartTargetEuclid (I := I) (M := M) α))
     (h_chart_H_m_plus_2 :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) (m + 2) 2
-        (eigenvectorChartComponentFun (I := I) (M := M) g r s h_uniform i α P₀)
+        (eigenvectorChartComponentFun (I := I) (M := M) g r s h_atlas i α P₀)
         (chartTargetEuclid (I := I) (M := M) α))
     (h_fChartEff_memW1p :
       DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 D_m.fChartEff
@@ -574,13 +575,13 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
           chartPouKernel (I := I) (M := M) α)]
         (fun _ : EuclN => (0 : ℝ))) :
     eigenvectorIteratedTensorChartBilinearData (I := I) (M := M)
-      g r s h_uniform i α P₀ (m + 1) :=
+      g r s h_atlas i α P₀ (m + 1) :=
   eigenvectorIteratedTensorChartBilinearData.mk_from_hypotheses
     (Fin.snoc D_m.directions l)
     (eigenvectorChartIteratedStep (I := I) (M := M)
-      g r s h_uniform i α P₀ m D_m.directions D_m.fChartEff l)
+      g r s h_atlas i α P₀ m D_m.directions D_m.fChartEff l)
     (eigenvectorChartIteratedStep_memLp_two_weighted (I := I) (M := M)
-      g r s h_uniform i α P₀ m D_m.directions
+      g r s h_atlas i α P₀ m D_m.directions
       D_m.fChartEff_memLp_weighted l)
     (by
       classical
@@ -615,7 +616,7 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
             (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a j l) y)
                 (EuclideanSpace.single j 1) *
               eigenvectorChartIteratedPartial (I := I) (M := M)
-                g r s h_uniform i α P₀ (m + 1) (Fin.cons a D_m.directions) y *
+                g r s h_atlas i α P₀ (m + 1) (Fin.cons a D_m.directions) y *
               ψ y
             ∂(volume : Measure EuclN) with hA_pair_def
       set B_pair : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
@@ -623,7 +624,7 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
           ∫ y in Ω,
             weightedInvGramDerivOnEuclid (I := I) g α a j l y *
               eigenvectorChartIteratedPartial (I := I) (M := M)
-                g r s h_uniform i α P₀ (m + 2) (Fin.cons a (Fin.snoc D_m.directions j)) y *
+                g r s h_atlas i α P₀ (m + 2) (Fin.cons a (Fin.snoc D_m.directions j)) y *
               ψ y
             ∂(volume : Measure EuclN) with hB_pair_def
       set PR_pair : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
@@ -631,7 +632,7 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
           ∫ y in Ω,
             weightedInvGramOnEuclid (I := I) g α a j y *
               eigenvectorChartIteratedPartial (I := I) (M := M)
-                g r s h_uniform i α P₀ (m + 2) (Fin.cons a (Fin.snoc D_m.directions l)) y *
+                g r s h_atlas i α P₀ (m + 2) (Fin.cons a (Fin.snoc D_m.directions l)) y *
               (fderiv ℝ ψ y) (EuclideanSpace.single j 1)
             ∂(volume : Measure EuclN) with hPR_pair_def
       set INT_LHS_m_pair : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
@@ -639,23 +640,23 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
           ∫ y in Ω,
             weightedInvGramOnEuclid (I := I) g α a j y *
               eigenvectorChartIteratedPartial (I := I) (M := M)
-                g r s h_uniform i α P₀ (m + 1) (Fin.cons a D_m.directions) y *
+                g r s h_atlas i α P₀ (m + 1) (Fin.cons a D_m.directions) y *
               (fderiv ℝ ψ_l y) (EuclideanSpace.single j 1)
             ∂(volume : Measure EuclN) with hINT_LHS_m_pair_def
       have h_principal_pair : ∀ a j : Fin (Module.finrank ℝ E),
           INT_LHS_m_pair a j = A_pair a j + B_pair a j - PR_pair a j := by
         intro a j
         have h_pp := ibp_principal_pair (I := I) (M := M)
-          g r s h_uniform i α P₀ m D_m.directions
+          g r s h_atlas i α P₀ m D_m.directions
           h_chart_H_m_plus_2 l a j hψ_smooth hψ_cs hψ_supp
         have h_inner := ibp_inner_j (I := I) (M := M)
-          g r s h_uniform i α P₀ m D_m.directions
+          g r s h_atlas i α P₀ m D_m.directions
           h_chart_H_m_plus_2 l a j hψ_smooth hψ_cs hψ_supp
         have h_pp' : INT_LHS_m_pair a j =
             -((∫ y in Ω,
                 weightedInvGramDerivOnEuclid (I := I) g α a j l y *
                   eigenvectorChartIteratedPartial (I := I) (M := M)
-                    g r s h_uniform i α P₀ (m + 1) (Fin.cons a D_m.directions) y *
+                    g r s h_atlas i α P₀ (m + 1) (Fin.cons a D_m.directions) y *
                   (fderiv ℝ ψ y) (EuclideanSpace.single j 1)
                 ∂(volume : Measure EuclN))
               + PR_pair a j) := h_pp
@@ -728,29 +729,29 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
       -- Local L² integrability on `K`.
       have h_M_m_int : IntegrableOn
           (eigenvectorChartIteratedPartial (I := I) (M := M)
-            g r s h_uniform i α P₀ m D_m.directions) K (volume : Measure EuclN) := by
+            g r s h_atlas i α P₀ m D_m.directions) K (volume : Measure EuclN) := by
         have h := (eigenvectorChartIteratedPartial_memLp_volume (I := I) (M := M)
-          g r s h_uniform i α P₀ m D_m.directions).restrict K
+          g r s h_atlas i α P₀ m D_m.directions).restrict K
         rw [h_restrict_K_eq] at h
         exact h.integrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
       have h_M_m1_int : ∀ idx : Fin (m + 1) → Fin (Module.finrank ℝ E),
           IntegrableOn
             (eigenvectorChartIteratedPartial (I := I) (M := M)
-              g r s h_uniform i α P₀ (m + 1) idx)
+              g r s h_atlas i α P₀ (m + 1) idx)
             K (volume : Measure EuclN) := by
         intro idx
         have h := (eigenvectorChartIteratedPartial_memLp_volume (I := I) (M := M)
-          g r s h_uniform i α P₀ (m + 1) idx).restrict K
+          g r s h_atlas i α P₀ (m + 1) idx).restrict K
         rw [h_restrict_K_eq] at h
         exact h.integrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
       have h_M_m2_int : ∀ idx : Fin (m + 2) → Fin (Module.finrank ℝ E),
           IntegrableOn
             (eigenvectorChartIteratedPartial (I := I) (M := M)
-              g r s h_uniform i α P₀ (m + 2) idx)
+              g r s h_atlas i α P₀ (m + 2) idx)
             K (volume : Measure EuclN) := by
         intro idx
         have h := (eigenvectorChartIteratedPartial_memLp_volume (I := I) (M := M)
-          g r s h_uniform i α P₀ (m + 2) idx).restrict K
+          g r s h_atlas i α P₀ (m + 2) idx).restrict K
         rw [h_restrict_K_eq] at h
         exact h.integrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
       have h_fChartEff_int : IntegrableOn D_m.fChartEff K (volume : Measure EuclN) := by
@@ -780,7 +781,7 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
       have h_int_LHS_m_pair : ∀ a j : Fin (Module.finrank ℝ E),
           Integrable (fun y => weightedInvGramOnEuclid (I := I) g α a j y *
               eigenvectorChartIteratedPartial (I := I) (M := M)
-                g r s h_uniform i α P₀ (m + 1) (Fin.cons a D_m.directions) y *
+                g r s h_atlas i α P₀ (m + 1) (Fin.cons a D_m.directions) y *
               (fderiv ℝ ψ_l y) (EuclideanSpace.single j 1))
             ((volume : Measure EuclN).restrict Ω) := fun a j =>
         integrable_triple_helper (α := α) hK_compact hK_meas hK_in
@@ -791,7 +792,7 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
             (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a j l) y)
               (EuclideanSpace.single j 1) *
             eigenvectorChartIteratedPartial (I := I) (M := M)
-              g r s h_uniform i α P₀ (m + 1) (Fin.cons a D_m.directions) y * ψ y)
+              g r s h_atlas i α P₀ (m + 1) (Fin.cons a D_m.directions) y * ψ y)
             ((volume : Measure EuclN).restrict Ω) := fun a j =>
         integrable_triple_helper (α := α) hK_compact hK_meas hK_in
           (h_aij_fderiv_cont a j)
@@ -800,7 +801,7 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
           Integrable (fun y =>
             weightedInvGramDerivOnEuclid (I := I) g α a j l y *
             eigenvectorChartIteratedPartial (I := I) (M := M)
-              g r s h_uniform i α P₀ (m + 2) (Fin.cons a (Fin.snoc D_m.directions j)) y * ψ y)
+              g r s h_atlas i α P₀ (m + 2) (Fin.cons a (Fin.snoc D_m.directions j)) y * ψ y)
             ((volume : Measure EuclN).restrict Ω) := fun a j =>
         integrable_triple_helper (α := α) hK_compact hK_meas hK_in
           (h_daij_cont a j)
@@ -809,7 +810,7 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
           Integrable (fun y =>
             weightedInvGramOnEuclid (I := I) g α a j y *
             eigenvectorChartIteratedPartial (I := I) (M := M)
-              g r s h_uniform i α P₀ (m + 2) (Fin.cons a (Fin.snoc D_m.directions l)) y *
+              g r s h_atlas i α P₀ (m + 2) (Fin.cons a (Fin.snoc D_m.directions l)) y *
             (fderiv ℝ ψ y) (EuclideanSpace.single j 1))
             ((volume : Measure EuclN).restrict Ω) := fun a j =>
         integrable_triple_helper (α := α) hK_compact hK_meas hK_in
@@ -822,14 +823,14 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
             ∑ j : Fin (Module.finrank ℝ E),
               weightedInvGramOnEuclid (I := I) g α a j y *
                 eigenvectorChartIteratedPartial (I := I) (M := M)
-                  g r s h_uniform i α P₀ (m + 1) (Fin.cons a D_m.directions) y *
+                  g r s h_atlas i α P₀ (m + 1) (Fin.cons a D_m.directions) y *
                 (fderiv ℝ ψ_l y) (EuclideanSpace.single j 1))
           ∂(volume : Measure EuclN) with hINT_LHS_principal_m_l_def
       set INT_LHS_mass_m_l : ℝ :=
         ∫ y in Ω,
           densityOnEuclid (I := I) g α y *
             eigenvectorChartIteratedPartial (I := I) (M := M)
-              g r s h_uniform i α P₀ m D_m.directions y * ψ_l y
+              g r s h_atlas i α P₀ m D_m.directions y * ψ_l y
           ∂(volume : Measure EuclN) with hINT_LHS_mass_m_l_def
       set INT_RHS_m_l : ℝ :=
         ∫ y in Ω,
@@ -844,7 +845,7 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
               ∑ j : Fin (Module.finrank ℝ E),
                 weightedInvGramOnEuclid (I := I) g α a j y *
                   eigenvectorChartIteratedPartial (I := I) (M := M)
-                    g r s h_uniform i α P₀ (m + 1) (Fin.cons a D_m.directions) y *
+                    g r s h_atlas i α P₀ (m + 1) (Fin.cons a D_m.directions) y *
                   (fderiv ℝ ψ_l y) (EuclideanSpace.single j 1))
             ∂(volume : Measure EuclN)) = _
         rw [integral_finset_sum _ (fun a _ =>
@@ -883,21 +884,21 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
       set N_C : ℝ :=
         ∫ y in Ω, densityDerivOnEuclid (I := I) g α l y *
           eigenvectorChartIteratedPartial (I := I) (M := M)
-            g r s h_uniform i α P₀ m D_m.directions y * ψ y
+            g r s h_atlas i α P₀ m D_m.directions y * ψ y
           ∂(volume : Measure EuclN) with hN_C_def
       set N_mass_new : ℝ :=
         ∫ y in Ω,
           densityOnEuclid (I := I) g α y *
           eigenvectorChartIteratedPartial (I := I) (M := M)
-            g r s h_uniform i α P₀ (m + 1) (Fin.snoc D_m.directions l) y * ψ y
+            g r s h_atlas i α P₀ (m + 1) (Fin.snoc D_m.directions l) y * ψ y
           ∂(volume : Measure EuclN) with hN_mass_new_def
       have h_mass_ibp : INT_LHS_mass_m_l = -(N_C + N_mass_new) := by
-        have hb := ibp_mass (I := I) (M := M) g r s h_uniform i α P₀ m D_m.directions
+        have hb := ibp_mass (I := I) (M := M) g r s h_atlas i α P₀ m D_m.directions
           h_chart_H_m_plus_1 l hψ_smooth hψ_cs hψ_supp
         change (∫ y in Ω,
             densityOnEuclid (I := I) g α y *
               eigenvectorChartIteratedPartial (I := I) (M := M)
-                g r s h_uniform i α P₀ m D_m.directions y * ψ_l y
+                g r s h_atlas i α P₀ m D_m.directions y * ψ_l y
             ∂(volume : Measure EuclN)) = _
         rw [hb]
         rfl
@@ -930,7 +931,7 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
         ∫ y in Ω,
           densityOnEuclid (I := I) g α y *
             eigenvectorChartIteratedStep (I := I) (M := M)
-              g r s h_uniform i α P₀ m D_m.directions D_m.fChartEff l y * ψ y
+              g r s h_atlas i α P₀ m D_m.directions D_m.fChartEff l y * ψ y
           ∂(volume : Measure EuclN) with hI_step_RHS_def
       set LHS_principal_new : ℝ :=
         ∫ y in Ω,
@@ -938,7 +939,7 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
             ∑ j : Fin (Module.finrank ℝ E),
               weightedInvGramOnEuclid (I := I) g α a j y *
                 eigenvectorChartIteratedPartial (I := I) (M := M)
-                  g r s h_uniform i α P₀ (m + 2) (Fin.cons a (Fin.snoc D_m.directions l)) y *
+                  g r s h_atlas i α P₀ (m + 2) (Fin.cons a (Fin.snoc D_m.directions l)) y *
                 (fderiv ℝ ψ y) (EuclideanSpace.single j 1))
           ∂(volume : Measure EuclN) with hLHS_principal_new_def
       have h_LHS_principal_new_eq : LHS_principal_new = ∑ a, ∑ j, PR_pair a j := by
@@ -947,7 +948,7 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
               ∑ j : Fin (Module.finrank ℝ E),
                 weightedInvGramOnEuclid (I := I) g α a j y *
                   eigenvectorChartIteratedPartial (I := I) (M := M)
-                    g r s h_uniform i α P₀ (m + 2) (Fin.cons a (Fin.snoc D_m.directions l)) y *
+                    g r s h_atlas i α P₀ (m + 2) (Fin.cons a (Fin.snoc D_m.directions l)) y *
                   (fderiv ℝ ψ y) (EuclideanSpace.single j 1))
             ∂(volume : Measure EuclN)) = _
         rw [integral_finset_sum _ (fun a _ =>
@@ -957,26 +958,26 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
       -- The chosen mixed partials vanish a.e. off `Kα`.
       have h_M_m_ae :
           eigenvectorChartIteratedPartial (I := I) (M := M)
-            g r s h_uniform i α P₀ m D_m.directions
+            g r s h_atlas i α P₀ m D_m.directions
             =ᵐ[(volume : Measure EuclN).restrict (Ω \ Kα)]
             (fun _ : EuclN => (0 : ℝ)) := by
         have h := eigenvectorChartIteratedPartial_ae_zero_off_chartPouKernel
-          (I := I) (M := M) g r s h_uniform i α P₀ m D_m.directions
+          (I := I) (M := M) g r s h_atlas i α P₀ m D_m.directions
         exact h
       have h_M_m1_ae : ∀ idx : Fin (m + 1) → Fin (Module.finrank ℝ E),
           eigenvectorChartIteratedPartial (I := I) (M := M)
-            g r s h_uniform i α P₀ (m + 1) idx
+            g r s h_atlas i α P₀ (m + 1) idx
             =ᵐ[(volume : Measure EuclN).restrict (Ω \ Kα)]
             (fun _ : EuclN => (0 : ℝ)) := fun idx =>
         eigenvectorChartIteratedPartial_ae_zero_off_chartPouKernel
-          (I := I) (M := M) g r s h_uniform i α P₀ (m + 1) idx
+          (I := I) (M := M) g r s h_atlas i α P₀ (m + 1) idx
       have h_M_m2_ae : ∀ idx : Fin (m + 2) → Fin (Module.finrank ℝ E),
           eigenvectorChartIteratedPartial (I := I) (M := M)
-            g r s h_uniform i α P₀ (m + 2) idx
+            g r s h_atlas i α P₀ (m + 2) idx
             =ᵐ[(volume : Measure EuclN).restrict (Ω \ Kα)]
             (fun _ : EuclN => (0 : ℝ)) := fun idx =>
         eigenvectorChartIteratedPartial_ae_zero_off_chartPouKernel
-          (I := I) (M := M) g r s h_uniform i α P₀ (m + 2) idx
+          (I := I) (M := M) g r s h_atlas i α P₀ (m + 2) idx
       have h_fChartEff_wp_ae :
           chosenWeakPartial' (d := Module.finrank ℝ E) 2 l D_m.fChartEff Ω
             =ᵐ[(volume : Measure EuclN).restrict (Ω \ Kα)]
@@ -987,30 +988,30 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
       have h_numer_ae_zero :
           ∀ᵐ y ∂((volume : Measure EuclN).restrict (Ω \ Kα)),
             eigenvectorChartIteratedStepNumerator (I := I) (M := M)
-              g r s h_uniform i α P₀ m D_m.directions D_m.fChartEff l y = 0 := by
+              g r s h_atlas i α P₀ m D_m.directions D_m.fChartEff l y = 0 := by
         have h_M_m1_each : ∀ a : Fin (Module.finrank ℝ E),
             ∀ᵐ y ∂((volume : Measure EuclN).restrict (Ω \ Kα)),
               eigenvectorChartIteratedPartial (I := I) (M := M)
-                g r s h_uniform i α P₀ (m + 1) (Fin.cons a D_m.directions) y = 0 :=
+                g r s h_atlas i α P₀ (m + 1) (Fin.cons a D_m.directions) y = 0 :=
           fun a => h_M_m1_ae (Fin.cons a D_m.directions)
         have h_M_m1_wp_each : ∀ a b : Fin (Module.finrank ℝ E),
             ∀ᵐ y ∂((volume : Measure EuclN).restrict (Ω \ Kα)),
               chosenWeakPartial' (d := Module.finrank ℝ E) 2 b
                 (eigenvectorChartIteratedPartial (I := I) (M := M)
-                  g r s h_uniform i α P₀ (m + 1) (Fin.cons a D_m.directions)) Ω y = 0 :=
+                  g r s h_atlas i α P₀ (m + 1) (Fin.cons a D_m.directions)) Ω y = 0 :=
           fun a b =>
             chosenWeakPartial'_ae_zero_off_chartPouKernel_of_ae_zero
               (I := I) (M := M) α (h_M_m1_ae (Fin.cons a D_m.directions)) b
         have h_M_m1_all : ∀ᵐ y ∂((volume : Measure EuclN).restrict (Ω \ Kα)),
             ∀ a : Fin (Module.finrank ℝ E),
               eigenvectorChartIteratedPartial (I := I) (M := M)
-                g r s h_uniform i α P₀ (m + 1) (Fin.cons a D_m.directions) y = 0 := by
+                g r s h_atlas i α P₀ (m + 1) (Fin.cons a D_m.directions) y = 0 := by
           rw [ae_all_iff]; exact h_M_m1_each
         have h_M_m1_wp_all : ∀ᵐ y ∂((volume : Measure EuclN).restrict (Ω \ Kα)),
             ∀ a b : Fin (Module.finrank ℝ E),
               chosenWeakPartial' (d := Module.finrank ℝ E) 2 b
                 (eigenvectorChartIteratedPartial (I := I) (M := M)
-                  g r s h_uniform i α P₀ (m + 1) (Fin.cons a D_m.directions)) Ω y = 0 := by
+                  g r s h_atlas i α P₀ (m + 1) (Fin.cons a D_m.directions)) Ω y = 0 := by
           rw [ae_all_iff]; intro a; rw [ae_all_iff]; exact h_M_m1_wp_each a
         filter_upwards [h_M_m_ae, h_M_m1_all, h_M_m1_wp_all,
           h_fChartEff_ae_zero_off_K, h_fChartEff_wp_ae] with y h_M_m_y h_M_m1_y
@@ -1022,7 +1023,7 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
                 (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a b l) y)
                     (EuclideanSpace.single b 1) *
                   eigenvectorChartIteratedPartial (I := I) (M := M)
-                    g r s h_uniform i α P₀ (m + 1) (Fin.cons a D_m.directions) y) = 0 := by
+                    g r s h_atlas i α P₀ (m + 1) (Fin.cons a D_m.directions) y) = 0 := by
           refine Finset.sum_eq_zero ?_; intro a _
           refine Finset.sum_eq_zero ?_; intro _ _
           rw [h_M_m1_y a]; ring
@@ -1032,7 +1033,7 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
                 weightedInvGramDerivOnEuclid (I := I) g α a b l y *
                   chosenWeakPartial' (d := Module.finrank ℝ E) 2 b
                     (eigenvectorChartIteratedPartial (I := I) (M := M)
-                      g r s h_uniform i α P₀ (m + 1) (Fin.cons a D_m.directions))
+                      g r s h_atlas i α P₀ (m + 1) (Fin.cons a D_m.directions))
                     (chartTargetEuclid (I := I) (M := M) α) y) = 0 := by
           refine Finset.sum_eq_zero ?_; intro a _
           refine Finset.sum_eq_zero ?_; intro b _
@@ -1045,40 +1046,40 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
           ∫ y in Ω,
             Set.indicator Kα
               (fun z => eigenvectorChartIteratedStepNumerator (I := I) (M := M)
-                g r s h_uniform i α P₀ m D_m.directions D_m.fChartEff l z) y * ψ y
+                g r s h_atlas i α P₀ m D_m.directions D_m.fChartEff l z) y * ψ y
             ∂(volume : Measure EuclN) := by
         change (∫ y in Ω,
             densityOnEuclid (I := I) g α y *
               eigenvectorChartIteratedStep (I := I) (M := M)
-                g r s h_uniform i α P₀ m D_m.directions D_m.fChartEff l y * ψ y
+                g r s h_atlas i α P₀ m D_m.directions D_m.fChartEff l y * ψ y
             ∂(volume : Measure EuclN)) = _
         refine setIntegral_congr_fun hΩ_meas (fun y hy => ?_)
         have h_pt := density_mul_eigenvectorChartIteratedStep_eq_indicator_numerator
-          (I := I) (M := M) g r s h_uniform i α P₀ m D_m.directions D_m.fChartEff l y hy
+          (I := I) (M := M) g r s h_atlas i α P₀ m D_m.directions D_m.fChartEff l y hy
         rw [show densityOnEuclid (I := I) g α y *
             eigenvectorChartIteratedStep (I := I) (M := M)
-              g r s h_uniform i α P₀ m D_m.directions D_m.fChartEff l y * ψ y =
+              g r s h_atlas i α P₀ m D_m.directions D_m.fChartEff l y * ψ y =
             (densityOnEuclid (I := I) g α y *
               eigenvectorChartIteratedStep (I := I) (M := M)
-                g r s h_uniform i α P₀ m D_m.directions D_m.fChartEff l y) * ψ y from rfl]
+                g r s h_atlas i α P₀ m D_m.directions D_m.fChartEff l y) * ψ y from rfl]
         rw [h_pt]
       -- `∫_Ω indicator Kα f · ψ = ∫_Ω f · ψ`.
       have h_indicator_eq_numerator :
           ∫ y in Ω,
             Set.indicator Kα
               (fun z => eigenvectorChartIteratedStepNumerator (I := I) (M := M)
-                g r s h_uniform i α P₀ m D_m.directions D_m.fChartEff l z) y * ψ y
+                g r s h_atlas i α P₀ m D_m.directions D_m.fChartEff l z) y * ψ y
             ∂(volume : Measure EuclN) =
           ∫ y in Ω,
             eigenvectorChartIteratedStepNumerator (I := I) (M := M)
-              g r s h_uniform i α P₀ m D_m.directions D_m.fChartEff l y * ψ y
+              g r s h_atlas i α P₀ m D_m.directions D_m.fChartEff l y * ψ y
             ∂(volume : Measure EuclN) := by
         refine MeasureTheory.integral_congr_ae ?_
         refine (ae_restrict_iff' hΩ_meas).mpr ?_
         have h_off : ∀ᵐ y ∂(volume : Measure EuclN),
             y ∈ Ω \ Kα →
             eigenvectorChartIteratedStepNumerator (I := I) (M := M)
-              g r s h_uniform i α P₀ m D_m.directions D_m.fChartEff l y = 0 := by
+              g r s h_atlas i α P₀ m D_m.directions D_m.fChartEff l y = 0 := by
           rw [← ae_restrict_iff' hΩ_diff_Kα_meas]
           exact h_numer_ae_zero
         filter_upwards [h_off] with y hy hy_Ω
@@ -1090,14 +1091,14 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
       have h_step_RHS_eq_num : I_step_RHS =
           ∫ y in Ω,
             eigenvectorChartIteratedStepNumerator (I := I) (M := M)
-              g r s h_uniform i α P₀ m D_m.directions D_m.fChartEff l y * ψ y
+              g r s h_atlas i α P₀ m D_m.directions D_m.fChartEff l y * ψ y
             ∂(volume : Measure EuclN) := by
         rw [h_step_RHS_eq_indicator]; exact h_indicator_eq_numerator
       -- Step 8: expand the numerator integrand and use linearity.
       have h_int_C : Integrable (fun y =>
           densityDerivOnEuclid (I := I) g α l y *
             eigenvectorChartIteratedPartial (I := I) (M := M)
-              g r s h_uniform i α P₀ m D_m.directions y * ψ y)
+              g r s h_atlas i α P₀ m D_m.directions y * ψ y)
           ((volume : Measure EuclN).restrict Ω) :=
         integrable_triple_helper (α := α) hK_compact hK_meas hK_in
           h_dens_deriv_cont h_M_m_int hψ_cont hψ_supp_K
@@ -1115,7 +1116,7 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
       have h_numer_decomp :
           (∫ y in Ω,
             eigenvectorChartIteratedStepNumerator (I := I) (M := M)
-              g r s h_uniform i α P₀ m D_m.directions D_m.fChartEff l y * ψ y
+              g r s h_atlas i α P₀ m D_m.directions D_m.fChartEff l y * ψ y
             ∂(volume : Measure EuclN)) =
           (∑ a, ∑ j, A_pair a j) + (∑ a, ∑ j, B_pair a j) - N_C + N_D + N_E := by
         set f_A : EuclN → ℝ := fun y => ∑ a : Fin (Module.finrank ℝ E),
@@ -1123,19 +1124,19 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
             (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a b l) y)
               (EuclideanSpace.single b 1) *
             eigenvectorChartIteratedPartial (I := I) (M := M)
-              g r s h_uniform i α P₀ (m + 1) (Fin.cons a D_m.directions) y * ψ y
+              g r s h_atlas i α P₀ (m + 1) (Fin.cons a D_m.directions) y * ψ y
             with hf_A_def
         set f_B : EuclN → ℝ := fun y => ∑ a : Fin (Module.finrank ℝ E),
           ∑ b : Fin (Module.finrank ℝ E),
             weightedInvGramDerivOnEuclid (I := I) g α a b l y *
             chosenWeakPartial' (d := Module.finrank ℝ E) 2 b
               (eigenvectorChartIteratedPartial (I := I) (M := M)
-                g r s h_uniform i α P₀ (m + 1) (Fin.cons a D_m.directions))
+                g r s h_atlas i α P₀ (m + 1) (Fin.cons a D_m.directions))
               (chartTargetEuclid (I := I) (M := M) α) y * ψ y with hf_B_def
         set f_C : EuclN → ℝ := fun y =>
           - (densityDerivOnEuclid (I := I) g α l y *
             eigenvectorChartIteratedPartial (I := I) (M := M)
-              g r s h_uniform i α P₀ m D_m.directions y * ψ y) with hf_C_def
+              g r s h_atlas i α P₀ m D_m.directions y * ψ y) with hf_C_def
         set f_D : EuclN → ℝ := fun y =>
           densityDerivOnEuclid (I := I) g α l y *
             D_m.fChartEff y * ψ y with hf_D_def
@@ -1145,7 +1146,7 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
             ψ y with hf_E_def
         have h_integrand_eq : ∀ y : EuclN,
             eigenvectorChartIteratedStepNumerator (I := I) (M := M)
-              g r s h_uniform i α P₀ m D_m.directions D_m.fChartEff l y * ψ y =
+              g r s h_atlas i α P₀ m D_m.directions D_m.fChartEff l y * ψ y =
             f_A y + f_B y + f_C y + f_D y + f_E y := by
           intro y
           unfold eigenvectorChartIteratedStepNumerator
@@ -1158,7 +1159,7 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
               weightedInvGramDerivOnEuclid (I := I) g α a b l y *
               chosenWeakPartial' (d := Module.finrank ℝ E) 2 b
                 (eigenvectorChartIteratedPartial (I := I) (M := M)
-                  g r s h_uniform i α P₀ (m + 1) (Fin.cons a D_m.directions))
+                  g r s h_atlas i α P₀ (m + 1) (Fin.cons a D_m.directions))
                 (chartTargetEuclid (I := I) (M := M) α) y * ψ y)
               ((volume : Measure EuclN).restrict Ω) := fun a b =>
           integrable_triple_helper (α := α) hK_compact hK_meas hK_in
@@ -1167,7 +1168,7 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
               have h_g := chosenWeakPartial'_memLp_volume_uncond
                 (Ω := Ω) b
                 (eigenvectorChartIteratedPartial (I := I) (M := M)
-                  g r s h_uniform i α P₀ (m + 1) (Fin.cons a D_m.directions))
+                  g r s h_atlas i α P₀ (m + 1) (Fin.cons a D_m.directions))
               have h_g_K := h_g.restrict K
               rw [h_restrict_K_eq] at h_g_K
               exact h_g_K.integrable (by norm_num : (1 : ℝ≥0∞) ≤ 2))
@@ -1202,7 +1203,7 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
                   (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a b l) y)
                     (EuclideanSpace.single b 1) *
                   eigenvectorChartIteratedPartial (I := I) (M := M)
-                    g r s h_uniform i α P₀ (m + 1) (Fin.cons a D_m.directions) y * ψ y
+                    g r s h_atlas i α P₀ (m + 1) (Fin.cons a D_m.directions) y * ψ y
               ∂(volume : Measure EuclN)) = _
           rw [integral_finset_sum _ (fun a _ =>
             (integrable_finset_sum _ (fun b _ => h_int_A_pair a b)))]
@@ -1216,7 +1217,7 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
                   weightedInvGramDerivOnEuclid (I := I) g α a b l y *
                   chosenWeakPartial' (d := Module.finrank ℝ E) 2 b
                     (eigenvectorChartIteratedPartial (I := I) (M := M)
-                      g r s h_uniform i α P₀ (m + 1) (Fin.cons a D_m.directions))
+                      g r s h_atlas i α P₀ (m + 1) (Fin.cons a D_m.directions))
                     (chartTargetEuclid (I := I) (M := M) α) y * ψ y
               ∂(volume : Measure EuclN)) = _
           rw [integral_finset_sum _ (fun a _ =>
@@ -1229,10 +1230,10 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
           -- is the chosen weak `b`-partial of the level-`(m+1)` mixed partial.
           have h_eq :
               eigenvectorChartIteratedPartial (I := I) (M := M)
-                  g r s h_uniform i α P₀ (m + 2) (Fin.cons a (Fin.snoc D_m.directions b)) =
+                  g r s h_atlas i α P₀ (m + 2) (Fin.cons a (Fin.snoc D_m.directions b)) =
                 chosenWeakPartial' (d := Module.finrank ℝ E) 2 b
                   (eigenvectorChartIteratedPartial (I := I) (M := M)
-                    g r s h_uniform i α P₀ (m + 1) (Fin.cons a D_m.directions))
+                    g r s h_atlas i α P₀ (m + 1) (Fin.cons a D_m.directions))
                   (chartTargetEuclid (I := I) (M := M) α) := by
             rw [eigenvectorChartIteratedPartial_succ]
             have h_last : (Fin.cons a (Fin.snoc D_m.directions b) :
@@ -1262,7 +1263,7 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
           change (∫ y in Ω,
               - (densityDerivOnEuclid (I := I) g α l y *
                 eigenvectorChartIteratedPartial (I := I) (M := M)
-                  g r s h_uniform i α P₀ m D_m.directions y * ψ y)
+                  g r s h_atlas i α P₀ m D_m.directions y * ψ y)
               ∂(volume : Measure EuclN)) = _
           rw [MeasureTheory.integral_neg]
         have h_int_f_D : (∫ y in Ω, f_D y ∂(volume : Measure EuclN)) = N_D := rfl
@@ -1279,21 +1280,21 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
 section ElaborationTests
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
-  (h_uniform : uniformTensorChartSobolevBound g r s)
+  (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
 
 /-- The iterated step produces a level-`(m + 1)` datum from a level-`m` datum. -/
 example (α : M) (P₀ : TensorCompIdx (E := E) r s) {m : ℕ}
     (D_m : eigenvectorIteratedTensorChartBilinearData (I := I) (M := M)
-      g r s h_uniform i α P₀ m)
+      g r s h_atlas i α P₀ m)
     (l : Fin (Module.finrank ℝ E))
     (h1 : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) (m + 1) 2
-      (eigenvectorChartComponentFun (I := I) (M := M) g r s h_uniform i α P₀)
+      (eigenvectorChartComponentFun (I := I) (M := M) g r s h_atlas i α P₀)
       (chartTargetEuclid (I := I) (M := M) α))
     (h2 : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) (m + 2) 2
-      (eigenvectorChartComponentFun (I := I) (M := M) g r s h_uniform i α P₀)
+      (eigenvectorChartComponentFun (I := I) (M := M) g r s h_atlas i α P₀)
       (chartTargetEuclid (I := I) (M := M) α))
     (h3 : DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 D_m.fChartEff
       (chartTargetEuclid (I := I) (M := M) α))
@@ -1302,9 +1303,9 @@ example (α : M) (P₀ : TensorCompIdx (E := E) r s) {m : ℕ}
         chartPouKernel (I := I) (M := M) α)]
       (fun _ : EuclN => (0 : ℝ))) :
     eigenvectorIteratedTensorChartBilinearData (I := I) (M := M)
-      g r s h_uniform i α P₀ (m + 1) :=
+      g r s h_atlas i α P₀ (m + 1) :=
   eigenvectorIteratedTensorChartBilinearData_step
-    g r s h_uniform i α P₀ D_m l h1 h2 h3 h4
+    g r s h_atlas i α P₀ D_m l h1 h2 h3 h4
 
 end ElaborationTests
 

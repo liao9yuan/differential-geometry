@@ -1,20 +1,21 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorSmoothChartComponentTransport
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.PouCutoffComponentBridge
+import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # The chart component of the smooth eigenvector representative
 
 For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, the uniform-Sobolev
-hypothesis `h_uniform` and an eigenbasis index `i`, the smooth representative
-`eigenvectorSmooth g r s h_uniform i` is the finite partition-of-unity sum, over
+hypothesis `h_atlas` and an eigenbasis index `i`, the smooth representative
+`eigenvectorSmooth g r s h_atlas i` is the finite partition-of-unity sum, over
 the chart centres in `chartAtlasPOU_finset`, of the per-chart smooth sections
-`eigenvectorSmoothChart g r s h_uniform i α`.
+`eigenvectorSmoothChart g r s h_atlas i α`.
 
 This file proves the **chart-component equality**: the canonical Euclidean
 chart-`β` `P₀`-component of `eigenvectorSmooth` equals — as an element of the
 chart `L²` space — the canonical chart-`β` `P₀`-component of the
 connection-Laplacian resolvent eigenvector `tensorResolventEigenbasisVec
-h_uniform i`.
+h_atlas i`.
 
 ## The argument
 
@@ -102,7 +103,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
-  (h_uniform : uniformTensorChartSobolevBound g r s)
+  (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
 
 /-! ## A measure-theoretic gluing helper
@@ -174,7 +175,7 @@ component multi-indices `Q`, of the chart-`β` pushforwards of the single
 `if`-gated transformation-law terms. -/
 private lemma chartPushedRaw_ite_transitionSum_eq_finsetSum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α β : M) (P₀ : TensorCompIdx (E := E) r s) (y : EuclN) :
     chartPushedRaw I β
@@ -182,7 +183,7 @@ private lemma chartPushedRaw_ite_transitionSum_eq_finsetSum
           ∑ Q : TensorCompIdx (E := E) r s,
             transitionCoeff (E := E) (I := I) (M := M) r s α β P₀ Q x *
               tensorChartComponentRaw (I := I) (M := M) g r s
-                (eigenvectorSmoothChart (I := I) (M := M) g r s h_uniform i α)
+                (eigenvectorSmoothChart (I := I) (M := M) g r s h_atlas i α)
                 α Q.1 Q.2 x
           else 0) y =
       ∑ Q : TensorCompIdx (E := E) r s,
@@ -190,7 +191,7 @@ private lemma chartPushedRaw_ite_transitionSum_eq_finsetSum
           (fun x => if x ∈ (chartAt H α).source then
             transitionCoeff (E := E) (I := I) (M := M) r s α β P₀ Q x *
               tensorChartComponentRaw (I := I) (M := M) g r s
-                (eigenvectorSmoothChart (I := I) (M := M) g r s h_uniform i α)
+                (eigenvectorSmoothChart (I := I) (M := M) g r s h_atlas i α)
                 α Q.1 Q.2 x
           else 0) y := by
   classical
@@ -201,14 +202,14 @@ private lemma chartPushedRaw_ite_transitionSum_eq_finsetSum
           ∑ Q : TensorCompIdx (E := E) r s,
             transitionCoeff (E := E) (I := I) (M := M) r s α β P₀ Q x *
               tensorChartComponentRaw (I := I) (M := M) g r s
-                (eigenvectorSmoothChart (I := I) (M := M) g r s h_uniform i α)
+                (eigenvectorSmoothChart (I := I) (M := M) g r s h_atlas i α)
                 α Q.1 Q.2 x
           else 0) =
         fun x => ∑ Q : TensorCompIdx (E := E) r s,
           (if x ∈ (chartAt H α).source then
             transitionCoeff (E := E) (I := I) (M := M) r s α β P₀ Q x *
               tensorChartComponentRaw (I := I) (M := M) g r s
-                (eigenvectorSmoothChart (I := I) (M := M) g r s h_uniform i α)
+                (eigenvectorSmoothChart (I := I) (M := M) g r s h_atlas i α)
                 α Q.1 Q.2 x
           else 0) := by
     funext x
@@ -219,7 +220,7 @@ private lemma chartPushedRaw_ite_transitionSum_eq_finsetSum
     (fun Q x => if x ∈ (chartAt H α).source then
       transitionCoeff (E := E) (I := I) (M := M) r s α β P₀ Q x *
         tensorChartComponentRaw (I := I) (M := M) g r s
-          (eigenvectorSmoothChart (I := I) (M := M) g r s h_uniform i α)
+          (eigenvectorSmoothChart (I := I) (M := M) g r s h_atlas i α)
           α Q.1 Q.2 x
     else 0) y
 
@@ -238,11 +239,11 @@ over component multi-indices `Q`, of the chart-transition transport of the
 resolvent eigenvector's chart-`α` `Q`-components. -/
 private lemma eigenvectorSmoothChart_tensorL2ChartComponent_eq_transport_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α β : M) (P₀ : TensorCompIdx (E := E) r s) :
     ((tensorL2ChartComponent (I := I) (M := M) g r s
-        (eigenvectorSmoothChart (I := I) (M := M) g r s h_uniform i α :
+        (eigenvectorSmoothChart (I := I) (M := M) g r s h_atlas i α :
           TensorL2 r s g) β P₀ :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ)
       =ᵐ[chartL2Measure (I := I) (M := M) β]
@@ -251,14 +252,14 @@ private lemma eigenvectorSmoothChart_tensorL2ChartComponent_eq_transport_sum
         ∑ Q : TensorCompIdx (E := E) r s,
           ((chartTransitionTransportCLM (I := I) (M := M) g r s α β P₀ Q
               (tensorL2ChartComponent (I := I) (M := M) g r s
-                (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i)
+                (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i)
                 α Q) :
               Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
             EuclN → ℝ) y) := by
   classical
   -- Start from the per-chart component formula ("D-i").
   refine (eigenvectorSmoothChart_tensorL2ChartComponent_coeFn_aeEq
-    (I := I) (M := M) g r s h_uniform i α β P₀).trans ?_
+    (I := I) (M := M) g r s h_atlas i α β P₀).trans ?_
   -- Push the chart pushforward through the inner component sum, so the per-`Q`
   -- transport reconciliation applies.
   have h_push : ∀ y : EuclN,
@@ -269,7 +270,7 @@ private lemma eigenvectorSmoothChart_tensorL2ChartComponent_eq_transport_sum
             ∑ Q : TensorCompIdx (E := E) r s,
               transitionCoeff (E := E) (I := I) (M := M) r s α β P₀ Q x *
                 tensorChartComponentRaw (I := I) (M := M) g r s
-                  (eigenvectorSmoothChart (I := I) (M := M) g r s h_uniform i α)
+                  (eigenvectorSmoothChart (I := I) (M := M) g r s h_atlas i α)
                   α Q.1 Q.2 x
             else 0) y =
         ∑ Q : TensorCompIdx (E := E) r s,
@@ -279,12 +280,12 @@ private lemma eigenvectorSmoothChart_tensorL2ChartComponent_eq_transport_sum
               (fun x => if x ∈ (chartAt H α).source then
                 transitionCoeff (E := E) (I := I) (M := M) r s α β P₀ Q x *
                   tensorChartComponentRaw (I := I) (M := M) g r s
-                    (eigenvectorSmoothChart (I := I) (M := M) g r s h_uniform i α)
+                    (eigenvectorSmoothChart (I := I) (M := M) g r s h_atlas i α)
                     α Q.1 Q.2 x
               else 0) y) := by
     intro y
     rw [chartPushedRaw_ite_transitionSum_eq_finsetSum
-      (I := I) (M := M) g r s h_uniform i α β P₀ y, Finset.mul_sum]
+      (I := I) (M := M) g r s h_atlas i α β P₀ y, Finset.mul_sum]
   -- The right side of "D-i" therefore becomes a finite sum of single transport
   -- terms; reconcile each by the single transport-term identity ("File 2").
   have h_terms : ∀ Q : TensorCompIdx (E := E) r s,
@@ -294,7 +295,7 @@ private lemma eigenvectorSmoothChart_tensorL2ChartComponent_eq_transport_sum
           (fun x => if x ∈ (chartAt H α).source then
             transitionCoeff (E := E) (I := I) (M := M) r s α β P₀ Q x *
               tensorChartComponentRaw (I := I) (M := M) g r s
-                (eigenvectorSmoothChart (I := I) (M := M) g r s h_uniform i α)
+                (eigenvectorSmoothChart (I := I) (M := M) g r s h_atlas i α)
                 α Q.1 Q.2 x
           else 0) y)
         =ᵐ[chartL2Measure (I := I) (M := M) β]
@@ -302,11 +303,11 @@ private lemma eigenvectorSmoothChart_tensorL2ChartComponent_eq_transport_sum
           (fun x => ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) y *
         ((chartTransitionTransportCLM (I := I) (M := M) g r s α β P₀ Q
             (tensorL2ChartComponent (I := I) (M := M) g r s
-              (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i)
+              (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i)
               α Q) :
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) :=
     fun Q => eigenvectorSmoothChart_transport_term_aeEq
-      (I := I) (M := M) g r s h_uniform i β α P₀ Q
+      (I := I) (M := M) g r s h_atlas i β α P₀ Q
   -- Assemble: rewrite the product as a finite sum, then sum the per-`Q`
   -- reconciliations, then pull the partition-of-unity weight back out.
   have h_sum := finsetSum_ae_eq (I := I) (M := M) β
@@ -345,17 +346,17 @@ chart-`α` `L²` measure: where the weight is nonzero the `if` evaluates to `0`,
 and where it is zero the off-support vanishing kills the component. -/
 private lemma eigenvectorChartComponentFun_ite_chartPushedPouWeight_zero_ae_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (Q : TensorCompIdx (E := E) r s) :
     (fun y => if chartPushedPouWeight (I := I) (M := M) α y = 0 then
-        eigenvectorChartComponentFun (I := I) (M := M) g r s h_uniform i α Q y
+        eigenvectorChartComponentFun (I := I) (M := M) g r s h_atlas i α Q y
       else 0)
       =ᵐ[chartL2Measure (I := I) (M := M) α]
       (fun _ : EuclN => (0 : ℝ)) := by
   classical
   filter_upwards [eigenvectorChartComponentFun_ae_zero_where_chartPushedPouWeight_zero
-    (I := I) (M := M) g r s h_uniform i α Q] with y hy
+    (I := I) (M := M) g r s h_atlas i α Q] with y hy
   by_cases hw : chartPushedPouWeight (I := I) (M := M) α y = 0
   · rw [if_pos hw]
     exact hy hw
@@ -377,13 +378,13 @@ of the eigenvector chart component (transported across the chart transition)
 kills the precomposed component. -/
 private lemma chartTransitionTransportCLM_eigenvector_ae_zero_of_notMem
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α β : M) (P₀ Q : TensorCompIdx (E := E) r s)
     (hα : α ∉ transportChartCenters (I := I) (M := M) β) :
     ((chartTransitionTransportCLM (I := I) (M := M) g r s α β P₀ Q
         (tensorL2ChartComponent (I := I) (M := M) g r s
-          (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) α Q) :
+          (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) α Q) :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ)
       =ᵐ[chartL2Measure (I := I) (M := M) β]
       (fun _ : EuclN => (0 : ℝ)) := by
@@ -393,7 +394,7 @@ private lemma chartTransitionTransportCLM_eigenvector_ae_zero_of_notMem
   -- component.
   have h_coeFn := chartTransitionTransportCLM_coeFn_aeEq (I := I) (M := M)
     g r s α β P₀ Q (tensorL2ChartComponent (I := I) (M := M) g r s
-      (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) α Q)
+      (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) α Q)
   refine h_coeFn.trans ?_
   -- The transport coefficient is supported in the overlap of the two chart
   -- sources; the chart overlap `chartOverlapEuclid β α` is open, hence
@@ -417,7 +418,7 @@ private lemma chartTransitionTransportCLM_eigenvector_ae_zero_of_notMem
   have h_on_overlap :
       (fun y => chartPushedRaw (I := I) (M := M) β
           (transportCoeffManifold (I := I) (M := M) g r s α β P₀ Q) y *
-        (eigenvectorChartComponentFun (I := I) (M := M) g r s h_uniform i α Q)
+        (eigenvectorChartComponentFun (I := I) (M := M) g r s h_atlas i α Q)
           (chartTransitionEuclid (I := I) (M := M) β α y))
         =ᵐ[(chartL2Measure (I := I) (M := M) β).restrict
             (chartOverlapEuclid (I := I) (M := M) β α)]
@@ -428,11 +429,11 @@ private lemma chartTransitionTransportCLM_eigenvector_ae_zero_of_notMem
     -- across the chart transition `chartTransitionEuclid β α`.
     have h_gate_target :=
       eigenvectorChartComponentFun_ite_chartPushedPouWeight_zero_ae_zero
-        (I := I) (M := M) g r s h_uniform i α Q
+        (I := I) (M := M) g r s h_atlas i α Q
     have h_gate_overlap :
         (fun y => if chartPushedPouWeight (I := I) (M := M) α y = 0 then
             eigenvectorChartComponentFun (I := I) (M := M)
-              g r s h_uniform i α Q y
+              g r s h_atlas i α Q y
           else 0)
           =ᵐ[(volume : Measure EuclN).restrict
               (chartOverlapEuclid (I := I) (M := M) α β)]
@@ -504,7 +505,7 @@ private lemma chartTransitionTransportCLM_eigenvector_ae_zero_of_notMem
       -- The transported gating fact at `y`.
       have hy_gate' : (if chartPushedPouWeight (I := I) (M := M) α
             (chartTransitionEuclid (I := I) (M := M) β α y) = 0 then
-          eigenvectorChartComponentFun (I := I) (M := M) g r s h_uniform i α Q
+          eigenvectorChartComponentFun (I := I) (M := M) g r s h_atlas i α Q
             (chartTransitionEuclid (I := I) (M := M) β α y)
         else 0) = 0 := hy_gate
       rw [if_pos hw_zero] at hy_gate'
@@ -514,7 +515,7 @@ private lemma chartTransitionTransportCLM_eigenvector_ae_zero_of_notMem
   have h_off_overlap : ∀ y, y ∉ chartOverlapEuclid (I := I) (M := M) β α →
       chartPushedRaw (I := I) (M := M) β
           (transportCoeffManifold (I := I) (M := M) g r s α β P₀ Q) y *
-        (eigenvectorChartComponentFun (I := I) (M := M) g r s h_uniform i α Q)
+        (eigenvectorChartComponentFun (I := I) (M := M) g r s h_atlas i α Q)
           (chartTransitionEuclid (I := I) (M := M) β α y) = 0 := by
     intro y hy_notin
     by_cases hy_target : y ∈ chartTargetEuclid (I := I) (M := M) β
@@ -557,14 +558,14 @@ chart-`α` `Q`-components vanishes almost everywhere on the chart-`β` `L²`
 measure. -/
 private lemma transportSum_eigenvector_ae_zero_of_notMem
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α β : M) (P₀ : TensorCompIdx (E := E) r s)
     (hα : α ∉ transportChartCenters (I := I) (M := M) β) :
     (fun y => ∑ Q : TensorCompIdx (E := E) r s,
         ((chartTransitionTransportCLM (I := I) (M := M) g r s α β P₀ Q
             (tensorL2ChartComponent (I := I) (M := M) g r s
-              (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i)
+              (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i)
               α Q) :
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
       =ᵐ[chartL2Measure (I := I) (M := M) β]
@@ -573,12 +574,12 @@ private lemma transportSum_eigenvector_ae_zero_of_notMem
   have h_each : ∀ Q : TensorCompIdx (E := E) r s,
       ((chartTransitionTransportCLM (I := I) (M := M) g r s α β P₀ Q
           (tensorL2ChartComponent (I := I) (M := M) g r s
-            (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i)
+            (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i)
             α Q) :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ)
         =ᵐ[chartL2Measure (I := I) (M := M) β] (fun _ : EuclN => (0 : ℝ)) :=
     fun Q => chartTransitionTransportCLM_eigenvector_ae_zero_of_notMem
-      (I := I) (M := M) g r s h_uniform i α β P₀ Q hα
+      (I := I) (M := M) g r s h_atlas i α β P₀ Q hα
   have h_sum := finsetSum_ae_eq (I := I) (M := M) β
     (Finset.univ : Finset (TensorCompIdx (E := E) r s))
     (fun Q _ => h_each Q)
@@ -598,12 +599,12 @@ chartAtlasPOU_finset` and the off-transport vanishing. -/
 /-- **The chart-component equality of the smooth eigenvector representative.**
 
 For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, the uniform-Sobolev
-hypothesis `h_uniform`, an eigenbasis index `i`, a chart base point `β` and a
+hypothesis `h_atlas`, an eigenbasis index `i`, a chart base point `β` and a
 component multi-index `P₀`, the canonical Euclidean chart-`β` `P₀`-component of
-the smooth representative `eigenvectorSmooth g r s h_uniform i` equals — as an
+the smooth representative `eigenvectorSmooth g r s h_atlas i` equals — as an
 element of the chart `L²` space `Lp ℝ 2 (chartL2Measure β)` — the canonical
 chart-`β` `P₀`-component of the connection-Laplacian resolvent eigenvector
-`tensorResolventEigenbasisVec h_uniform i`.
+`tensorResolventEigenbasisVec h_atlas i`.
 
 The smooth representative is the finite partition-of-unity sum of the per-chart
 smooth sections; the canonical chart component is continuous-linear in the
@@ -617,13 +618,13 @@ for a chart centre outside the transport set the corresponding transport term
 vanishes almost everywhere. -/
 theorem eigenvectorSmooth_tensorL2ChartComponent_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (β : M) (P₀ : TensorCompIdx (E := E) r s) :
     tensorL2ChartComponent g r s
-        (eigenvectorSmooth g r s h_uniform i : TensorL2 r s g) β P₀ =
+        (eigenvectorSmooth g r s h_atlas i : TensorL2 r s g) β P₀ =
       tensorL2ChartComponent g r s
-        (tensorResolventEigenbasisVec h_uniform i : TensorL2 r s g) β P₀ := by
+        (tensorResolventEigenbasisVec h_atlas i : TensorL2 r s g) β P₀ := by
   classical
   -- Reduce to the a.e. equality of the underlying functions.
   apply Lp.ext
@@ -631,12 +632,12 @@ theorem eigenvectorSmooth_tensorL2ChartComponent_eq
   -- `L²`-coercion distributes through the finite sum (the smooth-section
   -- embedding is linear).
   have h_coe_sum :
-      (eigenvectorSmooth (I := I) (M := M) g r s h_uniform i : TensorL2 r s g) =
+      (eigenvectorSmooth (I := I) (M := M) g r s h_atlas i : TensorL2 r s g) =
         ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
-          (eigenvectorSmoothChart (I := I) (M := M) g r s h_uniform i α :
+          (eigenvectorSmoothChart (I := I) (M := M) g r s h_atlas i α :
             TensorL2 r s g) := by
     rw [← smoothToTensorL2_apply (I := I) (M := M) g r s,
-      eigenvectorSmooth_eq (I := I) (M := M) g r s h_uniform i,
+      eigenvectorSmooth_eq (I := I) (M := M) g r s h_atlas i,
       map_sum]
     refine Finset.sum_congr rfl (fun α _ => ?_)
     rw [smoothToTensorL2_apply]
@@ -644,11 +645,11 @@ theorem eigenvectorSmooth_tensorL2ChartComponent_eq
   -- argument, so it distributes through the finite sum.
   have h_lhs_sum :
       tensorL2ChartComponent (I := I) (M := M) g r s
-          (eigenvectorSmooth (I := I) (M := M) g r s h_uniform i :
+          (eigenvectorSmooth (I := I) (M := M) g r s h_atlas i :
             TensorL2 r s g) β P₀ =
         ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
           tensorL2ChartComponent (I := I) (M := M) g r s
-            (eigenvectorSmoothChart (I := I) (M := M) g r s h_uniform i α :
+            (eigenvectorSmoothChart (I := I) (M := M) g r s h_atlas i α :
               TensorL2 r s g) β P₀ := by
     rw [← tensorL2ChartComponentCLM_apply (I := I) (M := M) g r s β P₀,
       h_coe_sum, map_sum]
@@ -659,13 +660,13 @@ theorem eigenvectorSmooth_tensorL2ChartComponent_eq
   refine (coeFn_finsetSum_chartL2 (I := I) (M := M) β
     (chartAtlasPOU_finset (I := I) (M := M))
     (fun α => tensorL2ChartComponent (I := I) (M := M) g r s
-      (eigenvectorSmoothChart (I := I) (M := M) g r s h_uniform i α :
+      (eigenvectorSmoothChart (I := I) (M := M) g r s h_atlas i α :
         TensorL2 r s g) β P₀)).trans ?_
   -- Each per-chart summand becomes a chart-pushed-weight-times-transport-sum.
   have h_lhs_terms :
       (fun y => ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
         ((tensorL2ChartComponent (I := I) (M := M) g r s
-            (eigenvectorSmoothChart (I := I) (M := M) g r s h_uniform i α :
+            (eigenvectorSmoothChart (I := I) (M := M) g r s h_atlas i α :
               TensorL2 r s g) β P₀ :
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
         =ᵐ[chartL2Measure (I := I) (M := M) β]
@@ -675,19 +676,19 @@ theorem eigenvectorSmooth_tensorL2ChartComponent_eq
           ∑ Q : TensorCompIdx (E := E) r s,
             ((chartTransitionTransportCLM (I := I) (M := M) g r s α β P₀ Q
                 (tensorL2ChartComponent (I := I) (M := M) g r s
-                  (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i)
+                  (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i)
                   α Q) :
                 Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
               EuclN → ℝ) y)) :=
     finsetSum_ae_eq (I := I) (M := M) β
       (chartAtlasPOU_finset (I := I) (M := M))
       (fun α _ => eigenvectorSmoothChart_tensorL2ChartComponent_eq_transport_sum
-        (I := I) (M := M) g r s h_uniform i α β P₀)
+        (I := I) (M := M) g r s h_atlas i α β P₀)
   refine h_lhs_terms.trans ?_
   -- The eigenvector's chart-`β` `P₀`-component, by the abstract transport law.
   refine Filter.EventuallyEq.symm
     ((tensorL2ChartComponent_ae_eq_pou_transport_sum (I := I) (M := M)
-      g r s (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i)
+      g r s (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i)
       β P₀).trans ?_)
   -- Match the two finite double sums: reindex the left sum over the
   -- partition-of-unity support set down to the transport chart centres, the
@@ -702,7 +703,7 @@ theorem eigenvectorSmooth_tensorL2ChartComponent_eq
       ∑ Q : TensorCompIdx (E := E) r s,
         ((chartTransitionTransportCLM (I := I) (M := M) g r s α β P₀ Q
             (tensorL2ChartComponent (I := I) (M := M) g r s
-              (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i)
+              (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i)
               α Q) :
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y
     with hF_def
@@ -716,7 +717,7 @@ theorem eigenvectorSmooth_tensorL2ChartComponent_eq
           ∑ Q : TensorCompIdx (E := E) r s,
             ((chartTransitionTransportCLM (I := I) (M := M) g r s γ β P₀ Q
                 (tensorL2ChartComponent (I := I) (M := M) g r s
-                  (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i)
+                  (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i)
                   γ Q) :
                 Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
               EuclN → ℝ) y) =
@@ -756,7 +757,7 @@ theorem eigenvectorSmooth_tensorL2ChartComponent_eq
       have hα_notin : α ∉ transportChartCenters (I := I) (M := M) β :=
         (Finset.mem_sdiff.mp hα).2
       have h_zero := transportSum_eigenvector_ae_zero_of_notMem
-        (I := I) (M := M) g r s h_uniform i α β P₀ hα_notin
+        (I := I) (M := M) g r s h_atlas i α β P₀ hα_notin
       filter_upwards [h_zero] with y hy
       rw [hF_def]
       change chartPushedRaw I β
@@ -764,7 +765,7 @@ theorem eigenvectorSmooth_tensorL2ChartComponent_eq
         ∑ Q : TensorCompIdx (E := E) r s,
           ((chartTransitionTransportCLM (I := I) (M := M) g r s α β P₀ Q
               (tensorL2ChartComponent (I := I) (M := M) g r s
-                (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i)
+                (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i)
                 α Q) :
               Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y =
         (0 : ℝ)

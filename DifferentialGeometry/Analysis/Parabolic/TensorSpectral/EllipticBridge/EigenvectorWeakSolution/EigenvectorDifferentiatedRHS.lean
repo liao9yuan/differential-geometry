@@ -25,7 +25,7 @@ steps the right-hand side is the level-`m` differentiated source built here.
 
 ## The level-`m` differentiated right-hand side
 
-`eigenvectorChartRHSDiff g r s h_uniform i α P₀ l` (with `l : Fin m → Fin n` the
+`eigenvectorChartRHSDiff g r s h_atlas i α P₀ l` (with `l : Fin m → Fin n` the
 `m`-direction multi-index) is the level-`m` differentiated right-hand side of the
 eigenvector chart variational identity. It is defined by recursion on `m`:
 
@@ -61,7 +61,7 @@ differentiated right-hand side is `MemLp 2` with respect to the chart-pulled
 weighted measure restricted to `chartTargetEuclid α`.
 
 The membership is established **unconditionally** — with no regularity hypothesis
-on the eigenvector beyond the uniform-Sobolev hypothesis `h_uniform` already
+on the eigenvector beyond the uniform-Sobolev hypothesis `h_atlas` already
 needed to name the eigenvector. The mechanism is that every constituent of the
 differentiated numerator is unconditionally `MemLp 2` of the plain Lebesgue
 volume restricted to the chart target:
@@ -154,19 +154,19 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 The chart `P₀`-component of the resolvent eigenvector, presented as a function
 `EuclN → ℝ` — the coercion-to-function of the `Lp ℝ 2 (chartL2Measure α)`
-element `tensorL2ChartComponent g r s (tensorResolventEigenbasisVec h_uniform i)
+element `tensorL2ChartComponent g r s (tensorResolventEigenbasisVec h_atlas i)
 α P₀`. -/
 
 /-- The chart `P₀`-component of the resolvent eigenvector, as a function
 `EuclN → ℝ`. -/
 def eigenvectorChartComponentFun
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) : EuclN → ℝ :=
   fun y =>
     ((tensorL2ChartComponent (I := I) (M := M) g r s
-        (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) α P₀ :
+        (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) α P₀ :
       Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
 
 omit [CompleteSpace E] in
@@ -175,18 +175,18 @@ restricted to the chart target: it is the coercion of an `Lp` element of
 `chartL2Measure α = volume.restrict (chartTargetEuclid α)`. -/
 lemma eigenvectorChartComponentFun_memLp_volume
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
     MemLp (eigenvectorChartComponentFun (I := I) (M := M)
-        g r s h_uniform i α P₀) 2
+        g r s h_atlas i α P₀) 2
       ((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)) := by
   -- The chart component is an `Lp` element of `chartL2Measure α`, and
   -- `chartL2Measure α` is definitionally the volume restricted to the chart
   -- target.
   have h := Lp.memLp (tensorL2ChartComponent (I := I) (M := M) g r s
-    (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) α P₀)
+    (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) α P₀)
   exact h
 
 /-! ## Unconditional `L²` membership of the canonical chosen weak partial
@@ -218,7 +218,7 @@ private lemma chosenWeakPartial'_memLp_volume_unconditional
 
 /-! ## The recursive `m`-fold mixed weak partial of the eigenvector chart component
 
-`eigenvectorChartIteratedPartial g r s h_uniform i α P₀ l` is the `m`-fold mixed
+`eigenvectorChartIteratedPartial g r s h_atlas i α P₀ l` is the `m`-fold mixed
 weak partial of the eigenvector chart component in the directions encoded by
 `l : Fin m → Fin n`, taken via the canonical chosen weak partial
 `chosenWeakPartial'`. The recursion peels the **last** entry `l (Fin.last m)`,
@@ -230,48 +230,48 @@ is the chart component itself; at `m + 1` it is the chosen weak
 `l (Fin.last m)`-partial of the level-`m` mixed partial. -/
 def eigenvectorChartIteratedPartial
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
     ∀ (m : ℕ), (Fin m → Fin (Module.finrank ℝ E)) → EuclN → ℝ
-  | 0, _ => eigenvectorChartComponentFun (I := I) (M := M) g r s h_uniform i α P₀
+  | 0, _ => eigenvectorChartComponentFun (I := I) (M := M) g r s h_atlas i α P₀
   | m + 1, l =>
       chosenWeakPartial' (d := Module.finrank ℝ E) 2 (l (Fin.last m))
-        (eigenvectorChartIteratedPartial g r s h_uniform i α P₀ m (Fin.init l))
+        (eigenvectorChartIteratedPartial g r s h_atlas i α P₀ m (Fin.init l))
         (chartTargetEuclid (I := I) (M := M) α)
 
 omit [CompleteSpace E] in
 /-- Definitional unfolding of `eigenvectorChartIteratedPartial` at `m = 0`. -/
 @[simp] theorem eigenvectorChartIteratedPartial_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (l : Fin 0 → Fin (Module.finrank ℝ E)) :
     eigenvectorChartIteratedPartial (I := I) (M := M)
-        g r s h_uniform i α P₀ 0 l =
+        g r s h_atlas i α P₀ 0 l =
       eigenvectorChartComponentFun (I := I) (M := M)
-        g r s h_uniform i α P₀ := rfl
+        g r s h_atlas i α P₀ := rfl
 
 omit [CompleteSpace E] in
 /-- Definitional unfolding of `eigenvectorChartIteratedPartial` at `m + 1`. -/
 theorem eigenvectorChartIteratedPartial_succ
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (m : ℕ) (l : Fin (m + 1) → Fin (Module.finrank ℝ E)) :
     eigenvectorChartIteratedPartial (I := I) (M := M)
-        g r s h_uniform i α P₀ (m + 1) l =
+        g r s h_atlas i α P₀ (m + 1) l =
       chosenWeakPartial' (d := Module.finrank ℝ E) 2 (l (Fin.last m))
         (eigenvectorChartIteratedPartial (I := I) (M := M)
-          g r s h_uniform i α P₀ m (Fin.init l))
+          g r s h_atlas i α P₀ m (Fin.init l))
         (chartTargetEuclid (I := I) (M := M) α) := rfl
 
 omit [CompleteSpace E] in
 /-- **Unconditional `L²` membership of every `m`-fold mixed weak partial.** For
 *every* level `m` and *every* direction multi-index `l : Fin m → Fin n`, the
-`m`-fold mixed weak partial `eigenvectorChartIteratedPartial g r s h_uniform i α
+`m`-fold mixed weak partial `eigenvectorChartIteratedPartial g r s h_atlas i α
 P₀ m l` is `MemLp 2` of the plain Lebesgue volume restricted to the chart target.
 
 The proof is induction on `m`: the base case is the chart component (an `Lp`
@@ -280,19 +280,19 @@ weak partial `chosenWeakPartial'_memLp_volume_unconditional`. No `W^{1,2}`
 hypothesis on the eigenvector is needed. -/
 theorem eigenvectorChartIteratedPartial_memLp_volume
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (m : ℕ) (l : Fin m → Fin (Module.finrank ℝ E)) :
     MemLp (eigenvectorChartIteratedPartial (I := I) (M := M)
-        g r s h_uniform i α P₀ m l) 2
+        g r s h_atlas i α P₀ m l) 2
       ((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)) := by
   induction m with
   | zero =>
       rw [eigenvectorChartIteratedPartial_zero]
       exact eigenvectorChartComponentFun_memLp_volume
-        (I := I) (M := M) g r s h_uniform i α P₀
+        (I := I) (M := M) g r s h_atlas i α P₀
   | succ m _ih =>
       rw [eigenvectorChartIteratedPartial_succ]
       exact chosenWeakPartial'_memLp_volume_unconditional
@@ -305,17 +305,17 @@ the (already restricted) volume to a compact subset `K ⊆ chartTargetEuclid α`
 yields `volume.restrict K`. -/
 private lemma eigenvectorChartIteratedPartial_memLp_volume_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (m : ℕ) (l : Fin m → Fin (Module.finrank ℝ E))
     {K : Set EuclN} (hK_meas : MeasurableSet K)
     (hK_in : K ⊆ chartTargetEuclid (I := I) (M := M) α) :
     MemLp (eigenvectorChartIteratedPartial (I := I) (M := M)
-        g r s h_uniform i α P₀ m l) 2
+        g r s h_atlas i α P₀ m l) 2
       ((volume : Measure EuclN).restrict K) := by
   have h_global := eigenvectorChartIteratedPartial_memLp_volume
-    (I := I) (M := M) g r s h_uniform i α P₀ m l
+    (I := I) (M := M) g r s h_atlas i α P₀ m l
   have h_eq : ((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)).restrict K =
       (volume : Measure EuclN).restrict K := by
@@ -372,7 +372,7 @@ weak partial `D.weak_partial a` is, in the iterated indexing, the
 * `E` — `densityOnEuclid g α · (∂_{lₙ}-weak-partial of fChartEffPrev)`. -/
 def eigenvectorChartRHSDiffNumerator
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
     (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
@@ -383,7 +383,7 @@ def eigenvectorChartRHSDiffNumerator
       (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a b
             (l (Fin.last m))) y)
           (EuclideanSpace.single b 1) *
-        eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_uniform i α P₀
+        eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_atlas i α P₀
           (m + 1) (Fin.cons a (Fin.init l)) y)
   -- Layer B: (∂_{lₙ} a_ab) · (∂_b of the (m+1)-fold mixed partial, `cons a init`).
   + (∑ a : Fin (Module.finrank ℝ E),
@@ -391,11 +391,11 @@ def eigenvectorChartRHSDiffNumerator
         weightedInvGramDerivOnEuclid (I := I) g α a b (l (Fin.last m)) y *
           chosenWeakPartial' (d := Module.finrank ℝ E) 2 b
             (eigenvectorChartIteratedPartial (I := I) (M := M)
-              g r s h_uniform i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
+              g r s h_atlas i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
             (chartTargetEuclid (I := I) (M := M) α) y)
   -- Layer C: -(∂_{lₙ} c) · (m-fold mixed partial, index `Fin.init l`).
   - densityDerivOnEuclid (I := I) g α (l (Fin.last m)) y *
-      eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_uniform i α P₀
+      eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_atlas i α P₀
         m (Fin.init l) y
   -- Layer D: (∂_{lₙ} c) · fChartEffPrev.
   + densityDerivOnEuclid (I := I) g α (l (Fin.last m)) y * fChartEffPrev y
@@ -414,12 +414,12 @@ For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
 multi-index `l : Fin m → Fin n`, this is the level-`m` differentiated right-hand
 side. It is defined by recursion on `m`:
 
-* level `0` is the seven-term `eigenvectorChartRHS g r s h_uniform i α P₀`;
+* level `0` is the seven-term `eigenvectorChartRHS g r s h_atlas i α P₀`;
 * level `m + 1` is the indicator, of the compact partition-of-unity kernel
   `chartPouKernel α`, of the chart-density-divided level-`m` differentiated
   numerator `eigenvectorChartRHSDiffNumerator` (with `fChartEffPrev` the
   level-`m` differentiated right-hand side `eigenvectorChartRHSDiff g r s
-  h_uniform i α P₀ (Fin.init l)`).
+  h_atlas i α P₀ (Fin.init l)`).
 
 The recursion peels the **last** entry `l (Fin.last m)`, the outermost
 differentiation direction; the `Fin.init l` argument of the recursive call is the
@@ -429,43 +429,43 @@ This is **data** (a function `EuclN → ℝ`): it is the differentiated `f_chart
 field consumed by the next-level chart-bilinear divergence-form datum. -/
 def eigenvectorChartRHSDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
     ∀ (m : ℕ), (Fin m → Fin (Module.finrank ℝ E)) → EuclN → ℝ
-  | 0, _ => eigenvectorChartRHS (I := I) (M := M) g r s h_uniform i α P₀
+  | 0, _ => eigenvectorChartRHS (I := I) (M := M) g r s h_atlas i α P₀
   | m + 1, l =>
       Set.indicator (chartPouKernel (I := I) (M := M) α)
         (fun y => eigenvectorChartRHSDiffNumerator (I := I) (M := M)
-            g r s h_uniform i α P₀ m l
-            (eigenvectorChartRHSDiff g r s h_uniform i α P₀ m (Fin.init l)) y /
+            g r s h_atlas i α P₀ m l
+            (eigenvectorChartRHSDiff g r s h_atlas i α P₀ m (Fin.init l)) y /
           densityOnEuclid (I := I) g α y)
 
 omit [CompleteSpace E] in
 /-- Definitional unfolding of `eigenvectorChartRHSDiff` at `m = 0`. -/
 @[simp] theorem eigenvectorChartRHSDiff_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (l : Fin 0 → Fin (Module.finrank ℝ E)) :
-    eigenvectorChartRHSDiff (I := I) (M := M) g r s h_uniform i α P₀ 0 l =
-      eigenvectorChartRHS (I := I) (M := M) g r s h_uniform i α P₀ := rfl
+    eigenvectorChartRHSDiff (I := I) (M := M) g r s h_atlas i α P₀ 0 l =
+      eigenvectorChartRHS (I := I) (M := M) g r s h_atlas i α P₀ := rfl
 
 omit [CompleteSpace E] in
 /-- Definitional unfolding of `eigenvectorChartRHSDiff` at `m + 1`. -/
 theorem eigenvectorChartRHSDiff_succ
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (m : ℕ) (l : Fin (m + 1) → Fin (Module.finrank ℝ E)) :
-    eigenvectorChartRHSDiff (I := I) (M := M) g r s h_uniform i α P₀ (m + 1) l =
+    eigenvectorChartRHSDiff (I := I) (M := M) g r s h_atlas i α P₀ (m + 1) l =
       Set.indicator (chartPouKernel (I := I) (M := M) α)
         (fun y => eigenvectorChartRHSDiffNumerator (I := I) (M := M)
-            g r s h_uniform i α P₀ m l
+            g r s h_atlas i α P₀ m l
             (eigenvectorChartRHSDiff (I := I) (M := M)
-              g r s h_uniform i α P₀ m (Fin.init l)) y /
+              g r s h_atlas i α P₀ m (Fin.init l)) y /
           densityOnEuclid (I := I) g α y) := rfl
 
 /-! ## Support of the differentiated right-hand side
@@ -480,13 +480,13 @@ the compact partition-of-unity kernel `chartPouKernel α` — it is the indicato
 that kernel. -/
 theorem eigenvectorChartRHSDiff_succ_eq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (m : ℕ) (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
     {y : EuclN} (hy : y ∉ chartPouKernel (I := I) (M := M) α) :
     eigenvectorChartRHSDiff (I := I) (M := M)
-        g r s h_uniform i α P₀ (m + 1) l y = 0 := by
+        g r s h_atlas i α P₀ (m + 1) l y = 0 := by
   rw [eigenvectorChartRHSDiff_succ, Set.indicator_of_notMem hy]
 
 /-! ## Weighted-`L²` membership of the differentiated numerator
@@ -565,7 +565,7 @@ scaffold for the weighted-`L²` regularity of the standalone-step effective
 source. -/
 lemma eigenvectorChartRHSDiffNumerator_memLp_volume_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
     (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
@@ -574,7 +574,7 @@ lemma eigenvectorChartRHSDiffNumerator_memLp_volume_compact
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α))) :
     MemLp (fun y => eigenvectorChartRHSDiffNumerator (I := I) (M := M)
-        g r s h_uniform i α P₀ m l fChartEffPrev y) 2
+        g r s h_atlas i α P₀ m l fChartEffPrev y) 2
       ((volume : Measure EuclN).restrict
         (chartPouKernel (I := I) (M := M) α)) := by
   classical
@@ -595,7 +595,7 @@ lemma eigenvectorChartRHSDiffNumerator_memLp_volume_compact
               (l (Fin.last m))) y)
             (EuclideanSpace.single b 1) *
           eigenvectorChartIteratedPartial (I := I) (M := M)
-            g r s h_uniform i α P₀ (m + 1) (Fin.cons a (Fin.init l)) y) 2
+            g r s h_atlas i α P₀ (m + 1) (Fin.cons a (Fin.init l)) y) 2
       ((volume : Measure EuclN).restrict K) := by
     refine memLp_finset_sum _ (fun a _ => memLp_finset_sum _ (fun b _ => ?_))
     -- The coefficient `∂_b (weightedInvGramDerivOnEuclid · · ·)` is `C^∞`.
@@ -622,7 +622,7 @@ lemma eigenvectorChartRHSDiffNumerator_memLp_volume_compact
     exact memLp_volume_compact_contDiffOn_mul (I := I) (M := M) α
       h_coeff hK_compact hK_meas hK_in
       (eigenvectorChartIteratedPartial_memLp_volume_compact
-        (I := I) (M := M) g r s h_uniform i α P₀ (m + 1)
+        (I := I) (M := M) g r s h_atlas i α P₀ (m + 1)
         (Fin.cons a (Fin.init l)) hK_meas hK_in)
   -- Layer B: a finite double sum of `a_ab · (∂_b of the (m+1)-fold mixed
   -- partial)`.
@@ -631,7 +631,7 @@ lemma eigenvectorChartRHSDiffNumerator_memLp_volume_compact
         weightedInvGramDerivOnEuclid (I := I) g α a b (l (Fin.last m)) y *
           chosenWeakPartial' (d := Module.finrank ℝ E) 2 b
             (eigenvectorChartIteratedPartial (I := I) (M := M)
-              g r s h_uniform i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
+              g r s h_atlas i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
             (chartTargetEuclid (I := I) (M := M) α) y) 2
       ((volume : Measure EuclN).restrict K) := by
     refine memLp_finset_sum _ (fun a _ => memLp_finset_sum _ (fun b _ => ?_))
@@ -643,7 +643,7 @@ lemma eigenvectorChartRHSDiffNumerator_memLp_volume_compact
     have h_global := chosenWeakPartial'_memLp_volume_unconditional
       (Ω := chartTargetEuclid (I := I) (M := M) α) b
       (eigenvectorChartIteratedPartial (I := I) (M := M)
-        g r s h_uniform i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
+        g r s h_atlas i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
     have h_eq : ((volume : Measure EuclN).restrict
           (chartTargetEuclid (I := I) (M := M) α)).restrict K =
         (volume : Measure EuclN).restrict K := by
@@ -656,13 +656,13 @@ lemma eigenvectorChartRHSDiffNumerator_memLp_volume_compact
   have hC : MemLp (fun y =>
       densityDerivOnEuclid (I := I) g α (l (Fin.last m)) y *
         eigenvectorChartIteratedPartial (I := I) (M := M)
-          g r s h_uniform i α P₀ m (Fin.init l) y) 2
+          g r s h_atlas i α P₀ m (Fin.init l) y) 2
       ((volume : Measure EuclN).restrict K) :=
     memLp_volume_compact_contDiffOn_mul (I := I) (M := M) α
       (densityDerivOnEuclid_contDiffOn (I := I) g α (l (Fin.last m)))
       hK_compact hK_meas hK_in
       (eigenvectorChartIteratedPartial_memLp_volume_compact
-        (I := I) (M := M) g r s h_uniform i α P₀ m (Fin.init l)
+        (I := I) (M := M) g r s h_atlas i α P₀ m (Fin.init l)
         hK_meas hK_in)
   -- Layer D: `(∂_{lₙ} c) · fChartEffPrev`.
   have hD : MemLp (fun y =>
@@ -702,12 +702,12 @@ lemma eigenvectorChartRHSDiffNumerator_memLp_volume_compact
 For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
 `i`, a chart center `α : M`, a component multi-index `P₀`, and a direction
 multi-index `l : Fin m → Fin n`, the level-`m` differentiated right-hand side
-`eigenvectorChartRHSDiff g r s h_uniform i α P₀ m l` is `MemLp 2` with respect
+`eigenvectorChartRHSDiff g r s h_atlas i α P₀ m l` is `MemLp 2` with respect
 to the chart-pulled weighted measure `(chartPulledWeightedMeasure g α).restrict
 (chartTargetEuclid α)`.
 
 The membership is **unconditional**: it carries no regularity hypothesis on the
-eigenvector beyond the uniform-Sobolev hypothesis `h_uniform` already needed to
+eigenvector beyond the uniform-Sobolev hypothesis `h_atlas` already needed to
 name it. The proof is induction on `m`:
 
 * level `0` is the seven-term `eigenvectorChartRHS`, whose weighted-`L²`
@@ -732,19 +732,19 @@ function and hence unconditionally `MemLp 2` of the restricted volume; the
 never enters. -/
 theorem eigenvectorChartRHSDiff_memLp_weighted
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (m : ℕ) (l : Fin m → Fin (Module.finrank ℝ E)) :
     MemLp (eigenvectorChartRHSDiff (I := I) (M := M)
-        g r s h_uniform i α P₀ m l) 2
+        g r s h_atlas i α P₀ m l) 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α)) := by
   induction m with
   | zero =>
       rw [eigenvectorChartRHSDiff_zero]
       exact eigenvectorChartRHS_memLp_weighted
-        (I := I) (M := M) g r s h_uniform i α P₀
+        (I := I) (M := M) g r s h_atlas i α P₀
   | succ m ih =>
       classical
       set K : Set EuclN := chartPouKernel (I := I) (M := M) α with hK_def
@@ -758,24 +758,24 @@ theorem eigenvectorChartRHSDiff_memLp_weighted
       have h_prev := ih (Fin.init l)
       -- The differentiated numerator is `MemLp 2 (volume.restrict K)`.
       have h_num := eigenvectorChartRHSDiffNumerator_memLp_volume_compact
-        (I := I) (M := M) g r s h_uniform i α P₀ m l h_prev
+        (I := I) (M := M) g r s h_atlas i α P₀ m l h_prev
       -- Dividing by the chart density is a `C^∞`-coefficient multiplication.
       have h_div : MemLp (fun y => eigenvectorChartRHSDiffNumerator
-          (I := I) (M := M) g r s h_uniform i α P₀ m l
+          (I := I) (M := M) g r s h_atlas i α P₀ m l
             (eigenvectorChartRHSDiff (I := I) (M := M)
-              g r s h_uniform i α P₀ m (Fin.init l)) y /
+              g r s h_atlas i α P₀ m (Fin.init l)) y /
           densityOnEuclid (I := I) g α y) 2
           ((volume : Measure EuclN).restrict K) := by
         have h_eq : (fun y => eigenvectorChartRHSDiffNumerator
-            (I := I) (M := M) g r s h_uniform i α P₀ m l
+            (I := I) (M := M) g r s h_atlas i α P₀ m l
               (eigenvectorChartRHSDiff (I := I) (M := M)
-                g r s h_uniform i α P₀ m (Fin.init l)) y /
+                g r s h_atlas i α P₀ m (Fin.init l)) y /
             densityOnEuclid (I := I) g α y) =
             fun y => (1 / densityOnEuclid (I := I) g α y) *
               eigenvectorChartRHSDiffNumerator (I := I) (M := M)
-                g r s h_uniform i α P₀ m l
+                g r s h_atlas i α P₀ m l
                 (eigenvectorChartRHSDiff (I := I) (M := M)
-                  g r s h_uniform i α P₀ m (Fin.init l)) y := by
+                  g r s h_atlas i α P₀ m (Fin.init l)) y := by
           funext y
           rw [one_div, mul_comm, ← div_eq_mul_inv]
         rw [h_eq]
@@ -786,7 +786,7 @@ theorem eigenvectorChartRHSDiff_memLp_weighted
       -- chart-density-divided numerator; it is `MemLp 2 (volume.restrict
       -- (chartTarget))` and vanishes pointwise off `K`.
       have h_plain : MemLp (eigenvectorChartRHSDiff (I := I) (M := M)
-          g r s h_uniform i α P₀ (m + 1) l) 2
+          g r s h_atlas i α P₀ (m + 1) l) 2
           ((volume : Measure EuclN).restrict
             (chartTargetEuclid (I := I) (M := M) α)) := by
         rw [eigenvectorChartRHSDiff_succ]
@@ -804,7 +804,7 @@ theorem eigenvectorChartRHSDiff_memLp_weighted
         (I := I) (M := M) g α hK_compact hK_meas hK_in
         (Filter.Eventually.of_forall (fun y hy =>
           eigenvectorChartRHSDiff_succ_eq_zero_off_chartPouKernel
-            (I := I) (M := M) g r s h_uniform i α P₀ m l hy))
+            (I := I) (M := M) g r s h_atlas i α P₀ m l hy))
         h_plain
 
 /-! ## Sanity tests -/
@@ -812,29 +812,29 @@ theorem eigenvectorChartRHSDiff_memLp_weighted
 section ElaborationTests
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
-  (h_uniform : uniformTensorChartSobolevBound g r s)
+  (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
 
 example (α : M) (P₀ : TensorCompIdx (E := E) r s)
     {m : ℕ} (l : Fin m → Fin (Module.finrank ℝ E)) : EuclN → ℝ :=
-  eigenvectorChartRHSDiff (I := I) (M := M) g r s h_uniform i α P₀ m l
+  eigenvectorChartRHSDiff (I := I) (M := M) g r s h_atlas i α P₀ m l
 
 example (α : M) (P₀ : TensorCompIdx (E := E) r s)
     {m : ℕ} (l : Fin m → Fin (Module.finrank ℝ E)) :
     MemLp (eigenvectorChartRHSDiff (I := I) (M := M)
-        g r s h_uniform i α P₀ m l) 2
+        g r s h_atlas i α P₀ m l) 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α)) :=
   eigenvectorChartRHSDiff_memLp_weighted (I := I) (M := M)
-    g r s h_uniform i α P₀ m l
+    g r s h_atlas i α P₀ m l
 
 /-- At level `0` the differentiated right-hand side is the seven-term
 `eigenvectorChartRHS`. -/
 example (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (l : Fin 0 → Fin (Module.finrank ℝ E)) :
-    eigenvectorChartRHSDiff (I := I) (M := M) g r s h_uniform i α P₀ 0 l =
-      eigenvectorChartRHS (I := I) (M := M) g r s h_uniform i α P₀ :=
-  eigenvectorChartRHSDiff_zero (I := I) (M := M) g r s h_uniform i α P₀ l
+    eigenvectorChartRHSDiff (I := I) (M := M) g r s h_atlas i α P₀ 0 l =
+      eigenvectorChartRHS (I := I) (M := M) g r s h_atlas i α P₀ :=
+  eigenvectorChartRHSDiff_zero (I := I) (M := M) g r s h_atlas i α P₀ l
 
 end ElaborationTests
 

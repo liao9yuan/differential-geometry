@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.WeakSolutionGlobal
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorChartPartialL2
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.PouComponentBridge
+import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # The `n → ∞` `L²`-limits of the three lower-order coefficient terms
@@ -10,7 +11,7 @@ For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
 and a component multi-index `P₀`, the per-approximant chart bilinear identity of
 the connection Laplacian carries three lower-order coefficient terms on its
 right-hand side, evaluated at the partition-of-unity-weighted smooth approximant
-`Tₙ := pouSmul g r s α (eigenvectorSmoothApprox g r s h_uniform i n)`:
+`Tₙ := pouSmul g r s α (eigenvectorSmoothApprox g r s h_atlas i n)`:
 
 * the principal rotation coefficient `covPrincipalRotationCoeff g r s Tₙ α P₀`;
 * the lower-order rotation value coefficient
@@ -24,7 +25,7 @@ This file produces, for each of these, the `n → ∞` `L²`-limit in
 
 ## The tracing identity
 
-With `wₙ := eigenvectorSmoothApprox g r s h_uniform i n` and
+With `wₙ := eigenvectorSmoothApprox g r s h_atlas i n` and
 `Tₙ := pouSmul g r s α wₙ.toCcTensor`, the raw chart component of `Tₙ` is the
 partition-of-unity-weighted chart component of `wₙ.toCcTensor`
 (`tensorChartComponentRaw_pouSmul_eq_tensorChartComponentPou`), whose Euclidean
@@ -46,13 +47,13 @@ sequences converges.
 
 ## Main definitions
 
-* `covPrincipalRotationCoeffLimit g r s h_uniform i α P₀` — the explicit
+* `covPrincipalRotationCoeffLimit g r s h_atlas i α P₀` — the explicit
   `L²`-limit function of `covPrincipalRotationCoeff g r s Tₙ α P₀`.
-* `covLowerOrderRotationValueCoeffLimit g r s h_uniform i α P₀` — the explicit
+* `covLowerOrderRotationValueCoeffLimit g r s h_atlas i α P₀` — the explicit
   `L²`-limit function of `covLowerOrderRotationValueCoeff g r s Tₙ α P₀`.
-* `weightedGradCoeffLimit g r s h_uniform i α P₀ l` — the explicit `L²`-limit
+* `weightedGradCoeffLimit g r s h_atlas i α P₀ l` — the explicit `L²`-limit
   function of `weightedGradCoeff g r s Tₙ α P₀ l`.
-* `weightedGradCoeffDivLimit g r s h_uniform i α P₀ l` — the explicit `L²`-limit
+* `weightedGradCoeffDivLimit g r s h_atlas i α P₀ l` — the explicit `L²`-limit
   function of `euclidPartial l (weightedGradCoeff g r s Tₙ α P₀ l)`.
 
 ## Main results
@@ -445,7 +446,7 @@ lemma tendsto_bdd_mul
 
 /-! ## The two `T`-dependent atoms and their `L²`-limits
 
-With `wₙ := eigenvectorSmoothApprox g r s h_uniform i n`, the two atoms through
+With `wₙ := eigenvectorSmoothApprox g r s h_atlas i n`, the two atoms through
 which the lower-order coefficients depend on `Tₙ := pouSmul g r s α wₙ.toCcTensor`
 are the bare chart component `tensorChartComponent g r s wₙ.toCcTensor α P` and
 its chart-Euclidean partial. Their `L²` classes are the rescaled images of the
@@ -456,124 +457,124 @@ limit objects of `EigenvectorChartComponentL2.lean` and
 approximant. -/
 def approxComponentLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P : TensorCompIdx (E := E) r s) (n : ℕ) :
     Lp ℝ 2 (chartL2Measure (I := I) (M := M) α) :=
   (tensorChartComponent_memLp (I := I) (M := M) g r s
-    (eigenvectorSmoothApprox (I := I) (M := M) g r s h_uniform i n).toCcTensor
+    (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n).toCcTensor
     α P.1 P.2).toLp
     (tensorChartComponent (I := I) (M := M) g r s
       (eigenvectorSmoothApprox (I := I) (M := M)
-        g r s h_uniform i n).toCcTensor α P.1 P.2)
+        g r s h_atlas i n).toCcTensor α P.1 P.2)
 
 /-- The `L²` limit of `approxComponentLp`: `μ` times the canonical chart
 component of the eigenvector. -/
 def componentLpLimit
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P : TensorCompIdx (E := E) r s) :
     Lp ℝ 2 (chartL2Measure (I := I) (M := M) α) :=
   i.fst.val •
     tensorL2ChartComponent (I := I) (M := M) g r s
-      (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) α P
+      (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) α P
 
 /-- The `n`-th approximant chart component `L²` class converges to
 `componentLpLimit`. -/
 lemma approxComponentLp_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P : TensorCompIdx (E := E) r s) :
     Filter.Tendsto
-      (fun n => approxComponentLp (I := I) (M := M) g r s h_uniform i α P n)
+      (fun n => approxComponentLp (I := I) (M := M) g r s h_atlas i α P n)
       atTop
-      (𝓝 (componentLpLimit (I := I) (M := M) g r s h_uniform i α P)) := by
+      (𝓝 (componentLpLimit (I := I) (M := M) g r s h_atlas i α P)) := by
   classical
   -- Rescale the headline `eigenvectorChartComponentL2_tendsto` by `μ • ·`.
   have h_tendsto :=
     (eigenvectorChartComponentL2_tendsto (I := I) (M := M)
-      g r s h_uniform i α P).const_smul i.fst.val
+      g r s h_atlas i α P).const_smul i.fst.val
   -- Identify the `n`-th rescaled term with `approxComponentLp`.
   have h_term : ∀ n : ℕ,
       i.fst.val •
         tensorL2ChartComponent (I := I) (M := M) g r s
           ((i.fst.val)⁻¹ •
             (((eigenvectorSmoothApprox (I := I) (M := M)
-                g r s h_uniform i n).toCcTensor) : TensorL2 r s g)) α P =
-        approxComponentLp (I := I) (M := M) g r s h_uniform i α P n := by
+                g r s h_atlas i n).toCcTensor) : TensorL2 r s g)) α P =
+        approxComponentLp (I := I) (M := M) g r s h_atlas i α P n := by
     intro n
     rw [eigenvectorChartComponentL2_approx_eq (I := I) (M := M)
-      g r s h_uniform i α P n, smul_smul, mul_inv_cancel₀ i.fst.val_ne_zero,
+      g r s h_atlas i α P n, smul_smul, mul_inv_cancel₀ i.fst.val_ne_zero,
       one_smul]
     rfl
   rw [show (fun n => i.fst.val •
         tensorL2ChartComponent (I := I) (M := M) g r s
           ((i.fst.val)⁻¹ •
             (((eigenvectorSmoothApprox (I := I) (M := M)
-                g r s h_uniform i n).toCcTensor) : TensorL2 r s g)) α P) =
+                g r s h_atlas i n).toCcTensor) : TensorL2 r s g)) α P) =
       (fun n => approxComponentLp (I := I) (M := M)
-        g r s h_uniform i α P n) from funext h_term] at h_tendsto
+        g r s h_atlas i α P n) from funext h_term] at h_tendsto
   exact h_tendsto
 
 /-- The `L²` class of the chosen weak `k`-th chart partial of the bare Euclidean
 chart component of the `n`-th smooth approximant. -/
 def approxPartialLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) (n : ℕ) :
     Lp ℝ 2 (chartL2Measure (I := I) (M := M) α) :=
   (chosenWeakPartial'_tensorChartComponent_memLp (I := I) (M := M) g r s
-    (eigenvectorSmoothApprox (I := I) (M := M) g r s h_uniform i n)
+    (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n)
     α P.1 P.2 k).toLp
     (chosenWeakPartial' (d := Module.finrank ℝ E) 2 k
       (tensorChartComponent (I := I) (M := M) g r s
         (eigenvectorSmoothApprox (I := I) (M := M)
-          g r s h_uniform i n).toCcTensor α P.1 P.2)
+          g r s h_atlas i n).toCcTensor α P.1 P.2)
       (chartTargetEuclid (I := I) (M := M) α))
 
 /-- The `L²` limit of `approxPartialLp`: `μ` times the candidate weak chart
 partial of the eigenvector chart component. -/
 def partialLpLimit
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) :
     Lp ℝ 2 (chartL2Measure (I := I) (M := M) α) :=
   i.fst.val •
-    eigenvectorChartPartialLp (I := I) (M := M) g r s h_uniform i α P k
+    eigenvectorChartPartialLp (I := I) (M := M) g r s h_atlas i α P k
 
 /-- The `n`-th approximant chart partial `L²` class converges to
 `partialLpLimit`. -/
 lemma approxPartialLp_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) :
     Filter.Tendsto
-      (fun n => approxPartialLp (I := I) (M := M) g r s h_uniform i α P k n)
+      (fun n => approxPartialLp (I := I) (M := M) g r s h_atlas i α P k n)
       atTop
-      (𝓝 (partialLpLimit (I := I) (M := M) g r s h_uniform i α P k)) := by
+      (𝓝 (partialLpLimit (I := I) (M := M) g r s h_atlas i α P k)) := by
   classical
   have h_tendsto :=
     (eigenvectorChartPartialLp_tendsto (I := I) (M := M)
-      g r s h_uniform i α P k).const_smul i.fst.val
+      g r s h_atlas i α P k).const_smul i.fst.val
   have h_term : ∀ n : ℕ,
       i.fst.val •
         ((i.fst.val)⁻¹ •
           eigenvectorChartPartialCLM (I := I) (M := M) g r s α P k
             (smoothToTensorH1Compl (I := I) (M := M) g r s
               (eigenvectorSmoothApprox (I := I) (M := M)
-                g r s h_uniform i n))) =
-        approxPartialLp (I := I) (M := M) g r s h_uniform i α P k n := by
+                g r s h_atlas i n))) =
+        approxPartialLp (I := I) (M := M) g r s h_atlas i α P k n := by
     intro n
     rw [eigenvectorChartPartialLp_approx_eq (I := I) (M := M)
-      g r s h_uniform i α P k n, smul_smul, mul_inv_cancel₀ i.fst.val_ne_zero,
+      g r s h_atlas i α P k n, smul_smul, mul_inv_cancel₀ i.fst.val_ne_zero,
       one_smul]
     rfl
   rw [show (fun n => i.fst.val •
@@ -581,9 +582,9 @@ lemma approxPartialLp_tendsto
           eigenvectorChartPartialCLM (I := I) (M := M) g r s α P k
             (smoothToTensorH1Compl (I := I) (M := M) g r s
               (eigenvectorSmoothApprox (I := I) (M := M)
-                g r s h_uniform i n)))) =
+                g r s h_atlas i n)))) =
       (fun n => approxPartialLp (I := I) (M := M)
-        g r s h_uniform i α P k n) from funext h_term] at h_tendsto
+        g r s h_atlas i α P k n) from funext h_term] at h_tendsto
   exact h_tendsto
 
 /-! ## Almost-everywhere identification of the chart-partial atom
@@ -684,7 +685,7 @@ handles a chart-partial atom. -/
 factor times the representative of `componentLpLimit`. -/
 lemma tendsto_componentSummand
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P : TensorCompIdx (E := E) r s)
     {c : EuclN → ℝ}
@@ -693,11 +694,11 @@ lemma tendsto_componentSummand
       MemLp (fun y => c y *
         tensorChartComponent (I := I) (M := M) g r s
           (eigenvectorSmoothApprox (I := I) (M := M)
-            g r s h_uniform i n).toCcTensor α P.1 P.2 y) 2
+            g r s h_atlas i n).toCcTensor α P.1 P.2 y) 2
         (chartL2Measure (I := I) (M := M) α))
     (hlim_memLp : MemLp
       (fun y => Set.indicator (chartPouKernel (I := I) (M := M) α) c y *
-        (componentLpLimit (I := I) (M := M) g r s h_uniform i α P :
+        (componentLpLimit (I := I) (M := M) g r s h_atlas i α P :
           EuclN → ℝ) y) 2 (chartL2Measure (I := I) (M := M) α)) :
     Filter.Tendsto
       (fun n => (hP_memLp n).toLp _)
@@ -719,12 +720,12 @@ lemma tendsto_componentSummand
     aestronglyMeasurable_indicator_mul (I := I) (M := M) α hc
   -- The general bounded-multiplication convergence engine.
   have h_engine := tendsto_bdd_mul (I := I) (M := M) α hC_nn hci_bd hci_meas
-    (approxComponentLp_tendsto (I := I) (M := M) g r s h_uniform i α P)
+    (approxComponentLp_tendsto (I := I) (M := M) g r s h_atlas i α P)
   -- Identify the `n`-th term and the limit.
   have h_term : ∀ n : ℕ,
       (memLp_bdd_mul (I := I) (M := M) α hC_nn hci_bd hci_meas
         (Lp.memLp (approxComponentLp (I := I) (M := M)
-          g r s h_uniform i α P n))).toLp _ =
+          g r s h_atlas i α P n))).toLp _ =
         (hP_memLp n).toLp _ := by
     intro n
     apply Lp.ext
@@ -732,11 +733,11 @@ lemma tendsto_componentSummand
       (MemLp.coeFn_toLp _).symm)
     -- `ci · approxComponentLp` agrees a.e. with `c · tensorChartComponent`.
     have hcomp : (approxComponentLp (I := I) (M := M)
-        g r s h_uniform i α P n : EuclN → ℝ) =ᵐ[
+        g r s h_atlas i α P n : EuclN → ℝ) =ᵐ[
         chartL2Measure (I := I) (M := M) α]
         tensorChartComponent (I := I) (M := M) g r s
           (eigenvectorSmoothApprox (I := I) (M := M)
-            g r s h_uniform i n).toCcTensor α P.1 P.2 := by
+            g r s h_atlas i n).toCcTensor α P.1 P.2 := by
       rw [approxComponentLp]; exact MemLp.coeFn_toLp _
     filter_upwards [hcomp] with y hy
     rw [hy]
@@ -748,12 +749,12 @@ lemma tendsto_componentSummand
   have h_lim :
       (memLp_bdd_mul (I := I) (M := M) α hC_nn hci_bd hci_meas
         (Lp.memLp (componentLpLimit (I := I) (M := M)
-          g r s h_uniform i α P))).toLp _ = hlim_memLp.toLp _ := by
+          g r s h_atlas i α P))).toLp _ = hlim_memLp.toLp _ := by
     apply Lp.ext
     exact (MemLp.coeFn_toLp _).trans (MemLp.coeFn_toLp _).symm
   rw [show (fun n => (memLp_bdd_mul (I := I) (M := M) α hC_nn hci_bd hci_meas
         (Lp.memLp (approxComponentLp (I := I) (M := M)
-          g r s h_uniform i α P n))).toLp _) =
+          g r s h_atlas i α P n))).toLp _) =
       (fun n => (hP_memLp n).toLp _) from funext h_term, h_lim] at h_engine
   exact h_engine
 
@@ -762,7 +763,7 @@ g r s wₙ α P)`, `L²`-classed and convergent. The limit is the `L²` class of
 kernel-indicator factor times the representative of `partialLpLimit`. -/
 lemma tendsto_partialSummand
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E))
@@ -773,11 +774,11 @@ lemma tendsto_partialSummand
         euclidPartial (E := E) k
           (tensorChartComponent (I := I) (M := M) g r s
             (eigenvectorSmoothApprox (I := I) (M := M)
-              g r s h_uniform i n).toCcTensor α P.1 P.2) y) 2
+              g r s h_atlas i n).toCcTensor α P.1 P.2) y) 2
         (chartL2Measure (I := I) (M := M) α))
     (hlim_memLp : MemLp
       (fun y => Set.indicator (chartPouKernel (I := I) (M := M) α) c y *
-        (partialLpLimit (I := I) (M := M) g r s h_uniform i α P k :
+        (partialLpLimit (I := I) (M := M) g r s h_atlas i α P k :
           EuclN → ℝ) y) 2 (chartL2Measure (I := I) (M := M) α)) :
     Filter.Tendsto
       (fun n => (hP_memLp n).toLp _)
@@ -797,11 +798,11 @@ lemma tendsto_partialSummand
       (chartL2Measure (I := I) (M := M) α) :=
     aestronglyMeasurable_indicator_mul (I := I) (M := M) α hc
   have h_engine := tendsto_bdd_mul (I := I) (M := M) α hC_nn hci_bd hci_meas
-    (approxPartialLp_tendsto (I := I) (M := M) g r s h_uniform i α P k)
+    (approxPartialLp_tendsto (I := I) (M := M) g r s h_atlas i α P k)
   have h_term : ∀ n : ℕ,
       (memLp_bdd_mul (I := I) (M := M) α hC_nn hci_bd hci_meas
         (Lp.memLp (approxPartialLp (I := I) (M := M)
-          g r s h_uniform i α P k n))).toLp _ =
+          g r s h_atlas i α P k n))).toLp _ =
         (hP_memLp n).toLp _ := by
     intro n
     apply Lp.ext
@@ -809,16 +810,16 @@ lemma tendsto_partialSummand
       (MemLp.coeFn_toLp _).symm)
     -- `ci · approxPartialLp` agrees a.e. with `c · euclidPartial k …`.
     have hpart : (approxPartialLp (I := I) (M := M)
-        g r s h_uniform i α P k n : EuclN → ℝ) =ᵐ[
+        g r s h_atlas i α P k n : EuclN → ℝ) =ᵐ[
         chartL2Measure (I := I) (M := M) α]
         euclidPartial (E := E) k
           (tensorChartComponent (I := I) (M := M) g r s
             (eigenvectorSmoothApprox (I := I) (M := M)
-              g r s h_uniform i n).toCcTensor α P.1 P.2) := by
+              g r s h_atlas i n).toCcTensor α P.1 P.2) := by
       refine (MemLp.coeFn_toLp _).trans ?_
       exact chosenWeakPartial'_tensorChartComponent_ae_eq (I := I) (M := M)
         g r s (eigenvectorSmoothApprox (I := I) (M := M)
-          g r s h_uniform i n).toCcTensor α P.1 P.2 k
+          g r s h_atlas i n).toCcTensor α P.1 P.2 k
     filter_upwards [hpart] with y hy
     rw [hy]
     by_cases hker : y ∈ chartPouKernel (I := I) (M := M) α
@@ -829,12 +830,12 @@ lemma tendsto_partialSummand
   have h_lim :
       (memLp_bdd_mul (I := I) (M := M) α hC_nn hci_bd hci_meas
         (Lp.memLp (partialLpLimit (I := I) (M := M)
-          g r s h_uniform i α P k))).toLp _ = hlim_memLp.toLp _ := by
+          g r s h_atlas i α P k))).toLp _ = hlim_memLp.toLp _ := by
     apply Lp.ext
     exact (MemLp.coeFn_toLp _).trans (MemLp.coeFn_toLp _).symm
   rw [show (fun n => (memLp_bdd_mul (I := I) (M := M) α hC_nn hci_bd hci_meas
         (Lp.memLp (approxPartialLp (I := I) (M := M)
-          g r s h_uniform i α P k n))).toLp _) =
+          g r s h_atlas i α P k n))).toLp _) =
       (fun n => (hP_memLp n).toLp _) from funext h_term, h_lim] at h_engine
   exact h_engine
 
@@ -949,7 +950,7 @@ approximant is `L²`: it agrees almost everywhere with the chosen weak chart
 partial, which is `L²`. -/
 lemma euclidPartial_tensorChartComponent_approx_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) (n : ℕ) :
@@ -957,21 +958,21 @@ lemma euclidPartial_tensorChartComponent_approx_memLp
       (euclidPartial (E := E) k
         (tensorChartComponent (I := I) (M := M) g r s
           (eigenvectorSmoothApprox (I := I) (M := M)
-            g r s h_uniform i n).toCcTensor α P.1 P.2)) 2
+            g r s h_atlas i n).toCcTensor α P.1 P.2)) 2
       (chartL2Measure (I := I) (M := M) α) :=
   MemLp.ae_eq
     (chosenWeakPartial'_tensorChartComponent_ae_eq (I := I) (M := M) g r s
       (eigenvectorSmoothApprox (I := I) (M := M)
-        g r s h_uniform i n).toCcTensor α P.1 P.2 k)
+        g r s h_atlas i n).toCcTensor α P.1 P.2 k)
     (chosenWeakPartial'_tensorChartComponent_memLp (I := I) (M := M) g r s
-      (eigenvectorSmoothApprox (I := I) (M := M) g r s h_uniform i n)
+      (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n)
       α P.1 P.2 k)
 
 /-- A `C^∞`-on-the-chart-target factor times the chart component of the `n`-th
 smooth approximant is `L²`. -/
 lemma memLp_factor_mul_componentAtom
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P : TensorCompIdx (E := E) r s) (n : ℕ)
     {c : EuclN → ℝ}
@@ -980,7 +981,7 @@ lemma memLp_factor_mul_componentAtom
       (fun y => c y *
         tensorChartComponent (I := I) (M := M) g r s
           (eigenvectorSmoothApprox (I := I) (M := M)
-            g r s h_uniform i n).toCcTensor α P.1 P.2 y) 2
+            g r s h_atlas i n).toCcTensor α P.1 P.2 y) 2
       (chartL2Measure (I := I) (M := M) α) := by
   classical
   obtain ⟨C, hC_nn, hC⟩ := exists_bound_on_chartPouKernel (I := I) (M := M) α hc
@@ -994,11 +995,11 @@ lemma memLp_factor_mul_componentAtom
       (fun y => c y *
         tensorChartComponent (I := I) (M := M) g r s
           (eigenvectorSmoothApprox (I := I) (M := M)
-            g r s h_uniform i n).toCcTensor α P.1 P.2 y) =
+            g r s h_atlas i n).toCcTensor α P.1 P.2 y) =
         (fun y => Set.indicator (chartPouKernel (I := I) (M := M) α) c y *
           tensorChartComponent (I := I) (M := M) g r s
             (eigenvectorSmoothApprox (I := I) (M := M)
-              g r s h_uniform i n).toCcTensor α P.1 P.2 y) := by
+              g r s h_atlas i n).toCcTensor α P.1 P.2 y) := by
     funext y
     by_cases hker : y ∈ chartPouKernel (I := I) (M := M) α
     · rw [Set.indicator_of_mem hker]
@@ -1010,13 +1011,13 @@ lemma memLp_factor_mul_componentAtom
     (aestronglyMeasurable_indicator_mul (I := I) (M := M) α hc)
     (tensorChartComponent_memLp (I := I) (M := M) g r s
       (eigenvectorSmoothApprox (I := I) (M := M)
-        g r s h_uniform i n).toCcTensor α P.1 P.2)
+        g r s h_atlas i n).toCcTensor α P.1 P.2)
 
 /-- A `C^∞`-on-the-chart-target factor times the chart-Euclidean partial of the
 chart component of the `n`-th smooth approximant is `L²`. -/
 lemma memLp_factor_mul_partialAtom
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) (n : ℕ)
@@ -1027,7 +1028,7 @@ lemma memLp_factor_mul_partialAtom
         euclidPartial (E := E) k
           (tensorChartComponent (I := I) (M := M) g r s
             (eigenvectorSmoothApprox (I := I) (M := M)
-              g r s h_uniform i n).toCcTensor α P.1 P.2) y) 2
+              g r s h_atlas i n).toCcTensor α P.1 P.2) y) 2
       (chartL2Measure (I := I) (M := M) α) := by
   classical
   obtain ⟨C, hC_nn, hC⟩ := exists_bound_on_chartPouKernel (I := I) (M := M) α hc
@@ -1042,12 +1043,12 @@ lemma memLp_factor_mul_partialAtom
         euclidPartial (E := E) k
           (tensorChartComponent (I := I) (M := M) g r s
             (eigenvectorSmoothApprox (I := I) (M := M)
-              g r s h_uniform i n).toCcTensor α P.1 P.2) y) =
+              g r s h_atlas i n).toCcTensor α P.1 P.2) y) =
         (fun y => Set.indicator (chartPouKernel (I := I) (M := M) α) c y *
           euclidPartial (E := E) k
             (tensorChartComponent (I := I) (M := M) g r s
               (eigenvectorSmoothApprox (I := I) (M := M)
-                g r s h_uniform i n).toCcTensor α P.1 P.2) y) := by
+                g r s h_atlas i n).toCcTensor α P.1 P.2) y) := by
     funext y
     by_cases hker : y ∈ chartPouKernel (I := I) (M := M) α
     · rw [Set.indicator_of_mem hker]
@@ -1058,7 +1059,7 @@ lemma memLp_factor_mul_partialAtom
   exact memLp_bdd_mul (I := I) (M := M) α hC_nn hci_bd
     (aestronglyMeasurable_indicator_mul (I := I) (M := M) α hc)
     (euclidPartial_tensorChartComponent_approx_memLp (I := I) (M := M)
-      g r s h_uniform i α P k n)
+      g r s h_atlas i α P k n)
 
 /-- A `C^∞`-on-the-chart-target factor, indicator-cut to the partition-of-unity
 kernel, times an arbitrary `L²` limit class, is `L²`. -/
@@ -1144,7 +1145,7 @@ chart directions, of the chart-partial limit object `partialLpLimit`, with each
 coefficient cut to the partition-of-unity kernel. -/
 noncomputable def covPrincipalRotationCoeffLimit
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) : EuclN → ℝ :=
   fun y =>
@@ -1154,7 +1155,7 @@ noncomputable def covPrincipalRotationCoeffLimit
           ∑ l : Fin (Module.finrank ℝ E),
             Set.indicator (chartPouKernel (I := I) (M := M) α)
                 (principalRotationFactor (I := I) (M := M) g r s α P₀ P Q k l) y *
-              (partialLpLimit (I := I) (M := M) g r s h_uniform i α P k :
+              (partialLpLimit (I := I) (M := M) g r s h_atlas i α P k :
                 EuclN → ℝ) y
 
 /-- The principal rotation coefficient at the partition-of-unity-weighted
@@ -1162,13 +1163,13 @@ approximant equals, pointwise, the four-fold finite sum of `principalRotationFac
 times the chart-partial atom of `wₙ.toCcTensor`. -/
 private lemma covPrincipalRotationCoeff_pouSmul_eq_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (n : ℕ) (y : EuclN) :
     covPrincipalRotationCoeff (I := I) (M := M) g r s
         (pouSmul (I := I) (M := M) g r s α
           (eigenvectorSmoothApprox (I := I) (M := M)
-            g r s h_uniform i n).toCcTensor) α P₀ y =
+            g r s h_atlas i n).toCcTensor) α P₀ y =
       ∑ P : TensorCompIdx (E := E) r s,
         ∑ Q : TensorCompIdx (E := E) r s,
           ∑ k : Fin (Module.finrank ℝ E),
@@ -1177,7 +1178,7 @@ private lemma covPrincipalRotationCoeff_pouSmul_eq_sum
                 euclidPartial (E := E) k
                   (tensorChartComponent (I := I) (M := M) g r s
                     (eigenvectorSmoothApprox (I := I) (M := M)
-                      g r s h_uniform i n).toCcTensor α P.1 P.2) y := by
+                      g r s h_atlas i n).toCcTensor α P.1 P.2) y := by
   classical
   rw [covPrincipalRotationCoeff_def]
   refine Finset.sum_congr rfl (fun P _ => Finset.sum_congr rfl (fun Q _ => ?_))
@@ -1187,7 +1188,7 @@ private lemma covPrincipalRotationCoeff_pouSmul_eq_sum
   refine Finset.sum_congr rfl (fun l _ => ?_)
   rw [chartPushedRaw_tensorChartComponentRaw_pouSmul_eq (I := I) (M := M)
     g r s α (eigenvectorSmoothApprox (I := I) (M := M)
-      g r s h_uniform i n).toCcTensor P.1 P.2]
+      g r s h_atlas i n).toCcTensor P.1 P.2]
   rw [principalRotationFactor]
   ring
 
@@ -1195,14 +1196,14 @@ private lemma covPrincipalRotationCoeff_pouSmul_eq_sum
 approximant is `L²`. -/
 theorem covPrincipalRotationCoeff_pouSmul_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (n : ℕ) :
     MemLp
       (covPrincipalRotationCoeff (I := I) (M := M) g r s
         (pouSmul (I := I) (M := M) g r s α
           (eigenvectorSmoothApprox (I := I) (M := M)
-            g r s h_uniform i n).toCcTensor) α P₀) 2
+            g r s h_atlas i n).toCcTensor) α P₀) 2
       (chartL2Measure (I := I) (M := M) α) := by
   classical
   refine (memLp_finset_sum (μ := chartL2Measure (I := I) (M := M) α)
@@ -1215,21 +1216,21 @@ theorem covPrincipalRotationCoeff_pouSmul_memLp
           (Finset.univ : Finset (Fin (Module.finrank ℝ E)))
           (fun l _ =>
             memLp_factor_mul_partialAtom (I := I) (M := M)
-              g r s h_uniform i α P k n
+              g r s h_atlas i α P k n
               (principalRotationFactor_contDiffOn (I := I) (M := M)
                 g r s α P₀ P Q k l)))))).ae_eq ?_
   exact Filter.EventuallyEq.symm (Filter.Eventually.of_forall (fun y =>
     covPrincipalRotationCoeff_pouSmul_eq_sum (I := I) (M := M)
-      g r s h_uniform i α P₀ n y))
+      g r s h_atlas i α P₀ n y))
 
 /-- The `L²`-limit function of the principal rotation coefficient is `L²`. -/
 theorem covPrincipalRotationCoeffLimit_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
     MemLp (covPrincipalRotationCoeffLimit (I := I) (M := M)
-        g r s h_uniform i α P₀) 2
+        g r s h_atlas i α P₀) 2
       (chartL2Measure (I := I) (M := M) α) := by
   classical
   unfold covPrincipalRotationCoeffLimit
@@ -1243,27 +1244,27 @@ theorem covPrincipalRotationCoeffLimit_memLp
           (fun l _ => memLp_indicatorFactor_mul_lp (I := I) (M := M) α
             (principalRotationFactor_contDiffOn (I := I) (M := M)
               g r s α P₀ P Q k l)
-            (partialLpLimit (I := I) (M := M) g r s h_uniform i α P k)))))
+            (partialLpLimit (I := I) (M := M) g r s h_atlas i α P k)))))
 
 /-- **The `n → ∞` `L²`-limit of the principal rotation coefficient.** For a
 closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index `i`, a
 chart center `α : M`, and a component multi-index `P₀`, the `L²` classes of the
 principal rotation coefficient `covPrincipalRotationCoeff g r s Tₙ α P₀` at the
 partition-of-unity-weighted approximants `Tₙ := pouSmul g r s α
-(eigenvectorSmoothApprox g r s h_uniform i n).toCcTensor` converge, as `n → ∞`
+(eigenvectorSmoothApprox g r s h_atlas i n).toCcTensor` converge, as `n → ∞`
 and in `Lp ℝ 2 (chartL2Measure α)`, to the `L²` class of the explicit limit
-function `covPrincipalRotationCoeffLimit g r s h_uniform i α P₀`. -/
+function `covPrincipalRotationCoeffLimit g r s h_atlas i α P₀`. -/
 theorem covPrincipalRotationCoeff_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
     Filter.Tendsto
       (fun n => (covPrincipalRotationCoeff_pouSmul_memLp (I := I) (M := M)
-        g r s h_uniform i α P₀ n).toLp _)
+        g r s h_atlas i α P₀ n).toLp _)
       atTop
       (𝓝 ((covPrincipalRotationCoeffLimit_memLp (I := I) (M := M)
-        g r s h_uniform i α P₀).toLp _)) := by
+        g r s h_atlas i α P₀).toLp _)) := by
   classical
   -- The genuine `n`-th summand and the limiting summand, indexed by `(P, Q, k, l)`.
   have hf : ∀ (a : TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s ×
@@ -1273,9 +1274,9 @@ theorem covPrincipalRotationCoeff_tendsto
           euclidPartial (E := E) a.2.2.1
             (tensorChartComponent (I := I) (M := M) g r s
               (eigenvectorSmoothApprox (I := I) (M := M)
-                g r s h_uniform i n).toCcTensor α a.1.1 a.1.2) y) 2
+                g r s h_atlas i n).toCcTensor α a.1.1 a.1.2) y) 2
         (chartL2Measure (I := I) (M := M) α) := fun a n =>
-    memLp_factor_mul_partialAtom (I := I) (M := M) g r s h_uniform i α a.1
+    memLp_factor_mul_partialAtom (I := I) (M := M) g r s h_atlas i α a.1
       a.2.2.1 n (principalRotationFactor_contDiffOn (I := I) (M := M)
         g r s α P₀ a.1 a.2.1 a.2.2.1 a.2.2.2)
   have hflim : ∀ a : TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s ×
@@ -1283,20 +1284,20 @@ theorem covPrincipalRotationCoeff_tendsto
       MemLp (fun y => Set.indicator (chartPouKernel (I := I) (M := M) α)
             (principalRotationFactor (I := I) (M := M)
               g r s α P₀ a.1 a.2.1 a.2.2.1 a.2.2.2) y *
-          (partialLpLimit (I := I) (M := M) g r s h_uniform i α a.1 a.2.2.1 :
+          (partialLpLimit (I := I) (M := M) g r s h_atlas i α a.1 a.2.2.1 :
             EuclN → ℝ) y) 2
         (chartL2Measure (I := I) (M := M) α) := fun a =>
     memLp_indicatorFactor_mul_lp (I := I) (M := M) α
       (principalRotationFactor_contDiffOn (I := I) (M := M)
         g r s α P₀ a.1 a.2.1 a.2.2.1 a.2.2.2)
-      (partialLpLimit (I := I) (M := M) g r s h_uniform i α a.1 a.2.2.1)
+      (partialLpLimit (I := I) (M := M) g r s h_atlas i α a.1 a.2.2.1)
   -- Per-summand `L²`-convergence.
   have h_tendsto : ∀ a : TensorCompIdx (E := E) r s ×
         TensorCompIdx (E := E) r s ×
         Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E),
       Filter.Tendsto (fun n => (hf a n).toLp _) atTop
         (𝓝 ((hflim a).toLp _)) := fun a =>
-    tendsto_partialSummand (I := I) (M := M) g r s h_uniform i α a.1 a.2.2.1
+    tendsto_partialSummand (I := I) (M := M) g r s h_atlas i α a.1 a.2.2.1
       (principalRotationFactor_contDiffOn (I := I) (M := M)
         g r s α P₀ a.1 a.2.1 a.2.2.1 a.2.2.2)
       (fun n => hf a n) (hflim a)
@@ -1305,7 +1306,7 @@ theorem covPrincipalRotationCoeff_tendsto
       covPrincipalRotationCoeff (I := I) (M := M) g r s
           (pouSmul (I := I) (M := M) g r s α
             (eigenvectorSmoothApprox (I := I) (M := M)
-              g r s h_uniform i n).toCcTensor) α P₀
+              g r s h_atlas i n).toCcTensor) α P₀
         =ᵐ[chartL2Measure (I := I) (M := M) α]
         fun y => ∑ a : TensorCompIdx (E := E) r s ×
             TensorCompIdx (E := E) r s ×
@@ -1315,15 +1316,15 @@ theorem covPrincipalRotationCoeff_tendsto
             euclidPartial (E := E) a.2.2.1
               (tensorChartComponent (I := I) (M := M) g r s
                 (eigenvectorSmoothApprox (I := I) (M := M)
-                  g r s h_uniform i n).toCcTensor α a.1.1 a.1.2) y := by
+                  g r s h_atlas i n).toCcTensor α a.1.1 a.1.2) y := by
     intro n
     refine Filter.Eventually.of_forall (fun y => ?_)
     rw [covPrincipalRotationCoeff_pouSmul_eq_sum (I := I) (M := M)
-      g r s h_uniform i α P₀ n y]
+      g r s h_atlas i α P₀ n y]
     simp only [Fintype.sum_prod_type]
   -- The limit function is the flattened finite sum of the limiting summands.
   have hFlim_eq :
-      covPrincipalRotationCoeffLimit (I := I) (M := M) g r s h_uniform i α P₀
+      covPrincipalRotationCoeffLimit (I := I) (M := M) g r s h_atlas i α P₀
         =ᵐ[chartL2Measure (I := I) (M := M) α]
         fun y => ∑ a : TensorCompIdx (E := E) r s ×
             TensorCompIdx (E := E) r s ×
@@ -1331,7 +1332,7 @@ theorem covPrincipalRotationCoeff_tendsto
           Set.indicator (chartPouKernel (I := I) (M := M) α)
               (principalRotationFactor (I := I) (M := M)
                 g r s α P₀ a.1 a.2.1 a.2.2.1 a.2.2.2) y *
-            (partialLpLimit (I := I) (M := M) g r s h_uniform i α a.1 a.2.2.1 :
+            (partialLpLimit (I := I) (M := M) g r s h_atlas i α a.1 a.2.2.1 :
               EuclN → ℝ) y := by
     refine Filter.Eventually.of_forall (fun y => ?_)
     rw [covPrincipalRotationCoeffLimit]
@@ -1339,9 +1340,9 @@ theorem covPrincipalRotationCoeff_tendsto
   exact tendsto_toLp_finsetSum (I := I) (M := M) α Finset.univ
     hf hflim h_tendsto
     (fun n => covPrincipalRotationCoeff_pouSmul_memLp (I := I) (M := M)
-      g r s h_uniform i α P₀ n)
+      g r s h_atlas i α P₀ n)
     (covPrincipalRotationCoeffLimit_memLp (I := I) (M := M)
-      g r s h_uniform i α P₀)
+      g r s h_atlas i α P₀)
     hFn_eq hFlim_eq
 
 /-! ## The zeroth-order Christoffel-correction tracing identity
@@ -1429,7 +1430,7 @@ multi-index pairs and chart directions, of the chart-component limit object
 kernel. -/
 noncomputable def weightedGradCoeffLimit
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (l : Fin (Module.finrank ℝ E)) : EuclN → ℝ :=
@@ -1440,7 +1441,7 @@ noncomputable def weightedGradCoeffLimit
           ∑ p : TensorCompIdx (E := E) r s,
             Set.indicator (chartPouKernel (I := I) (M := M) α)
                 (weightedGradFactor (I := I) (M := M) g r s α P₀ l P Q k p) y *
-              (componentLpLimit (I := I) (M := M) g r s h_uniform i α p :
+              (componentLpLimit (I := I) (M := M) g r s h_atlas i α p :
                 EuclN → ℝ) y
 
 /-- On the chart target, the chart-density-weighted lower-order gradient
@@ -1449,7 +1450,7 @@ finite sum of `weightedGradFactor` times the bare chart-component atom of
 `wₙ.toCcTensor`. -/
 private lemma weightedGradCoeff_pouSmul_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (l : Fin (Module.finrank ℝ E)) (n : ℕ)
@@ -1457,7 +1458,7 @@ private lemma weightedGradCoeff_pouSmul_eqOn
     weightedGradCoeff (I := I) (M := M) g r s
         (pouSmul (I := I) (M := M) g r s α
           (eigenvectorSmoothApprox (I := I) (M := M)
-            g r s h_uniform i n).toCcTensor) α P₀ l y =
+            g r s h_atlas i n).toCcTensor) α P₀ l y =
       ∑ P : TensorCompIdx (E := E) r s,
         ∑ Q : TensorCompIdx (E := E) r s,
           ∑ k : Fin (Module.finrank ℝ E),
@@ -1465,7 +1466,7 @@ private lemma weightedGradCoeff_pouSmul_eqOn
               weightedGradFactor (I := I) (M := M) g r s α P₀ l P Q k p y *
                 tensorChartComponent (I := I) (M := M) g r s
                   (eigenvectorSmoothApprox (I := I) (M := M)
-                    g r s h_uniform i n).toCcTensor α p.1 p.2 y := by
+                    g r s h_atlas i n).toCcTensor α p.1 p.2 y := by
   classical
   -- Expand the coefficient and the Christoffel correction at the chart-target
   -- point, then match the four-fold sum termwise.
@@ -1478,7 +1479,7 @@ private lemma weightedGradCoeff_pouSmul_eqOn
   refine Finset.sum_congr rfl (fun k _ => ?_)
   rw [covDerivLowerOrderTerm_pouSmul_eqOn (I := I) (M := M) g r s α
     (eigenvectorSmoothApprox (I := I) (M := M)
-      g r s h_uniform i n).toCcTensor k P.1 P.2 hy]
+      g r s h_atlas i n).toCcTensor k P.1 P.2 hy]
   simp only [Finset.mul_sum, Finset.sum_mul]
   refine Finset.sum_congr rfl (fun p _ => ?_)
   rw [weightedGradFactor]
@@ -1488,7 +1489,7 @@ private lemma weightedGradCoeff_pouSmul_eqOn
 partition-of-unity-weighted approximant is `L²`. -/
 theorem weightedGradCoeff_pouSmul_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (l : Fin (Module.finrank ℝ E)) (n : ℕ) :
@@ -1496,7 +1497,7 @@ theorem weightedGradCoeff_pouSmul_memLp
       (weightedGradCoeff (I := I) (M := M) g r s
         (pouSmul (I := I) (M := M) g r s α
           (eigenvectorSmoothApprox (I := I) (M := M)
-            g r s h_uniform i n).toCcTensor) α P₀ l) 2
+            g r s h_atlas i n).toCcTensor) α P₀ l) 2
       (chartL2Measure (I := I) (M := M) α) := by
   classical
   refine (memLp_finset_sum (μ := chartL2Measure (I := I) (M := M) α)
@@ -1509,7 +1510,7 @@ theorem weightedGradCoeff_pouSmul_memLp
           (Finset.univ : Finset (TensorCompIdx (E := E) r s))
           (fun p _ =>
             memLp_factor_mul_componentAtom (I := I) (M := M)
-              g r s h_uniform i α p n
+              g r s h_atlas i α p n
               (weightedGradFactor_contDiffOn (I := I) (M := M)
                 g r s α P₀ l P Q k p)))))).ae_eq ?_
   refine Filter.EventuallyEq.symm ?_
@@ -1518,18 +1519,18 @@ theorem weightedGradCoeff_pouSmul_memLp
     (chartTargetEuclid_measurableSet (I := I) (M := M) α)).mpr ?_
   exact Filter.Eventually.of_forall (fun y hy =>
     weightedGradCoeff_pouSmul_eqOn (I := I) (M := M)
-      g r s h_uniform i α P₀ l n hy)
+      g r s h_atlas i α P₀ l n hy)
 
 /-- The `L²`-limit function of the chart-density-weighted lower-order gradient
 coefficient is `L²`. -/
 theorem weightedGradCoeffLimit_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (l : Fin (Module.finrank ℝ E)) :
     MemLp (weightedGradCoeffLimit (I := I) (M := M)
-        g r s h_uniform i α P₀ l) 2
+        g r s h_atlas i α P₀ l) 2
       (chartL2Measure (I := I) (M := M) α) := by
   classical
   unfold weightedGradCoeffLimit
@@ -1543,7 +1544,7 @@ theorem weightedGradCoeffLimit_memLp
           (fun p _ => memLp_indicatorFactor_mul_lp (I := I) (M := M) α
             (weightedGradFactor_contDiffOn (I := I) (M := M)
               g r s α P₀ l P Q k p)
-            (componentLpLimit (I := I) (M := M) g r s h_uniform i α p)))))
+            (componentLpLimit (I := I) (M := M) g r s h_atlas i α p)))))
 
 /-- **The `n → ∞` `L²`-limit of the chart-density-weighted lower-order gradient
 coefficient.** For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an
@@ -1551,19 +1552,19 @@ eigenbasis index `i`, a chart center `α : M`, a component multi-index `P₀`, a
 chart direction `l`, the `L²` classes of `weightedGradCoeff g r s Tₙ α P₀ l` at
 the partition-of-unity-weighted approximants converge, as `n → ∞` and in
 `Lp ℝ 2 (chartL2Measure α)`, to the `L²` class of the explicit limit function
-`weightedGradCoeffLimit g r s h_uniform i α P₀ l`. -/
+`weightedGradCoeffLimit g r s h_atlas i α P₀ l`. -/
 theorem weightedGradCoeff_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (l : Fin (Module.finrank ℝ E)) :
     Filter.Tendsto
       (fun n => (weightedGradCoeff_pouSmul_memLp (I := I) (M := M)
-        g r s h_uniform i α P₀ l n).toLp _)
+        g r s h_atlas i α P₀ l n).toLp _)
       atTop
       (𝓝 ((weightedGradCoeffLimit_memLp (I := I) (M := M)
-        g r s h_uniform i α P₀ l).toLp _)) := by
+        g r s h_atlas i α P₀ l).toLp _)) := by
   classical
   have hf : ∀ (a : TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s ×
         Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s) (n : ℕ),
@@ -1571,9 +1572,9 @@ theorem weightedGradCoeff_tendsto
             g r s α P₀ l a.1 a.2.1 a.2.2.1 a.2.2.2 y *
           tensorChartComponent (I := I) (M := M) g r s
             (eigenvectorSmoothApprox (I := I) (M := M)
-              g r s h_uniform i n).toCcTensor α a.2.2.2.1 a.2.2.2.2 y) 2
+              g r s h_atlas i n).toCcTensor α a.2.2.2.1 a.2.2.2.2 y) 2
         (chartL2Measure (I := I) (M := M) α) := fun a n =>
-    memLp_factor_mul_componentAtom (I := I) (M := M) g r s h_uniform i α
+    memLp_factor_mul_componentAtom (I := I) (M := M) g r s h_atlas i α
       a.2.2.2 n (weightedGradFactor_contDiffOn (I := I) (M := M)
         g r s α P₀ l a.1 a.2.1 a.2.2.1 a.2.2.2)
   have hflim : ∀ a : TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s ×
@@ -1581,19 +1582,19 @@ theorem weightedGradCoeff_tendsto
       MemLp (fun y => Set.indicator (chartPouKernel (I := I) (M := M) α)
             (weightedGradFactor (I := I) (M := M)
               g r s α P₀ l a.1 a.2.1 a.2.2.1 a.2.2.2) y *
-          (componentLpLimit (I := I) (M := M) g r s h_uniform i α a.2.2.2 :
+          (componentLpLimit (I := I) (M := M) g r s h_atlas i α a.2.2.2 :
             EuclN → ℝ) y) 2
         (chartL2Measure (I := I) (M := M) α) := fun a =>
     memLp_indicatorFactor_mul_lp (I := I) (M := M) α
       (weightedGradFactor_contDiffOn (I := I) (M := M)
         g r s α P₀ l a.1 a.2.1 a.2.2.1 a.2.2.2)
-      (componentLpLimit (I := I) (M := M) g r s h_uniform i α a.2.2.2)
+      (componentLpLimit (I := I) (M := M) g r s h_atlas i α a.2.2.2)
   have h_tendsto : ∀ a : TensorCompIdx (E := E) r s ×
         TensorCompIdx (E := E) r s ×
         Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s,
       Filter.Tendsto (fun n => (hf a n).toLp _) atTop
         (𝓝 ((hflim a).toLp _)) := fun a =>
-    tendsto_componentSummand (I := I) (M := M) g r s h_uniform i α a.2.2.2
+    tendsto_componentSummand (I := I) (M := M) g r s h_atlas i α a.2.2.2
       (weightedGradFactor_contDiffOn (I := I) (M := M)
         g r s α P₀ l a.1 a.2.1 a.2.2.1 a.2.2.2)
       (fun n => hf a n) (hflim a)
@@ -1601,7 +1602,7 @@ theorem weightedGradCoeff_tendsto
       weightedGradCoeff (I := I) (M := M) g r s
           (pouSmul (I := I) (M := M) g r s α
             (eigenvectorSmoothApprox (I := I) (M := M)
-              g r s h_uniform i n).toCcTensor) α P₀ l
+              g r s h_atlas i n).toCcTensor) α P₀ l
         =ᵐ[chartL2Measure (I := I) (M := M) α]
         fun y => ∑ a : TensorCompIdx (E := E) r s ×
             TensorCompIdx (E := E) r s ×
@@ -1610,17 +1611,17 @@ theorem weightedGradCoeff_tendsto
               g r s α P₀ l a.1 a.2.1 a.2.2.1 a.2.2.2 y *
             tensorChartComponent (I := I) (M := M) g r s
               (eigenvectorSmoothApprox (I := I) (M := M)
-                g r s h_uniform i n).toCcTensor α a.2.2.2.1 a.2.2.2.2 y := by
+                g r s h_atlas i n).toCcTensor α a.2.2.2.1 a.2.2.2.2 y := by
     intro n
     rw [chartL2Measure]
     refine (ae_restrict_iff'
       (chartTargetEuclid_measurableSet (I := I) (M := M) α)).mpr ?_
     refine Filter.Eventually.of_forall (fun y hy => ?_)
     rw [weightedGradCoeff_pouSmul_eqOn (I := I) (M := M)
-      g r s h_uniform i α P₀ l n hy]
+      g r s h_atlas i α P₀ l n hy]
     simp only [Fintype.sum_prod_type]
   have hFlim_eq :
-      weightedGradCoeffLimit (I := I) (M := M) g r s h_uniform i α P₀ l
+      weightedGradCoeffLimit (I := I) (M := M) g r s h_atlas i α P₀ l
         =ᵐ[chartL2Measure (I := I) (M := M) α]
         fun y => ∑ a : TensorCompIdx (E := E) r s ×
             TensorCompIdx (E := E) r s ×
@@ -1628,7 +1629,7 @@ theorem weightedGradCoeff_tendsto
           Set.indicator (chartPouKernel (I := I) (M := M) α)
               (weightedGradFactor (I := I) (M := M)
                 g r s α P₀ l a.1 a.2.1 a.2.2.1 a.2.2.2) y *
-            (componentLpLimit (I := I) (M := M) g r s h_uniform i α a.2.2.2 :
+            (componentLpLimit (I := I) (M := M) g r s h_atlas i α a.2.2.2 :
               EuclN → ℝ) y := by
     refine Filter.Eventually.of_forall (fun y => ?_)
     rw [weightedGradCoeffLimit]
@@ -1636,8 +1637,8 @@ theorem weightedGradCoeff_tendsto
   exact tendsto_toLp_finsetSum (I := I) (M := M) α Finset.univ
     hf hflim h_tendsto
     (fun n => weightedGradCoeff_pouSmul_memLp (I := I) (M := M)
-      g r s h_uniform i α P₀ l n)
-    (weightedGradCoeffLimit_memLp (I := I) (M := M) g r s h_uniform i α P₀ l)
+      g r s h_atlas i α P₀ l n)
+    (weightedGradCoeffLimit_memLp (I := I) (M := M) g r s h_atlas i α P₀ l)
     hFn_eq hFlim_eq
 
 /-! ## A nested finite-sum `L²`-convergence step
@@ -1864,7 +1865,7 @@ the bare chart-component atom, plus `weightedGradFactor` times the
 chart-Euclidean partial of the bare chart-component atom. -/
 private lemma euclidPartial_weightedGradCoeff_pouSmul_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (l : Fin (Module.finrank ℝ E)) (n : ℕ)
@@ -1873,7 +1874,7 @@ private lemma euclidPartial_weightedGradCoeff_pouSmul_eqOn
         (weightedGradCoeff (I := I) (M := M) g r s
           (pouSmul (I := I) (M := M) g r s α
             (eigenvectorSmoothApprox (I := I) (M := M)
-              g r s h_uniform i n).toCcTensor) α P₀ l) y =
+              g r s h_atlas i n).toCcTensor) α P₀ l) y =
       (∑ P : TensorCompIdx (E := E) r s,
           ∑ Q : TensorCompIdx (E := E) r s,
             ∑ k : Fin (Module.finrank ℝ E),
@@ -1882,7 +1883,7 @@ private lemma euclidPartial_weightedGradCoeff_pouSmul_eqOn
                     (weightedGradFactor (I := I) (M := M) g r s α P₀ l P Q k p) y *
                   tensorChartComponent (I := I) (M := M) g r s
                     (eigenvectorSmoothApprox (I := I) (M := M)
-                      g r s h_uniform i n).toCcTensor α p.1 p.2 y)
+                      g r s h_atlas i n).toCcTensor α p.1 p.2 y)
         + ∑ P : TensorCompIdx (E := E) r s,
             ∑ Q : TensorCompIdx (E := E) r s,
               ∑ k : Fin (Module.finrank ℝ E),
@@ -1891,7 +1892,7 @@ private lemma euclidPartial_weightedGradCoeff_pouSmul_eqOn
                     euclidPartial (E := E) l
                       (tensorChartComponent (I := I) (M := M) g r s
                         (eigenvectorSmoothApprox (I := I) (M := M)
-                          g r s h_uniform i n).toCcTensor α p.1 p.2) y := by
+                          g r s h_atlas i n).toCcTensor α p.1 p.2) y := by
   classical
   -- The chart target is open; on it the coefficient agrees with the four-fold
   -- sum, so the chart-Euclidean partials agree at `y`.
@@ -1899,7 +1900,7 @@ private lemma euclidPartial_weightedGradCoeff_pouSmul_eqOn
     DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
       (I := I) (M := M) α
   set wₙ : SmoothCcTensor g r s :=
-    (eigenvectorSmoothApprox (I := I) (M := M) g r s h_uniform i n).toCcTensor
+    (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n).toCcTensor
     with hwₙ_def
   -- The four-fold-sum representative of the coefficient on the chart target.
   set Sum4 : EuclN → ℝ := fun z =>
@@ -1916,7 +1917,7 @@ private lemma euclidPartial_weightedGradCoeff_pouSmul_eqOn
     refine Filter.eventually_of_mem (hopen.mem_nhds hy) (fun z hz => ?_)
     rw [hSum4_def]
     exact weightedGradCoeff_pouSmul_eqOn (I := I) (M := M)
-      g r s h_uniform i α P₀ l n hz
+      g r s h_atlas i α P₀ l n hz
   rw [euclidPartial_def, hcoeff_evt.fderiv_eq, ← euclidPartial_def]
   -- Differentiability of every `(P, Q, k, p)`-leaf at `y`.
   have hleaf_diff : ∀ P Q : TensorCompIdx (E := E) r s,
@@ -1983,7 +1984,7 @@ chart-partial limit `partialLpLimit` (from the chart-partial group). Each
 coefficient is cut to the partition-of-unity kernel. -/
 noncomputable def weightedGradCoeffDivLimit
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (l : Fin (Module.finrank ℝ E)) : EuclN → ℝ :=
@@ -1996,7 +1997,7 @@ noncomputable def weightedGradCoeffDivLimit
                   (euclidPartial (E := E) l
                     (weightedGradFactor (I := I) (M := M) g r s α P₀ l P Q k p))
                   y *
-                (componentLpLimit (I := I) (M := M) g r s h_uniform i α p :
+                (componentLpLimit (I := I) (M := M) g r s h_atlas i α p :
                   EuclN → ℝ) y)
       + ∑ P : TensorCompIdx (E := E) r s,
           ∑ Q : TensorCompIdx (E := E) r s,
@@ -2005,14 +2006,14 @@ noncomputable def weightedGradCoeffDivLimit
                 Set.indicator (chartPouKernel (I := I) (M := M) α)
                     (weightedGradFactor (I := I) (M := M) g r s α P₀ l P Q k p)
                     y *
-                  (partialLpLimit (I := I) (M := M) g r s h_uniform i α p l :
+                  (partialLpLimit (I := I) (M := M) g r s h_atlas i α p l :
                     EuclN → ℝ) y
 
 /-- The chart-Euclidean divergence of the chart-density-weighted lower-order
 gradient coefficient at the partition-of-unity-weighted approximant is `L²`. -/
 theorem euclidPartial_weightedGradCoeff_pouSmul_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (l : Fin (Module.finrank ℝ E)) (n : ℕ) :
@@ -2021,7 +2022,7 @@ theorem euclidPartial_weightedGradCoeff_pouSmul_memLp
         (weightedGradCoeff (I := I) (M := M) g r s
           (pouSmul (I := I) (M := M) g r s α
             (eigenvectorSmoothApprox (I := I) (M := M)
-              g r s h_uniform i n).toCcTensor) α P₀ l)) 2
+              g r s h_atlas i n).toCcTensor) α P₀ l)) 2
       (chartL2Measure (I := I) (M := M) α) := by
   classical
   -- The component-atom group: `∂_l weightedGradFactor · chart component`.
@@ -2034,7 +2035,7 @@ theorem euclidPartial_weightedGradCoeff_pouSmul_memLp
                   (weightedGradFactor (I := I) (M := M) g r s α P₀ l P Q k p) y *
                 tensorChartComponent (I := I) (M := M) g r s
                   (eigenvectorSmoothApprox (I := I) (M := M)
-                    g r s h_uniform i n).toCcTensor α p.1 p.2 y) 2
+                    g r s h_atlas i n).toCcTensor α p.1 p.2 y) 2
       (chartL2Measure (I := I) (M := M) α) :=
     memLp_finset_sum (μ := chartL2Measure (I := I) (M := M) α)
       (Finset.univ : Finset (TensorCompIdx (E := E) r s))
@@ -2045,7 +2046,7 @@ theorem euclidPartial_weightedGradCoeff_pouSmul_memLp
           (fun k _ => memLp_finset_sum
             (Finset.univ : Finset (TensorCompIdx (E := E) r s))
             (fun p _ => memLp_factor_mul_componentAtom (I := I) (M := M)
-              g r s h_uniform i α p n
+              g r s h_atlas i α p n
               (euclidPartial_weightedGradFactor_contDiffOn (I := I) (M := M)
                 g r s α P₀ l P Q k p)))))
   -- The chart-partial-atom group: `weightedGradFactor · ∂_l chart component`.
@@ -2058,7 +2059,7 @@ theorem euclidPartial_weightedGradCoeff_pouSmul_memLp
                 euclidPartial (E := E) l
                   (tensorChartComponent (I := I) (M := M) g r s
                     (eigenvectorSmoothApprox (I := I) (M := M)
-                      g r s h_uniform i n).toCcTensor α p.1 p.2) y) 2
+                      g r s h_atlas i n).toCcTensor α p.1 p.2) y) 2
       (chartL2Measure (I := I) (M := M) α) :=
     memLp_finset_sum (μ := chartL2Measure (I := I) (M := M) α)
       (Finset.univ : Finset (TensorCompIdx (E := E) r s))
@@ -2069,7 +2070,7 @@ theorem euclidPartial_weightedGradCoeff_pouSmul_memLp
           (fun k _ => memLp_finset_sum
             (Finset.univ : Finset (TensorCompIdx (E := E) r s))
             (fun p _ => memLp_factor_mul_partialAtom (I := I) (M := M)
-              g r s h_uniform i α p l n
+              g r s h_atlas i α p l n
               (weightedGradFactor_contDiffOn (I := I) (M := M)
                 g r s α P₀ l P Q k p)))))
   refine (hcomp.add hpart).ae_eq ?_
@@ -2079,18 +2080,18 @@ theorem euclidPartial_weightedGradCoeff_pouSmul_memLp
     (chartTargetEuclid_measurableSet (I := I) (M := M) α)).mpr ?_
   exact Filter.Eventually.of_forall (fun y hy =>
     euclidPartial_weightedGradCoeff_pouSmul_eqOn (I := I) (M := M)
-      g r s h_uniform i α P₀ l n hy)
+      g r s h_atlas i α P₀ l n hy)
 
 /-- The `L²`-limit function of the chart-Euclidean divergence of the
 chart-density-weighted lower-order gradient coefficient is `L²`. -/
 theorem weightedGradCoeffDivLimit_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (l : Fin (Module.finrank ℝ E)) :
     MemLp (weightedGradCoeffDivLimit (I := I) (M := M)
-        g r s h_uniform i α P₀ l) 2
+        g r s h_atlas i α P₀ l) 2
       (chartL2Measure (I := I) (M := M) α) := by
   classical
   unfold weightedGradCoeffDivLimit
@@ -2105,7 +2106,7 @@ theorem weightedGradCoeffDivLimit_memLp
             (fun p _ => memLp_indicatorFactor_mul_lp (I := I) (M := M) α
               (euclidPartial_weightedGradFactor_contDiffOn (I := I) (M := M)
                 g r s α P₀ l P Q k p)
-              (componentLpLimit (I := I) (M := M) g r s h_uniform i α p)))))
+              (componentLpLimit (I := I) (M := M) g r s h_atlas i α p)))))
   · exact memLp_finset_sum (Finset.univ : Finset (TensorCompIdx (E := E) r s))
       (fun P _ => memLp_finset_sum
         (Finset.univ : Finset (TensorCompIdx (E := E) r s))
@@ -2116,7 +2117,7 @@ theorem weightedGradCoeffDivLimit_memLp
             (fun p _ => memLp_indicatorFactor_mul_lp (I := I) (M := M) α
               (weightedGradFactor_contDiffOn (I := I) (M := M)
                 g r s α P₀ l P Q k p)
-              (partialLpLimit (I := I) (M := M) g r s h_uniform i α p l)))))
+              (partialLpLimit (I := I) (M := M) g r s h_atlas i α p l)))))
 
 /-- The `L²` class of a function equal almost everywhere to a sum of two `L²`
 functions is the sum of the `L²` classes of the summands. -/
@@ -2142,21 +2143,21 @@ Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index `i`, a chart
 center `α : M`, a component multi-index `P₀`, and a chart direction `l`, the
 `L²` classes of `euclidPartial l (weightedGradCoeff g r s Tₙ α P₀ l)` at the
 partition-of-unity-weighted approximants `Tₙ := pouSmul g r s α
-(eigenvectorSmoothApprox g r s h_uniform i n).toCcTensor` converge, as `n → ∞`
+(eigenvectorSmoothApprox g r s h_atlas i n).toCcTensor` converge, as `n → ∞`
 and in `Lp ℝ 2 (chartL2Measure α)`, to the `L²` class of the explicit limit
-function `weightedGradCoeffDivLimit g r s h_uniform i α P₀ l`. -/
+function `weightedGradCoeffDivLimit g r s h_atlas i α P₀ l`. -/
 theorem weightedGradCoeffDiv_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (l : Fin (Module.finrank ℝ E)) :
     Filter.Tendsto
       (fun n => (euclidPartial_weightedGradCoeff_pouSmul_memLp (I := I) (M := M)
-        g r s h_uniform i α P₀ l n).toLp _)
+        g r s h_atlas i α P₀ l n).toLp _)
       atTop
       (𝓝 ((weightedGradCoeffDivLimit_memLp (I := I) (M := M)
-        g r s h_uniform i α P₀ l).toLp _)) := by
+        g r s h_atlas i α P₀ l).toLp _)) := by
   classical
   -- The component-atom group: `∂_l weightedGradFactor · chart component`, with
   -- limit the kernel-cut `∂_l weightedGradFactor` against `componentLpLimit`.
@@ -2166,33 +2167,33 @@ theorem weightedGradCoeffDiv_tendsto
           (weightedGradFactor (I := I) (M := M) g r s α P₀ l P Q k p) y *
         tensorChartComponent (I := I) (M := M) g r s
           (eigenvectorSmoothApprox (I := I) (M := M)
-            g r s h_uniform i n).toCcTensor α p.1 p.2 y)
+            g r s h_atlas i n).toCcTensor α p.1 p.2 y)
     (flim := fun P Q k p y =>
       Set.indicator (chartPouKernel (I := I) (M := M) α)
           (euclidPartial (E := E) l
             (weightedGradFactor (I := I) (M := M) g r s α P₀ l P Q k p)) y *
-        (componentLpLimit (I := I) (M := M) g r s h_uniform i α p :
+        (componentLpLimit (I := I) (M := M) g r s h_atlas i α p :
           EuclN → ℝ) y)
     (fun P Q k p n => memLp_factor_mul_componentAtom (I := I) (M := M)
-      g r s h_uniform i α p n
+      g r s h_atlas i α p n
       (euclidPartial_weightedGradFactor_contDiffOn (I := I) (M := M)
         g r s α P₀ l P Q k p))
     (fun P Q k p => memLp_indicatorFactor_mul_lp (I := I) (M := M) α
       (euclidPartial_weightedGradFactor_contDiffOn (I := I) (M := M)
         g r s α P₀ l P Q k p)
-      (componentLpLimit (I := I) (M := M) g r s h_uniform i α p))
+      (componentLpLimit (I := I) (M := M) g r s h_atlas i α p))
     (fun P Q k p => tendsto_componentSummand (I := I) (M := M)
-      g r s h_uniform i α p
+      g r s h_atlas i α p
       (euclidPartial_weightedGradFactor_contDiffOn (I := I) (M := M)
         g r s α P₀ l P Q k p)
       (fun n => memLp_factor_mul_componentAtom (I := I) (M := M)
-        g r s h_uniform i α p n
+        g r s h_atlas i α p n
         (euclidPartial_weightedGradFactor_contDiffOn (I := I) (M := M)
           g r s α P₀ l P Q k p))
       (memLp_indicatorFactor_mul_lp (I := I) (M := M) α
         (euclidPartial_weightedGradFactor_contDiffOn (I := I) (M := M)
           g r s α P₀ l P Q k p)
-        (componentLpLimit (I := I) (M := M) g r s h_uniform i α p)))
+        (componentLpLimit (I := I) (M := M) g r s h_atlas i α p)))
   -- The chart-partial-atom group: `weightedGradFactor · ∂_l chart component`,
   -- with limit the kernel-cut `weightedGradFactor` against `partialLpLimit`.
   have h_part := tendsto_sum4 (I := I) (M := M) α
@@ -2201,39 +2202,39 @@ theorem weightedGradCoeffDiv_tendsto
         euclidPartial (E := E) l
           (tensorChartComponent (I := I) (M := M) g r s
             (eigenvectorSmoothApprox (I := I) (M := M)
-              g r s h_uniform i n).toCcTensor α p.1 p.2) y)
+              g r s h_atlas i n).toCcTensor α p.1 p.2) y)
     (flim := fun P Q k p y =>
       Set.indicator (chartPouKernel (I := I) (M := M) α)
           (weightedGradFactor (I := I) (M := M) g r s α P₀ l P Q k p) y *
-        (partialLpLimit (I := I) (M := M) g r s h_uniform i α p l :
+        (partialLpLimit (I := I) (M := M) g r s h_atlas i α p l :
           EuclN → ℝ) y)
     (fun P Q k p n => memLp_factor_mul_partialAtom (I := I) (M := M)
-      g r s h_uniform i α p l n
+      g r s h_atlas i α p l n
       (weightedGradFactor_contDiffOn (I := I) (M := M) g r s α P₀ l P Q k p))
     (fun P Q k p => memLp_indicatorFactor_mul_lp (I := I) (M := M) α
       (weightedGradFactor_contDiffOn (I := I) (M := M) g r s α P₀ l P Q k p)
-      (partialLpLimit (I := I) (M := M) g r s h_uniform i α p l))
+      (partialLpLimit (I := I) (M := M) g r s h_atlas i α p l))
     (fun P Q k p => tendsto_partialSummand (I := I) (M := M)
-      g r s h_uniform i α p l
+      g r s h_atlas i α p l
       (weightedGradFactor_contDiffOn (I := I) (M := M) g r s α P₀ l P Q k p)
       (fun n => memLp_factor_mul_partialAtom (I := I) (M := M)
-        g r s h_uniform i α p l n
+        g r s h_atlas i α p l n
         (weightedGradFactor_contDiffOn (I := I) (M := M) g r s α P₀ l P Q k p))
       (memLp_indicatorFactor_mul_lp (I := I) (M := M) α
         (weightedGradFactor_contDiffOn (I := I) (M := M) g r s α P₀ l P Q k p)
-        (partialLpLimit (I := I) (M := M) g r s h_uniform i α p l)))
+        (partialLpLimit (I := I) (M := M) g r s h_atlas i α p l)))
   -- Add the two convergent groups.
   have h_add := h_comp.add h_part
   -- Identify the `n`-th sum with the divergence-coefficient `L²` class.
   have h_termN : ∀ n : ℕ,
       (euclidPartial_weightedGradCoeff_pouSmul_memLp (I := I) (M := M)
-        g r s h_uniform i α P₀ l n).toLp _ =
+        g r s h_atlas i α P₀ l n).toLp _ =
       (memLp_finset_sum (μ := chartL2Measure (I := I) (M := M) α)
           Finset.univ (fun P _ => memLp_finset_sum Finset.univ
             (fun Q _ => memLp_finset_sum Finset.univ
               (fun k _ => memLp_finset_sum Finset.univ
                 (fun p _ => memLp_factor_mul_componentAtom (I := I) (M := M)
-                  g r s h_uniform i α p n
+                  g r s h_atlas i α p n
                   (euclidPartial_weightedGradFactor_contDiffOn (I := I) (M := M)
                     g r s α P₀ l P Q k p)))))).toLp _ +
         (memLp_finset_sum (μ := chartL2Measure (I := I) (M := M) α)
@@ -2241,7 +2242,7 @@ theorem weightedGradCoeffDiv_tendsto
             (fun Q _ => memLp_finset_sum Finset.univ
               (fun k _ => memLp_finset_sum Finset.univ
                 (fun p _ => memLp_factor_mul_partialAtom (I := I) (M := M)
-                  g r s h_uniform i α p l n
+                  g r s h_atlas i α p l n
                   (weightedGradFactor_contDiffOn (I := I) (M := M)
                     g r s α P₀ l P Q k p)))))).toLp _ := by
     intro n
@@ -2251,11 +2252,11 @@ theorem weightedGradCoeffDiv_tendsto
       (chartTargetEuclid_measurableSet (I := I) (M := M) α)).mpr ?_
     exact Filter.Eventually.of_forall (fun y hy =>
       euclidPartial_weightedGradCoeff_pouSmul_eqOn (I := I) (M := M)
-        g r s h_uniform i α P₀ l n hy)
+        g r s h_atlas i α P₀ l n hy)
   -- Identify the limiting sum with the divergence-coefficient limit `L²` class.
   have h_termLim :
       (weightedGradCoeffDivLimit_memLp (I := I) (M := M)
-        g r s h_uniform i α P₀ l).toLp _ =
+        g r s h_atlas i α P₀ l).toLp _ =
       (memLp_finset_sum (μ := chartL2Measure (I := I) (M := M) α)
           Finset.univ (fun P _ => memLp_finset_sum Finset.univ
             (fun Q _ => memLp_finset_sum Finset.univ
@@ -2264,7 +2265,7 @@ theorem weightedGradCoeffDiv_tendsto
                   (euclidPartial_weightedGradFactor_contDiffOn (I := I) (M := M)
                     g r s α P₀ l P Q k p)
                   (componentLpLimit (I := I) (M := M)
-                    g r s h_uniform i α p)))))).toLp _ +
+                    g r s h_atlas i α p)))))).toLp _ +
         (memLp_finset_sum (μ := chartL2Measure (I := I) (M := M) α)
           Finset.univ (fun P _ => memLp_finset_sum Finset.univ
             (fun Q _ => memLp_finset_sum Finset.univ
@@ -2273,18 +2274,18 @@ theorem weightedGradCoeffDiv_tendsto
                   (weightedGradFactor_contDiffOn (I := I) (M := M)
                     g r s α P₀ l P Q k p)
                   (partialLpLimit (I := I) (M := M)
-                    g r s h_uniform i α p l)))))).toLp _ := by
+                    g r s h_atlas i α p l)))))).toLp _ := by
     refine toLp_add_eq (I := I) (M := M) α _ _ _ ?_
     refine Filter.Eventually.of_forall (fun y => ?_)
     rw [weightedGradCoeffDivLimit]
   rw [show (fun n => (euclidPartial_weightedGradCoeff_pouSmul_memLp
-        (I := I) (M := M) g r s h_uniform i α P₀ l n).toLp _) =
+        (I := I) (M := M) g r s h_atlas i α P₀ l n).toLp _) =
       (fun n => (memLp_finset_sum (μ := chartL2Measure (I := I) (M := M) α)
           Finset.univ (fun P _ => memLp_finset_sum Finset.univ
             (fun Q _ => memLp_finset_sum Finset.univ
               (fun k _ => memLp_finset_sum Finset.univ
                 (fun p _ => memLp_factor_mul_componentAtom (I := I) (M := M)
-                  g r s h_uniform i α p n
+                  g r s h_atlas i α p n
                   (euclidPartial_weightedGradFactor_contDiffOn (I := I) (M := M)
                     g r s α P₀ l P Q k p)))))).toLp _ +
         (memLp_finset_sum (μ := chartL2Measure (I := I) (M := M) α)
@@ -2292,7 +2293,7 @@ theorem weightedGradCoeffDiv_tendsto
             (fun Q _ => memLp_finset_sum Finset.univ
               (fun k _ => memLp_finset_sum Finset.univ
                 (fun p _ => memLp_factor_mul_partialAtom (I := I) (M := M)
-                  g r s h_uniform i α p l n
+                  g r s h_atlas i α p l n
                   (weightedGradFactor_contDiffOn (I := I) (M := M)
                     g r s α P₀ l P Q k p)))))).toLp _)
       from funext h_termN, h_termLim]
@@ -2302,23 +2303,23 @@ theorem weightedGradCoeffDiv_tendsto
 chart-density-weighted lower-order gradient coefficient.** Summed over the chart
 directions `l`, the `L²` classes of `∑_l euclidPartial l (weightedGradCoeff g r s
 Tₙ α P₀ l)` converge, as `n → ∞` and in `Lp ℝ 2 (chartL2Measure α)`, to the `L²`
-class of `∑_l weightedGradCoeffDivLimit g r s h_uniform i α P₀ l`. -/
+class of `∑_l weightedGradCoeffDivLimit g r s h_atlas i α P₀ l`. -/
 theorem weightedGradCoeffDivSum_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
     Filter.Tendsto
       (fun n => ∑ l : Fin (Module.finrank ℝ E),
         (euclidPartial_weightedGradCoeff_pouSmul_memLp (I := I) (M := M)
-          g r s h_uniform i α P₀ l n).toLp _)
+          g r s h_atlas i α P₀ l n).toLp _)
       atTop
       (𝓝 (∑ l : Fin (Module.finrank ℝ E),
         (weightedGradCoeffDivLimit_memLp (I := I) (M := M)
-          g r s h_uniform i α P₀ l).toLp _)) :=
+          g r s h_atlas i α P₀ l).toLp _)) :=
   tendsto_finset_sum (Finset.univ : Finset (Fin (Module.finrank ℝ E)))
     (fun l _ => weightedGradCoeffDiv_tendsto (I := I) (M := M)
-      g r s h_uniform i α P₀ l)
+      g r s h_atlas i α P₀ l)
 
 /-! ## The `n → ∞` `L²`-limit of the lower-order rotation value coefficient
 
@@ -2399,14 +2400,14 @@ of the bare chart-component atom) plus the five-fold nested component-atom sum
 (`valueComponentFactor` against the bare chart-component atom). -/
 private lemma covLowerOrderRotationValueCoeff_pouSmul_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (n : ℕ)
     {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
     covLowerOrderRotationValueCoeff (I := I) (M := M) g r s
         (pouSmul (I := I) (M := M) g r s α
           (eigenvectorSmoothApprox (I := I) (M := M)
-            g r s h_uniform i n).toCcTensor) α P₀ y =
+            g r s h_atlas i n).toCcTensor) α P₀ y =
       (∑ P : TensorCompIdx (E := E) r s,
           ∑ Q : TensorCompIdx (E := E) r s,
             ∑ k : Fin (Module.finrank ℝ E),
@@ -2415,7 +2416,7 @@ private lemma covLowerOrderRotationValueCoeff_pouSmul_eqOn
                   euclidPartial (E := E) k
                     (tensorChartComponent (I := I) (M := M) g r s
                       (eigenvectorSmoothApprox (I := I) (M := M)
-                        g r s h_uniform i n).toCcTensor α P.1 P.2) y)
+                        g r s h_atlas i n).toCcTensor α P.1 P.2) y)
         + ∑ P : TensorCompIdx (E := E) r s,
             ∑ Q : TensorCompIdx (E := E) r s,
               ∑ k : Fin (Module.finrank ℝ E),
@@ -2425,10 +2426,10 @@ private lemma covLowerOrderRotationValueCoeff_pouSmul_eqOn
                         g r s α P₀ P Q k l p y *
                       tensorChartComponent (I := I) (M := M) g r s
                         (eigenvectorSmoothApprox (I := I) (M := M)
-                          g r s h_uniform i n).toCcTensor α p.1 p.2 y := by
+                          g r s h_atlas i n).toCcTensor α p.1 p.2 y := by
   classical
   set wₙ : SmoothCcTensor g r s :=
-    (eigenvectorSmoothApprox (I := I) (M := M) g r s h_uniform i n).toCcTensor
+    (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n).toCcTensor
     with hwₙ_def
   rw [covLowerOrderRotationValueCoeff_def]
   -- For each `(P, Q, k, l)`-summand the inner body collapses.
@@ -2594,14 +2595,14 @@ private lemma covLowerOrderRotationValueCoeff_pouSmul_eqOn
 approximant is `L²`. -/
 theorem covLowerOrderRotationValueCoeff_pouSmul_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (n : ℕ) :
     MemLp
       (covLowerOrderRotationValueCoeff (I := I) (M := M) g r s
         (pouSmul (I := I) (M := M) g r s α
           (eigenvectorSmoothApprox (I := I) (M := M)
-            g r s h_uniform i n).toCcTensor) α P₀) 2
+            g r s h_atlas i n).toCcTensor) α P₀) 2
       (chartL2Measure (I := I) (M := M) α) := by
   classical
   -- The chart-partial-atom group: `valuePartialFactor · ∂_k chart component`.
@@ -2614,7 +2615,7 @@ theorem covLowerOrderRotationValueCoeff_pouSmul_memLp
                 euclidPartial (E := E) k
                   (tensorChartComponent (I := I) (M := M) g r s
                     (eigenvectorSmoothApprox (I := I) (M := M)
-                      g r s h_uniform i n).toCcTensor α P.1 P.2) y) 2
+                      g r s h_atlas i n).toCcTensor α P.1 P.2) y) 2
       (chartL2Measure (I := I) (M := M) α) :=
     memLp_finset_sum (μ := chartL2Measure (I := I) (M := M) α)
       (Finset.univ : Finset (TensorCompIdx (E := E) r s))
@@ -2625,7 +2626,7 @@ theorem covLowerOrderRotationValueCoeff_pouSmul_memLp
           (fun k _ => memLp_finset_sum
             (Finset.univ : Finset (Fin (Module.finrank ℝ E)))
             (fun l _ => memLp_factor_mul_partialAtom (I := I) (M := M)
-              g r s h_uniform i α P k n
+              g r s h_atlas i α P k n
               (valuePartialFactor_contDiffOn (I := I) (M := M)
                 g r s α P₀ P Q k l)))))
   -- The component-atom group: `valueComponentFactor · chart component`.
@@ -2638,7 +2639,7 @@ theorem covLowerOrderRotationValueCoeff_pouSmul_memLp
                 valueComponentFactor (I := I) (M := M) g r s α P₀ P Q k l p y *
                   tensorChartComponent (I := I) (M := M) g r s
                     (eigenvectorSmoothApprox (I := I) (M := M)
-                      g r s h_uniform i n).toCcTensor α p.1 p.2 y) 2
+                      g r s h_atlas i n).toCcTensor α p.1 p.2 y) 2
       (chartL2Measure (I := I) (M := M) α) :=
     memLp_finset_sum (μ := chartL2Measure (I := I) (M := M) α)
       (Finset.univ : Finset (TensorCompIdx (E := E) r s))
@@ -2651,7 +2652,7 @@ theorem covLowerOrderRotationValueCoeff_pouSmul_memLp
             (fun l _ => memLp_finset_sum
               (Finset.univ : Finset (TensorCompIdx (E := E) r s))
               (fun p _ => memLp_factor_mul_componentAtom (I := I) (M := M)
-                g r s h_uniform i α p n
+                g r s h_atlas i α p n
                 (valueComponentFactor_contDiffOn (I := I) (M := M)
                   g r s α P₀ P Q k l p))))))
   refine (hpart.add hcomp).ae_eq ?_
@@ -2661,7 +2662,7 @@ theorem covLowerOrderRotationValueCoeff_pouSmul_memLp
     (chartTargetEuclid_measurableSet (I := I) (M := M) α)).mpr ?_
   exact Filter.Eventually.of_forall (fun y hy =>
     covLowerOrderRotationValueCoeff_pouSmul_eqOn (I := I) (M := M)
-      g r s h_uniform i α P₀ n hy)
+      g r s h_atlas i α P₀ n hy)
 
 /-- **The explicit `L²`-limit function of the lower-order rotation value
 coefficient.** A finite `C^∞`-coefficient-weighted sum of the chart-partial limit
@@ -2670,7 +2671,7 @@ limit object `componentLpLimit` (the component-atom group), each coefficient cut
 to the partition-of-unity kernel. -/
 noncomputable def covLowerOrderRotationValueCoeffLimit
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) : EuclN → ℝ :=
   fun y =>
@@ -2680,7 +2681,7 @@ noncomputable def covLowerOrderRotationValueCoeffLimit
             ∑ l : Fin (Module.finrank ℝ E),
               Set.indicator (chartPouKernel (I := I) (M := M) α)
                   (valuePartialFactor (I := I) (M := M) g r s α P₀ P Q k l) y *
-                (partialLpLimit (I := I) (M := M) g r s h_uniform i α P k :
+                (partialLpLimit (I := I) (M := M) g r s h_atlas i α P k :
                   EuclN → ℝ) y)
       + ∑ P : TensorCompIdx (E := E) r s,
           ∑ Q : TensorCompIdx (E := E) r s,
@@ -2690,18 +2691,18 @@ noncomputable def covLowerOrderRotationValueCoeffLimit
                   Set.indicator (chartPouKernel (I := I) (M := M) α)
                       (valueComponentFactor (I := I) (M := M)
                         g r s α P₀ P Q k l p) y *
-                    (componentLpLimit (I := I) (M := M) g r s h_uniform i α p :
+                    (componentLpLimit (I := I) (M := M) g r s h_atlas i α p :
                       EuclN → ℝ) y
 
 /-- The `L²`-limit function of the lower-order rotation value coefficient is
 `L²`. -/
 theorem covLowerOrderRotationValueCoeffLimit_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
     MemLp (covLowerOrderRotationValueCoeffLimit (I := I) (M := M)
-        g r s h_uniform i α P₀) 2
+        g r s h_atlas i α P₀) 2
       (chartL2Measure (I := I) (M := M) α) := by
   classical
   unfold covLowerOrderRotationValueCoeffLimit
@@ -2716,7 +2717,7 @@ theorem covLowerOrderRotationValueCoeffLimit_memLp
             (fun l _ => memLp_indicatorFactor_mul_lp (I := I) (M := M) α
               (valuePartialFactor_contDiffOn (I := I) (M := M)
                 g r s α P₀ P Q k l)
-              (partialLpLimit (I := I) (M := M) g r s h_uniform i α P k)))))
+              (partialLpLimit (I := I) (M := M) g r s h_atlas i α P k)))))
   · exact memLp_finset_sum (Finset.univ : Finset (TensorCompIdx (E := E) r s))
       (fun P _ => memLp_finset_sum
         (Finset.univ : Finset (TensorCompIdx (E := E) r s))
@@ -2730,27 +2731,27 @@ theorem covLowerOrderRotationValueCoeffLimit_memLp
                 (valueComponentFactor_contDiffOn (I := I) (M := M)
                   g r s α P₀ P Q k l p)
                 (componentLpLimit (I := I) (M := M)
-                  g r s h_uniform i α p))))))
+                  g r s h_atlas i α p))))))
 
 /-- **The `n → ∞` `L²`-limit of the lower-order rotation value coefficient.**
 For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
 `i`, a chart center `α : M`, and a component multi-index `P₀`, the `L²` classes
 of the lower-order rotation value coefficient `covLowerOrderRotationValueCoeff g
 r s Tₙ α P₀` at the partition-of-unity-weighted approximants `Tₙ := pouSmul g r s
-α (eigenvectorSmoothApprox g r s h_uniform i n).toCcTensor` converge, as `n → ∞`
+α (eigenvectorSmoothApprox g r s h_atlas i n).toCcTensor` converge, as `n → ∞`
 and in `Lp ℝ 2 (chartL2Measure α)`, to the `L²` class of the explicit limit
-function `covLowerOrderRotationValueCoeffLimit g r s h_uniform i α P₀`. -/
+function `covLowerOrderRotationValueCoeffLimit g r s h_atlas i α P₀`. -/
 theorem covLowerOrderRotationValueCoeff_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
     Filter.Tendsto
       (fun n => (covLowerOrderRotationValueCoeff_pouSmul_memLp (I := I) (M := M)
-        g r s h_uniform i α P₀ n).toLp _)
+        g r s h_atlas i α P₀ n).toLp _)
       atTop
       (𝓝 ((covLowerOrderRotationValueCoeffLimit_memLp (I := I) (M := M)
-        g r s h_uniform i α P₀).toLp _)) := by
+        g r s h_atlas i α P₀).toLp _)) := by
   classical
   -- The chart-partial-atom group: `valuePartialFactor · ∂_k chart component`,
   -- with limit the kernel-cut `valuePartialFactor` against `partialLpLimit`.
@@ -2760,27 +2761,27 @@ theorem covLowerOrderRotationValueCoeff_tendsto
         euclidPartial (E := E) k
           (tensorChartComponent (I := I) (M := M) g r s
             (eigenvectorSmoothApprox (I := I) (M := M)
-              g r s h_uniform i n).toCcTensor α P.1 P.2) y)
+              g r s h_atlas i n).toCcTensor α P.1 P.2) y)
     (flim := fun P Q k l y =>
       Set.indicator (chartPouKernel (I := I) (M := M) α)
           (valuePartialFactor (I := I) (M := M) g r s α P₀ P Q k l) y *
-        (partialLpLimit (I := I) (M := M) g r s h_uniform i α P k :
+        (partialLpLimit (I := I) (M := M) g r s h_atlas i α P k :
           EuclN → ℝ) y)
     (fun P Q k l n => memLp_factor_mul_partialAtom (I := I) (M := M)
-      g r s h_uniform i α P k n
+      g r s h_atlas i α P k n
       (valuePartialFactor_contDiffOn (I := I) (M := M) g r s α P₀ P Q k l))
     (fun P Q k l => memLp_indicatorFactor_mul_lp (I := I) (M := M) α
       (valuePartialFactor_contDiffOn (I := I) (M := M) g r s α P₀ P Q k l)
-      (partialLpLimit (I := I) (M := M) g r s h_uniform i α P k))
+      (partialLpLimit (I := I) (M := M) g r s h_atlas i α P k))
     (fun P Q k l => tendsto_partialSummand (I := I) (M := M)
-      g r s h_uniform i α P k
+      g r s h_atlas i α P k
       (valuePartialFactor_contDiffOn (I := I) (M := M) g r s α P₀ P Q k l)
       (fun n => memLp_factor_mul_partialAtom (I := I) (M := M)
-        g r s h_uniform i α P k n
+        g r s h_atlas i α P k n
         (valuePartialFactor_contDiffOn (I := I) (M := M) g r s α P₀ P Q k l))
       (memLp_indicatorFactor_mul_lp (I := I) (M := M) α
         (valuePartialFactor_contDiffOn (I := I) (M := M) g r s α P₀ P Q k l)
-        (partialLpLimit (I := I) (M := M) g r s h_uniform i α P k)))
+        (partialLpLimit (I := I) (M := M) g r s h_atlas i α P k)))
   -- The component-atom group: `valueComponentFactor · chart component`, with
   -- limit the kernel-cut `valueComponentFactor` against `componentLpLimit`.
   have h_comp := tendsto_sum5 (I := I) (M := M) α
@@ -2788,39 +2789,39 @@ theorem covLowerOrderRotationValueCoeff_tendsto
       valueComponentFactor (I := I) (M := M) g r s α P₀ P Q k l p y *
         tensorChartComponent (I := I) (M := M) g r s
           (eigenvectorSmoothApprox (I := I) (M := M)
-            g r s h_uniform i n).toCcTensor α p.1 p.2 y)
+            g r s h_atlas i n).toCcTensor α p.1 p.2 y)
     (flim := fun P Q k l p y =>
       Set.indicator (chartPouKernel (I := I) (M := M) α)
           (valueComponentFactor (I := I) (M := M) g r s α P₀ P Q k l p) y *
-        (componentLpLimit (I := I) (M := M) g r s h_uniform i α p :
+        (componentLpLimit (I := I) (M := M) g r s h_atlas i α p :
           EuclN → ℝ) y)
     (fun P Q k l p n => memLp_factor_mul_componentAtom (I := I) (M := M)
-      g r s h_uniform i α p n
+      g r s h_atlas i α p n
       (valueComponentFactor_contDiffOn (I := I) (M := M) g r s α P₀ P Q k l p))
     (fun P Q k l p => memLp_indicatorFactor_mul_lp (I := I) (M := M) α
       (valueComponentFactor_contDiffOn (I := I) (M := M) g r s α P₀ P Q k l p)
-      (componentLpLimit (I := I) (M := M) g r s h_uniform i α p))
+      (componentLpLimit (I := I) (M := M) g r s h_atlas i α p))
     (fun P Q k l p => tendsto_componentSummand (I := I) (M := M)
-      g r s h_uniform i α p
+      g r s h_atlas i α p
       (valueComponentFactor_contDiffOn (I := I) (M := M) g r s α P₀ P Q k l p)
       (fun n => memLp_factor_mul_componentAtom (I := I) (M := M)
-        g r s h_uniform i α p n
+        g r s h_atlas i α p n
         (valueComponentFactor_contDiffOn (I := I) (M := M)
           g r s α P₀ P Q k l p))
       (memLp_indicatorFactor_mul_lp (I := I) (M := M) α
         (valueComponentFactor_contDiffOn (I := I) (M := M) g r s α P₀ P Q k l p)
-        (componentLpLimit (I := I) (M := M) g r s h_uniform i α p)))
+        (componentLpLimit (I := I) (M := M) g r s h_atlas i α p)))
   have h_add := h_part.add h_comp
   -- Identify the `n`-th sum with the value-coefficient `L²` class.
   have h_termN : ∀ n : ℕ,
       (covLowerOrderRotationValueCoeff_pouSmul_memLp (I := I) (M := M)
-        g r s h_uniform i α P₀ n).toLp _ =
+        g r s h_atlas i α P₀ n).toLp _ =
       (memLp_finset_sum (μ := chartL2Measure (I := I) (M := M) α)
           Finset.univ (fun P _ => memLp_finset_sum Finset.univ
             (fun Q _ => memLp_finset_sum Finset.univ
               (fun k _ => memLp_finset_sum Finset.univ
                 (fun l _ => memLp_factor_mul_partialAtom (I := I) (M := M)
-                  g r s h_uniform i α P k n
+                  g r s h_atlas i α P k n
                   (valuePartialFactor_contDiffOn (I := I) (M := M)
                     g r s α P₀ P Q k l)))))).toLp _ +
         (memLp_finset_sum (μ := chartL2Measure (I := I) (M := M) α)
@@ -2829,7 +2830,7 @@ theorem covLowerOrderRotationValueCoeff_tendsto
               (fun k _ => memLp_finset_sum Finset.univ
                 (fun l _ => memLp_finset_sum Finset.univ
                   (fun p _ => memLp_factor_mul_componentAtom (I := I) (M := M)
-                    g r s h_uniform i α p n
+                    g r s h_atlas i α p n
                     (valueComponentFactor_contDiffOn (I := I) (M := M)
                       g r s α P₀ P Q k l p))))))).toLp _ := by
     intro n
@@ -2839,11 +2840,11 @@ theorem covLowerOrderRotationValueCoeff_tendsto
       (chartTargetEuclid_measurableSet (I := I) (M := M) α)).mpr ?_
     exact Filter.Eventually.of_forall (fun y hy =>
       covLowerOrderRotationValueCoeff_pouSmul_eqOn (I := I) (M := M)
-        g r s h_uniform i α P₀ n hy)
+        g r s h_atlas i α P₀ n hy)
   -- Identify the limiting sum with the value-coefficient limit `L²` class.
   have h_termLim :
       (covLowerOrderRotationValueCoeffLimit_memLp (I := I) (M := M)
-        g r s h_uniform i α P₀).toLp _ =
+        g r s h_atlas i α P₀).toLp _ =
       (memLp_finset_sum (μ := chartL2Measure (I := I) (M := M) α)
           Finset.univ (fun P _ => memLp_finset_sum Finset.univ
             (fun Q _ => memLp_finset_sum Finset.univ
@@ -2852,7 +2853,7 @@ theorem covLowerOrderRotationValueCoeff_tendsto
                   (valuePartialFactor_contDiffOn (I := I) (M := M)
                     g r s α P₀ P Q k l)
                   (partialLpLimit (I := I) (M := M)
-                    g r s h_uniform i α P k)))))).toLp _ +
+                    g r s h_atlas i α P k)))))).toLp _ +
         (memLp_finset_sum (μ := chartL2Measure (I := I) (M := M) α)
           Finset.univ (fun P _ => memLp_finset_sum Finset.univ
             (fun Q _ => memLp_finset_sum Finset.univ
@@ -2862,18 +2863,18 @@ theorem covLowerOrderRotationValueCoeff_tendsto
                     (valueComponentFactor_contDiffOn (I := I) (M := M)
                       g r s α P₀ P Q k l p)
                     (componentLpLimit (I := I) (M := M)
-                      g r s h_uniform i α p))))))).toLp _ := by
+                      g r s h_atlas i α p))))))).toLp _ := by
     refine toLp_add_eq (I := I) (M := M) α _ _ _ ?_
     refine Filter.Eventually.of_forall (fun y => ?_)
     rw [covLowerOrderRotationValueCoeffLimit]
   rw [show (fun n => (covLowerOrderRotationValueCoeff_pouSmul_memLp
-        (I := I) (M := M) g r s h_uniform i α P₀ n).toLp _) =
+        (I := I) (M := M) g r s h_atlas i α P₀ n).toLp _) =
       (fun n => (memLp_finset_sum (μ := chartL2Measure (I := I) (M := M) α)
           Finset.univ (fun P _ => memLp_finset_sum Finset.univ
             (fun Q _ => memLp_finset_sum Finset.univ
               (fun k _ => memLp_finset_sum Finset.univ
                 (fun l _ => memLp_factor_mul_partialAtom (I := I) (M := M)
-                  g r s h_uniform i α P k n
+                  g r s h_atlas i α P k n
                   (valuePartialFactor_contDiffOn (I := I) (M := M)
                     g r s α P₀ P Q k l)))))).toLp _ +
         (memLp_finset_sum (μ := chartL2Measure (I := I) (M := M) α)
@@ -2882,7 +2883,7 @@ theorem covLowerOrderRotationValueCoeff_tendsto
               (fun k _ => memLp_finset_sum Finset.univ
                 (fun l _ => memLp_finset_sum Finset.univ
                   (fun p _ => memLp_factor_mul_componentAtom (I := I) (M := M)
-                    g r s h_uniform i α p n
+                    g r s h_atlas i α p n
                     (valueComponentFactor_contDiffOn (I := I) (M := M)
                       g r s α P₀ P Q k l p))))))).toLp _)
       from funext h_termN, h_termLim]

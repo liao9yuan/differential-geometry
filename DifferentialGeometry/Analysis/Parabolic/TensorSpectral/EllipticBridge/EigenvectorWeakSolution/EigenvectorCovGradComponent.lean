@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.Eig
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorChartWeightedMemLp
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.CutoffChartComponentMemWkp
 import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.BootstrapSource
+import DifferentialGeometry.Geometry.LocalChartConsistency
 
 /-!
 # Iterated Sobolev regularity of the covariant-gradient partition-of-unity chart
@@ -278,33 +279,33 @@ private lemma memWkp_coef_mul_factor
 /-! ## Iterated Sobolev regularity of the eigenvector chart components
 
 The regularity input `h_pou_phi` is phrased for the `L²`-coercion
-`TensorH1ComplToTensorL2 g r s (eigenvectorResolvent g r s h_uniform i)` of the
+`TensorH1ComplToTensorL2 g r s (eigenvectorResolvent g r s h_atlas i)` of the
 `H¹`-completion resolvent. The three named limit objects of the committed
 covariant-gradient identity, however, all reference chart components of the
-eigenvector vector `tensorResolventEigenbasisVec h_uniform i` itself. The two
+eigenvector vector `tensorResolventEigenbasisVec h_atlas i` itself. The two
 differ by the nonzero scalar `μ⁻¹` (`eigenvector_chartComponent_eq`), and
 `MemWkp` is scalar-invariant; the lemma below transfers the regularity. -/
 
 /-- The partition-of-unity Euclidean chart components of the eigenvector vector
-`tensorResolventEigenbasisVec h_uniform i` are `MemWkp N 2` on every chart
+`tensorResolventEigenbasisVec h_atlas i` are `MemWkp N 2` on every chart
 target, given that those of the `L²`-coercion of the eigenvector resolvent are
 `MemWkp N 2`. The two chart components differ by the nonzero scalar `μ⁻¹`, and
 `MemWkp` is scalar-invariant; the iteration order is preserved. -/
 private lemma eigenvectorVec_pou_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (N : ℕ)
     (h_pou_phi : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
       MemWkp (d := Module.finrank ℝ E) N 2
         (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
             (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-              (eigenvectorResolvent (I := I) (M := M) g r s h_uniform i))
+              (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
             β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
         (chartTargetEuclid (I := I) (M := M) β))
     (β : M) (Q : TensorCompIdx (E := E) r s) :
     MemWkp (d := Module.finrank ℝ E) N 2
       (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-          (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) β Q :
+          (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) β Q :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
       (chartTargetEuclid (I := I) (M := M) β) := by
   classical
@@ -314,46 +315,46 @@ private lemma eigenvectorVec_pou_memWkp
   have h_res : MemWkp (d := Module.finrank ℝ E) N 2
       (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
           (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-            (eigenvectorResolvent (I := I) (M := M) g r s h_uniform i))
+            (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
           β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω :=
     h_pou_phi β Q
   -- The eigenvector chart component is `μ⁻¹` times the resolvent-coercion chart
   -- component (`eigenvector_chartComponent_eq`). Pass to `coeFn` and rescale.
   have h_chart_eq := eigenvector_chartComponent_eq (I := I) (M := M)
-    g r s h_uniform i β Q
+    g r s h_atlas i β Q
   have h_ae : (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-        (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) β Q :
+        (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) β Q :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
       =ᵐ[(volume : Measure EuclN).restrict Ω]
       (fun y => (i.fst.val)⁻¹ *
         ((tensorL2ChartComponent (I := I) (M := M) g r s
           (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-            (eigenvectorResolvent (I := I) (M := M) g r s h_uniform i))
+            (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
           β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) := by
     have h_smul := Lp.coeFn_smul (i.fst.val)⁻¹
       (tensorL2ChartComponent (I := I) (M := M) g r s
         (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-          (eigenvectorResolvent (I := I) (M := M) g r s h_uniform i)) β Q)
+          (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i)) β Q)
     have h_smul' : (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-          (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) β Q :
+          (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) β Q :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
         =ᵐ[chartL2Measure (I := I) (M := M) β]
         (fun y => (i.fst.val)⁻¹ •
           ((tensorL2ChartComponent (I := I) (M := M) g r s
             (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-              (eigenvectorResolvent (I := I) (M := M) g r s h_uniform i))
+              (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
             β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) := by
       rw [h_chart_eq]
       exact h_smul
     -- `chartL2Measure β` is, definitionally, `volume.restrict Ω`.
     have h_smul'' : (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-          (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) β Q :
+          (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) β Q :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
         =ᵐ[(volume : Measure EuclN).restrict Ω]
         (fun y => (i.fst.val)⁻¹ •
           ((tensorL2ChartComponent (I := I) (M := M) g r s
             (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-              (eigenvectorResolvent (I := I) (M := M) g r s h_uniform i))
+              (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
             β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
             EuclN → ℝ) y) := h_smul'
     filter_upwards [h_smul''] with y hy
@@ -372,19 +373,19 @@ weak partial of that chart component; since the chart component is `W^{K+1,2}`,
 the weak partial is `W^{K,2}`. -/
 private lemma eigenvectorChartWeakPartial_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)
     (h_pou_phi : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
       MemWkp (d := Module.finrank ℝ E) (K + 1) 2
         (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
             (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-              (eigenvectorResolvent (I := I) (M := M) g r s h_uniform i))
+              (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
             β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
         (chartTargetEuclid (I := I) (M := M) β))
     (β : M) (P : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) :
     MemWkp (d := Module.finrank ℝ E) K 2
-      (eigenvectorChartWeakPartial (I := I) (M := M) g r s h_uniform i β P k)
+      (eigenvectorChartWeakPartial (I := I) (M := M) g r s h_atlas i β P k)
       (chartTargetEuclid (I := I) (M := M) β) := by
   classical
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) β with hΩ_def
@@ -392,26 +393,26 @@ private lemma eigenvectorChartWeakPartial_memWkp
   -- The eigenvector chart component is `W^{K+1,2}`.
   have hu : MemWkp (d := Module.finrank ℝ E) (K + 1) 2
       (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-          (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) β P :
+          (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) β P :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω :=
-    eigenvectorVec_pou_memWkp (I := I) (M := M) g r s h_uniform i (K + 1)
+    eigenvectorVec_pou_memWkp (I := I) (M := M) g r s h_atlas i (K + 1)
       h_pou_phi β P
   -- `eigenvectorChartWeakPartial` is a genuine weak `k`-th partial of that chart
   -- component (the committed headline).
   have hg_weak : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k
-      (eigenvectorChartWeakPartial (I := I) (M := M) g r s h_uniform i β P k)
+      (eigenvectorChartWeakPartial (I := I) (M := M) g r s h_atlas i β P k)
       (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-          (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) β P :
+          (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) β P :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω :=
     eigenvectorChartWeakPartial_hasWeakPartialDeriv (I := I) (M := M)
-      g r s h_uniform i β P k
+      g r s h_atlas i β P k
   -- `eigenvectorChartWeakPartial` is locally `L²` on the chart target
   -- (`chartL2Measure β` is, definitionally, `volume.restrict Ω`).
   have hg_loc : LocallyIntegrable
-      (eigenvectorChartWeakPartial (I := I) (M := M) g r s h_uniform i β P k)
+      (eigenvectorChartWeakPartial (I := I) (M := M) g r s h_atlas i β P k)
       ((volume : Measure EuclN).restrict Ω) := by
     have h_memLp : MemLp (eigenvectorChartWeakPartial (I := I) (M := M)
-        g r s h_uniform i β P k) 2
+        g r s h_atlas i β P k) 2
         ((volume : Measure EuclN).restrict Ω) := by
       rw [eigenvectorChartWeakPartial]
       exact Lp.memLp _
@@ -426,19 +427,19 @@ component is `W^{K,2}` by the cutoff ↔ partition-of-unity bridge, and the
 multiplier preserves `W^{K,2}` regularity via `MemWkp.smul_smooth_bounded`. -/
 private lemma covGradPouLeibnizCrossLimit_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)
     (h_pou_phi : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
       MemWkp (d := Module.finrank ℝ E) (K + 1) 2
         (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
             (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-              (eigenvectorResolvent (I := I) (M := M) g r s h_uniform i))
+              (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
             β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
         (chartTargetEuclid (I := I) (M := M) β))
     (β : M) (P : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) :
     MemWkp (d := Module.finrank ℝ E) K 2
-      (covGradPouLeibnizCrossLimit (I := I) (M := M) g r s h_uniform i β P k)
+      (covGradPouLeibnizCrossLimit (I := I) (M := M) g r s h_atlas i β P k)
       (chartTargetEuclid (I := I) (M := M) β) := by
   classical
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) β with hΩ_def
@@ -494,12 +495,12 @@ private lemma covGradPouLeibnizCrossLimit_memWkp
   -- cutoff ↔ partition-of-unity bridge fed the order-`K` regularity input.
   have hcutoff_memWkp : MemWkp (d := Module.finrank ℝ E) K 2
       (fun y => ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
-          (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) β P :
+          (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) β P :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω :=
     tensorL2ChartComponentCutoff_memWkp_of_pou (I := I) (M := M) g r s
-      (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) β P K
+      (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) β P K
       (fun β' Q' => eigenvectorVec_pou_memWkp (I := I) (M := M)
-        g r s h_uniform i K
+        g r s h_atlas i K
         (fun β'' Q'' => (h_pou_phi β'' Q'').le_of_le (Nat.le_succ K)) β' Q')
   -- The product `multiplier · cutoff component` is `W^{K,2}`.
   have h_prod : MemWkp (d := Module.finrank ℝ E) K 2
@@ -508,7 +509,7 @@ private lemma covGradPouLeibnizCrossLimit_memWkp
             (chartPushedRaw I β
               ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)) y *
           ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
-            (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) β P :
+            (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) β P :
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω :=
     MemWkp.smul_smooth_bounded (d := Module.finrank ℝ E) K
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open hmult_smooth'
@@ -520,7 +521,7 @@ private lemma covGradPouLeibnizCrossLimit_memWkp
             (chartPushedRaw I β
               ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)) y *
           ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
-            (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) β P :
+            (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) β P :
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω
   exact h_prod
 
@@ -533,19 +534,19 @@ so each summand is `W^{K,2}` by the "smooth coefficient × kernel-vanishing
 factor" closure; a finite sum of `W^{K,2}` functions is `W^{K,2}`. -/
 private lemma covGradChristoffelLimit_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)
     (h_pou_phi : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
       MemWkp (d := Module.finrank ℝ E) (K + 1) 2
         (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
             (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-              (eigenvectorResolvent (I := I) (M := M) g r s h_uniform i))
+              (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
             β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
         (chartTargetEuclid (I := I) (M := M) β))
     (β : M) (P : TensorCompIdx (E := E) r s)
     (k : Fin (Module.finrank ℝ E)) :
     MemWkp (d := Module.finrank ℝ E) K 2
-      (covGradChristoffelLimit (I := I) (M := M) g r s h_uniform i β P k)
+      (covGradChristoffelLimit (I := I) (M := M) g r s h_atlas i β P k)
       (chartTargetEuclid (I := I) (M := M) β) := by
   classical
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) β with hΩ_def
@@ -558,24 +559,24 @@ private lemma covGradChristoffelLimit_memWkp
               (covDerivLowerOrderCoeff (I := I) (M := M)
                 g r s β k P.1 p.1 P.2 p.2) y *
             (tensorL2ChartComponent (I := I) (M := M) g r s
-              (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) β p :
+              (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) β p :
               EuclN → ℝ) y) Ω := by
     intro p
     -- The eigenvector chart `p`-component is `W^{K,2}` and ae-kernel-vanishing.
     have hfactor_memWkp : MemWkp (d := Module.finrank ℝ E) K 2
         (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
-            (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) β p :
+            (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) β p :
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω :=
       eigenvectorVec_pou_memWkp (I := I) (M := M)
-        g r s h_uniform i K
+        g r s h_atlas i K
         (fun β' Q' => (h_pou_phi β' Q').le_of_le (Nat.le_succ K)) β p
     have hfactor_ae_zero : ∀ᵐ y ∂(chartL2Measure (I := I) (M := M) β),
         y ∉ chartPouKernel (I := I) (M := M) β →
           (tensorL2ChartComponent (I := I) (M := M) g r s
-            (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) β p :
+            (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) β p :
             EuclN → ℝ) y = 0 :=
       tensorL2ChartComponent_ae_zero_off_chartPouKernel (I := I) (M := M)
-        g r s (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) β p
+        g r s (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) β p
     -- "Smooth coefficient × kernel-vanishing factor": the product without the
     -- indicator is `W^{K,2}`.
     have h_no_indicator : MemWkp (d := Module.finrank ℝ E) K 2
@@ -583,7 +584,7 @@ private lemma covGradChristoffelLimit_memWkp
           covDerivLowerOrderCoeff (I := I) (M := M)
               g r s β k P.1 p.1 P.2 p.2 y *
             (tensorL2ChartComponent (I := I) (M := M) g r s
-              (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) β p :
+              (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) β p :
               EuclN → ℝ) y) Ω :=
       memWkp_coef_mul_factor (I := I) (M := M) β K
         (covDerivLowerOrderCoeff_contDiffOn (I := I) (M := M)
@@ -595,7 +596,7 @@ private lemma covGradChristoffelLimit_memWkp
           covDerivLowerOrderCoeff (I := I) (M := M)
               g r s β k P.1 p.1 P.2 p.2 y *
             (tensorL2ChartComponent (I := I) (M := M) g r s
-              (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) β p :
+              (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) β p :
               EuclN → ℝ) y)
         =ᵐ[(volume : Measure EuclN).restrict Ω]
         (fun y =>
@@ -603,13 +604,13 @@ private lemma covGradChristoffelLimit_memWkp
               (covDerivLowerOrderCoeff (I := I) (M := M)
                 g r s β k P.1 p.1 P.2 p.2) y *
             (tensorL2ChartComponent (I := I) (M := M) g r s
-              (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) β p :
+              (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) β p :
               EuclN → ℝ) y) := by
       -- `chartL2Measure β` is, definitionally, `volume.restrict Ω`.
       have hfactor_ae_zero' : ∀ᵐ y ∂((volume : Measure EuclN).restrict Ω),
           y ∉ chartPouKernel (I := I) (M := M) β →
             (tensorL2ChartComponent (I := I) (M := M) g r s
-              (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) β p :
+              (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) β p :
               EuclN → ℝ) y = 0 := hfactor_ae_zero
       filter_upwards [hfactor_ae_zero'] with y hy
       by_cases hyK : y ∈ chartPouKernel (I := I) (M := M) β
@@ -624,7 +625,7 @@ private lemma covGradChristoffelLimit_memWkp
             (covDerivLowerOrderCoeff (I := I) (M := M)
               g r s β k P.1 p.1 P.2 p.2) y *
           (tensorL2ChartComponent (I := I) (M := M) g r s
-            (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) β p :
+            (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) β p :
             EuclN → ℝ) y) Ω := by
     classical
     induction (Finset.univ : Finset (TensorCompIdx (E := E) r s))
@@ -638,21 +639,21 @@ private lemma covGradChristoffelLimit_memWkp
                   (covDerivLowerOrderCoeff (I := I) (M := M)
                     g r s β k P.1 p.1 P.2 p.2) y *
                 (tensorL2ChartComponent (I := I) (M := M) g r s
-                  (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i)
+                  (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i)
                   β p : EuclN → ℝ) y) =
             (fun y =>
               (Set.indicator (chartPouKernel (I := I) (M := M) β)
                   (covDerivLowerOrderCoeff (I := I) (M := M)
                     g r s β k P.1 a.1 P.2 a.2) y *
                 (tensorL2ChartComponent (I := I) (M := M) g r s
-                  (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i)
+                  (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i)
                   β a : EuclN → ℝ) y) +
               ∑ p ∈ t,
                 Set.indicator (chartPouKernel (I := I) (M := M) β)
                     (covDerivLowerOrderCoeff (I := I) (M := M)
                       g r s β k P.1 p.1 P.2 p.2) y *
                   (tensorL2ChartComponent (I := I) (M := M) g r s
-                    (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i)
+                    (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i)
                     β p : EuclN → ℝ) y) := by
           funext y
           rw [Finset.sum_insert ha]
@@ -666,7 +667,7 @@ private lemma covGradChristoffelLimit_memWkp
             (covDerivLowerOrderCoeff (I := I) (M := M)
               g r s β k P.1 p.1 P.2 p.2) y *
           (tensorL2ChartComponent (I := I) (M := M) g r s
-            (tensorResolventEigenbasisVec (I := I) (M := M) h_uniform i) β p :
+            (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) β p :
             EuclN → ℝ) y) Ω
   exact h_sum
 
@@ -677,7 +678,7 @@ chart component.** For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an
 eigenbasis index `i`, an iteration order `K`, a chart centre `β` and an
 `(r, s + 1)`-component multi-index `Q'`, if every partition-of-unity Euclidean
 chart component of the `L²`-coercion of the eigenvector resolvent
-`eigenvectorResolvent g r s h_uniform i` — taken at every chart centre and for
+`eigenvectorResolvent g r s h_atlas i` — taken at every chart centre and for
 every component multi-index — is iterated Sobolev regular of order `K + 1`
 (`W^{K+1,2}`), then the partition-of-unity Euclidean chart `Q'`-component of the
 section-level covariant gradient `tensorCovGradL2Compl g r s` of that resolvent
@@ -691,20 +692,20 @@ limit, and a Christoffel-correction limit; each of the three is `W^{K,2}`, and
 scalar multiplication. -/
 theorem eigenvectorCovGrad_pou_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)
     (h_pou_phi : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
       MemWkp (d := Module.finrank ℝ E) (K + 1) 2
         (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
             (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
-              (eigenvectorResolvent (I := I) (M := M) g r s h_uniform i))
+              (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
             β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
         (chartTargetEuclid (I := I) (M := M) β))
     (β : M) (Q' : TensorCompIdx (E := E) r (s + 1)) :
     MemWkp (d := Module.finrank ℝ E) K 2
       (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
           (tensorCovGradL2Compl (I := I) (M := M) g r s
-            (eigenvectorResolvent (I := I) (M := M) g r s h_uniform i)) β Q' :
+            (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i)) β Q' :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
       (chartTargetEuclid (I := I) (M := M) β) := by
   classical
@@ -714,46 +715,46 @@ theorem eigenvectorCovGrad_pou_memWkp
   -- The three named limit terms are each `W^{K,2}` on the chart target.
   have h1 : MemWkp (d := Module.finrank ℝ E) K 2
       (eigenvectorChartWeakPartial (I := I) (M := M)
-        g r s h_uniform i β P (Q'.2 0)) Ω :=
+        g r s h_atlas i β P (Q'.2 0)) Ω :=
     eigenvectorChartWeakPartial_memWkp (I := I) (M := M)
-      g r s h_uniform i K h_pou_phi β P (Q'.2 0)
+      g r s h_atlas i K h_pou_phi β P (Q'.2 0)
   have h2 : MemWkp (d := Module.finrank ℝ E) K 2
       (covGradPouLeibnizCrossLimit (I := I) (M := M)
-        g r s h_uniform i β P (Q'.2 0)) Ω :=
+        g r s h_atlas i β P (Q'.2 0)) Ω :=
     covGradPouLeibnizCrossLimit_memWkp (I := I) (M := M)
-      g r s h_uniform i K h_pou_phi β P (Q'.2 0)
+      g r s h_atlas i K h_pou_phi β P (Q'.2 0)
   have h3 : MemWkp (d := Module.finrank ℝ E) K 2
       (covGradChristoffelLimit (I := I) (M := M)
-        g r s h_uniform i β P (Q'.2 0)) Ω :=
+        g r s h_atlas i β P (Q'.2 0)) Ω :=
     covGradChristoffelLimit_memWkp (I := I) (M := M)
-      g r s h_uniform i K h_pou_phi β P (Q'.2 0)
+      g r s h_atlas i K h_pou_phi β P (Q'.2 0)
   -- The three-term sum `principal − cross + Christoffel` is `W^{K,2}`.
   have h_sum : MemWkp (d := Module.finrank ℝ E) K 2
       (fun y =>
         eigenvectorChartWeakPartial (I := I) (M := M)
-            g r s h_uniform i β P (Q'.2 0) y
+            g r s h_atlas i β P (Q'.2 0) y
           - covGradPouLeibnizCrossLimit (I := I) (M := M)
-              g r s h_uniform i β P (Q'.2 0) y
+              g r s h_atlas i β P (Q'.2 0) y
           + covGradChristoffelLimit (I := I) (M := M)
-              g r s h_uniform i β P (Q'.2 0) y) Ω :=
+              g r s h_atlas i β P (Q'.2 0) y) Ω :=
     MemWkp.add (d := Module.finrank ℝ E) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open
       (MemWkp.sub (d := Module.finrank ℝ E)
         (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h1 h2) h3
   -- The committed identity: the `μ⁻¹`-rescaled chart component agrees almost
   -- everywhere with that three-term sum.
   have h_ae := eigenvectorCovGrad_pou_chartComponent_ae_eq (I := I) (M := M)
-    g r s h_uniform i β Q'
+    g r s h_atlas i β Q'
   -- The coercion of the `μ⁻¹`-scaled `Lp` class is `μ⁻¹` times the coercion.
   have h_smul := Lp.coeFn_smul (i.fst.val)⁻¹
     (tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
       (tensorCovGradL2Compl (I := I) (M := M) g r s
-        (eigenvectorResolvent (I := I) (M := M) g r s h_uniform i)) β Q')
+        (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i)) β Q')
   -- `μ⁻¹` times the chart-component coercion is `W^{K,2}`.
   have h_scaled : MemWkp (d := Module.finrank ℝ E) K 2
       (fun y => (i.fst.val)⁻¹ *
         ((tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
           (tensorCovGradL2Compl (I := I) (M := M) g r s
-            (eigenvectorResolvent (I := I) (M := M) g r s h_uniform i)) β Q' :
+            (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i)) β Q' :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω := by
     refine (MemWkp_congr_ae (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open ?_).mpr h_sum
@@ -762,17 +763,17 @@ theorem eigenvectorCovGrad_pou_memWkp
     have h_combined : (fun y => (i.fst.val)⁻¹ *
           ((tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
             (tensorCovGradL2Compl (I := I) (M := M) g r s
-              (eigenvectorResolvent (I := I) (M := M) g r s h_uniform i))
+              (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
             β Q' : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
             EuclN → ℝ) y)
         =ᵐ[chartL2Measure (I := I) (M := M) β]
         (fun y =>
           eigenvectorChartWeakPartial (I := I) (M := M)
-              g r s h_uniform i β P (Q'.2 0) y
+              g r s h_atlas i β P (Q'.2 0) y
             - covGradPouLeibnizCrossLimit (I := I) (M := M)
-                g r s h_uniform i β P (Q'.2 0) y
+                g r s h_atlas i β P (Q'.2 0) y
             + covGradChristoffelLimit (I := I) (M := M)
-                g r s h_uniform i β P (Q'.2 0) y) := by
+                g r s h_atlas i β P (Q'.2 0) y) := by
       filter_upwards [h_smul, h_ae] with y hy_smul hy_ae
       rw [← hy_ae, hy_smul, Pi.smul_apply, smul_eq_mul]
     exact h_combined
@@ -782,18 +783,18 @@ theorem eigenvectorCovGrad_pou_memWkp
       (fun y => i.fst.val * ((i.fst.val)⁻¹ *
         ((tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
           (tensorCovGradL2Compl (I := I) (M := M) g r s
-            (eigenvectorResolvent (I := I) (M := M) g r s h_uniform i)) β Q' :
+            (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i)) β Q' :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)) Ω :=
     MemWkp.const_smul (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_scaled i.fst.val
   have h_final_eq : (fun y => i.fst.val * ((i.fst.val)⁻¹ *
         ((tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
           (tensorCovGradL2Compl (I := I) (M := M) g r s
-            (eigenvectorResolvent (I := I) (M := M) g r s h_uniform i)) β Q' :
+            (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i)) β Q' :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)) =
       (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
           (tensorCovGradL2Compl (I := I) (M := M) g r s
-            (eigenvectorResolvent (I := I) (M := M) g r s h_uniform i)) β Q' :
+            (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i)) β Q' :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) := by
     funext y
     rw [mul_inv_cancel_left₀ hμ_ne]

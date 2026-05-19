@@ -135,7 +135,7 @@ partial.**
 For every level `m`, direction multi-index `dirs : Fin m → Fin n`, and new
 direction `a`, given global chart-`H^{m+1}` regularity of the eigenvector chart
 component, the `(m + 1)`-fold mixed weak partial `eigenvectorChartIteratedPartial
-g r s h_uniform i α P₀ (m + 1) (Fin.cons a dirs)` — which differentiates `a`
+g r s h_atlas i α P₀ (m + 1) (Fin.cons a dirs)` — which differentiates `a`
 innermost — agrees almost everywhere on the chart target with the chosen weak
 `a`-partial `chosenWeakPartial' 2 a (eigenvectorChartIteratedPartial … m dirs)`
 of the `m`-fold mixed weak partial along `dirs`.
@@ -144,22 +144,22 @@ This is the eigenvector/tensor mirror of the scalar campaign's
 `chosenMthMixedPartialChartPushedU_cons_eq_chosenWeakPartial_chosenMthMixed_ae_weak`. -/
 theorem eigenvectorChartIteratedPartial_cons_eq_chosenWeakPartial_ae
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
     ∀ (m : ℕ) (dirs : Fin m → Fin (Module.finrank ℝ E))
       (a : Fin (Module.finrank ℝ E)),
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) (m + 1) 2
-        (eigenvectorChartComponentFun (I := I) (M := M) g r s h_uniform i α P₀)
+        (eigenvectorChartComponentFun (I := I) (M := M) g r s h_atlas i α P₀)
         (chartTargetEuclid (I := I) (M := M) α) →
       eigenvectorChartIteratedPartial (I := I) (M := M)
-          g r s h_uniform i α P₀ (m + 1) (Fin.cons a dirs)
+          g r s h_atlas i α P₀ (m + 1) (Fin.cons a dirs)
         =ᵐ[(volume : Measure EuclN).restrict
           (chartTargetEuclid (I := I) (M := M) α)]
       chosenWeakPartial' (d := Module.finrank ℝ E) 2 a
         (eigenvectorChartIteratedPartial (I := I) (M := M)
-          g r s h_uniform i α P₀ m dirs)
+          g r s h_atlas i α P₀ m dirs)
         (chartTargetEuclid (I := I) (M := M) α) := by
   intro m
   induction m with
@@ -168,10 +168,10 @@ theorem eigenvectorChartIteratedPartial_cons_eq_chosenWeakPartial_ae
       -- At `m = 0`, the recursion peels the (single) entry `a`.
       have h_lhs_eq :
           eigenvectorChartIteratedPartial (I := I) (M := M)
-              g r s h_uniform i α P₀ 1 (Fin.cons a dirs) =
+              g r s h_atlas i α P₀ 1 (Fin.cons a dirs) =
             chosenWeakPartial' (d := Module.finrank ℝ E) 2 a
               (eigenvectorChartIteratedPartial (I := I) (M := M)
-                g r s h_uniform i α P₀ 0 dirs)
+                g r s h_atlas i α P₀ 0 dirs)
               (chartTargetEuclid (I := I) (M := M) α) := by
         rw [eigenvectorChartIteratedPartial_succ]
         have h_last : (Fin.cons a dirs : Fin 1 → _) (Fin.last 0) = a := rfl
@@ -191,24 +191,24 @@ theorem eigenvectorChartIteratedPartial_cons_eq_chosenWeakPartial_ae
           Fin (m + 2) → Fin (Module.finrank ℝ E)) = Fin.cons a (Fin.init dirs) :=
         fin_init_cons dirs
       have h_lhs_unfold :
-          eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_uniform i α P₀
+          eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_atlas i α P₀
               (m + 2) (Fin.cons a dirs) =
             chosenWeakPartial' (d := Module.finrank ℝ E) 2 (dirs (Fin.last m))
               (eigenvectorChartIteratedPartial (I := I) (M := M)
-                g r s h_uniform i α P₀ (m + 1) (Fin.cons a (Fin.init dirs))) Ω := by
+                g r s h_atlas i α P₀ (m + 1) (Fin.cons a (Fin.init dirs))) Ω := by
         rw [eigenvectorChartIteratedPartial_succ, h_last, h_init]
       have h_dirs_unfold :
-          eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_uniform i α P₀
+          eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_atlas i α P₀
               (m + 1) dirs =
             chosenWeakPartial' (d := Module.finrank ℝ E) 2 (dirs (Fin.last m))
               (eigenvectorChartIteratedPartial (I := I) (M := M)
-                g r s h_uniform i α P₀ m (Fin.init dirs)) Ω := by
+                g r s h_atlas i α P₀ m (Fin.init dirs)) Ω := by
         rw [eigenvectorChartIteratedPartial_succ]
       -- The inductive hypothesis needs chart-`H^{m+1}` of the parent.
       have h_parent_for_ih :
           DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
             (d := Module.finrank ℝ E) (m + 1) 2
-            (eigenvectorChartComponentFun (I := I) (M := M) g r s h_uniform i α P₀)
+            (eigenvectorChartComponentFun (I := I) (M := M) g r s h_atlas i α P₀)
             Ω :=
         DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.le_of_le
           (by omega) h_parent
@@ -217,12 +217,12 @@ theorem eigenvectorChartIteratedPartial_cons_eq_chosenWeakPartial_ae
       have h_propagate :
           chosenWeakPartial' (d := Module.finrank ℝ E) 2 (dirs (Fin.last m))
               (eigenvectorChartIteratedPartial (I := I) (M := M)
-                g r s h_uniform i α P₀ (m + 1) (Fin.cons a (Fin.init dirs))) Ω
+                g r s h_atlas i α P₀ (m + 1) (Fin.cons a (Fin.init dirs))) Ω
             =ᵐ[(volume : Measure EuclN).restrict Ω]
           chosenWeakPartial' (d := Module.finrank ℝ E) 2 (dirs (Fin.last m))
             (chosenWeakPartial' (d := Module.finrank ℝ E) 2 a
               (eigenvectorChartIteratedPartial (I := I) (M := M)
-                g r s h_uniform i α P₀ m (Fin.init dirs)) Ω) Ω :=
+                g r s h_atlas i α P₀ m (Fin.init dirs)) Ω) Ω :=
         chosenWeakPartial'_ae_congr (d := Module.finrank ℝ E)
           (p := 2) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ih (dirs (Fin.last m))
       -- The `m`-fold mixed partial along `Fin.init dirs` lies in chart-`H²`.
@@ -230,16 +230,16 @@ theorem eigenvectorChartIteratedPartial_cons_eq_chosenWeakPartial_ae
           DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
             (d := Module.finrank ℝ E) 2 2
             (eigenvectorChartIteratedPartial (I := I) (M := M)
-              g r s h_uniform i α P₀ m (Fin.init dirs)) Ω := by
+              g r s h_atlas i α P₀ m (Fin.init dirs)) Ω := by
         have h_parent_2_m :
             DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
               (d := Module.finrank ℝ E) (2 + m) 2
               (eigenvectorChartComponentFun (I := I) (M := M)
-                g r s h_uniform i α P₀) Ω := by
+                g r s h_atlas i α P₀) Ω := by
           have h_eq : (2 : ℕ) + m = m + 2 := by ring
           rw [h_eq]; exact h_parent
         exact eigenvectorChartIteratedPartial_memWkp_of_memWkp
-          (I := I) (M := M) g r s h_uniform i α P₀ m 2 h_parent_2_m (Fin.init dirs)
+          (I := I) (M := M) g r s h_atlas i α P₀ m 2 h_parent_2_m (Fin.init dirs)
       -- Polymorphic Schwarz commutativity at order two.
       have h_swap :=
         chosenWeakPartial'_swap_ae_of_memWkp_two
@@ -249,30 +249,30 @@ theorem eigenvectorChartIteratedPartial_cons_eq_chosenWeakPartial_ae
           chosenWeakPartial' (d := Module.finrank ℝ E) 2 a
               (chosenWeakPartial' (d := Module.finrank ℝ E) 2 (dirs (Fin.last m))
                 (eigenvectorChartIteratedPartial (I := I) (M := M)
-                  g r s h_uniform i α P₀ m (Fin.init dirs)) Ω) Ω =
+                  g r s h_atlas i α P₀ m (Fin.init dirs)) Ω) Ω =
             chosenWeakPartial' (d := Module.finrank ℝ E) 2 a
               (eigenvectorChartIteratedPartial (I := I) (M := M)
-                g r s h_uniform i α P₀ (m + 1) dirs) Ω := by
+                g r s h_atlas i α P₀ (m + 1) dirs) Ω := by
         rw [← h_dirs_unfold]
-      calc eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_uniform i α P₀
+      calc eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_atlas i α P₀
               (m + 2) (Fin.cons a dirs)
           = chosenWeakPartial' (d := Module.finrank ℝ E) 2 (dirs (Fin.last m))
               (eigenvectorChartIteratedPartial (I := I) (M := M)
-                g r s h_uniform i α P₀ (m + 1) (Fin.cons a (Fin.init dirs))) Ω :=
+                g r s h_atlas i α P₀ (m + 1) (Fin.cons a (Fin.init dirs))) Ω :=
             h_lhs_unfold
         _ =ᵐ[(volume : Measure EuclN).restrict Ω]
             chosenWeakPartial' (d := Module.finrank ℝ E) 2 (dirs (Fin.last m))
               (chosenWeakPartial' (d := Module.finrank ℝ E) 2 a
                 (eigenvectorChartIteratedPartial (I := I) (M := M)
-                  g r s h_uniform i α P₀ m (Fin.init dirs)) Ω) Ω := h_propagate
+                  g r s h_atlas i α P₀ m (Fin.init dirs)) Ω) Ω := h_propagate
         _ =ᵐ[(volume : Measure EuclN).restrict Ω]
             chosenWeakPartial' (d := Module.finrank ℝ E) 2 a
               (chosenWeakPartial' (d := Module.finrank ℝ E) 2 (dirs (Fin.last m))
                 (eigenvectorChartIteratedPartial (I := I) (M := M)
-                  g r s h_uniform i α P₀ m (Fin.init dirs)) Ω) Ω := h_swap
+                  g r s h_atlas i α P₀ m (Fin.init dirs)) Ω) Ω := h_swap
         _ = chosenWeakPartial' (d := Module.finrank ℝ E) 2 a
               (eigenvectorChartIteratedPartial (I := I) (M := M)
-                g r s h_uniform i α P₀ (m + 1) dirs) Ω := h_final
+                g r s h_atlas i α P₀ (m + 1) dirs) Ω := h_final
 
 /-! ## Structural order-assembly: chart-`H^{m+2}` from per-level regularity
 
@@ -293,7 +293,7 @@ partial in directions `dirs` lies in chart-`H^{m+2}`. The headline assembly
 specialises this at `j = 0`. -/
 private theorem eigenvectorIteratedPartial_memWkp_of_chartH_at_all_indices
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
     ∀ (m : ℕ) (j : ℕ) (dirs : Fin j → Fin (Module.finrank ℝ E)),
@@ -301,18 +301,18 @@ private theorem eigenvectorIteratedPartial_memWkp_of_chartH_at_all_indices
         DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
           (d := Module.finrank ℝ E) 1 2
           (eigenvectorChartIteratedPartial (I := I) (M := M)
-            g r s h_uniform i α P₀ j idx_all)
+            g r s h_atlas i α P₀ j idx_all)
           (chartTargetEuclid (I := I) (M := M) α)) →
       (∀ idx_next : Fin (j + 1) → Fin (Module.finrank ℝ E),
         DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
           (d := Module.finrank ℝ E) (m + 1) 2
           (eigenvectorChartIteratedPartial (I := I) (M := M)
-            g r s h_uniform i α P₀ (j + 1) idx_next)
+            g r s h_atlas i α P₀ (j + 1) idx_next)
           (chartTargetEuclid (I := I) (M := M) α)) →
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
         (d := Module.finrank ℝ E) (m + 2) 2
         (eigenvectorChartIteratedPartial (I := I) (M := M)
-          g r s h_uniform i α P₀ j dirs)
+          g r s h_atlas i α P₀ j dirs)
         (chartTargetEuclid (I := I) (M := M) α) := by
   intro m j dirs h_w1p_j h_memWkp_succ
   -- `MemWkp (m+2) 2` of the `j`-fold mixed partial in `dirs`: by `MemWkp_succ`,
@@ -327,10 +327,10 @@ private theorem eigenvectorIteratedPartial_memWkp_of_chartH_at_all_indices
     -- `= eigenvectorChartIteratedPartial … (j+1) (Fin.snoc dirs a)`.
     have h_succ_eq :
         eigenvectorChartIteratedPartial (I := I) (M := M)
-            g r s h_uniform i α P₀ (j + 1) (Fin.snoc dirs a) =
+            g r s h_atlas i α P₀ (j + 1) (Fin.snoc dirs a) =
           chosenWeakPartial' (d := Module.finrank ℝ E) 2 a
             (eigenvectorChartIteratedPartial (I := I) (M := M)
-              g r s h_uniform i α P₀ j dirs)
+              g r s h_atlas i α P₀ j dirs)
             (chartTargetEuclid (I := I) (M := M) α) := by
       rw [eigenvectorChartIteratedPartial_succ]
       have h_last : (Fin.snoc dirs a :
@@ -362,7 +362,7 @@ step of the arbitrary-order interior-regularity bootstrap that raises the
 Sobolev order of the chart component by two. -/
 theorem eigenvectorChartComponent_memWkp_m_plus_two_of_iterated
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
     (h_intermediate_w1p :
@@ -370,18 +370,18 @@ theorem eigenvectorChartComponent_memWkp_m_plus_two_of_iterated
         DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
           (d := Module.finrank ℝ E) 1 2
           (eigenvectorChartIteratedPartial (I := I) (M := M)
-            g r s h_uniform i α P₀ j idx)
+            g r s h_atlas i α P₀ j idx)
           (chartTargetEuclid (I := I) (M := M) α))
     (h_top_memWkp_two :
       ∀ (idx : Fin m → Fin (Module.finrank ℝ E)),
         DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
           (d := Module.finrank ℝ E) 2 2
           (eigenvectorChartIteratedPartial (I := I) (M := M)
-            g r s h_uniform i α P₀ m idx)
+            g r s h_atlas i α P₀ m idx)
           (chartTargetEuclid (I := I) (M := M) α)) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) (m + 2) 2
-      (eigenvectorChartComponentFun (I := I) (M := M) g r s h_uniform i α P₀)
+      (eigenvectorChartComponentFun (I := I) (M := M) g r s h_atlas i α P₀)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
   -- The general statement, parametrised by the "gap" between the direction
@@ -395,7 +395,7 @@ theorem eigenvectorChartComponent_memWkp_m_plus_two_of_iterated
         DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
           (d := Module.finrank ℝ E) (gap + 2) 2
           (eigenvectorChartIteratedPartial (I := I) (M := M)
-            g r s h_uniform i α P₀ j dirs)
+            g r s h_atlas i α P₀ j dirs)
           (chartTargetEuclid (I := I) (M := M) α) := by
     intro gap
     induction gap with
@@ -408,14 +408,14 @@ theorem eigenvectorChartComponent_memWkp_m_plus_two_of_iterated
         intro j hj dirs
         -- Apply the per-direction-count engine at `m_eng := gap + 1`, `j`.
         have h_engine := eigenvectorIteratedPartial_memWkp_of_chartH_at_all_indices
-          (I := I) (M := M) g r s h_uniform i α P₀ (gap + 1) j dirs
+          (I := I) (M := M) g r s h_atlas i α P₀ (gap + 1) j dirs
         -- The chart-`H¹` hypothesis: every `j`-fold partial (`j ≤ m`).
         have hj_le : j ≤ m := by omega
         have h_w1p : ∀ idx_all : Fin j → Fin (Module.finrank ℝ E),
             DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
               (d := Module.finrank ℝ E) 1 2
               (eigenvectorChartIteratedPartial (I := I) (M := M)
-                g r s h_uniform i α P₀ j idx_all)
+                g r s h_atlas i α P₀ j idx_all)
               (chartTargetEuclid (I := I) (M := M) α) :=
           fun idx_all => h_intermediate_w1p j hj_le idx_all
         -- The chart-`H^{gap+2}` hypothesis: every `(j+1)`-fold partial,
@@ -424,7 +424,7 @@ theorem eigenvectorChartComponent_memWkp_m_plus_two_of_iterated
             DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
               (d := Module.finrank ℝ E) ((gap + 1) + 1) 2
               (eigenvectorChartIteratedPartial (I := I) (M := M)
-                g r s h_uniform i α P₀ (j + 1) idx_next)
+                g r s h_atlas i α P₀ (j + 1) idx_next)
               (chartTargetEuclid (I := I) (M := M) α) := by
           intro idx_next
           have h_ih := ih (j + 1) (by omega) idx_next
@@ -444,7 +444,7 @@ theorem eigenvectorChartComponent_memWkp_m_plus_two_of_iterated
 section ElaborationTests
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
-  (h_uniform : uniformTensorChartSobolevBound g r s)
+  (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
 
 /-- The Schwarz reindexing identity re-expresses the `Fin.cons`-indexed iterated
@@ -454,18 +454,18 @@ example (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
     (a : Fin (Module.finrank ℝ E))
     (h_parent : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) (m + 1) 2
-      (eigenvectorChartComponentFun (I := I) (M := M) g r s h_uniform i α P₀)
+      (eigenvectorChartComponentFun (I := I) (M := M) g r s h_atlas i α P₀)
       (chartTargetEuclid (I := I) (M := M) α)) :
     eigenvectorChartIteratedPartial (I := I) (M := M)
-        g r s h_uniform i α P₀ (m + 1) (Fin.cons a dirs)
+        g r s h_atlas i α P₀ (m + 1) (Fin.cons a dirs)
       =ᵐ[(volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)]
     chosenWeakPartial' (d := Module.finrank ℝ E) 2 a
       (eigenvectorChartIteratedPartial (I := I) (M := M)
-        g r s h_uniform i α P₀ m dirs)
+        g r s h_atlas i α P₀ m dirs)
       (chartTargetEuclid (I := I) (M := M) α) :=
   eigenvectorChartIteratedPartial_cons_eq_chosenWeakPartial_ae
-    g r s h_uniform i α P₀ m dirs a h_parent
+    g r s h_atlas i α P₀ m dirs a h_parent
 
 end ElaborationTests
 
