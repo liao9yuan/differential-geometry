@@ -32,11 +32,11 @@ The **maximal-regularity bounds** (the deliverables), with `C(T) = 1 + T`:
 
 ## Main definitions
 
-* `maximalRegularityDerivField h_uniform a hT f` — the time derivative `∂_t u`,
+* `maximalRegularityDerivField h_atlas a hT f` — the time derivative `∂_t u`,
   an element of `L²([0,T]; Hᵃ)`, with `i`-th mode `fᵢ − λᵢ·φᵢ`.
-* `maximalRegularitySolField h_uniform a hT hT1 f` — the solution `u`, viewed as
+* `maximalRegularitySolField h_atlas a hT hT1 f` — the solution `u`, viewed as
   an element of `L²([0,T]; H^{a+2})` (the two-derivative-gain regularity).
-* `maximalRegularityOp h_uniform a hT hT1 f` — the solution operator, landing in
+* `maximalRegularityOp h_atlas a hT hT1 f` — the solution operator, landing in
   the strong-solution space `H¹([0,T]; Hᵃ)` (initial value `0`, `L²` time
   derivative `∂_t u`).
 
@@ -79,7 +79,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
-  {h_uniform : uniformTensorChartSobolevBound g r s}
+  {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
 variable {a : ℝ} {T : ℝ}
 
 /-! ## The per-mode building blocks
@@ -94,7 +94,7 @@ solution and its time derivative. -/
 the convolution of the `i`-th eigen-coordinate of the forcing against the heat
 kernel of eigenvalue `λᵢ`. -/
 def solModeCoeff (hT : 0 ≤ T)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T)
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) : timeL2 ℝ T :=
   perModeConvL2 (TensorEigenIdx.lambda (I := I) (M := M) i)
     (tensor_lambda_nonneg (I := I) (M := M) i) hT
@@ -103,7 +103,7 @@ def solModeCoeff (hT : 0 ≤ T)
 /-- The per-mode time-derivative coordinate: `perModeConvDerivL2 λᵢ (timeModeCoeff
 f i)`, the right-hand side `fᵢ − λᵢ·φᵢ` of the per-mode scalar ODE. -/
 def derivModeCoeff (hT : 0 ≤ T)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T)
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) : timeL2 ℝ T :=
   perModeConvDerivL2 (TensorEigenIdx.lambda (I := I) (M := M) i)
     (tensor_lambda_nonneg (I := I) (M := M) i) hT
@@ -117,7 +117,7 @@ weights `(1 + λᵢ)^σ` so as to feed `norm_sq_le_of_weighted_perMode_le`. -/
 /-- The auxiliary per-mode bound on the convolution itself:
 `‖perModeConvL2 λᵢ (timeModeCoeff f i)‖ ≤ T · ‖timeModeCoeff f i‖`. -/
 theorem norm_solModeCoeff_le (hT : 0 ≤ T)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T)
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     ‖solModeCoeff (I := I) (M := M) (a := a) hT f i‖ ≤
       T * ‖timeModeCoeff (I := I) (M := M) f i‖ := by
@@ -127,7 +127,7 @@ theorem norm_solModeCoeff_le (hT : 0 ≤ T)
 
 /-- The per-mode maximal-regularity estimate `λᵢ · ‖φᵢ‖ ≤ ‖fᵢ‖`. -/
 theorem lambda_mul_norm_solModeCoeff_le (hT : 0 ≤ T)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T)
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     TensorEigenIdx.lambda (I := I) (M := M) i *
         ‖solModeCoeff (I := I) (M := M) (a := a) hT f i‖ ≤
@@ -147,7 +147,7 @@ the per-mode bound underlying the `H^{a+2}` maximal-regularity estimate.  It is
 the sum of the convolution bound `‖φᵢ‖ ≤ T‖fᵢ‖` and the maximal-regularity
 estimate `λᵢ‖φᵢ‖ ≤ ‖fᵢ‖`. -/
 theorem one_add_lambda_mul_norm_solModeCoeff_le (hT : 0 ≤ T)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T)
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     (1 + TensorEigenIdx.lambda (I := I) (M := M) i) *
         ‖solModeCoeff (I := I) (M := M) (a := a) hT f i‖ ≤
@@ -169,7 +169,7 @@ theorem one_add_lambda_mul_norm_solModeCoeff_le (hT : 0 ≤ T)
 
 /-- The per-mode time-derivative estimate `‖fᵢ − λᵢ·φᵢ‖ ≤ 2·‖fᵢ‖`. -/
 theorem norm_derivModeCoeff_le (hT : 0 ≤ T)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T)
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     ‖derivModeCoeff (I := I) (M := M) (a := a) hT f i‖ ≤
       2 * ‖timeModeCoeff (I := I) (M := M) f i‖ :=
@@ -199,7 +199,7 @@ private theorem tensorSobolevWeight_add_two
 
   `(1 + λᵢ)^{a+2} · ‖φᵢ‖² ≤ (1 + T)² · (1 + λᵢ)ᵃ · ‖fᵢ‖²`. -/
 theorem weighted_solModeCoeff_le (hT : 0 ≤ T)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T)
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     tensorSobolevWeight (I := I) (M := M) i (a + 2) *
         ‖solModeCoeff (I := I) (M := M) (a := a) hT f i‖ ^ 2 ≤
@@ -238,7 +238,7 @@ theorem weighted_solModeCoeff_le (hT : 0 ≤ T)
 /-- The mode family `i ↦ φᵢ` of solution coordinates is weighted-summable at the
 `H^{a+2}` scale. -/
 theorem summable_solModeCoeff (hT : 0 ≤ T)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T) :
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T) :
     Summable (fun i => tensorSobolevWeight (I := I) (M := M) i (a + 2) *
       ‖solModeCoeff (I := I) (M := M) (a := a) hT f i‖ ^ 2) := by
   -- Dominated by `(1 + T)²` times the (summable) weighted forcing family.
@@ -255,7 +255,7 @@ theorem summable_solModeCoeff (hT : 0 ≤ T)
 
   `(1 + λᵢ)ᵃ · ‖fᵢ − λᵢ·φᵢ‖² ≤ 2² · (1 + λᵢ)ᵃ · ‖fᵢ‖²`. -/
 theorem weighted_derivModeCoeff_le (hT : 0 ≤ T)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T)
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     tensorSobolevWeight (I := I) (M := M) i a *
         ‖derivModeCoeff (I := I) (M := M) (a := a) hT f i‖ ^ 2 ≤
@@ -279,7 +279,7 @@ theorem weighted_derivModeCoeff_le (hT : 0 ≤ T)
 /-- The mode family `i ↦ fᵢ − λᵢ·φᵢ` of time-derivative coordinates is
 weighted-summable at the `Hᵃ` scale. -/
 theorem summable_derivModeCoeff (hT : 0 ≤ T)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T) :
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T) :
     Summable (fun i => tensorSobolevWeight (I := I) (M := M) i a *
       ‖derivModeCoeff (I := I) (M := M) (a := a) hT f i‖ ^ 2) := by
   have hdom : Summable (fun i => 2 ^ 2 *
@@ -300,21 +300,21 @@ time derivative `∂_t u ∈ L²([0,T]; Hᵃ)`. -/
 /-- **The time-derivative field `∂_t u`.**  For a forcing term `f ∈ L²([0,T];
 Hᵃ)`, this is the element of `L²([0,T]; Hᵃ)` whose `i`-th eigen-coordinate is
 `fᵢ − λᵢ·φᵢ`, the per-mode scalar ODE right-hand side. -/
-def maximalRegularityDerivField (h_uniform : uniformTensorChartSobolevBound g r s)
+def maximalRegularityDerivField (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (a : ℝ) {T : ℝ} (hT : 0 ≤ T)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T) :
-    timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T :=
-  timeL2OfModes (I := I) (M := M) h_uniform
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T) :
+    timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T :=
+  timeL2OfModes (I := I) (M := M) h_atlas
     (fun i => derivModeCoeff (I := I) (M := M) (a := a) hT f i)
 
 /-- The `i`-th eigen-coordinate of the time-derivative field is `fᵢ − λᵢ·φᵢ`. -/
 theorem maximalRegularityDerivField_timeModeCoeff (hT : 0 ≤ T)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T)
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     timeModeCoeff (I := I) (M := M)
-        (maximalRegularityDerivField (I := I) (M := M) h_uniform a hT f) i =
+        (maximalRegularityDerivField (I := I) (M := M) h_atlas a hT f) i =
       derivModeCoeff (I := I) (M := M) (a := a) hT f i :=
-  timeL2OfModes_timeModeCoeff (I := I) (M := M) (h_uniform := h_uniform) _
+  timeL2OfModes_timeModeCoeff (I := I) (M := M) (h_atlas := h_atlas) _
     (summable_derivModeCoeff (I := I) (M := M) (a := a) hT f) i
 
 /-- **The solution field `u`, viewed in `L²([0,T]; H^{a+2})`.**  For a forcing
@@ -322,22 +322,22 @@ term `f ∈ L²([0,T]; Hᵃ)`, this is the element of `L²([0,T]; H^{a+2})` whos
 `i`-th eigen-coordinate is `φᵢ = perModeConvL2 λᵢ fᵢ`.  The two-derivative gain
 (`H^{a+2}` from a forcing in `Hᵃ`) is exactly what the maximal-regularity bound
 quantifies. -/
-def maximalRegularitySolField (h_uniform : uniformTensorChartSobolevBound g r s)
+def maximalRegularitySolField (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (a : ℝ) {T : ℝ} (hT : 0 ≤ T)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T) :
-    timeL2 (tensorHs (I := I) (M := M) g r s h_uniform (a + 2)) T :=
-  timeL2OfModes (I := I) (M := M) h_uniform
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T) :
+    timeL2 (tensorHs (I := I) (M := M) g r s h_atlas (a + 2)) T :=
+  timeL2OfModes (I := I) (M := M) h_atlas
     (fun i => solModeCoeff (I := I) (M := M) (a := a) hT f i)
 
 /-- The `i`-th eigen-coordinate of the solution field is `φᵢ = perModeConvL2 λᵢ
 (timeModeCoeff f i)`. -/
 theorem maximalRegularitySolField_timeModeCoeff (hT : 0 ≤ T)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T)
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     timeModeCoeff (I := I) (M := M)
-        (maximalRegularitySolField (I := I) (M := M) h_uniform a hT f) i =
+        (maximalRegularitySolField (I := I) (M := M) h_atlas a hT f) i =
       solModeCoeff (I := I) (M := M) (a := a) hT f i :=
-  timeL2OfModes_timeModeCoeff (I := I) (M := M) (h_uniform := h_uniform) _
+  timeL2OfModes_timeModeCoeff (I := I) (M := M) (h_atlas := h_atlas) _
     (summable_solModeCoeff (I := I) (M := M) (a := a) hT f) i
 
 /-! ## The maximal-regularity operator
@@ -347,39 +347,39 @@ space `H¹([0,T]; Hᵃ)`: the time-`H¹` element with initial value `0` and `L²
 time derivative the time-derivative field `∂_t u`. -/
 
 /-- **The `L²`-maximal-regularity operator.**  For a forcing term `f ∈ L²([0,T];
-Hᵃ)`, `maximalRegularityOp h_uniform a hT hT1 f` is the Duhamel solution of
+Hᵃ)`, `maximalRegularityOp h_atlas a hT hT1 f` is the Duhamel solution of
 `∂_t u = Δ_∇ u + f`, `u(0) = 0`, packaged as an element of the strong-solution
 space `H¹([0,T]; Hᵃ)`: its initial value is `0` and its `L²` time derivative is
 the time-derivative field `∂_t u`. -/
-def maximalRegularityOp (h_uniform : uniformTensorChartSobolevBound g r s)
+def maximalRegularityOp (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (a : ℝ) {T : ℝ} (hT : 0 < T) (_hT1 : T ≤ 1)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T) :
-    timeH1 (tensorHs (I := I) (M := M) g r s h_uniform a) T :=
-  TimeSobolev.timeH1.mk (0 : tensorHs (I := I) (M := M) g r s h_uniform a)
-    (maximalRegularityDerivField (I := I) (M := M) h_uniform a hT.le f)
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T) :
+    timeH1 (tensorHs (I := I) (M := M) g r s h_atlas a) T :=
+  TimeSobolev.timeH1.mk (0 : tensorHs (I := I) (M := M) g r s h_atlas a)
+    (maximalRegularityDerivField (I := I) (M := M) h_atlas a hT.le f)
 
 @[simp] theorem maximalRegularityOp_trace0_eq
     (hT : 0 < T) (hT1 : T ≤ 1)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T) :
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T) :
     TimeSobolev.timeH1.trace0 _ T
-        (maximalRegularityOp (I := I) (M := M) h_uniform a hT hT1 f) =
+        (maximalRegularityOp (I := I) (M := M) h_atlas a hT hT1 f) =
       0 :=
   rfl
 
 @[simp] theorem maximalRegularityOp_timeDeriv
     (hT : 0 < T) (hT1 : T ≤ 1)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T) :
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T) :
     TimeSobolev.timeH1.timeDeriv _ T
-        (maximalRegularityOp (I := I) (M := M) h_uniform a hT hT1 f) =
-      maximalRegularityDerivField (I := I) (M := M) h_uniform a hT.le f :=
+        (maximalRegularityOp (I := I) (M := M) h_atlas a hT hT1 f) =
+      maximalRegularityDerivField (I := I) (M := M) h_atlas a hT.le f :=
   rfl
 
 /-- **Initial condition.**  The Duhamel solution vanishes at `t = 0`:
 `u(0) = 0`. -/
 theorem maximalRegularityOp_trace0 (hT : 0 < T) (hT1 : T ≤ 1)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T) :
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T) :
     TimeSobolev.timeH1.trace0 _ T
-        (maximalRegularityOp (I := I) (M := M) h_uniform a hT hT1 f) = 0 :=
+        (maximalRegularityOp (I := I) (M := M) h_atlas a hT hT1 f) = 0 :=
   rfl
 
 /-! ## The maximal-regularity bounds -/
@@ -392,8 +392,8 @@ solution field lies in `L²([0,T]; H^{a+2})` with
 The output gains *two* Sobolev derivatives over the forcing; the constant
 `C(T) = 1 + T` depends only on the (bounded) time horizon. -/
 theorem maximalRegularityOp_norm_Ha2_le (hT : 0 < T) (_hT1 : T ≤ 1)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T) :
-    ‖maximalRegularitySolField (I := I) (M := M) h_uniform a hT.le f‖ ≤
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T) :
+    ‖maximalRegularitySolField (I := I) (M := M) h_atlas a hT.le f‖ ≤
       (1 + T) * ‖f‖ := by
   refine norm_le_of_weighted_perMode_le (I := I) (M := M) (b := a + 2)
     (C := 1 + T) (by linarith [hT.le]) _ f (fun i => ?_)
@@ -408,8 +408,8 @@ theorem maximalRegularityOp_norm_Ha2_le (hT : 0 < T) (_hT1 : T ≤ 1)
 
 The constant `2` is absolute. -/
 theorem maximalRegularityOp_norm_deriv_le (hT : 0 < T) (_hT1 : T ≤ 1)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T) :
-    ‖maximalRegularityDerivField (I := I) (M := M) h_uniform a hT.le f‖ ≤
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T) :
+    ‖maximalRegularityDerivField (I := I) (M := M) h_atlas a hT.le f‖ ≤
       2 * ‖f‖ := by
   refine norm_le_of_weighted_perMode_le (I := I) (M := M) (b := a)
     (C := 2) (by norm_num) _ f (fun i => ?_)
@@ -424,23 +424,23 @@ bounded from `L²([0,T]; Hᵃ)` into the strong-solution space `H¹([0,T]; Hᵃ)
 The `H¹`-graph norm `‖u‖² = ‖u(0)‖² + ‖∂_t u‖²` combines the (vanishing) initial
 condition and the `∂_t` bound. -/
 theorem maximalRegularityOp_norm_le (hT : 0 < T) (hT1 : T ≤ 1)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T) :
-    ‖maximalRegularityOp (I := I) (M := M) h_uniform a hT hT1 f‖ ≤ 2 * ‖f‖ := by
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T) :
+    ‖maximalRegularityOp (I := I) (M := M) h_atlas a hT hT1 f‖ ≤ 2 * ‖f‖ := by
   -- `‖u‖² = ‖u(0)‖² + ‖∂_t u‖² = 0 + ‖∂_t u‖² ≤ (2‖f‖)²`.
   have hnormsq := TimeSobolev.timeH1.norm_sq_eq
-    (maximalRegularityOp (I := I) (M := M) h_uniform a hT hT1 f)
-  have hinit : (maximalRegularityOp (I := I) (M := M) h_uniform a hT hT1 f).init = 0 :=
+    (maximalRegularityOp (I := I) (M := M) h_atlas a hT hT1 f)
+  have hinit : (maximalRegularityOp (I := I) (M := M) h_atlas a hT hT1 f).init = 0 :=
     rfl
-  have hderiv : (maximalRegularityOp (I := I) (M := M) h_uniform a hT hT1 f).deriv =
-      maximalRegularityDerivField (I := I) (M := M) h_uniform a hT.le f := rfl
+  have hderiv : (maximalRegularityOp (I := I) (M := M) h_atlas a hT hT1 f).deriv =
+      maximalRegularityDerivField (I := I) (M := M) h_atlas a hT.le f := rfl
   have hderiv_le := maximalRegularityOp_norm_deriv_le (I := I) (M := M)
-    (h_uniform := h_uniform) (a := a) hT hT1 f
-  have hsq : ‖maximalRegularityOp (I := I) (M := M) h_uniform a hT hT1 f‖ ^ 2 ≤
+    (h_atlas := h_atlas) (a := a) hT hT1 f
+  have hsq : ‖maximalRegularityOp (I := I) (M := M) h_atlas a hT hT1 f‖ ^ 2 ≤
       (2 * ‖f‖) ^ 2 := by
     rw [hnormsq, hinit, hderiv, norm_zero]
     have h2f_nonneg : 0 ≤ 2 * ‖f‖ := mul_nonneg (by norm_num) (norm_nonneg _)
     nlinarith [hderiv_le, norm_nonneg
-      (maximalRegularityDerivField (I := I) (M := M) h_uniform a hT.le f)]
+      (maximalRegularityDerivField (I := I) (M := M) h_atlas a hT.le f)]
   have h := Real.sqrt_le_sqrt hsq
   rwa [Real.sqrt_sq (norm_nonneg _),
     Real.sqrt_sq (mul_nonneg (by norm_num) (norm_nonneg _))] at h

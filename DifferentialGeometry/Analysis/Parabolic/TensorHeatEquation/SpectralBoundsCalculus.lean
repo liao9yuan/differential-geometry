@@ -9,20 +9,20 @@ import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
 # Time differentiability and `C^∞`-ness of the tensor spectral power family
 
 For a closed Riemannian manifold `(M, g)` with a uniform tensor Sobolev
-bound `h_uniform`, this file proves the time-calculus properties of the
-family `tensorHeatPower g r s h_uniform k t` on `TensorL2 r s g`:
+bound `h_atlas`, this file proves the time-calculus properties of the
+family `tensorHeatPower g r s h_atlas k t` on `TensorL2 r s g`:
 
 * `tensorHeatPower_comp_tensorHeatSemigroup`,
   `tensorHeatSemigroup_comp_tensorHeatPower` — both directions of the
   composition law `(-Δ_∇)^k e^{t₁ Δ_∇} ∘ e^{t₂ Δ_∇} =
   (-Δ_∇)^k e^{(t₁+t₂) Δ_∇}` (for `0 < t₁`, `0 ≤ t₂`).
-* `hasDerivAt_tensorHeatPower` — `(d/ds) tensorHeatPower g r s h_uniform k s
-  = -tensorHeatPower g r s h_uniform (k+1) s` at every `t > 0`, in the
+* `hasDerivAt_tensorHeatPower` — `(d/ds) tensorHeatPower g r s h_atlas k s
+  = -tensorHeatPower g r s h_atlas (k+1) s` at every `t > 0`, in the
   operator-norm topology.
 * `hasDerivAt_tensorHeatSemigroup` — specialization of the above for
   `k = 0`.
 * `iteratedDerivWithin_tensorHeatSemigroup_Ioi` — the iterated form
-  `(d/ds)^j e^{s Δ_∇} = (-1)^j tensorHeatPower g r s h_uniform j s`.
+  `(d/ds)^j e^{s Δ_∇} = (-1)^j tensorHeatPower g r s h_atlas j s`.
 * `contDiffOn_tensorHeatPower_Ioi`,
   `contDiffOn_tensorHeatSemigroup_Ioi` — `C^∞`-ness on `(0, ∞)` in the
   operator-norm topology.
@@ -55,6 +55,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open DifferentialGeometry.Geometry
 
 /-! ## File-local Borel-space instances on `E` and `M` -/
 
@@ -147,51 +148,51 @@ private lemma tensor_lambda_pow_mul_exp_le_calc
 /-! ## Compositions -/
 
 set_option linter.unusedVariables false in
-/-- Right-composition: `tensorHeatPower g r s h_uniform k t₁ ∘L
-tensorHeatSemigroup g r s h_uniform t₂ = tensorHeatPower g r s h_uniform
+/-- Right-composition: `tensorHeatPower g r s h_atlas k t₁ ∘L
+tensorHeatSemigroup g r s h_atlas t₂ = tensorHeatPower g r s h_atlas
 k (t₁ + t₂)`, valid for `0 < t₁` and `0 ≤ t₂`. -/
 theorem tensorHeatPower_comp_tensorHeatSemigroup
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : HasLocallyConstantChartAt H M)
     {k : ℕ} (hk : 1 ≤ k) {t₁ t₂ : ℝ} (ht₁ : 0 < t₁) (ht₂ : 0 ≤ t₂) :
-    (tensorHeatPower (I := I) (M := M) g r s h_uniform k t₁).comp
-        (tensorHeatSemigroup (I := I) (M := M) g r s h_uniform t₂) =
-      tensorHeatPower (I := I) (M := M) g r s h_uniform k (t₁ + t₂) := by
+    (tensorHeatPower (I := I) (M := M) g r s h_atlas k t₁).comp
+        (tensorHeatSemigroup (I := I) (M := M) g r s h_atlas t₂) =
+      tensorHeatPower (I := I) (M := M) g r s h_atlas k (t₁ + t₂) := by
   classical
   apply ContinuousLinearMap.ext
   intro T
   set b := tensorResolventHilbertEigenbasisSigma
-    (I := I) (M := M) (g := g) (r := r) (s := s) h_uniform
+    (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas
   have ht12_pos : 0 < t₁ + t₂ := by linarith
   rw [ContinuousLinearMap.comp_apply,
-      tensorHeatSemigroup_apply_of_nonneg (I := I) (M := M) ht₂ T,
-      tensorHeatPower_apply_of_pos (I := I) (M := M) h_uniform k ht12_pos T]
-  -- Pull `tensorHeatPower g r s h_uniform k t₁` inside the tsum.
+      tensorHeatSemigroup_apply_of_nonneg (I := I) (M := M) h_atlas ht₂ T,
+      tensorHeatPower_apply_of_pos (I := I) (M := M) h_atlas k ht12_pos T]
+  -- Pull `tensorHeatPower g r s h_atlas k t₁` inside the tsum.
   have h_summable_t₂ :=
-    tensorSummable_heatTerm (I := I) (M := M) h_uniform ht₂ T
+    tensorSummable_heatTerm (I := I) (M := M) h_atlas ht₂ T
   have h_pull :
-      tensorHeatPower (I := I) (M := M) g r s h_uniform k t₁
+      tensorHeatPower (I := I) (M := M) g r s h_atlas k t₁
           (∑' i : TensorEigenIdx (I := I) (M := M) g r s,
             Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t₂) •
               ⟪b i, T⟫_ℝ • b i) =
       ∑' i : TensorEigenIdx (I := I) (M := M) g r s,
-        tensorHeatPower (I := I) (M := M) g r s h_uniform k t₁
+        tensorHeatPower (I := I) (M := M) g r s h_atlas k t₁
           (Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t₂) •
             ⟪b i, T⟫_ℝ • b i) := by
     have h_hsum := h_summable_t₂.hasSum
     exact (h_hsum.mapL
-      (tensorHeatPower (I := I) (M := M) g r s h_uniform k t₁)).tsum_eq.symm
+      (tensorHeatPower (I := I) (M := M) g r s h_atlas k t₁)).tsum_eq.symm
   rw [h_pull]
   apply tsum_congr
   intro i
-  rw [(tensorHeatPower (I := I) (M := M) g r s h_uniform k t₁).map_smul,
-      (tensorHeatPower (I := I) (M := M) g r s h_uniform k t₁).map_smul]
+  rw [(tensorHeatPower (I := I) (M := M) g r s h_atlas k t₁).map_smul,
+      (tensorHeatPower (I := I) (M := M) g r s h_atlas k t₁).map_smul]
   -- tensorHeatPower k t₁ (b i) = λ^k · exp(-λ t₁) • b i.
   have h_basis_apply :
-      tensorHeatPower (I := I) (M := M) g r s h_uniform k t₁ (b i) =
+      tensorHeatPower (I := I) (M := M) g r s h_atlas k t₁ (b i) =
       ((TensorEigenIdx.lambda (I := I) (M := M) i) ^ k *
           Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t₁)) • b i :=
-    tensorHeatPower_apply_basis_pos (I := I) (M := M) h_uniform k ht₁ i
+    tensorHeatPower_apply_basis_pos (I := I) (M := M) h_atlas k ht₁ i
   rw [h_basis_apply]
   rw [show (Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t₂) •
         (⟪b i, T⟫_ℝ • ((TensorEigenIdx.lambda (I := I) (M := M) i) ^ k *
@@ -222,52 +223,52 @@ theorem tensorHeatPower_comp_tensorHeatSemigroup
   ring
 
 set_option linter.unusedVariables false in
-/-- Left-composition: `tensorHeatSemigroup g r s h_uniform t₂ ∘L
-tensorHeatPower g r s h_uniform k t₁ = tensorHeatPower g r s h_uniform k
+/-- Left-composition: `tensorHeatSemigroup g r s h_atlas t₂ ∘L
+tensorHeatPower g r s h_atlas k t₁ = tensorHeatPower g r s h_atlas k
 (t₁ + t₂)`, valid for `0 < t₁` and `0 ≤ t₂`. -/
 theorem tensorHeatSemigroup_comp_tensorHeatPower
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : HasLocallyConstantChartAt H M)
     {k : ℕ} (hk : 1 ≤ k) {t₁ t₂ : ℝ} (ht₁ : 0 < t₁) (ht₂ : 0 ≤ t₂) :
-    (tensorHeatSemigroup (I := I) (M := M) g r s h_uniform t₂).comp
-        (tensorHeatPower (I := I) (M := M) g r s h_uniform k t₁) =
-      tensorHeatPower (I := I) (M := M) g r s h_uniform k (t₁ + t₂) := by
+    (tensorHeatSemigroup (I := I) (M := M) g r s h_atlas t₂).comp
+        (tensorHeatPower (I := I) (M := M) g r s h_atlas k t₁) =
+      tensorHeatPower (I := I) (M := M) g r s h_atlas k (t₁ + t₂) := by
   classical
   apply ContinuousLinearMap.ext
   intro T
   set b := tensorResolventHilbertEigenbasisSigma
-    (I := I) (M := M) (g := g) (r := r) (s := s) h_uniform
+    (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas
   have ht12_pos : 0 < t₁ + t₂ := by linarith
   rw [ContinuousLinearMap.comp_apply,
-      tensorHeatPower_apply_of_pos (I := I) (M := M) h_uniform k ht₁ T,
-      tensorHeatPower_apply_of_pos (I := I) (M := M) h_uniform k ht12_pos T]
-  -- Pull `tensorHeatSemigroup g r s h_uniform t₂` inside the tsum.
+      tensorHeatPower_apply_of_pos (I := I) (M := M) h_atlas k ht₁ T,
+      tensorHeatPower_apply_of_pos (I := I) (M := M) h_atlas k ht12_pos T]
+  -- Pull `tensorHeatSemigroup g r s h_atlas t₂` inside the tsum.
   have h_summable_t₁ :=
-    tensorSummable_heatPowerTerm (I := I) (M := M) h_uniform k ht₁ T
+    tensorSummable_heatPowerTerm (I := I) (M := M) h_atlas k ht₁ T
   have h_pull :
-      tensorHeatSemigroup (I := I) (M := M) g r s h_uniform t₂
+      tensorHeatSemigroup (I := I) (M := M) g r s h_atlas t₂
           (∑' i : TensorEigenIdx (I := I) (M := M) g r s,
             ((TensorEigenIdx.lambda (I := I) (M := M) i) ^ k *
                 Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t₁)) •
               ⟪b i, T⟫_ℝ • b i) =
       ∑' i : TensorEigenIdx (I := I) (M := M) g r s,
-        tensorHeatSemigroup (I := I) (M := M) g r s h_uniform t₂
+        tensorHeatSemigroup (I := I) (M := M) g r s h_atlas t₂
           (((TensorEigenIdx.lambda (I := I) (M := M) i) ^ k *
               Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t₁)) •
             ⟪b i, T⟫_ℝ • b i) := by
     have h_hsum := h_summable_t₁.hasSum
     exact (h_hsum.mapL
-      (tensorHeatSemigroup (I := I) (M := M) g r s h_uniform t₂)).tsum_eq.symm
+      (tensorHeatSemigroup (I := I) (M := M) g r s h_atlas t₂)).tsum_eq.symm
   rw [h_pull]
   apply tsum_congr
   intro i
-  rw [(tensorHeatSemigroup (I := I) (M := M) g r s h_uniform t₂).map_smul,
-      (tensorHeatSemigroup (I := I) (M := M) g r s h_uniform t₂).map_smul]
+  rw [(tensorHeatSemigroup (I := I) (M := M) g r s h_atlas t₂).map_smul,
+      (tensorHeatSemigroup (I := I) (M := M) g r s h_atlas t₂).map_smul]
   -- tensorHeatSemigroup t₂ (b i) = exp(-λ t₂) • b i.
   have h_basis_apply :
-      tensorHeatSemigroup (I := I) (M := M) g r s h_uniform t₂ (b i) =
+      tensorHeatSemigroup (I := I) (M := M) g r s h_atlas t₂ (b i) =
       Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t₂) • b i :=
-    tensorHeatSemigroup_apply_basis (I := I) (M := M) ht₂ i
+    tensorHeatSemigroup_apply_basis (I := I) (M := M) h_atlas ht₂ i
   rw [h_basis_apply]
   rw [show (((TensorEigenIdx.lambda (I := I) (M := M) i) ^ k *
             Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t₁)) •
@@ -300,9 +301,9 @@ theorem tensorHeatSemigroup_comp_tensorHeatPower
 
 /-! ## Time differentiability
 
-We prove that `s ↦ tensorHeatPower g r s h_uniform k s` is differentiable
+We prove that `s ↦ tensorHeatPower g r s h_atlas k s` is differentiable
 at every `t > 0` in the operator-norm topology, with derivative
-`-tensorHeatPower g r s h_uniform (k+1) t`. The key ingredient is a
+`-tensorHeatPower g r s h_atlas (k+1) t`. The key ingredient is a
 uniform Taylor remainder bound on the spectrum, which gives a
 Lipschitz-type estimate on the difference quotient, controlled by a
 finite spectral supremum. -/
@@ -425,29 +426,29 @@ tensorHeatPower (k+1) t T‖ ≤
 tensorHeatPowerCoeffBoundCalc (k+2) (t/2) · h² · ‖T‖`. -/
 private lemma tensorNorm_heatPower_taylor_remainder
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : HasLocallyConstantChartAt H M)
     (k : ℕ) {t : ℝ} (ht : 0 < t)
     {h : ℝ} (hh : |h| ≤ t / 2) (T : TensorL2 r s g) :
-    ‖tensorHeatPower (I := I) (M := M) g r s h_uniform k (t + h) T -
-        tensorHeatPower (I := I) (M := M) g r s h_uniform k t T +
-        h • tensorHeatPower (I := I) (M := M) g r s h_uniform (k + 1) t T‖ ≤
+    ‖tensorHeatPower (I := I) (M := M) g r s h_atlas k (t + h) T -
+        tensorHeatPower (I := I) (M := M) g r s h_atlas k t T +
+        h • tensorHeatPower (I := I) (M := M) g r s h_atlas (k + 1) t T‖ ≤
       tensorHeatPowerCoeffBoundCalc (k + 2) (t / 2) * h ^ 2 * ‖T‖ := by
   set b := tensorResolventHilbertEigenbasisSigma
-    (I := I) (M := M) (g := g) (r := r) (s := s) h_uniform
+    (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas
   have h_th_pos : 0 < t + h := by
     have : -h ≤ t / 2 := by
       have := abs_le.mp hh
       linarith [this.1]
     linarith
-  rw [tensorHeatPower_apply_of_pos (I := I) (M := M) h_uniform k h_th_pos T,
-      tensorHeatPower_apply_of_pos (I := I) (M := M) h_uniform k ht T,
-      tensorHeatPower_apply_of_pos (I := I) (M := M) h_uniform (k + 1) ht T]
+  rw [tensorHeatPower_apply_of_pos (I := I) (M := M) h_atlas k h_th_pos T,
+      tensorHeatPower_apply_of_pos (I := I) (M := M) h_atlas k ht T,
+      tensorHeatPower_apply_of_pos (I := I) (M := M) h_atlas (k + 1) ht T]
   have h_sum_th :=
-    tensorSummable_heatPowerTerm (I := I) (M := M) h_uniform k h_th_pos T
+    tensorSummable_heatPowerTerm (I := I) (M := M) h_atlas k h_th_pos T
   have h_sum_t :=
-    tensorSummable_heatPowerTerm (I := I) (M := M) h_uniform k ht T
+    tensorSummable_heatPowerTerm (I := I) (M := M) h_atlas k ht T
   have h_sum_t1 :=
-    tensorSummable_heatPowerTerm (I := I) (M := M) h_uniform (k + 1) ht T
+    tensorSummable_heatPowerTerm (I := I) (M := M) h_atlas (k + 1) ht T
   set A : TensorEigenIdx (I := I) (M := M) g r s → TensorL2 r s g := fun i =>
     ((TensorEigenIdx.lambda (I := I) (M := M) i) ^ k *
         Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * (t + h))) •
@@ -563,7 +564,7 @@ private lemma tensorNorm_heatPower_taylor_remainder
       Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
         (⟪b i, T⟫_ℝ) ^ 2) := by
     have h_norm_sq_summable :=
-      tensorSummable_basis_coeff_sq (I := I) (M := M) h_uniform T
+      tensorSummable_basis_coeff_sq (I := I) (M := M) h_atlas T
     have h_eq :
         (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
           ‖⟪b i, T⟫_ℝ‖ ^ 2) =
@@ -579,7 +580,7 @@ private lemma tensorNorm_heatPower_taylor_remainder
       (h_coeff_sq_summable.mul_left (Cψ ^ 2))
     intro i; positivity
   have h_norm_sq_eq := tensorOrthonormal_norm_sq_eq_tsum_sq
-    (I := I) (M := M) h_uniform (fun i => ψ i * ⟪b i, T⟫_ℝ) h_summable_f_sq
+    (I := I) (M := M) h_atlas (fun i => ψ i * ⟪b i, T⟫_ℝ) h_summable_f_sq
   change ‖∑' i, (ψ i * ⟪b i, T⟫_ℝ) • b i‖ ≤ Cψ * ‖T‖
   have h_norm_sq_le : ‖∑' i, (ψ i * ⟪b i, T⟫_ℝ) • b i‖ ^ 2 ≤
       Cψ ^ 2 * ‖T‖ ^ 2 := by
@@ -596,7 +597,7 @@ private lemma tensorNorm_heatPower_taylor_remainder
       exact h_step
     refine le_trans h_dom ?_
     have h_parseval :=
-      tensorParseval_norm_sq (I := I) (M := M) h_uniform T
+      tensorParseval_norm_sq (I := I) (M := M) h_atlas T
     have h_eq : (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
           ‖⟪b i, T⟫_ℝ‖ ^ 2) =
         (fun i => (⟪b i, T⟫_ℝ) ^ 2) := by
@@ -613,16 +614,16 @@ private lemma tensorNorm_heatPower_taylor_remainder
 /-! ## Operator-norm differentiability -/
 
 set_option synthInstance.maxHeartbeats 400000 in
-/-- For `0 < t`, `s ↦ tensorHeatPower g r s h_uniform k s` has
-operator-norm derivative `-tensorHeatPower g r s h_uniform (k+1) t` at
+/-- For `0 < t`, `s ↦ tensorHeatPower g r s h_atlas k s` has
+operator-norm derivative `-tensorHeatPower g r s h_atlas (k+1) t` at
 `t`. -/
 theorem hasDerivAt_tensorHeatPower
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : HasLocallyConstantChartAt H M)
     (k : ℕ) {t : ℝ} (ht : 0 < t) :
     HasDerivAt
-      (fun u : ℝ => tensorHeatPower (I := I) (M := M) g r s h_uniform k u)
-      (-tensorHeatPower (I := I) (M := M) g r s h_uniform (k + 1) t) t := by
+      (fun u : ℝ => tensorHeatPower (I := I) (M := M) g r s h_atlas k u)
+      (-tensorHeatPower (I := I) (M := M) g r s h_atlas (k + 1) t) t := by
   rw [hasDerivAt_iff_isLittleO_nhds_zero]
   rw [Asymptotics.isLittleO_iff]
   intro ε hε
@@ -646,34 +647,34 @@ theorem hasDerivAt_tensorHeatPower
     have := min_le_right (t / 2) (ε / (Cb + 1))
     linarith [hh]
   have h_op_bound :
-      ‖tensorHeatPower (I := I) (M := M) g r s h_uniform k (t + h) -
-          tensorHeatPower (I := I) (M := M) g r s h_uniform k t -
-          h • -tensorHeatPower (I := I) (M := M) g r s h_uniform (k + 1) t‖ ≤
+      ‖tensorHeatPower (I := I) (M := M) g r s h_atlas k (t + h) -
+          tensorHeatPower (I := I) (M := M) g r s h_atlas k t -
+          h • -tensorHeatPower (I := I) (M := M) g r s h_atlas (k + 1) t‖ ≤
         Cb * h ^ 2 := by
     apply ContinuousLinearMap.opNorm_le_bound _ (by positivity)
     intro T
     have h_eq :
-        tensorHeatPower (I := I) (M := M) g r s h_uniform k (t + h) -
-            tensorHeatPower (I := I) (M := M) g r s h_uniform k t -
-            h • -tensorHeatPower (I := I) (M := M) g r s h_uniform (k + 1) t =
-          tensorHeatPower (I := I) (M := M) g r s h_uniform k (t + h) -
-            tensorHeatPower (I := I) (M := M) g r s h_uniform k t +
-            h • tensorHeatPower (I := I) (M := M) g r s h_uniform (k + 1) t := by
-      rw [show h • -tensorHeatPower (I := I) (M := M) g r s h_uniform (k + 1) t =
-          -(h • tensorHeatPower (I := I) (M := M) g r s h_uniform (k + 1) t) from by
+        tensorHeatPower (I := I) (M := M) g r s h_atlas k (t + h) -
+            tensorHeatPower (I := I) (M := M) g r s h_atlas k t -
+            h • -tensorHeatPower (I := I) (M := M) g r s h_atlas (k + 1) t =
+          tensorHeatPower (I := I) (M := M) g r s h_atlas k (t + h) -
+            tensorHeatPower (I := I) (M := M) g r s h_atlas k t +
+            h • tensorHeatPower (I := I) (M := M) g r s h_atlas (k + 1) t := by
+      rw [show h • -tensorHeatPower (I := I) (M := M) g r s h_atlas (k + 1) t =
+          -(h • tensorHeatPower (I := I) (M := M) g r s h_atlas (k + 1) t) from by
         rw [smul_neg]]
       abel
     rw [h_eq]
-    rw [show (tensorHeatPower (I := I) (M := M) g r s h_uniform k (t + h) -
-          tensorHeatPower (I := I) (M := M) g r s h_uniform k t +
+    rw [show (tensorHeatPower (I := I) (M := M) g r s h_atlas k (t + h) -
+          tensorHeatPower (I := I) (M := M) g r s h_atlas k t +
             h • tensorHeatPower
-              (I := I) (M := M) g r s h_uniform (k + 1) t) T =
-        tensorHeatPower (I := I) (M := M) g r s h_uniform k (t + h) T -
-          tensorHeatPower (I := I) (M := M) g r s h_uniform k t T +
+              (I := I) (M := M) g r s h_atlas (k + 1) t) T =
+        tensorHeatPower (I := I) (M := M) g r s h_atlas k (t + h) T -
+          tensorHeatPower (I := I) (M := M) g r s h_atlas k t T +
             h • tensorHeatPower
-              (I := I) (M := M) g r s h_uniform (k + 1) t T from rfl]
+              (I := I) (M := M) g r s h_atlas (k + 1) t T from rfl]
     have h_taylor := tensorNorm_heatPower_taylor_remainder
-      (I := I) (M := M) h_uniform k ht h_abs_le_t2 T
+      (I := I) (M := M) h_atlas k ht h_abs_le_t2 T
     rw [show Cb * h ^ 2 * ‖T‖ =
         (tensorHeatPowerCoeffBoundCalc (k + 2) (t / 2) * h ^ 2) * ‖T‖ from rfl]
     exact h_taylor
@@ -692,95 +693,96 @@ theorem hasDerivAt_tensorHeatPower
     exact h_mul_lt
   linarith [abs_nonneg h, h_step]
 
-/-- Specialization: `s ↦ tensorHeatSemigroup g r s h_uniform s` has
-operator-norm derivative `-tensorHeatPower g r s h_uniform 1 t` at
+/-- Specialization: `s ↦ tensorHeatSemigroup g r s h_atlas s` has
+operator-norm derivative `-tensorHeatPower g r s h_atlas 1 t` at
 `t > 0`. -/
 theorem hasDerivAt_tensorHeatSemigroup
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : HasLocallyConstantChartAt H M)
     {t : ℝ} (ht : 0 < t) :
     HasDerivAt
-      (fun u : ℝ => tensorHeatSemigroup (I := I) (M := M) g r s h_uniform u)
-      (-tensorHeatPower (I := I) (M := M) g r s h_uniform 1 t) t := by
-  have h := hasDerivAt_tensorHeatPower (I := I) (M := M) h_uniform 0 ht
+      (fun u : ℝ => tensorHeatSemigroup (I := I) (M := M) g r s h_atlas u)
+      (-tensorHeatPower (I := I) (M := M) g r s h_atlas 1 t) t := by
+  have h := hasDerivAt_tensorHeatPower (I := I) (M := M)
+    (g := g) (r := r) (s := s) h_atlas 0 ht
   have h_funext :
-      (fun u : ℝ => tensorHeatPower (I := I) (M := M) g r s h_uniform 0 u) =
-      (fun u : ℝ => tensorHeatSemigroup (I := I) (M := M) g r s h_uniform u) := by
-    funext u; exact tensorHeatPower_zero (I := I) (M := M) g r s h_uniform u
+      (fun u : ℝ => tensorHeatPower (I := I) (M := M) g r s h_atlas 0 u) =
+      (fun u : ℝ => tensorHeatSemigroup (I := I) (M := M) g r s h_atlas u) := by
+    funext u; exact tensorHeatPower_zero (I := I) (M := M) g r s h_atlas u
   rw [h_funext] at h
   exact h
 
 /-! ## Iterated derivatives and `C^∞` on `(0, ∞)` -/
 
-/-- For every `0 < t`, `s ↦ tensorHeatPower g r s h_uniform k s` is
+/-- For every `0 < t`, `s ↦ tensorHeatPower g r s h_atlas k s` is
 differentiable at `t`. -/
 theorem differentiableAt_tensorHeatPower
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : HasLocallyConstantChartAt H M)
     (k : ℕ) {t : ℝ} (ht : 0 < t) :
     DifferentiableAt ℝ
-      (fun u : ℝ => tensorHeatPower (I := I) (M := M) g r s h_uniform k u) t :=
-  (hasDerivAt_tensorHeatPower (I := I) (M := M) h_uniform k ht).differentiableAt
+      (fun u : ℝ => tensorHeatPower (I := I) (M := M) g r s h_atlas k u) t :=
+  (hasDerivAt_tensorHeatPower (I := I) (M := M) h_atlas k ht).differentiableAt
 
-/-- `s ↦ tensorHeatPower g r s h_uniform k s` is differentiable on
+/-- `s ↦ tensorHeatPower g r s h_atlas k s` is differentiable on
 `(0, ∞)`. -/
 theorem differentiableOn_tensorHeatPower_Ioi
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s) (k : ℕ) :
+    (h_atlas : HasLocallyConstantChartAt H M) (k : ℕ) :
     DifferentiableOn ℝ
-      (fun u : ℝ => tensorHeatPower (I := I) (M := M) g r s h_uniform k u)
+      (fun u : ℝ => tensorHeatPower (I := I) (M := M) g r s h_atlas k u)
       (Set.Ioi 0) := by
   intro t ht
   exact (differentiableAt_tensorHeatPower
-    (I := I) (M := M) h_uniform k ht).differentiableWithinAt
+    (I := I) (M := M) h_atlas k ht).differentiableWithinAt
 
-/-- Continuity of `s ↦ tensorHeatPower g r s h_uniform k s` at every
+/-- Continuity of `s ↦ tensorHeatPower g r s h_atlas k s` at every
 `t > 0`. -/
 theorem continuousAt_tensorHeatPower
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : HasLocallyConstantChartAt H M)
     (k : ℕ) {t : ℝ} (ht : 0 < t) :
     ContinuousAt
-      (fun u : ℝ => tensorHeatPower (I := I) (M := M) g r s h_uniform k u) t :=
-  (hasDerivAt_tensorHeatPower (I := I) (M := M) h_uniform k ht).continuousAt
+      (fun u : ℝ => tensorHeatPower (I := I) (M := M) g r s h_atlas k u) t :=
+  (hasDerivAt_tensorHeatPower (I := I) (M := M) h_atlas k ht).continuousAt
 
-/-- `s ↦ tensorHeatPower g r s h_uniform k s` is continuous on
+/-- `s ↦ tensorHeatPower g r s h_atlas k s` is continuous on
 `(0, ∞)`. -/
 theorem continuousOn_tensorHeatPower_Ioi
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s) (k : ℕ) :
+    (h_atlas : HasLocallyConstantChartAt H M) (k : ℕ) :
     ContinuousOn
-      (fun u : ℝ => tensorHeatPower (I := I) (M := M) g r s h_uniform k u)
+      (fun u : ℝ => tensorHeatPower (I := I) (M := M) g r s h_atlas k u)
       (Set.Ioi 0) :=
   fun _ ht =>
     (continuousAt_tensorHeatPower
-      (I := I) (M := M) h_uniform k ht).continuousWithinAt
+      (I := I) (M := M) h_atlas k ht).continuousWithinAt
 
-/-- The derivative of `s ↦ tensorHeatPower g r s h_uniform k s` on
-`(0, ∞)` is `-tensorHeatPower g r s h_uniform (k+1) s`. -/
+/-- The derivative of `s ↦ tensorHeatPower g r s h_atlas k s` on
+`(0, ∞)` is `-tensorHeatPower g r s h_atlas (k+1) s`. -/
 theorem deriv_tensorHeatPower
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : HasLocallyConstantChartAt H M)
     (k : ℕ) {t : ℝ} (ht : 0 < t) :
     deriv (fun u : ℝ =>
-        tensorHeatPower (I := I) (M := M) g r s h_uniform k u) t =
-      -tensorHeatPower (I := I) (M := M) g r s h_uniform (k + 1) t :=
-  (hasDerivAt_tensorHeatPower (I := I) (M := M) h_uniform k ht).deriv
+        tensorHeatPower (I := I) (M := M) g r s h_atlas k u) t =
+      -tensorHeatPower (I := I) (M := M) g r s h_atlas (k + 1) t :=
+  (hasDerivAt_tensorHeatPower (I := I) (M := M) h_atlas k ht).deriv
 
 set_option synthInstance.maxHeartbeats 400000 in
 /-- The `j`-th iterated derivative on `(0, ∞)` of `s ↦
-tensorHeatSemigroup g r s h_uniform s` at `t` is `(-1)^j •
-tensorHeatPower g r s h_uniform j t`. -/
+tensorHeatSemigroup g r s h_atlas s` at `t` is `(-1)^j •
+tensorHeatPower g r s h_atlas j t`. -/
 theorem iteratedDerivWithin_tensorHeatSemigroup_Ioi
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s) :
+    (h_atlas : HasLocallyConstantChartAt H M) :
     ∀ j : ℕ, ∀ {t : ℝ}, 0 < t →
       iteratedDerivWithin j
           (fun u : ℝ =>
-            tensorHeatSemigroup (I := I) (M := M) g r s h_uniform u)
+            tensorHeatSemigroup (I := I) (M := M) g r s h_atlas u)
           (Set.Ioi 0) t =
         (-1 : ℝ) ^ j •
-          tensorHeatPower (I := I) (M := M) g r s h_uniform j t := by
+          tensorHeatPower (I := I) (M := M) g r s h_atlas j t := by
   intro j
   induction j with
   | zero =>
@@ -795,37 +797,37 @@ theorem iteratedDerivWithin_tensorHeatSemigroup_Ioi
     have h_eq_on : Set.EqOn
         (iteratedDerivWithin j
           (fun u : ℝ =>
-            tensorHeatSemigroup (I := I) (M := M) g r s h_uniform u)
+            tensorHeatSemigroup (I := I) (M := M) g r s h_atlas u)
           (Set.Ioi 0))
         (fun u : ℝ => (-1 : ℝ) ^ j •
-          tensorHeatPower (I := I) (M := M) g r s h_uniform j u)
+          tensorHeatPower (I := I) (M := M) g r s h_atlas j u)
         (Set.Ioi 0) := by
       intro u hu
       exact ih hu
     have h_dw_eq :
         derivWithin (iteratedDerivWithin j
           (fun u : ℝ =>
-            tensorHeatSemigroup (I := I) (M := M) g r s h_uniform u)
+            tensorHeatSemigroup (I := I) (M := M) g r s h_atlas u)
           (Set.Ioi 0)) (Set.Ioi 0) t =
         derivWithin (fun u : ℝ => (-1 : ℝ) ^ j •
-          tensorHeatPower (I := I) (M := M) g r s h_uniform j u)
+          tensorHeatPower (I := I) (M := M) g r s h_atlas j u)
           (Set.Ioi 0) t :=
       derivWithin_congr h_eq_on (h_eq_on ht_mem)
     rw [h_dw_eq]
     have hd : HasDerivAt
         (fun u : ℝ => (-1 : ℝ) ^ j •
-          tensorHeatPower (I := I) (M := M) g r s h_uniform j u)
+          tensorHeatPower (I := I) (M := M) g r s h_atlas j u)
         ((-1 : ℝ) ^ j •
-          -tensorHeatPower (I := I) (M := M) g r s h_uniform (j + 1) t) t := by
+          -tensorHeatPower (I := I) (M := M) g r s h_atlas (j + 1) t) t := by
       have hbase := hasDerivAt_tensorHeatPower
-        (I := I) (M := M) h_uniform j ht
+        (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas j ht
       exact hbase.const_smul ((-1 : ℝ) ^ j)
     have hd_within :
         HasDerivWithinAt
           (fun u : ℝ => (-1 : ℝ) ^ j •
-            tensorHeatPower (I := I) (M := M) g r s h_uniform j u)
+            tensorHeatPower (I := I) (M := M) g r s h_atlas j u)
           ((-1 : ℝ) ^ j •
-            -tensorHeatPower (I := I) (M := M) g r s h_uniform (j + 1) t)
+            -tensorHeatPower (I := I) (M := M) g r s h_atlas (j + 1) t)
           (Set.Ioi 0) t :=
       hd.hasDerivWithinAt
     have h_unique : UniqueDiffWithinAt ℝ (Set.Ioi (0 : ℝ)) t :=
@@ -836,74 +838,75 @@ theorem iteratedDerivWithin_tensorHeatSemigroup_Ioi
     rw [neg_smul, smul_neg]
 
 set_option synthInstance.maxHeartbeats 400000 in
-/-- `s ↦ tensorHeatPower g r s h_uniform k s` is `C^∞` on `(0, ∞)`. -/
+/-- `s ↦ tensorHeatPower g r s h_atlas k s` is `C^∞` on `(0, ∞)`. -/
 theorem contDiffOn_tensorHeatPower_Ioi
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s) (k : ℕ) :
+    (h_atlas : HasLocallyConstantChartAt H M) (k : ℕ) :
     ContDiffOn ℝ ∞
-      (fun u : ℝ => tensorHeatPower (I := I) (M := M) g r s h_uniform k u)
+      (fun u : ℝ => tensorHeatPower (I := I) (M := M) g r s h_atlas k u)
       (Set.Ioi 0) := by
   rw [contDiffOn_infty]
   intro n
   induction n generalizing k with
   | zero =>
     change ContDiffOn ℝ 0
-      (fun u : ℝ => tensorHeatPower (I := I) (M := M) g r s h_uniform k u)
+      (fun u : ℝ => tensorHeatPower (I := I) (M := M) g r s h_atlas k u)
       (Set.Ioi 0)
     rw [contDiffOn_zero]
-    exact continuousOn_tensorHeatPower_Ioi (I := I) (M := M) h_uniform k
+    exact continuousOn_tensorHeatPower_Ioi (I := I) (M := M) h_atlas k
   | succ n ih =>
     rw [show ((n + 1 : ℕ) : WithTop ℕ∞) = (n : WithTop ℕ∞) + 1 from by
         push_cast; rfl]
     rw [contDiffOn_succ_iff_derivWithin (uniqueDiffOn_Ioi 0)]
     refine ⟨?_, ?_, ?_⟩
     · exact differentiableOn_tensorHeatPower_Ioi
-        (I := I) (M := M) h_uniform k
+        (I := I) (M := M) h_atlas k
     · intro h_omega
       exfalso
       simp at h_omega
     · have h_deriv_eq : Set.EqOn
           (derivWithin (fun u : ℝ =>
-              tensorHeatPower (I := I) (M := M) g r s h_uniform k u)
+              tensorHeatPower (I := I) (M := M) g r s h_atlas k u)
             (Set.Ioi 0))
           (fun u : ℝ =>
-            -tensorHeatPower (I := I) (M := M) g r s h_uniform (k + 1) u)
+            -tensorHeatPower (I := I) (M := M) g r s h_atlas (k + 1) u)
           (Set.Ioi 0) := by
         intro u hu
         have hd := hasDerivAt_tensorHeatPower
-          (I := I) (M := M) h_uniform k hu
+          (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas k hu
         have hd_within :
             HasDerivWithinAt
               (fun u : ℝ =>
-                tensorHeatPower (I := I) (M := M) g r s h_uniform k u)
+                tensorHeatPower (I := I) (M := M) g r s h_atlas k u)
               (-tensorHeatPower
-                (I := I) (M := M) g r s h_uniform (k + 1) u)
+                (I := I) (M := M) g r s h_atlas (k + 1) u)
               (Set.Ioi 0) u :=
           hd.hasDerivWithinAt
         rw [hd_within.derivWithin ((uniqueDiffOn_Ioi 0) u hu)]
       apply ContDiffOn.congr _ h_deriv_eq
       have h_neg :
           (fun u : ℝ =>
-              -tensorHeatPower (I := I) (M := M) g r s h_uniform (k + 1) u) =
+              -tensorHeatPower (I := I) (M := M) g r s h_atlas (k + 1) u) =
           (fun u : ℝ =>
               -1 • tensorHeatPower
-                (I := I) (M := M) g r s h_uniform (k + 1) u) := by
+                (I := I) (M := M) g r s h_atlas (k + 1) u) := by
         funext u; rw [neg_one_smul]
       rw [h_neg]
       exact (ih (k + 1)).const_smul _
 
-/-- `s ↦ tensorHeatSemigroup g r s h_uniform s` is `C^∞` on `(0, ∞)`. -/
+/-- `s ↦ tensorHeatSemigroup g r s h_atlas s` is `C^∞` on `(0, ∞)`. -/
 theorem contDiffOn_tensorHeatSemigroup_Ioi
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s) :
+    (h_atlas : HasLocallyConstantChartAt H M) :
     ContDiffOn ℝ ∞
-      (fun u : ℝ => tensorHeatSemigroup (I := I) (M := M) g r s h_uniform u)
+      (fun u : ℝ => tensorHeatSemigroup (I := I) (M := M) g r s h_atlas u)
       (Set.Ioi 0) := by
-  have h := contDiffOn_tensorHeatPower_Ioi (I := I) (M := M) h_uniform 0
+  have h := contDiffOn_tensorHeatPower_Ioi (I := I) (M := M)
+    (g := g) (r := r) (s := s) h_atlas 0
   have h_eq :
-      (fun u : ℝ => tensorHeatPower (I := I) (M := M) g r s h_uniform 0 u) =
-      (fun u : ℝ => tensorHeatSemigroup (I := I) (M := M) g r s h_uniform u) := by
-    funext u; exact tensorHeatPower_zero (I := I) (M := M) g r s h_uniform u
+      (fun u : ℝ => tensorHeatPower (I := I) (M := M) g r s h_atlas 0 u) =
+      (fun u : ℝ => tensorHeatSemigroup (I := I) (M := M) g r s h_atlas u) := by
+    funext u; exact tensorHeatPower_zero (I := I) (M := M) g r s h_atlas u
   rw [h_eq] at h
   exact h
 

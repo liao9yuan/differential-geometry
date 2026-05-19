@@ -24,7 +24,7 @@ and `H⁰` is isometrically `TensorL2 r s g` itself.
 
 ## Design
 
-`tensorHs g r s h_uniform σ` is a one-field structure carrying the
+`tensorHs g r s h_atlas σ` is a one-field structure carrying the
 coordinate family `coeff : TensorEigenIdx g r s → ℝ` together with the
 weighted square-summability witness. A structure (rather than a subtype
 of `TensorL2`) is used so the carrier is topology-free: this lets the
@@ -39,7 +39,7 @@ diagonal rescaling `cᵢ ↦ √(1+λᵢ)^σ · cᵢ`.
 
 ## Main definitions
 
-* `tensorHs g r s h_uniform σ` — the spectral `Hˢ` Sobolev space, a
+* `tensorHs g r s h_atlas σ` — the spectral `Hˢ` Sobolev space, a
   real Hilbert space.
 * `tensorHs.coeff` — the `i`-th eigenbasis coordinate of an element.
 * `tensorHsToL2` — the inclusion `Hˢ →L[ℝ] TensorL2 r s g`.
@@ -150,54 +150,54 @@ lemma sq_sqrt_tensorSobolevWeight {g : SmoothRiemannianMetric I M}
 `⟪bᵢ, T⟫` for the eigenbasis `b = tensorResolventHilbertEigenbasisSigma`.
 Concretely this is `(b.repr T) i`. -/
 def tensorL2Coeff {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (T : TensorL2 r s g) (i : TensorEigenIdx (I := I) (M := M) g r s) :
     ℝ :=
-  (tensorResolventHilbertEigenbasisSigma (I := I) (M := M) h_uniform).repr T i
+  (tensorResolventHilbertEigenbasisSigma (I := I) (M := M) h_atlas).repr T i
 
 /-- The eigenbasis coordinate equals the inner product `⟪bᵢ, T⟫`. -/
 lemma tensorL2Coeff_eq_inner {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (T : TensorL2 r s g) (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    tensorL2Coeff (I := I) (M := M) h_uniform T i =
-      ⟪tensorResolventHilbertEigenbasisSigma (I := I) (M := M) h_uniform i,
+    tensorL2Coeff (I := I) (M := M) h_atlas T i =
+      ⟪tensorResolventHilbertEigenbasisSigma (I := I) (M := M) h_atlas i,
         T⟫_ℝ := by
   unfold tensorL2Coeff
   exact HilbertBasis.repr_apply_apply _ T i
 
 /-- The eigenbasis-coordinate family of `T` is square-summable. -/
 lemma tensorL2Coeff_summable_sq {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (T : TensorL2 r s g) :
     Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
-      (tensorL2Coeff (I := I) (M := M) h_uniform T i) ^ 2) := by
-  have h := tensorSummable_basis_coeff_sq (I := I) (M := M) h_uniform T
+      (tensorL2Coeff (I := I) (M := M) h_atlas T i) ^ 2) := by
+  have h := tensorSummable_basis_coeff_sq (I := I) (M := M) h_atlas T
   have h_eq : (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
         ‖⟪tensorResolventHilbertEigenbasisSigma
-            (I := I) (M := M) h_uniform i, T⟫_ℝ‖ ^ 2) =
-      (fun i => (tensorL2Coeff (I := I) (M := M) h_uniform T i) ^ 2) := by
+            (I := I) (M := M) h_atlas i, T⟫_ℝ‖ ^ 2) =
+      (fun i => (tensorL2Coeff (I := I) (M := M) h_atlas T i) ^ 2) := by
     funext i
     rw [tensorL2Coeff_eq_inner, Real.norm_eq_abs, sq_abs]
   rwa [h_eq] at h
 
 /-- `tensorL2Coeff` is additive in its `L²` argument. -/
 lemma tensorL2Coeff_add {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (S T : TensorL2 r s g) (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    tensorL2Coeff (I := I) (M := M) h_uniform (S + T) i =
-      tensorL2Coeff (I := I) (M := M) h_uniform S i +
-        tensorL2Coeff (I := I) (M := M) h_uniform T i := by
+    tensorL2Coeff (I := I) (M := M) h_atlas (S + T) i =
+      tensorL2Coeff (I := I) (M := M) h_atlas S i +
+        tensorL2Coeff (I := I) (M := M) h_atlas T i := by
   unfold tensorL2Coeff
   rw [map_add]
   rfl
 
 /-- `tensorL2Coeff` is `ℝ`-homogeneous in its `L²` argument. -/
 lemma tensorL2Coeff_smul {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (c : ℝ) (T : TensorL2 r s g)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    tensorL2Coeff (I := I) (M := M) h_uniform (c • T) i =
-      c * tensorL2Coeff (I := I) (M := M) h_uniform T i := by
+    tensorL2Coeff (I := I) (M := M) h_atlas (c • T) i =
+      c * tensorL2Coeff (I := I) (M := M) h_atlas T i := by
   unfold tensorL2Coeff
   rw [map_smul]
   rfl
@@ -216,7 +216,7 @@ eigenbasis expansion lies in the weighted `ℓ²`; see `tensorHsToL2`.
 The structure is intentionally topology-free: the `Hˢ` Hilbert topology
 is installed below via an `InnerProductSpace.Core`. -/
 structure tensorHs (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (_h_uniform : uniformTensorChartSobolevBound g r s) (σ : ℝ) where
+    (_h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) (σ : ℝ) where
   /-- The eigenbasis-coordinate family. -/
   coeff : TensorEigenIdx (I := I) (M := M) g r s → ℝ
   /-- The weighted square-summability witness placing `coeff` in `Hˢ`. -/
@@ -227,23 +227,23 @@ structure tensorHs (g : SmoothRiemannianMetric I M) (r s : ℕ)
 namespace tensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
-  {h_uniform : uniformTensorChartSobolevBound g r s} {σ : ℝ}
+  {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ}
 
 /-- Two `Hˢ` elements are equal once their coordinate families agree. -/
-@[ext] lemma ext {S T : tensorHs (I := I) (M := M) g r s h_uniform σ}
+@[ext] lemma ext {S T : tensorHs (I := I) (M := M) g r s h_atlas σ}
     (h : S.coeff = T.coeff) : S = T := by
   cases S; cases T; cases h; rfl
 
 /-! ### Additive-group and module structure -/
 
-instance : Zero (tensorHs (I := I) (M := M) g r s h_uniform σ) where
+instance : Zero (tensorHs (I := I) (M := M) g r s h_atlas σ) where
   zero := ⟨fun _ => 0, by simp⟩
 
 @[simp] lemma zero_coeff :
-    (0 : tensorHs (I := I) (M := M) g r s h_uniform σ).coeff =
+    (0 : tensorHs (I := I) (M := M) g r s h_atlas σ).coeff =
       (fun _ => 0) := rfl
 
-instance : Add (tensorHs (I := I) (M := M) g r s h_uniform σ) where
+instance : Add (tensorHs (I := I) (M := M) g r s h_atlas σ) where
   add S T :=
     { coeff := fun i => S.coeff i + T.coeff i
       weighted_summable := by
@@ -281,10 +281,10 @@ instance : Add (tensorHs (I := I) (M := M) g r s h_uniform σ) where
                     (T.coeff i) ^ 2) := by ring }
 
 @[simp] lemma add_coeff
-    (S T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
+    (S T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
     (S + T).coeff = (fun i => S.coeff i + T.coeff i) := rfl
 
-instance : Neg (tensorHs (I := I) (M := M) g r s h_uniform σ) where
+instance : Neg (tensorHs (I := I) (M := M) g r s h_atlas σ) where
   neg S :=
     { coeff := fun i => -S.coeff i
       weighted_summable := by
@@ -298,10 +298,10 @@ instance : Neg (tensorHs (I := I) (M := M) g r s h_uniform σ) where
           funext i; ring
         rwa [h_eq] }
 
-@[simp] lemma neg_coeff (S : tensorHs (I := I) (M := M) g r s h_uniform σ) :
+@[simp] lemma neg_coeff (S : tensorHs (I := I) (M := M) g r s h_atlas σ) :
     (-S).coeff = (fun i => -S.coeff i) := rfl
 
-instance : SMul ℝ (tensorHs (I := I) (M := M) g r s h_uniform σ) where
+instance : SMul ℝ (tensorHs (I := I) (M := M) g r s h_atlas σ) where
   smul c S :=
     { coeff := fun i => c * S.coeff i
       weighted_summable := by
@@ -317,10 +317,10 @@ instance : SMul ℝ (tensorHs (I := I) (M := M) g r s h_uniform σ) where
         exact hS.mul_left _ }
 
 @[simp] lemma smul_coeff (c : ℝ)
-    (S : tensorHs (I := I) (M := M) g r s h_uniform σ) :
+    (S : tensorHs (I := I) (M := M) g r s h_atlas σ) :
     (c • S).coeff = (fun i => c * S.coeff i) := rfl
 
-instance : AddCommGroup (tensorHs (I := I) (M := M) g r s h_uniform σ) where
+instance : AddCommGroup (tensorHs (I := I) (M := M) g r s h_atlas σ) where
   add_assoc S T U := by ext i; simp [add_assoc]
   zero_add S := by ext i; simp
   add_zero S := by ext i; simp
@@ -329,7 +329,7 @@ instance : AddCommGroup (tensorHs (I := I) (M := M) g r s h_uniform σ) where
   nsmul := nsmulRec
   zsmul := zsmulRec
 
-instance : Module ℝ (tensorHs (I := I) (M := M) g r s h_uniform σ) where
+instance : Module ℝ (tensorHs (I := I) (M := M) g r s h_atlas σ) where
   one_smul S := by ext i; simp
   mul_smul a b S := by ext i; simp [mul_assoc]
   smul_zero c := by ext i; simp
@@ -346,7 +346,7 @@ is absolutely convergent by Cauchy–Schwarz on the weighted squares. -/
 is summable: it is dominated by the AM–GM bound coming from the two
 weighted-square-summable families. -/
 lemma weightedProd_summable
-    (S T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
+    (S T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
     Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
       tensorSobolevWeight (I := I) (M := M) i σ *
         (S.coeff i * T.coeff i)) := by
@@ -391,13 +391,13 @@ lemma weightedProd_summable
 
 /-- The weighted `Hˢ` inner-product value, as a bare function:
 `⟪S, T⟫ = ∑ᵢ (1 + λᵢ)^σ · (coeff i S) · (coeff i T)`. -/
-def innerFun (S T : tensorHs (I := I) (M := M) g r s h_uniform σ) : ℝ :=
+def innerFun (S T : tensorHs (I := I) (M := M) g r s h_atlas σ) : ℝ :=
   ∑' i, tensorSobolevWeight (I := I) (M := M) i σ *
     (S.coeff i * T.coeff i)
 
 /-- `innerFun T T` is the weighted sum of squares
 `∑ᵢ (1 + λᵢ)^σ (coeff i T)²`. -/
-lemma innerFun_self (T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
+lemma innerFun_self (T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
     innerFun (I := I) (M := M) T T =
       ∑' i, tensorSobolevWeight (I := I) (M := M) i σ *
         (T.coeff i) ^ 2 := by
@@ -413,7 +413,7 @@ the first slot are all immediate from the corresponding `tsum`
 identities. -/
 @[reducible] def innerCore :
     InnerProductSpace.Core ℝ
-      (tensorHs (I := I) (M := M) g r s h_uniform σ) where
+      (tensorHs (I := I) (M := M) g r s h_atlas σ) where
   inner S T := innerFun (I := I) (M := M) S T
   conj_inner_symm S T := by
     simp only [conj_trivial]
@@ -482,28 +482,28 @@ identities. -/
 /-- The `NormedAddCommGroup` instance on `Hˢ` induced by the weighted
 inner product. -/
 instance instNormedAddCommGroup :
-    NormedAddCommGroup (tensorHs (I := I) (M := M) g r s h_uniform σ) :=
+    NormedAddCommGroup (tensorHs (I := I) (M := M) g r s h_atlas σ) :=
   InnerProductSpace.Core.toNormedAddCommGroup
     (cd := innerCore (I := I) (M := M) (g := g) (r := r) (s := s)
-      (h_uniform := h_uniform) (σ := σ))
+      (h_atlas := h_atlas) (σ := σ))
 
 /-- The `InnerProductSpace ℝ` instance on `Hˢ`. -/
 instance instInnerProductSpace :
-    InnerProductSpace ℝ (tensorHs (I := I) (M := M) g r s h_uniform σ) :=
+    InnerProductSpace ℝ (tensorHs (I := I) (M := M) g r s h_atlas σ) :=
   InnerProductSpace.ofCore
     (innerCore (I := I) (M := M) (g := g) (r := r) (s := s)
-      (h_uniform := h_uniform) (σ := σ)).1
+      (h_atlas := h_atlas) (σ := σ)).1
 
 /-- The `Hˢ` inner product is the weighted `tsum`
 `∑ᵢ (1 + λᵢ)^σ · (coeff i S) · (coeff i T)`. -/
-lemma inner_def (S T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
+lemma inner_def (S T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
     (inner ℝ S T : ℝ) =
       ∑' i, tensorSobolevWeight (I := I) (M := M) i σ *
         (S.coeff i * T.coeff i) := rfl
 
 /-- The `Hˢ` inner product of `T` with itself is the weighted sum of
 squares `∑ᵢ (1+λᵢ)^σ (coeff i T)²`. -/
-lemma inner_self_eq (T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
+lemma inner_self_eq (T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
     (inner ℝ T T : ℝ) =
       ∑' i, tensorSobolevWeight (I := I) (M := M) i σ *
         (T.coeff i) ^ 2 :=
@@ -514,7 +514,7 @@ lemma inner_self_eq (T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
 /-- The squared `Hˢ` norm equals the weighted sum of squared
 coordinates: `‖T‖² = ∑ᵢ (1 + λᵢ)^σ · (coeff i T)²`. -/
 theorem norm_sq_eq_tsum
-    (T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
+    (T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
     ‖T‖ ^ 2 =
       ∑' i, tensorSobolevWeight (I := I) (M := M) i σ *
         (T.coeff i) ^ 2 := by
@@ -523,7 +523,7 @@ theorem norm_sq_eq_tsum
 /-- The `Hˢ` norm is the square root of the weighted sum of squared
 coordinates. -/
 theorem norm_eq_sqrt_tsum
-    (T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
+    (T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
     ‖T‖ =
       Real.sqrt (∑' i, tensorSobolevWeight (I := I) (M := M) i σ *
         (T.coeff i) ^ 2) := by
@@ -541,11 +541,11 @@ square-summability of the rescaled family. -/
 namespace tensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
-  {h_uniform : uniformTensorChartSobolevBound g r s} {σ : ℝ}
+  {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ}
 
 /-- The rescaled coordinate family `i ↦ √(1+λᵢ)^σ · coeff i` of an `Hˢ`
 element is square-summable, hence a member of `ℓ²(ι, ℝ)`. -/
-lemma rescale_memℓp (T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
+lemma rescale_memℓp (T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
     Memℓp (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
       Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ) *
         T.coeff i) 2 := by
@@ -572,13 +572,13 @@ lemma rescale_memℓp (T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
 
 /-- The forward rescaling map `Hˢ → ℓ²(ι, ℝ)`,
 `T ↦ (i ↦ √(1+λᵢ)^σ · coeff i)`. -/
-def rescaleToL2 (T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
+def rescaleToL2 (T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
     lp (fun _ : TensorEigenIdx (I := I) (M := M) g r s => ℝ) 2 :=
   ⟨fun i => Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ) *
       T.coeff i, rescale_memℓp (I := I) (M := M) T⟩
 
 @[simp] lemma rescaleToL2_apply
-    (T : tensorHs (I := I) (M := M) g r s h_uniform σ)
+    (T : tensorHs (I := I) (M := M) g r s h_atlas σ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     (rescaleToL2 (I := I) (M := M) T : _ → ℝ) i =
       Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ) *
@@ -626,7 +626,7 @@ lemma rescaleFromL2_weighted_summable
 `f ↦ (i ↦ √(1+λᵢ)^σ ⁻¹ · f i)`. -/
 def rescaleFromL2
     (f : lp (fun _ : TensorEigenIdx (I := I) (M := M) g r s => ℝ) 2) :
-    tensorHs (I := I) (M := M) g r s h_uniform σ where
+    tensorHs (I := I) (M := M) g r s h_atlas σ where
   coeff i := (Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ))⁻¹ *
     (f : _ → ℝ) i
   weighted_summable := rescaleFromL2_weighted_summable (I := I) (M := M) f
@@ -634,7 +634,7 @@ def rescaleFromL2
 @[simp] lemma rescaleFromL2_coeff
     (f : lp (fun _ : TensorEigenIdx (I := I) (M := M) g r s => ℝ) 2)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    (rescaleFromL2 (I := I) (M := M) (h_uniform := h_uniform) (σ := σ)
+    (rescaleFromL2 (I := I) (M := M) (h_atlas := h_atlas) (σ := σ)
         f).coeff i =
       (Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ))⁻¹ *
         (f : _ → ℝ) i := rfl
@@ -644,7 +644,7 @@ equivalence. The forward map is the diagonal rescaling
 `cᵢ ↦ √(1+λᵢ)^σ · cᵢ`; norm preservation is the weighted-norm
 identity. -/
 def rescaleEquivL2 :
-    tensorHs (I := I) (M := M) g r s h_uniform σ ≃ₗᵢ[ℝ]
+    tensorHs (I := I) (M := M) g r s h_atlas σ ≃ₗᵢ[ℝ]
       lp (fun _ : TensorEigenIdx (I := I) (M := M) g r s => ℝ) 2 where
   toFun := rescaleToL2 (I := I) (M := M)
   invFun := rescaleFromL2 (I := I) (M := M)
@@ -713,9 +713,9 @@ def rescaleEquivL2 :
     rwa [Real.sqrt_sq h1, Real.sqrt_sq h2] at this
 
 @[simp] lemma rescaleEquivL2_apply
-    (T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
+    (T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
     (rescaleEquivL2 (I := I) (M := M)
-      (h_uniform := h_uniform) (σ := σ) T : _ → ℝ) =
+      (h_atlas := h_atlas) (σ := σ) T : _ → ℝ) =
       (fun i => Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ) *
         T.coeff i) := rfl
 
@@ -725,10 +725,10 @@ Transported from completeness of `ℓ²(ι, ℝ)` along the linear isometric
 equivalence `rescaleEquivL2`. -/
 
 instance instCompleteSpace :
-    CompleteSpace (tensorHs (I := I) (M := M) g r s h_uniform σ) :=
+    CompleteSpace (tensorHs (I := I) (M := M) g r s h_atlas σ) :=
   (rescaleEquivL2 (I := I) (M := M)
     (g := g) (r := r) (s := s)
-    (h_uniform := h_uniform) (σ := σ)).toIsometryEquiv.completeSpace
+    (h_atlas := h_atlas) (σ := σ)).toIsometryEquiv.completeSpace
 
 end tensorHs
 
@@ -742,12 +742,12 @@ inclusion of `Hˢ` into `TensorL2 r s g`. -/
 namespace tensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
-  {h_uniform : uniformTensorChartSobolevBound g r s} {σ : ℝ}
+  {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ}
 
 /-- For `σ ≥ 0`, the (unweighted) coordinate family of an `Hˢ` element
 is square-summable. -/
 lemma coeff_summable_sq_of_nonneg (hσ : 0 ≤ σ)
-    (T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
+    (T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
     Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
       (T.coeff i) ^ 2) := by
   refine Summable.of_nonneg_of_le (fun i => sq_nonneg _) ?_
@@ -761,7 +761,7 @@ lemma coeff_summable_sq_of_nonneg (hσ : 0 ≤ σ)
 /-- For `σ ≥ 0`, the coordinate family of an `Hˢ` element, viewed in
 `ℓ²(ι, ℝ)`. -/
 def toL2Seq (hσ : 0 ≤ σ)
-    (T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
+    (T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
     lp (fun _ : TensorEigenIdx (I := I) (M := M) g r s => ℝ) 2 :=
   ⟨T.coeff, by
     apply memℓp_gen
@@ -777,7 +777,7 @@ def toL2Seq (hσ : 0 ≤ σ)
     exact coeff_summable_sq_of_nonneg (I := I) (M := M) hσ T⟩
 
 @[simp] lemma toL2Seq_apply (hσ : 0 ≤ σ)
-    (T : tensorHs (I := I) (M := M) g r s h_uniform σ)
+    (T : tensorHs (I := I) (M := M) g r s h_atlas σ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     (toL2Seq (I := I) (M := M) hσ T : _ → ℝ) i = T.coeff i := rfl
 
@@ -785,18 +785,18 @@ def toL2Seq (hσ : 0 ≤ σ)
 an `Hˢ` element to the `L²` tensor with the same eigenbasis coordinate
 family, reconstructed via the inverse Hilbert-basis representation. -/
 def toL2Fun (hσ : 0 ≤ σ)
-    (T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
+    (T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
     TensorL2 r s g :=
   (tensorResolventHilbertEigenbasisSigma
-    (I := I) (M := M) h_uniform).repr.symm
+    (I := I) (M := M) h_atlas).repr.symm
     (toL2Seq (I := I) (M := M) hσ T)
 
 /-- The `L²` eigenbasis coordinate of `toL2Fun T` is the `Hˢ`
 coordinate of `T`. -/
 @[simp] lemma tensorL2Coeff_toL2Fun (hσ : 0 ≤ σ)
-    (T : tensorHs (I := I) (M := M) g r s h_uniform σ)
+    (T : tensorHs (I := I) (M := M) g r s h_atlas σ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    tensorL2Coeff (I := I) (M := M) h_uniform
+    tensorL2Coeff (I := I) (M := M) h_atlas
         (toL2Fun (I := I) (M := M) hσ T) i = T.coeff i := by
   unfold tensorL2Coeff toL2Fun
   rw [LinearIsometryEquiv.apply_symm_apply]
@@ -804,7 +804,7 @@ coordinate of `T`. -/
 
 /-- `toL2Seq` is additive. -/
 lemma toL2Seq_add (hσ : 0 ≤ σ)
-    (S T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
+    (S T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
     toL2Seq (I := I) (M := M) hσ (S + T) =
       toL2Seq (I := I) (M := M) hσ S + toL2Seq (I := I) (M := M) hσ T := by
   apply lp.ext
@@ -813,7 +813,7 @@ lemma toL2Seq_add (hσ : 0 ≤ σ)
 
 /-- `toL2Seq` is `ℝ`-homogeneous. -/
 lemma toL2Seq_smul (hσ : 0 ≤ σ) (c : ℝ)
-    (T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
+    (T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
     toL2Seq (I := I) (M := M) hσ (c • T) =
       c • toL2Seq (I := I) (M := M) hσ T := by
   apply lp.ext
@@ -823,7 +823,7 @@ lemma toL2Seq_smul (hσ : 0 ≤ σ) (c : ℝ)
 
 /-- `toL2Fun` is additive. -/
 lemma toL2Fun_add (hσ : 0 ≤ σ)
-    (S T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
+    (S T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
     toL2Fun (I := I) (M := M) hσ (S + T) =
       toL2Fun (I := I) (M := M) hσ S + toL2Fun (I := I) (M := M) hσ T := by
   unfold toL2Fun
@@ -831,7 +831,7 @@ lemma toL2Fun_add (hσ : 0 ≤ σ)
 
 /-- `toL2Fun` is `ℝ`-homogeneous. -/
 lemma toL2Fun_smul (hσ : 0 ≤ σ) (c : ℝ)
-    (T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
+    (T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
     toL2Fun (I := I) (M := M) hσ (c • T) =
       c • toL2Fun (I := I) (M := M) hσ T := by
   unfold toL2Fun
@@ -840,17 +840,17 @@ lemma toL2Fun_smul (hσ : 0 ≤ σ) (c : ℝ)
 /-- For `σ ≥ 0`, the `L²` norm of `toL2Fun T` is bounded by the `Hˢ`
 norm of `T`: the inclusion is norm-non-increasing. -/
 lemma norm_toL2Fun_le (hσ : 0 ≤ σ)
-    (T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
+    (T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
     ‖toL2Fun (I := I) (M := M) hσ T‖ ≤ ‖T‖ := by
   -- Compare squared norms: `∑ cᵢ² ≤ ∑ wᵢ cᵢ²` since `wᵢ ≥ 1`.
   have h_l2_sq : ‖toL2Fun (I := I) (M := M) hσ T‖ ^ 2 =
       ∑' i, (T.coeff i) ^ 2 := by
-    have h_par := tensorParseval_norm_sq (I := I) (M := M) h_uniform
+    have h_par := tensorParseval_norm_sq (I := I) (M := M) h_atlas
       (toL2Fun (I := I) (M := M) hσ T)
     have h_eq :
         (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
           ‖⟪tensorResolventHilbertEigenbasisSigma
-              (I := I) (M := M) h_uniform i,
+              (I := I) (M := M) h_atlas i,
             toL2Fun (I := I) (M := M) hσ T⟫_ℝ‖ ^ 2) =
         (fun i => (T.coeff i) ^ 2) := by
       funext i
@@ -892,9 +892,9 @@ contraction) and is injective. The `L²` eigenbasis coordinate of the
 image of `T` equals the `Hˢ` coordinate of `T`; see
 `tensorHsToL2_tensorL2Coeff`. -/
 def tensorHsToL2 {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s) {σ : ℝ}
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) {σ : ℝ}
     (hσ : 0 ≤ σ) :
-    tensorHs (I := I) (M := M) g r s h_uniform σ →L[ℝ]
+    tensorHs (I := I) (M := M) g r s h_atlas σ →L[ℝ]
       TensorL2 r s g :=
   LinearMap.mkContinuous
     { toFun := tensorHs.toL2Fun (I := I) (M := M) hσ
@@ -908,36 +908,36 @@ def tensorHsToL2 {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
 /-- `tensorHsToL2` applied to `T` is the underlying `toL2Fun T`. -/
 @[simp] lemma tensorHsToL2_apply {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} {h_uniform : uniformTensorChartSobolevBound g r s} {σ : ℝ}
-    (hσ : 0 ≤ σ) (T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
-    tensorHsToL2 (I := I) (M := M) h_uniform hσ T =
+    {r s : ℕ} {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ}
+    (hσ : 0 ≤ σ) (T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
+    tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hσ T =
       tensorHs.toL2Fun (I := I) (M := M) hσ T := rfl
 
 /-- The operator norm of the inclusion `Hˢ →L[ℝ] TensorL2` is at most
 `1` for `σ ≥ 0`. -/
 theorem tensorHsToL2_opNorm_le_one {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} {h_uniform : uniformTensorChartSobolevBound g r s} {σ : ℝ}
+    {r s : ℕ} {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ}
     (hσ : 0 ≤ σ) :
-    ‖tensorHsToL2 (I := I) (M := M) h_uniform hσ‖ ≤ 1 :=
+    ‖tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hσ‖ ≤ 1 :=
   LinearMap.mkContinuous_norm_le _ zero_le_one _
 
 /-- The `L²` eigenbasis coordinate of the image of `T` under the
 inclusion equals the `Hˢ` coordinate of `T`. -/
 @[simp] theorem tensorHsToL2_tensorL2Coeff {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} {h_uniform : uniformTensorChartSobolevBound g r s} {σ : ℝ}
-    (hσ : 0 ≤ σ) (T : tensorHs (I := I) (M := M) g r s h_uniform σ)
+    {r s : ℕ} {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ}
+    (hσ : 0 ≤ σ) (T : tensorHs (I := I) (M := M) g r s h_atlas σ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    tensorL2Coeff (I := I) (M := M) h_uniform
-        (tensorHsToL2 (I := I) (M := M) h_uniform hσ T) i = T.coeff i := by
+    tensorL2Coeff (I := I) (M := M) h_atlas
+        (tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hσ T) i = T.coeff i := by
   rw [tensorHsToL2_apply]
   exact tensorHs.tensorL2Coeff_toL2Fun (I := I) (M := M) hσ T i
 
 /-- The inclusion `Hˢ →L[ℝ] TensorL2` is injective for `σ ≥ 0`. -/
 theorem tensorHsToL2_injective {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} {h_uniform : uniformTensorChartSobolevBound g r s} {σ : ℝ}
+    {r s : ℕ} {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ}
     (hσ : 0 ≤ σ) :
     Function.Injective
-      (tensorHsToL2 (I := I) (M := M) h_uniform hσ) := by
+      (tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hσ) := by
   intro S T hST
   ext i
   have hS := tensorHsToL2_tensorL2Coeff (I := I) (M := M) hσ S i
@@ -954,22 +954,22 @@ isometric identification of `H⁰` with `TensorL2 r s g`. -/
 /-- The spectral `H⁰` Sobolev space is isometrically isomorphic to the
 `L²` Hilbert space `TensorL2 r s g`. -/
 def tensorHsZeroEquivL2 {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s) :
-    tensorHs (I := I) (M := M) g r s h_uniform 0 ≃ₗᵢ[ℝ]
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) :
+    tensorHs (I := I) (M := M) g r s h_atlas 0 ≃ₗᵢ[ℝ]
       TensorL2 r s g :=
   (tensorHs.rescaleEquivL2 (I := I) (M := M)
-    (g := g) (r := r) (s := s) (h_uniform := h_uniform) (σ := 0)).trans
+    (g := g) (r := r) (s := s) (h_atlas := h_atlas) (σ := 0)).trans
     (tensorResolventHilbertEigenbasisSigma
-      (I := I) (M := M) h_uniform).repr.symm
+      (I := I) (M := M) h_atlas).repr.symm
 
 /-- The `H⁰`-to-`L²` identification sends `T` to the `L²` tensor with
 the same eigenbasis coordinates. -/
 theorem tensorHsZeroEquivL2_tensorL2Coeff {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} (h_uniform : uniformTensorChartSobolevBound g r s)
-    (T : tensorHs (I := I) (M := M) g r s h_uniform 0)
+    {r s : ℕ} (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    (T : tensorHs (I := I) (M := M) g r s h_atlas 0)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    tensorL2Coeff (I := I) (M := M) h_uniform
-        (tensorHsZeroEquivL2 (I := I) (M := M) h_uniform T) i =
+    tensorL2Coeff (I := I) (M := M) h_atlas
+        (tensorHsZeroEquivL2 (I := I) (M := M) h_atlas T) i =
       T.coeff i := by
   unfold tensorHsZeroEquivL2 tensorL2Coeff
   rw [LinearIsometryEquiv.trans_apply,
@@ -982,13 +982,13 @@ theorem tensorHsZeroEquivL2_tensorL2Coeff {g : SmoothRiemannianMetric I M}
 becomes the `H⁰` element whose coordinate family is `U`'s eigenbasis
 coordinate family. -/
 theorem tensorHsZeroEquivL2_symm_coeff {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} (h_uniform : uniformTensorChartSobolevBound g r s)
+    {r s : ℕ} (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (U : TensorL2 r s g)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    ((tensorHsZeroEquivL2 (I := I) (M := M) h_uniform).symm U).coeff i =
-      tensorL2Coeff (I := I) (M := M) h_uniform U i := by
-  have h := tensorHsZeroEquivL2_tensorL2Coeff (I := I) (M := M) h_uniform
-    ((tensorHsZeroEquivL2 (I := I) (M := M) h_uniform).symm U) i
+    ((tensorHsZeroEquivL2 (I := I) (M := M) h_atlas).symm U).coeff i =
+      tensorL2Coeff (I := I) (M := M) h_atlas U i := by
+  have h := tensorHsZeroEquivL2_tensorL2Coeff (I := I) (M := M) h_atlas
+    ((tensorHsZeroEquivL2 (I := I) (M := M) h_atlas).symm U) i
   rw [LinearIsometryEquiv.apply_symm_apply] at h
   exact h.symm
 
@@ -1001,10 +1001,10 @@ particular every single eigenvector `bᵢ` lies in every `Hˢ`. -/
 /-- A finitely-supported coordinate family `f` defines an element of
 `Hˢ` for every exponent `σ`. -/
 def tensorHsOfFiniteSupport {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s) (σ : ℝ)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) (σ : ℝ)
     (f : TensorEigenIdx (I := I) (M := M) g r s → ℝ)
     (hf : (Function.support f).Finite) :
-    tensorHs (I := I) (M := M) g r s h_uniform σ where
+    tensorHs (I := I) (M := M) g r s h_atlas σ where
   coeff := f
   weighted_summable := by
     apply summable_of_hasFiniteSupport
@@ -1017,10 +1017,10 @@ def tensorHsOfFiniteSupport {g : SmoothRiemannianMetric I M} {r s : ℕ}
     ring
 
 @[simp] lemma tensorHsOfFiniteSupport_coeff {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} (h_uniform : uniformTensorChartSobolevBound g r s) (σ : ℝ)
+    {r s : ℕ} (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) (σ : ℝ)
     (f : TensorEigenIdx (I := I) (M := M) g r s → ℝ)
     (hf : (Function.support f).Finite) :
-    (tensorHsOfFiniteSupport (I := I) (M := M) h_uniform σ f hf).coeff =
+    (tensorHsOfFiniteSupport (I := I) (M := M) h_atlas σ f hf).coeff =
       f := rfl
 
 open scoped Classical in
@@ -1028,10 +1028,10 @@ open scoped Classical in
 defines an element of every `Hˢ` — the spectral representation of the
 `j`-th eigenvector `b j`. -/
 def tensorHsBasisVec {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s) (σ : ℝ)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) (σ : ℝ)
     (j : TensorEigenIdx (I := I) (M := M) g r s) :
-    tensorHs (I := I) (M := M) g r s h_uniform σ :=
-  tensorHsOfFiniteSupport (I := I) (M := M) h_uniform σ
+    tensorHs (I := I) (M := M) g r s h_atlas σ :=
+  tensorHsOfFiniteSupport (I := I) (M := M) h_atlas σ
     (fun i => if i = j then (1 : ℝ) else 0)
     (by
       apply Set.Finite.subset (Set.finite_singleton j)
@@ -1042,34 +1042,34 @@ def tensorHsBasisVec {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
 open scoped Classical in
 @[simp] lemma tensorHsBasisVec_coeff {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} (h_uniform : uniformTensorChartSobolevBound g r s) (σ : ℝ)
+    {r s : ℕ} (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) (σ : ℝ)
     (j i : TensorEigenIdx (I := I) (M := M) g r s) :
-    (tensorHsBasisVec (I := I) (M := M) h_uniform σ j).coeff i =
+    (tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas σ j).coeff i =
       (if i = j then (1 : ℝ) else 0) := rfl
 
 /-- For `σ ≥ 0`, the inclusion `Hˢ → TensorL2` carries the spectral
-basis vector `tensorHsBasisVec h_uniform σ j` to the actual eigenbasis
+basis vector `tensorHsBasisVec h_atlas σ j` to the actual eigenbasis
 vector `b j`. -/
 theorem tensorHsToL2_tensorHsBasisVec {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} {h_uniform : uniformTensorChartSobolevBound g r s} {σ : ℝ}
+    {r s : ℕ} {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ}
     (hσ : 0 ≤ σ) (j : TensorEigenIdx (I := I) (M := M) g r s) :
-    tensorHsToL2 (I := I) (M := M) h_uniform hσ
-        (tensorHsBasisVec (I := I) (M := M) h_uniform σ j) =
+    tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hσ
+        (tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas σ j) =
       tensorResolventHilbertEigenbasisSigma
-        (I := I) (M := M) h_uniform j := by
+        (I := I) (M := M) h_atlas j := by
   classical
   -- Both sides have the same eigenbasis coordinates, and the eigenbasis
   -- representation `b.repr` is injective.
   set b := tensorResolventHilbertEigenbasisSigma
-    (I := I) (M := M) h_uniform with hb
+    (I := I) (M := M) h_atlas with hb
   apply b.repr.injective
   ext i
-  have h_lhs : (b.repr (tensorHsToL2 (I := I) (M := M) h_uniform hσ
-        (tensorHsBasisVec (I := I) (M := M) h_uniform σ j))) i =
+  have h_lhs : (b.repr (tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hσ
+        (tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas σ j))) i =
       (if i = j then (1 : ℝ) else 0) := by
-    have h_coeff : tensorL2Coeff (I := I) (M := M) h_uniform
-        (tensorHsToL2 (I := I) (M := M) h_uniform hσ
-          (tensorHsBasisVec (I := I) (M := M) h_uniform σ j)) i =
+    have h_coeff : tensorL2Coeff (I := I) (M := M) h_atlas
+        (tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hσ
+          (tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas σ j)) i =
         (if i = j then (1 : ℝ) else 0) := by
       rw [tensorHsToL2_tensorL2Coeff, tensorHsBasisVec_coeff]
     rw [← h_coeff]
@@ -1084,38 +1084,38 @@ theorem tensorHsToL2_tensorHsBasisVec {g : SmoothRiemannianMetric I M}
 /-! ## Sanity tests -/
 
 example (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s) (σ : ℝ) :
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) (σ : ℝ) :
     Type _ :=
-  tensorHs (I := I) (M := M) g r s h_uniform σ
+  tensorHs (I := I) (M := M) g r s h_atlas σ
 
 example (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s) (σ : ℝ) :
-    NormedAddCommGroup (tensorHs (I := I) (M := M) g r s h_uniform σ) :=
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) (σ : ℝ) :
+    NormedAddCommGroup (tensorHs (I := I) (M := M) g r s h_atlas σ) :=
   inferInstance
 
 example (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s) (σ : ℝ) :
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) (σ : ℝ) :
     InnerProductSpace ℝ
-      (tensorHs (I := I) (M := M) g r s h_uniform σ) :=
+      (tensorHs (I := I) (M := M) g r s h_atlas σ) :=
   inferInstance
 
 example (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s) (σ : ℝ) :
-    CompleteSpace (tensorHs (I := I) (M := M) g r s h_uniform σ) :=
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) (σ : ℝ) :
+    CompleteSpace (tensorHs (I := I) (M := M) g r s h_atlas σ) :=
   inferInstance
 
 example {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    {h_uniform : uniformTensorChartSobolevBound g r s} {σ : ℝ}
+    {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ}
     (hσ : 0 ≤ σ) :
-    tensorHs (I := I) (M := M) g r s h_uniform σ →L[ℝ]
+    tensorHs (I := I) (M := M) g r s h_atlas σ →L[ℝ]
       TensorL2 r s g :=
-  tensorHsToL2 (I := I) (M := M) h_uniform hσ
+  tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hσ
 
 example {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s) :
-    tensorHs (I := I) (M := M) g r s h_uniform 0 ≃ₗᵢ[ℝ]
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) :
+    tensorHs (I := I) (M := M) g r s h_atlas 0 ≃ₗᵢ[ℝ]
       TensorL2 r s g :=
-  tensorHsZeroEquivL2 (I := I) (M := M) h_uniform
+  tensorHsZeroEquivL2 (I := I) (M := M) h_atlas
 
 end TensorHeatEquation
 end Parabolic

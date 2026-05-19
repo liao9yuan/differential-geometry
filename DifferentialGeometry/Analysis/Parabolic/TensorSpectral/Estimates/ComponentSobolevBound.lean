@@ -29,8 +29,8 @@ element, and it vanishes outside the chart-α source.
 * `tensorChartComponent_memWkpChart_one_two`: membership in `MemWkpChart g 1 2`.
 * `tensorChartComponentScalar_wkpNormChart_lt_top`: the chart-Sobolev norm is
   finite.
-* `tensorChartComponent_wkpNormChart_le`: existential norm bound packaging the
-  chart-Sobolev norm of the scalar component as
+* `tensorChartComponent_wkpNormChart_le_per_section_forall`: existential norm
+  bound packaging the chart-Sobolev norm of the scalar component as
   `ENNReal.ofReal C * (‖S‖₊ + 1)`, with the constant `C` depending on the
   tensor section `S`. The `+1` offset is essential for the per-section bound
   to hold in the boundary case `‖S‖ = 0`.
@@ -305,7 +305,7 @@ tensor section `S : SmoothCcTensorH1 g r s` admits a finite nonnegative
 constant `C` (depending on `S`) such that the chart-Sobolev norm of the
 manifold-side scalar chart-frame component is bounded by `ENNReal.ofReal C`
 times `(‖S‖₊ + 1)`. -/
-theorem tensorChartComponent_wkpNormChart_le
+theorem tensorChartComponent_wkpNormChart_le_per_section_forall
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -325,3 +325,10 @@ end Analysis
 end DifferentialGeometry
 
 end
+
+section Sanity
+#print axioms
+  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponent_memWkpChart_one_two
+#print axioms
+  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponent_wkpNormChart_le_per_section_forall
+end Sanity

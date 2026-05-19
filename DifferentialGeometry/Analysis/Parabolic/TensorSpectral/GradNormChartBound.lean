@@ -555,7 +555,7 @@ private lemma sum_sq_partialDeriv_scalarOnE_chartAtlasPOU_continuousOn
 negative real constant `M_dρ` such that, for every `b` in the chart-α POU
 `tsupport`, the sum of squared chart-direction partials of `scalarOnE α ρ_α`
 at `extChartAt I α b` is bounded above by `M_dρ`. -/
-private theorem exists_sum_sq_partialDeriv_scalarOnE_chartAtlasPOU_sup
+theorem exists_sum_sq_partialDeriv_scalarOnE_chartAtlasPOU_sup
     (α : M) :
     ∃ M_dρ : ℝ, 0 ≤ M_dρ ∧
       ∀ b : M, b ∈ tsupport (fun x : M =>

@@ -8,8 +8,7 @@ For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, this file
 combines the two trivial ingredients to derive the L²-side compactness
 of the variational tensor resolvent
 `tensorResolventL2 g r s : TensorL2 r s g →L[ℝ] TensorL2 r s g`
-from the uniform-in-`(S, α, Idx, Jdx)` chart-Sobolev `W^{1,2}` envelope
-`uniformTensorChartSobolevBound g r s`.
+from a locally-constant chart selection `HasLocallyConstantChartAt H M`.
 
 The factorisation
 `tensorResolventL2 g r s = TensorH1ComplToTensorL2 g r s ∘L
@@ -31,6 +30,7 @@ namespace TensorSpectral
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
+open DifferentialGeometry.Geometry
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -47,9 +47,9 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 /-! ## Headline: conditional compactness of the L²-side tensor resolvent -/
 
-/-- **Conditional compactness of the L²-side tensor resolvent.** Under the
-uniform-in-`(S, α, Idx, Jdx)` chart-Sobolev `W^{1,2}` envelope
-`uniformTensorChartSobolevBound g r s`, the L²-side resolvent operator
+/-- **Compactness of the L²-side tensor resolvent.** Given a locally-
+constant chart selection `HasLocallyConstantChartAt H M`, the L²-side
+resolvent operator
 `tensorResolventL2 g r s : TensorL2 r s g →L[ℝ] TensorL2 r s g`
 is a compact operator.
 
@@ -62,12 +62,12 @@ The proof combines two trivial ingredients:
   `tensorResolventL2 = TensorH1ComplToTensorL2 ∘L tensorResolvent`. -/
 theorem tensorResolventL2_isCompactOperator
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s) :
+    (h_atlas : HasLocallyConstantChartAt H M) :
     IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s) :=
   tensorResolventL2_isCompactOperator_of_isCompactOperator
     (I := I) (M := M) g r s
     (TensorH1ComplToTensorL2_isCompactOperator
-      (I := I) (M := M) g r s h_uniform)
+      (I := I) (M := M) g r s h_atlas)
 
 /-! ## Companion: compact self-adjoint package on the L²-side resolvent
 
@@ -80,19 +80,19 @@ compact self-adjoint spectral theorem on the L² Hilbert space. -/
 self-adjoint, conditional on the uniform chart-Sobolev hypothesis. -/
 theorem tensorResolventL2_isCompactOperator_and_isSelfAdjoint_of_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s) :
+    (h_atlas : HasLocallyConstantChartAt H M) :
     IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s) ∧
       IsSelfAdjoint (tensorResolventL2 (I := I) (M := M) g r s) :=
   ⟨tensorResolventL2_isCompactOperator
-      (I := I) (M := M) g r s h_uniform,
+      (I := I) (M := M) g r s h_atlas,
    tensorResolventL2_isSelfAdjoint (I := I) (M := M) g r s⟩
 
 /-! ## Sanity test -/
 
 example (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h : uniformTensorChartSobolevBound g r s) :
+    (h_atlas : HasLocallyConstantChartAt H M) :
     IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s) :=
-  tensorResolventL2_isCompactOperator (I := I) (M := M) g r s h
+  tensorResolventL2_isCompactOperator (I := I) (M := M) g r s h_atlas
 
 end TensorSpectral
 end Parabolic

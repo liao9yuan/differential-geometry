@@ -11,9 +11,8 @@ develops the spectral decomposition of the L²-side resolvent
 
   `R := tensorResolventL2 g r s : TensorL2 r s g →L[ℝ] TensorL2 r s g`
 
-of the variational tensor Laplacian, conditional on the uniform-in-
-`(S, α, Idx, Jdx)` chart-Sobolev `W^{1,2}` envelope
-`uniformTensorChartSobolevBound g r s`. Under this hypothesis the
+of the variational tensor Laplacian, given a locally-constant chart
+selection `HasLocallyConstantChartAt H M`. Under this hypothesis the
 operator `R` is a compact self-adjoint operator on the Hilbert space
 `TensorL2 r s g`, so Mathlib's compact self-adjoint spectral theorem
 yields:
@@ -68,6 +67,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
+open DifferentialGeometry.Geometry
 
 /-! ## File-local Borel-space instances on `E` and `M` -/
 
@@ -113,14 +113,14 @@ compact), each eigenspace at a non-zero scalar is finite-dimensional.
 This is the spectral theorem for compact operators applied to `R`. -/
 theorem tensorResolventEigenspace_finiteDim
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : HasLocallyConstantChartAt H M)
     {μ : ℝ} (hμ : μ ≠ 0) :
     FiniteDimensional ℝ (tensorResolventEigenspace
       (I := I) (M := M) g r s μ) := by
   have hCompact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s) :=
     tensorResolventL2_isCompactOperator
-      (I := I) (M := M) g r s h_uniform
+      (I := I) (M := M) g r s h_atlas
   -- Direct application of Mathlib's `finite_dimensional_eigenspace`.
   exact ContinuousLinearMap.finite_dimensional_eigenspace hCompact μ hμ
 
@@ -136,13 +136,13 @@ applied to the (already established) self-adjointness of `R` plus the
 conditional compactness. -/
 theorem tensorResolventEigenspaces_iSup_orthogonal_eq_bot
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s) :
+    (h_atlas : HasLocallyConstantChartAt H M) :
     (⨆ μ : ℝ, tensorResolventEigenspace
       (I := I) (M := M) g r s μ)ᗮ = ⊥ := by
   have hCompact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s) :=
     tensorResolventL2_isCompactOperator
-      (I := I) (M := M) g r s h_uniform
+      (I := I) (M := M) g r s h_atlas
   have hSymm : (tensorResolventL2 (I := I) (M := M) g r s).IsSymmetric :=
     (ContinuousLinearMap.isSelfAdjoint_iff_isSymmetric).mp
       (tensorResolventL2_isSelfAdjoint (I := I) (M := M) g r s)
@@ -292,7 +292,7 @@ the closed unit ball into a compact set), `(R v_n)` admits a convergent
 separated by `√2 ε > 0`. -/
 theorem tensorResolvent_eigenvalues_finite_above
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : HasLocallyConstantChartAt H M)
     {ε : ℝ} (hε : 0 < ε) :
     Set.Finite { μ : ℝ |
       Module.End.HasEigenvalue
@@ -301,7 +301,7 @@ theorem tensorResolvent_eigenvalues_finite_above
   have hCompact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s) :=
     tensorResolventL2_isCompactOperator
-      (I := I) (M := M) g r s h_uniform
+      (I := I) (M := M) g r s h_atlas
   by_contra h_inf
   rw [Set.not_finite] at h_inf
   -- Extract an injective sequence of elements of the set.
@@ -515,13 +515,13 @@ is trivial. Equivalently, the kernel of `tensorResolventL2 g r s` is
 `{0}`. -/
 theorem tensorResolventEigenspace_zero_eq_bot
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s) :
+    (h_atlas : HasLocallyConstantChartAt H M) :
     tensorResolventEigenspace (I := I) (M := M) g r s 0 = ⊥ := by
   -- `tensorResolventEigenspace g r s 0
   --     = ker (tensorResolventL2 g r s).toLinearMap = {0}` by injectivity.
-  -- The `h_uniform` parameter is recorded for downstream use but the proof
+  -- The `h_atlas` parameter is recorded for downstream use but the proof
   -- only depends on the variational injectivity argument.
-  let _ := h_uniform
+  let _ := h_atlas
   unfold tensorResolventEigenspace
   rw [Module.End.eigenspace_zero]
   rw [LinearMap.ker_eq_bot]

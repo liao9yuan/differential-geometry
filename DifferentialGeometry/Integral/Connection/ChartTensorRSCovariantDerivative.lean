@@ -260,8 +260,9 @@ We mirror the `slotCLM` substitution introduced in
 
 /-- Tangent-slot substitution: identity on every coordinate except slot `k`,
 where it places the given CLM `Φ`. Identical to the helper in
-`ChartTensor0SCovariantDerivative.lean`; re-declared here to keep the
-construction self-contained. -/
+`ChartTensor0SCovariantDerivative.lean`; re-declared here as a non-private
+alias to keep the construction self-contained while letting downstream
+op-norm bounds reason about its structure. -/
 def tangentSlotCLM (n : ℕ) {b : M}
     (k : Fin n) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b)
     (i : Fin n) : TangentSpace I b →L[ℝ] TangentSpace I b :=
@@ -300,7 +301,7 @@ This is just `compContinuousLinearMapL` on the `E`-valued multilinear maps;
 the wrap into the `Tensor0SSpace` level uses the bundle CLE
 `tensor0SSpace_continuousLinearEquiv` and the definitional identification
 `TangentSpace I b = E`. -/
-private noncomputable def tangentCompCLML_E (n : ℕ) (b : M)
+noncomputable def tangentCompCLML_E (n : ℕ) (b : M)
     (Φ : Fin n → (TangentSpace I b →L[ℝ] TangentSpace I b)) :
     ContinuousMultilinearMap ℝ (fun _ : Fin n => E) ℝ →L[ℝ]
       ContinuousMultilinearMap ℝ (fun _ : Fin n => E) ℝ :=

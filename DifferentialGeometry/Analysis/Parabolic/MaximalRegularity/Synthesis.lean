@@ -34,8 +34,8 @@ summable squared norms `(1 + λᵢ)ˢ · ‖gᵢ‖²`.
 
 ## Main definitions
 
-* `singleModeTimeL2 h_uniform i` — the `i`-th single-mode embedding.
-* `timeL2OfModes h_uniform g hsum` — the synthesised time-`L²` tensor field.
+* `singleModeTimeL2 h_atlas i` — the `i`-th single-mode embedding.
+* `timeL2OfModes h_atlas g hsum` — the synthesised time-`L²` tensor field.
 
 ## Main results
 
@@ -72,7 +72,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
-  {h_uniform : uniformTensorChartSobolevBound g r s}
+  {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
 
 /-! ## The single-mode embedding `ℝ → Hˢ`
 
@@ -81,12 +81,12 @@ spectral Sobolev space `Hˢ`, sending `c` to the scalar multiple of the `i`-th
 spectral basis vector.  It is linear, and its norm is `√((1 + λᵢ)ˢ)` since
 `bᵢ` has `Hˢ`-norm `√((1 + λᵢ)ˢ)` (it is the single-mode coordinate family). -/
 
-/-- The `Hˢ`-norm of the spectral basis vector `tensorHsBasisVec h_uniform σ i`
+/-- The `Hˢ`-norm of the spectral basis vector `tensorHsBasisVec h_atlas σ i`
 is `√((1 + λᵢ)ˢ) = √(tensorSobolevWeight i σ)`.  Its only nonzero coordinate is
 the `i`-th, equal to `1`. -/
 theorem norm_tensorHsBasisVec {σ : ℝ}
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    ‖tensorHsBasisVec (I := I) (M := M) h_uniform σ i‖ =
+    ‖tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas σ i‖ =
       Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ) := by
   classical
   rw [tensorHs.norm_eq_sqrt_tsum]
@@ -94,7 +94,7 @@ theorem norm_tensorHsBasisVec {σ : ℝ}
   -- The weighted-square family of `bᵢ` is supported at `i`, with value the
   -- weight at `i`.
   have hfun : (fun j => tensorSobolevWeight (I := I) (M := M) j σ *
-        ((tensorHsBasisVec (I := I) (M := M) h_uniform σ i).coeff j) ^ 2)
+        ((tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas σ i).coeff j) ^ 2)
       = fun j => if j = i then tensorSobolevWeight (I := I) (M := M) j σ else 0 := by
     funext j
     rw [tensorHsBasisVec_coeff]
@@ -106,30 +106,30 @@ theorem norm_tensorHsBasisVec {σ : ℝ}
 /-- The single-mode embedding `ℝ →L[ℝ] Hˢ`, `c ↦ c · bᵢ`: the scalar multiple of
 the `i`-th spectral basis vector.  Its operator norm is `√(tensorSobolevWeight
 i σ)`. -/
-def singleModeCLM (h_uniform : uniformTensorChartSobolevBound g r s) {σ : ℝ}
+def singleModeCLM (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) {σ : ℝ}
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    ℝ →L[ℝ] tensorHs (I := I) (M := M) g r s h_uniform σ :=
+    ℝ →L[ℝ] tensorHs (I := I) (M := M) g r s h_atlas σ :=
   LinearMap.mkContinuous
-    { toFun := fun c => c • tensorHsBasisVec (I := I) (M := M) h_uniform σ i
+    { toFun := fun c => c • tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas σ i
       map_add' := fun c d => by rw [add_smul]
       map_smul' := fun a c => by rw [smul_smul]; rfl }
     (Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ))
     (fun c => by
-      change ‖c • tensorHsBasisVec (I := I) (M := M) h_uniform σ i‖ ≤ _
+      change ‖c • tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas σ i‖ ≤ _
       rw [norm_smul, norm_tensorHsBasisVec (I := I) (M := M) i, Real.norm_eq_abs]
       exact le_of_eq (mul_comm _ _))
 
 @[simp] theorem singleModeCLM_apply {σ : ℝ}
     (i : TensorEigenIdx (I := I) (M := M) g r s) (c : ℝ) :
-    singleModeCLM (I := I) (M := M) h_uniform (σ := σ) i c =
-      c • tensorHsBasisVec (I := I) (M := M) h_uniform σ i := rfl
+    singleModeCLM (I := I) (M := M) h_atlas (σ := σ) i c =
+      c • tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas σ i := rfl
 
 open scoped Classical in
 /-- The `j`-th coordinate of `singleModeCLM i c` is `c` if `j = i` and `0`
 otherwise. -/
 @[simp] theorem singleModeCLM_coeff {σ : ℝ}
     (i j : TensorEigenIdx (I := I) (M := M) g r s) (c : ℝ) :
-    (singleModeCLM (I := I) (M := M) h_uniform (σ := σ) i c).coeff j =
+    (singleModeCLM (I := I) (M := M) h_atlas (σ := σ) i c).coeff j =
       (if j = i then c else 0) := by
   classical
   rw [singleModeCLM_apply]
@@ -149,18 +149,18 @@ variable {σ : ℝ} {T : ℝ}
 /-- The `i`-th single-mode time-`L²` embedding `L²(0,T) →L[ℝ] L²([0,T]; Hˢ)`: a
 scalar time function `g` is sent to the time-`L²` tensor field `t ↦ (g t) · bᵢ`
 whose only nonzero eigen-coordinate is the `i`-th. -/
-def singleModeTimeL2 (h_uniform : uniformTensorChartSobolevBound g r s) {σ : ℝ}
+def singleModeTimeL2 (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) {σ : ℝ}
     {T : ℝ} (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    timeL2 ℝ T →L[ℝ] timeL2 (tensorHs (I := I) (M := M) g r s h_uniform σ) T :=
-  (singleModeCLM (I := I) (M := M) h_uniform (σ := σ) i).compLpL 2 (timeMeasure T)
+    timeL2 ℝ T →L[ℝ] timeL2 (tensorHs (I := I) (M := M) g r s h_atlas σ) T :=
+  (singleModeCLM (I := I) (M := M) h_atlas (σ := σ) i).compLpL 2 (timeMeasure T)
 
 /-- `singleModeTimeL2 i g` is represented a.e. by the function
 `t ↦ (g t) · bᵢ`. -/
 theorem singleModeTimeL2_coeFn (i : TensorEigenIdx (I := I) (M := M) g r s)
     (gf : timeL2 ℝ T) :
-    singleModeTimeL2 (I := I) (M := M) h_uniform (σ := σ) i gf =ᵐ[timeMeasure T]
-      fun t => (gf t) • tensorHsBasisVec (I := I) (M := M) h_uniform σ i := by
-  have h := (singleModeCLM (I := I) (M := M) h_uniform (σ := σ) i).coeFn_compLpL
+    singleModeTimeL2 (I := I) (M := M) h_atlas (σ := σ) i gf =ᵐ[timeMeasure T]
+      fun t => (gf t) • tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas σ i := by
+  have h := (singleModeCLM (I := I) (M := M) h_atlas (σ := σ) i).coeFn_compLpL
     (p := 2) (μ := timeMeasure T) gf
   exact h.trans (Eventually.of_forall fun t => singleModeCLM_apply (I := I) (M := M) i (gf t))
 
@@ -170,17 +170,17 @@ open scoped Classical in
 theorem timeModeCoeff_singleModeTimeL2
     (i j : TensorEigenIdx (I := I) (M := M) g r s) (gf : timeL2 ℝ T) :
     timeModeCoeff (I := I) (M := M)
-        (singleModeTimeL2 (I := I) (M := M) h_uniform (σ := σ) i gf) j =
+        (singleModeTimeL2 (I := I) (M := M) h_atlas (σ := σ) i gf) j =
       (if j = i then gf else 0) := by
   classical
   refine Lp.ext ?_
   have hlhs := timeModeCoeff_coeFn (I := I) (M := M)
-    (singleModeTimeL2 (I := I) (M := M) h_uniform (σ := σ) i gf) j
-  have hsm := singleModeTimeL2_coeFn (I := I) (M := M) (h_uniform := h_uniform)
+    (singleModeTimeL2 (I := I) (M := M) h_atlas (σ := σ) i gf) j
+  have hsm := singleModeTimeL2_coeFn (I := I) (M := M) (h_atlas := h_atlas)
     (σ := σ) i gf
   -- The coordinate of `(gf t) • bᵢ` at `j` is `(if j = i then gf t else 0)`.
   have hcoord : ∀ t,
-      (((gf t) • tensorHsBasisVec (I := I) (M := M) h_uniform σ i).coeff j)
+      (((gf t) • tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas σ i).coeff j)
         = (if j = i then gf t else 0) := by
     intro t
     simp only [tensorHs.smul_coeff, tensorHsBasisVec_coeff]
@@ -199,12 +199,12 @@ theorem timeModeCoeff_singleModeTimeL2
 `(1 + λᵢ)ˢ · ‖g‖²`: the single-mode field carries the `Hˢ`-weight of its mode. -/
 theorem norm_singleModeTimeL2_sq (i : TensorEigenIdx (I := I) (M := M) g r s)
     (gf : timeL2 ℝ T) :
-    ‖singleModeTimeL2 (I := I) (M := M) h_uniform (σ := σ) i gf‖ ^ 2 =
+    ‖singleModeTimeL2 (I := I) (M := M) h_atlas (σ := σ) i gf‖ ^ 2 =
       tensorSobolevWeight (I := I) (M := M) i σ * ‖gf‖ ^ 2 := by
   rw [TimeSobolev.norm_sq_eq_integral, TimeSobolev.norm_sq_eq_integral,
     ← MeasureTheory.integral_const_mul]
   refine integral_congr_ae ?_
-  filter_upwards [singleModeTimeL2_coeFn (I := I) (M := M) (h_uniform := h_uniform)
+  filter_upwards [singleModeTimeL2_coeFn (I := I) (M := M) (h_atlas := h_atlas)
     (σ := σ) i gf] with t ht
   rw [ht, norm_smul, mul_pow, norm_tensorHsBasisVec (I := I) (M := M) i,
     Real.sq_sqrt (tensorSobolevWeight_nonneg (I := I) (M := M) i σ),
@@ -214,15 +214,15 @@ theorem norm_singleModeTimeL2_sq (i : TensorEigenIdx (I := I) (M := M) g r s)
 √((1 + λᵢ)ˢ) · ‖g‖`. -/
 theorem norm_singleModeTimeL2 (i : TensorEigenIdx (I := I) (M := M) g r s)
     (gf : timeL2 ℝ T) :
-    ‖singleModeTimeL2 (I := I) (M := M) h_uniform (σ := σ) i gf‖ =
+    ‖singleModeTimeL2 (I := I) (M := M) h_atlas (σ := σ) i gf‖ =
       Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ) * ‖gf‖ := by
-  have hsq := norm_singleModeTimeL2_sq (I := I) (M := M) (h_uniform := h_uniform)
+  have hsq := norm_singleModeTimeL2_sq (I := I) (M := M) (h_atlas := h_atlas)
     (σ := σ) i gf
   have hrhs_nonneg : 0 ≤ Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ) * ‖gf‖ :=
     mul_nonneg (Real.sqrt_nonneg _) (norm_nonneg _)
   have h := Real.sqrt_le_sqrt (le_of_eq hsq)
   have h' := Real.sqrt_le_sqrt (le_of_eq hsq.symm)
-  have hsqrt : ‖singleModeTimeL2 (I := I) (M := M) h_uniform (σ := σ) i gf‖ =
+  have hsqrt : ‖singleModeTimeL2 (I := I) (M := M) h_atlas (σ := σ) i gf‖ =
       Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ * ‖gf‖ ^ 2) := by
     rw [← hsq, Real.sqrt_sq (norm_nonneg _)]
   rw [hsqrt, Real.sqrt_mul (tensorSobolevWeight_nonneg (I := I) (M := M) i σ),
@@ -238,14 +238,14 @@ of the orthogonal spectral basis vectors `bᵢ`, `b_j`. -/
 `⟪bᵢ, b_j⟫ = 0` for `i ≠ j`. -/
 theorem inner_tensorHsBasisVec_eq_zero {i j : TensorEigenIdx (I := I) (M := M) g r s}
     (hij : i ≠ j) :
-    (inner ℝ (tensorHsBasisVec (I := I) (M := M) h_uniform σ i)
-      (tensorHsBasisVec (I := I) (M := M) h_uniform σ j) : ℝ) = 0 := by
+    (inner ℝ (tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas σ i)
+      (tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas σ j) : ℝ) = 0 := by
   classical
   rw [tensorHs.inner_def]
   -- Every term of the weighted coordinate-product series vanishes.
   have hterm : (fun k => tensorSobolevWeight (I := I) (M := M) k σ *
-        ((tensorHsBasisVec (I := I) (M := M) h_uniform σ i).coeff k *
-          (tensorHsBasisVec (I := I) (M := M) h_uniform σ j).coeff k))
+        ((tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas σ i).coeff k *
+          (tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas σ j).coeff k))
       = fun _ => (0 : ℝ) := by
     funext k
     rw [tensorHsBasisVec_coeff, tensorHsBasisVec_coeff]
@@ -259,17 +259,17 @@ distinct eigen-indices vanishes. -/
 theorem inner_singleModeTimeL2_eq_zero
     {i j : TensorEigenIdx (I := I) (M := M) g r s} (hij : i ≠ j)
     (gf hf : timeL2 ℝ T) :
-    (inner ℝ (singleModeTimeL2 (I := I) (M := M) h_uniform (σ := σ) i gf)
-      (singleModeTimeL2 (I := I) (M := M) h_uniform (σ := σ) j hf) : ℝ) = 0 := by
+    (inner ℝ (singleModeTimeL2 (I := I) (M := M) h_atlas (σ := σ) i gf)
+      (singleModeTimeL2 (I := I) (M := M) h_atlas (σ := σ) j hf) : ℝ) = 0 := by
   rw [TimeSobolev.inner_def]
   rw [show (∫ t in Set.Icc (0 : ℝ) T,
-        inner ℝ (singleModeTimeL2 (I := I) (M := M) h_uniform (σ := σ) i gf t)
-          (singleModeTimeL2 (I := I) (M := M) h_uniform (σ := σ) j hf t))
+        inner ℝ (singleModeTimeL2 (I := I) (M := M) h_atlas (σ := σ) i gf t)
+          (singleModeTimeL2 (I := I) (M := M) h_atlas (σ := σ) j hf t))
       = ∫ t in Set.Icc (0 : ℝ) T, (0 : ℝ) from ?_, integral_zero]
   refine integral_congr_ae ?_
-  filter_upwards [singleModeTimeL2_coeFn (I := I) (M := M) (h_uniform := h_uniform)
+  filter_upwards [singleModeTimeL2_coeFn (I := I) (M := M) (h_atlas := h_atlas)
       (σ := σ) i gf,
-    singleModeTimeL2_coeFn (I := I) (M := M) (h_uniform := h_uniform)
+    singleModeTimeL2_coeFn (I := I) (M := M) (h_atlas := h_atlas)
       (σ := σ) j hf] with t hit hjt
   rw [hit, hjt, inner_smul_left, inner_smul_right,
     inner_tensorHsBasisVec_eq_zero (I := I) (M := M) hij, mul_zero, mul_zero]
@@ -283,34 +283,34 @@ unconditionally convergent sum in `L²([0,T]; Hˢ)`. -/
 
 /-- The rescaled single-mode embedding as a continuous linear map:
 `g ↦ √((1 + λᵢ)ˢ)⁻¹ • singleModeTimeL2 i g`. -/
-def singleModeScaledCLM (h_uniform : uniformTensorChartSobolevBound g r s) {σ : ℝ}
+def singleModeScaledCLM (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) {σ : ℝ}
     {T : ℝ} (i : TensorEigenIdx (I := I) (M := M) g r s) :
     timeL2 ℝ T →L[ℝ]
-      timeL2 (tensorHs (I := I) (M := M) g r s h_uniform σ) T :=
+      timeL2 (tensorHs (I := I) (M := M) g r s h_atlas σ) T :=
   (Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ))⁻¹ •
-    singleModeTimeL2 (I := I) (M := M) h_uniform (σ := σ) (T := T) i
+    singleModeTimeL2 (I := I) (M := M) h_atlas (σ := σ) (T := T) i
 
 @[simp] theorem singleModeScaledCLM_apply
     (i : TensorEigenIdx (I := I) (M := M) g r s) (gf : timeL2 ℝ T) :
-    singleModeScaledCLM (I := I) (M := M) h_uniform (σ := σ) i gf =
+    singleModeScaledCLM (I := I) (M := M) h_atlas (σ := σ) i gf =
       (Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ))⁻¹ •
-        singleModeTimeL2 (I := I) (M := M) h_uniform (σ := σ) i gf := by
+        singleModeTimeL2 (I := I) (M := M) h_atlas (σ := σ) i gf := by
   rw [singleModeScaledCLM, ContinuousLinearMap.smul_apply]
 
 /-- The rescaled single-mode embedding `L²(0,T) →ₗᵢ[ℝ] L²([0,T]; Hˢ)`,
 `g ↦ √((1 + λᵢ)ˢ)⁻¹ • singleModeTimeL2 i g`: a *linear isometry*, the
 single-mode embedding normalised so that `bᵢ` has unit image. -/
-def singleModeIsometry (h_uniform : uniformTensorChartSobolevBound g r s) {σ : ℝ}
+def singleModeIsometry (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) {σ : ℝ}
     {T : ℝ} (i : TensorEigenIdx (I := I) (M := M) g r s) :
     timeL2 ℝ T →ₗᵢ[ℝ]
-      timeL2 (tensorHs (I := I) (M := M) g r s h_uniform σ) T :=
-  { (singleModeScaledCLM (I := I) (M := M) h_uniform (σ := σ) i).toLinearMap with
+      timeL2 (tensorHs (I := I) (M := M) g r s h_atlas σ) T :=
+  { (singleModeScaledCLM (I := I) (M := M) h_atlas (σ := σ) i).toLinearMap with
     norm_map' := fun gf => by
       have hsqrt_pos : 0 < Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ) :=
         Real.sqrt_pos.mpr (tensorSobolevWeight_pos (I := I) (M := M) i σ)
-      have hval : ((singleModeScaledCLM (I := I) (M := M) h_uniform (σ := σ) i).toLinearMap
+      have hval : ((singleModeScaledCLM (I := I) (M := M) h_atlas (σ := σ) i).toLinearMap
             gf) = (Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ))⁻¹ •
-              singleModeTimeL2 (I := I) (M := M) h_uniform (σ := σ) i gf :=
+              singleModeTimeL2 (I := I) (M := M) h_atlas (σ := σ) i gf :=
         singleModeScaledCLM_apply (I := I) (M := M) i gf
       rw [hval, norm_smul, norm_singleModeTimeL2 (I := I) (M := M) i, Real.norm_eq_abs,
         abs_of_pos (inv_pos.mpr hsqrt_pos), ← mul_assoc,
@@ -318,17 +318,17 @@ def singleModeIsometry (h_uniform : uniformTensorChartSobolevBound g r s) {σ : 
 
 @[simp] theorem singleModeIsometry_apply
     (i : TensorEigenIdx (I := I) (M := M) g r s) (gf : timeL2 ℝ T) :
-    singleModeIsometry (I := I) (M := M) h_uniform (σ := σ) i gf =
+    singleModeIsometry (I := I) (M := M) h_atlas (σ := σ) i gf =
       (Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ))⁻¹ •
-        singleModeTimeL2 (I := I) (M := M) h_uniform (σ := σ) i gf :=
+        singleModeTimeL2 (I := I) (M := M) h_atlas (σ := σ) i gf :=
   singleModeScaledCLM_apply (I := I) (M := M) i gf
 
 /-- The rescaled single-mode embeddings form an orthogonal family in
 `L²([0,T]; Hˢ)`. -/
 theorem orthogonalFamily_singleModeIsometry
-    (h_uniform : uniformTensorChartSobolevBound g r s) {σ : ℝ} {T : ℝ} :
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) {σ : ℝ} {T : ℝ} :
     OrthogonalFamily ℝ (fun _ : TensorEigenIdx (I := I) (M := M) g r s => timeL2 ℝ T)
-      (fun i => singleModeIsometry (I := I) (M := M) h_uniform (σ := σ) (T := T) i) := by
+      (fun i => singleModeIsometry (I := I) (M := M) h_atlas (σ := σ) (T := T) i) := by
   intro i j hij gf hf
   rw [singleModeIsometry_apply, singleModeIsometry_apply, inner_smul_left,
     inner_smul_right, inner_singleModeTimeL2_eq_zero (I := I) (M := M) hij,
@@ -338,15 +338,15 @@ theorem orthogonalFamily_singleModeIsometry
 re-weighted scalar function `√((1 + λᵢ)ˢ) • gᵢ`. -/
 theorem singleModeTimeL2_eq_isometry (i : TensorEigenIdx (I := I) (M := M) g r s)
     (gf : timeL2 ℝ T) :
-    singleModeTimeL2 (I := I) (M := M) h_uniform (σ := σ) i gf =
-      singleModeIsometry (I := I) (M := M) h_uniform (σ := σ) i
+    singleModeTimeL2 (I := I) (M := M) h_atlas (σ := σ) i gf =
+      singleModeIsometry (I := I) (M := M) h_atlas (σ := σ) i
         ((Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ)) • gf) := by
   have hsqrt_pos : 0 < Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ) :=
     Real.sqrt_pos.mpr (tensorSobolevWeight_pos (I := I) (M := M) i σ)
   rw [singleModeIsometry_apply, map_smul, smul_smul,
     inv_mul_cancel₀ (ne_of_gt hsqrt_pos), one_smul]
 
-variable (h_uniform) in
+variable (h_atlas) in
 /-- **Synthesis of a time-`L²` tensor field from its eigen-coordinate family.**
 Given, for each eigen-index `i`, a scalar function `gFam i ∈ L²(0,T)`, with the
 spectral-weighted family `i ↦ (1 + λᵢ)ˢ · ‖gFam i‖²` summable, the family of
@@ -356,25 +356,25 @@ theorem summable_singleModeTimeL2
     (gFam : TensorEigenIdx (I := I) (M := M) g r s → timeL2 ℝ T)
     (hsum : Summable (fun i => tensorSobolevWeight (I := I) (M := M) i σ *
       ‖gFam i‖ ^ 2)) :
-    Summable (fun i => singleModeTimeL2 (I := I) (M := M) h_uniform (σ := σ) i
+    Summable (fun i => singleModeTimeL2 (I := I) (M := M) h_atlas (σ := σ) i
       (gFam i)) := by
   -- Re-weight: `singleModeTimeL2 i (gFam i) = V i (√(weight i σ) • gFam i)`.
-  have hrw : (fun i => singleModeTimeL2 (I := I) (M := M) h_uniform (σ := σ) i
+  have hrw : (fun i => singleModeTimeL2 (I := I) (M := M) h_atlas (σ := σ) i
         (gFam i))
-      = fun i => singleModeIsometry (I := I) (M := M) h_uniform (σ := σ) i
+      = fun i => singleModeIsometry (I := I) (M := M) h_atlas (σ := σ) i
           ((Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ)) • gFam i) := by
     funext i
     exact singleModeTimeL2_eq_isometry (I := I) (M := M) i (gFam i)
   rw [hrw]
   -- Apply the orthogonal-family summability criterion.
   rw [(orthogonalFamily_singleModeIsometry (I := I) (M := M)
-    h_uniform (σ := σ) (T := T)).summable_iff_norm_sq_summable]
+    h_atlas (σ := σ) (T := T)).summable_iff_norm_sq_summable]
   -- `‖√(weight i σ) • gFam i‖² = weight i σ · ‖gFam i‖²`.
   refine hsum.congr (fun i => ?_)
   rw [norm_smul, mul_pow, Real.norm_eq_abs, sq_abs,
     Real.sq_sqrt (tensorSobolevWeight_nonneg (I := I) (M := M) i σ)]
 
-variable (h_uniform) in
+variable (h_atlas) in
 /-- **The synthesised time-`L²` tensor field.**  This is the element of
 `L²([0,T]; Hˢ)` reconstructed from a scalar mode family `gFam`: the sum
 `∑ᵢ singleModeTimeL2 i (gFam i)`.  When the spectral-weighted family
@@ -383,8 +383,8 @@ the synthesised field has `i`-th eigen-coordinate `gFam i`
 (`timeL2OfModes_timeModeCoeff`). -/
 def timeL2OfModes
     (gFam : TensorEigenIdx (I := I) (M := M) g r s → timeL2 ℝ T) :
-    timeL2 (tensorHs (I := I) (M := M) g r s h_uniform σ) T :=
-  ∑' i, singleModeTimeL2 (I := I) (M := M) h_uniform (σ := σ) i (gFam i)
+    timeL2 (tensorHs (I := I) (M := M) g r s h_atlas σ) T :=
+  ∑' i, singleModeTimeL2 (I := I) (M := M) h_atlas (σ := σ) i (gFam i)
 
 /-- **The synthesised field has the prescribed eigen-coordinates.**  When the
 spectral-weighted family is summable, for every eigen-index `j`,
@@ -396,24 +396,24 @@ theorem timeL2OfModes_timeModeCoeff
       ‖gFam i‖ ^ 2))
     (j : TensorEigenIdx (I := I) (M := M) g r s) :
     timeModeCoeff (I := I) (M := M)
-        (timeL2OfModes (I := I) (M := M) (σ := σ) h_uniform gFam) j =
+        (timeL2OfModes (I := I) (M := M) (σ := σ) h_atlas gFam) j =
       gFam j := by
   classical
-  haveI := countable_tensorEigenIdx (I := I) (M := M) h_uniform
+  haveI := countable_tensorEigenIdx (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas
   -- The coordinate functional commutes with the convergent sum.
-  have hsumm := summable_singleModeTimeL2 (I := I) (M := M) h_uniform gFam hsum
+  have hsumm := summable_singleModeTimeL2 (I := I) (M := M) h_atlas gFam hsum
   have hcomm : timeModeCoeff (I := I) (M := M)
-        (timeL2OfModes (I := I) (M := M) (σ := σ) h_uniform gFam) j =
+        (timeL2OfModes (I := I) (M := M) (σ := σ) h_atlas gFam) j =
       ∑' i, timeModeCoeff (I := I) (M := M)
-        (singleModeTimeL2 (I := I) (M := M) h_uniform (σ := σ) i (gFam i)) j := by
+        (singleModeTimeL2 (I := I) (M := M) h_atlas (σ := σ) i (gFam i)) j := by
     rw [timeL2OfModes]
     exact ContinuousLinearMap.map_tsum
-      ((tensorHsCoeffL (I := I) (M := M) h_uniform j).compLpL 2 (timeMeasure T))
+      ((tensorHsCoeffL (I := I) (M := M) h_atlas j).compLpL 2 (timeMeasure T))
       hsumm
   rw [hcomm]
   -- Each term is `if i = j then gFam i else 0`; the sum collapses to `gFam j`.
   have hterm : (fun i => timeModeCoeff (I := I) (M := M)
-        (singleModeTimeL2 (I := I) (M := M) h_uniform (σ := σ) i (gFam i)) j)
+        (singleModeTimeL2 (I := I) (M := M) h_atlas (σ := σ) i (gFam i)) j)
       = fun i => if i = j then gFam i else 0 := by
     funext i
     rw [timeModeCoeff_singleModeTimeL2 (I := I) (M := M) i j (gFam i)]

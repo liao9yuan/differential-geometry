@@ -33,8 +33,8 @@ finite-dimensional model fibre and is the natural follow-up.
 * `tensorChartComponentScalar_eLpNorm_two_lt_top`: the `L²` norm of the
   chart-frame scalar component is finite.
 * `tensorChartComponentScalar_eLpNorm_le_l2`: existential `L²` bound,
-  packaged in the style of `tensorChartComponent_wkpNormChart_le` from
-  `ComponentSobolevBound.lean`.
+  packaged in the style of `tensorChartComponent_wkpNormChart_le_per_section_forall`
+  from `ComponentSobolevBound.lean`.
 -/
 
 noncomputable section

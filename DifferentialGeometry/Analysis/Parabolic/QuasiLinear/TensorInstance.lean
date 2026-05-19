@@ -5,7 +5,7 @@ import DifferentialGeometry.Analysis.Parabolic.TensorLinearParabolic
 # Quasi-linear tensor heat equation on `L²`: short-time existence and uniqueness
 
 For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, and a uniform
-tensor Sobolev bound `h_uniform`, the tensor heat semigroup `e^{t Δ_∇}`
+tensor Sobolev bound `h_atlas`, the tensor heat semigroup `e^{t Δ_∇}`
 on `TensorL2 r s g` is a bounded strongly continuous one-parameter
 contraction semigroup. This file packages it as a `BoundedC0Semigroup`
 and feeds it into the abstract semilinear existence/uniqueness machinery
@@ -18,7 +18,7 @@ for a globally Lipschitz lower-order nonlinearity `N : TensorL2 → TensorL2`.
 
 ## Main definitions
 
-* `tensorBoundedC0Semigroup g r s h_uniform` — the tensor heat semigroup
+* `tensorBoundedC0Semigroup g r s h_atlas` — the tensor heat semigroup
   `e^{t Δ_∇}` packaged as a `BoundedC0Semigroup (TensorL2 r s g)`.
 
 ## Main results
@@ -78,28 +78,28 @@ the established analytic properties of the tensor heat semigroup:
 a bounded strongly continuous one-parameter contraction semigroup. -/
 noncomputable def tensorBoundedC0Semigroup
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s) :
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) :
     BoundedC0Semigroup (TensorL2 r s g) where
-  toFun := fun t => tensorHeatSemigroup (I := I) (M := M) g r s h_uniform t
+  toFun := fun t => tensorHeatSemigroup (I := I) (M := M) g r s h_atlas t
   apply_zero :=
-    tensorHeatSemigroup_zero (I := I) (M := M) h_uniform
+    tensorHeatSemigroup_zero (I := I) (M := M) h_atlas
   apply_add := fun _ _ ht hs =>
-    tensorHeatSemigroup_add (I := I) (M := M) h_uniform ht hs
+    tensorHeatSemigroup_add (I := I) (M := M) h_atlas ht hs
   opNorm_le_one := fun t _ =>
     tensorHeatSemigroup_opNorm_le_one
-      (I := I) (M := M) (h_uniform := h_uniform) t
+      (I := I) (M := M) (h_atlas := h_atlas) t
   continuousOn_apply := fun T =>
     tensorHeatSemigroup_continuous_on_nonneg
-      (I := I) (M := M) h_uniform T
+      (I := I) (M := M) h_atlas T
 
 /-- The underlying one-parameter family of `tensorBoundedC0Semigroup` is
 the tensor heat semigroup. -/
 @[simp]
 theorem tensorBoundedC0Semigroup_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s) (t : ℝ) :
-    tensorBoundedC0Semigroup (I := I) (M := M) g r s h_uniform t =
-      tensorHeatSemigroup (I := I) (M := M) g r s h_uniform t :=
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) (t : ℝ) :
+    tensorBoundedC0Semigroup (I := I) (M := M) g r s h_atlas t =
+      tensorHeatSemigroup (I := I) (M := M) g r s h_atlas t :=
   rfl
 
 /-! ## Short-time existence for the quasi-linear tensor heat equation
@@ -116,7 +116,7 @@ semigroup — to the concrete heat-semigroup applications. -/
 heat equation.**
 
 For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a uniform
-tensor Sobolev bound `h_uniform`, an initial datum `T_0 : TensorL2 r s g`,
+tensor Sobolev bound `h_atlas`, an initial datum `T_0 : TensorL2 r s g`,
 and a globally Lipschitz lower-order nonlinearity `N`, there is a
 positive existence time `T` and a continuous path
 `u : [0, T] → TensorL2 r s g` solving the Duhamel integral equation
@@ -126,21 +126,21 @@ positive existence time `T` and a continuous path
 with `u(0) = T_0`. -/
 theorem tensor_quasilinear_parabolic_existence
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (T_0 : TensorL2 r s g)
     {N : TensorL2 r s g → TensorL2 r s g} {L : ℝ≥0} (hN : LipschitzWith L N) :
     ∃ T : ℝ, 0 < T ∧ ∃ u : ℝ → TensorL2 r s g,
       ContinuousOn u (Set.Icc 0 T) ∧
       u 0 = T_0 ∧
       ∀ t ∈ Set.Icc (0:ℝ) T,
-        u t = tensorHeatSemigroup g r s h_uniform t T_0 +
+        u t = tensorHeatSemigroup g r s h_atlas t T_0 +
           ∫ τ in (0:ℝ)..t,
-            tensorHeatSemigroup g r s h_uniform (t - τ) (N (u τ)) := by
+            tensorHeatSemigroup g r s h_atlas (t - τ) (N (u τ)) := by
   -- Apply the abstract semilinear existence theorem to the tensor heat
   -- semigroup.
   obtain ⟨T, hT_pos, u, hu_cont, hu_zero, hu_eq⟩ :=
     semilinear_parabolic_existence
-      (tensorBoundedC0Semigroup (I := I) (M := M) g r s h_uniform) T_0 hN
+      (tensorBoundedC0Semigroup (I := I) (M := M) g r s h_atlas) T_0 hN
   refine ⟨T, hT_pos, u, hu_cont, hu_zero, ?_⟩
   -- The abstract Duhamel terms coincide with the concrete heat-semigroup
   -- applications by definition of `tensorBoundedC0Semigroup`.
@@ -163,25 +163,25 @@ quasi-linear tensor heat Duhamel integral equation with the same initial
 datum `T_0` coincide on `[0, T]`, provided `(L : ℝ) * T < 1`. -/
 theorem tensor_quasilinear_parabolic_unique
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (T_0 : TensorL2 r s g)
     {N : TensorL2 r s g → TensorL2 r s g} {L : ℝ≥0} (hN : LipschitzWith L N)
     {T : ℝ} (hT : 0 < T) (hTL : (L : ℝ) * T < 1)
     {u v : ℝ → TensorL2 r s g}
     (hu : ContinuousOn u (Set.Icc 0 T)) (hv : ContinuousOn v (Set.Icc 0 T))
     (hu_eq : ∀ t ∈ Set.Icc (0:ℝ) T,
-      u t = tensorHeatSemigroup g r s h_uniform t T_0 +
+      u t = tensorHeatSemigroup g r s h_atlas t T_0 +
         ∫ τ in (0:ℝ)..t,
-          tensorHeatSemigroup g r s h_uniform (t - τ) (N (u τ)))
+          tensorHeatSemigroup g r s h_atlas (t - τ) (N (u τ)))
     (hv_eq : ∀ t ∈ Set.Icc (0:ℝ) T,
-      v t = tensorHeatSemigroup g r s h_uniform t T_0 +
+      v t = tensorHeatSemigroup g r s h_atlas t T_0 +
         ∫ τ in (0:ℝ)..t,
-          tensorHeatSemigroup g r s h_uniform (t - τ) (N (v τ))) :
+          tensorHeatSemigroup g r s h_atlas (t - τ) (N (v τ))) :
     Set.EqOn u v (Set.Icc 0 T) := by
   -- Translate the concrete Duhamel equations into the abstract form
   -- expected by `semilinear_parabolic_unique`, then apply it.
   refine semilinear_parabolic_unique
-    (tensorBoundedC0Semigroup (I := I) (M := M) g r s h_uniform) T_0 hN
+    (tensorBoundedC0Semigroup (I := I) (M := M) g r s h_atlas) T_0 hN
     hT hTL hu hv ?_ ?_
   · intro t ht
     simpa only [tensorBoundedC0Semigroup_apply] using hu_eq t ht
@@ -200,11 +200,11 @@ semigroup — to the tensor mild-solution formula. -/
 the concrete tensor mild solution. -/
 theorem duhamel_tensorBoundedC0Semigroup_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_uniform : uniformTensorChartSobolevBound g r s)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (T_0 : TensorL2 r s g) (F : ℝ → TensorL2 r s g) (t : ℝ) :
-    duhamel (tensorBoundedC0Semigroup (I := I) (M := M) g r s h_uniform)
+    duhamel (tensorBoundedC0Semigroup (I := I) (M := M) g r s h_atlas)
         T_0 F t =
-      tensorMildSolution (I := I) (M := M) g r s h_uniform T_0 F t :=
+      tensorMildSolution (I := I) (M := M) g r s h_atlas T_0 F t :=
   rfl
 
 end Parabolic

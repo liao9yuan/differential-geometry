@@ -1189,7 +1189,7 @@ lemma chartTensorCovDerivPointwiseInner_eq_tensorCovDerivPointwiseInner
 /-- The covariant derivative of a smooth compactly-supported tensor section
 applied to a chart-basis tangent vector field is smooth as a tensor section
 on the chart base set. -/
-private lemma tensorCovDeriv_chartBasis_contMDiffOn
+lemma tensorCovDeriv_chartBasis_contMDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (i : Fin (Module.finrank ℝ E)) :

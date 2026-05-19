@@ -9,7 +9,7 @@ import Mathlib.MeasureTheory.Integral.DominatedConvergence
 
 For a closed Riemannian manifold `(M, g)`, ranks `(r, s)` and a real exponent
 `a ≥ 0`, an element `f ∈ L²([0,T]; Hᵃ)` of the vector-valued time-`L²` space —
-with `Hᵃ = tensorHs g r s h_uniform a`, the spectral Sobolev space — has, at
+with `Hᵃ = tensorHs g r s h_atlas a`, the spectral Sobolev space — has, at
 almost every time `t`, eigen-coordinates `fᵢ(t) := (f t).coeff i` against the
 rough-Laplacian eigenbasis.  This file proves that the `L²([0,T]; Hᵃ)` norm
 decomposes mode by mode:
@@ -91,7 +91,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
-  {h_uniform : uniformTensorChartSobolevBound g r s}
+  {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
 
 /-! ## Countability of the eigen-index type
 
@@ -106,15 +106,15 @@ is countable. -/
 `TensorEigenIdx g r s` is countable: a sigma-type over the countable type
 `TensorNonzeroResolventEigenvalue g r s` with finite (`Fin _`) fibres.
 
-Stated as a lemma (consuming the explicit `uniformTensorChartSobolevBound`
+Stated as a lemma (consuming the explicit `HasLocallyConstantChartAt`
 hypothesis) rather than as an instance; downstream proofs install it with
 `haveI` where the Tonelli interchange or a countable a.e.-intersection needs
 it. -/
 lemma countable_tensorEigenIdx
-    (h_uniform : uniformTensorChartSobolevBound g r s) :
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) :
     Countable (TensorEigenIdx (I := I) (M := M) g r s) := by
   haveI : Countable (TensorNonzeroResolventEigenvalue (I := I) (M := M) g r s) :=
-    TensorNonzeroResolventEigenvalue.countable (I := I) (M := M) g r s h_uniform
+    TensorNonzeroResolventEigenvalue.countable (I := I) (M := M) g r s h_atlas
   infer_instance
 
 /-! ## The eigenbasis-coordinate functional on `Hᵃ`
@@ -129,7 +129,7 @@ makes the time-mode coordinate `t ↦ (f t).coeff i` measurable. -/
 /-- The single-term lower bound from weighted Parseval: the `i`-th weighted
 square is at most the full weighted sum, i.e. at most `‖T‖²`. -/
 lemma tensorHsWeightMulCoeffSqLeNormSq {a : ℝ}
-    (T : tensorHs (I := I) (M := M) g r s h_uniform a)
+    (T : tensorHs (I := I) (M := M) g r s h_atlas a)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     tensorSobolevWeight (I := I) (M := M) i a * (T.coeff i) ^ 2 ≤ ‖T‖ ^ 2 := by
   rw [tensorHs.norm_sq_eq_tsum (I := I) (M := M) T]
@@ -141,7 +141,7 @@ lemma tensorHsWeightMulCoeffSqLeNormSq {a : ℝ}
 /-- The `i`-th eigenbasis coordinate is bounded by `(1 + λᵢ)^(-a/2)` times the
 `Hᵃ` norm: `|T.coeff i| ≤ √(weight i a)⁻¹ · ‖T‖`. -/
 lemma tensorHsAbsCoeffLe {a : ℝ}
-    (T : tensorHs (I := I) (M := M) g r s h_uniform a)
+    (T : tensorHs (I := I) (M := M) g r s h_atlas a)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     |T.coeff i| ≤
       (Real.sqrt (tensorSobolevWeight (I := I) (M := M) i a))⁻¹ * ‖T‖ := by
@@ -171,9 +171,9 @@ lemma tensorHsAbsCoeffLe {a : ℝ}
 linear map `Hᵃ →L[ℝ] ℝ`.  Its underlying function is `T ↦ T.coeff i`; the
 operator norm is at most `(1 + λᵢ)^(-a/2)`.  Continuity of this functional is
 the measurability input for the time-mode coordinate map. -/
-def tensorHsCoeffL (h_uniform : uniformTensorChartSobolevBound g r s) {a : ℝ}
+def tensorHsCoeffL (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) {a : ℝ}
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    tensorHs (I := I) (M := M) g r s h_uniform a →L[ℝ] ℝ :=
+    tensorHs (I := I) (M := M) g r s h_atlas a →L[ℝ] ℝ :=
   LinearMap.mkContinuous
     { toFun := fun T => T.coeff i
       map_add' := fun S T => by
@@ -189,12 +189,12 @@ def tensorHsCoeffL (h_uniform : uniformTensorChartSobolevBound g r s) {a : ℝ}
 
 @[simp] lemma tensorHsCoeffL_apply {a : ℝ}
     (i : TensorEigenIdx (I := I) (M := M) g r s)
-    (T : tensorHs (I := I) (M := M) g r s h_uniform a) :
-    tensorHsCoeffL (I := I) (M := M) h_uniform i T = T.coeff i := rfl
+    (T : tensorHs (I := I) (M := M) g r s h_atlas a) :
+    tensorHsCoeffL (I := I) (M := M) h_atlas i T = T.coeff i := rfl
 
 lemma tensorHsCoeffL_opNorm_le {a : ℝ}
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    ‖tensorHsCoeffL (I := I) (M := M) h_uniform (a := a) i‖ ≤
+    ‖tensorHsCoeffL (I := I) (M := M) h_atlas (a := a) i‖ ≤
       (Real.sqrt (tensorSobolevWeight (I := I) (M := M) i a))⁻¹ :=
   LinearMap.mkContinuous_norm_le _
     (le_of_lt (inv_pos.mpr (Real.sqrt_pos.mpr
@@ -218,26 +218,26 @@ space of the bounded coordinate functional `tensorHsCoeffL i : Hᵃ →L[ℝ] �
 the underlying function agrees a.e. with `t ↦ (f t).coeff i`
 (`timeModeCoeff_coeFn`). -/
 def timeModeCoeff {a : ℝ} {T : ℝ}
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T)
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     timeL2 ℝ T :=
-  (tensorHsCoeffL (I := I) (M := M) h_uniform i).compLpL 2 (timeMeasure T) f
+  (tensorHsCoeffL (I := I) (M := M) h_atlas i).compLpL 2 (timeMeasure T) f
 
 /-- `timeModeCoeff f i` is represented almost everywhere by the function
 `t ↦ (f t).coeff i`. -/
 theorem timeModeCoeff_coeFn {a : ℝ} {T : ℝ}
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T)
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     timeModeCoeff (I := I) (M := M) f i =ᵐ[timeMeasure T]
       fun t => (f t).coeff i := by
-  have h := (tensorHsCoeffL (I := I) (M := M) h_uniform i).coeFn_compLpL
+  have h := (tensorHsCoeffL (I := I) (M := M) h_atlas i).coeFn_compLpL
     (p := 2) (μ := timeMeasure T) f
   exact h.trans
     (Eventually.of_forall fun t => tensorHsCoeffL_apply (I := I) (M := M) i (f t))
 
 /-- `f ↦ timeModeCoeff f i` is additive. -/
 theorem timeModeCoeff_add {a : ℝ} {T : ℝ}
-    (f₁ f₂ : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T)
+    (f₁ f₂ : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     timeModeCoeff (I := I) (M := M) (f₁ + f₂) i =
       timeModeCoeff (I := I) (M := M) f₁ i +
@@ -247,7 +247,7 @@ theorem timeModeCoeff_add {a : ℝ} {T : ℝ}
 
 /-- `f ↦ timeModeCoeff f i` is `ℝ`-homogeneous. -/
 theorem timeModeCoeff_smul {a : ℝ} {T : ℝ} (c : ℝ)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T)
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     timeModeCoeff (I := I) (M := M) (c • f) i =
       c • timeModeCoeff (I := I) (M := M) f i := by
@@ -258,17 +258,17 @@ theorem timeModeCoeff_smul {a : ℝ} {T : ℝ} (c : ℝ)
 `‖timeModeCoeff f i‖ ≤ (1 + λᵢ)^(-a/2) · ‖f‖`, the operator-norm bound coming
 from the coordinate functional `tensorHsCoeffL i`. -/
 theorem norm_timeModeCoeff_le {a : ℝ} {T : ℝ}
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T)
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     ‖timeModeCoeff (I := I) (M := M) f i‖ ≤
       (Real.sqrt (tensorSobolevWeight (I := I) (M := M) i a))⁻¹ * ‖f‖ := by
   refine le_trans
-    (((tensorHsCoeffL (I := I) (M := M) h_uniform i).compLpL 2
+    (((tensorHsCoeffL (I := I) (M := M) h_atlas i).compLpL 2
       (timeMeasure T)).le_opNorm f) ?_
   refine mul_le_mul_of_nonneg_right ?_ (norm_nonneg f)
   exact le_trans
     (ContinuousLinearMap.norm_compLpL_le
-      (tensorHsCoeffL (I := I) (M := M) h_uniform i))
+      (tensorHsCoeffL (I := I) (M := M) h_atlas i))
     (tensorHsCoeffL_opNorm_le (I := I) (M := M) i)
 
 /-! ## Pointwise integrability of the eigen-coordinate squares
@@ -279,7 +279,7 @@ square.  These facts feed the Fubini interchange below. -/
 
 /-- The square of a time-mode coordinate is integrable for the time measure. -/
 theorem integrable_timeModeCoeff_sq {a : ℝ} {T : ℝ}
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T)
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     Integrable (fun t => (timeModeCoeff (I := I) (M := M) f i t) ^ 2)
       (timeMeasure T) :=
@@ -288,7 +288,7 @@ theorem integrable_timeModeCoeff_sq {a : ℝ} {T : ℝ}
 /-- The squared `L²(0,T)` norm of a time-mode coordinate is the integral of the
 squared eigen-coordinate over `[0,T]`. -/
 theorem norm_timeModeCoeff_sq_eq_integral {a : ℝ} {T : ℝ}
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T)
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2 =
       ∫ t in Set.Icc (0 : ℝ) T,
@@ -301,7 +301,7 @@ theorem norm_timeModeCoeff_sq_eq_integral {a : ℝ} {T : ℝ}
 eigen-coordinate function `t ↦ (f t).coeff i` — its a.e.-equivalent
 `timeModeCoeff f i` has integrable square. -/
 theorem integrable_weight_mul_coeff_sq {a : ℝ} {T : ℝ}
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T)
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     Integrable (fun t => tensorSobolevWeight (I := I) (M := M) i a *
       ((f t).coeff i) ^ 2) (timeMeasure T) := by
@@ -320,7 +320,7 @@ decomposition of the time-`L²` norm. -/
 section PlancherelFubini
 
 variable {a : ℝ} {T : ℝ}
-  (f : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T)
+  (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T)
 
 /-- The pointwise nonnegative integrand of the Tonelli interchange, as an
 `ℝ≥0∞`-valued function: `t ↦ ENNReal.ofReal ((1 + λᵢ)ᵃ · (f t).coeff i ²)`.
@@ -395,7 +395,7 @@ norm identity and its `Summable` companion. -/
 private theorem ennreal_tsum_weight_mul_norm_sq_ne_top :
     (∑' i, ENNReal.ofReal (tensorSobolevWeight (I := I) (M := M) i a *
       ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2)) ≠ (⊤ : ℝ≥0∞) := by
-  haveI := countable_tensorEigenIdx (I := I) (M := M) h_uniform
+  haveI := countable_tensorEigenIdx (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas
   -- The pointwise spatial Plancherel expansion, lifted to `ℝ≥0∞`.
   have hpoint : ∀ t : ℝ,
       ENNReal.ofReal (‖f t‖ ^ 2) =
@@ -462,7 +462,7 @@ theorem norm_sq_eq_tsum_timeModeCoeff :
     ‖f‖ ^ 2 =
       ∑' i, tensorSobolevWeight (I := I) (M := M) i a *
         ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2 := by
-  haveI := countable_tensorEigenIdx (I := I) (M := M) h_uniform
+  haveI := countable_tensorEigenIdx (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas
   -- The pointwise spatial Plancherel expansion, lifted to `ℝ≥0∞`.
   have hpoint : ∀ t : ℝ,
       ENNReal.ofReal (‖f t‖ ^ 2) =
@@ -539,8 +539,8 @@ for every eigen-index `i`, then the time-`L²` norms satisfy
 The proof sums the per-mode bound over `i` and applies the Plancherel–Fubini
 identity at the two Sobolev scales. -/
 theorem norm_sq_le_of_weighted_perMode_le {a b : ℝ} {T : ℝ} {C : ℝ}
-    (gT : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform b) T)
-    (fT : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T)
+    (gT : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas b) T)
+    (fT : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T)
     (hbound : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
       tensorSobolevWeight (I := I) (M := M) i b *
           ‖timeModeCoeff (I := I) (M := M) gT i‖ ^ 2 ≤
@@ -560,8 +560,8 @@ theorem norm_sq_le_of_weighted_perMode_le {a b : ℝ} {T : ℝ} {C : ℝ}
 `‖g‖_{L²([0,T];Hᵇ)} ≤ C · ‖f‖_{L²([0,T];Hᵃ)}`. -/
 theorem norm_le_of_weighted_perMode_le {a b : ℝ} {T : ℝ} {C : ℝ}
     (hC : 0 ≤ C)
-    (gT : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform b) T)
-    (fT : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T)
+    (gT : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas b) T)
+    (fT : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T)
     (hbound : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
       tensorSobolevWeight (I := I) (M := M) i b *
           ‖timeModeCoeff (I := I) (M := M) gT i‖ ^ 2 ≤
@@ -604,7 +604,7 @@ def timeModeSynthesisPointwise {b : ℝ}
     (cFam : TensorEigenIdx (I := I) (M := M) g r s → ℝ)
     (hsum : Summable (fun i => tensorSobolevWeight (I := I) (M := M) i b *
       (cFam i) ^ 2)) :
-    tensorHs (I := I) (M := M) g r s h_uniform b where
+    tensorHs (I := I) (M := M) g r s h_atlas b where
   coeff := cFam
   weighted_summable := hsum
 
@@ -614,7 +614,7 @@ def timeModeSynthesisPointwise {b : ℝ}
       (cFam i) ^ 2))
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     (timeModeSynthesisPointwise (I := I) (M := M)
-      (h_uniform := h_uniform) cFam hsum).coeff i = cFam i := rfl
+      (h_atlas := h_atlas) cFam hsum).coeff i = cFam i := rfl
 
 /-- **Uniqueness of synthesis.**  Two time-`L²` tensor fields with identical
 eigen-coordinate families — `timeModeCoeff f₁ i = timeModeCoeff f₂ i` for every
@@ -624,11 +624,11 @@ eigen-index `i` — are equal.  Equivalently, the coordinate family
 The proof uses that the eigen-index type is countable, so the per-mode
 a.e.-coordinate agreement can be intersected over all `i` at once. -/
 theorem timeModeCoeff_injective {b : ℝ} {T : ℝ}
-    {f₁ f₂ : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform b) T}
+    {f₁ f₂ : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas b) T}
     (h : ∀ i, timeModeCoeff (I := I) (M := M) f₁ i =
       timeModeCoeff (I := I) (M := M) f₂ i) :
     f₁ = f₂ := by
-  haveI := countable_tensorEigenIdx (I := I) (M := M) h_uniform
+  haveI := countable_tensorEigenIdx (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas
   refine MeasureTheory.Lp.ext ?_
   -- For each `i`, the `i`-coordinates of `⇑f₁` and `⇑f₂` agree a.e.
   have hcoord : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,

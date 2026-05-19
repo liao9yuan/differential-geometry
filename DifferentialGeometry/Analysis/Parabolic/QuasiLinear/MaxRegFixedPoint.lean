@@ -52,7 +52,7 @@ bound is the pointwise estimate `‖N x − N y‖ ≤ L‖x − y‖` integrate
 
 * `nemytskii hN` — the Nemytskii (pointwise-composition) operator
   `L²([0,T]; H^{a+2}) → L²([0,T]; Hᵃ)`, `f ↦ N ∘ f`.
-* `quasilinearDuhamelMap h_uniform a hT hT1 u₀ hN` — the forcing-space
+* `quasilinearDuhamelMap h_atlas a hT hT1 u₀ hN` — the forcing-space
   fixed-point map `Φ` of the quasi-linear equation.
 
 ## Main results
@@ -101,7 +101,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
-  {h_uniform : uniformTensorChartSobolevBound g r s}
+  {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
 variable {a : ℝ} {T : ℝ}
 
 /-! ## The Nemytskii operator
@@ -121,8 +121,8 @@ The two analytic facts behind the construction are:
 section Nemytskii
 
 variable {L : ℝ≥0}
-  {N : tensorHs (I := I) (M := M) g r s h_uniform (a + 2) →
-    tensorHs (I := I) (M := M) g r s h_uniform a}
+  {N : tensorHs (I := I) (M := M) g r s h_atlas (a + 2) →
+    tensorHs (I := I) (M := M) g r s h_atlas a}
 
 /-- The pointwise composition `t ↦ N (f t)` of a Lipschitz nonlinearity `N` with
 a time-`L²` field `f ∈ L²([0,T]; H^{a+2})` is itself square-integrable for the
@@ -130,7 +130,7 @@ a time-`L²` field `f ∈ L²([0,T]; H^{a+2})` is itself square-integrable for t
 `t ↦ N (f t) − N 0` (square-integrable by `LipschitzWith.comp_memLp`) and the
 constant `N 0` (square-integrable on a finite measure space). -/
 theorem memLp_comp_nemytskii (hN : LipschitzWith L N)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform (a + 2)) T) :
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas (a + 2)) T) :
     MemLp (fun t => N (f t)) 2 (timeMeasure T) := by
   -- The `0`-fixing Lipschitz part `Ñ x = N x − N 0`, with constant `L` (the
   -- constant function is Lipschitz with constant `0`, and `L + 0 = L`).
@@ -138,7 +138,7 @@ theorem memLp_comp_nemytskii (hN : LipschitzWith L N)
     have hsubL := hN.sub (LipschitzWith.const (N 0))
     rwa [add_zero] at hsubL
   have hshift0 : (fun x => N x - N 0) (0 : tensorHs (I := I) (M := M) g r s
-      h_uniform (a + 2)) = 0 := by simp
+      h_atlas (a + 2)) = 0 := by simp
   -- `Ñ ∘ ⇑f` is `MemLp` by `LipschitzWith.comp_memLp`.
   have hcomp : MemLp ((fun x => N x - N 0) ∘ fun t => f t) 2 (timeMeasure T) :=
     hshift.comp_memLp hshift0 (Lp.memLp f)
@@ -164,14 +164,14 @@ t)`.  The output lands in `L²` because `N` is Lipschitz (`memLp_comp_nemytskii`
 and the underlying function agrees a.e. with `t ↦ N (f t)`
 (`nemytskii_coeFn`). -/
 def nemytskii (hN : LipschitzWith L N) :
-    timeL2 (tensorHs (I := I) (M := M) g r s h_uniform (a + 2)) T →
-      timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T :=
+    timeL2 (tensorHs (I := I) (M := M) g r s h_atlas (a + 2)) T →
+      timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T :=
   fun f => (memLp_comp_nemytskii (I := I) (M := M) hN f).toLp (fun t => N (f t))
 
 /-- `nemytskii hN f` is represented almost everywhere by the pointwise
 composition `t ↦ N (f t)`. -/
 theorem nemytskii_coeFn (hN : LipschitzWith L N)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform (a + 2)) T) :
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas (a + 2)) T) :
     nemytskii (I := I) (M := M) hN f =ᵐ[timeMeasure T] fun t => N (f t) :=
   (memLp_comp_nemytskii (I := I) (M := M) hN f).coeFn_toLp
 
@@ -184,7 +184,7 @@ images is bounded by `L²` times the squared `L²` distance of the fields:
 This is the pointwise Lipschitz estimate `‖N (f t) − N (f' t)‖ ≤ L·‖f t − f' t‖`
 squared and integrated in time. -/
 theorem nemytskii_dist_sq_le (hN : LipschitzWith L N)
-    (f f' : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform (a + 2)) T) :
+    (f f' : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas (a + 2)) T) :
     ‖nemytskii (I := I) (M := M) hN f - nemytskii (I := I) (M := M) hN f'‖ ^ 2 ≤
       (L : ℝ) ^ 2 * ‖f - f'‖ ^ 2 := by
   -- Both norms are integrals of pointwise squared norms over `[0,T]`.
@@ -268,10 +268,10 @@ the homogeneous part cancel in the difference of two Duhamel images. -/
 `maximalRegularitySolField (f + f') = maximalRegularitySolField f +
 maximalRegularitySolField f'`. -/
 theorem maximalRegularitySolField_add (hT : 0 ≤ T)
-    (f f' : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T) :
-    maximalRegularitySolField (I := I) (M := M) h_uniform a hT (f + f') =
-      maximalRegularitySolField (I := I) (M := M) h_uniform a hT f +
-        maximalRegularitySolField (I := I) (M := M) h_uniform a hT f' := by
+    (f f' : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T) :
+    maximalRegularitySolField (I := I) (M := M) h_atlas a hT (f + f') =
+      maximalRegularitySolField (I := I) (M := M) h_atlas a hT f +
+        maximalRegularitySolField (I := I) (M := M) h_atlas a hT f' := by
   refine timeModeCoeff_injective (I := I) (M := M) (fun i => ?_)
   rw [maximalRegularitySolField_timeModeCoeff (I := I) (M := M) (a := a)
       hT (f + f') i,
@@ -288,12 +288,12 @@ maximalRegularitySolField f'`.  This is the form consumed by the contraction
 estimate: it identifies the difference of two Duhamel solution fields (after the
 homogeneous part has cancelled) with the solution field of the difference. -/
 theorem maximalRegularitySolField_sub (hT : 0 ≤ T)
-    (f f' : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T) :
-    maximalRegularitySolField (I := I) (M := M) h_uniform a hT (f - f') =
-      maximalRegularitySolField (I := I) (M := M) h_uniform a hT f -
-        maximalRegularitySolField (I := I) (M := M) h_uniform a hT f' := by
+    (f f' : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T) :
+    maximalRegularitySolField (I := I) (M := M) h_atlas a hT (f - f') =
+      maximalRegularitySolField (I := I) (M := M) h_atlas a hT f -
+        maximalRegularitySolField (I := I) (M := M) h_atlas a hT f' := by
   have hadd := maximalRegularitySolField_add (I := I) (M := M)
-    (h_uniform := h_uniform) (a := a) hT (f - f') f'
+    (h_atlas := h_atlas) (a := a) hT (f - f') f'
   rw [sub_add_cancel] at hadd
   rw [hadd, add_sub_cancel_right]
 
@@ -313,13 +313,13 @@ fixed initial datum the homogeneous-flow field cancels:
   `maxRegDuhamelSolField … u₀ g − maxRegDuhamelSolField … u₀ g'
     = maximalRegularitySolField (g − g')`. -/
 theorem maxRegDuhamelSolField_sub (hT : 0 < T) (hT1 : T ≤ 1)
-    (u₀ : tensorHs (I := I) (M := M) g r s h_uniform (a + 2))
-    (gforce gforce' : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T) :
-    maxRegDuhamelSolField (I := I) (M := M) h_uniform a hT hT1 u₀ gforce -
-        maxRegDuhamelSolField (I := I) (M := M) h_uniform a hT hT1 u₀ gforce' =
-      maximalRegularitySolField (I := I) (M := M) h_uniform a hT.le
+    (u₀ : tensorHs (I := I) (M := M) g r s h_atlas (a + 2))
+    (gforce gforce' : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T) :
+    maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce -
+        maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce' =
+      maximalRegularitySolField (I := I) (M := M) h_atlas a hT.le
         (gforce - gforce') := by
-  rw [maximalRegularitySolField_sub (I := I) (M := M) (h_uniform := h_uniform)
+  rw [maximalRegularitySolField_sub (I := I) (M := M) (h_atlas := h_atlas)
     (a := a) hT.le gforce gforce']
   -- The homogeneous-flow fields cancel; only the solution fields survive.
   rw [maxRegDuhamelSolField, maxRegDuhamelSolField]
@@ -336,14 +336,14 @@ leaving `maximalRegularitySolField (g − g')`, whose `L²([0,T]; H^{a+2})` norm
 bounded by `(1 + T)·‖g − g'‖` (the two-derivative-gain maximal-regularity
 estimate `maximalRegularityOp_norm_Ha2_le`). -/
 theorem maxRegDuhamelSolField_dist_le (hT : 0 < T) (hT1 : T ≤ 1)
-    (u₀ : tensorHs (I := I) (M := M) g r s h_uniform (a + 2))
-    (gforce gforce' : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T) :
-    ‖maxRegDuhamelSolField (I := I) (M := M) h_uniform a hT hT1 u₀ gforce -
-        maxRegDuhamelSolField (I := I) (M := M) h_uniform a hT hT1 u₀ gforce'‖ ≤
+    (u₀ : tensorHs (I := I) (M := M) g r s h_atlas (a + 2))
+    (gforce gforce' : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T) :
+    ‖maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce -
+        maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce'‖ ≤
       (1 + T) * ‖gforce - gforce'‖ := by
-  rw [maxRegDuhamelSolField_sub (I := I) (M := M) (h_uniform := h_uniform)
+  rw [maxRegDuhamelSolField_sub (I := I) (M := M) (h_atlas := h_atlas)
     (a := a) hT hT1 u₀ gforce gforce']
-  exact maximalRegularityOp_norm_Ha2_le (I := I) (M := M) (h_uniform := h_uniform)
+  exact maximalRegularityOp_norm_Ha2_le (I := I) (M := M) (h_atlas := h_atlas)
     (a := a) hT hT1 (gforce - gforce')
 
 /-! ## The forcing-space fixed-point map
@@ -366,28 +366,28 @@ a self-map of the forcing space `L²([0,T]; Hᵃ)`.  It first forms the
 Nemytskii operator (pointwise composition with `N`).  A fixed point `g⋆ = Φ(g⋆)`
 is a forcing term reproducing `N(u)` along its own Duhamel solution; the
 quasi-linear strong solution is the Duhamel image of `g⋆`. -/
-def quasilinearDuhamelMap (h_uniform : uniformTensorChartSobolevBound g r s)
+def quasilinearDuhamelMap (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (a : ℝ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
-    (u₀ : tensorHs (I := I) (M := M) g r s h_uniform (a + 2))
+    (u₀ : tensorHs (I := I) (M := M) g r s h_atlas (a + 2))
     {L : ℝ≥0}
-    {N : tensorHs (I := I) (M := M) g r s h_uniform (a + 2) →
-      tensorHs (I := I) (M := M) g r s h_uniform a}
+    {N : tensorHs (I := I) (M := M) g r s h_atlas (a + 2) →
+      tensorHs (I := I) (M := M) g r s h_atlas a}
     (hN : LipschitzWith L N) :
-    timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T →
-      timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T :=
+    timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T →
+      timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T :=
   fun gforce => nemytskii (I := I) (M := M) hN
-    (maxRegDuhamelSolField (I := I) (M := M) h_uniform a hT hT1 u₀ gforce)
+    (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce)
 
 @[simp] theorem quasilinearDuhamelMap_apply (hT : 0 < T) (hT1 : T ≤ 1)
-    (u₀ : tensorHs (I := I) (M := M) g r s h_uniform (a + 2))
+    (u₀ : tensorHs (I := I) (M := M) g r s h_atlas (a + 2))
     {L : ℝ≥0}
-    {N : tensorHs (I := I) (M := M) g r s h_uniform (a + 2) →
-      tensorHs (I := I) (M := M) g r s h_uniform a}
+    {N : tensorHs (I := I) (M := M) g r s h_atlas (a + 2) →
+      tensorHs (I := I) (M := M) g r s h_atlas a}
     (hN : LipschitzWith L N)
-    (gforce : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T) :
-    quasilinearDuhamelMap (I := I) (M := M) h_uniform a hT hT1 u₀ hN gforce =
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T) :
+    quasilinearDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ hN gforce =
       nemytskii (I := I) (M := M) hN
-        (maxRegDuhamelSolField (I := I) (M := M) h_uniform a hT hT1 u₀ gforce) :=
+        (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce) :=
   rfl
 
 /-- **The Lipschitz bound of the forcing-space fixed-point map.**  For a fixed
@@ -399,36 +399,36 @@ The Nemytskii operator contributes the Lipschitz factor `L`
 (`nemytskii_lipschitzWith`); the `H^{a+2}`-field contraction estimate
 `maxRegDuhamelSolField_dist_le` contributes the factor `(1 + T)`. -/
 theorem quasilinearDuhamelMap_dist_le (hT : 0 < T) (hT1 : T ≤ 1)
-    (u₀ : tensorHs (I := I) (M := M) g r s h_uniform (a + 2))
+    (u₀ : tensorHs (I := I) (M := M) g r s h_atlas (a + 2))
     {L : ℝ≥0}
-    {N : tensorHs (I := I) (M := M) g r s h_uniform (a + 2) →
-      tensorHs (I := I) (M := M) g r s h_uniform a}
+    {N : tensorHs (I := I) (M := M) g r s h_atlas (a + 2) →
+      tensorHs (I := I) (M := M) g r s h_atlas a}
     (hN : LipschitzWith L N)
-    (gforce gforce' : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T) :
-    dist (quasilinearDuhamelMap (I := I) (M := M) h_uniform a hT hT1 u₀ hN gforce)
-        (quasilinearDuhamelMap (I := I) (M := M) h_uniform a hT hT1 u₀ hN
+    (gforce gforce' : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T) :
+    dist (quasilinearDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ hN gforce)
+        (quasilinearDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ hN
           gforce') ≤
       (L : ℝ) * (1 + T) * dist gforce gforce' := by
   -- The Nemytskii Lipschitz step.
   have hnem := (nemytskii_lipschitzWith (I := I) (M := M) hN).dist_le_mul
-    (maxRegDuhamelSolField (I := I) (M := M) h_uniform a hT hT1 u₀ gforce)
-    (maxRegDuhamelSolField (I := I) (M := M) h_uniform a hT hT1 u₀ gforce')
+    (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce)
+    (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce')
   -- The `H^{a+2}`-field contraction step, in `dist` form.
   have hfield : dist
-      (maxRegDuhamelSolField (I := I) (M := M) h_uniform a hT hT1 u₀ gforce)
-      (maxRegDuhamelSolField (I := I) (M := M) h_uniform a hT hT1 u₀ gforce') ≤
+      (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce)
+      (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce') ≤
         (1 + T) * dist gforce gforce' := by
     rw [dist_eq_norm, dist_eq_norm]
     exact maxRegDuhamelSolField_dist_le (I := I) (M := M)
-      (h_uniform := h_uniform) (a := a) hT hT1 u₀ gforce gforce'
+      (h_atlas := h_atlas) (a := a) hT hT1 u₀ gforce gforce'
   -- Chain the two estimates.
   calc dist
-        (quasilinearDuhamelMap (I := I) (M := M) h_uniform a hT hT1 u₀ hN gforce)
-        (quasilinearDuhamelMap (I := I) (M := M) h_uniform a hT hT1 u₀ hN
+        (quasilinearDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ hN gforce)
+        (quasilinearDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ hN
           gforce')
       ≤ (L : ℝ) * dist
-          (maxRegDuhamelSolField (I := I) (M := M) h_uniform a hT hT1 u₀ gforce)
-          (maxRegDuhamelSolField (I := I) (M := M) h_uniform a hT hT1 u₀
+          (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce)
+          (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀
             gforce') := hnem
     _ ≤ (L : ℝ) * ((1 + T) * dist gforce gforce') :=
         mul_le_mul_of_nonneg_left hfield L.coe_nonneg
@@ -456,15 +456,15 @@ The contraction constant is `< 1` by `quasilinear_contraction_const_lt_one`; the
 `LipschitzWith` property is the global `dist` bound
 `quasilinearDuhamelMap_dist_le`. -/
 theorem quasilinearDuhamelMap_contracting (hT : 0 < T) (hT1 : T ≤ 1)
-    (u₀ : tensorHs (I := I) (M := M) g r s h_uniform (a + 2))
+    (u₀ : tensorHs (I := I) (M := M) g r s h_atlas (a + 2))
     {L : ℝ≥0}
-    {N : tensorHs (I := I) (M := M) g r s h_uniform (a + 2) →
-      tensorHs (I := I) (M := M) g r s h_uniform a}
+    {N : tensorHs (I := I) (M := M) g r s h_atlas (a + 2) →
+      tensorHs (I := I) (M := M) g r s h_atlas a}
     (hN : LipschitzWith L N) (hL : 2 * (L : ℝ) < 1) :
     ContractingWith
       ⟨(L : ℝ) * (1 + T),
         mul_nonneg L.coe_nonneg (by linarith [hT.le])⟩
-      (quasilinearDuhamelMap (I := I) (M := M) h_uniform a hT hT1 u₀ hN) := by
+      (quasilinearDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ hN) := by
   refine ⟨?_, ?_⟩
   · -- The contraction constant is `< 1` as an element of `ℝ≥0`.
     rw [← NNReal.coe_lt_coe]
@@ -473,7 +473,7 @@ theorem quasilinearDuhamelMap_contracting (hT : 0 < T) (hT1 : T ≤ 1)
   · -- `LipschitzWith` from the global `dist` bound.
     refine LipschitzWith.of_dist_le_mul (fun gforce gforce' => ?_)
     have h := quasilinearDuhamelMap_dist_le (I := I) (M := M)
-      (h_uniform := h_uniform) (a := a) hT hT1 u₀ hN gforce gforce'
+      (h_atlas := h_atlas) (a := a) hT hT1 u₀ hN gforce gforce'
     -- The `ℝ≥0` contraction constant coerces to `(L : ℝ)·(1 + T)`.
     simpa only [NNReal.coe_mk] using h
 
@@ -510,9 +510,9 @@ Duhamel field.  Precisely, the data `u, gforce` satisfy:
 * `gforce = nemytskii hN (maxRegDuhamelSolField … u₀ gforce)` — the fixed-point
   equation: the forcing reproduces `N` applied to the solution field, i.e.
   `gforce = N(field of u)`;
-* `timeH1.trace0 _ _ u = tensorHsInclusion h_uniform _ u₀` — the initial value
+* `timeH1.trace0 _ _ u = tensorHsInclusion h_atlas _ u₀` — the initial value
   is `u₀` (taken in `Hᵃ` via the spectral inclusion `H^{a+2} ↪ Hᵃ`);
-* `timeH1.timeDeriv _ _ u = timeScaleLaplacian h_uniform a (field of u) +
+* `timeH1.timeDeriv _ _ u = timeScaleLaplacian h_atlas a (field of u) +
   nemytskii hN (field of u)` — **the equation**: the time derivative equals the
   rough Laplacian of the `H^{a+2}`-valued solution field plus the Nemytskii
   nonlinearity applied to that same field, `∂_t u = Δ_∇ u + N(u)`.
@@ -520,44 +520,44 @@ Duhamel field.  Precisely, the data `u, gforce` satisfy:
 The solution is the affine Duhamel image of the unique fixed point of the
 forcing-space contraction `quasilinearDuhamelMap`. -/
 theorem quasilinear_strong_existence {L : ℝ≥0}
-    {N : tensorHs (I := I) (M := M) g r s h_uniform (a + 2) →
-      tensorHs (I := I) (M := M) g r s h_uniform a}
+    {N : tensorHs (I := I) (M := M) g r s h_atlas (a + 2) →
+      tensorHs (I := I) (M := M) g r s h_atlas a}
     (hT : 0 < T) (hT1 : T ≤ 1)
-    (u₀ : tensorHs (I := I) (M := M) g r s h_uniform (a + 2))
+    (u₀ : tensorHs (I := I) (M := M) g r s h_atlas (a + 2))
     (hN : LipschitzWith L N) (hL : 2 * (L : ℝ) < 1) :
-    ∃ (u : MaxRegSolutionSpace (I := I) (M := M) h_uniform a T)
-      (gforce : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T),
-      u = maxRegDuhamelMap (I := I) (M := M) h_uniform a hT hT1 u₀ gforce ∧
+    ∃ (u : MaxRegSolutionSpace (I := I) (M := M) h_atlas a T)
+      (gforce : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T),
+      u = maxRegDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ gforce ∧
         gforce = nemytskii (I := I) (M := M) hN
-            (maxRegDuhamelSolField (I := I) (M := M) h_uniform a hT hT1 u₀
+            (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀
               gforce) ∧
         TimeSobolev.timeH1.trace0 _ T u =
-            tensorHsInclusion (I := I) (M := M) h_uniform
+            tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas
               (show a ≤ a + 2 by linarith) u₀ ∧
         TimeSobolev.timeH1.timeDeriv _ T u =
-          timeScaleLaplacian (I := I) (M := M) h_uniform a
-              (maxRegDuhamelSolField (I := I) (M := M) h_uniform a hT hT1 u₀
+          timeScaleLaplacian (I := I) (M := M) h_atlas a
+              (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀
                 gforce) +
             nemytskii (I := I) (M := M) hN
-              (maxRegDuhamelSolField (I := I) (M := M) h_uniform a hT hT1 u₀
+              (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀
                 gforce) := by
   -- The forcing-space map is a contraction; take its Banach fixed point.
   have hcontr := quasilinearDuhamelMap_contracting (I := I) (M := M)
-    (h_uniform := h_uniform) (a := a) hT hT1 u₀ hN hL
+    (h_atlas := h_atlas) (a := a) hT hT1 u₀ hN hL
   set gStar := ContractingWith.fixedPoint
-    (quasilinearDuhamelMap (I := I) (M := M) h_uniform a hT hT1 u₀ hN) hcontr
+    (quasilinearDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ hN) hcontr
     with hgStar_def
   -- The fixed-point equation `Φ(gStar) = gStar`, i.e. `gStar = N ∘ (field)`.
   have hgStar_fix :
-      quasilinearDuhamelMap (I := I) (M := M) h_uniform a hT hT1 u₀ hN gStar =
+      quasilinearDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ hN gStar =
         gStar :=
     ContractingWith.fixedPoint_isFixedPt hcontr
   have hgStar_eq : gStar = nemytskii (I := I) (M := M) hN
-      (maxRegDuhamelSolField (I := I) (M := M) h_uniform a hT hT1 u₀ gStar) := by
+      (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gStar) := by
     rw [← quasilinearDuhamelMap_apply (I := I) (M := M) (a := a) hT hT1 u₀ hN
       gStar, hgStar_fix]
   -- The strong solution is the affine Duhamel image of the fixed point.
-  refine ⟨maxRegDuhamelMap (I := I) (M := M) h_uniform a hT hT1 u₀ gStar,
+  refine ⟨maxRegDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ gStar,
     gStar, rfl, hgStar_eq, ?_, ?_⟩
   · -- Initial condition: the trace of the Duhamel image is `u₀`.
     exact maxRegDuhamelMap_trace0 (I := I) (M := M) (a := a) (T := T)
@@ -584,37 +584,37 @@ This is uniqueness of the Banach fixed point of the contraction
 `quasilinearDuhamelMap`: a forcing term solving the fixed-point equation is by
 definition a fixed point of `Φ`, and a contraction has a unique fixed point. -/
 theorem quasilinear_strong_unique {L : ℝ≥0}
-    {N : tensorHs (I := I) (M := M) g r s h_uniform (a + 2) →
-      tensorHs (I := I) (M := M) g r s h_uniform a}
+    {N : tensorHs (I := I) (M := M) g r s h_atlas (a + 2) →
+      tensorHs (I := I) (M := M) g r s h_atlas a}
     (hT : 0 < T) (hT1 : T ≤ 1)
-    (u₀ : tensorHs (I := I) (M := M) g r s h_uniform (a + 2))
+    (u₀ : tensorHs (I := I) (M := M) g r s h_atlas (a + 2))
     (hN : LipschitzWith L N) (hL : 2 * (L : ℝ) < 1)
-    {gforce₁ gforce₂ : timeL2 (tensorHs (I := I) (M := M) g r s h_uniform a) T}
+    {gforce₁ gforce₂ : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T}
     (hg₁ : gforce₁ = nemytskii (I := I) (M := M) hN
-      (maxRegDuhamelSolField (I := I) (M := M) h_uniform a hT hT1 u₀ gforce₁))
+      (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce₁))
     (hg₂ : gforce₂ = nemytskii (I := I) (M := M) hN
-      (maxRegDuhamelSolField (I := I) (M := M) h_uniform a hT hT1 u₀ gforce₂)) :
+      (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce₂)) :
     gforce₁ = gforce₂ ∧
-      maxRegDuhamelMap (I := I) (M := M) h_uniform a hT hT1 u₀ gforce₁ =
-        maxRegDuhamelMap (I := I) (M := M) h_uniform a hT hT1 u₀ gforce₂ := by
+      maxRegDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ gforce₁ =
+        maxRegDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ gforce₂ := by
   -- The forcing-space map is a contraction.
   have hcontr := quasilinearDuhamelMap_contracting (I := I) (M := M)
-    (h_uniform := h_uniform) (a := a) hT hT1 u₀ hN hL
+    (h_atlas := h_atlas) (a := a) hT hT1 u₀ hN hL
   -- Both forcings are fixed points of the contraction `Φ`.
   have hfix₁ :
       Function.IsFixedPt
-        (quasilinearDuhamelMap (I := I) (M := M) h_uniform a hT hT1 u₀ hN)
+        (quasilinearDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ hN)
         gforce₁ := by
-    change quasilinearDuhamelMap (I := I) (M := M) h_uniform a hT hT1 u₀ hN
+    change quasilinearDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ hN
         gforce₁ = gforce₁
     rw [quasilinearDuhamelMap_apply (I := I) (M := M) (a := a) hT hT1 u₀ hN
       gforce₁]
     exact hg₁.symm
   have hfix₂ :
       Function.IsFixedPt
-        (quasilinearDuhamelMap (I := I) (M := M) h_uniform a hT hT1 u₀ hN)
+        (quasilinearDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ hN)
         gforce₂ := by
-    change quasilinearDuhamelMap (I := I) (M := M) h_uniform a hT hT1 u₀ hN
+    change quasilinearDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ hN
         gforce₂ = gforce₂
     rw [quasilinearDuhamelMap_apply (I := I) (M := M) (a := a) hT hT1 u₀ hN
       gforce₂]

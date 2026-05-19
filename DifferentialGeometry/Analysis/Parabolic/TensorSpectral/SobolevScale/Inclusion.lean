@@ -4,7 +4,7 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.Defs
 # Continuous inclusions of the spectral `Hˢ` Sobolev scale
 
 For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, the
-spectral Sobolev spaces `tensorHs g r s h_uniform σ` form a decreasing
+spectral Sobolev spaces `tensorHs g r s h_atlas σ` form a decreasing
 scale: a larger exponent `σ` imposes faster decay of the eigenbasis
 coordinates, so `Hˢ ⊆ Hᵗ` whenever `τ ≤ σ`. Concretely, since the
 weight `(1 + λᵢ)^σ` is monotone in the exponent (the base is `≥ 1`),
@@ -25,9 +25,9 @@ diagonal rescaling isometry `rescaleEquivL2`.
 
 ## Main definitions
 
-* `tensorHsInclusion h_uniform hτσ` — the continuous linear inclusion
+* `tensorHsInclusion h_atlas hτσ` — the continuous linear inclusion
   `Hˢ →L[ℝ] Hᵗ` for `τ ≤ σ`.
-* `tensorHsFiniteSupportSubmodule h_uniform σ` — the submodule of `Hˢ`
+* `tensorHsFiniteSupportSubmodule h_atlas σ` — the submodule of `Hˢ`
   of elements with finitely-supported coordinate family.
 
 ## Main results
@@ -94,12 +94,12 @@ then `(1+λᵢ)^τ ≤ (1+λᵢ)^σ` gives `∑ᵢ (1+λᵢ)^τ cᵢ² < ∞`. -
 namespace tensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
-  {h_uniform : uniformTensorChartSobolevBound g r s}
+  {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
 
 /-- For `τ ≤ σ`, the coordinate family of an `Hˢ` element is
 weighted-square-summable at the smaller exponent `τ`. -/
 lemma weighted_summable_of_le {τ σ : ℝ} (hτσ : τ ≤ σ)
-    (T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
+    (T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
     Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
       tensorSobolevWeight (I := I) (M := M) i τ * (T.coeff i) ^ 2) := by
   refine Summable.of_nonneg_of_le ?_ ?_ T.weighted_summable
@@ -117,18 +117,18 @@ lemma weighted_summable_of_le {τ σ : ℝ} (hτσ : τ ≤ σ)
 `Hˢ` element is sent to the `Hᵗ` element with the *same* coordinate
 family. -/
 def inclusionFun {τ σ : ℝ} (hτσ : τ ≤ σ)
-    (T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
-    tensorHs (I := I) (M := M) g r s h_uniform τ where
+    (T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
+    tensorHs (I := I) (M := M) g r s h_atlas τ where
   coeff := T.coeff
   weighted_summable := weighted_summable_of_le (I := I) (M := M) hτσ T
 
 @[simp] lemma inclusionFun_coeff {τ σ : ℝ} (hτσ : τ ≤ σ)
-    (T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
+    (T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
     (inclusionFun (I := I) (M := M) hτσ T).coeff = T.coeff := rfl
 
 /-- `inclusionFun` is additive. -/
 lemma inclusionFun_add {τ σ : ℝ} (hτσ : τ ≤ σ)
-    (S T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
+    (S T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
     inclusionFun (I := I) (M := M) hτσ (S + T) =
       inclusionFun (I := I) (M := M) hτσ S +
         inclusionFun (I := I) (M := M) hτσ T := by
@@ -137,7 +137,7 @@ lemma inclusionFun_add {τ σ : ℝ} (hτσ : τ ≤ σ)
 
 /-- `inclusionFun` is `ℝ`-homogeneous. -/
 lemma inclusionFun_smul {τ σ : ℝ} (hτσ : τ ≤ σ) (c : ℝ)
-    (T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
+    (T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
     inclusionFun (I := I) (M := M) hτσ (c • T) =
       c • inclusionFun (I := I) (M := M) hτσ T := by
   ext i
@@ -146,7 +146,7 @@ lemma inclusionFun_smul {τ σ : ℝ} (hτσ : τ ≤ σ) (c : ℝ)
 /-- For `τ ≤ σ`, the `Hᵗ` norm of `inclusionFun T` is bounded by the
 `Hˢ` norm of `T`: the inclusion is norm-non-increasing. -/
 lemma norm_inclusionFun_le {τ σ : ℝ} (hτσ : τ ≤ σ)
-    (T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
+    (T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
     ‖inclusionFun (I := I) (M := M) hτσ T‖ ≤ ‖T‖ := by
   -- Compare squared norms `∑ wᵗ cᵢ² ≤ ∑ wˢ cᵢ²` by weight monotonicity.
   have h_t_sq : ‖inclusionFun (I := I) (M := M) hτσ T‖ ^ 2 =
@@ -183,10 +183,10 @@ coordinate families, has operator norm at most `1` (the weight is
 monotone in the exponent, making the inclusion a contraction), and is
 injective. See `tensorHsInclusion_coeff`. -/
 def tensorHsInclusion {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_uniform : uniformTensorChartSobolevBound g r s) {τ σ : ℝ}
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) {τ σ : ℝ}
     (hτσ : τ ≤ σ) :
-    tensorHs (I := I) (M := M) g r s h_uniform σ →L[ℝ]
-      tensorHs (I := I) (M := M) g r s h_uniform τ :=
+    tensorHs (I := I) (M := M) g r s h_atlas σ →L[ℝ]
+      tensorHs (I := I) (M := M) g r s h_atlas τ :=
   LinearMap.mkContinuous
     { toFun := tensorHs.inclusionFun (I := I) (M := M) hτσ
       map_add' := tensorHs.inclusionFun_add (I := I) (M := M) hτσ
@@ -201,53 +201,53 @@ def tensorHsInclusion {g : SmoothRiemannianMetric I M} {r s : ℕ}
 /-- `tensorHsInclusion` applied to `T` is the underlying
 `inclusionFun T`. -/
 @[simp] lemma tensorHsInclusion_apply {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} {h_uniform : uniformTensorChartSobolevBound g r s}
+    {r s : ℕ} {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
     {τ σ : ℝ} (hτσ : τ ≤ σ)
-    (T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
-    tensorHsInclusion (I := I) (M := M) h_uniform hτσ T =
+    (T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
+    tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hτσ T =
       tensorHs.inclusionFun (I := I) (M := M) hτσ T := rfl
 
 /-- The inclusion `Hˢ → Hᵗ` preserves the eigenbasis coordinate
 family. -/
 @[simp] theorem tensorHsInclusion_coeff {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} {h_uniform : uniformTensorChartSobolevBound g r s}
+    {r s : ℕ} {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
     {τ σ : ℝ} (hτσ : τ ≤ σ)
-    (T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
-    (tensorHsInclusion (I := I) (M := M) h_uniform hτσ T).coeff =
+    (T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
+    (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hτσ T).coeff =
       T.coeff := rfl
 
 /-- The eigenbasis coordinate of `tensorHsInclusion … T` at `i`. -/
 @[simp] theorem tensorHsInclusion_coeff_apply
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    {h_uniform : uniformTensorChartSobolevBound g r s} {τ σ : ℝ}
-    (hτσ : τ ≤ σ) (T : tensorHs (I := I) (M := M) g r s h_uniform σ)
+    {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {τ σ : ℝ}
+    (hτσ : τ ≤ σ) (T : tensorHs (I := I) (M := M) g r s h_atlas σ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    (tensorHsInclusion (I := I) (M := M) h_uniform hτσ T).coeff i =
+    (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hτσ T).coeff i =
       T.coeff i := rfl
 
 /-- The operator norm of the inclusion `Hˢ → Hᵗ` is at most `1` for
 `τ ≤ σ`. -/
 theorem tensorHsInclusion_opNorm_le_one {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} {h_uniform : uniformTensorChartSobolevBound g r s}
+    {r s : ℕ} {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
     {τ σ : ℝ} (hτσ : τ ≤ σ) :
-    ‖tensorHsInclusion (I := I) (M := M) h_uniform hτσ‖ ≤ 1 :=
+    ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hτσ‖ ≤ 1 :=
   LinearMap.mkContinuous_norm_le _ zero_le_one _
 
 /-- For `τ ≤ σ`, the inclusion is norm-non-increasing:
 `‖incl T‖_{Hᵗ} ≤ ‖T‖_{Hˢ}`. -/
 theorem tensorHsInclusion_norm_le {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} {h_uniform : uniformTensorChartSobolevBound g r s}
+    {r s : ℕ} {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
     {τ σ : ℝ} (hτσ : τ ≤ σ)
-    (T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
-    ‖tensorHsInclusion (I := I) (M := M) h_uniform hτσ T‖ ≤ ‖T‖ :=
+    (T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
+    ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hτσ T‖ ≤ ‖T‖ :=
   tensorHs.norm_inclusionFun_le (I := I) (M := M) hτσ T
 
 /-- The inclusion `Hˢ → Hᵗ` is injective for `τ ≤ σ`. -/
 theorem tensorHsInclusion_injective {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} {h_uniform : uniformTensorChartSobolevBound g r s}
+    {r s : ℕ} {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
     {τ σ : ℝ} (hτσ : τ ≤ σ) :
     Function.Injective
-      (tensorHsInclusion (I := I) (M := M) h_uniform hτσ) := by
+      (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hτσ) := by
   intro S T hST
   ext i
   have h := congrArg (fun U => tensorHs.coeff U i) hST
@@ -258,11 +258,11 @@ theorem tensorHsInclusion_injective {g : SmoothRiemannianMetric I M}
 /-- The inclusion at the reflexive exponent `σ ≤ σ` is the identity
 continuous linear map. -/
 @[simp] theorem tensorHsInclusion_refl {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} {h_uniform : uniformTensorChartSobolevBound g r s}
+    {r s : ℕ} {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
     {σ : ℝ} :
-    tensorHsInclusion (I := I) (M := M) h_uniform (le_refl σ) =
+    tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas (le_refl σ) =
       ContinuousLinearMap.id ℝ
-        (tensorHs (I := I) (M := M) g r s h_uniform σ) := by
+        (tensorHs (I := I) (M := M) g r s h_atlas σ) := by
   refine ContinuousLinearMap.ext (fun T => ?_)
   refine tensorHs.ext ?_
   funext i
@@ -272,20 +272,20 @@ continuous linear map. -/
 fixes every vector. -/
 @[simp] theorem tensorHsInclusion_refl_apply
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    {h_uniform : uniformTensorChartSobolevBound g r s} {σ : ℝ}
-    (T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
-    tensorHsInclusion (I := I) (M := M) h_uniform (le_refl σ) T = T := by
+    {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ}
+    (T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
+    tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas (le_refl σ) T = T := by
   ext i
   simp only [tensorHsInclusion_coeff_apply]
 
 /-- The inclusions compose: for `ρ ≤ τ ≤ σ`, the inclusion `Hˢ → Hᵖ` is
 the composite `Hˢ → Hᵗ → Hᵖ`. -/
 theorem tensorHsInclusion_trans {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} {h_uniform : uniformTensorChartSobolevBound g r s}
+    {r s : ℕ} {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
     {ρ τ σ : ℝ} (hρτ : ρ ≤ τ) (hτσ : τ ≤ σ) :
-    tensorHsInclusion (I := I) (M := M) h_uniform (hρτ.trans hτσ) =
-      (tensorHsInclusion (I := I) (M := M) h_uniform hρτ).comp
-        (tensorHsInclusion (I := I) (M := M) h_uniform hτσ) := by
+    tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas (hρτ.trans hτσ) =
+      (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hρτ).comp
+        (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hτσ) := by
   ext T i
   simp only [tensorHsInclusion_coeff_apply, ContinuousLinearMap.coe_comp',
     Function.comp_apply]
@@ -293,12 +293,12 @@ theorem tensorHsInclusion_trans {g : SmoothRiemannianMetric I M}
 /-- The inclusions compose, applied form: for `ρ ≤ τ ≤ σ`, including
 `Hˢ → Hᵖ` directly agrees with going through `Hᵗ`. -/
 theorem tensorHsInclusion_trans_apply {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} {h_uniform : uniformTensorChartSobolevBound g r s}
+    {r s : ℕ} {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
     {ρ τ σ : ℝ} (hρτ : ρ ≤ τ) (hτσ : τ ≤ σ)
-    (T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
-    tensorHsInclusion (I := I) (M := M) h_uniform (hρτ.trans hτσ) T =
-      tensorHsInclusion (I := I) (M := M) h_uniform hρτ
-        (tensorHsInclusion (I := I) (M := M) h_uniform hτσ T) := by
+    (T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
+    tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas (hρτ.trans hτσ) T =
+      tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hρτ
+        (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hτσ T) := by
   ext i
   simp only [tensorHsInclusion_coeff_apply]
 
@@ -313,30 +313,30 @@ they agree once the `L²` eigenbasis coordinates match. -/
 `tensorHsToL2 hτ ∘ tensorHsInclusion hτσ = tensorHsToL2 hσ`. -/
 theorem tensorHsToL2_comp_tensorHsInclusion
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    {h_uniform : uniformTensorChartSobolevBound g r s} {τ σ : ℝ}
+    {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {τ σ : ℝ}
     (hτ : 0 ≤ τ) (hτσ : τ ≤ σ) :
-    (tensorHsToL2 (I := I) (M := M) h_uniform hτ).comp
-        (tensorHsInclusion (I := I) (M := M) h_uniform hτσ) =
-      tensorHsToL2 (I := I) (M := M) h_uniform (hτ.trans hτσ) := by
+    (tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hτ).comp
+        (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hτσ) =
+      tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas (hτ.trans hτσ) := by
   -- Both `L²` images have the same eigenbasis coordinates; the
   -- eigenbasis representation is injective.
   ext T
   refine (tensorResolventHilbertEigenbasisSigma
-    (I := I) (M := M) h_uniform).repr.injective ?_
+    (I := I) (M := M) h_atlas).repr.injective ?_
   ext i
   have hlhs : ((tensorResolventHilbertEigenbasisSigma
-        (I := I) (M := M) h_uniform).repr
-      ((tensorHsToL2 (I := I) (M := M) h_uniform hτ).comp
-        (tensorHsInclusion (I := I) (M := M) h_uniform hτσ) T)) i =
+        (I := I) (M := M) h_atlas).repr
+      ((tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hτ).comp
+        (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hτσ) T)) i =
       T.coeff i := by
     have h := tensorHsToL2_tensorL2Coeff (I := I) (M := M) hτ
-      (tensorHsInclusion (I := I) (M := M) h_uniform hτσ T) i
+      (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hτσ T) i
     rw [tensorHsInclusion_coeff_apply] at h
     simpa only [ContinuousLinearMap.coe_comp', Function.comp_apply,
       tensorL2Coeff] using h
   have hrhs : ((tensorResolventHilbertEigenbasisSigma
-        (I := I) (M := M) h_uniform).repr
-      (tensorHsToL2 (I := I) (M := M) h_uniform (hτ.trans hτσ) T)) i =
+        (I := I) (M := M) h_atlas).repr
+      (tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas (hτ.trans hτσ) T)) i =
       T.coeff i := by
     have h := tensorHsToL2_tensorL2Coeff (I := I) (M := M)
       (hτ.trans hτσ) T i
@@ -346,14 +346,14 @@ theorem tensorHsToL2_comp_tensorHsInclusion
 /-- For `0 ≤ τ ≤ σ`, the `L²` inclusion of `Hˢ` factors through `Hᵗ`,
 applied form. -/
 theorem tensorHsToL2_tensorHsInclusion {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} {h_uniform : uniformTensorChartSobolevBound g r s}
+    {r s : ℕ} {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
     {τ σ : ℝ} (hτ : 0 ≤ τ) (hτσ : τ ≤ σ)
-    (T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
-    tensorHsToL2 (I := I) (M := M) h_uniform hτ
-        (tensorHsInclusion (I := I) (M := M) h_uniform hτσ T) =
-      tensorHsToL2 (I := I) (M := M) h_uniform (hτ.trans hτσ) T := by
+    (T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
+    tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hτ
+        (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hτσ T) =
+      tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas (hτ.trans hτσ) T := by
   have h := tensorHsToL2_comp_tensorHsInclusion (I := I) (M := M)
-    (g := g) (r := r) (s := s) (h_uniform := h_uniform) hτ hτσ
+    (g := g) (r := r) (s := s) (h_atlas := h_atlas) hτ hτσ
   exact congrArg (fun L => L T) h
 
 /-- For `0 ≤ σ`, the `L²` inclusion `tensorHsToL2` factors as the
@@ -361,27 +361,27 @@ inclusion `Hˢ → H⁰` followed by the isometric identification
 `H⁰ ≃ₗᵢ TensorL2`. -/
 theorem tensorHsZeroEquivL2_comp_tensorHsInclusion_zero
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    {h_uniform : uniformTensorChartSobolevBound g r s} {σ : ℝ}
-    (hσ : 0 ≤ σ) (T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
-    tensorHsZeroEquivL2 (I := I) (M := M) h_uniform
-        (tensorHsInclusion (I := I) (M := M) h_uniform hσ T) =
-      tensorHsToL2 (I := I) (M := M) h_uniform hσ T := by
+    {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ}
+    (hσ : 0 ≤ σ) (T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
+    tensorHsZeroEquivL2 (I := I) (M := M) h_atlas
+        (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hσ T) =
+      tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hσ T := by
   -- Compare `L²` eigenbasis coordinates: both equal `T.coeff`.
   refine (tensorResolventHilbertEigenbasisSigma
-    (I := I) (M := M) h_uniform).repr.injective ?_
+    (I := I) (M := M) h_atlas).repr.injective ?_
   ext i
   have hlhs : ((tensorResolventHilbertEigenbasisSigma
-        (I := I) (M := M) h_uniform).repr
-      (tensorHsZeroEquivL2 (I := I) (M := M) h_uniform
-        (tensorHsInclusion (I := I) (M := M) h_uniform hσ T))) i =
+        (I := I) (M := M) h_atlas).repr
+      (tensorHsZeroEquivL2 (I := I) (M := M) h_atlas
+        (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hσ T))) i =
       T.coeff i := by
     have h := tensorHsZeroEquivL2_tensorL2Coeff (I := I) (M := M)
-      h_uniform (tensorHsInclusion (I := I) (M := M) h_uniform hσ T) i
+      h_atlas (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hσ T) i
     rw [tensorHsInclusion_coeff_apply] at h
     simpa only [tensorL2Coeff] using h
   have hrhs : ((tensorResolventHilbertEigenbasisSigma
-        (I := I) (M := M) h_uniform).repr
-      (tensorHsToL2 (I := I) (M := M) h_uniform hσ T)) i = T.coeff i := by
+        (I := I) (M := M) h_atlas).repr
+      (tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hσ T)) i = T.coeff i := by
     have h := tensorHsToL2_tensorL2Coeff (I := I) (M := M) hσ T i
     simpa only [tensorL2Coeff] using h
   rw [hlhs, hrhs]
@@ -395,15 +395,15 @@ elements is a linear subspace of `Hˢ`, and below it is shown dense. -/
 namespace tensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
-  {h_uniform : uniformTensorChartSobolevBound g r s} {σ : ℝ}
+  {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ}
 
 /-- The submodule of `Hˢ` consisting of elements whose eigenbasis
 coordinate family has finite support. Equivalently, the span of the
 spectral basis vectors `tensorHsBasisVec`; see
 `tensorHsFiniteSupportSubmodule_eq_span`. -/
-def finiteSupportSubmodule (h_uniform : uniformTensorChartSobolevBound g r s)
+def finiteSupportSubmodule (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (σ : ℝ) :
-    Submodule ℝ (tensorHs (I := I) (M := M) g r s h_uniform σ) where
+    Submodule ℝ (tensorHs (I := I) (M := M) g r s h_atlas σ) where
   carrier := {T | (Function.support T.coeff).Finite}
   add_mem' := by
     intro S T hS hT
@@ -429,9 +429,9 @@ def finiteSupportSubmodule (h_uniform : uniformTensorChartSobolevBound g r s)
     exact hi (by rw [hcon, mul_zero])
 
 @[simp] lemma mem_finiteSupportSubmodule
-    {h_uniform : uniformTensorChartSobolevBound g r s} {σ : ℝ}
-    (T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
-    T ∈ finiteSupportSubmodule (I := I) (M := M) h_uniform σ ↔
+    {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ}
+    (T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
+    T ∈ finiteSupportSubmodule (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas σ ↔
       (Function.support T.coeff).Finite := Iff.rfl
 
 end tensorHs
@@ -447,17 +447,17 @@ the finitely-supported submodule is then immediate. -/
 namespace tensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
-  {h_uniform : uniformTensorChartSobolevBound g r s} {σ : ℝ}
+  {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ}
 
 open scoped Classical in
 /-- The rescaling isometry carries the spectral basis component
 `(coeff i T) • bᵢ` to the canonical `ℓ²` unit family
 `lp.single 2 i (√(1+λᵢ)^σ · coeff i T)`. -/
 lemma rescaleEquivL2_smul_basisVec
-    (T : tensorHs (I := I) (M := M) g r s h_uniform σ)
+    (T : tensorHs (I := I) (M := M) g r s h_atlas σ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    rescaleEquivL2 (I := I) (M := M) (h_uniform := h_uniform) (σ := σ)
-        (T.coeff i • tensorHsBasisVec (I := I) (M := M) h_uniform σ i) =
+    rescaleEquivL2 (I := I) (M := M) (h_atlas := h_atlas) (σ := σ)
+        (T.coeff i • tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas σ i) =
       lp.single 2 i
         (Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ) *
           T.coeff i) := by
@@ -476,15 +476,15 @@ The proof transports the canonical finitely-supported `ℓ²`
 approximation `lp.hasSum_single` of `rescaleEquivL2 T` back along the
 diagonal rescaling isometry. -/
 theorem hasSum_smul_basisVec
-    (T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
+    (T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
     HasSum (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
-      T.coeff i • tensorHsBasisVec (I := I) (M := M) h_uniform σ i) T := by
+      T.coeff i • tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas σ i) T := by
   classical
   -- Transport `HasSum` along the continuous-linear-equiv `rescaleEquivL2`:
   -- it suffices to prove the `HasSum` of the *image* family in `ℓ²`.
   rw [← ContinuousLinearEquiv.hasSum'
     (e := (rescaleEquivL2 (I := I) (M := M)
-      (h_uniform := h_uniform) (σ := σ)).toContinuousLinearEquiv)]
+      (h_atlas := h_atlas) (σ := σ)).toContinuousLinearEquiv)]
   -- The image of `(coeff i T) • bᵢ` is the canonical `ℓ²` unit family,
   -- whose sum is `rescaleEquivL2 T` by `lp.hasSum_single`.
   have h_l2 : HasSum
@@ -493,11 +493,11 @@ theorem hasSum_smul_basisVec
           (Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ) *
             T.coeff i))
       (rescaleEquivL2 (I := I) (M := M)
-        (h_uniform := h_uniform) (σ := σ) T) := by
+        (h_atlas := h_atlas) (σ := σ) T) := by
     have h := lp.hasSum_single (α := TensorEigenIdx (I := I) (M := M) g r s)
       (E := fun _ => ℝ) (p := 2) (by norm_num)
       (rescaleEquivL2 (I := I) (M := M)
-        (h_uniform := h_uniform) (σ := σ) T)
+        (h_atlas := h_atlas) (σ := σ) T)
     refine h.congr_fun (fun i => ?_)
     rw [rescaleEquivL2_apply]
   refine h_l2.congr_fun (fun i => ?_)
@@ -509,10 +509,10 @@ spectral basis expansion: the finitely-supported elements (the span of
 `tensorHsBasisVec`) are dense in `Hˢ`. Stated as `T` lying in the
 topological closure of the finitely-supported submodule. -/
 theorem mem_closure_finiteSupportSubmodule
-    (T : tensorHs (I := I) (M := M) g r s h_uniform σ) :
+    (T : tensorHs (I := I) (M := M) g r s h_atlas σ) :
     T ∈ closure
-      (finiteSupportSubmodule (I := I) (M := M) h_uniform σ :
-        Set (tensorHs (I := I) (M := M) g r s h_uniform σ)) := by
+      (finiteSupportSubmodule (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas σ :
+        Set (tensorHs (I := I) (M := M) g r s h_atlas σ)) := by
   classical
   -- `T` is the limit of finite partial sums of `T.coeff i • bᵢ`, each
   -- of which has finite support, hence lies in the submodule.
@@ -538,9 +538,9 @@ lets bounded operators be extended from finite linear combinations of
 eigenvectors to all of `Hˢ`. -/
 theorem tensorHsFiniteSupportSubmodule_topologicalClosure
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    {h_uniform : uniformTensorChartSobolevBound g r s} {σ : ℝ} :
-    (tensorHs.finiteSupportSubmodule (I := I) (M := M)
-        h_uniform σ).topologicalClosure = ⊤ := by
+    {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ} :
+    (tensorHs.finiteSupportSubmodule (I := I) (M := M) (g := g) (r := r) (s := s)
+        h_atlas σ).topologicalClosure = ⊤ := by
   rw [eq_top_iff]
   intro T _
   rw [← SetLike.mem_coe, Submodule.topologicalClosure_coe]
@@ -549,36 +549,36 @@ theorem tensorHsFiniteSupportSubmodule_topologicalClosure
 /-- The set of finitely-supported elements of `Hˢ` is dense. -/
 theorem tensorHsFiniteSupportSubmodule_dense
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    {h_uniform : uniformTensorChartSobolevBound g r s} {σ : ℝ} :
-    Dense (tensorHs.finiteSupportSubmodule (I := I) (M := M)
-      h_uniform σ :
-      Set (tensorHs (I := I) (M := M) g r s h_uniform σ)) := by
+    {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ} :
+    Dense (tensorHs.finiteSupportSubmodule (I := I) (M := M) (g := g) (r := r) (s := s)
+      h_atlas σ :
+      Set (tensorHs (I := I) (M := M) g r s h_atlas σ)) := by
   rw [Submodule.dense_iff_topologicalClosure_eq_top]
   exact tensorHsFiniteSupportSubmodule_topologicalClosure
-    (I := I) (M := M)
+    (I := I) (M := M) (g := g) (r := r) (s := s)
 
 /-- The set of elements of `Hˢ` with finitely-supported coordinate
 family is dense, stated directly on the predicate. -/
 theorem tensorHs_dense_finiteSupport {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} {h_uniform : uniformTensorChartSobolevBound g r s}
+    {r s : ℕ} {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
     {σ : ℝ} :
-    Dense {T : tensorHs (I := I) (M := M) g r s h_uniform σ |
+    Dense {T : tensorHs (I := I) (M := M) g r s h_atlas σ |
       (Function.support T.coeff).Finite} :=
-  tensorHsFiniteSupportSubmodule_dense (I := I) (M := M)
+  tensorHsFiniteSupportSubmodule_dense (I := I) (M := M) (g := g) (r := r) (s := s)
 
 /-- The span of the spectral basis vectors `tensorHsBasisVec` is dense
 in `Hˢ`: every `Hˢ` element is approximated in `Hˢ`-norm by finite
 linear combinations of eigenvectors. -/
 theorem tensorHsBasisVec_span_dense {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} {h_uniform : uniformTensorChartSobolevBound g r s}
+    {r s : ℕ} {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
     {σ : ℝ} :
     Dense (Submodule.span ℝ
-      (Set.range (tensorHsBasisVec (I := I) (M := M) h_uniform σ)) :
-      Set (tensorHs (I := I) (M := M) g r s h_uniform σ)) := by
+      (Set.range (tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas σ)) :
+      Set (tensorHs (I := I) (M := M) g r s h_atlas σ)) := by
   classical
   -- The span of the basis vectors equals the finitely-supported
   -- submodule, which is dense.
-  refine tensorHsFiniteSupportSubmodule_dense (I := I) (M := M)
+  refine tensorHsFiniteSupportSubmodule_dense (I := I) (M := M) (g := g) (r := r) (s := s)
     |>.mono ?_
   intro T hT
   -- `T` finitely supported ⇒ `T = ∑_{i ∈ s} (coeff i) • bᵢ` over its
@@ -586,13 +586,13 @@ theorem tensorHsBasisVec_span_dense {g : SmoothRiemannianMetric I M}
   rw [SetLike.mem_coe, tensorHs.mem_finiteSupportSubmodule] at hT
   classical
   have h_eq : T = ∑ i ∈ hT.toFinset,
-      T.coeff i • tensorHsBasisVec (I := I) (M := M) h_uniform σ i := by
+      T.coeff i • tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas σ i := by
     refine tensorHs.ext ?_
     funext j
     -- Read off the `j`-th coordinate of the finite sum.
     have h_sum : (∑ i ∈ hT.toFinset,
           T.coeff i • tensorHsBasisVec (I := I) (M := M)
-            h_uniform σ i).coeff j =
+            h_atlas σ i).coeff j =
         ∑ i ∈ hT.toFinset,
           (if j = i then T.coeff i else 0) := by
       induction hT.toFinset using Finset.induction with
@@ -621,15 +621,15 @@ theorem tensorHsBasisVec_span_dense {g : SmoothRiemannianMetric I M}
 /-! ## Sanity tests -/
 
 example {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    {h_uniform : uniformTensorChartSobolevBound g r s} {τ σ : ℝ}
+    {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {τ σ : ℝ}
     (hτσ : τ ≤ σ) :
-    tensorHs (I := I) (M := M) g r s h_uniform σ →L[ℝ]
-      tensorHs (I := I) (M := M) g r s h_uniform τ :=
-  tensorHsInclusion (I := I) (M := M) h_uniform hτσ
+    tensorHs (I := I) (M := M) g r s h_atlas σ →L[ℝ]
+      tensorHs (I := I) (M := M) g r s h_atlas τ :=
+  tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas hτσ
 
 example {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    {h_uniform : uniformTensorChartSobolevBound g r s} {σ : ℝ} :
-    Dense {T : tensorHs (I := I) (M := M) g r s h_uniform σ |
+    {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ} :
+    Dense {T : tensorHs (I := I) (M := M) g r s h_atlas σ |
       (Function.support T.coeff).Finite} :=
   tensorHs_dense_finiteSupport (I := I) (M := M)
 
