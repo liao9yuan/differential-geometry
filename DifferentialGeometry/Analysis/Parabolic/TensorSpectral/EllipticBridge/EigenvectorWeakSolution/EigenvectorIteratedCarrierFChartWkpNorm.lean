@@ -249,6 +249,106 @@ private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel
     rw [Real.sqrt_eq_rpow, ← ENNReal.ofReal_rpow_of_nonneg hc_nn (by positivity)]
   rw [h_pow_eq, smul_eq_mul]
 
+omit [CompleteSpace E] in
+/-- **Eigenbasis-uniform weighted-versus-volume `eLpNorm` comparison on the
+kernel.** The constant-uniform twin of
+`eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel`: given a family of
+functions `f i : EuclN → ℝ`, indexed by an arbitrary type `ι`, each vanishing
+almost everywhere — with respect to the plain Lebesgue volume restricted to
+`chartTargetEuclid α \ chartPouKernel α` — off the compact partition-of-unity
+kernel `chartPouKernel α`, there is a *single* nonnegative constant `C` such that
+`eLpNorm (f i) 2 (μw.restrict (chartTargetEuclid α)) ≤ ENNReal.ofReal C ·
+eLpNorm (f i) 2 (volume.restrict (chartTargetEuclid α))` holds for *every* index
+`i`, where `μw = chartPulledWeightedMeasure g α`.
+
+The comparison constant is the square root of the kernel-domination constant `c`
+from `chartPulledWeightedMeasure_restrict_le_volume_on_chartPouKernel`, which
+depends only on `g` and `α`, not on the function. Hoisting that constant before
+the index, the per-index comparison proof is exactly the per-function proof of
+`eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel` for `f i`. -/
+private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel_uniform
+    {ι : Type*} (g : SmoothRiemannianMetric I M) (α : M) {f : ι → EuclN → ℝ}
+    (hf : ∀ i, f i =ᵐ[(volume : Measure EuclN).restrict
+        (chartTargetEuclid (I := I) (M := M) α \
+          chartPouKernel (I := I) (M := M) α)] (fun _ : EuclN => (0 : ℝ))) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : ι,
+        eLpNorm (f i) 2
+            ((chartPulledWeightedMeasure (I := I) g α).restrict
+              (chartTargetEuclid (I := I) (M := M) α))
+          ≤ ENNReal.ofReal C *
+            eLpNorm (f i) 2
+              ((volume : Measure EuclN).restrict
+                (chartTargetEuclid (I := I) (M := M) α)) := by
+  classical
+  set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
+  set K : Set EuclN := chartPouKernel (I := I) (M := M) α with hK_def
+  have hK_meas : MeasurableSet K :=
+    chartPouKernel_measurableSet (I := I) (M := M) α
+  have hK_in : K ⊆ Ω := chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α
+  have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
+  have hV_meas : MeasurableSet (Ω \ K) := hΩ_open.measurableSet.diff hK_meas
+  -- Domination of the weighted measure on `K`: the constant `c` is `i`-free,
+  -- so the witness `√c` can be hoisted before the index.
+  obtain ⟨c, hc_nn, hc_le⟩ :=
+    chartPulledWeightedMeasure_restrict_le_volume_on_chartPouKernel
+      (I := I) (M := M) g α
+  refine ⟨Real.sqrt c, Real.sqrt_nonneg _, fun i => ?_⟩
+  -- Recast the off-kernel a.e.-vanishing of `f i` as a pointwise implication
+  -- on `Ω`.
+  have hf' : ∀ᵐ y ∂((volume : Measure EuclN).restrict Ω),
+      y ∉ K → f i y = 0 := by
+    have hf_i := hf i
+    rw [Filter.EventuallyEq, ae_restrict_iff' hV_meas] at hf_i
+    rw [ae_restrict_iff' hΩ_open.measurableSet]
+    filter_upwards [hf_i] with y hy hy_Ω hy_K
+    exact hy ⟨hy_Ω, hy_K⟩
+  -- The weighted measure restricted to `Ω` is absolutely continuous w.r.t. the
+  -- plain volume restricted to `Ω`.
+  have h_abs : (chartPulledWeightedMeasure (I := I) g α).restrict Ω ≪
+      (volume : Measure EuclN).restrict Ω := by
+    unfold chartPulledWeightedMeasure
+    exact (withDensity_absolutelyContinuous (volume : Measure EuclN) _).restrict Ω
+  -- `f i` vanishes a.e. off `K` for the weighted restricted measure too.
+  have hf_w : ∀ᵐ y ∂((chartPulledWeightedMeasure (I := I) g α).restrict Ω),
+      y ∉ K → f i y = 0 := h_abs.ae_le hf'
+  -- `f i` agrees a.e. with `K.indicator (f i)` for both measures.
+  have h_ind_w : f i =ᵐ[(chartPulledWeightedMeasure (I := I) g α).restrict Ω]
+      K.indicator (f i) := by
+    filter_upwards [hf_w] with y hy
+    by_cases hyK : y ∈ K
+    · rw [Set.indicator_of_mem hyK]
+    · rw [Set.indicator_of_notMem hyK, hy hyK]
+  have h_ind_v : f i =ᵐ[(volume : Measure EuclN).restrict Ω] K.indicator (f i) := by
+    filter_upwards [hf'] with y hy
+    by_cases hyK : y ∈ K
+    · rw [Set.indicator_of_mem hyK]
+    · rw [Set.indicator_of_notMem hyK, hy hyK]
+  -- Rewrite both `eLpNorm`s through the indicator.
+  rw [eLpNorm_congr_ae h_ind_w, eLpNorm_congr_ae h_ind_v,
+    eLpNorm_indicator_eq_eLpNorm_restrict hK_meas,
+    eLpNorm_indicator_eq_eLpNorm_restrict hK_meas]
+  -- `(μ.restrict Ω).restrict K = μ.restrict K` because `K ⊆ Ω`.
+  rw [Measure.restrict_restrict_of_subset hK_in,
+    Measure.restrict_restrict_of_subset hK_in]
+  -- Dominate the weighted measure on `K`, then split the scalar.
+  have h_mono :
+      eLpNorm (f i) 2 ((chartPulledWeightedMeasure (I := I) g α).restrict K)
+        ≤ eLpNorm (f i) 2
+            (ENNReal.ofReal c • ((volume : Measure EuclN).restrict K)) :=
+    eLpNorm_mono_measure (f i) hc_le
+  refine h_mono.trans ?_
+  rw [eLpNorm_smul_measure_of_ne_top (by norm_num : (2 : ℝ≥0∞) ≠ ⊤)]
+  -- `(1 / 2 : ℝ≥0∞).toReal = 1 / 2`.
+  have h_toReal : ((1 / 2 : ℝ≥0∞).toReal : ℝ) = (1 : ℝ) / 2 := by
+    rw [show (1 / 2 : ℝ≥0∞) = (1 : ℝ≥0∞) / 2 from rfl]; simp
+  rw [h_toReal]
+  -- `ENNReal.ofReal c ^ (1 / 2) = ENNReal.ofReal (√c)`.
+  have h_pow_eq : ENNReal.ofReal c ^ ((1 : ℝ) / 2) =
+      ENNReal.ofReal (Real.sqrt c) := by
+    rw [Real.sqrt_eq_rpow, ← ENNReal.ofReal_rpow_of_nonneg hc_nn (by positivity)]
+  rw [h_pow_eq, smul_eq_mul]
+
 /-! ## The weighted-`L²` bound for the iterated carrier's effective source field -/
 
 section MainBound
@@ -357,6 +457,127 @@ theorem eigenvectorIteratedCarrier_fChartEff_eLpNorm_le
             diffRHSAggregate (I := I) (M := M)
               g r s h_atlas i α P₀ m 0 directions) :=
           mul_le_mul' (le_refl _) hCvol_bd
+    _ = ENNReal.ofReal ((i.fst.val)⁻¹ * (Ccmp * Cvol)) *
+          diffRHSAggregate (I := I) (M := M)
+            g r s h_atlas i α P₀ m 0 directions := by
+          rw [← mul_assoc, ← ENNReal.ofReal_mul hCcmp_nn]
+          congr 2
+          ring
+
+/-- **The eigenbasis-uniform weighted-`L²` bound for the iterated carrier's
+effective source field.**
+
+The constant-uniform twin of `eigenvectorIteratedCarrier_fChartEff_eLpNorm_le`:
+for a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a chart center
+`α : M`, a component multi-index `P₀`, a level `m`, and a direction multi-index
+`directions`, with the order-`(m + 1)` partition-of-unity regularity input
+`h_pou` phrased uniformly over the eigenbasis index, there is a *single*
+nonnegative constant `C` such that, for *every* eigenbasis index `i` with
+resolvent eigenvalue `μ := i.fst.val`, every level-`m` iterated carrier `D_m`
+whose effective source field `fChartEff` is the level-`m` differentiated chart
+right-hand side `eigenvectorChartRHSDiff g r s h_atlas i α P₀ m directions`, and
+every chart-`H^{m+1}` regularity witness `h_parent` of the eigenvector chart
+component, the `L²`-norm of the carrier's effective source `f_chart` against the
+chart-pulled weighted measure restricted to the chart-`α` target is bounded by
+`ENNReal.ofReal (μ⁻¹ · C)` times the order-`0` aggregate
+`diffRHSAggregate g r s h_atlas i α P₀ m 0 directions`.
+
+A `_uniform` statement cannot be derived from its per-`i` original (one cannot
+get `∃ C, ∀ i` from `∀ i, ∃ C`); this carries its own proof. The comparison
+constant is hoisted by the eigenbasis-uniform comparison
+`eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel_uniform` (its
+constant depends only on `g` and `α`), and the plain-volume constant is hoisted
+by the eigenbasis-uniform weighted-`eLpNorm` bound
+`eigenvectorChartRHSDiff_eLpNorm_le_uniform`. The per-`i` carrier identity, the
+per-`i` off-kernel a.e.-vanishing, and the resolvent-eigenvalue reciprocity stay
+inside the `∀ i`. -/
+theorem eigenvectorIteratedCarrier_fChartEff_eLpNorm_le_uniform
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) {m : ℕ}
+    (directions : Fin m → Fin (Module.finrank ℝ E))
+    (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
+      (β : M) (Q : TensorCompIdx (E := E) r s),
+      MemWkp (d := Module.finrank ℝ E) (m + 1 + 0) 2
+        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+              (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
+            β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+        (chartTargetEuclid (I := I) (M := M) β)) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
+        (D_m : eigenvectorIteratedTensorChartBilinearData (I := I) (M := M)
+          g r s h_atlas i α P₀ m)
+        (_h_fChartEff : D_m.fChartEff =
+          eigenvectorChartRHSDiff (I := I) (M := M)
+            g r s h_atlas i α P₀ m directions)
+        (h_parent : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
+          (d := Module.finrank ℝ E) (m + 1) 2
+          (eigenvectorChartComponentFun (I := I) (M := M) g r s h_atlas i α P₀)
+          (chartTargetEuclid (I := I) (M := M) α)),
+        eLpNorm
+            ((eigenvectorIteratedTensorChartBilinearData_toData
+                (I := I) (M := M) g r s h_atlas i α P₀ D_m h_parent).f_chart)
+            2 ((chartPulledWeightedMeasure (I := I) g α).restrict
+                (chartTargetEuclid (I := I) (M := M) α))
+          ≤ ENNReal.ofReal ((i.fst.val)⁻¹ * C) *
+            diffRHSAggregate (I := I) (M := M)
+              g r s h_atlas i α P₀ m 0 directions := by
+  classical
+  -- The level-`m` right-hand side vanishes a.e. off the compact kernel — this
+  -- holds for every eigenbasis index, so it furnishes the function family fed
+  -- to the eigenbasis-uniform comparison.
+  have h_ae_zero :
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        eigenvectorChartRHSDiff (I := I) (M := M)
+            g r s h_atlas i α P₀ m directions
+          =ᵐ[(volume : Measure EuclN).restrict
+            (chartTargetEuclid (I := I) (M := M) α \
+              chartPouKernel (I := I) (M := M) α)] (fun _ : EuclN => (0 : ℝ)) :=
+    fun i => rhsDiff_ae_zero_off_chartPouKernel (I := I) (M := M)
+      g r s h_atlas i α P₀ m directions
+  -- The eigenbasis-uniform weighted-versus-volume `eLpNorm` comparison — its
+  -- constant depends only on `g` and `α`, so it is hoisted before `intro i`.
+  obtain ⟨Ccmp, hCcmp_nn, hCcmp_bd⟩ :=
+    eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel_uniform
+      (I := I) (M := M)
+      (ι := TensorEigenIdx (I := I) (M := M) g r s) g α h_ae_zero
+  -- The eigenbasis-uniform plain-volume weighted-`eLpNorm` bound for the
+  -- differentiated right-hand side — its constant is likewise `i`-free.
+  obtain ⟨Cvol, hCvol_nn, hCvol_bd⟩ :=
+    eigenvectorChartRHSDiff_eLpNorm_le_uniform (I := I) (M := M)
+      g r s h_atlas α P₀ m directions h_pou
+  -- Assemble: the headline constant is `Ccmp · Cvol`.
+  refine ⟨Ccmp * Cvol, mul_nonneg hCcmp_nn hCvol_nn, ?_⟩
+  intro i D_m h_fChartEff h_parent
+  -- The carrier's `f_chart` is, definitionally, `D_m.fChartEff`.
+  have h_f_chart_eq :
+      (eigenvectorIteratedTensorChartBilinearData_toData
+          (I := I) (M := M) g r s h_atlas i α P₀ D_m h_parent).f_chart =
+        eigenvectorChartRHSDiff (I := I) (M := M)
+          g r s h_atlas i α P₀ m directions := by
+    change D_m.fChartEff =
+      eigenvectorChartRHSDiff (I := I) (M := M)
+        g r s h_atlas i α P₀ m directions
+    exact h_fChartEff
+  rw [h_f_chart_eq]
+  -- Chain the eigenbasis-uniform comparison through the eigenbasis-uniform
+  -- plain-volume bound, both specialised at `i`.
+  calc
+    eLpNorm (eigenvectorChartRHSDiff (I := I) (M := M)
+            g r s h_atlas i α P₀ m directions) 2
+          ((chartPulledWeightedMeasure (I := I) g α).restrict
+            (chartTargetEuclid (I := I) (M := M) α))
+        ≤ ENNReal.ofReal Ccmp *
+          eLpNorm (eigenvectorChartRHSDiff (I := I) (M := M)
+              g r s h_atlas i α P₀ m directions) 2
+            ((volume : Measure EuclN).restrict
+              (chartTargetEuclid (I := I) (M := M) α)) := hCcmp_bd i
+    _ ≤ ENNReal.ofReal Ccmp *
+          (ENNReal.ofReal ((i.fst.val)⁻¹ * Cvol) *
+            diffRHSAggregate (I := I) (M := M)
+              g r s h_atlas i α P₀ m 0 directions) :=
+          mul_le_mul' (le_refl _) (hCvol_bd i)
     _ = ENNReal.ofReal ((i.fst.val)⁻¹ * (Ccmp * Cvol)) *
           diffRHSAggregate (I := I) (M := M)
             g r s h_atlas i α P₀ m 0 directions := by
@@ -607,6 +828,42 @@ example (α : M) (P₀ : TensorCompIdx (E := E) r s) {m : ℕ}
             g r s h_atlas i α P₀ m 0 directions :=
   eigenvectorIteratedCarrier_fChartEff_eLpNorm_le (I := I) (M := M)
     g r s h_atlas i α P₀ directions D_m h_fChartEff h_parent h_pou
+
+/-- The eigenbasis-uniform headline produces, from the uniformly-phrased
+order-`(m + 1)` partition-of-unity regularity input, a single nonnegative
+constant serving the weighted-`L²` bound for the iterated carrier's effective
+source field of *every* eigenbasis index. -/
+example (α : M) (P₀ : TensorCompIdx (E := E) r s) {m : ℕ}
+    (directions : Fin m → Fin (Module.finrank ℝ E))
+    (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
+      (β : M) (Q : TensorCompIdx (E := E) r s),
+      MemWkp (d := Module.finrank ℝ E) (m + 1 + 0) 2
+        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+              (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
+            β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+        (chartTargetEuclid (I := I) (M := M) β)) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
+        (D_m : eigenvectorIteratedTensorChartBilinearData (I := I) (M := M)
+          g r s h_atlas i α P₀ m)
+        (_h_fChartEff : D_m.fChartEff =
+          eigenvectorChartRHSDiff (I := I) (M := M)
+            g r s h_atlas i α P₀ m directions)
+        (h_parent : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
+          (d := Module.finrank ℝ E) (m + 1) 2
+          (eigenvectorChartComponentFun (I := I) (M := M) g r s h_atlas i α P₀)
+          (chartTargetEuclid (I := I) (M := M) α)),
+        eLpNorm
+            ((eigenvectorIteratedTensorChartBilinearData_toData
+                (I := I) (M := M) g r s h_atlas i α P₀ D_m h_parent).f_chart)
+            2 ((chartPulledWeightedMeasure (I := I) g α).restrict
+                (chartTargetEuclid (I := I) (M := M) α))
+          ≤ ENNReal.ofReal ((i.fst.val)⁻¹ * C) *
+            diffRHSAggregate (I := I) (M := M)
+              g r s h_atlas i α P₀ m 0 directions :=
+  eigenvectorIteratedCarrier_fChartEff_eLpNorm_le_uniform (I := I) (M := M)
+    g r s h_atlas α P₀ directions h_pou
 
 /-- The finiteness lemma certifies the order-`K` aggregate is finite. -/
 example (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
