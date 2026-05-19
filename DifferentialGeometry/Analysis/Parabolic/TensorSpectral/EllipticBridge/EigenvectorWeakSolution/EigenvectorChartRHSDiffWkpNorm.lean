@@ -683,6 +683,297 @@ theorem eigenvectorChartRHSDiff_wkpNorm_le
         exact add_le_add h_tail_one h_tail_one
       exact add_le_add h_head_le h_tail_le
 
+/-! ## The eigenbasis-uniform order-`K` `wkpNorm`-graded bound
+
+The per-eigenvector headline `eigenvectorChartRHSDiff_wkpNorm_le` produces, for
+each fixed eigenbasis index `i`, a nonnegative constant `C` — quantified *after*
+`i`, hence in principle depending on `i`. The downstream bounded-operator
+endpoint needs the constant **uniform** across the whole eigenbasis: a single
+nonnegative `C` that serves every `i` simultaneously, with only the genuine
+resolvent-eigenvalue factor `(i.fst.val)⁻¹` remaining inside the `∀ i`.
+
+`eigenvectorChartRHSDiff_wkpNorm_le_uniform` provides exactly that. It is **not**
+derivable from the per-`i` headline — one cannot extract `∃ C, ∀ i` from
+`∀ i, ∃ C`. It carries its own proof: the per-`i` induction on `m`, with the
+constant produced `i`-freely at every level. At level `0` the base constant is
+the eigenbasis-uniform constant of `eigenvectorChartRHS_wkpNorm_le_uniform`; at
+level `m + 1` the constant `max Cstep (2 * Cstep * Cih)` is built from the
+eigenbasis-uniform step constant `Cstep` of
+`eigenvectorChartIteratedStep_wkpNorm_le_uniform` and the inductive constant
+`Cih` (uniform by the inductive hypothesis) — an `i`-free arithmetic expression
+in `m`, `K`, `l` alone.
+
+The per-`i` regularity input `h_pou` is lifted to a single top-level
+`∀ i …`-quantified hypothesis. The `(i.fst.val)⁻¹` factor stays explicit inside
+the `∀ i`; only `C` is hoisted out. -/
+
+set_option linter.style.multiGoal false in
+/-- **The eigenbasis-uniform order-`K` `wkpNorm`-graded bound for the
+differentiated chart right-hand side.**
+
+The constant-uniform twin of `eigenvectorChartRHSDiff_wkpNorm_le`: for a closed
+Riemannian manifold `(M, g)`, ranks `(r, s)`, a chart center `α : M`, a component
+multi-index `P₀`, a level `m`, a regularity order `K`, a direction multi-index
+`l : Fin m → Fin n`, and the order-`(m + 1 + K)` partition-of-unity regularity
+input `h_pou` phrased uniformly over `i`, there is a single nonnegative constant
+`C` such that, for *every* eigenbasis index `i` with resolvent eigenvalue
+`μ := i.fst.val`, the order-`K` iterated Euclidean Sobolev norm of the level-`m`
+differentiated chart right-hand side `eigenvectorChartRHSDiff g r s h_atlas i α
+P₀ m l` on the chart-`α` target is bounded by `ENNReal.ofReal (μ⁻¹ * C)` times
+the finite order-`K` aggregate `diffRHSAggregate` of primitive regularity data.
+
+A `_uniform` statement cannot be derived from its per-`i` original (one cannot
+get `∃ C, ∀ i` from `∀ i, ∃ C`); this carries its own proof — the per-`i`
+induction on `m` of `eigenvectorChartRHSDiff_wkpNorm_le`, with the constant
+produced `i`-freely at every level. At level `0` the base constant is the
+eigenbasis-uniform constant of `eigenvectorChartRHS_wkpNorm_le_uniform`; at level
+`m + 1` the constant `max Cstep (2 * Cstep * Cih)` is built from the
+eigenbasis-uniform step constant of `eigenvectorChartIteratedStep_wkpNorm_le_uniform`
+and the inductive constant — an `i`-free arithmetic expression in `m`, `K`, `l`. -/
+theorem eigenvectorChartRHSDiff_wkpNorm_le_uniform
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
+    (l : Fin m → Fin (Module.finrank ℝ E))
+    (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
+      (β : M) (Q : TensorCompIdx (E := E) r s),
+      MemWkp (d := Module.finrank ℝ E) (m + 1 + K) 2
+        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+              (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
+            β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+        (chartTargetEuclid (I := I) (M := M) β)) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        wkpNorm (d := Module.finrank ℝ E) K 2
+            (eigenvectorChartRHSDiff (I := I) (M := M) g r s h_atlas i α P₀ m l)
+            (chartTargetEuclid (I := I) (M := M) α)
+          ≤ ENNReal.ofReal ((i.fst.val)⁻¹ * C) *
+            diffRHSAggregate (I := I) (M := M) g r s h_atlas i α P₀ m K l := by
+  classical
+  -- Induction on `m`, with `K` generalised so the inductive hypothesis can be
+  -- invoked at `K + 1`. The direction multi-index `l` and `h_pou` are
+  -- generalised automatically, their types depending on `m`. The existential
+  -- constant `∃ C` is produced *before* the `∀ i`, with `C` not mentioning `i`.
+  induction m generalizing K with
+  | zero =>
+      -- Level `0`: the differentiated right-hand side is `eigenvectorChartRHS`.
+      -- `eigenvectorChartRHS_wkpNorm_le_uniform` needs `h_pou` at order `K + 1`;
+      -- this theorem's `h_pou` is at order `0 + 1 + K = K + 1`.
+      have h_pou' : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
+          (β : M) (Q : TensorCompIdx (E := E) r s),
+          MemWkp (d := Module.finrank ℝ E) (K + 1) 2
+            (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+                (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+                  (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
+                β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
+              EuclN → ℝ) y)
+            (chartTargetEuclid (I := I) (M := M) β) := by
+        intro i β Q
+        have h_idx : (0 : ℕ) + 1 + K = K + 1 := by omega
+        rw [← h_idx]
+        exact h_pou i β Q
+      -- The eigenbasis-uniform level-`0` constant — `i`-free.
+      obtain ⟨C, hC_nn, hC_bd⟩ := eigenvectorChartRHS_wkpNorm_le_uniform
+        (I := I) (M := M) g r s h_atlas α P₀ K h_pou'
+      refine ⟨C, hC_nn, fun i => ?_⟩
+      -- Reduce to `eigenvectorChartRHS` and the level-`0` aggregate.
+      rw [eigenvectorChartRHSDiff_zero, diffRHSAggregate_zero]
+      -- `rhsZeroAggregate` is definitionally the parenthesised right-hand side
+      -- of `eigenvectorChartRHS_wkpNorm_le_uniform`.
+      show wkpNorm (d := Module.finrank ℝ E) K 2
+          (eigenvectorChartRHS (I := I) (M := M) g r s h_atlas i α P₀)
+          (chartTargetEuclid (I := I) (M := M) α)
+        ≤ ENNReal.ofReal ((i.fst.val)⁻¹ * C) *
+          rhsZeroAggregate (I := I) (M := M) g r s h_atlas i α P₀ K
+      exact hC_bd i
+  | succ m ih =>
+      -- Level `m + 1`. The previous-level effective right-hand side, as a
+      -- function of the eigenbasis index, fed to the uniform step bound.
+      set fPrev : TensorEigenIdx (I := I) (M := M) g r s → EuclN → ℝ :=
+        fun i => eigenvectorChartRHSDiff (I := I) (M := M)
+          g r s h_atlas i α P₀ m (Fin.init l) with hfPrev_def
+      -- `h_pou` at order `m + 1 + (K + 1) = m + 2 + K`, phrased uniformly.
+      have h_pou_prev : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
+          (β : M) (Q : TensorCompIdx (E := E) r s),
+          MemWkp (d := Module.finrank ℝ E) (m + 1 + (K + 1)) 2
+            (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+                (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+                  (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
+                β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
+              EuclN → ℝ) y)
+            (chartTargetEuclid (I := I) (M := M) β) := by
+        intro i β Q
+        have h_idx : m + 1 + (K + 1) = m + 1 + 1 + K := by omega
+        rw [h_idx]
+        exact h_pou i β Q
+      -- Hypothesis (a): the order-`(2 + K)` iterated-weak-partial regularity —
+      -- supplied unconditionally for every `i`.
+      have h_iter : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
+          (j : ℕ) (idx : Fin j → Fin (Module.finrank ℝ E)),
+          MemWkp (d := Module.finrank ℝ E) (2 + K) 2
+            (eigenvectorChartIteratedPartial (I := I) (M := M)
+              g r s h_atlas i α P₀ j idx)
+            (chartTargetEuclid (I := I) (M := M) α) :=
+        fun i => iteratedPartial_memWkp_two_add (I := I) (M := M)
+          g r s h_atlas i α P₀ K
+      -- Hypothesis (b): the level-`m` right-hand side `fPrev i` is
+      -- `MemWkp (K + 1) 2` for every `i` — the qualitative headline at order
+      -- `K + 1`.
+      have h_prev : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+          MemWkp (d := Module.finrank ℝ E) (K + 1) 2 (fPrev i)
+            (chartTargetEuclid (I := I) (M := M) α) := by
+        intro i
+        rw [hfPrev_def]
+        exact eigenvectorChartRHSDiff_memWkp (I := I) (M := M)
+          g r s h_atlas i α P₀ m (K + 1) (Fin.init l) (h_pou_prev i)
+      -- Hypothesis (c): the level-`m` right-hand side `fPrev i` is ae-zero off
+      -- the partition-of-unity kernel for every `i`.
+      have h_prev_zero : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+          (fPrev i) =ᵐ[(volume : Measure EuclN).restrict
+              (chartTargetEuclid (I := I) (M := M) α \
+                chartPouKernel (I := I) (M := M) α)]
+            (fun _ : EuclN => (0 : ℝ)) := by
+        intro i
+        rw [hfPrev_def]
+        exact rhsDiff_ae_zero_off_chartPouKernel (I := I) (M := M)
+          g r s h_atlas i α P₀ m (Fin.init l)
+      -- The eigenbasis-uniform step constant `Cstep` — `i`-free.
+      obtain ⟨Cstep, hCstep_nn, hCstep_bd⟩ :=
+        eigenvectorChartIteratedStep_wkpNorm_le_uniform (I := I) (M := M)
+          g r s h_atlas α P₀ m K (Fin.init l) (l (Fin.last m))
+          (fChartEffPrev := fPrev) h_iter h_prev h_prev_zero
+      -- The inductive constant `Cih` at order `K + 1` and direction `Fin.init l`
+      -- — `i`-free by the inductive hypothesis.
+      obtain ⟨Cih, hCih_nn, hCih_bd⟩ := ih (K + 1) (Fin.init l) h_pou_prev
+      -- The headline constant `max Cstep (2 * Cstep * Cih)` — `i`-free.
+      refine ⟨max Cstep (2 * Cstep * Cih), le_max_of_le_left hCstep_nn,
+        fun i => ?_⟩
+      -- The per-`i` argument: the resolvent eigenvalue lies in `(0, 1]`.
+      have hμ_pos : 0 < i.fst.val := eigenIdx_val_pos (I := I) (M := M) g r s i
+      have hμ_le_one : i.fst.val ≤ 1 :=
+        eigenIdx_val_le_one (I := I) (M := M) g r s i
+      have hμ_inv_nn : 0 ≤ (i.fst.val)⁻¹ := le_of_lt (inv_pos.mpr hμ_pos)
+      have hμ_inv_ge_one : (1 : ℝ) ≤ (i.fst.val)⁻¹ := by
+        rw [le_inv_comm₀ (by norm_num) hμ_pos]; simpa using hμ_le_one
+      -- Write `l = Fin.snoc (Fin.init l) (l (Fin.last m))`.
+      have h_snoc :
+          eigenvectorChartRHSDiff (I := I) (M := M)
+              g r s h_atlas i α P₀ (m + 1) l =
+            eigenvectorChartRHSDiff (I := I) (M := M)
+              g r s h_atlas i α P₀ (m + 1)
+              (Fin.snoc (Fin.init l) (l (Fin.last m))) := by
+        rw [Fin.snoc_init_self]
+      rw [h_snoc]
+      -- The standalone-step identity (used backwards).
+      rw [← eigenvectorChartIteratedStep_eq_rhsDiff_succ (I := I) (M := M)
+        g r s h_atlas i α P₀ m (Fin.init l) (l (Fin.last m))]
+      -- Abbreviations for the head and the inductive aggregate.
+      set H := diffRHSHead (I := I) (M := M) g r s h_atlas i α P₀ m K
+        (Fin.snoc (Fin.init l) (l (Fin.last m))) with hH_def
+      set D := diffRHSAggregate (I := I) (M := M) g r s h_atlas i α P₀ m (K + 1)
+        (Fin.init l) with hD_def
+      set Pprev := eigenvectorChartRHSDiff (I := I) (M := M)
+        g r s h_atlas i α P₀ m (Fin.init l) with hPprev_def
+      -- The step bound at the index `i`. `fPrev i` is definitionally `Pprev`.
+      have hCstep_bd_i := hCstep_bd i
+      have hfPrev_i : fPrev i = Pprev := by rw [hfPrev_def, hPprev_def]
+      rw [hfPrev_i] at hCstep_bd_i
+      -- The differentiated-numerator aggregate `diffNumeratorAggregateK` splits
+      -- as `diffRHSHead + wkpNorm (K + 1) Pprev + wkpNorm K Pprev`.
+      have h_num_split :
+          diffNumeratorAggregateK (I := I) (M := M) g r s h_atlas i α P₀ m K
+              (Fin.snoc (Fin.init l) (l (Fin.last m))) Pprev =
+            H
+              + wkpNorm (d := Module.finrank ℝ E) (K + 1) 2 Pprev
+                  (chartTargetEuclid (I := I) (M := M) α)
+              + wkpNorm (d := Module.finrank ℝ E) K 2 Pprev
+                  (chartTargetEuclid (I := I) (M := M) α) := by
+        rw [hH_def]; rfl
+      rw [h_num_split] at hCstep_bd_i
+      -- The order-`K` `wkpNorm` of `Pprev` is `≤` its order-`(K + 1)` `wkpNorm`.
+      have h_prev_mono :
+          wkpNorm (d := Module.finrank ℝ E) K 2 Pprev
+              (chartTargetEuclid (I := I) (M := M) α)
+            ≤ wkpNorm (d := Module.finrank ℝ E) (K + 1) 2 Pprev
+                (chartTargetEuclid (I := I) (M := M) α) :=
+        wkpNorm_mono_order (d := Module.finrank ℝ E) (Nat.le_succ K) _ _
+      -- The inductive hypothesis bound on `wkpNorm (K + 1) Pprev`.
+      have h_ih_bd :
+          wkpNorm (d := Module.finrank ℝ E) (K + 1) 2 Pprev
+              (chartTargetEuclid (I := I) (M := M) α)
+            ≤ ENNReal.ofReal ((i.fst.val)⁻¹ * Cih) * D := hCih_bd i
+      have h_prev_K_le :
+          wkpNorm (d := Module.finrank ℝ E) K 2 Pprev
+              (chartTargetEuclid (I := I) (M := M) α)
+            ≤ ENNReal.ofReal ((i.fst.val)⁻¹ * Cih) * D :=
+        le_trans h_prev_mono h_ih_bd
+      -- Bound the differentiated-numerator aggregate.
+      have h_aggr_le :
+          H
+              + wkpNorm (d := Module.finrank ℝ E) (K + 1) 2 Pprev
+                  (chartTargetEuclid (I := I) (M := M) α)
+              + wkpNorm (d := Module.finrank ℝ E) K 2 Pprev
+                  (chartTargetEuclid (I := I) (M := M) α)
+            ≤ H + ENNReal.ofReal ((i.fst.val)⁻¹ * Cih) * D
+                + ENNReal.ofReal ((i.fst.val)⁻¹ * Cih) * D :=
+        add_le_add (add_le_add (le_refl H) h_ih_bd) h_prev_K_le
+      -- Chain the step bound through the aggregate bound.
+      have h_step_chained :
+          wkpNorm (d := Module.finrank ℝ E) K 2
+              (eigenvectorChartIteratedStep (I := I) (M := M)
+                g r s h_atlas i α P₀ m (Fin.init l) Pprev (l (Fin.last m)))
+              (chartTargetEuclid (I := I) (M := M) α)
+            ≤ ENNReal.ofReal Cstep *
+              (H + ENNReal.ofReal ((i.fst.val)⁻¹ * Cih) * D
+                + ENNReal.ofReal ((i.fst.val)⁻¹ * Cih) * D) :=
+        le_trans hCstep_bd_i (mul_le_mul' (le_refl _) h_aggr_le)
+      refine le_trans h_step_chained ?_
+      -- The level-`(m+1)` aggregate (at the original `l`) is `H + D`.
+      have h_target_aggr :
+          diffRHSAggregate (I := I) (M := M) g r s h_atlas i α P₀ (m + 1) K l
+            = H + D := by
+        rw [diffRHSAggregate_succ, hH_def, hD_def, Fin.snoc_init_self]
+      rw [h_target_aggr]
+      -- Set `C' := max Cstep (2 * Cstep * Cih)`.
+      set C' : ℝ := max Cstep (2 * Cstep * Cih) with hC'_def
+      have hCih_nn' : 0 ≤ Cih := hCih_nn
+      have hC'_nn : 0 ≤ C' := le_max_of_le_left hCstep_nn
+      -- Distribute both products over `+`.
+      rw [mul_add, mul_add, mul_add, add_assoc]
+      -- The `H` summand: `ofReal Cstep * H ≤ ofReal (μ⁻¹ C') * H`.
+      have h_head_le :
+          ENNReal.ofReal Cstep * H
+            ≤ ENNReal.ofReal ((i.fst.val)⁻¹ * C') * H := by
+        gcongr
+        have h1 : Cstep ≤ C' := le_max_left _ _
+        nlinarith [h1, hμ_inv_ge_one, hC'_nn, hCstep_nn]
+      -- Each `D` summand: `ofReal Cstep * (ofReal(μ⁻¹ Cih) D) ≤ ofReal(μ⁻¹ C'/2) D`.
+      have h_tail_one :
+          ENNReal.ofReal Cstep * (ENNReal.ofReal ((i.fst.val)⁻¹ * Cih) * D)
+            ≤ ENNReal.ofReal ((i.fst.val)⁻¹ * C' / 2) * D := by
+        rw [← mul_assoc, ← ENNReal.ofReal_mul hCstep_nn]
+        gcongr
+        have h2C : 2 * Cstep * Cih ≤ C' := le_max_right _ _
+        have h_cs_ci_nn : 0 ≤ Cstep * Cih := mul_nonneg hCstep_nn hCih_nn'
+        nlinarith [h2C, hμ_inv_ge_one, hμ_inv_nn, h_cs_ci_nn]
+      -- The two `D` summands recombine into `ofReal(μ⁻¹ C') * D`.
+      have h_tail_combine :
+          ENNReal.ofReal ((i.fst.val)⁻¹ * C' / 2) * D
+              + ENNReal.ofReal ((i.fst.val)⁻¹ * C' / 2) * D
+            = ENNReal.ofReal ((i.fst.val)⁻¹ * C') * D := by
+        rw [← add_mul, ← ENNReal.ofReal_add (by positivity) (by positivity)]
+        congr 2
+        ring
+      have h_tail_le :
+          ENNReal.ofReal Cstep * (ENNReal.ofReal ((i.fst.val)⁻¹ * Cih) * D)
+              + ENNReal.ofReal Cstep *
+                  (ENNReal.ofReal ((i.fst.val)⁻¹ * Cih) * D)
+            ≤ ENNReal.ofReal ((i.fst.val)⁻¹ * C') * D := by
+        rw [← h_tail_combine]
+        exact add_le_add h_tail_one h_tail_one
+      exact add_le_add h_head_le h_tail_le
+
 /-! ## The `K = 0` corollary — the weighted-`eLpNorm` bound
 
 At `K = 0` the order-`K` `wkpNorm`-graded bound becomes a weighted-`eLpNorm`
@@ -729,6 +1020,53 @@ theorem eigenvectorChartRHSDiff_eLpNorm_le
   refine ⟨C, hC_nn, ?_⟩
   -- `wkpNorm 0 2 f Ω = eLpNorm f 2 (volume.restrict Ω)`.
   rwa [wkpNorm_zero (d := Module.finrank ℝ E)] at hC_bd
+
+/-- **The eigenbasis-uniform weighted-`eLpNorm` bound for the differentiated
+chart right-hand side.**
+
+The constant-uniform twin of `eigenvectorChartRHSDiff_eLpNorm_le`, and the
+`K = 0` instance of `eigenvectorChartRHSDiff_wkpNorm_le_uniform`: for a closed
+Riemannian manifold `(M, g)`, ranks `(r, s)`, a chart center `α : M`, a component
+multi-index `P₀`, a level `m`, a direction multi-index `l : Fin m → Fin n`, and
+the order-`(m + 1)` partition-of-unity regularity input `h_pou` phrased uniformly
+over `i`, there is a single nonnegative constant `C` such that, for *every*
+eigenbasis index `i` with resolvent eigenvalue `μ := i.fst.val`, the `L²`-norm of
+the level-`m` differentiated chart right-hand side `eigenvectorChartRHSDiff g r s
+h_atlas i α P₀ m l` against the plain Lebesgue volume restricted to the chart-`α`
+target is bounded by `ENNReal.ofReal (μ⁻¹ * C)` times the order-`0` aggregate
+`diffRHSAggregate … m 0 l`.
+
+A `_uniform` statement cannot be derived from its per-`i` original (one cannot
+get `∃ C, ∀ i` from `∀ i, ∃ C`); this carries its own proof — the eigenbasis-
+uniform headline `eigenvectorChartRHSDiff_wkpNorm_le_uniform` at `K = 0`, with
+the order-`0` `wkpNorm` restated as the weighted `eLpNorm` via `wkpNorm_zero`. -/
+theorem eigenvectorChartRHSDiff_eLpNorm_le_uniform
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
+    (l : Fin m → Fin (Module.finrank ℝ E))
+    (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
+      (β : M) (Q : TensorCompIdx (E := E) r s),
+      MemWkp (d := Module.finrank ℝ E) (m + 1 + 0) 2
+        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+              (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
+            β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+        (chartTargetEuclid (I := I) (M := M) β)) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        eLpNorm (eigenvectorChartRHSDiff (I := I) (M := M)
+            g r s h_atlas i α P₀ m l)
+            2 ((volume : Measure EuclN).restrict
+              (chartTargetEuclid (I := I) (M := M) α))
+          ≤ ENNReal.ofReal ((i.fst.val)⁻¹ * C) *
+            diffRHSAggregate (I := I) (M := M) g r s h_atlas i α P₀ m 0 l := by
+  obtain ⟨C, hC_nn, hC_bd⟩ := eigenvectorChartRHSDiff_wkpNorm_le_uniform
+    (I := I) (M := M) g r s h_atlas α P₀ m 0 l h_pou
+  refine ⟨C, hC_nn, fun i => ?_⟩
+  -- `wkpNorm 0 2 f Ω = eLpNorm f 2 (volume.restrict Ω)`.
+  have hC_bd_i := hC_bd i
+  rwa [wkpNorm_zero (d := Module.finrank ℝ E)] at hC_bd_i
 
 end MainBound
 
@@ -780,6 +1118,53 @@ example (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
           diffRHSAggregate (I := I) (M := M) g r s h_atlas i α P₀ m 0 l :=
   eigenvectorChartRHSDiff_eLpNorm_le (I := I) (M := M)
     g r s h_atlas i α P₀ m l h_pou
+
+/-- The eigenbasis-uniform headline produces, from the uniformly-phrased
+order-`(m + 1 + K)` partition-of-unity regularity input, a single nonnegative
+constant serving the order-`K` `wkpNorm`-graded bound for *every* eigenbasis
+index. -/
+example (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
+    (l : Fin m → Fin (Module.finrank ℝ E))
+    (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
+      (β : M) (Q : TensorCompIdx (E := E) r s),
+      MemWkp (d := Module.finrank ℝ E) (m + 1 + K) 2
+        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+              (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
+            β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+        (chartTargetEuclid (I := I) (M := M) β)) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        wkpNorm (d := Module.finrank ℝ E) K 2
+            (eigenvectorChartRHSDiff (I := I) (M := M) g r s h_atlas i α P₀ m l)
+            (chartTargetEuclid (I := I) (M := M) α)
+          ≤ ENNReal.ofReal ((i.fst.val)⁻¹ * C) *
+            diffRHSAggregate (I := I) (M := M) g r s h_atlas i α P₀ m K l :=
+  eigenvectorChartRHSDiff_wkpNorm_le_uniform (I := I) (M := M)
+    g r s h_atlas α P₀ m K l h_pou
+
+/-- The eigenbasis-uniform `K = 0` corollary produces a single nonnegative
+constant serving the weighted-`eLpNorm` bound for *every* eigenbasis index. -/
+example (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
+    (l : Fin m → Fin (Module.finrank ℝ E))
+    (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
+      (β : M) (Q : TensorCompIdx (E := E) r s),
+      MemWkp (d := Module.finrank ℝ E) (m + 1 + 0) 2
+        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+              (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
+            β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+        (chartTargetEuclid (I := I) (M := M) β)) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        eLpNorm (eigenvectorChartRHSDiff (I := I) (M := M)
+            g r s h_atlas i α P₀ m l)
+            2 ((volume : Measure EuclN).restrict
+              (chartTargetEuclid (I := I) (M := M) α))
+          ≤ ENNReal.ofReal ((i.fst.val)⁻¹ * C) *
+            diffRHSAggregate (I := I) (M := M) g r s h_atlas i α P₀ m 0 l :=
+  eigenvectorChartRHSDiff_eLpNorm_le_uniform (I := I) (M := M)
+    g r s h_atlas α P₀ m l h_pou
 
 end ElaborationTests
 
