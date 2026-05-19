@@ -3,6 +3,7 @@ import RicciFlower.Realized.TensorOperators
 import RicciFlower.Tensor.RSTensor.MetricCompatibility
 import RicciFlower.Metric.Basic
 import Mathlib.Analysis.Calculus.Deriv.Basic
+import Mathlib.Topology.Order.IntermediateValue
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -990,6 +991,80 @@ def TensorBarrierLimitClosureOn
       TensorBarrierUniformOnSlab (I := I) (M := M) G S delta t0) ->
   TwoTensorFamilyNonnegativeOn (I := I) (M := M) S (Set.Icc 0 T)
 
+/-- The set of times where a tensor family is pointwise nonnegative is closed
+on a compact time interval, provided every quadratic evaluation is continuous
+there. -/
+private theorem nonnegativeTime_isClosed
+    {S : TwoTensorFamily (I := I) (M := M)}
+    {T : Real}
+    (hcont : ∀ x, ∀ v w : TangentSpace I x,
+      ContinuousOn (fun t : Real => S t x v w) (Set.Icc 0 T)) :
+    IsClosed ({t : Real | TwoTensorFamilyNonnegativeAtTime (I := I) (M := M)
+      S t} ∩ Set.Icc 0 T) := by
+  rw [show
+      {t : Real | TwoTensorFamilyNonnegativeAtTime (I := I) (M := M) S t} ∩
+          Set.Icc 0 T =
+        Set.Icc 0 T ∩ ⋂ x : M, ⋂ v : TangentSpace I x,
+          (Set.Icc 0 T ∩ (fun t : Real => S t x v v) ⁻¹' Set.Ici 0) by
+    ext t
+    constructor
+    · intro ht
+      refine ⟨ht.2, ?_⟩
+      rw [Set.mem_iInter]
+      intro x
+      rw [Set.mem_iInter]
+      intro v
+      exact ⟨ht.2, ht.1 x v⟩
+    · intro ht
+      refine ⟨?_, ht.1⟩
+      intro x v
+      exact ((Set.mem_iInter.mp (Set.mem_iInter.mp ht.2 x) v)).2]
+  exact isClosed_Icc.inter
+    (isClosed_iInter fun x =>
+      isClosed_iInter fun v =>
+        (hcont x v v).preimage_isClosed_of_isClosed isClosed_Icc isClosed_Ici)
+
+/-- Closed-interval continuation closes the global barrier-limit step once the
+unperturbed tensor evaluations are continuous in time. -/
+private theorem barrierLimitClosure_of_continuous
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorFamily (I := I) (M := M)}
+    {T : Real}
+    (hT : 0 ≤ T)
+    (hcont : ∀ x, ∀ v w : TangentSpace I x,
+      ContinuousOn (fun t : Real => S t x v w) (Set.Icc 0 T)) :
+    TensorBarrierLimitClosureOn (I := I) (M := M) G S T := by
+  intro hinit hstep
+  let P : Set Real := {t : Real | TwoTensorFamilyNonnegativeAtTime (I := I) (M := M) S t}
+  have hclosed : IsClosed (P ∩ Set.Icc 0 T) := by
+    simpa [P] using nonnegativeTime_isClosed (I := I) (M := M) (S := S) hcont
+  have hP : Set.Icc 0 T ⊆ P := by
+    refine hclosed.Icc_subset_of_forall_exists_gt (a := 0) (b := T) ?_ ?_
+    · simpa [P] using hinit
+    · intro t ht y hy
+      have htIcc : t ∈ Set.Icc 0 T := ⟨ht.2.1, le_of_lt ht.2.2⟩
+      obtain ⟨delta, hdelta, _hdeltaT, hbarrier⟩ :=
+        hstep t htIcc ht.2.2 ht.1
+      have hslab : TwoTensorFamilyNonnegativeOn (I := I) (M := M) S
+          (Set.Icc t (t + delta)) :=
+        tensorBarrier_limit_on_fixed_slab (I := I) (M := M)
+          (G := G) (S := S) hdelta hbarrier
+      let z : Real := min y (t + delta)
+      have htz : t < z := by
+        dsimp [z]
+        exact lt_min hy (by linarith)
+      have hz_le_delta : z ≤ t + delta := by
+        dsimp [z]
+        exact min_le_right y (t + delta)
+      have hz_le_y : z ≤ y := by
+        dsimp [z]
+        exact min_le_left y (t + delta)
+      have hzP : P z :=
+        hslab z ⟨le_of_lt htz, hz_le_delta⟩
+      exact ⟨z, hzP, htz, hz_le_y⟩
+  intro t ht
+  exact hP ht
+
 /--
 Regularity package needed for Hamilton's tensor weak maximum principle.
 
@@ -1026,8 +1101,6 @@ structure TensorWMPRegularityOn
         G N (Set.Icc t0 (t0 + delta))) ->
       (d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0) ->
       TensorFirstNullScalarSigns (I := I) (M := M) G S X N epsilon delta t0 d
-  barrierLimitClosure :
-    TensorBarrierLimitClosureOn (I := I) (M := M) G S T
 
 /-- Convert an absolute-value reaction estimate into the one-sided upper bound
 needed in the strict-barrier local estimate. -/
@@ -1443,7 +1516,8 @@ theorem tensor_wmp_of_barrier_limit
     (hnull : TensorNullEigenvectorCondition (I := I) (M := M) G N (Set.Icc 0 T))
     (hinit : TwoTensorFamilyNonnegativeAtTime (I := I) (M := M) S 0) :
     TwoTensorFamilyNonnegativeOn (I := I) (M := M) S (Set.Icc 0 T) := by
-  exact hreg.barrierLimitClosure hinit
+  exact barrierLimitClosure_of_continuous (I := I) (M := M)
+    (G := G) (S := S) _hT hreg.barrierRegularity.tensor_eval_continuous hinit
     (fun t0 ht0 ht0T hinit_t0 =>
       tensorBarrier_nonnegative_on_short_slab (I := I) (M := M)
         (G := G) (S := S) (X := X) (N := N)

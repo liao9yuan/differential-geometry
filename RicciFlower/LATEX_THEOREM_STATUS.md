@@ -525,12 +525,16 @@ if the null-eigenvector condition holds and S(0) >= 0, then S(t) >= 0.
 ```
 
 Status: detailed LaTeX proof; RicciFlower-native
-`Realized.hamilton_tensor_wmp` interface with one explicit analytic frontier.
+`Realized.hamilton_tensor_wmp` interface with the barrier/order/operator
+core proved.  The global barrier-limit closure is now produced from the
+existing time-continuity field by closed-interval continuous induction, not
+stored as a frontier field.
 
 Distance: `4`.
 
-Next target: prove the analytic tensor maximum-principle frontier, or first
-factor it through a general convex-cone/vector-bundle maximum-principle API.
+Next target: prove the remaining analytic producers:
+`metricGainControl`, `TensorFirstNullCompactnessOn`, and
+`TensorFirstNullScalarSigns`.
 
 ### Black Box 7.6, `bb:scalar-strong-mp`
 
