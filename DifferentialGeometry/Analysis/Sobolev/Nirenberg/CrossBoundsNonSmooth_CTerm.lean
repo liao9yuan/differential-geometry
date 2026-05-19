@@ -137,34 +137,13 @@ private lemma aestronglyMeasurable_v_test
 /-! ## Headline non-smooth `c`-term bound -/
 
 set_option linter.unusedVariables false in
-/-- **Non-smooth analogue of `c_term_bound`.**
+/-- **Quantitative non-smooth `c`-term bound.**
 
-For a non-smooth `u : E → ℝ` with `u ∈ L²` and explicit weak partials
-`g i : E → ℝ` (with `g i ∈ L²` and
-`DeGiorgi.HasWeakPartialDeriv i (g i) u Set.univ`), the `c`-term
-
-  `∫_Ω c · u · v_test`,
-
-with `v_test` the standard Nirenberg test function
-`D_{-h}^k(η² · D_h^k u)`, satisfies
-
-  `|∫_Ω c · u · v_test| ≤ ε · ∫ η² · ∑_i (D_h^k g_i)² +
-     C · (∫_{Ω'} ∑_i g_i² + ∫_{Ω'} u²)`,
-
-with `C` independent of `h` (for `|h| ≤ 1`).
-
-Two non-smooth-specific hypotheses are exposed and supplied by callers
-through the standard mollification + Young argument:
-
-* `h_v_test_sq_bound` — the analogue of the smooth `v_test_sq_int_le`,
-  stating
-  `∫ (v_test)² ≤ 8N² · ∫_{tsupp η}(D_h^k u)² + 2 · ∫ η² · (D_h^k g_k)²`.
-* `h_FK_diffQuot_u_bound` — the Fréchet–Kolmogorov bound
-  `∫_{tsupp η}(D_h^k u)² ≤ ∫_{Ω'} ∑_i g_i²`.
-
-Apart from these two non-smooth ingredients, the proof is a mechanical
-transcription of the smooth `c_term_bound`. -/
-theorem c_term_bound_nonsmooth
+The explicit-constant form of `c_term_bound_nonsmooth`: the same
+absorbing inequality with the constant exposed as the closed formula
+`max (4 · ε · N²) (Mc² / (2 · ε))`, where `Mc` is the supremum of
+`|c|` on `closure Ω'`. -/
+theorem c_term_bound_nonsmooth_quantitative
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ}
     (hu_l2 : MemLp u 2 (volume : Measure E))
@@ -194,21 +173,32 @@ theorem c_term_bound_nonsmooth
       ∫ x in tsupport η, (DifferentialGeometry.Analysis.Sobolev.diffQuot k h u x)^2
           ∂(volume : Measure E) ≤
         ∫ x in Ω', ∑ i : Fin d, ((g i) x) ^ 2 ∂(volume : Measure E)) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
+    ∀ ⦃h : ℝ⦄, h ≠ 0 → |h| ≤ R₀ →
       |∫ x in Ω, B.c x * u x *
           DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction
             k h η u x ∂(volume : Measure E)| ≤
         ε * ∫ x, (η x)^2 *
             ∑ i : Fin d, DifferentialGeometry.Analysis.Sobolev.diffQuot k h (g i) x ^ 2
           ∂(volume : Measure E) +
-        C * (∫ x in Ω',
+        (max (4 * ε * N^2)
+            ((Classical.choose
+                (SmoothEllipticBilinearForm.bounded_c_on_compact
+                  (d := d) B hΩ'_compact))^2 / (2 * ε)))
+          * (∫ x in Ω',
               ∑ i : Fin d, ((g i) x) ^ 2
             ∂(volume : Measure E) +
           ∫ x in Ω', (u x)^2 ∂(volume : Measure E)) := by
   classical
   -- Bound the c-coefficient on the compact closure of Ω'.
-  obtain ⟨Mc, hMc_nn, h_Mc⟩ :=
-    SmoothEllipticBilinearForm.bounded_c_on_compact (d := d) B hΩ'_compact
+  set Mc : ℝ := Classical.choose
+    (SmoothEllipticBilinearForm.bounded_c_on_compact (d := d) B hΩ'_compact)
+    with hMc_eq
+  have hMc_nn : 0 ≤ Mc :=
+    (Classical.choose_spec
+      (SmoothEllipticBilinearForm.bounded_c_on_compact (d := d) B hΩ'_compact)).1
+  have h_Mc : ∀ x ∈ closure Ω', |B.c x| ≤ Mc :=
+    (Classical.choose_spec
+      (SmoothEllipticBilinearForm.bounded_c_on_compact (d := d) B hΩ'_compact)).2
   -- Constant C depending on ε, N, Mc but not on h.
   set C : ℝ := max (4 * ε * N^2) (Mc^2 / (2 * ε)) with hC_def
   have hC_nn : 0 ≤ C := by
@@ -216,7 +206,6 @@ theorem c_term_bound_nonsmooth
     refine le_max_of_le_left ?_
     refine mul_nonneg ?_ (sq_nonneg _)
     exact mul_nonneg (by linarith) hε.le
-  refine ⟨C, hC_nn, ?_⟩
   intro h hh hh_le
   have h_thick_in_Ω' : Metric.cthickening |h| (tsupport η) ⊆ Ω' := hh_supp_in_Ω' hh_le
   -- Notation for the test function.
@@ -560,5 +549,91 @@ theorem c_term_bound_nonsmooth
         C * ∫ x in Ω', (u x)^2 ∂(volume : Measure E) := by ring
     linarith
   linarith
+
+set_option linter.unusedVariables false in
+/-- **Non-smooth analogue of `c_term_bound`.**
+
+For a non-smooth `u : E → ℝ` with `u ∈ L²` and explicit weak partials
+`g i : E → ℝ` (with `g i ∈ L²` and
+`DeGiorgi.HasWeakPartialDeriv i (g i) u Set.univ`), the `c`-term
+
+  `∫_Ω c · u · v_test`,
+
+with `v_test` the standard Nirenberg test function
+`D_{-h}^k(η² · D_h^k u)`, satisfies
+
+  `|∫_Ω c · u · v_test| ≤ ε · ∫ η² · ∑_i (D_h^k g_i)² +
+     C · (∫_{Ω'} ∑_i g_i² + ∫_{Ω'} u²)`,
+
+with `C` independent of `h` (for `|h| ≤ 1`).
+
+Two non-smooth-specific hypotheses are exposed and supplied by callers
+through the standard mollification + Young argument:
+
+* `h_v_test_sq_bound` — the analogue of the smooth `v_test_sq_int_le`,
+  stating
+  `∫ (v_test)² ≤ 8N² · ∫_{tsupp η}(D_h^k u)² + 2 · ∫ η² · (D_h^k g_k)²`.
+* `h_FK_diffQuot_u_bound` — the Fréchet–Kolmogorov bound
+  `∫_{tsupp η}(D_h^k u)² ≤ ∫_{Ω'} ∑_i g_i²`.
+
+Apart from these two non-smooth ingredients, the proof is a mechanical
+transcription of the smooth `c_term_bound`.
+
+This is the existential packaging of `c_term_bound_nonsmooth_quantitative`,
+which exposes `C` as an explicit formula. -/
+theorem c_term_bound_nonsmooth
+    {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
+    {u : E → ℝ}
+    (hu_l2 : MemLp u 2 (volume : Measure E))
+    {g : Fin d → E → ℝ}
+    (hg_l2 : ∀ i, MemLp (g i) 2 (volume : Measure E))
+    (h_weakPartial : ∀ i, DeGiorgi.HasWeakPartialDeriv (d := d) i (g i) u Set.univ)
+    {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
+    (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1)
+    {N : ℝ} (hN : 0 ≤ N) (h_fderiv_eta : ∀ x : E, ‖fderiv ℝ η x‖ ≤ N)
+    {Ω' : Set E} (hΩ' : IsOpen Ω') (hΩ'_closure : closure Ω' ⊆ Ω)
+    (hΩ'_compact : IsCompact (closure Ω'))
+    (hη_in_Ω' : tsupport η ⊆ Ω')
+    {R₀ : ℝ}
+    (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ R₀ →
+      Metric.cthickening |h| (tsupport η) ⊆ Ω')
+    (k : Fin d) (ε : ℝ) (hε : 0 < ε)
+    (h_v_test_sq_bound : ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
+      ∫ x, (DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction
+          k h η u x)^2 ∂(volume : Measure E) ≤
+        8 * N^2 *
+          ∫ x in tsupport η, (DifferentialGeometry.Analysis.Sobolev.diffQuot k h u x)^2
+            ∂(volume : Measure E) +
+        2 * ∫ x, (η x)^2 *
+            (DifferentialGeometry.Analysis.Sobolev.diffQuot k h (g k) x)^2
+          ∂(volume : Measure E))
+    (h_FK_diffQuot_u_bound : ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
+      ∫ x in tsupport η, (DifferentialGeometry.Analysis.Sobolev.diffQuot k h u x)^2
+          ∂(volume : Measure E) ≤
+        ∫ x in Ω', ∑ i : Fin d, ((g i) x) ^ 2 ∂(volume : Measure E)) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
+      |∫ x in Ω, B.c x * u x *
+          DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.nirenbergTestFunction
+            k h η u x ∂(volume : Measure E)| ≤
+        ε * ∫ x, (η x)^2 *
+            ∑ i : Fin d, DifferentialGeometry.Analysis.Sobolev.diffQuot k h (g i) x ^ 2
+          ∂(volume : Measure E) +
+        C * (∫ x in Ω',
+              ∑ i : Fin d, ((g i) x) ^ 2
+            ∂(volume : Measure E) +
+          ∫ x in Ω', (u x)^2 ∂(volume : Measure E)) := by
+  classical
+  refine ⟨max (4 * ε * N^2)
+      ((Classical.choose
+          (SmoothEllipticBilinearForm.bounded_c_on_compact
+            (d := d) B hΩ'_compact))^2 / (2 * ε)), ?_, ?_⟩
+  · refine le_max_of_le_left ?_
+    refine mul_nonneg ?_ (sq_nonneg _)
+    exact mul_nonneg (by linarith) hε.le
+  · intro h hh hh_le
+    exact c_term_bound_nonsmooth_quantitative (d := d) B hu_l2 hg_l2
+      h_weakPartial hη hη_supp hη_range hN h_fderiv_eta hΩ' hΩ'_closure
+      hΩ'_compact hη_in_Ω' hh_supp_in_Ω' k ε hε h_v_test_sq_bound
+      h_FK_diffQuot_u_bound hh hh_le
 
 end DifferentialGeometry.Analysis.Sobolev.NirenbergCrossBoundsNonSmooth

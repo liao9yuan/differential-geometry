@@ -633,28 +633,13 @@ private lemma gradL2sqOn_nonsmooth_nonneg
 /-! ## Headline non-smooth Cross_1 bound -/
 
 set_option linter.unusedVariables false in
-/-- **Non-smooth analogue of `cross_1_bound`.**
+/-- **Quantitative non-smooth Cross_1 bound.**
 
-For a non-smooth `u : E → ℝ` with `u ∈ L²` and explicit weak partials
-`g i : E → ℝ` (with `g i ∈ L²` and
-`DeGiorgi.HasWeakPartialDeriv i (g i) u Set.univ`), the first cross
-term
-
-  `S' := ∑_{i,j} ∫ 2 · (translate k h B.a_{ij}) · η · ∂_j η ·
-            (diffQuot k h g_i) · (diffQuot k h u)`
-
-is bounded by
-
-  `ε · ∫ η² ∑_i (diffQuot k h g_i)² + C · ∫_{Ω'} ∑_i g_i²`,
-
-with `C` independent of `h` (for `|h| ≤ 1`). The Fréchet–Kolmogorov
-bound
-
-  `∫_{tsupport η} (D_h^k u)² ≤ ∫_{Ω'} ∑_i g_i²`
-
-is taken as an explicit hypothesis `h_FK_diffQuot_u_bound`; downstream
-callers supply it via the standard mollification + Young argument. -/
-theorem cross_1_bound_nonsmooth
+The explicit-constant form of `cross_1_bound_nonsmooth`: the same
+absorbing inequality with the constant exposed as the closed formula
+`(1 / (ε / d)) · Λ² · N² · d²`, where `d = Fintype.card (Fin d)` and
+`Λ` is the supremum of `|a^{ij}|` on `closure Ω'`. -/
+theorem cross_1_bound_nonsmooth_quantitative
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ}
     (hu_l2 : MemLp u 2 (volume : Measure E))
@@ -674,7 +659,7 @@ theorem cross_1_bound_nonsmooth
       ∫ x in tsupport η, (diffQuot k h u x)^2 ∂(volume : Measure E) ≤
         ∫ x in Ω', ∑ i : Fin d, ((g i) x) ^ 2 ∂(volume : Measure E))
     (ε : ℝ) (hε : 0 < ε) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
+    ∀ ⦃h : ℝ⦄, h ≠ 0 → |h| ≤ R₀ →
       |- ∑ i : Fin d, ∑ j : Fin d, ∫ x, 2 *
             (DifferentialGeometry.Analysis.Sobolev.translate k h
               (fun y : E => B.a y i j)) x *
@@ -687,13 +672,24 @@ theorem cross_1_bound_nonsmooth
             ∑ i : Fin d,
               DifferentialGeometry.Analysis.Sobolev.diffQuot k h (g i) x ^ 2
           ∂(volume : Measure E) +
-        C * ∫ x in Ω',
+        ((1 / (ε / (Fintype.card (Fin d) : ℝ)))
+            * (Classical.choose
+                (SmoothEllipticBilinearForm.bounded_a_on_compact
+                  (d := d) B hΩ'_compact))^2
+            * N^2 * (Fintype.card (Fin d) : ℝ)^2) * ∫ x in Ω',
             ∑ i : Fin d, ((g i) x) ^ 2
           ∂(volume : Measure E) := by
   classical
   -- Constant Λ bounding |a^{ij}| on closure Ω'.
-  obtain ⟨Λ, hΛ_nn, hΛ⟩ :=
-    SmoothEllipticBilinearForm.bounded_a_on_compact (d := d) B hΩ'_compact
+  set Λ : ℝ := Classical.choose
+    (SmoothEllipticBilinearForm.bounded_a_on_compact (d := d) B hΩ'_compact)
+    with hΛ_eq
+  have hΛ_nn : 0 ≤ Λ :=
+    (Classical.choose_spec
+      (SmoothEllipticBilinearForm.bounded_a_on_compact (d := d) B hΩ'_compact)).1
+  have hΛ : ∀ i j : Fin d, ∀ x ∈ closure Ω', |B.a x i j| ≤ Λ :=
+    (Classical.choose_spec
+      (SmoothEllipticBilinearForm.bounded_a_on_compact (d := d) B hΩ'_compact)).2
   set d_real : ℝ := (Fintype.card (Fin d) : ℝ) with hd_real
   have hd_pos : 0 < d_real := by
     rw [hd_real]; exact_mod_cast Fintype.card_pos
@@ -705,7 +701,6 @@ theorem cross_1_bound_nonsmooth
     refine mul_nonneg (mul_nonneg (mul_nonneg ?_ (sq_nonneg _)) (sq_nonneg _))
       (sq_nonneg _)
     exact (one_div_pos.mpr hε'_pos).le
-  refine ⟨C, hC_nn, ?_⟩
   intro h hh hh_le
   have h_thick_in_Ω' : Metric.cthickening |h| (tsupport η) ⊆ Ω' := hh_supp_in_Ω' hh_le
   have h_each_pointwise := fun (i j : Fin d) (x : E) =>
@@ -936,5 +931,83 @@ theorem cross_1_bound_nonsmooth
     refine mul_le_mul_of_nonneg_left h_diffQuot_sq_le ?_
     rw [h_C_eq]; exact mul_nonneg h_d_real_sq_nn h_factor_nn
   linarith
+
+set_option linter.unusedVariables false in
+/-- **Non-smooth analogue of `cross_1_bound`.**
+
+For a non-smooth `u : E → ℝ` with `u ∈ L²` and explicit weak partials
+`g i : E → ℝ` (with `g i ∈ L²` and
+`DeGiorgi.HasWeakPartialDeriv i (g i) u Set.univ`), the first cross
+term
+
+  `S' := ∑_{i,j} ∫ 2 · (translate k h B.a_{ij}) · η · ∂_j η ·
+            (diffQuot k h g_i) · (diffQuot k h u)`
+
+is bounded by
+
+  `ε · ∫ η² ∑_i (diffQuot k h g_i)² + C · ∫_{Ω'} ∑_i g_i²`,
+
+with `C` independent of `h` (for `|h| ≤ 1`). The Fréchet–Kolmogorov
+bound
+
+  `∫_{tsupport η} (D_h^k u)² ≤ ∫_{Ω'} ∑_i g_i²`
+
+is taken as an explicit hypothesis `h_FK_diffQuot_u_bound`; downstream
+callers supply it via the standard mollification + Young argument.
+
+This is the existential packaging of `cross_1_bound_nonsmooth_quantitative`,
+which exposes `C` as an explicit formula. -/
+theorem cross_1_bound_nonsmooth
+    {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
+    {u : E → ℝ}
+    (hu_l2 : MemLp u 2 (volume : Measure E))
+    {g : Fin d → E → ℝ}
+    (hg_l2 : ∀ i, MemLp (g i) 2 (volume : Measure E))
+    (h_weakPartial : ∀ i, DeGiorgi.HasWeakPartialDeriv (d := d) i (g i) u Set.univ)
+    {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
+    (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1)
+    {N : ℝ} (hN : 0 ≤ N) (h_fderiv_eta : ∀ x : E, ‖fderiv ℝ η x‖ ≤ N)
+    {Ω' : Set E} (hΩ' : IsOpen Ω') (hΩ'_closure : closure Ω' ⊆ Ω)
+    (hΩ'_compact : IsCompact (closure Ω'))
+    {R₀ : ℝ}
+    (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ R₀ →
+      Metric.cthickening |h| (tsupport η) ⊆ Ω')
+    (k : Fin d)
+    (h_FK_diffQuot_u_bound : ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
+      ∫ x in tsupport η, (diffQuot k h u x)^2 ∂(volume : Measure E) ≤
+        ∫ x in Ω', ∑ i : Fin d, ((g i) x) ^ 2 ∂(volume : Measure E))
+    (ε : ℝ) (hε : 0 < ε) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ {h : ℝ}, h ≠ 0 → |h| ≤ R₀ →
+      |- ∑ i : Fin d, ∑ j : Fin d, ∫ x, 2 *
+            (DifferentialGeometry.Analysis.Sobolev.translate k h
+              (fun y : E => B.a y i j)) x *
+            (η x) *
+            ((fderiv ℝ η x) (EuclideanSpace.single j 1)) *
+            DifferentialGeometry.Analysis.Sobolev.diffQuot k h (g i) x *
+            DifferentialGeometry.Analysis.Sobolev.diffQuot k h u x
+          ∂(volume : Measure E)| ≤
+        ε * ∫ x, (η x)^2 *
+            ∑ i : Fin d,
+              DifferentialGeometry.Analysis.Sobolev.diffQuot k h (g i) x ^ 2
+          ∂(volume : Measure E) +
+        C * ∫ x in Ω',
+            ∑ i : Fin d, ((g i) x) ^ 2
+          ∂(volume : Measure E) := by
+  classical
+  refine ⟨(1 / (ε / (Fintype.card (Fin d) : ℝ)))
+      * (Classical.choose
+          (SmoothEllipticBilinearForm.bounded_a_on_compact
+            (d := d) B hΩ'_compact))^2
+      * N^2 * (Fintype.card (Fin d) : ℝ)^2, ?_, ?_⟩
+  · have hd_pos : (0 : ℝ) < (Fintype.card (Fin d) : ℝ) := by
+      exact_mod_cast Fintype.card_pos
+    have hε'_pos : 0 < ε / (Fintype.card (Fin d) : ℝ) := div_pos hε hd_pos
+    refine mul_nonneg (mul_nonneg (mul_nonneg ?_ (sq_nonneg _)) (sq_nonneg _))
+      (sq_nonneg _)
+    exact (one_div_pos.mpr hε'_pos).le
+  · intro h hh hh_le
+    exact cross_1_bound_nonsmooth_quantitative (d := d) B hu_l2 hg_l2
+      h_weakPartial hη hη_supp hη_range hN h_fderiv_eta hΩ' hΩ'_closure
+      hΩ'_compact hh_supp_in_Ω' k h_FK_diffQuot_u_bound ε hε hh hh_le
 
 end DifferentialGeometry.Analysis.Sobolev.NirenbergCrossBoundsNonSmooth
