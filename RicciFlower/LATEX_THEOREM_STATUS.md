@@ -528,12 +528,57 @@ Status: detailed LaTeX proof; RicciFlower-native
 `Realized.hamilton_tensor_wmp` interface with the barrier/order/operator
 core proved.  The global barrier-limit closure is now produced from the
 existing time-continuity field by closed-interval continuous induction, not
-stored as a frontier field.
+stored as a frontier field.  The first-null compactness extraction is also
+proved for section-backed barriers in the geometric time-slab form as
+`TensorFirstNullCompactnessOn.of_section_timeSlab`, assuming compactness of
+`MetricUnitTangentTimeSlab` and continuity of `barrierTimeSlabQuad` there.
+That continuity is now produced by `barrierTimeCont` from the transparent
+scalar-evaluation inputs `metricBundleQuad` and `tensorSecBundleQuad`.
+The time-slab compactness route has also been reduced in
+`QuadraticBounds.lean`: `metricUnitTimeSlabParam_surjective` and
+`metricUnitTimeSlab_compact_of_param_cont` reduce it to compactness of a fixed
+reference-unit source and continuity of the normalization map.  The closed
+interval source-compactness and scalar normalization coefficient continuity are
+now packaged by `metricUnitTimeSlab_icc_compact_of_param_cont` and
+`metricUnitTimeSlabScale_cont_of_bundle`; the remaining normalization issue is
+continuity of the scaled tangent-bundle component.
+That normalization issue is now closed in `QuadraticBounds.lean` by
+`tangentBundle_smul_cont`,
+`metricUnitTimeSlabScaledBundle_cont_of_bundle`, and
+`metricUnitTimeSlab_icc_compact_of_bundle`.  The section-backed public
+regularity constructor `TensorWMPSectionReg.ofCompact` uses this compactness
+producer, so smooth two-tensor-section callers no longer need to pass
+unit-slab compactness separately once they have metric/tensor quadratic
+continuity.
+The section-backed public wrapper
+`Realized.hamilton_tensor_wmp_section` now routes those transparent inputs
+through `TensorWMPSectionReg.toRaw`, so smooth two-tensor-section callers no
+longer need to supply the raw first-null compactness package directly.
+The scalar continuity wiring is one layer sharper:
+`metricFamQuadCont` and `tensorQuadCont` turn total-space continuity of the
+time-dependent metric/two-tensor sections over a compact test slab into the
+required scalar quadratic continuities, and `TensorWMPSectionReg.ofTotal`
+packages this as the preferred section-backed regularity constructor.
+The metric-gain route is also now geometric-time-slab based:
+`compactUnitTimeSlab_absBound` and `metricGainAt_of_totalCont` produce the
+fixed-start half-gain package from transparent total-space continuity and
+regular-time metric-variation derivative inputs on `Set.Ioc` local slabs,
+rather than from the old dependent-sigma unit slab.  The ambient derivative set
+is still the closed test slab, and the conclusion remains closed-slab
+nonnegativity, but no derivative is requested at the local left endpoint.
+`metricGainControl_of_metricVariation` packages those local inputs into the
+exact `metricGainControl` field shape used by the WMP barrier regularity
+package.  The interval-level bridge is now checked as
+`metricGainControl_of_metricVariationOn`, and the closed-open solution-interval
+wrapper `metricGainControl_of_metricVariationOn_closedOpen` shows that finite
+test slabs inside `[0, omega)` do not require a left-endpoint derivative.
 
-Distance: `4`.
+Distance: `3`.
 
-Next target: prove the remaining analytic producers:
-`metricGainControl`, `TensorFirstNullCompactnessOn`, and
+Next target: prove the remaining analytic/geometric producers:
+total-space continuity of the time-dependent metric and metric-variation
+two-tensor sections from the eventual smooth family API, the pointwise
+identification of the metric-variation tensor with `-2 Ric`, and
 `TensorFirstNullScalarSigns`.
 
 ### Black Box 7.6, `bb:scalar-strong-mp`
@@ -712,15 +757,18 @@ RicciFlower's `Rm04(W,X,Y,Z)` lowers the output slot first, so the actual
 `stdRmDiag3 (-l1) (-l2) (-l3)`.  The new `curv3_frame_neg` /
 `canon3_frame_neg` bridge records the corrected result: the canonical
 Section 6 reaction agrees with `+ricciReact3`, matching `tfRel_eigen`.
-The theorem `tfHeat_sec6` now consumes the canonical Section 6 Ricci-norm heat
-equation directly; the heat equation and reaction relation are conditional on
-nonzero scalar curvature, matching the book's `R > 0` domain.
+The theorem `tfHeat_sec6` consumes the canonical Section 6 Ricci-norm heat
+equation directly, and the newer `tfRel_frame` / `tfHeat_frame` pair feeds the
+convention-correct diagonal eigenframe hypotheses into this route without a
+manual `tfRicReactRel` assumption.  The heat equation and reaction relation are
+conditional on nonzero scalar curvature, matching the book's `R > 0` domain.
 
-Distance: `2`.
+Distance: `1`.
 
-Next target: feed `canon3_frame_neg` into the Section 10 heat-equation wrapper
-by producing the actual eigenframe and Riemann-from-Ricci component hypotheses.
-The scalar-square Laplacian, diagonal finite sums, sign bridge, and Section 6
+Next target: produce the actual Ricci orthonormal eigenframe component package
+feeding `tfHeat_frame`, including scalar/norm/cubic component identifications
+and the convention-correct 3D Riemann-from-Ricci component hypothesis.  The
+scalar-square Laplacian, diagonal finite sums, sign bridge, and Section 6
 heat-equation assembly are no longer expected frontiers.
 
 ### Lemma 10.5, `lem:quotient-evolution`

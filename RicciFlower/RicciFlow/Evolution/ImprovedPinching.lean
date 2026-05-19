@@ -404,6 +404,72 @@ theorem canon3_frame_neg
     curv3_frame_neg (I := I) S Rm04 gInv frame t x l1 l2 l3 hInv hRic hRm]
   ring
 
+/-- Reaction relation from a convention-correct diagonal Ricci eigenframe.
+
+This is the Section 10 bridge from the canonical Section 6 reaction term to
+the eigenvalue algebra `tfRel_eigen`. -/
+theorem tfRel_frame
+    {D : Realized.RealTimeInterval}
+    [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D)
+    (Rm04 : Real -> Realized.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> Realized.InverseMetricComponents M (Fin 3))
+    (frame : Fin 3 -> (x : M) -> TangentSpace I x)
+    (scalar ricciTraceCube : Real -> M -> Real)
+    (l1 l2 l3 : Real -> M -> Real)
+    (hscalar : ∀ t x,
+      scalar t x =
+        DimensionThree.ricciEigenScalar3 (l1 t x) (l2 t x) (l3 t x))
+    (hcube : ∀ t x,
+      ricciTraceCube t x =
+        DimensionThree.ricciEigenTraceCube3 (l1 t x) (l2 t x) (l3 t x))
+    (hInv : ∀ (t : Real) (x : M) (i j : Fin 3),
+      gInv t x i j = DimensionThree.delta3 i j)
+    (hRic : ∀ (t : Real) (x : M) (i j : Fin 3),
+      ricciCompInFrame (I := I) S frame t x i j =
+        DimensionThree.ricciDiag3 (l1 t x) (l2 t x) (l3 t x) i j)
+    (hRm : ∀ (t : Real) (x : M) (i j k l : Fin 3),
+      Realized.rm04Comp (I := I) (Rm04 t) frame x i k j l =
+        DimensionThree.stdRmDiag3 (-(l1 t x)) (-(l2 t x)) (-(l3 t x))
+          k j l i) :
+    tfRicReactRel
+      scalar
+      (ricciNormSqInFrame (I := I) S gInv frame)
+      (tfRicNormSq scalar (ricciNormSqInFrame (I := I) S gInv frame))
+      (cubicQ scalar (ricciNormSqInFrame (I := I) S gInv frame)
+        ricciTraceCube)
+      (ricciNormCurvatureReactionInFrame (I := I) S Rm04 gInv frame) := by
+  classical
+  refine tfRel_from_eigen
+    (M := M)
+    scalar (ricciNormSqInFrame (I := I) S gInv frame) ricciTraceCube
+    (ricciNormCurvatureReactionInFrame (I := I) S Rm04 gInv frame)
+    l1 l2 l3 hscalar ?_ hcube ?_
+  · intro t x
+    have hRicAt : ∀ i j : Fin 3,
+        S.base.ricciAt t x (Realized.vec2 (frame i x) (frame j x)) =
+          DimensionThree.ricciDiag3 (l1 t x) (l2 t x) (l3 t x) i j := by
+      intro i j
+      simpa [ricciCompInFrame] using hRic t x i j
+    have hraised : ∀ i j : Fin 3,
+        raisedRicciCompInFrame (I := I) S gInv frame t x i j =
+          DimensionThree.ricciDiag3 (l1 t x) (l2 t x) (l3 t x) i j := by
+      intro i j
+      unfold raisedRicciCompInFrame
+      fin_cases i <;> fin_cases j <;>
+        simp [Fin.sum_univ_three, hInv t x, hRicAt, DimensionThree.delta3,
+          DimensionThree.ricciDiag3]
+    unfold ricciNormSqInFrame
+    simp_rw [hRic t x]
+    simp_rw [hraised]
+    unfold DimensionThree.ricciEigenNormSq3 DimensionThree.ricciDiag3
+    simp [Fin.sum_univ_three]
+    ring
+  · intro t x
+    exact canon3_frame_neg (I := I) S Rm04 gInv frame t x
+      (l1 t x) (l2 t x) (l3 t x)
+      (hInv t x) (hRic t x) (hRm t x)
+
 /-- The scalar Laplacian expected for the square of scalar curvature:
 `Δ(R²) = 2 R ΔR + 2 |∇R|²`. -/
 def scalarSqLap
@@ -773,6 +839,73 @@ theorem tfHeat_sec6
       (I := I) S Rm04 gInv frame roughLapRic ricciNormLap nablaRic
       h_inv h_ricci hInvSym hRicSym h_lap)
     hRel
+
+/-- Section 10.4 from Section 6 heat equations and a convention-correct
+diagonal 3D Ricci eigenframe. -/
+theorem tfHeat_frame
+    {D : Realized.RealTimeInterval}
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D)
+    (Rm04 : Real -> Realized.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> Realized.InverseMetricComponents M (Fin 3))
+    (frame : Fin 3 -> (x : M) -> TangentSpace I x)
+    (roughLapRic : Real -> M -> Fin 3 -> Fin 3 -> Real)
+    (ricciNormLap : Real -> M -> Real)
+    (nablaRic : Real -> M -> Fin 3 -> Fin 3 -> Fin 3 -> Real)
+    (scalar scalarLap gradScalarNormSq ricciTraceCube : Real -> M -> Real)
+    (l1 l2 l3 : Real -> M -> Real)
+    (hscalarHeat : ScalarEvolutionEquationOn
+      (D := D) scalar scalarLap
+      (ricciNormSqInFrame (I := I) S gInv frame))
+    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame)
+    (h_ricci : RicciEvolutionEquationInFrame
+      (I := I) S Rm04 gInv frame roughLapRic)
+    (h_lap : Realized.RicciNormScalarLaplacianExpansionInFrame
+      (I := I) (M := M) (Time := Real) ricciNormLap roughLapRic
+      (ricciTwoTensorField (I := I) S) gInv frame nablaRic)
+    (hscalar : ∀ t x,
+      scalar t x =
+        DimensionThree.ricciEigenScalar3 (l1 t x) (l2 t x) (l3 t x))
+    (hcube : ∀ t x,
+      ricciTraceCube t x =
+        DimensionThree.ricciEigenTraceCube3 (l1 t x) (l2 t x) (l3 t x))
+    (hInv : ∀ (t : Real) (x : M) (i j : Fin 3),
+      gInv t x i j = DimensionThree.delta3 i j)
+    (hRic : ∀ (t : Real) (x : M) (i j : Fin 3),
+      ricciCompInFrame (I := I) S frame t x i j =
+        DimensionThree.ricciDiag3 (l1 t x) (l2 t x) (l3 t x) i j)
+    (hRm : ∀ (t : Real) (x : M) (i j k l : Fin 3),
+      Realized.rm04Comp (I := I) (Rm04 t) frame x i k j l =
+        DimensionThree.stdRmDiag3 (-(l1 t x)) (-(l2 t x)) (-(l3 t x))
+          k j l i) :
+    tfRicHeatOn
+      (D := D)
+      (tfRicNormSq scalar (ricciNormSqInFrame (I := I) S gInv frame))
+      (tfLap scalar scalarLap gradScalarNormSq ricciNormLap)
+      (nablaRicciNormSqInFrame (M := M) nablaRic gInv)
+      gradScalarNormSq scalar
+      (ricciNormSqInFrame (I := I) S gInv frame)
+      (cubicQ scalar (ricciNormSqInFrame (I := I) S gInv frame)
+        ricciTraceCube) := by
+  classical
+  have hInvSym : ∀ t x i j, gInv t x i j = gInv t x j i := by
+    intro t x i j
+    rw [hInv t x i j, hInv t x j i]
+    fin_cases i <;> fin_cases j <;> simp [DimensionThree.delta3]
+  have hRicSym : ∀ t x i j,
+      ricciCompInFrame (I := I) S frame t x i j =
+        ricciCompInFrame (I := I) S frame t x j i := by
+    intro t x i j
+    rw [hRic t x i j, hRic t x j i]
+    fin_cases i <;> fin_cases j <;> simp [DimensionThree.ricciDiag3]
+  exact tfHeat_sec6
+    (I := I) S Rm04 gInv frame roughLapRic ricciNormLap nablaRic
+    scalar scalarLap gradScalarNormSq
+    (cubicQ scalar (ricciNormSqInFrame (I := I) S gInv frame)
+      ricciTraceCube)
+    hscalarHeat h_inv h_ricci hInvSym hRicSym h_lap
+    (tfRel_frame (I := I) S Rm04 gInv frame scalar ricciTraceCube
+      l1 l2 l3 hscalar hcube hInv hRic hRm)
 
 end RicciFlow
 end RicciFlower

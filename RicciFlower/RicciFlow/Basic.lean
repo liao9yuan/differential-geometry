@@ -39,6 +39,7 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 /-! ## Ricci-flow solutions as metric families -/
 
@@ -585,20 +586,32 @@ theorem isSolutionOn_timeShift
     (hS : IsSolutionOn (I := I) S) (τ : Real) :
     IsSolutionOn (I := I) (S.timeShift τ) where
   smoothMetric := by
-    intro x X Y
-    have hOld := hS.smoothMetric x X Y
-    have haff : ContDiff Real ⊤ (fun s : Real => s + τ) :=
-      contDiff_id.add contDiff_const
-    have hmaps :
-        Set.MapsTo (fun s : Real => s + τ) (D.timeShift τ).carrier D.carrier := by
-      intro s hs
-      exact hs
-    have hcomp :
-        ContDiffOn Real ⊤
-          (fun s : Real => (S.family.metric (s + τ)).inner x X Y)
-          (D.timeShift τ).carrier := by
-      simpa [Function.comp_def] using hOld.comp haff.contDiffOn hmaps
-    simpa [SolutionOn.family, SolutionOn.timeShift, SolutionFamily.timeShift] using hcomp
+    constructor
+    · intro x X Y
+      have hOld := hS.smoothMetric.coeff x X Y
+      have haff : ContDiff Real ⊤ (fun s : Real => s + τ) :=
+        contDiff_id.add contDiff_const
+      have hmaps :
+          Set.MapsTo (fun s : Real => s + τ) (D.timeShift τ).carrier D.carrier := by
+        intro s hs
+        exact hs
+      have hcomp :
+          ContDiffOn Real ⊤
+            (fun s : Real => (S.family.metric (s + τ)).inner x X Y)
+            (D.timeShift τ).carrier := by
+        simpa [Function.comp_def] using hOld.comp haff.contDiffOn hmaps
+      simpa [SolutionOn.family, SolutionOn.timeShift, SolutionFamily.timeShift] using hcomp
+    · have hmaps :
+          Set.MapsTo (fun s : Real => s + τ) (D.timeShift τ).carrier D.carrier := by
+        intro s hs
+        exact hs
+      have htime : Continuous (fun s : Real => s + τ) :=
+        (continuous_id.add continuous_const)
+      have hcont :=
+        Realized.Tensor0SFamilyContinuousOnSet.comp_time (I := I) (M := M)
+          hS.smoothMetric.metricTensor_cont htime hmaps
+      simpa [SolutionOn.family, SolutionOn.timeShift, SolutionFamily.timeShift]
+        using hcont
   smoothConnection := by
     intro t
     let t' : Realized.RealTimeInterval.FlowTime D := ⟨(t : Real) + τ, t.2⟩

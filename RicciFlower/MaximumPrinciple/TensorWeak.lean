@@ -1,6 +1,7 @@
 import RicciFlower.Realized.Curvature
 import RicciFlower.Realized.TensorOperators
 import RicciFlower.Tensor.RSTensor.MetricCompatibility
+import RicciFlower.Tensor.RSTensor.QuadraticBounds
 import RicciFlower.Metric.Basic
 import Mathlib.Analysis.Calculus.Deriv.Basic
 import Mathlib.Topology.Order.IntermediateValue
@@ -182,6 +183,501 @@ theorem tensorBarrierSec_apply
     norm_num
   rw [h0, h1]
 
+private theorem eval02_sec_eq
+    (S : TwoTensorSecFamily (I := I) (M := M))
+    (t : Real) (x : M) (v w : TangentSpace I x) :
+    eval02 (I := I) (M := M) (S t x) v w =
+      twoTensorSecToFamily (I := I) (M := M) S t x v w := by
+  rfl
+
+private theorem quad02_sec_eq
+    (S : TwoTensorSecFamily (I := I) (M := M))
+    (t : Real) (x : M) (v : TangentSpace I x) :
+    quad02 (I := I) (M := M) (S t x) v =
+      twoTensorSecToFamily (I := I) (M := M) S t x v v := by
+  calc
+    quad02 (I := I) (M := M) (S t x) v =
+        eval02 (I := I) (M := M) (S t x) v v := by
+          rw [eval02_self]
+    _ = twoTensorSecToFamily (I := I) (M := M) S t x v v :=
+          eval02_sec_eq (I := I) (M := M) S t x v v
+
+/-- The positive metric barrier preserves pointwise symmetry. -/
+theorem barrierSymmAt
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorFamily (I := I) (M := M)}
+    {epsilon delta t0 t : Real} {x : M}
+    (hS : TwoTensorSymmetricAt (I := I) (M := M) (S t) x) :
+    TwoTensorSymmetricAt (I := I) (M := M)
+      (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t) x := by
+  intro v w
+  simp [tensorBarrierFamily, hS v w, (G t).symm x v w]
+
+private theorem vec2_self_eq_const {x : M} (v : TangentSpace I x) :
+    vec2 (I := I) v v = fun _ : Fin 2 => v := by
+  funext i
+  fin_cases i <;> simp [vec2, Curvature.vec2]
+
+/-- Section-backed barriers are quadratic in the repeated tangent vector. -/
+theorem barrierSec_smul2
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorSecFamily (I := I) (M := M))
+    (epsilon delta t0 t : Real) (x : M) (a : Real)
+    (v : TangentSpace I x) :
+    twoTensorSecToFamily (I := I) (M := M)
+        (tensorBarrierSecFamily (I := I) (M := M) G S epsilon delta t0)
+        t x (a • v) (a • v) =
+      a * a *
+        twoTensorSecToFamily (I := I) (M := M)
+          (tensorBarrierSecFamily (I := I) (M := M) G S epsilon delta t0)
+          t x v v := by
+  have hscale := tensor02_smul2 (I := I) (M := M)
+    ((tensorBarrierSecFamily (I := I) (M := M) G S epsilon delta t0) t x)
+    a v
+  simpa [quad02, twoTensorSecToFamily, vec2_self_eq_const] using hscale
+
+/-- A section-backed raw barrier keeps the same quadratic scaling. -/
+theorem barrierFamily_smul2
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorSecFamily (I := I) (M := M))
+    (epsilon delta t0 t : Real) (x : M) (a : Real)
+    (v : TangentSpace I x) :
+    tensorBarrierFamily (I := I) (M := M) G
+        (twoTensorSecToFamily (I := I) (M := M) S)
+        epsilon delta t0 t x (a • v) (a • v) =
+      a * a *
+        tensorBarrierFamily (I := I) (M := M) G
+          (twoTensorSecToFamily (I := I) (M := M) S)
+          epsilon delta t0 t x v v := by
+  rw [← tensorBarrierSec_apply (I := I) (M := M) G S epsilon delta t0 t x
+      (a • v) (a • v),
+    ← tensorBarrierSec_apply (I := I) (M := M) G S epsilon delta t0 t x v v]
+  exact barrierSec_smul2 (I := I) (M := M) G S epsilon delta t0 t x a v
+
+/-- A negative section-backed barrier value can be normalized to a metric-unit
+tangent vector at the same time and base point. -/
+theorem negBarrier_unit
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorSecFamily (I := I) (M := M))
+    (epsilon delta t0 t : Real) (x : M) (v : TangentSpace I x)
+    (hneg :
+      tensorBarrierFamily (I := I) (M := M) G
+        (twoTensorSecToFamily (I := I) (M := M) S)
+        epsilon delta t0 t x v v < 0) :
+    ∃ u : TangentSpace I x,
+      (G t).inner x u u = 1 ∧
+      tensorBarrierFamily (I := I) (M := M) G
+        (twoTensorSecToFamily (I := I) (M := M) S)
+        epsilon delta t0 t x u u < 0 := by
+  let B : TwoTensorFamily (I := I) (M := M) :=
+    tensorBarrierFamily (I := I) (M := M) G
+      (twoTensorSecToFamily (I := I) (M := M) S) epsilon delta t0
+  have hv : v ≠ 0 := by
+    intro hv0
+    have hzero : B t x (0 : TangentSpace I x) (0 : TangentSpace I x) = 0 := by
+      have hscale := barrierFamily_smul2 (I := I) (M := M)
+        G S epsilon delta t0 t x 0 (0 : TangentSpace I x)
+      simpa [B] using hscale
+    have hnegB : B t x v v < 0 := by
+      simpa [B] using hneg
+    have hvzero : B t x v v = 0 := by
+      simpa [hv0] using hzero
+    rw [hvzero] at hnegB
+    linarith
+  let r : Real := (G t).inner x v v
+  have hrpos : 0 < r := (G t).pos x v hv
+  let s : Real := Real.sqrt r
+  have hspos : 0 < s := Real.sqrt_pos.mpr hrpos
+  have hsne : s ≠ 0 := ne_of_gt hspos
+  let a : Real := s⁻¹
+  let u : TangentSpace I x := a • v
+  have hss : s * s = r := by
+    simpa [sq] using (Real.sq_sqrt (le_of_lt hrpos))
+  have hunit : (G t).inner x u u = 1 := by
+    have haa : a * a * r = 1 := by
+      have hmul : (s * s) * (s⁻¹ * s⁻¹) = 1 := by
+        field_simp [hsne]
+      calc
+        a * a * r = (s⁻¹ * s⁻¹) * (s * s) := by
+          rw [hss]
+        _ = (s * s) * (s⁻¹ * s⁻¹) := by ring
+        _ = 1 := hmul
+    calc
+      (G t).inner x u u = a * a * r := by
+        simpa [u, r] using metric_smul2 (I := I) (M := M) (G t) a v
+      _ = 1 := haa
+  have hcoeff_pos : 0 < a * a := mul_pos (inv_pos.mpr hspos) (inv_pos.mpr hspos)
+  have hquad :
+      B t x u u = a * a * B t x v v := by
+    simpa [B, u, a] using
+      barrierFamily_smul2 (I := I) (M := M) G S epsilon delta t0 t x a v
+  refine ⟨u, hunit, ?_⟩
+  change B t x u u < 0
+  rw [hquad]
+  have hnegB : B t x v v < 0 := by
+    simpa [B] using hneg
+  exact mul_neg_of_pos_of_neg hcoeff_pos hnegB
+
+/-- The scalar barrier quadratic form on a metric unit-tangent time slab. -/
+def barrierUnitQuad
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorFamily (I := I) (M := M))
+    (epsilon delta t0 tA tB : Real)
+    (p : MetricUnitTangentSlab (I := I) (M := M) G tA tB) : Real :=
+  tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 p.1.1
+    (MetricUnitTangent.base (I := I) (M := M) p.2)
+    (MetricUnitTangent.vec (I := I) (M := M) p.2)
+    (MetricUnitTangent.vec (I := I) (M := M) p.2)
+
+@[simp]
+theorem barrierUnitQuad_mk
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorFamily (I := I) (M := M))
+    (epsilon delta t0 tA tB t : Real) (ht : t ∈ Set.Icc tA tB)
+    (x : M) (v : TangentSpace I x)
+    (hunit : (G t).inner x v v = 1) :
+    barrierUnitQuad (I := I) (M := M) G S epsilon delta t0 tA tB
+      (⟨⟨t, ht⟩,
+        (⟨(⟨x, v⟩ : TangentBundle I M), hunit⟩ :
+          MetricUnitTangent (I := I) (M := M) (G t))⟩ :
+        MetricUnitTangentSlab (I := I) (M := M) G tA tB) =
+      tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t x v v := by
+  rfl
+
+/-- A negative section-backed barrier value gives a negative point on the
+metric unit-tangent slab at the same time. -/
+theorem negBarrier_unitSlab
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorSecFamily (I := I) (M := M))
+    (epsilon delta t0 tA tB t : Real) (ht : t ∈ Set.Icc tA tB)
+    (x : M) (v : TangentSpace I x)
+    (hneg :
+      tensorBarrierFamily (I := I) (M := M) G
+        (twoTensorSecToFamily (I := I) (M := M) S)
+        epsilon delta t0 t x v v < 0) :
+    ∃ p : MetricUnitTangentSlab (I := I) (M := M) G tA tB,
+      p.1.1 = t ∧
+      barrierUnitQuad (I := I) (M := M) G
+        (twoTensorSecToFamily (I := I) (M := M) S)
+        epsilon delta t0 tA tB p < 0 := by
+  obtain ⟨u, hunit, hneg_u⟩ :=
+    negBarrier_unit (I := I) (M := M) G S epsilon delta t0 t x v hneg
+  refine ⟨⟨⟨t, ht⟩,
+      (⟨(⟨x, u⟩ : TangentBundle I M), hunit⟩ :
+        MetricUnitTangent (I := I) (M := M) (G t))⟩, rfl, ?_⟩
+  simpa using hneg_u
+
+/-- Failure of nonnegativity for a section-backed barrier produces a negative
+point on the metric unit-tangent time slab. -/
+theorem failure_unitSlab
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorSecFamily (I := I) (M := M))
+    (epsilon delta t0 tA tB : Real)
+    (hfail :
+      ¬ TwoTensorFamilyNonnegativeOn (I := I) (M := M)
+        (tensorBarrierFamily (I := I) (M := M) G
+          (twoTensorSecToFamily (I := I) (M := M) S)
+          epsilon delta t0)
+        (Set.Icc tA tB)) :
+    ∃ p : MetricUnitTangentSlab (I := I) (M := M) G tA tB,
+      barrierUnitQuad (I := I) (M := M) G
+        (twoTensorSecToFamily (I := I) (M := M) S)
+        epsilon delta t0 tA tB p < 0 := by
+  classical
+  unfold TwoTensorFamilyNonnegativeOn TwoTensorNonnegativeAt at hfail
+  push Not at hfail
+  obtain ⟨t, ht, x, v, hneg⟩ := hfail
+  obtain ⟨p, _hpt, hpneg⟩ :=
+    negBarrier_unitSlab (I := I) (M := M) G S epsilon delta t0 tA tB
+      t ht x v hneg
+  exact ⟨p, hpneg⟩
+
+private theorem metricUnitSlab_time_cont
+    (G : Real -> SmoothRiemannianMetric I M) (tA tB : Real) :
+    Continuous (fun p : MetricUnitTangentSlab (I := I) (M := M) G tA tB =>
+      (p.1 : {t : Real // t ∈ Set.Icc tA tB})) := by
+  change Continuous
+    (fun p :
+      (Σ t : {t : Real // t ∈ Set.Icc tA tB},
+        MetricUnitTangent (I := I) (M := M) (G t.1)) => p.1)
+  rw [continuous_def]
+  intro s hs
+  exact isOpen_sigma_fst_preimage s
+
+private theorem metricUnitSlab_timeVal_cont
+    (G : Real -> SmoothRiemannianMetric I M) (tA tB : Real) :
+    Continuous (fun p : MetricUnitTangentSlab (I := I) (M := M) G tA tB =>
+      p.1.1) :=
+  continuous_subtype_val.comp
+    (metricUnitSlab_time_cont (I := I) (M := M) G tA tB)
+
+/-- Metric quadratic evaluation on an ambient time/tangent-bundle product. -/
+def metricBundleQuad
+    (G : Real -> SmoothRiemannianMetric I M) (K : Set Real)
+    (q : {t : Real // t ∈ K} × TangentBundle I M) : Real :=
+  metricTimeBundleQuad (I := I) (M := M) G K q
+
+/-- Section-backed two-tensor quadratic evaluation on an ambient
+time/tangent-bundle product. -/
+def tensorSecBundleQuad
+    (S : TwoTensorSecFamily (I := I) (M := M)) (K : Set Real)
+    (q : {t : Real // t ∈ K} × TangentBundle I M) : Real :=
+  S q.1.1 q.2.proj (fun _ : Fin 2 => q.2.2)
+
+/-- Metric-family quadratic continuity from continuity of the corresponding
+metric `(0,2)` tensor section over the time/tangent-bundle product. -/
+theorem metricFamQuadCont
+    (G : Real -> SmoothRiemannianMetric I M) (K : Set Real)
+    (hG :
+      Continuous (fun q : {t : Real // t ∈ K} × TangentBundle I M =>
+        TotalSpace.mk' (Tensor0SModel 2 Real E)
+          (E := fun x : M => Tensor0SSpace 2 I x) q.2.proj
+          (metricTensorField (I := I) (G q.1.1) q.2.proj))) :
+    Continuous (metricBundleQuad (I := I) (M := M) G K) := by
+  let P := {t : Real // t ∈ K} × TangentBundle I M
+  let b : P -> M := fun q => q.2.proj
+  let T : (q : P) -> Tensor0SSpace (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) 2 (b q) :=
+    fun q => metricTensorField (I := I) (G q.1.1) (b q)
+  let v : Fin 2 -> (q : P) -> TangentSpace I (b q) :=
+    fun _ q => q.2.2
+  have hb : Continuous b := by
+    dsimp [b]
+    exact (FiberBundle.continuous_proj E (TangentSpace I)).comp continuous_snd
+  have hT : Continuous (fun q : P =>
+      TotalSpace.mk' (Tensor0SModel 2 Real E)
+        (E := fun x : M => Tensor0SSpace 2 I x) (b q) (T q)) := by
+    simpa [P, b, T] using hG
+  have hv : ∀ i : Fin 2, Continuous (fun q : P =>
+      TotalSpace.mk' E (E := fun x : M => TangentSpace I x) (b q) (v i q)) := by
+    intro i
+    simpa [P, b, v] using (continuous_snd :
+      Continuous (fun q : P => (q.2 : TangentBundle I M)))
+  have hEval := TensorMultilinear.continuous_section_apply_base
+    (𝕜 := Real) (I := I) (M := M) (P := P) (n := 2)
+    b hb T hT v hv
+  simpa [metricBundleQuad, metricTimeBundleQuad, T, b, v,
+    Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply,
+    metricTensorField_apply, vec2_self_eq_const] using hEval
+
+/-- Section-backed two-tensor quadratic continuity from continuity of the
+two-tensor section over the time/tangent-bundle product. -/
+theorem tensorQuadCont
+    (S : TwoTensorSecFamily (I := I) (M := M)) (K : Set Real)
+    (hS :
+      Continuous (fun q : {t : Real // t ∈ K} × TangentBundle I M =>
+        TotalSpace.mk' (Tensor0SModel 2 Real E)
+          (E := fun x : M => Tensor0SSpace 2 I x) q.2.proj
+          (S q.1.1 q.2.proj))) :
+    Continuous (tensorSecBundleQuad (I := I) (M := M) S K) := by
+  let P := {t : Real // t ∈ K} × TangentBundle I M
+  let b : P -> M := fun q => q.2.proj
+  let T : (q : P) -> Tensor0SSpace (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) 2 (b q) :=
+    fun q => S q.1.1 (b q)
+  let v : Fin 2 -> (q : P) -> TangentSpace I (b q) :=
+    fun _ q => q.2.2
+  have hb : Continuous b := by
+    dsimp [b]
+    exact (FiberBundle.continuous_proj E (TangentSpace I)).comp continuous_snd
+  have hT : Continuous (fun q : P =>
+      TotalSpace.mk' (Tensor0SModel 2 Real E)
+        (E := fun x : M => Tensor0SSpace 2 I x) (b q) (T q)) := by
+    simpa [P, b, T] using hS
+  have hv : ∀ i : Fin 2, Continuous (fun q : P =>
+      TotalSpace.mk' E (E := fun x : M => TangentSpace I x) (b q) (v i q)) := by
+    intro i
+    simpa [P, b, v] using (continuous_snd :
+      Continuous (fun q : P => (q.2 : TangentBundle I M)))
+  have hEval := TensorMultilinear.continuous_section_apply_base
+    (𝕜 := Real) (I := I) (M := M) (P := P) (n := 2)
+    b hb T hT v hv
+  simpa [tensorSecBundleQuad, T, b, v, vec2_self_eq_const,
+    Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply] using hEval
+
+/-- Raw barrier quadratic evaluation on an ambient time/tangent-bundle product. -/
+def barrierBundleQuad
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorFamily (I := I) (M := M))
+    (epsilon delta t0 : Real) (K : Set Real)
+    (q : {t : Real // t ∈ K} × TangentBundle I M) : Real :=
+  tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0
+    q.1.1 q.2.proj q.2.2 q.2.2
+
+/-- The section-backed ambient barrier quadratic form is continuous if the
+metric and two-tensor quadratic evaluations are continuous. -/
+theorem barrierBundleCont
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorSecFamily (I := I) (M := M))
+    (epsilon delta t0 : Real) (K : Set Real)
+    (hS : Continuous (tensorSecBundleQuad (I := I) (M := M) S K))
+    (hG : Continuous (metricBundleQuad (I := I) (M := M) G K)) :
+    Continuous (barrierBundleQuad (I := I) (M := M) G
+      (twoTensorSecToFamily (I := I) (M := M) S) epsilon delta t0 K) := by
+  have htime :
+      Continuous (fun q : {t : Real // t ∈ K} × TangentBundle I M =>
+        (q.1.1 : Real)) :=
+    continuous_subtype_val.comp continuous_fst
+  have hcoef :
+      Continuous (fun q : {t : Real // t ∈ K} × TangentBundle I M =>
+        epsilon * (delta + q.1.1 - t0)) := by
+    exact continuous_const.mul ((continuous_const.add htime).sub continuous_const)
+  have hmain :
+      Continuous (fun q : {t : Real // t ∈ K} × TangentBundle I M =>
+        tensorSecBundleQuad (I := I) (M := M) S K q +
+          (epsilon * (delta + q.1.1 - t0)) *
+            metricBundleQuad (I := I) (M := M) G K q) :=
+    hS.add (hcoef.mul hG)
+  refine hmain.congr ?_
+  intro q
+  simp [barrierBundleQuad, tensorSecBundleQuad, metricBundleQuad,
+    metricTimeBundleQuad, tensorBarrierFamily, twoTensorSecToFamily,
+    vec2_self_eq_const, mul_assoc]
+
+/-- The scalar barrier quadratic form on the geometric metric unit-tangent
+time slab. -/
+def barrierTimeSlabQuad
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorFamily (I := I) (M := M))
+    (epsilon delta t0 : Real) (K : Set Real)
+    (p : MetricUnitTangentTimeSlab (I := I) (M := M) G K) : Real :=
+  tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0
+    (MetricUnitTangentTimeSlab.time (I := I) (M := M) p)
+    (MetricUnitTangentTimeSlab.base (I := I) (M := M) p)
+    (MetricUnitTangentTimeSlab.vec (I := I) (M := M) p)
+    (MetricUnitTangentTimeSlab.vec (I := I) (M := M) p)
+
+theorem barrierTimeSlabQuad_apply
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorFamily (I := I) (M := M))
+    (epsilon delta t0 : Real) (K : Set Real)
+    (p : MetricUnitTangentTimeSlab (I := I) (M := M) G K) :
+    barrierTimeSlabQuad (I := I) (M := M) G S epsilon delta t0 K p =
+      tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0
+        (MetricUnitTangentTimeSlab.time (I := I) (M := M) p)
+        (MetricUnitTangentTimeSlab.base (I := I) (M := M) p)
+        (MetricUnitTangentTimeSlab.vec (I := I) (M := M) p)
+        (MetricUnitTangentTimeSlab.vec (I := I) (M := M) p) :=
+  rfl
+
+@[simp]
+theorem barrierTimeSlabQuad_mk
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorFamily (I := I) (M := M))
+    (epsilon delta t0 t : Real) (K : Set Real) (ht : t ∈ K)
+    (x : M) (v : TangentSpace I x)
+    (hunit : (G t).inner x v v = 1) :
+    barrierTimeSlabQuad (I := I) (M := M) G S epsilon delta t0 K
+      (⟨(⟨t, ht⟩, (⟨x, v⟩ : TangentBundle I M)), hunit⟩ :
+        MetricUnitTangentTimeSlab (I := I) (M := M) G K) =
+      tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t x v v := by
+  rfl
+
+/-- The geometric time-slab barrier quadratic form is continuous if the
+ambient metric and section-backed tensor quadratic evaluations are continuous. -/
+theorem barrierTimeCont
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorSecFamily (I := I) (M := M))
+    (epsilon delta t0 : Real) (K : Set Real)
+    (hS : Continuous (tensorSecBundleQuad (I := I) (M := M) S K))
+    (hG : Continuous (metricBundleQuad (I := I) (M := M) G K)) :
+    Continuous
+      (barrierTimeSlabQuad (I := I) (M := M) G
+        (twoTensorSecToFamily (I := I) (M := M) S) epsilon delta t0 K) := by
+  have hbundle := barrierBundleCont (I := I) (M := M)
+    G S epsilon delta t0 K hS hG
+  have hsub :
+      Continuous (fun p : MetricUnitTangentTimeSlab (I := I) (M := M) G K =>
+        (p.1 : {t : Real // t ∈ K} × TangentBundle I M)) :=
+    continuous_subtype_val
+  simpa [barrierTimeSlabQuad, barrierBundleQuad,
+    MetricUnitTangentTimeSlab.time, MetricUnitTangentTimeSlab.base,
+    MetricUnitTangentTimeSlab.vec, MetricUnitTangentTimeSlab.bundlePoint]
+    using hbundle.comp hsub
+
+/-- A negative section-backed barrier value gives a negative point on the
+geometric metric unit-tangent time slab at the same time. -/
+theorem negBarrier_timeSlab
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorSecFamily (I := I) (M := M))
+    (epsilon delta t0 t : Real) {K : Set Real} (ht : t ∈ K)
+    (x : M) (v : TangentSpace I x)
+    (hneg :
+      tensorBarrierFamily (I := I) (M := M) G
+        (twoTensorSecToFamily (I := I) (M := M) S)
+        epsilon delta t0 t x v v < 0) :
+    ∃ p : MetricUnitTangentTimeSlab (I := I) (M := M) G K,
+      MetricUnitTangentTimeSlab.time (I := I) (M := M) p = t ∧
+      barrierTimeSlabQuad (I := I) (M := M) G
+        (twoTensorSecToFamily (I := I) (M := M) S)
+        epsilon delta t0 K p < 0 := by
+  obtain ⟨u, hunit, hneg_u⟩ :=
+    negBarrier_unit (I := I) (M := M) G S epsilon delta t0 t x v hneg
+  refine ⟨⟨(⟨t, ht⟩, (⟨x, u⟩ : TangentBundle I M)), hunit⟩, rfl, ?_⟩
+  simpa using hneg_u
+
+/-- Failure of nonnegativity for a section-backed barrier produces a negative
+point on the geometric metric unit-tangent time slab. -/
+theorem failure_timeSlab
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorSecFamily (I := I) (M := M))
+    (epsilon delta t0 : Real) {K : Set Real}
+    (hfail :
+      ¬ TwoTensorFamilyNonnegativeOn (I := I) (M := M)
+        (tensorBarrierFamily (I := I) (M := M) G
+          (twoTensorSecToFamily (I := I) (M := M) S)
+          epsilon delta t0) K) :
+    ∃ p : MetricUnitTangentTimeSlab (I := I) (M := M) G K,
+      barrierTimeSlabQuad (I := I) (M := M) G
+        (twoTensorSecToFamily (I := I) (M := M) S)
+        epsilon delta t0 K p < 0 := by
+  classical
+  unfold TwoTensorFamilyNonnegativeOn TwoTensorNonnegativeAt at hfail
+  push Not at hfail
+  obtain ⟨t, ht, x, v, hneg⟩ := hfail
+  obtain ⟨p, _hpt, hpneg⟩ :=
+    negBarrier_timeSlab (I := I) (M := M) G S epsilon delta t0 t ht x v hneg
+  exact ⟨p, hpneg⟩
+
+private theorem metricUnitTimeSlab_timeVal_cont
+    (G : Real -> SmoothRiemannianMetric I M) (K : Set Real) :
+    Continuous (fun p : MetricUnitTangentTimeSlab (I := I) (M := M) G K =>
+      MetricUnitTangentTimeSlab.time (I := I) (M := M) p) := by
+  have htime :
+      Continuous (fun p : MetricUnitTangentTimeSlab (I := I) (M := M) G K =>
+        (p.1.1 : {t : Real // t ∈ K})) :=
+    continuous_fst.comp continuous_subtype_val
+  exact continuous_subtype_val.comp htime
+
+private theorem exists_left_neg_of_continuousOn
+    {f : Real -> Real} {a b c : Real}
+    (hab : a < b) (hbc : b ≤ c)
+    (hcont : ContinuousOn f (Set.Icc a c)) (hneg : f b < 0) :
+    ∃ s : Real, s ∈ Set.Icc a c ∧ s < b ∧ f s < 0 := by
+  have hbmem : b ∈ Set.Icc a c := ⟨le_of_lt hab, hbc⟩
+  have hpre :
+      {s : Real | f s < 0} ∈ nhdsWithin b (Set.Icc a c) :=
+    (hcont.continuousWithinAt hbmem).preimage_mem_nhdsWithin
+      (isOpen_Iio.mem_nhds hneg)
+  rcases mem_nhdsWithin_iff_exists_mem_nhds_inter.mp hpre with
+    ⟨u, hu_nhds, hu_subset⟩
+  rcases exists_Ioc_subset_of_mem_nhds' hu_nhds hab with
+    ⟨l, hlb, hlu⟩
+  let s : Real := (max a l + b) / 2
+  have hmax_lt : max a l < b := max_lt hab hlb.2
+  have hmax_lt_s : max a l < s := by
+    dsimp [s]
+    linarith
+  have hmax_le_s : max a l ≤ s := le_of_lt hmax_lt_s
+  have hs_lt : s < b := by
+    dsimp [s]
+    linarith
+  have ha_le_s : a ≤ s := le_trans (le_max_left a l) hmax_le_s
+  have hl_lt_s : l < s := lt_of_le_of_lt (le_max_right a l) hmax_lt_s
+  have hs_mem_u : s ∈ u := hlu ⟨hl_lt_s, le_of_lt hs_lt⟩
+  have hs_mem_Icc : s ∈ Set.Icc a c := ⟨ha_le_s, le_trans (le_of_lt hs_lt) hbc⟩
+  exact ⟨s, hs_mem_Icc, hs_lt, hu_subset ⟨hs_mem_u, hs_mem_Icc⟩⟩
+
 /-- Spatial first and second covariant derivative realizations for a
 section-backed two-tensor family. -/
 structure TensorSpatialDerivs
@@ -303,11 +799,11 @@ structure TensorBarrierRegularityOn
             ∀ epsilon : Real,
               SmallBarrierEps epsilon ->
               ∃ metricDeriv : TensorQuadraticFormFamily (I := I) (M := M),
-                (∀ t, t ∈ Set.Icc t0 (t0 + delta) ->
+                (∀ t, t ∈ Set.Ioc t0 (t0 + delta) ->
                   ∀ x, ∀ v : TangentSpace I x,
                     HasDerivWithinAt (fun s : Real => (G s).inner x v v)
                       (metricDeriv t x v) (Set.Icc t0 (t0 + delta)) t) ∧
-                (∀ t, t ∈ Set.Icc t0 (t0 + delta) ->
+                (∀ t, t ∈ Set.Ioc t0 (t0 + delta) ->
                   ∀ x, ∀ v : TangentSpace I x,
                     (epsilon / 2) * (G t).inner x v v ≤
                       epsilon * ((G t).inner x v v +
@@ -346,13 +842,13 @@ def TensorParabolicInequalityWithDriftOn
     (nablaS : TensorNabla1Family (I := I) (M := M))
     (T : Real) : Prop :=
   ∃ timeDeriv : TensorQuadraticFormFamily (I := I) (M := M),
-    (∀ t, t ∈ Set.Icc 0 T ->
+    (∀ t, t ∈ Set.Ioc 0 T ->
       ∀ x, ∀ v : TangentSpace I x,
         HasDerivWithinAt
           (fun s : Real => S s x v v)
           (timeDeriv t x v)
           (Set.Icc 0 T) t) ∧
-    (∀ t, t ∈ Set.Icc 0 T ->
+    (∀ t, t ∈ Set.Ioc 0 T ->
       ∀ x, ∀ v : TangentSpace I x,
         tensorHeatWithDrift2QuadMetricAt (I := I) (G t) (X t)
             (nabla2S t x) (nablaS t x) v +
@@ -667,36 +1163,36 @@ theorem strictBarrier_of_derivEst
     {nabla2S : TensorNabla2Family (I := I) (M := M)}
     {nablaS : TensorNabla1Family (I := I) (M := M)}
     {epsilon delta t0 T : Real}
-    (hsub : Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T)
+    (hsub : Set.Ioc t0 (t0 + delta) ⊆ Set.Ioc 0 T)
     (hbase : TensorParabolicInequalityWithDriftOn (I := I) (M := M)
       G S X N nabla2S nablaS T)
     (metricDeriv reactionErr metricGain :
       TensorQuadraticFormFamily (I := I) (M := M))
     (hG :
-      ∀ t, t ∈ Set.Icc t0 (t0 + delta) ->
+      ∀ t, t ∈ Set.Ioc t0 (t0 + delta) ->
         ∀ x, ∀ v : TangentSpace I x,
           HasDerivWithinAt (fun s : Real => (G s).inner x v v)
             (metricDeriv t x v) (Set.Icc t0 (t0 + delta)) t)
     (hGain :
-      ∀ t, t ∈ Set.Icc t0 (t0 + delta) ->
+      ∀ t, t ∈ Set.Ioc t0 (t0 + delta) ->
         ∀ x, ∀ v : TangentSpace I x,
           metricGain t x v ≤
             epsilon * ((G t).inner x v v +
               (delta + t - t0) * metricDeriv t x v))
     (hReaction :
-      ∀ t, t ∈ Set.Icc t0 (t0 + delta) ->
+      ∀ t, t ∈ Set.Ioc t0 (t0 + delta) ->
         ∀ x, ∀ v : TangentSpace I x,
           N t (G t)
               (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t)
               x v v ≤
             N t (G t) (S t) x v v + reactionErr t x v)
     (hMargin :
-      ∀ t, t ∈ Set.Icc t0 (t0 + delta) ->
+      ∀ t, t ∈ Set.Ioc t0 (t0 + delta) ->
         ∀ x, ∀ v : TangentSpace I x,
           v ≠ 0 -> reactionErr t x v < metricGain t x v) :
     TensorParabolicStrictInequalityWithDriftOn (I := I) (M := M) G
       (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0) X N
-      nabla2S nablaS (Set.Icc t0 (t0 + delta)) := by
+      nabla2S nablaS (Set.Ioc t0 (t0 + delta)) := by
   rcases hbase with ⟨timeDerivS, hSbase, hbase_ineq⟩
   let timeDerivBarrier : TensorQuadraticFormFamily (I := I) (M := M) :=
     fun t x v =>
@@ -704,24 +1200,36 @@ theorem strictBarrier_of_derivEst
         epsilon * ((G t).inner x v v +
           (delta + t - t0) * metricDeriv t x v)
   have hSlocal :
-      ∀ t, t ∈ Set.Icc t0 (t0 + delta) ->
+      ∀ t, t ∈ Set.Ioc t0 (t0 + delta) ->
         ∀ x, ∀ v : TangentSpace I x,
           HasDerivWithinAt (fun s : Real => S s x v v)
-            (timeDerivS t x v) (Set.Icc t0 (t0 + delta)) t := by
+            (timeDerivS t x v) (Set.Ioc t0 (t0 + delta)) t := by
     intro t ht x v
-    exact (hSbase t (hsub ht) x v).mono hsub
+    have hsub_closed : Set.Ioc t0 (t0 + delta) ⊆ Set.Icc 0 T := by
+      intro s hs
+      exact ⟨le_of_lt (hsub hs).1, (hsub hs).2⟩
+    exact (hSbase t (hsub ht) x v).mono hsub_closed
+  have hGlocal :
+      ∀ t, t ∈ Set.Ioc t0 (t0 + delta) ->
+        ∀ x, ∀ v : TangentSpace I x,
+          HasDerivWithinAt (fun s : Real => (G s).inner x v v)
+            (metricDeriv t x v) (Set.Ioc t0 (t0 + delta)) t := by
+    intro t ht x v
+    exact (hG t ht x v).mono (by
+      intro s hs
+      exact ⟨le_of_lt hs.1, hs.2⟩)
   have hest :
       TensorBarrierLocalEst (I := I) (M := M) G S X N
         nabla2S nablaS nabla2S nablaS epsilon delta t0
-        (Set.Icc t0 (t0 + delta)) timeDerivS timeDerivBarrier :=
+        (Set.Ioc t0 (t0 + delta)) timeDerivS timeDerivBarrier :=
     localEst_deriv (I := I) (M := M)
       (G := G) (S := S) (X := X) (N := N)
       (nabla2S := nabla2S) (nablaS := nablaS)
       (epsilon := epsilon) (delta := delta) (t0 := t0)
-      (U := Set.Icc t0 (t0 + delta))
+      (U := Set.Ioc t0 (t0 + delta))
       (timeDerivS := timeDerivS) (metricDeriv := metricDeriv)
       (reactionErr := reactionErr) (metricGain := metricGain)
-      hSlocal hG hGain hReaction hMargin
+      hSlocal hGlocal hGain hReaction hMargin
   refine ⟨timeDerivBarrier, hest.1, ?_⟩
   intro t ht x v hv
   rcases hest.2 t ht x v with
@@ -740,7 +1248,7 @@ theorem strictParabolic_of_est
     {nabla2Barrier : TensorNabla2Family (I := I) (M := M)}
     {nablaBarrier : TensorNabla1Family (I := I) (M := M)}
     {epsilon delta t0 T : Real} {U : Set Real}
-    (hsub : U ⊆ Set.Icc 0 T)
+    (hsub : U ⊆ Set.Ioc 0 T)
     (hbase : TensorParabolicInequalityWithDriftOn (I := I) (M := M)
       G S X N nabla2S nablaS T)
     (hest : ∀ timeDerivS : TensorQuadraticFormFamily (I := I) (M := M),
@@ -784,6 +1292,255 @@ structure TensorFirstNullData
   null :
     tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t1 x1 v v = 0
 
+/-- At a section-backed first-null point, positive semidefiniteness plus
+symmetry makes the null vector a left-kernel vector for the barrier tensor. -/
+theorem firstNullKernel_left
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorSecFamily (I := I) (M := M)}
+    {epsilon delta t0 : Real}
+    (hsym :
+      TwoTensorFamilySymmetricOn (I := I) (M := M)
+        (twoTensorSecToFamily (I := I) (M := M) S)
+        (Set.Icc t0 (t0 + delta)))
+    (d : TensorFirstNullData (I := I) (M := M) G
+      (twoTensorSecToFamily (I := I) (M := M) S) epsilon delta t0) :
+    ∀ w : TangentSpace I d.x1,
+      tensorBarrierFamily (I := I) (M := M) G
+        (twoTensorSecToFamily (I := I) (M := M) S)
+        epsilon delta t0 d.t1 d.x1 d.v w = 0 := by
+  let Bsec : TwoTensorSecFamily (I := I) (M := M) :=
+    tensorBarrierSecFamily (I := I) (M := M) G S epsilon delta t0
+  let A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 d.x1 :=
+    Bsec d.t1 d.x1
+  have ht1_slab : d.t1 ∈ Set.Icc t0 (t0 + delta) :=
+    ⟨le_of_lt d.t1_mem.1, d.t1_mem.2⟩
+  have hBsym :
+      TwoTensorSymmetricAt (I := I) (M := M)
+        (tensorBarrierFamily (I := I) (M := M) G
+          (twoTensorSecToFamily (I := I) (M := M) S)
+          epsilon delta t0 d.t1) d.x1 :=
+    barrierSymmAt (I := I) (M := M)
+      (G := G) (S := twoTensorSecToFamily (I := I) (M := M) S)
+      (epsilon := epsilon) (delta := delta) (t0 := t0)
+      (t := d.t1) (x := d.x1)
+      (hsym d.t1 ht1_slab d.x1)
+  have hAsym :
+      ∀ u w : TangentSpace I d.x1,
+        eval02 (I := I) (M := M) A u w =
+          eval02 (I := I) (M := M) A w u := by
+    intro u w
+    calc
+      eval02 (I := I) (M := M) A u w =
+          twoTensorSecToFamily (I := I) (M := M) Bsec d.t1 d.x1 u w := by
+            exact eval02_sec_eq (I := I) (M := M) Bsec d.t1 d.x1 u w
+      _ =
+          tensorBarrierFamily (I := I) (M := M) G
+            (twoTensorSecToFamily (I := I) (M := M) S)
+            epsilon delta t0 d.t1 d.x1 u w := by
+            exact tensorBarrierSec_apply (I := I) (M := M) G S epsilon delta t0
+              d.t1 d.x1 u w
+      _ =
+          tensorBarrierFamily (I := I) (M := M) G
+            (twoTensorSecToFamily (I := I) (M := M) S)
+            epsilon delta t0 d.t1 d.x1 w u := hBsym u w
+      _ =
+          twoTensorSecToFamily (I := I) (M := M) Bsec d.t1 d.x1 w u := by
+            exact (tensorBarrierSec_apply (I := I) (M := M) G S epsilon delta t0
+              d.t1 d.x1 w u).symm
+      _ = eval02 (I := I) (M := M) A w u := by
+            exact (eval02_sec_eq (I := I) (M := M) Bsec d.t1 d.x1 w u).symm
+  have hApsd : ∀ u : TangentSpace I d.x1,
+      0 ≤ quad02 (I := I) (M := M) A u := by
+    intro u
+    have hraw := d.nonnegative_until d.t1
+      ⟨le_of_lt d.t1_mem.1, le_rfl⟩ d.x1 u
+    calc
+      0 ≤
+          tensorBarrierFamily (I := I) (M := M) G
+            (twoTensorSecToFamily (I := I) (M := M) S)
+            epsilon delta t0 d.t1 d.x1 u u := hraw
+      _ = quad02 (I := I) (M := M) A u := by
+          rw [← tensorBarrierSec_apply (I := I) (M := M) G S epsilon delta t0
+            d.t1 d.x1 u u]
+          exact (quad02_sec_eq (I := I) (M := M) Bsec d.t1 d.x1 u).symm
+  have hAnull : quad02 (I := I) (M := M) A d.v = 0 := by
+    calc
+      quad02 (I := I) (M := M) A d.v =
+          twoTensorSecToFamily (I := I) (M := M) Bsec d.t1 d.x1 d.v d.v :=
+            quad02_sec_eq (I := I) (M := M) Bsec d.t1 d.x1 d.v
+      _ =
+          tensorBarrierFamily (I := I) (M := M) G
+            (twoTensorSecToFamily (I := I) (M := M) S)
+            epsilon delta t0 d.t1 d.x1 d.v d.v :=
+            tensorBarrierSec_apply (I := I) (M := M) G S epsilon delta t0
+              d.t1 d.x1 d.v d.v
+      _ = 0 := d.null
+  have hkernel :=
+    psd_null_left (I := I) (M := M) A hAsym hApsd hAnull
+  intro w
+  calc
+    tensorBarrierFamily (I := I) (M := M) G
+        (twoTensorSecToFamily (I := I) (M := M) S)
+        epsilon delta t0 d.t1 d.x1 d.v w =
+        twoTensorSecToFamily (I := I) (M := M) Bsec d.t1 d.x1 d.v w := by
+          exact (tensorBarrierSec_apply (I := I) (M := M) G S epsilon delta t0
+            d.t1 d.x1 d.v w).symm
+    _ = eval02 (I := I) (M := M) A d.v w := by
+          exact (eval02_sec_eq (I := I) (M := M) Bsec d.t1 d.x1 d.v w).symm
+    _ = 0 := hkernel w
+
+/-- Right-kernel version of `firstNullKernel_left`, using barrier symmetry. -/
+theorem firstNullKernel_right
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorSecFamily (I := I) (M := M)}
+    {epsilon delta t0 : Real}
+    (hsym :
+      TwoTensorFamilySymmetricOn (I := I) (M := M)
+        (twoTensorSecToFamily (I := I) (M := M) S)
+        (Set.Icc t0 (t0 + delta)))
+    (d : TensorFirstNullData (I := I) (M := M) G
+      (twoTensorSecToFamily (I := I) (M := M) S) epsilon delta t0) :
+    ∀ w : TangentSpace I d.x1,
+      tensorBarrierFamily (I := I) (M := M) G
+        (twoTensorSecToFamily (I := I) (M := M) S)
+        epsilon delta t0 d.t1 d.x1 w d.v = 0 := by
+  have ht1_slab : d.t1 ∈ Set.Icc t0 (t0 + delta) :=
+    ⟨le_of_lt d.t1_mem.1, d.t1_mem.2⟩
+  have hBsym :
+      TwoTensorSymmetricAt (I := I) (M := M)
+        (tensorBarrierFamily (I := I) (M := M) G
+          (twoTensorSecToFamily (I := I) (M := M) S)
+          epsilon delta t0 d.t1) d.x1 :=
+    barrierSymmAt (I := I) (M := M)
+      (G := G) (S := twoTensorSecToFamily (I := I) (M := M) S)
+      (epsilon := epsilon) (delta := delta) (t0 := t0)
+      (t := d.t1) (x := d.x1)
+      (hsym d.t1 ht1_slab d.x1)
+  intro w
+  rw [hBsym w d.v]
+  exact firstNullKernel_left (I := I) (M := M) hsym d w
+
+/-- One-dimensional derivative sign at a right-end minimum.
+
+If `phi` is nonnegative on `[a,t]`, vanishes at `t`, and has derivative `d`
+within a larger open interval `(a,b]` at `t`, then `d <= 0`. -/
+private theorem deriv_nonpos_of_nonneg_left
+    {phi : Real -> Real} {a b t d : Real}
+    (hat : a < t) (htb : t ≤ b)
+    (hnonneg : ∀ s : Real, s ∈ Set.Icc a t -> 0 ≤ phi s)
+    (hzero : phi t = 0)
+    (hderiv : HasDerivWithinAt phi d (Set.Ioc a b) t) :
+    d ≤ 0 := by
+  let m : Real := (a + t) / 2
+  have ham : a < m := by
+    dsimp [m]
+    linarith
+  have hmt : m < t := by
+    dsimp [m]
+    linarith
+  have hsubset : Set.Icc m t ⊆ Set.Ioc a b := by
+    intro y hy
+    exact ⟨lt_of_lt_of_le ham hy.1, hy.2.trans htb⟩
+  have hderiv_m : HasDerivWithinAt phi d (Set.Icc m t) t :=
+    hderiv.mono hsubset
+  have hmin : IsMinOn phi (Set.Icc m t) t := by
+    intro y hy
+    rw [hzero]
+    exact hnonneg y ⟨(le_of_lt ham).trans hy.1, hy.2⟩
+  have hlocal : IsLocalMinOn phi (Set.Icc m t) t := hmin.localize
+  have hdir : m - t ∈ posTangentConeAt (Set.Icc m t) t := by
+    have hseg : segment Real t m ⊆ Set.Icc m t := by
+      rw [segment_symm, segment_eq_Icc (le_of_lt hmt)]
+    exact sub_mem_posTangentConeAt_of_segment_subset hseg
+  have hnonneg_deriv :
+      0 ≤ (fderivWithin Real phi (Set.Icc m t) t : Real →L[Real] Real) (m - t) :=
+    hlocal.fderivWithin_nonneg hdir
+  have huniq :
+      UniqueDiffWithinAt Real (Set.Icc m t) t :=
+    (uniqueDiffOn_Icc hmt).uniqueDiffWithinAt ⟨le_of_lt hmt, le_rfl⟩
+  have hderiv_eq : derivWithin phi (Set.Icc m t) t = d :=
+    hderiv_m.derivWithin huniq
+  have hlin :
+      (fderivWithin Real phi (Set.Icc m t) t : Real →L[Real] Real) (m - t) =
+        (m - t) * derivWithin phi (Set.Icc m t) t := by
+    rw [← fderivWithin_derivWithin (𝕜 := Real) (f := phi)
+      (s := Set.Icc m t) (x := t)]
+    simpa [smul_eq_mul] using
+      ((fderivWithin Real phi (Set.Icc m t) t : Real →L[Real] Real).map_smul
+        (m - t) (1 : Real))
+  rw [hlin, hderiv_eq] at hnonneg_deriv
+  exact nonpos_of_mul_nonneg_right hnonneg_deriv (sub_neg.mpr hmt)
+
+/-- The fixed-vector time derivative at a first-null point is nonpositive. -/
+theorem firstNullTime_nonpos
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorFamily (I := I) (M := M)}
+    {epsilon delta t0 : Real}
+    (d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0)
+    (timeDeriv : TensorQuadraticFormFamily (I := I) (M := M))
+    (hderiv :
+      ∀ t, t ∈ Set.Ioc t0 (t0 + delta) ->
+        ∀ x, ∀ v : TangentSpace I x,
+          HasDerivWithinAt
+            (fun s : Real =>
+              tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0
+                s x v v)
+            (timeDeriv t x v) (Set.Ioc t0 (t0 + delta)) t) :
+    timeDeriv d.t1 d.x1 d.v ≤ 0 := by
+  exact deriv_nonpos_of_nonneg_left
+    (a := t0) (b := t0 + delta) (t := d.t1)
+    (d := timeDeriv d.t1 d.x1 d.v)
+    d.t1_mem.1 d.t1_mem.2
+    (fun s hs => d.nonnegative_until s hs d.x1 d.v)
+    d.null
+    (hderiv d.t1 d.t1_mem d.x1 d.v)
+
+/-- Drift-slot cancellation for a scalar test `phi = B(V,V)`.
+
+This is the first-derivative product rule specialized to a point where the
+moving test vector fields have zero covariant derivative and the scalar test
+has zero spatial derivative in the drift direction. -/
+theorem nablaEval_zero
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2}
+    {nablaB : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 3}
+    (hreal :
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 cov B nablaB)
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (V : Fin 2 ->
+      ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    {x : M} {v : TangentSpace I x}
+    (hV : ∀ q : Fin 2, V q x = v)
+    (hphi :
+      extDerivFun (I := I) (fun p : M => B p (fun q : Fin 2 => V q p))
+        x (X x) = 0)
+    (hcovV :
+      ∀ q : Fin 2, ((cov (fun p : M => V q p) x) (X x)) = 0) :
+    nablaB x (Fin.cons (X x) (vec2 (I := I) v v)) = 0 := by
+  have hslots : (fun q : Fin 2 => V q x) = vec2 (I := I) v v := by
+    funext q
+    rw [hV q]
+    fin_cases q <;> simp [vec2, Curvature.vec2]
+  have h :=
+    TotalNabla0SRealizes.eval_smooth_slots (I := I)
+      hreal X V x
+  rw [hslots] at h
+  rw [h]
+  have hsum :
+      (∑ a : Fin 2,
+        B x
+          (Function.update (vec2 (I := I) v v) a
+            ((cov (fun p : M => V a p) x) (X x)))) = 0 := by
+    apply Finset.sum_eq_zero
+    intro a _ha
+    rw [hcovV a]
+    exact (B x).map_update_zero (vec2 (I := I) v v) a
+  rw [hphi, hsum]
+  simp
+
 /--
 Compactness and continuity package for extracting the first null vector of the
 positive tensor barrier.
@@ -804,6 +1561,271 @@ structure TensorFirstNullCompactnessOn
       (Set.Icc t0 (t0 + delta))) ->
     Nonempty (TensorFirstNullData (I := I) (M := M) G S epsilon delta t0)
 
+namespace TensorFirstNullCompactnessOn
+
+/-- Section-backed first-null compactness.  This is the geometric bridge from
+smooth tensor sections to the raw first-null package used by the WMP kernel. -/
+theorem of_section
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorSecFamily (I := I) (M := M))
+    (epsilon delta t0 : Real)
+    (hcompact :
+      IsCompact
+        (Set.univ :
+          Set (MetricUnitTangentSlab (I := I) (M := M) G t0 (t0 + delta))))
+    (hunit_cont :
+      Continuous
+        (barrierUnitQuad (I := I) (M := M) G
+          (twoTensorSecToFamily (I := I) (M := M) S)
+          epsilon delta t0 t0 (t0 + delta)))
+    (hfixed_cont :
+      ∀ x (v : TangentSpace I x),
+        ContinuousOn
+          (fun t : Real =>
+            tensorBarrierFamily (I := I) (M := M) G
+              (twoTensorSecToFamily (I := I) (M := M) S)
+              epsilon delta t0 t x v v)
+          (Set.Icc t0 (t0 + delta))) :
+    TensorFirstNullCompactnessOn (I := I) (M := M) G
+      (twoTensorSecToFamily (I := I) (M := M) S) epsilon delta t0 := by
+  classical
+  let Sraw : TwoTensorFamily (I := I) (M := M) :=
+    twoTensorSecToFamily (I := I) (M := M) S
+  let B : TwoTensorFamily (I := I) (M := M) :=
+    tensorBarrierFamily (I := I) (M := M) G Sraw epsilon delta t0
+  let slab := MetricUnitTangentSlab (I := I) (M := M) G t0 (t0 + delta)
+  let φ : slab -> Real :=
+    barrierUnitQuad (I := I) (M := M) G Sraw epsilon delta t0 t0 (t0 + delta)
+  let Z : Set slab := {p | φ p ≤ 0}
+  refine ⟨?_⟩
+  intro hinit_pos hfail
+  have hZclosed : IsClosed Z := by
+    have hclosed : IsClosed ((Set.Iic (0 : Real)) : Set Real) := isClosed_Iic
+    simpa [Z, φ] using hclosed.preimage hunit_cont
+  have hZcompact : IsCompact Z := by
+    simpa [Z] using hcompact.inter_right hZclosed
+  obtain ⟨pbad, hpbad_neg⟩ :=
+    failure_unitSlab (I := I) (M := M) G S epsilon delta t0 t0
+      (t0 + delta) hfail
+  have hZne : Z.Nonempty := ⟨pbad, le_of_lt hpbad_neg⟩
+  obtain ⟨p1, hp1Z, hmin⟩ :=
+    hZcompact.exists_isMinOn hZne
+      (metricUnitSlab_timeVal_cont (I := I) (M := M) G t0 (t0 + delta)).continuousOn
+  let t1 : Real := p1.1.1
+  let x1 : M := MetricUnitTangent.base (I := I) (M := M) p1.2
+  let v1 : TangentSpace I x1 := MetricUnitTangent.vec (I := I) (M := M) p1.2
+  have hp1_time : t1 ∈ Set.Icc t0 (t0 + delta) := by
+    simp [t1]
+  have hp1_nonpos : φ p1 ≤ 0 := hp1Z
+  have hv1_ne : v1 ≠ 0 := by
+    intro hv
+    have hbad : (0 : Real) = 1 := by
+      simpa [v1, hv] using
+        (MetricUnitTangent.unit (I := I) (M := M) p1.2)
+    norm_num at hbad
+  have ht1_ne_t0 : t1 ≠ t0 := by
+    intro ht1eq
+    have hpos : 0 < φ p1 := by
+      have hpos_raw := hinit_pos x1 v1 hv1_ne
+      simpa [φ, barrierUnitQuad, Sraw, B, t1, x1, v1, ht1eq] using hpos_raw
+    linarith
+  have ht1_gt : t0 < t1 := lt_of_le_of_ne hp1_time.1 (Ne.symm ht1_ne_t0)
+  have hnonneg_until :
+      ∀ t, t ∈ Set.Icc t0 t1 ->
+        ∀ x, TwoTensorNonnegativeAt (I := I) (M := M) (B t) x := by
+    intro t ht x v
+    by_contra hnot
+    have hneg : B t x v v < 0 := lt_of_not_ge hnot
+    have ht_full : t ∈ Set.Icc t0 (t0 + delta) :=
+      ⟨ht.1, le_trans ht.2 hp1_time.2⟩
+    rcases lt_or_eq_of_le ht.2 with hlt | heq
+    · obtain ⟨q, hq_time, hqneg⟩ :=
+        negBarrier_unitSlab (I := I) (M := M) G S epsilon delta t0
+          t0 (t0 + delta) t ht_full x v (by simpa [B, Sraw] using hneg)
+      have hqZ : q ∈ Z := by
+        simpa [Z, φ] using le_of_lt hqneg
+      have hmin_q := hmin hqZ
+      have hqtime : q.1.1 = t := hq_time
+      have ht1_le_t : t1 ≤ t := by
+        have ht1_le_q : (p1.1.1 : Real) ≤ q.1.1 := by
+          exact (Subtype.coe_le_coe).2 hmin_q
+        simpa [t1, hqtime] using ht1_le_q
+      linarith
+    · have hneg_t1 :
+          B t1 x v v < 0 := by
+        simpa [heq] using hneg
+      obtain ⟨s, hs_full, hs_lt, hsneg⟩ :=
+        exists_left_neg_of_continuousOn (a := t0) (b := t1)
+          (c := t0 + delta) ht1_gt hp1_time.2
+          (by simpa [B, Sraw] using hfixed_cont x v)
+          hneg_t1
+      obtain ⟨q, hq_time, hqneg⟩ :=
+        negBarrier_unitSlab (I := I) (M := M) G S epsilon delta t0
+          t0 (t0 + delta) s hs_full x v (by simpa [B, Sraw] using hsneg)
+      have hqZ : q ∈ Z := by
+        simpa [Z, φ] using le_of_lt hqneg
+      have hmin_q := hmin hqZ
+      have hqtime : q.1.1 = s := hq_time
+      have ht1_le_s : t1 ≤ s := by
+        have ht1_le_q : (p1.1.1 : Real) ≤ q.1.1 := by
+          exact (Subtype.coe_le_coe).2 hmin_q
+        simpa [t1, hqtime] using ht1_le_q
+      linarith
+  have hnonneg_p1 : 0 ≤ φ p1 := by
+    have hquad :=
+      hnonneg_until t1 ⟨le_of_lt ht1_gt, le_rfl⟩ x1 v1
+    simpa [φ, barrierUnitQuad, B, Sraw, t1, x1, v1] using hquad
+  have hnullφ : φ p1 = 0 := le_antisymm hp1_nonpos hnonneg_p1
+  refine Nonempty.intro
+    { t1 := t1
+      x1 := x1
+      v := v1
+      t1_mem := ⟨ht1_gt, hp1_time.2⟩
+      v_ne_zero := hv1_ne
+      unit := by
+        exact MetricUnitTangent.unit (I := I) (M := M) p1.2
+      nonnegative_until := ?_
+      null := ?_ }
+  · intro t ht x
+    simpa [B, Sraw] using hnonneg_until t ht x
+  · simpa [φ, barrierUnitQuad, B, Sraw, t1, x1, v1] using hnullφ
+
+end TensorFirstNullCompactnessOn
+
+namespace TensorFirstNullCompactnessOn
+
+/-- Section-backed first-null compactness using the geometric time-slab
+subtype of `{t // t ∈ K} × TangentBundle`, rather than the dependent sigma
+slab with coproduct topology. -/
+theorem of_section_timeSlab
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorSecFamily (I := I) (M := M))
+    (epsilon delta t0 : Real)
+    (hcompact :
+      IsCompact
+        (Set.univ :
+          Set (MetricUnitTangentTimeSlab (I := I) (M := M) G
+            (Set.Icc t0 (t0 + delta)))))
+    (hunit_cont :
+      Continuous
+        (barrierTimeSlabQuad (I := I) (M := M) G
+          (twoTensorSecToFamily (I := I) (M := M) S)
+          epsilon delta t0 (Set.Icc t0 (t0 + delta))))
+    (hfixed_cont :
+      ∀ x (v : TangentSpace I x),
+        ContinuousOn
+          (fun t : Real =>
+            tensorBarrierFamily (I := I) (M := M) G
+              (twoTensorSecToFamily (I := I) (M := M) S)
+              epsilon delta t0 t x v v)
+          (Set.Icc t0 (t0 + delta))) :
+    TensorFirstNullCompactnessOn (I := I) (M := M) G
+      (twoTensorSecToFamily (I := I) (M := M) S) epsilon delta t0 := by
+  classical
+  let Sraw : TwoTensorFamily (I := I) (M := M) :=
+    twoTensorSecToFamily (I := I) (M := M) S
+  let B : TwoTensorFamily (I := I) (M := M) :=
+    tensorBarrierFamily (I := I) (M := M) G Sraw epsilon delta t0
+  let slab := MetricUnitTangentTimeSlab (I := I) (M := M) G
+    (Set.Icc t0 (t0 + delta))
+  let φ : slab -> Real :=
+    barrierTimeSlabQuad (I := I) (M := M) G Sraw epsilon delta t0
+      (Set.Icc t0 (t0 + delta))
+  let Z : Set slab := {p | φ p ≤ 0}
+  refine ⟨?_⟩
+  intro hinit_pos hfail
+  have hZclosed : IsClosed Z := by
+    have hclosed : IsClosed ((Set.Iic (0 : Real)) : Set Real) := isClosed_Iic
+    simpa [Z, φ] using hclosed.preimage hunit_cont
+  have hZcompact : IsCompact Z := by
+    simpa [Z] using hcompact.inter_right hZclosed
+  obtain ⟨pbad, hpbad_neg⟩ :=
+    failure_timeSlab (I := I) (M := M) G S epsilon delta t0
+      (K := Set.Icc t0 (t0 + delta)) hfail
+  have hZne : Z.Nonempty := ⟨pbad, le_of_lt hpbad_neg⟩
+  obtain ⟨p1, hp1Z, hmin⟩ :=
+    hZcompact.exists_isMinOn hZne
+      (metricUnitTimeSlab_timeVal_cont (I := I) (M := M)
+        G (Set.Icc t0 (t0 + delta))).continuousOn
+  let t1 : Real := MetricUnitTangentTimeSlab.time (I := I) (M := M) p1
+  let x1 : M := MetricUnitTangentTimeSlab.base (I := I) (M := M) p1
+  let v1 : TangentSpace I x1 :=
+    MetricUnitTangentTimeSlab.vec (I := I) (M := M) p1
+  have hp1_time : t1 ∈ Set.Icc t0 (t0 + delta) := by
+    simpa [t1] using
+      (MetricUnitTangentTimeSlab.time_mem (I := I) (M := M) p1)
+  have hp1_nonpos : φ p1 ≤ 0 := hp1Z
+  have hv1_ne : v1 ≠ 0 := by
+    intro hv
+    have hbad : (0 : Real) = 1 := by
+      simpa [v1, hv] using
+        (MetricUnitTangentTimeSlab.unit (I := I) (M := M) p1)
+    norm_num at hbad
+  have ht1_ne_t0 : t1 ≠ t0 := by
+    intro ht1eq
+    have hpos : 0 < φ p1 := by
+      have hpos_raw := hinit_pos x1 v1 hv1_ne
+      simpa [φ, barrierTimeSlabQuad, Sraw, B, t1, x1, v1, ht1eq] using hpos_raw
+    linarith
+  have ht1_gt : t0 < t1 := lt_of_le_of_ne hp1_time.1 (Ne.symm ht1_ne_t0)
+  have hnonneg_until :
+      ∀ t, t ∈ Set.Icc t0 t1 ->
+        ∀ x, TwoTensorNonnegativeAt (I := I) (M := M) (B t) x := by
+    intro t ht x v
+    by_contra hnot
+    have hneg : B t x v v < 0 := lt_of_not_ge hnot
+    have ht_full : t ∈ Set.Icc t0 (t0 + delta) :=
+      ⟨ht.1, le_trans ht.2 hp1_time.2⟩
+    rcases lt_or_eq_of_le ht.2 with hlt | heq
+    · obtain ⟨q, hq_time, hqneg⟩ :=
+        negBarrier_timeSlab (I := I) (M := M) G S epsilon delta t0 t
+          (K := Set.Icc t0 (t0 + delta)) ht_full x v
+          (by simpa [B, Sraw] using hneg)
+      have hqZ : q ∈ Z := by
+        simpa [Z, φ] using le_of_lt hqneg
+      have hmin_q := hmin hqZ
+      have ht1_le_t : t1 ≤ t := by
+        simpa [t1, hq_time] using hmin_q
+      linarith
+    · have hneg_t1 :
+          B t1 x v v < 0 := by
+        simpa [heq] using hneg
+      obtain ⟨s, hs_full, hs_lt, hsneg⟩ :=
+        exists_left_neg_of_continuousOn (a := t0) (b := t1)
+          (c := t0 + delta) ht1_gt hp1_time.2
+          (by simpa [B, Sraw] using hfixed_cont x v)
+          hneg_t1
+      obtain ⟨q, hq_time, hqneg⟩ :=
+        negBarrier_timeSlab (I := I) (M := M) G S epsilon delta t0 s
+          (K := Set.Icc t0 (t0 + delta)) hs_full x v
+          (by simpa [B, Sraw] using hsneg)
+      have hqZ : q ∈ Z := by
+        simpa [Z, φ] using le_of_lt hqneg
+      have hmin_q := hmin hqZ
+      have ht1_le_s : t1 ≤ s := by
+        simpa [t1, hq_time] using hmin_q
+      linarith
+  have hnonneg_p1 : 0 ≤ φ p1 := by
+    have hquad :=
+      hnonneg_until t1 ⟨le_of_lt ht1_gt, le_rfl⟩ x1 v1
+    simpa [φ, barrierTimeSlabQuad, B, Sraw, t1, x1, v1] using hquad
+  have hnullφ : φ p1 = 0 := le_antisymm hp1_nonpos hnonneg_p1
+  refine Nonempty.intro
+    { t1 := t1
+      x1 := x1
+      v := v1
+      t1_mem := ⟨ht1_gt, hp1_time.2⟩
+      v_ne_zero := hv1_ne
+      unit := by
+        exact MetricUnitTangentTimeSlab.unit (I := I) (M := M) p1
+      nonnegative_until := ?_
+      null := ?_ }
+  · intro t ht x
+    simpa [B, Sraw] using hnonneg_until t ht x
+  · simpa [φ, barrierTimeSlabQuad, B, Sraw, t1, x1, v1] using hnullφ
+
+end TensorFirstNullCompactnessOn
+
 /--
 The strict barrier supersolution inequality produced after adding
 `epsilon * (delta + t - t0) * g`.
@@ -822,7 +1844,7 @@ def TensorBarrierStrictSupersolutionOn
   TensorParabolicStrictInequalityWithDriftOn (I := I) (M := M) G
     (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0) X N
     nabla2Barrier nablaBarrier
-    (Set.Icc t0 (t0 + delta))
+    (Set.Ioc t0 (t0 + delta))
 
 theorem strictBarrier_of_est
     {G : Real -> SmoothRiemannianMetric I M}
@@ -834,14 +1856,14 @@ theorem strictBarrier_of_est
     {nabla2Barrier : TensorNabla2Family (I := I) (M := M)}
     {nablaBarrier : TensorNabla1Family (I := I) (M := M)}
     {epsilon delta t0 T : Real}
-    (hsub : Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T)
+    (hsub : Set.Ioc t0 (t0 + delta) ⊆ Set.Ioc 0 T)
     (hbase : TensorParabolicInequalityWithDriftOn (I := I) (M := M)
       G S X N nabla2S nablaS T)
     (hest : ∀ timeDerivS : TensorQuadraticFormFamily (I := I) (M := M),
       ∃ timeDerivBarrier : TensorQuadraticFormFamily (I := I) (M := M),
         TensorBarrierLocalEst (I := I) (M := M) G S X N
           nabla2S nablaS nabla2Barrier nablaBarrier epsilon delta t0
-          (Set.Icc t0 (t0 + delta)) timeDerivS timeDerivBarrier) :
+          (Set.Ioc t0 (t0 + delta)) timeDerivS timeDerivBarrier) :
     TensorBarrierStrictSupersolutionOn (I := I) (M := M) G S X N
       nabla2Barrier nablaBarrier epsilon delta t0 := by
   exact strictParabolic_of_est (I := I) (M := M)
@@ -849,7 +1871,7 @@ theorem strictBarrier_of_est
     (nabla2S := nabla2S) (nablaS := nablaS)
     (nabla2Barrier := nabla2Barrier) (nablaBarrier := nablaBarrier)
     (epsilon := epsilon) (delta := delta) (t0 := t0) (T := T)
-    (U := Set.Icc t0 (t0 + delta)) hsub hbase hest
+    (U := Set.Ioc t0 (t0 + delta)) hsub hbase hest
 
 /--
 Uniform strict barrier supersolution on a fixed short slab for small barriers.
@@ -890,6 +1912,256 @@ def TensorFirstNullScalarSigns
     drift = 0 ∧
     0 ≤ reaction ∧
     drift + reaction < timeDeriv - laplacian
+
+/--
+Build the first-null scalar-sign package from the transparent local scalar
+test-function inputs.
+
+The remaining geometric work for future producers is exactly the hypotheses
+here: the scalar test has nonpositive time derivative at the first null point,
+nonnegative Laplacian, zero drift, and its heat-with-drift value agrees with
+the tensor heat-with-drift quadratic evaluation.  The strict inequality and
+reaction nonnegativity are then obtained from the already proved WMP inputs.
+-/
+theorem scalarSigns_of_eval
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {nabla2Barrier : TensorNabla2Family (I := I) (M := M)}
+    {nablaBarrier : TensorNabla1Family (I := I) (M := M)}
+    {epsilon delta t0 : Real}
+    (hstrict : TensorBarrierStrictSupersolutionOn (I := I) (M := M)
+      G S X N nabla2Barrier nablaBarrier epsilon delta t0)
+    (hnull : TensorNullEigenvectorCondition (I := I) (M := M)
+      G N (Set.Icc t0 (t0 + delta)))
+    (d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0)
+    (laplacian drift : Real)
+    (htime_nonpos :
+      ∀ timeDeriv : TensorQuadraticFormFamily (I := I) (M := M),
+        (∀ t, t ∈ Set.Ioc t0 (t0 + delta) ->
+          ∀ x, ∀ v : TangentSpace I x,
+            HasDerivWithinAt
+              (fun s : Real =>
+                tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0
+                  s x v v)
+              (timeDeriv t x v) (Set.Ioc t0 (t0 + delta)) t) ->
+        timeDeriv d.t1 d.x1 d.v ≤ 0)
+    (hlaplacian_nonneg : 0 ≤ laplacian)
+    (hdrift_zero : drift = 0)
+    (hheat_eq :
+      tensorHeatWithDrift2QuadMetricAt (I := I) (G d.t1) (X d.t1)
+          (nabla2Barrier d.t1 d.x1) (nablaBarrier d.t1 d.x1) d.v =
+        laplacian + drift) :
+    TensorFirstNullScalarSigns (I := I) (M := M) G S X N epsilon delta t0 d := by
+  rcases hstrict with ⟨timeDeriv, hderiv, hstrict_eval⟩
+  let reaction : Real :=
+    N d.t1 (G d.t1)
+      (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 d.t1)
+      d.x1 d.v d.v
+  have ht1_mem_slab : d.t1 ∈ Set.Icc t0 (t0 + delta) :=
+    ⟨le_of_lt d.t1_mem.1, d.t1_mem.2⟩
+  have ht1_mem_until : d.t1 ∈ Set.Icc t0 d.t1 :=
+    ⟨le_of_lt d.t1_mem.1, le_rfl⟩
+  have hbarrier_nonnegative :
+      TwoTensorNonnegativeAt (I := I) (M := M)
+        (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 d.t1)
+        d.x1 :=
+    d.nonnegative_until d.t1 ht1_mem_until d.x1
+  have hreaction_nonneg : 0 ≤ reaction := by
+    simpa [reaction] using
+      hnull d.t1 ht1_mem_slab
+        (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 d.t1)
+        d.x1 hbarrier_nonnegative d.v d.null
+  have hstrict_at :
+      tensorHeatWithDrift2QuadMetricAt (I := I) (G d.t1) (X d.t1)
+          (nabla2Barrier d.t1 d.x1) (nablaBarrier d.t1 d.x1) d.v +
+        reaction <
+        timeDeriv d.t1 d.x1 d.v := by
+    simpa [reaction] using
+      hstrict_eval d.t1 d.t1_mem d.x1 d.v d.v_ne_zero
+  refine ⟨timeDeriv d.t1 d.x1 d.v, laplacian, drift, reaction,
+    htime_nonpos timeDeriv hderiv, hlaplacian_nonneg, hdrift_zero,
+    hreaction_nonneg, ?_⟩
+  linarith
+
+/--
+Version of `scalarSigns_of_eval` for separately identified Laplacian and
+drift terms.  This is the form expected from the corrected local test-section
+calculation: prove the rough-Laplacian trace identity and the drift
+cancellation separately, then assemble the tensor heat-with-drift value.
+-/
+theorem scalarSigns_of_parts
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {nabla2Barrier : TensorNabla2Family (I := I) (M := M)}
+    {nablaBarrier : TensorNabla1Family (I := I) (M := M)}
+    {epsilon delta t0 : Real}
+    (hstrict : TensorBarrierStrictSupersolutionOn (I := I) (M := M)
+      G S X N nabla2Barrier nablaBarrier epsilon delta t0)
+    (hnull : TensorNullEigenvectorCondition (I := I) (M := M)
+      G N (Set.Icc t0 (t0 + delta)))
+    (d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0)
+    (laplacian drift : Real)
+    (htime_nonpos :
+      ∀ timeDeriv : TensorQuadraticFormFamily (I := I) (M := M),
+        (∀ t, t ∈ Set.Ioc t0 (t0 + delta) ->
+          ∀ x, ∀ v : TangentSpace I x,
+            HasDerivWithinAt
+              (fun s : Real =>
+                tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0
+                  s x v v)
+              (timeDeriv t x v) (Set.Ioc t0 (t0 + delta)) t) ->
+        timeDeriv d.t1 d.x1 d.v ≤ 0)
+    (hlaplacian_nonneg : 0 ≤ laplacian)
+    (hdrift_zero : drift = 0)
+    (hlap :
+      metricTraceFirstTwo0SAt (I := I) (G d.t1)
+        (nabla2Barrier d.t1 d.x1) (vec2 d.v d.v) = laplacian)
+    (hdrift :
+      (nablaBarrier d.t1 d.x1)
+        (Fin.cons (X d.t1 d.x1) (vec2 d.v d.v)) = drift) :
+    TensorFirstNullScalarSigns (I := I) (M := M) G S X N epsilon delta t0 d := by
+  exact scalarSigns_of_eval (I := I) (M := M)
+    (G := G) (S := S) (X := X) (N := N)
+    (nabla2Barrier := nabla2Barrier) (nablaBarrier := nablaBarrier)
+    hstrict hnull d laplacian drift htime_nonpos hlaplacian_nonneg
+    hdrift_zero
+    (heatQuad_eq_parts (I := I) (G d.t1) (X d.t1)
+      (nabla2Barrier d.t1 d.x1) (nablaBarrier d.t1 d.x1) d.v
+      laplacian drift hlap hdrift)
+
+/--
+Zero-drift specialization of `scalarSigns_of_parts`.  This is the expected
+shape at a first-null point after extending the null vector locally with
+vanishing covariant derivative and using that the scalar test function has zero
+spatial derivative.
+-/
+theorem scalarSigns_of_lap
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {nabla2Barrier : TensorNabla2Family (I := I) (M := M)}
+    {nablaBarrier : TensorNabla1Family (I := I) (M := M)}
+    {epsilon delta t0 : Real}
+    (hstrict : TensorBarrierStrictSupersolutionOn (I := I) (M := M)
+      G S X N nabla2Barrier nablaBarrier epsilon delta t0)
+    (hnull : TensorNullEigenvectorCondition (I := I) (M := M)
+      G N (Set.Icc t0 (t0 + delta)))
+    (d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0)
+    (laplacian : Real)
+    (htime_nonpos :
+      ∀ timeDeriv : TensorQuadraticFormFamily (I := I) (M := M),
+        (∀ t, t ∈ Set.Ioc t0 (t0 + delta) ->
+          ∀ x, ∀ v : TangentSpace I x,
+            HasDerivWithinAt
+              (fun s : Real =>
+                tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0
+                  s x v v)
+              (timeDeriv t x v) (Set.Ioc t0 (t0 + delta)) t) ->
+        timeDeriv d.t1 d.x1 d.v ≤ 0)
+    (hlaplacian_nonneg : 0 ≤ laplacian)
+    (hlap :
+      metricTraceFirstTwo0SAt (I := I) (G d.t1)
+        (nabla2Barrier d.t1 d.x1) (vec2 d.v d.v) = laplacian)
+    (hdrift :
+      (nablaBarrier d.t1 d.x1)
+        (Fin.cons (X d.t1 d.x1) (vec2 d.v d.v)) = 0) :
+    TensorFirstNullScalarSigns (I := I) (M := M) G S X N epsilon delta t0 d := by
+  exact scalarSigns_of_parts (I := I) (M := M)
+    (G := G) (S := S) (X := X) (N := N)
+    (nabla2Barrier := nabla2Barrier) (nablaBarrier := nablaBarrier)
+    hstrict hnull d laplacian 0 htime_nonpos hlaplacian_nonneg rfl hlap hdrift
+
+/--
+First-null specialization of `scalarSigns_of_lap`.  The nonpositive time
+derivative is supplied directly by `TensorFirstNullData`, so future local
+test-section producers only have to prove the spatial Laplacian and drift
+facts.
+-/
+theorem scalarSigns_of_lap_firstNull
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {nabla2Barrier : TensorNabla2Family (I := I) (M := M)}
+    {nablaBarrier : TensorNabla1Family (I := I) (M := M)}
+    {epsilon delta t0 : Real}
+    (hstrict : TensorBarrierStrictSupersolutionOn (I := I) (M := M)
+      G S X N nabla2Barrier nablaBarrier epsilon delta t0)
+    (hnull : TensorNullEigenvectorCondition (I := I) (M := M)
+      G N (Set.Icc t0 (t0 + delta)))
+    (d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0)
+    (laplacian : Real)
+    (hlaplacian_nonneg : 0 ≤ laplacian)
+    (hlap :
+      metricTraceFirstTwo0SAt (I := I) (G d.t1)
+        (nabla2Barrier d.t1 d.x1) (vec2 d.v d.v) = laplacian)
+    (hdrift :
+      (nablaBarrier d.t1 d.x1)
+        (Fin.cons (X d.t1 d.x1) (vec2 d.v d.v)) = 0) :
+    TensorFirstNullScalarSigns (I := I) (M := M) G S X N epsilon delta t0 d := by
+  exact scalarSigns_of_lap (I := I) (M := M)
+    (G := G) (S := S) (X := X) (N := N)
+    (nabla2Barrier := nabla2Barrier) (nablaBarrier := nablaBarrier)
+    hstrict hnull d laplacian
+    (fun timeDeriv hderiv => firstNullTime_nonpos (I := I) (M := M)
+      d timeDeriv hderiv)
+    hlaplacian_nonneg hlap hdrift
+
+/--
+First-null scalar signs from a local smooth test section.  The drift
+cancellation is supplied by the first-derivative tensor product rule
+`nablaEval_zero`; callers still provide the spatial Laplacian comparison.
+-/
+theorem scalarSigns_of_local
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {nabla2Barrier : TensorNabla2Family (I := I) (M := M)}
+    {nablaBarrier : TensorNabla1Family (I := I) (M := M)}
+    {epsilon delta t0 : Real}
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2}
+    {nablaB : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 3}
+    (hstrict : TensorBarrierStrictSupersolutionOn (I := I) (M := M)
+      G S X N nabla2Barrier nablaBarrier epsilon delta t0)
+    (hnull : TensorNullEigenvectorCondition (I := I) (M := M)
+      G N (Set.Icc t0 (t0 + delta)))
+    (d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0)
+    (laplacian : Real)
+    (hlaplacian_nonneg : 0 ≤ laplacian)
+    (hlap :
+      metricTraceFirstTwo0SAt (I := I) (G d.t1)
+        (nabla2Barrier d.t1 d.x1) (vec2 d.v d.v) = laplacian)
+    (hreal :
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 cov B nablaB)
+    (Xsec :
+      ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (V : Fin 2 ->
+      ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (hX : X d.t1 d.x1 = Xsec d.x1)
+    (hnabla : nablaBarrier d.t1 d.x1 = nablaB d.x1)
+    (hV : ∀ q : Fin 2, V q d.x1 = d.v)
+    (hphi :
+      extDerivFun (I := I) (fun p : M => B p (fun q : Fin 2 => V q p))
+        d.x1 (Xsec d.x1) = 0)
+    (hcovV :
+      ∀ q : Fin 2, ((cov (fun p : M => V q p) d.x1) (Xsec d.x1)) = 0) :
+    TensorFirstNullScalarSigns (I := I) (M := M) G S X N epsilon delta t0 d := by
+  apply scalarSigns_of_lap_firstNull (I := I) (M := M)
+    (G := G) (S := S) (X := X) (N := N)
+    (nabla2Barrier := nabla2Barrier) (nablaBarrier := nablaBarrier)
+    hstrict hnull d laplacian hlaplacian_nonneg hlap
+  rw [hnabla, hX]
+  exact nablaEval_zero (I := I) (M := M) hreal Xsec V hV hphi hcovV
 
 /--
 Uniform barrier nonnegativity on a fixed short slab for small barriers.
@@ -1102,6 +2374,256 @@ structure TensorWMPRegularityOn
       (d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0) ->
       TensorFirstNullScalarSigns (I := I) (M := M) G S X N epsilon delta t0 d
 
+/--
+Section-backed regularity package for Hamilton's tensor WMP.
+
+This is the public geometric entry point for smooth two-tensor sections.  It
+replaces the raw `firstNullCompactness` field with the transparent inputs used
+by `TensorFirstNullCompactnessOn.of_section`: compactness of the metric
+unit-tangent geometric time slab, continuity of the metric and tensor
+quadratic evaluations on the ambient time/tangent-bundle product, and
+fixed-vector time continuity.
+-/
+structure TensorWMPSectionReg
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorSecFamily (I := I) (M := M))
+    (X : TimeDependentVectorField (I := I) (M := M))
+    (N : TwoTensorReaction (I := I) (M := M))
+    (T : Real) : Prop where
+  symmetric :
+    TwoTensorFamilySymmetricOn (I := I) (M := M)
+      (twoTensorSecToFamily (I := I) (M := M) S) (Set.Icc 0 T)
+  barrierRegularity :
+    TensorBarrierRegularityOn (I := I) (M := M) G
+      (twoTensorSecToFamily (I := I) (M := M) S) X N T
+  unitSlabCompact :
+    ∀ delta t0 : Real,
+      0 < delta ->
+      Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+      IsCompact
+        (Set.univ :
+          Set (MetricUnitTangentTimeSlab (I := I) (M := M) G
+            (Set.Icc t0 (t0 + delta))))
+  metricQuadCont :
+    ∀ delta t0 : Real,
+      0 < delta ->
+      Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+      Continuous
+        (metricBundleQuad (I := I) (M := M) G
+          (Set.Icc t0 (t0 + delta)))
+  tensorQuadCont :
+    ∀ delta t0 : Real,
+      0 < delta ->
+      Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+      Continuous
+        (tensorSecBundleQuad (I := I) (M := M) S
+          (Set.Icc t0 (t0 + delta)))
+  barrierFixedContinuous :
+    ∀ epsilon delta t0 : Real,
+      0 < epsilon ->
+      0 < delta ->
+      Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+      ∀ x (v : TangentSpace I x),
+        ContinuousOn
+          (fun t : Real =>
+            tensorBarrierFamily (I := I) (M := M) G
+              (twoTensorSecToFamily (I := I) (M := M) S)
+              epsilon delta t0 t x v v)
+          (Set.Icc t0 (t0 + delta))
+  firstNullScalarSigns :
+    ∀ epsilon delta t0 : Real,
+      0 < epsilon ->
+      0 < delta ->
+      Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+      ∀ (nabla2Barrier : TensorNabla2Family (I := I) (M := M))
+        (nablaBarrier : TensorNabla1Family (I := I) (M := M)),
+      (hstrict : TensorBarrierStrictSupersolutionOn (I := I) (M := M)
+        G (twoTensorSecToFamily (I := I) (M := M) S) X N
+        nabla2Barrier nablaBarrier epsilon delta t0) ->
+      (hnull : TensorNullEigenvectorCondition (I := I) (M := M)
+        G N (Set.Icc t0 (t0 + delta))) ->
+      (d : TensorFirstNullData (I := I) (M := M) G
+        (twoTensorSecToFamily (I := I) (M := M) S) epsilon delta t0) ->
+      TensorFirstNullScalarSigns (I := I) (M := M) G
+        (twoTensorSecToFamily (I := I) (M := M) S) X N epsilon delta t0 d
+
+namespace TensorWMPSectionReg
+
+/-- Build the section-backed WMP regularity package using the geometric
+closed-slab compactness theorem for the unit tangent time slab.  Callers supply
+the transparent scalar quadratic continuities; compactness is no longer a
+separate first-null input. -/
+theorem ofCompact
+    [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorSecFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {T : Real}
+    (hsym :
+      TwoTensorFamilySymmetricOn (I := I) (M := M)
+        (twoTensorSecToFamily (I := I) (M := M) S) (Set.Icc 0 T))
+    (hbar :
+      TensorBarrierRegularityOn (I := I) (M := M) G
+        (twoTensorSecToFamily (I := I) (M := M) S) X N T)
+    (hMetric :
+      ∀ delta t0 : Real,
+        0 < delta ->
+        Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+        Continuous
+          (metricBundleQuad (I := I) (M := M) G
+            (Set.Icc t0 (t0 + delta))))
+    (hTensor :
+      ∀ delta t0 : Real,
+        0 < delta ->
+        Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+        Continuous
+          (tensorSecBundleQuad (I := I) (M := M) S
+            (Set.Icc t0 (t0 + delta))))
+    (hFixed :
+      ∀ epsilon delta t0 : Real,
+        0 < epsilon ->
+        0 < delta ->
+        Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+        ∀ x (v : TangentSpace I x),
+          ContinuousOn
+            (fun t : Real =>
+              tensorBarrierFamily (I := I) (M := M) G
+                (twoTensorSecToFamily (I := I) (M := M) S)
+                epsilon delta t0 t x v v)
+            (Set.Icc t0 (t0 + delta)))
+    (hSigns :
+      ∀ epsilon delta t0 : Real,
+        0 < epsilon ->
+        0 < delta ->
+        Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+        ∀ (nabla2Barrier : TensorNabla2Family (I := I) (M := M))
+          (nablaBarrier : TensorNabla1Family (I := I) (M := M)),
+        (hstrict : TensorBarrierStrictSupersolutionOn (I := I) (M := M)
+          G (twoTensorSecToFamily (I := I) (M := M) S) X N
+          nabla2Barrier nablaBarrier epsilon delta t0) ->
+        (hnull : TensorNullEigenvectorCondition (I := I) (M := M)
+          G N (Set.Icc t0 (t0 + delta))) ->
+        (d : TensorFirstNullData (I := I) (M := M) G
+          (twoTensorSecToFamily (I := I) (M := M) S) epsilon delta t0) ->
+        TensorFirstNullScalarSigns (I := I) (M := M) G
+          (twoTensorSecToFamily (I := I) (M := M) S) X N epsilon delta t0 d) :
+    TensorWMPSectionReg (I := I) (M := M) G S X N T where
+  symmetric := hsym
+  barrierRegularity := hbar
+  unitSlabCompact := by
+    intro delta t0 hdelta hsub
+    exact metricUnitTimeSlab_icc_compact_of_bundle (I := I) (M := M)
+      G t0 (t0 + delta) (G t0)
+      (by
+        simpa [metricBundleQuad] using hMetric delta t0 hdelta hsub)
+  metricQuadCont := hMetric
+  tensorQuadCont := hTensor
+  barrierFixedContinuous := hFixed
+  firstNullScalarSigns := hSigns
+
+/-- Build the section-backed regularity package from total-space continuity of
+the time-dependent metric and two-tensor sections over each compact test slab. -/
+theorem ofTotal
+    [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorSecFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {T : Real}
+    (hsym :
+      TwoTensorFamilySymmetricOn (I := I) (M := M)
+        (twoTensorSecToFamily (I := I) (M := M) S) (Set.Icc 0 T))
+    (hbar :
+      TensorBarrierRegularityOn (I := I) (M := M) G
+        (twoTensorSecToFamily (I := I) (M := M) S) X N T)
+    (hMetric :
+      ∀ delta t0 : Real,
+        0 < delta ->
+        Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+        Continuous
+          (fun q : {t : Real // t ∈ Set.Icc t0 (t0 + delta)} × TangentBundle I M =>
+            TotalSpace.mk' (Tensor0SModel 2 Real E)
+              (E := fun x : M => Tensor0SSpace 2 I x) q.2.proj
+              (metricTensorField (I := I) (G q.1.1) q.2.proj)))
+    (hTensor :
+      ∀ delta t0 : Real,
+        0 < delta ->
+        Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+        Continuous
+          (fun q : {t : Real // t ∈ Set.Icc t0 (t0 + delta)} × TangentBundle I M =>
+            TotalSpace.mk' (Tensor0SModel 2 Real E)
+              (E := fun x : M => Tensor0SSpace 2 I x) q.2.proj
+              (S q.1.1 q.2.proj)))
+    (hFixed :
+      ∀ epsilon delta t0 : Real,
+        0 < epsilon ->
+        0 < delta ->
+        Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+        ∀ x (v : TangentSpace I x),
+          ContinuousOn
+            (fun t : Real =>
+              tensorBarrierFamily (I := I) (M := M) G
+                (twoTensorSecToFamily (I := I) (M := M) S)
+                epsilon delta t0 t x v v)
+            (Set.Icc t0 (t0 + delta)))
+    (hSigns :
+      ∀ epsilon delta t0 : Real,
+        0 < epsilon ->
+        0 < delta ->
+        Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+        ∀ (nabla2Barrier : TensorNabla2Family (I := I) (M := M))
+          (nablaBarrier : TensorNabla1Family (I := I) (M := M)),
+        (hstrict : TensorBarrierStrictSupersolutionOn (I := I) (M := M)
+          G (twoTensorSecToFamily (I := I) (M := M) S) X N
+          nabla2Barrier nablaBarrier epsilon delta t0) ->
+        (hnull : TensorNullEigenvectorCondition (I := I) (M := M)
+          G N (Set.Icc t0 (t0 + delta))) ->
+        (d : TensorFirstNullData (I := I) (M := M) G
+          (twoTensorSecToFamily (I := I) (M := M) S) epsilon delta t0) ->
+        TensorFirstNullScalarSigns (I := I) (M := M) G
+          (twoTensorSecToFamily (I := I) (M := M) S) X N epsilon delta t0 d) :
+    TensorWMPSectionReg (I := I) (M := M) G S X N T :=
+  ofCompact (I := I) (M := M)
+    (G := G) (S := S) (X := X) (N := N) (T := T)
+    hsym hbar
+    (fun delta t0 hdelta hsub =>
+      RicciFlower.Realized.metricFamQuadCont (I := I) (M := M)
+        G (Set.Icc t0 (t0 + delta))
+        (hMetric delta t0 hdelta hsub))
+    (fun delta t0 hdelta hsub =>
+      RicciFlower.Realized.tensorQuadCont (I := I) (M := M)
+        S (Set.Icc t0 (t0 + delta))
+        (hTensor delta t0 hdelta hsub))
+    hFixed hSigns
+
+/-- Convert the section-backed WMP regularity package to the raw kernel
+package, producing first-null compactness via `TensorFirstNullCompactnessOn.of_section`. -/
+theorem toRaw
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorSecFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {T : Real}
+    (h : TensorWMPSectionReg (I := I) (M := M) G S X N T) :
+    TensorWMPRegularityOn (I := I) (M := M) G
+      (twoTensorSecToFamily (I := I) (M := M) S) X N T where
+  symmetric := h.symmetric
+  barrierRegularity := h.barrierRegularity
+  firstNullCompactness := by
+    intro epsilon delta t0 hepsilon hdelta hsub
+    exact TensorFirstNullCompactnessOn.of_section_timeSlab (I := I) (M := M)
+      G S epsilon delta t0
+      (h.unitSlabCompact delta t0 hdelta hsub)
+      (barrierTimeCont (I := I) (M := M) G S epsilon delta t0
+        (Set.Icc t0 (t0 + delta))
+        (h.tensorQuadCont delta t0 hdelta hsub)
+        (h.metricQuadCont delta t0 hdelta hsub))
+      (h.barrierFixedContinuous epsilon delta t0 hepsilon hdelta hsub)
+  firstNullScalarSigns := h.firstNullScalarSigns
+
+end TensorWMPSectionReg
+
 /-- Convert an absolute-value reaction estimate into the one-sided upper bound
 needed in the strict-barrier local estimate. -/
 private theorem reaction_bound_of_abs {a b R : Real}
@@ -1162,22 +2684,22 @@ theorem strictBarrierBounds
             ∃ metricDeriv : TensorQuadraticFormFamily (I := I) (M := M),
             ∃ reactionErr : TensorQuadraticFormFamily (I := I) (M := M),
             ∃ metricGain : TensorQuadraticFormFamily (I := I) (M := M),
-              (∀ t, t ∈ Set.Icc t0 (t0 + delta) ->
+              (∀ t, t ∈ Set.Ioc t0 (t0 + delta) ->
                 ∀ x, ∀ v : TangentSpace I x,
                   HasDerivWithinAt (fun s : Real => (G s).inner x v v)
                     (metricDeriv t x v) (Set.Icc t0 (t0 + delta)) t) ∧
-              (∀ t, t ∈ Set.Icc t0 (t0 + delta) ->
+              (∀ t, t ∈ Set.Ioc t0 (t0 + delta) ->
                 ∀ x, ∀ v : TangentSpace I x,
                   metricGain t x v ≤
                     epsilon * ((G t).inner x v v +
                       (delta + t - t0) * metricDeriv t x v)) ∧
-              (∀ t, t ∈ Set.Icc t0 (t0 + delta) ->
+              (∀ t, t ∈ Set.Ioc t0 (t0 + delta) ->
                 ∀ x, ∀ v : TangentSpace I x,
                   N t (G t)
                       (tensorBarrierFamily (I := I) (M := M)
                         G S epsilon delta t0 t) x v v ≤
                     N t (G t) (S t) x v v + reactionErr t x v) ∧
-              (∀ t, t ∈ Set.Icc t0 (t0 + delta) ->
+              (∀ t, t ∈ Set.Ioc t0 (t0 + delta) ->
                 ∀ x, ∀ v : TangentSpace I x,
                   v ≠ 0 -> reactionErr t x v < metricGain t x v) := by
   obtain ⟨delta0, hdelta0, hdelta0T, hmetric⟩ :=
@@ -1200,7 +2722,8 @@ theorem strictBarrierBounds
   · intro t ht x v
     exact hmetric_gain t ht x v
   · intro t ht x v
-    have hLip_t := hLip epsilon delta hepsilon hdelta hdelta_le t ht x v
+    have ht_closed : t ∈ Set.Icc t0 (t0 + delta) := ⟨le_of_lt ht.1, ht.2⟩
+    have hLip_t := hLip epsilon delta hepsilon hdelta hdelta_le t ht_closed x v
     dsimp [reactionErr]
     exact reaction_bound_of_abs (a := N t (G t) (S t) x v v)
       (b := N t (G t)
@@ -1209,7 +2732,7 @@ theorem strictBarrierBounds
   · intro t ht x v hv
     dsimp [reactionErr, metricGain]
     have htime_nonneg : 0 ≤ delta + t - t0 := by
-      have ht_sub : 0 ≤ t - t0 := sub_nonneg.mpr ht.1
+      have ht_sub : 0 ≤ t - t0 := sub_nonneg.mpr (le_of_lt ht.1)
       have hsum : 0 ≤ delta + (t - t0) :=
         add_nonneg (le_of_lt hdelta) ht_sub
       simpa [sub_eq_add_neg, add_assoc, add_comm, add_left_comm] using hsum
@@ -1341,14 +2864,14 @@ theorem tensorBarrier_strict_supersolution
       hmetric_deriv, hgain, hreaction, hmargin⟩ :=
     hstrict_bounds delta hdelta hdelta_le_delta0 hsmall epsilon hepsilon
   refine ⟨nabla2S, nablaS, ?_⟩
-  have hsub : Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T := by
+  have hsubInterior : Set.Ioc t0 (t0 + delta) ⊆ Set.Ioc 0 T := by
     intro t ht
-    exact ⟨le_trans ht0.1 ht.1, le_trans ht.2 hdeltaT⟩
+    exact ⟨lt_of_le_of_lt ht0.1 ht.1, le_trans ht.2 hdeltaT⟩
   exact strictBarrier_of_derivEst (I := I) (M := M)
     (G := G) (S := S) (X := X) (N := N)
     (nabla2S := nabla2S) (nablaS := nablaS)
     (epsilon := epsilon) (delta := delta) (t0 := t0) (T := T)
-    hsub hparabolic.evaluatedInequality
+    hsubInterior hparabolic.evaluatedInequality
     metricDeriv reactionErr metricGain hmetric_deriv hgain hreaction hmargin
 
 /--
@@ -1421,7 +2944,7 @@ theorem tensor_first_null_contradiction
             (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 d.t1)
             d.x1 d.v d.v <
         timeDeriv d.t1 d.x1 d.v := by
-    exact hstrict_eval d.t1 ht1_mem_slab d.x1 d.v d.v_ne_zero
+    exact hstrict_eval d.t1 d.t1_mem d.x1 d.v d.v_ne_zero
   have ht1_mem_until : d.t1 ∈ Set.Icc t0 d.t1 :=
     ⟨le_of_lt d.t1_mem.1, le_rfl⟩
   have hbarrier_nonnegative :
@@ -1545,6 +3068,29 @@ theorem hamilton_tensor_wmp
     TwoTensorFamilyNonnegativeOn (I := I) (M := M) S (Set.Icc 0 T) := by
   exact tensor_wmp_of_barrier_limit (I := I) (M := M)
     (G := G) (S := S) (X := X) (N := N) _hT hreg _hparabolic _hnull _hinit
+
+/-- Section-backed public wrapper for Hamilton's tensor WMP. -/
+theorem hamilton_tensor_wmp_section
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorSecFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {nabla2S : TensorNabla2Family (I := I) (M := M)}
+    {nablaS : TensorNabla1Family (I := I) (M := M)}
+    {T : Real}
+    (_hT : 0 ≤ T)
+    (hreg : TensorWMPSectionReg (I := I) (M := M) G S X N T)
+    (_hparabolic : TensorParabolicSupersolutionWithDriftOn
+      (I := I) (M := M) G (twoTensorSecToFamily (I := I) (M := M) S)
+      X N nabla2S nablaS T)
+    (_hnull : TensorNullEigenvectorCondition (I := I) (M := M) G N (Set.Icc 0 T))
+    (_hinit : TwoTensorFamilyNonnegativeAtTime (I := I) (M := M)
+      (twoTensorSecToFamily (I := I) (M := M) S) 0) :
+    TwoTensorFamilyNonnegativeOn (I := I) (M := M)
+      (twoTensorSecToFamily (I := I) (M := M) S) (Set.Icc 0 T) := by
+  exact hamilton_tensor_wmp (I := I) (M := M)
+    (G := G) (S := twoTensorSecToFamily (I := I) (M := M) S)
+    (X := X) (N := N) _hT hreg.toRaw _hparabolic _hnull _hinit
 
 end
 

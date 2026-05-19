@@ -42,6 +42,7 @@ variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M]
 
 /-- Closed, connected, smooth, boundaryless, three-dimensional manifold
@@ -221,6 +222,7 @@ structure Ham3CGHLimitData (I : ModelWithCorners Real E H) (M : Type u) where
   [topology : TopologicalSpace N]
   [charted : ChartedSpace H N]
   [smooth : IsManifold I ∞ N]
+  [smooth_plus : IsManifold I ((∞ : WithTop ℕ∞) + 1) N]
   [sigmaCompact : SigmaCompactSpace N]
   [t2 : T2Space N]
   basepoint : N
@@ -242,6 +244,7 @@ def Ham3LimitFlow (L : Ham3CGHLimitData (I := I) M) : Prop :=
   letI : TopologicalSpace L.N := L.topology
   letI : ChartedSpace H L.N := L.charted
   letI : IsManifold I ∞ L.N := L.smooth
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) L.N := L.smooth_plus
   letI : SigmaCompactSpace L.N := L.sigmaCompact
   letI : T2Space L.N := L.t2
   RicciFlow.IsSolutionOn (I := I) L.S
