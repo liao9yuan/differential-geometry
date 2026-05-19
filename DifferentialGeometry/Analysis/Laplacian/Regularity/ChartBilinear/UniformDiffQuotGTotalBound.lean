@@ -12,30 +12,43 @@ quantity
 G_total = ∫_{Ω'} ∑_l (g_g l)² + ∫_{Ω'} (u_g)² + ∫_{Ω'} (f_g)²
 ```
 
-where the chart-localised data `g_g`, `u_g`, `f_g` are the canonical
-cutoff extensions of a `ChartBilinearH1ComplData` `D`:
+where the chart-localised data `g_g`, `u_g` are the canonical cutoff
+extensions of a `ChartBilinearH1ComplData` `D`, and `f_g` is the cutoff
+extension of an arbitrary `L²`-loc source `fSrc`:
 
 * `u_g := χ · D.u_chart`,
-* `f_g := χ · D.f_chart`,
+* `f_g := χ · fSrc`,
 * `g_g l := (∂_l χ) · D.u_chart + χ · D.weak_partial l`,
 
 for a smooth compactly-supported cutoff `χ` supported in the chart
 target.
 
 For a quantitative campaign, `G_total` must be re-expressed and bounded
-by the divergence-form data's own `L²` norms — `eLpNorm` of
-`D.weak_partial l`, `D.u_chart`, `D.f_chart` over `closure Ω'` — with a
+by the underlying data's own `L²` norms — `eLpNorm` of
+`D.weak_partial l`, `D.u_chart`, `fSrc` over `closure Ω'` — with a
 constant depending only on the chart geometry (the cutoff `χ`), not on
-`D`.
+`D` or `fSrc`.
 
-## Main result
+A density-reconciliation helper (`chartDensitySup`,
+`densityWeightedSource_memLp`, `densityWeightedSource_eLpNorm_sq_le`)
+lets a downstream consumer instantiate the free source as
+`fun x => densityOnEuclid g α x · f x` for an `L²`-loc `f` — the
+chart-pulled bilinear form carries a volume-density factor — and then
+trade the `density · f` norm for the `f` norm with the explicit constant
+`chartDensitySup²`.
 
-* `gTotal_le_data_eLpNorm`: the `G_total` expression, for the canonical
-  cutoff extensions of `D`, is bounded by `C_χ` times the sum of squared
-  `L²(closure Ω')` norms of `D.weak_partial l`, `D.u_chart`, `D.f_chart`,
+## Main results
+
+* `gTotal_le_data_eLpNorm`: the `G_total` expression — first two terms
+  from the canonical cutoff extensions of `D`, third term from the free
+  source `fSrc` — is bounded by `C_χ` times the sum of squared
+  `L²(closure Ω')` norms of `D.weak_partial l`, `D.u_chart`, `fSrc`,
   where `C_χ = 2 · (n + 1) · (M_χ² + M_∂χ² + 1)` depends only on the
   cutoff sup bounds `M_χ ≥ |χ|`, `M_∂χ ≥ |∂_l χ|` and the dimension `n`.
-  The constant is quantified before `D`.
+  The constant is quantified before `D` and `fSrc`.
+* `chartDensitySup`, `densityWeightedSource_memLp`,
+  `densityWeightedSource_eLpNorm_sq_le`: the density-reconciliation
+  helper described above.
 
 ## Strategy
 
@@ -192,22 +205,25 @@ Let `g` be a smooth Riemannian metric, `α : M`, and `Ω'` a subset of
 supported cutoff supported in the chart target, with `|χ|` bounded by
 `M_χ` and each directional partial `|∂_l χ|` bounded by `M_∂χ`.
 
-Then, for every `ChartBilinearH1ComplData D`, the energy quantity
+Let `fSrc : EuclN → ℝ` be an arbitrary source function lying in
+`L²(closure Ω')`. Then, for every `ChartBilinearH1ComplData D`, the
+energy quantity
 
 ```
 G_total = ∫_{Ω'} ∑_l ((∂_l χ) · D.u_chart + χ · D.weak_partial l)²
         + ∫_{Ω'} (χ · D.u_chart)²
-        + ∫_{Ω'} (χ · D.f_chart)²
+        + ∫_{Ω'} (χ · fSrc)²
 ```
 
-— assembled from the canonical cutoff extensions
-`u_g = χ · D.u_chart`, `f_g = χ · D.f_chart`,
-`g_g l = (∂_l χ) · D.u_chart + χ · D.weak_partial l` — is bounded by
+— whose first two terms are the canonical cutoff extensions
+`u_g = χ · D.u_chart`, `g_g l = (∂_l χ) · D.u_chart + χ · D.weak_partial l`
+of `D`, and whose third term is the cutoff extension `χ · fSrc` of the
+free source `fSrc` — is bounded by
 
 ```
 C_χ · ( ∑_l (eLpNorm (D.weak_partial l) 2 (volume.restrict (closure Ω')))²
         + (eLpNorm D.u_chart 2 (volume.restrict (closure Ω')))²
-        + (eLpNorm D.f_chart 2 (volume.restrict (closure Ω')))² )
+        + (eLpNorm fSrc 2 (volume.restrict (closure Ω')))² )
 ```
 
 (all `eLpNorm`s in `toReal` form), with the explicit constant
@@ -217,8 +233,8 @@ C_χ = 2 · (n + 1) · (M_χ² + M_∂χ² + 1)
 ```
 
 depending only on the cutoff sup bounds `M_χ`, `M_∂χ` and the dimension
-`n = finrank ℝ E` — and **not** on `D`. The constant `C_χ` is quantified
-before `D`. -/
+`n = finrank ℝ E` — and **not** on `D` or `fSrc`. The constant `C_χ` is
+quantified before `D` and `fSrc`. -/
 theorem gTotal_le_data_eLpNorm
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -230,20 +246,22 @@ theorem gTotal_le_data_eLpNorm
     {Ω' : Set EuclN}
     (hΩ'_closure_compact : IsCompact (closure Ω'))
     (hΩ'_closure_in : closure Ω' ⊆ chartTargetEuclid (I := I) (M := M) α)
+    {fSrc : EuclN → ℝ}
+    (hfSrc : MemLp fSrc 2 ((volume : Measure EuclN).restrict (closure Ω')))
     (D : ChartBilinearH1ComplData (I := I) (M := M) g α) :
     (∫ x in Ω', ∑ l : Fin (Module.finrank ℝ E),
         ((fderiv ℝ χ x) (EuclideanSpace.single l 1) * D.u_chart x +
           χ x * D.weak_partial l x) ^ 2
       ∂(volume : Measure EuclN)) +
     (∫ x in Ω', (χ x * D.u_chart x) ^ 2 ∂(volume : Measure EuclN)) +
-    (∫ x in Ω', (χ x * D.f_chart x) ^ 2 ∂(volume : Measure EuclN)) ≤
+    (∫ x in Ω', (χ x * fSrc x) ^ 2 ∂(volume : Measure EuclN)) ≤
       (2 * ((Module.finrank ℝ E : ℝ) + 1) * (M_χ ^ 2 + M_dχ ^ 2 + 1)) *
         ((∑ l : Fin (Module.finrank ℝ E),
             (eLpNorm (D.weak_partial l) 2
               ((volume : Measure EuclN).restrict (closure Ω'))).toReal ^ 2) +
           (eLpNorm D.u_chart 2
             ((volume : Measure EuclN).restrict (closure Ω'))).toReal ^ 2 +
-          (eLpNorm D.f_chart 2
+          (eLpNorm fSrc 2
             ((volume : Measure EuclN).restrict (closure Ω'))).toReal ^ 2) := by
   classical
   -- We work with `n := finrank ℝ E` and the restricted reference measure
@@ -269,10 +287,9 @@ theorem gTotal_le_data_eLpNorm
       ((volume : Measure EuclN).restrict (closure Ω')) :=
     memLp_volume_restrict_of_memLp_chartPulledWeightedMeasure (I := I) (M := M)
       D.u_chart_memLp_weighted hΩ'_closure_compact hΩ'_closure_meas hΩ'_closure_in
-  have hf_l2 : MemLp D.f_chart 2
-      ((volume : Measure EuclN).restrict (closure Ω')) :=
-    memLp_volume_restrict_of_memLp_chartPulledWeightedMeasure (I := I) (M := M)
-      D.f_chart_memLp_weighted hΩ'_closure_compact hΩ'_closure_meas hΩ'_closure_in
+  -- `L²(closure Ω')` membership of the free source `fSrc`, supplied directly.
+  have hf_l2 : MemLp fSrc 2
+      ((volume : Measure EuclN).restrict (closure Ω')) := hfSrc
   have hwp_l2 : ∀ l : Fin (Module.finrank ℝ E), MemLp (D.weak_partial l) 2
       ((volume : Measure EuclN).restrict (closure Ω')) := fun l =>
     D.weak_partial_locally_memLp l (closure Ω') hΩ'_closure_compact hΩ'_closure_in
@@ -288,7 +305,7 @@ theorem gTotal_le_data_eLpNorm
         ((volume : Measure EuclN).restrict (closure Ω'))).toReal ^ 2 with hSw_def
   set Su : ℝ := (eLpNorm D.u_chart 2
       ((volume : Measure EuclN).restrict (closure Ω'))).toReal ^ 2 with hSu_def
-  set Sf : ℝ := (eLpNorm D.f_chart 2
+  set Sf : ℝ := (eLpNorm fSrc 2
       ((volume : Measure EuclN).restrict (closure Ω'))).toReal ^ 2 with hSf_def
   have hSw_nn : 0 ≤ Sw := by
     rw [hSw_def]; exact Finset.sum_nonneg (fun _ _ => sq_nonneg _)
@@ -300,7 +317,7 @@ theorem gTotal_le_data_eLpNorm
     rw [hSu_def]
     exact integral_sq_eq_eLpNorm_two_toReal_sq hu_l2
   have hf_int_closure :
-      ∫ x in closure Ω', (D.f_chart x) ^ 2 ∂(volume : Measure EuclN) = Sf := by
+      ∫ x in closure Ω', (fSrc x) ^ 2 ∂(volume : Measure EuclN) = Sf := by
     rw [hSf_def]
     exact integral_sq_eq_eLpNorm_two_toReal_sq hf_l2
   have hwp_int_closure : ∀ l : Fin (Module.finrank ℝ E),
@@ -315,8 +332,8 @@ theorem gTotal_le_data_eLpNorm
   have hug_l2 : MemLp (fun x => χ x * D.u_chart x) 2
       ((volume : Measure EuclN).restrict (closure Ω')) :=
     memLp_cutoff_mul hM_χ_nn hM_χ_bd hχ_aesm hu_l2
-  -- `χ · D.f_chart ∈ L²(closure Ω')`.
-  have hfg_l2 : MemLp (fun x => χ x * D.f_chart x) 2
+  -- `χ · fSrc ∈ L²(closure Ω')`.
+  have hfg_l2 : MemLp (fun x => χ x * fSrc x) 2
       ((volume : Measure EuclN).restrict (closure Ω')) :=
     memLp_cutoff_mul hM_χ_nn hM_χ_bd hχ_aesm hf_l2
   -- `(∂_l χ) · D.u_chart + χ · D.weak_partial l ∈ L²(closure Ω')`.
@@ -363,7 +380,7 @@ theorem gTotal_le_data_eLpNorm
       (closure Ω') (volume : Measure EuclN) := by
     have := hug_l2.integrable_sq
     simpa [IntegrableOn, pow_two] using this
-  have h_fg_sq_int : IntegrableOn (fun x => (χ x * D.f_chart x) ^ 2)
+  have h_fg_sq_int : IntegrableOn (fun x => (χ x * fSrc x) ^ 2)
       (closure Ω') (volume : Measure EuclN) := by
     have := hfg_l2.integrable_sq
     simpa [IntegrableOn, pow_two] using this
@@ -386,8 +403,8 @@ theorem gTotal_le_data_eLpNorm
       (Filter.Eventually.of_forall (fun x => sq_nonneg _))
       (Filter.Eventually.of_forall subset_closure)
   have h_fg_mono :
-      (∫ x in Ω', (χ x * D.f_chart x) ^ 2 ∂(volume : Measure EuclN)) ≤
-      ∫ x in closure Ω', (χ x * D.f_chart x) ^ 2 ∂(volume : Measure EuclN) :=
+      (∫ x in Ω', (χ x * fSrc x) ^ 2 ∂(volume : Measure EuclN)) ≤
+      ∫ x in closure Ω', (χ x * fSrc x) ^ 2 ∂(volume : Measure EuclN) :=
     setIntegral_mono_set h_fg_sq_int
       (Filter.Eventually.of_forall (fun x => sq_nonneg _))
       (Filter.Eventually.of_forall subset_closure)
@@ -429,7 +446,7 @@ theorem gTotal_le_data_eLpNorm
       (closure Ω') (volume : Measure EuclN) := by
     have := hu_l2.integrable_sq
     simpa [IntegrableOn, pow_two] using this
-  have h_f_sq_int : IntegrableOn (fun x => (D.f_chart x) ^ 2)
+  have h_f_sq_int : IntegrableOn (fun x => (fSrc x) ^ 2)
       (closure Ω') (volume : Measure EuclN) := by
     have := hf_l2.integrable_sq
     simpa [IntegrableOn, pow_two] using this
@@ -532,22 +549,22 @@ theorem gTotal_le_data_eLpNorm
         (Filter.Eventually.of_forall (fun x => h_χmul_pt D.u_chart x))
     rwa [integral_const_mul, hu_int_closure] at h_int_le
   have h_fg_closure_le :
-      (∫ x in closure Ω', (χ x * D.f_chart x) ^ 2 ∂(volume : Measure EuclN)) ≤
+      (∫ x in closure Ω', (χ x * fSrc x) ^ 2 ∂(volume : Measure EuclN)) ≤
       M_χ ^ 2 * Sf := by
     have h_int_le :
-        (∫ x in closure Ω', (χ x * D.f_chart x) ^ 2 ∂(volume : Measure EuclN)) ≤
-        ∫ x in closure Ω', M_χ ^ 2 * (D.f_chart x) ^ 2
+        (∫ x in closure Ω', (χ x * fSrc x) ^ 2 ∂(volume : Measure EuclN)) ≤
+        ∫ x in closure Ω', M_χ ^ 2 * (fSrc x) ^ 2
           ∂(volume : Measure EuclN) :=
       integral_mono_of_nonneg
         (Filter.Eventually.of_forall (fun x => sq_nonneg _))
         (h_f_sq_int.integrable.const_mul (M_χ ^ 2))
-        (Filter.Eventually.of_forall (fun x => h_χmul_pt D.f_chart x))
+        (Filter.Eventually.of_forall (fun x => h_χmul_pt fSrc x))
     rwa [integral_const_mul, hf_int_closure] at h_int_le
   have h_ug_final :
       (∫ x in Ω', (χ x * D.u_chart x) ^ 2 ∂(volume : Measure EuclN)) ≤
       M_χ ^ 2 * Su := le_trans h_ug_mono h_ug_closure_le
   have h_fg_final :
-      (∫ x in Ω', (χ x * D.f_chart x) ^ 2 ∂(volume : Measure EuclN)) ≤
+      (∫ x in Ω', (χ x * fSrc x) ^ 2 ∂(volume : Measure EuclN)) ≤
       M_χ ^ 2 * Sf := le_trans h_fg_mono h_fg_closure_le
   -- ====================================================================
   -- Step 4: assemble and absorb into the explicit constant `C_χ`.
@@ -558,7 +575,7 @@ theorem gTotal_le_data_eLpNorm
           ((fderiv ℝ χ x) (EuclideanSpace.single l 1) * D.u_chart x +
             χ x * D.weak_partial l x) ^ 2 ∂(volume : Measure EuclN)) +
       (∫ x in Ω', (χ x * D.u_chart x) ^ 2 ∂(volume : Measure EuclN)) +
-      (∫ x in Ω', (χ x * D.f_chart x) ^ 2 ∂(volume : Measure EuclN)) ≤
+      (∫ x in Ω', (χ x * fSrc x) ^ 2 ∂(volume : Measure EuclN)) ≤
       (2 * (Module.finrank ℝ E : ℝ) * M_dχ ^ 2 * Su + 2 * M_χ ^ 2 * Sw) +
         M_χ ^ 2 * Su + M_χ ^ 2 * Sf := by
     have := add_le_add (add_le_add h_principal_final h_ug_final) h_fg_final
@@ -609,6 +626,169 @@ theorem gTotal_le_data_eLpNorm
       ≤ Cχ * (Sw + Su + Sf) := h_final
     _ = (2 * ((Module.finrank ℝ E : ℝ) + 1) * (M_χ ^ 2 + M_dχ ^ 2 + 1)) *
           (Sw + Su + Sf) := by rw [hCχ_def]
+
+/-! ## Density-reconciliation helper
+
+The downstream consumer of `gTotal_le_data_eLpNorm` instantiates the free
+source as `fun x => densityOnEuclid g α x · f x` for an `L²`-loc `f`,
+because the chart-pulled bilinear form carries a volume-density factor.
+Since `densityOnEuclid g α` is smooth — hence continuous — on the chart
+target, it is bounded on the compact `closure Ω'`. The four declarations
+below name an explicit sup bound `chartDensitySup` for `|density|` over
+`closure Ω'`, and trade the `density · f` norm for the `f` norm with the
+explicit constant `chartDensitySup²`. -/
+
+/-- An explicit real upper bound for `|densityOnEuclid g α|` over
+`closure Ω'`: the supremum of the image of `closure Ω'` under
+`|densityOnEuclid g α|`.
+
+This is a named geometric constant. It is defined unconditionally (when
+`closure Ω'` is empty the supremum of the empty set is `0`); under the
+compactness and chart-target hypotheses it is an honest sup bound, see
+`abs_densityOnEuclid_le_chartDensitySup`. -/
+noncomputable def chartDensitySup
+    (g : SmoothRiemannianMetric I M) (α : M) (Ω' : Set EuclN) : ℝ :=
+  sSup ((fun x => |densityOnEuclid (I := I) g α x|) '' closure Ω')
+
+/-- `chartDensitySup` is nonnegative: it is the supremum of a set of
+nonnegative reals (or `0` when `closure Ω'` is empty). -/
+lemma chartDensitySup_nonneg
+    (g : SmoothRiemannianMetric I M) (α : M) (Ω' : Set EuclN) :
+    0 ≤ chartDensitySup (I := I) (M := M) g α Ω' := by
+  unfold chartDensitySup
+  refine Real.sSup_nonneg ?_
+  rintro y ⟨x, _, rfl⟩
+  exact abs_nonneg _
+
+/-- Under compactness of `closure Ω'` and containment in the chart
+target, `chartDensitySup` is an honest upper bound for `|densityOnEuclid|`
+at every point of `closure Ω'`. -/
+lemma abs_densityOnEuclid_le_chartDensitySup
+    {g : SmoothRiemannianMetric I M} {α : M} {Ω' : Set EuclN}
+    (hΩ'_closure_compact : IsCompact (closure Ω'))
+    (hΩ'_closure_in : closure Ω' ⊆ chartTargetEuclid (I := I) (M := M) α)
+    {x : EuclN} (hx : x ∈ closure Ω') :
+    |densityOnEuclid (I := I) g α x| ≤
+      chartDensitySup (I := I) (M := M) g α Ω' := by
+  -- `|densityOnEuclid g α|` is continuous on `closure Ω'`, hence the
+  -- compact image is bounded above, so the membership gives `≤ sSup`.
+  have h_dens_contOn : ContinuousOn (densityOnEuclid (I := I) g α)
+      (closure Ω') :=
+    ((densityOnEuclid_contDiffOn (I := I) g α).continuousOn).mono hΩ'_closure_in
+  have h_abs_contOn : ContinuousOn
+      (fun x => |densityOnEuclid (I := I) g α x|) (closure Ω') :=
+    h_dens_contOn.abs
+  have h_bddAbove : BddAbove
+      ((fun x => |densityOnEuclid (I := I) g α x|) '' closure Ω') :=
+    hΩ'_closure_compact.bddAbove_image h_abs_contOn
+  exact le_csSup h_bddAbove (Set.mem_image_of_mem _ hx)
+
+/-- The density-weighted source `fun x => densityOnEuclid g α x · f x`
+lies in `L²(closure Ω')` whenever `f` does: `densityOnEuclid g α` is
+continuous, hence bounded on the compact `closure Ω'`, and the product of
+a bounded function with an `L²` function is `L²`. -/
+lemma densityWeightedSource_memLp
+    {g : SmoothRiemannianMetric I M} {α : M} {Ω' : Set EuclN}
+    (hΩ'_closure_compact : IsCompact (closure Ω'))
+    (hΩ'_closure_in : closure Ω' ⊆ chartTargetEuclid (I := I) (M := M) α)
+    {f : EuclN → ℝ}
+    (hf : MemLp f 2 ((volume : Measure EuclN).restrict (closure Ω'))) :
+    MemLp (fun x => densityOnEuclid (I := I) g α x * f x) 2
+      ((volume : Measure EuclN).restrict (closure Ω')) := by
+  classical
+  have hΩ'_closure_meas : MeasurableSet (closure Ω') :=
+    isClosed_closure.measurableSet
+  -- `densityOnEuclid g α` is continuous on `closure Ω'`.
+  have h_dens_contOn : ContinuousOn (densityOnEuclid (I := I) g α)
+      (closure Ω') :=
+    ((densityOnEuclid_contDiffOn (I := I) g α).continuousOn).mono hΩ'_closure_in
+  -- a.e.-strong-measurability of `densityOnEuclid g α` for the restricted
+  -- measure, from continuity on the measurable closure.
+  have h_dens_aesm : AEStronglyMeasurable (densityOnEuclid (I := I) g α)
+      ((volume : Measure EuclN).restrict (closure Ω')) :=
+    h_dens_contOn.aestronglyMeasurable hΩ'_closure_meas
+  -- pointwise bound `|density x| ≤ chartDensitySup` on `closure Ω'`.
+  set Mden : ℝ := chartDensitySup (I := I) (M := M) g α Ω' with hMden_def
+  have hMden_nn : 0 ≤ Mden :=
+    chartDensitySup_nonneg (I := I) (M := M) g α Ω'
+  -- `‖density·f‖ ≤ ‖Mden · f‖` a.e. on the restricted measure.
+  have h_pt_le : ∀ᵐ x ∂((volume : Measure EuclN).restrict (closure Ω')),
+      ‖densityOnEuclid (I := I) g α x * f x‖ ≤ ‖Mden * f x‖ := by
+    refine ae_restrict_of_forall_mem hΩ'_closure_meas ?_
+    intro x hx
+    rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_mul, abs_mul,
+      abs_of_nonneg hMden_nn]
+    have h_dens_bd : |densityOnEuclid (I := I) g α x| ≤ Mden :=
+      abs_densityOnEuclid_le_chartDensitySup
+        hΩ'_closure_compact hΩ'_closure_in hx
+    exact mul_le_mul_of_nonneg_right h_dens_bd (abs_nonneg _)
+  exact MemLp.mono (hf.const_mul Mden)
+    (h_dens_aesm.mul hf.aestronglyMeasurable) h_pt_le
+
+/-- The squared `L²(closure Ω')` norm of the density-weighted source
+`fun x => densityOnEuclid g α x · f x` is bounded by `chartDensitySup²`
+times the squared `L²(closure Ω')` norm of `f`. -/
+lemma densityWeightedSource_eLpNorm_sq_le
+    {g : SmoothRiemannianMetric I M} {α : M} {Ω' : Set EuclN}
+    (hΩ'_closure_compact : IsCompact (closure Ω'))
+    (hΩ'_closure_in : closure Ω' ⊆ chartTargetEuclid (I := I) (M := M) α)
+    {f : EuclN → ℝ}
+    (hf : MemLp f 2 ((volume : Measure EuclN).restrict (closure Ω'))) :
+    (eLpNorm (fun x => densityOnEuclid (I := I) g α x * f x) 2
+        ((volume : Measure EuclN).restrict (closure Ω'))).toReal ^ 2 ≤
+      (chartDensitySup (I := I) (M := M) g α Ω') ^ 2 *
+        (eLpNorm f 2
+          ((volume : Measure EuclN).restrict (closure Ω'))).toReal ^ 2 := by
+  classical
+  have hΩ'_closure_meas : MeasurableSet (closure Ω') :=
+    isClosed_closure.measurableSet
+  set μ : Measure EuclN := (volume : Measure EuclN).restrict (closure Ω')
+    with hμ_def
+  set Mden : ℝ := chartDensitySup (I := I) (M := M) g α Ω' with hMden_def
+  have hMden_nn : 0 ≤ Mden :=
+    chartDensitySup_nonneg (I := I) (M := M) g α Ω'
+  -- pointwise: `‖density·f‖ ≤ ‖Mden • f‖` a.e. on `μ`.
+  have h_pt_le : ∀ᵐ x ∂μ,
+      ‖densityOnEuclid (I := I) g α x * f x‖ ≤ ‖(Mden • f) x‖ := by
+    rw [hμ_def]
+    refine ae_restrict_of_forall_mem hΩ'_closure_meas ?_
+    intro x hx
+    change ‖densityOnEuclid (I := I) g α x * f x‖ ≤ ‖Mden • f x‖
+    rw [Real.norm_eq_abs, smul_eq_mul, Real.norm_eq_abs, abs_mul, abs_mul,
+      abs_of_nonneg hMden_nn]
+    have h_dens_bd : |densityOnEuclid (I := I) g α x| ≤ Mden :=
+      abs_densityOnEuclid_le_chartDensitySup
+        hΩ'_closure_compact hΩ'_closure_in hx
+    exact mul_le_mul_of_nonneg_right h_dens_bd (abs_nonneg _)
+  -- `eLpNorm (density·f) ≤ eLpNorm (Mden • f) = ‖Mden‖ₑ · eLpNorm f`.
+  have h_eLp_le :
+      eLpNorm (fun x => densityOnEuclid (I := I) g α x * f x) 2 μ ≤
+        (‖Mden‖ₑ : ℝ≥0∞) * eLpNorm f 2 μ := by
+    calc eLpNorm (fun x => densityOnEuclid (I := I) g α x * f x) 2 μ
+        ≤ eLpNorm (Mden • f) 2 μ := eLpNorm_mono_ae h_pt_le
+      _ = (‖Mden‖ₑ : ℝ≥0∞) * eLpNorm f 2 μ := eLpNorm_const_smul Mden f 2 μ
+  -- Pass to `toReal` and square.
+  have h_eLpf_ne_top : eLpNorm f 2 μ ≠ (⊤ : ℝ≥0∞) := by
+    rw [hμ_def]; exact hf.2.ne
+  have h_toReal_le :
+      (eLpNorm (fun x => densityOnEuclid (I := I) g α x * f x) 2 μ).toReal ≤
+        Mden * (eLpNorm f 2 μ).toReal := by
+    have h_mono := ENNReal.toReal_mono
+      (by
+        rw [hμ_def]
+        exact ENNReal.mul_ne_top ENNReal.coe_ne_top hf.2.ne) h_eLp_le
+    rwa [ENNReal.toReal_mul, toReal_enorm, Real.norm_eq_abs,
+      abs_of_nonneg hMden_nn] at h_mono
+  -- Square the nonnegative inequality.
+  have h_lhs_nn : 0 ≤
+      (eLpNorm (fun x => densityOnEuclid (I := I) g α x * f x) 2 μ).toReal :=
+    ENNReal.toReal_nonneg
+  have h_rhs_nn : 0 ≤ Mden * (eLpNorm f 2 μ).toReal :=
+    mul_nonneg hMden_nn ENNReal.toReal_nonneg
+  calc (eLpNorm (fun x => densityOnEuclid (I := I) g α x * f x) 2 μ).toReal ^ 2
+      ≤ (Mden * (eLpNorm f 2 μ).toReal) ^ 2 := by
+        exact pow_le_pow_left₀ h_lhs_nn h_toReal_le 2
+    _ = Mden ^ 2 * (eLpNorm f 2 μ).toReal ^ 2 := by ring
 
 end ChartBilinearUniformDiffQuotBound
 
