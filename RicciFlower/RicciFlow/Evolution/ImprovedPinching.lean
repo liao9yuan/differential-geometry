@@ -299,7 +299,7 @@ theorem curvReact3_frame
       ricciReact3 l1 l2 l3 := by
   classical
   have hRicEval : ∀ i j : Fin 3,
-      ((S.base.ricci t) x) (Realized.vec2 (frame i x) (frame j x)) =
+      S.base.ricciAt t x (Realized.vec2 (frame i x) (frame j x)) =
         DimensionThree.ricciDiag3 l1 l2 l3 i j := by
     intro i j
     simpa [ricciCompInFrame] using hRic i j
@@ -363,7 +363,7 @@ theorem curv3_frame_neg
       -ricciReact3 l1 l2 l3 := by
   classical
   have hRicEval : ∀ i j : Fin 3,
-      ((S.base.ricci t) x) (Realized.vec2 (frame i x) (frame j x)) =
+      S.base.ricciAt t x (Realized.vec2 (frame i x) (frame j x)) =
         DimensionThree.ricciDiag3 l1 l2 l3 i j := by
     intro i j
     simpa [ricciCompInFrame] using hRic i j

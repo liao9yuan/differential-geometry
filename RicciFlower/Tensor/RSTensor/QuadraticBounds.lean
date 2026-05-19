@@ -457,7 +457,7 @@ the tautological vector over the tangent bundle, not a base-indexed section. -/
 theorem metricUnit_quadCont
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) 2) :
+      (n := ∞) 2) :
     Continuous (fun p : MetricUnitTangent (I := I) (M := M) g =>
       quad02 (I := I) (M := M)
         (A (MetricUnitTangent.base (I := I) (M := M) p))

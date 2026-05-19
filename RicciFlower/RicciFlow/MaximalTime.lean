@@ -71,6 +71,20 @@ def Rm04RealizesSolutionConnectionOn
       (S.family.metric (t : Real)) (S.family.connection (t : Real))
       (Rm04 (t : Real))
 
+/-- The canonical lowered Riemann section of a solution's metric realizes its
+Levi-Civita connection curvature. -/
+theorem rm04Realizes_metric
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) :
+    Rm04RealizesSolutionConnectionOn (I := I) S S.base.rm04 := by
+  intro t
+  simpa [SolutionOn.family, SolutionFamily.rm04, SolutionFamily.connection,
+    metricCov] using
+    (Realized.rm04Section_realizes (I := I) (M := M)
+      (S.base.metric (t : Real))
+      (metricCov (I := I) (M := M) (S.base.metric (t : Real)))
+      (metricCov_smooth (I := I) (M := M) (S.base.metric (t : Real))))
+
 /-- Metric-induced squared norm of a time-indexed lowered Riemann tensor. -/
 def curvatureNormSq
     {D : Realized.RealTimeInterval}
@@ -181,6 +195,16 @@ theorem formsSing_of_maximal
     FormsSingularityAt (I := I) S := by
   rcases hRmEx with ⟨Rm04, hRm⟩
   exact ⟨Rm04, hRm, rmUnbounded_of_maximal (I := I) hmax hRm⟩
+
+/-- Canonical metric-curvature version of Lemma 11.3. -/
+theorem formsSing_of_maximal_metric
+    {alpha omega : Real} {hαω : alpha < omega}
+    {S : SolutionOn (I := I) (M := M)
+      (Realized.RealTimeInterval.closedOpen alpha omega hαω)}
+    (hmax : IsMaximalAtEndpoint (I := I) hαω S) :
+    FormsSingularityAt (I := I) S := by
+  exact formsSing_of_maximal (I := I) hmax
+    ⟨S.base.rm04, rm04Realizes_metric (I := I) S⟩
 
 /-- Interface for Lemma 14.27.  Proving this requires the global extension
 criterion and compactness/regularity inputs; this file only exposes the target

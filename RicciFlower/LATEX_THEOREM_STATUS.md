@@ -48,7 +48,7 @@ the full statements, theorem names, and file locations.
 | Target | Distance | Smallest next step |
 | --- | ---: | --- |
 | Hamilton Section 6 remainder | `1` | Next local target is the trace-free Ricci norm evolution; arbitrary-frame packaging of Lemma 6.3 is optional polish. |
-| Lemma 11.1 finite time | `1` | Prove the scalar-package producer `HamiltonPositiveRicci.ham3_scalar74`; `ham3_finite_time` now delegates to `finiteTime3D`. |
+| Lemma 11.1 finite time | `1` | `HamiltonPositiveRicci.ham3_scalar74` and `ham3_finite_time` are now assembled; `Ham3FlowPackage` now carries `IsSmoothSolutionOn`, so canonical scalar regularity and intrinsic scalar evolution are packaged. Remaining work is scalar WMP regularity. |
 | Lemma 10.5 quotient evolution | `2` | Port the pure scalar quotient algebra to `RicciFlower` if it is still needed by the pinching route. |
 | Assumption 3.1 calculus package | `3` | Continue native Bianchi, contracted Bianchi, tensor commutator, and trace/norm infrastructure. |
 | Lemma 6.7 | `0` | Closed canonically through the `(0,2)` tensor Bochner product rule and `ricci_heat_mc`. |
@@ -172,19 +172,30 @@ curvature. Equivalently, M is diffeomorphic to a spherical space form.
 
 Status: native theorem-shaped endpoint now exists as
 `RicciFlower.HamiltonPositiveRicci.thm_2_1`.  It uses the current
-`SmoothRiemannianMetric`, Levi-Civita curvature-producer, `SolutionOn`, and
-`IsSolutionOn` structures.  The final Section 12 assembly is now represented
-natively in `ham3_const_metric`: finite time, point selection/rescaling,
-Ricci-nonnegative preservation, the coarse `|Rm| <= 100` bound, the
-`r0 = 1/10` window, noncollapsing, CGH compactness, constant-curvature limit,
-and pullback to `M` are separate named endpoints.  The remaining `sorry`s are
-deliberately global analytic or topology inputs, not local tensor algebra.
+`SmoothRiemannianMetric`, canonical metric Ricci/scalar accessors,
+`SolutionOn`, and `IsSolutionOn` structures.  The final Section 12 assembly is
+represented natively in `ham3_const_metric`: finite time, point
+selection/rescaling, Ricci-nonnegative preservation, the Section 12
+Corollary 11.4 curvature bound, the `r0 = 1/10` window, noncollapsing, CGH
+compactness, constant-curvature limit, and pullback to `M` are separate named
+endpoints.  The local arithmetic and logical assembly check.  The remaining
+`sorry`s are deliberately global analytic or topology inputs, plus the honest
+Hamilton-side scalar regularity/evolution producer endpoints.
+
+Verification: the full local `lake build` completed successfully after the
+canonical Ricci accessor fallout in `ImprovedPinching.lean` and the
+`metricUnit_quadCont` smoothness-level mismatch in `QuadraticBounds.lean` were
+repaired.
 
 Distance: `4`.
 
 Next target: replace the Section 12 endpoint `sorry`s one at a time with the
-native finite-time, point-selection, noncollapsing, compactness, and
-three-dimensional limit-curvature producers already tracked in Section 11.
+native producer theorems already tracked in Section 11.  The closest local
+scalar-evolution bridge `HamiltonPositiveRicci.ham3_evol74` is closed through
+`RicciFlow.scalarEvolOfSmooth`.  Canonical scalar spacetime regularity and
+intrinsic scalar evolution now come from `IsSmoothSolutionOn`; the remaining
+regularity endpoint `ham3_scalarRegular` belongs to the smooth maximal-flow
+setup, not to the scalar WMP theorem itself.
 Do not collapse these back into a single final convergence black box.
 
 ### Assumption 3.1, `ass:riemannian-calculus`
@@ -807,7 +818,7 @@ The maximal Ricci flow starting from a closed 3-manifold with R(g0) > 0 has
 finite maximal time, bounded by data from g0.
 ```
 
-Status: native normalized scalar-evolution wrapper closed as
+Status: native normalized scalar finite-time theorem closed as
 `RicciFlow.finiteTime3D` in
 `RicciFlower/RicciFlow/Evolution/ScalarFiniteTime.lean`.  The Section 12
 endpoint `HamiltonPositiveRicci.ham3_finite_time` now calls this theorem and
@@ -815,13 +826,19 @@ is no longer a direct finite-time black box.  It is exactly Corollary 7.4 with
 dimension parameter `3`, proving `omega <= 3 / (2 * c0)` from a positive
 initial scalar minimum and the scalar evolution/WMP package.
 
+The Hamilton-side scalar package assembly is also now represented natively:
+`HamiltonPositiveRicci.ham3_scalar74` builds the package consumed by
+`finiteTime3D` from named producers.  The initial scalar minimum, time-zero
+scalar positivity, scalar continuity-on-slab consumer, Laplacian realization,
+Ricci trace/norm lower bound, WMP regularity consumer, and Lipschitz reaction
+input are checked.  The intrinsic scalar evolution bridge `ham3_evol74` is
+also checked via `RicciFlow.scalarEvolOfSmooth`.  The remaining producer
+frontiers are `ham3_flow_exists_normalized` and `ham3_scalarRegular`.
+
 Distance: `1`.
 
-Next target: prove `HamiltonPositiveRicci.ham3_scalar74`, the scalar-package
-producer that extracts the normalized `[0,omega)` scalar evolution, scalar
-Laplacian realization, WMP regularity, Ricci-norm lower bound, and Lipschitz
-reaction input from the maximal-flow package.  Arbitrary initial time should be
-handled later by a time-shift wrapper.
+Next target: move `ham3_scalarRegular` into the smooth maximal-flow setup.
+Arbitrary initial time should be handled later by a time-shift wrapper.
 
 ### Black Box 11.2, `bb:rf-extension-criterion`
 
@@ -889,18 +906,15 @@ the intrinsic norm estimate.
 
 Distance: `0` for the pointwise first-trace realized statement.
 
-Section 12 routing: `HamiltonPositiveRicci.ham3_point_select` now returns
-`Ham3EigenModel`, and `HamiltonPositiveRicci.ham3_rm_bound` is proved from
-point selection, Ricci nonnegativity, and that eigenmodel.  The spectral bridge
-`DimensionThree.ricciEigenBasis3` is checked: it turns `Ric >= 0` into an
-orthonormal Ricci eigenbasis and diagonal component data using the pointwise
-metric inner product.  The concrete first-trace producer is also checked:
-`DimensionThree.traceDataOfFirst` turns convention-correct Ricci/Rm04 trace
-data into `RiemannFromRicci3DTraceDataAt` for `-Ric` and `-scalar`, which is
-the necessary sign bridge because the finite 3D algebra uses the displayed-slot
-`stdRicci3` convention.  `DimensionThree.normSqLeOfFirstData` now hides that
-sign bookkeeping from consumers by building the signed package internally from
-the convention-correct first-trace data.
+Section 12 routing: the pointwise Corollary 11.4 estimate is closed, but
+`HamiltonPositiveRicci.ham3_rm_bound` is still a theorem-shaped producer
+frontier.  It no longer hides the conclusion behind a vacuous `Ham3RmBound`
+predicate or an artificial eigenmodel stored in the blow-up data.  Its current
+statement asks directly for a positive universal constant and the expected
+rescaled slab inequality for the canonical curvature norm of `P.S.base.rm04`.
+The remaining work is packaging the pointwise first-trace realized estimate
+with parabolic rescaling and Ricci-nonnegative preservation on the selected
+slabs.
 
 ### Definition 11.5, `def:parabolic-rescaling`
 

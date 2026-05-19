@@ -120,6 +120,30 @@ theorem msm110_ch6_1_scalar_curvature_evolution
   scalarEvolutionEquationOn_of_contractedBianchi
     (M := M) scalar scalarLap contractedRicciHessian ricciNormSq hpre hbianchi
 
+/-- Intrinsic scalar-curvature evolution supplied by a smooth Ricci-flow
+solution package.
+
+This is the canonical equation-side version used by global applications: the
+scalar is `S.scalar`, the Laplacian is the intrinsic `laplacianAt` for any
+realized family agreeing with `S.family` at regular times, and the reaction term
+is the intrinsic Ricci norm squared. -/
+theorem scalarEvolOfSmooth
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSmoothSolutionOn (I := I) (M := M) S)
+    (G : Realized.RealizedMetricFamily (I := I) (M := M) Real)
+    (hmetric : ∀ t : Realized.RealTimeInterval.RegularTime D,
+      G.metric (t : Real) = S.family.metric (t : Real))
+    (hconnection : ∀ t : Realized.RealTimeInterval.RegularTime D,
+      G.connection (t : Real) = S.family.connection (t : Real)) :
+    ScalarEvolutionEquationOn (D := D)
+      S.scalar
+      (fun t x => Realized.laplacianAt (I := I) G t (S.scalar t) x)
+      (fun t x =>
+        normSq0S (I := I) (S.family.metric t) x 2 (S.ricci t x)) := by
+  intro t x
+  exact hS.scalarEvolution G hmetric hconnection t x
+
 /-! ## Heat-operator realization interface -/
 
 /-- The scalar Laplacian realization needed to turn scalar evolution into the

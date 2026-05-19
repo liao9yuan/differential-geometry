@@ -29,7 +29,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
-variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+variable {M : Type*} [TopologicalSpace M] [T2Space M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 /-- Output package of the curvature-section producer for a static metric and
 connection.  Constructing this package from connection laws is the tensoriality
@@ -103,9 +103,9 @@ theorem rm04Section_realizes
   have h13 :=
     rm13Section_realizes (I := I) (M := M) cov hcov X Y Z x
       (dualToCotangent (I := I) ((tangentFlatLinear (I := I) g x) (W x)))
-  rw [Riemann.CovariantDerivative.rm04Section_apply,
-    Riemann.CovariantDerivative.riemannCurvature04At_eq_lower_riemannCurvatureAt]
-  simpa [Riemann.CovariantDerivative.rm13Section_apply, tangentFlatLinear_apply] using h13
+  exact
+    Riemann.CovariantDerivative.rm04Section_apply_smooth
+      (I := I) (M := M) g cov hcov W X Y Z x
 
 end Realized
 end RicciFlower

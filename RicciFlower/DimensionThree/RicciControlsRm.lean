@@ -327,6 +327,93 @@ theorem ricciEigenBasis3
     rw [h22] at hnon
     simpa [ricciDiag3, l3] using hnon
 
+/-- The metric trace of a `(0,2)` tensor is the ordinary trace of the
+endomorphism obtained by raising its first slot. -/
+theorem metricTrace_eq_ricciEnd
+    (g : SmoothRiemannianMetric I M)
+    (Ric : Tensor02At (I := I) (M := M) x) :
+    Realized.metricTracePair0SAt (I := I) g Ric =
+      LinearMap.trace Real (TangentSpace I x)
+        (ricciEndAt (I := I) g Ric) := by
+  classical
+  let basis : Module.Basis (Coordinates.CoordinateIdx (𝕜 := Real) E) Real
+      (TangentSpace I x) :=
+    Coordinates.coordinateFrameAt_toBasis (I := I) x
+  let gInv :
+      Coordinates.CoordinateIdx (𝕜 := Real) E ->
+        Coordinates.CoordinateIdx (𝕜 := Real) E -> Real := fun k l =>
+    Coordinates.inverseMetricFlatModelInChart_component
+      (I := I) g x k l (extChartAt I x x)
+  have hinv :
+      MetricInverseInBasis (I := I) g x basis gInv := by
+    simpa [basis, gInv] using
+      Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
+        (I := I) g x
+  rw [Realized.metricTracePair0SAt_eq_sum_basis (I := I) g basis gInv hinv]
+  rw [linearMap_trace_eq_sum_inv_inner_apply (I := I) g x basis gInv hinv]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  refine Finset.sum_congr rfl fun j _ => ?_
+  rw [ricciEnd_inner (I := I) g Ric (basis i) (basis j)]
+
+/-- Positive diagonal values of a `(0,2)` tensor force its metric trace to be
+strictly positive in dimension three.  No symmetry is needed: the trace only
+sees the diagonal values in an orthonormal basis. -/
+theorem metricTrace_pos_of_posDef
+    (g : SmoothRiemannianMetric I M)
+    (Ric : Tensor02At (I := I) (M := M) x)
+    (hdim : Module.finrank Real (TangentSpace I x) = 3)
+    (hpos : forall v : TangentSpace I x, v ≠ 0 ->
+      0 < Ric (vec2 (I := I) v v)) :
+    0 < Realized.metricTracePair0SAt (I := I) g Ric := by
+  classical
+  let D := (tangentMetricData (I := I) g x).metric
+  letI : InnerProductSpace.Core Real (TangentSpace I x) := D.toCore
+  letI : NormedAddCommGroup (TangentSpace I x) :=
+    @InnerProductSpace.Core.toNormedAddCommGroup Real (TangentSpace I x) _ _ _
+      D.toCore
+  letI : InnerProductSpace Real (TangentSpace I x) :=
+    @InnerProductSpace.ofCore Real (TangentSpace I x) _ _ _ D.toCore.toCore
+  have htrace :
+      0 < LinearMap.trace Real (TangentSpace I x)
+        (ricciEndAt (I := I) g Ric) := by
+    rw [LinearMap.trace_eq_sum_inner
+      (ricciEndAt (I := I) g Ric)
+      (stdOrthonormalBasis Real (TangentSpace I x))]
+    refine Finset.sum_pos ?_ ?_
+    · intro i _hi
+      have hne :
+          stdOrthonormalBasis Real (TangentSpace I x) i ≠ 0 := by
+        intro hzero
+        have hnorm :
+            ‖stdOrthonormalBasis Real (TangentSpace I x) i‖ = (1 : Real) :=
+          (stdOrthonormalBasis Real (TangentSpace I x)).norm_eq_one i
+        simp [hzero] at hnorm
+      have hinner :
+          Inner.inner Real
+              ((ricciEndAt (I := I) g Ric)
+                (stdOrthonormalBasis Real (TangentSpace I x) i))
+              (stdOrthonormalBasis Real (TangentSpace I x) i) =
+            g.inner x
+              ((ricciEndAt (I := I) g Ric)
+                (stdOrthonormalBasis Real (TangentSpace I x) i))
+              (stdOrthonormalBasis Real (TangentSpace I x) i) := by
+        change D.inner
+              ((ricciEndAt (I := I) g Ric)
+                (stdOrthonormalBasis Real (TangentSpace I x) i))
+              (stdOrthonormalBasis Real (TangentSpace I x) i) =
+            g.inner x
+              ((ricciEndAt (I := I) g Ric)
+                (stdOrthonormalBasis Real (TangentSpace I x) i))
+              (stdOrthonormalBasis Real (TangentSpace I x) i)
+        rfl
+      rw [real_inner_comm, hinner,
+        ricciEnd_inner (I := I) g Ric
+          (stdOrthonormalBasis Real (TangentSpace I x) i)
+          (stdOrthonormalBasis Real (TangentSpace I x) i)]
+      exact hpos (stdOrthonormalBasis Real (TangentSpace I x) i) hne
+    · exact ⟨⟨0, by simpa [hdim]⟩, Finset.mem_univ _⟩
+  rwa [metricTrace_eq_ricciEnd (I := I) g Ric]
+
 private theorem scalar_eq_of_trace_diag
     {g : SmoothRiemannianMetric I M}
     {Ric : Tensor02At (I := I) (M := M) x}

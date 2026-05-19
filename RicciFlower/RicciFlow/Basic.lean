@@ -255,6 +255,12 @@ noncomputable def ricciAt
     RicciAtFamily (I := I) (M := M) :=
   fun t x => metricRicciAt (I := I) (M := M) (G.metric t) x
 
+/-- The scalar curvature of the family metric at time `t`. -/
+noncomputable def scalar
+    (G : SolutionFamily (I := I) (M := M)) :
+    Real -> M -> Real :=
+  fun t x => metricScalarAt (I := I) (M := M) (G.metric t) x
+
 /-- Compatibility bundled `(1,3)` Riemann tensor of the family metric.
 
 This remains a realization-section API.  The canonical metric curvature used by
@@ -286,6 +292,13 @@ noncomputable def ricci
     (t : Real) (x : M) :
     G.ricci t x = G.ricciAt t x := by
   simp [ricci, ricciAt]
+
+@[simp] theorem scalar_apply
+    (G : SolutionFamily (I := I) (M := M))
+    (t : Real) (x : M) :
+    G.scalar t x =
+      Realized.metricTracePair0SAt (I := I) (G.metric t) (G.ricciAt t x) := by
+  simp [scalar, metricScalarAt, ricciAt]
 
 /-- The metric and connection are compatible at every flow time of `D`. -/
 def MetricCompatibleOn
@@ -356,6 +369,12 @@ def ricciAt {D : Realized.RealTimeInterval}
     RicciAtFamily (I := I) (M := M) :=
   S.base.ricciAt
 
+/-- The canonical scalar curvature family of a solution candidate. -/
+def scalar {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) :
+    Real -> M -> Real :=
+  S.base.scalar
+
 @[simp] theorem family_metric {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) :
     S.family.metric = S.base.metric := by
@@ -376,6 +395,19 @@ def ricciAt {D : Realized.RealTimeInterval}
     S.ricciAt = S.base.ricciAt := by
   rfl
 
+@[simp] theorem scalar_eq {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) :
+    S.scalar = S.base.scalar := by
+  rfl
+
+@[simp] theorem scalar_eq_metricTrace {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (t : Real) (x : M) :
+    S.scalar t x =
+      Realized.metricTracePair0SAt (I := I) (S.family.metric t)
+        (S.ricciAt t x) := by
+  simp [scalar, SolutionFamily.scalar_apply]
+
 @[simp] theorem timeShift_family_metric {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (τ s : Real) :
     (S.timeShift τ).family.metric s = S.family.metric (s + τ) := by
@@ -389,6 +421,11 @@ def ricciAt {D : Realized.RealTimeInterval}
 @[simp] theorem timeShift_ricciAt {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (τ s : Real) :
     (S.timeShift τ).ricciAt s = S.ricciAt (s + τ) := by
+  rfl
+
+@[simp] theorem timeShift_scalar {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (τ s : Real) :
+    (S.timeShift τ).scalar s = S.scalar (s + τ) := by
   rfl
 
 /-- The shifted solution has the same initial metric, evaluated at the shifted
@@ -451,6 +488,90 @@ theorem leviCivita
       (I := I) (S.base.metric (t : Real))
 
 end IsSolutionOn
+
+/-- Joint spacetime regularity of the canonical curvature quantities of a
+solution candidate.
+
+The current Ricci-flow solution predicate records time-smooth metric
+coefficients and fixed-time spatial smoothness.  This producer interface is the
+place where the analytic smooth Ricci-flow package supplies joint spacetime
+regularity of the canonical curvature tensors; scalar continuity is then a
+short consequence rather than a Hamilton-side proof. -/
+structure CanonicalCurvatureSpacetimeRegularOn
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) : Prop where
+  scalar_continuousAt : ∀ p : Real × M,
+    ContinuousAt (fun q : Real × M => S.scalar q.1 q.2) p
+
+/-- Strong Ricci-flow solution predicate used by global Hamilton packages.
+
+`IsSolutionOn` records the Ricci-flow equation and the interval-wise metric and
+connection smoothness currently used by the local evolution files.  The
+Hamilton/global layer also needs the curvature quantities supplied by a smooth
+Ricci flow to be regular on spacetime and to satisfy the intrinsic scalar
+evolution equation.  This package is the place where the smooth Ricci-flow
+existence theorem exposes that stronger output.
+
+Later Ricci/Riemann spacetime regularity fields should be added here rather
+than as Hamilton-specific theorem endpoints. -/
+structure IsSmoothSolutionOn
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) : Prop where
+  isSolution : IsSolutionOn (I := I) S
+  curvatureRegular : CanonicalCurvatureSpacetimeRegularOn (I := I) (M := M) S
+  scalarEvolution : ∀
+    (G : Realized.RealizedMetricFamily (I := I) (M := M) Real),
+      (∀ t : Realized.RealTimeInterval.RegularTime D,
+        G.metric (t : Real) = S.family.metric (t : Real)) ->
+      (∀ t : Realized.RealTimeInterval.RegularTime D,
+        G.connection (t : Real) = S.family.connection (t : Real)) ->
+      ∀ (t : Realized.RealTimeInterval.RegularTime D) (x : M),
+        HasDerivWithinAt
+          (fun s : Real => S.scalar s x)
+          (Realized.laplacianAt (I := I) G (t : Real)
+              (S.scalar (t : Real)) x +
+            2 * normSq0S (I := I) (S.family.metric (t : Real)) x 2
+              (S.ricci (t : Real) x))
+          D.carrier
+          (t : Real)
+
+namespace IsSmoothSolutionOn
+
+/-- A smooth solution is in particular a Ricci-flow solution in the ordinary
+folder-level sense. -/
+theorem toIsSolutionOn
+    {D : Realized.RealTimeInterval}
+    {S : SolutionOn (I := I) (M := M) D}
+    (hS : IsSmoothSolutionOn (I := I) (M := M) S) :
+    IsSolutionOn (I := I) S :=
+  hS.isSolution
+
+/-- A smooth solution supplies the canonical scalar spacetime regularity used
+by scalar maximum-principle packages. -/
+theorem curvReg
+    {D : Realized.RealTimeInterval}
+    {S : SolutionOn (I := I) (M := M) D}
+    (hS : IsSmoothSolutionOn (I := I) (M := M) S) :
+    CanonicalCurvatureSpacetimeRegularOn (I := I) (M := M) S :=
+  hS.curvatureRegular
+
+end IsSmoothSolutionOn
+
+namespace SolutionOn
+
+/-- Continuity of canonical scalar curvature on any spacetime slab, extracted
+from the general canonical-curvature regularity package. -/
+theorem scalar_continuousOn
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (_hS : IsSolutionOn (I := I) S)
+    (hreg : CanonicalCurvatureSpacetimeRegularOn (I := I) (M := M) S)
+    (T : Real) :
+    ContinuousOn (fun p : Real × M => S.scalar p.1 p.2)
+      ((Set.Icc 0 T).prod (Set.univ : Set M)) := by
+  exact (continuous_iff_continuousAt.mpr hreg.scalar_continuousAt).continuousOn
+
+end SolutionOn
 
 /-- Time translation preserves the Ricci-flow solution predicate.
 
