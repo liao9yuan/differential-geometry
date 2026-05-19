@@ -654,6 +654,506 @@ theorem wkpNorm_crossRightGradCoeffDivLimit_le
 
 end MainBound
 
+/-! ## The factor-uniform off-kernel-vanishing smooth-coefficient `wkpNorm` bound
+
+The `factor`-hoisted twin of `wkpNorm_offKernelSmoothCoef_mul_le`: a *single*
+nonnegative constant — built purely from the coefficient's iterated-derivative
+bounds, with no dependence on the factor — controls the order-`K` `wkpNorm` of
+the product `coef · factor` for *every* `W^{K,2}` factor simultaneously. The
+constant is the constant supplied by the `factor`-polymorphic global-smoothness
+Leibniz bound `wkpNorm_smul_smooth_bounded_le`, whose `∀ {u}` quantifier already
+exposes the factor-uniformity; it is hoisted before the `∀ factor`. -/
+
+section OffKernelCoefBoundUniform
+
+set_option linter.unusedSectionVars false in
+/-- **Factor-uniform off-kernel-vanishing smooth-coefficient `wkpNorm` bound.**
+The `factor`-uniform companion of `wkpNorm_offKernelSmoothCoef_mul_le`: for a
+coefficient `coef : EuclN → ℝ` that is `C^∞` on the open Euclidean chart target
+and vanishes pointwise off a compact kernel `Kkern` inside the chart target,
+there is a *single* nonnegative constant `C` such that for *every* factor in
+`MemWkp K 2` on the chart target,
+
+```
+wkpNorm K 2 (fun y => coef y * factor y) (chartTargetEuclid α)
+  ≤ ENNReal.ofReal C * wkpNorm K 2 factor (chartTargetEuclid α).
+```
+
+The off-kernel vanishing makes `coef` globally `C^∞` and compactly supported; a
+uniform bound on its iterated derivatives up to order `K` feeds the
+factor-polymorphic global-smoothness Leibniz bound
+`wkpNorm_smul_smooth_bounded_le`, whose constant is independent of the factor.
+The `∀ factor` therefore moves inside the `∃ C`. -/
+private lemma wkpNorm_offKernelSmoothCoef_mul_le_uniform
+    (α : M) (K : ℕ)
+    {coef : EuclN → ℝ}
+    {Kkern : Set EuclN}
+    (hKkern_compact : IsCompact Kkern)
+    (hKkern_in : Kkern ⊆ chartTargetEuclid (I := I) (M := M) α)
+    (hcoef_chart : ContDiffOn ℝ (⊤ : ℕ∞) coef
+      (chartTargetEuclid (I := I) (M := M) α))
+    (hcoef_zero_off : ∀ y : EuclN, y ∉ Kkern → coef y = 0) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ factor : EuclN → ℝ,
+        MemWkp (d := Module.finrank ℝ E) K 2 factor
+            (chartTargetEuclid (I := I) (M := M) α) →
+          wkpNorm (d := Module.finrank ℝ E) K 2
+              (fun y => coef y * factor y)
+              (chartTargetEuclid (I := I) (M := M) α)
+            ≤ ENNReal.ofReal C *
+              wkpNorm (d := Module.finrank ℝ E) K 2 factor
+                (chartTargetEuclid (I := I) (M := M) α) := by
+  classical
+  set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
+  have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
+  -- The closed support of `coef` sits inside the compact kernel, hence in `Ω`.
+  have h_supp : Function.support coef ⊆ Kkern := by
+    intro z hz
+    by_contra hzk
+    exact hz (hcoef_zero_off z hzk)
+  have h_tsupp : tsupport coef ⊆ Kkern :=
+    closure_minimal h_supp hKkern_compact.isClosed
+  have h_tsupp_Ω : tsupport coef ⊆ Ω := h_tsupp.trans hKkern_in
+  -- `coef` is globally `C^∞`: smooth on `tsupport coef ⊆ Ω`, zero off it.
+  have hcoef_smooth : ContDiff ℝ (⊤ : ℕ∞) coef := by
+    have h_open_compl : IsOpen ((tsupport coef)ᶜ) :=
+      (isClosed_tsupport _).isOpen_compl
+    rw [contDiff_iff_contDiffAt]
+    intro y
+    by_cases hy_supp : y ∈ tsupport coef
+    · have hy_chart : y ∈ Ω := h_tsupp_Ω hy_supp
+      exact (hcoef_chart y hy_chart).contDiffAt (hΩ_open.mem_nhds hy_chart)
+    · have h_eq_zero : coef =ᶠ[𝓝 y] (fun _ : EuclN => (0 : ℝ)) := by
+        filter_upwards [h_open_compl.mem_nhds hy_supp] with z hz
+        exact image_eq_zero_of_notMem_tsupport hz
+      exact contDiffAt_const.congr_of_eventuallyEq h_eq_zero
+  have hcoef_cs : HasCompactSupport coef :=
+    HasCompactSupport.of_support_subset_isCompact hKkern_compact h_supp
+  -- A uniform bound on the iterated derivatives of `coef` up to order `K`.
+  obtain ⟨C₀, hC₀_nn, hC₀_bd⟩ :=
+    exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
+      (d := Module.finrank ℝ E) hcoef_smooth hcoef_cs K
+  -- The factor-polymorphic global-smoothness Leibniz bound for the coefficient:
+  -- its constant `Kc` is independent of the factor, so it is hoisted before the
+  -- `∀ factor`.
+  obtain ⟨Kc, hKc_pos, hKc_bd⟩ :=
+    wkpNorm_smul_smooth_bounded_le (d := Module.finrank ℝ E) K
+      (by norm_num : (1 : ℝ≥0∞) ≤ 2) (by norm_num) hΩ_open hcoef_smooth
+      hC₀_nn (fun j _hj y _hy => hC₀_bd y j _hj)
+  exact ⟨Kc, le_of_lt hKc_pos, fun factor hfactor => hKc_bd hfactor⟩
+
+end OffKernelCoefBoundUniform
+
+/-! ## The eigenbasis-uniform `K`-graded explicit-norm bound for the cross-right
+gradient-divergence limit -/
+
+section MainBoundUniform
+
+/-- **Eigenbasis-uniform `K`-graded explicit-norm `wkpNorm` bound for the
+cross-right gradient-divergence limit.** The eigenbasis-uniform companion of
+`wkpNorm_crossRightGradCoeffDivLimit_le`: a *single* nonnegative constant `C`,
+independent of the eigenbasis index `i`, serves every `i` simultaneously — the
+`∀ i` quantifier moved inside the `∃ C`.
+
+For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a chart center
+`α : M`, a base component multi-index `P₀`, and an iteration order `K`, given
+the order-`K + 1` `MemWkp` regularity hypothesis `h_pou` on the
+resolvent-inclusion partition-of-unity chart components — phrased uniformly over
+`i` — there is a nonnegative constant `C` such that, for every `i`, the order-`K`
+iterated Euclidean Sobolev norm of the cross-right gradient-divergence limit
+`crossRightGradCoeffDivLimit g r s h_atlas i α P₀` is bounded by
+`ENNReal.ofReal C` times the sum of the order-`K` `wkpNorm`s of its two atom
+families.
+
+No exposed eigenvalue factor appears: the witness constant of
+`wkpNorm_crossRightGradCoeffDivLimit_le` is the maximum of two triple-index
+cardinality multiples of constants supplied by the off-kernel smooth-coefficient
+bound `wkpNorm_offKernelSmoothCoef_mul_le`, whose constant is the
+iterated-derivative data of the test-independent `C^∞` factor
+`crossRightDivFactor` (and its chart-Euclidean partial) — chart-geometric data,
+independent of the abstract resolvent element and hence of `i`. That single
+constant is hoisted before the `∀ i` via the factor-uniform companion
+`wkpNorm_offKernelSmoothCoef_mul_le_uniform`. -/
+theorem wkpNorm_crossRightGradCoeffDivLimit_le_uniform
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) (K : ℕ)
+    (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
+      (β : M) (Q : TensorCompIdx (E := E) r s),
+      MemWkp (d := Module.finrank ℝ E) (K + 1) 2
+        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+              (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i))
+            β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+        (chartTargetEuclid (I := I) (M := M) β)) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        wkpNorm (d := Module.finrank ℝ E) K 2
+            (crossRightGradCoeffDivLimit (I := I) (M := M)
+              g r s h_atlas i α P₀)
+            (chartTargetEuclid (I := I) (M := M) α)
+          ≤ ENNReal.ofReal C *
+            ((∑ P : TensorCompIdx (E := E) r s,
+                wkpNorm (d := Module.finrank ℝ E) K 2
+                  ((crossRightLimitComponent (I := I) (M := M)
+                      g r s h_atlas i α P :
+                      Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ)
+                  (chartTargetEuclid (I := I) (M := M) α))
+              + (∑ P : TensorCompIdx (E := E) r s,
+                  ∑ l : Fin (Module.finrank ℝ E),
+                    wkpNorm (d := Module.finrank ℝ E) K 2
+                      ((cutoffPartialLpLimit (I := I) (M := M)
+                          g r s h_atlas i α P l :
+                          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
+                          EuclN → ℝ)
+                      (chartTargetEuclid (I := I) (M := M) α))) := by
+  classical
+  set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
+  have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
+  have hKα_compact : IsCompact (chartPouKernel (I := I) (M := M) α) :=
+    chartPouKernel_isCompact (I := I) (M := M) α
+  have hKα_in : chartPouKernel (I := I) (M := M) α ⊆ Ω :=
+    chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α
+  -- The triple-index type for the two three-fold sums.
+  set ι : Type _ :=
+    Fin (Module.finrank ℝ E) × TensorCompIdx (E := E) r s ×
+      TensorCompIdx (E := E) r s with hι_def
+  -- Per triple `j`, a *factor-uniform* constant for the component-atom-group
+  -- coefficient (the chart-Euclidean partial of `crossRightDivFactor`) — built
+  -- purely from that `C^∞` factor, independent of the resolvent element and
+  -- hence of `i`.
+  have hCcomp_data : ∀ j : ι, ∃ C : ℝ, 0 ≤ C ∧
+      ∀ factor : EuclN → ℝ, MemWkp (d := Module.finrank ℝ E) K 2 factor Ω →
+        wkpNorm (d := Module.finrank ℝ E) K 2
+            (fun y => euclidPartial (E := E) j.1
+                (crossRightDivFactor (I := I) (M := M)
+                  g r s α P₀ j.1 j.2.1 j.2.2) y * factor y) Ω
+          ≤ ENNReal.ofReal C *
+            wkpNorm (d := Module.finrank ℝ E) K 2 factor Ω := by
+    intro j
+    rw [hΩ_def]
+    exact wkpNorm_offKernelSmoothCoef_mul_le_uniform (I := I) (M := M) α K
+      hKα_compact hKα_in
+      (euclidPartial_crossRightDivFactor_contDiffOn (I := I) (M := M)
+        g r s α P₀ j.1 j.2.1 j.2.2)
+      (fun y hy => euclidPartial_crossRightDivFactor_eq_zero_off_chartPouKernel
+        (I := I) (M := M) g r s α P₀ j.1 j.2.1 j.2.2 hy)
+  -- Per triple `j`, a factor-uniform constant for the chart-partial-atom-group
+  -- coefficient (`crossRightDivFactor` itself) — likewise `i`-independent.
+  have hCpart_data : ∀ j : ι, ∃ C : ℝ, 0 ≤ C ∧
+      ∀ factor : EuclN → ℝ, MemWkp (d := Module.finrank ℝ E) K 2 factor Ω →
+        wkpNorm (d := Module.finrank ℝ E) K 2
+            (fun y => crossRightDivFactor (I := I) (M := M)
+                g r s α P₀ j.1 j.2.1 j.2.2 y * factor y) Ω
+          ≤ ENNReal.ofReal C *
+            wkpNorm (d := Module.finrank ℝ E) K 2 factor Ω := by
+    intro j
+    rw [hΩ_def]
+    exact wkpNorm_offKernelSmoothCoef_mul_le_uniform (I := I) (M := M) α K
+      hKα_compact hKα_in
+      (crossRightDivFactor_contDiffOn (I := I) (M := M)
+        g r s α P₀ j.1 j.2.1 j.2.2)
+      (fun y hy => crossRightDivFactor_eq_zero_off_chartPouKernel
+        (I := I) (M := M) g r s α P₀ j.1 j.2.1 j.2.2 hy)
+  -- Fold the per-triple constants into a single triple-uniform constant for
+  -- each group: the sum over the (finitely many) triples.
+  choose Ccompf hCcompf_nn hCcompf using hCcomp_data
+  choose Cpartf hCpartf_nn hCpartf using hCpart_data
+  set Ccomp : ℝ := ∑ j : ι, Ccompf j with hCcomp_def
+  set Cpart : ℝ := ∑ j : ι, Cpartf j with hCpart_def
+  have hCcomp_nn : 0 ≤ Ccomp :=
+    Finset.sum_nonneg (fun j _ => hCcompf_nn j)
+  have hCpart_nn : 0 ≤ Cpart :=
+    Finset.sum_nonneg (fun j _ => hCpartf_nn j)
+  -- Each per-triple constant is dominated by the group sum.
+  have hCcompf_le : ∀ j : ι, Ccompf j ≤ Ccomp := fun j =>
+    Finset.single_le_sum (fun k _ => hCcompf_nn k) (Finset.mem_univ j)
+  have hCpartf_le : ∀ j : ι, Cpartf j ≤ Cpart := fun j =>
+    Finset.single_le_sum (fun k _ => hCpartf_nn k) (Finset.mem_univ j)
+  -- The headline constant: the larger of the two triple-index cardinality
+  -- multiples — hoisted before the `∀ i`.
+  refine ⟨max ((Fintype.card ι : ℝ) * Ccomp) ((Fintype.card ι : ℝ) * Cpart),
+    le_max_of_le_left (by positivity), fun i => ?_⟩
+  -- The remainder reproduces the per-`i` proof body for the fixed index `i`,
+  -- with the factor-uniform per-triple constants in place of the per-summand
+  -- ones.
+  -- Abbreviations for the two atom families and the two `wkpNorm`-sum targets.
+  set Acomp : TensorCompIdx (E := E) r s → EuclN → ℝ :=
+    fun P => ((crossRightLimitComponent (I := I) (M := M)
+      g r s h_atlas i α P :
+      Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) with hAcomp_def
+  set Apart : TensorCompIdx (E := E) r s → Fin (Module.finrank ℝ E) → EuclN → ℝ :=
+    fun P l => ((cutoffPartialLpLimit (I := I) (M := M)
+      g r s h_atlas i α P l :
+      Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) with hApart_def
+  set Sumcomp : ℝ≥0∞ :=
+    ∑ P : TensorCompIdx (E := E) r s,
+      wkpNorm (d := Module.finrank ℝ E) K 2 (Acomp P) Ω with hSumcomp_def
+  set Sumpart : ℝ≥0∞ :=
+    ∑ P : TensorCompIdx (E := E) r s,
+      ∑ l : Fin (Module.finrank ℝ E),
+        wkpNorm (d := Module.finrank ℝ E) K 2 (Apart P l) Ω with hSumpart_def
+  -- The two atom families are `W^{K,2}` on the chart target, from `h_pou i`.
+  have hAcomp_memWkp : ∀ P : TensorCompIdx (E := E) r s,
+      MemWkp (d := Module.finrank ℝ E) K 2 (Acomp P) Ω := by
+    intro P
+    rw [hAcomp_def, hΩ_def]
+    exact crossRightLimitComponent_memWkp (I := I) (M := M)
+      g r s h_atlas i α P K (h_pou i)
+  have hApart_memWkp : ∀ (P : TensorCompIdx (E := E) r s)
+      (l : Fin (Module.finrank ℝ E)),
+      MemWkp (d := Module.finrank ℝ E) K 2 (Apart P l) Ω := by
+    intro P l
+    rw [hApart_def, hΩ_def]
+    exact cutoffPartialLpLimit_memWkp (I := I) (M := M)
+      g r s h_atlas i α P l K (h_pou i)
+  -- The component-atom-group summand, as a function indexed by `(l, P, Q)`.
+  set summandComp : ι → EuclN → ℝ :=
+    fun j y => Set.indicator (chartPouKernel (I := I) (M := M) α)
+        (euclidPartial (E := E) j.1
+          (crossRightDivFactor (I := I) (M := M) g r s α P₀ j.1 j.2.1 j.2.2)) y *
+      Acomp j.2.1 y with hsummandComp_def
+  -- The chart-partial-atom-group summand, as a function indexed by `(l, P, Q)`.
+  set summandPart : ι → EuclN → ℝ :=
+    fun j y => Set.indicator (chartPouKernel (I := I) (M := M) α)
+        (crossRightDivFactor (I := I) (M := M) g r s α P₀ j.1 j.2.1 j.2.2) y *
+      Apart j.2.1 j.1 y with hsummandPart_def
+  -- Each component-atom summand is the identity-cut `C^∞` coefficient times the
+  -- `W^{K,2}` atom: the indicator is the identity since the chart-Euclidean
+  -- partial of `crossRightDivFactor` vanishes off the kernel.
+  have hsummandComp_eq : ∀ j : ι, summandComp j =
+      (fun y => euclidPartial (E := E) j.1
+          (crossRightDivFactor (I := I) (M := M)
+            g r s α P₀ j.1 j.2.1 j.2.2) y * Acomp j.2.1 y) := by
+    intro j
+    funext y
+    simp only [hsummandComp_def]
+    by_cases hyK : y ∈ chartPouKernel (I := I) (M := M) α
+    · rw [Set.indicator_of_mem hyK]
+    · rw [Set.indicator_of_notMem hyK,
+        euclidPartial_crossRightDivFactor_eq_zero_off_chartPouKernel
+          (I := I) (M := M) g r s α P₀ j.1 j.2.1 j.2.2 hyK]
+  have hsummandPart_eq : ∀ j : ι, summandPart j =
+      (fun y => crossRightDivFactor (I := I) (M := M)
+          g r s α P₀ j.1 j.2.1 j.2.2 y * Apart j.2.1 j.1 y) := by
+    intro j
+    funext y
+    simp only [hsummandPart_def]
+    by_cases hyK : y ∈ chartPouKernel (I := I) (M := M) α
+    · rw [Set.indicator_of_mem hyK]
+    · rw [Set.indicator_of_notMem hyK,
+        crossRightDivFactor_eq_zero_off_chartPouKernel
+          (I := I) (M := M) g r s α P₀ j.1 j.2.1 j.2.2 hyK]
+  -- The per-summand `wkpNorm` bound for the component-atom group, from the
+  -- factor-uniform constant `Ccompf j` applied to the atom `Acomp j.2.1`.
+  have hCcomp : ∀ j : ι,
+      wkpNorm (d := Module.finrank ℝ E) K 2 (summandComp j) Ω ≤
+        ENNReal.ofReal Ccomp *
+          wkpNorm (d := Module.finrank ℝ E) K 2 (Acomp j.2.1) Ω := by
+    intro j
+    rw [hsummandComp_eq j]
+    refine (hCcompf j (Acomp j.2.1) (hAcomp_memWkp j.2.1)).trans ?_
+    exact mul_le_mul_left (ENNReal.ofReal_le_ofReal (hCcompf_le j)) _
+  -- The per-summand `wkpNorm` bound for the chart-partial-atom group.
+  have hCpart : ∀ j : ι,
+      wkpNorm (d := Module.finrank ℝ E) K 2 (summandPart j) Ω ≤
+        ENNReal.ofReal Cpart *
+          wkpNorm (d := Module.finrank ℝ E) K 2 (Apart j.2.1 j.1) Ω := by
+    intro j
+    rw [hsummandPart_eq j]
+    refine (hCpartf j (Apart j.2.1 j.1) (hApart_memWkp j.2.1 j.1)).trans ?_
+    exact mul_le_mul_left (ENNReal.ofReal_le_ofReal (hCpartf_le j)) _
+  -- The per-summand `MemWkp` data for both groups, via `MemWkp.smul_smooth`'s
+  -- closure through the `wkpNorm_offKernelSmoothCoef_mul_le` workhorse.
+  have hsummandComp_memWkp : ∀ j : ι,
+      MemWkp (d := Module.finrank ℝ E) K 2 (summandComp j) Ω := by
+    intro j
+    rw [hsummandComp_eq j, hΩ_def]
+    exact (wkpNorm_offKernelSmoothCoef_mul_le (I := I) (M := M) α K
+      hKα_compact hKα_in
+      (euclidPartial_crossRightDivFactor_contDiffOn (I := I) (M := M)
+        g r s α P₀ j.1 j.2.1 j.2.2)
+      (fun y hy => euclidPartial_crossRightDivFactor_eq_zero_off_chartPouKernel
+        (I := I) (M := M) g r s α P₀ j.1 j.2.1 j.2.2 hy)
+      (by rw [← hΩ_def]; exact hAcomp_memWkp j.2.1)).1
+  have hsummandPart_memWkp : ∀ j : ι,
+      MemWkp (d := Module.finrank ℝ E) K 2 (summandPart j) Ω := by
+    intro j
+    rw [hsummandPart_eq j, hΩ_def]
+    exact (wkpNorm_offKernelSmoothCoef_mul_le (I := I) (M := M) α K
+      hKα_compact hKα_in
+      (crossRightDivFactor_contDiffOn (I := I) (M := M)
+        g r s α P₀ j.1 j.2.1 j.2.2)
+      (fun y hy => crossRightDivFactor_eq_zero_off_chartPouKernel
+        (I := I) (M := M) g r s α P₀ j.1 j.2.1 j.2.2 hy)
+      (by rw [← hΩ_def]; exact hApart_memWkp j.2.1 j.1)).1
+  -- `crossRightGradCoeffDivLimit` is the sum of two three-fold sums of
+  -- functions; rewrite the pointwise nested sums as single `Finset.sum`s of
+  -- functions over the triple-index `ι`.
+  have h_funcA : ∀ y : EuclN,
+      (∑ l : Fin (Module.finrank ℝ E),
+          ∑ P : TensorCompIdx (E := E) r s,
+            ∑ Q : TensorCompIdx (E := E) r s,
+              Set.indicator (chartPouKernel (I := I) (M := M) α)
+                  (euclidPartial (E := E) l
+                    (crossRightDivFactor (I := I) (M := M)
+                      g r s α P₀ l P Q)) y *
+                (crossRightLimitComponent (I := I) (M := M)
+                  g r s h_atlas i α P :
+                  EuclN → ℝ) y)
+        = ∑ j : ι, summandComp j y := by
+    intro y
+    rw [show (Finset.univ : Finset ι) =
+        (Finset.univ : Finset (Fin (Module.finrank ℝ E))) ×ˢ
+          (Finset.univ : Finset (TensorCompIdx (E := E) r s ×
+            TensorCompIdx (E := E) r s)) from
+      (Finset.univ_product_univ).symm]
+    rw [Finset.sum_product]
+    refine Finset.sum_congr rfl (fun l _ => ?_)
+    rw [show (Finset.univ : Finset (TensorCompIdx (E := E) r s ×
+          TensorCompIdx (E := E) r s)) =
+        (Finset.univ : Finset (TensorCompIdx (E := E) r s)) ×ˢ
+          (Finset.univ : Finset (TensorCompIdx (E := E) r s)) from
+      (Finset.univ_product_univ).symm]
+    rw [Finset.sum_product]
+  have h_funcB : ∀ y : EuclN,
+      (∑ l : Fin (Module.finrank ℝ E),
+          ∑ P : TensorCompIdx (E := E) r s,
+            ∑ Q : TensorCompIdx (E := E) r s,
+              Set.indicator (chartPouKernel (I := I) (M := M) α)
+                  (crossRightDivFactor (I := I) (M := M)
+                    g r s α P₀ l P Q) y *
+                (cutoffPartialLpLimit (I := I) (M := M)
+                  g r s h_atlas i α P l :
+                  EuclN → ℝ) y)
+        = ∑ j : ι, summandPart j y := by
+    intro y
+    rw [show (Finset.univ : Finset ι) =
+        (Finset.univ : Finset (Fin (Module.finrank ℝ E))) ×ˢ
+          (Finset.univ : Finset (TensorCompIdx (E := E) r s ×
+            TensorCompIdx (E := E) r s)) from
+      (Finset.univ_product_univ).symm]
+    rw [Finset.sum_product]
+    refine Finset.sum_congr rfl (fun l _ => ?_)
+    rw [show (Finset.univ : Finset (TensorCompIdx (E := E) r s ×
+          TensorCompIdx (E := E) r s)) =
+        (Finset.univ : Finset (TensorCompIdx (E := E) r s)) ×ˢ
+          (Finset.univ : Finset (TensorCompIdx (E := E) r s)) from
+      (Finset.univ_product_univ).symm]
+    rw [Finset.sum_product]
+  -- The two three-fold-sum function-groups, as single `ι`-sums of functions.
+  have hsumComp_memWkp :
+      MemWkp (d := Module.finrank ℝ E) K 2
+        (fun y => ∑ j : ι, summandComp j y) Ω :=
+    memWkp_finset_sum_iota hΩ_open
+      (Finset.univ : Finset ι) summandComp
+      (fun j _ => hsummandComp_memWkp j)
+  have hsumPart_memWkp :
+      MemWkp (d := Module.finrank ℝ E) K 2
+        (fun y => ∑ j : ι, summandPart j y) Ω :=
+    memWkp_finset_sum_iota hΩ_open
+      (Finset.univ : Finset ι) summandPart
+      (fun j _ => hsummandPart_memWkp j)
+  -- The triangle inequality: across the two three-fold sums, then within each.
+  have h_triangle :
+      wkpNorm (d := Module.finrank ℝ E) K 2
+          (crossRightGradCoeffDivLimit (I := I) (M := M)
+            g r s h_atlas i α P₀) Ω
+        ≤ (∑ j : ι, wkpNorm (d := Module.finrank ℝ E) K 2 (summandComp j) Ω)
+          + (∑ j : ι, wkpNorm (d := Module.finrank ℝ E) K 2 (summandPart j) Ω) := by
+    have h_split : crossRightGradCoeffDivLimit (I := I) (M := M)
+        g r s h_atlas i α P₀ =
+        (fun y => (∑ j : ι, summandComp j y) + (∑ j : ι, summandPart j y)) := by
+      funext y
+      unfold crossRightGradCoeffDivLimit
+      rw [h_funcA y, h_funcB y]
+    rw [h_split]
+    refine le_trans
+      (wkpNorm_add_le (d := Module.finrank ℝ E) (by norm_num) hΩ_open
+        hsumComp_memWkp hsumPart_memWkp) (add_le_add ?_ ?_)
+    · exact wkpNorm_sum_le (d := Module.finrank ℝ E) (by norm_num) hΩ_open
+        (Finset.univ : Finset ι) summandComp
+        (fun j _ => hsummandComp_memWkp j)
+    · exact wkpNorm_sum_le (d := Module.finrank ℝ E) (by norm_num) hΩ_open
+        (Finset.univ : Finset ι) summandPart
+        (fun j _ => hsummandPart_memWkp j)
+  -- The component-atom-group sum: each summand's atom `wkpNorm` is bounded by
+  -- the full component-atom sum `Sumcomp`, so every summand is `≤ ofReal Ccomp *
+  -- Sumcomp`; the triple-sum of that constant is `card ι • (ofReal Ccomp *
+  -- Sumcomp)`.
+  have h_groupA :
+      (∑ j : ι, wkpNorm (d := Module.finrank ℝ E) K 2 (summandComp j) Ω)
+        ≤ ENNReal.ofReal ((Fintype.card ι : ℝ) * Ccomp) * Sumcomp := by
+    have h_each : ∀ j : ι,
+        wkpNorm (d := Module.finrank ℝ E) K 2 (summandComp j) Ω ≤
+          ENNReal.ofReal Ccomp * Sumcomp := by
+      intro j
+      refine (hCcomp j).trans (mul_le_mul_right ?_ (ENNReal.ofReal Ccomp))
+      rw [hSumcomp_def]
+      exact Finset.single_le_sum
+        (f := fun P => wkpNorm (d := Module.finrank ℝ E) K 2 (Acomp P) Ω)
+        (fun P _ => zero_le _) (Finset.mem_univ j.2.1)
+    refine le_trans (Finset.sum_le_sum (fun j _ => h_each j)) ?_
+    rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
+    rw [ENNReal.ofReal_mul (by positivity), ENNReal.ofReal_natCast, mul_assoc]
+  -- The chart-partial-atom-group sum: each summand's atom `wkpNorm` is bounded
+  -- by the full chart-partial-atom sum `Sumpart`.
+  have h_groupB :
+      (∑ j : ι, wkpNorm (d := Module.finrank ℝ E) K 2 (summandPart j) Ω)
+        ≤ ENNReal.ofReal ((Fintype.card ι : ℝ) * Cpart) * Sumpart := by
+    have h_each : ∀ j : ι,
+        wkpNorm (d := Module.finrank ℝ E) K 2 (summandPart j) Ω ≤
+          ENNReal.ofReal Cpart * Sumpart := by
+      intro j
+      refine (hCpart j).trans (mul_le_mul_right ?_ (ENNReal.ofReal Cpart))
+      rw [hSumpart_def]
+      refine le_trans ?_
+        (Finset.single_le_sum
+          (f := fun P => ∑ l : Fin (Module.finrank ℝ E),
+            wkpNorm (d := Module.finrank ℝ E) K 2 (Apart P l) Ω)
+          (fun P _ => zero_le _) (Finset.mem_univ j.2.1))
+      exact Finset.single_le_sum
+        (f := fun l => wkpNorm (d := Module.finrank ℝ E) K 2 (Apart j.2.1 l) Ω)
+        (fun l _ => zero_le _) (Finset.mem_univ j.1)
+    refine le_trans (Finset.sum_le_sum (fun j _ => h_each j)) ?_
+    rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
+    rw [ENNReal.ofReal_mul (by positivity), ENNReal.ofReal_natCast, mul_assoc]
+  -- The two group constants are dominated by their max.
+  have hCcomp_le :
+      ENNReal.ofReal ((Fintype.card ι : ℝ) * Ccomp) ≤
+        ENNReal.ofReal
+          (max ((Fintype.card ι : ℝ) * Ccomp) ((Fintype.card ι : ℝ) * Cpart)) :=
+    ENNReal.ofReal_le_ofReal (le_max_left _ _)
+  have hCpart_le :
+      ENNReal.ofReal ((Fintype.card ι : ℝ) * Cpart) ≤
+        ENNReal.ofReal
+          (max ((Fintype.card ι : ℝ) * Ccomp) ((Fintype.card ι : ℝ) * Cpart)) :=
+    ENNReal.ofReal_le_ofReal (le_max_right _ _)
+  calc
+    wkpNorm (d := Module.finrank ℝ E) K 2
+        (crossRightGradCoeffDivLimit (I := I) (M := M)
+          g r s h_atlas i α P₀) Ω
+        ≤ (∑ j : ι, wkpNorm (d := Module.finrank ℝ E) K 2 (summandComp j) Ω)
+          + (∑ j : ι, wkpNorm (d := Module.finrank ℝ E) K 2 (summandPart j) Ω) :=
+        h_triangle
+    _ ≤ ENNReal.ofReal ((Fintype.card ι : ℝ) * Ccomp) * Sumcomp
+          + ENNReal.ofReal ((Fintype.card ι : ℝ) * Cpart) * Sumpart :=
+        add_le_add h_groupA h_groupB
+    _ ≤ ENNReal.ofReal
+            (max ((Fintype.card ι : ℝ) * Ccomp)
+              ((Fintype.card ι : ℝ) * Cpart)) * Sumcomp
+          + ENNReal.ofReal
+              (max ((Fintype.card ι : ℝ) * Ccomp)
+                ((Fintype.card ι : ℝ) * Cpart)) * Sumpart :=
+        add_le_add (mul_le_mul_left hCcomp_le _)
+          (mul_le_mul_left hCpart_le _)
+    _ = ENNReal.ofReal
+            (max ((Fintype.card ι : ℝ) * Ccomp)
+              ((Fintype.card ι : ℝ) * Cpart)) * (Sumcomp + Sumpart) :=
+        (mul_add _ _ _).symm
+
+end MainBoundUniform
+
 end TensorSpectral
 end Parabolic
 end Analysis
