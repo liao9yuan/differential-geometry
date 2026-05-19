@@ -1492,6 +1492,864 @@ theorem eigenvectorChartRHS_eLpNorm_le
 
 end MainBound
 
+/-! ## Uniform-constant restatements
+
+The headline bound `eigenvectorChartRHS_eLpNorm_le` produces, per eigenbasis
+index `i`, a nonnegative constant `C`. A downstream bounded-operator argument
+over the whole eigenbasis needs the constant *uniform* — one `C` serving every
+`i`. The seven per-term constants are geometric (chart-transition / density /
+dimension / operator-norm data) and do not depend on `i`, so the uniform
+restatement is provable: the witness construction is hoisted before the `∀ i`.
+
+The eigenvector index `i` is **not** a section variable here, so each restatement
+carries its own `∀ i`. A `_uniform` statement cannot be derived from its per-`i`
+original (one cannot get `∃ C, ∀ i` from `∀ i, ∃ C`); each carries its own proof
+— the per-`i` proof with the constant hoisted before the `∀ i`. -/
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
+/-- **Uniform-constant finite-sum aggregation.** The constant-uniform form of
+`eLpNorm_sum_le_const_mul_aggregate`: a finite indexed family of summands
+`F j i`, each weighted-`MemLp` and each — *with an `i`-uniform constant* — having
+its `eLpNorm` bounded by `ENNReal.ofReal Cⱼ` times an aggregate `A i`, has its
+summed `eLpNorm` bounded by `ENNReal.ofReal` of a single nonnegative constant —
+*the same for every `i`* — times `A i`. The per-summand constants are themselves
+`i`-uniform, so their sum (times the index cardinality) is an `i`-uniform
+headline constant. -/
+private lemma eLpNorm_sum_le_const_mul_aggregate_uniform
+    {ι : Type*} [Fintype ι] {ν : Type*} {μ : Measure EuclN}
+    (F : ι → ν → EuclN → ℝ) (A : ν → ℝ≥0∞)
+    (hF : ∀ (j : ι) (n : ν), MemLp (F j n) 2 μ)
+    (hbd : ∀ j : ι, ∃ C : ℝ, 0 ≤ C ∧
+      ∀ n : ν, eLpNorm (F j n) 2 μ ≤ ENNReal.ofReal C * A n) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ n : ν,
+        eLpNorm (fun y => ∑ j : ι, F j n y) 2 μ ≤ ENNReal.ofReal C * A n := by
+  classical
+  -- Extract the `i`-uniform per-summand nonnegative constant and bound.
+  choose Cf hCf_nn hCf using hbd
+  -- The headline constant: the sum of the per-summand constants times the
+  -- cardinality of the (finite) index type — manifestly `i`-free.
+  refine ⟨(∑ j : ι, Cf j) * (Fintype.card ι : ℝ),
+    mul_nonneg (Finset.sum_nonneg (fun j _ => hCf_nn j)) (by positivity),
+    fun n => ?_⟩
+  -- The function `fun y => ∑ j, F j n y` is the `Finset.sum` of the `F j n`.
+  have h_fun : (fun y => ∑ j : ι, F j n y) = ∑ j : ι, F j n := by
+    funext y
+    exact (Finset.sum_apply y Finset.univ (fun j => F j n)).symm
+  rw [h_fun]
+  -- The triangle inequality `eLpNorm_sum_le`.
+  have h_tri : eLpNorm (∑ j : ι, F j n) 2 μ ≤ ∑ j : ι, eLpNorm (F j n) 2 μ :=
+    eLpNorm_sum_le (fun j _ => (hF j n).aestronglyMeasurable) (by norm_num)
+  -- Each per-summand `eLpNorm` is `≤ ENNReal.ofReal (∑ Cf) * A n`: bound the
+  -- per-summand constant `Cf j` by the whole nonnegative sum `∑ Cf`.
+  have h_step : ∑ j : ι, eLpNorm (F j n) 2 μ
+      ≤ ∑ _j : ι, ENNReal.ofReal (∑ k : ι, Cf k) * A n := by
+    refine Finset.sum_le_sum (fun j _ => ?_)
+    refine (hCf j n).trans ?_
+    gcongr
+    exact Finset.single_le_sum (fun k _ => hCf_nn k) (Finset.mem_univ j)
+  -- The constant sum is `card • (ENNReal.ofReal (∑ Cf) * A n)`.
+  have h_const : ∑ _j : ι, ENNReal.ofReal (∑ k : ι, Cf k) * A n
+      = (Fintype.card ι : ℝ≥0∞) *
+          (ENNReal.ofReal (∑ k : ι, Cf k) * A n) := by
+    rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
+  -- Reassociate `card * ENNReal.ofReal (∑ Cf)` into a single `ENNReal.ofReal`.
+  have h_cast : (Fintype.card ι : ℝ≥0∞) * ENNReal.ofReal (∑ k : ι, Cf k)
+      = ENNReal.ofReal ((∑ j : ι, Cf j) * (Fintype.card ι : ℝ)) := by
+    rw [mul_comm (∑ j : ι, Cf j), ENNReal.ofReal_mul (by positivity),
+      ENNReal.ofReal_natCast]
+  calc
+    eLpNorm (∑ j : ι, F j n) 2 μ
+        ≤ ∑ j : ι, eLpNorm (F j n) 2 μ := h_tri
+    _ ≤ ∑ _j : ι, ENNReal.ofReal (∑ k : ι, Cf k) * A n := h_step
+    _ = (Fintype.card ι : ℝ≥0∞) *
+          (ENNReal.ofReal (∑ k : ι, Cf k) * A n) := h_const
+    _ = ((Fintype.card ι : ℝ≥0∞) * ENNReal.ofReal (∑ k : ι, Cf k)) * A n := by
+        rw [mul_assoc]
+    _ = ENNReal.ofReal ((∑ j : ι, Cf j) * (Fintype.card ι : ℝ)) * A n := by
+        rw [h_cast]
+
+section TermBoundsUniform
+
+variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
+  (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+  (α : M) (P₀ : TensorCompIdx (E := E) r s)
+
+omit [CompleteSpace E] in
+/-- **Uniform-constant `eLpNorm` bound for bracket term 1.** The constant-uniform
+form of `rhsTerm1_eLpNorm_le`: the constant is the literal `1`, manifestly
+`i`-free. -/
+private lemma rhsTerm1_eLpNorm_le_uniform :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        eLpNorm (rhsTerm1 (I := I) (M := M) g r s h_atlas i α P₀) 2
+            ((chartPulledWeightedMeasure (I := I) g α).restrict
+              (chartTargetEuclid (I := I) (M := M) α))
+          ≤ ENNReal.ofReal C *
+            rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀ := by
+  refine ⟨1, by norm_num, fun i => ?_⟩
+  rw [rhsTerm1, ENNReal.ofReal_one, one_mul]
+  exact le_trans (le_of_eq rfl)
+    (aggrUchart_le_rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀)
+
+/-- **Uniform-constant `eLpNorm` bound for bracket term 2.** The constant-uniform
+form of `rhsTerm2_eLpNorm_le`: the per-`i` constant is the `eLpNorm`-coefficient
+bound of the `i`-free `C^∞` product `covChartMetricGram · crossLeftTestCoeff`
+over the compact cutoff chart kernel, summed over the cross-left double-index;
+the uniform coefficient lemma `eLpNorm_weighted_contDiffOn_mul_le_uniform`
+exhibits each summand's constant once, before the `∀ i`, and the uniform
+aggregation lemma assembles the double sum. -/
+private lemma rhsTerm2_eLpNorm_le_uniform :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        eLpNorm (rhsTerm2 (I := I) (M := M) g r s h_atlas i α P₀) 2
+            ((chartPulledWeightedMeasure (I := I) g α).restrict
+              (chartTargetEuclid (I := I) (M := M) α))
+          ≤ ENNReal.ofReal C *
+            rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀ := by
+  classical
+  set μw : Measure EuclN :=
+    (chartPulledWeightedMeasure (I := I) g α).restrict
+      (chartTargetEuclid (I := I) (M := M) α) with hμw_def
+  -- The cross-left double-sum summand, indexed by the pair `(P, Q)` and `i`.
+  set F : (TensorCompIdx (E := E) r (s + 1) ×
+      TensorCompIdx (E := E) r (s + 1)) →
+      TensorEigenIdx (I := I) (M := M) g r s → EuclN → ℝ :=
+    fun x i y =>
+      (covChartMetricGram (I := I) (M := M) g r (s + 1) α x.1 x.2 y *
+          crossLeftTestCoeff (I := I) (M := M) g r s α P₀ x.2 y) *
+        ((crossLeftLimitComponent (I := I) (M := M) g r s h_atlas i α x.1 :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
+    with hF_def
+  -- Per-summand weighted-`MemLp`, for every `i`.
+  have hF_memLp : ∀ (x : TensorCompIdx (E := E) r (s + 1) ×
+      TensorCompIdx (E := E) r (s + 1))
+      (i : TensorEigenIdx (I := I) (M := M) g r s),
+      MemLp (F x i) 2 μw := by
+    intro x i
+    rw [hμw_def, hF_def]
+    exact rhsTerm2_summand_memLp (I := I) (M := M)
+      g r s h_atlas i α P₀ x.1 x.2
+  -- Per-summand `i`-uniform explicit-norm bound by the full aggregate.
+  have hF_bd : ∀ x : TensorCompIdx (E := E) r (s + 1) ×
+      TensorCompIdx (E := E) r (s + 1), ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        eLpNorm (F x i) 2 μw
+          ≤ ENNReal.ofReal C *
+            rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀ := by
+    intro x
+    -- The uniform coefficient bound for the `i`-free `C^∞` product. It is
+    -- `∀ w`-quantified; the cross-left limit atom — `i`-dependent — is one such
+    -- `w`, so the same constant serves every `i`.
+    obtain ⟨C, hC_nn, hC_bd⟩ := eLpNorm_weighted_contDiffOn_mul_le_uniform
+      (I := I) (M := M) g α
+      ((covChartMetricGram_contDiffOn (I := I) (M := M)
+          g r (s + 1) α x.1 x.2).mul
+        (crossLeftTestCoeff_contDiffOn (I := I) (M := M) g r s α P₀ x.2))
+      (cutoffChartKernelEuclid_isCompact (I := I) (M := M) α)
+      (cutoffChartKernelEuclid_measurableSet (I := I) (M := M) α)
+      (cutoffChartKernelEuclid_subset_chartTargetEuclid (I := I) (M := M) α)
+    refine ⟨C, hC_nn, fun i => ?_⟩
+    -- The cross-left limit vanishes a.e. off the compact cutoff chart kernel.
+    have h_aezero :
+        ∀ᵐ y ∂((chartPulledWeightedMeasure (I := I) g α).restrict
+            (chartTargetEuclid (I := I) (M := M) α)),
+          y ∉ cutoffChartKernelEuclid (I := I) (M := M) α →
+            ((crossLeftLimitComponent (I := I) (M := M) g r s h_atlas i α x.1 :
+              Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
+              EuclN → ℝ) y = 0 := by
+      rw [crossLeftLimitComponent]
+      exact
+        tensorL2ChartComponentCutoff_ae_zero_off_cutoffChartKernelEuclid_weighted
+          (I := I) (M := M) g r (s + 1)
+          (tensorCovGradL2Compl (I := I) (M := M) g r s
+            (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i)) α x.1
+    -- The atom's `eLpNorm` is dominated by the cross-left aggregate piece.
+    have h_atom_le :
+        eLpNorm ((crossLeftLimitComponent (I := I) (M := M)
+            g r s h_atlas i α x.1 :
+            Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) 2 μw
+          ≤ rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀ := by
+      refine le_trans ?_
+        (aggrCrossLeft_le_rhsAggregate (I := I) (M := M)
+          g r s h_atlas i α P₀)
+      rw [hμw_def, aggrCrossLeft]
+      exact Finset.single_le_sum
+        (f := fun P => eLpNorm ((crossLeftLimitComponent (I := I) (M := M)
+            g r s h_atlas i α P :
+            Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) 2
+          ((chartPulledWeightedMeasure (I := I) g α).restrict
+            (chartTargetEuclid (I := I) (M := M) α)))
+        (fun P _ => zero_le _) (Finset.mem_univ x.1)
+    rw [hμw_def, hF_def]
+    refine le_trans (hC_bd _
+      (crossLeftLimitComponent_memLp_weighted (I := I) (M := M)
+        g r s h_atlas i α x.1) h_aezero) ?_
+    gcongr
+  -- The uniform aggregation lemma assembles the double sum.
+  obtain ⟨C, hC_nn, hC_bd⟩ := eLpNorm_sum_le_const_mul_aggregate_uniform
+    (μ := μw) F
+    (fun i => rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀)
+    hF_memLp hF_bd
+  refine ⟨C, hC_nn, fun i => ?_⟩
+  -- Identify the single-product sum with the nested double sum.
+  have h_eq : (fun y => ∑ x : TensorCompIdx (E := E) r (s + 1) ×
+      TensorCompIdx (E := E) r (s + 1), F x i y)
+      = rhsTerm2 (I := I) (M := M) g r s h_atlas i α P₀ := by
+    funext y
+    simp only [rhsTerm2, hF_def, Fintype.sum_prod_type]
+  rw [← h_eq, hμw_def]
+  exact hC_bd i
+
+/-- **Uniform-constant `eLpNorm` bound for bracket term 3.** The constant-uniform
+form of `rhsTerm3_eLpNorm_le`; the argument mirrors that of term 2 with the
+cross-right limit objects. -/
+private lemma rhsTerm3_eLpNorm_le_uniform :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        eLpNorm (rhsTerm3 (I := I) (M := M) g r s h_atlas i α P₀) 2
+            ((chartPulledWeightedMeasure (I := I) g α).restrict
+              (chartTargetEuclid (I := I) (M := M) α))
+          ≤ ENNReal.ofReal C *
+            rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀ := by
+  classical
+  set μw : Measure EuclN :=
+    (chartPulledWeightedMeasure (I := I) g α).restrict
+      (chartTargetEuclid (I := I) (M := M) α) with hμw_def
+  -- The cross-right double-sum summand, indexed by the pair `(P, Q)` and `i`.
+  set F : (TensorCompIdx (E := E) r s ×
+      TensorCompIdx (E := E) r s) →
+      TensorEigenIdx (I := I) (M := M) g r s → EuclN → ℝ :=
+    fun x i y =>
+      (covChartMetricGram (I := I) (M := M) g r s α x.1 x.2 y *
+          crossRightTestValueCoeff (I := I) (M := M) g r s α P₀ x.2 y) *
+        ((crossRightLimitComponent (I := I) (M := M) g r s h_atlas i α x.1 :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
+    with hF_def
+  have hF_memLp : ∀ (x : TensorCompIdx (E := E) r s ×
+      TensorCompIdx (E := E) r s)
+      (i : TensorEigenIdx (I := I) (M := M) g r s),
+      MemLp (F x i) 2 μw := by
+    intro x i
+    rw [hμw_def, hF_def]
+    exact rhsTerm3_summand_memLp (I := I) (M := M)
+      g r s h_atlas i α P₀ x.1 x.2
+  have hF_bd : ∀ x : TensorCompIdx (E := E) r s ×
+      TensorCompIdx (E := E) r s, ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        eLpNorm (F x i) 2 μw
+          ≤ ENNReal.ofReal C *
+            rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀ := by
+    intro x
+    obtain ⟨C, hC_nn, hC_bd⟩ := eLpNorm_weighted_contDiffOn_mul_le_uniform
+      (I := I) (M := M) g α
+      ((covChartMetricGram_contDiffOn (I := I) (M := M) g r s α x.1 x.2).mul
+        (crossRightTestValueCoeff_contDiffOn (I := I) (M := M) g r s α P₀ x.2))
+      (cutoffChartKernelEuclid_isCompact (I := I) (M := M) α)
+      (cutoffChartKernelEuclid_measurableSet (I := I) (M := M) α)
+      (cutoffChartKernelEuclid_subset_chartTargetEuclid (I := I) (M := M) α)
+    refine ⟨C, hC_nn, fun i => ?_⟩
+    have h_aezero :
+        ∀ᵐ y ∂((chartPulledWeightedMeasure (I := I) g α).restrict
+            (chartTargetEuclid (I := I) (M := M) α)),
+          y ∉ cutoffChartKernelEuclid (I := I) (M := M) α →
+            ((crossRightLimitComponent (I := I) (M := M) g r s h_atlas i α x.1 :
+              Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
+              EuclN → ℝ) y = 0 := by
+      rw [crossRightLimitComponent]
+      exact
+        tensorL2ChartComponentCutoff_ae_zero_off_cutoffChartKernelEuclid_weighted
+          (I := I) (M := M) g r s
+          (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+            (eigenvectorResolvent (I := I) (M := M) g r s h_atlas i)) α x.1
+    have h_atom_le :
+        eLpNorm ((crossRightLimitComponent (I := I) (M := M)
+            g r s h_atlas i α x.1 :
+            Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) 2 μw
+          ≤ rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀ := by
+      refine le_trans ?_
+        (aggrCrossRight_le_rhsAggregate (I := I) (M := M)
+          g r s h_atlas i α P₀)
+      rw [hμw_def, aggrCrossRight]
+      exact Finset.single_le_sum
+        (f := fun P => eLpNorm ((crossRightLimitComponent (I := I) (M := M)
+            g r s h_atlas i α P :
+            Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) 2
+          ((chartPulledWeightedMeasure (I := I) g α).restrict
+            (chartTargetEuclid (I := I) (M := M) α)))
+        (fun P _ => zero_le _) (Finset.mem_univ x.1)
+    rw [hμw_def, hF_def]
+    refine le_trans (hC_bd _
+      (crossRightLimitComponent_memLp_weighted (I := I) (M := M)
+        g r s h_atlas i α x.1) h_aezero) ?_
+    gcongr
+  obtain ⟨C, hC_nn, hC_bd⟩ := eLpNorm_sum_le_const_mul_aggregate_uniform
+    (μ := μw) F
+    (fun i => rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀)
+    hF_memLp hF_bd
+  refine ⟨C, hC_nn, fun i => ?_⟩
+  have h_eq : (fun y => ∑ x : TensorCompIdx (E := E) r s ×
+      TensorCompIdx (E := E) r s, F x i y)
+      = rhsTerm3 (I := I) (M := M) g r s h_atlas i α P₀ := by
+    funext y
+    simp only [rhsTerm3, hF_def, Fintype.sum_prod_type]
+  rw [← h_eq, hμw_def]
+  exact hC_bd i
+
+/-- **Uniform-constant `eLpNorm` bound for bracket term 4.** The constant-uniform
+form of `rhsTerm4_eLpNorm_le`: the uniform companion lemma
+`eLpNorm_covPrincipalRotationCoeffLimit_le_uniform` bounds it, with one constant
+for every `i`, by a constant times the chart-partial aggregate piece, which is
+dominated by the full aggregate. -/
+private lemma rhsTerm4_eLpNorm_le_uniform :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        eLpNorm (rhsTerm4 (I := I) (M := M) g r s h_atlas i α P₀) 2
+            ((chartPulledWeightedMeasure (I := I) g α).restrict
+              (chartTargetEuclid (I := I) (M := M) α))
+          ≤ ENNReal.ofReal C *
+            rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀ := by
+  obtain ⟨C, hC_nn, hC_bd⟩ := eLpNorm_covPrincipalRotationCoeffLimit_le_uniform
+    (I := I) (M := M) g r s h_atlas α P₀
+  refine ⟨C, hC_nn, fun i => ?_⟩
+  rw [rhsTerm4]
+  refine le_trans (hC_bd i) ?_
+  gcongr
+  exact aggrPartial_le_rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀
+
+/-- **Uniform-constant `eLpNorm` bound for bracket term 5.** The constant-uniform
+form of `rhsTerm5_eLpNorm_le`: the uniform companion lemma
+`eLpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform` bounds it, with one
+constant for every `i`, by a constant times the sum of the chart-partial and
+chart-component aggregate pieces; each piece is dominated by the full aggregate,
+so doubling the companion constant absorbs the factor. -/
+private lemma rhsTerm5_eLpNorm_le_uniform :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        eLpNorm (rhsTerm5 (I := I) (M := M) g r s h_atlas i α P₀) 2
+            ((chartPulledWeightedMeasure (I := I) g α).restrict
+              (chartTargetEuclid (I := I) (M := M) α))
+          ≤ ENNReal.ofReal C *
+            rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀ := by
+  obtain ⟨C, hC_nn, hC_bd⟩ :=
+    eLpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform
+      (I := I) (M := M) g r s h_atlas α P₀
+  -- The uniform headline constant for this term is `2 * C`.
+  refine ⟨2 * C, by positivity, fun i => ?_⟩
+  rw [rhsTerm5]
+  -- Bound the companion lemma's two-piece RHS sum by twice the full aggregate.
+  have h_sum_le :
+      (∑ P : TensorCompIdx (E := E) r s,
+          ∑ k : Fin (Module.finrank ℝ E),
+            eLpNorm ((partialLpLimit (I := I) (M := M)
+                g r s h_atlas i α P k :
+              Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) 2
+              ((chartPulledWeightedMeasure (I := I) g α).restrict
+                (chartTargetEuclid (I := I) (M := M) α)))
+        + (∑ p : TensorCompIdx (E := E) r s,
+            eLpNorm ((componentLpLimit (I := I) (M := M)
+                g r s h_atlas i α p :
+              Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) 2
+              ((chartPulledWeightedMeasure (I := I) g α).restrict
+                (chartTargetEuclid (I := I) (M := M) α)))
+      ≤ 2 * rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀ := by
+    rw [two_mul]
+    exact add_le_add
+      (aggrPartial_le_rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀)
+      (aggrComponent_le_rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀)
+  refine le_trans (hC_bd i) ?_
+  calc
+    ENNReal.ofReal C *
+        ((∑ P : TensorCompIdx (E := E) r s,
+            ∑ k : Fin (Module.finrank ℝ E),
+              eLpNorm ((partialLpLimit (I := I) (M := M)
+                  g r s h_atlas i α P k :
+                Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) 2
+                ((chartPulledWeightedMeasure (I := I) g α).restrict
+                  (chartTargetEuclid (I := I) (M := M) α)))
+          + (∑ p : TensorCompIdx (E := E) r s,
+              eLpNorm ((componentLpLimit (I := I) (M := M)
+                  g r s h_atlas i α p :
+                Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) 2
+                ((chartPulledWeightedMeasure (I := I) g α).restrict
+                  (chartTargetEuclid (I := I) (M := M) α))))
+        ≤ ENNReal.ofReal C *
+            (2 * rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀) := by
+          gcongr
+    _ = ENNReal.ofReal (2 * C) *
+          rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀ := by
+        rw [← ofReal_two, ← mul_assoc, ← ENNReal.ofReal_mul hC_nn,
+          mul_comm C 2]
+
+/-- **Uniform-constant `eLpNorm` bound for the lower-order gradient-divergence
+chart-direction sum.** The constant-uniform form of
+`weightedGradCoeffDivLimit_sum_eLpNorm_le`: the uniform companion lemma
+`eLpNorm_weightedGradCoeffDivLimit_le_uniform` bounds each chart-direction
+summand, with one constant for every `i`, by a constant times the sum of the
+chart-component and chart-partial aggregate pieces — `≤ 2 *` the full aggregate;
+the uniform aggregation lemma assembles the chart-direction sum. -/
+private lemma weightedGradCoeffDivLimit_sum_eLpNorm_le_uniform :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        eLpNorm
+            (fun y => ∑ l : Fin (Module.finrank ℝ E),
+              weightedGradCoeffDivLimit (I := I) (M := M)
+                g r s h_atlas i α P₀ l y) 2
+            ((chartPulledWeightedMeasure (I := I) g α).restrict
+              (chartTargetEuclid (I := I) (M := M) α))
+          ≤ ENNReal.ofReal C *
+            rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀ := by
+  classical
+  set μw : Measure EuclN :=
+    (chartPulledWeightedMeasure (I := I) g α).restrict
+      (chartTargetEuclid (I := I) (M := M) α) with hμw_def
+  -- The chart-direction summand, indexed by `l` and `i`.
+  set F : Fin (Module.finrank ℝ E) →
+      TensorEigenIdx (I := I) (M := M) g r s → EuclN → ℝ :=
+    fun l i => weightedGradCoeffDivLimit (I := I) (M := M)
+      g r s h_atlas i α P₀ l with hF_def
+  have hF_memLp : ∀ (l : Fin (Module.finrank ℝ E))
+      (i : TensorEigenIdx (I := I) (M := M) g r s),
+      MemLp (F l i) 2 μw := by
+    intro l i
+    rw [hμw_def, hF_def]
+    exact weightedGradCoeffDivLimit_memLp_weighted
+      (I := I) (M := M) g r s h_atlas i α P₀ l
+  -- Per chart direction `l`: an `i`-uniform explicit-norm bound by the full
+  -- aggregate (the companion lemma's two-piece sum is `≤ 2 * aggregate`).
+  have hF_bd : ∀ l : Fin (Module.finrank ℝ E), ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        eLpNorm (F l i) 2 μw
+          ≤ ENNReal.ofReal C *
+            rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀ := by
+    intro l
+    obtain ⟨C, hC_nn, hC_bd⟩ := eLpNorm_weightedGradCoeffDivLimit_le_uniform
+      (I := I) (M := M) g r s h_atlas α P₀ l
+    -- The companion constant doubled absorbs the two-piece aggregate sum.
+    refine ⟨2 * C, by positivity, fun i => ?_⟩
+    rw [hμw_def, hF_def]
+    refine le_trans (hC_bd i) ?_
+    -- The companion lemma's RHS sum is `aggrComponent + aggrPartial`.
+    have h_sum_le :
+        (∑ p : TensorCompIdx (E := E) r s,
+            eLpNorm ((componentLpLimit (I := I) (M := M)
+                g r s h_atlas i α p :
+              Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) 2
+              ((chartPulledWeightedMeasure (I := I) g α).restrict
+                (chartTargetEuclid (I := I) (M := M) α)))
+          + (∑ p : TensorCompIdx (E := E) r s,
+              ∑ l' : Fin (Module.finrank ℝ E),
+                eLpNorm ((partialLpLimit (I := I) (M := M)
+                    g r s h_atlas i α p l' :
+                  Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) 2
+                  ((chartPulledWeightedMeasure (I := I) g α).restrict
+                    (chartTargetEuclid (I := I) (M := M) α)))
+        ≤ 2 * rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀ := by
+      rw [two_mul]
+      exact add_le_add
+        (aggrComponent_le_rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀)
+        (aggrPartial_le_rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀)
+    calc
+      ENNReal.ofReal C *
+          ((∑ p : TensorCompIdx (E := E) r s,
+              eLpNorm ((componentLpLimit (I := I) (M := M)
+                  g r s h_atlas i α p :
+                Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) 2
+                ((chartPulledWeightedMeasure (I := I) g α).restrict
+                  (chartTargetEuclid (I := I) (M := M) α)))
+            + (∑ p : TensorCompIdx (E := E) r s,
+                ∑ l' : Fin (Module.finrank ℝ E),
+                  eLpNorm ((partialLpLimit (I := I) (M := M)
+                      g r s h_atlas i α p l' :
+                    Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
+                    EuclN → ℝ) 2
+                    ((chartPulledWeightedMeasure (I := I) g α).restrict
+                      (chartTargetEuclid (I := I) (M := M) α))))
+          ≤ ENNReal.ofReal C *
+              (2 * rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀) := by
+            gcongr
+      _ = ENNReal.ofReal (2 * C) *
+            rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀ := by
+          rw [← ofReal_two, ← mul_assoc, ← ENNReal.ofReal_mul hC_nn,
+            mul_comm C 2]
+  -- The uniform aggregation lemma assembles the chart-direction sum.
+  obtain ⟨C, hC_nn, hC_bd⟩ := eLpNorm_sum_le_const_mul_aggregate_uniform
+    (μ := μw) F
+    (fun i => rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀)
+    hF_memLp hF_bd
+  refine ⟨C, hC_nn, fun i => ?_⟩
+  rw [hμw_def] at hC_bd
+  exact hC_bd i
+
+/-- **Uniform-constant `eLpNorm` bound for bracket term 6.** The constant-uniform
+form of `rhsTerm6_eLpNorm_le`: bracket term 6 is the product of the `i`-free
+`C^∞` reciprocal chart density with the lower-order gradient-divergence
+chart-direction sum; the uniform coefficient bound
+`eLpNorm_weighted_contDiffOn_mul_le_uniform` and the uniform chart-direction-sum
+bound `weightedGradCoeffDivLimit_sum_eLpNorm_le_uniform` combine into one
+constant for every `i`. -/
+private lemma rhsTerm6_eLpNorm_le_uniform :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        eLpNorm (rhsTerm6 (I := I) (M := M) g r s h_atlas i α P₀) 2
+            ((chartPulledWeightedMeasure (I := I) g α).restrict
+              (chartTargetEuclid (I := I) (M := M) α))
+          ≤ ENNReal.ofReal C *
+            rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀ := by
+  classical
+  -- The uniform coefficient bound for the `i`-free `1 / densityOnEuclid` factor.
+  obtain ⟨C₁, hC₁_nn, hC₁_bd⟩ := eLpNorm_weighted_contDiffOn_mul_le_uniform
+    (I := I) (M := M) g α
+    (one_div_densityOnEuclid_contDiffOn (I := I) (M := M) g α)
+    (chartPouKernel_isCompact (I := I) (M := M) α)
+    (chartPouKernel_measurableSet (I := I) (M := M) α)
+    (chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α)
+  -- The uniform chart-direction-sum bound.
+  obtain ⟨C₂, hC₂_nn, hC₂_bd⟩ := weightedGradCoeffDivLimit_sum_eLpNorm_le_uniform
+    (I := I) (M := M) g r s h_atlas α P₀
+  -- The uniform headline constant for this term is `C₁ * C₂`.
+  refine ⟨C₁ * C₂, by positivity, fun i => ?_⟩
+  unfold rhsTerm6
+  calc
+    eLpNorm
+        (fun y => (1 / densityOnEuclid (I := I) g α y) *
+          (∑ l : Fin (Module.finrank ℝ E),
+            weightedGradCoeffDivLimit (I := I) (M := M)
+              g r s h_atlas i α P₀ l y)) 2
+        ((chartPulledWeightedMeasure (I := I) g α).restrict
+          (chartTargetEuclid (I := I) (M := M) α))
+        ≤ ENNReal.ofReal C₁ *
+            eLpNorm
+              (fun y => ∑ l : Fin (Module.finrank ℝ E),
+                weightedGradCoeffDivLimit (I := I) (M := M)
+                  g r s h_atlas i α P₀ l y) 2
+              ((chartPulledWeightedMeasure (I := I) g α).restrict
+                (chartTargetEuclid (I := I) (M := M) α)) :=
+          hC₁_bd _
+            (weightedGradCoeffDivLimit_sum_memLp (I := I) (M := M)
+              g r s h_atlas i α P₀)
+            (weightedGradCoeffDivLimit_sum_ae_zero_off_chartPouKernel
+              (I := I) (M := M) g r s h_atlas i α P₀)
+    _ ≤ ENNReal.ofReal C₁ *
+          (ENNReal.ofReal C₂ *
+            rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀) := by
+        gcongr
+        exact hC₂_bd i
+    _ = ENNReal.ofReal (C₁ * C₂) *
+          rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀ := by
+        rw [ENNReal.ofReal_mul hC₁_nn, mul_assoc]
+
+/-- **Uniform-constant `eLpNorm` bound for bracket term 7.** The constant-uniform
+form of `rhsTerm7_eLpNorm_le`: bracket term 7 is the product of the `i`-free
+`C^∞` reciprocal chart density with the cross-right gradient-divergence limit;
+the uniform coefficient bound `eLpNorm_weighted_contDiffOn_mul_le_uniform` and
+the uniform companion lemma `eLpNorm_crossRightGradCoeffDivLimit_le_uniform`
+combine into one constant for every `i`. -/
+private lemma rhsTerm7_eLpNorm_le_uniform :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        eLpNorm (rhsTerm7 (I := I) (M := M) g r s h_atlas i α P₀) 2
+            ((chartPulledWeightedMeasure (I := I) g α).restrict
+              (chartTargetEuclid (I := I) (M := M) α))
+          ≤ ENNReal.ofReal C *
+            rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀ := by
+  classical
+  -- The uniform coefficient bound for the `i`-free `1 / densityOnEuclid` factor.
+  obtain ⟨C₁, hC₁_nn, hC₁_bd⟩ := eLpNorm_weighted_contDiffOn_mul_le_uniform
+    (I := I) (M := M) g α
+    (one_div_densityOnEuclid_contDiffOn (I := I) (M := M) g α)
+    (chartPouKernel_isCompact (I := I) (M := M) α)
+    (chartPouKernel_measurableSet (I := I) (M := M) α)
+    (chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α)
+  -- The uniform companion lemma for the cross-right gradient-divergence limit.
+  obtain ⟨C₂, hC₂_nn, hC₂_bd⟩ := eLpNorm_crossRightGradCoeffDivLimit_le_uniform
+    (I := I) (M := M) g r s h_atlas α P₀
+  -- The uniform headline constant for this term is `C₁ * (2 * C₂)`.
+  refine ⟨C₁ * (2 * C₂), by positivity, fun i => ?_⟩
+  unfold rhsTerm7
+  -- The companion lemma's RHS sum is `aggrCrossRight + aggrCutoffPartial`.
+  have h_sum_le :
+      (∑ P : TensorCompIdx (E := E) r s,
+          eLpNorm ((crossRightLimitComponent (I := I) (M := M)
+              g r s h_atlas i α P :
+            Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) 2
+            ((chartPulledWeightedMeasure (I := I) g α).restrict
+              (chartTargetEuclid (I := I) (M := M) α)))
+        + (∑ P : TensorCompIdx (E := E) r s,
+            ∑ l : Fin (Module.finrank ℝ E),
+              eLpNorm ((cutoffPartialLpLimit (I := I) (M := M)
+                  g r s h_atlas i α P l :
+                Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) 2
+                ((chartPulledWeightedMeasure (I := I) g α).restrict
+                  (chartTargetEuclid (I := I) (M := M) α)))
+      ≤ 2 * rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀ := by
+    rw [two_mul]
+    exact add_le_add
+      (aggrCrossRight_le_rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀)
+      (aggrCutoffPartial_le_rhsAggregate (I := I) (M := M)
+        g r s h_atlas i α P₀)
+  calc
+    eLpNorm
+        (fun y => (1 / densityOnEuclid (I := I) g α y) *
+          crossRightGradCoeffDivLimit (I := I) (M := M)
+            g r s h_atlas i α P₀ y) 2
+        ((chartPulledWeightedMeasure (I := I) g α).restrict
+          (chartTargetEuclid (I := I) (M := M) α))
+        ≤ ENNReal.ofReal C₁ *
+            eLpNorm (crossRightGradCoeffDivLimit (I := I) (M := M)
+                g r s h_atlas i α P₀) 2
+              ((chartPulledWeightedMeasure (I := I) g α).restrict
+                (chartTargetEuclid (I := I) (M := M) α)) :=
+          hC₁_bd _
+            (crossRightGradCoeffDivLimit_memLp_weighted (I := I) (M := M)
+              g r s h_atlas i α P₀)
+            (Filter.Eventually.of_forall (fun y hy =>
+              crossRightGradCoeffDivLimit_eq_zero_off_chartPouKernel
+                (I := I) (M := M) g r s h_atlas i α P₀ hy))
+    _ ≤ ENNReal.ofReal C₁ *
+          (ENNReal.ofReal C₂ *
+            (2 * rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀)) := by
+        gcongr
+        exact le_trans (hC₂_bd i) (by gcongr)
+    _ = ENNReal.ofReal (C₁ * (2 * C₂)) *
+          rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀ := by
+        rw [ENNReal.ofReal_mul hC₁_nn,
+          ENNReal.ofReal_mul (by norm_num : (0 : ℝ) ≤ 2), ofReal_two]
+        ring
+
+end TermBoundsUniform
+
+section BracketBoundUniform
+
+variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
+  (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+  (α : M) (P₀ : TensorCompIdx (E := E) r s)
+
+/-- **Uniform-constant seven-term bracket `eLpNorm` bound.** The constant-uniform
+form of `rhsBracket_eLpNorm_le`: a single nonnegative constant `C` — the sum of
+the seven `i`-uniform per-term constants — serves every eigenbasis index `i`.
+Each per-term `_uniform` lemma supplies its `i`-free constant; iterated Minkowski
+over the seven-term bracket and the right-distributivity of `*` over `+` in
+`ℝ≥0∞` assemble them. -/
+private lemma rhsBracket_eLpNorm_le_uniform :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        eLpNorm (rhsBracket (I := I) (M := M) g r s h_atlas i α P₀) 2
+            ((chartPulledWeightedMeasure (I := I) g α).restrict
+              (chartTargetEuclid (I := I) (M := M) α))
+          ≤ ENNReal.ofReal C *
+            rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀ := by
+  classical
+  -- The seven `i`-uniform per-term explicit-norm bounds.
+  obtain ⟨D1, hD1_nn, hD1⟩ := rhsTerm1_eLpNorm_le_uniform
+    (I := I) (M := M) g r s h_atlas α P₀
+  obtain ⟨D2, hD2_nn, hD2⟩ := rhsTerm2_eLpNorm_le_uniform
+    (I := I) (M := M) g r s h_atlas α P₀
+  obtain ⟨D3, hD3_nn, hD3⟩ := rhsTerm3_eLpNorm_le_uniform
+    (I := I) (M := M) g r s h_atlas α P₀
+  obtain ⟨D4, hD4_nn, hD4⟩ := rhsTerm4_eLpNorm_le_uniform
+    (I := I) (M := M) g r s h_atlas α P₀
+  obtain ⟨D5, hD5_nn, hD5⟩ := rhsTerm5_eLpNorm_le_uniform
+    (I := I) (M := M) g r s h_atlas α P₀
+  obtain ⟨D6, hD6_nn, hD6⟩ := rhsTerm6_eLpNorm_le_uniform
+    (I := I) (M := M) g r s h_atlas α P₀
+  obtain ⟨D7, hD7_nn, hD7⟩ := rhsTerm7_eLpNorm_le_uniform
+    (I := I) (M := M) g r s h_atlas α P₀
+  -- The uniform headline constant: the sum of the seven per-term constants.
+  refine ⟨D1 + D2 + D3 + D4 + D5 + D6 + D7, by positivity, fun i => ?_⟩
+  set μw : Measure EuclN :=
+    (chartPulledWeightedMeasure (I := I) g α).restrict
+      (chartTargetEuclid (I := I) (M := M) α) with hμw_def
+  -- The seven per-term weighted-`MemLp` memberships, for this `i`.
+  have hM1 := rhsTerm1_memLp (I := I) (M := M) g r s h_atlas i α P₀
+  have hM2 := rhsTerm2_memLp (I := I) (M := M) g r s h_atlas i α P₀
+  have hM3 := rhsTerm3_memLp (I := I) (M := M) g r s h_atlas i α P₀
+  have hM4 := rhsTerm4_memLp (I := I) (M := M) g r s h_atlas i α P₀
+  have hM5 := rhsTerm5_memLp (I := I) (M := M) g r s h_atlas i α P₀
+  have hM6 := rhsTerm6_memLp (I := I) (M := M) g r s h_atlas i α P₀
+  have hM7 := rhsTerm7_memLp (I := I) (M := M) g r s h_atlas i α P₀
+  rw [← hμw_def] at hM1 hM2 hM3 hM4 hM5 hM6 hM7
+  -- The partial-bracket weighted-`MemLp` memberships, built term by term.
+  have hB12 := hM1.sub hM2
+  have hB123 := hB12.add hM3
+  have hB1234 := hB123.sub hM4
+  have hB12345 := hB1234.sub hM5
+  have hB123456 := hB12345.add hM6
+  -- Iterated Minkowski over the seven-term bracket.
+  have h_tri :
+      eLpNorm (rhsBracket (I := I) (M := M) g r s h_atlas i α P₀) 2 μw
+        ≤ eLpNorm (rhsTerm1 (I := I) (M := M) g r s h_atlas i α P₀) 2 μw
+          + eLpNorm (rhsTerm2 (I := I) (M := M) g r s h_atlas i α P₀) 2 μw
+          + eLpNorm (rhsTerm3 (I := I) (M := M) g r s h_atlas i α P₀) 2 μw
+          + eLpNorm (rhsTerm4 (I := I) (M := M) g r s h_atlas i α P₀) 2 μw
+          + eLpNorm (rhsTerm5 (I := I) (M := M) g r s h_atlas i α P₀) 2 μw
+          + eLpNorm (rhsTerm6 (I := I) (M := M) g r s h_atlas i α P₀) 2 μw
+          + eLpNorm (rhsTerm7 (I := I) (M := M) g r s h_atlas i α P₀) 2 μw := by
+    rw [rhsBracket]
+    -- Peel `- T7`, then `+ T6`, then `- T5`, `- T4`, `+ T3`, `- T2`.
+    refine le_trans (eLpNorm_sub_le hB123456.aestronglyMeasurable
+      hM7.aestronglyMeasurable (by norm_num)) ?_
+    refine add_le_add ?_ (le_refl _)
+    refine le_trans (eLpNorm_add_le hB12345.aestronglyMeasurable
+      hM6.aestronglyMeasurable (by norm_num)) ?_
+    refine add_le_add ?_ (le_refl _)
+    refine le_trans (eLpNorm_sub_le hB1234.aestronglyMeasurable
+      hM5.aestronglyMeasurable (by norm_num)) ?_
+    refine add_le_add ?_ (le_refl _)
+    refine le_trans (eLpNorm_sub_le hB123.aestronglyMeasurable
+      hM4.aestronglyMeasurable (by norm_num)) ?_
+    refine add_le_add ?_ (le_refl _)
+    refine le_trans (eLpNorm_add_le hB12.aestronglyMeasurable
+      hM3.aestronglyMeasurable (by norm_num)) ?_
+    refine add_le_add ?_ (le_refl _)
+    exact eLpNorm_sub_le hM1.aestronglyMeasurable
+      hM2.aestronglyMeasurable (by norm_num)
+  -- Each of the seven per-term `eLpNorm`s is `≤ ofReal Dⱼ * aggregate`; the
+  -- seven-fold sum is `≤ ofReal (∑ Dⱼ) * aggregate`.
+  refine le_trans h_tri ?_
+  have h_seven :
+      eLpNorm (rhsTerm1 (I := I) (M := M) g r s h_atlas i α P₀) 2 μw
+        + eLpNorm (rhsTerm2 (I := I) (M := M) g r s h_atlas i α P₀) 2 μw
+        + eLpNorm (rhsTerm3 (I := I) (M := M) g r s h_atlas i α P₀) 2 μw
+        + eLpNorm (rhsTerm4 (I := I) (M := M) g r s h_atlas i α P₀) 2 μw
+        + eLpNorm (rhsTerm5 (I := I) (M := M) g r s h_atlas i α P₀) 2 μw
+        + eLpNorm (rhsTerm6 (I := I) (M := M) g r s h_atlas i α P₀) 2 μw
+        + eLpNorm (rhsTerm7 (I := I) (M := M) g r s h_atlas i α P₀) 2 μw
+      ≤ ENNReal.ofReal D1 *
+            rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀
+          + ENNReal.ofReal D2 *
+            rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀
+          + ENNReal.ofReal D3 *
+            rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀
+          + ENNReal.ofReal D4 *
+            rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀
+          + ENNReal.ofReal D5 *
+            rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀
+          + ENNReal.ofReal D6 *
+            rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀
+          + ENNReal.ofReal D7 *
+            rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀ := by
+    exact add_le_add (add_le_add (add_le_add (add_le_add (add_le_add
+      (add_le_add (hD1 i) (hD2 i)) (hD3 i)) (hD4 i)) (hD5 i)) (hD6 i)) (hD7 i)
+  refine le_trans h_seven ?_
+  -- Collect the seven `ofReal Dⱼ * aggregate` terms into `ofReal (∑ Dⱼ) *
+  -- aggregate` by right-distributivity of `*` over `+` in `ℝ≥0∞`.
+  rw [ENNReal.ofReal_add (by positivity) hD7_nn,
+    ENNReal.ofReal_add (by positivity) hD6_nn,
+    ENNReal.ofReal_add (by positivity) hD5_nn,
+    ENNReal.ofReal_add (by positivity) hD4_nn,
+    ENNReal.ofReal_add (by positivity) hD3_nn,
+    ENNReal.ofReal_add hD1_nn hD2_nn]
+  rw [add_mul, add_mul, add_mul, add_mul, add_mul, add_mul]
+
+end BracketBoundUniform
+
+section MainBoundUniform
+
+/-- **Uniform-constant explicit-norm `eLpNorm` bound for the eigenvector chart
+right-hand side.**
+
+The constant-uniform form of `eigenvectorChartRHS_eLpNorm_le`: a single
+nonnegative constant `C` — geometric (chart-transition / density / dimension /
+operator-norm data), independent of the eigenbasis index — serves *every*
+eigenbasis index `i`. For each `i`, with resolvent eigenvalue `μ := i.fst.val`,
+the weighted `eLpNorm` of `eigenvectorChartRHS g r s h_atlas i α P₀` is bounded
+by `ENNReal.ofReal (μ⁻¹ * C)` times the finite source-quantity aggregate of that
+`i`.
+
+The explicit eigenvalue factor `μ⁻¹` stays *inside* the `∀ i` — it is a genuine
+per-`i` quantity, not part of the uniform constant. Only the geometric constant
+`C` is hoisted before the `∀ i`. The proof exhibits the `i`-uniform witness of
+the seven-term bracket bound `rhsBracket_eLpNorm_le_uniform`, then for each `i`
+runs the per-`i` headline argument: `eigenvectorChartRHS` is the `μ⁻¹`-scalar
+multiple of the seven-term bracket, and the homogeneity of `eLpNorm` factors out
+`ENNReal.ofReal μ⁻¹`. -/
+theorem eigenvectorChartRHS_eLpNorm_le_uniform
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        eLpNorm (eigenvectorChartRHS (I := I) (M := M) g r s h_atlas i α P₀) 2
+            ((chartPulledWeightedMeasure (I := I) g α).restrict
+              (chartTargetEuclid (I := I) (M := M) α))
+          ≤ ENNReal.ofReal ((i.fst.val)⁻¹ * C) *
+            (eLpNorm (eigenvectorChartComponentFun (I := I) (M := M)
+                  g r s h_atlas i α P₀) 2
+                ((chartPulledWeightedMeasure (I := I) g α).restrict
+                  (chartTargetEuclid (I := I) (M := M) α))
+              + (∑ P : TensorCompIdx (E := E) r (s + 1),
+                  eLpNorm ((crossLeftLimitComponent (I := I) (M := M)
+                      g r s h_atlas i α P :
+                    Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) 2
+                    ((chartPulledWeightedMeasure (I := I) g α).restrict
+                      (chartTargetEuclid (I := I) (M := M) α)))
+              + (∑ P : TensorCompIdx (E := E) r s,
+                  eLpNorm ((crossRightLimitComponent (I := I) (M := M)
+                      g r s h_atlas i α P :
+                    Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) 2
+                    ((chartPulledWeightedMeasure (I := I) g α).restrict
+                      (chartTargetEuclid (I := I) (M := M) α)))
+              + (∑ P : TensorCompIdx (E := E) r s,
+                  ∑ k : Fin (Module.finrank ℝ E),
+                    eLpNorm ((partialLpLimit (I := I) (M := M)
+                        g r s h_atlas i α P k :
+                      Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
+                      EuclN → ℝ) 2
+                      ((chartPulledWeightedMeasure (I := I) g α).restrict
+                        (chartTargetEuclid (I := I) (M := M) α)))
+              + (∑ p : TensorCompIdx (E := E) r s,
+                  eLpNorm ((componentLpLimit (I := I) (M := M)
+                      g r s h_atlas i α p :
+                    Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) 2
+                    ((chartPulledWeightedMeasure (I := I) g α).restrict
+                      (chartTargetEuclid (I := I) (M := M) α)))
+              + (∑ P : TensorCompIdx (E := E) r s,
+                  ∑ l : Fin (Module.finrank ℝ E),
+                    eLpNorm ((cutoffPartialLpLimit (I := I) (M := M)
+                        g r s h_atlas i α P l :
+                      Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
+                      EuclN → ℝ) 2
+                      ((chartPulledWeightedMeasure (I := I) g α).restrict
+                        (chartTargetEuclid (I := I) (M := M) α)))) := by
+  classical
+  -- The `i`-uniform seven-term bracket bound — the constant is hoisted before
+  -- the `∀ i`.
+  obtain ⟨C, hC_nn, hC_bd⟩ := rhsBracket_eLpNorm_le_uniform
+    (I := I) (M := M) g r s h_atlas α P₀
+  refine ⟨C, hC_nn, fun i => ?_⟩
+  set μw : Measure EuclN :=
+    (chartPulledWeightedMeasure (I := I) g α).restrict
+      (chartTargetEuclid (I := I) (M := M) α) with hμw_def
+  -- The resolvent eigenvalue is strictly positive.
+  have hμ_pos : 0 < i.fst.val := eigenIdx_val_pos (I := I) (M := M) g r s i
+  have hμ_inv_nn : 0 ≤ (i.fst.val)⁻¹ := le_of_lt (inv_pos.mpr hμ_pos)
+  have hC_bd_i := hC_bd i
+  -- `eigenvectorChartRHS = μ⁻¹ • rhsBracket`; the `eLpNorm` factors out `‖μ⁻¹‖ₑ`.
+  have h_smul_eq :
+      eLpNorm (eigenvectorChartRHS (I := I) (M := M) g r s h_atlas i α P₀) 2 μw
+        = ENNReal.ofReal (i.fst.val)⁻¹ *
+          eLpNorm (rhsBracket (I := I) (M := M) g r s h_atlas i α P₀) 2 μw := by
+    rw [eigenvectorChartRHS_eq_smul_bracket (I := I) (M := M)
+      g r s h_atlas i α P₀]
+    have h := eLpNorm_const_smul (μ := μw) (p := 2) (i.fst.val)⁻¹
+      (rhsBracket (I := I) (M := M) g r s h_atlas i α P₀)
+    rw [Real.enorm_of_nonneg hμ_inv_nn] at h
+    exact h
+  -- Assemble: `ofReal μ⁻¹ * eLpNorm bracket ≤ ofReal μ⁻¹ * (ofReal C * aggr)`.
+  rw [h_smul_eq]
+  have h_step :
+      ENNReal.ofReal (i.fst.val)⁻¹ *
+          eLpNorm (rhsBracket (I := I) (M := M) g r s h_atlas i α P₀) 2 μw
+        ≤ ENNReal.ofReal ((i.fst.val)⁻¹ * C) *
+          rhsAggregate (I := I) (M := M) g r s h_atlas i α P₀ := by
+    rw [ENNReal.ofReal_mul hμ_inv_nn, mul_assoc]
+    gcongr
+  -- The aggregate `rhsAggregate` is, by definition, this theorem's RHS sum.
+  exact h_step
+
+end MainBoundUniform
+
 /-! ## Sanity test -/
 
 section ElaborationTest
@@ -1544,6 +2402,53 @@ example :
                     ((chartPulledWeightedMeasure (I := I) g α).restrict
                       (chartTargetEuclid (I := I) (M := M) α)))) :=
   eigenvectorChartRHS_eLpNorm_le (I := I) (M := M) g r s h_atlas i α P₀
+
+example :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        eLpNorm (eigenvectorChartRHS (I := I) (M := M) g r s h_atlas i α P₀) 2
+            ((chartPulledWeightedMeasure (I := I) g α).restrict
+              (chartTargetEuclid (I := I) (M := M) α))
+          ≤ ENNReal.ofReal ((i.fst.val)⁻¹ * C) *
+            (eLpNorm (eigenvectorChartComponentFun (I := I) (M := M)
+                  g r s h_atlas i α P₀) 2
+                ((chartPulledWeightedMeasure (I := I) g α).restrict
+                  (chartTargetEuclid (I := I) (M := M) α))
+              + (∑ P : TensorCompIdx (E := E) r (s + 1),
+                  eLpNorm ((crossLeftLimitComponent (I := I) (M := M)
+                      g r s h_atlas i α P :
+                    Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) 2
+                    ((chartPulledWeightedMeasure (I := I) g α).restrict
+                      (chartTargetEuclid (I := I) (M := M) α)))
+              + (∑ P : TensorCompIdx (E := E) r s,
+                  eLpNorm ((crossRightLimitComponent (I := I) (M := M)
+                      g r s h_atlas i α P :
+                    Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) 2
+                    ((chartPulledWeightedMeasure (I := I) g α).restrict
+                      (chartTargetEuclid (I := I) (M := M) α)))
+              + (∑ P : TensorCompIdx (E := E) r s,
+                  ∑ k : Fin (Module.finrank ℝ E),
+                    eLpNorm ((partialLpLimit (I := I) (M := M)
+                        g r s h_atlas i α P k :
+                      Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
+                      EuclN → ℝ) 2
+                      ((chartPulledWeightedMeasure (I := I) g α).restrict
+                        (chartTargetEuclid (I := I) (M := M) α)))
+              + (∑ p : TensorCompIdx (E := E) r s,
+                  eLpNorm ((componentLpLimit (I := I) (M := M)
+                      g r s h_atlas i α p :
+                    Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) 2
+                    ((chartPulledWeightedMeasure (I := I) g α).restrict
+                      (chartTargetEuclid (I := I) (M := M) α)))
+              + (∑ P : TensorCompIdx (E := E) r s,
+                  ∑ l : Fin (Module.finrank ℝ E),
+                    eLpNorm ((cutoffPartialLpLimit (I := I) (M := M)
+                        g r s h_atlas i α P l :
+                      Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
+                      EuclN → ℝ) 2
+                      ((chartPulledWeightedMeasure (I := I) g α).restrict
+                        (chartTargetEuclid (I := I) (M := M) α)))) :=
+  eigenvectorChartRHS_eLpNorm_le_uniform (I := I) (M := M) g r s h_atlas α P₀
 
 end ElaborationTest
 
