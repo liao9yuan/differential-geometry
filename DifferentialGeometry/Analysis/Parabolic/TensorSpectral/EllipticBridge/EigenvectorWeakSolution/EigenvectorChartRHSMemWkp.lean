@@ -809,6 +809,109 @@ private lemma hasWeakPartialDeriv_ae_zero_off_of_ae_zero_off
   filter_upwards [hgp_zero_V'] with y hy hy_mem hy_notKc
   exact hy ⟨hy_mem, hy_notKc⟩
 
+/-! ## Off-cutoff-kernel vanishing of the cutoff chart-partial atom
+
+The cutoff chart-partial atom `cutoffPartialLpLimit g r s h_atlas i α P k` is a
+genuine weak `k`-th partial of the eigenvector cutoff chart component
+`tensorL2ChartComponentCutoff g r s (tensorResolventEigenbasisVec h_atlas i) α
+P`, which vanishes almost everywhere off the compact cutoff kernel
+`cutoffChartKernelEuclid α`. The cutoff chart component is `W^{1,2}` without any
+regularity hypothesis — its weak partial in every direction is the corresponding
+`L²` cutoff chart-partial limit object — so the locality of weak partials
+propagates the off-kernel vanishing to the cutoff chart-partial atom. -/
+
+/-- **The eigenvector cutoff chart component is `W^{1,2}` unconditionally.** Its
+weak `k`-th partial in every chart-coordinate direction `k` is the `L²` cutoff
+chart-partial limit object `eigenvectorCutoffChartPartialLp g r s h_atlas i α P
+k`, so the canonical `W^{1,2}`-membership predicate holds with no
+partition-of-unity regularity input. -/
+lemma eigenvectorCutoffChartComponent_memW1p
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P : TensorCompIdx (E := E) r s) :
+    DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
+      (fun y => ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+          (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) α P :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
+      (chartTargetEuclid (I := I) (M := M) α) := by
+  classical
+  refine ⟨Lp.memLp _, fun k => ?_⟩
+  refine ⟨((eigenvectorCutoffChartPartialLp (I := I) (M := M)
+      g r s h_atlas i α P k :
+      Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ),
+    Lp.memLp _, ?_⟩
+  exact eigenvectorCutoffChartPartialLp_hasWeakPartialDeriv (I := I) (M := M)
+    g r s h_atlas i α P k
+
+/-- **Off-cutoff-kernel vanishing of the cutoff chart-partial atom.** For any
+eigenbasis index `i`, the cutoff chart-partial atom `cutoffPartialLpLimit g r s
+h_atlas i α P k` vanishes almost everywhere — on the plain Lebesgue volume
+restricted to the chart target — off the compact cutoff kernel
+`cutoffChartKernelEuclid α`. No partition-of-unity regularity hypothesis is
+needed: the cutoff chart component is unconditionally `W^{1,2}`, the cutoff
+chart-partial atom is a weak partial of it, and the locality of weak partials
+transfers the off-kernel vanishing. -/
+lemma cutoffPartialLpLimit_ae_zero_off_cutoffChartKernelEuclid
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P : TensorCompIdx (E := E) r s)
+    (k : Fin (Module.finrank ℝ E)) :
+    ∀ᵐ y ∂((volume : Measure EuclN).restrict
+        (chartTargetEuclid (I := I) (M := M) α)),
+      y ∉ cutoffChartKernelEuclid (I := I) (M := M) α →
+        ((cutoffPartialLpLimit (I := I) (M := M) g r s h_atlas i α P k :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y = 0 := by
+  classical
+  set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
+  have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
+  -- `cutoffPartialLpLimit = μ • eigenvectorCutoffChartPartialLp`; the bare
+  -- cutoff chart partial is a weak `k`-th partial of the cutoff chart component.
+  have h_smul : (fun y => ((cutoffPartialLpLimit (I := I) (M := M)
+        g r s h_atlas i α P k :
+        Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
+      =ᵐ[(volume : Measure EuclN).restrict Ω]
+      (fun y => i.fst.val •
+        ((eigenvectorCutoffChartPartialLp (I := I) (M := M)
+          g r s h_atlas i α P k :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) := by
+    rw [cutoffPartialLpLimit]
+    exact Lp.coeFn_smul i.fst.val _
+  -- The bare cutoff chart partial is a weak `k`-th partial of the cutoff chart
+  -- component, which vanishes a.e. off the compact cutoff kernel.
+  have h_weak : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k
+      ((eigenvectorCutoffChartPartialLp (I := I) (M := M)
+          g r s h_atlas i α P k :
+        Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ)
+      (fun y => ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+          (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) α P :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) Ω :=
+    eigenvectorCutoffChartPartialLp_hasWeakPartialDeriv (I := I) (M := M)
+      g r s h_atlas i α P k
+  have h_comp_memW1p : DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
+      (fun y => ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+          (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) α P :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) Ω :=
+    eigenvectorCutoffChartComponent_memW1p (I := I) (M := M)
+      g r s h_atlas i α P
+  -- The cutoff chart component vanishes a.e. off the compact cutoff kernel.
+  have h_comp_zero := tensorL2ChartComponentCutoff_ae_zero_off_cutoffChartKernelEuclid
+    (I := I) (M := M) g r s
+    (tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i) α P
+  -- The locality of weak partials propagates the off-kernel vanishing.
+  have h_partial_zero : ∀ᵐ y ∂((volume : Measure EuclN).restrict Ω),
+      y ∉ cutoffChartKernelEuclid (I := I) (M := M) α →
+        ((eigenvectorCutoffChartPartialLp (I := I) (M := M)
+            g r s h_atlas i α P k :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y = 0 :=
+    hasWeakPartialDeriv_ae_zero_off_of_ae_zero_off hΩ_open k
+      (cutoffChartKernelEuclid_isCompact (I := I) (M := M) α).isClosed
+      (Lp.memLp _) h_weak h_comp_memW1p
+      (by rw [← chartL2Measure]; exact h_comp_zero)
+  filter_upwards [h_smul, h_partial_zero] with y hy hy_zero hyK
+  rw [hy, smul_eq_mul, hy_zero hyK, mul_zero]
+
 /-! ## `MemWkp` for an indicator-cut chart-target-smooth coefficient times an
 ae-kernel-vanishing factor
 
