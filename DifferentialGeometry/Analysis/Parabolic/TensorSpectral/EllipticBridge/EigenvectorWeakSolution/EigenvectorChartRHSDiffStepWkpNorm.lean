@@ -272,6 +272,156 @@ private lemma wkpNorm_coef_mul_factor_le
   rw [h_norm_eq]
   exact hKc_bd hfactor_memWkp
 
+/-! ## The factor-uniform smooth-coefficient `wkpNorm` bound with ae-vanishing
+
+The factor-uniform twin of `wkpNorm_coef_mul_factor_le`. The smooth cutoff
+representative `χ · coef`, its uniform iterated-derivative bound `C₀`, and the
+Leibniz constant `Kc` depend only on the chart-target-smooth coefficient `coef`
+and the order `K`, not on the factor being multiplied — `wkpNorm_smul_smooth_bounded_le`
+already produces a factor-uniform `Kc`. Only the factor-membership, factor-ae-vanishing,
+and the resulting ae-equality vary with the factor. Hoisting the cutoff data
+before the `∀ factor` therefore yields a single nonnegative constant `C`
+bounding `wkpNorm K 2 (coef · factor)` by `ENNReal.ofReal C · wkpNorm K 2 factor`
+for every admissible factor at once. -/
+
+private lemma wkpNorm_coef_mul_factor_le_uniform
+    (α : M) (K : ℕ)
+    {coef : EuclN → ℝ}
+    (hcoef_chart : ContDiffOn ℝ (⊤ : ℕ∞) coef
+      (chartTargetEuclid (I := I) (M := M) α)) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ factor : EuclN → ℝ,
+      MemWkp (d := Module.finrank ℝ E) K 2 factor
+          (chartTargetEuclid (I := I) (M := M) α) →
+      (factor =ᵐ[(volume : Measure EuclN).restrict
+        (chartTargetEuclid (I := I) (M := M) α \
+          chartPouKernel (I := I) (M := M) α)] (fun _ => (0 : ℝ))) →
+      MemWkp (d := Module.finrank ℝ E) K 2
+          (fun y => coef y * factor y)
+          (chartTargetEuclid (I := I) (M := M) α) ∧
+        wkpNorm (d := Module.finrank ℝ E) K 2
+            (fun y => coef y * factor y)
+            (chartTargetEuclid (I := I) (M := M) α)
+          ≤ ENNReal.ofReal C *
+            wkpNorm (d := Module.finrank ℝ E) K 2 factor
+              (chartTargetEuclid (I := I) (M := M) α) := by
+  classical
+  set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
+  set Kα : Set EuclN := chartPouKernel (I := I) (M := M) α with hKα_def
+  have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
+  have hΩ_meas : MeasurableSet Ω := hΩ_open.measurableSet
+  have hKα_compact : IsCompact Kα := chartPouKernel_isCompact (I := I) (M := M) α
+  have hKα_in : Kα ⊆ Ω :=
+    chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α
+  -- A smooth cutoff `χ` equal to `1` on `cthickening δ Kα`, supported in `Ω`.
+  obtain ⟨δ, χ, hδ_pos, hδ_in, hχ_smooth, hχ_cs, _hχ_range, hχ_one, hχ_tsupp⟩ :=
+    exists_smooth_cutoff_with_neighborhood (d := Module.finrank ℝ E)
+      hKα_compact hΩ_open hKα_in
+  -- `χ · coef` is globally smooth: smooth on `tsupport χ ⊆ Ω`, identically zero
+  -- (hence smooth) on the open complement of `tsupport χ`.
+  have hχ_coef_smooth : ContDiff ℝ (⊤ : ℕ∞) (fun y => χ y * coef y) := by
+    have h_open_compl : IsOpen ((tsupport χ)ᶜ) :=
+      (isClosed_tsupport _).isOpen_compl
+    rw [contDiff_iff_contDiffAt]
+    intro y
+    by_cases hy_supp : y ∈ tsupport χ
+    · have hy_chart : y ∈ Ω := hχ_tsupp hy_supp
+      exact hχ_smooth.contDiffAt.mul
+        ((hcoef_chart y hy_chart).contDiffAt (hΩ_open.mem_nhds hy_chart))
+    · have h_eq_zero : (fun y => χ y * coef y)
+          =ᶠ[𝓝 y] (fun _ : EuclN => (0 : ℝ)) := by
+        filter_upwards [h_open_compl.mem_nhds hy_supp] with z hz
+        rw [image_eq_zero_of_notMem_tsupport hz, zero_mul]
+      exact contDiffAt_const.congr_of_eventuallyEq h_eq_zero
+  have hχ_coef_cs : HasCompactSupport (fun y => χ y * coef y) :=
+    HasCompactSupport.mul_right hχ_cs
+  -- Uniform bound on the iterated derivatives of `χ · coef` up to order `K`.
+  obtain ⟨C₀, hC₀_nn, hC₀_bd⟩ :=
+    exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
+      (d := Module.finrank ℝ E) hχ_coef_smooth hχ_coef_cs K
+  -- The factor-uniform quantitative Leibniz bound for the cutoff product.
+  obtain ⟨Kc, _hKc_pos, hKc_bd⟩ :=
+    wkpNorm_smul_smooth_bounded_le (d := Module.finrank ℝ E) K
+      (by norm_num : (1 : ℝ≥0∞) ≤ 2) (by norm_num) hΩ_open hχ_coef_smooth
+      hC₀_nn (fun j _hj y _hy => hC₀_bd y j _hj)
+  set Cδ : Set EuclN := Metric.cthickening δ Kα with hCδ_def
+  have hCδ_closed : IsClosed Cδ := Metric.isClosed_cthickening
+  have hCδ_meas : MeasurableSet Cδ := hCδ_closed.measurableSet
+  refine ⟨Kc, le_of_lt _hKc_pos, fun factor hfactor_memWkp hfactor_ae_zero => ?_⟩
+  -- `(χ · coef) · factor ∈ MemWkp K 2`, via `MemWkp.smul_smooth_bounded`.
+  have h_prod_memWkp : MemWkp (d := Module.finrank ℝ E) K 2
+      (fun y => (χ y * coef y) * factor y) Ω :=
+    MemWkp.smul_smooth_bounded (d := Module.finrank ℝ E) K
+      (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open hχ_coef_smooth
+      (fun j _hj y _hy => hC₀_bd y j _hj) hfactor_memWkp
+  -- `(χ · coef) · factor =ᵃᵉ coef · factor` on `volume.restrict Ω`.
+  have h_ae_eq : (fun y => (χ y * coef y) * factor y)
+      =ᵐ[(volume : Measure EuclN).restrict Ω]
+      (fun y => coef y * factor y) := by
+    -- On `Cδ ⊆ Ω`: `χ = 1`, so `(χ · coef) · factor = coef · factor`.
+    have h_eq_on_Cδ : (fun y => (χ y * coef y) * factor y)
+        =ᵐ[(volume : Measure EuclN).restrict Cδ]
+        (fun y => coef y * factor y) := by
+      refine (ae_restrict_iff' hCδ_meas).mpr ?_
+      refine Filter.Eventually.of_forall fun y hy => ?_
+      have hχy : χ y = 1 := hχ_one y hy
+      change (χ y * coef y) * factor y = coef y * factor y
+      rw [hχy]; ring
+    -- On `Ω \ Cδ ⊆ Ω \ Kα`: `factor` ae-vanishes.
+    have hKα_in_Cδ : Kα ⊆ Cδ := Metric.self_subset_cthickening _
+    have h_diff_sub : Ω \ Cδ ⊆ Ω \ Kα := fun y hy =>
+      ⟨hy.1, fun hyK => hy.2 (hKα_in_Cδ hyK)⟩
+    have h_factor_ae_zero_diff : factor =ᵐ[(volume : Measure EuclN).restrict
+        (Ω \ Cδ)] (fun _ => (0 : ℝ)) := by
+      have h_abs : (volume : Measure EuclN).restrict (Ω \ Cδ) ≪
+          (volume : Measure EuclN).restrict (Ω \ Kα) :=
+        MeasureTheory.Measure.absolutelyContinuous_of_le
+          (MeasureTheory.Measure.restrict_mono h_diff_sub le_rfl)
+      exact h_abs.ae_le hfactor_ae_zero
+    have h_eq_on_diff : (fun y => (χ y * coef y) * factor y)
+        =ᵐ[(volume : Measure EuclN).restrict (Ω \ Cδ)]
+        (fun y => coef y * factor y) := by
+      filter_upwards [h_factor_ae_zero_diff] with y hy
+      show (χ y * coef y) * factor y = coef y * factor y
+      rw [hy]; ring
+    have h_eq_on_inter : (fun y => (χ y * coef y) * factor y)
+        =ᵐ[(volume : Measure EuclN).restrict (Ω ∩ Cδ)]
+        (fun y => coef y * factor y) := by
+      have h_abs : (volume : Measure EuclN).restrict (Ω ∩ Cδ) ≪
+          (volume : Measure EuclN).restrict Cδ :=
+        MeasureTheory.Measure.absolutelyContinuous_of_le
+          (MeasureTheory.Measure.restrict_mono Set.inter_subset_right le_rfl)
+      exact h_abs.ae_le h_eq_on_Cδ
+    have h_diff_meas : MeasurableSet (Ω \ Cδ) := hΩ_meas.diff hCδ_meas
+    have h_cover : Ω = (Ω ∩ Cδ) ∪ (Ω \ Cδ) := by
+      ext y; constructor
+      · intro hy
+        by_cases h : y ∈ Cδ
+        · exact Or.inl ⟨hy, h⟩
+        · exact Or.inr ⟨hy, h⟩
+      · rintro (⟨hy, _⟩ | ⟨hy, _⟩) <;> exact hy
+    have h_disj : Disjoint (Ω ∩ Cδ) (Ω \ Cδ) :=
+      Set.disjoint_left.mpr fun y hy hy' => hy'.2 hy.2
+    have hΩ_restrict_eq : (volume : Measure EuclN).restrict Ω =
+        (volume : Measure EuclN).restrict ((Ω ∩ Cδ) ∪ (Ω \ Cδ)) := by
+      rw [← h_cover]
+    rw [hΩ_restrict_eq, MeasureTheory.Measure.restrict_union h_disj h_diff_meas]
+    exact (MeasureTheory.ae_add_measure_iff).mpr ⟨h_eq_on_inter, h_eq_on_diff⟩
+  -- Transfer `MemWkp K 2` through the ae-equality.
+  have h_memWkp : MemWkp (d := Module.finrank ℝ E) K 2
+      (fun y => coef y * factor y) Ω :=
+    (MemWkp_congr_ae (d := Module.finrank ℝ E)
+      (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae_eq).mp h_prod_memWkp
+  refine ⟨h_memWkp, ?_⟩
+  -- Transfer the `wkpNorm` bound through the ae-equality.
+  have h_norm_eq : wkpNorm (d := Module.finrank ℝ E) K 2
+      (fun y => coef y * factor y) Ω =
+      wkpNorm (d := Module.finrank ℝ E) K 2
+        (fun y => (χ y * coef y) * factor y) Ω :=
+    (wkpNorm_congr_ae (d := Module.finrank ℝ E)
+      (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae_eq).symm
+  rw [h_norm_eq]
+  exact hKc_bd hfactor_memWkp
+
 /-! ## A finite-sum closure for `MemWkp K 2`
 
 The differentiated numerator's layers `A`, `B` are finite double sums; the helper
@@ -860,6 +1010,121 @@ theorem eigenvectorChartRHSDiffNumerator_div_density_wkpNorm_le
     _ = ENNReal.ofReal (C₂ * C₁) * A := by
           rw [ENNReal.ofReal_mul hC₂_nn, mul_assoc]
 
+omit [CompleteSpace E] in
+/-- **The uniform-constant `K`-graded explicit-norm `wkpNorm` bound for the
+chart-density-divided differentiated chart-RHS numerator.**
+
+The constant-uniform form of `eigenvectorChartRHSDiffNumerator_div_density_wkpNorm_le`:
+a single nonnegative constant `C` — geometric, the combined Leibniz constant of
+the `C^∞` reciprocal chart density and the numerator's per-layer Leibniz
+constants, independent of the eigenbasis index — serves *every* eigenbasis index
+`i`. For each `i`, the order-`K` Sobolev norm of the chart-density-divided
+differentiated chart-RHS numerator
+`eigenvectorChartRHSDiffNumerator g r s h_atlas i α P₀ m l (fChartEffPrev i) /
+densityOnEuclid g α` on the open Euclidean chart target `chartTargetEuclid α` is
+bounded by `ENNReal.ofReal C` times the finite aggregate `diffNumeratorAggregateK`
+of the order-`K` source norms of that `i` — the *same* aggregate appearing in
+`eigenvectorChartRHSDiffNumerator_wkpNorm_le_uniform`.
+
+The genuine regularity hypotheses are uniform over `i`: every `(m+1)`-fold and
+`m`-fold iterated weak partial of every eigenvector chart component lies in
+`W^{2 + K, 2}(chartTargetEuclid α)` (`h_iter`); each previous-level right-hand
+side `fChartEffPrev i` lies in `W^{K + 1, 2}(chartTargetEuclid α)` (`h_prev`) and
+vanishes almost everywhere off the partition-of-unity kernel `chartPouKernel α`
+(`h_prev_zero`).
+
+A `_uniform` statement cannot be derived from its per-`i` original (one cannot
+get `∃ C, ∀ i` from `∀ i, ∃ C`); this carries its own proof — the per-`i` proof
+of `eigenvectorChartRHSDiffNumerator_div_density_wkpNorm_le` with the two
+geometric constants hoisted before the `∀ i` via the constant-uniform numerator
+bound `eigenvectorChartRHSDiffNumerator_wkpNorm_le_uniform` and the factor-uniform
+smooth-coefficient bound `wkpNorm_coef_mul_factor_le_uniform`. -/
+theorem eigenvectorChartRHSDiffNumerator_div_density_wkpNorm_le_uniform
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
+    (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
+    (fChartEffPrev : TensorEigenIdx (I := I) (M := M) g r s → EuclN → ℝ)
+    (h_iter : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
+        (j : ℕ) (idx : Fin j → Fin (Module.finrank ℝ E)),
+      MemWkp (d := Module.finrank ℝ E) (2 + K) 2
+        (eigenvectorChartIteratedPartial (I := I) (M := M)
+          g r s h_atlas i α P₀ j idx)
+        (chartTargetEuclid (I := I) (M := M) α))
+    (h_prev : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+      MemWkp (d := Module.finrank ℝ E) (K + 1) 2 (fChartEffPrev i)
+        (chartTargetEuclid (I := I) (M := M) α))
+    (h_prev_zero : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+      (fChartEffPrev i) =ᵐ[(volume : Measure EuclN).restrict
+          (chartTargetEuclid (I := I) (M := M) α \
+            chartPouKernel (I := I) (M := M) α)] (fun _ => (0 : ℝ))) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        wkpNorm (d := Module.finrank ℝ E) K 2
+            (fun y =>
+              eigenvectorChartRHSDiffNumerator (I := I) (M := M)
+                g r s h_atlas i α P₀ m l (fChartEffPrev i) y /
+              densityOnEuclid (I := I) g α y)
+            (chartTargetEuclid (I := I) (M := M) α)
+          ≤ ENNReal.ofReal C *
+            diffNumeratorAggregateK (I := I) (M := M)
+              g r s h_atlas i α P₀ m K l (fChartEffPrev i) := by
+  classical
+  set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
+  -- The numerator's order-`K` `wkpNorm` bound — `i`-uniform constant `C₁`.
+  obtain ⟨C₁, hC₁_nn, hC₁⟩ := eigenvectorChartRHSDiffNumerator_wkpNorm_le_uniform
+    (I := I) (M := M) g r s h_atlas α P₀ m K l fChartEffPrev
+    h_iter h_prev h_prev_zero
+  -- The reciprocal-density smooth-coefficient bound — factor-uniform constant `C₂`.
+  obtain ⟨C₂, hC₂_nn, hC₂⟩ := wkpNorm_coef_mul_factor_le_uniform
+    (I := I) (M := M) α K
+    (one_div_densityOnEuclid_contDiffOn_chartTargetEuclid (I := I) (M := M) g α)
+  -- The headline constant: the product of the two geometric constants.
+  refine ⟨C₂ * C₁, mul_nonneg hC₂_nn hC₁_nn, fun i => ?_⟩
+  set A := diffNumeratorAggregateK (I := I) (M := M)
+    g r s h_atlas i α P₀ m K l (fChartEffPrev i) with hA_def
+  set numFun : EuclN → ℝ := eigenvectorChartRHSDiffNumerator (I := I) (M := M)
+    g r s h_atlas i α P₀ m l (fChartEffPrev i) with hnumFun_def
+  -- Rewrite the quotient as `(1 / density) · numerator`.
+  have h_eq : (fun y => numFun y / densityOnEuclid (I := I) g α y) =
+      (fun y => (1 / densityOnEuclid (I := I) g α y) * numFun y) := by
+    funext y
+    rw [one_div, mul_comm, ← div_eq_mul_inv]
+  rw [h_eq]
+  -- The numerator's order-`K` `wkpNorm` bound for this `i`.
+  have hC₁_i : wkpNorm (d := Module.finrank ℝ E) K 2 numFun Ω
+      ≤ ENNReal.ofReal C₁ * A := by
+    have := hC₁ i
+    rw [← hnumFun_def, ← hΩ_def, ← hA_def] at this
+    exact this
+  -- The numerator is `MemWkp K 2` on the chart target — re-derived from `h_iter i`.
+  have h_num_memWkp : MemWkp (d := Module.finrank ℝ E) K 2 numFun Ω := by
+    rw [hnumFun_def, hΩ_def]
+    exact eigenvectorChartRHSDiffNumerator_memWkp_of_iter
+      (I := I) (M := M) g r s h_atlas i α P₀ m K l
+      (h_iter i) (h_prev i) (h_prev_zero i)
+  -- The numerator ae-vanishes off the partition-of-unity kernel.
+  have h_num_ae_zero :
+      numFun =ᵐ[(volume : Measure EuclN).restrict
+        (Ω \ chartPouKernel (I := I) (M := M) α)] (fun _ : EuclN => (0 : ℝ)) := by
+    rw [hnumFun_def, hΩ_def]
+    exact eigenvectorChartRHSDiffNumerator_ae_zero_off_chartPouKernel
+      (I := I) (M := M) g r s h_atlas i α P₀ m l (h_prev_zero i)
+  -- The factor-uniform smooth-coefficient bound, instantiated at `numFun`.
+  have hC₂_i := (hC₂ numFun h_num_memWkp h_num_ae_zero).2
+  rw [← hΩ_def] at hC₂_i
+  -- Chain: `wkpNorm ((1/density) · num) ≤ ofReal C₂ · wkpNorm num`
+  --        `≤ ofReal C₂ · (ofReal C₁ · A) = ofReal (C₂ * C₁) · A`.
+  calc
+    wkpNorm (d := Module.finrank ℝ E) K 2
+        (fun y => (1 / densityOnEuclid (I := I) g α y) * numFun y) Ω
+        ≤ ENNReal.ofReal C₂ * wkpNorm (d := Module.finrank ℝ E) K 2 numFun Ω :=
+          hC₂_i
+    _ ≤ ENNReal.ofReal C₂ * (ENNReal.ofReal C₁ * A) := by
+          gcongr
+    _ = ENNReal.ofReal (C₂ * C₁) * A := by
+          rw [ENNReal.ofReal_mul hC₂_nn, mul_assoc]
+
 end DivDensityBound
 
 /-! ## `wkpNorm` bound for the standalone inductive step
@@ -1017,6 +1282,157 @@ theorem eigenvectorChartIteratedStep_wkpNorm_le
   rw [← hΩ_def] at hC
   rw [h_norm_eq, hQ_def]
   exact hC
+
+omit [CompleteSpace E] in
+/-- **The uniform-constant `K`-graded explicit-norm `wkpNorm` bound for the
+standalone inductive step.**
+
+The constant-uniform form of `eigenvectorChartIteratedStep_wkpNorm_le`: a single
+nonnegative constant `C` — geometric, inherited unchanged from
+`eigenvectorChartRHSDiffNumerator_div_density_wkpNorm_le_uniform`, independent of
+the eigenbasis index — serves *every* eigenbasis index `i`. For each `i`, the
+order-`K` Sobolev norm of the level-`(m+1)` standalone inductive step
+`eigenvectorChartIteratedStep g r s h_atlas i α P₀ m dirs (fChartEffPrev i) l` on
+the open Euclidean chart target `chartTargetEuclid α` is bounded by
+`ENNReal.ofReal C` times the finite aggregate `diffNumeratorAggregateK` of the
+order-`K` source norms of that `i`, evaluated at the snoc-extended direction
+multi-index `Fin.snoc dirs l`.
+
+The genuine regularity hypotheses are uniform over `i`: every iterated weak
+partial feeding the differentiated numerator lies in
+`W^{2 + K, 2}(chartTargetEuclid α)` (`h_iter`); each previous-level right-hand
+side `fChartEffPrev i` lies in `W^{K + 1, 2}(chartTargetEuclid α)` (`h_prev`) and
+vanishes almost everywhere off the partition-of-unity kernel `chartPouKernel α`
+(`h_prev_zero`).
+
+A `_uniform` statement cannot be derived from its per-`i` original (one cannot
+get `∃ C, ∀ i` from `∀ i, ∃ C`); this carries its own proof — the per-`i` proof
+of `eigenvectorChartIteratedStep_wkpNorm_le` with the constant hoisted before the
+`∀ i` via the constant-uniform density-divided numerator bound
+`eigenvectorChartRHSDiffNumerator_div_density_wkpNorm_le_uniform`. The
+indicator-stripping ae-equality remains per-`i`. -/
+theorem eigenvectorChartIteratedStep_wkpNorm_le_uniform
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
+    (dirs : Fin m → Fin (Module.finrank ℝ E))
+    (l : Fin (Module.finrank ℝ E))
+    (fChartEffPrev : TensorEigenIdx (I := I) (M := M) g r s → EuclN → ℝ)
+    (h_iter : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
+        (j : ℕ) (idx : Fin j → Fin (Module.finrank ℝ E)),
+      MemWkp (d := Module.finrank ℝ E) (2 + K) 2
+        (eigenvectorChartIteratedPartial (I := I) (M := M)
+          g r s h_atlas i α P₀ j idx)
+        (chartTargetEuclid (I := I) (M := M) α))
+    (h_prev : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+      MemWkp (d := Module.finrank ℝ E) (K + 1) 2 (fChartEffPrev i)
+        (chartTargetEuclid (I := I) (M := M) α))
+    (h_prev_zero : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+      (fChartEffPrev i) =ᵐ[(volume : Measure EuclN).restrict
+          (chartTargetEuclid (I := I) (M := M) α \
+            chartPouKernel (I := I) (M := M) α)] (fun _ => (0 : ℝ))) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        wkpNorm (d := Module.finrank ℝ E) K 2
+            (eigenvectorChartIteratedStep (I := I) (M := M)
+              g r s h_atlas i α P₀ m dirs (fChartEffPrev i) l)
+            (chartTargetEuclid (I := I) (M := M) α)
+          ≤ ENNReal.ofReal C *
+            diffNumeratorAggregateK (I := I) (M := M)
+              g r s h_atlas i α P₀ m K (Fin.snoc dirs l) (fChartEffPrev i) := by
+  classical
+  set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
+  -- The density-divided bound for the snoc-extended numerator — `i`-uniform `C`.
+  obtain ⟨C, hC_nn, hC⟩ :=
+    eigenvectorChartRHSDiffNumerator_div_density_wkpNorm_le_uniform
+      (I := I) (M := M) g r s h_atlas α P₀ m K (Fin.snoc dirs l) fChartEffPrev
+      h_iter h_prev h_prev_zero
+  refine ⟨C, hC_nn, fun i => ?_⟩
+  -- `eigenvectorChartIteratedStep = indicator (chartPouKernel α) Q`, where
+  -- `Q = eigenvectorChartRHSDiffNumerator … (Fin.snoc dirs l) / density`.
+  set Q : EuclN → ℝ := fun y =>
+    eigenvectorChartRHSDiffNumerator (I := I) (M := M)
+      g r s h_atlas i α P₀ m (Fin.snoc dirs l) (fChartEffPrev i) y /
+    densityOnEuclid (I := I) g α y with hQ_def
+  -- The standalone step is the indicator of the kernel applied to `Q`.
+  have h_step_eq :
+      eigenvectorChartIteratedStep (I := I) (M := M)
+        g r s h_atlas i α P₀ m dirs (fChartEffPrev i) l =
+      Set.indicator (chartPouKernel (I := I) (M := M) α) Q := by
+    unfold eigenvectorChartIteratedStep
+    have h_num := eigenvectorChartIteratedStepNumerator_eq_rhsDiffNumerator
+      (I := I) (M := M) g r s h_atlas i α P₀ m dirs (fChartEffPrev i) l
+    funext y
+    simp only [hQ_def]
+    rw [h_num]
+  -- `Q` ae-vanishes off the partition-of-unity kernel — the public restatement.
+  have hQ_ae_zero : Q =ᵐ[(volume : Measure EuclN).restrict
+      (Ω \ chartPouKernel (I := I) (M := M) α)]
+      (fun _ : EuclN => (0 : ℝ)) := by
+    rw [hQ_def, hΩ_def]
+    exact eigenvectorChartRHSDiffNumerator_div_density_ae_zero_off_chartPouKernel
+      (I := I) (M := M) g r s h_atlas i α P₀ m (Fin.snoc dirs l)
+      (h_prev_zero i)
+  -- `indicator (chartPouKernel α) Q =ᵐ Q` on the open chart target.
+  -- Split `Ω = (Ω ∩ chartPouKernel α) ∪ (Ω \ chartPouKernel α)`:
+  --  on the kernel intersection, the indicator returns `Q`;
+  --  off the kernel, the indicator vanishes and `Q =ᵐ 0`.
+  have h_indicator_ae_eq_Q :
+      Set.indicator (chartPouKernel (I := I) (M := M) α) Q =ᵐ[
+        (volume : Measure EuclN).restrict Ω] Q := by
+    set Kα : Set EuclN := chartPouKernel (I := I) (M := M) α with hKα_def
+    have hΩ_meas : MeasurableSet Ω :=
+      (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
+    have hKα_meas : MeasurableSet Kα :=
+      chartPouKernel_measurableSet (I := I) (M := M) α
+    -- On `Ω ∩ Kα`: `indicator Kα Q = Q`.
+    have h_inter_meas : MeasurableSet (Ω ∩ Kα) := hΩ_meas.inter hKα_meas
+    have h_eq_on_inter : Set.indicator Kα Q =ᵐ[
+        (volume : Measure EuclN).restrict (Ω ∩ Kα)] Q := by
+      refine (ae_restrict_iff' h_inter_meas).mpr ?_
+      refine Filter.Eventually.of_forall fun y hy => ?_
+      exact Set.indicator_of_mem hy.2 _
+    -- On `Ω \ Kα`: `indicator Kα Q = 0` and `Q =ᵐ 0`.
+    have h_diff_meas : MeasurableSet (Ω \ Kα) := hΩ_meas.diff hKα_meas
+    have h_indicator_ae_zero : Set.indicator Kα Q =ᵐ[
+        (volume : Measure EuclN).restrict (Ω \ Kα)]
+        (fun _ : EuclN => (0 : ℝ)) := by
+      refine (ae_restrict_iff' h_diff_meas).mpr ?_
+      refine Filter.Eventually.of_forall fun y hy => ?_
+      exact Set.indicator_of_notMem hy.2 _
+    have h_eq_on_diff : Set.indicator Kα Q =ᵐ[
+        (volume : Measure EuclN).restrict (Ω \ Kα)] Q := by
+      filter_upwards [h_indicator_ae_zero, hQ_ae_zero] with y h0 hQ0
+      rw [h0, hQ0]
+    -- Cover `Ω` by the two disjoint pieces and recombine the ae-equalities.
+    have h_cover : Ω = (Ω ∩ Kα) ∪ (Ω \ Kα) := by
+      ext y; constructor
+      · intro hy
+        by_cases h : y ∈ Kα
+        · exact Or.inl ⟨hy, h⟩
+        · exact Or.inr ⟨hy, h⟩
+      · rintro (⟨hy, _⟩ | ⟨hy, _⟩) <;> exact hy
+    have h_disj : Disjoint (Ω ∩ Kα) (Ω \ Kα) :=
+      Set.disjoint_left.mpr fun y hy hy' => hy'.2 hy.2
+    have hΩ_restrict_eq : (volume : Measure EuclN).restrict Ω =
+        (volume : Measure EuclN).restrict ((Ω ∩ Kα) ∪ (Ω \ Kα)) := by
+      rw [← h_cover]
+    rw [hΩ_restrict_eq, MeasureTheory.Measure.restrict_union h_disj h_diff_meas]
+    exact (MeasureTheory.ae_add_measure_iff).mpr ⟨h_eq_on_inter, h_eq_on_diff⟩
+  -- The order-`K` `wkpNorm` of the step equals that of `Q` via the ae-equality.
+  have h_norm_eq : wkpNorm (d := Module.finrank ℝ E) K 2
+      (eigenvectorChartIteratedStep (I := I) (M := M)
+        g r s h_atlas i α P₀ m dirs (fChartEffPrev i) l) Ω =
+      wkpNorm (d := Module.finrank ℝ E) K 2 Q Ω := by
+    rw [h_step_eq]
+    exact wkpNorm_congr_ae (d := Module.finrank ℝ E)
+      (by norm_num : (1 : ℝ≥0∞) ≤ 2)
+      (chartTargetEuclid_isOpen (I := I) (M := M) α) h_indicator_ae_eq_Q
+  -- The density-divided bound for this `i`, against the snoc-extended aggregate.
+  have hC_i := hC i
+  rw [← hΩ_def] at hC_i
+  rw [h_norm_eq, hQ_def]
+  exact hC_i
 
 end IteratedStepBound
 
