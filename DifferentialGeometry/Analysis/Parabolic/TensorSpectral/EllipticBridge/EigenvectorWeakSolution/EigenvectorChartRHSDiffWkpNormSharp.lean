@@ -94,7 +94,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 omit [CompleteSpace E] in
 /-- The resolvent eigenvalue's reciprocal `(i.fst.val)⁻¹` is at least `1`. -/
-private lemma sharpDiff_eigen_inv_one_le
+lemma sharpDiff_eigen_inv_one_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -114,7 +114,7 @@ private lemma sharpDiff_eigen_inv_one_le
 
 omit [CompleteSpace E] in
 /-- `(i.fst.val)⁻¹ ≥ 0`. -/
-private lemma sharpDiff_eigen_inv_nn
+lemma sharpDiff_eigen_inv_nn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -124,7 +124,7 @@ private lemma sharpDiff_eigen_inv_nn
 
 omit [CompleteSpace E] in
 /-- For `1 ≤ x`, `x^a ≤ x^b` whenever `a ≤ b`. -/
-private lemma sharpDiff_pow_eigen_inv_mono
+lemma sharpDiff_pow_eigen_inv_mono
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s) {a b : ℕ} (hab : a ≤ b) :
@@ -134,7 +134,7 @@ private lemma sharpDiff_pow_eigen_inv_mono
 
 omit [CompleteSpace E] in
 /-- For nonnegative `C` and `k ≤ e`, `ofReal (C · μ⁻¹^k) ≤ ofReal (C · μ⁻¹^e)`. -/
-private lemma sharpDiff_ofReal_const_pow_eigen_inv_le
+lemma sharpDiff_ofReal_const_pow_eigen_inv_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -159,7 +159,7 @@ smooth coefficient on the chart target and a factor that ae-vanishes off the
 compact partition-of-unity kernel. Mirrors the `sharp_wkpNorm_coef_mul_factor_le_uniform`
 helper of `EigenvectorChartRHSDiffNumeratorWkpNormSharp` but is local to this
 file. -/
-private lemma sharpDiff_wkpNorm_coef_mul_factor_le_uniform
+lemma sharpDiff_wkpNorm_coef_mul_factor_le_uniform
     (α : M) (K : ℕ)
     {coef : EuclN → ℝ}
     (hcoef_chart : ContDiffOn ℝ (⊤ : ℕ∞) coef
@@ -467,7 +467,7 @@ private lemma sharpDiff_diff_memWkp
 omit [CompleteSpace E] in
 /-- `wkpNorm K of indicator_{chartPouKernel α} Q = wkpNorm K of Q` on the open
 chart target, when `Q` ae-vanishes off the kernel. -/
-private lemma sharpDiff_wkpNorm_indicator_eq
+lemma sharpDiff_wkpNorm_indicator_eq
     (α : M) (K : ℕ) {Q : EuclN → ℝ}
     (hQ_ae_zero : Q =ᵐ[(volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α \

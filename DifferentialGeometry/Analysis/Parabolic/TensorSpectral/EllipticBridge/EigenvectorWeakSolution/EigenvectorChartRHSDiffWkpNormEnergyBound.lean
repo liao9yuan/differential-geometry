@@ -109,7 +109,7 @@ omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)] [TopologicalSpace H] [TopologicalSpace M]
   [ChartedSpace H M] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
   [T2Space M] [SigmaCompactSpace M] in
-private lemma finsetSum_eNNReal_ofReal_mul_le
+lemma finsetSum_eNNReal_ofReal_mul_le
     {ι : Type*} (s : Finset ι) (f : ι → ℝ≥0∞) (C : ι → ℝ) (A : ℝ≥0∞)
     (hC : ∀ j ∈ s, 0 ≤ C j)
     (hbd : ∀ j ∈ s, f j ≤ ENNReal.ofReal (C j) * A) :
