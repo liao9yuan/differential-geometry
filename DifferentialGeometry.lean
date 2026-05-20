@@ -177,6 +177,7 @@ import DifferentialGeometry.Tensor.Product.HomEquiv
 import DifferentialGeometry.Tensor.Product.Pretrivialization
 import DifferentialGeometry.Tensor.Product.Section
 import DifferentialGeometry.Tensor.RSTensor.BundleSectionContinuity
+import DifferentialGeometry.Tensor.RSTensor.Tensor0SBundleLocalityIdentities
 import DifferentialGeometry.Tensor.RSTensor.ChartJacobianSmooth
 import DifferentialGeometry.Tensor.RSTensor.ChartJacobianSmoothness
 import DifferentialGeometry.Tensor.RSTensor.Contract
