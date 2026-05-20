@@ -345,6 +345,7 @@ import DifferentialGeometry.Analysis.Sobolev.Chart.TransitionQMP
 import DifferentialGeometry.Analysis.Sobolev.Chart.Transition
 import DifferentialGeometry.Analysis.Sobolev.Chart.AtlasIndependence
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.FderivToWkpNormBridge
 import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseHelpers
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.MultiplyQuant
 import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBound
@@ -753,6 +754,7 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Variational
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Resolvent
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Rellich.Tensor
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.Components
+import DifferentialGeometry.Integral.Connection.ChartPulledCovDerivChartCompBound
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartComponents
 import DifferentialGeometry.Analysis.Sobolev.Tensor.Defs
 import DifferentialGeometry.Analysis.Sobolev.Tensor.NormBasics
