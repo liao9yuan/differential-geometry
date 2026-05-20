@@ -3,6 +3,7 @@ import Mathlib.Algebra.BigOperators.Group.Finset.Basic
 import Mathlib.Algebra.BigOperators.Group.Finset.Sigma
 import Mathlib.Data.Fin.Tuple.Basic
 import Mathlib.Tactic.Abel
+import Mathlib.Tactic.FinCases
 
 /-!
 # Slot algebra for tensor calculations
@@ -17,6 +18,38 @@ open scoped BigOperators
 namespace RicciFlower
 namespace Tensor
 namespace SlotAlgebra
+
+/-- Reindex a sum over three finite slots as an explicit triple sum. -/
+lemma sum_fin3_fun_eq_triple
+    {R ι : Type*} [CommSemiring R] [Fintype ι] [DecidableEq ι]
+    (A B C : ι -> R) (K : ι -> ι -> ι -> R) :
+    (∑ r : Fin 3 -> ι, A (r 0) * B (r 1) * C (r 2) * K (r 0) (r 1) (r 2)) =
+      ∑ i : ι, ∑ k : ι, ∑ j : ι, A i * B k * C j * K i k j := by
+  classical
+  let e : (Fin 3 -> ι) ≃ ((ι × ι) × ι) := {
+    toFun := fun r => ((r 0, r 1), r 2)
+    invFun := fun p q =>
+      if q = (0 : Fin 3) then p.1.1
+      else if q = (1 : Fin 3) then p.1.2
+      else p.2
+    left_inv := by
+      intro r
+      funext q
+      fin_cases q <;> simp
+    right_inv := by
+      intro p
+      rcases p with ⟨⟨i, k⟩, j⟩
+      simp }
+  calc
+    (∑ r : Fin 3 -> ι, A (r 0) * B (r 1) * C (r 2) * K (r 0) (r 1) (r 2))
+        =
+      ∑ p : (ι × ι) × ι,
+        A p.1.1 * B p.1.2 * C p.2 * K p.1.1 p.1.2 p.2 := by
+        exact Fintype.sum_equiv e _ _ (by
+          intro r
+          simp [e])
+    _ = ∑ i : ι, ∑ k : ι, ∑ j : ι, A i * B k * C j * K i k j := by
+      simp [Fintype.sum_prod_type]
 
 lemma update_update_ne_comm
     {ι V : Type*} [DecidableEq ι]

@@ -346,6 +346,390 @@ theorem frameGammaMat_coord
     Coordinates.coordinateFrameAt, Coordinates.coordinateTrivializationAt,
     curveVelocity, x, frame, hframe] using h
 
+/-- In a fixed coordinate frame centered at `x₀`, the local-frame connection
+matrix in a curve direction is the velocity-coordinate contraction of the
+fixed-center Christoffel coefficient function. -/
+theorem frameGammaMat_fixed
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (x₀ : M) (gamma : Curve M) (t : Real)
+    (hgt : gamma t ∈ Coordinates.coordinateFrameSet (I := I) x₀)
+    (j k : Coordinates.CoordinateIdx (𝕜 := Real) E) :
+    Lecture07.frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov
+        (Coordinates.coordinateTrivializationAt (I := I) x₀)
+        (Module.finBasis Real E) gamma t
+        (1 : TangentSpace 𝓘(Real, Real) t) k j =
+      ∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        (Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff
+            i (gamma t) (curveVelocity I gamma t) *
+          Realized.christoffelCoordFun (I := I) cov x₀ i j k (gamma t) := by
+  classical
+  let frame := Coordinates.coordinateFrameAt (I := I) x₀
+  let hframe := Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀
+  have h :=
+    Coordinates.christoffelAlongInFrame_eq_sum_coeff
+      (I := I) (Idx := Coordinates.CoordinateIdx (𝕜 := Real) E)
+      cov frame hframe hgt (curveVelocity I gamma t) j k
+  simpa [Lecture07.frameGammaMat, Lecture07.frameGamma,
+    Coordinates.christoffelAlongInFrame, Realized.christoffelCoordFun,
+    Coordinates.coordinateFrameAt, Coordinates.coordinateTrivializationAt,
+    curveVelocity, frame, hframe] using h
+
+/-- Fixed-coordinate expansion of the connection matrix in the time direction
+of a two-parameter surface. -/
+theorem frameGammaMat_time
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (x₀ : M) (F : Surface M) (s t : Real)
+    (hst : F (s, t) ∈ Coordinates.coordinateFrameSet (I := I) x₀)
+    (j k : Coordinates.CoordinateIdx (𝕜 := Real) E) :
+    Lecture07.frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov
+        (Coordinates.coordinateTrivializationAt (I := I) x₀)
+        (Module.finBasis Real E) (timeCurve F s) t
+        (1 : TangentSpace 𝓘(Real, Real) t) k j =
+      ∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        (Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff
+            i (F (s, t)) (timeField I F (s, t)) *
+          Realized.christoffelCoordFun (I := I) cov x₀ i j k (F (s, t)) := by
+  simpa [timeCurve, timeField] using
+    frameGammaMat_fixed (I := I) cov x₀ (timeCurve F s) t hst j k
+
+/-- Fixed-coordinate expansion of the connection matrix in the variation
+parameter direction of a two-parameter surface. -/
+theorem frameGammaMat_param
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (x₀ : M) (F : Surface M) (s t : Real)
+    (hst : F (s, t) ∈ Coordinates.coordinateFrameSet (I := I) x₀)
+    (j k : Coordinates.CoordinateIdx (𝕜 := Real) E) :
+    Lecture07.frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov
+        (Coordinates.coordinateTrivializationAt (I := I) x₀)
+        (Module.finBasis Real E) (paramCurve F t) s
+        (1 : TangentSpace 𝓘(Real, Real) s) k j =
+      ∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        (Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff
+            i (F (s, t)) (paramField I F (s, t)) *
+          Realized.christoffelCoordFun (I := I) cov x₀ i j k (F (s, t)) := by
+  simpa [paramCurve, paramField] using
+    frameGammaMat_fixed (I := I) cov x₀ (paramCurve F t) s hst j k
+
+/-- Product rule for the fixed-coordinate time-direction connection matrix
+when the variation parameter changes.  The derivative of the Christoffel
+coefficient along the surface is supplied separately, so this lemma is only
+finite-sum calculus. -/
+private theorem gammaT_deriv_s
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (x₀ : M) (F : Surface M) (s t : Real)
+    (hmem : ∀ᶠ σ : Real in 𝓝 s,
+      F (σ, t) ∈ Coordinates.coordinateFrameSet (I := I) x₀)
+    (T S Ts : Coordinates.CoordinateIdx (𝕜 := Real) E -> Real)
+    (hT :
+      ∀ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        (Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff
+            i (F (s, t)) (timeField I F (s, t)) = T i)
+    (hTderiv :
+      ∀ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        HasDerivAt
+          (fun σ : Real =>
+            (Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff
+              i (F (σ, t)) (timeField I F (σ, t)))
+          (Ts i) s)
+    (hCderiv :
+      ∀ i j k : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        HasDerivAt
+          (fun σ : Real =>
+            Realized.christoffelCoordFun (I := I) cov x₀ i j k (F (σ, t)))
+          (∑ a : Coordinates.CoordinateIdx (𝕜 := Real) E,
+            S a * Realized.christoffelCoordDerivAt (I := I) cov x₀ a i j k) s)
+    (j k : Coordinates.CoordinateIdx (𝕜 := Real) E) :
+    HasDerivAt
+      (fun σ : Real =>
+        Lecture07.frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov
+          (Coordinates.coordinateTrivializationAt (I := I) x₀)
+          (Module.finBasis Real E) (timeCurve F σ) t
+          (1 : TangentSpace 𝓘(Real, Real) t) k j)
+      (∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        (Ts i * Realized.christoffelCoordFun (I := I) cov x₀ i j k (F (s, t)) +
+          T i *
+            (∑ a : Coordinates.CoordinateIdx (𝕜 := Real) E,
+              S a * Realized.christoffelCoordDerivAt (I := I) cov x₀ a i j k)))
+      s := by
+  classical
+  let coeff :
+      Coordinates.CoordinateIdx (𝕜 := Real) E -> Real -> Real :=
+    fun i σ =>
+      (Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff
+        i (F (σ, t)) (timeField I F (σ, t))
+  let C :
+      Coordinates.CoordinateIdx (𝕜 := Real) E -> Real -> Real :=
+    fun i σ => Realized.christoffelCoordFun (I := I) cov x₀ i j k (F (σ, t))
+  have hrhs :
+      HasDerivAt
+        (fun σ : Real =>
+          ∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E, coeff i σ * C i σ)
+        (∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+          (Ts i * Realized.christoffelCoordFun (I := I) cov x₀ i j k (F (s, t)) +
+            T i *
+              (∑ a : Coordinates.CoordinateIdx (𝕜 := Real) E,
+                S a * Realized.christoffelCoordDerivAt (I := I) cov x₀ a i j k)))
+        s := by
+    refine HasDerivAt.fun_sum fun i _ => ?_
+    have hmul := (hTderiv i).mul (hCderiv i j k)
+    simpa [coeff, C, hT i, mul_assoc, mul_left_comm, mul_comm] using hmul
+  have hline :
+      (fun σ : Real =>
+        Lecture07.frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov
+          (Coordinates.coordinateTrivializationAt (I := I) x₀)
+          (Module.finBasis Real E) (timeCurve F σ) t
+          (1 : TangentSpace 𝓘(Real, Real) t) k j) =ᶠ[𝓝 s]
+        (fun σ : Real =>
+          ∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E, coeff i σ * C i σ) := by
+    filter_upwards [hmem] with σ hσ
+    simpa [coeff, C] using
+      (frameGammaMat_time (I := I) cov x₀ F σ t hσ j k)
+  exact hrhs.congr_of_eventuallyEq hline
+
+/-- Product rule for the fixed-coordinate parameter-direction connection matrix
+when the time parameter changes. -/
+private theorem gammaS_deriv_t
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (x₀ : M) (F : Surface M) (s t : Real)
+    (hmem : ∀ᶠ τ : Real in 𝓝 t,
+      F (s, τ) ∈ Coordinates.coordinateFrameSet (I := I) x₀)
+    (S T St : Coordinates.CoordinateIdx (𝕜 := Real) E -> Real)
+    (hS :
+      ∀ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        (Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff
+            i (F (s, t)) (paramField I F (s, t)) = S i)
+    (hSderiv :
+      ∀ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        HasDerivAt
+          (fun τ : Real =>
+            (Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff
+              i (F (s, τ)) (paramField I F (s, τ)))
+          (St i) t)
+    (hCderiv :
+      ∀ i j k : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        HasDerivAt
+          (fun τ : Real =>
+            Realized.christoffelCoordFun (I := I) cov x₀ i j k (F (s, τ)))
+          (∑ a : Coordinates.CoordinateIdx (𝕜 := Real) E,
+            T a * Realized.christoffelCoordDerivAt (I := I) cov x₀ a i j k) t)
+    (j k : Coordinates.CoordinateIdx (𝕜 := Real) E) :
+    HasDerivAt
+      (fun τ : Real =>
+        Lecture07.frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov
+          (Coordinates.coordinateTrivializationAt (I := I) x₀)
+          (Module.finBasis Real E) (paramCurve F τ) s
+          (1 : TangentSpace 𝓘(Real, Real) s) k j)
+      (∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        (St i * Realized.christoffelCoordFun (I := I) cov x₀ i j k (F (s, t)) +
+          S i *
+            (∑ a : Coordinates.CoordinateIdx (𝕜 := Real) E,
+              T a * Realized.christoffelCoordDerivAt (I := I) cov x₀ a i j k)))
+      t := by
+  classical
+  let coeff :
+      Coordinates.CoordinateIdx (𝕜 := Real) E -> Real -> Real :=
+    fun i τ =>
+      (Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff
+        i (F (s, τ)) (paramField I F (s, τ))
+  let C :
+      Coordinates.CoordinateIdx (𝕜 := Real) E -> Real -> Real :=
+    fun i τ => Realized.christoffelCoordFun (I := I) cov x₀ i j k (F (s, τ))
+  have hrhs :
+      HasDerivAt
+        (fun τ : Real =>
+          ∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E, coeff i τ * C i τ)
+        (∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+          (St i * Realized.christoffelCoordFun (I := I) cov x₀ i j k (F (s, t)) +
+            S i *
+              (∑ a : Coordinates.CoordinateIdx (𝕜 := Real) E,
+                T a * Realized.christoffelCoordDerivAt (I := I) cov x₀ a i j k)))
+        t := by
+    refine HasDerivAt.fun_sum fun i _ => ?_
+    have hmul := (hSderiv i).mul (hCderiv i j k)
+    simpa [coeff, C, hS i, mul_assoc, mul_left_comm, mul_comm] using hmul
+  have hline :
+      (fun τ : Real =>
+        Lecture07.frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov
+          (Coordinates.coordinateTrivializationAt (I := I) x₀)
+          (Module.finBasis Real E) (paramCurve F τ) s
+          (1 : TangentSpace 𝓘(Real, Real) s) k j) =ᶠ[𝓝 t]
+        (fun τ : Real =>
+          ∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E, coeff i τ * C i τ) := by
+    filter_upwards [hmem] with τ hτ
+    simpa [coeff, C] using
+      (frameGammaMat_param (I := I) cov x₀ F s τ hτ j k)
+  exact hrhs.congr_of_eventuallyEq hline
+
+/-- Matrix-valued version of `gammaT_deriv_s`. -/
+private theorem gammaT_deriv_s_mat
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (x₀ : M) (F : Surface M) (s t : Real)
+    (hmem : ∀ᶠ σ : Real in 𝓝 s,
+      F (σ, t) ∈ Coordinates.coordinateFrameSet (I := I) x₀)
+    (T S Ts : Coordinates.CoordinateIdx (𝕜 := Real) E -> Real)
+    (hT :
+      ∀ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        (Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff
+            i (F (s, t)) (timeField I F (s, t)) = T i)
+    (hTderiv :
+      ∀ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        HasDerivAt
+          (fun σ : Real =>
+            (Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff
+              i (F (σ, t)) (timeField I F (σ, t)))
+          (Ts i) s)
+    (hCderiv :
+      ∀ i j k : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        HasDerivAt
+          (fun σ : Real =>
+            Realized.christoffelCoordFun (I := I) cov x₀ i j k (F (σ, t)))
+          (∑ a : Coordinates.CoordinateIdx (𝕜 := Real) E,
+            S a * Realized.christoffelCoordDerivAt (I := I) cov x₀ a i j k) s) :
+    HasDerivAt
+      (fun σ : Real =>
+        Lecture07.frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov
+          (Coordinates.coordinateTrivializationAt (I := I) x₀)
+          (Module.finBasis Real E) (timeCurve F σ) t
+          (1 : TangentSpace 𝓘(Real, Real) t))
+      (fun k j =>
+        ∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+          (Ts i * Realized.christoffelCoordFun (I := I) cov x₀ i j k (F (s, t)) +
+            T i *
+              (∑ a : Coordinates.CoordinateIdx (𝕜 := Real) E,
+                S a * Realized.christoffelCoordDerivAt (I := I) cov x₀ a i j k)))
+      s := by
+  change HasDerivAt
+    (fun σ : Real => fun k j =>
+      Lecture07.frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov
+        (Coordinates.coordinateTrivializationAt (I := I) x₀)
+        (Module.finBasis Real E) (timeCurve F σ) t
+        (1 : TangentSpace 𝓘(Real, Real) t) k j)
+    (fun k j =>
+      ∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        (Ts i * Realized.christoffelCoordFun (I := I) cov x₀ i j k (F (s, t)) +
+          T i *
+            (∑ a : Coordinates.CoordinateIdx (𝕜 := Real) E,
+              S a * Realized.christoffelCoordDerivAt (I := I) cov x₀ a i j k)))
+    s
+  rw [hasDerivAt_pi]
+  intro k
+  rw [hasDerivAt_pi]
+  intro j
+  exact gammaT_deriv_s (I := I) cov x₀ F s t hmem T S Ts hT hTderiv hCderiv j k
+
+/-- Matrix-valued version of `gammaS_deriv_t`. -/
+private theorem gammaS_deriv_t_mat
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (x₀ : M) (F : Surface M) (s t : Real)
+    (hmem : ∀ᶠ τ : Real in 𝓝 t,
+      F (s, τ) ∈ Coordinates.coordinateFrameSet (I := I) x₀)
+    (S T St : Coordinates.CoordinateIdx (𝕜 := Real) E -> Real)
+    (hS :
+      ∀ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        (Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff
+            i (F (s, t)) (paramField I F (s, t)) = S i)
+    (hSderiv :
+      ∀ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        HasDerivAt
+          (fun τ : Real =>
+            (Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff
+              i (F (s, τ)) (paramField I F (s, τ)))
+          (St i) t)
+    (hCderiv :
+      ∀ i j k : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        HasDerivAt
+          (fun τ : Real =>
+            Realized.christoffelCoordFun (I := I) cov x₀ i j k (F (s, τ)))
+          (∑ a : Coordinates.CoordinateIdx (𝕜 := Real) E,
+            T a * Realized.christoffelCoordDerivAt (I := I) cov x₀ a i j k) t) :
+    HasDerivAt
+      (fun τ : Real =>
+        Lecture07.frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov
+          (Coordinates.coordinateTrivializationAt (I := I) x₀)
+          (Module.finBasis Real E) (paramCurve F τ) s
+          (1 : TangentSpace 𝓘(Real, Real) s))
+      (fun k j =>
+        ∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+          (St i * Realized.christoffelCoordFun (I := I) cov x₀ i j k (F (s, t)) +
+            S i *
+              (∑ a : Coordinates.CoordinateIdx (𝕜 := Real) E,
+                T a * Realized.christoffelCoordDerivAt (I := I) cov x₀ a i j k)))
+      t := by
+  change HasDerivAt
+    (fun τ : Real => fun k j =>
+      Lecture07.frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov
+        (Coordinates.coordinateTrivializationAt (I := I) x₀)
+        (Module.finBasis Real E) (paramCurve F τ) s
+        (1 : TangentSpace 𝓘(Real, Real) s) k j)
+    (fun k j =>
+      ∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        (St i * Realized.christoffelCoordFun (I := I) cov x₀ i j k (F (s, t)) +
+          S i *
+            (∑ a : Coordinates.CoordinateIdx (𝕜 := Real) E,
+              T a * Realized.christoffelCoordDerivAt (I := I) cov x₀ a i j k)))
+    t
+  rw [hasDerivAt_pi]
+  intro k
+  rw [hasDerivAt_pi]
+  intro j
+  exact gammaS_deriv_t (I := I) cov x₀ F s t hmem S T St hS hSderiv hCderiv j k
+
+/-- Pure algebra for the antisymmetric derivative part of the curvature
+matrix.  After the product-rule expansions of `∂s Γt` and `∂t Γs`, equal
+mixed velocity derivatives cancel, leaving only the antisymmetrized
+Christoffel-coordinate derivative. -/
+private theorem gammaDeriv_skew
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (S T Ts St : ι -> Real)
+    (C : ι -> ι -> ι -> Real) (dC : ι -> ι -> ι -> ι -> Real)
+    (dΓt_s dΓs_t : Matrix ι ι Real)
+    (hΓt : ∀ m j : ι,
+      dΓt_s m j =
+        ∑ k : ι, (Ts k * C k j m +
+          T k * (∑ i : ι, S i * dC i k j m)))
+    (hΓs : ∀ m j : ι,
+      dΓs_t m j =
+        ∑ i : ι, (St i * C i j m +
+          S i * (∑ k : ι, T k * dC k i j m)))
+    (hmix : Ts = St) :
+    ∀ m j : ι,
+      dΓt_s m j - dΓs_t m j =
+        ∑ i : ι, ∑ k : ι,
+          S i * T k * (dC i k j m - dC k i j m) := by
+  classical
+  intro m j
+  have hfirst :
+      (∑ k : ι, Ts k * C k j m) =
+        (∑ i : ι, St i * C i j m) := by
+    subst hmix
+    rfl
+  have hsecond :
+      (∑ k : ι, T k * (∑ i : ι, S i * dC i k j m)) =
+        ∑ i : ι, ∑ k : ι, S i * T k * dC i k j m := by
+    calc
+      (∑ k : ι, T k * (∑ i : ι, S i * dC i k j m))
+          = ∑ k : ι, ∑ i : ι, T k * (S i * dC i k j m) := by
+            simp [Finset.mul_sum]
+      _ = ∑ i : ι, ∑ k : ι, T k * (S i * dC i k j m) := by
+            rw [Finset.sum_comm]
+      _ = ∑ i : ι, ∑ k : ι, S i * T k * dC i k j m := by
+            simp [mul_left_comm, mul_comm]
+  have hthird :
+      (∑ i : ι, S i * (∑ k : ι, T k * dC k i j m)) =
+        ∑ i : ι, ∑ k : ι, S i * T k * dC k i j m := by
+    simp [Finset.mul_sum, mul_assoc]
+  rw [hΓt, hΓs]
+  simp_rw [Finset.sum_add_distrib]
+  rw [hfirst, hsecond, hthird]
+  have hdiff :
+      (∑ i : ι, ∑ k : ι,
+          S i * T k * (dC i k j m - dC k i j m)) =
+        (∑ i : ι, ∑ k : ι, S i * T k * dC i k j m) -
+          (∑ i : ι, ∑ k : ι, S i * T k * dC k i j m) := by
+    simp [Finset.sum_sub_distrib, mul_sub]
+  rw [hdiff]
+  abel
+
 private theorem curvMat_contract
     {ι : Type*} [Fintype ι] [DecidableEq ι]
     (S T V : ι -> Real)
@@ -414,7 +798,7 @@ private theorem curvMat_contract
       _ =
         ∑ i : ι, ∑ k : ι, ∑ j : ι,
           S i * T k * V j * (∑ a : ι, C k j a * C i a m) := by
-          simp [Finset.mul_sum, Finset.sum_mul, mul_assoc, mul_left_comm, mul_comm]
+          simp [Finset.mul_sum, mul_left_comm, mul_comm]
   have hQ :
       (∑ j : ι,
         (∑ a : ι,
@@ -438,7 +822,7 @@ private theorem curvMat_contract
       _ =
         ∑ i : ι, ∑ k : ι, ∑ j : ι,
           S i * T k * V j * (∑ a : ι, C i j a * C k a m) := by
-          simp [Finset.mul_sum, Finset.sum_mul, mul_assoc, mul_left_comm, mul_comm]
+          simp [Finset.mul_sum, mul_left_comm, mul_comm]
   calc
     (dΓt_s - dΓs_t + Γs * Γt - Γt * Γs).mulVec V m =
         (∑ j : ι, (Γs * Γt) m j * V j) -
@@ -467,8 +851,8 @@ private theorem curvMat_contract
               (∑ a : ι, C k j a * C i a m) -
               (∑ a : ι, C i j a * C k a m)) := by
           rw [hP, hQ, hD]
-          simp [Finset.sum_add_distrib, Finset.sum_sub_distrib, mul_add,
-            mul_sub, sub_eq_add_neg, mul_assoc, mul_left_comm, mul_comm]
+          simp [Finset.sum_add_distrib, mul_add, sub_eq_add_neg, mul_assoc,
+            mul_left_comm, mul_comm]
           abel_nf
 
 /-- Coordinate expansion of the fixed-frame curvature matrix expression.
@@ -520,6 +904,180 @@ theorem frameCurvMat_coord
       hΓs hΓt hdΓ m
   simpa [Lecture07.frameCurvMat, Realized.christoffelCurvCoeffAt, add_assoc,
     sub_eq_add_neg, mul_assoc, mul_left_comm, mul_comm] using h
+
+/-- Coordinate expansion of the fixed-frame curvature matrix after the
+product-rule derivatives of `Γs` and `Γt` have been supplied.  The equal mixed
+velocity derivative terms are cancelled by `gammaDeriv_skew`. -/
+theorem frameCurvMat_deriv
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {x : M}
+    (S T V Ts St : Coordinates.CoordinateIdx (𝕜 := Real) E -> Real)
+    (Γs Γt dΓt_s dΓs_t :
+      Matrix (Coordinates.CoordinateIdx (𝕜 := Real) E)
+        (Coordinates.CoordinateIdx (𝕜 := Real) E) Real)
+    (hΓs :
+      ∀ m j : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        Γs m j =
+          ∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+            S i * Realized.christoffelCoordAt (I := I) cov x i j m)
+    (hΓt :
+      ∀ m j : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        Γt m j =
+          ∑ k : Coordinates.CoordinateIdx (𝕜 := Real) E,
+            T k * Realized.christoffelCoordAt (I := I) cov x k j m)
+    (hDΓt :
+      ∀ m j : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        dΓt_s m j =
+          ∑ k : Coordinates.CoordinateIdx (𝕜 := Real) E,
+            (Ts k * Realized.christoffelCoordAt (I := I) cov x k j m +
+              T k *
+                (∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+                  S i * Realized.christoffelCoordDerivAt (I := I) cov x i k j m)))
+    (hDΓs :
+      ∀ m j : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        dΓs_t m j =
+          ∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+            (St i * Realized.christoffelCoordAt (I := I) cov x i j m +
+              S i *
+                (∑ k : Coordinates.CoordinateIdx (𝕜 := Real) E,
+                  T k * Realized.christoffelCoordDerivAt (I := I) cov x k i j m)))
+    (hmix : Ts = St)
+    (m : Coordinates.CoordinateIdx (𝕜 := Real) E) :
+    (Lecture07.frameCurvMat Γs Γt dΓt_s dΓs_t).mulVec V m =
+      ∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        ∑ k : Coordinates.CoordinateIdx (𝕜 := Real) E,
+          ∑ j : Coordinates.CoordinateIdx (𝕜 := Real) E,
+            S i * T k * V j *
+              Realized.christoffelCurvCoeffAt (I := I) cov x i k j m := by
+  classical
+  exact frameCurvMat_coord (I := I)
+    (S := S) (T := T) (V := V)
+    (Γs := Γs) (Γt := Γt) (dΓt_s := dΓt_s) (dΓs_t := dΓs_t)
+    hΓs hΓt
+    (gammaDeriv_skew
+      (S := S) (T := T) (Ts := Ts) (St := St)
+      (C := fun i j m => Realized.christoffelCoordAt (I := I) cov x i j m)
+      (dC := fun i k j m =>
+        Realized.christoffelCoordDerivAt (I := I) cov x i k j m)
+      (dΓt_s := dΓt_s) (dΓs_t := dΓs_t) hDΓt hDΓs hmix)
+    m
+
+/-- Cotangent-tested curvature bridge after the fixed-coordinate `Γ` matrices
+and their product-rule derivatives have been identified. -/
+theorem curvVec_scalar_deriv
+    [T2Space M]
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞}
+    (hcov1 : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
+      (1 : WithTop ℕ∞))
+    {gamma : Curve M} {J : VectorFieldAlong I gamma} {t : Real}
+    (Γs Γt dΓt_s dΓs_t :
+      Matrix (Coordinates.CoordinateIdx (𝕜 := Real) E)
+        (Coordinates.CoordinateIdx (𝕜 := Real) E) Real)
+    (Ts St : Coordinates.CoordinateIdx (𝕜 := Real) E -> Real)
+    (α : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      1 (gamma t))
+    (hΓs :
+      ∀ m j : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        Γs m j =
+          ∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+            (Coordinates.coordinateFrameAt_toBasis (I := I) (gamma t)).repr
+                (J t) i *
+              Realized.christoffelCoordAt (I := I) cov (gamma t) i j m)
+    (hΓt :
+      ∀ m j : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        Γt m j =
+          ∑ k : Coordinates.CoordinateIdx (𝕜 := Real) E,
+            (Coordinates.coordinateFrameAt_toBasis (I := I) (gamma t)).repr
+                (curveVelocity I gamma t) k *
+              Realized.christoffelCoordAt (I := I) cov (gamma t) k j m)
+    (hDΓt :
+      ∀ m j : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        dΓt_s m j =
+          ∑ k : Coordinates.CoordinateIdx (𝕜 := Real) E,
+            (Ts k * Realized.christoffelCoordAt (I := I) cov (gamma t) k j m +
+              (Coordinates.coordinateFrameAt_toBasis (I := I) (gamma t)).repr
+                (curveVelocity I gamma t) k *
+                (∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+                  (Coordinates.coordinateFrameAt_toBasis (I := I) (gamma t)).repr
+                    (J t) i *
+                    Realized.christoffelCoordDerivAt (I := I) cov
+                      (gamma t) i k j m)))
+    (hDΓs :
+      ∀ m j : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        dΓs_t m j =
+          ∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+            (St i * Realized.christoffelCoordAt (I := I) cov (gamma t) i j m +
+              (Coordinates.coordinateFrameAt_toBasis (I := I) (gamma t)).repr
+                (J t) i *
+                (∑ k : Coordinates.CoordinateIdx (𝕜 := Real) E,
+                  (Coordinates.coordinateFrameAt_toBasis (I := I) (gamma t)).repr
+                    (curveVelocity I gamma t) k *
+                    Realized.christoffelCoordDerivAt (I := I) cov
+                      (gamma t) k i j m)))
+    (hmix : Ts = St) :
+    cotangentToDual (I := I) α
+        (Lecture07.frameCurvVec (I := I)
+          (Coordinates.coordinateTrivializationAt (I := I) (gamma t))
+          (Module.finBasis Real E) Γs Γt dΓt_s dΓs_t
+          (curveVelocity I gamma t)) =
+      curvatureAlongScalarAt (I := I) cov hcov gamma J t α := by
+  classical
+  let S : Coordinates.CoordinateIdx (𝕜 := Real) E -> Real :=
+    fun i => (Coordinates.coordinateFrameAt_toBasis (I := I) (gamma t)).repr (J t) i
+  let T : Coordinates.CoordinateIdx (𝕜 := Real) E -> Real :=
+    fun i =>
+      (Coordinates.coordinateFrameAt_toBasis (I := I) (gamma t)).repr
+        (curveVelocity I gamma t) i
+  refine curvVec_scalar_of_coeff (I := I) (cov := cov) (hcov := hcov)
+    hcov1 (gamma := gamma) (J := J) (t := t)
+    Γs Γt dΓt_s dΓs_t α ?_
+  intro m
+  have htriple :=
+    frameCurvMat_deriv (I := I) (cov := cov) (x := gamma t)
+      (S := S) (T := T) (V := T) (Ts := Ts) (St := St)
+      (Γs := Γs) (Γt := Γt) (dΓt_s := dΓt_s) (dΓs_t := dΓs_t)
+      (by simpa [S] using hΓs)
+      (by simpa [T] using hΓt)
+      (by simpa [S, T] using hDΓt)
+      (by simpa [S, T] using hDΓs)
+      hmix m
+  have hframeVec :
+      Lecture07.frameVec (I := I)
+          (Coordinates.coordinateTrivializationAt (I := I) (gamma t))
+          (Module.finBasis Real E) (curveVelocity I gamma t) = T := by
+    ext i
+    simp [T, Lecture07.frameVec,
+      Bundle.Trivialization.localFrame_coeff, IsLocalFrameOn.coeff,
+      Coordinates.coordinateFrameAt_toBasis, Coordinates.coordinateFrameAt_basis,
+      Coordinates.coordinateFrameAt, Coordinates.coordinateTrivializationAt]
+    rfl
+  calc
+    (Lecture07.frameCurvMat Γs Γt dΓt_s dΓs_t).mulVec
+        (Lecture07.frameVec (I := I)
+          (Coordinates.coordinateTrivializationAt (I := I) (gamma t))
+          (Module.finBasis Real E) (curveVelocity I gamma t)) m =
+      ∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        ∑ k : Coordinates.CoordinateIdx (𝕜 := Real) E,
+          ∑ j : Coordinates.CoordinateIdx (𝕜 := Real) E,
+            S i * T k * T j *
+              Realized.christoffelCurvCoeffAt (I := I) cov (gamma t) i k j m := by
+        rw [hframeVec]
+        exact htriple
+    _ =
+      ∑ r : Fin 3 -> Coordinates.CoordinateIdx (𝕜 := Real) E,
+        (∏ q : Fin 3,
+          (Coordinates.coordinateFrameAt_toBasis (I := I) (gamma t)).repr
+            (vec3 (I := I) (J t) (curveVelocity I gamma t)
+              (curveVelocity I gamma t) q) (r q)) *
+          Realized.christoffelCurvCoeffAt (I := I) cov (gamma t)
+            (r 0) (r 1) (r 2) m := by
+        rw [← sum_fin3_fun_eq_triple
+          (A := S) (B := T) (C := T)
+          (K := fun i k j =>
+            Realized.christoffelCurvCoeffAt (I := I) cov (gamma t) i k j m)]
+        simp [S, T, RicciFlower.Curvature.vec3, Fin.prod_univ_three,
+          mul_assoc]
 
 /-- Pointwise Jacobi equation along a curve.
 
@@ -582,6 +1140,280 @@ def VariationCurvCommAt
         cotangentToDual (I := I) α A +
             curvatureAlongScalarAt (I := I) cov hcov
               (timeCurve F s0) (variationField I F s0) t α = 0
+
+/-- Surface-jet curvature commutator in the centered coordinate frame.
+
+This is the checked bridge from the fixed-frame surface commutator to the
+Jacobi-facing `VariationCurvCommAt`.  The remaining producer work is exactly
+the scalar surface calculus supplied here as hypotheses: derivatives of the
+time/parameter velocity coefficients, derivatives of Christoffel coefficients
+along the surface, and mixed-partial equality. -/
+theorem curvComm_surface
+    [T2Space M]
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞}
+    (hcov1 : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
+      (1 : WithTop ℕ∞))
+    {F : Surface M} {s t : Real}
+    {Vs : SurfaceField I F} {DtsV : TangentSpace I (F (s, t))}
+    (hjet : HasPBSurfaceCovDeriv2At (I := I) cov F (timeField I F) Vs
+      (fun _ => 0) s t (0 : TangentSpace I (F (s, t))) DtsV)
+    (hmem_s : ∀ᶠ σ : Real in 𝓝 s,
+      F (σ, t) ∈ Coordinates.coordinateFrameSet (I := I) (F (s, t)))
+    (hmem_t : ∀ᶠ τ : Real in 𝓝 t,
+      F (s, τ) ∈ Coordinates.coordinateFrameSet (I := I) (F (s, t)))
+    (S T Ts St : Coordinates.CoordinateIdx (𝕜 := Real) E -> Real)
+    (hS :
+      ∀ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        (Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) (F (s, t))).coeff
+            i (F (s, t)) (paramField I F (s, t)) = S i)
+    (hT :
+      ∀ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        (Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) (F (s, t))).coeff
+            i (F (s, t)) (timeField I F (s, t)) = T i)
+    (hTderiv :
+      ∀ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        HasDerivAt
+          (fun σ : Real =>
+            (Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) (F (s, t))).coeff
+              i (F (σ, t)) (timeField I F (σ, t)))
+          (Ts i) s)
+    (hSderiv :
+      ∀ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        HasDerivAt
+          (fun τ : Real =>
+            (Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) (F (s, t))).coeff
+              i (F (s, τ)) (paramField I F (s, τ)))
+          (St i) t)
+    (hCs :
+      ∀ i j k : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        HasDerivAt
+          (fun σ : Real =>
+            Realized.christoffelCoordFun (I := I) cov (F (s, t)) i j k (F (σ, t)))
+          (∑ a : Coordinates.CoordinateIdx (𝕜 := Real) E,
+            S a * Realized.christoffelCoordDerivAt (I := I) cov
+              (F (s, t)) a i j k) s)
+    (hCt :
+      ∀ i j k : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        HasDerivAt
+          (fun τ : Real =>
+            Realized.christoffelCoordFun (I := I) cov (F (s, t)) i j k (F (s, τ)))
+          (∑ a : Coordinates.CoordinateIdx (𝕜 := Real) E,
+            T a * Realized.christoffelCoordDerivAt (I := I) cov
+              (F (s, t)) a i j k) t)
+    {vt vst vts : Coordinates.CoordinateIdx (𝕜 := Real) E -> Real}
+    (hvt_s : HasDerivAt
+      (fun σ : Real =>
+        Lecture07.frameDerivVec (I := I) (I' := 𝓘(Real, Real)) (M := M)
+          (Coordinates.coordinateTrivializationAt (I := I) (F (s, t)))
+          (Module.finBasis Real E) (timeCurve F σ)
+          (fun τ => timeField I F (σ, τ)) t
+          (1 : TangentSpace 𝓘(Real, Real) t)) vst s)
+    (hvs : HasDerivAt
+      (fun σ : Real =>
+        Lecture07.frameVec (I := I)
+          (Coordinates.coordinateTrivializationAt (I := I) (F (s, t)))
+          (Module.finBasis Real E) (timeField I F (σ, t))) Ts s)
+    (hvs_t : HasDerivAt
+      (fun τ : Real =>
+        Lecture07.frameDerivVec (I := I) (I' := 𝓘(Real, Real)) (M := M)
+          (Coordinates.coordinateTrivializationAt (I := I) (F (s, t)))
+          (Module.finBasis Real E) (paramCurve F τ)
+          (fun σ => timeField I F (σ, τ)) s
+          (1 : TangentSpace 𝓘(Real, Real) s)) vts t)
+    (hvt : HasDerivAt
+      (fun τ : Real =>
+        Lecture07.frameVec (I := I)
+          (Coordinates.coordinateTrivializationAt (I := I) (F (s, t)))
+          (Module.finBasis Real E) (timeField I F (s, τ))) vt t)
+    (hmix_raw : vst = vts)
+    (hmix : Ts = St) :
+    VariationCurvCommAt (I := I) cov hcov F s t
+      (fun τ => Vs (s, τ)) := by
+  classical
+  let x : M := F (s, t)
+  let e := Coordinates.coordinateTrivializationAt (I := I) x
+  let b := Module.finBasis Real E
+  let Γs : Matrix (Coordinates.CoordinateIdx (𝕜 := Real) E)
+      (Coordinates.CoordinateIdx (𝕜 := Real) E) Real :=
+    Lecture07.frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+      (paramCurve F t) s (1 : TangentSpace 𝓘(Real, Real) s)
+  let Γt : Matrix (Coordinates.CoordinateIdx (𝕜 := Real) E)
+      (Coordinates.CoordinateIdx (𝕜 := Real) E) Real :=
+    Lecture07.frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+      (timeCurve F s) t (1 : TangentSpace 𝓘(Real, Real) t)
+  let dΓt_s : Matrix (Coordinates.CoordinateIdx (𝕜 := Real) E)
+      (Coordinates.CoordinateIdx (𝕜 := Real) E) Real :=
+    fun k j =>
+      ∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        (Ts i * Realized.christoffelCoordAt (I := I) cov x i j k +
+          T i *
+            (∑ a : Coordinates.CoordinateIdx (𝕜 := Real) E,
+              S a * Realized.christoffelCoordDerivAt (I := I) cov x a i j k))
+  let dΓs_t : Matrix (Coordinates.CoordinateIdx (𝕜 := Real) E)
+      (Coordinates.CoordinateIdx (𝕜 := Real) E) Real :=
+    fun k j =>
+      ∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        (St i * Realized.christoffelCoordAt (I := I) cov x i j k +
+          S i *
+            (∑ a : Coordinates.CoordinateIdx (𝕜 := Real) E,
+              T a * Realized.christoffelCoordDerivAt (I := I) cov x a i j k))
+  have hmem_s_e : ∀ᶠ σ : Real in 𝓝 s, F (σ, t) ∈ e.baseSet := by
+    simpa [e, x, Coordinates.coordinateTrivializationAt] using hmem_s
+  have hmem_t_e : ∀ᶠ τ : Real in 𝓝 t, F (s, τ) ∈ e.baseSet := by
+    simpa [e, x, Coordinates.coordinateTrivializationAt] using hmem_t
+  have hΓt_deriv : HasDerivAt
+      (fun σ : Real =>
+        Lecture07.frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+          (surfaceTimeCurve F σ) t (1 : TangentSpace 𝓘(Real, Real) t))
+      dΓt_s s := by
+    have h := gammaT_deriv_s_mat (I := I) cov x F s t hmem_s T S Ts
+      (by simpa [x] using hT) (by simpa [x] using hTderiv)
+      (by simpa [x, Realized.christoffelCoordAt, Realized.christoffelCoordFun] using hCs)
+    simpa [dΓt_s, e, b, x, surfaceTimeCurve, timeCurve,
+      Realized.christoffelCoordAt, Realized.christoffelCoordFun] using h
+  have hΓs_deriv : HasDerivAt
+      (fun τ : Real =>
+        Lecture07.frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+          (surfaceParamCurve F τ) s (1 : TangentSpace 𝓘(Real, Real) s))
+      dΓs_t t := by
+    have h := gammaS_deriv_t_mat (I := I) cov x F s t hmem_t S T St
+      (by simpa [x] using hS) (by simpa [x] using hSderiv)
+      (by simpa [x, Realized.christoffelCoordAt, Realized.christoffelCoordFun] using hCt)
+    simpa [dΓs_t, e, b, x, surfaceParamCurve, paramCurve,
+      Realized.christoffelCoordAt, Realized.christoffelCoordFun] using h
+  have hvt_s' : HasDerivAt
+      (fun σ : Real =>
+        Lecture07.frameDerivVec (I := I) (I' := 𝓘(Real, Real)) (M := M) e b
+          (surfaceTimeCurve F σ) (fun τ => timeField I F (σ, τ)) t
+          (1 : TangentSpace 𝓘(Real, Real) t)) vst s := by
+    simpa [e, b, x, surfaceTimeCurve, timeCurve] using hvt_s
+  have hvs_t' : HasDerivAt
+      (fun τ : Real =>
+        Lecture07.frameDerivVec (I := I) (I' := 𝓘(Real, Real)) (M := M) e b
+          (surfaceParamCurve F τ) (fun σ => timeField I F (σ, τ)) s
+          (1 : TangentSpace 𝓘(Real, Real) s)) vts t := by
+    simpa [e, b, x, surfaceParamCurve, paramCurve] using hvs_t
+  have hvs' : HasDerivAt
+      (fun σ : Real => Lecture07.frameVec (I := I) e b (timeField I F (σ, t)))
+      Ts s := by
+    simpa [e, b, x] using hvs
+  have hvt' : HasDerivAt
+      (fun τ : Real => Lecture07.frameVec (I := I) e b (timeField I F (s, τ)))
+      vt t := by
+    simpa [e, b, x] using hvt
+  have hvec_raw := hjet.frame_dts_neg_vec (I := I) (cov := cov)
+    (hDst := by rfl) (e := e) (b := b) hmem_s_e hmem_t_e
+    hΓt_deriv hvt_s' hvs' hΓs_deriv hvs_t' hvt' hmix_raw
+  have hvec : DtsV =
+      -Lecture07.frameCurvVec (I := I) e b Γs Γt dΓt_s dΓs_t
+        (timeField I F (s, t)) := by
+    simpa [Γs, Γt, e, b, x, surfaceParamCurve, surfaceTimeCurve,
+      paramCurve, timeCurve] using hvec_raw
+  refine ⟨DtsV, ?_, ?_⟩
+  · simpa [HasPBTimeCovDerivAt, surfaceTimeCurve, timeCurve] using
+      hjet.has_time_param
+  · intro α
+    have hcurv : cotangentToDual (I := I) α
+          (Lecture07.frameCurvVec (I := I) e b Γs Γt dΓt_s dΓs_t
+            (timeField I F (s, t))) =
+        curvatureAlongScalarAt (I := I) cov hcov
+          (timeCurve F s) (variationField I F s) t α := by
+      have hΓs_val :
+          ∀ m j : Coordinates.CoordinateIdx (𝕜 := Real) E,
+            Γs m j =
+              ∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+                (Coordinates.coordinateFrameAt_toBasis (I := I) (timeCurve F s t)).repr
+                    (variationField I F s t) i *
+                  Realized.christoffelCoordAt (I := I) cov (timeCurve F s t) i j m := by
+        intro m j
+        have h := frameGammaMat_coord (I := I) cov (paramCurve F t) s j m
+        simpa [Γs, e, b, x, timeCurve, paramCurve, variationField] using h
+      have hΓt_val :
+          ∀ m j : Coordinates.CoordinateIdx (𝕜 := Real) E,
+            Γt m j =
+              ∑ k : Coordinates.CoordinateIdx (𝕜 := Real) E,
+                (Coordinates.coordinateFrameAt_toBasis (I := I) (timeCurve F s t)).repr
+                    (curveVelocity I (timeCurve F s) t) k *
+                  Realized.christoffelCoordAt (I := I) cov (timeCurve F s t) k j m := by
+        intro m j
+        have h := frameGammaMat_coord (I := I) cov (timeCurve F s) t j m
+        simpa [Γt, e, b, x, timeCurve] using h
+      have hSrepr :
+          ∀ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+            (Coordinates.coordinateFrameAt_toBasis (I := I) (timeCurve F s t)).repr
+                (variationField I F s t) i = S i := by
+        intro i
+        rw [← hS i]
+        have hcoeff :=
+          Coordinates.coordinateFrameAt_coeff_eq_toBasis_coord (I := I)
+            (F (s, t)) (paramField I F (s, t)) i
+        simpa [timeCurve, variationField, paramField] using hcoeff.symm
+      have hTrepr :
+          ∀ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+            (Coordinates.coordinateFrameAt_toBasis (I := I) (timeCurve F s t)).repr
+                (curveVelocity I (timeCurve F s) t) i = T i := by
+        intro i
+        rw [← hT i]
+        have hcoeff :=
+          Coordinates.coordinateFrameAt_coeff_eq_toBasis_coord (I := I)
+            (F (s, t)) (timeField I F (s, t)) i
+        simpa [timeCurve, timeField] using hcoeff.symm
+      have hDΓt_val :
+          ∀ m j : Coordinates.CoordinateIdx (𝕜 := Real) E,
+              dΓt_s m j =
+              ∑ k : Coordinates.CoordinateIdx (𝕜 := Real) E,
+                (Ts k * Realized.christoffelCoordAt (I := I) cov (timeCurve F s t) k j m +
+                  (Coordinates.coordinateFrameAt_toBasis (I := I) (timeCurve F s t)).repr
+                    (curveVelocity I (timeCurve F s) t) k *
+                    (∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+                      (Coordinates.coordinateFrameAt_toBasis (I := I) (timeCurve F s t)).repr
+                        (variationField I F s t) i *
+                        Realized.christoffelCoordDerivAt (I := I) cov
+                          (timeCurve F s t) i k j m)) := by
+        intro m j
+        dsimp [dΓt_s, x]
+        simp_rw [← hTrepr, ← hSrepr]
+        simp [timeCurve]
+      have hDΓs_val :
+          ∀ m j : Coordinates.CoordinateIdx (𝕜 := Real) E,
+            dΓs_t m j =
+              ∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
+                (St i * Realized.christoffelCoordAt (I := I) cov (timeCurve F s t) i j m +
+                  (Coordinates.coordinateFrameAt_toBasis (I := I) (timeCurve F s t)).repr
+                    (variationField I F s t) i *
+                    (∑ k : Coordinates.CoordinateIdx (𝕜 := Real) E,
+                      (Coordinates.coordinateFrameAt_toBasis (I := I) (timeCurve F s t)).repr
+                        (curveVelocity I (timeCurve F s) t) k *
+                        Realized.christoffelCoordDerivAt (I := I) cov
+                          (timeCurve F s t) k i j m)) := by
+        intro m j
+        dsimp [dΓs_t, x]
+        simp_rw [← hTrepr, ← hSrepr]
+        simp [timeCurve]
+      have hmain := curvVec_scalar_deriv (I := I) (cov := cov) (hcov := hcov)
+        hcov1 (gamma := timeCurve F s) (J := variationField I F s) (t := t)
+        Γs Γt dΓt_s dΓs_t Ts St α
+        hΓs_val hΓt_val hDΓt_val hDΓs_val hmix
+      simpa [e, b, Γs, Γt, x, timeCurve, timeField] using hmain
+    let R : TangentSpace I (timeCurve F s t) :=
+      Lecture07.frameCurvVec (I := I) e b Γs Γt dΓt_s dΓs_t
+        (timeField I F (s, t))
+    have hdual :
+        cotangentToDual (I := I) α (-R) + cotangentToDual (I := I) α R = 0 := by
+      rw [map_neg]
+      exact neg_add_cancel _
+    have hcurvR :
+        cotangentToDual (I := I) α R =
+          curvatureAlongScalarAt (I := I) cov hcov
+            (timeCurve F s) (variationField I F s) t α := by
+      simpa [R] using hcurv
+    rw [hvec]
+    change cotangentToDual (I := I) α (-R) +
+        curvatureAlongScalarAt (I := I) cov hcov
+          (timeCurve F s) (variationField I F s) t α = 0
+    rw [← hcurvR]
+    exact hdual
 
 /-! ## Representative-level identities -/
 

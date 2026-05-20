@@ -3157,6 +3157,36 @@ def TensorFirstNullScalarSigns
     0 ≤ reaction ∧
     drift + reaction < timeDeriv - laplacian
 
+/-- A strict barrier witness together with the first-null scalar signs proved
+for the same first and second spatial derivative witnesses. -/
+structure TensorStrictCert
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorFamily (I := I) (M := M))
+    (X : TimeDependentVectorField (I := I) (M := M))
+    (N : TwoTensorReaction (I := I) (M := M))
+    (epsilon delta t0 : Real) : Type _ where
+  nabla2Barrier : TensorNabla2Family (I := I) (M := M)
+  nablaBarrier : TensorNabla1Family (I := I) (M := M)
+  strict :
+    TensorBarrierStrictSupersolutionOn (I := I) (M := M) G S X N
+      nabla2Barrier nablaBarrier epsilon delta t0
+  signs :
+    TensorNullEigenvectorCondition (I := I) (M := M) G N
+      (Set.Icc t0 (t0 + delta)) ->
+    ∀ d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0,
+      TensorFirstNullScalarSigns (I := I) (M := M) G S X N epsilon delta t0 d
+
+/-- Uniform strict barrier certificates on a fixed short slab. -/
+def TensorStrictCertSlab
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorFamily (I := I) (M := M))
+    (X : TimeDependentVectorField (I := I) (M := M))
+    (N : TwoTensorReaction (I := I) (M := M))
+    (delta t0 : Real) : Prop :=
+  ∀ epsilon : Real, SmallBarrierEps epsilon ->
+    Nonempty (TensorStrictCert (I := I) (M := M) G S X N
+      epsilon delta t0)
+
 /--
 Build the first-null scalar-sign package from the transparent local scalar
 test-function inputs.
@@ -4215,13 +4245,29 @@ private theorem barrierLimitClosure_of_continuous
   intro t ht
   exact hP ht
 
-/--
-Regularity package needed for Hamilton's tensor weak maximum principle.
+/-- Regularity package for the tensor WMP, without any strict-barrier witness. -/
+structure TensorWMPCore
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorFamily (I := I) (M := M))
+    (X : TimeDependentVectorField (I := I) (M := M))
+    (N : TwoTensorReaction (I := I) (M := M))
+    (T : Real) : Prop where
+  symmetric : TwoTensorFamilySymmetricOn (I := I) (M := M) S (Set.Icc 0 T)
+  barrierRegularity :
+    TensorBarrierRegularityOn (I := I) (M := M) G S X N T
+  firstNullCompactness :
+    ∀ epsilon delta t0 : Real,
+      0 < epsilon ->
+      0 < delta ->
+      Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+      TensorFirstNullCompactnessOn (I := I) (M := M) G S epsilon delta t0
 
-The first field is a concrete algebraic side condition used by downstream
-callers.  The remaining field intentionally names the analytic regularity
-content still to be produced around the tensor heat-operator API: smoothness
-on compact slabs, compact first-null setup, and the local barrier estimates.
+/--
+Compatibility regularity package needed by the original raw WMP theorem.
+
+New producer routes should prefer `TensorWMPCore` plus a `TensorStrictCert`;
+this package remains as the old interface whose scalar signs must work for an
+arbitrary strict-barrier witness.
 -/
 structure TensorWMPRegularityOn
     (G : Real -> SmoothRiemannianMetric I M)
@@ -4252,15 +4298,85 @@ structure TensorWMPRegularityOn
       (d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0) ->
       TensorFirstNullScalarSigns (I := I) (M := M) G S X N epsilon delta t0 d
 
+namespace TensorWMPRegularityOn
+
+/-- Forget the compatibility scalar-sign producer, retaining only regularity. -/
+def toCore
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {T : Real}
+    (h : TensorWMPRegularityOn (I := I) (M := M) G S X N T) :
+    TensorWMPCore (I := I) (M := M) G S X N T where
+  symmetric := h.symmetric
+  barrierRegularity := h.barrierRegularity
+  firstNullCompactness := h.firstNullCompactness
+
+end TensorWMPRegularityOn
+
 /--
-Section-backed regularity package for Hamilton's tensor WMP.
+Section-backed regularity package for Hamilton's tensor WMP, without scalar
+signs.  The signs are produced later by strict-barrier certificates whose
+derivative witnesses match the section covariant derivatives.
+-/
+structure TensorWMPSectionCore
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorSecFamily (I := I) (M := M))
+    (X : TimeDependentVectorField (I := I) (M := M))
+    (N : TwoTensorReaction (I := I) (M := M))
+    (T : Real) : Prop where
+  symmetric :
+    TwoTensorFamilySymmetricOn (I := I) (M := M)
+      (twoTensorSecToFamily (I := I) (M := M) S) (Set.Icc 0 T)
+  barrierRegularity :
+    TensorBarrierRegularityOn (I := I) (M := M) G
+      (twoTensorSecToFamily (I := I) (M := M) S) X N T
+  unitSlabCompact :
+    ∀ delta t0 : Real,
+      0 < delta ->
+      Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+      IsCompact
+        (Set.univ :
+          Set (MetricUnitTangentTimeSlab (I := I) (M := M) G
+            (Set.Icc t0 (t0 + delta))))
+  metricQuadCont :
+    ∀ delta t0 : Real,
+      0 < delta ->
+      Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+      Continuous
+        (metricBundleQuad (I := I) (M := M) G
+          (Set.Icc t0 (t0 + delta)))
+  tensorQuadCont :
+    ∀ delta t0 : Real,
+      0 < delta ->
+      Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+      Continuous
+        (tensorSecBundleQuad (I := I) (M := M) S
+          (Set.Icc t0 (t0 + delta)))
+  barrierFixedContinuous :
+    ∀ epsilon delta t0 : Real,
+      0 < epsilon ->
+      0 < delta ->
+      Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+      ∀ x (v : TangentSpace I x),
+        ContinuousOn
+          (fun t : Real =>
+            tensorBarrierFamily (I := I) (M := M) G
+              (twoTensorSecToFamily (I := I) (M := M) S)
+              epsilon delta t0 t x v v)
+          (Set.Icc t0 (t0 + delta))
+
+/--
+Compatibility section-backed regularity package for Hamilton's tensor WMP.
 
 This is the public geometric entry point for smooth two-tensor sections.  It
 replaces the raw `firstNullCompactness` field with the transparent inputs used
 by `TensorFirstNullCompactnessOn.of_section`: compactness of the metric
 unit-tangent geometric time slab, continuity of the metric and tensor
 quadratic evaluations on the ambient time/tangent-bundle product, and
-fixed-vector time continuity.
+fixed-vector time continuity.  New producers should prefer
+`TensorWMPSectionCore` plus `TensorStrictCert`.
 -/
 structure TensorWMPSectionReg
     (G : Real -> SmoothRiemannianMetric I M)
@@ -4325,7 +4441,209 @@ structure TensorWMPSectionReg
       TensorFirstNullScalarSigns (I := I) (M := M) G
         (twoTensorSecToFamily (I := I) (M := M) S) X N epsilon delta t0 d
 
+namespace TensorWMPSectionCore
+
+/-- Build the section-backed core regularity package from compact slab data. -/
+theorem ofCompact
+    [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorSecFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {T : Real}
+    (hsym :
+      TwoTensorFamilySymmetricOn (I := I) (M := M)
+        (twoTensorSecToFamily (I := I) (M := M) S) (Set.Icc 0 T))
+    (hbar :
+      TensorBarrierRegularityOn (I := I) (M := M) G
+        (twoTensorSecToFamily (I := I) (M := M) S) X N T)
+    (hMetric :
+      ∀ delta t0 : Real,
+        0 < delta ->
+        Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+        Continuous
+          (metricBundleQuad (I := I) (M := M) G
+            (Set.Icc t0 (t0 + delta))))
+    (hTensor :
+      ∀ delta t0 : Real,
+        0 < delta ->
+        Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+        Continuous
+          (tensorSecBundleQuad (I := I) (M := M) S
+            (Set.Icc t0 (t0 + delta))))
+    (hFixed :
+      ∀ epsilon delta t0 : Real,
+        0 < epsilon ->
+        0 < delta ->
+        Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+        ∀ x (v : TangentSpace I x),
+          ContinuousOn
+            (fun t : Real =>
+              tensorBarrierFamily (I := I) (M := M) G
+                (twoTensorSecToFamily (I := I) (M := M) S)
+                epsilon delta t0 t x v v)
+            (Set.Icc t0 (t0 + delta))) :
+    TensorWMPSectionCore (I := I) (M := M) G S X N T where
+  symmetric := hsym
+  barrierRegularity := hbar
+  unitSlabCompact := by
+    intro delta t0 hdelta hsub
+    exact metricUnitTimeSlab_icc_compact_of_bundle (I := I) (M := M)
+      G t0 (t0 + delta) (G t0)
+      (by
+        simpa [metricBundleQuad] using hMetric delta t0 hdelta hsub)
+  metricQuadCont := hMetric
+  tensorQuadCont := hTensor
+  barrierFixedContinuous := hFixed
+
+/-- Build section-backed core regularity from total-space continuity. -/
+theorem ofTotal
+    [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorSecFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {T : Real}
+    (hsym :
+      TwoTensorFamilySymmetricOn (I := I) (M := M)
+        (twoTensorSecToFamily (I := I) (M := M) S) (Set.Icc 0 T))
+    (hbar :
+      TensorBarrierRegularityOn (I := I) (M := M) G
+        (twoTensorSecToFamily (I := I) (M := M) S) X N T)
+    (hMetric :
+      ∀ delta t0 : Real,
+        0 < delta ->
+        Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+        Continuous
+          (fun q : {t : Real // t ∈ Set.Icc t0 (t0 + delta)} × TangentBundle I M =>
+            TotalSpace.mk' (Tensor0SModel 2 Real E)
+              (E := fun x : M => Tensor0SSpace 2 I x) q.2.proj
+              (metricTensorField (I := I) (G q.1.1) q.2.proj)))
+    (hTensor :
+      ∀ delta t0 : Real,
+        0 < delta ->
+        Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+        Continuous
+          (fun q : {t : Real // t ∈ Set.Icc t0 (t0 + delta)} × TangentBundle I M =>
+            TotalSpace.mk' (Tensor0SModel 2 Real E)
+              (E := fun x : M => Tensor0SSpace 2 I x) q.2.proj
+              (S q.1.1 q.2.proj)))
+    (hFixed :
+      ∀ epsilon delta t0 : Real,
+        0 < epsilon ->
+        0 < delta ->
+        Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+        ∀ x (v : TangentSpace I x),
+          ContinuousOn
+            (fun t : Real =>
+              tensorBarrierFamily (I := I) (M := M) G
+                (twoTensorSecToFamily (I := I) (M := M) S)
+                epsilon delta t0 t x v v)
+            (Set.Icc t0 (t0 + delta))) :
+    TensorWMPSectionCore (I := I) (M := M) G S X N T :=
+  ofCompact (I := I) (M := M)
+    (G := G) (S := S) (X := X) (N := N) (T := T)
+    hsym hbar
+    (fun delta t0 hdelta hsub =>
+      RicciFlower.Realized.metricFamQuadCont (I := I) (M := M)
+        G (Set.Icc t0 (t0 + delta))
+        (hMetric delta t0 hdelta hsub))
+    (fun delta t0 hdelta hsub =>
+      RicciFlower.Realized.tensorQuadCont (I := I) (M := M)
+        S (Set.Icc t0 (t0 + delta))
+        (hTensor delta t0 hdelta hsub))
+    hFixed
+
+/-- Build the section-backed core package from a smooth realized metric family. -/
+theorem ofSmoothMetric
+    [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    {S : TwoTensorSecFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {T : Real}
+    (hTsub : Set.Icc 0 T ⊆ D.carrier)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (hsym :
+      TwoTensorFamilySymmetricOn (I := I) (M := M)
+        (twoTensorSecToFamily (I := I) (M := M) S) (Set.Icc 0 T))
+    (hbar :
+      TensorBarrierRegularityOn (I := I) (M := M) (fun t => G.metric t)
+        (twoTensorSecToFamily (I := I) (M := M) S) X N T)
+    (hTensor :
+      ∀ delta t0 : Real,
+        0 < delta ->
+        Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+        Continuous
+          (fun q : {t : Real // t ∈ Set.Icc t0 (t0 + delta)} × TangentBundle I M =>
+            TotalSpace.mk' (Tensor0SModel 2 Real E)
+              (E := fun x : M => Tensor0SSpace 2 I x) q.2.proj
+              (S q.1.1 q.2.proj)))
+    (hFixed :
+      ∀ epsilon delta t0 : Real,
+        0 < epsilon ->
+        0 < delta ->
+        Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+        ∀ x (v : TangentSpace I x),
+          ContinuousOn
+            (fun t : Real =>
+              tensorBarrierFamily (I := I) (M := M) (fun t => G.metric t)
+                (twoTensorSecToFamily (I := I) (M := M) S)
+                epsilon delta t0 t x v v)
+            (Set.Icc t0 (t0 + delta))) :
+    TensorWMPSectionCore (I := I) (M := M) (fun t => G.metric t) S X N T :=
+  ofTotal (I := I) (M := M)
+    (G := fun t => G.metric t) (S := S) (X := X) (N := N) (T := T)
+    hsym hbar
+    (fun delta t0 hdelta hsub =>
+      metricTensor_tangentBundle_cont_of_metricFamilySmoothOn
+        (I := I) (M := M) G hG
+        (fun t ht => hTsub (hsub ht)))
+    hTensor hFixed
+
+/-- Convert section-backed core regularity to raw core regularity. -/
+theorem toRaw
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorSecFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {T : Real}
+    (h : TensorWMPSectionCore (I := I) (M := M) G S X N T) :
+    TensorWMPCore (I := I) (M := M) G
+      (twoTensorSecToFamily (I := I) (M := M) S) X N T where
+  symmetric := h.symmetric
+  barrierRegularity := h.barrierRegularity
+  firstNullCompactness := by
+    intro epsilon delta t0 hepsilon hdelta hsub
+    exact TensorFirstNullCompactnessOn.of_section_timeSlab (I := I) (M := M)
+      G S epsilon delta t0
+      (h.unitSlabCompact delta t0 hdelta hsub)
+      (barrierTimeCont (I := I) (M := M) G S epsilon delta t0
+        (Set.Icc t0 (t0 + delta))
+        (h.tensorQuadCont delta t0 hdelta hsub)
+        (h.metricQuadCont delta t0 hdelta hsub))
+      (h.barrierFixedContinuous epsilon delta t0 hepsilon hdelta hsub)
+
+end TensorWMPSectionCore
+
 namespace TensorWMPSectionReg
+
+/-- Forget the compatibility scalar-sign producer, retaining only core data. -/
+def toCore
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorSecFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {T : Real}
+    (h : TensorWMPSectionReg (I := I) (M := M) G S X N T) :
+    TensorWMPSectionCore (I := I) (M := M) G S X N T where
+  symmetric := h.symmetric
+  barrierRegularity := h.barrierRegularity
+  unitSlabCompact := h.unitSlabCompact
+  metricQuadCont := h.metricQuadCont
+  tensorQuadCont := h.tensorQuadCont
+  barrierFixedContinuous := h.barrierFixedContinuous
 
 /-- Build the section-backed WMP regularity package using the geometric
 closed-slab compactness theorem for the unit tangent time slab.  Callers supply
@@ -4610,7 +4928,7 @@ theorem strictBarrierBounds
     {X : TimeDependentVectorField (I := I) (M := M)}
     {N : TwoTensorReaction (I := I) (M := M)}
     {T t0 : Real}
-    (hreg : TensorWMPRegularityOn (I := I) (M := M) G S X N T)
+    (hreg : TensorWMPCore (I := I) (M := M) G S X N T)
     (ht0 : t0 ∈ Set.Icc 0 T)
     (ht0T : t0 < T)
     {nabla2S : TensorNabla2Family (I := I) (M := M)}
@@ -4798,7 +5116,7 @@ theorem tensorBarrier_strict_supersolution
         delta t0 := by
   obtain ⟨delta0, K, hdelta0, hK, _hdelta0T, hstrict_bounds⟩ :=
     strictBarrierBounds (I := I) (M := M)
-      hreg ht0 ht0T hparabolic.evaluatedInequality
+      hreg.toCore ht0 ht0T hparabolic.evaluatedInequality
   obtain ⟨delta, hdelta, hdelta_le_delta0, hdeltaT, hsmall⟩ :=
     exists_small_delta (t0 := t0) (T := T) (delta0 := delta0) (K := K)
       ht0T hdelta0 hK
@@ -4817,6 +5135,88 @@ theorem tensorBarrier_strict_supersolution
     (epsilon := epsilon) (delta := delta) (t0 := t0) (T := T)
     hsubInterior hparabolic.evaluatedInequality
     metricDeriv reactionErr metricGain hmetric_deriv hgain hreaction hmargin
+
+/-- Section-backed strict-barrier certificates with scalar signs tied to the
+section covariant derivative witnesses. -/
+theorem strictCert_sec
+    [I.Boundaryless] [T2Space M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorSecFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {nablaS : TensorNabla1SecFamily (I := I) (M := M)}
+    {nabla2S : TensorNabla2SecFamily (I := I) (M := M)}
+    {cov : Real -> CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {t0 T : Real}
+    (ht0 : t0 ∈ Set.Icc 0 T)
+    (ht0T : t0 < T)
+    (hreg : TensorWMPSectionCore (I := I) (M := M) G S X N T)
+    (hparabolic : TensorParabolicSupersolutionWithDriftOn
+      (I := I) (M := M) G (twoTensorSecToFamily (I := I) (M := M) S) X N
+      (fun t x => nabla2S t x) (fun t x => nablaS t x) T)
+    (hcov1 : ∀ t : Real,
+      CovariantDerivative.ContMDiffCovariantDerivativeLocally
+        (cov t) (1 : WithTop ℕ∞))
+    (hcovInf : ∀ t : Real,
+      CovariantDerivative.ContMDiffCovariantDerivativeLocally
+        (cov t) (∞ : WithTop ℕ∞))
+    (hmc : ∀ t : Real,
+      RicciFlower.Connection.IsMetricCompatible (I := I) (cov t) (G t))
+    (hS : TensorSpatialDerivs (I := I) (M := M) cov S nablaS nabla2S) :
+    ∃ delta : Real, 0 < delta ∧ t0 + delta ≤ T ∧
+      TensorStrictCertSlab (I := I) (M := M) G
+        (twoTensorSecToFamily (I := I) (M := M) S) X N delta t0 := by
+  obtain ⟨delta0, K, hdelta0, hK, _hdelta0T, hstrict_bounds⟩ :=
+    strictBarrierBounds (I := I) (M := M)
+      hreg.toRaw ht0 ht0T hparabolic.evaluatedInequality
+  obtain ⟨delta, hdelta, hdelta_le_delta0, hdeltaT, hsmall⟩ :=
+    exists_small_delta (t0 := t0) (T := T) (delta0 := delta0) (K := K)
+      ht0T hdelta0 hK
+  refine ⟨delta, hdelta, hdeltaT, ?_⟩
+  intro epsilon hepsilon
+  obtain ⟨metricDeriv, reactionErr, metricGain,
+      hmetric_deriv, hgain, hreaction, hmargin⟩ :=
+    hstrict_bounds delta hdelta hdelta_le_delta0 hsmall epsilon hepsilon
+  have hsubInterior : Set.Ioc t0 (t0 + delta) ⊆ Set.Ioc 0 T := by
+    intro t ht
+    exact ⟨lt_of_le_of_lt ht0.1 ht.1, le_trans ht.2 hdeltaT⟩
+  have hsubClosed : Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T := by
+    intro t ht
+    exact ⟨le_trans ht0.1 ht.1, le_trans ht.2 hdeltaT⟩
+  have hstrict : TensorBarrierStrictSupersolutionOn (I := I) (M := M)
+      G (twoTensorSecToFamily (I := I) (M := M) S) X N
+      (fun t x => nabla2S t x) (fun t x => nablaS t x)
+      epsilon delta t0 :=
+    strictBarrier_of_derivEst (I := I) (M := M)
+      (G := G) (S := twoTensorSecToFamily (I := I) (M := M) S)
+      (X := X) (N := N)
+      (nabla2S := fun t x => nabla2S t x)
+      (nablaS := fun t x => nablaS t x)
+      (epsilon := epsilon) (delta := delta) (t0 := t0) (T := T)
+      hsubInterior hparabolic.evaluatedInequality
+      metricDeriv reactionErr metricGain hmetric_deriv hgain hreaction hmargin
+  refine ⟨⟨fun t x => nabla2S t x, fun t x => nablaS t x, hstrict, ?_⟩⟩
+  intro hnull d
+  obtain ⟨Xsec, hXsec⟩ :=
+    ContMDiffSection.exists_eq_at
+      (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞))
+      d.x1 (X d.t1 d.x1)
+  have hsym :
+      TwoTensorFamilySymmetricOn (I := I) (M := M)
+        (twoTensorSecToFamily (I := I) (M := M) S)
+        (Set.Icc t0 (t0 + delta)) := by
+    intro t ht x
+    exact hreg.symmetric t (hsubClosed ht) x
+  exact scalarSigns_secHess (I := I) (M := M)
+    (G := G) (S := S) (X := X) (N := N)
+    (nablaS := nablaS) (nabla2S := nabla2S) (cov := cov)
+    hstrict hnull hsym d (hcov1 d.t1) (hcovInf d.t1) hmc hS Xsec
+    (laplacianNonnegativeAtSpatialMin_of_metricCompatible
+      (I := I) (cov d.t1) (G d.t1) (hmc d.t1))
+    hXsec.symm
 
 /--
 Step 3: if the barrier fails to stay positive, compactness gives first-null
@@ -4913,6 +5313,52 @@ theorem tensor_first_null_contradiction
 /--
 Step 5: the strict barrier remains nonnegative on the short slab.
 -/
+theorem shortSlab_cert
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {t0 T : Real}
+    (ht0 : t0 ∈ Set.Icc 0 T)
+    (_ht0T : t0 < T)
+    (hreg : TensorWMPCore (I := I) (M := M) G S X N T)
+    (hcert :
+      ∃ delta : Real, 0 < delta ∧ t0 + delta ≤ T ∧
+        TensorStrictCertSlab (I := I) (M := M) G S X N delta t0)
+    (hnull : TensorNullEigenvectorCondition (I := I) (M := M) G
+      N (Set.Icc 0 T))
+    (hinit : TwoTensorFamilyNonnegativeAtTime (I := I) (M := M) S t0) :
+    ∃ delta : Real, 0 < delta ∧ t0 + delta ≤ T ∧
+      TensorBarrierUniformOnSlab (I := I) (M := M) G S delta t0 := by
+  classical
+  obtain ⟨delta, hdelta, hdeltaT, hstrict_uniform⟩ := hcert
+  refine ⟨delta, hdelta, hdeltaT, ?_⟩
+  intro epsilon hepsilon
+  obtain ⟨cert⟩ := hstrict_uniform epsilon hepsilon
+  by_contra hfail
+  have hinit_pos : ∀ x, TwoTensorPositiveDefiniteAt (I := I) (M := M)
+      (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t0) x :=
+    tensorBarrier_initial_positive (I := I) (M := M)
+      (G := G) (S := S) hepsilon.1 hdelta hinit
+  have hsub : Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T := by
+    intro t ht
+    exact ⟨le_trans ht0.1 ht.1, le_trans ht.2 hdeltaT⟩
+  have hcompact : TensorFirstNullCompactnessOn (I := I) (M := M)
+      G S epsilon delta t0 :=
+    hreg.firstNullCompactness epsilon delta t0 hepsilon.1 hdelta hsub
+  obtain ⟨d⟩ :=
+    tensorBarrier_first_null_of_failure (I := I) (M := M)
+      (G := G) (S := S) (epsilon := epsilon) (delta := delta) (t0 := t0)
+      hcompact hinit_pos hfail
+  have hnull_slab : TensorNullEigenvectorCondition (I := I) (M := M) G
+      N (Set.Icc t0 (t0 + delta)) := by
+    intro t ht A x hA v hv
+    exact hnull t (hsub ht) A x hA v hv
+  exact tensor_first_null_contradiction (I := I) (M := M)
+    (G := G) (S := S) (X := X) (N := N)
+    (nabla2Barrier := cert.nabla2Barrier) (nablaBarrier := cert.nablaBarrier)
+    cert.strict hnull_slab d (cert.signs hnull_slab d)
+
 theorem tensorBarrier_nonnegative_on_short_slab
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorFamily (I := I) (M := M)}
@@ -4990,6 +5436,134 @@ theorem tensor_wmp_of_barrier_limit
         (G := G) (S := S) (X := X) (N := N)
         ht0 ht0T hreg hparabolic hnull hinit_t0)
 
+/-- Tensor WMP from core regularity and strict-barrier certificates. -/
+theorem wmp_of_cert
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {T : Real}
+    (_hT : 0 ≤ T)
+    (hreg : TensorWMPCore (I := I) (M := M) G S X N T)
+    (hcert :
+      ∀ t0 : Real, t0 ∈ Set.Icc 0 T -> t0 < T ->
+        ∃ delta : Real, 0 < delta ∧ t0 + delta ≤ T ∧
+          TensorStrictCertSlab (I := I) (M := M) G S X N delta t0)
+    (hnull : TensorNullEigenvectorCondition (I := I) (M := M) G N (Set.Icc 0 T))
+    (hinit : TwoTensorFamilyNonnegativeAtTime (I := I) (M := M) S 0) :
+    TwoTensorFamilyNonnegativeOn (I := I) (M := M) S (Set.Icc 0 T) := by
+  exact barrierLimitClosure_of_continuous (I := I) (M := M)
+    (G := G) (S := S) _hT hreg.barrierRegularity.tensor_eval_continuous hinit
+    (fun t0 ht0 ht0T hinit_t0 =>
+      shortSlab_cert (I := I) (M := M)
+        (G := G) (S := S) (X := X) (N := N)
+        ht0 ht0T hreg (hcert t0 ht0 ht0T) hnull hinit_t0)
+
+/-- Theorem 7.5, section-backed producer form.
+
+This is the generic tensor WMP endpoint for smooth two-tensor sections.  The
+strict-barrier derivatives are selected from `TensorSpatialDerivs`, and the
+first-null scalar signs are produced by `strictCert_sec` for those same
+derivative witnesses. -/
+theorem wmp_section_sec
+    [I.Boundaryless] [T2Space M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorSecFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {nablaS : TensorNabla1SecFamily (I := I) (M := M)}
+    {nabla2S : TensorNabla2SecFamily (I := I) (M := M)}
+    {cov : Real -> CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {T : Real}
+    (_hT : 0 ≤ T)
+    (hreg : TensorWMPSectionCore (I := I) (M := M) G S X N T)
+    (hparabolic : TensorParabolicSupersolutionWithDriftOn
+      (I := I) (M := M) G (twoTensorSecToFamily (I := I) (M := M) S) X N
+      (fun t x => nabla2S t x) (fun t x => nablaS t x) T)
+    (hnull : TensorNullEigenvectorCondition (I := I) (M := M) G N (Set.Icc 0 T))
+    (hinit : TwoTensorFamilyNonnegativeAtTime (I := I) (M := M)
+      (twoTensorSecToFamily (I := I) (M := M) S) 0)
+    (hcov1 : ∀ t : Real,
+      CovariantDerivative.ContMDiffCovariantDerivativeLocally
+        (cov t) (1 : WithTop ℕ∞))
+    (hcovInf : ∀ t : Real,
+      CovariantDerivative.ContMDiffCovariantDerivativeLocally
+        (cov t) (∞ : WithTop ℕ∞))
+    (hmc : ∀ t : Real,
+      RicciFlower.Connection.IsMetricCompatible (I := I) (cov t) (G t))
+    (hS : TensorSpatialDerivs (I := I) (M := M) cov S nablaS nabla2S) :
+    TwoTensorFamilyNonnegativeOn (I := I) (M := M)
+      (twoTensorSecToFamily (I := I) (M := M) S) (Set.Icc 0 T) := by
+  exact wmp_of_cert (I := I) (M := M)
+    (G := G) (S := twoTensorSecToFamily (I := I) (M := M) S)
+    (X := X) (N := N) _hT hreg.toRaw
+    (fun t0 ht0 ht0T =>
+      strictCert_sec (I := I) (M := M)
+        (G := G) (S := S) (X := X) (N := N)
+        (nablaS := nablaS) (nabla2S := nabla2S) (cov := cov)
+        ht0 ht0T hreg hparabolic hcov1 hcovInf hmc hS)
+    hnull hinit
+
+/-- Hypothesis package for theorem 7.5 in its generic section-backed form.
+
+This is only a bundled presentation of the real inputs consumed by
+`wmp_section_sec`; it does not add a new producer predicate or hide a
+Ricci-flow-specific assumption. -/
+structure TensorWMPInput
+    (G : Real -> SmoothRiemannianMetric I M)
+    (S : TwoTensorSecFamily (I := I) (M := M))
+    (X : TimeDependentVectorField (I := I) (M := M))
+    (N : TwoTensorReaction (I := I) (M := M))
+    (cov : Real -> CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (nablaS : TensorNabla1SecFamily (I := I) (M := M))
+    (nabla2S : TensorNabla2SecFamily (I := I) (M := M))
+    (T : Real) : Prop where
+  hT : 0 ≤ T
+  reg : TensorWMPSectionCore (I := I) (M := M) G S X N T
+  parabolic :
+    TensorParabolicSupersolutionWithDriftOn
+      (I := I) (M := M) G (twoTensorSecToFamily (I := I) (M := M) S) X N
+      (fun t x => nabla2S t x) (fun t x => nablaS t x) T
+  null : TensorNullEigenvectorCondition (I := I) (M := M) G N (Set.Icc 0 T)
+  initial :
+    TwoTensorFamilyNonnegativeAtTime (I := I) (M := M)
+      (twoTensorSecToFamily (I := I) (M := M) S) 0
+  hcov1 : ∀ t : Real,
+    CovariantDerivative.ContMDiffCovariantDerivativeLocally
+      (cov t) (1 : WithTop ℕ∞)
+  hcovInf : ∀ t : Real,
+    CovariantDerivative.ContMDiffCovariantDerivativeLocally
+      (cov t) (∞ : WithTop ℕ∞)
+  hmc : ∀ t : Real,
+    RicciFlower.Connection.IsMetricCompatible (I := I) (cov t) (G t)
+  spatial : TensorSpatialDerivs (I := I) (M := M) cov S nablaS nabla2S
+
+/-- Theorem 7.5 in LaTeX-facing packaged form. -/
+theorem tensor_wmp
+    [I.Boundaryless] [T2Space M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorSecFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {cov : Real -> CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {nablaS : TensorNabla1SecFamily (I := I) (M := M)}
+    {nabla2S : TensorNabla2SecFamily (I := I) (M := M)}
+    {T : Real}
+    (data : TensorWMPInput (I := I) (M := M) G S X N cov nablaS nabla2S T) :
+    TwoTensorFamilyNonnegativeOn (I := I) (M := M)
+      (twoTensorSecToFamily (I := I) (M := M) S) (Set.Icc 0 T) := by
+  exact wmp_section_sec (I := I) (M := M)
+    (G := G) (S := S) (X := X) (N := N)
+    (nablaS := nablaS) (nabla2S := nabla2S) (cov := cov)
+    data.hT data.reg data.parabolic data.null data.initial
+    data.hcov1 data.hcovInf data.hmc data.spatial
+
 /--
 Hamilton's weak maximum principle for symmetric two-tensors.
 
@@ -5013,7 +5587,11 @@ theorem hamilton_tensor_wmp
   exact tensor_wmp_of_barrier_limit (I := I) (M := M)
     (G := G) (S := S) (X := X) (N := N) _hT hreg _hparabolic _hnull _hinit
 
-/-- Section-backed public wrapper for Hamilton's tensor WMP. -/
+/-- Compatibility section-backed public wrapper for Hamilton's tensor WMP.
+
+This preserves the older `TensorWMPSectionReg` interface, whose scalar-sign
+field is stronger than the producer route now needs.  New theorem-7.5 producers
+should use `wmp_section_sec`. -/
 theorem hamilton_tensor_wmp_section
     {G : Real -> SmoothRiemannianMetric I M}
     {S : TwoTensorSecFamily (I := I) (M := M)}

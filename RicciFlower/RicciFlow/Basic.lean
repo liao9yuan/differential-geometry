@@ -590,6 +590,28 @@ structure CanonicalScalarRegularOn
     ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
       MDiffAt (T% fun y : M =>
         Realized.gradientFun (I := I) (S.family.metric t) (S.scalar t) y) x
+  scalar_mul_grad :
+    ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
+      MDiffAt (T% ((S.scalar t) • fun y : M =>
+        Realized.gradientFun (I := I) (S.family.metric t) (S.scalar t) y)) x
+  scalar_sq_space :
+    ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun y : M => S.scalar t y ^ 2) x
+  scalar_sq_grad :
+    ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
+      MDiffAt (T% fun y : M =>
+        Realized.gradientFun (I := I) (S.family.metric t)
+          (fun z : M => S.scalar t z ^ 2) y) x
+  scalar_sq_div_space :
+    ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun y : M => S.scalar t y ^ 2 / 3) x
+  scalar_sq_div_grad :
+    ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
+      MDiffAt (T% fun y : M =>
+        Realized.gradientFun (I := I) (S.family.metric t)
+          (fun z : M => S.scalar t z ^ 2 / 3) y) x
   scalar_grad_sub_const :
     ∀ t : Real, t ∈ D.carrier -> ∀ c : Real, ∀ x : M,
       MDiffAt (T% fun y : M =>
@@ -613,6 +635,24 @@ theorem toCurvReg
 
 end CanonicalScalarRegularOn
 
+/-- Regularity of the canonical Ricci norm needed by scalar operator identities.
+
+This package is deliberately below the Ricci-flow heat equation.  It records
+the differentiability needed to use scalar Laplacian linearity for
+`|Ric|² - R² / 3`; Ricci evolution and Bochner realization remain separate
+producer frontiers. -/
+structure CanonicalRicciRegularOn
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) : Prop where
+  ricci_norm_space :
+    ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
+      MDifferentiableAt I 𝓘(Real, Real) (ricciNorm (I := I) S t) x
+  ricci_norm_grad :
+    ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
+      MDiffAt (T% fun y : M =>
+        Realized.gradientFun (I := I) (S.family.metric t)
+          (ricciNorm (I := I) S t) y) x
+
 /-- Strong Ricci-flow solution predicate used by global Hamilton packages.
 
 `IsSolutionOn` records the Ricci-flow equation and the interval-wise metric and
@@ -630,6 +670,7 @@ structure IsSmoothSolutionOn
   isSolution : IsSolutionOn (I := I) S
   curvatureRegular : CanonicalCurvatureSpacetimeRegularOn (I := I) (M := M) S
   scalarRegular : CanonicalScalarRegularOn (I := I) (M := M) S
+  ricciRegular : CanonicalRicciRegularOn (I := I) (M := M) S
   scalarEvolution : ∀
     (G : Realized.RealizedMetricFamily (I := I) (M := M) Real),
       (∀ t : Realized.RealTimeInterval.RegularTime D,

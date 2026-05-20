@@ -9,19 +9,16 @@ daily work logs.
 | Area | Status |
 | --- | --- |
 | Section 3/14 calculus | Mostly native; no longer the main blocker. |
-| Section 6 evolution | Core inverse metric, Christoffel, Ricci, scalar, and frame Ricci-norm routes are native; intrinsic smooth-solution Ricci-norm heat is the lower frontier. |
+| Section 6 evolution | Core inverse metric, Christoffel, Ricci, scalar, and frame Ricci-norm routes are native; intrinsic smooth-solution Ricci-norm component data is the lower frontier. |
 | Section 7 scalar WMP/lower bound | Native consumer path; scalar regularity from smooth solutions is available. |
 | Section 9 Ricci preservation | Local algebra and selectors are native; tensor-WMP regularity remains analytic. |
-| Section 10 pinching | Active frontier: trace-free Laplacian part of `ricciDataSmooth`, then quotient and pinching producers. |
+| Section 10 pinching | Active frontier is now lower producer work in `Evolution/RicciNorm.lean`, then quotient and pinching producers. |
 | Section 11/12 global flow | Global analytic and compactness black boxes remain. |
 
 ## Active Native Frontiers
 
-- `ricciHeatSmooth`: lower Section 6 producer for canonical Ricci-norm heat
-  from `IsSmoothSolutionOn`.
-- `ricciDataSmooth`: remaining Section 10 trace-free Laplacian identity for
-  the book-facing trace-free Ricci heat theorem.  The intrinsic reaction
-  realization is checked by `tfReactSmooth`.
+- `ricciHeatDataSmooth`: lower Section 6 producer for canonical Ricci-norm
+  component data from `IsSmoothSolutionOn`.
 - Tensor WMP first-null scalar-sign/product-rule bridge.
 - Section 10 quotient evolution and improved pinching producers.
 
@@ -71,9 +68,9 @@ goal.
 ### Lemmas 6.1-6.7
 
 Status: inverse metric, Christoffel, Ricci, scalar, and frame Ricci-norm
-evolution have native routes.  `ricciHeatSmooth` is now the named lower
-frontier for deriving the intrinsic canonical Ricci-norm heat equation from
-`IsSmoothSolutionOn`.
+evolution have native routes.  `ricciHeatSmooth` is now a checked algebraic
+consumer of `RicciHeatData`; `ricciHeatDataSmooth` is the named lower frontier
+for deriving canonical Ricci-norm component data from `IsSmoothSolutionOn`.
 
 Distance: `0` for the existing endpoints.
 
@@ -91,13 +88,18 @@ Next target: optional convenience wrappers only.
 
 ### Theorem 7.5 and Black Box 7.6
 
-Status: tensor WMP has a detailed native route but still depends on analytic
-and local first-null scalar-sign producers.  Scalar strong MP remains a global
+Status: tensor WMP now has a checked section-backed certificate route in
+`MaximumPrinciple/TensorWeak.lean`.  The local first-null scalar signs are
+produced from the selected section derivatives by `strictCert_sec`,
+`wmp_section_sec` is the abstract producer endpoint, and `tensor_wmp` is the
+LaTeX-facing packaged theorem 7.5 entry.  Scalar strong MP remains a global
 analytic black box for blow-up limits.
 
-Distance: `3`/`5`.
+Distance: `1`/`5`.
 
-Next target: finish the tensor first-null scalar-sign product-rule bridge.
+Next target: keep Ricci-flow application producers separate from theorem 7.5;
+feed section regularity, spatial derivatives, parabolic inequality, and null
+condition into `wmp_section_sec` from the appropriate application layer.
 
 ### Lemmas 8.1, 10.7, 10.8
 
@@ -110,13 +112,16 @@ Next target: consume these through Section 10 producer packages.
 ### Lemmas 9.1-9.3
 
 Status: conditional native setup exists for preservation and strict positivity
-via local algebra and unit-tangent compactness.  Remaining dependencies are the
-tensor WMP/regularity producers, not low-level Ricci algebra.
+via local algebra and unit-tangent compactness.  Lemma 9.1 and Lemma 9.2 now
+have section-backed consumers through `ricci_nonneg_wmp` and
+`ricci_pinch_wmp`, both consuming the generic `TensorWMPInput` package.
+Remaining dependencies are Ricci-flow application producers that feed it, not
+low-level Ricci algebra.
 
 Distance: `1-2`.
 
-Next target: finish Theorem 7.5 producer route and avoid new endpoint
-assumptions.
+Next target: build application-layer section regularity, spatial derivative,
+parabolic, and null-condition packages without adding new endpoint assumptions.
 
 ### Lemma 10.4, `lem:evol-tracefree-ricci-norm`
 
@@ -127,10 +132,11 @@ canonical metric curvature and internal order-one Levi-Civita smoothness.
 
 Distance: `1`.
 
-Remaining frontier: prove the trace-free Laplacian identity inside
-`ricciDataSmooth`.  The Ricci-norm heat part has been lowered to
-`RicciFlow.ricciHeatSmooth`; `tfDataSmooth` and `tfBookData` are thin
-book-facing assembly wrappers over those canonical data.
+Remaining frontier: lower producer work in
+`RicciFlow/Evolution/RicciNorm.lean`.  The Section 10 wrapper now consumes
+`tfLapCore`; `tfLapReg` is closed from the scalar/Ricci regularity packages,
+and `ricciHeatDataSmooth` is still the canonical Ricci-norm component-data
+producer from `IsSmoothSolutionOn`.
 
 ### Lemmas 10.5-10.9
 
@@ -140,8 +146,8 @@ native.
 
 Distance: `2-4`.
 
-Next target: after `ricciHeatSmooth` and the Laplacian part of
-`ricciDataSmooth`, port quotient evolution and assemble the pinching estimate.
+Next target: after `ricciHeatDataSmooth`, port quotient evolution and assemble
+the pinching estimate.
 
 ### Lemmas 11.1-11.6
 
@@ -174,7 +180,7 @@ Hamilton proofs.
 
 ## Near-Term Work Queue
 
-1. Prove `ricciHeatSmooth` and the Laplacian part of `ricciDataSmooth`.
+1. Prove `ricciHeatDataSmooth` in `RicciFlow/Evolution/RicciNorm.lean`.
 2. Continue to quotient evolution and pinching estimates.
 3. Keep tensor WMP first-null scalar-sign work separate from Ricci-flow
    endpoint wrappers.

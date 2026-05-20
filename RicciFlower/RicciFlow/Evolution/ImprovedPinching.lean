@@ -2,6 +2,7 @@ import Mathlib.Analysis.SpecialFunctions.Pow.Real
 import Mathlib.Tactic.FieldSimp
 import RicciFlower.RicciFlow.Basic
 import RicciFlower.RicciFlow.Evolution.Scalar
+import RicciFlower.RicciFlow.Evolution.RicciNorm
 import RicciFlower.RicciFlow.Evolution.ScalarGradient
 import RicciFlower.Bochner
 import RicciFlower.DimensionThree.RicciControlsRm
@@ -1765,8 +1766,9 @@ theorem tfRicHeat_alg
       (D := D) ricciNormSq ricciNormLap nablaRicNormSq reaction)
     (hSq : scalarSqHeatOn
       (D := D) scalar scalarSqLap gradScalarNormSq ricciNormSq)
-    (hLap : ∀ t x,
-      tfLap t x = ricciNormLap t x - scalarSqLap t x / 3)
+    (hLap : ∀ t : Realized.RealTimeInterval.RegularTime D, ∀ x,
+      tfLap (t : Real) x = ricciNormLap (t : Real) x -
+        scalarSqLap (t : Real) x / 3)
     (hRel : tfRicReactRel
       scalar ricciNormSq (tfRicNormSq scalar ricciNormSq) Q reaction) :
     tfRicHeatOn
@@ -1814,7 +1816,7 @@ theorem tfRicHeat_alg
           (4 * ricciNormSq (t : Real) x *
               tfRicNormSq scalar ricciNormSq (t : Real) x -
             2 * Q (t : Real) x) / scalar (t : Real) x) := by
-    rw [hLap (t : Real) x, ← hRel (t : Real) x hR]
+    rw [hLap t x, ← hRel (t : Real) x hR]
     ring
   rw [hValue] at hDeriv
   exact hDeriv
@@ -3415,10 +3417,9 @@ theorem tfReactSmooth
   simpa [tfRicNormSq, cubicQ, SolutionOn.scalar_eq_metricTrace,
     hnorm, hreact] using hrel
 
-/-- Remaining Section 10 analytic producer for the book-facing trace-free heat
-equation.  The Ricci-norm heat equation is now supplied by the lower
-`ricciHeatSmooth`; the unresolved Section 10 work here is the scalar-square
-Laplacian product rule for the canonical intrinsic operators. -/
+/-- Section 10 assembly producer for the book-facing trace-free heat equation.
+The Ricci-norm heat equation is supplied by the lower `ricciHeatSmooth`, and
+the trace-free Laplacian identity is supplied by `tfLapCore` at regular times. -/
 theorem ricciDataSmooth
     {D : Realized.RealTimeInterval}
     [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
@@ -3430,17 +3431,20 @@ theorem ricciDataSmooth
     RicciNormHeatEquationOn
       (D := D) (ricciNorm (I := I) S) (ricciNormLap (I := I) S)
       (ricciGradSq (I := I) S) (ricciReact (I := I) S) ∧
-    (∀ t x,
-      tfLapBook (I := I) S t x =
+    (∀ (t : Realized.RealTimeInterval.RegularTime D) x,
+      tfLapBook (I := I) S (t : Real) x =
         tfLap S.scalar
           (fun t x =>
             Realized.laplacianAt (I := I) (flowG (I := I) S) t
               (S.scalar t) x)
-      (scalGradSq (I := I) S) (ricciNormLap (I := I) S) t x) := by
+      (scalGradSq (I := I) S) (ricciNormLap (I := I) S) (t : Real) x) := by
   refine ⟨ricciHeatSmooth (I := I) S _hS, ?_⟩
-  sorry
+  intro t x
+  have h := tfLapCore (I := I) S _hS (t : Real) (D.regular_subset t.2) x
+  simpa [tfLapBook, tfLap, scalarSqLap, scalGradSq, tfRicNormSq,
+    tfRicNormSqAt, ricciNormLap, flowG] using h
 
-/-- Trace-free Laplacian projection from the remaining canonical analytic
+/-- Trace-free Laplacian projection from the canonical lower analytic
 producer. -/
 theorem tfLapBook_eq
     {D : Realized.RealTimeInterval}
@@ -3450,13 +3454,13 @@ theorem tfLapBook_eq
     (hS : IsSmoothSolutionOn (I := I) (M := M) S)
     (hdim : ∀ (_t : Real) (x : M),
       Module.finrank Real (TangentSpace I x) = 3) :
-    ∀ t x,
-      tfLapBook (I := I) S t x =
+    ∀ (t : Realized.RealTimeInterval.RegularTime D) x,
+      tfLapBook (I := I) S (t : Real) x =
         tfLap S.scalar
           (fun t x =>
             Realized.laplacianAt (I := I) (flowG (I := I) S) t
               (S.scalar t) x)
-          (scalGradSq (I := I) S) (ricciNormLap (I := I) S) t x :=
+          (scalGradSq (I := I) S) (ricciNormLap (I := I) S) (t : Real) x :=
   (ricciDataSmooth (I := I) S hS hdim).2
 
 /-- Smooth-solution producer frontier for the canonical non-scalar data in the
@@ -3477,13 +3481,13 @@ theorem tfDataSmooth
       RicciNormHeatEquationOn
         (D := D) (ricciNorm (I := I) S) (ricciNormLap (I := I) S)
         (ricciGradSq (I := I) S) reaction ∧
-      (∀ t x,
-        tfLapBook (I := I) S t x =
+      (∀ (t : Realized.RealTimeInterval.RegularTime D) x,
+        tfLapBook (I := I) S (t : Real) x =
           tfLap S.scalar
             (fun t x =>
               Realized.laplacianAt (I := I) (flowG (I := I) S) t
                 (S.scalar t) x)
-            (scalGradSq (I := I) S) (ricciNormLap (I := I) S) t x) ∧
+            (scalGradSq (I := I) S) (ricciNormLap (I := I) S) (t : Real) x) ∧
       tfRicReactRel
         S.scalar (ricciNorm (I := I) S)
         (tfRicNormSq S.scalar (ricciNorm (I := I) S))
@@ -3508,13 +3512,13 @@ theorem tfBookData
       RicciNormHeatEquationOn
         (D := D) (ricciNorm (I := I) S) ricciNormLap
         (ricciGradSq (I := I) S) reaction ∧
-      (∀ t x,
-        tfLapBook (I := I) S t x =
+      (∀ (t : Realized.RealTimeInterval.RegularTime D) x,
+        tfLapBook (I := I) S (t : Real) x =
           tfLap S.scalar
             (fun t x =>
               Realized.laplacianAt (I := I) (flowG (I := I) S) t
                 (S.scalar t) x)
-            (scalGradSq (I := I) S) ricciNormLap t x) ∧
+            (scalGradSq (I := I) S) ricciNormLap (t : Real) x) ∧
       tfRicReactRel
         S.scalar (ricciNorm (I := I) S)
         (tfRicNormSq S.scalar (ricciNorm (I := I) S))
@@ -3568,9 +3572,10 @@ theorem tfHeat_book
         RicciNormHeatEquationOn
           (D := D) (ricciNorm (I := I) S) ricciNormLap
           (ricciGradSq (I := I) S) reaction ∧
-        (∀ t x,
-          tfLapBook (I := I) S t x =
-            tfLap S.scalar scalarLap (scalGradSq (I := I) S) ricciNormLap t x) ∧
+        (∀ (t : Realized.RealTimeInterval.RegularTime D) x,
+          tfLapBook (I := I) S (t : Real) x =
+            tfLap S.scalar scalarLap (scalGradSq (I := I) S) ricciNormLap
+              (t : Real) x) ∧
         tfRicReactRel
           S.scalar (ricciNorm (I := I) S)
           (tfRicNormSq S.scalar (ricciNorm (I := I) S))
@@ -3598,12 +3603,9 @@ theorem tfHeat_book
       (cubicQ S.scalar (ricciNorm (I := I) S) (ricciCube (I := I) S))
       reaction
       hscalar hRic hRel
-  have hLapFun :
-      tfLapBook (I := I) S =
-        tfLap S.scalar scalarLap (scalGradSq (I := I) S) ricciNormLap := by
-    funext t x
-    exact hLap t x
-  simpa [hLapFun] using hcore
+  intro t x hR
+  have hcore' := hcore t x hR
+  simpa [hLap t x] using hcore'
 
 /-- Section 10.4 from Section 6 heat equations and a convention-correct
 diagonal 3D Ricci eigenframe. -/

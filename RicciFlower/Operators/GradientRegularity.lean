@@ -54,27 +54,29 @@ private theorem gradientFun_coeff_eq_sum
       gInvBasisAt (I := I) g x₀ (x := y) hy
   rw [(coordinateFrameAt_isLocalFrame (I := I) x₀).coeff_apply_of_mem
     hy (fun z : M => gradientFun (I := I) g f z) k]
+  change basis.coord k (gradientFun (I := I) g f y) = _
   rw [coord_eq_invInner (I := I) g y basis gInv hinv k
     (gradientFun (I := I) g f y)]
   apply Finset.sum_congr rfl
   intro l _
   have hbasis_l : basis l = coordinateFrameAt (I := I) x₀ l y := by
-    simpa [basis] using
-      (coordinateFrameAt_isLocalFrame (I := I) x₀).toBasisAt_coe hy l
+    exact (coordinateFrameAt_isLocalFrame (I := I) x₀).toBasisAt_coe hy l
+  have hinner :
+      g.inner y (gradientFun (I := I) g f y) (basis l) =
+        extDerivFun (I := I) f y (basis l) := by
+    rw [inner_gradientFun (I := I) g f y (basis l)]
+    rw [← RicciFlower.extDerivFun_real_eq_mfderiv (I := I) f y (basis l)]
   calc
     gInv k l * g.inner y (basis l) (gradientFun (I := I) g f y)
         = gInv k l * g.inner y (gradientFun (I := I) g f y) (basis l) := by
           rw [g.symm y (basis l) (gradientFun (I := I) g f y)]
-    _ = gInv k l * mfderiv I 𝓘(Real, Real) f y (basis l) := by
-          rw [inner_gradientFun]
     _ = gInv k l * extDerivFun (I := I) f y (basis l) := by
-          rw [RicciFlower.extDerivFun_real_eq_mfderiv (I := I) f y (basis l)]
+          rw [hinner]
     _ =
-        inverseMetricFlatModelInChart_component (I := I) g x₀ k l
+          inverseMetricFlatModelInChart_component (I := I) g x₀ k l
             (extChartAt I x₀ y) *
           extDerivFun (I := I) f y (coordinateFrameAt (I := I) x₀ l y) := by
           rw [hbasis_l]
-          rfl
 
 private theorem gradientFun_contMDiffAt
     (g : SmoothRiemannianMetric I M)
@@ -136,6 +138,51 @@ theorem gradientFun_mdiffAt
     {f : M -> Real} (hf : ContMDiff I 𝓘(Real, Real) ∞ f) (x : M) :
     MDiffAt (T% fun y : M => gradientFun (I := I) g f y) x :=
   (gradientFun_smooth (I := I) g hf).contMDiffAt.mdifferentiableAt (by simp)
+
+/-- If a scalar and its realized gradient are differentiable, then the
+scalar-multiple tangent field `f ∇f` is differentiable. -/
+theorem scalar_mul_grad_mdiffAt
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    (g : SmoothRiemannianMetric I M)
+    {f : M -> Real} {x : M}
+    (hf : ∀ y : M, MDifferentiableAt I 𝓘(Real, Real) f y)
+    (hgrad : ∀ y : M,
+      MDiffAt (T% fun z : M => gradientFun (I := I) g f z) y) :
+    MDiffAt (T% (f • fun y : M => gradientFun (I := I) g f y)) x := by
+  simpa using (hf x).smul_section (hgrad x)
+
+/-- Compatibility alias for the scalar-multiple gradient closure. -/
+theorem mdiffAt_smul_gradientFun
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    (g : SmoothRiemannianMetric I M)
+    {f : M -> Real} {x : M}
+    (hf : ∀ y : M, MDifferentiableAt I 𝓘(Real, Real) f y)
+    (hgrad : ∀ y : M,
+      MDiffAt (T% fun z : M => gradientFun (I := I) g f z) y) :
+    MDiffAt (T% (f • fun y : M => gradientFun (I := I) g f y)) x :=
+  scalar_mul_grad_mdiffAt (I := I) g hf hgrad
+
+/-- Smooth scaled shifts also have differentiable `u ∇u`, where
+`u = a * (f - c)`. -/
+theorem mdiffAt_const_mul_sub_const_smul_gradientFun
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    (g : SmoothRiemannianMetric I M)
+    {f : M -> Real} {x : M} (a c : Real)
+    (hf : ContMDiff I 𝓘(Real, Real) ∞ f) :
+    MDiffAt
+      (T% ((fun y : M => a * (f y - c)) • fun y : M =>
+        gradientFun (I := I) g (fun z : M => a * (f z - c)) y)) x := by
+  let u : M -> Real := fun y => a * (f y - c)
+  have hu : ContMDiff I 𝓘(Real, Real) ∞ u := by
+    simpa [u] using (contMDiff_const.mul (hf.sub contMDiff_const))
+  have hudiff : ∀ y : M, MDifferentiableAt I 𝓘(Real, Real) u y := by
+    intro y
+    exact hu.contMDiffAt.mdifferentiableAt (by simp)
+  have hugrad : ∀ y : M,
+      MDiffAt (T% fun z : M => gradientFun (I := I) g u z) y := by
+    intro y
+    exact gradientFun_mdiffAt (I := I) g hu y
+  simpa [u] using scalar_mul_grad_mdiffAt (I := I) g hudiff hugrad
 
 end Realized
 end RicciFlower

@@ -420,8 +420,11 @@ theorem laplacian_sub
           simp [laplacian, hgrad]
     _ = laplacian (I := I) cov g f x -
         laplacian (I := I) cov g h x := by
-          rw [divergence_sub (I := I) cov hgradf hgradh]
-          rfl
+          simpa [laplacian, Pi.sub_apply] using
+            (divergence_sub (I := I) cov
+              (X := fun y : M => gradientFun (I := I) g f y)
+              (Y := fun y : M => gradientFun (I := I) g h y)
+              hgradf hgradh)
 
 /-- The Laplacian scales by a spatially constant scalar. -/
 theorem laplacian_const_smul

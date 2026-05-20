@@ -393,6 +393,25 @@ theorem totalNabla0S_realizes (s : ℕ)
   exact totalNabla0SFun_apply_section
     (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s cov X α x slots
 
+/-- Canonical first and second spatial covariant derivatives of a covariant
+tensor field, bundled with their realization witnesses.
+
+The constructor using the canonical `totalNabla0S` fields lives in
+`Regularity/TotalNabla0S.lean`, where `totalNabla0S_reg` is available without
+creating an import cycle. -/
+structure CanonicalSpatialDerivs0S {s : ℕ}
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (A : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) s) where
+  nablaA : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+    (n := (∞ : WithTop ℕ∞)) (s + 1)
+  nabla2A : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+    (n := (∞ : WithTop ℕ∞)) (s + 2)
+  first : TotalNabla0SRealizes (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+    (M := M) s cov A nablaA
+  second : TotalNabla0SRealizes (𝕜 := 𝕜) (E := E) (H := H) (I := I)
+    (M := M) (s + 1) cov nablaA nabla2A
+
 /-- Definition 14.5 for any supplied total covariant derivative realization:
 evaluating the total derivative on smooth moving slots agrees with the usual
 tensorial derivation rule. -/

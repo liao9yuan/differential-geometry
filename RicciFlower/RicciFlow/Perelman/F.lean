@@ -107,6 +107,12 @@ def fFunctionalClosedBracket (scalarCurvature lapPotential : M -> Real) :
     M -> Real :=
   fun x => scalarCurvature x + lapPotential x
 
+/-- Scalar derivative of the closed bracket `R + Delta f`. -/
+def fFunctionalClosedBracketVariation
+    (scalarCurvatureVariation lapPotentialVariation : M -> Real) :
+    M -> Real :=
+  fun x => scalarCurvatureVariation x + lapPotentialVariation x
+
 /-- Concrete measure-theoretic version of Perelman's `F` functional. -/
 def fFunctional [MeasurableSpace M] (mu : Measure M)
     (scalarCurvature gradPotentialNormSq potential : M -> Real) : Real :=
@@ -1142,6 +1148,34 @@ theorem expWeightedIntegralVariation_eq_pre510
   unfold expWeightedMeasureVariationFactor
   ring
 
+/-- Pointwise closed-bracket version of the formula 5.10 integrand bridge.
+Here the geometric producer differentiates the closed bracket `R + Delta f`,
+so the extra `(Delta f - |grad f|^2)` correction is supplied by the later
+integral comparison with the original `R + |grad f|^2` bracket. -/
+theorem expWeightedClosedVariation_eq_pre510
+    {scalarCurvature lapPotential gradPotentialNormSq potential
+      potentialVariation metricVariationTrace metricVariationRicciHess
+      weightedDivergenceTrace shiftedTrace closedBracketVariation :
+      M -> Real}
+    (hvariation :
+      ∀ x : M,
+        closedBracketVariation x =
+          -metricVariationRicciHess x +
+            weightedDivergenceTrace x + shiftedTrace x) :
+    ∀ x : M,
+      expWeightedIntegralVariationIntegrand potential potentialVariation
+          metricVariationTrace
+          (fFunctionalClosedBracket scalarCurvature lapPotential)
+          closedBracketVariation x =
+      expNegPotentialDensity potential x *
+          fFunctionalPre510Integrand scalarCurvature lapPotential
+            gradPotentialNormSq potentialVariation metricVariationTrace
+            metricVariationRicciHess weightedDivergenceTrace shiftedTrace x := by
+  intro x
+  unfold expWeightedIntegralVariationIntegrand fFunctionalPre510Integrand
+    fFunctionalClosedBracket
+  rw [hvariation x]
+
 /-- The formula 5.10 remainder has zero integral once the closed divergence
 term vanishes and weighted Green identifies the shifted Hessian trace. -/
 theorem rem510_integral_zero [MeasurableSpace M]
@@ -1416,6 +1450,134 @@ theorem firstVariationIntegral_eq_pre510
             gradPotentialNormSq potentialVariation metricVariationTrace
             metricVariationRicciHess weightedDivergenceTrace shiftedTrace)
         hmeas).symm
+
+/-- Closed-bracket integral bridge for formula 5.10.
+
+This is the producer form suited to the `R + Delta f` trace variation coming
+from `LeviCivita.Variation`: once the closed bracket varies by
+`-v^{ij}(Ric_ij + Hess_ij f) + div_A + Hess(h - V/2)`, the moving-volume
+integrand is exactly the pre-cancellation formula 5.10 integral. -/
+theorem closedIntegral_eq_pre510
+    [T2Space M] [SigmaCompactSpace M]
+    (G : Realized.RealizedMetricFamily (I := I) (M := M) Real)
+    {s0 : Real}
+    {scalarCurvature lapPotential gradPotentialNormSq potential
+      potentialVariation metricVariationTrace metricVariationRicciHess
+      weightedDivergenceTrace shiftedTrace closedBracketVariation : M -> Real}
+    (hmeas :
+      AEMeasurable
+        (fun x : M => ENNReal.ofReal (expNegPotentialDensity potential x))
+        (riemannianVolumeMeasure (I := I) (M := M) (G.metric s0)))
+    (hvariation :
+      ∀ x : M,
+        closedBracketVariation x =
+          -metricVariationRicciHess x +
+            weightedDivergenceTrace x + shiftedTrace x) :
+    (∫ x,
+        expWeightedIntegralVariationIntegrand potential potentialVariation
+          metricVariationTrace
+          (fFunctionalClosedBracket scalarCurvature lapPotential)
+          closedBracketVariation x
+        ∂(volumeMeasureFamily (I := I) (M := M) G s0)) =
+      ∫ x,
+        fFunctionalPre510Integrand scalarCurvature lapPotential
+          gradPotentialNormSq potentialVariation metricVariationTrace
+          metricVariationRicciHess weightedDivergenceTrace shiftedTrace x
+        ∂(expNegPotentialWeightedMeasure
+            (riemannianVolumeMeasure (I := I) (M := M) (G.metric s0))
+            potential) := by
+  calc
+    (∫ x,
+        expWeightedIntegralVariationIntegrand potential potentialVariation
+          metricVariationTrace
+          (fFunctionalClosedBracket scalarCurvature lapPotential)
+          closedBracketVariation x
+        ∂(volumeMeasureFamily (I := I) (M := M) G s0))
+        =
+      ∫ x,
+        expNegPotentialDensity potential x *
+          fFunctionalPre510Integrand scalarCurvature lapPotential
+            gradPotentialNormSq potentialVariation metricVariationTrace
+            metricVariationRicciHess weightedDivergenceTrace shiftedTrace x
+        ∂(riemannianVolumeMeasure (I := I) (M := M) (G.metric s0)) := by
+      simp only [volumeMeasureFamily, metricFamilyForMeasure,
+        riemannianMeasureFamily]
+      apply integral_congr_ae
+      exact Filter.Eventually.of_forall
+        (expWeightedClosedVariation_eq_pre510 (M := M)
+          (hvariation := hvariation))
+    _ =
+      ∫ x,
+        fFunctionalPre510Integrand scalarCurvature lapPotential
+          gradPotentialNormSq potentialVariation metricVariationTrace
+          metricVariationRicciHess weightedDivergenceTrace shiftedTrace x
+        ∂(expNegPotentialWeightedMeasure
+            (riemannianVolumeMeasure (I := I) (M := M) (G.metric s0))
+            potential) := by
+      exact (expNegPotentialWeightedMeasure_integral_eq_base
+        (mu := riemannianVolumeMeasure (I := I) (M := M) (G.metric s0))
+        (potential := potential)
+        (integrand :=
+          fFunctionalPre510Integrand scalarCurvature lapPotential
+            gradPotentialNormSq potentialVariation metricVariationTrace
+            metricVariationRicciHess weightedDivergenceTrace shiftedTrace)
+        hmeas).symm
+
+/-- Integral bridge from the original `R + |grad f|^2` moving-volume integrand
+to the pre-cancellation formula 5.10 integral via the closed bracket
+`R + Delta f`.  The hypothesis `hclosed_compare` is the differentiated
+closed-manifold Green/IBP comparison between the two bracket forms. -/
+theorem firstVar_pre510_closed
+    [T2Space M] [SigmaCompactSpace M]
+    (G : Realized.RealizedMetricFamily (I := I) (M := M) Real)
+    {scalarCurvaturePath gradPotentialNormSqPath potentialPath :
+      Real -> M -> Real}
+    {s0 : Real}
+    {scalarCurvature lapPotential gradPotentialNormSq potential
+      potentialVariation metricVariationTrace metricVariationRicciHess
+      weightedDivergenceTrace shiftedTrace scalarCurvatureVariation
+      gradPotentialNormSqVariation closedBracketVariation : M -> Real}
+    (hmeas :
+      AEMeasurable
+        (fun x : M => ENNReal.ofReal (expNegPotentialDensity potential x))
+        (riemannianVolumeMeasure (I := I) (M := M) (G.metric s0)))
+    (hclosed_compare :
+      (∫ x,
+        expWeightedIntegralVariationIntegrand
+          (potentialPath s0) potentialVariation metricVariationTrace
+          (fFunctionalBracket (scalarCurvaturePath s0)
+            (gradPotentialNormSqPath s0))
+          (fFunctionalBracketVariation scalarCurvatureVariation
+            gradPotentialNormSqVariation) x
+        ∂(volumeMeasureFamily (I := I) (M := M) G s0)) =
+      ∫ x,
+        expWeightedIntegralVariationIntegrand potential potentialVariation
+          metricVariationTrace
+          (fFunctionalClosedBracket scalarCurvature lapPotential)
+          closedBracketVariation x
+        ∂(volumeMeasureFamily (I := I) (M := M) G s0))
+    (hclosed_variation :
+      ∀ x : M,
+        closedBracketVariation x =
+          -metricVariationRicciHess x +
+            weightedDivergenceTrace x + shiftedTrace x) :
+    (∫ x,
+        expWeightedIntegralVariationIntegrand
+          (potentialPath s0) potentialVariation metricVariationTrace
+          (fFunctionalBracket (scalarCurvaturePath s0)
+            (gradPotentialNormSqPath s0))
+          (fFunctionalBracketVariation scalarCurvatureVariation
+            gradPotentialNormSqVariation) x
+        ∂(volumeMeasureFamily (I := I) (M := M) G s0)) =
+      ∫ x,
+        fFunctionalPre510Integrand scalarCurvature lapPotential
+          gradPotentialNormSq potentialVariation metricVariationTrace
+          metricVariationRicciHess weightedDivergenceTrace shiftedTrace x
+        ∂(expNegPotentialWeightedMeasure
+            (riemannianVolumeMeasure (I := I) (M := M) (G.metric s0))
+            potential) := by
+  rw [hclosed_compare]
+  exact closedIntegral_eq_pre510 (I := I) (M := M) G hmeas hclosed_variation
 
 /-- Formula 5.10 from the geometric connection-trace divergence field and the
 weighted Green shift identity.  This is the assembly form matching the book's
