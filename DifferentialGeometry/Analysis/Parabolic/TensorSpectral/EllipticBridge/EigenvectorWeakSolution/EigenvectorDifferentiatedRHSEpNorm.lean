@@ -2512,6 +2512,508 @@ private lemma eigenvectorChartRHSDiffNumerator_layerE_eLpNorm_le_chartcpt
 
 end SharpAtomBounds
 
+/-! ## Sharp `eLpNorm` bound for the differentiated chart-RHS numerator
+
+The sharp companion of `eigenvectorChartRHSDiffNumerator_eLpNorm_le_uniform`:
+takes a *direct quantitative `eLpNorm` bound* on each of the five layer atoms
+of the differentiated chart-RHS numerator (one per layer) and concludes a sharp
+`eLpNorm` bound on the numerator itself, of the form
+
+```
+eLpNorm (numerator) 2 μ
+  ≤ ENNReal.ofReal (C · (i.fst.val)⁻¹^e) ·
+      ENNReal.ofReal ‖tensorResolventEigenbasisVec h_atlas i‖,
+```
+
+where `μ = volume.restrict (chartPouKernel α)`, `e := max(eAtomA, eAtomB,
+eAtomC, eAtomD, eAtomE)`, and `C` is the appropriate geometric combination of
+the per-layer constants and the per-layer input atom constants. NO
+`diffNumeratorAggregate` appears on the right.
+
+The proof composes the five sharp per-layer bounds
+`eigenvectorChartRHSDiffNumerator_layerX_eLpNorm_le_chartcpt` via iterated
+Minkowski (`eLpNorm_add_le` / `eLpNorm_sub_le`); the per-layer `μ⁻¹^eAtomX`
+exponents are uniformly promoted to `μ⁻¹^e` via `pow_le_pow_right₀` (the
+resolvent eigenvalue is in `(0, 1]`, so `μ⁻¹ ≥ 1`). -/
+
+section SharpMainBound
+
+omit [CompleteSpace E] in
+/-- The resolvent eigenvalue lies in the unit interval `(0, 1]`; this is the
+quantitative spectrum statement used to compare the per-layer
+`(i.fst.val)⁻¹^eAtomX` factors via `pow_le_pow_right₀`. -/
+private lemma eigen_inv_one_le
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    (i : TensorEigenIdx (I := I) (M := M) g r s) :
+    1 ≤ (i.fst.val)⁻¹ := by
+  have h_norm :
+      ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖ = 1 :=
+    (tensorResolventEigenbasisVec_orthonormal (I := I) (M := M)
+      (g := g) (r := r) (s := s) h_atlas).norm_eq_one i
+  have hμ_unit : i.fst.val ∈ Set.Ioc (0 : ℝ) 1 :=
+    tensorResolvent_eigenvalue_mem_unit_interval (I := I) (M := M) g r s
+      (tensorResolventEigenbasisVec_mem (I := I) (M := M) h_atlas i)
+      (by
+        intro h_zero
+        rw [h_zero, norm_zero] at h_norm
+        exact one_ne_zero h_norm.symm)
+  have hμ_pos : 0 < i.fst.val := hμ_unit.1
+  have hμ_le_one : i.fst.val ≤ 1 := hμ_unit.2
+  exact (one_le_inv₀ hμ_pos).mpr hμ_le_one
+
+omit [CompleteSpace E] in
+/-- A per-layer `(i.fst.val)⁻¹^k` factor is dominated by `(i.fst.val)⁻¹^e`
+when `k ≤ e`, since the resolvent eigenvalue lies in `(0, 1]` (so `μ⁻¹ ≥ 1`)
+and `pow` is monotone in the exponent for bases `≥ 1`. -/
+private lemma pow_eigen_inv_le
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    {k e : ℕ} (hke : k ≤ e) :
+    (i.fst.val)⁻¹ ^ k ≤ (i.fst.val)⁻¹ ^ e := by
+  exact pow_le_pow_right₀
+    (eigen_inv_one_le (I := I) (M := M) g r s h_atlas i) hke
+
+omit [CompleteSpace E] in
+/-- For a nonnegative `C` and `k ≤ e`, `ofReal (C · μ⁻¹^k) ≤ ofReal (C ·
+μ⁻¹^e)`, where `μ = i.fst.val` is the resolvent eigenvalue. The exponent
+unification step used to homogenise the five per-layer `μ⁻¹^eAtomX` factors. -/
+private lemma ofReal_const_pow_eigen_inv_le
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    {C : ℝ} (hC_nn : 0 ≤ C) {k e : ℕ} (hke : k ≤ e) :
+    ENNReal.ofReal (C * (i.fst.val)⁻¹ ^ k) ≤
+      ENNReal.ofReal (C * (i.fst.val)⁻¹ ^ e) := by
+  refine ENNReal.ofReal_le_ofReal ?_
+  exact mul_le_mul_of_nonneg_left
+    (pow_eigen_inv_le (I := I) (M := M) g r s h_atlas i hke) hC_nn
+
+omit [CompleteSpace E] in
+/-- **Sharp `eLpNorm` bound for the differentiated chart-RHS numerator.**
+
+For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis-uniform
+chart-effective-previous-level data `fChartEffPrev`, a chart center `α : M`, a
+component multi-index `P₀`, a level `m`, a direction multi-index
+`l : Fin (m + 1) → Fin n`, and *five direct quantitative `eLpNorm`
+hypotheses* — one per layer — bounding each layer's atom in the form
+`eLpNorm atom 2 μ ≤ ofReal (CatomX · μ⁻¹^eAtomX) · ofReal ‖vec_i‖`, where
+`μ = volume.restrict (chartPouKernel α)`, `μ⁻¹ = (i.fst.val)⁻¹`, and
+`vec_i = tensorResolventEigenbasisVec h_atlas i`, there is a nonnegative
+constant `C` and an exponent `e : ℕ` — `C` geometric (the combined sup-norms of
+the `C^∞` chart-target coefficients, times the per-layer atom constants
+`CatomA · … · CatomE`), `e` the maximum of the five per-layer exponents — such
+that for *every* eigenbasis index `i`,
+
+```
+eLpNorm (numerator) 2 (volume.restrict (chartPouKernel α))
+  ≤ ENNReal.ofReal (C · (i.fst.val)⁻¹^e) · ofReal ‖vec_i‖.
+```
+
+The output `(C, e)` carries no `diffNumeratorAggregate` factor on the
+right-hand side: every input hypothesis already pegs each atom's `eLpNorm` to
+the eigenvalue / eigenvector data directly, so the assembled bound is sharp.
+
+The proof structure mirrors `eigenvectorChartRHSDiffNumerator_eLpNorm_le_uniform`:
+the five layers are bounded individually via the five sharp per-layer bounds
+`eigenvectorChartRHSDiffNumerator_layerX_eLpNorm_le_chartcpt`; their exponents
+are unified to `e := max(eAtomA, eAtomB, eAtomC, eAtomD, eAtomE)` via
+`pow_le_pow_right₀` (using `μ⁻¹ ≥ 1`, which holds because `μ ∈ (0, 1]`); the
+iterated triangle inequality on `+ B - C + D + E` over the five layers gives
+the assembled bound. -/
+theorem eigenvectorChartRHSDiffNumerator_eLpNorm_le_chartcpt
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
+    (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
+    (fChartEffPrev : TensorEigenIdx (I := I) (M := M) g r s → EuclN → ℝ)
+    -- Genuine measurability of the previous-level data — needed for the iterated
+    -- Minkowski combination of the five layers.
+    (h_prev_aesm : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+      AEStronglyMeasurable (fChartEffPrev i)
+        ((volume : Measure EuclN).restrict
+          (chartPouKernel (I := I) (M := M) α)))
+    -- Layer A atom: eLpNorm of (m+1)-fold partial.
+    (CatomA : ℝ) (eAtomA : ℕ) (hCatomA_nn : 0 ≤ CatomA)
+    (hAtomA_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
+        (a : Fin (Module.finrank ℝ E)),
+      eLpNorm (eigenvectorChartIteratedPartial (I := I) (M := M)
+          g r s h_atlas i α P₀ (m + 1) (Fin.cons a (Fin.init l))) 2
+        ((volume : Measure EuclN).restrict
+          (chartPouKernel (I := I) (M := M) α))
+        ≤ ENNReal.ofReal (CatomA * (i.fst.val)⁻¹ ^ eAtomA) *
+          ENNReal.ofReal
+            ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖)
+    -- Layer B atom: eLpNorm of chosenWeakPartial b ((m+1)-fold).
+    (CatomB : ℝ) (eAtomB : ℕ) (hCatomB_nn : 0 ≤ CatomB)
+    (hAtomB_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
+        (a b : Fin (Module.finrank ℝ E)),
+      eLpNorm
+          (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
+            (d := Module.finrank ℝ E) 2 b
+            (eigenvectorChartIteratedPartial (I := I) (M := M)
+              g r s h_atlas i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
+            (chartTargetEuclid (I := I) (M := M) α)) 2
+        ((volume : Measure EuclN).restrict
+          (chartPouKernel (I := I) (M := M) α))
+        ≤ ENNReal.ofReal (CatomB * (i.fst.val)⁻¹ ^ eAtomB) *
+          ENNReal.ofReal
+            ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖)
+    -- Layer C atom: eLpNorm of m-fold partial.
+    (CatomC : ℝ) (eAtomC : ℕ) (hCatomC_nn : 0 ≤ CatomC)
+    (hAtomC_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s),
+      eLpNorm (eigenvectorChartIteratedPartial (I := I) (M := M)
+          g r s h_atlas i α P₀ m (Fin.init l)) 2
+        ((volume : Measure EuclN).restrict
+          (chartPouKernel (I := I) (M := M) α))
+        ≤ ENNReal.ofReal (CatomC * (i.fst.val)⁻¹ ^ eAtomC) *
+          ENNReal.ofReal
+            ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖)
+    -- Layer D atom: eLpNorm of fChartEffPrev i.
+    (CatomD : ℝ) (eAtomD : ℕ) (hCatomD_nn : 0 ≤ CatomD)
+    (hAtomD_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s),
+      eLpNorm (fChartEffPrev i) 2
+        ((volume : Measure EuclN).restrict
+          (chartPouKernel (I := I) (M := M) α))
+        ≤ ENNReal.ofReal (CatomD * (i.fst.val)⁻¹ ^ eAtomD) *
+          ENNReal.ofReal
+            ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖)
+    -- Layer E atom: eLpNorm of chosen_weak_partial of fChartEffPrev.
+    (CatomE : ℝ) (eAtomE : ℕ) (hCatomE_nn : 0 ≤ CatomE)
+    (hAtomE_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s),
+      eLpNorm
+          (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
+            (d := Module.finrank ℝ E) 2 (l (Fin.last m))
+            (fChartEffPrev i)
+            (chartTargetEuclid (I := I) (M := M) α)) 2
+        ((volume : Measure EuclN).restrict
+          (chartPouKernel (I := I) (M := M) α))
+        ≤ ENNReal.ofReal (CatomE * (i.fst.val)⁻¹ ^ eAtomE) *
+          ENNReal.ofReal
+            ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖) :
+    ∃ (C : ℝ) (e : ℕ), 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        eLpNorm (fun y => eigenvectorChartRHSDiffNumerator (I := I) (M := M)
+            g r s h_atlas i α P₀ m l (fChartEffPrev i) y) 2
+          ((volume : Measure EuclN).restrict
+            (chartPouKernel (I := I) (M := M) α))
+          ≤ ENNReal.ofReal (C * (i.fst.val)⁻¹ ^ e) *
+            ENNReal.ofReal
+              ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖ := by
+  classical
+  -- The five sharp per-layer bounds, hoisting the geometric constants before `∀ i`.
+  obtain ⟨CA, hCA_nn, hCA⟩ :=
+    eigenvectorChartRHSDiffNumerator_layerA_eLpNorm_le_chartcpt
+      (I := I) (M := M) g r s h_atlas α P₀ m l CatomA eAtomA hCatomA_nn hAtomA_bd
+  obtain ⟨CB, hCB_nn, hCB⟩ :=
+    eigenvectorChartRHSDiffNumerator_layerB_eLpNorm_le_chartcpt
+      (I := I) (M := M) g r s h_atlas α P₀ m l CatomB eAtomB hCatomB_nn hAtomB_bd
+  obtain ⟨CC, hCC_nn, hCC⟩ :=
+    eigenvectorChartRHSDiffNumerator_layerC_eLpNorm_le_chartcpt
+      (I := I) (M := M) g r s h_atlas α P₀ m l CatomC eAtomC hCatomC_nn hAtomC_bd
+  obtain ⟨CD, hCD_nn, hCD⟩ :=
+    eigenvectorChartRHSDiffNumerator_layerD_eLpNorm_le_chartcpt
+      (I := I) (M := M) g r s h_atlas α P₀ m l fChartEffPrev CatomD eAtomD
+      hCatomD_nn hAtomD_bd
+  obtain ⟨CE, hCE_nn, hCE⟩ :=
+    eigenvectorChartRHSDiffNumerator_layerE_eLpNorm_le_chartcpt
+      (I := I) (M := M) g r s h_atlas α P₀ m l fChartEffPrev CatomE eAtomE
+      hCatomE_nn hAtomE_bd
+  -- The headline exponent: the maximum of the five per-layer exponents.
+  set e : ℕ := max (max eAtomA (max eAtomB eAtomC)) (max eAtomD eAtomE)
+    with he_def
+  have heA : eAtomA ≤ e := le_max_of_le_left (le_max_left _ _)
+  have heB : eAtomB ≤ e := le_max_of_le_left (le_trans (le_max_left _ _)
+    (le_max_right _ _))
+  have heC : eAtomC ≤ e := le_max_of_le_left (le_trans (le_max_right _ _)
+    (le_max_right _ _))
+  have heD : eAtomD ≤ e := le_max_of_le_right (le_max_left _ _)
+  have heE : eAtomE ≤ e := le_max_of_le_right (le_max_right _ _)
+  -- Per-layer nonneg products.
+  have hCA_prod_nn : 0 ≤ CA * CatomA := mul_nonneg hCA_nn hCatomA_nn
+  have hCB_prod_nn : 0 ≤ CB * CatomB := mul_nonneg hCB_nn hCatomB_nn
+  have hCC_prod_nn : 0 ≤ CC * CatomC := mul_nonneg hCC_nn hCatomC_nn
+  have hCD_prod_nn : 0 ≤ CD * CatomD := mul_nonneg hCD_nn hCatomD_nn
+  have hCE_prod_nn : 0 ≤ CE * CatomE := mul_nonneg hCE_nn hCatomE_nn
+  -- The headline constant: the sum of the five per-layer products.
+  refine ⟨CA * CatomA + CB * CatomB + CC * CatomC + CD * CatomD + CE * CatomE,
+    e, by positivity, fun i => ?_⟩
+  set K : Set EuclN := chartPouKernel (I := I) (M := M) α with hK_def
+  set μ : Measure EuclN := (volume : Measure EuclN).restrict K with hμ_def
+  set Rhs : ℝ≥0∞ := ENNReal.ofReal
+      ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖ with hRhs_def
+  have hK_meas : MeasurableSet K :=
+    chartPouKernel_measurableSet (I := I) (M := M) α
+  have hK_in : K ⊆ chartTargetEuclid (I := I) (M := M) α :=
+    chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α
+  -- The five layers, as functions `EuclN → ℝ`.
+  set layerA : EuclN → ℝ := fun y => ∑ a : Fin (Module.finrank ℝ E),
+    ∑ b : Fin (Module.finrank ℝ E),
+      (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a b
+            (l (Fin.last m))) y)
+          (EuclideanSpace.single b 1) *
+        eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_atlas i α P₀
+          (m + 1) (Fin.cons a (Fin.init l)) y with hlayerA_def
+  set layerB : EuclN → ℝ := fun y => ∑ a : Fin (Module.finrank ℝ E),
+    ∑ b : Fin (Module.finrank ℝ E),
+      weightedInvGramDerivOnEuclid (I := I) g α a b (l (Fin.last m)) y *
+        chosenWeakPartial' (d := Module.finrank ℝ E) 2 b
+          (eigenvectorChartIteratedPartial (I := I) (M := M)
+            g r s h_atlas i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
+          (chartTargetEuclid (I := I) (M := M) α) y with hlayerB_def
+  set layerC : EuclN → ℝ := fun y =>
+    densityDerivOnEuclid (I := I) g α (l (Fin.last m)) y *
+      eigenvectorChartIteratedPartial (I := I) (M := M) g r s h_atlas i α P₀
+        m (Fin.init l) y with hlayerC_def
+  set layerD : EuclN → ℝ := fun y =>
+    densityDerivOnEuclid (I := I) g α (l (Fin.last m)) y *
+      fChartEffPrev i y with hlayerD_def
+  set layerE : EuclN → ℝ := fun y =>
+    densityOnEuclid (I := I) g α y *
+      chosenWeakPartial' (d := Module.finrank ℝ E) 2 (l (Fin.last m))
+        (fChartEffPrev i) (chartTargetEuclid (I := I) (M := M) α) y
+    with hlayerE_def
+  -- The numerator is, pointwise, `layerA + layerB - layerC + layerD + layerE`.
+  have h_num_eq : (fun y => eigenvectorChartRHSDiffNumerator (I := I) (M := M)
+      g r s h_atlas i α P₀ m l (fChartEffPrev i) y) =
+      fun y => layerA y + layerB y - layerC y + layerD y + layerE y := by
+    funext y
+    rw [eigenvectorChartRHSDiffNumerator]
+  -- `MemLp` of each layer (for the iterated-triangle-inequality measurability).
+  have h_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
+    chartTargetEuclid_isOpen (I := I) (M := M) α
+  have hK_compact : IsCompact K := chartPouKernel_isCompact (I := I) (M := M) α
+  -- Layer A: `MemLp 2 μ`.
+  have hA_mem : MemLp layerA 2 μ := by
+    rw [hlayerA_def]
+    refine memLp_finset_sum _ (fun a _ => memLp_finset_sum _ (fun b _ => ?_))
+    have h_coeff : ContDiffOn ℝ ∞
+        (fun y => (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a b
+              (l (Fin.last m))) y)
+            (EuclideanSpace.single b 1))
+        (chartTargetEuclid (I := I) (M := M) α) := by
+      have h_diffOn : ContDiffOn ℝ ∞
+          (weightedInvGramDerivOnEuclid (I := I) g α a b (l (Fin.last m)))
+          (chartTargetEuclid (I := I) (M := M) α) :=
+        weightedInvGramDerivOnEuclid_contDiffOn (I := I) g α a b (l (Fin.last m))
+      have h_fderiv : ContDiffOn ℝ ∞
+          (fun y => fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a b
+              (l (Fin.last m))) y)
+          (chartTargetEuclid (I := I) (M := M) α) :=
+        ((contDiffOn_infty_iff_fderiv_of_isOpen h_open).1 h_diffOn).2
+      have h_eval : ContDiff ℝ ∞
+          (fun (L : EuclN →L[ℝ] ℝ) => L (EuclideanSpace.single b 1)) :=
+        (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single b (1 : ℝ))).contDiff
+      exact h_eval.contDiffOn.comp h_fderiv (mapsTo_univ _ _)
+    have h_atom_mem := iter_memLp_volume_restrict
+      (I := I) (M := M) g r s h_atlas i α P₀ (m + 1)
+      (Fin.cons a (Fin.init l)) hK_meas hK_in
+    rw [← hμ_def] at h_atom_mem
+    exact memLp_volume_compact_contDiffOn_mul (I := I) (M := M) α
+      h_coeff hK_compact hK_meas hK_in h_atom_mem
+  -- Layer B: `MemLp 2 μ`.
+  have hB_mem : MemLp layerB 2 μ := by
+    rw [hlayerB_def]
+    refine memLp_finset_sum _ (fun a _ => memLp_finset_sum _ (fun b _ => ?_))
+    have h_chosen_mem := chosenWp_memLp_volume_restrict b
+      (eigenvectorChartIteratedPartial (I := I) (M := M)
+        g r s h_atlas i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
+      (Ω := chartTargetEuclid (I := I) (M := M) α)
+      hK_meas hK_in
+    rw [← hμ_def] at h_chosen_mem
+    exact memLp_volume_compact_contDiffOn_mul (I := I) (M := M) α
+      (weightedInvGramDerivOnEuclid_contDiffOn (I := I) g α a b (l (Fin.last m)))
+      hK_compact hK_meas hK_in h_chosen_mem
+  -- Layer C: `MemLp 2 μ`.
+  have hC_mem : MemLp layerC 2 μ := by
+    rw [hlayerC_def]
+    have h_atom_mem := iter_memLp_volume_restrict
+      (I := I) (M := M) g r s h_atlas i α P₀ m (Fin.init l) hK_meas hK_in
+    rw [← hμ_def] at h_atom_mem
+    exact memLp_volume_compact_contDiffOn_mul (I := I) (M := M) α
+      (densityDerivOnEuclid_contDiffOn (I := I) g α (l (Fin.last m)))
+      hK_compact hK_meas hK_in h_atom_mem
+  -- Layer D and E will use the layer-D and layer-E `_le_chartcpt` MemLp side,
+  -- which we get from the per-layer bound itself. But we need `MemLp` to invoke
+  -- iterated triangle inequality on `+ B - C + D + E`. We exhibit `MemLp 2 μ`
+  -- for layers `D` and `E` directly via `memLp_volume_compact_contDiffOn_mul`.
+  -- For layer `D` we need `MemLp (fChartEffPrev i) 2 μ`; from `hAtomD_bd` we
+  -- have `eLpNorm (fChartEffPrev i) 2 μ < ⊤` (since the RHS is `< ⊤`).
+  -- However, an `eLpNorm` bound alone doesn't immediately give `MemLp` (the
+  -- aestronglyMeasurable side is missing). To stay self-contained we ask: does
+  -- the hypothesis `hAtomD_bd` give `aestronglyMeasurable`? No — only the
+  -- `eLpNorm` bound. We therefore need to bound by triangle inequality the
+  -- combined `+B - C + D + E` directly: `eLpNorm_add_le` and `eLpNorm_sub_le`
+  -- only need `aestronglyMeasurable` of each side, not full `MemLp`. The
+  -- layers `A, B, C` have full `MemLp`; for `D, E` we use the
+  -- `aestronglyMeasurable` of the layer functions themselves, which holds
+  -- since `densityDerivOnEuclid` and `densityOnEuclid` are continuous (hence
+  -- `AEStronglyMeasurable`) and the chosen weak partial is `AEStronglyMeasurable`
+  -- by `chosenWp_memLp_volume_restrict`. We package these as `AEStronglyMeasurable`
+  -- of the layer functions.
+  have h_aesm_D : AEStronglyMeasurable layerD μ := by
+    rw [hlayerD_def]
+    have h_dens_cts : ContinuousOn (densityDerivOnEuclid (I := I) g α
+        (l (Fin.last m))) (chartTargetEuclid (I := I) (M := M) α) :=
+      (densityDerivOnEuclid_contDiffOn (I := I) g α (l (Fin.last m))).continuousOn
+    have h_dens_aesm : AEStronglyMeasurable
+        (densityDerivOnEuclid (I := I) g α (l (Fin.last m))) μ := by
+      have h_K : AEStronglyMeasurable
+          (densityDerivOnEuclid (I := I) g α (l (Fin.last m)))
+          ((volume : Measure EuclN).restrict K) :=
+        (h_dens_cts.mono hK_in).aestronglyMeasurable hK_meas
+      simpa [hμ_def, hK_def] using h_K
+    exact h_dens_aesm.mul (h_prev_aesm i)
+  have h_aesm_E : AEStronglyMeasurable layerE μ := by
+    rw [hlayerE_def]
+    have h_dens_cts : ContinuousOn (densityOnEuclid (I := I) g α)
+        (chartTargetEuclid (I := I) (M := M) α) :=
+      (densityOnEuclid_contDiffOn (I := I) g α).continuousOn
+    have h_dens_aesm : AEStronglyMeasurable
+        (densityOnEuclid (I := I) g α) μ := by
+      have h_K : AEStronglyMeasurable
+          (densityOnEuclid (I := I) g α)
+          ((volume : Measure EuclN).restrict K) :=
+        (h_dens_cts.mono hK_in).aestronglyMeasurable hK_meas
+      simpa [hμ_def, hK_def] using h_K
+    have h_chosen_mem := chosenWp_memLp_volume_restrict (l (Fin.last m))
+      (fChartEffPrev i) (Ω := chartTargetEuclid (I := I) (M := M) α)
+      hK_meas hK_in
+    rw [← hμ_def] at h_chosen_mem
+    exact h_dens_aesm.mul h_chosen_mem.aestronglyMeasurable
+  -- The five per-layer `eLpNorm` bounds at `i`. Since `μ := volume.restrict K`
+  -- and `Rhs := ofReal ‖vec_i‖` are `set`-bindings, they are definitionally
+  -- equal to the explicit expressions in the per-layer bounds; we keep them
+  -- abbreviated `μ` and `Rhs` here for readability.
+  have hCA_i := hCA i
+  have hCB_i := hCB i
+  have hCC_i := hCC i
+  have hCD_i := hCD i
+  have hCE_i := hCE i
+  -- Promote per-layer exponents to `e` via `pow_le_pow_right₀` (uses `μ⁻¹ ≥ 1`).
+  have hCA_e : eLpNorm layerA 2 μ ≤
+      ENNReal.ofReal (CA * CatomA * (i.fst.val)⁻¹ ^ e) * Rhs := by
+    refine le_trans hCA_i (mul_le_mul' ?_ (le_refl _))
+    exact ofReal_const_pow_eigen_inv_le (I := I) (M := M) g r s h_atlas i
+      hCA_prod_nn heA
+  have hCB_e : eLpNorm layerB 2 μ ≤
+      ENNReal.ofReal (CB * CatomB * (i.fst.val)⁻¹ ^ e) * Rhs := by
+    refine le_trans hCB_i (mul_le_mul' ?_ (le_refl _))
+    exact ofReal_const_pow_eigen_inv_le (I := I) (M := M) g r s h_atlas i
+      hCB_prod_nn heB
+  have hCC_e : eLpNorm layerC 2 μ ≤
+      ENNReal.ofReal (CC * CatomC * (i.fst.val)⁻¹ ^ e) * Rhs := by
+    refine le_trans hCC_i (mul_le_mul' ?_ (le_refl _))
+    exact ofReal_const_pow_eigen_inv_le (I := I) (M := M) g r s h_atlas i
+      hCC_prod_nn heC
+  have hCD_e : eLpNorm layerD 2 μ ≤
+      ENNReal.ofReal (CD * CatomD * (i.fst.val)⁻¹ ^ e) * Rhs := by
+    refine le_trans hCD_i (mul_le_mul' ?_ (le_refl _))
+    exact ofReal_const_pow_eigen_inv_le (I := I) (M := M) g r s h_atlas i
+      hCD_prod_nn heD
+  have hCE_e : eLpNorm layerE 2 μ ≤
+      ENNReal.ofReal (CE * CatomE * (i.fst.val)⁻¹ ^ e) * Rhs := by
+    refine le_trans hCE_i (mul_le_mul' ?_ (le_refl _))
+    exact ofReal_const_pow_eigen_inv_le (I := I) (M := M) g r s h_atlas i
+      hCE_prod_nn heE
+  rw [h_num_eq]
+  -- Iterated Minkowski over the five layers `A + B - C + D + E`.
+  have h_tri :
+      eLpNorm (fun y => layerA y + layerB y - layerC y + layerD y + layerE y) 2 μ
+        ≤ eLpNorm layerA 2 μ + eLpNorm layerB 2 μ + eLpNorm layerC 2 μ
+          + eLpNorm layerD 2 μ + eLpNorm layerE 2 μ := by
+    have h_pi : (fun y => layerA y + layerB y - layerC y + layerD y + layerE y)
+        = layerA + layerB - layerC + layerD + layerE := by
+      funext y
+      simp only [Pi.add_apply, Pi.sub_apply]
+    rw [h_pi]
+    have hAB_aesm : AEStronglyMeasurable (layerA + layerB) μ :=
+      hA_mem.aestronglyMeasurable.add hB_mem.aestronglyMeasurable
+    have hABC_aesm : AEStronglyMeasurable (layerA + layerB - layerC) μ :=
+      hAB_aesm.sub hC_mem.aestronglyMeasurable
+    have hABCD_aesm : AEStronglyMeasurable
+        (layerA + layerB - layerC + layerD) μ :=
+      hABC_aesm.add h_aesm_D
+    refine le_trans (eLpNorm_add_le hABCD_aesm h_aesm_E (by norm_num)) ?_
+    refine add_le_add ?_ (le_refl _)
+    refine le_trans (eLpNorm_add_le hABC_aesm h_aesm_D (by norm_num)) ?_
+    refine add_le_add ?_ (le_refl _)
+    refine le_trans (eLpNorm_sub_le hAB_aesm
+      hC_mem.aestronglyMeasurable (by norm_num)) ?_
+    refine add_le_add ?_ (le_refl _)
+    exact eLpNorm_add_le hA_mem.aestronglyMeasurable
+      hB_mem.aestronglyMeasurable (by norm_num)
+  refine le_trans h_tri ?_
+  -- Each of the five per-layer `eLpNorm`s is `≤ ofReal (CX * CatomX * μ⁻¹^e) * Rhs`.
+  have h_five :
+      eLpNorm layerA 2 μ + eLpNorm layerB 2 μ + eLpNorm layerC 2 μ
+        + eLpNorm layerD 2 μ + eLpNorm layerE 2 μ
+      ≤ ENNReal.ofReal (CA * CatomA * (i.fst.val)⁻¹ ^ e) * Rhs +
+        ENNReal.ofReal (CB * CatomB * (i.fst.val)⁻¹ ^ e) * Rhs +
+        ENNReal.ofReal (CC * CatomC * (i.fst.val)⁻¹ ^ e) * Rhs +
+        ENNReal.ofReal (CD * CatomD * (i.fst.val)⁻¹ ^ e) * Rhs +
+        ENNReal.ofReal (CE * CatomE * (i.fst.val)⁻¹ ^ e) * Rhs :=
+    add_le_add (add_le_add (add_le_add (add_le_add hCA_e hCB_e) hCC_e) hCD_e)
+      hCE_e
+  refine le_trans h_five ?_
+  -- Collect the five `ofReal (CX * CatomX * μ⁻¹^e) * Rhs` terms into a single
+  -- `ofReal ((CA·CatomA + … + CE·CatomE) * μ⁻¹^e) * Rhs`.
+  set μi : ℝ := (i.fst.val)⁻¹ ^ e with hμi_def
+  have hμi_nn : 0 ≤ μi := by
+    rw [hμi_def]
+    have h1 : 1 ≤ (i.fst.val)⁻¹ :=
+      eigen_inv_one_le (I := I) (M := M) g r s h_atlas i
+    have : 0 ≤ (i.fst.val)⁻¹ := le_trans zero_le_one h1
+    exact pow_nonneg this _
+  -- Rewrite `CX * CatomX * μ⁻¹^e = (CX * CatomX) * μi`.
+  have h_pull :
+      ENNReal.ofReal (CA * CatomA * (i.fst.val)⁻¹ ^ e) * Rhs +
+        ENNReal.ofReal (CB * CatomB * (i.fst.val)⁻¹ ^ e) * Rhs +
+        ENNReal.ofReal (CC * CatomC * (i.fst.val)⁻¹ ^ e) * Rhs +
+        ENNReal.ofReal (CD * CatomD * (i.fst.val)⁻¹ ^ e) * Rhs +
+        ENNReal.ofReal (CE * CatomE * (i.fst.val)⁻¹ ^ e) * Rhs
+        = ENNReal.ofReal ((CA * CatomA + CB * CatomB + CC * CatomC +
+            CD * CatomD + CE * CatomE) * (i.fst.val)⁻¹ ^ e) * Rhs := by
+    -- Repeatedly use `ofReal_add` to combine and `add_mul`.
+    have hp1 : 0 ≤ CA * CatomA + CB * CatomB := add_nonneg hCA_prod_nn hCB_prod_nn
+    have hp2 : 0 ≤ CA * CatomA + CB * CatomB + CC * CatomC :=
+      add_nonneg hp1 hCC_prod_nn
+    have hp3 : 0 ≤ CA * CatomA + CB * CatomB + CC * CatomC + CD * CatomD :=
+      add_nonneg hp2 hCD_prod_nn
+    -- Combine the five `ENNReal.ofReal` terms.
+    have h_sum_ofReal :
+        ENNReal.ofReal (CA * CatomA * (i.fst.val)⁻¹ ^ e) +
+          ENNReal.ofReal (CB * CatomB * (i.fst.val)⁻¹ ^ e) +
+          ENNReal.ofReal (CC * CatomC * (i.fst.val)⁻¹ ^ e) +
+          ENNReal.ofReal (CD * CatomD * (i.fst.val)⁻¹ ^ e) +
+          ENNReal.ofReal (CE * CatomE * (i.fst.val)⁻¹ ^ e)
+          = ENNReal.ofReal ((CA * CatomA + CB * CatomB + CC * CatomC +
+              CD * CatomD + CE * CatomE) * (i.fst.val)⁻¹ ^ e) := by
+      rw [add_mul, add_mul, add_mul, add_mul,
+        ENNReal.ofReal_add (by positivity) (mul_nonneg hCE_prod_nn hμi_nn),
+        ENNReal.ofReal_add (by positivity) (mul_nonneg hCD_prod_nn hμi_nn),
+        ENNReal.ofReal_add (by positivity) (mul_nonneg hCC_prod_nn hμi_nn),
+        ENNReal.ofReal_add (mul_nonneg hCA_prod_nn hμi_nn)
+          (mul_nonneg hCB_prod_nn hμi_nn)]
+    calc ENNReal.ofReal (CA * CatomA * (i.fst.val)⁻¹ ^ e) * Rhs +
+            ENNReal.ofReal (CB * CatomB * (i.fst.val)⁻¹ ^ e) * Rhs +
+            ENNReal.ofReal (CC * CatomC * (i.fst.val)⁻¹ ^ e) * Rhs +
+            ENNReal.ofReal (CD * CatomD * (i.fst.val)⁻¹ ^ e) * Rhs +
+            ENNReal.ofReal (CE * CatomE * (i.fst.val)⁻¹ ^ e) * Rhs
+        = (ENNReal.ofReal (CA * CatomA * (i.fst.val)⁻¹ ^ e) +
+            ENNReal.ofReal (CB * CatomB * (i.fst.val)⁻¹ ^ e) +
+            ENNReal.ofReal (CC * CatomC * (i.fst.val)⁻¹ ^ e) +
+            ENNReal.ofReal (CD * CatomD * (i.fst.val)⁻¹ ^ e) +
+            ENNReal.ofReal (CE * CatomE * (i.fst.val)⁻¹ ^ e)) * Rhs := by
+          rw [add_mul, add_mul, add_mul, add_mul]
+      _ = ENNReal.ofReal ((CA * CatomA + CB * CatomB + CC * CatomC +
+              CD * CatomD + CE * CatomE) * (i.fst.val)⁻¹ ^ e) * Rhs := by
+          rw [h_sum_ofReal]
+  rw [h_pull]
+
+end SharpMainBound
+
 /-! ## Sanity test -/
 
 section ElaborationTest
