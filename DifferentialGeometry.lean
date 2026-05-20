@@ -707,6 +707,7 @@ import DifferentialGeometry.Integral.Connection.ChartBridge.Ricci
 import DifferentialGeometry.Integral.Connection.RicciIdentitySmoothFrame
 import DifferentialGeometry.Integral.Connection.ConnectionLaplacian
 import DifferentialGeometry.Integral.Connection.TensorConnLaplacian
+import DifferentialGeometry.Integral.Connection.TensorConnLaplacianChart
 import DifferentialGeometry.Integral.Connection.ChartBridge.Laplacian
 import DifferentialGeometry.Integral.Connection.ChartBridge.HessFrobenius
 import DifferentialGeometry.Integral.Connection.Bochner
