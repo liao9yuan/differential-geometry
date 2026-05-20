@@ -1296,6 +1296,282 @@ theorem rawTensorConnLap_fixedFrame_contMDiff
 
 end FixedFrame
 
+/-! ## Part 11: pointwise bilinear tensoriality of the raw second cov derivative
+
+The summand of `rawTensorConnLap_fixedFrame` (and of `rawTensorConnLap`) at a fixed
+evaluation point `y` is the value at `y` of the *raw second covariant derivative*
+$$
+  \Psi_T(X, Y)(y) := (\nabla^{(r,s)}_Y \nabla^{(r,s)}_X T)(y)
+    - (\nabla^{(r,s)}_{(\nabla^{TM}_Y X)} T)(y),
+$$
+written in terms of the bundled tensor and Levi-Civita covariant derivatives as
+
+```
+cov_RS (covApply cov_RS X T) y (Y y) - cov_RS T y ((LeviCivita g) X y (Y y)).
+```
+
+The two basic structural facts are pointwise bilinear tensoriality in `(X, Y)` at `y`:
+
+* `rawTensorConnLap_psi_tensorialAt_left`: tensoriality in the `X`-argument at `y`,
+  derived from the Leibniz rule of `cov_RS` and of `LeviCivita g`. The Leibniz
+  cross-terms cancel between the two halves of `Ψ_T`.
+* `rawTensorConnLap_psi_tensorialAt_right`: tensoriality in the `Y`-argument at `y`,
+  which is automatic from `ContinuousLinearMap`-linearity since `Y` only enters
+  through evaluating linear maps at `Y y`.
+
+Together with `TensorialAt.mkHom₂`, these would package `Ψ_T(·, ·)(y)` into a
+continuous bilinear map on `T_y M`. The orthonormal-frame trace of that bilinear
+map at `y` is the textbook expression for `(Δ_∇ T)(y)`. We do not perform the
+final bundling here; the two tensoriality theorems suffice to expose the pointwise
+bilinearity structure to downstream consumers. -/
+
+section RawPsiTensorial
+
+variable [CompleteSpace E]
+
+/-- Pointwise smoothness witness for the tensor covariant derivative section
+`b ↦ cov_RS.toFun T b`, treated as a section of the Hom-bundle
+`Hom(TM, TensorRSSpace r s)`, when `T` is globally `C^∞`. -/
+private lemma covRS_T_mdiff_at
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    {T : Π b : M, TensorRSSpace r s I b}
+    (hT_total : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y (T y)))
+    (y : M) :
+    MDifferentiableAt I (I.prod 𝓘(ℝ, E →L[ℝ] TensorRSModel r s ℝ E))
+      (fun b : M => TotalSpace.mk' (E →L[ℝ] TensorRSModel r s ℝ E)
+        (E := fun x : M => TangentSpace I x →L[ℝ]
+          TensorRSSpace r s I x) b
+        ((TensorRSNabla.tensorRSCovariantDerivative I M r s
+            (LeviCivita (I := I) g)).toFun T b)) y := by
+  classical
+  -- Bump T's smoothness to (∞ + 1).
+  have hT_plus : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
+      ((∞ : WithTop ℕ∞) + 1)
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y (T y)) := by
+    rw [show ((∞ : WithTop ℕ∞) + 1) = ∞ from rfl]
+    exact hT_total
+  -- The `ContMDiffCovariantDerivative ∞` instance gives global smoothness of
+  -- `b ↦ cov_RS.toFun T b` as a section of `Hom(TM, V)`.
+  have hcov_sec :
+      ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] TensorRSModel r s ℝ E)) ∞
+        (fun b : M => (⟨b,
+          (TensorRSNabla.tensorRSCovariantDerivative I M r s
+              (LeviCivita (I := I) g)).toFun T b⟩ :
+          TotalSpace (E →L[ℝ] TensorRSModel r s ℝ E)
+            (fun b : M => TangentSpace I b →L[ℝ] TensorRSSpace r s I b)))
+        Set.univ :=
+    (TensorRSNabla.tensorRSCovariantDerivative_contMDiff
+      (I := I) (M := M) r s (LeviCivita (I := I) g)).contMDiff.contMDiff
+      (σ := T) hT_plus.contMDiffOn
+  exact ((hcov_sec.contMDiffAt (Filter.univ_mem)).mdifferentiableAt (by simp))
+
+/-- Pointwise smoothness witness for `covApply cov_RS X T` as a tensor section,
+derived from globally smooth `T` and pointwise differentiability of `X` at `y`. -/
+private lemma covApply_covRS_X_T_mdiff_at
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    {T : Π b : M, TensorRSSpace r s I b}
+    (hT_total : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y (T y)))
+    {X : Π b : M, TangentSpace I b} {y : M}
+    (hX : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun z : M => TotalSpace.mk' E (E := TangentSpace I) z (X z)) y) :
+    MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
+      (fun z : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun w : M => TensorRSSpace r s I w) z
+        (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+            (LeviCivita (I := I) g)) X T z)) y := by
+  classical
+  -- Use `MDifferentiableAt.clm_bundle_apply` applied to the Hom-section
+  -- `b ↦ cov_RS.toFun T b` and the vector section `X`.
+  have hHom := covRS_T_mdiff_at (I := I) g r s hT_total y
+  -- The CLM application gives `(cov_RS.toFun T b)(X b) = covApply cov_RS X T b`.
+  have := MDifferentiableAt.clm_bundle_apply (b := id) hHom hX
+  exact this
+
+/-- **Left tensoriality of the raw second cov derivative at `y`.**
+
+For a globally smooth raw tensor section `T` and a globally smooth vector field
+`Y`, the bilinear form
+`Ψ_T(X, Y)(y) := cov_RS (covApply cov_RS X T) y (Y y) - cov_RS T y (cov_TM X y (Y y))`
+is tensorial in the `X`-argument at `y` (i.e., depends only on `X(y)`).
+
+The proof is the standard Leibniz cancellation: applying the Leibniz rule of
+`cov_RS` to the section `f • (covApply cov_RS X T)` and the Leibniz rule of
+`LeviCivita g` to the vector field `f • X`, the `extDerivFun f y`-multiplied
+cross-terms in the two halves coincide and cancel under the subtraction. -/
+private theorem rawTensorConnLap_psi_tensorialAt_left
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T : Π b : M, TensorRSSpace r s I b)
+    (hT_total : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y (T y)))
+    (Y : Π b : M, TangentSpace I b)
+    (_hY_smooth : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun y : M => TotalSpace.mk' E
+        (E := fun z : M => TangentSpace I z) y (Y y)))
+    (y : M) :
+    TensorialAt I E
+      (fun (X : Π b : M, TangentSpace I b) =>
+        (TensorRSNabla.tensorRSCovariantDerivative I M r s
+            (LeviCivita (I := I) g)).toFun
+          (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+            (LeviCivita (I := I) g)) X T) y (Y y) -
+        (TensorRSNabla.tensorRSCovariantDerivative I M r s
+            (LeviCivita (I := I) g)).toFun T y
+          ((LeviCivita (I := I) g).toFun X y (Y y)))
+      y where
+  smul := by
+    intro f X hf hX
+    classical
+    set cov_RS := TensorRSNabla.tensorRSCovariantDerivative I M r s
+      (LeviCivita (I := I) g) with hcovRS_def
+    set cov_TM := LeviCivita (I := I) g with hcovTM_def
+    -- Step A: `covApply cov_RS (f • X) T = f • (covApply cov_RS X T)`.
+    have h_covApply_smul :
+        covApply cov_RS (f • X) T = f • (covApply cov_RS X T) := by
+      funext z
+      change cov_RS.toFun T z ((f • X) z) = f z • (cov_RS.toFun T z (X z))
+      have h_smul_pi : (f • X : Π b : M, TangentSpace I b) z = f z • X z := rfl
+      rw [h_smul_pi, ContinuousLinearMap.map_smul]
+    -- Step B: smoothness witness for `covApply cov_RS X T` at `y`.
+    have hAppX : MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
+        (fun z : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+          (E := fun w : M => TensorRSSpace r s I w) z
+          (covApply cov_RS X T z)) y :=
+      covApply_covRS_X_T_mdiff_at (I := I) g r s hT_total hX
+    -- Step C: Leibniz on `cov_RS` for `f • (covApply cov_RS X T)`.
+    have h_leib_RS := cov_RS.isCovariantDerivativeOn.leibniz
+      (σ := covApply cov_RS X T) (g := f) hAppX hf
+    -- Step D: Leibniz on `cov_TM` for `f • X`.
+    have h_leib_TM := cov_TM.isCovariantDerivativeOn.leibniz
+      (σ := X) (g := f) hX hf
+    -- Goal: compute the LHS using both Leibniz expansions, then simplify.
+    change cov_RS.toFun (covApply cov_RS (f • X) T) y (Y y) -
+        cov_RS.toFun T y (cov_TM.toFun (f • X) y (Y y)) =
+      f y • (cov_RS.toFun (covApply cov_RS X T) y (Y y) -
+        cov_RS.toFun T y (cov_TM.toFun X y (Y y)))
+    rw [h_covApply_smul, h_leib_RS, h_leib_TM]
+    -- After expansion the goal becomes an additive/scalar arithmetic identity
+    -- in `TensorRSSpace r s I y`. The two `extDerivFun f y`-multiplied terms
+    -- coincide and cancel after unfolding `covApply ... = cov_RS.toFun T y (X y)`.
+    -- The fact `covApply cov_RS X T y = cov_RS.toFun T y (X y)` is definitional.
+    have h_covApply_pt : covApply cov_RS X T y = cov_RS.toFun T y (X y) := rfl
+    simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
+      ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.map_add,
+      ContinuousLinearMap.map_smul, smul_sub, h_covApply_pt]
+    abel
+  add := by
+    intro X X' hX hX'
+    classical
+    set cov_RS := TensorRSNabla.tensorRSCovariantDerivative I M r s
+      (LeviCivita (I := I) g) with hcovRS_def
+    set cov_TM := LeviCivita (I := I) g with hcovTM_def
+    -- Step A: `covApply cov_RS (X + X') T = covApply cov_RS X T + covApply cov_RS X' T`.
+    have h_covApply_add :
+        covApply cov_RS (X + X') T =
+          covApply cov_RS X T + covApply cov_RS X' T := by
+      funext z
+      change cov_RS.toFun T z ((X + X') z) =
+        cov_RS.toFun T z (X z) + cov_RS.toFun T z (X' z)
+      have : (X + X' : Π b : M, TangentSpace I b) z = X z + X' z := rfl
+      rw [this, ContinuousLinearMap.map_add]
+    -- Step B: smoothness witnesses at `y`.
+    have hAppX : MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
+        (fun z : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+          (E := fun w : M => TensorRSSpace r s I w) z
+          (covApply cov_RS X T z)) y :=
+      covApply_covRS_X_T_mdiff_at (I := I) g r s hT_total hX
+    have hAppX' : MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
+        (fun z : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+          (E := fun w : M => TensorRSSpace r s I w) z
+          (covApply cov_RS X' T z)) y :=
+      covApply_covRS_X_T_mdiff_at (I := I) g r s hT_total hX'
+    -- Step C: additivity of `cov_RS` on the sum.
+    have h_add_RS : cov_RS.toFun (covApply cov_RS X T +
+        covApply cov_RS X' T) y =
+      cov_RS.toFun (covApply cov_RS X T) y +
+        cov_RS.toFun (covApply cov_RS X' T) y :=
+      cov_RS.isCovariantDerivativeOn.add hAppX hAppX'
+    -- Step D: additivity of `cov_TM` on `X + X'`.
+    have h_add_TM : cov_TM.toFun (X + X') y =
+        cov_TM.toFun X y + cov_TM.toFun X' y :=
+      cov_TM.isCovariantDerivativeOn.add hX hX'
+    change cov_RS.toFun (covApply cov_RS (X + X') T) y (Y y) -
+        cov_RS.toFun T y (cov_TM.toFun (X + X') y (Y y)) =
+      (cov_RS.toFun (covApply cov_RS X T) y (Y y) -
+        cov_RS.toFun T y (cov_TM.toFun X y (Y y))) +
+      (cov_RS.toFun (covApply cov_RS X' T) y (Y y) -
+        cov_RS.toFun T y (cov_TM.toFun X' y (Y y)))
+    rw [h_covApply_add, h_add_RS, h_add_TM]
+    simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.map_add]
+    abel
+
+/-- **Right tensoriality of the raw second cov derivative at `y`.**
+
+For a globally smooth raw tensor section `T` and any vector field `X`, the
+bilinear form
+`Ψ_T(X, Y)(y) := cov_RS (covApply cov_RS X T) y (Y y) - cov_RS T y (cov_TM X y (Y y))`
+is tensorial in the `Y`-argument at `y`. Since `Y` only enters through
+`ContinuousLinearMap` evaluations at `Y y` (no derivative of `Y` is taken),
+this tensoriality is automatic: both halves are `ℝ`-linear in `Y y`. -/
+private theorem rawTensorConnLap_psi_tensorialAt_right
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T : Π b : M, TensorRSSpace r s I b)
+    (_hT_total : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y (T y)))
+    (X : Π b : M, TangentSpace I b)
+    (_hX_smooth : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun y : M => TotalSpace.mk' E
+        (E := fun z : M => TangentSpace I z) y (X y)))
+    (y : M) :
+    TensorialAt I E
+      (fun (Y : Π b : M, TangentSpace I b) =>
+        (TensorRSNabla.tensorRSCovariantDerivative I M r s
+            (LeviCivita (I := I) g)).toFun
+          (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+            (LeviCivita (I := I) g)) X T) y (Y y) -
+        (TensorRSNabla.tensorRSCovariantDerivative I M r s
+            (LeviCivita (I := I) g)).toFun T y
+          ((LeviCivita (I := I) g).toFun X y (Y y)))
+      y where
+  smul := by
+    intro f Y _hf _hY
+    classical
+    set cov_RS := TensorRSNabla.tensorRSCovariantDerivative I M r s
+      (LeviCivita (I := I) g) with hcovRS_def
+    set cov_TM := LeviCivita (I := I) g with hcovTM_def
+    -- `(f • Y) y = f y • Y y` and both halves are CLMs in their last argument.
+    have h_smul_at : (f • Y : Π b : M, TangentSpace I b) y = f y • Y y := rfl
+    change cov_RS.toFun (covApply cov_RS X T) y ((f • Y) y) -
+        cov_RS.toFun T y (cov_TM.toFun X y ((f • Y) y)) =
+      f y • (cov_RS.toFun (covApply cov_RS X T) y (Y y) -
+        cov_RS.toFun T y (cov_TM.toFun X y (Y y)))
+    rw [h_smul_at]
+    simp only [ContinuousLinearMap.map_smul, smul_sub]
+  add := by
+    intro Y Y' _hY _hY'
+    classical
+    set cov_RS := TensorRSNabla.tensorRSCovariantDerivative I M r s
+      (LeviCivita (I := I) g) with hcovRS_def
+    set cov_TM := LeviCivita (I := I) g with hcovTM_def
+    have h_add_at : (Y + Y' : Π b : M, TangentSpace I b) y = Y y + Y' y := rfl
+    change cov_RS.toFun (covApply cov_RS X T) y ((Y + Y') y) -
+        cov_RS.toFun T y (cov_TM.toFun X y ((Y + Y') y)) =
+      (cov_RS.toFun (covApply cov_RS X T) y (Y y) -
+        cov_RS.toFun T y (cov_TM.toFun X y (Y y))) +
+      (cov_RS.toFun (covApply cov_RS X T) y (Y' y) -
+        cov_RS.toFun T y (cov_TM.toFun X y (Y' y)))
+    rw [h_add_at]
+    simp only [ContinuousLinearMap.map_add]
+    abel
+
+end RawPsiTensorial
+
 end Connection
 end Integral
 end DifferentialGeometry
