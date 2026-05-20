@@ -98,7 +98,7 @@ target and ae-vanishes off the compact partition-of-unity kernel, the
 product `coef · factor` lies in `W^{K, 2}` on the chart target and has
 `wkpNorm K 2 (coef · factor) ≤ ENNReal.ofReal C · wkpNorm K 2 factor`. -/
 
-private lemma sharp_wkpNorm_coef_mul_factor_le_uniform
+lemma sharp_wkpNorm_coef_mul_factor_le_uniform
     (α : M) (K : ℕ)
     {coef : EuclN → ℝ}
     (hcoef_chart : ContDiffOn ℝ (⊤ : ℕ∞) coef
@@ -253,7 +253,7 @@ private lemma sharp_wkpNorm_coef_mul_factor_le_uniform
 omit [CompleteSpace E] in
 /-- The resolvent eigenvalue's reciprocal `(i.fst.val)⁻¹` is at least
 `1`. -/
-private lemma sharp_eigen_inv_one_le
+lemma sharp_eigen_inv_one_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -274,7 +274,7 @@ private lemma sharp_eigen_inv_one_le
 omit [CompleteSpace E] in
 /-- For nonnegative `C` and `k ≤ e`, `ofReal (C · μ⁻¹^k) ≤ ofReal (C ·
 μ⁻¹^e)`. -/
-private lemma sharp_ofReal_const_pow_eigen_inv_le
+lemma sharp_ofReal_const_pow_eigen_inv_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -408,7 +408,7 @@ For each layer X ∈ {A, B, C, D, E}, we bound the layer's `wkpNorm K` on
 
 omit [CompleteSpace E] in
 /-- **Sharp `wkpNorm` bound for layer `A`.** -/
-private lemma sharp_layerA_wkpNorm_le
+lemma sharp_layerA_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -645,7 +645,7 @@ private lemma sharp_layerA_wkpNorm_le
 
 omit [CompleteSpace E] in
 /-- **Sharp `wkpNorm` bound for layer `B`.** -/
-private lemma sharp_layerB_wkpNorm_le
+lemma sharp_layerB_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -900,7 +900,7 @@ private lemma sharp_layerB_wkpNorm_le
 
 omit [CompleteSpace E] in
 /-- **Sharp `wkpNorm` bound for layer `C`.** -/
-private lemma sharp_layerC_wkpNorm_le
+lemma sharp_layerC_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -950,7 +950,7 @@ private lemma sharp_layerC_wkpNorm_le
 
 omit [CompleteSpace E] in
 /-- **Sharp `wkpNorm` bound for layer `D`.** -/
-private lemma sharp_layerD_wkpNorm_le
+lemma sharp_layerD_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (α : M) (_P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -992,7 +992,7 @@ private lemma sharp_layerD_wkpNorm_le
 
 omit [CompleteSpace E] in
 /-- **Sharp `wkpNorm` bound for layer `E`.** -/
-private lemma sharp_layerE_wkpNorm_le
+lemma sharp_layerE_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (α : M) (_P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
