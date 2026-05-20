@@ -97,6 +97,7 @@ import DifferentialGeometry.Integral.Connection.SlotChristoffelCorrectionOpNorm
 import DifferentialGeometry.Integral.Connection.ChartTensorRSCurryFactor
 import DifferentialGeometry.Integral.Connection.ChartTensorRSCovariantDerivativeAgreement
 import DifferentialGeometry.Integral.Connection.ChartTensorRSSecondCovariantDerivative
+import DifferentialGeometry.Integral.Connection.ChartPulledCovApplyExplicitFormula
 import DifferentialGeometry.Synthetic.Realization.TensorContract
 import DifferentialGeometry.Synthetic.Realization.NablaContractSynthetic
 import DifferentialGeometry.Synthetic.Realization.TimeDeriv
@@ -349,6 +350,7 @@ import DifferentialGeometry.Analysis.Sobolev.Chart.Transition
 import DifferentialGeometry.Analysis.Sobolev.Chart.AtlasIndependence
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.FderivToWkpNormBridge
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedFderivToWkpNormBridge
 import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseHelpers
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.MultiplyQuant
 import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBound
