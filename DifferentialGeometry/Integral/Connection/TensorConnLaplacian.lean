@@ -1890,6 +1890,163 @@ private theorem rawTensorConnLap_eq_frame_trace
 
 end RawPsiTensorial
 
+/-! ## Part 12: unconditional smoothness of the raw tensor connection Laplacian
+
+The earlier sections proved:
+
+* `rawTensorConnLap_fixedFrame_contMDiff` — for a fixed smooth tangent frame
+  `B`, the fixed-frame variant `rawTensorConnLap_fixedFrame g r s B T` is a
+  smooth section in the base point.
+* `rawTensorConnLap_eq_frame_trace` — for any `g_y`-orthonormal basis `B` of
+  `T_y M`, the value `rawTensorConnLap g r s T y` equals
+  `∑ i, Ψ̂_T(y)(B_i, B_i)`, the orthonormal-frame trace of the bundled raw
+  second covariant derivative.
+
+Combining these on the open neighbourhood `smoothOrthoFrameNbhd g x₀` of any
+point `x₀`, the smooth orthonormal frame field `smoothOrthoFrame g x₀` is
+`g_y`-orthonormal at every `y` in the neighbourhood, so the frame-trace
+formula reduces `rawTensorConnLap g r s T y` to
+`rawTensorConnLap_fixedFrame g r s (smoothOrthoFrame g x₀) T y`. The
+fixed-frame smoothness then gives smoothness of `rawTensorConnLap` on the
+neighbourhood, and local-to-global yields global smoothness. -/
+
+section UnconditionalSmoothness
+
+variable [CompleteSpace E]
+
+/-- **Identification of `rawTensorConnLap` with the fixed-frame variant at
+points where the fixed frame is `g`-orthonormal.** For a fixed smooth tangent
+frame `B` such that `B i y` is `g_y`-orthonormal at the evaluation point `y`,
+the raw connection Laplacian agrees with the fixed-frame variant at `y`. -/
+private theorem rawTensorConnLap_eq_fixedFrame_of_orthonormal
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T : Π b : M, TensorRSSpace r s I b)
+    (hT_total : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y (T y)))
+    {B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b}
+    (hB_smooth : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (B i)))
+    (y : M)
+    (hB_orth : ∀ i j : Fin (Module.finrank ℝ E),
+      g.inner y (B i y) (B j y) = if i = j then (1 : ℝ) else 0) :
+    rawTensorConnLap (I := I) g r s T y =
+      rawTensorConnLap_fixedFrame (I := I) g r s B T y := by
+  classical
+  -- Step 1: apply frame invariance with the single-point frame `fun i => B i y`.
+  have h_frame_trace :
+      rawTensorConnLap (I := I) g r s T y =
+        ∑ i : Fin (Module.finrank ℝ E),
+          rawTensorConnLap_psi_bilinAt g r s T hT_total y (B i y) (B i y) :=
+    rawTensorConnLap_eq_frame_trace (I := I) g r s T hT_total y
+      (fun i => B i y) hB_orth
+  -- Step 2: at every `i`, identify the bilinear value with the fixed-frame
+  -- summand via `rawTensorConnLap_psi_bilinAt_apply`. Each `B i` is smooth
+  -- as a tangent-bundle section, hence MDifferentiableAt at `y`.
+  have h_summand_eq : ∀ i : Fin (Module.finrank ℝ E),
+      rawTensorConnLap_psi_bilinAt g r s T hT_total y (B i y) (B i y) =
+        (TensorRSNabla.tensorRSCovariantDerivative I M r s
+              (LeviCivita (I := I) g)).toFun
+            (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+              (LeviCivita (I := I) g)) (B i) T) y (B i y) -
+          (TensorRSNabla.tensorRSCovariantDerivative I M r s
+              (LeviCivita (I := I) g)).toFun
+            T y
+            ((LeviCivita (I := I) g).toFun (B i) y (B i y)) := by
+    intro i
+    have hBi_mdiff : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+        (fun z : M => TotalSpace.mk' E
+          (E := fun w : M => TangentSpace I w) z (B i z)) y :=
+      (hB_smooth i).contMDiffAt.mdifferentiableAt (by simp)
+    exact rawTensorConnLap_psi_bilinAt_apply (I := I) g r s T hT_total
+      (X := B i) (Y := B i) hBi_mdiff hBi_mdiff
+  -- Step 3: combine the two steps. The RHS sum, term by term, is exactly the
+  -- fixed-frame definition.
+  rw [h_frame_trace]
+  rw [Finset.sum_congr rfl (fun i _ => h_summand_eq i)]
+  rfl
+
+/-- **The raw tensor connection Laplacian agrees with the fixed-frame variant
+on `smoothOrthoFrameNbhd g x₀`.** For any centre point `x₀`, the smooth
+orthonormal frame field `smoothOrthoFrame g x₀` is `g_y`-orthonormal at every
+`y` in the open neighbourhood `smoothOrthoFrameNbhd g x₀`. Hence the raw
+connection Laplacian coincides with the fixed-frame variant on the
+neighbourhood. -/
+private theorem rawTensorConnLap_eq_fixedFrame_smoothOrthoFrame_on_nbhd
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T : Π b : M, TensorRSSpace r s I b)
+    (hT_total : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y (T y)))
+    (x₀ : M)
+    {y : M} (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x₀) :
+    rawTensorConnLap (I := I) g r s T y =
+      rawTensorConnLap_fixedFrame (I := I) g r s
+        (smoothOrthoFrame (I := I) g x₀) T y :=
+  rawTensorConnLap_eq_fixedFrame_of_orthonormal (I := I) g r s T hT_total
+    (B := smoothOrthoFrame (I := I) g x₀)
+    (fun i => smoothOrthoFrame_smooth (I := I) g x₀ i) y
+    (fun i j => smoothOrthoFrame_orthonormal (I := I) g x₀ hy i j)
+
+/-- **Unconditional smoothness of the raw tensor connection Laplacian.** For a
+smooth raw `(r, s)`-tensor section `T`, the raw connection Laplacian
+`rawTensorConnLap g r s T` is a smooth tensor section. -/
+theorem rawTensorConnLap_contMDiff
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T : Π b : M, TensorRSSpace r s I b)
+    (hT_total : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y (T y))) :
+    ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y
+        (rawTensorConnLap (I := I) g r s T y)) := by
+  classical
+  -- `ContMDiff` unfolds to `∀ x, ContMDiffAt`. We work pointwise.
+  intro x₀
+  -- The fixed-frame variant with the smooth orthonormal frame at `x₀` is
+  -- globally smooth, in particular `ContMDiffAt` at `x₀`.
+  have h_fixed : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y
+        (rawTensorConnLap_fixedFrame (I := I) g r s
+          (smoothOrthoFrame (I := I) g x₀) T y)) :=
+    rawTensorConnLap_fixedFrame_contMDiff (I := I) g r s hT_total
+      (fun i => smoothOrthoFrame_smooth (I := I) g x₀ i)
+  have h_fixed_at : ContMDiffAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y
+        (rawTensorConnLap_fixedFrame (I := I) g r s
+          (smoothOrthoFrame (I := I) g x₀) T y)) x₀ :=
+    h_fixed x₀
+  -- The two section-functions agree on the neighbourhood `smoothOrthoFrameNbhd
+  -- g x₀` of `x₀`. Hence they are `EventuallyEq` at `x₀`.
+  have h_eventuallyEq :
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y
+        (rawTensorConnLap (I := I) g r s T y)) =ᶠ[𝓝 x₀]
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y
+        (rawTensorConnLap_fixedFrame (I := I) g r s
+          (smoothOrthoFrame (I := I) g x₀) T y)) := by
+    filter_upwards [smoothOrthoFrameNbhd_mem_nhds (I := I) (M := M) x₀] with y hy
+    -- Equality of `TotalSpace.mk'` follows from equality of the fibre values
+    -- at the same base.
+    have h_fib : rawTensorConnLap (I := I) g r s T y =
+        rawTensorConnLap_fixedFrame (I := I) g r s
+          (smoothOrthoFrame (I := I) g x₀) T y :=
+      rawTensorConnLap_eq_fixedFrame_smoothOrthoFrame_on_nbhd (I := I)
+        g r s T hT_total x₀ hy
+    -- Lift to the total space.
+    exact congrArg (TotalSpace.mk' (TensorRSModel r s ℝ E)
+      (E := fun z : M => TensorRSSpace r s I z) y) h_fib
+  -- Transport `ContMDiffAt` along `EventuallyEq`. The `congr_of_eventuallyEq`
+  -- lemma takes `f₁ =ᶠ[𝓝 x] f` and `ContMDiffAt f x` and produces
+  -- `ContMDiffAt f₁ x`, so we pass `h_eventuallyEq` directly (with
+  -- `f₁ = rawTensorConnLap …`, `f = rawTensorConnLap_fixedFrame …`).
+  exact h_fixed_at.congr_of_eventuallyEq h_eventuallyEq
+
+end UnconditionalSmoothness
+
 end Connection
 end Integral
 end DifferentialGeometry
