@@ -597,6 +597,381 @@ theorem rawTensorConnLap_frame_trace
               (smoothOrthoFrame (I := I) g x i) x
               (smoothOrthoFrame (I := I) g x i x))) := rfl
 
+/-! ## Part 8: support inclusion and compact-support preservation
+
+The locality result `rawTensorConnLap_eq_zero_of_eventually_zero` (Part 5)
+immediately upgrades to a support inclusion: the value at `x` vanishes whenever
+`T` vanishes on a neighbourhood of `x`. Composing with the underlying
+smooth-section data of a `SmoothCcTensor`, we obtain that the function
+`b ↦ TensorRSSpace.toModel (rawTensorConnLap g r s T b)` has compact support
+contained in `tsupport (b ↦ TensorRSSpace.toModel (T b))`.
+
+The smoothness witnesses needed by `rawTensorConnLap_eq_zero_of_eventually_zero`
+at each `x` come from `ContMDiffSection.contMDiff` for `T` itself and from
+`covApply_contMDiffOn` for `covApply cov (smoothOrthoFrame g x i) T`,
+discharged using `smoothOrthoFrame_smooth`. -/
+
+section CompactSupport
+
+variable [CompleteSpace E]
+
+/-- **Pointwise smoothness witness of `T` from the bundled section.** A bundled
+`ContMDiffSection` of class `C^∞` gives the manifold-differentiability of the
+total-space form at every point. -/
+private lemma rawTensorConnLap_T_mdiff_at (r s : ℕ)
+    (T : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
+        (fun x : M => TensorRSSpace r s I x)⟯)
+    (x : M) :
+    MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y (T y)) x := by
+  classical
+  -- `T.contMDiff` gives `ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+  --     (fun y => TotalSpace.mk' (TensorRSModel r s ℝ E)
+  --                 (E := fun z => TensorRSSpace r s I z) y (T y))`.
+  exact (T.contMDiff x).mdifferentiableAt (by simp)
+
+/-- **Smoothness of `covApply cov B T` at every point** when both `B` and `T`
+are globally `C^∞`. This is the smoothness witness required by
+`rawTensorConnLap_eq_zero_of_eventually_zero` for the first derivative section
+`covApply cov B T`. -/
+private lemma rawTensorConnLap_covApply_mdiff_at
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
+        (fun x : M => TensorRSSpace r s I x)⟯)
+    (B : Π b : M, TangentSpace I b)
+    (hB : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+        (fun b : M => TotalSpace.mk' E (E := TangentSpace I) b (B b)))
+    (x : M) :
+    MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y
+        (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+            (LeviCivita (I := I) g))
+          B (fun y : M => T y) y)) x := by
+  classical
+  set cov := TensorRSNabla.tensorRSCovariantDerivative I M r s
+    (LeviCivita (I := I) g) with hcov_def
+  -- Smoothness of `T` as a total-space form (from `T.contMDiff`).
+  have hT_total : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y (T y)) := T.contMDiff
+  -- Bump T's smoothness witness from ∞ to (∞ + 1) using that ∞ + 1 = ∞ for WithTop ℕ∞.
+  have hT_plus : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
+      ((∞ : WithTop ℕ∞) + 1)
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y (T y)) := by
+    -- `∞ + 1 = ∞` in `WithTop ℕ∞` holds definitionally.
+    rw [show ((∞ : WithTop ℕ∞) + 1) = ∞ from rfl]
+    exact hT_total
+  -- Smoothness of `covApply cov B T` from `covApply_contMDiffOn`.
+  have h_covApply :
+      ContMDiffOn I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+        (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+          (E := fun z : M => TensorRSSpace r s I z) y
+          (covApply cov B (fun y : M => T y) y)) Set.univ :=
+    covApply_contMDiffOn (cov := cov) hB hT_plus
+  -- Extract `MDifferentiableAt` at `x`.
+  have h_at : ContMDiffAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y
+        (covApply cov B (fun y : M => T y) y)) x :=
+    h_covApply.contMDiffAt (Filter.univ_mem)
+  exact h_at.mdifferentiableAt (by simp)
+
+/-- **Support inclusion (pointwise).** If `T` is a smooth `(r, s)`-tensor
+section and `x ∉ tsupport (b ↦ TensorRSSpace.toModel (T b))`, then
+`rawTensorConnLap g r s T x = 0`.
+
+The proof finds an open neighbourhood `U` of `x` where `T` vanishes (using the
+definition of `tsupport`), then applies `rawTensorConnLap_eq_zero_of_eventually_zero`
+with smoothness witnesses from `T.contMDiff`. -/
+theorem rawTensorConnLap_eq_zero_of_not_mem_tsupport
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
+        (fun x : M => TensorRSSpace r s I x)⟯)
+    {x : M}
+    (hx : x ∉ tsupport (fun b : M => TensorRSSpace.toModel (T b))) :
+    rawTensorConnLap (I := I) g r s (fun y : M => T y) x = 0 := by
+  classical
+  -- From `x ∉ tsupport`, the section vanishes eventually on a neighbourhood.
+  have hT_eq : (fun b : M => TensorRSSpace.toModel (T b)) =ᶠ[𝓝 x] 0 :=
+    notMem_tsupport_iff_eventuallyEq.mp hx
+  -- Extract an open neighbourhood `U` of `x` on which `T b = 0` for all `b ∈ U`.
+  rw [Filter.eventuallyEq_iff_exists_mem] at hT_eq
+  obtain ⟨V, hV_nhds, hV_eq⟩ := hT_eq
+  -- Convert to open set inside the neighbourhood: there exists open U with x ∈ U ⊆ V.
+  obtain ⟨U, hUV, hU_open, hxU⟩ := mem_nhds_iff.mp hV_nhds
+  -- `T b = 0` for all `b ∈ U`, in `TensorRSSpace r s I b`.
+  have hT_zero_U : ∀ b ∈ U, (fun y : M => T y) b = 0 := by
+    intro b hbU
+    -- `hV_eq b : (fun b => TensorRSSpace.toModel (T b)) b = 0 b = 0`.
+    have h_model_zero : TensorRSSpace.toModel (T b) = 0 := by
+      have := hV_eq (hUV hbU)
+      simpa using this
+    -- Apply injectivity of `toModel`.
+    have h_model_zero' : TensorRSSpace.toModel (T b) =
+        TensorRSSpace.toModel (0 : TensorRSSpace r s I b) := by
+      rw [h_model_zero, TensorRSSpace.toModel_zero]
+    exact TensorRSSpace.toModel_injective h_model_zero'
+  -- Apply `rawTensorConnLap_eq_zero_of_eventually_zero`.
+  apply rawTensorConnLap_eq_zero_of_eventually_zero (I := I) g r s
+    (T := fun y : M => T y) (U := U) hU_open hxU hT_zero_U
+  · -- `MDifferentiableAt` of T at x.
+    exact rawTensorConnLap_T_mdiff_at (I := I) r s T x
+  · -- `MDifferentiableAt` of `covApply cov (smoothOrthoFrame g x i) T` at x.
+    intro i
+    exact rawTensorConnLap_covApply_mdiff_at (I := I) g r s T
+      (smoothOrthoFrame (I := I) g x i)
+      (smoothOrthoFrame_smooth (I := I) g x i) x
+
+/-- **Support inclusion (functional).** The support of
+`b ↦ TensorRSSpace.toModel (rawTensorConnLap g r s T b)` is contained in
+`tsupport (b ↦ TensorRSSpace.toModel (T b))`. -/
+theorem rawTensorConnLap_support_subset_tsupport
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
+        (fun x : M => TensorRSSpace r s I x)⟯) :
+    Function.support
+        (fun b : M => TensorRSSpace.toModel
+          (rawTensorConnLap (I := I) g r s (fun y : M => T y) b)) ⊆
+      tsupport (fun b : M => TensorRSSpace.toModel (T b)) := by
+  classical
+  intro x hx
+  -- `hx : x ∈ support (rawTensorConnLap ... x ↦ toModel · )`.
+  -- We show `x ∈ tsupport (T x ↦ toModel · )` by contradiction.
+  by_contra hxnot
+  apply hx
+  -- From `hxnot`, the rawTensorConnLap vanishes at x.
+  have h_zero : rawTensorConnLap (I := I) g r s
+      (fun y : M => T y) x = 0 :=
+    rawTensorConnLap_eq_zero_of_not_mem_tsupport (I := I) g r s T hxnot
+  -- And then `toModel` of zero is zero.
+  change TensorRSSpace.toModel
+    (rawTensorConnLap (I := I) g r s (fun y : M => T y) x) = 0
+  rw [h_zero, TensorRSSpace.toModel_zero]
+
+/-- **Compact-support preservation.** If `T` is a smooth `(r, s)`-tensor
+section whose model image has compact support, then so does the model image of
+the raw connection Laplacian of `T`. -/
+theorem rawTensorConnLap_hasCompactSupport
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
+        (fun x : M => TensorRSSpace r s I x)⟯)
+    (hT_cc : HasCompactSupport (fun b : M => TensorRSSpace.toModel (T b))) :
+    HasCompactSupport (fun b : M =>
+      TensorRSSpace.toModel
+        (rawTensorConnLap (I := I) g r s (fun y : M => T y) b)) := by
+  classical
+  -- Use `HasCompactSupport.mono'` with the support-inclusion lemma.
+  refine HasCompactSupport.mono'
+    (f := fun b : M => TensorRSSpace.toModel (T b)) hT_cc ?_
+  exact rawTensorConnLap_support_subset_tsupport (I := I) g r s T
+
+end CompactSupport
+
+/-! ## Part 9: bundled `SmoothCcTensor`-to-section package
+
+For a smooth, compactly-supported `(r, s)`-tensor section, the raw connection
+Laplacian inherits compact support automatically (Part 8). The smoothness of
+the resulting function `b ↦ rawTensorConnLap g r s T.toFun b` is a separate
+question: the trace formula uses `smoothOrthoFrame g x` whose centre `x`
+varies with the evaluation point, and proving smoothness reduces to
+frame-invariance of the second-covariant-derivative trace. We expose this as
+an explicit hypothesis on the bundled operator so that downstream consumers
+can supply the witness on a per-use basis. -/
+
+section BundledOperator
+
+open DifferentialGeometry.Integral.L2
+
+variable [CompleteSpace E]
+
+/-- **Bundled connection Laplacian on `SmoothCcTensor`, taking smoothness as an
+explicit hypothesis.** For a smooth, compactly-supported `(r, s)`-tensor
+section `T : SmoothCcTensor g r s`, given a smoothness witness for the
+total-space form of the raw connection Laplacian, the result is packaged as a
+`SmoothCcTensor g r s`.
+
+The smoothness hypothesis is exposed because the proof of smoothness of
+`b ↦ rawTensorConnLap g r s T.toFun b` requires frame-invariance of the
+second-covariant-derivative trace, which is a separate piece of infrastructure
+not yet established in the codebase. -/
+noncomputable def tensorConnLaplacian_of_contMDiff
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
+    (hSmooth : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y
+        (rawTensorConnLap (I := I) g r s (fun z : M => T.toSection z) y))) :
+    SmoothCcTensor g r s where
+  toSection :=
+    { toFun := fun b : M =>
+        rawTensorConnLap (I := I) g r s (fun z : M => T.toSection z) b
+      contMDiff_toFun := hSmooth }
+  hasCompactSupport :=
+    rawTensorConnLap_hasCompactSupport (I := I) g r s T.toSection
+      T.hasCompactSupport
+
+/-- The underlying function of `tensorConnLaplacian_of_contMDiff` is
+`rawTensorConnLap`. -/
+@[simp] lemma tensorConnLaplacian_of_contMDiff_toFun
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
+    (hSmooth : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y
+        (rawTensorConnLap (I := I) g r s (fun z : M => T.toSection z) y)))
+    (x : M) :
+    (tensorConnLaplacian_of_contMDiff (I := I) g r s T hSmooth).toSection x =
+      rawTensorConnLap (I := I) g r s (fun z : M => T.toSection z) x := rfl
+
+/-! ### Bundled algebraic properties via smoothness hypotheses
+
+The bundled operator inherits additivity and scalar homogeneity from the raw
+operator (Parts 3 and 4). Each algebraic identity requires the smoothness
+hypothesis on every involved section. The differentiability witnesses required
+by `rawTensorConnLap_add` and `rawTensorConnLap_smul` follow from
+`ContMDiffSection.contMDiff` for the inputs and `covApply_contMDiffOn` for
+the first-derivative sections. -/
+
+/-- **Additivity at the bundled level.** For two `SmoothCcTensor g r s`
+inputs with their smoothness witnesses, the bundled connection Laplacian is
+additive at the underlying-section level. -/
+theorem tensorConnLaplacian_of_contMDiff_add
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T T' : SmoothCcTensor g r s)
+    (hSmooth_T : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y
+        (rawTensorConnLap (I := I) g r s (fun z : M => T.toSection z) y)))
+    (hSmooth_T' : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y
+        (rawTensorConnLap (I := I) g r s (fun z : M => T'.toSection z) y)))
+    (hSmooth_sum : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y
+        (rawTensorConnLap (I := I) g r s
+          (fun z : M => (T + T').toSection z) y)))
+    (x : M) :
+    (tensorConnLaplacian_of_contMDiff (I := I) g r s (T + T')
+        hSmooth_sum).toSection x =
+      (tensorConnLaplacian_of_contMDiff (I := I) g r s T hSmooth_T).toSection x +
+        (tensorConnLaplacian_of_contMDiff (I := I) g r s T'
+          hSmooth_T').toSection x := by
+  classical
+  -- Unfold both sides to `rawTensorConnLap` form.
+  rw [tensorConnLaplacian_of_contMDiff_toFun,
+      tensorConnLaplacian_of_contMDiff_toFun,
+      tensorConnLaplacian_of_contMDiff_toFun]
+  -- The underlying function of `T + T'` is `T.toSection + T'.toSection`.
+  have h_add_fun : (fun z : M => (T + T').toSection z) =
+      (fun z : M => T.toSection z + T'.toSection z) := by
+    funext z
+    rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add]
+    rfl
+  rw [h_add_fun]
+  -- Now apply `rawTensorConnLap_add` with the appropriate differentiability witnesses.
+  refine rawTensorConnLap_add (I := I) g r s
+    (T := fun z : M => T.toSection z) (T' := fun z : M => T'.toSection z)
+    (fun y => ?_) (fun y => ?_) (fun y i => ?_) (fun y i => ?_) x
+  · exact rawTensorConnLap_T_mdiff_at (I := I) r s T.toSection y
+  · exact rawTensorConnLap_T_mdiff_at (I := I) r s T'.toSection y
+  · exact rawTensorConnLap_covApply_mdiff_at (I := I) g r s T.toSection
+      (smoothOrthoFrame (I := I) g y i)
+      (smoothOrthoFrame_smooth (I := I) g y i) y
+  · exact rawTensorConnLap_covApply_mdiff_at (I := I) g r s T'.toSection
+      (smoothOrthoFrame (I := I) g y i)
+      (smoothOrthoFrame_smooth (I := I) g y i) y
+
+/-- **Scalar homogeneity at the bundled level.** For a `SmoothCcTensor g r s`
+input with its smoothness witness, the bundled connection Laplacian commutes
+with scalar multiplication at the underlying-section level. -/
+theorem tensorConnLaplacian_of_contMDiff_smul
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (c : ℝ) (T : SmoothCcTensor g r s)
+    (hSmooth_T : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y
+        (rawTensorConnLap (I := I) g r s (fun z : M => T.toSection z) y)))
+    (hSmooth_cT : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y
+        (rawTensorConnLap (I := I) g r s
+          (fun z : M => (c • T).toSection z) y)))
+    (x : M) :
+    (tensorConnLaplacian_of_contMDiff (I := I) g r s (c • T)
+        hSmooth_cT).toSection x =
+      c • (tensorConnLaplacian_of_contMDiff (I := I) g r s T
+        hSmooth_T).toSection x := by
+  classical
+  rw [tensorConnLaplacian_of_contMDiff_toFun,
+      tensorConnLaplacian_of_contMDiff_toFun]
+  -- The underlying function of `c • T` is `c • T.toSection`.
+  have h_smul_fun : (fun z : M => (c • T).toSection z) =
+      (fun z : M => c • T.toSection z) := by
+    funext z
+    rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul]
+    rfl
+  rw [h_smul_fun]
+  refine rawTensorConnLap_smul (I := I) g r s
+    (T := fun z : M => T.toSection z) c
+    (fun y => ?_) (fun y i => ?_) x
+  · exact rawTensorConnLap_T_mdiff_at (I := I) r s T.toSection y
+  · exact rawTensorConnLap_covApply_mdiff_at (I := I) g r s T.toSection
+      (smoothOrthoFrame (I := I) g y i)
+      (smoothOrthoFrame_smooth (I := I) g y i) y
+
+/-- The zero section maps to the zero section. -/
+theorem tensorConnLaplacian_of_contMDiff_zero
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (hSmooth : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y
+        (rawTensorConnLap (I := I) g r s
+          (fun z : M => (0 : SmoothCcTensor g r s).toSection z) y))) :
+    tensorConnLaplacian_of_contMDiff (I := I) g r s
+        (0 : SmoothCcTensor g r s) hSmooth =
+      (0 : SmoothCcTensor g r s) := by
+  classical
+  -- We use `SmoothCcTensor.ext` to reduce to equality of underlying sections.
+  apply SmoothCcTensor.ext
+  -- Reduce to pointwise equality at the section level via `ContMDiffSection.coe_inj`.
+  apply ContMDiffSection.coe_inj
+  funext x
+  -- Underlying function of the zero section is identically zero.
+  have h_zero_fun : (fun z : M => (0 : SmoothCcTensor g r s).toSection z) =
+      (fun _ : M => (0 : TensorRSSpace r s I _)) := by
+    funext z
+    have h_sec_zero : (0 : SmoothCcTensor g r s).toSection =
+        (0 : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
+          (fun x : M => TensorRSSpace r s I x)⟯) :=
+      SmoothCcTensor.toSection_zero
+    rw [h_sec_zero, ContMDiffSection.coe_zero]
+    rfl
+  -- Show: `rawTensorConnLap g r s (zero section) x = 0`.
+  have h_rawConnLap_zero :
+      rawTensorConnLap (I := I) g r s
+        (fun z : M => (0 : SmoothCcTensor g r s).toSection z) x = 0 := by
+    rw [h_zero_fun]
+    exact rawTensorConnLap_zero (I := I) g r s x
+  -- LHS: the toFun of `tensorConnLaplacian_of_contMDiff ... 0 ...` at x.
+  -- Unfolds to `rawTensorConnLap g r s (zero section) x`.
+  -- RHS: the toFun of `(0 : SmoothCcTensor g r s).toSection` at x, which is 0.
+  change rawTensorConnLap (I := I) g r s
+      (fun z : M => (0 : SmoothCcTensor g r s).toSection z) x =
+    ((0 : SmoothCcTensor g r s).toSection : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
+      (fun x : M => TensorRSSpace r s I x)⟯) x
+  rw [h_rawConnLap_zero]
+  -- Now reduce the RHS: zero section evaluated at x is 0.
+  have h_sec_zero : (0 : SmoothCcTensor g r s).toSection =
+      (0 : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
+        (fun x : M => TensorRSSpace r s I x)⟯) :=
+    SmoothCcTensor.toSection_zero
+  rw [h_sec_zero, ContMDiffSection.coe_zero]
+  rfl
+
+end BundledOperator
+
 end Connection
 end Integral
 end DifferentialGeometry
