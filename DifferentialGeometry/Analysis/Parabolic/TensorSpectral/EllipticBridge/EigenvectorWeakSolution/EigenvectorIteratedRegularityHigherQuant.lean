@@ -250,7 +250,7 @@ This is the quantitative twin of
 `m`, repeatedly applying the `wkpNorm`-monotone chosen-weak-partial bound
 `wkpNorm_chosenWeakPartial_le` (each peel drops one Sobolev order and does not
 increase the norm). -/
-private theorem eigenvectorChartIteratedPartial_wkpNorm_le_of_memWkp
+theorem eigenvectorChartIteratedPartial_wkpNorm_le_of_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

@@ -2037,8 +2037,8 @@ theorem diffRHSAggregate_le_energy_perK
           ENNReal.ofReal
             ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖)
     (Citer : ℕ → ℝ) (eIter : ℕ → ℕ) (hCiter_nn : ∀ K', 0 ≤ Citer K')
-    (hCiter_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s) (j : ℕ)
-      (idx : Fin j → Fin (Module.finrank ℝ E)) (K' : ℕ),
+    (hCiter_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s) (j : ℕ),
+      j ≤ m + 1 → ∀ (idx : Fin j → Fin (Module.finrank ℝ E)) (K' : ℕ),
       wkpNorm (d := Module.finrank ℝ E) (2 + K') 2
           (eigenvectorChartIteratedPartial (I := I) (M := M)
             g r s h_atlas i α P₀ j idx)
@@ -2247,17 +2247,18 @@ theorem diffRHSAggregate_le_energy_perK
   -- general direction multi-index. For our purposes we phrase it abstractly:
   -- for any K' and l', the head is bounded by
   -- `((Fintype.card (Fin n) : ℝ) + 1) * Citer K' * Rhs_eff`, provided
-  -- `eIter K' ≤ e_out`.
+  -- `eIter K' ≤ e_out` and `m'' + 1 ≤ m + 1` (i.e., `m'' ≤ m`).
   -- Reusable head bound: combines two iterated-partial atoms.
   have h_head_bound :
       ∀ (m'' K' : ℕ) (l' : Fin (m'' + 1) → Fin (Module.finrank ℝ E)),
-        eIter K' ≤ e_out →
+        m'' + 1 ≤ m + 1 → eIter K' ≤ e_out →
         diffRHSHead (I := I) (M := M) g r s h_atlas i α P₀ m'' K' l'
           ≤ ENNReal.ofReal
               (((Fintype.card (Fin (Module.finrank ℝ E)) : ℝ) + 1) *
                 Citer K') * Rhs_eff := by
-    intro m'' K' l' h_eIter_le
+    intro m'' K' l' hm''_le_succ h_eIter_le
     rw [diffRHSHead]
+    have hm''_le : m'' ≤ m + 1 := Nat.le_of_succ_le hm''_le_succ
     -- Reduce each summand to `ofReal Citer K' * Rhs_eff`.
     have h_first_each : ∀ a ∈ (Finset.univ : Finset (Fin (Module.finrank ℝ E))),
         wkpNorm (d := Module.finrank ℝ E) (2 + K') 2
@@ -2266,7 +2267,7 @@ theorem diffRHSAggregate_le_energy_perK
             (chartTargetEuclid (I := I) (M := M) α)
           ≤ ENNReal.ofReal (Citer K') * Rhs_eff := fun a _ha =>
       h_bridge _ (Citer K') (eIter K') (hCiter_nn K') h_eIter_le
-        (hCiter_bd i (m'' + 1) (Fin.cons a (Fin.init l')) K')
+        (hCiter_bd i (m'' + 1) hm''_le_succ (Fin.cons a (Fin.init l')) K')
     have h_first :
         (∑ a : Fin (Module.finrank ℝ E),
             wkpNorm (d := Module.finrank ℝ E) (2 + K') 2
@@ -2292,7 +2293,7 @@ theorem diffRHSAggregate_le_energy_perK
             (chartTargetEuclid (I := I) (M := M) α)
           ≤ ENNReal.ofReal (Citer K') * Rhs_eff :=
       h_bridge _ (Citer K') (eIter K') (hCiter_nn K') h_eIter_le
-        (hCiter_bd i m'' (Fin.init l') K')
+        (hCiter_bd i m'' hm''_le (Fin.init l') K')
     have h_total :
         (∑ a : Fin (Module.finrank ℝ E),
             wkpNorm (d := Module.finrank ℝ E) (2 + K') 2
@@ -2422,7 +2423,9 @@ theorem diffRHSAggregate_le_energy_perK
           have h_idx : m - (m''' + 1) ≤ m + 1 := by omega
           have h_in := hIter_le (m - (m''' + 1)) h_idx
           exact h_in.trans (le_max_right _ _)
-        have h_head := h_head_bound m''' (K + (m - (m''' + 1))) l' h_eIter_le_local
+        have hm'''_succ_le : m''' + 1 ≤ m + 1 := by omega
+        have h_head := h_head_bound m''' (K + (m - (m''' + 1))) l'
+          hm'''_succ_le h_eIter_le_local
         -- Replace Citer K' in the head bound by the supremum.
         have h_in_range : m - (m''' + 1) ∈ Finset.range (m + 1) :=
           Finset.mem_range.mpr (by omega)
