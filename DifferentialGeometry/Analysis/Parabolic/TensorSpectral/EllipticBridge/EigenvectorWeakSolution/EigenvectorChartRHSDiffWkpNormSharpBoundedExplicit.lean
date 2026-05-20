@@ -438,7 +438,7 @@ private lemma rhsZeroAggregate_le_at_target
                 EuclN → ℝ) y)
               (chartTargetEuclid (I := I) (M := M) α)
             ≤ ENNReal.ofReal (H.Cpar K) * Rhs_eff := fun k _hk =>
-        h_bridge _ (H.Cpar K) (H.ePar K) (H.hCpar_nn K) hPar_le (H.hCpar_bd i P k K hK_le_N)
+        h_bridge _ (H.Cpar K) (H.ePar K) (H.hCpar_nn K) hPar_le (H.hCpar_bd i P k K hKN)
       have h_sum := finsetSum_eNNReal_ofReal_mul_le
         (Finset.univ : Finset (Fin (Module.finrank ℝ E)))
         (fun k => wkpNorm (d := Module.finrank ℝ E) K 2
@@ -556,7 +556,7 @@ private lemma rhsZeroAggregate_le_at_target
                 EuclN → ℝ) y)
               (chartTargetEuclid (I := I) (M := M) α)
             ≤ ENNReal.ofReal (H.Ccut K) * Rhs_eff := fun l _hl =>
-        h_bridge _ (H.Ccut K) (H.eCcut K) (H.hCcut_nn K) hCcut_le (H.hCcut_bd i P l K hK_le_N)
+        h_bridge _ (H.Ccut K) (H.eCcut K) (H.hCcut_nn K) hCcut_le (H.hCcut_bd i P l K hKN)
       have h_sum := finsetSum_eNNReal_ofReal_mul_le
         (Finset.univ : Finset (Fin (Module.finrank ℝ E)))
         (fun l => wkpNorm (d := Module.finrank ℝ E) K 2

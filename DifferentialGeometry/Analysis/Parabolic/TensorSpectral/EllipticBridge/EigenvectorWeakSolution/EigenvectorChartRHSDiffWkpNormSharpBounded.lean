@@ -151,13 +151,17 @@ structure sharpDiffPerKBdd
       ≤ ENNReal.ofReal (CresL K' * (i.fst.val)⁻¹ ^ (eResL K')) *
         ENNReal.ofReal
           ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖
-  /-- Partial-`Lp`-limit atom at order `K' ≤ N`. -/
+  /-- Partial-`Lp`-limit atom at order `K' + 1 ≤ N` (the partial-limit atom is
+  a chart partial of the chart component, so it eats one order off the chart-
+  component bound; the tightened precondition matches the converter
+  `eigenvector_partialLpLimit_perK_from_uniform_β`'s output, and the recursion
+  only ever queries this atom at chains `K' + 1 ≤ N`). -/
   Cpar : ℕ → ℝ
   ePar : ℕ → ℕ
   hCpar_nn : ∀ K', 0 ≤ Cpar K'
   hCpar_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
     (P : TensorCompIdx (E := E) r s) (k : Fin (Module.finrank ℝ E)) (K' : ℕ),
-    K' ≤ N →
+    K' + 1 ≤ N →
     wkpNorm (d := Module.finrank ℝ E) K' 2
         (fun y => ((partialLpLimit (I := I) (M := M)
             g r s h_atlas i α P k :
@@ -199,13 +203,18 @@ structure sharpDiffPerKBdd
       ≤ ENNReal.ofReal (CcR K' * (i.fst.val)⁻¹ ^ (eCcR K')) *
         ENNReal.ofReal
           ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖
-  /-- Cutoff-partial-`Lp`-limit atom at order `K' ≤ N`. -/
+  /-- Cutoff-partial-`Lp`-limit atom at order `K' + 1 ≤ N` (the cutoff
+  partial-limit atom is a chart partial of the cutoff chart component, so it
+  eats one order off the chart-component bound; the tightened precondition
+  matches the converter
+  `eigenvector_cutoffPartialLpLimit_perK_from_uniform_β`'s output, and the
+  recursion only ever queries this atom at chains `K' + 1 ≤ N`). -/
   Ccut : ℕ → ℝ
   eCcut : ℕ → ℕ
   hCcut_nn : ∀ K', 0 ≤ Ccut K'
   hCcut_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
     (P : TensorCompIdx (E := E) r s) (l : Fin (Module.finrank ℝ E)) (K' : ℕ),
-    K' ≤ N →
+    K' + 1 ≤ N →
     wkpNorm (d := Module.finrank ℝ E) K' 2
         (fun y => ((cutoffPartialLpLimit (I := I) (M := M)
             g r s h_atlas i α P l :
@@ -705,7 +714,7 @@ lemma rhsZeroAggregate_le_energy_perK_bdd
                 EuclN → ℝ) y)
               (chartTargetEuclid (I := I) (M := M) α)
             ≤ ENNReal.ofReal (H.Cpar K) * Rhs_eff := fun k _hk =>
-        h_bridge _ (H.Cpar K) (H.ePar K) (H.hCpar_nn K) hPar_le (H.hCpar_bd i P k K hK_le_N)
+        h_bridge _ (H.Cpar K) (H.ePar K) (H.hCpar_nn K) hPar_le (H.hCpar_bd i P k K hKN)
       have h_sum := finsetSum_eNNReal_ofReal_mul_le
         (Finset.univ : Finset (Fin (Module.finrank ℝ E)))
         (fun k => wkpNorm (d := Module.finrank ℝ E) K 2
@@ -823,7 +832,7 @@ lemma rhsZeroAggregate_le_energy_perK_bdd
                 EuclN → ℝ) y)
               (chartTargetEuclid (I := I) (M := M) α)
             ≤ ENNReal.ofReal (H.Ccut K) * Rhs_eff := fun l _hl =>
-        h_bridge _ (H.Ccut K) (H.eCcut K) (H.hCcut_nn K) hCcut_le (H.hCcut_bd i P l K hK_le_N)
+        h_bridge _ (H.Ccut K) (H.eCcut K) (H.hCcut_nn K) hCcut_le (H.hCcut_bd i P l K hKN)
       have h_sum := finsetSum_eNNReal_ofReal_mul_le
         (Finset.univ : Finset (Fin (Module.finrank ℝ E)))
         (fun l => wkpNorm (d := Module.finrank ℝ E) K 2
