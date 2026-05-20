@@ -88,7 +88,7 @@ index is the non-negative real
     (‖fderiv ℝ (chart-pulled covApply cov_RS B_i T₀) (extChartAt I α y)‖
       * ‖B_i y‖ + ‖covApply cov_RS B_i T₀ y‖)`,
 where `B_i = smoothOrthoFrame g y i`. -/
-private noncomputable def chartFrameData
+noncomputable def chartFrameData
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : Π b : M, TensorRSSpace r s I b)
     (y : M) (i : Fin (Module.finrank ℝ E)) : ℝ :=
@@ -309,7 +309,7 @@ index uses the inner Γ-vector
 `v_i := (LeviCivita g) B_i y (B_i y)` (with `B_i = smoothOrthoFrame g y i`),
 together with the chart-pulled Fréchet derivative of the chart-representation
 of `T₀` itself. -/
-private noncomputable def secondAppChartData
+noncomputable def secondAppChartData
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : Π b : M, TensorRSSpace r s I b)
     (y : M) (i : Fin (Module.finrank ℝ E)) : ℝ :=
