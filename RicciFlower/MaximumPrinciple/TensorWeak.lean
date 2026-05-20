@@ -2,6 +2,10 @@ import RicciFlower.Realized.Curvature
 import RicciFlower.Realized.TensorOperators
 import RicciFlower.Tensor.RSTensor.MetricCompatibility
 import RicciFlower.Tensor.RSTensor.QuadraticBounds
+import RicciFlower.Tensor.RSTensor.NablaOnTensors.Connection.OneJet
+import RicciFlower.Tensor.RSTensor.NablaOnTensors.Connection.Tangent
+import RicciFlower.Tensor.RicciIdentity.Tensor0S.Realization
+import RicciFlower.Operators.HessianTrace
 import RicciFlower.Operators.LaplacianMinimum
 import RicciFlower.Metric.Basic
 import Mathlib.Analysis.Calculus.Deriv.Basic
@@ -1421,6 +1425,58 @@ theorem firstNullKernel_right
   rw [hBsym w d.v]
   exact firstNullKernel_left (I := I) (M := M) hsym d w
 
+/-- Transfer the first-null left-kernel fact from the raw barrier evaluator to
+a local `(0,2)` tensor field whose left-null evaluations agree with it. -/
+private theorem firstNullFieldKerL
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorSecFamily (I := I) (M := M)}
+    {epsilon delta t0 : Real}
+    (hsym :
+      TwoTensorFamilySymmetricOn (I := I) (M := M)
+        (twoTensorSecToFamily (I := I) (M := M) S)
+        (Set.Icc t0 (t0 + delta)))
+    (d : TensorFirstNullData (I := I) (M := M) G
+      (twoTensorSecToFamily (I := I) (M := M) S) epsilon delta t0)
+    {B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2}
+    (hB :
+      ∀ w : TangentSpace I d.x1,
+        B d.x1 (vec2 (I := I) d.v w) =
+          tensorBarrierFamily (I := I) (M := M) G
+            (twoTensorSecToFamily (I := I) (M := M) S)
+            epsilon delta t0 d.t1 d.x1 d.v w) :
+    ∀ w : TangentSpace I d.x1,
+      B d.x1 (vec2 (I := I) d.v w) = 0 := by
+  intro w
+  rw [hB w]
+  exact firstNullKernel_left (I := I) (M := M) hsym d w
+
+/-- Transfer the first-null right-kernel fact from the raw barrier evaluator to
+a local `(0,2)` tensor field whose right-null evaluations agree with it. -/
+private theorem firstNullFieldKerR
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorSecFamily (I := I) (M := M)}
+    {epsilon delta t0 : Real}
+    (hsym :
+      TwoTensorFamilySymmetricOn (I := I) (M := M)
+        (twoTensorSecToFamily (I := I) (M := M) S)
+        (Set.Icc t0 (t0 + delta)))
+    (d : TensorFirstNullData (I := I) (M := M) G
+      (twoTensorSecToFamily (I := I) (M := M) S) epsilon delta t0)
+    {B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2}
+    (hB :
+      ∀ w : TangentSpace I d.x1,
+        B d.x1 (vec2 (I := I) w d.v) =
+          tensorBarrierFamily (I := I) (M := M) G
+            (twoTensorSecToFamily (I := I) (M := M) S)
+            epsilon delta t0 d.t1 d.x1 w d.v) :
+    ∀ w : TangentSpace I d.x1,
+      B d.x1 (vec2 (I := I) w d.v) = 0 := by
+  intro w
+  rw [hB w]
+  exact firstNullKernel_right (I := I) (M := M) hsym d w
+
 /-- One-dimensional derivative sign at a right-end minimum.
 
 If `phi` is nonnegative on `[a,t]`, vanishes at `t`, and has derivative `d`
@@ -1540,6 +1596,483 @@ theorem nablaEval_extDeriv
   rw [hsum]
   simp
 
+/--
+First-derivative product rule at a null vector in the kernel of the two-tensor.
+
+This variant does not require the moving test vector fields to have zero
+covariant derivative in the differentiating direction.  The two correction
+terms in the tensor product rule vanish because the null vector is in the left
+and right kernel of `B x`.
+-/
+private theorem nablaEval_ker
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2}
+    {nablaB : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 3}
+    (hreal :
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 cov B nablaB)
+    (Y : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (V : Fin 2 ->
+      ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    {x : M} {v : TangentSpace I x}
+    (hV : ∀ q : Fin 2, V q x = v)
+    (hkerL : ∀ w : TangentSpace I x, B x (vec2 (I := I) v w) = 0)
+    (hkerR : ∀ w : TangentSpace I x, B x (vec2 (I := I) w v) = 0) :
+    nablaB x (Fin.cons (Y x) (vec2 (I := I) v v)) =
+      extDerivFun (I := I) (fun p : M => B p (fun q : Fin 2 => V q p))
+        x (Y x) := by
+  have hslots : (fun q : Fin 2 => V q x) = vec2 (I := I) v v := by
+    funext q
+    rw [hV q]
+    fin_cases q <;> simp [vec2, Curvature.vec2]
+  have h :=
+    TotalNabla0SRealizes.eval_smooth_slots (I := I)
+      hreal Y V x
+  rw [hslots] at h
+  rw [h]
+  have hsum :
+      (∑ a : Fin 2,
+        B x
+          (Function.update (vec2 (I := I) v v) a
+            ((cov (fun p : M => V a p) x) (Y x)))) = 0 := by
+    apply Finset.sum_eq_zero
+    intro a _ha
+    fin_cases a
+    · change
+        B x
+          (Function.update (vec2 (I := I) v v) (0 : Fin 2)
+            ((cov (fun p : M => V 0 p) x) (Y x))) = 0
+      let A : TangentSpace I x := (cov (fun p : M => V 0 p) x) (Y x)
+      have hupdate :
+          Function.update (vec2 (I := I) v v) (0 : Fin 2) A =
+            vec2 (I := I) A v := by
+        funext q
+        fin_cases q <;> simp [vec2, Curvature.vec2, Function.update, A]
+      rw [hupdate]
+      exact hkerR A
+    · change
+        B x
+          (Function.update (vec2 (I := I) v v) (1 : Fin 2)
+            ((cov (fun p : M => V 1 p) x) (Y x))) = 0
+      let A : TangentSpace I x := (cov (fun p : M => V 1 p) x) (Y x)
+      have hupdate :
+          Function.update (vec2 (I := I) v v) (1 : Fin 2) A =
+            vec2 (I := I) v A := by
+        funext q
+        fin_cases q <;> simp [vec2, Curvature.vec2, Function.update, A]
+      rw [hupdate]
+      exact hkerL A
+  rw [hsum]
+  simp
+
+/--
+Pointwise version of `nablaEval_ker` for an arbitrary tangent direction.
+
+The required smooth direction field is chosen internally; this is useful when
+the direction is a correction term such as `(∇_X Y)_x`.
+-/
+private theorem nablaEval_ker_tangent
+    [T2Space M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2}
+    {nablaB : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 3}
+    (hreal :
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 cov B nablaB)
+    (Vsec : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    {x : M} {v : TangentSpace I x}
+    (hV : Vsec x = v)
+    (hkerL : ∀ w : TangentSpace I x, B x (vec2 (I := I) v w) = 0)
+    (hkerR : ∀ w : TangentSpace I x, B x (vec2 (I := I) w v) = 0)
+    (A : TangentSpace I x) :
+    nablaB x (Fin.cons A (vec2 (I := I) v v)) =
+      extDerivFun (I := I)
+        (fun p : M => B p (vec2 (I := I) (Vsec p) (Vsec p))) x A := by
+  obtain ⟨Ysec, hYsec⟩ :=
+    ContMDiffSection.exists_eq_at
+      (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞)) x A
+  let V : Fin 2 ->
+      ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
+    fun _ => Vsec
+  have hV' : ∀ q : Fin 2, V q x = v := by
+    intro q
+    exact hV
+  have hcalc :=
+    nablaEval_ker (I := I) (M := M) hreal Ysec V hV' hkerL hkerR
+  simpa [V, hYsec, vec2_self_eq_const] using hcalc
+
+/-- The derivative of a correction term `B(A,V)` vanishes when `A` vanishes at
+the point and `V` is a right-null vector for `B` there. -/
+private theorem deriv_eval_zero_left
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2}
+    {nablaB : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 3}
+    (hreal :
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 cov B nablaB)
+    (X A V : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    {x : M} {v : TangentSpace I x}
+    (hA : A x = 0)
+    (hV : V x = v)
+    (hkerR : ∀ w : TangentSpace I x, B x (vec2 (I := I) w v) = 0) :
+    extDerivFun (I := I)
+      (fun p : M => B p (vec2 (I := I) (A p) (V p))) x (X x) = 0 := by
+  let U : Fin 2 ->
+      ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
+    Fin.cons A (fun _ : Fin 1 => V)
+  have hslots : (fun q : Fin 2 => U q x) =
+      vec2 (I := I) (0 : TangentSpace I x) v := by
+    funext q
+    fin_cases q <;> simp [U, hA, hV, vec2, Curvature.vec2]
+  have h := TotalNabla0SRealizes.eval_smooth_slots (I := I) hreal X U x
+  rw [hslots] at h
+  have hfun :
+      (fun p : M => B p (fun a : Fin 2 => U a p)) =
+        (fun p : M => B p (vec2 (I := I) (A p) (V p))) := by
+    funext p
+    congr
+    funext q
+    fin_cases q <;> simp [U, vec2, Curvature.vec2]
+  rw [hfun] at h
+  have hlhs :
+      nablaB x (Fin.cons (X x) (vec2 (I := I) (0 : TangentSpace I x) v)) = 0 := by
+    exact (nablaB x).map_coord_zero (1 : Fin 3)
+      (by
+        change (vec2 (I := I) (0 : TangentSpace I x) v) (0 : Fin 2) = 0
+        simp [vec2, Curvature.vec2])
+  have hsum :
+      (∑ a : Fin 2,
+        B x
+          (Function.update (vec2 (I := I) (0 : TangentSpace I x) v) a
+            ((cov (fun p : M => U a p) x) (X x)))) = 0 := by
+    rw [Fin.sum_univ_two]
+    have h0 :
+        B x
+          (Function.update (vec2 (I := I) (0 : TangentSpace I x) v) (0 : Fin 2)
+            ((cov (fun p : M => U 0 p) x) (X x))) = 0 := by
+      let W : TangentSpace I x := (cov (fun p : M => U 0 p) x) (X x)
+      have hupdate :
+          Function.update (vec2 (I := I) (0 : TangentSpace I x) v) (0 : Fin 2) W =
+            vec2 (I := I) W v := by
+        funext q
+        fin_cases q <;> simp [vec2, Curvature.vec2, Function.update, W]
+      rw [hupdate]
+      exact hkerR W
+    have h1 :
+        B x
+          (Function.update (vec2 (I := I) (0 : TangentSpace I x) v) (1 : Fin 2)
+            ((cov (fun p : M => U 1 p) x) (X x))) = 0 := by
+      let W : TangentSpace I x := (cov (fun p : M => U 1 p) x) (X x)
+      have hupdate :
+          Function.update (vec2 (I := I) (0 : TangentSpace I x) v) (1 : Fin 2) W =
+            vec2 (I := I) (0 : TangentSpace I x) W := by
+        funext q
+        fin_cases q <;> simp [vec2, Curvature.vec2, Function.update, W]
+      have hzero :
+          B x (vec2 (I := I) (0 : TangentSpace I x) W) = 0 := by
+        exact (B x).map_coord_zero (0 : Fin 2)
+          (by simp [vec2, Curvature.vec2])
+      rw [hupdate]
+      exact hzero
+    rw [h0, h1]
+    simp
+  rw [hlhs, hsum] at h
+  simpa using h.symm
+
+/-- The derivative of a correction term `B(V,A)` vanishes when `A` vanishes at
+the point and `V` is a left-null vector for `B` there. -/
+private theorem deriv_eval_zero_right
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2}
+    {nablaB : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 3}
+    (hreal :
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 cov B nablaB)
+    (X V A : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    {x : M} {v : TangentSpace I x}
+    (hV : V x = v)
+    (hA : A x = 0)
+    (hkerL : ∀ w : TangentSpace I x, B x (vec2 (I := I) v w) = 0) :
+    extDerivFun (I := I)
+      (fun p : M => B p (vec2 (I := I) (V p) (A p))) x (X x) = 0 := by
+  let U : Fin 2 ->
+      ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
+    Fin.cons V (fun _ : Fin 1 => A)
+  have hslots : (fun q : Fin 2 => U q x) =
+      vec2 (I := I) v (0 : TangentSpace I x) := by
+    funext q
+    fin_cases q <;> simp [U, hA, hV, vec2, Curvature.vec2]
+  have h := TotalNabla0SRealizes.eval_smooth_slots (I := I) hreal X U x
+  rw [hslots] at h
+  have hfun :
+      (fun p : M => B p (fun a : Fin 2 => U a p)) =
+        (fun p : M => B p (vec2 (I := I) (V p) (A p))) := by
+    funext p
+    congr
+    funext q
+    fin_cases q <;> simp [U, vec2, Curvature.vec2]
+  rw [hfun] at h
+  have hlhs :
+      nablaB x (Fin.cons (X x) (vec2 (I := I) v (0 : TangentSpace I x))) = 0 := by
+    exact (nablaB x).map_coord_zero (2 : Fin 3)
+      (by
+        change (vec2 (I := I) v (0 : TangentSpace I x)) (1 : Fin 2) = 0
+        simp [vec2, Curvature.vec2])
+  have hsum :
+      (∑ a : Fin 2,
+        B x
+          (Function.update (vec2 (I := I) v (0 : TangentSpace I x)) a
+            ((cov (fun p : M => U a p) x) (X x)))) = 0 := by
+    rw [Fin.sum_univ_two]
+    have h0 :
+        B x
+          (Function.update (vec2 (I := I) v (0 : TangentSpace I x)) (0 : Fin 2)
+            ((cov (fun p : M => U 0 p) x) (X x))) = 0 := by
+      let W : TangentSpace I x := (cov (fun p : M => U 0 p) x) (X x)
+      have hupdate :
+          Function.update (vec2 (I := I) v (0 : TangentSpace I x)) (0 : Fin 2) W =
+            vec2 (I := I) W (0 : TangentSpace I x) := by
+        funext q
+        fin_cases q <;> simp [vec2, Curvature.vec2, Function.update, W]
+      have hzero :
+          B x (vec2 (I := I) W (0 : TangentSpace I x)) = 0 := by
+        exact (B x).map_coord_zero (1 : Fin 2)
+          (by simp [vec2, Curvature.vec2])
+      rw [hupdate]
+      exact hzero
+    have h1 :
+        B x
+          (Function.update (vec2 (I := I) v (0 : TangentSpace I x)) (1 : Fin 2)
+            ((cov (fun p : M => U 1 p) x) (X x))) = 0 := by
+      let W : TangentSpace I x := (cov (fun p : M => U 1 p) x) (X x)
+      have hupdate :
+          Function.update (vec2 (I := I) v (0 : TangentSpace I x)) (1 : Fin 2) W =
+            vec2 (I := I) v W := by
+        funext q
+        fin_cases q <;> simp [vec2, Curvature.vec2, Function.update, W]
+      rw [hupdate]
+      exact hkerL W
+    rw [h0, h1]
+    simp
+  rw [hlhs, hsum] at h
+  simpa using h.symm
+
+/-- C¹-slot version of `deriv_eval_zero_left`.  The moved slot need only be a
+locally `C¹` tangent field near the evaluation point. -/
+private theorem deriv_eval_zero_left_C1
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2}
+    {nablaB : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 3}
+    (hreal :
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 cov B nablaB)
+    (X V : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    (A : (p : M) -> TangentSpace I p)
+    {x : M} {v : TangentSpace I x}
+    (hA_at :
+      ContMDiffAt I (I.prod 𝓘(Real, E)) (1 : WithTop ℕ∞)
+        (fun p : M => (⟨p, A p⟩ : TotalSpace E (TangentSpace I : M -> Type _))) x)
+    (hA : A x = 0)
+    (hV : V x = v)
+    (hkerR : ∀ w : TangentSpace I x, B x (vec2 (I := I) w v) = 0) :
+    extDerivFun (I := I)
+      (fun p : M => B p (vec2 (I := I) (A p) (V p))) x (X x) = 0 := by
+  let U : Fin 2 -> (p : M) -> TangentSpace I p :=
+    Fin.cons A (fun _ : Fin 1 => fun p : M => V p)
+  have hV_at :
+      ContMDiffAt I (I.prod 𝓘(Real, E)) (1 : WithTop ℕ∞)
+        (fun p : M =>
+          (⟨p, V p⟩ : TotalSpace E (TangentSpace I : M -> Type _))) x := by
+    have htop :
+        ContMDiffAt I (I.prod 𝓘(Real, E)) (∞ : WithTop ℕ∞)
+          (fun p : M =>
+            (⟨p, V p⟩ : TotalSpace E (TangentSpace I : M -> Type _))) x :=
+      V.contMDiff.contMDiffAt
+    exact htop.of_le (by simp)
+  have hU_at : ∀ a : Fin 2,
+      ContMDiffAt I (I.prod 𝓘(Real, E)) (1 : WithTop ℕ∞)
+        (fun p : M =>
+          (⟨p, U a p⟩ : TotalSpace E (TangentSpace I : M -> Type _))) x := by
+    intro a
+    fin_cases a
+    · simpa [U] using hA_at
+    · simpa [U] using hV_at
+  have hslots : (fun q : Fin 2 => U q x) =
+      vec2 (I := I) (0 : TangentSpace I x) v := by
+    funext q
+    fin_cases q <;> simp [U, hA, hV, vec2, Curvature.vec2]
+  have h := TotalNabla0SRealizes.eval_C1_slots (I := I) hreal X U x hU_at
+  rw [hslots] at h
+  have hfun :
+      (fun p : M => B p (fun a : Fin 2 => U a p)) =
+        (fun p : M => B p (vec2 (I := I) (A p) (V p))) := by
+    funext p
+    congr
+    funext q
+    fin_cases q <;> simp [U, vec2, Curvature.vec2]
+  rw [hfun] at h
+  have hlhs :
+      nablaB x (Fin.cons (X x) (vec2 (I := I) (0 : TangentSpace I x) v)) = 0 := by
+    exact (nablaB x).map_coord_zero (1 : Fin 3)
+      (by
+        change (vec2 (I := I) (0 : TangentSpace I x) v) (0 : Fin 2) = 0
+        simp [vec2, Curvature.vec2])
+  have hsum :
+      (∑ a : Fin 2,
+        B x
+          (Function.update (vec2 (I := I) (0 : TangentSpace I x) v) a
+            ((cov (U a) x) (X x)))) = 0 := by
+    rw [Fin.sum_univ_two]
+    have h0 :
+        B x
+          (Function.update (vec2 (I := I) (0 : TangentSpace I x) v) (0 : Fin 2)
+            ((cov (U 0) x) (X x))) = 0 := by
+      let W : TangentSpace I x := (cov (U 0) x) (X x)
+      have hupdate :
+          Function.update (vec2 (I := I) (0 : TangentSpace I x) v) (0 : Fin 2) W =
+            vec2 (I := I) W v := by
+        funext q
+        fin_cases q <;> simp [vec2, Curvature.vec2, Function.update, W]
+      rw [hupdate]
+      exact hkerR W
+    have h1 :
+        B x
+          (Function.update (vec2 (I := I) (0 : TangentSpace I x) v) (1 : Fin 2)
+            ((cov (U 1) x) (X x))) = 0 := by
+      let W : TangentSpace I x := (cov (U 1) x) (X x)
+      have hupdate :
+          Function.update (vec2 (I := I) (0 : TangentSpace I x) v) (1 : Fin 2) W =
+            vec2 (I := I) (0 : TangentSpace I x) W := by
+        funext q
+        fin_cases q <;> simp [vec2, Curvature.vec2, Function.update, W]
+      have hzero :
+          B x (vec2 (I := I) (0 : TangentSpace I x) W) = 0 := by
+        exact (B x).map_coord_zero (0 : Fin 2)
+          (by simp [vec2, Curvature.vec2])
+      rw [hupdate]
+      exact hzero
+    rw [h0, h1]
+    simp
+  rw [hlhs, hsum] at h
+  simpa using h.symm
+
+/-- C¹-slot version of `deriv_eval_zero_right`.  The moved slot need only be a
+locally `C¹` tangent field near the evaluation point. -/
+private theorem deriv_eval_zero_right_C1
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2}
+    {nablaB : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 3}
+    (hreal :
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 cov B nablaB)
+    (X V : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    (A : (p : M) -> TangentSpace I p)
+    {x : M} {v : TangentSpace I x}
+    (hA_at :
+      ContMDiffAt I (I.prod 𝓘(Real, E)) (1 : WithTop ℕ∞)
+        (fun p : M => (⟨p, A p⟩ : TotalSpace E (TangentSpace I : M -> Type _))) x)
+    (hV : V x = v)
+    (hA : A x = 0)
+    (hkerL : ∀ w : TangentSpace I x, B x (vec2 (I := I) v w) = 0) :
+    extDerivFun (I := I)
+      (fun p : M => B p (vec2 (I := I) (V p) (A p))) x (X x) = 0 := by
+  let U : Fin 2 -> (p : M) -> TangentSpace I p :=
+    Fin.cons (fun p : M => V p) (fun _ : Fin 1 => A)
+  have hV_at :
+      ContMDiffAt I (I.prod 𝓘(Real, E)) (1 : WithTop ℕ∞)
+        (fun p : M =>
+          (⟨p, V p⟩ : TotalSpace E (TangentSpace I : M -> Type _))) x := by
+    have htop :
+        ContMDiffAt I (I.prod 𝓘(Real, E)) (∞ : WithTop ℕ∞)
+          (fun p : M =>
+            (⟨p, V p⟩ : TotalSpace E (TangentSpace I : M -> Type _))) x :=
+      V.contMDiff.contMDiffAt
+    exact htop.of_le (by simp)
+  have hU_at : ∀ a : Fin 2,
+      ContMDiffAt I (I.prod 𝓘(Real, E)) (1 : WithTop ℕ∞)
+        (fun p : M =>
+          (⟨p, U a p⟩ : TotalSpace E (TangentSpace I : M -> Type _))) x := by
+    intro a
+    fin_cases a
+    · simpa [U] using hV_at
+    · simpa [U] using hA_at
+  have hslots : (fun q : Fin 2 => U q x) =
+      vec2 (I := I) v (0 : TangentSpace I x) := by
+    funext q
+    fin_cases q <;> simp [U, hA, hV, vec2, Curvature.vec2]
+  have h := TotalNabla0SRealizes.eval_C1_slots (I := I) hreal X U x hU_at
+  rw [hslots] at h
+  have hfun :
+      (fun p : M => B p (fun a : Fin 2 => U a p)) =
+        (fun p : M => B p (vec2 (I := I) (V p) (A p))) := by
+    funext p
+    congr
+    funext q
+    fin_cases q <;> simp [U, vec2, Curvature.vec2]
+  rw [hfun] at h
+  have hlhs :
+      nablaB x (Fin.cons (X x) (vec2 (I := I) v (0 : TangentSpace I x))) = 0 := by
+    exact (nablaB x).map_coord_zero (2 : Fin 3)
+      (by
+        change (vec2 (I := I) v (0 : TangentSpace I x)) (1 : Fin 2) = 0
+        simp [vec2, Curvature.vec2])
+  have hsum :
+      (∑ a : Fin 2,
+        B x
+          (Function.update (vec2 (I := I) v (0 : TangentSpace I x)) a
+            ((cov (U a) x) (X x)))) = 0 := by
+    rw [Fin.sum_univ_two]
+    have h0 :
+        B x
+          (Function.update (vec2 (I := I) v (0 : TangentSpace I x)) (0 : Fin 2)
+            ((cov (U 0) x) (X x))) = 0 := by
+      let W : TangentSpace I x := (cov (U 0) x) (X x)
+      have hupdate :
+          Function.update (vec2 (I := I) v (0 : TangentSpace I x)) (0 : Fin 2) W =
+            vec2 (I := I) W (0 : TangentSpace I x) := by
+        funext q
+        fin_cases q <;> simp [vec2, Curvature.vec2, Function.update, W]
+      have hzero :
+          B x (vec2 (I := I) W (0 : TangentSpace I x)) = 0 := by
+        exact (B x).map_coord_zero (1 : Fin 2)
+          (by simp [vec2, Curvature.vec2])
+      rw [hupdate]
+      exact hzero
+    have h1 :
+        B x
+          (Function.update (vec2 (I := I) v (0 : TangentSpace I x)) (1 : Fin 2)
+            ((cov (U 1) x) (X x))) = 0 := by
+      let W : TangentSpace I x := (cov (U 1) x) (X x)
+      have hupdate :
+          Function.update (vec2 (I := I) v (0 : TangentSpace I x)) (1 : Fin 2) W =
+            vec2 (I := I) v W := by
+        funext q
+        fin_cases q <;> simp [vec2, Curvature.vec2, Function.update, W]
+      rw [hupdate]
+      exact hkerL W
+    rw [h0, h1]
+    simp
+  rw [hlhs, hsum] at h
+  simpa using h.symm
+
 /-- Second-derivative moving-slot product rule at a point where all moved
 slots have zero covariant derivative in the differentiating direction. -/
 theorem nabla2Eval_extDeriv
@@ -1572,7 +2105,11 @@ theorem nabla2Eval_extDeriv
         Fin.cons (n := 2) (α := fun _ : Fin 3 => TangentSpace I x)
           (Y x) (vec2 (I := I) v v) := by
     funext q
-    fin_cases q <;> simp [W, hV, vec2, Curvature.vec2]
+    cases q using Fin.cases with
+    | zero =>
+        simp [W]
+    | succ q =>
+        simp [W, hV q, vec2, Curvature.vec2, Fin.cons_succ]
   have h :=
     TotalNabla0SRealizes.eval_smooth_slots (I := I)
       hreal X W x
@@ -1588,13 +2125,604 @@ theorem nabla2Eval_extDeriv
     apply Finset.sum_eq_zero
     intro a _ha
     have hz : ((cov (fun p : M => W a p) x) (X x)) = 0 := by
-      fin_cases a <;> simp [W, hcovY, hcovV]
+      cases a using Fin.cases with
+      | zero =>
+          simpa [W, Fin.cons_zero] using hcovY
+      | succ a =>
+          simpa [W, Fin.cons_succ] using hcovV a
     rw [hz]
     exact (nablaB x).map_update_zero
       (Fin.cons (n := 2) (α := fun _ : Fin 3 => TangentSpace I x)
         (Y x) (vec2 (I := I) v v)) a
-  rw [hsum]
-  simp [W]
+  have hfun :
+      (fun p : M => nablaB p (fun a : Fin 3 => W a p)) =
+        (fun p : M => nablaB p (Fin.cons (Y p) (fun q : Fin 2 => V q p))) := by
+    funext p
+    congr
+    funext a
+    cases a using Fin.cases with
+    | zero =>
+        simp [W, Fin.cons_zero]
+    | succ a =>
+        simp [W, Fin.cons_succ]
+  rw [hfun, hsum]
+  simp
+
+/--
+Second-derivative moving-slot product rule with the `∇_X Y` correction kept.
+
+This is the form that matches the covariant Hessian definition.  The repeated
+test vector section has zero covariant derivative at the point, so only the
+correction from the middle slot `Y` remains.
+-/
+private theorem nabla2Eval_extDeriv_oneSec_corr
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {nablaB : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 3}
+    {nabla2B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 4}
+    (hreal :
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        3 cov nablaB nabla2B)
+    (X Y Vsec : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    {x : M} {v : TangentSpace I x}
+    (hV : Vsec x = v)
+    (hcovV : ((cov (fun p : M => Vsec p) x) (X x)) = 0) :
+    nabla2B x (Fin.cons (X x) (Fin.cons (Y x) (vec2 (I := I) v v))) =
+      extDerivFun (I := I)
+        (fun p : M => nablaB p (Fin.cons (Y p) (vec2 (I := I) (Vsec p) (Vsec p))))
+        x (X x) -
+      nablaB x
+        (Fin.cons ((cov (fun p : M => Y p) x) (X x)) (vec2 (I := I) v v)) := by
+  let W : Fin 3 ->
+      ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
+    Fin.cons Y (fun _ : Fin 2 => Vsec)
+  have hslots :
+      (fun q : Fin 3 => W q x) =
+        Fin.cons (n := 2) (α := fun _ : Fin 3 => TangentSpace I x)
+          (Y x) (vec2 (I := I) v v) := by
+    funext q
+    cases q using Fin.cases with
+    | zero =>
+        simp [W]
+    | succ q =>
+        simp [W, hV, vec2, Curvature.vec2, Fin.cons_succ]
+  have h :=
+    TotalNabla0SRealizes.eval_smooth_slots (I := I)
+      hreal X W x
+  rw [hslots] at h
+  rw [h]
+  have hsum :
+      (∑ a : Fin 3,
+        nablaB x
+          (Function.update
+            (Fin.cons (n := 2) (α := fun _ : Fin 3 => TangentSpace I x)
+              (Y x) (vec2 (I := I) v v))
+            a ((cov (fun p : M => W a p) x) (X x)))) =
+      nablaB x
+        (Fin.cons ((cov (fun p : M => Y p) x) (X x)) (vec2 (I := I) v v)) := by
+    rw [Fin.sum_univ_three]
+    have h0 :
+        nablaB x
+          (Function.update
+            (Fin.cons (n := 2) (α := fun _ : Fin 3 => TangentSpace I x)
+              (Y x) (vec2 (I := I) v v))
+            0 ((cov (fun p : M => W 0 p) x) (X x))) =
+        nablaB x
+          (Fin.cons ((cov (fun p : M => Y p) x) (X x)) (vec2 (I := I) v v)) := by
+      congr
+      funext q
+      cases q using Fin.cases with
+      | zero =>
+          simp [W, Function.update, Fin.cons_zero]
+      | succ q =>
+          simp [Function.update, Fin.cons_succ]
+    have h1 :
+        nablaB x
+          (Function.update
+            (Fin.cons (n := 2) (α := fun _ : Fin 3 => TangentSpace I x)
+              (Y x) (vec2 (I := I) v v))
+            1 ((cov (fun p : M => W 1 p) x) (X x))) = 0 := by
+      have hz : ((cov (fun p : M => W 1 p) x) (X x)) = 0 := by
+        simpa [W, Fin.cons_succ] using hcovV
+      rw [hz]
+      exact (nablaB x).map_update_zero
+        (Fin.cons (n := 2) (α := fun _ : Fin 3 => TangentSpace I x)
+          (Y x) (vec2 (I := I) v v)) 1
+    have h2 :
+        nablaB x
+          (Function.update
+            (Fin.cons (n := 2) (α := fun _ : Fin 3 => TangentSpace I x)
+              (Y x) (vec2 (I := I) v v))
+            2 ((cov (fun p : M => W 2 p) x) (X x))) = 0 := by
+      have hz : ((cov (fun p : M => W 2 p) x) (X x)) = 0 := by
+        simpa [W, Fin.cons_succ] using hcovV
+      rw [hz]
+      exact (nablaB x).map_update_zero
+        (Fin.cons (n := 2) (α := fun _ : Fin 3 => TangentSpace I x)
+          (Y x) (vec2 (I := I) v v)) 2
+    rw [h0, h1, h2]
+    simp
+  have hfun :
+      (fun p : M => nablaB p (fun a : Fin 3 => W a p)) =
+        (fun p : M => nablaB p
+          (Fin.cons (Y p) (vec2 (I := I) (Vsec p) (Vsec p)))) := by
+    funext p
+    congr
+    funext a
+    cases a using Fin.cases with
+    | zero =>
+        simp [W, Fin.cons_zero]
+    | succ a =>
+        simp [W, vec2_self_eq_const, Fin.cons_succ]
+  rw [hfun, hsum]
+
+/--
+Second-derivative product rule with the correction term rewritten as the
+directional derivative of the scalar test function `phi = B(V,V)`.
+
+This is the local calc matching the covariant Hessian formula: the `∇_X Y`
+correction in the tensor derivative becomes the corresponding `d phi` term by
+the first-null kernel product rule.
+-/
+private theorem nabla2Eval_extDeriv_oneSec_corr_phi
+    [T2Space M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2}
+    {nablaB : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 3}
+    {nabla2B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 4}
+    (hreal1 :
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 cov B nablaB)
+    (hreal2 :
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        3 cov nablaB nabla2B)
+    (X Y Vsec : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    {x : M} {v : TangentSpace I x}
+    (hV : Vsec x = v)
+    (hcovV : ((cov (fun p : M => Vsec p) x) (X x)) = 0)
+    (hkerL : ∀ w : TangentSpace I x, B x (vec2 (I := I) v w) = 0)
+    (hkerR : ∀ w : TangentSpace I x, B x (vec2 (I := I) w v) = 0) :
+    nabla2B x (Fin.cons (X x) (Fin.cons (Y x) (vec2 (I := I) v v))) =
+      extDerivFun (I := I)
+        (fun p : M => nablaB p (Fin.cons (Y p) (vec2 (I := I) (Vsec p) (Vsec p))))
+        x (X x) -
+      extDerivFun (I := I)
+        (fun p : M => B p (vec2 (I := I) (Vsec p) (Vsec p))) x
+        ((cov (fun p : M => Y p) x) (X x)) := by
+  let A : TangentSpace I x := (cov (fun p : M => Y p) x) (X x)
+  have hA :
+      nablaB x (Fin.cons A (vec2 (I := I) v v)) =
+        extDerivFun (I := I)
+          (fun p : M => B p (vec2 (I := I) (Vsec p) (Vsec p))) x A :=
+    nablaEval_ker_tangent (I := I) (M := M) hreal1 Vsec hV hkerL hkerR A
+  calc
+    nabla2B x (Fin.cons (X x) (Fin.cons (Y x) (vec2 (I := I) v v)))
+        =
+      extDerivFun (I := I)
+        (fun p : M => nablaB p (Fin.cons (Y p) (vec2 (I := I) (Vsec p) (Vsec p))))
+        x (X x) -
+      nablaB x
+        (Fin.cons ((cov (fun p : M => Y p) x) (X x)) (vec2 (I := I) v v)) := by
+          exact nabla2Eval_extDeriv_oneSec_corr (I := I) (M := M)
+            hreal2 X Y Vsec hV hcovV
+    _ =
+      extDerivFun (I := I)
+        (fun p : M => nablaB p (Fin.cons (Y p) (vec2 (I := I) (Vsec p) (Vsec p))))
+        x (X x) -
+      extDerivFun (I := I)
+        (fun p : M => B p (vec2 (I := I) (Vsec p) (Vsec p))) x
+        ((cov (fun p : M => Y p) x) (X x)) := by
+          simpa [A] using congrArg
+            (fun z : Real =>
+              extDerivFun (I := I)
+                (fun p : M =>
+                  nablaB p (Fin.cons (Y p) (vec2 (I := I) (Vsec p) (Vsec p))))
+                x (X x) - z)
+            hA
+
+/--
+Corrected second-derivative product rule for the scalar test
+`phi = B(V,V)` at a PSD-null vector.
+
+The correction terms in the first derivative of `B(V,V)` are
+`B(∇_Y V,V)` and `B(V,∇_Y V)`.  If `V` has zero covariant derivative at the
+point, those correction fields vanish there; the left/right kernel hypotheses
+make their derivatives vanish in the `X` direction.  This leaves exactly the
+covariant scalar Hessian expression.
+-/
+private theorem nabla2Eval_extDeriv_oneSec_hess
+    [T2Space M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2}
+    {nablaB : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 3}
+    {nabla2B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 4}
+    (hreal1 :
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 cov B nablaB)
+    (hreal2 :
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        3 cov nablaB nabla2B)
+    (X Y V : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    {x : M} {v : TangentSpace I x}
+    (hV : V x = v)
+    (hcovVX : ((cov (fun p : M => V p) x) (X x)) = 0)
+    (hcovVY : ((cov (fun p : M => V p) x) (Y x)) = 0)
+    (hA_at :
+      ContMDiffAt I (I.prod 𝓘(Real, E)) (1 : WithTop ℕ∞)
+        (fun p : M =>
+          (⟨p, ((cov (fun q : M => V q) p) (Y p))⟩ :
+            TotalSpace E (TangentSpace I : M -> Type _))) x)
+    (hkerL : ∀ w : TangentSpace I x, B x (vec2 (I := I) v w) = 0)
+    (hkerR : ∀ w : TangentSpace I x, B x (vec2 (I := I) w v) = 0)
+    (hdphi :
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun p : M =>
+          extDerivFun (I := I)
+            (fun q : M => B q (vec2 (I := I) (V q) (V q))) p (Y p)) x) :
+    nabla2B x (Fin.cons (X x) (Fin.cons (Y x) (vec2 (I := I) v v))) =
+      extDerivFun (I := I)
+        (fun p : M =>
+          extDerivFun (I := I)
+            (fun q : M => B q (vec2 (I := I) (V q) (V q))) p (Y p))
+        x (X x) -
+      extDerivFun (I := I)
+        (fun p : M => B p (vec2 (I := I) (V p) (V p))) x
+        ((cov (fun p : M => Y p) x) (X x)) := by
+  let phi : M -> Real := fun p => B p (vec2 (I := I) (V p) (V p))
+  let A : (p : M) -> TangentSpace I p := fun p => ((cov (fun q : M => V q) p) (Y p))
+  let dphiY : M -> Real := fun p => extDerivFun (I := I) phi p (Y p)
+  let corrL : M -> Real := fun p => B p (vec2 (I := I) (A p) (V p))
+  let corrR : M -> Real := fun p => B p (vec2 (I := I) (V p) (A p))
+  have hV_at :
+      ContMDiffAt I (I.prod 𝓘(Real, E)) (1 : WithTop ℕ∞)
+        (fun p : M =>
+          (⟨p, V p⟩ : TotalSpace E (TangentSpace I : M -> Type _))) x := by
+    have htop :
+        ContMDiffAt I (I.prod 𝓘(Real, E)) (∞ : WithTop ℕ∞)
+          (fun p : M =>
+            (⟨p, V p⟩ : TotalSpace E (TangentSpace I : M -> Type _))) x :=
+      V.contMDiff.contMDiffAt
+    exact htop.of_le (by simp)
+  have hA_at' :
+      ContMDiffAt I (I.prod 𝓘(Real, E)) (1 : WithTop ℕ∞)
+        (fun p : M => (⟨p, A p⟩ : TotalSpace E (TangentSpace I : M -> Type _))) x := by
+    simpa [A] using hA_at
+  have hcorrL :
+      MDifferentiableAt I 𝓘(Real, Real) corrL x := by
+    let Slots : Fin 2 -> (p : M) -> TangentSpace I p :=
+      Fin.cons A (fun _ : Fin 1 => fun p : M => V p)
+    have hSlots : ∀ a : Fin 2,
+        ContMDiffAt I (I.prod 𝓘(Real, E)) (1 : WithTop ℕ∞)
+          (fun p : M =>
+            (⟨p, Slots a p⟩ : TotalSpace E (TangentSpace I : M -> Type _))) x := by
+      intro a
+      fin_cases a
+      · simpa [Slots] using hA_at'
+      · simpa [Slots] using hV_at
+    have hraw := tensor0SField_eval_C1_slots_mdiffAt
+      (I := I) (M := M) B Slots x hSlots
+    have hfun :
+        (fun p : M => B p (fun a : Fin 2 => Slots a p)) = corrL := by
+      funext p
+      congr
+      funext a
+      fin_cases a <;> simp [Slots, vec2, Curvature.vec2]
+    rw [← hfun]
+    exact hraw
+  have hcorrR :
+      MDifferentiableAt I 𝓘(Real, Real) corrR x := by
+    let Slots : Fin 2 -> (p : M) -> TangentSpace I p :=
+      Fin.cons (fun p : M => V p) (fun _ : Fin 1 => A)
+    have hSlots : ∀ a : Fin 2,
+        ContMDiffAt I (I.prod 𝓘(Real, E)) (1 : WithTop ℕ∞)
+          (fun p : M =>
+            (⟨p, Slots a p⟩ : TotalSpace E (TangentSpace I : M -> Type _))) x := by
+      intro a
+      fin_cases a
+      · simpa [Slots] using hV_at
+      · simpa [Slots] using hA_at'
+    have hraw := tensor0SField_eval_C1_slots_mdiffAt
+      (I := I) (M := M) B Slots x hSlots
+    have hfun :
+        (fun p : M => B p (fun a : Fin 2 => Slots a p)) = corrR := by
+      funext p
+      congr
+      funext a
+      fin_cases a <;> simp [Slots, vec2, Curvature.vec2]
+    rw [← hfun]
+    exact hraw
+  have hleft_fun :
+      (fun p : M =>
+        nablaB p (Fin.cons (Y p) (vec2 (I := I) (V p) (V p)))) =
+        (fun p : M => dphiY p - corrL p - corrR p) := by
+    funext p
+    let Slots : Fin 2 ->
+        ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
+      fun _ => V
+    have hprod :=
+      TotalNabla0SRealizes.eval_smooth_slots (I := I) hreal1 Y Slots p
+    have hslots : (fun a : Fin 2 => Slots a p) =
+        vec2 (I := I) (V p) (V p) := by
+      funext a
+      fin_cases a <;> simp [Slots, vec2, Curvature.vec2]
+    rw [hslots] at hprod
+    have hfun :
+        (fun q : M => B q (fun a : Fin 2 => Slots a q)) = phi := by
+      funext q
+      simp [phi, Slots, vec2_self_eq_const]
+    rw [hfun] at hprod
+    have hsum :
+        (∑ a : Fin 2,
+          B p
+            (Function.update (vec2 (I := I) (V p) (V p)) a
+              ((cov (fun q : M => Slots a q) p) (Y p)))) =
+          corrL p + corrR p := by
+      rw [Fin.sum_univ_two]
+      have h0 :
+          B p
+            (Function.update (vec2 (I := I) (V p) (V p)) (0 : Fin 2)
+              ((cov (fun q : M => Slots 0 q) p) (Y p))) =
+            corrL p := by
+        have hcov :
+            ((cov (fun q : M => Slots 0 q) p) (Y p)) = A p := by
+          rfl
+        rw [hcov]
+        congr
+        funext a
+        fin_cases a <;> simp [vec2, Curvature.vec2, Function.update]
+      have h1 :
+          B p
+            (Function.update (vec2 (I := I) (V p) (V p)) (1 : Fin 2)
+              ((cov (fun q : M => Slots 1 q) p) (Y p))) =
+            corrR p := by
+        have hcov :
+            ((cov (fun q : M => Slots 1 q) p) (Y p)) = A p := by
+          rfl
+        rw [hcov]
+        congr
+        funext a
+        fin_cases a <;> simp [vec2, Curvature.vec2, Function.update]
+      rw [h0, h1]
+    rw [hprod, hsum]
+    ring
+  have hleft_deriv :
+      extDerivFun (I := I)
+        (fun p : M =>
+          nablaB p (Fin.cons (Y p) (vec2 (I := I) (V p) (V p)))) x (X x) =
+      extDerivFun (I := I) dphiY x (X x) := by
+    rw [hleft_fun]
+    have hsub1 :
+        MDifferentiableAt I 𝓘(Real, Real) (fun p : M => dphiY p - corrL p) x :=
+      hdphi.sub hcorrL
+    rw [extDerivFun_sub_at (I := I) (x := x) (v := X x) hsub1 hcorrR]
+    rw [extDerivFun_sub_at (I := I) (x := x) (v := X x) hdphi hcorrL]
+    have hA0 : A x = 0 := by
+      simp [A, hcovVY]
+    have hcorrL_zero :
+        extDerivFun (I := I) corrL x (X x) = 0 := by
+      simpa [corrL] using
+        deriv_eval_zero_left_C1 (I := I) (M := M)
+          hreal1 X V A hA_at' hA0 hV hkerR
+    have hcorrR_zero :
+        extDerivFun (I := I) corrR x (X x) = 0 := by
+      simpa [corrR] using
+        deriv_eval_zero_right_C1 (I := I) (M := M)
+          hreal1 X V A hA_at' hV hA0 hkerL
+    rw [hcorrL_zero, hcorrR_zero]
+    ring
+  have hcorr_phi :=
+    nabla2Eval_extDeriv_oneSec_corr_phi (I := I) (M := M)
+      hreal1 hreal2 X Y V hV hcovVX hkerL hkerR
+  rw [hleft_deriv] at hcorr_phi
+  simpa [phi, dphiY] using hcorr_phi
+
+/-- Product-rule bridge from the tensor second derivative to a supplied scalar
+Hessian realization for `phi = B(V,V)`. -/
+private theorem nabla2Eval_hess
+    [T2Space M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2}
+    {nablaB : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 3}
+    {nabla2B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 4}
+    {du : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 1}
+    {Hess : (y : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 y}
+    (hreal1 :
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 cov B nablaB)
+    (hreal2 :
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        3 cov nablaB nabla2B)
+    (X Y V : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    {x : M} {v : TangentSpace I x}
+    (hV : V x = v)
+    (hcovVX : ((cov (fun p : M => V p) x) (X x)) = 0)
+    (hcovVY : ((cov (fun p : M => V p) x) (Y x)) = 0)
+    (hA_at :
+      ContMDiffAt I (I.prod 𝓘(Real, E)) (1 : WithTop ℕ∞)
+        (fun p : M =>
+          (⟨p, ((cov (fun q : M => V q) p) (Y p))⟩ :
+            TotalSpace E (TangentSpace I : M -> Type _))) x)
+    (hkerL : ∀ w : TangentSpace I x, B x (vec2 (I := I) v w) = 0)
+    (hkerR : ∀ w : TangentSpace I x, B x (vec2 (I := I) w v) = 0)
+    (hdu :
+      DuFieldRealizes (I := I)
+        (fun p : M => B p (vec2 (I := I) (V p) (V p))) du)
+    (hHess :
+      HessianRealizesNablaDuAt (I := I) cov du Hess x)
+    (hdphi :
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun p : M =>
+          extDerivFun (I := I)
+            (fun q : M => B q (vec2 (I := I) (V q) (V q))) p (Y p)) x) :
+    nabla2B x (Fin.cons (X x) (Fin.cons (Y x) (vec2 (I := I) v v))) =
+      Hess x (vec2 (I := I) (X x) (Y x)) := by
+  let phi : M -> Real := fun p => B p (vec2 (I := I) (V p) (V p))
+  have hprod :
+      nabla2B x (Fin.cons (X x) (Fin.cons (Y x) (vec2 (I := I) v v))) =
+        extDerivFun (I := I)
+          (fun p : M => extDerivFun (I := I) phi p (Y p)) x (X x) -
+        extDerivFun (I := I) phi x ((cov (fun p : M => Y p) x) (X x)) := by
+    simpa [phi] using
+      nabla2Eval_extDeriv_oneSec_hess (I := I) (M := M)
+        hreal1 hreal2 X Y V hV hcovVX hcovVY hA_at hkerL hkerR hdphi
+  have hnabla_eval :
+      nablaDuAt (I := I) cov X du x (fun _ : Fin 1 => Y x) =
+        extDerivFun (I := I) (fun y : M => du y (fun _ : Fin 1 => Y y))
+          x (X x) -
+        du x (fun _ : Fin 1 => (cov (fun y : M => Y y) x) (X x)) := by
+    simpa [nablaDuAt] using
+      Coordinates.nabla0SFun_one_eval_smooth_slots (I := I) cov X Y du x
+  have hdu_fun :
+      (fun y : M => du y (fun _ : Fin 1 => Y y)) =
+        (fun y : M => extDerivFun (I := I) phi y (Y y)) := by
+    funext y
+    rw [hdu y]
+    exact differential1FormFun_apply_eq_extDerivFun (I := I) phi y (Y y)
+  have hdu_corr :
+      du x (fun _ : Fin 1 => (cov (fun y : M => Y y) x) (X x)) =
+        extDerivFun (I := I) phi x ((cov (fun y : M => Y y) x) (X x)) := by
+    rw [hdu x]
+    exact differential1FormFun_apply_eq_extDerivFun
+      (I := I) phi x ((cov (fun y : M => Y y) x) (X x))
+  have hnabla_phi :
+      nablaDuAt (I := I) cov X du x (fun _ : Fin 1 => Y x) =
+        extDerivFun (I := I) (fun y : M => extDerivFun (I := I) phi y (Y y))
+          x (X x) -
+        extDerivFun (I := I) phi x ((cov (fun y : M => Y y) x) (X x)) := by
+    rw [hnabla_eval, hdu_fun, hdu_corr]
+  calc
+    nabla2B x (Fin.cons (X x) (Fin.cons (Y x) (vec2 (I := I) v v)))
+        =
+      extDerivFun (I := I) (fun y : M => extDerivFun (I := I) phi y (Y y))
+        x (X x) -
+      extDerivFun (I := I) phi x ((cov (fun y : M => Y y) x) (X x)) := hprod
+    _ = nablaDuAt (I := I) cov X du x (fun _ : Fin 1 => Y x) := hnabla_phi.symm
+    _ = Hess x (vec2 (I := I) (X x) (Y x)) := (hHess X (Y x)).symm
+
+/-- Slot-level form of `nabla2Eval_hess`, suitable for the metric trace. -/
+private theorem nabla2Eval_hess_slots
+    [T2Space M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2}
+    {nablaB : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 3}
+    {nabla2B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 4}
+    {du : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 1}
+    {Hess : (y : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 y}
+    (hreal1 :
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 cov B nablaB)
+    (hreal2 :
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        3 cov nablaB nabla2B)
+    (V : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    {x : M} {v : TangentSpace I x}
+    (hV : V x = v)
+    (hcovV :
+      ∀ W : ContMDiffSection I E (∞ : WithTop ℕ∞)
+          (TangentSpace I : M -> Type _),
+        ((cov (fun p : M => V p) x) (W x)) = 0)
+    (hkerL : ∀ w : TangentSpace I x, B x (vec2 (I := I) v w) = 0)
+    (hkerR : ∀ w : TangentSpace I x, B x (vec2 (I := I) w v) = 0)
+    (hdu :
+      DuFieldRealizes (I := I)
+        (fun p : M => B p (vec2 (I := I) (V p) (V p))) du)
+    (hHess :
+      HessianRealizesNablaDuAt (I := I) cov du Hess x)
+    (hAreg :
+      ∀ Y : ContMDiffSection I E (∞ : WithTop ℕ∞)
+          (TangentSpace I : M -> Type _),
+        ContMDiffAt I (I.prod 𝓘(Real, E)) (1 : WithTop ℕ∞)
+          (fun p : M =>
+            (⟨p, ((cov (fun q : M => V q) p) (Y p))⟩ :
+              TotalSpace E (TangentSpace I : M -> Type _))) x) :
+    ∀ U W : TangentSpace I x,
+      nabla2B x (metricTraceInput (I := I) U W (vec2 (I := I) v v)) =
+        Hess x (vec2 (I := I) U W) := by
+  let phi : M -> Real := fun p => B p (vec2 (I := I) (V p) (V p))
+  have hphi :
+      ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) phi := by
+    let Slots : Fin 2 ->
+        ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
+      fun _ => V
+    have hraw := TensorMultilinear.contMDiff_tensor0SField_apply
+      (I := I) (M := M) B Slots
+    simpa [phi, Slots, vec2_self_eq_const] using hraw
+  intro U W
+  obtain ⟨Xsec, hXsec⟩ :=
+    ContMDiffSection.exists_eq_at
+      (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞)) x U
+  obtain ⟨Ysec, hYsec⟩ :=
+    ContMDiffSection.exists_eq_at
+      (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞)) x W
+  have hA_at := hAreg Ysec
+  have hdphi :
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun p : M =>
+          extDerivFun (I := I)
+            (fun q : M => B q (vec2 (I := I) (V q) (V q))) p (Ysec p)) x := by
+    simpa [phi] using dphi_apply_mdiffAt (I := I) phi hphi Ysec x
+  have hcalc :=
+    nabla2Eval_hess (I := I) (M := M)
+      hreal1 hreal2 Xsec Ysec V hV (hcovV Xsec) (hcovV Ysec)
+      hA_at hkerL hkerR hdu hHess hdphi
+  have hinput :
+      metricTraceInput (I := I) U W (vec2 (I := I) v v) =
+        Fin.cons (Xsec x) (Fin.cons (Ysec x) (vec2 (I := I) v v)) := by
+    funext q
+    cases q using Fin.cases with
+    | zero =>
+        change U = Xsec x
+        exact hXsec.symm
+    | succ q =>
+        cases q using Fin.cases with
+        | zero =>
+            change W = Ysec x
+            exact hYsec.symm
+        | succ q =>
+            cases q using Fin.cases with
+            | zero =>
+                rfl
+            | succ q =>
+                fin_cases q
+                rfl
+  calc
+    nabla2B x (metricTraceInput (I := I) U W (vec2 (I := I) v v))
+        =
+      nabla2B x (Fin.cons (Xsec x) (Fin.cons (Ysec x) (vec2 (I := I) v v))) := by
+        rw [hinput]
+    _ = Hess x (vec2 (I := I) (Xsec x) (Ysec x)) := hcalc
+    _ = Hess x (vec2 (I := I) U W) := by
+        rw [hXsec, hYsec]
 
 /-- Drift-slot cancellation for a scalar test `phi = B(V,V)`.
 
@@ -1621,26 +2749,8 @@ theorem nablaEval_zero
     (hcovV :
       ∀ q : Fin 2, ((cov (fun p : M => V q p) x) (X x)) = 0) :
     nablaB x (Fin.cons (X x) (vec2 (I := I) v v)) = 0 := by
-  have hslots : (fun q : Fin 2 => V q x) = vec2 (I := I) v v := by
-    funext q
-    rw [hV q]
-    fin_cases q <;> simp [vec2, Curvature.vec2]
-  have h :=
-    TotalNabla0SRealizes.eval_smooth_slots (I := I)
-      hreal X V x
-  rw [hslots] at h
-  rw [h]
-  have hsum :
-      (∑ a : Fin 2,
-        B x
-          (Function.update (vec2 (I := I) v v) a
-            ((cov (fun p : M => V a p) x) (X x)))) = 0 := by
-    apply Finset.sum_eq_zero
-    intro a _ha
-    rw [hcovV a]
-    exact (B x).map_update_zero (vec2 (I := I) v v) a
-  rw [hphi, hsum]
-  simp
+  rw [nablaEval_extDeriv (I := I) (M := M) hreal X V hV hcovV]
+  exact hphi
 
 /-- The scalar test function obtained by evaluating the first-null barrier on
 local repeated vector slots has a spatial local minimum at the first-null base
@@ -2345,9 +3455,6 @@ theorem scalarSigns_of_local_min
         B p (fun q : Fin 2 => V q p) =
           tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0
             d.t1 p (V 0 p) (V 0 p))
-    (hphi :
-      extDerivFun (I := I) (fun p : M => B p (fun q : Fin 2 => V q p))
-        d.x1 (Xsec d.x1) = 0)
     (hcovV :
       ∀ q : Fin 2, ((cov (fun p : M => V q p) d.x1) (Xsec d.x1)) = 0)
     (hmdiff :
@@ -2365,6 +3472,13 @@ theorem scalarSigns_of_local_min
   let phi : M -> Real := fun p => B p (fun q : Fin 2 => V q p)
   have hmin : IsLocalMin phi d.x1 :=
     firstNullLocalMin (I := I) (M := M) d V hV hB
+  have hphi :
+      extDerivFun (I := I) phi d.x1 (Xsec d.x1) = 0 := by
+    have hmf :
+        mfderiv I 𝓘(Real, Real) phi d.x1 = 0 :=
+      mfderiv_eq_zero_at_spatial_min (I := I) hmin hmdiff
+    rw [RicciFlower.extDerivFun_real_eq_mfderiv, hmf]
+    rfl
   have hlap_nonneg :
       0 ≤ laplacian (I := I) cov (G d.t1) phi d.x1 :=
     hlapMin hmin hmdiff hmdiff_near hgrad
@@ -2374,6 +3488,558 @@ theorem scalarSigns_of_local_min
     (cov := cov) (B := B) (nablaB := nablaB)
     hstrict hnull d (laplacian (I := I) cov (G d.t1) phi d.x1)
     hlap_nonneg hlap hreal Xsec V hX hnabla hV hphi hcovV
+
+/-- Single-section version of `scalarSigns_of_local_min`.
+
+This is the shape needed by the geometric first-null proof: one local test
+section is evaluated in both tensor slots. -/
+theorem scalarSigns_oneSec
+    [I.Boundaryless]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {nabla2Barrier : TensorNabla2Family (I := I) (M := M)}
+    {nablaBarrier : TensorNabla1Family (I := I) (M := M)}
+    {epsilon delta t0 : Real}
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2}
+    {nablaB : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 3}
+    (hstrict : TensorBarrierStrictSupersolutionOn (I := I) (M := M)
+      G S X N nabla2Barrier nablaBarrier epsilon delta t0)
+    (hnull : TensorNullEigenvectorCondition (I := I) (M := M)
+      G N (Set.Icc t0 (t0 + delta)))
+    (d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0)
+    (hreal :
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 cov B nablaB)
+    (Xsec Vsec :
+      ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (hlapMin : LaplacianNonnegativeAtSpatialMin (I := I) cov (G d.t1))
+    (hessPhi :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 d.x1)
+    (hlap :
+      ScalarLaplacianRealizesTraceAt (I := I) cov (G d.t1)
+        (fun p : M => B p (vec2 (I := I) (Vsec p) (Vsec p))) hessPhi)
+    (hslots :
+      ∀ U W : TangentSpace I d.x1,
+        (nabla2Barrier d.t1 d.x1)
+          (metricTraceInput (I := I) U W (vec2 (I := I) d.v d.v)) =
+        hessPhi (vec2 (I := I) U W))
+    (hX : X d.t1 d.x1 = Xsec d.x1)
+    (hnabla : nablaBarrier d.t1 d.x1 = nablaB d.x1)
+    (hV : Vsec d.x1 = d.v)
+    (hB :
+      ∀ p : M,
+        B p (vec2 (I := I) (Vsec p) (Vsec p)) =
+          tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0
+            d.t1 p (Vsec p) (Vsec p))
+    (hcovV : ((cov (fun p : M => Vsec p) d.x1) (Xsec d.x1)) = 0)
+    (hmdiff :
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun p : M => B p (vec2 (I := I) (Vsec p) (Vsec p))) d.x1)
+    (hmdiff_near :
+      ∀ᶠ y in nhds d.x1,
+        MDifferentiableAt I 𝓘(Real, Real)
+          (fun p : M => B p (vec2 (I := I) (Vsec p) (Vsec p))) y)
+    (hgrad :
+      MDiffAt (T% fun y : M =>
+        gradientFun (I := I) (G d.t1)
+          (fun p : M => B p (vec2 (I := I) (Vsec p) (Vsec p))) y) d.x1) :
+    TensorFirstNullScalarSigns (I := I) (M := M) G S X N epsilon delta t0 d := by
+  let V : Fin 2 ->
+      ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
+    fun _ => Vsec
+  have hV' : ∀ q : Fin 2, V q d.x1 = d.v := by
+    intro q
+    exact hV
+  have hB' :
+      ∀ p : M,
+        B p (fun q : Fin 2 => V q p) =
+          tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0
+            d.t1 p (V 0 p) (V 0 p) := by
+    intro p
+    simpa [V, vec2_self_eq_const] using hB p
+  have hcovV' :
+      ∀ q : Fin 2, ((cov (fun p : M => V q p) d.x1) (Xsec d.x1)) = 0 := by
+    intro q
+    simpa [V] using hcovV
+  have hlap' :
+      metricTraceFirstTwo0SAt (I := I) (G d.t1)
+        (nabla2Barrier d.t1 d.x1) (vec2 d.v d.v) =
+      laplacian (I := I) cov (G d.t1)
+        (fun p : M => B p (fun q : Fin 2 => V q p)) d.x1 := by
+    have hraw :
+        metricTraceFirstTwo0SAt (I := I) (G d.t1)
+          (nabla2Barrier d.t1 d.x1) (vec2 d.v d.v) =
+        laplacian (I := I) cov (G d.t1)
+          (fun p : M => B p (vec2 (I := I) (Vsec p) (Vsec p))) d.x1 := by
+      exact lapTrace_of_slots (I := I) cov (G d.t1)
+        (fun p : M => B p (vec2 (I := I) (Vsec p) (Vsec p)))
+        (nabla2Barrier d.t1 d.x1) (vec2 (I := I) d.v d.v)
+        hessPhi hlap hslots
+    simpa [V, vec2_self_eq_const] using hraw
+  have hmdiff' :
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun p : M => B p (fun q : Fin 2 => V q p)) d.x1 := by
+    simpa [V, vec2_self_eq_const] using hmdiff
+  have hmdiff_near' :
+      ∀ᶠ y in nhds d.x1,
+        MDifferentiableAt I 𝓘(Real, Real)
+          (fun p : M => B p (fun q : Fin 2 => V q p)) y := by
+    simpa [V, vec2_self_eq_const] using hmdiff_near
+  have hgrad' :
+      MDiffAt (T% fun y : M =>
+        gradientFun (I := I) (G d.t1)
+          (fun p : M => B p (fun q : Fin 2 => V q p)) y) d.x1 := by
+    simpa [V, vec2_self_eq_const] using hgrad
+  exact scalarSigns_of_local_min (I := I) (M := M)
+    (G := G) (S := S) (X := X) (N := N)
+    (nabla2Barrier := nabla2Barrier) (nablaBarrier := nablaBarrier)
+    (cov := cov) (B := B) (nablaB := nablaB)
+    hstrict hnull d hreal Xsec V hlapMin hlap' hX hnabla hV' hB' hcovV'
+    hmdiff' hmdiff_near' hgrad'
+
+/-- One-section scalar signs using a realized scalar Hessian for
+`phi = B(V,V)`.
+
+This is the real bridge that discharges the raw `hslots` input of
+`scalarSigns_oneSec` from the checked second-derivative product rule. -/
+theorem scalarSigns_hess
+    [I.Boundaryless] [T2Space M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {nabla2Barrier : TensorNabla2Family (I := I) (M := M)}
+    {nablaBarrier : TensorNabla1Family (I := I) (M := M)}
+    {epsilon delta t0 : Real}
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2}
+    {nablaB : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 3}
+    {nabla2B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 4}
+    {du : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 1}
+    {Hess : (y : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 y}
+    (hstrict : TensorBarrierStrictSupersolutionOn (I := I) (M := M)
+      G S X N nabla2Barrier nablaBarrier epsilon delta t0)
+    (hnull : TensorNullEigenvectorCondition (I := I) (M := M)
+      G N (Set.Icc t0 (t0 + delta)))
+    (d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0)
+    (hreal1 :
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 cov B nablaB)
+    (hreal2 :
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        3 cov nablaB nabla2B)
+    (Xsec Vsec :
+      ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (hlapMin : LaplacianNonnegativeAtSpatialMin (I := I) cov (G d.t1))
+    (hnabla2 : nabla2Barrier d.t1 d.x1 = nabla2B d.x1)
+    (hkerL : ∀ w : TangentSpace I d.x1, B d.x1 (vec2 (I := I) d.v w) = 0)
+    (hkerR : ∀ w : TangentSpace I d.x1, B d.x1 (vec2 (I := I) w d.v) = 0)
+    (hdu :
+      DuFieldRealizes (I := I)
+        (fun p : M => B p (vec2 (I := I) (Vsec p) (Vsec p))) du)
+    (hHess :
+      HessianRealizesNablaDuAt (I := I) cov du Hess d.x1)
+    (hlap :
+      ScalarLaplacianRealizesTraceAt (I := I) cov (G d.t1)
+        (fun p : M => B p (vec2 (I := I) (Vsec p) (Vsec p))) (Hess d.x1))
+    (hAreg :
+      ∀ Y : ContMDiffSection I E (∞ : WithTop ℕ∞)
+          (TangentSpace I : M -> Type _),
+        ContMDiffAt I (I.prod 𝓘(Real, E)) (1 : WithTop ℕ∞)
+          (fun p : M =>
+            (⟨p, ((cov (fun q : M => Vsec q) p) (Y p))⟩ :
+              TotalSpace E (TangentSpace I : M -> Type _))) d.x1)
+    (hX : X d.t1 d.x1 = Xsec d.x1)
+    (hnabla : nablaBarrier d.t1 d.x1 = nablaB d.x1)
+    (hV : Vsec d.x1 = d.v)
+    (hB :
+      ∀ p : M,
+        B p (vec2 (I := I) (Vsec p) (Vsec p)) =
+          tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0
+            d.t1 p (Vsec p) (Vsec p))
+    (hcovV :
+      ∀ W : ContMDiffSection I E (∞ : WithTop ℕ∞)
+          (TangentSpace I : M -> Type _),
+        ((cov (fun p : M => Vsec p) d.x1) (W d.x1)) = 0)
+    (hmdiff :
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun p : M => B p (vec2 (I := I) (Vsec p) (Vsec p))) d.x1)
+    (hmdiff_near :
+      ∀ᶠ y in nhds d.x1,
+        MDifferentiableAt I 𝓘(Real, Real)
+          (fun p : M => B p (vec2 (I := I) (Vsec p) (Vsec p))) y)
+    (hgrad :
+      MDiffAt (T% fun y : M =>
+        gradientFun (I := I) (G d.t1)
+          (fun p : M => B p (vec2 (I := I) (Vsec p) (Vsec p))) y) d.x1) :
+    TensorFirstNullScalarSigns (I := I) (M := M) G S X N epsilon delta t0 d := by
+  have hslots :
+      ∀ U W : TangentSpace I d.x1,
+        (nabla2Barrier d.t1 d.x1)
+          (metricTraceInput (I := I) U W (vec2 (I := I) d.v d.v)) =
+        (Hess d.x1) (vec2 (I := I) U W) := by
+    intro U W
+    rw [hnabla2]
+    exact nabla2Eval_hess_slots (I := I) (M := M)
+      hreal1 hreal2 Vsec hV hcovV hkerL hkerR hdu hHess hAreg U W
+  exact scalarSigns_oneSec (I := I) (M := M)
+    (G := G) (S := S) (X := X) (N := N)
+    (nabla2Barrier := nabla2Barrier) (nablaBarrier := nablaBarrier)
+    (cov := cov) (B := B) (nablaB := nablaB)
+    hstrict hnull d hreal1 Xsec Vsec hlapMin (Hess d.x1) hlap hslots
+    hX hnabla hV hB (hcovV Xsec) hmdiff hmdiff_near hgrad
+
+/-- One-jet scalar signs with canonical scalar `du`, Hessian, and Laplacian
+trace producers.
+
+This section-backed producer removes the explicit `du`/Hessian/Laplacian
+realization inputs from `scalarSigns_hess`.  The correction field
+`p ↦ (cov V p) (Y p)` is produced as a local `C1` slot from connection
+regularity; scalar gradient regularity is derived from smoothness of
+`phi = B(V,V)`. -/
+theorem scalarSigns_covHess
+    [I.Boundaryless] [T2Space M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorSecFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {nabla2Barrier : TensorNabla2Family (I := I) (M := M)}
+    {nablaBarrier : TensorNabla1Family (I := I) (M := M)}
+    {epsilon delta t0 : Real}
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2}
+    {nablaB : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 3}
+    {nabla2B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 4}
+    (hcov1 : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
+      (1 : WithTop ℕ∞))
+    (hcovInf : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
+      (∞ : WithTop ℕ∞))
+    (hstrict : TensorBarrierStrictSupersolutionOn (I := I) (M := M)
+      G (twoTensorSecToFamily (I := I) (M := M) S) X N
+      nabla2Barrier nablaBarrier epsilon delta t0)
+    (hnull : TensorNullEigenvectorCondition (I := I) (M := M)
+      G N (Set.Icc t0 (t0 + delta)))
+    (hsym :
+      TwoTensorFamilySymmetricOn (I := I) (M := M)
+        (twoTensorSecToFamily (I := I) (M := M) S)
+        (Set.Icc t0 (t0 + delta)))
+    (d : TensorFirstNullData (I := I) (M := M) G
+      (twoTensorSecToFamily (I := I) (M := M) S) epsilon delta t0)
+    (hmc : RicciFlower.Connection.IsMetricCompatible (I := I) cov (G d.t1))
+    (hreal1 :
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 cov B nablaB)
+    (hreal2 :
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        3 cov nablaB nabla2B)
+    (Xsec :
+      ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (hlapMin : LaplacianNonnegativeAtSpatialMin (I := I) cov (G d.t1))
+    (hnabla2 : nabla2Barrier d.t1 d.x1 = nabla2B d.x1)
+    (hkerB_left :
+      ∀ w : TangentSpace I d.x1,
+        B d.x1 (vec2 (I := I) d.v w) =
+          tensorBarrierFamily (I := I) (M := M) G
+            (twoTensorSecToFamily (I := I) (M := M) S)
+            epsilon delta t0 d.t1 d.x1 d.v w)
+    (hkerB_right :
+      ∀ w : TangentSpace I d.x1,
+        B d.x1 (vec2 (I := I) w d.v) =
+          tensorBarrierFamily (I := I) (M := M) G
+            (twoTensorSecToFamily (I := I) (M := M) S)
+            epsilon delta t0 d.t1 d.x1 w d.v)
+    (hX : X d.t1 d.x1 = Xsec d.x1)
+    (hnabla : nablaBarrier d.t1 d.x1 = nablaB d.x1)
+    (hB :
+      ∀ Vsec :
+          ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _),
+        Vsec d.x1 = d.v ->
+        ∀ p : M,
+          B p (vec2 (I := I) (Vsec p) (Vsec p)) =
+            tensorBarrierFamily (I := I) (M := M) G
+              (twoTensorSecToFamily (I := I) (M := M) S)
+              epsilon delta t0 d.t1 p (Vsec p) (Vsec p)) :
+    TensorFirstNullScalarSigns (I := I) (M := M) G
+      (twoTensorSecToFamily (I := I) (M := M) S) X N epsilon delta t0 d := by
+  obtain ⟨Vsec, hV, hcovVall⟩ :=
+    TensorLieDeriv.exists_cov_zero_at_apply (I := I) cov hcov1 d.x1 d.v
+  let phi : M -> Real := fun p => B p (vec2 (I := I) (Vsec p) (Vsec p))
+  have hphi :
+      ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) phi := by
+    let Slots : Fin 2 ->
+        ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
+      fun _ => Vsec
+    have hraw :=
+      TensorMultilinear.contMDiff_tensor0SField_apply (I := I) (M := M) B Slots
+    simpa [phi, Slots, vec2_self_eq_const] using hraw
+  let du : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 1 :=
+    duSec (I := I) phi hphi
+  let Hess : (y : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 y :=
+    fun y => hessianSec (I := I) cov hcovInf phi hphi y
+  have hdu : DuFieldRealizes (I := I) phi du := by
+    simpa [du] using duSec_realizes (I := I) phi hphi
+  have hHess : HessianRealizesNablaDuAt (I := I) cov du Hess d.x1 := by
+    simpa [du, Hess] using
+      hessianSec_realizesAt (I := I) cov hcovInf phi hphi d.x1
+  have hlap :
+      ScalarLaplacianRealizesTraceAt (I := I) cov (G d.t1) phi (Hess d.x1) := by
+    simpa [Hess] using
+      scalarLap_smooth (I := I) cov hcovInf (G d.t1) hmc phi hphi
+  have hkerL : ∀ w : TangentSpace I d.x1,
+      B d.x1 (vec2 (I := I) d.v w) = 0 :=
+    firstNullFieldKerL (I := I) (M := M) hsym d hkerB_left
+  have hkerR : ∀ w : TangentSpace I d.x1,
+      B d.x1 (vec2 (I := I) w d.v) = 0 :=
+    firstNullFieldKerR (I := I) (M := M) hsym d hkerB_right
+  have hmdiff :
+      MDifferentiableAt I 𝓘(Real, Real) phi d.x1 :=
+    hphi.contMDiffAt.mdifferentiableAt (by simp)
+  have hmdiff_near :
+      ∀ᶠ y in nhds d.x1, MDifferentiableAt I 𝓘(Real, Real) phi y := by
+    refine Filter.Eventually.of_forall ?_
+    intro y
+    exact hphi.contMDiffAt.mdifferentiableAt (by simp)
+  have hgrad :
+      MDiffAt (T% fun y : M =>
+        gradientFun (I := I) (G d.t1) phi y) d.x1 :=
+    gradientFun_mdiffAt (I := I) (G d.t1) hphi d.x1
+  have hAreg :
+      ∀ Y : ContMDiffSection I E (∞ : WithTop ℕ∞)
+          (TangentSpace I : M -> Type _),
+        ContMDiffAt I (I.prod 𝓘(Real, E)) (1 : WithTop ℕ∞)
+          (fun p : M =>
+            (⟨p, ((cov (fun q : M => Vsec q) p) (Y p))⟩ :
+              TotalSpace E (TangentSpace I : M -> Type _))) d.x1 := by
+    intro Y
+    simpa using
+      CovariantDerivative.smoothSections_cov_contMDiffAt_one
+        (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        cov hcov1 Y Vsec d.x1
+  exact scalarSigns_hess (I := I) (M := M)
+    (G := G) (S := twoTensorSecToFamily (I := I) (M := M) S)
+    (X := X) (N := N)
+    (nabla2Barrier := nabla2Barrier) (nablaBarrier := nablaBarrier)
+    (cov := cov) (B := B) (nablaB := nablaB) (nabla2B := nabla2B)
+    (du := du) (Hess := Hess)
+    hstrict hnull d hreal1 hreal2 Xsec Vsec hlapMin hnabla2
+    hkerL hkerR hdu hHess hlap hAreg
+    hX hnabla hV (hB Vsec hV) hcovVall hmdiff hmdiff_near
+    (by simpa [phi] using hgrad)
+
+/-- Section-backed version of `scalarSigns_covHess`.
+
+This instantiates the frozen barrier tensor and its first two spatial
+covariant derivatives from `barrierDerivs`; no separate `B`, `∇B`, or `∇²B`
+producer is exposed. -/
+theorem scalarSigns_secHess
+    [I.Boundaryless] [T2Space M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorSecFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {nablaS : TensorNabla1SecFamily (I := I) (M := M)}
+    {nabla2S : TensorNabla2SecFamily (I := I) (M := M)}
+    {epsilon delta t0 : Real}
+    {cov : Real -> CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    (hstrict : TensorBarrierStrictSupersolutionOn (I := I) (M := M)
+      G (twoTensorSecToFamily (I := I) (M := M) S) X N
+      (fun t x => nabla2S t x) (fun t x => nablaS t x)
+      epsilon delta t0)
+    (hnull : TensorNullEigenvectorCondition (I := I) (M := M)
+      G N (Set.Icc t0 (t0 + delta)))
+    (hsym :
+      TwoTensorFamilySymmetricOn (I := I) (M := M)
+        (twoTensorSecToFamily (I := I) (M := M) S)
+        (Set.Icc t0 (t0 + delta)))
+    (d : TensorFirstNullData (I := I) (M := M) G
+      (twoTensorSecToFamily (I := I) (M := M) S) epsilon delta t0)
+    (hcov1 : CovariantDerivative.ContMDiffCovariantDerivativeLocally
+      (cov d.t1) (1 : WithTop ℕ∞))
+    (hcovInf : CovariantDerivative.ContMDiffCovariantDerivativeLocally
+      (cov d.t1) (∞ : WithTop ℕ∞))
+    (hmc : ∀ t : Real,
+      RicciFlower.Connection.IsMetricCompatible (I := I) (cov t) (G t))
+    (hS : TensorSpatialDerivs (I := I) (M := M) cov S nablaS nabla2S)
+    (Xsec :
+      ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (hlapMin : LaplacianNonnegativeAtSpatialMin (I := I) (cov d.t1) (G d.t1))
+    (hX : X d.t1 d.x1 = Xsec d.x1) :
+    TensorFirstNullScalarSigns (I := I) (M := M) G
+      (twoTensorSecToFamily (I := I) (M := M) S) X N epsilon delta t0 d := by
+  let B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2 :=
+    (tensorBarrierSecFamily (I := I) (M := M) G S epsilon delta t0) d.t1
+  have hbarDerivs :
+      TensorSpatialDerivs (I := I) (M := M) cov
+        (tensorBarrierSecFamily (I := I) (M := M) G S epsilon delta t0)
+        nablaS nabla2S :=
+    barrierDerivs (I := I) (M := M) cov G S nablaS nabla2S
+      epsilon delta t0 hmc hS
+  have hkerB_left :
+      ∀ w : TangentSpace I d.x1,
+        B d.x1 (vec2 (I := I) d.v w) =
+          tensorBarrierFamily (I := I) (M := M) G
+            (twoTensorSecToFamily (I := I) (M := M) S)
+            epsilon delta t0 d.t1 d.x1 d.v w := by
+    intro w
+    simpa [B] using
+      tensorBarrierSec_apply (I := I) (M := M) G S epsilon delta t0
+        d.t1 d.x1 d.v w
+  have hkerB_right :
+      ∀ w : TangentSpace I d.x1,
+        B d.x1 (vec2 (I := I) w d.v) =
+          tensorBarrierFamily (I := I) (M := M) G
+            (twoTensorSecToFamily (I := I) (M := M) S)
+            epsilon delta t0 d.t1 d.x1 w d.v := by
+    intro w
+    simpa [B] using
+      tensorBarrierSec_apply (I := I) (M := M) G S epsilon delta t0
+        d.t1 d.x1 w d.v
+  have hB :
+      ∀ Vsec :
+          ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _),
+        Vsec d.x1 = d.v ->
+        ∀ p : M,
+          B p (vec2 (I := I) (Vsec p) (Vsec p)) =
+            tensorBarrierFamily (I := I) (M := M) G
+              (twoTensorSecToFamily (I := I) (M := M) S)
+              epsilon delta t0 d.t1 p (Vsec p) (Vsec p) := by
+    intro Vsec _hV p
+    simpa [B] using
+      tensorBarrierSec_apply (I := I) (M := M) G S epsilon delta t0
+        d.t1 p (Vsec p) (Vsec p)
+  exact scalarSigns_covHess (I := I) (M := M)
+    (G := G) (S := S) (X := X) (N := N)
+    (nabla2Barrier := fun t x => nabla2S t x)
+    (nablaBarrier := fun t x => nablaS t x)
+    (cov := cov d.t1) (B := B) (nablaB := nablaS d.t1)
+    (nabla2B := nabla2S d.t1)
+    hcov1 hcovInf hstrict hnull hsym d (hmc d.t1)
+    (hbarDerivs.first d.t1) (hbarDerivs.second d.t1) Xsec hlapMin
+    rfl hkerB_left hkerB_right hX rfl hB
+
+/--
+First-null scalar signs with the local zero-covariant-derivative test section
+constructed internally.
+
+This is the `OneJet` consumer: callers no longer supply the local test section
+or the proof `∇V = 0` at the first-null point.  The remaining hypotheses are
+the genuine scalar-test-function producers for the section selected by the
+one-jet theorem: the Laplacian bridge, the equality with the barrier scalar
+test, and the differentiability/gradient inputs used by
+`LaplacianNonnegativeAtSpatialMin`.
+-/
+theorem scalarSigns_covZero
+    [I.Boundaryless] [T2Space M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {nabla2Barrier : TensorNabla2Family (I := I) (M := M)}
+    {nablaBarrier : TensorNabla1Family (I := I) (M := M)}
+    {epsilon delta t0 : Real}
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2}
+    {nablaB : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 3}
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov 1)
+    (hstrict : TensorBarrierStrictSupersolutionOn (I := I) (M := M)
+      G S X N nabla2Barrier nablaBarrier epsilon delta t0)
+    (hnull : TensorNullEigenvectorCondition (I := I) (M := M)
+      G N (Set.Icc t0 (t0 + delta)))
+    (d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0)
+    (hreal :
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 cov B nablaB)
+    (Xsec :
+      ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (hlapMin : LaplacianNonnegativeAtSpatialMin (I := I) cov (G d.t1))
+    (hX : X d.t1 d.x1 = Xsec d.x1)
+    (hnabla : nablaBarrier d.t1 d.x1 = nablaB d.x1)
+    (hessPhi :
+      ∀ Vsec :
+        ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _),
+        Vsec d.x1 = d.v ->
+        Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 d.x1)
+    (hlap :
+      ∀ (Vsec :
+          ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+        (hV : Vsec d.x1 = d.v),
+        ScalarLaplacianRealizesTraceAt (I := I) cov (G d.t1)
+          (fun p : M => B p (vec2 (I := I) (Vsec p) (Vsec p)))
+          (hessPhi Vsec hV))
+    (hslots :
+      ∀ Vsec :
+        ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _),
+        ∀ hV : Vsec d.x1 = d.v,
+          ∀ U W : TangentSpace I d.x1,
+            (nabla2Barrier d.t1 d.x1)
+              (metricTraceInput (I := I) U W (vec2 (I := I) d.v d.v)) =
+            (hessPhi Vsec hV) (vec2 (I := I) U W))
+    (hB :
+      ∀ Vsec :
+        ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _),
+        Vsec d.x1 = d.v ->
+        ∀ p : M,
+          B p (vec2 (I := I) (Vsec p) (Vsec p)) =
+            tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0
+              d.t1 p (Vsec p) (Vsec p))
+    (hmdiff :
+      ∀ Vsec :
+        ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _),
+        Vsec d.x1 = d.v ->
+        MDifferentiableAt I 𝓘(Real, Real)
+          (fun p : M => B p (vec2 (I := I) (Vsec p) (Vsec p))) d.x1)
+    (hmdiff_near :
+      ∀ Vsec :
+        ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _),
+        Vsec d.x1 = d.v ->
+        ∀ᶠ y in nhds d.x1,
+          MDifferentiableAt I 𝓘(Real, Real)
+            (fun p : M => B p (vec2 (I := I) (Vsec p) (Vsec p))) y)
+    (hgrad :
+      ∀ Vsec :
+        ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _),
+        Vsec d.x1 = d.v ->
+        MDiffAt (T% fun y : M =>
+          gradientFun (I := I) (G d.t1)
+            (fun p : M => B p (vec2 (I := I) (Vsec p) (Vsec p))) y) d.x1) :
+    TensorFirstNullScalarSigns (I := I) (M := M) G S X N epsilon delta t0 d := by
+  obtain ⟨Vsec, hV, hcovVall⟩ :=
+    TensorLieDeriv.exists_cov_zero_at_apply (I := I) cov hcov d.x1 d.v
+  exact scalarSigns_oneSec (I := I) (M := M)
+    (G := G) (S := S) (X := X) (N := N)
+    (nabla2Barrier := nabla2Barrier) (nablaBarrier := nablaBarrier)
+    (cov := cov) (B := B) (nablaB := nablaB)
+    hstrict hnull d hreal Xsec Vsec hlapMin (hessPhi Vsec hV)
+    (hlap Vsec hV) (hslots Vsec hV) hX hnabla hV (hB Vsec hV) (hcovVall Xsec)
+    (hmdiff Vsec hV) (hmdiff_near Vsec hV) (hgrad Vsec hV)
 
 /--
 Uniform barrier nonnegativity on a fixed short slab for small barriers.

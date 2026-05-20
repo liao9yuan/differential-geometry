@@ -250,6 +250,72 @@ lemma sum_update_finCons_raw
       (F := F) (head := head) (dHead := d 0) (tail := tail)
       (dTail := fun q : Fin s => d q.succ)
 
+/-- Rotate a triple finite sum by moving the last index to the front. -/
+lemma sum_rotate3
+    {ι κ ι' A : Type*} [Fintype ι] [Fintype κ] [Fintype ι']
+    [AddCommMonoid A] (F : ι → κ → ι' → A) :
+    (∑ i : ι, ∑ k : κ, ∑ j : ι', F i k j) =
+      ∑ j : ι', ∑ i : ι, ∑ k : κ, F i k j := by
+  calc
+    (∑ i : ι, ∑ k : κ, ∑ j : ι', F i k j)
+        = ∑ i : ι, ∑ j : ι', ∑ k : κ, F i k j := by
+          refine Finset.sum_congr rfl ?_
+          intro i _
+          rw [Finset.sum_comm]
+    _ = ∑ j : ι', ∑ i : ι, ∑ k : κ, F i k j := by
+          rw [Finset.sum_comm]
+
+/-- Rotate a quadruple finite sum by moving the last index to the front. -/
+lemma sum_rotate4
+    {ι κ ι' κ' A : Type*} [Fintype ι] [Fintype κ] [Fintype ι']
+    [Fintype κ'] [AddCommMonoid A] (F : ι → κ → ι' → κ' → A) :
+    (∑ i : ι, ∑ k : κ, ∑ l : ι', ∑ m : κ', F i k l m) =
+      ∑ m : κ', ∑ i : ι, ∑ k : κ, ∑ l : ι', F i k l m := by
+  calc
+    (∑ i : ι, ∑ k : κ, ∑ l : ι', ∑ m : κ', F i k l m)
+        = ∑ i : ι, ∑ k : κ, ∑ m : κ', ∑ l : ι', F i k l m := by
+          refine Finset.sum_congr rfl ?_
+          intro i _
+          refine Finset.sum_congr rfl ?_
+          intro k _
+          rw [Finset.sum_comm]
+    _ = ∑ m : κ', ∑ i : ι, ∑ k : κ, ∑ l : ι', F i k l m := by
+          rw [sum_rotate3]
+
+/-- Rotate a quadruple finite sum by moving the last two indices to the front. -/
+lemma sum_rotate4_two
+    {ι κ ι' κ' A : Type*} [Fintype ι] [Fintype κ] [Fintype ι']
+    [Fintype κ'] [AddCommMonoid A] (F : ι → κ → ι' → κ' → A) :
+    (∑ i : ι, ∑ k : κ, ∑ l : ι', ∑ m : κ', F i k l m) =
+      ∑ l : ι', ∑ m : κ', ∑ i : ι, ∑ k : κ, F i k l m := by
+  calc
+    (∑ i : ι, ∑ k : κ, ∑ l : ι', ∑ m : κ', F i k l m)
+        = ∑ i : ι, ∑ l : ι', ∑ k : κ, ∑ m : κ', F i k l m := by
+          refine Finset.sum_congr rfl ?_
+          intro i _
+          rw [Finset.sum_comm]
+    _ = ∑ l : ι', ∑ i : ι, ∑ k : κ, ∑ m : κ', F i k l m := by
+          rw [Finset.sum_comm]
+    _ = ∑ l : ι', ∑ m : κ', ∑ i : ι, ∑ k : κ, F i k l m := by
+          refine Finset.sum_congr rfl ?_
+          intro l _
+          rw [sum_rotate3]
+
+/-- Expand an outer right factor through a double sum and rotate indices. -/
+lemma sum_mul_right3
+    {ι κ ι' R : Type*} [Fintype ι] [Fintype κ] [Fintype ι']
+    [Semiring R] (F : ι → κ → ι' → R) (c : ι' → R) :
+    (∑ j : ι', (∑ i : ι, ∑ k : κ, F i k j) * c j) =
+      ∑ i : ι, ∑ k : κ, ∑ j : ι', F i k j * c j := by
+  calc
+    (∑ j : ι', (∑ i : ι, ∑ k : κ, F i k j) * c j)
+        = ∑ j : ι', ∑ i : ι, ∑ k : κ, F i k j * c j := by
+          refine Finset.sum_congr rfl ?_
+          intro j _
+          simp [Finset.sum_mul]
+    _ = ∑ i : ι, ∑ k : κ, ∑ j : ι', F i k j * c j := by
+          rw [← sum_rotate3]
+
 end SlotAlgebra
 end Tensor
 end RicciFlower

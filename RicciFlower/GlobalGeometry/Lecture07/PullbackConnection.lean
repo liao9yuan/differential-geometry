@@ -1233,6 +1233,49 @@ def frameVec {ι : Type*}
     ι -> Real :=
   fun k => e.localFrame_coeff I b k x v
 
+/-- Reassemble a tangent vector from coefficients in a fixed local frame. -/
+def frameSum {ι : Type*} [Fintype ι]
+    (e : TangentTriv (I := I) (M := M)) [MemTrivializationAtlas e]
+    (b : Module.Basis ι Real E) {x : M} (c : ι -> Real) :
+    TangentSpace I x :=
+  ∑ k : ι, c k • e.localFrame b k x
+
+/-- In the frame domain, `frameSum` inverts `frameVec` on coefficients. -/
+theorem frameVec_frameSum
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (e : TangentTriv (I := I) (M := M)) [MemTrivializationAtlas e]
+    (b : Module.Basis ι Real E) {x : M} (hx : x ∈ e.baseSet)
+    (c : ι -> Real) :
+    frameVec (I := I) e b (frameSum (I := I) e b c : TangentSpace I x) = c := by
+  classical
+  ext k
+  rw [frameVec, frameSum]
+  rw [localFrame_coeff_eq_basis_repr (I := I) e b hx k]
+  simp [e.localFrame_apply_of_mem_baseSet b hx]
+  rw [Finset.sum_eq_single k]
+  · simp
+  · intro j _ hj
+    exact Finsupp.single_eq_of_ne (Ne.symm hj)
+  · intro hk
+    exact (hk (Finset.mem_univ k)).elim
+
+/-- In the frame domain, `frameVec` determines a tangent vector. -/
+theorem frameVec_eq_iff
+    {ι : Type*}
+    (e : TangentTriv (I := I) (M := M)) [MemTrivializationAtlas e]
+    (b : Module.Basis ι Real E) {x : M} (hx : x ∈ e.baseSet)
+    {u v : TangentSpace I x} :
+    frameVec (I := I) e b u = frameVec (I := I) e b v ↔ u = v := by
+  constructor
+  · intro h
+    apply (e.basisAt b hx).ext_elem
+    intro k
+    rw [← localFrame_coeff_eq_basis_repr (I := I) e b hx k u]
+    rw [← localFrame_coeff_eq_basis_repr (I := I) e b hx k v]
+    exact congrFun h k
+  · intro h
+    rw [h]
+
 /-- Local-frame derivative coefficient vector of a pullback tangent section. -/
 def frameDerivVec {ι : Type*} [Fintype ι]
     (e : TangentTriv (I := I) (M := M)) [MemTrivializationAtlas e]
@@ -1251,6 +1294,35 @@ def frameGammaMat {ι : Type*} [Fintype ι]
     (u : TangentSpace I' y) : Matrix ι ι Real :=
   fun k j => frameGamma (I := I) (M := M) cov e b (f y)
     ((mfderiv I' I f y) u) j k
+
+/-- The local-frame curvature matrix expression
+`∂s Γt - ∂t Γs + ΓsΓt - ΓtΓs`. -/
+def frameCurvMat {ι : Type*} [Fintype ι]
+    (Γs Γt dΓt_s dΓs_t : Matrix ι ι Real) : Matrix ι ι Real :=
+  dΓt_s - dΓs_t + Γs * Γt - Γt * Γs
+
+/-- The vector represented by the local-frame curvature matrix expression
+applied to a tangent vector's frame coefficients. -/
+def frameCurvVec {ι : Type*} [Fintype ι]
+    (e : TangentTriv (I := I) (M := M)) [MemTrivializationAtlas e]
+    (b : Module.Basis ι Real E)
+    (Γs Γt dΓt_s dΓs_t : Matrix ι ι Real)
+    {x : M} (V : TangentSpace I x) : TangentSpace I x :=
+  frameSum (I := I) e b
+    ((frameCurvMat Γs Γt dΓt_s dΓs_t).mulVec
+      (frameVec (I := I) e b V))
+
+/-- Coefficients of `frameCurvVec` are the curvature matrix expression. -/
+theorem frameVec_frameCurvVec
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (e : TangentTriv (I := I) (M := M)) [MemTrivializationAtlas e]
+    (b : Module.Basis ι Real E) {x : M} (hx : x ∈ e.baseSet)
+    (Γs Γt dΓt_s dΓs_t : Matrix ι ι Real) (V : TangentSpace I x) :
+    frameVec (I := I) e b
+        (frameCurvVec (I := I) e b Γs Γt dΓt_s dΓs_t V) =
+      (frameCurvMat Γs Γt dΓt_s dΓs_t).mulVec
+        (frameVec (I := I) e b V) := by
+  rw [frameCurvVec, frameVec_frameSum (I := I) e b hx]
 
 /-- Vector form of the fixed-frame pullback derivative formula. -/
 theorem HasFrameDerivAt.frame_vec_eq
@@ -1599,6 +1671,502 @@ structure HasPBSurfaceCovDeriv2At
     HasPBParamCovDerivAt (I := I) cov F Vt s t DstV
   has_time_param :
     HasPBTimeCovDerivAt (I := I) cov F Vs s t DtsV
+
+/-- Frame-vector expansion of `D_s(D_t V)` from a surface 2-jet.
+
+The hypotheses `hΓt`, `hvt`, and `hvs` are exactly the scalar/vector
+coefficient regularity needed to differentiate the time-direction frame
+formula in the parameter direction. -/
+theorem HasPBSurfaceCovDeriv2At.dst_frame
+    {ι : Type} [Fintype ι] [DecidableEq ι]
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {F : Surface M} {V Vs Vt : SurfaceFieldAlong I F}
+    {s t : Real} {DstV DtsV : TangentSpace I (F (s, t))}
+    (hjet : HasPBSurfaceCovDeriv2At (I := I) cov F V Vs Vt s t DstV DtsV)
+    (e : TangentTriv (I := I) (M := M)) [MemTrivializationAtlas e]
+    (b : Module.Basis ι Real E)
+    (hmem : ∀ᶠ σ : Real in 𝓝 s, F (σ, t) ∈ e.baseSet)
+    {dΓt_s : Matrix ι ι Real} {vst vs : ι -> Real}
+    (hΓt : HasDerivAt
+      (fun σ : Real =>
+        frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+          (surfaceTimeCurve F σ) t
+          (1 : TangentSpace 𝓘(Real, Real) t)) dΓt_s s)
+    (hvt : HasDerivAt
+      (fun σ : Real =>
+        frameDerivVec (I := I) (I' := 𝓘(Real, Real)) (M := M) e b
+          (surfaceTimeCurve F σ) (fun τ => V (σ, τ)) t
+          (1 : TangentSpace 𝓘(Real, Real) t)) vst s)
+    (hvs : HasDerivAt
+      (fun σ : Real => frameVec (I := I) e b (V (σ, t))) vs s) :
+    frameVec (I := I) e b DstV =
+      coeffCov
+        (frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+          (surfaceParamCurve F t) s
+          (1 : TangentSpace 𝓘(Real, Real) s))
+        (vst + dΓt_s.mulVec (frameVec (I := I) e b (V (s, t))) +
+          (frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+            (surfaceTimeCurve F s) t
+            (1 : TangentSpace 𝓘(Real, Real) t)).mulVec vs)
+        (coeffCov
+          (frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+            (surfaceTimeCurve F s) t
+            (1 : TangentSpace 𝓘(Real, Real) t))
+          (frameDerivVec (I := I) (I' := 𝓘(Real, Real)) (M := M) e b
+            (surfaceTimeCurve F s) (fun τ => V (s, τ)) t
+            (1 : TangentSpace 𝓘(Real, Real) t))
+          (frameVec (I := I) e b (V (s, t)))) := by
+  have hx : F (s, t) ∈ e.baseSet := hmem.self_of_nhds
+  have hDst :=
+    HasPBParamCovDerivAt.frame_vec_eq (I := I) (cov := cov)
+      hjet.has_param_time e b hx
+  have htime_at :
+      HasPBTimeCovDerivAt (I := I) cov F V s t (Vt (s, t)) :=
+    hjet.has_time_germ.self_of_nhds
+  have hVt_at :=
+    HasPBTimeCovDerivAt.frame_vec_eq (I := I) (cov := cov)
+      htime_at e b hx
+  have htime_line :
+      (fun σ : Real => frameVec (I := I) e b (Vt (σ, t))) =ᶠ[𝓝 s]
+        (fun σ : Real =>
+          coeffCov
+            (frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+              (surfaceTimeCurve F σ) t
+              (1 : TangentSpace 𝓘(Real, Real) t))
+            (frameDerivVec (I := I) (I' := 𝓘(Real, Real)) (M := M) e b
+              (surfaceTimeCurve F σ) (fun τ => V (σ, τ)) t
+              (1 : TangentSpace 𝓘(Real, Real) t))
+            (frameVec (I := I) e b (V (σ, t)))) := by
+    filter_upwards [eventually_prod_left hjet.has_time_germ, hmem] with σ hσ hσmem
+    exact HasPBTimeCovDerivAt.frame_vec_eq (I := I) (cov := cov)
+      hσ e b hσmem
+  have htime_deriv :
+      HasDerivAt (fun σ : Real => frameVec (I := I) e b (Vt (σ, t)))
+        (vst + dΓt_s.mulVec (frameVec (I := I) e b (V (s, t))) +
+          (frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+            (surfaceTimeCurve F s) t
+            (1 : TangentSpace 𝓘(Real, Real) t)).mulVec vs) s := by
+    have hraw := hasDerivAt_coeffCov
+      (Γ := fun σ : Real =>
+        frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+          (surfaceTimeCurve F σ) t
+          (1 : TangentSpace 𝓘(Real, Real) t))
+      (v := fun σ : Real => frameVec (I := I) e b (V (σ, t)))
+      (dvFun := fun σ : Real =>
+        frameDerivVec (I := I) (I' := 𝓘(Real, Real)) (M := M) e b
+          (surfaceTimeCurve F σ) (fun τ => V (σ, τ)) t
+          (1 : TangentSpace 𝓘(Real, Real) t))
+      hΓt hvs hvt
+    exact hraw.congr_of_eventuallyEq htime_line
+  have hderivVec :=
+    frameDerivVec_eq_of_hasDerivAt (I := I) e b
+      (gamma := surfaceParamCurve F t)
+      (S := fun σ => Vt (σ, t)) htime_deriv
+  rw [hDst, hderivVec, hVt_at]
+
+/-- Frame-vector expansion of `D_t(D_s V)` from a surface 2-jet. -/
+theorem HasPBSurfaceCovDeriv2At.dts_frame
+    {ι : Type} [Fintype ι] [DecidableEq ι]
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {F : Surface M} {V Vs Vt : SurfaceFieldAlong I F}
+    {s t : Real} {DstV DtsV : TangentSpace I (F (s, t))}
+    (hjet : HasPBSurfaceCovDeriv2At (I := I) cov F V Vs Vt s t DstV DtsV)
+    (e : TangentTriv (I := I) (M := M)) [MemTrivializationAtlas e]
+    (b : Module.Basis ι Real E)
+    (hmem : ∀ᶠ τ : Real in 𝓝 t, F (s, τ) ∈ e.baseSet)
+    {dΓs_t : Matrix ι ι Real} {vts vt : ι -> Real}
+    (hΓs : HasDerivAt
+      (fun τ : Real =>
+        frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+          (surfaceParamCurve F τ) s
+          (1 : TangentSpace 𝓘(Real, Real) s)) dΓs_t t)
+    (hvs : HasDerivAt
+      (fun τ : Real =>
+        frameDerivVec (I := I) (I' := 𝓘(Real, Real)) (M := M) e b
+          (surfaceParamCurve F τ) (fun σ => V (σ, τ)) s
+          (1 : TangentSpace 𝓘(Real, Real) s)) vts t)
+    (hvt : HasDerivAt
+      (fun τ : Real => frameVec (I := I) e b (V (s, τ))) vt t) :
+    frameVec (I := I) e b DtsV =
+      coeffCov
+        (frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+          (surfaceTimeCurve F s) t
+          (1 : TangentSpace 𝓘(Real, Real) t))
+        (vts + dΓs_t.mulVec (frameVec (I := I) e b (V (s, t))) +
+          (frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+            (surfaceParamCurve F t) s
+            (1 : TangentSpace 𝓘(Real, Real) s)).mulVec vt)
+        (coeffCov
+          (frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+            (surfaceParamCurve F t) s
+            (1 : TangentSpace 𝓘(Real, Real) s))
+          (frameDerivVec (I := I) (I' := 𝓘(Real, Real)) (M := M) e b
+            (surfaceParamCurve F t) (fun σ => V (σ, t)) s
+            (1 : TangentSpace 𝓘(Real, Real) s))
+          (frameVec (I := I) e b (V (s, t)))) := by
+  have hx : F (s, t) ∈ e.baseSet := hmem.self_of_nhds
+  have hDts :=
+    HasPBTimeCovDerivAt.frame_vec_eq (I := I) (cov := cov)
+      hjet.has_time_param e b hx
+  have hparam_at :
+      HasPBParamCovDerivAt (I := I) cov F V s t (Vs (s, t)) :=
+    hjet.has_param_germ.self_of_nhds
+  have hVs_at :=
+    HasPBParamCovDerivAt.frame_vec_eq (I := I) (cov := cov)
+      hparam_at e b hx
+  have hparam_line :
+      (fun τ : Real => frameVec (I := I) e b (Vs (s, τ))) =ᶠ[𝓝 t]
+        (fun τ : Real =>
+          coeffCov
+            (frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+              (surfaceParamCurve F τ) s
+              (1 : TangentSpace 𝓘(Real, Real) s))
+            (frameDerivVec (I := I) (I' := 𝓘(Real, Real)) (M := M) e b
+              (surfaceParamCurve F τ) (fun σ => V (σ, τ)) s
+              (1 : TangentSpace 𝓘(Real, Real) s))
+            (frameVec (I := I) e b (V (s, τ)))) := by
+    filter_upwards [eventually_prod_right hjet.has_param_germ, hmem] with τ hτ hτmem
+    exact HasPBParamCovDerivAt.frame_vec_eq (I := I) (cov := cov)
+      hτ e b hτmem
+  have hparam_deriv :
+      HasDerivAt (fun τ : Real => frameVec (I := I) e b (Vs (s, τ)))
+        (vts + dΓs_t.mulVec (frameVec (I := I) e b (V (s, t))) +
+          (frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+            (surfaceParamCurve F t) s
+            (1 : TangentSpace 𝓘(Real, Real) s)).mulVec vt) t := by
+    have hraw := hasDerivAt_coeffCov
+      (Γ := fun τ : Real =>
+        frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+          (surfaceParamCurve F τ) s
+          (1 : TangentSpace 𝓘(Real, Real) s))
+      (v := fun τ : Real => frameVec (I := I) e b (V (s, τ)))
+      (dvFun := fun τ : Real =>
+        frameDerivVec (I := I) (I' := 𝓘(Real, Real)) (M := M) e b
+          (surfaceParamCurve F τ) (fun σ => V (σ, τ)) s
+          (1 : TangentSpace 𝓘(Real, Real) s))
+      hΓs hvt hvs
+    exact hraw.congr_of_eventuallyEq hparam_line
+  have hderivVec :=
+    frameDerivVec_eq_of_hasDerivAt (I := I) e b
+      (gamma := surfaceTimeCurve F s)
+      (S := fun τ => Vs (s, τ)) hparam_deriv
+  rw [hDts, hderivVec, hVs_at]
+
+/-- Fixed-frame coefficient commutator produced by a surface 2-jet.
+
+This is the geometric-calculus bridge before curvature identification: the
+right hand side is the usual curvature matrix expression
+`∂s Γt - ∂t Γs + ΓsΓt - ΓtΓs` applied to the coefficient vector of `V`. -/
+theorem HasPBSurfaceCovDeriv2At.frame_comm
+    {ι : Type} [Fintype ι] [DecidableEq ι]
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {F : Surface M} {V Vs Vt : SurfaceFieldAlong I F}
+    {s t : Real} {DstV DtsV : TangentSpace I (F (s, t))}
+    (hjet : HasPBSurfaceCovDeriv2At (I := I) cov F V Vs Vt s t DstV DtsV)
+    (e : TangentTriv (I := I) (M := M)) [MemTrivializationAtlas e]
+    (b : Module.Basis ι Real E)
+    (hmem_s : ∀ᶠ σ : Real in 𝓝 s, F (σ, t) ∈ e.baseSet)
+    (hmem_t : ∀ᶠ τ : Real in 𝓝 t, F (s, τ) ∈ e.baseSet)
+    {dΓt_s dΓs_t : Matrix ι ι Real} {vs vt vst vts : ι -> Real}
+    (hΓt : HasDerivAt
+      (fun σ : Real =>
+        frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+          (surfaceTimeCurve F σ) t
+          (1 : TangentSpace 𝓘(Real, Real) t)) dΓt_s s)
+    (hvt_s : HasDerivAt
+      (fun σ : Real =>
+        frameDerivVec (I := I) (I' := 𝓘(Real, Real)) (M := M) e b
+          (surfaceTimeCurve F σ) (fun τ => V (σ, τ)) t
+          (1 : TangentSpace 𝓘(Real, Real) t)) vst s)
+    (hvs : HasDerivAt
+      (fun σ : Real => frameVec (I := I) e b (V (σ, t))) vs s)
+    (hΓs : HasDerivAt
+      (fun τ : Real =>
+        frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+          (surfaceParamCurve F τ) s
+          (1 : TangentSpace 𝓘(Real, Real) s)) dΓs_t t)
+    (hvs_t : HasDerivAt
+      (fun τ : Real =>
+        frameDerivVec (I := I) (I' := 𝓘(Real, Real)) (M := M) e b
+          (surfaceParamCurve F τ) (fun σ => V (σ, τ)) s
+          (1 : TangentSpace 𝓘(Real, Real) s)) vts t)
+    (hvt : HasDerivAt
+      (fun τ : Real => frameVec (I := I) e b (V (s, τ))) vt t)
+    (hmix : vst = vts) :
+    frameVec (I := I) e b (DstV - DtsV) =
+      (dΓt_s - dΓs_t +
+        frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+          (surfaceParamCurve F t) s
+          (1 : TangentSpace 𝓘(Real, Real) s) *
+        frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+          (surfaceTimeCurve F s) t
+          (1 : TangentSpace 𝓘(Real, Real) t) -
+        frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+          (surfaceTimeCurve F s) t
+          (1 : TangentSpace 𝓘(Real, Real) t) *
+        frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+          (surfaceParamCurve F t) s
+          (1 : TangentSpace 𝓘(Real, Real) s)).mulVec
+        (frameVec (I := I) e b (V (s, t))) := by
+  have hdst := hjet.dst_frame (I := I) e b hmem_s hΓt hvt_s hvs
+  have hdts := hjet.dts_frame (I := I) e b hmem_t hΓs hvs_t hvt
+  have hvs_eq :=
+    frameDerivVec_eq_of_hasDerivAt (I := I) e b
+      (gamma := surfaceParamCurve F t)
+      (S := fun σ => V (σ, t)) hvs
+  have hvt_eq :=
+    frameDerivVec_eq_of_hasDerivAt (I := I) e b
+      (gamma := surfaceTimeCurve F s)
+      (S := fun τ => V (s, τ)) hvt
+  calc
+    frameVec (I := I) e b (DstV - DtsV) =
+        frameVec (I := I) e b DstV - frameVec (I := I) e b DtsV := by
+          ext k
+          simp [frameVec]
+    _ =
+        (dΓt_s - dΓs_t +
+          frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+            (surfaceParamCurve F t) s
+            (1 : TangentSpace 𝓘(Real, Real) s) *
+          frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+            (surfaceTimeCurve F s) t
+            (1 : TangentSpace 𝓘(Real, Real) t) -
+          frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+            (surfaceTimeCurve F s) t
+            (1 : TangentSpace 𝓘(Real, Real) t) *
+          frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+            (surfaceParamCurve F t) s
+            (1 : TangentSpace 𝓘(Real, Real) s)).mulVec
+          (frameVec (I := I) e b (V (s, t))) := by
+          rw [hdst, hdts, hvs_eq, hvt_eq]
+          exact coeffCov_comm_at
+            (v := frameVec (I := I) e b (V (s, t)))
+            (vs := vs) (vt := vt) (vst := vst) (vts := vts)
+            (Γs := frameGammaMat
+              (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+              (surfaceParamCurve F t) s
+              (1 : TangentSpace 𝓘(Real, Real) s))
+            (Γt := frameGammaMat
+              (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+              (surfaceTimeCurve F s) t
+              (1 : TangentSpace 𝓘(Real, Real) t))
+            (dΓt_s := dΓt_s) (dΓs_t := dΓs_t) hmix
+
+/-- Same as `HasPBSurfaceCovDeriv2At.frame_comm`, packaged through
+`frameCurvMat`. -/
+theorem HasPBSurfaceCovDeriv2At.frame_comm_mat
+    {ι : Type} [Fintype ι] [DecidableEq ι]
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {F : Surface M} {V Vs Vt : SurfaceFieldAlong I F}
+    {s t : Real} {DstV DtsV : TangentSpace I (F (s, t))}
+    (hjet : HasPBSurfaceCovDeriv2At (I := I) cov F V Vs Vt s t DstV DtsV)
+    (e : TangentTriv (I := I) (M := M)) [MemTrivializationAtlas e]
+    (b : Module.Basis ι Real E)
+    (hmem_s : ∀ᶠ σ : Real in 𝓝 s, F (σ, t) ∈ e.baseSet)
+    (hmem_t : ∀ᶠ τ : Real in 𝓝 t, F (s, τ) ∈ e.baseSet)
+    {dΓt_s dΓs_t : Matrix ι ι Real} {vs vt vst vts : ι -> Real}
+    (hΓt : HasDerivAt
+      (fun σ : Real =>
+        frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+          (surfaceTimeCurve F σ) t
+          (1 : TangentSpace 𝓘(Real, Real) t)) dΓt_s s)
+    (hvt_s : HasDerivAt
+      (fun σ : Real =>
+        frameDerivVec (I := I) (I' := 𝓘(Real, Real)) (M := M) e b
+          (surfaceTimeCurve F σ) (fun τ => V (σ, τ)) t
+          (1 : TangentSpace 𝓘(Real, Real) t)) vst s)
+    (hvs : HasDerivAt
+      (fun σ : Real => frameVec (I := I) e b (V (σ, t))) vs s)
+    (hΓs : HasDerivAt
+      (fun τ : Real =>
+        frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+          (surfaceParamCurve F τ) s
+          (1 : TangentSpace 𝓘(Real, Real) s)) dΓs_t t)
+    (hvs_t : HasDerivAt
+      (fun τ : Real =>
+        frameDerivVec (I := I) (I' := 𝓘(Real, Real)) (M := M) e b
+          (surfaceParamCurve F τ) (fun σ => V (σ, τ)) s
+          (1 : TangentSpace 𝓘(Real, Real) s)) vts t)
+    (hvt : HasDerivAt
+      (fun τ : Real => frameVec (I := I) e b (V (s, τ))) vt t)
+    (hmix : vst = vts) :
+    frameVec (I := I) e b (DstV - DtsV) =
+      (frameCurvMat
+        (frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+          (surfaceParamCurve F t) s
+          (1 : TangentSpace 𝓘(Real, Real) s))
+        (frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+          (surfaceTimeCurve F s) t
+          (1 : TangentSpace 𝓘(Real, Real) t))
+        dΓt_s dΓs_t).mulVec
+        (frameVec (I := I) e b (V (s, t))) := by
+  simpa [frameCurvMat] using
+    hjet.frame_comm (I := I) e b hmem_s hmem_t hΓt hvt_s hvs hΓs hvs_t hvt hmix
+
+/-- Jacobi-facing form of the fixed-frame commutator: if `D_s(D_t V)=0`,
+then `D_t(D_s V)` has coefficients `-R(S,T)V` in the same frame. -/
+theorem HasPBSurfaceCovDeriv2At.frame_dts_neg
+    {ι : Type} [Fintype ι] [DecidableEq ι]
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {F : Surface M} {V Vs Vt : SurfaceFieldAlong I F}
+    {s t : Real} {DstV DtsV : TangentSpace I (F (s, t))}
+    (hjet : HasPBSurfaceCovDeriv2At (I := I) cov F V Vs Vt s t DstV DtsV)
+    (hDst : DstV = 0)
+    (e : TangentTriv (I := I) (M := M)) [MemTrivializationAtlas e]
+    (b : Module.Basis ι Real E)
+    (hmem_s : ∀ᶠ σ : Real in 𝓝 s, F (σ, t) ∈ e.baseSet)
+    (hmem_t : ∀ᶠ τ : Real in 𝓝 t, F (s, τ) ∈ e.baseSet)
+    {dΓt_s dΓs_t : Matrix ι ι Real} {vs vt vst vts : ι -> Real}
+    (hΓt : HasDerivAt
+      (fun σ : Real =>
+        frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+          (surfaceTimeCurve F σ) t
+          (1 : TangentSpace 𝓘(Real, Real) t)) dΓt_s s)
+    (hvt_s : HasDerivAt
+      (fun σ : Real =>
+        frameDerivVec (I := I) (I' := 𝓘(Real, Real)) (M := M) e b
+          (surfaceTimeCurve F σ) (fun τ => V (σ, τ)) t
+          (1 : TangentSpace 𝓘(Real, Real) t)) vst s)
+    (hvs : HasDerivAt
+      (fun σ : Real => frameVec (I := I) e b (V (σ, t))) vs s)
+    (hΓs : HasDerivAt
+      (fun τ : Real =>
+        frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+          (surfaceParamCurve F τ) s
+          (1 : TangentSpace 𝓘(Real, Real) s)) dΓs_t t)
+    (hvs_t : HasDerivAt
+      (fun τ : Real =>
+        frameDerivVec (I := I) (I' := 𝓘(Real, Real)) (M := M) e b
+          (surfaceParamCurve F τ) (fun σ => V (σ, τ)) s
+          (1 : TangentSpace 𝓘(Real, Real) s)) vts t)
+    (hvt : HasDerivAt
+      (fun τ : Real => frameVec (I := I) e b (V (s, τ))) vt t)
+    (hmix : vst = vts) :
+    frameVec (I := I) e b DtsV =
+      -((frameCurvMat
+        (frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+          (surfaceParamCurve F t) s
+          (1 : TangentSpace 𝓘(Real, Real) s))
+        (frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+          (surfaceTimeCurve F s) t
+          (1 : TangentSpace 𝓘(Real, Real) t))
+        dΓt_s dΓs_t).mulVec
+        (frameVec (I := I) e b (V (s, t)))) := by
+  have hcomm := hjet.frame_comm_mat (I := I) e b hmem_s hmem_t
+    hΓt hvt_s hvs hΓs hvs_t hvt hmix
+  have hneg :
+      -frameVec (I := I) e b DtsV =
+        (frameCurvMat
+          (frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+            (surfaceParamCurve F t) s
+            (1 : TangentSpace 𝓘(Real, Real) s))
+          (frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+            (surfaceTimeCurve F s) t
+            (1 : TangentSpace 𝓘(Real, Real) t))
+          dΓt_s dΓs_t).mulVec
+          (frameVec (I := I) e b (V (s, t))) := by
+    have hframe_neg :
+        frameVec (I := I) e b (-DtsV) = -frameVec (I := I) e b DtsV := by
+      ext k
+      simp [frameVec]
+    simpa [hDst, hframe_neg] using hcomm
+  calc
+    frameVec (I := I) e b DtsV = -(-frameVec (I := I) e b DtsV) := by simp
+    _ =
+      -((frameCurvMat
+        (frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+          (surfaceParamCurve F t) s
+          (1 : TangentSpace 𝓘(Real, Real) s))
+        (frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+          (surfaceTimeCurve F s) t
+          (1 : TangentSpace 𝓘(Real, Real) t))
+        dΓt_s dΓs_t).mulVec
+        (frameVec (I := I) e b (V (s, t)))) := by
+        rw [hneg]
+
+/-- Vector form of `HasPBSurfaceCovDeriv2At.frame_dts_neg`, reconstructed in
+the same fixed local frame. -/
+theorem HasPBSurfaceCovDeriv2At.frame_dts_neg_vec
+    {ι : Type} [Fintype ι] [DecidableEq ι]
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {F : Surface M} {V Vs Vt : SurfaceFieldAlong I F}
+    {s t : Real} {DstV DtsV : TangentSpace I (F (s, t))}
+    (hjet : HasPBSurfaceCovDeriv2At (I := I) cov F V Vs Vt s t DstV DtsV)
+    (hDst : DstV = 0)
+    (e : TangentTriv (I := I) (M := M)) [MemTrivializationAtlas e]
+    (b : Module.Basis ι Real E)
+    (hmem_s : ∀ᶠ σ : Real in 𝓝 s, F (σ, t) ∈ e.baseSet)
+    (hmem_t : ∀ᶠ τ : Real in 𝓝 t, F (s, τ) ∈ e.baseSet)
+    {dΓt_s dΓs_t : Matrix ι ι Real} {vs vt vst vts : ι -> Real}
+    (hΓt : HasDerivAt
+      (fun σ : Real =>
+        frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+          (surfaceTimeCurve F σ) t
+          (1 : TangentSpace 𝓘(Real, Real) t)) dΓt_s s)
+    (hvt_s : HasDerivAt
+      (fun σ : Real =>
+        frameDerivVec (I := I) (I' := 𝓘(Real, Real)) (M := M) e b
+          (surfaceTimeCurve F σ) (fun τ => V (σ, τ)) t
+          (1 : TangentSpace 𝓘(Real, Real) t)) vst s)
+    (hvs : HasDerivAt
+      (fun σ : Real => frameVec (I := I) e b (V (σ, t))) vs s)
+    (hΓs : HasDerivAt
+      (fun τ : Real =>
+        frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+          (surfaceParamCurve F τ) s
+          (1 : TangentSpace 𝓘(Real, Real) s)) dΓs_t t)
+    (hvs_t : HasDerivAt
+      (fun τ : Real =>
+        frameDerivVec (I := I) (I' := 𝓘(Real, Real)) (M := M) e b
+          (surfaceParamCurve F τ) (fun σ => V (σ, τ)) s
+          (1 : TangentSpace 𝓘(Real, Real) s)) vts t)
+    (hvt : HasDerivAt
+      (fun τ : Real => frameVec (I := I) e b (V (s, τ))) vt t)
+    (hmix : vst = vts) :
+    DtsV =
+      -frameCurvVec (I := I) e b
+        (frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+          (surfaceParamCurve F t) s
+          (1 : TangentSpace 𝓘(Real, Real) s))
+        (frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+          (surfaceTimeCurve F s) t
+          (1 : TangentSpace 𝓘(Real, Real) t))
+        dΓt_s dΓs_t (V (s, t)) := by
+  let Γs : Matrix ι ι Real :=
+      (frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+        (surfaceParamCurve F t) s
+        (1 : TangentSpace 𝓘(Real, Real) s))
+  let Γt : Matrix ι ι Real :=
+      (frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+        (surfaceTimeCurve F s) t
+        (1 : TangentSpace 𝓘(Real, Real) t))
+  let c : ι -> Real :=
+    (frameCurvMat Γs Γt dΓt_s dΓs_t).mulVec
+      (frameVec (I := I) e b (V (s, t)))
+  have hx : F (s, t) ∈ e.baseSet := hmem_s.self_of_nhds
+  apply (frameVec_eq_iff (I := I) e b hx).mp
+  have hcoeff := hjet.frame_dts_neg (I := I) hDst e b hmem_s hmem_t
+    hΓt hvt_s hvs hΓs hvs_t hvt hmix
+  have hright :
+      frameVec (I := I) e b
+          (-(frameCurvVec (I := I) e b Γs Γt dΓt_s dΓs_t
+            (V (s, t)))) =
+        -c := by
+    have hneg :
+        frameVec (I := I) e b
+            (-(frameCurvVec (I := I) e b Γs Γt dΓt_s dΓs_t
+              (V (s, t)))) =
+          -frameVec (I := I) e b
+            (frameCurvVec (I := I) e b Γs Γt dΓt_s dΓs_t
+              (V (s, t))) := by
+      ext k
+      simp [frameVec]
+    rw [hneg, frameVec_frameCurvVec (I := I) e b hx Γs Γt dΓt_s dΓs_t
+      (V (s, t))]
+  change frameVec (I := I) e b DtsV =
+    frameVec (I := I) e b
+      (-(frameCurvVec (I := I) e b Γs Γt dΓt_s dΓs_t (V (s, t))))
+  rw [hcoeff, hright]
 
 section CurveFrameCompat
 

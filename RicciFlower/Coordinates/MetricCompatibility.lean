@@ -337,10 +337,10 @@ theorem inverseMetricFlatModelInChart_component_contDiffWithinAt
   simpa [inverseMetricFlatModelInChart_component, εk, εl] using
     (contDiffWithinAt_const (c := εk)).clm_apply happ
 
-theorem gInvComp_mdiffAt
+theorem gInvComp_contMDiffAt
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (k l : CoordinateIdx (𝕜 := Real) E) :
-    MDifferentiableAt I 𝓘(Real, Real)
+    ContMDiffAt I 𝓘(Real, Real) ∞
       (fun y : M =>
         inverseMetricFlatModelInChart_component (I := I) g x₀ k l
           (extChartAt I x₀ y)) x₀ := by
@@ -364,7 +364,16 @@ theorem gInvComp_mdiffAt
       ContMDiffAt I 𝓘(Real, Real) ∞ (f ∘ extChartAt I x₀) x₀ :=
     hcomp.contMDiffAt ((isOpen_extChartAt_source (I := I) x₀).mem_nhds
       (mem_extChartAt_source (I := I) x₀))
-  simpa [f, Function.comp_def] using hcompAt.mdifferentiableAt (by simp)
+  simpa [f, Function.comp_def] using hcompAt
+
+theorem gInvComp_mdiffAt
+    (g : SmoothRiemannianMetric I M) (x₀ : M)
+    (k l : CoordinateIdx (𝕜 := Real) E) :
+    MDifferentiableAt I 𝓘(Real, Real)
+      (fun y : M =>
+        inverseMetricFlatModelInChart_component (I := I) g x₀ k l
+          (extChartAt I x₀ y)) x₀ := by
+  exact (gInvComp_contMDiffAt (I := I) g x₀ k l).mdifferentiableAt (by simp)
 
 theorem inverseMetricFlatModelInChart_component_center_eq_symm
     (g : SmoothRiemannianMetric I M) (x₀ : M)

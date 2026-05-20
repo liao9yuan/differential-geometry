@@ -148,6 +148,36 @@ theorem heatOperatorWithDrift_const_smul
   rw [driftTerm_const_smul (I := I) G t X a (hf x)]
   ring
 
+/-- Family-facing subtraction rule for the scalar Laplacian. -/
+theorem laplacianAt_sub
+    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (t : Time) {f h : M -> Real} {x : M}
+    (hf : forall y : M, MDifferentiableAt I 𝓘(Real, Real) f y)
+    (hh : forall y : M, MDifferentiableAt I 𝓘(Real, Real) h y)
+    (hgradf : MDiffAt (T% fun y : M =>
+      gradientFun (I := I) (G.metric t) f y) x)
+    (hgradh : MDiffAt (T% fun y : M =>
+      gradientFun (I := I) (G.metric t) h y) x) :
+    laplacianAt (I := I) G t (fun y : M => f y - h y) x =
+      laplacianAt (I := I) G t f x -
+        laplacianAt (I := I) G t h x := by
+  unfold laplacianAt
+  exact laplacian_sub (I := I) (G.connection t) (G.metric t)
+    hf hh hgradf hgradh
+
+/-- Family-facing constant-scalar rule for the scalar Laplacian. -/
+theorem laplacianAt_smul
+    (G : RealizedMetricFamily (I := I) (M := M) Time)
+    (t : Time) (a : Real) {f : M -> Real} {x : M}
+    (hf : forall y : M, MDifferentiableAt I 𝓘(Real, Real) f y)
+    (hgrad : MDiffAt (T% fun y : M =>
+      gradientFun (I := I) (G.metric t) f y) x) :
+    laplacianAt (I := I) G t (a • f) x =
+      a * laplacianAt (I := I) G t f x := by
+  unfold laplacianAt
+  exact laplacian_const_smul (I := I) (G.connection t) (G.metric t)
+    a hf hgrad
+
 end FamilyAlgebraicRules
 
 @[simp] theorem gradientAt_eq

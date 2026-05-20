@@ -1105,6 +1105,41 @@ open RicciFlower.Coordinates
 
 variable [DecidableEq (CoordinateIdx (𝕜 := Real) E)]
 
+/-- Finite trace contraction of a two-index object against inverse-metric
+components.  This is the scalar trace algebra used when contracting the
+variation of `Ric + Hess f`. -/
+def trace2
+    {ι : Type*} [Fintype ι]
+    (gInv T : ι -> ι -> Real) : Real :=
+  ∑ i : ι, ∑ j : ι, gInv i j * T i j
+
+/-- Product rule for the finite trace contraction `trace2`. -/
+theorem trace2_deriv
+    {ι : Type*} [Fintype ι]
+    {timeSet : Set Real} {base : Real}
+    {gInvPath TPath : Real -> ι -> ι -> Real}
+    {gInvDot TDot : ι -> ι -> Real}
+    (hgInv :
+      ∀ i j : ι,
+        HasDerivWithinAt (fun s : Real => gInvPath s i j)
+          (gInvDot i j) timeSet base)
+    (hT :
+      ∀ i j : ι,
+        HasDerivWithinAt (fun s : Real => TPath s i j)
+          (TDot i j) timeSet base) :
+    HasDerivWithinAt
+      (fun s : Real => trace2 (gInvPath s) (TPath s))
+      ((Finset.univ : Finset ι).sum fun i =>
+        (Finset.univ : Finset ι).sum fun j =>
+          gInvDot i j * TPath base i j + gInvPath base i j * TDot i j)
+      timeSet base := by
+  unfold trace2
+  refine HasDerivWithinAt.fun_sum ?_
+  intro i _
+  refine HasDerivWithinAt.fun_sum ?_
+  intro j _
+  simpa [mul_add] using (hgInv i j).mul (hT i j)
+
 private def covDGamma
     {ι : Type*} [Fintype ι]
     (Gamma A : ι -> ι -> ι -> Real)
@@ -2246,6 +2281,61 @@ theorem lcRicciHessVarShifted
   rw [htrace]
   ring_nf
 
+/-- Trace contraction of the shifted `Ric + Hess f` variation formula.  This is
+the scalar producer for the variation of `g^{ij}(Ric_ij + Hess_ij f)` before
+identifying the inverse-metric variation term with `-v_ij(Ric_ij+Hess_ij f)`. -/
+theorem lcTraceVar
+    (G : Realized.RealizedMetricFamily (I := I) (M := M) Real)
+    (hLC : ∀ s : Real,
+      IsLeviCivita (I := I) (G.connection s) (G.metric s))
+    (timeSet : Set Real) (base : Real) (x0 : M)
+    (f : Real -> M -> Real) (h metricTrace : M -> Real)
+    (gammaDot :
+      M -> CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
+        CoordinateIdx (𝕜 := Real) E -> Real)
+    (gInvPath :
+      Real -> CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
+        Real)
+    (gInvDot :
+      CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E -> Real)
+    (hgamma : gammaCoordDerivAt (I := I) G timeSet base x0 gammaDot)
+    (hmix : gammaMixedCoordAt (I := I) G timeSet base x0 gammaDot)
+    (hfirst : scalarFirstVarCoordAt (I := I) f h timeSet base x0)
+    (hsecond : scalarSecondVarCoordAt (I := I) f h timeSet base x0)
+    (hgInv :
+      ∀ i j : CoordinateIdx (𝕜 := Real) E,
+        HasDerivWithinAt (fun s : Real => gInvPath s i j)
+          (gInvDot i j) timeSet base)
+    (htrace :
+      ∀ i j : CoordinateIdx (𝕜 := Real) E,
+        gammaTraceCovAt (I := I) (G.connection base) gammaDot x0 i j =
+          (1 / 2 : Real) *
+            scalarHessCoordAt (I := I) (G.connection base) metricTrace x0 i j) :
+    HasDerivWithinAt
+      (fun s : Real =>
+        trace2 (gInvPath s)
+          (fun i j : CoordinateIdx (𝕜 := Real) E =>
+            Realized.christoffelRicciCoeffAt (I := I) (G.connection s) x0 i j +
+              scalarHessCoordAt (I := I) (G.connection s) (f s) x0 i j))
+      ((Finset.univ : Finset (CoordinateIdx (𝕜 := Real) E)).sum fun i =>
+        (Finset.univ : Finset (CoordinateIdx (𝕜 := Real) E)).sum fun j =>
+          gInvDot i j *
+            (Realized.christoffelRicciCoeffAt (I := I) (G.connection base)
+                x0 i j +
+              scalarHessCoordAt (I := I) (G.connection base) (f base)
+                x0 i j) +
+          gInvPath base i j *
+            (gammaWeightedDivCoordAt (I := I) (G.connection base) gammaDot
+                (f base) x0 i j +
+              shiftedScalarHessCoordAt (I := I) (G.connection base) h
+                metricTrace x0 i j))
+      timeSet base := by
+  apply trace2_deriv
+  · exact hgInv
+  · intro i j
+    exact lcRicciHessVarShifted (I := I) G hLC timeSet base x0 f h
+      metricTrace gammaDot hgamma hmix hfirst hsecond i j (htrace i j)
+
 /-- Coordinate-frame variation of `Ric_ij + Hess_ij f` with the trace
 covariant-derivative input produced from the traced Christoffel one-form. -/
 theorem lcRicciHessShifted_of_trace
@@ -2298,6 +2388,76 @@ theorem lcRicciHessShifted_of_trace
     htrace_deriv htrace_point htrace_ext
   exact lcRicciHessVarShifted (I := I) G hLC timeSet base x0 f h
     metricTrace gammaDot hgamma hmix hfirst hsecond i j htrace_cov
+
+/-- Trace contraction of `lcRicciHessShifted_of_trace`.  This removes the
+pointwise `nabla_i A^p_pj` input from the scalar trace variation producer. -/
+theorem lcTraceVar_of_trace
+    (G : Realized.RealizedMetricFamily (I := I) (M := M) Real)
+    (hLC : ∀ s : Real,
+      IsLeviCivita (I := I) (G.connection s) (G.metric s))
+    (timeSet : Set Real) (base : Real) (x0 : M)
+    (f : Real -> M -> Real) (h metricTrace : M -> Real)
+    (gammaDot :
+      M -> CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
+        CoordinateIdx (𝕜 := Real) E -> Real)
+    (gInvPath :
+      Real -> CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
+        Real)
+    (gInvDot :
+      CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E -> Real)
+    (hgamma : gammaCoordDerivAt (I := I) G timeSet base x0 gammaDot)
+    (hmix : gammaMixedCoordAt (I := I) G timeSet base x0 gammaDot)
+    (hfirst : scalarFirstVarCoordAt (I := I) f h timeSet base x0)
+    (hsecond : scalarSecondVarCoordAt (I := I) f h timeSet base x0)
+    (hgInv :
+      ∀ i j : CoordinateIdx (𝕜 := Real) E,
+        HasDerivWithinAt (fun s : Real => gInvPath s i j)
+          (gInvDot i j) timeSet base)
+    (htrace_eventual :
+      ∀ j : CoordinateIdx (𝕜 := Real) E,
+        (fun y : M => ∑ p : CoordinateIdx (𝕜 := Real) E,
+          gammaDot y p p j) =ᶠ[nhds x0]
+            fun y : M =>
+              (1 / 2 : Real) *
+                scalarCoordDerivFun (I := I) metricTrace x0 j y)
+    (htrace_point :
+      ∀ a : CoordinateIdx (𝕜 := Real) E,
+        (∑ p : CoordinateIdx (𝕜 := Real) E, gammaDot x0 p p a) =
+          (1 / 2 : Real) * scalarCoordDerivAt (I := I) metricTrace x0 a)
+    (hgamma_mdiff :
+      ∀ j p : CoordinateIdx (𝕜 := Real) E,
+        MDifferentiableAt I 𝓘(Real, Real)
+          (fun y : M => gammaDot y p p j) x0)
+    (hscalar_mdiff :
+      ∀ j : CoordinateIdx (𝕜 := Real) E,
+        MDifferentiableAt I 𝓘(Real, Real)
+          (scalarCoordDerivFun (I := I) metricTrace x0 j) x0) :
+    HasDerivWithinAt
+      (fun s : Real =>
+        trace2 (gInvPath s)
+          (fun i j : CoordinateIdx (𝕜 := Real) E =>
+            Realized.christoffelRicciCoeffAt (I := I) (G.connection s) x0 i j +
+              scalarHessCoordAt (I := I) (G.connection s) (f s) x0 i j))
+      ((Finset.univ : Finset (CoordinateIdx (𝕜 := Real) E)).sum fun i =>
+        (Finset.univ : Finset (CoordinateIdx (𝕜 := Real) E)).sum fun j =>
+          gInvDot i j *
+            (Realized.christoffelRicciCoeffAt (I := I) (G.connection base)
+                x0 i j +
+              scalarHessCoordAt (I := I) (G.connection base) (f base)
+                x0 i j) +
+          gInvPath base i j *
+            (gammaWeightedDivCoordAt (I := I) (G.connection base) gammaDot
+                (f base) x0 i j +
+              shiftedScalarHessCoordAt (I := I) (G.connection base) h
+                metricTrace x0 i j))
+      timeSet base := by
+  apply trace2_deriv
+  · exact hgInv
+  · intro i j
+    exact lcRicciHessShifted_of_trace
+      (I := I) G hLC timeSet base x0 f h metricTrace gammaDot
+      hgamma hmix hfirst hsecond i j (htrace_eventual j) htrace_point
+      (hgamma_mdiff j) (hscalar_mdiff j)
 
 /-- Coordinate-frame shifted Ricci-plus-Hessian variation with the Christoffel
 trace inputs produced from the metric-trace and inverse-metric compatibility

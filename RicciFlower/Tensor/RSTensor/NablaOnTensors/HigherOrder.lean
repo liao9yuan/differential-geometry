@@ -430,6 +430,45 @@ theorem TotalNabla0SRealizes.eval_smooth_slots {s : ℕ}
             (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
             cov X V α x₀
 
+/-- Definition 14.5 for any supplied total covariant derivative realization:
+evaluating the total derivative on `C¹` moving slots agrees with the usual
+tensorial derivation rule. -/
+theorem TotalNabla0SRealizes.eval_C1_slots {s : ℕ}
+    {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
+    {α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) s}
+    {nablaAlpha : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) (s + 1)}
+    (h : TotalNabla0SRealizes (𝕜 := 𝕜) (E := E) (H := H)
+      (I := I) (M := M) s cov α nablaAlpha)
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (V : Fin s → (x : M) → TangentSpace I x)
+    (x₀ : M)
+    (hV_at : ∀ a : Fin s,
+      ContMDiffAt I (I.prod 𝓘(𝕜, E)) (1 : WithTop ℕ∞)
+        (fun y : M => (⟨y, V a y⟩ : TotalSpace E (TangentSpace I : M → Type _))) x₀) :
+    nablaAlpha x₀ (Fin.cons (X x₀) (fun a : Fin s => V a x₀)) =
+      extDerivFun (I := I) (fun p : M => α p (fun a : Fin s => V a p))
+        x₀ (X x₀) -
+        ∑ a : Fin s,
+          α x₀
+            (Function.update (fun b : Fin s => V b x₀) a
+              ((cov (V a) x₀) (X x₀))) := by
+  calc
+    nablaAlpha x₀ (Fin.cons (X x₀) (fun a : Fin s => V a x₀))
+        = nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+            s cov X α x₀ (fun a : Fin s => V a x₀) := by
+          exact h.apply X x₀ (fun a : Fin s => V a x₀)
+    _ = extDerivFun (I := I) (fun p : M => α p (fun a : Fin s => V a p))
+          x₀ (X x₀) -
+          ∑ a : Fin s,
+            α x₀
+              (Function.update (fun b : Fin s => V b x₀) a
+                ((cov (V a) x₀) (X x₀))) := by
+          exact nabla0SFun_eval_C1_slots
+            (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+            cov X V α x₀ hV_at
+
 theorem TotalNablaRSRealizes.apply {r s : ℕ}
     {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
     {T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)

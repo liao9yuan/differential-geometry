@@ -660,6 +660,78 @@ theorem rm13_eval_eq_christoffelCurvCoord
           rw [hcurv_raw]
           simp [cotangentToDual_apply, map_sum, frame]
 
+/-- Coordinate-frame expansion of a realized `(1,3)` curvature tensor on
+arbitrary tangent vectors.
+
+The compact index `r : Fin 3 -> CoordinateIdx` records the three lower
+curvature slots.  This is the multilinear extension of
+`rm13_eval_eq_christoffelCurvCoord`. -/
+theorem rm13_coord_expand
+    [T2Space M]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
+      (1 : WithTop ℕ∞))
+    (Rm13 : Tensor13Section (I := I) (M := M))
+    (x₀ : M)
+    (alpha :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x₀)
+    (hRm : Rm13RealizesConnection (I := I) cov Rm13)
+    (hcurv : ConnectionCurvatureCoordAt (I := I) cov x₀)
+    (X Y Z : TangentSpace I x₀) :
+    Rm13 x₀ alpha (vec3 X Y Z) =
+      ∑ r : Fin 3 -> CoordinateIdx (𝕜 := Real) E,
+        (∏ q : Fin 3,
+          (coordinateFrameAt_toBasis (I := I) x₀).repr
+            (vec3 X Y Z q) (r q)) *
+          (∑ m : CoordinateIdx (𝕜 := Real) E,
+            christoffelCurvCoeffAt (I := I) cov x₀ (r 0) (r 1) (r 2) m *
+              alpha (fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ m x₀)) := by
+  classical
+  let basis := coordinateFrameAt_toBasis (I := I) x₀
+  let slot : Fin 3 -> TangentSpace I x₀ := vec3 X Y Z
+  let g : (q : Fin 3) -> CoordinateIdx (𝕜 := Real) E -> TangentSpace I x₀ :=
+    fun q i => basis.repr (slot q) i • basis i
+  have hslot : (fun q : Fin 3 => ∑ i : CoordinateIdx (𝕜 := Real) E, g q i) = slot := by
+    funext q
+    simpa [g] using (basis.sum_repr (slot q)).symm
+  calc
+    Rm13 x₀ alpha (vec3 X Y Z) =
+        Rm13 x₀ alpha (fun q : Fin 3 => ∑ i : CoordinateIdx (𝕜 := Real) E, g q i) := by
+          rw [hslot]
+    _ = ∑ r : Fin 3 -> CoordinateIdx (𝕜 := Real) E,
+        Rm13 x₀ alpha (fun q : Fin 3 => g q (r q)) := by
+          rw [(Rm13 x₀ alpha).map_sum]
+    _ =
+      ∑ r : Fin 3 -> CoordinateIdx (𝕜 := Real) E,
+        (∏ q : Fin 3,
+          (coordinateFrameAt_toBasis (I := I) x₀).repr
+            (vec3 X Y Z q) (r q)) *
+          (∑ m : CoordinateIdx (𝕜 := Real) E,
+            christoffelCurvCoeffAt (I := I) cov x₀ (r 0) (r 1) (r 2) m *
+              alpha (fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ m x₀)) := by
+          refine Finset.sum_congr rfl fun r _ => ?_
+          have hsmul :
+              Rm13 x₀ alpha (fun q : Fin 3 => g q (r q)) =
+                (∏ q : Fin 3, basis.repr (slot q) (r q)) *
+                  Rm13 x₀ alpha (fun q : Fin 3 => basis (r q)) := by
+            rw [(Rm13 x₀ alpha).map_smul_univ]
+            simp [smul_eq_mul]
+          have hbasisSlots :
+              (fun q : Fin 3 => basis (r q)) =
+                vec3 (basis (r 0)) (basis (r 1)) (basis (r 2)) := by
+            funext q
+            fin_cases q <;> simp [RicciFlower.Curvature.vec3]
+          have hbasisEval :
+              Rm13 x₀ alpha (fun q : Fin 3 => basis (r q)) =
+                ∑ m : CoordinateIdx (𝕜 := Real) E,
+                  christoffelCurvCoeffAt (I := I) cov x₀ (r 0) (r 1) (r 2) m *
+                    alpha (fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ m x₀) := by
+            rw [hbasisSlots]
+            simpa [basis, coordinateFrameAt_toBasis_apply] using
+              rm13_eval_eq_christoffelCurvCoord
+                (I := I) cov hcov Rm13 x₀ alpha hRm hcurv (r 0) (r 1) (r 2)
+          rw [hsmul, hbasisEval]
+
 /-- The intrinsic Ricci trace of a realized `(1,3)` curvature tensor is the
 coordinate Christoffel trace in the chart-induced coordinate frame. -/
 theorem ricciFromRm13At_coordFrame_eq_christoffelRicciCoeffAt

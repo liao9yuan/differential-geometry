@@ -478,28 +478,8 @@ theorem ricciNormSqInFrame_eq_normSq0S
         basis (fun i j : Idx => gInv t x i j) :=
     metricInverseInBasis_of_solution_frame
       (I := I) S gInv frame hframe hinv t hx
-  rw [normSq0S_eq_inner]
-  rw [inner0S_two_eq_coord
-    (I := I) (S.family.metric t) x basis
-    (fun i j : Idx => gInv t x i j) hinvAt (S.ricci t x) (S.ricci t x)]
-  simp [ricciNormSqInFrame, raisedRicciCompInFrame, ricciCompInFrame,
-    Realized.vec2, basis, IsLocalFrameOn.toBasisAt_coe,
-    Finset.mul_sum, mul_assoc, mul_left_comm, mul_comm]
-  refine Finset.sum_congr rfl fun i _ => ?_
-  refine Finset.sum_congr rfl fun j _ => ?_
-  refine Finset.sum_congr rfl fun k _ => ?_
-  refine Finset.sum_congr rfl fun l _ => ?_
-  have hij :
-      RicciFlower.Curvature.vec2 (I := I) (frame i x) (frame j x) =
-        (fun a : Fin 2 => if a = 0 then frame i x else frame j x) := by
-    funext a
-    fin_cases a <;> simp [RicciFlower.Curvature.vec2]
-  have hkl :
-      RicciFlower.Curvature.vec2 (I := I) (frame k x) (frame l x) =
-        (fun a : Fin 2 => if a = 0 then frame k x else frame l x) := by
-    funext a
-    fin_cases a <;> simp [RicciFlower.Curvature.vec2]
-  rw [hij, hkl]
+  exact ricciNormSq_basis (I := I) S gInv frame basis hinvAt
+    (by intro i; simp [basis, IsLocalFrameOn.toBasisAt_coe])
 
 /-- In an orthonormal frame, raising both Ricci indices leaves components
 unchanged. -/

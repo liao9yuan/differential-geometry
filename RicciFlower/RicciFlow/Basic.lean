@@ -464,6 +464,69 @@ def MetricVariationEquationOn
   Realized.MetricVariationEquationOn (I := I) S.family
     (RicciAtFamily.toTensorField (I := I) S.ricciAt)
 
+/-- Intrinsic Ricci norm square `|Ric|²` for a solution candidate. -/
+def ricciNorm
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) :
+    Real -> M -> Real :=
+  fun t x => normSq0S (I := I) (S.family.metric t) x 2 (S.ricci t x)
+
+/-- Intrinsic `|∇ Ric|²`, using the canonical total covariant derivative. -/
+def ricciGradSq
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) :
+    Real -> M -> Real :=
+  fun t x =>
+    normSq0S (I := I) (S.family.metric t) x 3
+      (totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 (S.family.connection t) (S.ricci t) x)
+
+/-- The all-real realized metric family canonically attached to a Ricci-flow
+solution candidate. -/
+def flowG
+    {D : Realized.RealTimeInterval}
+    [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D) :
+    Realized.RealizedMetricFamily (I := I) (M := M) Real where
+  metric := S.base.metric
+  connection := S.base.connection
+  metricCompatible := by
+    intro t
+    simpa [SolutionFamily.connection] using
+      (LeviCivita.leviCivitaConnectionOfMetric_isMetricCompatible
+        (I := I) (S.base.metric t))
+
+/-- Canonical intrinsic Laplacian of the Ricci norm square `|Ric|²`. -/
+def ricciNormLap
+    {D : Realized.RealTimeInterval}
+    [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D) :
+    Real -> M -> Real :=
+  fun t x =>
+    Realized.laplacianAt (I := I) (flowG (I := I) S) t
+      (ricciNorm (I := I) S t) x
+
+/-- The `(0,4)` tensor with components `Ric_ij Ric_kl` in the slot order used
+by the Ricci-norm curvature reaction `Rm04(i,k,j,l) Ric_ij Ric_kl`. -/
+def ricciPair04 {x : M}
+    (Ric : Realized.Tensor02At (I := I) (M := M) x) :
+    Realized.Tensor04At (I := I) (M := M) x :=
+  (Bundle.continuousMultilinearMap.product_fun
+      (𝕜 := Real) (B := M) (F := E) (E := TangentSpace I)
+      (s := 2) (q := 2) (x := x) Ric Ric).domDomCongr
+    (Equiv.swap (1 : Fin 4) (2 : Fin 4))
+
+/-- Intrinsic canonical Ricci-norm curvature reaction scalar.  This is the
+coordinate-free version of the Section 6 frame reaction, with the project sign
+convention already applied. -/
+def ricciReact
+    {D : Realized.RealTimeInterval}
+    [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D) : Real -> M -> Real :=
+  fun t x =>
+    -inner0S (I := I) (S.base.metric t) x 4 (S.base.rm04 t x)
+      (ricciPair04 (I := I) (S.ricciAt t x))
+
 /-- Predicate package saying the folder-level candidate is a Ricci-flow
 solution. -/
 structure IsSolutionOn
@@ -527,6 +590,16 @@ structure CanonicalScalarRegularOn
     ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
       MDiffAt (T% fun y : M =>
         Realized.gradientFun (I := I) (S.family.metric t) (S.scalar t) y) x
+  scalar_grad_sub_const :
+    ∀ t : Real, t ∈ D.carrier -> ∀ c : Real, ∀ x : M,
+      MDiffAt (T% fun y : M =>
+        Realized.gradientFun (I := I) (S.family.metric t)
+          (fun z : M => S.scalar t z - c) y) x
+  scalar_grad_const_mul_sub_const :
+    ∀ t : Real, t ∈ D.carrier -> ∀ a c : Real, ∀ x : M,
+      MDiffAt (T% fun y : M =>
+        Realized.gradientFun (I := I) (S.family.metric t)
+          (fun z : M => a * (S.scalar t z - c)) y) x
 
 namespace CanonicalScalarRegularOn
 
@@ -1305,6 +1378,46 @@ def ricciNormSqInFrame
           raisedRicciCompInFrame (I := I) S gInv frame t x i j := by
   rfl
 
+/-- The coordinate Ricci norm in any frame agrees with the intrinsic squared
+Ricci norm, provided the supplied inverse components really are the inverse
+metric in the matching pointwise basis. -/
+theorem ricciNormSq_basis
+    {D : Realized.RealTimeInterval}
+    [DecidableEq Idx]
+    (S : SolutionOn (I := I) (M := M) D)
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    {t : Real} {x : M}
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (hinv : MetricInverseInBasis
+      (I := I) (M := M) (S.family.metric t) x basis
+      (fun i j : Idx => gInv t x i j))
+    (hbasis : ∀ i : Idx, basis i = frame i x) :
+    ricciNormSqInFrame (I := I) S gInv frame t x =
+      normSq0S (I := I) (S.family.metric t) x 2 (S.ricci t x) := by
+  classical
+  rw [normSq0S_eq_inner]
+  rw [inner0S_two_eq_coord
+    (I := I) (S.family.metric t) x basis
+    (fun i j : Idx => gInv t x i j) hinv (S.ricci t x) (S.ricci t x)]
+  simp [ricciNormSqInFrame, raisedRicciCompInFrame, ricciCompInFrame,
+    Realized.vec2, hbasis, Finset.mul_sum, mul_assoc, mul_left_comm, mul_comm]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  refine Finset.sum_congr rfl fun j _ => ?_
+  refine Finset.sum_congr rfl fun k _ => ?_
+  refine Finset.sum_congr rfl fun l _ => ?_
+  have hij :
+      RicciFlower.Curvature.vec2 (I := I) (frame i x) (frame j x) =
+        (fun a : Fin 2 => if a = 0 then frame i x else frame j x) := by
+    funext a
+    fin_cases a <;> simp [RicciFlower.Curvature.vec2]
+  have hkl :
+      RicciFlower.Curvature.vec2 (I := I) (frame k x) (frame l x) =
+        (fun a : Fin 2 => if a = 0 then frame k x else frame l x) := by
+    funext a
+    fin_cases a <;> simp [RicciFlower.Curvature.vec2]
+  rw [hij, hkl]
+
 /-- Coordinate inner product `<roughDelta Ric, Ric>` for a folder-level
 Ricci-flow solution. -/
 def roughLapRicciInnerInFrame
@@ -1333,6 +1446,28 @@ def roughLapRicciInnerInFrame
   rfl
 
 /-- Coordinate squared norm of `nabla Ric`. -/
+def nablaRicComp
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (frame : Idx -> (x : M) -> TangentSpace I x) :
+    Real -> M -> Idx -> Idx -> Idx -> Real :=
+  fun t x a i j =>
+    totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      2 (S.family.connection t) (S.ricci t) x
+        (Realized.vec3 (I := I) (frame a x) (frame i x) (frame j x))
+
+@[simp] theorem nablaRicComp_apply
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (t : Real) (x : M) (a i j : Idx) :
+    nablaRicComp (I := I) S frame t x a i j =
+      totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 (S.family.connection t) (S.ricci t) x
+          (Realized.vec3 (I := I) (frame a x) (frame i x) (frame j x)) := by
+  rfl
+
+/-- Coordinate squared norm of a supplied `nabla Ric` component array. -/
 def nablaRicciNormSqInFrame
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
     (gInv : Real -> Realized.InverseMetricComponents M Idx) :
@@ -1351,6 +1486,160 @@ def nablaRicciNormSqInFrame
         gInv t x a b * gInv t x i k * gInv t x j l *
           nablaRic t x a i j * nablaRic t x b k l := by
   rfl
+
+private def fin3Slots (a b c : Idx) : Fin 3 -> Idx :=
+  fun q => if q = 0 then a else if q = 1 then b else c
+
+@[simp] private theorem fin3Slots_zero (a b c : Idx) :
+    fin3Slots (Idx := Idx) a b c 0 = a := by
+  simp [fin3Slots]
+
+@[simp] private theorem fin3Slots_one (a b c : Idx) :
+    fin3Slots (Idx := Idx) a b c 1 = b := by
+  simp [fin3Slots]
+
+@[simp] private theorem fin3Slots_two (a b c : Idx) :
+    fin3Slots (Idx := Idx) a b c 2 = c := by
+  simp [fin3Slots]
+
+private def fin3PairEquiv :
+    ((Fin 3 -> Idx) × (Fin 3 -> Idx)) ≃
+      (((((Idx × Idx) × Idx) × Idx) × Idx) × Idx) where
+  toFun p := (((((p.1 0, p.2 0), p.1 1), p.1 2), p.2 1), p.2 2)
+  invFun p :=
+    (fin3Slots (Idx := Idx) p.1.1.1.1.1 p.1.1.1.2 p.1.1.2,
+      fin3Slots (Idx := Idx) p.1.1.1.1.2 p.1.2 p.2)
+  left_inv p := by
+    ext q <;> fin_cases q <;> simp
+  right_inv p := by
+    rcases p with ⟨⟨⟨⟨⟨a, b⟩, i⟩, j⟩, k⟩, l⟩
+    simp
+
+private theorem coordInner3_eq
+    {x : M}
+    (gInv : Idx -> Idx -> Real)
+    (A B : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (basis : Module.Basis Idx Real (TangentSpace I x)) :
+    coordInner0S (I := I) (x := x) 3 gInv A B basis =
+      ∑ a : Idx, ∑ b : Idx, ∑ i : Idx, ∑ j : Idx, ∑ k : Idx, ∑ l : Idx,
+        gInv a b * gInv i k * gInv j l *
+          A (Realized.vec3 (I := I) (basis a) (basis i) (basis j)) *
+            B (Realized.vec3 (I := I) (basis b) (basis k) (basis l)) := by
+  classical
+  unfold coordInner0S tensor0SComponent
+  rw [← Fintype.sum_prod_type']
+  rw [Fintype.sum_equiv (fin3PairEquiv (Idx := Idx))
+    (fun p : (Fin 3 -> Idx) × (Fin 3 -> Idx) =>
+      ((∏ q : Fin 3, gInv (p.1 q) (p.2 q)) *
+        A (fun q : Fin 3 => basis (p.1 q))) *
+          B (fun q : Fin 3 => basis (p.2 q)))
+    (fun p : (((((Idx × Idx) × Idx) × Idx) × Idx) × Idx) =>
+      ((∏ q : Fin 3,
+          gInv (((fin3PairEquiv (Idx := Idx)).symm p).1 q)
+            (((fin3PairEquiv (Idx := Idx)).symm p).2 q)) *
+        A (fun q : Fin 3 => basis (((fin3PairEquiv (Idx := Idx)).symm p).1 q))) *
+          B (fun q : Fin 3 => basis (((fin3PairEquiv (Idx := Idx)).symm p).2 q)))]
+  · repeat rw [Fintype.sum_prod_type]
+    refine Finset.sum_congr rfl fun a _ => ?_
+    refine Finset.sum_congr rfl fun b _ => ?_
+    refine Finset.sum_congr rfl fun i _ => ?_
+    refine Finset.sum_congr rfl fun j _ => ?_
+    refine Finset.sum_congr rfl fun k _ => ?_
+    refine Finset.sum_congr rfl fun l _ => ?_
+    change
+      ((∏ q : Fin 3,
+          gInv (fin3Slots (Idx := Idx) a i j q)
+            (fin3Slots (Idx := Idx) b k l q)) *
+        A (fun q : Fin 3 => basis (fin3Slots (Idx := Idx) a i j q))) *
+          B (fun q : Fin 3 => basis (fin3Slots (Idx := Idx) b k l q)) =
+        gInv a b * gInv i k * gInv j l *
+          A (Realized.vec3 (I := I) (basis a) (basis i) (basis j)) *
+            B (Realized.vec3 (I := I) (basis b) (basis k) (basis l))
+    rw [Fin.prod_univ_three]
+    have hA :
+        (fun q : Fin 3 => basis (fin3Slots (Idx := Idx) a i j q)) =
+          Realized.vec3 (I := I) (basis a) (basis i) (basis j) := by
+      funext q
+      fin_cases q <;> simp [Realized.vec3, RicciFlower.Curvature.vec3]
+    have hB :
+        (fun q : Fin 3 => basis (fin3Slots (Idx := Idx) b k l q)) =
+          Realized.vec3 (I := I) (basis b) (basis k) (basis l) := by
+      funext q
+      fin_cases q <;> simp [Realized.vec3, RicciFlower.Curvature.vec3]
+    rw [hA, hB]
+    simp [fin3Slots]
+  · intro p
+    have h1 :
+        fin3Slots (Idx := Idx) (p.1 0) (p.1 1) (p.1 2) = p.1 := by
+      funext q
+      fin_cases q <;> simp
+    have h2 :
+        fin3Slots (Idx := Idx) (p.2 0) (p.2 1) (p.2 2) = p.2 := by
+      funext q
+      fin_cases q <;> simp
+    simp [fin3PairEquiv, h1, h2]
+
+/-- A component array realizing the canonical covariant derivative of Ricci has
+the same squared norm as the intrinsic tensor `|∇ Ric|²`. -/
+private theorem nablaRicciNorm_basis
+    {D : Realized.RealTimeInterval}
+    [DecidableEq Idx]
+    (S : SolutionOn (I := I) (M := M) D)
+    (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    {t : Real} {x : M}
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (hinv : MetricInverseInBasis
+      (I := I) (M := M) (S.family.metric t) x basis
+      (fun i j : Idx => gInv t x i j))
+    (hbasis : ∀ i : Idx, basis i = frame i x)
+    (hnabla : ∀ a i j : Idx,
+      totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 (S.family.connection t) (S.ricci t) x
+          (Realized.vec3 (I := I) (frame a x) (frame i x) (frame j x)) =
+        nablaRic t x a i j) :
+    nablaRicciNormSqInFrame (M := M) nablaRic gInv t x =
+      ricciGradSq (I := I) S t x := by
+  classical
+  rw [ricciGradSq]
+  rw [normSq0S_eq_coord
+    (I := I) (S.family.metric t) x 3 basis
+    (fun i j : Idx => gInv t x i j) hinv]
+  rw [coordInner3_eq (I := I) (x := x)
+    (fun i j : Idx => gInv t x i j)
+    (totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      2 (S.family.connection t) (S.ricci t) x)
+    (totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      2 (S.family.connection t) (S.ricci t) x)
+    basis]
+  have hnabla' : ∀ a i j : Idx,
+      totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 (S.base.connection t) (S.base.ricci t) x
+          (Realized.vec3 (I := I) (frame a x) (frame i x) (frame j x)) =
+        nablaRic t x a i j := by
+    intro a i j
+    simpa [SolutionOn.family, SolutionOn.ricci] using hnabla a i j
+  simp [nablaRicciNormSqInFrame, hbasis, hnabla', mul_left_comm, mul_comm]
+
+/-- The canonical frame components of `∇ Ric` have squared norm equal to the
+intrinsic `|∇ Ric|²`. -/
+theorem nablaRicciNorm_can
+    {D : Realized.RealTimeInterval}
+    [DecidableEq Idx]
+    (S : SolutionOn (I := I) (M := M) D)
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    {t : Real} {x : M}
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (hinv : MetricInverseInBasis
+      (I := I) (M := M) (S.family.metric t) x basis
+      (fun i j : Idx => gInv t x i j))
+    (hbasis : ∀ i : Idx, basis i = frame i x) :
+    nablaRicciNormSqInFrame (M := M) (nablaRicComp (I := I) S frame) gInv t x =
+      ricciGradSq (I := I) S t x :=
+  nablaRicciNorm_basis (I := I) S (nablaRicComp (I := I) S frame) gInv frame
+    basis hinv hbasis (by intro a i j; rfl)
 
 /-- The curvature-Ricci-Ricci term `R_ikjl Ric^ij Ric^kl`. -/
 def curvRicciRicciInFrame

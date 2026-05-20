@@ -367,39 +367,9 @@ theorem scalarRegOfSmooth
     simpa [smul_eq_mul] using
       (hdiff.const_smul (Real.exp (-(K : Real) * t)))
   · intro t ht x
-    let a : Real := Real.exp (-(K : Real) * t)
-    let f : M -> Real := fun z : M => S.scalar t z - scalarLowerBarrier n c0 t
-    have hf : ∀ y : M, MDifferentiableAt I 𝓘(Real, Real) f y := by
-      intro y
-      exact (hreg.scalar_space t (hsubset t ht) y).sub mdifferentiableAt_const
-    have hdiff_grad : MDiffAt (T% fun y : M =>
-        Realized.gradientFun (I := I) (G.metric t) f y) x := by
-      have hfun :
-          (fun y : M => Realized.gradientFun (I := I) (G.metric t) f y) =
-            (fun y : M =>
-              Realized.gradientFun (I := I) (S.family.metric t) (S.scalar t) y) := by
-        funext y
-        rw [hmetric t ht]
-        rw [Realized.gradientFun_sub (I := I) (S.family.metric t)
-          (hreg.scalar_space t (hsubset t ht) y) mdifferentiableAt_const]
-        rw [Realized.gradientFun_const]
-        simp [f]
-      simpa [hfun] using hreg.scalar_grad t (hsubset t ht) x
-    have hsmul : MDiffAt (T% fun y : M =>
-        a • Realized.gradientFun (I := I) (G.metric t) f y) x := by
-      exact mdifferentiableAt_const.smul_section hdiff_grad
-    have hfun :
-        (fun y : M =>
-          Realized.gradientFun (I := I) (G.metric t)
-            (fun z : M =>
-              Real.exp (-(K : Real) * t) *
-                (S.scalar t z - scalarLowerBarrier n c0 t)) y) =
-          (fun y : M => a • Realized.gradientFun (I := I) (G.metric t) f y) := by
-      funext y
-      rw [Realized.gradientFun_const_smul (I := I) (G.metric t) a (hf y)]
-      simp [a, f, smul_eq_mul]
-    simpa [hfun]
-      using hsmul
+    rw [hmetric t ht]
+    exact hreg.scalar_grad_const_mul_sub_const t (hsubset t ht)
+      (Real.exp (-(K : Real) * t)) (scalarLowerBarrier n c0 t) x
   · intro t ht x
     exact hreg.scalar_time_within ht hsubset x
   · intro t ht y
@@ -407,18 +377,9 @@ theorem scalarRegOfSmooth
   · intro t ht y
     exact (hreg.scalar_space t (hsubset t ht) y).sub mdifferentiableAt_const
   · intro t ht x
-    let f : M -> Real := fun z : M => S.scalar t z - scalarLowerBarrier n c0 t
-    have hfun :
-        (fun y : M => Realized.gradientFun (I := I) (G.metric t) f y) =
-          (fun y : M =>
-            Realized.gradientFun (I := I) (S.family.metric t) (S.scalar t) y) := by
-      funext y
-      rw [hmetric t ht]
-      rw [Realized.gradientFun_sub (I := I) (S.family.metric t)
-        (hreg.scalar_space t (hsubset t ht) y) mdifferentiableAt_const]
-      rw [Realized.gradientFun_const]
-      simp [f]
-    simpa [f, hfun] using hreg.scalar_grad t (hsubset t ht) x
+    rw [hmetric t ht]
+    exact hreg.scalar_grad_sub_const t (hsubset t ht)
+      (scalarLowerBarrier n c0 t) x
 
 /-! ## Ricci-flow producer bridge for the WMP hypothesis -/
 
