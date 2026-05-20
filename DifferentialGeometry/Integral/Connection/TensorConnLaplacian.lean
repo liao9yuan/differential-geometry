@@ -1409,11 +1409,11 @@ private theorem rawTensorConnLap_psi_tensorialAt_left
     (hT_total : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
       (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
         (E := fun z : M => TensorRSSpace r s I z) y (T y)))
-    (Y : Π b : M, TangentSpace I b)
-    (_hY_smooth : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
-      (fun y : M => TotalSpace.mk' E
-        (E := fun z : M => TangentSpace I z) y (Y y)))
-    (y : M) :
+    (y : M)
+    {Y : Π b : M, TangentSpace I b}
+    (_hY_diff : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun z : M => TotalSpace.mk' E
+        (E := fun w : M => TangentSpace I w) z (Y z)) y) :
     TensorialAt I E
       (fun (X : Π b : M, TangentSpace I b) =>
         (TensorRSNabla.tensorRSCovariantDerivative I M r s
@@ -1524,11 +1524,11 @@ private theorem rawTensorConnLap_psi_tensorialAt_right
     (_hT_total : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
       (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
         (E := fun z : M => TensorRSSpace r s I z) y (T y)))
-    (X : Π b : M, TangentSpace I b)
-    (_hX_smooth : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
-      (fun y : M => TotalSpace.mk' E
-        (E := fun z : M => TangentSpace I z) y (X y)))
-    (y : M) :
+    (y : M)
+    {X : Π b : M, TangentSpace I b}
+    (_hX_diff : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun z : M => TotalSpace.mk' E
+        (E := fun w : M => TangentSpace I w) z (X z)) y) :
     TensorialAt I E
       (fun (Y : Π b : M, TangentSpace I b) =>
         (TensorRSNabla.tensorRSCovariantDerivative I M r s
@@ -1569,6 +1569,88 @@ private theorem rawTensorConnLap_psi_tensorialAt_right
     rw [h_add_at]
     simp only [ContinuousLinearMap.map_add]
     abel
+
+/-! ### Bundling Ψ_T at `y` as a continuous bilinear map
+
+The two pointwise tensoriality theorems
+`rawTensorConnLap_psi_tensorialAt_left` and `…_right` package via
+`TensorialAt.mkHom₂` into a continuous bilinear map
+`T_y M →L[ℝ] T_y M →L[ℝ] TensorRSSpace r s I y`. The bilinear value at a pair
+of fibre vectors `(u, v)` is obtained by extending each to a globally smooth
+section using `FiberBundle.extend` and evaluating the raw second covariant
+derivative. The standard `mkHom₂_apply` lemma identifies the bilinear value at
+the pointwise values of any pair of differentiable sections with `Ψ_T` applied
+to those sections directly. -/
+
+/-- The raw second covariant derivative `Ψ_T(·, ·)(y)` packaged as a continuous
+bilinear map `T_y M →L[ℝ] T_y M →L[ℝ] TensorRSSpace r s I y`.
+
+The pointwise tensoriality of `Ψ_T` in each of the `(X, Y)`-arguments at `y`
+(see `rawTensorConnLap_psi_tensorialAt_left/right`) allows `Mathlib`'s
+`TensorialAt.mkHom₂` to manufacture the bilinear CLM. The bilinear value at a
+pair of fibre vectors `(u, v) : T_y M × T_y M` is the value of
+`Ψ_T(extend u, extend v)` at `y`, where `extend` is the standard smooth
+extension of a fibre vector to a global section of the tangent bundle. -/
+private noncomputable def rawTensorConnLap_psi_bilinAt
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T : Π b : M, TensorRSSpace r s I b)
+    (hT_total : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y (T y)))
+    (y : M) :
+    TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] TensorRSSpace r s I y :=
+  TensorialAt.mkHom₂
+    (F := E) (F' := E)
+    (V := (TangentSpace I : M → Type _))
+    (V' := (TangentSpace I : M → Type _))
+    (A := TensorRSSpace r s I y)
+    (Φ := fun (X Y : Π b : M, TangentSpace I b) =>
+      (TensorRSNabla.tensorRSCovariantDerivative I M r s
+          (LeviCivita (I := I) g)).toFun
+        (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+          (LeviCivita (I := I) g)) X T) y (Y y) -
+      (TensorRSNabla.tensorRSCovariantDerivative I M r s
+          (LeviCivita (I := I) g)).toFun T y
+        ((LeviCivita (I := I) g).toFun X y (Y y)))
+    y
+    (fun Y hY =>
+      rawTensorConnLap_psi_tensorialAt_left g r s T hT_total y (Y := Y) hY)
+    (fun X hX =>
+      rawTensorConnLap_psi_tensorialAt_right g r s T hT_total y (X := X) hX)
+
+/-- **Apply formula for `rawTensorConnLap_psi_bilinAt`.**
+
+For globally smooth (in particular, `MDifferentiableAt y`) sections `X` and `Y`
+of the tangent bundle, the bundled bilinear map at `y` evaluated on the
+pointwise fibre values `(X y, Y y)` agrees with the raw `Ψ_T(X, Y)(y)`:
+
+`Ψ̂_T(y) (X y) (Y y) =
+   cov_RS (covApply cov_RS X T) y (Y y) - cov_RS T y (cov_TM X y (Y y))`. -/
+private theorem rawTensorConnLap_psi_bilinAt_apply
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T : Π b : M, TensorRSSpace r s I b)
+    (hT_total : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y (T y)))
+    {y : M}
+    {X Y : Π b : M, TangentSpace I b}
+    (hX : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun z : M => TotalSpace.mk' E
+        (E := fun w : M => TangentSpace I w) z (X z)) y)
+    (hY : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun z : M => TotalSpace.mk' E
+        (E := fun w : M => TangentSpace I w) z (Y z)) y) :
+    rawTensorConnLap_psi_bilinAt g r s T hT_total y (X y) (Y y) =
+      (TensorRSNabla.tensorRSCovariantDerivative I M r s
+          (LeviCivita (I := I) g)).toFun
+        (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+          (LeviCivita (I := I) g)) X T) y (Y y) -
+      (TensorRSNabla.tensorRSCovariantDerivative I M r s
+          (LeviCivita (I := I) g)).toFun T y
+        ((LeviCivita (I := I) g).toFun X y (Y y)) := by
+  classical
+  unfold rawTensorConnLap_psi_bilinAt
+  exact TensorialAt.mkHom₂_apply _ _ hX hY
 
 end RawPsiTensorial
 
