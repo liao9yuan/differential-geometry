@@ -293,6 +293,133 @@ structure ScalarLowerBoundWMPRegularity
       Realized.gradientFun (I := I) (G.metric t)
         (fun z : M => scalar t z - scalarLowerBarrier n c0 t) y) x
 
+/-- Smooth Ricci-flow solutions provide the scalar regularity package needed
+by the lower-bound WMP, after restricting to a compact time slab and using any
+all-real metric family that agrees with the solution metric on that slab.
+
+This is the precise smooth-regularity producer frontier for the scalar
+lower-bound argument: it expands smoothness of the canonical scalar curvature
+into the weighted continuity, spatial differentiability, time
+within-differentiability, and gradient regularity assumptions consumed by the
+maximum principle. -/
+theorem scalarRegOfSmooth
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSmoothSolutionOn (I := I) (M := M) S)
+    (G : Realized.RealizedMetricFamily (I := I) (M := M) Real)
+    (T n c0 : Real) (K : NNReal)
+    (hsubset : ∀ t : Real, t ∈ Set.Icc 0 T -> t ∈ D.carrier)
+    (hmetric : ∀ t : Real, t ∈ Set.Icc 0 T ->
+      G.metric t = S.family.metric t)
+    (hden : ∀ t : Real, t ∈ Set.Icc 0 T ->
+      1 - (2 / n) * c0 * t ≠ 0) :
+    ScalarLowerBoundWMPRegularity (I := I) G T n c0 S.scalar K := by
+  classical
+  let hreg := hS.scalarRegular
+  have hscalar_cont : ContinuousOn
+      (fun p : Real × M => S.scalar p.1 p.2)
+      (Realized.spacetimeSlab (M := M) T) := by
+    exact
+      (continuous_iff_continuousAt.mpr hreg.scalar_continuousAt).continuousOn
+  have hbar_cont : ContinuousOn
+      (fun p : Real × M => scalarLowerBarrier n c0 p.1)
+      (Realized.spacetimeSlab (M := M) T) := by
+    have hden_ne : ∀ p : Real × M, p ∈ Realized.spacetimeSlab (M := M) T ->
+        1 - (2 / n) * c0 * p.1 ≠ 0 := by
+      intro p hp
+      exact hden p.1 hp.1
+    have hden_cont : ContinuousOn
+        (fun p : Real × M => 1 - (2 / n) * c0 * p.1)
+        (Realized.spacetimeSlab (M := M) T) := by
+      have hlin : Continuous
+          (fun p : Real × M => ((2 / n) * c0) * p.1) :=
+        continuous_const.mul continuous_fst
+      have hcont : Continuous
+          (fun p : Real × M => 1 - ((2 / n) * c0) * p.1) :=
+        continuous_const.sub hlin
+      simpa [mul_assoc] using hcont.continuousOn
+    have hconst : ContinuousOn
+        (fun _p : Real × M => c0)
+        (Realized.spacetimeSlab (M := M) T) := by
+      exact continuous_const.continuousOn
+    simpa [scalarLowerBarrier] using hconst.div hden_cont hden_ne
+  refine
+    { weighted_cont := ?_
+      weighted_mdiff := ?_
+      weighted_grad := ?_
+      scalar_time := ?_
+      scalar_space := ?_
+      diff_space := ?_
+      diff_grad := ?_ }
+  · have hexp_cont : ContinuousOn
+        (fun p : Real × M => Real.exp (-(K : Real) * p.1))
+        (Realized.spacetimeSlab (M := M) T) := by
+      have hlin : Continuous
+          (fun p : Real × M => -((K : Real) * p.1)) :=
+        (continuous_const.mul continuous_fst).neg
+      simpa using (Real.continuous_exp.comp hlin).continuousOn
+    exact hexp_cont.mul (hscalar_cont.sub hbar_cont)
+  · intro t ht x
+    have hdiff :
+        MDifferentiableAt I 𝓘(Real, Real)
+          (fun y : M => S.scalar t y - scalarLowerBarrier n c0 t) x :=
+      (hreg.scalar_space t (hsubset t ht) x).sub mdifferentiableAt_const
+    simpa [smul_eq_mul] using
+      (hdiff.const_smul (Real.exp (-(K : Real) * t)))
+  · intro t ht x
+    let a : Real := Real.exp (-(K : Real) * t)
+    let f : M -> Real := fun z : M => S.scalar t z - scalarLowerBarrier n c0 t
+    have hf : ∀ y : M, MDifferentiableAt I 𝓘(Real, Real) f y := by
+      intro y
+      exact (hreg.scalar_space t (hsubset t ht) y).sub mdifferentiableAt_const
+    have hdiff_grad : MDiffAt (T% fun y : M =>
+        Realized.gradientFun (I := I) (G.metric t) f y) x := by
+      have hfun :
+          (fun y : M => Realized.gradientFun (I := I) (G.metric t) f y) =
+            (fun y : M =>
+              Realized.gradientFun (I := I) (S.family.metric t) (S.scalar t) y) := by
+        funext y
+        rw [hmetric t ht]
+        rw [Realized.gradientFun_sub (I := I) (S.family.metric t)
+          (hreg.scalar_space t (hsubset t ht) y) mdifferentiableAt_const]
+        rw [Realized.gradientFun_const]
+        simp [f]
+      simpa [hfun] using hreg.scalar_grad t (hsubset t ht) x
+    have hsmul : MDiffAt (T% fun y : M =>
+        a • Realized.gradientFun (I := I) (G.metric t) f y) x := by
+      exact mdifferentiableAt_const.smul_section hdiff_grad
+    have hfun :
+        (fun y : M =>
+          Realized.gradientFun (I := I) (G.metric t)
+            (fun z : M =>
+              Real.exp (-(K : Real) * t) *
+                (S.scalar t z - scalarLowerBarrier n c0 t)) y) =
+          (fun y : M => a • Realized.gradientFun (I := I) (G.metric t) f y) := by
+      funext y
+      rw [Realized.gradientFun_const_smul (I := I) (G.metric t) a (hf y)]
+      simp [a, f, smul_eq_mul]
+    simpa [hfun]
+      using hsmul
+  · intro t ht x
+    exact hreg.scalar_time_within ht hsubset x
+  · intro t ht y
+    exact hreg.scalar_space t (hsubset t ht) y
+  · intro t ht y
+    exact (hreg.scalar_space t (hsubset t ht) y).sub mdifferentiableAt_const
+  · intro t ht x
+    let f : M -> Real := fun z : M => S.scalar t z - scalarLowerBarrier n c0 t
+    have hfun :
+        (fun y : M => Realized.gradientFun (I := I) (G.metric t) f y) =
+          (fun y : M =>
+            Realized.gradientFun (I := I) (S.family.metric t) (S.scalar t) y) := by
+      funext y
+      rw [hmetric t ht]
+      rw [Realized.gradientFun_sub (I := I) (S.family.metric t)
+        (hreg.scalar_space t (hsubset t ht) y) mdifferentiableAt_const]
+      rw [Realized.gradientFun_const]
+      simp [f]
+    simpa [f, hfun] using hreg.scalar_grad t (hsubset t ht) x
+
 /-! ## Ricci-flow producer bridge for the WMP hypothesis -/
 
 /-- Closed-slab scalar evolution interface kept for compatibility.  The
@@ -852,3 +979,4 @@ theorem scalar_curvature_lower_bound_of_scalarEvolution_inFrame_closedOpen
 
 end RicciFlow
 end RicciFlower
+

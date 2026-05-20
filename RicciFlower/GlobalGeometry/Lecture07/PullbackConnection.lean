@@ -1,6 +1,7 @@
 import RicciFlower.GlobalGeometry.Lecture07.Geodesics
 import RicciFlower.VectorBundle.LocalFrameRegularity
 import RicciFlower.VectorBundle.PartialMfderiv
+import Mathlib.Analysis.Calculus.Deriv.Prod
 import Mathlib.Geometry.Manifold.VectorBundle.Pullback
 
 set_option autoImplicit false
@@ -1225,6 +1226,86 @@ def coeffCov {ι : Type*} [Fintype ι]
     (Γ : Matrix ι ι Real) (dv v : ι -> Real) : ι -> Real :=
   dv + Γ.mulVec v
 
+/-- Local-frame coefficient vector of one tangent vector. -/
+def frameVec {ι : Type*}
+    (e : TangentTriv (I := I) (M := M)) [MemTrivializationAtlas e]
+    (b : Module.Basis ι Real E) {x : M} (v : TangentSpace I x) :
+    ι -> Real :=
+  fun k => e.localFrame_coeff I b k x v
+
+/-- Local-frame derivative coefficient vector of a pullback tangent section. -/
+def frameDerivVec {ι : Type*} [Fintype ι]
+    (e : TangentTriv (I := I) (M := M)) [MemTrivializationAtlas e]
+    (b : Module.Basis ι Real E) (f : N -> M)
+    (S : PullbackSection f (TangentSpace I)) (y : N)
+    (u : TangentSpace I' y) : ι -> Real :=
+  fun k => frameCoeffDeriv (I := I) (I' := I') (M := M) e b f S y u k
+
+/-- Connection matrix in a fixed local frame.  The row index is the output
+coefficient and the column index is the coefficient of the differentiated
+field, so `frameGammaMat.mulVec` matches the `HasFrameDerivAt` formula. -/
+def frameGammaMat {ι : Type*} [Fintype ι]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (e : TangentTriv (I := I) (M := M)) [MemTrivializationAtlas e]
+    (b : Module.Basis ι Real E) (f : N -> M) (y : N)
+    (u : TangentSpace I' y) : Matrix ι ι Real :=
+  fun k j => frameGamma (I := I) (M := M) cov e b (f y)
+    ((mfderiv I' I f y) u) j k
+
+/-- Vector form of the fixed-frame pullback derivative formula. -/
+theorem HasFrameDerivAt.frame_vec_eq
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {e : TangentTriv (I := I) (M := M)} [MemTrivializationAtlas e]
+    {b : Module.Basis ι Real E} {f : N -> M}
+    {S : PullbackSection f (TangentSpace I)} {y : N}
+    {u : TangentSpace I' y} {A : TangentSpace I (f y)}
+    (hA : HasFrameDerivAt (I := I) (I' := I') cov e b f S y u A) :
+    frameVec (I := I) e b A =
+      coeffCov (frameGammaMat (I := I) (I' := I') (M := M) cov e b f y u)
+        (frameDerivVec (I := I) (I' := I') (M := M) e b f S y u)
+        (frameVec (I := I) e b (S y)) := by
+  classical
+  ext k
+  calc
+    frameVec (I := I) e b A k =
+        frameCoeffDeriv (I := I) (I' := I') (M := M) e b f S y u k +
+          ∑ j : ι,
+            e.localFrame_coeff I b j (f y) (S y) *
+              frameGamma (I := I) (M := M) cov e b (f y)
+                ((mfderiv I' I f y) u) j k := by
+          exact (hA.2.2 k).2
+    _ =
+        coeffCov (frameGammaMat (I := I) (I' := I') (M := M) cov e b f y u)
+          (frameDerivVec (I := I) (I' := I') (M := M) e b f S y u)
+          (frameVec (I := I) e b (S y)) k := by
+          simp [coeffCov, frameVec, frameDerivVec, frameGammaMat,
+            Matrix.mulVec, dotProduct, mul_comm]
+
+/-- On a real parameter line, `frameDerivVec` is the ordinary derivative of
+the local-frame coefficient vector. -/
+theorem frameDerivVec_eq_of_hasDerivAt
+    {ι : Type*} [Fintype ι]
+    (e : TangentTriv (I := I) (M := M)) [MemTrivializationAtlas e]
+    (b : Module.Basis ι Real E) {gamma : Curve M}
+    {S : VectorFieldAlong I gamma} {t : Real} {dS : ι -> Real}
+    (hS : HasDerivAt (fun r : Real => frameVec (I := I) e b (S r)) dS t) :
+    frameDerivVec (I := I) (I' := 𝓘(Real, Real)) (M := M) e b
+      gamma S t (1 : TangentSpace 𝓘(Real, Real) t) = dS := by
+  ext k
+  have hk : HasDerivAt
+      (fun r : Real => e.localFrame_coeff I b k (gamma r) (S r)) (dS k) t := by
+    simpa [frameVec] using (hasDerivAt_pi.mp hS k)
+  have hmf := hk.hasFDerivAt.hasMFDerivAt.mfderiv
+  rw [frameDerivVec, frameCoeffDeriv, extDerivFun_real_eq_mfderiv]
+  change
+    (mfderiv 𝓘(Real, Real) 𝓘(Real, Real)
+      (fun r : Real => e.localFrame_coeff I b k (gamma r) (S r)) t)
+      (1 : TangentSpace 𝓘(Real, Real) t) = dS k
+  rw [hmf]
+  change (ContinuousLinearMap.toSpanSingleton Real (dS k)) (1 : Real) = dS k
+  exact ContinuousLinearMap.toSpanSingleton_apply_one (R₁ := Real) (x := dS k)
+
 /-- Pure coefficient/matrix commutator identity for two covariant
 first-order operators `∂s + Γs` and `∂t + Γt`.
 
@@ -1261,6 +1342,42 @@ theorem eventually_prod_right
     (h : ∀ᶠ q : Real × Real in 𝓝 (s, t), P q) :
     ∀ᶠ t' : Real in 𝓝 t, P (s, t') := by
   exact (ContinuousAt.prodMk continuousAt_const continuousAt_id).tendsto.eventually h
+
+/-- Derivative of a finite matrix-vector product.  This is the calculus helper
+used later to differentiate connection-matrix terms in a fixed frame. -/
+theorem hasDerivAt_mulVec
+    {ι : Type*} [Fintype ι]
+    {Γ : Real -> Matrix ι ι Real} {v : Real -> ι -> Real}
+    {x : Real} {dΓ : Matrix ι ι Real} {dv : ι -> Real}
+    (hΓ : HasDerivAt Γ dΓ x) (hv : HasDerivAt v dv x) :
+    HasDerivAt (fun r => (Γ r).mulVec (v r))
+      (dΓ.mulVec (v x) + (Γ x).mulVec dv) x := by
+  classical
+  rw [hasDerivAt_pi]
+  intro i
+  have hsum :
+      HasDerivAt
+        (fun r => Finset.univ.sum
+          (fun j : ι => Γ r i j * (v r) j))
+        (Finset.univ.sum
+          (fun j : ι => dΓ i j * (v x) j + Γ x i j * dv j)) x := by
+    refine HasDerivAt.fun_sum fun j _ => ?_
+    exact ((hasDerivAt_pi.mp (hasDerivAt_pi.mp hΓ i) j).mul
+      (hasDerivAt_pi.mp hv j))
+  simpa [Matrix.mulVec, dotProduct, Finset.sum_add_distrib] using hsum
+
+/-- Derivative of the pointwise coefficient covariant derivative
+`dv + Γ v`. -/
+theorem hasDerivAt_coeffCov
+    {ι : Type*} [Fintype ι]
+    {Γ : Real -> Matrix ι ι Real} {v dvFun : Real -> ι -> Real}
+    {x : Real} {dΓ : Matrix ι ι Real} {dv ddv : ι -> Real}
+    (hΓ : HasDerivAt Γ dΓ x) (hv : HasDerivAt v dv x)
+    (hdv : HasDerivAt dvFun ddv x) :
+    HasDerivAt (fun r => coeffCov (Γ r) (dvFun r) (v r))
+      (ddv + dΓ.mulVec (v x) + (Γ x).mulVec dv) x := by
+  have hmv := hasDerivAt_mulVec (Γ := Γ) (v := v) hΓ hv
+  simpa [coeffCov, add_assoc] using hdv.add hmv
 
 /-- A two-parameter surface, with first parameter used for variations and second
 parameter used as curve time. -/
@@ -1343,6 +1460,126 @@ theorem HasPBTimeCovDerivAt.unique
     (cov := cov) (f := surfaceTimeCurve F s)
     (S := fun τ => V (s, τ)) (y := t)
     (u := (1 : TangentSpace 𝓘(Real, Real) t)) hA hB
+
+/-- Parameter-direction surface derivatives satisfy the fixed-frame
+coefficient formula in any overlapping tangent local frame. -/
+theorem HasPBParamCovDerivAt.frame_eq
+    {ι : Type} [Fintype ι] [DecidableEq ι]
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {F : Surface M} {V : SurfaceFieldAlong I F} {s t : Real}
+    {A : TangentSpace I (F (s, t))}
+    (hA : HasPBParamCovDerivAt (I := I) cov F V s t A)
+    (e : TangentTriv (I := I) (M := M)) [MemTrivializationAtlas e]
+    (b : Module.Basis ι Real E) (hx : F (s, t) ∈ e.baseSet) (k : ι) :
+    e.localFrame_coeff I b k (F (s, t)) A =
+      frameCoeffDeriv (I := I) (I' := 𝓘(Real, Real)) (M := M) e b
+        (surfaceParamCurve F t) (fun σ => V (σ, t)) s
+        (1 : TangentSpace 𝓘(Real, Real) s) k +
+        ∑ j : ι,
+          e.localFrame_coeff I b j (F (s, t)) (V (s, t)) *
+            frameGamma (I := I) (M := M) cov e b (F (s, t))
+              ((mfderiv 𝓘(Real, Real) I (surfaceParamCurve F t) s)
+                (1 : TangentSpace 𝓘(Real, Real) s)) j k := by
+  have hf :
+      HasFrameAlongAt (I := I) cov e b (surfaceParamCurve F t)
+        (fun σ => V (σ, t)) s A := by
+    simpa [HasPBParamCovDerivAt, HasPBCovAlongAt] using
+      (HasPBCovDerivAt.toFrame
+        (I := I) (I' := 𝓘(Real, Real)) (cov := cov)
+        (f := surfaceParamCurve F t) (S := fun σ => V (σ, t))
+        (y := s) (u := (1 : TangentSpace 𝓘(Real, Real) s))
+        hA e b hx)
+  exact (hf.2.2 k).2
+
+/-- Vector form of `HasPBParamCovDerivAt.frame_eq`. -/
+theorem HasPBParamCovDerivAt.frame_vec_eq
+    {ι : Type} [Fintype ι] [DecidableEq ι]
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {F : Surface M} {V : SurfaceFieldAlong I F} {s t : Real}
+    {A : TangentSpace I (F (s, t))}
+    (hA : HasPBParamCovDerivAt (I := I) cov F V s t A)
+    (e : TangentTriv (I := I) (M := M)) [MemTrivializationAtlas e]
+    (b : Module.Basis ι Real E) (hx : F (s, t) ∈ e.baseSet) :
+    frameVec (I := I) e b A =
+      coeffCov
+        (frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+          (surfaceParamCurve F t) s
+          (1 : TangentSpace 𝓘(Real, Real) s))
+        (frameDerivVec (I := I) (I' := 𝓘(Real, Real)) (M := M) e b
+          (surfaceParamCurve F t) (fun σ => V (σ, t)) s
+          (1 : TangentSpace 𝓘(Real, Real) s))
+        (frameVec (I := I) e b (V (s, t))) := by
+  have hf :
+      HasFrameAlongAt (I := I) cov e b (surfaceParamCurve F t)
+        (fun σ => V (σ, t)) s A := by
+    simpa [HasPBParamCovDerivAt, HasPBCovAlongAt] using
+      (HasPBCovDerivAt.toFrame
+        (I := I) (I' := 𝓘(Real, Real)) (cov := cov)
+        (f := surfaceParamCurve F t) (S := fun σ => V (σ, t))
+        (y := s) (u := (1 : TangentSpace 𝓘(Real, Real) s))
+        hA e b hx)
+  exact HasFrameDerivAt.frame_vec_eq (I := I) (I' := 𝓘(Real, Real))
+    (cov := cov) hf
+
+/-- Time-direction surface derivatives satisfy the fixed-frame coefficient
+formula in any overlapping tangent local frame. -/
+theorem HasPBTimeCovDerivAt.frame_eq
+    {ι : Type} [Fintype ι] [DecidableEq ι]
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {F : Surface M} {V : SurfaceFieldAlong I F} {s t : Real}
+    {A : TangentSpace I (F (s, t))}
+    (hA : HasPBTimeCovDerivAt (I := I) cov F V s t A)
+    (e : TangentTriv (I := I) (M := M)) [MemTrivializationAtlas e]
+    (b : Module.Basis ι Real E) (hx : F (s, t) ∈ e.baseSet) (k : ι) :
+    e.localFrame_coeff I b k (F (s, t)) A =
+      frameCoeffDeriv (I := I) (I' := 𝓘(Real, Real)) (M := M) e b
+        (surfaceTimeCurve F s) (fun τ => V (s, τ)) t
+        (1 : TangentSpace 𝓘(Real, Real) t) k +
+        ∑ j : ι,
+          e.localFrame_coeff I b j (F (s, t)) (V (s, t)) *
+            frameGamma (I := I) (M := M) cov e b (F (s, t))
+              ((mfderiv 𝓘(Real, Real) I (surfaceTimeCurve F s) t)
+                (1 : TangentSpace 𝓘(Real, Real) t)) j k := by
+  have hf :
+      HasFrameAlongAt (I := I) cov e b (surfaceTimeCurve F s)
+        (fun τ => V (s, τ)) t A := by
+    simpa [HasPBTimeCovDerivAt, HasPBCovAlongAt] using
+      (HasPBCovDerivAt.toFrame
+        (I := I) (I' := 𝓘(Real, Real)) (cov := cov)
+        (f := surfaceTimeCurve F s) (S := fun τ => V (s, τ))
+        (y := t) (u := (1 : TangentSpace 𝓘(Real, Real) t))
+        hA e b hx)
+  exact (hf.2.2 k).2
+
+/-- Vector form of `HasPBTimeCovDerivAt.frame_eq`. -/
+theorem HasPBTimeCovDerivAt.frame_vec_eq
+    {ι : Type} [Fintype ι] [DecidableEq ι]
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {F : Surface M} {V : SurfaceFieldAlong I F} {s t : Real}
+    {A : TangentSpace I (F (s, t))}
+    (hA : HasPBTimeCovDerivAt (I := I) cov F V s t A)
+    (e : TangentTriv (I := I) (M := M)) [MemTrivializationAtlas e]
+    (b : Module.Basis ι Real E) (hx : F (s, t) ∈ e.baseSet) :
+    frameVec (I := I) e b A =
+      coeffCov
+        (frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b
+          (surfaceTimeCurve F s) t
+          (1 : TangentSpace 𝓘(Real, Real) t))
+        (frameDerivVec (I := I) (I' := 𝓘(Real, Real)) (M := M) e b
+          (surfaceTimeCurve F s) (fun τ => V (s, τ)) t
+          (1 : TangentSpace 𝓘(Real, Real) t))
+        (frameVec (I := I) e b (V (s, t))) := by
+  have hf :
+      HasFrameAlongAt (I := I) cov e b (surfaceTimeCurve F s)
+        (fun τ => V (s, τ)) t A := by
+    simpa [HasPBTimeCovDerivAt, HasPBCovAlongAt] using
+      (HasPBCovDerivAt.toFrame
+        (I := I) (I' := 𝓘(Real, Real)) (cov := cov)
+        (f := surfaceTimeCurve F s) (S := fun τ => V (s, τ))
+        (y := t) (u := (1 : TangentSpace 𝓘(Real, Real) t))
+        hA e b hx)
+  exact HasFrameDerivAt.frame_vec_eq (I := I) (I' := 𝓘(Real, Real))
+    (cov := cov) hf
 
 /-- A two-parameter covariant 2-jet of a surface field.
 

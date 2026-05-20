@@ -347,11 +347,21 @@ theorem ham3_scalarRegular
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
     (c0 : Real) (K : Real -> NNReal) (T : Real)
-    (_hsubset : ∀ t : Real, t ∈ Set.Icc 0 T -> t ∈ P.D.carrier) :
+    (hsubset : ∀ t : Real, t ∈ Set.Icc 0 T -> t ∈ P.D.carrier)
+    (hden : ∀ t : Real, t ∈ Set.Icc 0 T ->
+      1 - (2 / (3 : Real)) * c0 * t ≠ 0) :
     RicciFlow.ScalarLowerBoundWMPRegularity
       (I := I) (ham3RealFamily (I := I) P) T 3 c0
       (ham3Scalar (I := I) P) (K T) := by
-  sorry
+  simpa [ham3Scalar, ham3Solution] using
+    (RicciFlow.scalarRegOfSmooth (I := I) (M := M)
+      P.S P.isSmooth (ham3RealFamily (I := I) P) T 3 c0 (K T)
+      hsubset
+      (by
+        intro t ht
+        have htD : t ∈ P.D.carrier := hsubset t ht
+        simp [ham3RealFamily, ham3RealFamilyCore, htD])
+      hden)
 
 /-! ## Section 12 blow-up quantities derived from the maximal flow -/
 
@@ -623,19 +633,29 @@ theorem ham3_reg74
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
     (hD : P.D = Realized.RealTimeInterval.closedOpen 0 omega h0ω)
-    (c0 : Real) (K : Real -> NNReal) :
+    (c0 : Real) (hc0 : 0 < c0) (K : Real -> NNReal) :
     forall T : Real, 0 < T -> T < omega ->
       T < RicciFlow.scalarBlowupTime 3 c0 ->
         RicciFlow.ScalarLowerBoundWMPRegularity
           (I := I) (ham3RealFamily (I := I) P) T 3 c0
           (ham3Scalar (I := I) P) (K T) := by
-  intro T _hT hTω _hPole
+  intro T _hT hTω hPole
   have hsubset : ∀ t : Real, t ∈ Set.Icc 0 T -> t ∈ P.D.carrier := by
     intro t ht
     rw [hD]
     exact ⟨ht.1, lt_of_le_of_lt ht.2 hTω⟩
+  have hden_pos :
+      ∀ t : Real, t ∈ Set.Icc 0 T ->
+        0 < 1 - (2 / (3 : Real)) * c0 * t :=
+    RicciFlow.scalarLowerBarrier_denominator_pos_on_Icc_of_lt_blowup
+      (n := 3) (c0 := c0) (by norm_num) hc0 hPole
+  have hden :
+      ∀ t : Real, t ∈ Set.Icc 0 T ->
+        1 - (2 / (3 : Real)) * c0 * t ≠ 0 := by
+    intro t ht
+    exact ne_of_gt (hden_pos t ht)
   simpa [ham3RealFamily, ham3Scalar, ham3Solution] using
-    ham3_scalarRegular (I := I) (M := M) P c0 K T hsubset
+    ham3_scalarRegular (I := I) (M := M) P c0 K T hsubset hden
 
 /-- Three-dimensional trace Cauchy-Schwarz for the intrinsic scalar and Ricci
 norm package. -/
@@ -814,7 +834,7 @@ theorem ham3_scalar74
   refine ⟨ham3RealFamily (I := I) P, c0,
     ham3Scalar (I := I) P, ham3ScalarLap (I := I) P,
     ham3RicNormSq (I := I) P, K, hinit_min, hinit_pos, hcont, ?_, ?_, ?_, ?_, ?_⟩
-  · exact ham3_reg74 (I := I) (M := M) h0ω P hD c0 K
+  · exact ham3_reg74 (I := I) (M := M) h0ω P hD c0 hc0 K
   · exact ham3_evol74 (I := I) (M := M) h0ω P hD
   · intro T _hT _hTω _hPole
     exact ham3_lap74 (I := I) (M := M) P T

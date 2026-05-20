@@ -504,6 +504,42 @@ structure CanonicalCurvatureSpacetimeRegularOn
   scalar_continuousAt : ∀ p : Real × M,
     ContinuousAt (fun q : Real × M => S.scalar q.1 q.2) p
 
+/-- Regularity of the canonical scalar curvature needed by scalar maximum
+principle consumers.
+
+This is deliberately not tied to a particular barrier or comparison theorem.
+It records the scalar field's basic time/space differentiability and the fixed
+time regularity of its gradient for the evolving metric.  Producer theorems
+from spacetime-smooth metrics and canonical curvature should target this
+package, while WMP files derive their barrier-specific hypotheses from it. -/
+structure CanonicalScalarRegularOn
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) : Prop where
+  scalar_continuousAt : ∀ p : Real × M,
+    ContinuousAt (fun q : Real × M => S.scalar q.1 q.2) p
+  scalar_time_within :
+    ∀ {K : Set Real} {t : Real}, t ∈ K -> K ⊆ D.carrier -> ∀ x : M,
+      DifferentiableWithinAt Real (fun s : Real => S.scalar s x) K t
+  scalar_space :
+    ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
+      MDifferentiableAt I 𝓘(Real, Real) (S.scalar t) x
+  scalar_grad :
+    ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
+      MDiffAt (T% fun y : M =>
+        Realized.gradientFun (I := I) (S.family.metric t) (S.scalar t) y) x
+
+namespace CanonicalScalarRegularOn
+
+/-- Scalar regularity contains scalar spacetime continuity. -/
+theorem toCurvReg
+    {D : Realized.RealTimeInterval}
+    {S : SolutionOn (I := I) (M := M) D}
+    (hreg : CanonicalScalarRegularOn (I := I) (M := M) S) :
+    CanonicalCurvatureSpacetimeRegularOn (I := I) (M := M) S where
+  scalar_continuousAt := hreg.scalar_continuousAt
+
+end CanonicalScalarRegularOn
+
 /-- Strong Ricci-flow solution predicate used by global Hamilton packages.
 
 `IsSolutionOn` records the Ricci-flow equation and the interval-wise metric and
@@ -520,6 +556,7 @@ structure IsSmoothSolutionOn
     (S : SolutionOn (I := I) (M := M) D) : Prop where
   isSolution : IsSolutionOn (I := I) S
   curvatureRegular : CanonicalCurvatureSpacetimeRegularOn (I := I) (M := M) S
+  scalarRegular : CanonicalScalarRegularOn (I := I) (M := M) S
   scalarEvolution : ∀
     (G : Realized.RealizedMetricFamily (I := I) (M := M) Real),
       (∀ t : Realized.RealTimeInterval.RegularTime D,
@@ -555,6 +592,15 @@ theorem curvReg
     (hS : IsSmoothSolutionOn (I := I) (M := M) S) :
     CanonicalCurvatureSpacetimeRegularOn (I := I) (M := M) S :=
   hS.curvatureRegular
+
+/-- A smooth solution supplies the canonical scalar regularity package used by
+scalar maximum-principle producers. -/
+theorem scalarReg
+    {D : Realized.RealTimeInterval}
+    {S : SolutionOn (I := I) (M := M) D}
+    (hS : IsSmoothSolutionOn (I := I) (M := M) S) :
+    CanonicalScalarRegularOn (I := I) (M := M) S :=
+  hS.scalarRegular
 
 end IsSmoothSolutionOn
 

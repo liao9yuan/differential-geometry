@@ -26,10 +26,10 @@ the full statements, theorem names, and file locations.
 
 | Distance | Count | Current interpretation |
 | --- | ---: | --- |
-| `0` | 22 | Native theorem closed; only presentation wrappers or downstream use remain. |
+| `0` | 23 | Native theorem closed; only presentation wrappers or downstream use remain. |
 | `1` | 1 | A checked consumer route remains one packaging or compatibility wrapper away. |
 | `2` | 2 | In-tree component or finite-sum producer work remains. |
-| `3` | 3 | A real geometric producer is still missing. |
+| `3` | 2 | A real geometric producer is still missing. |
 | `4` | 15 | Major analytic/global Ricci-flow infrastructure or old synthetic route remains. |
 | `5` | 10 | Deliberate black box or external-scale theorem for now. |
 
@@ -48,9 +48,9 @@ the full statements, theorem names, and file locations.
 | Target | Distance | Smallest next step |
 | --- | ---: | --- |
 | Hamilton Section 6 remainder | `1` | Next local target is the trace-free Ricci norm evolution; arbitrary-frame packaging of Lemma 6.3 is optional polish. |
-| Lemma 11.1 finite time | `1` | `HamiltonPositiveRicci.ham3_scalar74` and `ham3_finite_time` are now assembled; `Ham3FlowPackage` now carries `IsSmoothSolutionOn`, so canonical scalar regularity and intrinsic scalar evolution are packaged. Remaining work is scalar WMP regularity. |
+| Lemma 11.1 finite time | `1` | `HamiltonPositiveRicci.ham3_scalar74` and `ham3_finite_time` are now assembled. `ham3_scalarRegular` is checked; the remaining scalar regularity frontier is the general producer `RicciFlow.scalarRegOfSmooth`. |
 | Lemma 10.5 quotient evolution | `2` | Port the pure scalar quotient algebra to `RicciFlower` if it is still needed by the pinching route. |
-| Assumption 3.1 calculus package | `3` | Continue native Bianchi, contracted Bianchi, tensor commutator, and trace/norm infrastructure. |
+| Assumption 3.1 calculus package | `0` | Treat this as a lookup map for native local-calculus endpoints; no single Section 3 package theorem is needed. |
 | Lemma 6.7 | `0` | Closed canonically through the `(0,2)` tensor Bochner product rule and `ricci_heat_mc`. |
 | Corollary 11.4 | `0` | Closed at the pointwise first-trace realization layer by `DimensionThree.normSqLeOfFirstData`; remaining work belongs to Section 12 geometry packaging, not the local inequality. |
 | Lemma 11.15 | `3` | Finish the native Einstein-space-form bridge from contracted Bianchi and the 3D Riemann-from-Ricci formula. |
@@ -194,8 +194,8 @@ native producer theorems already tracked in Section 11.  The closest local
 scalar-evolution bridge `HamiltonPositiveRicci.ham3_evol74` is closed through
 `RicciFlow.scalarEvolOfSmooth`.  Canonical scalar spacetime regularity and
 intrinsic scalar evolution now come from `IsSmoothSolutionOn`; the remaining
-regularity endpoint `ham3_scalarRegular` belongs to the smooth maximal-flow
-setup, not to the scalar WMP theorem itself.
+regularity endpoint now lives as `RicciFlow.scalarRegOfSmooth` in the scalar
+lower-bound layer, not in Hamilton's endpoint or the scalar WMP theorem itself.
 Do not collapse these back into a single final convergence black box.
 
 ### Assumption 3.1, `ass:riemannian-calculus`
@@ -210,17 +210,33 @@ Bianchi identities, tensor commutator identities, norms, traces, divergences,
 contractions, and rough Laplacian Delta T = g^{ij} nabla_i nabla_j T.
 ```
 
-Status: partially native.  Relevant files include
-`RicciFlower/Realized/Connection.lean`,
-`RicciFlower/Realized/Curvature.lean`,
-`RicciFlower/Realized/CurvatureTensor.lean`,
-`RicciFlower/Realized/CurvatureComponents.lean`,
-`RicciFlower/Tensor/RSTensor/NablaOnTensors.lean`, and tensor metric files.
+Status: mostly native.  The old realized files are now mostly compatibility
+surface; the working calculus is spread across the RicciFlower-native layers:
+Levi-Civita construction and smoothness in `RicciFlower/LeviCivita/*` and
+`RicciFlower/LeviCivita/Smooth/*`, tensor covariant-derivative regularity in
+`RicciFlower/Tensor/RSTensor/NablaOnTensors/*`, curvature realizations and
+component projections in `RicciFlower/Curvature/*`, one-form and `(0,s)` Ricci
+identities in `RicciFlower/Connection/RicciIdentity.lean` and
+`RicciFlower/Tensor/RicciIdentity/*`, Bianchi and contracted-Bianchi interfaces
+in `RicciFlower/Bianchi.lean`, and trace/norm/rough-Laplacian infrastructure in
+`RicciFlower/RoughLaplacian.lean`, `RicciFlower/Operators/HessianTrace.lean`,
+`RicciFlower/Tensor/RSTensor/MetricTrace.lean`, and
+`RicciFlower/Curvature/Contractions.lean`.
 
-Distance: `3`.
+Recent checkpoint: after the tensor, curvature-component, Ricci-identity, and
+Levi-Civita smoothness refactors, the `RicciFlower` target builds with warnings
+only.  This assumption should be treated as a navigation/index assumption:
+future proofs should locate the needed native endpoint in the appropriate layer,
+not wait for a single monolithic Section 3 calculus theorem.
 
-Next target: close tensor Ricci identity, Bianchi/contracted Bianchi, curvature
-section producers, and intrinsic tensor rough Laplacian.
+Distance: `0`.
+
+Next target: maintain this ledger as a map from each calculus clause to its
+native file/theorem family.  When a downstream proof needs Levi-Civita, tensor
+`nabla`, curvature, Bianchi, commutator, contraction, trace, norm, divergence,
+or rough-Laplacian facts, first search these native layers and add only the
+small adapter required by that proof.  Downstream Section 10-12 analytic/global
+frontiers should stay separate from this local-calculus status.
 
 ### Black Box 4.2, `bb:strictly-parabolic-short-time`
 
@@ -762,13 +778,26 @@ equation directly, and the newer `tfRel_frame` / `tfHeat_frame` pair feeds the
 convention-correct diagonal eigenframe hypotheses into this route without a
 manual `tfRicReactRel` assumption.  The heat equation and reaction relation are
 conditional on nonzero scalar curvature, matching the book's `R > 0` domain.
+The pointwise producer layer is now also native: `tfRel_basis` proves the
+reaction relation from a diagonal Ricci basis, and `tfRel_trace` supplies the
+required signed `Rm04` component hypothesis from the convention-correct
+`RiemannFromRicci3DTraceDataAt g (-Ric) (-scalar) Rm04 basis` package.
+The frame-level bridge `tfRel_data` and heat-equation consumer `tfHeat_data`
+now replace the raw `hRm` component-array hypothesis by this signed trace-data
+package plus a basis matching the frame.  The newer `tfRel_first` /
+`tfHeat_first` route goes one layer lower again, producing the signed trace
+package from convention-correct first-trace Ricci realization, scalar trace
+realization, orthonormality, and algebraic curvature symmetries.
 
 Distance: `1`.
 
-Next target: produce the actual Ricci orthonormal eigenframe component package
-feeding `tfHeat_frame`, including scalar/norm/cubic component identifications
-and the convention-correct 3D Riemann-from-Ricci component hypothesis.  The
-scalar-square Laplacian, diagonal finite sums, sign bridge, and Section 6
+Next target: assemble the actual Ricci-flow pointwise package feeding
+`tfHeat_first` from existing geometric data: choose the Ricci orthonormal
+eigenbasis/basis-matching frame, prove inverse-metric delta components, identify
+the scalar, norm, and cubic component scalars, and supply the first-trace
+Ricci/scalar realization and algebraic curvature symmetries.  The
+scalar-square Laplacian, diagonal finite sums, sign bridge, pointwise trace
+bridge, raw `Rm04` component bridge, signed trace-data bridge, and Section 6
 heat-equation assembly are no longer expected frontiers.
 
 ### Lemma 10.5, `lem:quotient-evolution`
@@ -885,11 +914,14 @@ scalar positivity, scalar continuity-on-slab consumer, Laplacian realization,
 Ricci trace/norm lower bound, WMP regularity consumer, and Lipschitz reaction
 input are checked.  The intrinsic scalar evolution bridge `ham3_evol74` is
 also checked via `RicciFlow.scalarEvolOfSmooth`.  The remaining producer
-frontiers are `ham3_flow_exists_normalized` and `ham3_scalarRegular`.
+frontiers are `ham3_flow_exists_normalized` and the general scalar regularity
+producer `RicciFlow.scalarRegOfSmooth`.
 
 Distance: `1`.
 
-Next target: move `ham3_scalarRegular` into the smooth maximal-flow setup.
+Next target: prove `RicciFlow.scalarRegOfSmooth` from the smooth-flow
+regularity API, or strengthen `IsSmoothSolutionOn` with exactly the scalar WMP
+regularity output.
 Arbitrary initial time should be handled later by a time-shift wrapper.
 
 ### Black Box 11.2, `bb:rf-extension-criterion`

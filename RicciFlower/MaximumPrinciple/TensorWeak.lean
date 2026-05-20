@@ -2,6 +2,7 @@ import RicciFlower.Realized.Curvature
 import RicciFlower.Realized.TensorOperators
 import RicciFlower.Tensor.RSTensor.MetricCompatibility
 import RicciFlower.Tensor.RSTensor.QuadraticBounds
+import RicciFlower.Operators.LaplacianMinimum
 import RicciFlower.Metric.Basic
 import Mathlib.Analysis.Calculus.Deriv.Basic
 import Mathlib.Topology.Order.IntermediateValue
@@ -1498,6 +1499,106 @@ theorem firstNullTime_nonpos
 /-- Drift-slot cancellation for a scalar test `phi = B(V,V)`.
 
 This is the first-derivative product rule specialized to a point where the
+moving test vector fields have zero covariant derivative. -/
+theorem nablaEval_extDeriv
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2}
+    {nablaB : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 3}
+    (hreal :
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 cov B nablaB)
+    (Y : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (V : Fin 2 ->
+      ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    {x : M} {v : TangentSpace I x}
+    (hV : ∀ q : Fin 2, V q x = v)
+    (hcovV :
+      ∀ q : Fin 2, ((cov (fun p : M => V q p) x) (Y x)) = 0) :
+    nablaB x (Fin.cons (Y x) (vec2 (I := I) v v)) =
+      extDerivFun (I := I) (fun p : M => B p (fun q : Fin 2 => V q p))
+        x (Y x) := by
+  have hslots : (fun q : Fin 2 => V q x) = vec2 (I := I) v v := by
+    funext q
+    rw [hV q]
+    fin_cases q <;> simp [vec2, Curvature.vec2]
+  have h :=
+    TotalNabla0SRealizes.eval_smooth_slots (I := I)
+      hreal Y V x
+  rw [hslots] at h
+  rw [h]
+  have hsum :
+      (∑ a : Fin 2,
+        B x
+          (Function.update (vec2 (I := I) v v) a
+            ((cov (fun p : M => V a p) x) (Y x)))) = 0 := by
+    apply Finset.sum_eq_zero
+    intro a _ha
+    rw [hcovV a]
+    exact (B x).map_update_zero (vec2 (I := I) v v) a
+  rw [hsum]
+  simp
+
+/-- Second-derivative moving-slot product rule at a point where all moved
+slots have zero covariant derivative in the differentiating direction. -/
+theorem nabla2Eval_extDeriv
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {nablaB : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 3}
+    {nabla2B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 4}
+    (hreal :
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        3 cov nablaB nabla2B)
+    (X Y : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    (V : Fin 2 ->
+      ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    {x : M} {v : TangentSpace I x}
+    (hV : ∀ q : Fin 2, V q x = v)
+    (hcovY : ((cov (fun p : M => Y p) x) (X x)) = 0)
+    (hcovV :
+      ∀ q : Fin 2, ((cov (fun p : M => V q p) x) (X x)) = 0) :
+    nabla2B x (Fin.cons (X x) (Fin.cons (Y x) (vec2 (I := I) v v))) =
+      extDerivFun (I := I)
+        (fun p : M => nablaB p (Fin.cons (Y p) (fun q : Fin 2 => V q p)))
+        x (X x) := by
+  let W : Fin 3 ->
+      ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
+    Fin.cons Y V
+  have hslots :
+      (fun q : Fin 3 => W q x) =
+        Fin.cons (n := 2) (α := fun _ : Fin 3 => TangentSpace I x)
+          (Y x) (vec2 (I := I) v v) := by
+    funext q
+    fin_cases q <;> simp [W, hV, vec2, Curvature.vec2]
+  have h :=
+    TotalNabla0SRealizes.eval_smooth_slots (I := I)
+      hreal X W x
+  rw [hslots] at h
+  rw [h]
+  have hsum :
+      (∑ a : Fin 3,
+        nablaB x
+          (Function.update
+            (Fin.cons (n := 2) (α := fun _ : Fin 3 => TangentSpace I x)
+              (Y x) (vec2 (I := I) v v))
+            a ((cov (fun p : M => W a p) x) (X x)))) = 0 := by
+    apply Finset.sum_eq_zero
+    intro a _ha
+    have hz : ((cov (fun p : M => W a p) x) (X x)) = 0 := by
+      fin_cases a <;> simp [W, hcovY, hcovV]
+    rw [hz]
+    exact (nablaB x).map_update_zero
+      (Fin.cons (n := 2) (α := fun _ : Fin 3 => TangentSpace I x)
+        (Y x) (vec2 (I := I) v v)) a
+  rw [hsum]
+  simp [W]
+
+/-- Drift-slot cancellation for a scalar test `phi = B(V,V)`.
+
+This is the first-derivative product rule specialized to a point where the
 moving test vector fields have zero covariant derivative and the scalar test
 has zero spatial derivative in the drift direction. -/
 theorem nablaEval_zero
@@ -1540,6 +1641,39 @@ theorem nablaEval_zero
     exact (B x).map_update_zero (vec2 (I := I) v v) a
   rw [hphi, hsum]
   simp
+
+/-- The scalar test function obtained by evaluating the first-null barrier on
+local repeated vector slots has a spatial local minimum at the first-null base
+point. -/
+theorem firstNullLocalMin
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorFamily (I := I) (M := M)}
+    {epsilon delta t0 : Real}
+    (d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0)
+    {B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2}
+    (V : Fin 2 ->
+      ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (hV : ∀ q : Fin 2, V q d.x1 = d.v)
+    (hB :
+      ∀ p : M,
+        B p (fun q : Fin 2 => V q p) =
+          tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0
+            d.t1 p (V 0 p) (V 0 p)) :
+    IsLocalMin (fun p : M => B p (fun q : Fin 2 => V q p)) d.x1 := by
+  unfold IsLocalMin IsMinFilter
+  filter_upwards [] with p
+  have hbase :
+      B d.x1 (fun q : Fin 2 => V q d.x1) = 0 := by
+    rw [hB d.x1, hV 0]
+    exact d.null
+  have hp :
+      0 ≤ B p (fun q : Fin 2 => V q p) := by
+    rw [hB p]
+    exact d.nonnegative_until d.t1
+      ⟨le_of_lt d.t1_mem.1, le_rfl⟩ p (V 0 p)
+  rw [hbase]
+  exact hp
 
 /--
 Compactness and continuity package for extracting the first null vector of the
@@ -2164,6 +2298,84 @@ theorem scalarSigns_of_local
   exact nablaEval_zero (I := I) (M := M) hreal Xsec V hV hphi hcovV
 
 /--
+First-null scalar signs from a local test section and the scalar
+minimum-principle Laplacian producer.  This closes the Laplacian sign part of
+the first-null scalarization; callers still supply the bridge identifying the
+tensor rough-Laplacian trace with the scalar Laplacian of `phi = B(V,V)`.
+-/
+theorem scalarSigns_of_local_min
+    [I.Boundaryless]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {nabla2Barrier : TensorNabla2Family (I := I) (M := M)}
+    {nablaBarrier : TensorNabla1Family (I := I) (M := M)}
+    {epsilon delta t0 : Real}
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2}
+    {nablaB : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 3}
+    (hstrict : TensorBarrierStrictSupersolutionOn (I := I) (M := M)
+      G S X N nabla2Barrier nablaBarrier epsilon delta t0)
+    (hnull : TensorNullEigenvectorCondition (I := I) (M := M)
+      G N (Set.Icc t0 (t0 + delta)))
+    (d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0)
+    (hreal :
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 cov B nablaB)
+    (Xsec :
+      ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (V : Fin 2 ->
+      ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (hlapMin : LaplacianNonnegativeAtSpatialMin (I := I) cov (G d.t1))
+    (hlap :
+      metricTraceFirstTwo0SAt (I := I) (G d.t1)
+        (nabla2Barrier d.t1 d.x1) (vec2 d.v d.v) =
+      laplacian (I := I) cov (G d.t1)
+        (fun p : M => B p (fun q : Fin 2 => V q p)) d.x1)
+    (hX : X d.t1 d.x1 = Xsec d.x1)
+    (hnabla : nablaBarrier d.t1 d.x1 = nablaB d.x1)
+    (hV : ∀ q : Fin 2, V q d.x1 = d.v)
+    (hB :
+      ∀ p : M,
+        B p (fun q : Fin 2 => V q p) =
+          tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0
+            d.t1 p (V 0 p) (V 0 p))
+    (hphi :
+      extDerivFun (I := I) (fun p : M => B p (fun q : Fin 2 => V q p))
+        d.x1 (Xsec d.x1) = 0)
+    (hcovV :
+      ∀ q : Fin 2, ((cov (fun p : M => V q p) d.x1) (Xsec d.x1)) = 0)
+    (hmdiff :
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun p : M => B p (fun q : Fin 2 => V q p)) d.x1)
+    (hmdiff_near :
+      ∀ᶠ y in nhds d.x1,
+        MDifferentiableAt I 𝓘(Real, Real)
+          (fun p : M => B p (fun q : Fin 2 => V q p)) y)
+    (hgrad :
+      MDiffAt (T% fun y : M =>
+        gradientFun (I := I) (G d.t1)
+          (fun p : M => B p (fun q : Fin 2 => V q p)) y) d.x1) :
+    TensorFirstNullScalarSigns (I := I) (M := M) G S X N epsilon delta t0 d := by
+  let phi : M -> Real := fun p => B p (fun q : Fin 2 => V q p)
+  have hmin : IsLocalMin phi d.x1 :=
+    firstNullLocalMin (I := I) (M := M) d V hV hB
+  have hlap_nonneg :
+      0 ≤ laplacian (I := I) cov (G d.t1) phi d.x1 :=
+    hlapMin hmin hmdiff hmdiff_near hgrad
+  exact scalarSigns_of_local (I := I) (M := M)
+    (G := G) (S := S) (X := X) (N := N)
+    (nabla2Barrier := nabla2Barrier) (nablaBarrier := nablaBarrier)
+    (cov := cov) (B := B) (nablaB := nablaB)
+    hstrict hnull d (laplacian (I := I) cov (G d.t1) phi d.x1)
+    hlap_nonneg hlap hreal Xsec V hX hnabla hV hphi hcovV
+
+/--
 Uniform barrier nonnegativity on a fixed short slab for small barriers.
 
 The time slab is fixed before `epsilon` varies over `0 < epsilon ≤ 1`; this is
@@ -2596,6 +2808,72 @@ theorem ofTotal
         S (Set.Icc t0 (t0 + delta))
         (hTensor delta t0 hdelta hsub))
     hFixed hSigns
+
+/-- Build the section-backed WMP regularity package from a smooth realized
+metric family.  The strengthened `MetricFamilySmoothOn` supplies the metric
+total-space continuity; callers still supply the tensor-family continuity. -/
+theorem ofSmoothMetric
+    [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    {S : TwoTensorSecFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {T : Real}
+    (hTsub : Set.Icc 0 T ⊆ D.carrier)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (hsym :
+      TwoTensorFamilySymmetricOn (I := I) (M := M)
+        (twoTensorSecToFamily (I := I) (M := M) S) (Set.Icc 0 T))
+    (hbar :
+      TensorBarrierRegularityOn (I := I) (M := M) (fun t => G.metric t)
+        (twoTensorSecToFamily (I := I) (M := M) S) X N T)
+    (hTensor :
+      ∀ delta t0 : Real,
+        0 < delta ->
+        Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+        Continuous
+          (fun q : {t : Real // t ∈ Set.Icc t0 (t0 + delta)} × TangentBundle I M =>
+            TotalSpace.mk' (Tensor0SModel 2 Real E)
+              (E := fun x : M => Tensor0SSpace 2 I x) q.2.proj
+              (S q.1.1 q.2.proj)))
+    (hFixed :
+      ∀ epsilon delta t0 : Real,
+        0 < epsilon ->
+        0 < delta ->
+        Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+        ∀ x (v : TangentSpace I x),
+          ContinuousOn
+            (fun t : Real =>
+              tensorBarrierFamily (I := I) (M := M) (fun t => G.metric t)
+                (twoTensorSecToFamily (I := I) (M := M) S)
+                epsilon delta t0 t x v v)
+            (Set.Icc t0 (t0 + delta)))
+    (hSigns :
+      ∀ epsilon delta t0 : Real,
+        0 < epsilon ->
+        0 < delta ->
+        Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T ->
+        ∀ (nabla2Barrier : TensorNabla2Family (I := I) (M := M))
+          (nablaBarrier : TensorNabla1Family (I := I) (M := M)),
+        (hstrict : TensorBarrierStrictSupersolutionOn (I := I) (M := M)
+          (fun t => G.metric t) (twoTensorSecToFamily (I := I) (M := M) S) X N
+          nabla2Barrier nablaBarrier epsilon delta t0) ->
+        (hnull : TensorNullEigenvectorCondition (I := I) (M := M)
+          (fun t => G.metric t) N (Set.Icc t0 (t0 + delta))) ->
+        (d : TensorFirstNullData (I := I) (M := M) (fun t => G.metric t)
+          (twoTensorSecToFamily (I := I) (M := M) S) epsilon delta t0) ->
+        TensorFirstNullScalarSigns (I := I) (M := M) (fun t => G.metric t)
+          (twoTensorSecToFamily (I := I) (M := M) S) X N epsilon delta t0 d) :
+    TensorWMPSectionReg (I := I) (M := M) (fun t => G.metric t) S X N T :=
+  ofTotal (I := I) (M := M)
+    (G := fun t => G.metric t) (S := S) (X := X) (N := N) (T := T)
+    hsym hbar
+    (fun delta t0 hdelta hsub =>
+      metricTensor_tangentBundle_cont_of_metricFamilySmoothOn
+        (I := I) (M := M) G hG
+        (fun t ht => hTsub (hsub ht)))
+    hTensor hFixed hSigns
 
 /-- Convert the section-backed WMP regularity package to the raw kernel
 package, producing first-null compactness via `TensorFirstNullCompactnessOn.of_section`. -/
