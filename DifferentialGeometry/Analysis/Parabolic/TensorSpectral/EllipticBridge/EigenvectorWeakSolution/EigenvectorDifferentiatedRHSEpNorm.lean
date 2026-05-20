@@ -1962,6 +1962,556 @@ theorem eigenvectorChartRHSDiffNumerator_eLpNorm_le_uniform
 
 end MainBoundUniform
 
+/-! ## Sharp per-layer `eLpNorm` bounds with direct atom hypotheses
+
+The five `_le_uniform` per-layer bounds (`…_layerA_eLpNorm_le_uniform`, …)
+take qualitative `MemWkp` hypotheses on the iterated weak partials of the
+eigenvector chart components and conclude an `eLpNorm` bound of each layer by
+an explicit constant times `diffNumeratorAggregate`, the finite aggregate
+containing `wkpNorm 2 2` of the `(m+1)`- and `m`-fold iterated weak partials.
+
+The following sharp variants take, instead, *direct quantitative `eLpNorm`
+bounds* on each layer's atom (the `(m+1)`-fold iterated weak partial for
+layers `A`, `C`; the chosen weak partial of the `(m+1)`-fold iterated weak
+partial for layer `B`; `fChartEffPrev` for layer `D`; the chosen weak partial
+of `fChartEffPrev` for layer `E`) of the form `eLpNorm atom ≤
+ENNReal.ofReal (C_atom · μ⁻¹^e_atom) · ‖vec‖`, where `μ = i.fst.val` is the
+eigenvalue and `‖vec‖ = ‖tensorResolventEigenbasisVec h_atlas i‖`. They
+conclude with the same multiplicative shape: an `i`-uniform `C` times
+`ofReal (C_atom · μ⁻¹^e_atom) · ‖vec‖`.
+
+The proof structure mirrors the corresponding `_le_uniform` variant: the
+geometric coefficient sup-norm is hoisted to an `i`-uniform constant via
+`eLpNorm_volume_restrict_contDiffOn_mul_le_uniform`, and the per-summand
+`gcongr` step routes through the direct `hAtom*_bd` hypothesis instead of the
+`atom-`wkpNorm`-into-aggregate` chain. The geometric constant — exactly the
+same one as in the corresponding `_le_uniform` variant — multiplies through
+the inner-sum cardinality bookkeeping to give the final `i`-uniform `C`.
+
+The sharp variants are intended as inputs to a recursive `eLpNorm` bound at
+order `m+1` whose atom hypotheses are produced from a single chart-`W^{m+1,2}`
+hypothesis on the eigenvector chart component (the `MemWkp (k + (m+1)) 2`
+chart-pou wrapper) via the polymorphic chart-cpt-to-iterated-partial bridge.
+This avoids the circular dependency in which the bound at order `m+1` would
+otherwise require chart `wkpNorm (m+3) 2`. -/
+
+section SharpAtomBounds
+
+/-! ### Unconditional `MemLp` helpers
+
+The sharp variants require, per summand, the `MemLp 2` of layer atoms
+(iterated weak partials and chosen weak partials thereof) for the
+restricted-volume measure on a compact subset of the chart target. The
+iterated weak partial is unconditionally `MemLp 2` of the chart-target
+restricted volume (`eigenvectorChartIteratedPartial_memLp_volume`); the
+chosen weak partial of an arbitrary function is unconditionally `MemLp 2`
+by the `DeGiorgi.MemW1p` case split. -/
+
+omit [CompleteSpace E] in
+/-- The `m`-fold mixed weak partial of the eigenvector chart component is
+`MemLp 2` of the volume restricted to any measurable subset of the chart
+target. -/
+private lemma iter_memLp_volume_restrict
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s)
+    (m : ℕ) (l : Fin m → Fin (Module.finrank ℝ E))
+    {K : Set EuclN} (hK_meas : MeasurableSet K)
+    (hK_in : K ⊆ chartTargetEuclid (I := I) (M := M) α) :
+    MemLp (eigenvectorChartIteratedPartial (I := I) (M := M)
+        g r s h_atlas i α P₀ m l) 2
+      ((volume : Measure EuclN).restrict K) := by
+  have h_global := eigenvectorChartIteratedPartial_memLp_volume
+    (I := I) (M := M) g r s h_atlas i α P₀ m l
+  have h_eq : ((volume : Measure EuclN).restrict
+        (chartTargetEuclid (I := I) (M := M) α)).restrict K =
+      (volume : Measure EuclN).restrict K := by
+    rw [Measure.restrict_restrict hK_meas]
+    exact congrArg _ (Set.inter_eq_self_of_subset_left hK_in)
+  exact h_eq ▸ h_global.restrict K
+
+omit [CompleteSpace E] in
+/-- The canonical chosen weak partial `chosenWeakPartial' 2 b w Ω` of an
+arbitrary function is `MemLp 2` of the volume restricted to any measurable
+subset of `Ω`: by case split on `DeGiorgi.MemW1p 2 w Ω`, the chosen weak
+partial is either the genuine `L²` weak partial of a `W^{1,2}` element or
+the zero function. -/
+private lemma chosenWp_memLp_volume_restrict
+    (b : Fin (Module.finrank ℝ E)) (w : EuclN → ℝ) {Ω K : Set EuclN}
+    (hK_meas : MeasurableSet K) (hK_in : K ⊆ Ω) :
+    MemLp (chosenWeakPartial' (d := Module.finrank ℝ E) 2 b w Ω) 2
+      ((volume : Measure EuclN).restrict K) := by
+  classical
+  have h_global : MemLp (chosenWeakPartial' (d := Module.finrank ℝ E) 2 b w Ω)
+      2 ((volume : Measure EuclN).restrict Ω) := by
+    by_cases hw : DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 w Ω
+    · exact chosenWeakPartial'_memLp_of_mem hw b
+    · rw [chosenWeakPartial'_of_not_mem hw b]
+      exact MemLp.zero
+  have h_eq : ((volume : Measure EuclN).restrict Ω).restrict K =
+      (volume : Measure EuclN).restrict K := by
+    rw [Measure.restrict_restrict hK_meas]
+    exact congrArg _ (Set.inter_eq_self_of_subset_left hK_in)
+  exact h_eq ▸ h_global.restrict K
+
+/-! ### Per-layer sharp `eLpNorm` bounds
+
+Each sharp variant takes a *direct quantitative `eLpNorm` bound* on its
+layer's atom, of the form `eLpNorm atom 2 μ ≤ ofReal (CatomX · (μᵢ)⁻¹^eAtomX)
+· ofReal ‖vec_i‖`, where `μᵢ = i.fst.val` is the eigenvalue and `vec_i =
+tensorResolventEigenbasisVec h_atlas i`. The conclusion has the same
+multiplicative shape, with an `i`-uniform geometric constant `C` (the
+sup-norm of the smooth coefficient on the compact kernel) absorbed into the
+prefactor:
+`eLpNorm (layer X) 2 μ ≤ ofReal (C · CatomX · (μᵢ)⁻¹^eAtomX) · ofReal ‖vec_i‖`.
+
+The proof structure mirrors the corresponding `_le_uniform` variant: the
+geometric coefficient sup-norm is hoisted before the `∀ i` via
+`eLpNorm_volume_restrict_contDiffOn_mul_le_uniform`, and the per-summand
+`gcongr` step routes through `hAtom*_bd` directly instead of the
+`atom-wkpNorm-into-diffNumeratorAggregate` chain. -/
+
+omit [CompleteSpace E] in
+/-- **Sharp `eLpNorm` bound for layer `A`** with a direct quantitative
+`eLpNorm` hypothesis on the layer-`A` atom (the `(m+1)`-fold iterated weak
+partial). The geometric constant is hoisted before the `∀ i`. -/
+private lemma eigenvectorChartRHSDiffNumerator_layerA_eLpNorm_le_chartcpt
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
+    (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
+    (CatomA : ℝ) (eAtomA : ℕ) (_hCatomA_nn : 0 ≤ CatomA)
+    (hAtomA_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
+        (a : Fin (Module.finrank ℝ E)),
+      eLpNorm (eigenvectorChartIteratedPartial (I := I) (M := M)
+          g r s h_atlas i α P₀ (m + 1) (Fin.cons a (Fin.init l))) 2
+        ((volume : Measure EuclN).restrict
+          (chartPouKernel (I := I) (M := M) α))
+        ≤ ENNReal.ofReal (CatomA * (i.fst.val)⁻¹ ^ eAtomA) *
+          ENNReal.ofReal
+            ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        eLpNorm (fun y => ∑ a : Fin (Module.finrank ℝ E),
+            ∑ b : Fin (Module.finrank ℝ E),
+              (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a b
+                    (l (Fin.last m))) y)
+                  (EuclideanSpace.single b 1) *
+                eigenvectorChartIteratedPartial (I := I) (M := M)
+                  g r s h_atlas i α P₀ (m + 1) (Fin.cons a (Fin.init l)) y) 2
+          ((volume : Measure EuclN).restrict
+            (chartPouKernel (I := I) (M := M) α))
+          ≤ ENNReal.ofReal (C * CatomA * (i.fst.val)⁻¹ ^ eAtomA) *
+            ENNReal.ofReal
+              ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖ := by
+  classical
+  set μ : Measure EuclN := (volume : Measure EuclN).restrict
+    (chartPouKernel (I := I) (M := M) α) with hμ_def
+  have hK_compact : IsCompact (chartPouKernel (I := I) (M := M) α) :=
+    chartPouKernel_isCompact (I := I) (M := M) α
+  have hK_meas : MeasurableSet (chartPouKernel (I := I) (M := M) α) :=
+    chartPouKernel_measurableSet (I := I) (M := M) α
+  have hK_in : chartPouKernel (I := I) (M := M) α ⊆
+      chartTargetEuclid (I := I) (M := M) α :=
+    chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α
+  -- The `C^∞` coefficient `∂_b (weightedInvGramDerivOnEuclid · · ·)`.
+  have h_coeff : ∀ a b : Fin (Module.finrank ℝ E), ContDiffOn ℝ ∞
+      (fun y => (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a b
+            (l (Fin.last m))) y)
+          (EuclideanSpace.single b 1))
+      (chartTargetEuclid (I := I) (M := M) α) := by
+    intro a b
+    have h_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
+      chartTargetEuclid_isOpen (I := I) (M := M) α
+    have h_diffOn : ContDiffOn ℝ ∞
+        (weightedInvGramDerivOnEuclid (I := I) g α a b (l (Fin.last m)))
+        (chartTargetEuclid (I := I) (M := M) α) :=
+      weightedInvGramDerivOnEuclid_contDiffOn (I := I) g α a b (l (Fin.last m))
+    have h_fderiv : ContDiffOn ℝ ∞
+        (fun y => fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a b
+            (l (Fin.last m))) y)
+        (chartTargetEuclid (I := I) (M := M) α) :=
+      ((contDiffOn_infty_iff_fderiv_of_isOpen h_open).1 h_diffOn).2
+    have h_eval : ContDiff ℝ ∞
+        (fun (L : EuclN →L[ℝ] ℝ) => L (EuclideanSpace.single b 1)) :=
+      (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single b (1 : ℝ))).contDiff
+    exact h_eval.contDiffOn.comp h_fderiv (mapsTo_univ _ _)
+  -- The double-sum aggregation, hoisting the geometric constant. The
+  -- aggregate `A i` is `ofReal (CatomA · (i.fst.val)⁻¹^eAtomA) · ofReal ‖vec_i‖`.
+  -- The double `?_` placeholders are filled later: first MemLp, then the bound.
+  have h_main : ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        eLpNorm (fun y => ∑ a : Fin (Module.finrank ℝ E),
+            ∑ b : Fin (Module.finrank ℝ E),
+              (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a b
+                    (l (Fin.last m))) y)
+                  (EuclideanSpace.single b 1) *
+                eigenvectorChartIteratedPartial (I := I) (M := M)
+                  g r s h_atlas i α P₀ (m + 1) (Fin.cons a (Fin.init l)) y) 2 μ
+          ≤ ENNReal.ofReal C *
+              (ENNReal.ofReal (CatomA * (i.fst.val)⁻¹ ^ eAtomA) *
+                ENNReal.ofReal
+                  ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖) := by
+    refine eLpNorm_sum_le_const_mul_aggregate_uniform
+      (μ := μ) (ι := Fin (Module.finrank ℝ E))
+      (ν := TensorEigenIdx (I := I) (M := M) g r s)
+      (F := fun a => fun i => fun y => ∑ b : Fin (Module.finrank ℝ E),
+        (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a b
+              (l (Fin.last m))) y)
+            (EuclideanSpace.single b 1) *
+          eigenvectorChartIteratedPartial (I := I) (M := M)
+            g r s h_atlas i α P₀ (m + 1) (Fin.cons a (Fin.init l)) y)
+      (A := fun i => ENNReal.ofReal (CatomA * (i.fst.val)⁻¹ ^ eAtomA) *
+        ENNReal.ofReal
+          ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖) ?_ ?_
+    · -- Each inner sum over `b` is `MemLp 2 μ`.
+      intro a i
+      refine memLp_finset_sum _ (fun b _ => ?_)
+      have h_atom_mem := iter_memLp_volume_restrict
+        (I := I) (M := M) g r s h_atlas i α P₀ (m + 1)
+        (Fin.cons a (Fin.init l)) hK_meas hK_in
+      rw [← hμ_def] at h_atom_mem
+      exact memLp_volume_compact_contDiffOn_mul (I := I) (M := M) α
+        (h_coeff a b) hK_compact hK_meas hK_in h_atom_mem
+    · -- Each inner sum over `b` is `eLpNorm`-bounded by an `i`-uniform constant.
+      intro a
+      refine eLpNorm_sum_le_const_mul_aggregate_uniform
+        (μ := μ) (ι := Fin (Module.finrank ℝ E))
+        (ν := TensorEigenIdx (I := I) (M := M) g r s)
+        (F := fun b => fun i => fun y =>
+          (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a b
+                (l (Fin.last m))) y)
+              (EuclideanSpace.single b 1) *
+            eigenvectorChartIteratedPartial (I := I) (M := M)
+              g r s h_atlas i α P₀ (m + 1) (Fin.cons a (Fin.init l)) y)
+        (A := fun i => ENNReal.ofReal (CatomA * (i.fst.val)⁻¹ ^ eAtomA) *
+          ENNReal.ofReal
+            ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖) ?_ ?_
+      · intro b i
+        have h_atom_mem := iter_memLp_volume_restrict
+          (I := I) (M := M) g r s h_atlas i α P₀ (m + 1)
+          (Fin.cons a (Fin.init l)) hK_meas hK_in
+        rw [← hμ_def] at h_atom_mem
+        exact memLp_volume_compact_contDiffOn_mul (I := I) (M := M) α
+          (h_coeff a b) hK_compact hK_meas hK_in h_atom_mem
+      · intro b
+        obtain ⟨C₀, hC₀_nn, hC₀⟩ :=
+          eLpNorm_volume_restrict_contDiffOn_mul_le_uniform
+            (I := I) (M := M) α (h_coeff a b) hK_compact hK_meas hK_in
+        rw [← hμ_def] at hC₀
+        refine ⟨C₀, hC₀_nn, fun i => le_trans (hC₀ _) ?_⟩
+        gcongr
+        exact hAtomA_bd i a
+  -- Repack `ofReal C * (ofReal (CatomA · …) * ofReal ‖·‖) = ofReal (C · CatomA · …) · ofReal ‖·‖`.
+  obtain ⟨C, hC_nn, hC⟩ := h_main
+  refine ⟨C, hC_nn, fun i => ?_⟩
+  refine le_trans (hC i) ?_
+  rw [← mul_assoc, ← ENNReal.ofReal_mul hC_nn, mul_assoc C CatomA]
+
+omit [CompleteSpace E] in
+/-- **Sharp `eLpNorm` bound for layer `B`** with a direct quantitative
+`eLpNorm` hypothesis on the layer-`B` atom (the chosen weak `b`-partial of
+the `(m+1)`-fold iterated weak partial). -/
+private lemma eigenvectorChartRHSDiffNumerator_layerB_eLpNorm_le_chartcpt
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
+    (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
+    (CatomB : ℝ) (eAtomB : ℕ) (_hCatomB_nn : 0 ≤ CatomB)
+    (hAtomB_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
+        (a b : Fin (Module.finrank ℝ E)),
+      eLpNorm (chosenWeakPartial' (d := Module.finrank ℝ E) 2 b
+          (eigenvectorChartIteratedPartial (I := I) (M := M)
+            g r s h_atlas i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
+          (chartTargetEuclid (I := I) (M := M) α)) 2
+        ((volume : Measure EuclN).restrict
+          (chartPouKernel (I := I) (M := M) α))
+        ≤ ENNReal.ofReal (CatomB * (i.fst.val)⁻¹ ^ eAtomB) *
+          ENNReal.ofReal
+            ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        eLpNorm (fun y => ∑ a : Fin (Module.finrank ℝ E),
+            ∑ b : Fin (Module.finrank ℝ E),
+              weightedInvGramDerivOnEuclid (I := I) g α a b (l (Fin.last m)) y *
+                chosenWeakPartial' (d := Module.finrank ℝ E) 2 b
+                  (eigenvectorChartIteratedPartial (I := I) (M := M)
+                    g r s h_atlas i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
+                  (chartTargetEuclid (I := I) (M := M) α) y) 2
+          ((volume : Measure EuclN).restrict
+            (chartPouKernel (I := I) (M := M) α))
+          ≤ ENNReal.ofReal (C * CatomB * (i.fst.val)⁻¹ ^ eAtomB) *
+            ENNReal.ofReal
+              ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖ := by
+  classical
+  set μ : Measure EuclN := (volume : Measure EuclN).restrict
+    (chartPouKernel (I := I) (M := M) α) with hμ_def
+  have hK_compact : IsCompact (chartPouKernel (I := I) (M := M) α) :=
+    chartPouKernel_isCompact (I := I) (M := M) α
+  have hK_meas : MeasurableSet (chartPouKernel (I := I) (M := M) α) :=
+    chartPouKernel_measurableSet (I := I) (M := M) α
+  have hK_in : chartPouKernel (I := I) (M := M) α ⊆
+      chartTargetEuclid (I := I) (M := M) α :=
+    chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α
+  have h_main : ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        eLpNorm (fun y => ∑ a : Fin (Module.finrank ℝ E),
+            ∑ b : Fin (Module.finrank ℝ E),
+              weightedInvGramDerivOnEuclid (I := I) g α a b (l (Fin.last m)) y *
+                chosenWeakPartial' (d := Module.finrank ℝ E) 2 b
+                  (eigenvectorChartIteratedPartial (I := I) (M := M)
+                    g r s h_atlas i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
+                  (chartTargetEuclid (I := I) (M := M) α) y) 2 μ
+          ≤ ENNReal.ofReal C *
+              (ENNReal.ofReal (CatomB * (i.fst.val)⁻¹ ^ eAtomB) *
+                ENNReal.ofReal
+                  ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖) := by
+    refine eLpNorm_sum_le_const_mul_aggregate_uniform
+      (μ := μ) (ι := Fin (Module.finrank ℝ E))
+      (ν := TensorEigenIdx (I := I) (M := M) g r s)
+      (F := fun a => fun i => fun y => ∑ b : Fin (Module.finrank ℝ E),
+        weightedInvGramDerivOnEuclid (I := I) g α a b (l (Fin.last m)) y *
+          chosenWeakPartial' (d := Module.finrank ℝ E) 2 b
+            (eigenvectorChartIteratedPartial (I := I) (M := M)
+              g r s h_atlas i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
+            (chartTargetEuclid (I := I) (M := M) α) y)
+      (A := fun i => ENNReal.ofReal (CatomB * (i.fst.val)⁻¹ ^ eAtomB) *
+        ENNReal.ofReal
+          ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖) ?_ ?_
+    · intro a i
+      refine memLp_finset_sum _ (fun b _ => ?_)
+      have h_chosen_mem := chosenWp_memLp_volume_restrict b
+        (eigenvectorChartIteratedPartial (I := I) (M := M)
+          g r s h_atlas i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
+        (Ω := chartTargetEuclid (I := I) (M := M) α)
+        hK_meas hK_in
+      rw [← hμ_def] at h_chosen_mem
+      exact memLp_volume_compact_contDiffOn_mul (I := I) (M := M) α
+        (weightedInvGramDerivOnEuclid_contDiffOn (I := I) g α a b (l (Fin.last m)))
+        hK_compact hK_meas hK_in h_chosen_mem
+    · intro a
+      refine eLpNorm_sum_le_const_mul_aggregate_uniform
+        (μ := μ) (ι := Fin (Module.finrank ℝ E))
+        (ν := TensorEigenIdx (I := I) (M := M) g r s)
+        (F := fun b => fun i => fun y =>
+          weightedInvGramDerivOnEuclid (I := I) g α a b (l (Fin.last m)) y *
+            chosenWeakPartial' (d := Module.finrank ℝ E) 2 b
+              (eigenvectorChartIteratedPartial (I := I) (M := M)
+                g r s h_atlas i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
+              (chartTargetEuclid (I := I) (M := M) α) y)
+        (A := fun i => ENNReal.ofReal (CatomB * (i.fst.val)⁻¹ ^ eAtomB) *
+          ENNReal.ofReal
+            ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖) ?_ ?_
+      · intro b i
+        have h_chosen_mem := chosenWp_memLp_volume_restrict b
+          (eigenvectorChartIteratedPartial (I := I) (M := M)
+            g r s h_atlas i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
+          (Ω := chartTargetEuclid (I := I) (M := M) α)
+          hK_meas hK_in
+        rw [← hμ_def] at h_chosen_mem
+        exact memLp_volume_compact_contDiffOn_mul (I := I) (M := M) α
+          (weightedInvGramDerivOnEuclid_contDiffOn (I := I) g α a b
+            (l (Fin.last m)))
+          hK_compact hK_meas hK_in h_chosen_mem
+      · intro b
+        obtain ⟨C₀, hC₀_nn, hC₀⟩ :=
+          eLpNorm_volume_restrict_contDiffOn_mul_le_uniform
+            (I := I) (M := M) α
+            (weightedInvGramDerivOnEuclid_contDiffOn (I := I) g α a b
+              (l (Fin.last m)))
+            hK_compact hK_meas hK_in
+        rw [← hμ_def] at hC₀
+        refine ⟨C₀, hC₀_nn, fun i => le_trans (hC₀ _) ?_⟩
+        gcongr
+        exact hAtomB_bd i a b
+  obtain ⟨C, hC_nn, hC⟩ := h_main
+  refine ⟨C, hC_nn, fun i => ?_⟩
+  refine le_trans (hC i) ?_
+  rw [← mul_assoc, ← ENNReal.ofReal_mul hC_nn, mul_assoc C CatomB]
+
+omit [CompleteSpace E] in
+/-- **Sharp `eLpNorm` bound for layer `C`** with a direct quantitative
+`eLpNorm` hypothesis on the layer-`C` atom (the `m`-fold iterated weak
+partial). -/
+private lemma eigenvectorChartRHSDiffNumerator_layerC_eLpNorm_le_chartcpt
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
+    (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
+    (CatomC : ℝ) (eAtomC : ℕ) (_hCatomC_nn : 0 ≤ CatomC)
+    (hAtomC_bd : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+      eLpNorm (eigenvectorChartIteratedPartial (I := I) (M := M)
+          g r s h_atlas i α P₀ m (Fin.init l)) 2
+        ((volume : Measure EuclN).restrict
+          (chartPouKernel (I := I) (M := M) α))
+        ≤ ENNReal.ofReal (CatomC * (i.fst.val)⁻¹ ^ eAtomC) *
+          ENNReal.ofReal
+            ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        eLpNorm (fun y =>
+            densityDerivOnEuclid (I := I) g α (l (Fin.last m)) y *
+              eigenvectorChartIteratedPartial (I := I) (M := M)
+                g r s h_atlas i α P₀ m (Fin.init l) y) 2
+          ((volume : Measure EuclN).restrict
+            (chartPouKernel (I := I) (M := M) α))
+          ≤ ENNReal.ofReal (C * CatomC * (i.fst.val)⁻¹ ^ eAtomC) *
+            ENNReal.ofReal
+              ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖ := by
+  classical
+  set μ : Measure EuclN := (volume : Measure EuclN).restrict
+    (chartPouKernel (I := I) (M := M) α) with hμ_def
+  have hK_compact : IsCompact (chartPouKernel (I := I) (M := M) α) :=
+    chartPouKernel_isCompact (I := I) (M := M) α
+  have hK_meas : MeasurableSet (chartPouKernel (I := I) (M := M) α) :=
+    chartPouKernel_measurableSet (I := I) (M := M) α
+  have hK_in : chartPouKernel (I := I) (M := M) α ⊆
+      chartTargetEuclid (I := I) (M := M) α :=
+    chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α
+  obtain ⟨C₀, hC₀_nn, hC₀⟩ := eLpNorm_volume_restrict_contDiffOn_mul_le_uniform
+    (I := I) (M := M) α
+    (densityDerivOnEuclid_contDiffOn (I := I) g α (l (Fin.last m)))
+    hK_compact hK_meas hK_in
+  rw [← hμ_def] at hC₀
+  refine ⟨C₀, hC₀_nn, fun i => ?_⟩
+  refine le_trans (hC₀ _) ?_
+  -- `ofReal C₀ · eLpNorm atom ≤ ofReal C₀ · (ofReal (CatomC · μ⁻¹^e) · ofReal ‖·‖)`,
+  -- then collect: `ofReal C₀ · ofReal (CatomC · μ⁻¹^e) = ofReal (C₀ · CatomC · μ⁻¹^e)`.
+  calc
+    ENNReal.ofReal C₀ * eLpNorm (eigenvectorChartIteratedPartial (I := I) (M := M)
+            g r s h_atlas i α P₀ m (Fin.init l)) 2 μ
+        ≤ ENNReal.ofReal C₀ *
+          (ENNReal.ofReal (CatomC * (i.fst.val)⁻¹ ^ eAtomC) *
+            ENNReal.ofReal
+              ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖) := by
+          gcongr
+          exact hAtomC_bd i
+    _ = ENNReal.ofReal (C₀ * CatomC * (i.fst.val)⁻¹ ^ eAtomC) *
+          ENNReal.ofReal
+            ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖ := by
+          rw [← mul_assoc, ← ENNReal.ofReal_mul hC₀_nn, mul_assoc C₀ CatomC]
+
+omit [CompleteSpace E] in
+/-- **Sharp `eLpNorm` bound for layer `D`** with a direct quantitative
+`eLpNorm` hypothesis on `fChartEffPrev`. -/
+private lemma eigenvectorChartRHSDiffNumerator_layerD_eLpNorm_le_chartcpt
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    (α : M) (_P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
+    (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
+    (fChartEffPrev : TensorEigenIdx (I := I) (M := M) g r s → EuclN → ℝ)
+    (CatomD : ℝ) (eAtomD : ℕ) (_hCatomD_nn : 0 ≤ CatomD)
+    (hAtomD_bd : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+      eLpNorm (fChartEffPrev i) 2
+        ((volume : Measure EuclN).restrict
+          (chartPouKernel (I := I) (M := M) α))
+        ≤ ENNReal.ofReal (CatomD * (i.fst.val)⁻¹ ^ eAtomD) *
+          ENNReal.ofReal
+            ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        eLpNorm (fun y =>
+            densityDerivOnEuclid (I := I) g α (l (Fin.last m)) y *
+              fChartEffPrev i y) 2
+          ((volume : Measure EuclN).restrict
+            (chartPouKernel (I := I) (M := M) α))
+          ≤ ENNReal.ofReal (C * CatomD * (i.fst.val)⁻¹ ^ eAtomD) *
+            ENNReal.ofReal
+              ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖ := by
+  classical
+  set μ : Measure EuclN := (volume : Measure EuclN).restrict
+    (chartPouKernel (I := I) (M := M) α) with hμ_def
+  have hK_compact : IsCompact (chartPouKernel (I := I) (M := M) α) :=
+    chartPouKernel_isCompact (I := I) (M := M) α
+  have hK_meas : MeasurableSet (chartPouKernel (I := I) (M := M) α) :=
+    chartPouKernel_measurableSet (I := I) (M := M) α
+  have hK_in : chartPouKernel (I := I) (M := M) α ⊆
+      chartTargetEuclid (I := I) (M := M) α :=
+    chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α
+  obtain ⟨C₀, hC₀_nn, hC₀⟩ := eLpNorm_volume_restrict_contDiffOn_mul_le_uniform
+    (I := I) (M := M) α
+    (densityDerivOnEuclid_contDiffOn (I := I) g α (l (Fin.last m)))
+    hK_compact hK_meas hK_in
+  rw [← hμ_def] at hC₀
+  refine ⟨C₀, hC₀_nn, fun i => ?_⟩
+  refine le_trans (hC₀ _) ?_
+  calc
+    ENNReal.ofReal C₀ * eLpNorm (fChartEffPrev i) 2 μ
+        ≤ ENNReal.ofReal C₀ *
+          (ENNReal.ofReal (CatomD * (i.fst.val)⁻¹ ^ eAtomD) *
+            ENNReal.ofReal
+              ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖) := by
+          gcongr
+          exact hAtomD_bd i
+    _ = ENNReal.ofReal (C₀ * CatomD * (i.fst.val)⁻¹ ^ eAtomD) *
+          ENNReal.ofReal
+            ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖ := by
+          rw [← mul_assoc, ← ENNReal.ofReal_mul hC₀_nn, mul_assoc C₀ CatomD]
+
+omit [CompleteSpace E] in
+/-- **Sharp `eLpNorm` bound for layer `E`** with a direct quantitative
+`eLpNorm` hypothesis on the chosen weak `lₙ`-partial of `fChartEffPrev`. -/
+private lemma eigenvectorChartRHSDiffNumerator_layerE_eLpNorm_le_chartcpt
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    (α : M) (_P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
+    (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
+    (fChartEffPrev : TensorEigenIdx (I := I) (M := M) g r s → EuclN → ℝ)
+    (CatomE : ℝ) (eAtomE : ℕ) (_hCatomE_nn : 0 ≤ CatomE)
+    (hAtomE_bd : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+      eLpNorm (chosenWeakPartial' (d := Module.finrank ℝ E) 2 (l (Fin.last m))
+          (fChartEffPrev i) (chartTargetEuclid (I := I) (M := M) α)) 2
+        ((volume : Measure EuclN).restrict
+          (chartPouKernel (I := I) (M := M) α))
+        ≤ ENNReal.ofReal (CatomE * (i.fst.val)⁻¹ ^ eAtomE) *
+          ENNReal.ofReal
+            ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        eLpNorm (fun y =>
+            densityOnEuclid (I := I) g α y *
+              chosenWeakPartial' (d := Module.finrank ℝ E) 2 (l (Fin.last m))
+                (fChartEffPrev i) (chartTargetEuclid (I := I) (M := M) α) y) 2
+          ((volume : Measure EuclN).restrict
+            (chartPouKernel (I := I) (M := M) α))
+          ≤ ENNReal.ofReal (C * CatomE * (i.fst.val)⁻¹ ^ eAtomE) *
+            ENNReal.ofReal
+              ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖ := by
+  classical
+  set μ : Measure EuclN := (volume : Measure EuclN).restrict
+    (chartPouKernel (I := I) (M := M) α) with hμ_def
+  have hK_compact : IsCompact (chartPouKernel (I := I) (M := M) α) :=
+    chartPouKernel_isCompact (I := I) (M := M) α
+  have hK_meas : MeasurableSet (chartPouKernel (I := I) (M := M) α) :=
+    chartPouKernel_measurableSet (I := I) (M := M) α
+  have hK_in : chartPouKernel (I := I) (M := M) α ⊆
+      chartTargetEuclid (I := I) (M := M) α :=
+    chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α
+  obtain ⟨C₀, hC₀_nn, hC₀⟩ := eLpNorm_volume_restrict_contDiffOn_mul_le_uniform
+    (I := I) (M := M) α
+    (densityOnEuclid_contDiffOn (I := I) g α)
+    hK_compact hK_meas hK_in
+  rw [← hμ_def] at hC₀
+  refine ⟨C₀, hC₀_nn, fun i => ?_⟩
+  refine le_trans (hC₀ _) ?_
+  calc
+    ENNReal.ofReal C₀ * eLpNorm
+        (chosenWeakPartial' (d := Module.finrank ℝ E) 2 (l (Fin.last m))
+          (fChartEffPrev i) (chartTargetEuclid (I := I) (M := M) α)) 2 μ
+        ≤ ENNReal.ofReal C₀ *
+          (ENNReal.ofReal (CatomE * (i.fst.val)⁻¹ ^ eAtomE) *
+            ENNReal.ofReal
+              ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖) := by
+          gcongr
+          exact hAtomE_bd i
+    _ = ENNReal.ofReal (C₀ * CatomE * (i.fst.val)⁻¹ ^ eAtomE) *
+          ENNReal.ofReal
+            ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖ := by
+          rw [← mul_assoc, ← ENNReal.ofReal_mul hC₀_nn, mul_assoc C₀ CatomE]
+
+end SharpAtomBounds
+
 /-! ## Sanity test -/
 
 section ElaborationTest
