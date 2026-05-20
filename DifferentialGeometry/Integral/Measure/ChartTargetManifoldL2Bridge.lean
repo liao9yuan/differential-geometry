@@ -67,6 +67,78 @@ local notation "EuclN" =>
 
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
+/-! ## A pre-extracted per-chart POU×density bound, named publicly
+
+We expose, as a public `noncomputable def`, the value of the per-chart
+POU×density chart-target sup bound used inside
+`manifold_l2_norm_sq_le_finset_sum_chart_target_l2_norm_sq`. The point of
+naming it publicly is to make the chart-target L² bridge's overall constant
+shareable across two different invocations of the bridge on different
+sections — and in particular to support a uniform-constant variant in which
+the existential constant is quantified outside the universal over sections. -/
+
+variable (I M) in
+/-- The per-chart `α : M` POU×density chart-target sup bound, extracted via
+`Classical.choose` from the existence lemma
+`exists_pou_chartDensity_bound_on_chartTarget`. The witness depends only on
+`g`, `α`, the canonical chart atlas, and the canonical partition of unity.
+
+Naming this constant via a public `noncomputable def` (rather than via a
+local `let` inside a proof) makes the value definitionally shareable across
+different invocations of the chart-target L² bridge. -/
+noncomputable def chartL2BridgeMα
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    (g : SmoothRiemannianMetric I M) (α : M) : ℝ :=
+  (exists_pou_chartDensity_bound_on_chartTarget
+    (I := I) (M := M) (h_atlas := h_atlas) g α).choose
+
+lemma chartL2BridgeMα_nonneg
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    (g : SmoothRiemannianMetric I M) (α : M) :
+    0 ≤ chartL2BridgeMα (I := I) (M := M) h_atlas g α :=
+  (exists_pou_chartDensity_bound_on_chartTarget
+    (I := I) (M := M) (h_atlas := h_atlas) g α).choose_spec.1
+
+lemma chartL2BridgeMα_le
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {y : E} (hy : y ∈ (extChartAt I α).target) :
+    (chartAtlasPOU I M α : M → ℝ) ((extChartAt I α).symm y) *
+        chartDensity g α ((extChartAt I α).symm y) ≤
+      chartL2BridgeMα (I := I) (M := M) h_atlas g α :=
+  (exists_pou_chartDensity_bound_on_chartTarget
+    (I := I) (M := M) (h_atlas := h_atlas) g α).choose_spec.2 y hy
+
+variable (I M) in
+/-- The chart-target L² bridge's overall multiplicative constant, defined as
+`(euclideanHaarFactor E : ℝ) * ∑ α ∈ chartAtlasPOU_finset I M,
+  (chartL2BridgeMα h_atlas g α + 1)`. This is the constant produced by
+`manifold_l2_norm_sq_le_finset_sum_chart_target_l2_norm_sq`, exposed publicly
+so that downstream callers can quantify the existential `∃ C` outside a
+universal over input sections. -/
+noncomputable def chartTargetL2BridgeConstant
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    (g : SmoothRiemannianMetric I M) : ℝ :=
+  (euclideanHaarFactor E : ℝ) *
+    ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+      (chartL2BridgeMα (I := I) (M := M) h_atlas g α + 1)
+
+lemma chartTargetL2BridgeConstant_nonneg
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    (g : SmoothRiemannianMetric I M) :
+    0 ≤ chartTargetL2BridgeConstant (I := I) (M := M) h_atlas g := by
+  refine mul_nonneg ?_ ?_
+  · exact (euclideanHaarFactor_pos (E := E)).le
+  · refine Finset.sum_nonneg ?_
+    intro α _
+    have := chartL2BridgeMα_nonneg (I := I) (M := M) h_atlas g α
+    linarith
+
 /-! ## Pointwise identification of the fiber norm with the model norm -/
 
 /-- The induced norm on the fiber `TensorRSSpace r s I x` coincides with the
@@ -156,37 +228,32 @@ theorem manifold_l2_norm_sq_le_finset_sum_chart_target_l2_norm_sq
     rw [heq]
     exact ENNReal.measurable_ofReal.comp hS_meas
   -- Step 1: assemble per-α constants via the POU×density chart-target bound.
-  -- For each α : M, pick a bound `M_α`; package them into a single constant `C`.
-  -- We use `Finset.sup` over `Sfin` for the constant; non-finset terms vanish
-  -- because their POU weight is zero.
-  -- We first construct, for each α, a witness `M_α` and the bound property.
-  have hα_bound : ∀ α : M,
-      ∃ M_α : ℝ, 0 ≤ M_α ∧
-        ∀ y ∈ (extChartAt I α).target,
-          (chartAtlasPOU I M α : M → ℝ) ((extChartAt I α).symm y) *
-              chartDensity g α ((extChartAt I α).symm y) ≤ M_α :=
-    fun α => exists_pou_chartDensity_bound_on_chartTarget
-      (I := I) (M := M) (h_atlas := h_atlas) g α
-  -- Choose, for each α ∈ Sfin, a specific bound `Mα α`.
-  let Mα : M → ℝ := fun α => (hα_bound α).choose
-  have hMα_nn : ∀ α : M, 0 ≤ Mα α := fun α => (hα_bound α).choose_spec.1
+  -- We use the public `chartL2BridgeMα h_atlas g α` extracted via
+  -- `Classical.choose` from the same existence lemma. Naming the constant via
+  -- a public `noncomputable def` (rather than via a local `let` inside this
+  -- proof) makes the bridge's overall constant shareable across different
+  -- invocations on different sections — needed by the uniform-constant
+  -- variant below.
+  let Mα : M → ℝ := fun α =>
+    chartL2BridgeMα (I := I) (M := M) h_atlas g α
+  have hMα_nn : ∀ α : M, 0 ≤ Mα α := fun α =>
+    chartL2BridgeMα_nonneg (I := I) (M := M) h_atlas g α
   have hMα_le : ∀ α : M, ∀ y ∈ (extChartAt I α).target,
       (chartAtlasPOU I M α : M → ℝ) ((extChartAt I α).symm y) *
           chartDensity g α ((extChartAt I α).symm y) ≤ Mα α :=
-    fun α => (hα_bound α).choose_spec.2
-  -- Choose the global constant: maximum of `c_E * Mα α` over Sfin (or `0` if Sfin
-  -- is empty). The Haar scale factor `c_E := euclideanHaarFactor E` is real-valued
-  -- via the `.toReal` of its `ℝ≥0` representative; converting to `ℝ`.
+    fun α y hy => chartL2BridgeMα_le (I := I) (M := M) h_atlas g α hy
+  -- The Haar scale factor `c_E := euclideanHaarFactor E` is real-valued via
+  -- the `.toReal` of its `ℝ≥0` representative; converting to `ℝ`.
   set cE : ℝ := (euclideanHaarFactor E : ℝ) with hcE_def
   have hcE_nn : 0 ≤ cE := (euclideanHaarFactor_pos (E := E)).le
-  -- Take a sum-based constant: `C := cE * (Σ_α (Mα α + 1))`.
-  set C : ℝ := cE * ∑ α ∈ Sfin, (Mα α + 1) with hC_def
-  have hC_nn : 0 ≤ C := by
-    refine mul_nonneg hcE_nn ?_
-    refine Finset.sum_nonneg ?_
-    intro α _
-    have := hMα_nn α
-    linarith
+  -- The named uniform constant `C := cE * (Σ_α (Mα α + 1))`.
+  set C : ℝ := chartTargetL2BridgeConstant (I := I) (M := M) h_atlas g
+    with hC_def
+  have hC_unfold : C = cE * ∑ α ∈ Sfin, (Mα α + 1) := by
+    rw [hC_def, hcE_def, hSfin_def]
+    rfl
+  have hC_nn : 0 ≤ C :=
+    chartTargetL2BridgeConstant_nonneg (I := I) (M := M) h_atlas g
   refine ⟨C, hC_nn, ?_⟩
   -- Step 2: rewrite the LHS as a finite sum via POU expansion on compact M.
   -- ∫⁻ F dμ_g = Σ' β, ∫⁻ ofReal(ρ_β) · F d(chartLocalMeasure g β)
@@ -442,7 +509,6 @@ theorem manifold_l2_norm_sq_le_finset_sum_chart_target_l2_norm_sq
         have hsum_nn : ∀ β ∈ Sfin, 0 ≤ Mα β + 1 := by
           intro β _; have := hMα_nn β; linarith
         exact Finset.single_le_sum (f := fun β => Mα β + 1) hsum_nn hα_mem
-      have hC_unfold : C = cE * ∑ β ∈ Sfin, (Mα β + 1) := hC_def
       rw [hC_unfold]
       exact mul_le_mul_of_nonneg_left h_term_le hcE_nn
     -- Bound the per-term LHS by `ofReal C * ...`.
@@ -463,6 +529,317 @@ theorem manifold_l2_norm_sq_le_finset_sum_chart_target_l2_norm_sq
     have hsum_bound :=
       Finset.sum_le_sum hper_term_bound
     -- Pull `ofReal C` out of the sum on the right.
+    have hpull_out :
+        ∑ α ∈ Sfin,
+            ENNReal.ofReal C *
+              ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+                ENNReal.ofReal
+                  (tensorTrivProjPushedNormSq (I := I) (M := M) g r s α S y)
+                ∂(volume : Measure EuclN)
+          = ENNReal.ofReal C *
+              ∑ α ∈ Sfin,
+                ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+                  ENNReal.ofReal
+                    (tensorTrivProjPushedNormSq (I := I) (M := M) g r s α S y)
+                  ∂(volume : Measure EuclN) := by
+      rw [← Finset.mul_sum]
+    rw [← hpull_out]
+    exact hsum_bound
+
+/-! ## Uniform-constant variant of the L² bridge
+
+The constant `C` produced by
+`manifold_l2_norm_sq_le_finset_sum_chart_target_l2_norm_sq` depends only on
+`g`, the canonical chart atlas, and the canonical partition of unity — not on
+the input section. We expose a uniform-constant variant whose existential `C`
+is shared across all input sections with the same Borel-measurability witness.
+
+The constant is the public `noncomputable def`
+`chartTargetL2BridgeConstant h_atlas g`, with associated non-negativity
+lemma `chartTargetL2BridgeConstant_nonneg`. The proof is a direct repackaging
+of the per-section bridge: we re-derive the bound using the named constant
+and re-use the same proof structure. -/
+
+set_option linter.unusedSectionVars false in
+/-- **Uniform-constant manifold L² bound by a finite sum of chart-target L²
+norms.**
+
+For a smooth closed Riemannian manifold `(M, g)`, the manifold L²-norm-squared
+of a fiberwise tensor section `S` against the canonical Riemannian volume
+measure is bounded by the named constant
+`chartTargetL2BridgeConstant h_atlas g` times the finite sum, over the
+chart-atlas partition-of-unity support set, of the chart-target integrals of
+`tensorTrivProjPushedNormSq g r s α S`. The bound holds for every Borel-
+measurable section, with a single constant chosen uniformly. -/
+theorem uniform_manifold_l2_norm_sq_le_finset_sum_chart_target_l2_norm_sq
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (S : Π b : M, TensorRSSpace r s I b)
+    (hS_meas : Measurable (fun x : M => ‖S x‖ ^ 2)) :
+    ∫⁻ x, (‖S x‖ₑ : ℝ≥0∞) ^ 2
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g) ≤
+      ENNReal.ofReal
+          (chartTargetL2BridgeConstant (I := I) (M := M) h_atlas g) *
+        ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+          ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+            ENNReal.ofReal
+              (tensorTrivProjPushedNormSq (I := I) (M := M) g r s α S y)
+            ∂(volume : Measure EuclN) := by
+  classical
+  -- Set up the finite-support POU finset and the integrand.
+  set Sfin : Finset M := chartAtlasPOU_finset (I := I) (M := M) with hSfin_def
+  set F : M → ℝ≥0∞ := fun x => (‖S x‖ₑ : ℝ≥0∞) ^ 2 with hF_def
+  have hF_meas : Measurable F := by
+    have heq : F = fun x : M => ENNReal.ofReal (‖S x‖ ^ 2) := by
+      funext x
+      have hen : ‖S x‖ₑ = ENNReal.ofReal ‖S x‖ := (ofReal_norm _).symm
+      change (‖S x‖ₑ : ℝ≥0∞) ^ 2 = ENNReal.ofReal (‖S x‖ ^ 2)
+      rw [hen, ← ENNReal.ofReal_pow (norm_nonneg _) 2]
+    rw [heq]
+    exact ENNReal.measurable_ofReal.comp hS_meas
+  -- Re-use the per-α POU×density bound from the public named def.
+  let Mα : M → ℝ := fun α =>
+    chartL2BridgeMα (I := I) (M := M) h_atlas g α
+  have hMα_nn : ∀ α : M, 0 ≤ Mα α := fun α =>
+    chartL2BridgeMα_nonneg (I := I) (M := M) h_atlas g α
+  have hMα_le : ∀ α : M, ∀ y ∈ (extChartAt I α).target,
+      (chartAtlasPOU I M α : M → ℝ) ((extChartAt I α).symm y) *
+          chartDensity g α ((extChartAt I α).symm y) ≤ Mα α :=
+    fun α y hy => chartL2BridgeMα_le (I := I) (M := M) h_atlas g α hy
+  set cE : ℝ := (euclideanHaarFactor E : ℝ) with hcE_def
+  have hcE_nn : 0 ≤ cE := (euclideanHaarFactor_pos (E := E)).le
+  set C : ℝ := chartTargetL2BridgeConstant (I := I) (M := M) h_atlas g
+    with hC_def
+  have hC_unfold : C = cE * ∑ α ∈ Sfin, (Mα α + 1) := by
+    rw [hC_def, hcE_def, hSfin_def]
+    rfl
+  -- Now repeat the per-section bridge's body verbatim with our named `C`.
+  rw [riemannianVolumeMeasure_def]
+  rw [riemannianMeasure_lintegral_eq (I := I) g (chartAtlasPOU I M) hF_meas]
+  -- Reduce the tsum to a finset sum over Sfin.
+  have htsum_eq_finsum :
+      ∑' β : M, ∫⁻ x, ENNReal.ofReal
+              ((chartAtlasPOU I M β : M → ℝ) x) * F x
+            ∂(chartLocalMeasure (I := I) g β) =
+        ∑ β ∈ Sfin, ∫⁻ x, ENNReal.ofReal
+              ((chartAtlasPOU I M β : M → ℝ) x) * F x
+            ∂(chartLocalMeasure (I := I) g β) := by
+    rw [tsum_eq_sum]
+    intro β hβ
+    have hρ_zero : ∀ x : M, (chartAtlasPOU I M β : M → ℝ) x = 0 := fun x =>
+      chartAtlasPOU_weight_zero_of_notMem (I := I) (M := M) hβ x
+    have hint_zero : ∀ x : M, ENNReal.ofReal
+        ((chartAtlasPOU I M β : M → ℝ) x) * F x = 0 := by
+      intro x
+      rw [hρ_zero x]
+      simp
+    have hintegrand : (fun x : M => ENNReal.ofReal
+        ((chartAtlasPOU I M β : M → ℝ) x) * F x) =
+        (fun _ : M => (0 : ℝ≥0∞)) := by
+      funext x
+      exact hint_zero x
+    rw [hintegrand]
+    simp
+  rw [htsum_eq_finsum]
+  refine
+    le_trans
+      (b := ∑ α ∈ Sfin,
+        ENNReal.ofReal (cE * (Mα α + 1)) *
+          ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+            ENNReal.ofReal
+              (tensorTrivProjPushedNormSq (I := I) (M := M) g r s α S y)
+            ∂(volume : Measure EuclN))
+      (Finset.sum_le_sum ?_) ?_
+  · intro α hα_mem
+    have hρα_meas : Measurable (fun x : M =>
+        ENNReal.ofReal ((chartAtlasPOU I M α : M → ℝ) x)) :=
+      measurable_ofReal_pou_weight (chartAtlasPOU I M) α
+    have hgα_meas : Measurable
+        (fun x : M => ENNReal.ofReal ((chartAtlasPOU I M α : M → ℝ) x) * F x) :=
+      hρα_meas.mul hF_meas
+    have hbridge :=
+      chartLocalMeasure_lintegral_via_chartTargetEuclid
+        (I := I) (M := M) g α (F := fun x : M =>
+          ENNReal.ofReal ((chartAtlasPOU I M α : M → ℝ) x) * F x) hgα_meas
+    rw [hbridge]
+    have hpt_bound : ∀ y, y ∈ chartTargetEuclid (I := I) (M := M) α →
+        ENNReal.ofReal
+            (chartDensity g α
+              ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+          (ENNReal.ofReal
+              ((chartAtlasPOU I M α : M → ℝ)
+                ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+            F ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))
+        ≤ ENNReal.ofReal (Mα α + 1) *
+            ENNReal.ofReal
+              (tensorTrivProjPushedNormSq (I := I) (M := M) g r s α S y) := by
+      intro y hy
+      have hy_target : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target := by
+        rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
+        exact hy
+      have hdens_pos := chartDensity_pos_on_target
+        (I := I) (M := M) g α hy_target
+      have hdens_nn := hdens_pos.le
+      have hρα_nn := (chartAtlasPOU I M).nonneg α
+        ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
+      have hprod_le := hMα_le α ((toEuclidean (E := E)).symm y) hy_target
+      have hkey :
+          ENNReal.ofReal
+              (chartDensity g α
+                ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+            ENNReal.ofReal
+              ((chartAtlasPOU I M α : M → ℝ)
+                ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))
+            ≤ ENNReal.ofReal (Mα α + 1) := by
+        have hbase :
+            chartDensity g α
+                ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) *
+              (chartAtlasPOU I M α : M → ℝ)
+                ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
+              ≤ Mα α + 1 := by
+          have hsym : (chartAtlasPOU I M α : M → ℝ)
+                ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) *
+              chartDensity g α
+                ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
+              ≤ Mα α := hprod_le
+          have : chartDensity g α
+                ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) *
+              (chartAtlasPOU I M α : M → ℝ)
+                ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
+              ≤ Mα α := by
+            rw [mul_comm]; exact hsym
+          linarith
+        rw [← ENNReal.ofReal_mul hdens_nn]
+        exact ENNReal.ofReal_le_ofReal hbase
+      have hF_eq :
+          F ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) =
+            ENNReal.ofReal
+              (tensorTrivProjPushedNormSq (I := I) (M := M) g r s α S y) := by
+        rw [hF_def]
+        exact enorm_sq_apply_eq_ofReal_pushedNormSq
+          (I := I) (M := M) g r s α S hy
+      calc ENNReal.ofReal
+              (chartDensity g α
+                ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+            (ENNReal.ofReal
+                ((chartAtlasPOU I M α : M → ℝ)
+                  ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+              F ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))
+          = (ENNReal.ofReal
+                (chartDensity g α
+                  ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+              ENNReal.ofReal
+                ((chartAtlasPOU I M α : M → ℝ)
+                  ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))) *
+              F ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) := by
+            ring
+        _ ≤ ENNReal.ofReal (Mα α + 1) *
+              F ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) := by
+            exact mul_le_mul_left hkey _
+        _ = ENNReal.ofReal (Mα α + 1) *
+              ENNReal.ofReal
+                (tensorTrivProjPushedNormSq (I := I) (M := M) g r s α S y) := by
+            rw [hF_eq]
+    have hint_le :
+        ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+          ENNReal.ofReal
+              (chartDensity g α
+                ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+            (ENNReal.ofReal
+                ((chartAtlasPOU I M α : M → ℝ)
+                  ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+              F ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))
+            ∂(volume : Measure EuclN)
+          ≤ ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+              ENNReal.ofReal (Mα α + 1) *
+                ENNReal.ofReal
+                  (tensorTrivProjPushedNormSq (I := I) (M := M) g r s α S y)
+              ∂(volume : Measure EuclN) := by
+      exact MeasureTheory.setLIntegral_mono_ae'
+        (chartTargetEuclid_measurableSet (I := I) (M := M) α)
+        (Filter.Eventually.of_forall hpt_bound)
+    have hpull :
+        ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+            ENNReal.ofReal (Mα α + 1) *
+              ENNReal.ofReal
+                (tensorTrivProjPushedNormSq (I := I) (M := M) g r s α S y)
+            ∂(volume : Measure EuclN)
+          = ENNReal.ofReal (Mα α + 1) *
+              ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+                ENNReal.ofReal
+                  (tensorTrivProjPushedNormSq (I := I) (M := M) g r s α S y)
+                ∂(volume : Measure EuclN) := by
+      rw [MeasureTheory.lintegral_const_mul']
+      exact ENNReal.ofReal_ne_top
+    calc (euclideanHaarFactor E : ℝ≥0∞) *
+          ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+            ENNReal.ofReal
+                (chartDensity g α
+                  ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+              (ENNReal.ofReal
+                  ((chartAtlasPOU I M α : M → ℝ)
+                    ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+                F ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))
+            ∂(volume : Measure EuclN)
+        ≤ (euclideanHaarFactor E : ℝ≥0∞) *
+            ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+              ENNReal.ofReal (Mα α + 1) *
+                ENNReal.ofReal
+                  (tensorTrivProjPushedNormSq (I := I) (M := M) g r s α S y)
+              ∂(volume : Measure EuclN) := by
+          exact mul_le_mul_right hint_le _
+      _ = (euclideanHaarFactor E : ℝ≥0∞) *
+            (ENNReal.ofReal (Mα α + 1) *
+              ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+                ENNReal.ofReal
+                  (tensorTrivProjPushedNormSq (I := I) (M := M) g r s α S y)
+                ∂(volume : Measure EuclN)) := by
+          rw [hpull]
+      _ = ((euclideanHaarFactor E : ℝ≥0∞) *
+            ENNReal.ofReal (Mα α + 1)) *
+              ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+                ENNReal.ofReal
+                  (tensorTrivProjPushedNormSq (I := I) (M := M) g r s α S y)
+                ∂(volume : Measure EuclN) := by
+          ring
+      _ = ENNReal.ofReal (cE * (Mα α + 1)) *
+            ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+              ENNReal.ofReal
+                (tensorTrivProjPushedNormSq (I := I) (M := M) g r s α S y)
+              ∂(volume : Measure EuclN) := by
+          congr 1
+          rw [hcE_def]
+          have hMα1_nn : 0 ≤ Mα α + 1 := by have := hMα_nn α; linarith
+          rw [ENNReal.ofReal_mul (NNReal.coe_nonneg _)]
+          congr 1
+          rw [ENNReal.ofReal_coe_nnreal]
+  · -- Bound per-term coefficient by `ofReal C` and sum.
+    have hper_term_le : ∀ α ∈ Sfin,
+        ENNReal.ofReal (cE * (Mα α + 1)) ≤ ENNReal.ofReal C := by
+      intro α hα_mem
+      refine ENNReal.ofReal_le_ofReal ?_
+      have h_term_le : Mα α + 1 ≤ ∑ β ∈ Sfin, (Mα β + 1) := by
+        have hsum_nn : ∀ β ∈ Sfin, 0 ≤ Mα β + 1 := by
+          intro β _; have := hMα_nn β; linarith
+        exact Finset.single_le_sum (f := fun β => Mα β + 1) hsum_nn hα_mem
+      rw [hC_unfold]
+      exact mul_le_mul_of_nonneg_left h_term_le hcE_nn
+    have hper_term_bound : ∀ α ∈ Sfin,
+        ENNReal.ofReal (cE * (Mα α + 1)) *
+            ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+              ENNReal.ofReal
+                (tensorTrivProjPushedNormSq (I := I) (M := M) g r s α S y)
+              ∂(volume : Measure EuclN)
+          ≤ ENNReal.ofReal C *
+              ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+                ENNReal.ofReal
+                  (tensorTrivProjPushedNormSq (I := I) (M := M) g r s α S y)
+                ∂(volume : Measure EuclN) := by
+      intro α hα_mem
+      exact mul_le_mul_left (hper_term_le α hα_mem) _
+    have hsum_bound :=
+      Finset.sum_le_sum hper_term_bound
     have hpull_out :
         ∑ α ∈ Sfin,
             ENNReal.ofReal C *
