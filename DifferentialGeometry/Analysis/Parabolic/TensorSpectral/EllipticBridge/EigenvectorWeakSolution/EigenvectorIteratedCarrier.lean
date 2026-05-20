@@ -181,7 +181,7 @@ differentiated right-hand side off the compact partition-of-unity kernel
 at every positive level it is the indicator of the kernel, so vanishes pointwise
 off it (`eigenvectorChartRHSDiff_succ_eq_zero_off_chartPouKernel`). -/
 
-private lemma eigenvectorChartRHSDiff_ae_zero_off_chartPouKernel
+lemma eigenvectorChartRHSDiff_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

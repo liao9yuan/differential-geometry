@@ -1160,7 +1160,7 @@ rhsZeroAggregate g r s h_atlas i α P₀ K
 
 This is the per-`K`-fixed analogue of
 `rhsZeroAggregate_le_energy_uniform`. -/
-private lemma rhsZeroAggregate_le_energy_perK
+lemma rhsZeroAggregate_le_energy_perK
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (K : ℕ)

@@ -468,7 +468,7 @@ omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M]
 open Euclidean chart target: the chart density is `C^∞`
 (`densityOnEuclid_contDiffOn`) and strictly positive (`densityOnEuclid_pos`)
 there. -/
-private lemma one_div_densityOnEuclid_contDiffOn_chartTargetEuclid
+lemma one_div_densityOnEuclid_contDiffOn_chartTargetEuclid
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContDiffOn ℝ (⊤ : ℕ∞) (fun y => 1 / densityOnEuclid (I := I) g α y)
       (chartTargetEuclid (I := I) (M := M) α) :=
@@ -518,7 +518,7 @@ omit [CompleteSpace E] in
 kernel `chartPouKernel α`: each of its five layer factors ae-vanishes on
 `chartTargetEuclid α \ chartPouKernel α`, so each layer and their `+`/`-`
 combination does. -/
-private lemma eigenvectorChartRHSDiffNumerator_ae_zero_off_chartPouKernel
+lemma eigenvectorChartRHSDiffNumerator_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -687,7 +687,7 @@ the iterated-weak-partial memberships directly from `h_iter` rather than from a
 chart-component regularity hypothesis. -/
 
 omit [CompleteSpace E] in
-private lemma eigenvectorChartRHSDiffNumerator_memWkp_of_iter
+lemma eigenvectorChartRHSDiffNumerator_memWkp_of_iter
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
