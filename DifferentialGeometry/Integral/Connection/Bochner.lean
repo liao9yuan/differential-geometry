@@ -2144,7 +2144,7 @@ The proof uses `orthonormal_basis_bilin_trace` applied to the bilinear form
 `T : T_x M → T_x M` satisfying `g(T(Z), W) = g(X, Z) * g(W, Y)`. The endomorphism
 `T` is the rank-one operator `Z ↦ g(X, Z) • Y_♯` where `Y_♯` is the metric-flat
 of `Y`; its trace is `g(X, Y)` directly. -/
-private theorem g_inner_eq_orthonormal_parseval_sum
+theorem g_inner_eq_orthonormal_parseval_sum
     (X Y : TangentSpace I x)
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (hB : ∀ i j : Fin (Module.finrank ℝ E),

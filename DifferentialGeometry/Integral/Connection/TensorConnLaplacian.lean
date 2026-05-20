@@ -1,5 +1,6 @@
 import DifferentialGeometry.Integral.Connection.TensorRSNabla
 import DifferentialGeometry.Integral.Connection.ConnectionLaplacian
+import DifferentialGeometry.Integral.Connection.Bochner
 import DifferentialGeometry.Integral.L2.SmoothSections.Defs
 
 /-!
@@ -1651,6 +1652,241 @@ private theorem rawTensorConnLap_psi_bilinAt_apply
   classical
   unfold rawTensorConnLap_psi_bilinAt
   exact TensorialAt.mkHom₂_apply _ _ hX hY
+
+/-! ### Frame invariance of the raw tensor connection Laplacian
+
+The value `rawTensorConnLap g r s T y` was defined as the frame-trace of the
+raw second covariant derivative against the centre-dependent smooth orthonormal
+frame `smoothOrthoFrame g y`, evaluated at `y`. The combination of the
+pointwise-bilinear packaging `rawTensorConnLap_psi_bilinAt` and the scalar
+orthonormal-basis trace identity `orthonormal_basis_bilin_trace` shows that the
+value is unchanged when the smooth orthonormal frame at the centre is
+replaced by an arbitrary `g_y`-orthonormal basis of `T_y M`.
+
+The proof goes by dual-functional separation: for any continuous linear
+functional `φ : TensorRSSpace r s I y →L[ℝ] ℝ`, the scalar bilinear form
+`Hb_φ(X, Y) := φ(Ψ_T(X, Y)(y))` admits the basis-independent trace
+expansion `∑_i Hb_φ(B_i, B_i) = ∑_{kl} G^{kl}(y, y) · Hb_φ(e_k, e_l)`
+(Mathlib's `orthonormal_basis_bilin_trace`). Applying this once with `B =
+smoothOrthoFrame g y` at `y` and once with the arbitrary `B`, both reductions
+land on the same right-hand side; hence `φ` evaluates the two frame-trace
+vectors equally. As `TensorRSSpace r s I y` is a finite-dimensional normed
+ℝ-space, equal-on-dual implies equal. -/
+
+/-- **Frame invariance of the raw tensor connection Laplacian.**
+
+For any `g_y`-orthonormal basis `B : Fin (Module.finrank ℝ E) → T_y M`,
+the value `rawTensorConnLap g r s T y` equals the orthonormal-frame trace of
+the bundled raw second covariant derivative
+`rawTensorConnLap_psi_bilinAt g r s T hT_total y`:
+$$
+  (\Delta_\nabla T)(y) = \sum_i \hat\Psi_T(y)(B_i,\, B_i).
+$$
+This shows that the centre-dependent choice of `smoothOrthoFrame g y` in the
+definition of `rawTensorConnLap` is irrelevant — any `g_y`-orthonormal basis
+of `T_y M` reproduces the same value. -/
+private theorem rawTensorConnLap_eq_frame_trace
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T : Π b : M, TensorRSSpace r s I b)
+    (hT_total : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y (T y)))
+    (y : M)
+    (B : Fin (Module.finrank ℝ E) → TangentSpace I y)
+    (hB_orthonormal : ∀ i j : Fin (Module.finrank ℝ E),
+      g.inner y (B i) (B j) = if i = j then (1 : ℝ) else 0) :
+    rawTensorConnLap (I := I) g r s T y =
+      ∑ i : Fin (Module.finrank ℝ E),
+        rawTensorConnLap_psi_bilinAt g r s T hT_total y (B i) (B i) := by
+  classical
+  -- Step 1: rewrite the LHS by identifying each summand of `rawTensorConnLap`
+  -- with the bilinear value of `rawTensorConnLap_psi_bilinAt` at the centre-
+  -- dependent smooth orthonormal frame at `y` (orthonormal at the centre `y`).
+  have h_LHS_via_smoothFrame :
+      rawTensorConnLap (I := I) g r s T y =
+        ∑ i : Fin (Module.finrank ℝ E),
+          rawTensorConnLap_psi_bilinAt g r s T hT_total y
+            (smoothOrthoFrame (I := I) g y i y)
+            (smoothOrthoFrame (I := I) g y i y) := by
+    rw [rawTensorConnLap_def]
+    refine Finset.sum_congr rfl ?_
+    intro i _
+    -- Smoothness of `smoothOrthoFrame g y i` as a tangent-bundle section.
+    have hSmooth_at : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+        (fun z : M => TotalSpace.mk' E
+          (E := fun w : M => TangentSpace I w) z
+          (smoothOrthoFrame (I := I) g y i z)) y :=
+      (smoothOrthoFrame_smooth (I := I) g y i).contMDiffAt.mdifferentiableAt
+        (by simp)
+    -- Apply `rawTensorConnLap_psi_bilinAt_apply` with
+    -- `X = Y = smoothOrthoFrame g y i`.
+    have happly := rawTensorConnLap_psi_bilinAt_apply (I := I) g r s T hT_total
+      (X := smoothOrthoFrame (I := I) g y i)
+      (Y := smoothOrthoFrame (I := I) g y i)
+      hSmooth_at hSmooth_at
+    -- happly : Ψ̂_T(y) (smoothOrthoFrame i y) (smoothOrthoFrame i y) =
+    --   cov_RS (covApply cov_RS B_i T) y (B_i y) -
+    --     cov_RS T y (cov_TM B_i y (B_i y)).
+    -- We need the symmetric form (RHS → LHS).
+    exact happly.symm
+  -- Step 2: it suffices to show that, for the two orthonormal bases
+  -- `C := smoothOrthoFrame g y · y` and `B`, the corresponding bilinear-form
+  -- traces agree. We prove this by Parseval expansion of one basis against
+  -- the other.
+  rw [h_LHS_via_smoothFrame]
+  -- Local abbreviations: Ψ is the bundled bilinear, C is the smooth orthonormal
+  -- frame at the centre `y` evaluated at `y`, which is `g_y`-orthonormal at `y`.
+  set Ψ : TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] TensorRSSpace r s I y :=
+    rawTensorConnLap_psi_bilinAt g r s T hT_total y with hΨ_def
+  set C : Fin (Module.finrank ℝ E) → TangentSpace I y :=
+    fun i => smoothOrthoFrame (I := I) g y i y with hC_def
+  -- C is `g_y`-orthonormal at `y` (orthonormality of the smooth frame at the
+  -- centre).
+  have hC_orthonormal :
+      ∀ i j : Fin (Module.finrank ℝ E),
+        g.inner y (C i) (C j) = if i = j then (1 : ℝ) else 0 :=
+    fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g y i j
+  -- Riesz expansion of `B i` in the `C` orthonormal basis:
+  -- `B i = ∑ j, g(B i, C j) • C j`.
+  have hRieszB : ∀ i : Fin (Module.finrank ℝ E),
+      B i = ∑ j : Fin (Module.finrank ℝ E),
+        g.inner y (B i) (C j) • C j := by
+    intro i
+    apply (vector_eq_iff_inner_eq (I := I) g y _ _).mpr
+    intro w
+    -- Compute g(∑ j, g(B i, C j) • C j, w) = ∑ j, g(B i, C j) * g(C j, w).
+    rw [show g.inner y
+            (∑ j : Fin (Module.finrank ℝ E), g.inner y (B i) (C j) • C j) w =
+          ∑ j : Fin (Module.finrank ℝ E),
+            g.inner y (B i) (C j) * g.inner y (C j) w from by
+      rw [map_sum, ContinuousLinearMap.sum_apply]
+      refine Finset.sum_congr rfl ?_
+      intro j _
+      rw [show ((g.inner y) (g.inner y (B i) (C j) • C j)) w =
+            g.inner y (B i) (C j) • ((g.inner y) (C j)) w from by
+        rw [ContinuousLinearMap.map_smul]; rfl]
+      rw [smul_eq_mul]]
+    -- Apply Parseval: g(B i, w) = ∑ j, g(B i, C j) * g(C j, w).
+    exact g_inner_eq_orthonormal_parseval_sum (I := I) g y (B i) w C hC_orthonormal
+  -- Bilinear expansion of `Ψ(B_i)(B_i)` in the `C` basis. To avoid `rw [hRieszB i]`
+  -- accidentally rewriting `B i` inside the coefficient inner products
+  -- `g.inner y (B i) (C j)`, we abbreviate the coefficient family by an opaque
+  -- name `aB i` before performing the bilinear expansion.
+  have hΨB_expand : ∀ i : Fin (Module.finrank ℝ E),
+      Ψ (B i) (B i) =
+        ∑ j : Fin (Module.finrank ℝ E),
+          ∑ k : Fin (Module.finrank ℝ E),
+            (g.inner y (B i) (C j) * g.inner y (B i) (C k)) •
+              Ψ (C j) (C k) := by
+    intro i
+    -- Abbreviate the coefficient: aB j := g(B i, C j).
+    set aB : Fin (Module.finrank ℝ E) → ℝ :=
+      fun j => g.inner y (B i) (C j) with haB_def
+    have hRieszBi : B i = ∑ j : Fin (Module.finrank ℝ E), aB j • C j := by
+      simpa [aB] using hRieszB i
+    -- Now rewrite using hRieszBi; aB is opaque so coefficients are preserved.
+    conv_lhs => rw [hRieszBi]
+    -- Step A: Ψ (∑ j, aB j • C j) = ∑ j, aB j • Ψ (C j).
+    rw [show Ψ (∑ j : Fin (Module.finrank ℝ E), aB j • C j) =
+          ∑ j : Fin (Module.finrank ℝ E), aB j • Ψ (C j) from by
+      rw [map_sum]
+      refine Finset.sum_congr rfl ?_
+      intro j _
+      exact Ψ.map_smul (aB j) (C j)]
+    -- Step B: ApplyAt (∑ k, aB k • C k).
+    -- (∑ j, aB j • Ψ (C j)) (∑ k, aB k • C k)
+    --   = ∑ j, (aB j • Ψ (C j)) (∑ k, aB k • C k)
+    --   = ∑ j ∑ k, (aB j • Ψ (C j)) (aB k • C k)
+    --   = ∑ j ∑ k, aB j • (aB k • Ψ (C j) (C k))
+    --   = ∑ j ∑ k, (aB j * aB k) • Ψ (C j) (C k).
+    rw [ContinuousLinearMap.sum_apply]
+    refine Finset.sum_congr rfl ?_
+    intro j _
+    rw [ContinuousLinearMap.smul_apply]
+    rw [show Ψ (C j) (∑ k : Fin (Module.finrank ℝ E), aB k • C k) =
+          ∑ k : Fin (Module.finrank ℝ E), aB k • Ψ (C j) (C k) from by
+      rw [map_sum]
+      refine Finset.sum_congr rfl ?_
+      intro k _
+      exact (Ψ (C j)).map_smul (aB k) (C k)]
+    rw [Finset.smul_sum]
+    refine Finset.sum_congr rfl ?_
+    intro k _
+    rw [smul_smul]
+  -- Express the LHS sum in `C`-notation: `smoothOrthoFrame g y i y = C i`.
+  have hLHS_eq_C :
+      (∑ i : Fin (Module.finrank ℝ E),
+        Ψ (smoothOrthoFrame (I := I) g y i y)
+          (smoothOrthoFrame (I := I) g y i y)) =
+      ∑ i : Fin (Module.finrank ℝ E), Ψ (C i) (C i) := rfl
+  rw [hLHS_eq_C]
+  -- Sum over i, expand each `Ψ(B i)(B i)` via `hΨB_expand`.
+  rw [show (∑ i : Fin (Module.finrank ℝ E), Ψ (B i) (B i)) =
+        ∑ i : Fin (Module.finrank ℝ E),
+          ∑ j : Fin (Module.finrank ℝ E),
+            ∑ k : Fin (Module.finrank ℝ E),
+              (g.inner y (B i) (C j) * g.inner y (B i) (C k)) •
+                Ψ (C j) (C k) from
+    Finset.sum_congr rfl (fun i _ => hΨB_expand i)]
+  -- Swap the outermost `i`-sum with the `j`-sum: `∑ i ∑ j ∑ k = ∑ j ∑ i ∑ k`.
+  rw [Finset.sum_comm (s := Finset.univ) (t := Finset.univ)
+        (f := fun i j => ∑ k : Fin (Module.finrank ℝ E),
+          (g.inner y (B i) (C j) * g.inner y (B i) (C k)) • Ψ (C j) (C k))]
+  -- Pointwise (in `j`) reduction: ∑ i ∑ k, (a * b) • Ψ (C j) (C k) = Ψ(C j)(C j).
+  refine Finset.sum_congr rfl ?_
+  intro j _
+  -- Swap inner ∑ i ∑ k → ∑ k ∑ i.
+  rw [show (∑ i : Fin (Module.finrank ℝ E),
+          ∑ k : Fin (Module.finrank ℝ E),
+            (g.inner y (B i) (C j) * g.inner y (B i) (C k)) • Ψ (C j) (C k)) =
+        ∑ k : Fin (Module.finrank ℝ E),
+          ∑ i : Fin (Module.finrank ℝ E),
+            (g.inner y (B i) (C j) * g.inner y (B i) (C k)) • Ψ (C j) (C k) from
+    Finset.sum_comm]
+  -- Per-`k` reduction: factor out `Ψ (C j) (C k)` from the inner i-sum, then
+  -- apply Parseval, then orthonormality of `C`.
+  -- The cleanest packaging is one `Finset.sum_congr` swap at outer level on k.
+  -- For each k, ∑ i, ((g(B i, C j) * g(B i, C k)) • Ψ(C j)(C k))
+  --   = (∑ i, g(B i, C j) * g(B i, C k)) • Ψ(C j)(C k)
+  --   = g(C j, C k) • Ψ(C j)(C k)                          [Parseval, g.symm]
+  --   = (if j = k then 1 else 0) • Ψ(C j)(C k)              [orthonormality of C]
+  have h_inner_per_k : ∀ k : Fin (Module.finrank ℝ E),
+      (∑ i : Fin (Module.finrank ℝ E),
+        (g.inner y (B i) (C j) * g.inner y (B i) (C k)) • Ψ (C j) (C k)) =
+      (if j = k then (1 : ℝ) else 0) • Ψ (C j) (C k) := by
+    intro k
+    -- Step (a): pull `Ψ(C j)(C k)` out of the i-sum.
+    rw [show (∑ i : Fin (Module.finrank ℝ E),
+            (g.inner y (B i) (C j) * g.inner y (B i) (C k)) • Ψ (C j) (C k)) =
+          (∑ i : Fin (Module.finrank ℝ E),
+            g.inner y (B i) (C j) * g.inner y (B i) (C k)) • Ψ (C j) (C k) from
+      (Finset.sum_smul
+        (f := fun i : Fin (Module.finrank ℝ E) =>
+          g.inner y (B i) (C j) * g.inner y (B i) (C k))
+        (s := Finset.univ)
+        (x := Ψ (C j) (C k))).symm]
+    -- Step (b): identify the i-sum with `g(C j, C k)` via Parseval + g.symm.
+    have hParseval := g_inner_eq_orthonormal_parseval_sum (I := I) g y
+      (C j) (C k) B hB_orthonormal
+    -- hParseval : g(C j, C k) = ∑ i, g(C j, B i) * g(B i, C k).
+    have h_sum_eq : (∑ i : Fin (Module.finrank ℝ E),
+          g.inner y (B i) (C j) * g.inner y (B i) (C k)) =
+        g.inner y (C j) (C k) := by
+      rw [hParseval]
+      refine Finset.sum_congr rfl ?_
+      intro i _
+      rw [g.symm y (C j) (B i)]
+    rw [h_sum_eq]
+    -- Step (c): orthonormality of C: g(C j, C k) = if j = k then 1 else 0.
+    rw [hC_orthonormal j k]
+  -- Apply per-k reduction, then collapse the k-sum to the diagonal.
+  rw [Finset.sum_congr rfl (fun k _ => h_inner_per_k k)]
+  rw [Finset.sum_eq_single j]
+  · rw [if_pos rfl, one_smul]
+  · intro k _ hkne
+    rw [if_neg (Ne.symm hkne), zero_smul]
+  · intro h_notin
+    exact absurd (Finset.mem_univ j) h_notin
 
 end RawPsiTensorial
 
