@@ -113,13 +113,17 @@ structure sharpDiffPerKBdd
       ≤ ENNReal.ofReal (Ceig K' * (i.fst.val)⁻¹ ^ (eEig K')) *
         ENNReal.ofReal
           ‖tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i‖
-  /-- High-order resolvent chart-component atom at order `K' + 1` with `K' ≤ N`. -/
+  /-- High-order resolvent chart-component atom at order `K' + 1` with
+  `K' + 1 ≤ N`. The tightened precondition matches the actual recursion
+  usage: the level-`m` outer step only queries this atom at chains
+  `K' ≤ K + m`, with the high-order chart-cpt bound entering at order
+  `K' + 1 ≤ K + m + 1 = N`. -/
   CresH : ℕ → ℝ
   eResH : ℕ → ℕ
   hCresH_nn : ∀ K', 0 ≤ CresH K'
   hCresH_bd : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
     (β : M) (Q : TensorCompIdx (E := E) r s) (K' : ℕ),
-    K' ≤ N →
+    K' + 1 ≤ N →
     wkpNorm (d := Module.finrank ℝ E) (K' + 1) 2
         (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
             (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
@@ -470,7 +474,7 @@ lemma rhsZeroAggregate_le_energy_perK_bdd
               (chartTargetEuclid (I := I) (M := M) β)
             ≤ ENNReal.ofReal (H.CresH K) * Rhs_eff := fun Q _hQ =>
         h_bridge _ (H.CresH K) (H.eResH K) (H.hCresH_nn K) hResH_le
-          (H.hCresH_bd i β Q K hK_le_N)
+          (H.hCresH_bd i β Q K hKN)
       have h_sum := finsetSum_eNNReal_ofReal_mul_le
         (Finset.univ : Finset (TensorCompIdx (E := E) r s))
         (fun Q => wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
@@ -517,7 +521,7 @@ lemma rhsZeroAggregate_le_energy_perK_bdd
                 (chartTargetEuclid (I := I) (M := M) β')
               ≤ ENNReal.ofReal (H.CresH K) * Rhs_eff := fun Q _hQ =>
           h_bridge _ (H.CresH K) (H.eResH K) (H.hCresH_nn K) hResH_le
-            (H.hCresH_bd i β' Q K hK_le_N)
+            (H.hCresH_bd i β' Q K hKN)
         have h_sum := finsetSum_eNNReal_ofReal_mul_le
           (Finset.univ : Finset (TensorCompIdx (E := E) r s))
           (fun Q => wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
