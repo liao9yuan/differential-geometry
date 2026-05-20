@@ -713,6 +713,7 @@ import DifferentialGeometry.Integral.Connection.ConnectionLaplacian
 import DifferentialGeometry.Integral.Connection.TensorConnLaplacian
 import DifferentialGeometry.Integral.Connection.TensorConnLaplacianChart
 import DifferentialGeometry.Integral.Connection.RawTensorConnLapPointwiseBound
+import DifferentialGeometry.Integral.Connection.RawTensorConnLapPerChartL2Bound
 import DifferentialGeometry.Integral.Connection.TensorRSChartFiberOpNorm
 import DifferentialGeometry.Integral.Connection.TensorRSChartFiberForwardOpNorm
 import DifferentialGeometry.Integral.Connection.TensorRSChartReprNormBound
@@ -755,6 +756,7 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Resolvent
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Rellich.Tensor
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.Components
 import DifferentialGeometry.Integral.Connection.ChartPulledCovDerivChartCompBound
+import DifferentialGeometry.Integral.Connection.ChartPulledTensorReprChartCompBound
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartComponents
 import DifferentialGeometry.Analysis.Sobolev.Tensor.Defs
 import DifferentialGeometry.Analysis.Sobolev.Tensor.NormBasics
