@@ -201,6 +201,8 @@ import DifferentialGeometry.Integral.Measure.Glue
 import DifferentialGeometry.Integral.Measure.Invariance
 import DifferentialGeometry.Integral.Measure.Properties
 import DifferentialGeometry.Integral.Measure.Family
+import DifferentialGeometry.Integral.Measure.PouDensityChartBound
+import DifferentialGeometry.Integral.Measure.TensorChartPulled
 import DifferentialGeometry.Integral.SyntheticBridge.SmoothFamily
 import DifferentialGeometry.Integral.L2.Basic
 import DifferentialGeometry.Integral.L2.CompactSupport
