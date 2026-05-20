@@ -1614,6 +1614,9 @@ theorem ricciVariationFormulaInCoordFrameAt_of_christoffelVariation
       Realized.RicciTensorRealizesRm13Trace (I := I) (S.ricci s) (Rm13 s))
     (hRm : ∀ s : Real,
       Realized.Rm13RealizesConnection (I := I) (S.family.connection s) (Rm13 s))
+    (hcov : ∀ s : Real,
+      CovariantDerivative.ContMDiffCovariantDerivativeLocally
+        (S.family.connection s) (1 : WithTop ℕ∞))
     (hcurv : ∀ s : Real,
       Realized.ConnectionCurvatureCoordAt (I := I) (S.family.connection s) x₀)
     (hvar : ChristoffelVariationEquationInFrameOn (I := I) S
@@ -1646,7 +1649,8 @@ theorem ricciVariationFormulaInCoordFrameAt_of_christoffelVariation
         Realized.christoffelRicciCoeffAt (I := I) (S.family.connection s) x₀ i j
     rw [hRicTrace s x₀]
     exact Realized.ricciFromRm13At_coordFrame_eq_christoffelRicciCoeffAt
-      (I := I) (S.family.connection s) (Rm13 s) x₀ (hRm s) (hcurv s) i j
+      (I := I) (S.family.connection s) (hcov s) (Rm13 s) x₀
+      (hRm s) (hcurv s) i j
   exact hderiv.congr
     (fun s _hs => hricci s)
     (hricci (t : Real))
@@ -1929,6 +1933,9 @@ theorem ricciVariationFormulaInCoordFrameAt_of_christoffelEvolution_nabla2
       Realized.RicciTensorRealizesRm13Trace (I := I) (S.ricci s) (Rm13 s))
     (hRm : ∀ s : Real,
       Realized.Rm13RealizesConnection (I := I) (S.family.connection s) (Rm13 s))
+    (hcov : ∀ s : Real,
+      CovariantDerivative.ContMDiffCovariantDerivativeLocally
+        (S.family.connection s) (1 : WithTop ℕ∞))
     (hcurv : ∀ s : Real,
       Realized.ConnectionCurvatureCoordAt (I := I) (S.family.connection s) x₀)
     (hmix :
@@ -1959,7 +1966,7 @@ theorem ricciVariationFormulaInCoordFrameAt_of_christoffelEvolution_nabla2
   have hlocal :=
     ricciVariationFormulaInCoordFrameAt_of_christoffelVariation
       (I := I) S hS (christoffelEvolutionRHSInFrame (M := M) gInv nablaRic)
-      Rm13 x₀ hRicTrace hRm hcurv hvar hmix
+      Rm13 x₀ hRicTrace hRm hcov hcurv hvar hmix
   intro t x hx i j
   have hx_eq : x = x₀ := by
     simpa using hx
@@ -3491,6 +3498,9 @@ theorem ricciEvolutionEquationInCoordFrameAt_of_christoffelEvolution_nabla2_comm
       Realized.RicciTensorRealizesRm13Trace (I := I) (S.ricci s) (Rm13 s))
     (hRm : ∀ s : Real,
       Realized.Rm13RealizesConnection (I := I) (S.family.connection s) (Rm13 s))
+    (hcov : ∀ s : Real,
+      CovariantDerivative.ContMDiffCovariantDerivativeLocally
+        (S.family.connection s) (1 : WithTop ℕ∞))
     (hcurv : ∀ s : Real,
       Realized.ConnectionCurvatureCoordAt (I := I) (S.family.connection s) x₀)
     (hmix :
@@ -3508,7 +3518,7 @@ theorem ricciEvolutionEquationInCoordFrameAt_of_christoffelEvolution_nabla2_comm
     nabla2Ric
     (ricciVariationFormulaInCoordFrameAt_of_christoffelEvolution_nabla2
       (I := I) S hS gInv gInvDt nablaRic nabla2Ric Rm13 x₀ hmetricReg
-      hnablaReg hRicTrace hRm hcurv hmix)
+      hnablaReg hRicTrace hRm hcov hcurv hmix)
     hcomm
 
 /-- LaTeX Lemma 6.3, `lem:evol-ricci`, in the local coordinate-frame display
@@ -3544,6 +3554,9 @@ theorem evol_ricci_coordFrameAt_of_christoffelEvolution_nabla2_commutators
       Realized.RicciTensorRealizesRm13Trace (I := I) (S.ricci s) (Rm13 s))
     (hRm : ∀ s : Real,
       Realized.Rm13RealizesConnection (I := I) (S.family.connection s) (Rm13 s))
+    (hcov : ∀ s : Real,
+      CovariantDerivative.ContMDiffCovariantDerivativeLocally
+        (S.family.connection s) (1 : WithTop ℕ∞))
     (hcurv : ∀ s : Real,
       Realized.ConnectionCurvatureCoordAt (I := I) (S.family.connection s) x₀)
     (hmix :
@@ -3568,7 +3581,7 @@ theorem evol_ricci_coordFrameAt_of_christoffelEvolution_nabla2_commutators
   have h :=
     ricciEvolutionEquationInCoordFrameAt_of_christoffelEvolution_nabla2_commutators
       (I := I) S hS Rm13 Rm04 gInv gInvDt nablaRic nabla2Ric x₀ hmetricReg
-      hnablaReg hRicTrace hRm hcurv hmix hcomm
+      hnablaReg hRicTrace hRm hcov hcurv hmix hcomm
   have hAt := h t x₀ (by simp) i j
   simpa [ricciEvolutionRHSInFrame] using hAt
 
@@ -4165,6 +4178,9 @@ theorem evol_ricci_lichnerowicz_coordFrameAt_of_christoffelEvolution_nabla2_comm
       Realized.RicciTensorRealizesRm13Trace (I := I) (S.ricci s) (Rm13 s))
     (hRm : ∀ s : Real,
       Realized.Rm13RealizesConnection (I := I) (S.family.connection s) (Rm13 s))
+    (hcov : ∀ s : Real,
+      CovariantDerivative.ContMDiffCovariantDerivativeLocally
+        (S.family.connection s) (1 : WithTop ℕ∞))
     (hcurv : ∀ s : Real,
       Realized.ConnectionCurvatureCoordAt (I := I) (S.family.connection s) x₀)
     (hmix :
@@ -4190,7 +4206,7 @@ theorem evol_ricci_lichnerowicz_coordFrameAt_of_christoffelEvolution_nabla2_comm
   have hRicci :=
     evol_ricci_coordFrameAt_of_christoffelEvolution_nabla2_commutators
       (I := I) S hS Rm13 Rm04 gInv gInvDt nablaRic nabla2Ric x₀ hmetricReg
-      hnablaReg hRicTrace hRm hcurv hmix hcomm t i j
+      hnablaReg hRicTrace hRm hcov hcurv hmix hcomm t i j
   have hSpec :
       RicciLichnerowiczSpecializesInFrame
         (I := I) S Rm04 gInv (coordinateFrameAt (I := I) x₀)
