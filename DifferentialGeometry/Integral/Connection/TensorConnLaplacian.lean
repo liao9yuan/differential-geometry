@@ -972,6 +972,330 @@ theorem tensorConnLaplacian_of_contMDiff_zero
 
 end BundledOperator
 
+/-! ## Part 10: fixed-smooth-frame variant and its smoothness
+
+The raw operator `rawTensorConnLap g r s T x` uses the centre-dependent frame
+`smoothOrthoFrame g x`. To establish smoothness as a function of `x`, we
+introduce a variant that uses a *fixed* tangent frame `B : Fin n → Π b,
+TangentSpace I b` of smooth global sections. The fixed-frame operator is
+smooth in `x` by direct composition of smooth operations, and at every `x`
+it agrees with `rawTensorConnLap g r s T x` provided the fixed frame is
+`g_x`-orthonormal at `x`.
+
+This is the structural analogue of how the scalar / vector connection
+Laplacians are made smooth: a chart-local (chart-α-dependent) formula is
+shown to be smooth on the chart source, and the global operator is identified
+with this chart formula on a neighbourhood of every point. -/
+
+section FixedFrame
+
+variable [CompleteSpace E]
+
+/-- **Fixed-smooth-frame variant of the raw connection Laplacian on
+`(r, s)`-tensor sections.** For a smooth Riemannian metric `g`, ranks
+`(r, s)`, a fixed frame `B : Fin n → Π b, TangentSpace I b`, a raw
+`(r, s)`-tensor section `T`, and an evaluation point `x`, the value is the
+trace formula
+$$
+  \sum_i \bigl(\nabla^{(r,s)}_{B_i x}\,\nabla^{(r,s)}_{B_i} T -
+    \nabla^{(r,s)}_{(\nabla_{B_i} B_i)(x)} T\bigr).
+$$
+Here `∇^{(r,s)}` abbreviates the bundled tensor covariant derivative and the
+underlying tangent covariant derivative is the Levi-Civita connection of `g`.
+The dependence on `B` is genuine in the absence of an orthonormality
+hypothesis; orthonormality at the centre point `x` is what reduces this to
+the standard connection Laplacian at `x`. -/
+noncomputable def rawTensorConnLap_fixedFrame
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
+    (T : Π b : M, TensorRSSpace r s I b) (x : M) :
+    TensorRSSpace r s I x :=
+  ∑ i : Fin (Module.finrank ℝ E),
+    ((TensorRSNabla.tensorRSCovariantDerivative I M r s
+          (LeviCivita (I := I) g)).toFun
+        (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+          (LeviCivita (I := I) g))
+          (B i) T) x (B i x) -
+      (TensorRSNabla.tensorRSCovariantDerivative I M r s
+          (LeviCivita (I := I) g)).toFun
+        T x
+        ((LeviCivita (I := I) g).toFun (B i) x (B i x)))
+
+/-- The defining identity for `rawTensorConnLap_fixedFrame`. -/
+@[simp] lemma rawTensorConnLap_fixedFrame_def
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
+    (T : Π b : M, TensorRSSpace r s I b) (x : M) :
+    rawTensorConnLap_fixedFrame (I := I) g r s B T x =
+      ∑ i : Fin (Module.finrank ℝ E),
+        ((TensorRSNabla.tensorRSCovariantDerivative I M r s
+              (LeviCivita (I := I) g)).toFun
+            (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+              (LeviCivita (I := I) g))
+              (B i) T) x (B i x) -
+          (TensorRSNabla.tensorRSCovariantDerivative I M r s
+              (LeviCivita (I := I) g)).toFun
+            T x
+            ((LeviCivita (I := I) g).toFun (B i) x (B i x))) := rfl
+
+/-- **Identification with the centre-dependent raw operator at orthonormality
+points.** When the fixed frame `B` equals `smoothOrthoFrame g x` (the
+centre-`x`-dependent smooth orthonormal frame), the fixed-frame variant
+agrees with `rawTensorConnLap` at `x`. This is true by definition (both
+expressions are the same finite sum), and is provided as a `rfl` lemma so
+downstream consumers can switch between the two presentations. -/
+lemma rawTensorConnLap_fixedFrame_smoothOrthoFrame
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T : Π b : M, TensorRSSpace r s I b) (x : M) :
+    rawTensorConnLap_fixedFrame (I := I) g r s
+        (smoothOrthoFrame (I := I) g x) T x =
+      rawTensorConnLap (I := I) g r s T x := rfl
+
+/-! ### Smoothness of the fixed-frame variant
+
+For a fixed smooth orthonormal frame `B` and a smooth tensor section `T`, the
+fixed-frame operator is smooth in `x` by composition of smooth operations:
+
+1. Each `B i` is smooth (hypothesis on the fixed frame).
+2. `covApply cov (B i) T` is smooth as a tensor section: this uses
+   `covApply_contMDiffOn` with `cov := tensorRSCovariantDerivative`.
+3. The covariant derivative `cov` then composes once more to give a smooth
+   section of `Hom(TM, TensorRSSpace)`.
+4. Application of `cov.toFun T` to `cov.toFun B_i B_i` at `x` is bilinear in
+   smooth sections, hence smooth.
+5. Each summand is smooth; the finite sum is smooth.
+
+The smoothness witness on `T` requires `(∞ + 1 : WithTop ℕ∞)`-smoothness as
+input (one degree higher than the output) — this is the standard
+`ContMDiffCovariantDerivative` convention. -/
+
+/-- **The fixed-frame operator's first cov-derivative section
+`b ↦ cov.toFun T b (B_i b)` is smooth** when both `T` and `B_i` are smooth. -/
+private lemma rawTensorConnLap_fixedFrame_covApply_T_contMDiff
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    {T : Π b : M, TensorRSSpace r s I b}
+    {B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b}
+    (hT_total : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y (T y)))
+    (hB : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (T% (B i)))
+    (i : Fin (Module.finrank ℝ E)) :
+    ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y
+        (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+            (LeviCivita (I := I) g)) (B i) T y)) := by
+  classical
+  -- Bump T's smoothness witness from ∞ to (∞ + 1).
+  have hT_plus : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
+      ((∞ : WithTop ℕ∞) + 1)
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y (T y)) := by
+    rw [show ((∞ : WithTop ℕ∞) + 1) = ∞ from rfl]
+    exact hT_total
+  have hOn :
+      ContMDiffOn I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+        (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+          (E := fun z : M => TensorRSSpace r s I z) y
+          (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+              (LeviCivita (I := I) g)) (B i) T y)) Set.univ :=
+    covApply_contMDiffOn
+      (cov := TensorRSNabla.tensorRSCovariantDerivative I M r s
+        (LeviCivita (I := I) g)) (hB i) hT_plus
+  intro b
+  exact hOn.contMDiffAt (Filter.univ_mem)
+
+/-- **Second cov-derivative summand smoothness.** The function
+`b ↦ cov.toFun (covApply cov (B i) T) b (B i b)`, which is the first summand
+of `rawTensorConnLap_fixedFrame`, is smooth in `b`. -/
+private lemma rawTensorConnLap_fixedFrame_firstSummand_contMDiff
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    {T : Π b : M, TensorRSSpace r s I b}
+    {B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b}
+    (hT_total : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y (T y)))
+    (hB : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (T% (B i)))
+    (i : Fin (Module.finrank ℝ E)) :
+    ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y
+        ((TensorRSNabla.tensorRSCovariantDerivative I M r s
+            (LeviCivita (I := I) g)).toFun
+          (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+            (LeviCivita (I := I) g)) (B i) T) y (B i y))) := by
+  classical
+  set cov := TensorRSNabla.tensorRSCovariantDerivative I M r s
+    (LeviCivita (I := I) g) with hcov_def
+  -- Step 1: The first-derivative section `covApply cov (B i) T` is smooth.
+  have h1 : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y
+        (covApply cov (B i) T y)) :=
+    rawTensorConnLap_fixedFrame_covApply_T_contMDiff (I := I) g r s hT_total hB i
+  -- Step 2: Bump to (∞ + 1) for input to the next covApply.
+  have h1_plus : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
+      ((∞ : WithTop ℕ∞) + 1)
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y
+        (covApply cov (B i) T y)) := by
+    rw [show ((∞ : WithTop ℕ∞) + 1) = ∞ from rfl]
+    exact h1
+  -- Step 3: Apply `covApply_contMDiffOn` to get smoothness of the second cov-deriv.
+  have hOn :
+      ContMDiffOn I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+        (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+          (E := fun z : M => TensorRSSpace r s I z) y
+          (covApply cov (B i)
+            (fun z : M => covApply cov (B i) T z) y)) Set.univ :=
+    covApply_contMDiffOn (cov := cov) (hB i) h1_plus
+  -- Step 4: `covApply cov (B i) (covApply cov (B i) T) y = cov.toFun (covApply cov (B i) T) y (B i y)`
+  -- by definition of `covApply`.
+  intro b
+  have hAt : ContMDiffAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y
+        (covApply cov (B i)
+          (fun z : M => covApply cov (B i) T z) y)) b :=
+    hOn.contMDiffAt (Filter.univ_mem)
+  -- The two functions agree pointwise because
+  --   covApply cov X T y = cov.toFun T y (X y).
+  convert hAt
+
+/-- **Smoothness of `b ↦ cov.toFun B_i b (B_i b)`** for a smooth frame field. -/
+private lemma rawTensorConnLap_fixedFrame_covBB_contMDiff
+    (g : SmoothRiemannianMetric I M)
+    {B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b}
+    (hB : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (B i)))
+    (i : Fin (Module.finrank ℝ E)) :
+    ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun y : M => TotalSpace.mk' E (E := TangentSpace I) y
+        ((LeviCivita (I := I) g).toFun (B i) y (B i y))) := by
+  classical
+  set cov := LeviCivita (I := I) g with hcov_def
+  -- This is `covApply cov (B i) (B i)`: `covApply cov X Z y = cov.toFun Z y (X y)`.
+  -- We use `covApply_contMDiffOn` with the source = the tangent bundle.
+  have hB_plus : ContMDiff I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1)
+      (T% (B i)) := by
+    rw [show ((∞ : WithTop ℕ∞) + 1) = ∞ from rfl]
+    exact hB i
+  have hOn :
+      ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
+        (fun y : M => TotalSpace.mk' E (E := TangentSpace I) y
+          (covApply cov (B i) (B i) y)) Set.univ :=
+    covApply_contMDiffOn (cov := cov) (hB i) hB_plus
+  intro b
+  exact hOn.contMDiffAt (Filter.univ_mem)
+
+/-- **Second summand smoothness.** The function
+`b ↦ cov.toFun T b (cov.toFun B_i b (B_i b))`, which is the second summand
+of `rawTensorConnLap_fixedFrame`, is smooth in `b`. -/
+private lemma rawTensorConnLap_fixedFrame_secondSummand_contMDiff
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    {T : Π b : M, TensorRSSpace r s I b}
+    {B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b}
+    (hT_total : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y (T y)))
+    (hB : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (T% (B i)))
+    (i : Fin (Module.finrank ℝ E)) :
+    ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y
+        ((TensorRSNabla.tensorRSCovariantDerivative I M r s
+            (LeviCivita (I := I) g)).toFun T y
+          ((LeviCivita (I := I) g).toFun (B i) y (B i y)))) := by
+  classical
+  set cov := TensorRSNabla.tensorRSCovariantDerivative I M r s
+    (LeviCivita (I := I) g) with hcov_def
+  -- Define `W := fun y => cov_TM.toFun (B i) y (B i y)`. This is smooth (previous lemma).
+  set W : Π b : M, TangentSpace I b :=
+    fun y => (LeviCivita (I := I) g).toFun (B i) y (B i y) with hW_def
+  have hW_smooth : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun y : M => TotalSpace.mk' E (E := TangentSpace I) y (W y)) :=
+    rawTensorConnLap_fixedFrame_covBB_contMDiff (I := I) g hB i
+  -- Now we want smoothness of `b ↦ cov.toFun T b (W b)`.
+  -- This is `covApply cov W T y = cov.toFun T y (W y)`.
+  have hT_plus : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E))
+      ((∞ : WithTop ℕ∞) + 1)
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y (T y)) := by
+    rw [show ((∞ : WithTop ℕ∞) + 1) = ∞ from rfl]
+    exact hT_total
+  have hOn :
+      ContMDiffOn I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+        (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+          (E := fun z : M => TensorRSSpace r s I z) y
+          (covApply cov W T y)) Set.univ :=
+    covApply_contMDiffOn (cov := cov) hW_smooth hT_plus
+  intro b
+  have hAt : ContMDiffAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y
+        (covApply cov W T y)) b :=
+    hOn.contMDiffAt (Filter.univ_mem)
+  convert hAt
+
+/-- **Smoothness of the fixed-frame variant.** For a smooth raw tensor section
+`T` and a fixed smooth tangent frame `B` (each `B i` a smooth global tangent
+section), the fixed-frame operator `rawTensorConnLap_fixedFrame g r s B T` is
+a smooth tensor section. -/
+theorem rawTensorConnLap_fixedFrame_contMDiff
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    {T : Π b : M, TensorRSSpace r s I b}
+    {B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b}
+    (hT_total : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y (T y)))
+    (hB : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (T% (B i))) :
+    ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y
+        (rawTensorConnLap_fixedFrame (I := I) g r s B T y)) := by
+  classical
+  -- The fixed-frame operator at `y` is a finite sum of summands, each smooth.
+  -- We use `ContMDiff.sum_section` to handle the finite sum.
+  -- First, each per-index summand (first - second) is smooth.
+  have h_per_index_smooth : ∀ i : Fin (Module.finrank ℝ E),
+      ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+        (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+          (E := fun z : M => TensorRSSpace r s I z) y
+          ((TensorRSNabla.tensorRSCovariantDerivative I M r s
+              (LeviCivita (I := I) g)).toFun
+            (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+              (LeviCivita (I := I) g)) (B i) T) y (B i y) -
+            (TensorRSNabla.tensorRSCovariantDerivative I M r s
+              (LeviCivita (I := I) g)).toFun T y
+              ((LeviCivita (I := I) g).toFun (B i) y (B i y)))) := by
+    intro i
+    have h_first := rawTensorConnLap_fixedFrame_firstSummand_contMDiff
+      (I := I) g r s hT_total hB i
+    have h_second := rawTensorConnLap_fixedFrame_secondSummand_contMDiff
+      (I := I) g r s hT_total hB i
+    exact h_first.sub_section h_second
+  -- Now the total = `∑ i (...)`. Use `ContMDiff.sum_section`.
+  have h_sum_smooth : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) y
+        (∑ i : Fin (Module.finrank ℝ E),
+          ((TensorRSNabla.tensorRSCovariantDerivative I M r s
+              (LeviCivita (I := I) g)).toFun
+            (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+              (LeviCivita (I := I) g)) (B i) T) y (B i y) -
+            (TensorRSNabla.tensorRSCovariantDerivative I M r s
+              (LeviCivita (I := I) g)).toFun T y
+              ((LeviCivita (I := I) g).toFun (B i) y (B i y))))) := by
+    refine ContMDiff.sum_section (s := Finset.univ) (fun i _ => ?_)
+    exact h_per_index_smooth i
+  -- The goal matches `h_sum_smooth` by the defining identity of `rawTensorConnLap_fixedFrame`.
+  exact h_sum_smooth
+
+end FixedFrame
+
 end Connection
 end Integral
 end DifferentialGeometry
