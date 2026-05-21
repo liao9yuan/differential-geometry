@@ -102,7 +102,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 compactly-supported `(r, s)`-tensor section at `b` is bounded by the sum of the
 absolute values of its chart-frame components, times the basis-element norm
 constant. -/
-private lemma reprNorm_le_sum_components
+lemma reprNorm_le_sum_components
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M) (b : M) :
     ‖tensorRSChartE_section_repr (I := I) r s α
