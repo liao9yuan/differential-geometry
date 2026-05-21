@@ -5474,7 +5474,7 @@ private lemma per_alpha_pointwise_bound
   classical
   obtain ⟨K_2b, hK_2b_nn, hK_2b_bound⟩ :=
     tensorTrivProjPushedNormSq_rawTensorConnLap_le_chartTarget_data_on_pouImage
-      (I := I) (M := M) h_atlas h_atlas_strong g r s α
+      (I := I) (M := M) h_atlas g r s α
   refine ⟨K_2b, hK_2b_nn, ?_⟩
   intro T y hy
   set ρ : ℝ := (chartAtlasPOU I M α : M → ℝ)

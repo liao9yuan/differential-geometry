@@ -112,8 +112,6 @@ The constant `K` depends on `g`, the chart at `α`, the chart-atlas locality
 hypotheses, and the ranks `r`, `s`; it is independent of `T` and `y`. -/
 theorem tensorTrivProjPushedNormSq_rawTensorConnLap_le_chartTarget_data_on_pouImage
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (_h_atlas_strong :
-        DifferentialGeometry.Geometry.HasChartSourceConsistentChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧
       ∀ (T : SmoothCcTensor g r s),
