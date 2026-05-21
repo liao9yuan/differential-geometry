@@ -714,6 +714,7 @@ import DifferentialGeometry.Integral.Connection.ChartBridge.Hessian
 import DifferentialGeometry.Integral.Connection.ChartBridge.Riemann
 import DifferentialGeometry.Integral.Connection.ChartBridge.Ricci
 import DifferentialGeometry.Integral.Connection.RicciIdentitySmoothFrame
+import DifferentialGeometry.Integral.Connection.ChartFrameNormGlobalSmooth
 import DifferentialGeometry.Integral.Connection.ConnectionLaplacian
 import DifferentialGeometry.Integral.Connection.TensorConnLaplacian
 import DifferentialGeometry.Integral.Connection.RawTensorConnLapLocality

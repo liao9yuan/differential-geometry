@@ -324,6 +324,92 @@ theorem chartFrameNorm_at_zero_norm_one
   unfold chartFrameNorm
   exact chartFrameNormFiber_at_zero_norm (I := I) g α hb
 
+/-! ## Chart-equality propagation
+
+If two centres `α₁, α₂ : M` have the same `chartAt H` chart, then the
+trivializations on the tangent bundle agree pointwise. Since the chart-frame
+Gram-Schmidt construction depends on the chart centre only through its
+trivialization, the resulting frames at any base point agree as well. -/
+
+/-- If `chartAt H α₁ = chartAt H α₂`, the `chartBasisVecFiber` values agree
+pointwise. -/
+theorem chartBasisVecFiber_eq_of_chartAt_eq
+    {α₁ α₂ : M} (h : chartAt H α₁ = chartAt H α₂)
+    (i : Fin (Module.finrank ℝ E)) (x : M) :
+    chartBasisVecFiber (I := I) α₁ i x = chartBasisVecFiber (I := I) α₂ i x := by
+  classical
+  -- `trivializationAt E (TangentSpace I) α = ...localTriv (achart H α)`,
+  -- and `achart H α₁ = achart H α₂` follows from `chartAt H α₁ = chartAt H α₂`.
+  unfold chartBasisVecFiber
+  have h_triv : trivializationAt E (TangentSpace I) α₁ =
+      trivializationAt E (TangentSpace I) α₂ := by
+    rw [TangentBundle.trivializationAt_eq_localTriv (I := I) α₁,
+        TangentBundle.trivializationAt_eq_localTriv (I := I) α₂]
+    congr 1
+    apply Subtype.ext
+    change (chartAt H α₁ : OpenPartialHomeomorph M H) = (chartAt H α₂ : OpenPartialHomeomorph M H)
+    exact h
+  rw [h_triv]
+
+/-- Strong induction package: under `chartAt H α₁ = chartAt H α₂`, the raw and
+normalised Gram-Schmidt vectors at any base point `b` and any index `i.val ≤ k`
+agree between `α = α₁` and `α = α₂`. -/
+private theorem chartFrame_eq_of_chartAt_eq_strong
+    (g : SmoothRiemannianMetric I M) {α₁ α₂ : M}
+    (h : chartAt H α₁ = chartAt H α₂) (b : M) :
+    ∀ k : ℕ, ∀ i : Fin (Module.finrank ℝ E), i.val ≤ k →
+      chartFrameRawFiber (I := I) g α₁ b i =
+        chartFrameRawFiber (I := I) g α₂ b i ∧
+      chartFrameNormFiber (I := I) g α₁ b i =
+        chartFrameNormFiber (I := I) g α₂ b i := by
+  classical
+  intro k
+  induction k with
+  | zero =>
+    intro i hi_le
+    have hi_val : i.val = 0 := Nat.le_zero.mp hi_le
+    have hi_eq : i = ⟨0, NeZero.pos _⟩ := Fin.ext hi_val
+    subst hi_eq
+    refine ⟨?_, ?_⟩
+    · rw [chartFrameRawFiber_at_zero, chartFrameRawFiber_at_zero,
+          chartBasisVecFiber_eq_of_chartAt_eq (I := I) (H := H) (M := M) h]
+    · rw [chartFrameNormFiber_at_zero, chartFrameNormFiber_at_zero,
+          chartBasisVecFiber_eq_of_chartAt_eq (I := I) (H := H) (M := M) h]
+  | succ k ih =>
+    intro i hi_le
+    by_cases hi_lt : i.val ≤ k
+    · exact ih i hi_lt
+    · have hi_eq : i.val = k + 1 := by omega
+      have ih_below : ∀ j : Fin (Module.finrank ℝ E), j.val < i.val →
+          chartFrameNormFiber (I := I) g α₁ b j =
+            chartFrameNormFiber (I := I) g α₂ b j := by
+        intro j hj
+        have hj_le : j.val ≤ k := by omega
+        exact (ih j hj_le).2
+      have h_raw : chartFrameRawFiber (I := I) g α₁ b i =
+          chartFrameRawFiber (I := I) g α₂ b i := by
+        unfold chartFrameRawFiber
+        rw [chartBasisVecFiber_eq_of_chartAt_eq (I := I) (H := H) (M := M) h]
+        congr 1
+        apply Finset.sum_congr rfl
+        intro j' _
+        have hlift : (⟨j'.val, lt_trans j'.isLt i.isLt⟩ :
+            Fin (Module.finrank ℝ E)).val < i.val := j'.isLt
+        rw [ih_below ⟨j'.val, lt_trans j'.isLt i.isLt⟩ hlift]
+      refine ⟨h_raw, ?_⟩
+      rw [chartFrameNormFiber_eq, chartFrameNormFiber_eq, h_raw]
+
+/-- If `chartAt H α₁ = chartAt H α₂`, then `chartFrameNorm g α₁ i b =
+chartFrameNorm g α₂ i b`. -/
+theorem chartFrameNorm_eq_of_chartAt_eq
+    (g : SmoothRiemannianMetric I M) {α₁ α₂ : M}
+    (h : chartAt H α₁ = chartAt H α₂)
+    (i : Fin (Module.finrank ℝ E)) (b : M) :
+    chartFrameNorm (I := I) g α₁ i b = chartFrameNorm (I := I) g α₂ i b := by
+  classical
+  unfold chartFrameNorm
+  exact (chartFrame_eq_of_chartAt_eq_strong (I := I) g h b i.val i (le_refl _)).2
+
 /-! ## Stage 3b: inductive orthonormality of the un-bumped Gram-Schmidt frame
 
 The inductive Gram-Schmidt step preserves orthogonality and unit length on
