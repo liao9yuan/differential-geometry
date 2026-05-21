@@ -324,7 +324,7 @@ slot kernels are bounded by op-norm uniform bounds times `‖repr T(b)‖`.
 
 /-- Pointwise norm bound on the chart-pulled value of `covApply ∇ B T` at a
 chart-`α` POU-tsupport + Levi-Civita good-set point. -/
-private theorem chart_pulled_covApply_repr_value_bound
+private theorem chart_pulled_covApply_repr_value_bound_local
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -637,15 +637,15 @@ theorem rawTensorRepr_intrinsic_chartPulled_value_norm_sq_le_repr_data
   classical
   set B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     chartFrameNormGlobalSmooth (I := I) (M := M) g α i with hB_def
-  -- Inner-step constants from `chart_pulled_covApply_repr_value_bound`:
+  -- Inner-step constants from `chart_pulled_covApply_repr_value_bound_local`:
   -- bounds `‖repr (covApply ∇ B T) b‖` and `‖repr (covApply ∇ B (covApply ∇ B T)) b‖`
   -- in terms of orders 0, 1 of the inner argument.
   obtain ⟨K_inner, hK_inner_nn, hK_inner_bound⟩ :=
-    chart_pulled_covApply_repr_value_bound
+    chart_pulled_covApply_repr_value_bound_local
       (I := I) (M := M) h_atlas g r s α B
   -- The outer step is a NESTED application: we need to bound
   -- `‖repr (covApply ∇ B (covApply ∇ B T)) b‖` by orders 0, 1, 2 of T,
-  -- but our `chart_pulled_covApply_repr_value_bound` only handles a smooth
+  -- but our `chart_pulled_covApply_repr_value_bound_local` only handles a smooth
   -- *bundled* tensor input. For the nested case, we instead apply the explicit
   -- formula directly with `σ := covApply ∇ B T` (smooth section) and bound
   -- each piece in terms of orders 0, 1, 2 of T.
@@ -656,7 +656,7 @@ theorem rawTensorRepr_intrinsic_chartPulled_value_norm_sq_le_repr_data
   --     is bounded by `chart_pulled_covApply_repr_fderiv_bound` (Sub-E) by
   --     orders 0, 1, 2 of T.
   --   * slot kernels: bounded by `‖σ(b)‖ = ‖repr (covApply ∇ B T)(b)‖`,
-  --     itself bounded by orders 0, 1 of T (via `chart_pulled_covApply_repr_value_bound`).
+  --     itself bounded by orders 0, 1 of T (via `chart_pulled_covApply_repr_value_bound_local`).
   --
   -- Sub-E:
   obtain ⟨K_E, hK_E_nn, hK_E_bound⟩ :=

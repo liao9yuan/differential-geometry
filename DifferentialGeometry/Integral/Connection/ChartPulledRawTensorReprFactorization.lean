@@ -103,7 +103,7 @@ squared bound to obtain a linear bound on `‖rawTensorConnLap (T) b‖` -/
 
 private lemma rawTensorConnLap_norm_le_chartPulledRepr_data_on_pou_tsupport_goodSet
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (h_atlas_strong :
+    (_h_atlas_strong :
         DifferentialGeometry.Geometry.HasChartSourceConsistentChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧
@@ -128,7 +128,7 @@ private lemma rawTensorConnLap_norm_le_chartPulledRepr_data_on_pou_tsupport_good
   -- Extract the squared headline.
   obtain ⟨K_sq, hK_sq_nn, hK_sq_bound⟩ :=
     rawTensorConnLap_norm_sq_le_chartPulledRepr_data_on_pou_tsupport_goodSet
-      (I := I) (M := M) h_atlas h_atlas_strong g r s α
+      (I := I) (M := M) h_atlas g r s α
   -- Set K_lin := √K_sq.
   set K_lin : ℝ := Real.sqrt K_sq with hK_lin_def
   have hK_lin_nn : 0 ≤ K_lin := Real.sqrt_nonneg _

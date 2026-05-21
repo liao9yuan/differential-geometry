@@ -112,7 +112,7 @@ The constant `K` depends on `g`, the chart at `α`, the chart-atlas locality
 hypotheses, and the ranks `r`, `s`; it is independent of `T` and `y`. -/
 theorem tensorTrivProjPushedNormSq_rawTensorConnLap_le_chartTarget_data_on_pouImage
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (h_atlas_strong :
+    (_h_atlas_strong :
         DifferentialGeometry.Geometry.HasChartSourceConsistentChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧
@@ -149,7 +149,7 @@ theorem tensorTrivProjPushedNormSq_rawTensorConnLap_le_chartTarget_data_on_pouIm
   -- Extract the source bound.
   obtain ⟨K, hK_nn, hK_bound⟩ :=
     rawTensorConnLap_norm_sq_le_chartPulledRepr_data_on_pou_tsupport_goodSet
-      (I := I) (M := M) h_atlas h_atlas_strong g r s α
+      (I := I) (M := M) h_atlas g r s α
   refine ⟨K, hK_nn, ?_⟩
   intro T y hy
   -- Unpack `y ∈ toEuclidean '' (extChartAt α '' (POU ∩ goodSet))`.
