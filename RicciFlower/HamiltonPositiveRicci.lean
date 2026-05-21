@@ -168,17 +168,17 @@ abbrev ham3Solution
     RicciFlow.SolutionOn (I := I) (M := M) P.D :=
   P.S
 
-/-- Global maximal-flow setup supplies joint spacetime regularity for the
-canonical curvature quantities.
+/-- Global maximal-flow setup supplies joint spacetime continuity for the
+canonical scalar curvature.
 
 This is a theorem endpoint, not stored data in `Ham3FlowPackage`: proving it
 belongs to the smooth Ricci-flow existence/regularity package. -/
-theorem ham3_curvRegular
+theorem ham3_scalarSTCont
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0) :
-    RicciFlower.RicciFlow.CanonicalCurvatureSpacetimeRegularOn
+    RicciFlower.RicciFlow.ScalarSTContOn
       (I := I) (M := M) (ham3Solution (I := I) (M := M) P) := by
-  exact P.isSmooth.curvatureRegular
+  exact P.isSmooth.scalarSTCont
 
 /-- Canonical metric-induced squared curvature norm for a Hamilton Section 12
 package. -/
@@ -564,9 +564,9 @@ theorem ham3_cont74
       (Realized.spacetimeSlab (M := M)
         (RicciFlow.scalarBlowupTime 3 c0)) := by
   have hreg :
-      RicciFlow.CanonicalCurvatureSpacetimeRegularOn
+      RicciFlow.ScalarSTContOn
         (I := I) (M := M) (ham3Solution (I := I) P) :=
-    ham3_curvRegular (I := I) (M := M) P
+    ham3_scalarSTCont (I := I) (M := M) P
   simpa [ham3Scalar, Realized.spacetimeSlab] using
     RicciFlow.SolutionOn.scalar_continuousOn
       (I := I) (M := M) (ham3Solution (I := I) P)

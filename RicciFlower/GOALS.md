@@ -13,14 +13,16 @@ admits a metric of constant positive sectional curvature.
 
 - RicciFlower-local tensor, coordinate, Levi-Civita, Ricci identity, Bochner,
   and scalar calculus layers are now mostly native.
-- Section 6 evolution interfaces are largely available; the remaining
-  Ricci-norm heat producer is now the lower-layer `ricciHeatDataSmooth`
-  frontier.
+- Section 6 evolution interfaces are largely available; `ricciHeatDataSmooth`
+  is now checked from the strengthened `IsSmoothSolutionOn` fields, and the
+  remaining lower frontier is producing that strengthened package from
+  `IsSolutionOn`.
 - Section 7 scalar lower-bound and finite-time consumers are native.
 - Section 9 local preservation algebra exists; analytic tensor-WMP producers
   remain explicit.
 - Section 10.4 has a checked consumer stack; `ricciDataSmooth` now consumes
-  lower `Evolution/RicciNorm.lean` producers.
+  lower `Evolution/RicciNorm.lean` producers, and the live producer work is in
+  `RicciFlow/Regularity.lean`.
 - Section 11/12 still contain global analytic and compactness frontiers.
 
 ## Main Dependency Ladder
@@ -64,9 +66,10 @@ until the project intentionally opens parabolic PDE existence.
 ### G5. Ricci-Flow Evolution Equations
 
 Native routes exist for inverse metric, Christoffel symbols, Ricci, scalar,
-and frame Ricci norm.  The current lower target is the canonical intrinsic
-Ricci-norm component-data producer `ricciHeatDataSmooth`; Section 10 should
-consume `ricciHeatSmooth` rather than add endpoint hypotheses.
+frame Ricci norm, and smooth-solution Ricci-norm data.  The current lower
+target is `smoothOfSol` in `RicciFlow/Regularity.lean`: produce the
+strengthened `IsSmoothSolutionOn` fields from `IsSolutionOn` rather than adding
+endpoint hypotheses.
 
 ### G6. Maximum Principles
 
@@ -76,7 +79,7 @@ producer frontiers, especially the first-null scalar-sign/product-rule bridge.
 ### G7. Positive Ricci Preservation And Pinching
 
 Dimension-three algebra is native.  The remaining important local frontiers are
-the Section 6 `ricciHeatDataSmooth` producer, quotient evolution, and pinching
+the remaining `smoothOfSol` field producers, quotient evolution, and pinching
 estimates.
 
 ### G8. Convergence To Constant Positive Curvature
@@ -99,7 +102,8 @@ Levi-Civita smoothness, or finite-dimensional Ricci algebra.
 
 ## Immediate Next Work
 
-1. Prove `ricciHeatDataSmooth` in the Ricci-flow evolution layer.
+1. Close the remaining `smoothOfSol` field producers in
+   `RicciFlow/Regularity.lean`.
 2. Continue to quotient evolution and improved pinching estimates.
 3. Keep global Section 11/12 producers explicit and separate from local
    tensor/evolution work.

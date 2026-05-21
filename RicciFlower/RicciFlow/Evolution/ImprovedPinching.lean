@@ -81,13 +81,16 @@ theorem tfRic_apply
 
 /-- Pointwise trace-free Ricci norm square from Definition 10.1:
 `|Ric°|² = |Ric|² - R²/3`. -/
-def tfRicNormSqAt (scalar ricciNormSq : Real) : Real :=
-  ricciNormSq - scalar ^ 2 / 3
+abbrev tfRicNormSqAt (scalar ricciNormSq : Real) : Real :=
+  tracefreeRicciNormSqAtOf scalar ricciNormSq
 
-/-- Time-space trace-free Ricci norm square. -/
-def tfRicNormSq
-    (scalar ricciNormSq : Real -> M -> Real) (t : Real) (x : M) : Real :=
-  tfRicNormSqAt (scalar t x) (ricciNormSq t x)
+/-- Time-space trace-free Ricci norm square.
+
+This is a readability wrapper for the canonical scalar-gradient formula, not a
+separate formula definition. -/
+abbrev tfRicNormSq
+    (scalar ricciNormSq : Real -> M -> Real) : Real -> M -> Real :=
+  tracefreeRicciNormSqOf scalar ricciNormSq
 
 /-- Compatibility with the older scalar-gradient interface. -/
 theorem tfRicNormSq_compat
@@ -213,8 +216,9 @@ theorem tfRel_eigen (l1 l2 l3 : Real)
           (DimensionThree.ricciEigenNormSq3 l1 l2 l3)
           (DimensionThree.ricciEigenTraceCube3 l1 l2 l3)) /
         DimensionThree.ricciEigenScalar3 l1 l2 l3 := by
-  unfold ricciReact3 tfRicNormSqAt cubicQAt DimensionThree.ricciEigenScalar3
-    DimensionThree.ricciEigenNormSq3 DimensionThree.ricciEigenTraceCube3
+  unfold ricciReact3 tfRicNormSqAt tracefreeRicciNormSqAtOf cubicQAt
+    DimensionThree.ricciEigenScalar3 DimensionThree.ricciEigenNormSq3
+    DimensionThree.ricciEigenTraceCube3
   have hR' : l1 + l2 + l3 ≠ 0 := by
     simpa [DimensionThree.ricciEigenScalar3] using hR
   field_simp [hR']
@@ -252,7 +256,8 @@ theorem tfRel_from_eigen
       DimensionThree.ricciEigenScalar3 (l1 t x) (l2 t x) (l3 t x) ≠ 0 := by
     simpa [hscalar t x] using hR
   rw [hreaction t x, hscalar t x, hnorm t x]
-  rw [tfRicNormSq, tfRicNormSqAt, cubicQ, hscalar t x, hnorm t x, hcube t x]
+  rw [tfRicNormSq, tracefreeRicciNormSqOf, cubicQ, hscalar t x, hnorm t x,
+    hcube t x]
   exact tfRel_eigen (l1 t x) (l2 t x) (l3 t x) hR'
 
 /-- Reaction relation produced when the reaction term is the diagonal
@@ -1000,8 +1005,11 @@ theorem sec6_norm_at
         Realized.ricciCompAt (I := I) basis (S.ricciAt t x) i j := by
     intro i j
     rw [hraisedFrame i j, hRicAt i j]
-  unfold ricciNormSqInFrame ricciNormAt
-  simp_rw [hRicAt, hraised]
+  rw [ricciNormSqInFrame_apply]
+  unfold ricciNormAt
+  refine Finset.sum_congr rfl fun i _ => ?_
+  refine Finset.sum_congr rfl fun j _ => ?_
+  rw [hRicAt i j, hraised i j]
 
 theorem sec6_react_at
     {D : Realized.RealTimeInterval}
@@ -1096,7 +1104,7 @@ theorem tfRel_point_sec6
     (ricciTraceCube := ricciTraceCube t x)
     (hheat t x) (heig t x) (htrace t x) (hdiag t x) (hcube t x) hR
   rw [hreact, hnorm]
-  unfold tfRicNormSq cubicQ
+  unfold tfRicNormSq tracefreeRicciNormSqOf cubicQ
   rw [hnorm]
   exact hpoint
 
@@ -1481,9 +1489,8 @@ theorem tfRel_frame
       fin_cases i <;> fin_cases j <;>
         simp [Fin.sum_univ_three, hInv t x, hRicAt, DimensionThree.delta3,
           DimensionThree.ricciDiag3]
-    unfold ricciNormSqInFrame
-    simp_rw [hRic t x]
-    simp_rw [hraised]
+    rw [ricciNormSqInFrame_apply]
+    simp [hRicAt, hInv t x, DimensionThree.delta3]
     unfold DimensionThree.ricciEigenNormSq3 DimensionThree.ricciDiag3
     simp [Fin.sum_univ_three]
     ring
@@ -1946,7 +1953,7 @@ theorem tfHeat_sec6
     (hscalar : ScalarEvolutionEquationOn
       (D := D) scalar scalarLap
       (ricciNormSqInFrame (I := I) S gInv frame))
-    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame)
+    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame Set.univ)
     (h_ricci : RicciEvolutionEquationInFrame
       (I := I) S Rm04 gInv frame roughLapRic)
     (hInvSym : forall t x i j, gInv t x i j = gInv t x j i)
@@ -2000,7 +2007,7 @@ theorem tfHeat_point
     (hscalarHeat : ScalarEvolutionEquationOn
       (D := D) scalar scalarLap
       (ricciNormSqInFrame (I := I) S gInv frame))
-    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame)
+    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame Set.univ)
     (h_ricci : RicciEvolutionEquationInFrame
       (I := I) S Rm04 gInv frame roughLapRic)
     (h_lap : Realized.RicciNormScalarLaplacianExpansionInFrame
@@ -2072,7 +2079,7 @@ theorem tfHeat_pfirst
     (hscalarHeat : ScalarEvolutionEquationOn
       (D := D) scalar scalarLap
       (ricciNormSqInFrame (I := I) S gInv frame))
-    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame)
+    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame Set.univ)
     (h_ricci : RicciEvolutionEquationInFrame
       (I := I) S Rm04 gInv frame roughLapRic)
     (h_lap : Realized.RicciNormScalarLaplacianExpansionInFrame
@@ -2144,7 +2151,7 @@ theorem tfHeat_eig
     (hscalarHeat : ScalarEvolutionEquationOn
       (D := D) scalar scalarLap
       (ricciNormSqInFrame (I := I) S gInv frame))
-    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame)
+    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame Set.univ)
     (h_ricci : RicciEvolutionEquationInFrame
       (I := I) S Rm04 gInv frame roughLapRic)
     (h_lap : Realized.RicciNormScalarLaplacianExpansionInFrame
@@ -2269,7 +2276,7 @@ theorem tfHeat_can
     (hscalarHeat : ScalarEvolutionEquationOn
       (D := D) scalar scalarLap
       (ricciNormSqInFrame (I := I) S gInv frame))
-    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame)
+    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame Set.univ)
     (h_ricci : RicciEvolutionEquationInFrame
       (I := I) S Rm04 gInv frame roughLapRic)
     (h_lap : Realized.RicciNormScalarLaplacianExpansionInFrame
@@ -2496,7 +2503,7 @@ theorem tfHeat_scalar
     (hscalarHeat : ScalarEvolutionEquationOn
       (D := D) S.scalar scalarLap
       (ricciNormSqInFrame (I := I) S gInv frame))
-    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame)
+    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame Set.univ)
     (h_ricci : RicciEvolutionEquationInFrame
       (I := I) S Rm04 gInv frame roughLapRic)
     (h_lap : Realized.RicciNormScalarLaplacianExpansionInFrame
@@ -2572,7 +2579,7 @@ theorem tfHeat_trace
     (hscalarHeat : ScalarEvolutionEquationOn
       (D := D) S.scalar scalarLap
       (ricciNormSqInFrame (I := I) S gInv frame))
-    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame)
+    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame Set.univ)
     (h_ricci : RicciEvolutionEquationInFrame
       (I := I) S Rm04 gInv frame roughLapRic)
     (h_lap : Realized.RicciNormScalarLaplacianExpansionInFrame
@@ -2648,7 +2655,7 @@ theorem tfHeat_lc
     (hscalarHeat : ScalarEvolutionEquationOn
       (D := D) S.scalar scalarLap
       (ricciNormSqInFrame (I := I) S gInv frame))
-    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame)
+    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame Set.univ)
     (h_ricci : RicciEvolutionEquationInFrame
       (I := I) S Rm04 gInv frame roughLapRic)
     (h_lap : Realized.RicciNormScalarLaplacianExpansionInFrame
@@ -2760,7 +2767,7 @@ theorem tfHeat_metric
     (hscalarHeat : ScalarEvolutionEquationOn
       (D := D) S.scalar scalarLap
       (ricciNormSqInFrame (I := I) S gInv frame))
-    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame)
+    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame Set.univ)
     (h_ricci : RicciEvolutionEquationInFrame
       (I := I) S S.base.rm04 gInv frame roughLapRic)
     (h_lap : Realized.RicciNormScalarLaplacianExpansionInFrame
@@ -2829,7 +2836,7 @@ theorem tfHeat_metric_smooth
     (hscalarHeat : ScalarEvolutionEquationOn
       (D := D) S.scalar scalarLap
       (ricciNormSqInFrame (I := I) S gInv frame))
-    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame)
+    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame Set.univ)
     (h_ricci : RicciEvolutionEquationInFrame
       (I := I) S S.base.rm04 gInv frame roughLapRic)
     (h_lap : Realized.RicciNormScalarLaplacianExpansionInFrame
@@ -3041,7 +3048,7 @@ theorem tfHeat_mc
     (hscalarHeat : ScalarEvolutionEquationOn
       (D := D) S.scalar scalarLap
       (ricciNormSqInFrame (I := I) S gInv frame))
-    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame)
+    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame Set.univ)
     (h_ricci : RicciEvolutionEquationInFrame
       (I := I) S S.base.rm04 gInv frame roughLapRic)
     (hheatBasis : ∀ (t : Real) (x : M) (i : Fin 3),
@@ -3624,7 +3631,7 @@ theorem tfHeat_frame
     (hscalarHeat : ScalarEvolutionEquationOn
       (D := D) scalar scalarLap
       (ricciNormSqInFrame (I := I) S gInv frame))
-    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame)
+    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame Set.univ)
     (h_ricci : RicciEvolutionEquationInFrame
       (I := I) S Rm04 gInv frame roughLapRic)
     (h_lap : Realized.RicciNormScalarLaplacianExpansionInFrame
@@ -3693,7 +3700,7 @@ theorem tfHeat_data
     (hscalarHeat : ScalarEvolutionEquationOn
       (D := D) scalar scalarLap
       (ricciNormSqInFrame (I := I) S gInv frame))
-    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame)
+    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame Set.univ)
     (h_ricci : RicciEvolutionEquationInFrame
       (I := I) S Rm04 gInv frame roughLapRic)
     (h_lap : Realized.RicciNormScalarLaplacianExpansionInFrame
@@ -3763,7 +3770,7 @@ theorem tfHeat_first
     (hscalarHeat : ScalarEvolutionEquationOn
       (D := D) scalar scalarLap
       (ricciNormSqInFrame (I := I) S gInv frame))
-    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame)
+    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame Set.univ)
     (h_ricci : RicciEvolutionEquationInFrame
       (I := I) S Rm04 gInv frame roughLapRic)
     (h_lap : Realized.RicciNormScalarLaplacianExpansionInFrame

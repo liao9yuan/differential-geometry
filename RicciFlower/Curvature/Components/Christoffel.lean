@@ -362,6 +362,32 @@ private theorem coordinateFrame_covariantDeriv_mdiffAt_one
   exact ((hW_on x₀ hx₀).contMDiffAt (hu.mem_nhds hx₀)).mdifferentiableAt
     (by norm_num)
 
+/-- A coordinate-frame Christoffel coefficient is differentiable at the chart
+center for a `C¹` covariant derivative. -/
+theorem christoffelCoordFun_mdiffAt_one
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
+      (1 : WithTop ℕ∞))
+    (x₀ : M) (i j k : CoordinateIdx (𝕜 := Real) E) :
+    MDifferentiableAt I 𝓘(Real, Real)
+      (christoffelCoordFun (I := I) cov x₀ i j k) x₀ := by
+  let e := coordinateTrivializationAt (I := I) x₀
+  let b := Module.finBasis Real E
+  let frame := coordinateFrameAt (I := I) x₀
+  let Z : (x : M) -> TangentSpace I x :=
+    fun p => (cov (frame j) p) (frame i p)
+  have hx : x₀ ∈ e.baseSet := by
+    simp [e, coordinateTrivializationAt]
+  have hZ : MDiffAt (T% Z) x₀ := by
+    simpa [Z, frame] using
+      coordinateFrame_covariantDeriv_mdiffAt_one (I := I) cov hcov x₀ i j
+  have hcoeff :=
+    mdifferentiableAt_localFrame_coeff
+      (I := I) (e := e) (b := b) hx hZ k
+  simpa [christoffelCoordFun, christoffelSymbolInFrame, e, b, frame, Z,
+    coordinateFrameAt, coordinateFrameAt_isLocalFrame_one,
+    coordinateTrivializationAt] using hcoeff
+
 /-- Coordinate coefficients of a locally smooth tangent field are smooth at the
 base point. -/
 private theorem coordinateFrame_coeff_contMDiffAt_of_contMDiffAt

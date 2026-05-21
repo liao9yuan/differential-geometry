@@ -45,7 +45,7 @@ variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
 /-- A time-dependent covariant two-tensor field. -/
 abbrev TwoTensorFamily : Type _ :=
-  Real -> TwoTensorField (I := I) (M := M)
+  Real -> RawTwoTensorField (I := I) (M := M)
 
 /-- A time-dependent vector field used for drift terms. -/
 abbrev TimeDependentVectorField : Type _ :=
@@ -67,19 +67,19 @@ abbrev TensorNabla2Family : Type _ :=
 
 /-- A fiberwise algebraic reaction term for the tensor maximum principle. -/
 abbrev TwoTensorReaction : Type _ :=
-  Real -> SmoothRiemannianMetric I M -> TwoTensorField (I := I) (M := M) ->
-    TwoTensorField (I := I) (M := M)
+  Real -> SmoothRiemannianMetric I M -> RawTwoTensorField (I := I) (M := M) ->
+    RawTwoTensorField (I := I) (M := M)
 
 /-- Pointwise symmetry of a covariant two-tensor. -/
-def TwoTensorSymmetricAt (A : TwoTensorField (I := I) (M := M)) (x : M) : Prop :=
+def TwoTensorSymmetricAt (A : RawTwoTensorField (I := I) (M := M)) (x : M) : Prop :=
   ∀ X Y : TangentSpace I x, A x X Y = A x Y X
 
 /-- Pointwise nonnegativity of a covariant two-tensor as a quadratic form. -/
-def TwoTensorNonnegativeAt (A : TwoTensorField (I := I) (M := M)) (x : M) : Prop :=
+def TwoTensorNonnegativeAt (A : RawTwoTensorField (I := I) (M := M)) (x : M) : Prop :=
   ∀ v : TangentSpace I x, 0 ≤ A x v v
 
 /-- Pointwise positive definiteness of a covariant two-tensor as a quadratic form. -/
-def TwoTensorPositiveDefiniteAt (A : TwoTensorField (I := I) (M := M)) (x : M) : Prop :=
+def TwoTensorPositiveDefiniteAt (A : RawTwoTensorField (I := I) (M := M)) (x : M) : Prop :=
   ∀ v : TangentSpace I x, v ≠ 0 -> 0 < A x v v
 
 /-- Symmetry of a tensor family on a set of times. -/
@@ -758,7 +758,7 @@ def TensorNullEigenvectorCondition
     (G : Real -> SmoothRiemannianMetric I M)
     (N : TwoTensorReaction (I := I) (M := M))
     (U : Set Real) : Prop :=
-  ∀ t, t ∈ U -> ∀ A : TwoTensorField (I := I) (M := M), ∀ x,
+  ∀ t, t ∈ U -> ∀ A : RawTwoTensorField (I := I) (M := M), ∀ x,
     TwoTensorNonnegativeAt (I := I) (M := M) A x ->
     ∀ v : TangentSpace I x,
       A x v v = 0 ->
@@ -5136,6 +5136,51 @@ theorem tensorBarrier_strict_supersolution
     hsubInterior hparabolic.evaluatedInequality
     metricDeriv reactionErr metricGain hmetric_deriv hgain hreaction hmargin
 
+/--
+Compatibility adapter from the old regularity package to the certificate
+route.
+
+The old package asks scalar signs for every strict-barrier derivative witness.
+This theorem is the only place in the old raw WMP route where that stronger
+field is used: it turns the strict-barrier witnesses into `TensorStrictCert`s.
+-/
+theorem certSlab_of_reg
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {nabla2S : TensorNabla2Family (I := I) (M := M)}
+    {nablaS : TensorNabla1Family (I := I) (M := M)}
+    {t0 T : Real}
+    (ht0 : t0 ∈ Set.Icc 0 T)
+    (ht0T : t0 < T)
+    (hreg : TensorWMPRegularityOn (I := I) (M := M) G S X N T)
+    (hparabolic : TensorParabolicSupersolutionWithDriftOn
+      (I := I) (M := M) G S X N nabla2S nablaS T) :
+    ∃ delta : Real, 0 < delta ∧ t0 + delta ≤ T ∧
+      TensorStrictCertSlab (I := I) (M := M) G S X N delta t0 := by
+  obtain ⟨delta, hdelta, hdeltaT, hstrict_uniform⟩ :=
+    tensorBarrier_strict_supersolution (I := I) (M := M)
+      (G := G) (S := S) (X := X) (N := N)
+      ht0 ht0T hreg hparabolic
+  refine ⟨delta, hdelta, hdeltaT, ?_⟩
+  intro epsilon hepsilon
+  obtain ⟨nabla2Barrier, nablaBarrier, hstrict⟩ :=
+    hstrict_uniform epsilon hepsilon
+  refine ⟨?_⟩
+  refine
+    { nabla2Barrier := nabla2Barrier
+      nablaBarrier := nablaBarrier
+      strict := hstrict
+      signs := ?_ }
+  intro hnull d
+  have hsub : Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T := by
+    intro t ht
+    exact ⟨le_trans ht0.1 ht.1, le_trans ht.2 hdeltaT⟩
+  exact
+    hreg.firstNullScalarSigns epsilon delta t0 hepsilon.1 hdelta hsub
+      nabla2Barrier nablaBarrier hstrict hnull d
+
 /-- Section-backed strict-barrier certificates with scalar signs tied to the
 section covariant derivative witnesses. -/
 theorem strictCert_sec
@@ -5217,6 +5262,30 @@ theorem strictCert_sec
     (laplacianNonnegativeAtSpatialMin_of_metricCompatible
       (I := I) (cov d.t1) (G d.t1) (hmc d.t1))
     hXsec.symm
+
+/-- Compatibility adapter from the old section regularity package to the
+certificate route.  New section producers should use `strictCert_sec` instead,
+where the derivative witnesses are fixed by `TensorSpatialDerivs`. -/
+theorem certSlab_of_sectionReg
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorSecFamily (I := I) (M := M)}
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {nabla2S : TensorNabla2Family (I := I) (M := M)}
+    {nablaS : TensorNabla1Family (I := I) (M := M)}
+    {t0 T : Real}
+    (ht0 : t0 ∈ Set.Icc 0 T)
+    (ht0T : t0 < T)
+    (hreg : TensorWMPSectionReg (I := I) (M := M) G S X N T)
+    (hparabolic : TensorParabolicSupersolutionWithDriftOn
+      (I := I) (M := M) G (twoTensorSecToFamily (I := I) (M := M) S) X N
+      nabla2S nablaS T) :
+    ∃ delta : Real, 0 < delta ∧ t0 + delta ≤ T ∧
+      TensorStrictCertSlab (I := I) (M := M) G
+        (twoTensorSecToFamily (I := I) (M := M) S) X N delta t0 :=
+  certSlab_of_reg (I := I) (M := M)
+    (G := G) (S := twoTensorSecToFamily (I := I) (M := M) S)
+    (X := X) (N := N) ht0 ht0T hreg.toRaw hparabolic
 
 /--
 Step 3: if the barrier fails to stay positive, compactness gives first-null
@@ -5377,39 +5446,13 @@ theorem tensorBarrier_nonnegative_on_short_slab
     (hinit : TwoTensorFamilyNonnegativeAtTime (I := I) (M := M) S t0) :
     ∃ delta : Real, 0 < delta ∧ t0 + delta ≤ T ∧
       TensorBarrierUniformOnSlab (I := I) (M := M) G S delta t0 := by
-  classical
-  obtain ⟨delta, hdelta, hdeltaT, hstrict_uniform⟩ :=
-    tensorBarrier_strict_supersolution (I := I) (M := M)
-      (G := G) (S := S) (X := X) (N := N) ht0 ht0T hreg hparabolic
-  refine ⟨delta, hdelta, hdeltaT, ?_⟩
-  intro epsilon hepsilon
-  obtain ⟨nabla2Barrier, nablaBarrier, hstrict⟩ :=
-    hstrict_uniform epsilon hepsilon
-  by_contra hfail
-  have hinit_pos : ∀ x, TwoTensorPositiveDefiniteAt (I := I) (M := M)
-      (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t0) x :=
-    tensorBarrier_initial_positive (I := I) (M := M)
-      (G := G) (S := S) hepsilon.1 hdelta hinit
-  have hsub : Set.Icc t0 (t0 + delta) ⊆ Set.Icc 0 T := by
-    intro t ht
-    exact ⟨le_trans ht0.1 ht.1, le_trans ht.2 hdeltaT⟩
-  have hcompact : TensorFirstNullCompactnessOn (I := I) (M := M)
-      G S epsilon delta t0 :=
-    hreg.firstNullCompactness epsilon delta t0 hepsilon.1 hdelta hsub
-  obtain ⟨d⟩ :=
-    tensorBarrier_first_null_of_failure (I := I) (M := M)
-      (G := G) (S := S) (epsilon := epsilon) (delta := delta) (t0 := t0)
-      hcompact hinit_pos hfail
-  have hnull_slab : TensorNullEigenvectorCondition (I := I) (M := M) G
-      N (Set.Icc t0 (t0 + delta)) := by
-    intro t ht A x hA v hv
-    exact hnull t (hsub ht) A x hA v hv
-  exact tensor_first_null_contradiction (I := I) (M := M)
+  exact shortSlab_cert (I := I) (M := M)
     (G := G) (S := S) (X := X) (N := N)
-    (nabla2Barrier := nabla2Barrier) (nablaBarrier := nablaBarrier)
-    hstrict hnull_slab d
-    (hreg.firstNullScalarSigns epsilon delta t0 hepsilon.1 hdelta hsub
-      nabla2Barrier nablaBarrier hstrict hnull_slab d)
+    ht0 ht0T hreg.toCore
+    (certSlab_of_reg (I := I) (M := M)
+      (G := G) (S := S) (X := X) (N := N)
+      ht0 ht0T hreg hparabolic)
+    hnull hinit
 
 /--
 Step 6: iterate short slabs and let `epsilon -> 0`.
@@ -5432,9 +5475,13 @@ theorem tensor_wmp_of_barrier_limit
   exact barrierLimitClosure_of_continuous (I := I) (M := M)
     (G := G) (S := S) _hT hreg.barrierRegularity.tensor_eval_continuous hinit
     (fun t0 ht0 ht0T hinit_t0 =>
-      tensorBarrier_nonnegative_on_short_slab (I := I) (M := M)
+      shortSlab_cert (I := I) (M := M)
         (G := G) (S := S) (X := X) (N := N)
-        ht0 ht0T hreg hparabolic hnull hinit_t0)
+        ht0 ht0T hreg.toCore
+        (certSlab_of_reg (I := I) (M := M)
+          (G := G) (S := S) (X := X) (N := N)
+          ht0 ht0T hreg hparabolic)
+        hnull hinit_t0)
 
 /-- Tensor WMP from core regularity and strict-barrier certificates. -/
 theorem wmp_of_cert
@@ -5584,8 +5631,13 @@ theorem hamilton_tensor_wmp
     (_hnull : TensorNullEigenvectorCondition (I := I) (M := M) G N (Set.Icc 0 T))
     (_hinit : TwoTensorFamilyNonnegativeAtTime (I := I) (M := M) S 0) :
     TwoTensorFamilyNonnegativeOn (I := I) (M := M) S (Set.Icc 0 T) := by
-  exact tensor_wmp_of_barrier_limit (I := I) (M := M)
-    (G := G) (S := S) (X := X) (N := N) _hT hreg _hparabolic _hnull _hinit
+  exact wmp_of_cert (I := I) (M := M)
+    (G := G) (S := S) (X := X) (N := N) _hT hreg.toCore
+    (fun t0 ht0 ht0T =>
+      certSlab_of_reg (I := I) (M := M)
+        (G := G) (S := S) (X := X) (N := N)
+        ht0 ht0T hreg _hparabolic)
+    _hnull _hinit
 
 /-- Compatibility section-backed public wrapper for Hamilton's tensor WMP.
 
@@ -5610,9 +5662,14 @@ theorem hamilton_tensor_wmp_section
       (twoTensorSecToFamily (I := I) (M := M) S) 0) :
     TwoTensorFamilyNonnegativeOn (I := I) (M := M)
       (twoTensorSecToFamily (I := I) (M := M) S) (Set.Icc 0 T) := by
-  exact hamilton_tensor_wmp (I := I) (M := M)
+  exact wmp_of_cert (I := I) (M := M)
     (G := G) (S := twoTensorSecToFamily (I := I) (M := M) S)
-    (X := X) (N := N) _hT hreg.toRaw _hparabolic _hnull _hinit
+    (X := X) (N := N) _hT hreg.toCore.toRaw
+    (fun t0 ht0 ht0T =>
+      certSlab_of_sectionReg (I := I) (M := M)
+        (G := G) (S := S) (X := X) (N := N)
+        ht0 ht0T hreg _hparabolic)
+    _hnull _hinit
 
 end
 

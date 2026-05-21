@@ -314,7 +314,7 @@ private theorem extDerivFun_comp_eq_of_eventuallyEq
 
 /-- A local-frame coefficient of a tangent vector is the corresponding
 coordinate in the pointwise basis. -/
-private theorem localFrame_coeff_eq_basis_repr
+theorem localFrame_coeff_eq_basis_repr
     {ι : Type*}
     (e : Trivialization E
       (TotalSpace.proj : TotalSpace E (TangentSpace I : M -> Type _) -> M))
@@ -1377,6 +1377,59 @@ theorem frameDerivVec_eq_of_hasDerivAt
   rw [hmf]
   change (ContinuousLinearMap.toSpanSingleton Real (dS k)) (1 : Real) = dS k
   exact ContinuousLinearMap.toSpanSingleton_apply_one (R₁ := Real) (x := dS k)
+
+/-- Build a fixed-frame along-curve derivative from a derivative of the whole
+coefficient vector. -/
+theorem HasFrameAlongAt.of_frameVec_hasDerivAt
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {e : TangentTriv (I := I) (M := M)} [MemTrivializationAtlas e]
+    {b : Module.Basis ι Real E} {gamma : Curve M}
+    {S : VectorFieldAlong I gamma} {t : Real} {dS : ι -> Real}
+    (hx : gamma t ∈ e.baseSet)
+    (hgamma : MDifferentiableAt 𝓘(Real, Real) I gamma t)
+    (hS : HasDerivAt (fun r : Real => frameVec (I := I) e b (S r)) dS t) :
+    HasFrameAlongAt (I := I) cov e b gamma S t
+      (frameSum (I := I) e b
+        (coeffCov
+          (frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b gamma t
+            (1 : TangentSpace 𝓘(Real, Real) t))
+          dS (frameVec (I := I) e b (S t)))) := by
+  classical
+  refine ⟨hx, hgamma, ?_⟩
+  have hderivVec := frameDerivVec_eq_of_hasDerivAt (I := I) e b
+    (gamma := gamma) (S := S) hS
+  have hsum := frameVec_frameSum (I := I) e b hx
+    (coeffCov
+      (frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b gamma t
+        (1 : TangentSpace 𝓘(Real, Real) t))
+      dS (frameVec (I := I) e b (S t)))
+  intro k
+  constructor
+  · have hk : HasDerivAt
+        (fun r : Real => e.localFrame_coeff I b k (gamma r) (S r)) (dS k) t := by
+      simpa [frameVec] using (hasDerivAt_pi.mp hS k)
+    exact hk.hasFDerivAt.hasMFDerivAt.mdifferentiableAt
+  · have hk := congrFun hsum k
+    change frameVec (I := I) e b
+        (frameSum (I := I) e b
+          (coeffCov
+            (frameGammaMat (I := I) (I' := 𝓘(Real, Real)) (M := M) cov e b gamma t
+              (1 : TangentSpace 𝓘(Real, Real) t))
+            dS (frameVec (I := I) e b (S t)))) k =
+      frameCoeffDeriv (I := I) (I' := 𝓘(Real, Real)) (M := M) e b gamma S t
+          (1 : TangentSpace 𝓘(Real, Real) t) k +
+        ∑ j : ι,
+          e.localFrame_coeff I b j (gamma t) (S t) *
+            frameGamma (I := I) (M := M) cov e b (gamma t)
+              ((mfderiv 𝓘(Real, Real) I gamma t)
+                (1 : TangentSpace 𝓘(Real, Real) t)) j k
+    have hderiv_k :
+        frameCoeffDeriv (I := I) (I' := 𝓘(Real, Real)) (M := M) e b gamma S t
+            (1 : TangentSpace 𝓘(Real, Real) t) k = dS k := by
+      simpa [frameDerivVec] using congrFun hderivVec k
+    rw [hk, hderiv_k]
+    simp [coeffCov, frameGammaMat, frameVec, Matrix.mulVec, dotProduct, mul_comm]
 
 /-- Pure coefficient/matrix commutator identity for two covariant
 first-order operators `∂s + Γs` and `∂t + Γt`.

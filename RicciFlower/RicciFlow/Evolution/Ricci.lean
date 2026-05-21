@@ -3661,7 +3661,7 @@ theorem ricciEvolutionEquationInFrame_of_riemann_trace
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (rm04Dt : Real -> M -> Idx -> Idx -> Idx -> Idx -> Real)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
-    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame)
+    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame Set.univ)
     (h_trace : RicciTensorRealizesRm04TraceInFrameOn
       (I := I) S Rm04 gInv frame)
     (h_rm : RiemannEvolutionEquationInFrameOn (I := I) (D := D) Rm04 frame rm04Dt)
@@ -3710,7 +3710,7 @@ theorem ricciEvolutionEquationInFrame_of_riemann_trace
                 (s := D.carrier) (x := (t : Real))
                 (fun l _hl =>
                   by
-                    exact (h_inv t x k l).mul (h_rm t x k i j l)))))
+                    exact (h_inv t x (by simp) k l).mul (h_rm t x k i j l)))))
   have hricci :
       HasDerivWithinAt
         (fun s : Real => ricciCompInFrame (I := I) S frame s x i j)

@@ -1,4 +1,6 @@
 import RicciFlower.GlobalGeometry.Lecture07.PullbackConnection
+import RicciFlower.GlobalGeometry.Lecture07.SurfaceCalculus
+import RicciFlower.LeviCivita.Smooth
 import RicciFlower.Riemann.Basic
 import RicciFlower.Curvature.Components.Christoffel
 import RicciFlower.Tensor.Auxiliary.SlotAlgebra
@@ -69,9 +71,10 @@ def variationField (I : ModelWithCorners Real E H) (F : Surface M)
     (s0 : Real) : VectorFieldAlong I (timeCurve F s0) :=
   fun t => curveVelocity I (paramCurve F t) s0
 
-/-- Smoothness of a two-parameter variation as a map from the product model. -/
-def SmoothSurface (I : ModelWithCorners Real E H) (F : Surface M) : Prop :=
-  ContMDiff (𝓘(Real, Real).prod 𝓘(Real, Real)) I ∞ F
+/-- Smoothness of a two-parameter variation as a map from the standard product
+model.  The implementation lives in the Lecture 7 surface-calculus layer. -/
+abbrev SmoothSurface (I : ModelWithCorners Real E H) (F : Surface M) : Prop :=
+  Lecture07.SmoothSurface (I := I) F
 
 /-! ## Surface fields and curve restrictions -/
 
@@ -136,7 +139,7 @@ theorem surfParam_rep
 
 /-- A surface-field representative restricts to the canonical frame-defined
 pullback derivative along a time curve. -/
-theorem surfTime_frame
+private theorem surfTime_frame
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {F : Surface M} {V : SurfaceField I F} {X : GlobalVectorField I M}
     {s0 t : Real}
@@ -150,7 +153,7 @@ theorem surfTime_frame
 
 /-- A surface-field representative restricts to the canonical frame-defined
 pullback derivative along a parameter curve. -/
-theorem surfParam_frame
+private theorem surfParam_frame
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {F : Surface M} {V : SurfaceField I F} {X : GlobalVectorField I M}
     {s t0 : Real}
@@ -1072,7 +1075,7 @@ theorem curvVec_scalar_deriv
               (curveVelocity I gamma t) q) (r q)) *
           Realized.christoffelCurvCoeffAt (I := I) cov (gamma t)
             (r 0) (r 1) (r 2) m := by
-        rw [← sum_fin3_fun_eq_triple
+        rw [← RicciFlower.Tensor.SlotAlgebra.sum_fin3_fun_eq_triple
           (A := S) (B := T) (C := T)
           (K := fun i k j =>
             Realized.christoffelCurvCoeffAt (I := I) cov (gamma t) i k j m)]
@@ -1148,7 +1151,7 @@ Jacobi-facing `VariationCurvCommAt`.  The remaining producer work is exactly
 the scalar surface calculus supplied here as hypotheses: derivatives of the
 time/parameter velocity coefficients, derivatives of Christoffel coefficients
 along the surface, and mixed-partial equality. -/
-theorem curvComm_surface
+private theorem curvComm_surface
     [T2Space M]
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞}
@@ -1415,6 +1418,186 @@ theorem curvComm_surface
     rw [← hcurvR]
     exact hdual
 
+/-- Smooth-surface producer for the Jacobi curvature commutator.
+
+All fixed-coordinate scalar data required by `curvComm_surface` is produced in
+`Lecture07.SurfaceCalculus`; this theorem keeps `VariationCurvCommAt` free of
+coordinate-calculus hypotheses. -/
+private theorem curvComm_smooth
+    [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞}
+    (hcov1 : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
+      (1 : WithTop ℕ∞))
+    {F : Surface M} {s t : Real}
+    (hF : SmoothSurface (I := I) F)
+    {Vs : SurfaceField I F} {DtsV : TangentSpace I (F (s, t))}
+    (hjet : HasPBSurfaceCovDeriv2At (I := I) cov F (timeField I F) Vs
+      (fun _ => 0) s t (0 : TangentSpace I (F (s, t))) DtsV) :
+    VariationCurvCommAt (I := I) cov hcov F s t
+      (fun τ => Vs (s, τ)) := by
+  let jet := Lecture07.SmoothSurface.coordSurfJet
+    (I := I) (cov := cov) hcov1 hF s t
+  exact curvComm_surface (I := I) (cov := cov) (hcov := hcov) hcov1
+    (F := F) (s := s) (t := t) (Vs := Vs) (DtsV := DtsV)
+    hjet
+    (by simpa [jet] using jet.hmem_s)
+    (by simpa [jet] using jet.hmem_t)
+    jet.S jet.T jet.Ts jet.St
+    (by
+      intro i
+      simpa [jet, paramField, Lecture07.surfaceParamField] using jet.hS i)
+    (by
+      intro i
+      simpa [jet, timeField, Lecture07.surfaceTimeField] using jet.hT i)
+    (by
+      intro i
+      simpa [jet, timeField, Lecture07.surfaceTimeField] using jet.hTderiv i)
+    (by
+      intro i
+      simpa [jet, paramField, Lecture07.surfaceParamField] using jet.hSderiv i)
+    (by
+      intro i j k
+      simpa [jet] using jet.hCs i j k)
+    (by
+      intro i j k
+      simpa [jet] using jet.hCt i j k)
+    (by simpa [jet, timeCurve, Lecture07.surfaceTimeCurve,
+      timeField, Lecture07.surfaceTimeField] using jet.hvt_s)
+    (by simpa [jet, timeField, Lecture07.surfaceTimeField] using jet.hvs)
+    (by simpa [jet, paramCurve, Lecture07.surfaceParamCurve,
+      timeField, Lecture07.surfaceTimeField] using jet.hvs_t)
+    (by simpa [jet, timeField, Lecture07.surfaceTimeField] using jet.hvt)
+    (by simpa [jet] using jet.hmix_raw)
+    (by simpa [jet] using jet.hmix)
+
+/-- A set-level geodesic variation gives the corresponding time-acceleration
+germ at any interior point of the parameter rectangle. -/
+theorem IsGeodesicVariationOn.geoGerm
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {F : Surface M} {S T : Set Real} {s t : Real}
+    (hgeo : IsGeodesicVariationOn (I := I) cov F S T)
+    (hS : S ∈ 𝓝 s) (hT : T ∈ 𝓝 t) :
+    ∀ᶠ q : Real × Real in 𝓝 (s, t),
+      HasPBCovAccelAt (I := I) cov (timeCurve F q.1) q.2
+        (0 : TangentSpace I (F q)) := by
+  have hfst : Tendsto Prod.fst (𝓝 ((s, t) : Real × Real)) (𝓝 s) :=
+    continuousAt_fst.tendsto
+  have hsnd : Tendsto Prod.snd (𝓝 ((s, t) : Real × Real)) (𝓝 t) :=
+    continuousAt_snd.tendsto
+  filter_upwards [hfst.eventually hS, hsnd.eventually hT] with q hqS hqT
+  simpa [timeCurve] using hgeo q.1 hqS q.2 hqT
+
+/-- The time part of the surface 2-jet produced by a geodesic variation.
+
+The remaining inputs specify the parameter derivative field `Vs = D_s T` and
+its time derivative at the point. -/
+private theorem timeJet_of_geo
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {F : Surface M} {s t : Real}
+    (hF : SmoothSurface (I := I) F)
+    {Vs : SurfaceField I F} {DtsV : TangentSpace I (F (s, t))}
+    (hgeo :
+      ∀ᶠ q : Real × Real in 𝓝 (s, t),
+        HasPBCovAccelAt (I := I) cov (timeCurve F q.1) q.2
+          (0 : TangentSpace I (F q)))
+    (hVs :
+      ∀ᶠ q : Real × Real in 𝓝 (s, t),
+        HasPBParamCovDerivAt (I := I) cov F (timeField I F)
+          q.1 q.2 (Vs q))
+    (hDts : HasPBTimeCovDerivAt (I := I) cov F Vs s t DtsV) :
+    HasPBSurfaceCovDeriv2At (I := I) cov F (timeField I F) Vs
+      (fun _ => 0) s t (0 : TangentSpace I (F (s, t))) DtsV := by
+  refine
+    { has_param_germ := ?_
+      has_time_germ := ?_
+      has_param_time := ?_
+      has_time_param := hDts }
+  · exact hVs
+  · filter_upwards [hgeo] with q hq
+    simpa [HasPBTimeCovDerivAt, HasPBCovAccelAt, timeField,
+      Lecture07.surfaceTimeCurve, timeCurve, velocityAlong] using hq
+  · have hparam : MDifferentiableAt 𝓘(Real, Real) I
+        (Lecture07.surfaceParamCurve F t) s := by
+      simpa [SmoothSurface] using hF.mdiffAt_param (I := I) s t
+    exact HasPBParamCovDerivAt.zero (I := I) (cov := cov) hparam
+
+/-- Smooth geodesic-variation curvature commutator from a parameter-derivative
+surface field. -/
+private theorem curvComm_geo
+    [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞}
+    (hcov1 : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
+      (1 : WithTop ℕ∞))
+    {F : Surface M} {s t : Real}
+    (hF : SmoothSurface (I := I) F)
+    {Vs : SurfaceField I F} {DtsV : TangentSpace I (F (s, t))}
+    (hgeo :
+      ∀ᶠ q : Real × Real in 𝓝 (s, t),
+        HasPBCovAccelAt (I := I) cov (timeCurve F q.1) q.2
+          (0 : TangentSpace I (F q)))
+    (hVs :
+      ∀ᶠ q : Real × Real in 𝓝 (s, t),
+        HasPBParamCovDerivAt (I := I) cov F (timeField I F)
+          q.1 q.2 (Vs q))
+    (hDts : HasPBTimeCovDerivAt (I := I) cov F Vs s t DtsV) :
+    VariationCurvCommAt (I := I) cov hcov F s t
+      (fun τ => Vs (s, τ)) :=
+  curvComm_smooth (I := I) (cov := cov) (hcov := hcov) hcov1 hF
+    (timeJet_of_geo (I := I) (cov := cov) hF hgeo hVs hDts)
+
+/-- Smooth-surface torsion swap for a torsion-free connection.
+
+The field is the canonical coordinate/frame-defined `D_s T` field supplied by
+the surface-calculus producer. -/
+private theorem torsionSwap_smooth
+    [IsManifold I 1 M] [IsManifold I 2 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    (htf : LeviCivita.IsTorsionFree (I := I) cov)
+    {F : Surface M} {s t : Real}
+    (hF : SmoothSurface (I := I) F) :
+    VariationTorsionSwapAt (I := I) cov F s t
+      (fun τ => Lecture07.dsTimeField (I := I) cov F (s, τ)) := by
+  constructor
+  · have h := Lecture07.SmoothSurface.hasTime_param_eq_dsTime
+      (I := I) (cov := cov) htf hF s t
+    simpa [HasPBTimeCovDerivAt, timeCurve, variationField, paramField,
+      Lecture07.surfaceTimeCurve, Lecture07.surfaceParamField] using h
+  · have h := Lecture07.SmoothSurface.hasParam_dsTime
+      (I := I) (cov := cov) hF s t
+    simpa [HasPBParamCovDerivAt, paramCurve, paramRestrictField, timeField,
+      Lecture07.surfaceParamCurve, Lecture07.surfaceTimeField] using h
+
+/-- Smooth geodesic-variation curvature commutator with the canonical
+`D_s T` field. -/
+private theorem curvComm_geodesic
+    [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞}
+    (hcov1 : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
+      (1 : WithTop ℕ∞))
+    {F : Surface M} {S T : Set Real} {s t : Real}
+    (hF : SmoothSurface (I := I) F)
+    (hgeo : IsGeodesicVariationOn (I := I) cov F S T)
+    (hS : S ∈ 𝓝 s) (hT : T ∈ 𝓝 t) :
+    VariationCurvCommAt (I := I) cov hcov F s t
+      (fun τ => Lecture07.dsTimeField (I := I) cov F (s, τ)) := by
+  refine curvComm_geo (I := I) (cov := cov) (hcov := hcov)
+    (DtsV := Lecture07.dtdsTimeFieldIn (I := I) cov (F (s, t)) F s t) hcov1
+    hF (hgeo.geoGerm (I := I) hS hT) ?_ ?_
+  · filter_upwards with q
+    simpa [timeField, Lecture07.surfaceTimeField] using
+      Lecture07.SmoothSurface.hasParam_dsTime
+        (I := I) (cov := cov) hF q.1 q.2
+  · simpa [Lecture07.HasPBTimeCovDerivAt] using
+      Lecture07.SmoothSurface.hasTime_dsTime
+        (I := I) (cov := cov) hcov1 hF s t
+
 /-! ## Representative-level identities -/
 
 /-- Representative-level torsion swap.
@@ -1422,7 +1605,7 @@ theorem curvComm_surface
 For a torsion-free pair with zero Lie bracket at the point, the two first
 covariant derivatives agree.  This is the algebraic core of
 `D_t S = D_s T`. -/
-theorem torsionSwap_rep
+private theorem torsionSwap_rep
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {X Y : GlobalVectorField I M} {x : M}
     (hX : MDiffAt (T% X) x) (hY : MDiffAt (T% Y) x)
@@ -1492,7 +1675,7 @@ theorem torsionSwap_frame
   exact ⟨htime, hparam⟩
 
 /-- Curvature along a curve computed by smooth ambient representatives. -/
-theorem curvScalar_rep
+private theorem curvScalar_rep
     [T2Space M]
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞}
@@ -1514,7 +1697,7 @@ theorem curvScalar_rep
 
 /-- The cotangent-tested Jacobi scalar equation for the negative curvature
 representative. -/
-theorem jacobiScalar_rep
+private theorem jacobiScalar_rep
     [T2Space M]
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞}
@@ -1550,7 +1733,7 @@ theorem jacobiScalar_rep
 The derivative witness is already in the canonical pullback API; smooth ambient
 representatives are used only to identify the pointwise curvature scalar with
 RicciFlower's current `riemannCurvatureAt` tensor API. -/
-theorem curvComm_frame
+private theorem curvComm_frame
     [T2Space M]
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞}
@@ -1576,7 +1759,7 @@ theorem curvComm_frame
 
 /-- A representative-level curvature commutator value supplies
 `VariationCurvCommAt`. -/
-theorem curvComm_rep
+private theorem curvComm_rep
     [T2Space M]
     {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
     {hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞}
@@ -1618,32 +1801,67 @@ theorem jacobi_of_variation
   refine ⟨A, ?_, hscalar⟩
   exact ⟨W, (hswap t ht).1, hWA⟩
 
+/-- A smooth torsion-free geodesic variation has a Jacobi variation field. -/
+theorem jacobi_of_smooth_geodesic_variation
+    [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞}
+    (hcov1 : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
+      (1 : WithTop ℕ∞))
+    (htf : LeviCivita.IsTorsionFree (I := I) cov)
+    {F : Surface M} {S T : Set Real} {s0 : Real}
+    (hF : SmoothSurface (I := I) F)
+    (hgeo : IsGeodesicVariationOn (I := I) cov F S T)
+    (hS : S ∈ 𝓝 s0) (hTopen : IsOpen T) :
+    IsJacobiFieldOn (I := I) cov hcov
+      (timeCurve F s0) (variationField I F s0) T := by
+  let W : VectorFieldAlong I (timeCurve F s0) :=
+    fun τ => Lecture07.dsTimeField (I := I) cov F (s0, τ)
+  refine jacobi_of_variation (I := I) (cov := cov) (hcov := hcov)
+    (F := F) (S := S) (T := T) (s0 := s0) (W := W)
+    hgeo ?_ ?_
+  · intro t _ht
+    exact torsionSwap_smooth (I := I) (cov := cov) htf hF
+  · intro t ht
+    exact curvComm_geodesic (I := I) (cov := cov) (hcov := hcov)
+      hcov1 hF hgeo hS (hTopen.mem_nhds ht)
+
+/-- Levi-Civita specialization of the smooth geodesic-variation Jacobi theorem. -/
+theorem jacobi_of_lc_variation
+    [SigmaCompactSpace M] [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (g : SmoothRiemannianMetric I M)
+    {F : Surface M} {S T : Set Real} {s0 : Real}
+    (hF : SmoothSurface (I := I) F)
+    (hgeo : IsGeodesicVariationOn (I := I)
+      (LeviCivita.leviCivitaConnectionOfMetric (I := I) g) F S T)
+    (hS : S ∈ 𝓝 s0) (hTopen : IsOpen T) :
+    IsJacobiFieldOn (I := I)
+      (LeviCivita.leviCivitaConnectionOfMetric (I := I) g)
+      (LeviCivita.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+        (I := I) g)
+      (timeCurve F s0) (variationField I F s0) T := by
+  let cov := LeviCivita.leviCivitaConnectionOfMetric (I := I) g
+  have hcov :
+      CovariantDerivative.ContMDiffCovariantDerivativeLocally
+        (I := I) (E := E) (M := M) cov ∞ :=
+    LeviCivita.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      (I := I) g
+  have hcov1 :
+      CovariantDerivative.ContMDiffCovariantDerivativeLocally
+        (I := I) (E := E) (M := M) cov (1 : WithTop ℕ∞) :=
+    LeviCivita.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
+      (I := I) g
+  have htf : LeviCivita.IsTorsionFree (I := I) cov :=
+    LeviCivita.leviCivitaConnectionOfMetric_isTorsionFree (I := I) g
+  exact jacobi_of_smooth_geodesic_variation (I := I)
+    (cov := cov) (hcov := hcov) hcov1 htf hF hgeo hS hTopen
+
 /-!
-The tempting producer
-
-```
-SmoothSurface F →
-cov.torsion = 0 →
-IsGeodesicVariationOn cov F S T →
-∃ W, (∀ t ∈ T, VariationTorsionSwapAt cov F s0 t W) ∧
-  ∀ t ∈ T, VariationCurvCommAt cov hcov F s0 t W
-```
-
-is not true for the current representative-based pullback derivative.
-
-In flat `Real`, the variation `F (s,t) = s * t` has geodesic time-curves.
-At `s0 = 0`, the base curve is constant, while the variation field is
-`J(t) = t` in the same tangent fiber.  The present
-`HasPullbackCovariantDerivativeAlongCurveAt` requires a single ambient
-representative to realize `J` near a time, hence would force `J` to be locally
-constant along that constant base curve.
-
-The correct next producer must therefore either:
-
-* use a genuine pullback connection on arbitrary sections of `F^* TM`, or
-* assume explicit local ambient representatives/descent data and then apply
-  the checked `surfTime_rep`, `surfParam_rep`, `torsionSwap_rep`, and
-  `curvComm_rep` lemmas above.
+The smooth-surface producer above is the canonical route for Jacobi fields.
+The representative-level lemmas below are retained as compatibility tools for
+older arguments that already provide ambient section representatives.
 -/
 
 end GlobalGeometry

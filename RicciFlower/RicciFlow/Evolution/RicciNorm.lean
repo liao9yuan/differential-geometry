@@ -210,52 +210,162 @@ theorem ricciHeat_of_data
       h.timeDeriv
       h.laplacian
 
-/-- Canonical inverse-metric coefficients in the coordinate frame centered at
-`x0`, for the metric at time `t`. -/
-noncomputable def coordInv
-    {D : Realized.RealTimeInterval}
-    [SigmaCompactSpace M] [T2Space M]
-    (S : SolutionOn (I := I) (M := M) D)
-    (x0 : M) :
-    Real -> Realized.InverseMetricComponents M
-      (Coordinates.CoordinateIdx (𝕜 := Real) E) :=
-  fun t x i j =>
-    Coordinates.inverseMetricFlatModelInChart_component
-      (I := I) (S.family.metric t) x0 i j (extChartAt I x0 x)
+private theorem pair04_apply {x : M}
+    (Ric : Realized.Tensor02At (I := I) (M := M) x)
+    (v : Fin 4 -> TangentSpace I x) :
+    ricciPair04 (I := I) Ric v =
+      Ric (Realized.vec2 (I := I) (v 0) (v 2)) *
+        Ric (Realized.vec2 (I := I) (v 1) (v 3)) := by
+  unfold ricciPair04
+  rw [ContinuousMultilinearMap.domDomCongr_apply]
+  rw [Bundle.continuousMultilinearMap.product_fun_apply]
+  have hswap0 : (Equiv.swap (1 : Fin 4) (2 : Fin 4)) 0 = 0 := by decide
+  have hswap1 : (Equiv.swap (1 : Fin 4) (2 : Fin 4)) 1 = 2 := by decide
+  have hswap2 : (Equiv.swap (1 : Fin 4) (2 : Fin 4)) 2 = 1 := by decide
+  have hswap3 : (Equiv.swap (1 : Fin 4) (2 : Fin 4)) 3 = 3 := by decide
+  congr 2 <;> funext a <;> fin_cases a <;>
+    simp [hswap0, hswap1, hswap2, hswap3, Realized.vec2,
+      RicciFlower.Curvature.vec2]
 
-/-- The canonical coordinate inverse really is the inverse metric in the
-centered coordinate basis at the center point. -/
-theorem coordInvReal
-    {D : Realized.RealTimeInterval}
-    [SigmaCompactSpace M] [T2Space M]
-    (S : SolutionOn (I := I) (M := M) D)
-    (x0 : M) (t : Real) :
-    Tensor0SBundle.MetricInverseInBasis
-      (I := I) (M := M) (S.family.metric t) x0
-      (Coordinates.coordinateFrameAt_toBasis (I := I) x0)
-      (fun i j => coordInv (I := I) S x0 t x0 i j) := by
-  simpa [coordInv] using
-    Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
-      (I := I) (S.family.metric t) x0
+private def slot4ikjl {Idx : Type*} (i j k l : Idx) : Fin 4 -> Idx :=
+  fun a => if a = 0 then i else if a = 1 then k else if a = 2 then j else l
 
-/-- Canonical coordinate rough Laplacian components
-`g^{ab} (nabla_a nabla_b Ric)_ij` in the coordinate frame centered at `x0`,
-once the coordinate components of `nabla^2 Ric` have been produced. -/
-noncomputable def coordRoughRic
-    {D : Realized.RealTimeInterval}
-    [SigmaCompactSpace M] [T2Space M]
-    (S : SolutionOn (I := I) (M := M) D)
-    (x0 : M)
-    (nabla2Ric : Real -> M ->
-      Coordinates.CoordinateIdx (𝕜 := Real) E ->
-      Coordinates.CoordinateIdx (𝕜 := Real) E ->
-      Coordinates.CoordinateIdx (𝕜 := Real) E ->
-      Coordinates.CoordinateIdx (𝕜 := Real) E -> Real) :
-    Real -> M ->
-      Coordinates.CoordinateIdx (𝕜 := Real) E ->
-      Coordinates.CoordinateIdx (𝕜 := Real) E -> Real :=
-  roughLapRicInFrame
-    (M := M) (coordInv (I := I) S x0) nabla2Ric
+private def fin4ikjl {Idx : Type*} :
+    (Fin 4 -> Idx) ≃ (((Idx × Idx) × Idx) × Idx) where
+  toFun u := (((u 0, u 2), u 1), u 3)
+  invFun p := slot4ikjl p.1.1.1 p.1.1.2 p.1.2 p.2
+  left_inv u := by
+    funext a
+    fin_cases a <;> simp [slot4ikjl]
+  right_inv p := by
+    rcases p with ⟨⟨⟨i, j⟩, k⟩, l⟩
+    simp [slot4ikjl]
+
+private theorem sumFin4Slot {Idx α : Type*} [Fintype Idx] [AddCommMonoid α]
+    (F : (Fin 4 -> Idx) -> α) :
+    (∑ u : Fin 4 -> Idx, F u) =
+      ∑ i : Idx, ∑ j : Idx, ∑ k : Idx, ∑ l : Idx,
+        F (slot4ikjl i j k l) := by
+  rw [Fintype.sum_equiv (fin4ikjl (Idx := Idx)) F
+    (fun p : (((Idx × Idx) × Idx) × Idx) =>
+      F (slot4ikjl p.1.1.1 p.1.1.2 p.1.2 p.2))]
+  · repeat rw [Fintype.sum_prod_type]
+  · intro u
+    congr 1
+    exact ((fin4ikjl (Idx := Idx)).left_inv u).symm
+
+private theorem sumPairProd {Idx : Type*} [Fintype Idx]
+    (A B : Idx -> Idx -> Real) :
+    (∑ a : Idx, ∑ c : Idx, A a c) *
+        (∑ b : Idx, ∑ d : Idx, B b d) =
+      ∑ a : Idx, ∑ c : Idx, ∑ b : Idx, ∑ d : Idx, A a c * B b d := by
+  classical
+  rw [Finset.sum_mul]
+  refine Finset.sum_congr rfl fun a _ => ?_
+  rw [Finset.sum_mul]
+  refine Finset.sum_congr rfl fun c _ => ?_
+  rw [Finset.mul_sum]
+  refine Finset.sum_congr rfl fun b _ => ?_
+  rw [Finset.mul_sum]
+
+private theorem pairSum_eq
+    {Idx : Type*} [Fintype Idx] {x : M}
+    (gInv : Idx -> Idx -> Real)
+    (Ric : Realized.Tensor02At (I := I) (M := M) x)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (i j k l : Idx) :
+    (∑ u : Fin 4 -> Idx,
+      (∏ q : Fin 4, gInv (slot4ikjl i j k l q) (u q)) *
+        ricciPair04 (I := I) Ric (fun q : Fin 4 => basis (u q))) =
+      (∑ a : Idx, ∑ c : Idx,
+        gInv i a * gInv j c *
+          Ric (Realized.vec2 (I := I) (basis a) (basis c))) *
+      (∑ b : Idx, ∑ d : Idx,
+        gInv k b * gInv l d *
+          Ric (Realized.vec2 (I := I) (basis b) (basis d))) := by
+  classical
+  rw [sumFin4Slot]
+  trans
+      ∑ a : Idx, ∑ c : Idx, ∑ b : Idx, ∑ d : Idx,
+        (gInv i a * gInv j c *
+          Ric (Realized.vec2 (I := I) (basis a) (basis c))) *
+        (gInv k b * gInv l d *
+          Ric (Realized.vec2 (I := I) (basis b) (basis d)))
+  · refine Finset.sum_congr rfl fun a _ => ?_
+    refine Finset.sum_congr rfl fun c _ => ?_
+    refine Finset.sum_congr rfl fun b _ => ?_
+    refine Finset.sum_congr rfl fun d _ => ?_
+    simp [slot4ikjl, pair04_apply, Fin.prod_univ_four, Realized.vec2]
+    ring_nf
+  · exact (sumPairProd
+      (fun a c : Idx =>
+        gInv i a * gInv j c *
+          Ric (Realized.vec2 (I := I) (basis a) (basis c)))
+      (fun b d : Idx =>
+        gInv k b * gInv l d *
+          Ric (Realized.vec2 (I := I) (basis b) (basis d)))).symm
+
+private theorem coordPair4_eq
+    {Idx : Type*} [Fintype Idx] {x : M}
+    (gInv : Idx -> Idx -> Real)
+    (Ric : Realized.Tensor02At (I := I) (M := M) x)
+    (Rm04 : Realized.Tensor04At (I := I) (M := M) x)
+    (basis : Module.Basis Idx Real (TangentSpace I x)) :
+    coordInner0S (I := I) (x := x) 4 gInv Rm04
+        (ricciPair04 (I := I) Ric) basis =
+      ∑ i : Idx, ∑ j : Idx, ∑ k : Idx, ∑ l : Idx,
+        Rm04 (Realized.vec4 (I := I) (basis i) (basis k) (basis j) (basis l)) *
+          (∑ a : Idx, ∑ c : Idx,
+            gInv i a * gInv j c *
+              Ric (Realized.vec2 (I := I) (basis a) (basis c))) *
+          (∑ b : Idx, ∑ d : Idx,
+            gInv k b * gInv l d *
+              Ric (Realized.vec2 (I := I) (basis b) (basis d))) := by
+  classical
+  unfold coordInner0S tensor0SComponent
+  rw [sumFin4Slot]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  refine Finset.sum_congr rfl fun j _ => ?_
+  refine Finset.sum_congr rfl fun k _ => ?_
+  refine Finset.sum_congr rfl fun l _ => ?_
+  calc
+    (∑ u : Fin 4 -> Idx,
+        ((∏ q : Fin 4, gInv (slot4ikjl i j k l q) (u q)) *
+            Rm04 (fun q : Fin 4 => basis (slot4ikjl i j k l q))) *
+          ricciPair04 (I := I) Ric (fun q : Fin 4 => basis (u q)))
+        =
+        Rm04 (Realized.vec4 (I := I) (basis i) (basis k) (basis j) (basis l)) *
+          (∑ u : Fin 4 -> Idx,
+            (∏ q : Fin 4, gInv (slot4ikjl i j k l q) (u q)) *
+              ricciPair04 (I := I) Ric (fun q : Fin 4 => basis (u q))) := by
+          rw [Finset.mul_sum]
+          refine Finset.sum_congr rfl fun u _ => ?_
+          have hRm :
+              (fun q : Fin 4 => basis (slot4ikjl i j k l q)) =
+                Realized.vec4 (I := I) (basis i) (basis k) (basis j) (basis l) := by
+            funext q
+            fin_cases q <;> simp [slot4ikjl, Realized.vec4,
+              RicciFlower.Curvature.vec4]
+          rw [hRm]
+          ring
+    _ =
+        Rm04 (Realized.vec4 (I := I) (basis i) (basis k) (basis j) (basis l)) *
+          ((∑ a : Idx, ∑ c : Idx,
+              gInv i a * gInv j c *
+                Ric (Realized.vec2 (I := I) (basis a) (basis c))) *
+            (∑ b : Idx, ∑ d : Idx,
+              gInv k b * gInv l d *
+                Ric (Realized.vec2 (I := I) (basis b) (basis d)))) := by
+          rw [pairSum_eq (I := I) gInv Ric basis i j k l]
+    _ =
+        Rm04 (Realized.vec4 (I := I) (basis i) (basis k) (basis j) (basis l)) *
+          (∑ a : Idx, ∑ c : Idx,
+            gInv i a * gInv j c *
+              Ric (Realized.vec2 (I := I) (basis a) (basis c))) *
+          (∑ b : Idx, ∑ d : Idx,
+            gInv k b * gInv l d *
+              Ric (Realized.vec2 (I := I) (basis b) (basis d))) := by
+          ring
 
 /-- Produce intrinsic Ricci-norm heat data from an existing frame-level Ricci
 evolution and Bochner route, plus the frame-to-intrinsic identifications. -/
@@ -269,7 +379,7 @@ private def ricciDataOfFrame
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
-    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame)
+    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame Set.univ)
     (h_ricci : RicciEvolutionEquationInFrame
       (I := I) S Rm04 gInv frame roughLapRic)
     (hInvSym : forall t x i j, gInv t x i j = gInv t x j i)
@@ -326,50 +436,6 @@ private def ricciDataOfFrame
     exact (hlap t x).trans (by
       rw [hnabla t x])
 
-/-- Canonical coordinate-frame data still missing from the smooth-solution
-producer.
-
-The component functions are fixed by `SolutionOn`: inverse-metric coefficients
-are `coordInv`, the frame is `coordinateFrameAt`, `nablaRic` is the canonical
-`nablaRicComp`, and the rough Laplacian is the metric trace `coordRoughRic` of
-the produced `nabla2Ric` components.  The remaining fields are the genuine
-lower producers: inverse-metric evolution, Ricci evolution,
-Bochner/Laplacian realization, and symmetry bookkeeping. -/
-structure RicciCoordData
-    {D : Realized.RealTimeInterval}
-    [SigmaCompactSpace M] [T2Space M]
-    (S : SolutionOn (I := I) (M := M) D) where
-  nabla2Ric : forall _x0, Real -> M ->
-    Coordinates.CoordinateIdx (𝕜 := Real) E ->
-    Coordinates.CoordinateIdx (𝕜 := Real) E ->
-    Coordinates.CoordinateIdx (𝕜 := Real) E ->
-    Coordinates.CoordinateIdx (𝕜 := Real) E -> Real
-  invEvol : forall x0,
-    InverseMetricEvolutionEquationInFrame
-      (I := I) S (coordInv (I := I) S x0)
-      (Coordinates.coordinateFrameAt (I := I) x0)
-  ricciEvol : forall x0,
-    RicciEvolutionEquationInFrame
-      (I := I) S S.base.rm04 (coordInv (I := I) S x0)
-      (Coordinates.coordinateFrameAt (I := I) x0)
-      (coordRoughRic (I := I) S x0 (nabla2Ric x0))
-  invSymm : forall x0 t x i j,
-    coordInv (I := I) S x0 t x i j =
-      coordInv (I := I) S x0 t x j i
-  ricciSymm : forall x0 t x i j,
-    ricciCompInFrame (I := I) S
-        (Coordinates.coordinateFrameAt (I := I) x0) t x i j =
-      ricciCompInFrame (I := I) S
-        (Coordinates.coordinateFrameAt (I := I) x0) t x j i
-  lap : forall x0,
-    Realized.RicciNormScalarLaplacianExpansionInFrame
-      (I := I) (M := M) (Time := Real) (ricciNormLap (I := I) S)
-      (coordRoughRic (I := I) S x0 (nabla2Ric x0))
-      (ricciTwoTensorField (I := I) S)
-      (coordInv (I := I) S x0)
-      (Coordinates.coordinateFrameAt (I := I) x0)
-      (nablaRicComp (I := I) S (Coordinates.coordinateFrameAt (I := I) x0))
-
 /-- The coordinate-frame zero-order reaction at the center is the intrinsic
 reaction scalar.  This is not independent data: it is the coordinate expression
 of the intrinsic contraction defining `ricciReact`. -/
@@ -382,9 +448,23 @@ theorem coordReact
       (I := I) S S.base.rm04 (coordInv (I := I) S x0)
       (Coordinates.coordinateFrameAt (I := I) x0) t x0 =
       ricciReact (I := I) S t x0 := by
-  -- Routine finite-sum bridge from the `inner0S_eq_coord` expansion of
-  -- `ricciPair04` to `curvRicciRicciInFrame`.
-  sorry
+  classical
+  rw [ricciNormCurvatureReactionInFrame_apply, ricciReact]
+  congr 1
+  rw [inner0S_eq_coord
+    (I := I) (S.base.metric t) x0 4
+    (Coordinates.coordinateFrameAt_toBasis (I := I) x0)
+    (fun i j : Coordinates.CoordinateIdx (𝕜 := Real) E =>
+      coordInv (I := I) S x0 t x0 i j)
+    (coordInvReal (I := I) S x0 t)]
+  rw [coordPair4_eq]
+  unfold curvRicciRicciInFrame raisedRicciCompInFrame
+    Realized.raisedRicciComponentsInFrame ricciTwoTensorField Realized.rm04Comp
+  refine Finset.sum_congr rfl fun i _ => ?_
+  refine Finset.sum_congr rfl fun j _ => ?_
+  refine Finset.sum_congr rfl fun k _ => ?_
+  refine Finset.sum_congr rfl fun l _ => ?_
+  simp [Coordinates.coordinateFrameAt_toBasis_apply, Realized.vec2, Realized.vec4]
 
 /-- Produce intrinsic Ricci-norm heat data from pointwise coordinate-frame
 data.
@@ -396,24 +476,62 @@ def ricciDataAtCoord
     {D : Realized.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
-    (hcoord : RicciCoordData (I := I) S) :
+    (nabla2Ric : forall _x0, Real -> M ->
+      Coordinates.CoordinateIdx (𝕜 := Real) E ->
+      Coordinates.CoordinateIdx (𝕜 := Real) E ->
+      Coordinates.CoordinateIdx (𝕜 := Real) E ->
+      Coordinates.CoordinateIdx (𝕜 := Real) E -> Real)
+    (hInvEvol : forall x0,
+      InverseMetricEvolutionEquationInFrame
+        (I := I) S (coordInv (I := I) S x0)
+        (Coordinates.coordinateFrameAt (I := I) x0)
+        (Coordinates.coordinateFrameSet (I := I) x0))
+    (hRicciEvol : forall x0,
+      RicciEvolutionEquationInFrame
+        (I := I) S S.base.rm04 (coordInv (I := I) S x0)
+        (Coordinates.coordinateFrameAt (I := I) x0)
+        (coordRoughRic (I := I) S x0 (nabla2Ric x0)))
+    (hInvSymm : forall x0 t i j,
+      coordInv (I := I) S x0 t x0 i j =
+        coordInv (I := I) S x0 t x0 j i)
+    (hRicciSymm : forall x0 t i j,
+      ricciCompInFrame (I := I) S
+          (Coordinates.coordinateFrameAt (I := I) x0) t x0 i j =
+        ricciCompInFrame (I := I) S
+          (Coordinates.coordinateFrameAt (I := I) x0) t x0 j i)
+    (hLap : forall t x,
+      ricciNormLap (I := I) S t x =
+        2 *
+            roughLapRicciInnerInFrame
+              (I := I) S (coordRoughRic (I := I) S x (nabla2Ric x))
+              (coordInv (I := I) S x)
+              (Coordinates.coordinateFrameAt (I := I) x) t x +
+          2 * ricciGradSq (I := I) S t x) :
     RicciHeatData (I := I) S := by
   refine
     { roughLapInner := fun t x =>
         roughLapRicciInnerInFrame
-          (I := I) S (coordRoughRic (I := I) S x (hcoord.nabla2Ric x))
+          (I := I) S (coordRoughRic (I := I) S x (nabla2Ric x))
           (coordInv (I := I) S x)
           (Coordinates.coordinateFrameAt (I := I) x) t x
       timeDeriv := ?_
       laplacian := ?_ }
   · intro t x
     let frame := Coordinates.coordinateFrameAt (I := I) x
-    have hdt :=
-      ricciNormTimeDerivativeComponentsOn_of_ricciEvolution_canonical
+    have hbase :=
+      ricciNormSqInFrame_hasDerivWithinAt
         (I := I) S S.base.rm04 (coordInv (I := I) S x) frame
-        (coordRoughRic (I := I) S x (hcoord.nabla2Ric x))
-        (hcoord.invEvol x) (hcoord.ricciEvol x)
-        (hcoord.invSymm x) (hcoord.ricciSymm x)
+        (coordRoughRic (I := I) S x (nabla2Ric x))
+        (hInvEvol x) (hRicciEvol x) t x
+        (Coordinates.coordinateFrameAt_mem (I := I) x)
+    have hsimplify :=
+      ricciDerivSimpAt
+        (I := I) S S.base.rm04 (coordInv (I := I) S x) frame
+        (coordRoughRic (I := I) S x (nabla2Ric x)) t x
+        (fun i j => hInvSymm x (t : Real) i j)
+        (fun i j => hRicciSymm x (t : Real) i j)
+    have hframe0 :=
+      hbase.congr_deriv hsimplify
     have hnorm : forall s : Real,
         ricciNormSqInFrame (I := I) S (coordInv (I := I) S x) frame s x =
           ricciNorm (I := I) S s x := by
@@ -432,13 +550,13 @@ def ricciDataAtCoord
         (fun s : Real => ricciNorm (I := I) S s x)
         (2 *
             roughLapRicciInnerInFrame
-              (I := I) S (coordRoughRic (I := I) S x (hcoord.nabla2Ric x))
+              (I := I) S (coordRoughRic (I := I) S x (nabla2Ric x))
               (coordInv (I := I) S x)
               frame (t : Real) x +
           4 * ricciReact (I := I) S (t : Real) x)
         D.carrier (t : Real)
     have hframeDeriv :=
-      (hdt t x).congr_deriv (by
+      hframe0.congr_deriv (by
         rw [coordReact (I := I) S x (t : Real)])
     refine hframeDeriv.congr_of_eventuallyEq ?_ ?_
     filter_upwards with s
@@ -446,56 +564,38 @@ def ricciDataAtCoord
     exact (hnorm (t : Real)).symm
   · intro t x
     let frame := Coordinates.coordinateFrameAt (I := I) x
-    have hlap :=
-      ricciNormLaplacianComponentsOn_of_normSq_laplacian_expansion
-        (I := I) S (coordInv (I := I) S x) frame
-        (coordRoughRic (I := I) S x (hcoord.nabla2Ric x))
-        (ricciNormLap (I := I) S)
-        (nablaRicComp (I := I) S frame) (hcoord.lap x)
-    have hbasis :
-        forall i : Coordinates.CoordinateIdx (𝕜 := Real) E,
-          Coordinates.coordinateFrameAt_toBasis (I := I) x i = frame i x := by
-      intro i
-      simp [frame, Coordinates.coordinateFrameAt_toBasis_apply]
-    have hnabla :
-        nablaRicciNormSqInFrame (M := M) (nablaRicComp (I := I) S frame)
-            (coordInv (I := I) S x) t x =
-          ricciGradSq (I := I) S t x := by
-      exact
-        nablaRicciNorm_can (I := I) S (coordInv (I := I) S x) frame
-          (Coordinates.coordinateFrameAt_toBasis (I := I) x)
-          (coordInvReal (I := I) S x t)
-          hbasis
     change
       ricciNormLap (I := I) S t x =
         2 *
             roughLapRicciInnerInFrame
-              (I := I) S (coordRoughRic (I := I) S x (hcoord.nabla2Ric x))
+              (I := I) S (coordRoughRic (I := I) S x (nabla2Ric x))
               (coordInv (I := I) S x)
               frame t x +
           2 * ricciGradSq (I := I) S t x
-    exact (hlap t x).trans (by
-      rw [hnabla])
+    exact hLap t x
 
 /-- Smooth-solution producer for canonical Ricci-norm component data.
 
-This is the remaining lower-layer frontier.  It should be produced from the
-canonical Ricci evolution equation, inverse-metric variation, canonical
-`nabla Ric`, and the tensor norm-square Bochner/Laplacian realization. -/
+This theorem consumes the strengthened `IsSmoothSolutionOn` coordinate fields;
+the production of those fields belongs to `RicciFlow.Regularity`. -/
 def ricciHeatDataSmooth
     {D : Realized.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
-    (_hS : IsSmoothSolutionOn (I := I) (M := M) S) :
+    (hS : IsSmoothSolutionOn (I := I) (M := M) S) :
     RicciHeatData (I := I) S := by
-  have hcoord : RicciCoordData (I := I) S := by
-    sorry
-  exact ricciDataAtCoord (I := I) S hcoord
+  exact
+    ricciDataAtCoord (I := I) S (coordNab2Ric (I := I) S)
+      (fun x0 => hS.invEvol x0)
+      (fun x0 => hS.ricciEvol x0)
+      (fun x0 => hS.invSymm x0)
+      (fun x0 => hS.ricciSymm x0)
+      hS.ricciLap
 
 /-- Canonical Ricci-norm heat producer from a smooth Ricci-flow solution.
 
-This theorem is now a thin consumer of `ricciHeatDataSmooth`; the remaining
-frontier is the component-data producer, not this algebraic heat assembly. -/
+This theorem is a thin consumer of `ricciHeatDataSmooth`; the remaining work is
+to derive that data from the smooth metric and Ricci-flow equation. -/
 theorem ricciHeatSmooth
     {D : Realized.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]

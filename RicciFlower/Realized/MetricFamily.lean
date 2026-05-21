@@ -254,6 +254,27 @@ def Tensor0SFamilyContinuousOnSet
     TotalSpace.mk' (Tensor0SModel s Real E)
       (E := fun x : M => Tensor0SSpace s I x) q.2 (A q.1.1 q.2))
 
+/-- A real-time family of smooth covariant two-tensor fields.  Each fixed time
+is a bundled smooth section; time regularity is recorded by separate predicates
+such as `SmoothTwoTensorFamilyOnSet`. -/
+abbrev SmoothTwoTensorFamily : Type _ :=
+  Real -> Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+    (n := (∞ : WithTop ℕ∞)) 2
+
+/-- Regularity package for a real-time family of smooth two-tensor fields on a
+time set.  The fields are spatially smooth by type, have smooth fixed-vector
+time coefficients, and are jointly continuous as a tensor section over
+`K × M`. -/
+structure SmoothTwoTensorFamilyOnSet
+    (K : Set Real) (A : SmoothTwoTensorFamily (I := I) (M := M)) : Prop where
+  coeff :
+    ∀ (x : M) (X Y : TangentSpace I x),
+      ContDiffOn Real ⊤
+        (fun t : Real => A t x (fun i : Fin 2 => if i = 0 then X else Y)) K
+  tensor_cont :
+    Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2 K
+      (fun t x => A t x)
+
 namespace Tensor0SFamilyContinuousOnSet
 
 /-- Restrict a time-dependent tensor continuity statement to a smaller time set. -/
