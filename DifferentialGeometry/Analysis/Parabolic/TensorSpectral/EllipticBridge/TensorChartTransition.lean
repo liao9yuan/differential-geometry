@@ -444,9 +444,343 @@ theorem tensorChartComponentRaw_chartTransition_decomp
     exact tensorChartComponentRaw_eq_transitionCoeff_sum
       (E := E) (I := I) (M := M) g r s S γ α P₀ hx
 
+/-! ## Uniform op-norm bound on `transitionCoeff` over POU tsupport overlaps
+
+For closed Riemannian manifolds the chart-atlas partition of unity has finite
+nonempty support: there is a designated finite set `chartAtlasPOU_finset` of
+chart base points outside which the partition-of-unity weight vanishes
+identically. Each weight has compact closed support (`tsupport`) contained in
+the corresponding chart source.
+
+Restricting the smooth (hence continuous) function `transitionCoeff r s γ α P₀ Q`
+to the closed-in-`M` set
+`tsupport (POU γ) ∩ tsupport (POU α) ⊆ (chartAt H γ).source ∩ (chartAt H α).source`
+yields a continuous function on a compact set, hence bounded. The component
+multi-index pair `(P₀, Q)` ranges over the finite type `TensorCompIdx r s`
+squared, and `(γ, α)` ranges over the finite product
+`chartAtlasPOU_finset × chartAtlasPOU_finset` (for pairs outside this product
+the tsupport overlap is empty, so the bound is vacuous).
+
+Taking the maximum over all these finite parameter choices produces a single
+uniform constant `K ≥ 0` bounding `|transitionCoeff r s γ α P₀ Q b|` for every
+`(γ, α, P₀, Q, b)` with `b` in the POU tsupport overlap. -/
+
+section UniformBound
+
+/-! ### A `transitionCoeff` overlap region is compact and chart-subordinate -/
+
+/-- The intersection of two POU tsupports is a closed subset of the compact
+manifold `M`, hence compact. -/
+private lemma pouTsupport_inter_isCompact (γ α : M) :
+    IsCompact
+      (tsupport (fun x : M =>
+          ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
+        tsupport (fun x : M =>
+          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
+  (pouTsupport_isCompact (I := I) (M := M) γ).inter_right
+    (isClosed_tsupport _)
+
+/-- The POU tsupport at `γ` is contained in the chart source at `γ`. -/
+private lemma pouTsupport_subset_chartSource (γ : M) :
+    tsupport (fun x : M =>
+        ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
+      (chartAt H γ).source :=
+  DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M γ
+
+/-- The intersection of two POU tsupports is a subset of the chart-source
+intersection that is the natural smoothness domain of `transitionCoeff`. -/
+private lemma pouTsupport_inter_subset_chartSource_inter (γ α : M) :
+    tsupport (fun x : M =>
+        ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
+      tsupport (fun x : M =>
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
+      (chartAt H γ).source ∩ (chartAt H α).source := by
+  intro x hx
+  exact ⟨pouTsupport_subset_chartSource (I := I) (M := M) γ hx.1,
+    pouTsupport_subset_chartSource (I := I) (M := M) α hx.2⟩
+
+/-! ### Per-pair, per-`(P₀, Q)` bound from continuity on the compact overlap -/
+
+/-- For each pair `(γ, α)` of chart base points and each component-index pair
+`(P₀, Q)`, the absolute value of `transitionCoeff r s γ α P₀ Q` is bounded on
+the (compact) POU tsupport intersection. The bound is non-negative. -/
+private lemma exists_transitionCoeff_bound_on_pouTsupport_pair
+    (r s : ℕ) (γ α : M) (P₀ Q : TensorCompIdx (E := E) r s) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ b ∈ tsupport (fun x : M =>
+            ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
+          tsupport (fun x : M =>
+            ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x),
+        |transitionCoeff (E := E) (I := I) (M := M) r s γ α P₀ Q b| ≤ C := by
+  classical
+  -- Abbreviate the compact intersection.
+  set K : Set M := tsupport (fun x : M =>
+        ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
+      tsupport (fun x : M =>
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) with hK_def
+  -- Case split on whether `K` is empty.
+  by_cases hK_empty : K = ∅
+  · -- Empty case: any `C ≥ 0` works, take `C = 0`.
+    refine ⟨0, le_refl 0, ?_⟩
+    intro b hb
+    rw [hK_empty] at hb
+    exact absurd hb (Set.notMem_empty b)
+  · -- Non-empty case: extract max on the compact set.
+    have hK_ne : K.Nonempty := Set.nonempty_iff_ne_empty.mpr hK_empty
+    have hK_compact : IsCompact K :=
+      pouTsupport_inter_isCompact (I := I) (M := M) γ α
+    have hK_sub : K ⊆ (chartAt H γ).source ∩ (chartAt H α).source :=
+      pouTsupport_inter_subset_chartSource_inter (I := I) (M := M) γ α
+    -- `transitionCoeff r s γ α P₀ Q` is `ContinuousOn` on the chart-overlap.
+    have h_cont_overlap : ContinuousOn
+        (transitionCoeff (E := E) (I := I) (M := M) r s γ α P₀ Q)
+        ((chartAt H γ).source ∩ (chartAt H α).source) :=
+      (contMDiffOn_transitionCoeff (E := E) (I := I) (M := M)
+        r s γ α P₀ Q).continuousOn
+    -- Restrict to `K`.
+    have h_cont_K : ContinuousOn
+        (transitionCoeff (E := E) (I := I) (M := M) r s γ α P₀ Q) K :=
+      h_cont_overlap.mono hK_sub
+    -- Pass to `|·|`.
+    have h_abs_cont_K : ContinuousOn
+        (fun b => |transitionCoeff (E := E) (I := I) (M := M)
+          r s γ α P₀ Q b|) K :=
+      continuous_abs.comp_continuousOn h_cont_K
+    -- Extract the maximizer.
+    obtain ⟨b_max, _hb_max_mem, hb_max⟩ :=
+      hK_compact.exists_isMaxOn hK_ne h_abs_cont_K
+    set C₀ : ℝ := |transitionCoeff (E := E) (I := I) (M := M)
+      r s γ α P₀ Q b_max| with hC₀_def
+    have hC₀_nn : 0 ≤ C₀ := abs_nonneg _
+    refine ⟨C₀, hC₀_nn, ?_⟩
+    intro b hb
+    exact hb_max hb
+
+/-! ### Vanishing of `transitionCoeff` data outside `chartAtlasPOU_finset`
+
+When `γ ∉ chartAtlasPOU_finset`, the partition-of-unity weight at `γ` is
+identically zero, so its function support is empty and its tsupport (the
+closure of an empty set) is empty. The tsupport intersection with any other
+POU tsupport is then empty, so the bound predicate is vacuously satisfied. -/
+
+private lemma chartAtlasPOU_tsupport_eq_empty_of_notMem_finset
+    {γ : M} (hγ : γ ∉ chartAtlasPOU_finset (I := I) (M := M)) :
+    tsupport (fun x : M =>
+        ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) = ∅ := by
+  classical
+  -- The function support is empty, since the function is identically zero.
+  have h_supp_empty :
+      Function.support (fun x : M =>
+        ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) = ∅ := by
+    ext x
+    simp only [Function.mem_support, ne_eq, Set.mem_empty_iff_false, iff_false,
+      Decidable.not_not]
+    exact DifferentialGeometry.Integral.Measure.chartAtlasPOU_weight_zero_of_notMem
+      (I := I) (M := M) hγ x
+  -- The tsupport is the closure of the function support.
+  unfold tsupport
+  rw [h_supp_empty, closure_empty]
+
+private lemma pouTsupport_inter_eq_empty_of_left_notMem_finset
+    {γ : M} (hγ : γ ∉ chartAtlasPOU_finset (I := I) (M := M)) (α : M) :
+    tsupport (fun x : M =>
+        ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
+      tsupport (fun x : M =>
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) = ∅ := by
+  rw [chartAtlasPOU_tsupport_eq_empty_of_notMem_finset
+    (I := I) (M := M) hγ]
+  exact Set.empty_inter _
+
+private lemma pouTsupport_inter_eq_empty_of_right_notMem_finset
+    (γ : M) {α : M} (hα : α ∉ chartAtlasPOU_finset (I := I) (M := M)) :
+    tsupport (fun x : M =>
+        ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
+      tsupport (fun x : M =>
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) = ∅ := by
+  rw [chartAtlasPOU_tsupport_eq_empty_of_notMem_finset
+    (I := I) (M := M) hα]
+  exact Set.inter_empty _
+
+/-! ### Aggregation of the per-pair, per-`(P₀, Q)` bounds into a single
+constant by finset induction
+
+We package the bound as a plain existential: there exists a single `K : ℝ`
+simultaneously bounding the absolute value of `transitionCoeff` over the
+finite product of the quantified data, constructed inductively on the
+chart-atlas POU finset using the per-`(γ, α)` joint bound. -/
+
+/-- For a fixed pair `(γ, α)` and each component index `(P₀, Q)`, the per-pair
+bound is a finite quantification on the (compact, hence bounded) POU-tsupport
+intersection. Aggregating over the finite type `TensorCompIdx r s ×
+TensorCompIdx r s` (handled by `Finset.induction_on` on the universe finset)
+gives a single non-negative constant. -/
+private lemma exists_transitionCoeff_bound_on_pouTsupport_joint_PQ
+    (r s : ℕ) (γ α : M) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ P₀ Q : TensorCompIdx (E := E) r s,
+      ∀ b ∈ tsupport (fun x : M =>
+            ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
+          tsupport (fun x : M =>
+            ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x),
+        |transitionCoeff (E := E) (I := I) (M := M) r s γ α P₀ Q b| ≤ C := by
+  classical
+  -- Universal-over-`(P₀, Q)` form: induct on `Finset.univ`.
+  -- The auxiliary claim: for a finset `T : Finset (TensorCompIdx × TensorCompIdx)`,
+  -- there is a uniform `C` bounding all `(PQ ∈ T)` cases.
+  suffices h_aux :
+      ∀ T : Finset (TensorCompIdx (E := E) r s × TensorCompIdx (E := E) r s),
+        ∃ C : ℝ, 0 ≤ C ∧
+          ∀ PQ ∈ T,
+          ∀ b ∈ tsupport (fun x : M =>
+                ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
+              tsupport (fun x : M =>
+                ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x),
+            |transitionCoeff (E := E) (I := I) (M := M)
+              r s γ α PQ.1 PQ.2 b| ≤ C by
+    obtain ⟨C, hC_nn, hC_le⟩ := h_aux
+      (Finset.univ : Finset (TensorCompIdx (E := E) r s ×
+        TensorCompIdx (E := E) r s))
+    refine ⟨C, hC_nn, ?_⟩
+    intro P₀ Q b hb
+    exact hC_le (P₀, Q) (Finset.mem_univ _) b hb
+  -- Induction on `T`.
+  intro T
+  induction T using Finset.induction_on with
+  | empty =>
+    refine ⟨0, le_refl 0, ?_⟩
+    intro PQ hPQ
+    exact absurd hPQ (Finset.notMem_empty _)
+  | insert PQ T' _hPQ_notin ih =>
+    obtain ⟨C_T, hC_T_nn, hC_T_le⟩ := ih
+    obtain ⟨C_PQ, hC_PQ_nn, hC_PQ_le⟩ :=
+      exists_transitionCoeff_bound_on_pouTsupport_pair
+        (E := E) (I := I) (M := M) r s γ α PQ.1 PQ.2
+    refine ⟨max C_T C_PQ, le_max_of_le_left hC_T_nn, ?_⟩
+    intro QQ hQQ b hb
+    rcases Finset.mem_insert.mp hQQ with heq | hin
+    · -- `QQ = PQ`: use the new per-`(P₀, Q)` bound.
+      subst heq
+      exact le_trans (hC_PQ_le b hb) (le_max_right _ _)
+    · -- `QQ ∈ T'`: use the inductive hypothesis.
+      exact le_trans (hC_T_le QQ hin b hb) (le_max_left _ _)
+
+/-- Existential form: there is a single non-negative constant `K` bounding
+`|transitionCoeff r s γ α P₀ Q b|` simultaneously over all chart base points
+`γ, α : M`, all component multi-indices `P₀, Q`, and all `b` in the POU
+tsupport intersection at `(γ, α)`. Proved by induction on
+`chartAtlasPOU_finset × chartAtlasPOU_finset`. -/
+private lemma exists_transitionCoeff_uniform_bound_on_pouTsupport
+    (r s : ℕ) :
+    ∃ K : ℝ, 0 ≤ K ∧
+      ∀ γ α : M, ∀ P₀ Q : TensorCompIdx (E := E) r s, ∀ b : M,
+        b ∈ tsupport (fun x : M =>
+            ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
+          tsupport (fun x : M =>
+            ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
+        |transitionCoeff (E := E) (I := I) (M := M) r s γ α P₀ Q b| ≤ K := by
+  classical
+  -- Auxiliary: induction on a finset `S` of chart-base-point pairs.
+  suffices h_aux :
+      ∀ S : Finset (M × M),
+        ∃ K : ℝ, 0 ≤ K ∧
+          ∀ γα ∈ S,
+          ∀ P₀ Q : TensorCompIdx (E := E) r s, ∀ b : M,
+            b ∈ tsupport (fun x : M =>
+                ((chartAtlasPOU I M γα.1 : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
+              tsupport (fun x : M =>
+                ((chartAtlasPOU I M γα.2 : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
+            |transitionCoeff (E := E) (I := I) (M := M)
+              r s γα.1 γα.2 P₀ Q b| ≤ K by
+    -- Take `S := chartAtlasPOU_finset × chartAtlasPOU_finset`.
+    obtain ⟨K, hK_nn, hK_le⟩ := h_aux
+      (chartAtlasPOU_finset (I := I) (M := M) ×ˢ
+        chartAtlasPOU_finset (I := I) (M := M))
+    refine ⟨K, hK_nn, ?_⟩
+    intro γ α P₀ Q b hb
+    -- Case split on the membership of `(γ, α)` in the product.
+    by_cases hγ : γ ∈ chartAtlasPOU_finset (I := I) (M := M)
+    · by_cases hα : α ∈ chartAtlasPOU_finset (I := I) (M := M)
+      · -- Both in: apply `hK_le`.
+        have hmem : (γ, α) ∈
+            chartAtlasPOU_finset (I := I) (M := M) ×ˢ
+              chartAtlasPOU_finset (I := I) (M := M) :=
+          Finset.mem_product.mpr ⟨hγ, hα⟩
+        exact hK_le (γ, α) hmem P₀ Q b hb
+      · -- α not in: tsupport intersection is empty.
+        have h_empty := pouTsupport_inter_eq_empty_of_right_notMem_finset
+          (I := I) (M := M) γ hα
+        rw [h_empty] at hb
+        exact absurd hb (Set.notMem_empty b)
+    · -- γ not in: tsupport intersection is empty.
+      have h_empty := pouTsupport_inter_eq_empty_of_left_notMem_finset
+        (I := I) (M := M) hγ α
+      rw [h_empty] at hb
+      exact absurd hb (Set.notMem_empty b)
+  -- Induction on `S`.
+  intro S
+  induction S using Finset.induction_on with
+  | empty =>
+    refine ⟨0, le_refl 0, ?_⟩
+    intro γα hγα
+    exact absurd hγα (Finset.notMem_empty _)
+  | insert γα S' _hγα_notin ih =>
+    obtain ⟨K_S, hK_S_nn, hK_S_le⟩ := ih
+    obtain ⟨K_γα, hK_γα_nn, hK_γα_le⟩ :=
+      exists_transitionCoeff_bound_on_pouTsupport_joint_PQ
+        (E := E) (I := I) (M := M) r s γα.1 γα.2
+    refine ⟨max K_S K_γα, le_max_of_le_left hK_S_nn, ?_⟩
+    intro δβ hδβ P₀ Q b hb
+    rcases Finset.mem_insert.mp hδβ with heq | hin
+    · -- `δβ = γα`.
+      subst heq
+      exact le_trans (hK_γα_le P₀ Q b hb) (le_max_right _ _)
+    · -- `δβ ∈ S'`.
+      exact le_trans (hK_S_le δβ hin P₀ Q b hb) (le_max_left _ _)
+
+/-- **Uniform op-norm bound on `transitionCoeff` over chart overlaps,
+restricted to POU tsupport ranges.**
+
+For a closed Riemannian manifold modelled on a finite-dimensional real
+inner-product space, and fixed tensor ranks `(r, s)`, there exists a single
+non-negative real constant `K` such that for every pair of chart base points
+`γ, α : M`, every component multi-index pair `(P₀, Q) : TensorCompIdx r s ×
+TensorCompIdx r s`, and every point `b : M` lying in the intersection of the
+closed supports of the partition-of-unity weights `chartAtlasPOU γ` and
+`chartAtlasPOU α`, the absolute value of `transitionCoeff r s γ α P₀ Q b` is
+bounded by `K`.
+
+The constant `K` depends only on the manifold, the metric-induced bundle
+structure, and the ranks `(r, s)`. It does NOT depend on a chart-source
+consistency hypothesis on the atlas, and it is uniform over all the
+quantified data above.
+
+For pairs `(γ, α)` outside the (finite) `chartAtlasPOU_finset` the relevant
+POU tsupport intersection is empty (since the partition-of-unity weight at a
+chart base point outside that finite set is identically zero), so the bound
+is vacuously satisfied for those pairs; effectively the supremum is taken
+over the finite product `chartAtlasPOU_finset × chartAtlasPOU_finset`. -/
+theorem transitionCoeff_le_uniform_on_pouTsupport
+    (r s : ℕ) :
+    ∃ K : ℝ, 0 ≤ K ∧
+      ∀ γ α : M, ∀ P₀ Q : TensorCompIdx (E := E) r s, ∀ b : M,
+        b ∈ tsupport (fun x : M =>
+            ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
+          tsupport (fun x : M =>
+            ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
+        |transitionCoeff (E := E) (I := I) (M := M) r s γ α P₀ Q b| ≤ K :=
+  exists_transitionCoeff_uniform_bound_on_pouTsupport
+    (E := E) (I := I) (M := M) r s
+
+end UniformBound
+
 end TensorSpectral
 end Parabolic
 end Analysis
 end DifferentialGeometry
 
 end
+
+/-! ## Axiom audit -/
+
+#print axioms
+  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.transitionCoeff_le_uniform_on_pouTsupport
