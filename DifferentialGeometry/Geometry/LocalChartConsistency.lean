@@ -21,6 +21,8 @@ on uniform control of the bundle trivialisation across a base set.
 ## Main definitions
 
 * `HasLocallyConstantChartAt H M` — the predicate.
+* `HasChartSourceConsistentChartAt H M` — the stronger predicate: the
+  chart-selection function `chartAt H` is constant on each chart source.
 
 ## Main results
 
@@ -30,6 +32,9 @@ on uniform control of the bundle trivialisation across a base set.
   space `H`, viewed as a charted space over itself via `chartedSpaceSelf`,
   has locally constant chart selection (in fact, the chart is constant
   *globally*).
+* `hasChartSourceConsistentChartAt_self` — the model space `H`, viewed as a
+  charted space over itself via `chartedSpaceSelf`, has chart-source-
+  consistent chart selection.
 -/
 
 noncomputable section
@@ -80,6 +85,50 @@ theorem hasLocallyConstantChartAt_self
     HasLocallyConstantChartAt H H := by
   intro b₀
   filter_upwards with b
+  rfl
+
+/-- A `ChartedSpace H M` has chart-source-consistent chart selection if the
+canonical chart-selection function `chartAt H : M → OpenPartialHomeomorph M H`
+is constant on each chart source: for every `α : M` and every `b` in the
+source of `chartAt H α`, the chart at `b` coincides with the chart at `α`.
+
+This is strictly stronger than `HasLocallyConstantChartAt` (which only
+requires the chart to be locally constant near each point), and is typical of
+manifolds whose chart sources are connected (e.g. spheres, Lie groups,
+products of charted spaces, open submanifolds of the model space). -/
+def HasChartSourceConsistentChartAt
+    (H : Type*) [TopologicalSpace H]
+    (M : Type*) [TopologicalSpace M] [ChartedSpace H M] : Prop :=
+  ∀ α : M, ∀ b ∈ (chartAt H α).source, chartAt H b = chartAt H α
+
+namespace HasChartSourceConsistentChartAt
+
+variable {H : Type*} [TopologicalSpace H]
+  {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+
+/-- The chart-source-consistency predicate implies the locally-constant
+predicate at every point of the manifold: on any chart source, the chart is
+constant, and every point lies in its own chart source. -/
+theorem toHasLocallyConstantChartAt
+    (h : HasChartSourceConsistentChartAt H M) :
+    HasLocallyConstantChartAt H M := by
+  intro b₀
+  have hb₀_src : b₀ ∈ (chartAt H b₀).source := mem_chart_source H b₀
+  have hopen : IsOpen (chartAt H b₀).source := (chartAt H b₀).open_source
+  refine Filter.eventually_of_mem (hopen.mem_nhds hb₀_src) ?_
+  intro b hb
+  exact h b₀ b hb
+
+end HasChartSourceConsistentChartAt
+
+/-- The model space `H`, viewed as a charted space over itself via
+`chartedSpaceSelf`, has chart-source-consistent chart selection. In fact,
+the chart selection is globally constant: `chartAt H b = OpenPartialHomeomorph.refl H`
+for every `b : H`. -/
+theorem hasChartSourceConsistentChartAt_self
+    (H : Type*) [TopologicalSpace H] :
+    HasChartSourceConsistentChartAt H H := by
+  intro _ _ _
   rfl
 
 end Geometry

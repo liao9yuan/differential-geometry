@@ -103,7 +103,7 @@ noncomputable def chartFrameData
           (LeviCivita (I := I) g))
           (smoothOrthoFrame (I := I) g y i) T₀ y‖)
 
-private lemma chartFrameData_nonneg
+lemma chartFrameData_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : Π b : M, TensorRSSpace r s I b)
     (y : M) (i : Fin (Module.finrank ℝ E)) :
@@ -322,7 +322,7 @@ noncomputable def secondAppChartData
         (smoothOrthoFrame (I := I) g y i y)‖
       + ‖T₀ y‖)
 
-private lemma secondAppChartData_nonneg
+lemma secondAppChartData_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : Π b : M, TensorRSSpace r s I b)
     (y : M) (i : Fin (Module.finrank ℝ E)) :
