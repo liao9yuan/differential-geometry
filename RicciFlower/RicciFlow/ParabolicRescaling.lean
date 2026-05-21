@@ -302,6 +302,38 @@ theorem paraSol
   smoothMetric := metricFamilySmooth_para (I := I) S hS τ R hR hτ
   smoothConnection := connectionFamilySmooth_para (I := I) S hS τ R hR hτ
   equation := metricVariation_para (I := I) S hS τ R hR hτ
+  scalarCont := by
+    -- Frontier: preserve scalar-curvature spacetime regularity under the
+    -- canonical scalar scaling law for parabolic rescaling.
+    sorry
+  scalarTime := by
+    -- Frontier: preserve scalar-curvature time regularity under the
+    -- canonical scalar scaling law for parabolic rescaling.
+    sorry
+  ricciCont := by
+    -- Frontier: preserve canonical Ricci tensor-family continuity under
+    -- constant metric scaling and affine time pullback.
+    sorry
+  rm04Cont := by
+    -- Frontier: preserve canonical lowered Riemann tensor-family continuity
+    -- under constant metric scaling and affine time pullback.
+    sorry
+  nablaRicCont := by
+    -- Frontier: preserve canonical `nabla Ric` family continuity under
+    -- parabolic rescaling.
+    sorry
+  ricciNormSpace := by
+    -- Frontier: preserve fixed-time spatial differentiability of `|Ric|^2`
+    -- under the canonical Ricci and inverse-metric scaling laws.
+    sorry
+  ricciNormGrad := by
+    -- Frontier: preserve fixed-time gradient regularity of `|Ric|^2` under
+    -- the canonical Ricci and inverse-metric scaling laws.
+    sorry
+  scalarEvolution := by
+    -- Frontier: preserve scalar heat evolution under the canonical scalar and
+    -- Laplacian scaling laws for parabolic rescaling.
+    sorry
 
 theorem paraBack_para_metric
     (G : SolutionFamily (I := I) (M := M))

@@ -504,6 +504,57 @@ structure IsSolutionOn
   smoothMetric : Realized.MetricFamilySmoothOn (I := I) (M := M) D S.family
   smoothConnection : RicciFlower.Connection.ConnectionFamilySmoothOn (I := I) (M := M) S.family
   equation : MetricVariationEquationOn (I := I) S
+  /-- Spacetime continuity of scalar curvature supplied by the smooth
+  metric-family regularity in the short-time existence package. -/
+  scalarCont : ∀ p : Real × M,
+    ContinuousAt (fun q : Real × M => S.scalar q.1 q.2) p
+  /-- Within-time differentiability of scalar curvature on time sets contained
+  in the solution carrier, supplied by the smooth metric-family regularity in
+  the short-time existence package. -/
+  scalarTime :
+    ∀ {K : Set Real} {t : Real}, t ∈ K -> K ⊆ D.carrier -> ∀ x : M,
+      DifferentiableWithinAt Real (fun s : Real => S.scalar s x) K t
+  /-- Total-space continuity of the canonical Ricci tensor family. -/
+  ricciCont :
+    Realized.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2 D.carrier
+      (fun t x => S.ricci t x)
+  /-- Total-space continuity of the canonical lowered Riemann tensor family. -/
+  rm04Cont :
+    Realized.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 4 D.carrier
+      (fun t x => S.base.rm04 t x)
+  /-- Total-space continuity of the canonical `∇ Ric` family. -/
+  nablaRicCont :
+    Realized.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 3 D.carrier
+      (fun t x =>
+        totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+          2 (S.family.connection t) (S.ricci t) x)
+  /-- Fixed-time spatial differentiability of the canonical Ricci norm. -/
+  ricciNormSpace :
+    ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
+      MDifferentiableAt I 𝓘(Real, Real) (ricciNorm (I := I) S t) x
+  /-- Fixed-time smoothness of the canonical Ricci-norm gradient field. -/
+  ricciNormGrad :
+    ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
+      MDiffAt (T% fun y : M =>
+        Realized.gradientFun (I := I) (S.family.metric t)
+          (ricciNorm (I := I) S t) y) x
+  /-- Scalar curvature heat equation supplied by the smooth Ricci-flow
+  solution package. -/
+  scalarEvolution : ∀
+    (G : Realized.RealizedMetricFamily (I := I) (M := M) Real),
+      (∀ t : Realized.RealTimeInterval.RegularTime D,
+        G.metric (t : Real) = S.family.metric (t : Real)) ->
+      (∀ t : Realized.RealTimeInterval.RegularTime D,
+        G.connection (t : Real) = S.family.connection (t : Real)) ->
+      ∀ (t : Realized.RealTimeInterval.RegularTime D) (x : M),
+        HasDerivWithinAt
+          (fun s : Real => S.scalar s x)
+          (Realized.laplacianAt (I := I) G (t : Real)
+              (S.scalar (t : Real)) x +
+            2 * normSq0S (I := I) (S.family.metric (t : Real)) x 2
+              (S.ricci (t : Real) x))
+          D.carrier
+          (t : Real)
 
 namespace IsSolutionOn
 
@@ -743,6 +794,121 @@ theorem isSolutionOn_timeShift
     have hcomp := hOld.comp (x := (t : Real)) hshift hmaps
     simpa [MetricVariationEquationOn, SolutionOn.family, SolutionOn.timeShift,
       SolutionFamily.timeShift, RicciAtFamily.toTensorField, Function.comp_def] using hcomp
+  scalarCont := by
+    intro p
+    have hOld := hS.scalarCont (p.1 + τ, p.2)
+    have htime : ContinuousAt (fun q : Real × M => q.1 + τ) p :=
+      continuousAt_fst.add continuousAt_const
+    have hmap : ContinuousAt (fun q : Real × M => (q.1 + τ, q.2)) p :=
+      htime.prodMk continuousAt_snd
+    have hcomp :
+        ContinuousAt
+          (fun q : Real × M => S.scalar (q.1 + τ) q.2) p :=
+      ContinuousAt.comp
+        (x := p)
+        (f := fun q : Real × M => (q.1 + τ, q.2))
+        (g := fun q : Real × M => S.scalar q.1 q.2)
+        hOld hmap
+    simpa [Function.comp_def] using hcomp
+  scalarTime := by
+    intro K t ht hK x
+    let shift : Real -> Real := fun s => s + τ
+    have ht' : shift t ∈ shift '' K := ⟨t, ht, rfl⟩
+    have hK' : shift '' K ⊆ D.carrier := by
+      intro r hr
+      rcases hr with ⟨s, hs, rfl⟩
+      exact hK hs
+    have hOld := hS.scalarTime (K := shift '' K) (t := shift t) ht' hK' x
+    have hshift : DifferentiableWithinAt Real shift K t := by
+      simpa [shift] using
+        ((differentiableWithinAt_id' (𝕜 := Real) (s := K) (x := t)).add_const τ)
+    have hmaps : Set.MapsTo shift K (shift '' K) := by
+      intro s hs
+      exact ⟨s, hs, rfl⟩
+    have hcomp := hOld.comp t hshift hmaps
+    simpa [shift, Function.comp_def] using hcomp
+  ricciCont := by
+    have hmaps :
+        Set.MapsTo (fun s : Real => s + τ) (D.timeShift τ).carrier D.carrier := by
+      intro s hs
+      exact hs
+    have htime : Continuous (fun s : Real => s + τ) :=
+      continuous_id.add continuous_const
+    have hcont :=
+      Realized.Tensor0SFamilyContinuousOnSet.comp_time (I := I) (M := M)
+        hS.ricciCont htime hmaps
+    simpa [SolutionOn.ricci, SolutionOn.timeShift, SolutionFamily.timeShift] using hcont
+  rm04Cont := by
+    have hmaps :
+        Set.MapsTo (fun s : Real => s + τ) (D.timeShift τ).carrier D.carrier := by
+      intro s hs
+      exact hs
+    have htime : Continuous (fun s : Real => s + τ) :=
+      continuous_id.add continuous_const
+    have hcont :=
+      Realized.Tensor0SFamilyContinuousOnSet.comp_time (I := I) (M := M)
+        hS.rm04Cont htime hmaps
+    simpa [SolutionOn.timeShift, SolutionFamily.timeShift] using hcont
+  nablaRicCont := by
+    have hmaps :
+        Set.MapsTo (fun s : Real => s + τ) (D.timeShift τ).carrier D.carrier := by
+      intro s hs
+      exact hs
+    have htime : Continuous (fun s : Real => s + τ) :=
+      continuous_id.add continuous_const
+    have hcont :=
+      Realized.Tensor0SFamilyContinuousOnSet.comp_time (I := I) (M := M)
+        hS.nablaRicCont htime hmaps
+    simpa [SolutionOn.family, SolutionOn.ricci, SolutionOn.timeShift,
+      SolutionFamily.timeShift] using hcont
+  ricciNormSpace := by
+    intro t ht x
+    have h := hS.ricciNormSpace (t + τ) ht x
+    simpa [ricciNorm, SolutionOn.family, SolutionOn.ricci, SolutionOn.timeShift,
+      SolutionFamily.timeShift] using h
+  ricciNormGrad := by
+    intro t ht x
+    have h := hS.ricciNormGrad (t + τ) ht x
+    simpa [ricciNorm, SolutionOn.family, SolutionOn.ricci, SolutionOn.timeShift,
+      SolutionFamily.timeShift] using h
+  scalarEvolution := by
+    intro G hmetric hconnection t x
+    let G' : Realized.RealizedMetricFamily (I := I) (M := M) Real :=
+      { metric := fun r : Real => G.metric (r - τ)
+        connection := fun r : Real => G.connection (r - τ)
+        metricCompatible := fun r => by
+          simpa using G.metricCompatible (r - τ) }
+    have hmetric' : ∀ r : Realized.RealTimeInterval.RegularTime D,
+        G'.metric (r : Real) = S.family.metric (r : Real) := by
+      intro r
+      let rs : Realized.RealTimeInterval.RegularTime (D.timeShift τ) :=
+        ⟨(r : Real) - τ, by simpa [sub_add_cancel] using r.2⟩
+      have h := hmetric rs
+      simpa [G', rs, SolutionOn.family, SolutionOn.timeShift, SolutionFamily.timeShift,
+        sub_add_cancel] using h
+    have hconnection' : ∀ r : Realized.RealTimeInterval.RegularTime D,
+        G'.connection (r : Real) = S.family.connection (r : Real) := by
+      intro r
+      let rs : Realized.RealTimeInterval.RegularTime (D.timeShift τ) :=
+        ⟨(r : Real) - τ, by simpa [sub_add_cancel] using r.2⟩
+      have h := hconnection rs
+      simpa [G', rs, SolutionOn.family, SolutionOn.timeShift, SolutionFamily.timeShift,
+        SolutionFamily.connection, sub_add_cancel] using h
+    let t' : Realized.RealTimeInterval.RegularTime D := ⟨(t : Real) + τ, t.2⟩
+    have hOld := hS.scalarEvolution G' hmetric' hconnection' t' x
+    have hshift :
+        HasDerivWithinAt (fun s : Real => s + τ) 1
+          (D.timeShift τ).carrier (t : Real) := by
+      simpa using
+        ((hasDerivWithinAt_id (t : Real) (D.timeShift τ).carrier).add_const τ)
+    have hmaps :
+        Set.MapsTo (fun s : Real => s + τ) (D.timeShift τ).carrier D.carrier := by
+      intro s hs
+      exact hs
+    have hcomp := hOld.comp (x := (t : Real)) hshift hmaps
+    simpa [G', t', Realized.laplacianAt, SolutionOn.family, SolutionOn.ricci,
+      SolutionOn.timeShift, SolutionFamily.timeShift, SolutionFamily.connection,
+      Function.comp_def, sub_eq_add_neg, add_assoc] using hcomp
 
 /-- Convert the folder-level solution predicate to the older realized
 compatibility predicate. -/
@@ -2090,6 +2256,84 @@ theorem raisedRicciCompInFrame_hasDerivWithinAt
                   have hprod := (hia.mul hjb).mul hrab
                   simpa [Pi.mul_apply, mul_assoc, add_mul] using hprod))))
 
+/-- Pointwise product-rule derivative of the raised Ricci components.  This is
+the centered variant used with coordinate frames, where Lemma 6.3 is only
+available at the coordinate center. -/
+theorem raisedRicciDerivAt
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (Rm04 : Real -> Realized.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (roughLapRic : Real -> M -> Idx -> Idx -> Real)
+    {u : Set M}
+    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame u)
+    (t : Realized.RealTimeInterval.RegularTime D)
+    (x : M) (hx : x ∈ u)
+    (h_ricci : ∀ a b : Idx,
+      HasDerivWithinAt
+        (fun s : Real => ricciCompInFrame (I := I) S frame s x a b)
+        (ricciEvolutionRHSInFrame (I := I) S Rm04 gInv frame roughLapRic
+          (t : Real) x a b)
+        D.carrier
+        (t : Real))
+    (i j : Idx) :
+    HasDerivWithinAt
+      (fun s : Real => raisedRicciCompInFrame (I := I) S gInv frame s x i j)
+      (raisedRicciDerivRHSInFrame (I := I) S Rm04 gInv frame roughLapRic
+        (t : Real) x i j)
+      D.carrier
+      (t : Real) := by
+  simpa [raisedRicciCompInFrame, raisedRicciDerivRHSInFrame, Finset.sum_apply] using
+    (HasDerivWithinAt.fun_sum
+      (u := (Finset.univ : Finset Idx))
+      (A := fun a s =>
+        ∑ b : Idx,
+          gInv s x i a * gInv s x j b *
+            ricciCompInFrame (I := I) S frame s x a b)
+      (A' := fun a =>
+        ∑ b : Idx,
+          (inverseMetricEvolutionRHSInFrame (I := I) S gInv frame
+                (t : Real) x i a *
+              gInv (t : Real) x j b *
+                ricciCompInFrame (I := I) S frame (t : Real) x a b +
+            gInv (t : Real) x i a *
+              inverseMetricEvolutionRHSInFrame (I := I) S gInv frame
+                (t : Real) x j b *
+                ricciCompInFrame (I := I) S frame (t : Real) x a b +
+              gInv (t : Real) x i a * gInv (t : Real) x j b *
+                ricciEvolutionRHSInFrame
+                  (I := I) S Rm04 gInv frame roughLapRic (t : Real) x a b))
+      (s := D.carrier) (x := (t : Real))
+      (fun a _ha =>
+        by
+          simpa [Finset.sum_apply] using
+            (HasDerivWithinAt.fun_sum
+              (u := (Finset.univ : Finset Idx))
+              (A := fun b s =>
+                gInv s x i a * gInv s x j b *
+                  ricciCompInFrame (I := I) S frame s x a b)
+              (A' := fun b =>
+                (inverseMetricEvolutionRHSInFrame (I := I) S gInv frame
+                      (t : Real) x i a *
+                    gInv (t : Real) x j b *
+                      ricciCompInFrame (I := I) S frame (t : Real) x a b +
+                  gInv (t : Real) x i a *
+                    inverseMetricEvolutionRHSInFrame (I := I) S gInv frame
+                      (t : Real) x j b *
+                      ricciCompInFrame (I := I) S frame (t : Real) x a b +
+                    gInv (t : Real) x i a * gInv (t : Real) x j b *
+                      ricciEvolutionRHSInFrame
+                        (I := I) S Rm04 gInv frame roughLapRic (t : Real) x a b))
+              (s := D.carrier) (x := (t : Real))
+              (fun b _hb =>
+                by
+                  have hia := h_inv t x hx i a
+                  have hjb := h_inv t x hx j b
+                  have hrab := h_ricci a b
+                  have hprod := (hia.mul hjb).mul hrab
+                  simpa [Pi.mul_apply, mul_assoc, add_mul] using hprod))))
+
 /-- Product-rule derivative of the coordinate Ricci norm square. -/
 theorem ricciNormSqInFrame_hasDerivWithinAt
     {D : Realized.RealTimeInterval}
@@ -2147,6 +2391,75 @@ theorem ricciNormSqInFrame_hasDerivWithinAt
                   have hRaised :=
                     raisedRicciCompInFrame_hasDerivWithinAt
                       (I := I) S Rm04 gInv frame roughLapRic h_inv h_ricci t x hx i j
+                  have hprod := hRic.mul hRaised
+                  simpa [Pi.mul_apply] using hprod))))
+
+/-- Pointwise product-rule derivative of the coordinate Ricci norm square.
+This avoids requiring a global evolution equation for a local coordinate
+frame; only the component derivatives at the evaluation point are used. -/
+theorem ricciNormSqDerivAt
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (Rm04 : Real -> Realized.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (roughLapRic : Real -> M -> Idx -> Idx -> Real)
+    {u : Set M}
+    (h_inv : InverseMetricEvolutionEquationInFrame (I := I) S gInv frame u)
+    (t : Realized.RealTimeInterval.RegularTime D)
+    (x : M) (hx : x ∈ u)
+    (h_ricci : ∀ i j : Idx,
+      HasDerivWithinAt
+        (fun s : Real => ricciCompInFrame (I := I) S frame s x i j)
+        (ricciEvolutionRHSInFrame (I := I) S Rm04 gInv frame roughLapRic
+          (t : Real) x i j)
+        D.carrier
+        (t : Real)) :
+    HasDerivWithinAt
+      (fun s : Real => ricciNormSqInFrame (I := I) S gInv frame s x)
+      (ricciNormDerivRHSInFrame (I := I) S Rm04 gInv frame roughLapRic
+        (t : Real) x)
+      D.carrier
+      (t : Real) := by
+  simpa [ricciNormSqInFrame, ricciNormDerivRHSInFrame, Finset.sum_apply] using
+    (HasDerivWithinAt.fun_sum
+      (u := (Finset.univ : Finset Idx))
+      (A := fun i s =>
+        ∑ j : Idx,
+          ricciCompInFrame (I := I) S frame s x i j *
+            raisedRicciCompInFrame (I := I) S gInv frame s x i j)
+      (A' := fun i =>
+        ∑ j : Idx,
+          (ricciEvolutionRHSInFrame
+                (I := I) S Rm04 gInv frame roughLapRic (t : Real) x i j *
+              raisedRicciCompInFrame (I := I) S gInv frame (t : Real) x i j +
+            ricciCompInFrame (I := I) S frame (t : Real) x i j *
+              raisedRicciDerivRHSInFrame
+                (I := I) S Rm04 gInv frame roughLapRic (t : Real) x i j))
+      (s := D.carrier) (x := (t : Real))
+      (fun i _hi =>
+        by
+          simpa [Finset.sum_apply] using
+            (HasDerivWithinAt.fun_sum
+              (u := (Finset.univ : Finset Idx))
+              (A := fun j s =>
+                ricciCompInFrame (I := I) S frame s x i j *
+                  raisedRicciCompInFrame (I := I) S gInv frame s x i j)
+              (A' := fun j =>
+                (ricciEvolutionRHSInFrame
+                      (I := I) S Rm04 gInv frame roughLapRic (t : Real) x i j *
+                    raisedRicciCompInFrame (I := I) S gInv frame (t : Real) x i j +
+                  ricciCompInFrame (I := I) S frame (t : Real) x i j *
+                    raisedRicciDerivRHSInFrame
+                      (I := I) S Rm04 gInv frame roughLapRic (t : Real) x i j))
+              (s := D.carrier) (x := (t : Real))
+              (fun j _hj =>
+                by
+                  have hRic := h_ricci i j
+                  have hRaised :=
+                    raisedRicciDerivAt
+                      (I := I) S Rm04 gInv frame roughLapRic h_inv t x hx
+                      h_ricci i j
                   have hprod := hRic.mul hRaised
                   simpa [Pi.mul_apply] using hprod))))
 
@@ -2440,11 +2753,19 @@ structure IsSmoothSolutionOn
         (Coordinates.coordinateFrameAt (I := I) x0)
         (Coordinates.coordinateFrameSet (I := I) x0)
   ricciEvol :
-    ∀ x0 : M,
-      RicciEvolutionEquationInFrame
-        (I := I) S S.base.rm04 (coordInv (I := I) S x0)
-        (Coordinates.coordinateFrameAt (I := I) x0)
-        (coordRoughRic (I := I) S x0 (coordNab2Ric (I := I) S x0))
+    ∀ x0 : M, ∀ (t : Realized.RealTimeInterval.RegularTime D)
+      (i j : Coordinates.CoordinateIdx (𝕜 := Real) E),
+      HasDerivWithinAt
+        (fun s : Real =>
+          ricciCompInFrame (I := I) S
+            (Coordinates.coordinateFrameAt (I := I) x0) s x0 i j)
+        (ricciEvolutionRHSInFrame
+          (I := I) S S.base.rm04 (coordInv (I := I) S x0)
+          (Coordinates.coordinateFrameAt (I := I) x0)
+          (coordRoughRic (I := I) S x0 (coordNab2Ric (I := I) S x0))
+          (t : Real) x0 i j)
+        D.carrier
+        (t : Real)
   invSymm :
     ∀ x0 : M, ∀ t i j,
       coordInv (I := I) S x0 t x0 i j =

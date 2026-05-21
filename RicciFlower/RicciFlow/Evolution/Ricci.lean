@@ -173,6 +173,61 @@ def ConnectionLocallySmoothOn
     CovariantDerivative.ContMDiffCovariantDerivativeLocally
       (S.family.connection (t : Real)) (1 : WithTop ℕ∞)
 
+/-- Static Levi-Civita smoothness gives the connection smoothness needed at
+flow times. -/
+theorem connSmoothOfSol
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (_hS : IsSolutionOn (I := I) S) :
+    ∀ s : Real, s ∈ D.carrier ->
+      CovariantDerivative.ContMDiffCovariantDerivativeLocally
+        (S.family.connection s) (1 : WithTop ℕ∞) := by
+  intro s _hs
+  simpa [SolutionFamily.connection, metricCov] using
+    LeviCivita.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
+      (I := I) (M := M) (S.base.metric s)
+
+/-- Coordinate curvature realization produced from the canonical smooth
+Levi-Civita connection. -/
+theorem connCurvOfSol
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (_hS : IsSolutionOn (I := I) S)
+    (x₀ : M) :
+    ∀ s : Real, s ∈ D.carrier ->
+      Realized.ConnectionCurvatureCoordAt (I := I) (S.family.connection s) x₀ := by
+  intro s hs
+  have htop :
+      CovariantDerivative.ContMDiffCovariantDerivativeLocally
+        (I := I) (E := E) (M := M) (S.family.connection s) ∞ := by
+    simpa [SolutionFamily.connection, metricCov] using
+      metricCov_smooth (I := I) (M := M) (S.base.metric s)
+  exact Realized.connection_curvature_coord_of_christoffel
+    (I := I) (S.family.connection s) htop x₀
+
+/-- Canonical `(1,3)` Riemann realization for the solution family. -/
+theorem rm13OfSol
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) :
+    ∀ s : Real, s ∈ D.carrier ->
+      Realized.Rm13RealizesConnection (I := I)
+        (S.family.connection s) (S.base.rm13 s) := by
+  intro s _hs
+  simpa [SolutionFamily.connection,
+    SolutionFamily.rm13, metricCov] using
+      (metricCurvData (I := I) (M := M) (S.base.metric s)).h_rm13
+
+/-- Canonical Ricci trace realization for the solution family. -/
+theorem ricciTraceOfSol
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) :
+    ∀ s : Real, s ∈ D.carrier ->
+      Realized.RicciTensorRealizesRm13Trace (I := I)
+        (S.ricci s) (S.base.rm13 s) := by
+  intro s _hs
+  simpa [SolutionOn.ricci_eq, SolutionFamily.ricci, SolutionFamily.rm13] using
+    (metricCurvData (I := I) (M := M) (S.base.metric s)).h_ricci13
+
 /-- Ricci symmetry in a fixed frame, only at regular flow times. -/
 def RicciSymmetricInFrameOnRegular
     {D : Realized.RealTimeInterval}
@@ -1367,7 +1422,7 @@ private theorem christoffelCoordDerivAt_hasDerivWithinAt_of_christoffelVariation
       Real -> M -> CoordinateIdx (𝕜 := Real) E -> CoordinateIdx (𝕜 := Real) E ->
         CoordinateIdx (𝕜 := Real) E -> Real)
     (x₀ : M)
-    (hmix : ChristoffelVariationMixedDerivativeInFrameOn (I := I) S
+    (hmix : ChristoffelVariationMixedDerivativeInFrameOnRegular (I := I) S
       (coordinateFrameAt (I := I) x₀)
       (coordinateFrameAt_isLocalFrame_one (I := I) x₀) rhs)
     (t : Realized.RealTimeInterval.RegularTime D)
@@ -1383,8 +1438,9 @@ private theorem christoffelCoordDerivAt_hasDerivWithinAt_of_christoffelVariation
   have hx₀ : x₀ ∈ coordinateFrameSet (I := I) x₀ :=
     coordinateFrameAt_mem (I := I) x₀
   simpa [Realized.christoffelCoordDerivAt, Realized.christoffelCoordFun] using
-    fixedBaseExtDerivTimeDerivativeOn_apply (I := I) (h := hmix i j k)
-      (x := x₀) hx₀ (coordinateFrameAt (I := I) x₀ dir x₀)
+    fixedBaseExtDerivTimeDerivativeOnRegular_apply (I := I) (h := hmix i j k)
+      (t := (t : Real)) t.2 (x := x₀) hx₀
+      (coordinateFrameAt (I := I) x₀ dir x₀)
 
 /-- Time derivative of a coordinate Christoffel coefficient from a supplied
 Christoffel variation formula. -/
@@ -1426,7 +1482,7 @@ theorem christoffelCurvCoeffAt_hasDerivWithinAt_of_christoffelVariation
     (hvar : ChristoffelVariationEquationInFrameOn (I := I) S
       (coordinateFrameAt (I := I) x₀)
       (coordinateFrameAt_isLocalFrame_one (I := I) x₀) rhs)
-    (hmix : ChristoffelVariationMixedDerivativeInFrameOn (I := I) S
+    (hmix : ChristoffelVariationMixedDerivativeInFrameOnRegular (I := I) S
       (coordinateFrameAt (I := I) x₀)
       (coordinateFrameAt_isLocalFrame_one (I := I) x₀) rhs)
     (t : Realized.RealTimeInterval.RegularTime D)
@@ -1562,7 +1618,7 @@ theorem christoffelRicciCoeffAt_hasDerivWithinAt_of_christoffelVariation
     (hvar : ChristoffelVariationEquationInFrameOn (I := I) S
       (coordinateFrameAt (I := I) x₀)
       (coordinateFrameAt_isLocalFrame_one (I := I) x₀) rhs)
-    (hmix : ChristoffelVariationMixedDerivativeInFrameOn (I := I) S
+    (hmix : ChristoffelVariationMixedDerivativeInFrameOnRegular (I := I) S
       (coordinateFrameAt (I := I) x₀)
       (coordinateFrameAt_isLocalFrame_one (I := I) x₀) rhs)
     (t : Realized.RealTimeInterval.RegularTime D)
@@ -1610,19 +1666,19 @@ theorem ricciVariationFormulaInCoordFrameAt_of_christoffelVariation
         CoordinateIdx (𝕜 := Real) E -> Real)
     (Rm13 : Real -> Realized.Tensor13Section (I := I) (M := M))
     (x₀ : M)
-    (hRicTrace : ∀ s : Real,
+    (hRicTrace : ∀ s : Real, s ∈ D.carrier ->
       Realized.RicciTensorRealizesRm13Trace (I := I) (S.ricci s) (Rm13 s))
-    (hRm : ∀ s : Real,
+    (hRm : ∀ s : Real, s ∈ D.carrier ->
       Realized.Rm13RealizesConnection (I := I) (S.family.connection s) (Rm13 s))
-    (hcov : ∀ s : Real,
+    (hcov : ∀ s : Real, s ∈ D.carrier ->
       CovariantDerivative.ContMDiffCovariantDerivativeLocally
         (S.family.connection s) (1 : WithTop ℕ∞))
-    (hcurv : ∀ s : Real,
+    (hcurv : ∀ s : Real, s ∈ D.carrier ->
       Realized.ConnectionCurvatureCoordAt (I := I) (S.family.connection s) x₀)
     (hvar : ChristoffelVariationEquationInFrameOn (I := I) S
       (coordinateFrameAt (I := I) x₀)
       (coordinateFrameAt_isLocalFrame_one (I := I) x₀) rhs)
-    (hmix : ChristoffelVariationMixedDerivativeInFrameOn (I := I) S
+    (hmix : ChristoffelVariationMixedDerivativeInFrameOnRegular (I := I) S
       (coordinateFrameAt (I := I) x₀)
       (coordinateFrameAt_isLocalFrame_one (I := I) x₀) rhs) :
     RicciVariationFormulaInFrameOnLocal (I := I) S
@@ -1638,22 +1694,22 @@ theorem ricciVariationFormulaInCoordFrameAt_of_christoffelVariation
     christoffelRicciCoeffAt_hasDerivWithinAt_of_christoffelVariation
       (I := I) S hS rhs x₀ hvar hmix t i j
   have hricci :
-      ∀ s : Real,
+      ∀ s : Real, s ∈ D.carrier ->
         ricciCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) s x₀ i j =
           Realized.christoffelRicciCoeffAt (I := I) (S.family.connection s) x₀ i j := by
-    intro s
+    intro s hs
     unfold ricciCompInFrame
     change (S.ricci s x₀)
         (Realized.vec2 (coordinateFrameAt (I := I) x₀ i x₀)
           (coordinateFrameAt (I := I) x₀ j x₀)) =
         Realized.christoffelRicciCoeffAt (I := I) (S.family.connection s) x₀ i j
-    rw [hRicTrace s x₀]
+    rw [hRicTrace s hs x₀]
     exact Realized.ricciFromRm13At_coordFrame_eq_christoffelRicciCoeffAt
-      (I := I) (S.family.connection s) (hcov s) (Rm13 s) x₀
-      (hRm s) (hcurv s) i j
+      (I := I) (S.family.connection s) (hcov s hs) (Rm13 s) x₀
+      (hRm s hs) (hcurv s hs) i j
   exact hderiv.congr
-    (fun s _hs => hricci s)
-    (hricci (t : Real))
+    (fun s hs => hricci s hs)
+    (hricci (t : Real) (D.regular_subset t.2))
 
 /-- Covariantly differentiating the Ricci-flow Christoffel variation and using
 `nabla g^{-1} = 0` turns the actual Christoffel-variation tensor into the
@@ -1929,17 +1985,17 @@ theorem ricciVariationFormulaInCoordFrameAt_of_christoffelEvolution_nabla2
         (I := I) S (coordinateFrameAt (I := I) x₀)
         (coordinateFrameSet (I := I) x₀)
         (coordinateFrameAt_isLocalFrame_one (I := I) x₀) nablaRic nabla2Ric)
-    (hRicTrace : ∀ s : Real,
+    (hRicTrace : ∀ s : Real, s ∈ D.carrier ->
       Realized.RicciTensorRealizesRm13Trace (I := I) (S.ricci s) (Rm13 s))
-    (hRm : ∀ s : Real,
+    (hRm : ∀ s : Real, s ∈ D.carrier ->
       Realized.Rm13RealizesConnection (I := I) (S.family.connection s) (Rm13 s))
-    (hcov : ∀ s : Real,
+    (hcov : ∀ s : Real, s ∈ D.carrier ->
       CovariantDerivative.ContMDiffCovariantDerivativeLocally
         (S.family.connection s) (1 : WithTop ℕ∞))
-    (hcurv : ∀ s : Real,
+    (hcurv : ∀ s : Real, s ∈ D.carrier ->
       Realized.ConnectionCurvatureCoordAt (I := I) (S.family.connection s) x₀)
     (hmix :
-      ChristoffelVariationMixedDerivativeInFrameOn (I := I) S
+      ChristoffelVariationMixedDerivativeInFrameOnRegular (I := I) S
         (coordinateFrameAt (I := I) x₀)
         (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
         (christoffelEvolutionRHSInFrame (M := M) gInv nablaRic)) :
@@ -3494,17 +3550,17 @@ theorem ricciEvolutionEquationInCoordFrameAt_of_christoffelEvolution_nabla2_comm
         (I := I) S (coordinateFrameAt (I := I) x₀)
         (coordinateFrameSet (I := I) x₀)
         (coordinateFrameAt_isLocalFrame_one (I := I) x₀) nablaRic nabla2Ric)
-    (hRicTrace : ∀ s : Real,
+    (hRicTrace : ∀ s : Real, s ∈ D.carrier ->
       Realized.RicciTensorRealizesRm13Trace (I := I) (S.ricci s) (Rm13 s))
-    (hRm : ∀ s : Real,
+    (hRm : ∀ s : Real, s ∈ D.carrier ->
       Realized.Rm13RealizesConnection (I := I) (S.family.connection s) (Rm13 s))
-    (hcov : ∀ s : Real,
+    (hcov : ∀ s : Real, s ∈ D.carrier ->
       CovariantDerivative.ContMDiffCovariantDerivativeLocally
         (S.family.connection s) (1 : WithTop ℕ∞))
-    (hcurv : ∀ s : Real,
+    (hcurv : ∀ s : Real, s ∈ D.carrier ->
       Realized.ConnectionCurvatureCoordAt (I := I) (S.family.connection s) x₀)
     (hmix :
-      ChristoffelVariationMixedDerivativeInFrameOn (I := I) S
+      ChristoffelVariationMixedDerivativeInFrameOnRegular (I := I) S
         (coordinateFrameAt (I := I) x₀)
         (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
         (christoffelEvolutionRHSInFrame (M := M) gInv nablaRic))
@@ -3550,17 +3606,17 @@ theorem evol_ricci_coordFrameAt_of_christoffelEvolution_nabla2_commutators
         (I := I) S (coordinateFrameAt (I := I) x₀)
         (coordinateFrameSet (I := I) x₀)
         (coordinateFrameAt_isLocalFrame_one (I := I) x₀) nablaRic nabla2Ric)
-    (hRicTrace : ∀ s : Real,
+    (hRicTrace : ∀ s : Real, s ∈ D.carrier ->
       Realized.RicciTensorRealizesRm13Trace (I := I) (S.ricci s) (Rm13 s))
-    (hRm : ∀ s : Real,
+    (hRm : ∀ s : Real, s ∈ D.carrier ->
       Realized.Rm13RealizesConnection (I := I) (S.family.connection s) (Rm13 s))
-    (hcov : ∀ s : Real,
+    (hcov : ∀ s : Real, s ∈ D.carrier ->
       CovariantDerivative.ContMDiffCovariantDerivativeLocally
         (S.family.connection s) (1 : WithTop ℕ∞))
-    (hcurv : ∀ s : Real,
+    (hcurv : ∀ s : Real, s ∈ D.carrier ->
       Realized.ConnectionCurvatureCoordAt (I := I) (S.family.connection s) x₀)
     (hmix :
-      ChristoffelVariationMixedDerivativeInFrameOn (I := I) S
+      ChristoffelVariationMixedDerivativeInFrameOnRegular (I := I) S
         (coordinateFrameAt (I := I) x₀)
         (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
         (christoffelEvolutionRHSInFrame (M := M) gInv nablaRic))
@@ -3584,6 +3640,35 @@ theorem evol_ricci_coordFrameAt_of_christoffelEvolution_nabla2_commutators
       hnablaReg hRicTrace hRm hcov hcurv hmix hcomm
   have hAt := h t x₀ (by simp) i j
   simpa [ricciEvolutionRHSInFrame] using hAt
+
+/-- Canonical centered coordinate Ricci evolution produced from a Ricci-flow
+solution.
+
+This is the theorem-level producer consumed by `RicciFlow.Regularity`.  The
+remaining proof frontier is to derive the centered Christoffel mixed derivative
+and contracted commutator inputs from the canonical metric/Ricci data, then
+apply `evol_ricci_coordFrameAt_of_christoffelEvolution_nabla2_commutators`. -/
+theorem coordRicciEvol
+    [IsManifold I (∞ + 1) M]
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (x₀ : M)
+    (t : Realized.RealTimeInterval.RegularTime D)
+    (i j : CoordinateIdx (𝕜 := Real) E) :
+    HasDerivWithinAt
+      (fun s : Real =>
+        ricciCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) s x₀ i j)
+      (ricciEvolutionRHSInFrame
+        (I := I) S S.base.rm04 (coordInv (I := I) S x₀)
+        (coordinateFrameAt (I := I) x₀)
+        (coordRoughRic (I := I) S x₀ (coordNab2Ric (I := I) S x₀))
+        (t : Real) x₀ i j)
+      D.carrier
+      (t : Real) := by
+  -- Frontier: assemble canonical centered Lemma 6.3 from `coordGammaMix`,
+  -- canonical `nabla² Ric`, curvature realization, and contracted commutators.
+  sorry
 
 end CoordinateFrameRicciEvolution
 
@@ -4174,17 +4259,17 @@ theorem evol_ricci_lichnerowicz_coordFrameAt_of_christoffelEvolution_nabla2_comm
         (I := I) S (coordinateFrameAt (I := I) x₀)
         (coordinateFrameSet (I := I) x₀)
         (coordinateFrameAt_isLocalFrame_one (I := I) x₀) nablaRic nabla2Ric)
-    (hRicTrace : ∀ s : Real,
+    (hRicTrace : ∀ s : Real, s ∈ D.carrier ->
       Realized.RicciTensorRealizesRm13Trace (I := I) (S.ricci s) (Rm13 s))
-    (hRm : ∀ s : Real,
+    (hRm : ∀ s : Real, s ∈ D.carrier ->
       Realized.Rm13RealizesConnection (I := I) (S.family.connection s) (Rm13 s))
-    (hcov : ∀ s : Real,
+    (hcov : ∀ s : Real, s ∈ D.carrier ->
       CovariantDerivative.ContMDiffCovariantDerivativeLocally
         (S.family.connection s) (1 : WithTop ℕ∞))
-    (hcurv : ∀ s : Real,
+    (hcurv : ∀ s : Real, s ∈ D.carrier ->
       Realized.ConnectionCurvatureCoordAt (I := I) (S.family.connection s) x₀)
     (hmix :
-      ChristoffelVariationMixedDerivativeInFrameOn (I := I) S
+      ChristoffelVariationMixedDerivativeInFrameOnRegular (I := I) S
         (coordinateFrameAt (I := I) x₀)
         (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
         (christoffelEvolutionRHSInFrame (M := M) gInv nablaRic))

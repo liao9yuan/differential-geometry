@@ -670,9 +670,7 @@ theorem variableMetricConnectionDiffDerivative_of_metricCovDeriv
       MetricCovDerivDerivativeComponentsInFrameOnLocal
         (I := I) S frame u metricCovDerivDt)
     (hmetricRicci :
-      MetricCovDerivDerivativeIsRicciFlowInFrame metricCovDerivDt nablaRic)
-    (_hunique : forall t : Realized.RealTimeInterval.RegularTime D,
-      UniqueDiffWithinAt Real D.carrier (t : Real)) :
+      MetricCovDerivDerivativeIsRicciFlowInFrame metricCovDerivDt nablaRic) :
     VariableMetricConnectionDiffDerivativeInFrameOnLocal
       (I := I) S frame u (christoffelVariationLoweredRHSInFrame nablaRic) := by
   intro t x hx i j l
@@ -1386,7 +1384,7 @@ theorem christoffelEvolution_of_metricFrameTimeRegularity
         (I := I) S frame u (christoffelVariationLoweredRHSInFrame nablaRic) :=
     variableMetricConnectionDiffDerivative_of_metricCovDeriv
       (I := I) S hS frame hframe hu metricCovDerivDt nablaRic
-      hmetric hmetricRicci hmetricFrame.uniqueTimeDerivatives
+      hmetric hmetricRicci
   have hRhs :
       HasDerivWithinAt rhs target D.carrier (t : Real) := by
     dsimp [rhs, target]
@@ -1420,6 +1418,96 @@ theorem christoffelEvolution_of_metricFrameTimeRegularity
         (t : Real) s hx i j k
     · exact christoffelSymbol_sub_eq_sum_inv_connectionDiff
         (I := I) S gInv frame hframe hmetricFrame.nondegenerateGram
+        (t : Real) (t : Real) hx i j k
+  have hGammaPlus :
+      HasDerivWithinAt
+        (fun s : Real => (gamma s - gamma0) + gamma0)
+        target
+        D.carrier
+        (t : Real) := by
+    simpa using hSub.add_const gamma0
+  have hGamma :
+      HasDerivWithinAt gamma target D.carrier (t : Real) := by
+    refine hGammaPlus.congr ?_ ?_
+    · intro s _hs
+      ring
+    · ring
+  simpa [gamma, target, christoffelEvolutionRHSInFrame] using hGamma
+
+/-- Lemma 6.2 from inverse-metric evolution and fixed-base metric variation.
+
+This theorem-level producer avoids the legacy metric-frame package: the inverse
+metric derivative is supplied by the actual inverse evolution equation, and the
+metric covariant-derivative variation is supplied separately. -/
+theorem gammaEvolOfInv
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (hu : IsOpen u)
+    (metricCovDerivDt nablaRic :
+      Real -> M -> Idx -> Idx -> Idx -> Real)
+    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
+    (hinvEvol : InverseMetricEvolutionEquationInFrame
+      (I := I) S gInv frame u)
+    (hmetric :
+      MetricCovDerivDerivativeComponentsInFrameOnLocal
+        (I := I) S frame u metricCovDerivDt)
+    (hmetricRicci :
+      MetricCovDerivDerivativeIsRicciFlowInFrame metricCovDerivDt nablaRic) :
+    ChristoffelEvolutionEquationInFrameOn
+      (I := I) S gInv frame hframe nablaRic := by
+  intro t x hx i j k
+  let gamma : Real -> Real := fun s =>
+    RicciFlower.Coordinates.christoffelSymbolInFrame
+      (S.family.connection s) frame hframe x i j k
+  let gamma0 : Real := gamma (t : Real)
+  let rhs : Real -> Real := fun s =>
+    ∑ l : Idx, gInv s x k l *
+      connectionDiffLoweredInFrame (I := I) S frame s (t : Real) s x i j l
+  let target : Real :=
+    ∑ l : Idx, gInv (t : Real) x k l *
+      christoffelVariationLoweredRHSInFrame nablaRic (t : Real) x i j l
+  have hDiff :
+      VariableMetricConnectionDiffDerivativeInFrameOnLocal
+        (I := I) S frame u (christoffelVariationLoweredRHSInFrame nablaRic) :=
+    variableMetricConnectionDiffDerivative_of_metricCovDeriv
+      (I := I) S hS frame hframe hu metricCovDerivDt nablaRic
+      hmetric hmetricRicci
+  have hRhs :
+      HasDerivWithinAt rhs target D.carrier (t : Real) := by
+    dsimp [rhs, target]
+    simpa [Finset.sum_apply] using
+      (HasDerivWithinAt.fun_sum
+        (u := (Finset.univ : Finset Idx))
+        (A := fun l s =>
+          gInv s x k l *
+            connectionDiffLoweredInFrame (I := I) S frame s (t : Real) s x i j l)
+        (A' := fun l =>
+          gInv (t : Real) x k l *
+            christoffelVariationLoweredRHSInFrame nablaRic (t : Real) x i j l)
+        (s := D.carrier) (x := (t : Real))
+        (fun l _hl =>
+          by
+            have hprod :=
+              (hinvEvol t x hx k l).mul (hDiff t x hx i j l)
+            refine hprod.congr_deriv ?_
+            simp))
+  have hSub :
+      HasDerivWithinAt
+        (fun s : Real => gamma s - gamma0)
+        target
+        D.carrier
+        (t : Real) := by
+    refine hRhs.congr ?_ ?_
+    · intro s _hs
+      exact christoffelSymbol_sub_eq_sum_inv_connectionDiff
+        (I := I) S gInv frame hframe hinv
+        (t : Real) s hx i j k
+    · exact christoffelSymbol_sub_eq_sum_inv_connectionDiff
+        (I := I) S gInv frame hframe hinv
         (t : Real) (t : Real) hx i j k
   have hGammaPlus :
       HasDerivWithinAt

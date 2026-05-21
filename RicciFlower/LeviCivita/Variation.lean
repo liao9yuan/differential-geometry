@@ -230,28 +230,50 @@ def metricExtDtOn
       (extDerivFun (I := I) (fun y : M => metricDot y a b) x (frame d x))
       base
 
-/-- Chart/model mixed regularity gives `metricExtDtOn`.
+/-- Fixed-base mixed derivative rules for all metric components produce the
+`metricExtDtOn` package.
 
-This theorem keeps the regularity input as an explicit analytic hypothesis,
-instead of bundling it as a field of a component package. -/
-theorem metricExtDt_chart
+This is a genuine producer from the generic mixed-derivative API in
+`VectorBundle.PartialMfderiv`: the analytic content is that
+`∂_s ∂_d g_ab = ∂_d v_ab` in the fixed frame. -/
+theorem metricExtDt_of_fixedBase
     (G : Realized.RealizedMetricFamily (I := I) (M := M) Real)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (base : Real) (u : Set M)
     (metricDot : M -> Idx -> Idx -> Real)
-    (hchart :
-      ∀ x : M, x ∈ u -> ∀ d a b : Idx,
-        HasDerivAt
-          (fun s : Real =>
-            extDerivFun (I := I)
-              (fun y : M => (G.metric s).inner y (frame a y) (frame b y))
-              x (frame d x))
-          (extDerivFun (I := I) (fun y : M => metricDot y a b) x
-            (frame d x))
-          base) :
+    (hmix : ∀ a b : Idx,
+      FixedBaseExtDerivTimeDerivativeOn (I := I) (Set.univ : Set Real) u
+        (fun s : Real => fun y : M =>
+          (G.metric s).inner y (frame a y) (frame b y))
+        (fun _s : Real => fun y : M => metricDot y a b)) :
     metricExtDtOn (I := I) G frame base u metricDot := by
   intro x hx d a b
-  exact hchart x hx d a b
+  have h :=
+    fixedBaseExtDerivTimeDerivativeOn_apply (I := I) (h := hmix a b)
+      (t := base) (x := x) hx (frame d x)
+  simpa using h
+
+/-- Regular-time version of `metricExtDt_of_fixedBase`.  This is the version
+suited to one-base-time variations: the derivative is only required at
+`base`, while the time-domain can still be a larger set. -/
+theorem metricExtDt_of_fixedBaseRegular
+    (G : Realized.RealizedMetricFamily (I := I) (M := M) Real)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (base : Real) (u : Set M)
+    (metricDot : M -> Idx -> Idx -> Real)
+    (hmix : ∀ a b : Idx,
+      FixedBaseExtDerivTimeDerivativeOnRegular (I := I)
+        (Set.univ : Set Real) ({base} : Set Real) u
+        (fun s : Real => fun y : M =>
+          (G.metric s).inner y (frame a y) (frame b y))
+        (fun _s : Real => fun y : M => metricDot y a b)) :
+    metricExtDtOn (I := I) G frame base u metricDot := by
+  intro x hx d a b
+  have ht : base ∈ ({base} : Set Real) := by simp
+  have h :=
+    fixedBaseExtDerivTimeDerivativeOnRegular_apply (I := I)
+      (h := hmix a b) (t := base) ht (x := x) hx (frame d x)
+  simpa using h
 
 /-- Fixed-frame covariant derivative components of an arbitrary metric
 variation tensor. -/
@@ -763,26 +785,6 @@ def gammaDerivOn
           (G.connection s) frame hframe x i j k)
       (gammaDot x k i j)
       base
-
-/-- Chart-level Christoffel derivative regularity gives the fixed-frame
-Christoffel derivative package. -/
-theorem gammaDeriv_chart
-    (G : Realized.RealizedMetricFamily (I := I) (M := M) Real)
-    (frame : Idx -> (x : M) -> TangentSpace I x)
-    (hframe : IsLocalFrameOn I E 1 frame u)
-    (base : Real) (u : Set M)
-    (gammaDot : M -> Idx -> Idx -> Idx -> Real)
-    (hchart :
-      ∀ x : M, x ∈ u -> ∀ i j k : Idx,
-        HasDerivAt
-          (fun s : Real =>
-            Coordinates.christoffelSymbolInFrame
-              (G.connection s) frame hframe x i j k)
-          (gammaDot x k i j)
-          base) :
-    gammaDerivOn (I := I) G frame hframe base u gammaDot := by
-  intro x hx i j k
-  exact hchart x hx i j k
 
 /-- Product-rule bridge: the variable-metric lowered connection difference has
 derivative obtained by lowering `gammaDot` with the base metric. -/
@@ -2302,37 +2304,74 @@ def scalarSecondVarCoordAt
       timeSet
       base
 
-/-- Chart-level first spatial derivative regularity of the potential path gives
-the scalar first-coordinate derivative package. -/
-theorem scalarFirst_chart
+/-- A fixed-base mixed derivative rule for the scalar path produces the first
+coordinate-derivative variation package. -/
+theorem scalarFirst_of_fixedBase
     (f : Real -> M -> Real) (h : M -> Real)
     (timeSet : Set Real) (base : Real) (x0 : M)
-    (hchart :
-      ∀ p : CoordinateIdx (𝕜 := Real) E,
-        HasDerivWithinAt
-          (fun s : Real => scalarCoordDerivAt (I := I) (f s) x0 p)
-          (scalarCoordDerivAt (I := I) h x0 p)
-          timeSet
-          base) :
+    (hmix :
+      FixedBaseExtDerivTimeDerivativeOn (I := I) timeSet ({x0} : Set M)
+        f (fun _s : Real => h)) :
     scalarFirstVarCoordAt (I := I) f h timeSet base x0 := by
   intro p
-  exact hchart p
+  have hx : x0 ∈ ({x0} : Set M) := by simp
+  have hderiv :=
+    fixedBaseExtDerivTimeDerivativeOn_apply (I := I) (h := hmix)
+      (t := base) (x := x0) hx (coordinateFrameAt (I := I) x0 p x0)
+  simpa [scalarCoordDerivAt] using hderiv
 
-/-- Chart-level second spatial derivative regularity of the potential path
-gives the scalar second-coordinate derivative package. -/
-theorem scalarSecond_chart
+/-- Regular-time version of `scalarFirst_of_fixedBase`, used when the chart
+mixed-derivative theorem is available only at the base time. -/
+theorem scalarFirst_of_fixedBaseRegular
     (f : Real -> M -> Real) (h : M -> Real)
     (timeSet : Set Real) (base : Real) (x0 : M)
-    (hchart :
-      ∀ i j : CoordinateIdx (𝕜 := Real) E,
-        HasDerivWithinAt
-          (fun s : Real => scalarCoordSecondAt (I := I) (f s) x0 i j)
-          (scalarCoordSecondAt (I := I) h x0 i j)
-          timeSet
-          base) :
+    (hmix :
+      FixedBaseExtDerivTimeDerivativeOnRegular (I := I) timeSet
+        ({base} : Set Real) ({x0} : Set M) f (fun _s : Real => h)) :
+    scalarFirstVarCoordAt (I := I) f h timeSet base x0 := by
+  intro p
+  have ht : base ∈ ({base} : Set Real) := by simp
+  have hx : x0 ∈ ({x0} : Set M) := by simp
+  have hderiv :=
+    fixedBaseExtDerivTimeDerivativeOnRegular_apply (I := I) (h := hmix)
+      (t := base) ht (x := x0) hx (coordinateFrameAt (I := I) x0 p x0)
+  simpa [scalarCoordDerivAt] using hderiv
+
+/-- Fixed-base mixed derivative rules for the first scalar coordinate
+derivatives produce the second coordinate-derivative variation package. -/
+theorem scalarSecond_of_fixedBase
+    (f : Real -> M -> Real) (h : M -> Real)
+    (timeSet : Set Real) (base : Real) (x0 : M)
+    (hmix : ∀ j : CoordinateIdx (𝕜 := Real) E,
+      FixedBaseExtDerivTimeDerivativeOn (I := I) timeSet ({x0} : Set M)
+        (fun s : Real => scalarCoordDerivFun (I := I) (f s) x0 j)
+        (fun _s : Real => scalarCoordDerivFun (I := I) h x0 j)) :
     scalarSecondVarCoordAt (I := I) f h timeSet base x0 := by
   intro i j
-  exact hchart i j
+  have hx : x0 ∈ ({x0} : Set M) := by simp
+  have hderiv :=
+    fixedBaseExtDerivTimeDerivativeOn_apply (I := I) (h := hmix j)
+      (t := base) (x := x0) hx (coordinateFrameAt (I := I) x0 i x0)
+  simpa [scalarCoordSecondAt] using hderiv
+
+/-- Regular-time version of `scalarSecond_of_fixedBase`, used when the mixed
+derivative of `∂_j f_s` is only produced at the base time. -/
+theorem scalarSecond_of_fixedBaseRegular
+    (f : Real -> M -> Real) (h : M -> Real)
+    (timeSet : Set Real) (base : Real) (x0 : M)
+    (hmix : ∀ j : CoordinateIdx (𝕜 := Real) E,
+      FixedBaseExtDerivTimeDerivativeOnRegular (I := I) timeSet
+        ({base} : Set Real) ({x0} : Set M)
+        (fun s : Real => scalarCoordDerivFun (I := I) (f s) x0 j)
+        (fun _s : Real => scalarCoordDerivFun (I := I) h x0 j)) :
+    scalarSecondVarCoordAt (I := I) f h timeSet base x0 := by
+  intro i j
+  have ht : base ∈ ({base} : Set Real) := by simp
+  have hx : x0 ∈ ({x0} : Set M) := by simp
+  have hderiv :=
+    fixedBaseExtDerivTimeDerivativeOnRegular_apply (I := I) (h := hmix j)
+      (t := base) ht (x := x0) hx (coordinateFrameAt (I := I) x0 i x0)
+  simpa [scalarCoordSecondAt] using hderiv
 
 /-- Coordinate-frame Hessian variation from Christoffel variation:
 `d Hess_ij(f_s) / ds = Hess_ij(h) - A^p_ij partial_p f`. -/

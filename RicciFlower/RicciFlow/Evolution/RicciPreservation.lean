@@ -43,7 +43,7 @@ def ricciNorm3 (Ric : Fin 3 -> Fin 3 -> Real) : Real :=
 
 /-- The Ricci reaction tensor components
 `2 R_ikjl Ric_kl - 2 Ric_i^k Ric_kj` in an orthonormal `Fin 3` basis. -/
-def ricciReact
+def ricciPresReact
     (Rm : Fin 3 -> Fin 3 -> Fin 3 -> Fin 3 -> Real)
     (Ric : Fin 3 -> Fin 3 -> Real) (i j : Fin 3) : Real :=
   2 * (∑ k : Fin 3, ∑ l : Fin 3, Rm i k j l * Ric k l) -
@@ -55,18 +55,18 @@ def pinchReact
     (delta : Real)
     (Rm : Fin 3 -> Fin 3 -> Fin 3 -> Fin 3 -> Real)
     (Ric : Fin 3 -> Fin 3 -> Real) (i j : Fin 3) : Real :=
-  ricciReact Rm Ric i j -
+  ricciPresReact Rm Ric i j -
     2 * delta * (ricciNorm3 Ric * RicciFlower.DimensionThree.delta3 i j -
       ricciScal3 Ric * Ric i j)
 
 /-- Lemma 9.1 reaction algebra at a Ricci-null eigenvector. -/
 theorem ricciReactNull
     (l1 l2 l3 : Real) (hnull : l1 = 0) :
-    ricciReact (RicciFlower.DimensionThree.stdRmDiag3 l1 l2 l3)
+    ricciPresReact (RicciFlower.DimensionThree.stdRmDiag3 l1 l2 l3)
       (RicciFlower.DimensionThree.ricciDiag3 l1 l2 l3) 0 0 =
       (l2 - l3) ^ 2 := by
   subst l1
-  unfold ricciReact ricciSq3 RicciFlower.DimensionThree.stdRmDiag3
+  unfold ricciPresReact ricciSq3 RicciFlower.DimensionThree.stdRmDiag3
     RicciFlower.DimensionThree.ricciDiag3 RicciFlower.DimensionThree.ricciEigenScalar3
     RicciFlower.DimensionThree.delta3
   simp [Fin.sum_univ_three]
@@ -75,7 +75,7 @@ theorem ricciReactNull
 /-- Nonnegativity form of `ricciReactNull`. -/
 theorem ricciReact_ge
     (l1 l2 l3 : Real) (hnull : l1 = 0) :
-    0 <= ricciReact (RicciFlower.DimensionThree.stdRmDiag3 l1 l2 l3)
+    0 <= ricciPresReact (RicciFlower.DimensionThree.stdRmDiag3 l1 l2 l3)
       (RicciFlower.DimensionThree.ricciDiag3 l1 l2 l3) 0 0 := by
   rw [ricciReactNull l1 l2 l3 hnull]
   positivity
@@ -106,7 +106,7 @@ theorem pinchReactNull
           (3 * delta ^ 2 * l1 + 3 * delta ^ 2 * l2 + 3 * delta ^ 2 * l3 +
             2 * delta * l1 - delta * l2 - delta * l3 + 2 * l1 - l2 - l3) := by
     dsimp [lhs, rhs]
-    unfold pinchReact ricciReact ricciSq3 ricciNorm3 ricciScal3
+    unfold pinchReact ricciPresReact ricciSq3 ricciNorm3 ricciScal3
       RicciFlower.DimensionThree.stdRmDiag3 RicciFlower.DimensionThree.ricciDiag3
       RicciFlower.DimensionThree.ricciEigenScalar3 RicciFlower.DimensionThree.delta3
     simp [Fin.sum_univ_three]

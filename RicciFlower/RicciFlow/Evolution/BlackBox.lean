@@ -103,14 +103,12 @@ theorem variableMetricConnectionDiffDerivative_of_blackBox
     (hframe : IsLocalFrameOn I E 1 frame u)
     (hu : IsOpen u)
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
-    (hunique : forall t : Realized.RealTimeInterval.RegularTime D,
-      UniqueDiffWithinAt Real D.carrier (t : Real))
     (hbb : ConnectionVariationBlackBoxInFrameOn (I := I) S frame u nablaRic) :
     VariableMetricConnectionDiffDerivativeInFrameOnLocal
       (I := I) S frame u (christoffelVariationLoweredRHSInFrame nablaRic) :=
   variableMetricConnectionDiffDerivative_of_metricCovDeriv
     (I := I) S hS frame hframe hu hbb.metricCovDerivDt nablaRic
-    hbb.metricCovDerivDerivative hbb.metricCovDerivRicciFlow hunique
+    hbb.metricCovDerivDerivative hbb.metricCovDerivRicciFlow
 
 /-- Use the black-box connection regularity package to obtain raised
 Christoffel evolution in Lemma 6.2. -/
