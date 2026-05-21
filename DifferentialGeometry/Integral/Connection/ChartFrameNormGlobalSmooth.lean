@@ -409,6 +409,62 @@ theorem chartFrameNormGlobalSmooth_eventuallyEq_smoothOrthoFrame
     (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun y
   rw [hLHS_step, hFrame_eq, hGlobal_eq]
 
+/-! ## Stage C: orthonormality of the globally smooth frame -/
+
+/-- **Orthonormality of the globally smooth chart-α frame**. On the intersection
+of the chart-α partition-of-unity tsupport with the chart-α Levi-Civita good
+set, the globally smooth section `chartFrameNormGlobalSmooth g α i` satisfies
+the orthonormality identity at every base point `b`.
+
+The proof combines the local-equality lemma
+`chartFrameNormGlobalSmooth_eq_chartFrameNorm_on_pouTsupportNbhd` (showing the
+global section equals `chartFrameNorm g α i` on an open neighbourhood of the
+tsupport, contained in the chart-α source) with `chartFrameNorm_orthonormal`
+(asserting pointwise orthonormality of the Gram-Schmidt frame on the chart-α
+trivialization base set). -/
+theorem chartFrameNormGlobalSmooth_orthonormal_on_pouTsupportGoodSet
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {b : M}
+    (hb : b ∈ tsupport (fun x : M =>
+            ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
+          chartLeviCivitaGoodSet (I := I) α)
+    (i j : Fin (Module.finrank ℝ E)) :
+    g.inner b
+        ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b)
+        ((chartFrameNormGlobalSmooth (I := I) (M := M) g α j).toFun b) =
+      if i = j then 1 else 0 := by
+  classical
+  -- Extract the open neighbourhood and local-equality data for index `i`.
+  obtain ⟨U_i, _hU_i_open, htsupp_U_i, hU_i_source, hU_eq_i⟩ :=
+    chartFrameNormGlobalSmooth_eq_chartFrameNorm_on_pouTsupportNbhd
+      (I := I) (M := M) g α i
+  -- Extract the analogous data for index `j` (the open `U` depends on `i`).
+  obtain ⟨U_j, _hU_j_open, htsupp_U_j, _hU_j_source, hU_eq_j⟩ :=
+    chartFrameNormGlobalSmooth_eq_chartFrameNorm_on_pouTsupportNbhd
+      (I := I) (M := M) g α j
+  -- `b` is in the partition-of-unity tsupport, hence in both `U_i` and `U_j`.
+  have hb_pou : b ∈ tsupport (fun x : M =>
+      ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) := hb.1
+  have hb_U_i : b ∈ U_i := htsupp_U_i hb_pou
+  have hb_U_j : b ∈ U_j := htsupp_U_j hb_pou
+  -- Via `U_i ⊆ chart source`, get `b ∈ chart source`.
+  have hb_source : b ∈ (chartAt H α).source := hU_i_source hb_U_i
+  -- Convert chart-source membership to trivialization base-set membership.
+  have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
+    rw [trivializationAt_baseSet_eq_chartAt_source]
+    exact hb_source
+  -- The global section equals `chartFrameNorm g α _` at `b` (for both indices).
+  have h_eq_i : (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b =
+      chartFrameNorm (I := I) g α i b := hU_eq_i b hb_U_i
+  have h_eq_j : (chartFrameNormGlobalSmooth (I := I) (M := M) g α j).toFun b =
+      chartFrameNorm (I := I) g α j b := hU_eq_j b hb_U_j
+  rw [h_eq_i, h_eq_j]
+  exact chartFrameNorm_orthonormal (I := I) g α hb_base i j
+
+section
+#print axioms DifferentialGeometry.Integral.Connection.chartFrameNormGlobalSmooth_orthonormal_on_pouTsupportGoodSet
+end
+
 end Connection
 end Integral
 end DifferentialGeometry
