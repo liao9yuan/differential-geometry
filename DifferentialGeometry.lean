@@ -765,6 +765,7 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Rellich.Tensor
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.Components
 import DifferentialGeometry.Integral.Connection.ChartPulledCovDerivChartCompBound
 import DifferentialGeometry.Integral.Connection.ChartPulledTensorReprChartCompBound
+import DifferentialGeometry.Integral.Connection.IteratedFDerivTensorReprChartCompBound
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartComponents
 import DifferentialGeometry.Analysis.Sobolev.Tensor.Defs
 import DifferentialGeometry.Analysis.Sobolev.Tensor.NormBasics
