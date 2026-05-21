@@ -144,7 +144,7 @@ lemma reprNorm_le_sum_components
 
 /-- Each chart-frame scalar component pulled by `(extChartAt I α).symm` is
 Fréchet-differentiable at the chart-coord image of any chart-source point. -/
-private lemma chart_pulled_component_differentiableAt
+lemma chart_pulled_component_differentiableAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -205,7 +205,7 @@ chart-α-trivialised representation of `T.toSection` at the chart-coord point
 
   `Σ_{Idx, Jdx} ‖fderiv ℝ (component_Idx_Jdx ∘ symm) (extChartAt b)‖
                   * ‖basis-elt(Idx, Jdx)‖`. -/
-private lemma fderiv_repr_opNorm_le_sum_fderiv_components
+lemma fderiv_repr_opNorm_le_sum_fderiv_components
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M) {b : M}
     (hb_chart : b ∈ (chartAt H α).source) :
