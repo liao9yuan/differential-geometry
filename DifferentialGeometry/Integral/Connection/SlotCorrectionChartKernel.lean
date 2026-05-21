@@ -1376,9 +1376,9 @@ of the chart-`α` Levi-Civita good set. Hence its Fréchet-derivative is
 continuous on that open set, and uniformly bounded on the closed compact
 image of the POU tsupport ∩ good set. -/
 
-/-- Chart-pulled `ContDiffOn` smoothness of `inputSlotChartKernel`. (Auxiliary
-form, used to derive the uniform fderiv bound.) -/
-private lemma inputSlotChartKernel_chart_pulled_contDiffOn_aux
+/-- **Chart-pulled `ContDiffOn` smoothness of `inputSlotChartKernel`** on the
+chart-target image of the chart-`α` Levi-Civita good set. -/
+theorem inputSlotChartKernel_chart_pulled_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (k : Fin r) :
     ContDiffOn ℝ ∞
@@ -1410,9 +1410,9 @@ private lemma inputSlotChartKernel_chart_pulled_contDiffOn_aux
     rfl
   exact h_at.contDiffWithinAt
 
-/-- Chart-pulled `ContDiffOn` smoothness of `outputSlotChartKernel`. (Auxiliary
-form, used to derive the uniform fderiv bound.) -/
-private lemma outputSlotChartKernel_chart_pulled_contDiffOn_aux
+/-- **Chart-pulled `ContDiffOn` smoothness of `outputSlotChartKernel`** on the
+chart-target image of the chart-`α` Levi-Civita good set. -/
+theorem outputSlotChartKernel_chart_pulled_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (l : Fin s) :
     ContDiffOn ℝ ∞
@@ -1453,7 +1453,7 @@ private lemma inputSlotChartKernel_fderiv_continuousOn
                         ((extChartAt I α).symm y')) y‖)
       ((extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) := by
   classical
-  have hcd := inputSlotChartKernel_chart_pulled_contDiffOn_aux (I := I) (M := M)
+  have hcd := inputSlotChartKernel_chart_pulled_contDiffOn (I := I) (M := M)
     g r s α B k
   have hOpen := goodSet_image_isOpen (I := I) (M := M) α
   have hfd_cd : ContDiffOn ℝ ∞
@@ -1473,7 +1473,7 @@ private lemma outputSlotChartKernel_fderiv_continuousOn
                         ((extChartAt I α).symm y')) y‖)
       ((extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) := by
   classical
-  have hcd := outputSlotChartKernel_chart_pulled_contDiffOn_aux (I := I) (M := M)
+  have hcd := outputSlotChartKernel_chart_pulled_contDiffOn (I := I) (M := M)
     g r s α B l
   have hOpen := goodSet_image_isOpen (I := I) (M := M) α
   have hfd_cd : ContDiffOn ℝ ∞
