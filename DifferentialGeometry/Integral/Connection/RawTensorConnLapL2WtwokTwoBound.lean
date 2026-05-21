@@ -6,6 +6,7 @@ import DifferentialGeometry.Analysis.Sobolev.Tensor.Defs
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.FderivToWkpNormBridge
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedFderivToWkpNormBridge
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartTensor.GoodSetMeasure
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.TensorChartTransition
 import DifferentialGeometry.Integral.Connection.SlotCorrectionChartFderivBound
 
 /-!
@@ -4439,6 +4440,163 @@ private lemma finset_sum_sq_le_card_mul_sum_sq
   have h_sum_one : (∑ _i ∈ s, (1 : ℝ)) = (s.card : ℝ) := by simp
   rw [h_sum_one] at hbase
   exact hbase
+
+/-! ## Chart-transition bound replacements (POU-tsupport variant)
+
+The chart-equality wrapper helpers above (`tensorChartComponentRaw_eq_of_shared_source`
+and `tensorChartComponentRaw_eq_sum_pou`) compare raw chart-frame scalar components
+across chart base points by routing through a chart-source-consistency predicate
+on the atlas. That predicate is vacuously satisfied on closed manifolds whose
+atlas is not artificially globally constant, so those equalities are not directly
+provable in that generality.
+
+The replacement strategy uses the genuine tensor transformation law: across any
+two chart sources `(chartAt H γ).source ∩ (chartAt H α).source`, the raw
+chart-frame scalar component at `α` is a finite linear combination of the
+raw chart-frame scalar components at `γ`, weighted by the smooth bundle
+coordinate-change scalar functions `transitionCoeff r s γ α P₀ Q`. Restricted
+to the POU `tsupport` overlap (a compact set inside the chart overlap), every
+`|transitionCoeff|` is bounded by a uniform constant `K_trans` depending only
+on `(g, r, s)` and the manifold, via `transitionCoeff_le_uniform_on_pouTsupport`.
+
+The two lemmas below repackage this with POU `tsupport` membership as the
+chart-overlap witness; they make `tensorChartComponentRaw_chartTransition_eq`
+available as an honest equality (chart-transition law) and a squared upper bound
+suitable for L² propagation. Together they take the role formerly played by
+the chart-equality wrapper layer for downstream chart-pulled L² estimates,
+while requiring only the genuine inner-product / closed-manifold hypotheses
+already in the section's global variables. -/
+
+/-- **Chart-transition law via POU tsupport.** For any two chart base points
+`α, β : M` whose POU `tsupport`s both contain a point `b`, the raw chart-frame
+scalar component of a smooth compactly-supported tensor section `T` at `α` and
+multi-index `(Idx, Jdx)` equals the finite sum over component multi-indices `Q`
+of `transitionCoeff r s β α ⟨Idx, Jdx⟩ Q b · raw component of T at β, Q b`. -/
+private lemma tensorChartComponentRaw_chartTransition_eq
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T : SmoothCcTensor g r s) (α β b : M)
+    (hb_α_pou : b ∈ tsupport (fun x : M =>
+          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x))
+    (hb_β_pou : b ∈ tsupport (fun x : M =>
+          ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ) x))
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
+    tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx b =
+      ∑ Q : TensorCompIdx (E := E) r s,
+        transitionCoeff (E := E) (I := I) (M := M) r s β α ⟨Idx, Jdx⟩ Q b *
+          tensorChartComponentRaw (I := I) (M := M) g r s T β Q.1 Q.2 b := by
+  classical
+  -- POU tsupport is subordinate to the corresponding chart source.
+  have hsupp_α :
+      tsupport ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) ⊆
+        (chartAt H α).source :=
+    chartAtlasPOU_isSubordinate I M α
+  have hsupp_β :
+      tsupport ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ) ⊆
+        (chartAt H β).source :=
+    chartAtlasPOU_isSubordinate I M β
+  have hb_α_src : b ∈ (chartAt H α).source := hsupp_α hb_α_pou
+  have hb_β_src : b ∈ (chartAt H β).source := hsupp_β hb_β_pou
+  -- Apply the chart-transition decomposition with `γ := β`, `α := α`, `P₀ := ⟨Idx, Jdx⟩`.
+  exact tensorChartComponentRaw_eq_transitionCoeff_sum
+    (E := E) (I := I) (M := M) g r s T β α ⟨Idx, Jdx⟩ ⟨hb_β_src, hb_α_src⟩
+
+/-- **Squared chart-transition bound via POU tsupport.** Under the same POU
+`tsupport` overlap, the squared raw chart-frame scalar component at `α` is
+bounded by `N_idx · K² · Σ_Q (raw β Q b)²`, where `N_idx` is the cardinality
+of the component multi-index type and `K` is any uniform `transitionCoeff`
+bound on the relevant POU-`tsupport` overlap (in particular, the universal
+constant from `transitionCoeff_le_uniform_on_pouTsupport`). The Cauchy-Schwarz
+factor `N_idx` is the squared-finset cost of distributing the sum over `Q`. -/
+private lemma tensorChartComponentRaw_sq_chartTransition_bound
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T : SmoothCcTensor g r s) (K : ℝ)
+    (hK_bound :
+      ∀ γ α : M,
+        ∀ P₀ Q : TensorCompIdx (E := E) r s,
+        ∀ b : M,
+          b ∈ tsupport (fun x : M =>
+              ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
+            tsupport (fun x : M =>
+              ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
+          |transitionCoeff (E := E) (I := I) (M := M) r s γ α P₀ Q b| ≤ K)
+    (α β b : M)
+    (hb_α_pou : b ∈ tsupport (fun x : M =>
+          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x))
+    (hb_β_pou : b ∈ tsupport (fun x : M =>
+          ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ) x))
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
+    (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx b) ^ 2 ≤
+      ((Finset.univ : Finset (TensorCompIdx (E := E) r s)).card : ℝ) *
+        K ^ 2 *
+        ∑ Q : TensorCompIdx (E := E) r s,
+          (tensorChartComponentRaw (I := I) (M := M) g r s T β Q.1 Q.2 b) ^ 2 := by
+  classical
+  -- Rewrite the LHS via the chart-transition equality.
+  rw [tensorChartComponentRaw_chartTransition_eq
+    (I := I) (M := M) g r s T α β b hb_α_pou hb_β_pou Idx Jdx]
+  -- Per-`Q` real-valued bound.
+  set f : TensorCompIdx (E := E) r s → ℝ :=
+    fun Q =>
+      transitionCoeff (E := E) (I := I) (M := M) r s β α ⟨Idx, Jdx⟩ Q b *
+        tensorChartComponentRaw (I := I) (M := M) g r s T β Q.1 Q.2 b
+    with hf_def
+  -- Per-Q bound: `(f Q)² ≤ K² · (raw β Q b)²`.
+  have h_per_Q : ∀ Q : TensorCompIdx (E := E) r s,
+      (f Q) ^ 2 ≤ K ^ 2 *
+        (tensorChartComponentRaw (I := I) (M := M) g r s T β Q.1 Q.2 b) ^ 2 := by
+    intro Q
+    rw [hf_def, mul_pow]
+    refine mul_le_mul_of_nonneg_right ?_ (sq_nonneg _)
+    have hK_Q :
+        |transitionCoeff (E := E) (I := I) (M := M) r s β α ⟨Idx, Jdx⟩ Q b| ≤ K :=
+      hK_bound β α ⟨Idx, Jdx⟩ Q b ⟨hb_β_pou, hb_α_pou⟩
+    have h_sq_abs := sq_abs
+      (transitionCoeff (E := E) (I := I) (M := M) r s β α ⟨Idx, Jdx⟩ Q b)
+    calc (transitionCoeff (E := E) (I := I) (M := M) r s β α ⟨Idx, Jdx⟩ Q b) ^ 2
+        = |transitionCoeff (E := E) (I := I) (M := M) r s β α ⟨Idx, Jdx⟩ Q b| ^ 2 :=
+            h_sq_abs.symm
+      _ ≤ K ^ 2 := pow_le_pow_left₀ (abs_nonneg _) hK_Q 2
+  -- Cauchy-Schwarz over the multi-index sum.
+  have hCS : (∑ Q, f Q) ^ 2 ≤
+      ((Finset.univ : Finset (TensorCompIdx (E := E) r s)).card : ℝ) *
+        ∑ Q, (f Q) ^ 2 :=
+    finset_sum_sq_le_card_mul_sum_sq
+      (Finset.univ : Finset (TensorCompIdx (E := E) r s)) f
+  refine hCS.trans ?_
+  -- Multiply the per-Q bound through and factor out `K²`.
+  have h_sum_bound :
+      (∑ Q : TensorCompIdx (E := E) r s, (f Q) ^ 2) ≤
+      ∑ Q : TensorCompIdx (E := E) r s, K ^ 2 *
+        (tensorChartComponentRaw (I := I) (M := M) g r s T β Q.1 Q.2 b) ^ 2 :=
+    Finset.sum_le_sum (fun Q _ => h_per_Q Q)
+  have h_factor_out :
+      (∑ Q : TensorCompIdx (E := E) r s, K ^ 2 *
+          (tensorChartComponentRaw (I := I) (M := M) g r s T β Q.1 Q.2 b) ^ 2) =
+        K ^ 2 *
+          ∑ Q : TensorCompIdx (E := E) r s,
+            (tensorChartComponentRaw (I := I) (M := M) g r s T β Q.1 Q.2 b) ^ 2 := by
+    rw [← Finset.mul_sum]
+  have h_card_nn :
+      0 ≤ ((Finset.univ : Finset (TensorCompIdx (E := E) r s)).card : ℝ) :=
+    Nat.cast_nonneg _
+  calc ((Finset.univ : Finset (TensorCompIdx (E := E) r s)).card : ℝ) *
+            ∑ Q, (f Q) ^ 2
+      ≤ ((Finset.univ : Finset (TensorCompIdx (E := E) r s)).card : ℝ) *
+              ∑ Q : TensorCompIdx (E := E) r s, K ^ 2 *
+                (tensorChartComponentRaw (I := I) (M := M) g r s T β Q.1 Q.2 b) ^ 2 :=
+        mul_le_mul_of_nonneg_left h_sum_bound h_card_nn
+    _ = ((Finset.univ : Finset (TensorCompIdx (E := E) r s)).card : ℝ) *
+              (K ^ 2 *
+                ∑ Q : TensorCompIdx (E := E) r s,
+                  (tensorChartComponentRaw (I := I) (M := M) g r s T β Q.1 Q.2 b) ^ 2) := by
+            rw [h_factor_out]
+    _ = ((Finset.univ : Finset (TensorCompIdx (E := E) r s)).card : ℝ) *
+              K ^ 2 *
+              ∑ Q : TensorCompIdx (E := E) r s,
+                (tensorChartComponentRaw (I := I) (M := M) g r s T β Q.1 Q.2 b) ^ 2 := by
+            ring
 
 /-- Pointwise Cauchy-Schwarz for `raw α IJ`: `(raw α IJ b)² ≤ |finset| ·
 Σ_β (tensorChartComponentPou β IJ b)²`. -/
