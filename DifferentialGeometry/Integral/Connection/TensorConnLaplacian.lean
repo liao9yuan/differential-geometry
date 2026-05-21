@@ -1592,7 +1592,7 @@ The pointwise tensoriality of `Ψ_T` in each of the `(X, Y)`-arguments at `y`
 pair of fibre vectors `(u, v) : T_y M × T_y M` is the value of
 `Ψ_T(extend u, extend v)` at `y`, where `extend` is the standard smooth
 extension of a fibre vector to a global section of the tangent bundle. -/
-private noncomputable def rawTensorConnLap_psi_bilinAt
+noncomputable def rawTensorConnLap_psi_bilinAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b)
     (hT_total : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
@@ -1627,7 +1627,7 @@ pointwise fibre values `(X y, Y y)` agrees with the raw `Ψ_T(X, Y)(y)`:
 
 `Ψ̂_T(y) (X y) (Y y) =
    cov_RS (covApply cov_RS X T) y (Y y) - cov_RS T y (cov_TM X y (Y y))`. -/
-private theorem rawTensorConnLap_psi_bilinAt_apply
+theorem rawTensorConnLap_psi_bilinAt_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b)
     (hT_total : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
@@ -1685,7 +1685,7 @@ $$
 This shows that the centre-dependent choice of `smoothOrthoFrame g y` in the
 definition of `rawTensorConnLap` is irrelevant — any `g_y`-orthonormal basis
 of `T_y M` reproduces the same value. -/
-private theorem rawTensorConnLap_eq_frame_trace
+theorem rawTensorConnLap_eq_frame_trace
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b)
     (hT_total : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
@@ -1918,7 +1918,7 @@ variable [CompleteSpace E]
 points where the fixed frame is `g`-orthonormal.** For a fixed smooth tangent
 frame `B` such that `B i y` is `g_y`-orthonormal at the evaluation point `y`,
 the raw connection Laplacian agrees with the fixed-frame variant at `y`. -/
-private theorem rawTensorConnLap_eq_fixedFrame_of_orthonormal
+theorem rawTensorConnLap_eq_fixedFrame_of_orthonormal
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b)
     (hT_total : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
@@ -2051,4 +2051,11 @@ end Connection
 end Integral
 end DifferentialGeometry
 
+end
+
+section
+#print axioms DifferentialGeometry.Integral.Connection.rawTensorConnLap_psi_bilinAt
+#print axioms DifferentialGeometry.Integral.Connection.rawTensorConnLap_psi_bilinAt_apply
+#print axioms DifferentialGeometry.Integral.Connection.rawTensorConnLap_eq_frame_trace
+#print axioms DifferentialGeometry.Integral.Connection.rawTensorConnLap_eq_fixedFrame_of_orthonormal
 end
