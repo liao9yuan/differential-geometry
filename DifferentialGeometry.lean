@@ -769,6 +769,7 @@ import DifferentialGeometry.Integral.Connection.SlotCorrectionChartKernel
 import DifferentialGeometry.Integral.Connection.ChartPulledTensorReprChartCompBound
 import DifferentialGeometry.Integral.Connection.IntrinsicPieceFderivBound
 import DifferentialGeometry.Integral.Connection.IteratedFDerivTensorReprChartCompBound
+import DifferentialGeometry.Integral.Connection.SlotCorrectionChartFderivBound
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartComponents
 import DifferentialGeometry.Analysis.Sobolev.Tensor.Defs
 import DifferentialGeometry.Analysis.Sobolev.Tensor.NormBasics
