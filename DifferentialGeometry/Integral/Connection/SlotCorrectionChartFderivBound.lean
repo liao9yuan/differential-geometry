@@ -79,7 +79,7 @@ on the chart-target image of the chart-`α` Levi-Civita good set -/
 /-- Smoothness on the chart-target image of the chart-`α` Levi-Civita good set
 of the chart-pulled tensor representation
 `tensorRSChartE_section_repr r s α T ∘ (extChartAt I α).symm`. -/
-private lemma R_contDiffOn_goodSet
+lemma R_contDiffOn_goodSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s) :
     ContDiffOn ℝ ∞
