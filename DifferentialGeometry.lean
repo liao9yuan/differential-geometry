@@ -699,6 +699,7 @@ import DifferentialGeometry.Integral.Connection.LeviCivitaChartMetric
 import DifferentialGeometry.Integral.Connection.LeviCivitaChartSmooth
 
 import DifferentialGeometry.Integral.Connection.LeviCivita
+import DifferentialGeometry.Integral.Connection.TensorRSCovariantDerivativeCongrLocally
 import DifferentialGeometry.Integral.Connection.CotangentExtension
 import DifferentialGeometry.Integral.Connection.TensorExtension
 import DifferentialGeometry.Integral.Connection.TensorMetricCompatible
