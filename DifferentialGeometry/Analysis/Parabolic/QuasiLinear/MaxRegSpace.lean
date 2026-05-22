@@ -373,11 +373,11 @@ derivative, and the packaged element of the solution space `E_T`. -/
 datum `u₀ ∈ H^{a+2}`, this is the element of `L²([0,T]; H^{a+2})` whose `i`-th
 eigen-coordinate is the scalar decay `t ↦ e^{−λᵢ t} · cᵢ`.  It is the homogeneous
 flow `t ↦ e^{tΔ_∇} u₀` viewed in its full `H^{a+2}` spatial regularity. -/
-def maxRegHomogeneousSolField (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+def maxRegHomogeneousSolField (_h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (a : ℝ) (T : ℝ)
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2)) :
     timeL2 (tensorHs (I := I) (M := M) g r s (a + 2)) T :=
-  timeL2OfModes (I := I) (M := M) (σ := a + 2) h_atlas
+  timeL2OfModes (I := I) (M := M) (σ := a + 2)
     (fun i => homModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i)
 
 /-- The `i`-th eigen-coordinate of the homogeneous-flow field is the scalar decay
@@ -389,18 +389,18 @@ theorem maxRegHomogeneousSolField_timeModeCoeff (hT : 0 ≤ T)
         (maxRegHomogeneousSolField (I := I) (M := M) h_atlas a T u₀) i =
       homModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i :=
   timeL2OfModes_timeModeCoeff (I := I) (M := M) (σ := a + 2)
-    (h_atlas := h_atlas) _
+    h_atlas _
     (summable_homModeCoeff (I := I) (M := M) (a := a) (T := T) hT u₀) i
 
 /-- **The `Hᵃ`-valued time-derivative field of the homogeneous heat flow.**  For
 initial datum `u₀ ∈ H^{a+2}`, this is the element of `L²([0,T]; Hᵃ)` whose `i`-th
 eigen-coordinate is `t ↦ −λᵢ · e^{−λᵢ t} · cᵢ`.  It is `∂_t (e^{tΔ_∇} u₀) = Δ_∇
 e^{tΔ_∇} u₀`. -/
-def maxRegHomogeneousDerivField (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+def maxRegHomogeneousDerivField (_h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (a : ℝ) (T : ℝ)
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2)) :
     timeL2 (tensorHs (I := I) (M := M) g r s a) T :=
-  timeL2OfModes (I := I) (M := M) (σ := a) h_atlas
+  timeL2OfModes (I := I) (M := M) (σ := a)
     (fun i => homDerivModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i)
 
 /-- The `i`-th eigen-coordinate of the homogeneous-flow time-derivative field is
@@ -412,7 +412,7 @@ theorem maxRegHomogeneousDerivField_timeModeCoeff (hT : 0 ≤ T)
         (maxRegHomogeneousDerivField (I := I) (M := M) h_atlas a T u₀) i =
       homDerivModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i :=
   timeL2OfModes_timeModeCoeff (I := I) (M := M) (σ := a)
-    (h_atlas := h_atlas) _
+    h_atlas _
     (summable_homDerivModeCoeff (I := I) (M := M) (a := a) (T := T) hT u₀) i
 
 /-- **The homogeneous part of the Duhamel map.**  For initial datum `u₀ ∈
@@ -554,7 +554,7 @@ theorem maximalRegularityOp_add (hT : 0 < T) (hT1 : T ≤ 1)
         (0 : tensorHs (I := I) (M := M) g r s a)
     rw [add_zero]
   · rw [TimeSobolev.timeH1.deriv_add]
-    exact maximalRegularityDerivField_add (I := I) (M := M) (a := a) hT.le f f'
+    exact maximalRegularityDerivField_add (I := I) (M := M) (h_atlas := h_atlas) (a := a) hT.le f f'
 
 /-- The maximal-regularity operator is `ℝ`-homogeneous in the forcing term:
 `maximalRegularityOp (c • f) = c • maximalRegularityOp f`. -/
@@ -568,7 +568,7 @@ theorem maximalRegularityOp_smul (hT : 0 < T) (hT1 : T ≤ 1) (c : ℝ)
       c • (0 : tensorHs (I := I) (M := M) g r s a)
     rw [smul_zero]
   · rw [TimeSobolev.timeH1.deriv_smul]
-    exact maximalRegularityDerivField_smul (I := I) (M := M) (a := a) hT.le c f
+    exact maximalRegularityDerivField_smul (I := I) (M := M) (h_atlas := h_atlas) (a := a) hT.le c f
 
 /-- The maximal-regularity operator commutes with subtraction of forcing terms:
 `maximalRegularityOp (f − f') = maximalRegularityOp f − maximalRegularityOp f'`.

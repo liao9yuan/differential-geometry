@@ -35,13 +35,13 @@ operator that shifts the scale by *exactly* `s` is `tensorLambdaPower s`
 
 ## Main definitions
 
-* `tensorFractionalPower h_atlas θ` — the continuous linear operator
+* `tensorFractionalPower θ` — the continuous linear operator
   `(1 − Δ_∇)^θ : Hˢ →L[ℝ] H^{σ−2θ}` multiplying coordinate `i` by
   `(1 + λᵢ)^θ`.
-* `tensorFractionalPowerEquiv h_atlas θ σ` — the same map packaged as
+* `tensorFractionalPowerEquiv θ σ` — the same map packaged as
   a linear isometric equivalence `Hˢ ≃ₗᵢ[ℝ] H^{σ−2θ}`; its inverse is
   `(1 − Δ_∇)^{−θ}`.
-* `tensorLambdaPower h_atlas s` — the scale shift by exactly `s`,
+* `tensorLambdaPower s` — the scale shift by exactly `s`,
   `Λˢ := (1 − Δ_∇)^{s/2} : Hˢ →L[ℝ] H^{σ−s}`.
 
 ## Main results
@@ -352,7 +352,7 @@ scale by `2θ`: it maps `Hˢ` isometrically to `H^{σ−2θ}`. See
 `tensorFractionalPower_coeff` for the coordinate formula and
 `tensorFractionalPower_norm` for the isometry. -/
 def tensorFractionalPower {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (_h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) (θ : ℝ) {σ : ℝ} :
+    (θ : ℝ) {σ : ℝ} :
     tensorHs (I := I) (M := M) g r s σ →L[ℝ]
       tensorHs (I := I) (M := M) g r s (σ - 2 * θ) :=
   LinearMap.mkContinuous
@@ -369,43 +369,43 @@ def tensorFractionalPower {g : SmoothRiemannianMetric I M} {r s : ℕ}
 /-- `tensorFractionalPower` applied to `T` is the underlying
 `fractionalPowerFun T`. -/
 @[simp] lemma tensorFractionalPower_apply {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ}
+    {r s : ℕ} {σ : ℝ}
     (θ : ℝ) (T : tensorHs (I := I) (M := M) g r s σ) :
-    tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas θ T =
+    tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) θ T =
       tensorHs.fractionalPowerFun (I := I) (M := M) θ T := rfl
 
 /-- The coordinate formula for the fractional power: `(1 − Δ_∇)^θ`
 multiplies the `i`-th coordinate by `(1 + λᵢ)^θ`. -/
 @[simp] theorem tensorFractionalPower_coeff {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ}
+    {r s : ℕ} {σ : ℝ}
     (θ : ℝ) (T : tensorHs (I := I) (M := M) g r s σ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    (tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas θ T).coeff i =
+    (tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) θ T).coeff i =
       tensorSobolevWeight (I := I) (M := M) i θ * T.coeff i := rfl
 
 /-- The operator norm of the fractional power is at most `1`. (It is in
 fact an isometry; see `tensorFractionalPower_norm`.) -/
 theorem tensorFractionalPower_opNorm_le_one {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ}
+    {r s : ℕ} {σ : ℝ}
     (θ : ℝ) :
-    ‖tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) (σ := σ) h_atlas θ‖ ≤ 1 :=
+    ‖tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) (σ := σ) θ‖ ≤ 1 :=
   LinearMap.mkContinuous_norm_le _ zero_le_one _
 
 /-- The fractional power `(1 − Δ_∇)^θ` is an isometry: the `H^{σ−2θ}`
 norm of `(1 − Δ_∇)^θ T` equals the `Hˢ` norm of `T`. -/
 theorem tensorFractionalPower_norm {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ}
+    {r s : ℕ} {σ : ℝ}
     (θ : ℝ) (T : tensorHs (I := I) (M := M) g r s σ) :
-    ‖tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas θ T‖ = ‖T‖ :=
+    ‖tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) θ T‖ = ‖T‖ :=
   tensorHs.norm_fractionalPowerFun (I := I) (M := M) θ T
 
 /-- The fractional power preserves the `Hˢ` inner product: it is an
 isometric linear map, hence inner-product preserving. -/
 theorem tensorFractionalPower_inner {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ}
+    {r s : ℕ} {σ : ℝ}
     (θ : ℝ) (S T : tensorHs (I := I) (M := M) g r s σ) :
-    (inner ℝ (tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas θ S)
-        (tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas θ T) : ℝ) =
+    (inner ℝ (tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) θ S)
+        (tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) θ T) : ℝ) =
       inner ℝ S T := by
   -- The weighted inner-product series match term-by-term:
   -- `(1+λ)^{σ-2θ}·((1+λ)^θ a)·((1+λ)^θ b) = (1+λ)^σ·a·b`.
@@ -444,10 +444,10 @@ the weight `(1 + λᵢ)^0 = 1`. The target scale is `σ − 2·0`, so this is
 stated as an equality of coordinate families. -/
 @[simp] theorem tensorFractionalPower_zero_coeff
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ}
+    {σ : ℝ}
     (T : tensorHs (I := I) (M := M) g r s σ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    (tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas (0 : ℝ) T).coeff i =
+    (tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) (0 : ℝ) T).coeff i =
       T.coeff i := by
   rw [tensorFractionalPower_coeff, tensorSobolevWeight_zero, one_mul]
 
@@ -456,9 +456,9 @@ definitional scale rewrite `σ − 2·0 = σ`: it sends `T` to
 `tensorHs.cast` of `T`. -/
 theorem tensorFractionalPower_zero
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ}
+    {σ : ℝ}
     (T : tensorHs (I := I) (M := M) g r s σ) :
-    tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas (0 : ℝ) T =
+    tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) (0 : ℝ) T =
       tensorHs.cast (I := I) (M := M)
         (by ring : σ = σ - 2 * 0) T := by
   refine tensorHs.ext ?_
@@ -470,14 +470,14 @@ theorem tensorFractionalPower_zero
 intermediate scale is `H^{σ−2φ}` and the final scale is
 `H^{σ−2(θ+φ)}`. -/
 theorem tensorFractionalPower_add_apply {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ}
+    {r s : ℕ} {σ : ℝ}
     (θ φ : ℝ) (T : tensorHs (I := I) (M := M) g r s σ) :
-    tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas θ
-        (tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas φ T) =
+    tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) θ
+        (tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) φ T) =
       (tensorHs.cast (I := I) (M := M)
         (by ring :
           σ - 2 * (θ + φ) = (σ - 2 * φ) - 2 * θ))
-        (tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas (θ + φ) T) := by
+        (tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) (θ + φ) T) := by
   refine tensorHs.ext ?_
   funext i
   rw [tensorFractionalPower_coeff, tensorFractionalPower_coeff,
@@ -497,7 +497,7 @@ equivalence `Hˢ ≃ₗᵢ[ℝ] H^{σ−2θ}`. The forward map is the spectral
 multiplier by `(1 + λᵢ)^θ`; its inverse is `(1 − Δ_∇)^{−θ}`, the
 multiplier by `(1 + λᵢ)^{−θ}`. See `tensorFractionalPowerEquiv_symm`. -/
 def tensorFractionalPowerEquiv {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (_h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) (θ σ : ℝ) :
+    (θ σ : ℝ) :
     tensorHs (I := I) (M := M) g r s σ ≃ₗᵢ[ℝ]
       tensorHs (I := I) (M := M) g r s (σ - 2 * θ) where
   toFun := tensorHs.fractionalPowerFun (I := I) (M := M) θ
@@ -530,18 +530,18 @@ def tensorFractionalPowerEquiv {g : SmoothRiemannianMetric I M} {r s : ℕ}
 `fractionalPowerFun T`; it agrees with `tensorFractionalPower`. -/
 @[simp] theorem tensorFractionalPowerEquiv_apply
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} (θ σ : ℝ)
+    (θ σ : ℝ)
     (T : tensorHs (I := I) (M := M) g r s σ) :
-    tensorFractionalPowerEquiv (I := I) (M := M) h_atlas θ σ T =
-      tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas θ T := rfl
+    tensorFractionalPowerEquiv (I := I) (M := M) (g := g) (r := r) (s := s) θ σ T =
+      tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) θ T := rfl
 
 /-- The coordinate formula for the fractional-power equivalence. -/
 @[simp] theorem tensorFractionalPowerEquiv_coeff
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} (θ σ : ℝ)
+    (θ σ : ℝ)
     (T : tensorHs (I := I) (M := M) g r s σ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    (tensorFractionalPowerEquiv (I := I) (M := M) h_atlas θ σ T).coeff i =
+    (tensorFractionalPowerEquiv (I := I) (M := M) (g := g) (r := r) (s := s) θ σ T).coeff i =
       tensorSobolevWeight (I := I) (M := M) i θ * T.coeff i := rfl
 
 /-- The fractional-power equivalence at exponent `θ`, regarded as a
@@ -549,10 +549,10 @@ continuous linear map (via its `ContinuousLinearEquiv`), is the operator
 `tensorFractionalPower`. -/
 theorem tensorFractionalPowerEquiv_toContinuousLinearMap
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} (θ σ : ℝ) :
+    (θ σ : ℝ) :
     (tensorFractionalPowerEquiv (I := I) (M := M) (g := g) (r := r) (s := s)
-        h_atlas θ σ).toContinuousLinearEquiv.toContinuousLinearMap =
-      tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) (σ := σ) h_atlas θ := by
+        θ σ).toContinuousLinearEquiv.toContinuousLinearMap =
+      tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) (σ := σ) θ := by
   refine ContinuousLinearMap.ext (fun T => ?_)
   rfl
 
@@ -560,18 +560,18 @@ theorem tensorFractionalPowerEquiv_toContinuousLinearMap
 inverting `(1 − Δ_∇)^θ` is the same as raising to the negated exponent.
 The cast records the definitional scale `σ − 2θ − 2(−θ) = σ`. -/
 theorem tensorFractionalPowerEquiv_symm {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
+    {r s : ℕ}
     (θ σ : ℝ) (T : tensorHs (I := I) (M := M) g r s (σ - 2 * θ)) :
-    (tensorFractionalPowerEquiv (I := I) (M := M) h_atlas θ σ).symm T =
+    (tensorFractionalPowerEquiv (I := I) (M := M) (g := g) (r := r) (s := s) θ σ).symm T =
       tensorHs.cast (I := I) (M := M)
         (by ring : σ - 2 * θ - 2 * (-θ) = σ)
-        (tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas (-θ) T) := rfl
+        (tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) (-θ) T) := rfl
 
 /-- The fractional-power equivalence is an isometry, in norm form. -/
 theorem tensorFractionalPowerEquiv_norm {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
+    {r s : ℕ}
     (θ σ : ℝ) (T : tensorHs (I := I) (M := M) g r s σ) :
-    ‖tensorFractionalPowerEquiv (I := I) (M := M) h_atlas θ σ T‖ = ‖T‖ :=
+    ‖tensorFractionalPowerEquiv (I := I) (M := M) (g := g) (r := r) (s := s) θ σ T‖ = ‖T‖ :=
   tensorHs.norm_fractionalPowerFun (I := I) (M := M) θ T
 
 /-! ## The scale shift `Λˢ` by exactly `s`
@@ -675,7 +675,7 @@ end tensorHs
 `tensorLambdaPower_eq_fractionalPower` for its identification with
 `tensorFractionalPower (s/2)`.) -/
 def tensorLambdaPower {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (_h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) (sh : ℝ) {σ : ℝ} :
+    (sh : ℝ) {σ : ℝ} :
     tensorHs (I := I) (M := M) g r s σ →L[ℝ]
       tensorHs (I := I) (M := M) g r s (σ - sh) :=
   LinearMap.mkContinuous
@@ -692,33 +692,33 @@ def tensorLambdaPower {g : SmoothRiemannianMetric I M} {r s : ℕ}
 /-- `tensorLambdaPower` applied to `T` is the underlying
 `lambdaPowerFun T`. -/
 @[simp] lemma tensorLambdaPower_apply {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ}
+    {r s : ℕ} {σ : ℝ}
     (sh : ℝ) (T : tensorHs (I := I) (M := M) g r s σ) :
-    tensorLambdaPower (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas sh T =
+    tensorLambdaPower (I := I) (M := M) (g := g) (r := r) (s := s) sh T =
       tensorHs.lambdaPowerFun (I := I) (M := M) sh T := rfl
 
 /-- The coordinate formula for the scale shift: `Λˢ` multiplies the
 `i`-th coordinate by `(1 + λᵢ)^{s/2}`. -/
 @[simp] theorem tensorLambdaPower_coeff {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ}
+    {r s : ℕ} {σ : ℝ}
     (sh : ℝ) (T : tensorHs (I := I) (M := M) g r s σ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    (tensorLambdaPower (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas sh T).coeff i =
+    (tensorLambdaPower (I := I) (M := M) (g := g) (r := r) (s := s) sh T).coeff i =
       tensorSobolevWeight (I := I) (M := M) i (sh / 2) * T.coeff i := rfl
 
 /-- The scale shift `Λˢ` is an isometry: `‖Λˢ T‖_{H^{σ−s}} = ‖T‖_{Hˢ}`. -/
 theorem tensorLambdaPower_norm {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ}
+    {r s : ℕ} {σ : ℝ}
     (sh : ℝ) (T : tensorHs (I := I) (M := M) g r s σ) :
-    ‖tensorLambdaPower (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas sh T‖ = ‖T‖ :=
+    ‖tensorLambdaPower (I := I) (M := M) (g := g) (r := r) (s := s) sh T‖ = ‖T‖ :=
   tensorHs.norm_lambdaPowerFun (I := I) (M := M) sh T
 
 /-- The operator norm of the scale shift is at most `1` (it is an
 isometry; see `tensorLambdaPower_norm`). -/
 theorem tensorLambdaPower_opNorm_le_one {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ}
+    {r s : ℕ} {σ : ℝ}
     (sh : ℝ) :
-    ‖tensorLambdaPower (I := I) (M := M) (g := g) (r := r) (s := s) (σ := σ) h_atlas sh‖ ≤ 1 :=
+    ‖tensorLambdaPower (I := I) (M := M) (g := g) (r := r) (s := s) (σ := σ) sh‖ ≤ 1 :=
   LinearMap.mkContinuous_norm_le _ zero_le_one _
 
 /-- The scale shift `Λˢ` is the fractional power `(1 − Δ_∇)^{s/2}`,
@@ -726,12 +726,12 @@ modulo the definitional scale rewrite `σ − 2·(s/2) = σ − s`: applied to
 `T`, both produce the coordinate family `i ↦ (1 + λᵢ)^{s/2} · T.coeff i`. -/
 theorem tensorLambdaPower_eq_fractionalPower
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ}
+    {σ : ℝ}
     (sh : ℝ) (T : tensorHs (I := I) (M := M) g r s σ) :
-    tensorLambdaPower (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas sh T =
+    tensorLambdaPower (I := I) (M := M) (g := g) (r := r) (s := s) sh T =
       tensorHs.cast (I := I) (M := M)
         (by ring : σ - 2 * (sh / 2) = σ - sh)
-        (tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas (sh / 2) T) := by
+        (tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) (sh / 2) T) := by
   refine tensorHs.ext ?_
   funext i
   rw [tensorLambdaPower_coeff, tensorHs.cast_coeff,
@@ -741,10 +741,10 @@ theorem tensorLambdaPower_eq_fractionalPower
 scale is `σ − 0`, so this is stated coordinatewise. -/
 @[simp] theorem tensorLambdaPower_zero_coeff
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {σ : ℝ}
+    {σ : ℝ}
     (T : tensorHs (I := I) (M := M) g r s σ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    (tensorLambdaPower (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas (0 : ℝ) T).coeff i =
+    (tensorLambdaPower (I := I) (M := M) (g := g) (r := r) (s := s) (0 : ℝ) T).coeff i =
       T.coeff i := by
   rw [tensorLambdaPower_coeff, zero_div, tensorSobolevWeight_zero, one_mul]
 
@@ -761,14 +761,14 @@ applying `(1 − Δ_∇)^θ` then including `H^{σ−2θ} ↪ H^{τ−2θ}`. Bot
 multiply the coordinate by `(1 + λᵢ)^θ` without touching the index. -/
 theorem tensorFractionalPower_tensorHsInclusion
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {τ σ : ℝ}
+    {τ σ : ℝ}
     (θ : ℝ) (hτσ : τ ≤ σ)
     (T : tensorHs (I := I) (M := M) g r s σ) :
-    tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas θ
+    tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) θ
         (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) hτσ T) =
       tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
         (sub_le_sub_right hτσ (2 * θ))
-        (tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas θ T) := by
+        (tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) θ T) := by
   refine tensorHs.ext ?_
   funext i
   rw [tensorFractionalPower_coeff, tensorHsInclusion_coeff_apply,
@@ -779,14 +779,14 @@ operator form: `(1 − Δ_∇)^θ ∘ ι_{τ≤σ} = ι_{τ−2θ ≤ σ−2θ} 
 as continuous linear maps `Hˢ → H^{τ−2θ}`. -/
 theorem tensorFractionalPower_comp_tensorHsInclusion
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} {τ σ : ℝ}
+    {τ σ : ℝ}
     (θ : ℝ) (hτσ : τ ≤ σ) :
-    (tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas θ).comp
+    (tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) θ).comp
         (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) hτσ) =
       (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
           (sub_le_sub_right hτσ (2 * θ))).comp
         (tensorFractionalPower (I := I) (M := M) (σ := σ)
-          h_atlas θ) := by
+          θ) := by
   refine ContinuousLinearMap.ext (fun T => ?_)
   rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply]
   exact tensorFractionalPower_tensorHsInclusion (I := I) (M := M) θ hτσ T
@@ -804,11 +804,11 @@ fractional power `(1 − Δ_∇)^{(σ−τ)/2}`: it multiplies the coordinate by
 `(1 + λᵢ)^{(σ−τ)/2}` and shifts the scale from `σ` to
 `σ − (σ−τ) = τ`. -/
 def tensorHsEquivOfFractionalPower {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    {r s : ℕ}
     (σ τ : ℝ) :
     tensorHs (I := I) (M := M) g r s σ ≃ₗᵢ[ℝ]
       tensorHs (I := I) (M := M) g r s τ :=
-  (tensorFractionalPowerEquiv (I := I) (M := M) h_atlas
+  (tensorFractionalPowerEquiv (I := I) (M := M) (g := g) (r := r) (s := s)
     ((σ - τ) / 2) σ).trans
     (tensorHs.castEquiv (I := I) (M := M)
       (by ring : σ - 2 * ((σ - τ) / 2) = τ))
@@ -817,16 +817,16 @@ def tensorHsEquivOfFractionalPower {g : SmoothRiemannianMetric I M}
 the `i`-th coordinate by `(1 + λᵢ)^{(σ−τ)/2}`. -/
 @[simp] theorem tensorHsEquivOfFractionalPower_coeff
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} (σ τ : ℝ)
+    (σ τ : ℝ)
     (T : tensorHs (I := I) (M := M) g r s σ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    (tensorHsEquivOfFractionalPower (I := I) (M := M) h_atlas σ τ T).coeff
+    (tensorHsEquivOfFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) σ τ T).coeff
         i =
       tensorSobolevWeight (I := I) (M := M) i ((σ - τ) / 2) * T.coeff i := by
   unfold tensorHsEquivOfFractionalPower
   rw [LinearIsometryEquiv.trans_apply]
   change (tensorHs.castEquiv (I := I) (M := M) _
-    (tensorFractionalPowerEquiv (I := I) (M := M) h_atlas
+    (tensorFractionalPowerEquiv (I := I) (M := M) (g := g) (r := r) (s := s)
       ((σ - τ) / 2) σ T)).coeff i = _
   rw [tensorHs.castEquiv_coeff, tensorFractionalPowerEquiv_coeff]
 
@@ -835,32 +835,32 @@ This is the precise sense in which all the spectral Sobolev spaces are
 "the same" Hilbert space, with the eigen-coordinates merely reweighted. -/
 theorem tensorHsEquivOfFractionalPower_norm
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} (σ τ : ℝ)
+    (σ τ : ℝ)
     (T : tensorHs (I := I) (M := M) g r s σ) :
-    ‖tensorHsEquivOfFractionalPower (I := I) (M := M) h_atlas σ τ T‖ =
+    ‖tensorHsEquivOfFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) σ τ T‖ =
       ‖T‖ :=
-  (tensorHsEquivOfFractionalPower (I := I) (M := M)
-    h_atlas σ τ).norm_map T
+  (tensorHsEquivOfFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s)
+    σ τ).norm_map T
 
 /-! ## Sanity tests -/
 
 example {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M} (θ : ℝ) {σ : ℝ} :
+    (θ : ℝ) {σ : ℝ} :
     tensorHs (I := I) (M := M) g r s σ →L[ℝ]
       tensorHs (I := I) (M := M) g r s (σ - 2 * θ) :=
-  tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas θ
+  tensorFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) θ
 
 example {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) (θ σ : ℝ) :
+    (θ σ : ℝ) :
     tensorHs (I := I) (M := M) g r s σ ≃ₗᵢ[ℝ]
       tensorHs (I := I) (M := M) g r s (σ - 2 * θ) :=
-  tensorFractionalPowerEquiv (I := I) (M := M) h_atlas θ σ
+  tensorFractionalPowerEquiv (I := I) (M := M) (g := g) (r := r) (s := s) θ σ
 
 example {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) (σ τ : ℝ) :
+    (σ τ : ℝ) :
     tensorHs (I := I) (M := M) g r s σ ≃ₗᵢ[ℝ]
       tensorHs (I := I) (M := M) g r s τ :=
-  tensorHsEquivOfFractionalPower (I := I) (M := M) h_atlas σ τ
+  tensorHsEquivOfFractionalPower (I := I) (M := M) (g := g) (r := r) (s := s) σ τ
 
 end TensorHeatEquation
 end Parabolic

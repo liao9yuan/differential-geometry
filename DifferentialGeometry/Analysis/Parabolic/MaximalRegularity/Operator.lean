@@ -304,11 +304,11 @@ time derivative `∂_t u ∈ L²([0,T]; Hᵃ)`. -/
 /-- **The time-derivative field `∂_t u`.**  For a forcing term `f ∈ L²([0,T];
 Hᵃ)`, this is the element of `L²([0,T]; Hᵃ)` whose `i`-th eigen-coordinate is
 `fᵢ − λᵢ·φᵢ`, the per-mode scalar ODE right-hand side. -/
-def maximalRegularityDerivField (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+def maximalRegularityDerivField (_h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (a : ℝ) {T : ℝ} (hT : 0 ≤ T)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
     timeL2 (tensorHs (I := I) (M := M) g r s a) T :=
-  timeL2OfModes (I := I) (M := M) h_atlas
+  timeL2OfModes (I := I) (M := M)
     (fun i => derivModeCoeff (I := I) (M := M) (a := a) hT f i)
 
 /-- The `i`-th eigen-coordinate of the time-derivative field is `fᵢ − λᵢ·φᵢ`. -/
@@ -318,7 +318,7 @@ theorem maximalRegularityDerivField_timeModeCoeff (hT : 0 ≤ T)
     timeModeCoeff (I := I) (M := M)
         (maximalRegularityDerivField (I := I) (M := M) h_atlas a hT f) i =
       derivModeCoeff (I := I) (M := M) (a := a) hT f i :=
-  timeL2OfModes_timeModeCoeff (I := I) (M := M) (h_atlas := h_atlas) _
+  timeL2OfModes_timeModeCoeff (I := I) (M := M) h_atlas _
     (summable_derivModeCoeff (I := I) (M := M) (a := a) hT h_atlas f) i
 
 /-- **The solution field `u`, viewed in `L²([0,T]; H^{a+2})`.**  For a forcing
@@ -326,11 +326,11 @@ term `f ∈ L²([0,T]; Hᵃ)`, this is the element of `L²([0,T]; H^{a+2})` whos
 `i`-th eigen-coordinate is `φᵢ = perModeConvL2 λᵢ fᵢ`.  The two-derivative gain
 (`H^{a+2}` from a forcing in `Hᵃ`) is exactly what the maximal-regularity bound
 quantifies. -/
-def maximalRegularitySolField (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+def maximalRegularitySolField (_h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (a : ℝ) {T : ℝ} (hT : 0 ≤ T)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
     timeL2 (tensorHs (I := I) (M := M) g r s (a + 2)) T :=
-  timeL2OfModes (I := I) (M := M) h_atlas
+  timeL2OfModes (I := I) (M := M)
     (fun i => solModeCoeff (I := I) (M := M) (a := a) hT f i)
 
 /-- The `i`-th eigen-coordinate of the solution field is `φᵢ = perModeConvL2 λᵢ
@@ -341,7 +341,7 @@ theorem maximalRegularitySolField_timeModeCoeff (hT : 0 ≤ T)
     timeModeCoeff (I := I) (M := M)
         (maximalRegularitySolField (I := I) (M := M) h_atlas a hT f) i =
       solModeCoeff (I := I) (M := M) (a := a) hT f i :=
-  timeL2OfModes_timeModeCoeff (I := I) (M := M) (h_atlas := h_atlas) _
+  timeL2OfModes_timeModeCoeff (I := I) (M := M) h_atlas _
     (summable_solModeCoeff (I := I) (M := M) (a := a) hT h_atlas f) i
 
 /-! ## The maximal-regularity operator
