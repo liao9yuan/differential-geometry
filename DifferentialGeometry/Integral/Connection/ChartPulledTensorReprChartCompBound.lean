@@ -305,12 +305,8 @@ constant times the sum of the operator norms of the chart-coordinate
 Fréchet derivatives of each chart-pulled scalar component.
 
 The constant `K` depends only on the ranks `r`, `s`, and the ambient
-model space `E`; it is independent of `T`, `α`, `b`, and `g`.
-
-The `h_atlas` argument is accepted for signature consistency with the
-covariant-derivative analogue; the proof does not consume it directly. -/
+model space `E`; it is independent of `T`, `α`, `b`, and `g`. -/
 theorem chart_pulled_tensor_repr_norm_le_chartComp_data
-    (_h_atlas : HasLocallyConstantChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧
       ∀ (T : SmoothCcTensor g r s),

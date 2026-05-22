@@ -550,7 +550,6 @@ does not currently carry an `IsContinuousRiemannianBundle` instance for
 general `(r, s)`, so the pointwise squared norm of a smooth section is not
 automatically measurable, and is supplied here as a public input. -/
 theorem rawTensorConnLap_L2NormSq_le_chartSobolevRawNormPou
-    (_h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (T : SmoothCcTensor g r s),

@@ -209,7 +209,6 @@ hypothesis is not actually used here: the squared envelope dominates the
 squared norm pointwise on all of `M`. The hypothesis is retained in the
 statement to advertise the intended downstream use. -/
 theorem rawTensorConnLap_norm_sq_le_chart_data_on_pou_tsupport
-    (_h_atlas : HasLocallyConstantChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T :
       letI _h_top : TopologicalSpace

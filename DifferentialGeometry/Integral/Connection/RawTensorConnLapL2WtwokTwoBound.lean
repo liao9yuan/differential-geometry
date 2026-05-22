@@ -7208,7 +7208,7 @@ theorem rawTensorConnLap_L2NormSq_le_wtwokTwoNorm_sq
   -- The bridge gives ∫ ‖raw‖² ≤ ofReal C_bridge · chartSobolevRawNormPou.
   obtain ⟨_C_bridge', _hC_bridge'_nn, hC_bridge_bound⟩ :=
     rawTensorConnLap_L2NormSq_le_chartSobolevRawNormPou
-      (I := I) (M := M) h_atlas g r s
+      (I := I) (M := M) g r s
   have h1 := hC_bridge_bound T hraw_meas
   refine h1.trans ?_
   have h2 := hC_B3_bound T
