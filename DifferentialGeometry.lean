@@ -793,6 +793,7 @@ import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartComponents
 import DifferentialGeometry.Analysis.Sobolev.Tensor.Defs
 import DifferentialGeometry.Analysis.Sobolev.Tensor.NormBasics
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartLocality
+import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedNorm
 import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.ChartPrimitives
 import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.PrincipalForm
 import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.CovDerivIntrinsicComponent
