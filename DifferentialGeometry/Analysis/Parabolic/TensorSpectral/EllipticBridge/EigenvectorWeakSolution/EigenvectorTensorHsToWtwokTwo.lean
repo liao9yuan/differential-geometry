@@ -6,7 +6,7 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.Defs
 
 For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, the uniform-Sobolev
 hypothesis `h_atlas`, an order `k : ℕ` and a real Sobolev exponent `σ`, this
-file constructs, from each element `T : tensorHs g r s h_atlas σ` whose
+file constructs, from each element `T : tensorHs g r s σ` whose
 eigenbasis coordinates have **finite support**, a smooth, compactly-supported
 representative
 
@@ -157,7 +157,7 @@ end TensorHsSmoothReprAux
 
 /-- **The smooth representative of a finitely-supported `Hˢ` element.**
 
-For an element `T : tensorHs g r s h_atlas σ` whose coordinate family
+For an element `T : tensorHs g r s σ` whose coordinate family
 `T.coeff` has finite support `hT_fs`, the canonical smooth, compactly-supported
 representative is the finite linear combination
 
@@ -168,8 +168,8 @@ stays inside it. The representative depends only on the coordinate family, not
 on the choice of finite cover of the support. -/
 noncomputable def tensorHsSmoothRepr
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
-    {σ : ℝ} (T : tensorHs (I := I) (M := M) g r s h_atlas σ)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    {σ : ℝ} (T : tensorHs (I := I) (M := M) g r s σ)
     (hT_fs : (Function.support T.coeff).Finite) :
     SmoothCcTensor g r s :=
   TensorHsSmoothReprAux.partialSum (I := I) (M := M) g r s h_atlas
@@ -179,10 +179,10 @@ noncomputable def tensorHsSmoothRepr
 smooth eigenvector representatives. -/
 theorem tensorHsSmoothRepr_eq
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
-    {σ : ℝ} (T : tensorHs (I := I) (M := M) g r s h_atlas σ)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    {σ : ℝ} (T : tensorHs (I := I) (M := M) g r s σ)
     (hT_fs : (Function.support T.coeff).Finite) :
-    tensorHsSmoothRepr (I := I) (M := M) T hT_fs =
+    tensorHsSmoothRepr (I := I) (M := M) h_atlas T hT_fs =
       ∑ i ∈ hT_fs.toFinset,
         T.coeff i •
           eigenvectorSmooth (I := I) (M := M) g r s h_atlas i := rfl
@@ -191,11 +191,11 @@ theorem tensorHsSmoothRepr_eq
 tensor Sobolev space `W^{2k, 2}` for *every* `k : ℕ`. -/
 theorem tensorHsSmoothRepr_memWtwokTwo
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
-    {σ : ℝ} (T : tensorHs (I := I) (M := M) g r s h_atlas σ)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    {σ : ℝ} (T : tensorHs (I := I) (M := M) g r s σ)
     (hT_fs : (Function.support T.coeff).Finite) (k : ℕ) :
     MemWtwokTwo (I := I) (M := M) g k
-      (tensorHsSmoothRepr (I := I) (M := M) T hT_fs) :=
+      (tensorHsSmoothRepr (I := I) (M := M) h_atlas T hT_fs) :=
   TensorHsSmoothReprAux.partialSum_memWtwokTwo
     (I := I) (M := M) g r s h_atlas k hT_fs.toFinset T.coeff
 
@@ -218,11 +218,11 @@ open scoped Classical in
 the chosen finite subset, else zero. -/
 private lemma sum_basisVec_coeff_apply
     (σ : ℝ) (S : Finset (TensorEigenIdx (I := I) (M := M) g r s))
-    (T : tensorHs (I := I) (M := M) g r s h_atlas σ)
+    (T : tensorHs (I := I) (M := M) g r s σ)
     (j : TensorEigenIdx (I := I) (M := M) g r s) :
     (∑ i ∈ S, T.coeff i •
         tensorHsBasisVec (I := I) (M := M)
-          (g := g) (r := r) (s := s) h_atlas σ i).coeff j =
+          (g := g) (r := r) (s := s) σ i).coeff j =
       ∑ i ∈ S, (if j = i then T.coeff i else 0) := by
   classical
   induction S using Finset.induction with
@@ -241,17 +241,16 @@ spectral expansion (`tensorHs.hasSum_smul_basisVec`) collapses to this finite
 identity when the coordinate family has finite support. -/
 theorem tensorHs_eq_finset_sum_of_finite_support
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
-    {σ : ℝ} (T : tensorHs (I := I) (M := M) g r s h_atlas σ)
+    {σ : ℝ} (T : tensorHs (I := I) (M := M) g r s σ)
     (hT_fs : (Function.support T.coeff).Finite) :
     T = ∑ i ∈ hT_fs.toFinset, T.coeff i •
       tensorHsBasisVec (I := I) (M := M)
-        (g := g) (r := r) (s := s) h_atlas σ i := by
+        (g := g) (r := r) (s := s) σ i := by
   classical
   refine tensorHs.ext ?_
   funext j
   rw [TensorHsSmoothReprAux.sum_basisVec_coeff_apply
-    (I := I) (M := M) g r s h_atlas σ hT_fs.toFinset T j]
+    (I := I) (M := M) g r s σ hT_fs.toFinset T j]
   -- The summand vanishes except at `i = j`, where it is `T.coeff j`.
   by_cases hj_supp : j ∈ Function.support T.coeff
   · -- `j` is in the support, so it is in `hT_fs.toFinset`.
@@ -284,15 +283,15 @@ of a finitely-supported `Hˢ` element to the same `L²` element as the abstract
 inclusion `tensorHsToL2 hσ T`. -/
 theorem tensorHsSmoothRepr_toL2
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
-    {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
-    {σ : ℝ} (hσ : 0 ≤ σ) (T : tensorHs (I := I) (M := M) g r s h_atlas σ)
+    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+    {σ : ℝ} (hσ : 0 ≤ σ) (T : tensorHs (I := I) (M := M) g r s σ)
     (hT_fs : (Function.support T.coeff).Finite) :
-    (tensorHsSmoothRepr (I := I) (M := M) T hT_fs : TensorL2 r s g) =
+    (tensorHsSmoothRepr (I := I) (M := M) h_atlas T hT_fs : TensorL2 r s g) =
       tensorHsToL2 (I := I) (M := M)
         (g := g) (r := r) (s := s) h_atlas hσ T := by
   classical
   -- Unfold the smooth representative to its finite sum.
-  rw [tensorHsSmoothRepr_eq (I := I) (M := M) T hT_fs]
+  rw [tensorHsSmoothRepr_eq (I := I) (M := M) h_atlas T hT_fs]
   -- Rewrite `T` as the finite sum of its basis components.
   conv_rhs => rw [tensorHs_eq_finset_sum_of_finite_support
     (I := I) (M := M) T hT_fs]
@@ -485,7 +484,7 @@ representative of a finitely-supported spectral Sobolev element.**
 For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, the uniform-Sobolev
 hypothesis `h_atlas` and an order `k : ℕ`, there is a single geometric
 constant `C ≥ 0` — uniform over every Sobolev exponent `σ` and every
-finitely-supported element `T : tensorHs g r s h_atlas σ` — such that the
+finitely-supported element `T : tensorHs g r s σ` — such that the
 global tensor Sobolev norm `wtwokTwoNorm g k (tensorHsSmoothRepr T hT_fs)` of
 the canonical smooth representative is bounded by
 
@@ -504,10 +503,10 @@ theorem tensorHsSmoothRepr_wtwokTwoNorm_le_uniform
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
-      ∀ {σ : ℝ} (T : tensorHs (I := I) (M := M) g r s h_atlas σ)
+      ∀ {σ : ℝ} (T : tensorHs (I := I) (M := M) g r s σ)
         (hT_fs : (Function.support T.coeff).Finite),
         wtwokTwoNorm (I := I) (M := M) g k
-            (tensorHsSmoothRepr (I := I) (M := M) T hT_fs)
+            (tensorHsSmoothRepr (I := I) (M := M) h_atlas T hT_fs)
           ≤ ENNReal.ofReal C *
               ENNReal.ofReal (∑ i ∈ hT_fs.toFinset,
                 |T.coeff i| * (i.fst.val)⁻¹ ^ (2 * k + 1)) := by
@@ -579,35 +578,35 @@ section ElaborationTests
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
 
-example {σ : ℝ} (T : tensorHs (I := I) (M := M) g r s h_atlas σ)
+example {σ : ℝ} (T : tensorHs (I := I) (M := M) g r s σ)
     (hT_fs : (Function.support T.coeff).Finite) :
     SmoothCcTensor g r s :=
-  tensorHsSmoothRepr (I := I) (M := M) T hT_fs
+  tensorHsSmoothRepr (I := I) (M := M) h_atlas T hT_fs
 
-example {σ : ℝ} (T : tensorHs (I := I) (M := M) g r s h_atlas σ)
+example {σ : ℝ} (T : tensorHs (I := I) (M := M) g r s σ)
     (hT_fs : (Function.support T.coeff).Finite) (k : ℕ) :
     MemWtwokTwo (I := I) (M := M) g k
-      (tensorHsSmoothRepr (I := I) (M := M) T hT_fs) :=
-  tensorHsSmoothRepr_memWtwokTwo (I := I) (M := M) T hT_fs k
+      (tensorHsSmoothRepr (I := I) (M := M) h_atlas T hT_fs) :=
+  tensorHsSmoothRepr_memWtwokTwo (I := I) (M := M) h_atlas T hT_fs k
 
 example (k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
-      ∀ {σ : ℝ} (T : tensorHs (I := I) (M := M) g r s h_atlas σ)
+      ∀ {σ : ℝ} (T : tensorHs (I := I) (M := M) g r s σ)
         (hT_fs : (Function.support T.coeff).Finite),
         wtwokTwoNorm (I := I) (M := M) g k
-            (tensorHsSmoothRepr (I := I) (M := M) T hT_fs)
+            (tensorHsSmoothRepr (I := I) (M := M) h_atlas T hT_fs)
           ≤ ENNReal.ofReal C *
               ENNReal.ofReal (∑ i ∈ hT_fs.toFinset,
                 |T.coeff i| * (i.fst.val)⁻¹ ^ (2 * k + 1)) :=
   tensorHsSmoothRepr_wtwokTwoNorm_le_uniform (I := I) (M := M) g r s h_atlas k
 
 example {σ : ℝ} (hσ : 0 ≤ σ)
-    (T : tensorHs (I := I) (M := M) g r s h_atlas σ)
+    (T : tensorHs (I := I) (M := M) g r s σ)
     (hT_fs : (Function.support T.coeff).Finite) :
-    (tensorHsSmoothRepr (I := I) (M := M) T hT_fs : TensorL2 r s g) =
+    (tensorHsSmoothRepr (I := I) (M := M) h_atlas T hT_fs : TensorL2 r s g) =
       tensorHsToL2 (I := I) (M := M)
         (g := g) (r := r) (s := s) h_atlas hσ T :=
-  tensorHsSmoothRepr_toL2 (I := I) (M := M) hσ T hT_fs
+  tensorHsSmoothRepr_toL2 (I := I) (M := M) h_atlas hσ T hT_fs
 
 end ElaborationTests
 

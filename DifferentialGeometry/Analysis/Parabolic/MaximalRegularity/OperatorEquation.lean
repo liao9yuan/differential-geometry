@@ -95,7 +95,7 @@ private theorem scaleLaplacianWeightMulTwo
 
 /-- The pointwise bound `(1 + λᵢ)ᵗ · (λᵢ · v_i)² ≤ (1 + λᵢ)^{τ+2} · v_i²`. -/
 private theorem weightLambdaMulSqLe
-    (v : tensorHs (I := I) (M := M) g r s h_atlas (τ + 2))
+    (v : tensorHs (I := I) (M := M) g r s (τ + 2))
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     tensorSobolevWeight (I := I) (M := M) i τ *
         (-(TensorEigenIdx.lambda (I := I) (M := M) i) * v.coeff i) ^ 2 ≤
@@ -117,7 +117,7 @@ private theorem weightLambdaMulSqLe
 /-- The coordinate family `i ↦ -λᵢ · v_i` is weighted-summable at the scale
 `τ` whenever `v ∈ H^{τ+2}`: the rough Laplacian of `v` lies in `Hᵗ`. -/
 private theorem scaleLaplacianWeightedSummable
-    (v : tensorHs (I := I) (M := M) g r s h_atlas (τ + 2)) :
+    (v : tensorHs (I := I) (M := M) g r s (τ + 2)) :
     Summable (fun i => tensorSobolevWeight (I := I) (M := M) i τ *
       (-(TensorEigenIdx.lambda (I := I) (M := M) i) * v.coeff i) ^ 2) := by
   refine Summable.of_nonneg_of_le (fun i => ?_) (fun i => ?_) v.weighted_summable
@@ -128,20 +128,20 @@ private theorem scaleLaplacianWeightedSummable
 /-- The underlying coordinate function of the rough Laplacian on the spectral
 scale: it multiplies the `i`-th coordinate by `-λᵢ`, carrying `H^{τ+2}` into
 `Hᵗ`. -/
-def scaleLaplacianFun (v : tensorHs (I := I) (M := M) g r s h_atlas (τ + 2)) :
-    tensorHs (I := I) (M := M) g r s h_atlas τ where
+def scaleLaplacianFun (v : tensorHs (I := I) (M := M) g r s (τ + 2)) :
+    tensorHs (I := I) (M := M) g r s τ where
   coeff i := -(TensorEigenIdx.lambda (I := I) (M := M) i) * v.coeff i
   weighted_summable := scaleLaplacianWeightedSummable (I := I) (M := M) v
 
 @[simp] theorem scaleLaplacianFun_coeff
-    (v : tensorHs (I := I) (M := M) g r s h_atlas (τ + 2))
+    (v : tensorHs (I := I) (M := M) g r s (τ + 2))
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     (scaleLaplacianFun (I := I) (M := M) v).coeff i =
       -(TensorEigenIdx.lambda (I := I) (M := M) i) * v.coeff i := rfl
 
 /-- The rough Laplacian on the scale is additive. -/
 theorem scaleLaplacianFun_add
-    (v w : tensorHs (I := I) (M := M) g r s h_atlas (τ + 2)) :
+    (v w : tensorHs (I := I) (M := M) g r s (τ + 2)) :
     scaleLaplacianFun (I := I) (M := M) (v + w) =
       scaleLaplacianFun (I := I) (M := M) v + scaleLaplacianFun (I := I) (M := M) w := by
   refine tensorHs.ext (funext (fun i => ?_))
@@ -150,7 +150,7 @@ theorem scaleLaplacianFun_add
 
 /-- The rough Laplacian on the scale is `ℝ`-homogeneous. -/
 theorem scaleLaplacianFun_smul (c : ℝ)
-    (v : tensorHs (I := I) (M := M) g r s h_atlas (τ + 2)) :
+    (v : tensorHs (I := I) (M := M) g r s (τ + 2)) :
     scaleLaplacianFun (I := I) (M := M) (c • v) =
       c • scaleLaplacianFun (I := I) (M := M) v := by
   refine tensorHs.ext (funext (fun i => ?_))
@@ -160,7 +160,7 @@ theorem scaleLaplacianFun_smul (c : ℝ)
 /-- The rough Laplacian on the scale is norm-non-increasing:
 `‖Δ_∇ v‖_{Hᵗ} ≤ ‖v‖_{H^{τ+2}}`. -/
 theorem norm_scaleLaplacianFun_le
-    (v : tensorHs (I := I) (M := M) g r s h_atlas (τ + 2)) :
+    (v : tensorHs (I := I) (M := M) g r s (τ + 2)) :
     ‖scaleLaplacianFun (I := I) (M := M) v‖ ≤ ‖v‖ := by
   have hsq : ‖scaleLaplacianFun (I := I) (M := M) v‖ ^ 2 ≤ ‖v‖ ^ 2 := by
     rw [tensorHs.norm_sq_eq_tsum (I := I) (M := M),
@@ -177,10 +177,10 @@ theorem norm_scaleLaplacianFun_le
 linear operator `Δ_∇ : H^{τ+2} →L[ℝ] Hᵗ`.  It multiplies the `i`-th
 eigen-coordinate by `-λᵢ` (geometer convention `Δ_∇ = -∇*∇`), losing exactly two
 Sobolev derivatives.  Its operator norm is at most `1`. -/
-def tensorScaleLaplacian (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
+def tensorScaleLaplacian (_h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (τ : ℝ) :
-    tensorHs (I := I) (M := M) g r s h_atlas (τ + 2) →L[ℝ]
-      tensorHs (I := I) (M := M) g r s h_atlas τ :=
+    tensorHs (I := I) (M := M) g r s (τ + 2) →L[ℝ]
+      tensorHs (I := I) (M := M) g r s τ :=
   LinearMap.mkContinuous
     { toFun := scaleLaplacianFun (I := I) (M := M)
       map_add' := scaleLaplacianFun_add (I := I) (M := M)
@@ -192,14 +192,14 @@ def tensorScaleLaplacian (h_atlas : DifferentialGeometry.Geometry.HasLocallyCons
       exact norm_scaleLaplacianFun_le (I := I) (M := M) v)
 
 @[simp] theorem tensorScaleLaplacian_apply (τ : ℝ)
-    (v : tensorHs (I := I) (M := M) g r s h_atlas (τ + 2)) :
+    (v : tensorHs (I := I) (M := M) g r s (τ + 2)) :
     tensorScaleLaplacian (I := I) (M := M) h_atlas τ v =
       scaleLaplacianFun (I := I) (M := M) v := rfl
 
 /-- The coordinate formula for the rough Laplacian: `Δ_∇` multiplies the `i`-th
 coordinate by `-λᵢ`. -/
 @[simp] theorem tensorScaleLaplacian_coeff (τ : ℝ)
-    (v : tensorHs (I := I) (M := M) g r s h_atlas (τ + 2))
+    (v : tensorHs (I := I) (M := M) g r s (τ + 2))
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     (tensorScaleLaplacian (I := I) (M := M) h_atlas τ v).coeff i =
       -(TensorEigenIdx.lambda (I := I) (M := M) i) * v.coeff i := rfl
@@ -216,14 +216,14 @@ map `L²([0,T]; H^{τ+2}) →L[ℝ] L²([0,T]; Hᵗ)`: the rough Laplacian `Δ_�
 pointwise in time. -/
 def timeScaleLaplacian (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (τ : ℝ) {T : ℝ} :
-    timeL2 (tensorHs (I := I) (M := M) g r s h_atlas (τ + 2)) T →L[ℝ]
-      timeL2 (tensorHs (I := I) (M := M) g r s h_atlas τ) T :=
+    timeL2 (tensorHs (I := I) (M := M) g r s (τ + 2)) T →L[ℝ]
+      timeL2 (tensorHs (I := I) (M := M) g r s τ) T :=
   (tensorScaleLaplacian (I := I) (M := M) h_atlas τ).compLpL 2 (timeMeasure T)
 
 /-- `timeScaleLaplacian τ v` is represented a.e. by the pointwise rough
 Laplacian `t ↦ Δ_∇ (v t)`. -/
 theorem timeScaleLaplacian_coeFn
-    (v : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas (τ + 2)) T) :
+    (v : timeL2 (tensorHs (I := I) (M := M) g r s (τ + 2)) T) :
     timeScaleLaplacian (I := I) (M := M) h_atlas τ v =ᵐ[timeMeasure T]
       fun t => tensorScaleLaplacian (I := I) (M := M) h_atlas τ (v t) :=
   (tensorScaleLaplacian (I := I) (M := M) h_atlas τ).coeFn_compLpL
@@ -232,7 +232,7 @@ theorem timeScaleLaplacian_coeFn
 /-- The time-mode coordinate of the rough Laplacian of a field: the rough
 Laplacian multiplies the `i`-th time-mode coordinate by `-λᵢ`. -/
 theorem timeModeCoeff_timeScaleLaplacian
-    (v : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas (τ + 2)) T)
+    (v : timeL2 (tensorHs (I := I) (M := M) g r s (τ + 2)) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     timeModeCoeff (I := I) (M := M)
         (timeScaleLaplacian (I := I) (M := M) h_atlas τ v) i =
@@ -256,7 +256,7 @@ time-derivative field equals `-λᵢ` times the `i`-th coordinate of the solutio
 field plus the `i`-th coordinate of the forcing.  This is the per-mode scalar
 ODE `φᵢ' = -λᵢ·φᵢ + fᵢ`, holding by construction of `perModeConvDerivL2`. -/
 theorem maximalRegularityOp_solves_perMode {a : ℝ} (hT : 0 ≤ T)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T)
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     timeModeCoeff (I := I) (M := M)
         (maximalRegularityDerivField (I := I) (M := M) h_atlas a hT f) i =
@@ -283,7 +283,7 @@ plus the forcing.
 Mode by mode this is the per-mode scalar ODE `φᵢ' = -λᵢ·φᵢ + fᵢ`; the assembly
 is the injectivity of the time-mode coordinate map. -/
 theorem maximalRegularityOp_solves {a : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T) :
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
     TimeSobolev.timeH1.timeDeriv _ T
         (maximalRegularityOp (I := I) (M := M) h_atlas a hT hT1 f) =
       timeScaleLaplacian (I := I) (M := M) h_atlas a
@@ -293,7 +293,7 @@ theorem maximalRegularityOp_solves {a : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
   rw [maximalRegularityOp_timeDeriv (I := I) (M := M) (h_atlas := h_atlas)
     (a := a) hT hT1 f]
   -- Two `timeL2(Hᵃ)` elements with identical time-mode coordinates are equal.
-  refine timeModeCoeff_injective (I := I) (M := M) (fun i => ?_)
+  refine timeModeCoeff_injective (I := I) (M := M) h_atlas (fun i => ?_)
   rw [timeModeCoeff_add (I := I) (M := M),
     timeModeCoeff_timeScaleLaplacian (I := I) (M := M) (τ := a)
       (maximalRegularitySolField (I := I) (M := M) h_atlas a hT.le f) i]

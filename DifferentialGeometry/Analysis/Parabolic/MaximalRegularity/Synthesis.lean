@@ -81,12 +81,12 @@ spectral Sobolev space `Hˢ`, sending `c` to the scalar multiple of the `i`-th
 spectral basis vector.  It is linear, and its norm is `√((1 + λᵢ)ˢ)` since
 `bᵢ` has `Hˢ`-norm `√((1 + λᵢ)ˢ)` (it is the single-mode coordinate family). -/
 
-/-- The `Hˢ`-norm of the spectral basis vector `tensorHsBasisVec h_atlas σ i`
+/-- The `Hˢ`-norm of the spectral basis vector `tensorHsBasisVec σ i`
 is `√((1 + λᵢ)ˢ) = √(tensorSobolevWeight i σ)`.  Its only nonzero coordinate is
 the `i`-th, equal to `1`. -/
 theorem norm_tensorHsBasisVec {σ : ℝ}
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    ‖tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas σ i‖ =
+    ‖tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) σ i‖ =
       Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ) := by
   classical
   rw [tensorHs.norm_eq_sqrt_tsum]
@@ -94,7 +94,7 @@ theorem norm_tensorHsBasisVec {σ : ℝ}
   -- The weighted-square family of `bᵢ` is supported at `i`, with value the
   -- weight at `i`.
   have hfun : (fun j => tensorSobolevWeight (I := I) (M := M) j σ *
-        ((tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas σ i).coeff j) ^ 2)
+        ((tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) σ i).coeff j) ^ 2)
       = fun j => if j = i then tensorSobolevWeight (I := I) (M := M) j σ else 0 := by
     funext j
     rw [tensorHsBasisVec_coeff]
@@ -106,23 +106,23 @@ theorem norm_tensorHsBasisVec {σ : ℝ}
 /-- The single-mode embedding `ℝ →L[ℝ] Hˢ`, `c ↦ c · bᵢ`: the scalar multiple of
 the `i`-th spectral basis vector.  Its operator norm is `√(tensorSobolevWeight
 i σ)`. -/
-def singleModeCLM (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) {σ : ℝ}
+def singleModeCLM (_h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) {σ : ℝ}
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    ℝ →L[ℝ] tensorHs (I := I) (M := M) g r s h_atlas σ :=
+    ℝ →L[ℝ] tensorHs (I := I) (M := M) g r s σ :=
   LinearMap.mkContinuous
-    { toFun := fun c => c • tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas σ i
+    { toFun := fun c => c • tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) σ i
       map_add' := fun c d => by rw [add_smul]
       map_smul' := fun a c => by rw [smul_smul]; rfl }
     (Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ))
     (fun c => by
-      change ‖c • tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas σ i‖ ≤ _
+      change ‖c • tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) σ i‖ ≤ _
       rw [norm_smul, norm_tensorHsBasisVec (I := I) (M := M) i, Real.norm_eq_abs]
       exact le_of_eq (mul_comm _ _))
 
 @[simp] theorem singleModeCLM_apply {σ : ℝ}
     (i : TensorEigenIdx (I := I) (M := M) g r s) (c : ℝ) :
     singleModeCLM (I := I) (M := M) h_atlas (σ := σ) i c =
-      c • tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas σ i := rfl
+      c • tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) σ i := rfl
 
 open scoped Classical in
 /-- The `j`-th coordinate of `singleModeCLM i c` is `c` if `j = i` and `0`
@@ -151,7 +151,7 @@ scalar time function `g` is sent to the time-`L²` tensor field `t ↦ (g t) · 
 whose only nonzero eigen-coordinate is the `i`-th. -/
 def singleModeTimeL2 (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) {σ : ℝ}
     {T : ℝ} (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    timeL2 ℝ T →L[ℝ] timeL2 (tensorHs (I := I) (M := M) g r s h_atlas σ) T :=
+    timeL2 ℝ T →L[ℝ] timeL2 (tensorHs (I := I) (M := M) g r s σ) T :=
   (singleModeCLM (I := I) (M := M) h_atlas (σ := σ) i).compLpL 2 (timeMeasure T)
 
 /-- `singleModeTimeL2 i g` is represented a.e. by the function
@@ -159,7 +159,7 @@ def singleModeTimeL2 (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstant
 theorem singleModeTimeL2_coeFn (i : TensorEigenIdx (I := I) (M := M) g r s)
     (gf : timeL2 ℝ T) :
     singleModeTimeL2 (I := I) (M := M) h_atlas (σ := σ) i gf =ᵐ[timeMeasure T]
-      fun t => (gf t) • tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas σ i := by
+      fun t => (gf t) • tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) σ i := by
   have h := (singleModeCLM (I := I) (M := M) h_atlas (σ := σ) i).coeFn_compLpL
     (p := 2) (μ := timeMeasure T) gf
   exact h.trans (Eventually.of_forall fun t => singleModeCLM_apply (I := I) (M := M) i (gf t))
@@ -180,7 +180,7 @@ theorem timeModeCoeff_singleModeTimeL2
     (σ := σ) i gf
   -- The coordinate of `(gf t) • bᵢ` at `j` is `(if j = i then gf t else 0)`.
   have hcoord : ∀ t,
-      (((gf t) • tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas σ i).coeff j)
+      (((gf t) • tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) σ i).coeff j)
         = (if j = i then gf t else 0) := by
     intro t
     simp only [tensorHs.smul_coeff, tensorHsBasisVec_coeff]
@@ -238,14 +238,14 @@ of the orthogonal spectral basis vectors `bᵢ`, `b_j`. -/
 `⟪bᵢ, b_j⟫ = 0` for `i ≠ j`. -/
 theorem inner_tensorHsBasisVec_eq_zero {i j : TensorEigenIdx (I := I) (M := M) g r s}
     (hij : i ≠ j) :
-    (inner ℝ (tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas σ i)
-      (tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas σ j) : ℝ) = 0 := by
+    (inner ℝ (tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) σ i)
+      (tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) σ j) : ℝ) = 0 := by
   classical
   rw [tensorHs.inner_def]
   -- Every term of the weighted coordinate-product series vanishes.
   have hterm : (fun k => tensorSobolevWeight (I := I) (M := M) k σ *
-        ((tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas σ i).coeff k *
-          (tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas σ j).coeff k))
+        ((tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) σ i).coeff k *
+          (tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) σ j).coeff k))
       = fun _ => (0 : ℝ) := by
     funext k
     rw [tensorHsBasisVec_coeff, tensorHsBasisVec_coeff]
@@ -286,7 +286,7 @@ unconditionally convergent sum in `L²([0,T]; Hˢ)`. -/
 def singleModeScaledCLM (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) {σ : ℝ}
     {T : ℝ} (i : TensorEigenIdx (I := I) (M := M) g r s) :
     timeL2 ℝ T →L[ℝ]
-      timeL2 (tensorHs (I := I) (M := M) g r s h_atlas σ) T :=
+      timeL2 (tensorHs (I := I) (M := M) g r s σ) T :=
   (Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ))⁻¹ •
     singleModeTimeL2 (I := I) (M := M) h_atlas (σ := σ) (T := T) i
 
@@ -303,7 +303,7 @@ single-mode embedding normalised so that `bᵢ` has unit image. -/
 def singleModeIsometry (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M) {σ : ℝ}
     {T : ℝ} (i : TensorEigenIdx (I := I) (M := M) g r s) :
     timeL2 ℝ T →ₗᵢ[ℝ]
-      timeL2 (tensorHs (I := I) (M := M) g r s h_atlas σ) T :=
+      timeL2 (tensorHs (I := I) (M := M) g r s σ) T :=
   { (singleModeScaledCLM (I := I) (M := M) h_atlas (σ := σ) i).toLinearMap with
     norm_map' := fun gf => by
       have hsqrt_pos : 0 < Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ) :=
@@ -383,7 +383,7 @@ the synthesised field has `i`-th eigen-coordinate `gFam i`
 (`timeL2OfModes_timeModeCoeff`). -/
 def timeL2OfModes
     (gFam : TensorEigenIdx (I := I) (M := M) g r s → timeL2 ℝ T) :
-    timeL2 (tensorHs (I := I) (M := M) g r s h_atlas σ) T :=
+    timeL2 (tensorHs (I := I) (M := M) g r s σ) T :=
   ∑' i, singleModeTimeL2 (I := I) (M := M) h_atlas (σ := σ) i (gFam i)
 
 /-- **The synthesised field has the prescribed eigen-coordinates.**  When the
@@ -408,7 +408,7 @@ theorem timeL2OfModes_timeModeCoeff
         (singleModeTimeL2 (I := I) (M := M) h_atlas (σ := σ) i (gFam i)) j := by
     rw [timeL2OfModes]
     exact ContinuousLinearMap.map_tsum
-      ((tensorHsCoeffL (I := I) (M := M) h_atlas j).compLpL 2 (timeMeasure T))
+      ((tensorHsCoeffL (I := I) (M := M) j).compLpL 2 (timeMeasure T))
       hsumm
   rw [hcomm]
   -- Each term is `if i = j then gFam i else 0`; the sum collapses to `gFam j`.

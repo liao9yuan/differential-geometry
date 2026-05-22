@@ -121,8 +121,8 @@ The two analytic facts behind the construction are:
 section Nemytskii
 
 variable {L : ℝ≥0}
-  {N : tensorHs (I := I) (M := M) g r s h_atlas (a + 2) →
-    tensorHs (I := I) (M := M) g r s h_atlas a}
+  {N : tensorHs (I := I) (M := M) g r s (a + 2) →
+    tensorHs (I := I) (M := M) g r s a}
 
 /-- The pointwise composition `t ↦ N (f t)` of a Lipschitz nonlinearity `N` with
 a time-`L²` field `f ∈ L²([0,T]; H^{a+2})` is itself square-integrable for the
@@ -130,7 +130,7 @@ a time-`L²` field `f ∈ L²([0,T]; H^{a+2})` is itself square-integrable for t
 `t ↦ N (f t) − N 0` (square-integrable by `LipschitzWith.comp_memLp`) and the
 constant `N 0` (square-integrable on a finite measure space). -/
 theorem memLp_comp_nemytskii (hN : LipschitzWith L N)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas (a + 2)) T) :
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s (a + 2)) T) :
     MemLp (fun t => N (f t)) 2 (timeMeasure T) := by
   -- The `0`-fixing Lipschitz part `Ñ x = N x − N 0`, with constant `L` (the
   -- constant function is Lipschitz with constant `0`, and `L + 0 = L`).
@@ -138,7 +138,7 @@ theorem memLp_comp_nemytskii (hN : LipschitzWith L N)
     have hsubL := hN.sub (LipschitzWith.const (N 0))
     rwa [add_zero] at hsubL
   have hshift0 : (fun x => N x - N 0) (0 : tensorHs (I := I) (M := M) g r s
-      h_atlas (a + 2)) = 0 := by simp
+      (a + 2)) = 0 := by simp
   -- `Ñ ∘ ⇑f` is `MemLp` by `LipschitzWith.comp_memLp`.
   have hcomp : MemLp ((fun x => N x - N 0) ∘ fun t => f t) 2 (timeMeasure T) :=
     hshift.comp_memLp hshift0 (Lp.memLp f)
@@ -164,14 +164,14 @@ t)`.  The output lands in `L²` because `N` is Lipschitz (`memLp_comp_nemytskii`
 and the underlying function agrees a.e. with `t ↦ N (f t)`
 (`nemytskii_coeFn`). -/
 def nemytskii (hN : LipschitzWith L N) :
-    timeL2 (tensorHs (I := I) (M := M) g r s h_atlas (a + 2)) T →
-      timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T :=
+    timeL2 (tensorHs (I := I) (M := M) g r s (a + 2)) T →
+      timeL2 (tensorHs (I := I) (M := M) g r s a) T :=
   fun f => (memLp_comp_nemytskii (I := I) (M := M) hN f).toLp (fun t => N (f t))
 
 /-- `nemytskii hN f` is represented almost everywhere by the pointwise
 composition `t ↦ N (f t)`. -/
 theorem nemytskii_coeFn (hN : LipschitzWith L N)
-    (f : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas (a + 2)) T) :
+    (f : timeL2 (tensorHs (I := I) (M := M) g r s (a + 2)) T) :
     nemytskii (I := I) (M := M) hN f =ᵐ[timeMeasure T] fun t => N (f t) :=
   (memLp_comp_nemytskii (I := I) (M := M) hN f).coeFn_toLp
 
@@ -184,7 +184,7 @@ images is bounded by `L²` times the squared `L²` distance of the fields:
 This is the pointwise Lipschitz estimate `‖N (f t) − N (f' t)‖ ≤ L·‖f t − f' t‖`
 squared and integrated in time. -/
 theorem nemytskii_dist_sq_le (hN : LipschitzWith L N)
-    (f f' : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas (a + 2)) T) :
+    (f f' : timeL2 (tensorHs (I := I) (M := M) g r s (a + 2)) T) :
     ‖nemytskii (I := I) (M := M) hN f - nemytskii (I := I) (M := M) hN f'‖ ^ 2 ≤
       (L : ℝ) ^ 2 * ‖f - f'‖ ^ 2 := by
   -- Both norms are integrals of pointwise squared norms over `[0,T]`.
@@ -268,11 +268,11 @@ the homogeneous part cancel in the difference of two Duhamel images. -/
 `maximalRegularitySolField (f + f') = maximalRegularitySolField f +
 maximalRegularitySolField f'`. -/
 theorem maximalRegularitySolField_add (hT : 0 ≤ T)
-    (f f' : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T) :
+    (f f' : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
     maximalRegularitySolField (I := I) (M := M) h_atlas a hT (f + f') =
       maximalRegularitySolField (I := I) (M := M) h_atlas a hT f +
         maximalRegularitySolField (I := I) (M := M) h_atlas a hT f' := by
-  refine timeModeCoeff_injective (I := I) (M := M) (fun i => ?_)
+  refine timeModeCoeff_injective (I := I) (M := M) h_atlas (fun i => ?_)
   rw [maximalRegularitySolField_timeModeCoeff (I := I) (M := M) (a := a)
       hT (f + f') i,
     timeModeCoeff_add (I := I) (M := M),
@@ -288,7 +288,7 @@ maximalRegularitySolField f'`.  This is the form consumed by the contraction
 estimate: it identifies the difference of two Duhamel solution fields (after the
 homogeneous part has cancelled) with the solution field of the difference. -/
 theorem maximalRegularitySolField_sub (hT : 0 ≤ T)
-    (f f' : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T) :
+    (f f' : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
     maximalRegularitySolField (I := I) (M := M) h_atlas a hT (f - f') =
       maximalRegularitySolField (I := I) (M := M) h_atlas a hT f -
         maximalRegularitySolField (I := I) (M := M) h_atlas a hT f' := by
@@ -313,8 +313,8 @@ fixed initial datum the homogeneous-flow field cancels:
   `maxRegDuhamelSolField … u₀ g − maxRegDuhamelSolField … u₀ g'
     = maximalRegularitySolField (g − g')`. -/
 theorem maxRegDuhamelSolField_sub (hT : 0 < T) (hT1 : T ≤ 1)
-    (u₀ : tensorHs (I := I) (M := M) g r s h_atlas (a + 2))
-    (gforce gforce' : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T) :
+    (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
+    (gforce gforce' : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
     maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce -
         maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce' =
       maximalRegularitySolField (I := I) (M := M) h_atlas a hT.le
@@ -336,8 +336,8 @@ leaving `maximalRegularitySolField (g − g')`, whose `L²([0,T]; H^{a+2})` norm
 bounded by `(1 + T)·‖g − g'‖` (the two-derivative-gain maximal-regularity
 estimate `maximalRegularityOp_norm_Ha2_le`). -/
 theorem maxRegDuhamelSolField_dist_le (hT : 0 < T) (hT1 : T ≤ 1)
-    (u₀ : tensorHs (I := I) (M := M) g r s h_atlas (a + 2))
-    (gforce gforce' : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T) :
+    (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
+    (gforce gforce' : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
     ‖maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce -
         maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce'‖ ≤
       (1 + T) * ‖gforce - gforce'‖ := by
@@ -368,23 +368,23 @@ is a forcing term reproducing `N(u)` along its own Duhamel solution; the
 quasi-linear strong solution is the Duhamel image of `g⋆`. -/
 def quasilinearDuhamelMap (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (a : ℝ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
-    (u₀ : tensorHs (I := I) (M := M) g r s h_atlas (a + 2))
+    (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
     {L : ℝ≥0}
-    {N : tensorHs (I := I) (M := M) g r s h_atlas (a + 2) →
-      tensorHs (I := I) (M := M) g r s h_atlas a}
+    {N : tensorHs (I := I) (M := M) g r s (a + 2) →
+      tensorHs (I := I) (M := M) g r s a}
     (hN : LipschitzWith L N) :
-    timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T →
-      timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T :=
+    timeL2 (tensorHs (I := I) (M := M) g r s a) T →
+      timeL2 (tensorHs (I := I) (M := M) g r s a) T :=
   fun gforce => nemytskii (I := I) (M := M) hN
     (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce)
 
 @[simp] theorem quasilinearDuhamelMap_apply (hT : 0 < T) (hT1 : T ≤ 1)
-    (u₀ : tensorHs (I := I) (M := M) g r s h_atlas (a + 2))
+    (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
     {L : ℝ≥0}
-    {N : tensorHs (I := I) (M := M) g r s h_atlas (a + 2) →
-      tensorHs (I := I) (M := M) g r s h_atlas a}
+    {N : tensorHs (I := I) (M := M) g r s (a + 2) →
+      tensorHs (I := I) (M := M) g r s a}
     (hN : LipschitzWith L N)
-    (gforce : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T) :
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
     quasilinearDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ hN gforce =
       nemytskii (I := I) (M := M) hN
         (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce) :=
@@ -399,12 +399,12 @@ The Nemytskii operator contributes the Lipschitz factor `L`
 (`nemytskii_lipschitzWith`); the `H^{a+2}`-field contraction estimate
 `maxRegDuhamelSolField_dist_le` contributes the factor `(1 + T)`. -/
 theorem quasilinearDuhamelMap_dist_le (hT : 0 < T) (hT1 : T ≤ 1)
-    (u₀ : tensorHs (I := I) (M := M) g r s h_atlas (a + 2))
+    (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
     {L : ℝ≥0}
-    {N : tensorHs (I := I) (M := M) g r s h_atlas (a + 2) →
-      tensorHs (I := I) (M := M) g r s h_atlas a}
+    {N : tensorHs (I := I) (M := M) g r s (a + 2) →
+      tensorHs (I := I) (M := M) g r s a}
     (hN : LipschitzWith L N)
-    (gforce gforce' : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T) :
+    (gforce gforce' : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
     dist (quasilinearDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ hN gforce)
         (quasilinearDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ hN
           gforce') ≤
@@ -456,10 +456,10 @@ The contraction constant is `< 1` by `quasilinear_contraction_const_lt_one`; the
 `LipschitzWith` property is the global `dist` bound
 `quasilinearDuhamelMap_dist_le`. -/
 theorem quasilinearDuhamelMap_contracting (hT : 0 < T) (hT1 : T ≤ 1)
-    (u₀ : tensorHs (I := I) (M := M) g r s h_atlas (a + 2))
+    (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
     {L : ℝ≥0}
-    {N : tensorHs (I := I) (M := M) g r s h_atlas (a + 2) →
-      tensorHs (I := I) (M := M) g r s h_atlas a}
+    {N : tensorHs (I := I) (M := M) g r s (a + 2) →
+      tensorHs (I := I) (M := M) g r s a}
     (hN : LipschitzWith L N) (hL : 2 * (L : ℝ) < 1) :
     ContractingWith
       ⟨(L : ℝ) * (1 + T),
@@ -520,19 +520,19 @@ Duhamel field.  Precisely, the data `u, gforce` satisfy:
 The solution is the affine Duhamel image of the unique fixed point of the
 forcing-space contraction `quasilinearDuhamelMap`. -/
 theorem quasilinear_strong_existence {L : ℝ≥0}
-    {N : tensorHs (I := I) (M := M) g r s h_atlas (a + 2) →
-      tensorHs (I := I) (M := M) g r s h_atlas a}
+    {N : tensorHs (I := I) (M := M) g r s (a + 2) →
+      tensorHs (I := I) (M := M) g r s a}
     (hT : 0 < T) (hT1 : T ≤ 1)
-    (u₀ : tensorHs (I := I) (M := M) g r s h_atlas (a + 2))
+    (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
     (hN : LipschitzWith L N) (hL : 2 * (L : ℝ) < 1) :
     ∃ (u : MaxRegSolutionSpace (I := I) (M := M) h_atlas a T)
-      (gforce : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T),
+      (gforce : timeL2 (tensorHs (I := I) (M := M) g r s a) T),
       u = maxRegDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ gforce ∧
         gforce = nemytskii (I := I) (M := M) hN
             (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀
               gforce) ∧
         TimeSobolev.timeH1.trace0 _ T u =
-            tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas
+            tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
               (show a ≤ a + 2 by linarith) u₀ ∧
         TimeSobolev.timeH1.timeDeriv _ T u =
           timeScaleLaplacian (I := I) (M := M) h_atlas a
@@ -584,12 +584,12 @@ This is uniqueness of the Banach fixed point of the contraction
 `quasilinearDuhamelMap`: a forcing term solving the fixed-point equation is by
 definition a fixed point of `Φ`, and a contraction has a unique fixed point. -/
 theorem quasilinear_strong_unique {L : ℝ≥0}
-    {N : tensorHs (I := I) (M := M) g r s h_atlas (a + 2) →
-      tensorHs (I := I) (M := M) g r s h_atlas a}
+    {N : tensorHs (I := I) (M := M) g r s (a + 2) →
+      tensorHs (I := I) (M := M) g r s a}
     (hT : 0 < T) (hT1 : T ≤ 1)
-    (u₀ : tensorHs (I := I) (M := M) g r s h_atlas (a + 2))
+    (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
     (hN : LipschitzWith L N) (hL : 2 * (L : ℝ) < 1)
-    {gforce₁ gforce₂ : timeL2 (tensorHs (I := I) (M := M) g r s h_atlas a) T}
+    {gforce₁ gforce₂ : timeL2 (tensorHs (I := I) (M := M) g r s a) T}
     (hg₁ : gforce₁ = nemytskii (I := I) (M := M) hN
       (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce₁))
     (hg₂ : gforce₂ = nemytskii (I := I) (M := M) hN
