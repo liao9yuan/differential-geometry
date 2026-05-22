@@ -659,75 +659,9 @@ end Tensor0SBundle
 
 /-! ## `IsContinuousRiemannianBundle` instance for the `(r, s)`-tensor bundle
 
-We package the bundle inner product as a continuous section of the hom bundle
-and install the typeclass instance. The CLM-valued continuity in the basepoint
-is established by chart-local operator-norm continuity, lifted via
-`continuousAt_hom_bundle`. -/
-
-namespace DifferentialGeometry
-namespace Tensor
-namespace TensorRSRiemannianBundleContinuous
-
-set_option backward.isDefEq.respectTransparency false
-
-open Bundle Set IsManifold ContinuousLinearMap
-open scoped Manifold Topology Bundle ContDiff BigOperators
-
-open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.Tensor.Tensor0SRiemannian
-open DifferentialGeometry.Tensor.Tensor0SRiemannianBundle
-open DifferentialGeometry.Tensor.Tensor0SInnerSectionContinuity
-open DifferentialGeometry.Tensor.TensorRSRiemannian
-open DifferentialGeometry.Tensor.TensorRSRiemannianBundle
-open Tensor0SBundle
-
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
-variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
-variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-
-/-! ### Bedrock instances for `TensorRSSpace` -/
-
-instance tensorRSSpace_totalSpace_topologicalSpace (r s : ℕ) :
-    TopologicalSpace (Bundle.TotalSpace (TensorRSModel r s ℝ E)
-      (TensorRSSpace r s I (M := M))) :=
-  Tensor0SBundle.tensorRSBundle_topology r s
-
-instance tensorRSSpace_fiberBundle (r s : ℕ) :
-    FiberBundle (TensorRSModel r s ℝ E) (TensorRSSpace r s I (M := M)) :=
-  Tensor0SBundle.tensorRSBundle_fiber r s
-
-instance tensorRSSpace_vectorBundle (r s : ℕ) :
-    VectorBundle ℝ (TensorRSModel r s ℝ E) (TensorRSSpace r s I (M := M)) :=
-  Tensor0SBundle.tensorRSBundle_vector r s
-
-/-! ### CLM-valued continuity of the bundle inner section
-
-The total-space continuity of `b ↦ TotalSpace.mk' _ b (tensorRSRiemannianInnerCLM g r s b)`
-on the hom bundle would yield an `IsContinuousRiemannianBundle` instance through Mathlib's
-auto-derivation. The proof structure mirrors the `(0, s)`-case (in
-`Tensor0SInnerSectionContinuity.lean`):
-
-1. In each chart α, prove operator-norm continuity of the chart-α inner CLM via
-   `continuousAt_bilin_of_basis_continuousAt`, reducing to scalar continuity on
-   model-fibre basis pairs.
-2. Each scalar continuity follows from `chartTensorInnerPointwise_continuousOn` applied
-   with constant inputs and the chart-local continuity of `b ↦ loweredCompose g r s α b T`
-   for fixed `T` — a fact derivable by basis-tuple evaluation through
-   `MetricLowering.contMDiffOn_lower_at_chartBasis_aux` style arguments.
-3. Bridge to `inCoordinates` via `inCoordinates_apply_eq₂` and lift to total-space
-   continuity using `continuousAt_hom_bundle`.
-
-Step (2) requires a constant-model-tensor variant of `MetricLowering.contMDiffOn_loweredCompose`
-(which currently is phrased for smooth bundle sections). This auxiliary is the only piece
-needed to complete the chain. It is naturally established by mirroring the existing
-`contMDiffOn_lower_at_chartBasis_aux` machinery for a constant model tensor in place of a
-smooth section.
-
-The data and the algebraic / bound / measure-theoretic infrastructure assembled above is
-sufficient to discharge `IsContinuousRiemannianBundle` once that auxiliary is shipped. -/
-
-end TensorRSRiemannianBundleContinuous
-end Tensor
-end DifferentialGeometry
+The `IsContinuousRiemannianBundle` typeclass instance for the `(r, s)`-tensor
+bundle is installed at a higher layer in the project, in
+`Analysis/Parabolic/TensorSpectral/ChartTensor/TensorRSContRiemannianBundle.lean`,
+where the chart-frame `(r, s)`-inner product machinery
+(`chartTensorInnerPointwise_rs_model`, with its smoothness theorem and bridge
+identity) is available. -/
