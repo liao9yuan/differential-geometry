@@ -483,7 +483,7 @@ theorem nonzero_iSup_tensorResolventEigenspace_orthogonal_eq_bot
     by_cases hν : ν = 0
     · rw [hν,
           tensorResolventEigenspace_zero_eq_bot
-            (I := I) (M := M) g r s h_atlas]
+            (I := I) (M := M) g r s]
       exact bot_le
     · by_cases h_eig_bot :
           tensorResolventEigenspace (I := I) (M := M) g r s ν = ⊥

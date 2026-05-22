@@ -514,14 +514,9 @@ theorem tensorResolventL2_injective
 is trivial. Equivalently, the kernel of `tensorResolventL2 g r s` is
 `{0}`. -/
 theorem tensorResolventEigenspace_zero_eq_bot
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_atlas : HasLocallyConstantChartAt H M) :
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     tensorResolventEigenspace (I := I) (M := M) g r s 0 = ⊥ := by
-  -- `tensorResolventEigenspace g r s 0
-  --     = ker (tensorResolventL2 g r s).toLinearMap = {0}` by injectivity.
-  -- The `h_atlas` parameter is recorded for downstream use but the proof
-  -- only depends on the variational injectivity argument.
-  let _ := h_atlas
+  -- The proof only depends on the variational injectivity argument.
   unfold tensorResolventEigenspace
   rw [Module.End.eigenspace_zero]
   rw [LinearMap.ker_eq_bot]
