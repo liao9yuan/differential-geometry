@@ -103,8 +103,6 @@ squared bound to obtain a linear bound on `‖rawTensorConnLap (T) b‖` -/
 
 private lemma rawTensorConnLap_norm_le_chartPulledRepr_data_on_pou_tsupport_goodSet
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (_h_atlas_strong :
-        DifferentialGeometry.Geometry.HasChartSourceConsistentChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧
       ∀ (T : SmoothCcTensor g r s),
@@ -299,8 +297,6 @@ The constant `K` depends on `g`, the chart at `α`, the chart-atlas locality
 hypotheses, and the ranks `r`, `s`; it is independent of `T` and `b`. -/
 theorem rawTensorConnLap_chartPulledRepr_norm_le_sum_iteratedFDeriv_repr
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (h_atlas_strong :
-        DifferentialGeometry.Geometry.HasChartSourceConsistentChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧
       ∀ (T : SmoothCcTensor g r s),
@@ -328,7 +324,7 @@ theorem rawTensorConnLap_chartPulledRepr_norm_le_sum_iteratedFDeriv_repr
   -- Step 1: linear (unsquared) bound on ‖raw T b‖.
   obtain ⟨K_lin, hK_lin_nn, hK_lin_bound⟩ :=
     rawTensorConnLap_norm_le_chartPulledRepr_data_on_pou_tsupport_goodSet
-      (I := I) (M := M) h_atlas h_atlas_strong g r s α
+      (I := I) (M := M) h_atlas g r s α
   -- Step 2: forward fibre-norm bound on POU tsupport.
   obtain ⟨C_fwd, hCfwd_pos, hCfwd_bound⟩ :=
     tensorRSChartE_section_repr_norm_le_on_pou_tsupport

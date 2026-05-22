@@ -36,7 +36,7 @@ The pointwise bound, in squared form, reads
           (extChartAt I α b)‖ ^ 2)
 ```
 
-with `K ≥ 0` depending only on `h_atlas`, `h_atlas_strong`, `g`, the chart
+with `K ≥ 0` depending only on `h_atlas`, `g`, the chart
 at `α`, the ranks `r`, `s`, and the chart-frame index `i`. The constant is
 *independent* of `T` and `b`.
 
@@ -608,8 +608,6 @@ chart-atlas locality hypotheses, the metric `g`, the chart at `α`, the ranks
 `T` and `b`. -/
 theorem rawTensorRepr_intrinsic_chartPulled_value_norm_sq_le_repr_data
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (h_atlas_strong :
-        DifferentialGeometry.Geometry.HasChartSourceConsistentChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (i : Fin (Module.finrank ℝ E)) :
     ∃ K : ℝ, 0 ≤ K ∧
