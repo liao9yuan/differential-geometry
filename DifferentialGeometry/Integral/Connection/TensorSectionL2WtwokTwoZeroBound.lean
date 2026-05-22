@@ -324,7 +324,6 @@ we bound the manifold L² of `‖T.toSection‖²` by a constant multiple of the
 POU-weighted chart-target aggregate `chartSobolevSectionNormPou`. -/
 
 theorem tensorSection_L2NormSq_le_chartSobolevSectionNormPou
-    (_h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (T : SmoothCcTensor g r s),
@@ -1273,7 +1272,7 @@ theorem tensorSection_L2NormSq_le_wtwokTwoNorm_zero_sq
   set W : ℝ≥0∞ := (wtwokTwoNorm (I := I) (M := M) g 0 T) ^ 2 with hW_def
   obtain ⟨_C_bridge', _hC_bridge'_nn, hC_bridge_bound⟩ :=
     tensorSection_L2NormSq_le_chartSobolevSectionNormPou
-      (I := I) (M := M) h_atlas g r s
+      (I := I) (M := M) g r s
   have h1 := hC_bridge_bound T hsec_meas
   refine h1.trans ?_
   have h2 := hC_B3_bound T
