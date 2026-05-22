@@ -400,6 +400,15 @@ structure MetricFamilySmoothOn
   metricTensor_cont :
     Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2 D.carrier
       (fun t x => metricTensorField (I := I) (G.metric t) x)
+  frameCompSmooth :
+    forall {Idx : Type} [Fintype Idx]
+      (frame : Idx -> (x : M) -> TangentSpace I x) {u : Set M},
+      IsLocalFrameOn I E 1 frame u ->
+      forall i j : Idx,
+        ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ⊤
+          (fun p : Real × M =>
+            (G.metric p.1).inner p.2 (frame i p.2) (frame j p.2))
+          (D.carrier ×ˢ u)
 
 /-- Extract a metric coefficient's interval time smoothness. -/
 theorem metric_smooth_coeff_of_metricFamilySmoothOn

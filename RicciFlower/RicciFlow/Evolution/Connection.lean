@@ -553,6 +553,136 @@ theorem metricCovDerivDerivativeIsRicciFlowInFrame_neg_two
   intro t x i j l
   rfl
 
+/-- Differentiate the fixed-base covariant metric derivative from the exact
+mixed-derivative producer, without using the legacy metric-frame package. -/
+theorem metricCovDerivOfMix
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    {u : Set M}
+    (hricci :
+      forall t x, x ∈ u -> forall a b : Idx,
+        MDifferentiableAt I 𝓘(Real, Real)
+          (fun y : M => ricciCompInFrame (I := I) S frame t y a b) x)
+    (hmix :
+      forall a b : Idx,
+        FixedBaseExtDerivTimeDerivativeOnRegular (I := I)
+          D.carrier D.regular u
+          (fun s x => metricCompInFrame (I := I) S frame s x a b)
+          (fun t x => (-2 : Real) *
+            ricciCompInFrame (I := I) S frame t x a b))
+    (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
+    (hnabla :
+      NablaRicciComponentsByConnectionInFrameOn
+        (I := I) S frame u nablaRic) :
+    MetricCovDerivDerivativeComponentsInFrameOnLocal
+      (I := I) S frame u
+      (fun t x d a b => (-2 : Real) * nablaRic t x d a b) := by
+  intro t x hx d a b
+  let Ca : TangentSpace I x :=
+    (S.family.connection (t : Real) (frame a) x) (frame d x)
+  let Cb : TangentSpace I x :=
+    (S.family.connection (t : Real) (frame b) x) (frame d x)
+  have hExtRaw :
+      HasDerivWithinAt
+        (fun s : Real =>
+          extDerivFun (I := I)
+            (fun y : M => metricCompInFrame (I := I) S frame s y a b)
+            x (frame d x))
+        (extDerivFun (I := I)
+          (fun y : M => (-2 : Real) *
+            ricciCompInFrame (I := I) S frame (t : Real) y a b)
+          x (frame d x))
+        D.carrier
+        (t : Real) :=
+    fixedBaseExtDerivTimeDerivativeOnRegular_apply (I := I)
+      (h := hmix a b) (t := (t : Real)) t.2 (x := x) hx (frame d x)
+  have hscale :
+      extDerivFun (I := I)
+          (fun y : M => (-2 : Real) *
+            ricciCompInFrame (I := I) S frame (t : Real) y a b)
+          x (frame d x) =
+        (-2 : Real) *
+          extDerivFun (I := I)
+            (fun y : M => ricciCompInFrame (I := I) S frame (t : Real) y a b)
+            x (frame d x) := by
+    have h :=
+      extDerivFun_const_mul (I := I) (-2 : Real)
+        (hricci (t : Real) x hx a b)
+    simpa [smul_eq_mul] using congrArg (fun L => L (frame d x)) h
+  have hExt :
+      HasDerivWithinAt
+        (fun s : Real =>
+          extDerivFun (I := I)
+            (fun y : M => metricCompInFrame (I := I) S frame s y a b)
+            x (frame d x))
+        ((-2 : Real) *
+          extDerivFun (I := I)
+            (fun y : M => ricciCompInFrame (I := I) S frame (t : Real) y a b)
+            x (frame d x))
+        D.carrier
+        (t : Real) :=
+    hExtRaw.congr_deriv hscale
+  have hCa :
+      HasDerivWithinAt
+        (fun s : Real => (S.family.metric s).inner x Ca (frame b x))
+        ((-2 : Real) *
+          S.ricciAt (t : Real) x (Realized.vec2 Ca (frame b x)))
+        D.carrier
+        (t : Real) := by
+    simpa [Ca, ricciCompInFrame] using
+      metric_derivWithin_eq_neg_two_ricci
+        (I := I) S hS t x Ca (frame b x)
+  have hCb :
+      HasDerivWithinAt
+        (fun s : Real => (S.family.metric s).inner x (frame a x) Cb)
+        ((-2 : Real) *
+          S.ricciAt (t : Real) x (Realized.vec2 (frame a x) Cb))
+        D.carrier
+        (t : Real) := by
+    simpa [Cb, ricciCompInFrame] using
+      metric_derivWithin_eq_neg_two_ricci
+        (I := I) S hS t x (frame a x) Cb
+  have hDeriv :
+      HasDerivWithinAt
+        (fun s : Real =>
+          extDerivFun (I := I)
+              (fun y : M => metricCompInFrame (I := I) S frame s y a b)
+              x (frame d x) -
+            (S.family.metric s).inner x Ca (frame b x) -
+            (S.family.metric s).inner x (frame a x) Cb)
+        (((-2 : Real) *
+            extDerivFun (I := I)
+              (fun y : M => ricciCompInFrame (I := I) S frame (t : Real) y a b)
+              x (frame d x)) -
+          ((-2 : Real) *
+            S.ricciAt (t : Real) x (Realized.vec2 Ca (frame b x))) -
+          ((-2 : Real) *
+            S.ricciAt (t : Real) x (Realized.vec2 (frame a x) Cb)))
+        D.carrier
+        (t : Real) :=
+    (hExt.sub hCa).sub hCb
+  refine hDeriv.congr ?_ ?_ |>.congr_deriv ?_
+  · intro s _hs
+    simp [metricCovDerivCompInFrameAtBase, metricCompInFrame, Ca, Cb]
+  · simp [metricCovDerivCompInFrameAtBase, metricCompInFrame, Ca, Cb]
+  · have hn := hnabla (t : Real) x hx d a b
+    unfold ricciCovDerivCompInFrame at hn
+    change
+      (-2 : Real) *
+            extDerivFun (I := I)
+              (fun y : M => ricciCompInFrame (I := I) S frame (t : Real) y a b)
+              x (frame d x) -
+          (-2 : Real) *
+            S.ricciAt (t : Real) x (Realized.vec2 Ca (frame b x)) -
+          (-2 : Real) *
+            S.ricciAt (t : Real) x (Realized.vec2 (frame a x) Cb) =
+        (-2 : Real) * nablaRic (t : Real) x d a b
+    rw [hn]
+    simp [Ca, Cb]
+    ring
+
 /-- Differentiate the fixed-base metric covariant derivative along Ricci flow.
 
 This is the coordinate statement
@@ -1091,6 +1221,38 @@ theorem frameCoeff_eq_sum_inv_metricPairing
             (I := I) (M := M) (S.family.metric t) (hframe.toBasisAt hx)
             (fun i j : Idx => gInv t x i j) hinvAt k V
 
+/-- Local inverse metric components give the frame coefficient formula on the
+local frame domain. -/
+theorem frameCoeffLocal
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (hinv : InvMetricLocal (I := I) S gInv frame u)
+    (t : Real) {x : M} (hx : x ∈ u)
+    (k : Idx) (V : TangentSpace I x) :
+    hframe.coeff k x V =
+      ∑ l : Idx, gInv t x k l * (S.family.metric t).inner x (frame l x) V := by
+  have hinvAt :
+      Tensor0SBundle.MetricInverseInBasis
+        (I := I) (M := M) (S.family.metric t) x
+        (hframe.toBasisAt hx) (fun i j : Idx => gInv t x i j) := by
+    intro i j
+    constructor
+    · simpa [metricCompInFrame, IsLocalFrameOn.toBasisAt_coe] using
+        (hinv t x hx i j).1
+    · simpa [metricCompInFrame, IsLocalFrameOn.toBasisAt_coe] using
+        (hinv t x hx i j).2
+  calc
+    hframe.coeff k x V = (hframe.toBasisAt hx).repr V k := by
+        simp [IsLocalFrameOn.coeff, hx]
+    _ = ∑ l : Idx, gInv t x k l * (S.family.metric t).inner x (frame l x) V := by
+        simpa [IsLocalFrameOn.toBasisAt_coe] using
+          Realized.basis_coord_eq_sum_inv_inner
+            (I := I) (M := M) (S.family.metric t) (hframe.toBasisAt hx)
+            (fun i j : Idx => gInv t x i j) hinvAt k V
+
 /-- Raise a supplied lowered connection-variation pairing formula to
 Christoffel components. -/
 theorem christoffelVariationEquationInFrameOn_of_pairing_local
@@ -1174,6 +1336,65 @@ theorem christoffelSymbol_sub_eq_sum_inv_connectionDiff
       (I := I) S gInv frame hframe hinv var hx k Vvar
   have hbase :=
     frameCoeff_eq_sum_inv_metricPairing
+      (I := I) S gInv frame hframe hinv var hx k Vbase
+  calc
+    RicciFlower.Coordinates.christoffelSymbolInFrame
+        (S.family.connection var) frame hframe x i j k -
+      RicciFlower.Coordinates.christoffelSymbolInFrame
+        (S.family.connection base) frame hframe x i j k
+        = (∑ l : Idx, gInv var x k l *
+            (S.family.metric var).inner x (frame l x) Vvar) -
+          (∑ l : Idx, gInv var x k l *
+            (S.family.metric var).inner x (frame l x) Vbase) := by
+            change hframe.coeff k x Vvar - hframe.coeff k x Vbase =
+              (∑ l : Idx, gInv var x k l *
+                (S.family.metric var).inner x (frame l x) Vvar) -
+              (∑ l : Idx, gInv var x k l *
+                (S.family.metric var).inner x (frame l x) Vbase)
+            rw [hvar, hbase]
+    _ = ∑ l : Idx, gInv var x k l *
+          ((S.family.metric var).inner x (frame l x) Vvar -
+            (S.family.metric var).inner x (frame l x) Vbase) := by
+            rw [← Finset.sum_sub_distrib]
+            refine Finset.sum_congr rfl fun l _hl => ?_
+            ring
+    _ = ∑ l : Idx, gInv var x k l *
+          (S.family.metric var).inner x (frame l x) (Vvar - Vbase) := by
+            refine Finset.sum_congr rfl fun l _hl => ?_
+            rw [map_sub]
+    _ = ∑ l : Idx, gInv var x k l *
+          connectionDiffLoweredInFrame (I := I) S frame var base var x i j l := by
+            refine Finset.sum_congr rfl fun l _hl => ?_
+            unfold connectionDiffLoweredInFrame connectionDiffVectorInFrame Vvar Vbase
+            rw [(S.family.metric var).symm x (frame l x)
+              ((S.family.connection var (frame j) x) (frame i x) -
+                (S.family.connection base (frame j) x) (frame i x))]
+
+/-- Local inverse-component version of the Christoffel difference identity. -/
+theorem gammaSubLocal
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (hinv : InvMetricLocal (I := I) S gInv frame u)
+    (base var : Real) {x : M} (hx : x ∈ u)
+    (i j k : Idx) :
+    RicciFlower.Coordinates.christoffelSymbolInFrame
+        (S.family.connection var) frame hframe x i j k -
+      RicciFlower.Coordinates.christoffelSymbolInFrame
+        (S.family.connection base) frame hframe x i j k =
+      ∑ l : Idx, gInv var x k l *
+        connectionDiffLoweredInFrame (I := I) S frame var base var x i j l := by
+  let Vvar : TangentSpace I x :=
+    (S.family.connection var (frame j) x) (frame i x)
+  let Vbase : TangentSpace I x :=
+    (S.family.connection base (frame j) x) (frame i x)
+  have hvar :=
+    frameCoeffLocal
+      (I := I) S gInv frame hframe hinv var hx k Vvar
+  have hbase :=
+    frameCoeffLocal
       (I := I) S gInv frame hframe hinv var hx k Vbase
   calc
     RicciFlower.Coordinates.christoffelSymbolInFrame
@@ -1507,6 +1728,93 @@ theorem gammaEvolOfInv
         (I := I) S gInv frame hframe hinv
         (t : Real) s hx i j k
     · exact christoffelSymbol_sub_eq_sum_inv_connectionDiff
+        (I := I) S gInv frame hframe hinv
+        (t : Real) (t : Real) hx i j k
+  have hGammaPlus :
+      HasDerivWithinAt
+        (fun s : Real => (gamma s - gamma0) + gamma0)
+        target
+        D.carrier
+        (t : Real) := by
+    simpa using hSub.add_const gamma0
+  have hGamma :
+      HasDerivWithinAt gamma target D.carrier (t : Real) := by
+    refine hGammaPlus.congr ?_ ?_
+    · intro s _hs
+      ring
+    · ring
+  simpa [gamma, target, christoffelEvolutionRHSInFrame] using hGamma
+
+/-- Lemma 6.2 from local inverse-metric evolution and fixed-base metric
+variation. -/
+theorem gammaEvolLocal
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (gInv : Real -> Realized.InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (hu : IsOpen u)
+    (metricCovDerivDt nablaRic :
+      Real -> M -> Idx -> Idx -> Idx -> Real)
+    (hinv : InvMetricLocal (I := I) S gInv frame u)
+    (hinvEvol : InverseMetricEvolutionEquationInFrame
+      (I := I) S gInv frame u)
+    (hmetric :
+      MetricCovDerivDerivativeComponentsInFrameOnLocal
+        (I := I) S frame u metricCovDerivDt)
+    (hmetricRicci :
+      MetricCovDerivDerivativeIsRicciFlowInFrame metricCovDerivDt nablaRic) :
+    ChristoffelEvolutionEquationInFrameOn
+      (I := I) S gInv frame hframe nablaRic := by
+  intro t x hx i j k
+  let gamma : Real -> Real := fun s =>
+    RicciFlower.Coordinates.christoffelSymbolInFrame
+      (S.family.connection s) frame hframe x i j k
+  let gamma0 : Real := gamma (t : Real)
+  let rhs : Real -> Real := fun s =>
+    ∑ l : Idx, gInv s x k l *
+      connectionDiffLoweredInFrame (I := I) S frame s (t : Real) s x i j l
+  let target : Real :=
+    ∑ l : Idx, gInv (t : Real) x k l *
+      christoffelVariationLoweredRHSInFrame nablaRic (t : Real) x i j l
+  have hDiff :
+      VariableMetricConnectionDiffDerivativeInFrameOnLocal
+        (I := I) S frame u (christoffelVariationLoweredRHSInFrame nablaRic) :=
+    variableMetricConnectionDiffDerivative_of_metricCovDeriv
+      (I := I) S hS frame hframe hu metricCovDerivDt nablaRic
+      hmetric hmetricRicci
+  have hRhs :
+      HasDerivWithinAt rhs target D.carrier (t : Real) := by
+    dsimp [rhs, target]
+    simpa [Finset.sum_apply] using
+      (HasDerivWithinAt.fun_sum
+        (u := (Finset.univ : Finset Idx))
+        (A := fun l s =>
+          gInv s x k l *
+            connectionDiffLoweredInFrame (I := I) S frame s (t : Real) s x i j l)
+        (A' := fun l =>
+          gInv (t : Real) x k l *
+            christoffelVariationLoweredRHSInFrame nablaRic (t : Real) x i j l)
+        (s := D.carrier) (x := (t : Real))
+        (fun l _hl =>
+          by
+            have hprod :=
+              (hinvEvol t x hx k l).mul (hDiff t x hx i j l)
+            refine hprod.congr_deriv ?_
+            simp))
+  have hSub :
+      HasDerivWithinAt
+        (fun s : Real => gamma s - gamma0)
+        target
+        D.carrier
+        (t : Real) := by
+    refine hRhs.congr ?_ ?_
+    · intro s _hs
+      exact gammaSubLocal
+        (I := I) S gInv frame hframe hinv
+        (t : Real) s hx i j k
+    · exact gammaSubLocal
         (I := I) S gInv frame hframe hinv
         (t : Real) (t : Real) hx i j k
   have hGammaPlus :

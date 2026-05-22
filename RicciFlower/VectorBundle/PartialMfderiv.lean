@@ -579,6 +579,30 @@ private theorem model_spatial_fderiv_eq
     (fderiv ℝ G (s, x)) (0, V)
   rw [hLderiv]
 
+private theorem model_spatial_fderiv_eq_of_contDiffAt
+    (F : ℝ -> E -> ℝ)
+    {s : ℝ} {x V : E}
+    (hF : ContDiffAt ℝ 2 (fun p : ℝ × E => F p.1 p.2) (s, x)) :
+    (fderiv ℝ (F s) x) V =
+      (fderiv ℝ (fun p : ℝ × E => F p.1 p.2) (s, x)) (0, V) := by
+  let G : ℝ × E -> ℝ := fun p => F p.1 p.2
+  let L : E -> ℝ × E := fun y => (s, y)
+  have hG : DifferentiableAt ℝ G (s, x) :=
+    hF.differentiableAt (by norm_num : (2 : WithTop ℕ∞) ≠ 0)
+  have hL : DifferentiableAt ℝ L x := by
+    fun_prop
+  have hcomp := fderiv_comp (𝕜 := ℝ) (x := x) (f := L) (g := G) hG hL
+  have hLderiv : (fderiv ℝ L x) V = (0, V) := by
+    rw [DifferentiableAt.fderiv_prodMk]
+    · simp
+    · fun_prop
+    · fun_prop
+  change (fderiv ℝ (G ∘ L) x) V = (fderiv ℝ G (s, x)) (0, V)
+  rw [hcomp]
+  change (fderiv ℝ G (s, x)) ((fderiv ℝ L x) V) =
+    (fderiv ℝ G (s, x)) (0, V)
+  rw [hLderiv]
+
 private theorem model_hasDerivAt_fixed_snd
     (A : ℝ × E -> ℝ) (t : ℝ) (x : E)
     (hA : DifferentiableAt ℝ A (t, x)) :
@@ -703,6 +727,80 @@ theorem fixedBaseFDerivTimeDerivativeAt_of_contDiff
   refine (h0.congr_deriv hswap).congr_of_eventuallyEq ?_
   filter_upwards with s
   exact model_spatial_fderiv_eq (E := E) F hF s x V
+
+theorem fixedBaseFDerivTimeDerivativeAt_of_contDiffAt
+    (F : ℝ -> E -> ℝ)
+    {t : ℝ} {x V : E}
+    (hF : ContDiffAt ℝ 2 (fun p : ℝ × E => F p.1 p.2) (t, x)) :
+    HasDerivAt
+      (fun s : ℝ => (fderiv ℝ (F s) x) V)
+      ((fderiv ℝ
+        (fun y : E =>
+          (fderiv ℝ (fun p : ℝ × E => F p.1 p.2) (t, y)) (1, 0))
+        x) V)
+      t := by
+  let G : ℝ × E -> ℝ := fun p => F p.1 p.2
+  let A : ℝ × E -> ℝ := fun p => (fderiv ℝ G p) (0, V)
+  let B : ℝ × E -> ℝ := fun p => (fderiv ℝ G p) (1, 0)
+  have hAcont : ContDiffAt ℝ 1 A (t, x) := by
+    have hDA : ContDiffAt ℝ 1 (fderiv ℝ G) (t, x) :=
+      hF.fderiv_right (m := (1 : WithTop ℕ∞)) (by norm_num)
+    exact hDA.clm_apply contDiffAt_const
+  have hA : DifferentiableAt ℝ A (t, x) :=
+    hAcont.differentiableAt (by norm_num : (1 : WithTop ℕ∞) ≠ 0)
+  have h0 := model_hasDerivAt_fixed_snd (E := E) A t x hA
+  have hswap :
+      (fderiv ℝ A (t, x)) (1, 0) =
+        (fderiv ℝ (fun y : E => B (t, y)) x) V := by
+    have hlie := VectorField.fderiv_apply_lieBracket
+      (𝕜 := ℝ) (E := ℝ × E) (F := ℝ)
+      (f := G)
+      (V := fun _ : ℝ × E => (1, 0))
+      (W := fun _ : ℝ × E => (0, V))
+      (x := (t, x))
+      hF
+      (by norm_num : minSmoothness ℝ 2 ≤ (2 : WithTop ℕ∞))
+      (by fun_prop)
+      (by fun_prop)
+    have hlie' :
+        (fderiv ℝ A (t, x)) (1, 0) =
+          (fderiv ℝ B (t, x)) (0, V) := by
+      unfold A B
+      simp [VectorField.lieBracket] at hlie
+      linarith
+    rw [hlie']
+    symm
+    have hBcont : ContDiffAt ℝ 1 B (t, x) := by
+      have hDB : ContDiffAt ℝ 1 (fderiv ℝ G) (t, x) :=
+        hF.fderiv_right (m := (1 : WithTop ℕ∞)) (by norm_num)
+      exact hDB.clm_apply contDiffAt_const
+    have hBdiff : DifferentiableAt ℝ B (t, x) :=
+      hBcont.differentiableAt (by norm_num : (1 : WithTop ℕ∞) ≠ 0)
+    let L : E -> ℝ × E := fun y => (t, y)
+    have hL : DifferentiableAt ℝ L x := by
+      fun_prop
+    have hcomp := fderiv_comp (𝕜 := ℝ) (x := x) (f := L) (g := B) hBdiff hL
+    have hLderiv : (fderiv ℝ L x) V = (0, V) := by
+      rw [DifferentiableAt.fderiv_prodMk]
+      · simp
+      · fun_prop
+      · fun_prop
+    change (fderiv ℝ (B ∘ L) x) V = (fderiv ℝ B (t, x)) (0, V)
+    rw [hcomp]
+    change (fderiv ℝ B (t, x)) ((fderiv ℝ L x) V) =
+      (fderiv ℝ B (t, x)) (0, V)
+    rw [hLderiv]
+  refine (h0.congr_deriv hswap).congr_of_eventuallyEq ?_
+  have h_event :
+      ∀ᶠ s in 𝓝 t,
+        ContDiffAt ℝ 2 (fun p : ℝ × E => F p.1 p.2) (s, x) :=
+    by
+      have hmap : ContinuousAt (fun s : ℝ => (s, x)) t := by
+        fun_prop
+      exact hmap.eventually
+        (hF.eventually (by norm_num : (2 : WithTop ℕ∞) ≠ ∞))
+  filter_upwards [h_event] with s hs
+  exact model_spatial_fderiv_eq_of_contDiffAt (E := E) F hs
 
 theorem fixedBaseFDerivTimeDerivativeWithinAt_of_contDiff
     (F : ℝ -> E -> ℝ)
@@ -1057,6 +1155,82 @@ theorem fixedBaseExtDerivTimeDerivativeOnRegular_singleton_of_chart_contDiffOnTi
         (φ := fun y : E =>
           (fderiv Real (fun p : Real × E => Φ p.1 p.2) (t, y)) (1, 0))
       (hFtdiff t ht) (hFtchart t ht) V
+  exact
+    (hmodel.congr
+      (fun s hs => hleft s hs)
+      (hleft t (hregular_subset ht))).congr_deriv hright.symm
+
+/-- Pointwise chart-level constructor for regular-time fixed-base mixed
+derivatives on a singleton.
+
+This is the local version of
+`fixedBaseExtDerivTimeDerivativeOnRegular_singleton_of_chart_contDiffOnTime`:
+the chart representative only needs to be `C²` at the regular spacetime point
+where the derivative is evaluated. -/
+theorem fixedBaseAtReg
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
+    [I.Boundaryless]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    {timeSet regularSet : Set Real} {x₀ : M}
+    {F Ft : Real -> M -> Real} {Φ : Real -> E -> Real}
+    (hregular_subset : regularSet ⊆ timeSet)
+    (hΦ : ∀ t : Real, t ∈ regularSet ->
+      ContDiffAt Real 2 (fun p : Real × E => Φ p.1 p.2)
+        (t, extChartAt I x₀ x₀))
+    (hFdiff :
+      ∀ s : Real, s ∈ timeSet ->
+        MDifferentiableAt I 𝓘(Real, Real) (F s) x₀)
+    (hFchart :
+      ∀ s : Real, s ∈ timeSet ->
+        writtenInExtChartAt I 𝓘(Real, Real) x₀ (F s)
+          =ᶠ[nhds (extChartAt I x₀ x₀)] Φ s)
+    (hFtdiff :
+      ∀ t : Real, t ∈ regularSet ->
+        MDifferentiableAt I 𝓘(Real, Real) (Ft t) x₀)
+    (hFtchart :
+      ∀ t : Real, t ∈ regularSet ->
+        writtenInExtChartAt I 𝓘(Real, Real) x₀ (Ft t)
+          =ᶠ[nhds (extChartAt I x₀ x₀)]
+            fun y : E =>
+              (fderiv Real (fun p : Real × E => Φ p.1 p.2) (t, y)) (1, 0)) :
+    FixedBaseExtDerivTimeDerivativeOnRegular
+      (I := I) timeSet regularSet ({x₀} : Set M) F Ft := by
+  intro t ht x hx V
+  rw [Set.mem_singleton_iff] at hx
+  subst x
+  let z₀ : E := extChartAt I x₀ x₀
+  have hmodel :
+      HasDerivWithinAt
+        (fun s : Real => (fderiv Real (Φ s) z₀) V)
+        ((fderiv Real
+          (fun y : E =>
+            (fderiv Real (fun p : Real × E => Φ p.1 p.2) (t, y)) (1, 0))
+          z₀) V)
+        timeSet t :=
+    (fixedBaseFDerivTimeDerivativeAt_of_contDiffAt
+      (E := E) (F := Φ) (t := t) (x := z₀) (V := V) (hΦ t ht)).hasDerivWithinAt
+  have hleft :
+      ∀ s : Real, s ∈ timeSet ->
+        extDerivFun (I := I) (F s) x₀ V =
+          fderiv Real (Φ s) z₀ V := by
+    intro s hs
+    exact
+      extDerivFun_eq_fderiv_of_writtenInExtChartAt_eventuallyEq
+        (I := I) (x := x₀) (f := F s) (φ := Φ s)
+        (hFdiff s hs) (hFchart s hs) V
+  have hright :
+      extDerivFun (I := I) (Ft t) x₀ V =
+        fderiv Real
+          (fun y : E =>
+            (fderiv Real (fun p : Real × E => Φ p.1 p.2) (t, y)) (1, 0))
+          z₀ V := by
+    exact
+      extDerivFun_eq_fderiv_of_writtenInExtChartAt_eventuallyEq
+        (I := I) (x := x₀) (f := Ft t)
+        (φ := fun y : E =>
+          (fderiv Real (fun p : Real × E => Φ p.1 p.2) (t, y)) (1, 0))
+        (hFtdiff t ht) (hFtchart t ht) V
   exact
     (hmodel.congr
       (fun s hs => hleft s hs)

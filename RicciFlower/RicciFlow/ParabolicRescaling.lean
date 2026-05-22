@@ -75,6 +75,12 @@ def paraInterval
   regular_subset := by
     intro s hs
     exact D.regular_subset hs
+  regular_mem_nhds := by
+    intro s hs
+    have hcont : ContinuousAt (fun r : Real => paraTime τ R r) s := by
+      unfold paraTime
+      fun_prop
+    simpa [Set.preimage] using hcont.preimage_mem_nhds (D.regular_mem_nhds hs)
 
 @[simp] theorem paraInterval_carrier
     (D : Realized.RealTimeInterval) (τ R : Real) (hR : 0 < R)
@@ -261,6 +267,44 @@ theorem metricFamilySmooth_para
         R hcomp
     simpa [SolutionOn.family, paraSolution, paraFamily, metricTensorField_scaleMetric]
       using hscale
+  · intro Idx _ frame u hframe i j
+    have hOld :
+        ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ⊤
+          (fun p : Real × M =>
+            (S.family.metric p.1).inner p.2 (frame i p.2) (frame j p.2))
+          (D.carrier ×ˢ u) :=
+      hS.smoothMetric.frameCompSmooth frame hframe i j
+    have htime :
+        ContMDiff (𝓘(Real, Real).prod I) 𝓘(Real, Real) ⊤
+          (fun p : Real × M => paraTime τ R p.1) := by
+      unfold paraTime
+      exact contMDiff_const.add (contMDiff_fst.div_const R)
+    have hmapSmooth :
+        ContMDiff (𝓘(Real, Real).prod I) (𝓘(Real, Real).prod I) ⊤
+          (fun p : Real × M => (paraTime τ R p.1, p.2)) :=
+      htime.prodMk contMDiff_snd
+    have hmaps :
+        Set.MapsTo (fun p : Real × M => (paraTime τ R p.1, p.2))
+          ((paraInterval D τ R hR hτ).carrier ×ˢ u) (D.carrier ×ˢ u) := by
+      intro p hp
+      exact ⟨hp.1, hp.2⟩
+    have hcomp :
+        ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ⊤
+          (fun p : Real × M =>
+            (S.base.metric (paraTime τ R p.1)).inner p.2
+              (frame i p.2) (frame j p.2))
+          ((paraInterval D τ R hR hτ).carrier ×ˢ u) := by
+      simpa [SolutionOn.family, Function.comp_def] using
+        hOld.comp hmapSmooth.contMDiffOn hmaps
+    have hscale :
+        ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ⊤
+          (fun p : Real × M =>
+            R * (S.base.metric (paraTime τ R p.1)).inner p.2
+              (frame i p.2) (frame j p.2))
+          ((paraInterval D τ R hR hτ).carrier ×ˢ u) :=
+      (contMDiffOn_const (c := R)).mul hcomp
+    simpa [SolutionOn.family, paraSolution, paraFamily, scaleMetric_inner,
+      smul_eq_mul] using hscale
 
 /-- Connection smoothness is preserved by the affine time pullback. -/
 theorem connectionFamilySmooth_para

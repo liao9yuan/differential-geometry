@@ -772,6 +772,31 @@ theorem isSolutionOn_timeShift
           hS.smoothMetric.metricTensor_cont htime hmaps
       simpa [SolutionOn.family, SolutionOn.timeShift, SolutionFamily.timeShift]
         using hcont
+    · intro Idx _ frame u hframe i j
+      have hOld :
+          ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ⊤
+            (fun p : Real × M =>
+              (S.family.metric p.1).inner p.2 (frame i p.2) (frame j p.2))
+            (D.carrier ×ˢ u) :=
+        hS.smoothMetric.frameCompSmooth frame hframe i j
+      have hmapSmooth :
+          ContMDiff (𝓘(Real, Real).prod I) (𝓘(Real, Real).prod I) ⊤
+            (fun p : Real × M => (p.1 + τ, p.2)) := by
+        exact (contMDiff_fst.add contMDiff_const).prodMk contMDiff_snd
+      have hmaps :
+          Set.MapsTo (fun p : Real × M => (p.1 + τ, p.2))
+            ((D.timeShift τ).carrier ×ˢ u) (D.carrier ×ˢ u) := by
+        intro p hp
+        exact ⟨hp.1, hp.2⟩
+      have hcomp :
+          ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ⊤
+            (fun p : Real × M =>
+              (S.family.metric (p.1 + τ)).inner p.2
+                (frame i p.2) (frame j p.2))
+            ((D.timeShift τ).carrier ×ˢ u) := by
+        simpa [Function.comp_def] using hOld.comp hmapSmooth.contMDiffOn hmaps
+      simpa [SolutionOn.family, SolutionOn.timeShift, SolutionFamily.timeShift]
+        using hcomp
   smoothConnection := by
     intro t
     let t' : Realized.RealTimeInterval.FlowTime D := ⟨(t : Real) + τ, t.2⟩
