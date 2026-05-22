@@ -762,6 +762,7 @@ import DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.DeTurckCorrectionSe
 import DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.DeTurckCorrectionSymbolFormula
 import DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.DeTurckCorrectionSymbol
 import DifferentialGeometry.PDE.DeTurck.StrictParabolicity
+import DifferentialGeometry.PDE.ParabolicShortTime
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.PreHilbert
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.CovariantLeibniz
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.CovGrad
