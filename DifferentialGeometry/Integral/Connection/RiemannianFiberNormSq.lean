@@ -67,7 +67,7 @@ local instances is a real number — the sum of squared evaluations of `T`. -/
 `J` and an orthonormal basis `e` (with respect to `g`) of `TangentSpace I b`. We package
 it as a separate function so the unfolding of `riemannianFiberNormSq` does not have to
 expose the locally-bound `letI` instances. -/
-private noncomputable def fiberNormSqSummand
+noncomputable def fiberNormSqSummand
     (g : SmoothRiemannianMetric I M) (b : M) (r s : ℕ)
     (T : TensorRSSpace r s I b)
     (n : ℕ) (e : Fin n → TangentSpace I b)
@@ -77,7 +77,7 @@ private noncomputable def fiberNormSqSummand
         (fun k => g.inner b (e (K k))))
       (fun k => e (J k))) ^ 2
 
-private lemma fiberNormSqSummand_nonneg
+lemma fiberNormSqSummand_nonneg
     (g : SmoothRiemannianMetric I M) (b : M) (r s : ℕ)
     (T : TensorRSSpace r s I b)
     (n : ℕ) (e : Fin n → TangentSpace I b)
