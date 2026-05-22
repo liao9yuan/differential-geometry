@@ -20,9 +20,9 @@ eigenvalue, with the geometer sign convention `Δ_∇ = -∇*∇` giving eigenva
 absorbs two factors of `(1 + λᵢ)`, so `Δ_∇` maps `H^{τ+2}` boundedly to `Hᵗ`:
 it gains exactly two Sobolev derivatives of room — equivalently, it loses two.
 
-* `tensorScaleLaplacian h_atlas τ` — the diagonal operator `Δ_∇ : H^{τ+2}
+* `tensorScaleLaplacian τ` — the diagonal operator `Δ_∇ : H^{τ+2}
   →L[ℝ] Hᵗ`, multiplying the `i`-th coordinate by `-λᵢ`.
-* `timeScaleLaplacian h_atlas τ` — its action on time-`L²` tensor fields,
+* `timeScaleLaplacian τ` — its action on time-`L²` tensor fields,
   `L²([0,T]; H^{τ+2}) →L[ℝ] L²([0,T]; Hᵗ)`.
 
 ## Main result
@@ -177,8 +177,7 @@ theorem norm_scaleLaplacianFun_le
 linear operator `Δ_∇ : H^{τ+2} →L[ℝ] Hᵗ`.  It multiplies the `i`-th
 eigen-coordinate by `-λᵢ` (geometer convention `Δ_∇ = -∇*∇`), losing exactly two
 Sobolev derivatives.  Its operator norm is at most `1`. -/
-def tensorScaleLaplacian (_h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (τ : ℝ) :
+def tensorScaleLaplacian (τ : ℝ) :
     tensorHs (I := I) (M := M) g r s (τ + 2) →L[ℝ]
       tensorHs (I := I) (M := M) g r s τ :=
   LinearMap.mkContinuous
@@ -193,7 +192,7 @@ def tensorScaleLaplacian (_h_atlas : DifferentialGeometry.Geometry.HasLocallyCon
 
 @[simp] theorem tensorScaleLaplacian_apply (τ : ℝ)
     (v : tensorHs (I := I) (M := M) g r s (τ + 2)) :
-    tensorScaleLaplacian (I := I) (M := M) h_atlas τ v =
+    tensorScaleLaplacian (I := I) (M := M) τ v =
       scaleLaplacianFun (I := I) (M := M) v := rfl
 
 /-- The coordinate formula for the rough Laplacian: `Δ_∇` multiplies the `i`-th
@@ -201,7 +200,7 @@ coordinate by `-λᵢ`. -/
 @[simp] theorem tensorScaleLaplacian_coeff (τ : ℝ)
     (v : tensorHs (I := I) (M := M) g r s (τ + 2))
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    (tensorScaleLaplacian (I := I) (M := M) h_atlas τ v).coeff i =
+    (tensorScaleLaplacian (I := I) (M := M) τ v).coeff i =
       -(TensorEigenIdx.lambda (I := I) (M := M) i) * v.coeff i := rfl
 
 /-! ## The rough Laplacian on time-`L²` tensor fields
@@ -214,19 +213,18 @@ variable {τ : ℝ} {T : ℝ}
 /-- **The rough Laplacian on time-`L²` tensor fields**, as a continuous linear
 map `L²([0,T]; H^{τ+2}) →L[ℝ] L²([0,T]; Hᵗ)`: the rough Laplacian `Δ_∇` applied
 pointwise in time. -/
-def timeScaleLaplacian (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (τ : ℝ) {T : ℝ} :
+def timeScaleLaplacian (τ : ℝ) {T : ℝ} :
     timeL2 (tensorHs (I := I) (M := M) g r s (τ + 2)) T →L[ℝ]
       timeL2 (tensorHs (I := I) (M := M) g r s τ) T :=
-  (tensorScaleLaplacian (I := I) (M := M) h_atlas τ).compLpL 2 (timeMeasure T)
+  (tensorScaleLaplacian (I := I) (M := M) τ).compLpL 2 (timeMeasure T)
 
 /-- `timeScaleLaplacian τ v` is represented a.e. by the pointwise rough
 Laplacian `t ↦ Δ_∇ (v t)`. -/
 theorem timeScaleLaplacian_coeFn
     (v : timeL2 (tensorHs (I := I) (M := M) g r s (τ + 2)) T) :
-    timeScaleLaplacian (I := I) (M := M) h_atlas τ v =ᵐ[timeMeasure T]
-      fun t => tensorScaleLaplacian (I := I) (M := M) h_atlas τ (v t) :=
-  (tensorScaleLaplacian (I := I) (M := M) h_atlas τ).coeFn_compLpL
+    timeScaleLaplacian (I := I) (M := M) τ v =ᵐ[timeMeasure T]
+      fun t => tensorScaleLaplacian (I := I) (M := M) τ (v t) :=
+  (tensorScaleLaplacian (I := I) (M := M) τ).coeFn_compLpL
     (p := 2) (μ := timeMeasure T) v
 
 /-- The time-mode coordinate of the rough Laplacian of a field: the rough
@@ -235,13 +233,13 @@ theorem timeModeCoeff_timeScaleLaplacian
     (v : timeL2 (tensorHs (I := I) (M := M) g r s (τ + 2)) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     timeModeCoeff (I := I) (M := M)
-        (timeScaleLaplacian (I := I) (M := M) h_atlas τ v) i =
+        (timeScaleLaplacian (I := I) (M := M) τ v) i =
       (-(TensorEigenIdx.lambda (I := I) (M := M) i)) •
         timeModeCoeff (I := I) (M := M) v i := by
   refine Lp.ext ?_
   have hlhs := timeModeCoeff_coeFn (I := I) (M := M)
-    (timeScaleLaplacian (I := I) (M := M) h_atlas τ v) i
-  have hΔ := timeScaleLaplacian_coeFn (I := I) (M := M) (h_atlas := h_atlas)
+    (timeScaleLaplacian (I := I) (M := M) τ v) i
+  have hΔ := timeScaleLaplacian_coeFn (I := I) (M := M)
     (τ := τ) v
   have hsmul := Lp.coeFn_smul (-(TensorEigenIdx.lambda (I := I) (M := M) i))
     (timeModeCoeff (I := I) (M := M) v i)
@@ -286,7 +284,7 @@ theorem maximalRegularityOp_solves {a : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
     TimeSobolev.timeH1.timeDeriv _ T
         (maximalRegularityOp (I := I) (M := M) h_atlas a hT hT1 f) =
-      timeScaleLaplacian (I := I) (M := M) h_atlas a
+      timeScaleLaplacian (I := I) (M := M) a
           (maximalRegularitySolField (I := I) (M := M) h_atlas a hT.le f) +
         f := by
   -- The time derivative of the operator's output is the time-derivative field.

@@ -512,7 +512,7 @@ Duhamel field.  Precisely, the data `u, gforce` satisfy:
   `gforce = N(field of u)`;
 * `timeH1.trace0 _ _ u = tensorHsInclusion h_atlas _ u₀` — the initial value
   is `u₀` (taken in `Hᵃ` via the spectral inclusion `H^{a+2} ↪ Hᵃ`);
-* `timeH1.timeDeriv _ _ u = timeScaleLaplacian h_atlas a (field of u) +
+* `timeH1.timeDeriv _ _ u = timeScaleLaplacian a (field of u) +
   nemytskii hN (field of u)` — **the equation**: the time derivative equals the
   rough Laplacian of the `H^{a+2}`-valued solution field plus the Nemytskii
   nonlinearity applied to that same field, `∂_t u = Δ_∇ u + N(u)`.
@@ -525,7 +525,7 @@ theorem quasilinear_strong_existence {L : ℝ≥0}
     (hT : 0 < T) (hT1 : T ≤ 1)
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
     (hN : LipschitzWith L N) (hL : 2 * (L : ℝ) < 1) :
-    ∃ (u : MaxRegSolutionSpace (I := I) (M := M) h_atlas a T)
+    ∃ (u : MaxRegSolutionSpace (I := I) (M := M) a T)
       (gforce : timeL2 (tensorHs (I := I) (M := M) g r s a) T),
       u = maxRegDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ gforce ∧
         gforce = nemytskii (I := I) (M := M) hN
@@ -535,7 +535,7 @@ theorem quasilinear_strong_existence {L : ℝ≥0}
             tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
               (show a ≤ a + 2 by linarith) u₀ ∧
         TimeSobolev.timeH1.timeDeriv _ T u =
-          timeScaleLaplacian (I := I) (M := M) h_atlas a
+          timeScaleLaplacian (I := I) (M := M) a
               (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀
                 gforce) +
             nemytskii (I := I) (M := M) hN
