@@ -771,6 +771,275 @@ theorem transitionCoeff_le_uniform_on_pouTsupport
   exists_transitionCoeff_uniform_bound_on_pouTsupport
     (E := E) (I := I) (M := M) r s
 
+/-! ## Uniform op-norm bound on the chart-transition Fréchet derivative
+
+The chart-transition map `extChartAt I α ∘ (extChartAt I γ).symm` is `C^∞` on
+the open `E`-source `((extChartAt I γ).symm ≫ extChartAt I α).source`. Its
+Fréchet derivative is therefore `ContinuousOn` on the same set, and its
+operator norm is bounded on any compact subset.
+
+For chart base points `γ, α` in the (finite) `chartAtlasPOU_finset` and points
+`b : M` in `tsupport (POU γ) ∩ tsupport (POU α)`, the image
+`extChartAt I γ '' (tsupport (POU γ) ∩ tsupport (POU α))` is a compact subset
+of `((extChartAt I γ).symm ≫ extChartAt I α).source`. Taking the maximum of
+the per-pair operator-norm bounds over the finite chart-pair product yields a
+single uniform constant `K_jac ≥ 0`. For pairs outside the finite product the
+POU tsupport intersection is empty, so the bound is vacuously satisfied. -/
+
+/-- The `E`-source of the chart transition `(extChartAt I γ).symm ≫
+extChartAt I α` is open in `E` for a boundaryless model. The source equals
+`I '' ((chartAt H γ).symm ≫ₕ chartAt H α).source`, which under boundaryless
+`I` (so `range I = univ`) equals `I.symm ⁻¹' ((chartAt H γ).symm ≫ₕ chartAt
+H α).source`; the preimage is open by continuity of `I.symm` and openness of
+the `OpenPartialHomeomorph` trans source. -/
+private lemma isOpen_extCoordChange_source (γ α : M) :
+    IsOpen (((extChartAt I γ).symm ≫ extChartAt I α).source) := by
+  classical
+  -- Rewrite the source via `ext_coord_change_source` and `I.image_eq`.
+  rw [ext_coord_change_source (I := I) α γ, I.image_eq, I.range_eq_univ,
+    Set.inter_univ]
+  -- The remaining set is the preimage of an open set under continuous `I.symm`.
+  exact ((chartAt H γ).symm ≫ₕ chartAt H α).open_source.preimage I.continuous_symm
+
+/-- The image of `tsupport (POU γ) ∩ tsupport (POU α)` under `extChartAt I γ`
+is compact in `E`. Continuous image (`extChartAt I γ` is continuous on
+`(chartAt H γ).source`) of a compact set; the POU tsupport intersection is
+compact and contained in `(chartAt H γ).source`. -/
+private lemma pouTsupport_inter_image_extChartAt_isCompact (γ α : M) :
+    IsCompact
+      ((extChartAt I γ) '' (tsupport (fun x : M =>
+          ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
+        tsupport (fun x : M =>
+          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x))) := by
+  classical
+  have hK_compact : IsCompact (tsupport (fun x : M =>
+        ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
+      tsupport (fun x : M =>
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
+    pouTsupport_inter_isCompact (I := I) (M := M) γ α
+  have h_cont : ContinuousOn (extChartAt I γ) (chartAt H γ).source := by
+    have h := continuousOn_extChartAt (I := I) γ
+    rw [extChartAt_source (I := I)] at h
+    exact h
+  have hK_sub : tsupport (fun x : M =>
+        ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
+      tsupport (fun x : M =>
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
+      (chartAt H γ).source := fun x hx =>
+    pouTsupport_subset_chartSource (I := I) (M := M) γ hx.1
+  exact hK_compact.image_of_continuousOn (h_cont.mono hK_sub)
+
+/-- For `b ∈ (chartAt H γ).source ∩ (chartAt H α).source`, the point
+`extChartAt I γ b` lies in `((extChartAt I γ).symm ≫ extChartAt I α).source`.
+This is the image identity `extend_image_source_inter` rewritten via
+`I.extendCoordChange_source`. -/
+private lemma extChartAt_mem_extCoordChange_source
+    {γ α : M} {b : M}
+    (hbγ : b ∈ (chartAt H γ).source) (hbα : b ∈ (chartAt H α).source) :
+    extChartAt I γ b ∈ ((extChartAt I γ).symm ≫ extChartAt I α).source := by
+  classical
+  -- The image identity:
+  -- (chartAt H γ).extend I '' ((chartAt H γ).source ∩ (chartAt H α).source)
+  --   = (I.extendCoordChange (chartAt H γ) (chartAt H α)).source.
+  have h_img := OpenPartialHomeomorph.extend_image_source_inter
+    (I := I) (f := chartAt H γ) (f' := chartAt H α)
+  -- The trans `(extChartAt I γ).symm ≫ extChartAt I α` is by definition
+  -- `I.extendCoordChange (chartAt H γ) (chartAt H α)` (both unfold to
+  -- `((chartAt H γ).extend I).symm ≫ (chartAt H α).extend I`).
+  change extChartAt I γ b ∈ (I.extendCoordChange (chartAt H γ) (chartAt H α)).source
+  rw [← h_img]
+  exact ⟨b, ⟨hbγ, hbα⟩, rfl⟩
+
+/-- The image of `tsupport (POU γ) ∩ tsupport (POU α)` under `extChartAt I γ`
+is contained in `((extChartAt I γ).symm ≫ extChartAt I α).source`. -/
+private lemma pouTsupport_inter_image_subset_extCoordChange_source
+    (γ α : M) :
+    (extChartAt I γ) '' (tsupport (fun x : M =>
+        ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
+      tsupport (fun x : M =>
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) ⊆
+      ((extChartAt I γ).symm ≫ extChartAt I α).source := by
+  classical
+  rintro z ⟨b, hb, rfl⟩
+  have hb_inter : b ∈ (chartAt H γ).source ∩ (chartAt H α).source :=
+    pouTsupport_inter_subset_chartSource_inter (I := I) (M := M) γ α hb
+  exact extChartAt_mem_extCoordChange_source
+    (I := I) (M := M) hb_inter.1 hb_inter.2
+
+/-! ### Per-pair bound: continuous Fréchet derivative on a compact image -/
+
+/-- For each pair `(γ, α)` of chart base points, the operator norm of the
+Fréchet derivative `fderiv ℝ (extChartAt I α ∘ (extChartAt I γ).symm)` at the
+point `extChartAt I γ b`, with `b` in the POU tsupport intersection, is
+bounded by a non-negative constant `C_{γ,α}`. The argument: the chart
+transition is `ContDiffOn ℝ ∞` on the open source, hence its Fréchet
+derivative is `ContinuousOn`; the operator norm is continuous; the image of
+the (compact) POU tsupport intersection under `extChartAt I γ` is compact
+and contained in the open source; bounded continuous functions on compact
+sets achieve their maxima. -/
+private lemma exists_fderiv_chartTransition_bound_on_pouTsupport_pair
+    (γ α : M) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ b ∈ tsupport (fun x : M =>
+            ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
+          tsupport (fun x : M =>
+            ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x),
+        ‖fderiv ℝ (extChartAt I α ∘ (extChartAt I γ).symm)
+            (extChartAt I γ b)‖ ≤ C := by
+  classical
+  -- The chart-transition source in `E`.
+  set U : Set E := ((extChartAt I γ).symm ≫ extChartAt I α).source with hU_def
+  have hU_open : IsOpen U :=
+    isOpen_extCoordChange_source (I := I) (M := M) γ α
+  -- Smoothness of the chart transition on `U`.
+  have h_contDiff : ContDiffOn ℝ ∞
+      (extChartAt I α ∘ (extChartAt I γ).symm) U :=
+    contDiffOn_ext_coord_change (I := I) (n := ∞) α γ
+  -- Continuity of `fderiv` on `U`.
+  have h_one_le : (1 : WithTop ℕ∞) ≤ ∞ := by
+    exact_mod_cast (by decide : (1 : ℕ∞) ≤ ⊤)
+  have h_cont_fderiv : ContinuousOn
+      (fderiv ℝ (extChartAt I α ∘ (extChartAt I γ).symm)) U :=
+    h_contDiff.continuousOn_fderiv_of_isOpen hU_open h_one_le
+  -- Continuity of the operator norm composed with `fderiv` on `U`.
+  have h_cont_norm : ContinuousOn
+      (fun y : E => ‖fderiv ℝ (extChartAt I α ∘ (extChartAt I γ).symm) y‖) U :=
+    continuous_norm.comp_continuousOn h_cont_fderiv
+  -- The image `K_E` of the POU tsupport intersection.
+  set K_E : Set E := (extChartAt I γ) '' (tsupport (fun x : M =>
+        ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
+      tsupport (fun x : M =>
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) with hKE_def
+  have hKE_compact : IsCompact K_E :=
+    pouTsupport_inter_image_extChartAt_isCompact (I := I) (M := M) γ α
+  have hKE_subset_U : K_E ⊆ U :=
+    pouTsupport_inter_image_subset_extCoordChange_source (I := I) (M := M) γ α
+  -- Case split on whether `K_E` is empty.
+  by_cases hKE_empty : K_E = ∅
+  · -- Empty case: every `C ≥ 0` works, take `C = 0`.
+    refine ⟨0, le_refl 0, ?_⟩
+    intro b hb
+    -- Reach a contradiction: `extChartAt I γ b ∈ K_E = ∅`.
+    have h_mem : extChartAt I γ b ∈ K_E := ⟨b, hb, rfl⟩
+    rw [hKE_empty] at h_mem
+    exact absurd h_mem (Set.notMem_empty _)
+  · -- Non-empty case: take the maximum on `K_E`.
+    have hKE_ne : K_E.Nonempty := Set.nonempty_iff_ne_empty.mpr hKE_empty
+    have h_cont_norm_KE : ContinuousOn
+        (fun y : E => ‖fderiv ℝ (extChartAt I α ∘ (extChartAt I γ).symm) y‖)
+        K_E := h_cont_norm.mono hKE_subset_U
+    obtain ⟨y_max, _hy_mem, hy_max⟩ :=
+      hKE_compact.exists_isMaxOn hKE_ne h_cont_norm_KE
+    set C₀ : ℝ := ‖fderiv ℝ (extChartAt I α ∘ (extChartAt I γ).symm) y_max‖
+      with hC₀_def
+    have hC₀_nn : 0 ≤ C₀ := norm_nonneg _
+    refine ⟨C₀, hC₀_nn, ?_⟩
+    intro b hb
+    have h_mem : extChartAt I γ b ∈ K_E := ⟨b, hb, rfl⟩
+    exact hy_max h_mem
+
+/-! ### Aggregation: finset induction over `chartAtlasPOU_finset` pairs -/
+
+/-- Existential form: there is a single non-negative constant `K_jac` bounding
+`‖fderiv ℝ (extChartAt I α ∘ (extChartAt I γ).symm) (extChartAt I γ b)‖`
+simultaneously over all pairs `(γ, α)` of chart base points and all `b` in
+the POU tsupport intersection at `(γ, α)`. Proved by induction on
+`chartAtlasPOU_finset × chartAtlasPOU_finset`. -/
+private lemma exists_fderiv_chartTransition_uniform_bound_on_pouTsupport :
+    ∃ K_jac : ℝ, 0 ≤ K_jac ∧
+      ∀ γ α : M, ∀ b : M,
+        b ∈ tsupport (fun x : M =>
+            ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
+          tsupport (fun x : M =>
+            ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
+        ‖fderiv ℝ (extChartAt I α ∘ (extChartAt I γ).symm)
+            (extChartAt I γ b)‖ ≤ K_jac := by
+  classical
+  -- Auxiliary: induct on a finset `S` of chart-base-point pairs.
+  suffices h_aux :
+      ∀ S : Finset (M × M),
+        ∃ K_jac : ℝ, 0 ≤ K_jac ∧
+          ∀ γα ∈ S, ∀ b : M,
+            b ∈ tsupport (fun x : M =>
+                ((chartAtlasPOU I M γα.1 : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
+              tsupport (fun x : M =>
+                ((chartAtlasPOU I M γα.2 : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
+            ‖fderiv ℝ (extChartAt I γα.2 ∘ (extChartAt I γα.1).symm)
+                (extChartAt I γα.1 b)‖ ≤ K_jac by
+    obtain ⟨K_jac, hK_nn, hK_le⟩ := h_aux
+      (chartAtlasPOU_finset (I := I) (M := M) ×ˢ
+        chartAtlasPOU_finset (I := I) (M := M))
+    refine ⟨K_jac, hK_nn, ?_⟩
+    intro γ α b hb
+    by_cases hγ : γ ∈ chartAtlasPOU_finset (I := I) (M := M)
+    · by_cases hα : α ∈ chartAtlasPOU_finset (I := I) (M := M)
+      · have hmem : (γ, α) ∈
+            chartAtlasPOU_finset (I := I) (M := M) ×ˢ
+              chartAtlasPOU_finset (I := I) (M := M) :=
+          Finset.mem_product.mpr ⟨hγ, hα⟩
+        exact hK_le (γ, α) hmem b hb
+      · have h_empty := pouTsupport_inter_eq_empty_of_right_notMem_finset
+          (I := I) (M := M) γ hα
+        rw [h_empty] at hb
+        exact absurd hb (Set.notMem_empty b)
+    · have h_empty := pouTsupport_inter_eq_empty_of_left_notMem_finset
+        (I := I) (M := M) hγ α
+      rw [h_empty] at hb
+      exact absurd hb (Set.notMem_empty b)
+  intro S
+  induction S using Finset.induction_on with
+  | empty =>
+    refine ⟨0, le_refl 0, ?_⟩
+    intro γα hγα
+    exact absurd hγα (Finset.notMem_empty _)
+  | insert γα S' _hγα_notin ih =>
+    obtain ⟨K_S, hK_S_nn, hK_S_le⟩ := ih
+    obtain ⟨K_γα, hK_γα_nn, hK_γα_le⟩ :=
+      exists_fderiv_chartTransition_bound_on_pouTsupport_pair
+        (E := E) (I := I) (M := M) γα.1 γα.2
+    refine ⟨max K_S K_γα, le_max_of_le_left hK_S_nn, ?_⟩
+    intro δβ hδβ b hb
+    rcases Finset.mem_insert.mp hδβ with heq | hin
+    · subst heq
+      exact le_trans (hK_γα_le b hb) (le_max_right _ _)
+    · exact le_trans (hK_S_le δβ hin b hb) (le_max_left _ _)
+
+/-- **Uniform op-norm bound on the chart-transition Fréchet derivative over
+POU tsupport overlaps.**
+
+For a closed Riemannian manifold modelled on a finite-dimensional real
+inner-product space, there exists a single non-negative real constant
+`K_jac` such that for every pair of chart base points `γ, α : M` and every
+point `b : M` lying in the intersection of the closed supports of the
+partition-of-unity weights `chartAtlasPOU γ` and `chartAtlasPOU α`, the
+operator norm of the Fréchet derivative
+
+  `fderiv ℝ (extChartAt I α ∘ (extChartAt I γ).symm) (extChartAt I γ b)`
+
+is bounded by `K_jac`. The constant `K_jac` depends only on the manifold.
+
+For pairs `(γ, α)` outside the (finite) `chartAtlasPOU_finset` the relevant
+POU tsupport intersection is empty (since the partition-of-unity weight at a
+chart base point outside that finite set is identically zero), so the bound
+is vacuously satisfied for those pairs; effectively the supremum is taken
+over the finite product `chartAtlasPOU_finset × chartAtlasPOU_finset`.
+
+Applying the theorem with `γ` and `α` swapped gives the analogous bound for
+the inverse chart transition `extChartAt I γ ∘ (extChartAt I α).symm` at the
+point `extChartAt I α b` (the POU tsupport intersection is symmetric in
+`γ, α`). -/
+theorem chartTransition_fderiv_le_uniform_on_pouTsupport :
+    ∃ K_jac : ℝ, 0 ≤ K_jac ∧
+      ∀ γ α : M, ∀ b : M,
+        b ∈ tsupport (fun x : M =>
+            ((chartAtlasPOU I M γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
+          tsupport (fun x : M =>
+            ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
+        ‖fderiv ℝ (extChartAt I α ∘ (extChartAt I γ).symm)
+            (extChartAt I γ b)‖ ≤ K_jac :=
+  exists_fderiv_chartTransition_uniform_bound_on_pouTsupport
+    (E := E) (I := I) (M := M)
+
 end UniformBound
 
 end TensorSpectral
@@ -784,3 +1053,6 @@ end
 
 #print axioms
   DifferentialGeometry.Analysis.Parabolic.TensorSpectral.transitionCoeff_le_uniform_on_pouTsupport
+
+#print axioms
+  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartTransition_fderiv_le_uniform_on_pouTsupport
