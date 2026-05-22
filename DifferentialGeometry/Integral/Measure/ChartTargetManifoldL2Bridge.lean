@@ -112,7 +112,7 @@ lemma chartL2BridgeMα_le
 variable (I M) in
 /-- The chart-target L² bridge's overall multiplicative constant, defined as
 `(euclideanHaarFactor E : ℝ) * ∑ α ∈ chartAtlasPOU_finset I M,
-  (chartL2BridgeMα h_atlas g α + 1)`. This is the constant produced by
+  (chartL2BridgeMα g α + 1)`. This is the constant produced by
 `manifold_l2_norm_sq_le_finset_sum_chart_target_l2_norm_sq`, exposed publicly
 so that downstream callers can quantify the existential `∃ C` outside a
 universal over input sections. -/
@@ -548,7 +548,7 @@ the input section. We expose a uniform-constant variant whose existential `C`
 is shared across all input sections with the same Borel-measurability witness.
 
 The constant is the public `noncomputable def`
-`chartTargetL2BridgeConstant h_atlas g`, with associated non-negativity
+`chartTargetL2BridgeConstant g`, with associated non-negativity
 lemma `chartTargetL2BridgeConstant_nonneg`. The proof is a direct repackaging
 of the per-section bridge: we re-derive the bound using the named constant
 and re-use the same proof structure. -/

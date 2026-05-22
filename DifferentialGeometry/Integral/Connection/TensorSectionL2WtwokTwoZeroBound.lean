@@ -905,8 +905,6 @@ monotonicity bound on `wkpNorm 0 2 ≤ wtwokTwoNorm g 0 T`. -/
 
 private lemma per_alpha_section_summand_le_wtwokTwoNorm_zero_sq
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (_h_atlas_strong :
-        DifferentialGeometry.Geometry.HasChartSourceConsistentChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧
       ∀ (T : SmoothCcTensor g r s),
@@ -1193,8 +1191,6 @@ private lemma per_alpha_section_summand_le_wtwokTwoNorm_zero_sq
 
 theorem chartSobolevSectionNormPou_le_wtwokTwoNorm_zero_sq
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (h_atlas_strong :
-        DifferentialGeometry.Geometry.HasChartSourceConsistentChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (T : SmoothCcTensor g r s),
@@ -1205,7 +1201,7 @@ theorem chartSobolevSectionNormPou_le_wtwokTwoNorm_zero_sq
   set Sfin : Finset M := chartAtlasPOU_finset (I := I) (M := M) with hSfin_def
   set Kα : M → ℝ := fun α => Classical.choose
     (per_alpha_section_summand_le_wtwokTwoNorm_zero_sq
-      (I := I) (M := M) h_atlas h_atlas_strong g r s α) with hKα_def
+      (I := I) (M := M) h_atlas g r s α) with hKα_def
   have hKα_spec : ∀ α : M, 0 ≤ Kα α ∧
       ∀ (T : SmoothCcTensor g r s),
         ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
@@ -1220,7 +1216,7 @@ theorem chartSobolevSectionNormPou_le_wtwokTwoNorm_zero_sq
             (wtwokTwoNorm (I := I) (M := M) g 0 T) ^ 2 := fun α =>
     Classical.choose_spec
       (per_alpha_section_summand_le_wtwokTwoNorm_zero_sq
-        (I := I) (M := M) h_atlas h_atlas_strong g r s α)
+        (I := I) (M := M) h_atlas g r s α)
   set C : ℝ := ∑ α ∈ Sfin, Kα α with hC_def
   have hC_nn : 0 ≤ C := Finset.sum_nonneg (fun α _ => (hKα_spec α).1)
   refine ⟨C, hC_nn, ?_⟩
@@ -1244,8 +1240,6 @@ respect to the Riemannian volume measure on `M`) is bounded by `C` times the
 square of the order-zero tensor chart-Sobolev norm `wtwokTwoNorm g 0 T`. -/
 theorem tensorSection_L2NormSq_le_wtwokTwoNorm_zero_sq
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (h_atlas_strong :
-        DifferentialGeometry.Geometry.HasChartSourceConsistentChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (T : SmoothCcTensor g r s),
@@ -1266,7 +1260,7 @@ theorem tensorSection_L2NormSq_le_wtwokTwoNorm_zero_sq
     chartSobolevRawNormPouBridgeConstant_nonneg (I := I) (M := M) g
   obtain ⟨C_B3, hC_B3_nn, hC_B3_bound⟩ :=
     chartSobolevSectionNormPou_le_wtwokTwoNorm_zero_sq
-      (I := I) (M := M) h_atlas h_atlas_strong g r s
+      (I := I) (M := M) h_atlas g r s
   refine ⟨C_bridge * C_B3, mul_nonneg hC_bridge_nn hC_B3_nn, ?_⟩
   intro T hsec_meas
   set W : ℝ≥0∞ := (wtwokTwoNorm (I := I) (M := M) g 0 T) ^ 2 with hW_def

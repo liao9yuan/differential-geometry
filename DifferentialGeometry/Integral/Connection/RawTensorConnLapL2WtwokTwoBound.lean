@@ -5604,8 +5604,6 @@ Outside the partition-of-unity support, the bound is trivial (the integrand
 is zero). -/
 private lemma per_alpha_pointwise_bound
     (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (h_atlas_strong :
-        DifferentialGeometry.Geometry.HasChartSourceConsistentChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧
       ∀ (T : SmoothCcTensor g r s),
@@ -6704,7 +6702,7 @@ private lemma per_alpha_chartSobolev_summand_le_wtwokTwoNorm_sq
   classical
   -- Pointwise bound via `per_alpha_pointwise_bound`.
   obtain ⟨K_2b, hK_2b_nn, hK_2b_bound⟩ :=
-    per_alpha_pointwise_bound (I := I) (M := M) h_atlas h_atlas_strong g r s α
+    per_alpha_pointwise_bound (I := I) (M := M) h_atlas g r s α
   -- The three per-α V/F/I bounds.
   obtain ⟨Cv, hCv_nn, hCv_bound⟩ :=
     per_alpha_V_int_le_wtwokTwoNorm_sq (I := I) (M := M) g r s α
