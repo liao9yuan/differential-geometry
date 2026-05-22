@@ -545,7 +545,6 @@ where `ρ_α` is the chart-atlas partition-of-unity weight at `α`. The constant
 `HasLocallyConstantChartAt H M` is accepted in the signature for symmetry with
 neighbouring per-`α` atom bounds; the proof itself does not need it. -/
 theorem exists_eLpNorm_sq_pou_mul_sum_triv_chart_cov_le_const_mul_h1NormSq
-    (_h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (S : SmoothCcTensorH1 g r s),
@@ -952,7 +951,6 @@ private lemma ofReal_tensorL2Norm_le_norm_ennreal
 /-- **Per-`α` `L²` bound on the `raw²` chart-component indicator over POU
 support.** -/
 theorem exists_integral_indicator_tsupp_raw_sq_le_const_mul_h1NormSq
-    (_h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (S : SmoothCcTensorH1 g r s)

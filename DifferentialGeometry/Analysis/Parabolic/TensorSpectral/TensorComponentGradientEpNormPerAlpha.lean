@@ -575,10 +575,10 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
       (I := I) (M := M) h_atlas g r s α
   obtain ⟨C₂, hC₂_nn, h_G2⟩ :=
     exists_eLpNorm_sq_pou_mul_sum_triv_chart_cov_le_const_mul_h1NormSq
-      (I := I) (M := M) h_atlas g r s α
+      (I := I) (M := M) g r s α
   obtain ⟨C₄, hC₄_nn, h_G4⟩ :=
     exists_integral_indicator_tsupp_raw_sq_le_const_mul_h1NormSq
-      (I := I) (M := M) h_atlas g r s α
+      (I := I) (M := M) g r s α
   -- Uniform input/output slot-correction operator-norm bounds on `tsupport ρ_α`.
   obtain ⟨M_F_in, hM_F_in_nn, hM_F_in_le⟩ :=
     chartTensorRSInputSlotCorrection_norm_le_const_on_pouTsupport
