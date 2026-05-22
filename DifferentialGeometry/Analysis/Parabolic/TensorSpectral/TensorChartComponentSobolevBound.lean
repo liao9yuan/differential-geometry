@@ -304,7 +304,6 @@ private lemma ofReal_tensorL2Norm_le_norm_ennreal
 /-- **Headline theorem (α-uniform L² bound for chart-frame scalar
 components).** -/
 theorem tensorChartComponentScalar_eLpNorm_le
-    (_h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C₀ : ℝ, 0 ≤ C₀ ∧
       ∀ (S : SmoothCcTensorH1 g r s) (α : M)
@@ -352,7 +351,7 @@ theorem tensorChartComponentScalar_eLpNorm_le_forall
           (riemannianVolumeMeasure (I := I) (M := M) g) ≤
           ENNReal.ofReal C₀ * (‖S‖₊ : ℝ≥0∞) :=
   tensorChartComponentScalar_eLpNorm_le
-    (I := I) (M := M) h_atlas g r s
+    (I := I) (M := M) g r s
 
 end ScalarUniform
 
