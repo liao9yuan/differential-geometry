@@ -248,7 +248,6 @@ private lemma intrinsicPiece_differentiableAt
 /-- Differentiability of the chart-pulled input-slot Christoffel correction at
 the chart point. -/
 private lemma inputSlotPiece_differentiableAt
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -333,7 +332,6 @@ private lemma inputSlotPiece_differentiableAt
 /-- Differentiability of the chart-pulled output-slot Christoffel correction
 at the chart point. -/
 private lemma outputSlotPiece_differentiableAt
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -607,7 +605,7 @@ theorem chart_pulled_covApply_repr_fderiv_bound
           (chartTensorRSInputSlotCorrection (I := I) r s g α
             (fun y' : M => T.toSection y') B.toFun
             ((extChartAt I α).symm y) k)) (extChartAt I α b) := fun k =>
-    inputSlotPiece_differentiableAt (I := I) (M := M) h_atlas g r s α T B k hb_good
+    inputSlotPiece_differentiableAt (I := I) (M := M) g r s α T B k hb_good
   have h_out_diff : ∀ l : Fin s, DifferentiableAt ℝ
       (fun y : E =>
         (trivializationAt (TensorRSModel r s ℝ E)
@@ -616,7 +614,7 @@ theorem chart_pulled_covApply_repr_fderiv_bound
           (chartTensorRSOutputSlotCorrection (I := I) r s g α
             (fun y' : M => T.toSection y') B.toFun
             ((extChartAt I α).symm y) l)) (extChartAt I α b) := fun l =>
-    outputSlotPiece_differentiableAt (I := I) (M := M) h_atlas g r s α T B l hb_good
+    outputSlotPiece_differentiableAt (I := I) (M := M) g r s α T B l hb_good
   have h_in_sum_diff : DifferentiableAt ℝ
       (fun y : E => ∑ k : Fin r,
         (trivializationAt (TensorRSModel r s ℝ E)

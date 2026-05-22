@@ -156,7 +156,7 @@ noncomputable def chartSobolevRawNorm
 
 L² bound of the raw tensor connection Laplacian by the chart-target Sobolev-
 style aggregate. The constant `C` is the named public
-`chartTargetL2BridgeConstant h_atlas g`, which depends only on `g`, the
+`chartTargetL2BridgeConstant g`, which depends only on `g`, the
 canonical chart atlas, and the canonical partition of unity. -/
 
 /-- **Manifold L² bound for the raw tensor connection Laplacian.**
@@ -170,13 +170,12 @@ the inequality
         ≤ ENNReal.ofReal C *
             chartSobolevRawNorm g r s T`,
 
-with the named uniform constant `C := chartTargetL2BridgeConstant h_atlas g`,
+with the named uniform constant `C := chartTargetL2BridgeConstant g`,
 which depends only on `g`, the canonical chart atlas, and the canonical
 partition of unity.
 
-The hypothesis `h_atlas` is the locally-constant chart predicate, consumed by
-`uniform_manifold_l2_norm_sq_le_finset_sum_chart_target_l2_norm_sq` via the
-chart-target sup bound for the chart density.
+The chart-target sup bound used to assemble `C` is provided unconditionally
+by `uniform_manifold_l2_norm_sq_le_finset_sum_chart_target_l2_norm_sq`.
 
 The measurability hypothesis `hΔT_meas` is the natural one: the
 `(r, s)`-tensor bundle does not currently carry an
@@ -187,7 +186,6 @@ supplied here as a public input.
 The constant `C` is uniform across all sections `T`: the `∃ C` is
 quantified outside the universal `∀ T`. -/
 theorem rawTensorConnLap_L2NormSq_le_chartSobolevRawNorm
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (T : SmoothCcTensor g r s),
@@ -200,17 +198,17 @@ theorem rawTensorConnLap_L2NormSq_le_chartSobolevRawNorm
                   (fun z : M => T.toSection z) x‖ₑ : ℝ≥0∞) ^ 2
               ∂(riemannianVolumeMeasure (I := I) (M := M) g) ≤
             ENNReal.ofReal
-                (chartTargetL2BridgeConstant (I := I) (M := M) h_atlas g) *
+                (chartTargetL2BridgeConstant (I := I) (M := M) g) *
               chartSobolevRawNorm (I := I) (M := M) g r s T := by
   classical
-  refine ⟨chartTargetL2BridgeConstant (I := I) (M := M) h_atlas g,
-    chartTargetL2BridgeConstant_nonneg (I := I) (M := M) h_atlas g, ?_⟩
+  refine ⟨chartTargetL2BridgeConstant (I := I) (M := M) g,
+    chartTargetL2BridgeConstant_nonneg (I := I) (M := M) g, ?_⟩
   intro T hΔT_meas
   -- Apply the uniform-constant chart-target L² bridge with input section the
   -- raw connection Laplacian of `T.toSection`.
   have hbound :=
     uniform_manifold_l2_norm_sq_le_finset_sum_chart_target_l2_norm_sq
-      (I := I) (M := M) (h_atlas := h_atlas) g r s
+      (I := I) (M := M) g r s
       (S := fun b : M =>
         rawTensorConnLap (I := I) g r s
           (fun z : M => T.toSection z) b)
@@ -230,7 +228,6 @@ together with a compact-support witness. The proof is a one-line packaging. -/
 
 /-- The headline restated against the underlying `ContMDiffSection`. -/
 theorem rawTensorConnLap_L2NormSq_le_chartSobolevRawNorm_of_section
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (T₀ : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
@@ -246,7 +243,7 @@ theorem rawTensorConnLap_L2NormSq_le_chartSobolevRawNorm_of_section
                   (fun z : M => T₀ z) x‖ₑ : ℝ≥0∞) ^ 2
               ∂(riemannianVolumeMeasure (I := I) (M := M) g) ≤
             ENNReal.ofReal
-                (chartTargetL2BridgeConstant (I := I) (M := M) h_atlas g) *
+                (chartTargetL2BridgeConstant (I := I) (M := M) g) *
               ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
                 ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
                   ENNReal.ofReal
@@ -257,8 +254,8 @@ theorem rawTensorConnLap_L2NormSq_le_chartSobolevRawNorm_of_section
                       y)
                   ∂(volume : Measure EuclN) := by
   classical
-  refine ⟨chartTargetL2BridgeConstant (I := I) (M := M) h_atlas g,
-    chartTargetL2BridgeConstant_nonneg (I := I) (M := M) h_atlas g, ?_⟩
+  refine ⟨chartTargetL2BridgeConstant (I := I) (M := M) g,
+    chartTargetL2BridgeConstant_nonneg (I := I) (M := M) g, ?_⟩
   intro T₀ _hT₀_cc hΔT_meas
   -- Apply the uniform-constant bridge directly with input section the raw
   -- connection Laplacian of `T₀`. The compact-support witness is not used
@@ -266,7 +263,7 @@ theorem rawTensorConnLap_L2NormSq_le_chartSobolevRawNorm_of_section
   -- consistency with the bundled `SmoothCcTensor` form.
   exact
     uniform_manifold_l2_norm_sq_le_finset_sum_chart_target_l2_norm_sq
-      (I := I) (M := M) (h_atlas := h_atlas) g r s
+      (I := I) (M := M) g r s
       (S := fun b : M =>
         rawTensorConnLap (I := I) g r s
           (fun z : M => T₀ z) b)

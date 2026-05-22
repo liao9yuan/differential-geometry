@@ -58,14 +58,12 @@ constant `M_α`. The constant depends only on `g`, the chart `α`, and the
 canonical partition of unity. -/
 theorem exists_pou_chartDensity_bound_on_chartTarget
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∃ M_α : ℝ, 0 ≤ M_α ∧
       ∀ y ∈ (extChartAt I α).target,
         (chartAtlasPOU I M α : M → ℝ) ((extChartAt I α).symm y) *
             chartDensity g α ((extChartAt I α).symm y) ≤ M_α := by
   classical
-  -- Free the unused `HasLocallyConstantChartAt` hypothesis from the proof body.
   set ρα : M → ℝ := fun x => (chartAtlasPOU I M α : M → ℝ) x with hρα_def
   set T : Set M := tsupport ρα with hT_def
   -- `tsupport ρα` is closed; on a compact manifold it is compact.

@@ -88,29 +88,26 @@ local `let` inside a proof) makes the value definitionally shareable across
 different invocations of the chart-target L² bridge. -/
 noncomputable def chartL2BridgeMα
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (g : SmoothRiemannianMetric I M) (α : M) : ℝ :=
   (exists_pou_chartDensity_bound_on_chartTarget
-    (I := I) (M := M) (h_atlas := h_atlas) g α).choose
+    (I := I) (M := M) g α).choose
 
 lemma chartL2BridgeMα_nonneg
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (g : SmoothRiemannianMetric I M) (α : M) :
-    0 ≤ chartL2BridgeMα (I := I) (M := M) h_atlas g α :=
+    0 ≤ chartL2BridgeMα (I := I) (M := M) g α :=
   (exists_pou_chartDensity_bound_on_chartTarget
-    (I := I) (M := M) (h_atlas := h_atlas) g α).choose_spec.1
+    (I := I) (M := M) g α).choose_spec.1
 
 lemma chartL2BridgeMα_le
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (g : SmoothRiemannianMetric I M) (α : M)
     {y : E} (hy : y ∈ (extChartAt I α).target) :
     (chartAtlasPOU I M α : M → ℝ) ((extChartAt I α).symm y) *
         chartDensity g α ((extChartAt I α).symm y) ≤
-      chartL2BridgeMα (I := I) (M := M) h_atlas g α :=
+      chartL2BridgeMα (I := I) (M := M) g α :=
   (exists_pou_chartDensity_bound_on_chartTarget
-    (I := I) (M := M) (h_atlas := h_atlas) g α).choose_spec.2 y hy
+    (I := I) (M := M) g α).choose_spec.2 y hy
 
 variable (I M) in
 /-- The chart-target L² bridge's overall multiplicative constant, defined as
@@ -121,22 +118,20 @@ so that downstream callers can quantify the existential `∃ C` outside a
 universal over input sections. -/
 noncomputable def chartTargetL2BridgeConstant
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (g : SmoothRiemannianMetric I M) : ℝ :=
   (euclideanHaarFactor E : ℝ) *
     ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
-      (chartL2BridgeMα (I := I) (M := M) h_atlas g α + 1)
+      (chartL2BridgeMα (I := I) (M := M) g α + 1)
 
 lemma chartTargetL2BridgeConstant_nonneg
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (g : SmoothRiemannianMetric I M) :
-    0 ≤ chartTargetL2BridgeConstant (I := I) (M := M) h_atlas g := by
+    0 ≤ chartTargetL2BridgeConstant (I := I) (M := M) g := by
   refine mul_nonneg ?_ ?_
   · exact (euclideanHaarFactor_pos (E := E)).le
   · refine Finset.sum_nonneg ?_
     intro α _
-    have := chartL2BridgeMα_nonneg (I := I) (M := M) h_atlas g α
+    have := chartL2BridgeMα_nonneg (I := I) (M := M) g α
     linarith
 
 /-! ## Pointwise identification of the fiber norm with the model norm -/
@@ -194,13 +189,11 @@ canonical Riemannian volume measure is bounded by `C` times the finite sum,
 over the chart-atlas partition-of-unity support set `chartAtlasPOU_finset I M`,
 of the chart-target integrals of `tensorTrivProjPushedNormSq g r s α S`.
 
-The hypothesis `h_atlas` is the locally-constant chart predicate ensuring that
-each chart-target sup bound is finite; it is consumed by
-`exists_pou_chartDensity_bound_on_chartTarget` via the chain of α-uniform
-chart-target sup bounds for the chart density. -/
+No external hypothesis is required for the chart-target sup bound; it is
+provided unconditionally by `exists_pou_chartDensity_bound_on_chartTarget`
+via the chain of α-uniform chart-target sup bounds for the chart density. -/
 theorem manifold_l2_norm_sq_le_finset_sum_chart_target_l2_norm_sq
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Π b : M, TensorRSSpace r s I b)
     (hS_meas : Measurable (fun x : M => ‖S x‖ ^ 2)) :
@@ -235,25 +228,25 @@ theorem manifold_l2_norm_sq_le_finset_sum_chart_target_l2_norm_sq
   -- invocations on different sections — needed by the uniform-constant
   -- variant below.
   let Mα : M → ℝ := fun α =>
-    chartL2BridgeMα (I := I) (M := M) h_atlas g α
+    chartL2BridgeMα (I := I) (M := M) g α
   have hMα_nn : ∀ α : M, 0 ≤ Mα α := fun α =>
-    chartL2BridgeMα_nonneg (I := I) (M := M) h_atlas g α
+    chartL2BridgeMα_nonneg (I := I) (M := M) g α
   have hMα_le : ∀ α : M, ∀ y ∈ (extChartAt I α).target,
       (chartAtlasPOU I M α : M → ℝ) ((extChartAt I α).symm y) *
           chartDensity g α ((extChartAt I α).symm y) ≤ Mα α :=
-    fun α y hy => chartL2BridgeMα_le (I := I) (M := M) h_atlas g α hy
+    fun α y hy => chartL2BridgeMα_le (I := I) (M := M) g α hy
   -- The Haar scale factor `c_E := euclideanHaarFactor E` is real-valued via
   -- the `.toReal` of its `ℝ≥0` representative; converting to `ℝ`.
   set cE : ℝ := (euclideanHaarFactor E : ℝ) with hcE_def
   have hcE_nn : 0 ≤ cE := (euclideanHaarFactor_pos (E := E)).le
   -- The named uniform constant `C := cE * (Σ_α (Mα α + 1))`.
-  set C : ℝ := chartTargetL2BridgeConstant (I := I) (M := M) h_atlas g
+  set C : ℝ := chartTargetL2BridgeConstant (I := I) (M := M) g
     with hC_def
   have hC_unfold : C = cE * ∑ α ∈ Sfin, (Mα α + 1) := by
     rw [hC_def, hcE_def, hSfin_def]
     rfl
   have hC_nn : 0 ≤ C :=
-    chartTargetL2BridgeConstant_nonneg (I := I) (M := M) h_atlas g
+    chartTargetL2BridgeConstant_nonneg (I := I) (M := M) g
   refine ⟨C, hC_nn, ?_⟩
   -- Step 2: rewrite the LHS as a finite sum via POU expansion on compact M.
   -- ∫⁻ F dμ_g = Σ' β, ∫⁻ ofReal(ρ_β) · F d(chartLocalMeasure g β)
@@ -567,20 +560,19 @@ norms.**
 For a smooth closed Riemannian manifold `(M, g)`, the manifold L²-norm-squared
 of a fiberwise tensor section `S` against the canonical Riemannian volume
 measure is bounded by the named constant
-`chartTargetL2BridgeConstant h_atlas g` times the finite sum, over the
+`chartTargetL2BridgeConstant g` times the finite sum, over the
 chart-atlas partition-of-unity support set, of the chart-target integrals of
 `tensorTrivProjPushedNormSq g r s α S`. The bound holds for every Borel-
 measurable section, with a single constant chosen uniformly. -/
 theorem uniform_manifold_l2_norm_sq_le_finset_sum_chart_target_l2_norm_sq
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Π b : M, TensorRSSpace r s I b)
     (hS_meas : Measurable (fun x : M => ‖S x‖ ^ 2)) :
     ∫⁻ x, (‖S x‖ₑ : ℝ≥0∞) ^ 2
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) ≤
       ENNReal.ofReal
-          (chartTargetL2BridgeConstant (I := I) (M := M) h_atlas g) *
+          (chartTargetL2BridgeConstant (I := I) (M := M) g) *
         ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
           ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
             ENNReal.ofReal
@@ -600,16 +592,16 @@ theorem uniform_manifold_l2_norm_sq_le_finset_sum_chart_target_l2_norm_sq
     exact ENNReal.measurable_ofReal.comp hS_meas
   -- Re-use the per-α POU×density bound from the public named def.
   let Mα : M → ℝ := fun α =>
-    chartL2BridgeMα (I := I) (M := M) h_atlas g α
+    chartL2BridgeMα (I := I) (M := M) g α
   have hMα_nn : ∀ α : M, 0 ≤ Mα α := fun α =>
-    chartL2BridgeMα_nonneg (I := I) (M := M) h_atlas g α
+    chartL2BridgeMα_nonneg (I := I) (M := M) g α
   have hMα_le : ∀ α : M, ∀ y ∈ (extChartAt I α).target,
       (chartAtlasPOU I M α : M → ℝ) ((extChartAt I α).symm y) *
           chartDensity g α ((extChartAt I α).symm y) ≤ Mα α :=
-    fun α y hy => chartL2BridgeMα_le (I := I) (M := M) h_atlas g α hy
+    fun α y hy => chartL2BridgeMα_le (I := I) (M := M) g α hy
   set cE : ℝ := (euclideanHaarFactor E : ℝ) with hcE_def
   have hcE_nn : 0 ≤ cE := (euclideanHaarFactor_pos (E := E)).le
-  set C : ℝ := chartTargetL2BridgeConstant (I := I) (M := M) h_atlas g
+  set C : ℝ := chartTargetL2BridgeConstant (I := I) (M := M) g
     with hC_def
   have hC_unfold : C = cE * ∑ α ∈ Sfin, (Mα α + 1) := by
     rw [hC_def, hcE_def, hSfin_def]

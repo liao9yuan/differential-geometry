@@ -226,7 +226,6 @@ to the canonical compact set `tsupport(POU_α)`, which is contained in
 `(chartAt H α).source` by `pouTsupport_subset_baseSet`. -/
 theorem chartInvGramMatrix_l1Sum_isBounded_on_pouTsupport
     [SigmaCompactSpace M] [CompactSpace M]
-    (h_atlas : HasLocallyConstantChartAt H M)
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∃ C : ℝ, 0 < C ∧
       ∀ b : M, b ∈ tsupport (fun x : M =>

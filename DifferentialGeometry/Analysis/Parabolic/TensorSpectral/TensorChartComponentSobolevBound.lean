@@ -340,7 +340,6 @@ theorem tensorChartComponentScalar_eLpNorm_le
 
 /-- Functional packaging of the headline `α`-uniform bound. -/
 theorem tensorChartComponentScalar_eLpNorm_le_forall
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C₀ : ℝ, 0 ≤ C₀ ∧
       ∀ (S : SmoothCcTensorH1 g r s) (α : M)
