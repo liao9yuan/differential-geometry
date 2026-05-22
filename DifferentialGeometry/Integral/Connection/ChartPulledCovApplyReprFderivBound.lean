@@ -286,7 +286,7 @@ private lemma inputSlotPiece_differentiableAt
       (hU_open.mem_nhds hx_mem)
   have hK_at :=
     inputSlotChartKernel_contDiffAt_chart_pulled
-      (I := I) (M := M) h_atlas g r s α B k hb_good
+      (I := I) (M := M) g r s α B k hb_good
   have hK_diff : DifferentiableAt ℝ
       (fun y : E => inputSlotChartKernel (I := I) g r s α B.toFun k
         ((extChartAt I α).symm y)) (extChartAt I α b) := by
@@ -371,7 +371,7 @@ private lemma outputSlotPiece_differentiableAt
       (hU_open.mem_nhds hx_mem)
   have hK_at :=
     outputSlotChartKernel_contDiffAt_chart_pulled
-      (I := I) (M := M) h_atlas g r s α B l hb_good
+      (I := I) (M := M) g r s α B l hb_good
   have hK_diff : DifferentiableAt ℝ
       (fun y : E => outputSlotChartKernel (I := I) g r s α B.toFun l
         ((extChartAt I α).symm y)) (extChartAt I α b) := by

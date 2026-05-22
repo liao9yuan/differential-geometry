@@ -393,7 +393,7 @@ theorem chart_pulled_input_slot_correction_fderiv_bound
       (hU_open.mem_nhds hx_mem)
   have hK_at :=
     inputSlotChartKernel_contDiffAt_chart_pulled
-      (I := I) (M := M) h_atlas g r s α B k hb_good
+      (I := I) (M := M) g r s α B k hb_good
   have hK_diff : DifferentiableAt ℝ K_chart x := by
     have hne : (∞ : WithTop ℕ∞) ≠ 0 := by
       intro h
@@ -591,7 +591,7 @@ theorem chart_pulled_output_slot_correction_fderiv_bound
       (hU_open.mem_nhds hx_mem)
   have hK_at :=
     outputSlotChartKernel_contDiffAt_chart_pulled
-      (I := I) (M := M) h_atlas g r s α B l hb_good
+      (I := I) (M := M) g r s α B l hb_good
   have hK_diff : DifferentiableAt ℝ K_chart x := by
     have hne : (∞ : WithTop ℕ∞) ≠ 0 := by
       intro h

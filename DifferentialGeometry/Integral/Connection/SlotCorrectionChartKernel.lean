@@ -937,7 +937,6 @@ The chart-pulled input-slot kernel `y ↦ inputSlotChartKernel g r s α B k
 ((extChartAt I α).symm y)` is `ContDiffAt ℝ ∞` at `extChartAt I α b` for any
 `b` in the chart-`α` Levi-Civita good set. -/
 theorem inputSlotChartKernel_contDiffAt_chart_pulled
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (k : Fin r) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α) :
@@ -946,11 +945,6 @@ theorem inputSlotChartKernel_contDiffAt_chart_pulled
                       ((extChartAt I α).symm y))
       (extChartAt I α b) := by
   classical
-  -- The smoothness of the kernel does not depend on the locality hypothesis;
-  -- it follows from the local smoothness of the chart-Jacobian-conjugated
-  -- parallel CLM on the chart source. We retain `h_atlas` in the signature
-  -- for API uniformity with the uniform-bound headlines below.
-  let _ := h_atlas
   -- inputSlotChartKernel = (compL).flip (inputSlotPrecompCLM).
   -- This is a continuous linear map applied to inputSlotPrecompCLM.
   -- Smoothness of compL_flip ∘ inputSlotPrecompCLM follows.
@@ -975,7 +969,6 @@ The chart-pulled output-slot kernel `y ↦ outputSlotChartKernel g r s α B l
 ((extChartAt I α).symm y)` is `ContDiffAt ℝ ∞` at `extChartAt I α b` for any
 `b` in the chart-`α` Levi-Civita good set. -/
 theorem outputSlotChartKernel_contDiffAt_chart_pulled
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (l : Fin s) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α) :
@@ -984,7 +977,6 @@ theorem outputSlotChartKernel_contDiffAt_chart_pulled
                       ((extChartAt I α).symm y))
       (extChartAt I α b) := by
   classical
-  let _ := h_atlas
   have h_postcomp := outputSlotPostcompCLM_chart_pulled_contDiffAt
     (I := I) (M := M) g s α B l hb
   set L : (Tensor0SModel s ℝ E →L[ℝ] Tensor0SModel s ℝ E) →L[ℝ]
