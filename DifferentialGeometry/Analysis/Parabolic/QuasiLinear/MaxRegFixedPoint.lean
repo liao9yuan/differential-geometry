@@ -264,24 +264,28 @@ solution coordinate `solModeCoeff` is the composition of the linear maps
 `timeModeCoeff` and `perModeConvL2`.  This is the algebraic identity that lets
 the homogeneous part cancel in the difference of two Duhamel images. -/
 
+include h_atlas in
 /-- The maximal-regularity solution field is additive in the forcing term:
 `maximalRegularitySolField (f + f') = maximalRegularitySolField f +
 maximalRegularitySolField f'`. -/
 theorem maximalRegularitySolField_add (hT : 0 ≤ T)
     (f f' : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
-    maximalRegularitySolField (I := I) (M := M) h_atlas a hT (f + f') =
-      maximalRegularitySolField (I := I) (M := M) h_atlas a hT f +
-        maximalRegularitySolField (I := I) (M := M) h_atlas a hT f' := by
+    maximalRegularitySolField (I := I) (M := M) a hT (f + f') =
+      maximalRegularitySolField (I := I) (M := M) a hT f +
+        maximalRegularitySolField (I := I) (M := M) a hT f' := by
   refine timeModeCoeff_injective (I := I) (M := M) h_atlas (fun i => ?_)
-  rw [maximalRegularitySolField_timeModeCoeff (I := I) (M := M) (a := a)
-      hT (f + f') i,
+  rw [maximalRegularitySolField_timeModeCoeff (I := I) (M := M)
+      (h_atlas := h_atlas) (a := a) hT (f + f') i,
     timeModeCoeff_add (I := I) (M := M),
-    maximalRegularitySolField_timeModeCoeff (I := I) (M := M) (a := a) hT f i,
-    maximalRegularitySolField_timeModeCoeff (I := I) (M := M) (a := a) hT f' i]
+    maximalRegularitySolField_timeModeCoeff (I := I) (M := M)
+      (h_atlas := h_atlas) (a := a) hT f i,
+    maximalRegularitySolField_timeModeCoeff (I := I) (M := M)
+      (h_atlas := h_atlas) (a := a) hT f' i]
   -- `solModeCoeff` is the linear `perModeConvL2` of the linear `timeModeCoeff`.
   rw [solModeCoeff, solModeCoeff, solModeCoeff,
     timeModeCoeff_add (I := I) (M := M), map_add]
 
+include h_atlas in
 /-- The maximal-regularity solution field commutes with subtraction of forcing
 terms: `maximalRegularitySolField (f − f') = maximalRegularitySolField f −
 maximalRegularitySolField f'`.  This is the form consumed by the contraction
@@ -289,9 +293,9 @@ estimate: it identifies the difference of two Duhamel solution fields (after the
 homogeneous part has cancelled) with the solution field of the difference. -/
 theorem maximalRegularitySolField_sub (hT : 0 ≤ T)
     (f f' : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
-    maximalRegularitySolField (I := I) (M := M) h_atlas a hT (f - f') =
-      maximalRegularitySolField (I := I) (M := M) h_atlas a hT f -
-        maximalRegularitySolField (I := I) (M := M) h_atlas a hT f' := by
+    maximalRegularitySolField (I := I) (M := M) a hT (f - f') =
+      maximalRegularitySolField (I := I) (M := M) a hT f -
+        maximalRegularitySolField (I := I) (M := M) a hT f' := by
   have hadd := maximalRegularitySolField_add (I := I) (M := M)
     (h_atlas := h_atlas) (a := a) hT (f - f') f'
   rw [sub_add_cancel] at hadd
@@ -306,6 +310,7 @@ maximal-regularity solution fields.  The two-derivative-gain bound
 `L²([0,T]; Hᵃ)` distance of the forcings.  This is the estimate the
 forcing-space fixed point feeds through the Nemytskii operator. -/
 
+include h_atlas in
 /-- **The `H^{a+2}`-field difference of the affine Duhamel map equals the
 maximal-regularity solution field of the difference of the forcings.**  For a
 fixed initial datum the homogeneous-flow field cancels:
@@ -315,9 +320,9 @@ fixed initial datum the homogeneous-flow field cancels:
 theorem maxRegDuhamelSolField_sub (hT : 0 < T) (hT1 : T ≤ 1)
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
     (gforce gforce' : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
-    maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce -
-        maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce' =
-      maximalRegularitySolField (I := I) (M := M) h_atlas a hT.le
+    maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀ gforce -
+        maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀ gforce' =
+      maximalRegularitySolField (I := I) (M := M) a hT.le
         (gforce - gforce') := by
   rw [maximalRegularitySolField_sub (I := I) (M := M) (h_atlas := h_atlas)
     (a := a) hT.le gforce gforce']
@@ -325,6 +330,7 @@ theorem maxRegDuhamelSolField_sub (hT : 0 < T) (hT1 : T ≤ 1)
   rw [maxRegDuhamelSolField, maxRegDuhamelSolField]
   abel
 
+include h_atlas in
 /-- **The `H^{a+2}`-field contraction estimate of the affine Duhamel map.**  For
 a fixed initial datum `u₀` and two forcing terms `g, g' ∈ L²([0,T]; Hᵃ)`,
 
@@ -338,8 +344,8 @@ estimate `maximalRegularityOp_norm_Ha2_le`). -/
 theorem maxRegDuhamelSolField_dist_le (hT : 0 < T) (hT1 : T ≤ 1)
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
     (gforce gforce' : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
-    ‖maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce -
-        maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce'‖ ≤
+    ‖maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀ gforce -
+        maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀ gforce'‖ ≤
       (1 + T) * ‖gforce - gforce'‖ := by
   rw [maxRegDuhamelSolField_sub (I := I) (M := M) (h_atlas := h_atlas)
     (a := a) hT hT1 u₀ gforce gforce']
@@ -366,8 +372,7 @@ a self-map of the forcing space `L²([0,T]; Hᵃ)`.  It first forms the
 Nemytskii operator (pointwise composition with `N`).  A fixed point `g⋆ = Φ(g⋆)`
 is a forcing term reproducing `N(u)` along its own Duhamel solution; the
 quasi-linear strong solution is the Duhamel image of `g⋆`. -/
-def quasilinearDuhamelMap (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    (a : ℝ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+def quasilinearDuhamelMap (a : ℝ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
     {L : ℝ≥0}
     {N : tensorHs (I := I) (M := M) g r s (a + 2) →
@@ -376,7 +381,7 @@ def quasilinearDuhamelMap (h_atlas : DifferentialGeometry.Geometry.HasLocallyCon
     timeL2 (tensorHs (I := I) (M := M) g r s a) T →
       timeL2 (tensorHs (I := I) (M := M) g r s a) T :=
   fun gforce => nemytskii (I := I) (M := M) hN
-    (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce)
+    (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀ gforce)
 
 @[simp] theorem quasilinearDuhamelMap_apply (hT : 0 < T) (hT1 : T ≤ 1)
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
@@ -385,11 +390,12 @@ def quasilinearDuhamelMap (h_atlas : DifferentialGeometry.Geometry.HasLocallyCon
       tensorHs (I := I) (M := M) g r s a}
     (hN : LipschitzWith L N)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
-    quasilinearDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ hN gforce =
+    quasilinearDuhamelMap (I := I) (M := M) a hT hT1 u₀ hN gforce =
       nemytskii (I := I) (M := M) hN
-        (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce) :=
+        (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀ gforce) :=
   rfl
 
+include h_atlas in
 /-- **The Lipschitz bound of the forcing-space fixed-point map.**  For a fixed
 initial datum `u₀` and two forcing terms `g, g' ∈ L²([0,T]; Hᵃ)`,
 
@@ -405,30 +411,30 @@ theorem quasilinearDuhamelMap_dist_le (hT : 0 < T) (hT1 : T ≤ 1)
       tensorHs (I := I) (M := M) g r s a}
     (hN : LipschitzWith L N)
     (gforce gforce' : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
-    dist (quasilinearDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ hN gforce)
-        (quasilinearDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ hN
+    dist (quasilinearDuhamelMap (I := I) (M := M) a hT hT1 u₀ hN gforce)
+        (quasilinearDuhamelMap (I := I) (M := M) a hT hT1 u₀ hN
           gforce') ≤
       (L : ℝ) * (1 + T) * dist gforce gforce' := by
   -- The Nemytskii Lipschitz step.
   have hnem := (nemytskii_lipschitzWith (I := I) (M := M) hN).dist_le_mul
-    (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce)
-    (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce')
+    (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀ gforce)
+    (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀ gforce')
   -- The `H^{a+2}`-field contraction step, in `dist` form.
   have hfield : dist
-      (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce)
-      (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce') ≤
+      (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀ gforce)
+      (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀ gforce') ≤
         (1 + T) * dist gforce gforce' := by
     rw [dist_eq_norm, dist_eq_norm]
     exact maxRegDuhamelSolField_dist_le (I := I) (M := M)
       (h_atlas := h_atlas) (a := a) hT hT1 u₀ gforce gforce'
   -- Chain the two estimates.
   calc dist
-        (quasilinearDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ hN gforce)
-        (quasilinearDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ hN
+        (quasilinearDuhamelMap (I := I) (M := M) a hT hT1 u₀ hN gforce)
+        (quasilinearDuhamelMap (I := I) (M := M) a hT hT1 u₀ hN
           gforce')
       ≤ (L : ℝ) * dist
-          (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce)
-          (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀
+          (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀ gforce)
+          (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀
             gforce') := hnem
     _ ≤ (L : ℝ) * ((1 + T) * dist gforce gforce') :=
         mul_le_mul_of_nonneg_left hfield L.coe_nonneg
@@ -446,6 +452,7 @@ theorem quasilinear_contraction_const_lt_one {L : ℝ≥0} {T : ℝ} (hT1 : T �
     _ = 2 * (L : ℝ) := by ring
     _ < 1 := hL
 
+include h_atlas in
 /-- **The forcing-space fixed-point map is a contraction.**  For a fixed initial
 datum `u₀`, a Lipschitz nonlinearity `N` with constant `L`, and `0 < T ≤ 1` with
 the smallness hypothesis `2·L < 1`, the quasi-linear Duhamel map `Φ` is a
@@ -464,7 +471,7 @@ theorem quasilinearDuhamelMap_contracting (hT : 0 < T) (hT1 : T ≤ 1)
     ContractingWith
       ⟨(L : ℝ) * (1 + T),
         mul_nonneg L.coe_nonneg (by linarith [hT.le])⟩
-      (quasilinearDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ hN) := by
+      (quasilinearDuhamelMap (I := I) (M := M) a hT hT1 u₀ hN) := by
   refine ⟨?_, ?_⟩
   · -- The contraction constant is `< 1` as an element of `ℝ≥0`.
     rw [← NNReal.coe_lt_coe]
@@ -489,6 +496,7 @@ The fixed-point equation `g⋆ = N ∘ (field of u⋆)` is exactly what converts
 linear equation `∂_t u⋆ = Δ_∇ u⋆ + g⋆` (`maxRegDuhamelMap_timeDeriv_eq`) into
 the quasi-linear equation `∂_t u⋆ = Δ_∇ u⋆ + N(field of u⋆)`. -/
 
+include h_atlas in
 /-- **Strong existence for the quasi-linear tensor heat equation.**
 
 For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a Sobolev exponent
@@ -510,7 +518,7 @@ Duhamel field.  Precisely, the data `u, gforce` satisfy:
 * `gforce = nemytskii hN (maxRegDuhamelSolField … u₀ gforce)` — the fixed-point
   equation: the forcing reproduces `N` applied to the solution field, i.e.
   `gforce = N(field of u)`;
-* `timeH1.trace0 _ _ u = tensorHsInclusion h_atlas _ u₀` — the initial value
+* `timeH1.trace0 _ _ u = tensorHsInclusion _ u₀` — the initial value
   is `u₀` (taken in `Hᵃ` via the spectral inclusion `H^{a+2} ↪ Hᵃ`);
 * `timeH1.timeDeriv _ _ u = timeScaleLaplacian a (field of u) +
   nemytskii hN (field of u)` — **the equation**: the time derivative equals the
@@ -527,37 +535,37 @@ theorem quasilinear_strong_existence {L : ℝ≥0}
     (hN : LipschitzWith L N) (hL : 2 * (L : ℝ) < 1) :
     ∃ (u : MaxRegSolutionSpace (I := I) (M := M) a T)
       (gforce : timeL2 (tensorHs (I := I) (M := M) g r s a) T),
-      u = maxRegDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ gforce ∧
+      u = maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gforce ∧
         gforce = nemytskii (I := I) (M := M) hN
-            (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀
+            (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀
               gforce) ∧
         TimeSobolev.timeH1.trace0 _ T u =
             tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
               (show a ≤ a + 2 by linarith) u₀ ∧
         TimeSobolev.timeH1.timeDeriv _ T u =
           timeScaleLaplacian (I := I) (M := M) a
-              (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀
+              (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀
                 gforce) +
             nemytskii (I := I) (M := M) hN
-              (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀
+              (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀
                 gforce) := by
   -- The forcing-space map is a contraction; take its Banach fixed point.
   have hcontr := quasilinearDuhamelMap_contracting (I := I) (M := M)
     (h_atlas := h_atlas) (a := a) hT hT1 u₀ hN hL
   set gStar := ContractingWith.fixedPoint
-    (quasilinearDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ hN) hcontr
+    (quasilinearDuhamelMap (I := I) (M := M) a hT hT1 u₀ hN) hcontr
     with hgStar_def
   -- The fixed-point equation `Φ(gStar) = gStar`, i.e. `gStar = N ∘ (field)`.
   have hgStar_fix :
-      quasilinearDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ hN gStar =
+      quasilinearDuhamelMap (I := I) (M := M) a hT hT1 u₀ hN gStar =
         gStar :=
     ContractingWith.fixedPoint_isFixedPt hcontr
   have hgStar_eq : gStar = nemytskii (I := I) (M := M) hN
-      (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gStar) := by
+      (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀ gStar) := by
     rw [← quasilinearDuhamelMap_apply (I := I) (M := M) (a := a) hT hT1 u₀ hN
       gStar, hgStar_fix]
   -- The strong solution is the affine Duhamel image of the fixed point.
-  refine ⟨maxRegDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ gStar,
+  refine ⟨maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gStar,
     gStar, rfl, hgStar_eq, ?_, ?_⟩
   · -- Initial condition: the trace of the Duhamel image is `u₀`.
     exact maxRegDuhamelMap_trace0 (I := I) (M := M) (a := a) (T := T)
@@ -565,10 +573,11 @@ theorem quasilinear_strong_existence {L : ℝ≥0}
   · -- The equation `∂_t u = Δ_∇ (field) + N(field)`: the linear heat-equation
     -- lemma gives `∂_t u = Δ_∇ (field) + gStar`, and the fixed-point equation
     -- rewrites the trailing forcing `gStar` as the Nemytskii nonlinearity.
-    rw [maxRegDuhamelMap_timeDeriv_eq (I := I) (M := M) (a := a) (T := T)
-      hT hT1 u₀ gStar]
+    rw [maxRegDuhamelMap_timeDeriv_eq (I := I) (M := M) (h_atlas := h_atlas)
+      (a := a) (T := T) hT hT1 u₀ gStar]
     exact congrArg₂ (· + ·) rfl hgStar_eq
 
+include h_atlas in
 /-- **Uniqueness of the quasi-linear strong solution.**
 
 The strong solution produced by the forcing-space fixed-point construction is
@@ -591,30 +600,30 @@ theorem quasilinear_strong_unique {L : ℝ≥0}
     (hN : LipschitzWith L N) (hL : 2 * (L : ℝ) < 1)
     {gforce₁ gforce₂ : timeL2 (tensorHs (I := I) (M := M) g r s a) T}
     (hg₁ : gforce₁ = nemytskii (I := I) (M := M) hN
-      (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce₁))
+      (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀ gforce₁))
     (hg₂ : gforce₂ = nemytskii (I := I) (M := M) hN
-      (maxRegDuhamelSolField (I := I) (M := M) h_atlas a hT hT1 u₀ gforce₂)) :
+      (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀ gforce₂)) :
     gforce₁ = gforce₂ ∧
-      maxRegDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ gforce₁ =
-        maxRegDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ gforce₂ := by
+      maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gforce₁ =
+        maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gforce₂ := by
   -- The forcing-space map is a contraction.
   have hcontr := quasilinearDuhamelMap_contracting (I := I) (M := M)
     (h_atlas := h_atlas) (a := a) hT hT1 u₀ hN hL
   -- Both forcings are fixed points of the contraction `Φ`.
   have hfix₁ :
       Function.IsFixedPt
-        (quasilinearDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ hN)
+        (quasilinearDuhamelMap (I := I) (M := M) a hT hT1 u₀ hN)
         gforce₁ := by
-    change quasilinearDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ hN
+    change quasilinearDuhamelMap (I := I) (M := M) a hT hT1 u₀ hN
         gforce₁ = gforce₁
     rw [quasilinearDuhamelMap_apply (I := I) (M := M) (a := a) hT hT1 u₀ hN
       gforce₁]
     exact hg₁.symm
   have hfix₂ :
       Function.IsFixedPt
-        (quasilinearDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ hN)
+        (quasilinearDuhamelMap (I := I) (M := M) a hT hT1 u₀ hN)
         gforce₂ := by
-    change quasilinearDuhamelMap (I := I) (M := M) h_atlas a hT hT1 u₀ hN
+    change quasilinearDuhamelMap (I := I) (M := M) a hT hT1 u₀ hN
         gforce₂ = gforce₂
     rw [quasilinearDuhamelMap_apply (I := I) (M := M) (a := a) hT hT1 u₀ hN
       gforce₂]
