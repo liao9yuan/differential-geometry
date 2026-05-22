@@ -159,8 +159,7 @@ matrix over any compact subset of `(chartAt H α).source`. The locality
 hypothesis is taken for API uniformity (chart-`J`, chart-Gram-bilinear)
 but is not required for the proof. -/
 theorem chartGramMatrix_entry_isBounded_on_compact
-    (_h_atlas : HasLocallyConstantChartAt H M)
-    (g : SmoothRiemannianMetric I M)
+(g : SmoothRiemannianMetric I M)
     (α : M) (i j : Fin (Module.finrank ℝ E))
     {K : Set M} (hK : IsCompact K) (hKsub : K ⊆ (chartAt H α).source) :
     ∃ C : ℝ, 0 < C ∧
@@ -175,8 +174,7 @@ matrix over any compact subset of `(chartAt H α).source`. The locality
 hypothesis is taken for API uniformity (chart-`J`, chart-Gram-bilinear)
 but is not required for the proof. -/
 theorem chartInvGramMatrix_entry_isBounded_on_compact
-    (_h_atlas : HasLocallyConstantChartAt H M)
-    (g : SmoothRiemannianMetric I M)
+(g : SmoothRiemannianMetric I M)
     (α : M) (i j : Fin (Module.finrank ℝ E))
     {K : Set M} (hK : IsCompact K) (hKsub : K ⊆ (chartAt H α).source) :
     ∃ C : ℝ, 0 < C ∧
@@ -204,8 +202,7 @@ chart-Gram matrix is smooth on the chart base set
 on `(chartAt H α).source` and the extreme-value theorem applies on
 `K`. -/
 theorem chartInvGramMatrix_l1Sum_isBounded_on_compact
-    (_h_atlas : HasLocallyConstantChartAt H M)
-    (g : SmoothRiemannianMetric I M)
+(g : SmoothRiemannianMetric I M)
     (α : M) {K : Set M} (hK : IsCompact K)
     (hKsub : K ⊆ (chartAt H α).source) :
     ∃ C : ℝ, 0 < C ∧
@@ -250,7 +247,7 @@ theorem chartInvGramMatrix_l1Sum_isBounded_on_pouTsupport
     rw [← h_set_eq]
     exact hKα_sub_base
   rcases chartInvGramMatrix_l1Sum_isBounded_on_compact
-      (I := I) (M := M) h_atlas g α hKα_compact hKα_sub_src with ⟨C, hC_pos, hC_le⟩
+      (I := I) (M := M) g α hKα_compact hKα_sub_src with ⟨C, hC_pos, hC_le⟩
   exact ⟨C, hC_pos, fun b hb => hC_le b hb⟩
 
 end TensorSpectral
