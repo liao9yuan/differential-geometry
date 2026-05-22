@@ -1481,7 +1481,6 @@ private lemma outputSlotChartKernel_fderiv_continuousOn
 /-- **Uniform Fréchet-derivative op-norm bound for the chart-pulled
 input-slot kernel.** -/
 theorem inputSlotChartKernel_fderiv_opNorm_uniform_on_pouTsupport
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (k : Fin r) :
     ∃ K : ℝ, 0 ≤ K ∧
@@ -1494,8 +1493,7 @@ theorem inputSlotChartKernel_fderiv_opNorm_uniform_on_pouTsupport
             (extChartAt I α b)‖ ≤ K := by
   classical
   -- The fderiv bound follows from continuity of fderiv on the open good-set
-  -- image. We retain `h_atlas` in the signature for API uniformity.
-  let _ := h_atlas
+  -- image.
   set K_set : Set M := tsupport (fun x : M =>
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) with hK_set_def
   have hK_compact : IsCompact K_set :=
@@ -1534,7 +1532,6 @@ theorem inputSlotChartKernel_fderiv_opNorm_uniform_on_pouTsupport
 /-- **Uniform Fréchet-derivative op-norm bound for the chart-pulled
 output-slot kernel.** -/
 theorem outputSlotChartKernel_fderiv_opNorm_uniform_on_pouTsupport
-    (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (l : Fin s) :
     ∃ K : ℝ, 0 ≤ K ∧
@@ -1546,7 +1543,6 @@ theorem outputSlotChartKernel_fderiv_opNorm_uniform_on_pouTsupport
                             ((extChartAt I α).symm y))
             (extChartAt I α b)‖ ≤ K := by
   classical
-  let _ := h_atlas
   set K_set : Set M := tsupport (fun x : M =>
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) with hK_set_def
   have hK_compact : IsCompact K_set :=

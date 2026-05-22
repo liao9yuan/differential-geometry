@@ -465,7 +465,7 @@ theorem inputSlot_correction_iteratedFDeriv_two_bound
       (I := I) (M := M) h_atlas g r s α B k
   obtain ⟨K1, hK1_nn, hK1_bound⟩ :=
     inputSlotChartKernel_fderiv_opNorm_uniform_on_pouTsupport
-      (I := I) (M := M) h_atlas g r s α B k
+      (I := I) (M := M) g r s α B k
   obtain ⟨K2, hK2_nn, hK2_bound⟩ :=
     inputSlotChartKernel_iteratedFDeriv_two_uniform_on_pouTsupport
       (I := I) (M := M) g r s α B k
@@ -745,7 +745,7 @@ theorem outputSlot_correction_iteratedFDeriv_two_bound
       (I := I) (M := M) h_atlas g r s α B l
   obtain ⟨K1, hK1_nn, hK1_bound⟩ :=
     outputSlotChartKernel_fderiv_opNorm_uniform_on_pouTsupport
-      (I := I) (M := M) h_atlas g r s α B l
+      (I := I) (M := M) g r s α B l
   obtain ⟨K2, hK2_nn, hK2_bound⟩ :=
     outputSlotChartKernel_iteratedFDeriv_two_uniform_on_pouTsupport
       (I := I) (M := M) g r s α B l

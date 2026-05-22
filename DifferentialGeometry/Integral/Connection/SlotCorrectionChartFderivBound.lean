@@ -349,7 +349,7 @@ theorem chart_pulled_input_slot_correction_fderiv_bound
       (I := I) (M := M) h_atlas g r s α B k
   obtain ⟨K_d, hKd_nn, hKd_bound⟩ :=
     inputSlotChartKernel_fderiv_opNorm_uniform_on_pouTsupport
-      (I := I) (M := M) h_atlas g r s α B k
+      (I := I) (M := M) g r s α B k
   refine ⟨max K_op K_d, le_trans hKop_nn (le_max_left _ _), ?_⟩
   intro T b hb
   have hb_good : b ∈ chartLeviCivitaGoodSet (I := I) α := hb.2
@@ -548,7 +548,7 @@ theorem chart_pulled_output_slot_correction_fderiv_bound
       (I := I) (M := M) h_atlas g r s α B l
   obtain ⟨K_d, hKd_nn, hKd_bound⟩ :=
     outputSlotChartKernel_fderiv_opNorm_uniform_on_pouTsupport
-      (I := I) (M := M) h_atlas g r s α B l
+      (I := I) (M := M) g r s α B l
   refine ⟨max K_op K_d, le_trans hKop_nn (le_max_left _ _), ?_⟩
   intro T b hb
   have hb_good : b ∈ chartLeviCivitaGoodSet (I := I) α := hb.2
