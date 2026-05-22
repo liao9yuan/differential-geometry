@@ -388,8 +388,7 @@ theorem maxRegHomogeneousSolField_timeModeCoeff (hT : 0 ≤ T)
     timeModeCoeff (I := I) (M := M)
         (maxRegHomogeneousSolField (I := I) (M := M) h_atlas a T u₀) i =
       homModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i :=
-  timeL2OfModes_timeModeCoeff (I := I) (M := M) (σ := a + 2)
-    h_atlas _
+  timeL2OfModes_timeModeCoeff (I := I) (M := M) (σ := a + 2) _
     (summable_homModeCoeff (I := I) (M := M) (a := a) (T := T) hT u₀) i
 
 /-- **The `Hᵃ`-valued time-derivative field of the homogeneous heat flow.**  For
@@ -411,8 +410,7 @@ theorem maxRegHomogeneousDerivField_timeModeCoeff (hT : 0 ≤ T)
     timeModeCoeff (I := I) (M := M)
         (maxRegHomogeneousDerivField (I := I) (M := M) h_atlas a T u₀) i =
       homDerivModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i :=
-  timeL2OfModes_timeModeCoeff (I := I) (M := M) (σ := a)
-    h_atlas _
+  timeL2OfModes_timeModeCoeff (I := I) (M := M) (σ := a) _
     (summable_homDerivModeCoeff (I := I) (M := M) (a := a) (T := T) hT u₀) i
 
 /-- **The homogeneous part of the Duhamel map.**  For initial datum `u₀ ∈

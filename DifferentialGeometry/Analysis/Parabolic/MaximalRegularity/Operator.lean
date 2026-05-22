@@ -318,7 +318,7 @@ theorem maximalRegularityDerivField_timeModeCoeff (hT : 0 ≤ T)
     timeModeCoeff (I := I) (M := M)
         (maximalRegularityDerivField (I := I) (M := M) h_atlas a hT f) i =
       derivModeCoeff (I := I) (M := M) (a := a) hT f i :=
-  timeL2OfModes_timeModeCoeff (I := I) (M := M) h_atlas _
+  timeL2OfModes_timeModeCoeff (I := I) (M := M) _
     (summable_derivModeCoeff (I := I) (M := M) (a := a) hT h_atlas f) i
 
 /-- **The solution field `u`, viewed in `L²([0,T]; H^{a+2})`.**  For a forcing
@@ -341,7 +341,7 @@ theorem maximalRegularitySolField_timeModeCoeff (hT : 0 ≤ T)
     timeModeCoeff (I := I) (M := M)
         (maximalRegularitySolField (I := I) (M := M) h_atlas a hT f) i =
       solModeCoeff (I := I) (M := M) (a := a) hT f i :=
-  timeL2OfModes_timeModeCoeff (I := I) (M := M) h_atlas _
+  timeL2OfModes_timeModeCoeff (I := I) (M := M) _
     (summable_solModeCoeff (I := I) (M := M) (a := a) hT h_atlas f) i
 
 /-! ## The maximal-regularity operator
