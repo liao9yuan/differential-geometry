@@ -101,7 +101,7 @@ chart-α-trivialised representation of `T.toSection` is bounded by a uniform
 constant `K_basis` times the finite double sum of the squares of the raw
 chart-frame scalar components. The constant `K_basis` depends only on the
 ranks `(r, s)` and the model space. -/
-private lemma reprNormSq_le_sum_components_sq
+theorem reprNormSq_le_sum_components_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M) (b : M) :
     ‖tensorRSChartE_section_repr (I := I) r s α
