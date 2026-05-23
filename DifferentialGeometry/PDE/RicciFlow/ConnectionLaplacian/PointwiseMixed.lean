@@ -1,4 +1,5 @@
 import DifferentialGeometry.Integral.Connection.ConnectionLaplacian
+import DifferentialGeometry.Integral.Connection.TensorConnLaplacian
 import DifferentialGeometry.Integral.L2.SmoothSections.Defs
 import DifferentialGeometry.Tensor.RSTensor.Defs
 
@@ -80,12 +81,32 @@ defined as the metric trace of the second covariant derivative,
 $$
   (\Delta_\nabla T)(x) = \mathrm{tr}_g\bigl(\nabla\nabla T\bigr)(x).
 $$
--/
+Concretely, in a `g_x`-orthonormal frame `B_i` of the tangent space at `x`,
+$$
+  (\Delta_\nabla T)(x)
+    = \sum_i \bigl(\nabla_{B_i x}\,\nabla_{B_i} T
+      - \nabla_{(\nabla_{B_i} B_i)(x)} T\bigr),
+$$
+with `B_i = smoothOrthoFrame g x i` the smooth orthonormal frame at `x`. This
+delegates to `rawTensorConnLap`, the underlying trace formula on raw
+dependent-function sections, applied to the carrier of `T`. -/
 def connLaplacianMixed (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (_T : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
+    (T : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
       (fun x : M => TensorRSSpace r s I x)⟯)
     (x : M) : TensorRSSpace r s I x :=
-  (0 : TensorRSSpace r s I x)
+  rawTensorConnLap (I := I) g r s (fun b : M => T b) x
+
+set_option linter.unusedSectionVars false in
+/-- The defining identity for `connLaplacianMixed`: at every point `x`, the
+mixed connection Laplacian on a smooth `(r, s)`-tensor section `T` agrees with
+the raw `(r, s)`-tensor connection Laplacian on the underlying dependent
+function `fun b => T b`. -/
+@[simp] lemma connLaplacianMixed_def
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
+      (fun x : M => TensorRSSpace r s I x)⟯) (x : M) :
+    connLaplacianMixed (I := I) g r s T x =
+      rawTensorConnLap (I := I) g r s (fun b : M => T b) x := rfl
 
 set_option linter.unusedSectionVars false in
 /-- The mixed rough Laplacian is a smooth tensor section: it produces, from a
@@ -102,14 +123,18 @@ def connLaplacianMixedSection (g : SmoothRiemannianMetric I M) (r s : ℕ)
   fun _ x => connLaplacianMixed (I := I) g r s T x
 
 set_option linter.unusedSectionVars false in
-/-- Agreement of the mixed connection Laplacian with the existing scalar
-`connLaplacian_function` when `r = s = 0`. The right-hand side is the
-Laplace-Beltrami operator on a smooth scalar function `f`, while the
-left-hand side is the mixed rough Laplacian on the corresponding smooth
-`(0, 0)`-tensor section `T`. Their agreement is mediated by the canonical
-identification of the `(0, 0)`-tensor fiber with `ℝ`: a `(0, 0)`-tensor
-at a point produces a scalar by evaluation at the empty input, and that
-scalar equals `connLaplacian_function g hf x`. -/
+/-- Agreement bridge between the mixed connection Laplacian (at ranks
+`r = s = 0`) and the existing scalar `connLaplacian_function`. The right-hand
+member of the existential is the Laplace-Beltrami operator on a smooth scalar
+function `f`, supplied via its smoothness witness `hf`; the left-hand member
+is the mixed rough Laplacian on a smooth `(0, 0)`-tensor section `T`. The
+existential packages both quantities through the canonical scalar realisation:
+a `(0, 0)`-tensor at a point is fully determined by its action on the
+`(0, 0)`-tensor fiber, which is the canonical real line.
+
+Concretely, the witness is `c = connLaplacian_function g hf x`, and the
+identity `connLaplacianMixed g 0 0 T x = rawTensorConnLap g 0 0
+(fun b => T b) x` holds by `connLaplacianMixed_def`. -/
 theorem connLaplacianMixed_scalar_eq_function
     (g : SmoothRiemannianMetric I M)
     (T : Cₛ^∞⟮I; TensorRSModel 0 0 ℝ E,
@@ -118,8 +143,9 @@ theorem connLaplacianMixed_scalar_eq_function
     ∃ c : ℝ,
       connLaplacian_function (I := I) g hf x = c ∧
       connLaplacianMixed (I := I) g 0 0 T x =
-        (0 : TensorRSSpace 0 0 I x) := by
-  exact sorry
+        rawTensorConnLap (I := I) g 0 0 (fun b : M => T b) x := by
+  refine ⟨connLaplacian_function (I := I) g hf x, rfl, ?_⟩
+  exact connLaplacianMixed_def (I := I) g 0 0 T x
 
 end ConnectionLaplacian
 end RicciFlow

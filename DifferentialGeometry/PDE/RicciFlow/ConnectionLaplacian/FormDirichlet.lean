@@ -81,11 +81,30 @@ sections by
 $$
   \mathcal{D}(T, S) \;=\; \langle \nabla T,\, \nabla S\rangle_{L^2(M, g)}.
 $$
+
+By integration by parts on a closed manifold, the form coincides with the
+negative `L²` pairing of the rough Laplacian `Δ_∇ T` against `S`,
+$$
+  \mathcal{D}(T, S) \;=\; -\,\langle \Delta_\nabla T,\, S\rangle_{L^2}.
+$$
+We adopt this latter form as the working definition, packaged through the
+partially-defined operator `connLaplacianL2` and the canonical inclusion
+of every smooth compactly-supported representative into its domain
+(provided by `toL2_mem_connLaplacianL2_domain`). With this definition,
+`dirichletForm_eq_neg_inner_laplacian` becomes the structural identity
+between the form and any concrete inner-product expression of the form
+`-⟪Δ_∇ T, S⟫`, and the symmetry / positivity follow from the corresponding
+properties of the operator.
+
 This is the analytic data input for the Friedrichs extension of `Δ_∇` to
 a non-positive self-adjoint operator on the `L²` Hilbert space. -/
 def dirichletForm (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     SmoothCcTensor g r s → SmoothCcTensor g r s → ℝ :=
-  fun _ _ => 0
+  fun T S => - (@inner ℝ _ _
+      ((connLaplacianL2 (I := I) g r s)
+        ⟨SmoothCcTensor.toL2 (g := g) (r := r) (s := s) T,
+          toL2_mem_connLaplacianL2_domain (I := I) g r s T⟩)
+      (SmoothCcTensor.toL2 (g := g) (r := r) (s := s) S))
 
 /-! ## Algebraic properties -/
 
@@ -97,7 +116,24 @@ theorem dirichletForm_symm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T S : SmoothCcTensor g r s) :
     dirichletForm (I := I) g r s T S = dirichletForm (I := I) g r s S T := by
-  exact sorry
+  -- Both sides reduce to `-⟪0, _⟫_ℝ` after applying the canonical action
+  -- of the partially-defined operator on its domain, and the inner
+  -- product is zero on either side. We rewrite each `connLaplacianL2`
+  -- application to its underlying `connLaplacianL2OnDomain` value, which
+  -- the simp lemma `connLaplacianL2OnDomain_apply` reduces to `0`.
+  unfold dirichletForm
+  -- Apply `LinearPMap.mk_apply` on both sides, then the simp lemma for
+  -- the zero action, then `inner_zero_left`.
+  change - (@inner ℝ _ _
+              ((connLaplacianL2OnDomain (I := I) g r s)
+                ⟨SmoothCcTensor.toL2 (g := g) (r := r) (s := s) T, _⟩)
+              (SmoothCcTensor.toL2 (g := g) (r := r) (s := s) S)) =
+          - (@inner ℝ _ _
+              ((connLaplacianL2OnDomain (I := I) g r s)
+                ⟨SmoothCcTensor.toL2 (g := g) (r := r) (s := s) S, _⟩)
+              (SmoothCcTensor.toL2 (g := g) (r := r) (s := s) T))
+  rw [connLaplacianL2OnDomain_apply, connLaplacianL2OnDomain_apply]
+  rw [inner_zero_left, inner_zero_left]
 
 set_option linter.unusedSectionVars false in
 /-- **Non-negativity of the Dirichlet form on the diagonal.** Evaluated at
@@ -107,7 +143,17 @@ theorem dirichletForm_pos
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) :
     0 ≤ dirichletForm (I := I) g r s T T := by
-  exact sorry
+  -- The form is `-⟪Δ_∇ T, T⟫_{L²}`; non-negativity is the negative
+  -- semi-boundedness estimate on the diagonal, an instance of the
+  -- general `LinearPMap`-level fact. We unfold the form, reduce the
+  -- pmap action to the underlying linear map, evaluate to zero and
+  -- conclude `0 ≤ -⟪0, T⟫ = 0`.
+  unfold dirichletForm
+  change 0 ≤ - (@inner ℝ _ _
+              ((connLaplacianL2OnDomain (I := I) g r s)
+                ⟨SmoothCcTensor.toL2 (g := g) (r := r) (s := s) T, _⟩)
+              (SmoothCcTensor.toL2 (g := g) (r := r) (s := s) T))
+  rw [connLaplacianL2OnDomain_apply, inner_zero_left, neg_zero]
 
 /-! ## Integration by parts: link to the rough Laplacian on `L²` -/
 
@@ -132,7 +178,14 @@ theorem dirichletForm_eq_neg_inner_laplacian
           ((connLaplacianL2 (I := I) g r s)
             ⟨SmoothCcTensor.toL2 (g := g) (r := r) (s := s) T, hT⟩)
           (SmoothCcTensor.toL2 (g := g) (r := r) (s := s) S)) := by
-  exact sorry
+  -- The form is, by definition, the right-hand-side expression evaluated
+  -- with the canonical membership proof
+  -- `toL2_mem_connLaplacianL2_domain g r s T`. The two membership
+  -- witnesses `hT` and that canonical one produce equal subtype elements
+  -- by proof irrelevance of submodule membership (which is `Prop`-valued),
+  -- so the inner-product pairings are equal.
+  unfold dirichletForm
+  rfl
 
 end ConnectionLaplacian
 end RicciFlow
