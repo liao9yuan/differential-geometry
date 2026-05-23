@@ -784,6 +784,10 @@ import DifferentialGeometry.PDE.RicciFlow.HeatSemigroup.StronglyContinuous
 import DifferentialGeometry.PDE.RicciFlow.HeatSemigroup.Generator
 import DifferentialGeometry.PDE.RicciFlow.HeatSemigroup.Analytic
 import DifferentialGeometry.PDE.RicciFlow.HeatSemigroup.Smoothing
+import DifferentialGeometry.PDE.RicciFlow.MaximalRegularity.BochnerSobolev
+import DifferentialGeometry.PDE.RicciFlow.MaximalRegularity.Space
+import DifferentialGeometry.PDE.RicciFlow.MaximalRegularity.DeSimonIsomorphism
+import DifferentialGeometry.PDE.RicciFlow.MaximalRegularity.LinearExistence
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.HilbertSpace
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.Inclusion
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcDense
