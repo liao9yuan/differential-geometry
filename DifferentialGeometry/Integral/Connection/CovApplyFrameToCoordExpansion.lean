@@ -141,7 +141,7 @@ private lemma chartFrameNormGlobalSmoothCoordMatrix_eq_clmAt_proj
 
 /-- The chart-α coordinate matrix `b ↦ C^k_i(b)` is `ContMDiffOn` on the
 chart-α trivialization base set. -/
-private lemma chartFrameNormGlobalSmoothCoordMatrix_contMDiffOn
+lemma chartFrameNormGlobalSmoothCoordMatrix_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) :
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞
