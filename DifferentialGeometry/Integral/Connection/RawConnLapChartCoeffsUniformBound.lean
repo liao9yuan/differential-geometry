@@ -67,7 +67,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 /-- The chart-α image of the partition-of-unity tsupport, transferred to the
 chart-Euclidean target via `toEuclidean`, is a compact subset of
 `chartTargetEuclid α`. -/
-private lemma pouTsupport_image_isCompact (α : M) :
+lemma pouTsupport_image_isCompact (α : M) :
     IsCompact
       ((fun b : M => (toEuclidean (E := E)) ((extChartAt I α) b)) ''
         tsupport (fun x : M =>
@@ -110,7 +110,7 @@ private lemma pouTsupport_image_isCompact (α : M) :
 /-- The chart-α image of the partition-of-unity tsupport (via `toEuclidean ∘
 extChartAt I α`) is contained in the chart-Euclidean target
 `chartTargetEuclid α`. -/
-private lemma pouTsupport_image_subset_chartTargetEuclid (α : M) :
+lemma pouTsupport_image_subset_chartTargetEuclid (α : M) :
     ((fun b : M => (toEuclidean (E := E)) ((extChartAt I α) b)) ''
       tsupport (fun x : M =>
           ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) ⊆
@@ -129,7 +129,7 @@ private lemma pouTsupport_image_subset_chartTargetEuclid (α : M) :
 
 /-- Auxiliary: a function that is `ContDiffOn ℝ ∞` on a set `U` is continuous
 on `U`, hence bounded on any compact subset `K ⊆ U`. -/
-private lemma exists_sup_bound_of_contDiffOn_on_compact_subset
+lemma exists_sup_bound_of_contDiffOn_on_compact_subset
     {U : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))}
     {K : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))} (hK : IsCompact K)
     (hKU : K ⊆ U) {f : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}

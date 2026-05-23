@@ -70,7 +70,7 @@ is bounded by the operator norm `‖iteratedFDeriv ℝ 2 f y‖`. -/
 /-- For a `C^2` (at `y`) scalar function on Euclidean space, the squared
 second Euclidean partial `∂_l ∂_k f y` is bounded by the operator norm
 squared of `iteratedFDeriv ℝ 2 f y`. -/
-private lemma euclidPartial_sq_le_iteratedFDeriv_two_sq
+lemma euclidPartial_sq_le_iteratedFDeriv_two_sq
     {f : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
     {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
     (hf : ContDiffAt ℝ 2 f y)
