@@ -483,7 +483,7 @@ private lemma tensorChartComponentRawEuclidPull_contDiffOn
 /-- The iterated Fréchet derivative of the EuclN-pulled scaled raw chart
 component, evaluated on the basis-`basisIdx`-tuple, equals `c` times the
 corresponding value for the unscaled section. -/
-private lemma iteratedFDeriv_basisEval_smul_eq
+theorem iteratedFDeriv_basisEval_smul_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (T : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -734,7 +734,7 @@ theorem tensorPouSobolevHsNorm_neg
 `tensorPouSobolevHsNorm`. The integrand vanishes off the compact set
 `chartImagePOUTsupport α` (POU pulled back to the chart target is zero there),
 and on the compact set the integrand is bounded by a continuous function. -/
-private lemma tensorPouSobolevHsNorm_inner_integral_lt_top'
+theorem tensorPouSobolevHsNorm_inner_integral_lt_top'
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -1092,6 +1092,110 @@ theorem tensorPouSobolevHsNormSq_lt_top
   unfold tensorPouSobolevHsNormSq
   exact ENNReal.pow_lt_top
     (tensorPouSobolevHsNorm_lt_top (I := I) (M := M) g k T)
+
+/-! ## Additional helpers for the inner-product construction
+
+This section exposes additivity of the raw chart-frame scalar component
+post-composed with `(extChartAt I α).symm ∘ (toEuclidean.symm)`, and the
+corresponding additivity for the iterated Fréchet derivative evaluated on the
+basis-`basisIdx`-tuple. These helpers are used to discharge bilinearity of
+the inner product on `SmoothCcTensorHs g r s k`. -/
+
+/-- The raw chart-frame scalar component, post-composed with
+`(extChartAt I α).symm ∘ (toEuclidean.symm)`, of a sum of tensor sections
+equals the sum of components (a pointwise identity on `EuclN`). -/
+private lemma tensorChartComponentRaw_comp_euclid_add_eq
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T₁ T₂ : SmoothCcTensor g r s) (α : M)
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
+    (tensorChartComponentRaw (I := I) (M := M) g r s (T₁ + T₂) α Idx Jdx
+        ∘ (extChartAt I α).symm
+        ∘ (toEuclidean (E := E)).symm) =
+      (tensorChartComponentRaw (I := I) (M := M) g r s T₁ α Idx Jdx
+        ∘ (extChartAt I α).symm
+        ∘ (toEuclidean (E := E)).symm) +
+      (tensorChartComponentRaw (I := I) (M := M) g r s T₂ α Idx Jdx
+        ∘ (extChartAt I α).symm
+        ∘ (toEuclidean (E := E)).symm) := by
+  funext y
+  have h := tensorChartComponentRaw_add (I := I) (M := M) g r s T₁ T₂ α Idx Jdx
+    ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
+  exact h
+
+/-- The iterated Fréchet derivative of the EuclN-pulled raw chart component
+of a sum of tensor sections, evaluated on the basis-`basisIdx`-tuple, equals
+the sum of the corresponding values for the summand sections. -/
+theorem iteratedFDeriv_basisEval_add_eq
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T₁ T₂ : SmoothCcTensor g r s) (α : M)
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E))
+    (j : ℕ) (basisIdx : Fin j → Fin (Module.finrank ℝ E))
+    {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
+    (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
+    (iteratedFDeriv ℝ j
+        (tensorChartComponentRaw (I := I) (M := M) g r s (T₁ + T₂) α Idx Jdx
+          ∘ (extChartAt I α).symm
+          ∘ (toEuclidean (E := E)).symm) y)
+      (fun i => EuclideanSpace.basisFun
+        (Fin (Module.finrank ℝ E)) ℝ (basisIdx i)) =
+    (iteratedFDeriv ℝ j
+        (tensorChartComponentRaw (I := I) (M := M) g r s T₁ α Idx Jdx
+          ∘ (extChartAt I α).symm
+          ∘ (toEuclidean (E := E)).symm) y)
+      (fun i => EuclideanSpace.basisFun
+        (Fin (Module.finrank ℝ E)) ℝ (basisIdx i)) +
+    (iteratedFDeriv ℝ j
+        (tensorChartComponentRaw (I := I) (M := M) g r s T₂ α Idx Jdx
+          ∘ (extChartAt I α).symm
+          ∘ (toEuclidean (E := E)).symm) y)
+      (fun i => EuclideanSpace.basisFun
+        (Fin (Module.finrank ℝ E)) ℝ (basisIdx i)) := by
+  classical
+  have hfun :
+      (tensorChartComponentRaw (I := I) (M := M) g r s (T₁ + T₂) α Idx Jdx
+          ∘ (extChartAt I α).symm
+          ∘ (toEuclidean (E := E)).symm) =
+        (tensorChartComponentRaw (I := I) (M := M) g r s T₁ α Idx Jdx
+          ∘ (extChartAt I α).symm
+          ∘ (toEuclidean (E := E)).symm) +
+        (tensorChartComponentRaw (I := I) (M := M) g r s T₂ α Idx Jdx
+          ∘ (extChartAt I α).symm
+          ∘ (toEuclidean (E := E)).symm) :=
+    tensorChartComponentRaw_comp_euclid_add_eq
+      (I := I) (M := M) g r s T₁ T₂ α Idx Jdx
+  rw [hfun]
+  have h_cdAt₁ : ContDiffAt ℝ ∞
+      (tensorChartComponentRaw (I := I) (M := M) g r s T₁ α Idx Jdx
+        ∘ (extChartAt I α).symm
+        ∘ (toEuclidean (E := E)).symm) y := by
+    have h_cdOn := tensorChartComponentRawEuclidPull_contDiffOn
+      (I := I) (M := M) g r s T₁ α Idx Jdx
+    have h_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
+      chartTargetEuclid_isOpen (I := I) (M := M) α
+    exact h_cdOn.contDiffAt (h_open.mem_nhds hy)
+  have h_cdAt₂ : ContDiffAt ℝ ∞
+      (tensorChartComponentRaw (I := I) (M := M) g r s T₂ α Idx Jdx
+        ∘ (extChartAt I α).symm
+        ∘ (toEuclidean (E := E)).symm) y := by
+    have h_cdOn := tensorChartComponentRawEuclidPull_contDiffOn
+      (I := I) (M := M) g r s T₂ α Idx Jdx
+    have h_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
+      chartTargetEuclid_isOpen (I := I) (M := M) α
+    exact h_cdOn.contDiffAt (h_open.mem_nhds hy)
+  have h_cdAt₁_n : ContDiffAt ℝ j
+      (tensorChartComponentRaw (I := I) (M := M) g r s T₁ α Idx Jdx
+        ∘ (extChartAt I α).symm
+        ∘ (toEuclidean (E := E)).symm) y :=
+    h_cdAt₁.of_le (by exact_mod_cast le_top)
+  have h_cdAt₂_n : ContDiffAt ℝ j
+      (tensorChartComponentRaw (I := I) (M := M) g r s T₂ α Idx Jdx
+        ∘ (extChartAt I α).symm
+        ∘ (toEuclidean (E := E)).symm) y :=
+    h_cdAt₂.of_le (by exact_mod_cast le_top)
+  rw [iteratedFDeriv_add_apply h_cdAt₁_n h_cdAt₂_n]
+  rfl
 
 #print axioms tensorPouSobolevHsNorm
 #print axioms tensorPouSobolevHsNorm_nonneg

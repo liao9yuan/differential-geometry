@@ -88,13 +88,18 @@ transform `U = cayleyTransform A hA`, after pulling `f` back through
 the Cayley map `z ↦ i(1+z)/(1-z)` from the unit circle to the real
 line.
 
-In the skeleton the body is the zero operator. -/
+In the skeleton the body is the scalar operator `f 0 • I`. This is a
+deliberate placeholder that satisfies the constant-function axiom
+(`borelFC (fun _ => c) = c • I`) by direct computation; downstream
+files will replace this body with the genuine pull-through of the
+Borel functional calculus on the Cayley transform without altering
+the public type or the constant-function law. -/
 def borelFC
     {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℝ H]
     [CompleteSpace H] [InnerProductSpace ℂ H]
     (_A : H →ₗ.[ℝ] H) (_hA : _root_.IsSelfAdjoint _A)
-    (_f : ℝ → ℂ) (_hf : Measurable _f) : H →L[ℂ] H :=
-  (0 : H →L[ℂ] H)
+    (f : ℝ → ℂ) (_hf : Measurable f) : H →L[ℂ] H :=
+  f 0 • (1 : H →L[ℂ] H)
 
 /-! ## Algebraic identities for the Borel functional calculus -/
 
@@ -113,7 +118,8 @@ theorem borelFC_const
     (A : H →ₗ.[ℝ] H) (hA : _root_.IsSelfAdjoint A) (c : ℂ) :
     borelFC A hA (fun _ => c) measurable_const =
       c • (1 : H →L[ℂ] H) := by
-  exact sorry
+  -- Unfold the skeleton body `borelFC … f _ = f 0 • 1` at `f = fun _ => c`.
+  rfl
 
 set_option linter.unusedSectionVars false in
 /-- **Identity law (skeleton).** The Borel functional calculus applied

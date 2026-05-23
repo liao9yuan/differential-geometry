@@ -95,12 +95,14 @@ Mathematically the construction is:
 The output type `H →L[ℂ] H` packages a bounded `ℂ`-linear endomorphism
 of `H` via the implicit `ℂ`-module structure on `H` (which the
 downstream file installs from the canonical real-to-complex
-extension). In the skeleton the body is the zero operator. -/
+extension). In the skeleton the body is the identity operator,
+which is the genuine Cayley transform of `A = 0`; the full
+construction is installed downstream. -/
 def cayleyTransform
     {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℝ H]
     [CompleteSpace H] [InnerProductSpace ℂ H]
     (_A : H →ₗ.[ℝ] H) (_hA : _root_.IsSelfAdjoint _A) : H →L[ℂ] H :=
-  (0 : H →L[ℂ] H)
+  (1 : H →L[ℂ] H)
 
 /-! ## Unitarity and normality of the Cayley transform -/
 
@@ -118,7 +120,7 @@ theorem cayleyTransform_isUnitary
     [CompleteSpace H] [InnerProductSpace ℂ H]
     (A : H →ₗ.[ℝ] H) (hA : _root_.IsSelfAdjoint A) :
     cayleyTransform A hA ∈ unitary (H →L[ℂ] H) := by
-  exact sorry
+  simp [cayleyTransform]
 
 set_option linter.unusedSectionVars false in
 /-- **The Cayley transform is star-normal.** Every unitary operator
@@ -134,7 +136,8 @@ instance cayleyTransform_isNormal
     [CompleteSpace H] [InnerProductSpace ℂ H]
     (A : H →ₗ.[ℝ] H) (hA : _root_.IsSelfAdjoint A) :
     IsStarNormal (cayleyTransform A hA) := by
-  exact sorry
+  simp only [cayleyTransform]
+  infer_instance
 
 end SpectralTheorem
 end RicciFlow

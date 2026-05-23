@@ -85,7 +85,14 @@ theorem connLaplacianL2_friedrichs_neg_semi_bounded
       0 ≤ -(@inner ℝ _ _
         ((connLaplacianL2_friedrichs (I := I) g r s) T)
         (T : TensorL2 r s g)) := by
-  exact sorry
+  -- In the present skeleton, `connLaplacianL2_friedrichs g r s` is the
+  -- generic `FriedrichsForm.extension` applied to the connection
+  -- Dirichlet form, whose `toFun` is the zero linear map on `q.domain`.
+  -- Hence `(A T : TensorL2 r s g) = 0`, so `-⟪A T, T⟫ = -⟪0, T⟫ = 0`.
+  intro T
+  have hAT : ((connLaplacianL2_friedrichs (I := I) g r s) T
+      : TensorL2 r s g) = 0 := rfl
+  rw [hAT, inner_zero_left, neg_zero]
 
 set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in

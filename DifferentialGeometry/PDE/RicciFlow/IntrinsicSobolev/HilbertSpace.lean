@@ -66,6 +66,8 @@ namespace IntrinsicSobolev
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Sobolev.Tensor
+open DifferentialGeometry.Analysis.Sobolev.Chart
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -186,39 +188,884 @@ end SmoothCcTensorHs
 
 /-! ## Pre-inner-product core, induced norm, inner-product space structure
 
-The inner product on `SmoothCcTensorHs g r s k` is the polarised form of the
-square of `tensorPouSobolevHsNorm g k`. Equivalently, it is the
-chart-tsum / multi-index / iterated-derivative / basis-tuple expansion of the
-pointwise inner product of the two iterated derivatives of the raw scalar
-components, weighted by the partition of unity and integrated against the
-chart-target Lebesgue measure.
+The inner product on `SmoothCcTensorHs g r s k` is the chart-aggregated
+bilinear form whose diagonal recovers the square of `tensorPouSobolevHsNorm
+g k`. Concretely it is a finite sum (over the chart-atlas partition-of-unity
+finite support) of multi-indexed integrals over the chart targets of the
+pointwise product of two iterated Fréchet derivatives of the raw scalar
+components, weighted by the partition of unity. -/
 
-The bundling and the proofs of the four `PreInnerProductSpace.Core` fields
-are deferred to follow-up files; here we record only the signature so
-downstream consumers can import the Hilbert space unconditionally. -/
+/-! ### Pointwise integrand and per-summand integral -/
+
+set_option linter.unusedSectionVars false in
+/-- The real-valued pointwise integrand of the inner product on
+`SmoothCcTensorHs g r s k`: at point `y` of the chart target it is the
+partition-of-unity weight times the product of the iterated Fréchet
+derivatives of the EuclN-pulled raw chart-frame scalar components of `T` and
+`S`, evaluated on the basis-`basisIdx`-tuple. -/
+private noncomputable def hkIntegrand
+    {g : SmoothRiemannianMetric I M} {r s k : ℕ}
+    (T S : SmoothCcTensorHs g r s k) (α : M)
+    (IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E)))
+    (j : ℕ) (basisIdx : Fin j → Fin (Module.finrank ℝ E))
+    (y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) : ℝ :=
+  ((chartAtlasPOU I M α : M → ℝ)
+      ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+    ((iteratedFDeriv ℝ j
+            (tensorChartComponentRaw (I := I) (M := M) g r s
+                T.toCcTensor α IJ.1 IJ.2
+              ∘ (extChartAt I α).symm
+              ∘ (toEuclidean (E := E)).symm) y)
+          (fun i => EuclideanSpace.basisFun
+            (Fin (Module.finrank ℝ E)) ℝ (basisIdx i)) *
+      (iteratedFDeriv ℝ j
+            (tensorChartComponentRaw (I := I) (M := M) g r s
+                S.toCcTensor α IJ.1 IJ.2
+              ∘ (extChartAt I α).symm
+              ∘ (toEuclidean (E := E)).symm) y)
+          (fun i => EuclideanSpace.basisFun
+            (Fin (Module.finrank ℝ E)) ℝ (basisIdx i)))
+
+set_option linter.unusedSectionVars false in
+/-- The per-`(α, IJ, j, basisIdx)` integral of `hkIntegrand T S` over the
+chart-target Euclidean set. -/
+private noncomputable def hkOneTerm
+    {g : SmoothRiemannianMetric I M} {r s k : ℕ}
+    (T S : SmoothCcTensorHs g r s k) (α : M)
+    (IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E)))
+    (j : ℕ) (basisIdx : Fin j → Fin (Module.finrank ℝ E)) : ℝ :=
+  ∫ y in chartTargetEuclid (I := I) (M := M) α,
+    hkIntegrand (I := I) (M := M) T S α IJ j basisIdx y
+    ∂(volume :
+      Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))))
+
+set_option linter.unusedSectionVars false in
+/-- The inner product on `SmoothCcTensorHs g r s k`: a finite sum over the
+chart-atlas partition-of-unity finite support, the component multi-index
+pair, the iterated-derivative order, and the basis-tuple index, of the
+per-summand integral `hkOneTerm`. -/
+private noncomputable def hkInner
+    {g : SmoothRiemannianMetric I M} {r s k : ℕ}
+    (T S : SmoothCcTensorHs g r s k) : ℝ :=
+  ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+    ∑ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E)),
+      ∑ j ∈ Finset.range (2 * k + 1),
+        ∑ basisIdx : Fin j → Fin (Module.finrank ℝ E),
+          hkOneTerm (I := I) (M := M) T S α IJ j basisIdx
+
+/-! ### Continuity and integrability of the integrand -/
+
+set_option linter.unusedSectionVars false in
+/-- Continuity of the inner-product integrand on the open chart target. -/
+private lemma hkIntegrand_continuousOn
+    {g : SmoothRiemannianMetric I M} {r s k : ℕ}
+    (T S : SmoothCcTensorHs g r s k) (α : M)
+    (IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E)))
+    (j : ℕ) (basisIdx : Fin j → Fin (Module.finrank ℝ E)) :
+    ContinuousOn
+      (fun y => hkIntegrand (I := I) (M := M) T S α IJ j basisIdx y)
+      (chartTargetEuclid (I := I) (M := M) α) := by
+  classical
+  unfold hkIntegrand
+  -- POU pull-back is continuous on the chart target.
+  have hPOU_smooth :
+      ContMDiff I (𝓘(ℝ, ℝ)) ∞
+        (fun x : M => (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) x) :=
+    (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff
+  have hPOU_cont : Continuous fun x : M => (chartAtlasPOU I M α : M → ℝ) x :=
+    hPOU_smooth.continuous
+  have hSymmCont : ContinuousOn ((extChartAt I α).symm)
+      (extChartAt I α).target :=
+    continuousOn_extChartAt_symm α
+  have h_toEucl_cont : Continuous
+      ((toEuclidean (E := E)).symm : _ → _) :=
+    (toEuclidean (E := E)).symm.continuous
+  have h_inner : ContinuousOn
+      (fun y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
+        (extChartAt I α).symm ((toEuclidean (E := E)).symm y))
+      (chartTargetEuclid (I := I) (M := M) α) := by
+    refine hSymmCont.comp h_toEucl_cont.continuousOn ?_
+    intro y hy
+    unfold chartTargetEuclid at hy
+    obtain ⟨z, hz_tgt, hz_eq⟩ := hy
+    rw [← hz_eq]
+    change (toEuclidean (E := E)).symm
+        ((toEuclidean (E := E)) z) ∈ (extChartAt I α).target
+    rw [(toEuclidean (E := E)).symm_apply_apply]
+    exact hz_tgt
+  have hPOU_pull_cont :
+      ContinuousOn (fun y : EuclideanSpace ℝ
+            (Fin (Module.finrank ℝ E)) =>
+          (chartAtlasPOU I M α : M → ℝ)
+            ((extChartAt I α).symm
+              ((toEuclidean (E := E)).symm y)))
+        (chartTargetEuclid (I := I) (M := M) α) :=
+    hPOU_cont.comp_continuousOn' h_inner
+  -- Iterated Fréchet derivatives of T and S are continuous on the open chart target.
+  have h_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
+    chartTargetEuclid_isOpen (I := I) (M := M) α
+  have h_eval_contOn : ∀ (U : SmoothCcTensor g r s),
+      ContinuousOn
+        (fun y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
+          (iteratedFDeriv ℝ j
+              (tensorChartComponentRaw (I := I) (M := M) g r s U α IJ.1 IJ.2
+                ∘ (extChartAt I α).symm
+                ∘ (toEuclidean (E := E)).symm)
+              y)
+            (fun i => EuclideanSpace.basisFun
+              (Fin (Module.finrank ℝ E)) ℝ (basisIdx i)))
+        (chartTargetEuclid (I := I) (M := M) α) := by
+    intro U
+    have h_cdOn : ContDiffOn ℝ ∞
+        (tensorChartComponentRaw (I := I) (M := M) g r s U α IJ.1 IJ.2
+          ∘ (extChartAt I α).symm
+          ∘ (toEuclidean (E := E)).symm)
+        (chartTargetEuclid (I := I) (M := M) α) := by
+      classical
+      have h_raw_smoothOn : ContMDiffOn I (𝓘(ℝ, ℝ)) ∞
+          (tensorChartComponentRaw (I := I) (M := M) g r s U α IJ.1 IJ.2)
+          ((chartAt H α).source) :=
+        tensorChartComponentRaw_contMDiffOn_chart_source
+          (I := I) (M := M) g r s U α IJ.1 IJ.2
+      have h_raw_pull_contDiffOn :
+          ContDiffOn ℝ ∞
+            (tensorChartComponentRaw (I := I) (M := M) g r s U α IJ.1 IJ.2
+              ∘ (extChartAt I α).symm)
+            (extChartAt I α).target := by
+        have h_extSymm : ContMDiffOn 𝓘(ℝ, E) I ∞
+            ((extChartAt I α).symm : E → M) (extChartAt I α).target :=
+          contMDiffOn_extChartAt_symm α
+        have h_comp_mdiff : ContMDiffOn 𝓘(ℝ, E) (𝓘(ℝ, ℝ)) ∞
+            (tensorChartComponentRaw (I := I) (M := M) g r s U α IJ.1 IJ.2
+              ∘ (extChartAt I α).symm)
+            (extChartAt I α).target := by
+          refine h_raw_smoothOn.comp h_extSymm ?_
+          intro y hy
+          change (extChartAt I α).symm y ∈ (chartAt H α).source
+          rw [← extChartAt_source (I := I)]
+          exact (extChartAt I α).map_target hy
+        exact h_comp_mdiff.contDiffOn
+      have h_toEucl_symm_smooth :
+          ContDiff ℝ ∞ ((toEuclidean (E := E)).symm) :=
+        ContinuousLinearEquiv.contDiff _
+      have h_maps : Set.MapsTo ((toEuclidean (E := E)).symm)
+          (chartTargetEuclid (I := I) (M := M) α)
+          (extChartAt I α).target := by
+        intro y hy
+        rcases hy with ⟨z, hz_tgt, hz_eq⟩
+        have h_eq : (toEuclidean (E := E)).symm y = z := by
+          rw [← hz_eq]; exact (toEuclidean (E := E)).symm_apply_apply z
+        rw [h_eq]; exact hz_tgt
+      exact h_raw_pull_contDiffOn.comp
+        h_toEucl_symm_smooth.contDiffOn h_maps
+    have h_iter_contOn : ContinuousOn
+        (iteratedFDeriv ℝ j
+          (tensorChartComponentRaw (I := I) (M := M) g r s U α IJ.1 IJ.2
+            ∘ (extChartAt I α).symm
+            ∘ (toEuclidean (E := E)).symm))
+        (chartTargetEuclid (I := I) (M := M) α) := by
+      intro y hy
+      have h_cd : ContDiffAt ℝ ∞
+          (tensorChartComponentRaw (I := I) (M := M) g r s U α IJ.1 IJ.2
+            ∘ (extChartAt I α).symm
+            ∘ (toEuclidean (E := E)).symm) y :=
+        h_cdOn.contDiffAt (h_open.mem_nhds hy)
+      have h_cont_iter : ContinuousAt
+          (iteratedFDeriv ℝ j
+            (tensorChartComponentRaw (I := I) (M := M) g r s U α IJ.1 IJ.2
+              ∘ (extChartAt I α).symm
+              ∘ (toEuclidean (E := E)).symm)) y :=
+        h_cd.continuousAt_iteratedFDeriv (k := j) (by exact_mod_cast le_top)
+      exact h_cont_iter.continuousWithinAt
+    have h_apply : Continuous
+        fun A : ContinuousMultilinearMap ℝ
+            (fun _ : Fin j => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) ℝ =>
+          A (fun i => EuclideanSpace.basisFun
+            (Fin (Module.finrank ℝ E)) ℝ (basisIdx i)) :=
+      continuous_eval_const _
+    exact h_apply.comp_continuousOn h_iter_contOn
+  exact hPOU_pull_cont.mul ((h_eval_contOn T.toCcTensor).mul
+    (h_eval_contOn S.toCcTensor))
+
+set_option linter.unusedSectionVars false in
+/-- The inner-product integrand vanishes on the chart target outside the
+compact set `chartImagePOUTsupport α` (because the POU weight does). -/
+private lemma hkIntegrand_zero_off_compact
+    {g : SmoothRiemannianMetric I M} {r s k : ℕ}
+    (T S : SmoothCcTensorHs g r s k) (α : M)
+    (IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E)))
+    (j : ℕ) (basisIdx : Fin j → Fin (Module.finrank ℝ E))
+    {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
+    (hy_target : y ∈ chartTargetEuclid (I := I) (M := M) α)
+    (hy_off : y ∉ chartImagePOUTsupport (I := I) (M := M) α) :
+    hkIntegrand (I := I) (M := M) T S α IJ j basisIdx y = 0 := by
+  classical
+  -- POU at the pulled point is zero outside the compact set.
+  have hpush_zero :
+      chartPushed (I := I) (M := M)
+        (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)
+        α (fun _ : M => (1 : ℝ)) y = 0 :=
+    chartPushed_eq_zero_off_chartImagePOUTsupport (I := I) (M := M)
+      α (fun _ => 1) hy_target hy_off
+  have hpush_unfold :
+      chartPushed (I := I) (M := M)
+          (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)
+          α (fun _ : M => (1 : ℝ)) y =
+        (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α : M → ℝ)
+          ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) := by
+    simp [chartPushed]
+  have hPOU_y : (chartAtlasPOU I M α : M → ℝ)
+      ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) = 0 := by
+    rw [← hpush_unfold]; exact hpush_zero
+  unfold hkIntegrand
+  rw [hPOU_y, zero_mul]
+
+set_option linter.unusedSectionVars false in
+/-- The inner-product integrand vanishes when `α` is outside the
+chart-atlas partition-of-unity finite support, because the POU weight is
+identically zero there. -/
+private lemma hkIntegrand_zero_of_notMem_finset
+    {g : SmoothRiemannianMetric I M} {r s k : ℕ}
+    (T S : SmoothCcTensorHs g r s k) {α : M}
+    (hα : α ∉ chartAtlasPOU_finset (I := I) (M := M))
+    (IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E)))
+    (j : ℕ) (basisIdx : Fin j → Fin (Module.finrank ℝ E))
+    (y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :
+    hkIntegrand (I := I) (M := M) T S α IJ j basisIdx y = 0 := by
+  have hPOU_zero : ∀ x : M, (chartAtlasPOU I M α : M → ℝ) x = 0 :=
+    fun x => chartAtlasPOU_weight_zero_of_notMem (I := I) (M := M) hα x
+  unfold hkIntegrand
+  rw [hPOU_zero, zero_mul]
+
+set_option linter.unusedSectionVars false in
+/-- `hkOneTerm` vanishes when `α` is outside the partition-of-unity finite
+support. -/
+private lemma hkOneTerm_zero_of_notMem_finset
+    {g : SmoothRiemannianMetric I M} {r s k : ℕ}
+    (T S : SmoothCcTensorHs g r s k) {α : M}
+    (hα : α ∉ chartAtlasPOU_finset (I := I) (M := M))
+    (IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E)))
+    (j : ℕ) (basisIdx : Fin j → Fin (Module.finrank ℝ E)) :
+    hkOneTerm (I := I) (M := M) T S α IJ j basisIdx = 0 := by
+  unfold hkOneTerm
+  have h : (fun y => hkIntegrand (I := I) (M := M) T S α IJ j basisIdx y) =
+      (fun _ : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) => (0 : ℝ)) := by
+    funext y
+    exact hkIntegrand_zero_of_notMem_finset
+      (I := I) (M := M) T S hα IJ j basisIdx y
+  rw [h]
+  simp
+
+set_option linter.unusedSectionVars false in
+/-- Integrability of the inner-product integrand on the chart target: by
+continuity on the open chart target, support inside the compact subset
+`chartImagePOUTsupport α`, and finite Lebesgue measure on this compact set. -/
+private lemma hkIntegrand_integrableOn
+    {g : SmoothRiemannianMetric I M} {r s k : ℕ}
+    (T S : SmoothCcTensorHs g r s k) (α : M)
+    (IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E)))
+    (j : ℕ) (basisIdx : Fin j → Fin (Module.finrank ℝ E)) :
+    IntegrableOn
+      (fun y => hkIntegrand (I := I) (M := M) T S α IJ j basisIdx y)
+      (chartTargetEuclid (I := I) (M := M) α)
+      (volume :
+        Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))) := by
+  classical
+  set K : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :=
+    chartImagePOUTsupport (I := I) (M := M) α with hK_def
+  have hK_compact : IsCompact K :=
+    chartImagePOUTsupport_isCompact (I := I) (M := M) α
+  have hK_sub : K ⊆ chartTargetEuclid (I := I) (M := M) α :=
+    chartImagePOUTsupport_subset_target (I := I) (M := M) α
+  have hT_meas : MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
+    (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
+  have hK_meas : MeasurableSet K := hK_compact.isClosed.measurableSet
+  -- Continuity on the open chart target.
+  have h_cont :
+      ContinuousOn (fun y => hkIntegrand (I := I) (M := M) T S α IJ j basisIdx y)
+        (chartTargetEuclid (I := I) (M := M) α) :=
+    hkIntegrand_continuousOn (I := I) (M := M) T S α IJ j basisIdx
+  -- Restricted to K, the integrand is continuous, so integrable on K.
+  have h_int_K : IntegrableOn
+      (fun y => hkIntegrand (I := I) (M := M) T S α IJ j basisIdx y) K
+      (volume :
+        Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))) := by
+    have h_cont_K : ContinuousOn
+        (fun y => hkIntegrand (I := I) (M := M) T S α IJ j basisIdx y) K :=
+      h_cont.mono hK_sub
+    exact h_cont_K.integrableOn_compact hK_compact
+  -- Off K (but on T = chartTargetEuclid α), the integrand is zero.
+  have h_zero_off : ∀ y ∈ chartTargetEuclid (I := I) (M := M) α,
+      y ∉ K → hkIntegrand (I := I) (M := M) T S α IJ j basisIdx y = 0 := by
+    intro y hyT hyK
+    exact hkIntegrand_zero_off_compact
+      (I := I) (M := M) T S α IJ j basisIdx hyT hyK
+  -- Express the integral on T as integral on K via the indicator congruence.
+  have h_indicator_eq :
+      Set.indicator (chartTargetEuclid (I := I) (M := M) α)
+          (fun y => hkIntegrand (I := I) (M := M) T S α IJ j basisIdx y) =
+        Set.indicator K
+          (fun y => hkIntegrand (I := I) (M := M) T S α IJ j basisIdx y) := by
+    funext y
+    by_cases hyK : y ∈ K
+    · have hyT : y ∈ chartTargetEuclid (I := I) (M := M) α := hK_sub hyK
+      simp [Set.indicator_of_mem, hyK, hyT]
+    · by_cases hyT : y ∈ chartTargetEuclid (I := I) (M := M) α
+      · have hf0 := h_zero_off y hyT hyK
+        rw [Set.indicator_of_mem hyT, Set.indicator_of_notMem hyK, hf0]
+      · simp [Set.indicator_of_notMem, hyT, hyK]
+  -- Transfer integrability from K to T via integrable_indicator_iff.
+  have h_int_T : Integrable
+      (Set.indicator (chartTargetEuclid (I := I) (M := M) α)
+        (fun y => hkIntegrand (I := I) (M := M) T S α IJ j basisIdx y))
+      (volume :
+        Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))) := by
+    rw [h_indicator_eq]
+    rw [← MeasureTheory.integrable_indicator_iff hK_meas] at h_int_K
+    exact h_int_K
+  rw [← MeasureTheory.integrable_indicator_iff hT_meas]
+  exact h_int_T
+
+/-! ### Bilinearity of the integrand and the per-summand integral -/
+
+set_option linter.unusedSectionVars false in
+/-- Symmetry of the inner-product integrand: `hkIntegrand T S = hkIntegrand S T`. -/
+private lemma hkIntegrand_symm
+    {g : SmoothRiemannianMetric I M} {r s k : ℕ}
+    (T S : SmoothCcTensorHs g r s k) (α : M)
+    (IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E)))
+    (j : ℕ) (basisIdx : Fin j → Fin (Module.finrank ℝ E))
+    (y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :
+    hkIntegrand (I := I) (M := M) T S α IJ j basisIdx y =
+      hkIntegrand (I := I) (M := M) S T α IJ j basisIdx y := by
+  unfold hkIntegrand
+  ring
+
+set_option linter.unusedSectionVars false in
+/-- Additivity of the inner-product integrand in the first argument on
+the chart target. -/
+private lemma hkIntegrand_add_left
+    {g : SmoothRiemannianMetric I M} {r s k : ℕ}
+    (T₁ T₂ S : SmoothCcTensorHs g r s k) (α : M)
+    (IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E)))
+    (j : ℕ) (basisIdx : Fin j → Fin (Module.finrank ℝ E))
+    {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
+    (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
+    hkIntegrand (I := I) (M := M) (T₁ + T₂) S α IJ j basisIdx y =
+      hkIntegrand (I := I) (M := M) T₁ S α IJ j basisIdx y +
+      hkIntegrand (I := I) (M := M) T₂ S α IJ j basisIdx y := by
+  unfold hkIntegrand
+  -- (T₁ + T₂).toCcTensor = T₁.toCcTensor + T₂.toCcTensor.
+  have htoCc : (T₁ + T₂).toCcTensor =
+      T₁.toCcTensor + T₂.toCcTensor :=
+    SmoothCcTensorHs.toCcTensor_add T₁ T₂
+  rw [htoCc]
+  have hadd :=
+    DifferentialGeometry.Analysis.Sobolev.Tensor.iteratedFDeriv_basisEval_add_eq
+      (I := I) (M := M) g r s T₁.toCcTensor T₂.toCcTensor α IJ.1 IJ.2 j basisIdx hy
+  rw [hadd]
+  ring
+
+set_option linter.unusedSectionVars false in
+/-- Scalar homogeneity of the inner-product integrand in the first argument
+on the chart target. -/
+private lemma hkIntegrand_smul_left
+    {g : SmoothRiemannianMetric I M} {r s k : ℕ}
+    (c : ℝ) (T S : SmoothCcTensorHs g r s k) (α : M)
+    (IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E)))
+    (j : ℕ) (basisIdx : Fin j → Fin (Module.finrank ℝ E))
+    {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
+    (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
+    hkIntegrand (I := I) (M := M) (c • T) S α IJ j basisIdx y =
+      c * hkIntegrand (I := I) (M := M) T S α IJ j basisIdx y := by
+  unfold hkIntegrand
+  -- (c • T).toCcTensor = c • T.toCcTensor.
+  have htoCc : (c • T).toCcTensor = c • T.toCcTensor :=
+    SmoothCcTensorHs.toCcTensor_smul c T
+  rw [htoCc]
+  have hsmul :=
+    DifferentialGeometry.Analysis.Sobolev.Tensor.iteratedFDeriv_basisEval_smul_eq
+      (I := I) (M := M) g r s c T.toCcTensor α IJ.1 IJ.2 j basisIdx hy
+  rw [hsmul]
+  -- After the rewrite, the c • ... is a real scalar action, equivalent to c * ...
+  simp only [smul_eq_mul]
+  ring
+
+set_option linter.unusedSectionVars false in
+/-- Symmetry of `hkOneTerm`. -/
+private lemma hkOneTerm_symm
+    {g : SmoothRiemannianMetric I M} {r s k : ℕ}
+    (T S : SmoothCcTensorHs g r s k) (α : M)
+    (IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E)))
+    (j : ℕ) (basisIdx : Fin j → Fin (Module.finrank ℝ E)) :
+    hkOneTerm (I := I) (M := M) T S α IJ j basisIdx =
+      hkOneTerm (I := I) (M := M) S T α IJ j basisIdx := by
+  unfold hkOneTerm
+  refine MeasureTheory.setIntegral_congr_fun
+    (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet ?_
+  intro y _
+  exact hkIntegrand_symm (I := I) (M := M) T S α IJ j basisIdx y
+
+set_option linter.unusedSectionVars false in
+/-- Additivity of `hkOneTerm` in the first argument. -/
+private lemma hkOneTerm_add_left
+    {g : SmoothRiemannianMetric I M} {r s k : ℕ}
+    (T₁ T₂ S : SmoothCcTensorHs g r s k) (α : M)
+    (IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E)))
+    (j : ℕ) (basisIdx : Fin j → Fin (Module.finrank ℝ E)) :
+    hkOneTerm (I := I) (M := M) (T₁ + T₂) S α IJ j basisIdx =
+      hkOneTerm (I := I) (M := M) T₁ S α IJ j basisIdx +
+      hkOneTerm (I := I) (M := M) T₂ S α IJ j basisIdx := by
+  unfold hkOneTerm
+  rw [← MeasureTheory.integral_add
+    (hkIntegrand_integrableOn (I := I) (M := M) T₁ S α IJ j basisIdx)
+    (hkIntegrand_integrableOn (I := I) (M := M) T₂ S α IJ j basisIdx)]
+  refine MeasureTheory.setIntegral_congr_fun
+    (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet ?_
+  intro y hy
+  exact hkIntegrand_add_left (I := I) (M := M) T₁ T₂ S α IJ j basisIdx hy
+
+set_option linter.unusedSectionVars false in
+/-- Scalar homogeneity of `hkOneTerm` in the first argument. -/
+private lemma hkOneTerm_smul_left
+    {g : SmoothRiemannianMetric I M} {r s k : ℕ}
+    (c : ℝ) (T S : SmoothCcTensorHs g r s k) (α : M)
+    (IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E)))
+    (j : ℕ) (basisIdx : Fin j → Fin (Module.finrank ℝ E)) :
+    hkOneTerm (I := I) (M := M) (c • T) S α IJ j basisIdx =
+      c * hkOneTerm (I := I) (M := M) T S α IJ j basisIdx := by
+  unfold hkOneTerm
+  rw [← MeasureTheory.integral_const_mul]
+  refine MeasureTheory.setIntegral_congr_fun
+    (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet ?_
+  intro y hy
+  exact hkIntegrand_smul_left (I := I) (M := M) c T S α IJ j basisIdx hy
+
+set_option linter.unusedSectionVars false in
+/-- Non-negativity of the diagonal `hkOneTerm T T` (the integrand reduces
+to `POU · (D^j f)(e_b)²` which is non-negative). -/
+private lemma hkOneTerm_self_nonneg
+    {g : SmoothRiemannianMetric I M} {r s k : ℕ}
+    (T : SmoothCcTensorHs g r s k) (α : M)
+    (IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E)))
+    (j : ℕ) (basisIdx : Fin j → Fin (Module.finrank ℝ E)) :
+    0 ≤ hkOneTerm (I := I) (M := M) T T α IJ j basisIdx := by
+  unfold hkOneTerm
+  refine MeasureTheory.setIntegral_nonneg
+    (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet ?_
+  intro y _
+  unfold hkIntegrand
+  have hPOU_nn : 0 ≤ (chartAtlasPOU I M α : M → ℝ)
+      ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) :=
+    (chartAtlasPOU I M).nonneg α _
+  have hsq_nn : (0 : ℝ) ≤
+      (iteratedFDeriv ℝ j
+            (tensorChartComponentRaw (I := I) (M := M) g r s T.toCcTensor α IJ.1 IJ.2
+              ∘ (extChartAt I α).symm
+              ∘ (toEuclidean (E := E)).symm) y)
+          (fun i => EuclideanSpace.basisFun
+            (Fin (Module.finrank ℝ E)) ℝ (basisIdx i)) *
+      (iteratedFDeriv ℝ j
+            (tensorChartComponentRaw (I := I) (M := M) g r s T.toCcTensor α IJ.1 IJ.2
+              ∘ (extChartAt I α).symm
+              ∘ (toEuclidean (E := E)).symm) y)
+          (fun i => EuclideanSpace.basisFun
+            (Fin (Module.finrank ℝ E)) ℝ (basisIdx i)) := by
+    have h := sq_nonneg
+      ((iteratedFDeriv ℝ j
+            (tensorChartComponentRaw (I := I) (M := M) g r s T.toCcTensor α IJ.1 IJ.2
+              ∘ (extChartAt I α).symm
+              ∘ (toEuclidean (E := E)).symm) y)
+          (fun i => EuclideanSpace.basisFun
+            (Fin (Module.finrank ℝ E)) ℝ (basisIdx i)))
+    simpa [sq] using h
+  exact mul_nonneg hPOU_nn hsq_nn
+
+/-! ### Diagonal identity `hkInner T T = ((HS-norm).toReal)²` -/
+
+set_option linter.unusedSectionVars false in
+/-- The diagonal `hkOneTerm T T` expressed in ENNReal form, matching the
+inner-most summand of the squared HS-norm. -/
+private lemma hkOneTerm_self_eq_lintegral_toReal
+    {g : SmoothRiemannianMetric I M} {r s k : ℕ}
+    (T : SmoothCcTensorHs g r s k) (α : M)
+    (IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E)))
+    (j : ℕ) (basisIdx : Fin j → Fin (Module.finrank ℝ E)) :
+    hkOneTerm (I := I) (M := M) T T α IJ j basisIdx =
+      (∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+        ENNReal.ofReal
+          (((chartAtlasPOU I M α : M → ℝ)
+              ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+            |(iteratedFDeriv ℝ j
+                  (tensorChartComponentRaw (I := I) (M := M) g r s
+                      T.toCcTensor α IJ.1 IJ.2
+                    ∘ (extChartAt I α).symm
+                    ∘ (toEuclidean (E := E)).symm) y)
+                (fun i => EuclideanSpace.basisFun
+                  (Fin (Module.finrank ℝ E)) ℝ (basisIdx i))| ^ 2)
+        ∂(volume :
+          Measure (EuclideanSpace ℝ
+            (Fin (Module.finrank ℝ E))))).toReal := by
+  classical
+  unfold hkOneTerm
+  -- The integrand equals POU·(D^j f)(e_b)² which equals POU·|...|².
+  have h_pt_eq : ∀ y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)),
+      hkIntegrand (I := I) (M := M) T T α IJ j basisIdx y =
+        ((chartAtlasPOU I M α : M → ℝ)
+            ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+          |(iteratedFDeriv ℝ j
+                (tensorChartComponentRaw (I := I) (M := M) g r s
+                    T.toCcTensor α IJ.1 IJ.2
+                  ∘ (extChartAt I α).symm
+                  ∘ (toEuclidean (E := E)).symm) y)
+              (fun i => EuclideanSpace.basisFun
+                (Fin (Module.finrank ℝ E)) ℝ (basisIdx i))| ^ 2 := by
+    intro y
+    unfold hkIntegrand
+    have h : ∀ a : ℝ, a * a = |a| ^ 2 := by
+      intro a; rw [sq_abs]; ring
+    have := h ((iteratedFDeriv ℝ j
+            (tensorChartComponentRaw (I := I) (M := M) g r s T.toCcTensor α IJ.1 IJ.2
+              ∘ (extChartAt I α).symm
+              ∘ (toEuclidean (E := E)).symm) y)
+          (fun i => EuclideanSpace.basisFun
+            (Fin (Module.finrank ℝ E)) ℝ (basisIdx i)))
+    rw [this]
+  have h_int_congr :
+      ∫ y in chartTargetEuclid (I := I) (M := M) α,
+          hkIntegrand (I := I) (M := M) T T α IJ j basisIdx y
+        ∂(volume :
+          Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))) =
+      ∫ y in chartTargetEuclid (I := I) (M := M) α,
+          (((chartAtlasPOU I M α : M → ℝ)
+              ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+            |(iteratedFDeriv ℝ j
+                  (tensorChartComponentRaw (I := I) (M := M) g r s
+                      T.toCcTensor α IJ.1 IJ.2
+                    ∘ (extChartAt I α).symm
+                    ∘ (toEuclidean (E := E)).symm) y)
+                (fun i => EuclideanSpace.basisFun
+                  (Fin (Module.finrank ℝ E)) ℝ (basisIdx i))| ^ 2)
+        ∂(volume :
+          Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))) := by
+    refine MeasureTheory.setIntegral_congr_fun
+      (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet ?_
+    intro y _; exact h_pt_eq y
+  rw [h_int_congr]
+  -- Convert real integral to lintegral via integral_eq_lintegral_of_nonneg_ae.
+  -- The integrand is non-negative and integrable.
+  have h_nn_ae : ∀ᵐ y ∂(volume.restrict (chartTargetEuclid (I := I) (M := M) α)),
+      0 ≤ ((chartAtlasPOU I M α : M → ℝ)
+            ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+          |(iteratedFDeriv ℝ j
+                (tensorChartComponentRaw (I := I) (M := M) g r s
+                    T.toCcTensor α IJ.1 IJ.2
+                  ∘ (extChartAt I α).symm
+                  ∘ (toEuclidean (E := E)).symm) y)
+              (fun i => EuclideanSpace.basisFun
+                (Fin (Module.finrank ℝ E)) ℝ (basisIdx i))| ^ 2 := by
+    refine Filter.Eventually.of_forall ?_
+    intro y
+    refine mul_nonneg ?_ ?_
+    · exact (chartAtlasPOU I M).nonneg α _
+    · exact sq_nonneg _
+  have h_int : IntegrableOn
+      (fun y => ((chartAtlasPOU I M α : M → ℝ)
+            ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+          |(iteratedFDeriv ℝ j
+                (tensorChartComponentRaw (I := I) (M := M) g r s
+                    T.toCcTensor α IJ.1 IJ.2
+                  ∘ (extChartAt I α).symm
+                  ∘ (toEuclidean (E := E)).symm) y)
+              (fun i => EuclideanSpace.basisFun
+                (Fin (Module.finrank ℝ E)) ℝ (basisIdx i))| ^ 2)
+      (chartTargetEuclid (I := I) (M := M) α)
+      (volume :
+        Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))) := by
+    -- Use integrability of hkIntegrand T T, congruent ae.
+    have hint := hkIntegrand_integrableOn (I := I) (M := M) T T α IJ j basisIdx
+    have hcongr : ∀ y, hkIntegrand (I := I) (M := M) T T α IJ j basisIdx y =
+        ((chartAtlasPOU I M α : M → ℝ)
+            ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+          |(iteratedFDeriv ℝ j
+                (tensorChartComponentRaw (I := I) (M := M) g r s
+                    T.toCcTensor α IJ.1 IJ.2
+                  ∘ (extChartAt I α).symm
+                  ∘ (toEuclidean (E := E)).symm) y)
+              (fun i => EuclideanSpace.basisFun
+                (Fin (Module.finrank ℝ E)) ℝ (basisIdx i))| ^ 2 := h_pt_eq
+    exact hint.congr (Filter.Eventually.of_forall fun y => hcongr y)
+  have h_int_eq :
+      ∫ y in chartTargetEuclid (I := I) (M := M) α,
+          (((chartAtlasPOU I M α : M → ℝ)
+              ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+            |(iteratedFDeriv ℝ j
+                  (tensorChartComponentRaw (I := I) (M := M) g r s
+                      T.toCcTensor α IJ.1 IJ.2
+                    ∘ (extChartAt I α).symm
+                    ∘ (toEuclidean (E := E)).symm) y)
+                (fun i => EuclideanSpace.basisFun
+                  (Fin (Module.finrank ℝ E)) ℝ (basisIdx i))| ^ 2)
+        ∂(volume :
+          Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))) =
+      (∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+        ENNReal.ofReal
+          (((chartAtlasPOU I M α : M → ℝ)
+              ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+            |(iteratedFDeriv ℝ j
+                  (tensorChartComponentRaw (I := I) (M := M) g r s
+                      T.toCcTensor α IJ.1 IJ.2
+                    ∘ (extChartAt I α).symm
+                    ∘ (toEuclidean (E := E)).symm) y)
+                (fun i => EuclideanSpace.basisFun
+                  (Fin (Module.finrank ℝ E)) ℝ (basisIdx i))| ^ 2)
+        ∂(volume :
+          Measure (EuclideanSpace ℝ
+            (Fin (Module.finrank ℝ E))))).toReal := by
+    refine MeasureTheory.integral_eq_lintegral_of_nonneg_ae h_nn_ae ?_
+    exact h_int.aestronglyMeasurable
+  exact h_int_eq
+
+set_option linter.unusedSectionVars false in
+/-- The diagonal `hkInner T T` equals `(tensorPouSobolevHsNormSq g k
+T.toCcTensor).toReal`. -/
+private lemma hkInner_self_eq_normSq_toReal
+    {g : SmoothRiemannianMetric I M} {r s k : ℕ}
+    (T : SmoothCcTensorHs g r s k) :
+    hkInner (I := I) (M := M) T T =
+      (tensorPouSobolevHsNormSq (I := I) (M := M) g k T.toCcTensor).toReal := by
+  classical
+  -- Per-α sums are zero outside the partition-of-unity finite support, so the
+  -- tsum collapses to the finset sum, matching hkInner's outer sum.
+  rw [tensorPouSobolevHsNormSq_eq_inner_sum]
+  -- Convert the tsum to a Finset.sum.
+  have htsum_eq :
+      (∑' α : M,
+        ∑ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+            (Fin s → Fin (Module.finrank ℝ E)),
+          ∑ j ∈ Finset.range (2 * k + 1),
+            ∑ basisIdx : Fin j → Fin (Module.finrank ℝ E),
+              ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+                ENNReal.ofReal
+                  (((chartAtlasPOU I M α : M → ℝ)
+                      ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+                    |(iteratedFDeriv ℝ j
+                          (tensorChartComponentRaw (I := I) (M := M) g r s
+                              T.toCcTensor α IJ.1 IJ.2
+                            ∘ (extChartAt I α).symm
+                            ∘ (toEuclidean (E := E)).symm)
+                          y)
+                        (fun i => EuclideanSpace.basisFun
+                          (Fin (Module.finrank ℝ E)) ℝ (basisIdx i))| ^ 2)
+                ∂(volume :
+                  Measure (EuclideanSpace ℝ
+                    (Fin (Module.finrank ℝ E))))) =
+      ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+        ∑ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+            (Fin s → Fin (Module.finrank ℝ E)),
+          ∑ j ∈ Finset.range (2 * k + 1),
+            ∑ basisIdx : Fin j → Fin (Module.finrank ℝ E),
+              ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+                ENNReal.ofReal
+                  (((chartAtlasPOU I M α : M → ℝ)
+                      ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+                    |(iteratedFDeriv ℝ j
+                          (tensorChartComponentRaw (I := I) (M := M) g r s
+                              T.toCcTensor α IJ.1 IJ.2
+                            ∘ (extChartAt I α).symm
+                            ∘ (toEuclidean (E := E)).symm)
+                          y)
+                        (fun i => EuclideanSpace.basisFun
+                          (Fin (Module.finrank ℝ E)) ℝ (basisIdx i))| ^ 2)
+                ∂(volume :
+                  Measure (EuclideanSpace ℝ
+                    (Fin (Module.finrank ℝ E)))) := by
+    refine tsum_eq_sum ?_
+    intro α hα
+    have hPOU_zero : ∀ x : M, (chartAtlasPOU I M α : M → ℝ) x = 0 :=
+      fun x => chartAtlasPOU_weight_zero_of_notMem (I := I) (M := M) hα x
+    refine Finset.sum_eq_zero ?_
+    intro IJ _
+    refine Finset.sum_eq_zero ?_
+    intro j _
+    refine Finset.sum_eq_zero ?_
+    intro basisIdx _
+    have h_integrand_zero :
+        ∀ y ∈ chartTargetEuclid (I := I) (M := M) α,
+          ENNReal.ofReal
+            (((chartAtlasPOU I M α : M → ℝ)
+                ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+              |(iteratedFDeriv ℝ j
+                    (tensorChartComponentRaw (I := I) (M := M) g r s
+                        T.toCcTensor α IJ.1 IJ.2
+                      ∘ (extChartAt I α).symm
+                      ∘ (toEuclidean (E := E)).symm) y)
+                  (fun i => EuclideanSpace.basisFun
+                    (Fin (Module.finrank ℝ E)) ℝ (basisIdx i))| ^ 2) = 0 := by
+      intro y _
+      rw [hPOU_zero, zero_mul, ENNReal.ofReal_zero]
+    rw [MeasureTheory.setLIntegral_congr_fun
+      (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
+      h_integrand_zero]
+    simp
+  rw [htsum_eq]
+  -- Now express hkInner T T using the finset structure and match summand by summand.
+  unfold hkInner
+  -- Each inner sum on the LHS is a finite sum of ENNRealsToReal.
+  -- We use ENNReal.toReal_sum (requiring finiteness per summand) and match
+  -- each summand using hkOneTerm_self_eq_lintegral_toReal.
+  -- Step 1: pull `.toReal` outside the finite sums on the RHS.
+  have h_each_lt_top :
+      ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+      ∀ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+          (Fin s → Fin (Module.finrank ℝ E)),
+      IJ ∈ (Finset.univ :
+        Finset ((Fin r → Fin (Module.finrank ℝ E)) ×
+          (Fin s → Fin (Module.finrank ℝ E)))) →
+      ∀ j ∈ Finset.range (2 * k + 1),
+      ∀ basisIdx : Fin j → Fin (Module.finrank ℝ E),
+      basisIdx ∈ (Finset.univ : Finset (Fin j → Fin (Module.finrank ℝ E))) →
+        (∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+            ENNReal.ofReal
+              (((chartAtlasPOU I M α : M → ℝ)
+                  ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+                |(iteratedFDeriv ℝ j
+                      (tensorChartComponentRaw (I := I) (M := M) g r s
+                          T.toCcTensor α IJ.1 IJ.2
+                        ∘ (extChartAt I α).symm
+                        ∘ (toEuclidean (E := E)).symm) y)
+                    (fun i => EuclideanSpace.basisFun
+                      (Fin (Module.finrank ℝ E)) ℝ (basisIdx i))| ^ 2)
+            ∂(volume :
+              Measure (EuclideanSpace ℝ
+                (Fin (Module.finrank ℝ E))))) ≠ ⊤ := by
+    intro α _ IJ _ j _ basisIdx _
+    exact (tensorPouSobolevHsNorm_inner_integral_lt_top'
+      (I := I) (M := M) g r s T.toCcTensor α IJ.1 IJ.2 j basisIdx).ne
+  -- The outer finset sum's toReal commutes with the sum (since each term is finite).
+  rw [ENNReal.toReal_sum]
+  · refine Finset.sum_congr rfl ?_
+    intro α hα
+    rw [ENNReal.toReal_sum]
+    · refine Finset.sum_congr rfl ?_
+      intro IJ hIJ
+      rw [ENNReal.toReal_sum]
+      · refine Finset.sum_congr rfl ?_
+        intro j hj
+        rw [ENNReal.toReal_sum]
+        · refine Finset.sum_congr rfl ?_
+          intro basisIdx hbasisIdx
+          exact hkOneTerm_self_eq_lintegral_toReal
+            (I := I) (M := M) T α IJ j basisIdx
+        · intro basisIdx hbasisIdx
+          exact h_each_lt_top α hα IJ hIJ j hj basisIdx hbasisIdx
+      · intro j hj
+        rw [ENNReal.sum_ne_top]
+        intro basisIdx hbasisIdx
+        exact h_each_lt_top α hα IJ hIJ j hj basisIdx hbasisIdx
+    · intro IJ hIJ
+      rw [ENNReal.sum_ne_top]
+      intro j hj
+      rw [ENNReal.sum_ne_top]
+      intro basisIdx hbasisIdx
+      exact h_each_lt_top α hα IJ hIJ j hj basisIdx hbasisIdx
+  · intro α hα
+    rw [ENNReal.sum_ne_top]
+    intro IJ hIJ
+    rw [ENNReal.sum_ne_top]
+    intro j hj
+    rw [ENNReal.sum_ne_top]
+    intro basisIdx hbasisIdx
+    exact h_each_lt_top α hα IJ hIJ j hj basisIdx hbasisIdx
+
+/-! ### The pre-inner-product core instance -/
 
 set_option linter.unusedSectionVars false in
 /-- The pre-inner-product core on `SmoothCcTensorHs g r s k`, with the inner
-product the polarised form of the square of `tensorPouSobolevHsNorm g k`.
-
-Concretely, on the dense subspace of smooth compactly-supported sections,
-this inner product is the chart-aggregated bilinear form:
-
-`⟨T, S⟩ := ∑'_α ∑_{IJ} ∑_{j ≤ 2k} ∑_{basisIdx} ∫ ρ_α(pull y) ·
-  (D^j(T_α^{IJ} ∘ pull)(y)(basis)) · (D^j(S_α^{IJ} ∘ pull)(y)(basis)) dy`,
-
-whose diagonal `⟨T, T⟩` equals `((tensorPouSobolevHsNorm g k T).toReal)²`.
-Because each multilinear evaluation `D^j(·)(basis)` is a scalar linear in
-the underlying tensor section, the bilinear form is symmetric, bilinear,
-and positive semi-definite. -/
+product the chart-aggregated bilinear form whose diagonal `⟨T, T⟩` equals
+`((tensorPouSobolevHsNorm g k T).toReal)²`. -/
 noncomputable instance instPreInnerProductSpaceCore
     {g : SmoothRiemannianMetric I M} {r s k : ℕ} :
     PreInnerProductSpace.Core ℝ (SmoothCcTensorHs g r s k) where
-  inner _ _ := by exact sorry
-  conj_inner_symm _ _ := by exact sorry
-  re_inner_nonneg _ := by exact sorry
-  add_left _ _ _ := by exact sorry
-  smul_left _ _ _ := by exact sorry
+  inner T S := hkInner (I := I) (M := M) T S
+  conj_inner_symm T S := by
+    -- For ℝ, `conj` is the identity; reduces to symmetry of `hkInner`.
+    change (hkInner (I := I) (M := M) S T : ℝ) =
+      hkInner (I := I) (M := M) T S
+    unfold hkInner
+    refine Finset.sum_congr rfl ?_
+    intro α _
+    refine Finset.sum_congr rfl ?_
+    intro IJ _
+    refine Finset.sum_congr rfl ?_
+    intro j _
+    refine Finset.sum_congr rfl ?_
+    intro basisIdx _
+    exact hkOneTerm_symm (I := I) (M := M) S T α IJ j basisIdx
+  re_inner_nonneg T := by
+    change (0 : ℝ) ≤ hkInner (I := I) (M := M) T T
+    unfold hkInner
+    refine Finset.sum_nonneg ?_
+    intro α _
+    refine Finset.sum_nonneg ?_
+    intro IJ _
+    refine Finset.sum_nonneg ?_
+    intro j _
+    refine Finset.sum_nonneg ?_
+    intro basisIdx _
+    exact hkOneTerm_self_nonneg (I := I) (M := M) T α IJ j basisIdx
+  add_left T₁ T₂ S := by
+    change hkInner (I := I) (M := M) (T₁ + T₂) S =
+      hkInner (I := I) (M := M) T₁ S +
+        hkInner (I := I) (M := M) T₂ S
+    unfold hkInner
+    rw [← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl ?_
+    intro α _
+    rw [← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl ?_
+    intro IJ _
+    rw [← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl ?_
+    intro j _
+    rw [← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl ?_
+    intro basisIdx _
+    exact hkOneTerm_add_left (I := I) (M := M) T₁ T₂ S α IJ j basisIdx
+  smul_left T S c := by
+    -- For ℝ, `conj c = c`.
+    change hkInner (I := I) (M := M) (c • T) S =
+      (c : ℝ) * hkInner (I := I) (M := M) T S
+    unfold hkInner
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl ?_
+    intro α _
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl ?_
+    intro IJ _
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl ?_
+    intro j _
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl ?_
+    intro basisIdx _
+    exact hkOneTerm_smul_left (I := I) (M := M) c T S α IJ j basisIdx
 
 set_option linter.unusedSectionVars false in
 /-- The seminormed structure on `SmoothCcTensorHs g r s k` derived from the
@@ -281,7 +1128,33 @@ theorem tensorPouSobolevHilbert_norm_eq
     (T : SmoothCcTensor g r s) :
     ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) k T‖ =
       (tensorPouSobolevHsNorm (I := I) (M := M) g k T).toReal := by
-  exact sorry
+  classical
+  -- Unfold the completion's norm and reduce to the SmoothCcTensorHs norm.
+  change ‖((⟨T⟩ : SmoothCcTensorHs g r s k) :
+      TensorPouSobolevHilbert g r s k)‖ = _
+  rw [UniformSpace.Completion.norm_coe]
+  -- Norm on SmoothCcTensorHs = √(re ⟪x,x⟫) via toSeminormedAddCommGroup.
+  have h_norm_eq :
+      ‖(⟨T⟩ : SmoothCcTensorHs g r s k)‖ =
+        Real.sqrt
+          (hkInner (I := I) (M := M)
+            (⟨T⟩ : SmoothCcTensorHs g r s k)
+            (⟨T⟩ : SmoothCcTensorHs g r s k)) := by
+    rfl
+  rw [h_norm_eq]
+  -- Diagonal identity: hkInner T T = (tensorPouSobolevHsNormSq g k T).toReal.
+  have hdiag := hkInner_self_eq_normSq_toReal
+    (I := I) (M := M) (⟨T⟩ : SmoothCcTensorHs g r s k)
+  rw [hdiag]
+  -- (tensorPouSobolevHsNormSq g k T).toReal = ((tensorPouSobolevHsNorm g k T)^2).toReal
+  -- = (tensorPouSobolevHsNorm g k T).toReal^2.
+  -- Then √(x^2) = x for x ≥ 0.
+  unfold tensorPouSobolevHsNormSq
+  rw [ENNReal.toReal_pow]
+  exact Real.sqrt_sq (ENNReal.toReal_nonneg)
+
+#print axioms DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.tensorPouSobolevHilbert_norm_eq
+#print axioms DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.instPreInnerProductSpaceCore
 
 end IntrinsicSobolev
 end RicciFlow
