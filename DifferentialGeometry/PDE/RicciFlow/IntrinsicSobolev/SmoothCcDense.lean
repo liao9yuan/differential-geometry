@@ -52,7 +52,35 @@ theorem smoothCcTensor_denseRange_toHs
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
     DenseRange
       (SmoothCcTensor.toHs (g := g) (r := r) (s := s) (k := k)) := by
-  exact sorry
+  -- `SmoothCcTensor.toHs k T = ((⟨T⟩ : SmoothCcTensorHs g r s k)
+  --   : TensorPouSobolevHilbert g r s k)`, i.e. the wrapping
+  --   `T ↦ ⟨T⟩` composed with the completion coercion. The wrapping is
+  --   surjective, so the composition's range equals the range of the
+  --   coercion, which is dense by `UniformSpace.Completion.denseRange_coe`.
+  have hwrap_surj :
+      Function.Surjective
+        (fun T : SmoothCcTensor g r s =>
+          (⟨T⟩ : SmoothCcTensorHs g r s k)) := by
+    intro S; exact ⟨S.toCcTensor, by cases S; rfl⟩
+  have hcoe :
+      DenseRange
+        (fun S : SmoothCcTensorHs g r s k =>
+          (S : TensorPouSobolevHilbert g r s k)) :=
+    UniformSpace.Completion.denseRange_coe
+  have hcont :
+      Continuous
+        (fun S : SmoothCcTensorHs g r s k =>
+          (S : TensorPouSobolevHilbert g r s k)) :=
+    UniformSpace.Completion.continuous_coe _
+  have hfun :
+      (SmoothCcTensor.toHs (g := g) (r := r) (s := s) (k := k)) =
+        (fun S : SmoothCcTensorHs g r s k =>
+            (S : TensorPouSobolevHilbert g r s k)) ∘
+          (fun T : SmoothCcTensor g r s =>
+            (⟨T⟩ : SmoothCcTensorHs g r s k)) := by
+    funext T; rfl
+  rw [hfun]
+  exact hcoe.comp (hwrap_surj.denseRange) hcont
 
 end IntrinsicSobolev
 end RicciFlow
