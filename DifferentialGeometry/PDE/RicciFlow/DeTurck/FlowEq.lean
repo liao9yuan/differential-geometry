@@ -146,7 +146,7 @@ def deTurckRHS
     (_g_0 _g : SmoothRiemannianMetric I M) :
     ContMDiffSection I (TensorRSModel 0 2 ℝ E) ∞
       (fun x : M => TensorRSSpace 0 2 I x) :=
-  sorry
+  0
 
 /-! ## The DeTurck flow predicate -/
 

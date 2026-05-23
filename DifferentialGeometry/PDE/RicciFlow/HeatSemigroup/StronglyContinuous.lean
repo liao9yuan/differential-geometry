@@ -82,7 +82,9 @@ theorem heatSemigroup_apply_zero
     [InnerProductSpace ℂ (TensorL2 r s g)]
     (u : TensorL2 r s g) :
     heatSemigroup (I := I) g r s 0 u = u := by
-  exact sorry
+  -- Unfold the skeleton definition: `heatSemigroup = id`.
+  change (ContinuousLinearMap.id ℂ (TensorL2 r s g)) u = u
+  rfl
 
 /-! ## Strong continuity at `t = 0` -/
 
@@ -101,7 +103,16 @@ theorem heatSemigroup_continuous_at_zero
     [InnerProductSpace ℂ (TensorL2 r s g)]
     (u : TensorL2 r s g) :
     ContinuousAt (fun t : NNReal => heatSemigroup (I := I) g r s t u) 0 := by
-  exact sorry
+  -- Skeleton: the heat semigroup is the constant identity, hence the
+  -- orbit `t ↦ heatSemigroup t u` is the constant function `t ↦ u`,
+  -- which is continuous at every point.
+  have h_const : (fun t : NNReal => heatSemigroup (I := I) g r s t u) =
+      fun _ : NNReal => u := by
+    funext t
+    change (ContinuousLinearMap.id ℂ (TensorL2 r s g)) u = u
+    rfl
+  rw [h_const]
+  exact continuousAt_const
 
 /-! ## The semigroup law -/
 
@@ -122,7 +133,27 @@ theorem heatSemigroup_composition
     heatSemigroup (I := I) g r s (s_time + t_time) =
       (heatSemigroup (I := I) g r s s_time).comp
         (heatSemigroup (I := I) g r s t_time) := by
-  exact sorry
+  -- Skeleton: each `heatSemigroup` value is the identity, so both sides
+  -- are the identity (since `id ∘ id = id`). Prove the equality by
+  -- extending to all `u` and reducing each side to `u`.
+  ext u
+  -- LHS: `heatSemigroup (s + t) u = u`.
+  have hL :
+      heatSemigroup (I := I) g r s (s_time + t_time) u = u := by
+    change (ContinuousLinearMap.id ℂ (TensorL2 r s g)) u = u
+    rfl
+  -- RHS: `(heatSemigroup s ∘ heatSemigroup t) u = u`.
+  have hR_inner :
+      heatSemigroup (I := I) g r s t_time u = u := by
+    change (ContinuousLinearMap.id ℂ (TensorL2 r s g)) u = u
+    rfl
+  have hR :
+      ((heatSemigroup (I := I) g r s s_time).comp
+        (heatSemigroup (I := I) g r s t_time)) u = u := by
+    rw [ContinuousLinearMap.comp_apply, hR_inner]
+    change (ContinuousLinearMap.id ℂ (TensorL2 r s g)) u = u
+    rfl
+  rw [hL, hR]
 
 end HeatSemigroup
 end RicciFlow

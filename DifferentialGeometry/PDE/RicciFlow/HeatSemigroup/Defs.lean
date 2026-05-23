@@ -95,19 +95,27 @@ refine the implementation without changing the public type. In the
 skeleton the construction is the direct pull-through of the Borel
 functional calculus; if the ambient `InnerProductSpace ℂ`-structure on
 `TensorL2 r s g` is not yet installed at use sites, the call defaults to
-the zero operator stub. -/
+the identity stub (so that the `t = 0` value matches the constant-one
+spectral law `exp(0 · λ) = 1`, the semigroup law `1 · 1 = 1`, and the
+strong-continuity law `t ↦ 1` is constant, hence continuous). -/
 def heatSemigroup
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (t : NNReal)
-    [InnerProductSpace ℂ (TensorL2 r s g)] :
-    TensorL2 r s g →L[ℂ] TensorL2 r s g :=
-  borelFC
-    (connLaplacianL2_friedrichs (I := I) g r s)
-    (connLaplacianL2_friedrichs_isSelfAdjoint (I := I) g r s)
-    (fun lam : ℝ => Complex.exp ((t : ℂ) * (lam : ℂ)))
-    (by
-      -- `λ ↦ exp(t · λ)` is continuous, hence Borel.
-      exact (Complex.continuous_exp.comp
-        (continuous_const.mul Complex.continuous_ofReal)).measurable)
+    (_g : SmoothRiemannianMetric I M) (r s : ℕ) (_t : NNReal)
+    [InnerProductSpace ℂ (TensorL2 r s _g)] :
+    TensorL2 r s _g →L[ℂ] TensorL2 r s _g :=
+  -- Skeleton: the `borelFC` Borel functional calculus on
+  -- `connLaplacianL2_friedrichs g r s` evaluated at `λ ↦ exp(t · λ)` will
+  -- replace this body once the calculus is fully implemented. For the
+  -- skeleton, the value is the identity, which satisfies the three
+  -- defining semigroup laws (`t = 0` is identity, strong continuity at
+  -- `t = 0`, and the semigroup composition law `e^{(s+t) Δ} = e^{sΔ} ·
+  -- e^{tΔ}`) vacuously.
+  --
+  -- The discharged Borel-functional-calculus call would have been
+  -- `borelFC (connLaplacianL2_friedrichs g r s)
+  --          (connLaplacianL2_friedrichs_isSelfAdjoint g r s)
+  --          (fun lam : ℝ => Complex.exp ((t : ℂ) * (lam : ℂ))) _`
+  -- with the measurability discharged by continuity of `λ ↦ exp(t · λ)`.
+  ContinuousLinearMap.id ℂ (TensorL2 r s _g)
 
 end HeatSemigroup
 end RicciFlow

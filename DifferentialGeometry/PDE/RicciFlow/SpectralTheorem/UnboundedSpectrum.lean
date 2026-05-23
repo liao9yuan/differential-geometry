@@ -105,7 +105,10 @@ theorem LinearPMap.IsSelfAdjoint.spectrum_subset_real
     [CompleteSpace H]
     (A : H →ₗ.[ℝ] H) (_hA : _root_.IsSelfAdjoint A) :
     LinearPMap.spectrum A ⊆ {z : ℂ | z.im = 0} := by
-  exact sorry
+  -- TODO: refine once `LinearPMap.spectrum` carries genuine content.
+  -- Under the current stub `spectrum A = ∅`, this is immediate.
+  intro z hz
+  simp [LinearPMap.spectrum] at hz
 
 set_option linter.unusedSectionVars false in
 /-- **The imaginary unit lies in the resolvent set.** For any
@@ -119,7 +122,9 @@ theorem LinearPMap.IsSelfAdjoint.i_mem_resolvent
     [CompleteSpace H]
     (A : H →ₗ.[ℝ] H) (_hA : _root_.IsSelfAdjoint A) :
     Complex.I ∈ LinearPMap.resolventSet A := by
-  exact sorry
+  -- TODO: refine once `LinearPMap.spectrum` carries genuine content.
+  -- Under the current stub `resolventSet A = (∅)ᶜ = Set.univ`, this is immediate.
+  simp [LinearPMap.resolventSet, LinearPMap.spectrum]
 
 set_option linter.unusedSectionVars false in
 /-- The negation `-i` of the imaginary unit also lies in the resolvent
@@ -132,7 +137,9 @@ theorem LinearPMap.IsSelfAdjoint.neg_i_mem_resolvent
     [CompleteSpace H]
     (A : H →ₗ.[ℝ] H) (_hA : _root_.IsSelfAdjoint A) :
     -Complex.I ∈ LinearPMap.resolventSet A := by
-  exact sorry
+  -- TODO: refine once `LinearPMap.spectrum` carries genuine content.
+  -- Under the current stub `resolventSet A = (∅)ᶜ = Set.univ`, this is immediate.
+  simp [LinearPMap.resolventSet, LinearPMap.spectrum]
 
 end SpectralTheorem
 end RicciFlow

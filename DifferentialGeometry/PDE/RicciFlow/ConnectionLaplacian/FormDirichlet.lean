@@ -1,5 +1,6 @@
 import DifferentialGeometry.PDE.RicciFlow.ConnectionLaplacian.L2PMap
 import DifferentialGeometry.PDE.RicciFlow.ConnectionLaplacian.NegSemiBounded
+import DifferentialGeometry.PDE.RicciFlow.ConnectionLaplacian.Symmetric
 
 /-!
 # Dirichlet form associated to the connection Laplacian
@@ -140,6 +141,63 @@ theorem dirichletForm_eq_neg_inner_laplacian
   -- so the inner-product pairings are equal.
   unfold dirichletForm
   rfl
+
+/-! ## Symmetry of the Dirichlet form -/
+
+set_option linter.unusedSectionVars false in
+/-- **Symmetry of the Dirichlet form.** As a bilinear form on
+`SmoothCcTensor g r s`, the Dirichlet form is symmetric:
+$$
+  \mathcal{D}(T, S) \;=\; \mathcal{D}(S, T).
+$$
+This is the formal consequence of the symmetry of the connection
+Laplacian on its `L²` domain (`connLaplacianL2_isSymmetric`) together
+with the conjugate-symmetry of the real inner product
+(`real_inner_comm`). -/
+theorem dirichletForm_symm
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T S : SmoothCcTensor g r s) :
+    dirichletForm (I := I) g r s T S = dirichletForm (I := I) g r s S T := by
+  unfold dirichletForm
+  -- Symmetry of `connLaplacianL2` on its domain.
+  have hsym :
+      @inner ℝ _ _
+          ((connLaplacianL2 (I := I) g r s)
+            ⟨SmoothCcTensor.toL2 (g := g) (r := r) (s := s) T,
+              toL2_mem_connLaplacianL2_domain (I := I) g r s T⟩)
+          (SmoothCcTensor.toL2 (g := g) (r := r) (s := s) S) =
+        @inner ℝ _ _
+          (SmoothCcTensor.toL2 (g := g) (r := r) (s := s) T)
+          ((connLaplacianL2 (I := I) g r s)
+            ⟨SmoothCcTensor.toL2 (g := g) (r := r) (s := s) S,
+              toL2_mem_connLaplacianL2_domain (I := I) g r s S⟩) :=
+    connLaplacianL2_isSymmetric (I := I) g r s
+      ⟨SmoothCcTensor.toL2 (g := g) (r := r) (s := s) T,
+        toL2_mem_connLaplacianL2_domain (I := I) g r s T⟩
+      ⟨SmoothCcTensor.toL2 (g := g) (r := r) (s := s) S,
+        toL2_mem_connLaplacianL2_domain (I := I) g r s S⟩
+  rw [hsym, real_inner_comm]
+
+/-! ## Diagonal positivity of the Dirichlet form -/
+
+set_option linter.unusedSectionVars false in
+/-- **Diagonal positivity of the Dirichlet form.** For every smooth
+compactly-supported `(r, s)`-tensor section `T`, the diagonal value of
+the Dirichlet form is non-negative:
+$$
+  0 \;\le\; \mathcal{D}(T, T).
+$$
+This is the formal consequence of the negative semi-boundedness of the
+connection Laplacian on its `L²` domain
+(`connLaplacianL2_neg_semi_bounded`). -/
+theorem dirichletForm_pos
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T : SmoothCcTensor g r s) :
+    0 ≤ dirichletForm (I := I) g r s T T := by
+  unfold dirichletForm
+  exact connLaplacianL2_neg_semi_bounded (I := I) g r s
+    ⟨SmoothCcTensor.toL2 (g := g) (r := r) (s := s) T,
+      toL2_mem_connLaplacianL2_domain (I := I) g r s T⟩
 
 end ConnectionLaplacian
 end RicciFlow
