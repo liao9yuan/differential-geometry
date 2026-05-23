@@ -95,7 +95,7 @@ form required for the orthonormality contraction
 `Σ_i C^k_i · C^l_i = g^{kl}` to collapse on both sides. -/
 
 /-- **The chart-α inverse-Gram-matrix-weighted principal sum.** -/
-private noncomputable def chartInvGramPrincipalSum
+noncomputable def chartInvGramPrincipalSum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -125,7 +125,7 @@ projection of `(cov_RS).toFun (covApply cov_RS B_i T₀) b (∂_l b)`), minus th
 chart-frame trace Γ-correction. -/
 
 /-- **The chart-α frame-coordinate-matrix-weighted predecessor double sum.** -/
-private noncomputable def chartFrameCoordMatrixWeightedDoubleSum
+noncomputable def chartFrameCoordMatrixWeightedDoubleSum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -153,7 +153,7 @@ the chart-α frame-vs-coordinate-basis residual data after the inverse-Gram
 contraction has been extracted on the principal slot. -/
 
 /-- **The chart-α Leibniz remainder.** -/
-private noncomputable def chartLeibnizRemainder
+noncomputable def chartLeibnizRemainder
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -191,7 +191,7 @@ frame-weighted double sum -/
 /-- **Algebraic identity: principal sum + Leibniz remainder = frame-weighted
 double sum.** A direct application of the definition of the Leibniz remainder
 as the difference of the frame-weighted double sum and the principal sum. -/
-private lemma chartInvGramPrincipal_plus_LeibnizRemainder_eq_frameWeighted
+lemma chartInvGramPrincipal_plus_LeibnizRemainder_eq_frameWeighted
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
