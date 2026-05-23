@@ -796,6 +796,8 @@ import DifferentialGeometry.PDE.RicciFlow.MaximalRegularity.LinearExistence
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.HilbertSpace
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.Inclusion
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcDense
+import DifferentialGeometry.PDE.RicciFlow.RicciFlow.DeTurckInverse
+import DifferentialGeometry.PDE.RicciFlow.RicciFlow.ShortTime
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.PreHilbert
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.CovariantLeibniz
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.CovGrad
