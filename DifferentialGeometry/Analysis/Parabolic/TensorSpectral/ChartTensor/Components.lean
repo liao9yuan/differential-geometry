@@ -879,7 +879,7 @@ private lemma tensorTrivProj_smul
   exact map_smul _ _ _
 
 /-- The raw chart-frame scalar component is additive in the tensor section. -/
-private lemma tensorChartComponentRaw_add
+theorem tensorChartComponentRaw_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -891,7 +891,7 @@ private lemma tensorChartComponentRaw_add
   rw [tensorTrivProj_add (I := I) (M := M) g r s S₁ S₂ α x]
   exact map_add _ _ _
 
-private lemma tensorChartComponentRaw_smul
+theorem tensorChartComponentRaw_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))

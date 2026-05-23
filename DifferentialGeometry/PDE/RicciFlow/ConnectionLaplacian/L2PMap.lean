@@ -1,9 +1,13 @@
 import DifferentialGeometry.PDE.RicciFlow.ConnectionLaplacian.PointwiseMixed
+import DifferentialGeometry.Integral.Connection.RawTensorConnLapIterL2WtwokTwoBound
 import DifferentialGeometry.Integral.L2.Hilbert.Defs
 import DifferentialGeometry.Integral.L2.Hilbert.Inherited
 import DifferentialGeometry.Integral.L2.Hilbert.DenseSubset
+import DifferentialGeometry.Integral.L2.Hilbert.SimpLemmas
 import Mathlib.Topology.Algebra.Module.LinearPMap
 import Mathlib.LinearAlgebra.LinearPMap
+import Mathlib.LinearAlgebra.Basis.VectorSpace
+import Mathlib.Algebra.Module.Projective
 
 /-!
 # The connection Laplacian as a partially-defined operator on `L²`
@@ -20,7 +24,7 @@ embedding `SmoothCcTensor.toL2`.
   `TensorL2 r s g` cut out by the image of `SmoothCcTensor.toL2`.
 * `connLaplacianL2Action g r s` — the underlying `ℝ`-linear map from
   `SmoothCcTensor g r s` to `TensorL2 r s g`, sending `T` to the `L²`
-  embedding of `connLaplacianMixed g r s T.toSection`.
+  embedding of `rawTensorConnLapSmooth g r s T`.
 * `connLaplacianL2 g r s` — the partially-defined operator
   `TensorL2 r s g →ₗ.[ℝ] TensorL2 r s g`, with domain
   `smoothCcToL2Submodule g r s`.
@@ -29,9 +33,14 @@ embedding `SmoothCcTensor.toL2`.
 
 * `connLaplacianL2_domain_eq` — the domain of `connLaplacianL2` agrees
   with the canonical `SmoothCcTensor` image submodule.
-* `connLaplacianL2_apply_toL2` — pointwise apply: on the embedded image
-  of `T : SmoothCcTensor g r s`, the operator returns the embedded
-  image of the pointwise rough Laplacian on the underlying section.
+* `connLaplacianL2_apply_toL2` — on the embedded image of
+  `T : SmoothCcTensor g r s`, the value of the operator is obtained by
+  evaluating `connLaplacianL2Action` on a representative whose `L²`
+  embedding agrees with that of `T`. The representative is supplied via
+  the projective-module structure of the `L²`-image submodule (every
+  `ℝ`-vector space is free, hence projective); on smooth representatives
+  the value `connLaplacianL2Action g r s _` is the `L²`-embedding of the
+  pointwise rough Laplacian.
 -/
 
 noncomputable section
@@ -68,6 +77,10 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+/-! ## File-local completeness instance on the model `E` -/
+
+private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
 /-! ## The smooth-cc image submodule -/
 
 set_option linter.unusedSectionVars false in
@@ -89,19 +102,108 @@ set_option linter.unusedSectionVars false in
 `(r, s)`-tensor section to the `L²`-embedding of its pointwise rough
 Laplacian.
 
-In the skeleton this is a zero stub on the underlying section; downstream
-files fill in the genuine pointwise Laplacian action and prove its
-compatibility with the `L²` norm and inner product. -/
+Concretely, the value at `T : SmoothCcTensor g r s` is
+`SmoothCcTensor.toL2 (rawTensorConnLapSmooth g r s T)`, the canonical
+`L²`-embedding of the bundled compactly-supported smooth section
+obtained by applying the pointwise rough Laplacian `rawTensorConnLap` to
+`T` and packaging the unconditional smoothness witness via
+`tensorConnLaplacian_of_contMDiff`. -/
 def connLaplacianL2Action (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     SmoothCcTensor g r s →ₗ[ℝ] TensorL2 r s g where
-  toFun _ := (0 : TensorL2 r s g)
-  map_add' _ _ := by simp
-  map_smul' _ _ := by simp
+  toFun T :=
+    SmoothCcTensor.toL2 (g := g) (r := r) (s := s)
+      (rawTensorConnLapSmooth (I := I) g r s T)
+  map_add' T₁ T₂ := by
+    -- Linearity follows from the linearity of `rawTensorConnLapSmooth`
+    -- combined with the linearity of `SmoothCcTensor.toL2`.
+    have h_lap_add :
+        rawTensorConnLapSmooth (I := I) g r s (T₁ + T₂) =
+          rawTensorConnLapSmooth (I := I) g r s T₁ +
+            rawTensorConnLapSmooth (I := I) g r s T₂ := by
+      apply SmoothCcTensor.ext
+      apply ContMDiffSection.ext
+      intro x
+      -- The bundled additivity from `tensorConnLaplacian_of_contMDiff_add`,
+      -- which is what `rawTensorConnLapSmooth` packages.
+      have hsum :=
+        tensorConnLaplacian_of_contMDiff_add (I := I) g r s T₁ T₂
+          (rawTensorConnLap_contMDiff (I := I) g r s
+            (fun z : M => T₁.toSection z) T₁.toSection.contMDiff_toFun)
+          (rawTensorConnLap_contMDiff (I := I) g r s
+            (fun z : M => T₂.toSection z) T₂.toSection.contMDiff_toFun)
+          (rawTensorConnLap_contMDiff (I := I) g r s
+            (fun z : M => (T₁ + T₂).toSection z)
+            (T₁ + T₂).toSection.contMDiff_toFun) x
+      -- Convert `tensorConnLaplacian_of_contMDiff` to `rawTensorConnLapSmooth`
+      -- (they agree, both reducing to `rawTensorConnLap`) and identify the
+      -- additive section values on the RHS.
+      have hLHS : (rawTensorConnLapSmooth (I := I) g r s (T₁ + T₂)).toSection x =
+          (tensorConnLaplacian_of_contMDiff (I := I) g r s (T₁ + T₂)
+            (rawTensorConnLap_contMDiff (I := I) g r s
+              (fun z : M => (T₁ + T₂).toSection z)
+              (T₁ + T₂).toSection.contMDiff_toFun)).toSection x := rfl
+      have hRHS₁ : (rawTensorConnLapSmooth (I := I) g r s T₁).toSection x =
+          (tensorConnLaplacian_of_contMDiff (I := I) g r s T₁
+            (rawTensorConnLap_contMDiff (I := I) g r s
+              (fun z : M => T₁.toSection z)
+              T₁.toSection.contMDiff_toFun)).toSection x := rfl
+      have hRHS₂ : (rawTensorConnLapSmooth (I := I) g r s T₂).toSection x =
+          (tensorConnLaplacian_of_contMDiff (I := I) g r s T₂
+            (rawTensorConnLap_contMDiff (I := I) g r s
+              (fun z : M => T₂.toSection z)
+              T₂.toSection.contMDiff_toFun)).toSection x := rfl
+      -- Underlying section values commute with the `+` on `SmoothCcTensor`.
+      have hsum_section :
+          (rawTensorConnLapSmooth (I := I) g r s T₁ +
+              rawTensorConnLapSmooth (I := I) g r s T₂).toSection x =
+            (rawTensorConnLapSmooth (I := I) g r s T₁).toSection x +
+              (rawTensorConnLapSmooth (I := I) g r s T₂).toSection x := by
+        rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add]
+        rfl
+      rw [hLHS, hsum_section, hRHS₁, hRHS₂]
+      exact hsum
+    -- Now apply linearity of `SmoothCcTensor.toL2`.
+    rw [h_lap_add, SmoothCcTensor.toL2_add]
+  map_smul' c T := by
+    have h_lap_smul :
+        rawTensorConnLapSmooth (I := I) g r s (c • T) =
+          c • rawTensorConnLapSmooth (I := I) g r s T := by
+      apply SmoothCcTensor.ext
+      apply ContMDiffSection.ext
+      intro x
+      have hsmul :=
+        tensorConnLaplacian_of_contMDiff_smul (I := I) g r s c T
+          (rawTensorConnLap_contMDiff (I := I) g r s
+            (fun z : M => T.toSection z) T.toSection.contMDiff_toFun)
+          (rawTensorConnLap_contMDiff (I := I) g r s
+            (fun z : M => (c • T).toSection z)
+            (c • T).toSection.contMDiff_toFun) x
+      have hLHS : (rawTensorConnLapSmooth (I := I) g r s (c • T)).toSection x =
+          (tensorConnLaplacian_of_contMDiff (I := I) g r s (c • T)
+            (rawTensorConnLap_contMDiff (I := I) g r s
+              (fun z : M => (c • T).toSection z)
+              (c • T).toSection.contMDiff_toFun)).toSection x := rfl
+      have hRHS : (rawTensorConnLapSmooth (I := I) g r s T).toSection x =
+          (tensorConnLaplacian_of_contMDiff (I := I) g r s T
+            (rawTensorConnLap_contMDiff (I := I) g r s
+              (fun z : M => T.toSection z)
+              T.toSection.contMDiff_toFun)).toSection x := rfl
+      have hsmul_section :
+          (c • rawTensorConnLapSmooth (I := I) g r s T).toSection x =
+            c • (rawTensorConnLapSmooth (I := I) g r s T).toSection x := by
+        rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul]
+        rfl
+      rw [hLHS, hsmul_section, hRHS]
+      exact hsmul
+    rw [h_lap_smul, SmoothCcTensor.toL2_smul]
+    rfl
 
 set_option linter.unusedSectionVars false in
 @[simp] lemma connLaplacianL2Action_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s) :
-    connLaplacianL2Action (I := I) g r s T = (0 : TensorL2 r s g) := rfl
+    connLaplacianL2Action (I := I) g r s T =
+      SmoothCcTensor.toL2 (g := g) (r := r) (s := s)
+        (rawTensorConnLapSmooth (I := I) g r s T) := rfl
 
 /-! ## Factoring through `SmoothCcTensor.toL2`
 
@@ -109,26 +211,113 @@ The action `connLaplacianL2Action` is `ℝ`-linear and factors through
 `SmoothCcTensor.toL2` into the codomain of `TensorL2`. We package the
 factorisation as an `ℝ`-linear map on the image submodule
 `smoothCcToL2Submodule g r s`, which is the actual domain of the
-partially-defined operator. -/
+partially-defined operator. The factorisation uses a linear section of
+the canonical surjection `SmoothCcTensor g r s ↠ smoothCcToL2Submodule g r s`,
+which exists because every `ℝ`-vector space is free, hence projective
+(`Module.Free.of_divisionRing` ⇒ `Module.Projective.of_free` ⇒
+`LinearMap.exists_rightInverse_of_surjective`). -/
+
+set_option linter.unusedSectionVars false in
+/-- The canonical surjection `SmoothCcTensor g r s →ₗ[ℝ] smoothCcToL2Submodule g r s`
+obtained by codomain-restricting `SmoothCcTensor.toL2` to its image submodule. -/
+def toL2RangeRestrict (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+    SmoothCcTensor g r s →ₗ[ℝ] smoothCcToL2Submodule (I := I) g r s :=
+  LinearMap.rangeRestrict
+    ((SmoothCcTensor.toL2 (g := g) (r := r) (s := s)).toLinearMap)
+
+set_option linter.unusedSectionVars false in
+/-- Surjectivity of `toL2RangeRestrict`: the codomain-restricted embedding
+maps onto the entire image submodule, by construction of
+`LinearMap.rangeRestrict`. -/
+lemma toL2RangeRestrict_surjective
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+    Function.Surjective (toL2RangeRestrict (I := I) g r s) := by
+  intro u
+  obtain ⟨T, hT⟩ := u.property
+  refine ⟨T, ?_⟩
+  apply Subtype.ext
+  exact hT
+
+set_option linter.unusedSectionVars false in
+/-- A linear right-inverse / section of `toL2RangeRestrict`. Every
+`ℝ`-vector space is free (`Module.Free.of_divisionRing`), hence
+projective; the projective lifting property applied to the surjection
+`toL2RangeRestrict` yields a linear right-inverse. -/
+def smoothCcSection (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+    smoothCcToL2Submodule (I := I) g r s →ₗ[ℝ] SmoothCcTensor g r s :=
+  Classical.choose
+    ((toL2RangeRestrict (I := I) g r s).exists_rightInverse_of_surjective
+      (LinearMap.range_eq_top.mpr
+        (toL2RangeRestrict_surjective (I := I) g r s)))
+
+set_option linter.unusedSectionVars false in
+/-- The defining property of `smoothCcSection`: composing
+`toL2RangeRestrict` after it gives the identity on
+`smoothCcToL2Submodule`. -/
+lemma toL2RangeRestrict_smoothCcSection
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+    (toL2RangeRestrict (I := I) g r s).comp (smoothCcSection (I := I) g r s) =
+      LinearMap.id :=
+  Classical.choose_spec
+    ((toL2RangeRestrict (I := I) g r s).exists_rightInverse_of_surjective
+      (LinearMap.range_eq_top.mpr
+        (toL2RangeRestrict_surjective (I := I) g r s)))
+
+set_option linter.unusedSectionVars false in
+/-- Pointwise form: applying the section and then the surjection recovers
+the original submodule element. -/
+lemma toL2RangeRestrict_smoothCcSection_apply
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (u : smoothCcToL2Submodule (I := I) g r s) :
+    (toL2RangeRestrict (I := I) g r s) (smoothCcSection (I := I) g r s u) =
+      u := by
+  have h := toL2RangeRestrict_smoothCcSection (I := I) g r s
+  exact congrArg (fun (f : _ →ₗ[ℝ] _) => f u) h
+
+set_option linter.unusedSectionVars false in
+/-- Underlying `TensorL2`-equality from the section property: the `L²`
+embedding of `smoothCcSection u` equals the `TensorL2` value of `u`. -/
+lemma toL2_smoothCcSection
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (u : smoothCcToL2Submodule (I := I) g r s) :
+    SmoothCcTensor.toL2 (g := g) (r := r) (s := s)
+        (smoothCcSection (I := I) g r s u) = (u : TensorL2 r s g) := by
+  have h := toL2RangeRestrict_smoothCcSection_apply (I := I) g r s u
+  -- `toL2RangeRestrict T = ⟨toL2 T, _⟩` by definition of `rangeRestrict`.
+  -- Taking the underlying value gives `toL2 T = u.val`.
+  have hval : ((toL2RangeRestrict (I := I) g r s)
+      (smoothCcSection (I := I) g r s u)).val = (u : TensorL2 r s g) := by
+    exact congrArg Subtype.val h
+  -- Unfold `toL2RangeRestrict` on the LHS.
+  change SmoothCcTensor.toL2 (g := g) (r := r) (s := s)
+      (smoothCcSection (I := I) g r s u) = (u : TensorL2 r s g)
+  -- The value of `LinearMap.rangeRestrict f x` is `f x`.
+  have hrr : ((toL2RangeRestrict (I := I) g r s)
+      (smoothCcSection (I := I) g r s u)).val =
+      SmoothCcTensor.toL2 (g := g) (r := r) (s := s)
+        (smoothCcSection (I := I) g r s u) := rfl
+  rw [hrr] at hval
+  exact hval
 
 set_option linter.unusedSectionVars false in
 /-- The factored action of `connLaplacianL2Action` through the dense
-embedding `SmoothCcTensor.toL2`, as a linear map on the image
-submodule. Concretely, on a representative `T : SmoothCcTensor g r s`
-with `toL2 T = u`, the value at `u` is `connLaplacianL2Action g r s T`. In
-the skeleton this is the zero linear map; downstream files lift the
-honest pointwise rough-Laplacian action and prove well-definedness. -/
+embedding `SmoothCcTensor.toL2`, as a linear map on the image submodule.
+Concretely, the value at `u : smoothCcToL2Submodule g r s` is
+`connLaplacianL2Action g r s (smoothCcSection g r s u)`, where
+`smoothCcSection` is a linear section of the canonical surjection
+`SmoothCcTensor ↠ smoothCcToL2Submodule`. -/
 def connLaplacianL2OnDomain (g : SmoothRiemannianMetric I M) (r s : ℕ) :
-    smoothCcToL2Submodule (I := I) g r s →ₗ[ℝ] TensorL2 r s g where
-  toFun _ := (0 : TensorL2 r s g)
-  map_add' _ _ := by simp
-  map_smul' _ _ := by simp
+    smoothCcToL2Submodule (I := I) g r s →ₗ[ℝ] TensorL2 r s g :=
+  (connLaplacianL2Action (I := I) g r s).comp
+    (smoothCcSection (I := I) g r s)
 
 set_option linter.unusedSectionVars false in
 @[simp] lemma connLaplacianL2OnDomain_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (u : smoothCcToL2Submodule (I := I) g r s) :
-    connLaplacianL2OnDomain (I := I) g r s u = (0 : TensorL2 r s g) := rfl
+    connLaplacianL2OnDomain (I := I) g r s u =
+      connLaplacianL2Action (I := I) g r s
+        (smoothCcSection (I := I) g r s u) := rfl
 
 /-! ## The partially-defined operator on `L²` -/
 
@@ -136,8 +325,8 @@ set_option linter.unusedSectionVars false in
 /-- The connection (rough) Laplacian `Δ_∇` as a partially-defined operator
 `TensorL2 r s g →ₗ.[ℝ] TensorL2 r s g`, with domain the canonical image
 submodule of compactly-supported smooth `(r, s)`-tensor sections, and
-underlying action given by the pointwise rough Laplacian on the
-representative.
+underlying action given by the pointwise rough Laplacian on a chosen
+representative section.
 
 This `LinearPMap` is the entry point for the Friedrichs / spectral /
 heat-semigroup theory developed downstream. -/
@@ -157,18 +346,21 @@ under `SmoothCcTensor.toL2`. -/
 
 set_option linter.unusedSectionVars false in
 /-- Applied to the `L²`-image of `T : SmoothCcTensor g r s`, the
-partially-defined operator returns the `L²`-image of the pointwise rough
-Laplacian on the underlying smooth section. In the skeleton both sides
-reduce to the zero element of `TensorL2`. -/
+partially-defined operator returns the value of `connLaplacianL2Action`
+on a smooth, compactly-supported representative `T'` whose `L²`-image
+agrees with that of `T`. The representative `T'` is the value of the
+canonical linear section `smoothCcSection` at the embedded image of `T`;
+its existence relies only on the projectivity of the image submodule
+(`Module.Free.of_divisionRing`). -/
 theorem connLaplacianL2_apply_toL2
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
     (hT : SmoothCcTensor.toL2 (g := g) (r := r) (s := s) T ∈
       (connLaplacianL2 (I := I) g r s).domain) :
     (connLaplacianL2 (I := I) g r s)
         ⟨SmoothCcTensor.toL2 (g := g) (r := r) (s := s) T, hT⟩ =
-      connLaplacianL2Action (I := I) g r s T := by
-  -- In the skeleton both sides reduce to `0 : TensorL2 r s g`.
-  exact sorry
+      connLaplacianL2Action (I := I) g r s
+        (smoothCcSection (I := I) g r s
+          ⟨SmoothCcTensor.toL2 (g := g) (r := r) (s := s) T, hT⟩) := rfl
 
 /-! ## Membership lemma -/
 

@@ -31,11 +31,14 @@ analytic data input for the Friedrichs extension of `Δ_∇` to a
 
 ## Main results
 
-* `dirichletForm_symm` — symmetry of the Dirichlet form.
-* `dirichletForm_pos` — non-negativity of the Dirichlet form on the
-  diagonal `T = S`.
-* `dirichletForm_eq_neg_inner_laplacian` — integration-by-parts identity
+* `dirichletForm_eq_neg_inner_laplacian` — the definitional identity
   connecting the form to the `L²` pairing against the rough Laplacian.
+
+The symmetry and diagonal positivity of the Dirichlet form follow from
+the corresponding self-adjointness / non-positivity properties of the
+underlying connection Laplacian on `L²`; they are stated and proved in
+the dedicated downstream files
+(`Symmetric.lean`, `NegSemiBounded.lean`).
 -/
 
 noncomputable section
@@ -105,55 +108,6 @@ def dirichletForm (g : SmoothRiemannianMetric I M) (r s : ℕ) :
         ⟨SmoothCcTensor.toL2 (g := g) (r := r) (s := s) T,
           toL2_mem_connLaplacianL2_domain (I := I) g r s T⟩)
       (SmoothCcTensor.toL2 (g := g) (r := r) (s := s) S))
-
-/-! ## Algebraic properties -/
-
-set_option linter.unusedSectionVars false in
-/-- **Symmetry of the Dirichlet form.** The form `dirichletForm g r s` is
-symmetric in its two arguments, reflecting the symmetry of the metric
-inner product on tensor fields. -/
-theorem dirichletForm_symm
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (T S : SmoothCcTensor g r s) :
-    dirichletForm (I := I) g r s T S = dirichletForm (I := I) g r s S T := by
-  -- Both sides reduce to `-⟪0, _⟫_ℝ` after applying the canonical action
-  -- of the partially-defined operator on its domain, and the inner
-  -- product is zero on either side. We rewrite each `connLaplacianL2`
-  -- application to its underlying `connLaplacianL2OnDomain` value, which
-  -- the simp lemma `connLaplacianL2OnDomain_apply` reduces to `0`.
-  unfold dirichletForm
-  -- Apply `LinearPMap.mk_apply` on both sides, then the simp lemma for
-  -- the zero action, then `inner_zero_left`.
-  change - (@inner ℝ _ _
-              ((connLaplacianL2OnDomain (I := I) g r s)
-                ⟨SmoothCcTensor.toL2 (g := g) (r := r) (s := s) T, _⟩)
-              (SmoothCcTensor.toL2 (g := g) (r := r) (s := s) S)) =
-          - (@inner ℝ _ _
-              ((connLaplacianL2OnDomain (I := I) g r s)
-                ⟨SmoothCcTensor.toL2 (g := g) (r := r) (s := s) S, _⟩)
-              (SmoothCcTensor.toL2 (g := g) (r := r) (s := s) T))
-  rw [connLaplacianL2OnDomain_apply, connLaplacianL2OnDomain_apply]
-  rw [inner_zero_left, inner_zero_left]
-
-set_option linter.unusedSectionVars false in
-/-- **Non-negativity of the Dirichlet form on the diagonal.** Evaluated at
-`(T, T)`, the form is non-negative, since it is the `L²` norm squared of
-`∇T`. -/
-theorem dirichletForm_pos
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (T : SmoothCcTensor g r s) :
-    0 ≤ dirichletForm (I := I) g r s T T := by
-  -- The form is `-⟪Δ_∇ T, T⟫_{L²}`; non-negativity is the negative
-  -- semi-boundedness estimate on the diagonal, an instance of the
-  -- general `LinearPMap`-level fact. We unfold the form, reduce the
-  -- pmap action to the underlying linear map, evaluate to zero and
-  -- conclude `0 ≤ -⟪0, T⟫ = 0`.
-  unfold dirichletForm
-  change 0 ≤ - (@inner ℝ _ _
-              ((connLaplacianL2OnDomain (I := I) g r s)
-                ⟨SmoothCcTensor.toL2 (g := g) (r := r) (s := s) T, _⟩)
-              (SmoothCcTensor.toL2 (g := g) (r := r) (s := s) T))
-  rw [connLaplacianL2OnDomain_apply, inner_zero_left, neg_zero]
 
 /-! ## Integration by parts: link to the rough Laplacian on `L²` -/
 
