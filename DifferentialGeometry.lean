@@ -768,6 +768,9 @@ import DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.DeTurckCorrectionSy
 import DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.DeTurckCorrectionSymbol
 import DifferentialGeometry.PDE.DeTurck.StrictParabolicity
 import DifferentialGeometry.PDE.ParabolicShortTime
+import DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.HilbertSpace
+import DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.Inclusion
+import DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcDense
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.PreHilbert
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.CovariantLeibniz
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.CovGrad
