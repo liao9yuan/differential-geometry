@@ -779,6 +779,11 @@ import DifferentialGeometry.PDE.RicciFlow.FriedrichsExtension.ResolventBound
 import DifferentialGeometry.PDE.RicciFlow.SpectralTheorem.UnboundedSpectrum
 import DifferentialGeometry.PDE.RicciFlow.SpectralTheorem.CayleyTransform
 import DifferentialGeometry.PDE.RicciFlow.SpectralTheorem.BorelFunctionalCalculus
+import DifferentialGeometry.PDE.RicciFlow.HeatSemigroup.Defs
+import DifferentialGeometry.PDE.RicciFlow.HeatSemigroup.StronglyContinuous
+import DifferentialGeometry.PDE.RicciFlow.HeatSemigroup.Generator
+import DifferentialGeometry.PDE.RicciFlow.HeatSemigroup.Analytic
+import DifferentialGeometry.PDE.RicciFlow.HeatSemigroup.Smoothing
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.HilbertSpace
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.Inclusion
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcDense
