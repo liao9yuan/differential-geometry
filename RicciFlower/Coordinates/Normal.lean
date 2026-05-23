@@ -1,7 +1,9 @@
+import RicciFlower.Coordinates.ChartRegistration
 import RicciFlower.GlobalGeometry.Lecture07.SprayChartPush
 import Mathlib.Analysis.Calculus.FDeriv.Basic
 import Mathlib.Analysis.Calculus.InverseFunctionTheorem.FDeriv
 import Mathlib.Analysis.ODE.Gronwall
+import Mathlib.Geometry.Manifold.LocalDiffeomorph
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -3389,16 +3391,188 @@ structure NormalCoordinateData
   target_open :
     IsOpen (exp '' Metric.ball (0 : TangentSpace I x) radius)
 
-/-- Existence of the current normal-coordinate package.
+/-- Topological normal-coordinate data obtained from the strict inverse
+function theorem.
 
-This uses the functional endpoint from `expAt_strict` and the inverse function
-theorem for its chart expression.  The endpoint relation itself supplies chart
-source control through `expAt_mem_source`, so the open image statement can be
-pulled back from the tangent-coordinate local homeomorphism. -/
-theorem exists_normalData
+This stores the actual local homeomorphism for
+`v ↦ extChartAt I x (exp v)`.  It intentionally does not claim that the
+corresponding chart is smooth or belongs to the maximal atlas. -/
+structure NormalTopChartData
+    (g : SmoothRiemannianMetric I M) (x : M) where
+  domain : Set (TangentSpace I x)
+  domain_open : IsOpen domain
+  zero_mem_domain : (0 : TangentSpace I x) ∈ domain
+  exp : TangentSpace I x -> M
+  exp_zero : exp 0 = x
+  chartExp : OpenPartialHomeomorph (TangentSpace I x) (TangentSpace I x)
+  domain_subset_source : domain ⊆ chartExp.source
+  exp_realizes :
+    ∀ v : TangentSpace I x, v ∈ domain -> expAt (I := I) g x v (exp v)
+  exp_mem_source :
+    ∀ v : TangentSpace I x, v ∈ domain -> exp v ∈ (extChartAt I x).source
+  chartExp_eq :
+    ∀ v : TangentSpace I x, v ∈ domain -> chartExp v = extChartAt I x (exp v)
+
+namespace NormalTopChartData
+
+/-- Forget the stored topological local homeomorphism to the older endpoint
+package by shrinking the open tangent-domain to a metric ball. -/
+def toNormalCoordinateData
+    {g : SmoothRiemannianMetric I M} {x : M}
+    (N : NormalTopChartData (I := I) g x) :
+    NormalCoordinateData (I := I) g x := by
+  have hnhds : N.domain ∈ 𝓝 (0 : TangentSpace I x) :=
+    N.domain_open.mem_nhds N.zero_mem_domain
+  rw [Metric.mem_nhds_iff] at hnhds
+  let r : Real := Classical.choose hnhds
+  have hr : 0 < r := (Classical.choose_spec hnhds).1
+  have hrsub :
+      Metric.ball (0 : TangentSpace I x) r ⊆ N.domain :=
+    (Classical.choose_spec hnhds).2
+  let B : Set (TangentSpace I x) := Metric.ball (0 : TangentSpace I x) r
+  have hBsub_source : B ⊆ N.chartExp.source := fun v hv =>
+    N.domain_subset_source (hrsub hv)
+  have hsrc_exp : ∀ v ∈ B, N.exp v ∈ (extChartAt I x).source := by
+    intro v hv
+    exact N.exp_mem_source v (hrsub hv)
+  have hchartOpen : IsOpen (N.chartExp '' B) :=
+    N.chartExp.isOpen_image_of_subset_source Metric.isOpen_ball hBsub_source
+  have htargetOpen : IsOpen (N.exp '' B) := by
+    have hpreOpen :
+        IsOpen ((extChartAt I x).source ∩
+          (extChartAt I x) ⁻¹' (N.chartExp '' B)) := by
+      rw [extChartAt]
+      exact (chartAt H x).isOpen_extend_preimage' (I := I) hchartOpen
+    have himage :
+        N.exp '' B =
+          (extChartAt I x).source ∩ (extChartAt I x) ⁻¹' (N.chartExp '' B) := by
+      ext y
+      constructor
+      · rintro ⟨v, hv, rfl⟩
+        exact ⟨hsrc_exp v hv, v, hv, N.chartExp_eq v (hrsub hv)⟩
+      · rintro ⟨hy_src, v, hv, h_eq⟩
+        refine ⟨v, hv, ?_⟩
+        apply (extChartAt I x).injOn (hsrc_exp v hv) hy_src
+        simpa [N.chartExp_eq v (hrsub hv)] using h_eq
+    simpa [B, himage] using hpreOpen
+  refine {
+    radius := r
+    radius_pos := hr
+    exp := N.exp
+    exp_zero := N.exp_zero
+    exp_realizes := ?_
+    source_inj := ?_
+    target_open := ?_
+  }
+  · intro v hv
+    exact (expAt_iff (I := I) g x v (N.exp v)).1 (N.exp_realizes v (hrsub hv))
+  · intro v hv w hw h_eq
+    have hvN : v ∈ N.domain := hrsub hv
+    have hwN : w ∈ N.domain := hrsub hw
+    apply N.chartExp.injOn (N.domain_subset_source hvN) (N.domain_subset_source hwN)
+    rw [N.chartExp_eq v hvN, N.chartExp_eq w hwN]
+    exact congrArg (fun y : M => extChartAt I x y) h_eq
+  · simpa [B] using htargetOpen
+
+end NormalTopChartData
+
+/-- Smooth local-diffeomorphism data for the exponential endpoint map.
+
+This is the geometric/ODE frontier behind smooth normal coordinates: the
+selected endpoint map must be a genuine smooth local diffeomorphism near
+`0 : T_xM`, and it must realize the relation-valued endpoint API on its source.
+The normal chart is the local inverse of `expLD`, not the construction chart
+`extChartAt I x`. -/
+structure NormalExpLocalDiffeomorphData
+    (g : SmoothRiemannianMetric I M) (x : M) where
+  expLD :
+    PartialDiffeomorph
+      (modelWithCornersSelf Real (TangentSpace I x)) I
+      (TangentSpace I x) M (∞ : WithTop ℕ∞)
+  zero_mem_source : (0 : TangentSpace I x) ∈ expLD.source
+  map_zero : expLD 0 = x
+  expAt_realizes :
+    ∀ v : TangentSpace I x, v ∈ expLD.source -> expAt (I := I) g x v (expLD v)
+
+namespace NormalExpLocalDiffeomorphData
+
+/-- The smooth normal partial diffeomorphism `normalCoord ∘ Exp_x^{-1}`.
+
+This is the smooth object underlying the normal chart.  Its inverse is the
+exponential local diffeomorphism followed by `normalHCoord⁻¹`. -/
+def normalPartialDiffeomorph [I.Boundaryless]
+    {g : SmoothRiemannianMetric I M} {x : M}
+    (D : NormalExpLocalDiffeomorphData (I := I) g x) :
+    PartialDiffeomorph I I M H (∞ : WithTop ℕ∞) :=
+  PartialDiffeomorph.transDiffeomorph (I := I) D.expLD.symm
+    (normalHCoordDiffeomorph (I := I) x)
+
+/-- The normal coordinate chart induced by a smooth local exponential
+diffeomorphism.  Its inverse is `D.expLD`; its forward map sends a nearby point
+to the normal coordinate of the unique tangent vector that exponentiates to it.
+-/
+def normalChart [I.Boundaryless]
+    {g : SmoothRiemannianMetric I M} {x : M}
+    (D : NormalExpLocalDiffeomorphData (I := I) g x) :
+    OpenPartialHomeomorph M H :=
+  (D.normalPartialDiffeomorph (I := I)).toOpenPartialHomeomorph
+
+@[simp]
+theorem normalPartialDiffeomorph_toOpenPartialHomeomorph [I.Boundaryless]
+    {g : SmoothRiemannianMetric I M} {x : M}
+    (D : NormalExpLocalDiffeomorphData (I := I) g x) :
+    (D.normalPartialDiffeomorph (I := I)).toOpenPartialHomeomorph =
+      D.expLD.symm.toOpenPartialHomeomorph.transHomeomorph
+        (normalHCoordHomeomorph (I := I) x) := by
+  simp [normalPartialDiffeomorph]
+
+@[simp]
+theorem normalChart_eq [I.Boundaryless]
+    {g : SmoothRiemannianMetric I M} {x : M}
+    (D : NormalExpLocalDiffeomorphData (I := I) g x) :
+    D.normalChart (I := I) =
+      D.expLD.symm.toOpenPartialHomeomorph.transHomeomorph
+        (normalHCoordHomeomorph (I := I) x) := by
+  simp [normalChart]
+
+/-- Forget smooth local-diffeomorphism exponential data to the older
+relation-valued endpoint package by shrinking the source to a metric ball. -/
+def toNormalCoordinateData
+    {g : SmoothRiemannianMetric I M} {x : M}
+    (D : NormalExpLocalDiffeomorphData (I := I) g x) :
+    NormalCoordinateData (I := I) g x := by
+  have hnhds : D.expLD.source ∈ 𝓝 (0 : TangentSpace I x) :=
+    D.expLD.open_source.mem_nhds D.zero_mem_source
+  rw [Metric.mem_nhds_iff] at hnhds
+  let r : Real := Classical.choose hnhds
+  have hr : 0 < r := (Classical.choose_spec hnhds).1
+  have hrsub :
+      Metric.ball (0 : TangentSpace I x) r ⊆ D.expLD.source :=
+    (Classical.choose_spec hnhds).2
+  let expHomeomorph := D.expLD.toOpenPartialHomeomorph
+  refine {
+    radius := r
+    radius_pos := hr
+    exp := D.expLD
+    exp_zero := D.map_zero
+    exp_realizes := ?_
+    source_inj := ?_
+    target_open := ?_
+  }
+  · intro v hv
+    exact (expAt_iff (I := I) g x v (D.expLD v)).1 (D.expAt_realizes v (hrsub hv))
+  · intro v hv w hw h_eq
+    exact expHomeomorph.injOn (hrsub hv) (hrsub hw) h_eq
+  · exact expHomeomorph.isOpen_image_of_subset_source Metric.isOpen_ball hrsub
+
+end NormalExpLocalDiffeomorphData
+
+/-- The strict inverse-function theorem applied to the endpoint map, retaining
+the resulting topological local homeomorphism in tangent coordinates. -/
+theorem expAt_topChart
     [I.Boundaryless] [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) (x : M) :
-    Nonempty (NormalCoordinateData (I := I) g x) := by
+    Nonempty (NormalTopChartData (I := I) g x) := by
   classical
   obtain ⟨r0, hr0, exp, hexp0, hreal, hstrict⟩ :=
     expAt_strict (I := I) g x
@@ -3413,65 +3587,275 @@ theorem exists_normalData
   let eIFT := hstrictIso.toOpenPartialHomeomorph chartExp
   have hIFTsrc : (0 : TangentSpace I x) ∈ eIFT.source := by
     simpa [eIFT] using hstrictIso.mem_toOpenPartialHomeomorph_source
-  have hgood :
-      Metric.ball (0 : TangentSpace I x) r0 ∩ eIFT.source ∈
-        𝓝 (0 : TangentSpace I x) :=
-    Filter.inter_mem (Metric.ball_mem_nhds _ hr0)
-      (eIFT.open_source.mem_nhds hIFTsrc)
-  rw [Metric.mem_nhds_iff] at hgood
-  obtain ⟨r, hr, hrsub⟩ := hgood
-  let B : Set (TangentSpace I x) := Metric.ball (0 : TangentSpace I x) r
-  have hBsub_r0 : B ⊆ Metric.ball (0 : TangentSpace I x) r0 := by
-    intro v hv
-    exact (hrsub hv).1
-  have hBsub_eIFT : B ⊆ eIFT.source := by
-    intro v hv
-    exact (hrsub hv).2
-  have hsrc_exp : ∀ v ∈ B, exp v ∈ (extChartAt I x).source := by
-    intro v hv
-    have hv0 : v ∈ Metric.ball (0 : TangentSpace I x) r0 := hBsub_r0 hv
-    have hcoord : exp v ∈ coordinateFrameSet (I := I) x :=
-      expAt_mem_source (I := I) (hreal v hv0)
-    simpa [coordinateFrameSet, coordinateTrivializationAt, extChartAt_source] using hcoord
-  have hchartOpen : IsOpen (chartExp '' B) := by
-    simpa [eIFT, chartExp] using
-      eIFT.isOpen_image_of_subset_source (Metric.isOpen_ball) hBsub_eIFT
-  have htargetOpen : IsOpen (exp '' B) := by
-    have hpreOpen :
-        IsOpen ((extChartAt I x).source ∩
-          (extChartAt I x) ⁻¹' (chartExp '' B)) := by
-      rw [extChartAt]
-      exact (chartAt H x).isOpen_extend_preimage' (I := I) hchartOpen
-    have himage :
-        exp '' B =
-          (extChartAt I x).source ∩ (extChartAt I x) ⁻¹' (chartExp '' B) := by
-      ext y
-      constructor
-      · rintro ⟨v, hv, rfl⟩
-        exact ⟨hsrc_exp v hv, v, hv, rfl⟩
-      · rintro ⟨hy_src, v, hv, h_eq⟩
-        refine ⟨v, hv, ?_⟩
-        apply (extChartAt I x).injOn (hsrc_exp v hv) hy_src
-        simpa [chartExp] using h_eq
-    simpa [B, himage] using hpreOpen
   refine ⟨{
-    radius := r
-    radius_pos := hr
+    domain := Metric.ball (0 : TangentSpace I x) r0 ∩ eIFT.source
+    domain_open := Metric.isOpen_ball.inter eIFT.open_source
+    zero_mem_domain := ?_
     exp := exp
     exp_zero := hexp0
+    chartExp := eIFT
+    domain_subset_source := ?_
+    exp_realizes := ?_
+    exp_mem_source := ?_
+    chartExp_eq := ?_
+  }⟩
+  · exact ⟨Metric.mem_ball_self hr0, hIFTsrc⟩
+  · intro v hv
+    exact hv.2
+  · intro v hv
+    exact hreal v hv.1
+  · intro v hv
+    have hcoord : exp v ∈ coordinateFrameSet (I := I) x :=
+      expAt_mem_source (I := I) (hreal v hv.1)
+    simpa [coordinateFrameSet, coordinateTrivializationAt, extChartAt_source] using hcoord
+  · intro v hv
+    simp [eIFT, chartExp]
+
+/-- The topological local inverse-function skeleton supplied by
+`expAt_strict`.
+
+This deliberately stops at the older endpoint package: strict differentiability
+at the center gives local injectivity and open image, but not smooth maximal
+atlas membership for the normal chart. -/
+theorem expAt_topData
+    [I.Boundaryless] [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    Nonempty (NormalCoordinateData (I := I) g x) := by
+  obtain ⟨N⟩ := expAt_topChart (I := I) g x
+  exact ⟨N.toNormalCoordinateData (I := I)⟩
+
+/-- Smooth normal-coordinate chart data before registering the tangent-bundle
+trivialization.
+
+This is the correct smooth local-diffeomorphism layer: it records a genuine
+normal chart in the maximal atlas and the endpoint/inverse formulas, but does
+not yet claim that the chart has been converted to a `LocalChartAt`. -/
+structure NormalChartCoreData
+    (g : SmoothRiemannianMetric I M) (x : M) where
+  domain : Set (TangentSpace I x)
+  domain_open : IsOpen domain
+  zero_mem_domain : (0 : TangentSpace I x) ∈ domain
+  exp : TangentSpace I x -> M
+  exp_zero : exp 0 = x
+  chart : OpenPartialHomeomorph M H
+  mem_source : x ∈ chart.source
+  mem_max : chart ∈ IsManifold.maximalAtlas I (∞ : WithTop ℕ∞) M
+  exp_realizes :
+    ∀ v : TangentSpace I x, v ∈ domain -> expAt (I := I) g x v (exp v)
+  source_eq : exp '' domain = chart.source
+  exp_open_image :
+    ∀ s : Set (TangentSpace I x), IsOpen s -> s ⊆ domain -> IsOpen (exp '' s)
+  ext_exp_eq :
+    ∀ v : TangentSpace I x, v ∈ domain -> chart.extend I (exp v) = normalCoord (I := I) x v
+  symm_normalCoord_eq :
+    ∀ v : TangentSpace I x, v ∈ domain -> chart.symm (normalHCoord (I := I) x v) = exp v
+
+namespace NormalChartCoreData
+
+/-- Forget smooth normal-chart core data to the older relation-valued endpoint
+package by shrinking the open tangent-domain to a metric ball. -/
+def toNormalCoordinateData
+    {g : SmoothRiemannianMetric I M} {x : M}
+    (N : NormalChartCoreData (I := I) g x) :
+    NormalCoordinateData (I := I) g x := by
+  have hnhds : N.domain ∈ 𝓝 (0 : TangentSpace I x) :=
+    N.domain_open.mem_nhds N.zero_mem_domain
+  rw [Metric.mem_nhds_iff] at hnhds
+  let r : Real := Classical.choose hnhds
+  have hr : 0 < r := (Classical.choose_spec hnhds).1
+  have hrsub :
+      Metric.ball (0 : TangentSpace I x) r ⊆ N.domain :=
+    (Classical.choose_spec hnhds).2
+  refine {
+    radius := r
+    radius_pos := hr
+    exp := N.exp
+    exp_zero := N.exp_zero
     exp_realizes := ?_
     source_inj := ?_
     target_open := ?_
-  }⟩
+  }
   · intro v hv
-    exact hreal v (hBsub_r0 (by simpa [B] using hv))
+    exact (expAt_iff (I := I) g x v (N.exp v)).1 (N.exp_realizes v (hrsub hv))
   · intro v hv w hw h_eq
-    have hvB : v ∈ B := by simpa [B] using hv
-    have hwB : w ∈ B := by simpa [B] using hw
-    apply eIFT.injOn (hBsub_eIFT hvB) (hBsub_eIFT hwB)
-    change chartExp v = chartExp w
-    exact congrArg (fun y : M => extChartAt I x y) h_eq
-  · simpa [B] using htargetOpen
+    apply normalCoord_injective (I := I) x
+    calc
+      normalCoord (I := I) x v = N.chart.extend I (N.exp v) := (N.ext_exp_eq v (hrsub hv)).symm
+      _ = N.chart.extend I (N.exp w) := congrArg (fun y : M => N.chart.extend I y) h_eq
+      _ = normalCoord (I := I) x w := N.ext_exp_eq w (hrsub hw)
+  · exact N.exp_open_image (Metric.ball (0 : TangentSpace I x) r)
+      Metric.isOpen_ball hrsub
+
+end NormalChartCoreData
+
+namespace NormalExpLocalDiffeomorphData
+
+/-- A smooth local exponential diffeomorphism gives the smooth chart-core
+package: the normal chart is the inverse exponential map followed by the
+linear normal-coordinate homeomorphism. -/
+def toNormalChartCoreData [I.Boundaryless]
+    {g : SmoothRiemannianMetric I M} {x : M}
+    (D : NormalExpLocalDiffeomorphData (I := I) g x) :
+    NormalChartCoreData (I := I) g x := by
+  classical
+  let e : OpenPartialHomeomorph (TangentSpace I x) M :=
+    D.expLD.toOpenPartialHomeomorph
+  refine {
+    domain := D.expLD.source
+    domain_open := D.expLD.open_source
+    zero_mem_domain := D.zero_mem_source
+    exp := D.expLD
+    exp_zero := D.map_zero
+    chart := D.normalChart (I := I)
+    mem_source := ?_
+    mem_max := ?_
+    exp_realizes := ?_
+    source_eq := ?_
+    exp_open_image := ?_
+    ext_exp_eq := ?_
+    symm_normalCoord_eq := ?_
+  }
+  · have hx_target : x ∈ D.expLD.target := by
+      have h0 : D.expLD 0 ∈ D.expLD.target := by
+        simpa [e] using
+          (e.map_source (x := (0 : TangentSpace I x)) D.zero_mem_source)
+      simpa [D.map_zero] using h0
+    simpa [normalChart, e] using hx_target
+  ·
+    exact PartialDiffeomorph.toOpenPartialHomeomorph_mem_maximalAtlas
+      (I := I) (D.normalPartialDiffeomorph (I := I))
+  · intro v hv
+    exact (expAt_iff (I := I) g x v (D.expLD v)).1 (D.expAt_realizes v hv)
+  · simpa [normalChart, e] using e.image_source_eq_target
+  · intro s hs hsub
+    exact e.isOpen_image_of_subset_source hs hsub
+  · intro v hv
+    have hv_target : D.expLD v ∈ D.expLD.target := by
+      exact e.map_source hv
+    have hsymm : D.expLD.symm (D.expLD v) = v := by
+      simpa [e] using e.left_inv hv
+    have hchart :
+        D.normalChart (I := I) (D.expLD v) = normalHCoord (I := I) x v := by
+      change normalHCoord (I := I) x (D.expLD.symm (D.expLD v)) =
+        normalHCoord (I := I) x v
+      rw [hsymm]
+    calc
+      (D.normalChart (I := I)).extend I (D.expLD v)
+          = I (D.normalChart (I := I) (D.expLD v)) := rfl
+      _ = I (normalHCoord (I := I) x v) := congrArg I hchart
+      _ = normalCoord (I := I) x v := model_normalHCoord (I := I) x v
+  · intro v hv
+    have hv_target : D.expLD v ∈ D.expLD.target := by
+      exact e.map_source hv
+    have hnormal_target :
+        normalHCoord (I := I) x v ∈ (D.normalChart (I := I)).target := by
+      have hpre :
+          (normalHCoordHomeomorph (I := I) x).symm
+              (normalHCoord (I := I) x v) = v := by
+        rw [← normalHCoordHomeomorph_apply (I := I) x v]
+        exact (normalHCoordHomeomorph (I := I) x).left_inv v
+      simpa [normalChart, e, hpre] using hv
+    have hright :
+        (D.normalChart (I := I)) ((D.normalChart (I := I)).symm
+            (normalHCoord (I := I) x v)) =
+          normalHCoord (I := I) x v := by
+      exact (D.normalChart (I := I)).right_inv hnormal_target
+    have hchart :
+        D.normalChart (I := I) (D.expLD v) = normalHCoord (I := I) x v := by
+      have hsymm : D.expLD.symm (D.expLD v) = v := by
+        simpa [e] using e.left_inv hv
+      change normalHCoord (I := I) x (D.expLD.symm (D.expLD v)) =
+        normalHCoord (I := I) x v
+      rw [hsymm]
+    exact (D.normalChart (I := I)).injOn
+      ((D.normalChart (I := I)).map_target hnormal_target)
+      (by simpa [normalChart, e] using hv_target)
+      (hright.trans hchart.symm)
+
+end NormalExpLocalDiffeomorphData
+
+/-- The real smooth exponential-map frontier.
+
+This should be proved from smooth dependence of the chart-fixed geodesic flow
+on the initial velocity, followed by the smooth inverse-function/local
+diffeomorphism theorem. -/
+theorem expAt_localDiffeomorph
+    [I.Boundaryless] [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    Nonempty (NormalExpLocalDiffeomorphData (I := I) g x) := by
+  sorry
+
+/-- Smooth normal-chart core data follows from the smooth local exponential
+diffeomorphism frontier. -/
+theorem expAt_smoothChartCore
+    [I.Boundaryless] [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    Nonempty (NormalChartCoreData (I := I) g x) := by
+  obtain ⟨D⟩ := expAt_localDiffeomorph (I := I) g x
+  exact ⟨D.toNormalChartCoreData (I := I)⟩
+
+/-- Normal coordinates as an actual selected local chart.
+
+The chart is part of the data, not reconstructed from the default `extChartAt`.
+This is the package downstream normal-coordinate frames should consume.  The
+older `NormalCoordinateData` is only the relation-valued compatibility view
+obtained by forgetting this chart structure. -/
+structure NormalChartData
+    (g : SmoothRiemannianMetric I M) (x : M) where
+  radius : Real
+  radius_pos : 0 < radius
+  exp : TangentSpace I x -> M
+  exp_zero : exp 0 = x
+  localChart : LocalChartAt (I := I) x
+  exp_realizes :
+    ∀ v : TangentSpace I x,
+      v ∈ Metric.ball (0 : TangentSpace I x) radius ->
+        expAt (I := I) g x v (exp v)
+  source_eq :
+    exp '' Metric.ball (0 : TangentSpace I x) radius = localChart.source
+  ext_exp_eq :
+    ∀ v : TangentSpace I x,
+      v ∈ Metric.ball (0 : TangentSpace I x) radius ->
+        localChart.ext (exp v) = normalCoord (I := I) x v
+  symm_normalCoord_eq :
+    ∀ v : TangentSpace I x,
+      v ∈ Metric.ball (0 : TangentSpace I x) radius ->
+        localChart.chart.symm (normalHCoord (I := I) x v) = exp v
+
+namespace NormalChartData
+
+/-- Forget a genuine normal local chart to the older relation-valued endpoint
+package. -/
+def toNormalCoordinateData [I.Boundaryless]
+    {g : SmoothRiemannianMetric I M} {x : M}
+    (N : NormalChartData (I := I) g x) :
+    NormalCoordinateData (I := I) g x where
+  radius := N.radius
+  radius_pos := N.radius_pos
+  exp := N.exp
+  exp_zero := N.exp_zero
+  exp_realizes := by
+    intro v hv
+    exact (expAt_iff (I := I) g x v (N.exp v)).1 (N.exp_realizes v hv)
+  source_inj := by
+    intro v hv w hw h_eq
+    apply normalCoord_injective (I := I) x
+    calc
+      normalCoord (I := I) x v = N.localChart.ext (N.exp v) := (N.ext_exp_eq v hv).symm
+      _ = N.localChart.ext (N.exp w) := congrArg N.localChart.ext h_eq
+      _ = normalCoord (I := I) x w := N.ext_exp_eq w hw
+  target_open := by
+    simpa [N.source_eq] using N.localChart.source_open
+
+end NormalChartData
+
+/-- Compatibility existence for the older relation-valued package. -/
+theorem exists_normalData
+    [I.Boundaryless] [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    Nonempty (NormalCoordinateData (I := I) g x) := by
+  obtain ⟨D⟩ := expAt_localDiffeomorph (I := I) g x
+  exact ⟨D.toNormalCoordinateData (I := I)⟩
 
 end Coordinates
 end RicciFlower

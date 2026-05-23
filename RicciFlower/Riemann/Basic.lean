@@ -124,7 +124,7 @@ private theorem cov_tangentConst_apply_mdiffAt_self
     (h_on x hx).contMDiffAt (e.open_baseSet.mem_nhds hx)
   exact h_at.mdifferentiableAt (by simp)
 
-private theorem cov_smooth_apply_mdiffAt
+theorem cov_smooth_apply_mdiffAt
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
       (∞ : WithTop ℕ∞))
@@ -164,7 +164,7 @@ private theorem cov_smooth_apply_mdiffAt
     (h_on x hx).contMDiffAt (e.open_baseSet.mem_nhds hx)
   exact h_at.mdifferentiableAt (by simp)
 
-private theorem cov_smooth_apply_contMDiffAt
+theorem cov_smooth_apply_contMDiffAt
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
       (∞ : WithTop ℕ∞))
@@ -202,7 +202,7 @@ private theorem cov_smooth_apply_contMDiffAt
     simpa [e] using hcovY.clm_bundle_apply hX
   exact (h_on x hx).contMDiffAt (e.open_baseSet.mem_nhds hx)
 
-private theorem cov_smooth_apply_raw_mdiffAt
+theorem cov_smooth_apply_raw_mdiffAt
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
       (∞ : WithTop ℕ∞))
@@ -241,7 +241,7 @@ private theorem cov_smooth_apply_raw_mdiffAt
     (hcovY_on x hx).contMDiffAt (e.open_baseSet.mem_nhds hx)
   exact (hcovY_at.mdifferentiableAt (by simp)).clm_bundle_apply hX
 
-private theorem curvField_contMDiffAt
+theorem curvField_contMDiffAt
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
       (∞ : WithTop ℕ∞))
@@ -460,7 +460,7 @@ theorem connectionRiemannCurvatureField_congr_of_eventuallyEq
   simp [RicciFlower.Curvature.connectionRiemannCurvatureField, hcovZY, hcovZX,
     hZ_at, hXx, hYx, hbr]
 
-private theorem connectionRiemannCurvatureField_tensorial_left
+theorem connectionRiemannCurvatureField_tensorial_left
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
       (∞ : WithTop ℕ∞))
@@ -512,7 +512,7 @@ private theorem connectionRiemannCurvatureField_tensorial_left
     simp [map_add]
     module
 
-private theorem connectionRiemannCurvatureField_tensorial_middle
+theorem connectionRiemannCurvatureField_tensorial_middle
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
       (∞ : WithTop ℕ∞))

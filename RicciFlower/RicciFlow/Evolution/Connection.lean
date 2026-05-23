@@ -1199,7 +1199,7 @@ theorem frameCoeff_eq_sum_inv_metricPairing
     (gInv : Real -> Realized.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
-    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
+    (hinv : InvMetricLocal (I := I) S gInv frame u)
     (t : Real) {x : M} (hx : x ∈ u)
     (k : Idx) (V : TangentSpace I x) :
     hframe.coeff k x V =
@@ -1210,8 +1210,8 @@ theorem frameCoeff_eq_sum_inv_metricPairing
         (hframe.toBasisAt hx) (fun i j : Idx => gInv t x i j) := by
     intro i j
     constructor
-    · simpa [metricCompInFrame, IsLocalFrameOn.toBasisAt_coe] using (hinv t x i j).1
-    · simpa [metricCompInFrame, IsLocalFrameOn.toBasisAt_coe] using (hinv t x i j).2
+    · simpa [metricCompInFrame, IsLocalFrameOn.toBasisAt_coe] using (hinv t x hx i j).1
+    · simpa [metricCompInFrame, IsLocalFrameOn.toBasisAt_coe] using (hinv t x hx i j).2
   calc
     hframe.coeff k x V = (hframe.toBasisAt hx).repr V k := by
         simp [IsLocalFrameOn.coeff, hx]
@@ -1262,7 +1262,7 @@ theorem christoffelVariationEquationInFrameOn_of_pairing_local
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (loweredRHS : Real -> M -> Idx -> Idx -> Idx -> Real)
-    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
+    (hinv : InvMetricLocal (I := I) S gInv frame u)
     (hpair :
       forall (t : Realized.RealTimeInterval.RegularTime D) (x : M), x ∈ u ->
         forall i j l : Idx,
@@ -1302,11 +1302,11 @@ theorem christoffelVariationEquationInFrameOn_of_pairing_local
   refine hsum.congr ?_ ?_
   · intro s _hs
     symm
-    exact (frameCoeff_eq_sum_inv_metricPairing
+    exact (frameCoeffLocal
       (I := I) S gInv frame hframe hinv (t : Real) hx k
       ((S.family.connection s (frame j) x) (frame i x))).symm
   · symm
-    exact (frameCoeff_eq_sum_inv_metricPairing
+    exact (frameCoeffLocal
       (I := I) S gInv frame hframe hinv (t : Real) hx k
       ((S.family.connection (t : Real) (frame j) x) (frame i x))).symm
 
@@ -1318,7 +1318,7 @@ theorem christoffelSymbol_sub_eq_sum_inv_connectionDiff
     (gInv : Real -> Realized.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
-    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
+    (hinv : InvMetricLocal (I := I) S gInv frame u)
     (base var : Real) {x : M} (hx : x ∈ u)
     (i j k : Idx) :
     RicciFlower.Coordinates.christoffelSymbolInFrame
@@ -1437,7 +1437,7 @@ theorem christoffelEvolutionEquationInFrameOn_of_pairing
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
-    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
+    (hinv : InvMetricLocal (I := I) S gInv frame u)
     (hpair : ConnectionVariationPairingEquationInFrameOn
       (I := I) S frame nablaRic) :
     ChristoffelEvolutionEquationInFrameOn
@@ -1470,11 +1470,11 @@ theorem christoffelEvolutionEquationInFrameOn_of_pairing
   refine hsum.congr ?_ ?_
   · intro s _hs
     symm
-    exact (frameCoeff_eq_sum_inv_metricPairing
+    exact (frameCoeffLocal
       (I := I) S gInv frame hframe hinv (t : Real) hx k
       ((S.family.connection s (frame j) x) (frame i x))).symm
   · symm
-    exact (frameCoeff_eq_sum_inv_metricPairing
+    exact (frameCoeffLocal
       (I := I) S gInv frame hframe hinv (t : Real) hx k
       ((S.family.connection (t : Real) (frame j) x) (frame i x))).symm
 
@@ -1487,7 +1487,7 @@ theorem christoffelEvolutionEquationInFrameOn_of_pairing_local
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
-    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
+    (hinv : InvMetricLocal (I := I) S gInv frame u)
     (hpair : ConnectionVariationPairingEquationInFrameOnLocal
       (I := I) S frame u nablaRic) :
     ChristoffelEvolutionEquationInFrameOn
@@ -1520,11 +1520,11 @@ theorem christoffelEvolutionEquationInFrameOn_of_pairing_local
   refine hsum.congr ?_ ?_
   · intro s _hs
     symm
-    exact (frameCoeff_eq_sum_inv_metricPairing
+    exact (frameCoeffLocal
       (I := I) S gInv frame hframe hinv (t : Real) hx k
       ((S.family.connection s (frame j) x) (frame i x))).symm
   · symm
-    exact (frameCoeff_eq_sum_inv_metricPairing
+    exact (frameCoeffLocal
       (I := I) S gInv frame hframe hinv (t : Real) hx k
       ((S.family.connection (t : Real) (frame j) x) (frame i x))).symm
 
@@ -1538,7 +1538,7 @@ theorem christoffelMetricVariationEquationInFrameOn_of_metricVariation
     (hframe : IsLocalFrameOn I E 1 frame u)
     (hu : IsOpen u)
     (pairDt metricCovDerivDt : Real -> M -> Idx -> Idx -> Idx -> Real)
-    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
+    (hinv : InvMetricLocal (I := I) S gInv frame u)
     (hpair :
       ConnectionPairingDerivativeInFrameOnLocal
         (I := I) S frame u pairDt)
@@ -1634,10 +1634,10 @@ theorem christoffelEvolution_of_metricFrameTimeRegularity
         (t : Real) := by
     refine hRhs.congr ?_ ?_
     · intro s _hs
-      exact christoffelSymbol_sub_eq_sum_inv_connectionDiff
+      exact gammaSubLocal
         (I := I) S gInv frame hframe hmetricFrame.nondegenerateGram
         (t : Real) s hx i j k
-    · exact christoffelSymbol_sub_eq_sum_inv_connectionDiff
+    · exact gammaSubLocal
         (I := I) S gInv frame hframe hmetricFrame.nondegenerateGram
         (t : Real) (t : Real) hx i j k
   have hGammaPlus :
@@ -1670,7 +1670,7 @@ theorem gammaEvolOfInv
     (hu : IsOpen u)
     (metricCovDerivDt nablaRic :
       Real -> M -> Idx -> Idx -> Idx -> Real)
-    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
+    (hinv : InvMetricLocal (I := I) S gInv frame u)
     (hinvEvol : InverseMetricEvolutionEquationInFrame
       (I := I) S gInv frame u)
     (hmetric :
@@ -1724,10 +1724,10 @@ theorem gammaEvolOfInv
         (t : Real) := by
     refine hRhs.congr ?_ ?_
     · intro s _hs
-      exact christoffelSymbol_sub_eq_sum_inv_connectionDiff
+      exact gammaSubLocal
         (I := I) S gInv frame hframe hinv
         (t : Real) s hx i j k
-    · exact christoffelSymbol_sub_eq_sum_inv_connectionDiff
+    · exact gammaSubLocal
         (I := I) S gInv frame hframe hinv
         (t : Real) (t : Real) hx i j k
   have hGammaPlus :
@@ -1920,7 +1920,7 @@ theorem christoffelEvolution_of_ricciFlowMetricVariation
     (hu : IsOpen u)
     (pairDt metricCovDerivDt nablaRic :
       Real -> M -> Idx -> Idx -> Idx -> Real)
-    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
+    (hinv : InvMetricLocal (I := I) S gInv frame u)
     (hpair :
       ConnectionPairingDerivativeInFrameOnLocal
         (I := I) S frame u pairDt)
@@ -1951,7 +1951,7 @@ theorem christoffelEvolution_of_koszul
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (pairDt nablaRic : Real -> M -> Idx -> Idx -> Idx -> Real)
-    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
+    (hinv : InvMetricLocal (I := I) S gInv frame u)
     (hdt : ConnectionPairingDerivativeInFrameOn (I := I) S frame pairDt)
     (hkoszul : KoszulConnectionVariationInFrame (M := M) pairDt nablaRic) :
     ChristoffelEvolutionEquationInFrameOn

@@ -963,6 +963,45 @@ theorem metric_derivWithin_eq_neg_two_ricci
   simpa [MetricVariationEquationOn, RicciAtFamily.toTensorField] using
     hS.equation t x X Y
 
+/-- At a regular time the metric evolution equation is an ordinary time
+derivative.  The interval-local `HasDerivWithinAt` form remains the canonical
+PDE interface, but `D.regular_mem_nhds` prevents endpoint semantics here. -/
+theorem metricDerivAt
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (t : Realized.RealTimeInterval.RegularTime D)
+    (x : M) (X Y : TangentSpace I x) :
+    HasDerivAt
+      (fun s : Real => (S.family.metric s).inner x X Y)
+      ((-2 : Real) * S.ricciAt (t : Real) x (Realized.vec2 X Y))
+      (t : Real) :=
+  (metric_derivWithin_eq_neg_two_ricci
+    (I := I) S hS t x X Y).hasDerivAt (D.regular_mem_nhds t.2)
+
+/-- At a regular time the scalar evolution equation is an ordinary time
+derivative.  This is just the `HasDerivAt` projection of the smooth solution
+package's interval-local scalar heat equation. -/
+theorem scalarEvolAt
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (G : Realized.RealizedMetricFamily (I := I) (M := M) Real)
+    (hmetric : ∀ t : Realized.RealTimeInterval.RegularTime D,
+      G.metric (t : Real) = S.family.metric (t : Real))
+    (hconnection : ∀ t : Realized.RealTimeInterval.RegularTime D,
+      G.connection (t : Real) = S.family.connection (t : Real))
+    (t : Realized.RealTimeInterval.RegularTime D) (x : M) :
+    HasDerivAt
+      (fun s : Real => S.scalar s x)
+      (Realized.laplacianAt (I := I) G (t : Real)
+          (S.scalar (t : Real)) x +
+        2 * normSq0S (I := I) (S.family.metric (t : Real)) x 2
+          (S.ricci (t : Real) x))
+      (t : Real) :=
+  (hS.scalarEvolution G hmetric hconnection t x).hasDerivAt
+    (D.regular_mem_nhds t.2)
+
 /-! ## Section 6.2: Ricci and scalar evolution interfaces -/
 
 section Components

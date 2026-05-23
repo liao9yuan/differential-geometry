@@ -227,6 +227,7 @@ theorem invEvolOfSol
 
 /-- Coordinate Ricci evolution produced from a metric Ricci-flow solution. -/
 theorem ricciEvolOfSol
+    [I.Boundaryless]
     {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
@@ -815,6 +816,7 @@ coordinate inverse-metric evolution, coordinate Ricci evolution, symmetries,
 and the Ricci-norm Bochner/Laplacian expansion from the metric smoothness and
 Ricci-flow equation recorded by `IsSolutionOn`. -/
 theorem smoothOfSol
+    [I.Boundaryless]
     {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) :

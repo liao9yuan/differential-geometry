@@ -551,6 +551,116 @@ theorem extDerivFun_apply_contMDiffAt
     (mfderiv I 𝓘(𝕜, 𝕜) f p) (e.symmL 𝕜 p (Xcoord p))
   rw [hcancel]
 
+/-- Product-spacetime smoothness of spatial exterior derivatives.
+
+If `F : Real × M -> Real` is `C^3` at `(t, x)` and `X` is a `C^2` spatial
+vector field at `x`, then `(s, y) |-> d_y (F(s, ·)) (X_y)` is `C^2` at
+`(t, x)`. -/
+theorem prodExtDerivAt
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+    {F : Real × M -> Real} {X : (x : M) -> TangentSpace I x}
+    {t : Real} {x : M}
+    (hF : ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real)
+      (3 : WithTop ℕ∞) F (t, x))
+    (hX : ContMDiffAt I (I.prod 𝓘(Real, E))
+      (∞ : WithTop ℕ∞) (T% X) x) :
+    ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real)
+      (2 : WithTop ℕ∞)
+      (fun p : Real × M =>
+        extDerivFun (I := I) (fun y : M => F (p.1, y)) p.2 (X p.2))
+      (t, x) := by
+  let e := trivializationAt E (TangentSpace I : M -> Type _) x
+  let XcoordM : M -> E := fun y => e.continuousLinearMapAt Real y (X y)
+  let Xcoord : Real × M -> E := fun p => XcoordM p.2
+  have hXcoordM :
+      ContMDiffAt I 𝓘(Real, E) (2 : WithTop ℕ∞) XcoordM x := by
+    have hXTopInf :
+        ContMDiffAt I 𝓘(Real, E) (∞ : WithTop ℕ∞)
+          (fun y : M => (e ⟨y, X y⟩).2) x := by
+      simpa [e] using
+        (e.contMDiffAt_section_iff
+          (s := fun y : M => X y)
+          (x₀ := x)
+          (by
+            simp [e])).mp hX
+    have hXTop :
+        ContMDiffAt I 𝓘(Real, E) (2 : WithTop ℕ∞)
+          (fun y : M => (e ⟨y, X y⟩).2) x :=
+      hXTopInf.of_le
+        (by exact WithTop.coe_le_coe.2 (le_top : (2 : ℕ∞) ≤ (⊤ : ℕ∞)))
+    refine hXTop.congr_of_eventuallyEq ?_
+    filter_upwards [e.open_baseSet.mem_nhds (by
+        simp [e])] with y hy
+    have hcoe : ⇑(e.linearMapAt Real y) = fun z => (e ⟨y, z⟩).2 :=
+      e.coe_linearMapAt_of_mem (R := Real) hy
+    simp [XcoordM, Bundle.Trivialization.continuousLinearMapAt_apply, hcoe]
+  have hXcoord :
+      ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, E)
+        (2 : WithTop ℕ∞) Xcoord (t, x) := by
+    exact hXcoordM.comp (t, x)
+      (contMDiffAt_snd (I := 𝓘(Real, Real)) (J := I) (p := (t, x)))
+  have harg :
+      ContMDiffAt ((𝓘(Real, Real).prod I).prod I)
+        (𝓘(Real, Real).prod I) (3 : WithTop ℕ∞)
+        (fun q : (Real × M) × M => (q.1.1, q.2)) ((t, x), x) := by
+    exact contMDiffAt_fst.fst.prodMk contMDiffAt_snd
+  have hFprod :
+      ContMDiffAt ((𝓘(Real, Real).prod I).prod I) 𝓘(Real, Real)
+        (3 : WithTop ℕ∞)
+        (fun q : (Real × M) × M => F (q.1.1, q.2)) ((t, x), x) :=
+    hF.comp ((t, x), x) harg
+  have hApply :=
+    ContMDiffAt.mfderiv_apply
+      (I := I) (I' := 𝓘(Real, Real))
+      (f := fun (p : Real × M) (y : M) => F (p.1, y))
+      (g := fun p : Real × M => p.2)
+      (g₁ := fun p : Real × M => p)
+      (g₂ := Xcoord)
+      (x₀ := (t, x))
+      (m := (2 : WithTop ℕ∞))
+      hFprod
+      contMDiffAt_snd
+      contMDiffAt_id
+      hXcoord
+      le_rfl
+  refine hApply.congr_of_eventuallyEq ?_
+  have hbase :
+      {p : Real × M | p.2 ∈ e.baseSet} ∈ 𝓝 (t, x) := by
+    exact (continuous_snd.tendsto (t, x)).eventually
+      (e.open_baseSet.mem_nhds (by simp [e]))
+  filter_upwards [hbase] with p hp
+  have hp_src : p.2 ∈ (chartAt H x).source := by
+    simpa [e, TangentBundle.trivializationAt_baseSet] using hp
+  have hf_src : F (p.1, p.2) ∈ (chartAt Real (F (t, x))).source := by
+    simp
+  rw [inTangentCoordinates_eq (I := I) (I' := 𝓘(Real, Real))
+    (f := fun p : Real × M => p.2) (g := fun p : Real × M => F (p.1, p.2))
+    (ϕ := fun p : Real × M =>
+      mfderiv I 𝓘(Real, Real) (fun y : M => F (p.1, y)) p.2)
+    hp_src hf_src]
+  have htarget :
+      (tangentBundleCore 𝓘(Real, Real) Real).coordChange
+        (achart Real (F (p.1, p.2))) (achart Real (F (t, x))) (F (p.1, p.2)) =
+          (1 : Real →L[Real] Real) := by
+    simp
+  have hsource :
+      (tangentBundleCore I M).coordChange (achart H x) (achart H p.2) p.2 =
+        e.symmL Real p.2 := by
+    simpa [e] using
+      (TangentBundle.symmL_trivializationAt_eq_core
+        (𝕜 := Real) (I := I) (b₀ := x) (b := p.2) hp_src).symm
+  have hcancel :
+      e.symmL Real p.2 (Xcoord p) = X p.2 := by
+    exact e.symmL_continuousLinearMapAt (R := Real) hp (X p.2)
+  rw [htarget, hsource]
+  change
+    (mfderiv I 𝓘(Real, Real) (fun y : M => F (p.1, y)) p.2) (X p.2) =
+      (mfderiv I 𝓘(Real, Real) (fun y : M => F (p.1, y)) p.2)
+        (e.symmL Real p.2 (Xcoord p))
+  rw [hcancel]
+
 section ModelMixed
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -1160,6 +1270,49 @@ theorem fixedBaseExtDerivTimeDerivativeOnRegular_singleton_of_chart_contDiffOnTi
       (fun s hs => hleft s hs)
       (hleft t (hregular_subset ht))).congr_deriv hright.symm
 
+/-- Model-space time-derivative identification for a smooth spacetime chart
+representative.
+
+If the slice derivative of `Φ` in the time variable is supplied as `Ψ`, and the
+time set is a neighborhood of the regular time, then `Ψ` agrees locally with the
+full Frechet derivative of `Φ` applied to the time direction `(1, 0)`. -/
+theorem eventuallyEq_timeFDeriv
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+    {timeSet : Set Real}
+    {Φ Ψ : Real -> E -> Real}
+    {t : Real} {y₀ : E}
+    (htime : timeSet ∈ 𝓝 t)
+    (hdiff : ∀ᶠ y in 𝓝 y₀,
+      DifferentiableAt Real
+        (fun p : Real × E => Φ p.1 p.2)
+        (t, y))
+    (hderiv : ∀ᶠ y in 𝓝 y₀,
+      HasDerivWithinAt
+        (fun s : Real => Φ s y)
+        (Ψ t y)
+        timeSet
+        t) :
+    Ψ t =ᶠ[𝓝 y₀]
+      fun y : E =>
+        (fderiv Real
+          (fun p : Real × E => Φ p.1 p.2)
+          (t, y)) (1, 0) := by
+  filter_upwards [hdiff, hderiv] with y hy_diff hy_deriv
+  let A : Real × E -> Real := fun p => Φ p.1 p.2
+  let L : Real -> Real × E := fun s => (s, y)
+  have hline : HasDerivAt L (1, 0) t := by
+    exact (hasDerivAt_id t).prodMk (hasDerivAt_const (x := t) (c := y))
+  have hchart :
+      HasDerivAt
+        (fun s : Real => A (L s))
+        ((fderiv Real A (t, y)) (1, 0)) t := by
+    simpa [A, L] using
+      hy_diff.hasFDerivAt.comp_hasDerivAt t hline
+  have htime_deriv :
+      HasDerivAt (fun s : Real => Φ s y) (Ψ t y) t :=
+    hy_deriv.hasDerivAt htime
+  exact htime_deriv.unique hchart
+
 /-- Pointwise chart-level constructor for regular-time fixed-base mixed
 derivatives on a singleton.
 
@@ -1235,5 +1388,247 @@ theorem fixedBaseAtReg
     (hmodel.congr
       (fun s hs => hleft s hs)
       (hleft t (hregular_subset ht))).congr_deriv hright.symm
+
+/-- Chart expression of scalar spacetime smoothness on `Real × M`, centered at
+the given spatial point. -/
+theorem contDiffAt_prodChart
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
+    [I.Boundaryless]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    {n : WithTop ℕ∞} {F : Real × M -> Real} {t : Real} {x : M}
+    (hF : ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) n F (t, x)) :
+    ContDiffAt Real n
+      (fun p : Real × E => F (p.1, (extChartAt I x).symm p.2))
+      (t, extChartAt I x x) := by
+  have hsrc :=
+    (contMDiffAt_iff_source
+      (I := 𝓘(Real, Real).prod I) (I' := 𝓘(Real, Real))
+      (f := F) (x := (t, x))).mp hF
+  rw [contMDiffWithinAt_iff_contDiffWithinAt] at hsrc
+  have hsrc' :
+      ContDiffWithinAt Real n
+        (fun p : Real × E => F (p.1, (extChartAt I x).symm p.2))
+        Set.univ (t, extChartAt I x x) := by
+    convert hsrc using 1
+    · ext p
+      have hp : p ∈ Set.range (Prod.map id (I : H -> E)) := by
+        simp [Set.range_prodMap, ModelWithCorners.range_eq_univ]
+      simp [hp]
+  simpa [contDiffWithinAt_univ] using hsrc'
+
+/-- Build regular-time fixed-base spatial derivative commutation from ordinary
+time derivatives of the scalar slices and spacetime smoothness.
+
+This is the manifold-level bridge from a Ricci-flow metric equation
+`∂ₜ F = Ft` to the fixed-base derivative predicate used by the Christoffel
+variation calculation. -/
+theorem fixedBaseOnReg_of_timeDerivWithin
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
+    [I.Boundaryless]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    {timeSet regularSet : Set Real} {u : Set M}
+    {F Ft : Real -> M -> Real}
+    (hregular_subset : regularSet ⊆ timeSet)
+    (hregular_nhds :
+      ∀ {t : Real}, t ∈ regularSet -> timeSet ∈ 𝓝 t)
+    (hSmooth :
+      ∀ t, t ∈ regularSet -> ∀ x : M, x ∈ u ->
+        ContMDiffAt
+          (𝓘(Real, Real).prod I) 𝓘(Real, Real) 2
+          (fun p : Real × M => F p.1 p.2)
+          (t, x))
+    (hFdiff :
+      ∀ s, s ∈ timeSet -> ∀ x : M, x ∈ u ->
+        MDifferentiableAt I 𝓘(Real, Real) (F s) x)
+    (hFtdiff :
+      ∀ t, t ∈ regularSet -> ∀ x : M, x ∈ u ->
+        MDifferentiableAt I 𝓘(Real, Real) (Ft t) x)
+    (hTime :
+      ∀ t, t ∈ regularSet -> ∀ x : M,
+        HasDerivWithinAt
+          (fun s : Real => F s x)
+          (Ft t x)
+          timeSet
+          t) :
+    FixedBaseExtDerivTimeDerivativeOnRegular
+      (I := I) timeSet regularSet u F Ft := by
+  intro t ht x hx V
+  let Φ : Real -> E -> Real := fun s y => F s ((extChartAt I x).symm y)
+  have hsingle :
+      FixedBaseExtDerivTimeDerivativeOnRegular
+        (I := I) timeSet regularSet ({x} : Set M) F Ft := by
+    refine fixedBaseAtReg
+      (I := I) (timeSet := timeSet) (regularSet := regularSet)
+      (x₀ := x) (F := F) (Ft := Ft) (Φ := Φ)
+      hregular_subset ?hΦ ?hFdiff ?hFchart ?hFtdiff ?hFtchart
+    · intro τ hτ
+      have hτs :
+          ContMDiffAt
+            (𝓘(Real, Real).prod I) 𝓘(Real, Real) 2
+            (fun p : Real × M => F p.1 p.2)
+            (τ, x) :=
+        hSmooth τ hτ x hx
+      simpa [Φ] using contDiffAt_prodChart (I := I) hτs
+    · intro s hs
+      exact hFdiff s hs x hx
+    · intro s hs
+      filter_upwards [extChartAt_target_mem_nhds (I := I) x] with y hy
+      simp [Φ, writtenInExtChartAt, extChartAt]
+    · intro τ hτ
+      exact hFtdiff τ hτ x hx
+    · intro τ hτ
+      have hraw :
+          (fun y : E => Ft τ ((extChartAt I x).symm y)) =ᶠ[𝓝 (extChartAt I x x)]
+            fun y : E =>
+              (fderiv Real (fun p : Real × E => Φ p.1 p.2) (τ, y)) (1, 0) := by
+        apply eventuallyEq_timeFDeriv
+          (Φ := Φ)
+          (Ψ := fun τ y => Ft τ ((extChartAt I x).symm y))
+          (t := τ) (y₀ := extChartAt I x x)
+        · exact hregular_nhds hτ
+        · have hτs :
+              ContDiffAt Real 2
+                (fun p : Real × E => Φ p.1 p.2)
+                (τ, extChartAt I x x) := by
+            have hτm :
+                ContMDiffAt
+                  (𝓘(Real, Real).prod I) 𝓘(Real, Real) 2
+                  (fun p : Real × M => F p.1 p.2)
+                  (τ, x) :=
+              hSmooth τ hτ x hx
+            simpa [Φ] using contDiffAt_prodChart (I := I) hτm
+          have hev :=
+            (hτs.eventually (by norm_num)).mono fun y hy =>
+              (hy.of_le (by norm_num)).differentiableAt_one
+          have hev' :
+              ∀ᶠ y in 𝓝 τ ×ˢ 𝓝 (extChartAt I x x),
+                DifferentiableAt Real (fun p : Real × E => Φ p.1 p.2) y := by
+            simpa [nhds_prod_eq] using hev
+          exact
+            (tendsto_const_nhds.prodMk Filter.tendsto_id).eventually hev'
+        · filter_upwards with y
+          exact hTime τ hτ ((extChartAt I x).symm y)
+      have hFt_raw :
+          writtenInExtChartAt I 𝓘(Real, Real) x (Ft τ)
+            =ᶠ[𝓝 (extChartAt I x x)]
+              fun y : E => Ft τ ((extChartAt I x).symm y) := by
+        filter_upwards [extChartAt_target_mem_nhds (I := I) x] with y hy
+        simp [writtenInExtChartAt, extChartAt]
+      exact hFt_raw.trans hraw
+  exact hsingle t ht x (by simp) V
+
+/-- Local-domain version of `fixedBaseOnReg_of_timeDerivWithin`.
+
+This is the form needed for local-frame component equations: the supplied time
+derivative is only known on an open spatial domain, but the chart points near a
+base point in that domain remain in the domain. -/
+theorem fixedBaseOnRegLocal
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
+    [I.Boundaryless]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    {timeSet regularSet : Set Real} {u : Set M}
+    {F Ft : Real -> M -> Real}
+    (hu : IsOpen u)
+    (hregular_subset : regularSet ⊆ timeSet)
+    (hregular_nhds :
+      ∀ {t : Real}, t ∈ regularSet -> timeSet ∈ 𝓝 t)
+    (hSmooth :
+      ∀ t, t ∈ regularSet -> ∀ x : M, x ∈ u ->
+        ContMDiffAt
+          (𝓘(Real, Real).prod I) 𝓘(Real, Real) 2
+          (fun p : Real × M => F p.1 p.2)
+          (t, x))
+    (hFdiff :
+      ∀ s, s ∈ timeSet -> ∀ x : M, x ∈ u ->
+        MDifferentiableAt I 𝓘(Real, Real) (F s) x)
+    (hFtdiff :
+      ∀ t, t ∈ regularSet -> ∀ x : M, x ∈ u ->
+        MDifferentiableAt I 𝓘(Real, Real) (Ft t) x)
+    (hTime :
+      ∀ t, t ∈ regularSet -> ∀ x : M, x ∈ u ->
+        HasDerivWithinAt
+          (fun s : Real => F s x)
+          (Ft t x)
+          timeSet
+          t) :
+    FixedBaseExtDerivTimeDerivativeOnRegular
+      (I := I) timeSet regularSet u F Ft := by
+  intro t ht x hx V
+  let Φ : Real -> E -> Real := fun s y => F s ((extChartAt I x).symm y)
+  have hsingle :
+      FixedBaseExtDerivTimeDerivativeOnRegular
+        (I := I) timeSet regularSet ({x} : Set M) F Ft := by
+    refine fixedBaseAtReg
+      (I := I) (timeSet := timeSet) (regularSet := regularSet)
+      (x₀ := x) (F := F) (Ft := Ft) (Φ := Φ)
+      hregular_subset ?hΦ ?hFdiff ?hFchart ?hFtdiff ?hFtchart
+    · intro τ hτ
+      have hτs :
+          ContMDiffAt
+            (𝓘(Real, Real).prod I) 𝓘(Real, Real) 2
+            (fun p : Real × M => F p.1 p.2)
+            (τ, x) :=
+        hSmooth τ hτ x hx
+      simpa [Φ] using contDiffAt_prodChart (I := I) hτs
+    · intro s hs
+      exact hFdiff s hs x hx
+    · intro s hs
+      filter_upwards [extChartAt_target_mem_nhds (I := I) x] with y hy
+      simp [Φ, writtenInExtChartAt, extChartAt]
+    · intro τ hτ
+      exact hFtdiff τ hτ x hx
+    · intro τ hτ
+      have hleft : (extChartAt I x).symm ((extChartAt I x) x) = x :=
+        (extChartAt I x).left_inv (mem_extChartAt_source (I := I) x)
+      have hsymm_tend :
+          Filter.Tendsto (fun y : E => (extChartAt I x).symm y)
+            (𝓝 (extChartAt I x x)) (𝓝 x) := by
+        simpa only [ContinuousAt, hleft, Function.comp_def] using
+          continuousAt_extChartAt_symm (I := I) x
+      have hu_event :
+          ∀ᶠ y in 𝓝 (extChartAt I x x), (extChartAt I x).symm y ∈ u :=
+        hsymm_tend.eventually (hu.mem_nhds hx)
+      have hraw :
+          (fun y : E => Ft τ ((extChartAt I x).symm y)) =ᶠ[𝓝 (extChartAt I x x)]
+            fun y : E =>
+              (fderiv Real (fun p : Real × E => Φ p.1 p.2) (τ, y)) (1, 0) := by
+        apply eventuallyEq_timeFDeriv
+          (Φ := Φ)
+          (Ψ := fun τ y => Ft τ ((extChartAt I x).symm y))
+          (t := τ) (y₀ := extChartAt I x x)
+        · exact hregular_nhds hτ
+        · have hτs :
+              ContDiffAt Real 2
+                (fun p : Real × E => Φ p.1 p.2)
+                (τ, extChartAt I x x) := by
+            have hτm :
+                ContMDiffAt
+                  (𝓘(Real, Real).prod I) 𝓘(Real, Real) 2
+                  (fun p : Real × M => F p.1 p.2)
+                  (τ, x) :=
+              hSmooth τ hτ x hx
+            simpa [Φ] using contDiffAt_prodChart (I := I) hτm
+          have hev :=
+            (hτs.eventually (by norm_num)).mono fun y hy =>
+              (hy.of_le (by norm_num)).differentiableAt_one
+          have hev' :
+              ∀ᶠ y in 𝓝 τ ×ˢ 𝓝 (extChartAt I x x),
+                DifferentiableAt Real (fun p : Real × E => Φ p.1 p.2) y := by
+            simpa [nhds_prod_eq] using hev
+          exact
+            (tendsto_const_nhds.prodMk Filter.tendsto_id).eventually hev'
+        · filter_upwards [hu_event] with y hyu
+          exact hTime τ hτ ((extChartAt I x).symm y) hyu
+      have hFt_raw :
+          writtenInExtChartAt I 𝓘(Real, Real) x (Ft τ)
+            =ᶠ[𝓝 (extChartAt I x x)]
+              fun y : E => Ft τ ((extChartAt I x).symm y) := by
+        filter_upwards [extChartAt_target_mem_nhds (I := I) x] with y hy
+        simp [writtenInExtChartAt, extChartAt]
+      exact hFt_raw.trans hraw
+  exact hsingle t ht x (by simp) V
 
 end RicciFlower

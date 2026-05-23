@@ -65,7 +65,7 @@ theorem inverseMetricEvolution_of_timeRegularityBlackBox
     (hS : IsSolutionOn (I := I) S)
     (gInv : Real -> Realized.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
-    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
+    (hinv : InvMetricLocal (I := I) S gInv frame Set.univ)
     (hbb : InverseMetricTimeRegularityBlackBoxInFrameOn (M := M) (Idx := Idx)
       (D := D) gInv) :
     InverseMetricEvolutionEquationInFrame (I := I) S gInv frame Set.univ :=

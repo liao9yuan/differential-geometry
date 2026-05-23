@@ -109,7 +109,11 @@ theorem coordMetricSmoothAt
       (prod_mem_nhds (D.regular_mem_nhds t.2)
         ((coordinateFrameSet_open (I := I) x₀).mem_nhds hx))
 
-/-- The inverse components invert the frame Gram matrix at all times. -/
+/-- Deprecated global inverse-metric components in a fixed frame.
+
+Prefer `InvMetricLocal` on the actual local frame domain.  A general manifold
+does not carry this kind of global frame data. -/
+@[deprecated "use InvMetricLocal on the actual local frame domain" (since := "2026-05-22")]
 def InverseMetricComponentsInFrameOn [DecidableEq Idx]
     {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -138,13 +142,21 @@ def InvMetricLocal [DecidableEq Idx]
         metricCompInFrame (I := I) S frame t x i k * gInv t x k j) =
         (if i = j then 1 else 0)
 
-/-- Symmetry of the inverse metric components in the chosen frame. -/
+/-- Deprecated global symmetry predicate for supplied inverse metric
+components.
+
+Prefer a pointwise symmetry hypothesis or derive symmetry from
+`MetricInverseInBasis` at the point where it is needed. -/
+@[deprecated "use pointwise inverse symmetry or derive it from MetricInverseInBasis" (since := "2026-05-22")]
 def SymmetricInverseMetricComponentsInFrameOn
     (gInv : Real -> Realized.InverseMetricComponents M Idx) : Prop :=
   forall t x i j, gInv t x i j = gInv t x j i
 
-/-- A supplied two-sided inverse of the frame Gram matrix is automatically
-symmetric. -/
+/-- Deprecated global-frame symmetry projection.
+
+Prefer deriving pointwise symmetry from `MetricInverseInBasis`, or from
+`InvMetricLocal` plus a local-frame membership proof. -/
+@[deprecated "derive pointwise symmetry from MetricInverseInBasis or InvMetricLocal" (since := "2026-05-22")]
 theorem gInv_symm [DecidableEq Idx]
     {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -198,7 +210,7 @@ structure MetricFrameTimeRegularityInFrameOnLocal
   /-- Nondegeneracy is represented by an explicit two-sided inverse of the
   frame Gram matrix. -/
   nondegenerateGram :
-    InverseMetricComponentsInFrameOn (I := I) S gInv frame
+    InvMetricLocal (I := I) S gInv frame u
   inverseMetricDerivative :
     InverseMetricDerivativeComponentsOn (D := D) gInv gInvDt
   uniqueTimeDerivatives :
@@ -681,10 +693,149 @@ private theorem coordInvCLM_eq
         intro a b
         simpa [coordInv, metricCompInFrame,
           Coordinates.coordinateFrameAt_basis_apply] using (hbasis a b).1)
-      (by
-        intro a b
-        simpa [coordInv, metricCompInFrame,
-          Coordinates.coordinateFrameAt_basis_apply] using (hbasis a b).2)
+        (by
+          intro a b
+          simpa [coordInv, metricCompInFrame,
+            Coordinates.coordinateFrameAt_basis_apply] using (hbasis a b).2)
+
+private theorem coordFrameGramCLM_spacetimeSmooth
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (x0 : M) :
+    ContMDiffOn (𝓘(Real, Real).prod I)
+      𝓘(Real,
+        (Coordinates.CoordinateIdx (𝕜 := Real) E -> Real) →L[Real]
+          (Coordinates.CoordinateIdx (𝕜 := Real) E -> Real)) ⊤
+      (fun p : Real × M =>
+        frameGramCLM (I := I) S (Coordinates.coordinateFrameAt (I := I) x0) p)
+      (D.carrier ×ˢ Coordinates.coordinateFrameSet (I := I) x0) := by
+  classical
+  unfold frameGramCLM
+  apply contMDiffOn_finset_sum
+  intro i _hi
+  apply contMDiffOn_finset_sum
+  intro j _hj
+  exact (coordMetricSmooth (I := I) S hS x0 i j).smul contMDiffOn_const
+
+private theorem coordFrameGInvCLM_spacetimeSmooth
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (x0 : M) :
+    ContMDiffOn (𝓘(Real, Real).prod I)
+      𝓘(Real,
+        (Coordinates.CoordinateIdx (𝕜 := Real) E -> Real) →L[Real]
+          (Coordinates.CoordinateIdx (𝕜 := Real) E -> Real)) ⊤
+      (fun p : Real × M =>
+        frameGInvCLM (Idx := Coordinates.CoordinateIdx (𝕜 := Real) E)
+          (coordInv (I := I) S x0) p)
+      (D.carrier ×ˢ Coordinates.coordinateFrameSet (I := I) x0) := by
+  classical
+  intro p hp
+  have hgram := coordFrameGramCLM_spacetimeSmooth (I := I) S hS x0 p hp
+  have hbasis :=
+    Coordinates.gInvBasisAt (I := I) (S.family.metric p.1) x0 hp.2
+  have hleft : ∀ a b : Coordinates.CoordinateIdx (𝕜 := Real) E,
+      (∑ k : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        coordInv (I := I) S x0 p.1 p.2 a k *
+          metricCompInFrame (I := I) S
+            (Coordinates.coordinateFrameAt (I := I) x0) p.1 p.2 k b) =
+        (if a = b then 1 else 0) := by
+    intro a b
+    simpa [coordInv, metricCompInFrame,
+      Coordinates.coordinateFrameAt_basis_apply] using (hbasis a b).1
+  have hright : ∀ a b : Coordinates.CoordinateIdx (𝕜 := Real) E,
+      (∑ k : Coordinates.CoordinateIdx (𝕜 := Real) E,
+        metricCompInFrame (I := I) S
+            (Coordinates.coordinateFrameAt (I := I) x0) p.1 p.2 a k *
+          coordInv (I := I) S x0 p.1 p.2 k b) =
+        (if a = b then 1 else 0) := by
+    intro a b
+    simpa [coordInv, metricCompInFrame,
+      Coordinates.coordinateFrameAt_basis_apply] using (hbasis a b).2
+  have hinvAt :
+      ContDiffAt Real ⊤ ContinuousLinearMap.inverse
+        (frameGramCLM (I := I) S
+          (Coordinates.coordinateFrameAt (I := I) x0) p) :=
+    (frameGramCLM_isInvertible_at
+      (I := I) S (coordInv (I := I) S x0)
+      (Coordinates.coordinateFrameAt (I := I) x0) p
+      hleft hright).contDiffAt_map_inverse
+  have hcomp :
+      ContMDiffWithinAt (𝓘(Real, Real).prod I)
+        𝓘(Real,
+          (Coordinates.CoordinateIdx (𝕜 := Real) E -> Real) →L[Real]
+            (Coordinates.CoordinateIdx (𝕜 := Real) E -> Real)) ⊤
+        (fun q : Real × M =>
+          ContinuousLinearMap.inverse
+            (frameGramCLM (I := I) S
+              (Coordinates.coordinateFrameAt (I := I) x0) q))
+        (D.carrier ×ˢ Coordinates.coordinateFrameSet (I := I) x0) p := by
+    simpa [Function.comp_def] using hinvAt.comp_contMDiffWithinAt hgram
+  refine hcomp.congr_of_eventuallyEq_of_mem ?_ hp
+  filter_upwards [self_mem_nhdsWithin] with q hq
+  exact
+    (coordInvCLM_eq (I := I) S x0 (x := q.2) hq.2 q.1).symm
+
+/-- Canonical coordinate inverse metric components are jointly smooth on the
+coordinate-frame spacetime domain. -/
+theorem coordInvSmooth
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (x0 : M) (i j : Coordinates.CoordinateIdx (𝕜 := Real) E) :
+    ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ⊤
+      (fun p : Real × M => coordInv (I := I) S x0 p.1 p.2 i j)
+      (D.carrier ×ˢ Coordinates.coordinateFrameSet (I := I) x0) := by
+  classical
+  have hsmooth :=
+    coordFrameGInvCLM_spacetimeSmooth (I := I) S hS x0
+  have happ :
+      ContMDiffOn (𝓘(Real, Real).prod I)
+        𝓘(Real, Coordinates.CoordinateIdx (𝕜 := Real) E -> Real) ⊤
+        (fun p : Real × M =>
+          frameGInvCLM (Idx := Coordinates.CoordinateIdx (𝕜 := Real) E)
+            (coordInv (I := I) S x0) p
+            (Pi.single j 1))
+        (D.carrier ×ˢ Coordinates.coordinateFrameSet (I := I) x0) := by
+    exact hsmooth.clm_apply contMDiffOn_const
+  have hcoord :
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ⊤
+        (fun p : Real × M =>
+          frameGInvCLM (Idx := Coordinates.CoordinateIdx (𝕜 := Real) E)
+            (coordInv (I := I) S x0) p
+            (Pi.single j 1) i)
+        (D.carrier ×ˢ Coordinates.coordinateFrameSet (I := I) x0) := by
+    exact (contMDiffOn_const
+      (I := 𝓘(Real, Real).prod I)
+      (I' := 𝓘(Real, (Coordinates.CoordinateIdx (𝕜 := Real) E -> Real) →L[Real] Real))
+      (n := ⊤) (s := D.carrier ×ˢ Coordinates.coordinateFrameSet (I := I) x0)
+      (c := LinearMap.toContinuousLinearMap
+        (LinearMap.proj (R := Real)
+          (φ := fun _ : Coordinates.CoordinateIdx (𝕜 := Real) E => Real) i))).clm_apply happ
+  refine hcoord.congr ?_
+  intro p hp
+  simpa using
+    (sum_mul_pi_single (Idx := Coordinates.CoordinateIdx (𝕜 := Real) E)
+      (fun k => coordInv (I := I) S x0 p.1 p.2 i k) j).symm
+
+/-- Pointwise spacetime smoothness of canonical coordinate inverse metric
+components at regular times and coordinate-frame points. -/
+theorem coordInvSmoothAt
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (x0 : M) (t : Realized.RealTimeInterval.RegularTime D) (x : M)
+    (hx : x ∈ Coordinates.coordinateFrameSet (I := I) x0)
+    (i j : Coordinates.CoordinateIdx (𝕜 := Real) E) :
+    ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ⊤
+      (fun p : Real × M => coordInv (I := I) S x0 p.1 p.2 i j)
+      ((t : Real), x) := by
+  exact
+    (coordInvSmooth (I := I) S hS x0 i j).contMDiffAt
+      (prod_mem_nhds (D.regular_mem_nhds t.2)
+        ((Coordinates.coordinateFrameSet_open (I := I) x0).mem_nhds hx))
 
 private theorem frameGInvCLM_spacetimeSmooth
     [DecidableEq Idx]
@@ -705,11 +856,25 @@ private theorem frameGInvCLM_spacetimeSmooth
   intro p hp
   have hgram :=
     frameGramCLM_spacetimeSmooth (I := I) S gInv gInvDt frame hreg p hp
+  have hleft : forall a b : Idx,
+      (∑ k : Idx,
+        gInv p.1 p.2 a k *
+          metricCompInFrame (I := I) S frame p.1 p.2 k b) =
+        (if a = b then 1 else 0) := by
+    intro a b
+    exact (hreg.nondegenerateGram p.1 p.2 hp.2 a b).1
+  have hright : forall a b : Idx,
+      (∑ k : Idx,
+        metricCompInFrame (I := I) S frame p.1 p.2 a k *
+          gInv p.1 p.2 k b) =
+        (if a = b then 1 else 0) := by
+    intro a b
+    exact (hreg.nondegenerateGram p.1 p.2 hp.2 a b).2
   have hinvAt :
       ContDiffAt Real ⊤ ContinuousLinearMap.inverse
         (frameGramCLM (I := I) S frame p) :=
-    (frameGramCLM_isInvertible (I := I) S gInv frame
-      hreg.nondegenerateGram p).contDiffAt_map_inverse
+    (frameGramCLM_isInvertible_at (I := I) S gInv frame p
+      hleft hright).contDiffAt_map_inverse
   have hcomp :
       ContMDiffWithinAt (𝓘(Real, Real).prod I)
         𝓘(Real, (Idx -> Real) →L[Real] (Idx -> Real)) ⊤
@@ -719,8 +884,23 @@ private theorem frameGInvCLM_spacetimeSmooth
     by
       simpa [Function.comp_def] using hinvAt.comp_contMDiffWithinAt hgram
   refine hcomp.congr_of_eventuallyEq_of_mem ?_ hp
-  filter_upwards with q
-  exact (frameGInvCLM_eq_inverse (I := I) S gInv frame hreg.nondegenerateGram q).symm
+  filter_upwards [self_mem_nhdsWithin] with q hq
+  have hleftq : forall a b : Idx,
+      (∑ k : Idx,
+        gInv q.1 q.2 a k *
+          metricCompInFrame (I := I) S frame q.1 q.2 k b) =
+        (if a = b then 1 else 0) := by
+    intro a b
+    exact (hreg.nondegenerateGram q.1 q.2 hq.2 a b).1
+  have hrightq : forall a b : Idx,
+      (∑ k : Idx,
+        metricCompInFrame (I := I) S frame q.1 q.2 a k *
+          gInv q.1 q.2 k b) =
+        (if a = b then 1 else 0) := by
+    intro a b
+    exact (hreg.nondegenerateGram q.1 q.2 hq.2 a b).2
+  exact (frameGInvCLM_eq_inverse_at (I := I) S gInv frame q
+    hleftq hrightq).symm
 
 /-- Spacetime smoothness of the supplied inverse-metric components.
 
@@ -984,12 +1164,13 @@ private theorem inverseMetric_derivative_row_eq
     (gInv : Real -> Realized.InverseMetricComponents M Idx)
     (gInvDt : Real -> M -> Idx -> Idx -> Real)
     (frame : Idx -> (x : M) -> TangentSpace I x)
+    {u : Set M}
     (hdt : InverseMetricDerivativeComponentsOn (D := D) gInv gInvDt)
-    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
+    (hinv : InvMetricLocal (I := I) S gInv frame u)
     (hunique : forall t : Realized.RealTimeInterval.RegularTime D,
       UniqueDiffWithinAt Real D.carrier (t : Real))
     (t : Realized.RealTimeInterval.RegularTime D)
-    (x : M) (i j : Idx) :
+    (x : M) (hx : x ∈ u) (i j : Idx) :
     (∑ a : Idx,
         (gInvDt (t : Real) x i a *
           metricCompInFrame (I := I) S frame (t : Real) x a j +
@@ -1032,9 +1213,9 @@ private theorem inverseMetric_derivative_row_eq
         (x := (t : Real)) (s := D.carrier)
         (c := (if i = j then 1 else 0 : Real))).congr
         (fun s _hs => by
-          exact (hinv s x i j).1)
+          exact (hinv s x hx i j).1)
         (by
-          exact (hinv (t : Real) x i j).1)
+          exact (hinv (t : Real) x hx i j).1)
   have h1 := hlhs.derivWithin (hunique t)
   have h0 := hconst.derivWithin (hunique t)
   exact h1.symm.trans h0
@@ -1162,7 +1343,7 @@ theorem inverseMetricCovDerivCompInFrame_eq_zero
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
-    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
+    (hinv : InvMetricLocal (I := I) S gInv frame u)
     (t : Real)
     (hmc : RicciFlower.Connection.IsMetricCompatible (I := I)
       cov (S.family.metric t))
@@ -1186,8 +1367,21 @@ theorem inverseMetricCovDerivCompInFrame_eq_zero
     extDerivFun (I := I) (fun y : M => gInv t y a b) x (frame d x)
   let Γ : Idx -> Idx -> Real := fun a b =>
     christoffelSymbolInFrame cov frame hframe x d a b
-  have hsymm : SymmetricInverseMetricComponentsInFrameOn gInv :=
-    gInv_symm (I := I) S gInv frame hinv
+  have hinvAt :
+      Tensor0SBundle.MetricInverseInBasis
+        (I := I) (M := M) (S.family.metric t) x
+        (hframe.toBasisAt hx) (fun a b : Idx => gInv t x a b) := by
+    intro a b
+    constructor
+    · simpa [metricCompInFrame, IsLocalFrameOn.toBasisAt_coe] using
+        (hinv t x hx a b).1
+    · simpa [metricCompInFrame, IsLocalFrameOn.toBasisAt_coe] using
+        (hinv t x hx a b).2
+  have hsymm : ∀ a b : Idx, U a b = U b a := by
+    intro a b
+    simpa [U] using
+      Tensor0SBundle.invMetric_symm (I := I) (M := M) (S.family.metric t)
+        x (hframe.toBasisAt hx) (fun a b : Idx => gInv t x a b) hinvAt a b
   have hDG : ∀ a b : Idx,
       DG a b =
         (∑ p : Idx, Γ a p * G p b) +
@@ -1219,17 +1413,18 @@ theorem inverseMetricCovDerivCompInFrame_eq_zero
           (hginv_mdiff k a) (hmetric_mdiff a m)
     have hconst :
         (fun y : M => ∑ a : Idx,
-          gInv t y k a * metricCompInFrame (I := I) S frame t y a m) =
+          gInv t y k a * metricCompInFrame (I := I) S frame t y a m) =ᶠ[nhds x]
         (fun _ : M => if k = m then 1 else 0) := by
-      funext y
-      exact (hinv t y k m).1
-    have hderiv :=
-      congrArg (fun F : M -> Real => extDerivFun (I := I) F x (frame d x)) hconst
+      filter_upwards [hu.mem_nhds hx] with y hy
+      exact (hinv t y hy k m).1
     have hzero_raw :
         extDerivFun (I := I)
           (fun y : M => ∑ a : Idx,
             gInv t y k a * metricCompInFrame (I := I) S frame t y a m)
           x (frame d x) = 0 := by
+      have hderiv :=
+        metric_extDerivFun_congr_eventually (I := I) (x := x)
+          (v := frame d x) hconst
       simpa using hderiv
     have hF_eq :
         ((Finset.univ : Finset Idx).sum F) =
@@ -1268,10 +1463,10 @@ theorem inverseMetricCovDerivCompInFrame_eq_zero
         _ = 0 := hrow m)
     (by
       intro a b
-      simpa [G, U] using (hinv t x a b).1)
+      simpa [G, U] using (hinv t x hx a b).1)
     (by
       intro a b
-      simpa [G, U] using (hinv t x a b).2)
+      simpa [G, U] using (hinv t x hx a b).2)
     (by
       intro a b
       simpa [G, metricCompInFrame] using
@@ -1280,7 +1475,7 @@ theorem inverseMetricCovDerivCompInFrame_eq_zero
   have hUG_left : ∀ p : Idx,
       (∑ a : Idx, U k a * G a p) = (if k = p then 1 else 0) := by
     intro p
-    simpa [U, G] using (hinv t x k p).1
+    simpa [U, G] using (hinv t x hx k p).1
   have hUG_right_sym : ∀ p : Idx,
       (∑ b : Idx, U l b * G p b) = (if p = l then 1 else 0) := by
     intro p
@@ -1288,11 +1483,11 @@ theorem inverseMetricCovDerivCompInFrame_eq_zero
       (∑ b : Idx, U l b * G p b)
           = ∑ b : Idx, G p b * U b l := by
               refine Finset.sum_congr rfl fun b _hb => ?_
-              change gInv t x l b * G p b = G p b * gInv t x b l
-              rw [hsymm t x l b]
+              change U l b * G p b = G p b * U b l
+              rw [hsymm l b]
               ring
       _ = (if p = l then 1 else 0) := by
-              simpa [U, G] using (hinv t x p l).2
+              simpa [U, G] using (hinv t x hx p l).2
   have hterm1 :
       (∑ a : Idx, ∑ b : Idx,
         U k a * U l b * (∑ p : Idx, Γ a p * G p b)) =
@@ -1379,8 +1574,8 @@ theorem inverseMetricCovDerivCompInFrame_eq_zero
             simp
       _ = ∑ a : Idx, Γ a k * U a l := by
             refine Finset.sum_congr rfl fun a _ha => ?_
-            change gInv t x l a * Γ a k = Γ a k * gInv t x a l
-            rw [hsymm t x l a]
+            change U l a * Γ a k = Γ a k * U a l
+            rw [hsymm l a]
             ring
   have htrace :
       (∑ a : Idx, ∑ b : Idx, U k a * U l b * DG a b) =
@@ -1756,11 +1951,11 @@ theorem inverseMetricEvolutionEquationInFrame_of_inverse_components
     (frame : Idx -> (x : M) -> TangentSpace I x)
     {u : Set M}
     (hdt : InverseMetricDerivativeComponentsOn (D := D) gInv gInvDt)
-    (hinv : InverseMetricComponentsInFrameOn (I := I) S gInv frame)
+    (hinv : InvMetricLocal (I := I) S gInv frame u)
     (hunique : forall t : Realized.RealTimeInterval.RegularTime D,
       UniqueDiffWithinAt Real D.carrier (t : Real)) :
     InverseMetricEvolutionEquationInFrame (I := I) S gInv frame u := by
-  intro t x _hx i j
+  intro t x hx i j
   have hrow : forall m : Idx,
       (∑ a : Idx,
           (gInvDt (t : Real) x i a *
@@ -1770,7 +1965,7 @@ theorem inverseMetricEvolutionEquationInFrame_of_inverse_components
         0 := by
     intro m
     exact inverseMetric_derivative_row_eq
-      (I := I) S hS gInv gInvDt frame hdt hinv hunique t x i m
+      (I := I) S hS gInv gInvDt frame hdt hinv hunique t x hx i m
   have hsolve :
       gInvDt (t : Real) x i j =
         inverseMetricEvolutionRHSInFrame (I := I) S gInv frame (t : Real) x i j := by
@@ -1782,8 +1977,8 @@ theorem inverseMetricEvolutionEquationInFrame_of_inverse_components
       (gInvDt := fun a b => gInvDt (t : Real) x a b)
       i
       hrow
-      (fun a b => (hinv (t : Real) x a b).1)
-      (fun a b => (hinv (t : Real) x a b).2)
+      (fun a b => (hinv (t : Real) x hx a b).1)
+      (fun a b => (hinv (t : Real) x hx a b).2)
       (fun a b => by
         simpa [metricCompInFrame] using
           (S.family.metric (t : Real)).symm x (frame a x) (frame b x))
