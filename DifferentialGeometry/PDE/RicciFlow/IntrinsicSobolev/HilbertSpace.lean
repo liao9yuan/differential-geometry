@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedNorm
+import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedHsNorm
 import DifferentialGeometry.Integral.L2.SmoothSections.PreHilbert
 import Mathlib.Analysis.InnerProductSpace.Defs
 import Mathlib.Topology.UniformSpace.Completion
@@ -15,18 +15,25 @@ inner-product space `E`, and a non-negative integer regularity order `k`, this
 file constructs the intrinsic `H^k` Sobolev Hilbert space of smooth
 `(r, s)`-tensor fields, obtained as the Hausdorff completion of the
 pre-Hilbert space of smooth compactly-supported sections equipped with an
-inner product whose induced norm is the partition-of-unity-weighted
-chart-Sobolev norm `tensorPouSobolevNorm g k`.
+inner product whose induced norm is the Hilbert-Schmidt partition-of-unity-
+weighted chart-Sobolev norm `tensorPouSobolevHsNorm g k`.
 
 The construction parallels the standard `TensorL2` / `TensorH1Compl` design:
 a wrapper structure carries `SmoothCcTensor g r s` together with a fresh
 `PreInnerProductSpace.Core` instance, and the Hilbert space itself is the
 uniform-space completion of the wrapped pre-Hilbert space.
 
+The use of the Hilbert-Schmidt aggregation of iterated-Fréchet-derivative
+components in `tensorPouSobolevHsNorm` (rather than the operator-norm
+aggregation in `tensorPouSobolevNorm`) is what allows the norm to be
+induced by an inner product, because the parallelogram law fails for the
+operator norm on multilinear maps of arity `≥ 2` and holds for the
+Hilbert-Schmidt sum-of-squares-over-components expansion.
+
 ## Main definitions
 
 * `SmoothCcTensorHs g r s k` — wrapper around `SmoothCcTensor g r s` carrying
-  the `H^k`-style pre-Hilbert structure (norm = `tensorPouSobolevNorm g k`).
+  the `H^k`-style pre-Hilbert structure (norm = `tensorPouSobolevHsNorm g k`).
 * `TensorPouSobolevHilbert g r s k` — the intrinsic `H^k` Hilbert space, the
   Hausdorff completion of `SmoothCcTensorHs g r s k`.
 * `SmoothCcTensor.toHs` — canonical embedding `SmoothCcTensor g r s →
@@ -35,7 +42,7 @@ uniform-space completion of the wrapped pre-Hilbert space.
 ## Main results
 
 * `tensorPouSobolevHilbert_norm_eq` — the norm on `TensorPouSobolevHilbert g
-  r s k` agrees with `(tensorPouSobolevNorm g k T).toReal` on the dense
+  r s k` agrees with `(tensorPouSobolevHsNorm g k T).toReal` on the dense
   subspace of smooth compactly-supported sections.
 -/
 
@@ -80,7 +87,7 @@ structure as a fresh Lean type, avoiding clashes with the existing `L^2`
 pre-Hilbert structure on `SmoothCcTensor g r s`. -/
 
 /-- Compactly-supported smooth `(r, s)`-tensor section wrapped to carry the
-`H^k` pre-Hilbert structure (with norm `tensorPouSobolevNorm g k`).
+`H^k` pre-Hilbert structure (with norm `tensorPouSobolevHsNorm g k`).
 
 A separate Lean type from `SmoothCcTensor` (which already carries the `L^2`
 pre-Hilbert structure) and from `SmoothCcTensorH1` (which carries the `H^1`
@@ -180,14 +187,30 @@ end SmoothCcTensorHs
 /-! ## Pre-inner-product core, induced norm, inner-product space structure
 
 The inner product on `SmoothCcTensorHs g r s k` is the polarised form of the
-square of `tensorPouSobolevNorm g k`. The bundling and the proofs of the four
-`PreInnerProductSpace.Core` fields are deferred to follow-up files; here we
-record only the signature so downstream consumers can import the Hilbert space
-unconditionally. -/
+square of `tensorPouSobolevHsNorm g k`. Equivalently, it is the
+chart-tsum / multi-index / iterated-derivative / basis-tuple expansion of the
+pointwise inner product of the two iterated derivatives of the raw scalar
+components, weighted by the partition of unity and integrated against the
+chart-target Lebesgue measure.
+
+The bundling and the proofs of the four `PreInnerProductSpace.Core` fields
+are deferred to follow-up files; here we record only the signature so
+downstream consumers can import the Hilbert space unconditionally. -/
 
 set_option linter.unusedSectionVars false in
 /-- The pre-inner-product core on `SmoothCcTensorHs g r s k`, with the inner
-product the polarised form of the square of `tensorPouSobolevNorm g k`. -/
+product the polarised form of the square of `tensorPouSobolevHsNorm g k`.
+
+Concretely, on the dense subspace of smooth compactly-supported sections,
+this inner product is the chart-aggregated bilinear form:
+
+`⟨T, S⟩ := ∑'_α ∑_{IJ} ∑_{j ≤ 2k} ∑_{basisIdx} ∫ ρ_α(pull y) ·
+  (D^j(T_α^{IJ} ∘ pull)(y)(basis)) · (D^j(S_α^{IJ} ∘ pull)(y)(basis)) dy`,
+
+whose diagonal `⟨T, T⟩` equals `((tensorPouSobolevHsNorm g k T).toReal)²`.
+Because each multilinear evaluation `D^j(·)(basis)` is a scalar linear in
+the underlying tensor section, the bilinear form is symmetric, bilinear,
+and positive semi-definite. -/
 noncomputable instance instPreInnerProductSpaceCore
     {g : SmoothRiemannianMetric I M} {r s k : ℕ} :
     PreInnerProductSpace.Core ℝ (SmoothCcTensorHs g r s k) where
@@ -219,8 +242,8 @@ noncomputable instance instInnerProductSpace
 closed smooth Riemannian manifold `(M, g)`, defined as the Hausdorff
 completion of the pre-Hilbert space `SmoothCcTensorHs g r s k` of smooth
 compactly-supported sections equipped with the inner product whose induced
-norm is the partition-of-unity-weighted chart-Sobolev norm
-`tensorPouSobolevNorm g k`.
+norm is the Hilbert-Schmidt partition-of-unity-weighted chart-Sobolev norm
+`tensorPouSobolevHsNorm g k`.
 
 Mathematically this is the textbook intrinsic `H^k(M; T^{(r,s)} M)` Sobolev
 space. By Mathlib's automatic instances on the completion of a pre-Hilbert
@@ -249,14 +272,15 @@ end SmoothCcTensor
 
 set_option linter.unusedSectionVars false in
 /-- The Hilbert-space norm on `TensorPouSobolevHilbert g r s k` agrees with
-the partition-of-unity-weighted chart-Sobolev norm on the dense subspace of
-smooth compactly-supported sections: for any `T : SmoothCcTensor g r s`,
-`‖T.toHs k‖ = (tensorPouSobolevNorm g k T).toReal`. -/
+the Hilbert-Schmidt partition-of-unity-weighted chart-Sobolev norm on the
+dense subspace of smooth compactly-supported sections: for any
+`T : SmoothCcTensor g r s`,
+`‖T.toHs k‖ = (tensorPouSobolevHsNorm g k T).toReal`. -/
 theorem tensorPouSobolevHilbert_norm_eq
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (k : ℕ)
     (T : SmoothCcTensor g r s) :
     ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) k T‖ =
-      (tensorPouSobolevNorm (I := I) (M := M) g k T).toReal := by
+      (tensorPouSobolevHsNorm (I := I) (M := M) g k T).toReal := by
   exact sorry
 
 end IntrinsicSobolev

@@ -833,6 +833,7 @@ import DifferentialGeometry.Analysis.Sobolev.Tensor.Defs
 import DifferentialGeometry.Analysis.Sobolev.Tensor.NormBasics
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartLocality
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedNorm
+import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedHsNorm
 import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.ChartPrimitives
 import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.ChartInvGramMatrixPullback
 import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.ChartFrameCoordMatrixPullback
