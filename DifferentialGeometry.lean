@@ -776,6 +776,9 @@ import DifferentialGeometry.PDE.RicciFlow.ConnectionLaplacian.FormDirichlet
 import DifferentialGeometry.PDE.RicciFlow.FriedrichsExtension.Construction
 import DifferentialGeometry.PDE.RicciFlow.FriedrichsExtension.SelfAdjoint
 import DifferentialGeometry.PDE.RicciFlow.FriedrichsExtension.ResolventBound
+import DifferentialGeometry.PDE.RicciFlow.SpectralTheorem.UnboundedSpectrum
+import DifferentialGeometry.PDE.RicciFlow.SpectralTheorem.CayleyTransform
+import DifferentialGeometry.PDE.RicciFlow.SpectralTheorem.BorelFunctionalCalculus
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.HilbertSpace
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.Inclusion
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcDense
