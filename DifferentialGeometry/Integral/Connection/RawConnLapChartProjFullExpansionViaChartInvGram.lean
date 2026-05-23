@@ -15,13 +15,13 @@ Levi-Civita good set, as the sum of three pieces:
 
 * a chart-α inverse-Gram-matrix-weighted *principal* double sum
   `Σ_{k, l} chartInvGramMatrix g α b k l · [chart-α (Idx, Jdx) projection of
-   (cov_RS).toFun (covApply cov_RS B_k T₀.toSection) b
+   (cov_RS).toFun (covApply cov_RS (chartBasisVecFiber α k) T₀.toSection) b
      (chartBasisVecFiber α l b)]`
-  over the chart-α coordinate indices `(k, l)`, where the inner-cov vector
-  field has been *fictitiously* indexed by the chart-α coordinate basis index
-  `k` via the algebraic identity `B_k = B_k` (i.e., we keep the chart-α
-  globally smooth orthonormal frame on the inner slot, but the OUTER summation
-  index now ranges over the chart-α coordinate index, not the frame index);
+  over the chart-α coordinate indices `(k, l)`, where BOTH the inner-cov
+  vector field and the outer evaluation vector are the chart-α coordinate-
+  basis tangent vectors `∂_k`, `∂_l`. This is the natural pairing that allows
+  the subsequent orthonormality contraction `Σ_i C^k_i · C^l_i = g^{kl}` to
+  collapse cleanly on both factors;
 
 * a *Leibniz remainder* defined as the algebraic difference between the
   predecessor's chart-α `(Idx, Jdx)`-projection double sum (over `(i, l)` with
@@ -83,13 +83,16 @@ second covariant derivative
 The principal term is the chart-α inverse-Gram-matrix-weighted double sum over
 the chart-α coordinate indices `(k, l)` of the chart-α `(Idx, Jdx)` projection
 of the bundle covariant derivative
-`(cov_RS).toFun (covApply cov_RS B_k T₀.toSection)` at `b` applied to the
-chart-α coordinate-basis tangent vector `chartBasisVecFiber α l b`.
+`(cov_RS).toFun (covApply cov_RS (chartBasisVecFiber α k) T₀.toSection)` at
+`b` applied to the chart-α coordinate-basis tangent vector
+`chartBasisVecFiber α l b`.
 
-The inner vector field remains `B_k = chartFrameNormGlobalSmooth g α k`, the
-chart-α globally smooth orthonormal frame indexed by the *chart-α coordinate
-index* `k`. The chart-α inverse Gram matrix `chartInvGramMatrix g α b k l`
-weights the double sum. -/
+The inner vector field is `chartBasisVecFiber α k`, the chart-α coordinate-
+basis tangent vector indexed by the *chart-α coordinate index* `k`. The
+chart-α inverse Gram matrix `chartInvGramMatrix g α b k l` weights the double
+sum. Pairing the chart-coordinate basis on both inner and outer slots is the
+form required for the orthonormality contraction
+`Σ_i C^k_i · C^l_i = g^{kl}` to collapse on both sides. -/
 
 /-- **The chart-α inverse-Gram-matrix-weighted principal sum.** -/
 private noncomputable def chartInvGramPrincipalSum
@@ -108,7 +111,7 @@ private noncomputable def chartInvGramPrincipalSum
                 (LeviCivita (I := I) g)).toFun
               (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
                 (LeviCivita (I := I) g))
-                (chartFrameNormGlobalSmooth (I := I) (M := M) g α k).toFun
+                (chartBasisVecFiber (I := I) α k)
                 (fun z : M => T₀.toSection z)) b
               (chartBasisVecFiber (I := I) α l b)))
 
@@ -214,11 +217,11 @@ the sum of:
 
 * the chart-α inverse-Gram-matrix-weighted *principal* double sum
   `Σ_{k, l} chartInvGramMatrix g α b k l · [chart-α (Idx, Jdx) projection of
-   (cov_RS).toFun (covApply cov_RS B_k T₀.toSection) b
+   (cov_RS).toFun (covApply cov_RS (chartBasisVecFiber α k) T₀.toSection) b
      (chartBasisVecFiber α l b)]`,
   exposing the metric-trace structure of the chart-α inverse Gram matrix as
   the contraction tensor that emerges from the orthonormality identity for
-  the chart-α frame coordinate matrix;
+  the chart-α frame coordinate matrix on both the inner and outer slots;
 
 * a *Leibniz remainder* packaging the residual frame-index data after the
   inverse-Gram contraction, T₀-linear with chart-α coordinate-basis smooth
