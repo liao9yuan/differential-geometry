@@ -1107,13 +1107,826 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
     _ ≤ K_max * Lmax * 3 * (ρ * RHS_pouSobolev) := h_step3
     _ = K_max * Lmax * 3 * (ρ * RHS_pouSobolev) := rfl
 
+/-! ## AEMeasurability of the per-`α`, per-`(IJ, j)` POU-weighted integrand on
+the Euclidean chart-target restriction -/
+
+/-- The per-`α`, per-`(IJ, j)` POU-weighted squared-norm integrand is
+AEMeasurable on the restriction of `volume` to the Euclidean chart target.
+The argument: the integrand is continuous on the open chart target
+`chartTargetEuclid α`, then `ContinuousOn.aemeasurable` applies. -/
+private lemma pouWeightedSummand_aemeasurable_on_chartTarget
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
+    (α : M)
+    (IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E)))
+    (j : ℕ) :
+    AEMeasurable
+      (fun y : EuclN => ENNReal.ofReal
+        (((chartAtlasPOU I M α : M → ℝ)
+            ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+          ‖iteratedFDeriv ℝ j
+              (tensorChartComponentRaw (I := I) (M := M) g r s T α IJ.1 IJ.2
+                ∘ (extChartAt I α).symm)
+              ((toEuclidean (E := E)).symm y)‖ ^ 2))
+      ((volume : Measure EuclN).restrict
+        (chartTargetEuclid (I := I) (M := M) α)) := by
+  classical
+  -- The integrand is `ENNReal.ofReal ∘ (POU(symm ∘ toEucl.symm) * ‖iterFD ...‖²)`.
+  -- Step 1: continuity of `iterFD j (rawComp ∘ (extChartAt I α).symm)` on the
+  -- Euclidean chart target `(extChartAt I α).target`.
+  have h_iterFD_cont :
+      ContinuousOn
+        (fun y' : E => iteratedFDeriv ℝ j
+          (tensorChartComponentRaw (I := I) (M := M) g r s T α IJ.1 IJ.2 ∘
+            (extChartAt I α).symm)
+          y')
+        ((extChartAt I α).target) :=
+    iteratedFDeriv_tensorChartComponentRaw_comp_symm_continuousOn
+      (I := I) (M := M) g r s T α IJ.1 IJ.2 j
+  -- Step 2: `toEuclidean.symm` is globally continuous.
+  have h_toEucl_symm_cont : Continuous ((toEuclidean (E := E)).symm) :=
+    (toEuclidean (E := E)).symm.continuous
+  -- Step 3: the chart target image equals the preimage of the chart target
+  -- under `toEuclidean.symm`.
+  have h_eq_preimage :
+      chartTargetEuclid (I := I) (M := M) α =
+        (toEuclidean (E := E)).symm ⁻¹' (extChartAt I α).target :=
+    chartTargetEuclid_eq_preimage_symm (I := I) (M := M) α
+  have h_maps :
+      Set.MapsTo (fun y : EuclN => (toEuclidean (E := E)).symm y)
+        (chartTargetEuclid (I := I) (M := M) α) ((extChartAt I α).target) := by
+    intro y hy
+    rw [h_eq_preimage] at hy
+    exact hy
+  -- Step 4: continuity on the chart target of
+  -- `fun y => iterFD j (...) (toEuclidean.symm y)`.
+  have h_iterFD_comp_cont :
+      ContinuousOn
+        (fun y : EuclN => iteratedFDeriv ℝ j
+          (tensorChartComponentRaw (I := I) (M := M) g r s T α IJ.1 IJ.2 ∘
+            (extChartAt I α).symm)
+          ((toEuclidean (E := E)).symm y))
+        (chartTargetEuclid (I := I) (M := M) α) :=
+    h_iterFD_cont.comp h_toEucl_symm_cont.continuousOn h_maps
+  -- Step 5: continuity of the norm and norm squared.
+  have h_norm_sq_cont :
+      ContinuousOn
+        (fun y : EuclN => ‖iteratedFDeriv ℝ j
+          (tensorChartComponentRaw (I := I) (M := M) g r s T α IJ.1 IJ.2 ∘
+            (extChartAt I α).symm)
+          ((toEuclidean (E := E)).symm y)‖ ^ 2)
+        (chartTargetEuclid (I := I) (M := M) α) :=
+    h_iterFD_comp_cont.norm.pow 2
+  -- Step 6: continuity of the POU weight composed with the chart maps.
+  have h_pou_cont : Continuous (fun b : M => (chartAtlasPOU I M α : M → ℝ) b) :=
+    (chartAtlasPOU I M α).contMDiff.continuous
+  -- Continuity of `(extChartAt I α).symm` on the chart target.
+  have h_extSymm_cont :
+      ContinuousOn (fun y : E => (extChartAt I α).symm y) ((extChartAt I α).target) :=
+    continuousOn_extChartAt_symm (I := I) α
+  -- Continuity of `(extChartAt I α).symm ∘ toEucl.symm` on chart target image.
+  have h_pou_comp_cont :
+      ContinuousOn
+        (fun y : EuclN => (chartAtlasPOU I M α : M → ℝ)
+          ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))
+        (chartTargetEuclid (I := I) (M := M) α) := by
+    have h_inner_cont :
+        ContinuousOn
+          (fun y : EuclN => (extChartAt I α).symm ((toEuclidean (E := E)).symm y))
+          (chartTargetEuclid (I := I) (M := M) α) :=
+      h_extSymm_cont.comp h_toEucl_symm_cont.continuousOn h_maps
+    exact h_pou_cont.comp_continuousOn h_inner_cont
+  -- Step 7: continuity of the product `POU(...) * ‖iterFD(...)‖²` on chart target.
+  have h_prod_cont :
+      ContinuousOn
+        (fun y : EuclN =>
+          ((chartAtlasPOU I M α : M → ℝ)
+              ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+          ‖iteratedFDeriv ℝ j
+              (tensorChartComponentRaw (I := I) (M := M) g r s T α IJ.1 IJ.2 ∘
+                (extChartAt I α).symm)
+              ((toEuclidean (E := E)).symm y)‖ ^ 2)
+        (chartTargetEuclid (I := I) (M := M) α) :=
+    h_pou_comp_cont.mul h_norm_sq_cont
+  -- Step 8: AEMeasurability via `ContinuousOn.aemeasurable`.
+  have h_meas_set :
+      MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
+    (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
+  have h_prod_aemeas :
+      AEMeasurable
+        (fun y : EuclN =>
+          ((chartAtlasPOU I M α : M → ℝ)
+              ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+          ‖iteratedFDeriv ℝ j
+              (tensorChartComponentRaw (I := I) (M := M) g r s T α IJ.1 IJ.2 ∘
+                (extChartAt I α).symm)
+              ((toEuclidean (E := E)).symm y)‖ ^ 2)
+        ((volume : Measure EuclN).restrict
+          (chartTargetEuclid (I := I) (M := M) α)) :=
+    h_prod_cont.aemeasurable h_meas_set
+  exact ENNReal.measurable_ofReal.comp_aemeasurable h_prod_aemeas
+
+/-! ## Per-`α`, per-`(Idx, Jdx)` squared `L²`-norm bound -/
+
+/-- Squared-`L²` per-`α`, per-`(Idx, Jdx)` bound. The squared `eLpNorm 2` of the
+chart component of the raw tensor connection Laplacian over the chart target is
+bounded by `ofReal K_max · Σ_IJ' Σ_j (POU-weighted integral)`, where `K_max` is
+the per-α constant from `tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand`. -/
+private lemma sq_eLpNorm_tensorChartComp_le_pou_summand
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
+    ∃ K : ℝ, 0 ≤ K ∧
+      ∀ (T : SmoothCcTensor g r s)
+        (Idx : Fin r → Fin (Module.finrank ℝ E))
+        (Jdx : Fin s → Fin (Module.finrank ℝ E)),
+        (eLpNorm
+            (tensorChartComp (I := I) (M := M) g r s
+              (rawTensorConnLapSmooth (I := I) g r s T) α Idx Jdx) 2
+            ((volume : Measure EuclN).restrict
+              (chartTargetEuclid (I := I) (M := M) α))) ^ 2 ≤
+          ENNReal.ofReal K *
+            (∑ IJ' : (Fin r → Fin (Module.finrank ℝ E)) ×
+                (Fin s → Fin (Module.finrank ℝ E)),
+              ∑ j ∈ Finset.range 3,
+                ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+                  ENNReal.ofReal
+                    (((chartAtlasPOU I M α : M → ℝ)
+                        ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+                      ‖iteratedFDeriv ℝ j
+                          (tensorChartComponentRaw (I := I) (M := M) g r s T α IJ'.1 IJ'.2
+                            ∘ (extChartAt I α).symm)
+                          ((toEuclidean (E := E)).symm y)‖ ^ 2)
+                  ∂(volume : Measure EuclN)) := by
+  classical
+  obtain ⟨K, hK_nn, hK_bound⟩ :=
+    tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
+      (I := I) (M := M) g r s α
+  refine ⟨K, hK_nn, ?_⟩
+  intro T Idx Jdx
+  -- (eLpNorm 2)² = ∫ ofReal (f y)² dμ.
+  have h_sq_eLp :
+      (eLpNorm
+          (tensorChartComp (I := I) (M := M) g r s
+            (rawTensorConnLapSmooth (I := I) g r s T) α Idx Jdx) 2
+          ((volume : Measure EuclN).restrict
+            (chartTargetEuclid (I := I) (M := M) α))) ^ 2 =
+      ∫⁻ y, ENNReal.ofReal
+          ((tensorChartComp (I := I) (M := M) g r s
+              (rawTensorConnLapSmooth (I := I) g r s T) α Idx Jdx y) ^ 2)
+          ∂((volume : Measure EuclN).restrict
+              (chartTargetEuclid (I := I) (M := M) α)) :=
+    sq_eLpNorm_two_eq_lintegral_ofReal_sq _ _
+  rw [h_sq_eLp]
+  set μ : Measure EuclN :=
+    (volume : Measure EuclN).restrict (chartTargetEuclid (I := I) (M := M) α)
+    with hμ_def
+  -- Apply pointwise bound under lintegral_mono.
+  have h_pt : ∀ y : EuclN,
+      ENNReal.ofReal
+          ((tensorChartComp (I := I) (M := M) g r s
+              (rawTensorConnLapSmooth (I := I) g r s T) α Idx Jdx y) ^ 2) ≤
+        ENNReal.ofReal
+          (K *
+            (((chartAtlasPOU I M α : M → ℝ)
+                ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+              ∑ IJ' : (Fin r → Fin (Module.finrank ℝ E)) ×
+                  (Fin s → Fin (Module.finrank ℝ E)),
+                ∑ j ∈ Finset.range 3,
+                  ‖iteratedFDeriv ℝ j
+                      ((tensorChartComponentRaw (I := I) (M := M) g r s
+                            T α IJ'.1 IJ'.2)
+                        ∘ (extChartAt I α).symm)
+                      ((toEuclidean (E := E)).symm y)‖ ^ 2)) := by
+    intro y
+    exact ENNReal.ofReal_le_ofReal (hK_bound T Idx Jdx y)
+  have h_int_le :
+      ∫⁻ y, ENNReal.ofReal
+          ((tensorChartComp (I := I) (M := M) g r s
+              (rawTensorConnLapSmooth (I := I) g r s T) α Idx Jdx y) ^ 2) ∂μ ≤
+      ∫⁻ y, ENNReal.ofReal
+          (K *
+            (((chartAtlasPOU I M α : M → ℝ)
+                ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+              ∑ IJ' : (Fin r → Fin (Module.finrank ℝ E)) ×
+                  (Fin s → Fin (Module.finrank ℝ E)),
+                ∑ j ∈ Finset.range 3,
+                  ‖iteratedFDeriv ℝ j
+                      ((tensorChartComponentRaw (I := I) (M := M) g r s
+                            T α IJ'.1 IJ'.2)
+                        ∘ (extChartAt I α).symm)
+                      ((toEuclidean (E := E)).symm y)‖ ^ 2)) ∂μ :=
+    lintegral_mono h_pt
+  refine le_trans h_int_le ?_
+  -- Split out the constant K and split sum.
+  have h_pou_nn : ∀ y : EuclN,
+      0 ≤ (chartAtlasPOU I M α : M → ℝ)
+          ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) := fun y =>
+    (chartAtlasPOU I M).nonneg α _
+  have h_summand_nn : ∀ y : EuclN, ∀ IJ' : (Fin r → Fin (Module.finrank ℝ E)) ×
+      (Fin s → Fin (Module.finrank ℝ E)), ∀ j ∈ Finset.range 3,
+      0 ≤ ‖iteratedFDeriv ℝ j
+          ((tensorChartComponentRaw (I := I) (M := M) g r s T α IJ'.1 IJ'.2)
+            ∘ (extChartAt I α).symm)
+          ((toEuclidean (E := E)).symm y)‖ ^ 2 := fun _ _ _ _ => sq_nonneg _
+  have h_inner_sum_nn : ∀ y : EuclN,
+      0 ≤ ∑ IJ' : (Fin r → Fin (Module.finrank ℝ E)) ×
+          (Fin s → Fin (Module.finrank ℝ E)),
+        ∑ j ∈ Finset.range 3,
+          ‖iteratedFDeriv ℝ j
+              ((tensorChartComponentRaw (I := I) (M := M) g r s T α IJ'.1 IJ'.2)
+                ∘ (extChartAt I α).symm)
+              ((toEuclidean (E := E)).symm y)‖ ^ 2 := fun y => by
+    refine Finset.sum_nonneg (fun IJ' _ => ?_)
+    refine Finset.sum_nonneg (fun j hj => ?_)
+    exact h_summand_nn y IJ' j hj
+  have h_prod_inner_nn : ∀ y : EuclN,
+      0 ≤ ((chartAtlasPOU I M α : M → ℝ)
+              ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+            ∑ IJ' : (Fin r → Fin (Module.finrank ℝ E)) ×
+                (Fin s → Fin (Module.finrank ℝ E)),
+              ∑ j ∈ Finset.range 3,
+                ‖iteratedFDeriv ℝ j
+                    ((tensorChartComponentRaw (I := I) (M := M) g r s T α IJ'.1 IJ'.2)
+                      ∘ (extChartAt I α).symm)
+                    ((toEuclidean (E := E)).symm y)‖ ^ 2 := fun y =>
+    mul_nonneg (h_pou_nn y) (h_inner_sum_nn y)
+  -- Rewrite ofReal(K * prod) = ofReal K * ofReal prod.
+  have h_ofReal_mul : ∀ y : EuclN,
+      ENNReal.ofReal
+        (K *
+          (((chartAtlasPOU I M α : M → ℝ)
+              ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+            ∑ IJ' : (Fin r → Fin (Module.finrank ℝ E)) ×
+                (Fin s → Fin (Module.finrank ℝ E)),
+              ∑ j ∈ Finset.range 3,
+                ‖iteratedFDeriv ℝ j
+                    ((tensorChartComponentRaw (I := I) (M := M) g r s T α IJ'.1 IJ'.2)
+                      ∘ (extChartAt I α).symm)
+                    ((toEuclidean (E := E)).symm y)‖ ^ 2)) =
+      ENNReal.ofReal K *
+        ENNReal.ofReal
+          (((chartAtlasPOU I M α : M → ℝ)
+              ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+            ∑ IJ' : (Fin r → Fin (Module.finrank ℝ E)) ×
+                (Fin s → Fin (Module.finrank ℝ E)),
+              ∑ j ∈ Finset.range 3,
+                ‖iteratedFDeriv ℝ j
+                    ((tensorChartComponentRaw (I := I) (M := M) g r s T α IJ'.1 IJ'.2)
+                      ∘ (extChartAt I α).symm)
+                    ((toEuclidean (E := E)).symm y)‖ ^ 2) := fun y =>
+    ENNReal.ofReal_mul hK_nn
+  -- Rewrite ofReal(POU * sum) = ofReal POU * ofReal sum... but POU may not split
+  -- cleanly through Σ via ofReal_sum_of_nonneg without a finset sum.
+  -- Instead: distribute POU into the inner sum.
+  have h_distrib : ∀ y : EuclN,
+      ((chartAtlasPOU I M α : M → ℝ)
+          ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+        ∑ IJ' : (Fin r → Fin (Module.finrank ℝ E)) ×
+            (Fin s → Fin (Module.finrank ℝ E)),
+          ∑ j ∈ Finset.range 3,
+            ‖iteratedFDeriv ℝ j
+                ((tensorChartComponentRaw (I := I) (M := M) g r s T α IJ'.1 IJ'.2)
+                  ∘ (extChartAt I α).symm)
+                ((toEuclidean (E := E)).symm y)‖ ^ 2 =
+      ∑ IJ' : (Fin r → Fin (Module.finrank ℝ E)) ×
+          (Fin s → Fin (Module.finrank ℝ E)),
+        ∑ j ∈ Finset.range 3,
+          ((chartAtlasPOU I M α : M → ℝ)
+              ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+            ‖iteratedFDeriv ℝ j
+                ((tensorChartComponentRaw (I := I) (M := M) g r s T α IJ'.1 IJ'.2)
+                  ∘ (extChartAt I α).symm)
+                ((toEuclidean (E := E)).symm y)‖ ^ 2 := fun y => by
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl (fun IJ' _ => ?_)
+    rw [Finset.mul_sum]
+  -- After distribution, the integrand becomes
+  -- ofReal(K) * ofReal(Σ_IJ' Σ_j (POU * ‖...‖²)).
+  -- We use ofReal_sum_of_nonneg to push ofReal inside the sums.
+  have h_inner_summand_nn : ∀ y : EuclN, ∀ IJ' : (Fin r → Fin (Module.finrank ℝ E)) ×
+      (Fin s → Fin (Module.finrank ℝ E)), ∀ j ∈ Finset.range 3,
+      0 ≤ ((chartAtlasPOU I M α : M → ℝ)
+              ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+            ‖iteratedFDeriv ℝ j
+                ((tensorChartComponentRaw (I := I) (M := M) g r s T α IJ'.1 IJ'.2)
+                  ∘ (extChartAt I α).symm)
+                ((toEuclidean (E := E)).symm y)‖ ^ 2 :=
+    fun y IJ' j _ => mul_nonneg (h_pou_nn y) (sq_nonneg _)
+  -- Combine into the new integrand form.
+  have h_integrand_eq : ∀ y : EuclN,
+      ENNReal.ofReal
+        (K *
+          (((chartAtlasPOU I M α : M → ℝ)
+              ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+            ∑ IJ' : (Fin r → Fin (Module.finrank ℝ E)) ×
+                (Fin s → Fin (Module.finrank ℝ E)),
+              ∑ j ∈ Finset.range 3,
+                ‖iteratedFDeriv ℝ j
+                    ((tensorChartComponentRaw (I := I) (M := M) g r s T α IJ'.1 IJ'.2)
+                      ∘ (extChartAt I α).symm)
+                    ((toEuclidean (E := E)).symm y)‖ ^ 2)) =
+      ENNReal.ofReal K *
+        ∑ IJ' : (Fin r → Fin (Module.finrank ℝ E)) ×
+            (Fin s → Fin (Module.finrank ℝ E)),
+          ∑ j ∈ Finset.range 3,
+            ENNReal.ofReal
+              (((chartAtlasPOU I M α : M → ℝ)
+                  ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+                ‖iteratedFDeriv ℝ j
+                    ((tensorChartComponentRaw (I := I) (M := M) g r s T α IJ'.1 IJ'.2)
+                      ∘ (extChartAt I α).symm)
+                    ((toEuclidean (E := E)).symm y)‖ ^ 2) := by
+    intro y
+    rw [h_ofReal_mul y, h_distrib y]
+    have h_outer_nn : ∀ IJ' ∈ (Finset.univ :
+        Finset ((Fin r → Fin (Module.finrank ℝ E)) ×
+          (Fin s → Fin (Module.finrank ℝ E)))),
+        0 ≤ ∑ j ∈ Finset.range 3,
+          ((chartAtlasPOU I M α : M → ℝ)
+              ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+            ‖iteratedFDeriv ℝ j
+                ((tensorChartComponentRaw (I := I) (M := M) g r s T α IJ'.1 IJ'.2)
+                  ∘ (extChartAt I α).symm)
+                ((toEuclidean (E := E)).symm y)‖ ^ 2 := by
+      intro IJ' _
+      refine Finset.sum_nonneg (fun j hj => ?_)
+      exact h_inner_summand_nn y IJ' j hj
+    rw [ENNReal.ofReal_sum_of_nonneg h_outer_nn]
+    refine congrArg (fun z => ENNReal.ofReal K * z) ?_
+    refine Finset.sum_congr rfl (fun IJ' _ => ?_)
+    refine (ENNReal.ofReal_sum_of_nonneg (fun j hj =>
+      h_inner_summand_nn y IJ' j hj))
+  -- Rewrite integrand and split.
+  rw [show
+      (fun y : EuclN => ENNReal.ofReal
+        (K *
+          (((chartAtlasPOU I M α : M → ℝ)
+              ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+            ∑ IJ' : (Fin r → Fin (Module.finrank ℝ E)) ×
+                (Fin s → Fin (Module.finrank ℝ E)),
+              ∑ j ∈ Finset.range 3,
+                ‖iteratedFDeriv ℝ j
+                    ((tensorChartComponentRaw (I := I) (M := M) g r s T α IJ'.1 IJ'.2)
+                      ∘ (extChartAt I α).symm)
+                    ((toEuclidean (E := E)).symm y)‖ ^ 2))) =
+      (fun y : EuclN => ENNReal.ofReal K *
+        ∑ IJ' : (Fin r → Fin (Module.finrank ℝ E)) ×
+            (Fin s → Fin (Module.finrank ℝ E)),
+          ∑ j ∈ Finset.range 3,
+            ENNReal.ofReal
+              (((chartAtlasPOU I M α : M → ℝ)
+                  ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+                ‖iteratedFDeriv ℝ j
+                    ((tensorChartComponentRaw (I := I) (M := M) g r s T α IJ'.1 IJ'.2)
+                      ∘ (extChartAt I α).symm)
+                    ((toEuclidean (E := E)).symm y)‖ ^ 2)) from by
+    funext y; exact h_integrand_eq y]
+  -- Now: ∫ ofReal K · (sum) dμ = ofReal K · ∫ sum dμ = ofReal K · sum ∫ dμ.
+  rw [lintegral_const_mul' (ENNReal.ofReal K) _ ENNReal.ofReal_ne_top]
+  refine mul_le_mul_right ?_ _
+  -- ∫ (Σ_IJ' Σ_j integrand) dμ = Σ_IJ' Σ_j ∫ integrand dμ.
+  have h_swap_IJ :
+      ∫⁻ y, ∑ IJ' : (Fin r → Fin (Module.finrank ℝ E)) ×
+            (Fin s → Fin (Module.finrank ℝ E)),
+          ∑ j ∈ Finset.range 3,
+            ENNReal.ofReal
+              (((chartAtlasPOU I M α : M → ℝ)
+                  ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+                ‖iteratedFDeriv ℝ j
+                    ((tensorChartComponentRaw (I := I) (M := M) g r s T α IJ'.1 IJ'.2)
+                      ∘ (extChartAt I α).symm)
+                    ((toEuclidean (E := E)).symm y)‖ ^ 2) ∂μ =
+        ∑ IJ' : (Fin r → Fin (Module.finrank ℝ E)) ×
+            (Fin s → Fin (Module.finrank ℝ E)),
+          ∫⁻ y,
+            ∑ j ∈ Finset.range 3,
+              ENNReal.ofReal
+                (((chartAtlasPOU I M α : M → ℝ)
+                    ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+                  ‖iteratedFDeriv ℝ j
+                      ((tensorChartComponentRaw (I := I) (M := M) g r s T α IJ'.1 IJ'.2)
+                        ∘ (extChartAt I α).symm)
+                      ((toEuclidean (E := E)).symm y)‖ ^ 2) ∂μ := by
+    refine lintegral_finset_sum' _ (fun IJ' _ => ?_)
+    refine Finset.aemeasurable_fun_sum _ (fun j _ => ?_)
+    exact pouWeightedSummand_aemeasurable_on_chartTarget
+      (I := I) (M := M) g r s T α IJ' j
+  rw [h_swap_IJ]
+  refine Finset.sum_le_sum (fun IJ' _ => ?_)
+  have h_swap_j :
+      ∫⁻ y, ∑ j ∈ Finset.range 3,
+            ENNReal.ofReal
+              (((chartAtlasPOU I M α : M → ℝ)
+                  ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+                ‖iteratedFDeriv ℝ j
+                    ((tensorChartComponentRaw (I := I) (M := M) g r s T α IJ'.1 IJ'.2)
+                      ∘ (extChartAt I α).symm)
+                    ((toEuclidean (E := E)).symm y)‖ ^ 2) ∂μ =
+        ∑ j ∈ Finset.range 3,
+          ∫⁻ y, ENNReal.ofReal
+              (((chartAtlasPOU I M α : M → ℝ)
+                  ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+                ‖iteratedFDeriv ℝ j
+                    ((tensorChartComponentRaw (I := I) (M := M) g r s T α IJ'.1 IJ'.2)
+                      ∘ (extChartAt I α).symm)
+                    ((toEuclidean (E := E)).symm y)‖ ^ 2) ∂μ := by
+    refine lintegral_finset_sum' _ (fun j _ => ?_)
+    exact pouWeightedSummand_aemeasurable_on_chartTarget
+      (I := I) (M := M) g r s T α IJ' j
+  rw [h_swap_j]
+
+/-! ## Main headline: chart-Sobolev-zero bound -/
+
+/-- **Unconditional chart-Sobolev-zero bound on the raw tensor connection
+Laplacian by the partition-of-unity-weighted chart-Sobolev norm.**
+
+For a closed smooth Riemannian manifold `(M, g)`, ranks `(r, s)`, there exists
+a finite constant `C : ℝ≥0∞` such that for every smooth compactly-supported
+`(r, s)`-tensor section `T`,
+
+```
+wtwokTwoNorm g 0 (rawTensorConnLapSmooth g r s T)
+    ≤ C * tensorPouSobolevNorm g 1 T.
+```
+
+The constant depends only on `g`, `r`, `s`, the chart atlas, and the partition
+of unity; it is uniform in `T`. There are no chart-locality, chart-source
+consistency, or other auxiliary chart-atlas predicates at the headline.
+
+Strategy:
+
+1. Collapse the chart-aggregating `tsum` defining the LHS to a finset sum over
+   `chartAtlasPOU_finset` (via `wtwokTwoNorm_zero_rawTensorConnLap_collapsed`).
+
+2. Apply Cauchy–Schwarz `(∑ a_i)² ≤ N · ∑ a_i²` on the flattened finset to
+   obtain `LHS² ≤ N · ∑_{α∈S} ∑_{Idx,Jdx} (eLpNorm)²`.
+
+3. Use the per-`α`, per-`(Idx, Jdx)` squared-`L²` bound
+   `sq_eLpNorm_tensorChartComp_le_pou_summand`, bounding the inner sum by
+   `ofReal K_α · Σ_IJ' Σ_j (POU-weighted integrand integrated over chart target)`.
+
+4. Sum: the per-`(Idx, Jdx)` factor introduces a multiplicative
+   `n^(r+s) = card((Fin r → Fin n) × (Fin s → Fin n))` and the per-`α` factor
+   collapses into the `tensorPouSobolevNormSqAgg`, which equals
+   `(tensorPouSobolevNorm g 1 T)²` (via `tensorPouSobolevNorm_one_sq_eq_agg`
+   and `tensorPouSobolevNormSqAgg_eq_finset_sum`).
+
+5. Take a square root via `ENNReal.pow_le_pow_left_iff`. -/
+theorem wtwokTwoNorm_zero_rawTensorConnLap_le_tensorPouSobolevNorm_one
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+    ∃ C : ℝ≥0∞, C ≠ ⊤ ∧
+      ∀ (T : SmoothCcTensor g r s),
+        wtwokTwoNorm (I := I) (M := M) g 0
+            (rawTensorConnLapSmooth (I := I) g r s T) ≤
+          C * tensorPouSobolevNorm (I := I) (M := M) g 1 T := by
+  classical
+  set n := Module.finrank ℝ E with hn_def
+  set S : Finset M := chartAtlasPOU_finset (I := I) (M := M) with hS_def
+  -- Choose per-α K-witnesses.
+  have h_each : ∀ α : M, ∃ K : ℝ, 0 ≤ K ∧
+      ∀ (T : SmoothCcTensor g r s)
+        (Idx : Fin r → Fin n)
+        (Jdx : Fin s → Fin n),
+        (eLpNorm
+            (tensorChartComp (I := I) (M := M) g r s
+              (rawTensorConnLapSmooth (I := I) g r s T) α Idx Jdx) 2
+            ((volume : Measure EuclN).restrict
+              (chartTargetEuclid (I := I) (M := M) α))) ^ 2 ≤
+          ENNReal.ofReal K *
+            (∑ IJ' : (Fin r → Fin n) × (Fin s → Fin n),
+              ∑ j ∈ Finset.range 3,
+                ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+                  ENNReal.ofReal
+                    (((chartAtlasPOU I M α : M → ℝ)
+                        ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+                      ‖iteratedFDeriv ℝ j
+                          (tensorChartComponentRaw (I := I) (M := M) g r s T α IJ'.1 IJ'.2
+                            ∘ (extChartAt I α).symm)
+                          ((toEuclidean (E := E)).symm y)‖ ^ 2)
+                  ∂(volume : Measure EuclN)) := fun α =>
+    sq_eLpNorm_tensorChartComp_le_pou_summand (I := I) (M := M) g r s α
+  choose K_pt hK_pt_nn hK_pt_bound using h_each
+  -- Pick K_max as max over S of K_pt.
+  set K_max : ℝ := if hSne : S.Nonempty then S.sup' hSne K_pt else 1 with hK_max_def
+  have hK_max_nn : 0 ≤ K_max := by
+    rw [hK_max_def]
+    by_cases hSne : S.Nonempty
+    · rw [dif_pos hSne]
+      obtain ⟨α₀, hα₀⟩ := hSne
+      exact le_trans (hK_pt_nn α₀) (Finset.le_sup' K_pt hα₀)
+    · rw [dif_neg hSne]; linarith
+  have hK_le_max : ∀ α ∈ S, K_pt α ≤ K_max := by
+    intro α hα
+    rw [hK_max_def]
+    have hSne : S.Nonempty := ⟨α, hα⟩
+    rw [dif_pos hSne]
+    exact Finset.le_sup' K_pt hα
+  -- The final constant: C² := S.card · n^(r+s) · K_max · n^(r+s) = S.card · K_max · n^(2(r+s)).
+  -- Concretely: C := Real.sqrt (S.card · n^(2(r+s)) · K_max).
+  set nIJ : ℕ :=
+    Fintype.card ((Fin r → Fin n) × (Fin s → Fin n)) with hnIJ_def
+  set Nflat : ℕ := S.card * nIJ with hNflat_def
+  set C_sq : ℝ := (Nflat : ℝ) * (nIJ : ℝ) * K_max with hC_sq_def
+  have hC_sq_nn : 0 ≤ C_sq := by
+    rw [hC_sq_def]
+    refine mul_nonneg (mul_nonneg ?_ ?_) hK_max_nn
+    · exact Nat.cast_nonneg _
+    · exact Nat.cast_nonneg _
+  set C : ℝ := Real.sqrt C_sq with hC_def
+  have hC_nn : 0 ≤ C := Real.sqrt_nonneg _
+  refine ⟨ENNReal.ofReal C, ENNReal.ofReal_ne_top, ?_⟩
+  intro T
+  -- Notation.
+  set LHS : ℝ≥0∞ := wtwokTwoNorm (I := I) (M := M) g 0
+    (rawTensorConnLapSmooth (I := I) g r s T) with hLHS_def
+  set W₁ : ℝ≥0∞ := tensorPouSobolevNorm (I := I) (M := M) g 1 T with hW₁_def
+  -- Step 1: collapse LHS to finset sum.
+  set FS : ℝ≥0∞ :=
+    ∑ α ∈ S,
+      ∑ Idx : Fin r → Fin n,
+        ∑ Jdx : Fin s → Fin n,
+          eLpNorm
+            (tensorChartComp (I := I) (M := M) g r s
+              (rawTensorConnLapSmooth (I := I) g r s T) α Idx Jdx) 2
+            ((volume : Measure EuclN).restrict
+              (chartTargetEuclid (I := I) (M := M) α)) with hFS_def
+  have hLHS_eq : LHS = FS := by
+    rw [hLHS_def, hFS_def]
+    exact wtwokTwoNorm_zero_rawTensorConnLap_collapsed
+      (I := I) (M := M) g r s T
+  -- Step 2: flatten Σ_{α} Σ_{Idx} Σ_{Jdx} into Σ_{(α, IJ)} via product finset.
+  -- Define the per-(α, IJ) eLpNorm summand.
+  set f : M × ((Fin r → Fin n) × (Fin s → Fin n)) → ℝ≥0∞ := fun p =>
+    eLpNorm
+      (tensorChartComp (I := I) (M := M) g r s
+        (rawTensorConnLapSmooth (I := I) g r s T) p.1 p.2.1 p.2.2) 2
+      ((volume : Measure EuclN).restrict
+        (chartTargetEuclid (I := I) (M := M) p.1)) with hf_def
+  have hFS_flat :
+      FS = ∑ p ∈ (S ×ˢ (Finset.univ :
+            Finset ((Fin r → Fin n) × (Fin s → Fin n)))), f p := by
+    rw [hFS_def, hf_def]
+    rw [Finset.sum_product]
+    refine Finset.sum_congr rfl (fun α _ => ?_)
+    rw [show (Finset.univ : Finset ((Fin r → Fin n) × (Fin s → Fin n))) =
+        (Finset.univ : Finset (Fin r → Fin n)) ×ˢ
+          (Finset.univ : Finset (Fin s → Fin n)) from rfl]
+    rw [Finset.sum_product]
+  -- card of the product finset = S.card · nIJ.
+  have h_card_flat :
+      (S ×ˢ (Finset.univ :
+            Finset ((Fin r → Fin n) × (Fin s → Fin n)))).card =
+        Nflat := by
+    rw [Finset.card_product, hNflat_def, hnIJ_def]
+    rfl
+  -- Apply ENNReal Cauchy-Schwarz.
+  have h_CS : FS ^ 2 ≤ (Nflat : ℝ≥0∞) *
+      ∑ p ∈ (S ×ˢ (Finset.univ :
+            Finset ((Fin r → Fin n) × (Fin s → Fin n)))), (f p) ^ 2 := by
+    rw [hFS_flat]
+    have hCS_pre := ennreal_sq_finset_sum_le_card_mul_sq_finset_sum
+      (S ×ˢ (Finset.univ :
+            Finset ((Fin r → Fin n) × (Fin s → Fin n)))) f
+    rw [h_card_flat] at hCS_pre
+    exact hCS_pre
+  -- Step 3: bound (f p)² for each p ∈ S × univ.
+  -- Use the per-α bound:
+  have h_per_p : ∀ p ∈ (S ×ˢ (Finset.univ :
+            Finset ((Fin r → Fin n) × (Fin s → Fin n)))),
+      (f p) ^ 2 ≤
+        ENNReal.ofReal K_max *
+          (∑ IJ' : (Fin r → Fin n) × (Fin s → Fin n),
+            ∑ j ∈ Finset.range 3,
+              ∫⁻ y in chartTargetEuclid (I := I) (M := M) p.1,
+                ENNReal.ofReal
+                  (((chartAtlasPOU I M p.1 : M → ℝ)
+                      ((extChartAt I p.1).symm ((toEuclidean (E := E)).symm y))) *
+                    ‖iteratedFDeriv ℝ j
+                        (tensorChartComponentRaw (I := I) (M := M) g r s
+                          T p.1 IJ'.1 IJ'.2
+                          ∘ (extChartAt I p.1).symm)
+                        ((toEuclidean (E := E)).symm y)‖ ^ 2)
+                ∂(volume : Measure EuclN)) := by
+    intro p hp
+    rw [Finset.mem_product] at hp
+    obtain ⟨hα, _⟩ := hp
+    have h_bound := hK_pt_bound p.1 T p.2.1 p.2.2
+    have h_K_le : ENNReal.ofReal (K_pt p.1) ≤ ENNReal.ofReal K_max :=
+      ENNReal.ofReal_le_ofReal (hK_le_max p.1 hα)
+    refine le_trans h_bound ?_
+    refine mul_le_mul_left h_K_le _
+  -- Sum the per-p bounds.
+  have h_sum_p_bd : ∑ p ∈ (S ×ˢ (Finset.univ :
+            Finset ((Fin r → Fin n) × (Fin s → Fin n)))), (f p) ^ 2 ≤
+        ∑ p ∈ (S ×ˢ (Finset.univ :
+            Finset ((Fin r → Fin n) × (Fin s → Fin n)))),
+          ENNReal.ofReal K_max *
+            (∑ IJ' : (Fin r → Fin n) × (Fin s → Fin n),
+              ∑ j ∈ Finset.range 3,
+                ∫⁻ y in chartTargetEuclid (I := I) (M := M) p.1,
+                  ENNReal.ofReal
+                    (((chartAtlasPOU I M p.1 : M → ℝ)
+                        ((extChartAt I p.1).symm ((toEuclidean (E := E)).symm y))) *
+                      ‖iteratedFDeriv ℝ j
+                          (tensorChartComponentRaw (I := I) (M := M) g r s
+                            T p.1 IJ'.1 IJ'.2
+                            ∘ (extChartAt I p.1).symm)
+                          ((toEuclidean (E := E)).symm y)‖ ^ 2)
+                  ∂(volume : Measure EuclN)) :=
+    Finset.sum_le_sum h_per_p
+  -- Pull ofReal K_max out and re-collapse Σ over p ∈ S × univ.
+  have h_pull_K :
+      ∑ p ∈ (S ×ˢ (Finset.univ :
+            Finset ((Fin r → Fin n) × (Fin s → Fin n)))),
+          ENNReal.ofReal K_max *
+            (∑ IJ' : (Fin r → Fin n) × (Fin s → Fin n),
+              ∑ j ∈ Finset.range 3,
+                ∫⁻ y in chartTargetEuclid (I := I) (M := M) p.1,
+                  ENNReal.ofReal
+                    (((chartAtlasPOU I M p.1 : M → ℝ)
+                        ((extChartAt I p.1).symm ((toEuclidean (E := E)).symm y))) *
+                      ‖iteratedFDeriv ℝ j
+                          (tensorChartComponentRaw (I := I) (M := M) g r s
+                            T p.1 IJ'.1 IJ'.2
+                            ∘ (extChartAt I p.1).symm)
+                          ((toEuclidean (E := E)).symm y)‖ ^ 2)
+                  ∂(volume : Measure EuclN)) =
+      ENNReal.ofReal K_max *
+        ∑ p ∈ (S ×ˢ (Finset.univ :
+            Finset ((Fin r → Fin n) × (Fin s → Fin n)))),
+          (∑ IJ' : (Fin r → Fin n) × (Fin s → Fin n),
+            ∑ j ∈ Finset.range 3,
+              ∫⁻ y in chartTargetEuclid (I := I) (M := M) p.1,
+                ENNReal.ofReal
+                  (((chartAtlasPOU I M p.1 : M → ℝ)
+                      ((extChartAt I p.1).symm ((toEuclidean (E := E)).symm y))) *
+                    ‖iteratedFDeriv ℝ j
+                        (tensorChartComponentRaw (I := I) (M := M) g r s
+                          T p.1 IJ'.1 IJ'.2
+                          ∘ (extChartAt I p.1).symm)
+                        ((toEuclidean (E := E)).symm y)‖ ^ 2)
+                ∂(volume : Measure EuclN)) := by
+    rw [Finset.mul_sum]
+  -- Convert Σ over p ∈ S × univ to Σ_{α∈S} Σ_{IJ} (sum independent of IJ).
+  -- The summand depends on p.1 only.
+  have h_sum_collapse_p :
+      ∑ p ∈ (S ×ˢ (Finset.univ :
+            Finset ((Fin r → Fin n) × (Fin s → Fin n)))),
+          (∑ IJ' : (Fin r → Fin n) × (Fin s → Fin n),
+            ∑ j ∈ Finset.range 3,
+              ∫⁻ y in chartTargetEuclid (I := I) (M := M) p.1,
+                ENNReal.ofReal
+                  (((chartAtlasPOU I M p.1 : M → ℝ)
+                      ((extChartAt I p.1).symm ((toEuclidean (E := E)).symm y))) *
+                    ‖iteratedFDeriv ℝ j
+                        (tensorChartComponentRaw (I := I) (M := M) g r s
+                          T p.1 IJ'.1 IJ'.2
+                          ∘ (extChartAt I p.1).symm)
+                        ((toEuclidean (E := E)).symm y)‖ ^ 2)
+                ∂(volume : Measure EuclN)) =
+      (nIJ : ℝ≥0∞) *
+        ∑ α ∈ S,
+          (∑ IJ' : (Fin r → Fin n) × (Fin s → Fin n),
+            ∑ j ∈ Finset.range 3,
+              ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+                ENNReal.ofReal
+                  (((chartAtlasPOU I M α : M → ℝ)
+                      ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+                    ‖iteratedFDeriv ℝ j
+                        (tensorChartComponentRaw (I := I) (M := M) g r s
+                          T α IJ'.1 IJ'.2
+                          ∘ (extChartAt I α).symm)
+                        ((toEuclidean (E := E)).symm y)‖ ^ 2)
+                ∂(volume : Measure EuclN)) := by
+    rw [Finset.sum_product]
+    -- LHS: Σ_{α ∈ S} Σ_{IJ ∈ univ} G(α) (sum independent of IJ).
+    -- Use Finset.sum_const to reduce inner sum, then pull nIJ out.
+    have h_inner : ∀ α : M,
+        (∑ _IJ : (Fin r → Fin n) × (Fin s → Fin n),
+          (∑ IJ' : (Fin r → Fin n) × (Fin s → Fin n),
+            ∑ j ∈ Finset.range 3,
+              ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+                ENNReal.ofReal
+                  (((chartAtlasPOU I M α : M → ℝ)
+                      ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+                    ‖iteratedFDeriv ℝ j
+                        (tensorChartComponentRaw (I := I) (M := M) g r s
+                          T α IJ'.1 IJ'.2
+                          ∘ (extChartAt I α).symm)
+                        ((toEuclidean (E := E)).symm y)‖ ^ 2)
+                ∂(volume : Measure EuclN))) =
+          (nIJ : ℝ≥0∞) *
+            (∑ IJ' : (Fin r → Fin n) × (Fin s → Fin n),
+              ∑ j ∈ Finset.range 3,
+                ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+                  ENNReal.ofReal
+                    (((chartAtlasPOU I M α : M → ℝ)
+                        ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+                      ‖iteratedFDeriv ℝ j
+                          (tensorChartComponentRaw (I := I) (M := M) g r s
+                            T α IJ'.1 IJ'.2
+                            ∘ (extChartAt I α).symm)
+                          ((toEuclidean (E := E)).symm y)‖ ^ 2)
+                  ∂(volume : Measure EuclN)) := by
+      intro α
+      rw [Finset.sum_const, Finset.card_univ, ← hnIJ_def, nsmul_eq_mul]
+    rw [show
+        (fun α : M => ∑ _IJ : (Fin r → Fin n) × (Fin s → Fin n),
+          (∑ IJ' : (Fin r → Fin n) × (Fin s → Fin n),
+            ∑ j ∈ Finset.range 3,
+              ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+                ENNReal.ofReal
+                  (((chartAtlasPOU I M α : M → ℝ)
+                      ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+                    ‖iteratedFDeriv ℝ j
+                        (tensorChartComponentRaw (I := I) (M := M) g r s
+                          T α IJ'.1 IJ'.2
+                          ∘ (extChartAt I α).symm)
+                        ((toEuclidean (E := E)).symm y)‖ ^ 2)
+                ∂(volume : Measure EuclN))) =
+        (fun α : M => (nIJ : ℝ≥0∞) *
+          (∑ IJ' : (Fin r → Fin n) × (Fin s → Fin n),
+            ∑ j ∈ Finset.range 3,
+              ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+                ENNReal.ofReal
+                  (((chartAtlasPOU I M α : M → ℝ)
+                      ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+                    ‖iteratedFDeriv ℝ j
+                        (tensorChartComponentRaw (I := I) (M := M) g r s
+                          T α IJ'.1 IJ'.2
+                          ∘ (extChartAt I α).symm)
+                        ((toEuclidean (E := E)).symm y)‖ ^ 2)
+                ∂(volume : Measure EuclN))) from by
+      funext α; exact h_inner α]
+    rw [← Finset.mul_sum]
+  -- Identify the inner sum as (tensorPouSobolevNorm g 1 T)² via the existing helpers.
+  have h_inner_eq :
+      ∑ α ∈ S,
+        (∑ IJ' : (Fin r → Fin n) × (Fin s → Fin n),
+          ∑ j ∈ Finset.range 3,
+            ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+              ENNReal.ofReal
+                (((chartAtlasPOU I M α : M → ℝ)
+                    ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+                  ‖iteratedFDeriv ℝ j
+                      (tensorChartComponentRaw (I := I) (M := M) g r s
+                        T α IJ'.1 IJ'.2
+                        ∘ (extChartAt I α).symm)
+                      ((toEuclidean (E := E)).symm y)‖ ^ 2)
+              ∂(volume : Measure EuclN)) =
+      W₁ ^ 2 := by
+    rw [hW₁_def, tensorPouSobolevNorm_one_sq_eq_agg (I := I) (M := M) g T,
+        tensorPouSobolevNormSqAgg_eq_finset_sum (I := I) (M := M) g T, ← hS_def]
+  -- Chain the bounds.
+  have h_FS_sq_le : FS ^ 2 ≤
+      (Nflat : ℝ≥0∞) * (ENNReal.ofReal K_max *
+        ((nIJ : ℝ≥0∞) * W₁ ^ 2)) := by
+    refine le_trans h_CS ?_
+    refine mul_le_mul_right ?_ _
+    refine le_trans h_sum_p_bd ?_
+    rw [h_pull_K, h_sum_collapse_p, h_inner_eq]
+  -- Rearrange RHS = ofReal C_sq · W₁².
+  have h_rearrange :
+      (Nflat : ℝ≥0∞) * (ENNReal.ofReal K_max *
+          ((nIJ : ℝ≥0∞) * W₁ ^ 2)) =
+        ENNReal.ofReal C_sq * W₁ ^ 2 := by
+    -- C_sq = (Nflat : ℝ) · (nIJ : ℝ) · K_max.
+    have h_C_sq_ofReal :
+        ENNReal.ofReal C_sq =
+          (Nflat : ℝ≥0∞) * (nIJ : ℝ≥0∞) * ENNReal.ofReal K_max := by
+      rw [hC_sq_def]
+      rw [ENNReal.ofReal_mul (mul_nonneg (Nat.cast_nonneg _) (Nat.cast_nonneg _))]
+      rw [ENNReal.ofReal_mul (Nat.cast_nonneg _)]
+      rw [ENNReal.ofReal_natCast, ENNReal.ofReal_natCast]
+    rw [h_C_sq_ofReal]
+    ring
+  rw [h_rearrange] at h_FS_sq_le
+  -- ofReal C_sq = (ofReal C)².
+  have h_C_sq_eq : C_sq = C ^ 2 := by
+    rw [hC_def, sq, Real.mul_self_sqrt hC_sq_nn]
+  have h_ofReal_C_sq : ENNReal.ofReal C_sq = (ENNReal.ofReal C) ^ 2 := by
+    rw [h_C_sq_eq, ENNReal.ofReal_pow (Real.sqrt_nonneg _)]
+  rw [h_ofReal_C_sq] at h_FS_sq_le
+  -- Combine the squares.
+  have h_mul_sq : (ENNReal.ofReal C) ^ 2 * W₁ ^ 2 =
+      (ENNReal.ofReal C * W₁) ^ 2 := by
+    rw [mul_pow]
+  rw [h_mul_sq] at h_FS_sq_le
+  -- Take square root via ENNReal.pow_le_pow_left_iff.
+  rw [hLHS_eq]
+  exact (ENNReal.pow_le_pow_left_iff (a := FS)
+    (b := ENNReal.ofReal C * W₁) (n := 2) (by norm_num)).mp h_FS_sq_le
+
 end Connection
 end Integral
 end DifferentialGeometry
 
 end
 
-/-! ## Sanity check: axioms used by the pointwise headline. -/
+/-! ## Sanity check: axioms used by the pointwise headline and main headline. -/
 
 open DifferentialGeometry.Integral.Connection in
 #print axioms tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
+
+open DifferentialGeometry.Integral.Connection in
+#print axioms wtwokTwoNorm_zero_rawTensorConnLap_le_tensorPouSobolevNorm_one

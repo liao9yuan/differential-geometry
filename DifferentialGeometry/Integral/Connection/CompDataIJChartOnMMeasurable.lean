@@ -79,7 +79,7 @@ continuous. This follows from the `C^∞`-on-target witness
 `chartPushedRaw_tensorChartComponentRaw_contDiffOn` together with
 `ContDiffOn.continuousOn_iteratedFDerivWithin` and the open-set identification
 `iteratedFDerivWithin = iteratedFDeriv` on open sets. -/
-private lemma iteratedFDeriv_tensorChartComponentRaw_comp_symm_continuousOn
+lemma iteratedFDeriv_tensorChartComponentRaw_comp_symm_continuousOn
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T₀ : SmoothCcTensor g r s) (α : M)
