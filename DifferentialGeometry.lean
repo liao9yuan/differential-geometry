@@ -773,6 +773,11 @@ import DifferentialGeometry.PDE.RicciFlow.ConnectionLaplacian.L2PMap
 import DifferentialGeometry.PDE.RicciFlow.ConnectionLaplacian.Symmetric
 import DifferentialGeometry.PDE.RicciFlow.ConnectionLaplacian.NegSemiBounded
 import DifferentialGeometry.PDE.RicciFlow.ConnectionLaplacian.FormDirichlet
+import DifferentialGeometry.PDE.RicciFlow.DeTurck.FlowEq
+import DifferentialGeometry.PDE.RicciFlow.DeTurck.Linearization
+import DifferentialGeometry.PDE.RicciFlow.DeTurck.Lipschitz
+import DifferentialGeometry.PDE.RicciFlow.DeTurck.Nonlinearity
+import DifferentialGeometry.PDE.RicciFlow.DeTurck.ShortTime
 import DifferentialGeometry.PDE.RicciFlow.FriedrichsExtension.Construction
 import DifferentialGeometry.PDE.RicciFlow.FriedrichsExtension.SelfAdjoint
 import DifferentialGeometry.PDE.RicciFlow.FriedrichsExtension.ResolventBound
