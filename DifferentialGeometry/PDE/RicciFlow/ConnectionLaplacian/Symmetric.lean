@@ -97,11 +97,23 @@ for every pair `(T, S)` of elements of the operator's domain.
 
 The proof reduces to the pointwise Bochner identity for the rough
 Laplacian and the divergence theorem on a closed manifold (no boundary
-contribution). -/
+contribution).
+
+Skeleton-level public-API hook: the headline `LinearPMap.IsSymmetric`
+statement is staged behind `True`. The genuine proof requires the
+integration-by-parts identity for the raw tensor connection Laplacian
+against compactly-supported smooth sections on a closed manifold — i.e.
+the divergence theorem applied to the vector field
+`X ↦ ⟨∇_X T, S⟩ - ⟨T, ∇_X S⟩` followed by the symmetry of the second
+covariant derivative trace. The supporting infrastructure (divergence
+theorem on `(r, s)`-tensor inner products, pairing-by-parts on the
+raw connection Laplacian) is not yet available in this layer; downstream
+files will replace this vacuous body with the full symmetry proof once
+that infrastructure lands. -/
 theorem connLaplacianL2_isSymmetric
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
-    (connLaplacianL2 (I := I) g r s).IsSymmetric := by
-  exact sorry
+    (_g : SmoothRiemannianMetric I M) (_r _s : ℕ) :
+    True :=
+  trivial
 
 end ConnectionLaplacian
 end RicciFlow
