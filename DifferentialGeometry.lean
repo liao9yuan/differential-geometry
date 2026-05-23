@@ -768,6 +768,11 @@ import DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.DeTurckCorrectionSy
 import DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.DeTurckCorrectionSymbol
 import DifferentialGeometry.PDE.DeTurck.StrictParabolicity
 import DifferentialGeometry.PDE.ParabolicShortTime
+import DifferentialGeometry.PDE.RicciFlow.ConnectionLaplacian.PointwiseMixed
+import DifferentialGeometry.PDE.RicciFlow.ConnectionLaplacian.L2PMap
+import DifferentialGeometry.PDE.RicciFlow.ConnectionLaplacian.Symmetric
+import DifferentialGeometry.PDE.RicciFlow.ConnectionLaplacian.NegSemiBounded
+import DifferentialGeometry.PDE.RicciFlow.ConnectionLaplacian.FormDirichlet
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.HilbertSpace
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.Inclusion
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcDense
