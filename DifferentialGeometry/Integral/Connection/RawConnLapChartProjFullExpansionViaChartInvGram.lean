@@ -168,7 +168,7 @@ Unchanged from the predecessor: chart-α `(Idx, Jdx)`-projection of the
 single-cov chart-frame trace Γ-correction summand. -/
 
 /-- **The chart-frame trace Γ-correction.** -/
-private noncomputable def chartFrameTraceΓCorrection
+noncomputable def chartFrameTraceΓCorrection
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
