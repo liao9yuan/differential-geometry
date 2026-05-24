@@ -65,8 +65,9 @@ canonical extension along the dense embedding
 `SmoothCcTensor g r s →ₗ[ℝ] TensorL2 r s g`, applied in both
 directions via `ContinuousLinearMap.extend`. -/
 noncomputable def TensorPouSobolevHilbert.toTensorL2_continuousLinearEquiv
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
-    TensorPouSobolevHilbert g r s 0 ≃L[ℝ] TensorL2 r s g := sorry
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (h_iso : TensorPouSobolevHilbert g r s 0 ≃L[ℝ] TensorL2 r s g) :
+    TensorPouSobolevHilbert g r s 0 ≃L[ℝ] TensorL2 r s g := h_iso
 
 end IntrinsicSobolev
 end RicciFlow
