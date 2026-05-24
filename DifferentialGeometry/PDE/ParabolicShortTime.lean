@@ -184,28 +184,40 @@ def IsLinearTensorParabolicMildSolution
     ∀ t ∈ Set.Icc (0 : ℝ) T,
       u t = S t u₀ + ∫ τ in (0 : ℝ)..t, S (t - τ) (F τ)
 
-/-- **Linear inhomogeneous tensor heat equation: mild solution exists** (SKELETON).
+/-- **Linear inhomogeneous tensor heat equation: mild solution exists.**
 
-The existing project lemma `tensor_linear_parabolic_existence`
-(`Analysis/Parabolic/TensorLinearParabolic.lean:525`) provides this under
-the chart-locality predicate `HasLocallyConstantChartAt H M`. After Route Y,
-the predicate is removed; the predicate-free statement is the target.
+A predicate-free mild-solution existence statement for the abstract linear
+inhomogeneous evolution equation `∂_t u + L u = F(t)` with initial datum
+`u₀`, where `L` is the (generator of the) bounded `C₀`-semigroup `S` on a
+Banach space `X`. The solution is given by the Duhamel formula
+`u(t) = S t u₀ + ∫₀ᵗ S (t - τ) (F τ) dτ`.
 
-For the skeleton we keep the conclusion identical to the Duhamel form and stub
-the proof. The underlying machinery — `tensorHeatSemigroup`, mild-solution
-continuity, the Duhamel formula — is already in place. -/
+The construction is direct: we take `u := duhamel S u₀ F`. The initial
+condition `u 0 = u₀` is `duhamel_zero`; continuity on `[0, T]` follows
+from `duhamel_continuousOn` on `[0, ∞)` by restriction. Any positive
+existence time works for this purely linear case; we pick `T := 1`. -/
 theorem linear_tensor_parabolic_shortTime_exists
     [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
-    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
+    {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [CompleteSpace X]
     (S : Analysis.Parabolic.QuasiLinear.BoundedC0Semigroup X) (u₀ : X)
-    (F : ℝ → X) (_hF : Continuous F) :
+    (F : ℝ → X) (hF : Continuous F) :
     ∃ T : ℝ, ∃ u : ℝ → X,
       IsLinearTensorParabolicMildSolution S u₀ F T u := by
-  -- Skeleton: actual proof uses `semilinear_parabolic_existence` with `N := 0`
-  -- and forcing absorbed into the constant term, or directly the project's
-  -- `tensorMildSolution`/`tensor_linear_parabolic_existence` once
-  -- predicate-free.
-  sorry
+  -- The Duhamel formula directly produces the mild solution; no Banach
+  -- fixed point is needed in the purely linear case. Pick any positive
+  -- existence time; `T := 1` suffices.
+  refine ⟨1, Analysis.Parabolic.QuasiLinear.duhamel S u₀ F, ?_, ?_, ?_, ?_⟩
+  · exact zero_lt_one
+  · exact Analysis.Parabolic.QuasiLinear.duhamel_zero S u₀ F
+  · -- Continuity on `[0, 1]` from continuity on `[0, ∞)` by restriction.
+    have h_cont :
+        ContinuousOn (Analysis.Parabolic.QuasiLinear.duhamel S u₀ F)
+          (Set.Ici (0 : ℝ)) :=
+      Analysis.Parabolic.QuasiLinear.duhamel_continuousOn S u₀ hF
+    exact h_cont.mono (Set.Icc_subset_Ici_self)
+  · -- The Duhamel integral identity is `rfl` against the definition.
+    intro t _
+    rfl
 
 /-! ## Section D — Composition note
 
