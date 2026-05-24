@@ -1104,6 +1104,7 @@ import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.PouNormChartComp
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.Glue
 import DifferentialGeometry.PDE.RicciFlow.Pullback.RiemannConjugation
 import DifferentialGeometry.PDE.RicciFlow.Pullback.CovDerivPullbackNaturality
+import DifferentialGeometry.PDE.RicciFlow.Pullback.CovDerivPullbackPointwise
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.AssemblePouIso
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace
 import DifferentialGeometry.PDE.RicciFlow.Pullback.RicciTraceConjugation
