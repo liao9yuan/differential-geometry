@@ -76,9 +76,6 @@ theorem Diffeomorph.pullbackInner_pos
   exact g.pos (Φ x) _ hvImg
 
 -- order 408: smoothness of `x ↦ g.inner (Φ x)` as a section over the original base.
--- Stub: this is blocked by the smoothness-level mismatch between the metric
--- (`C^ω` / analytic) and the diffeomorphism (only `C^∞`). See dispatch report.
-set_option backward.isDefEq.respectTransparency false in
 /-- The fiberwise inner product `g.inner` of the original metric, pulled back along the
 diffeomorphism `Φ` (i.e. evaluated at `Φ x`), is a smooth section of the bundle of
 continuous bilinear forms on `E`. -/
@@ -86,7 +83,7 @@ theorem inner_comp_smooth_along_diffeo
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
       ((fun b ↦ TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ) b (g.inner b)) ∘ (Φ : M → M)) :=
-  sorry
+  g.contMDiff.comp Φ.contMDiff
 
 -- Helper lemma extracted from the bundled metric: pullback inner is computable in
 -- terms of `mfderiv I I Φ x` applied to its arguments.
@@ -167,15 +164,16 @@ noncomputable def Diffeomorph.pullbackMetric
   pos x v hv := Diffeomorph.pullbackInner_pos g Φ x v hv
   isVonNBounded x := Diffeomorph.pullbackInner_isVonNBounded g Φ x
   contMDiff := by
-    -- The pullback section factors as the composition
-    --   x ↦ (g.inner (Φ x), mfderiv I I Φ x)
-    --     ↦ (g.inner (Φ x)).bilinearComp (mfderiv I I Φ x) (mfderiv I I Φ x)
-    -- where the first factor is the product of (i) the section
-    -- `b ↦ g.inner b` precomposed with `Φ`, and (ii) the global manifold
-    -- derivative of `Φ`. Both are smooth, but combining them at the bundle level
-    -- requires bilinear-CLM smoothness infrastructure that this dispatch
-    -- has elected not to write inline. We mark this field as PARTIAL pending
-    -- the auxiliary smoothness substep (order 405 / 406 / 407).
+    -- The pullback section factors pointwise as
+    --   pullbackInner g Φ x = (g.inner (Φ x)).bilinearComp (mfderiv I I Φ x) (mfderiv I I Φ x)
+    -- (see `pullbackInner_eval`). The first factor `x ↦ g.inner (Φ x)` is
+    -- smooth as a section of the bilinear-form bundle over `M` (see
+    -- `inner_comp_smooth_along_diffeo`). The second factor `x ↦ mfderiv I I Φ x`
+    -- is a section of `Hom(TM, Φ^* TM)`. Combining the two into a section of
+    -- the bilinear-form bundle over `M` requires a "smoothness of a pulled-back
+    -- bilinear-form section along a smooth base map" lemma that is not yet
+    -- available; the chart-local building blocks are in place via
+    -- `bilinear_pullback_bundle_smooth`, but a bundle-level wrapper is missing.
     sorry
 
 -- order 400: capstone wrapper-existence
@@ -237,23 +235,19 @@ theorem Diffeomorph.pullbackInner_contMDiff
         ((Diffeomorph.pullbackInner g Φ x : E →L[ℝ] E →L[ℝ] ℝ))) :=
   (Diffeomorph.pullbackMetric g Φ).contMDiff
 
--- order 406: mfderiv of a diffeomorphism is smooth.
-/-- The global `mfderiv` of a smooth diffeomorphism is smooth, viewed as a
-section of the CLM bundle through the `inTangentCoordinates` representation.
-Blocked: requires `ContMDiffAt.contMDiffAt_mfderiv` (smoothness of the
-manifold-derivative) plus the smoothness-level mismatch
-(`C^∞` diffeomorphism vs `C^ω` metric target). -/
+-- order 406: smoothness of a diffeomorphism as a manifold map.
+/-- A diffeomorphism is smooth as a map `M → M`. This is the smoothness witness
+carried by the `Diffeomorph` structure. -/
 theorem Diffeomorph.mfderiv_contMDiff
     (Φ : M ≃ₘ⟮I, I⟯ M) :
-    ContMDiff I I ∞ (Φ : M → M) := by
-  sorry
+    ContMDiff I I ∞ (Φ : M → M) :=
+  Φ.contMDiff
 
 -- order 407: bilinear pullback bundle is smooth.
-/-- The bilinear pullback `(B, L) ↦ B.bilinearComp L L` is smooth in `(B, L)`.
-Blocked: requires the smoothness of the trilinear `(B, L₁, L₂) ↦ B.bilinearComp L₁ L₂`
-operation on the model space, which in turn relies on the smoothness-of-bilinear
-composition CLM (`ContinuousLinearMap.compL` smoothness) plus the smoothness-level
-mismatch (`C^∞` diffeomorphism vs `C^ω` metric target). -/
+/-- The bilinear pullback `(B, L) ↦ B.bilinearComp L L` is smooth in `(B, L)` on the
+model normed space. The operation is a polynomial composition of (i) precomposition
+`(B, L) ↦ B.comp L`, (ii) `ContinuousLinearMap.flip` (a linear isometry equivalence,
+hence smooth), and these are iterated twice, so the composite is `C^∞`. -/
 theorem bilinear_pullback_bundle_smooth
     (_Φ : M ≃ₘ⟮I, I⟯ M) :
     ContMDiff
@@ -261,6 +255,56 @@ theorem bilinear_pullback_bundle_smooth
       𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ) ∞
       (fun p : (E →L[ℝ] E →L[ℝ] ℝ) × (E →L[ℝ] E) =>
         ContinuousLinearMap.bilinearComp p.1 p.2 p.2) := by
-  sorry
+  -- Use the manifold-level CLM-comp / CLM-from-CLM combinators directly on
+  -- the prod model, avoiding any conversion between `ModelProd` and `×`.
+  -- The two component projections are smooth on the product manifold.
+  have hfst : ContMDiff
+      (𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ).prod 𝓘(ℝ, E →L[ℝ] E))
+      𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ) ∞
+      (fun p : (E →L[ℝ] E →L[ℝ] ℝ) × (E →L[ℝ] E) => p.1) :=
+    contMDiff_fst
+  have hsnd : ContMDiff
+      (𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ).prod 𝓘(ℝ, E →L[ℝ] E))
+      𝓘(ℝ, E →L[ℝ] E) ∞
+      (fun p : (E →L[ℝ] E →L[ℝ] ℝ) × (E →L[ℝ] E) => p.2) :=
+    contMDiff_snd
+  -- The CLM-flip operation on the model is itself a continuous linear isometry,
+  -- in particular a CLM, hence `ContDiff ℝ ∞`. Promote it to a smooth-on-source
+  -- map via `ContDiff.comp_contMDiff`.
+  have hflipDiff : ContDiff ℝ ∞
+      ((ContinuousLinearMap.flipₗᵢ ℝ E E ℝ) :
+        (E →L[ℝ] E →L[ℝ] ℝ) → (E →L[ℝ] E →L[ℝ] ℝ)) :=
+    (ContinuousLinearMap.flipₗᵢ ℝ E E ℝ).contDiff
+  -- Step 1: precomposition `(B, L) ↦ B.comp L` is smooth.
+  have h1 : ContMDiff
+      (𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ).prod 𝓘(ℝ, E →L[ℝ] E))
+      𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ) ∞
+      (fun p : (E →L[ℝ] E →L[ℝ] ℝ) × (E →L[ℝ] E) => p.1.comp p.2) :=
+    hfst.clm_comp hsnd
+  -- Step 2: apply flip.
+  have h2 : ContMDiff
+      (𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ).prod 𝓘(ℝ, E →L[ℝ] E))
+      𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ) ∞
+      (fun p : (E →L[ℝ] E →L[ℝ] ℝ) × (E →L[ℝ] E) => (p.1.comp p.2).flip) := by
+    have hcomp := hflipDiff.comp_contMDiff h1
+    -- `(flipₗᵢ ℝ E E ℝ) (p.1.comp p.2) = (p.1.comp p.2).flip` definitionally.
+    simpa [ContinuousLinearMap.coe_flipₗᵢ, Function.comp_def] using hcomp
+  -- Step 3: precompose again with `p.2`.
+  have h3 : ContMDiff
+      (𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ).prod 𝓘(ℝ, E →L[ℝ] E))
+      𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ) ∞
+      (fun p : (E →L[ℝ] E →L[ℝ] ℝ) × (E →L[ℝ] E) =>
+        (p.1.comp p.2).flip.comp p.2) := h2.clm_comp hsnd
+  -- Step 4: apply flip a second time.
+  have h4 : ContMDiff
+      (𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ).prod 𝓘(ℝ, E →L[ℝ] E))
+      𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ) ∞
+      (fun p : (E →L[ℝ] E →L[ℝ] ℝ) × (E →L[ℝ] E) =>
+        ((p.1.comp p.2).flip.comp p.2).flip) := by
+    have hcomp := hflipDiff.comp_contMDiff h3
+    simpa [ContinuousLinearMap.coe_flipₗᵢ, Function.comp_def] using hcomp
+  -- Unfold the goal: `bilinearComp f gE gF = ((f.comp gE).flip.comp gF).flip`.
+  -- This is the body of `def bilinearComp`, so `show` discharges it.
+  exact h4
 
 end DifferentialGeometry.PDE.RicciFlow.Pullback
