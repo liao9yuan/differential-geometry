@@ -1,6 +1,8 @@
 import DifferentialGeometry.Metric.Basic
 import DifferentialGeometry.Integral.Connection.Ricci
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Existence
+import DifferentialGeometry.PDE.DeTurck.Symbol
+import DifferentialGeometry.PDE.RicciFlow.PrincipalSymbol
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 
 /-!
@@ -59,7 +61,7 @@ universe u v
 open scoped Manifold ContDiff Topology
 open Bundle MeasureTheory
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -83,8 +85,8 @@ def IsQuasilinearMetricParabolicSolution
     (g_fam : ℝ → SmoothRiemannianMetric I M) : Prop :=
   0 < T ∧ g_fam 0 = g₀ ∧
     ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
-      HasDerivAt (fun s : ℝ => (g_fam s).inner x v w)
-                  (F (g_fam t) x v w) t
+      HasDerivWithinAt (fun s : ℝ => (g_fam s).inner x v w)
+                  (F (g_fam t) x v w) (Set.Ici 0) t
 
 /-- An abstract strict-parabolicity hypothesis on an operator `F` at a metric `g`.
 
@@ -94,13 +96,11 @@ For the skeleton this is an opaque `Prop` placeholder; downstream callers
 the linearisation infrastructure in `PDE/DeTurck/DeTurckLinearization/`. The
 shape `Prop` is what `quasilinear_metric_parabolic_shortTime_exists` consumes. -/
 def IsStrictlyParabolicMetricRHS
-    (_F : SmoothRiemannianMetric I M →
+    (F : SmoothRiemannianMetric I M →
          (∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ))
-    (_g : SmoothRiemannianMetric I M) : Prop :=
-  -- Opaque skeleton-level placeholder for the strict-parabolicity witness.
-  -- Replaced downstream by the concrete symbol-matching condition from
-  -- `PDE/DeTurck/Symbol.lean::IsStrictlyParabolic`.
-  True
+    (g : SmoothRiemannianMetric I M) : Prop :=
+  ∃ σ : DifferentialGeometry.PDE.DeTurck.TensorSymbol (E := E) I M,
+    DifferentialGeometry.PDE.RicciFlow.HasPrincipalSymbol F g σ
 
 /-- A second-order parabolic operator `F` on metrics has *smooth quasi-linear
 dependence on* the data `(g, ∇g, ∇²g)`. As an abstract Prop placeholder for the
@@ -108,9 +108,15 @@ skeleton; downstream the concrete content is "F factors through chart-coordinate
 data as a smooth function of metric components and their first two derivatives,
 strictly parabolic in the highest-order part". -/
 def IsSmoothQuasilinearMetricRHS
-    (_F : SmoothRiemannianMetric I M →
+    (F : SmoothRiemannianMetric I M →
          (∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)) : Prop :=
-  True
+  (∀ (g : SmoothRiemannianMetric I M) (α : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+        (fun x => F g x
+          (DifferentialGeometry.Integral.Measure.chartModelBasis E i)
+          (DifferentialGeometry.Integral.Measure.chartModelBasis E j))
+        (chartAt H α).source)
+    ∧ ∀ g : SmoothRiemannianMetric I M, IsStrictlyParabolicMetricRHS F g
 
 /-! ## Section B — The Phase 7 → Phase 8 endpoint (skeleton) -/
 
