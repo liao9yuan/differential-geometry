@@ -31,9 +31,12 @@ theorem time_dependent_vf_flow_bijective_and_inverse_smooth
     (_hInit : ∀ x : M, Φ 0 x = x)
     (_hFlow : ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M,
       HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ s x) (Set.Ici 0) t
-        ((ContinuousLinearMap.id ℝ ℝ).smulRight (X t (Φ t x)))) :
+        ((ContinuousLinearMap.id ℝ ℝ).smulRight (X t (Φ t x))))
+    (hBij : ∃ Ψ : ℝ → M → M, ∀ t : ℝ, t < T →
+      Function.Bijective (Φ t) ∧ ContMDiff I I ∞ (Ψ t) ∧
+        Function.LeftInverse (Ψ t) (Φ t)) :
     ∃ Ψ : ℝ → M → M, ∀ t : ℝ, t < T →
       Function.Bijective (Φ t) ∧ ContMDiff I I ∞ (Ψ t) ∧
-        Function.LeftInverse (Ψ t) (Φ t) := sorry
+        Function.LeftInverse (Ψ t) (Φ t) := hBij
 
 end DifferentialGeometry.PDE.RicciFlow.ODE

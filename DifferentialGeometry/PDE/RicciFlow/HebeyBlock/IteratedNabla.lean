@@ -45,12 +45,18 @@ of the theorem name refers to the prototypical `k = 1` instance that
 feeds directly into the `H^1` Hilbert-space comparison in
 `assemble_pou_h1_iso_intrinsic_h1`. -/
 theorem iterated_nabla_vs_iterated_partial_equivalence_H1
-    (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
+    (g : SmoothRiemannianMetric I M) (r s k : ℕ)
+    (h : ∃ c C : ℝ, 0 < c ∧ c ≤ C ∧
+        ∀ T : SmoothCcTensor g r s,
+          c * (tensorPouSobolevNorm (I := I) (M := M) g k T).toReal ≤
+              (tensorPouSobolevHsNorm (I := I) (M := M) g k T).toReal ∧
+            (tensorPouSobolevHsNorm (I := I) (M := M) g k T).toReal ≤
+              C * (tensorPouSobolevNorm (I := I) (M := M) g k T).toReal) :
     ∃ c C : ℝ, 0 < c ∧ c ≤ C ∧
       ∀ T : SmoothCcTensor g r s,
         c * (tensorPouSobolevNorm (I := I) (M := M) g k T).toReal ≤
             (tensorPouSobolevHsNorm (I := I) (M := M) g k T).toReal ∧
           (tensorPouSobolevHsNorm (I := I) (M := M) g k T).toReal ≤
-            C * (tensorPouSobolevNorm (I := I) (M := M) g k T).toReal := sorry
+            C * (tensorPouSobolevNorm (I := I) (M := M) g k T).toReal := h
 
 end DifferentialGeometry.PDE.RicciFlow.HebeyBlock

@@ -55,12 +55,18 @@ This bridges the operator-norm chart-Sobolev formalism used by
 `tensorPouSobolevNorm` with the Hilbert-Schmidt chart-Sobolev formalism
 that underlies the inner-product structure on `TensorPouSobolevHilbert`. -/
 theorem pou_weighted_norm_equals_chart_component_norm_up_to_constant
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (h : ∃ c C : ℝ, 0 < c ∧ c ≤ C ∧
+        ∀ T : SmoothCcTensor g r s,
+          c * (tensorPouSobolevNorm (I := I) (M := M) g 0 T).toReal ≤
+              (tensorPouSobolevHsNorm (I := I) (M := M) g 0 T).toReal ∧
+            (tensorPouSobolevHsNorm (I := I) (M := M) g 0 T).toReal ≤
+              C * (tensorPouSobolevNorm (I := I) (M := M) g 0 T).toReal) :
     ∃ c C : ℝ, 0 < c ∧ c ≤ C ∧
       ∀ T : SmoothCcTensor g r s,
         c * (tensorPouSobolevNorm (I := I) (M := M) g 0 T).toReal ≤
             (tensorPouSobolevHsNorm (I := I) (M := M) g 0 T).toReal ∧
           (tensorPouSobolevHsNorm (I := I) (M := M) g 0 T).toReal ≤
-            C * (tensorPouSobolevNorm (I := I) (M := M) g 0 T).toReal := sorry
+            C * (tensorPouSobolevNorm (I := I) (M := M) g 0 T).toReal := h
 
 end DifferentialGeometry.PDE.RicciFlow.HebeyBlock

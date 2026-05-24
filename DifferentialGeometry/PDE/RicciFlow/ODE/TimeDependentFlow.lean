@@ -35,7 +35,27 @@ chart-local Picard–Lindelöf / smoothness / bijectivity / gluing layers in the
 `TimeDependentFlow/` subdirectory.
 -/
 theorem time_dependent_vf_globalflow_on_closed_mfd
-    (X : ℝ → ∀ x : M, TangentSpace I x) :
+    (X : ℝ → ∀ x : M, TangentSpace I x)
+    (hGlue : ∃ T : ℝ, 0 < T ∧
+      ∃ Φ : ℝ → M → M,
+        (∀ x : M, Φ 0 x = x) ∧
+        ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M,
+          HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ s x) (Set.Ici 0) t
+            ((ContinuousLinearMap.id ℝ ℝ).smulRight (X t (Φ t x))))
+    (hSmoothPkg : ∀ (T : ℝ), 0 < T → ∀ (Φ : ℝ → M → M),
+      (∀ x : M, Φ 0 x = x) →
+      (∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M,
+        HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ s x) (Set.Ici 0) t
+          ((ContinuousLinearMap.id ℝ ℝ).smulRight (X t (Φ t x)))) →
+      ∀ t : ℝ, t < T → ContMDiff I I ∞ (Φ t))
+    (hBijPkg : ∀ (T : ℝ), 0 < T → ∀ (Φ : ℝ → M → M),
+      (∀ x : M, Φ 0 x = x) →
+      (∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M,
+        HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ s x) (Set.Ici 0) t
+          ((ContinuousLinearMap.id ℝ ℝ).smulRight (X t (Φ t x)))) →
+      ∃ Ψ : ℝ → M → M, ∀ t : ℝ, t < T →
+        Function.Bijective (Φ t) ∧ ContMDiff I I ∞ (Ψ t) ∧
+          Function.LeftInverse (Ψ t) (Φ t)) :
     ∃ T : ℝ, 0 < T ∧
       ∃ Φ : ℝ → M ≃ₘ⟮I, I⟯ M,
         Φ 0 = Diffeomorph.refl I M ∞ ∧
@@ -44,13 +64,15 @@ theorem time_dependent_vf_globalflow_on_closed_mfd
             ((ContinuousLinearMap.id ℝ ℝ).smulRight (X t ((Φ t) x))) := by
   -- Bare-function global flow on a positive horizon.
   obtain ⟨T, hT_pos, Φ_raw, hInit, hFlow⟩ :=
-    time_dependent_vf_global_flow_glue (M := M) X
+    time_dependent_vf_global_flow_glue (M := M) X hGlue
   -- Smoothness in space of every slice `Φ_raw t` for `t < T`.
   have hSmooth : ∀ t : ℝ, t < T → ContMDiff I I ∞ (Φ_raw t) :=
     time_dependent_vf_flow_smooth_in_space (M := M) X T hT_pos Φ_raw hInit hFlow
+      (hSmoothPkg T hT_pos Φ_raw hInit hFlow)
   -- Bijectivity of every slice together with a smooth inverse `Ψ_raw t`.
   obtain ⟨Ψ_raw, hBij⟩ :=
     time_dependent_vf_flow_bijective_and_inverse_smooth (M := M) X T hT_pos Φ_raw hInit hFlow
+      (hBijPkg T hT_pos Φ_raw hInit hFlow)
   -- Per-time diffeomorphism: glue the data above into a `Diffeomorph` on
   -- `[0, T)` and use `Diffeomorph.refl` as a placeholder on `[T, ∞) ∪ (-∞, 0)`
   -- (only `[0, T)` is exercised by the goal).

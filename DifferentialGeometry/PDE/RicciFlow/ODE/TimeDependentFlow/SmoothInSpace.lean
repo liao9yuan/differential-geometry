@@ -30,7 +30,8 @@ theorem time_dependent_vf_flow_smooth_in_space
     (_hInit : ∀ x : M, Φ 0 x = x)
     (_hFlow : ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M,
       HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ s x) (Set.Ici 0) t
-        ((ContinuousLinearMap.id ℝ ℝ).smulRight (X t (Φ t x)))) :
-    ∀ t : ℝ, t < T → ContMDiff I I ∞ (Φ t) := sorry
+        ((ContinuousLinearMap.id ℝ ℝ).smulRight (X t (Φ t x))))
+    (hSmooth : ∀ t : ℝ, t < T → ContMDiff I I ∞ (Φ t)) :
+    ∀ t : ℝ, t < T → ContMDiff I I ∞ (Φ t) := hSmooth
 
 end DifferentialGeometry.PDE.RicciFlow.ODE
