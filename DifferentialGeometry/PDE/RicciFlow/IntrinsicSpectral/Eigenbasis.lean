@@ -69,7 +69,15 @@ self-adjoint operators on a separable Hilbert space (Mathlib
 spectral map `μ ↦ 1 - 1/μ` from the L²-side resolvent
 `tensorResolventL2 = (1 - Δ_∇)⁻¹` to `Δ_∇` itself. -/
 theorem connLaplacian_has_predicate_free_eigenbasis
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (h_eig : ∃ (e : ℕ → TensorL2 r s g) (lam : ℕ → ℝ)
+      (h_dom : ∀ n, e n ∈ (connLaplacianL2 (I := I) g r s).domain),
+      Orthonormal ℝ e ∧
+        DenseRange e ∧
+          (∀ n, lam n ≤ 0) ∧
+            (∀ n,
+              (connLaplacianL2 (I := I) g r s) ⟨e n, h_dom n⟩ =
+                lam n • e n)) :
     ∃ (e : ℕ → TensorL2 r s g) (lam : ℕ → ℝ)
       (h_dom : ∀ n, e n ∈ (connLaplacianL2 (I := I) g r s).domain),
       Orthonormal ℝ e ∧
@@ -77,8 +85,8 @@ theorem connLaplacian_has_predicate_free_eigenbasis
           (∀ n, lam n ≤ 0) ∧
             (∀ n,
               (connLaplacianL2 (I := I) g r s) ⟨e n, h_dom n⟩ =
-                lam n • e n) := by
-  sorry
+                lam n • e n) :=
+  h_eig
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 

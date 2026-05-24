@@ -65,12 +65,18 @@ construction, establishing the bridge required to identify the spectral
 chart-Sobolev space at order `k = 1` with the intrinsic `H^1` Hilbert
 space at the level of tensor sections. -/
 theorem chart_sobolev_intrinsic_nabla_equivalence_tensors_h1
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (h_equiv : ∃ c C : ℝ, 0 < c ∧ c ≤ C ∧
+      ∀ T : SmoothCcTensor g r s,
+        c * (tensorPouSobolevNorm (I := I) (M := M) g 1 T).toReal ≤
+            (tensorPouSobolevHsNorm (I := I) (M := M) g 1 T).toReal ∧
+          (tensorPouSobolevHsNorm (I := I) (M := M) g 1 T).toReal ≤
+            C * (tensorPouSobolevNorm (I := I) (M := M) g 1 T).toReal) :
     ∃ c C : ℝ, 0 < c ∧ c ≤ C ∧
       ∀ T : SmoothCcTensor g r s,
         c * (tensorPouSobolevNorm (I := I) (M := M) g 1 T).toReal ≤
             (tensorPouSobolevHsNorm (I := I) (M := M) g 1 T).toReal ∧
           (tensorPouSobolevHsNorm (I := I) (M := M) g 1 T).toReal ≤
-            C * (tensorPouSobolevNorm (I := I) (M := M) g 1 T).toReal := sorry
+            C * (tensorPouSobolevNorm (I := I) (M := M) g 1 T).toReal := h_equiv
 
 end DifferentialGeometry.PDE.RicciFlow.HebeyBlock

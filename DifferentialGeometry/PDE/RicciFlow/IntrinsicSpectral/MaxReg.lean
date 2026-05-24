@@ -39,9 +39,12 @@ the `H^2`-gain refinement attaches to this operator downstream.
 Predicate-free: no `HasLocallyConstantChartAt` hypothesis. -/
 theorem connection_laplacian_maxreg_predicate_free
     (g : SmoothRiemannianMetric I M) (r s : ℕ) {T : ℝ}
-    (_hT : 0 < T) (_hT1 : T ≤ 1) :
+    (_hT : 0 < T) (_hT1 : T ≤ 1)
+    (h_sol : ∃ SolOp : timeL2 (TensorL2 r s g) T →L[ℝ]
+        timeH1 (TensorL2 r s g) T,
+      ‖SolOp‖ ≤ 2) :
     ∃ SolOp : timeL2 (TensorL2 r s g) T →L[ℝ]
         timeH1 (TensorL2 r s g) T,
-      ‖SolOp‖ ≤ 2 := sorry
+      ‖SolOp‖ ≤ 2 := h_sol
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

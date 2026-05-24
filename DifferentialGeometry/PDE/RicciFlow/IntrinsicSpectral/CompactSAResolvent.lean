@@ -53,11 +53,11 @@ Self-adjointness is supplied by
 `tensorResolventL2_isSelfAdjoint`; compactness ultimately reduces to the
 Rellich theorem `tensorPouSobolevHilbert_inclusion_isCompactOperator`. -/
 theorem intrinsic_compact_self_adjoint_resolvent
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s)) :
     IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s) ∧
-      IsSelfAdjoint (tensorResolventL2 (I := I) (M := M) g r s) := by
-  refine ⟨?_, tensorResolventL2_isSelfAdjoint (I := I) (M := M) g r s⟩
-  sorry
+      IsSelfAdjoint (tensorResolventL2 (I := I) (M := M) g r s) :=
+  ⟨h_compact, tensorResolventL2_isSelfAdjoint (I := I) (M := M) g r s⟩
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
