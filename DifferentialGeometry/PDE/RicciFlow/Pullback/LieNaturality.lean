@@ -4,6 +4,8 @@ import DifferentialGeometry.PDE.RicciFlow.Pullback.MLieBracketNaturality
 import DifferentialGeometry.PDE.RicciFlow.Pullback.PushforwardVF
 import DifferentialGeometry.PDE.RicciFlow.Pullback.CartanFormula
 import DifferentialGeometry.PDE.RicciFlow.Pullback.CovDerivPullbackNaturality
+import DifferentialGeometry.PDE.RicciFlow.Pullback.CovDerivPullbackPointwise
+import DifferentialGeometry.PDE.RicciFlow.Pullback.ChainRule
 import DifferentialGeometry.PDE.DeTurck.LieDerivativeMetric
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
@@ -11,6 +13,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 open Bundle
 open scoped Manifold ContDiff
 open DifferentialGeometry
+open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.PDE.DeTurck
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -22,98 +25,69 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 /-- **Naturality of the Lie derivative of a metric along a diffeomorphism (pointwise).**
 
 For a smooth Riemannian metric `g`, a diffeomorphism `Φ : M ≃ₘ⟮I, I⟯ M`, and a
-smooth vector field `X` whose `Diffeomorph.pushforward Φ X` is also smooth, the
-Lie derivative of the pullback metric along `X` equals — pointwise — the
-Lie derivative of `g` along the pushforward `Φ_* X`, transported back along
-`mfderiv I I Φ x` in both slots.
-
-More precisely, packaging `X` and `Diffeomorph.pushforward Φ X` as
-`Cₛ^∞`-sections via the supplied smoothness witnesses, the bundled
-`(0,2)`-tensor field `𝓛_X (Φ^* g)` evaluated at `(v, w) ∈ (T_x M)²` coincides
-with `𝓛_{Φ_* X} g` at `Φ x` evaluated on `(mfderiv I I Φ x v, mfderiv I I Φ x w)`.
+smooth section `Y` on `M` whose pushforward `Diffeomorph.pushforward Φ Y` is also
+smooth, the Lie derivative of the pullback metric `Φ^* g` along `Y` equals —
+pointwise at `x ∈ M` — the Lie derivative of `g` along the pushforward `Φ_* Y`,
+evaluated at `Φ x` on the differentials `mfderiv I I Φ x v` and
+`mfderiv I I Φ x w`.
 
 This is the diffeomorphism-naturality of the Killing operator and underlies the
 DeTurck pullback chain of identities.
 
-PROOF OUTLINE / GAP.
-
-The proof has a clean three-line skeleton, but each line consumes infrastructure
-that is not yet available:
-
-  (1) Apply `cartan_formula_for_lie_deriv_metric` to both sides:
-      LHS = (Φ*g).inner x (∇^{Φ*g}_v X) w + (Φ*g).inner x v (∇^{Φ*g}_w X)
-      RHS = g.inner (Φx) (∇^g_{dΦv} (Φ*X)) (dΦw)
-            + g.inner (Φx) (dΦv) (∇^g_{dΦw} (Φ*X))
-
-  (2) Apply `pullback_metric_evaluation_formula` to convert each `(Φ*g).inner x`
-      on the LHS into `g.inner (Φx)` composed with `mfderiv I I Φ x`:
-      (Φ*g).inner x (∇^{Φ*g}_v X) w = g.inner (Φx) (dΦ (∇^{Φ*g}_v X)) (dΦ w).
-
-  (3) Identify each LHS summand with the corresponding RHS summand via the
-      **connection-pullback naturality identity**
-        dΦ (∇^{Φ*g}_v X) = ∇^g_{dΦ v} (Φ_* X)        (★)
-      (and symmetrically with `w` in place of `v`).
-
-Identity (★) is the genuine missing ingredient. It says that the Levi-Civita
-connection of the pullback metric, transported by the differential `dΦ`, agrees
-with the Levi-Civita connection of `g` applied to the pushforward vector field.
-This is the "tensorial" statement of `levi_civita_pullback_conjugation`, which
-holds at the level of bundled `CovariantDerivative`s by `rfl`
-(`covariant_derivative_of_pullback_vf_naturality`) but whose pointwise
-unfolding into (★) requires either:
-
-  (a) A Koszul-uniqueness lemma in the concrete (chart-coordinate) framework
-      — analogous to `levi_civita_uniqueness` at the Synthetic layer
-      (`Synthetic/Geometry/Connection.lean`) but instantiated for
-      `LeviCivita (I := I) g` and its pullback. The Synthetic version proves
-      that any torsion-free metric-compatible connection equals the Levi-Civita
-      connection; transferring this through the
-      `Synthetic/Realization/LeviCivita.lean` bridge to obtain (★) for the
-      concrete `CovariantDerivative` is straightforward in principle but
-      requires building the matching pullback-by-conjugation data in the
-      Synthetic instance and then unfolding the bridge, totalling roughly
-      400–600 new lines of infrastructure.
-
-  (b) A direct chart-coordinate proof, expanding both sides of (★) via
-      `chart_christoffel_expansion_of_nabla_on_vf` (proven in
-      `CartanFormula.lean`) and the Jacobian-of-`Φ` transformation rule for
-      Christoffel symbols. This involves the substitution
-        chartChristoffel (Φ*g) at chart-of-x =
-          [Jacobian and Hessian of Φ contributions]
-            + chartChristoffel g at chart-of-Φx pulled back through `dΦ`,
-      which is the classical "Christoffel symbols transform as a connection"
-      identity. Formalizing this from scratch is approximately 800–1200 lines
-      of chart-coordinate calculation, including the chain rule for the second
-      derivative of a chart change and the matrix algebra to recombine terms.
-
-Path (a) is the cleaner mathematical formulation; path (b) is more elementary
-but longer. Neither fits in 800 lines without first laying down the missing
-infrastructure (Koszul uniqueness at the concrete level OR the Christoffel-
-transformation lemma) in separate files. The 800-line cap and "no new
-def : Prop / class / axiom" constraints prevent both within this single fill.
-
-DOWNSTREAM EFFECT.
-
-The DeTurck pullback chain currently consumes
-`lie_derivative_pullback_naturality` as a single black-box identity. Once (★)
-is supplied (via either path), the chain closes by Cartan + the pullback
-evaluation formula in roughly 60 lines of straightforward symbol-pushing,
-which is well within the budget for the *next* iteration. -/
+The proof unfolds both sides by the Cartan formula, converts the pullback inner
+product to `g` via `pullback_metric_evaluation_formula`, and identifies the
+differential of the pullback Levi-Civita derivative with the Levi-Civita
+derivative of the pushforward via `covariant_derivative_pullback_pointwise`. -/
 theorem lie_derivative_pullback_naturality
     (g : SmoothRiemannianMetric I M)
     (Φ : M ≃ₘ⟮I, I⟯ M)
-    (X : ∀ x : M, TangentSpace I x)
-    (hX_smooth : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
-      (fun x : M => TotalSpace.mk' E (E := TangentSpace I) x (X x)))
+    (Y : ∀ x : M, TangentSpace I x)
+    (hY_smooth : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun x : M => TotalSpace.mk' E (E := TangentSpace I) x (Y x)))
     (hPush_smooth : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun x : M => TotalSpace.mk' E (E := TangentSpace I) x
-        (Diffeomorph.pushforward Φ X x)))
+        (Diffeomorph.pushforward Φ Y x)))
     (x : M) (v w : TangentSpace I x) :
     lieDerivMetric (I := I) (Diffeomorph.pullbackMetric g Φ)
-        ⟨X, hX_smooth⟩ x v w
+        ⟨Y, hY_smooth⟩ x v w
       = lieDerivMetric (I := I) g
-          ⟨Diffeomorph.pushforward Φ X, hPush_smooth⟩ (Φ x)
-            (mfderiv I I Φ x v) (mfderiv I I Φ x w) := sorry
+          ⟨Diffeomorph.pushforward Φ Y, hPush_smooth⟩ (Φ x)
+            (mfderiv I I Φ x v) (mfderiv I I Φ x w) := by
+  -- Step 1: Apply Cartan to the LHS (computing `lieDerivMetric (Φ*g) Y x v w`).
+  rw [cartan_formula_for_lie_deriv_metric (I := I)
+    (Diffeomorph.pullbackMetric g Φ) ⟨Y, hY_smooth⟩ x v w]
+  -- Step 2: Apply Cartan to the RHS (computing
+  -- `lieDerivMetric g (Φ_*Y) (Φ x) (dΦv) (dΦw)`).
+  rw [cartan_formula_for_lie_deriv_metric (I := I) g
+    ⟨Diffeomorph.pushforward Φ Y, hPush_smooth⟩ (Φ x)
+    (mfderiv I I (⇑Φ) x v) (mfderiv I I (⇑Φ) x w)]
+  -- After Cartan, the `Cₛ^∞` coercions unfold to the underlying section
+  -- functions `Y` and `Diffeomorph.pushforward Φ Y`. Normalise the surface form.
+  change (Diffeomorph.pullbackMetric g Φ).inner x
+        ((LeviCivita (I := I) (Diffeomorph.pullbackMetric g Φ)) Y x v) w
+      + (Diffeomorph.pullbackMetric g Φ).inner x v
+        ((LeviCivita (I := I) (Diffeomorph.pullbackMetric g Φ)) Y x w)
+    = g.inner (Φ x) ((LeviCivita (I := I) g)
+        (Diffeomorph.pushforward Φ Y) (Φ x) (mfderiv I I (⇑Φ) x v))
+        (mfderiv I I (⇑Φ) x w)
+      + g.inner (Φ x) (mfderiv I I (⇑Φ) x v) ((LeviCivita (I := I) g)
+        (Diffeomorph.pushforward Φ Y) (Φ x) (mfderiv I I (⇑Φ) x w))
+  -- Step 3: Convert each `(Φ*g).inner x` summand on the LHS to `g.inner (Φ x)`
+  -- via the pullback evaluation formula.
+  rw [pullback_metric_evaluation_formula (I := I) g Φ x
+        ((LeviCivita (I := I) (Diffeomorph.pullbackMetric g Φ)) Y x v) w,
+      pullback_metric_evaluation_formula (I := I) g Φ x v
+        ((LeviCivita (I := I) (Diffeomorph.pullbackMetric g Φ)) Y x w)]
+  -- Step 4: Establish manifold-differentiability of the section `Y` at `x` from
+  -- the supplied total-space smoothness witness.
+  have hinfty : (∞ : WithTop ℕ∞) ≠ 0 := by decide
+  have hY_mdiff : MDifferentiableAt I I.tangent
+      (fun y : M => (TotalSpace.mk' E y (Y y) : TangentBundle I M)) x :=
+    (hY_smooth x).mdifferentiableAt hinfty
+  -- Step 5: Apply the connection-pullback pointwise identity in both slots.
+  -- Each call rewrites `mfderiv Φ x (∇^{Φ*g} Y x v) = ∇^g (Φ_*Y) (Φx) (mfderiv Φ x v)`.
+  rw [covariant_derivative_pullback_pointwise (I := I) g Φ v hY_mdiff,
+      covariant_derivative_pullback_pointwise (I := I) g Φ w hY_mdiff]
 
 /-- **Naturality of the Lie derivative of a metric along a diffeomorphism
 (globally bundled form).**
@@ -121,26 +95,26 @@ theorem lie_derivative_pullback_naturality
 The Lie-derivative naturality identity of `lie_derivative_pullback_naturality`,
 phrased as a single equation of real numbers at an arbitrary base point: at every
 `x : M` and every pair `(v, w) ∈ (T_x M)²` the Lie derivative of the pullback
-metric along `X` (evaluated on `v, w`) equals the Lie derivative of `g` along
-the pushforward `Φ_* X` (evaluated on `mfderiv I I Φ x v, mfderiv I I Φ x w`).
+metric along `Y` (evaluated on `v, w`) equals the Lie derivative of `g` along
+the pushforward `Φ_* Y` (evaluated on `mfderiv I I Φ x v, mfderiv I I Φ x w`).
 This is the bundled-tensor-field formulation that downstream callers (e.g. the
 DeTurck flow conjugation) consume directly. -/
 theorem assemble_lie_deriv_naturality
     (g : SmoothRiemannianMetric I M)
     (Φ : M ≃ₘ⟮I, I⟯ M)
-    (X : ∀ x : M, TangentSpace I x)
-    (hX_smooth : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
-      (fun x : M => TotalSpace.mk' E (E := TangentSpace I) x (X x)))
+    (Y : ∀ x : M, TangentSpace I x)
+    (hY_smooth : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun x : M => TotalSpace.mk' E (E := TangentSpace I) x (Y x)))
     (hPush_smooth : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun x : M => TotalSpace.mk' E (E := TangentSpace I) x
-        (Diffeomorph.pushforward Φ X x))) :
+        (Diffeomorph.pushforward Φ Y x))) :
     ∀ x : M, ∀ v w : TangentSpace I x,
       lieDerivMetric (I := I) (Diffeomorph.pullbackMetric g Φ)
-          ⟨X, hX_smooth⟩ x v w
+          ⟨Y, hY_smooth⟩ x v w
         = lieDerivMetric (I := I) g
-            ⟨Diffeomorph.pushforward Φ X, hPush_smooth⟩ (Φ x)
+            ⟨Diffeomorph.pushforward Φ Y, hPush_smooth⟩ (Φ x)
               (mfderiv I I Φ x v) (mfderiv I I Φ x w) :=
   fun x v w =>
-    lie_derivative_pullback_naturality g Φ X hX_smooth hPush_smooth x v w
+    lie_derivative_pullback_naturality g Φ Y hY_smooth hPush_smooth x v w
 
 end DifferentialGeometry.PDE.RicciFlow.Pullback
