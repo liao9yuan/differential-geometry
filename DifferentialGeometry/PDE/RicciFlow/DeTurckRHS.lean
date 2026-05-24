@@ -19,31 +19,21 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## Smoothness downgrade
+/-! ## Smoothness-index bridge
 
-The local alias `SmoothRiemannianMetric I M` (i.e.
-`DifferentialGeometry.SmoothRiemannianMetric I M`) is
-`Bundle.ContMDiffRiemannianMetric I ⊤ E (TangentSpace I)`, where `⊤ : WithTop ℕ∞`
-is the analytic-`ω` top of the smoothness lattice.  The Riemannian
-infrastructure (`ricciTensor`, `deTurckVF`, `lieDerivMetric`) is built on
-`Bundle.ContMDiffRiemannianMetric I ∞ E (TangentSpace I)`, the strictly
-smaller `C^∞` regularity (`∞ = ((⊤ : ℕ∞) : WithTop ℕ∞)`).  Because the
-underlying inner-product / symmetry / positivity / topological-boundedness
-fields of `ContMDiffRiemannianMetric` are independent of `n`, the smoothness
-witness `g.contMDiff` for `n = ⊤` automatically downgrades via
-`ContMDiff.of_le : ContMDiff … ⊤ f → ContMDiff … ∞ f` (since `∞ ≤ ⊤`). -/
+Both `DifferentialGeometry.SmoothRiemannianMetric I M` (from
+`Metric/Basic.lean`) and `Integral.Measure.SmoothRiemannianMetric I M`
+(from `Integral/Measure/ChartDensity.lean`) are now aliased to
+`Bundle.ContMDiffRiemannianMetric I ∞ E (TangentSpace I)`; the bridge
+is a definitional identity. -/
 
-/-- Downgrade the smoothness index of a smooth Riemannian metric from `⊤`
-to `∞`, retaining all the algebraic data and obtaining the weaker
-smoothness witness via `ContMDiff.of_le`. -/
+/-- Identify a smooth Riemannian metric across the two project aliases
+(`DifferentialGeometry.SmoothRiemannianMetric` and
+`Integral.Measure.SmoothRiemannianMetric`), both of which now reduce to
+`Bundle.ContMDiffRiemannianMetric I ∞ E (TangentSpace I)`. -/
 noncomputable def smoothRiemannianMetricToInfty
     (g : SmoothRiemannianMetric I M) :
-    Integral.Measure.SmoothRiemannianMetric I M where
-  inner := g.inner
-  symm := g.symm
-  pos := g.pos
-  isVonNBounded := g.isVonNBounded
-  contMDiff := g.contMDiff.of_le (le_top)
+    Integral.Measure.SmoothRiemannianMetric I M := g
 
 /-! ## Continuous-linear upgrade of the Lie-derivative metric
 

@@ -84,7 +84,7 @@ diffeomorphism `Φ` (i.e. evaluated at `Φ x`), is a smooth section of the bundl
 continuous bilinear forms on `E`. -/
 theorem inner_comp_smooth_along_diffeo
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M) :
-    ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ⊤
+    ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
       ((fun b ↦ TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ) b (g.inner b)) ∘ (Φ : M → M)) :=
   sorry
 
@@ -232,7 +232,7 @@ theorem Diffeomorph.pullbackMetric_refl
 This is exactly the `contMDiff` field of `Diffeomorph.pullbackMetric g Φ`. -/
 theorem Diffeomorph.pullbackInner_contMDiff
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M) :
-    ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ⊤
+    ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
       (fun x => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ) x
         ((Diffeomorph.pullbackInner g Φ x : E →L[ℝ] E →L[ℝ] ℝ))) :=
   (Diffeomorph.pullbackMetric g Φ).contMDiff
@@ -245,7 +245,7 @@ manifold-derivative) plus the smoothness-level mismatch
 (`C^∞` diffeomorphism vs `C^ω` metric target). -/
 theorem Diffeomorph.mfderiv_contMDiff
     (Φ : M ≃ₘ⟮I, I⟯ M) :
-    ContMDiff I I ⊤ (Φ : M → M) := by
+    ContMDiff I I ∞ (Φ : M → M) := by
   sorry
 
 -- order 407: bilinear pullback bundle is smooth.
@@ -258,7 +258,7 @@ theorem bilinear_pullback_bundle_smooth
     (_Φ : M ≃ₘ⟮I, I⟯ M) :
     ContMDiff
       (𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ).prod 𝓘(ℝ, E →L[ℝ] E))
-      𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ) ⊤
+      𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ) ∞
       (fun p : (E →L[ℝ] E →L[ℝ] ℝ) × (E →L[ℝ] E) =>
         ContinuousLinearMap.bilinearComp p.1 p.2 p.2) := by
   sorry
