@@ -13,6 +13,7 @@ import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
+set_option backward.isDefEq.respectTransparency false
 
 /-!
 # RicciFlower Realized Metric Families
@@ -332,6 +333,45 @@ theorem const_smul
   rw [FiberBundle.continuousAt_totalSpace] at hAq ⊢
   refine ⟨hAq.1, ?_⟩
   simpa [map_smul] using (hAq.2.const_smul c)
+
+/-- Addition preserves time-dependent tensor continuity. -/
+theorem add
+    {s : Nat} {K : Set Real}
+    {A B : (t : Real) -> (x : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x}
+    (hA : Tensor0SFamilyContinuousOnSet (I := I) (M := M) s K A)
+    (hB : Tensor0SFamilyContinuousOnSet (I := I) (M := M) s K B) :
+    Tensor0SFamilyContinuousOnSet (I := I) (M := M) s K
+      (fun t x => A t x + B t x) := by
+  unfold Tensor0SFamilyContinuousOnSet at hA hB ⊢
+  rw [continuous_iff_continuousAt] at hA hB ⊢
+  intro q
+  have hAq := hA q
+  have hBq := hB q
+  rw [FiberBundle.continuousAt_totalSpace] at hAq hBq ⊢
+  refine ⟨hAq.1, ?_⟩
+  simpa [map_add] using hAq.2.add hBq.2
+
+/-- Multiplication by a jointly continuous scalar family preserves
+time-dependent tensor continuity. -/
+theorem smul
+    {s : Nat} {K : Set Real}
+    {f : Real -> M -> Real}
+    {A : (t : Real) -> (x : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x}
+    (hf : Continuous (fun q : {t : Real // t ∈ K} × M => f q.1.1 q.2))
+    (hA : Tensor0SFamilyContinuousOnSet (I := I) (M := M) s K A) :
+    Tensor0SFamilyContinuousOnSet (I := I) (M := M) s K
+      (fun t x => f t x • A t x) := by
+  unfold Tensor0SFamilyContinuousOnSet at hA ⊢
+  rw [continuous_iff_continuousAt] at hA ⊢
+  intro q
+  have hAq := hA q
+  have hfq : ContinuousAt (fun q : {t : Real // t ∈ K} × M => f q.1.1 q.2) q :=
+    hf.continuousAt
+  rw [FiberBundle.continuousAt_totalSpace] at hAq ⊢
+  refine ⟨hAq.1, ?_⟩
+  simpa [map_smul] using hfq.smul hAq.2
 
 /-- Pull time-dependent tensor continuity from the base product to the
 time/tangent-bundle product by using the tangent bundle projection. -/

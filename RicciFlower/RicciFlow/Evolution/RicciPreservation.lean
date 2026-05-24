@@ -1,6 +1,7 @@
 import RicciFlower.DimensionThree.RicciControlsRm
 import RicciFlower.MaximumPrinciple.TensorWeak
 import RicciFlower.Realized.CurvatureProducers
+import RicciFlower.RicciFlow.Basic
 import RicciFlower.LeviCivita.Koszul
 import RicciFlower.Tensor.RSTensor.QuadraticBounds
 
@@ -8,6 +9,7 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedVariables false
 set_option linter.unusedSectionVars false
+set_option backward.isDefEq.respectTransparency false
 
 /-!
 # Ricci positivity and pinching preservation
@@ -24,6 +26,7 @@ namespace RicciFlower
 namespace RicciFlow
 
 open Realized
+open Bundle
 open Tensor0SBundle
 open scoped BigOperators Manifold ContDiff
 
@@ -137,6 +140,70 @@ theorem pinchReact_ge
     positivity
   exact add_nonneg h1 h2
 
+/-- Scalar curvature reconstructed from a shifted pinching-null diagonal tensor
+`diag(0,a,b) = Ric - delta R g` when `delta < 1/3`. -/
+def shiftScal3 (delta a b : Real) : Real :=
+  (a + b) / (1 - 3 * delta)
+
+/-- First Ricci eigenvalue reconstructed from a shifted pinching-null diagonal
+tensor. -/
+def shiftRic1 (delta a b : Real) : Real :=
+  delta * shiftScal3 delta a b
+
+/-- Second Ricci eigenvalue reconstructed from a shifted pinching-null diagonal
+tensor. -/
+def shiftRic2 (delta a b : Real) : Real :=
+  a + delta * shiftScal3 delta a b
+
+/-- Third Ricci eigenvalue reconstructed from a shifted pinching-null diagonal
+tensor. -/
+def shiftRic3 (delta a b : Real) : Real :=
+  b + delta * shiftScal3 delta a b
+
+/-- The reconstructed Ricci eigenvalues have scalar trace `shiftScal3`. -/
+theorem shiftScal3_eq
+    (delta a b : Real) (hdelta13 : delta < (1 : Real) / 3) :
+    RicciFlower.DimensionThree.ricciEigenScalar3
+      (shiftRic1 delta a b) (shiftRic2 delta a b) (shiftRic3 delta a b) =
+      shiftScal3 delta a b := by
+  have hden : 1 - 3 * delta ≠ 0 := by
+    nlinarith
+  have hden' : 1 - delta * 3 ≠ 0 := by
+    nlinarith
+  unfold RicciFlower.DimensionThree.ricciEigenScalar3
+    shiftRic1 shiftRic2 shiftRic3 shiftScal3
+  field_simp [hden, hden']
+  ring
+
+/-- The first reconstructed Ricci eigenvalue is pinching-null. -/
+theorem shiftNull3
+    (delta a b : Real) (hdelta13 : delta < (1 : Real) / 3) :
+    shiftRic1 delta a b =
+      delta * RicciFlower.DimensionThree.ricciEigenScalar3
+        (shiftRic1 delta a b) (shiftRic2 delta a b) (shiftRic3 delta a b) := by
+  rw [shiftScal3_eq delta a b hdelta13]
+  rfl
+
+/-- Shifted pinching reaction nonnegativity at a reconstructed null direction.
+
+This is the algebraic core for the strict `0 < delta < 1/3` Section 9 null
+condition after diagonalizing a nonnegative tensor
+`Ric - delta R g = diag(0,a,b)`.  The nonnegativity of `a,b` belongs to the
+diagonalization/reconstruction bridge; the reaction value itself only needs the
+pinching-null relation and `0 <= delta < 1/3`. -/
+theorem pinchShiftNull_ge
+    (delta a b : Real)
+    (hdelta0 : 0 <= delta) (hdelta13 : delta < (1 : Real) / 3) :
+    0 <= pinchReact delta
+      (RicciFlower.DimensionThree.stdRmDiag3
+        (shiftRic1 delta a b) (shiftRic2 delta a b) (shiftRic3 delta a b))
+      (RicciFlower.DimensionThree.ricciDiag3
+        (shiftRic1 delta a b) (shiftRic2 delta a b) (shiftRic3 delta a b))
+      0 0 := by
+  exact pinchReact_ge delta
+    (shiftRic1 delta a b) (shiftRic2 delta a b) (shiftRic3 delta a b)
+    hdelta0 (le_of_lt hdelta13) (shiftNull3 delta a b hdelta13)
+
 /-! ## Conditional tensor-WMP consumers -/
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -169,6 +236,28 @@ def PinchInit
     0 < delta ∧ delta <= (1 : Real) / 3 ∧
       TwoTensorFamilyNonnegativeAtTime (I := I) (M := M)
         (pinchTensor (I := I) (M := M) G Ric scalar delta) 0
+
+/-- Strict version of the initial pinching selector, used by the shifted
+pinching null-condition route where `delta = 1/3` is intentionally excluded. -/
+def PinchInitLt
+    (G : Real -> SmoothRiemannianMetric I M)
+    (Ric : TwoTensorFamily (I := I) (M := M))
+    (scalar : Real -> M -> Real) : Prop :=
+  ∃ delta : Real,
+    0 < delta ∧ delta < (1 : Real) / 3 ∧
+      TwoTensorFamilyNonnegativeAtTime (I := I) (M := M)
+        (pinchTensor (I := I) (M := M) G Ric scalar delta) 0
+
+/-- Forget the strict upper bound in the compatibility initial pinching
+selector. -/
+theorem pinchInit_of_lt
+    {G : Real -> SmoothRiemannianMetric I M}
+    {Ric : TwoTensorFamily (I := I) (M := M)}
+    {scalar : Real -> M -> Real}
+    (hinit : PinchInitLt (I := I) (M := M) G Ric scalar) :
+    PinchInit (I := I) (M := M) G Ric scalar := by
+  rcases hinit with ⟨delta, hdelta0, hdelta13, hpinch⟩
+  exact ⟨delta, hdelta0, le_of_lt hdelta13, hpinch⟩
 
 /-- Uniform initial bounds which imply a selected pinching constant.  The
 compactness/eigenvalue selector for Corollary 9.3 should produce this package
@@ -414,11 +503,11 @@ theorem unitLower_raw
       let x0 := UnitTangent.base (I := I) (M := M) p0
       let v0 := UnitTangent.vec (I := I) (M := M) p0
       have hunit0 : (G 0).inner x0 v0 v0 = 1 := by
-        simpa [x0, v0] using UnitTangent.unit (I := I) (M := M) p0
+        simp [x0, v0, UnitTangent.unit]
       have hv0 : v0 ≠ 0 := by
         intro hz
         have hbad : (0 : Real) = 1 := by
-          simpa [hz] using hunit0
+          simp [hz] at hunit0
         norm_num at hbad
       exact hpos x0 v0 hv0
     refine ⟨c, hc, ?_⟩
@@ -599,24 +688,26 @@ theorem boundsPos_ricMin
     (scalar := scalar) (ricMin := ricMin) hmin
     (scalarUpper_cont (M := M) hscalar)
 
-/-- Uniform initial lower Ricci and upper scalar bounds select an initial
-pinching constant. -/
-theorem pinchInit_of_bounds
+/-- Uniform initial lower Ricci and upper scalar bounds select a strict
+initial pinching constant `0 < delta < 1/3`. -/
+theorem pinchInitLt_bounds
     {G : Real -> SmoothRiemannianMetric I M}
     {Ric : TwoTensorFamily (I := I) (M := M)}
     {scalar : Real -> M -> Real}
     (hbounds : InitBounds (I := I) (M := M) G Ric scalar) :
-    PinchInit (I := I) (M := M) G Ric scalar := by
+    PinchInitLt (I := I) (M := M) G Ric scalar := by
   rcases hbounds with ⟨c, C, hc, hC, hRicLower, hScalarUpper⟩
-  let delta : Real := min ((1 : Real) / 3) (c / C)
-  have hthird_pos : 0 < (1 : Real) / 3 := by norm_num
+  let delta : Real := min ((1 : Real) / 6) (c / C)
+  have hsix_pos : 0 < (1 : Real) / 6 := by norm_num
   have hdiv_pos : 0 < c / C := div_pos hc hC
   have hdelta_pos : 0 < delta := by
     dsimp [delta]
-    exact lt_min hthird_pos hdiv_pos
-  have hdelta_le_third : delta <= (1 : Real) / 3 := by
+    exact lt_min hsix_pos hdiv_pos
+  have hdelta_le_six : delta <= (1 : Real) / 6 := by
     dsimp [delta]
     exact min_le_left _ _
+  have hdelta_lt_third : delta < (1 : Real) / 3 := by
+    nlinarith
   have hdelta_nonneg : 0 <= delta := le_of_lt hdelta_pos
   have hdelta_le_div : delta <= c / C := by
     dsimp [delta]
@@ -625,7 +716,7 @@ theorem pinchInit_of_bounds
     have hmul := mul_le_mul_of_nonneg_right hdelta_le_div (le_of_lt hC)
     have hcancel : c / C * C = c := div_mul_cancel₀ c (ne_of_gt hC)
     nlinarith
-  refine ⟨delta, hdelta_pos, hdelta_le_third, ?_⟩
+  refine ⟨delta, hdelta_pos, hdelta_lt_third, ?_⟩
   intro x v
   have hg_nonneg : 0 <= (G 0).inner x v v := by
     by_cases hv : v = 0
@@ -634,7 +725,8 @@ theorem pinchInit_of_bounds
     · exact le_of_lt ((G 0).pos x v hv)
   have hscalar_le : delta * scalar 0 x <= delta * C :=
     mul_le_mul_of_nonneg_left (hScalarUpper x) hdelta_nonneg
-  have hscaled_le : delta * scalar 0 x * (G 0).inner x v v <= c * (G 0).inner x v v := by
+  have hscaled_le :
+      delta * scalar 0 x * (G 0).inner x v v <= c * (G 0).inner x v v := by
     calc
       delta * scalar 0 x * (G 0).inner x v v
           = (delta * scalar 0 x) * (G 0).inner x v v := by ring
@@ -646,6 +738,30 @@ theorem pinchInit_of_bounds
     le_trans hscaled_le (hRicLower x v)
   simpa [pinchTensor, sub_nonneg] using hpinch_le
 
+/-- Uniform initial lower Ricci and upper scalar bounds select an initial
+pinching constant. -/
+theorem pinchInit_of_bounds
+    {G : Real -> SmoothRiemannianMetric I M}
+    {Ric : TwoTensorFamily (I := I) (M := M)}
+    {scalar : Real -> M -> Real}
+    (hbounds : InitBounds (I := I) (M := M) G Ric scalar) :
+    PinchInit (I := I) (M := M) G Ric scalar := by
+  exact pinchInit_of_lt (I := I) (M := M)
+    (pinchInitLt_bounds (I := I) (M := M) (G := G) (Ric := Ric)
+      (scalar := scalar) hbounds)
+
+/-- Strict initial Ricci positivity gives strict initial pinching once the
+compactness selector has produced the uniform initial bounds. -/
+theorem pinchInitLt_of_pos
+    {G : Real -> SmoothRiemannianMetric I M}
+    {Ric : TwoTensorFamily (I := I) (M := M)}
+    {scalar : Real -> M -> Real}
+    (hpos : RicciPosInit (I := I) (M := M) Ric)
+    (hbounds : BoundsOfPosRic (I := I) (M := M) G Ric scalar) :
+    PinchInitLt (I := I) (M := M) G Ric scalar := by
+  exact pinchInitLt_bounds (I := I) (M := M) (G := G) (Ric := Ric)
+    (scalar := scalar) (hbounds hpos)
+
 /-- Strict initial Ricci positivity gives initial pinching once the compactness
 selector has produced the uniform initial bounds. -/
 theorem pinchInit_of_pos
@@ -655,8 +771,26 @@ theorem pinchInit_of_pos
     (hpos : RicciPosInit (I := I) (M := M) Ric)
     (hbounds : BoundsOfPosRic (I := I) (M := M) G Ric scalar) :
     PinchInit (I := I) (M := M) G Ric scalar := by
-  exact pinchInit_of_bounds (I := I) (M := M) (G := G) (Ric := Ric)
-    (scalar := scalar) (hbounds hpos)
+  exact pinchInit_of_lt (I := I) (M := M)
+    (pinchInitLt_of_pos (I := I) (M := M) (G := G) (Ric := Ric)
+      (scalar := scalar) hpos hbounds)
+
+/-- A realized Ricci-minimum lower bound and scalar continuity select a strict
+initial pinching constant. -/
+theorem pinchInitLt_ricMin
+    [CompactSpace M] [Nonempty M]
+    {G : Real -> SmoothRiemannianMetric I M}
+    {Ric : TwoTensorFamily (I := I) (M := M)}
+    {scalar : Real -> M -> Real}
+    {ricMin : M -> Real}
+    (hmin : RicMinData (I := I) (M := M) G Ric ricMin)
+    (hscalar : Continuous (fun x : M => scalar 0 x)) :
+    PinchInitLt (I := I) (M := M) G Ric scalar :=
+  pinchInitLt_bounds (I := I) (M := M) (G := G) (Ric := Ric)
+    (scalar := scalar)
+    (bounds_ricMin (I := I) (M := M) (G := G) (Ric := Ric)
+      (scalar := scalar) (ricMin := ricMin) hmin
+      (scalarUpper_cont (M := M) hscalar))
 
 /-- A realized Ricci-minimum lower bound and scalar continuity select the
 initial pinching constant. -/
@@ -669,11 +803,26 @@ theorem pinchInit_ricMin
     (hmin : RicMinData (I := I) (M := M) G Ric ricMin)
     (hscalar : Continuous (fun x : M => scalar 0 x)) :
     PinchInit (I := I) (M := M) G Ric scalar :=
-  pinchInit_of_bounds (I := I) (M := M) (G := G) (Ric := Ric)
-    (scalar := scalar)
-    (bounds_ricMin (I := I) (M := M) (G := G) (Ric := Ric)
-      (scalar := scalar) (ricMin := ricMin) hmin
-      (scalarUpper_cont (M := M) hscalar))
+  pinchInit_of_lt (I := I) (M := M)
+    (pinchInitLt_ricMin (I := I) (M := M) (G := G) (Ric := Ric)
+      (scalar := scalar) (ricMin := ricMin) hmin hscalar)
+
+/-- Metric/Ricci-native initial pinching selector.  The remaining geometric
+producer is now the canonical lower-bound function for the initial Ricci tensor,
+not a lower-bound function for an arbitrary supplied tensor family. -/
+theorem pinchInitLt_metric
+    [CompactSpace M] [SigmaCompactSpace M] [T2Space M] [Nonempty M]
+    {G : Real -> SmoothRiemannianMetric I M}
+    {Ric : TwoTensorFamily (I := I) (M := M)}
+    {scalar : Real -> M -> Real}
+    {ricMin : M -> Real}
+    (D : MetricRicciData (I := I) (M := M) G Ric)
+    (hmin : MetricRicciMin (I := I) (M := M) D ricMin)
+    (hscalar : Continuous (fun x : M => scalar 0 x)) :
+    PinchInitLt (I := I) (M := M) G Ric scalar :=
+  pinchInitLt_ricMin (I := I) (M := M) (G := G) (Ric := Ric)
+    (scalar := scalar) (ricMin := ricMin)
+    (ricMin_of_metric (I := I) (M := M) D hmin) hscalar
 
 /-- Metric/Ricci-native initial pinching selector.  The remaining geometric
 producer is now the canonical lower-bound function for the initial Ricci tensor,
@@ -688,9 +837,24 @@ theorem pinchInit_metric
     (hmin : MetricRicciMin (I := I) (M := M) D ricMin)
     (hscalar : Continuous (fun x : M => scalar 0 x)) :
     PinchInit (I := I) (M := M) G Ric scalar :=
-  pinchInit_ricMin (I := I) (M := M) (G := G) (Ric := Ric)
-    (scalar := scalar) (ricMin := ricMin)
-    (ricMin_of_metric (I := I) (M := M) D hmin) hscalar
+  pinchInit_of_lt (I := I) (M := M)
+    (pinchInitLt_metric (I := I) (M := M) (G := G) (Ric := Ric)
+      (scalar := scalar) (ricMin := ricMin) D hmin hscalar)
+
+/-- Metric/Ricci-native initial pinching selector from the unit tangent compact
+minimum route. -/
+theorem pinchInitLt_pos
+    [CompactSpace M] [SigmaCompactSpace M] [T2Space M] [Nonempty M]
+    {G : Real -> SmoothRiemannianMetric I M}
+    {Ric : TwoTensorFamily (I := I) (M := M)}
+    {scalar : Real -> M -> Real}
+    (D : MetricRicciData (I := I) (M := M) G Ric)
+    (hpos : MetricRicciPos (I := I) (M := M) D)
+    (hscalar : Continuous (fun x : M => scalar 0 x)) :
+    PinchInitLt (I := I) (M := M) G Ric scalar := by
+  rcases metricMin_pos (I := I) (M := M) D hpos with ⟨ricMin, hmin⟩
+  exact pinchInitLt_metric (I := I) (M := M) (G := G) (Ric := Ric)
+    (scalar := scalar) (ricMin := ricMin) D hmin hscalar
 
 /-- Metric/Ricci-native initial pinching selector from the unit tangent compact
 minimum route. -/
@@ -703,9 +867,9 @@ theorem pinchInit_pos
     (hpos : MetricRicciPos (I := I) (M := M) D)
     (hscalar : Continuous (fun x : M => scalar 0 x)) :
     PinchInit (I := I) (M := M) G Ric scalar := by
-  rcases metricMin_pos (I := I) (M := M) D hpos with ⟨ricMin, hmin⟩
-  exact pinchInit_metric (I := I) (M := M) (G := G) (Ric := Ric)
-    (scalar := scalar) (ricMin := ricMin) D hmin hscalar
+  exact pinchInit_of_lt (I := I) (M := M)
+    (pinchInitLt_pos (I := I) (M := M) (G := G) (Ric := Ric)
+      (scalar := scalar) D hpos hscalar)
 
 /-- Preserved pinching conclusion for a fixed `delta`. -/
 def PinchPres
@@ -714,6 +878,349 @@ def PinchPres
     (scalar : Real -> M -> Real) (T delta : Real) : Prop :=
   TwoTensorFamilyNonnegativeOn (I := I) (M := M)
     (pinchTensor (I := I) (M := M) G Ric scalar delta) (Set.Icc 0 T)
+
+/-! ### Ricci-flow producers for theorem 7.5 input packages -/
+
+/-- The all-time `C^1` regularity of the Levi-Civita connection in a
+Ricci-flow solution candidate. -/
+theorem ricciCov1
+    {D : Realized.RealTimeInterval}
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D) (t : Real) :
+    CovariantDerivative.ContMDiffCovariantDerivativeLocally
+      (I := I) (E := E) (M := M) (S.base.connection t)
+      (1 : WithTop ℕ∞) := by
+  simpa [SolutionFamily.connection] using
+    (LeviCivita.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
+      (I := I) (M := M) (S.base.metric t))
+
+/-- The all-time smoothness of the Levi-Civita connection in a Ricci-flow
+solution candidate. -/
+theorem ricciCovInf
+    {D : Realized.RealTimeInterval}
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D) (t : Real) :
+    CovariantDerivative.ContMDiffCovariantDerivativeLocally
+      (I := I) (E := E) (M := M) (S.base.connection t)
+      (∞ : WithTop ℕ∞) := by
+  simpa [SolutionFamily.connection, metricCov] using
+    metricCov_smooth (I := I) (M := M) (S.base.metric t)
+
+/-- Metric compatibility of the canonical Levi-Civita connection in a
+Ricci-flow solution candidate. -/
+theorem ricciMetricComp
+    {D : Realized.RealTimeInterval}
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D) (t : Real) :
+    RicciFlower.Connection.IsMetricCompatible
+      (I := I) (S.base.connection t) (S.base.metric t) := by
+  simpa [SolutionFamily.connection] using
+    (LeviCivita.leviCivitaConnectionOfMetric_isMetricCompatible
+      (I := I) (S.base.metric t))
+
+/-- Canonical first and second spatial Ricci derivatives for a solution
+candidate at one time. -/
+noncomputable def ricciDerivsWMP
+    {D : Realized.RealTimeInterval}
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D) (t : Real) :
+    CanonicalSpatialDerivs0S (𝕜 := Real) (E := E) (H := H) (I := I)
+      (M := M) (S.base.connection t) (S.ricci t) :=
+  CanonicalSpatialDerivs0S.of_smooth_connection
+    (E := E) (H := H) (I := I) (M := M)
+    (S.base.connection t) (ricciCovInf (I := I) S t) (S.ricci t)
+
+/-- Canonical smooth section representing `∇ Ric` for theorem 7.5 inputs. -/
+noncomputable def ricciNablaWMP
+    {D : Realized.RealTimeInterval}
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D) :
+    TensorNabla1SecFamily (I := I) (M := M) :=
+  fun t => (ricciDerivsWMP (I := I) S t).nablaA
+
+/-- Canonical smooth section representing `∇² Ric` for theorem 7.5 inputs. -/
+noncomputable def ricciNabla2WMP
+    {D : Realized.RealTimeInterval}
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D) :
+    TensorNabla2SecFamily (I := I) (M := M) :=
+  fun t => (ricciDerivsWMP (I := I) S t).nabla2A
+
+/-- The canonical Ricci derivative sections realize the first and second total
+covariant derivatives required by theorem 7.5. -/
+theorem ricciSpatialWMP
+    {D : Realized.RealTimeInterval}
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D) :
+    TensorSpatialDerivs (I := I) (M := M)
+      (fun t : Real => S.base.connection t) S.ricci
+      (ricciNablaWMP (I := I) S) (ricciNabla2WMP (I := I) S) := by
+  constructor
+  · intro t
+    simpa [ricciNablaWMP, ricciDerivsWMP] using
+      (ricciDerivsWMP (I := I) S t).first
+  · intro t
+    simpa [ricciNablaWMP, ricciNabla2WMP, ricciDerivsWMP] using
+      (ricciDerivsWMP (I := I) S t).second
+
+/-- The canonical smooth section for the shifted pinching tensor
+`Ric - delta R g`. -/
+noncomputable def pinchSec
+    {D : Realized.RealTimeInterval}
+    [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D) (delta : Real) :
+    TwoTensorSecFamily (I := I) (M := M) :=
+  fun t =>
+    letI := tensor0SBundle_topology (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) 2
+    let hscalar :
+        ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+          (fun x : M => delta * S.scalar t x) := by
+      have hR :
+          ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+            (fun x : M => S.scalar t x) := by
+        simpa [SolutionOn.scalar, SolutionFamily.scalar] using
+          metricScalar_smooth (I := I) (M := M) (S.base.metric t)
+      simpa only [Pi.mul_apply] using (contMDiff_const.mul hR)
+    let Ric : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        (n := (∞ : WithTop ℕ∞)) 2 := S.ricci t
+    Ric + (-1 : Real) •
+      tensor0SField_smulByFun (𝕜 := Real) (E := E) (H := H)
+        (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) (s := 2)
+        (fun x : M => delta * S.scalar t x) hscalar
+        (metricTensorField (I := I) (S.base.metric t))
+
+@[simp]
+theorem pinchSec_eq
+    {D : Realized.RealTimeInterval}
+    [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D) (delta : Real) :
+    twoTensorSecToFamily (I := I) (M := M) (pinchSec (I := I) S delta) =
+      pinchTensor (I := I) (M := M) (fun t : Real => S.base.metric t)
+        (twoTensorSecToFamily (I := I) (M := M) S.ricci) S.scalar delta := by
+  funext t x v w
+  simp only [pinchSec, pinchTensor, twoTensorSecToFamily,
+    ContMDiffSection.coe_add, Pi.add_apply, ContMDiffSection.coe_smul,
+    Pi.smul_apply, tensor0SField_smulByFun_apply,
+    ContinuousMultilinearMap.add_apply, ContinuousMultilinearMap.smul_apply,
+    smul_eq_mul]
+  change
+    ((S.ricci t) x) (vec2 (I := I) v w) +
+        (-1 : Real) * (delta * S.scalar t x *
+          (metricTensorField (I := I) (S.base.metric t) x)
+            (vec2 (I := I) v w)) =
+      ((S.ricci t) x) (vec2 (I := I) v w) -
+        delta * S.scalar t x * (S.base.metric t).inner x v w
+  rw [metricTensorField_apply]
+  have h0 : vec2 (I := I) v w 0 = v := by
+    unfold vec2 Curvature.vec2
+    simp
+  have h1 : vec2 (I := I) v w 1 = w := by
+    unfold vec2 Curvature.vec2
+    norm_num
+  rw [h0, h1]
+  ring
+
+/-- Canonical first and second spatial derivatives of the shifted pinching
+section for a solution candidate at one time. -/
+noncomputable def pinchDerivsWMP
+    {D : Realized.RealTimeInterval}
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D) (delta : Real) (t : Real) :
+    CanonicalSpatialDerivs0S (𝕜 := Real) (E := E) (H := H) (I := I)
+      (M := M) (S.base.connection t) ((pinchSec (I := I) S delta) t) :=
+  CanonicalSpatialDerivs0S.of_smooth_connection
+    (E := E) (H := H) (I := I) (M := M)
+    (S.base.connection t) (ricciCovInf (I := I) S t)
+    ((pinchSec (I := I) S delta) t)
+
+/-- Canonical smooth section representing `∇ (Ric - delta R g)` for theorem
+7.5 inputs. -/
+noncomputable def pinchNablaWMP
+    {D : Realized.RealTimeInterval}
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D) (delta : Real) :
+    TensorNabla1SecFamily (I := I) (M := M) :=
+  fun t => (pinchDerivsWMP (I := I) S delta t).nablaA
+
+/-- Canonical smooth section representing `∇² (Ric - delta R g)` for theorem
+7.5 inputs. -/
+noncomputable def pinchNabla2WMP
+    {D : Realized.RealTimeInterval}
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D) (delta : Real) :
+    TensorNabla2SecFamily (I := I) (M := M) :=
+  fun t => (pinchDerivsWMP (I := I) S delta t).nabla2A
+
+/-- The canonical shifted-pinching derivative sections realize the first and
+second total covariant derivatives required by theorem 7.5. -/
+theorem pinchSpatialWMP
+    {D : Realized.RealTimeInterval}
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D) (delta : Real) :
+    TensorSpatialDerivs (I := I) (M := M)
+      (fun t : Real => S.base.connection t) (pinchSec (I := I) S delta)
+      (pinchNablaWMP (I := I) S delta) (pinchNabla2WMP (I := I) S delta) := by
+  constructor
+  · intro t
+    simpa [pinchNablaWMP, pinchDerivsWMP] using
+      (pinchDerivsWMP (I := I) S delta t).first
+  · intro t
+    simpa [pinchNablaWMP, pinchNabla2WMP, pinchDerivsWMP] using
+      (pinchDerivsWMP (I := I) S delta t).second
+
+/-- The shifted pinching section is jointly continuous over the solution
+interval when the Ricci-flow solution package supplies scalar, Ricci, and
+metric total-space continuity. -/
+theorem pinchSecFamilyContinuousOnSet
+    {D : Realized.RealTimeInterval}
+    [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S) (delta : Real) :
+    Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2 D.carrier
+      (fun t x => (pinchSec (I := I) S delta) t x) := by
+  have hmap :
+      Continuous (fun q : {t : Real // t ∈ D.carrier} × M =>
+        ((q.1.1 : Real), q.2)) := by
+    exact (continuous_subtype_val.comp continuous_fst).prodMk continuous_snd
+  have hcoef :
+      Continuous (fun q : {t : Real // t ∈ D.carrier} × M =>
+        delta * S.scalar q.1.1 q.2) := by
+    have hscalarSub :
+        Continuous (fun q : {t : Real // t ∈ D.carrier} × M =>
+          S.scalar q.1.1 q.2) := by
+      rw [continuous_iff_continuousAt]
+      intro q
+      exact ContinuousAt.comp
+        (x := q)
+        (f := fun q : {t : Real // t ∈ D.carrier} × M =>
+          ((q.1.1 : Real), q.2))
+        (g := fun p : Real × M => S.scalar p.1 p.2)
+        (hS.scalarCont (q.1.1, q.2)) hmap.continuousAt
+    exact continuous_const.mul hscalarSub
+  have hmetric :
+      Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2 D.carrier
+        (fun t x => metricTensorField (I := I) (S.base.metric t) x) := by
+    simpa [SolutionOn.family] using hS.smoothMetric.metricTensor_cont
+  have hscaled :
+      Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2 D.carrier
+        (fun t x =>
+          (delta * S.scalar t x) •
+            metricTensorField (I := I) (S.base.metric t) x) :=
+    Tensor0SFamilyContinuousOnSet.smul (I := I) (M := M)
+      (s := 2) (K := D.carrier)
+      (f := fun t x => delta * S.scalar t x)
+      (A := fun t x => metricTensorField (I := I) (S.base.metric t) x)
+      hcoef hmetric
+  have hneg :
+      Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2 D.carrier
+        (fun t x =>
+          (-1 : Real) •
+            ((delta * S.scalar t x) •
+              metricTensorField (I := I) (S.base.metric t) x)) :=
+    Tensor0SFamilyContinuousOnSet.const_smul (I := I) (M := M)
+      (s := 2) (K := D.carrier)
+      (A := fun t x =>
+        (delta * S.scalar t x) •
+          metricTensorField (I := I) (S.base.metric t) x)
+      (-1 : Real) hscaled
+  have hsum :
+      Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2 D.carrier
+        (fun t x =>
+          S.ricci t x +
+            (-1 : Real) •
+              ((delta * S.scalar t x) •
+                metricTensorField (I := I) (S.base.metric t) x)) :=
+    Tensor0SFamilyContinuousOnSet.add (I := I) (M := M)
+      (s := 2) (K := D.carrier)
+      (A := fun t x => S.ricci t x)
+      (B := fun t x =>
+        (-1 : Real) •
+          ((delta * S.scalar t x) •
+            metricTensorField (I := I) (S.base.metric t) x))
+      hS.ricciCont hneg
+  simpa [pinchSec, tensor0SField_smulByFun_apply] using hsum
+
+/-- Tangent-bundle form of shifted pinching section continuity on any time set
+inside the solution interval. -/
+theorem pinchSec_tangentBundle_cont
+    {D : Realized.RealTimeInterval} {K : Set Real}
+    [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S) (delta : Real)
+    (hK : K ⊆ D.carrier) :
+    Continuous (fun q : {t : Real // t ∈ K} × TangentBundle I M =>
+      TotalSpace.mk' (Tensor0SModel 2 Real E)
+        (E := fun x : M => Tensor0SSpace 2 I x) q.2.proj
+        ((pinchSec (I := I) S delta) q.1.1 q.2.proj)) := by
+  exact Tensor0SFamilyContinuousOnSet.tangentBundle (I := I) (M := M)
+    (Tensor0SFamilyContinuousOnSet.mono (I := I) (M := M)
+      (pinchSecFamilyContinuousOnSet (I := I) S hS delta) hK)
+
+/-- Quadratic-evaluation continuity for the shifted pinching section on any
+time set inside the solution interval. -/
+theorem pinchSec_tensorQuadCont
+    {D : Realized.RealTimeInterval} {K : Set Real}
+    [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S) (delta : Real)
+    (hK : K ⊆ D.carrier) :
+    Continuous
+      (tensorSecBundleQuad (I := I) (M := M)
+        (pinchSec (I := I) S delta) K) :=
+  tensorQuadCont (I := I) (M := M) (pinchSec (I := I) S delta) K
+    (pinchSec_tangentBundle_cont (I := I) S hS delta hK)
+
+/-- Section 9 Ricci-flow data needed to feed theorem 7.5 for the canonical
+Ricci tensor.  The connection, metric compatibility, and spatial derivative
+realization are produced canonically from the solution candidate; the remaining
+fields are the genuine WMP application inputs. -/
+structure RicciWMPData
+    {D : Realized.RealTimeInterval}
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D) (T : Real) : Type _ where
+  X : TimeDependentVectorField (I := I) (M := M)
+  N : TwoTensorReaction (I := I) (M := M)
+  reg :
+    TensorWMPSectionCore (I := I) (M := M)
+      (fun t : Real => S.base.metric t) S.ricci X N T
+  parabolic :
+    TensorParabolicSupersolutionWithDriftOn (I := I) (M := M)
+      (fun t : Real => S.base.metric t)
+      (twoTensorSecToFamily (I := I) (M := M) S.ricci) X N
+      (fun t x => ricciNabla2WMP (I := I) S t x)
+      (fun t x => ricciNablaWMP (I := I) S t x) T
+  null :
+    TensorNullEigenvectorCondition (I := I) (M := M)
+      (fun t : Real => S.base.metric t) N (Set.Icc 0 T)
+  initial :
+    TwoTensorFamilyNonnegativeAtTime (I := I) (M := M)
+      (twoTensorSecToFamily (I := I) (M := M) S.ricci) 0
+
+namespace RicciWMPData
+
+/-- Build the theorem-7.5 input package for the canonical Ricci section of a
+Ricci-flow solution candidate. -/
+def toInput
+    {D : Realized.RealTimeInterval}
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    {S : SolutionOn (I := I) (M := M) D} {T : Real}
+    (data : RicciWMPData (I := I) (M := M) S T) (hT : 0 <= T) :
+    TensorWMPInput (I := I) (M := M)
+      (fun t : Real => S.base.metric t) S.ricci data.X data.N
+      (fun t : Real => S.base.connection t)
+      (ricciNablaWMP (I := I) S) (ricciNabla2WMP (I := I) S) T where
+  hT := hT
+  reg := data.reg
+  parabolic := data.parabolic
+  null := data.null
+  initial := data.initial
+  hcov1 := fun t => ricciCov1 (I := I) S t
+  hcovInf := fun t => ricciCovInf (I := I) S t
+  hmc := fun t => ricciMetricComp (I := I) S t
+  spatial := ricciSpatialWMP (I := I) S
+
+end RicciWMPData
 
 /-- Tensor-WMP data for the shifted tensor `Ric - delta R g`. -/
 structure PinchWMPData
@@ -749,6 +1256,88 @@ structure PinchWMPData
     forall t : Real,
       RicciFlower.Connection.IsMetricCompatible (I := I) (cov t) (G t)
   spatial : TensorSpatialDerivs (I := I) (M := M) cov S nablaS nabla2S
+
+namespace PinchWMPData
+
+/-- Build the theorem-7.5 input package from the Section 9 pinching data. -/
+def toInput
+    {G : Real -> SmoothRiemannianMetric I M}
+    {Ric : TwoTensorFamily (I := I) (M := M)}
+    {scalar : Real -> M -> Real}
+    {T delta : Real}
+    (data : PinchWMPData (I := I) (M := M) G Ric scalar T delta)
+    (hT : 0 <= T)
+    (hinit : TwoTensorFamilyNonnegativeAtTime (I := I) (M := M)
+      (pinchTensor (I := I) (M := M) G Ric scalar delta) 0) :
+    TensorWMPInput (I := I) (M := M)
+      G data.S data.X data.N data.cov data.nablaS data.nabla2S T where
+  hT := hT
+  reg := data.reg
+  parabolic := data.parabolic
+  null := data.null
+  initial := by
+    simpa [data.section_eq] using hinit
+  hcov1 := data.hcov1
+  hcovInf := data.hcovInf
+  hmc := data.hmc
+  spatial := data.spatial
+
+end PinchWMPData
+
+/-- Canonical Ricci-flow pinching WMP data with the section, connection, and
+spatial derivative fields produced from the solution candidate.  The remaining
+fields are exactly the still-genuine WMP application frontiers:
+section/barrier regularity, the parabolic inequality, and the reaction-wide
+null-eigenvector condition. -/
+structure PinchFlowWMPData
+    {D : Realized.RealTimeInterval}
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D) (T delta : Real) : Type _ where
+  X : TimeDependentVectorField (I := I) (M := M)
+  N : TwoTensorReaction (I := I) (M := M)
+  reg :
+    TensorWMPSectionCore (I := I) (M := M)
+      (fun t : Real => S.base.metric t) (pinchSec (I := I) S delta) X N T
+  parabolic :
+    TensorParabolicSupersolutionWithDriftOn (I := I) (M := M)
+      (fun t : Real => S.base.metric t)
+      (twoTensorSecToFamily (I := I) (M := M) (pinchSec (I := I) S delta))
+      X N
+      (fun t x => pinchNabla2WMP (I := I) S delta t x)
+      (fun t x => pinchNablaWMP (I := I) S delta t x) T
+  null :
+    TensorNullEigenvectorCondition (I := I) (M := M)
+      (fun t : Real => S.base.metric t) N (Set.Icc 0 T)
+
+namespace PinchFlowWMPData
+
+/-- Fill the old Section 9 pinching package from the canonical solution-level
+pinching section and derivative producers. -/
+def toPinchWMPData
+    {D : Realized.RealTimeInterval}
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    {S : SolutionOn (I := I) (M := M) D} {T delta : Real}
+    (data : PinchFlowWMPData (I := I) (M := M) S T delta) :
+    PinchWMPData (I := I) (M := M)
+      (fun t : Real => S.base.metric t)
+      (twoTensorSecToFamily (I := I) (M := M) S.ricci)
+      S.scalar T delta where
+  S := pinchSec (I := I) S delta
+  X := data.X
+  N := data.N
+  cov := fun t : Real => S.base.connection t
+  nablaS := pinchNablaWMP (I := I) S delta
+  nabla2S := pinchNabla2WMP (I := I) S delta
+  section_eq := pinchSec_eq (I := I) S delta
+  reg := data.reg
+  parabolic := data.parabolic
+  null := data.null
+  hcov1 := fun t => ricciCov1 (I := I) S t
+  hcovInf := fun t => ricciCovInf (I := I) S t
+  hmc := fun t => ricciMetricComp (I := I) S t
+  spatial := pinchSpatialWMP (I := I) S delta
+
+end PinchFlowWMPData
 
 /-- Lemma 9.1 as a raw compatibility consumer of Hamilton's tensor WMP. -/
 theorem ricci_nonneg_wmp_raw
@@ -795,6 +1384,25 @@ theorem ricci_nonneg_wmp
         (twoTensorSecToFamily (I := I) (M := M) RicSec) (Set.Icc 0 T) :=
     tensor_wmp (I := I) (M := M) data
   simpa [hRic] using hsec
+
+/-- Lemma 9.1 for the canonical Ricci section of a Ricci-flow solution
+candidate, with theorem-7.5 connection and spatial-derivative inputs produced
+from the solution candidate. -/
+theorem ricci_nonneg_sol
+    [I.Boundaryless] [T2Space M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    {D : Realized.RealTimeInterval}
+    [CompleteSpace E] [SigmaCompactSpace M]
+    (S : SolutionOn (I := I) (M := M) D)
+    {T : Real}
+    (hT : 0 <= T)
+    (data : RicciWMPData (I := I) (M := M) S T) :
+    TwoTensorFamilyNonnegativeOn (I := I) (M := M)
+      (twoTensorSecToFamily (I := I) (M := M) S.ricci) (Set.Icc 0 T) := by
+  exact tensor_wmp (I := I) (M := M) (RicciWMPData.toInput
+    (I := I) (M := M) data hT)
 
 /-- Lemma 9.2 as a raw compatibility consumer of Hamilton's tensor WMP. -/
 theorem ricci_pinch_wmp_raw
@@ -855,6 +1463,59 @@ theorem ricci_pinch_wmp
     tensor_wmp (I := I) (M := M) data
   simpa [PinchPres, hS] using hsec
 
+namespace PinchWMPData
+
+/-- Preserve a supplied Section 9 pinching package through theorem 7.5. -/
+theorem preserve
+    [I.Boundaryless] [T2Space M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    {G : Real -> SmoothRiemannianMetric I M}
+    {Ric : TwoTensorFamily (I := I) (M := M)}
+    {scalar : Real -> M -> Real}
+    {T delta : Real}
+    (data : PinchWMPData (I := I) (M := M) G Ric scalar T delta)
+    (hT : 0 <= T)
+    (hdelta0 : 0 <= delta) (hdelta13 : delta <= (1 : Real) / 3)
+    (hinit : TwoTensorFamilyNonnegativeAtTime (I := I) (M := M)
+      (pinchTensor (I := I) (M := M) G Ric scalar delta) 0) :
+    PinchPres (I := I) (M := M) G Ric scalar T delta := by
+  exact ricci_pinch_wmp (I := I) (M := M) (G := G) (Ric := Ric)
+    (scalar := scalar) (delta := delta) (S := data.S) (X := data.X)
+    (N := data.N) (cov := data.cov) (nablaS := data.nablaS)
+    (nabla2S := data.nabla2S) (T := T)
+    hdelta0 hdelta13 data.section_eq (data.toInput hT hinit)
+
+end PinchWMPData
+
+namespace PinchFlowWMPData
+
+/-- Preserve the canonical shifted pinching section through theorem 7.5 once
+the remaining WMP application data have been proved for that canonical
+section. -/
+theorem preserve
+    [I.Boundaryless] [T2Space M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    {D : Realized.RealTimeInterval}
+    [CompleteSpace E] [SigmaCompactSpace M]
+    {S : SolutionOn (I := I) (M := M) D}
+    {T delta : Real}
+    (data : PinchFlowWMPData (I := I) (M := M) S T delta)
+    (hT : 0 <= T)
+    (hdelta0 : 0 <= delta) (hdelta13 : delta <= (1 : Real) / 3)
+    (hinit : TwoTensorFamilyNonnegativeAtTime (I := I) (M := M)
+      (pinchTensor (I := I) (M := M) (fun t : Real => S.base.metric t)
+        (twoTensorSecToFamily (I := I) (M := M) S.ricci) S.scalar delta) 0) :
+    PinchPres (I := I) (M := M) (fun t : Real => S.base.metric t)
+      (twoTensorSecToFamily (I := I) (M := M) S.ricci) S.scalar T delta := by
+  exact (data.toPinchWMPData (I := I) (M := M)).preserve
+    (I := I) (M := M) hT hdelta0 hdelta13 hinit
+
+end PinchFlowWMPData
+
 /-- Corollary 9.3 setup from an already selected initial pinching constant. -/
 theorem pinch_init_wmp
     [I.Boundaryless] [T2Space M]
@@ -876,24 +1537,32 @@ theorem pinch_init_wmp
   rcases hinit with ⟨delta, hdelta0, hdelta13, hpinch0⟩
   let data := hdata delta hdelta0 hdelta13
   refine ⟨delta, hdelta0, hdelta13, ?_⟩
-  let input : TensorWMPInput (I := I) (M := M)
-      G data.S data.X data.N data.cov data.nablaS data.nabla2S T := {
-    hT := hT
-    reg := data.reg
-    parabolic := data.parabolic
-    null := data.null
-    initial := by
-      simpa [data.section_eq] using hpinch0
-    hcov1 := data.hcov1
-    hcovInf := data.hcovInf
-    hmc := data.hmc
-    spatial := data.spatial
-  }
-  exact ricci_pinch_wmp (I := I) (M := M) (G := G) (Ric := Ric)
-    (scalar := scalar) (delta := delta) (S := data.S) (X := data.X)
-    (N := data.N) (cov := data.cov) (nablaS := data.nablaS)
-    (nabla2S := data.nabla2S) (T := T)
-    (le_of_lt hdelta0) hdelta13 data.section_eq input
+  exact data.preserve (I := I) (M := M) hT
+    (le_of_lt hdelta0) hdelta13 hpinch0
+
+/-- Corollary 9.3 setup from a strict selected initial pinching constant. -/
+theorem pinch_init_wmp_lt
+    [I.Boundaryless] [T2Space M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    {G : Real -> SmoothRiemannianMetric I M}
+    {Ric : TwoTensorFamily (I := I) (M := M)}
+    {scalar : Real -> M -> Real}
+    {T : Real}
+    (hT : 0 <= T)
+    (hinit : PinchInitLt (I := I) (M := M) G Ric scalar)
+    (hdata :
+      ∀ delta : Real, 0 < delta -> delta < (1 : Real) / 3 ->
+        PinchWMPData (I := I) (M := M) G Ric scalar T delta) :
+    ∃ delta : Real,
+      0 < delta ∧ delta < (1 : Real) / 3 ∧
+        PinchPres (I := I) (M := M) G Ric scalar T delta := by
+  rcases hinit with ⟨delta, hdelta0, hdelta13, hpinch0⟩
+  let data := hdata delta hdelta0 hdelta13
+  refine ⟨delta, hdelta0, hdelta13, ?_⟩
+  exact data.preserve (I := I) (M := M) hT
+    (le_of_lt hdelta0) (le_of_lt hdelta13) hpinch0
 
 /-- Corollary 9.3 conditional form: strict initial Ricci positivity supplies a
 pinching constant, and Lemma 9.2 preserves it. -/
@@ -918,6 +1587,32 @@ theorem strict_pinch_wmp
   exact pinch_init_wmp (I := I) (M := M) (G := G) (Ric := Ric)
     (scalar := scalar) (T := T) hT
     (pinchInit_of_pos (I := I) (M := M) (G := G) (Ric := Ric)
+      (scalar := scalar) hpos hselect)
+    hdata
+
+/-- Strict-`delta` Corollary 9.3 conditional form: strict initial Ricci
+positivity supplies `0 < delta < 1/3`, and Lemma 9.2 preserves it. -/
+theorem strict_pinch_wmp_lt
+    [I.Boundaryless] [T2Space M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    {G : Real -> SmoothRiemannianMetric I M}
+    {Ric : TwoTensorFamily (I := I) (M := M)}
+    {scalar : Real -> M -> Real}
+    {T : Real}
+    (hT : 0 <= T)
+    (hpos : RicciPosInit (I := I) (M := M) Ric)
+    (hselect : BoundsOfPosRic (I := I) (M := M) G Ric scalar)
+    (hdata :
+      ∀ delta : Real, 0 < delta -> delta < (1 : Real) / 3 ->
+        PinchWMPData (I := I) (M := M) G Ric scalar T delta) :
+    ∃ delta : Real,
+      0 < delta ∧ delta < (1 : Real) / 3 ∧
+        PinchPres (I := I) (M := M) G Ric scalar T delta := by
+  exact pinch_init_wmp_lt (I := I) (M := M) (G := G) (Ric := Ric)
+    (scalar := scalar) (T := T) hT
+    (pinchInitLt_of_pos (I := I) (M := M) (G := G) (Ric := Ric)
       (scalar := scalar) hpos hselect)
     hdata
 
@@ -946,6 +1641,34 @@ theorem strict_pinch_min
   exact pinch_init_wmp (I := I) (M := M) (G := G) (Ric := Ric)
     (scalar := scalar) (T := T) hT
     (pinchInit_ricMin (I := I) (M := M) (G := G) (Ric := Ric)
+      (scalar := scalar) (ricMin := ricMin) hmin hscalar)
+    hdata
+
+/-- Strict-`delta` version using a realized continuous base Ricci-minimum
+function instead of a raw compactness selector. -/
+theorem strict_pinch_min_lt
+    [I.Boundaryless] [T2Space M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    [CompactSpace M] [Nonempty M]
+    {G : Real -> SmoothRiemannianMetric I M}
+    {Ric : TwoTensorFamily (I := I) (M := M)}
+    {scalar : Real -> M -> Real}
+    {ricMin : M -> Real}
+    {T : Real}
+    (hT : 0 <= T)
+    (hmin : RicMinData (I := I) (M := M) G Ric ricMin)
+    (hscalar : Continuous (fun x : M => scalar 0 x))
+    (hdata :
+      ∀ delta : Real, 0 < delta -> delta < (1 : Real) / 3 ->
+        PinchWMPData (I := I) (M := M) G Ric scalar T delta) :
+    ∃ delta : Real,
+      0 < delta ∧ delta < (1 : Real) / 3 ∧
+        PinchPres (I := I) (M := M) G Ric scalar T delta := by
+  exact pinch_init_wmp_lt (I := I) (M := M) (G := G) (Ric := Ric)
+    (scalar := scalar) (T := T) hT
+    (pinchInitLt_ricMin (I := I) (M := M) (G := G) (Ric := Ric)
       (scalar := scalar) (ricMin := ricMin) hmin hscalar)
     hdata
 
@@ -978,6 +1701,35 @@ theorem strict_pinch_metric
       (scalar := scalar) (ricMin := ricMin) D hmin hscalar)
     hdata
 
+/-- Strict-`delta` version with the initial Ricci tensor realized from the
+initial metric. -/
+theorem strict_pinch_metric_lt
+    [I.Boundaryless]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    [CompactSpace M] [SigmaCompactSpace M] [T2Space M] [Nonempty M]
+    {G : Real -> SmoothRiemannianMetric I M}
+    {Ric : TwoTensorFamily (I := I) (M := M)}
+    {scalar : Real -> M -> Real}
+    {ricMin : M -> Real}
+    {T : Real}
+    (hT : 0 <= T)
+    (D : MetricRicciData (I := I) (M := M) G Ric)
+    (hmin : MetricRicciMin (I := I) (M := M) D ricMin)
+    (hscalar : Continuous (fun x : M => scalar 0 x))
+    (hdata :
+      ∀ delta : Real, 0 < delta -> delta < (1 : Real) / 3 ->
+        PinchWMPData (I := I) (M := M) G Ric scalar T delta) :
+    ∃ delta : Real,
+      0 < delta ∧ delta < (1 : Real) / 3 ∧
+        PinchPres (I := I) (M := M) G Ric scalar T delta := by
+  exact pinch_init_wmp_lt (I := I) (M := M) (G := G) (Ric := Ric)
+    (scalar := scalar) (T := T) hT
+    (pinchInitLt_metric (I := I) (M := M) (G := G) (Ric := Ric)
+      (scalar := scalar) (ricMin := ricMin) D hmin hscalar)
+    hdata
+
 /-- Corollary 9.3 conditional form using the unit tangent compact-minimum
 selector. -/
 theorem strict_pinch_pos
@@ -1003,6 +1755,33 @@ theorem strict_pinch_pos
   exact pinch_init_wmp (I := I) (M := M) (G := G) (Ric := Ric)
     (scalar := scalar) (T := T) hT
     (pinchInit_pos (I := I) (M := M) (G := G) (Ric := Ric)
+      (scalar := scalar) D hpos hscalar)
+    hdata
+
+/-- Strict-`delta` version using the unit tangent compact-minimum selector. -/
+theorem strict_pinch_pos_lt
+    [I.Boundaryless]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    [CompactSpace M] [SigmaCompactSpace M] [T2Space M] [Nonempty M]
+    {G : Real -> SmoothRiemannianMetric I M}
+    {Ric : TwoTensorFamily (I := I) (M := M)}
+    {scalar : Real -> M -> Real}
+    {T : Real}
+    (hT : 0 <= T)
+    (D : MetricRicciData (I := I) (M := M) G Ric)
+    (hpos : MetricRicciPos (I := I) (M := M) D)
+    (hscalar : Continuous (fun x : M => scalar 0 x))
+    (hdata :
+      ∀ delta : Real, 0 < delta -> delta < (1 : Real) / 3 ->
+        PinchWMPData (I := I) (M := M) G Ric scalar T delta) :
+    ∃ delta : Real,
+      0 < delta ∧ delta < (1 : Real) / 3 ∧
+        PinchPres (I := I) (M := M) G Ric scalar T delta := by
+  exact pinch_init_wmp_lt (I := I) (M := M) (G := G) (Ric := Ric)
+    (scalar := scalar) (T := T) hT
+    (pinchInitLt_pos (I := I) (M := M) (G := G) (Ric := Ric)
       (scalar := scalar) D hpos hscalar)
     hdata
 
