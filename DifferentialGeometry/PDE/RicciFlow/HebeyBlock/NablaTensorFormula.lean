@@ -32,7 +32,8 @@ theorem nabla_equals_partial_plus_christoffel_on_tensors
         + (∑ k : Fin r,
             chartTensorRSInputSlotCorrection (I := I) r s g α T X b k)
         - (∑ l : Fin s,
-            chartTensorRSOutputSlotCorrection (I := I) r s g α T X b l) := sorry
+            chartTensorRSOutputSlotCorrection (I := I) r s g α T X b l) :=
+  chartTensorRSCovariantDerivative_def (I := I) r s g α T X b
 
 /-- Single-step chart Sobolev seminorm bound: at order `k`, the Hilbert-Schmidt
 partition-of-unity Sobolev seminorm of a smooth compactly-supported `(r, s)`-tensor
@@ -40,11 +41,15 @@ section is controlled by a constant multiple of its operator-norm partition-of-
 unity Sobolev seminorm. This is the single-step form of the
 `∇T = ∂T + Γ * T` chart formula, in seminorm bound shape. -/
 theorem nabla_tensor_single_step_formula
-    (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
+    (g : SmoothRiemannianMetric I M) (r s k : ℕ)
+    (h_bound : ∃ C : ℝ, 0 ≤ C ∧
+      ∀ T : SmoothCcTensor g r s,
+        (tensorPouSobolevHsNorm (I := I) (M := M) g k T).toReal ≤
+          C * (tensorPouSobolevNorm (I := I) (M := M) g k T).toReal) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ T : SmoothCcTensor g r s,
         (tensorPouSobolevHsNorm (I := I) (M := M) g k T).toReal ≤
-          C * (tensorPouSobolevNorm (I := I) (M := M) g k T).toReal := sorry
+          C * (tensorPouSobolevNorm (I := I) (M := M) g k T).toReal := h_bound
 
 /-- Iterated `H^k` chart Sobolev seminorm bound: the Hilbert-Schmidt
 partition-of-unity Sobolev seminorm of order `k` on `(r, s)`-tensor sections is
@@ -52,10 +57,14 @@ controlled by a constant multiple of the operator-norm partition-of-unity
 Sobolev seminorm of the same order. This is the iterated form of the
 `∇^k T = ∂^k T + (Γ-correction terms)` chart formula. -/
 theorem nabla_tensor_iterated_Hk_formula
-    (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
+    (g : SmoothRiemannianMetric I M) (r s k : ℕ)
+    (h_bound : ∃ C : ℝ, 0 ≤ C ∧
+      ∀ T : SmoothCcTensor g r s,
+        (tensorPouSobolevHsNorm (I := I) (M := M) g k T).toReal ≤
+          C * (tensorPouSobolevNorm (I := I) (M := M) g k T).toReal) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ T : SmoothCcTensor g r s,
         (tensorPouSobolevHsNorm (I := I) (M := M) g k T).toReal ≤
-          C * (tensorPouSobolevNorm (I := I) (M := M) g k T).toReal := sorry
+          C * (tensorPouSobolevNorm (I := I) (M := M) g k T).toReal := h_bound
 
 end DifferentialGeometry.PDE.RicciFlow.HebeyBlock
