@@ -16,18 +16,24 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 /--
 For a time-dependent vector field `X` on a closed manifold, the spatial slice
-`Φ t : M → M` of the global flow is bijective on `[0, T)`, with a smooth
-inverse (obtained from the time-reversed flow).
+`Φ t : M → M` of the global flow `Φ` produced by
+`time_dependent_vf_global_flow_glue` is bijective on `[0, T)`, with a smooth
+inverse `Ψ t` (obtained from the time-reversed flow).
 
-Signature shape: there exist a positive horizon `T`, a flow family `Φ`, and
-an inverse family `Ψ` such that for every `t < T` the map `Φ t` is bijective,
-`Ψ t` is smooth, and `Ψ t ∘ Φ t = id`.
+The flow `Φ`, its horizon `T`, and the initial-condition / flow-equation
+hypotheses are supplied as arguments so that the bijectivity / inverse
+conclusion is stated about the same flow used downstream in
+`time_dependent_vf_globalflow_on_closed_mfd`.
 -/
 theorem time_dependent_vf_flow_bijective_and_inverse_smooth
-    (X : ℝ → ∀ x : M, TangentSpace I x) :
-    ∃ T : ℝ, 0 < T ∧
-      ∃ Φ Ψ : ℝ → M → M, ∀ t : ℝ, t < T →
-        Function.Bijective (Φ t) ∧ ContMDiff I I ∞ (Ψ t) ∧
-          Function.LeftInverse (Ψ t) (Φ t) := sorry
+    (X : ℝ → ∀ x : M, TangentSpace I x)
+    (T : ℝ) (_hT : 0 < T) (Φ : ℝ → M → M)
+    (_hInit : ∀ x : M, Φ 0 x = x)
+    (_hFlow : ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M,
+      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ s x) (Set.Ici 0) t
+        ((ContinuousLinearMap.id ℝ ℝ).smulRight (X t (Φ t x)))) :
+    ∃ Ψ : ℝ → M → M, ∀ t : ℝ, t < T →
+      Function.Bijective (Φ t) ∧ ContMDiff I I ∞ (Ψ t) ∧
+        Function.LeftInverse (Ψ t) (Φ t) := sorry
 
 end DifferentialGeometry.PDE.RicciFlow.ODE
