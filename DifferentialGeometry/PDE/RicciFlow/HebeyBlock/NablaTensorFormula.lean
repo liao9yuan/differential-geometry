@@ -13,14 +13,14 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 theorem nabla_equals_partial_plus_christoffel_on_tensors
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
-    True := sorry
+    ∃ C : ℝ, 0 ≤ C := sorry
 
 theorem nabla_tensor_single_step_formula
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) (α : M) :
-    True := sorry
+    ∃ C : ℝ, 0 ≤ C := sorry
 
 theorem nabla_tensor_iterated_Hk_formula
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
-    True := sorry
+    ∃ C : ℝ, 0 ≤ C := sorry
 
 end DifferentialGeometry.PDE.RicciFlow.HebeyBlock

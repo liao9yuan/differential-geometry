@@ -27,6 +27,10 @@ theorem deTurckRicci_shortTime_exists
     (g₀ g_bg : SmoothRiemannianMetric I M) :
     ∃ T : ℝ, ∃ g_DT : ℝ → SmoothRiemannianMetric I M,
       IsQuasilinearMetricParabolicSolution (I := I)
-        (deTurckRicciRHS (I := I) g_bg) g₀ T g_DT := sorry
+        (deTurckRicciRHS (I := I) g_bg) g₀ T g_DT :=
+  DifferentialGeometry.PDE.quasilinear_metric_parabolic_shortTime_exists
+    (deTurckRicciRHS (I := I) g_bg) g₀
+    (deTurckRicciRHS_isStrictlyParabolic_at_self g₀ g_bg)
+    (deTurckRicciRHS_isSmoothQuasilinear g_bg)
 
 end DifferentialGeometry.PDE.RicciFlow

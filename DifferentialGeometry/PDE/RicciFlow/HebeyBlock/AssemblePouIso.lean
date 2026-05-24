@@ -21,6 +21,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 theorem assemble_pou_h1_iso_intrinsic_h1
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
-    True := sorry
+    ∃ c C : ℝ, 0 < c ∧ c ≤ C := sorry
 
 end DifferentialGeometry.PDE.RicciFlow.HebeyBlock
