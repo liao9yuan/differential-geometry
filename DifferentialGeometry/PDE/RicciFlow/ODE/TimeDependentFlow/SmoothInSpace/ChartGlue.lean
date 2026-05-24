@@ -25,6 +25,6 @@ in the sense of `ContMDiffAt I I ∞ f x`, conclude `ContMDiff I I ∞ f`.
 theorem chart_glue_smooth_of_chart_local_smooth
     (f : M → M)
     (h : ∀ x : M, ContMDiffAt I I ∞ f x) :
-    ContMDiff I I ∞ f := sorry
+    ContMDiff I I ∞ f := h
 
 end DifferentialGeometry.PDE.RicciFlow.ODE

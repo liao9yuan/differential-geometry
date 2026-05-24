@@ -1,14 +1,19 @@
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.HilbertSpace
+import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedHsNorm
 
 namespace DifferentialGeometry
 namespace PDE
 namespace RicciFlow
 namespace HebeyBlock
 
-open Bundle Manifold
-open scoped Manifold ContDiff
+open Bundle Manifold MeasureTheory Set
+open scoped Manifold ContDiff ENNReal BigOperators
 
 open DifferentialGeometry.Integral.Measure
+open DifferentialGeometry.Integral.L2
+open DifferentialGeometry.Analysis.Sobolev.Chart
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open DifferentialGeometry.Analysis.Sobolev.Tensor
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -16,50 +21,86 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- Existence of a non-negative bound governing the chart-frame component
-`H^k` seminorms of an `(r, s)`-tensor field in terms of its intrinsic
-Sobolev norm.
+/-- One-sided control of the **per-chart `H^k` chart-frame component
+seminorm** by the global Hilbert-Schmidt partition-of-unity-weighted
+chart-Sobolev norm.
 
 # Blueprint intent
 
-For each chart `α` in `chartAtlasPOU_finset I M` and each smooth
-compactly-supported `(r, s)`-tensor section `T : SmoothCcTensor g r s`,
-the local chart-frame component seminorm
+For each chart base point `α : M` and each smooth compactly-supported
+`(r, s)`-tensor section `T : SmoothCcTensor g r s`, the **chart-frame
+component `H^k` seminorm at `α`** is the single-chart contribution to
+`tensorPouSobolevHsNorm` (cf. `tensorPouSobolevHsNorm_eq`), namely the
+ENNReal-valued
 ```
-chartFrameCompHkSeminorm g k α T :=
-  ∑ IJ, ∑ j ∈ Finset.range (2*k+1), ∑ basisIdx,
-    (∫ y in chartTargetEuclid α,
-        (POU_α ∘ chart⁻¹ ∘ toEuclidean⁻¹) y *
-        |iteratedFDeriv ℝ j (tensorChartComponentRaw g r s T α IJ.1 IJ.2
-            ∘ chart⁻¹ ∘ toEuclidean⁻¹) y (e_{basisIdx})|^2 ∂volume)
+chartFrameCompHkSeminormAt g k α T :=
+  ∑ IJ : (Fin r → Fin n) × (Fin s → Fin n),
+    ∑ j ∈ Finset.range (2*k+1),
+      ∑ basisIdx : Fin j → Fin n,
+        ∫⁻ y in chartTargetEuclid α,
+          ENNReal.ofReal
+            (((chartAtlasPOU I M α : M → ℝ)
+                ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+              |(iteratedFDeriv ℝ j
+                    (tensorChartComponentRaw g r s T α IJ.1 IJ.2
+                      ∘ (extChartAt I α).symm
+                      ∘ (toEuclidean (E := E)).symm) y)
+                  (fun i => EuclideanSpace.basisFun
+                    (Fin n) ℝ (basisIdx i))| ^ 2)
+        ∂(volume : Measure (EuclideanSpace ℝ (Fin n))),
 ```
-satisfies the **one-sided control bound**
+where `n = Module.finrank ℝ E`. The chart-frame component
+`H^k`-seminorm at `α` is precisely the inner block that appears under
+the `tsum` (and before the `^(1/2)`) in `tensorPouSobolevHsNorm_eq`.
+
+The **one-sided control bound** asserts that this per-chart contribution
+is bounded by `C(g, k, α) ≥ 0` times the **square** of the global
+intrinsic Sobolev norm, viewed as an `ℝ`-valued quantity through
+`ENNReal.toReal`:
 ```
-chartFrameCompHkSeminorm g k α T ≤
-    C(g, k, α) · (tensorPouSobolevHsNorm g k T).toReal^2,
+(chartFrameCompHkSeminormAt g k α T).toReal ≤
+    C(g, k, α) · (tensorPouSobolevHsNorm g k T).toReal ^ 2.
 ```
-where `C(g, k, α) ≥ 0` depends only on the metric `g`, the regularity
-`k`, and the chart index `α` (via uniform `C^k`-bounds on the chart
-representation of `g` and its inverse — see
-`christoffel_Ck_bound_from_metric_Ck1` for the companion bound on the
-Christoffel symbols, and `uniform_chart_bounds_from_compactness` for the
+The constant `C(g, k, α)` is the operator norm of the chart-frame
+restriction map from the global Hilbert space `TensorPouSobolevHilbert`
+to the per-chart-α seminorm completion; it depends only on the metric
+`g`, the regularity `k`, and the chart index `α` (via uniform `C^k`
+bounds on the chart representation of `g` and its inverse — see
+`christoffel_Ck_bound_from_metric_Ck1` for the Christoffel-side
+companion, and `uniform_chart_bounds_from_compactness` for the
 absorption of the `α`-dependence into a single absolute constant via
 compactness of `M`).
 
-The constant `C` here is to be identified with the operator norm of
-the chart-frame restriction map
-`TensorPouSobolevHilbert g r s k → chartFrameCompHkSeminorm α`-completion,
-which is finite by smoothness of the chart-frame transition matrices
-on the compact set `chartImagePOUTsupport α`.
-
-The full inequality cannot be committed until the chart-frame component
-seminorm is a named definition; the existence form below records the
-non-negativity of `C` in a way usable by downstream files that consume
-this bound through the assembled isomorphism (see
-`assemble_pou_h1_iso_intrinsic_h1`). -/
+The constant is non-negative because both sides are non-negative. The
+quantifier here is on `T : SmoothCcTensor g r s`, matching the
+quantification pattern of `fibrewise_gram_twist_estimate` and of
+`iterated_nabla_vs_iterated_partial_equivalence_H1`. -/
 theorem chart_frame_component_norm_bound
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) (α : M) :
-    ∃ C : ℝ, 0 ≤ C := sorry
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ T : SmoothCcTensor g r s,
+        ((∑ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+              (Fin s → Fin (Module.finrank ℝ E)),
+            ∑ j ∈ Finset.range (2 * k + 1),
+              ∑ basisIdx : Fin j → Fin (Module.finrank ℝ E),
+                ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+                  ENNReal.ofReal
+                    (((chartAtlasPOU I M α : M → ℝ)
+                        ((extChartAt I α).symm
+                          ((toEuclidean (E := E)).symm y))) *
+                      |(iteratedFDeriv ℝ j
+                            (tensorChartComponentRaw (I := I) (M := M)
+                                g r s T α IJ.1 IJ.2
+                              ∘ (extChartAt I α).symm
+                              ∘ (toEuclidean (E := E)).symm)
+                            y)
+                          (fun i => EuclideanSpace.basisFun
+                            (Fin (Module.finrank ℝ E)) ℝ (basisIdx i))| ^ 2)
+                  ∂(volume :
+                    Measure (EuclideanSpace ℝ
+                      (Fin (Module.finrank ℝ E)))))).toReal ≤
+          C * (tensorPouSobolevHsNorm (I := I) (M := M) g k T).toReal ^ 2 :=
+  sorry
 
 end HebeyBlock
 end RicciFlow

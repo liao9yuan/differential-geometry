@@ -42,7 +42,28 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 partition-of-unity-weighted Sobolev Hilbert space at regularity order `0`
 and the metric `L²` Hilbert space of mixed `(r, s)`-tensor fields. Both
 arise as Hausdorff completions of pre-Hilbert structures on
-`SmoothCcTensor g r s`, with equivalent norms at order `k = 0`. -/
+`SmoothCcTensor g r s`, with equivalent norms at order `k = 0`.
+
+# Structural blocker
+
+Constructing this equivalence requires a two-sided uniform comparison
+of the form
+
+```
+c · ‖T‖_{TensorL2} ≤ (tensorPouSobolevHsNorm g 0 T).toReal ≤ C · ‖T‖_{TensorL2}
+```
+
+valid for every smooth compactly-supported `(r, s)`-tensor section `T`,
+with `0 < c ≤ C` independent of `T`. The forward direction (chart
+push-forward to intrinsic `L²`) is supplied at the scalar level by
+`DifferentialGeometry.Analysis.Parabolic.TensorSpectral.eLpNorm_chartPushed_le_const_mul_eLpNorm_riemannianVolumeMeasure`,
+but lifting it to tensor sections through fiberwise frame components
+and reverse-bridging from intrinsic to chart aggregates is the missing
+step. Once that comparison is available, the equivalence is the
+canonical extension along the dense embedding
+`SmoothCcTensor g r s →ₗ[ℝ] TensorPouSobolevHilbert g r s 0` /
+`SmoothCcTensor g r s →ₗ[ℝ] TensorL2 r s g`, applied in both
+directions via `ContinuousLinearMap.extend`. -/
 noncomputable def TensorPouSobolevHilbert.toTensorL2_continuousLinearEquiv
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     TensorPouSobolevHilbert g r s 0 ≃L[ℝ] TensorL2 r s g := sorry
