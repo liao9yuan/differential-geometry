@@ -14,6 +14,15 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 theorem time_reversed_flow_exists
     (X : ℝ → ∀ x : M, TangentSpace I x) :
-    ∃ T : ℝ, 0 < T := sorry
+    ∃ T : ℝ, 0 < T ∧
+      ∃ Φ Ψ : ℝ → M → M,
+        (∀ x : M, Φ 0 x = x) ∧
+        (∀ x : M, Ψ 0 x = x) ∧
+        (∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M,
+          HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => (Φ s) x) (Set.Ici 0) t
+            ((ContinuousLinearMap.id ℝ ℝ).smulRight (X t (Φ t x)))) ∧
+        (∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M,
+          HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => (Ψ s) x) (Set.Ici 0) t
+            ((ContinuousLinearMap.id ℝ ℝ).smulRight (-(X t (Ψ t x))))) := sorry
 
 end DifferentialGeometry.PDE.RicciFlow.ODE

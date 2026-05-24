@@ -6,6 +6,8 @@ namespace DifferentialGeometry.PDE.RicciFlow.HebeyBlock
 open Bundle
 open scoped Manifold ContDiff
 open DifferentialGeometry.Integral.Measure
+open DifferentialGeometry.Analysis.Sobolev.Tensor
+open DifferentialGeometry.Integral.L2
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -43,12 +45,24 @@ all `α` in the finite cover:
 
 The qualitative content: *all* of these chart-dependent constants can be
 replaced by a single absolute constant `C := C(g, r, s, k) ≥ 0`. The
-existence form below records the non-negativity of this absolute
-constant pending the commitment of the chart-component norm and
-Christoffel definitions; the witness is the finite supremum over the
-compact finite cover `chartAtlasPOU_finset I M`. -/
+global Sobolev consequence is the one-sided uniform bound
+
+```
+(tensorPouSobolevNorm g k T).toReal ≤
+    C · (tensorPouSobolevHsNorm g k T).toReal,
+```
+
+valid for every smooth compactly-supported `(r, s)`-tensor section `T`,
+which records that the (chart-aggregated) operator-norm chart-Sobolev
+norm is dominated by the (chart-aggregated) Hilbert-Schmidt chart-Sobolev
+norm with a constant `C ≥ 0` independent of `T` and of the chart used
+to compute each component, having absorbed every chart-by-chart bound
+through the finite-cover supremum. -/
 theorem uniform_chart_bounds_from_compactness
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
-    ∃ C : ℝ, 0 ≤ C := sorry
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ T : SmoothCcTensor g r s,
+        (tensorPouSobolevNorm (I := I) (M := M) g k T).toReal ≤
+          C * (tensorPouSobolevHsNorm (I := I) (M := M) g k T).toReal := sorry
 
 end DifferentialGeometry.PDE.RicciFlow.HebeyBlock

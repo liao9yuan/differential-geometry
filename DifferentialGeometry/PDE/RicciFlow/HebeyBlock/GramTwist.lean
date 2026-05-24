@@ -1,10 +1,14 @@
 import DifferentialGeometry.Metric.Basic
 import DifferentialGeometry.Integral.Connection.ChartMetric
+import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedNorm
+import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedHsNorm
 
 namespace DifferentialGeometry.PDE.RicciFlow.HebeyBlock
 
 open Bundle
 open scoped Manifold ContDiff
+open DifferentialGeometry.Analysis.Sobolev.Tensor
+open DifferentialGeometry.Integral.L2
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -51,12 +55,26 @@ norm equivalence in this block; it propagates upwards through
 `iterated_nabla_vs_iterated_partial_equivalence_H1` and
 `pou_weighted_norm_equals_chart_component_norm_up_to_constant`.
 
-The existence form below records `0 < c ∧ c ≤ C` pending the commitment
-of the fibrewise norm definitions; the witnesses are the global minimum
-and maximum eigenvalues of `g` in any chart-frame (finite and
-strictly positive by compactness of `M` and positivity of `g`). -/
+The global Sobolev consequence at order `k = 0` (the fibre-by-fibre level)
+is the two-sided comparison
+
+```
+c · (tensorPouSobolevNorm g 0 T).toReal ≤
+    (tensorPouSobolevHsNorm g 0 T).toReal ≤
+  C · (tensorPouSobolevNorm g 0 T).toReal,
+```
+
+valid for every smooth compactly-supported `(r, s)`-tensor section `T`,
+which is the fibrewise Gram-twist eigenvalue comparison aggregated over
+the chart-atlas partition-of-unity finite support against the volume
+measure of each chart target. -/
 theorem fibrewise_gram_twist_estimate
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
-    ∃ c C : ℝ, 0 < c ∧ c ≤ C := sorry
+    ∃ c C : ℝ, 0 < c ∧ c ≤ C ∧
+      ∀ T : SmoothCcTensor g r s,
+        c * (tensorPouSobolevNorm (I := I) (M := M) g 0 T).toReal ≤
+            (tensorPouSobolevHsNorm (I := I) (M := M) g 0 T).toReal ∧
+          (tensorPouSobolevHsNorm (I := I) (M := M) g 0 T).toReal ≤
+            C * (tensorPouSobolevNorm (I := I) (M := M) g 0 T).toReal := sorry
 
 end DifferentialGeometry.PDE.RicciFlow.HebeyBlock
