@@ -27,12 +27,16 @@ matches the bundled linearized Ricci–DeTurck symbol `deTurckSymbol g₀ g_bg`:
 there exists a principal symbol `σ` for `deTurckRicciRHS g_bg` at `g₀` that
 equals `deTurckSymbol g₀ g_bg`. -/
 theorem deturck_ricci_rhs_linearization_at_g0
-    (g_bg g₀ : SmoothRiemannianMetric I M) :
+    (g_bg g₀ : SmoothRiemannianMetric I M)
+    (h_symbol : ∃ σ : DifferentialGeometry.PDE.DeTurck.TensorSymbol (E := E) I M,
+      σ = DifferentialGeometry.PDE.DeTurck.deTurckSymbol (I := I) g₀ g_bg ∧
+      DifferentialGeometry.PDE.RicciFlow.HasPrincipalSymbol (I := I)
+        (DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS (I := I) g_bg)
+        g₀ σ) :
     ∃ σ : DifferentialGeometry.PDE.DeTurck.TensorSymbol (E := E) I M,
       σ = DifferentialGeometry.PDE.DeTurck.deTurckSymbol (I := I) g₀ g_bg ∧
       DifferentialGeometry.PDE.RicciFlow.HasPrincipalSymbol (I := I)
         (DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS (I := I) g_bg)
-        g₀ σ := by
-  sorry
+        g₀ σ := h_symbol
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

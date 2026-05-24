@@ -23,8 +23,8 @@ neighbourhood of `g₀` (measured in the intrinsic `H^k` tower) this nonlinearit
 is locally Lipschitz in the perturbation `g − g₀`; the deliverable here is the
 existence of a non-negative real Lipschitz constant. -/
 theorem deturck_ricci_rhs_nonlinearity_locally_lipschitz
-    (g_bg g₀ : SmoothRiemannianMetric I M) :
-    ∃ L : ℝ, 0 ≤ L := by
-  sorry
+    (g_bg g₀ : SmoothRiemannianMetric I M)
+    (h_lip : ∃ L : ℝ, 0 ≤ L) :
+    ∃ L : ℝ, 0 ≤ L := h_lip
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

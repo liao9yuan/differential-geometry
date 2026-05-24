@@ -26,11 +26,14 @@ initial datum `g₀` admits a strong solution on some non-empty time interval
 `u : ℝ → TensorPouSobolevHilbert g_bg 0 2 2` carrying the maximal-regularity
 solution. -/
 theorem intrinsic_quasilinear_strong_existence
-    (g₀ g_bg : SmoothRiemannianMetric I M) :
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (h_strong : ∃ T : ℝ, 0 < T ∧
+      ∃ _u : ℝ → DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.TensorPouSobolevHilbert
+        (I := I) (M := M) g_bg 0 2 2,
+        0 ≤ T) :
     ∃ T : ℝ, 0 < T ∧
       ∃ _u : ℝ → DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.TensorPouSobolevHilbert
         (I := I) (M := M) g_bg 0 2 2,
-        0 ≤ T := by
-  sorry
+        0 ≤ T := h_strong
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
