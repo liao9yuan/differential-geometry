@@ -1,21 +1,23 @@
 import DifferentialGeometry.PDE.DeTurck.LieDerivativeMetric
 import DifferentialGeometry.Integral.Connection.LeviCivita
 
+noncomputable section
+
 namespace DifferentialGeometry
 namespace PDE
 namespace RicciFlow
 namespace Pullback
 
-open Bundle
-open scoped Manifold ContDiff
+open Bundle Manifold Set
+open scoped Manifold Topology ContDiff
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.DeTurck
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
@@ -28,146 +30,20 @@ $$
 $$
 expresses the Lie derivative of the metric `g` along a vector field `W` as the
 symmetrized covariant derivative of `W`, where `∇` is the Levi-Civita connection of
-`g`. Equivalently, the right-hand side is `2 · (sym ∇W)(X, Y)` — the *Killing
-operator* of `W`. The identity uses the torsion-free property of `∇`
-(so `[X, Y] = ∇_X Y - ∇_Y X`) and its metric-compatibility
-(`X(g(Y, Z)) = g(∇_X Y, Z) + g(Y, ∇_X Z)`).
+`g`. The right-hand side is `2 · (sym ∇W)(X, Y)` — the *Killing operator* of `W`.
 
-The bundled Lie derivative `lieDerivMetric g W` is defined by the explicit
-chart-coordinate formula
-$$
-  (\mathcal L_W g)_{ij}
-    = W^k\,\partial_k g_{ij} + g_{kj}\,\partial_i W^k + g_{ik}\,\partial_j W^k ;
-$$
-the present file connects that formula to the connection form on the right-hand
-side, through three chart-coordinate steps:
+The proof unwinds in chart coordinates through:
 
-* the Christoffel expansion of `∇W` in a coordinate chart,
-  `(∇_X W)^i = X^j \partial_j W^i + X^j \Gamma^i_{jk} W^k`;
-* the chart form of metric compatibility,
-  `∂_k g_{ij} = g_{lj}\,\Gamma^l_{ik} + g_{il}\,\Gamma^l_{jk}`; and
-* an algebraic recombination that turns the right-hand side of the Cartan formula
-  into the left-hand side via these two identities.
--/
+* the chart-Christoffel expansion of `∇W`
+  (`chart_christoffel_expansion_of_nabla_on_vf`);
+* the chart form of metric compatibility (`metric_compat_coord_identity`);
+* an algebraic recombination (`cartan_formula_chart_algebra`).
 
-/-- **Cartan formula for the Lie derivative of a Riemannian metric.**
+The chart-coordinate computations are performed at the basepoint chart at `x`,
+where the canonical trivialization is the identity and the good-set membership
+`x ∈ chartLeviCivitaGoodSet x` is automatic via `self_mem_chartLeviCivitaGoodSet`. -/
 
-For a smooth Riemannian metric `g` on `M`, a smooth tangent vector field `W`, a
-point `x : M`, and tangent vectors `v, w : T_x M`:
-$$
-  (\mathcal L_W g)(v, w) = g(\nabla_v W, w) + g(v, \nabla_w W),
-$$
-where `∇` is the Levi-Civita connection of `g` and the left-hand side is the
-bundled Lie-derivative tensor `lieDerivMetric g W` evaluated at `(x, v, w)`.
-
-This is the connection form of the Killing operator that drives the DeTurck
-modification of the Ricci flow.
-
-PROOF NOTE. The identity unwinds in coordinates through the chart-Christoffel
-expansion of `∇W` (`chart_christoffel_expansion_of_nabla_on_vf`) and the
-chart form of metric compatibility (`metric_compat_coord_identity`), recombined
-algebraically (`cartan_formula_chart_algebra`).
-
-PROOF-INFRASTRUCTURE GAP. Closing this theorem requires three further chart
-bridges that are not yet present in the project:
-
-* identification of the bundled Levi-Civita value with the chart-`α` value at
-  a chart-good-set point on smooth inputs (`LeviCivita_chart_apply` supplies
-  the case `x ∈ chartLeviCivitaGoodSet α`; the canonical specialisation
-  `α := x` discharges the good-set hypothesis via
-  `self_mem_chartLeviCivitaGoodSet`);
-* the chart-coordinate Christoffel expansion of the chart-`α` Levi-Civita
-  derivative on a smooth section (`chart_christoffel_expansion_of_nabla_on_vf`
-  below, sketched in the same way the Hessian chart bridge unwinds the
-  chart-local connection: through `chartLeviCivita_apply`, the
-  `christoffelCorrection_apply` index-sum formula, and the
-  `chartE_section_repr`-vs-`chartCoeffOnE` model-basis-coordinate
-  identification);
-* the `g.inner`-to-chart-Gram-matrix bridge `g_inner_eq_chart_sum`, used to
-  read off the right-hand-side `g(∇_v W, w) + g(v, ∇_w W)` against the
-  chart-coordinate frame.
-
-The chart-algebraic recombination `cartan_formula_chart_algebra` below is the
-final algebraic step; it is itself blocked on the metric-compatibility
-identity `metric_compat_coord_identity` (proven above) being applied
-pointwise, which requires the chart-good-set membership condition. The
-unified pointwise statement collected here packages the identity in its
-intrinsic (chart-independent) form. -/
-theorem cartan_formula_for_lie_deriv_metric
-    (g : SmoothRiemannianMetric I M)
-    (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
-    (x : M) (v w : TangentSpace I x) :
-    lieDerivMetric (I := I) g W x v w =
-      g.inner x ((LeviCivita (I := I) g) (W : ∀ x : M, TangentSpace I x) x v) w
-      + g.inner x v
-          ((LeviCivita (I := I) g) (W : ∀ x : M, TangentSpace I x) x w) := by
-  sorry
-
-/-! ## Chart-coordinate helpers
-
-The Levi-Civita connection has the well-known chart-coordinate expression
-$$
-  (\nabla_X W)^i
-    = X^j \,\partial_j W^i + X^j\,\Gamma^i_{jk}\,W^k,
-$$
-where `X^j, W^k` are the components of `X, W` in the chart-`α` coordinate frame and
-`Γ^i_{jk}` are the Christoffel symbols of `g` in that chart
-(`chartChristoffel g α k j i`).  The chart form of metric compatibility is
-$$
-  \partial_k g_{ij}
-    = g_{lj}\,\Gamma^l_{ik} + g_{il}\,\Gamma^l_{jk}.
-$$
-These two identities, recombined with the symmetry
-`Γ^i_{jk} = Γ^i_{kj}` (the torsion-free property), yield the Cartan formula in chart
-coordinates.
--/
-
-/-- **Chart-Christoffel expansion of the covariant derivative of a vector field.**
-
-In the chart at `α : M`, on the chart-Levi-Civita good set, the `i`-th component of
-the Levi-Civita covariant derivative `∇_X W` in the chart-coordinate frame has the
-classical expression
-$$
-  (\nabla_X W)^i
-    = \sum_j X^j\,\partial_j W^i
-      + \sum_{j, k} X^j\,\Gamma^i_{jk}\,W^k.
-$$
-This is the coordinate form that feeds the Cartan-formula derivation: the second
-term is the lower-slot Christoffel correction acting on the upper index of `W`. -/
-theorem chart_christoffel_expansion_of_nabla_on_vf
-    (g : SmoothRiemannianMetric I M)
-    (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
-    (α : M) (x : M) (v : TangentSpace I x)
-    (i : Fin (Module.finrank ℝ E)) :
-    ((chartModelBasis E).repr
-        ((LeviCivita (I := I) g) (W : ∀ x : M, TangentSpace I x) x v)) i =
-      (∑ j : Fin (Module.finrank ℝ E),
-          ((chartModelBasis E).repr v) j *
-            partialDeriv (E := E) j (chartCoeffOnE (I := I) α W i)
-              (extChartAt I α x))
-      + (∑ j : Fin (Module.finrank ℝ E),
-          ∑ k : Fin (Module.finrank ℝ E),
-            ((chartModelBasis E).repr v) j *
-              chartChristoffel (I := I) g α j k i (extChartAt I α x) *
-              chartCoeff (I := I) α W k x) := by
-  sorry
-
-/-- **Chart form of metric compatibility.**
-
-The chart-coordinate Gram matrix `g_{ij}(α, ·)` and the chart-Christoffel symbols
-`Γ^l_{ik}` are related by
-$$
-  \partial_k g_{ij}
-    = \sum_l \Gamma^l_{ki}\,g_{lj}
-      + \sum_l \Gamma^l_{kj}\,g_{li}.
-$$
-This is the chart-coordinate translation of `g(∇_X Y, Z) + g(Y, ∇_X Z) = X(g(Y, Z))`
-applied to the coordinate frame `{e_j}`: the `(i, j, k)` components recover the
-Christoffel symbols against the Gram matrix, term by term. The hypothesis
-`x ∈ chartLeviCivitaGoodSet α` ensures that the chart point `extChartAt I α x` lies
-in the interior of the chart target, so that the defining `partialDeriv` of the
-Gram matrix has the chart-Christoffel form supplied by
-`partialDeriv_chartGramOnE_eq_chartChristoffel_sum`. -/
+/-- **Chart form of metric compatibility.** -/
 theorem metric_compat_coord_identity
     (g : SmoothRiemannianMetric I M)
     (α : M) {x : M} (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -184,44 +60,1033 @@ theorem metric_compat_coord_identity
   exact
     partialDeriv_chartGramOnE_eq_chartChristoffel_sum (I := I) g α i j k hint
 
-/-- **Cartan formula in chart coordinates.**
+/-! ## Local helpers: trivialization at the basepoint is the identity -/
 
-Combining the chart-Christoffel expansion of `∇W`
-(`chart_christoffel_expansion_of_nabla_on_vf`) and the chart form of metric
-compatibility (`metric_compat_coord_identity`), the chart-`α` component
-`(𝓛_W g)_{ij}` of the metric Lie derivative coincides with
-$$
-  g_{kj}\,(\nabla_{e_i} W)^k + g_{ik}\,(\nabla_{e_j} W)^k,
-$$
-the right-hand side of the Cartan formula evaluated on the chart-coordinate frame
-vectors `(e_i, e_j)`. This is the algebraic recombination step that produces the
-intrinsic Cartan formula from the two preceding identities. -/
+private lemma cartan_trivToE_self_apply (x : M) (v : TangentSpace I x) :
+    trivToE (I := I) x x v = v := by
+  classical
+  have h := TangentBundle.continuousLinearMapAt_trivializationAt (𝕜 := ℝ) (I := I)
+    (x₀ := x) (x := x) (mem_chart_source H x)
+  have h2 : (trivToE (I := I) x x : TangentSpace I x →L[ℝ] E) =
+      ContinuousLinearMap.id ℝ (TangentSpace I x) := by
+    rw [show (trivToE (I := I) x x : TangentSpace I x →L[ℝ] E) =
+          (trivializationAt E (TangentSpace I) x).continuousLinearMapAt ℝ x from rfl]
+    rw [h]; exact mfderiv_extChartAt_self (I := I) (x := x)
+  rw [show trivToE (I := I) x x v = (trivToE (I := I) x x : TangentSpace I x →L[ℝ] E) v
+        from rfl, h2]; rfl
+
+private lemma cartan_trivFromE_self_apply (x : M) (w : E) :
+    trivFromE (I := I) x x w = w := by
+  classical
+  have hbase : x ∈ (trivializationAt E (TangentSpace I) x).baseSet :=
+    FiberBundle.mem_baseSet_trivializationAt' x
+  have h := trivToE_trivFromE (I := I) x hbase w
+  rwa [cartan_trivToE_self_apply (I := I) x (trivFromE (I := I) x x w)] at h
+
+/-! ## (a) helper: chart-pullback identification -/
+
+/-- On a neighborhood of `extChartAt I x x`, `chartCoeffOnE x W i` equals the
+composition of the linear coord functional `b.coord i` with the chart pullback of
+`chartE_section_repr x W`. -/
+private lemma chartCoeffOnE_self_eq_basis_comp_pullback_eventuallyEq
+    (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
+    (x : M) (i : Fin (Module.finrank ℝ E)) :
+    (chartCoeffOnE (I := I) x W i) =ᶠ[nhds (extChartAt I x x)]
+      ((((chartModelBasis E).coord i).toContinuousLinearMap : E →L[ℝ] ℝ) ∘
+        chartE_section_repr (I := I) x (W : ∀ x : M, TangentSpace I x) ∘
+        (extChartAt I x).symm) := by
+  classical
+  have hx_good : x ∈ chartLeviCivitaGoodSet (I := I) x :=
+    self_mem_chartLeviCivitaGoodSet (I := I) (α := x)
+  have hint : extChartAt I x x ∈ interior ((extChartAt I x).target : Set E) :=
+    chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx_good
+  refine Filter.eventuallyEq_iff_exists_mem.mpr
+    ⟨interior ((extChartAt I x).target : Set E),
+      isOpen_interior.mem_nhds hint, ?_⟩
+  intro y hy_int
+  have hy_tgt : y ∈ (extChartAt I x).target := interior_subset hy_int
+  have hy_base : (extChartAt I x).symm y ∈
+      (trivializationAt E (TangentSpace I) x).baseSet := by
+    have hsource : (extChartAt I x).symm y ∈ (extChartAt I x).source :=
+      (extChartAt I x).map_target hy_tgt
+    rw [extChartAt_source_eq_chartAt_source (I := I)] at hsource
+    rw [trivializationAt_baseSet_eq_chartAt_source]
+    exact hsource
+  change chartCoeffOnE (I := I) x W i y =
+    ((chartModelBasis E).coord i).toContinuousLinearMap
+      (chartE_section_repr (I := I) x (W : ∀ x : M, TangentSpace I x)
+        ((extChartAt I x).symm y))
+  change (chartModelBasis E).repr
+      ((trivializationAt E (TangentSpace I) x)
+        ⟨((extChartAt I x).symm y), W ((extChartAt I x).symm y)⟩).2 i = _
+  rw [← chartE_section_repr_eq_trivialization_snd (I := I) x
+        (W : ∀ x : M, TangentSpace I x) hy_base]
+  rfl
+
+private lemma differentiableAt_chartE_pullback_self
+    (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
+    DifferentiableAt ℝ
+      (chartE_section_repr (I := I) x (W : ∀ x : M, TangentSpace I x) ∘
+        (extChartAt I x).symm) (extChartAt I x x) := by
+  classical
+  have hx_good : x ∈ chartLeviCivitaGoodSet (I := I) x :=
+    self_mem_chartLeviCivitaGoodSet (I := I) (α := x)
+  have hW_at : MDiffAt (T% fun y => W y) x := W.mdifferentiableAt
+  exact differentiableAt_chartE_pullback_of_MDiff (I := I) x hx_good hW_at
+
+/-! ## (a) Christoffel expansion at α := x
+
+We prove the expansion at the basepoint `α := x`, where the trivialization is the
+identity, so the chart-`x` reading reduces to the canonical model-basis reading. -/
+
+/-- **Chart-Christoffel expansion of the covariant derivative of a vector field
+at the basepoint chart.** -/
+theorem chart_christoffel_expansion_of_nabla_on_vf
+    (g : SmoothRiemannianMetric I M)
+    (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
+    (x : M) (v : TangentSpace I x)
+    (i : Fin (Module.finrank ℝ E)) :
+    ((chartModelBasis E).repr
+        ((LeviCivita (I := I) g) (W : ∀ x : M, TangentSpace I x) x v)) i =
+      (∑ j : Fin (Module.finrank ℝ E),
+          ((chartModelBasis E).repr v) j *
+            partialDeriv (E := E) j (chartCoeffOnE (I := I) x W i)
+              (extChartAt I x x))
+      + (∑ j : Fin (Module.finrank ℝ E),
+          ∑ k : Fin (Module.finrank ℝ E),
+            ((chartModelBasis E).repr v) j *
+              chartChristoffel (I := I) g x j k i (extChartAt I x x) *
+              chartCoeff (I := I) x W k x) := by
+  classical
+  have hx_good : x ∈ chartLeviCivitaGoodSet (I := I) x :=
+    self_mem_chartLeviCivitaGoodSet (I := I) (α := x)
+  have hx_base : x ∈ (trivializationAt E (TangentSpace I) x).baseSet :=
+    chartLeviCivitaGoodSet_mem_baseSet (I := I) hx_good
+  have hW_at : MDiffAt (T% fun y => W y) x := W.mdifferentiableAt
+  -- Step 1: LeviCivita ↝ chartLeviCivita ↝ explicit chart formula.
+  have hLC_apply :
+      (LeviCivita (I := I) g) (W : ∀ x : M, TangentSpace I x) x v =
+        chartLeviCivita (I := I) g x (W : ∀ x : M, TangentSpace I x) x v :=
+    LeviCivita_chart_apply (I := I) g x hx_good hW_at v
+  rw [hLC_apply]
+  rw [chartLeviCivita_apply (I := I) g x (W : ∀ x : M, TangentSpace I x) hx_good v]
+  -- Step 2: trivFromE x x = id, so peel off trivFromE.
+  rw [cartan_trivFromE_self_apply (I := I) x _]
+  rw [map_add, Finsupp.add_apply]
+  congr 1
+  · -- fderiv piece: chain rule + b.coord linearity + chartCoeffOnE bridge.
+    rw [cartan_trivToE_self_apply (I := I) x v]
+    set u : E := v with hu_def
+    set F : E → E := chartE_section_repr (I := I) x (W : ∀ x : M, TangentSpace I x) ∘
+        (extChartAt I x).symm with hF_def
+    have hudecomp : u = ∑ j, ((chartModelBasis E).repr u) j • (chartModelBasis E) j :=
+      (Module.Basis.sum_repr (chartModelBasis E) u).symm
+    have hfderiv_sum :
+        fderiv ℝ F (extChartAt I x x) u =
+          ∑ j, ((chartModelBasis E).repr u) j • fderiv ℝ F (extChartAt I x x)
+            ((chartModelBasis E) j) := by
+      conv_lhs => rw [hudecomp]
+      rw [map_sum]
+      refine Finset.sum_congr rfl (fun j _ => ?_)
+      rw [(fderiv ℝ F (extChartAt I x x)).map_smul]
+    -- LHS via hfderiv_sum:
+    -- b.repr (∑ j, (b.repr u) j • fderiv F ...e_j) i = ∑ j, (b.repr u) j • (b.repr (fderiv F ...e_j)) i.
+    rw [hfderiv_sum]
+    -- b.repr applied to Finset.sum: use map_sum then Finsupp coord application is sum of coords.
+    rw [show
+      ((chartModelBasis E).repr
+        (∑ j : Fin (Module.finrank ℝ E), ((chartModelBasis E).repr u) j •
+          fderiv ℝ F (extChartAt I x x) ((chartModelBasis E) j))) i =
+      ∑ j : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr u) j *
+          ((chartModelBasis E).repr (fderiv ℝ F (extChartAt I x x)
+            ((chartModelBasis E) j))) i from by
+      rw [map_sum]
+      simp only [map_smul, Finsupp.coe_finset_sum, Finset.sum_apply, Finsupp.coe_smul,
+        Pi.smul_apply, smul_eq_mul]]
+    refine Finset.sum_congr rfl (fun j _ => ?_)
+    congr 1
+    -- b.repr Y i = (b.coord i) Y ; chain rule on (b.coord i) ∘ F.
+    rw [show ((chartModelBasis E).repr (fderiv ℝ F (extChartAt I x x)
+          ((chartModelBasis E) j))) i =
+        (((chartModelBasis E).coord i).toContinuousLinearMap)
+          (fderiv ℝ F (extChartAt I x x) ((chartModelBasis E) j)) from by
+      rw [← Module.Basis.coord_apply]; rfl]
+    rw [← ContinuousLinearMap.comp_apply]
+    rw [← ContinuousLinearMap.fderiv (((chartModelBasis E).coord i).toContinuousLinearMap)]
+    rw [← fderiv_comp (x := extChartAt I x x)
+          (((chartModelBasis E).coord i).toContinuousLinearMap).differentiableAt
+          (differentiableAt_chartE_pullback_self (I := I) W x)]
+    unfold partialDeriv
+    have hev := chartCoeffOnE_self_eq_basis_comp_pullback_eventuallyEq (I := I) W x i
+    rw [hev.fderiv_eq]
+  · -- Christoffel piece: expand + collapse δ + identify with chartCoeff.
+    rw [christoffelCorrection_apply (I := I) g x x
+          (chartE_section_repr (I := I) x (W : ∀ x : M, TangentSpace I x) x) v]
+    rw [cartan_trivToE_self_apply (I := I) x v]
+    -- Pull b.repr through the triple sum.
+    rw [show ((chartModelBasis E).repr
+          (∑ i' : Fin (Module.finrank ℝ E),
+            ∑ j' : Fin (Module.finrank ℝ E),
+              ∑ k' : Fin (Module.finrank ℝ E),
+                (((chartModelBasis E).repr v) i' *
+                    ((chartModelBasis E).repr
+                      (chartE_section_repr (I := I) x
+                        (W : ∀ x : M, TangentSpace I x) x)) j' *
+                    chartChristoffel (I := I) g x i' j' k' (extChartAt I x x)) •
+                  (chartModelBasis E) k')) i =
+        ∑ i' : Fin (Module.finrank ℝ E),
+          ∑ j' : Fin (Module.finrank ℝ E),
+            ∑ k' : Fin (Module.finrank ℝ E),
+              (((chartModelBasis E).repr v) i' *
+                  ((chartModelBasis E).repr
+                    (chartE_section_repr (I := I) x
+                      (W : ∀ x : M, TangentSpace I x) x)) j' *
+                  chartChristoffel (I := I) g x i' j' k' (extChartAt I x x)) *
+                ((chartModelBasis E).repr ((chartModelBasis E) k')) i from by
+      simp only [map_sum, map_smul, Finsupp.coe_finset_sum, Finset.sum_apply,
+        Finsupp.coe_smul, Pi.smul_apply, smul_eq_mul]]
+    -- Collapse k'-sum: only k' = i contributes.
+    have hrepr_basis : ∀ (r s : Fin (Module.finrank ℝ E)),
+        ((chartModelBasis E).repr ((chartModelBasis E) r)) s =
+          if r = s then (1 : ℝ) else 0 := by
+      intro r s
+      rw [Module.Basis.repr_self]
+      by_cases h : r = s
+      · subst h; simp
+      · simp [h]
+    have hkc : ∀ (i' j' : Fin (Module.finrank ℝ E)),
+        (∑ k' : Fin (Module.finrank ℝ E),
+            (((chartModelBasis E).repr v) i' *
+                ((chartModelBasis E).repr
+                  (chartE_section_repr (I := I) x
+                    (W : ∀ x : M, TangentSpace I x) x)) j' *
+                chartChristoffel (I := I) g x i' j' k' (extChartAt I x x)) *
+              ((chartModelBasis E).repr ((chartModelBasis E) k')) i) =
+        ((chartModelBasis E).repr v) i' *
+          chartChristoffel (I := I) g x i' j' i (extChartAt I x x) *
+          ((chartModelBasis E).repr
+            (chartE_section_repr (I := I) x
+              (W : ∀ x : M, TangentSpace I x) x)) j' := by
+      intro i' j'
+      rw [Finset.sum_eq_single i
+        (fun k' _ hne => by
+          rw [hrepr_basis k' i, if_neg hne]; ring)
+        (fun hm => (hm (Finset.mem_univ i)).elim)]
+      rw [hrepr_basis i i, if_pos rfl]
+      ring
+    rw [show
+      ∑ i' : Fin (Module.finrank ℝ E),
+        ∑ j' : Fin (Module.finrank ℝ E),
+          ∑ k' : Fin (Module.finrank ℝ E),
+            (((chartModelBasis E).repr v) i' *
+                ((chartModelBasis E).repr
+                  (chartE_section_repr (I := I) x
+                    (W : ∀ x : M, TangentSpace I x) x)) j' *
+                chartChristoffel (I := I) g x i' j' k' (extChartAt I x x)) *
+              ((chartModelBasis E).repr ((chartModelBasis E) k')) i =
+      ∑ i' : Fin (Module.finrank ℝ E),
+        ∑ j' : Fin (Module.finrank ℝ E),
+          ((chartModelBasis E).repr v) i' *
+            chartChristoffel (I := I) g x i' j' i (extChartAt I x x) *
+            ((chartModelBasis E).repr
+              (chartE_section_repr (I := I) x
+                (W : ∀ x : M, TangentSpace I x) x)) j'
+      from Finset.sum_congr rfl (fun i' _ => Finset.sum_congr rfl (fun j' _ => hkc i' j'))]
+    -- b.repr (chartE_section_repr x W x) j' = chartCoeff x W j' x.
+    have hrepr_chartCoeff : ∀ (j' : Fin (Module.finrank ℝ E)),
+        ((chartModelBasis E).repr
+          (chartE_section_repr (I := I) x
+            (W : ∀ x : M, TangentSpace I x) x)) j' =
+        chartCoeff (I := I) x W j' x := by
+      intro j'
+      rw [chartE_section_repr_eq_trivialization_snd (I := I) x
+            (W : ∀ x : M, TangentSpace I x) hx_base]
+      rfl
+    refine Finset.sum_congr rfl (fun i' _ => Finset.sum_congr rfl (fun j' _ => ?_))
+    rw [hrepr_chartCoeff j']
+
+/-! ## (b) Cartan formula in chart coordinates at α := x -/
+
+/-- **Cartan formula in chart coordinates (at the basepoint).** -/
 theorem cartan_formula_chart_algebra
     (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
-    (α : M) (i j : Fin (Module.finrank ℝ E)) (x : M) :
-    chartLieDerivMetricMatrix (I := I) g W α i j x =
+    (i j : Fin (Module.finrank ℝ E)) (x : M) :
+    chartLieDerivMetricMatrix (I := I) g W x i j x =
       (∑ k : Fin (Module.finrank ℝ E),
-          chartGramMatrix (I := I) g α x k j *
+          chartGramMatrix (I := I) g x x k j *
             ((∑ l : Fin (Module.finrank ℝ E),
-                  partialDeriv (E := E) i (chartCoeffOnE (I := I) α W k)
-                    (extChartAt I α x) *
+                  partialDeriv (E := E) i (chartCoeffOnE (I := I) x W k)
+                    (extChartAt I x x) *
                     (if l = k then (1 : ℝ) else 0))
               + (∑ l : Fin (Module.finrank ℝ E),
-                  chartChristoffel (I := I) g α i l k (extChartAt I α x) *
-                    chartCoeff (I := I) α W l x)))
+                  chartChristoffel (I := I) g x i l k (extChartAt I x x) *
+                    chartCoeff (I := I) x W l x)))
       + (∑ k : Fin (Module.finrank ℝ E),
-          chartGramMatrix (I := I) g α x i k *
+          chartGramMatrix (I := I) g x x i k *
             ((∑ l : Fin (Module.finrank ℝ E),
-                  partialDeriv (E := E) j (chartCoeffOnE (I := I) α W k)
-                    (extChartAt I α x) *
+                  partialDeriv (E := E) j (chartCoeffOnE (I := I) x W k)
+                    (extChartAt I x x) *
                     (if l = k then (1 : ℝ) else 0))
               + (∑ l : Fin (Module.finrank ℝ E),
-                  chartChristoffel (I := I) g α j l k (extChartAt I α x) *
-                    chartCoeff (I := I) α W l x))) := by
-  sorry
+                  chartChristoffel (I := I) g x j l k (extChartAt I x x) *
+                    chartCoeff (I := I) x W l x))) := by
+  classical
+  have hx_good : x ∈ chartLeviCivitaGoodSet (I := I) x :=
+    self_mem_chartLeviCivitaGoodSet (I := I) (α := x)
+  have hx_src : x ∈ (extChartAt I x).source :=
+    chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hx_good
+  rw [chartLieDerivMetricMatrix_def (I := I) g W x i j x]
+  have hgram : ∀ a b : Fin (Module.finrank ℝ E),
+      chartGramOnE (I := I) g x a b (extChartAt I x x) =
+        chartGramMatrix (I := I) g x x a b := by
+    intro a b
+    unfold chartGramOnE
+    rw [(extChartAt I x).left_inv hx_src]
+  have hmc : ∀ k : Fin (Module.finrank ℝ E),
+      partialDeriv (E := E) k (chartGramOnE (I := I) g x i j) (extChartAt I x x) =
+        (∑ l, chartChristoffel (I := I) g x k i l (extChartAt I x x) *
+            chartGramOnE (I := I) g x l j (extChartAt I x x))
+        + (∑ l, chartChristoffel (I := I) g x k j l (extChartAt I x x) *
+            chartGramOnE (I := I) g x l i (extChartAt I x x)) := fun k =>
+    metric_compat_coord_identity (I := I) g x hx_good i j k
+  have hcoll1 : ∀ k : Fin (Module.finrank ℝ E),
+      (∑ l : Fin (Module.finrank ℝ E),
+        partialDeriv (E := E) i (chartCoeffOnE (I := I) x W k) (extChartAt I x x) *
+          (if l = k then (1 : ℝ) else 0)) =
+      partialDeriv (E := E) i (chartCoeffOnE (I := I) x W k) (extChartAt I x x) := by
+    intro k
+    rw [Finset.sum_eq_single k
+      (fun l _ hl => by rw [if_neg hl]; ring)
+      (fun hm => (hm (Finset.mem_univ k)).elim)]
+    simp
+  have hcoll2 : ∀ k : Fin (Module.finrank ℝ E),
+      (∑ l : Fin (Module.finrank ℝ E),
+        partialDeriv (E := E) j (chartCoeffOnE (I := I) x W k) (extChartAt I x x) *
+          (if l = k then (1 : ℝ) else 0)) =
+      partialDeriv (E := E) j (chartCoeffOnE (I := I) x W k) (extChartAt I x x) := by
+    intro k
+    rw [Finset.sum_eq_single k
+      (fun l _ hl => by rw [if_neg hl]; ring)
+      (fun hm => (hm (Finset.mem_univ k)).elim)]
+    simp
+  -- Substitute δ-collapses on RHS.
+  conv_rhs =>
+    rw [show
+      (∑ k : Fin (Module.finrank ℝ E),
+        chartGramMatrix (I := I) g x x k j *
+          ((∑ l, partialDeriv (E := E) i (chartCoeffOnE (I := I) x W k)
+              (extChartAt I x x) * (if l = k then (1 : ℝ) else 0))
+            + (∑ l, chartChristoffel (I := I) g x i l k (extChartAt I x x) *
+                  chartCoeff (I := I) x W l x))) =
+        (∑ k, chartGramMatrix (I := I) g x x k j *
+          partialDeriv (E := E) i (chartCoeffOnE (I := I) x W k) (extChartAt I x x))
+        + (∑ k, chartGramMatrix (I := I) g x x k j *
+          (∑ l, chartChristoffel (I := I) g x i l k (extChartAt I x x) *
+              chartCoeff (I := I) x W l x))
+      from by
+        rw [← Finset.sum_add_distrib]
+        refine Finset.sum_congr rfl (fun k _ => ?_)
+        rw [hcoll1 k, mul_add]]
+    rw [show
+      (∑ k : Fin (Module.finrank ℝ E),
+        chartGramMatrix (I := I) g x x i k *
+          ((∑ l, partialDeriv (E := E) j (chartCoeffOnE (I := I) x W k)
+              (extChartAt I x x) * (if l = k then (1 : ℝ) else 0))
+            + (∑ l, chartChristoffel (I := I) g x j l k (extChartAt I x x) *
+                  chartCoeff (I := I) x W l x))) =
+        (∑ k, chartGramMatrix (I := I) g x x i k *
+          partialDeriv (E := E) j (chartCoeffOnE (I := I) x W k) (extChartAt I x x))
+        + (∑ k, chartGramMatrix (I := I) g x x i k *
+          (∑ l, chartChristoffel (I := I) g x j l k (extChartAt I x x) *
+              chartCoeff (I := I) x W l x))
+      from by
+        rw [← Finset.sum_add_distrib]
+        refine Finset.sum_congr rfl (fun k _ => ?_)
+        rw [hcoll2 k, mul_add]]
+  -- Split convective via hmc.
+  rw [show
+    (∑ k : Fin (Module.finrank ℝ E),
+      chartCoeff (I := I) x W k x *
+        partialDeriv (E := E) k (chartGramOnE (I := I) g x i j) (extChartAt I x x))
+    = (∑ k, chartCoeff (I := I) x W k x *
+      (∑ l, chartChristoffel (I := I) g x k i l (extChartAt I x x) *
+          chartGramOnE (I := I) g x l j (extChartAt I x x)))
+      + (∑ k, chartCoeff (I := I) x W k x *
+      (∑ l, chartChristoffel (I := I) g x k j l (extChartAt I x x) *
+          chartGramOnE (I := I) g x l i (extChartAt I x x))) from by
+    rw [← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl (fun k _ => ?_)
+    rw [hmc k, mul_add]]
+  -- Reshape H1 and H2 to match B and D.
+  have hreshape_H1 :
+      (∑ k : Fin (Module.finrank ℝ E),
+        chartCoeff (I := I) x W k x *
+          (∑ l, chartChristoffel (I := I) g x k i l (extChartAt I x x) *
+              chartGramOnE (I := I) g x l j (extChartAt I x x))) =
+      (∑ k, chartGramMatrix (I := I) g x x k j *
+        (∑ l, chartChristoffel (I := I) g x i l k (extChartAt I x x) *
+            chartCoeff (I := I) x W l x)) := by
+    rw [show (∑ k : Fin (Module.finrank ℝ E),
+          chartCoeff (I := I) x W k x *
+            (∑ l, chartChristoffel (I := I) g x k i l (extChartAt I x x) *
+                chartGramOnE (I := I) g x l j (extChartAt I x x))) =
+        ∑ k, ∑ l,
+          chartCoeff (I := I) x W k x *
+            chartChristoffel (I := I) g x k i l (extChartAt I x x) *
+            chartGramOnE (I := I) g x l j (extChartAt I x x) from
+      Finset.sum_congr rfl (fun k _ => by
+        rw [Finset.mul_sum]
+        exact Finset.sum_congr rfl (fun l _ => by ring))]
+    rw [Finset.sum_comm]
+    refine Finset.sum_congr rfl (fun l _ => ?_)
+    rw [hgram l j]
+    rw [show (∑ k : Fin (Module.finrank ℝ E),
+          chartCoeff (I := I) x W k x *
+            chartChristoffel (I := I) g x k i l (extChartAt I x x) *
+            chartGramMatrix (I := I) g x x l j) =
+        chartGramMatrix (I := I) g x x l j *
+          ∑ k, chartChristoffel (I := I) g x i k l (extChartAt I x x) *
+            chartCoeff (I := I) x W k x from by
+      rw [Finset.mul_sum]
+      exact Finset.sum_congr rfl (fun k _ => by
+        rw [chartChristoffel_symm (I := I) g x k i l (extChartAt I x x)]
+        ring)]
+  have hreshape_H2 :
+      (∑ k : Fin (Module.finrank ℝ E),
+        chartCoeff (I := I) x W k x *
+          (∑ l, chartChristoffel (I := I) g x k j l (extChartAt I x x) *
+              chartGramOnE (I := I) g x l i (extChartAt I x x))) =
+      (∑ k, chartGramMatrix (I := I) g x x i k *
+        (∑ l, chartChristoffel (I := I) g x j l k (extChartAt I x x) *
+            chartCoeff (I := I) x W l x)) := by
+    rw [show (∑ k : Fin (Module.finrank ℝ E),
+          chartCoeff (I := I) x W k x *
+            (∑ l, chartChristoffel (I := I) g x k j l (extChartAt I x x) *
+                chartGramOnE (I := I) g x l i (extChartAt I x x))) =
+        ∑ k, ∑ l,
+          chartCoeff (I := I) x W k x *
+            chartChristoffel (I := I) g x k j l (extChartAt I x x) *
+            chartGramOnE (I := I) g x l i (extChartAt I x x) from
+      Finset.sum_congr rfl (fun k _ => by
+        rw [Finset.mul_sum]
+        exact Finset.sum_congr rfl (fun l _ => by ring))]
+    rw [Finset.sum_comm]
+    refine Finset.sum_congr rfl (fun l _ => ?_)
+    rw [hgram l i]
+    rw [show chartGramMatrix (I := I) g x x l i =
+          chartGramMatrix (I := I) g x x i l from by
+      rw [chartGramMatrix_apply, chartGramMatrix_apply]
+      exact g.symm x _ _]
+    rw [show (∑ k : Fin (Module.finrank ℝ E),
+          chartCoeff (I := I) x W k x *
+            chartChristoffel (I := I) g x k j l (extChartAt I x x) *
+            chartGramMatrix (I := I) g x x i l) =
+        chartGramMatrix (I := I) g x x i l *
+          ∑ k, chartChristoffel (I := I) g x j k l (extChartAt I x x) *
+            chartCoeff (I := I) x W k x from by
+      rw [Finset.mul_sum]
+      exact Finset.sum_congr rfl (fun k _ => by
+        rw [chartChristoffel_symm (I := I) g x k j l (extChartAt I x x)]
+        ring)]
+  rw [hreshape_H1, hreshape_H2]
+  ring
+
+/-! ## (c) The Cartan formula -/
+
+/-- **Cartan formula for the Lie derivative of a Riemannian metric.**
+
+For a smooth Riemannian metric `g` on `M`, a smooth tangent vector field `W`, a
+point `x : M`, and tangent vectors `v, w : T_x M`:
+$$
+  (\mathcal L_W g)(v, w) = g(\nabla_v W, w) + g(v, \nabla_w W),
+$$
+where `∇` is the Levi-Civita connection of `g` and the left-hand side is the
+bundled Lie-derivative tensor `lieDerivMetric g W` evaluated at `(x, v, w)`.
+
+This is the connection form of the Killing operator that drives the DeTurck
+modification of the Ricci flow. -/
+theorem cartan_formula_for_lie_deriv_metric
+    (g : SmoothRiemannianMetric I M)
+    (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
+    (x : M) (v w : TangentSpace I x) :
+    lieDerivMetric (I := I) g W x v w =
+      g.inner x ((LeviCivita (I := I) g) (W : ∀ x : M, TangentSpace I x) x v) w
+      + g.inner x v
+          ((LeviCivita (I := I) g) (W : ∀ x : M, TangentSpace I x) x w) := by
+  classical
+  have hx_good : x ∈ chartLeviCivitaGoodSet (I := I) x :=
+    self_mem_chartLeviCivitaGoodSet (I := I) (α := x)
+  have hx_base : x ∈ (trivializationAt E (TangentSpace I) x).baseSet :=
+    chartLeviCivitaGoodSet_mem_baseSet (I := I) hx_good
+  have hx_src : x ∈ (extChartAt I x).source :=
+    chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hx_good
+  rw [lieDerivMetric_apply (I := I) g W x v w]
+  have hLDM_eq : ∀ (i j : Fin (Module.finrank ℝ E)),
+      lieDerivMetricMatrix (I := I) g W i j x =
+        chartLieDerivMetricMatrix (I := I) g W x i j x := fun i j => rfl
+  rw [show
+    (∑ i, ∑ j, ((chartModelBasis E).repr v) i *
+      ((chartModelBasis E).repr w) j * lieDerivMetricMatrix (I := I) g W i j x) =
+    (∑ i, ∑ j, ((chartModelBasis E).repr v) i *
+      ((chartModelBasis E).repr w) j *
+      chartLieDerivMetricMatrix (I := I) g W x i j x)
+    from Finset.sum_congr rfl (fun i _ =>
+      Finset.sum_congr rfl (fun j _ => by rw [hLDM_eq]))]
+  -- Apply (b) inside the bilinear sum.
+  rw [show
+    (∑ i, ∑ j, ((chartModelBasis E).repr v) i *
+      ((chartModelBasis E).repr w) j *
+      chartLieDerivMetricMatrix (I := I) g W x i j x) =
+    (∑ i, ∑ j, ((chartModelBasis E).repr v) i *
+      ((chartModelBasis E).repr w) j *
+      ((∑ k, chartGramMatrix (I := I) g x x k j *
+          ((∑ l, partialDeriv (E := E) i (chartCoeffOnE (I := I) x W k)
+              (extChartAt I x x) * (if l = k then (1 : ℝ) else 0))
+            + (∑ l, chartChristoffel (I := I) g x i l k (extChartAt I x x) *
+                chartCoeff (I := I) x W l x)))
+        + (∑ k, chartGramMatrix (I := I) g x x i k *
+          ((∑ l, partialDeriv (E := E) j (chartCoeffOnE (I := I) x W k)
+              (extChartAt I x x) * (if l = k then (1 : ℝ) else 0))
+            + (∑ l, chartChristoffel (I := I) g x j l k (extChartAt I x x) *
+                chartCoeff (I := I) x W l x)))))
+    from Finset.sum_congr rfl (fun i _ =>
+      Finset.sum_congr rfl (fun j _ => by
+        rw [cartan_formula_chart_algebra (I := I) g W i j x]))]
+  -- Collapse δ-sums inside.
+  have hcoll : ∀ (a : Fin (Module.finrank ℝ E)) (k : Fin (Module.finrank ℝ E)),
+      (∑ l : Fin (Module.finrank ℝ E),
+        partialDeriv (E := E) a (chartCoeffOnE (I := I) x W k) (extChartAt I x x) *
+          (if l = k then (1 : ℝ) else 0)) =
+        partialDeriv (E := E) a (chartCoeffOnE (I := I) x W k) (extChartAt I x x) := by
+    intro a k
+    rw [Finset.sum_eq_single k
+      (fun l _ hl => by rw [if_neg hl]; ring)
+      (fun hm => (hm (Finset.mem_univ k)).elim)]
+    simp
+  -- Now distribute LHS into 4 pieces L1..L4.
+  rw [show
+    (∑ i, ∑ j, ((chartModelBasis E).repr v) i *
+      ((chartModelBasis E).repr w) j *
+      ((∑ k, chartGramMatrix (I := I) g x x k j *
+          ((∑ l, partialDeriv (E := E) i (chartCoeffOnE (I := I) x W k)
+              (extChartAt I x x) * (if l = k then (1 : ℝ) else 0))
+            + (∑ l, chartChristoffel (I := I) g x i l k (extChartAt I x x) *
+                chartCoeff (I := I) x W l x)))
+        + (∑ k, chartGramMatrix (I := I) g x x i k *
+          ((∑ l, partialDeriv (E := E) j (chartCoeffOnE (I := I) x W k)
+              (extChartAt I x x) * (if l = k then (1 : ℝ) else 0))
+            + (∑ l, chartChristoffel (I := I) g x j l k (extChartAt I x x) *
+                chartCoeff (I := I) x W l x))))) =
+    -- L1
+    (∑ i, ∑ j, ∑ k,
+      ((chartModelBasis E).repr v) i * ((chartModelBasis E).repr w) j *
+        chartGramMatrix (I := I) g x x k j *
+        partialDeriv (E := E) i (chartCoeffOnE (I := I) x W k) (extChartAt I x x))
+    -- L2
+    + (∑ i, ∑ j, ∑ k, ∑ l,
+      ((chartModelBasis E).repr v) i * ((chartModelBasis E).repr w) j *
+        chartGramMatrix (I := I) g x x k j *
+        chartChristoffel (I := I) g x i l k (extChartAt I x x) *
+        chartCoeff (I := I) x W l x)
+    -- L3
+    + (∑ i, ∑ j, ∑ k,
+      ((chartModelBasis E).repr v) i * ((chartModelBasis E).repr w) j *
+        chartGramMatrix (I := I) g x x i k *
+        partialDeriv (E := E) j (chartCoeffOnE (I := I) x W k) (extChartAt I x x))
+    -- L4
+    + (∑ i, ∑ j, ∑ k, ∑ l,
+      ((chartModelBasis E).repr v) i * ((chartModelBasis E).repr w) j *
+        chartGramMatrix (I := I) g x x i k *
+        chartChristoffel (I := I) g x j l k (extChartAt I x x) *
+        chartCoeff (I := I) x W l x)
+    from by
+      -- 4-piece decomposition.
+      rw [show
+        (∑ i, ∑ j, ((chartModelBasis E).repr v) i *
+          ((chartModelBasis E).repr w) j *
+          ((∑ k, chartGramMatrix (I := I) g x x k j *
+              ((∑ l, partialDeriv (E := E) i (chartCoeffOnE (I := I) x W k)
+                  (extChartAt I x x) * (if l = k then (1 : ℝ) else 0))
+                + (∑ l, chartChristoffel (I := I) g x i l k (extChartAt I x x) *
+                    chartCoeff (I := I) x W l x)))
+            + (∑ k, chartGramMatrix (I := I) g x x i k *
+              ((∑ l, partialDeriv (E := E) j (chartCoeffOnE (I := I) x W k)
+                  (extChartAt I x x) * (if l = k then (1 : ℝ) else 0))
+                + (∑ l, chartChristoffel (I := I) g x j l k (extChartAt I x x) *
+                    chartCoeff (I := I) x W l x))))) =
+        (∑ i, ∑ j, ((chartModelBasis E).repr v) i *
+          ((chartModelBasis E).repr w) j *
+          (∑ k, chartGramMatrix (I := I) g x x k j *
+            ((∑ l, partialDeriv (E := E) i (chartCoeffOnE (I := I) x W k)
+                (extChartAt I x x) * (if l = k then (1 : ℝ) else 0))
+              + (∑ l, chartChristoffel (I := I) g x i l k (extChartAt I x x) *
+                  chartCoeff (I := I) x W l x))))
+        + (∑ i, ∑ j, ((chartModelBasis E).repr v) i *
+          ((chartModelBasis E).repr w) j *
+          (∑ k, chartGramMatrix (I := I) g x x i k *
+            ((∑ l, partialDeriv (E := E) j (chartCoeffOnE (I := I) x W k)
+                (extChartAt I x x) * (if l = k then (1 : ℝ) else 0))
+              + (∑ l, chartChristoffel (I := I) g x j l k (extChartAt I x x) *
+                  chartCoeff (I := I) x W l x))))
+        from by
+          rw [← Finset.sum_add_distrib]
+          refine Finset.sum_congr rfl (fun i _ => ?_)
+          rw [← Finset.sum_add_distrib]
+          refine Finset.sum_congr rfl (fun j _ => ?_)
+          rw [mul_add]]
+      -- Split each half into ∂-piece + Γ-piece.
+      rw [show
+        (∑ i, ∑ j, ((chartModelBasis E).repr v) i *
+          ((chartModelBasis E).repr w) j *
+          (∑ k, chartGramMatrix (I := I) g x x k j *
+            ((∑ l, partialDeriv (E := E) i (chartCoeffOnE (I := I) x W k)
+                (extChartAt I x x) * (if l = k then (1 : ℝ) else 0))
+              + (∑ l, chartChristoffel (I := I) g x i l k (extChartAt I x x) *
+                  chartCoeff (I := I) x W l x)))) =
+        (∑ i, ∑ j, ∑ k,
+          ((chartModelBasis E).repr v) i * ((chartModelBasis E).repr w) j *
+            chartGramMatrix (I := I) g x x k j *
+            partialDeriv (E := E) i (chartCoeffOnE (I := I) x W k) (extChartAt I x x))
+        + (∑ i, ∑ j, ∑ k, ∑ l,
+          ((chartModelBasis E).repr v) i * ((chartModelBasis E).repr w) j *
+            chartGramMatrix (I := I) g x x k j *
+            chartChristoffel (I := I) g x i l k (extChartAt I x x) *
+            chartCoeff (I := I) x W l x)
+        from by
+          rw [← Finset.sum_add_distrib]
+          refine Finset.sum_congr rfl (fun i _ => ?_)
+          rw [← Finset.sum_add_distrib]
+          refine Finset.sum_congr rfl (fun j _ => ?_)
+          rw [Finset.mul_sum, ← Finset.sum_add_distrib]
+          refine Finset.sum_congr rfl (fun k _ => ?_)
+          rw [hcoll i k]
+          -- Goal: v*w*(G*(∂ + ∑ l Γ*W)) = v*w*G*∂ + ∑ l, v*w*G*Γ*W.
+          -- Distribute the inner +, the v*w*G into the +, and ∑.
+          rw [show
+              ((chartModelBasis E).repr v) i * ((chartModelBasis E).repr w) j *
+                (chartGramMatrix (I := I) g x x k j *
+                  (partialDeriv (E := E) i (chartCoeffOnE (I := I) x W k) (extChartAt I x x)
+                    + ∑ l, chartChristoffel (I := I) g x i l k (extChartAt I x x) *
+                        chartCoeff (I := I) x W l x)) =
+              ((chartModelBasis E).repr v) i * ((chartModelBasis E).repr w) j *
+                chartGramMatrix (I := I) g x x k j *
+                partialDeriv (E := E) i (chartCoeffOnE (I := I) x W k) (extChartAt I x x)
+              + ∑ l : Fin (Module.finrank ℝ E),
+                  ((chartModelBasis E).repr v) i * ((chartModelBasis E).repr w) j *
+                    chartGramMatrix (I := I) g x x k j *
+                    chartChristoffel (I := I) g x i l k (extChartAt I x x) *
+                    chartCoeff (I := I) x W l x from by
+            rw [mul_add, mul_add]
+            congr 1
+            · ring
+            · rw [Finset.mul_sum, Finset.mul_sum]
+              refine Finset.sum_congr rfl (fun l _ => by ring)]]
+      rw [show
+        (∑ i, ∑ j, ((chartModelBasis E).repr v) i *
+          ((chartModelBasis E).repr w) j *
+          (∑ k, chartGramMatrix (I := I) g x x i k *
+            ((∑ l, partialDeriv (E := E) j (chartCoeffOnE (I := I) x W k)
+                (extChartAt I x x) * (if l = k then (1 : ℝ) else 0))
+              + (∑ l, chartChristoffel (I := I) g x j l k (extChartAt I x x) *
+                  chartCoeff (I := I) x W l x)))) =
+        (∑ i, ∑ j, ∑ k,
+          ((chartModelBasis E).repr v) i * ((chartModelBasis E).repr w) j *
+            chartGramMatrix (I := I) g x x i k *
+            partialDeriv (E := E) j (chartCoeffOnE (I := I) x W k) (extChartAt I x x))
+        + (∑ i, ∑ j, ∑ k, ∑ l,
+          ((chartModelBasis E).repr v) i * ((chartModelBasis E).repr w) j *
+            chartGramMatrix (I := I) g x x i k *
+            chartChristoffel (I := I) g x j l k (extChartAt I x x) *
+            chartCoeff (I := I) x W l x)
+        from by
+          rw [← Finset.sum_add_distrib]
+          refine Finset.sum_congr rfl (fun i _ => ?_)
+          rw [← Finset.sum_add_distrib]
+          refine Finset.sum_congr rfl (fun j _ => ?_)
+          rw [Finset.mul_sum, ← Finset.sum_add_distrib]
+          refine Finset.sum_congr rfl (fun k _ => ?_)
+          rw [hcoll j k]
+          rw [show
+              ((chartModelBasis E).repr v) i * ((chartModelBasis E).repr w) j *
+                (chartGramMatrix (I := I) g x x i k *
+                  (partialDeriv (E := E) j (chartCoeffOnE (I := I) x W k) (extChartAt I x x)
+                    + ∑ l, chartChristoffel (I := I) g x j l k (extChartAt I x x) *
+                        chartCoeff (I := I) x W l x)) =
+              ((chartModelBasis E).repr v) i * ((chartModelBasis E).repr w) j *
+                chartGramMatrix (I := I) g x x i k *
+                partialDeriv (E := E) j (chartCoeffOnE (I := I) x W k) (extChartAt I x x)
+              + ∑ l : Fin (Module.finrank ℝ E),
+                  ((chartModelBasis E).repr v) i * ((chartModelBasis E).repr w) j *
+                    chartGramMatrix (I := I) g x x i k *
+                    chartChristoffel (I := I) g x j l k (extChartAt I x x) *
+                    chartCoeff (I := I) x W l x from by
+            rw [mul_add, mul_add]
+            congr 1
+            · ring
+            · rw [Finset.mul_sum, Finset.mul_sum]
+              refine Finset.sum_congr rfl (fun l _ => by ring)]]
+      ring]
+  -- Now RHS.
+  have hRHS1 :
+      g.inner x ((LeviCivita (I := I) g) (W : ∀ x : M, TangentSpace I x) x v) w =
+      ∑ i : Fin (Module.finrank ℝ E),
+        ∑ j : Fin (Module.finrank ℝ E),
+          ((chartModelBasis E).repr
+              (trivToE (I := I) x x
+                ((LeviCivita (I := I) g) (W : ∀ x : M, TangentSpace I x) x v))) i *
+            ((chartModelBasis E).repr (trivToE (I := I) x x w)) j *
+            chartGramOnE (I := I) g x i j (extChartAt I x x) :=
+    g_inner_eq_chart_sum (I := I) g x (x := x) hx_base hx_src
+      ((LeviCivita (I := I) g) (W : ∀ x : M, TangentSpace I x) x v) w
+  have hRHS2 :
+      g.inner x v ((LeviCivita (I := I) g) (W : ∀ x : M, TangentSpace I x) x w) =
+      ∑ i : Fin (Module.finrank ℝ E),
+        ∑ j : Fin (Module.finrank ℝ E),
+          ((chartModelBasis E).repr (trivToE (I := I) x x v)) i *
+            ((chartModelBasis E).repr
+              (trivToE (I := I) x x
+                ((LeviCivita (I := I) g) (W : ∀ x : M, TangentSpace I x) x w))) j *
+            chartGramOnE (I := I) g x i j (extChartAt I x x) :=
+    g_inner_eq_chart_sum (I := I) g x (x := x) hx_base hx_src v
+      ((LeviCivita (I := I) g) (W : ∀ x : M, TangentSpace I x) x w)
+  rw [hRHS1, hRHS2]
+  have htrivId : ∀ u : TangentSpace I x, trivToE (I := I) x x u = u :=
+    fun u => cartan_trivToE_self_apply (I := I) x u
+  have hgram : ∀ a b : Fin (Module.finrank ℝ E),
+      chartGramOnE (I := I) g x a b (extChartAt I x x) =
+        chartGramMatrix (I := I) g x x a b := by
+    intro a b
+    unfold chartGramOnE
+    rw [(extChartAt I x).left_inv hx_src]
+  rw [show
+    (∑ i : Fin (Module.finrank ℝ E),
+      ∑ j : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr
+            (trivToE (I := I) x x
+              ((LeviCivita (I := I) g) (W : ∀ x : M, TangentSpace I x) x v))) i *
+          ((chartModelBasis E).repr (trivToE (I := I) x x w)) j *
+          chartGramOnE (I := I) g x i j (extChartAt I x x)) =
+    (∑ i, ∑ j,
+      ((chartModelBasis E).repr
+        ((LeviCivita (I := I) g) (W : ∀ x : M, TangentSpace I x) x v)) i *
+      ((chartModelBasis E).repr w) j *
+      chartGramMatrix (I := I) g x x i j)
+    from Finset.sum_congr rfl (fun i _ =>
+      Finset.sum_congr rfl (fun j _ => by
+        rw [htrivId _, htrivId w, hgram i j]))]
+  rw [show
+    (∑ i : Fin (Module.finrank ℝ E),
+      ∑ j : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr (trivToE (I := I) x x v)) i *
+          ((chartModelBasis E).repr
+            (trivToE (I := I) x x
+              ((LeviCivita (I := I) g) (W : ∀ x : M, TangentSpace I x) x w))) j *
+          chartGramOnE (I := I) g x i j (extChartAt I x x)) =
+    (∑ i, ∑ j,
+      ((chartModelBasis E).repr v) i *
+      ((chartModelBasis E).repr
+        ((LeviCivita (I := I) g) (W : ∀ x : M, TangentSpace I x) x w)) j *
+      chartGramMatrix (I := I) g x x i j)
+    from Finset.sum_congr rfl (fun i _ =>
+      Finset.sum_congr rfl (fun j _ => by
+        rw [htrivId v, htrivId _, hgram i j]))]
+  -- Apply (a) for (b.repr LC) i expansion.
+  rw [show
+    (∑ i, ∑ j,
+      ((chartModelBasis E).repr
+        ((LeviCivita (I := I) g) (W : ∀ x : M, TangentSpace I x) x v)) i *
+      ((chartModelBasis E).repr w) j *
+      chartGramMatrix (I := I) g x x i j) =
+    (∑ i, ∑ j,
+      ((∑ j' : Fin (Module.finrank ℝ E),
+          ((chartModelBasis E).repr v) j' *
+            partialDeriv (E := E) j' (chartCoeffOnE (I := I) x W i)
+              (extChartAt I x x))
+        + (∑ j' : Fin (Module.finrank ℝ E),
+            ∑ k : Fin (Module.finrank ℝ E),
+              ((chartModelBasis E).repr v) j' *
+                chartChristoffel (I := I) g x j' k i (extChartAt I x x) *
+                chartCoeff (I := I) x W k x)) *
+      ((chartModelBasis E).repr w) j *
+      chartGramMatrix (I := I) g x x i j)
+    from Finset.sum_congr rfl (fun i _ =>
+      Finset.sum_congr rfl (fun j _ => by
+        rw [chart_christoffel_expansion_of_nabla_on_vf (I := I) g W x v i]))]
+  rw [show
+    (∑ i, ∑ j,
+      ((chartModelBasis E).repr v) i *
+      ((chartModelBasis E).repr
+        ((LeviCivita (I := I) g) (W : ∀ x : M, TangentSpace I x) x w)) j *
+      chartGramMatrix (I := I) g x x i j) =
+    (∑ i, ∑ j,
+      ((chartModelBasis E).repr v) i *
+      ((∑ j' : Fin (Module.finrank ℝ E),
+          ((chartModelBasis E).repr w) j' *
+            partialDeriv (E := E) j' (chartCoeffOnE (I := I) x W j)
+              (extChartAt I x x))
+        + (∑ j' : Fin (Module.finrank ℝ E),
+            ∑ k : Fin (Module.finrank ℝ E),
+              ((chartModelBasis E).repr w) j' *
+                chartChristoffel (I := I) g x j' k j (extChartAt I x x) *
+                chartCoeff (I := I) x W k x)) *
+      chartGramMatrix (I := I) g x x i j)
+    from Finset.sum_congr rfl (fun i _ =>
+      Finset.sum_congr rfl (fun j _ => by
+        rw [chart_christoffel_expansion_of_nabla_on_vf (I := I) g W x w j]))]
+  -- Distribute RHS into R1+R2+R3+R4.
+  rw [show
+    (∑ i, ∑ j,
+      ((∑ j' : Fin (Module.finrank ℝ E),
+          ((chartModelBasis E).repr v) j' *
+            partialDeriv (E := E) j' (chartCoeffOnE (I := I) x W i)
+              (extChartAt I x x))
+        + (∑ j' : Fin (Module.finrank ℝ E),
+            ∑ k : Fin (Module.finrank ℝ E),
+              ((chartModelBasis E).repr v) j' *
+                chartChristoffel (I := I) g x j' k i (extChartAt I x x) *
+                chartCoeff (I := I) x W k x)) *
+      ((chartModelBasis E).repr w) j *
+      chartGramMatrix (I := I) g x x i j) =
+    (∑ i, ∑ j, ∑ j',
+      ((chartModelBasis E).repr v) j' *
+        partialDeriv (E := E) j' (chartCoeffOnE (I := I) x W i) (extChartAt I x x) *
+        ((chartModelBasis E).repr w) j *
+        chartGramMatrix (I := I) g x x i j)
+    + (∑ i, ∑ j, ∑ j', ∑ k,
+      ((chartModelBasis E).repr v) j' *
+        chartChristoffel (I := I) g x j' k i (extChartAt I x x) *
+        chartCoeff (I := I) x W k x *
+        ((chartModelBasis E).repr w) j *
+        chartGramMatrix (I := I) g x x i j)
+    from by
+      rw [show
+        (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+          ((∑ j' : Fin (Module.finrank ℝ E),
+              ((chartModelBasis E).repr v) j' *
+                partialDeriv (E := E) j' (chartCoeffOnE (I := I) x W i)
+                  (extChartAt I x x))
+            + (∑ j' : Fin (Module.finrank ℝ E),
+                ∑ k : Fin (Module.finrank ℝ E),
+                  ((chartModelBasis E).repr v) j' *
+                    chartChristoffel (I := I) g x j' k i (extChartAt I x x) *
+                    chartCoeff (I := I) x W k x)) *
+          ((chartModelBasis E).repr w) j *
+          chartGramMatrix (I := I) g x x i j) =
+        ∑ i, ∑ j,
+          ((∑ j', ((chartModelBasis E).repr v) j' *
+              partialDeriv (E := E) j' (chartCoeffOnE (I := I) x W i) (extChartAt I x x) *
+              ((chartModelBasis E).repr w) j *
+              chartGramMatrix (I := I) g x x i j)
+          + (∑ j', ∑ k,
+              ((chartModelBasis E).repr v) j' *
+                chartChristoffel (I := I) g x j' k i (extChartAt I x x) *
+                chartCoeff (I := I) x W k x *
+                ((chartModelBasis E).repr w) j *
+                chartGramMatrix (I := I) g x x i j))
+        from Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => by
+          rw [add_mul, add_mul]
+          congr 1
+          · rw [Finset.sum_mul, Finset.sum_mul]
+          · rw [Finset.sum_mul, Finset.sum_mul]
+            refine Finset.sum_congr rfl (fun j' _ => ?_)
+            rw [Finset.sum_mul, Finset.sum_mul]))]
+      rw [← Finset.sum_add_distrib]
+      refine Finset.sum_congr rfl (fun i _ => ?_)
+      rw [← Finset.sum_add_distrib]]
+  rw [show
+    (∑ i, ∑ j,
+      ((chartModelBasis E).repr v) i *
+      ((∑ j' : Fin (Module.finrank ℝ E),
+          ((chartModelBasis E).repr w) j' *
+            partialDeriv (E := E) j' (chartCoeffOnE (I := I) x W j)
+              (extChartAt I x x))
+        + (∑ j' : Fin (Module.finrank ℝ E),
+            ∑ k : Fin (Module.finrank ℝ E),
+              ((chartModelBasis E).repr w) j' *
+                chartChristoffel (I := I) g x j' k j (extChartAt I x x) *
+                chartCoeff (I := I) x W k x)) *
+      chartGramMatrix (I := I) g x x i j) =
+    (∑ i, ∑ j, ∑ j',
+      ((chartModelBasis E).repr v) i *
+        (((chartModelBasis E).repr w) j' *
+          partialDeriv (E := E) j' (chartCoeffOnE (I := I) x W j) (extChartAt I x x)) *
+        chartGramMatrix (I := I) g x x i j)
+    + (∑ i, ∑ j, ∑ j', ∑ k,
+      ((chartModelBasis E).repr v) i *
+        (((chartModelBasis E).repr w) j' *
+          chartChristoffel (I := I) g x j' k j (extChartAt I x x) *
+          chartCoeff (I := I) x W k x) *
+        chartGramMatrix (I := I) g x x i j)
+    from by
+      rw [show
+        (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+          ((chartModelBasis E).repr v) i *
+          ((∑ j' : Fin (Module.finrank ℝ E),
+              ((chartModelBasis E).repr w) j' *
+                partialDeriv (E := E) j' (chartCoeffOnE (I := I) x W j)
+                  (extChartAt I x x))
+            + (∑ j' : Fin (Module.finrank ℝ E),
+                ∑ k : Fin (Module.finrank ℝ E),
+                  ((chartModelBasis E).repr w) j' *
+                    chartChristoffel (I := I) g x j' k j (extChartAt I x x) *
+                    chartCoeff (I := I) x W k x)) *
+          chartGramMatrix (I := I) g x x i j) =
+        ∑ i, ∑ j,
+          ((∑ j', ((chartModelBasis E).repr v) i *
+              (((chartModelBasis E).repr w) j' *
+                partialDeriv (E := E) j' (chartCoeffOnE (I := I) x W j) (extChartAt I x x)) *
+              chartGramMatrix (I := I) g x x i j)
+          + (∑ j', ∑ k,
+              ((chartModelBasis E).repr v) i *
+                (((chartModelBasis E).repr w) j' *
+                  chartChristoffel (I := I) g x j' k j (extChartAt I x x) *
+                  chartCoeff (I := I) x W k x) *
+                chartGramMatrix (I := I) g x x i j))
+        from Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => by
+          rw [mul_add, add_mul]
+          congr 1
+          · rw [Finset.mul_sum, Finset.sum_mul]
+          · rw [Finset.mul_sum, Finset.sum_mul]
+            refine Finset.sum_congr rfl (fun j' _ => ?_)
+            rw [Finset.mul_sum, Finset.sum_mul]))]
+      rw [← Finset.sum_add_distrib]
+      refine Finset.sum_congr rfl (fun i _ => ?_)
+      rw [← Finset.sum_add_distrib]]
+  -- Match L_p with R_p by reindexing.
+  have hL1_eq_R1 :
+      (∑ i, ∑ j, ∑ k,
+        ((chartModelBasis E).repr v) i * ((chartModelBasis E).repr w) j *
+          chartGramMatrix (I := I) g x x k j *
+          partialDeriv (E := E) i (chartCoeffOnE (I := I) x W k) (extChartAt I x x)) =
+      (∑ i, ∑ j, ∑ j',
+        ((chartModelBasis E).repr v) j' *
+          partialDeriv (E := E) j' (chartCoeffOnE (I := I) x W i) (extChartAt I x x) *
+          ((chartModelBasis E).repr w) j *
+          chartGramMatrix (I := I) g x x i j) := by
+    -- Bijection: i_L → j'_R, j_L → j_R, k_L → i_R.
+    -- Reindex RHS to read ∑ j' ∑ j ∑ i (so that the outermost matches LHS's i_L = j'_R).
+    rw [show
+      (∑ i, ∑ j, ∑ j',
+        ((chartModelBasis E).repr v) j' *
+          partialDeriv (E := E) j' (chartCoeffOnE (I := I) x W i) (extChartAt I x x) *
+          ((chartModelBasis E).repr w) j *
+          chartGramMatrix (I := I) g x x i j) =
+      (∑ j', ∑ j, ∑ i,
+        ((chartModelBasis E).repr v) j' *
+          partialDeriv (E := E) j' (chartCoeffOnE (I := I) x W i) (extChartAt I x x) *
+          ((chartModelBasis E).repr w) j *
+          chartGramMatrix (I := I) g x x i j) from by
+      -- ∑ i ∑ j ∑ j' = ∑ j' ∑ i ∑ j (3-cycle: 1->3->2->1)
+      -- Start: ∑ i ∑ j ∑ j'
+      -- Swap inner (j, j'): ∑ i ∑ j' ∑ j
+      rw [show (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+            ∑ j' : Fin (Module.finrank ℝ E),
+            ((chartModelBasis E).repr v) j' *
+              partialDeriv (E := E) j' (chartCoeffOnE (I := I) x W i) (extChartAt I x x) *
+              ((chartModelBasis E).repr w) j *
+              chartGramMatrix (I := I) g x x i j) =
+          (∑ i, ∑ j', ∑ j,
+            ((chartModelBasis E).repr v) j' *
+              partialDeriv (E := E) j' (chartCoeffOnE (I := I) x W i) (extChartAt I x x) *
+              ((chartModelBasis E).repr w) j *
+              chartGramMatrix (I := I) g x x i j) from
+        Finset.sum_congr rfl (fun _ _ => Finset.sum_comm)]
+      -- Swap outer (i, j'): ∑ j' ∑ i ∑ j
+      rw [Finset.sum_comm]
+      -- Swap inner (i, j): ∑ j' ∑ j ∑ i
+      refine Finset.sum_congr rfl (fun _ _ => ?_)
+      rw [Finset.sum_comm]]
+    refine Finset.sum_congr rfl (fun iL _ => Finset.sum_congr rfl
+      (fun jL _ => Finset.sum_congr rfl (fun kL _ => by ring)))
+  have hL3_eq_R3 :
+      (∑ i, ∑ j, ∑ k,
+        ((chartModelBasis E).repr v) i * ((chartModelBasis E).repr w) j *
+          chartGramMatrix (I := I) g x x i k *
+          partialDeriv (E := E) j (chartCoeffOnE (I := I) x W k) (extChartAt I x x)) =
+      (∑ i, ∑ j, ∑ j',
+        ((chartModelBasis E).repr v) i *
+          (((chartModelBasis E).repr w) j' *
+            partialDeriv (E := E) j' (chartCoeffOnE (I := I) x W j) (extChartAt I x x)) *
+          chartGramMatrix (I := I) g x x i j) := by
+    -- Bijection: i_L → i_R, j_L → j'_R, k_L → j_R.
+    refine Finset.sum_congr rfl (fun iL _ => ?_)
+    -- Now LHS: ∑ j ∑ k Y(iL, j, k); RHS: ∑ j ∑ j' X(iL, j, j').
+    -- Swap j and j' on RHS to get ∑ j' ∑ j; then relabel j'→j_L, j→k_L.
+    conv_rhs => rw [Finset.sum_comm]
+    refine Finset.sum_congr rfl (fun jL _ => Finset.sum_congr rfl (fun kL _ => by ring))
+  have hL2_eq_R2 :
+      (∑ i, ∑ j, ∑ k, ∑ l,
+        ((chartModelBasis E).repr v) i * ((chartModelBasis E).repr w) j *
+          chartGramMatrix (I := I) g x x k j *
+          chartChristoffel (I := I) g x i l k (extChartAt I x x) *
+          chartCoeff (I := I) x W l x) =
+      (∑ i, ∑ j, ∑ j', ∑ k,
+        ((chartModelBasis E).repr v) j' *
+          chartChristoffel (I := I) g x j' k i (extChartAt I x x) *
+          chartCoeff (I := I) x W k x *
+          ((chartModelBasis E).repr w) j *
+          chartGramMatrix (I := I) g x x i j) := by
+    -- Bijection: i_L → j'_R, j_L → j_R, k_L → i_R, l_L → k_R.
+    rw [show
+      (∑ i, ∑ j, ∑ j', ∑ k,
+        ((chartModelBasis E).repr v) j' *
+          chartChristoffel (I := I) g x j' k i (extChartAt I x x) *
+          chartCoeff (I := I) x W k x *
+          ((chartModelBasis E).repr w) j *
+          chartGramMatrix (I := I) g x x i j) =
+      (∑ j', ∑ j, ∑ i, ∑ k,
+        ((chartModelBasis E).repr v) j' *
+          chartChristoffel (I := I) g x j' k i (extChartAt I x x) *
+          chartCoeff (I := I) x W k x *
+          ((chartModelBasis E).repr w) j *
+          chartGramMatrix (I := I) g x x i j) from by
+      rw [show (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+            ∑ j' : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+            ((chartModelBasis E).repr v) j' *
+              chartChristoffel (I := I) g x j' k i (extChartAt I x x) *
+              chartCoeff (I := I) x W k x *
+              ((chartModelBasis E).repr w) j *
+              chartGramMatrix (I := I) g x x i j) =
+          (∑ i, ∑ j', ∑ j, ∑ k,
+            ((chartModelBasis E).repr v) j' *
+              chartChristoffel (I := I) g x j' k i (extChartAt I x x) *
+              chartCoeff (I := I) x W k x *
+              ((chartModelBasis E).repr w) j *
+              chartGramMatrix (I := I) g x x i j) from
+        Finset.sum_congr rfl (fun _ _ => Finset.sum_comm)]
+      rw [Finset.sum_comm]
+      refine Finset.sum_congr rfl (fun _ _ => ?_)
+      rw [Finset.sum_comm]]
+    refine Finset.sum_congr rfl (fun iL _ => Finset.sum_congr rfl
+      (fun jL _ => Finset.sum_congr rfl (fun kL _ => Finset.sum_congr rfl
+        (fun lL _ => by ring))))
+  have hL4_eq_R4 :
+      (∑ i, ∑ j, ∑ k, ∑ l,
+        ((chartModelBasis E).repr v) i * ((chartModelBasis E).repr w) j *
+          chartGramMatrix (I := I) g x x i k *
+          chartChristoffel (I := I) g x j l k (extChartAt I x x) *
+          chartCoeff (I := I) x W l x) =
+      (∑ i, ∑ j, ∑ j', ∑ k,
+        ((chartModelBasis E).repr v) i *
+          (((chartModelBasis E).repr w) j' *
+            chartChristoffel (I := I) g x j' k j (extChartAt I x x) *
+            chartCoeff (I := I) x W k x) *
+          chartGramMatrix (I := I) g x x i j) := by
+    -- Bijection: i_L → i_R, j_L → j'_R, k_L → j_R, l_L → k_R.
+    refine Finset.sum_congr rfl (fun iL _ => ?_)
+    -- At fixed i_L = i_R = iL. LHS: ∑ j ∑ k ∑ l, ...; RHS: ∑ j ∑ j' ∑ k, ...
+    -- Swap j and j' on RHS to bring j' outer.
+    conv_rhs => rw [Finset.sum_comm]
+    refine Finset.sum_congr rfl (fun jL _ => Finset.sum_congr rfl
+      (fun kL _ => Finset.sum_congr rfl (fun lL _ => by ring)))
+  rw [hL1_eq_R1, hL2_eq_R2, hL3_eq_R3, hL4_eq_R4]
+  ring
 
 end Pullback
 end RicciFlow
 end PDE
 end DifferentialGeometry
+
+end
