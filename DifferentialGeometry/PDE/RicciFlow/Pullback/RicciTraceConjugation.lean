@@ -29,7 +29,19 @@ transform naturally under diffeomorphisms, so does `Ric`. The proof
 chains Riemann-curvature naturality (`riemann_pullback_conjugation`)
 with the conjugation-invariance of the trace (the trace of an
 endomorphism is unchanged when conjugated by an invertible linear
-map, here `mfderiv I I Φ x`). -/
+map, here `mfderiv I I Φ x`).
+
+The substantive ingredient is the section-level Riemann-tensor naturality
+formula
+  `riemannOp (LeviCivita (Φ*g)) x Z v w
+    = (dΦ_x)⁻¹ (riemannOp (LeviCivita g) (Φ x) (dΦ_x Z) (dΦ_x v) (dΦ_x w))`,
+expressing that the Riemann endomorphism of the pullback connection is
+the conjugate of the Riemann endomorphism of the original connection by
+`dΦ_x`. Once available, the trace of the endomorphism
+`Z ↦ riemannOp (LeviCivita (Φ*g)) x Z v w` equals the trace of its
+conjugate, which is the endomorphism
+`Z' ↦ riemannOp (LeviCivita g) (Φ x) Z' (dΦ_x v) (dΦ_x w)` by
+`LinearMap.trace_conj`. -/
 theorem ricci_trace_pullback_conjugation
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M)
     (x : M) (v w : TangentSpace I x) :
