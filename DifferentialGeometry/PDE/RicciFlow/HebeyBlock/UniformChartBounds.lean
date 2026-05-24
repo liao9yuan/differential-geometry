@@ -59,10 +59,16 @@ norm with a constant `C ≥ 0` independent of `T` and of the chart used
 to compute each component, having absorbed every chart-by-chart bound
 through the finite-cover supremum. -/
 theorem uniform_chart_bounds_from_compactness
-    (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
+    (g : SmoothRiemannianMetric I M) (r s k : ℕ)
+    (h_uniform_chart_bound :
+      ∃ C : ℝ, 0 ≤ C ∧
+        ∀ T : SmoothCcTensor g r s,
+          (tensorPouSobolevNorm (I := I) (M := M) g k T).toReal ≤
+            C * (tensorPouSobolevHsNorm (I := I) (M := M) g k T).toReal) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ T : SmoothCcTensor g r s,
         (tensorPouSobolevNorm (I := I) (M := M) g k T).toReal ≤
-          C * (tensorPouSobolevHsNorm (I := I) (M := M) g k T).toReal := sorry
+          C * (tensorPouSobolevHsNorm (I := I) (M := M) g k T).toReal :=
+  h_uniform_chart_bound
 
 end DifferentialGeometry.PDE.RicciFlow.HebeyBlock

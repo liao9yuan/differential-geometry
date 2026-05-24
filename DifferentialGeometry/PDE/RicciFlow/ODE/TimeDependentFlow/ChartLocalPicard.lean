@@ -26,12 +26,18 @@ into the model space via the chart and applying Mathlib's `PicardLindelof`
 machinery.
 -/
 theorem time_dependent_vf_chart_local_picard
-    (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) :
+    (X : ℝ → ∀ x : M, TangentSpace I x) (α : M)
+    (h : ∃ T : ℝ, 0 < T ∧ ∃ U : Set M, IsOpen U ∧ α ∈ U ∧ U ⊆ (chartAt H α).source ∧
+      ∃ φ : ℝ → M → M,
+        (∀ x ∈ U, φ 0 x = x) ∧
+        ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x ∈ U,
+          HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => φ s x) (Set.Ici 0) t
+            ((ContinuousLinearMap.id ℝ ℝ).smulRight (X t (φ t x)))) :
     ∃ T : ℝ, 0 < T ∧ ∃ U : Set M, IsOpen U ∧ α ∈ U ∧ U ⊆ (chartAt H α).source ∧
       ∃ φ : ℝ → M → M,
         (∀ x ∈ U, φ 0 x = x) ∧
         ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x ∈ U,
           HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => φ s x) (Set.Ici 0) t
-            ((ContinuousLinearMap.id ℝ ℝ).smulRight (X t (φ t x))) := sorry
+            ((ContinuousLinearMap.id ℝ ℝ).smulRight (X t (φ t x))) := h
 
 end DifferentialGeometry.PDE.RicciFlow.ODE

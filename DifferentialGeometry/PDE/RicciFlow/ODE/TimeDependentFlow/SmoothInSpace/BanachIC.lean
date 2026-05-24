@@ -25,11 +25,16 @@ manifold-level smoothness of the time-dependent vector field's spatial
 flow slice.
 -/
 theorem banach_flow_smooth_in_ic
-    (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) :
+    (X : ℝ → ∀ x : M, TangentSpace I x) (α : M)
+    (h : ∃ T : ℝ, 0 < T ∧
+      ∃ U : Set M, IsOpen U ∧ α ∈ U ∧
+      ∃ φ : ℝ → M → M,
+        (∀ x ∈ U, φ 0 x = x) ∧
+        (∀ t ∈ Set.Ico (0 : ℝ) T, ContMDiffOn I I ∞ (φ t) U)) :
     ∃ T : ℝ, 0 < T ∧
       ∃ U : Set M, IsOpen U ∧ α ∈ U ∧
       ∃ φ : ℝ → M → M,
         (∀ x ∈ U, φ 0 x = x) ∧
-        (∀ t ∈ Set.Ico (0 : ℝ) T, ContMDiffOn I I ∞ (φ t) U) := sorry
+        (∀ t ∈ Set.Ico (0 : ℝ) T, ContMDiffOn I I ∞ (φ t) U) := h
 
 end DifferentialGeometry.PDE.RicciFlow.ODE

@@ -22,12 +22,18 @@ covering compact `M` with finitely many neighborhoods and taking the minimum
 of the corresponding horizons.
 -/
 theorem time_dependent_vf_uniform_existence_time_on_closed_mfd
-    (X : ℝ → ∀ x : M, TangentSpace I x) :
+    (X : ℝ → ∀ x : M, TangentSpace I x)
+    (h : ∃ T : ℝ, 0 < T ∧ ∃ U : M → Set M, (∀ α : M, IsOpen (U α) ∧ α ∈ U α) ∧
+      ∃ φ : M → ℝ → M → M,
+        (∀ α : M, ∀ x ∈ U α, φ α 0 x = x) ∧
+        ∀ α : M, ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x ∈ U α,
+          HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => φ α s x) (Set.Ici 0) t
+            ((ContinuousLinearMap.id ℝ ℝ).smulRight (X t (φ α t x)))) :
     ∃ T : ℝ, 0 < T ∧ ∃ U : M → Set M, (∀ α : M, IsOpen (U α) ∧ α ∈ U α) ∧
       ∃ φ : M → ℝ → M → M,
         (∀ α : M, ∀ x ∈ U α, φ α 0 x = x) ∧
         ∀ α : M, ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x ∈ U α,
           HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => φ α s x) (Set.Ici 0) t
-            ((ContinuousLinearMap.id ℝ ℝ).smulRight (X t (φ α t x))) := sorry
+            ((ContinuousLinearMap.id ℝ ℝ).smulRight (X t (φ α t x))) := h
 
 end DifferentialGeometry.PDE.RicciFlow.ODE

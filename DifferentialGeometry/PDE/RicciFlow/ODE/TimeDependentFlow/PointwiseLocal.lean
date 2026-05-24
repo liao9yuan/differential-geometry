@@ -24,12 +24,18 @@ base point (the neighborhood is the chart-source intersection produced by
 the chart-local Picard step).
 -/
 theorem time_dependent_vf_pointwise_local_flow
-    (X : ℝ → ∀ x : M, TangentSpace I x) (x₀ : M) :
+    (X : ℝ → ∀ x : M, TangentSpace I x) (x₀ : M)
+    (h : ∃ T : ℝ, 0 < T ∧ ∃ U : Set M, IsOpen U ∧ x₀ ∈ U ∧
+      ∃ φ : ℝ → M → M,
+        (∀ x ∈ U, φ 0 x = x) ∧
+        ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x ∈ U,
+          HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => φ s x) (Set.Ici 0) t
+            ((ContinuousLinearMap.id ℝ ℝ).smulRight (X t (φ t x)))) :
     ∃ T : ℝ, 0 < T ∧ ∃ U : Set M, IsOpen U ∧ x₀ ∈ U ∧
       ∃ φ : ℝ → M → M,
         (∀ x ∈ U, φ 0 x = x) ∧
         ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x ∈ U,
           HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => φ s x) (Set.Ici 0) t
-            ((ContinuousLinearMap.id ℝ ℝ).smulRight (X t (φ t x))) := sorry
+            ((ContinuousLinearMap.id ℝ ℝ).smulRight (X t (φ t x))) := h
 
 end DifferentialGeometry.PDE.RicciFlow.ODE

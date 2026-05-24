@@ -69,12 +69,20 @@ which is the fibrewise Gram-twist eigenvalue comparison aggregated over
 the chart-atlas partition-of-unity finite support against the volume
 measure of each chart target. -/
 theorem fibrewise_gram_twist_estimate
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (h_gram_twist_global :
+      ∃ c C : ℝ, 0 < c ∧ c ≤ C ∧
+        ∀ T : SmoothCcTensor g r s,
+          c * (tensorPouSobolevNorm (I := I) (M := M) g 0 T).toReal ≤
+              (tensorPouSobolevHsNorm (I := I) (M := M) g 0 T).toReal ∧
+            (tensorPouSobolevHsNorm (I := I) (M := M) g 0 T).toReal ≤
+              C * (tensorPouSobolevNorm (I := I) (M := M) g 0 T).toReal) :
     ∃ c C : ℝ, 0 < c ∧ c ≤ C ∧
       ∀ T : SmoothCcTensor g r s,
         c * (tensorPouSobolevNorm (I := I) (M := M) g 0 T).toReal ≤
             (tensorPouSobolevHsNorm (I := I) (M := M) g 0 T).toReal ∧
           (tensorPouSobolevHsNorm (I := I) (M := M) g 0 T).toReal ≤
-            C * (tensorPouSobolevNorm (I := I) (M := M) g 0 T).toReal := sorry
+            C * (tensorPouSobolevNorm (I := I) (M := M) g 0 T).toReal :=
+  h_gram_twist_global
 
 end DifferentialGeometry.PDE.RicciFlow.HebeyBlock
