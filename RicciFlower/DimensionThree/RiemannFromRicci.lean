@@ -56,6 +56,164 @@ def RicciSymAt
   forall X Y : TangentSpace I x,
     Ric (vec2 X Y) = Ric (vec2 Y X)
 
+private theorem sum_fin_two_fun {Idx : Type*} [Fintype Idx]
+    {α : Type*} [AddCommMonoid α]
+    (F : (Fin 2 -> Idx) -> α) :
+    (∑ I0 : Fin 2 -> Idx, F I0) =
+      ∑ i : Idx, ∑ j : Idx, F (fun a : Fin 2 => if a = 0 then i else j) := by
+  classical
+  rw [Fintype.sum_equiv (finTwoArrowEquiv Idx) F
+    (fun p : Idx × Idx => F (fun a : Fin 2 => if a = 0 then p.1 else p.2))]
+  · rw [Fintype.sum_prod_type]
+  · intro I0
+    congr
+    funext a
+    fin_cases a <;> simp [finTwoArrowEquiv]
+
+private theorem vec2_update_zero {x : M}
+    (X Y X' : TangentSpace I x) :
+    Function.update (vec2 (I := I) X Y) (0 : Fin 2) X' =
+      vec2 (I := I) X' Y := by
+  funext a
+  fin_cases a <;> simp [Curvature.vec2, Function.update]
+
+private theorem vec2_update_one {x : M}
+    (X Y Y' : TangentSpace I x) :
+    Function.update (vec2 (I := I) X Y) (1 : Fin 2) Y' =
+      vec2 (I := I) X Y' := by
+  funext a
+  fin_cases a <;> simp [Curvature.vec2, Function.update]
+
+/-- A `(0,2)` tensor symmetric on a basis is symmetric on all tangent vectors. -/
+theorem ricciSym_of_basis
+    {Idx : Type*} [Finite Idx]
+    {x : M}
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (Ric : Tensor02At (I := I) (M := M) x)
+    (hsym : ∀ i j : Idx,
+      Ric (vec2 (I := I) (basis i) (basis j)) =
+        Ric (vec2 (I := I) (basis j) (basis i))) :
+    RicciSymAt (I := I) Ric := by
+  classical
+  letI : Fintype Idx := Fintype.ofFinite Idx
+  intro X Y
+  let cx : Idx -> Real := fun i => basis.repr X i
+  let cy : Idx -> Real := fun i => basis.repr Y i
+  have hX : X = ∑ i : Idx, cx i • basis i := by
+    simp [cx]
+  have hY : Y = ∑ i : Idx, cy i • basis i := by
+    simp [cy]
+  have hXY :
+      Ric (vec2 (I := I) X Y) =
+        ∑ r : Fin 2 -> Idx,
+          Ric (fun a : Fin 2 =>
+            (if a = 0 then cx (r a) else cy (r a)) • basis (r a)) := by
+    rw [hX, hY]
+    have hsum :
+        Ric (fun a : Fin 2 =>
+            ∑ j : Idx,
+              (if a = 0 then cx j else cy j) • basis j) =
+          ∑ r : Fin 2 -> Idx,
+            Ric (fun a : Fin 2 =>
+              (if a = 0 then cx (r a) else cy (r a)) • basis (r a)) := by
+      simpa using
+        (ContinuousMultilinearMap.map_sum
+          (f := Ric)
+          (g := fun a j =>
+            (if a = 0 then cx j else cy j) • basis j))
+    simpa [vec2] using hsum
+  have hYX :
+      Ric (vec2 (I := I) Y X) =
+        ∑ r : Fin 2 -> Idx,
+          Ric (fun a : Fin 2 =>
+            (if a = 0 then cy (r a) else cx (r a)) • basis (r a)) := by
+    rw [hX, hY]
+    have hsum :
+        Ric (fun a : Fin 2 =>
+            ∑ j : Idx,
+              (if a = 0 then cy j else cx j) • basis j) =
+          ∑ r : Fin 2 -> Idx,
+            Ric (fun a : Fin 2 =>
+              (if a = 0 then cy (r a) else cx (r a)) • basis (r a)) := by
+      simpa using
+        (ContinuousMultilinearMap.map_sum
+          (f := Ric)
+          (g := fun a j =>
+            (if a = 0 then cy j else cx j) • basis j))
+    simpa [vec2] using hsum
+  rw [hXY, hYX]
+  rw [sum_fin_two_fun, sum_fin_two_fun]
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  refine Finset.sum_congr rfl fun j _ => ?_
+  have hleft :
+      (fun a : Fin 2 =>
+        (if a = 0
+          then cx ((fun a : Fin 2 => if a = 0 then j else i) a)
+          else cy ((fun a : Fin 2 => if a = 0 then j else i) a)) •
+            basis ((fun a : Fin 2 => if a = 0 then j else i) a)) =
+        vec2 (I := I) (cx j • basis j) (cy i • basis i) := by
+    funext a
+    fin_cases a <;> simp [vec2, Curvature.vec2]
+  have hright :
+      (fun a : Fin 2 =>
+        (if a = 0
+          then cy ((fun a : Fin 2 => if a = 0 then i else j) a)
+          else cx ((fun a : Fin 2 => if a = 0 then i else j) a)) •
+            basis ((fun a : Fin 2 => if a = 0 then i else j) a)) =
+        vec2 (I := I) (cy i • basis i) (cx j • basis j) := by
+    funext a
+    fin_cases a <;> simp [vec2, Curvature.vec2]
+  rw [hleft, hright]
+  have hL :
+      Ric (vec2 (I := I) (cx j • basis j) (cy i • basis i)) =
+        (cx j) * (cy i) *
+          Ric (vec2 (I := I) (basis j) (basis i)) := by
+    have h0 := Ric.map_update_smul
+      (vec2 (I := I) (basis j) (cy i • basis i))
+      (0 : Fin 2) (cx j) (basis j)
+    have h1 := Ric.map_update_smul
+      (vec2 (I := I) (basis j) (basis i))
+      (1 : Fin 2) (cy i) (basis i)
+    calc
+      Ric (vec2 (I := I) (cx j • basis j) (cy i • basis i))
+          = (cx j) *
+              Ric (vec2 (I := I) (basis j) (cy i • basis i)) := by
+              simpa only [vec2, Curvature.vec2, vec2_update_zero,
+                smul_eq_mul] using h0
+      _ = (cx j) * ((cy i) *
+              Ric (vec2 (I := I) (basis j) (basis i))) := by
+              congr 1
+              simpa only [vec2, Curvature.vec2, vec2_update_one,
+                smul_eq_mul] using h1
+      _ = (cx j) * (cy i) *
+              Ric (vec2 (I := I) (basis j) (basis i)) := by ring
+  have hR :
+      Ric (vec2 (I := I) (cy i • basis i) (cx j • basis j)) =
+        (cy i) * (cx j) *
+          Ric (vec2 (I := I) (basis i) (basis j)) := by
+    have h0 := Ric.map_update_smul
+      (vec2 (I := I) (basis i) (cx j • basis j))
+      (0 : Fin 2) (cy i) (basis i)
+    have h1 := Ric.map_update_smul
+      (vec2 (I := I) (basis i) (basis j))
+      (1 : Fin 2) (cx j) (basis j)
+    calc
+      Ric (vec2 (I := I) (cy i • basis i) (cx j • basis j))
+          = (cy i) *
+              Ric (vec2 (I := I) (basis i) (cx j • basis j)) := by
+              simpa only [vec2, Curvature.vec2, vec2_update_zero,
+                smul_eq_mul] using h0
+      _ = (cy i) * ((cx j) *
+              Ric (vec2 (I := I) (basis i) (basis j))) := by
+              congr 1
+              simpa only [vec2, Curvature.vec2, vec2_update_one,
+                smul_eq_mul] using h1
+      _ = (cy i) * (cx j) *
+              Ric (vec2 (I := I) (basis i) (basis j)) := by ring
+  rw [hL, hR, hsym j i]
+  ring
+
 /-- Pointwise nonnegativity of a Ricci-type `(0,2)` tensor. -/
 def RicciNonnegAt
     (Ric : Tensor02At (I := I) (M := M) x) : Prop :=

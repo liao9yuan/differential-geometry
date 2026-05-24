@@ -207,6 +207,9 @@ structure TensorWMPCore
     (N : TwoTensorReaction (I := I) (M := M))
     (T : Real) : Prop where
   symmetric : TwoTensorFamilySymmetricOn (I := I) (M := M) S (Set.Icc 0 T)
+  bilinear :
+    ∀ t, t ∈ Set.Icc 0 T -> ∀ x,
+      TwoTensorBilinearAt (I := I) (M := M) (S t) x
   barrierRegularity :
     TensorBarrierRegularityOn (I := I) (M := M) G S X N T
   firstNullCompactness :
@@ -230,6 +233,9 @@ structure TensorWMPRegularityOn
     (N : TwoTensorReaction (I := I) (M := M))
     (T : Real) : Prop where
   symmetric : TwoTensorFamilySymmetricOn (I := I) (M := M) S (Set.Icc 0 T)
+  bilinear :
+    ∀ t, t ∈ Set.Icc 0 T -> ∀ x,
+      TwoTensorBilinearAt (I := I) (M := M) (S t) x
   barrierRegularity :
     TensorBarrierRegularityOn (I := I) (M := M) G S X N T
   firstNullCompactness :
@@ -264,6 +270,7 @@ def toCore
     (h : TensorWMPRegularityOn (I := I) (M := M) G S X N T) :
     TensorWMPCore (I := I) (M := M) G S X N T where
   symmetric := h.symmetric
+  bilinear := h.bilinear
   barrierRegularity := h.barrierRegularity
   firstNullCompactness := h.firstNullCompactness
 
@@ -567,6 +574,7 @@ theorem toRaw
     TensorWMPCore (I := I) (M := M) G
       (twoTensorSecToFamily (I := I) (M := M) S) X N T where
   symmetric := h.symmetric
+  bilinear := fun t _ht x => twoTensorSecToFamily_bilin (I := I) (M := M) S t x
   barrierRegularity := h.barrierRegularity
   firstNullCompactness := by
     intro epsilon delta t0 hepsilon hdelta hsub
@@ -825,6 +833,7 @@ theorem toRaw
     TensorWMPRegularityOn (I := I) (M := M) G
       (twoTensorSecToFamily (I := I) (M := M) S) X N T where
   symmetric := h.symmetric
+  bilinear := fun t _ht x => twoTensorSecToFamily_bilin (I := I) (M := M) S t x
   barrierRegularity := h.barrierRegularity
   firstNullCompactness := by
     intro epsilon delta t0 hepsilon hdelta hsub

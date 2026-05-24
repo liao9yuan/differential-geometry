@@ -62,6 +62,21 @@ def pinchReact
     2 * delta * (ricciNorm3 Ric * RicciFlower.DimensionThree.delta3 i j -
       ricciScal3 Ric * Ric i j)
 
+/-- Standard three-dimensional Riemann-from-Ricci component model for an
+arbitrary Ricci matrix in an orthonormal `Fin 3` basis. -/
+def stdRmOfRic3
+    (Ric : Fin 3 -> Fin 3 -> Real)
+    (i j k l : Fin 3) : Real :=
+  RicciFlower.DimensionThree.delta3 i k * Ric j l
+    - RicciFlower.DimensionThree.delta3 i l * Ric j k
+    - RicciFlower.DimensionThree.delta3 j k * Ric i l
+    + RicciFlower.DimensionThree.delta3 j l * Ric i k
+    - (1 / 2 : Real) * ricciScal3 Ric *
+        (RicciFlower.DimensionThree.delta3 i k *
+            RicciFlower.DimensionThree.delta3 j l -
+          RicciFlower.DimensionThree.delta3 i l *
+            RicciFlower.DimensionThree.delta3 j k)
+
 /-- Lemma 9.1 reaction algebra at a Ricci-null eigenvector. -/
 theorem ricciReactNull
     (l1 l2 l3 : Real) (hnull : l1 = 0) :
@@ -204,6 +219,89 @@ theorem pinchShiftNull_ge
     (shiftRic1 delta a b) (shiftRic2 delta a b) (shiftRic3 delta a b)
     hdelta0 (le_of_lt hdelta13) (shiftNull3 delta a b hdelta13)
 
+/-- Scalar target for the shifted pinching reaction at a reconstructed
+first-null diagonal tensor.  This is the compact form future component
+producers should identify with the canonical reaction evaluation. -/
+def shiftReact3 (delta a b : Real) : Real :=
+  pinchReact delta
+    (RicciFlower.DimensionThree.stdRmDiag3
+      (shiftRic1 delta a b) (shiftRic2 delta a b) (shiftRic3 delta a b))
+    (RicciFlower.DimensionThree.ricciDiag3
+      (shiftRic1 delta a b) (shiftRic2 delta a b) (shiftRic3 delta a b))
+    0 0
+
+/-- Strict-delta nonnegativity of the compact shifted reaction target. -/
+theorem shiftReact3_nonneg
+    (delta a b : Real)
+    (hdelta0 : 0 < delta) (hdelta13 : delta < (1 : Real) / 3) :
+    0 <= shiftReact3 delta a b := by
+  exact pinchShiftNull_ge delta a b (le_of_lt hdelta0) hdelta13
+
+/-- Components of a shifted first-null block
+`S = Ric - delta * R * g` in an orthonormal basis whose first vector is null:
+`[[0,0,0],[0,a,c],[0,c,b]]`. -/
+def shiftBlockS3 (a b c : Real) (i j : Fin 3) : Real :=
+  if i = 0 then 0
+  else if j = 0 then 0
+  else if i = 1 then
+    if j = 1 then a else c
+  else
+    if j = 1 then c else b
+
+/-- Ricci components reconstructed from a shifted first-null block. -/
+def shiftRicBlock3 (delta a b c : Real) (i j : Fin 3) : Real :=
+  shiftBlockS3 a b c i j +
+    delta * shiftScal3 delta a b * RicciFlower.DimensionThree.delta3 i j
+
+/-- Shifted pinching reaction at a first-null block, using the full
+three-dimensional Riemann-from-Ricci model rather than a diagonal model. -/
+def shiftReactBlock3 (delta a b c : Real) : Real :=
+  pinchReact delta
+    (stdRmOfRic3 (shiftRicBlock3 delta a b c))
+    (shiftRicBlock3 delta a b c) 0 0
+
+/-- Explicit block expansion of the shifted first-null reaction. -/
+theorem shiftReactBlock3_eq
+    (delta a b c : Real) (hdelta13 : delta < (1 : Real) / 3) :
+    shiftReactBlock3 delta a b c =
+      delta ^ 2 * (1 - 3 * delta) * shiftScal3 delta a b ^ 2 +
+        (1 - delta) * ((a - b) ^ 2 + 4 * c ^ 2) := by
+  have hden : 1 - 3 * delta ≠ 0 := by nlinarith
+  have hden' : 1 - delta * 3 ≠ 0 := by nlinarith
+  have hden2 : 1 - delta * 6 + delta ^ 2 * 9 ≠ 0 := by
+    have hsq : (1 - delta * 3) ^ 2 ≠ 0 := pow_ne_zero 2 hden'
+    convert hsq using 1
+    ring
+  unfold shiftReactBlock3 pinchReact ricciPresReact ricciSq3 ricciNorm3
+    stdRmOfRic3 shiftRicBlock3 shiftBlockS3 shiftScal3
+    RicciFlower.DimensionThree.delta3
+  simp [Fin.sum_univ_three, ricciScal3]
+  field_simp [hden, hden', hden2]
+  ring_nf
+
+/-- Strict-delta nonnegativity of the shifted first-null block reaction. -/
+theorem shiftReactBlock3_nonneg
+    (delta a b c : Real)
+    (hdelta0 : 0 < delta) (hdelta13 : delta < (1 : Real) / 3) :
+    0 <= shiftReactBlock3 delta a b c := by
+  rw [shiftReactBlock3_eq delta a b c hdelta13]
+  have hdelta0' : 0 <= delta := le_of_lt hdelta0
+  have hcoeff1 : 0 <= 1 - 3 * delta := by nlinarith
+  have hcoeff2 : 0 <= 1 - delta := by nlinarith
+  have hR2 : 0 <= shiftScal3 delta a b ^ 2 := sq_nonneg _
+  have hsq : 0 <= (a - b) ^ 2 + 4 * c ^ 2 := by
+    have h1 : 0 <= (a - b) ^ 2 := sq_nonneg _
+    have h2 : 0 <= 4 * c ^ 2 := by positivity
+    exact add_nonneg h1 h2
+  have hterm1 :
+      0 <= delta ^ 2 * (1 - 3 * delta) * shiftScal3 delta a b ^ 2 := by
+    have hdelta_sq : 0 <= delta ^ 2 := sq_nonneg delta
+    positivity
+  have hterm2 :
+      0 <= (1 - delta) * ((a - b) ^ 2 + 4 * c ^ 2) := by
+    positivity
+  exact add_nonneg hterm1 hterm2
+
 /-! ## Conditional tensor-WMP consumers -/
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
@@ -212,6 +310,114 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+
+/-- A pointwise shifted first-null block in an orthonormal `Fin 3` basis.
+
+This only records the geometric block shape of the raw tensor.  It does not
+assert any reaction formula, and it does not choose the orthonormal basis. -/
+structure ShiftBlockAt
+    (g : SmoothRiemannianMetric I M)
+    (A : RawTwoTensorField (I := I) (M := M)) (x : M)
+    (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
+    (a b c : Real) : Prop where
+  orthonormal : DimensionThree.OrthonormalBasisAt (I := I) g x basis
+  components :
+    ∀ i j : Fin 3,
+      A x (basis i) (basis j) = shiftBlockS3 a b c i j
+
+/-- A nonzero scalar multiple of a raw bilinear null vector is null in the
+reverse direction.  This is the normalization step used before feeding a
+first-null vector into an orthonormal basis. -/
+theorem raw_null_of_smul
+    {A : RawTwoTensorField (I := I) (M := M)} {x : M}
+    {v e : TangentSpace I x} {r : Real}
+    (hbilin : TwoTensorBilinearAt (I := I) (M := M) A x)
+    (hnull : A x v v = 0) (hscale : v = r • e) (hr : r ≠ 0) :
+    A x e e = 0 := by
+  have hscale_eval : A x v v = (r * r) * A x e e := by
+    rw [hscale, hbilin.smul_left r e (r • e),
+      hbilin.smul_right r e e]
+    ring
+  have hmul : (r * r) * A x e e = 0 := by
+    simpa [hscale_eval] using hnull
+  have hr2 : r * r ≠ 0 := mul_ne_zero hr hr
+  exact (mul_eq_zero.mp hmul).resolve_left hr2
+
+/-- A PSD symmetric bilinear first-null tensor has shifted block components in
+any supplied orthonormal basis whose first vector is a normalization of the
+null direction.  The theorem consumes the basis; the separate basis-completion
+producer is still a frontier. -/
+theorem shiftBlockOfNull
+    {g : SmoothRiemannianMetric I M}
+    {A : RawTwoTensorField (I := I) (M := M)} {x : M}
+    {v : TangentSpace I x} {r : Real}
+    {basis : Module.Basis (Fin 3) Real (TangentSpace I x)}
+    (horth : DimensionThree.OrthonormalBasisAt (I := I) g x basis)
+    (hsym : TwoTensorSymmetricAt (I := I) (M := M) A x)
+    (hbilin : TwoTensorBilinearAt (I := I) (M := M) A x)
+    (hpsd : TwoTensorNonnegativeAt (I := I) (M := M) A x)
+    (hnull : A x v v = 0) (hscale : v = r • basis 0) (hr : r ≠ 0) :
+    ShiftBlockAt (I := I) (M := M) g A x basis
+      (A x (basis 1) (basis 1))
+      (A x (basis 2) (basis 2))
+      (A x (basis 1) (basis 2)) := by
+  refine ⟨horth, ?_⟩
+  have hnull0 : A x (basis 0) (basis 0) = 0 :=
+    raw_null_of_smul (I := I) (M := M) hbilin hnull hscale hr
+  have hleft :
+      ∀ w : TangentSpace I x, A x (basis 0) w = 0 :=
+    psd_null_left_raw (I := I) (M := M) hsym hbilin hpsd hnull0
+  have hright :
+      ∀ w : TangentSpace I x, A x w (basis 0) = 0 :=
+    psd_null_right_raw (I := I) (M := M) hsym hbilin hpsd hnull0
+  intro i j
+  fin_cases i <;> fin_cases j
+  · simp [shiftBlockS3, hnull0]
+  · simp [shiftBlockS3, hleft]
+  · simp [shiftBlockS3, hleft]
+  · simp [shiftBlockS3, hright]
+  · simp [shiftBlockS3]
+  · simp [shiftBlockS3]
+  · simp [shiftBlockS3, hright]
+  · simpa [shiftBlockS3] using hsym (basis 2) (basis 1)
+  · simp [shiftBlockS3]
+
+/-- Component-realization predicate for the shifted first-null block reaction.
+
+This is deliberately only an equality to the finite-dimensional block target.
+It does not assert that a raw tensor input has already been put into block
+form, nor that the supplied reaction is the canonical Ricci-flow reaction. -/
+def ShiftBlockReactRealizes
+    (G : Real -> SmoothRiemannianMetric I M)
+    (N : TwoTensorReaction (I := I) (M := M))
+    (delta t : Real)
+    (A : RawTwoTensorField (I := I) (M := M)) {x : M}
+    (v : TangentSpace I x) (a b c : Real) : Prop :=
+  (N t (G t) A) x v v = shiftReactBlock3 delta a b c
+
+/-- A symmetric-input null condition follows from a shifted first-null block
+realization plus the strict block algebra.  The geometric producer still has to
+show the reaction component equals `shiftReactBlock3`; this theorem only
+packages the algebraic nonnegativity once that component realization is known. -/
+theorem shiftNullSymm_of_block
+    {G : Real -> SmoothRiemannianMetric I M}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {U : Set Real} {delta : Real}
+    (hdelta0 : 0 < delta) (hdelta13 : delta < (1 : Real) / 3)
+    (hreal :
+      ∀ t, t ∈ U -> ∀ A : RawTwoTensorField (I := I) (M := M), ∀ x,
+        TwoTensorSymmetricAt (I := I) (M := M) A x ->
+        TwoTensorBilinearAt (I := I) (M := M) A x ->
+        TwoTensorNonnegativeAt (I := I) (M := M) A x ->
+        ∀ v : TangentSpace I x,
+          A x v v = 0 ->
+          ∃ a b c : Real,
+            ShiftBlockReactRealizes (I := I) (M := M) G N delta t A v a b c) :
+    TensorNullEigenvectorConditionSymm (I := I) (M := M) G N U := by
+  intro t ht A x hsym hbilin hA v hv
+  rcases hreal t ht A x hsym hbilin hA v hv with ⟨a, b, c, hreact⟩
+  rw [hreact]
+  exact shiftReactBlock3_nonneg delta a b c hdelta0 hdelta13
 
 /-- The pinching tensor `Ric - delta R g`. -/
 def pinchTensor
@@ -1021,6 +1227,63 @@ theorem pinchSec_eq
   rw [h0, h1]
   ring
 
+/-- Pointwise symmetry of the canonical metric Ricci tensor. -/
+theorem ricciAt_symm
+    {D : Realized.RealTimeInterval}
+    [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D)
+    (t : Real) (x : M) :
+    RicciFlower.DimensionThree.RicciSymAt (I := I) (S.ricciAt t x) := by
+  classical
+  let basis : Module.Basis (Coordinates.CoordinateIdx (𝕜 := Real) E)
+      Real (TangentSpace I x) :=
+    Coordinates.coordinateFrameAt_toBasis (I := I) x
+  let gInv :
+      Coordinates.CoordinateIdx (𝕜 := Real) E ->
+        Coordinates.CoordinateIdx (𝕜 := Real) E -> Real := fun k l =>
+    Coordinates.inverseMetricFlatModelInChart_component
+      (I := I) (S.base.metric t) x k l (extChartAt I x x)
+  have hinv :
+      MetricInverseInBasis (I := I) (S.base.metric t) x basis gInv := by
+    simpa [basis, gInv] using
+      Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
+        (I := I) (S.base.metric t) x
+  exact RicciFlower.DimensionThree.ricciSym_of_basis
+    (I := I) basis (S.ricciAt t x)
+    (fun i j => by
+      simpa [SolutionOn.ricciAt, SolutionFamily.ricciAt, basis, gInv] using
+        Curvature.metricRicciSymm (I := I) (M := M) (S.base.metric t)
+          basis gInv hinv i j)
+
+/-- Symmetry of the canonical Ricci section family. -/
+theorem ricciSec_symm
+    {D : Realized.RealTimeInterval}
+    [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D) (U : Set Real) :
+    TwoTensorFamilySymmetricOn (I := I) (M := M)
+      (twoTensorSecToFamily (I := I) (M := M) S.ricci) U := by
+  intro t _ht x v w
+  simpa [twoTensorSecToFamily, SolutionOn.ricci, SolutionFamily.ricci,
+    SolutionOn.ricciAt, SolutionFamily.ricciAt] using
+    ricciAt_symm (I := I) S t x v w
+
+/-- Symmetry of the shifted pinching section `Ric - delta R g`. -/
+theorem pinchSec_symm
+    {D : Realized.RealTimeInterval}
+    [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D) (delta : Real) (U : Set Real) :
+    TwoTensorFamilySymmetricOn (I := I) (M := M)
+      (twoTensorSecToFamily (I := I) (M := M) (pinchSec (I := I) S delta)) U := by
+  intro t _ht x v w
+  rw [pinchSec_eq (I := I) S delta]
+  simp only [pinchTensor]
+  have hRic := ricciAt_symm (I := I) S t x v w
+  have hg := (S.base.metric t).symm x v w
+  simpa [twoTensorSecToFamily, SolutionOn.ricci, SolutionFamily.ricci,
+    SolutionOn.ricciAt, SolutionFamily.ricciAt, hg] using congrArg
+      (fun z => z - delta * S.scalar t x * (S.base.metric t).inner x w v)
+      hRic
+
 /-- Canonical first and second spatial derivatives of the shifted pinching
 section for a solution candidate at one time. -/
 noncomputable def pinchDerivsWMP
@@ -1171,6 +1434,39 @@ theorem pinchSec_tensorQuadCont
   tensorQuadCont (I := I) (M := M) (pinchSec (I := I) S delta) K
     (pinchSec_tangentBundle_cont (I := I) S hS delta hK)
 
+/-- Core theorem-7.5 section regularity for the shifted pinching section from
+smooth Ricci-flow data, once the analytic barrier regularity field is supplied.
+
+This proves the compactness, metric/tensor total-space continuity, fixed-vector
+barrier continuity, and symmetry parts of the core package.  It intentionally
+does not prove `TensorBarrierRegularityOn.smallBarrierLip`; that remains the
+separate analytic reaction-control frontier. -/
+theorem pinchSecCore
+    {D : Realized.RealTimeInterval}
+    [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S) {T delta : Real}
+    (hTsub : Set.Icc 0 T ⊆ D.carrier)
+    {X : TimeDependentVectorField (I := I) (M := M)}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    (hbar : TensorBarrierRegularityOn (I := I) (M := M)
+      (fun t : Real => S.base.metric t)
+      (twoTensorSecToFamily (I := I) (M := M) (pinchSec (I := I) S delta))
+      X N T) :
+    TensorWMPSectionCore (I := I) (M := M)
+      (fun t : Real => S.base.metric t) (pinchSec (I := I) S delta) X N T := by
+  exact TensorWMPSectionCore.ofSmoothMetric (I := I) (M := M)
+    (G := S.family) (S := pinchSec (I := I) S delta)
+    (X := X) (N := N) (T := T)
+    hTsub hS.smoothMetric
+    (pinchSec_symm (I := I) S delta (Set.Icc 0 T))
+    (by simpa [SolutionOn.family] using hbar)
+    (fun d t0 _hd hsub =>
+      pinchSec_tangentBundle_cont (I := I) S hS delta
+        (fun t ht => hTsub (hsub ht)))
+    (fun epsilon d t0 _hepsilon _hd hsub x v =>
+      hbar.barrier_eval_continuous epsilon d t0 hsub x v v)
+
 /-- Section 9 Ricci-flow data needed to feed theorem 7.5 for the canonical
 Ricci tensor.  The connection, metric compatibility, and spatial derivative
 realization are produced canonically from the solution candidate; the remaining
@@ -1310,6 +1606,72 @@ structure PinchFlowWMPData
       (fun t : Real => S.base.metric t) N (Set.Icc 0 T)
 
 namespace PinchFlowWMPData
+
+/-- Build the canonical shifted-pinching WMP data package once the genuine
+application inputs have been supplied.  The core section regularity is produced
+from smooth solution data by `pinchSecCore`; callers no longer need to assemble
+the compactness and continuity fields manually. -/
+def ofBarrier
+    {D : Realized.RealTimeInterval}
+    [CompleteSpace E] [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
+    {S : SolutionOn (I := I) (M := M) D} (hS : IsSolutionOn (I := I) S)
+    {T delta : Real}
+    (hTsub : Set.Icc 0 T ⊆ D.carrier)
+    (X : TimeDependentVectorField (I := I) (M := M))
+    (N : TwoTensorReaction (I := I) (M := M))
+    (hbar : TensorBarrierRegularityOn (I := I) (M := M)
+      (fun t : Real => S.base.metric t)
+      (twoTensorSecToFamily (I := I) (M := M) (pinchSec (I := I) S delta))
+      X N T)
+    (hparabolic :
+      TensorParabolicSupersolutionWithDriftOn (I := I) (M := M)
+        (fun t : Real => S.base.metric t)
+        (twoTensorSecToFamily (I := I) (M := M) (pinchSec (I := I) S delta))
+        X N
+        (fun t x => pinchNabla2WMP (I := I) S delta t x)
+        (fun t x => pinchNablaWMP (I := I) S delta t x) T)
+    (hnull :
+      TensorNullEigenvectorCondition (I := I) (M := M)
+        (fun t : Real => S.base.metric t) N (Set.Icc 0 T)) :
+    PinchFlowWMPData (I := I) (M := M) S T delta where
+  X := X
+  N := N
+  reg := pinchSecCore (I := I) S hS hTsub hbar
+  parabolic := hparabolic
+  null := hnull
+
+/-- Build the canonical shifted-pinching WMP data using the natural symmetric
+null-condition interface.  The legacy raw null condition is recovered by
+symmetrizing the reaction input, so future reaction producers can work only on
+symmetric first-null tensors. -/
+def ofSymmNull
+    {D : Realized.RealTimeInterval}
+    [CompleteSpace E] [CompactSpace M] [SigmaCompactSpace M] [T2Space M]
+    {S : SolutionOn (I := I) (M := M) D} (hS : IsSolutionOn (I := I) S)
+    {T delta : Real}
+    (hTsub : Set.Icc 0 T ⊆ D.carrier)
+    (X : TimeDependentVectorField (I := I) (M := M))
+    (N : TwoTensorReaction (I := I) (M := M))
+    (hbar : TensorBarrierRegularityOn (I := I) (M := M)
+      (fun t : Real => S.base.metric t)
+      (twoTensorSecToFamily (I := I) (M := M) (pinchSec (I := I) S delta))
+      X N T)
+    (hparabolic :
+      TensorParabolicSupersolutionWithDriftOn (I := I) (M := M)
+        (fun t : Real => S.base.metric t)
+        (twoTensorSecToFamily (I := I) (M := M) (pinchSec (I := I) S delta))
+        X N
+        (fun t x => pinchNabla2WMP (I := I) S delta t x)
+        (fun t x => pinchNablaWMP (I := I) S delta t x) T)
+    (hdep :
+      TensorReactionSymmInputOn (I := I) (M := M)
+        (fun t : Real => S.base.metric t) N (Set.Icc 0 T))
+    (hnull :
+      TensorNullEigenvectorConditionSymm (I := I) (M := M)
+        (fun t : Real => S.base.metric t) N (Set.Icc 0 T)) :
+    PinchFlowWMPData (I := I) (M := M) S T delta :=
+  ofBarrier (I := I) (M := M) hS hTsub X N hbar hparabolic
+    (null_of_symm (I := I) (M := M) hdep hnull)
 
 /-- Fill the old Section 9 pinching package from the canonical solution-level
 pinching section and derivative producers. -/

@@ -83,6 +83,11 @@ theorem tensor_first_null_contradiction
       G S X N nabla2Barrier nablaBarrier epsilon delta t0)
     (_hnull : TensorNullEigenvectorCondition (I := I) (M := M) G
       N (Set.Icc t0 (t0 + delta)))
+    (hsym : TwoTensorFamilySymmetricOn (I := I) (M := M) S
+      (Set.Icc t0 (t0 + delta)))
+    (hbilin :
+      ∀ t, t ∈ Set.Icc t0 (t0 + delta) -> ∀ x,
+        TwoTensorBilinearAt (I := I) (M := M) (S t) x)
     (d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0)
     (hsigns : TensorFirstNullScalarSigns (I := I) (M := M)
       G S X N epsilon delta t0 d) :
@@ -105,6 +110,22 @@ theorem tensor_first_null_contradiction
         (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 d.t1)
         d.x1 :=
     d.nonnegative_until d.t1 ht1_mem_until d.x1
+  have hbarrier_symmetric :
+      TwoTensorSymmetricAt (I := I) (M := M)
+        (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 d.t1)
+        d.x1 :=
+    barrierSymmAt (I := I) (M := M)
+      (G := G) (S := S) (epsilon := epsilon) (delta := delta)
+      (t0 := t0) (t := d.t1) (x := d.x1)
+      (hsym d.t1 ht1_mem_slab d.x1)
+  have hbarrier_bilinear :
+      TwoTensorBilinearAt (I := I) (M := M)
+        (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 d.t1)
+        d.x1 :=
+    barrierBilinearAt (I := I) (M := M)
+      (G := G) (S := S) (epsilon := epsilon) (delta := delta)
+      (t0 := t0) (t := d.t1) (x := d.x1)
+      (hbilin d.t1 ht1_mem_slab d.x1)
   have _hreaction_nonnegative :
       0 ≤
         N d.t1 (G d.t1)
@@ -112,7 +133,7 @@ theorem tensor_first_null_contradiction
           d.x1 d.v d.v := by
     exact _hnull d.t1 ht1_mem_slab
       (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 d.t1)
-      d.x1 hbarrier_nonnegative d.v d.null
+      d.x1 hbarrier_symmetric hbarrier_bilinear hbarrier_nonnegative d.v d.null
   rcases hsigns with
     ⟨timeDeriv, laplacian, drift, reaction,
       htime_nonpos, hlaplacian_nonneg, hdrift_zero, hreaction_nonneg, hstrict_ineq⟩
@@ -161,12 +182,15 @@ theorem shortSlab_cert
       hcompact hinit_pos hfail
   have hnull_slab : TensorNullEigenvectorCondition (I := I) (M := M) G
       N (Set.Icc t0 (t0 + delta)) := by
-    intro t ht A x hA v hv
-    exact hnull t (hsub ht) A x hA v hv
+    intro t ht A x hsym hbilin hA v hv
+    exact hnull t (hsub ht) A x hsym hbilin hA v hv
   exact tensor_first_null_contradiction (I := I) (M := M)
     (G := G) (S := S) (X := X) (N := N)
     (nabla2Barrier := cert.nabla2Barrier) (nablaBarrier := cert.nablaBarrier)
-    cert.strict hnull_slab d (cert.signs hnull_slab d)
+    cert.strict hnull_slab
+    (fun t ht => hreg.symmetric t (hsub ht))
+    (fun t ht => hreg.bilinear t (hsub ht))
+    d (cert.signs hnull_slab d)
 
 theorem tensorBarrier_nonnegative_on_short_slab
     {G : Real -> SmoothRiemannianMetric I M}

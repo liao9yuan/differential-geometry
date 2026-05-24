@@ -21,8 +21,11 @@ admits a metric of constant positive sectional curvature.
   connection/spatial-derivative producers now feed theorem 7.5.  The shifted
   pinching section, its canonical spatial derivatives, and its tensor
   continuity producers are checked.  The strict `0 < delta < 1/3` initial
-  selector and shifted-null eigenvalue algebra are checked.  The parabolic,
-  tensor-level null, and full barrier-regularity producers remain explicit.
+  selector, shifted-null eigenvalue algebra, and shifted-section core
+  regularity package are checked.  The WMP null interface now requires
+  symmetric bilinear PSD inputs, and the off-diagonal first-null block reaction
+  algebra is checked.  The parabolic, canonical tensor-level null realization,
+  and barrier reaction-control producers remain explicit.
 - Section 10.4 has a checked `IsSolutionOn` endpoint.  Section 10.5 has
   checked book-facing wrappers for the positive-region quotient identity and
   the `alpha = 1`, `phi >= 0` side theorem, but the full arbitrary-exponent
@@ -92,8 +95,12 @@ package, and Section 9 now produces the canonical Ricci connection and spatial
 derivative fields from a Ricci-flow solution candidate.  The shifted pinching
 section `Ric - delta R g` now has checked section, spatial-derivative, and
 tensor-continuity producers, plus strict `0 < delta < 1/3` initial-selector
-wrappers.  The remaining frontiers are application-side parabolic, tensor-level
-null, and full barrier-regularity producers for the shifted tensor.
+wrappers and core WMP regularity from supplied barrier regularity.  The tensor
+WMP null predicates now require symmetric bilinear PSD inputs, and raw section
+and barrier tensors produce the bilinearity needed by the certificate stack.
+The remaining frontiers are application-side parabolic, canonical tensor-level
+null realization, and small-barrier reaction-control producers for the shifted
+tensor.
 
 ### G7. Positive Ricci Preservation And Pinching
 
@@ -102,14 +109,33 @@ Dimension-three algebra is native.  Section 9 now has checked
 `PinchWMPData.preserve` for the theorem-7.5 package route.  The shifted
 pinching section is checked as `pinchSec`, with `pinchSec_eq`,
 `pinchNablaWMP`, `pinchNabla2WMP`, `pinchSpatialWMP`, and the continuity
-producers `pinchSecFamilyContinuousOnSet`, `pinchSec_tangentBundle_cont`, and
-`pinchSec_tensorQuadCont`.  `PinchFlowWMPData` fills the canonical shifted
-section, connection, and spatial derivative fields into the older pinching WMP
-package.  The strict selector route is checked through `PinchInitLt`,
-`pinch_init_wmp_lt`, and the `strict_pinch_*_lt` wrappers, and the strict
-shifted-null eigenvalue algebra is checked through `pinchShiftNull_ge`.  The
-remaining Section 9 work is to prove its parabolic, tensor-level null, and full
-barrier-regularity inputs from Ricci-flow data.  Lemmas 10.7 and
+  producers `pinchSecFamilyContinuousOnSet`, `pinchSec_tangentBundle_cont`, and
+  `pinchSec_tensorQuadCont`.  `PinchFlowWMPData` fills the canonical shifted
+  section, connection, and spatial derivative fields into the older pinching WMP
+  package.  The strict selector route is checked through `PinchInitLt`,
+  `pinch_init_wmp_lt`, and the `strict_pinch_*_lt` wrappers, and the strict
+  shifted-null eigenvalue algebra is checked through `pinchShiftNull_ge` and
+  the compact target `shiftReact3_nonneg`.  The off-diagonal first-null block
+  target is checked through `stdRmOfRic3`, `shiftBlockS3`,
+  `shiftRicBlock3`, `shiftReactBlock3_eq`, and
+  `shiftReactBlock3_nonneg`.
+  `pinchSecCore` and `PinchFlowWMPData.ofBarrier` now produce the shifted-section
+  core WMP regularity package from smooth solution data once
+  `TensorBarrierRegularityOn` is supplied.  `PinchFlowWMPData.ofSymmNull`
+  also adapts the natural symmetric-input null interface to the legacy raw WMP
+  null field when the reaction ignores skew input, and
+  `shiftNullSymm_of_block` turns a concrete `ShiftBlockReactRealizes`
+  component realization into the symmetric null condition.  `ShiftBlockAt`,
+  `raw_null_of_smul`, and `shiftBlockOfNull` now prove the actual shifted
+  first-null block shape in any supplied orthonormal basis whose first vector
+  is a nonzero normalization of the null direction.  The remaining Section 9
+  work is to prove its parabolic, canonical tensor-level null realization, and
+  small-barrier reaction-control inputs from Ricci-flow data.  The next
+  null-condition frontier is not the block algebra but the canonical reaction
+  realization: WMP reactions still take raw evaluators, while invariant trace
+  and raised-contraction APIs currently consume bundled `Tensor02At` or tensor
+  sections.
+  Lemmas 10.7 and
 10.8 now also expose the
 Hamilton-ready reaction context: `DimensionThree.PinchEigen3.q_sub_nonneg`
 and the flow-facing `cubicQ_pinchOn` show
@@ -152,8 +178,8 @@ Levi-Civita smoothness, or finite-dimensional Ricci algebra.
 ## Immediate Next Work
 
 1. Produce the remaining Section 9 shifted-pinching application data:
-   parabolic inequality, tensor-level reaction-wide null bridge, and full
-   barrier/core regularity.
+   parabolic inequality, canonical reaction component realization for
+   `shiftReactBlock3`, and small-barrier reaction-control regularity.
 2. Continue from Lemma 10.6 equality to the improved pinching estimates.
 3. Keep global Section 11/12 producers explicit and separate from local
    tensor/evolution work.

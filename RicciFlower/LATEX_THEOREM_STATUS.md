@@ -11,16 +11,16 @@ daily work logs.
 | Section 3/14 calculus | Mostly native; no longer the main blocker. |
 | Section 6 evolution | Core inverse metric, Christoffel, Ricci, scalar, frame Ricci-norm, smooth-solution Ricci-norm data, and the `smoothOfSol` upgrade are native. |
 | Section 7 scalar WMP/lower bound | Native consumer path; scalar regularity from smooth solutions is available. |
-| Section 9 Ricci preservation | Local algebra, strict initial selectors, theorem-7.5 consumers, canonical Ricci-flow connection/spatial-derivative producers, and the shifted pinching section with tensor-continuity producers are native; remaining work is the parabolic/full barrier producers and the tensor-level null-condition bridge. |
+| Section 9 Ricci preservation | Local algebra, strict initial selectors, theorem-7.5 consumers, canonical Ricci-flow connection/spatial-derivative producers, and the shifted pinching section with tensor-continuity/core-regularity producers are native; the WMP null interface now requires symmetric bilinear PSD inputs, and the off-diagonal first-null block reaction algebra is checked. Remaining work is the parabolic/barrier-reaction producers and the canonical component-realization producer for the tensor-level null condition. |
 | Section 10 pinching | Lemma 10.4 is checked; Lemma 10.5 has checked positive-region and `alpha = 1`, `phi >= 0` side forms, but not the full book-facing hypothesis shape. Lemma 10.6 has checked raw quotient setup, book RHS rewrite, actual tensor-square setup, section-level mixed bridge, canonical solution-section packaging, and the book-facing `pinchEvol_book` theorem; the live local frontier is the later pinching estimates. |
 | Section 11/12 global flow | Global analytic and compactness black boxes remain. |
 
 ## Active Native Frontiers
 
 - Section 9 Ricci-flow application producers for the shifted pinching
-  parabolic condition, full barrier/core regularity, and the tensor-level
-  null-condition bridge from arbitrary first-null barrier tensors to the
-  checked strict-delta eigenvalue algebra.
+  parabolic condition, barrier reaction-control regularity, and the
+  tensor-level null-condition bridge from arbitrary symmetric bilinear
+  first-null barrier tensors to the checked strict-delta block algebra.
 - Section 10 Hamilton quotient specialization and improved pinching producers.
 
 ## Closed Or Stable Native Results
@@ -137,7 +137,18 @@ derivative fields are checked: `ricciCov1`, `ricciCovInf`,
 `pinchSec_tensorQuadCont`.  The strict selector route is checked through
 `PinchInitLt`, `pinchInitLt_*`, `pinch_init_wmp_lt`, and
 `strict_pinch_*_lt`.  The strict shifted-null eigenvalue algebra is checked by
-`shiftScal3_eq`, `shiftNull3`, and `pinchShiftNull_ge`.  `RicciWMPData.toInput`
+`shiftScal3_eq`, `shiftNull3`, `pinchShiftNull_ge`, and the compact target
+`shiftReact3_nonneg`.  The off-diagonal first-null block algebra is checked
+through `stdRmOfRic3`, `shiftBlockS3`, `shiftRicBlock3`,
+`shiftReactBlock3_eq`, and `shiftReactBlock3_nonneg`.  Section-core
+regularity for the shifted section is now checked through `ricciAt_symm`,
+`ricciSec_symm`, `pinchSec_symm`, `pinchSecCore`, and
+`PinchFlowWMPData.ofBarrier`; this fills compactness and continuity fields from
+smooth solution data once the analytic `TensorBarrierRegularityOn` input is
+supplied.  The TensorWeak null predicates now require symmetric bilinear PSD
+inputs.  `PinchFlowWMPData.ofSymmNull` adapts the natural symmetric-input null
+condition to the legacy raw WMP field when the reaction ignores skew input.
+`RicciWMPData.toInput`
 builds the Ricci `TensorWMPInput` package, `PinchWMPData.toInput` /
 `PinchWMPData.preserve` make the general pinching package reusable, and
 `PinchFlowWMPData` fills the canonical shifted section, connection, and spatial
@@ -146,12 +157,13 @@ derivative fields.
 Distance: `1-2`.
 
 Next target: prove the remaining shifted-pinching WMP application data from
-smooth Ricci-flow equations without adding endpoint assumptions: full
-barrier/core regularity, the direct tensor parabolic inequality, and the
-reaction-wide null-eigenvector condition.  The null-condition work should next
-produce the tensor diagonalization/reconstruction bridge for a symmetric
-first-null barrier tensor and connect the canonical reaction `N` to the checked
-`pinchShiftNull_ge` algebra.
+smooth Ricci-flow equations without adding endpoint assumptions: the
+small-barrier reaction Lipschitz field inside `TensorBarrierRegularityOn`, the
+direct tensor parabolic inequality, and the reaction-wide null-eigenvector
+condition.  The null-condition work should next produce the tensor
+diagonalization/reconstruction bridge for a symmetric bilinear first-null
+barrier tensor and show the canonical shifted reaction realizes
+`shiftReactBlock3`; the strict-delta block algebra itself is checked.
 
 ### Lemma 10.4, `lem:evol-tracefree-ricci-norm`
 
@@ -212,6 +224,15 @@ eigenvalue/pinching context from flow data.
 The full arbitrary-exponent book-facing 10.5 statement under only nonnegative
 numerator hypotheses remains unproved and should not be claimed.
 
+Section 9 shifted pinching now has a checked first-null block producer:
+`ShiftBlockAt`, `raw_null_of_smul`, and `shiftBlockOfNull` prove that a raw
+symmetric bilinear PSD tensor has the expected shifted first-null block
+components in any supplied orthonormal basis whose first vector normalizes the
+nonzero null direction.  The remaining null-condition frontier is the canonical
+reaction realization, because the tensor-WMP reaction input is still a raw
+evaluator while invariant trace and raised-contraction APIs consume bundled
+`Tensor02At` or tensor-section data.
+
 ### Lemmas 11.1-11.6
 
 Status: finite-time scalar blow-up consumers are native.  Point selection and
@@ -244,7 +265,7 @@ Hamilton proofs.
 ## Near-Term Work Queue
 
 1. Finish the remaining Section 9 pinching application producers: parabolic
-   inequality, tensor-level null-condition bridge, and full barrier/core
-   regularity for the shifted section.
+   inequality, tensor-level null-condition bridge, and small-barrier reaction
+   Lipschitz regularity for the shifted section.
 2. Continue from Hamilton quotient equality to the pinching estimates.
 3. Leave global analytic/compactness assumptions explicit.

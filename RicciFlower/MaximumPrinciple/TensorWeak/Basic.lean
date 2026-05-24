@@ -72,6 +72,18 @@ abbrev TwoTensorReaction : Type _ :=
 def TwoTensorSymmetricAt (A : RawTwoTensorField (I := I) (M := M)) (x : M) : Prop :=
   ∀ X Y : TangentSpace I x, A x X Y = A x Y X
 
+/-- Pointwise bilinearity of a raw covariant two-tensor evaluator. -/
+structure TwoTensorBilinearAt (A : RawTwoTensorField (I := I) (M := M)) (x : M) :
+    Prop where
+  add_left : ∀ X Y Z : TangentSpace I x,
+    A x (X + Y) Z = A x X Z + A x Y Z
+  smul_left : ∀ (c : Real) (X Z : TangentSpace I x),
+    A x (c • X) Z = c * A x X Z
+  add_right : ∀ X Y Z : TangentSpace I x,
+    A x X (Y + Z) = A x X Y + A x X Z
+  smul_right : ∀ (c : Real) (X Z : TangentSpace I x),
+    A x X (c • Z) = c * A x X Z
+
 /-- Pointwise nonnegativity of a covariant two-tensor as a quadratic form. -/
 def TwoTensorNonnegativeAt (A : RawTwoTensorField (I := I) (M := M)) (x : M) : Prop :=
   ∀ v : TangentSpace I x, 0 ≤ A x v v
@@ -142,6 +154,69 @@ theorem twoTensorSecToFamily_apply
     twoTensorSecToFamily (I := I) (M := M) S t x v w =
       S t x (vec2 (I := I) v w) := by
   rfl
+
+/-- A genuine two-tensor section gives a bilinear raw evaluator at every
+point. -/
+theorem twoTensorSecToFamily_bilin
+    (S : TwoTensorSecFamily (I := I) (M := M))
+    (t : Real) (x : M) :
+    TwoTensorBilinearAt (I := I) (M := M)
+      (twoTensorSecToFamily (I := I) (M := M) S t) x := by
+  constructor
+  · intro X Y Z
+    classical
+    let m : Fin 2 -> TangentSpace I x := vec2 (I := I) X Z
+    have hmap := (S t x).map_update_add m (0 : Fin 2) X Y
+    have hleft :
+        Function.update m (0 : Fin 2) (X + Y) = vec2 (I := I) (X + Y) Z := by
+      funext i
+      fin_cases i <;> simp [m, vec2, Curvature.vec2, Function.update]
+    have hX : Function.update m (0 : Fin 2) X = vec2 (I := I) X Z := by
+      funext i
+      fin_cases i <;> simp [m, vec2, Curvature.vec2, Function.update]
+    have hY : Function.update m (0 : Fin 2) Y = vec2 (I := I) Y Z := by
+      funext i
+      fin_cases i <;> simp [m, vec2, Curvature.vec2, Function.update]
+    simpa [twoTensorSecToFamily, hleft, hX, hY] using hmap
+  · intro c X Z
+    classical
+    let m : Fin 2 -> TangentSpace I x := vec2 (I := I) X Z
+    have hmap := (S t x).map_update_smul m (0 : Fin 2) c X
+    have hleft :
+        Function.update m (0 : Fin 2) (c • X) = vec2 (I := I) (c • X) Z := by
+      funext i
+      fin_cases i <;> simp [m, vec2, Curvature.vec2, Function.update]
+    have hX : Function.update m (0 : Fin 2) X = vec2 (I := I) X Z := by
+      funext i
+      fin_cases i <;> simp [m, vec2, Curvature.vec2, Function.update]
+    simpa [twoTensorSecToFamily, hleft, hX, smul_eq_mul] using hmap
+  · intro X Y Z
+    classical
+    let m : Fin 2 -> TangentSpace I x := vec2 (I := I) X Y
+    have hmap := (S t x).map_update_add m (1 : Fin 2) Y Z
+    have hleft :
+        Function.update m (1 : Fin 2) (Y + Z) = vec2 (I := I) X (Y + Z) := by
+      funext i
+      fin_cases i <;> simp [m, vec2, Curvature.vec2, Function.update]
+    have hY : Function.update m (1 : Fin 2) Y = vec2 (I := I) X Y := by
+      funext i
+      fin_cases i <;> simp [m, vec2, Curvature.vec2, Function.update]
+    have hZ : Function.update m (1 : Fin 2) Z = vec2 (I := I) X Z := by
+      funext i
+      fin_cases i <;> simp [m, vec2, Curvature.vec2, Function.update]
+    simpa [twoTensorSecToFamily, hleft, hY, hZ] using hmap
+  · intro c X Z
+    classical
+    let m : Fin 2 -> TangentSpace I x := vec2 (I := I) X Z
+    have hmap := (S t x).map_update_smul m (1 : Fin 2) c Z
+    have hleft :
+        Function.update m (1 : Fin 2) (c • Z) = vec2 (I := I) X (c • Z) := by
+      funext i
+      fin_cases i <;> simp [m, vec2, Curvature.vec2, Function.update]
+    have hZ : Function.update m (1 : Fin 2) Z = vec2 (I := I) X Z := by
+      funext i
+      fin_cases i <;> simp [m, vec2, Curvature.vec2, Function.update]
+    simpa [twoTensorSecToFamily, hleft, hZ, smul_eq_mul] using hmap
 
 /-- Section-backed positive barrier.  This is the smooth-section version of
 `tensorBarrierFamily`; it is used only as a producer bridge for spatial
@@ -215,6 +290,36 @@ theorem barrierSymmAt
       (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t) x := by
   intro v w
   simp [tensorBarrierFamily, hS v w, (G t).symm x v w]
+
+/-- The metric inner product is bilinear as a raw two-tensor evaluator. -/
+theorem metricInner_bilinAt
+    (G : Real -> SmoothRiemannianMetric I M)
+    (t : Real) (x : M) :
+    TwoTensorBilinearAt (I := I) (M := M)
+      (fun y v w => (G t).inner y v w) x := by
+  constructor <;> intros <;> simp
+
+/-- The positive metric barrier preserves pointwise bilinearity. -/
+theorem barrierBilinearAt
+    {G : Real -> SmoothRiemannianMetric I M}
+    {S : TwoTensorFamily (I := I) (M := M)}
+    {epsilon delta t0 t : Real} {x : M}
+    (hS : TwoTensorBilinearAt (I := I) (M := M) (S t) x) :
+    TwoTensorBilinearAt (I := I) (M := M)
+      (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 t) x := by
+  constructor
+  · intro X Y Z
+    simp [tensorBarrierFamily, hS.add_left X Y Z, add_assoc]
+    ring
+  · intro c X Z
+    simp [tensorBarrierFamily, hS.smul_left c X Z, mul_assoc, mul_left_comm]
+    ring
+  · intro X Y Z
+    simp [tensorBarrierFamily, hS.add_right X Y Z, mul_add, add_assoc]
+    ring
+  · intro c X Z
+    simp [tensorBarrierFamily, hS.smul_right c X Z, mul_assoc, mul_left_comm]
+    ring
 
 theorem vec2_self_eq_const {x : M} (v : TangentSpace I x) :
     vec2 (I := I) v v = fun _ : Fin 2 => v := by

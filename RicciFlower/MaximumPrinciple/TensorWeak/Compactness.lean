@@ -447,6 +447,11 @@ theorem scalarSigns_of_eval
       G S X N nabla2Barrier nablaBarrier epsilon delta t0)
     (hnull : TensorNullEigenvectorCondition (I := I) (M := M)
       G N (Set.Icc t0 (t0 + delta)))
+    (hsym : TwoTensorFamilySymmetricOn (I := I) (M := M) S
+      (Set.Icc t0 (t0 + delta)))
+    (hbilin :
+      ∀ t, t ∈ Set.Icc t0 (t0 + delta) -> ∀ x,
+        TwoTensorBilinearAt (I := I) (M := M) (S t) x)
     (d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0)
     (laplacian drift : Real)
     (htime_nonpos :
@@ -480,11 +485,27 @@ theorem scalarSigns_of_eval
         (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 d.t1)
         d.x1 :=
     d.nonnegative_until d.t1 ht1_mem_until d.x1
+  have hbarrier_symmetric :
+      TwoTensorSymmetricAt (I := I) (M := M)
+        (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 d.t1)
+        d.x1 :=
+    barrierSymmAt (I := I) (M := M)
+      (G := G) (S := S) (epsilon := epsilon) (delta := delta)
+      (t0 := t0) (t := d.t1) (x := d.x1)
+      (hsym d.t1 ht1_mem_slab d.x1)
+  have hbarrier_bilinear :
+      TwoTensorBilinearAt (I := I) (M := M)
+        (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 d.t1)
+        d.x1 :=
+    barrierBilinearAt (I := I) (M := M)
+      (G := G) (S := S) (epsilon := epsilon) (delta := delta)
+      (t0 := t0) (t := d.t1) (x := d.x1)
+      (hbilin d.t1 ht1_mem_slab d.x1)
   have hreaction_nonneg : 0 ≤ reaction := by
     simpa [reaction] using
       hnull d.t1 ht1_mem_slab
         (tensorBarrierFamily (I := I) (M := M) G S epsilon delta t0 d.t1)
-        d.x1 hbarrier_nonnegative d.v d.null
+        d.x1 hbarrier_symmetric hbarrier_bilinear hbarrier_nonnegative d.v d.null
   have hstrict_at :
       tensorHeatWithDrift2QuadMetricAt (I := I) (G d.t1) (X d.t1)
           (nabla2Barrier d.t1 d.x1) (nablaBarrier d.t1 d.x1) d.v +
@@ -515,6 +536,11 @@ theorem scalarSigns_of_parts
       G S X N nabla2Barrier nablaBarrier epsilon delta t0)
     (hnull : TensorNullEigenvectorCondition (I := I) (M := M)
       G N (Set.Icc t0 (t0 + delta)))
+    (hsym : TwoTensorFamilySymmetricOn (I := I) (M := M) S
+      (Set.Icc t0 (t0 + delta)))
+    (hbilin :
+      ∀ t, t ∈ Set.Icc t0 (t0 + delta) -> ∀ x,
+        TwoTensorBilinearAt (I := I) (M := M) (S t) x)
     (d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0)
     (laplacian drift : Real)
     (htime_nonpos :
@@ -539,7 +565,7 @@ theorem scalarSigns_of_parts
   exact scalarSigns_of_eval (I := I) (M := M)
     (G := G) (S := S) (X := X) (N := N)
     (nabla2Barrier := nabla2Barrier) (nablaBarrier := nablaBarrier)
-    hstrict hnull d laplacian drift htime_nonpos hlaplacian_nonneg
+    hstrict hnull hsym hbilin d laplacian drift htime_nonpos hlaplacian_nonneg
     hdrift_zero
     (heatQuad_eq_parts (I := I) (G d.t1) (X d.t1)
       (nabla2Barrier d.t1 d.x1) (nablaBarrier d.t1 d.x1) d.v
@@ -563,6 +589,11 @@ theorem scalarSigns_of_lap
       G S X N nabla2Barrier nablaBarrier epsilon delta t0)
     (hnull : TensorNullEigenvectorCondition (I := I) (M := M)
       G N (Set.Icc t0 (t0 + delta)))
+    (hsym : TwoTensorFamilySymmetricOn (I := I) (M := M) S
+      (Set.Icc t0 (t0 + delta)))
+    (hbilin :
+      ∀ t, t ∈ Set.Icc t0 (t0 + delta) -> ∀ x,
+        TwoTensorBilinearAt (I := I) (M := M) (S t) x)
     (d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0)
     (laplacian : Real)
     (htime_nonpos :
@@ -586,7 +617,8 @@ theorem scalarSigns_of_lap
   exact scalarSigns_of_parts (I := I) (M := M)
     (G := G) (S := S) (X := X) (N := N)
     (nabla2Barrier := nabla2Barrier) (nablaBarrier := nablaBarrier)
-    hstrict hnull d laplacian 0 htime_nonpos hlaplacian_nonneg rfl hlap hdrift
+    hstrict hnull hsym hbilin d laplacian 0 htime_nonpos
+    hlaplacian_nonneg rfl hlap hdrift
 
 /--
 First-null specialization of `scalarSigns_of_lap`.  The nonpositive time
@@ -606,6 +638,11 @@ theorem scalarSigns_of_lap_firstNull
       G S X N nabla2Barrier nablaBarrier epsilon delta t0)
     (hnull : TensorNullEigenvectorCondition (I := I) (M := M)
       G N (Set.Icc t0 (t0 + delta)))
+    (hsym : TwoTensorFamilySymmetricOn (I := I) (M := M) S
+      (Set.Icc t0 (t0 + delta)))
+    (hbilin :
+      ∀ t, t ∈ Set.Icc t0 (t0 + delta) -> ∀ x,
+        TwoTensorBilinearAt (I := I) (M := M) (S t) x)
     (d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0)
     (laplacian : Real)
     (hlaplacian_nonneg : 0 ≤ laplacian)
@@ -619,7 +656,7 @@ theorem scalarSigns_of_lap_firstNull
   exact scalarSigns_of_lap (I := I) (M := M)
     (G := G) (S := S) (X := X) (N := N)
     (nabla2Barrier := nabla2Barrier) (nablaBarrier := nablaBarrier)
-    hstrict hnull d laplacian
+    hstrict hnull hsym hbilin d laplacian
     (fun timeDeriv hderiv => firstNullTime_nonpos (I := I) (M := M)
       d timeDeriv hderiv)
     hlaplacian_nonneg hlap hdrift
@@ -646,6 +683,11 @@ theorem scalarSigns_of_local
       G S X N nabla2Barrier nablaBarrier epsilon delta t0)
     (hnull : TensorNullEigenvectorCondition (I := I) (M := M)
       G N (Set.Icc t0 (t0 + delta)))
+    (hsym : TwoTensorFamilySymmetricOn (I := I) (M := M) S
+      (Set.Icc t0 (t0 + delta)))
+    (hbilin :
+      ∀ t, t ∈ Set.Icc t0 (t0 + delta) -> ∀ x,
+        TwoTensorBilinearAt (I := I) (M := M) (S t) x)
     (d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0)
     (laplacian : Real)
     (hlaplacian_nonneg : 0 ≤ laplacian)
@@ -671,7 +713,7 @@ theorem scalarSigns_of_local
   apply scalarSigns_of_lap_firstNull (I := I) (M := M)
     (G := G) (S := S) (X := X) (N := N)
     (nabla2Barrier := nabla2Barrier) (nablaBarrier := nablaBarrier)
-    hstrict hnull d laplacian hlaplacian_nonneg hlap
+    hstrict hnull hsym hbilin d laplacian hlaplacian_nonneg hlap
   rw [hnabla, hX]
   exact nablaEval_zero (I := I) (M := M) hreal Xsec V hV hphi hcovV
 
@@ -701,6 +743,11 @@ theorem scalarSigns_of_local_min
       G S X N nabla2Barrier nablaBarrier epsilon delta t0)
     (hnull : TensorNullEigenvectorCondition (I := I) (M := M)
       G N (Set.Icc t0 (t0 + delta)))
+    (hsym : TwoTensorFamilySymmetricOn (I := I) (M := M) S
+      (Set.Icc t0 (t0 + delta)))
+    (hbilin :
+      ∀ t, t ∈ Set.Icc t0 (t0 + delta) -> ∀ x,
+        TwoTensorBilinearAt (I := I) (M := M) (S t) x)
     (d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0)
     (hreal :
       TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -754,7 +801,7 @@ theorem scalarSigns_of_local_min
     (G := G) (S := S) (X := X) (N := N)
     (nabla2Barrier := nabla2Barrier) (nablaBarrier := nablaBarrier)
     (cov := cov) (B := B) (nablaB := nablaB)
-    hstrict hnull d (laplacian (I := I) cov (G d.t1) phi d.x1)
+    hstrict hnull hsym hbilin d (laplacian (I := I) cov (G d.t1) phi d.x1)
     hlap_nonneg hlap hreal Xsec V hX hnabla hV hphi hcovV
 
 /-- Single-section version of `scalarSigns_of_local_min`.
@@ -781,6 +828,11 @@ theorem scalarSigns_oneSec
       G S X N nabla2Barrier nablaBarrier epsilon delta t0)
     (hnull : TensorNullEigenvectorCondition (I := I) (M := M)
       G N (Set.Icc t0 (t0 + delta)))
+    (hsym : TwoTensorFamilySymmetricOn (I := I) (M := M) S
+      (Set.Icc t0 (t0 + delta)))
+    (hbilin :
+      ∀ t, t ∈ Set.Icc t0 (t0 + delta) -> ∀ x,
+        TwoTensorBilinearAt (I := I) (M := M) (S t) x)
     (d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0)
     (hreal :
       TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -869,8 +921,8 @@ theorem scalarSigns_oneSec
     (G := G) (S := S) (X := X) (N := N)
     (nabla2Barrier := nabla2Barrier) (nablaBarrier := nablaBarrier)
     (cov := cov) (B := B) (nablaB := nablaB)
-    hstrict hnull d hreal Xsec V hlapMin hlap' hX hnabla hV' hB' hcovV'
-    hmdiff' hmdiff_near' hgrad'
+    hstrict hnull hsym hbilin d hreal Xsec V hlapMin hlap' hX hnabla hV' hB'
+    hcovV' hmdiff' hmdiff_near' hgrad'
 
 /-- One-section scalar signs using a realized scalar Hessian for
 `phi = B(V,V)`.
@@ -903,6 +955,11 @@ theorem scalarSigns_hess
       G S X N nabla2Barrier nablaBarrier epsilon delta t0)
     (hnull : TensorNullEigenvectorCondition (I := I) (M := M)
       G N (Set.Icc t0 (t0 + delta)))
+    (hsym : TwoTensorFamilySymmetricOn (I := I) (M := M) S
+      (Set.Icc t0 (t0 + delta)))
+    (hbilin :
+      ∀ t, t ∈ Set.Icc t0 (t0 + delta) -> ∀ x,
+        TwoTensorBilinearAt (I := I) (M := M) (S t) x)
     (d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0)
     (hreal1 :
       TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -968,7 +1025,7 @@ theorem scalarSigns_hess
     (G := G) (S := S) (X := X) (N := N)
     (nabla2Barrier := nabla2Barrier) (nablaBarrier := nablaBarrier)
     (cov := cov) (B := B) (nablaB := nablaB)
-    hstrict hnull d hreal1 Xsec Vsec hlapMin (Hess d.x1) hlap hslots
+    hstrict hnull hsym hbilin d hreal1 Xsec Vsec hlapMin (Hess d.x1) hlap hslots
     hX hnabla hV hB (hcovV Xsec) hmdiff hmdiff_near hgrad
 
 /-- One-jet scalar signs with canonical scalar `du`, Hessian, and Laplacian
@@ -1110,7 +1167,9 @@ theorem scalarSigns_covHess
     (nabla2Barrier := nabla2Barrier) (nablaBarrier := nablaBarrier)
     (cov := cov) (B := B) (nablaB := nablaB) (nabla2B := nabla2B)
     (du := du) (Hess := Hess)
-    hstrict hnull d hreal1 hreal2 Xsec Vsec hlapMin hnabla2
+    hstrict hnull hsym
+    (fun t _ht x => twoTensorSecToFamily_bilin (I := I) (M := M) S t x)
+    d hreal1 hreal2 Xsec Vsec hlapMin hnabla2
     hkerL hkerR hdu hHess hlap hAreg
     hX hnabla hV (hB Vsec hV) hcovVall hmdiff hmdiff_near
     (by simpa [phi] using hgrad)
@@ -1241,6 +1300,11 @@ theorem scalarSigns_covZero
       G S X N nabla2Barrier nablaBarrier epsilon delta t0)
     (hnull : TensorNullEigenvectorCondition (I := I) (M := M)
       G N (Set.Icc t0 (t0 + delta)))
+    (hsym : TwoTensorFamilySymmetricOn (I := I) (M := M) S
+      (Set.Icc t0 (t0 + delta)))
+    (hbilin :
+      ∀ t, t ∈ Set.Icc t0 (t0 + delta) -> ∀ x,
+        TwoTensorBilinearAt (I := I) (M := M) (S t) x)
     (d : TensorFirstNullData (I := I) (M := M) G S epsilon delta t0)
     (hreal :
       TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -1305,7 +1369,7 @@ theorem scalarSigns_covZero
     (G := G) (S := S) (X := X) (N := N)
     (nabla2Barrier := nabla2Barrier) (nablaBarrier := nablaBarrier)
     (cov := cov) (B := B) (nablaB := nablaB)
-    hstrict hnull d hreal Xsec Vsec hlapMin (hessPhi Vsec hV)
+    hstrict hnull hsym hbilin d hreal Xsec Vsec hlapMin (hessPhi Vsec hV)
     (hlap Vsec hV) (hslots Vsec hV) hX hnabla hV (hB Vsec hV) (hcovVall Xsec)
     (hmdiff Vsec hV) (hmdiff_near Vsec hV) (hgrad Vsec hV)
 

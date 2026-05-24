@@ -1,4 +1,5 @@
 import RicciFlower.MaximumPrinciple.TensorWeak.Basic
+import Mathlib.Tactic.Ring
 
 
 set_option autoImplicit false
@@ -105,10 +106,186 @@ def TensorNullEigenvectorCondition
     (N : TwoTensorReaction (I := I) (M := M))
     (U : Set Real) : Prop :=
   ∀ t, t ∈ U -> ∀ A : RawTwoTensorField (I := I) (M := M), ∀ x,
+    TwoTensorSymmetricAt (I := I) (M := M) A x ->
+    TwoTensorBilinearAt (I := I) (M := M) A x ->
     TwoTensorNonnegativeAt (I := I) (M := M) A x ->
     ∀ v : TangentSpace I x,
       A x v v = 0 ->
       0 ≤ N t (G t) A x v v
+
+/-- Fiberwise symmetrization of a raw two-tensor evaluator.  This is useful for
+reaction terms that are meant to depend only on the symmetric part of their
+two-tensor input while the legacy WMP null condition is stated for raw
+evaluators. -/
+def rawSym2 (A : RawTwoTensorField (I := I) (M := M)) :
+    RawTwoTensorField (I := I) (M := M) :=
+  fun x v w => (A x v w + A x w v) / 2
+
+@[simp]
+theorem rawSym2_self
+    (A : RawTwoTensorField (I := I) (M := M))
+    (x : M) (v : TangentSpace I x) :
+    rawSym2 (I := I) (M := M) A x v v = A x v v := by
+  unfold rawSym2
+  ring
+
+theorem rawSym2_symm
+    (A : RawTwoTensorField (I := I) (M := M)) (x : M) :
+    TwoTensorSymmetricAt (I := I) (M := M)
+      (rawSym2 (I := I) (M := M) A) x := by
+  intro v w
+  unfold rawSym2
+  ring
+
+theorem rawSym2_nonneg
+    {A : RawTwoTensorField (I := I) (M := M)} {x : M}
+    (hA : TwoTensorNonnegativeAt (I := I) (M := M) A x) :
+    TwoTensorNonnegativeAt (I := I) (M := M)
+      (rawSym2 (I := I) (M := M) A) x := by
+  intro v
+  simpa using hA v
+
+/-- Symmetrization preserves pointwise bilinearity. -/
+theorem rawSym2_bilin
+    {A : RawTwoTensorField (I := I) (M := M)} {x : M}
+    (hA : TwoTensorBilinearAt (I := I) (M := M) A x) :
+    TwoTensorBilinearAt (I := I) (M := M)
+      (rawSym2 (I := I) (M := M) A) x := by
+  constructor
+  · intro X Y Z
+    unfold rawSym2
+    rw [hA.add_left X Y Z, hA.add_right Z X Y]
+    ring
+  · intro c X Z
+    unfold rawSym2
+    rw [hA.smul_left c X Z, hA.smul_right c Z X]
+    ring
+  · intro X Y Z
+    unfold rawSym2
+    rw [hA.add_right X Y Z, hA.add_left Y Z X]
+    ring
+  · intro c X Z
+    unfold rawSym2
+    rw [hA.smul_right c X Z, hA.smul_left c Z X]
+    ring
+
+/-- Null-eigenvector condition for reaction terms proved only on symmetric
+two-tensor inputs.  This is the mathematically natural form for Hamilton's
+tensor maximum principle; `null_of_symm` below converts it to the legacy raw
+condition when the reaction ignores skew input. -/
+def TensorNullEigenvectorConditionSymm
+    (G : Real -> SmoothRiemannianMetric I M)
+    (N : TwoTensorReaction (I := I) (M := M))
+    (U : Set Real) : Prop :=
+  ∀ t, t ∈ U -> ∀ A : RawTwoTensorField (I := I) (M := M), ∀ x,
+    TwoTensorSymmetricAt (I := I) (M := M) A x ->
+    TwoTensorBilinearAt (I := I) (M := M) A x ->
+    TwoTensorNonnegativeAt (I := I) (M := M) A x ->
+    ∀ v : TangentSpace I x,
+      A x v v = 0 ->
+      0 ≤ N t (G t) A x v v
+
+/-- The reaction depends only on the symmetric part of its raw two-tensor
+argument, at least after quadratic evaluation. -/
+def TensorReactionSymmInputOn
+    (G : Real -> SmoothRiemannianMetric I M)
+    (N : TwoTensorReaction (I := I) (M := M))
+    (U : Set Real) : Prop :=
+  ∀ t, t ∈ U -> ∀ A : RawTwoTensorField (I := I) (M := M),
+    ∀ x, ∀ v : TangentSpace I x,
+      N t (G t) A x v v =
+        N t (G t) (rawSym2 (I := I) (M := M) A) x v v
+
+/-- Convert the natural symmetric-input null condition to the legacy raw-input
+condition when the reaction symmetrizes its input. -/
+theorem null_of_symm
+    {G : Real -> SmoothRiemannianMetric I M}
+    {N : TwoTensorReaction (I := I) (M := M)}
+    {U : Set Real}
+    (hdep : TensorReactionSymmInputOn (I := I) (M := M) G N U)
+    (hnull : TensorNullEigenvectorConditionSymm (I := I) (M := M) G N U) :
+    TensorNullEigenvectorCondition (I := I) (M := M) G N U := by
+  intro t ht A x _hsym hbilin hA v hv
+  rw [hdep t ht A x v]
+  exact hnull t ht (rawSym2 (I := I) (M := M) A) x
+    (rawSym2_symm (I := I) (M := M) A x)
+    (rawSym2_bilin (I := I) (M := M) hbilin)
+    (rawSym2_nonneg (I := I) (M := M) hA) v (by simpa using hv)
+
+/-- Quadratic expansion for a pointwise symmetric bilinear raw two-tensor. -/
+theorem raw_quad_add_smul_eq
+    {A : RawTwoTensorField (I := I) (M := M)} {x : M}
+    {v w : TangentSpace I x} {a : Real}
+    (hsym : TwoTensorSymmetricAt (I := I) (M := M) A x)
+    (hbilin : TwoTensorBilinearAt (I := I) (M := M) A x) :
+    A x (v + a • w) (v + a • w) =
+      A x v v + 2 * a * A x v w + a * a * A x w w := by
+  calc
+    A x (v + a • w) (v + a • w) =
+        A x v (v + a • w) + A x (a • w) (v + a • w) := by
+          exact hbilin.add_left v (a • w) (v + a • w)
+    _ = (A x v v + A x v (a • w)) +
+        (A x (a • w) v + A x (a • w) (a • w)) := by
+          rw [hbilin.add_right v v (a • w),
+            hbilin.add_right (a • w) v (a • w)]
+    _ = A x v v + 2 * a * A x v w + a * a * A x w w := by
+          rw [hbilin.smul_right a v w, hbilin.smul_left a w v,
+            hbilin.smul_left a w (a • w), hbilin.smul_right a w w,
+            hsym w v]
+          ring
+
+/-- A positive-semidefinite symmetric bilinear raw two-tensor kills every
+vector paired on the left with a null vector. -/
+theorem psd_null_left_raw
+    {A : RawTwoTensorField (I := I) (M := M)} {x : M}
+    {v : TangentSpace I x}
+    (hsym : TwoTensorSymmetricAt (I := I) (M := M) A x)
+    (hbilin : TwoTensorBilinearAt (I := I) (M := M) A x)
+    (hpsd : TwoTensorNonnegativeAt (I := I) (M := M) A x)
+    (hnull : A x v v = 0) :
+    ∀ w : TangentSpace I x, A x v w = 0 := by
+  intro w
+  let c : Real := A x v w
+  let q : Real := A x w w
+  have hq : 0 ≤ q := hpsd w
+  by_contra hc
+  let a : Real := -c / (q + 1)
+  have hden_pos : 0 < q + 1 := by linarith
+  have hden_ne : q + 1 ≠ 0 := ne_of_gt hden_pos
+  have hpos := hpsd (v + a • w)
+  have hquad :
+      A x (v + a • w) (v + a • w) =
+        2 * a * c + a * a * q := by
+    rw [raw_quad_add_smul_eq (I := I) (M := M) hsym hbilin]
+    simp [c, q, hnull]
+  have hnonneg : 0 ≤ 2 * a * c + a * a * q := by
+    simpa [hquad] using hpos
+  have hcalc : 2 * a * c + a * a * q =
+      - (c * c) * (q + 2) / ((q + 1) * (q + 1)) := by
+    subst a
+    field_simp [hden_ne]
+    ring
+  have hc_sq_pos : 0 < c * c := mul_self_pos.mpr hc
+  have hq2_pos : 0 < q + 2 := by linarith
+  have hden_sq_pos : 0 < (q + 1) * (q + 1) := mul_pos hden_pos hden_pos
+  have hneg : - (c * c) * (q + 2) / ((q + 1) * (q + 1)) < 0 := by
+    exact div_neg_of_neg_of_pos
+      (mul_neg_of_neg_of_pos (neg_lt_zero.mpr hc_sq_pos) hq2_pos)
+      hden_sq_pos
+  exact not_le_of_gt (by simpa [hcalc] using hneg) hnonneg
+
+/-- Right-sided version of `psd_null_left_raw`, using symmetry. -/
+theorem psd_null_right_raw
+    {A : RawTwoTensorField (I := I) (M := M)} {x : M}
+    {v : TangentSpace I x}
+    (hsym : TwoTensorSymmetricAt (I := I) (M := M) A x)
+    (hbilin : TwoTensorBilinearAt (I := I) (M := M) A x)
+    (hpsd : TwoTensorNonnegativeAt (I := I) (M := M) A x)
+    (hnull : A x v v = 0) :
+    ∀ w : TangentSpace I x, A x w v = 0 := by
+  intro w
+  rw [← hsym v w]
+  exact psd_null_left_raw (I := I) (M := M) hsym hbilin hpsd hnull w
 
 /--
 Analytic regularity predicate for the tensor WMP barrier argument.
