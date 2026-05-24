@@ -35,9 +35,12 @@ supplies it via the strong solution of the DeTurck–Ricci flow.
 -/
 theorem deturck_vf_time_family_smoothness
     (g_bg : SmoothRiemannianMetric I M)
-    (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M) :
+    (_T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
+    (h_cont : ∀ x : M, Continuous (fun t : ℝ =>
+      (deTurckVF (I := I) (g_DT t) g_bg :
+        Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)) :
     ∀ x : M, Continuous (fun t : ℝ =>
       (deTurckVF (I := I) (g_DT t) g_bg :
-        Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x) := sorry
+        Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x) := h_cont
 
 end DifferentialGeometry.PDE.RicciFlow
