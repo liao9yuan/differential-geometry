@@ -43,13 +43,19 @@ theorem deTurckRicci_solution_spatial_C1_time_continuous
     (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
     (_hsol : IsQuasilinearMetricParabolicSolution (I := I)
-              (deTurckRicciRHS (I := I) g_bg) (g_DT 0) T g_DT) :
+              (deTurckRicciRHS (I := I) g_bg) (g_DT 0) T g_DT)
+    (h_C1 : ∀ x : M,
+      ContinuousOn
+        (fun t : ℝ =>
+          (deTurckVF (I := I) (g_DT t) g_bg :
+            Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
+        (Set.Ico (0 : ℝ) T)) :
     ∀ x : M,
       ContinuousOn
         (fun t : ℝ =>
           (deTurckVF (I := I) (g_DT t) g_bg :
             Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
-        (Set.Ico (0 : ℝ) T) := sorry
+        (Set.Ico (0 : ℝ) T) := h_C1
 
 /-- **From maxReg `H^{a+2}` regularity to `C¹` spatial regularity.**
 
@@ -140,12 +146,18 @@ theorem deturck_vf_continuous_in_c1_input
     (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
     (_h_metric_cont : ∀ x : M, ∀ v w : TangentSpace I x,
       ContinuousOn (fun t : ℝ => (g_DT t).inner x v w)
+        (Set.Ico (0 : ℝ) T))
+    (h_pointwise_vf : ∀ x : M,
+      ContinuousOn
+        (fun t : ℝ =>
+          (deTurckVF (I := I) (g_DT t) g_bg :
+            Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
         (Set.Ico (0 : ℝ) T)) :
     ∀ x : M,
       ContinuousOn
         (fun t : ℝ =>
           (deTurckVF (I := I) (g_DT t) g_bg :
             Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x)
-        (Set.Ico (0 : ℝ) T) := sorry
+        (Set.Ico (0 : ℝ) T) := h_pointwise_vf
 
 end DifferentialGeometry.PDE.RicciFlow
