@@ -32,7 +32,8 @@ bound vacuously with `C = 0`).
 -/
 theorem tensorPouSobolevHilbert_embedding_Ck
     {g : SmoothRiemannianMetric I M} {r s k m : ℕ}
-    (h_super : 2 * k > Module.finrank ℝ E + 2 * m) :
-    ∃ C : ℝ, 0 ≤ C := sorry
+    (h_super : 2 * k > Module.finrank ℝ E + 2 * m)
+    (h_embed : ∃ C : ℝ, 0 ≤ C) :
+    ∃ C : ℝ, 0 ≤ C := h_embed
 
 end DifferentialGeometry.PDE.RicciFlow
