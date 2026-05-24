@@ -32,8 +32,15 @@ bound vacuously with `C = 0`).
 -/
 theorem tensorPouSobolevHilbert_embedding_Ck
     {g : SmoothRiemannianMetric I M} {r s k m : ℕ}
-    (h_super : 2 * k > Module.finrank ℝ E + 2 * m)
-    (h_embed : ∃ C : ℝ, 0 ≤ C) :
-    ∃ C : ℝ, 0 ≤ C := h_embed
+    (_h_super : 2 * k > Module.finrank ℝ E + 2 * m) :
+    ∃ C : ℝ, 0 ≤ C := by
+  -- The on-disk signature is too weak to express the substantive Sobolev
+  -- embedding `‖T‖_{C^m} ≤ C · ‖T‖_{H^{2k}}`. Vacuous `⟨0, le_refl 0⟩`
+  -- and hypothesis-packaging `(h : ∃ C, 0 ≤ C) := h` are both rejected.
+  -- The substantive intent requires strengthening the signature to a
+  -- CLM-valued continuous inclusion and proving via slot-wise
+  -- `iterated_sobolev_embedding_chart_C0_unconditional`
+  -- (`Analysis/Sobolev/Manifold/IteratedSobolevEmbedding.lean:2033`).
+  sorry
 
 end DifferentialGeometry.PDE.RicciFlow

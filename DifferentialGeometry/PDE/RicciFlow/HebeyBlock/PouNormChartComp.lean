@@ -13,7 +13,8 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-  [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+  [SigmaCompactSpace M]
 
 /-- Two-sided norm equivalence between the chart-aggregated partition-of-
 unity-weighted Hilbert-Schmidt chart-Sobolev norm
@@ -55,18 +56,22 @@ This bridges the operator-norm chart-Sobolev formalism used by
 `tensorPouSobolevNorm` with the Hilbert-Schmidt chart-Sobolev formalism
 that underlies the inner-product structure on `TensorPouSobolevHilbert`. -/
 theorem pou_weighted_norm_equals_chart_component_norm_up_to_constant
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h : ∃ c C : ℝ, 0 < c ∧ c ≤ C ∧
-        ∀ T : SmoothCcTensor g r s,
-          c * (tensorPouSobolevNorm (I := I) (M := M) g 0 T).toReal ≤
-              (tensorPouSobolevHsNorm (I := I) (M := M) g 0 T).toReal ∧
-            (tensorPouSobolevHsNorm (I := I) (M := M) g 0 T).toReal ≤
-              C * (tensorPouSobolevNorm (I := I) (M := M) g 0 T).toReal) :
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ c C : ℝ, 0 < c ∧ c ≤ C ∧
       ∀ T : SmoothCcTensor g r s,
         c * (tensorPouSobolevNorm (I := I) (M := M) g 0 T).toReal ≤
             (tensorPouSobolevHsNorm (I := I) (M := M) g 0 T).toReal ∧
           (tensorPouSobolevHsNorm (I := I) (M := M) g 0 T).toReal ≤
-            C * (tensorPouSobolevNorm (I := I) (M := M) g 0 T).toReal := h
+            C * (tensorPouSobolevNorm (I := I) (M := M) g 0 T).toReal :=
+  -- At order `k = 0` the operator-norm aggregation
+  -- `tensorPouSobolevNorm g 0 T` and the Hilbert-Schmidt aggregation
+  -- `tensorPouSobolevHsNorm g 0 T` collapse to the same single integrand
+  -- term `chartAtlasPOU α · |T_{IJ}^α|²`: the derivative-order sum is
+  -- over `Finset.range 1 = {0}`, the HS basis-index sum is over the
+  -- singleton `Fin 0 → Fin n`, and `iteratedFDeriv ℝ 0 f y = f y`. This
+  -- exact fibrewise reduction is packaged as
+  -- `fibrewise_gram_twist_estimate` (with `c = C = 1`).
+  fibrewise_gram_twist_estimate (I := I) (M := M) g r s
 
 end DifferentialGeometry.PDE.RicciFlow.HebeyBlock

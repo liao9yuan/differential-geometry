@@ -14,7 +14,8 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-  [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M]
 
 /-- Existence of a strictly positive two-sided bound governing the
 fibrewise Gram-twist estimate for `(r, s)`-tensor fields.
@@ -67,22 +68,62 @@ c · (tensorPouSobolevNorm g 0 T).toReal ≤
 valid for every smooth compactly-supported `(r, s)`-tensor section `T`,
 which is the fibrewise Gram-twist eigenvalue comparison aggregated over
 the chart-atlas partition-of-unity finite support against the volume
-measure of each chart target. -/
+measure of each chart target.
+
+## Implementation note (order `k = 0` reduction)
+
+At order `k = 0`, both `tensorPouSobolevNorm` and `tensorPouSobolevHsNorm`
+sum over `j ∈ Finset.range (2*0+1) = {0}`, so only the `j = 0` derivative
+term contributes. For `j = 0`, the iterated Fréchet derivative
+`iteratedFDeriv ℝ 0 f y` equals `f y` (a real number, since
+`tensorChartComponentRaw` is `ℝ`-valued). Consequently:
+
+* the `tensorPouSobolevNorm` integrand reduces to
+  `chartAtlasPOU α · ‖f y‖² = chartAtlasPOU α · |f y|²`;
+* the `tensorPouSobolevHsNorm` integrand sums over the single-element
+  index type `Fin 0 → Fin n` and reduces to the same expression
+  `chartAtlasPOU α · |f y|²`.
+
+Hence the two `ℝ≥0∞`-valued norms agree exactly, so the choice
+`c = C = 1` witnesses the two-sided bound on `ENNReal.toReal`. The
+non-trivial Gram-twist eigenvalue analysis is needed only at higher
+regularity orders, where the iterated derivatives carry chart-frame
+multilinear structure that the Riemannian metric reweights non-trivially. -/
 theorem fibrewise_gram_twist_estimate
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_gram_twist_global :
-      ∃ c C : ℝ, 0 < c ∧ c ≤ C ∧
-        ∀ T : SmoothCcTensor g r s,
-          c * (tensorPouSobolevNorm (I := I) (M := M) g 0 T).toReal ≤
-              (tensorPouSobolevHsNorm (I := I) (M := M) g 0 T).toReal ∧
-            (tensorPouSobolevHsNorm (I := I) (M := M) g 0 T).toReal ≤
-              C * (tensorPouSobolevNorm (I := I) (M := M) g 0 T).toReal) :
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ c C : ℝ, 0 < c ∧ c ≤ C ∧
       ∀ T : SmoothCcTensor g r s,
         c * (tensorPouSobolevNorm (I := I) (M := M) g 0 T).toReal ≤
             (tensorPouSobolevHsNorm (I := I) (M := M) g 0 T).toReal ∧
           (tensorPouSobolevHsNorm (I := I) (M := M) g 0 T).toReal ≤
-            C * (tensorPouSobolevNorm (I := I) (M := M) g 0 T).toReal :=
-  h_gram_twist_global
+            C * (tensorPouSobolevNorm (I := I) (M := M) g 0 T).toReal := by
+  -- At `k = 0`, both Sobolev norms reduce to the same expression because
+  -- (1) the derivative-order sum collapses to `j = 0`, and (2) at `j = 0`
+  -- the iterated Fréchet derivative is function evaluation and the
+  -- HS-basis-index sum is over the singleton `Fin 0 → Fin n`.
+  refine ⟨1, 1, by norm_num, le_refl 1, fun T => ?_⟩
+  have hEq :
+      tensorPouSobolevHsNorm (I := I) (M := M) g 0 T =
+        tensorPouSobolevNorm (I := I) (M := M) g 0 T := by
+    rw [tensorPouSobolevHsNorm_eq, tensorPouSobolevNorm_eq]
+    -- Reduce the two `(·)^(1/2)` expressions to equality of the bases.
+    congr 1
+    refine tsum_congr (fun α => ?_)
+    refine Finset.sum_congr rfl (fun IJ _ => ?_)
+    refine Finset.sum_congr rfl (fun j hj => ?_)
+    -- `2 * 0 + 1 = 1`, so `Finset.range 1 = {0}` and `j = 0`.
+    simp only [Finset.mem_range, Nat.mul_zero, Nat.zero_add] at hj
+    interval_cases j
+    -- For `j = 0`: HS sum is over `Fin 0 → Fin n` (a singleton via
+    -- `Pi.uniqueOfIsEmpty`).  Reduce both sides to function evaluation.
+    rw [Finset.univ_unique, Finset.sum_singleton]
+    refine MeasureTheory.lintegral_congr (fun y => ?_)
+    congr 2
+    rw [iteratedFDeriv_zero_apply, norm_iteratedFDeriv_zero, Real.norm_eq_abs]
+    rfl
+  rw [hEq]
+  refine ⟨?_, ?_⟩
+  · simp
+  · simp
 
 end DifferentialGeometry.PDE.RicciFlow.HebeyBlock

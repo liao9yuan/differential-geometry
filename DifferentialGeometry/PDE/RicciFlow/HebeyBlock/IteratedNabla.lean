@@ -13,7 +13,8 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-  [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M]
 
 /-- Two-sided norm equivalence between the iterated-covariant-derivative
 chart-Sobolev norm `(tensorPouSobolevHsNorm g k T).toReal` (in which the
@@ -44,19 +45,38 @@ constant via `uniform_chart_bounds_from_compactness`. The `_H1` suffix
 of the theorem name refers to the prototypical `k = 1` instance that
 feeds directly into the `H^1` Hilbert-space comparison in
 `assemble_pou_h1_iso_intrinsic_h1`. -/
+-- Status by regularity order:
+--   * `k = 0` is substantively PROVEN by direct delegation to
+--     `fibrewise_gram_twist_estimate`, which establishes the two-sided
+--     comparison (in fact with constants `c = C = 1`) by reducing both norms
+--     to a common single-term expression at order zero.
+--   * `k ≥ 1` remains open. The forward direction
+--     `HsNorm ≤ C · Norm` can in principle be assembled from
+--     `nabla_tensor_iterated_Hk_formula`, the `C^{k-1}` Christoffel bound
+--     `christoffel_Ck_bound_from_metric_Ck1`, and the one-sided
+--     `uniform_chart_bounds_from_compactness`. The reverse direction
+--     `c · Norm ≤ HsNorm` requires inverting the lower-order
+--     Christoffel-correction expansion at order `≥ 1`, for which no upstream
+--     witness exists in the current codebase. A substantive proof at general
+--     `k` is therefore blocked on building that lower-bound infrastructure.
 theorem iterated_nabla_vs_iterated_partial_equivalence_H1
-    (g : SmoothRiemannianMetric I M) (r s k : ℕ)
-    (h : ∃ c C : ℝ, 0 < c ∧ c ≤ C ∧
-        ∀ T : SmoothCcTensor g r s,
-          c * (tensorPouSobolevNorm (I := I) (M := M) g k T).toReal ≤
-              (tensorPouSobolevHsNorm (I := I) (M := M) g k T).toReal ∧
-            (tensorPouSobolevHsNorm (I := I) (M := M) g k T).toReal ≤
-              C * (tensorPouSobolevNorm (I := I) (M := M) g k T).toReal) :
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
     ∃ c C : ℝ, 0 < c ∧ c ≤ C ∧
       ∀ T : SmoothCcTensor g r s,
         c * (tensorPouSobolevNorm (I := I) (M := M) g k T).toReal ≤
             (tensorPouSobolevHsNorm (I := I) (M := M) g k T).toReal ∧
           (tensorPouSobolevHsNorm (I := I) (M := M) g k T).toReal ≤
-            C * (tensorPouSobolevNorm (I := I) (M := M) g k T).toReal := h
+            C * (tensorPouSobolevNorm (I := I) (M := M) g k T).toReal := by
+  match k with
+  | 0 =>
+    -- Substantive: at order `k = 0` the two norms agree on the nose, so the
+    -- two-sided bound holds with `c = C = 1` via `fibrewise_gram_twist_estimate`.
+    exact fibrewise_gram_twist_estimate (I := I) (M := M) g r s
+  | _ + 1 =>
+    -- Open at order `k ≥ 1`: see the comment block above.  The reverse
+    -- direction `c · tensorPouSobolevNorm ≤ tensorPouSobolevHsNorm` at
+    -- order `≥ 1` has no upstream witness in the current codebase.
+    sorry
 
 end DifferentialGeometry.PDE.RicciFlow.HebeyBlock

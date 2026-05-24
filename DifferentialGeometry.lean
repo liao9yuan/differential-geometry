@@ -168,6 +168,7 @@ import DifferentialGeometry.Tensor.Multilinear.Field
 import DifferentialGeometry.Tensor.Multilinear.Flip
 import DifferentialGeometry.Tensor.Multilinear.Dual
 import DifferentialGeometry.Tensor.Multilinear.Tensor
+import DifferentialGeometry.Tensor.Multilinear.HsBoundOp
 import DifferentialGeometry.Tensor.Mixed.Bundle
 import DifferentialGeometry.Tensor.Mixed.Fiber
 import DifferentialGeometry.Tensor.Mixed.DualFiber

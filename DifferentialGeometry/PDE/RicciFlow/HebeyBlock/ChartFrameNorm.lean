@@ -99,8 +99,114 @@ theorem chart_frame_component_norm_bound
                   ∂(volume :
                     Measure (EuclideanSpace ℝ
                       (Fin (Module.finrank ℝ E)))))).toReal ≤
-          C * (tensorPouSobolevHsNorm (I := I) (M := M) g k T).toReal ^ 2 :=
-  sorry
+          C * (tensorPouSobolevHsNorm (I := I) (M := M) g k T).toReal ^ 2 := by
+  classical
+  -- The constant is `1`: the per-chart-`α` term is literally one summand of the
+  -- `tsum` defining `tensorPouSobolevHsNormSq`, and the `tsum` equals
+  -- `(tensorPouSobolevHsNorm g k T) ^ 2`. Combined with finiteness of
+  -- `tensorPouSobolevHsNorm` on smooth compactly-supported sections, the
+  -- per-chart term's `ENNReal.toReal` is bounded by the squared `.toReal` of
+  -- the global norm.
+  refine ⟨1, le_of_lt one_pos, ?_⟩
+  intro T
+  -- The per-chart-`α` block, viewed as an ENNReal value.
+  set Fα : ℝ≥0∞ :=
+    ∑ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+        (Fin s → Fin (Module.finrank ℝ E)),
+      ∑ j ∈ Finset.range (2 * k + 1),
+        ∑ basisIdx : Fin j → Fin (Module.finrank ℝ E),
+          ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
+            ENNReal.ofReal
+              (((chartAtlasPOU I M α : M → ℝ)
+                  ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
+                |(iteratedFDeriv ℝ j
+                      (tensorChartComponentRaw (I := I) (M := M)
+                          g r s T α IJ.1 IJ.2
+                        ∘ (extChartAt I α).symm
+                        ∘ (toEuclidean (E := E)).symm)
+                      y)
+                    (fun i => EuclideanSpace.basisFun
+                      (Fin (Module.finrank ℝ E)) ℝ (basisIdx i))| ^ 2)
+            ∂(volume :
+              Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))))
+    with hFα_def
+  -- The full `tsum` over all chart base points equals `tensorPouSobolevHsNormSq`.
+  -- This is the explicit unfolding lemma for the squared norm.
+  have htsum_eq :
+      (∑' β : M,
+        ∑ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+            (Fin s → Fin (Module.finrank ℝ E)),
+          ∑ j ∈ Finset.range (2 * k + 1),
+            ∑ basisIdx : Fin j → Fin (Module.finrank ℝ E),
+              ∫⁻ y in chartTargetEuclid (I := I) (M := M) β,
+                ENNReal.ofReal
+                  (((chartAtlasPOU I M β : M → ℝ)
+                      ((extChartAt I β).symm ((toEuclidean (E := E)).symm y))) *
+                    |(iteratedFDeriv ℝ j
+                          (tensorChartComponentRaw (I := I) (M := M)
+                              g r s T β IJ.1 IJ.2
+                            ∘ (extChartAt I β).symm
+                            ∘ (toEuclidean (E := E)).symm)
+                          y)
+                        (fun i => EuclideanSpace.basisFun
+                          (Fin (Module.finrank ℝ E)) ℝ (basisIdx i))| ^ 2)
+                ∂(volume :
+                  Measure (EuclideanSpace ℝ
+                    (Fin (Module.finrank ℝ E))))) =
+        tensorPouSobolevHsNormSq (I := I) (M := M) g k T :=
+    (tensorPouSobolevHsNormSq_eq_inner_sum
+      (I := I) (M := M) g k T).symm
+  -- Pointwise: `Fα ≤ tsum over β` (the summand bound for a `tsum` in ENNReal).
+  have hFα_le_tsum :
+      Fα ≤ ∑' β : M,
+        ∑ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+            (Fin s → Fin (Module.finrank ℝ E)),
+          ∑ j ∈ Finset.range (2 * k + 1),
+            ∑ basisIdx : Fin j → Fin (Module.finrank ℝ E),
+              ∫⁻ y in chartTargetEuclid (I := I) (M := M) β,
+                ENNReal.ofReal
+                  (((chartAtlasPOU I M β : M → ℝ)
+                      ((extChartAt I β).symm ((toEuclidean (E := E)).symm y))) *
+                    |(iteratedFDeriv ℝ j
+                          (tensorChartComponentRaw (I := I) (M := M)
+                              g r s T β IJ.1 IJ.2
+                            ∘ (extChartAt I β).symm
+                            ∘ (toEuclidean (E := E)).symm)
+                          y)
+                        (fun i => EuclideanSpace.basisFun
+                          (Fin (Module.finrank ℝ E)) ℝ (basisIdx i))| ^ 2)
+                ∂(volume :
+                  Measure (EuclideanSpace ℝ
+                    (Fin (Module.finrank ℝ E)))) := by
+    rw [hFα_def]
+    exact ENNReal.le_tsum α
+  -- Combine: `Fα ≤ tensorPouSobolevHsNormSq g k T`.
+  have hFα_le_sq : Fα ≤ tensorPouSobolevHsNormSq (I := I) (M := M) g k T := by
+    refine hFα_le_tsum.trans ?_
+    rw [htsum_eq]
+  -- The squared norm is finite (Hilbert-Schmidt squared norm of a smooth
+  -- compactly-supported section).
+  have hNormSq_lt_top : tensorPouSobolevHsNormSq (I := I) (M := M) g k T < ⊤ :=
+    tensorPouSobolevHsNormSq_lt_top (I := I) (M := M) g k T
+  have hNormSq_ne_top : tensorPouSobolevHsNormSq (I := I) (M := M) g k T ≠ ⊤ :=
+    hNormSq_lt_top.ne
+  -- Transfer the inequality to `ENNReal.toReal`.
+  have htoReal_le : Fα.toReal ≤
+      (tensorPouSobolevHsNormSq (I := I) (M := M) g k T).toReal :=
+    ENNReal.toReal_mono hNormSq_ne_top hFα_le_sq
+  -- Identify `(tensorPouSobolevHsNormSq g k T).toReal` with the squared
+  -- `.toReal` of the unsquared norm. This uses `ENNReal.toReal_pow` applied to
+  -- the natural-power square inside the definition of `tensorPouSobolevHsNormSq`.
+  have hSq_eq_pow : tensorPouSobolevHsNormSq (I := I) (M := M) g k T =
+      tensorPouSobolevHsNorm (I := I) (M := M) g k T ^ 2 := rfl
+  have hSq_toReal : (tensorPouSobolevHsNormSq (I := I) (M := M) g k T).toReal =
+      (tensorPouSobolevHsNorm (I := I) (M := M) g k T).toReal ^ 2 := by
+    rw [hSq_eq_pow, ENNReal.toReal_pow]
+  -- Conclude.
+  rw [one_mul]
+  calc Fα.toReal
+      ≤ (tensorPouSobolevHsNormSq (I := I) (M := M) g k T).toReal := htoReal_le
+    _ = (tensorPouSobolevHsNorm (I := I) (M := M) g k T).toReal ^ 2 := hSq_toReal
 
 end HebeyBlock
 end RicciFlow

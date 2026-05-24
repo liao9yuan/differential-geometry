@@ -57,21 +57,8 @@ the model fibre. This packages the chart-aggregated operator-norm
 Hilbert-Schmidt `H^1`-Sobolev formalism that underlies the inner-product
 structure on `TensorPouSobolevHilbert g r s 1`. -/
 theorem assemble_pou_h1_iso_intrinsic_h1
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_iterated_nabla :
-        ∃ c C : ℝ, 0 < c ∧ c ≤ C ∧
-          ∀ T : SmoothCcTensor g r s,
-            c * (tensorPouSobolevNorm (I := I) (M := M) g 1 T).toReal ≤
-                (tensorPouSobolevHsNorm (I := I) (M := M) g 1 T).toReal ∧
-              (tensorPouSobolevHsNorm (I := I) (M := M) g 1 T).toReal ≤
-                C * (tensorPouSobolevNorm (I := I) (M := M) g 1 T).toReal)
-    (h_pou_chart_comp :
-        ∃ c C : ℝ, 0 < c ∧ c ≤ C ∧
-          ∀ T : SmoothCcTensor g r s,
-            c * (tensorPouSobolevNorm (I := I) (M := M) g 0 T).toReal ≤
-                (tensorPouSobolevHsNorm (I := I) (M := M) g 0 T).toReal ∧
-              (tensorPouSobolevHsNorm (I := I) (M := M) g 0 T).toReal ≤
-                C * (tensorPouSobolevNorm (I := I) (M := M) g 0 T).toReal) :
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ c C : ℝ, 0 < c ∧ c ≤ C ∧
       ∀ T : SmoothCcTensor g r s,
         c * (tensorPouSobolevNorm (I := I) (M := M) g 1 T).toReal ≤
@@ -79,25 +66,21 @@ theorem assemble_pou_h1_iso_intrinsic_h1
           (tensorPouSobolevHsNorm (I := I) (M := M) g 1 T).toReal ≤
             C * (tensorPouSobolevNorm (I := I) (M := M) g 1 T).toReal := by
   -- Step 1: extract the `k = 1` two-sided comparison via
-  -- `iterated_nabla_vs_iterated_partial_equivalence_H1` at `k = 1`,
-  -- forwarding the supplied hypothesis. This already yields constants
-  -- `c₁ ≤ C₁` matching the chart-frame Hilbert-Schmidt aggregation of
-  -- `∇^k T` (for `k ∈ {0, 1}`) against the corresponding operator-norm
-  -- chart-Sobolev aggregation.
+  -- `iterated_nabla_vs_iterated_partial_equivalence_H1` at `k = 1`. This
+  -- yields constants `c₁ ≤ C₁` matching the chart-frame Hilbert-Schmidt
+  -- aggregation of `∇^k T` (for `k ∈ {0, 1}`) against the corresponding
+  -- operator-norm chart-Sobolev aggregation. The underlying primitive
+  -- still has a `sorry` body (BLOCKED on reverse direction at k ≥ 1);
+  -- this composition transits the sorry through to the headline.
   obtain ⟨c₁, C₁, hc₁_pos, hc₁_le_C₁, h₁⟩ :=
     iterated_nabla_vs_iterated_partial_equivalence_H1
-      (I := I) (M := M) g r s 1 h_iterated_nabla
+      (I := I) (M := M) g r s 1
   -- Step 2: extract the `k = 0` two-sided comparison via
   -- `pou_weighted_norm_equals_chart_component_norm_up_to_constant`,
-  -- forwarding the supplied hypothesis. This contributes the
-  -- `T`-component (no derivative) of the `H^1` Hilbert-Schmidt versus
-  -- operator-norm chart-Sobolev equivalence, and ensures that the
-  -- Gram-twist constants of `fibrewise_gram_twist_estimate` absorb into
-  -- the absolute constants alongside the `k = 1` Christoffel contribution
-  -- of `christoffel_Ck_bound_from_metric_Ck1`.
+  -- which has been substantively proven at `k = 0` (`c = C = 1`).
   obtain ⟨c₀, C₀, hc₀_pos, hc₀_le_C₀, h₀⟩ :=
     pou_weighted_norm_equals_chart_component_norm_up_to_constant
-      (I := I) (M := M) g r s h_pou_chart_comp
+      (I := I) (M := M) g r s
   -- Step 3: package both pairs of constants into a single pair
   -- `(c, C) := (min c₀ c₁, max C₀ C₁)` via
   -- `uniform_chart_bounds_from_compactness` absorbing every chart-by-chart

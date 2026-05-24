@@ -39,12 +39,19 @@ the `H^2`-gain refinement attaches to this operator downstream.
 Predicate-free: no `HasLocallyConstantChartAt` hypothesis. -/
 theorem connection_laplacian_maxreg_predicate_free
     (g : SmoothRiemannianMetric I M) (r s : ℕ) {T : ℝ}
-    (_hT : 0 < T) (_hT1 : T ≤ 1)
-    (h_sol : ∃ SolOp : timeL2 (TensorL2 r s g) T →L[ℝ]
-        timeH1 (TensorL2 r s g) T,
-      ‖SolOp‖ ≤ 2) :
+    (_hT : 0 < T) (_hT1 : T ≤ 1) :
     ∃ SolOp : timeL2 (TensorL2 r s g) T →L[ℝ]
         timeH1 (TensorL2 r s g) T,
-      ‖SolOp‖ ≤ 2 := h_sol
+      ‖SolOp‖ ≤ 2 := by
+  -- The on-disk signature `∃ SolOp, ‖SolOp‖ ≤ 2` is satisfied vacuously
+  -- by the zero CLM (`‖0‖ = 0 ≤ 2`). That is exactly the
+  -- vacuous-witness-typed fill the user previously rejected at commit
+  -- `f20b9ae`; the substantive intent (De Simon maximal-regularity:
+  -- a particular `SolOp` is the Duhamel solution operator for
+  -- `∂_t u = Δ_∇ u + f`) is not enforceable from the present
+  -- existential alone. Until the signature is strengthened to specify
+  -- *which* operator solves the inhomogeneous heat equation, this
+  -- declaration remains an honest `sorry`.
+  sorry
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

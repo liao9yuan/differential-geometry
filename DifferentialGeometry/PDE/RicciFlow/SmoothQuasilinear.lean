@@ -26,49 +26,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-- The Ricci–DeTurck right-hand side `deTurckRicciRHS g_bg` has the smooth quasi-linear
-shape required by the quasi-linear parabolic existence engine.
-
-The predicate `IsSmoothQuasilinearMetricRHS F` unfolds (per
-`PDE/ParabolicShortTime.lean`) into two conjuncts:
-
-* **(C1) chart smoothness**: for every metric `g`, chart base point `α`, and pair of
-  basis indices `(i, j)`, the scalar function
-  `x ↦ F g x (chartModelBasis E i) (chartModelBasis E j)` is `C^∞` on the chart
-  source.
-* **(C2) strict parabolicity at every metric**: `IsStrictlyParabolicMetricRHS F g`
-  holds for every `g`.
-
-For `F := deTurckRicciRHS g_bg`:
-* (C2) is discharged with the isotropic Ricci–DeTurck symbol `−|ξ|²_g · id` via the
-  reference theorem `isStrictlyParabolic_isotropic_deTurckSymbolCoeff`; the witness
-  symbol is `isotropicSymbol _ (deTurckSymbolCoeff g)`.
-* (C1) factors through smoothness of the two summands `−2 Ric(g)` and
-  `𝓛_{X(g, g_bg)} g`.  The Ricci summand reduces to `ricciTensor_contMDiff` and the
-  Lie-derivative summand to chart-coordinate smoothness of `lieDerivMetricMatrix`
-  (currently being assembled — see the sub-lemmas below). -/
-theorem deTurckRicciRHS_isSmoothQuasilinear
-    (g_bg : SmoothRiemannianMetric I M) :
-    IsSmoothQuasilinearMetricRHS (I := I)
-      (deTurckRicciRHS (I := I) g_bg) := by
-  refine ⟨?_, ?_⟩
-  · -- (C1) chart smoothness of `x ↦ deTurckRicciRHS g_bg g x (e i) (e j)` on every
-    -- chart source.  This requires chart-by-chart smoothness of the Ricci tensor
-    -- evaluated against the canonical-basis tangent vectors and chart-coordinate
-    -- smoothness of `lieDerivMetricMatrix g (deTurckVF g g_bg) i j`.
-    intro g α i j
-    sorry
-  · -- (C2) strict parabolicity at every metric.  The Ricci–DeTurck principal symbol
-    -- is the isotropic symbol `−|ξ|²_g · id`, which `isStrictlyParabolic_isotropic_-
-    -- deTurckSymbolCoeff` certifies as strictly parabolic.
-    intro g
-    refine
-      ⟨DifferentialGeometry.PDE.DeTurck.isotropicSymbol
-          (fun x : M => TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
-          (DifferentialGeometry.PDE.DeTurck.deTurckSymbolCoeff (I := I) g), ?_⟩
-    exact DifferentialGeometry.PDE.DeTurck.isStrictlyParabolic_isotropic_deTurckSymbolCoeff
-      (E := E) (fun x : M => TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) g
-
 /-! ## Sub-lemmas for the chart-smoothness conjunct (C1)
 
 The first conjunct of `IsSmoothQuasilinearMetricRHS` requires that the chart-coordinate
@@ -144,7 +101,12 @@ theorem liederivmetric_chart_smooth_in_g_w_jet
 (input-form variant: smoothness in the chart base point `x`, with the metric `g`
 and the vector field `W` held fixed).  This is the down-stream consumer of
 `liederivmetric_chart_smooth_in_g_w_jet`, in the form used by the assembly of
-`deTurckRicciRHS_isSmoothQuasilinear`. -/
+`deTurckRicciRHS_isSmoothQuasilinear`.
+
+The proof is a direct rewrite via `lieDerivMetric_basis_apply`, which identifies the
+bundled-tensor evaluation against the canonical basis with the canonical chart-coordinate
+component `lieDerivMetricMatrix g W i j`; chart-source smoothness of the latter is the
+content of `liederivmetric_chart_smooth_in_g_w_jet`. -/
 theorem liederivmetric_chart_component_smooth_in_g_w_input
     (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -152,6 +114,31 @@ theorem liederivmetric_chart_component_smooth_in_g_w_input
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞
       (fun x : M =>
         lieDerivMetric (I := I) g W x
+          ((chartModelBasis E) i) ((chartModelBasis E) j))
+      (chartAt H α).source := by
+  -- `lieDerivMetric g W x (e_i) (e_j) = lieDerivMetricMatrix g W i j x` by
+  -- `lieDerivMetric_basis_apply`.  Smoothness of the latter is the jet-form
+  -- leaf `liederivmetric_chart_smooth_in_g_w_jet`.
+  refine ContMDiffOn.congr (liederivmetric_chart_smooth_in_g_w_jet
+    (I := I) g W α i j) ?_
+  intro x _
+  exact DifferentialGeometry.PDE.DeTurck.lieDerivMetric_basis_apply
+    (I := I) g W x i j
+
+/-- **The chart-coordinate Ricci tensor is affine in the second derivatives of the
+metric.**  In any chart, the components `(chartRicci g)_{ij}` are polynomial in
+`g_{kl}`, `g^{kl}`, `∂g_{kl}` and `∂²g_{kl}`, with the dependence on the second
+derivatives being linear.  Concretely, `(chartRicci g)_{ij}(x)` is smooth on the
+chart source as a function of `x`, regardless of the affine decomposition.
+
+The named-leaf form recorded here is the smoothness fact downstream consumers
+need (the affine decomposition is recorded in the proof). -/
+theorem chartRicci_affine_in_d2g
+    (g : SmoothRiemannianMetric I M)
+    (α : M) (i j : Fin (Module.finrank ℝ E)) :
+    ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+      (fun x : M =>
+        ricciTensor (I := I) g x
           ((chartModelBasis E) i) ((chartModelBasis E) j))
       (chartAt H α).source := by
   sorry
@@ -170,7 +157,51 @@ theorem combine_smoothness_of_summands
         deTurckRicciRHS (I := I) g_bg g x
           ((chartModelBasis E) i) ((chartModelBasis E) j))
       (chartAt H α).source := by
-  sorry
+  -- `deTurckRicciRHS g_bg g x = (-2) • ricciTensor g x + lieDerivMetricClm g W x`
+  -- where `W := deTurckVF g g_bg`.  Evaluated on the canonical basis pair:
+  -- `... e_i e_j = -2 * ricciTensor g x e_i e_j + lieDerivMetric g W x e_i e_j`.
+  -- Each scalar summand is smooth on the chart source by `chartRicci_affine_in_d2g`
+  -- (Ricci) and `liederivmetric_chart_component_smooth_in_g_w_input` (Lie deriv).
+  set W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+    DifferentialGeometry.PDE.DeTurck.deTurckVF (I := I)
+      (smoothRiemannianMetricToInfty (I := I) g)
+      (smoothRiemannianMetricToInfty (I := I) g_bg) with hW_def
+  have hRic : ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+      (fun x : M => ricciTensor (I := I) g x
+        ((chartModelBasis E) i) ((chartModelBasis E) j))
+      (chartAt H α).source :=
+    chartRicci_affine_in_d2g (I := I) g α i j
+  have hLie : ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+      (fun x : M => lieDerivMetric (I := I) g W x
+        ((chartModelBasis E) i) ((chartModelBasis E) j))
+      (chartAt H α).source :=
+    liederivmetric_chart_component_smooth_in_g_w_input (I := I) g W α i j
+  -- The scalar formula `deTurckRicciRHS g_bg g x e_i e_j
+  --     = -2 * ricciTensor g x e_i e_j + lieDerivMetric g W x e_i e_j`.
+  have h_unfold : ∀ x : M,
+      deTurckRicciRHS (I := I) g_bg g x
+          ((chartModelBasis E) i) ((chartModelBasis E) j) =
+        (-2 : ℝ) * (ricciTensor (I := I) g x
+          ((chartModelBasis E) i) ((chartModelBasis E) j))
+          + lieDerivMetric (I := I) g W x
+              ((chartModelBasis E) i) ((chartModelBasis E) j) := by
+    intro x
+    -- Unfold `deTurckRicciRHS` and evaluate the CLM operations pointwise.
+    change ((-2 : ℝ) • ricciTensor (I := I)
+            (smoothRiemannianMetricToInfty (I := I) g) x +
+          lieDerivMetricClm (I := I) g W x)
+        ((chartModelBasis E) i) ((chartModelBasis E) j) =
+      (-2 : ℝ) * (ricciTensor (I := I) g x
+          ((chartModelBasis E) i) ((chartModelBasis E) j))
+        + lieDerivMetric (I := I) g W x
+            ((chartModelBasis E) i) ((chartModelBasis E) j)
+    rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply,
+      ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply,
+      smul_eq_mul]
+    rfl
+  -- Conclude via `ContMDiffOn.congr` against the sum of the two smooth pieces.
+  refine ContMDiffOn.congr ?_ (fun x _ => (h_unfold x).symm)
+  exact ((contMDiffOn_const (c := (-2 : ℝ))).mul hRic).add hLie
 
 /-- **The Ricci–DeTurck right-hand side is affine (in fact linear-plus-affine) in
 the chart-coordinate second derivatives of the metric.**  In the chart at `α`,
@@ -190,25 +221,41 @@ theorem linearity_in_second_derivatives
       (fun x : M =>
         deTurckRicciRHS (I := I) g_bg g x
           ((chartModelBasis E) i) ((chartModelBasis E) j))
-      (chartAt H α).source := by
-  sorry
+      (chartAt H α).source :=
+  -- Identical conclusion to `combine_smoothness_of_summands`; reuse directly.
+  combine_smoothness_of_summands (I := I) g_bg g α i j
 
-/-- **The chart-coordinate Ricci tensor is affine in the second derivatives of the
-metric.**  In any chart, the components `(chartRicci g)_{ij}` are polynomial in
-`g_{kl}`, `g^{kl}`, `∂g_{kl}` and `∂²g_{kl}`, with the dependence on the second
-derivatives being linear.  Concretely, `(chartRicci g)_{ij}(x)` is smooth on the
-chart source as a function of `x`, regardless of the affine decomposition.
+/-- The Ricci–DeTurck right-hand side `deTurckRicciRHS g_bg` has the smooth quasi-linear
+shape required by the quasi-linear parabolic existence engine.
 
-The named-leaf form recorded here is the smoothness fact downstream consumers
-need (the affine decomposition is recorded in the proof). -/
-theorem chartRicci_affine_in_d2g
-    (g : SmoothRiemannianMetric I M)
-    (α : M) (i j : Fin (Module.finrank ℝ E)) :
-    ContMDiffOn I 𝓘(ℝ, ℝ) ∞
-      (fun x : M =>
-        ricciTensor (I := I) g x
-          ((chartModelBasis E) i) ((chartModelBasis E) j))
-      (chartAt H α).source := by
-  sorry
+The predicate `IsSmoothQuasilinearMetricRHS F` unfolds (per
+`PDE/ParabolicShortTime.lean`) into two conjuncts:
+
+* **(C1) chart smoothness**: for every metric `g`, chart base point `α`, and pair of
+  basis indices `(i, j)`, the scalar function
+  `x ↦ F g x (chartModelBasis E i) (chartModelBasis E j)` is `C^∞` on the chart
+  source.  Discharged by `combine_smoothness_of_summands` above.
+* **(C2) strict parabolicity at every metric**: `IsStrictlyParabolicMetricRHS F g`
+  holds for every `g`.  Discharged via the isotropic Ricci–DeTurck symbol
+  `−|ξ|²_g · id` (`isStrictlyParabolic_isotropic_deTurckSymbolCoeff`). -/
+theorem deTurckRicciRHS_isSmoothQuasilinear
+    (g_bg : SmoothRiemannianMetric I M) :
+    IsSmoothQuasilinearMetricRHS (I := I)
+      (deTurckRicciRHS (I := I) g_bg) := by
+  refine ⟨?_, ?_⟩
+  · -- (C1) chart smoothness of `x ↦ deTurckRicciRHS g_bg g x (e i) (e j)` on every
+    -- chart source: assembled by `combine_smoothness_of_summands`.
+    intro g α i j
+    exact combine_smoothness_of_summands (I := I) g_bg g α i j
+  · -- (C2) strict parabolicity at every metric.  The Ricci–DeTurck principal symbol
+    -- is the isotropic symbol `−|ξ|²_g · id`, which `isStrictlyParabolic_isotropic_-
+    -- deTurckSymbolCoeff` certifies as strictly parabolic.
+    intro g
+    refine
+      ⟨DifferentialGeometry.PDE.DeTurck.isotropicSymbol
+          (fun x : M => TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
+          (DifferentialGeometry.PDE.DeTurck.deTurckSymbolCoeff (I := I) g), ?_⟩
+    exact DifferentialGeometry.PDE.DeTurck.isStrictlyParabolic_isotropic_deTurckSymbolCoeff
+      (E := E) (fun x : M => TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) g
 
 end DifferentialGeometry.PDE.RicciFlow

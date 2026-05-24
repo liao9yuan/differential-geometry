@@ -25,16 +25,22 @@ manifold-level smoothness of the time-dependent vector field's spatial
 flow slice.
 -/
 theorem banach_flow_smooth_in_ic
-    (X : ℝ → ∀ x : M, TangentSpace I x) (α : M)
-    (h : ∃ T : ℝ, 0 < T ∧
-      ∃ U : Set M, IsOpen U ∧ α ∈ U ∧
-      ∃ φ : ℝ → M → M,
-        (∀ x ∈ U, φ 0 x = x) ∧
-        (∀ t ∈ Set.Ico (0 : ℝ) T, ContMDiffOn I I ∞ (φ t) U)) :
+    (_X : ℝ → ∀ x : M, TangentSpace I x) (α : M) :
     ∃ T : ℝ, 0 < T ∧
       ∃ U : Set M, IsOpen U ∧ α ∈ U ∧
       ∃ φ : ℝ → M → M,
         (∀ x ∈ U, φ 0 x = x) ∧
-        (∀ t ∈ Set.Ico (0 : ℝ) T, ContMDiffOn I I ∞ (φ t) U) := h
+        (∀ t ∈ Set.Ico (0 : ℝ) T, ContMDiffOn I I ∞ (φ t) U) := by
+  -- The on-disk signature lacks an ODE-anchor clause connecting `φ` to
+  -- `X`. Filling vacuously with the identity flow (`⟨1, _, univ, _, _,
+  -- fun _ x => x, …⟩`) is the pattern previously rejected at commit
+  -- `f20b9ae`; packaging it with a hypothesis matching the conclusion
+  -- is the most severe `/fill` violation. Substantive intent requires
+  -- strengthening the signature with the flow equation
+  -- `(d/dt) φ t x = X t (φ t x)` plus a Lipschitz hypothesis on `X`,
+  -- and proving via chart-pushforward of Mathlib's `IsPicardLindelof`.
+  -- Until that signature strengthening lands at blueprint level, this
+  -- declaration remains an honest `sorry`.
+  sorry
 
 end DifferentialGeometry.PDE.RicciFlow.ODE
