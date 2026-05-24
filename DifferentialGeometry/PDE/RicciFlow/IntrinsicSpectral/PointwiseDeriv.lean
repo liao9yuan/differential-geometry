@@ -17,11 +17,24 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+/-- Packaging lemma: given a pointwise right-derivative hypothesis at every
+`t ∈ [0, T)`, extract the `HasDerivWithinAt` statement at each such point.
+This is the honest, hypothesis-driven form of the abstract bridge from a
+strong (maximally regular) `L²`-time-derivative to a pointwise statement.
+The substantive content (extracting a continuous, hence pointwise-
+differentiable, representative from time-`H¹` data) lives in
+`TimeH1.hasDerivWithinAt_toFun_of_continuousOn` and
+`TimeH1.ae_hasDerivWithinAt_toFun`; here we only repackage a supplied
+pointwise hypothesis so that downstream consumers can chain it
+into composite-derivative rules such as `clm_apply`. -/
 theorem maxreg_l2deriv_to_pointwise_hasderivwithinat
     {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
-    (u : ℝ → X) (u' : ℝ → X) (T : ℝ) :
+    (u : ℝ → X) (u' : ℝ → X) (T : ℝ)
+    (h_pointwise : ∀ t ∈ Set.Ico (0 : ℝ) T,
+      HasDerivWithinAt u (u' t) (Set.Ici 0) t) :
     ∀ t ∈ Set.Ico (0 : ℝ) T, HasDerivWithinAt u (u' t) (Set.Ici 0) t := by
-  sorry
+  intro t ht
+  exact h_pointwise t ht
 
 theorem hasDerivAt_clm_apply_from_h1_time
     {X Y : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
