@@ -1,7 +1,9 @@
 import DifferentialGeometry.Metric.Basic
+import DifferentialGeometry.Integral.Connection.CotangentExtension
 import Mathlib.Geometry.Manifold.Diffeomorph
 import Mathlib.Geometry.Manifold.LocalDiffeomorph
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
+import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 import Mathlib.Analysis.InnerProductSpace.Basic
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
@@ -9,6 +11,7 @@ namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 open Bundle
 open scoped Manifold ContDiff
 open DifferentialGeometry
+open DifferentialGeometry.Integral.Connection
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -154,9 +157,32 @@ theorem Diffeomorph.pullbackInner_isVonNBounded
   rw [hseteq]
   exact himg
 
+-- order 408b: smoothness of `x ↦ ⟨Φ x, mfderiv I I Φ x (Y x)⟩`.
+/-- For a smooth diffeomorphism `Φ` and a smooth tangent section `Y`, the section
+`x ↦ ⟨Φ x, mfderiv I I Φ x (Y x)⟩` of the tangent bundle (with base map `Φ`) is smooth.
+Obtained from `tangentMap I I Φ` smoothness composed with the smooth tangent section `Y`. -/
+private theorem mfderiv_apply_section_smooth_along_diffeo
+    (Φ : M ≃ₘ⟮I, I⟯ M)
+    (Y : ∀ x : M, TangentSpace I x)
+    (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun x : M => TotalSpace.mk' E (E := TangentSpace I) x (Y x))) :
+    ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun x : M => TotalSpace.mk' E (E := TangentSpace I)
+        (Φ x) (mfderiv I I (Φ : M → M) x (Y x))) := by
+  -- `tangentMap I I Φ` of a `C^∞` map is `C^∞`.
+  have h_tangentMap : ContMDiff I.tangent I.tangent ∞ (tangentMap I I (Φ : M → M)) :=
+    Φ.contMDiff.contMDiff_tangentMap (le_refl _)
+  -- The section `x ↦ ⟨x, Y x⟩` is `C^∞` into `TangentBundle I M`.
+  -- Composing with `tangentMap I I Φ` gives smoothness of
+  -- `x ↦ tangentMap I I Φ ⟨x, Y x⟩ = ⟨Φ x, mfderiv I I Φ x (Y x)⟩`.
+  have h := h_tangentMap.comp hY
+  -- The result follows by definition of `tangentMap` on `TotalSpace.mk'`.
+  exact h
+
 -- order 409: bundled pullback metric
 /-- The pullback of a smooth Riemannian metric along a diffeomorphism. -/
 noncomputable def Diffeomorph.pullbackMetric
+    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M) :
     SmoothRiemannianMetric I M where
   inner x := Diffeomorph.pullbackInner g Φ x
@@ -164,21 +190,82 @@ noncomputable def Diffeomorph.pullbackMetric
   pos x v hv := Diffeomorph.pullbackInner_pos g Φ x v hv
   isVonNBounded x := Diffeomorph.pullbackInner_isVonNBounded g Φ x
   contMDiff := by
-    -- The pullback section factors pointwise as
-    --   pullbackInner g Φ x = (g.inner (Φ x)).bilinearComp (mfderiv I I Φ x) (mfderiv I I Φ x)
-    -- (see `pullbackInner_eval`). The first factor `x ↦ g.inner (Φ x)` is
-    -- smooth as a section of the bilinear-form bundle over `M` (see
-    -- `inner_comp_smooth_along_diffeo`). The second factor `x ↦ mfderiv I I Φ x`
-    -- is a section of `Hom(TM, Φ^* TM)`. Combining the two into a section of
-    -- the bilinear-form bundle over `M` requires a "smoothness of a pulled-back
-    -- bilinear-form section along a smooth base map" lemma that is not yet
-    -- available; the chart-local building blocks are in place via
-    -- `bilinear_pullback_bundle_smooth`, but a bundle-level wrapper is missing.
-    sorry
+    classical
+    -- Two-stage descent via `cotangentCov_clmSection_smooth_aux`.
+    -- Stage 1: For each smooth tangent section `Y`, the cotangent section
+    -- `x ↦ ⟨x, pullbackInner g Φ x (Y x)⟩` is smooth.
+    apply cotangentCov_clmSection_smooth_aux
+      (V₂ := fun x : M => TangentSpace I x →L[ℝ] ℝ)
+      (φ := fun x : M => Diffeomorph.pullbackInner g Φ x)
+    intro Y
+    -- Stage 2: For each smooth tangent section `W`, the scalar
+    -- `x ↦ pullbackInner g Φ x (Y x) (W x)` is smooth.
+    apply cotangentCov_clmSection_smooth_aux
+      (V₂ := fun _ : M => ℝ)
+      (φ := fun x : M => Diffeomorph.pullbackInner g Φ x (Y x))
+    intro W
+    -- Reduce to scalar smoothness via `contMDiffAt_section` for the trivial bundle.
+    -- Smoothness of `x ↦ ⟨Φ x, mfderiv I I Φ x (Y x)⟩` as a tangent-bundle section.
+    have hv := mfderiv_apply_section_smooth_along_diffeo Φ (fun x => Y x) Y.contMDiff
+    -- Same for W.
+    have hw := mfderiv_apply_section_smooth_along_diffeo Φ (fun x => W x) W.contMDiff
+    -- Smoothness of `x ↦ ⟨Φ x, g.inner (Φ x)⟩` as a bilinear-form bundle section,
+    -- with base map `Φ : M → M`.
+    have hg : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+        (fun x : M => TotalSpace.mk'
+          (E →L[ℝ] E →L[ℝ] ℝ)
+          (E := fun b : M => TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ)
+          (Φ x) (g.inner (Φ x))) :=
+      g.contMDiff.comp Φ.contMDiff
+    -- Apply the smooth bilinear form to the two smooth tangent sections.
+    have h_total : ContMDiff I (I.prod 𝓘(ℝ, ℝ)) ∞
+        (fun x : M => TotalSpace.mk' ℝ
+          (E := Bundle.Trivial M ℝ)
+          (Φ x)
+          (g.inner (Φ x) (mfderiv I I (Φ : M → M) x (Y x))
+            (mfderiv I I (Φ : M → M) x (W x)))) :=
+      ContMDiff.clm_bundle_apply₂
+        (E₁ := fun x : M => TangentSpace I x)
+        (E₂ := fun x : M => TangentSpace I x)
+        (E₃ := fun _ : M => ℝ)
+        (b := fun x : M => Φ x)
+        (ψ := fun x : M => g.inner (Φ x))
+        (v := fun x : M => mfderiv I I (Φ : M → M) x (Y x))
+        (w := fun x : M => mfderiv I I (Φ : M → M) x (W x))
+        hg hv hw
+    -- The trivial-bundle smoothness of a section `x ↦ ⟨b(x), s(x)⟩` is equivalent to
+    -- smoothness of `s : M → ℝ`. Extract the scalar smoothness.
+    have h_scalar : ContMDiff I 𝓘(ℝ, ℝ) ∞
+        (fun x : M => g.inner (Φ x) (mfderiv I I (Φ : M → M) x (Y x))
+            (mfderiv I I (Φ : M → M) x (W x))) := by
+      intro x
+      have h_at := h_total x
+      rw [contMDiffAt_totalSpace] at h_at
+      -- `(trivializationAt ℝ (Trivial M ℝ) (Φ x) ⟨Φ y, val⟩).2 = val` definitionally,
+      -- so the fibre component `h_at.2` equals our scalar.
+      have := h_at.2
+      convert this using 1
+    -- The pullback section value equals the scalar.
+    have h_pullback_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞
+        (fun x : M => Diffeomorph.pullbackInner g Φ x (Y x) (W x)) := by
+      have h_eq : (fun x : M => Diffeomorph.pullbackInner g Φ x (Y x) (W x))
+          = fun x : M => g.inner (Φ x) (mfderiv I I (Φ : M → M) x (Y x))
+              (mfderiv I I (Φ : M → M) x (W x)) := by
+        funext x; exact pullbackInner_eval g Φ x (Y x) (W x)
+      rw [h_eq]; exact h_scalar
+    intro x
+    rw [contMDiffAt_section]
+    refine (h_pullback_smooth.contMDiffAt).congr_of_eventuallyEq ?_
+    filter_upwards with y
+    change Diffeomorph.pullbackInner g Φ y (Y y) (W y) =
+      (trivializationAt ℝ (Bundle.Trivial M ℝ) x
+        ⟨y, Diffeomorph.pullbackInner g Φ y (Y y) (W y)⟩).2
+    rfl
 
 -- order 400: capstone wrapper-existence
 /-- The pullback metric exists: it is `Diffeomorph.pullbackMetric g Φ`. -/
 theorem diffeomorph_pullback_metric_exists
+    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M) :
     ∃ g' : SmoothRiemannianMetric I M, g' = Diffeomorph.pullbackMetric g Φ :=
   ⟨Diffeomorph.pullbackMetric g Φ, rfl⟩
@@ -186,6 +273,7 @@ theorem diffeomorph_pullback_metric_exists
 -- order 410: pullback under identity diffeomorphism
 /-- Pullback by the identity diffeomorphism is the identity operation. -/
 theorem Diffeomorph.pullbackMetric_refl
+    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     (g : SmoothRiemannianMetric I M) :
     Diffeomorph.pullbackMetric g (_root_.Diffeomorph.refl I M ∞) = g := by
   -- Establish equality of the `inner` data, then conclude record equality
@@ -229,6 +317,7 @@ theorem Diffeomorph.pullbackMetric_refl
 /-- Smoothness of the pullback inner-product section.
 This is exactly the `contMDiff` field of `Diffeomorph.pullbackMetric g Φ`. -/
 theorem Diffeomorph.pullbackInner_contMDiff
+    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
       (fun x => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ) x
