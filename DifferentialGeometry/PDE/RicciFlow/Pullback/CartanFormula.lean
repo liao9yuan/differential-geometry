@@ -66,7 +66,33 @@ modification of the Ricci flow.
 PROOF NOTE. The identity unwinds in coordinates through the chart-Christoffel
 expansion of `∇W` (`chart_christoffel_expansion_of_nabla_on_vf`) and the
 chart form of metric compatibility (`metric_compat_coord_identity`), recombined
-algebraically (`cartan_formula_chart_algebra`). -/
+algebraically (`cartan_formula_chart_algebra`).
+
+PROOF-INFRASTRUCTURE GAP. Closing this theorem requires three further chart
+bridges that are not yet present in the project:
+
+* identification of the bundled Levi-Civita value with the chart-`α` value at
+  a chart-good-set point on smooth inputs (`LeviCivita_chart_apply` supplies
+  the case `x ∈ chartLeviCivitaGoodSet α`; the canonical specialisation
+  `α := x` discharges the good-set hypothesis via
+  `self_mem_chartLeviCivitaGoodSet`);
+* the chart-coordinate Christoffel expansion of the chart-`α` Levi-Civita
+  derivative on a smooth section (`chart_christoffel_expansion_of_nabla_on_vf`
+  below, sketched in the same way the Hessian chart bridge unwinds the
+  chart-local connection: through `chartLeviCivita_apply`, the
+  `christoffelCorrection_apply` index-sum formula, and the
+  `chartE_section_repr`-vs-`chartCoeffOnE` model-basis-coordinate
+  identification);
+* the `g.inner`-to-chart-Gram-matrix bridge `g_inner_eq_chart_sum`, used to
+  read off the right-hand-side `g(∇_v W, w) + g(v, ∇_w W)` against the
+  chart-coordinate frame.
+
+The chart-algebraic recombination `cartan_formula_chart_algebra` below is the
+final algebraic step; it is itself blocked on the metric-compatibility
+identity `metric_compat_coord_identity` (proven above) being applied
+pointwise, which requires the chart-good-set membership condition. The
+unified pointwise statement collected here packages the identity in its
+intrinsic (chart-independent) form. -/
 theorem cartan_formula_for_lie_deriv_metric
     (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

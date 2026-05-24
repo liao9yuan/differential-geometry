@@ -30,6 +30,12 @@ theorem ricci_flow_short_time_existence
       [T2Space M] [SigmaCompactSpace M]
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ T : ℝ, 0 < T ∧
-      ∃ g_fam : ℝ → SmoothRiemannianMetric I M, g_fam 0 = g₀ := sorry
+      ∃ g_fam : ℝ → SmoothRiemannianMetric I M,
+        g_fam 0 = g₀ ∧
+        ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
+          HasDerivWithinAt (fun s : ℝ => (g_fam s).inner x v w)
+            ((-2 : ℝ) *
+              DifferentialGeometry.Integral.Connection.ricciTensor
+                (I := I) (g_fam t) x v w) (Set.Ici 0) t := sorry
 
 end DifferentialGeometry.PDE.RicciFlow
