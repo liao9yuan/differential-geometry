@@ -16,6 +16,7 @@ noncomputable def Diffeomorph.pushforward
       [IsManifold I ∞ M]
     (Φ : M ≃ₘ⟮I, I⟯ M)
     (W : ∀ x : M, TangentSpace I x) :
-    ∀ x : M, TangentSpace I x := sorry
+    ∀ x : M, TangentSpace I x :=
+  fun x => Φ.apply_symm_apply x ▸ (mfderiv I I Φ (Φ.symm x)) (W (Φ.symm x))
 
 end DifferentialGeometry.PDE.RicciFlow.Pullback
