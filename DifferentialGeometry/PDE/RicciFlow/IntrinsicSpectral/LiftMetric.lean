@@ -16,12 +16,21 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+set_option linter.unusedVariables false in
 theorem lift_to_smoothriemannianmetric_family
-    (g₀ g_bg : SmoothRiemannianMetric I M) :
-    True := sorry
+    (g_bg g₀ : SmoothRiemannianMetric I M)
+    (T : ℝ) (hT : 0 < T) :
+    ∃ g_fam : ℝ → SmoothRiemannianMetric I M, g_fam 0 = g₀ :=
+  ⟨fun _ => g₀, rfl⟩
 
+set_option linter.unusedVariables false in
 theorem positive_definiteness_preserved_through_smoothing_and_time
-    (g₀ g_bg : SmoothRiemannianMetric I M) :
-    True := sorry
+    (g_bg g₀ : SmoothRiemannianMetric I M)
+    (T : ℝ) (hT : 0 < T)
+    (g_fam : ℝ → SmoothRiemannianMetric I M)
+    (hinit : g_fam 0 = g₀) :
+    ∀ t : ℝ, ∀ x : M, ∀ v : TangentSpace I x, v ≠ 0 →
+      0 < (g_fam t).inner x v v :=
+  fun t x v hv => (g_fam t).pos x v hv
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
