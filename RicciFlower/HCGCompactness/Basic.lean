@@ -1,0 +1,133 @@
+import RicciFlower.RicciFlow.Basic
+
+set_option autoImplicit false
+set_option linter.style.longLine false
+set_option linter.unusedSectionVars false
+
+/-!
+# Basic Hamilton--Cheeger--Gromov Compactness Vocabulary
+
+This file contains only theorem-facing data and input packages for pointed
+Ricci-flow compactness.  The metric completeness, injectivity-radius, and
+noncollapsing slots are explicit input interfaces because the corresponding
+Riemannian distance and geodesic-ball APIs are not yet present in RicciFlower.
+-/
+
+noncomputable section
+
+universe u uE uH
+
+namespace RicciFlower
+namespace HCGCompactness
+
+open Bundle
+open scoped Manifold ContDiff
+
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
+variable {H : Type uH} [TopologicalSpace H]
+
+/-- One complete pointed Ricci-flow solution candidate on a fixed real time
+interval.
+
+The source manifold is part of the data so a sequence may vary its underlying
+manifold, as in the Hamilton compactness theorem. -/
+structure PointedFlowData
+    (I : ModelWithCorners Real E H) (D : Realized.RealTimeInterval) where
+  M : Type u
+  [topology : TopologicalSpace M]
+  [charted : ChartedSpace H M]
+  [smooth : IsManifold I ∞ M]
+  [smoothPlus : IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+  [sigmaCompact : SigmaCompactSpace M]
+  [t2 : T2Space M]
+  basepoint : M
+  S : RicciFlow.SolutionOn (I := I) (M := M) D
+  isSolution : RicciFlow.IsSolutionOn (I := I) S
+
+namespace PointedFlowData
+
+variable {I : ModelWithCorners Real E H}
+variable {D : Realized.RealTimeInterval}
+
+/-- Canonical squared norm of the lowered Riemann tensor of a pointed flow. -/
+def rmNormSq (F : PointedFlowData (I := I) D) (t : Real) (x : F.M) : Real :=
+  letI : TopologicalSpace F.M := F.topology
+  letI : ChartedSpace H F.M := F.charted
+  letI : IsManifold I ∞ F.M := F.smooth
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) F.M := F.smoothPlus
+  letI : SigmaCompactSpace F.M := F.sigmaCompact
+  letI : T2Space F.M := F.t2
+  Tensor0SBundle.normSq0S (I := I) (F.S.family.metric t) x 4
+    (F.S.base.rm04 t x)
+
+end PointedFlowData
+
+/-- A sequence of pointed Ricci-flow solution candidates on one common time
+interval. -/
+structure PointedFlowSeq (I : ModelWithCorners Real E H) where
+  D : Realized.RealTimeInterval
+  term : Nat -> PointedFlowData.{u, uE, uH} (I := I) D
+
+namespace PointedFlowSeq
+
+variable {I : ModelWithCorners Real E H}
+
+/-- Basepoint of the `i`th pointed flow in the sequence. -/
+def basepoint (X : PointedFlowSeq.{u, uE, uH} (I := I)) (i : Nat) :
+    (X.term i).M :=
+  (X.term i).basepoint
+
+end PointedFlowSeq
+
+/-- Completeness input for a pointed flow sequence.
+
+This is intentionally an input package: once RicciFlower has a canonical
+Riemannian distance/completeness API, `completeAt` should be specialized to it. -/
+structure CompleteInput {I : ModelWithCorners Real E H}
+    (X : PointedFlowSeq.{u, uE, uH} (I := I)) where
+  completeAt : Nat -> Real -> Prop
+  complete_on :
+    forall i : Nat, forall t : Real, t ∈ X.D.carrier -> completeAt i t
+
+/-- Uniform curvature bound on every compact time window inside the common
+time interval.  The bound is stated for the squared norm of the canonical
+lowered Riemann tensor. -/
+structure CurvBoundInput {I : ModelWithCorners Real E H}
+    (X : PointedFlowSeq.{u, uE, uH} (I := I)) : Prop where
+  bound_on_window :
+    forall a b : Real, Set.Icc a b ⊆ X.D.carrier ->
+      exists C : Real, 0 <= C /\
+        forall i : Nat, forall t : Real, t ∈ Set.Icc a b ->
+          forall x : (X.term i).M,
+            (X.term i).rmNormSq (I := I) t x <= C
+
+/-- Injectivity-radius input at the basepoints at time zero.
+
+The numeric accessor is not yet tied to a RicciFlower geodesic API; this record
+keeps that missing backend visible. -/
+structure InjInput {I : ModelWithCorners Real E H}
+    (_X : PointedFlowSeq.{u, uE, uH} (I := I)) where
+  injRadiusAtBase : Nat -> Real
+  iota : Real
+  iota_pos : 0 < iota
+  inj_lower : forall i : Nat, iota <= injRadiusAtBase i
+
+/-- Noncollapsing input at a fixed basepoint scale.
+
+This is the volume-side alternative to an injectivity-radius hypothesis.  It is
+kept separate because Perelman's theorem supplies volume noncollapse before a
+Cheeger--Gromov--Taylor style injectivity-radius bridge is formalized. -/
+structure NoncollapseInput {I : ModelWithCorners Real E H}
+    (_X : PointedFlowSeq.{u, uE, uH} (I := I)) where
+  kappa : Real
+  radius : Real
+  volumeAtBase : Nat -> Real
+  kappa_pos : 0 < kappa
+  radius_pos : 0 < radius
+  volume_lower :
+    forall i : Nat,
+      kappa * radius ^ (Module.finrank Real E) <= volumeAtBase i
+
+end HCGCompactness
+end RicciFlower

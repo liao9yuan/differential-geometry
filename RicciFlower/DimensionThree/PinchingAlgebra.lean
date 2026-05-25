@@ -89,6 +89,33 @@ theorem tracefreeRicciEigenNormSq3_nonneg
   unfold tracefreeRicciEigenNormSq3
   exact div_nonneg hpair (by norm_num)
 
+/-- Vanishing trace-free Ricci norm in eigenvalue variables is exactly equality
+of all three eigenvalues. -/
+theorem tracefreeRicciEigenNormSq3_eq_zero_iff
+    (l1 l2 l3 : Real) :
+    tracefreeRicciEigenNormSq3 l1 l2 l3 = 0 <->
+      l1 = l2 /\ l2 = l3 := by
+  constructor
+  · intro htf
+    have hpair : ricciEigenPairwiseGapSq3 l1 l2 l3 = 0 := by
+      unfold tracefreeRicciEigenNormSq3 at htf
+      nlinarith
+    have h12sq : (l1 - l2) ^ 2 = 0 := by
+      have hnon1 : 0 <= (l1 - l3) ^ 2 := sq_nonneg (l1 - l3)
+      have hnon2 : 0 <= (l2 - l3) ^ 2 := sq_nonneg (l2 - l3)
+      unfold ricciEigenPairwiseGapSq3 at hpair
+      nlinarith
+    have h23sq : (l2 - l3) ^ 2 = 0 := by
+      have hnon1 : 0 <= (l1 - l2) ^ 2 := sq_nonneg (l1 - l2)
+      have hnon2 : 0 <= (l1 - l3) ^ 2 := sq_nonneg (l1 - l3)
+      unfold ricciEigenPairwiseGapSq3 at hpair
+      nlinarith
+    constructor <;> nlinarith
+  · rintro ⟨h12, h23⟩
+    subst l2
+    subst l3
+    simp [tracefreeRicciEigenNormSq3, ricciEigenPairwiseGapSq3]
+
 /-- Hamilton's factorized `Q` after setting
 `l1 = z + b + a`, `l2 = z + b`, `l3 = z`. -/
 def hamiltonCubicQOrderedGaps3 [CommRing R] (a b z : R) : R :=
@@ -331,6 +358,185 @@ theorem q_sub_nonneg {l1 l2 l3 delta epsilon : Real}
     h.delta_nonneg hepsilon h.scalar_nonneg h.lower h.norm_le_scalar_sq
 
 end PinchEigen3
+
+/-- Pointwise eigenvalue context for Section 9 pinching before choosing an
+ordering of the Ricci eigenvalues.  Geometry supplies these inequalities by
+evaluating `Ric >= 0` and `Ric >= delta R g` on an orthonormal eigenbasis. -/
+structure PinchEigen3Unordered (l1 l2 l3 delta : Real) : Prop where
+  nonneg1 : 0 <= l1
+  nonneg2 : 0 <= l2
+  nonneg3 : 0 <= l3
+  delta_nonneg : 0 <= delta
+  lower1 : delta * ricciEigenScalar3 l1 l2 l3 <= l1
+  lower2 : delta * ricciEigenScalar3 l1 l2 l3 <= l2
+  lower3 : delta * ricciEigenScalar3 l1 l2 l3 <= l3
+
+namespace PinchEigen3Unordered
+
+private theorem q_sub_nonneg_ordered_perm
+    {l1 l2 l3 delta epsilon a b c : Real}
+    (h : PinchEigen3Unordered l1 l2 l3 delta)
+    (hepsilon : epsilon <= 2 * delta ^ 2)
+    (hba : b <= a) (hcb : c <= b)
+    (ha : 0 <= a) (hb : 0 <= b) (hc : 0 <= c)
+    (hlower : delta * ricciEigenScalar3 a b c <= c)
+    (hperm :
+      hamiltonCubicQ3 l1 l2 l3 -
+          epsilon * ricciEigenNormSq3 l1 l2 l3 *
+            tracefreeRicciEigenNormSq3 l1 l2 l3 =
+        hamiltonCubicQ3 a b c -
+          epsilon * ricciEigenNormSq3 a b c *
+            tracefreeRicciEigenNormSq3 a b c) :
+    0 <= hamiltonCubicQ3 l1 l2 l3 -
+      epsilon * ricciEigenNormSq3 l1 l2 l3 *
+        tracefreeRicciEigenNormSq3 l1 l2 l3 := by
+  rw [hperm]
+  exact PinchEigen3.q_sub_nonneg
+    ({ ord12 := hba
+       ord23 := hcb
+       nonneg1 := ha
+       nonneg2 := hb
+       nonneg3 := hc
+       delta_nonneg := h.delta_nonneg
+       lower := hlower } : PinchEigen3 a b c delta)
+    hepsilon
+
+private theorem q_expr_perm_123_132
+    (l1 l2 l3 epsilon : Real) :
+    hamiltonCubicQ3 l1 l2 l3 -
+        epsilon * ricciEigenNormSq3 l1 l2 l3 *
+          tracefreeRicciEigenNormSq3 l1 l2 l3 =
+      hamiltonCubicQ3 l1 l3 l2 -
+        epsilon * ricciEigenNormSq3 l1 l3 l2 *
+          tracefreeRicciEigenNormSq3 l1 l3 l2 := by
+  unfold hamiltonCubicQ3 ricciEigenNormSq3 tracefreeRicciEigenNormSq3
+    ricciEigenPairwiseGapSq3 ricciEigenScalar3 ricciEigenTraceCube3
+  ring
+
+private theorem q_expr_perm_123_312
+    (l1 l2 l3 epsilon : Real) :
+    hamiltonCubicQ3 l1 l2 l3 -
+        epsilon * ricciEigenNormSq3 l1 l2 l3 *
+          tracefreeRicciEigenNormSq3 l1 l2 l3 =
+      hamiltonCubicQ3 l3 l1 l2 -
+        epsilon * ricciEigenNormSq3 l3 l1 l2 *
+          tracefreeRicciEigenNormSq3 l3 l1 l2 := by
+  unfold hamiltonCubicQ3 ricciEigenNormSq3 tracefreeRicciEigenNormSq3
+    ricciEigenPairwiseGapSq3 ricciEigenScalar3 ricciEigenTraceCube3
+  ring
+
+private theorem q_expr_perm_123_213
+    (l1 l2 l3 epsilon : Real) :
+    hamiltonCubicQ3 l1 l2 l3 -
+        epsilon * ricciEigenNormSq3 l1 l2 l3 *
+          tracefreeRicciEigenNormSq3 l1 l2 l3 =
+      hamiltonCubicQ3 l2 l1 l3 -
+        epsilon * ricciEigenNormSq3 l2 l1 l3 *
+          tracefreeRicciEigenNormSq3 l2 l1 l3 := by
+  unfold hamiltonCubicQ3 ricciEigenNormSq3 tracefreeRicciEigenNormSq3
+    ricciEigenPairwiseGapSq3 ricciEigenScalar3 ricciEigenTraceCube3
+  ring
+
+private theorem q_expr_perm_123_231
+    (l1 l2 l3 epsilon : Real) :
+    hamiltonCubicQ3 l1 l2 l3 -
+        epsilon * ricciEigenNormSq3 l1 l2 l3 *
+          tracefreeRicciEigenNormSq3 l1 l2 l3 =
+      hamiltonCubicQ3 l2 l3 l1 -
+        epsilon * ricciEigenNormSq3 l2 l3 l1 *
+          tracefreeRicciEigenNormSq3 l2 l3 l1 := by
+  unfold hamiltonCubicQ3 ricciEigenNormSq3 tracefreeRicciEigenNormSq3
+    ricciEigenPairwiseGapSq3 ricciEigenScalar3 ricciEigenTraceCube3
+  ring
+
+private theorem q_expr_perm_123_321
+    (l1 l2 l3 epsilon : Real) :
+    hamiltonCubicQ3 l1 l2 l3 -
+        epsilon * ricciEigenNormSq3 l1 l2 l3 *
+          tracefreeRicciEigenNormSq3 l1 l2 l3 =
+      hamiltonCubicQ3 l3 l2 l1 -
+        epsilon * ricciEigenNormSq3 l3 l2 l1 *
+          tracefreeRicciEigenNormSq3 l3 l2 l1 := by
+  unfold hamiltonCubicQ3 ricciEigenNormSq3 tracefreeRicciEigenNormSq3
+    ricciEigenPairwiseGapSq3 ricciEigenScalar3 ricciEigenTraceCube3
+  ring
+
+/-- Packaged Lemma 10.8 for unordered pointwise eigenvalues. -/
+theorem q_sub_nonneg {l1 l2 l3 delta epsilon : Real}
+    (h : PinchEigen3Unordered l1 l2 l3 delta)
+    (hepsilon : epsilon <= 2 * delta ^ 2) :
+    0 <= hamiltonCubicQ3 l1 l2 l3 -
+      epsilon * ricciEigenNormSq3 l1 l2 l3 *
+        tracefreeRicciEigenNormSq3 l1 l2 l3 := by
+  by_cases h12 : l2 <= l1
+  · by_cases h23 : l3 <= l2
+    · exact q_sub_nonneg_ordered_perm h hepsilon h12 h23
+        h.nonneg1 h.nonneg2 h.nonneg3 h.lower3 rfl
+    · have h23' : l2 <= l3 := le_of_not_ge h23
+      by_cases h13 : l3 <= l1
+      · have hscal :
+            delta * ricciEigenScalar3 l1 l3 l2 <= l2 := by
+          have hs :
+              ricciEigenScalar3 l1 l3 l2 = ricciEigenScalar3 l1 l2 l3 := by
+            unfold ricciEigenScalar3
+            ring
+          rw [hs]
+          exact h.lower2
+        exact q_sub_nonneg_ordered_perm h hepsilon h13 h23'
+          h.nonneg1 h.nonneg3 h.nonneg2 hscal
+          (q_expr_perm_123_132 l1 l2 l3 epsilon)
+      · have h31 : l1 <= l3 := le_of_not_ge h13
+        have hscal :
+            delta * ricciEigenScalar3 l3 l1 l2 <= l2 := by
+          have hs :
+              ricciEigenScalar3 l3 l1 l2 = ricciEigenScalar3 l1 l2 l3 := by
+            unfold ricciEigenScalar3
+            ring
+          rw [hs]
+          exact h.lower2
+        exact q_sub_nonneg_ordered_perm h hepsilon h31 h12
+          h.nonneg3 h.nonneg1 h.nonneg2 hscal
+          (q_expr_perm_123_312 l1 l2 l3 epsilon)
+  · have h21 : l1 <= l2 := le_of_not_ge h12
+    by_cases h13 : l3 <= l1
+    · have hscal :
+          delta * ricciEigenScalar3 l2 l1 l3 <= l3 := by
+        have hs :
+            ricciEigenScalar3 l2 l1 l3 = ricciEigenScalar3 l1 l2 l3 := by
+          unfold ricciEigenScalar3
+          ring
+        rw [hs]
+        exact h.lower3
+      exact q_sub_nonneg_ordered_perm h hepsilon h21 h13
+        h.nonneg2 h.nonneg1 h.nonneg3 hscal
+        (q_expr_perm_123_213 l1 l2 l3 epsilon)
+    · have h31 : l1 <= l3 := le_of_not_ge h13
+      by_cases h32 : l3 <= l2
+      · have hscal :
+            delta * ricciEigenScalar3 l2 l3 l1 <= l1 := by
+          have hs :
+              ricciEigenScalar3 l2 l3 l1 = ricciEigenScalar3 l1 l2 l3 := by
+            unfold ricciEigenScalar3
+            ring
+          rw [hs]
+          exact h.lower1
+        exact q_sub_nonneg_ordered_perm h hepsilon h32 h31
+          h.nonneg2 h.nonneg3 h.nonneg1 hscal
+          (q_expr_perm_123_231 l1 l2 l3 epsilon)
+      · have h23 : l2 <= l3 := le_of_not_ge h32
+        have hscal :
+            delta * ricciEigenScalar3 l3 l2 l1 <= l1 := by
+          have hs :
+              ricciEigenScalar3 l3 l2 l1 = ricciEigenScalar3 l1 l2 l3 := by
+            unfold ricciEigenScalar3
+            ring
+          rw [hs]
+          exact h.lower1
+        exact q_sub_nonneg_ordered_perm h hepsilon h23 h21
+          h.nonneg3 h.nonneg2 h.nonneg1 hscal
+          (q_expr_perm_123_321 l1 l2 l3 epsilon)
+
+end PinchEigen3Unordered
 
 end DimensionThree
 end RicciFlower

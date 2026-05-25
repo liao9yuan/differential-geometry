@@ -393,6 +393,44 @@ theorem tangentBundle
       ((FiberBundle.continuous_proj E (TangentSpace I)).comp continuous_snd)
   exact hA.comp hpull
 
+/-- Evaluate a continuous time-dependent `(0,s)` tensor family on continuous
+time and tangent-vector inputs.
+
+This is the component-continuity projection used by local-coordinate
+arguments: a jointly continuous tensor family has continuous scalar components
+when tested against continuous vector fields. -/
+theorem eval_continuous
+    {s : Nat} {K : Set Real}
+    {A : (t : Real) -> (x : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x}
+    (hA : Tensor0SFamilyContinuousOnSet (I := I) (M := M) s K A)
+    {P : Type*} [TopologicalSpace P]
+    {τ : P -> Real} {b : P -> M}
+    (hτ : Continuous τ) (hτK : ∀ p : P, τ p ∈ K)
+    (hb : Continuous b)
+    {v : Fin s -> (p : P) -> TangentSpace I (b p)}
+    (hv : ∀ i : Fin s, Continuous (fun p : P =>
+      TotalSpace.mk' E (E := fun x : M => TangentSpace I x) (b p) (v i p))) :
+    Continuous (fun p : P => A (τ p) (b p) (fun i : Fin s => v i p)) := by
+  let T : (p : P) -> Tensor0SSpace (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) s (b p) :=
+    fun p => A (τ p) (b p)
+  have hT : Continuous (fun p : P =>
+      TotalSpace.mk' (Tensor0SModel s Real E)
+        (E := fun x : M => Tensor0SSpace s I x) (b p) (T p)) := by
+    unfold Tensor0SFamilyContinuousOnSet at hA
+    let pull : P -> {t : Real // t ∈ K} × M :=
+      fun p => (⟨τ p, hτK p⟩, b p)
+    have hpull : Continuous pull := by
+      dsimp [pull]
+      exact ((hτ.subtype_mk _).prodMk hb)
+    simpa [T, pull] using hA.comp hpull
+  have hEval := TensorMultilinear.continuous_section_apply_base
+    (𝕜 := Real) (I := I) (M := M) (P := P) (n := s)
+    b hb T hT v hv
+  simpa [Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply,
+    T] using hEval
+
 end Tensor0SFamilyContinuousOnSet
 
 /-- Quadratic evaluation of a time-dependent `(0,2)` tensor family on the

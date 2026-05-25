@@ -44,8 +44,12 @@ admits a metric of constant positive sectional curvature.
   canonical solution-section packaging, and the checked book-facing
   `pinchEvol_book` theorem, whose solution-level core produces quotient
   regularity and `|Ric^o|^2 >= 0` from solution data.
-  The live Section 10 work is now the proof of the native improved pinching
-  estimate theorem `pinchEstimate_sol`.
+  The native improved pinching estimate theorem `pinchEstimate_sol` is checked:
+  it now has the Section 9-to-Lemma-10.8 eigenvalue bridge, the scalar sign
+  reduction to the drift term, the drifted subsolution inequality, the compact
+  initial bound, the positive-time scalar WMP slab consumer, the final quotient
+  estimate assembly, and the coordinate-local slab continuity producer for
+  `fun p => ricciNorm S p.1 p.2`.
 - Section 11/12 still contain global analytic and compactness frontiers.
 
 ## Main Dependency Ladder
@@ -60,8 +64,10 @@ terminal/maximal ambient times.
 ### G1. Metric, Operators, And Compact Minimum Calculus
 
 Closed pieces include scalar WMP consumers, scalar regularity from smooth
-solutions, metric variation bounds interfaces, scalar lower bound, and
-finite-time scalar blow-up consumers.
+solutions, metric variation bounds interfaces, scalar lower bound, finite-time
+control, the noncircular scalar blow-up producer `ham3_scalar_blowup`, and the
+Lemma 11.6 point-selection/scalar-normalization producer
+`ham3_point_select`.
 
 Remaining work is mostly upstream analytic or global, not basic operator
 calculus.
@@ -214,15 +220,30 @@ hypothesis is scalar positivity `R > 0`.  The book-facing cleanup theorem
 interface now lives in `ImprovedPinching/Estimate.lean`: `PinchEstimateOn`
 records the domain-aware estimate, carrier-extension helpers provide the
 all-real display functions, and `ham3_pinch_imp` consumes this checked display
-wrapper.  The remaining important local frontier is the proof of
-`pinchEstimate_sol`, which must produce ordered `PinchEigen3` pointwise data
-from Section 9 Ricci nonnegativity and shifted pinching, then apply the scalar
-maximum principle to the 10.6 drifted subsolution.
+wrapper.  The Section 9 Ricci nonnegativity and shifted pinching package now
+feeds the Lemma 10.8 reaction sign through unordered pointwise eigenvalue
+data, and checked scalar sign lemmas reduce the Lemma 10.6 book RHS to the
+drift term.  The remaining important local frontier is to convert
+`pinchEvol_book` into a `parabolicOperatorWithDrift P_epsilon <= 0` statement
+on compact slabs, produce the compact initial maximum constant, and apply the
+scalar maximum principle.
 
 ### G8. Convergence To Constant Positive Curvature
 
-Point-selection, noncollapsing, Hamilton compactness, curvature convergence,
-and the topological handoff remain global-scale inputs.
+Point-selection is now checked.  Noncollapsing, Hamilton compactness, curvature
+convergence, limit pinching, and the topological handoff remain global-scale
+inputs.  The broad `ham3_limit_const_metric` frontier has been split into
+`limit_inherit`, `limit_scal_pos`, `limit_tf_zero`, `limit_const_pos`, and
+`limit_to_orig` so the CGH-dependent pieces are separated from the local
+pinching-to-limit and 3D constant-curvature steps.  The limit
+constant-curvature statement now explicitly carries connectedness and the
+three-dimensional rank hypothesis, and the checked pointwise bridge
+`limitEinstein_of_tf0` proves `Ric = (R / 3)g` from zero trace-free Ricci.
+The project convention audit also fixed `ConstPosSecMetric` to use
+`-Rm04(X,X,Y,Y)` as the positive sectional curvature numerator.  The remaining
+local geometry frontier is now the static theorem
+`limit_const_sec_of_einstein`: Schur plus the final 3D Riemann-from-Ricci
+component bridge.
 
 ## Black-Box Policy
 
@@ -239,8 +260,7 @@ Levi-Civita smoothness, or finite-dimensional Ricci algebra.
 
 ## Immediate Next Work
 
-1. Prove `RicciFlow.pinchEstimate_sol`: first close the tensor/eigenvalue
-   bridge to ordered `PinchEigen3`, then feed the 10.6 subsolution inequality
-   into the scalar weak maximum principle.
+1. Keep the checked Section 10 pinching estimate wired through the Hamilton
+   endpoint layer while filling the remaining nonlocal assumptions.
 2. Keep global Section 11/12 producers explicit and separate from local
    tensor/evolution work.

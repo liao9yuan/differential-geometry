@@ -116,6 +116,20 @@ noncomputable def totalNabla0SFun (s : ℕ)
       (tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
         s x₀ x₀ (α x₀)))
 
+/-- Structural congruence for the canonical total covariant derivative. -/
+theorem totalNabla0SFun_congr (s : ℕ)
+    {cov cov' : CovariantDerivative I E (TangentSpace I : M → Type _)}
+    {α β : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) s}
+    (hcov : cov = cov') (hα : α = β) (x : M) :
+    totalNabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        s cov α x =
+      totalNabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        s cov' β x := by
+  cases hcov
+  cases hα
+  rfl
+
 /-- Regularity predicate for the canonical total covariant derivative.
 
 This is explicit for the same reason as `Nabla0SRegular`: the construction is

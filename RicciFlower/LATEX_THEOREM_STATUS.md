@@ -12,7 +12,7 @@ daily work logs.
 | Section 6 evolution | Core inverse metric, Christoffel, Ricci, scalar, frame Ricci-norm, smooth-solution Ricci-norm data, and the `smoothOfSol` upgrade are native. |
 | Section 7 scalar WMP/lower bound | Native consumer path; scalar regularity from smooth solutions is available. |
 | Section 9 Ricci preservation | Local algebra, strict initial selectors, theorem-7.5 consumers, canonical Ricci-flow connection/spatial-derivative producers, and the shifted pinching section with tensor-continuity/core-regularity producers are native; the tensor-backed canonical shifted reaction `shiftNAt` and raw adapter `shiftNRaw` have the symmetric null condition checked from first-null geometry, now including the `delta = 0` Ricci-preservation endpoint. The direct shifted parabolic producer is checked as `pinchParabolic`; barrier reaction regularity is checked as `pinchBarrierReg`, `PinchFlowWMPData.ofShiftNClosed` assembles the shifted WMP data from smooth Ricci-flow hypotheses, `ricci_nonneg_sol_closed` proves Ricci nonnegativity from the `delta = 0` endpoint, and `ham3_pinch9` / `ham3_rescaled_ric_nonneg` wire the solution-level Section 9 packages into the Hamilton endpoint layer. |
-| Section 10 pinching | Lemma 10.4 is checked; Lemma 10.5 has checked positive-region and `alpha = 1`, `phi >= 0` side forms, but not the full book-facing hypothesis shape. Lemma 10.6 has checked raw quotient setup, book RHS rewrite, actual tensor-square setup, section-level mixed bridge, canonical solution-section packaging, and the book-facing `pinchEvol_book` theorem. The native estimate interface is now present in `ImprovedPinching/Estimate.lean`, and `ham3_pinch_imp` consumes its display wrapper; the live local frontier is proving `pinchEstimate_sol`. |
+| Section 10 pinching | Lemma 10.4 is checked; Lemma 10.5 has checked positive-region and `alpha = 1`, `phi >= 0` side forms, but not the full book-facing hypothesis shape. Lemma 10.6 has checked raw quotient setup, book RHS rewrite, actual tensor-square setup, section-level mixed bridge, canonical solution-section packaging, and the book-facing `pinchEvol_book` theorem. The native estimate interface is present in `ImprovedPinching/Estimate.lean`; the unordered eigenvalue bridge from Section 9 to the Lemma 10.8 reaction sign is checked, the book RHS is bounded by the drift term, the drifted subsolution inequality is checked as `pinchQuotient_parabolic_nonpos`, the compact initial bound is checked, the coordinate-local slab continuity producer for `fun p => ricciNorm S p.1 p.2` is checked, and `pinchEstimate_sol` is checked. `ham3_pinch_imp` consumes the display wrapper. |
 | Section 11/12 global flow | Global analytic and compactness black boxes remain. |
 
 ## Active Native Frontiers
@@ -236,12 +236,21 @@ adds the book assumptions `0 < epsilon < 1` and forwards to `pinchEvol_sol`.
 Distance: `0-1`.
 
 The 10.7/10.8 reaction-sign input for the 10.6 reaction term is now checked
-through `DimensionThree.PinchEigen3.q_sub_nonneg` and `cubicQ_pinchOn`.
+through `DimensionThree.PinchEigen3.q_sub_nonneg`,
+`DimensionThree.PinchEigen3Unordered.q_sub_nonneg`, and the pointwise
+Section-9 bridge `cubicQ_sub_nonneg_of_section9_point`.  The estimate layer
+also has checked scalar sign consumers:
+`cubicQ_sub_nonneg_of_section9`, `pinchBookRHS_le_drift_sol`,
+`pinchDriftVector`, and `pinchEstimateOn_of_pinchQuotient_bound`.
 
-Next target: prove `pinchEstimate_sol`.  The first subfrontier is producing
-ordered pointwise `PinchEigen3` data from Section 9 Ricci nonnegativity and
-shifted pinching; after that, the 10.6 drifted scalar subsolution must be fed
-into the scalar weak maximum principle on compact time slabs.
+The drifted scalar subsolution inequality, compact initial maximum,
+positive-time quotient spatial regularity, scalar WMP sign-change, slab WMP
+consumer, coordinate-local Ricci-norm slab continuity, and final
+quotient-estimate assembly are checked through
+`pinchQuotient_parabolic_nonpos`, `pinchQuotient_initial_bound`,
+`pinchQuotient_space_pos`, `pinchQuotient_grad_pos`,
+`Realized.parabolic_const_sub`, `pinchQuot_slab_bound`, `ricciNorm_slabCont`,
+and `pinchEstimate_sol`.
 The full arbitrary-exponent book-facing 10.5 statement under only nonnegative
 numerator hypotheses remains unproved and should not be claimed.
 
@@ -273,23 +282,41 @@ the external `hbar` assumption for the shifted WMP data package.
 
 ### Lemmas 11.1-11.6
 
-Status: finite-time scalar blow-up consumers are native.  Point selection and
-rescaling packages still depend on global producer assumptions.
+Status: finite-time, scalar blow-up, and point-selection consumers are native.
+The checked `ham3_scalar_blowup` route is noncircular: maximal-endpoint
+curvature blow-up is converted to scalar blow-up using Section 9 Ricci
+nonnegativity and the dimension-three curvature-control estimate.  The checked
+`ham3_point_select` route chooses compact-slab scalar maxima above levels
+tending to infinity, giving normalized rescaled scalar curvature and backward
+slab scalar bounds.  The later rescaling/noncollapsing/compactness packages
+still depend on global producer assumptions.
 
-Distance: `1-4`.
+Distance: `0-4`.
 
-Next target: keep global point-selection/rescaling separate from local
-evolution identities.
+Next target: keep the checked Lemma 11.6 point-selection package separate from
+the remaining global noncollapsing, compactness, and limit-geometry inputs.
 
 ### Black Boxes 11.8, 11.10, 11.12, 11.14
 
 Status: no-local-collapsing, CGH convergence/compactness, and Myers remain
-global inputs.
+global inputs.  The non-black-box part formerly hidden in
+`ham3_limit_const_metric` has been split into named Section 12 frontiers:
+`limit_inherit`, `limit_scal_pos`, `limit_tf_zero`, `limit_const_pos`, and
+`limit_to_orig`.  The limit constant-curvature path now explicitly includes
+connectedness and the three-dimensional rank input, and
+`HamiltonPositiveRicci.limitEinstein_of_tf0` checks the pointwise bridge
+`|Ric^o|^2 = 0 -> Ric = (R / 3)g`.  The project sign convention has also been
+audited here: positive sectional curvature is represented by
+`-Rm04(X,X,Y,Y)` in `ConstPosSecMetric`.
 
 Distance: `5`.
 
-Next target: do not open unless the project explicitly shifts to global
-geometry/compactness.
+Next target: decide which of the split limit-transfer frontiers should be
+opened first; `limit_tf_zero` is the local pinching-to-limit step, while
+`limit_inherit` and `limit_to_orig` depend on a real CGH convergence relation.
+For `limit_const_pos`, the next local target is the Schur bridge and the final
+3D Riemann-from-Ricci bridge, now isolated as
+`HamiltonPositiveRicci.limit_const_sec_of_einstein`.
 
 ### Appendix Section 14
 

@@ -1,5 +1,5 @@
 import RicciFlower.RicciFlow.Basic
-import RicciFlower.Metric.Scaling
+import RicciFlower.LeviCivita.Scaling
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -204,7 +204,9 @@ def paraSolution
     (τ R : Real) (hR : 0 < R) (hτ : τ ∈ D.carrier) :
     (paraSolution (I := I) S τ R hR hτ).base.connection =
       fun s => S.base.connection (paraTime τ R s) := by
-  sorry
+  funext s
+  simp [paraSolution, paraFamily, SolutionFamily.connection,
+    LeviCivita.lcConn_scaleMetric]
 
 @[simp] theorem paraSolution_ricci
     {D : Realized.RealTimeInterval}
@@ -212,7 +214,50 @@ def paraSolution
     (τ R : Real) (hR : 0 < R) (hτ : τ ∈ D.carrier) :
     (paraSolution (I := I) S τ R hR hτ).base.ricci =
       fun s => S.base.ricci (paraTime τ R s) := by
-  sorry
+  funext s
+  simp [paraSolution, paraFamily, SolutionFamily.ricci, metricRicci,
+    Curvature.metricRicci, Curvature.metricCov, LeviCivita.lcConn_scaleMetric]
+
+private theorem metricRm04_scaleMetric
+    (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M) (x : M) :
+    Curvature.metricRm04 (I := I) (M := M) (scaleMetric (I := I) c hc g) x =
+      c • Curvature.metricRm04 (I := I) (M := M) g x := by
+  ext v
+  have hv :
+      v = Curvature.vec4 (I := I) (v 0) (v 1) (v 2) (v 3) := by
+    funext i
+    fin_cases i <;> simp [Curvature.vec4]
+  rw [hv]
+  simp [Curvature.metricRm04, Curvature.metricCov, scaleMetric_inner,
+    LeviCivita.lcConn_scaleMetric, smul_eq_mul]
+
+@[simp] theorem paraSolution_rm04
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (τ R : Real) (hR : 0 < R) (hτ : τ ∈ D.carrier)
+    (s : Real) (x : M) :
+    (paraSolution (I := I) S τ R hR hτ).base.rm04 s x =
+      R • S.base.rm04 (paraTime τ R s) x := by
+  simpa [paraSolution, paraFamily, SolutionFamily.rm04] using
+    metricRm04_scaleMetric (I := I) R hR (S.base.metric (paraTime τ R s)) x
+
+@[simp] private theorem paraNablaRic_eq
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (τ R : Real) (hR : 0 < R) (hτ : τ ∈ D.carrier)
+    (s : Real) (x : M) :
+    totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 ((paraSolution (I := I) S τ R hR hτ).family.connection s)
+        ((paraSolution (I := I) S τ R hR hτ).ricci s) x =
+      totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 (S.family.connection (paraTime τ R s))
+        (S.ricci (paraTime τ R s)) x := by
+  refine totalNabla0SFun_congr (𝕜 := Real) (E := E) (H := H)
+    (I := I) (M := M) 2 ?_ ?_ x
+  · have h := congrFun (paraSolution_connection (I := I) S τ R hR hτ) s
+    simp [SolutionOn.family] at h ⊢
+  · have h := congrFun (paraSolution_ricci (I := I) S τ R hR hτ) s
+    simp [SolutionOn.ricci] at h ⊢
 
 private theorem metricTensorField_scaleMetric
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M) (x : M) :
@@ -220,6 +265,86 @@ private theorem metricTensorField_scaleMetric
       c • metricTensorField (I := I) g x := by
   ext v
   simp [metricTensorField_apply, scaleMetric_inner, smul_eq_mul]
+
+private theorem metricInverseInBasis_scaleMetric
+    (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M)
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx -> Idx -> Real)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInv) :
+    MetricInverseInBasis (I := I) (scaleMetric (I := I) c hc g) x basis
+      (fun i j => c⁻¹ * gInv i j) := by
+  intro i k
+  have hc0 : c ≠ 0 := ne_of_gt hc
+  constructor
+  · calc
+      ∑ j, (c⁻¹ * gInv i j) *
+          (scaleMetric (I := I) c hc g).inner x (basis j) (basis k)
+          = ∑ j, gInv i j * g.inner x (basis j) (basis k) := by
+            apply Finset.sum_congr rfl
+            intro j _hj
+            simp [scaleMetric_inner]
+            field_simp [hc0]
+      _ = if i = k then 1 else 0 := (hinv i k).1
+  · calc
+      ∑ j, (scaleMetric (I := I) c hc g).inner x (basis i) (basis j) *
+          (c⁻¹ * gInv j k)
+          = ∑ j, g.inner x (basis i) (basis j) * gInv j k := by
+            apply Finset.sum_congr rfl
+            intro j _hj
+            simp [scaleMetric_inner]
+            field_simp [hc0]
+      _ = if i = k then 1 else 0 := (hinv i k).2
+
+private theorem metricTracePair0SAt_scaleMetric
+    (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M)
+    {x : M} (B : Tensor0SSpace (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) 2 x) :
+    Realized.metricTracePair0SAt (I := I) (scaleMetric (I := I) c hc g) B =
+      c⁻¹ * Realized.metricTracePair0SAt (I := I) g B := by
+  classical
+  let basis : Module.Basis (Coordinates.CoordinateIdx (𝕜 := Real) E) Real
+      (TangentSpace I x) := Coordinates.coordinateFrameAt_toBasis (I := I) x
+  let gInv : Coordinates.CoordinateIdx (𝕜 := Real) E ->
+      Coordinates.CoordinateIdx (𝕜 := Real) E -> Real :=
+    fun k l =>
+      Coordinates.inverseMetricFlatModelInChart_component (I := I) g x k l
+        (extChartAt I x x)
+  have hinv : MetricInverseInBasis (I := I) g x basis gInv :=
+    Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center (I := I) g x
+  have hinvScale :
+      MetricInverseInBasis (I := I) (scaleMetric (I := I) c hc g) x basis
+        (fun i j => c⁻¹ * gInv i j) :=
+    metricInverseInBasis_scaleMetric (I := I) c hc g basis gInv hinv
+  rw [Realized.metricTracePair0SAt_eq_sum_basis (I := I)
+      (scaleMetric (I := I) c hc g) basis (fun i j => c⁻¹ * gInv i j) hinvScale,
+    Realized.metricTracePair0SAt_eq_sum_basis (I := I) g basis gInv hinv]
+  simp only [Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro i _hi
+  apply Finset.sum_congr rfl
+  intro j _hj
+  ring
+
+@[simp] theorem paraSolution_scalar
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (τ R : Real) (hR : 0 < R) (hτ : τ ∈ D.carrier) :
+    (paraSolution (I := I) S τ R hR hτ).scalar =
+      fun s x => R⁻¹ * S.scalar (paraTime τ R s) x := by
+  funext s x
+  simp [SolutionOn.scalar, SolutionFamily.scalar_apply, paraSolution, paraFamily,
+    SolutionFamily.ricciAt, metricRicciAt, Curvature.metricRicciAt,
+    Curvature.metricCov, LeviCivita.lcConn_scaleMetric,
+    metricTracePair0SAt_scaleMetric]
+
+private theorem lcConnectionSmooth
+    (g : SmoothRiemannianMetric I M) :
+    CovariantDerivative.ContMDiffCovariantDerivative
+      (LeviCivita.leviCivitaConnectionOfMetric (I := I) g) ∞ := by
+  exact
+    ⟨LeviCivita.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      (I := I) g (u := Set.univ) isOpen_univ⟩
 
 /-- Time smoothness of the rescaled metric family.  This is the exact
 regularity bridge: constant scaling plus affine time pullback preserves metric
@@ -310,21 +435,32 @@ theorem metricFamilySmooth_para
 theorem connectionFamilySmooth_para
     {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (hS : IsSolutionOn (I := I) S)
+    (_hS : IsSolutionOn (I := I) S)
     (τ R : Real) (hR : 0 < R) (hτ : τ ∈ D.carrier) :
     RicciFlower.Connection.ConnectionFamilySmoothOn (I := I) (M := M)
       (paraSolution (I := I) S τ R hR hτ).family := by
-  sorry
+  intro t
+  simpa [SolutionOn.family, paraSolution, paraFamily, SolutionFamily.connection,
+    Realized.RealizedMetricFamilyOn.connectionAt]
+    using lcConnectionSmooth (I := I)
+      ((paraSolution (I := I) S τ R hR hτ).base.metric (t : Real))
 
 /-- Levi-Civita-ness is preserved under parabolic rescaling. -/
 theorem leviCivita_para
     {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (hS : IsSolutionOn (I := I) S)
+    (_hS : IsSolutionOn (I := I) S)
     (τ R : Real) (hR : 0 < R) (hτ : τ ∈ D.carrier) :
     RicciFlower.LeviCivita.IsLeviCivitaFamilyOn (I := I)
       (paraSolution (I := I) S τ R hR hτ).family := by
-  sorry
+  constructor
+  · intro t
+    exact (paraSolution (I := I) S τ R hR hτ).metricCompatible t
+  · intro t
+    simpa [SolutionOn.family, paraSolution, paraFamily, SolutionFamily.connection,
+      Realized.RealizedMetricFamilyOn.connectionAt]
+      using LeviCivita.leviCivitaConnectionOfMetric_isTorsionFree
+        (I := I) ((paraSolution (I := I) S τ R hR hτ).base.metric (t : Real))
 
 /-- Metric evolution equation under parabolic rescaling. -/
 theorem metricVariation_para
@@ -334,7 +470,33 @@ theorem metricVariation_para
     (τ R : Real) (hR : 0 < R) (hτ : τ ∈ D.carrier) :
     MetricVariationEquationOn (I := I)
       (paraSolution (I := I) S τ R hR hτ) := by
-  sorry
+  intro t x X Y
+  let tOld : Realized.RealTimeInterval.RegularTime D :=
+    ⟨paraTime τ R (t : Real), t.2⟩
+  have hOld := hS.equation tOld x X Y
+  have htime :
+      HasDerivWithinAt (fun s : Real => paraTime τ R s) R⁻¹
+        (paraInterval D τ R hR hτ).carrier (t : Real) := by
+    simpa [paraTime, one_div] using
+      (((hasDerivWithinAt_id (t : Real)
+        (paraInterval D τ R hR hτ).carrier).div_const R).const_add τ)
+  have hmaps :
+      Set.MapsTo (fun s : Real => paraTime τ R s)
+        (paraInterval D τ R hR hτ).carrier D.carrier := by
+    intro s hs
+    exact hs
+  have hcomp := hOld.comp (x := (t : Real)) htime hmaps
+  have hscaled := hcomp.const_mul R
+  simpa [MetricVariationEquationOn, Realized.MetricVariationEquationOn,
+    SolutionOn.family, paraSolution, paraFamily, RicciAtFamily.toTensorField,
+    SolutionFamily.ricciAt, metricRicciAt, Curvature.metricRicciAt,
+    Curvature.metricCov, scaleMetric_inner, LeviCivita.lcConn_scaleMetric,
+    tOld]
+    using
+      (hscaled.congr_deriv (by
+        simp [tOld, SolutionFamily.ricciAt, metricRicciAt, Curvature.metricRicciAt,
+          Curvature.metricCov]
+        field_simp [ne_of_gt hR]))
 
 /-- Parabolic rescaling sends Ricci-flow solutions to Ricci-flow solutions. -/
 theorem paraSol
@@ -347,25 +509,79 @@ theorem paraSol
   smoothConnection := connectionFamilySmooth_para (I := I) S hS τ R hR hτ
   equation := metricVariation_para (I := I) S hS τ R hR hτ
   scalarCont := by
-    -- Frontier: preserve scalar-curvature spacetime regularity under the
-    -- canonical scalar scaling law for parabolic rescaling.
-    sorry
+    intro p
+    have hOld := hS.scalarCont (paraTime τ R p.1, p.2)
+    have htime : ContinuousAt (fun q : Real × M => paraTime τ R q.1) p := by
+      unfold paraTime
+      exact continuousAt_const.add (continuousAt_fst.div_const R)
+    have hmap : ContinuousAt (fun q : Real × M => (paraTime τ R q.1, q.2)) p :=
+      htime.prodMk continuousAt_snd
+    have hcomp :
+        ContinuousAt
+          (fun q : Real × M => S.scalar (paraTime τ R q.1) q.2) p :=
+      ContinuousAt.comp
+        (x := p)
+        (f := fun q : Real × M => (paraTime τ R q.1, q.2))
+        (g := fun q : Real × M => S.scalar q.1 q.2)
+        hOld hmap
+    have hscale :
+        ContinuousAt
+          (fun q : Real × M => R⁻¹ * S.scalar (paraTime τ R q.1) q.2) p :=
+      continuousAt_const.mul hcomp
+    have hscalar_fun :
+        (fun q : Real × M =>
+          (paraSolution (I := I) S τ R hR hτ).scalar q.1 q.2) =
+            fun q : Real × M => R⁻¹ * S.scalar (paraTime τ R q.1) q.2 := by
+      funext q
+      rw [paraSolution_scalar (I := I) S τ R hR hτ]
+    rw [hscalar_fun]
+    exact hscale
   scalarTime := by
     -- Frontier: preserve scalar-curvature time regularity under the
     -- canonical scalar scaling law for parabolic rescaling.
     sorry
   ricciCont := by
-    -- Frontier: preserve canonical Ricci tensor-family continuity under
-    -- constant metric scaling and affine time pullback.
-    sorry
+    have hmaps :
+        Set.MapsTo (fun s : Real => paraTime τ R s)
+          (paraInterval D τ R hR hτ).carrier D.carrier := by
+      intro s hs
+      exact hs
+    have htime : Continuous (fun s : Real => paraTime τ R s) := by
+      unfold paraTime
+      exact continuous_const.add (continuous_id.div_const R)
+    have hcont :=
+      Realized.Tensor0SFamilyContinuousOnSet.comp_time (I := I) (M := M)
+        hS.ricciCont htime hmaps
+    simpa [SolutionOn.ricci, paraSolution_ricci (I := I) S τ R hR hτ] using hcont
   rm04Cont := by
-    -- Frontier: preserve canonical lowered Riemann tensor-family continuity
-    -- under constant metric scaling and affine time pullback.
-    sorry
+    have hmaps :
+        Set.MapsTo (fun s : Real => paraTime τ R s)
+          (paraInterval D τ R hR hτ).carrier D.carrier := by
+      intro s hs
+      exact hs
+    have htime : Continuous (fun s : Real => paraTime τ R s) := by
+      unfold paraTime
+      exact continuous_const.add (continuous_id.div_const R)
+    have hcomp :=
+      Realized.Tensor0SFamilyContinuousOnSet.comp_time (I := I) (M := M)
+        hS.rm04Cont htime hmaps
+    have hscale :=
+      Realized.Tensor0SFamilyContinuousOnSet.const_smul (I := I) (M := M)
+        R hcomp
+    simpa [paraSolution_rm04 (I := I) S τ R hR hτ] using hscale
   nablaRicCont := by
-    -- Frontier: preserve canonical `nabla Ric` family continuity under
-    -- parabolic rescaling.
-    sorry
+    have hmaps :
+        Set.MapsTo (fun s : Real => paraTime τ R s)
+          (paraInterval D τ R hR hτ).carrier D.carrier := by
+      intro s hs
+      exact hs
+    have htime : Continuous (fun s : Real => paraTime τ R s) := by
+      unfold paraTime
+      exact continuous_const.add (continuous_id.div_const R)
+    have hcont :=
+      Realized.Tensor0SFamilyContinuousOnSet.comp_time (I := I) (M := M)
+        hS.nablaRicCont htime hmaps
+    simpa [paraNablaRic_eq (I := I) S τ R hR hτ] using hcont
   ricciNormSpace := by
     -- Frontier: preserve fixed-time spatial differentiability of `|Ric|^2`
     -- under the canonical Ricci and inverse-metric scaling laws.
@@ -395,14 +611,18 @@ theorem paraBack_para_connection
     (τ R : Real) (hR : 0 < R) (t : Real) :
     (paraBackFamily (I := I) (paraFamily (I := I) G τ R hR)
       τ R hR).connection t = G.connection t := by
-  sorry
+  simp [paraBackFamily, paraFamily, SolutionFamily.connection,
+    LeviCivita.lcConn_scaleMetric, paraTime_back (τ := τ) (R := R) (t := t)
+      (ne_of_gt hR)]
 
 theorem paraBack_para_ricci
     (G : SolutionFamily (I := I) (M := M))
     (τ R : Real) (hR : 0 < R) (t : Real) :
     (paraBackFamily (I := I) (paraFamily (I := I) G τ R hR)
       τ R hR).ricci t = G.ricci t := by
-  sorry
+  simp [paraBackFamily, paraFamily, SolutionFamily.ricci, metricRicci,
+    Curvature.metricRicci, Curvature.metricCov, LeviCivita.lcConn_scaleMetric,
+    paraTime_back (τ := τ) (R := R) (t := t) (ne_of_gt hR)]
 
 theorem para_paraBack_metric
     (G : SolutionFamily (I := I) (M := M))
@@ -420,14 +640,18 @@ theorem para_paraBack_connection
     (τ R : Real) (hR : 0 < R) (s : Real) :
     (paraFamily (I := I) (paraBackFamily (I := I) G τ R hR)
       τ R hR).connection s = G.connection s := by
-  sorry
+  simp [paraFamily, paraBackFamily, SolutionFamily.connection,
+    LeviCivita.lcConn_scaleMetric, paraBack_time (τ := τ) (R := R) (s := s)
+      (ne_of_gt hR)]
 
 theorem para_paraBack_ricci
     (G : SolutionFamily (I := I) (M := M))
     (τ R : Real) (hR : 0 < R) (s : Real) :
     (paraFamily (I := I) (paraBackFamily (I := I) G τ R hR)
       τ R hR).ricci s = G.ricci s := by
-  sorry
+  simp [paraFamily, paraBackFamily, SolutionFamily.ricci, metricRicci,
+    Curvature.metricRicci, Curvature.metricCov, LeviCivita.lcConn_scaleMetric,
+    paraBack_time (τ := τ) (R := R) (s := s) (ne_of_gt hR)]
 
 /-- Scalar curvature display under parabolic rescaling. -/
 def ParaScalarDisplay
