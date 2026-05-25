@@ -142,54 +142,24 @@ theorem lieDerivMetric_pairing_contMDiff
     -- is a `LinearMap.mk₂`, hence linear in `(v, w)`.
     set B : TangentSpace I b →ₗ[ℝ] TangentSpace I b →ₗ[ℝ] ℝ :=
       lieDerivMetric (I := I) g W b with hB_def
-    have hB_sum_left : ∀ (w : TangentSpace I b)
-        (f : Fin (Module.finrank ℝ E) → ℝ)
-        (v : Fin (Module.finrank ℝ E) → TangentSpace I b),
-        B (∑ i, f i • v i) w = ∑ i, f i * B (v i) w := by
-      intro w f v
-      classical
-      induction Finset.univ (α := Fin (Module.finrank ℝ E)) using Finset.induction_on with
-      | empty =>
-        simp
-      | insert hk ih =>
-        rename_i k s
-        rw [Finset.sum_insert hk, Finset.sum_insert hk]
-        rw [map_add, LinearMap.add_apply, ih]
-        rw [LinearMap.map_smul, LinearMap.smul_apply]
-        rw [smul_eq_mul]
-    have hB_sum_right : ∀ (v : TangentSpace I b)
-        (f : Fin (Module.finrank ℝ E) → ℝ)
-        (w : Fin (Module.finrank ℝ E) → TangentSpace I b),
-        B v (∑ j, f j • w j) = ∑ j, f j * B v (w j) := by
-      intro v f w
-      classical
-      induction Finset.univ (α := Fin (Module.finrank ℝ E)) using Finset.induction_on with
-      | empty =>
-        simp
-      | insert hk ih =>
-        rename_i k s
-        rw [Finset.sum_insert hk, Finset.sum_insert hk]
-        rw [LinearMap.map_add, ih, LinearMap.map_smul, smul_eq_mul]
-    -- Now compute.
+    -- Step 3a.  Expand the left slot using `LinearMap.map_sum` and `LinearMap.map_smul`.
     rw [hY_decomp]
-    rw [show (B (∑ i, chartCoeff (I := I) b₀ Y i b •
-              chartBasisVecFiber (I := I) b₀ i b)) (Z b) =
-        ∑ i, chartCoeff (I := I) b₀ Y i b *
-          B (chartBasisVecFiber (I := I) b₀ i b) (Z b) from
-      hB_sum_left (Z b) (fun i => chartCoeff (I := I) b₀ Y i b)
-        (fun i => chartBasisVecFiber (I := I) b₀ i b)]
+    rw [map_sum]
+    -- `B (∑ i, c i • v i) w = ∑ i, (B (c i • v i)) w = ∑ i, c i • (B (v i) w)`, then
+    -- `c i • r = c i * r` for scalars.
+    have h_smul_left : ∀ i,
+        B (chartCoeff (I := I) b₀ Y i b •
+            chartBasisVecFiber (I := I) b₀ i b) =
+          chartCoeff (I := I) b₀ Y i b •
+            B (chartBasisVecFiber (I := I) b₀ i b) := by
+      intro i; rw [LinearMap.map_smul]
+    simp_rw [h_smul_left, LinearMap.sum_apply, LinearMap.smul_apply, smul_eq_mul]
+    -- Step 3b.  Expand the right slot.
     refine Finset.sum_congr rfl ?_
     intro i _
     rw [hZ_decomp]
-    rw [show B (chartBasisVecFiber (I := I) b₀ i b)
-          (∑ j, chartCoeff (I := I) b₀ Z j b •
-            chartBasisVecFiber (I := I) b₀ j b) =
-        ∑ j, chartCoeff (I := I) b₀ Z j b *
-          B (chartBasisVecFiber (I := I) b₀ i b)
-            (chartBasisVecFiber (I := I) b₀ j b) from
-      hB_sum_right (chartBasisVecFiber (I := I) b₀ i b)
-        (fun j => chartCoeff (I := I) b₀ Z j b)
-        (fun j => chartBasisVecFiber (I := I) b₀ j b)]
+    rw [map_sum]
+    simp_rw [LinearMap.map_smul, smul_eq_mul]
     rw [Finset.mul_sum]
     refine Finset.sum_congr rfl ?_
     intro j _
@@ -229,7 +199,7 @@ theorem lieDerivMetric_pairing_contMDiff
       ContMDiffOn I 𝓘(ℝ, ℝ) ∞
         (fun b : M => lieDerivMetric (I := I) g W b (Y b) (Z b))
         (chartAt H b₀).source :=
-    h_sum_smooth.congr (fun b hb => (h_decomp b hb).symm)
+    h_sum_smooth.congr (fun b hb => h_decomp b hb)
   exact (h_pair_on_chart b₀ hb₀_chartSrc).contMDiffAt h_chart_nhd
 
 end RicciFlow
