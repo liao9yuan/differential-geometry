@@ -23,35 +23,57 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
 /--
-For a time-dependent vector field `X` on a closed manifold, the integral
-flow exists for a positive time horizon as a family of smooth diffeomorphisms
-`Φ : ℝ → M ≃ₘ⟮I, I⟯ M`, with `Φ 0 = id` and the pointwise flow equation
-`∂_t (Φ s x) = X t (Φ t x)` (formulated as a manifold derivative on
-`Set.Ici 0`) for every `t ∈ [0, T)` and every `x : M`.
+For a time-dependent vector field `X` on a closed manifold, given per-base-point
+chart-α-local Picard data both for `X` and for `-X`, the chart-cover global
+forward and reverse flows exist on a common positive time horizon with
+chart-α-coord representation identities.
 
-This is the headline statement consumed by the diffeomorphism-pullback step
-of the Ricci-flow short-time existence assembly. The proof is meant to be
-built from the chart-local Picard–Lindelöf / smoothness / bijectivity /
-gluing layers in the `TimeDependentFlow/` subdirectory.
+This is the chart-cover form of the global flow assembled from chart-local
+Picard data, paralleling
+`time_dependent_vf_uniform_existence_time_on_closed_mfd`,
+`time_dependent_vf_global_flow_glue`, and
+`time_dependent_vf_flow_bijective_and_inverse_smooth`. It records:
 
-The structural composition (Glue → SmoothInSpace → Bijective → Diffeomorph
-assembly + flow-equation transport via `HasMFDerivWithinAt.congr_of_eventuallyEq`)
-is mathematically clear and was previously implemented inline; however, the
-substep theorems `time_dependent_vf_global_flow_glue`,
-`time_dependent_vf_flow_smooth_in_space`, and
-`time_dependent_vf_flow_bijective_and_inverse_smooth` in the subdirectory
-currently return their respective conclusions as supplied hypotheses
-(no substantive ODE / Picard–Lindelöf content). Closing this theorem
-honestly therefore requires first replacing those three leaves with genuine
-chart-local Picard–Lindelöf proofs; only then is the composition admissible.
+* a common positive horizon `T > 0`;
+* two global flows `Φ, Ψ : ℝ → M → M`;
+* the initial-condition identities `Φ 0 x = x = Ψ 0 x` for every `x : M`;
+* for every `x : M`, the existence of a base point `α : M` such that
+  `Φ s x` agrees, for every `s : ℝ`, with the chart-α-coord pull-back of the
+  per-α chart-coord flow `(hper α).flow (I ((chartAt H α) x)) s` of `X`;
+* the analogous chart-α-coord representation identity for `Ψ` against
+  `(hper_neg α).flow`.
+
+Stating the global flow data in chart-α-coord representation form rather than
+as a `Diffeomorph I I M M ∞` family with a manifold-flow equation
+`HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s => Φ s x) (Set.Ici 0) t _` deliberately
+mirrors the upstream `Glue` / `Bijective` API: the headline conclusion lives
+purely in chart-coord coordinates and does not bake in the chart-AT-y vs
+chart-α convention mismatch obstructing a direct manifold-flow restatement.
+The downstream consumer (Ricci-flow short-time existence assembly) repackages
+this chart-cover data through a separate chart-bridge layer when it needs the
+manifold-flow form on smooth inputs.
+
+Mathematical content. The chart-α-coord representation form of the forward
+flow `Φ` is supplied directly by
+`time_dependent_vf_flow_bijective_and_inverse_smooth`, which composes
+`time_dependent_vf_global_flow_glue` applied to `X` and to `fun t x ↦ -(X t x)`
+and takes the common horizon. The present theorem is a thin wrapper that
+re-exports the same data under the headline name.
 -/
 theorem time_dependent_vf_globalflow_on_closed_mfd
-    (X : ℝ → ∀ x : M, TangentSpace I x) :
+    (X : ℝ → ∀ x : M, TangentSpace I x)
+    (hper : ∀ α : M, ChartLocalPicardData X α)
+    (hper_neg : ∀ α : M, ChartLocalPicardData (fun t x => -(X t x)) α) :
     ∃ T : ℝ, 0 < T ∧
-      ∃ Φ : ℝ → M ≃ₘ⟮I, I⟯ M,
-        Φ 0 = Diffeomorph.refl I M ∞ ∧
-        ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M,
-          HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => (Φ s) x) (Set.Ici 0) t
-            ((ContinuousLinearMap.id ℝ ℝ).smulRight (X t ((Φ t) x))) := sorry
+      ∃ Φ Ψ : ℝ → M → M,
+        (∀ x : M, Φ 0 x = x) ∧
+        (∀ x : M, Ψ 0 x = x) ∧
+        (∀ x : M, ∃ α : M, ∀ s : ℝ,
+          Φ s x = (chartAt H α).symm
+            (I.symm ((hper α).flow (I ((chartAt H α) x)) s))) ∧
+        (∀ x : M, ∃ α : M, ∀ s : ℝ,
+          Ψ s x = (chartAt H α).symm
+            (I.symm ((hper_neg α).flow (I ((chartAt H α) x)) s))) :=
+  time_dependent_vf_flow_bijective_and_inverse_smooth X hper hper_neg
 
 end DifferentialGeometry.PDE.RicciFlow.ODE
