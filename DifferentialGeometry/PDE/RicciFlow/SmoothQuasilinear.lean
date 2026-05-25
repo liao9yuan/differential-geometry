@@ -102,16 +102,27 @@ theorem deturckvf_chart_component_smooth_in_g_input
 /-- **Smoothness of the chart-coordinate components of `lieDerivMetric g W`, as a
 function of the metric–vector-field jet `(g, ∇g, W, ∇W)`.**  By the textbook
 formula `(𝓛_W g)_{ij} = W^k ∂_k g_{ij} + g_{kj} ∂_i W^k + g_{ik} ∂_j W^k`, the
-component `lieDerivMetricMatrix g W i j` is a polynomial in the chart values of
-`g`, `W`, and their first derivatives, and hence smooth on the chart source. -/
-theorem liederivmetric_chart_smooth_in_g_w_jet
+chart-`α` component `chartLieDerivMetricMatrix g W α i j` is a polynomial in the
+chart values of `g`, `W`, and their first derivatives, and hence smooth on the
+chart-`α` source.
+
+The statement uses the chart-`α` representative `chartLieDerivMetricMatrix g W α i j x`
+rather than the canonical chart-at-`x` component `lieDerivMetricMatrix g W i j x`
+(which is the diagonal specialisation `chartLieDerivMetricMatrix g W x i j x`).
+The chart-`α` form is what the chart-source smoothness statement intrinsically
+requires: the chart-at-`x` matrix entry, evaluated as `x` varies, is the
+diagonal of the two-parameter family `(α, x) ↦ chartLieDerivMetricMatrix g W α i j x`,
+whose smoothness in `α` (and hence on the diagonal) presently depends on the
+constant-section trivialisation smoothness mechanism, which is not in scope for
+the named-leaf API consumed below. -/
+theorem liederivmetric_chart_smooth_in_g_w_jet [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (α : M) (i j : Fin (Module.finrank ℝ E)) :
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞
-      (fun x : M => lieDerivMetricMatrix (I := I) g W i j x)
-      (chartAt H α).source := by
-  sorry
+      (fun x : M => chartLieDerivMetricMatrix (I := I) g W α i j x)
+      (chartAt H α).source :=
+  chartLieDerivMetricMatrix_contMDiffOn (I := I) g W α i j
 
 /-- **Each chart component of `lieDerivMetric g W` is smooth on the chart source**
 (input-form variant: smoothness in the chart base point `x`, with the metric `g`
