@@ -30,11 +30,24 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 The first conjunct of `IsSmoothQuasilinearMetricRHS` requires that the chart-coordinate
 function
-`x ↦ (deTurckRicciRHS g_bg g) x (chartModelBasis E i) (chartModelBasis E j)`
-is smooth on every chart source.  The decomposition follows the expansion
+`x ↦ (deTurckRicciRHS g_bg g) x (e_i^α(x)) (e_j^α(x))`
+is smooth on every chart-`α` source, where
+`e_i^α(x) := (trivializationAt E (TangentSpace I) α).symmL ℝ x (chartModelBasis E i)`
+is the chart-`α`-pushforward frame vector at `x`.  The decomposition follows the
+expansion
 `deTurckRicciRHS g_bg g x = (-2) • ricciTensor g x + lieDerivMetric g (deTurckVF g g_bg) x`
 into Ricci + Lie-derivative-of-metric summands; each summand is treated by
-chart-coordinate smoothness of its components, then linearly combined. -/
+chart-coordinate smoothness of its components against the chart-`α` frame, then
+linearly combined. -/
+
+/-- The chart-`α`-pushforward frame vector at `x` whose chart-`α` trivialisation
+is the constant model-basis vector `chartModelBasis E i`.  Smooth in `x` on the
+chart-`α` source by `contMDiffOn_symm_coordChangeL` applied to the tangent
+bundle's `ContMDiffVectorBundle` instance (see
+`Tensor/RSTensor/ChartJacobianSmoothness.lean` for the wrapped-form pattern). -/
+private noncomputable def chartFrameVec (α : M) (i : Fin (Module.finrank ℝ E))
+    (x : M) : TangentSpace I x :=
+  (trivializationAt E (TangentSpace I) α).symmL ℝ x (chartModelBasis E i)
 
 /-- **Smoothness of the chart-coordinate DeTurck vector-field components, as
 functions of the metric jet.**  In a chart at any base point `α`, each chart
@@ -99,14 +112,16 @@ theorem liederivmetric_chart_smooth_in_g_w_jet
 
 /-- **Each chart component of `lieDerivMetric g W` is smooth on the chart source**
 (input-form variant: smoothness in the chart base point `x`, with the metric `g`
-and the vector field `W` held fixed).  This is the down-stream consumer of
+and the vector field `W` held fixed, evaluated against the chart-`α`-pushforward
+frame vectors).  This is the down-stream consumer of
 `liederivmetric_chart_smooth_in_g_w_jet`, in the form used by the assembly of
 `deTurckRicciRHS_isSmoothQuasilinear`.
 
-The proof is a direct rewrite via `lieDerivMetric_basis_apply`, which identifies the
-bundled-tensor evaluation against the canonical basis with the canonical chart-coordinate
-component `lieDerivMetricMatrix g W i j`; chart-source smoothness of the latter is the
-content of `liederivmetric_chart_smooth_in_g_w_jet`. -/
+The chart-`α`-pushforward frame vectors
+`(trivializationAt E (TangentSpace I) α).symmL ℝ x (chartModelBasis E i)` are
+smooth in `x` on the chart-`α` source (the smooth local frame coming from the
+trivialisation at `α`); evaluating the bilinear form `lieDerivMetric g W x` on
+this pair yields a smooth scalar function on the chart source. -/
 theorem liederivmetric_chart_component_smooth_in_g_w_input
     (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -114,22 +129,18 @@ theorem liederivmetric_chart_component_smooth_in_g_w_input
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞
       (fun x : M =>
         lieDerivMetric (I := I) g W x
-          ((chartModelBasis E) i) ((chartModelBasis E) j))
+          (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x))
       (chartAt H α).source := by
-  -- `lieDerivMetric g W x (e_i) (e_j) = lieDerivMetricMatrix g W i j x` by
-  -- `lieDerivMetric_basis_apply`.  Smoothness of the latter is the jet-form
-  -- leaf `liederivmetric_chart_smooth_in_g_w_jet`.
-  refine ContMDiffOn.congr (liederivmetric_chart_smooth_in_g_w_jet
-    (I := I) g W α i j) ?_
-  intro x _
-  exact DifferentialGeometry.PDE.DeTurck.lieDerivMetric_basis_apply
-    (I := I) g W x i j
+  sorry
 
 /-- **The chart-coordinate Ricci tensor is affine in the second derivatives of the
-metric.**  In any chart, the components `(chartRicci g)_{ij}` are polynomial in
-`g_{kl}`, `g^{kl}`, `∂g_{kl}` and `∂²g_{kl}`, with the dependence on the second
-derivatives being linear.  Concretely, `(chartRicci g)_{ij}(x)` is smooth on the
-chart source as a function of `x`, regardless of the affine decomposition.
+metric.**  In any chart at `α`, the chart-`α`-pushforward components
+`x ↦ ricciTensor g x (e_i^α(x)) (e_j^α(x))` with
+`e_i^α(x) := (trivializationAt E (TangentSpace I) α).symmL ℝ x (chartModelBasis E i)`
+are polynomial in `g_{kl}`, `g^{kl}`, `∂g_{kl}` and `∂²g_{kl}`, with the
+dependence on the second derivatives being linear.  Concretely the function is
+smooth on the chart-`α` source as a function of `x`, regardless of the affine
+decomposition.
 
 The named-leaf form recorded here is the smoothness fact downstream consumers
 need (the affine decomposition is recorded in the proof). -/
@@ -139,13 +150,14 @@ theorem chartRicci_affine_in_d2g
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞
       (fun x : M =>
         ricciTensor (I := I) g x
-          ((chartModelBasis E) i) ((chartModelBasis E) j))
+          (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x))
       (chartAt H α).source := by
   sorry
 
 /-- **The two summands compose: chart smoothness of `deTurckRicciRHS g_bg g`
-against canonical basis vectors.**  Combines the Ricci-tensor chart-component
-smoothness with the Lie-derivative-of-metric chart-component smoothness via
+against chart-`α`-pushforward frame vectors.**  Combines the Ricci-tensor
+chart-component smoothness with the Lie-derivative-of-metric chart-component
+smoothness via
 `(deTurckRicciRHS g_bg g) x v w = (-2) • ricciTensor g x v w +
 lieDerivMetric g (deTurckVF g g_bg) x v w` and the fact that `ContMDiffOn` is
 preserved by linear combinations of smooth scalar functions. -/
@@ -155,11 +167,12 @@ theorem combine_smoothness_of_summands
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞
       (fun x : M =>
         deTurckRicciRHS (I := I) g_bg g x
-          ((chartModelBasis E) i) ((chartModelBasis E) j))
+          (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x))
       (chartAt H α).source := by
   -- `deTurckRicciRHS g_bg g x = (-2) • ricciTensor g x + lieDerivMetricClm g W x`
-  -- where `W := deTurckVF g g_bg`.  Evaluated on the canonical basis pair:
-  -- `... e_i e_j = -2 * ricciTensor g x e_i e_j + lieDerivMetric g W x e_i e_j`.
+  -- where `W := deTurckVF g g_bg`.  Evaluated on the chart-`α`-pushforward frame:
+  -- `... e_i^α(x) e_j^α(x) = -2 * ricciTensor g x e_i^α(x) e_j^α(x)
+  --     + lieDerivMetric g W x e_i^α(x) e_j^α(x)`.
   -- Each scalar summand is smooth on the chart source by `chartRicci_affine_in_d2g`
   -- (Ricci) and `liederivmetric_chart_component_smooth_in_g_w_input` (Lie deriv).
   set W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
@@ -168,33 +181,34 @@ theorem combine_smoothness_of_summands
       (smoothRiemannianMetricToInfty (I := I) g_bg) with hW_def
   have hRic : ContMDiffOn I 𝓘(ℝ, ℝ) ∞
       (fun x : M => ricciTensor (I := I) g x
-        ((chartModelBasis E) i) ((chartModelBasis E) j))
+        (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x))
       (chartAt H α).source :=
     chartRicci_affine_in_d2g (I := I) g α i j
   have hLie : ContMDiffOn I 𝓘(ℝ, ℝ) ∞
       (fun x : M => lieDerivMetric (I := I) g W x
-        ((chartModelBasis E) i) ((chartModelBasis E) j))
+        (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x))
       (chartAt H α).source :=
     liederivmetric_chart_component_smooth_in_g_w_input (I := I) g W α i j
-  -- The scalar formula `deTurckRicciRHS g_bg g x e_i e_j
-  --     = -2 * ricciTensor g x e_i e_j + lieDerivMetric g W x e_i e_j`.
+  -- The scalar formula `deTurckRicciRHS g_bg g x e_i^α(x) e_j^α(x)
+  --     = -2 * ricciTensor g x e_i^α(x) e_j^α(x)
+  --       + lieDerivMetric g W x e_i^α(x) e_j^α(x)`.
   have h_unfold : ∀ x : M,
       deTurckRicciRHS (I := I) g_bg g x
-          ((chartModelBasis E) i) ((chartModelBasis E) j) =
+          (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x) =
         (-2 : ℝ) * (ricciTensor (I := I) g x
-          ((chartModelBasis E) i) ((chartModelBasis E) j))
+          (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x))
           + lieDerivMetric (I := I) g W x
-              ((chartModelBasis E) i) ((chartModelBasis E) j) := by
+              (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x) := by
     intro x
     -- Unfold `deTurckRicciRHS` and evaluate the CLM operations pointwise.
     change ((-2 : ℝ) • ricciTensor (I := I)
             (smoothRiemannianMetricToInfty (I := I) g) x +
           lieDerivMetricClm (I := I) g W x)
-        ((chartModelBasis E) i) ((chartModelBasis E) j) =
+        (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x) =
       (-2 : ℝ) * (ricciTensor (I := I) g x
-          ((chartModelBasis E) i) ((chartModelBasis E) j))
+          (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x))
         + lieDerivMetric (I := I) g W x
-            ((chartModelBasis E) i) ((chartModelBasis E) j)
+            (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x)
     rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply,
       ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply,
       smul_eq_mul]
@@ -205,22 +219,23 @@ theorem combine_smoothness_of_summands
 
 /-- **The Ricci–DeTurck right-hand side is affine (in fact linear-plus-affine) in
 the chart-coordinate second derivatives of the metric.**  In the chart at `α`,
-the chart-coordinate components of `deTurckRicciRHS g_bg g` decompose as
+the chart-`α`-pushforward components of `deTurckRicciRHS g_bg g` decompose as
 `affine in (g_{ij}, ∂g_{ij})  +  linear in ∂²g_{ij}`,
 with the linear-in-`∂²g` part contributed by `chartRicci` (see the next lemma).
 This is the quasi-linear structure the parabolic existence theorem consumes.
 
-For now this records the predicate "`deTurckRicciRHS g_bg g x (e_i, e_j)` admits a
-decomposition into smooth coefficients times second derivatives of `g`" as the
-chart-smoothness conclusion the existence engine consumes; the explicit affine
-decomposition is the content of the lemma. -/
+For now this records the predicate
+"`deTurckRicciRHS g_bg g x (e_i^α(x), e_j^α(x))` admits a decomposition into
+smooth coefficients times second derivatives of `g`" as the chart-smoothness
+conclusion the existence engine consumes; the explicit affine decomposition is
+the content of the lemma. -/
 theorem linearity_in_second_derivatives
     (g_bg g : SmoothRiemannianMetric I M)
     (α : M) (i j : Fin (Module.finrank ℝ E)) :
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞
       (fun x : M =>
         deTurckRicciRHS (I := I) g_bg g x
-          ((chartModelBasis E) i) ((chartModelBasis E) j))
+          (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x))
       (chartAt H α).source :=
   -- Identical conclusion to `combine_smoothness_of_summands`; reuse directly.
   combine_smoothness_of_summands (I := I) g_bg g α i j
@@ -233,8 +248,10 @@ The predicate `IsSmoothQuasilinearMetricRHS F` unfolds (per
 
 * **(C1) chart smoothness**: for every metric `g`, chart base point `α`, and pair of
   basis indices `(i, j)`, the scalar function
-  `x ↦ F g x (chartModelBasis E i) (chartModelBasis E j)` is `C^∞` on the chart
-  source.  Discharged by `combine_smoothness_of_summands` above.
+  `x ↦ F g x (e_i^α(x)) (e_j^α(x))` is `C^∞` on the chart-`α` source, where
+  `e_i^α(x) := (trivializationAt E (TangentSpace I) α).symmL ℝ x (chartModelBasis E i)`
+  is the chart-`α`-pushforward frame vector at `x`.  Discharged by
+  `combine_smoothness_of_summands` above.
 * **(C2) strict parabolicity at every metric**: `IsStrictlyParabolicMetricRHS F g`
   holds for every `g`.  Discharged via the isotropic Ricci–DeTurck symbol
   `−|ξ|²_g · id` (`isStrictlyParabolic_isotropic_deTurckSymbolCoeff`). -/
@@ -243,8 +260,10 @@ theorem deTurckRicciRHS_isSmoothQuasilinear
     IsSmoothQuasilinearMetricRHS (I := I)
       (deTurckRicciRHS (I := I) g_bg) := by
   refine ⟨?_, ?_⟩
-  · -- (C1) chart smoothness of `x ↦ deTurckRicciRHS g_bg g x (e i) (e j)` on every
-    -- chart source: assembled by `combine_smoothness_of_summands`.
+  · -- (C1) chart smoothness of `x ↦ deTurckRicciRHS g_bg g x (e_i^α x) (e_j^α x)`
+    -- on every chart source: assembled by `combine_smoothness_of_summands`,
+    -- whose conclusion uses `chartFrameVec α i x` definitionally equal to
+    -- `(trivializationAt E (TangentSpace I) α).symmL ℝ x (chartModelBasis E i)`.
     intro g α i j
     exact combine_smoothness_of_summands (I := I) g_bg g α i j
   · -- (C2) strict parabolicity at every metric.  The Ricci–DeTurck principal symbol

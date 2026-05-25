@@ -30,12 +30,15 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 /-- Chart-component smoothness witness for an abstract metric operator `F`
 under the hypothesis that `F` has smooth quasi-linear dependence on metric data:
 for every metric `g`, basepoint `α`, and pair of model-basis indices `(i, j)`,
-the scalar function `x ↦ F g x (chartModelBasis E i) (chartModelBasis E j)` is
-`C^∞` on the chart source at `α`.
+the scalar function
+`x ↦ F g x (e_i^α(x)) (e_j^α(x))`
+with `e_i^α(x) := (trivializationAt E (TangentSpace I) α).symmL ℝ x (chartModelBasis E i)`
+is `C^∞` on the chart source at `α`.
 
 This is a projection from the first conjunct of `IsSmoothQuasilinearMetricRHS`.
-Shape patterned on `chartDeTurckOpMatrix_contMDiffOn`
-(`PDE/DeTurck/Transformation.lean`). -/
+The chart-`α`-pushforward frame vectors form a smooth local frame for
+`TangentSpace I` over the chart-`α` source — the natural smooth analogue of
+the constant model basis on a non-parallelizable manifold. -/
 theorem F_canonical_chart_component_smooth
     (F : SmoothRiemannianMetric I M →
          (∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ))
@@ -43,7 +46,11 @@ theorem F_canonical_chart_component_smooth
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞
-      (fun x : M => F g x (chartModelBasis E i) (chartModelBasis E j))
+      (fun x : M => F g x
+        ((trivializationAt E (TangentSpace I) α).symmL ℝ x
+          (chartModelBasis E i))
+        ((trivializationAt E (TangentSpace I) α).symmL ℝ x
+          (chartModelBasis E j)))
       (chartAt H α).source :=
   hF.1 g α i j
 

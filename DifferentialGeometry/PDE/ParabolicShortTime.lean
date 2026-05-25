@@ -106,15 +106,28 @@ def IsStrictlyParabolicMetricRHS
 dependence on* the data `(g, ∇g, ∇²g)`. As an abstract Prop placeholder for the
 skeleton; downstream the concrete content is "F factors through chart-coordinate
 data as a smooth function of metric components and their first two derivatives,
-strictly parabolic in the highest-order part". -/
+strictly parabolic in the highest-order part".
+
+The chart-smoothness conjunct is stated against the **chart-`α`-pushforward
+frame vectors** `(trivializationAt E (TangentSpace I) α).symmL ℝ x (chartModelBasis E i)`,
+which form a genuine smooth local frame for `TangentSpace I` over the chart-`α`
+source. (Stating chart-smoothness against the bare model-basis constants
+`chartModelBasis E i : E`, treated as `TangentSpace I x` via the canonical
+type-synonym defeq, would silently force smoothness of a constant tangent
+section — which is not available on a non-parallelizable manifold such as the
+two-sphere; the chart-frame formulation is the project's standard pattern,
+matching `Trivialization.coordChangeL` smoothness via
+`contMDiffOn_coordChangeL`.) -/
 def IsSmoothQuasilinearMetricRHS
     (F : SmoothRiemannianMetric I M →
          (∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)) : Prop :=
   (∀ (g : SmoothRiemannianMetric I M) (α : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn I 𝓘(ℝ, ℝ) ∞
         (fun x => F g x
-          (DifferentialGeometry.Integral.Measure.chartModelBasis E i)
-          (DifferentialGeometry.Integral.Measure.chartModelBasis E j))
+          ((trivializationAt E (TangentSpace I) α).symmL ℝ x
+            (DifferentialGeometry.Integral.Measure.chartModelBasis E i))
+          ((trivializationAt E (TangentSpace I) α).symmL ℝ x
+            (DifferentialGeometry.Integral.Measure.chartModelBasis E j)))
         (chartAt H α).source)
     ∧ ∀ g : SmoothRiemannianMetric I M, IsStrictlyParabolicMetricRHS F g
 

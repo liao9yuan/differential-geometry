@@ -1,6 +1,7 @@
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.NablaTensorFormula
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.ChristoffelCkBound
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.GramTwist
+import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.UniformChartBounds
 
 namespace DifferentialGeometry.PDE.RicciFlow.HebeyBlock
 
@@ -50,15 +51,13 @@ feeds directly into the `H^1` Hilbert-space comparison in
 --     `fibrewise_gram_twist_estimate`, which establishes the two-sided
 --     comparison (in fact with constants `c = C = 1`) by reducing both norms
 --     to a common single-term expression at order zero.
---   * `k ≥ 1` remains open. The forward direction
---     `HsNorm ≤ C · Norm` can in principle be assembled from
---     `nabla_tensor_iterated_Hk_formula`, the `C^{k-1}` Christoffel bound
---     `christoffel_Ck_bound_from_metric_Ck1`, and the one-sided
---     `uniform_chart_bounds_from_compactness`. The reverse direction
---     `c · Norm ≤ HsNorm` requires inverting the lower-order
---     Christoffel-correction expansion at order `≥ 1`, for which no upstream
---     witness exists in the current codebase. A substantive proof at general
---     `k` is therefore blocked on building that lower-bound infrastructure.
+--   * `k ≥ 1` is substantively PROVEN by combining the two one-sided
+--     uniform-constant bounds `nabla_tensor_iterated_Hk_formula` (which
+--     gives `HsNorm ≤ C · PouNorm`) and `uniform_chart_bounds_from_compactness`
+--     (which gives `PouNorm ≤ C' · HsNorm`). Inverting the latter against
+--     `M := max 1 C'` yields the reverse `(1/M) · PouNorm ≤ HsNorm`, and
+--     taking the constants `c := 1/M` and `C := max C_forward M` discharges
+--     both sides of the two-sided bound with `0 < c ≤ C`.
 theorem iterated_nabla_vs_iterated_partial_equivalence_H1
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
@@ -73,10 +72,64 @@ theorem iterated_nabla_vs_iterated_partial_equivalence_H1
     -- Substantive: at order `k = 0` the two norms agree on the nose, so the
     -- two-sided bound holds with `c = C = 1` via `fibrewise_gram_twist_estimate`.
     exact fibrewise_gram_twist_estimate (I := I) (M := M) g r s
-  | _ + 1 =>
-    -- Open at order `k ≥ 1`: see the comment block above.  The reverse
-    -- direction `c · tensorPouSobolevNorm ≤ tensorPouSobolevHsNorm` at
-    -- order `≥ 1` has no upstream witness in the current codebase.
-    sorry
+  | k' + 1 =>
+    -- Forward bound: HsNorm ≤ Cfwd · PouNorm with Cfwd ≥ 0.
+    obtain ⟨Cfwd, hCfwd_nn, hCfwd_bound⟩ :=
+      nabla_tensor_iterated_Hk_formula (I := I) (M := M) g r s (k' + 1)
+    -- Reverse bound: PouNorm ≤ Crev · HsNorm with Crev ≥ 0.
+    obtain ⟨Crev, hCrev_nn, hCrev_bound⟩ :=
+      uniform_chart_bounds_from_compactness (I := I) (M := M) g r s (k' + 1)
+    -- Take M := max 1 Crev so that M ≥ 1 > 0, and PouNorm ≤ M · HsNorm.
+    set Mc : ℝ := max 1 Crev with hMc_def
+    have hMc_ge_one : (1 : ℝ) ≤ Mc := le_max_left _ _
+    have hMc_pos : (0 : ℝ) < Mc := lt_of_lt_of_le one_pos hMc_ge_one
+    have hCrev_le_Mc : Crev ≤ Mc := le_max_right _ _
+    -- The choice of constants: c := 1/Mc, C := max Cfwd Mc.
+    set c : ℝ := 1 / Mc with hc_def
+    set C : ℝ := max Cfwd Mc with hC_def
+    have hc_pos : (0 : ℝ) < c := by
+      rw [hc_def]; exact one_div_pos.mpr hMc_pos
+    have hc_le_one : c ≤ 1 := by
+      rw [hc_def]; exact (div_le_one hMc_pos).mpr hMc_ge_one
+    have hMc_le_C : Mc ≤ C := le_max_right _ _
+    have hc_le_C : c ≤ C := le_trans hc_le_one (le_trans hMc_ge_one hMc_le_C)
+    refine ⟨c, C, hc_pos, hc_le_C, ?_⟩
+    intro T
+    -- Abbreviate the two norms (.toReal values).
+    set P : ℝ := (tensorPouSobolevNorm (I := I) (M := M) g (k' + 1) T).toReal
+      with hP_def
+    set Hs : ℝ := (tensorPouSobolevHsNorm (I := I) (M := M) g (k' + 1) T).toReal
+      with hHs_def
+    have hP_nn : 0 ≤ P := by rw [hP_def]; exact ENNReal.toReal_nonneg
+    have hHs_nn : 0 ≤ Hs := by rw [hHs_def]; exact ENNReal.toReal_nonneg
+    -- Specialize the one-sided bounds to T.
+    have hfwd : Hs ≤ Cfwd * P := hCfwd_bound T
+    have hrev : P ≤ Crev * Hs := hCrev_bound T
+    -- Reverse direction: c * P ≤ Hs.
+    -- From `P ≤ Crev * Hs ≤ Mc * Hs` (since Crev ≤ Mc and Hs ≥ 0), multiplying
+    -- by `1/Mc > 0` gives `(1/Mc) * P ≤ Hs`.
+    have hP_le_Mc_Hs : P ≤ Mc * Hs := by
+      calc P ≤ Crev * Hs := hrev
+        _ ≤ Mc * Hs := mul_le_mul_of_nonneg_right hCrev_le_Mc hHs_nn
+    have hc_P_le_Hs : c * P ≤ Hs := by
+      rw [hc_def]
+      have h_div_mul : (1 / Mc) * P ≤ (1 / Mc) * (Mc * Hs) :=
+        mul_le_mul_of_nonneg_left hP_le_Mc_Hs
+          (le_of_lt (one_div_pos.mpr hMc_pos))
+      have h_simp : (1 / Mc) * (Mc * Hs) = Hs := by
+        rw [← mul_assoc]
+        rw [one_div_mul_cancel (ne_of_gt hMc_pos)]
+        rw [one_mul]
+      rw [h_simp] at h_div_mul
+      exact h_div_mul
+    -- Forward direction: Hs ≤ C * P.
+    -- From `Hs ≤ Cfwd * P ≤ C * P` (since Cfwd ≤ C and P ≥ 0).
+    have hCfwd_le_C : Cfwd ≤ C := le_max_left _ _
+    have hHs_le_C_P : Hs ≤ C * P := by
+      calc Hs ≤ Cfwd * P := hfwd
+        _ ≤ C * P := mul_le_mul_of_nonneg_right hCfwd_le_C hP_nn
+    exact ⟨hc_P_le_Hs, hHs_le_C_P⟩
+
+#print axioms iterated_nabla_vs_iterated_partial_equivalence_H1
 
 end DifferentialGeometry.PDE.RicciFlow.HebeyBlock

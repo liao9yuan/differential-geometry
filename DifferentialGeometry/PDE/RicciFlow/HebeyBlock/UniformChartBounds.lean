@@ -1,5 +1,4 @@
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.ChartFrameNorm
-import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.IteratedNabla
 import DifferentialGeometry.Tensor.Multilinear.HsBoundOp
 
 namespace DifferentialGeometry.PDE.RicciFlow.HebeyBlock

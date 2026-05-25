@@ -1,5 +1,6 @@
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.HilbertSpace
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.UniformChartBounds
+import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.GramTwist
 
 namespace DifferentialGeometry.PDE.RicciFlow.HebeyBlock
 
