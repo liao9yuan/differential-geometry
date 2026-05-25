@@ -1,7 +1,10 @@
 import DifferentialGeometry.PDE.RicciFlow.DeTurckRHS
 import DifferentialGeometry.PDE.ParabolicShortTime
 import DifferentialGeometry.PDE.RicciFlow.StrictParabolicAtSelf
+import DifferentialGeometry.PDE.RicciFlow.Pullback.CartanFormula
 import DifferentialGeometry.Integral.Connection.Ricci
+import DifferentialGeometry.Integral.Connection.LeviCivita
+import DifferentialGeometry.Integral.Connection.CotangentExtension
 import DifferentialGeometry.PDE.DeTurck.VectorFieldSmooth
 import DifferentialGeometry.PDE.DeTurck.LieDerivativeMetric
 import DifferentialGeometry.Integral.DivergenceTheorem.LocalFormula
@@ -131,7 +134,144 @@ theorem liederivmetric_chart_component_smooth_in_g_w_input
         lieDerivMetric (I := I) g W x
           (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x))
       (chartAt H α).source := by
-  sorry
+  classical
+  -- Strategy parallels `chartRicci_affine_in_d2g`.  At every `x₀ ∈ chart-α source`,
+  -- extend the chart-α frame `chartFrameVec α k` to global smooth tangent sections `S k`
+  -- agreeing on a neighbourhood of `x₀`, then use the Cartan formula
+  --   `(𝓛_W g)(v, w) = g(∇_v W, w) + g(v, ∇_w W)`
+  -- (`cartan_formula_for_lie_deriv_metric`) to rewrite the pairing as a sum of two
+  -- smooth scalars; transfer back to the chart-frame expression via `eventuallyEq`.
+  intro x₀ hx₀
+  -- The chart-α frame, as a TotalSpace section, is smooth on the chart source.
+  have h_frame_on : ∀ k : Fin (Module.finrank ℝ E),
+      ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
+        (fun b : M => TotalSpace.mk' E b (chartFrameVec (I := I) α k b))
+        (chartAt H α).source := fun k => by
+    have h := chartAlphaFrame_section_contMDiffOn (I := I) α k
+    exact h
+  -- Extend the family to global smooth sections agreeing on a nbhd of `x₀`.
+  obtain ⟨S, hS_eq⟩ :=
+    exists_contMDiffSection_eqOn_nhd
+      (s := fun k : Fin (Module.finrank ℝ E) => fun b : M => chartFrameVec (I := I) α k b)
+      (u := (chartAt H α).source) (p := x₀)
+      h_frame_on ((chartAt H α).open_source) hx₀
+  -- Each `S k` is a smooth global tangent section.
+  have hSk_smooth : ∀ k : Fin (Module.finrank ℝ E),
+      ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+        (fun b : M => TotalSpace.mk' E b ((S k) b : TangentSpace I b)) :=
+    fun k => (S k).contMDiff
+  -- Smoothness of `W` as a tangent-bundle section.
+  have hW_smooth : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => TotalSpace.mk' E b (W b : TangentSpace I b)) := W.contMDiff
+  -- Upgrade `W`'s smoothness to the `(∞ + 1)` clause required by
+  -- `LeviCivita_section_contMDiffOn_univ` (note `(⊤ : ℕ∞) + 1 = ⊤`).
+  have hW_smooth' : ContMDiffOn I (I.prod 𝓘(ℝ, E))
+      ((∞ : WithTop ℕ∞) + 1)
+      (fun b : M => TotalSpace.mk' E b (W b : TangentSpace I b)) Set.univ := by
+    have : ContMDiff I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1)
+        (fun b : M => TotalSpace.mk' E b (W b : TangentSpace I b)) := by simpa using hW_smooth
+    exact this.contMDiffOn
+  -- Smoothness of the Levi-Civita Hom-bundle section `b ↦ (LC g) W b : T_b M →L[ℝ] T_b M`.
+  have h_LCWop : ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] E)) ∞
+      (fun b : M => TotalSpace.mk' (E →L[ℝ] E)
+        (E := fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)
+        b ((LeviCivita (I := I) g).toFun (fun b : M => W b) b)) Set.univ :=
+    LeviCivita_section_contMDiffOn_univ (I := I) g hW_smooth'
+  -- Smoothness of `b ↦ (LC g W) b (S k b)` as a tangent-bundle section, on `univ`.
+  have h_LCWS : ∀ k : Fin (Module.finrank ℝ E),
+      ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+        (fun b : M => TotalSpace.mk' E
+          (E := fun x : M => TangentSpace I x) b
+          ((LeviCivita (I := I) g).toFun (fun b : M => W b) b (S k b))) := by
+    intro k
+    intro b
+    have hop_at : ContMDiffAt I (I.prod 𝓘(ℝ, E →L[ℝ] E)) ∞
+        (fun b : M => TotalSpace.mk' (E →L[ℝ] E)
+          (E := fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)
+          b ((LeviCivita (I := I) g).toFun (fun b : M => W b) b)) b :=
+      h_LCWop.contMDiffAt (Filter.univ_mem)
+    have hSk_at : ContMDiffAt I (I.prod 𝓘(ℝ, E)) ∞
+        (fun b : M => TotalSpace.mk' E b ((S k) b : TangentSpace I b)) b := hSk_smooth k b
+    exact ContMDiffAt.clm_bundle_apply
+      (E₁ := fun x : M => TangentSpace I x)
+      (E₂ := fun x : M => TangentSpace I x)
+      (b := fun b : M => b)
+      (ϕ := fun b => (LeviCivita (I := I) g).toFun (fun b : M => W b) b)
+      (v := fun b => S k b)
+      hop_at hSk_at
+  -- Smoothness of the metric pairing `b ↦ g.inner b (X b) (Y b)` for smooth tangent
+  -- sections `X, Y`.  This is a direct chain via `clm_bundle_apply` against the smooth
+  -- metric `g`.
+  have h_inner :
+      ∀ {X Y : Π b : M, TangentSpace I b},
+        ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+          (fun b : M => TotalSpace.mk' E b (X b : TangentSpace I b)) →
+        ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+          (fun b : M => TotalSpace.mk' E b (Y b : TangentSpace I b)) →
+        ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun b : M => g.inner b (X b) (Y b)) := by
+    intro X Y hX hY
+    have hg : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+        (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+          (E := fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
+          b (g.inner b)) := g.contMDiff
+    -- Apply g.inner to X to get a smooth cotangent section (T_b M →L[ℝ] ℝ).
+    have hgX : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) ∞
+        (fun b : M => TotalSpace.mk' (E →L[ℝ] ℝ)
+          (E := fun x : M => TangentSpace I x →L[ℝ] ℝ) b (g.inner b (X b))) :=
+      ContMDiff.clm_bundle_apply
+        (E₁ := fun x : M => TangentSpace I x)
+        (E₂ := fun x : M => TangentSpace I x →L[ℝ] ℝ)
+        (b := fun b : M => b)
+        (ϕ := fun b => g.inner b) (v := fun b => X b) hg hX
+    -- Pair with Y.
+    exact cotangentCov_pairing_contMDiff hgX hY
+  -- Smoothness of each Cartan summand `b ↦ g.inner b (LC g W b (S i b)) (S j b)` and
+  -- `b ↦ g.inner b (S i b) (LC g W b (S j b))` globally on `M`.
+  have h_summand1 : ContMDiff I 𝓘(ℝ, ℝ) ∞
+      (fun b : M => g.inner b
+        ((LeviCivita (I := I) g).toFun (fun b : M => W b) b (S i b)) (S j b)) :=
+    h_inner (h_LCWS i) (hSk_smooth j)
+  have h_summand2 : ContMDiff I 𝓘(ℝ, ℝ) ∞
+      (fun b : M => g.inner b (S i b)
+        ((LeviCivita (I := I) g).toFun (fun b : M => W b) b (S j b))) :=
+    h_inner (hSk_smooth i) (h_LCWS j)
+  -- Their sum is globally smooth.
+  have h_sum_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞
+      (fun b : M =>
+        g.inner b ((LeviCivita (I := I) g).toFun (fun b : M => W b) b (S i b)) (S j b)
+        + g.inner b (S i b)
+            ((LeviCivita (I := I) g).toFun (fun b : M => W b) b (S j b))) :=
+    h_summand1.add h_summand2
+  -- The Cartan formula identifies the pairing with this sum, at each `b`.
+  have h_cartan_pair : ∀ b : M,
+      lieDerivMetric (I := I) g W b (S i b) (S j b) =
+        g.inner b ((LeviCivita (I := I) g).toFun (fun b : M => W b) b (S i b)) (S j b)
+        + g.inner b (S i b)
+            ((LeviCivita (I := I) g).toFun (fun b : M => W b) b (S j b)) := by
+    intro b
+    exact DifferentialGeometry.PDE.RicciFlow.Pullback.cartan_formula_for_lie_deriv_metric
+      (I := I) g W b (S i b) (S j b)
+  -- Hence `b ↦ lieDerivMetric g W b (S i b) (S j b)` is globally smooth.
+  have h_pair_S_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞
+      (fun b : M => lieDerivMetric (I := I) g W b (S i b) (S j b)) := by
+    have h_congr : (fun b : M => lieDerivMetric (I := I) g W b (S i b) (S j b)) =
+        (fun b : M =>
+          g.inner b ((LeviCivita (I := I) g).toFun (fun b : M => W b) b (S i b)) (S j b)
+          + g.inner b (S i b)
+              ((LeviCivita (I := I) g).toFun (fun b : M => W b) b (S j b))) :=
+      funext h_cartan_pair
+    rw [h_congr]; exact h_sum_smooth
+  -- ContMDiffAt at `x₀` from the global smoothness.
+  have h_pair_S_at : ContMDiffAt I 𝓘(ℝ, ℝ) ∞
+      (fun b : M => lieDerivMetric (I := I) g W b (S i b) (S j b)) x₀ := h_pair_S_smooth x₀
+  -- Transfer to the chart-α-frame expression via `eventuallyEq` on a nbhd of `x₀`.
+  have h_chart_at : ContMDiffAt I 𝓘(ℝ, ℝ) ∞
+      (fun x : M => lieDerivMetric (I := I) g W x
+        (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x)) x₀ := by
+    refine h_pair_S_at.congr_of_eventuallyEq ?_
+    filter_upwards [hS_eq] with b hb
+    rw [hb i, hb j]
+  exact h_chart_at.contMDiffWithinAt
 
 /-- **The chart-coordinate Ricci tensor is affine in the second derivatives of the
 metric.**  In any chart at `α`, the chart-`α`-pushforward components
