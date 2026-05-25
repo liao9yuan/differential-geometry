@@ -460,7 +460,7 @@ private lemma tensorPouSobolevNorm_inner_integral_lt_top
   rw [ENNReal.coe_toReal, Real.coe_toNNReal']
   exact (hB y hy).trans (le_max_left _ _)
 
-private lemma tensorPouSobolevNorm_ne_top
+theorem tensorPouSobolevNorm_ne_top
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (k : ℕ) (T : SmoothCcTensor g r s) :
     tensorPouSobolevNorm (I := I) (M := M) g k T ≠ ⊤ := by
