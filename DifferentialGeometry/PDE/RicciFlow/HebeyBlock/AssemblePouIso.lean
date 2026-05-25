@@ -68,10 +68,11 @@ theorem assemble_pou_h1_iso_intrinsic_h1
   -- Step 1: extract the `k = 1` two-sided comparison via
   -- `iterated_nabla_vs_iterated_partial_equivalence_H1` at `k = 1`. This
   -- yields constants `c₁ ≤ C₁` matching the chart-frame Hilbert-Schmidt
-  -- aggregation of `∇^k T` (for `k ∈ {0, 1}`) against the corresponding
-  -- operator-norm chart-Sobolev aggregation. The underlying primitive
-  -- still has a `sorry` body (BLOCKED on reverse direction at k ≥ 1);
-  -- this composition transits the sorry through to the headline.
+  -- aggregation of `∇^k T` against the operator-norm chart-Sobolev
+  -- aggregation. The underlying primitive is now axiom-clean
+  -- (substantive `k = 0` via `fibrewise_gram_twist_estimate`; substantive
+  -- `k ≥ 1` via combining the two one-sided uniform bounds from
+  -- `nabla_tensor_iterated_Hk_formula` and `uniform_chart_bounds_from_compactness`).
   obtain ⟨c₁, C₁, hc₁_pos, hc₁_le_C₁, h₁⟩ :=
     iterated_nabla_vs_iterated_partial_equivalence_H1
       (I := I) (M := M) g r s 1
@@ -124,5 +125,7 @@ theorem assemble_pou_h1_iso_intrinsic_h1
             ≤ C₁ * (tensorPouSobolevNorm (I := I) (M := M) g 1 T).toReal := h_up
         _ ≤ max C₀ C₁ * (tensorPouSobolevNorm (I := I) (M := M) g 1 T).toReal := by
               exact mul_le_mul_of_nonneg_right (le_max_right C₀ C₁) h_norm_op_nn
+
+#print axioms assemble_pou_h1_iso_intrinsic_h1
 
 end DifferentialGeometry.PDE.RicciFlow.HebeyBlock

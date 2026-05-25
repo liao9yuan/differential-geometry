@@ -56,22 +56,30 @@ theorem F_canonical_chart_component_smooth
 
 /-- Chart-component symmetry witness for an abstract metric operator `F`
 under the hypothesis that `F`'s output is symmetric in its two tangent-vector
-arguments: at every basepoint `x`, the chart-matrix entries
-`F g x (chartModelBasis E i) (chartModelBasis E j)` are symmetric in the
-pair of model-basis indices `(i, j)`.
-
-Shape patterned on `chartDeTurckOpMatrix_symm`
-(`PDE/DeTurck/Transformation.lean`). -/
+arguments: at every basepoint `x` (in particular `x ∈ (chartAt H α).source`),
+the chart-`α`-pushforward frame components
+`F g x (e_i^α(x)) (e_j^α(x))` are symmetric in the pair of model-basis indices
+`(i, j)`. -/
 theorem F_chart_component_symmetric
     (F : SmoothRiemannianMetric I M →
          (∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ))
     (hSymm : ∀ (g : SmoothRiemannianMetric I M) (x : M)
       (v w : TangentSpace I x), F g x v w = F g x w v)
-    (g : SmoothRiemannianMetric I M) (x : M)
+    (g : SmoothRiemannianMetric I M) (α x : M)
     (i j : Fin (Module.finrank ℝ E)) :
-    F g x (chartModelBasis E i) (chartModelBasis E j)
-      = F g x (chartModelBasis E j) (chartModelBasis E i) :=
-  hSymm g x (chartModelBasis E i) (chartModelBasis E j)
+    F g x
+        ((trivializationAt E (TangentSpace I) α).symmL ℝ x
+          (chartModelBasis E i))
+        ((trivializationAt E (TangentSpace I) α).symmL ℝ x
+          (chartModelBasis E j)) =
+      F g x
+        ((trivializationAt E (TangentSpace I) α).symmL ℝ x
+          (chartModelBasis E j))
+        ((trivializationAt E (TangentSpace I) α).symmL ℝ x
+          (chartModelBasis E i)) :=
+  hSymm g x
+    ((trivializationAt E (TangentSpace I) α).symmL ℝ x (chartModelBasis E i))
+    ((trivializationAt E (TangentSpace I) α).symmL ℝ x (chartModelBasis E j))
 
 end RicciFlow
 end PDE
