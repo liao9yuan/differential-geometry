@@ -1,5 +1,7 @@
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.HilbertSpace
 import DifferentialGeometry.Integral.L2.Hilbert.Defs
+import DifferentialGeometry.Integral.L2.Hilbert.Inherited
+import Mathlib.Analysis.Normed.Operator.Extend
 
 /-!
 # Banach equivalence: intrinsic `H^0` ≃L `TensorL2`
@@ -9,7 +11,10 @@ order `k = 0` and the metric `L²` Hilbert space of mixed `(r, s)`-tensor
 fields are canonically isomorphic as topological vector spaces over `ℝ`.
 
 This file declares the continuous linear equivalence
-`TensorPouSobolevHilbert g r s 0 ≃L[ℝ] TensorL2 r s g`.
+`TensorPouSobolevHilbert g r s 0 ≃L[ℝ] TensorL2 r s g`, constructed from a
+two-sided uniform equivalence between the pre-Hilbert seminorms on
+`SmoothCcTensor g r s` (the metric `L²` seminorm and the Hilbert-Schmidt
+partition-of-unity-weighted chart-Sobolev seminorm at order `0`).
 -/
 
 noncomputable section
@@ -31,6 +36,7 @@ namespace IntrinsicSobolev
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
+open DifferentialGeometry.Analysis.Sobolev.Tensor
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -38,36 +44,190 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+/-! ## Linear equivalence between the two pre-Hilbert wrappers
+
+The wrapper `SmoothCcTensorHs g r s 0` and the underlying `SmoothCcTensor g
+r s` carry the same data: a single field `toCcTensor`. The bijection
+between them is `ℝ`-linear by construction (all algebraic operations on
+`SmoothCcTensorHs` are inherited from `SmoothCcTensor` via the wrapper). -/
+
+/-- The canonical `ℝ`-linear equivalence between the wrapper carrying the
+intrinsic `H^0` pre-Hilbert structure and the underlying smooth
+compactly-supported tensor section type with its `L²` pre-Hilbert
+structure. Both types are `ℝ`-modules built from the same underlying data,
+linked by the wrapper field `toCcTensor`. -/
+noncomputable def smoothCcTensorHsLinearEquiv
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+    SmoothCcTensorHs g r s 0 ≃ₗ[ℝ] SmoothCcTensor g r s where
+  toFun := SmoothCcTensorHs.toCcTensor
+  invFun := fun T => ⟨T⟩
+  left_inv := fun ⟨_⟩ => rfl
+  right_inv := fun _ => rfl
+  map_add' S T := SmoothCcTensorHs.toCcTensor_add S T
+  map_smul' c S := SmoothCcTensorHs.toCcTensor_smul c S
+
+@[simp] lemma smoothCcTensorHsLinearEquiv_apply
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensorHs g r s 0) :
+    smoothCcTensorHsLinearEquiv (I := I) (M := M) g r s S = S.toCcTensor := rfl
+
+@[simp] lemma smoothCcTensorHsLinearEquiv_symm_apply
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s) :
+    (smoothCcTensorHsLinearEquiv (I := I) (M := M) g r s).symm T = ⟨T⟩ := rfl
+
+/-! ## Norm identity on the dense smooth subspace
+
+The norm on `SmoothCcTensorHs g r s 0` equals
+`(tensorPouSobolevHsNorm g 0 S.toCcTensor).toReal` for every `S`; this is
+the public identity `tensorPouSobolevHilbert_norm_eq` applied through the
+canonical embedding into the completion combined with
+`UniformSpace.Completion.norm_coe`. -/
+
+private lemma smoothCcTensorHs_norm_eq
+    (g : SmoothRiemannianMetric I M) {r s : ℕ}
+    (S : SmoothCcTensorHs g r s 0) :
+    ‖S‖ = (tensorPouSobolevHsNorm (I := I) (M := M) g 0 S.toCcTensor).toReal := by
+  -- Compose two facts:
+  -- (1) `‖((⟨T⟩ : SmoothCcTensorHs g r s 0) : TensorPouSobolevHilbert g r s 0)‖
+  --     = (tensorPouSobolevHsNorm g 0 T).toReal`  (via `tensorPouSobolevHilbert_norm_eq`)
+  -- (2) `‖(↑S : TensorPouSobolevHilbert g r s 0)‖ = ‖S‖`  (via
+  --     `UniformSpace.Completion.norm_coe`)
+  rcases S with ⟨T⟩
+  have h1 := tensorPouSobolevHilbert_norm_eq (I := I) (M := M) g (k := 0) T
+  -- Unfold `SmoothCcTensor.toHs k T` (LHS of h1) to
+  -- `((⟨T⟩ : SmoothCcTensorHs g r s 0) : TensorPouSobolevHilbert g r s 0)`
+  -- and use norm-coe.
+  have h2 : ‖((⟨T⟩ : SmoothCcTensorHs g r s 0) :
+        TensorPouSobolevHilbert g r s 0)‖ =
+      ‖(⟨T⟩ : SmoothCcTensorHs g r s 0)‖ :=
+    UniformSpace.Completion.norm_coe (⟨T⟩ : SmoothCcTensorHs g r s 0)
+  -- `SmoothCcTensor.toHs 0 T = ↑(⟨T⟩ : SmoothCcTensorHs g r s 0)` by definition.
+  have h_eq : SmoothCcTensor.toHs (g := g) (r := r) (s := s) 0 T =
+      ((⟨T⟩ : SmoothCcTensorHs g r s 0) :
+        TensorPouSobolevHilbert g r s 0) := rfl
+  rw [h_eq] at h1
+  linarith
+
+/-! ## The main equivalence
+
+Given a two-sided uniform comparison of seminorms on
+`SmoothCcTensor g r s` of the form
+
+    ‖T‖_{L²} ≤ C₁ · (tensorPouSobolevHsNorm g 0 T).toReal
+    (tensorPouSobolevHsNorm g 0 T).toReal ≤ C₂ · ‖T‖_{L²}
+
+the canonical `ℝ`-linear bijection between the two pre-Hilbert wrappers
+extends uniquely to a continuous `ℝ`-linear equivalence between their
+Hilbert-space completions, by `LinearEquiv.extend`. The dense linear maps
+into the respective completions are the coercions `toComplL`. -/
+
 /-- The canonical continuous linear equivalence between the intrinsic
 partition-of-unity-weighted Sobolev Hilbert space at regularity order `0`
-and the metric `L²` Hilbert space of mixed `(r, s)`-tensor fields. Both
-arise as Hausdorff completions of pre-Hilbert structures on
-`SmoothCcTensor g r s`, with equivalent norms at order `k = 0`.
+and the metric `L²` Hilbert space of mixed `(r, s)`-tensor fields.
 
-# Structural blocker
-
-Constructing this equivalence requires a two-sided uniform comparison
-of the form
-
-```
-c · ‖T‖_{TensorL2} ≤ (tensorPouSobolevHsNorm g 0 T).toReal ≤ C · ‖T‖_{TensorL2}
-```
-
-valid for every smooth compactly-supported `(r, s)`-tensor section `T`,
-with `0 < c ≤ C` independent of `T`. The forward direction (chart
-push-forward to intrinsic `L²`) is supplied at the scalar level by
-`DifferentialGeometry.Analysis.Parabolic.TensorSpectral.eLpNorm_chartPushed_le_const_mul_eLpNorm_riemannianVolumeMeasure`,
-but lifting it to tensor sections through fiberwise frame components
-and reverse-bridging from intrinsic to chart aggregates is the missing
-step. Once that comparison is available, the equivalence is the
-canonical extension along the dense embedding
-`SmoothCcTensor g r s →ₗ[ℝ] TensorPouSobolevHilbert g r s 0` /
-`SmoothCcTensor g r s →ₗ[ℝ] TensorL2 r s g`, applied in both
-directions via `ContinuousLinearMap.extend`. -/
+Constructed from a two-sided norm equivalence on the common dense subspace
+`SmoothCcTensor g r s`, via the extension lemma
+`LinearEquiv.extend` applied to the wrapper bijection and the canonical
+embeddings `toComplL` into each completion. The constants `C₁`, `C₂` are
+positive reals indexing the equivalence; they are absorbed as data into
+the equivalence (the underlying `ℝ`-linear map is independent of them, but
+the bound proofs in `LinearEquiv.extend` use them). -/
 noncomputable def TensorPouSobolevHilbert.toTensorL2_continuousLinearEquiv
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (h_iso : TensorPouSobolevHilbert g r s 0 ≃L[ℝ] TensorL2 r s g) :
-    TensorPouSobolevHilbert g r s 0 ≃L[ℝ] TensorL2 r s g := h_iso
+    (C₁ C₂ : ℝ)
+    (h_norm_le : ∀ T : SmoothCcTensor g r s,
+      ‖T‖ ≤ C₁ * (tensorPouSobolevHsNorm (I := I) (M := M) g 0 T).toReal)
+    (h_norm_ge : ∀ T : SmoothCcTensor g r s,
+      (tensorPouSobolevHsNorm (I := I) (M := M) g 0 T).toReal ≤ C₂ * ‖T‖) :
+    TensorPouSobolevHilbert g r s 0 ≃L[ℝ] TensorL2 r s g :=
+  -- The wrapper bijection (linear).
+  let f : SmoothCcTensorHs g r s 0 ≃ₗ[ℝ] SmoothCcTensor g r s :=
+    smoothCcTensorHsLinearEquiv (I := I) (M := M) g r s
+  -- The dense linear maps `e₁`, `e₂`: the canonical embeddings into the
+  -- completions.
+  let e₁ : SmoothCcTensorHs g r s 0 →ₗ[ℝ]
+      TensorPouSobolevHilbert g r s 0 :=
+    (UniformSpace.Completion.toComplL :
+      SmoothCcTensorHs g r s 0 →L[ℝ]
+        UniformSpace.Completion (SmoothCcTensorHs g r s 0)).toLinearMap
+  let e₂ : SmoothCcTensor g r s →ₗ[ℝ] TensorL2 r s g :=
+    (UniformSpace.Completion.toComplL :
+      SmoothCcTensor g r s →L[ℝ]
+        UniformSpace.Completion (SmoothCcTensor g r s)).toLinearMap
+  -- The forward and inverse norm bounds:
+  --   `‖e₂ (f S)‖ ≤ C₁ · ‖e₁ S‖`   for all S in the Hs wrapper
+  --   `‖e₁ (f.symm T)‖ ≤ C₂ · ‖e₂ T‖`   for all T in the L² wrapper
+  -- using `UniformSpace.Completion.norm_coe` and the per-wrapper norm
+  -- identifications.
+  f.extend e₁ e₂
+    -- density of e₁
+    (by
+      change DenseRange (UniformSpace.Completion.toComplL :
+        SmoothCcTensorHs g r s 0 →L[ℝ]
+          UniformSpace.Completion (SmoothCcTensorHs g r s 0))
+      rw [show (UniformSpace.Completion.toComplL :
+          SmoothCcTensorHs g r s 0 →
+            UniformSpace.Completion (SmoothCcTensorHs g r s 0)) =
+          ((↑) : SmoothCcTensorHs g r s 0 →
+            UniformSpace.Completion (SmoothCcTensorHs g r s 0)) from
+        UniformSpace.Completion.coe_toComplL]
+      exact UniformSpace.Completion.denseRange_coe)
+    -- forward norm bound
+    ⟨C₁, by
+      intro S
+      have hfS : f S = S.toCcTensor := rfl
+      have he₂T : ‖e₂ (f S)‖ = ‖S.toCcTensor‖ := by
+        rw [hfS]
+        change ‖((S.toCcTensor : SmoothCcTensor g r s) :
+          UniformSpace.Completion (SmoothCcTensor g r s))‖ =
+          ‖S.toCcTensor‖
+        exact UniformSpace.Completion.norm_coe S.toCcTensor
+      have he₁S : ‖e₁ S‖ = ‖S‖ := by
+        change ‖((S : SmoothCcTensorHs g r s 0) :
+          UniformSpace.Completion (SmoothCcTensorHs g r s 0))‖ = ‖S‖
+        exact UniformSpace.Completion.norm_coe S
+      rw [he₂T, he₁S]
+      have hS_norm : ‖S‖ =
+          (tensorPouSobolevHsNorm (I := I) (M := M) g 0 S.toCcTensor).toReal :=
+        smoothCcTensorHs_norm_eq (I := I) (M := M) g S
+      rw [hS_norm]
+      exact h_norm_le S.toCcTensor⟩
+    -- density of e₂
+    (by
+      change DenseRange (UniformSpace.Completion.toComplL :
+        SmoothCcTensor g r s →L[ℝ]
+          UniformSpace.Completion (SmoothCcTensor g r s))
+      rw [show (UniformSpace.Completion.toComplL :
+          SmoothCcTensor g r s →
+            UniformSpace.Completion (SmoothCcTensor g r s)) =
+          ((↑) : SmoothCcTensor g r s →
+            UniformSpace.Completion (SmoothCcTensor g r s)) from
+        UniformSpace.Completion.coe_toComplL]
+      exact UniformSpace.Completion.denseRange_coe)
+    -- inverse norm bound
+    ⟨C₂, by
+      intro T
+      have hfsymmT : f.symm T = ⟨T⟩ := rfl
+      have he₁ST : ‖e₁ (f.symm T)‖ = ‖(⟨T⟩ : SmoothCcTensorHs g r s 0)‖ := by
+        rw [hfsymmT]
+        change ‖((⟨T⟩ : SmoothCcTensorHs g r s 0) :
+          UniformSpace.Completion (SmoothCcTensorHs g r s 0))‖ =
+          ‖(⟨T⟩ : SmoothCcTensorHs g r s 0)‖
+        exact UniformSpace.Completion.norm_coe
+          (⟨T⟩ : SmoothCcTensorHs g r s 0)
+      have he₂T : ‖e₂ T‖ = ‖T‖ := by
+        change ‖((T : SmoothCcTensor g r s) :
+          UniformSpace.Completion (SmoothCcTensor g r s))‖ = ‖T‖
+        exact UniformSpace.Completion.norm_coe T
+      rw [he₁ST, he₂T]
+      have hT_norm : ‖(⟨T⟩ : SmoothCcTensorHs g r s 0)‖ =
+          (tensorPouSobolevHsNorm (I := I) (M := M) g 0 T).toReal := by
+        have := smoothCcTensorHs_norm_eq (I := I) (M := M) g
+          (⟨T⟩ : SmoothCcTensorHs g r s 0)
+        simpa using this
+      rw [hT_norm]
+      exact h_norm_ge T⟩
+
+#print axioms TensorPouSobolevHilbert.toTensorL2_continuousLinearEquiv
 
 end IntrinsicSobolev
 end RicciFlow
