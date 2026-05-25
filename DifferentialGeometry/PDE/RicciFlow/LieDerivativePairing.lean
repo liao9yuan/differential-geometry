@@ -1,4 +1,5 @@
 import DifferentialGeometry.PDE.RicciFlow.SmoothQuasilinear
+import DifferentialGeometry.PDE.DeTurck.LieDerivativeChartFrameIdentity
 
 /-!
 # Smoothness of the metric Lie-derivative pairing on smooth tangent sections
@@ -65,6 +66,30 @@ symmetry, whose underlying function is the same `symm`. -/
 lemma chartFrameVec_eq_chartBasisVecFiber
     (α : M) (i : Fin (Module.finrank ℝ E)) (b : M) :
     chartFrameVec (I := I) α i b = chartBasisVecFiber (I := I) α i b := rfl
+
+/-- **Chart-`α` frame identity for the metric Lie-derivative matrix (chart-frame
+form).** For a smooth Riemannian metric `g`, a smooth tangent vector field `W`,
+a chart base point `α : M`, indices `i, j`, and a manifold point
+`x ∈ chartLeviCivitaGoodSet α`,
+$$
+  (\mathcal L_W g)^{(α)}_{ij}(x)
+    = (\mathcal L_W g)(x)\bigl(e^{(α)}_i(x),\,e^{(α)}_j(x)\bigr),
+$$
+where $e^{(α)}_i(x) = (\text{triv}\,α).\text{symmL}\,ℝ\,x\,(e_i)$ is the chart-`α`
+frame vector at `x` (`chartFrameVec α i x`).  Trivial wrapper around
+`chartLieDerivMetricMatrix_eq_lieDerivMetric_chartBasis`, using the definitional
+equality `chartFrameVec α i b = chartBasisVecFiber α i b`. -/
+theorem chartLieDerivMetricMatrix_eq_lieDerivMetric_chartFrame
+    (g : SmoothRiemannianMetric I M)
+    (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
+    (α : M) (i j : Fin (Module.finrank ℝ E)) :
+    ∀ x ∈ chartLeviCivitaGoodSet (I := I) α,
+      chartLieDerivMetricMatrix (I := I) g W α i j x =
+        lieDerivMetric (I := I) g W x
+          (chartFrameVec (I := I) α i x)
+          (chartFrameVec (I := I) α j x) :=
+  DifferentialGeometry.PDE.DeTurck.chartLieDerivMetricMatrix_eq_lieDerivMetric_chartBasis
+    (I := I) g W α i j
 
 /-- **Smoothness of the metric Lie-derivative pairing on smooth tangent sections.**
 For a smooth Riemannian metric `g`, a smooth tangent vector field `W`, and two
