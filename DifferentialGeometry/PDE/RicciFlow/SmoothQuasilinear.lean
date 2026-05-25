@@ -45,7 +45,7 @@ is the constant model-basis vector `chartModelBasis E i`.  Smooth in `x` on the
 chart-`α` source by `contMDiffOn_symm_coordChangeL` applied to the tangent
 bundle's `ContMDiffVectorBundle` instance (see
 `Tensor/RSTensor/ChartJacobianSmoothness.lean` for the wrapped-form pattern). -/
-private noncomputable def chartFrameVec (α : M) (i : Fin (Module.finrank ℝ E))
+noncomputable def chartFrameVec (α : M) (i : Fin (Module.finrank ℝ E))
     (x : M) : TangentSpace I x :=
   (trivializationAt E (TangentSpace I) α).symmL ℝ x (chartModelBasis E i)
 
@@ -152,7 +152,51 @@ theorem chartRicci_affine_in_d2g
         ricciTensor (I := I) g x
           (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x))
       (chartAt H α).source := by
-  sorry
+  classical
+  -- Strategy: for each `x₀ ∈ chart-α source`, the chart-α frame vectors `chartFrameVec α k`
+  -- are smooth on the chart source; extend them to global smooth tangent sections via
+  -- `exists_contMDiffSection_eqOn_nhd`, then apply `ricciTensor_pairing_contMDiff` to
+  -- those global sections and transfer back via `eventuallyEq` on a nbhd of `x₀`.
+  intro x₀ hx₀
+  -- The chart-α frame, as a TotalSpace section, is smooth on the chart source.
+  -- `chartAlphaFrame_section_contMDiffOn α k` gives smoothness of
+  -- `fun b => TotalSpace.mk' E b ((triv α).symmL ℝ b (chartModelBasis E k))`,
+  -- which is definitionally `fun b => TotalSpace.mk' E b (chartFrameVec α k b)`.
+  have h_frame_on : ∀ k : Fin (Module.finrank ℝ E),
+      ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
+        (fun b : M => TotalSpace.mk' E b (chartFrameVec (I := I) α k b))
+        (chartAt H α).source := fun k => by
+    have h := chartAlphaFrame_section_contMDiffOn (I := I) α k
+    -- `chartFrameVec α k b = (triv α).symmL ℝ b (chartModelBasis E k)` by definition.
+    exact h
+  -- Extend the family `(chartFrameVec α k)_{k}` to global smooth sections agreeing on a
+  -- nbhd of `x₀`.
+  obtain ⟨S, hS_eq⟩ :=
+    exists_contMDiffSection_eqOn_nhd
+      (s := fun k : Fin (Module.finrank ℝ E) => fun b : M => chartFrameVec (I := I) α k b)
+      (u := (chartAt H α).source) (p := x₀)
+      h_frame_on ((chartAt H α).open_source) hx₀
+  -- Each `S k` is a smooth global tangent section.
+  have hSk_smooth : ∀ k : Fin (Module.finrank ℝ E),
+      ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (fun b : M => TotalSpace.mk' E b ((S k) b : TangentSpace I b))
+        := fun k => (S k).contMDiff
+  -- By `ricciTensor_pairing_contMDiff`, the scalar `b ↦ ricciTensor g b (S i b) (S j b)`
+  -- is globally smooth.
+  have h_scalar :
+      ContMDiff I 𝓘(ℝ, ℝ) ∞
+        (fun b : M => ricciTensor (I := I) g b ((S i) b) ((S j) b)) :=
+    ricciTensor_pairing_contMDiff (I := I) g (hSk_smooth i) (hSk_smooth j)
+  -- So in particular `ContMDiffAt` at `x₀`.
+  have h_scalar_at : ContMDiffAt I 𝓘(ℝ, ℝ) ∞
+      (fun b : M => ricciTensor (I := I) g b ((S i) b) ((S j) b)) x₀ := h_scalar x₀
+  -- Transfer to the chart-α-frame expression via `eventuallyEq` on a nbhd of `x₀`.
+  have h_chart_at : ContMDiffAt I 𝓘(ℝ, ℝ) ∞
+      (fun x : M => ricciTensor (I := I) g x
+        (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x)) x₀ := by
+    refine h_scalar_at.congr_of_eventuallyEq ?_
+    filter_upwards [hS_eq] with b hb
+    rw [hb i, hb j]
+  exact h_chart_at.contMDiffWithinAt
 
 /-- **The two summands compose: chart smoothness of `deTurckRicciRHS g_bg g`
 against chart-`α`-pushforward frame vectors.**  Combines the Ricci-tensor

@@ -1334,7 +1334,7 @@ private noncomputable def finBasisReprAt (i : Fin (Module.finrank ℝ E)) :
 
 /-- For smooth global tangent sections `Y, W`, the scalar
 `b ↦ ricciTensor g b (Y b) (W b)` is smooth on `M`. -/
-private theorem ricciTensor_pairing_contMDiff
+theorem ricciTensor_pairing_contMDiff
     (g : SmoothRiemannianMetric I M)
     {Y W : Π b : M, TangentSpace I b}
     (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y))
