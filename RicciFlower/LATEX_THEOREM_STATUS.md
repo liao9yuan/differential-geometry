@@ -11,16 +11,12 @@ daily work logs.
 | Section 3/14 calculus | Mostly native; no longer the main blocker. |
 | Section 6 evolution | Core inverse metric, Christoffel, Ricci, scalar, frame Ricci-norm, smooth-solution Ricci-norm data, and the `smoothOfSol` upgrade are native. |
 | Section 7 scalar WMP/lower bound | Native consumer path; scalar regularity from smooth solutions is available. |
-| Section 9 Ricci preservation | Local algebra, strict initial selectors, theorem-7.5 consumers, canonical Ricci-flow connection/spatial-derivative producers, and the shifted pinching section with tensor-continuity/core-regularity producers are native; the WMP null interface now requires symmetric bilinear PSD inputs, and the off-diagonal first-null block reaction algebra is checked. Remaining work is the parabolic/barrier-reaction producers and the canonical component-realization producer for the tensor-level null condition. |
-| Section 10 pinching | Lemma 10.4 is checked; Lemma 10.5 has checked positive-region and `alpha = 1`, `phi >= 0` side forms, but not the full book-facing hypothesis shape. Lemma 10.6 has checked raw quotient setup, book RHS rewrite, actual tensor-square setup, section-level mixed bridge, canonical solution-section packaging, and the book-facing `pinchEvol_book` theorem; the live local frontier is the later pinching estimates. |
+| Section 9 Ricci preservation | Local algebra, strict initial selectors, theorem-7.5 consumers, canonical Ricci-flow connection/spatial-derivative producers, and the shifted pinching section with tensor-continuity/core-regularity producers are native; the tensor-backed canonical shifted reaction `shiftNAt` and raw adapter `shiftNRaw` have the symmetric null condition checked from first-null geometry, now including the `delta = 0` Ricci-preservation endpoint. The direct shifted parabolic producer is checked as `pinchParabolic`; barrier reaction regularity is checked as `pinchBarrierReg`, `PinchFlowWMPData.ofShiftNClosed` assembles the shifted WMP data from smooth Ricci-flow hypotheses, `ricci_nonneg_sol_closed` proves Ricci nonnegativity from the `delta = 0` endpoint, and `ham3_pinch9` / `ham3_rescaled_ric_nonneg` wire the solution-level Section 9 packages into the Hamilton endpoint layer. |
+| Section 10 pinching | Lemma 10.4 is checked; Lemma 10.5 has checked positive-region and `alpha = 1`, `phi >= 0` side forms, but not the full book-facing hypothesis shape. Lemma 10.6 has checked raw quotient setup, book RHS rewrite, actual tensor-square setup, section-level mixed bridge, canonical solution-section packaging, and the book-facing `pinchEvol_book` theorem. The native estimate interface is now present in `ImprovedPinching/Estimate.lean`, and `ham3_pinch_imp` consumes its display wrapper; the live local frontier is proving `pinchEstimate_sol`. |
 | Section 11/12 global flow | Global analytic and compactness black boxes remain. |
 
 ## Active Native Frontiers
 
-- Section 9 Ricci-flow application producers for the shifted pinching
-  parabolic condition, barrier reaction-control regularity, and the
-  tensor-level null-condition bridge from arbitrary symmetric bilinear
-  first-null barrier tensors to the checked strict-delta block algebra.
 - Section 10 Hamilton quotient specialization and improved pinching producers.
 
 ## Closed Or Stable Native Results
@@ -131,8 +127,8 @@ The canonical Ricci-flow producers for theorem-7.5 connection and spatial
 derivative fields are checked: `ricciCov1`, `ricciCovInf`,
 `ricciMetricComp`, `ricciNablaWMP`, `ricciNabla2WMP`, and
 `ricciSpatialWMP`.  The shifted pinching section is now checked as
-`pinchSec`, with `pinchSec_eq`, `pinchNablaWMP`, `pinchNabla2WMP`,
-`pinchSpatialWMP`, and tensor-continuity producers
+`pinchSec`, with `pinchSec_eq`, explicit derivative fields
+`pinchNablaModel` / `pinchNab2ModelSec`, and tensor-continuity producers
 `pinchSecFamilyContinuousOnSet`, `pinchSec_tangentBundle_cont`, and
 `pinchSec_tensorQuadCont`.  The strict selector route is checked through
 `PinchInitLt`, `pinchInitLt_*`, `pinch_init_wmp_lt`, and
@@ -151,19 +147,43 @@ condition to the legacy raw WMP field when the reaction ignores skew input.
 `RicciWMPData.toInput`
 builds the Ricci `TensorWMPInput` package, `PinchWMPData.toInput` /
 `PinchWMPData.preserve` make the general pinching package reusable, and
-`PinchFlowWMPData` fills the canonical shifted section, connection, and spatial
-derivative fields.
+`PinchFlowWMPData` fills the canonical shifted section, connection, explicit
+derivative fields, and checked `TensorSpatialDerivs` proof.
 
-Distance: `1-2`.
+Distance: `0`.
 
-Next target: prove the remaining shifted-pinching WMP application data from
-smooth Ricci-flow equations without adding endpoint assumptions: the
-small-barrier reaction Lipschitz field inside `TensorBarrierRegularityOn`, the
-direct tensor parabolic inequality, and the reaction-wide null-eigenvector
-condition.  The null-condition work should next produce the tensor
-diagonalization/reconstruction bridge for a symmetric bilinear first-null
-barrier tensor and show the canonical shifted reaction realizes
-`shiftReactBlock3`; the strict-delta block algebra itself is checked.
+Next target: use the Section 9 package as an input to the later improved
+pinching estimates; the Section 9 WMP data itself is closed.
+The reaction-wide null-eigenvector condition is checked through
+`NullOrthonormalBasis3At`, `exists_nullOrthonormalBasis3At`, and
+`shiftNRaw_null_symm`, with `PinchFlowWMPData.ofShiftN` consuming it at the
+application layer.  The direct parabolic route is checked as `pinchParabolic`:
+`ricciQuadDeriv_coord` lifts coordinate Lemma 6.3 to arbitrary quadratic Ricci
+evaluations, `pinchQuadDeriv_coord` combines it with scalar and metric
+evolution, `ricciRoughTrace_coord` and `scalarHessTrace_eq_lap` identify the
+heat side, `ricciActualReactAt` and `ricciCoordReact_eq_actual` identify the
+coordinate reaction, and `shiftNRaw_pinchCoordReact` closes the canonical
+reaction bridge using the actual signed `Rm04` versus `rm04OfRic3At`
+convention theorem.  `PinchFlowWMPData.ofShiftNDirect` feeds this checked
+parabolic assembly into the canonical shifted WMP package.  The old canonical
+shifted `pinchNabla*`
+route has been removed from the WMP path; the checked file uses
+`pinchNablaModel` / `pinchNab2ModelSec`, with `pinchSpatialModel` proving
+their `TensorSpatialDerivs` input.  `pinchSmallLip` proves the canonical
+small-barrier reaction control, `pinchBarrierReg` fills the full
+`TensorBarrierRegularityOn` package, and
+`PinchFlowWMPData.ofShiftNClosed` assembles null condition, direct parabolic
+inequality, spatial derivative realization, and barrier regularity from
+smooth Ricci-flow data.
+The solution-level wrappers `pinch_sol_closed`, `pinch_init_sol_lt`, and
+`strict_pinch_sol_lt` now consume the closed package.  The generalized
+`delta = 0` path `pinch_sol_closed_nonneg` / `ricci_nonneg_sol_closed` proves
+Ricci nonnegativity from the same WMP machinery.  In the Hamilton endpoint,
+`HamiltonPositiveRicci.ham3_pinch9_fixed` now keeps one selected Section 9
+pinching constant across all compact subintervals, `ham3_pinch9` is its
+compatibility projection, and `HamiltonPositiveRicci.ham3_rescaled_ric_nonneg`
+converts the original-flow Ricci nonnegativity into the selected rescaled slab
+package.
 
 ### Lemma 10.4, `lem:evol-tracefree-ricci-norm`
 
@@ -218,9 +238,10 @@ Distance: `0-1`.
 The 10.7/10.8 reaction-sign input for the 10.6 reaction term is now checked
 through `DimensionThree.PinchEigen3.q_sub_nonneg` and `cubicQ_pinchOn`.
 
-Next target: continue from the Lemma 10.6 equality to the later pinching
-estimates and maximum-principle application by producing the needed
-eigenvalue/pinching context from flow data.
+Next target: prove `pinchEstimate_sol`.  The first subfrontier is producing
+ordered pointwise `PinchEigen3` data from Section 9 Ricci nonnegativity and
+shifted pinching; after that, the 10.6 drifted scalar subsolution must be fed
+into the scalar weak maximum principle on compact time slabs.
 The full arbitrary-exponent book-facing 10.5 statement under only nonnegative
 numerator hypotheses remains unproved and should not be claimed.
 
@@ -228,10 +249,27 @@ Section 9 shifted pinching now has a checked first-null block producer:
 `ShiftBlockAt`, `raw_null_of_smul`, and `shiftBlockOfNull` prove that a raw
 symmetric bilinear PSD tensor has the expected shifted first-null block
 components in any supplied orthonormal basis whose first vector normalizes the
-nonzero null direction.  The remaining null-condition frontier is the canonical
-reaction realization, because the tensor-WMP reaction input is still a raw
-evaluator while invariant trace and raised-contraction APIs consume bundled
-`Tensor02At` or tensor-section data.
+nonzero null direction.  The tensor-backed compatibility layer is checked:
+`Tensor02RealizesRawAt` and `tensor02OfRawAt` bundle raw bilinear evaluators,
+`Tensor02ReactionAt.toRawSymm` adapts tensor-backed reactions to the legacy raw
+WMP API, and `shiftNullSymm_of_block_scaled` handles the `r^2` scaling for
+arbitrary null vectors.  The basis-local tensor model `shiftNAtBasis` now
+bundles the finite shifted reaction components in a supplied orthonormal basis,
+and `shiftNAtBasis_comp_shiftBlock` realizes `shiftReactBlock3` for first-null
+blocks.  `shiftNBasisScaled` adds the checked `r^2` scaling for arbitrary null
+vectors proportional to the adapted first basis vector.  The canonical
+reaction is now also tensor-backed and basis-independent: `ricciReaction3At`,
+`shiftNAt`, `shiftNRaw`, `shiftNAt_comp_orthonormal`,
+`shiftNAt_comp_shiftBlock`, `shiftNRaw_realizes_block`, and `shiftNScaled`
+identify the invariant reaction with the same shifted first-null block target.
+The adapted first-null basis and symmetric null predicate are now checked by
+`NullOrthonormalBasis3At`, `exists_nullOrthonormalBasis3At`, and
+`shiftNRaw_null_symm`; `PinchFlowWMPData.ofShiftN` packages the canonical
+shifted reaction for the WMP application.  The direct parabolic input is now
+checked by `pinchParabolic`, and `PinchFlowWMPData.ofShiftNDirect` packages
+it with the canonical null producer.  The barrier regularity input is now
+checked by `pinchBarrierReg`, and `PinchFlowWMPData.ofShiftNClosed` removes
+the external `hbar` assumption for the shifted WMP data package.
 
 ### Lemmas 11.1-11.6
 
@@ -264,8 +302,5 @@ Hamilton proofs.
 
 ## Near-Term Work Queue
 
-1. Finish the remaining Section 9 pinching application producers: parabolic
-   inequality, tensor-level null-condition bridge, and small-barrier reaction
-   Lipschitz regularity for the shifted section.
-2. Continue from Hamilton quotient equality to the pinching estimates.
-3. Leave global analytic/compactness assumptions explicit.
+1. Continue from Hamilton quotient equality to the pinching estimates.
+2. Leave global analytic/compactness assumptions explicit.

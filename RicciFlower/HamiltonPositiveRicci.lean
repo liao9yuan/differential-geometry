@@ -3,7 +3,9 @@ import Mathlib.Topology.Algebra.ProperAction.Basic
 import RicciFlower.LeviCivita.Koszul
 import RicciFlower.Realized.CurvatureProducers
 import RicciFlower.RicciFlow.Basic
+import RicciFlower.RicciFlow.Evolution.ImprovedPinching
 import RicciFlower.RicciFlow.Evolution.LocalPinching
+import RicciFlower.RicciFlow.Evolution.RicciPreservation
 import RicciFlower.RicciFlow.Evolution.ScalarFiniteTime
 import RicciFlower.RicciFlow.MaximalTime
 import RicciFlower.DimensionThree.RicciControlsRm
@@ -399,6 +401,7 @@ def Ham3PointSel
     (Q : Ham3BlowupData M) : Prop :=
   (forall i : Nat, 0 < ham3BlowupScale (I := I) P Q i) /\
     (forall i : Nat, 0 < Q.time i) /\
+    (forall i : Nat, Q.time i ∈ P.D.carrier) /\
     (forall A : Real, exists N : Nat,
       forall i : Nat, N <= i ->
         A <= ham3BlowupScale (I := I) P Q i * Q.time i) /\
@@ -420,6 +423,51 @@ def Ham3RescaledRicNonneg
     -(ham3BlowupScale (I := I) P Q i * Q.time i) <= s -> s <= 0 ->
       0 <= P.S.ricciAt (ham3RescaledTime (I := I) P Q i s) x
         (Curvature.vec2 (I := I) v v)
+
+/-- Section 9 shifted pinching preservation available on every compact
+subinterval of the normalized maximal flow. -/
+def Ham3Section9Pinch
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0) (omega : Real) : Prop :=
+  forall T : Real, 0 <= T -> T < omega ->
+    exists delta : Real,
+      0 < delta /\ delta < (1 : Real) / 3 /\
+        RicciFlow.PinchPres (I := I) (M := M)
+          (fun t : Real => P.S.base.metric t)
+          (Realized.twoTensorSecToFamily (I := I) (M := M) P.S.ricci)
+          P.S.scalar T delta
+
+/-- Section 9 shifted pinching preservation with one fixed pinching constant
+valid on every compact subinterval of the maximal flow. -/
+def Ham3Section9PinchFixed
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0) (omega : Real) : Prop :=
+  exists delta : Real,
+    0 < delta /\ delta < (1 : Real) / 3 /\
+      forall T : Real, 0 <= T -> T < omega ->
+        RicciFlow.PinchPres (I := I) (M := M)
+          (fun t : Real => P.S.base.metric t)
+          (Realized.twoTensorSecToFamily (I := I) (M := M) P.S.ricci)
+          P.S.scalar T delta
+
+theorem Ham3Section9PinchFixed.toVarying
+    {g0 : SmoothRiemannianMetric I M}
+    {P : Ham3FlowPackage (I := I) (M := M) g0} {omega : Real}
+    (h : Ham3Section9PinchFixed (I := I) P omega) :
+    Ham3Section9Pinch (I := I) P omega := by
+  rcases h with ⟨delta, hdelta0, hdelta13, hpres⟩
+  intro T hT hTω
+  exact ⟨delta, hdelta0, hdelta13, hpres T hT hTω⟩
+
+/-- Section 9 Ricci nonnegativity preservation on every compact subinterval of
+the normalized maximal flow. -/
+def Ham3Section9RicNonneg
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0) (omega : Real) : Prop :=
+  forall T : Real, 0 <= T -> T < omega ->
+    Realized.TwoTensorFamilyNonnegativeOn (I := I) (M := M)
+      (Realized.twoTensorSecToFamily (I := I) (M := M) P.S.ricci)
+      (Set.Icc 0 T)
 
 /-- Eventually the fixed backward time window `[-r0^2,0]` lies inside the
 rescaled time slab `[-R_i t_i,0]`. -/
@@ -500,6 +548,31 @@ theorem ham3_scalar0_cont74
     simp [RicciFlow.SolutionOn.ricci, RicciFlow.SolutionOn.ricciAt,
       RicciFlow.SolutionFamily.ricci_apply]
   exact (hfun ▸ hmdiff.continuousAt)
+
+/-- Positive initial metric Ricci curvature gives positive time-zero Ricci for
+the canonical Ricci tensor carried by the Hamilton flow package. -/
+theorem ham3_ricci_pos0
+    {omega : Real} (h0ω : 0 < omega)
+    {g0 : SmoothRiemannianMetric I M}
+    (hpos : PosRicciMetric (I := I) (M := M) g0)
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D = Realized.RealTimeInterval.closedOpen 0 omega h0ω) :
+    RicciFlow.RicciPosInit (I := I) (M := M)
+      (Realized.twoTensorSecToFamily (I := I) (M := M) P.S.ricci) := by
+  intro x v hv
+  have hmetric0 : P.S.family.metric 0 = g0 := by
+    have hinit : P.D.initial = 0 := by
+      rw [hD]
+      rfl
+    simpa [hinit] using P.startsAt
+  have hpos0 :
+      0 < RicciFlow.metricRicciAt (I := I) (M := M)
+        (P.S.family.metric 0) x (Curvature.vec2 (I := I) v v) := by
+    rw [hmetric0]
+    exact hpos x v hv
+  simpa [Realized.twoTensorSecToFamily, RicciFlow.SolutionOn.ricci,
+    RicciFlow.SolutionOn.ricciAt, RicciFlow.SolutionFamily.ricci,
+    RicciFlow.SolutionFamily.ricciAt] using hpos0
 
 /-- Positive initial Ricci curvature gives positive initial scalar curvature
 after the normalized time setup identifies `t = 0` with the initial metric. -/
@@ -882,31 +955,323 @@ theorem ham3_point_select
     exists Q : Ham3BlowupData M, Ham3PointSel (I := I) P Q := by
   sorry
 
+/-- Section 9 shifted pinching preservation along the normalized Hamilton flow,
+produced by the closed Ricci-flow WMP data package. -/
+theorem ham3_pinch9_fixed
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    {omega : Real} (h0ω : 0 < omega)
+    (hM : Closed3Manifold (I := I) (M := M))
+    {g0 : SmoothRiemannianMetric I M}
+    (hpos : PosRicciMetric (I := I) (M := M) g0)
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D = Realized.RealTimeInterval.closedOpen 0 omega h0ω) :
+    Ham3Section9PinchFixed (I := I) P omega := by
+  rcases hM with ⟨hcompact, hconnected, hboundaryless, hdim⟩
+  letI : CompactSpace M := hcompact
+  letI : ConnectedSpace M := hconnected
+  letI : I.Boundaryless := hboundaryless
+  letI : Nonempty M := inferInstance
+  have hpos0 :
+      RicciFlow.RicciPosInit (I := I) (M := M)
+        (Realized.twoTensorSecToFamily (I := I) (M := M) P.S.ricci) :=
+    ham3_ricci_pos0 (I := I) (M := M) h0ω hpos P hD
+  have hinit : RicciFlow.PinchInitLt (I := I) (M := M)
+      (fun t : Real => P.S.base.metric t)
+      (Realized.twoTensorSecToFamily (I := I) (M := M) P.S.ricci)
+      P.S.scalar :=
+    RicciFlow.pinchInitLt_pos (I := I) (M := M)
+      (G := fun t : Real => P.S.base.metric t)
+      (Ric := Realized.twoTensorSecToFamily (I := I) (M := M) P.S.ricci)
+      (scalar := P.S.scalar)
+      (RicciFlow.metricData_sol0 (I := I) (M := M) P.S)
+      (RicciFlow.metricData_sol0_pos (I := I) (M := M) P.S hpos0)
+      (RicciFlow.scalar0_cont_sol (I := I) (M := M) P.S P.isSmooth.isSolution)
+  rcases hinit with ⟨delta, hdelta0, hdelta13, hpinch0⟩
+  refine ⟨delta, hdelta0, hdelta13, ?_⟩
+  intro T hT hTω
+  have hdimT : ∀ x : M, Module.finrank Real (TangentSpace I x) = 3 := by
+    intro x
+    simpa using hdim
+  have hTsub : Set.Icc 0 T ⊆ P.D.carrier := by
+    intro t ht
+    rw [hD]
+    exact ⟨ht.1, lt_of_le_of_lt ht.2 hTω⟩
+  have hTreg : Set.Ioc 0 T ⊆ P.D.regular := by
+    intro t ht
+    rw [hD]
+    exact ⟨ht.1, lt_of_le_of_lt ht.2 hTω⟩
+  exact RicciFlow.pinch_sol_closed (I := I) (M := M) (S := P.S)
+    P.isSmooth hT hdelta0 hdelta13 hdimT hTsub hTreg hpinch0
+
+/-- Section 9 shifted pinching preservation along the normalized Hamilton flow,
+produced by the closed Ricci-flow WMP data package. -/
+theorem ham3_pinch9
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    {omega : Real} (h0ω : 0 < omega)
+    (hM : Closed3Manifold (I := I) (M := M))
+    {g0 : SmoothRiemannianMetric I M}
+    (hpos : PosRicciMetric (I := I) (M := M) g0)
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D = Realized.RealTimeInterval.closedOpen 0 omega h0ω) :
+    Ham3Section9Pinch (I := I) P omega := by
+  exact (ham3_pinch9_fixed (I := I) (M := M) h0ω hM hpos P hD).toVarying
+
+/-- Section 9 Ricci nonnegativity along the normalized Hamilton flow, produced
+as the `delta = 0` endpoint of the shifted WMP package. -/
+theorem ham3_ric_nonneg9
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    {omega : Real} (h0ω : 0 < omega)
+    (hM : Closed3Manifold (I := I) (M := M))
+    {g0 : SmoothRiemannianMetric I M}
+    (hpos : PosRicciMetric (I := I) (M := M) g0)
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D = Realized.RealTimeInterval.closedOpen 0 omega h0ω) :
+    Ham3Section9RicNonneg (I := I) P omega := by
+  rcases hM with ⟨hcompact, hconnected, hboundaryless, hdim⟩
+  letI : CompactSpace M := hcompact
+  letI : ConnectedSpace M := hconnected
+  letI : I.Boundaryless := hboundaryless
+  letI : Nonempty M := inferInstance
+  have hpos0 := ham3_ricci_pos0 (I := I) (M := M) h0ω hpos P hD
+  have hinit : Realized.TwoTensorFamilyNonnegativeAtTime
+      (I := I) (M := M)
+      (Realized.twoTensorSecToFamily (I := I) (M := M) P.S.ricci) 0 := by
+    intro x v
+    by_cases hv : v = 0
+    · subst v
+      have hbilin := Realized.twoTensorSecToFamily_bilin
+        (I := I) (M := M) P.S.ricci 0 x
+      have hzero :
+          (Realized.twoTensorSecToFamily (I := I) (M := M) P.S.ricci)
+              0 x 0 0 = 0 := by
+        have h := hbilin.smul_left 0
+          (0 : TangentSpace I x) (0 : TangentSpace I x)
+        simpa using h
+      rw [hzero]
+    · exact le_of_lt (hpos0 x v hv)
+  intro T hT hTω
+  have hdimT : ∀ x : M, Module.finrank Real (TangentSpace I x) = 3 := by
+    intro x
+    simpa using hdim
+  have hTsub : Set.Icc 0 T ⊆ P.D.carrier := by
+    intro t ht
+    rw [hD]
+    exact ⟨ht.1, lt_of_le_of_lt ht.2 hTω⟩
+  have hTreg : Set.Ioc 0 T ⊆ P.D.regular := by
+    intro t ht
+    rw [hD]
+    exact ⟨ht.1, lt_of_le_of_lt ht.2 hTω⟩
+  exact RicciFlow.ricci_nonneg_sol_closed (I := I) (M := M) (S := P.S)
+    P.isSmooth hT hdimT hTsub hTreg hinit
+
 /-- Lemma 9.1-style input: nonnegative Ricci curvature persists on the selected
 rescaled flow slabs. -/
 theorem ham3_rescaled_ric_nonneg
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    {omega : Real} (h0ω : 0 < omega)
     (hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M)
     (hpos : PosRicciMetric (I := I) (M := M) g0)
     (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D = Realized.RealTimeInterval.closedOpen 0 omega h0ω)
     (Q : Ham3BlowupData M)
-    (_hsel : Ham3PointSel (I := I) P Q) :
+    (hsel : Ham3PointSel (I := I) P Q) :
     Ham3RescaledRicNonneg (I := I) P Q := by
-  sorry
+  rcases hsel with ⟨hscale, htime, htimeMem, _hprod, _hbase, _hscalarMax⟩
+  have hricOn : Ham3Section9RicNonneg (I := I) P omega :=
+    ham3_ric_nonneg9 (I := I) (M := M) h0ω hM hpos P hD
+  intro i s x v hsleft hsright
+  have hQiω : Q.time i < omega := by
+    have hmem := htimeMem i
+    rw [hD] at hmem
+    exact hmem.2
+  have hnonneg :=
+    hricOn (Q.time i) (le_of_lt (htime i)) hQiω
+  have hscale_ne : ham3BlowupScale (I := I) P Q i ≠ 0 :=
+    ne_of_gt (hscale i)
+  have hsdiv :
+      -Q.time i <= s / ham3BlowupScale (I := I) P Q i := by
+    have hdiv := div_le_div_of_nonneg_right hsleft (le_of_lt (hscale i))
+    have hcancel :
+        -(ham3BlowupScale (I := I) P Q i * Q.time i) /
+            ham3BlowupScale (I := I) P Q i = -Q.time i := by
+      field_simp [hscale_ne]
+    rwa [hcancel] at hdiv
+  have htau0 :
+      0 <= ham3RescaledTime (I := I) P Q i s := by
+    dsimp [ham3RescaledTime]
+    linarith
+  have htauT :
+      ham3RescaledTime (I := I) P Q i s <= Q.time i := by
+    dsimp [ham3RescaledTime]
+    have hsdiv_nonpos :
+        s / ham3BlowupScale (I := I) P Q i <= 0 := by
+      exact div_nonpos_of_nonpos_of_nonneg hsright (le_of_lt (hscale i))
+    linarith
+  have htau : ham3RescaledTime (I := I) P Q i s ∈ Set.Icc 0 (Q.time i) :=
+    ⟨htau0, htauT⟩
+  have hraw := hnonneg (ham3RescaledTime (I := I) P Q i s) htau x v
+  simpa [Realized.twoTensorSecToFamily, RicciFlow.SolutionOn.ricci,
+    RicciFlow.SolutionOn.ricciAt, RicciFlow.SolutionFamily.ricci,
+    RicciFlow.SolutionFamily.ricciAt] using hraw
+
+/-- Positive scalar curvature on the maximal Hamilton flow interval, produced
+from the scalar lower-barrier package used in Corollary 7.4. -/
+theorem ham3_scalar_pos
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    {omega : Real} (h0ω : 0 < omega)
+    (hM : Closed3Manifold (I := I) (M := M))
+    (g0 : SmoothRiemannianMetric I M)
+    (hpos : PosRicciMetric (I := I) (M := M) g0)
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D = Realized.RealTimeInterval.closedOpen 0 omega h0ω) :
+    ∀ t : Real, t ∈ P.D.carrier -> ∀ x : M, 0 < P.S.scalar t x := by
+  classical
+  rcases hM with ⟨hcompact, _hconnected, hboundaryless, hdim⟩
+  letI : CompactSpace M := hcompact
+  letI : I.Boundaryless := hboundaryless
+  letI : Nonempty M := inferInstance
+  rcases ham3_init74 (I := I) (M := M) hdim h0ω hpos P hD with
+    ⟨c0, hinit_min, hinit_pos⟩
+  have hcont := ham3_cont74 (I := I) (M := M) P c0
+  have hc0 : 0 < c0 :=
+    RicciFlow.InitialScalarMinimum.pos_of_forall_pos
+      (M := M) hinit_min hinit_pos
+  rcases ham3_lip74 (I := I) (M := M) P c0 hc0 hcont with
+    ⟨K, hK⟩
+  have hreg :
+      ∀ T : Real, 0 < T -> T < omega ->
+        T < RicciFlow.scalarBlowupTime 3 c0 ->
+          RicciFlow.ScalarLowerBoundWMPRegularity
+            (I := I) (ham3RealFamily (I := I) P) T 3 c0
+            (ham3Scalar (I := I) P) (K T) :=
+    ham3_reg74 (I := I) (M := M) h0ω P hD c0 hc0 K
+  have hevol :
+      RicciFlow.ScalarEvolutionEquationOn
+        (D := Realized.RealTimeInterval.closedOpen 0 omega h0ω)
+        (ham3Scalar (I := I) P)
+        (ham3ScalarLap (I := I) P)
+        (ham3RicNormSq (I := I) P) :=
+    ham3_evol74 (I := I) (M := M) h0ω P hD
+  have hlap :
+      ∀ T : Real, 0 < T -> T < omega ->
+        T < RicciFlow.scalarBlowupTime 3 c0 ->
+          RicciFlow.ScalarLaplacianRealizesHeatOperatorOn
+            (I := I) (ham3RealFamily (I := I) P) T
+            (ham3Scalar (I := I) P)
+            (ham3ScalarLap (I := I) P) := by
+    intro T _hT _hTω _hPole
+    exact ham3_lap74 (I := I) (M := M) P T
+  have hricci :
+      ∀ T : Real, 0 < T -> T < omega ->
+        T < RicciFlow.scalarBlowupTime 3 c0 ->
+          ∀ t : Real, t ∈ Set.Icc 0 T -> ∀ x : M,
+            (1 / 3 : Real) * (ham3Scalar (I := I) P t x) ^ 2 <=
+              ham3RicNormSq (I := I) P t x := by
+    intro _T _hT _hTω _hPole t _ht x
+    exact ham3_ricBound74 (I := I) (M := M) hdim P t x
+  have hF :
+      ∀ T : Real, 0 < T -> T < omega ->
+        T < RicciFlow.scalarBlowupTime 3 c0 ->
+          ∀ t : Real, t ∈ Set.Icc 0 T ->
+            LipschitzOnWith (K T)
+              (fun a : Real => RicciFlow.scalarLowerReaction 3 a t)
+              (Realized.scalarWMPValueSet (M := M) T
+                (ham3Scalar (I := I) P)
+                (RicciFlow.scalarLowerBarrier 3 c0)) := by
+    intro T hT hTω hPole
+    exact hK T hT omega hTω hPole
+  have hfinite :
+      omega <= RicciFlow.scalarBlowupTime 3 c0 := by
+    have hfin := RicciFlow.finiteTime3D (I := I) (M := M)
+      h0ω (ham3RealFamily (I := I) P) c0
+      (ham3Scalar (I := I) P) (ham3ScalarLap (I := I) P)
+      (ham3RicNormSq (I := I) P) K hinit_min hinit_pos hcont
+      hreg hevol hlap hricci hF
+    simpa [RicciFlow.scalarBlowupTime] using hfin.2
+  have hlower :
+      RicciFlow.ScalarLowerBarrierBoundUpToPole
+        (M := M) (ham3Scalar (I := I) P) 3 c0 omega :=
+    RicciFlow.scalarLowerBarrierBoundUpToPole_of_scalarEvolution_closedOpen
+      (I := I) h0ω (ham3RealFamily (I := I) P) 3 c0 (by norm_num)
+      hc0 (ham3Scalar (I := I) P) (ham3ScalarLap (I := I) P)
+      (ham3RicNormSq (I := I) P) K hreg hevol hlap hricci
+      (RicciFlow.InitialScalarMinimum.lowerBound (M := M) hinit_min) hF
+  intro t htD x
+  have ht_closed :
+      t ∈ (Realized.RealTimeInterval.closedOpen 0 omega h0ω).carrier := by
+    simpa [hD] using htD
+  rcases ht_closed with ⟨ht0, htω⟩
+  by_cases ht_zero : t = 0
+  · have h0 := hinit_pos x
+    simpa [ham3Scalar, ham3Solution, ht_zero] using h0
+  · have htpos : 0 < t := lt_of_le_of_ne ht0 (Ne.symm ht_zero)
+    have htblow : t < RicciFlow.scalarBlowupTime 3 c0 :=
+      lt_of_lt_of_le htω hfinite
+    have hbound :
+        RicciFlow.scalarLowerBarrier 3 c0 t <=
+          ham3Scalar (I := I) P t x :=
+      hlower t htpos htω htblow x
+    have hden :
+        0 < 1 - (2 / (3 : Real)) * c0 * t :=
+      RicciFlow.scalarLowerBarrier_denominator_pos_of_lt_blowup
+        (n := 3) (c0 := c0) (by norm_num) hc0 (le_of_lt htpos) htblow
+    have hpos_t :
+        0 < ham3Scalar (I := I) P t x :=
+      RicciFlow.scalar_curvature_positive_of_lower_barrier
+        (n := 3) (c0 := c0) (t := t) hbound hc0 hden
+    simpa [ham3Scalar, ham3Solution] using hpos_t
 
 /-- Hamilton's pinching improvement along the chosen flow. -/
 theorem ham3_pinch_imp
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    {omega : Real} (h0ω : 0 < omega)
     (hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M)
     (hpos : PosRicciMetric (I := I) (M := M) g0)
     (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D = Realized.RealTimeInterval.closedOpen 0 omega h0ω)
     (Q : Ham3BlowupData M)
     (_hsel : Ham3PointSel (I := I) P Q)
-    (_hric : Ham3RescaledRicNonneg (I := I) P Q) :
+    (_hric : Ham3RescaledRicNonneg (I := I) P Q)
+    (_hsec9 : Ham3Section9Pinch (I := I) P omega) :
     exists tracefreeRmNormSq scalar weight : Real -> M -> Real, exists C : Real,
       RicciFlow.HamiltonTracefreePinchingEstimateOn
         tracefreeRmNormSq scalar weight C := by
-  sorry
+  rcases hM with ⟨hcompact, hconnected, hboundaryless, hdim⟩
+  letI : CompactSpace M := hcompact
+  letI : ConnectedSpace M := hconnected
+  letI : I.Boundaryless := hboundaryless
+  letI : Nonempty M := inferInstance
+  have hdimT : ∀ x : M, Module.finrank Real (TangentSpace I x) = 3 := by
+    intro x
+    simpa using hdim
+  have hfixed : Ham3Section9PinchFixed (I := I) P omega :=
+    ham3_pinch9_fixed (I := I) (M := M) h0ω
+      ⟨hcompact, hconnected, hboundaryless, hdim⟩ hpos P hD
+  have hnonneg : Ham3Section9RicNonneg (I := I) P omega :=
+    ham3_ric_nonneg9 (I := I) (M := M) h0ω
+      ⟨hcompact, hconnected, hboundaryless, hdim⟩ hpos P hD
+  have hscalar :
+      ∀ t : Real, t ∈ P.D.carrier -> ∀ x : M, 0 < P.S.scalar t x :=
+    ham3_scalar_pos (I := I) (M := M) h0ω
+      ⟨hcompact, hconnected, hboundaryless, hdim⟩ g0 hpos P hD
+  rcases RicciFlow.pinchEstimate_display_sol (I := I) (M := M)
+      P.S P.isSmooth h0ω hD hdimT hscalar hfixed hnonneg with
+    ⟨tracefreeRmNormSq, scalar, weight, C, hest⟩
+  refine ⟨tracefreeRmNormSq, scalar, weight, C, ?_⟩
+  intro t x
+  exact hest t trivial x
 
 /-- Corollary 11.4-style producer: nonnegative Ricci controls the full
 curvature tensor on the selected rescaled slabs, with whatever universal
@@ -935,7 +1300,7 @@ theorem ham3_r0_window
     (Q : Ham3BlowupData M)
     (hsel : Ham3PointSel (I := I) P Q) :
     Ham3Window (I := I) P Q ham3_r0 := by
-  rcases hsel with ⟨_hscale, _htime, hprod, _hbase, _hscalarMax⟩
+  rcases hsel with ⟨_hscale, _htime, _htimeMem, hprod, _hbase, _hscalarMax⟩
   rcases hprod (ham3_r0 ^ 2) with ⟨N, hN⟩
   refine ⟨N, ?_⟩
   intro i hi s hsleft hsright
@@ -1031,12 +1396,14 @@ theorem ham3_const_metric
     exact ⟨omega, c0, h0ω, hD, hc0, hbound⟩
   rcases ham3_point_select (I := I) (M := M) hM g0 hg0 P hfinite with ⟨Q, hsel⟩
   have hric : Ham3RescaledRicNonneg (I := I) P Q :=
-    ham3_rescaled_ric_nonneg (I := I) (M := M) hM g0 hg0 P Q hsel
+    ham3_rescaled_ric_nonneg (I := I) (M := M) h0ω hM g0 hg0 P hD Q hsel
+  have hsec9 : Ham3Section9Pinch (I := I) P omega :=
+    ham3_pinch9 (I := I) (M := M) h0ω hM hg0 P hD
   have hpinch :
       exists tracefreeRmNormSq scalar weight : Real -> M -> Real, exists C : Real,
         RicciFlow.HamiltonTracefreePinchingEstimateOn
           tracefreeRmNormSq scalar weight C :=
-    ham3_pinch_imp (I := I) (M := M) hM g0 hg0 P Q hsel hric
+    ham3_pinch_imp (I := I) (M := M) h0ω hM g0 hg0 P hD Q hsel hric hsec9
   have hrm :
       exists C : Real, 0 < C /\
         forall (i : Nat) (s : Real) (x : M),

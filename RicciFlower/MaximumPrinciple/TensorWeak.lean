@@ -1,5 +1,6 @@
 import RicciFlower.MaximumPrinciple.TensorWeak.Basic
 import RicciFlower.MaximumPrinciple.TensorWeak.BarrierCore
+import RicciFlower.MaximumPrinciple.TensorWeak.TensorBackedReaction
 import RicciFlower.MaximumPrinciple.TensorWeak.FirstNull
 import RicciFlower.MaximumPrinciple.TensorWeak.Compactness
 import RicciFlower.MaximumPrinciple.TensorWeak.Limit

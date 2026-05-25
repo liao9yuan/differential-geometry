@@ -5,6 +5,7 @@ import RicciFlower.RicciFlow.Evolution.ImprovedPinching.HamiltonRHS
 import RicciFlower.RicciFlow.Evolution.ImprovedPinching.TfHeatAssembly
 import RicciFlower.RicciFlow.Evolution.ImprovedPinching.BookData
 import RicciFlower.RicciFlow.Evolution.ImprovedPinching.Wrappers
+import RicciFlower.RicciFlow.Evolution.ImprovedPinching.Estimate
 
 /-!
 # Improved Ricci pinching quantities

@@ -7,6 +7,7 @@ import RicciFlower.VectorBundle.PartialMfderiv
 
 set_option autoImplicit false
 set_option linter.style.longLine false
+set_option linter.unusedSectionVars false
 
 /-!
 # Metric compatibility as `nabla g = 0`
@@ -220,6 +221,41 @@ theorem zero_realizes_metric
   intro X x slots
   rw [nabla_metric_zero (I := I) cov g hmc X x]
   simp
+
+/-- Canonical zero first and second covariant derivatives of the metric tensor
+for a metric-compatible connection. -/
+noncomputable def metricDerivsZero
+    [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : RicciFlower.SmoothRiemannianMetric I M)
+    (hmc : RicciFlower.Connection.IsMetricCompatible (I := I) cov g) :
+    CanonicalSpatialDerivs0S (𝕜 := Real) (E := E) (H := H) (I := I)
+      (M := M) cov (metricTensorField (I := I) g) where
+  nablaA := 0
+  nabla2A := 0
+  first := zero_realizes_metric (I := I) cov g hmc
+  second := zero_realizes_nabla (I := I) 3 cov
+
+@[simp]
+theorem metricDerivsZero_nabla
+    [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : RicciFlower.SmoothRiemannianMetric I M)
+    (hmc : RicciFlower.Connection.IsMetricCompatible (I := I) cov g)
+    (x : M) (slots : Fin 3 -> TangentSpace I x) :
+    (metricDerivsZero (I := I) cov g hmc).nablaA x slots = 0 := rfl
+
+@[simp]
+theorem metricDerivsZero_nabla2
+    [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (g : RicciFlower.SmoothRiemannianMetric I M)
+    (hmc : RicciFlower.Connection.IsMetricCompatible (I := I) cov g)
+    (x : M) (slots : Fin 4 -> TangentSpace I x) :
+    (metricDerivsZero (I := I) cov g hmc).nabla2A x slots = 0 := rfl
 
 end
 
