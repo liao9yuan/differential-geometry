@@ -171,6 +171,44 @@ lemma chartBasisVec_contMDiffOn
   intro x hx
   exact (trivializationAt_chartBasisVec_snd (I := I) x₀ i hx)
 
+/-- Smoothness of the chart-`α`-pushforward frame vector
+`(triv α).symmL ℝ b (chartModelBasis E i)` as a smooth bundle section, on the
+chart-`α` source.  The fibre `(triv α).symmL ℝ b v` is, by `Trivialization.coe_symmₗ`,
+equal to `(triv α).symm b v` as a function of `v` (`symmL` is built from `symmₗ`
+with its function field given explicitly as `e.symm b`), so the section coincides
+pointwise with `chartBasisVec α i`; the smoothness then follows from
+`chartBasisVec_contMDiffOn` together with the identification
+`(trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source` for the
+tangent bundle (`TangentBundle.trivializationAt_baseSet`).  Stated with model
+space `I.tangent`, which unfolds (it is an `abbrev`) to `I.prod 𝓘(ℝ, E)`. -/
+lemma chartAlphaFrame_section_contMDiffOn
+    (α : M) (i : Fin (Module.finrank ℝ E)) :
+    ContMDiffOn I I.tangent ∞
+      (fun b : M => TotalSpace.mk' E b
+        ((trivializationAt E (TangentSpace I) α).symmL ℝ b
+          (chartModelBasis E i)))
+      (chartAt H α).source := by
+  -- Pointwise the section equals `chartBasisVec α i` — the only difference is
+  -- `symmL ℝ b v` vs `symm b v`, which agree as values (by `coe_symmₗ`).
+  have h_funext :
+      (fun b : M => TotalSpace.mk' E b
+          ((trivializationAt E (TangentSpace I) α).symmL ℝ b
+            (chartModelBasis E i)))
+        = chartBasisVec (I := I) α i := by
+    funext b
+    rfl
+  rw [h_funext]
+  -- `chartBasisVec_contMDiffOn` gives smoothness on `(triv α).baseSet`; rewrite
+  -- to the chart-`α` source via `TangentBundle.trivializationAt_baseSet`.
+  have h_base := chartBasisVec_contMDiffOn (I := I) α i
+  have h_baseSet :
+      (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source :=
+    TangentBundle.trivializationAt_baseSet (I := I) α
+  rw [h_baseSet] at h_base
+  -- `I.tangent` is an `abbrev` for `I.prod 𝓘(ℝ, E)`, so the model spaces match
+  -- definitionally.
+  exact h_base
+
 /-! ## Fiberwise basis from the trivialization -/
 
 /-- The chart-basis family at a point `x ∈ triv.baseSet` is a basis of `TangentSpace I x`,
