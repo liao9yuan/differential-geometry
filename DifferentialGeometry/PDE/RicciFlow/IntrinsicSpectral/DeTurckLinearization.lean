@@ -47,7 +47,14 @@ theorem deturck_ricci_rhs_linearization_at_g0
             (DifferentialGeometry.PDE.DeTurck.deTurckSymbolCoeff (I := I) g₀) ∧
       DifferentialGeometry.PDE.RicciFlow.HasPrincipalSymbol (I := I)
         (DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS (I := I) g_bg)
-        g₀ σ := by
-  sorry
+        g₀ σ :=
+  ⟨DifferentialGeometry.PDE.DeTurck.isotropicSymbol
+      (E := E)
+      (fun x : M => TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
+      (DifferentialGeometry.PDE.DeTurck.deTurckSymbolCoeff (I := I) g₀),
+    rfl,
+    DifferentialGeometry.PDE.DeTurck.isStrictlyParabolic_isotropic_deTurckSymbolCoeff
+      (E := E)
+      (fun x : M => TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) g₀⟩
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
