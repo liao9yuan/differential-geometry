@@ -1,5 +1,7 @@
 import RicciFlower.RicciFlow.Basic
 import RicciFlower.LeviCivita.Scaling
+import RicciFlower.Operators.Scaling
+import RicciFlower.Tensor.RSTensor.Tensor0SRiemannian.Scaling
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -266,36 +268,6 @@ private theorem metricTensorField_scaleMetric
   ext v
   simp [metricTensorField_apply, scaleMetric_inner, smul_eq_mul]
 
-private theorem metricInverseInBasis_scaleMetric
-    (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M)
-    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-    {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
-    (gInv : Idx -> Idx -> Real)
-    (hinv : MetricInverseInBasis (I := I) g x basis gInv) :
-    MetricInverseInBasis (I := I) (scaleMetric (I := I) c hc g) x basis
-      (fun i j => c⁻¹ * gInv i j) := by
-  intro i k
-  have hc0 : c ≠ 0 := ne_of_gt hc
-  constructor
-  · calc
-      ∑ j, (c⁻¹ * gInv i j) *
-          (scaleMetric (I := I) c hc g).inner x (basis j) (basis k)
-          = ∑ j, gInv i j * g.inner x (basis j) (basis k) := by
-            apply Finset.sum_congr rfl
-            intro j _hj
-            simp [scaleMetric_inner]
-            field_simp [hc0]
-      _ = if i = k then 1 else 0 := (hinv i k).1
-  · calc
-      ∑ j, (scaleMetric (I := I) c hc g).inner x (basis i) (basis j) *
-          (c⁻¹ * gInv j k)
-          = ∑ j, g.inner x (basis i) (basis j) * gInv j k := by
-            apply Finset.sum_congr rfl
-            intro j _hj
-            simp [scaleMetric_inner]
-            field_simp [hc0]
-      _ = if i = k then 1 else 0 := (hinv i k).2
-
 private theorem metricTracePair0SAt_scaleMetric
     (c : Real) (hc : 0 < c) (g : SmoothRiemannianMetric I M)
     {x : M} (B : Tensor0SSpace (𝕜 := Real) (E := E) (H := H)
@@ -315,7 +287,7 @@ private theorem metricTracePair0SAt_scaleMetric
   have hinvScale :
       MetricInverseInBasis (I := I) (scaleMetric (I := I) c hc g) x basis
         (fun i j => c⁻¹ * gInv i j) :=
-    metricInverseInBasis_scaleMetric (I := I) c hc g basis gInv hinv
+    metricInvBasis_scale (I := I) c hc g basis gInv hinv
   rw [Realized.metricTracePair0SAt_eq_sum_basis (I := I)
       (scaleMetric (I := I) c hc g) basis (fun i j => c⁻¹ * gInv i j) hinvScale,
     Realized.metricTracePair0SAt_eq_sum_basis (I := I) g basis gInv hinv]
@@ -337,6 +309,57 @@ private theorem metricTracePair0SAt_scaleMetric
     SolutionFamily.ricciAt, metricRicciAt, Curvature.metricRicciAt,
     Curvature.metricCov, LeviCivita.lcConn_scaleMetric,
     metricTracePair0SAt_scaleMetric]
+
+@[simp] theorem paraSolution_ricciNorm
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (τ R : Real) (hR : 0 < R) (hτ : τ ∈ D.carrier) :
+    ricciNorm (I := I) (paraSolution (I := I) S τ R hR hτ) =
+      fun s x => R⁻¹ * R⁻¹ * ricciNorm (I := I) S (paraTime τ R s) x := by
+  funext s x
+  simp [ricciNorm, SolutionOn.family, SolutionOn.ricci, paraSolution, paraFamily,
+    paraSolution_ricci (I := I) S τ R hR hτ, normSq0S_two_scale, mul_assoc]
+
+private theorem paraRicciNormGrad_eq
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (τ R : Real) (hR : 0 < R) (hτ : τ ∈ D.carrier)
+    {s : Real} (hs : s ∈ (paraInterval D τ R hR hτ).carrier) (x : M) :
+    Realized.gradientFun (I := I)
+        ((paraSolution (I := I) S τ R hR hτ).family.metric s)
+        (ricciNorm (I := I) (paraSolution (I := I) S τ R hR hτ) s) x =
+      (R⁻¹ * R⁻¹ * R⁻¹) •
+        Realized.gradientFun (I := I) (S.family.metric (paraTime τ R s))
+          (ricciNorm (I := I) S (paraTime τ R s)) x := by
+  have hdiff :
+      MDifferentiableAt I 𝓘(Real, Real)
+        (ricciNorm (I := I) S (paraTime τ R s)) x :=
+    hS.ricciNormSpace (paraTime τ R s) hs x
+  calc
+    Realized.gradientFun (I := I)
+        ((paraSolution (I := I) S τ R hR hτ).family.metric s)
+        (ricciNorm (I := I) (paraSolution (I := I) S τ R hR hτ) s) x =
+        Realized.gradientFun (I := I)
+          (scaleMetric (I := I) R hR (S.family.metric (paraTime τ R s)))
+          ((R⁻¹ * R⁻¹) • ricciNorm (I := I) S (paraTime τ R s)) x := by
+          simp [SolutionOn.family, paraSolution, paraFamily, paraSolution_ricciNorm,
+            Pi.smul_apply, smul_eq_mul, mul_assoc]
+    _ =
+        R⁻¹ • Realized.gradientFun (I := I) (S.family.metric (paraTime τ R s))
+          ((R⁻¹ * R⁻¹) • ricciNorm (I := I) S (paraTime τ R s)) x := by
+          rw [Realized.gradientFun_scale]
+    _ =
+        R⁻¹ • ((R⁻¹ * R⁻¹) •
+          Realized.gradientFun (I := I) (S.family.metric (paraTime τ R s))
+            (ricciNorm (I := I) S (paraTime τ R s)) x) := by
+          rw [Realized.gradientFun_const_smul (I := I)
+            (S.family.metric (paraTime τ R s)) (a := R⁻¹ * R⁻¹) hdiff]
+    _ =
+        (R⁻¹ * R⁻¹ * R⁻¹) •
+          Realized.gradientFun (I := I) (S.family.metric (paraTime τ R s))
+            (ricciNorm (I := I) S (paraTime τ R s)) x := by
+          simp [smul_smul, mul_assoc, mul_comm, mul_left_comm]
 
 private theorem lcConnectionSmooth
     (g : SmoothRiemannianMetric I M) :
@@ -583,13 +606,39 @@ theorem paraSol
         hS.nablaRicCont htime hmaps
     simpa [paraNablaRic_eq (I := I) S τ R hR hτ] using hcont
   ricciNormSpace := by
-    -- Frontier: preserve fixed-time spatial differentiability of `|Ric|^2`
-    -- under the canonical Ricci and inverse-metric scaling laws.
-    sorry
+    intro t ht x
+    have hOld :
+        MDifferentiableAt I 𝓘(Real, Real)
+          (ricciNorm (I := I) S (paraTime τ R t)) x :=
+      hS.ricciNormSpace (paraTime τ R t) ht x
+    have hscaled := hOld.const_mul (R⁻¹ * R⁻¹)
+    simpa [paraSolution_ricciNorm (I := I) S τ R hR hτ, mul_assoc] using hscaled
   ricciNormGrad := by
-    -- Frontier: preserve fixed-time gradient regularity of `|Ric|^2` under
-    -- the canonical Ricci and inverse-metric scaling laws.
-    sorry
+    intro t ht x
+    have hOld :
+        MDiffAt (T% fun y : M =>
+          Realized.gradientFun (I := I) (S.family.metric (paraTime τ R t))
+            (ricciNorm (I := I) S (paraTime τ R t)) y) x :=
+      hS.ricciNormGrad (paraTime τ R t) ht x
+    have hscaled :
+        MDiffAt (T% fun y : M =>
+          (R⁻¹ * R⁻¹ * R⁻¹) •
+            Realized.gradientFun (I := I) (S.family.metric (paraTime τ R t))
+              (ricciNorm (I := I) S (paraTime τ R t)) y) x := by
+      simpa [Pi.smul_apply] using
+        (mdifferentiableAt_const (I := I) (c := R⁻¹ * R⁻¹ * R⁻¹)).smul_section hOld
+    have hfun :
+        (fun y : M =>
+          Realized.gradientFun (I := I)
+            ((paraSolution (I := I) S τ R hR hτ).family.metric t)
+            (ricciNorm (I := I) (paraSolution (I := I) S τ R hR hτ) t) y) =
+          fun y : M =>
+            (R⁻¹ * R⁻¹ * R⁻¹) •
+              Realized.gradientFun (I := I) (S.family.metric (paraTime τ R t))
+                (ricciNorm (I := I) S (paraTime τ R t)) y := by
+      funext y
+      exact paraRicciNormGrad_eq (I := I) S hS τ R hR hτ ht y
+    simpa [hfun] using hscaled
   scalarEvolution := by
     -- Frontier: preserve scalar heat evolution under the canonical scalar and
     -- Laplacian scaling laws for parabolic rescaling.

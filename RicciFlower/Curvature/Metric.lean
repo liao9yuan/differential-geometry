@@ -147,6 +147,235 @@ theorem metricScalar_smooth
     Realized.trace02_smooth (I := I) (M := M) g
       (metricRicci (I := I) (M := M) g)
 
+/-- Three-dimensional Einstein differentiation input for Schur's lemma:
+if `Ric = (R / 3) g` as a static tensor field, then
+`∇Ric = (1 / 3) dR ⊗ g`.
+
+The dimension only enters through the coefficient in the Einstein equation;
+the proof itself is the scalar-times-parallel-metric product rule. -/
+theorem nablaRic_ein3
+    (g : SmoothRiemannianMetric I M)
+    (hEin : ∀ x : M, ∀ v w : TangentSpace I x,
+      metricRicciAt (I := I) (M := M) g x (Realized.vec2 (I := I) v w) =
+        (metricScalarAt (I := I) (M := M) g x / 3) * g.inner x v w)
+    (x : M) :
+    let cov := metricCov (I := I) (M := M) g
+    let Ric := metricRicci (I := I) (M := M) g
+    let scalar := fun y : M => metricScalarAt (I := I) (M := M) g y
+    let nablaRic := totalNabla0SFun (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) 2 cov Ric x
+    let dScalar := Realized.differential1FormFun (I := I) scalar x
+    ∀ A B C : TangentSpace I x,
+      nablaRic (Realized.vec3 (I := I) A B C) =
+        (1 / 3 : Real) * dScalar (fun _ : Fin 1 => A) * g.inner x B C := by
+  classical
+  dsimp
+  intro A B C
+  let cov := metricCov (I := I) (M := M) g
+  let Ric := metricRicci (I := I) (M := M) g
+  let scalar := fun y : M => metricScalarAt (I := I) (M := M) g y
+  let f3 : M -> Real := fun y : M => (1 / 3 : Real) * scalar y
+  let hscalar : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) scalar :=
+    metricScalar_smooth (I := I) (M := M) g
+  have hf3 : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f3 := by
+    exact contMDiff_const.mul hscalar
+  letI := tensor0SBundle_topology (𝕜 := Real) (E := E) (H := H)
+    (I := I) (M := M) (s := 1)
+  let dScalarSec : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I)
+      (M := M) (n := (∞ : WithTop ℕ∞)) 1 :=
+    Realized.duSec (I := I) scalar hscalar
+  let df3 : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I)
+      (M := M) (n := (∞ : WithTop ℕ∞)) 1 :=
+    tensor0SField_smulByFun (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) (s := 1)
+      (fun _ : M => (1 / 3 : Real)) contMDiff_const dScalarSec
+  let metricSec : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I)
+      (M := M) (n := (∞ : WithTop ℕ∞)) 2 :=
+    metricTensorField (I := I) g
+  let smulSec : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I)
+      (M := M) (n := (∞ : WithTop ℕ∞)) 2 :=
+    tensor0SField_smulByFun (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) (s := 2)
+      f3 hf3 metricSec
+  have hdf3 : ∀ y : M, ∀ v : TangentSpace I y,
+      df3 y (fun _ : Fin 1 => v) = extDerivFun (I := I) f3 y v := by
+    intro y v
+    have hf_y : MDifferentiableAt I 𝓘(Real, Real) scalar y :=
+      hscalar.contMDiffAt.mdifferentiableAt (by simp)
+    have hconst := RicciFlower.extDerivFun_const_mul
+      (I := I) (c := (1 / 3 : Real)) (f := scalar) (x := y) hf_y
+    have hv := DFunLike.congr_fun hconst v
+    calc
+      df3 y (fun _ : Fin 1 => v)
+          = (1 / 3 : Real) *
+              Realized.differential1FormFun (I := I) scalar y
+                (fun _ : Fin 1 => v) := by
+            simp [df3, dScalarSec]
+      _ = (1 / 3 : Real) * extDerivFun (I := I) scalar y v := by
+            rw [Realized.differential1FormFun_apply_eq_extDerivFun]
+      _ = extDerivFun (I := I) f3 y v := by
+            simpa [f3, Pi.smul_apply, smul_eq_mul] using hv.symm
+  letI := tensor0SBundle_topology (𝕜 := Real) (E := E) (H := H)
+    (I := I) (M := M) (s := 2)
+  letI := tensor0SBundle_fiber (𝕜 := Real) (E := E) (H := H)
+    (I := I) (M := M) (s := 2)
+  letI := tensor0SBundle_vector (𝕜 := Real) (E := E) (H := H)
+    (I := I) (M := M) (s := 2)
+  letI := tensor0SBundle_smooth (𝕜 := Real) (E := E) (H := H)
+    (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) (s := 2)
+  have hRicEq : Ric = smulSec := by
+    apply DFunLike.ext
+    intro y
+    apply ContinuousMultilinearMap.ext
+    intro slots
+    have hslots : slots = Realized.vec2 (I := I) (slots 0) (slots 1) := by
+      funext i
+      fin_cases i <;> rfl
+    have hEin_y := hEin y (slots 0) (slots 1)
+    rw [hslots]
+    simpa [Ric, smulSec, metricSec, f3, scalar, metricRicci_apply,
+      tensor0SField_smulByFun_apply, ContinuousMultilinearMap.smul_apply,
+      smul_eq_mul, metricTensorField_apply, Realized.vec2, div_eq_mul_inv,
+      mul_assoc, mul_comm, mul_left_comm] using hEin_y
+  let X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
+    (ContMDiffSection.exists_eq_at
+      (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞)) x A).choose
+  have hX : X x = A :=
+    (ContMDiffSection.exists_eq_at
+      (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞)) x A).choose_spec
+  let slots : Fin 2 -> TangentSpace I x := Realized.vec2 (I := I) B C
+  have hreal :=
+    nabla_smul_metric (I := I) (M := M) cov g
+      (LeviCivita.leviCivitaConnectionOfMetric_isMetricCompatible (I := I) g)
+      f3 hf3 df3 hdf3
+  have happly :=
+    TotalNabla0SRealizes.apply (I := I) hreal X x slots
+  have hsection :=
+    totalNabla0SFun_apply_section (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) 2 cov X smulSec x slots
+  have htot :
+      (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 1) (q := 2)
+          df3 metricSec) x (Fin.cons (X x) slots) =
+        totalNabla0SFun (𝕜 := Real) (E := E) (H := H)
+          (I := I) (M := M) 2 cov smulSec x (Fin.cons (X x) slots) := by
+    calc
+      (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 1) (q := 2)
+          df3 metricSec) x (Fin.cons (X x) slots)
+          =
+        nabla0SFun (𝕜 := Real) (E := E) (H := H)
+          (I := I) (M := M) 2 cov X smulSec x slots := by
+          simpa [metricSec, smulSec] using happly
+      _ =
+        totalNabla0SFun (𝕜 := Real) (E := E) (H := H)
+          (I := I) (M := M) 2 cov smulSec x (Fin.cons (X x) slots) := by
+          exact hsection.symm
+  have hslots3 : Fin.cons A slots = Realized.vec3 (I := I) A B C := by
+    funext i
+    fin_cases i <;> rfl
+  have hslots3X : Fin.cons (X x) slots = Realized.vec3 (I := I) A B C := by
+    rw [hX, hslots3]
+  have hprodEval :
+      (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 1) (q := 2)
+          df3 metricSec) x (Fin.cons (X x) slots) =
+        (1 / 3 : Real) *
+          Realized.differential1FormFun (I := I) scalar x
+            (fun _ : Fin 1 => A) * g.inner x B C := by
+    change (Bundle.continuousMultilinearMap.product_fun
+        (df3 x) (metricSec x)) (Fin.cons (X x) slots) =
+      (1 / 3 : Real) *
+        Realized.differential1FormFun (I := I) scalar x
+          (fun _ : Fin 1 => A) * g.inner x B C
+    rw [Bundle.continuousMultilinearMap.product_fun_apply]
+    have hleft :
+        Fin.cons (X x) slots ∘ Fin.castAdd 2 =
+          fun _ : Fin 1 => A := by
+      funext i
+      fin_cases i
+      exact hX
+    have hright :
+        Fin.cons (X x) slots ∘ Fin.natAdd 1 = slots := by
+      funext i
+      fin_cases i <;> rfl
+    rw [hleft, hright]
+    simp [df3, dScalarSec, metricSec, slots, metricTensorField_apply,
+      Realized.vec2, RicciFlower.Curvature.vec2, mul_assoc]
+  calc
+    totalNabla0SFun (𝕜 := Real) (E := E) (H := H)
+        (I := I) (M := M) 2 cov Ric x (Realized.vec3 (I := I) A B C)
+        =
+      totalNabla0SFun (𝕜 := Real) (E := E) (H := H)
+        (I := I) (M := M) 2 cov smulSec x (Realized.vec3 (I := I) A B C) := by
+          rw [hRicEq]
+    _ =
+      (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 1) (q := 2)
+          df3 metricSec) x (Fin.cons (X x) slots) := by
+          rw [← hslots3X, ← htot]
+    _ =
+      (1 / 3 : Real) *
+        Realized.differential1FormFun (I := I) scalar x
+          (fun _ : Fin 1 => A) * g.inner x B C := hprodEval
+
+/-- Pointwise three-dimensional Schur bridge for a static Einstein metric:
+the scalar differential vanishes at the point.  The `Fin 3` basis and inverse
+metric components are explicit so basis construction stays in the
+dimension-three layer. -/
+theorem dScalar_zero_ein3_at
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M)
+    {x : M} (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
+    (gInv : Fin 3 -> Fin 3 -> Real)
+    (hinv : MetricInverseInBasis (I := I) (M := M) g x basis gInv)
+    (hEin : ∀ y : M, ∀ v w : TangentSpace I y,
+      metricRicciAt (I := I) (M := M) g y (Realized.vec2 (I := I) v w) =
+        (metricScalarAt (I := I) (M := M) g y / 3) * g.inner y v w) :
+    let scalar := fun y : M => metricScalarAt (I := I) (M := M) g y
+    let dScalar := Realized.differential1FormFun (I := I) scalar x
+    ∀ X : TangentSpace I x, dScalar (fun _ : Fin 1 => X) = 0 := by
+  classical
+  dsimp
+  intro X
+  let cov := metricCov (I := I) (M := M) g
+  let hcov :=
+    LeviCivita.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+      (I := I) (M := M) g
+  let Ric : Realized.Tensor02Section (I := I) (M := M) :=
+    Riemann.CovariantDerivative.ricciSection (I := I) (M := M) cov hcov
+  let scalar : M -> Real :=
+    fun y => Realized.metricTracePair0SAt (I := I) g (Ric y)
+  let nablaRic :=
+    totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      2 cov Ric x
+  let dScalar := Realized.differential1FormFun (I := I) scalar x
+  obtain ⟨nablaRm04, hsecond, hRmSymm, hRicTrace, hScalar⟩ :=
+    Realized.metricBianchiAt (I := I) (M := M) g basis gInv hinv
+  have hInv : ∀ i j : Fin 3, gInv i j = gInv j i :=
+    invMetric_symm (I := I) (M := M) g x basis gInv hinv
+  have hEinNabla : ∀ A B C : TangentSpace I x,
+      nablaRic (Realized.vec3 (I := I) A B C) =
+        (1 / 3 : Real) * dScalar (fun _ : Fin 1 => A) * g.inner x B C := by
+    simpa [cov, hcov, Ric, scalar, nablaRic, dScalar, metricCov,
+      metricRicci, metricScalarAt] using
+      nablaRic_ein3 (I := I) (M := M) g hEin x
+  have hNablaSymm : Realized.NablaRicSymmAt (I := I) nablaRic := by
+    intro A B C
+    rw [hEinNabla A B C, hEinNabla A C B]
+    rw [g.symm x C B]
+  have hcontract :
+      Realized.ContractedBianchiOfSecondAt (I := I) basis gInv nablaRm04
+        nablaRic dScalar :=
+    Realized.contractOfSecond (I := I) basis gInv nablaRm04
+      nablaRic dScalar hRmSymm hRicTrace hScalar hNablaSymm hInv
+  have hBianchi : Realized.ContractedBianchiAt (I := I) basis gInv nablaRic
+      dScalar :=
+    Realized.contracted_bianchi_of_second (I := I) basis gInv nablaRm04
+      nablaRic dScalar hcontract hsecond
+  exact Realized.dR_zero_nablaEin3 (I := I) (M := M) g basis gInv hinv
+    nablaRic dScalar hBianchi hEinNabla X
+
 /-- Component symmetry of the canonical Ricci tensor of a smooth metric. -/
 theorem metricRicciSymm
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]

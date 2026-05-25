@@ -947,6 +947,86 @@ theorem contracted_bianchi
         (1 / 2 : Real) * dScalar (fun _ : Fin 1 => X) :=
   h X
 
+/-- Three-dimensional Schur algebra at one point: once the covariant derivative
+of Ricci has the Einstein form `∇Ric = (1 / 3) dR ⊗ g`, the contracted
+Bianchi identity forces `dR = 0`.
+
+The geometric producer for the Einstein-form covariant derivative is separate:
+it should come from differentiating `Ric = (R / 3) g` and using `∇g = 0`. -/
+theorem dR_zero_nablaEin3
+    {x : M}
+    (g : SmoothMetric I M)
+    (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
+    (gInv : Fin 3 -> Fin 3 -> Real)
+    (hinv : MetricInverseInBasis (I := I) g x basis gInv)
+    (nablaRic :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 3 x)
+    (dScalar :
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
+    (hBianchi : ContractedBianchiAt (I := I) basis gInv nablaRic dScalar)
+    (hEinNabla : ∀ A B C : TangentSpace I x,
+      nablaRic (vec3 (I := I) A B C) =
+        (1 / 3 : Real) * dScalar (fun _ : Fin 1 => A) * g.inner x B C) :
+    ∀ X : TangentSpace I x, dScalar (fun _ : Fin 1 => X) = 0 := by
+  classical
+  intro X
+  let α := cotangentToDual (I := I) dScalar
+  have hcoord :
+      dScalar (fun _ : Fin 1 => X) =
+        ∑ i : Fin 3, basis.repr X i *
+          dScalar (fun _ : Fin 1 => basis i) := by
+    calc
+      dScalar (fun _ : Fin 1 => X) = α X := by
+        simp [α, cotangentToDual_apply]
+      _ = α (∑ i : Fin 3, basis.repr X i • basis i) := by
+        rw [basis.sum_repr]
+      _ = ∑ i : Fin 3, basis.repr X i *
+          dScalar (fun _ : Fin 1 => basis i) := by
+        rw [map_sum]
+        apply Finset.sum_congr rfl
+        intro i _hi
+        simp [α, cotangentToDual_apply, smul_eq_mul]
+  have htrace :
+      (∑ i : Fin 3, ∑ j : Fin 3,
+        gInv i j * nablaRic (vec3 (I := I) (basis i) (basis j) X)) =
+          (1 / 3 : Real) * dScalar (fun _ : Fin 1 => X) := by
+    calc
+      (∑ i : Fin 3, ∑ j : Fin 3,
+        gInv i j * nablaRic (vec3 (I := I) (basis i) (basis j) X))
+          = ∑ i : Fin 3, ∑ j : Fin 3,
+              gInv i j *
+                ((1 / 3 : Real) * dScalar (fun _ : Fin 1 => basis i) *
+                  g.inner x (basis j) X) := by
+            apply Finset.sum_congr rfl
+            intro i _hi
+            apply Finset.sum_congr rfl
+            intro j _hj
+            rw [hEinNabla]
+      _ = (1 / 3 : Real) *
+            (∑ i : Fin 3, ∑ j : Fin 3,
+              gInv i j * g.inner x X (basis j) *
+                dScalar (fun _ : Fin 1 => basis i)) := by
+            rw [Finset.mul_sum]
+            apply Finset.sum_congr rfl
+            intro i _hi
+            rw [Finset.mul_sum]
+            apply Finset.sum_congr rfl
+            intro j _hj
+            rw [g.symm x (basis j) X]
+            ring
+      _ = (1 / 3 : Real) * dScalar (fun _ : Fin 1 => X) := by
+            rw [hcoord]
+            congr 1
+            apply Finset.sum_congr rfl
+            intro i _hi
+            rw [basis_repr_eq_sum_inv_inner (I := I) g x basis gInv hinv X i]
+            rw [Finset.sum_mul]
+  have hhalf :
+      (1 / 2 : Real) * dScalar (fun _ : Fin 1 => X) =
+        (1 / 3 : Real) * dScalar (fun _ : Fin 1 => X) := by
+    rw [← hBianchi X, htrace]
+  nlinarith
+
 /-- Section-level contracted Bianchi identity, with the basis and trace data
 chosen pointwise. -/
 def ContrBianchiSec

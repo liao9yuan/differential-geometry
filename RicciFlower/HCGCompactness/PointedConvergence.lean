@@ -1,4 +1,5 @@
 import RicciFlower.HCGCompactness.Basic
+import RicciFlower.Tensor.RSTensor.MetricCompatibility
 import RicciFlower.Tensor.RSTensor.NablaOnTensors.Regularity.TotalNabla0S
 
 set_option autoImplicit false
@@ -23,7 +24,7 @@ namespace HCGCompactness
 open scoped Manifold ContDiff
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [FiniteDimensional Real E] [CompleteSpace E]
+variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 
@@ -34,20 +35,11 @@ variable [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
 variable [IsManifold I ∞ M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M]
 
-/-- The `(0,2)` tensor field `g_k - g_infty` associated to two smooth
-Riemannian metrics. -/
-noncomputable def metricTensorDiff
-    (gk gInf : SmoothRiemannianMetric I M) :
-    Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
-      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2 :=
-  RiemannianMetric.to02Tensor (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) gk -
-    RiemannianMetric.to02Tensor (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) gInf
-
-/-- The `a`-fold covariant derivative of `g_k - g_infty`, using the
-Levi-Civita connection of the reference metric `g`.  The derivative slots are
-placed first, so the output has covariant valence `a + 2`. -/
-noncomputable def metricDiffCovDeriv
-    (gk gInf gRef : SmoothRiemannianMetric I M) :
+/-- The `a`-fold covariant derivative of a metric tensor, using the
+Levi-Civita connection of the reference metric `gRef`.  The derivative slots
+are placed first, so the output has covariant valence `a + 2`. -/
+noncomputable def metricCovDeriv
+    (h gRef : SmoothRiemannianMetric I M) :
     (a : Nat) ->
       Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
         (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) (a + 2) :=
@@ -55,7 +47,7 @@ noncomputable def metricDiffCovDeriv
     (motive := fun a : Nat =>
       Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
         (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) (a + 2))
-    (metricTensorDiff (I := I) gk gInf)
+    (Tensor0SBundle.metricTensorField (I := I) (M := M) h)
     (fun a A =>
       by
         let cov :=
@@ -74,6 +66,15 @@ noncomputable def metricDiffCovDeriv
             Tensor0SBundle.totalNabla0S (𝕜 := Real) (E := E) (H := H)
               (I := I) (M := M) (a + 2) cov A hreg)
 
+/-- The pointwise tensor `∇^a(g_k - g_infty)`, represented as the difference of
+the iterated covariant derivatives of the two metric tensors. -/
+noncomputable def metricDiffCovDerivAt
+    (a : Nat) (gk gInf gRef : SmoothRiemannianMetric I M) (x : M) :
+    Tensor0SBundle.Tensor0SSpace (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (a + 2) x :=
+  metricCovDeriv (I := I) gk gRef a x -
+    metricCovDeriv (I := I) gInf gRef a x
+
 /-- The pointwise quantity `|∇^a(g_k - g_infty)|_g` from MSM135 Definition
 3.1.  The covariant derivatives are taken using the Levi-Civita connection of
 `gRef`, and the tensor norm is the one induced by `gRef`. -/
@@ -81,7 +82,7 @@ noncomputable def metricDerivNorm
     (a : Nat) (gk gInf gRef : SmoothRiemannianMetric I M) (x : M) : Real :=
   Real.sqrt
     (Tensor0SBundle.normSq0S (I := I) gRef x (a + 2)
-      (metricDiffCovDeriv (I := I) gk gInf gRef a x))
+      (metricDiffCovDerivAt (I := I) a gk gInf gRef x))
 
 /-- The displayed `sup_{0 <= a <= p} sup_{x in K}` norm from MSM135
 Definition 3.1. -/

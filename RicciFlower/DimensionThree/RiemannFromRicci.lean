@@ -70,6 +70,79 @@ private theorem sum_fin_two_fun {Idx : Type*} [Fintype Idx]
     funext a
     fin_cases a <;> simp [finTwoArrowEquiv]
 
+private def fin4SlotsEquiv :
+    (Fin 4 -> Fin 3) ≃ (((Fin 3 × Fin 3) × Fin 3) × Fin 3) where
+  toFun f := (((f 0, f 1), f 2), f 3)
+  invFun p := slots4 p.1.1.1 p.1.1.2 p.1.2 p.2
+  left_inv f := by
+    funext a
+    fin_cases a <;> simp [slots4]
+  right_inv p := by
+    rcases p with ⟨⟨⟨i, j⟩, k⟩, l⟩
+    simp [slots4]
+
+private theorem sum_fin_four_fun {α : Type*} [AddCommMonoid α]
+    (F : (Fin 4 -> Fin 3) -> α) :
+    (∑ I0 : Fin 4 -> Fin 3, F I0) =
+      ∑ i : Fin 3, ∑ j : Fin 3, ∑ k : Fin 3, ∑ l : Fin 3,
+        F (slots4 i j k l) := by
+  classical
+  rw [Fintype.sum_equiv fin4SlotsEquiv F
+    (fun p : (((Fin 3 × Fin 3) × Fin 3) × Fin 3) =>
+      F (slots4 p.1.1.1 p.1.1.2 p.1.2 p.2))]
+  · repeat rw [Fintype.sum_prod_type]
+  · intro I0
+    have hslot :
+        slots4 (fin4SlotsEquiv I0).1.1.1 (fin4SlotsEquiv I0).1.1.2
+            (fin4SlotsEquiv I0).1.2 (fin4SlotsEquiv I0).2 = I0 := by
+      change fin4SlotsEquiv.symm (fin4SlotsEquiv I0) = I0
+      exact fin4SlotsEquiv.left_inv I0
+    rw [hslot]
+
+private theorem inner_eq_sum_repr3
+    {g : SmoothRiemannianMetric I M}
+    {basis : Module.Basis (Fin 3) Real (TangentSpace I x)}
+    (horth : OrthonormalBasisAt (I := I) g x basis)
+    (X Y : TangentSpace I x) :
+    g.inner x X Y =
+      ∑ i : Fin 3, basis.repr X i * basis.repr Y i := by
+  calc
+    g.inner x X Y =
+        tangentFlatLinear (I := I) g x
+          (∑ i : Fin 3, basis.repr X i • basis i) Y := by
+          rw [basis.sum_repr X]
+          rfl
+    _ = ∑ i : Fin 3, ∑ j : Fin 3,
+        basis.repr X i * basis.repr Y j * g.inner x (basis i) (basis j) := by
+          rw [map_sum]
+          simp only [LinearMap.coe_sum, Finset.sum_apply]
+          apply Finset.sum_congr rfl
+          intro i _hi
+          rw [map_smul]
+          change (basis.repr X i) *
+              g.inner x (basis i) Y =
+            ∑ j : Fin 3,
+              basis.repr X i * basis.repr Y j *
+                g.inner x (basis i) (basis j)
+          rw [show Y = ∑ j : Fin 3, basis.repr Y j • basis j by
+            rw [basis.sum_repr Y]]
+          rw [map_sum]
+          rw [Finset.mul_sum]
+          apply Finset.sum_congr rfl
+          intro j _hj
+          simp [map_smul, smul_eq_mul, mul_assoc]
+    _ = ∑ i : Fin 3, basis.repr X i * basis.repr Y i := by
+          have h00 := horth 0 0
+          have h01 := horth 0 1
+          have h02 := horth 0 2
+          have h10 := horth 1 0
+          have h11 := horth 1 1
+          have h12 := horth 1 2
+          have h20 := horth 2 0
+          have h21 := horth 2 1
+          have h22 := horth 2 2
+          simp [Fin.sum_univ_three, delta3, h00, h01, h02, h10, h11, h12, h20, h21, h22]
+
 private theorem vec2_update_zero {x : M}
     (X Y X' : TangentSpace I x) :
     Function.update (vec2 (I := I) X Y) (0 : Fin 2) X' =
@@ -606,6 +679,75 @@ theorem rm04Comp_displayedRiemannFromRicci3D_at
   unfold displayedRiemannFromRicciRhs3
   rw [← h.ricci_trace i l, ← h.ricci_trace j l, ← h.ricci_trace i k,
     ← h.ricci_trace j k, ← h.scalar_trace]
+
+/-- Component form of the three-dimensional space-form calculation under an
+Einstein Ricci tensor.  The left side follows RicciFlower's slot convention
+through `rm04Comp_displayedRiemannFromRicci3D_at`: it is the component
+`Rm04(e_k,e_i,e_j,e_l)`. -/
+theorem rm04Comp_einstein3_at
+    {g : SmoothRiemannianMetric I M}
+    {Ric : Tensor02At (I := I) (M := M) x}
+    {scalar : Real}
+    {Rm04 : Tensor04At (I := I) (M := M) x}
+    {basis : Module.Basis (Fin 3) Real (TangentSpace I x)}
+    (h : RiemannFromRicci3DTraceDataAt g Ric scalar Rm04 basis)
+    (hEin : ∀ i j : Fin 3,
+      ricciCompAt (I := I) basis Ric i j =
+        (scalar / 3) * delta3 i j) :
+    ∀ i j k l : Fin 3,
+      rm04CompAt (I := I) basis Rm04 k i j l =
+        (scalar / 6) *
+          (delta3 i l * delta3 j k - delta3 j l * delta3 i k) := by
+  intro i j k l
+  rw [rm04Comp_displayedRiemannFromRicci3D_at (I := I) h i j k l]
+  rw [hEin i l, hEin j l, hEin i k, hEin j k]
+  fin_cases i <;> fin_cases j <;> fin_cases k <;> fin_cases l <;>
+    simp [delta3] <;> ring
+
+/-- Arbitrary-vector version of the three-dimensional space-form calculation
+under an Einstein Ricci tensor.  The sign matches RicciFlower's lowered
+curvature convention `Rm04(W,X,Y,Z) = g(W,R(X,Y)Z)`. -/
+theorem rm04_einstein3_at
+    {g : SmoothRiemannianMetric I M}
+    {Ric : Tensor02At (I := I) (M := M) x}
+    {scalar : Real}
+    {Rm04 : Tensor04At (I := I) (M := M) x}
+    {basis : Module.Basis (Fin 3) Real (TangentSpace I x)}
+    (h : RiemannFromRicci3DTraceDataAt g Ric scalar Rm04 basis)
+    (hEin : ∀ i j : Fin 3,
+      ricciCompAt (I := I) basis Ric i j =
+        (scalar / 3) * delta3 i j)
+    (X Y : TangentSpace I x) :
+    Rm04 (vec4 (I := I) X X Y Y) =
+      -(scalar / 6) *
+        (g.inner x X X * g.inner x Y Y -
+          g.inner x X Y * g.inner x X Y) := by
+  classical
+  have hcomp := rm04Comp_einstein3_at (I := I) h hEin
+  have hcomp' : ∀ a b c d : Fin 3,
+      rm04CompAt (I := I) basis Rm04 a b c d =
+        (scalar / 6) *
+          (delta3 b d * delta3 c a - delta3 c d * delta3 b a) := by
+    intro a b c d
+    simpa using hcomp b c a d
+  have hcompSlots : ∀ a b c d : Fin 3,
+      component0S (I := I) basis Rm04 (slots4 a b c d) =
+        (scalar / 6) *
+          (delta3 b d * delta3 c a - delta3 c d * delta3 b a) := by
+    intro a b c d
+    change rm04CompAt (I := I) basis Rm04 a b c d =
+      (scalar / 6) *
+        (delta3 b d * delta3 c a - delta3 c d * delta3 b a)
+    exact hcomp' a b c d
+  have hXX := inner_eq_sum_repr3 (I := I) h.orthonormal X X
+  have hYY := inner_eq_sum_repr3 (I := I) h.orthonormal Y Y
+  have hXY := inner_eq_sum_repr3 (I := I) h.orthonormal X Y
+  rw [tensor0S_apply_eq_sum (I := I) basis Rm04 (vec4 (I := I) X X Y Y)]
+  rw [sum_fin_four_fun]
+  rw [hXX, hYY, hXY]
+  simp_rw [hcompSlots]
+  simp [slots4, Curvature.vec4, delta3, Fin.sum_univ_three, Fin.prod_univ_four]
+  ring
 
 /-- Local-frame wrapper for the pointwise bridge. -/
 theorem rm04Comp_displayedRiemannFromRicci3D_frame
