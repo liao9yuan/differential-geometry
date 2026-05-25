@@ -527,6 +527,24 @@ theorem IsCovDerivAlongChart.smul
   convert hcY using 1
   rw [hΓsmul, smul_sub]
 
+/-- Negation closure: if `W = D Y / dt`, then `-W = D (-Y) / dt`. This
+specialises `IsCovDerivAlongChart.smul` to the scalar `c = -1` and
+rewrites the resulting `(-1) •`-expressions as negations on both the
+section and its covariant derivative. -/
+theorem IsCovDerivAlongChart.neg
+    {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M} {uPrime : ℝ → E}
+    {Y W : ℝ → E} {s : Set ℝ}
+    (h : IsCovDerivAlongChart (I := I) g α γ uPrime Y W s) :
+    IsCovDerivAlongChart (I := I) g α γ uPrime
+      (fun t => - Y t) (fun t => - W t) s := by
+  have hsmul := IsCovDerivAlongChart.smul (h := h) (-1 : ℝ)
+  have hYeq : (fun t : ℝ => (-1 : ℝ) • Y t) = (fun t : ℝ => - Y t) := by
+    funext t; rw [neg_one_smul]
+  have hWeq : (fun t : ℝ => (-1 : ℝ) • W t) = (fun t : ℝ => - W t) := by
+    funext t; rw [neg_one_smul]
+  rw [hYeq, hWeq] at hsmul
+  exact hsmul
+
 /-- The zero section has zero covariant derivative. -/
 theorem IsCovDerivAlongChart.zero
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) (uPrime : ℝ → E) (s : Set ℝ)
