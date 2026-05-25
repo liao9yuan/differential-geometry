@@ -183,8 +183,7 @@ theorem liederivmetric_chart_component_smooth_in_g_w_input
         (fun b : M => TotalSpace.mk' E
           (E := fun x : M => TangentSpace I x) b
           ((LeviCivita (I := I) g).toFun (fun b : M => W b) b (S k b))) := by
-    intro k
-    intro b
+    intro k b
     have hop_at : ContMDiffAt I (I.prod 𝓘(ℝ, E →L[ℝ] E)) ∞
         (fun b : M => TotalSpace.mk' (E →L[ℝ] E)
           (E := fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)
