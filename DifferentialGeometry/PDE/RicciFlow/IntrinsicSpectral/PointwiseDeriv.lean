@@ -54,7 +54,23 @@ theorem maxreg_l2deriv_to_pointwise_hasderivwithinat
     (hrep : u.deriv =ᵐ[timeMeasure T] g) :
     ∀ t ∈ Set.Ico (0 : ℝ) T,
       HasDerivWithinAt u.toFun (g t) (Set.Ici (0 : ℝ)) t := by
-  sorry
+  intro t ht
+  -- `t ∈ Ico 0 T` gives `0 ≤ t` and `t < T`.
+  have ht_icc : t ∈ Set.Icc (0 : ℝ) T :=
+    ⟨ht.1, le_of_lt ht.2⟩
+  -- The `Icc 0 T`-relative derivative from the prerequisite lemma.
+  have hderivIcc : HasDerivWithinAt u.toFun (g t) (Set.Icc (0 : ℝ) T) t :=
+    u.hasDerivWithinAt_toFun_of_continuousOn hg hrep ht_icc
+  -- `Iic T` is a neighborhood of `t` because `t < T`.
+  have hIic : Set.Iic T ∈ nhds t := Iic_mem_nhds ht.2
+  -- Hence `Icc 0 T = Ici 0 ∩ Iic T` lies in `𝓝[Ici 0] t`.
+  have hmem : Set.Icc (0 : ℝ) T ∈ nhdsWithin t (Set.Ici (0 : ℝ)) := by
+    have : Set.Ici (0 : ℝ) ∩ Set.Iic T ∈ nhdsWithin t (Set.Ici (0 : ℝ)) :=
+      inter_mem_nhdsWithin _ hIic
+    -- `Ici 0 ∩ Iic T = Icc 0 T` definitionally.
+    simpa [Set.Ici_inter_Iic] using this
+  -- Transport the derivative from `Icc 0 T` to `Ici 0`.
+  exact hderivIcc.mono_of_mem_nhdsWithin hmem
 
 theorem hasDerivAt_clm_apply_from_h1_time
     {X Y : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
