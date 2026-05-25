@@ -763,6 +763,7 @@ import DifferentialGeometry.PDE.DeTurck.RicciLinearization.RicciSymbolFormula
 import DifferentialGeometry.PDE.DeTurck.RicciLinearization.RicciSymbol
 import DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.ChartVectorField
 import DifferentialGeometry.PDE.DeTurck.ChristoffelContInMetric
+import DifferentialGeometry.PDE.DeTurck.DeTurckVFChartCoord
 import DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.LinearizedVectorField
 import DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.DeTurckCorrectionSecondOrder
 import DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.DeTurckCorrectionSecondOrderSplit
