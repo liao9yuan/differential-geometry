@@ -372,6 +372,7 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.MorreyManifoldHigherOrder
 import DifferentialGeometry.Analysis.Sobolev.WithBoundary.EuclideanMorrey
 import DifferentialGeometry.Analysis.Sobolev.WithBoundary.EmbeddingSubcritical
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
+import DifferentialGeometry.Analysis.Sobolev.Chart.HolderMonoExponent
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevEmbedding
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbeddingCInfty
 import DifferentialGeometry.Analysis.Sobolev.WithBoundary.IteratedSobolevEmbedding
@@ -1120,6 +1121,7 @@ import DifferentialGeometry.PDE.RicciFlow.Pullback.RicciTraceConjugation
 import DifferentialGeometry.PDE.RicciFlow.Pullback.LieNaturality
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.SpectralPouH2Identify
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.TensorComponentScalarWkpBound
+import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.TensorChartCompUniformReverseH1
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.Bijective.ReversedFlow
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.MFDerivPackage
 import DifferentialGeometry.PDE.RicciFlow.Pullback.RicciNaturality
