@@ -4,6 +4,7 @@ import Mathlib.Geometry.Manifold.ChartedSpace
 import Mathlib.Topology.Separation.Basic
 import Mathlib.Topology.Compactness.SigmaCompact
 import Mathlib.Topology.Compactness.LocallyCompact
+import Mathlib.Topology.ShrinkingLemma
 import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.LinearAlgebra.FiniteDimensional.Basic
 import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.CoveringMap
@@ -413,19 +414,144 @@ theorem sigmaCompact_from_countable_fibre
     {p : E → X} (hp : IsCoveringMap p)
     (hfib : ∀ x, Countable (p ⁻¹' {x})) :
     SigmaCompactSpace E := by
-  -- Strategy via "fibre × base" decomposition.
-  -- Every `e : E` lies in `p ⁻¹' {p e}`, a countable set, and `p e ∈ X`
-  -- lies in some `Kn` of the σ-compact cover.
-  refine SigmaCompactSpace_iff_exists_compact_covering.mpr ?_
-  -- The discrete fibre over each `x` is countable; over a compact base
-  -- subset and a finite cover by trivialisations the preimage decomposes
-  -- into countably many compacts. This requires unwinding trivializations.
-  -- Full proof requires building the per-trivialization sheet decomposition
-  -- and combining via `isSigmaCompact_iUnion`. The technical buildout —
-  -- selecting the finite open subcover, mapping each slice through its
-  -- trivialization, listing the countably-many sheet copies — is non-trivial
-  -- and is left for a separate piece of infrastructure.
-  sorry
+  rw [← isSigmaCompact_univ_iff]
+  obtain ⟨K, hKcomp, hKcov⟩ :=
+    SigmaCompactSpace.exists_compact_covering (X := X)
+  have hunion : (Set.univ : Set E) = ⋃ n, p ⁻¹' (K n) := by
+    rw [← Set.preimage_iUnion, hKcov, Set.preimage_univ]
+  rw [hunion]
+  refine isSigmaCompact_iUnion _ ?_
+  intro n
+  let U : X → Set X := fun x => Classical.choose (hp x).2
+  have hUspec : ∀ x, x ∈ U x ∧ IsOpen (U x) ∧ IsOpen (p ⁻¹' U x) ∧
+      ∃ H : (p ⁻¹' U x) ≃ₜ (U x) × (p ⁻¹' {x}), ∀ y, (H y).1.1 = p y :=
+    fun x => Classical.choose_spec (hp x).2
+  have hKsub : K n ⊆ ⋃ x : X, U x := by
+    intro y _
+    exact Set.mem_iUnion.mpr ⟨y, (hUspec y).1⟩
+  obtain ⟨J, hJ⟩ :=
+    (hKcomp n).elim_finite_subcover U (fun x => (hUspec x).2.1) hKsub
+  haveI hKnCompact : CompactSpace ↥(K n) :=
+    isCompact_iff_compactSpace.mp (hKcomp n)
+  haveI : NormalSpace ↥(K n) := inferInstance
+  haveI hJ_finite : Finite ↥(↑J : Set X) := (J.finite_toSet).to_subtype
+  let V : ↥(↑J : Set X) → Set ↥(K n) := fun j =>
+    Subtype.val ⁻¹' (U (j : X))
+  have hVopen : ∀ j : ↥(↑J : Set X), IsOpen (V j) := fun j =>
+    (hUspec (j : X)).2.1.preimage continuous_subtype_val
+  have hVcover : (Set.univ : Set ↥(K n)) ⊆ ⋃ j : ↥(↑J : Set X), V j := by
+    intro y _
+    have hpy : (y : X) ∈ K n := y.2
+    have hbig : (y : X) ∈ ⋃ j ∈ J, U j := hJ hpy
+    rcases Set.mem_iUnion₂.mp hbig with ⟨j, hjJ, hjy⟩
+    refine Set.mem_iUnion.mpr ⟨⟨j, hjJ⟩, ?_⟩
+    exact hjy
+  have hVptfin :
+      ∀ x ∈ (Set.univ : Set ↥(K n)),
+        {j : ↥(↑J : Set X) | x ∈ V j}.Finite := by
+    intro x _
+    exact Set.toFinite _
+  obtain ⟨W, hWcov, hWclosed, hWsub⟩ :=
+    exists_subset_iUnion_closed_subset (s := (Set.univ : Set ↥(K n)))
+      (u := V) isClosed_univ hVopen hVptfin hVcover
+  let Wproj : ↥(↑J : Set X) → Set X := fun j => Subtype.val '' (W j)
+  have hWproj_compact : ∀ j, IsCompact (Wproj j) := by
+    intro j
+    have hWj_compact : IsCompact (W j) := (hWclosed j).isCompact
+    exact hWj_compact.image continuous_subtype_val
+  have hWproj_sub_U : ∀ j, Wproj j ⊆ U (j : X) := by
+    intro j y hy
+    rcases hy with ⟨w, hw, rfl⟩
+    exact hWsub j hw
+  have hWproj_sub_Kn : ∀ j, Wproj j ⊆ K n := by
+    intro j y hy
+    rcases hy with ⟨w, _, rfl⟩
+    exact w.2
+  have hWproj_cover : K n ⊆ ⋃ j : ↥(↑J : Set X), Wproj j := by
+    intro y hy
+    have hyKn : (⟨y, hy⟩ : ↥(K n)) ∈ (Set.univ : Set ↥(K n)) := trivial
+    rcases Set.mem_iUnion.mp (hWcov hyKn) with ⟨j, hyj⟩
+    refine Set.mem_iUnion.mpr ⟨j, ?_⟩
+    exact ⟨⟨y, hy⟩, hyj, rfl⟩
+  have hpKn_eq : p ⁻¹' (K n) = ⋃ j : ↥(↑J : Set X), p ⁻¹' (Wproj j) := by
+    ext e
+    constructor
+    · intro he
+      have hpeKn : p e ∈ K n := he
+      rcases Set.mem_iUnion.mp (hWproj_cover hpeKn) with ⟨j, hje⟩
+      exact Set.mem_iUnion.mpr ⟨j, hje⟩
+    · intro he
+      rcases Set.mem_iUnion.mp he with ⟨j, hje⟩
+      exact hWproj_sub_Kn j hje
+  rw [hpKn_eq]
+  refine isSigmaCompact_iUnion _ ?_
+  intro j
+  obtain ⟨H, hHproj⟩ := (hUspec (j : X)).2.2.2
+  set S : Set ↥(U (j : X)) := Subtype.val ⁻¹' (Wproj j) with hS_def
+  have hS_compact : IsCompact S := by
+    have hsubsetrange :
+        Wproj j ⊆ Set.range (Subtype.val : ↥(U (j : X)) → X) := by
+      rw [Subtype.range_val]
+      exact hWproj_sub_U j
+    have himg : Subtype.val '' S = Wproj j := by
+      ext y
+      constructor
+      · rintro ⟨z, hz, rfl⟩
+        exact hz
+      · intro hy
+        rcases hsubsetrange hy with ⟨z, rfl⟩
+        exact ⟨z, hy, rfl⟩
+    rw [Topology.IsEmbedding.subtypeVal.isCompact_iff, himg]
+    exact hWproj_compact j
+  let g : (p ⁻¹' ({(j : X)} : Set X)) → ↥(U (j : X)) → E :=
+    fun i u => (H.symm (u, i) : ↥(p ⁻¹' U (j : X)))
+  have hg_cont : ∀ i, Continuous (g i) := by
+    intro i
+    have h₁ : Continuous (fun u : ↥(U (j : X)) => (u, i)) :=
+      continuous_id.prodMk continuous_const
+    have h₂ : Continuous
+        (fun y : (↥(U (j : X))) × (p ⁻¹' ({(j : X)} : Set X)) =>
+          (H.symm y : ↥(p ⁻¹' U (j : X)))) := H.symm.continuous
+    have h₃ : Continuous (fun y : ↥(p ⁻¹' U (j : X)) => (y : E)) :=
+      continuous_subtype_val
+    exact h₃.comp (h₂.comp h₁)
+  have hgS_compact : ∀ i, IsCompact (g i '' S) :=
+    fun i => hS_compact.image (hg_cont i)
+  have hp_eq :
+      p ⁻¹' (Wproj j)
+        = ⋃ i : (p ⁻¹' ({(j : X)} : Set X)), g i '' S := by
+    ext e
+    constructor
+    · intro he
+      have hpeU : p e ∈ U (j : X) := hWproj_sub_U j he
+      have heU : e ∈ p ⁻¹' (U (j : X)) := hpeU
+      let eU : ↥(p ⁻¹' U (j : X)) := ⟨e, heU⟩
+      set pair := H eU with hpair_def
+      have hpair1 : (pair.1 : X) = p e := hHproj eU
+      have hpair_back : H.symm pair = eU := H.symm_apply_apply eU
+      refine Set.mem_iUnion.mpr ⟨pair.2, ?_⟩
+      refine ⟨pair.1, ?_, ?_⟩
+      · change (pair.1 : X) ∈ Wproj j
+        rw [hpair1]
+        exact he
+      · change ((H.symm (pair.1, pair.2) : ↥(p ⁻¹' U (j : X))) : E) = e
+        have hsplit : (pair.1, pair.2) = pair := rfl
+        rw [hsplit, hpair_back]
+    · intro he
+      rcases Set.mem_iUnion.mp he with ⟨i, hi⟩
+      rcases hi with ⟨u, hu, rfl⟩
+      change p ((H.symm (u, i) : ↥(p ⁻¹' U (j : X))) : E) ∈ Wproj j
+      have heq1 :
+          (H (H.symm (u, i))).1.1
+            = p ((H.symm (u, i) : ↥(p ⁻¹' U (j : X))) : E) :=
+        hHproj (H.symm (u, i))
+      have heq2 : H (H.symm (u, i)) = (u, i) := H.apply_symm_apply (u, i)
+      rw [heq2] at heq1
+      rw [← heq1]
+      exact hu
+  rw [hp_eq]
+  haveI : Countable (p ⁻¹' ({(j : X)} : Set X)) := hfib (j : X)
+  exact isSigmaCompact_iUnion_of_isCompact _ hgS_compact
 
 variable [SecondCountableTopology M] [Nonempty M]
 
