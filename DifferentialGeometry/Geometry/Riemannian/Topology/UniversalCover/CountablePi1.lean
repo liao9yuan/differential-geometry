@@ -59,10 +59,16 @@ theorem uc_pi1_countable_basis_refinement
 ordered pair of indices `(m, n)` whose corresponding basis sets meet,
 a point of `B m ∩ B n`. -/
 theorem uc_pi1_countable_anchors
-    (X : Type*) [TopologicalSpace X]
+    (X : Type*) [TopologicalSpace X] [Nonempty X]
     (B : ℕ → Set X) :
     ∃ anchor : ℕ × ℕ → X,
-      ∀ p : ℕ × ℕ, (B p.1 ∩ B p.2).Nonempty → anchor p ∈ B p.1 ∩ B p.2 := sorry
+      ∀ p : ℕ × ℕ, (B p.1 ∩ B p.2).Nonempty → anchor p ∈ B p.1 ∩ B p.2 := by
+  classical
+  refine ⟨fun p => if h : (B p.1 ∩ B p.2).Nonempty then h.choose
+                   else Classical.arbitrary X, ?_⟩
+  intro p hp
+  simp only [hp, dif_pos]
+  exact hp.choose_spec
 
 /-- **Lebesgue subdivision for a loop.** Given a (continuous) loop
 `γ : Path x x` in a space covered by `{B n}`, the pullback cover
