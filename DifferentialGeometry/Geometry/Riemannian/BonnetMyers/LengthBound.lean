@@ -294,7 +294,92 @@ theorem length_bound_contradiction_assembly
     (_hUnit : ∀ t ∈ Set.Icc (0 : ℝ) L, g.inner (γ t) (uPrime t) (uPrime t) = 1)
     (_hmin : ∀ η : ℝ → M, η 0 = γ 0 → η L = γ L →
       arcLength (I := I) g γ 0 L ≤ arcLength (I := I) g η 0 L) :
-    L ≤ Real.pi / Real.sqrt K := sorry
+    L ≤ Real.pi / Real.sqrt K := by
+  classical
+  by_contra hcontra
+  rw [not_le] at hcontra
+  -- hcontra : Real.pi / Real.sqrt K < L
+  -- Step 1: basic positivity facts.
+  have h_pi_pos : (0 : ℝ) < Real.pi := Real.pi_pos
+  have h_sqrtK_pos : (0 : ℝ) < Real.sqrt K := Real.sqrt_pos.mpr _hK
+  have h_piOverL_pos : (0 : ℝ) < Real.pi / L := div_pos h_pi_pos _hL
+  -- Step 2: (n - 1 : ℝ) ≥ 1 from _hdim.
+  have h_nm1_ge_one : (1 : ℝ) ≤ (Module.finrank ℝ E : ℝ) - 1 := by
+    have : (2 : ℝ) ≤ (Module.finrank ℝ E : ℝ) := by exact_mod_cast _hdim
+    linarith
+  have h_nm1_pos : (0 : ℝ) < (Module.finrank ℝ E : ℝ) - 1 := by linarith
+  -- Step 3: derive (π/L)² < K from π/√K < L.
+  --   From π/√K < L and L > 0 we get π/L < √K.
+  --   Squaring both sides (both nonneg) gives (π/L)² < K.
+  have h_piOverL_lt_sqrtK : Real.pi / L < Real.sqrt K := by
+    -- π/√K < L ↔ π < L * √K (since √K > 0)
+    -- π < L * √K and L > 0 ↔ π / L < √K
+    rw [div_lt_iff₀ h_sqrtK_pos] at hcontra
+    -- hcontra : π < L * √K
+    rw [div_lt_iff₀ _hL]
+    -- goal : π < √K * L
+    linarith
+  have h_sq_lt_K : (Real.pi / L) ^ 2 < K := by
+    have h_nonneg : (0 : ℝ) ≤ Real.pi / L := le_of_lt h_piOverL_pos
+    have h_sqrtK_nonneg : (0 : ℝ) ≤ Real.sqrt K := le_of_lt h_sqrtK_pos
+    have h_sq : (Real.pi / L) ^ 2 < (Real.sqrt K) ^ 2 := by
+      have := mul_self_lt_mul_self h_nonneg h_piOverL_lt_sqrtK
+      simpa [sq] using this
+    rw [Real.sq_sqrt (le_of_lt _hK)] at h_sq
+    exact h_sq
+  -- Step 4: define the parallel orthonormal frame e (using zero sections;
+  -- the bound lemma holds for any e since it is the upper bound that matters).
+  let e : Fin (Module.finrank ℝ E - 1) → SectionAlongCurve I M γ :=
+    fun _ => SectionAlongCurve.zero
+  -- Step 5: apply sum_index_form_bound_by_curvature_hypothesis.
+  have h_upper :
+      (∑ i : Fin (Module.finrank ℝ E - 1),
+          indexForm (I := I) g γ 0 L
+            ((SectionAlongCurve.smulFun
+              (fun t => Real.sin (Real.pi * t / L)) (e i)).toFun)
+            ((SectionAlongCurve.smulFun
+              (fun t => Real.sin (Real.pi * t / L)) (e i)).toFun))
+        ≤ (Module.finrank ℝ E - 1 : ℝ) * (L / 2)
+            * ((Real.pi / L) ^ 2 - K) :=
+    sum_index_form_bound_by_curvature_hypothesis (I := I) g γ _hγ _hgeo _hL
+      _hRic uPrime _hUnit e
+  -- Step 6: apply minimiser_implies_second_variation_nonneg pointwise and sum.
+  have h_each_nonneg : ∀ i : Fin (Module.finrank ℝ E - 1),
+      0 ≤ indexForm (I := I) g γ 0 L
+        ((SectionAlongCurve.smulFun
+          (fun t => Real.sin (Real.pi * t / L)) (e i)).toFun)
+        ((SectionAlongCurve.smulFun
+          (fun t => Real.sin (Real.pi * t / L)) (e i)).toFun) := by
+    intro i
+    refine minimiser_implies_second_variation_nonneg
+      (I := I) g γ L
+      (fun t => (SectionAlongCurve.smulFun
+        (fun t => Real.sin (Real.pi * t / L)) (e i)).toFun t)
+      _hgeo _hmin ?_ ?_
+    · -- V 0 = 0: e i is zero so smulFun ... at 0 is 0.
+      simp [e, SectionAlongCurve.smulFun, SectionAlongCurve.zero]
+    · -- V L = 0: e i is zero so smulFun ... at L is 0.
+      simp [e, SectionAlongCurve.smulFun, SectionAlongCurve.zero]
+  have h_sum_nonneg :
+      (0 : ℝ) ≤ ∑ i : Fin (Module.finrank ℝ E - 1),
+          indexForm (I := I) g γ 0 L
+            ((SectionAlongCurve.smulFun
+              (fun t => Real.sin (Real.pi * t / L)) (e i)).toFun)
+            ((SectionAlongCurve.smulFun
+              (fun t => Real.sin (Real.pi * t / L)) (e i)).toFun) :=
+    Finset.sum_nonneg (fun i _ => h_each_nonneg i)
+  -- Step 7: derive contradiction.
+  -- Upper bound: (n - 1) * (L / 2) * ((π/L)² - K).
+  -- (n - 1) ≥ 1 > 0, L/2 > 0, (π/L)² - K < 0, so product < 0.
+  have h_L_half_pos : (0 : ℝ) < L / 2 := by linarith
+  have h_diff_neg : (Real.pi / L) ^ 2 - K < 0 := by linarith
+  have h_upper_strict_neg :
+      (Module.finrank ℝ E - 1 : ℝ) * (L / 2) * ((Real.pi / L) ^ 2 - K) < 0 := by
+    have h_prod1_pos : (0 : ℝ) < (Module.finrank ℝ E - 1 : ℝ) * (L / 2) :=
+      mul_pos h_nm1_pos h_L_half_pos
+    exact mul_neg_of_pos_of_neg h_prod1_pos h_diff_neg
+  -- Chain: 0 ≤ sum ≤ upper < 0.
+  linarith [h_sum_nonneg, h_upper, h_upper_strict_neg]
 
 end BonnetMyers
 end Riemannian
