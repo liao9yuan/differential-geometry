@@ -1068,6 +1068,7 @@ import DifferentialGeometry.Analysis.ODE.FlowC1Continuous
 import DifferentialGeometry.Analysis.ODE.FlowCk
 import DifferentialGeometry.Analysis.ODE.FlowCkVariational
 import DifferentialGeometry.Analysis.ODE.FlowCInfinity
+import DifferentialGeometry.Analysis.ODE.FlowVariationalLinearMap
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.AbstractSemigroup
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.DuhamelMap
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Contraction
