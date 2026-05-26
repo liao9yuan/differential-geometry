@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Riemannian.AlongCurve
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Equation
+import DifferentialGeometry.Geometry.Riemannian.Variation.ParallelLocalODE
 import DifferentialGeometry.Integral.Connection.LeviCivita
 import DifferentialGeometry.Coordinates.NablaComponents
 import DifferentialGeometry.Integral.Measure.ChartDensity
@@ -79,20 +80,37 @@ blow-up, so the solution provided by Picard-Lindelöf extends to the
 full compact interval. -/
 
 /-- **parallel-local-existence-uniqueness.** On a compact interval
-`[a, b] ∋ t₀`, the linear parallel-transport ODE has a unique global
-solution with prescribed initial value `Y(t₀) = v₀`. -/
+`[a, b] ∋ t₀`, the linear parallel-transport ODE has a solution
+`Y : ℝ → E` with prescribed initial value `Y(t₀) = v₀`, and any
+solution agrees with it on `[a, b]`. The derivative condition is
+phrased as `HasDerivWithinAt` on `Icc a b` since the solution is
+only determined there; uniqueness is therefore expressed as
+`Set.EqOn` rather than functional equality on all of `ℝ`. -/
 theorem parallel_local_existence_uniqueness
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) {a b t₀ : ℝ} (hab : a ≤ b) (ht₀ : t₀ ∈ Set.Icc a b)
-    (hu : ∀ t ∈ Set.Icc a b, HasDerivAt (chartCurve (I := I) α γ) (uPrime t) t)
     (huCont : ContinuousOn uPrime (Set.Icc a b))
     (huCurveCont : ContinuousOn (chartCurve (I := I) α γ) (Set.Icc a b))
+    (hsource : ∀ t ∈ Set.Icc a b, γ t ∈ (chartAt H α).source)
     (v₀ : E) :
-    ∃! Y : ℝ → E,
-      (∀ t ∈ Set.Icc a b, HasDerivAt Y
-        (- chartChristoffelContraction (I := I) g α (uPrime t) (Y t)
-            (chartCurve (I := I) α γ t)) t) ∧
-      Y t₀ = v₀ := sorry
+    ∃ Y : ℝ → E,
+      ((∀ t ∈ Set.Icc a b, HasDerivWithinAt Y
+          (- chartChristoffelContraction (I := I) g α (uPrime t) (Y t)
+              (chartCurve (I := I) α γ t)) (Set.Icc a b) t) ∧
+        Y t₀ = v₀) ∧
+      (∀ Y' : ℝ → E,
+        ((∀ t ∈ Set.Icc a b, HasDerivWithinAt Y'
+            (- chartChristoffelContraction (I := I) g α (uPrime t) (Y' t)
+                (chartCurve (I := I) α γ t)) (Set.Icc a b) t) ∧
+          Y' t₀ = v₀) →
+        Set.EqOn Y Y' (Set.Icc a b)) := by
+  obtain ⟨Y, hY_deriv, hY_init⟩ :=
+    parallel_local_existence_on_Icc (I := I) g α γ uPrime hab ht₀ huCont
+      huCurveCont hsource v₀
+  refine ⟨Y, ⟨hY_deriv, hY_init⟩, ?_⟩
+  rintro Y' ⟨hY'_deriv, hY'_init⟩
+  exact parallel_local_uniqueness_on_Icc (I := I) g α γ uPrime hab ht₀ huCont
+    huCurveCont hsource hY_deriv hY'_deriv (hY_init.trans hY'_init.symm)
 
 /-! ## Chart-overlap consistency
 
