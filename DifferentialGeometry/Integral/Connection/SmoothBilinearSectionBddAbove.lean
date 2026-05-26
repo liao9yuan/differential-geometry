@@ -170,6 +170,32 @@ theorem bddAbove_iSup_normalized_of_locally_bounded_opNorm
     exact Finset.le_sup' Cₐ hy₀
   linarith
 
+/-- **BddAbove from continuous fibre op-norm.** When the function
+`b ↦ ‖Δ b‖` is continuous on the compact manifold `M`, the normalised
+double-iSup is `BddAbove`.  Continuity on compact gives boundedness,
+which supplies the local bound to the main combinator. -/
+theorem bddAbove_iSup_normalized_of_continuous_opNorm
+    (Δ : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+    (h_cont : Continuous (fun b : M => ‖Δ b‖)) :
+    BddAbove (Set.range
+      (fun y : M => ⨆ a : TangentSpace I y, ⨆ b : TangentSpace I y,
+        ‖Δ y a b‖ / (‖a‖ * ‖b‖ + 1))) := by
+  apply bddAbove_iSup_normalized_of_locally_bounded_opNorm
+  intro y₀
+  -- Continuity of ‖Δ ·‖ at y₀ gives a neighbourhood where it is bounded.
+  have hca : ContinuousAt (fun b : M => ‖Δ b‖) y₀ := h_cont.continuousAt
+  -- Use the ε-δ characterisation: for ε = 1 there is a neighbourhood
+  -- where |‖Δ b‖ - ‖Δ y₀‖| < 1, giving ‖Δ b‖ ≤ ‖Δ y₀‖ + 1.
+  -- Use Iic (closed half-line) and the ContinuousAt preimage.
+  have h_mem : Set.Iic (‖Δ y₀‖ + 1) ∈ nhds (‖Δ y₀‖) :=
+    Iic_mem_nhds (by linarith : ‖Δ y₀‖ < ‖Δ y₀‖ + 1)
+  have h_pre : (fun b : M => ‖Δ b‖) ⁻¹' Set.Iic (‖Δ y₀‖ + 1) ∈ nhds y₀ :=
+    hca.preimage_mem_nhds h_mem
+  rw [mem_nhds_iff] at h_pre
+  obtain ⟨W, hW_sub, hW_open, hy₀_mem⟩ := h_pre
+  refine ⟨W, hW_open, hy₀_mem, ‖Δ y₀‖ + 1, by positivity, fun b hb => ?_⟩
+  exact hW_sub hb
+
 end Connection
 end Integral
 end DifferentialGeometry
