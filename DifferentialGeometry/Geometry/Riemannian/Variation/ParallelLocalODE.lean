@@ -67,7 +67,25 @@ theorem parallel_lipschitz_bound_on_compact
     (hsource : ∀ t ∈ Set.Icc a b, γ t ∈ (chartAt H α).source) :
     ∃ K : NNReal,
       ParallelTransportLipschitzBound (I := I) g α γ uPrime K
-        (Set.Icc a b) := sorry
+        (Set.Icc a b) := by
+  -- Continuity of the CLM-valued function on the compact interval.
+  have hCLM : ContinuousOn
+      (fun t : ℝ => chartChristoffelContractionRightCLM (I := I) g α (uPrime t)
+        (chartCurve (I := I) α γ t)) (Set.Icc a b) :=
+    chart_christoffel_clm_continuous_on_compact g α γ uPrime hu hγ hsource
+  -- Hence continuity of its NNReal-valued operator norm.
+  have hN : ContinuousOn
+      (fun t : ℝ => ‖chartChristoffelContractionRightCLM (I := I) g α (uPrime t)
+        (chartCurve (I := I) α γ t)‖₊) (Set.Icc a b) :=
+    hCLM.nnnorm
+  -- Extract a maximum on the compact, nonempty interval `[a, b]`.
+  have hcpt : IsCompact (Set.Icc a b) := isCompact_Icc
+  have hne : (Set.Icc a b).Nonempty := Set.nonempty_Icc.mpr hab
+  obtain ⟨tmax, htmax_mem, htmax_max⟩ := hcpt.exists_isMaxOn hne hN
+  refine ⟨‖chartChristoffelContractionRightCLM (I := I) g α (uPrime tmax)
+    (chartCurve (I := I) α γ tmax)‖₊, ?_⟩
+  intro t ht
+  exact htmax_max ht
 
 /-- **parallel-picard-lindelof-data.** The Picard–Lindelöf data
 (time-dependent vector field + Lipschitz bound + continuity in time)
