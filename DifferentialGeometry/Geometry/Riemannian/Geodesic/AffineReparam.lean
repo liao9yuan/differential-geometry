@@ -36,6 +36,7 @@ namespace Riemannian
 namespace Geodesic
 
 open DifferentialGeometry.Integral.Measure
+open DifferentialGeometry.Integral.DivergenceTheorem
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
   [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -47,7 +48,32 @@ slots: `Γ(a v, a w)(y) = a² · Γ(v, w)(y)`. -/
 theorem chartChristoffelContraction_smul_left_right
     (g : SmoothRiemannianMetric I M) (α : M) (a : ℝ) (v w : E) (y : E) :
     chartChristoffelContraction (I := I) g α (a • v) (a • w) y
-      = (a * a) • chartChristoffelContraction (I := I) g α v w y := sorry
+      = (a * a) • chartChristoffelContraction (I := I) g α v w y := by
+  classical
+  unfold chartChristoffelContraction
+  rw [Finset.smul_sum]
+  refine Finset.sum_congr rfl ?_
+  intro k _
+  rw [smul_smul]
+  congr 1
+  calc ∑ i, ∑ j, chartChristoffel (I := I) g α i j k y *
+          chartCoord (E := E) i (a • v) * chartCoord (E := E) j (a • w)
+      = ∑ i, ∑ j, chartChristoffel (I := I) g α i j k y *
+          (a * chartCoord (E := E) i v) * (a * chartCoord (E := E) j w) := by
+        refine Finset.sum_congr rfl ?_
+        intro i _
+        refine Finset.sum_congr rfl ?_
+        intro j _
+        rw [chartCoord_smul, chartCoord_smul]
+    _ = (a * a) * ∑ i, ∑ j, chartChristoffel (I := I) g α i j k y *
+          chartCoord (E := E) i v * chartCoord (E := E) j w := by
+        rw [Finset.mul_sum]
+        refine Finset.sum_congr rfl ?_
+        intro i _
+        rw [Finset.mul_sum]
+        refine Finset.sum_congr rfl ?_
+        intro j _
+        ring
 
 /-- Degree-two fibre homogeneity of `geodesicVectorFieldChart g α`: the
 fibre component of `geodesicVectorFieldChart g α` at a `c`-rescaled lift

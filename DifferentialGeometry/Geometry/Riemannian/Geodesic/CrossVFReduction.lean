@@ -70,7 +70,11 @@ theorem IsGeodesicAt.hasGeodesicEquationAt
     [I.Boundaryless] [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {t₀ : ℝ}
     (hγ : IsGeodesicAt (I := I) g γ t₀) :
-    HasGeodesicEquationAt (I := I) g γ t₀ := sorry
+    HasGeodesicEquationAt (I := I) g γ t₀ := by
+  obtain ⟨f₁, hf₁_proj_t₀, hf₁, hcross⟩ :=
+    bm_c_gc_cross_vf_projection_uniqueness (I := I) (g := g) (γ := γ) (t₀ := t₀) hγ
+  exact IsGeodesicAt.hasGeodesicEquationAt_of_chartCentered_lift_eventuallyEq
+    (I := I) (g := g) (γ := γ) (t₀ := t₀) hγ (f₁ := f₁) hf₁ hf₁_proj_t₀ hcross
 
 end Geodesic
 end Riemannian
