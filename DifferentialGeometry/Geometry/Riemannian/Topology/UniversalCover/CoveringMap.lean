@@ -72,7 +72,72 @@ theorem uc_sheet_bijection_on_good_U
     Set.BijOn (proj :
         DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X → X)
       (basicOpen p U hU hp) U := by
-  sorry
+  refine ⟨?_, ?_, ?_⟩
+  · -- MapsTo: q ∈ basicOpen ⇒ q.1 = η 1 ∈ U.
+    intro q hq
+    obtain ⟨η, hηU, _⟩ := hq
+    have : η 1 ∈ U := hηU 1
+    simpa [proj, Path.target] using this
+  · -- InjOn: two preimages with the same projected point must be equal.
+    intro q hq q' hq' hqq'
+    obtain ⟨xq, cq⟩ := q
+    obtain ⟨xq', cq'⟩ := q'
+    obtain ⟨η, hηU, hqeq⟩ := hq
+    obtain ⟨η', hη'U, hq'eq⟩ := hq'
+    have hxy : xq = xq' := hqq'
+    subst hxy
+    refine Sigma.ext rfl ?_
+    simp only [heq_eq_eq] at hqeq hq'eq ⊢
+    rw [hqeq, hq'eq]
+    congr 1
+    have hloop_inU : ∀ t, (η.trans η'.symm) t ∈ U := by
+      intro t
+      rw [Path.trans_apply]
+      split_ifs with h
+      · exact hηU _
+      · rw [Path.symm_apply]; exact hη'U _
+    have hloop : (⟦η.trans η'.symm⟧ : Path.Homotopic.Quotient p.1 p.1) =
+        ⟦Path.refl p.1⟧ := hUloops _ hloop_inU
+    have hbase : Path.Homotopic.Quotient.trans
+        (Path.Homotopic.Quotient.mk η)
+        (Path.Homotopic.Quotient.symm (Path.Homotopic.Quotient.mk η')) =
+        Path.Homotopic.Quotient.refl p.1 := by
+      have h := hloop
+      change Path.Homotopic.Quotient.mk (η.trans η'.symm) =
+             Path.Homotopic.Quotient.mk (Path.refl p.1) at h
+      rw [Path.Homotopic.Quotient.mk_trans, Path.Homotopic.Quotient.mk_symm,
+          Path.Homotopic.Quotient.mk_refl] at h
+      exact h
+    have h₁ : Path.Homotopic.Quotient.mk η =
+        Path.Homotopic.Quotient.trans
+          (Path.Homotopic.Quotient.mk η)
+          (Path.Homotopic.Quotient.trans
+            (Path.Homotopic.Quotient.symm (Path.Homotopic.Quotient.mk η'))
+            (Path.Homotopic.Quotient.mk η')) := by
+      rw [Path.Homotopic.Quotient.symm_trans, Path.Homotopic.Quotient.trans_refl]
+    calc Path.Homotopic.Quotient.mk η
+        = Path.Homotopic.Quotient.trans
+            (Path.Homotopic.Quotient.mk η)
+            (Path.Homotopic.Quotient.trans
+              (Path.Homotopic.Quotient.symm (Path.Homotopic.Quotient.mk η'))
+              (Path.Homotopic.Quotient.mk η')) := h₁
+      _ = Path.Homotopic.Quotient.trans
+            (Path.Homotopic.Quotient.trans
+              (Path.Homotopic.Quotient.mk η)
+              (Path.Homotopic.Quotient.symm (Path.Homotopic.Quotient.mk η')))
+            (Path.Homotopic.Quotient.mk η') := by
+            rw [Path.Homotopic.Quotient.trans_assoc]
+      _ = Path.Homotopic.Quotient.trans
+            (Path.Homotopic.Quotient.refl p.1)
+            (Path.Homotopic.Quotient.mk η') := by rw [hbase]
+      _ = Path.Homotopic.Quotient.mk η' := by
+            rw [Path.Homotopic.Quotient.refl_trans]
+  · -- SurjOn: any y ∈ U is reached by a path in U from p.1.
+    intro y hy
+    have hjoined : JoinedIn U p.1 y := hUpc.joinedIn _ hp _ hy
+    refine ⟨⟨y, p.2.trans (Path.Homotopic.Quotient.mk hjoined.somePath)⟩, ?_, rfl⟩
+    refine ⟨hjoined.somePath, ?_, rfl⟩
+    exact fun t => hjoined.somePath_mem t
 
 /-- **The projection is a covering map.**
 
