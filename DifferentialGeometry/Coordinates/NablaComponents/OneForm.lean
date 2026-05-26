@@ -275,7 +275,9 @@ private theorem extDerivFun_mul
   simpa [extDerivFun, Pi.smul_apply, smul_eq_mul, mul_comm, mul_left_comm, mul_assoc]
     using hprod
 
-private theorem covariantDerivative_finset_sum
+/-- Finset-sum linearity of `cov`: if each summand is differentiable at `x`, then
+`cov` distributes over the finset sum. -/
+theorem covariantDerivative_finset_sum
     {ι : Type*} (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (t : Finset ι) (σ : ι -> (x : M) -> TangentSpace I x)
     {x : M} (v : TangentSpace I x)
