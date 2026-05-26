@@ -68,8 +68,12 @@ two equalities into two theorems for clean downstream consumption. -/
 
 /-- **Gauss's lemma (pullback form).** At every radial direction
 `v ∈ expDomain g p`, the pullback of `g` through `expMap g p` evaluates
-to `⟪v, v⟫` on the `(v, v)` slot, and annihilates the `(v, w)` slot for
-every `w` orthogonal to `v` in the Euclidean inner product. -/
+to `g_p(v, v)` on the `(v, v)` slot, and annihilates the `(v, w)` slot
+for every `w` that is `g_p`-orthogonal to `v`. The orthogonality and
+the target value are stated in the abstract metric `g.inner p`; the
+model-space Euclidean inner product `inner ℝ` on `E` is unrelated to
+`g.inner p` in general (its appearance in earlier skeleton drafts was a
+defect: the classical Gauss lemma is intrinsic to `g`). -/
 theorem gauss_lemma_pullback
     (g : SmoothRiemannianMetric I M) (p : M) {v : E}
     (hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p) :
@@ -80,8 +84,8 @@ theorem gauss_lemma_pullback
         (mfderiv 𝓘(ℝ, E) I
           (fun u : E => expMap (I := I) g p (show TangentSpace I p from u)) v
           (show TangentSpace I p from v)) =
-      inner ℝ v v ∧
-    ∀ {w : E}, inner ℝ v w = (0 : ℝ) →
+      g.inner p v v ∧
+    ∀ {w : E}, g.inner p v w = (0 : ℝ) →
       g.inner (expMap (I := I) g p (show TangentSpace I p from v))
           (mfderiv 𝓘(ℝ, E) I
             (fun u : E => expMap (I := I) g p (show TangentSpace I p from u)) v
@@ -206,15 +210,17 @@ lower bound `≥ ‖v‖`, with equality only for a monotone radial
 reparametrisation. -/
 
 /-- **Inside the normal ball, every `C¹` curve from `p` to `expMap g p v`
-has length at least `‖v‖`.** This is the length lower bound delivered
-by Gauss's lemma; the equality-case identification of the radial
-geodesic as the unique minimiser is the content of the prose statement
-and the assembly downstream. -/
+has length at least the `g_p`-norm of `v`.** This is the length lower
+bound delivered by Gauss's lemma; the equality-case identification of
+the radial geodesic as the unique minimiser is the content of the prose
+statement and the assembly downstream. The lower bound uses the
+`g`-norm `√(g_p(v,v))`, not the model-space Euclidean norm `‖v‖_E`
+(which has no a-priori relation to `g_p`). -/
 theorem normalBall_radial_unique_minimizer
     (g : SmoothRiemannianMetric I M) (p : M) {v : E}
     (hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p)
     (hball : v ∈ (NormalCoordinates.normalChartAt (I := I) g p).target) :
-    ENNReal.ofReal ‖v‖ ≤
+    ENNReal.ofReal (Real.sqrt (g.inner p v v)) ≤
       riemannianEDist I p
         (expMap (I := I) g p (show TangentSpace I p from v)) := by
   sorry
