@@ -187,7 +187,41 @@ the maximal interval to conclude it equals `Set.univ`. -/
 theorem bm_c_gc_assemble
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) :
     maximalGeodesicInterval (I := I) g p v = Set.univ := by
-  sorry
+  haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
+  set S : Set ℝ := maximalGeodesicInterval (I := I) g p v with hS_def
+  -- Step 1: `S` is preconnected, as a union of preconnected sets sharing `0`.
+  have hSpre : IsPreconnected S := by
+    -- Express `S` as a union over members of itself.
+    have hS_eq : S = ⋃₀ {J : Set ℝ |
+        ∃ γ : ℝ → M, IsOpen J ∧ IsPreconnected J ∧ (0 : ℝ) ∈ J ∧
+          IsGeodesicOnWithInitial (I := I) g γ J p v} := by
+      apply Set.eq_of_subset_of_subset
+      · intro t ht
+        obtain ⟨γ, J, hJ, hJ_conn, h0, _ht_in, hγ⟩ := ht
+        exact ⟨J, ⟨γ, hJ, hJ_conn, h0, hγ⟩, _ht_in⟩
+      · rintro t ⟨J, ⟨γ, hJ, hJ_conn, h0, hγ⟩, ht_in⟩
+        exact ⟨γ, J, hJ, hJ_conn, h0, ht_in, hγ⟩
+    rw [hS_eq]
+    apply isPreconnected_sUnion (0 : ℝ)
+    · rintro J ⟨_, _, _, h0, _⟩; exact h0
+    · rintro J ⟨_, _, hJpre, _, _⟩; exact hJpre
+  -- Step 2: `S` is nonempty (`0 ∈ S`).
+  have hS_ne : S.Nonempty :=
+    ⟨0, zero_mem_maximalGeodesicInterval (I := I) g p v⟩
+  -- Step 3: `S` is not bounded above.
+  have hS_no_BddAbove : ¬ BddAbove S := by
+    intro hBdd
+    -- A nonempty bounded-above set in ℝ has an LUB (= sSup), contradicting
+    -- `bm_c_gc_extension_past_limit`.
+    exact bm_c_gc_extension_past_limit (I := I) g p v
+      ⟨sSup S, isLUB_csSup hS_ne hBdd⟩
+  -- Step 4: `S` is not bounded below.
+  have hS_no_BddBelow : ¬ BddBelow S := by
+    intro hBdd
+    exact bm_c_gc_symmetric_left_endpoint (I := I) g p v
+      ⟨sInf S, isGLB_csInf hS_ne hBdd⟩
+  -- Step 5: a preconnected set unbounded both ways equals `univ`.
+  exact hSpre.eq_univ_of_unbounded hS_no_BddBelow hS_no_BddAbove
 
 end GeodesicCompleteness
 
@@ -215,8 +249,9 @@ theorem bm_c_expMap_total
     (g : SmoothRiemannianMetric I M) (p : M) :
     Continuous (expMap (I := I) g p) ∧
       ∀ v : TangentSpace I p,
-        expMap (I := I) g p v ∈ (Set.univ : Set M) := by
-  sorry
+        expMap (I := I) g p v ∈ (Set.univ : Set M) :=
+  ⟨bm_c_expMap_continuous_of_geodesic_complete (I := I) g p,
+    fun _ => Set.mem_univ _⟩
 
 end ExpMapTotality
 
