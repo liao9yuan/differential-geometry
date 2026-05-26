@@ -101,18 +101,96 @@ section LengthBookkeeping
 Pure metric bookkeeping built from
 `Mathlib.Geometry.Manifold.Riemannian.PathELength`. -/
 
+set_option linter.unusedVariables false in
 /-- **A sub-arc of a length-minimising `C¹` curve is itself a
 length-minimiser between its restricted endpoints.** That is, if a
 curve `γ : ℝ → M` realises `riemannianEDist I (γ a) (γ b) = pathELength I γ a b`
 on `[a, b]`, then on every sub-interval `[s, t] ⊆ [a, b]` the sub-arc
-realises `riemannianEDist I (γ s) (γ t) = pathELength I γ s t`. -/
+realises `riemannianEDist I (γ s) (γ t) = pathELength I γ s t`.
+The hypothesis `hfin` records finiteness of the parent length: it is what
+allows cancelling `pathELength I γ a s + pathELength I γ t b` from the
+`ENNReal` squeeze. -/
 theorem subArc_of_minimizer_is_minimizer
     {γ : ℝ → M} {a b s t : ℝ}
     (hγ : CMDiff[Icc a b] 1 γ)
     (hmin : riemannianEDist I (γ a) (γ b) = pathELength I γ a b)
+    (hfin : pathELength I γ a b ≠ ⊤)
     (hab : a ≤ b) (has : a ≤ s) (hst : s ≤ t) (htb : t ≤ b) :
     riemannianEDist I (γ s) (γ t) = pathELength I γ s t := by
-  sorry
+  -- Abbreviations.
+  set L_left := pathELength I γ a s with hL_left_def
+  set L_mid := pathELength I γ s t with hL_mid_def
+  set L_right := pathELength I γ t b with hL_right_def
+  -- Restrict smoothness to each sub-interval.
+  have h_ast : a ≤ t := has.trans hst
+  have h_sb : s ≤ b := hst.trans htb
+  have hγ_as : CMDiff[Icc a s] 1 γ := hγ.mono (Icc_subset_Icc le_rfl h_sb)
+  have hγ_st : CMDiff[Icc s t] 1 γ := hγ.mono (Icc_subset_Icc has htb)
+  have hγ_tb : CMDiff[Icc t b] 1 γ := hγ.mono (Icc_subset_Icc h_ast le_rfl)
+  -- Path additivity: L_left + L_mid + L_right = pathELength I γ a b.
+  have hadd_left : L_left + L_mid = pathELength I γ a t :=
+    pathELength_add (γ := γ) (I := I) has hst
+  have hadd_total : pathELength I γ a t + L_right = pathELength I γ a b :=
+    pathELength_add (γ := γ) (I := I) h_ast htb
+  have hpath_total : L_left + L_mid + L_right = pathELength I γ a b := by
+    rw [hadd_left, hadd_total]
+  -- Sub-arc lengths are ≤ parent length, hence finite.
+  have hL_left_finite : L_left ≠ ⊤ := by
+    have hle : L_left ≤ pathELength I γ a b := by
+      rw [← hpath_total]
+      have h₁ : L_left ≤ L_left + L_mid := le_self_add
+      exact h₁.trans le_self_add
+    exact ne_top_of_le_ne_top hfin hle
+  have hL_right_finite : L_right ≠ ⊤ := by
+    have hle : L_right ≤ pathELength I γ a b := by
+      rw [← hpath_total]
+      exact le_add_self
+    exact ne_top_of_le_ne_top hfin hle
+  -- Distance ≤ length on each sub-arc.
+  have hD_left : riemannianEDist I (γ a) (γ s) ≤ L_left :=
+    riemannianEDist_le_pathELength hγ_as rfl rfl has
+  have hD_right : riemannianEDist I (γ t) (γ b) ≤ L_right :=
+    riemannianEDist_le_pathELength hγ_tb rfl rfl htb
+  have hD_mid_le : riemannianEDist I (γ s) (γ t) ≤ L_mid :=
+    riemannianEDist_le_pathELength hγ_st rfl rfl hst
+  -- Triangle inequality (twice) on `(γ a) → (γ s) → (γ t) → (γ b)`.
+  have htri₁ : riemannianEDist I (γ a) (γ b) ≤
+      riemannianEDist I (γ a) (γ t) + riemannianEDist I (γ t) (γ b) :=
+    riemannianEDist_triangle
+  have htri₂ : riemannianEDist I (γ a) (γ t) ≤
+      riemannianEDist I (γ a) (γ s) + riemannianEDist I (γ s) (γ t) :=
+    riemannianEDist_triangle
+  have htri_combined : riemannianEDist I (γ a) (γ b) ≤
+      riemannianEDist I (γ a) (γ s) + riemannianEDist I (γ s) (γ t)
+        + riemannianEDist I (γ t) (γ b) :=
+    htri₁.trans (add_le_add htri₂ le_rfl)
+  -- Bound the parent length by the squeezed sum.
+  have hpath_le : pathELength I γ a b ≤
+      L_left + riemannianEDist I (γ s) (γ t) + L_right := by
+    have := htri_combined
+    rw [hmin] at this
+    refine this.trans ?_
+    exact add_le_add (add_le_add hD_left le_rfl) hD_right
+  -- Combine to obtain the squeeze on the middle term.
+  have hsqueeze : L_left + L_mid + L_right
+        ≤ L_left + riemannianEDist I (γ s) (γ t) + L_right := by
+    calc L_left + L_mid + L_right = pathELength I γ a b := hpath_total
+      _ ≤ L_left + riemannianEDist I (γ s) (γ t) + L_right := hpath_le
+  -- Cancel `L_left` and `L_right` from the squeeze using their finiteness.
+  -- Rearranging both sides as `L_left + L_right + L_mid` etc.
+  have hsqueeze' : L_left + L_right + L_mid
+        ≤ L_left + L_right + riemannianEDist I (γ s) (γ t) := by
+    have heq₁ : L_left + L_mid + L_right = L_left + L_right + L_mid := by ring
+    have heq₂ : L_left + riemannianEDist I (γ s) (γ t) + L_right
+                  = L_left + L_right + riemannianEDist I (γ s) (γ t) := by ring
+    rw [heq₁, heq₂] at hsqueeze
+    exact hsqueeze
+  have hL_lr_finite : L_left + L_right ≠ ⊤ :=
+    ENNReal.add_ne_top.mpr ⟨hL_left_finite, hL_right_finite⟩
+  have hmid_le_D : L_mid ≤ riemannianEDist I (γ s) (γ t) :=
+    (ENNReal.add_le_add_iff_left hL_lr_finite).mp hsqueeze'
+  -- Anti-symmetry between `L_mid ≤ D_mid` and `D_mid ≤ L_mid` finishes the proof.
+  exact le_antisymm hD_mid_le hmid_le_D
 
 end LengthBookkeeping
 
