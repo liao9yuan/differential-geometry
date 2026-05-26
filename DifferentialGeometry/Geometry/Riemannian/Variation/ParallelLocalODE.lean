@@ -45,7 +45,7 @@ Christoffel contraction continuous-linear-map
 `t ↦ Γ_α(u'(t), ·)(u(t))` is continuous on a compact sub-interval
 `[a, b]` whenever `u'` and `u` are continuous on `[a, b]` and `u`
 takes values in the chart source. -/
-theorem chart_christoffel_clm_continuous_on_compact
+theorem chart_christoffel_clm_continuous_on_compact [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) {a b : ℝ}
     (hu : ContinuousOn uPrime (Set.Icc a b))
@@ -53,13 +53,92 @@ theorem chart_christoffel_clm_continuous_on_compact
     (hsource : ∀ t ∈ Set.Icc a b, γ t ∈ (chartAt H α).source) :
     ContinuousOn (fun t : ℝ =>
       chartChristoffelContractionRightCLM (I := I) g α (uPrime t)
-        (chartCurve (I := I) α γ t)) (Set.Icc a b) := sorry
+        (chartCurve (I := I) α γ t)) (Set.Icc a b) := by
+  classical
+  -- Reduce continuity of the CLM-valued map to continuity of its pointwise
+  -- evaluation on each fixed `w : E`, using finite-dimensionality of `E`.
+  refine (continuousOn_clm_apply (𝕜 := ℝ) (E := E) (F := E)
+    (s := Set.Icc a b)).mpr ?_
+  intro w
+  -- Continuity of the curve `chartCurve` on `[a, b]` is given by `hγ`; it
+  -- additionally takes values in the interior of `(extChartAt I α).target`
+  -- by `hsource` and `[I.Boundaryless]`.
+  have hcurve_int : ∀ t ∈ Set.Icc a b,
+      chartCurve (I := I) α γ t ∈ interior (extChartAt I α).target := by
+    intro t ht
+    have hsrc : γ t ∈ (chartAt H α).source := hsource t ht
+    have hxsrc : γ t ∈ (extChartAt I α).source := by
+      rw [extChartAt_source]; exact hsrc
+    have hxtarget : chartCurve (I := I) α γ t ∈ (extChartAt I α).target := by
+      change extChartAt I α (γ t) ∈ (extChartAt I α).target
+      exact (extChartAt I α).map_source hxsrc
+    exact extChartAt_target_subset_interior_of_boundaryless (I := I) α hxtarget
+  -- Continuity of `chartCoord i` on `E`: it is the `i`-th basis-coordinate,
+  -- a continuous linear functional in finite dimension.
+  have hcoord : ∀ i : Fin (Module.finrank ℝ E),
+      Continuous fun v : E => chartCoord (E := E) i v := by
+    intro i
+    -- Rewrite via `equivFun` (the `ι → R` form of `repr` for finite `ι`) to
+    -- get a continuous-linear map on a finite-dimensional space.
+    have heq : (fun v : E => chartCoord (E := E) i v)
+        = fun v : E => (chartModelBasis E).equivFun v i := by
+      funext v
+      simp [chartCoord, Module.Basis.equivFun_apply]
+    rw [heq]
+    have hef : Continuous fun v : E => (chartModelBasis E).equivFun v :=
+      ((chartModelBasis E).equivFun.toLinearMap).continuous_of_finiteDimensional
+    exact (continuous_apply i).comp hef
+  -- Continuity of each Christoffel scalar `t ↦ Γ^k_{ij}(chartCurve t)` on
+  -- `[a, b]` follows by composing `chartChristoffel_contDiffOn_interior` with
+  -- the curve.
+  have hΓ : ∀ i j k : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun t : ℝ =>
+        chartChristoffel (I := I) g α i j k (chartCurve (I := I) α γ t))
+        (Set.Icc a b) := by
+    intro i j k
+    have hsm : ContinuousOn (chartChristoffel (I := I) g α i j k)
+        (interior (extChartAt I α).target) :=
+      (chartChristoffel_contDiffOn_interior (I := I) g α i j k).continuousOn
+    exact hsm.comp hγ hcurve_int
+  -- The sum-form of the integrand at fixed `w`.
+  set F : ℝ → E := fun t : ℝ =>
+    ∑ k : Fin (Module.finrank ℝ E),
+      (∑ i : Fin (Module.finrank ℝ E),
+        ∑ j : Fin (Module.finrank ℝ E),
+          chartChristoffel (I := I) g α i j k
+              (chartCurve (I := I) α γ t) *
+            chartCoord (E := E) i (uPrime t) *
+            chartCoord (E := E) j w) •
+        chartModelBasis E k with hF_def
+  -- The integrand equals `F` pointwise via the definition of
+  -- `chartChristoffelContraction` (and the `*RightCLM_apply` rfl-unfolding).
+  have hEq : ∀ t ∈ Set.Icc a b,
+      chartChristoffelContractionRightCLM (I := I) g α (uPrime t)
+          (chartCurve (I := I) α γ t) w = F t := by
+    intro t _
+    simp [F, chartChristoffelContractionRightCLM_apply,
+      chartChristoffelContraction_def]
+  -- It suffices to show `ContinuousOn F (Set.Icc a b)`, which transfers
+  -- back to the goal via `hEq` (`CLM-thing = F` on `Icc a b`).
+  suffices hF_cont : ContinuousOn F (Set.Icc a b) from
+    hF_cont.congr (fun t ht => (hEq t ht).symm)
+  -- Assemble: `F` is a finite sum of `(scalar) • (constant basis vector)`,
+  -- where the scalar is a finite sum of triple products of continuous-on
+  -- functions.
+  refine continuousOn_finset_sum _ (fun k _ => ?_)
+  refine ContinuousOn.smul ?_ continuousOn_const
+  refine continuousOn_finset_sum _ (fun i _ => ?_)
+  refine continuousOn_finset_sum _ (fun j _ => ?_)
+  refine ContinuousOn.mul (ContinuousOn.mul ?_ ?_) ?_
+  · exact hΓ i j k
+  · exact ((hcoord i).comp_continuousOn hu)
+  · exact continuousOn_const
 
 /-- **parallel-lipschitz-bound-on-compact.** Continuity of
 `t ↦ chartChristoffelContractionRightCLM g α (u'(t)) (u(t))` on the
 compact interval `[a, b]` yields a uniform Lipschitz constant `K` for
 the parallel-transport vector field on `[a, b]`. -/
-theorem parallel_lipschitz_bound_on_compact
+theorem parallel_lipschitz_bound_on_compact [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) {a b : ℝ} (hab : a ≤ b)
     (hu : ContinuousOn uPrime (Set.Icc a b))
