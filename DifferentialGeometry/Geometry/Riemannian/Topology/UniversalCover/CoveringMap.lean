@@ -501,7 +501,9 @@ basepoint `⟨default, ⟦Path.refl default⟧⟩` to `q`. -/
 instance UniversalCover.pathConnectedSpace :
     PathConnectedSpace
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X) :=
-  ⟨sorry, sorry⟩
+  ⟨⟨⟨(default : X),
+      _root_.Path.Homotopic.Quotient.mk (_root_.Path.refl (default : X))⟩⟩,
+    sorry⟩
 
 /-- **The universal cover is simply connected.**
 
