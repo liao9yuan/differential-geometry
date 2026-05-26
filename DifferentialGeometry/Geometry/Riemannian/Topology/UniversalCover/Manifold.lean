@@ -1,4 +1,5 @@
 import Mathlib.Geometry.Manifold.IsManifold.Basic
+import Mathlib.Geometry.Manifold.IsManifold.ExtChartAt
 import Mathlib.Geometry.Manifold.ChartedSpace
 import Mathlib.Topology.Separation.Basic
 import Mathlib.Topology.Compactness.SigmaCompact
@@ -141,14 +142,60 @@ instance instSigmaCompactSpace :
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
   sorry
 
+/-- A finite-dimensional smooth manifold modelled on `ℝ` is locally
+compact (inherited from its model space). Provided here as a `theorem`
+because the model `E` and `I` are not derivable from `M` alone. -/
+theorem locallyCompactSpaceBase (I : ModelWithCorners ℝ E H) :
+    LocallyCompactSpace M :=
+  Manifold.locallyCompact_of_finiteDimensional I
+
 /-- **The universal cover is locally compact.**
 
 Local compactness pulls back along the local homeomorphism `proj`
-provided by `UniversalCover.isCoveringMap`. -/
-instance instLocallyCompactSpace :
+provided by `UniversalCover.isCoveringMap`. The base manifold's own
+local compactness is assumed as a class hypothesis here; downstream
+instances can supply it via `locallyCompactSpaceBase` (or, equivalently,
+`Manifold.locallyCompact_of_finiteDimensional`). -/
+instance instLocallyCompactSpace [LocallyCompactSpace M] :
     LocallyCompactSpace
-      (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
-  sorry
+      (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) := by
+  -- `proj` is a covering map, hence a local homeomorphism.
+  have hLH : IsLocalHomeomorph (proj :
+      DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M) :=
+    UniversalCover.isCoveringMap.isLocalHomeomorph
+  refine ⟨fun xt n hn => ?_⟩
+  -- Extract an `OpenPartialHomeomorph` around `xt`.
+  obtain ⟨e, hxte, _hfe⟩ := hLH xt
+  -- `e.source` is open and contains `xt`, so `n ∩ e.source` is a neighbourhood
+  -- of `xt` in the universal cover.
+  have hSrcNhd : e.source ∈ 𝓝 xt := e.open_source.mem_nhds hxte
+  have hInterNhd : n ∩ e.source ∈ 𝓝 xt := Filter.inter_mem hn hSrcNhd
+  -- Push the neighbourhood across `e` to obtain a neighbourhood of `e xt` in `M`.
+  have himg : e '' (n ∩ e.source) ∈ 𝓝 (e xt) :=
+    e.image_mem_nhds hxte hInterNhd
+  -- Pick a compact neighbourhood `K` of `e xt` contained in `e '' (n ∩ e.source)`.
+  obtain ⟨K, hK_nhd, hKsub, hKcomp⟩ :=
+    LocallyCompactSpace.local_compact_nhds (e xt) (e '' (n ∩ e.source)) himg
+  -- The image being inside `e '' (n ∩ e.source)` implies `K ⊆ e.target`.
+  have hKtgt : K ⊆ e.target := by
+    intro y hy
+    obtain ⟨a, ha, rfl⟩ := hKsub hy
+    exact e.map_source ha.2
+  -- Pull `K` back through `e.symm`; it is compact (continuous image of compact).
+  have hSymmComp : IsCompact (e.symm '' K) :=
+    hKcomp.image_of_continuousOn (e.continuousOn_symm.mono hKtgt)
+  refine ⟨e.symm '' K, ?_, ?_, hSymmComp⟩
+  · -- `e.symm '' K` is a neighbourhood of `xt`: under the bijection
+    -- `map e.symm (𝓝 (e xt)) = 𝓝 xt`, the set `K ∈ 𝓝 (e xt)` maps to
+    -- `e.symm '' K ∈ 𝓝 xt`.
+    rw [← e.symm_map_nhds_eq hxte]
+    exact Filter.image_mem_map hK_nhd
+  · -- `e.symm '' K ⊆ n`: for `y = e a` with `a ∈ n ∩ e.source`,
+    -- `e.symm y = a ∈ n` by `e.left_inv`.
+    rintro _ ⟨y, hyK, rfl⟩
+    obtain ⟨a, ha, rfl⟩ := hKsub hyK
+    rw [e.left_inv ha.2]
+    exact ha.1
 
 end UniversalCover
 end Topology
