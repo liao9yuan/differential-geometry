@@ -56,7 +56,18 @@ subset of `M`. -/
 theorem bm_c_expMap_geodesicSegment_compactImage
     (g : SmoothRiemannianMetric I M) (p : M) (v₀ : TangentSpace I p) :
     IsCompact (maximalGeodesic (I := I) g p v₀ '' Set.Icc (0 : ℝ) 1) := by
-  sorry
+  -- Continuous image of a compact set is compact. The unit interval
+  -- `[0, 1]` is compact (`isCompact_Icc`); the maximal geodesic curve is
+  -- continuous on `[0, 1]` because, under geodesic completeness, every
+  -- point of `[0, 1]` lies in the maximal interval and is covered by a
+  -- chosen-curve witness which is itself continuous (as the projection
+  -- of an integral curve). The agreement of `maximalGeodesic` with the
+  -- local witness on a neighbourhood is the cross-basepoint coincidence
+  -- step; we package the continuity as the deferred sub-statement.
+  have h_cont :
+      ContinuousOn (maximalGeodesic (I := I) g p v₀) (Set.Icc (0 : ℝ) 1) := by
+    sorry
+  exact isCompact_Icc.image_of_continuousOn h_cont
 
 /-! ## 2. Finite chart-cover via the Lebesgue-number lemma -/
 
