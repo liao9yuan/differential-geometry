@@ -4,10 +4,12 @@ import DifferentialGeometry.Geometry.Riemannian.Geodesic.Existence
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.MaximalInterval
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Uniqueness
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Homogeneity
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.CrossVFReduction
 import DifferentialGeometry.Geometry.Riemannian.Exponential.Definition
 import DifferentialGeometry.Geometry.Riemannian.Exponential.SmoothnessUnconditional
 import DifferentialGeometry.Integral.Measure.ChartDensity
 import DifferentialGeometry.Integral.Connection.LeviCivita
+import Mathlib.Analysis.Calculus.MeanValue
 import Mathlib.Geometry.Manifold.Riemannian.Basic
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
 import Mathlib.Topology.UniformSpace.Cauchy
@@ -105,7 +107,57 @@ theorem bm_c_gc_constant_speed
           (mfderiv 𝓘(ℝ, ℝ) I γ s 1) =
         (g.inner (γ t)) (mfderiv 𝓘(ℝ, ℝ) I γ t 1)
           (mfderiv 𝓘(ℝ, ℝ) I γ t 1) := by
-  sorry
+  haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
+  -- The speed-squared function `F : ℝ → ℝ`.
+  set F : ℝ → ℝ := fun t =>
+      (g.inner (γ t)) (mfderiv 𝓘(ℝ, ℝ) I γ t 1)
+        (mfderiv 𝓘(ℝ, ℝ) I γ t 1) with hF_def
+  -- Strategy: show `F` has derivative `0` at every `t`, hence `F` is constant
+  -- by `is_const_of_deriv_eq_zero`. The derivative formula at `t` reads
+  --   `F'(t) = 2 · ⟨∇_{γ'} γ' (t), γ'(t)⟩_g(γ t)`
+  -- by metric compatibility of Levi-Civita applied to the curve `γ`. Along a
+  -- geodesic, the geodesic equation `∇_{γ'} γ' (t) = 0` (encoded
+  -- chart-locally by `IsGeodesicAt.hasGeodesicEquationAt`) makes the right-hand
+  -- side vanish.
+  --
+  -- The metric-compatibility identity in the precise form required here
+  --   `HasDerivAt (fun t => g.inner (γ t) (γ'(t)) (γ'(t)))
+  --      (2 · g.inner (γ t) ((∇_{γ'} γ')(t)) (γ'(t))) t`
+  -- is a chart-local computation: in normal coordinates at `γ t` it reduces
+  -- to standard product-rule differentiation of the metric components
+  -- `g_{ij}(γ(t)) · u'^i(t) · u'^j(t)` and the chart-coordinate Christoffel
+  -- relation `∂_k g_{ij} = g_{lj} Γ^l_{ik} + g_{il} Γ^l_{jk}`. We isolate this
+  -- step as `hF_deriv` below; it consumes the cross-VF reduction bridge
+  -- `IsGeodesicAt.hasGeodesicEquationAt` (which is itself PARTIAL via
+  -- `bm_c_gc_vf_chart_coincidence`).
+  have hF_deriv : ∀ t : ℝ, HasDerivAt F 0 t := by
+    intro t
+    -- Extract the local geodesic predicate at `t`.
+    have hγ_at : IsGeodesicAt (I := I) g γ t := hγ.isGeodesicAt t
+    -- Chart-coordinate second-derivative form of the geodesic equation at `t`.
+    have hγ_eq : HasGeodesicEquationAt (I := I) g γ t :=
+      IsGeodesicAt.hasGeodesicEquationAt (I := I) (g := g) (γ := γ) (t₀ := t) hγ_at
+    -- Differentiation of `F` at `t` via metric compatibility of Levi-Civita.
+    -- In the chart at `γ t`, write `u(s) := φ_{γ t}(γ s)`, `v := u'(t)`,
+    -- `a := u''(t)`. The geodesic equation says `a = -Γ_{γ t}(v, v)(u(t))`.
+    -- Differentiating `F(s) = g_{ij}(γ s) · v^i(s) · v^j(s)` at `s = t` uses
+    -- the product rule plus the Christoffel relation; the linear-in-`a` term
+    -- becomes `2 · g_{ij}(γ t) · v^i · a^j` and combines with the
+    -- metric-derivative term `(∂_k g_{ij}) · v^i · v^j · v^k` to yield zero
+    -- by the geodesic equation. The detailed chart-local product-rule chain
+    -- has not been packaged separately in the project; we record it here as
+    -- the single residual gap of this PARTIAL proof.
+    sorry
+  -- `F` is differentiable everywhere (witnessed by `hF_deriv`).
+  have hF_diff : Differentiable ℝ F :=
+    fun t => (hF_deriv t).differentiableAt
+  -- The derivative vanishes everywhere.
+  have hF_deriv_eq : ∀ t : ℝ, deriv F t = 0 :=
+    fun t => (hF_deriv t).deriv
+  -- A function with zero derivative on all of `ℝ` is constant.
+  have hF_const : ∀ s t : ℝ, F s = F t :=
+    fun s t => is_const_of_deriv_eq_zero hF_diff hF_deriv_eq s t
+  exact hF_const
 
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M]
 
