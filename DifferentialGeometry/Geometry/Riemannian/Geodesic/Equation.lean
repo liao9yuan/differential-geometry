@@ -468,6 +468,12 @@ theorem isGeodesic_const (g : SmoothRiemannianMetric I M) (p : M) :
     refine isMIntegralCurve_const ?_
     exact geodesicVectorFieldChart_zero_section (I := I) g p
 
+/-- A constant curve is a local geodesic at every time. Pointwise
+specialisation of `isGeodesic_const`. -/
+theorem IsGeodesicAt.const (g : SmoothRiemannianMetric I M) (p : M) (t : ℝ) :
+    IsGeodesicAt (I := I) g (fun _ : ℝ => p) t :=
+  (isGeodesic_const (I := I) g p).isGeodesicAt t
+
 /-! ## Time-translation reparametrisation preserves the geodesic property
 
 If `γ` is a geodesic, so is `s ↦ γ (s + b)` (time translation by `b`).

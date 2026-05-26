@@ -385,6 +385,13 @@ import DifferentialGeometry.Analysis.Laplacian.Operator.Operator
 import DifferentialGeometry.Analysis.Laplacian.Spectral.Resolvent
 import DifferentialGeometry.Analysis.Laplacian.Spectral.Spectrum
 import DifferentialGeometry.Analysis.Laplacian.Spectral.EigenBasis
+import DifferentialGeometry.Analysis.Laplacian.Spectral.EigenIdx
+import DifferentialGeometry.Analysis.Sobolev.Hs.SpectralDefs
+import DifferentialGeometry.Analysis.Sobolev.Hs.Inclusion
+import DifferentialGeometry.Analysis.Sobolev.Hs.HeatSemigroupHs
+import DifferentialGeometry.Analysis.Sobolev.Hs.HeatSemigroupHsExt
+import DifferentialGeometry.Analysis.Sobolev.Hs.FiniteSupport
+import DifferentialGeometry.Analysis.Sobolev.Hs.HeatSemigroupContinuity
 import DifferentialGeometry.Analysis.Laplacian.Spectral.Enumeration
 import DifferentialGeometry.Analysis.Laplacian.WithBoundary.InteriorSmoothScalarPreH1
 import DifferentialGeometry.Analysis.Laplacian.WithBoundary.InteriorH1Compl
@@ -438,6 +445,7 @@ import DifferentialGeometry.Geometry.NormGradSq
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Equation
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Existence
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.GeodesicEquationBridge
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.Homogeneity
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.MaximalInterval
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.SmoothFlow
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Smoothness
@@ -466,7 +474,6 @@ import DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 import DifferentialGeometry.Geometry.Riemannian.InjectivityRadius
 import DifferentialGeometry.Geometry.Riemannian.SectionalCurvature
 import DifferentialGeometry.Geometry.Riemannian.AlongCurve
-import DifferentialGeometry.Geometry.Riemannian.JacobiField
 
 import DifferentialGeometry.Analysis.Sobolev.Solutions.FriedrichsCommutator
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.NonSmooth
@@ -693,10 +700,12 @@ import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartComponents
 import DifferentialGeometry.Analysis.Sobolev.Tensor.Defs
 import DifferentialGeometry.Analysis.Sobolev.Tensor.NormBasics
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartLocality
+import DifferentialGeometry.Analysis.Sobolev.Tensor.ComponentRawVsChartCompBridge
 import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.ChartPrimitives
 import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.PrincipalForm
 import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.CovDerivIntrinsicComponent
 import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.CovDerivSlotCorrectionComponent
+import DifferentialGeometry.Integral.Connection.SlotCorrectionChartCompFormula
 import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.CovDerivComponentFormula
 import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.CovDerivChartForm
 import DifferentialGeometry.Analysis.Laplacian.TensorRegularity.CovDerivChartFormLowerOrder
@@ -777,6 +786,7 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TensorRSModelEvalB
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.CanonicalTensorRepr
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.ChartPartialCovariantBound
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.ChartPartialLowerOrderBound
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.ChartPartialUniformBound
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.EigenvectorChartComponentL2
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.PouComponentBridge
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.EllipticBridge.EigenvectorWeakSolution.SmoothApprox
@@ -786,6 +796,7 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.Defs
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.Inclusion
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.FractionalPower
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SmoothingHs
+import DifferentialGeometry.Analysis.SpectralBounds.SmoothingConst
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.BochnerL2
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeH1
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.PerMode
@@ -800,6 +811,7 @@ import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SpectralBounds
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SemigroupTimeRegularity
 import DifferentialGeometry.Analysis.Parabolic.TensorLinearParabolic
 
+import DifferentialGeometry.Analysis.ODE.IntegralGronwall
 import DifferentialGeometry.Analysis.ODE.Variational
 import DifferentialGeometry.Analysis.ODE.FlowC1
 import DifferentialGeometry.Analysis.ODE.FlowC1Bridge
@@ -813,8 +825,11 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.DuhamelMap
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Contraction
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Existence
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorInstance
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.ScalarInstance
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Scalar
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.MaxRegSpace
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.MaxRegFixedPoint
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.EnergyEstimates
 
 -- Public consumption-facing facade
 import DifferentialGeometry.Interface

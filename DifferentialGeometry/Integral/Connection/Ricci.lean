@@ -1115,6 +1115,47 @@ theorem ricciTensor_symm
       riemannOpEndo_trace_eq_zero g x v w] at htr_diff
   linarith
 
+/-- **Double-negation with swap.** Bilinearity in each slot cancels both negations, then
+symmetry exchanges the arguments: `Ric(-v, -w) = Ric(w, v)`. -/
+theorem ricciTensor_neg_neg_swap
+    (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
+    ricciTensor (I := I) g x (-v) (-w) = ricciTensor (I := I) g x w v := by
+  have h1 : ricciTensor (I := I) g x (-v) (-w) = ricciTensor (I := I) g x v w := by
+    simp
+  rw [h1, ricciTensor_symm]
+
+/-- **Diagonal of a sum.** Combining bilinearity with symmetry,
+`Ric(v + w, v + w) = Ric(v, v) + 2 · Ric(v, w) + Ric(w, w)`. -/
+theorem ricciTensor_add_self
+    (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
+    ricciTensor (I := I) g x (v + w) (v + w) =
+      ricciTensor (I := I) g x v v + 2 * ricciTensor (I := I) g x v w +
+        ricciTensor (I := I) g x w w := by
+  have hexpand : ricciTensor (I := I) g x (v + w) (v + w) =
+      ricciTensor (I := I) g x v v + ricciTensor (I := I) g x w v +
+        (ricciTensor (I := I) g x v w + ricciTensor (I := I) g x w w) := by
+    simp [map_add, ContinuousLinearMap.add_apply]
+  rw [hexpand, ricciTensor_symm (I := I) g x w v]
+  ring
+
+/-- **Sum with negated second slot.** Bilinearity expands the sum and pulls the negation
+out of the second slot: `Ric(v + w, -u) = -Ric(v, u) - Ric(w, u)`. -/
+theorem ricciTensor_add_neg
+    (g : SmoothRiemannianMetric I M) (x : M) (v w u : TangentSpace I x) :
+    ricciTensor (I := I) g x (v + w) (-u) =
+      -ricciTensor (I := I) g x v u - ricciTensor (I := I) g x w u := by
+  simp only [map_add, ContinuousLinearMap.add_apply, map_neg]
+  ring
+
+/-- **Difference with negated second slot.** Bilinearity expands the subtraction and pulls
+the negation out of the second slot: `Ric(v - w, -u) = Ric(w, u) - Ric(v, u)`. -/
+theorem ricciTensor_sub_neg
+    (g : SmoothRiemannianMetric I M) (x : M) (v w u : TangentSpace I x) :
+    ricciTensor (I := I) g x (v - w) (-u) =
+      ricciTensor (I := I) g x w u - ricciTensor (I := I) g x v u := by
+  simp only [map_sub, ContinuousLinearMap.sub_apply, map_neg]
+  ring
+
 end RicciSymmetry
 
 /-! ## Smoothness of `ricciTensor` as a `(0, 2)`-tensor section
