@@ -102,15 +102,11 @@ At each `x' : UniversalCover M`, the derivative
 lifted metric it carries the lifted inner product on `T_{x'} M̃` to the
 original inner product on `T_{proj x'} M`. Packaged here as a linear
 isometric equivalence. -/
-theorem proj_isLocalIsometry (_g : SmoothRiemannianMetric I M)
-    (_x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
-    -- The full statement is `T_{x'} M̃ ≃ₗᵢ[ℝ] T_{proj x'} M`, but the
-    -- LinearIsometryEquiv instance synthesis on `TangentSpace` requires
-    -- the lifted Riemannian-bundle instance to be in scope; in the
-    -- skeleton we record only the True placeholder so the declaration
-    -- typechecks, and `/fill` will supply both the lifted bundle and
-    -- the genuine isometric equivalence.
-    True :=
+theorem proj_isLocalIsometry (g : SmoothRiemannianMetric I M)
+    (x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
+    ∀ (v w : E),
+      g.inner (proj x') v w =
+        (liftedMetric (I := I) g).inner x' v w :=
   sorry
 
 end UniversalCover
