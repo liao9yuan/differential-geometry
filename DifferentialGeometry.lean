@@ -1124,6 +1124,7 @@ import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.SpectralPouH2Identify
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.TensorComponentScalarWkpBound
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.TensorReverseBridgeChristoffel
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.G1G3BridgeIntrinsic
+import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.G3IntrinsicL2Bound
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.Bijective.ReversedFlow
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.MFDerivPackage
 import DifferentialGeometry.PDE.RicciFlow.Pullback.RicciNaturality
