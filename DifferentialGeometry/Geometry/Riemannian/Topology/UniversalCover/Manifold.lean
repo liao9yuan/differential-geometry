@@ -1,6 +1,8 @@
 import Mathlib.Geometry.Manifold.IsManifold.Basic
 import Mathlib.Geometry.Manifold.IsManifold.ExtChartAt
 import Mathlib.Geometry.Manifold.ChartedSpace
+import Mathlib.Geometry.Manifold.ContMDiff.Atlas
+import Mathlib.Geometry.Manifold.ContMDiff.Basic
 import Mathlib.Topology.Separation.Basic
 import Mathlib.Topology.Compactness.SigmaCompact
 import Mathlib.Topology.Compactness.LocallyCompact
@@ -239,6 +241,118 @@ instance instIsManifold :
         congr 1
         exact localSection_collapse a b hhCaTarget
     exact StructureGroupoid.mem_of_eqOnSource _ hRestrIn hEq
+
+/-- **The projection `proj : UniversalCover M → M` is smooth.**
+
+On the source of the chart `coverChartAt xt` (which equals
+`chartAt H xt` for the universal cover), `proj` agrees with the
+composition `(chartAt H (proj xt)).symm ∘ (coverChartAt xt)`: indeed,
+`(coverChartAt xt) z = (chartAt H (proj xt)) (proj z)` by definition of
+`coverChartAt` and `proj_eq_localSection`, and the source condition
+guarantees `proj z ∈ (chartAt H (proj xt)).source` so we can apply the
+chart's left inverse.
+
+Both factors of this composition are smooth on their respective
+domains (atlas members and their inverses are smooth), and the image of
+`(coverChartAt xt).source` under `coverChartAt xt` lies in
+`(chartAt H (proj xt)).target`. Hence `proj` is smooth on a
+neighbourhood of every point, which by locality gives global
+smoothness. -/
+theorem proj_contMDiff :
+    ContMDiff I I ∞
+      (proj :
+        DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M) := by
+  apply contMDiff_of_locally_contMDiffOn
+  intro xt
+  refine ⟨((coverChartAt xt) :
+      OpenPartialHomeomorph
+        (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) H).source,
+    ((coverChartAt xt) :
+      OpenPartialHomeomorph
+        (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) H).open_source,
+    ?_, ?_⟩
+  · -- `xt` lies in the source of its own chart.
+    -- `chartAt H xt = coverChartAt xt` by definition of `instChartedSpace`.
+    exact (mem_chart_source H
+      (M :=
+        DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) xt)
+  -- Show `ContMDiffOn I I ∞ proj (coverChartAt xt).source`.
+  -- Step 1: relate `proj` to `(chartAt H (proj xt)).symm ∘ coverChartAt xt`
+  -- on the chart source.
+  -- `proj` agrees with the composition on the source.
+  have hcongr :
+      ∀ z ∈ ((coverChartAt xt) :
+          OpenPartialHomeomorph
+            (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) H).source,
+        ((chartAt H (proj xt)).symm ∘ (coverChartAt xt)) z = proj z := by
+    intro z hz
+    -- Unpack the source condition.
+    rw [coverChartAt_source_eq] at hz
+    obtain ⟨hzLS, hzLSproj⟩ := hz
+    rw [Set.mem_preimage] at hzLSproj
+    -- `(coverChartAt xt) z = chartAt H (proj xt) (localSection xt z)` by `trans_apply`.
+    have hCovApp : (coverChartAt xt) z
+        = (chartAt H (proj xt)) ((localSection xt) z) := by
+      unfold coverChartAt
+      rw [OpenPartialHomeomorph.trans_apply]
+    -- `localSection xt z = proj z` since `localSection xt` agrees with `proj`.
+    have hLSproj : (localSection xt) z = proj z := by
+      have hfun := proj_eq_localSection xt
+      have := congrArg (fun f => f z) hfun
+      simpa using this.symm
+    -- `proj z ∈ (chartAt H (proj xt)).source`.
+    have hprojSrc : proj z ∈ (chartAt H (proj xt)).source := by
+      rw [← hLSproj]; exact hzLSproj
+    -- Combine.
+    change (chartAt H (proj xt)).symm ((coverChartAt xt) z) = proj z
+    rw [hCovApp, hLSproj]
+    exact (chartAt H (proj xt)).left_inv hprojSrc
+  -- Step 2: prove smoothness of the composition.
+  -- Type-annotate `coverChartAt xt` to fix `H, M`.
+  set CXT : OpenPartialHomeomorph
+      (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) H :=
+    coverChartAt xt with hCXT_def
+  -- `coverChartAt xt = chartAt H xt` (definitionally), smooth on its source.
+  have h_chart_xt : ContMDiffOn I I ∞ (CXT : _ → H) CXT.source := by
+    have hgoal :
+        ContMDiffOn I I ∞
+          (chartAt H
+            (M :=
+              DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
+            xt :
+            _ → H)
+          (chartAt H
+            (M :=
+              DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
+            xt).source :=
+      contMDiffOn_chart
+    exact hgoal
+  -- `(chartAt H (proj xt)).symm` is smooth on the chart target.
+  have h_chart_symm : ContMDiffOn I I ∞
+      (chartAt H (M := M) (proj xt)).symm
+      (chartAt H (M := M) (proj xt)).target := contMDiffOn_chart_symm
+  -- The image of `(coverChartAt xt).source` under `coverChartAt xt`
+  -- lies inside `(chartAt H (proj xt)).target`.
+  have hMapsTo :
+      CXT.source ⊆ (CXT : _ → H) ⁻¹' (chartAt H (M := M) (proj xt)).target := by
+    intro z hz
+    -- Source of `e.trans e'` maps via `e.trans e'` into `e'.target`.
+    have hmap : CXT z ∈ CXT.target := CXT.map_source hz
+    -- `(coverChartAt xt).target = (chartAt H (proj xt)).target ∩ ...`
+    rw [hCXT_def, coverChartAt_target_eq] at hmap
+    exact hmap.1
+  -- Compose: smooth ∘ smooth = smooth.
+  have hcomp : ContMDiffOn I I ∞
+      ((chartAt H (M := M) (proj xt)).symm ∘ (CXT : _ → H))
+      CXT.source :=
+    h_chart_symm.comp h_chart_xt hMapsTo
+  -- Transfer to `proj` via congruence on the source.
+  rw [hCXT_def] at hcomp
+  -- `ContMDiffOn.congr` expects `f₁ y = f y` where `f` is the smooth function.
+  -- We have `comp z = proj z`, want `proj z = comp z` for the smooth `comp`.
+  refine hcomp.congr ?_
+  intro z hz
+  exact (hcongr z hz).symm
 
 /-- **The universal cover is Hausdorff.**
 
