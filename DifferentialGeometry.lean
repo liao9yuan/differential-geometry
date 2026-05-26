@@ -248,6 +248,7 @@ import DifferentialGeometry.Integral.DivergenceTheorem.IntegrationByParts
 import DifferentialGeometry.Geometry.Gradient
 import DifferentialGeometry.Geometry.Laplacian
 import DifferentialGeometry.Geometry.LocalChartConsistency
+import DifferentialGeometry.Geometry.FiniteAtlasIndexOnCompact
 import DifferentialGeometry.Geometry.Hessian
 import DifferentialGeometry.Geometry.Curvature.Riemann
 import DifferentialGeometry.Geometry.VossWeyl
