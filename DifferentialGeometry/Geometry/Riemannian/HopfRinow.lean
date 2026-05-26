@@ -1,0 +1,321 @@
+import DifferentialGeometry.Geometry.Riemannian.GaussLemma
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.Equation
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.Existence
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.MaximalInterval
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.Uniqueness
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.Homogeneity
+import DifferentialGeometry.Geometry.Riemannian.Exponential.Definition
+import DifferentialGeometry.Geometry.Riemannian.Exponential.SmoothnessUnconditional
+import DifferentialGeometry.Integral.Measure.ChartDensity
+import DifferentialGeometry.Integral.Connection.LeviCivita
+import Mathlib.Geometry.Manifold.Riemannian.Basic
+import Mathlib.Geometry.Manifold.Riemannian.PathELength
+import Mathlib.Topology.UniformSpace.Cauchy
+import Mathlib.Topology.EMetricSpace.Lipschitz
+
+set_option linter.unusedSectionVars false
+
+/-!
+# Hopf-Rinow: metric-completeness implies geodesic-completeness and the
+existence of minimising geodesics
+
+For a smooth Riemannian metric `g` on a connected, sigma-compact,
+boundaryless smooth manifold `M` that is metric-complete as a
+`PseudoEMetricSpace`, this file packages the classical Hopf-Rinow chain.
+
+## Geodesic-completeness chain
+
+* `bm_c_gc_constant_speed` -- a geodesic has constant `g`-speed.
+* `bm_c_gc_length_distance_bound` -- `riemannianEDist` is Lipschitz in
+  the parameter along a geodesic with constant speed bound.
+* `bm_c_gc_escape_cauchy` -- if the maximal interval of a geodesic
+  escapes to a finite right endpoint, the values form a Cauchy
+  sequence in `riemannianEDist`.
+* `bm_c_gc_velocity_limit` -- the velocity converges to a limit
+  vector in the tangent space at the metric limit point.
+* `bm_c_gc_extension_past_limit` -- local existence at the limit
+  point produces a geodesic extending the original past the supposed
+  escape time, contradicting maximality.
+* `bm_c_gc_symmetric_left_endpoint` -- the same argument on the
+  left endpoint via reflection `t \mapsto -t`.
+* `bm_c_gc_assemble` -- assembly: the maximal interval is `Set.univ`.
+
+## Exponential-map totality
+
+* `bm_c_expMap_continuous_of_geodesic_complete` -- continuity of
+  `expMap g p` on the entire tangent space, given geodesic
+  completeness.
+* `bm_c_expMap_total` -- totality plus continuity packaged.
+
+## Hopf-Rinow existence of minimisers
+
+* `path_length_infimum_attained` -- the infimum `riemannianEDist I p q`
+  is attained by a continuous curve.
+* `minimiser_is_smooth_geodesic` -- a length-minimising curve coincides
+  after arclength rescale with a smooth geodesic.
+* `unit_speed_rescale` -- affine reparametrisation rescales a geodesic
+  to unit-speed.
+* `unit_speed_minimising_geodesic_from_points` -- existence of a
+  unit-speed minimising geodesic between any two points.
+
+## Exponential surjectivity on the closed ball
+
+* `bm_c_expMap_surjective_on_closedBall` -- under a diameter bound,
+  `expMap g p` surjects onto `M` from a closed ball in `T_p M`.
+
+All thirteen statements are emitted below as `theorem ... := sorry`
+stubs.
+-/
+
+noncomputable section
+
+open Set Function Filter Bundle Manifold
+open scoped Topology Manifold ContDiff ENNReal
+
+namespace DifferentialGeometry
+namespace Geometry
+namespace Riemannian
+namespace HopfRinow
+
+open DifferentialGeometry.Integral.Measure
+open DifferentialGeometry.Geometry.Riemannian.Geodesic
+open DifferentialGeometry.Geometry.Riemannian.Exponential
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  [I.Boundaryless]
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+
+/-! ## Geodesic-completeness chain -/
+
+section GeodesicCompleteness
+
+/-- **Constant speed of a geodesic.** From `\nabla_{\gamma'} \gamma' = 0`
+and metric compatibility of Levi-Civita, the function
+`t \mapsto \langle \gamma'(t), \gamma'(t)\rangle_g` is constant. -/
+theorem bm_c_gc_constant_speed
+    (g : SmoothRiemannianMetric I M) {γ : ℝ → M}
+    (hγ : IsGeodesic (I := I) g γ) :
+    ∀ s t : ℝ,
+      (g.inner (γ s)) (mfderiv 𝓘(ℝ, ℝ) I γ s 1)
+          (mfderiv 𝓘(ℝ, ℝ) I γ s 1) =
+        (g.inner (γ t)) (mfderiv 𝓘(ℝ, ℝ) I γ t 1)
+          (mfderiv 𝓘(ℝ, ℝ) I γ t 1) := by
+  sorry
+
+variable [PseudoEMetricSpace M] [IsRiemannianManifold I M]
+
+/-- **Length-distance bound along a geodesic.** With constant `g`-speed
+`c := (g.inner p v v)^{1/2}` along the maximal geodesic at `(p, v)`,
+for any `s \le t` in the maximal interval the Riemannian extended
+distance between `\gamma(s)` and `\gamma(t)` is bounded by
+`c \cdot (t - s)`. -/
+theorem bm_c_gc_length_distance_bound
+    (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p)
+    {s t : ℝ}
+    (hs : s ∈ maximalGeodesicInterval (I := I) g p v)
+    (ht : t ∈ maximalGeodesicInterval (I := I) g p v)
+    (hst : s ≤ t) :
+    riemannianEDist I
+        (maximalGeodesic (I := I) g p v s)
+        (maximalGeodesic (I := I) g p v t) ≤
+      ENNReal.ofReal (Real.sqrt ((g.inner p) v v) * (t - s)) := by
+  sorry
+
+variable [CompleteSpace M]
+
+/-- **Escape sequences along a maximal geodesic are Cauchy.** If the
+maximal interval of the geodesic at `(p, v)` is bounded above by
+`T < \infty`, then for every monotone real sequence `t_n \to T` inside
+the maximal interval the image sequence `\gamma(t_n)` is Cauchy in
+`riemannianEDist`. -/
+theorem bm_c_gc_escape_cauchy
+    (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p)
+    {T : ℝ} (hT : IsLUB (maximalGeodesicInterval (I := I) g p v) T)
+    {tₙ : ℕ → ℝ}
+    (htₙ_mem : ∀ n, tₙ n ∈ maximalGeodesicInterval (I := I) g p v)
+    (htₙ_lim : Tendsto tₙ atTop (𝓝 T)) :
+    CauchySeq (fun n => maximalGeodesic (I := I) g p v (tₙ n)) := by
+  sorry
+
+/-- **Velocity limit at the finite escape time.** If the maximal
+interval of the geodesic at `(p, v)` is bounded above by `T < \infty`
+and the metric limit `y := \lim \gamma(t_n)` exists by completeness,
+then the velocity `\gamma'(t_n)` converges to some `w \in T_y M` with
+`(g.inner y) w w = (g.inner p) v v`. -/
+theorem bm_c_gc_velocity_limit
+    (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p)
+    {T : ℝ} (hT : IsLUB (maximalGeodesicInterval (I := I) g p v) T)
+    {tₙ : ℕ → ℝ}
+    (htₙ_mem : ∀ n, tₙ n ∈ maximalGeodesicInterval (I := I) g p v)
+    (htₙ_lim : Tendsto tₙ atTop (𝓝 T))
+    {y : M}
+    (hy : Tendsto (fun n => maximalGeodesic (I := I) g p v (tₙ n))
+      atTop (𝓝 y)) :
+    ∃ w : TangentSpace I y,
+      (g.inner y) w w = (g.inner p) v v := by
+  sorry
+
+/-- **Local extension past the supposed escape time.** Given the limit
+data `(y, w)` from `bm_c_gc_velocity_limit`, the local existence and
+uniqueness theorems for geodesics provide a geodesic on `(-\varepsilon,
+\varepsilon)` starting at `y` with initial velocity `w`; gluing
+contradicts the maximality of the original interval. Concretely, the
+maximal interval at `(p, v)` cannot be bounded above by a finite `T`. -/
+theorem bm_c_gc_extension_past_limit
+    (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) :
+    ¬ ∃ T : ℝ, IsLUB (maximalGeodesicInterval (I := I) g p v) T := by
+  sorry
+
+/-- **Symmetric argument at the left endpoint.** The same contradiction
+applies at the left endpoint via the reflection `t \mapsto -t`, which
+converts `(p, v)` to `(p, -v)`. Hence the maximal interval cannot be
+bounded below by a finite `T` either. -/
+theorem bm_c_gc_symmetric_left_endpoint
+    (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) :
+    ¬ ∃ T : ℝ, IsGLB (maximalGeodesicInterval (I := I) g p v) T := by
+  sorry
+
+/-- **Assembly: the maximal geodesic interval is the whole real line.**
+Combine the no-right-escape `bm_c_gc_extension_past_limit` with the
+no-left-escape `bm_c_gc_symmetric_left_endpoint` and the openness of
+the maximal interval to conclude it equals `Set.univ`. -/
+theorem bm_c_gc_assemble
+    (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) :
+    maximalGeodesicInterval (I := I) g p v = Set.univ := by
+  sorry
+
+end GeodesicCompleteness
+
+/-! ## Exponential map totality and continuity -/
+
+section ExpMapTotality
+
+variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+
+/-- **Continuity of `expMap g p` on the whole tangent space.** Under
+geodesic completeness (`bm_c_gc_assemble`), the exponential map at `p`
+is continuous on the entire tangent space `T_p M`. The proof propagates
+the smooth dependence of geodesics on initial conditions chart-locally
+along the compact arc `[0, 1]`. -/
+theorem bm_c_expMap_continuous_of_geodesic_complete
+    (g : SmoothRiemannianMetric I M) (p : M) :
+    Continuous (expMap (I := I) g p) := by
+  sorry
+
+/-- **Total continuity of `expMap g p`.** The exponential map at `p`
+is a total continuous function from the tangent space `T_p M` to `M`,
+under the geodesic-completeness conclusion of `bm_c_gc_assemble`. The
+membership conjunct `expMap g p v \in Set.univ` is trivial. -/
+theorem bm_c_expMap_total
+    (g : SmoothRiemannianMetric I M) (p : M) :
+    Continuous (expMap (I := I) g p) ∧
+      ∀ v : TangentSpace I p,
+        expMap (I := I) g p v ∈ (Set.univ : Set M) := by
+  sorry
+
+end ExpMapTotality
+
+/-! ## Hopf-Rinow existence: minimising geodesic between any two points -/
+
+section MinimiserExistence
+
+variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+
+/-- **Path-length infimum is attained.** On a complete connected
+sigma-compact Riemannian manifold, for every `p q : M` there exists a
+continuous curve `\gamma : [0, 1] \to M` from `p` to `q` whose
+`pathELength` realises `riemannianEDist I p q`. -/
+theorem path_length_infimum_attained
+    (g : SmoothRiemannianMetric I M) (p q : M) :
+    ∃ γ : ℝ → M,
+      Continuous γ ∧ γ 0 = p ∧ γ 1 = q ∧
+        pathELength I γ 0 1 = riemannianEDist I p q := by
+  sorry
+
+/-- **A length minimiser is, after arclength rescale, a smooth
+geodesic.** This consumes the Gauss-lemma cluster from
+`GaussLemma.lean`: at every interior parameter the minimiser is
+locally a radial geodesic in normal coordinates, and overlap
+consistency glues the pieces into a global smooth geodesic on the
+open parameter interval. -/
+theorem minimiser_is_smooth_geodesic
+    (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {a b : ℝ}
+    (hab : a ≤ b) (hγ : Continuous γ)
+    (hmin : pathELength I γ a b = riemannianEDist I (γ a) (γ b)) :
+    ∃ (L : ℝ) (η : ℝ → M),
+      0 ≤ L ∧ η 0 = γ a ∧ η L = γ b ∧
+        (∀ t ∈ Set.Ioo (0 : ℝ) L, ContMDiffAt 𝓘(ℝ, ℝ) I ∞ η t) ∧
+        (∀ t ∈ Set.Ioo (0 : ℝ) L,
+          IsGeodesicAt (I := I) g η t) := by
+  sorry
+
+/-- **Unit-speed reparametrisation of a geodesic of positive length.**
+A geodesic `\gamma : [a, b] \to M` whose `pathELength` equals
+`ENNReal.ofReal L` with `L > 0` becomes unit-speed under the affine
+reparametrisation `\eta(s) := \gamma(a + s \cdot (b - a)/L)` on
+`[0, L]`. The `IsGeodesicOn` predicate is preserved under affine
+reparametrisation. -/
+theorem unit_speed_rescale
+    (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {a b L : ℝ}
+    (hab : a ≤ b) (hL : 0 < L)
+    (hγ_geod : IsGeodesicOn (I := I) g γ (Set.Icc a b))
+    (hγ_len : pathELength I γ a b = ENNReal.ofReal L) :
+    ∃ η : ℝ → M,
+      η 0 = γ a ∧ η L = γ b ∧
+        IsGeodesicOn (I := I) g η (Set.Icc 0 L) ∧
+        ∀ t ∈ Set.Icc (0 : ℝ) L,
+          (g.inner (η t)) (mfderiv 𝓘(ℝ, ℝ) I η t 1)
+              (mfderiv 𝓘(ℝ, ℝ) I η t 1) = 1 := by
+  sorry
+
+/-- **Hopf-Rinow existence (unit-speed minimising geodesic).** Any two
+points `p q : M` on a complete connected sigma-compact Riemannian
+manifold are joined by a unit-speed `C^1` geodesic whose parameter
+length equals the Riemannian distance. Assembled from
+`path_length_infimum_attained`, `minimiser_is_smooth_geodesic`, and
+`unit_speed_rescale`. -/
+theorem unit_speed_minimising_geodesic_from_points
+    (g : SmoothRiemannianMetric I M) (p q : M) :
+    ∃ (γ : ℝ → M) (L : ℝ),
+      0 ≤ L ∧ γ 0 = p ∧ γ L = q ∧
+        ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Icc 0 L) ∧
+        IsGeodesicOn (I := I) g γ (Set.Icc 0 L) ∧
+        (∀ t ∈ Set.Icc (0 : ℝ) L,
+          (g.inner (γ t)) (mfderiv 𝓘(ℝ, ℝ) I γ t 1)
+              (mfderiv 𝓘(ℝ, ℝ) I γ t 1) = 1) ∧
+        riemannianEDist I p q = ENNReal.ofReal L := by
+  sorry
+
+end MinimiserExistence
+
+/-! ## Exponential surjectivity on the closed ball -/
+
+section ExpMapSurjectivity
+
+variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+
+/-- **`expMap g p` is surjective on `M` from the closed ball
+`Metric.closedBall 0 R \subseteq T_p M`, assuming a diameter bound.**
+For each `q : M`, pick a unit-speed minimising geodesic from `p` to
+`q` of length `L = riemannianDist p q \le R`; its initial velocity
+`L \cdot v_0` lies in the closed ball of radius `R`, and
+`expMap g p (L \cdot v_0) = q`. -/
+theorem bm_c_expMap_surjective_on_closedBall
+    (g : SmoothRiemannianMetric I M) (p : M) {R : ℝ} (hR : 0 ≤ R)
+    (hdiam : Metric.ediam (Set.univ : Set M) ≤ ENNReal.ofReal R) :
+    (Set.univ : Set M) ⊆
+      (expMap (I := I) g p) ''
+        (Metric.closedBall (0 : TangentSpace I p) R) := by
+  sorry
+
+end ExpMapSurjectivity
+
+end HopfRinow
+end Riemannian
+end Geometry
+end DifferentialGeometry

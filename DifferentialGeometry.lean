@@ -474,6 +474,19 @@ import DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 import DifferentialGeometry.Geometry.Riemannian.InjectivityRadius
 import DifferentialGeometry.Geometry.Riemannian.SectionalCurvature
 import DifferentialGeometry.Geometry.Riemannian.AlongCurve
+import DifferentialGeometry.Geometry.Riemannian.GaussLemma
+import DifferentialGeometry.Geometry.Riemannian.HopfRinow
+import DifferentialGeometry.Geometry.Riemannian.Variation.ParallelTransport
+import DifferentialGeometry.Geometry.Riemannian.Variation.SecondVariation
+import DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnected
+import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.Basic
+import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.CoveringMap
+import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.Manifold
+import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.Riemannian
+import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.Lifts
+import DifferentialGeometry.Geometry.Riemannian.BonnetMyers.RicciBound
+import DifferentialGeometry.Geometry.Riemannian.BonnetMyers.LengthBound
+import DifferentialGeometry.Geometry.Riemannian.BonnetMyers.Headlines
 
 import DifferentialGeometry.Analysis.Sobolev.Solutions.FriedrichsCommutator
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.NonSmooth
