@@ -90,24 +90,6 @@ theorem isCompact_image_closedBall_under_expMap
       g p
   exact hcompact.image hcont
 
-/-- **bm-c-univ-compact.** The whole space `Set.univ : Set M` is compact.
-Combines the diameter bound (sibling headline `bonnetMyers_diameter`) with
-exponential-map surjectivity on the closed ball of radius `π / √K` and
-`IsCompact.of_isClosed_subset` together with `isClosed_univ`. -/
-theorem isCompact_univ
-    {M : Type*}
-    {I : ModelWithCorners ℝ E H} [I.Boundaryless]
-    [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-    [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
-    [PseudoEMetricSpace M]
-    (g : SmoothRiemannianMetric I M)
-    [Bundle.RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
-    [IsRiemannianManifold I M] [CompleteSpace M]
-    (_hdim : 2 ≤ Module.finrank ℝ E)
-    {K : ℝ} (_hK : 0 < K)
-    (_hRic : RicciBoundedBelow (I := I) g (((Module.finrank ℝ E : ℝ) - 1) * K)) :
-    IsCompact (Set.univ : Set M) := sorry
-
 /-! ## Pairwise edist bound -/
 
 /-- **pairwise-edist-bound-from-geodesic.** The uniform pairwise edist
@@ -153,6 +135,51 @@ theorem bonnetMyers_diameter
   intro x _ y _
   exact pairwise_edist_bound_from_geodesic (E := E) g _hdim _hK _hRic x y
 
+/-! ## Compactness sub-leaf: `univ` is compact -/
+
+set_option linter.deprecated false in
+/-- **bm-c-univ-compact.** The whole space `Set.univ : Set M` is compact.
+Combines the diameter bound (sibling headline `bonnetMyers_diameter`) with
+exponential-map surjectivity on the closed ball of radius `π / √K` and
+`IsCompact.of_isClosed_subset` together with `isClosed_univ`. -/
+theorem isCompact_univ
+    {M : Type*}
+    {I : ModelWithCorners ℝ E H} [I.Boundaryless]
+    [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+    [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+    [PseudoEMetricSpace M]
+    (g : SmoothRiemannianMetric I M)
+    [Bundle.RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+    [IsRiemannianManifold I M] [CompleteSpace M]
+    (_hdim : 2 ≤ Module.finrank ℝ E)
+    {K : ℝ} (_hK : 0 < K)
+    (_hRic : RicciBoundedBelow (I := I) g (((Module.finrank ℝ E : ℝ) - 1) * K)) :
+    IsCompact (Set.univ : Set M) := by
+  -- Pick a base point from `Nonempty M` (provided by `ConnectedSpace M`).
+  let p : M := Classical.arbitrary M
+  -- The radius `R := π / √K` is non-negative (since `K > 0`).
+  set R : ℝ := Real.pi / Real.sqrt K with hR_def
+  have hR_nn : 0 ≤ R := by
+    have hpi_nn : (0 : ℝ) ≤ Real.pi := Real.pi_nonneg
+    have hsqrt_nn : (0 : ℝ) ≤ Real.sqrt K := Real.sqrt_nonneg K
+    exact div_nonneg hpi_nn hsqrt_nn
+  -- Diameter bound from the proved sibling headline.
+  have hdiam : EMetric.diam (Set.univ : Set M) ≤ ENNReal.ofReal R :=
+    bonnetMyers_diameter (E := E) g _hdim _hK _hRic
+  -- Exponential surjectivity on the closed ball of radius `R`.
+  have hsurj :
+      (Set.univ : Set M) ⊆
+        (expMap (I := I) g p) ''
+          (Metric.closedBall (0 : TangentSpace I p) R) :=
+    DifferentialGeometry.Geometry.Riemannian.HopfRinow.bm_c_expMap_surjective_on_closedBall
+      g p hR_nn hdiam
+  -- The image of the closed ball under `expMap` is compact.
+  have himg : IsCompact
+      ((expMap (I := I) g p) '' Metric.closedBall (0 : TangentSpace I p) R) :=
+    isCompact_image_closedBall_under_expMap (E := E) g p hR_nn
+  -- `univ` is closed; together with the compact superset, it is compact.
+  exact himg.of_isClosed_subset isClosed_univ hsurj
+
 /-! ## Headline 2: compactness -/
 
 /-- **bonnet-myers-compact.** *Bonnet-Myers compactness.* On a complete
@@ -170,7 +197,8 @@ theorem bonnetMyers_compact
     (_hdim : 2 ≤ Module.finrank ℝ E)
     {K : ℝ} (_hK : 0 < K)
     (_hRic : RicciBoundedBelow (I := I) g (((Module.finrank ℝ E : ℝ) - 1) * K)) :
-    CompactSpace M := sorry
+    CompactSpace M :=
+  isCompact_univ_iff.mp (isCompact_univ (E := E) g _hdim _hK _hRic)
 
 /-! ## Headline 3: finite fundamental group -/
 
@@ -196,7 +224,99 @@ theorem bonnetMyers_finite_fundamentalGroup
     {K : ℝ} (_hK : 0 < K)
     (_hRic : RicciBoundedBelow (I := I) g (((Module.finrank ℝ E : ℝ) - 1) * K))
     (x : M) :
-    Finite (FundamentalGroup M x) := sorry
+    Finite (FundamentalGroup M x) := by
+  -- Promote the manifold's `[Nonempty M]` (from `ConnectedSpace M`) to `[Inhabited M]`,
+  -- needed for the universal-cover infrastructure.
+  letI : Inhabited M := Classical.inhabited_of_nonempty'
+  -- The universal cover and its projection.
+  set UC := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M
+  set p :
+      DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M :=
+    DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.proj
+  -- The projection is a covering map: provided by the universal-cover infrastructure.
+  have hcov :
+      IsCoveringMap
+        (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.proj :
+          DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M) :=
+    DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.UniversalCover.isCoveringMap
+  -- `PathConnectedSpace M`: from `[ConnectedSpace M]` + `[LocPathConnectedSpace M]`.
+  haveI hpcM : PathConnectedSpace M :=
+    PathConnectedSpace.of_locPathConnectedSpace
+  -- Lifted Riemannian metric on the universal cover.
+  set gLift :
+      SmoothRiemannianMetric I
+        (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
+    DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.liftedMetric
+      (I := I) g
+  -- Bundled Riemannian-bundle structure on the tangent bundle of the universal cover.
+  haveI hRB :
+      Bundle.RiemannianBundle
+        (fun (xt :
+            DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) ↦
+          TangentSpace I xt) :=
+    ⟨gLift.toRiemannianMetric⟩
+  -- `SecondCountableTopology H` from finite-dimensional model space `E`.
+  haveI hSCH : SecondCountableTopology H :=
+    ModelWithCorners.secondCountableTopology I
+  -- `SecondCountableTopology M` from chart cover + σ-compactness.
+  haveI hSCM : SecondCountableTopology M :=
+    ChartedSpace.secondCountable_of_sigmaCompact H M
+  -- Compactness of the lifted manifold. This consumes the lifted instances and the
+  -- Ricci-bound pullback (`ricciBoundedBelow_pullback_universalCover`), and the
+  -- still-sorry `CompleteSpace` of the universal cover. We package the latter as a
+  -- local instance to mirror the upstream skeleton, then apply the proved compactness
+  -- headline (Headline 2) to the lifted data.
+  -- Ricci pullback to the universal cover.
+  have hRicLift :
+      RicciBoundedBelow (I := I) gLift (((Module.finrank ℝ E : ℝ) - 1) * K) :=
+    DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.ricciBoundedBelow_pullback_universalCover
+      (I := I) (g := g) _hRic
+  -- Completeness of the universal cover: routed through
+  -- `completeSpace_universalCover` (UC/Lifts.lean), whose signature is in place
+  -- though its body is pending.
+  haveI hCompUC :
+      CompleteSpace
+        (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
+    DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.completeSpace_universalCover
+      g
+  -- Apply Headline 2 (`bonnetMyers_compact`) to the lifted Riemannian manifold.
+  haveI hCompactUC :
+      CompactSpace
+        (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
+    bonnetMyers_compact (E := E) gLift _hdim _hK hRicLift
+  -- The fibre of the covering map over `x` is finite (compact + discrete).
+  haveI hFinFibre :
+      Finite
+        ((DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.proj :
+            DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M)
+          ⁻¹' {x}) :=
+    DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.fibre_finite
+      hcov x
+  -- Pick a base lift `e' ∈ proj⁻¹{x}` via path-connectedness of `M`.
+  obtain ⟨γ⟩ := PathConnectedSpace.joined (default : M) x
+  let e' :
+      ((DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.proj :
+          DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M)
+        ⁻¹' {x}) :=
+    ⟨⟨x, Path.Homotopic.Quotient.mk γ⟩,
+      by
+        change
+          (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.proj
+              (X := M)
+              (⟨x, Path.Homotopic.Quotient.mk γ⟩ :
+                DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M))
+            = x
+        rfl⟩
+  -- Fibre ↔ fundamental group bijection (from the universal-cover infrastructure).
+  have hEquiv :
+      ((DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.proj :
+          DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M)
+        ⁻¹' {x})
+        ≃ FundamentalGroup M x :=
+    DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.fibreEquivFundamentalGroup
+      hcov x e'
+  -- Transport finiteness across the bijection.
+  exact Finite.of_equiv _ hEquiv
 
 end BonnetMyers
 end Riemannian
