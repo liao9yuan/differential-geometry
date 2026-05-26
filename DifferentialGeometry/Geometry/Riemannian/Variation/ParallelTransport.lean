@@ -62,7 +62,13 @@ theorem parallel_ode_chart_local
       (∀ t ∈ s, HasDerivAt (chartCurve (I := I) α γ) (uPrime t) t) ∧
         (∀ t ∈ s, HasDerivAt Y
           (- chartChristoffelContraction (I := I) g α (uPrime t) (Y t)
-              (chartCurve (I := I) α γ t)) t) := sorry
+              (chartCurve (I := I) α γ t)) t) := by
+  unfold IsParallelChart IsCovDerivAlongChart
+  refine Iff.and Iff.rfl ?_
+  refine forall_congr' (fun t => ?_)
+  refine imp_congr_right (fun _ => ?_)
+  -- `(fun _ => 0) t - X = -X`
+  simp [zero_sub]
 
 /-! ## Local existence + uniqueness on a compact interval
 
