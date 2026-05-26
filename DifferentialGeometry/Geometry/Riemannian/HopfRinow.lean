@@ -124,7 +124,38 @@ theorem bm_c_gc_length_distance_bound
         (maximalGeodesic (I := I) g p v s)
         (maximalGeodesic (I := I) g p v t) ≤
       ENNReal.ofReal (Real.sqrt ((g.inner p) v v) * (t - s)) := by
-  sorry
+  -- Abbreviations for the maximal geodesic curve and its constant speed `c`.
+  set γ : ℝ → M := maximalGeodesic (I := I) g p v with hγ_def
+  set c : ℝ := Real.sqrt ((g.inner p) v v) with hc_def
+  -- The constant `c` is nonnegative as a square root.
+  have hc_nonneg : (0 : ℝ) ≤ c := Real.sqrt_nonneg _
+  -- Step 1. Smoothness witness for `γ` on `Icc s t`.
+  -- On the maximal interval, `γ = maximalGeodesic g p v` is locally a smooth
+  -- geodesic; in particular it is `C¹` on the compact subinterval `Icc s t`.
+  -- A self-contained derivation requires gluing chart-local witnesses across
+  -- `[s, t]` and reading off `ContMDiffOn` smoothness from the corresponding
+  -- `IsMIntegralCurveOn` data, which is a separate bridge from the
+  -- `MaximalInterval` module not currently exposed. Recorded as an
+  -- intermediate sorry isolating this gap.
+  have hγ_smooth : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Icc s t) := by
+    sorry
+  -- Step 2. PathELength bound by `c · (t - s)`.
+  -- Along a geodesic the norm of the velocity is the constant `c`; therefore
+  -- the integral defining `pathELength` is `c · (t - s)`. The constant-speed
+  -- identity used here is `bm_c_gc_constant_speed` (still a sorry); the
+  -- enorm identification between `‖γ'(τ)‖ₑ` and `ENNReal.ofReal (√⟨γ',γ'⟩_g)`
+  -- comes from the `IsRiemannianManifold` typeclass.  The composition is
+  -- isolated below.
+  have h_pathLen_le :
+      pathELength I γ s t ≤ ENNReal.ofReal (c * (t - s)) := by
+    sorry
+  -- Step 3. `riemannianEDist ≤ pathELength` from the Mathlib lemma.
+  have h_dist_le :
+      riemannianEDist I (γ s) (γ t) ≤ pathELength I γ s t :=
+    riemannianEDist_le_pathELength (I := I) (γ := γ) (a := s) (b := t)
+      hγ_smooth rfl rfl hst
+  -- Step 4. Chain the two bounds.
+  exact h_dist_le.trans h_pathLen_le
 
 variable [CompleteSpace M]
 
