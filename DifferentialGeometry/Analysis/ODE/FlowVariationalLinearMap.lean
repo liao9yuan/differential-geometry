@@ -2134,6 +2134,145 @@ theorem exists_isVariationalFlowProjection_zero_of_C1
 
 end LevelZeroFullWitness
 
+/-! ## The parameterized `C^{k+1}` variational-flow projection witness
+
+Combining the level-0 base case `exists_isVariationalFlowProjection_zero_of_C1`
+and the inductive successor step `exists_isVariationalFlowProjection_succ_C_step`,
+we obtain a variational-flow projection at every level `k : ℕ` from joint
+`C^{k+1}` regularity of `f`.  The induction is over `k`, and at each step the
+inductive hypothesis is applied to the augmented flow `aΦ` of `augVF f` on the
+augmented Banach space `E × (E →L[ℝ] E)`, so we package the statement as a
+universally-quantified auxiliary lemma over the Banach-space parameter `E`. -/
+
+section ParameterizedCkWitness
+
+set_option maxHeartbeats 800000 in
+/-- **Parameterized variational-flow projection witness.**
+
+If `f : ℝ → E → E` is jointly `C^{k+1}` on `Set.univ`, `E` is a finite-dimensional
+Banach space, `Φ` is a local Picard–Lindelöf flow centered at `(x₀, t₀)` with
+`t₀` strictly inside its time domain, and the flow's spatial radius `r` is
+positive, then there exist positive `T` and `ρ` together with a function
+`Y : E × ℝ → (E →L[ℝ] E)` that is a level-`k` variational-flow projection of
+`Φ` on the strictly-interior open neighbourhood
+`(ball x₀ ρ) ×ˢ Ioo (t₀ - T) (t₀ + T)`. -/
+theorem exists_isVariationalFlowProjection_of_C
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+      [CompleteSpace E] [FiniteDimensional ℝ E]
+    {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ}
+    {Φ : E × ℝ → E}
+    (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
+    (ht₀_Ioo : t₀ ∈ Set.Ioo tmin tmax)
+    (hr_pos : (0 : ℝ) < (r : ℝ))
+    (k : ℕ)
+    (hf_C : ContDiffOn ℝ ((k : ℕ∞) + 1) (Function.uncurry f)
+      (Set.univ : Set (ℝ × E))) :
+    ∃ (T : ℝ) (ρ : ℝ≥0) (_hT : 0 < T) (_hρ : 0 < (ρ : ℝ))
+      (Y : E × ℝ → (E →L[ℝ] E)),
+      IsVariationalFlowProjection hΦ T ρ Y (k : ℕ∞) := by
+  classical
+  -- Package the statement as a universally-quantified claim over the Banach-space
+  -- parameter `E`, so that the inductive step can specialize it to
+  -- `E × (E →L[ℝ] E)` for the augmented flow.
+  suffices haux : ∀ (k : ℕ) (E : Type _) [NormedAddCommGroup E] [NormedSpace ℝ E]
+      [CompleteSpace E] [FiniteDimensional ℝ E]
+      {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ}
+      {Φ : E × ℝ → E}
+      (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
+      (_ht₀_Ioo : t₀ ∈ Set.Ioo tmin tmax)
+      (_hr_pos : (0 : ℝ) < (r : ℝ))
+      (_hf_C : ContDiffOn ℝ ((k : ℕ∞) + 1) (Function.uncurry f)
+        (Set.univ : Set (ℝ × E))),
+      ∃ (T : ℝ) (ρ : ℝ≥0) (_hT : 0 < T) (_hρ : 0 < (ρ : ℝ))
+        (Y : E × ℝ → (E →L[ℝ] E)),
+        IsVariationalFlowProjection hΦ T ρ Y (k : ℕ∞) by
+    exact haux k E hΦ ht₀_Ioo hr_pos hf_C
+  clear hΦ ht₀_Ioo hr_pos hf_C
+  intro k
+  induction k with
+  | zero =>
+      intro E _ _ _ _ f t₀ x₀ r tmin tmax Φ hΦ ht₀_Ioo hr_pos hf_C
+      -- `(0 : ℕ∞) + 1 = 1` definitionally, so `hf_C : ContDiffOn ℝ 1 (uncurry f) univ`.
+      have hf_C1 : ContDiffOn ℝ 1 (Function.uncurry f) (Set.univ : Set (ℝ × E)) := by
+        simpa using hf_C
+      have h_witness := exists_isVariationalFlowProjection_zero_of_C1
+        hΦ ht₀_Ioo hr_pos hf_C1
+      -- The witness lives at level `(0 : ℕ∞)`, which is what we need (since `((0 : ℕ) : ℕ∞) = 0`).
+      obtain ⟨T, ρ, hT, hρ, Y, hY⟩ := h_witness
+      refine ⟨T, ρ, hT, hρ, Y, ?_⟩
+      -- `((0 : ℕ) : ℕ∞) = 0` and the predicate matches.
+      have h_zero : ((0 : ℕ) : ℕ∞) = (0 : ℕ∞) := by norm_cast
+      rw [h_zero]
+      exact hY
+  | succ n IH =>
+      intro E _ _ _ _ f t₀ x₀ r tmin tmax Φ hΦ ht₀_Ioo hr_pos hf_C
+      -- `hf_C : ContDiffOn ℝ (((n+1 : ℕ) : ℕ∞) + 1) (uncurry f) univ`.
+      -- Re-cast to the `(n : ℕ∞) + 2` shape required by the successor step.
+      have h_eq_succ_plus_one : (((n + 1 : ℕ) : ℕ∞) + 1 : WithTop ℕ∞) =
+          ((n : ℕ∞) + 2 : WithTop ℕ∞) := by push_cast; ring
+      have hf_Cn_plus_2 : ContDiffOn ℝ ((n : ℕ∞) + 2)
+          (Function.uncurry f) (Set.univ : Set (ℝ × E)) := by
+        have := hf_C
+        rw [h_eq_succ_plus_one] at this
+        exact this
+      -- Derive joint `C^1` of `f` for building `aΦ` via Picard–Lindelöf.
+      have hf_C1 : ContDiffOn ℝ 1 (Function.uncurry f) (Set.univ : Set (ℝ × E)) := by
+        refine hf_Cn_plus_2.of_le ?_
+        have h1 : (1 : WithTop ℕ∞) ≤ 2 := by decide
+        have h2 : (2 : WithTop ℕ∞) ≤ ((n : ℕ∞) : WithTop ℕ∞) + 2 := le_add_self
+        exact le_trans h1 h2
+      -- `uncurry (augVF f)` is `ContDiffOn ℝ ((n : ℕ∞) + 1)` since `uncurry f` is
+      -- `ContDiffOn ℝ ((n : ℕ∞) + 2) = ((n+1 : ℕ∞) + 1)`.  This rearrangement
+      -- mirrors the one inside `exists_isVariationalFlowProjection_succ_C_step`.
+      have hf_Cn_plus_2_as_succ : ContDiffOn ℝ (((n : ℕ∞) + 1) + 1)
+          (Function.uncurry f) (Set.univ : Set (ℝ × E)) := by
+        have h_eq_wt :
+            ((((n : ℕ∞) : WithTop ℕ∞) + 1) + 1 : WithTop ℕ∞) =
+            (((n : ℕ∞) : WithTop ℕ∞) + 2 : WithTop ℕ∞) := by
+          have h2 : ((2 : WithTop ℕ∞) = 1 + 1) := by decide
+          rw [h2, ← add_assoc]
+        rw [h_eq_wt]
+        exact hf_Cn_plus_2
+      have h_augVF_Cn_plus_1 :
+          ContDiffOn ℝ ((n : ℕ∞) + 1) (Function.uncurry (augVF f))
+            (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) :=
+        augVF_uncurry_contDiff (k := ((n : ℕ∞) + 1)) hf_Cn_plus_2_as_succ
+      -- Build the augmented flow `aΦ` from joint `C^1` of `augVF f` (the `((n : ℕ∞) + 1)`-
+      -- regularity downgraded to `1`).
+      have h_augVF_C1 : ContDiffOn ℝ 1 (Function.uncurry (augVF f))
+          (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) := by
+        refine h_augVF_Cn_plus_1.of_le ?_
+        have h1 : (1 : ℕ∞) ≤ (n : ℕ∞) + 1 := le_add_self
+        exact_mod_cast h1
+      obtain ⟨R_aug, ε_aug, hR_aug_pos, hε_aug_pos, aΦ, haΦ⟩ :=
+        exists_isLocalFlow_of_contDiffOn_univ (augVF f) h_augVF_C1 t₀
+          (x₀, ContinuousLinearMap.id ℝ E)
+      have hR_aug_R : (0 : ℝ) < (R_aug : ℝ) := by exact_mod_cast hR_aug_pos
+      have ht₀_a_Ioo : t₀ ∈ Set.Ioo (t₀ - ε_aug) (t₀ + ε_aug) :=
+        ⟨by linarith, by linarith⟩
+      -- Apply IH on `(augVF f, aΦ)` at level `n`, over the Banach space `E × (E →L[ℝ] E)`.
+      have hIH := IH (E × (E →L[ℝ] E)) (f := augVF f) (t₀ := t₀)
+        (x₀ := (x₀, ContinuousLinearMap.id ℝ E)) (r := R_aug)
+        (tmin := t₀ - ε_aug) (tmax := t₀ + ε_aug) (Φ := aΦ)
+        haΦ ht₀_a_Ioo hR_aug_R h_augVF_Cn_plus_1
+      obtain ⟨T_ih, ρ_ih, hT_ih_pos, hρ_ih_pos, Y_ih, hY_ih⟩ := hIH
+      -- Plug into the successor step.
+      have h_succ := exists_isVariationalFlowProjection_succ_C_step
+        (f := f) (t₀ := t₀) (x₀ := x₀) (r := r) (tmin := tmin) (tmax := tmax)
+        (Φ := Φ) hΦ ht₀_Ioo hr_pos n hf_Cn_plus_2
+        (R_aug := R_aug) (tmin_a := t₀ - ε_aug) (tmax_a := t₀ + ε_aug)
+        (aΦ := aΦ) haΦ ht₀_a_Ioo hR_aug_R
+        (T_ih := T_ih) (ρ_ih := ρ_ih) (Y_ih := Y_ih)
+        hT_ih_pos hρ_ih_pos hY_ih
+      obtain ⟨T, ρ, hT, hρ, Y, hY⟩ := h_succ
+      refine ⟨T, ρ, hT, hρ, Y, ?_⟩
+      -- Adjust the level: `((n+1 : ℕ) : ℕ∞) = (n : ℕ∞) + 1`.
+      have h_lvl : ((n + 1 : ℕ) : ℕ∞) = (n : ℕ∞) + 1 := by push_cast; ring
+      rw [h_lvl]
+      exact hY
+
+end ParameterizedCkWitness
+
 end Flow
 end ODE
 end Analysis
