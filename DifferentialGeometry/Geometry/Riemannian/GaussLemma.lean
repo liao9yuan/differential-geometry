@@ -311,7 +311,54 @@ theorem local_radial_identification_of_minimizer
     ∃ δ : ℝ, 0 < δ ∧ Icc (t₀ - δ) (t₀ + δ) ⊆ Icc a b ∧
       ∃ v : TangentSpace I (γ t₀), ∀ s : ℝ, s ∈ Icc (-δ) δ →
         γ (t₀ + s) = expMap (I := I) g (γ t₀) (s • v) := by
-  sorry
+  -- Extract interior-room data from `ht₀ : t₀ ∈ Ioo a b`.
+  obtain ⟨ha_lt, hb_lt⟩ := ht₀
+  have hδ_left_pos : 0 < t₀ - a := sub_pos.mpr ha_lt
+  have hδ_right_pos : 0 < b - t₀ := sub_pos.mpr hb_lt
+  -- Choose `δ := min (t₀ - a) (b - t₀) / 2`. Halving gives room on both
+  -- sides while keeping `δ > 0`.
+  set δ := min (t₀ - a) (b - t₀) / 2 with hδ_def
+  have hmin_pos : 0 < min (t₀ - a) (b - t₀) := lt_min hδ_left_pos hδ_right_pos
+  have hδ_pos : 0 < δ := by
+    rw [hδ_def]; exact half_pos hmin_pos
+  -- The interval bound `Icc (t₀ - δ) (t₀ + δ) ⊆ Icc a b`.
+  have hδ_le_left : δ ≤ t₀ - a := by
+    rw [hδ_def]
+    have h₁ : min (t₀ - a) (b - t₀) ≤ t₀ - a := min_le_left _ _
+    have h₂ : min (t₀ - a) (b - t₀) / 2 ≤ min (t₀ - a) (b - t₀) := by
+      exact half_le_self hmin_pos.le
+    exact h₂.trans h₁
+  have hδ_le_right : δ ≤ b - t₀ := by
+    rw [hδ_def]
+    have h₁ : min (t₀ - a) (b - t₀) ≤ b - t₀ := min_le_right _ _
+    have h₂ : min (t₀ - a) (b - t₀) / 2 ≤ min (t₀ - a) (b - t₀) := by
+      exact half_le_self hmin_pos.le
+    exact h₂.trans h₁
+  have h_lower : a ≤ t₀ - δ := by linarith
+  have h_upper : t₀ + δ ≤ b := by linarith
+  have h_subset : Icc (t₀ - δ) (t₀ + δ) ⊆ Icc a b :=
+    Icc_subset_Icc h_lower h_upper
+  -- The witness `v : TangentSpace I (γ t₀)` and the radial identification
+  -- `γ(t₀ + s) = expMap g (γ t₀) (s • v)` for `s ∈ [-δ, δ]` is the
+  -- equality case of the Gauss-lemma minimiser identification. The
+  -- proof composes `subArc_of_minimizer_is_minimizer` (with `hfin`
+  -- derived from `hmin` plus `riemannianEDist ≤ pathELength`) followed
+  -- by the equality case of `normalBall_radial_unique_minimizer`
+  -- (currently a length lower bound; the equality case sits as a
+  -- pending substep upstream). We isolate the existence of the witness
+  -- as an intermediate claim consumed below.
+  have hwitness :
+      ∃ v : TangentSpace I (γ t₀), ∀ s : ℝ, s ∈ Icc (-δ) δ →
+        γ (t₀ + s) = expMap (I := I) g (γ t₀) (s • v) := by
+    -- The sub-arc on `[t₀ - δ, t₀ + δ]` is itself a minimiser (via
+    -- `subArc_of_minimizer_is_minimizer`); inside the normal chart at
+    -- `γ t₀` the equality case of `normalBall_radial_unique_minimizer`
+    -- forces the sub-arc to coincide with a radial geodesic. The
+    -- explicit construction of `v` from this equality case is the
+    -- remaining substep, pending the upstream equality-case fill.
+    sorry
+  -- Package the choice of `δ`, the room subset, and the witness.
+  exact ⟨δ, hδ_pos, h_subset, hwitness⟩
 
 end LocalRadialIdentification
 
