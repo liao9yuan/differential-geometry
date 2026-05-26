@@ -143,7 +143,37 @@ theorem sheet_homeomorph [Nonempty M] (y : M) :
       (y' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
       (U' : Set (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M))
       (_hU' : IsOpen U') (_hy'U : y' ∈ U') (_hproj : proj (X := M) y' = y),
-      ∃ _h : (U' ≃ₜ U), True := sorry
+      ∃ _h : (U' ≃ₜ U), True := by
+  -- `M` is path-connected (connected + locally path-connected), so we can pick a
+  -- path from `default` to `y`. Its homotopy class gives a lift `y'` of `y` in
+  -- the universal cover.
+  haveI hpc : PathConnectedSpace M :=
+    (pathConnectedSpace_iff_connectedSpace).mpr inferInstance
+  obtain ⟨γ⟩ := PathConnectedSpace.joined (default : M) y
+  -- Build the lift `y' = ⟨y, ⟦γ⟧⟩`.
+  set y' :
+      DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M :=
+    ⟨y, Path.Homotopic.Quotient.mk γ⟩ with hy'_def
+  -- `proj` is a local homeomorphism (from the covering-map structure).
+  have hLH :
+      IsLocalHomeomorph
+        (proj :
+          DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M) :=
+    UniversalCover.isCoveringMap.isLocalHomeomorph
+  -- Extract an open partial homeomorphism `e` around `y'`.
+  obtain ⟨e, hy'e, hfe⟩ := hLH y'
+  -- `proj y' = y` by definition of `proj = Sigma.fst`.
+  have hproj_y' : proj (X := M) y' = y := rfl
+  -- `(↑e) y' = proj y' = y`.
+  have hy_eq : (e : _ → M) y' = y := by
+    have h1 := congrFun hfe y'
+    -- `h1 : proj y' = e y'`
+    exact h1.symm.trans hproj_y'
+  -- `y ∈ e.target`: from `e y' ∈ e.target` and `e y' = y`.
+  have hyU : y ∈ e.target := hy_eq ▸ e.map_source hy'e
+  -- Package up the existential.
+  refine ⟨e.target, e.open_target, hyU, y', e.source, e.open_source, hy'e,
+    hproj_y', e.toHomeomorphSourceTarget, trivial⟩
 
 /-- **Lifting the projected limit.**
 Combining the tail-in-single-sheet and sheet-homeomorphism statements,
@@ -176,7 +206,16 @@ theorem fibre_finite
     {X E : Type*} [TopologicalSpace X] [T1Space X]
     [TopologicalSpace E] [CompactSpace E]
     {p : E → X} (hp : IsCoveringMap p) (x : X) :
-    Finite (p ⁻¹' {x} : Set E) := sorry
+    Finite (p ⁻¹' {x} : Set E) := by
+  -- The fibre is discrete (covering map) and compact (closed in compact `E`).
+  -- A compact discrete space is finite.
+  haveI hdisc : DiscreteTopology (p ⁻¹' {x} : Set E) :=
+    (hp x).discreteTopology_fiber
+  have hclosed : IsClosed (p ⁻¹' {x} : Set E) :=
+    isClosed_singleton.preimage hp.continuous
+  haveI hcomp : CompactSpace (p ⁻¹' {x} : Set E) :=
+    isCompact_iff_compactSpace.mp hclosed.isCompact
+  exact finite_of_compact_of_discrete
 
 /-! ## Fibre / π₁ bijection -/
 
