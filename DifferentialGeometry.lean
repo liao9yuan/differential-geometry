@@ -1082,6 +1082,7 @@ import DifferentialGeometry.PDE.RicciFlow.LionsMagenes
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.ChartFrameNorm
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.GramTwist
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.ChristoffelCkBound
+import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.TensorChartTransitionCkBound
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.NablaTensorFormula
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.ChartLocalPicard
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.PointwiseLocal
