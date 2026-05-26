@@ -81,11 +81,14 @@ For any `x' : M'` and lifted tangent vectors `v', w', u'`, the Riemann
 curvature operator on `M'` (built from the lifted Levi-Civita) commutes with
 `mfderiv proj`: applying `dproj_x'` after `riemannOp (LC')` agrees with
 `riemannOp (LC)` after `dproj` on each slot.
-Skeleton uses `True` placeholder since the full statement involves
-`proj_isLocalIsometry` applied to tangent-space-dependent terms. -/
-theorem riemannOp_lifted_natural (_g : SmoothRiemannianMetric I M)
-    (_x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
-    True := sorry
+Stated pointwise on the model fibre `E` (which is definitionally the
+tangent space at any point), since the tangent spaces upstairs and
+downstairs coincide via `TangentSpace I _ = E`. -/
+theorem riemannOp_lifted_natural (g : SmoothRiemannianMetric I M)
+    (x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
+    (v' w' u' : E) :
+    riemannOp (LeviCivita (I := I) (liftedMetric (I := I) g)) x' v' w' u' =
+      riemannOp (LeviCivita (I := I) g) (proj x') v' w' u' := sorry
 
 /-- **Naturality of `ricciTensor` under `proj`.**
 For any `x' : M'` and lifted tangent vectors `v', w'`,
@@ -94,10 +97,12 @@ Proof: write `ricciTensor` as the trace of `Z ↦ riemannOp ... Z _ _`; by
 `riemannOp_lifted_natural`, the endomorphism on `M'` is conjugate (via the
 linear isometric equivalence `dproj_x'`) to the corresponding endomorphism on
 `M`; conclude by trace invariance under conjugation.
-Skeleton uses `True` placeholder. -/
-theorem ricciTensor_lifted_natural (_g : SmoothRiemannianMetric I M)
-    (_x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
-    True := sorry
+Stated pointwise on the model fibre `E`. -/
+theorem ricciTensor_lifted_natural (g : SmoothRiemannianMetric I M)
+    (x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
+    (v' w' : E) :
+    ricciTensor (I := I) (liftedMetric (I := I) g) x' v' w' =
+      ricciTensor (I := I) g (proj x') v' w' := sorry
 
 /-- **Ricci lower bound transfers to the universal cover.**
 If `Ric_g ≥ κ · g` on `M`, then `Ric_{liftedMetric g} ≥ κ · (liftedMetric g)`
@@ -130,8 +135,16 @@ disjoint union of sheets, and use Cauchy-ness with discrete fibres to show
 the sequence eventually stays in a single sheet (the discrete fibre
 coordinate is a Cauchy sequence in a discrete space, hence eventually
 constant).
-Skeleton uses `True` placeholder. -/
-theorem tail_in_single_sheet [Nonempty M] [CompleteSpace M] : True := sorry
+-/
+theorem tail_in_single_sheet [Nonempty M] [CompleteSpace M]
+    {x' : ℕ →
+      DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M}
+    (_hCauchy : CauchySeq x') {y : M}
+    (_hlim : Filter.Tendsto (fun n => proj (x' n)) Filter.atTop (𝓝 y)) :
+    ∃ (y' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
+      (U' : Set (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)),
+      proj (X := M) y' = y ∧ IsOpen U' ∧ y' ∈ U' ∧
+        ∀ᶠ n in Filter.atTop, x' n ∈ U' := sorry
 
 /-- **Each sheet over an evenly covered open set is a homeomorphism with the
 base.** Given a point `y ∈ M`, there exists an open neighbourhood `U ∋ y`
@@ -181,8 +194,15 @@ Combining the tail-in-single-sheet and sheet-homeomorphism statements,
 the unique preimage `y'` of `y` inside the eventually-stable sheet
 satisfies `x' n → y'` in `M'`. Continuity of the sheet inverse on `U`
 delivers convergence.
-Skeleton uses `True` placeholder. -/
-theorem lift_the_limit [Nonempty M] [CompleteSpace M] : True := sorry
+-/
+theorem lift_the_limit [Nonempty M] [CompleteSpace M]
+    {x' : ℕ →
+      DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M}
+    (_hCauchy : CauchySeq x') {y : M}
+    (_hlim : Filter.Tendsto (fun n => proj (x' n)) Filter.atTop (𝓝 y)) :
+    ∃ y' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M,
+      proj (X := M) y' = y ∧
+        Filter.Tendsto x' Filter.atTop (𝓝 y') := sorry
 
 /-- **The universal cover is complete.**
 Every Cauchy sequence in `M'` converges, by combining
@@ -190,10 +210,11 @@ Every Cauchy sequence in `M'` converges, by combining
 `CompleteSpace M` (a limit `y` exists downstairs),
 and `lift_the_limit` (the limit lifts to `M'`). Packaged by
 `Mathlib.Topology.UniformSpace.Cauchy.complete_of_cauchySeq_tendsto`.
-Skeleton uses `True` placeholder since a `CompleteSpace` instance on
-the universal cover requires a pseudo-uniform-space instance that is
-set up elsewhere. -/
-theorem completeSpace_universalCover [Nonempty M] [CompleteSpace M] : True := sorry
+-/
+theorem completeSpace_universalCover [Nonempty M] [CompleteSpace M]
+    (_g : SmoothRiemannianMetric I M) :
+    CompleteSpace
+      (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) := sorry
 
 /-! ## Fibre finiteness -/
 
@@ -231,7 +252,8 @@ theorem action_eval_surjective
     {X E : Type*} [TopologicalSpace X] [TopologicalSpace E]
     [PathConnectedSpace E]
     {p : E → X} (hp : IsCoveringMap p) (x : X) (e' : p ⁻¹' {x}) :
-    True := sorry
+    Function.Surjective
+      (fun γ : Path.Homotopic.Quotient x x => hp.monodromy γ e') := sorry
 
 /-- **Injectivity of the monodromy evaluation.**
 For any covering map `p : E → X` with `SimplyConnectedSpace E`, the
@@ -245,7 +267,8 @@ theorem action_eval_injective
     {X E : Type*} [TopologicalSpace X] [TopologicalSpace E]
     [SimplyConnectedSpace E]
     {p : E → X} (hp : IsCoveringMap p) (x : X) (e' : p ⁻¹' {x}) :
-    True := sorry
+    Function.Injective
+      (fun γ : Path.Homotopic.Quotient x x => hp.monodromy γ e') := sorry
 
 /-- **Fibre / loop-quotient bijection.**
 Packaging `action_eval_surjective` + `action_eval_injective` via
