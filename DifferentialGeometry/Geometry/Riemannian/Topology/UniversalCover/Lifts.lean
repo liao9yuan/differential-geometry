@@ -114,11 +114,12 @@ theorem ricciBoundedBelow_pullback_universalCover
 /-- **`proj` is `1`-Lipschitz for the lifted extended metric.**
 For any C¹ curve `γ` in `M'`, `pathELength (proj ∘ γ) = pathELength γ`
 because `proj` is a local isometry; taking the infimum yields
-`edist (proj x') (proj y') ≤ edist x' y'`.
-Skeleton uses `True` placeholder since `LipschitzWith` requires a
-pseudo-emetric-space instance on the universal cover that is set up
-elsewhere. -/
-theorem proj_lipschitz [Nonempty M] : True := sorry
+`edist (proj x') (proj y') ≤ edist x' y'`. -/
+theorem proj_lipschitz [Nonempty M] (_g : SmoothRiemannianMetric I M) :
+    LipschitzWith 1
+      (proj :
+        DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M) :=
+  sorry
 
 /-- **Tail of a Cauchy sequence lies in a single sheet.**
 Given a Cauchy sequence `x' : ℕ → M'` whose projection converges to `y ∈ M`,
