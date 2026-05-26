@@ -148,7 +148,10 @@ theorem bonnetMyers_diameter
     {K : ℝ} (_hK : 0 < K)
     (_hRic : RicciBoundedBelow (I := I) g (((Module.finrank ℝ E : ℝ) - 1) * K)) :
     EMetric.diam (Set.univ : Set M) ≤
-      ENNReal.ofReal (Real.pi / Real.sqrt K) := sorry
+      ENNReal.ofReal (Real.pi / Real.sqrt K) := by
+  refine Metric.ediam_le ?_
+  intro x _ y _
+  exact pairwise_edist_bound_from_geodesic (E := E) g _hdim _hK _hRic x y
 
 /-! ## Headline 2: compactness -/
 
