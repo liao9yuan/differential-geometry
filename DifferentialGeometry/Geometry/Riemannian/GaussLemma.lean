@@ -281,7 +281,31 @@ theorem arclength_reparam_is_smooth_geodesic
       (∀ t ∈ Ioo (0 : ℝ) L,
         DifferentialGeometry.Geometry.Riemannian.Geodesic.IsGeodesicAt
           (I := I) g η t) := by
-  sorry
+  -- Split on whether the parameter interval is degenerate.
+  rcases eq_or_lt_of_le hab with hab_eq | hab_lt
+  · -- Degenerate case `a = b`: the curve has a single point `γ a`. Take
+    -- `L = 0` and the constant curve `η = fun _ ↦ γ a`. The two universal
+    -- quantifiers range over `Ioo 0 0 = ∅`, hence are vacuous, and the
+    -- endpoint equalities reduce to `γ a = γ a` and `γ a = γ b` (the latter
+    -- by `hab_eq`).
+    refine ⟨0, fun _ : ℝ => γ a, le_refl 0, rfl, ?_, ?_, ?_⟩
+    · -- `η L = η 0 = γ a = γ b` since `a = b`.
+      simp [hab_eq]
+    · intro t ht
+      -- `Ioo 0 0 = ∅`, so `t ∈ Ioo 0 0` is a contradiction.
+      simp at ht
+    · intro t ht
+      simp at ht
+  · -- Nondegenerate case `a < b`: this is the substantive arclength
+    -- reparametrisation, requiring `local_radial_identification_of_minimizer`
+    -- (still a `sorry` in this file) plus a global gluing argument via
+    -- geodesic uniqueness. The construction is: pull the arclength parameter
+    -- `s : [a, b] → [0, L]` through the local radial-geodesic identification
+    -- on each `δ`-neighbourhood, then glue using the chart-flow uniqueness
+    -- in `Geodesic/Uniqueness.lean`. We leave this branch as a `sorry` until
+    -- the local-radial identification lemma is filled and the global
+    -- gluing infrastructure is built.
+    sorry
 
 end ArclengthReparam
 
