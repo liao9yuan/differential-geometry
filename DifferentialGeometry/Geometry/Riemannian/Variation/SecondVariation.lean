@@ -57,10 +57,15 @@ open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
 /-- Real-valued arc length of a curve `η : ℝ → M` on `[a, b]` against
 the smooth Riemannian metric `g`. The integrand is the speed
-`‖η'(t)‖_g = √ g.inner (η t) (η'(t)) (η'(t))`. -/
-def arcLength (g : SmoothRiemannianMetric I M) (η : ℝ → M) (a b : ℝ) : ℝ := by
-  classical
-  exact (sorry : ℝ)
+`‖η'(t)‖_g = √ g.inner (η t) (η'(t)) (η'(t))`, computed via the
+manifold derivative `mfderiv (𝓘(ℝ, ℝ)) I η t (1 : ℝ)`. The integral is
+the interval integral on `[a, b]`. -/
+def arcLength (g : SmoothRiemannianMetric I M) (η : ℝ → M) (a b : ℝ) : ℝ :=
+  ∫ t in a..b,
+    Real.sqrt
+      (g.inner (η t)
+        (mfderiv (𝓘(ℝ, ℝ)) I η t (1 : ℝ))
+        (mfderiv (𝓘(ℝ, ℝ)) I η t (1 : ℝ)))
 
 /-! ## Speed positivity on a regular variation -/
 
