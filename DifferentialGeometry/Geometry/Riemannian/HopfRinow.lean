@@ -289,6 +289,24 @@ theorem minimiser_is_smooth_geodesic
           IsGeodesicAt (I := I) g η t) := by
   sorry
 
+/-- **Auxiliary: `IsGeodesicOn` is preserved under affine
+reparametrisation.** If `γ` is a geodesic on `[a, b]` and
+`c, d : ℝ`, then `s ↦ γ (c · s + d)` is a geodesic on the
+preimage interval. The lifted curve is `s ↦ ⟨γ(c s + d), c • γ'(c s + d)⟩`,
+which is an integral curve of the same chart-fixed geodesic vector field
+on `TM` by the second-order chain rule combined with the quadratic scaling
+`Γ(c v, c v) = c² · Γ(v, v)` of the Christoffel contraction.
+
+The full chain-rule computation on `TM` is deferred: this is the
+substantial step in the unit-speed rescale theorem, and the missing
+TM-derivative infrastructure makes the proof open in this file. -/
+private theorem isGeodesicOn_affineReparam
+    (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {a b c d : ℝ}
+    (_hγ_geod : IsGeodesicOn (I := I) g γ (Set.Icc a b)) :
+    IsGeodesicOn (I := I) g (fun s => γ (c * s + d))
+      {s : ℝ | c * s + d ∈ Set.Icc a b} := by
+  sorry
+
 /-- **Unit-speed reparametrisation of a geodesic of positive length.**
 A geodesic `\gamma : [a, b] \to M` whose `pathELength` equals
 `ENNReal.ofReal L` with `L > 0` becomes unit-speed under the affine
@@ -306,7 +324,70 @@ theorem unit_speed_rescale
         ∀ t ∈ Set.Icc (0 : ℝ) L,
           (g.inner (η t)) (mfderiv 𝓘(ℝ, ℝ) I η t 1)
               (mfderiv 𝓘(ℝ, ℝ) I η t 1) = 1 := by
-  sorry
+  -- The affine speed factor.
+  set c : ℝ := (b - a) / L with hc_def
+  -- The reparametrised curve.
+  refine ⟨fun s => γ (a + s * c), ?_, ?_, ?_, ?_⟩
+  · -- `η 0 = γ a`: substitute `s = 0` and simplify `0 * c = 0`.
+    change γ (a + 0 * c) = γ a
+    simp
+  · -- `η L = γ b`: substitute `s = L`. We need `a + L * c = b`, i.e.
+    -- `L * ((b - a) / L) = b - a`. Uses `L ≠ 0`.
+    change γ (a + L * c) = γ b
+    have hL_ne : L ≠ 0 := ne_of_gt hL
+    have hLc : L * c = b - a := by
+      simp [hc_def, mul_div_assoc', mul_div_cancel_left₀ _ hL_ne]
+    have hsum : a + L * c = b := by rw [hLc]; ring
+    rw [hsum]
+  · -- `IsGeodesicOn` on `[0, L]` of `η`.
+    -- We use the affine-reparametrisation lemma above with `c := c` and
+    -- `d := a`, then show `Set.Icc (0 : ℝ) L ⊆ {s | c * s + a ∈ Set.Icc a b}`.
+    -- The functions `fun s => γ (a + s * c)` and `fun s => γ (c * s + a)`
+    -- agree by commutativity of multiplication and addition.
+    have hreparam :
+        IsGeodesicOn (I := I) g (fun s => γ (c * s + a))
+          {s : ℝ | c * s + a ∈ Set.Icc a b} :=
+      isGeodesicOn_affineReparam (I := I) g (a := a) (b := b)
+        (c := c) (d := a) hγ_geod
+    -- Rewrite `c * s + a` as `a + s * c`.
+    have hrw : (fun s => γ (c * s + a)) = (fun s => γ (a + s * c)) := by
+      funext s
+      have : c * s + a = a + s * c := by ring
+      rw [this]
+    rw [hrw] at hreparam
+    -- Now restrict to `Set.Icc 0 L`.
+    apply hreparam.mono
+    intro s hs
+    -- Goal: `a + s * c ∈ Set.Icc a b`, given `s ∈ [0, L]`.
+    rcases hs with ⟨hs0, hsL⟩
+    -- Show `c ≥ 0` (since `b ≥ a` and `L > 0`).
+    have hba : 0 ≤ b - a := sub_nonneg.mpr hab
+    have hL_ne : L ≠ 0 := ne_of_gt hL
+    have hc_nonneg : 0 ≤ c := by
+      rw [hc_def]; exact div_nonneg hba hL.le
+    -- `s * c ≥ 0`.
+    have hsc_nonneg : 0 ≤ s * c := mul_nonneg hs0 hc_nonneg
+    -- `s * c ≤ L * c = b - a`.
+    have hLc : L * c = b - a := by
+      simp [hc_def, mul_div_assoc', mul_div_cancel_left₀ _ hL_ne]
+    have hsc_le : s * c ≤ b - a := by
+      calc s * c ≤ L * c := mul_le_mul_of_nonneg_right hsL hc_nonneg
+        _ = b - a := hLc
+    refine ⟨?_, ?_⟩
+    · -- `a ≤ a + s * c`.
+      linarith
+    · -- `a + s * c ≤ b`.
+      linarith
+  · -- Unit-speed: the inner product of the velocity with itself equals 1
+    -- for every `t ∈ [0, L]`.
+    -- This requires the chain rule for `mfderiv` (η = γ ∘ (a + · * c)) and
+    -- the constant-speed property of geodesics (`bm_c_gc_constant_speed`),
+    -- combined with the length equation `hγ_len`. Both pieces are open:
+    -- `bm_c_gc_constant_speed` is still a `sorry` and the mfderiv chain
+    -- rule on manifolds requires additional bridge lemmas not present
+    -- in this file. Recorded as `sorry`.
+    intro t _ht
+    sorry
 
 /-- **Hopf-Rinow existence (unit-speed minimising geodesic).** Any two
 points `p q : M` on a complete connected sigma-compact Riemannian
