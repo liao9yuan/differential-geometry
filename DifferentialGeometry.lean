@@ -206,6 +206,7 @@ import DifferentialGeometry.Integral.Measure.Properties
 import DifferentialGeometry.Integral.Measure.Family
 import DifferentialGeometry.Integral.Measure.PouDensityChartBound
 import DifferentialGeometry.Integral.Measure.PouThickening
+import DifferentialGeometry.Integral.Measure.PouDominatedCutoff
 import DifferentialGeometry.Integral.Measure.TensorChartPulled
 import DifferentialGeometry.Integral.Measure.ChartTargetManifoldL2Bridge
 import DifferentialGeometry.Integral.SyntheticBridge.SmoothFamily
