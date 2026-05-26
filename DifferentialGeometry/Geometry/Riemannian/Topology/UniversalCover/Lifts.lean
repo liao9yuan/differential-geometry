@@ -74,7 +74,7 @@ self-equality which records existence of the lifted Levi-Civita
 connection. -/
 theorem leviCivita_lifted_eq_pullback (g : SmoothRiemannianMetric I M) :
     LeviCivita (I := I) (liftedMetric (I := I) g) =
-      LeviCivita (I := I) (liftedMetric (I := I) g) := sorry
+      LeviCivita (I := I) (liftedMetric (I := I) g) := rfl
 
 /-- **Naturality of `riemannOp` under `proj`.**
 For any `x' : M'` and lifted tangent vectors `v', w', u'`, the Riemann
