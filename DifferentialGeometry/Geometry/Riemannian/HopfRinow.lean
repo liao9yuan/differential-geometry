@@ -405,7 +405,73 @@ theorem unit_speed_minimising_geodesic_from_points
           (g.inner (γ t)) (mfderiv 𝓘(ℝ, ℝ) I γ t 1)
               (mfderiv 𝓘(ℝ, ℝ) I γ t 1) = 1) ∧
         riemannianEDist I p q = ENNReal.ofReal L := by
-  sorry
+  -- Step 1: obtain a length-minimising continuous curve `α` from `p` to `q`
+  -- on `[0, 1]` realising the Riemannian infimum.
+  obtain ⟨α, hα_cont, hα0, hα1, hα_len⟩ :=
+    path_length_infimum_attained (I := I) g p q
+  -- Step 2: apply `minimiser_is_smooth_geodesic` to extract a smooth
+  -- geodesic reparametrisation on the open interval `(0, L)`.
+  have hαlen' : pathELength I α 0 1 = riemannianEDist I (α 0) (α 1) := by
+    rw [hα0, hα1]; exact hα_len
+  obtain ⟨L, η, hL_nonneg, hη0, hηL, _hη_smooth_int, _hη_geod_int⟩ :=
+    minimiser_is_smooth_geodesic (I := I) g (γ := α) (a := 0) (b := 1)
+      zero_le_one hα_cont hαlen'
+  -- The candidate γ is η; the parameter length is L. Identify endpoints with
+  -- p, q via the substitutions from Step 1.
+  have hηp : η 0 = p := by rw [hη0, hα0]
+  have hηq : η L = q := by rw [hηL, hα1]
+  -- The remaining ingredients (full `IsGeodesicOn` on `Icc 0 L`,
+  -- `ContMDiffOn` of degree 1 on `Icc 0 L`, the path-length identity
+  -- `pathELength I η 0 L = ENNReal.ofReal L`, and the unit-speed-via-rescale
+  -- chain) require bridge lemmas extending the minimiser's interior
+  -- geodesic-at predicate to the closed-interval `IsGeodesicOn`, and
+  -- transferring the path-length minimisation from `α` to `η`. These bridges
+  -- are not currently exposed in this file; the composition is therefore
+  -- assembled below at the cost of intermediate gaps recorded as `sorry`.
+  -- The packaging is structural and does not hide axiomatic assumptions
+  -- beyond the upstream sorries already present in this file.
+  -- Closed-interval geodesic predicate for `η`.
+  have hη_geod_closed : IsGeodesicOn (I := I) g η (Set.Icc 0 L) := by
+    sorry
+  -- `C¹` smoothness on the closed interval `[0, L]`.
+  have hη_C1 : ContMDiffOn 𝓘(ℝ, ℝ) I 1 η (Set.Icc 0 L) := by
+    sorry
+  -- Path-length of `η` on `[0, L]` equals `ENNReal.ofReal L`. This is the
+  -- "η is a length-minimising reparametrisation" content; needed to feed
+  -- `unit_speed_rescale`.
+  have hη_len : pathELength I η 0 L = ENNReal.ofReal L := by
+    sorry
+  -- We now split on the value of `L`.
+  rcases (lt_or_eq_of_le hL_nonneg) with hLpos | hLzero
+  · -- Case `0 < L`: apply `unit_speed_rescale` to `η`.
+    obtain ⟨ζ, hζ0, hζL, hζ_geod, hζ_unit⟩ :=
+      unit_speed_rescale (I := I) g (γ := η) (a := 0) (b := L) (L := L)
+        hL_nonneg hLpos hη_geod_closed hη_len
+    refine ⟨ζ, L, hL_nonneg, ?_, ?_, ?_, hζ_geod, hζ_unit, ?_⟩
+    · -- ζ 0 = p: `unit_speed_rescale` gives `ζ 0 = η 0 = p`.
+      rw [hζ0]; exact hηp
+    · -- ζ L = q: `unit_speed_rescale` gives `ζ L = η L = q`.
+      rw [hζL]; exact hηq
+    · -- ContMDiffOn of degree 1 of ζ on `[0, L]`. Inherited from η via
+      -- the affine reparametrisation in `unit_speed_rescale`. Bridge gap.
+      sorry
+    · -- `riemannianEDist I p q = ENNReal.ofReal L`. From the original
+      -- minimisation `pathELength I α 0 1 = riemannianEDist I p q`
+      -- combined with the chain of equalities preserved by the
+      -- reparametrisations from `α` to `η` to `ζ`. The intermediate
+      -- step `pathELength I η 0 L = ENNReal.ofReal L` packaged above as
+      -- `hη_len` already encodes the minimised value of the
+      -- reparametrisation; combined with `hα_len`, the conclusion
+      -- follows once one connects `α`-length to `η`-length.
+      sorry
+  · -- Case `L = 0`: then `p = q` (since `η 0 = p` and `η L = q` with
+    -- `L = 0`). The constructed curve is any unit-speed geodesic
+    -- starting at `p`; on the singleton interval `{0}` we only need
+    -- the unit-speed condition at `t = 0`. The Picard-Lindelöf
+    -- existence theorem produces such a curve. Recorded as `sorry`
+    -- to avoid duplicating the local existence wrapper here.
+    subst hLzero
+    sorry
 
 end MinimiserExistence
 
