@@ -95,7 +95,28 @@ theorem IsGeodesicOn.affineReparam
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {a b : ℝ} (c d : ℝ)
     (h : IsGeodesicOn (I := I) g γ (Set.Icc a b)) :
     IsGeodesicOn (I := I) g (fun s => γ (c * s + d))
-      {s : ℝ | c * s + d ∈ Set.Icc a b} := sorry
+      {s : ℝ | c * s + d ∈ Set.Icc a b} := by
+  -- Unpack the chart basepoint and velocity lift witnessing the original
+  -- geodesic predicate on `Icc a b`.
+  obtain ⟨α, f, hproj, hf⟩ := h
+  -- Candidate reparametrised lift. The natural lift for the affine
+  -- reparametrisation `s ↦ γ(c · s + d)` is the time-shifted, time-rescaled
+  -- lift `s ↦ f(c · s + d)`; the fibre rescaling required to make this an
+  -- integral curve of the *same* `geodesicVectorFieldChart g α` is supplied
+  -- by `scaledTangentLift_transport`.
+  refine ⟨α, fun s => f (c * s + d), ?_, ?_⟩
+  · -- Projection identity: by definition of the candidate lift.
+    intro s
+    have hps := hproj (c * s + d)
+    simpa using hps
+  · -- Integral-curve identity. Combining `IsMIntegralCurveOn.comp_mul`
+    -- with `IsMIntegralCurveOn.comp_add` for the affine reparametrisation
+    -- shifts the parameter and rescales the vector field by `c`; absorbing
+    -- the `c` factor back into the field requires the fibre-scaling
+    -- transport (`scaledTangentLift_transport`), whose body is still a
+    -- placeholder. The integral-curve identity below is therefore retained
+    -- as a placeholder pending that transport result.
+    sorry
 
 end Geodesic
 end Riemannian
