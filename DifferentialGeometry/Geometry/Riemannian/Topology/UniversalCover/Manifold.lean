@@ -272,34 +272,130 @@ instance instT2Space :
     rintro z ⟨hzU, hzV⟩
     exact hUVdisj ⟨hzU, hzV⟩
 
+/-- **Countability of the polygonal-loop representatives.**
+
+Auxiliary intermediate step for `pi1_countable_from_secondCountable`.
+On a second-countable, connected, locally path-connected, semi-locally
+simply connected space, the homotopy classes of loops at `x` are in
+surjective image of a countable indexing set. Concretely, one fixes a
+countable basis of "small" path-connected opens whose ambient loops are
+null-homotopic, and represents every loop by a finite sequence of basis
+indices plus connecting anchor points (one per consecutive intersection,
+chosen from a fixed countable dense subset). The detailed combinatorial
+construction (Hatcher §1.3 / Spanier §2.4) is left as a standalone
+sublemma to be filled. -/
+theorem fundamentalGroup_isCountablyGenerated_aux
+    (X : Type*) [TopologicalSpace X]
+    [SecondCountableTopology X]
+    [ConnectedSpace X] [LocPathConnectedSpace X]
+    [DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnectedSpace X]
+    (x : X) :
+    ∃ (S : Type) (_ : Countable S) (f : S → FundamentalGroup X x),
+      Function.Surjective f :=
+  sorry
+
 /-- **Countability of the fundamental group for second-countable
 connected locally-simply-connected spaces.**
 
 A polygonal-path approximation through a countable base topology: every
 loop is homotopic to a path along edges of a countable simplicial
-structure, of which there are only countably many up to homotopy. -/
+structure, of which there are only countably many up to homotopy.
+
+The full classical argument decomposes into:
+
+1. Pick a countable basis `𝓑 = {Bₙ}` of `X` (from `SecondCountableTopology`)
+   refined to open path-connected sets each of which is contained in some
+   neighbourhood satisfying the semi-local condition.
+2. Pick a countable dense set of anchor points, one per nonempty pairwise
+   intersection `Bₙ ∩ Bₘ`.
+3. By the Lebesgue-number lemma, every loop in `X` based at `x` admits a
+   subdivision `0 = t₀ < t₁ < … < t_k = 1` and a finite sequence of basis
+   elements `B_{i₁}, …, B_{i_k}` with the image of `[t_{j-1}, t_j]` inside
+   `B_{iⱼ}`.
+4. Replacing each piece by the path joining the anchor points of
+   `B_{iⱼ₋₁} ∩ B_{iⱼ}` (which exists by path-connectedness of each `Bᵢ`),
+   we obtain a polygonal loop in `X` that is homotopic to the original by
+   the semi-local condition applied to each sub-piece.
+5. The set of all such polygonal loops, indexed by `List (ℕ × ℕ)` (basis
+   index plus anchor index in the relevant intersection), is countable;
+   its image in `FundamentalGroup X x` is therefore countable; and by
+   step 4 it is also surjective.
+
+This reduction is delivered as `fundamentalGroup_isCountablyGenerated_aux`. -/
 theorem pi1_countable_from_secondCountable
     (X : Type*) [TopologicalSpace X]
     [SecondCountableTopology X]
     [ConnectedSpace X] [LocPathConnectedSpace X]
     [DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnectedSpace X]
     (x : X) :
-    Countable (FundamentalGroup X x) :=
-  sorry
+    Countable (FundamentalGroup X x) := by
+  obtain ⟨S, hS, f, hf⟩ := fundamentalGroup_isCountablyGenerated_aux X x
+  exact Function.Surjective.countable hf
 
 /-- **Countability of fibres of the universal cover.**
 
-The fibre `proj ⁻¹' {x}` is in bijection with the fundamental group
-`FundamentalGroup M x` (via `pi1-fibre-pi1-bijection`); the latter is
-countable by `pi1_countable_from_secondCountable`. -/
+The fibre `proj ⁻¹' {x}` is in bijection with `Path.Homotopic.Quotient
+default x`, which by transport along a path from `default` to `x` is in
+bijection with `FundamentalGroup M default`; the latter is countable by
+`pi1_countable_from_secondCountable`. -/
 theorem fibre_countable
     [SecondCountableTopology M]
     (x : M) :
     Countable
       ((proj :
           DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M)
-        ⁻¹' {x}) :=
-  sorry
+        ⁻¹' {x}) := by
+  -- The fibre `proj ⁻¹' {x}` is in bijection with
+  -- `Path.Homotopic.Quotient default x`. By path-connectedness, this is in
+  -- bijection with `Path.Homotopic.Quotient default default = FundamentalGroup M default`.
+  have h_pi1_countable :
+      Countable (FundamentalGroup M (default : M)) :=
+    pi1_countable_from_secondCountable M default
+  haveI : PathConnectedSpace M := PathConnectedSpace.of_locPathConnectedSpace
+  have hpath : Path (default : M) x := PathConnectedSpace.somePath default x
+  -- Bijection between `proj ⁻¹' {x}` and `Path.Homotopic.Quotient default x`.
+  let e_fibre :
+      ((proj :
+          DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M)
+        ⁻¹' {x}) ≃ Path.Homotopic.Quotient (default : M) x :=
+    { toFun := fun p => by
+        rcases p with ⟨⟨y, q⟩, hy⟩
+        simp only [proj, Set.mem_preimage, Set.mem_singleton_iff] at hy
+        subst hy
+        exact q
+      invFun := fun q => ⟨⟨x, q⟩, by simp [proj]⟩
+      left_inv := by
+        rintro ⟨⟨y, q⟩, hy⟩
+        simp only [proj, Set.mem_preimage, Set.mem_singleton_iff] at hy
+        subst hy
+        rfl
+      right_inv := fun q => rfl }
+  -- Bijection between `Path.Homotopic.Quotient default x` and
+  -- `Path.Homotopic.Quotient default default` via concatenation with the path.
+  let e_pathTrans :
+      Path.Homotopic.Quotient (default : M) x ≃
+        Path.Homotopic.Quotient (default : M) (default : M) :=
+    { toFun := fun q =>
+        Path.Homotopic.Quotient.trans q (Path.Homotopic.Quotient.mk hpath.symm)
+      invFun := fun q =>
+        Path.Homotopic.Quotient.trans q (Path.Homotopic.Quotient.mk hpath)
+      left_inv := by
+        intro q
+        induction q using Path.Homotopic.Quotient.ind with | mk a =>
+        simp only [Path.Homotopic.Quotient.mk_symm]
+        rw [Path.Homotopic.Quotient.trans_assoc, Path.Homotopic.Quotient.symm_trans,
+          Path.Homotopic.Quotient.trans_refl]
+      right_inv := by
+        intro q
+        induction q using Path.Homotopic.Quotient.ind with | mk a =>
+        simp only [Path.Homotopic.Quotient.mk_symm]
+        rw [Path.Homotopic.Quotient.trans_assoc, Path.Homotopic.Quotient.trans_symm,
+          Path.Homotopic.Quotient.trans_refl] }
+  -- `FundamentalGroup M default` is definitionally `Path.Homotopic.Quotient default default`.
+  have hPHQ_countable :
+      Countable (Path.Homotopic.Quotient (default : M) (default : M)) :=
+    h_pi1_countable
+  exact Countable.of_equiv _ (e_fibre.trans e_pathTrans).symm
 
 /-- **σ-compactness from σ-compact base and countable fibre.**
 
