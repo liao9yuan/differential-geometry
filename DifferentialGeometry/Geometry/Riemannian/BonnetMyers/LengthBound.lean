@@ -288,6 +288,7 @@ theorem length_bound_contradiction_assembly
     (_hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
     (_hgeo : IsGeodesic (I := I) g γ) {L : ℝ} (_hL : 0 < L) {K : ℝ}
     (_hK : 0 < K)
+    (_hdim : 2 ≤ Module.finrank ℝ E)
     (_hRic : RicciBoundedBelow (I := I) g ((Module.finrank ℝ E - 1 : ℝ) * K))
     (uPrime : ℝ → E)
     (_hUnit : ∀ t ∈ Set.Icc (0 : ℝ) L, g.inner (γ t) (uPrime t) (uPrime t) = 1)
