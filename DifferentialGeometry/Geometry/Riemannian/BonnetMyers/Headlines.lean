@@ -62,7 +62,11 @@ theorem tangent_closedBall_isCompact
     (I : ModelWithCorners ℝ E H)
     [TopologicalSpace M] [ChartedSpace H M]
     (p : M) {R : ℝ} (_hR : 0 ≤ R) :
-    IsCompact (Metric.closedBall (0 : TangentSpace I p) R) := sorry
+    IsCompact (Metric.closedBall (0 : TangentSpace I p) R) := by
+  -- `TangentSpace I p` is definitionally `E`, a finite-dimensional real normed space,
+  -- hence a `ProperSpace`. On a `ProperSpace`, closed balls are compact.
+  haveI : ProperSpace E := FiniteDimensional.proper_real E
+  exact isCompact_closedBall (0 : TangentSpace I p) R
 
 /-- **bm-c-continuous-image-of-compact-is-compact.** Continuous image of a
 compact set is compact. Apply `IsCompact.image` to
@@ -76,8 +80,15 @@ theorem isCompact_image_closedBall_under_expMap
     (g : SmoothRiemannianMetric I M)
     [Bundle.RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
     [IsRiemannianManifold I M] [CompleteSpace M]
-    (p : M) {R : ℝ} (_hR : 0 ≤ R) :
-    IsCompact ((expMap g p) '' Metric.closedBall (0 : TangentSpace I p) R) := sorry
+    (p : M) {R : ℝ} (hR : 0 ≤ R) :
+    IsCompact ((expMap g p) '' Metric.closedBall (0 : TangentSpace I p) R) := by
+  -- Continuous image of the compact closed ball in `T_p M`.
+  have hcompact : IsCompact (Metric.closedBall (0 : TangentSpace I p) R) :=
+    tangent_closedBall_isCompact (E := E) I p hR
+  have hcont : Continuous (expMap (I := I) g p) :=
+    DifferentialGeometry.Geometry.Riemannian.HopfRinow.bm_c_expMap_continuous_of_geodesic_complete
+      g p
+  exact hcompact.image hcont
 
 /-- **bm-c-univ-compact.** The whole space `Set.univ : Set M` is compact.
 Combines the diameter bound (sibling headline `bonnetMyers_diameter`) with
