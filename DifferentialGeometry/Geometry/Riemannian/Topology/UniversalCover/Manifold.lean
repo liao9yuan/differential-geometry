@@ -562,7 +562,7 @@ Combine `UniversalCover.isCoveringMap`, `fibre_countable`, and
 instance instSigmaCompactSpace :
     SigmaCompactSpace
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
-  sorry
+  sigmaCompact_from_countable_fibre UniversalCover.isCoveringMap fibre_countable
 
 /-- A finite-dimensional smooth manifold modelled on `ℝ` is locally
 compact (inherited from its model space). Provided here as a `theorem`

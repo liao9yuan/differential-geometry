@@ -59,7 +59,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
   [LocPathConnectedSpace M]
   [DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnectedSpace M]
-  [Inhabited M] [PseudoEMetricSpace M]
+  [Inhabited M] [PseudoEMetricSpace M] [SecondCountableTopology M]
 
 /-! ## Ricci pullback to the universal cover -/
 
