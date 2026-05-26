@@ -450,6 +450,8 @@ import DifferentialGeometry.Geometry.Riemannian.Geodesic.MaximalInterval
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.SmoothFlow
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Smoothness
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Uniqueness
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.CrossVFReduction
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.AffineReparam
 import DifferentialGeometry.Geometry.Riemannian.Exponential.Bridge
 import DifferentialGeometry.Geometry.Riemannian.Exponential.ChartFlowToTangentLift
 import DifferentialGeometry.Geometry.Riemannian.Exponential.ChartIdentification
@@ -469,6 +471,7 @@ import DifferentialGeometry.Geometry.Riemannian.Exponential.Unconditional
 import DifferentialGeometry.Geometry.Riemannian.Exponential.UnifiedPackaging
 import DifferentialGeometry.Geometry.Riemannian.Exponential.UniformUniqueness
 import DifferentialGeometry.Geometry.Riemannian.Exponential.UniformExistence
+import DifferentialGeometry.Geometry.Riemannian.Exponential.ChainedFlowContinuity
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.MaximalRescaling
 import DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 import DifferentialGeometry.Geometry.Riemannian.InjectivityRadius
@@ -476,13 +479,19 @@ import DifferentialGeometry.Geometry.Riemannian.SectionalCurvature
 import DifferentialGeometry.Geometry.Riemannian.AlongCurve
 import DifferentialGeometry.Geometry.Riemannian.GaussLemma
 import DifferentialGeometry.Geometry.Riemannian.HopfRinow
+import DifferentialGeometry.Geometry.Riemannian.RadialSurjectivity
 import DifferentialGeometry.Geometry.Riemannian.Variation.ParallelTransport
+import DifferentialGeometry.Geometry.Riemannian.Variation.ParallelLocalODE
 import DifferentialGeometry.Geometry.Riemannian.Variation.SecondVariation
+import DifferentialGeometry.Geometry.Riemannian.Variation.FixedChartIdentities
 import DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnected
 import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.Basic
+import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.CountablePi1
 import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.CoveringMap
 import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.Manifold
 import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.Riemannian
+import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.LiftedMetricSmoothness
+import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.TruncationLift
 import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.Lifts
 import DifferentialGeometry.Geometry.Riemannian.BonnetMyers.RicciBound
 import DifferentialGeometry.Geometry.Riemannian.BonnetMyers.LengthBound
