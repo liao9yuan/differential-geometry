@@ -480,6 +480,7 @@ import DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 import DifferentialGeometry.Geometry.Riemannian.InjectivityRadius
 import DifferentialGeometry.Geometry.Riemannian.SectionalCurvature
 import DifferentialGeometry.Geometry.Riemannian.AlongCurve
+import DifferentialGeometry.Geometry.Riemannian.MFDerivAlongCurve
 import DifferentialGeometry.Geometry.Riemannian.GaussLemma
 import DifferentialGeometry.Geometry.Riemannian.HopfRinow
 import DifferentialGeometry.Geometry.Riemannian.RadialSurjectivity
