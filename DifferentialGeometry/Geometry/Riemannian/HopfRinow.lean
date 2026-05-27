@@ -396,6 +396,8 @@ theorem bm_c_gc_velocity_limit
   -- Combine.
   rw [step1, hs_sq, div_mul_cancel₀ _ hc_ne]
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Local extension past the supposed escape time.** Given the limit
 data `(y, w)` from `bm_c_gc_velocity_limit`, the local existence and
 uniqueness theorems for geodesics provide a geodesic on `(-\varepsilon,
@@ -405,6 +407,91 @@ maximal interval at `(p, v)` cannot be bounded above by a finite `T`. -/
 theorem bm_c_gc_extension_past_limit
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) :
     ¬ ∃ T : ℝ, IsLUB (maximalGeodesicInterval (I := I) g p v) T := by
+  haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
+  -- Argue by contradiction.
+  rintro ⟨T, hT⟩
+  -- Abbreviate the maximal interval.
+  set S : Set ℝ := maximalGeodesicInterval (I := I) g p v with hS_def
+  -- `S` is open.
+  have hS_open : IsOpen S := maximalGeodesicInterval_isOpen (I := I) g p v
+  -- `S` is nonempty: `0 ∈ S`.
+  have hS_ne : S.Nonempty :=
+    ⟨0, zero_mem_maximalGeodesicInterval (I := I) g p v⟩
+  -- The LUB `T` cannot lie in `S`: openness of `S` would give a
+  -- neighbourhood `(T - ε, T + ε) ⊆ S`, contradicting upper-bound-ness.
+  have hT_notMem : T ∉ S := by
+    intro hT_mem
+    -- `S ∈ 𝓝 T` from openness.
+    have hS_nhds : S ∈ 𝓝 T := hS_open.mem_nhds hT_mem
+    -- A real neighbourhood contains an open interval `(l, u) ∋ T`.
+    obtain ⟨l, u, ⟨hlT, hTu⟩, hsub⟩ :=
+      mem_nhds_iff_exists_Ioo_subset.mp hS_nhds
+    -- The midpoint `T' := (T + u) / 2` lies in `(T, u) ⊆ S`.
+    set T' : ℝ := (T + u) / 2 with hT'_def
+    have hT_lt_T' : T < T' := by
+      have : T + T < T + u := by linarith
+      have hT' : T = (T + T) / 2 := by ring
+      rw [hT', hT'_def]
+      exact (div_lt_div_iff_of_pos_right (by norm_num : (0 : ℝ) < 2)).mpr this
+    have hT'_lt_u : T' < u := by
+      have : T + u < u + u := by linarith
+      have hu' : u = (u + u) / 2 := by ring
+      conv_rhs => rw [hu']
+      rw [hT'_def]
+      exact (div_lt_div_iff_of_pos_right (by norm_num : (0 : ℝ) < 2)).mpr this
+    have hl_lt_T' : l < T' := by
+      -- `l < T` from `hlT` (membership in `Ioo l u`), and `T < T'`.
+      linarith [hlT, hT_lt_T']
+    have hT'_mem : T' ∈ S := hsub ⟨hl_lt_T', hT'_lt_u⟩
+    -- Upper-bound property: `T' ≤ T`, contradicting `T < T'`.
+    exact absurd (hT.1 hT'_mem) (not_le.mpr hT_lt_T')
+  -- Extract a strictly increasing sequence `tₙ ∈ S` with `tₙ → T`.
+  obtain ⟨tₙ, _h_strictMono, _h_lt_T, htₙ_lim, htₙ_mem⟩ :=
+    hT.exists_seq_strictMono_tendsto_of_notMem hT_notMem hS_ne
+  -- By `bm_c_gc_escape_cauchy`, `γ(tₙ)` is Cauchy in the
+  -- `[PseudoEMetricSpace M]` uniformity (which equals `riemannianEDist`
+  -- on `M` via `IsRiemannianManifold.out`, packaged inside escape-cauchy).
+  have h_cauchy :
+      CauchySeq (fun n => maximalGeodesic (I := I) g p v (tₙ n)) :=
+    bm_c_gc_escape_cauchy (I := I) g p v (T := T) hT htₙ_mem htₙ_lim
+  -- A Cauchy sequence in a complete pseudo-EMetric space converges to
+  -- some limit point `y : M` in the topology of `[PseudoEMetricSpace M]`.
+  obtain ⟨y, _hy⟩ := cauchySeq_tendsto_of_complete h_cauchy
+  -- Velocity-limit construction: `bm_c_gc_velocity_limit`'s proof is
+  -- topology-independent (the limit hypotheses are unused — they motivate
+  -- the witness but do not appear in the proof). We reproduce the
+  -- existential here without invoking the sibling, to avoid a spurious
+  -- `TopologicalSpace M`-diamond between the ChartedSpace topology and
+  -- the PseudoEMetricSpace topology at the call site.
+  have hfin_pos : 0 < Module.finrank ℝ E :=
+    Nat.pos_of_ne_zero (NeZero.ne _)
+  haveI : Nontrivial E := Module.nontrivial_of_finrank_pos hfin_pos
+  obtain ⟨u, _hu_ne⟩ : ∃ u : TangentSpace I y, u ≠ 0 :=
+    ⟨(exists_ne (0 : E)).choose, (exists_ne (0 : E)).choose_spec⟩
+  -- Scaled vector at `y` realising `(g.inner y) w w = (g.inner p) v v`.
+  set w : TangentSpace I y :=
+    Real.sqrt ((g.inner p) v v / (g.inner y) u u) • u with hw_def
+  -- Local existence at `(y, w)` produces a geodesic `η` on an interval
+  -- `(-ε, ε)` with `η 0 = y` and chart basepoint `y`.
+  obtain ⟨_η, _fη, _hfη0, _hη_proj, _hη0, _hfη_int, _hη_geod⟩ :=
+    exists_geodesic_at (I := I) g y w
+  -- Hand-off gap. We now have:
+  --   * the original maximal interval `S` and the curve `γ := maximalGeodesic g p v`
+  --     defined on `S`, with chart basepoint `p`;
+  --   * the limit point `y` (from the Cauchy convergence above);
+  --   * a tangent vector `w ∈ T_y M` of the correct speed;
+  --   * a local geodesic `η` at `(y, w)` defined on `(-ε, ε)`, with chart
+  --     basepoint `y`.
+  -- To derive `False` we must produce a single curve `γ̃ : ℝ → M` and a
+  -- connected open `J ∋ 0, T + δ` (for some `δ > 0`) such that
+  -- `IsGeodesicOnWithInitial g γ̃ J p v` holds — which would witness
+  -- `T + δ ∈ maximalGeodesicInterval g p v`, contradicting `IsLUB` on `T`.
+  -- This requires gluing `γ` to a shifted copy of `η` across the limit
+  -- point `y`. The chart basepoint of `η` is `y`, but `MaximalGeodesicWitness`
+  -- demands a single chart basepoint `p` throughout, so the gluing forces
+  -- ODE-uniqueness across chart changes — a chart-change invariance lemma
+  -- for `IsGeodesicAt`/`IsMIntegralCurveOn` that is not currently in the
+  -- project. Recorded as the single residual gap of this PARTIAL proof.
   sorry
 
 /-- **Symmetric argument at the left endpoint.** The same contradiction
