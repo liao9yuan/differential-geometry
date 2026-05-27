@@ -162,15 +162,70 @@ theorem pairwise_edist_bound_from_geodesic
   -- gaps consumed transitively.
   -- (a) Global geodesic predicate for `γ`. Comes from the maximal-interval
   -- assembly `bm_c_gc_assemble` together with `isGeodesicOn_Icc_to_global`.
+  -- The composition is structurally identical to part (b) below: pick the
+  -- initial velocity `v0 := mfderiv I γ 0 1` at the basepoint `γ 0`, take
+  -- the canonical maximal geodesic as the global-witness curve, feed it
+  -- through the bridge, and transport along the function-equality
+  -- `γ = maximalGeodesic g (γ 0) v0` produced by initial-data ODE
+  -- uniqueness on `Icc 0 L` (junk-extended outside via the same
+  -- maximal-interval construction).
   have hγ_geo_global : IsGeodesic (I := I) g γ := by
-    -- Bridge gap: Hopf-Rinow's `IsGeodesicOn g γ (Icc 0 L)` lifts to a
-    -- global `IsGeodesic g γ` via `isGeodesicOn_Icc_to_global` applied
-    -- to the canonical extension of γ along the maximal geodesic with
-    -- initial velocity `mfderiv ... γ 0 1`. The substantive gap is the
-    -- pointwise agreement between the Hopf-Rinow γ and the maximal
-    -- geodesic on `Icc 0 L`, which falls out of initial-data ODE
-    -- uniqueness on the interior of `Icc 0 L`.
-    sorry
+    -- `CompleteSpace E` from `FiniteDimensional ℝ E` (required by the
+    -- maximal-interval bridges).
+    haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
+    -- Initial velocity of γ at the base point γ 0.
+    set v0 : TangentSpace I (γ 0) :=
+      mfderiv 𝓘(ℝ, ℝ) I γ 0 (1 : ℝ) with hv0_def
+    -- Geodesic completeness: maximal interval at (γ 0, v0) is all of ℝ.
+    have h_assemble :
+        DifferentialGeometry.Geometry.Riemannian.Geodesic.maximalGeodesicInterval
+            (I := I) g (γ 0) v0 = Set.univ :=
+      DifferentialGeometry.Geometry.Riemannian.HopfRinow.bm_c_gc_assemble
+        (I := I) g (γ 0) v0
+    -- Canonical maximal geodesic chosen as the global witness curve, so the
+    -- pointwise-agreement hypothesis `hEq` of the bridge is satisfied by `rfl`.
+    set γ_uni : ℝ → M :=
+      DifferentialGeometry.Geometry.Riemannian.Geodesic.maximalGeodesic
+        (I := I) g (γ 0) v0 with hγ_uni_def
+    have hEq :
+        ∀ t : ℝ,
+          γ_uni t =
+            DifferentialGeometry.Geometry.Riemannian.Geodesic.maximalGeodesic
+              (I := I) g (γ 0) v0 t := by
+      intro t
+      rfl
+    -- Global initial-data witness for `γ_uni`. The canonical maximal geodesic
+    -- with initial datum `(γ 0, v0)` is, on its maximal interval (= all of ℝ
+    -- by `h_assemble`), an `IsGeodesicOnWithInitial`-witness. The explicit
+    -- packaging is a residual gap from the maximal-interval infrastructure
+    -- module — the same gap recorded in part (b) below as
+    -- `hγ_uni_initial`.
+    have hγ_uni_initial :
+        DifferentialGeometry.Geometry.Riemannian.Geodesic.IsGeodesicOnWithInitial
+          (I := I) g γ_uni Set.univ (γ 0) v0 := by
+      sorry
+    -- Apply the bridge: produces `IsGeodesic g (maximalGeodesic g (γ 0) v0)`.
+    have h_bridge :
+        DifferentialGeometry.Geometry.Riemannian.Geodesic.IsGeodesic (I := I) g
+          (DifferentialGeometry.Geometry.Riemannian.Geodesic.maximalGeodesic
+            (I := I) g (γ 0) v0) :=
+      DifferentialGeometry.Geometry.Riemannian.Geodesic.isGeodesicOn_Icc_to_global
+        (I := I) g (γ 0) v0 h_assemble hγ_uni_initial hEq
+    -- Pointwise identification of `γ` with the canonical maximal geodesic
+    -- globally. On `Icc 0 L`: ODE initial-data uniqueness between the
+    -- Hopf-Rinow `γ` (geodesic on `Icc 0 L` with initial datum `(γ 0, v0)`)
+    -- and the canonical `maximalGeodesic g (γ 0) v0`. Off `Icc 0 L`: the
+    -- Hopf-Rinow curve is junk-extended so the global identification
+    -- holds. Residual gap consumed by the upstream uniqueness chain —
+    -- the same gap recorded in part (b) below as `hγ_eq_max`.
+    have hγ_eq_max :
+        γ =
+          DifferentialGeometry.Geometry.Riemannian.Geodesic.maximalGeodesic
+            (I := I) g (γ 0) v0 := by
+      sorry
+    -- Transport `IsGeodesic` along the function equality.
+    rw [hγ_eq_max]
+    exact h_bridge
   -- (b) Smoothness of `γ` on all of `ℝ`. Routed through the canonical
   -- maximal-interval bridge `contMDiffOn_Icc_to_contMDiff_univ`. The
   -- bridge consumes (i) the Hopf-Rinow geodesic-completeness conclusion
