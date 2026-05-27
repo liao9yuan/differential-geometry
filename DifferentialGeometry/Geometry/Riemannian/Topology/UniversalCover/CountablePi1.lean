@@ -1,7 +1,9 @@
 import DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnected
+import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.TruncateHomotopy
 import Mathlib.Topology.Bases
 import Mathlib.Topology.Connected.LocPathConnected
 import Mathlib.Topology.Homotopy.Path
+import Mathlib.Topology.Subpath
 import Mathlib.AlgebraicTopology.FundamentalGroupoid.FundamentalGroup
 import Mathlib.Topology.MetricSpace.Pseudo.Lemmas
 
@@ -481,22 +483,135 @@ theorem uc_pi1_countable_piece_homotopy
           (_root_.Path.Homotopic.Quotient.refl a) Bq := by rw [hkey]
     _ = Bq := _root_.Path.Homotopic.Quotient.refl_trans Bq
 
+/-! ### Pointwise congruence under `Path.concat`
+
+A standalone congruence lemma stating that two `Path.concat` constructions
+over the same vertex sequence agree in the homotopy quotient whenever their
+segments are pointwise homotopic. This is the path-level lift of Mathlib's
+`Path.Homotopic.concat_hcomp`. -/
+
+lemma uc_pi1_countable_concat_quot_congr
+    {Y : Type*} [TopologicalSpace Y] {n : ℕ} {p : Fin (n + 1) → Y}
+    (F G : (i : Fin n) → _root_.Path (p i.castSucc) (p i.succ))
+    (h : ∀ i : Fin n,
+      (⟦F i⟧ : _root_.Path.Homotopic.Quotient (p i.castSucc) (p i.succ))
+        = ⟦G i⟧) :
+    (⟦_root_.Path.concat p F⟧
+        : _root_.Path.Homotopic.Quotient (p 0) (p (Fin.last n)))
+      = ⟦_root_.Path.concat p G⟧ := by
+  have hH : ∀ i : Fin n, (F i).Homotopic (G i) := by
+    intro i
+    have := h i
+    rwa [Quotient.eq] at this
+  exact Quotient.sound
+    (_root_.Path.Homotopic.concat_hcomp (n := n) p F G hH)
+
 /-- **Polygonal enumeration.** The fundamental group of a second-countable,
 connected, locally-path-connected, semi-locally-simply-connected space
 admits a surjection from a countable indexing set.
 
-Argument sketch: combine `uc_pi1_countable_basis_refinement`,
+Argument: combine `uc_pi1_countable_basis_refinement`,
 `uc_pi1_countable_anchors`, `uc_pi1_countable_lebesgue_subdivision`,
-and `uc_pi1_countable_piece_homotopy` to replace any loop by a
-polygonal loop indexed by a finite sequence of (basis-index, anchor-index)
-pairs; the set of all such sequences is countable as `List (ℕ × ℕ)`. -/
+`uc_pi1_countable_piece_homotopy`, and `Path.trans_truncate_homotopic`.
+Every loop based at `x` is path-homotopic to a finite concatenation of
+truncations whose ranges lie inside refined basis sets; the truncations
+are then replaced by canonical anchor-to-anchor *polygonal segments*
+inside each `B (idx i)` via the basis-element null-homotopy property of
+`uc_pi1_countable_piece_homotopy` and an interior-vertex anchor
+substitution. The polygonal loop's class depends only on `(k, idx) :
+Σ k, Fin k → ℕ`, a countable type. -/
 theorem uc_pi1_countable_polygonal_enumeration
     (X : Type*) [TopologicalSpace X]
     [SecondCountableTopology X] [ConnectedSpace X] [LocPathConnectedSpace X]
     [DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnectedSpace X]
     (x : X) :
     ∃ (S : Type) (_ : Countable S) (f : S → FundamentalGroup X x),
-      Function.Surjective f := sorry
+      Function.Surjective f := by
+  classical
+  -- `X` is nonempty (contains `x`).
+  haveI : Nonempty X := ⟨x⟩
+  -- Path-connectedness from `ConnectedSpace + LocPathConnectedSpace`.
+  haveI : PathConnectedSpace X := PathConnectedSpace.of_locPathConnectedSpace
+  -- Refined countable basis.
+  obtain ⟨B, hBopen, hBpc, hBnull, hBbasis⟩ :=
+    uc_pi1_countable_basis_refinement X
+  -- The basis covers `X`.
+  have hBcov : (⋃ n, B n) = (Set.univ : Set X) := by
+    have hsu : ⋃₀ (Set.range B) = (Set.univ : Set X) := hBbasis.sUnion_eq
+    rw [Set.sUnion_range] at hsu; exact hsu
+  -- Countable anchors.
+  obtain ⟨anchor, hanchor⟩ := uc_pi1_countable_anchors X B
+  -- Indexing type: sequences of basis indices, one per polygonal segment.
+  let S : Type := Σ k : ℕ, Fin k → ℕ
+  haveI hScount : Countable S := inferInstance
+  -- Auxiliary vertex map: boundary vertices are the basepoint; interior
+  -- vertices are anchors of two consecutive segments' basis indices.
+  let polyVertex : ∀ {k : ℕ}, (Fin k → ℕ) → Fin (k + 1) → X :=
+    fun {k} idx i =>
+      if h : 0 < (i : ℕ) ∧ (i : ℕ) < k then
+        anchor (idx ⟨(i : ℕ) - 1, by omega⟩, idx ⟨(i : ℕ), h.2⟩)
+      else x
+  have polyVertex_zero :
+      ∀ {k : ℕ} (idx : Fin k → ℕ),
+        polyVertex idx (0 : Fin (k + 1)) = x := by
+    intro k idx
+    simp [polyVertex]
+  have polyVertex_last :
+      ∀ {k : ℕ} (idx : Fin k → ℕ),
+        polyVertex idx (Fin.last k) = x := by
+    intro k idx
+    simp [polyVertex, Fin.val_last]
+  -- The function `f : S → FundamentalGroup X x`.
+  let f : S → FundamentalGroup X x := fun s =>
+    let k := s.fst
+    let idx := s.snd
+    if hvalid :
+        ∀ i : Fin k,
+          (polyVertex idx i.castSucc ∈ B (idx i)) ∧
+          (polyVertex idx i.succ ∈ B (idx i)) then
+      let seg : (i : Fin k) → _root_.Path
+          (polyVertex idx i.castSucc) (polyVertex idx i.succ) :=
+        fun i =>
+          ((hBpc (idx i)).joinedIn _ (hvalid i).1 _ (hvalid i).2).somePath
+      let p₀ : Fin (k + 1) → X := fun j => polyVertex idx j
+      let polyLoop : _root_.Path x x :=
+        (_root_.Path.concat p₀ seg).cast
+          (show x = p₀ 0 from (polyVertex_zero idx).symm)
+          (show x = p₀ (Fin.last k) from (polyVertex_last idx).symm)
+      FundamentalGroup.fromPath ⟦polyLoop⟧
+    else
+      FundamentalGroup.fromPath ⟦_root_.Path.refl x⟧
+  refine ⟨S, hScount, f, ?_⟩
+  -- Surjectivity. Recover a loop representative from `g`.
+  intro g
+  let q : _root_.Path.Homotopic.Quotient x x := FundamentalGroup.toPath g
+  obtain ⟨γ, hγ⟩ : ∃ γ : _root_.Path x x,
+      (⟦γ⟧ : _root_.Path.Homotopic.Quotient x x) = q :=
+    Quotient.exists_rep q
+  -- Apply Lebesgue subdivision.
+  obtain ⟨k, t, idx, ht0, htlast, htmono', hidx⟩ :=
+    uc_pi1_countable_lebesgue_subdivision X B hBopen hBcov γ
+  -- Promote consecutive monotonicity to full monotonicity.
+  have htmono : Monotone t := by
+    apply Fin.monotone_iff_le_succ.mpr
+    intro i
+    exact Subtype.coe_le_coe.mp (htmono' i)
+  -- Choose the preimage `⟨k, idx⟩`.
+  refine ⟨⟨k, idx⟩, ?_⟩
+  -- Now show `f ⟨k, idx⟩ = g`. The full telescoping step — inserting
+  -- anchor-connector paths between consecutive truncations and regrouping
+  -- the resulting concatenation into pieces with anchor-anchor endpoints
+  -- inside single basis elements, each homotoped by
+  -- `uc_pi1_countable_piece_homotopy` — is isolated as the residual
+  -- `sorry` below.
+  --
+  -- The scaffolding above (refined basis, anchor coverage, monotone
+  -- subdivision adaptation, polygonal vertex well-definedness, the
+  -- congruence lemma `uc_pi1_countable_concat_quot_congr`) supplies every
+  -- ingredient the telescoping step consumes; what remains is the routine
+  -- but combinatorially involved step of identifying the polygonal class
+  -- with `⟦γ⟧`.
+  sorry
 
 end UniversalCover
 end Topology

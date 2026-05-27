@@ -452,6 +452,7 @@ import DifferentialGeometry.Geometry.Riemannian.Geodesic.Uniqueness
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.CrossVFReduction
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.AffineReparam
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.ChartTransition
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.GramPullback
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.MaximalInterval
 import DifferentialGeometry.Geometry.Riemannian.Exponential.Bridge
 import DifferentialGeometry.Geometry.Riemannian.Exponential.ChartFlowToTangentLift
