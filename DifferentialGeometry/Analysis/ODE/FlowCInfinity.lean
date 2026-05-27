@@ -26,7 +26,7 @@ upgrades `Φ` to `C^{n+1}`.
 
 ## Main result
 
-* `contDiffOn_top_flow_of_isLocalFlow_of_contDiff_top`
+* `IsLocalFlow.contDiffOn_top`
 -/
 
 noncomputable section
@@ -57,7 +57,7 @@ variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {Φ : E × ℝ → E}
 
 /-- The variational coefficient `(x, t) ↦ fderiv ℝ (f t) (Φ(x, t))` is `C^n` when
 `f` is `C^{n+1}` and `Φ` is `C^n`. -/
-theorem contDiffOn_variational_coeff
+private theorem contDiffOn_variational_coeff_aux
     {n : ℕ} {T : ℝ} {ρ : ℝ≥0}
     (hf_succ : ContDiffOn ℝ ((n : ℕ∞) + 1) (uncurry f) (univ : Set (ℝ × E)))
     (hΦ_Cn : ContDiffOn ℝ (n : ℕ∞) Φ ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T))) :
@@ -89,7 +89,7 @@ variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax 
 If the vector field `f : ℝ → E → E` is jointly `C^∞` and `Φ` is a local
 Picard–Lindelöf flow of `f`, then `Φ` is jointly `C^∞` on the strictly interior open
 neighbourhood `ball x₀ ρ ×ˢ Ioo (t₀ - T) (t₀ + T)`. -/
-theorem contDiffOn_top_flow_of_isLocalFlow_of_contDiff_top
+theorem IsLocalFlow.contDiffOn_top
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf_top : ContDiff ℝ ∞ (uncurry f))
     {T_out T_mid T M : ℝ} (hT : 0 < T) (hT_lt_mid : T < T_mid)
@@ -139,7 +139,7 @@ theorem contDiffOn_top_flow_of_isLocalFlow_of_contDiff_top
       simpa using hf_Ck (n + 1)
     -- Coefficient A(x,t) := fderiv ℝ (f t) (Φ(x,t)) is C^n.
     have hcoeff_Cn : ContDiffOn ℝ (n : ℕ∞) (fun q : E × ℝ => fderiv ℝ (f q.2) (Φ q)) U :=
-      contDiffOn_variational_coeff hf_Csucc ih
+      contDiffOn_variational_coeff_aux hf_Csucc ih
     -- Coefficient in curried form for linearODESolution.
     set A : E → ℝ → (E →L[ℝ] E) := fun x t => fderiv ℝ (f t) (Φ ⟨x, t⟩)
     -- Each scalar variational solution linearODESolution(A, ..., fun _ => δ) is C^n.

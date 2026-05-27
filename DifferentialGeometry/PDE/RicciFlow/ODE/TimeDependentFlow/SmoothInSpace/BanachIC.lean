@@ -16,25 +16,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-theorem banach_flow_smooth_in_ic
-    (X : ℝ → ∀ x : M, TangentSpace I x) (α : M)
-    (hCont :
-      ContinuousOn (Function.uncurry (fun t x => X t x)) (Set.univ : Set (ℝ × M)))
-    (hLip : ∃ L K r : ℝ, 0 < L ∧ 0 < r ∧ 0 ≤ K ∧
-      ∀ t ∈ Set.Icc (0 : ℝ) L,
-        LipschitzOnWith (Real.toNNReal K)
-          (fun y : E => (X t ((chartAt H α).symm (I.symm y)) : E))
-          (Metric.ball (I ((chartAt H α) α)) r)) :
-    ∃ T : ℝ, 0 < T ∧ ∃ r' : ℝ, 0 < r' ∧
-      ∃ flow : E → ℝ → E,
-        (∀ y ∈ Metric.closedBall (I ((chartAt H α) α)) r',
-          flow y 0 = y ∧
-          ∀ t ∈ Set.Icc (0 : ℝ) T,
-            HasDerivWithinAt (flow y)
-              ((X t ((chartAt H α).symm (I.symm (flow y t)))) : E)
-              (Set.Icc (0 : ℝ) T) t) :=
-  time_dependent_vf_chart_local_picard_with_lipschitz X α hCont hLip
-
 section SmoothLocalFlow
 
 open Set Metric Function DifferentialGeometry.Analysis.ODE DifferentialGeometry.Analysis.ODE.Flow
@@ -49,11 +30,11 @@ interior open neighbourhood on which `Φ` is jointly `C^∞`.
 
 The proof combines the Picard--Lindelöf existence theorem
 (`exists_isLocalFlow_of_contDiffOn_univ`) with the Hartman smooth-dependence
-induction (`contDiffOn_top_flow_of_isLocalFlow_of_contDiff_top`). The only
+induction (`IsLocalFlow.contDiffOn_top`). The only
 substantial new content is the uniform operator-norm bound on the
 linearization `(x, t) ↦ fderiv ℝ (f t) (Φ(x, t))`, which follows from
 continuity of the composition on a compact product. -/
-theorem exists_smooth_localFlow_of_contDiff_top
+theorem exists_isLocalFlow_contDiffOn_top
     [CompleteSpace E]
     {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E}
     (hf : ContDiff ℝ ∞ (Function.uncurry f)) :
@@ -171,7 +152,7 @@ theorem exists_smooth_localFlow_of_contDiff_top
     exact hMglob_bound x (closedBall_subset_closedBall hρ_out_le_r hx) τ (hsub_T_out hτ)
   -- Step 5: Apply the Hartman C^∞ theorem.
   have hSmooth :=
-    contDiffOn_top_flow_of_isLocalFlow_of_contDiff_top
+    IsLocalFlow.contDiffOn_top
       hΦ hf hT_pos hT_lt_mid hT_mid_lt_out hMglob_nn hMT_mid_lt_one hsub_T_out
       hr'_pos hρ_lt_mid hρ_mid_lt_out hρρ' hρ_out_le_r hA_bd
   -- Package the result.
@@ -204,7 +185,7 @@ The proof applies the Hartman smooth-dependence theorem to obtain a smooth local
 flow `Φ_pl` solving the same ODE, then shows `Φ_pl(y, t) = hper.flow y t` for every
 `(y, t) ∈ closedBall(center, ρ) × Icc(0, T₀)` by Groenwall ODE uniqueness, and
 finally transfers the `C^∞` regularity via `ContDiffOn.congr`. -/
-theorem chart_local_picard_flow_contDiffOn_of_contDiff_top
+theorem ChartLocalPicardData.contDiffOn_top
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M)
     (hper : ChartLocalPicardData X α)
     (hSmoothX_chart : ContDiff ℝ ∞ (Function.uncurry fun t y =>
@@ -219,7 +200,7 @@ theorem chart_local_picard_flow_contDiffOn_of_contDiff_top
   have hf_top : ContDiff ℝ ∞ (Function.uncurry f_chart) := hSmoothX_chart
   obtain ⟨rN, εN, hrN, hεN, Φ_pl, hΦ_pl, ρ_pl, T_pl, hρ_pl_pos, hT_pl_pos,
     hρ_pl_le, hT_pl_le, hΦ_smooth⟩ :=
-    exists_smooth_localFlow_of_contDiff_top (f := f_chart) (t₀ := 0) (x₀ := center) hf_top
+    exists_isLocalFlow_contDiffOn_top (f := f_chart) (t₀ := 0) (x₀ := center) hf_top
   -- Step 2: Choose ρ₀ = min(ρ_pl, hper.r) and T₀ = min(T_pl, hper.T).
   set ρ₀ : ℝ := min ρ_pl hper.r
   set T₀ : ℝ := min T_pl hper.T

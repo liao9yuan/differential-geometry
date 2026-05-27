@@ -3956,7 +3956,7 @@ theorem linearODESolution_hasFDerivAt_param
 linear ODE solution. The function `(x, t) ↦ A(x, t) (Z(x, t))`, where
 `Z = linearODESolution A a b' h₀ Z₀`, is jointly continuous on
 `U ×ˢ Ioo a b'`. -/
-theorem linearODESolution_partial_t_continuousOn
+private theorem linearODESolution_partial_t_continuousOn
     {A : F → ℝ → (G →L[ℝ] G)} {a b' h₀ : ℝ} {Z₀ : F → G}
     (hab_lt : a < b') (h₀_mem : h₀ ∈ Set.Ioo a b')
     {U : Set F} (hU : IsOpen U)
@@ -3980,7 +3980,7 @@ open Classical in
 set_option linter.style.setOption false in
 set_option maxHeartbeats 800000 in
 /-- Joint continuity of the CLM-valued x-partial in the operator-norm topology. -/
-theorem variationalW_clm_continuousOn
+private theorem variationalW_clm_continuousOn
     [FiniteDimensional ℝ F]
     {A : F → ℝ → (G →L[ℝ] G)} {a b' : ℝ} (hab_lt : a < b')
     {h₀ : ℝ} (h₀_mem : h₀ ∈ Set.Ioo a b')
@@ -4042,7 +4042,7 @@ The proof decomposes the remainder as
 and bounds each piece as `o(||(h,s)||)` using the mean-value theorem (for the
 time piece) and `linearODESolution_hasFDerivAt_param` (for the parameter piece).
 -/
-theorem linearODESolution_hasFDerivAt_joint
+private theorem linearODESolution_hasFDerivAt_joint
     [FiniteDimensional ℝ F]
     {A : F → ℝ → (G →L[ℝ] G)} {Z₀ : F → G}
     {a b' : ℝ} (hab_lt : a < b') {h₀ : ℝ} (h₀_mem : h₀ ∈ Set.Ioo a b')
@@ -4224,7 +4224,7 @@ theorem linearODESolution_hasFDerivAt_joint
 set_option maxHeartbeats 800000 in
 /-- **C^1 regularity** of the joint map `(x, t) |-> linearODESolution A a b' h0 Z0 x t`
 on the open set `U xs Ioo a b'`. -/
-theorem linearODESolution_contDiffOn_one
+private theorem linearODESolution_contDiffOn_one
     [FiniteDimensional ℝ F]
     {A : F → ℝ → (G →L[ℝ] G)} {Z₀ : F → G}
     {a b' : ℝ} (hab_lt : a < b') {h₀ : ℝ} (h₀_mem : h₀ ∈ Set.Ioo a b')
