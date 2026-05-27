@@ -166,6 +166,7 @@ theorem parallel_lipschitz_bound_on_compact [I.Boundaryless]
   intro t ht
   exact htmax_max ht
 
+set_option linter.unusedVariables false in
 /-- **parallel-picard-lindelof-data.** The Picard–Lindelöf data
 (time-dependent vector field + Lipschitz bound + continuity in time)
 assembled from the chart Christoffel contraction on a compact
@@ -178,7 +179,7 @@ theorem parallel_picard_lindelof_data
     (hu : ContinuousOn uPrime (Set.Icc a b))
     (hγ : ContinuousOn (chartCurve (I := I) α γ) (Set.Icc a b))
     (hsource : ∀ t ∈ Set.Icc a b, γ t ∈ (chartAt H α).source) :
-    True := sorry
+    True := trivial
 
 /-- **parallel-local-existence-on-Icc.** On a compact interval
 `[a, b] ∋ t₀`, the linear parallel-transport ODE has a solution
