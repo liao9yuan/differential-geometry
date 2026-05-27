@@ -261,14 +261,66 @@ evaluation `γ ↦ hp.monodromy γ e'` at a chosen lift `e' ∈ p⁻¹{x}` is
 injective. Proof: two homotopy classes `γ₁, γ₂` whose monodromies agree at
 `e'` lift to paths in `E` with the same endpoints; simple connectedness of
 `E` makes the homotopy class of such a path unique, so the two lifts are
-homotopic; pushing the homotopy down via `liftHomotopy` recovers
-`γ₁ = γ₂`. -/
+homotopic; pushing the homotopy down via composition with `p` recovers
+`γ₁ = γ₂` in the loop quotient. -/
 theorem action_eval_injective
     {X E : Type*} [TopologicalSpace X] [TopologicalSpace E]
     [SimplyConnectedSpace E]
     {p : E → X} (hp : IsCoveringMap p) (x : X) (e' : p ⁻¹' {x}) :
     Function.Injective
-      (fun γ : Path.Homotopic.Quotient x x => hp.monodromy γ e') := sorry
+      (fun γ : Path.Homotopic.Quotient x x => hp.monodromy γ e') := by
+  -- Induct simultaneously on both quotient classes.
+  refine fun γ₁ γ₂ heq => ?_
+  induction γ₁ using Path.Homotopic.Quotient.ind with | _ p₁ =>
+  induction γ₂ using Path.Homotopic.Quotient.ind with | _ p₂ =>
+  -- Reduce equality in the quotient to `Path.Homotopic`.
+  rw [Path.Homotopic.Quotient.eq]
+  -- Extract the lifts of `p₁` and `p₂` through `hp`, starting at `e'`.
+  have he' : p (e' : E) = x := e'.2
+  set Γ₁ : C(unitInterval, E) := hp.liftPath p₁.toContinuousMap (e' : E)
+    (p₁.source.trans he'.symm) with hΓ₁
+  set Γ₂ : C(unitInterval, E) := hp.liftPath p₂.toContinuousMap (e' : E)
+    (p₂.source.trans he'.symm) with hΓ₂
+  -- Both lifts share `e'` as their starting point.
+  have hΓ₁_zero : Γ₁ 0 = (e' : E) := hp.liftPath_zero _ _ _
+  have hΓ₂_zero : Γ₂ 0 = (e' : E) := hp.liftPath_zero _ _ _
+  -- Both lifts have the same endpoint, since the monodromies agree.
+  have hends : Γ₁ 1 = Γ₂ 1 := by
+    have hmono : (hp.monodromy (Path.Homotopic.Quotient.mk p₁) e' : E) =
+        (hp.monodromy (Path.Homotopic.Quotient.mk p₂) e' : E) :=
+      congrArg Subtype.val heq
+    -- `monodromy ⟦p⟧ e' = ⟨liftPath p e' _ 1, _⟩` by `Quotient.lift_mk`.
+    change (Γ₁ : unitInterval → E) 1 = (Γ₂ : unitInterval → E) 1
+    exact hmono
+  -- Package the lifts as paths `e' ⟶ Γ₁ 1` in `E`.
+  let π₁ : Path (e' : E) (Γ₁ 1) :=
+    { toContinuousMap := Γ₁
+      source' := hΓ₁_zero
+      target' := rfl }
+  let π₂ : Path (e' : E) (Γ₁ 1) :=
+    { toContinuousMap := Γ₂
+      source' := hΓ₂_zero
+      target' := hends.symm }
+  -- Simple connectivity of `E` provides a homotopy `π₁ ≃ π₂` rel endpoints.
+  obtain ⟨H⟩ : Path.Homotopic π₁ π₂ := SimplyConnectedSpace.paths_homotopic π₁ π₂
+  -- `H` is a homotopy rel `{0, 1}` between `π₁.toContinuousMap = Γ₁` and
+  -- `π₂.toContinuousMap = Γ₂` as continuous maps `I → E`.
+  have hΓ_rel : ContinuousMap.HomotopicRel Γ₁ Γ₂ {0, 1} := ⟨H⟩
+  -- Compose with `p : C(E, X)` to obtain a homotopy `p ∘ Γ₁ ≃ p ∘ Γ₂` rel `{0, 1}`.
+  have hp_comp : ContinuousMap.HomotopicRel
+      ((⟨p, hp.continuous⟩ : C(E, X)).comp Γ₁)
+      ((⟨p, hp.continuous⟩ : C(E, X)).comp Γ₂) {0, 1} :=
+    hΓ_rel.comp_continuousMap _
+  -- The compositions equal `p₁` and `p₂` as continuous maps, by `liftPath_lifts`.
+  have hp_eq₁ : (⟨p, hp.continuous⟩ : C(E, X)).comp Γ₁ = p₁.toContinuousMap := by
+    ext t
+    exact congr_fun (hp.liftPath_lifts _ _ _) t
+  have hp_eq₂ : (⟨p, hp.continuous⟩ : C(E, X)).comp Γ₂ = p₂.toContinuousMap := by
+    ext t
+    exact congr_fun (hp.liftPath_lifts _ _ _) t
+  rw [hp_eq₁, hp_eq₂] at hp_comp
+  -- `Path.Homotopic` unfolds to `ContinuousMap.HomotopicRel` on the underlying maps.
+  exact hp_comp
 
 /-- **Fibre / loop-quotient bijection.**
 Packaging `action_eval_surjective` + `action_eval_injective` via
