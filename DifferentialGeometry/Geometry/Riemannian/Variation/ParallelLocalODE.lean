@@ -202,7 +202,7 @@ theorem parallel_local_existence_on_Icc
 `[a, b] ∋ t₀`, two solutions of the linear parallel-transport ODE
 sharing an initial value at `t₀` coincide on `[a, b]`. Proved via
 Grönwall against the uniform Lipschitz bound. -/
-theorem parallel_local_uniqueness_on_Icc
+theorem parallel_local_uniqueness_on_Icc [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) {a b t₀ : ℝ} (hab : a ≤ b) (ht₀ : t₀ ∈ Set.Icc a b)
     (hu : ContinuousOn uPrime (Set.Icc a b))
@@ -216,7 +216,140 @@ theorem parallel_local_uniqueness_on_Icc
         (- chartChristoffelContraction (I := I) g α (uPrime t) (Y₂ t)
             (chartCurve (I := I) α γ t)) (Set.Icc a b) t)
     (h_eq : Y₁ t₀ = Y₂ t₀) :
-    Set.EqOn Y₁ Y₂ (Set.Icc a b) := sorry
+    Set.EqOn Y₁ Y₂ (Set.Icc a b) := by
+  classical
+  -- The vector field of the linearised parallel-transport ODE,
+  -- `v t Y = - A(t) Y` where `A(t) := chartChristoffelContractionRightCLM …`.
+  set v : ℝ → E → E := fun t Y =>
+    - chartChristoffelContractionRightCLM (I := I) g α (uPrime t)
+        (chartCurve (I := I) α γ t) Y with hv_def
+  -- A uniform Lipschitz bound `K` on the operator-norm of `A(·)` over `[a, b]`.
+  obtain ⟨K, hK⟩ :=
+    parallel_lipschitz_bound_on_compact (I := I) g α γ uPrime hab hu hγ hsource
+  -- `v t` is Lipschitz with constant `K` on the whole space, for every
+  -- `t ∈ [a, b]`.
+  have hLip : ∀ t ∈ Set.Icc a b,
+      LipschitzOnWith K (v t) (Set.univ : Set E) := by
+    intro t ht
+    have hclm :
+        LipschitzWith ‖chartChristoffelContractionRightCLM (I := I) g α
+              (uPrime t) (chartCurve (I := I) α γ t)‖₊
+          (chartChristoffelContractionRightCLM (I := I) g α (uPrime t)
+            (chartCurve (I := I) α γ t)) :=
+      (chartChristoffelContractionRightCLM (I := I) g α (uPrime t)
+          (chartCurve (I := I) α γ t)).lipschitz
+    have hclm_neg :
+        LipschitzWith ‖chartChristoffelContractionRightCLM (I := I) g α
+              (uPrime t) (chartCurve (I := I) α γ t)‖₊
+          (fun Y => v t Y) := hclm.neg
+    exact (hclm_neg.weaken (hK t ht)).lipschitzOnWith
+  -- Re-express both hypotheses `hY₁`, `hY₂` in the standardised form
+  -- `HasDerivWithinAt Y (v t (Y t)) (Icc a b) t`, replacing
+  -- `chartChristoffelContraction` by its CLM-form.
+  have hY₁' : ∀ t ∈ Set.Icc a b,
+      HasDerivWithinAt Y₁ (v t (Y₁ t)) (Set.Icc a b) t := by
+    intro t ht
+    -- The two right-hand sides match by `chartChristoffelContractionRightCLM_apply`
+    -- (a `rfl`-lemma), so the conversion is `rfl`.
+    exact hY₁ t ht
+  have hY₂' : ∀ t ∈ Set.Icc a b,
+      HasDerivWithinAt Y₂ (v t (Y₂ t)) (Set.Icc a b) t := by
+    intro t ht
+    exact hY₂ t ht
+  -- Continuity of `Y₁`, `Y₂` on `[a, b]` follows from their pointwise
+  -- `HasDerivWithinAt`.
+  have hY₁_cont : ContinuousOn Y₁ (Set.Icc a b) :=
+    HasDerivWithinAt.continuousOn (f' := fun t => v t (Y₁ t)) hY₁'
+  have hY₂_cont : ContinuousOn Y₂ (Set.Icc a b) :=
+    HasDerivWithinAt.continuousOn (f' := fun t => v t (Y₂ t)) hY₂'
+  -- We split `[a, b] = [a, t₀] ∪ [t₀, b]` and apply
+  -- `ODE_solution_unique_of_mem_Icc_left` resp. `_right` to each piece.
+  rcases ht₀ with ⟨ht₀_a, ht₀_b⟩
+  -- Equality on the right piece `[t₀, b]`.
+  have h_right : Set.EqOn Y₁ Y₂ (Set.Icc t₀ b) := by
+    -- Lipschitz on `Ico t₀ b` (subset of `Icc a b`).
+    have hLip_r : ∀ t ∈ Set.Ico t₀ b,
+        LipschitzOnWith K (v t) (Set.univ : Set E) := by
+      intro t ht
+      have ht_mem : t ∈ Set.Icc a b :=
+        ⟨ht₀_a.trans ht.1, ht.2.le⟩
+      exact hLip t ht_mem
+    -- Continuity on `[t₀, b]`.
+    have hY₁_cont_r : ContinuousOn Y₁ (Set.Icc t₀ b) :=
+      hY₁_cont.mono (Set.Icc_subset_Icc_left ht₀_a)
+    have hY₂_cont_r : ContinuousOn Y₂ (Set.Icc t₀ b) :=
+      hY₂_cont.mono (Set.Icc_subset_Icc_left ht₀_a)
+    -- Differentiability on `Ico t₀ b` in the form `HasDerivWithinAt _ _ (Ici t) t`.
+    have hY₁_diff_r : ∀ t ∈ Set.Ico t₀ b,
+        HasDerivWithinAt Y₁ (v t (Y₁ t)) (Set.Ici t) t := by
+      intro t ht
+      have ht_mem : t ∈ Set.Icc a b :=
+        ⟨ht₀_a.trans ht.1, ht.2.le⟩
+      have h := hY₁' t ht_mem
+      -- `Icc a b ∈ 𝓝[Ici t] t` because `t ∈ Ico a b`.
+      have ht_Ico : t ∈ Set.Ico a b := ⟨ht_mem.1, ht.2⟩
+      have hmem : Set.Icc a b ∈ 𝓝[≥] t := Icc_mem_nhdsGE_of_mem ht_Ico
+      exact h.mono_of_mem_nhdsWithin hmem
+    have hY₂_diff_r : ∀ t ∈ Set.Ico t₀ b,
+        HasDerivWithinAt Y₂ (v t (Y₂ t)) (Set.Ici t) t := by
+      intro t ht
+      have ht_mem : t ∈ Set.Icc a b :=
+        ⟨ht₀_a.trans ht.1, ht.2.le⟩
+      have h := hY₂' t ht_mem
+      have ht_Ico : t ∈ Set.Ico a b := ⟨ht_mem.1, ht.2⟩
+      have hmem : Set.Icc a b ∈ 𝓝[≥] t := Icc_mem_nhdsGE_of_mem ht_Ico
+      exact h.mono_of_mem_nhdsWithin hmem
+    exact ODE_solution_unique_of_mem_Icc_right
+      (v := v) (s := fun _ => Set.univ) (K := K)
+      (f := Y₁) (g := Y₂) (a := t₀) (b := b)
+      hLip_r hY₁_cont_r hY₁_diff_r (fun _ _ => Set.mem_univ _)
+      hY₂_cont_r hY₂_diff_r (fun _ _ => Set.mem_univ _) h_eq
+  -- Equality on the left piece `[a, t₀]`.
+  have h_left : Set.EqOn Y₁ Y₂ (Set.Icc a t₀) := by
+    -- Lipschitz on `Ioc a t₀` (subset of `Icc a b`).
+    have hLip_l : ∀ t ∈ Set.Ioc a t₀,
+        LipschitzOnWith K (v t) (Set.univ : Set E) := by
+      intro t ht
+      have ht_mem : t ∈ Set.Icc a b :=
+        ⟨ht.1.le, ht.2.trans ht₀_b⟩
+      exact hLip t ht_mem
+    -- Continuity on `[a, t₀]`.
+    have hY₁_cont_l : ContinuousOn Y₁ (Set.Icc a t₀) :=
+      hY₁_cont.mono (Set.Icc_subset_Icc_right ht₀_b)
+    have hY₂_cont_l : ContinuousOn Y₂ (Set.Icc a t₀) :=
+      hY₂_cont.mono (Set.Icc_subset_Icc_right ht₀_b)
+    -- Differentiability on `Ioc a t₀` in the form `HasDerivWithinAt _ _ (Iic t) t`.
+    have hY₁_diff_l : ∀ t ∈ Set.Ioc a t₀,
+        HasDerivWithinAt Y₁ (v t (Y₁ t)) (Set.Iic t) t := by
+      intro t ht
+      have ht_mem : t ∈ Set.Icc a b :=
+        ⟨ht.1.le, ht.2.trans ht₀_b⟩
+      have h := hY₁' t ht_mem
+      have ht_Ioc : t ∈ Set.Ioc a b := ⟨ht.1, ht.2.trans ht₀_b⟩
+      have hmem : Set.Icc a b ∈ 𝓝[≤] t := Icc_mem_nhdsLE_of_mem ht_Ioc
+      exact h.mono_of_mem_nhdsWithin hmem
+    have hY₂_diff_l : ∀ t ∈ Set.Ioc a t₀,
+        HasDerivWithinAt Y₂ (v t (Y₂ t)) (Set.Iic t) t := by
+      intro t ht
+      have ht_mem : t ∈ Set.Icc a b :=
+        ⟨ht.1.le, ht.2.trans ht₀_b⟩
+      have h := hY₂' t ht_mem
+      have ht_Ioc : t ∈ Set.Ioc a b := ⟨ht.1, ht.2.trans ht₀_b⟩
+      have hmem : Set.Icc a b ∈ 𝓝[≤] t := Icc_mem_nhdsLE_of_mem ht_Ioc
+      exact h.mono_of_mem_nhdsWithin hmem
+    exact ODE_solution_unique_of_mem_Icc_left
+      (v := v) (s := fun _ => Set.univ) (K := K)
+      (f := Y₁) (g := Y₂) (a := a) (b := t₀)
+      hLip_l hY₁_cont_l hY₁_diff_l (fun _ _ => Set.mem_univ _)
+      hY₂_cont_l hY₂_diff_l (fun _ _ => Set.mem_univ _) h_eq
+  -- Combine left and right pieces via `Icc a b = Icc a t₀ ∪ Icc t₀ b`.
+  have hunion : Set.Icc a t₀ ∪ Set.Icc t₀ b = Set.Icc a b :=
+    Set.Icc_union_Icc_eq_Icc ht₀_a ht₀_b
+  intro t ht
+  have : t ∈ Set.Icc a t₀ ∪ Set.Icc t₀ b := by rw [hunion]; exact ht
+  rcases this with htl | htr
+  · exact h_left htl
+  · exact h_right htr
 
 end Variation
 end Riemannian
