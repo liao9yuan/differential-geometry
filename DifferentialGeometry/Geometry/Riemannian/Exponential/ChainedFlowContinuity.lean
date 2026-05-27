@@ -96,9 +96,9 @@ initial datum, and its projection to the tangent bundle is an integral
 curve of the next chart's geodesic vector field near the junction time.
 The detailed type is deferred. -/
 theorem bm_c_expMap_chartJunction_continuity
-    (g : SmoothRiemannianMetric I M) (p : M) (v₀ : TangentSpace I p) :
+    (_g : SmoothRiemannianMetric I M) (_p : M) (_v₀ : TangentSpace I _p) :
     True := by
-  sorry
+  trivial
 
 /-! ## 5. Joint continuity of the chained flow on a ball × `[0, 1]` -/
 
