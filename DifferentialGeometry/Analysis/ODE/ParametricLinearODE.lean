@@ -3951,6 +3951,365 @@ theorem linearODESolution_hasFDerivAt_param
   change ‖R t‖ ≤ c * ‖h‖
   exact h_final
 
+/-- **Joint continuity of the time-partial derivative** of the parametric
+linear ODE solution. The function `(x, t) ↦ A(x, t) (Z(x, t))`, where
+`Z = linearODESolution A a b' h₀ Z₀`, is jointly continuous on
+`U ×ˢ Ioo a b'`. -/
+theorem linearODESolution_partial_t_continuousOn
+    {A : F → ℝ → (G →L[ℝ] G)} {a b' h₀ : ℝ} {Z₀ : F → G}
+    (hab_lt : a < b') (h₀_mem : h₀ ∈ Set.Ioo a b')
+    {U : Set F} (hU : IsOpen U)
+    (hA_cont : ContinuousOn (Function.uncurry A) (U ×ˢ Set.Ioo a b'))
+    (hZ₀_cont : ContinuousOn Z₀ U) :
+    ContinuousOn
+      (fun p : F × ℝ => A p.1 p.2 (linearODESolution A a b' h₀ Z₀ p.1 p.2))
+      (U ×ˢ Set.Ioo a b') := by
+  have hZ_cont : ContinuousOn
+      (Function.uncurry (linearODESolution A a b' h₀ Z₀)) (U ×ˢ Set.Ioo a b') :=
+    linearODESolution_continuousOn hab_lt h₀_mem hU hA_cont hZ₀_cont
+  have h_app_cont : Continuous fun q : (G →L[ℝ] G) × G => q.1 q.2 :=
+    isBoundedBilinearMap_apply.continuous
+  have h_pair_cont : ContinuousOn
+      (fun p : F × ℝ => (A p.1 p.2, linearODESolution A a b' h₀ Z₀ p.1 p.2))
+      (U ×ˢ Set.Ioo a b') :=
+    ContinuousOn.prodMk hA_cont hZ_cont
+  exact h_app_cont.comp_continuousOn h_pair_cont
+
+open Classical in
+set_option linter.style.setOption false in
+set_option maxHeartbeats 800000 in
+/-- Joint continuity of the CLM-valued x-partial in the operator-norm topology. -/
+theorem variationalW_clm_continuousOn
+    [FiniteDimensional ℝ F]
+    {A : F → ℝ → (G →L[ℝ] G)} {a b' : ℝ} (hab_lt : a < b')
+    {h₀ : ℝ} (h₀_mem : h₀ ∈ Set.Ioo a b')
+    {Z₀ : F → G}
+    {U : Set F} (hU : IsOpen U)
+    (hA_cont : ContinuousOn (Function.uncurry A) (U ×ˢ Set.Ioo a b'))
+    (hDA_cont : ContinuousOn
+      (Function.uncurry fun x t => fderiv ℝ (fun y => A y t) x)
+      (U ×ˢ Set.Ioo a b'))
+    (hZ₀_cont : ContinuousOn Z₀ U)
+    (hDZ₀_cont : ContinuousOn (fun x => fderiv ℝ Z₀ x) U) :
+    ContinuousOn
+      (fun p : F × ℝ =>
+        if hx : p.1 ∈ U then
+          if ht : p.2 ∈ Set.Ioo a b' then
+            variationalW_clm hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont hx ht
+          else 0
+        else 0)
+      (U ×ˢ Set.Ioo a b') := by
+  rw [continuousOn_clm_apply]
+  intro v
+  have h_eq : ∀ p ∈ U ×ˢ Set.Ioo a b',
+      (if hx : p.1 ∈ U then
+        if ht : p.2 ∈ Set.Ioo a b' then
+          variationalW_clm hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont hx ht
+        else 0
+      else 0) v =
+      variationalW A a b' h₀ Z₀ p.1 v p.2 := by
+    intro ⟨x, t⟩ ⟨hxU, htI⟩
+    change (if hx : x ∈ U then if ht : t ∈ Set.Ioo a b' then
+            variationalW_clm hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont hx ht
+          else 0 else 0) v = _
+    rw [dif_pos hxU, dif_pos htI]
+    exact variationalW_clm_apply hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont hxU htI v
+  refine ContinuousOn.congr ?_ h_eq
+  have hZ₀'_cont : ContinuousOn (fun x => (fderiv ℝ Z₀ x) v) U :=
+    (ContinuousLinearMap.apply ℝ G v).continuous.comp_continuousOn hDZ₀_cont
+  exact variationalW_continuousOn hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont v hZ₀'_cont
+
+
+/-! ### Total Frechet derivative and C^1 regularity of the joint map (x, t) -> Z(x, t)
+
+We combine the parameter-partial derivative `variationalW_clm` and the
+time-partial derivative `A(x, t)(Z(x, t))` into the total Frechet derivative
+of the joint map `(x, t) |-> linearODESolution A a b' h0 Z0 x t` on
+`U xs Ioo a b'`.
+-/
+
+set_option maxHeartbeats 1600000 in
+/-- **Total Frechet derivative** of the joint map `(x, t) |-> Z(x, t)`.
+
+At every `(x0, t0) in U xs Ioo a b'`, the map
+`Function.uncurry (linearODESolution A a b' h0 Z0)` has Frechet derivative
+`(variationalW_clm ...).coprod (toSpanSingleton R (A x0 t0 (Z x0 t0)))`,
+i.e. the linear map `(h, s) |-> L_x(h) + s . A(x0, t0)(Z(x0, t0))`.
+
+The proof decomposes the remainder as
+`[Z(x0+h, t0+s) - Z(x0+h, t0) - s . v0] + [Z(x0+h, t0) - Z(x0, t0) - L_x(h)]`
+and bounds each piece as `o(||(h,s)||)` using the mean-value theorem (for the
+time piece) and `linearODESolution_hasFDerivAt_param` (for the parameter piece).
+-/
+theorem linearODESolution_hasFDerivAt_joint
+    [FiniteDimensional ℝ F]
+    {A : F → ℝ → (G →L[ℝ] G)} {Z₀ : F → G}
+    {a b' : ℝ} (hab_lt : a < b') {h₀ : ℝ} (h₀_mem : h₀ ∈ Set.Ioo a b')
+    {U : Set F} (hU : IsOpen U)
+    (hA_cont : ContinuousOn (Function.uncurry A) (U ×ˢ Set.Ioo a b'))
+    (hDA_cont : ContinuousOn
+      (Function.uncurry fun x t => fderiv ℝ (fun y => A y t) x)
+      (U ×ˢ Set.Ioo a b'))
+    (hA_diff : ∀ y ∈ U, ∀ s ∈ Set.Ioo a b',
+      HasFDerivAt (fun z => A z s) (fderiv ℝ (fun z => A z s) y) y)
+    (hZ₀_cont : ContinuousOn Z₀ U)
+    (hDZ₀_cont : ContinuousOn (fun x => fderiv ℝ Z₀ x) U)
+    (hZ₀_diff : ∀ y ∈ U, HasFDerivAt Z₀ (fderiv ℝ Z₀ y) y)
+    {x₀ : F} (hx₀ : x₀ ∈ U) {t₀ : ℝ} (ht₀ : t₀ ∈ Set.Ioo a b') :
+    HasFDerivAt (Function.uncurry (linearODESolution A a b' h₀ Z₀))
+      ((variationalW_clm hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont hx₀ ht₀).coprod
+        (ContinuousLinearMap.toSpanSingleton ℝ
+          (A x₀ t₀ (linearODESolution A a b' h₀ Z₀ x₀ t₀))))
+      (x₀, t₀) := by
+  set Z := linearODESolution A a b' h₀ Z₀ with hZ_def
+  set v₀ := A x₀ t₀ (Z x₀ t₀) with hv₀_def
+  set L_x := variationalW_clm hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont hx₀ ht₀
+  set L := L_x.coprod (ContinuousLinearMap.toSpanSingleton ℝ v₀)
+  -- Show `HasFDerivAt` via the `isLittleO` characterisation.
+  rw [hasFDerivAt_iff_isLittleO_nhds_zero, isLittleO_iff]
+  intro c hc
+  -- (1) From `hasFDerivAt_param`: the x-partial remainder is `o(||h||)`.
+  have hx_param := linearODESolution_hasFDerivAt_param hab_lt h₀_mem hU hA_cont hDA_cont
+    hA_diff hZ₀_cont hDZ₀_cont hZ₀_diff hx₀ ht₀
+  rw [hasFDerivAt_iff_isLittleO_nhds_zero] at hx_param
+  have hx_param_bd := hx_param.bound (show (0 : ℝ) < c / 2 by linarith)
+  obtain ⟨δ_x, hδ_x_pos, hδ_x_bd⟩ := Metric.eventually_nhds_iff.mp hx_param_bd
+  -- (2) Joint continuity of the t-partial at `(x₀, t₀)`.
+  have ht_partial_cont :
+      ContinuousOn (fun p : F × ℝ => A p.1 p.2 (Z p.1 p.2)) (U ×ˢ Set.Ioo a b') :=
+    linearODESolution_partial_t_continuousOn hab_lt h₀_mem hU hA_cont hZ₀_cont
+  have hS_open : IsOpen (U ×ˢ Set.Ioo a b' : Set (F × ℝ)) := hU.prod isOpen_Ioo
+  have hx₀t₀_mem : (x₀, t₀) ∈ U ×ˢ Set.Ioo a b' := ⟨hx₀, ht₀⟩
+  have ht_partial_cont_at : ContinuousAt
+      (fun p : F × ℝ => A p.1 p.2 (Z p.1 p.2)) (x₀, t₀) :=
+    (ht_partial_cont (x₀, t₀) hx₀t₀_mem).continuousAt (hS_open.mem_nhds hx₀t₀_mem)
+  rw [Metric.continuousAt_iff] at ht_partial_cont_at
+  obtain ⟨δ_t, hδ_t_pos, hδ_t_bd⟩ := ht_partial_cont_at (c / 2) (by linarith)
+  -- (3) Neighbourhood of `(0, 0)` mapping into `U x Ioo a b'`.
+  have h_add_nhds : ∀ᶠ p : F × ℝ in 𝓝 (0, 0),
+      x₀ + p.1 ∈ U ∧ t₀ + p.2 ∈ Set.Ioo a b' := by
+    have h1 : ∀ᶠ q : F in 𝓝 0, x₀ + q ∈ U := by
+      have : Continuous (fun q : F => x₀ + q) := continuous_const.add continuous_id
+      exact this.continuousAt.preimage_mem_nhds (by simpa using hU.mem_nhds hx₀)
+    have h2 : ∀ᶠ r : ℝ in 𝓝 0, t₀ + r ∈ Set.Ioo a b' := by
+      have : Continuous (fun r : ℝ => t₀ + r) := continuous_const.add continuous_id
+      exact this.continuousAt.preimage_mem_nhds (by simpa using isOpen_Ioo.mem_nhds ht₀)
+    rw [nhds_prod_eq]
+    exact h1.prod_mk h2
+  obtain ⟨δ₀, hδ₀_pos, hδ₀_bd⟩ := Metric.eventually_nhds_iff.mp h_add_nhds
+  -- Choose a uniform radius.
+  set δ := min δ₀ (min δ_x δ_t) with hδ_def
+  have hδ_pos : 0 < δ := lt_min hδ₀_pos (lt_min hδ_x_pos hδ_t_pos)
+  rw [Metric.eventually_nhds_iff]
+  refine ⟨δ, hδ_pos, fun ⟨h, s⟩ h_dist => ?_⟩
+  -- Unpack the distance condition: max ||h|| ||s|| < delta.
+  simp only [dist_zero_right] at h_dist
+  have hh_lt : ‖h‖ < δ := lt_of_le_of_lt (le_max_left _ _) h_dist
+  have hs_lt : ‖s‖ < δ := lt_of_le_of_lt (le_max_right _ _) h_dist
+  have hh_lt_δ₀ : ‖h‖ < δ₀ := lt_of_lt_of_le hh_lt (min_le_left _ _)
+  have hs_lt_δ₀ : ‖s‖ < δ₀ := lt_of_lt_of_le hs_lt (min_le_left _ _)
+  have hh_lt_δx : ‖h‖ < δ_x :=
+    lt_of_lt_of_le hh_lt ((min_le_right _ _).trans (min_le_left _ _))
+  have hhs_lt_δt : max ‖h‖ ‖s‖ < δ_t :=
+    lt_of_lt_of_le h_dist ((min_le_right _ _).trans (min_le_right _ _))
+  -- Domain membership.
+  have hprod_mem : x₀ + h ∈ U ∧ t₀ + s ∈ Set.Ioo a b' := by
+    have h_dist_pair : dist (h, s) (0, 0) < δ₀ := by
+      rw [Prod.dist_eq, dist_zero_right, dist_zero_right]
+      exact max_lt hh_lt_δ₀ hs_lt_δ₀
+    exact hδ₀_bd h_dist_pair
+  obtain ⟨hxh_U, hts_Ioo⟩ := hprod_mem
+  -- Simplify the goal.
+  change ‖uncurry Z ((x₀, t₀) + (h, s)) - uncurry Z (x₀, t₀) - L (h, s)‖ ≤ c * ‖(h, s)‖
+  simp only [uncurry, Prod.mk_add_mk]
+  have hL_eq : L (h, s) = L_x h + s • v₀ := by
+    simp [L, ContinuousLinearMap.coprod_apply, ContinuousLinearMap.toSpanSingleton_apply]
+  rw [hL_eq]
+  -- Split the remainder via the intermediate value Z(x₀+h, t₀).
+  have h_split :
+      Z (x₀ + h) (t₀ + s) - Z x₀ t₀ - (L_x h + s • v₀)
+        = (Z (x₀ + h) (t₀ + s) - Z (x₀ + h) t₀ - s • v₀)
+          + (Z (x₀ + h) t₀ - Z x₀ t₀ - L_x h) := by abel
+  rw [h_split]
+  -- Triangle inequality.
+  calc ‖(Z (x₀ + h) (t₀ + s) - Z (x₀ + h) t₀ - s • v₀)
+        + (Z (x₀ + h) t₀ - Z x₀ t₀ - L_x h)‖
+      ≤ ‖Z (x₀ + h) (t₀ + s) - Z (x₀ + h) t₀ - s • v₀‖
+        + ‖Z (x₀ + h) t₀ - Z x₀ t₀ - L_x h‖ := norm_add_le _ _
+    _ ≤ c / 2 * ‖(h, s)‖ + c / 2 * ‖(h, s)‖ := by
+        apply add_le_add
+        · -- Bound term_time via MVT on the auxiliary function
+          -- chi(r) = Z(x₀+h, r) - (r - t₀) . v₀
+          -- whose derivative is A(x₀+h, r)(Z(x₀+h, r)) - v₀.
+          have hZ_deriv_at : ∀ r ∈ Set.Ioo a b',
+              HasDerivAt (Z (x₀ + h) ·) (A (x₀ + h) r (Z (x₀ + h) r)) r :=
+            fun r hr => linearODESolution_hasDerivAt hab_lt h₀_mem hU hA_cont hxh_U hr
+          set χ : ℝ → G := fun r => Z (x₀ + h) r - (r - t₀) • v₀ with hχ_def
+          have hχ_diff : ∀ r ∈ Set.Ioo a b', DifferentiableAt ℝ χ r := by
+            intro r hr
+            exact (hZ_deriv_at r hr).differentiableAt.sub
+              (((hasDerivAt_id r).sub (hasDerivAt_const r t₀)).smul_const v₀).differentiableAt
+          have hχ_deriv : ∀ r ∈ Set.Ioo a b',
+              deriv χ r = A (x₀ + h) r (Z (x₀ + h) r) - v₀ := by
+            intro r hr
+            have hd : HasDerivAt χ (A (x₀ + h) r (Z (x₀ + h) r) - v₀) r := by
+              have hd1 := hZ_deriv_at r hr
+              have hd2 : HasDerivAt (fun r => (r - t₀) • v₀) v₀ r := by
+                have h_base := ((hasDerivAt_id r).sub (hasDerivAt_const r t₀)).smul_const v₀
+                -- h_base : HasDerivAt ((id - const t₀) • const v₀) ((1-0) • v₀) r
+                -- Simplify: (1-0) • v₀ = v₀, and the function is (r - t₀) • v₀.
+                convert h_base using 1
+                simp
+              exact hd1.sub hd2
+            exact hd.deriv
+          -- The set `uIcc t₀ (t₀ + s)` is convex, contained in `Ioo a b'`.
+          have h_uIcc_sub : Set.uIcc t₀ (t₀ + s) ⊆ Set.Ioo a b' := by
+            intro r hr
+            rw [Set.mem_uIcc] at hr
+            constructor
+            · rcases hr with ⟨h1, _⟩ | ⟨h1, _⟩ <;> linarith [ht₀.1, hts_Ioo.1]
+            · rcases hr with ⟨_, h2⟩ | ⟨_, h2⟩ <;> linarith [ht₀.2, hts_Ioo.2]
+          -- Derivative bound: for r in [t₀, t₀+s], dist (x₀+h, r) (x₀, t₀) < δ_t.
+          have hχ_deriv_bd : ∀ r ∈ Set.uIcc t₀ (t₀ + s), ‖deriv χ r‖ ≤ c / 2 := by
+            intro r hr
+            rw [hχ_deriv r (h_uIcc_sub hr)]
+            -- Need: dist (x₀+h, r) (x₀, t₀) < δ_t.
+            have h_r_bound : ‖r - t₀‖ ≤ ‖s‖ := by
+              rw [Set.mem_uIcc] at hr
+              rw [Real.norm_eq_abs, Real.norm_eq_abs]
+              rcases hr with ⟨h1, h2⟩ | ⟨h1, h2⟩
+              · rw [abs_of_nonneg (by linarith), abs_of_nonneg (by linarith)]; linarith
+              · rw [abs_of_nonpos (by linarith), abs_of_nonpos (by linarith)]; linarith
+            have h_dist_prod : dist (x₀ + h, r) (x₀, t₀) < δ_t := by
+              rw [Prod.dist_eq, dist_eq_norm, show x₀ + h - x₀ = h from add_sub_cancel_left _ _,
+                dist_eq_norm]
+              exact lt_of_le_of_lt (max_le_max le_rfl h_r_bound) hhs_lt_δt
+            have := hδ_t_bd h_dist_prod
+            rw [dist_eq_norm] at this
+            exact le_of_lt this
+          -- Apply the MVT.
+          -- Use `norm_image_sub_le_of_norm_deriv_le` for the 1D MVT.
+          have hχ_diff_uI : ∀ r ∈ Set.uIcc t₀ (t₀ + s),
+              DifferentiableAt ℝ χ r :=
+            fun r hr => hχ_diff r (h_uIcc_sub hr)
+          have h_mvt := Convex.norm_image_sub_le_of_norm_deriv_le
+            (𝕜 := ℝ)
+            hχ_diff_uI
+            hχ_deriv_bd
+            (convex_uIcc t₀ (t₀ + s))
+            (Set.left_mem_uIcc) (Set.right_mem_uIcc)
+          -- Simplify: chi(t₀+s) - chi(t₀) = Z(x₀+h, t₀+s) - Z(x₀+h, t₀) - s . v₀.
+          have hχ_diff_eq :
+              χ (t₀ + s) - χ t₀
+                = Z (x₀ + h) (t₀ + s) - Z (x₀ + h) t₀ - s • v₀ := by
+            simp [hχ_def]; ring_nf; abel
+          rw [← hχ_diff_eq]
+          have hs_eq : ‖t₀ + s - t₀‖ = ‖s‖ := by rw [add_sub_cancel_left]
+          rw [hs_eq] at h_mvt
+          calc ‖χ (t₀ + s) - χ t₀‖
+              ≤ c / 2 * ‖s‖ := h_mvt
+            _ ≤ c / 2 * ‖(h, s)‖ :=
+                mul_le_mul_of_nonneg_left (norm_snd_le (h, s)) (by linarith)
+        · -- Bound term_param from hasFDerivAt_param.
+          have h_param_bd : ‖Z (x₀ + h) t₀ - Z x₀ t₀ - L_x h‖ ≤ c / 2 * ‖h‖ := by
+            have := hδ_x_bd (show dist h 0 < δ_x by rwa [dist_zero_right])
+            simpa [hZ_def] using this
+          calc ‖Z (x₀ + h) t₀ - Z x₀ t₀ - L_x h‖
+              ≤ c / 2 * ‖h‖ := h_param_bd
+            _ ≤ c / 2 * ‖(h, s)‖ :=
+                mul_le_mul_of_nonneg_left (norm_fst_le (h, s)) (by linarith)
+    _ = c * ‖(h, s)‖ := by ring
+
+set_option maxHeartbeats 800000 in
+/-- **C^1 regularity** of the joint map `(x, t) |-> linearODESolution A a b' h0 Z0 x t`
+on the open set `U xs Ioo a b'`. -/
+theorem linearODESolution_contDiffOn_one
+    [FiniteDimensional ℝ F]
+    {A : F → ℝ → (G →L[ℝ] G)} {Z₀ : F → G}
+    {a b' : ℝ} (hab_lt : a < b') {h₀ : ℝ} (h₀_mem : h₀ ∈ Set.Ioo a b')
+    {U : Set F} (hU : IsOpen U)
+    (hA_cont : ContinuousOn (Function.uncurry A) (U ×ˢ Set.Ioo a b'))
+    (hDA_cont : ContinuousOn
+      (Function.uncurry fun x t => fderiv ℝ (fun y => A y t) x)
+      (U ×ˢ Set.Ioo a b'))
+    (hA_diff : ∀ y ∈ U, ∀ s ∈ Set.Ioo a b',
+      HasFDerivAt (fun z => A z s) (fderiv ℝ (fun z => A z s) y) y)
+    (hZ₀_cont : ContinuousOn Z₀ U)
+    (hDZ₀_cont : ContinuousOn (fun x => fderiv ℝ Z₀ x) U)
+    (hZ₀_diff : ∀ y ∈ U, HasFDerivAt Z₀ (fderiv ℝ Z₀ y) y) :
+    ContDiffOn ℝ 1
+      (Function.uncurry (linearODESolution A a b' h₀ Z₀))
+      (U ×ˢ Set.Ioo a b') := by
+  classical
+  set Z := linearODESolution A a b' h₀ Z₀ with hZ_def
+  have hS_open : IsOpen (U ×ˢ Set.Ioo a b' : Set (F × ℝ)) := hU.prod isOpen_Ioo
+  -- Use: ContDiffOn R (n+1) f S <-> DifferentiableOn + ... + ContDiffOn n (fderiv f) S.
+  change ContDiffOn ℝ ((0 : WithTop ℕ∞) + 1) _ _
+  rw [contDiffOn_succ_iff_fderiv_of_isOpen hS_open]
+  refine ⟨?_, ?_, ?_⟩
+  · -- DifferentiableOn.
+    intro ⟨x, t⟩ ⟨hx, ht⟩
+    exact (linearODESolution_hasFDerivAt_joint hab_lt h₀_mem hU hA_cont hDA_cont hA_diff
+      hZ₀_cont hDZ₀_cont hZ₀_diff hx ht).differentiableAt.differentiableWithinAt
+  · -- AnalyticOn (vacuous since 0 /= omega).
+    intro h_absurd; exact absurd h_absurd (by simp)
+  · -- ContDiffOn R 0 (fderiv R (uncurry Z)) S = ContinuousOn.
+    rw [contDiffOn_zero]
+    -- The fderiv at (x, t) in U x Ioo a b' equals
+    -- (variationalW_clm ...).coprod (toSpanSingleton R (A x t (Z x t))).
+    -- Step 1: show the composite formula is continuous on the domain.
+    have h_coprod_bilin : Continuous
+        (fun (p : (F →L[ℝ] G) × (ℝ →L[ℝ] G)) => p.1.coprod p.2) :=
+      (ContinuousLinearMap.coprodEquivL ℝ).continuous
+    have h_clm_cont : ContinuousOn
+        (fun p : F × ℝ =>
+          if hx : p.1 ∈ U then
+            if ht : p.2 ∈ Set.Ioo a b' then
+              variationalW_clm hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont hx ht
+            else 0
+          else 0)
+        (U ×ˢ Set.Ioo a b') :=
+      variationalW_clm_continuousOn hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont hDZ₀_cont
+    have h_toSpan_cont : ContinuousOn
+        (fun p : F × ℝ => ContinuousLinearMap.toSpanSingleton ℝ
+          (A p.1 p.2 (Z p.1 p.2)))
+        (U ×ˢ Set.Ioo a b') :=
+      (ContinuousLinearMap.toSpanSingletonCLE (𝕜 := ℝ) (E := G)).continuous.comp_continuousOn
+        (linearODESolution_partial_t_continuousOn hab_lt h₀_mem hU hA_cont hZ₀_cont)
+    have h_formula_cont : ContinuousOn
+        (fun p : F × ℝ =>
+          (if hx : p.1 ∈ U then
+            if ht : p.2 ∈ Set.Ioo a b' then
+              variationalW_clm hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont hx ht
+            else 0
+          else 0).coprod
+            (ContinuousLinearMap.toSpanSingleton ℝ (A p.1 p.2 (Z p.1 p.2))))
+        (U ×ˢ Set.Ioo a b') :=
+      h_coprod_bilin.comp_continuousOn (h_clm_cont.prodMk h_toSpan_cont)
+    -- Step 2: fderiv agrees with this formula on the domain.
+    apply h_formula_cont.congr
+    intro p hp
+    obtain ⟨hx, ht⟩ := Set.mem_prod.mp hp
+    -- On the domain, the dif_pos simplifies.
+    have h_eq : (if hx' : p.1 ∈ U then
+        if ht' : p.2 ∈ Set.Ioo a b' then
+          variationalW_clm hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont hx' ht'
+        else 0
+      else 0) = variationalW_clm hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont hx ht := by
+      rw [dif_pos hx, dif_pos ht]
+    -- Beta-reduce the applied lambda and use fderiv from hasFDerivAt_joint.
+    change fderiv ℝ (uncurry Z) p
+        = ((if hx' : p.1 ∈ U then
+              if ht' : p.2 ∈ Set.Ioo a b' then
+                variationalW_clm hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont hx' ht'
+              else 0
+            else 0).coprod
+            (ContinuousLinearMap.toSpanSingleton ℝ (A p.1 p.2 (Z p.1 p.2))))
+    rw [h_eq, hZ_def]
+    conv_lhs => rw [show p = (p.1, p.2) from Prod.mk.eta.symm]
+    exact (linearODESolution_hasFDerivAt_joint hab_lt h₀_mem hU hA_cont hDA_cont
+      hA_diff hZ₀_cont hDZ₀_cont hZ₀_diff hx ht).fderiv
+
 end VariationalSolution
 
 end Flow
