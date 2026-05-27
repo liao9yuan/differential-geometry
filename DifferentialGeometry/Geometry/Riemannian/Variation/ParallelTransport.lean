@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Riemannian.AlongCurve
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Equation
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.ChartTransition
 import DifferentialGeometry.Geometry.Riemannian.Variation.ParallelLocalODE
 import DifferentialGeometry.Integral.Connection.LeviCivita
 import DifferentialGeometry.Coordinates.NablaComponents
@@ -119,16 +120,33 @@ the linear change-of-frame; equivalently the parallel-transport
 condition is chart-invariant, as recorded in the global Levi-Civita
 construction. -/
 
-/-- **parallel-chart-overlap-consistency.** Two solutions in
-overlapping charts at the same point coincide modulo the chart-change
-linear isomorphism on tangent fibres; equivalently the parallel
-transport equation is invariant under chart transitions. -/
-theorem parallel_chart_overlap_consistency
+/-- **parallel-chart-overlap-consistency.** The chart-α coordinate
+representation `Yα` of a tangent-field along `γ` and its chart-β
+counterpart `Yβ` are related by the chart-transition Jacobian
+`T_{αβ} := chartTransitionAt α β` evaluated along the chart-curve
+`u_α(t) := extChartAt I α (γ t)`:
+`Yβ t = T_{αβ}(u_α t)(Yα t)`,
+and likewise `uPrimeβ t = T_{αβ}(u_α t)(uPrimeα t)`. Under this
+transition relation, parallelism of `Yα` in the chart at `α` is
+equivalent to parallelism of the transition-transformed
+`Yβ := t ↦ T_{αβ}(u_α t)(Yα t)` in the chart at `β`.
+
+This is the mathematically correct formulation: the *same manifold
+tangent-section* admits two distinct `E`-valued representations, one
+per chart, related by the chart-transition Jacobian. The previous
+"same `Y`" form is mathematically false because the chart-α and
+chart-β coordinate representations differ. -/
+theorem parallel_chart_overlap_consistency [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α β : M) (γ : ℝ → M)
-    (uPrimeα uPrimeβ : ℝ → E) (Y : ℝ → E) (s : Set ℝ)
-    (hαβ : ∀ t ∈ s, γ t ∈ (chartAt H α).source ∩ (chartAt H β).source) :
-    IsParallelChart (I := I) g α γ uPrimeα Y s ↔
-      IsParallelChart (I := I) g β γ uPrimeβ Y s := sorry
+    (uPrimeα Yα : ℝ → E) (s : Set ℝ)
+    (hαβ : ∀ t ∈ s, γ t ∈ (chartAt H α).source ∩ (chartAt H β).source)
+    (_hpar : IsParallelChart (I := I) g α γ uPrimeα Yα s) :
+    IsParallelChart (I := I) g β γ
+      (fun t => Geodesic.chartTransitionAt (I := I) α β
+                  (chartCurve (I := I) α γ t) (uPrimeα t))
+      (fun t => Geodesic.chartTransitionAt (I := I) α β
+                  (chartCurve (I := I) α γ t) (Yα t))
+      s := sorry
 
 /-! ## Global extension
 
