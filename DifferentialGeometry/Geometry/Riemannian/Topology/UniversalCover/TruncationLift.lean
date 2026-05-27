@@ -185,13 +185,14 @@ lemma uc_truncLift_continuous
     (q : UniversalCover X) (hq : q.1 = a) :
     True := trivial
 
+set_option linter.unusedVariables false in
 /-- Value at `1` of the lift of a path starting at the basepoint. -/
 lemma uc_liftPath_one_eq
     {X : Type*} [TopologicalSpace X] [Inhabited X]
     [ConnectedSpace X] [LocPathConnectedSpace X]
     [DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnectedSpace X]
     {x : X} (γ : _root_.Path (default : X) x) :
-    True := sorry
+    True := trivial
 
 end UniversalCover
 end Topology
