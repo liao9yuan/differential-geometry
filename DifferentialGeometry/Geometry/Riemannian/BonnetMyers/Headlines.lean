@@ -47,6 +47,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Geometry.Riemannian.Variation
+open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 
 /-! ## Compactness sub-leaves -/
 
@@ -452,8 +453,68 @@ theorem pairwise_edist_bound_from_geodesic
   have hL_le : L ≤ Real.pi / Real.sqrt K := by
     rcases lt_or_eq_of_le hL_nn with hL_pos | hL_zero
     · -- Case `0 < L`: invoke the contradiction assembly to bound `L`.
+      -- The assembly consumes a parallel orthonormal frame of `(uPrime)`'s
+      -- perpendicular subspace together with auxiliary regularity data
+      -- (continuity of `uPrime`, differentiability and parallelism of each
+      -- frame vector, frame orthonormality, perpendicularity to `uPrime`,
+      -- and interval-integrability of the relevant integrands). The frame
+      -- construction is the canonical Gram-Schmidt-then-parallel-transport
+      -- of a unit basis perpendicular to `uPrime 0` along `γ`; its
+      -- explicit packaging is delegated to a future leaf and recorded as
+      -- a structural residual gap here so that the headline composition
+      -- proceeds at the contradiction-assembly call site.
+      -- (i) the `mfderiv` realisation of `uPrime` — definitionally true.
+      have huPrimeEq :
+          ∀ t ∈ Set.Icc (0 : ℝ) L,
+            (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) : E) = uPrime t := by
+        intro t _ht; rfl
+      -- (ii) continuity of `uPrime` on `Icc 0 L`. Follows from
+      -- `ContMDiff 𝓘(ℝ, ℝ) I ∞ γ` via the continuity of the mfderiv map.
+      -- Recorded as a structural gap pending the explicit smoothness-to-
+      -- mfderiv-continuity bridge.
+      have huCont : ContinuousOn uPrime (Set.Icc (0 : ℝ) L) := by
+        sorry
+      -- (iii) parallel orthonormal perpendicular frame `e` along `γ`.
+      -- Canonical Gram-Schmidt at `γ 0` followed by parallel transport
+      -- along `γ`. The whole package is delegated.
+      have h_frame :
+          ∃ e : Fin (Module.finrank ℝ E - 1) → SectionAlongCurve I M γ,
+            (∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
+              DifferentiableAt ℝ (e i).toFun t) ∧
+            (∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
+              chartCovDerivAlong (I := I) g (γ t) γ (e i).toFun t = 0) ∧
+            (∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i j,
+              g.inner (γ t) ((e i).toFun t) ((e j).toFun t) =
+                if i = j then 1 else 0) ∧
+            (∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i,
+              g.inner (γ t) ((e i).toFun t) (uPrime t) = 0) := by
+        sorry
+      obtain ⟨e, heDiff, hParallel, hON, hPerp⟩ := h_frame
+      -- (iv) interval-integrability of each index-form integrand.
+      -- Follows from continuity of all the building blocks (sin · e i,
+      -- its derivative, the chart Christoffels, and γ itself) on the
+      -- compact interval. Recorded as a structural gap.
+      have hIntegrandSum :
+          ∀ i : Fin (Module.finrank ℝ E - 1),
+            IntervalIntegrable
+              (fun t : ℝ => indexFormIntegrand (I := I) g γ
+                ((SectionAlongCurve.smulFun
+                  (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun)
+                ((SectionAlongCurve.smulFun
+                  (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun) t)
+              MeasureTheory.volume 0 L := by
+        sorry
+      -- (v) interval-integrability of `t ↦ Ric(γ t)(uPrime t)(uPrime t)`.
+      -- Follows from continuity of `uPrime` and `γ` together with
+      -- smoothness of the Ricci tensor. Recorded as a structural gap.
+      have hRicIntegrable :
+          IntervalIntegrable
+            (fun t : ℝ => ricciTensor (I := I) g (γ t) (uPrime t) (uPrime t))
+            MeasureTheory.volume 0 L := by
+        sorry
       exact length_bound_contradiction_assembly (I := I) g γ hγ_smooth_global
-        hγ_geo_global hL_pos _hK _hdim hRic' uPrime hγ_unit hγ_min
+        hγ_geo_global hL_pos _hK _hdim hRic' uPrime huPrimeEq hγ_unit huCont
+        e heDiff hParallel hON hPerp hIntegrandSum hRicIntegrable hγ_min
     · -- Case `L = 0`: `0 ≤ π/√K` is immediate from positivity of `π`
       -- and the square root.
       rw [← hL_zero]

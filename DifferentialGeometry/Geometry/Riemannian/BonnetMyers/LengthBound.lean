@@ -737,16 +737,191 @@ the unit speed `γ'`, and evaluates the trigonometric integrals via
 theorem sum_index_form_bound_by_curvature_hypothesis
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (_hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
-    (_hgeo : IsGeodesic (I := I) g γ) {L : ℝ} (_hL : 0 < L) {K : ℝ}
-    (_hRic : RicciBoundedBelow (I := I) g ((Module.finrank ℝ E - 1 : ℝ) * K))
+    (_hgeo : IsGeodesic (I := I) g γ) {L : ℝ} (hL : 0 < L) {K : ℝ}
+    (hRic : RicciBoundedBelow (I := I) g ((Module.finrank ℝ E - 1 : ℝ) * K))
     (uPrime : ℝ → E)
-    (_hUnit : ∀ t ∈ Set.Icc (0 : ℝ) L, g.inner (γ t) (uPrime t) (uPrime t) = 1)
-    (e : Fin (Module.finrank ℝ E - 1) → SectionAlongCurve I M γ) :
+    (huPrimeEq : ∀ t ∈ Set.Icc (0 : ℝ) L,
+      (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ) : E) = uPrime t)
+    (hUnit : ∀ t ∈ Set.Icc (0 : ℝ) L, g.inner (γ t) (uPrime t) (uPrime t) = 1)
+    (huCont : ContinuousOn uPrime (Set.Icc (0 : ℝ) L))
+    (e : Fin (Module.finrank ℝ E - 1) → SectionAlongCurve I M γ)
+    (heDiff : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
+      DifferentiableAt ℝ (e i).toFun t)
+    (hParallel : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
+      chartCovDerivAlong (I := I) g (γ t) γ (e i).toFun t = 0)
+    (hON : ∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i j,
+      g.inner (γ t) ((e i).toFun t) ((e j).toFun t) = if i = j then 1 else 0)
+    (hPerp : ∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i,
+      g.inner (γ t) ((e i).toFun t) (uPrime t) = 0)
+    (hIntegrandSum : ∀ i : Fin (Module.finrank ℝ E - 1),
+      IntervalIntegrable
+        (fun t : ℝ => indexFormIntegrand (I := I) g γ
+          ((SectionAlongCurve.smulFun
+            (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun)
+          ((SectionAlongCurve.smulFun
+            (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun) t)
+        MeasureTheory.volume 0 L)
+    (hRicIntegrable : IntervalIntegrable
+      (fun t : ℝ => ricciTensor (I := I) g (γ t) (uPrime t) (uPrime t))
+      MeasureTheory.volume 0 L) :
     (∑ i : Fin (Module.finrank ℝ E - 1),
         indexForm (I := I) g γ 0 L
           ((SectionAlongCurve.smulFun (fun t => Real.sin (Real.pi * t / L)) (e i)).toFun)
           ((SectionAlongCurve.smulFun (fun t => Real.sin (Real.pi * t / L)) (e i)).toFun))
-      ≤ (Module.finrank ℝ E - 1 : ℝ) * (L / 2) * ((Real.pi / L) ^ 2 - K) := sorry
+      ≤ (Module.finrank ℝ E - 1 : ℝ) * (L / 2) * ((Real.pi / L) ^ 2 - K) := by
+  classical
+  have hEval :
+      (∑ i : Fin (Module.finrank ℝ E - 1),
+        indexForm (I := I) g γ 0 L
+          ((SectionAlongCurve.smulFun (fun t => Real.sin (Real.pi * t / L)) (e i)).toFun)
+          ((SectionAlongCurve.smulFun (fun t => Real.sin (Real.pi * t / L)) (e i)).toFun))
+      = ∫ t in (0 : ℝ)..L,
+          ((Module.finrank ℝ E - 1 : ℝ) * (Real.pi / L) ^ 2
+              * Real.cos (Real.pi * t / L) ^ 2
+            - Real.sin (Real.pi * t / L) ^ 2
+                * ricciTensor (I := I) g (γ t) (uPrime t) (uPrime t)) :=
+    sum_index_form_frame_evaluation (I := I) g γ _hγ _hgeo hL uPrime huPrimeEq
+      hUnit huCont e heDiff hParallel hON hPerp hIntegrandSum
+  rw [hEval]
+  have hL_nonneg : (0 : ℝ) ≤ L := le_of_lt hL
+  have h_sin_cont : Continuous (fun t : ℝ => Real.sin (Real.pi * t / L)) := by
+    have hcont : Continuous (fun t : ℝ => Real.pi * t / L) := by fun_prop
+    exact Real.continuous_sin.comp hcont
+  have h_cos_cont : Continuous (fun t : ℝ => Real.cos (Real.pi * t / L)) := by
+    have hcont : Continuous (fun t : ℝ => Real.pi * t / L) := by fun_prop
+    exact Real.continuous_cos.comp hcont
+  have h_sinSq_cont : Continuous (fun t : ℝ => Real.sin (Real.pi * t / L) ^ 2) :=
+    h_sin_cont.pow 2
+  have h_cosSq_cont : Continuous (fun t : ℝ => Real.cos (Real.pi * t / L) ^ 2) :=
+    h_cos_cont.pow 2
+  have hPtwise : ∀ t ∈ Set.Icc (0 : ℝ) L,
+      (Module.finrank ℝ E - 1 : ℝ) * (Real.pi / L) ^ 2
+            * Real.cos (Real.pi * t / L) ^ 2
+        - Real.sin (Real.pi * t / L) ^ 2
+            * ricciTensor (I := I) g (γ t) (uPrime t) (uPrime t)
+      ≤ (Module.finrank ℝ E - 1 : ℝ) *
+          ((Real.pi / L) ^ 2 * Real.cos (Real.pi * t / L) ^ 2
+            - K * Real.sin (Real.pi * t / L) ^ 2) := by
+    intro t ht
+    have hRicAt : (Module.finrank ℝ E - 1 : ℝ) * K * (g.inner (γ t) (uPrime t) (uPrime t))
+        ≤ ricciTensor (I := I) g (γ t) (uPrime t) (uPrime t) :=
+      hRic (γ t) (uPrime t)
+    have hUnit_t : g.inner (γ t) (uPrime t) (uPrime t) = 1 := hUnit t ht
+    rw [hUnit_t, mul_one] at hRicAt
+    have hsin_sq_nn : 0 ≤ Real.sin (Real.pi * t / L) ^ 2 := sq_nonneg _
+    have h_mul : Real.sin (Real.pi * t / L) ^ 2 * ((Module.finrank ℝ E - 1 : ℝ) * K)
+        ≤ Real.sin (Real.pi * t / L) ^ 2
+            * ricciTensor (I := I) g (γ t) (uPrime t) (uPrime t) :=
+      mul_le_mul_of_nonneg_left hRicAt hsin_sq_nn
+    nlinarith [h_mul]
+  have h_LHS_integrable :
+      IntervalIntegrable
+        (fun t : ℝ =>
+          (Module.finrank ℝ E - 1 : ℝ) * (Real.pi / L) ^ 2
+              * Real.cos (Real.pi * t / L) ^ 2
+            - Real.sin (Real.pi * t / L) ^ 2
+                * ricciTensor (I := I) g (γ t) (uPrime t) (uPrime t))
+        MeasureTheory.volume 0 L := by
+    refine IntervalIntegrable.sub ?_ ?_
+    · have : Continuous (fun t : ℝ =>
+          (Module.finrank ℝ E - 1 : ℝ) * (Real.pi / L) ^ 2
+            * Real.cos (Real.pi * t / L) ^ 2) :=
+        h_cosSq_cont.const_mul _
+      exact this.intervalIntegrable 0 L
+    · exact hRicIntegrable.continuousOn_mul h_sinSq_cont.continuousOn
+  have h_RHS_integrable :
+      IntervalIntegrable
+        (fun t : ℝ =>
+          (Module.finrank ℝ E - 1 : ℝ) *
+            ((Real.pi / L) ^ 2 * Real.cos (Real.pi * t / L) ^ 2
+              - K * Real.sin (Real.pi * t / L) ^ 2))
+        MeasureTheory.volume 0 L := by
+    have h_cont : Continuous (fun t : ℝ =>
+        (Module.finrank ℝ E - 1 : ℝ) *
+          ((Real.pi / L) ^ 2 * Real.cos (Real.pi * t / L) ^ 2
+            - K * Real.sin (Real.pi * t / L) ^ 2)) := by
+      refine Continuous.mul continuous_const ?_
+      exact (h_cosSq_cont.const_mul _).sub (h_sinSq_cont.const_mul _)
+    exact h_cont.intervalIntegrable 0 L
+  have h_mono :
+      (∫ t in (0 : ℝ)..L,
+          ((Module.finrank ℝ E - 1 : ℝ) * (Real.pi / L) ^ 2
+              * Real.cos (Real.pi * t / L) ^ 2
+            - Real.sin (Real.pi * t / L) ^ 2
+                * ricciTensor (I := I) g (γ t) (uPrime t) (uPrime t)))
+        ≤ ∫ t in (0 : ℝ)..L,
+            (Module.finrank ℝ E - 1 : ℝ) *
+              ((Real.pi / L) ^ 2 * Real.cos (Real.pi * t / L) ^ 2
+                - K * Real.sin (Real.pi * t / L) ^ 2) :=
+    intervalIntegral.integral_mono_on hL_nonneg h_LHS_integrable h_RHS_integrable
+      hPtwise
+  refine h_mono.trans ?_
+  have h_pull_const :
+      (∫ t in (0 : ℝ)..L,
+        (Module.finrank ℝ E - 1 : ℝ) *
+          ((Real.pi / L) ^ 2 * Real.cos (Real.pi * t / L) ^ 2
+            - K * Real.sin (Real.pi * t / L) ^ 2))
+      = (Module.finrank ℝ E - 1 : ℝ) *
+          ∫ t in (0 : ℝ)..L,
+            ((Real.pi / L) ^ 2 * Real.cos (Real.pi * t / L) ^ 2
+              - K * Real.sin (Real.pi * t / L) ^ 2) :=
+    intervalIntegral.integral_const_mul _ _
+  rw [h_pull_const]
+  have h_pi_div_L_ne : (Real.pi / L) ≠ 0 :=
+    ne_of_gt (div_pos Real.pi_pos hL)
+  have h_L_ne : L ≠ 0 := ne_of_gt hL
+  have h_sinSq_fun :
+      (fun t : ℝ => Real.sin (Real.pi * t / L) ^ 2)
+      = (fun t : ℝ => (fun x : ℝ => Real.sin x ^ 2) ((Real.pi / L) * t)) := by
+    funext t
+    congr 1
+    congr 1
+    field_simp
+  have h_cosSq_fun :
+      (fun t : ℝ => Real.cos (Real.pi * t / L) ^ 2)
+      = (fun t : ℝ => (fun x : ℝ => Real.cos x ^ 2) ((Real.pi / L) * t)) := by
+    funext t
+    congr 1
+    congr 1
+    field_simp
+  have h_intsinSq : ∫ t in (0 : ℝ)..L, Real.sin (Real.pi * t / L) ^ 2 = L / 2 := by
+    rw [h_sinSq_fun,
+        intervalIntegral.integral_comp_mul_left (fun x => Real.sin x ^ 2) h_pi_div_L_ne]
+    have h_bndL : (Real.pi / L) * L = Real.pi := by field_simp
+    have h_bnd0 : (Real.pi / L) * 0 = 0 := mul_zero _
+    rw [h_bnd0, h_bndL, integral_sin_sq]
+    rw [Real.sin_zero, Real.cos_zero, Real.sin_pi, Real.cos_pi, smul_eq_mul]
+    field_simp
+    ring
+  have h_intcosSq : ∫ t in (0 : ℝ)..L, Real.cos (Real.pi * t / L) ^ 2 = L / 2 := by
+    rw [h_cosSq_fun,
+        intervalIntegral.integral_comp_mul_left (fun x => Real.cos x ^ 2) h_pi_div_L_ne]
+    have h_bndL : (Real.pi / L) * L = Real.pi := by field_simp
+    have h_bnd0 : (Real.pi / L) * 0 = 0 := mul_zero _
+    rw [h_bnd0, h_bndL, integral_cos_sq]
+    rw [Real.sin_zero, Real.cos_zero, Real.sin_pi, Real.cos_pi, smul_eq_mul]
+    field_simp
+    ring
+  have h_cosSq_intInteg : IntervalIntegrable
+      (fun t : ℝ => Real.cos (Real.pi * t / L) ^ 2) MeasureTheory.volume 0 L :=
+    h_cosSq_cont.intervalIntegrable 0 L
+  have h_sinSq_intInteg : IntervalIntegrable
+      (fun t : ℝ => Real.sin (Real.pi * t / L) ^ 2) MeasureTheory.volume 0 L :=
+    h_sinSq_cont.intervalIntegrable 0 L
+  have h_split :
+      (∫ t in (0 : ℝ)..L,
+        ((Real.pi / L) ^ 2 * Real.cos (Real.pi * t / L) ^ 2
+          - K * Real.sin (Real.pi * t / L) ^ 2))
+      = (Real.pi / L) ^ 2 * (L / 2) - K * (L / 2) := by
+    rw [intervalIntegral.integral_sub
+        (h_cosSq_intInteg.const_mul ((Real.pi / L) ^ 2))
+        (h_sinSq_intInteg.const_mul K),
+      intervalIntegral.integral_const_mul,
+      intervalIntegral.integral_const_mul,
+      h_intsinSq, h_intcosSq]
+  rw [h_split]
+  apply le_of_eq
+  ring
 
 /-! ## Length-bound contradiction assembly -/
 
@@ -770,7 +945,30 @@ theorem length_bound_contradiction_assembly
     (_hdim : 2 ≤ Module.finrank ℝ E)
     (_hRic : RicciBoundedBelow (I := I) g ((Module.finrank ℝ E - 1 : ℝ) * K))
     (uPrime : ℝ → E)
+    (_huPrimeEq : ∀ t ∈ Set.Icc (0 : ℝ) L,
+      (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ) : E) = uPrime t)
     (_hUnit : ∀ t ∈ Set.Icc (0 : ℝ) L, g.inner (γ t) (uPrime t) (uPrime t) = 1)
+    (_huCont : ContinuousOn uPrime (Set.Icc (0 : ℝ) L))
+    (e : Fin (Module.finrank ℝ E - 1) → SectionAlongCurve I M γ)
+    (_heDiff : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
+      DifferentiableAt ℝ (e i).toFun t)
+    (_hParallel : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
+      chartCovDerivAlong (I := I) g (γ t) γ (e i).toFun t = 0)
+    (_hON : ∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i j,
+      g.inner (γ t) ((e i).toFun t) ((e j).toFun t) = if i = j then 1 else 0)
+    (_hPerp : ∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i,
+      g.inner (γ t) ((e i).toFun t) (uPrime t) = 0)
+    (_hIntegrandSum : ∀ i : Fin (Module.finrank ℝ E - 1),
+      IntervalIntegrable
+        (fun t : ℝ => indexFormIntegrand (I := I) g γ
+          ((SectionAlongCurve.smulFun
+            (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun)
+          ((SectionAlongCurve.smulFun
+            (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun) t)
+        MeasureTheory.volume 0 L)
+    (_hRicIntegrable : IntervalIntegrable
+      (fun t : ℝ => ricciTensor (I := I) g (γ t) (uPrime t) (uPrime t))
+      MeasureTheory.volume 0 L)
     (_hmin : ∀ η : ℝ → M, η 0 = γ 0 → η L = γ L →
       arcLength (I := I) g γ 0 L ≤ arcLength (I := I) g η 0 L) :
     L ≤ Real.pi / Real.sqrt K := by
@@ -806,11 +1004,10 @@ theorem length_bound_contradiction_assembly
       simpa [sq] using this
     rw [Real.sq_sqrt (le_of_lt _hK)] at h_sq
     exact h_sq
-  -- Step 4: define the parallel orthonormal frame e (using zero sections;
-  -- the bound lemma holds for any e since it is the upper bound that matters).
-  let e : Fin (Module.finrank ℝ E - 1) → SectionAlongCurve I M γ :=
-    fun _ => SectionAlongCurve.zero
-  -- Step 5: apply sum_index_form_bound_by_curvature_hypothesis.
+  -- Step 4: use the parallel orthonormal perpendicular frame `e` supplied as
+  -- a hypothesis.
+  -- Step 5: apply sum_index_form_bound_by_curvature_hypothesis, threading all
+  -- the parallel-frame data along.
   have h_upper :
       (∑ i : Fin (Module.finrank ℝ E - 1),
           indexForm (I := I) g γ 0 L
@@ -821,8 +1018,12 @@ theorem length_bound_contradiction_assembly
         ≤ (Module.finrank ℝ E - 1 : ℝ) * (L / 2)
             * ((Real.pi / L) ^ 2 - K) :=
     sum_index_form_bound_by_curvature_hypothesis (I := I) g γ _hγ _hgeo _hL
-      _hRic uPrime _hUnit e
+      _hRic uPrime _huPrimeEq _hUnit _huCont e _heDiff _hParallel _hON _hPerp
+      _hIntegrandSum _hRicIntegrable
   -- Step 6: apply minimiser_implies_second_variation_nonneg pointwise and sum.
+  -- The trial vector field V_i(t) := sin(π t / L) • (e i)(t) vanishes at the
+  -- endpoints since sin(0) = sin(π) = 0, so the endpoint conditions for
+  -- `minimiser_implies_second_variation_nonneg` are satisfied for any `e i`.
   have h_each_nonneg : ∀ i : Fin (Module.finrank ℝ E - 1),
       0 ≤ indexForm (I := I) g γ 0 L
         ((SectionAlongCurve.smulFun
@@ -835,10 +1036,12 @@ theorem length_bound_contradiction_assembly
       (fun t => (SectionAlongCurve.smulFun
         (fun t => Real.sin (Real.pi * t / L)) (e i)).toFun t)
       _hgeo _hmin ?_ ?_
-    · -- V 0 = 0: e i is zero so smulFun ... at 0 is 0.
-      simp [e, SectionAlongCurve.smulFun, SectionAlongCurve.zero]
-    · -- V L = 0: e i is zero so smulFun ... at L is 0.
-      simp [e, SectionAlongCurve.smulFun, SectionAlongCurve.zero]
+    · -- V 0 = 0: sin(π·0/L) = sin 0 = 0, so the smul gives zero.
+      simp [SectionAlongCurve.smulFun_toFun, Real.sin_zero]
+    · -- V L = 0: sin(π·L/L) = sin π = 0, so the smul gives zero.
+      have hL_ne : L ≠ 0 := ne_of_gt _hL
+      have h_arg : Real.pi * L / L = Real.pi := by field_simp
+      simp [SectionAlongCurve.smulFun_toFun, h_arg, Real.sin_pi]
   have h_sum_nonneg :
       (0 : ℝ) ≤ ∑ i : Fin (Module.finrank ℝ E - 1),
           indexForm (I := I) g γ 0 L
