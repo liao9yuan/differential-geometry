@@ -143,6 +143,84 @@ theorem IsGeodesicOn.affineReparam
     -- applied to the original lift's integral-curve hypothesis `hf`.
     exact scaledTangentLift_transport (I := I) g α hf c d
 
+/-! ## Affine reparametrisation invariance of `pathELength`
+
+For an affine reparametrisation `s ↦ c * s + d` with `c > 0`, the
+`pathELength` of the composed curve over `Icc ((a - d) / c) ((b - d) / c)`
+equals the `pathELength` of the original curve over `Icc a b`. This is a
+direct corollary of Mathlib's `pathELength_comp_of_monotoneOn` applied to
+the strictly increasing affine map `s ↦ c * s + d`.
+
+The lemma is stated in the `Manifold` namespace's `pathELength`. The
+typeclass requirement `[∀ x, ENormSMulClass ℝ (TangentSpace I x)]` for
+the underlying Mathlib reparametrisation lemma is supplied by the
+`RiemannianBundle` instance through the chain
+`RiemannianBundle ⟶ NormedAddCommGroup ⟶ NormSMulClass ⟶ ENormSMulClass`.
+-/
+
+section AffinePathELengthReparam
+
+open Manifold
+
+variable [Bundle.RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+
+/-- Affine reparametrisation invariance of `pathELength` with positive
+slope. If `c > 0` and `a ≤ b`, then the path length of `s ↦ γ (c * s + d)`
+on `Icc ((a - d) / c) ((b - d) / c)` equals the path length of `γ` on
+`Icc a b`, provided `γ` is `MDifferentiableOn` `Icc a b`. -/
+theorem pathELength_comp_affineHomeo
+    (γ : ℝ → M) {a b : ℝ} (c d : ℝ) (hab : a ≤ b) (hc : 0 < c)
+    (hγ : MDifferentiableOn 𝓘(ℝ, ℝ) I γ (Set.Icc a b)) :
+    pathELength I (fun s : ℝ => γ (c * s + d)) ((a - d) / c) ((b - d) / c)
+      = pathELength I γ a b := by
+  -- The reparametrisation `f s = c * s + d`.
+  set f : ℝ → ℝ := fun s : ℝ => c * s + d with hf_def
+  -- Image of the endpoints: `f ((a - d) / c) = a`, `f ((b - d) / c) = b`.
+  have hc_ne : c ≠ 0 := ne_of_gt hc
+  have hfa : f ((a - d) / c) = a := by
+    simp only [hf_def]
+    rw [mul_div_cancel₀ _ hc_ne]
+    ring
+  have hfb : f ((b - d) / c) = b := by
+    simp only [hf_def]
+    rw [mul_div_cancel₀ _ hc_ne]
+    ring
+  -- The new lower endpoint is `≤` the new upper endpoint.
+  have hab' : (a - d) / c ≤ (b - d) / c := by
+    rw [div_le_div_iff_of_pos_right hc]
+    linarith
+  -- `f` is monotone on `Icc ((a - d) / c) ((b - d) / c)` (it is monotone
+  -- on `ℝ`, hence on any subset).
+  have hf_mono : MonotoneOn f (Set.Icc ((a - d) / c) ((b - d) / c)) := by
+    intro x _ y _ hxy
+    simp only [hf_def]
+    have : c * x ≤ c * y := mul_le_mul_of_nonneg_left hxy hc.le
+    linarith
+  -- `f` is differentiable everywhere, hence on `Icc ((a - d) / c) ((b - d) / c)`.
+  have hf_diff : DifferentiableOn ℝ f (Set.Icc ((a - d) / c) ((b - d) / c)) := by
+    intro x _
+    -- `f x = c * x + d` is differentiable; convert from `Differentiable`.
+    have hdiff : Differentiable ℝ f := by
+      simp only [hf_def]
+      exact ((differentiable_const c).mul differentiable_id).add (differentiable_const d)
+    exact (hdiff x).differentiableWithinAt
+  -- The hypothesis `MDiff[Icc (f a') (f b')] γ` becomes `MDifferentiableOn`
+  -- on `Icc a b` after rewriting via `hfa`/`hfb`.
+  have hγ' : MDifferentiableOn 𝓘(ℝ, ℝ) I γ
+      (Set.Icc (f ((a - d) / c)) (f ((b - d) / c))) := by
+    rw [hfa, hfb]; exact hγ
+  -- Apply Mathlib's `pathELength_comp_of_monotoneOn`.
+  have hmain :
+      pathELength I (γ ∘ f) ((a - d) / c) ((b - d) / c)
+        = pathELength I γ (f ((a - d) / c)) (f ((b - d) / c)) :=
+    pathELength_comp_of_monotoneOn (I := I) (γ := γ) hab' hf_mono hf_diff hγ'
+  -- Rewrite the endpoints.
+  rw [hfa, hfb] at hmain
+  -- The composition `γ ∘ f` is `fun s => γ (c * s + d)` by definition of `f`.
+  exact hmain
+
+end AffinePathELengthReparam
+
 end Geodesic
 end Riemannian
 end Geometry
