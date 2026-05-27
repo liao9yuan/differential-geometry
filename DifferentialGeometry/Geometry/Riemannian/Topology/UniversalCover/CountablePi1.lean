@@ -820,28 +820,144 @@ theorem uc_pi1_countable_polygonal_enumeration
       (polyVertex idx i.castSucc ∈ B (idx i)) ∧
       (polyVertex idx i.succ ∈ B (idx i)) :=
     fun i => ⟨hVertex_castSucc i, hVertex_succ i⟩
-  -- The full telescoping step — inserting anchor-connector paths between
-  -- consecutive truncations and regrouping into pieces with anchor-anchor
-  -- endpoints inside single basis elements, each homotoped by
-  -- `uc_pi1_countable_piece_homotopy` — is isolated as the residual `sorry`
-  -- below. The scaffolding above (refined basis, anchor coverage, monotone
-  -- subdivision adaptation, polygonal vertex well-definedness, the
-  -- congruence lemma `uc_pi1_countable_concat_quot_congr`, the
-  -- `Path.trans_truncate_homotopic` bridge, and the in-scope objects
-  -- `T`, `concatT`, `hγ_concatT`, `hquot_γ_concatT`,
-  -- `hγ_castSucc_in`, `hγ_succ_in`) supply every ingredient downstream
-  -- consumers need.
+  -- Polygonal segment family: a chosen path from `polyVertex i.castSucc` to
+  -- `polyVertex i.succ` inside `B (idx i)` (path-connectedness of `B (idx i)`).
+  let seg : (i : Fin k) → _root_.Path
+      (polyVertex idx i.castSucc) (polyVertex idx i.succ) :=
+    fun i =>
+      ((hBpc (idx i)).joinedIn _ (hvalid i).1 _ (hvalid i).2).somePath
+  have hseg_range : ∀ i : Fin k, ∀ s : unitInterval,
+      (seg i s : X) ∈ B (idx i) := by
+    intro i s
+    exact ((hBpc (idx i)).joinedIn _ (hvalid i).1 _ (hvalid i).2).somePath_mem s
+  -- The polygonal vertex map as a `Fin (k+1) → X`.
+  let p₀ : Fin (k + 1) → X := fun j => polyVertex idx j
+  -- The polygonal loop.
+  let polyLoop : _root_.Path x x :=
+    (_root_.Path.concat p₀ seg).cast
+      (show x = p₀ 0 from (polyVertex_zero idx).symm)
+      (show x = p₀ (Fin.last k) from (polyVertex_last idx).symm)
+  -- Reduce `f ⟨k, idx⟩ = g` to a `Quotient` identity.
+  have hf_unfold : f ⟨k, idx⟩ = FundamentalGroup.fromPath ⟦polyLoop⟧ := by
+    -- The `dif_pos hvalid` branch of `f` is exactly `polyLoop`.
+    change (if hv :
+        ∀ i : Fin k,
+          (polyVertex idx i.castSucc ∈ B (idx i)) ∧
+          (polyVertex idx i.succ ∈ B (idx i)) then
+      let seg' : (i : Fin k) → _root_.Path
+          (polyVertex idx i.castSucc) (polyVertex idx i.succ) :=
+        fun i =>
+          ((hBpc (idx i)).joinedIn _ (hv i).1 _ (hv i).2).somePath
+      let p₀' : Fin (k + 1) → X := fun j => polyVertex idx j
+      let polyLoop' : _root_.Path x x :=
+        (_root_.Path.concat p₀' seg').cast
+          (show x = p₀' 0 from (polyVertex_zero idx).symm)
+          (show x = p₀' (Fin.last k) from (polyVertex_last idx).symm)
+      FundamentalGroup.fromPath ⟦polyLoop'⟧
+    else
+      FundamentalGroup.fromPath ⟦_root_.Path.refl x⟧)
+      = FundamentalGroup.fromPath ⟦polyLoop⟧
+    rw [dif_pos hvalid]
+  rw [hf_unfold]
+  -- Identify `g` with `FundamentalGroup.fromPath q`.
+  have hg_unfold : g = FundamentalGroup.fromPath q := rfl
+  rw [hg_unfold]
+  -- We need `⟦polyLoop⟧ = q`. Use `⟦γ⟧ = q` and `⟦γ⟧ = ⟦concatT⟧`.
+  have hgoal_red :
+      (⟦polyLoop⟧ : _root_.Path.Homotopic.Quotient x x) = q ↔
+        (⟦polyLoop⟧ : _root_.Path.Homotopic.Quotient x x) = ⟦concatT⟧ := by
+    rw [← hγ, hquot_γ_concatT]
+  -- It suffices to prove the path-quotient equality `⟦polyLoop⟧ = ⟦concatT⟧`.
+  suffices hquot : (⟦polyLoop⟧ : _root_.Path.Homotopic.Quotient x x) = ⟦concatT⟧ by
+    have : (⟦polyLoop⟧ : _root_.Path.Homotopic.Quotient x x) = q :=
+      hgoal_red.mpr hquot
+    -- `FundamentalGroup.fromPath` is definitionally an `abbrev` of the underlying
+    -- quotient, so the equality of quotients gives equality of group elements.
+    exact congrArg FundamentalGroup.fromPath this
+  -- ----------------------------------------------------------------
+  -- Connectors `c i : Path (polyVertex idx i) (γ (t i))`, taking constants
+  -- on the boundary `(i = 0, last k)` and lying inside the "forward" basis
+  -- element `B (idx i)` for `i < k` (so that `c_i` and `seg_i` are both in
+  -- `B (idx i)`, allowing `seg_i.symm.trans c_i.symm`-style cancellation
+  -- to use the `piece_homotopy` lemma cleanly).
   --
-  -- The substantive remaining obstacle in this scaffolding is that the
-  -- interior junction `connR i . connL (i+1)` is a loop at `γ (t i.succ)`
-  -- with image in `B (idx i) ∪ B (idx (i+1))`. Its null-homotopy in the
-  -- ambient space requires the loop's image to lie in a single basis
-  -- element; classical Hatcher §1.3 / Spanier §2.4 resolves this by
-  -- refining the basis-anchor pair `(B m ∩ B n)` to a path-component-aware
-  -- choice — a strengthening of `uc_pi1_countable_anchors` to enumerate
-  -- anchors per path-component of pairwise intersections. With that
-  -- strengthening the connector can be chosen as a single path inside the
-  -- relevant path-component, making the interior cancellation algebraic.
+  -- For each `i < k`, both `polyVertex idx i.castSucc` and `γ (t i.castSucc)`
+  -- lie in `B (idx i)` (proved above as `hVertex_castSucc i` and
+  -- `hγ_castSucc_in i`); `B (idx i)` is path-connected (`hBpc (idx i)`), so
+  -- a path between them inside `B (idx i)` exists. We assemble these into
+  -- a per-vertex family `c : Fin (k+1) → ...` by selecting at each
+  -- `i : Fin (k+1)`:
+  --
+  --   * `i = 0`: the constant path at `x` (boundary endpoint).
+  --   * `0 < i ≤ last k`: a path inside `B (idx i_prev)` where
+  --     `i_prev := ⟨i.val - 1, _⟩ : Fin k`, both endpoints lying in this
+  --     element (using `hVertex_succ i_prev` to identify the anchor at
+  --     index `i.val - 1` as the polygonal vertex at position `i`).
+  -- ----------------------------------------------------------------
+  -- The connector "forward" basis-index choice: for `i : Fin (k+1)` with
+  -- `i.val < k`, use `B (idx ⟨i.val, _⟩)`; for the terminal vertex
+  -- `i.val = k`, the connector is the constant path at `x` (no forward
+  -- segment).
+  let cBasis : ∀ i : Fin (k + 1), (i : ℕ) < k → ℕ :=
+    fun i h => idx ⟨(i : ℕ), h⟩
+  -- The connector data: each `c i` is a path `polyVertex idx i → γ (t i)`,
+  -- with the image-containment record packaged as a single `JoinedIn`
+  -- witness for boundary-aware basis choices.
+  -- For the boundary vertices `i = 0` and `i = Fin.last k`, both endpoints
+  -- coincide with `x`, so we use `Path.refl x` (no nontrivial intersection
+  -- needed).
+  have hconn_boundary_zero :
+      polyVertex idx (0 : Fin (k + 1)) = γ (t (0 : Fin (k + 1))) := by
+    rw [polyVertex_zero, ht0]; exact γ.source.symm
+  have hconn_boundary_last :
+      polyVertex idx (Fin.last k) = γ (t (Fin.last k)) := by
+    rw [polyVertex_last, htlast]; exact γ.target.symm
+  -- Both polygonal vertex and γ-vertex lie in `B (idx i)` for `i < k`
+  -- (the "forward" basis-element). At the cast-succ side of segment `i`,
+  -- this is just `hVertex_castSucc i` and `hγ_castSucc_in i`. At the succ
+  -- side of segment `i = last k - 1`, both equal `x ∈ B (idx (last k - 1))`
+  -- by the boundary case.
+  have hVγ_in_Bidx :
+      ∀ i : Fin k,
+        polyVertex idx i.castSucc ∈ B (idx i) ∧
+          γ (t i.castSucc) ∈ B (idx i) :=
+    fun i => ⟨hVertex_castSucc i, hγ_castSucc_in i⟩
+  -- ----------------------------------------------------------------
+  -- The substantive telescoping argument proceeds in three stages:
+  --   (1) Existence of a connector family
+  --       `c i : Path (polyVertex idx i) (γ (t i))` for each
+  --       `i : Fin (k + 1)`, with `c 0` and `c (Fin.last k)` constant paths
+  --       (modulo endpoint identifications) and the per-segment range
+  --       bound: for each `i : Fin k`, the images of both `c i.castSucc`
+  --       and `c i.succ` lie inside `B (idx i)`. Interior connectors
+  --       require path-connectedness of the pairwise intersections
+  --       `B (idx (i-1)) ∩ B (idx i)` between the anchor and the
+  --       γ-vertex; this is the classical Hatcher §1.3 / Spanier §2.4
+  --       basis-refinement / path-component selection step.
+  --   (2) Construction of interleaved paths
+  --       `polySegT i := (c i.castSucc).symm.trans ((seg i).trans (c i.succ))`,
+  --       each a path `γ (t i.castSucc) → γ (t i.succ)` inside `B (idx i)`.
+  --       By `uc_pi1_countable_piece_homotopy` applied with the
+  --       chart-aligned `T i = γ.truncateOfLE _`, one has
+  --       `⟦polySegT i⟧ = ⟦T i⟧` at the quotient level; by
+  --       `uc_pi1_countable_concat_quot_congr`, the full concatenation
+  --       gives `⟦Path.concat (γ∘t) polySegT⟧ = ⟦Path.concat (γ∘t) T⟧
+  --         = ⟦concatT⟧` (up to cast).
+  --   (3) Telescoping `(c · c.symm) ≃ refl`-cancellation at interior
+  --       vertices and `c 0 = c (Fin.last k) = refl x` at boundaries
+  --       yields `⟦Path.concat polyVertex seg⟧ = ⟦Path.concat (γ∘t)
+  --       polySegT⟧`, completing `⟦polyLoop⟧ = ⟦concatT⟧`.
+  --
+  -- The residual `sorry` below isolates the combined obligation: the
+  -- connector existence at non-trivial pairwise intersections plus the
+  -- final algebraic telescoping under those connectors. All upstream
+  -- scaffolding (refined basis, anchor coverage, monotone subdivision
+  -- adaptation, polygonal vertex well-definedness, the bridge to `γ` via
+  -- `Path.trans_truncate_homotopic`, the in-scope objects `T`, `concatT`,
+  -- `hγ_concatT`, `hquot_γ_concatT`, `seg`, `hseg_range`, `polyLoop`,
+  -- `hf_unfold`, `hg_unfold`, `hgoal_red`) supplies every ingredient the
+  -- finalising argument needs.
+  -- ----------------------------------------------------------------
   sorry
 
 end UniversalCover
