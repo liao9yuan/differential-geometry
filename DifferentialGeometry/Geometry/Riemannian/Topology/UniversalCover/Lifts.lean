@@ -279,7 +279,13 @@ noncomputable def fibreEquivLoopQuotient
     {X E : Type*} [TopologicalSpace X] [TopologicalSpace E]
     [PathConnectedSpace E] [SimplyConnectedSpace E]
     {p : E → X} (hp : IsCoveringMap p) (x : X) (e' : p ⁻¹' {x}) :
-    (p ⁻¹' {x}) ≃ Path.Homotopic.Quotient x x := sorry
+    (p ⁻¹' {x}) ≃ Path.Homotopic.Quotient x x :=
+  -- Bundle the monodromy evaluation `γ ↦ hp.monodromy γ e'` as a
+  -- `Path.Homotopic.Quotient x x → p ⁻¹' {x}` bijection from
+  -- `action_eval_injective` and `action_eval_surjective`, then invert.
+  (Equiv.ofBijective
+      (fun γ : Path.Homotopic.Quotient x x => hp.monodromy γ e')
+      ⟨action_eval_injective hp x e', action_eval_surjective hp x e'⟩).symm
 
 /-- **Fibre / fundamental-group bijection.**
 Compose `fibreEquivLoopQuotient` with the standard identification
