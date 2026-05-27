@@ -1140,6 +1140,7 @@ import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.Bijective
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.ChartOverlapUniqueness
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.Bijective.ChartCoverBijective
+import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.Bijective.UniformBijective
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.LiftMetric
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.PointwiseDeriv
 import DifferentialGeometry.PDE.RicciFlow.DeTurckShortTime
