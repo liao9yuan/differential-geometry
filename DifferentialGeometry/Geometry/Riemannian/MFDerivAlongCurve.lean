@@ -43,16 +43,22 @@ second-variation length-bound development).
   the same continuity, packaged for a compact base set `s`. This is
   the chart-fixed counterpart of `mfderiv_along_curve_continuousOn_of_contMDiff`.
 
-The continuity of the *raw* `mfderiv γ t 1 : E` (using the literal
-definitional identification `TangentSpace I (γ t) = E`) is **chart-α-coordinate
-continuity composed with the inverse-trivialization application**:
-`mfderiv γ t 1 = (trivializationAt α).symmL ℝ (γ t)
-                  (fderiv (extChartAt I α ∘ γ) t 1)` for
-`γ t ∈ (chartAt H α).source`. The continuity of `t ↦ (·).symmL ℝ (γ t)`
-as a CLM-valued family lives one layer below this file (it requires the
-`tangentMap`-of-`(extChartAt I α).symm` machinery from
-`Geometry/Manifold/ContMDiffMFDeriv.lean`); downstream developments that
-need it can route through the chart-coordinate-form delivered here.
+* `raw_mfderiv_eq_symmL_apply_fderiv` —
+  the **raw-form rewrite identity**: for `γ t ∈ (chartAt H α).source`,
+  `mfderiv γ t 1 = (trivializationAt α).symmL ℝ (γ t) (fderiv (extChartAt I α ∘ γ) t 1)`,
+  obtained by applying the inverse trivialization at `γ t` to the
+  chart-`α`-coordinate identity and using `Trivialization.symmL_continuousLinearMapAt`.
+  This is the substantive bridge between the raw `mfderiv γ t 1 : E` (using the
+  defeq `TangentSpace I (γ t) = E`) and the chart-pulled-back model-space
+  `fderiv`.
+
+The continuity of the *raw* `mfderiv γ t 1 : E` follows from the
+rewrite identity above combined with the CLM-valued continuity of the family
+`t ↦ (trivializationAt α).symmL ℝ (γ t)` on `γ ⁻¹ ((chartAt H α).source)`.
+The latter is a vector-bundle infrastructure fact about the tangent bundle's
+`symmL` family — it lives below this file (in the bundle / `tangentMap`
+machinery) and is not duplicated here; downstream developments that need
+it can route through the rewrite identity delivered above.
 -/
 
 noncomputable section
@@ -204,6 +210,55 @@ theorem chartCoord_mfderiv_along_curve_continuousOn
           ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] _) (1 : ℝ)) : E)) s := by
   exact (continuousOn_chartCoord_mfderiv_along_curve (I := I) (M := M)
     (γ := γ) hγ α).mono hs_sub
+
+/-! ### Raw `E`-valued chart-form identity
+
+For a `C^∞` curve `γ : ℝ → M` and a chart basepoint `α : M`, on the chart-pullback
+preimage `U(α) := γ ⁻¹ ((chartAt H α).source)`, the raw `mfderiv γ t 1 : E`
+(using the literal definitional identification `TangentSpace I (γ t) = E`)
+factors through the `α`-trivialization's inverse-CLM and the chart-pulled-back
+ordinary `fderiv`. This is the substantive **rewrite** identity for going
+between the raw form and the chart-`α`-coordinate form. -/
+
+/-- **Raw form equals `symmL` of chart-pulled-back `fderiv`.**
+
+For `t : ℝ` with `γ t ∈ (chartAt H α).source`, the raw mfderiv-velocity along
+the curve `γ` at `t`, evaluated at `1 : ℝ`, equals
+  `(trivializationAt α).symmL ℝ (γ t) (fderiv (extChartAt I α ∘ γ) t 1)`.
+
+This is the inverse-trivialization companion of `chartCoord_mfderiv_along_curve_eq_fderiv`,
+obtained by applying `(trivializationAt α).symmL ℝ (γ t)` to both sides of the
+chart-coordinate identity and using `Trivialization.symmL_continuousLinearMapAt`. -/
+theorem raw_mfderiv_eq_symmL_apply_fderiv
+    {γ : ℝ → M} (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
+    (α : M) {t : ℝ} (ht : γ t ∈ (chartAt H α).source) :
+    ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] _) (1 : ℝ) : E) =
+      ((trivializationAt E (TangentSpace I) α).symmL ℝ (γ t))
+        ((fderiv ℝ ((extChartAt I α) ∘ γ) t : ℝ →L[ℝ] E) (1 : ℝ)) := by
+  -- The trivialization `α`-coordinate form of the velocity.
+  have hCC : ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ (γ t))
+      ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] _) (1 : ℝ)) =
+        (fderiv ℝ ((extChartAt I α) ∘ γ) t : ℝ →L[ℝ] E) (1 : ℝ) :=
+    chartCoord_mfderiv_along_curve_eq_fderiv (I := I) (M := M) (γ := γ) hγ α ht
+  -- Apply `symmL` to both sides and use the `symmL ∘ continuousLinearMapAt = id` identity
+  -- on the chart base set.
+  have hbaseSet : γ t ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
+    rw [TangentBundle.trivializationAt_baseSet]; exact ht
+  -- `symmL b (continuousLinearMapAt b y) = y` for `b ∈ baseSet` and `y : E b`.
+  have hround :
+      ((trivializationAt E (TangentSpace I) α).symmL ℝ (γ t))
+          (((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ (γ t))
+            ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] _) (1 : ℝ))) =
+        ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] _) (1 : ℝ)) :=
+    (trivializationAt E (TangentSpace I) α).symmL_continuousLinearMapAt
+      (R := ℝ) hbaseSet _
+  -- Combine.
+  calc ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] _) (1 : ℝ) : E)
+      = ((trivializationAt E (TangentSpace I) α).symmL ℝ (γ t))
+          (((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ (γ t))
+            ((mfderiv 𝓘(ℝ, ℝ) I γ t : ℝ →L[ℝ] _) (1 : ℝ))) := hround.symm
+    _ = ((trivializationAt E (TangentSpace I) α).symmL ℝ (γ t))
+          ((fderiv ℝ ((extChartAt I α) ∘ γ) t : ℝ →L[ℝ] E) (1 : ℝ)) := by rw [hCC]
 
 /-! ### Lebesgue-number-style chart cover for a compact parameter set
 
