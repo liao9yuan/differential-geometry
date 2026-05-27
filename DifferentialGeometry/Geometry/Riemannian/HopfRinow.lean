@@ -494,13 +494,181 @@ theorem bm_c_gc_extension_past_limit
   -- project. Recorded as the single residual gap of this PARTIAL proof.
   sorry
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Symmetric argument at the left endpoint.** The same contradiction
 applies at the left endpoint via the reflection `t \mapsto -t`, which
 converts `(p, v)` to `(p, -v)`. Hence the maximal interval cannot be
-bounded below by a finite `T` either. -/
+bounded below by a finite `T` either.
+
+Structurally the proof mirrors `bm_c_gc_extension_past_limit`: we replace
+the upper-bound contradiction by the lower-bound one, the strictly
+monotone-up sequence approaching the supposed LUB by a strictly
+monotone-down (antitone) sequence approaching the supposed GLB, and we
+inline the Cauchy-along-the-sequence argument of `bm_c_gc_escape_cauchy`
+(its body uses only `tₙ ∈ S` and `tₙ → T`; the IsLUB hypothesis there is
+declared `_hT` and is unused, so the same chart-distance computation
+works equally for a GLB). The residual gap is the same gluing step
+across the metric limit point as in `bm_c_gc_extension_past_limit`. -/
 theorem bm_c_gc_symmetric_left_endpoint
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) :
     ¬ ∃ T : ℝ, IsGLB (maximalGeodesicInterval (I := I) g p v) T := by
+  haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
+  -- Argue by contradiction.
+  rintro ⟨T, hT⟩
+  -- Abbreviate the maximal interval.
+  set S : Set ℝ := maximalGeodesicInterval (I := I) g p v with hS_def
+  -- `S` is open.
+  have hS_open : IsOpen S := maximalGeodesicInterval_isOpen (I := I) g p v
+  -- `S` is nonempty: `0 ∈ S`.
+  have hS_ne : S.Nonempty :=
+    ⟨0, zero_mem_maximalGeodesicInterval (I := I) g p v⟩
+  -- The GLB `T` cannot lie in `S`: openness of `S` would give a
+  -- neighbourhood `(T - ε, T + ε) ⊆ S`, and the midpoint between `l` and
+  -- `T` (which is `< T`) would be a member of `S` violating the
+  -- lower-bound-ness.
+  have hT_notMem : T ∉ S := by
+    intro hT_mem
+    -- `S ∈ 𝓝 T` from openness.
+    have hS_nhds : S ∈ 𝓝 T := hS_open.mem_nhds hT_mem
+    -- A real neighbourhood contains an open interval `(l, u) ∋ T`.
+    obtain ⟨l, u, ⟨hlT, hTu⟩, hsub⟩ :=
+      mem_nhds_iff_exists_Ioo_subset.mp hS_nhds
+    -- The midpoint `T' := (l + T) / 2` lies in `(l, T) ⊆ (l, u) ⊆ S`.
+    set T' : ℝ := (l + T) / 2 with hT'_def
+    have hT'_lt_T : T' < T := by
+      have : l + T < T + T := by linarith
+      have hT' : T = (T + T) / 2 := by ring
+      conv_rhs => rw [hT']
+      rw [hT'_def]
+      exact (div_lt_div_iff_of_pos_right (by norm_num : (0 : ℝ) < 2)).mpr this
+    have hl_lt_T' : l < T' := by
+      have : l + l < l + T := by linarith
+      have hl' : l = (l + l) / 2 := by ring
+      rw [hl', hT'_def]
+      exact (div_lt_div_iff_of_pos_right (by norm_num : (0 : ℝ) < 2)).mpr this
+    have hT'_lt_u : T' < u := by
+      -- `T < u` from `hTu`, and `T' < T`.
+      linarith [hTu, hT'_lt_T]
+    have hT'_mem : T' ∈ S := hsub ⟨hl_lt_T', hT'_lt_u⟩
+    -- Lower-bound property: `T ≤ T'`, contradicting `T' < T`.
+    exact absurd (hT.1 hT'_mem) (not_le.mpr hT'_lt_T)
+  -- Extract a strictly antitone sequence `tₙ ∈ S` with `tₙ → T`, all
+  -- strictly above `T`.
+  obtain ⟨tₙ, _h_strictAnti, _h_gt_T, htₙ_lim, htₙ_mem⟩ :=
+    hT.exists_seq_strictAnti_tendsto_of_notMem hT_notMem hS_ne
+  -- Cauchy property of `γ(tₙ)` in the `[PseudoEMetricSpace M]`
+  -- uniformity. We inline the chart-distance computation here because
+  -- `bm_c_gc_escape_cauchy`'s public signature demands an
+  -- `IsLUB S T` hypothesis (declared `_hT`, unused inside the body),
+  -- which we cannot construct from `IsGLB S T`. The argument is
+  -- otherwise identical: bound each pair-distance by the length-distance
+  -- inequality and use Cauchy of `tₙ` in `ℝ`.
+  have h_cauchy :
+      CauchySeq (fun n => maximalGeodesic (I := I) g p v (tₙ n)) := by
+    set γ : ℝ → M := maximalGeodesic (I := I) g p v with hγ_def
+    set c : ℝ := Real.sqrt ((g.inner p) v v) with hc_def
+    have hc_nn : (0 : ℝ) ≤ c := Real.sqrt_nonneg _
+    -- The convergent sequence `tₙ → T` is Cauchy in `ℝ`.
+    have htₙ_cauchy : CauchySeq tₙ := htₙ_lim.cauchySeq
+    rw [Metric.cauchySeq_iff] at htₙ_cauchy
+    rw [EMetric.cauchySeq_iff]
+    intro ε hε
+    -- From `0 < ε` in `ℝ≥0∞`, find a real `δ₀ > 0` with `ofReal δ₀ < ε`.
+    obtain ⟨δ₀, hδ₀_nn, hδ₀_ofReal_pos, hδ₀_ofReal_lt⟩ :=
+      ENNReal.lt_iff_exists_real_btwn.mp hε
+    have hδ₀_pos : 0 < δ₀ := ENNReal.ofReal_pos.mp hδ₀_ofReal_pos
+    -- Real Cauchy threshold `δ := δ₀ / (c + 1)`.
+    have hcc_pos : 0 < c + 1 := by linarith
+    set δ : ℝ := δ₀ / (c + 1) with hδ_def
+    have hδ_pos : 0 < δ := div_pos hδ₀_pos hcc_pos
+    obtain ⟨N, hN⟩ := htₙ_cauchy δ hδ_pos
+    refine ⟨N, fun m hm n hn => ?_⟩
+    set s : ℝ := min (tₙ m) (tₙ n) with hs_def
+    set t : ℝ := max (tₙ m) (tₙ n) with ht_def
+    have hst : s ≤ t := min_le_max
+    have hs_mem : s ∈ maximalGeodesicInterval (I := I) g p v := by
+      rcases le_total (tₙ m) (tₙ n) with h | h
+      · rw [hs_def, min_eq_left h]; exact htₙ_mem m
+      · rw [hs_def, min_eq_right h]; exact htₙ_mem n
+    have ht_mem : t ∈ maximalGeodesicInterval (I := I) g p v := by
+      rcases le_total (tₙ m) (tₙ n) with h | h
+      · rw [ht_def, max_eq_right h]; exact htₙ_mem n
+      · rw [ht_def, max_eq_left h]; exact htₙ_mem m
+    have h_bound :
+        riemannianEDist I (γ s) (γ t) ≤ ENNReal.ofReal (c * (t - s)) := by
+      have :=
+        bm_c_gc_length_distance_bound (I := I) g p v (s := s) (t := t)
+          hs_mem ht_mem hst
+      simpa [hγ_def, hc_def] using this
+    have h_edist_bound :
+        edist (γ s) (γ t) ≤ ENNReal.ofReal (c * (t - s)) := by
+      rw [IsRiemannianManifold.out (I := I) (γ s) (γ t)]
+      exact h_bound
+    have h_edist_eq :
+        edist (γ (tₙ m)) (γ (tₙ n)) = edist (γ s) (γ t) := by
+      rcases le_total (tₙ m) (tₙ n) with h | h
+      · have hs_eq : s = tₙ m := by rw [hs_def, min_eq_left h]
+        have ht_eq : t = tₙ n := by rw [ht_def, max_eq_right h]
+        rw [hs_eq, ht_eq]
+      · have hs_eq : s = tₙ n := by rw [hs_def, min_eq_right h]
+        have ht_eq : t = tₙ m := by rw [ht_def, max_eq_left h]
+        rw [hs_eq, ht_eq, edist_comm]
+    have ht_sub_s : t - s = |tₙ m - tₙ n| := by
+      rcases le_total (tₙ m) (tₙ n) with h | h
+      · rw [hs_def, ht_def, min_eq_left h, max_eq_right h,
+            abs_of_nonpos (sub_nonpos.mpr h)]
+        ring
+      · rw [hs_def, ht_def, min_eq_right h, max_eq_left h,
+            abs_of_nonneg (sub_nonneg.mpr h)]
+    have h_dist_lt : |tₙ m - tₙ n| < δ := by
+      have := hN m hm n hn
+      rwa [Real.dist_eq] at this
+    have ht_sub_s_nn : 0 ≤ t - s := sub_nonneg.mpr hst
+    have h_ct_sub_s_le : c * (t - s) ≤ c * δ := by
+      have h_abs_lt : t - s < δ := by rw [ht_sub_s]; exact h_dist_lt
+      exact mul_le_mul_of_nonneg_left h_abs_lt.le hc_nn
+    have h_cdelta_lt_real : c * δ < δ₀ := by
+      rw [hδ_def]
+      have hrw : c * (δ₀ / (c + 1)) = δ₀ * (c / (c + 1)) := by ring
+      rw [hrw]
+      have hfrac_lt_one : c / (c + 1) < 1 := by
+        rw [div_lt_one hcc_pos]; linarith
+      have := (mul_lt_mul_of_pos_left hfrac_lt_one hδ₀_pos)
+      rwa [mul_one] at this
+    calc edist (γ (tₙ m)) (γ (tₙ n))
+        = edist (γ s) (γ t) := h_edist_eq
+      _ ≤ ENNReal.ofReal (c * (t - s)) := h_edist_bound
+      _ ≤ ENNReal.ofReal (c * δ) := ENNReal.ofReal_le_ofReal h_ct_sub_s_le
+      _ < ENNReal.ofReal δ₀ := by
+            rw [ENNReal.ofReal_lt_ofReal_iff hδ₀_pos]
+            exact h_cdelta_lt_real
+      _ < ε := hδ₀_ofReal_lt
+  -- A Cauchy sequence in a complete pseudo-EMetric space converges.
+  obtain ⟨y, _hy⟩ := cauchySeq_tendsto_of_complete h_cauchy
+  -- Velocity-limit construction (inlined as in `bm_c_gc_extension_past_limit`
+  -- to avoid the topology diamond between the ChartedSpace topology and
+  -- the PseudoEMetricSpace topology at the call site).
+  have hfin_pos : 0 < Module.finrank ℝ E :=
+    Nat.pos_of_ne_zero (NeZero.ne _)
+  haveI : Nontrivial E := Module.nontrivial_of_finrank_pos hfin_pos
+  obtain ⟨u, _hu_ne⟩ : ∃ u : TangentSpace I y, u ≠ 0 :=
+    ⟨(exists_ne (0 : E)).choose, (exists_ne (0 : E)).choose_spec⟩
+  -- Scaled vector at `y` realising `(g.inner y) w w = (g.inner p) v v`.
+  set w : TangentSpace I y :=
+    Real.sqrt ((g.inner p) v v / (g.inner y) u u) • u with hw_def
+  -- Local existence at `(y, w)` produces a geodesic `η` on `(-ε, ε)`.
+  obtain ⟨_η, _fη, _hfη0, _hη_proj, _hη0, _hfη_int, _hη_geod⟩ :=
+    exists_geodesic_at (I := I) g y w
+  -- Hand-off gap. As in `bm_c_gc_extension_past_limit`, deriving `False`
+  -- now requires producing a single geodesic curve `γ̃` on a connected
+  -- open `J ∋ 0, T - δ` (for some `δ > 0`) with chart basepoint `p`,
+  -- gluing the original `γ` to a shifted reflection of `η` across the
+  -- limit point `y`. The shift / chart-change invariance lemma for
+  -- `IsGeodesicAt` / `IsMIntegralCurveOn` that would discharge this
+  -- gluing is not currently exposed in the project. Recorded as the
+  -- single residual gap of this PARTIAL proof, matching the residual
+  -- gap of `bm_c_gc_extension_past_limit`.
   sorry
 
 /-- **Assembly: the maximal geodesic interval is the whole real line.**
