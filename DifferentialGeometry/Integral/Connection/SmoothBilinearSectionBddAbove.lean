@@ -196,8 +196,64 @@ theorem bddAbove_iSup_normalized_of_continuous_opNorm
   refine ⟨W, hW_open, hy₀_mem, ‖Δ y₀‖ + 1, by positivity, fun b hb => ?_⟩
   exact hW_sub hb
 
+/-! ## BddAbove for the raw op-norm range -/
+
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] in
+/-- **Global `BddAbove` for the fibre op-norm range from per-point local bounds.**
+Same hypothesis as `bddAbove_iSup_normalized_of_locally_bounded_opNorm`, but
+concludes `BddAbove` on the range of `y ↦ ‖Δ y‖` directly. -/
+theorem bddAbove_opNorm_range_of_locally_bounded
+    (Δ : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+    (h_local_bound : ∀ y₀ : M, ∃ W : Set M, IsOpen W ∧ y₀ ∈ W ∧
+      ∃ C : ℝ, 0 ≤ C ∧ ∀ b ∈ W, ‖Δ b‖ ≤ C) :
+    BddAbove (Set.range (fun y : M => ‖Δ y‖)) := by
+  classical
+  set W : M → Set M := fun y₀ => (h_local_bound y₀).choose with hW_def
+  have hW_open : ∀ y₀, IsOpen (W y₀) := fun y₀ => (h_local_bound y₀).choose_spec.1
+  have hW_mem : ∀ y₀, y₀ ∈ W y₀ := fun y₀ => (h_local_bound y₀).choose_spec.2.1
+  set Cₐ : M → ℝ := fun y₀ => (h_local_bound y₀).choose_spec.2.2.choose with hCₐ_def
+  have hCₐ_nn : ∀ y₀, 0 ≤ Cₐ y₀ := fun y₀ =>
+    (h_local_bound y₀).choose_spec.2.2.choose_spec.1
+  have hΔ_bound : ∀ y₀, ∀ b ∈ W y₀, ‖Δ b‖ ≤ Cₐ y₀ := fun y₀ =>
+    (h_local_bound y₀).choose_spec.2.2.choose_spec.2
+  have hW_cover : (Set.univ : Set M) ⊆ ⋃ y₀ : M, W y₀ := by
+    intro x _; exact Set.mem_iUnion.mpr ⟨x, hW_mem x⟩
+  rcases isCompact_univ.elim_finite_subcover W hW_open hW_cover with ⟨S, hS_sub⟩
+  by_cases hS_empty : S = ∅
+  · have h_range_empty : (Set.range (fun y : M => ‖Δ y‖)) = ∅ := by
+      apply Set.eq_empty_of_forall_notMem
+      rintro _ ⟨y, _⟩
+      have := Set.mem_iUnion₂.mp (hS_sub (Set.mem_univ y))
+      obtain ⟨y₀, hy₀, _⟩ := this
+      rw [hS_empty] at hy₀; exact Finset.notMem_empty _ hy₀
+    rw [h_range_empty]; exact bddAbove_empty
+  have hS_nonempty : S.Nonempty := Finset.nonempty_iff_ne_empty.mpr hS_empty
+  set C : ℝ := S.sup' hS_nonempty Cₐ
+  refine ⟨C, ?_⟩
+  rintro _ ⟨y, rfl⟩
+  obtain ⟨y₀, hy₀, hy_W⟩ := Set.mem_iUnion₂.mp (hS_sub (Set.mem_univ y))
+  exact (hΔ_bound y₀ y hy_W).trans (Finset.le_sup' Cₐ hy₀)
+
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] in
+/-- **BddAbove of the op-norm range from continuous fibre op-norm.** -/
+theorem bddAbove_opNorm_range_of_continuous_opNorm
+    (Δ : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+    (h_cont : Continuous (fun b : M => ‖Δ b‖)) :
+    BddAbove (Set.range (fun y : M => ‖Δ y‖)) := by
+  apply bddAbove_opNorm_range_of_locally_bounded
+  intro y₀
+  have hca : ContinuousAt (fun b : M => ‖Δ b‖) y₀ := h_cont.continuousAt
+  have h_mem : Set.Iic (‖Δ y₀‖ + 1) ∈ nhds (‖Δ y₀‖) :=
+    Iic_mem_nhds (by linarith : ‖Δ y₀‖ < ‖Δ y₀‖ + 1)
+  have h_pre : (fun b : M => ‖Δ b‖) ⁻¹' Set.Iic (‖Δ y₀‖ + 1) ∈ nhds y₀ :=
+    hca.preimage_mem_nhds h_mem
+  rw [mem_nhds_iff] at h_pre
+  obtain ⟨W, hW_sub, hW_open, hy₀_mem⟩ := h_pre
+  exact ⟨W, hW_open, hy₀_mem, ‖Δ y₀‖ + 1, by positivity, fun b hb => hW_sub hb⟩
+
 end Connection
 end Integral
 end DifferentialGeometry
 
 #print axioms DifferentialGeometry.Integral.Connection.bddAbove_iSup_normalized_of_locally_bounded_opNorm
+#print axioms DifferentialGeometry.Integral.Connection.bddAbove_opNorm_range_of_locally_bounded
