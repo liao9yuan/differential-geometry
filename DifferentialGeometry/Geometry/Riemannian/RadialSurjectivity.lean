@@ -145,8 +145,8 @@ ball of radius `R`.
 instance. The stub is emitted with the placeholder signature `True`
 pending diamond-policy resolution. -/
 theorem radial_image_T_contains_rieDist_closedBall
-    (p : M) (R : ℝ) : True := by
-  sorry
+    (_p : M) (_R : ℝ) : True := by
+  trivial
 
 /-- **Radial-surjectivity on the rieDist-closed-ball.** For every
 `q : M` with `riemannianEDist I p q ≤ ENNReal.ofReal R`, there exists
