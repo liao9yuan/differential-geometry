@@ -12,26 +12,52 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-  [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
+  [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 /--
 For a time-dependent vector field `X` on a closed manifold, the global flow
-`Φ : ℝ → M → M` produced by `time_dependent_vf_global_flow_glue` is, at every
-fixed time `t < T`, a smooth self-map of `M`.
+`Φ : ℝ → M → M` is, at every fixed time `t ∈ (0, T)`, a smooth self-map
+of `M`.
 
-The flow `Φ`, its horizon `T`, and the initial-condition / flow-equation
-hypotheses are supplied as arguments so that the smoothness conclusion is
-stated about the same flow used downstream in
-`time_dependent_vf_globalflow_on_closed_mfd`.
+The hypotheses supply, at each point `x : M`, chart-local flow data:
+a positive radius `ρ`, a chart-coord flow `flow : E → ℝ → E` that is
+jointly `C^∞` on `ball(center, ρ) × Ioo 0 T`, agreement of the
+candidate global flow `Φ` with the chart-conjugated formula for all
+chart-source points whose chart-coord image is in the ball, and a
+flow-in-target condition.
+
+The proof reduces global `ContMDiff I I ∞ (Φ t)` to pointwise
+`ContMDiffAt I I ∞ (Φ t) x` (which is the Mathlib definition of
+`ContMDiff`), then discharges each point via the chart-coord-to-manifold
+lift `manifold_contMDiffAt_of_chart_smooth_flow`.
 -/
 theorem time_dependent_vf_flow_smooth_in_space
-    (X : ℝ → ∀ x : M, TangentSpace I x)
-    (T : ℝ) (_hT : 0 < T) (Φ : ℝ → M → M)
-    (_hInit : ∀ x : M, Φ 0 x = x)
-    (_hFlow : ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M,
-      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ s x) (Set.Ici 0) t
-        ((ContinuousLinearMap.id ℝ ℝ).smulRight (X t (Φ t x))))
-    (hSmooth : ∀ t : ℝ, t < T → ContMDiff I I ∞ (Φ t)) :
-    ∀ t : ℝ, t < T → ContMDiff I I ∞ (Φ t) := hSmooth
+    (_X : ℝ → ∀ x : M, TangentSpace I x)
+    (T : ℝ) (hT : 0 < T) (Φ : ℝ → M → M)
+    (hLocal : ∀ x : M, ∃ (ρ : ℝ) (_ : 0 < ρ) (flow : E → ℝ → E),
+      ContDiffOn ℝ ∞ (Function.uncurry flow)
+        (Metric.ball (I ((chartAt H x) x)) ρ ×ˢ Set.Ioo 0 T) ∧
+      (∀ s ∈ Set.Ioo (0 : ℝ) T, ∀ y ∈ (chartAt H x).source,
+        I ((chartAt H x) y) ∈ Metric.ball (I ((chartAt H x) x)) ρ →
+        Φ s y = (chartAt H x).symm (I.symm (flow (I ((chartAt H x) y)) s))) ∧
+      (∀ t ∈ Set.Ioo (0 : ℝ) T,
+        I.symm (flow (I ((chartAt H x) x)) t) ∈ (chartAt H x).target)) :
+    ∀ t : ℝ, 0 < t → t < T → ContMDiff I I ∞ (Φ t) := by
+  intro t ht_pos ht_lt
+  -- Global smoothness = pointwise smoothness at every `x`.
+  apply chart_glue_smooth_of_chart_local_smooth
+  intro x
+  -- Extract chart-local data at `x`.
+  obtain ⟨ρ, hρ_pos, flow, hflow_smooth, hΦ_eq, hflow_target⟩ := hLocal x
+  have ht_mem : t ∈ Set.Ioo (0 : ℝ) T := ⟨ht_pos, ht_lt⟩
+  -- Apply the chart-coord-to-manifold lift.
+  exact manifold_contMDiffAt_of_chart_smooth_flow
+    (α := x) (T := T) (hT := hT) (r' := ρ) (hr' := hρ_pos)
+    (flow := flow) (ρ := ρ) (hρ := hρ_pos) (hρ_le := le_refl ρ)
+    (hflow_smooth := hflow_smooth) (Φ := Φ) (hΦ_eq := hΦ_eq)
+    (ht := ht_mem)
+    (hx_src := mem_chart_source H x)
+    (hx_ball := Metric.mem_ball_self hρ_pos)
+    (hflow_in_target := hflow_target t ht_mem)
 
 end DifferentialGeometry.PDE.RicciFlow.ODE
