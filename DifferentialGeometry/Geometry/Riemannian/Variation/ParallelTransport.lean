@@ -159,17 +159,34 @@ Wrap the unique global solution from `parallel-global-extension` as a
 
 /-- **parallel-section-packaging (def).** The parallel transport of
 `v₀ ∈ T_{γ t₀} M` along the smooth curve `γ`, as a
-`SectionAlongCurve I M γ`. -/
+`SectionAlongCurve I M γ`. Built by `Classical.choose` over the unique
+global parallel extension. -/
 noncomputable def parallelTransport
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
-    (t₀ : ℝ) (v₀ : E) : SectionAlongCurve I M γ := sorry
+    (t₀ : ℝ) (v₀ : E) : SectionAlongCurve I M γ :=
+  ⟨(parallel_global_extension (I := I) g γ hγ t₀ v₀).exists.choose⟩
+
+/-- The defining property of `parallelTransport`: the underlying
+function is the chosen witness of `parallel_global_extension`, hence
+satisfies both the initial-value condition and the chart-local
+parallel-transport ODE on every chart-segment. -/
+lemma parallelTransport_spec
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
+    (t₀ : ℝ) (v₀ : E) :
+    (parallelTransport (I := I) g γ hγ t₀ v₀).toFun t₀ = v₀ ∧
+      (∀ α : M, ∀ s : Set ℝ, (∀ t ∈ s, γ t ∈ (chartAt H α).source) →
+        IsParallelChart (I := I) g α γ
+          (fun t => deriv (chartCurve (I := I) α γ) t)
+          (parallelTransport (I := I) g γ hγ t₀ v₀).toFun s) :=
+  (parallel_global_extension (I := I) g γ hγ t₀ v₀).exists.choose_spec
 
 /-- **parallel-section-packaging (initial value).** The parallel
 transport agrees with `v₀` at the base time `t₀`. -/
 @[simp] theorem parallelTransport_initial
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
     (t₀ : ℝ) (v₀ : E) :
-    (parallelTransport (I := I) g γ hγ t₀ v₀).toFun t₀ = v₀ := sorry
+    (parallelTransport (I := I) g γ hγ t₀ v₀).toFun t₀ = v₀ :=
+  (parallelTransport_spec (I := I) g γ hγ t₀ v₀).1
 
 /-- **parallel-section-packaging (parallel in every chart).** In every
 chart `α` and on every interval where `γ` lies in the chart source,
