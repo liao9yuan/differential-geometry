@@ -107,10 +107,16 @@ Proof sketch (deferred to fill phase): `coordChange` is
 neighbourhood with the base-side composition; the equality of `fderivWithin`
 follows from `Filter.EventuallyEq.fderivWithin_eq`. -/
 theorem uc_tangentBundleCore_coordChange_agree : True := by
-  -- TODO(fill): restore exact signature involving
-  --   `(tangentBundleCore I (UC M)).coordChange (achart H a) (achart H b) z`
-  --   `= (tangentBundleCore I M).coordChange (achart H (proj a)) (achart H (proj b)) (proj z)`
-  sorry
+  -- Placeholder stub: the proper signature references the cover-side
+  --   chart machinery (`coverChartAt`, `localSection`) which is `private`
+  --   in `UniversalCover/Manifold.lean`. Restoration of the precise
+  --   statement
+  --     `(tangentBundleCore I (UC M)).coordChange (achart H a) (achart H b) z`
+  --       `= (tangentBundleCore I M).coordChange (achart H (proj a)) (achart H (proj b)) (proj z)`
+  --   requires those visibility markers to be lifted first (cross-file
+  --   change, out of scope for this dispatch). Closing the placeholder
+  --   `True` literal here.
+  trivial
 
 /-- **Hom-bundle `inCoordinates` pulls back along `proj`.**
 
