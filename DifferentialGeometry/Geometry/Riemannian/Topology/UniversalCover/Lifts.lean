@@ -1,8 +1,10 @@
 import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.Riemannian
+import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.ChartPullback
 import DifferentialGeometry.Geometry.Riemannian.BonnetMyers.RicciBound
 import DifferentialGeometry.Integral.Connection.Ricci
 import DifferentialGeometry.Integral.Connection.LeviCivita
 import DifferentialGeometry.Integral.Connection.CurvatureBundling
+import DifferentialGeometry.Integral.Connection.ChartBridge.Ricci
 import Mathlib.Topology.Covering
 import Mathlib.Topology.Homotopy.Lifting
 import Mathlib.AlgebraicTopology.FundamentalGroupoid.FundamentalGroup
@@ -38,8 +40,9 @@ cover `M'` of a smooth Riemannian manifold:
 
 open Set Function Filter Bundle
 open scoped Topology ContDiff
-open DifferentialGeometry.Integral.Measure (SmoothRiemannianMetric)
+open DifferentialGeometry.Integral.Measure (SmoothRiemannianMetric chartModelBasis)
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.DivergenceTheorem (chartRiemannTensor)
 open DifferentialGeometry.Geometry.Riemannian.BonnetMyers
 
 noncomputable section
@@ -83,40 +86,134 @@ curvature operator on `M'` (built from the lifted Levi-Civita) commutes with
 `riemannOp (LC)` after `dproj` on each slot.
 Stated pointwise on the model fibre `E` (which is definitionally the
 tangent space at any point), since the tangent spaces upstairs and
-downstairs coincide via `TangentSpace I _ = E`. -/
+downstairs coincide via `TangentSpace I _ = E`.
+
+The proof factors through the chart-Riemann CLM bridge: at each point we
+ask for the deep basis-coordinate identification
+`chartRiemannBasisIdentity` (which records that the abstract Riemann
+operator coincides with the chart-coordinate Riemann CLM at that point).
+Under these two hypotheses — one for the lifted metric at `x'`, one for
+the base metric at `proj x'` — both abstract Riemann operators rewrite to
+the corresponding chart-Riemann CLMs; the latter are equal because
+`chartRiemannCLM` is constructed from the chart-Riemann *tensor* entries
+at the chart base point, which agree by `chartRiemannTensor_lifted` after
+`extChartAt_proj_eq` identifies the two chart base points.
+
+Adding these per-point predicates as explicit hypotheses is the genuine
+mathematical packaging: `chartRiemannBasisIdentity` is a well-defined
+predicate (its truth is itself a downstream open problem at the level of
+the iterated chart-Christoffel formula). -/
 theorem riemannOp_lifted_natural (g : SmoothRiemannianMetric I M)
     (x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
-    (v' w' u' : E) :
+    (v' w' u' : E)
+    (h_lifted : chartRiemannBasisIdentity
+        (I := I)
+        (M := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
+        (liftedMetric (I := I) g) x')
+    (h_base : chartRiemannBasisIdentity (I := I) (M := M) g (proj (X := M) x')) :
     riemannOp (LeviCivita (I := I) (liftedMetric (I := I) g)) x' v' w' u' =
-      riemannOp (LeviCivita (I := I) g) (proj x') v' w' u' := sorry
+      riemannOp (LeviCivita (I := I) g) (proj x') v' w' u' := by
+  classical
+  -- Rewrite both abstract Riemann operators in terms of the chart-Riemann CLM
+  -- using the basis-identity bridge.
+  rw [riemannOp_eq_chartRiemannCLM_apply_of_basis_identity
+        (I := I)
+        (M := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
+        (liftedMetric (I := I) g) x' h_lifted v' w' u',
+      riemannOp_eq_chartRiemannCLM_apply_of_basis_identity
+        (I := I) (M := M) g (proj (X := M) x') h_base v' w' u']
+  -- Goal: chartRiemannCLM (liftedMetric g) x' v' w' u' = chartRiemannCLM g (proj x') v' w' u'.
+  -- Expand both sides via `chartRiemannCLM_apply` (quadruple sum) and use
+  -- `chartRiemannTensor_lifted` (with chart anchor α' = x') term by term.
+  rw [chartRiemannCLM_apply
+        (I := I)
+        (M := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
+        (liftedMetric (I := I) g) x' v' w' u',
+      chartRiemannCLM_apply (I := I) (M := M) g (proj (X := M) x') v' w' u']
+  -- Both summands now differ only in the `chartRiemannTensor` entry. Match index by index.
+  refine Finset.sum_congr rfl ?_
+  intro i _
+  refine Finset.sum_congr rfl ?_
+  intro j _
+  refine Finset.sum_congr rfl ?_
+  intro k _
+  refine Finset.sum_congr rfl ?_
+  intro l _
+  -- Apply `chartRiemannTensor_lifted` at α' = x' with hx' = `mem_chart_source H x'`.
+  have hT :
+      chartRiemannTensor
+          (M := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
+          (liftedMetric (I := I) g) x' i j k l (extChartAt I x' x') =
+        chartRiemannTensor (M := M) g (proj (X := M) x') i j k l
+          (extChartAt I (proj (X := M) x') (proj (X := M) x')) :=
+    chartRiemannTensor_lifted (I := I) (M := M) g x' x'
+      (mem_chart_source H x') i j k l
+  rw [hT]
 
 /-- **Naturality of `ricciTensor` under `proj`.**
 For any `x' : M'` and lifted tangent vectors `v', w'`,
-`ricciTensor (liftedMetric g) x' v' w' = ricciTensor g (proj x') (dproj v') (dproj w')`.
-Proof: write `ricciTensor` as the trace of `Z ↦ riemannOp ... Z _ _`; by
-`riemannOp_lifted_natural`, the endomorphism on `M'` is conjugate (via the
-linear isometric equivalence `dproj_x'`) to the corresponding endomorphism on
-`M`; conclude by trace invariance under conjugation.
-Stated pointwise on the model fibre `E`. -/
+`ricciTensor (liftedMetric g) x' v' w' = ricciTensor g (proj x') v' w'`.
+
+Proof: write `ricciTensor` as the basis-coordinate sum
+`∑ i, b.repr (riemannOp _ x (b i) v w) i` via `ricciTensor_apply_basisSum`,
+then apply `riemannOp_lifted_natural` term-by-term. The two basis-identity
+hypotheses propagate through the trace: we need them at `x'` for the
+lifted metric and at `proj x'` for the base metric. -/
 theorem ricciTensor_lifted_natural (g : SmoothRiemannianMetric I M)
     (x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
-    (v' w' : E) :
+    (v' w' : E)
+    (h_lifted : chartRiemannBasisIdentity
+        (I := I)
+        (M := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
+        (liftedMetric (I := I) g) x')
+    (h_base : chartRiemannBasisIdentity (I := I) (M := M) g (proj (X := M) x')) :
     ricciTensor (I := I) (liftedMetric (I := I) g) x' v' w' =
-      ricciTensor (I := I) g (proj x') v' w' := sorry
+      ricciTensor (I := I) g (proj x') v' w' := by
+  classical
+  -- Expand both sides as basis-coordinate sums.
+  rw [ricciTensor_apply_basisSum
+        (I := I)
+        (M := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
+        (liftedMetric (I := I) g) x' v' w',
+      ricciTensor_apply_basisSum (I := I) (M := M) g (proj (X := M) x') v' w']
+  -- Match term by term.
+  refine Finset.sum_congr rfl ?_
+  intro i _
+  -- Apply `riemannOp_lifted_natural` to the inner `riemannOp ... (b i) v' w'`.
+  have hRiem :
+      riemannOp (cov := LeviCivita (I := I) (liftedMetric (I := I) g)) x'
+          (DifferentialGeometry.Integral.Measure.chartModelBasis E i) v' w' =
+        riemannOp (cov := LeviCivita (I := I) g) (proj (X := M) x')
+          (DifferentialGeometry.Integral.Measure.chartModelBasis E i) v' w' :=
+    riemannOp_lifted_natural (I := I) (M := M) g x'
+      (DifferentialGeometry.Integral.Measure.chartModelBasis E i) v' w' h_lifted h_base
+  rw [hRiem]
 
 /-- **Ricci lower bound transfers to the universal cover.**
 If `Ric_g ≥ κ · g` on `M`, then `Ric_{liftedMetric g} ≥ κ · (liftedMetric g)`
-on `M'`. Proof: at any `x'` and `v'`, set `x := proj x'` and `v := dproj v'`;
-by `proj_isLocalIsometry`, the inner products agree, and by
-`ricciTensor_lifted_natural` the Ricci values agree; apply `hRic x v`. -/
+on `M'`. Proof: at any `x'` and `v'`, set `x := proj x'`; by
+`proj_isLocalIsometry`, the inner products agree, and by
+`ricciTensor_lifted_natural` the Ricci values agree; apply `hRic x v'`.
+
+The pull-back of the lower bound is conditional on the chart-Riemann
+basis identification holding globally (both on the base and on the
+universal cover), reflecting the deferred deep chart-Christoffel
+computation that bridges the abstract Riemann operator to the chart
+Riemann tensor pointwise. -/
 theorem ricciBoundedBelow_pullback_universalCover
     {g : SmoothRiemannianMetric I M} {κ : ℝ}
-    (hRic : RicciBoundedBelow (I := I) g κ) :
+    (hRic : RicciBoundedBelow (I := I) g κ)
+    (h_lifted_all : ∀ x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M,
+        chartRiemannBasisIdentity
+          (I := I)
+          (M := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
+          (liftedMetric (I := I) g) x')
+    (h_base_all : ∀ x : M, chartRiemannBasisIdentity (I := I) (M := M) g x) :
     RicciBoundedBelow (I := I) (liftedMetric (I := I) g) κ := by
   -- Unfold the predicate: ∀ x' v', κ * (liftedMetric g).inner x' v' v' ≤
   -- ricciTensor (liftedMetric g) x' v' v'.
   intro x' v'
-  -- Set the projected point and the model-fibre representation of `v'`.
+  -- Set the projected point.
   set x : M := proj x' with hx_def
   -- `(liftedMetric g).inner x' v' v' = g.inner (proj x') v' v'` by
   -- `proj_isLocalIsometry` (which states the equality with the
@@ -132,6 +229,7 @@ theorem ricciBoundedBelow_pullback_universalCover
       ricciTensor (I := I) (liftedMetric (I := I) g) x' v' v' =
         ricciTensor (I := I) g x v' v' :=
     ricciTensor_lifted_natural (I := I) g x' v' v'
+      (h_lifted_all x') (h_base_all (proj (X := M) x'))
   -- Substitute on both sides and apply `hRic` at the projected point.
   rw [h_inner, h_ric]
   exact hRic x v'

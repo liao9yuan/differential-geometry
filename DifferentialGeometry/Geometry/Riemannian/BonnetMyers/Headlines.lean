@@ -738,11 +738,20 @@ theorem bonnetMyers_finite_fundamentalGroup
   -- still-sorry `CompleteSpace` of the universal cover. We package the latter as a
   -- local instance to mirror the upstream skeleton, then apply the proved compactness
   -- headline (Headline 2) to the lifted data.
-  -- Ricci pullback to the universal cover.
+  -- Ricci pullback to the universal cover. The two `chartRiemannBasisIdentity`
+  -- hypotheses are propagated through the chart-Riemann CLM bridge, and are
+  -- isolated as named residual gaps pending the deferred-deep predicate
+  -- discharge in `Integral/Connection/ChartBridge/Riemann.lean`.
+  have hBasisLift : ∀ x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M,
+      DifferentialGeometry.Integral.Connection.chartRiemannBasisIdentity
+        (I := I) gLift x' := by sorry
+  have hBasisBase : ∀ x : M,
+      DifferentialGeometry.Integral.Connection.chartRiemannBasisIdentity
+        (I := I) g x := by sorry
   have hRicLift :
       RicciBoundedBelow (I := I) gLift (((Module.finrank ℝ E : ℝ) - 1) * K) :=
     DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.ricciBoundedBelow_pullback_universalCover
-      (I := I) (g := g) _hRic
+      (I := I) (g := g) _hRic hBasisLift hBasisBase
   -- Completeness of the universal cover: routed through
   -- `completeSpace_universalCover` (UC/Lifts.lean), whose signature is in place
   -- though its body is pending.
