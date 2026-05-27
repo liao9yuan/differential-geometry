@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.Manifold
 import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.LiftedMetricSmoothness
+import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.Riemannian
 import DifferentialGeometry.Integral.Measure.ChartDensity
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Topology.VectorBundle.Basic
@@ -27,7 +28,7 @@ applied to the fixed model-space basis vector, rewrites both sides through
 open Set Function Filter
 open scoped Topology ContDiff Manifold
 open DifferentialGeometry.Integral.Measure
-  (SmoothRiemannianMetric chartBasisVecFiber chartModelBasis)
+  (SmoothRiemannianMetric chartBasisVecFiber chartModelBasis chartGramMatrix)
 
 noncomputable section
 
@@ -152,6 +153,49 @@ theorem chartBasisVecFiber_lifted
   -- The fibre-type identification `TangentSpace I x' = E` is definitional,
   -- and the resulting equation lives in `E`; we just hand it over.
   exact hAt
+
+/-- **`chartGramMatrix` is natural under universal-cover projection.**
+
+For any chart anchor `α' : UC M`, indices `i j : Fin (finrank ℝ E)`, and a
+cover-point `x' ∈ (chartAt H α').source`, the Gram matrix entry of the
+lifted metric on the universal cover equals the corresponding entry of
+the base-side Gram matrix at the projected points.
+
+Proof. Both sides unfold via `chartGramMatrix_apply` (a `rfl`-style simp
+lemma) to inner products of the chart-basis fibre vectors. The lifted
+metric is defined by `(liftedMetric g).inner x' v w = g.inner (proj x') v w`
+(definitional from the `liftedMetric` `def`), and
+`chartBasisVecFiber_lifted` identifies the cover-side basis fibre vector
+at `x'` with the base-side one at `proj x'` (through the definitional
+identification of the tangent fibre with `E`). Combining these three
+rewrites yields the claim. -/
+theorem chartGramMatrix_lifted
+    (g : SmoothRiemannianMetric I M)
+    (α' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
+    (x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
+    (i j : Fin (Module.finrank ℝ E))
+    (hx' : x' ∈ (chartAt H α').source) :
+    chartGramMatrix
+        (M := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
+        (liftedMetric (I := I) g) α' x' i j =
+      chartGramMatrix (M := M) g
+        (proj (X := M) α') (proj (X := M) x') i j := by
+  -- Unfold both sides via the `rfl`-style `chartGramMatrix_apply` simp lemma.
+  rw [DifferentialGeometry.Integral.Measure.chartGramMatrix_apply
+        (I := I)
+        (M := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
+        (liftedMetric (I := I) g) α' x' i j,
+      DifferentialGeometry.Integral.Measure.chartGramMatrix_apply
+        (I := I) (M := M) g (proj α') (proj x') i j]
+  -- Rewrite the two cover-side chart-basis fibre vectors at `x'` via the
+  -- proven naturality lemma, replacing them by the base-side fibre vectors
+  -- at `proj x'`.
+  rw [chartBasisVecFiber_lifted (I := I) (M := M) g α' i x' hx',
+      chartBasisVecFiber_lifted (I := I) (M := M) g α' j x' hx']
+  -- The remaining equality is the defining identity of the lifted inner
+  -- product: `(liftedMetric g).inner x' v w = g.inner (proj x') v w` is
+  -- `rfl` from the `liftedMetric` `def`.
+  rfl
 
 end UniversalCover
 end Topology
