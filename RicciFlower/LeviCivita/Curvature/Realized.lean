@@ -311,7 +311,7 @@ private theorem slots4_eq_vec4 {x : M}
   fin_cases q <;> rfl
 
 /-- The covariant derivative of an all-point output-skew `(0,4)` tensor field
-is output-skew in its curvature slots. -/
+is last-pair-skew in its curvature slots. -/
 theorem nabla4OutSkew
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -323,9 +323,9 @@ theorem nabla4OutSkew
       (nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         4 cov X Rm04 x) (vec4 (I := I) W Y Z U) =
         - (nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-          4 cov X Rm04 x) (vec4 (I := I) U Y Z W) := by
+          4 cov X Rm04 x) (vec4 (I := I) W Y U Z) := by
   intro W Y Z U
-  let σ : Equiv.Perm (Fin 4) := Equiv.swap 0 3
+  let σ : Equiv.Perm (Fin 4) := Equiv.swap 2 3
   have hperm : ∀ y : M, ∀ slots : Fin 4 -> TangentSpace I y,
       Rm04 y slots = (-1 : Real) * Rm04 y (fun q : Fin 4 => slots (σ q)) := by
     intro y slots
@@ -339,7 +339,7 @@ theorem nabla4OutSkew
   simpa [σ, vec4, Equiv.swap_apply_def] using h
 
 /-- The covariant derivative of an all-point input-skew `(0,4)` tensor field
-is input-skew in its curvature slots. -/
+is first-pair-skew in its curvature slots. -/
 theorem nabla4InSkew
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -347,25 +347,25 @@ theorem nabla4InSkew
     (Rm04 : Tensor04Section (I := I) (M := M))
     (x : M)
     (hskew : ∀ y : M, ∀ W Y Z U : TangentSpace I y,
-      Rm04 y (vec4 (I := I) W Z Y U) =
+      Rm04 y (vec4 (I := I) Y W Z U) =
         -Rm04 y (vec4 (I := I) W Y Z U)) :
     ∀ W Y Z U : TangentSpace I x,
       (nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-        4 cov X Rm04 x) (vec4 (I := I) W Z Y U) =
+        4 cov X Rm04 x) (vec4 (I := I) Y W Z U) =
         - (nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
           4 cov X Rm04 x) (vec4 (I := I) W Y Z U) := by
   intro W Y Z U
-  let σ : Equiv.Perm (Fin 4) := Equiv.swap 1 2
+  let σ : Equiv.Perm (Fin 4) := Equiv.swap 0 1
   have hperm : ∀ y : M, ∀ slots : Fin 4 -> TangentSpace I y,
       Rm04 y slots = (-1 : Real) * Rm04 y (fun q : Fin 4 => slots (σ q)) := by
     intro y slots
     rw [slots4_eq_vec4 (I := I) (fun q : Fin 4 => slots (σ q))]
     rw [slots4_eq_vec4 (I := I) slots]
-    have h := hskew y (slots 0) (slots 2) (slots 1) (slots 3)
+    have h := hskew y (slots 1) (slots 0) (slots 2) (slots 3)
     simpa [σ, vec4, Equiv.swap_apply_def] using h
   have h := nabla0SFun_perm (I := I)
-    cov X Rm04 x σ (-1 : Real) hperm (vec4 (I := I) W Z Y U)
-  rw [slots4_eq_vec4 (I := I) (fun q : Fin 4 => vec4 (I := I) W Z Y U (σ q))] at h
+    cov X Rm04 x σ (-1 : Real) hperm (vec4 (I := I) Y W Z U)
+  rw [slots4_eq_vec4 (I := I) (fun q : Fin 4 => vec4 (I := I) Y W Z U (σ q))] at h
   simpa [σ, vec4, Equiv.swap_apply_def] using h
 
 /-- The covariant derivative of an all-point pair-symmetric `(0,4)` tensor
@@ -444,13 +444,13 @@ theorem canRmSymm
     have hright :=
       totalNabla0SFun_apply_section
         (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-        4 cov Asec Rm04 x (vec4 (I := I) Z X Y W)
+        4 cov Asec Rm04 x (vec4 (I := I) W X Z Y)
     rw [← hAsec]
     rw [show vec5 (I := I) (Asec x) W X Y Z =
         Fin.cons (Asec x) (vec4 (I := I) W X Y Z) by
         rw [finCons_vec4_eq_vec5]]
-    rw [show vec5 (I := I) (Asec x) Z X Y W =
-        Fin.cons (Asec x) (vec4 (I := I) Z X Y W) by
+    rw [show vec5 (I := I) (Asec x) W X Z Y =
+        Fin.cons (Asec x) (vec4 (I := I) W X Z Y) by
         rw [finCons_vec4_eq_vec5]]
     rw [hleft, hright]
     exact hsymm
@@ -477,14 +477,14 @@ theorem canRmSymm
     have hleft :=
       totalNabla0SFun_apply_section
         (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-        4 cov Asec Rm04 x (vec4 (I := I) W Y X Z)
+        4 cov Asec Rm04 x (vec4 (I := I) X W Y Z)
     have hright :=
       totalNabla0SFun_apply_section
         (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         4 cov Asec Rm04 x (vec4 (I := I) W X Y Z)
     rw [← hAsec]
-    rw [show vec5 (I := I) (Asec x) W Y X Z =
-        Fin.cons (Asec x) (vec4 (I := I) W Y X Z) by
+    rw [show vec5 (I := I) (Asec x) X W Y Z =
+        Fin.cons (Asec x) (vec4 (I := I) X W Y Z) by
         rw [finCons_vec4_eq_vec5]]
     rw [show vec5 (I := I) (Asec x) W X Y Z =
         Fin.cons (Asec x) (vec4 (I := I) W X Y Z) by
@@ -560,17 +560,17 @@ theorem canRmSecond
     totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       4 cov Rm04 x
   dsimp [SecondBianchiAt]
-  intro A W X Y Z
+  intro A X Y Z W
   obtain ⟨Asec, hAsec, hcovA⟩ :=
     TensorLieDeriv.exists_cov_zero_at_apply (I := I) cov hcov1 x A
-  obtain ⟨Wsec, hWsec, hcovW⟩ :=
-    TensorLieDeriv.exists_cov_zero_at_apply (I := I) cov hcov1 x W
   obtain ⟨Xsec, hXsec, hcovX⟩ :=
     TensorLieDeriv.exists_cov_zero_at_apply (I := I) cov hcov1 x X
   obtain ⟨Ysec, hYsec, hcovY⟩ :=
     TensorLieDeriv.exists_cov_zero_at_apply (I := I) cov hcov1 x Y
   obtain ⟨Zsec, hZsec, hcovZ⟩ :=
     TensorLieDeriv.exists_cov_zero_at_apply (I := I) cov hcov1 x Z
+  obtain ⟨Wsec, hWsec, hcovW⟩ :=
+    TensorLieDeriv.exists_cov_zero_at_apply (I := I) cov hcov1 x W
   let Rsec : ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M -> Type _) :=
     ⟨fun p : M =>
@@ -595,7 +595,7 @@ theorem canRmSecond
         (TangentSpace I : M -> Type _), (cov (fun p => Q p) x) (V x) = 0)
       (hcovR : ∀ V : ContMDiffSection I E (∞ : WithTop ℕ∞)
         (TangentSpace I : M -> Type _), (cov (fun p => R p) x) (V x) = 0) :
-      nablaRm04 (vec5 (I := I) D0 W (P x) (Q x) (R x)) =
+      nablaRm04 (vec5 (I := I) D0 (P x) (Q x) (R x) W) =
         g.inner x W
           (curvCovDerivOpAt (I := I) cov D P Q R x) := by
     let Rcurv : ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -610,16 +610,16 @@ theorem canRmSecond
     have htotal :=
       totalNabla0SFun_apply_section
         (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-        4 cov D Rm04 x (vec4 (I := I) W (P x) (Q x) (R x))
+        4 cov D Rm04 x (vec4 (I := I) (P x) (Q x) (R x) W)
     have heval :=
       nabla0SFun_eval_smooth_slots (𝕜 := Real) (E := E) (H := H)
         (I := I) (M := M) cov D
         (fun a : Fin 4 =>
           match a with
-          | ⟨0, _⟩ => Wsec
-          | ⟨1, _⟩ => P
-          | ⟨2, _⟩ => Q
-          | ⟨3, _⟩ => R)
+          | ⟨0, _⟩ => P
+          | ⟨1, _⟩ => Q
+          | ⟨2, _⟩ => R
+          | ⟨3, _⟩ => Wsec)
         Rm04 x
     have hderiv :
         extDerivFun (I := I)
@@ -627,10 +627,10 @@ theorem canRmSecond
               Rm04 p
                 (fun a : Fin 4 =>
                   (match a with
-                    | ⟨0, _⟩ => Wsec
-                    | ⟨1, _⟩ => P
-                    | ⟨2, _⟩ => Q
-                    | ⟨3, _⟩ => R) p))
+                    | ⟨0, _⟩ => P
+                    | ⟨1, _⟩ => Q
+                    | ⟨2, _⟩ => R
+                    | ⟨3, _⟩ => Wsec) p))
             x (D x) =
           g.inner x W ((cov (fun p : M => Rcurv p) x) (D x)) := by
       have hfun :
@@ -638,15 +638,15 @@ theorem canRmSecond
               Rm04 p
                 (fun a : Fin 4 =>
                   (match a with
-                    | ⟨0, _⟩ => Wsec
-                    | ⟨1, _⟩ => P
-                    | ⟨2, _⟩ => Q
-                    | ⟨3, _⟩ => R) p)) =
+                    | ⟨0, _⟩ => P
+                    | ⟨1, _⟩ => Q
+                    | ⟨2, _⟩ => R
+                    | ⟨3, _⟩ => Wsec) p)) =
             fun p : M => g.inner p (Wsec p) (Rcurv p) := by
         funext p
         simpa [Rcurv, Rm04, vec4, Curvature.vec4] using
           Riemann.CovariantDerivative.rm04Section_apply_smooth
-            (I := I) g cov hcov Wsec P Q R p
+            (I := I) g cov hcov P Q R Wsec p
       have hDmd : MDiffAt (T% fun p : M => D p) x :=
         (D.contMDiff.contMDiffAt (x := x)).mdifferentiableAt (by simp)
       have hWmd : MDiffAt (T% fun p : M => Wsec p) x :=
@@ -668,17 +668,17 @@ theorem canRmSecond
             (Function.update
               (fun b : Fin 4 =>
                 (match b with
-                  | ⟨0, _⟩ => Wsec
-                  | ⟨1, _⟩ => P
-                  | ⟨2, _⟩ => Q
-                  | ⟨3, _⟩ => R) x) a
+                  | ⟨0, _⟩ => P
+                  | ⟨1, _⟩ => Q
+                  | ⟨2, _⟩ => R
+                  | ⟨3, _⟩ => Wsec) x) a
               ((cov
                 (fun p : M =>
                   (match a with
-                    | ⟨0, _⟩ => Wsec
-                    | ⟨1, _⟩ => P
-                    | ⟨2, _⟩ => Q
-                    | ⟨3, _⟩ => R) p) x) (D x)))) = 0 := by
+                    | ⟨0, _⟩ => P
+                    | ⟨1, _⟩ => Q
+                    | ⟨2, _⟩ => R
+                    | ⟨3, _⟩ => Wsec) p) x) (D x)))) = 0 := by
       rw [Fin.sum_univ_four]
       simp [hcovW D, hcovP D, hcovQ D, hcovR D, tensor0S_update_zero]
     have hop :
@@ -817,13 +817,13 @@ theorem canRmSecond
       unfold curvCovDerivOpAt
       simp [Rcurv, hPterm, hQterm, hRterm]
     calc
-      nablaRm04 (vec5 (I := I) D0 W (P x) (Q x) (R x))
+      nablaRm04 (vec5 (I := I) D0 (P x) (Q x) (R x) W)
           =
         nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-          4 cov D Rm04 x (vec4 (I := I) W (P x) (Q x) (R x)) := by
+          4 cov D Rm04 x (vec4 (I := I) (P x) (Q x) (R x) W) := by
             rw [← hD]
-            rw [show vec5 (I := I) (D x) W (P x) (Q x) (R x) =
-                Fin.cons (D x) (vec4 (I := I) W (P x) (Q x) (R x)) by
+            rw [show vec5 (I := I) (D x) (P x) (Q x) (R x) W =
+                Fin.cons (D x) (vec4 (I := I) (P x) (Q x) (R x) W) by
                 rw [finCons_vec4_eq_vec5]]
             exact htotal
       _ =
@@ -831,17 +831,17 @@ theorem canRmSecond
           4 cov D Rm04 x
             (fun a : Fin 4 =>
               (match a with
-                | ⟨0, _⟩ => Wsec
-                | ⟨1, _⟩ => P
-                | ⟨2, _⟩ => Q
-                | ⟨3, _⟩ => R) x) := by
-            rw [show vec4 (I := I) W (P x) (Q x) (R x) =
+                | ⟨0, _⟩ => P
+                | ⟨1, _⟩ => Q
+                | ⟨2, _⟩ => R
+                | ⟨3, _⟩ => Wsec) x) := by
+            rw [show vec4 (I := I) (P x) (Q x) (R x) W =
                 (fun a : Fin 4 =>
                   (match a with
-                    | ⟨0, _⟩ => Wsec
-                    | ⟨1, _⟩ => P
-                    | ⟨2, _⟩ => Q
-                    | ⟨3, _⟩ => R) x) by
+                    | ⟨0, _⟩ => P
+                    | ⟨1, _⟩ => Q
+                    | ⟨2, _⟩ => R
+                    | ⟨3, _⟩ => Wsec) x) by
                 funext a
                 fin_cases a <;> simp [hWsec, vec4, Curvature.vec4]]
       _ =
@@ -850,44 +850,44 @@ theorem canRmSecond
               Rm04 p
                 (fun a : Fin 4 =>
                   (match a with
-                    | ⟨0, _⟩ => Wsec
-                    | ⟨1, _⟩ => P
-                    | ⟨2, _⟩ => Q
-                    | ⟨3, _⟩ => R) p))
+                    | ⟨0, _⟩ => P
+                    | ⟨1, _⟩ => Q
+                    | ⟨2, _⟩ => R
+                    | ⟨3, _⟩ => Wsec) p))
             x (D x) -
           (∑ a : Fin 4,
             Rm04 x
               (Function.update
                 (fun b : Fin 4 =>
                   (match b with
-                    | ⟨0, _⟩ => Wsec
-                    | ⟨1, _⟩ => P
-                    | ⟨2, _⟩ => Q
-                    | ⟨3, _⟩ => R) x) a
+                    | ⟨0, _⟩ => P
+                    | ⟨1, _⟩ => Q
+                    | ⟨2, _⟩ => R
+                    | ⟨3, _⟩ => Wsec) x) a
                 ((cov
                   (fun p : M =>
                     (match a with
-                      | ⟨0, _⟩ => Wsec
-                      | ⟨1, _⟩ => P
-                      | ⟨2, _⟩ => Q
-                      | ⟨3, _⟩ => R) p) x) (D x)))) := heval
+                      | ⟨0, _⟩ => P
+                      | ⟨1, _⟩ => Q
+                      | ⟨2, _⟩ => R
+                      | ⟨3, _⟩ => Wsec) p) x) (D x)))) := heval
       _ = g.inner x W ((cov (fun p : M => Rcurv p) x) (D x)) := by
             rw [hderiv, hcorr]
             simp
       _ = g.inner x W (curvCovDerivOpAt (I := I) cov D P Q R x) := by
             rw [hop]
   have h1 :
-      nablaRm04 (vec5 (I := I) A W X Y Z) =
+      nablaRm04 (vec5 (I := I) A X Y Z W) =
         g.inner x W (curvCovDerivOpAt (I := I) cov Asec Xsec Ysec Zsec x) := by
     simpa [hXsec, hYsec, hZsec] using
       term_eq Asec A hAsec Xsec Ysec Zsec hcovX hcovY hcovZ
   have h2 :
-      nablaRm04 (vec5 (I := I) X W Y A Z) =
+      nablaRm04 (vec5 (I := I) X Y A Z W) =
         g.inner x W (curvCovDerivOpAt (I := I) cov Xsec Ysec Asec Zsec x) := by
     simpa [hAsec, hYsec, hZsec] using
       term_eq Xsec X hXsec Ysec Asec Zsec hcovY hcovA hcovZ
   have h3 :
-      nablaRm04 (vec5 (I := I) Y W A X Z) =
+      nablaRm04 (vec5 (I := I) Y A X Z W) =
         g.inner x W (curvCovDerivOpAt (I := I) cov Ysec Asec Xsec Zsec x) := by
     simpa [hAsec, hXsec, hZsec] using
       term_eq Ysec Y hYsec Asec Xsec Zsec hcovA hcovX hcovZ
@@ -982,11 +982,12 @@ theorem canRicField
       ∑ i : Coordinates.CoordinateIdx (𝕜 := Real) E,
         ∑ j : Coordinates.CoordinateIdx (𝕜 := Real) E,
           gInv i j *
-            Rm04 y (vec4 (I := I) (basis i) (basis j)
-              (basis (slots 0)) (basis (slots 1))) := by
+            Rm04 y (vec4 (I := I) (basis i) (basis (slots 0))
+              (basis (slots 1)) (basis j)) := by
         simpa using hTrace (slots 0) (slots 1)
     _ =
-      metricTraceFirstTwo0SAt (I := I) g (Rm04 y)
+      metricTraceFirstTwo0SAt (I := I) g
+        ((Rm04 y).domDomCongr trace04Perm)
         (vec2 (I := I) (basis (slots 0)) (basis (slots 1))) := by
         rw [metricTraceFirstTwo0SAt_eq_sum_basis (I := I) g basis gInv hinv]
         apply Finset.sum_congr rfl

@@ -581,25 +581,28 @@ noncomputable def riemannCurvature04At
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞) (x : M) :
     Tensor04At (I := I) (M := M) x :=
-  Tensor0SSpace.ofModel (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-    (ContinuousLinearMap.uncurryLeft
-      (𝕜 := Real) (n := 3) (Ei := fun _ : Fin 4 => E) (G := Real)
-      (((TensorRSSpace.toModel (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-          (riemannCurvatureAt cov hcov x)).comp
-        (tangentFlatCotangentModelCLM (I := I) g x)) :
-        E →L[Real] ContinuousMultilinearMap Real (fun _ : Fin 3 => E) Real))
+  tensor04StdOfOutAt (I := I) (M := M)
+    (Tensor0SSpace.ofModel (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (ContinuousLinearMap.uncurryLeft
+        (𝕜 := Real) (n := 3) (Ei := fun _ : Fin 4 => E) (G := Real)
+        (((TensorRSSpace.toModel (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+            (riemannCurvatureAt cov hcov x)).comp
+          (tangentFlatCotangentModelCLM (I := I) g x)) :
+          E →L[Real] ContinuousMultilinearMap Real (fun _ : Fin 3 => E) Real)))
 
 @[simp]
 theorem riemannCurvature04At_apply_const
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞) {x : M}
-    (W X Y Z : TangentSpace I x) :
-    riemannCurvature04At g cov hcov x (vec4 W X Y Z) =
+    (X Y Z W : TangentSpace I x) :
+    riemannCurvature04At g cov hcov x (vec4 X Y Z W) =
       g.inner x W
         (riemannCurvatureAux cov
           (tangentConstAt (I := I) x X) (tangentConstAt (I := I) x Y)
           (tangentConstAt (I := I) x Z) x) := by
+  dsimp [riemannCurvature04At]
+  rw [tensor04StdOfOutAt_apply]
   change
     (ContinuousLinearMap.uncurryLeft
         (𝕜 := Real) (n := 3) (Ei := fun _ : Fin 4 => E) (G := Real)
@@ -658,8 +661,8 @@ theorem riemannCurvature04At_eq_lower_riemannCurvatureAt
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞) {x : M}
-    (W X Y Z : TangentSpace I x) :
-    riemannCurvature04At g cov hcov x (vec4 W X Y Z) =
+    (X Y Z W : TangentSpace I x) :
+    riemannCurvature04At g cov hcov x (vec4 X Y Z W) =
       riemannCurvatureAt cov hcov x (dualToCotangent ((tangentFlatLinear g x) W))
         (vec3 X Y Z) := by
   rw [riemannCurvature04At_apply_const, riemannCurvatureAt_apply_const]

@@ -291,6 +291,145 @@ noncomputable def freezeTail04Field
       freezeFirstTwo0S (I := I) (A x) (vec2 (I := I) (Y x) (Z x)) := by
   rfl
 
+private def freezeMiddle04Slots
+    (x₀ : M) (σ : Fin 2 -> CoordinateIdx (𝕜 := Real) E)
+    (Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _)) :
+    Fin 4 -> (y : M) -> TangentSpace I y
+  | ⟨0, _⟩ => coordinateFrameAt (I := I) x₀ (σ 0)
+  | ⟨1, _⟩ => fun y => Y y
+  | ⟨2, _⟩ => fun y => Z y
+  | ⟨3, _⟩ => coordinateFrameAt (I := I) x₀ (σ 1)
+
+private theorem freezeMiddle04Slots_vec4
+    (x₀ y : M) (σ : Fin 2 -> CoordinateIdx (𝕜 := Real) E)
+    (Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _)) :
+    (fun q : Fin 4 => freezeMiddle04Slots (I := I) x₀ σ Y Z q y) =
+      vec4 (I := I)
+        (coordinateFrameAt (I := I) x₀ (σ 0) y)
+        (Y y) (Z y)
+        (coordinateFrameAt (I := I) x₀ (σ 1) y) := by
+  funext q
+  fin_cases q <;> rfl
+
+set_option backward.isDefEq.respectTransparency false in
+/-- Freeze the middle two slots of a smooth standard-slot `(0,4)` tensor field
+against two smooth tangent sections, leaving a smooth `(0,2)` tensor field in
+slots `0` and `3`. -/
+noncomputable def freezeMiddle04Field
+    [CompleteSpace E]
+    (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 4)
+    (Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _)) :
+    Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2 := by
+  letI := tensor0SBundle_topology (𝕜 := Real) (E := E) (H := H) (I := I)
+    (M := M) 2
+  let F : (p : M) ->
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 p :=
+    fun p : M => freezeFirstTwo0S (I := I)
+      ((A p).domDomCongr trace04Perm)
+      (vec2 (I := I) (Y p) (Z p))
+  refine ⟨F, ?_⟩
+  let d := Module.finrank Real E
+  let b : Module.Basis (Fin d) Real E := Module.finBasis Real E
+  refine (contMDiff_multilinearSection_iff_coord (TangentSpace I)
+    (∞ : WithTop ℕ∞) b F).mpr ?_
+  intro σ x₀
+  have hcoeff :
+      ContMDiffAt I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+        (fun y : M =>
+          A y (fun q : Fin 4 => freezeMiddle04Slots (I := I) x₀ σ Y Z q y))
+        x₀ := by
+    let v : Fin 4 -> (y : M) -> TangentSpace I y :=
+      fun q y => freezeMiddle04Slots (I := I) x₀ σ Y Z q y
+    have hv : ∀ q : Fin 4,
+        ContMDiffAt I (I.prod 𝓘(Real, E)) (∞ : WithTop ℕ∞)
+          (fun y : M =>
+            TotalSpace.mk' E (E := fun x : M => TangentSpace I x) y (v q y)) x₀ := by
+      intro q
+      fin_cases q
+      · exact (coordinateFrameAt_isLocalFrame (I := I) x₀).contMDiffAt
+          (coordinateFrameSet_open (I := I) x₀)
+          (coordinateFrameAt_mem (I := I) x₀) (σ 0)
+      · exact Y.contMDiff x₀
+      · exact Z.contMDiff x₀
+      · exact (coordinateFrameAt_isLocalFrame (I := I) x₀).contMDiffAt
+          (coordinateFrameSet_open (I := I) x₀)
+          (coordinateFrameAt_mem (I := I) x₀) (σ 1)
+    have hA := TensorMultilinear.contMDiffAt_section_apply
+      (𝕜 := Real) (I := I) (M := M) (n := 4)
+      (T := fun y : M => A y) (A.contMDiff x₀) v hv
+    simpa [v, Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply]
+      using hA
+  refine hcoeff.congr_of_eventuallyEq ?_
+  let e := coordinateTrivializationAt (𝕜 := Real) (I := I) x₀
+  have hx₀ : x₀ ∈ coordinateFrameSet (𝕜 := Real) (I := I) x₀ :=
+    coordinateFrameAt_mem (𝕜 := Real) (I := I) x₀
+  filter_upwards [(coordinateFrameSet_open (𝕜 := Real) (I := I) x₀).mem_nhds hx₀]
+    with y hy
+  rw [continuousMultilinearMap_basis_repr]
+  change ((trivializationAt (Tensor0SModel 2 Real E)
+      (Bundle.continuousMultilinearMap Real 2 E
+        (TangentSpace I : M -> Type _)) x₀
+      ⟨y, F y⟩).2)
+      (fun a : Fin 2 => b (σ a)) =
+    A y (fun q : Fin 4 => freezeMiddle04Slots (I := I) x₀ σ Y Z q y)
+  change (F y).compContinuousLinearMap
+      (fun _ : Fin 2 =>
+        (trivializationAt E (TangentSpace I : M -> Type _) x₀).symmL Real y)
+      (fun a : Fin 2 => b (σ a)) =
+    A y (fun q : Fin 4 => freezeMiddle04Slots (I := I) x₀ σ Y Z q y)
+  rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
+  have hslot :
+      (fun a : Fin 2 =>
+        (trivializationAt E (TangentSpace I : M -> Type _) x₀).symmL Real y
+          (b (σ a))) =
+        vec2 (I := I)
+          (coordinateFrameAt (I := I) x₀ (σ 0) y)
+          (coordinateFrameAt (I := I) x₀ (σ 1) y) := by
+    funext q
+    fin_cases q
+    · change
+        (coordinateTrivializationAt (𝕜 := Real) (I := I) x₀).symmL Real y
+            (b (σ 0)) =
+          coordinateFrameAt (I := I) x₀ (σ 0) y
+      change e.symmL Real y (b (σ 0)) = e.localFrame b (σ 0) y
+      rw [Bundle.Trivialization.localFrame_apply_of_mem_baseSet
+        (e := e) (b := b) (i := σ 0) hy]
+      rfl
+    · change
+        (coordinateTrivializationAt (𝕜 := Real) (I := I) x₀).symmL Real y
+            (b (σ 1)) =
+          coordinateFrameAt (I := I) x₀ (σ 1) y
+      change e.symmL Real y (b (σ 1)) = e.localFrame b (σ 1) y
+      rw [Bundle.Trivialization.localFrame_apply_of_mem_baseSet
+        (e := e) (b := b) (i := σ 1) hy]
+      rfl
+  rw [hslot]
+  rw [freezeFirstTwo0S_apply]
+  rw [ContinuousMultilinearMap.domDomCongr_apply]
+  rw [metricTrace_input_vec2_eq_vec4]
+  rw [freezeMiddle04Slots_vec4]
+  congr 1
+  funext q
+  fin_cases q <;> simp [trace04Perm, RicciFlower.Curvature.vec4]
+
+@[simp] theorem freezeMiddle04Field_apply
+    [CompleteSpace E]
+    (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 4)
+    (Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    (x : M) :
+    freezeMiddle04Field (I := I) (M := M) A Y Z x =
+      freezeFirstTwo0S (I := I)
+        ((A x).domDomCongr trace04Perm)
+        (vec2 (I := I) (Y x) (Z x)) := by
+  rfl
+
 /-- Metric-compatible covariant differentiation commutes with the metric trace
 of a smooth `(0,2)` tensor, in the concrete basis form used by the contracted
 Bianchi interface. -/

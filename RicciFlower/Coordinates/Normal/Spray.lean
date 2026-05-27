@@ -1,4 +1,5 @@
 import RicciFlower.Coordinates.Normal.Base
+import Mathlib.Analysis.Calculus.MeanValue
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -178,20 +179,20 @@ theorem sprayAccel_smul
 
 /-- The tangent-bundle chart inverse centered at `0_x` is smooth at the chart
 coordinate of `0_x`. -/
-theorem phaseOfModel_cdAt
+theorem phaseOfModel_contMDiffAt
     [I.Boundaryless] (x : M) :
-    ContMDiffAt 𝓘(Real, E × E) I.tangent 1
+    ContMDiffAt 𝓘(Real, E × E) I.tangent ∞
       (phaseOfModel (I := I) x)
       (extChartAt I.tangent (phaseZero (I := I) x)
         (phaseZero (I := I) x)) := by
   have hwithin :
-      ContMDiffWithinAt 𝓘(Real, E × E) I.tangent 1
+      ContMDiffWithinAt 𝓘(Real, E × E) I.tangent ∞
         (extChartAt I.tangent (phaseZero (I := I) x)).symm
         (Set.range I.tangent)
         (extChartAt I.tangent (phaseZero (I := I) x)
           (phaseZero (I := I) x)) :=
     contMDiffWithinAt_extChartAt_symm_range_self
-      (I := I.tangent) (x := phaseZero (I := I) x) (n := (1 : WithTop ℕ∞))
+      (I := I.tangent) (x := phaseZero (I := I) x) (n := (∞ : WithTop ℕ∞))
   have hrange :
       Set.range I.tangent ∈
         𝓝 (extChartAt I.tangent (phaseZero (I := I) x)
@@ -199,6 +200,16 @@ theorem phaseOfModel_cdAt
     rw [ModelWithCorners.Boundaryless.range_eq_univ (I := I.tangent)]
     exact Filter.univ_mem
   simpa [phaseOfModel] using hwithin.contMDiffAt hrange
+
+/-- The tangent-bundle chart inverse centered at `0_x` is `C¹` at the chart
+coordinate of `0_x`. -/
+theorem phaseOfModel_cdAt
+    [I.Boundaryless] (x : M) :
+    ContMDiffAt 𝓘(Real, E × E) I.tangent 1
+      (phaseOfModel (I := I) x)
+      (extChartAt I.tangent (phaseZero (I := I) x)
+        (phaseZero (I := I) x)) :=
+  (phaseOfModel_contMDiffAt (I := I) x).of_le (by norm_num)
 
 /-- In the fixed tangent-bundle chart, the model vector field is locally the
 chart-fiber RHS used to define the spray. -/
@@ -590,25 +601,24 @@ theorem uIcc01_mem_ball_two {t : Real}
 
 /-- The chart-fiber RHS, pulled back to the fixed model chart, is smooth at
 `0_x`. -/
-theorem sprayFiber_cdAt
+theorem sprayFiber_contDiffAt
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M) :
-    ContDiffAt Real 1
+    ContDiffAt Real ∞
       (fun z : E × E =>
         leviCivitaGeodesicSprayChartFiber (I := I) g x
           (phaseOfModel (I := I) x z))
       (extChartAt I.tangent (phaseZero (I := I) x)
         (phaseZero (I := I) x)) := by
   have hfiber :
-      ContMDiffAt I.tangent 𝓘(Real, E × E) 1
+      ContMDiffAt I.tangent 𝓘(Real, E × E) ∞
         (leviCivitaGeodesicSprayChartFiber (I := I) g x)
         (phaseZero (I := I) x) := by
     have htop :=
       leviCivitaGeodesicSprayChartFiber_contMDiffAt_self
         (I := I) g x (0 : TangentSpace I x)
-    simpa [phaseZero] using
-      htop.of_le (by exact_mod_cast (le_top : (1 : ℕ∞) ≤ ⊤))
-  have hphase := phaseOfModel_cdAt (I := I) x
+    simpa [phaseZero] using htop
+  have hphase := phaseOfModel_contMDiffAt (I := I) x
   let z0 : E × E :=
     extChartAt I.tangent (phaseZero (I := I) x)
       (phaseZero (I := I) x)
@@ -617,12 +627,12 @@ theorem sprayFiber_cdAt
     exact PartialEquiv.left_inv _ (mem_extChartAt_source (I := I.tangent)
       (phaseZero (I := I) x))
   have hfiber' :
-      ContMDiffAt I.tangent 𝓘(Real, E × E) 1
+      ContMDiffAt I.tangent 𝓘(Real, E × E) ∞
         (leviCivitaGeodesicSprayChartFiber (I := I) g x)
         (phaseOfModel (I := I) x z0) := by
     simpa [hphase_self] using hfiber
   have hcomp :
-      ContMDiffAt 𝓘(Real, E × E) 𝓘(Real, E × E) 1
+      ContMDiffAt 𝓘(Real, E × E) 𝓘(Real, E × E) ∞
         ((leviCivitaGeodesicSprayChartFiber (I := I) g x) ∘
           phaseOfModel (I := I) x)
         z0 :=
@@ -631,17 +641,30 @@ theorem sprayFiber_cdAt
       hphase
   simpa [Function.comp_def, z0] using hcomp.contDiffAt
 
-/-- The fixed-chart model spray is `C^1` at the zero phase point. -/
-theorem modelSpray_cdAt
+/-- The chart-fiber RHS, pulled back to the fixed model chart, is `C¹` at
+`0_x`. -/
+theorem sprayFiber_cdAt
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M) :
-    ContDiffAt Real 1 (modelSpray (I := I) g x)
+    ContDiffAt Real 1
+      (fun z : E × E =>
+        leviCivitaGeodesicSprayChartFiber (I := I) g x
+          (phaseOfModel (I := I) x z))
+      (extChartAt I.tangent (phaseZero (I := I) x)
+        (phaseZero (I := I) x)) :=
+  (sprayFiber_contDiffAt (I := I) g x).of_le (by norm_num)
+
+/-- The fixed-chart model spray is smooth at the zero phase point. -/
+theorem modelSpray_contDiffAt
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    ContDiffAt Real ∞ (modelSpray (I := I) g x)
       (extChartAt I.tangent (phaseZero (I := I) x)
         (phaseZero (I := I) x)) := by
   let z0 : E × E :=
     extChartAt I.tangent (phaseZero (I := I) x)
       (phaseZero (I := I) x)
-  have hfiber := sprayFiber_cdAt (I := I) g x
+  have hfiber := sprayFiber_contDiffAt (I := I) g x
   have hsrc_nhds :
       {q : TangentBundle I M | q.proj ∈ (extChartAt I x).source} ∈
         𝓝 (phaseZero (I := I) x) := by
@@ -669,11 +692,162 @@ theorem modelSpray_cdAt
   have hsrc_event :
       ∀ᶠ z in 𝓝 z0,
         (phaseOfModel (I := I) x z).proj ∈ (extChartAt I x).source := by
-    have hphase_cont := (phaseOfModel_cdAt (I := I) x).continuousAt
+    have hphase_cont := (phaseOfModel_contMDiffAt (I := I) x).continuousAt
     simpa [z0] using hphase_cont.preimage_mem_nhds hsrc_nhds'
   refine hfiber.congr_of_eventuallyEq ?_
   filter_upwards [hsrc_event] with z hz
   exact modelSpray_eq_fiber (I := I) g x hz
+
+/-- The fixed-chart model spray is `C¹` at the zero phase point. -/
+theorem modelSpray_cdAt
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    ContDiffAt Real 1 (modelSpray (I := I) g x)
+      (extChartAt I.tangent (phaseZero (I := I) x)
+        (phaseZero (I := I) x)) :=
+  (modelSpray_contDiffAt (I := I) g x).of_le (by norm_num)
+
+/-- The scalar Christoffel quadratic term in the explicit model spray is
+smooth at every base coordinate in the fixed chart target. -/
+theorem sprayQuad_contDiffAt_of_mem
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M) {z : E × E}
+    (hy : z.1 ∈ (extChartAt I x).target)
+    (k : CoordinateIdx (𝕜 := Real) E) :
+    ContDiffAt Real ∞
+      (fun z : E × E =>
+        leviCivitaGeodesicSprayQuadratic (I := I) g x z.1 z.2 k)
+      z := by
+  classical
+  unfold leviCivitaGeodesicSprayQuadratic
+  refine ContDiffAt.sum fun i _ => ?_
+  refine ContDiffAt.sum fun j _ => ?_
+  let Γ : E -> Real :=
+    LeviCivita.leviCivitaChristoffelModelRHS
+      (I := I) g x i j k
+  have hΓWithin :=
+    LeviCivita.leviCivitaChristoffelModelRHS_contDiffWithinAt_of_mem
+      (I := I) g x hy i j k
+  have hRange : Set.range I ∈ 𝓝 z.1 := by
+    exact Filter.mem_of_superset
+      ((isOpen_extChartAt_target (I := I) x).mem_nhds hy)
+      (extChartAt_target_subset_range (I := I) x)
+  have hΓAt : ContDiffAt Real ∞ Γ z.1 := by
+    simpa [Γ] using hΓWithin.contDiffAt hRange
+  have hΓ : ContDiffAt Real ∞ (fun z : E × E => Γ z.1) z :=
+    hΓAt.comp z contDiffAt_fst
+  have hi : ContDiffAt Real ∞ (fun z : E × E => modelCoord i z.2) z := by
+    simpa [modelCoord] using
+      (((Module.finBasis Real E).coord i).toContinuousLinearMap.contDiff.contDiffAt.comp
+        z contDiffAt_snd)
+  have hj : ContDiffAt Real ∞ (fun z : E × E => modelCoord j z.2) z := by
+    simpa [modelCoord] using
+      (((Module.finBasis Real E).coord j).toContinuousLinearMap.contDiff.contDiffAt.comp
+        z contDiffAt_snd)
+  simpa [Γ] using (hΓ.mul hi).mul hj
+
+/-- The explicit model acceleration is smooth at every base coordinate in the
+fixed chart target. -/
+theorem sprayAccel_contDiffAt_of_mem
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M) {z : E × E}
+    (hy : z.1 ∈ (extChartAt I x).target) :
+    ContDiffAt Real ∞
+      (fun z : E × E =>
+        leviCivitaGeodesicSprayAcceleration (I := I) g x z.1 z.2)
+      z := by
+  classical
+  unfold leviCivitaGeodesicSprayAcceleration
+  refine ContDiffAt.sum fun k _ => ?_
+  have hq := (sprayQuad_contDiffAt_of_mem (I := I) g x hy k).neg
+  have hbasis : ContDiffAt Real ∞
+      (fun _ : E × E => Module.finBasis Real E k) z :=
+    contDiffAt_const
+  exact hq.smul hbasis
+
+/-- The explicit model pair `(v, -Γ(v,v))` is smooth at every base coordinate
+in the fixed chart target. -/
+theorem sprayPair_contDiffAt_of_mem
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M) {z : E × E}
+    (hy : z.1 ∈ (extChartAt I x).target) :
+    ContDiffAt Real ∞
+      (fun z : E × E =>
+        (z.2, leviCivitaGeodesicSprayAcceleration (I := I) g x z.1 z.2))
+      z := by
+  have hfst : ContDiffAt Real ∞ (fun z : E × E => z.2) z := contDiffAt_snd
+  have hsnd := sprayAccel_contDiffAt_of_mem (I := I) g x hy
+  exact hfst.prodMk hsnd
+
+/-- The fixed-chart model spray is smooth at every controlled phase point where
+the tangent chart and base chart source conditions hold. -/
+theorem modelSpray_contDiffAt_of_mem
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M) {z : E × E}
+    (hztarget : z ∈ (extChartAt I.tangent (phaseZero (I := I) x)).target)
+    (hsrc : (phaseOfModel (I := I) x z).proj ∈ (extChartAt I x).source) :
+    ContDiffAt Real ∞ (modelSpray (I := I) g x) z := by
+  have hchart := phaseOfModel_chart (I := I) x hztarget hsrc
+  have hy : z.1 ∈ (extChartAt I x).target := by
+    rw [← hchart]
+    exact (extChartAt I x).map_source hsrc
+  have hpair := sprayPair_contDiffAt_of_mem (I := I) g x hy
+  have htarget :
+      (extChartAt I.tangent (phaseZero (I := I) x)).target ∈ 𝓝 z :=
+    (isOpen_extChartAt_target (I := I.tangent)
+      (phaseZero (I := I) x)).mem_nhds hztarget
+  have hphase_cont :
+      ContinuousAt (phaseOfModel (I := I) x) z := by
+    simpa [phaseOfModel] using
+      (continuousAt_extChartAt_symm'' (I := I.tangent) hztarget)
+  have hproj :
+      ContinuousAt
+        (fun q : TangentBundle I M => q.proj)
+        (phaseOfModel (I := I) x z) :=
+    (FiberBundle.continuous_proj E
+      (TangentSpace I : M -> Type _)).continuousAt
+  have hsrc_nhds :
+      {q : TangentBundle I M | q.proj ∈ (extChartAt I x).source} ∈
+        𝓝 (phaseOfModel (I := I) x z) := by
+    exact hproj.preimage_mem_nhds
+      ((isOpen_extChartAt_source (I := I) x).mem_nhds hsrc)
+  have hsrc_event :
+      ∀ᶠ z' in 𝓝 z,
+        (phaseOfModel (I := I) x z').proj ∈ (extChartAt I x).source :=
+    hphase_cont.preimage_mem_nhds hsrc_nhds
+  have hev :
+      modelSpray (I := I) g x =ᶠ[𝓝 z]
+        fun z : E × E =>
+          (z.2, leviCivitaGeodesicSprayAcceleration (I := I) g x z.1 z.2) := by
+    filter_upwards [htarget, hsrc_event] with z' hz'target hz'src
+    exact modelSpray_eq_pair (I := I) g x hz'target hz'src
+  exact hpair.congr_of_eventuallyEq hev
+
+/-- Mean-value Taylor residual bound for the fixed-chart model spray on a
+controlled convex set. -/
+theorem modelSpray_taylor_bound
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M)
+    {s : Set (E × E)} (hs : Convex Real s)
+    (hctrl : ∀ z ∈ s,
+      z ∈ (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+        (phaseOfModel (I := I) x z).proj ∈ (extChartAt I x).source)
+    {z w : E × E} (hz : z ∈ s) (hw : w ∈ s) {C : Real}
+    (hD : ∀ u ∈ s,
+      ‖fderiv Real (modelSpray (I := I) g x) u -
+        fderiv Real (modelSpray (I := I) g x) z‖ ≤ C) :
+    ‖modelSpray (I := I) g x w - modelSpray (I := I) g x z -
+      fderiv Real (modelSpray (I := I) g x) z (w - z)‖ ≤
+        C * ‖w - z‖ := by
+  have hdiff : ∀ u ∈ s, DifferentiableAt Real (modelSpray (I := I) g x) u := by
+    intro u hu
+    exact
+      (modelSpray_contDiffAt_of_mem (I := I) g x
+        (hctrl u hu).1 (hctrl u hu).2).differentiableAt (by simp)
+  exact hs.norm_image_sub_le_of_norm_fderiv_le'
+    (f := modelSpray (I := I) g x)
+    (φ := fderiv Real (modelSpray (I := I) g x) z)
+    hdiff hD hz hw
 
 /-- The fixed-chart model spray is strictly differentiable at the zero phase.
 

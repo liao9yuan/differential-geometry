@@ -217,10 +217,10 @@ theorem riemannCurvature04At_apply_smooth
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞)
     [T2Space M]
-    (W X Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)
+    (X Y Z W : ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _))
     (x : M) :
-    riemannCurvature04At g cov hcov x (vec4 (W x) (X x) (Y x) (Z x)) =
+    riemannCurvature04At g cov hcov x (vec4 (X x) (Y x) (Z x) (W x)) =
       g.inner x (W x)
         (connectionRiemannCurvatureField cov
           (fun p : M => X p) (fun p : M => Y p) (fun p : M => Z p) x) := by
@@ -465,13 +465,13 @@ private theorem riemannCurvature04At_contMDiff
     exact mem_baseSet_trivializationAt E (TangentSpace I : M → Type _) x₀
   have hframe := eTan.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) b
   obtain ⟨s', hs'⟩ := hframe.exists_contMDiffSection_eqOn_nhd eTan.open_baseSet hx₀Tan
-  let Ws : ContMDiffSection I E (∞ : WithTop ℕ∞)
-      (TangentSpace I : M → Type _) := s' (σ 0)
   let Xs : ContMDiffSection I E (∞ : WithTop ℕ∞)
-      (TangentSpace I : M → Type _) := s' (σ 1)
+      (TangentSpace I : M → Type _) := s' (σ 0)
   let Ys : ContMDiffSection I E (∞ : WithTop ℕ∞)
-      (TangentSpace I : M → Type _) := s' (σ 2)
+      (TangentSpace I : M → Type _) := s' (σ 1)
   let Zs : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _) := s' (σ 2)
+  let Ws : ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _) := s' (σ 3)
   let Rsec : (p : M) → TangentSpace I p := fun p : M =>
     connectionRiemannCurvatureField cov
@@ -494,7 +494,7 @@ private theorem riemannCurvature04At_contMDiff
     simp [Bundle.Trivialization.basisAt, Trivialization.symmL_apply]
   have hslots :
       (fun a : Fin 4 => eTan.symmL Real p (b (σ a))) =
-        vec4 (I := I) (Ws p) (Xs p) (Ys p) (Zs p) := by
+        vec4 (I := I) (Xs p) (Ys p) (Zs p) (Ws p) := by
     funext a
     fin_cases a <;>
       simp [vec4, Ws, Xs, Ys, Zs,
@@ -520,7 +520,7 @@ private theorem riemannCurvature04At_contMDiff
     g.inner p (Ws p) (Rsec p)
   rw [ContinuousMultilinearMap.compContinuousLinearMap_apply, hslots]
   simpa [F, Rsec] using
-    riemannCurvature04At_apply_smooth (I := I) g cov hcov Ws Xs Ys Zs p
+    riemannCurvature04At_apply_smooth (I := I) g cov hcov Xs Ys Zs Ws p
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The bundled lowered `(0,4)` Riemann tensor section of a locally smooth
@@ -552,8 +552,8 @@ theorem rm04Section_apply_const
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞)
     [T2Space M]
     {x : M}
-    (W X Y Z : TangentSpace I x) :
-    rm04Section (I := I) (M := M) g cov hcov x (vec4 W X Y Z) =
+    (X Y Z W : TangentSpace I x) :
+    rm04Section (I := I) (M := M) g cov hcov x (vec4 X Y Z W) =
       g.inner x W
         (connectionRiemannCurvatureField cov
           (tangentConstAt (I := I) x X) (tangentConstAt (I := I) x Y)
@@ -567,16 +567,16 @@ theorem rm04Section_apply_smooth
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov ∞)
     [T2Space M]
-    (W X Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)
+    (X Y Z W : ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _))
     (x : M) :
     rm04Section (I := I) (M := M) g cov hcov x
-        (vec4 (W x) (X x) (Y x) (Z x)) =
+        (vec4 (X x) (Y x) (Z x) (W x)) =
       g.inner x (W x)
         (connectionRiemannCurvatureField cov
           (fun p : M => X p) (fun p : M => Y p) (fun p : M => Z p) x) := by
   rw [rm04Section_apply]
-  exact riemannCurvature04At_apply_smooth (I := I) g cov hcov W X Y Z x
+  exact riemannCurvature04At_apply_smooth (I := I) g cov hcov X Y Z W x
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The bundled Ricci tensor section of a locally smooth connection. -/

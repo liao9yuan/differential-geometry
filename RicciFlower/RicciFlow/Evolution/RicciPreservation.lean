@@ -1518,15 +1518,14 @@ private theorem sum_coord_react_cancel
 
 private theorem stdRmOfRic3_signed_contr
     (Ric : Fin 3 -> Fin 3 -> Real)
-    (hsym : ∀ i j : Fin 3, Ric i j = Ric j i)
     (i j : Fin 3) :
     (∑ k : Fin 3, ∑ l : Fin 3,
-        stdRmOfRic3 (fun a b : Fin 3 => -Ric a b) k j l i * Ric k l) =
+        stdRmOfRic3 (fun a b : Fin 3 => -Ric a b) i k j l * Ric k l) =
       -∑ k : Fin 3, ∑ l : Fin 3,
         stdRmOfRic3 Ric i k j l * Ric k l := by
   fin_cases i <;> fin_cases j <;>
     simp [stdRmOfRic3, ricciScal3, DimensionThree.delta3,
-      Fin.sum_univ_three, hsym] <;>
+      Fin.sum_univ_three] <;>
     ring
 
 private theorem actualRm04_comp_signed
@@ -1543,10 +1542,10 @@ private theorem actualRm04_comp_signed
     Rm04 (vec4 (I := I) (basis i) (basis k) (basis j) (basis l)) =
       stdRmOfRic3
         (fun a b : Fin 3 =>
-          -Ric (vec2 (I := I) (basis a) (basis b))) k j l i := by
+          -Ric (vec2 (I := I) (basis a) (basis b))) i k j l := by
   have hformula :=
     DimensionThree.rm04Comp_displayedRiemannFromRicci3D_at
-      (I := I) htrace k j i l
+      (I := I) htrace i k l j
   have htraceRic :
       metricTracePair0SAt (I := I) g Ric =
         ricciScal3
@@ -1565,7 +1564,6 @@ private theorem actualRm04Contr_eq_canonical
     {Rm04 : Tensor04At (I := I) (M := M) x}
     {basis : Module.Basis (Fin 3) Real (TangentSpace I x)}
     (horth : DimensionThree.OrthonormalBasisAt (I := I) g x basis)
-    (hsym : DimensionThree.RicciSymAt (I := I) Ric)
     (htrace :
       DimensionThree.RiemannFromRicci3DTraceDataAt
         (I := I) g (-Ric) (-(metricTracePair0SAt (I := I) g Ric))
@@ -1580,15 +1578,12 @@ private theorem actualRm04Contr_eq_canonical
           Ric (vec2 (I := I) (basis k) (basis l)) := by
   let RicC : Fin 3 -> Fin 3 -> Real :=
     fun a b => Ric (vec2 (I := I) (basis a) (basis b))
-  have hsymC : ∀ a b : Fin 3, RicC a b = RicC b a := by
-    intro a b
-    exact hsym (basis a) (basis b)
   calc
     (∑ k : Fin 3, ∑ l : Fin 3,
         Rm04 (vec4 (I := I) (basis i) (basis k) (basis j) (basis l)) *
           Ric (vec2 (I := I) (basis k) (basis l))) =
       ∑ k : Fin 3, ∑ l : Fin 3,
-        stdRmOfRic3 (fun a b : Fin 3 => -RicC a b) k j l i *
+        stdRmOfRic3 (fun a b : Fin 3 => -RicC a b) i k j l *
           RicC k l := by
         refine Finset.sum_congr rfl fun k _ => ?_
         refine Finset.sum_congr rfl fun l _ => ?_
@@ -1597,7 +1592,7 @@ private theorem actualRm04Contr_eq_canonical
     _ =
       -∑ k : Fin 3, ∑ l : Fin 3,
         stdRmOfRic3 RicC i k j l * RicC k l := by
-        exact stdRmOfRic3_signed_contr RicC hsymC i j
+        exact stdRmOfRic3_signed_contr RicC i j
     _ =
       -∑ k : Fin 3, ∑ l : Fin 3,
         rm04OfRic3At (I := I) (M := M) g Ric
@@ -2852,7 +2847,7 @@ private theorem ricciActualReactAt_eq_reaction_basis
       (rm04OfRic3At (I := I) (M := M) (S.base.metric t) (S.ricci t x))
       (S.ricci t x) i j
   have hcontr :=
-    actualRm04Contr_eq_canonical (I := I) (M := M) horth hsym htrace i j
+    actualRm04Contr_eq_canonical (I := I) (M := M) horth htrace i j
   calc
     ricciActualReactAt (I := I) S t x
         (vec2 (I := I) (basis i) (basis j)) =

@@ -306,9 +306,9 @@ global inputs.  The non-black-box part formerly hidden in
 connectedness, boundarylessness, and the three-dimensional rank input, and
 `HamiltonPositiveRicci.limitEinstein_of_tf0` checks the pointwise bridge
 `|Ric^o|^2 = 0 -> Ric = (R / 3)g`.  The project curvature convention now uses
-standard lowered-curvature slots for user-facing statements:
-`Rm04Std(X,Y,Z,W) = <R(X,Y)Z,W>`, and `ConstPosSecMetric` uses the sectional
-numerator `Rm04Std(X,Y,Y,X)`.  The local 3D Schur/space-form step is now
+standard lowered-curvature slots for the bundled user-facing `Rm04`:
+`Rm04(X,Y,Z,W) = <R(X,Y)Z,W>`, and `ConstPosSecMetric` uses the sectional
+numerator `Rm04(X,Y,Y,X)`.  The local 3D Schur/space-form step is now
 checked: `limit_const_sec_of_einstein` turns a connected boundaryless
 Einstein limit metric with positive scalar into `ConstPosSecMetric`, and
 `const_pos_of_tf0` / `limit_const_pos` are checked wrappers over it.

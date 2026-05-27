@@ -66,7 +66,7 @@ def AdmitsPosRicci : Prop :=
   exists g : SmoothRiemannianMetric I M, PosRicciMetric (I := I) (M := M) g
 
 /-- Constant positive sectional curvature, expressed in the standard lowered
-curvature slot order `Rm04(X,Y,Z,W) = g(W,R(X,Y)Z)`.
+curvature slot order `Rm04(X,Y,Z,W) = <R(X,Y)Z,W>`.
 
 The sectional numerator is `Rm04(X,Y,Y,X)`. -/
 def ConstPosSecMetric (g : SmoothRiemannianMetric I M) : Prop :=
@@ -2572,7 +2572,7 @@ theorem limit_const_sec_of_einstein
   have hscalar_x : L.S.scalar t0 x = R0 := hR0_scalar x
   calc
     Curvature.metricRm04StdAt (I := I) (M := L.N) g x X Y Y X =
-        L.S.base.rm04 t0 x (Curvature.vec4 (I := I) X X Y Y) := by
+        L.S.base.rm04 t0 x (Curvature.vec4 (I := I) X Y Y X) := by
           rfl
     _ = -((-L.S.scalar t0 x) / 6) *
           (g.inner x X X * g.inner x Y Y -

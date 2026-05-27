@@ -572,8 +572,8 @@ def rmRicciContractionCompInFrame
 
 /-- Component RHS for Lemma 6.3 in the project lowered-curvature convention:
 `Delta Ric_ij - 2 * rmRicciContractionCompInFrame - 2 Ric_i^k Ric_kj`. -/
--- Convention note: in this file's `Rm04(W,X,Y,Z) = g(W,R(X,Y)Z)` slot order,
--- the implementation below has a minus sign on `rmRicciContractionCompInFrame`.
+-- Convention note: with standard slots `Rm04(X,Y,Z,W) = <R(X,Y)Z,W>`, the
+-- implementation below has a minus sign on `rmRicciContractionCompInFrame`.
 def ricciEvolutionRHSInFrame
     {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -916,7 +916,7 @@ def curvRicciRicciInFrame
 
 /-- Canonical curvature reaction in the Ricci-norm evolution formula.
 
-With the project convention `Rm04(W,X,Y,Z) = g(W,R(X,Y)Z)`, the book term
+With the project standard convention `Rm04(X,Y,Z,W) = <R(X,Y)Z,W>`, the book term
 `R_ikjl Ric^{ij} Ric^{kl}` is the negative of `curvRicciRicciInFrame`. -/
 def ricciNormCurvatureReactionInFrame
     {D : Realized.RealTimeInterval}
@@ -1107,7 +1107,8 @@ theorem ricciDerivSimpAt
 
 After differentiating the inverse metrics and substituting Lemma 6.3, the
 inverse-metric derivative terms cancel the Ricci-quadratic terms, and the
-curvature term is recorded with the project `Rm04(W,X,Y,Z)` sign convention. -/
+curvature term is recorded with the project standard `Rm04(X,Y,Z,W)` slot
+convention. -/
 theorem ricciNormDerivativeSimplifiesInFrame_canonical
     {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

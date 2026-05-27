@@ -681,8 +681,8 @@ private theorem rm04_tconst_eval
       (1 : WithTop ℕ∞))
     (Rm04 : Tensor04Section (I := I) (M := M))
     (hRm04 : Rm04RealizesConnection (I := I) g cov Rm04)
-    {x : M} (W X Y Z : TangentSpace I x) :
-    Rm04 x (vec4 W X Y Z) =
+    {x : M} (X Y Z W : TangentSpace I x) :
+    Rm04 x (vec4 X Y Z W) =
       g.inner x W
         ((connectionRiemannCurvatureField (I := I) cov
           (tangentConstAt (I := I) x X)
@@ -705,10 +705,10 @@ private theorem rm04_tconst_eval
           (fun p : M => Xsec p) (fun p : M => Ysec p) (fun p : M => Zsec p) x :=
     connectionRiemannCurvatureField_eq_smooth_of_eventuallyEq_tangentConst
       (I := I) cov hcov X Y Z Xsec Ysec Zsec hXnear hYnear hZnear
-  have hRm := hRm04 Wsec Xsec Ysec Zsec x
+  have hRm := hRm04 Xsec Ysec Zsec Wsec x
   calc
-    Rm04 x (vec4 W X Y Z)
-        = Rm04 x (vec4 (Wsec x) (Xsec x) (Ysec x) (Zsec x)) := by
+    Rm04 x (vec4 X Y Z W)
+        = Rm04 x (vec4 (Xsec x) (Ysec x) (Zsec x) (Wsec x)) := by
           simp [hWx, hXx, hYx, hZx]
     _ = g.inner x (Wsec x)
         ((connectionRiemannCurvatureField (I := I) cov
@@ -1001,9 +1001,9 @@ theorem rm04InputSkewAt_of_leviCivita_realizes
     (hRm04 : Rm04RealizesConnection (I := I) g
       (leviCivitaConnectionOfMetric (I := I) g) Rm04)
     {x : M} :
-    forall W X Y Z : TangentSpace I x,
-      Rm04 x (vec4 W Y X Z) = -Rm04 x (vec4 W X Y Z) := by
-  intro W X Y Z
+    forall X Y Z W : TangentSpace I x,
+      Rm04 x (vec4 Y X Z W) = -Rm04 x (vec4 X Y Z W) := by
+  intro X Y Z W
   obtain ⟨Wsec, hWsec⟩ :=
     ContMDiffSection.exists_eq_at
       (I := I) (F := E) (V := (TangentSpace I : M -> Type _))
@@ -1020,8 +1020,8 @@ theorem rm04InputSkewAt_of_leviCivita_realizes
     ContMDiffSection.exists_eq_at
       (I := I) (F := E) (V := (TangentSpace I : M -> Type _))
       (n := (⊤ : ℕ∞)) x Z
-  have hleft := hRm04 Wsec Ysec Xsec Zsec x
-  have hright := hRm04 Wsec Xsec Ysec Zsec x
+  have hleft := hRm04 Ysec Xsec Zsec Wsec x
+  have hright := hRm04 Xsec Ysec Zsec Wsec x
   have hswap :=
     RicciFlower.Curvature.connectionRiemannCurvatureField_swap
       (I := I) (leviCivitaConnectionOfMetric (I := I) g)
@@ -1050,9 +1050,9 @@ theorem rm04InputSkew_ofRealizes
     (Rm04 : Tensor04Section (I := I) (M := M))
     (hRm04 : Rm04RealizesConnection (I := I) g cov Rm04)
     {x : M} :
-    forall W X Y Z : TangentSpace I x,
-      Rm04 x (vec4 W Y X Z) = -Rm04 x (vec4 W X Y Z) := by
-  intro W X Y Z
+    forall X Y Z W : TangentSpace I x,
+      Rm04 x (vec4 Y X Z W) = -Rm04 x (vec4 X Y Z W) := by
+  intro X Y Z W
   obtain ⟨Wsec, hWsec⟩ :=
     ContMDiffSection.exists_eq_at
       (I := I) (F := E) (V := (TangentSpace I : M -> Type _))
@@ -1069,8 +1069,8 @@ theorem rm04InputSkew_ofRealizes
     ContMDiffSection.exists_eq_at
       (I := I) (F := E) (V := (TangentSpace I : M -> Type _))
       (n := (⊤ : ℕ∞)) x Z
-  have hleft := hRm04 Wsec Ysec Xsec Zsec x
-  have hright := hRm04 Wsec Xsec Ysec Zsec x
+  have hleft := hRm04 Ysec Xsec Zsec Wsec x
+  have hright := hRm04 Xsec Ysec Zsec Wsec x
   have hswap :=
     RicciFlower.Curvature.connectionRiemannCurvatureField_swap
       (I := I) cov Xsec Ysec Zsec x
@@ -1100,10 +1100,10 @@ theorem firstBianchi_ofTF
     (hRm04 : Rm04RealizesConnection (I := I) g cov Rm04)
     {x : M} :
     FirstBianchiAt (I := I) (Rm04 x) := by
-  intro W X Y Z
-  have hXYZ := rm04_tconst_eval (I := I) g cov hcov Rm04 hRm04 W X Y Z
-  have hYZX := rm04_tconst_eval (I := I) g cov hcov Rm04 hRm04 W Y Z X
-  have hZXY := rm04_tconst_eval (I := I) g cov hcov Rm04 hRm04 W Z X Y
+  intro X Y Z W
+  have hXYZ := rm04_tconst_eval (I := I) g cov hcov Rm04 hRm04 X Y Z W
+  have hYZX := rm04_tconst_eval (I := I) g cov hcov Rm04 hRm04 Y Z X W
+  have hZXY := rm04_tconst_eval (I := I) g cov hcov Rm04 hRm04 Z X Y W
   have hBianchi :=
     Realized.connectionRiemannCurvatureField_tangentConst_first_bianchi_of_torsionFree
       (I := I) cov hcov htf x X Y Z
@@ -1121,16 +1121,16 @@ theorem firstBianchiAt_of_leviCivita_realizes
       (leviCivitaConnectionOfMetric (I := I) g) Rm04)
     {x : M} :
     FirstBianchiAt (I := I) (Rm04 x) := by
-  intro W X Y Z
+  intro X Y Z W
   have hXYZ :=
     rm04_tconst_eval (I := I) g (leviCivitaConnectionOfMetric (I := I) g)
-      hcov Rm04 hRm04 W X Y Z
+      hcov Rm04 hRm04 X Y Z W
   have hYZX :=
     rm04_tconst_eval (I := I) g (leviCivitaConnectionOfMetric (I := I) g)
-      hcov Rm04 hRm04 W Y Z X
+      hcov Rm04 hRm04 Y Z X W
   have hZXY :=
     rm04_tconst_eval (I := I) g (leviCivitaConnectionOfMetric (I := I) g)
-      hcov Rm04 hRm04 W Z X Y
+      hcov Rm04 hRm04 Z X Y W
   have hBianchi :=
     Realized.connectionRiemannCurvatureField_tangentConst_first_bianchi_of_torsionFree
       (I := I) (leviCivitaConnectionOfMetric (I := I) g) hcov
@@ -1143,28 +1143,28 @@ theorem firstBianchiAt_of_leviCivita_realizes
 private theorem rm04_pair_symm_of_input_output_first
     {x : M}
     {Rm04 : Tensor04At (I := I) (M := M) x}
-    (hinput : forall W X Y Z : TangentSpace I x,
-      Rm04 (vec4 W Y X Z) = -Rm04 (vec4 W X Y Z))
+    (hinput : forall X Y Z W : TangentSpace I x,
+      Rm04 (vec4 Y X Z W) = -Rm04 (vec4 X Y Z W))
     (houtput : Rm04OutputSkewAt (I := I) Rm04)
     (hfirst : FirstBianchiAt (I := I) Rm04) :
-    forall W X Y Z : TangentSpace I x,
-      Rm04 (vec4 W X Y Z) = Rm04 (vec4 Y Z W X) := by
+    forall X Y Z W : TangentSpace I x,
+      Rm04 (vec4 X Y Z W) = Rm04 (vec4 Z W X Y) := by
   intro W X Y Z
-  have hB0 := hfirst Z W X Y
-  have hB1 := hfirst W X Y Z
-  have hB2 := hfirst W X Z Y
-  have hB3 := hfirst Y W X Z
-  have hB4 := hfirst X W Y Z
-  have hO1 := houtput W X Y Z
-  have hO2 := houtput Y W X Z
-  have hO3 := houtput X W Y Z
-  have hO4 := houtput X W Z Y
-  have hO5 := houtput W X Z Y
-  have hO6 := houtput W Y Z X
-  have hI1 := hinput Z W Y X
-  have hI2 := hinput Y W Z X
-  have hI3 := hinput X W Z Y
-  have hI4 := hinput W X Z Y
+  have hB0 := hfirst W X Y Z
+  have hB1 := hfirst X Y Z W
+  have hB2 := hfirst X Z Y W
+  have hB3 := hfirst W X Z Y
+  have hB4 := hfirst W Y Z X
+  have hO1 := houtput X Y Z W
+  have hO2 := houtput W X Z Y
+  have hO3 := houtput W Y Z X
+  have hO4 := houtput W Z Y X
+  have hO5 := houtput X Z Y W
+  have hO6 := houtput Y Z X W
+  have hI1 := hinput W Y X Z
+  have hI2 := hinput W Z X Y
+  have hI3 := hinput W Z Y X
+  have hI4 := hinput X Z Y W
   linarith
 
 /-- The lowered Levi-Civita curvature tensor is skew-adjoint in the output
@@ -1178,13 +1178,13 @@ theorem rm04OutputSkewAt_of_leviCivita_realizes
       (leviCivitaConnectionOfMetric (I := I) g) Rm04)
     {x : M} :
     Rm04OutputSkewAt (I := I) (Rm04 x) := by
-  intro W X Y Z
+  intro X Y Z W
   have hleft :=
     rm04_tconst_eval (I := I) g (leviCivitaConnectionOfMetric (I := I) g)
-      hcov Rm04 hRm04 W X Y Z
+      hcov Rm04 hRm04 X Y Z W
   have hright :=
     rm04_tconst_eval (I := I) g (leviCivitaConnectionOfMetric (I := I) g)
-      hcov Rm04 hRm04 Z X Y W
+      hcov Rm04 hRm04 X Y W Z
   have hskew :=
     connectionRiemannCurvatureField_metric_skew_at_of_metricCompatible
       (I := I) g (leviCivitaConnectionOfMetric (I := I) g) hcov
@@ -1203,9 +1203,9 @@ theorem rm04OutputSkew_ofMC
     (hRm04 : Rm04RealizesConnection (I := I) g cov Rm04)
     {x : M} :
     Rm04OutputSkewAt (I := I) (Rm04 x) := by
-  intro W X Y Z
-  have hleft := rm04_tconst_eval (I := I) g cov hcov Rm04 hRm04 W X Y Z
-  have hright := rm04_tconst_eval (I := I) g cov hcov Rm04 hRm04 Z X Y W
+  intro X Y Z W
+  have hleft := rm04_tconst_eval (I := I) g cov hcov Rm04 hRm04 X Y Z W
+  have hright := rm04_tconst_eval (I := I) g cov hcov Rm04 hRm04 X Y W Z
   have hskew :=
     connectionRiemannCurvatureField_metric_skew_at_of_metricCompatible
       (I := I) g cov hcov hmc W X Y Z
@@ -1222,8 +1222,8 @@ theorem rm04PairSymm_ofLC
     (Rm04 : Tensor04Section (I := I) (M := M))
     (hRm04 : Rm04RealizesConnection (I := I) g cov Rm04)
     {x : M} :
-    forall W X Y Z : TangentSpace I x,
-      Rm04 x (vec4 W X Y Z) = Rm04 x (vec4 Y Z W X) :=
+    forall X Y Z W : TangentSpace I x,
+      Rm04 x (vec4 X Y Z W) = Rm04 x (vec4 Z W X Y) :=
   rm04_pair_symm_of_input_output_first (I := I)
     (rm04InputSkew_ofRealizes (I := I) g cov Rm04 hRm04)
     (rm04OutputSkew_ofMC (I := I) g cov hcov
@@ -1240,8 +1240,8 @@ theorem rm04PairSymmAt_of_leviCivita_realizes
     (hRm04 : Rm04RealizesConnection (I := I) g
       (leviCivitaConnectionOfMetric (I := I) g) Rm04)
     {x : M} :
-    forall W X Y Z : TangentSpace I x,
-      Rm04 x (vec4 W X Y Z) = Rm04 x (vec4 Y Z W X) :=
+    forall X Y Z W : TangentSpace I x,
+      Rm04 x (vec4 X Y Z W) = Rm04 x (vec4 Z W X Y) :=
   rm04_pair_symm_of_input_output_first (I := I)
     (rm04InputSkewAt_of_leviCivita_realizes (I := I) g Rm04 hRm04)
     (rm04OutputSkewAt_of_leviCivita_realizes (I := I) g hcov Rm04 hRm04)

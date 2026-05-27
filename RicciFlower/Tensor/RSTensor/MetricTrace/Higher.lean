@@ -456,8 +456,125 @@ private theorem tailFreezeNabla
         4 cov A x (Fin.cons (X x) (vec4 (I := I) U V (Y x) (Z x))) := by
         simpa [hUsec, hVsec] using hAtot.symm
 
-/-- Metric-compatible covariant differentiation commutes with tracing the
-first two covariant slots of a smooth `(0,4)` tensor field. -/
+private theorem middleFreezeNabla
+    [T2Space M] [CompleteSpace E] [I.Boundaryless] [IsManifold I 1 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov 1)
+    (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 4)
+    (X Y Z : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    {x : M}
+    (hYzero : ((cov (fun p : M => Y p) x) (X x)) = 0)
+    (hZzero : ((cov (fun p : M => Z p) x) (X x)) = 0)
+    (U V : TangentSpace I x) :
+    let B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        (n := (∞ : WithTop ℕ∞)) 2 :=
+      freezeMiddle04Field (I := I) (M := M) A Y Z
+    totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 cov B x (vec3 (I := I) (X x) U V) =
+      totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        4 cov A x (Fin.cons (X x) (vec4 (I := I) U (Y x) (Z x) V)) := by
+  classical
+  let B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2 :=
+    freezeMiddle04Field (I := I) (M := M) A Y Z
+  obtain ⟨Usec, hUsec, hUcov⟩ :=
+    TensorLieDeriv.exists_cov_zero_at_apply (I := I) cov hcov x U
+  obtain ⟨Vsec, hVsec, hVcov⟩ :=
+    TensorLieDeriv.exists_cov_zero_at_apply (I := I) cov hcov x V
+  let V2 : Fin 2 -> ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _)
+    | ⟨0, _⟩ => Usec
+    | ⟨1, _⟩ => Vsec
+  let V4 : Fin 4 -> ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _)
+    | ⟨0, _⟩ => Usec
+    | ⟨1, _⟩ => Y
+    | ⟨2, _⟩ => Z
+    | ⟨3, _⟩ => Vsec
+  have hBtot :=
+    totalNabla0SFun_apply_section (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) 2 cov X B x (vec2 (I := I) U V)
+  have hAtot :=
+    totalNabla0SFun_apply_section (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) 4 cov X A x
+      (vec4 (I := I) U (Y x) (Z x) V)
+  have hBeval :=
+    nabla0SFun_eval_smooth_slots (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) cov X V2 B x
+  have hAeval :=
+    nabla0SFun_eval_smooth_slots (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) cov X V4 A x
+  have hderiv :
+      extDerivFun (I := I)
+          (fun p : M => B p (fun a : Fin 2 => V2 a p)) x (X x) =
+        extDerivFun (I := I)
+          (fun p : M => A p (fun a : Fin 4 => V4 a p)) x (X x) := by
+    have hfun :
+        (fun p : M => B p (fun a : Fin 2 => V2 a p)) =
+          fun p : M => A p (fun a : Fin 4 => V4 a p) := by
+      funext p
+      have hV2p :
+          (fun a : Fin 2 => V2 a p) =
+            vec2 (I := I) (Usec p) (Vsec p) := by
+        funext a
+        fin_cases a <;> rfl
+      have hV4p :
+          (fun a : Fin 4 => V4 a p) =
+            vec4 (I := I) (Usec p) (Y p) (Z p) (Vsec p) := by
+        funext a
+        fin_cases a <;> rfl
+      rw [hV2p, hV4p]
+      simp only [B, freezeMiddle04Field_apply, freezeFirstTwo0S_apply,
+        ContinuousMultilinearMap.domDomCongr_apply, metricTrace_input_vec2_eq_vec4]
+      congr 1
+      funext q
+      fin_cases q <;> simp [trace04Perm, Curvature.vec4]
+    rw [hfun]
+  have hBcorr :
+      (∑ a : Fin 2,
+        B x
+          (Function.update (fun b : Fin 2 => V2 b x) a
+            ((cov (fun p : M => V2 a p) x) (X x)))) = 0 := by
+    rw [Fin.sum_univ_two]
+    simp [V2, hUcov X, hVcov X, metricTrace_tensor0S_update_zero]
+  have hAcorr :
+      (∑ a : Fin 4,
+        A x
+          (Function.update (fun b : Fin 4 => V4 b x) a
+            ((cov (fun p : M => V4 a p) x) (X x)))) = 0 := by
+    rw [Fin.sum_univ_four]
+    simp [V4, hUcov X, hYzero, hZzero, hVcov X, metricTrace_tensor0S_update_zero]
+  calc
+    totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 cov B x (vec3 (I := I) (X x) U V)
+        =
+      nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 cov X B x (vec2 (I := I) U V) := by
+        simpa [metricTrace_finCons_vec2_eq_vec3 (I := I), hUsec, hVsec] using hBtot
+    _ =
+      nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        4 cov X A x (vec4 (I := I) U (Y x) (Z x) V) := by
+        have hV2x :
+            (fun a : Fin 2 => V2 a x) = vec2 (I := I) U V := by
+          funext a
+          fin_cases a <;> simp [V2, hUsec, hVsec, Curvature.vec2]
+        have hV4x :
+            (fun a : Fin 4 => V4 a x) =
+              vec4 (I := I) U (Y x) (Z x) V := by
+          funext a
+          fin_cases a <;> simp [V4, hUsec, hVsec, Curvature.vec4]
+        rw [← hV2x, ← hV4x]
+        rw [hBeval, hAeval, hderiv, hBcorr, hAcorr]
+    _ =
+      totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        4 cov A x (Fin.cons (X x) (vec4 (I := I) U (Y x) (Z x) V)) := by
+        simpa [hUsec, hVsec] using hAtot.symm
+
+/-- Metric-compatible covariant differentiation commutes with the Ricci-style
+trace of a smooth standard-slot `(0,4)` tensor field. -/
 theorem nablaTrace04
     [T2Space M] [CompleteSpace E] [I.Boundaryless] [IsManifold I 1 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
@@ -481,7 +598,7 @@ theorem nablaTrace04
         2 cov traceA x
     nablaTraceA (vec3 (I := I) X Y Z) =
       ∑ i : Idx, ∑ j : Idx,
-        gInv i j * nablaA (Fin.cons X (vec4 (I := I) (basis i) (basis j) Y Z)) := by
+        gInv i j * nablaA (Fin.cons X (vec4 (I := I) (basis i) Y Z (basis j))) := by
   classical
   let traceA := trace04Field (I := I) (M := M) g A
   let nablaA :=
@@ -500,7 +617,7 @@ theorem nablaTrace04
     TensorLieDeriv.exists_cov_zero_at_apply (I := I) cov hcov x Z
   let B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) 2 :=
-    freezeTail04Field (I := I) (M := M) A Ysec Zsec
+    freezeMiddle04Field (I := I) (M := M) A Ysec Zsec
   let traceB : M -> Real := fun y => metricTracePair0SAt (I := I) g (B y)
   let dTraceB := differential1FormFun (I := I) traceB x
   let V2 : Fin 2 -> ContMDiffSection I E (∞ : WithTop ℕ∞)
@@ -565,7 +682,7 @@ theorem nablaTrace04
   intro j _
   congr 1
   have hfreeze :=
-    tailFreezeNabla (I := I) (M := M) cov hcov A Xsec Ysec Zsec
+    middleFreezeNabla (I := I) (M := M) cov hcov A Xsec Ysec Zsec
       (hYcov Xsec) (hZcov Xsec) (basis i) (basis j)
   simpa [B, nablaA, hXsec, hYsec, hZsec] using hfreeze
 

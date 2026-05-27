@@ -241,9 +241,9 @@ constant-curvature statement now explicitly carries connectedness,
 boundarylessness, and the three-dimensional rank hypothesis, and the checked pointwise bridge
 `limitEinstein_of_tf0` proves `Ric = (R / 3)g` from zero trace-free Ricci.
 The project convention audit now treats standard lowered-curvature slots as
-the user-facing convention: `Rm04Std(X,Y,Z,W) = <R(X,Y)Z,W>`.  The Hamilton
-endpoint `ConstPosSecMetric` uses the sectional numerator
-`Rm04Std(X,Y,Y,X)`.  The static local geometry theorem
+the bundled user-facing convention: `Rm04(X,Y,Z,W) = <R(X,Y)Z,W>`.  The
+Hamilton endpoint `ConstPosSecMetric` uses the sectional numerator
+`Rm04(X,Y,Y,X)`.  The static local geometry theorem
 `limit_const_sec_of_einstein` is checked: Schur gives one global scalar
 constant on the connected boundaryless limit, and the 3D Riemann-from-Ricci
   bridge gives constant positive sectional curvature.  The remaining frontiers

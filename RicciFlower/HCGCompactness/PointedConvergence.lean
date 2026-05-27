@@ -34,7 +34,6 @@ section FixedManifoldMetricConvergence
 
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [T2Space M] [IsManifold I ∞ M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M]
 
 /-- One covariant-derivative step in the recursive definition of
@@ -53,6 +52,9 @@ noncomputable def metricCovDerivStep
   haveI : IsManifold I 2 M :=
     IsManifold.of_le (I := I) (M := M) (n := ∞)
       (by decide : (2 : WithTop ℕ∞) ≤ ∞)
+  haveI : IsManifold I ((∞ : WithTop ℕ∞) + 1) M := by
+    change IsManifold I ∞ M
+    infer_instance
   let cov :=
     LeviCivita.leviCivitaConnectionOfMetric (I := I) gRef
   let hcov :
@@ -85,6 +87,9 @@ noncomputable def metricCovDeriv
       haveI : IsManifold I 1 M :=
         IsManifold.of_le (I := I) (M := M) (n := ∞)
           (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+      haveI : IsManifold I ((∞ : WithTop ℕ∞) + 1) M := by
+        change IsManifold I ∞ M
+        infer_instance
       exact Tensor0SBundle.metricTensorField (I := I) (M := M) h)
     (fun a A =>
       by
@@ -155,7 +160,6 @@ structure MetricCInfConvData
     (I : ModelWithCorners Real E H) (M : Type*)
     [TopologicalSpace M] [ChartedSpace H M]
     [T2Space M] [IsManifold I ∞ M]
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
     [SigmaCompactSpace M] where
   gSeq : Nat -> SmoothRiemannianMetric I M
   gInf : SmoothRiemannianMetric I M
@@ -369,8 +373,6 @@ structure SourceDomainMetricData
   charted : ChartedSpace H (SourceDomain (I := I) Φ k)
   t2 : T2Space (SourceDomain (I := I) Φ k)
   smooth : IsManifold I ∞ (SourceDomain (I := I) Φ k)
-  smoothPlus :
-    IsManifold I ((∞ : WithTop ℕ∞) + 1) (SourceDomain (I := I) Φ k)
   sigmaCompact : SigmaCompactSpace (SourceDomain (I := I) Φ k)
   limitMetric :
     letI : TopologicalSpace (SourceDomain (I := I) Φ k) := topology
@@ -396,7 +398,9 @@ structure SourceDomainMetricData
     letI : ChartedSpace H L.M := L.charted
     letI : T2Space L.M := L.t2
     letI : IsManifold I ∞ L.M := L.smooth
-    letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) L.M := L.smoothPlus
+    letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) L.M := by
+      change IsManifold I ∞ L.M
+      infer_instance
     letI : SigmaCompactSpace L.M := L.sigmaCompact
     forall (t : Real) (x : SourceDomain (I := I) Φ k)
       (v w : TangentSpace I x),
@@ -411,7 +415,9 @@ structure SourceDomainMetricData
     letI : ChartedSpace H L.M := L.charted
     letI : T2Space L.M := L.t2
     letI : IsManifold I ∞ L.M := L.smooth
-    letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) L.M := L.smoothPlus
+    letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) L.M := by
+      change IsManifold I ∞ L.M
+      infer_instance
     letI : SigmaCompactSpace L.M := L.sigmaCompact
     letI : TopologicalSpace (X.term (subseq k)).M :=
       (X.term (subseq k)).topology
@@ -422,7 +428,9 @@ structure SourceDomainMetricData
     letI : IsManifold I ∞ (X.term (subseq k)).M :=
       (X.term (subseq k)).smooth
     letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) (X.term (subseq k)).M :=
-      (X.term (subseq k)).smoothPlus
+      by
+        change IsManifold I ∞ (X.term (subseq k)).M
+        infer_instance
     letI : SigmaCompactSpace (X.term (subseq k)).M :=
       (X.term (subseq k)).sigmaCompact
     forall (t : Real) (x : SourceDomain (I := I) Φ k)
@@ -450,7 +458,9 @@ noncomputable def derivNormSupOn
   letI : T2Space (SourceDomain (I := I) Φ k) := D.t2
   letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) := D.smooth
   letI : IsManifold I ((∞ : WithTop ℕ∞) + 1)
-      (SourceDomain (I := I) Φ k) := D.smoothPlus
+      (SourceDomain (I := I) Φ k) := by
+    change IsManifold I ∞ (SourceDomain (I := I) Φ k)
+    infer_instance
   letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) := D.sigmaCompact
   exact metricDerivNormSupOn (I := I)
     (sourceCompactSet (I := I) Φ k K) p
@@ -577,7 +587,9 @@ def ScalarPullbackTendsto
       letI : IsManifold I ∞ (X.term (subseq k)).M :=
         (X.term (subseq k)).smooth
       letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) (X.term (subseq k)).M :=
-        (X.term (subseq k)).smoothPlus
+        by
+          change IsManifold I ∞ (X.term (subseq k)).M
+          infer_instance
       letI : SigmaCompactSpace (X.term (subseq k)).M :=
         (X.term (subseq k)).sigmaCompact
       letI : T2Space (X.term (subseq k)).M :=
@@ -587,7 +599,9 @@ def ScalarPullbackTendsto
       letI : TopologicalSpace L.M := L.topology
       letI : ChartedSpace H L.M := L.charted
       letI : IsManifold I ∞ L.M := L.smooth
-      letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) L.M := L.smoothPlus
+      letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) L.M := by
+        change IsManifold I ∞ L.M
+        infer_instance
       letI : SigmaCompactSpace L.M := L.sigmaCompact
       letI : T2Space L.M := L.t2
       L.S.scalar t x)

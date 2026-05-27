@@ -306,7 +306,9 @@ theorem localMetricFlatBasis_isInvertible {ι : Type*} [Fintype ι]
   rw [← hA]
   exact ContinuousLinearMap.isInvertible_equiv
 
-private theorem localMetricFlatBasis_contMDiffAt {ι : Type*} [Fintype ι]
+/-- The metric flat map in a fixed local-frame basis is smooth at every point
+of the trivialization base set. -/
+theorem localMetricFlatBasis_contMDiffAt {ι : Type*} [Fintype ι]
     (e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
     [MemTrivializationAtlas e] (b : Module.Basis ι Real E)
     (g : SmoothRiemannianMetric I M) {x : M} (hx : x ∈ e.baseSet) :

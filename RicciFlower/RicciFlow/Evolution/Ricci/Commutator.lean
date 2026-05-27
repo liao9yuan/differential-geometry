@@ -52,7 +52,8 @@ private theorem curvatureAction0SAt_vec2_eq
 
 /-- Contract the first curvature-action identity obtained from the `(0,2)`
 Ricci identity.  This is the convention-correct finite-index curvature algebra
-`R_ikjl Ric^kl + Ric_i^k Ric_kj` for `Rm04(W,X,Y,Z)=g(W,R(X,Y)Z)`. -/
+`R_ikjl Ric^kl + Ric_i^k Ric_kj` for standard lowered slots
+`Rm04(X,Y,Z,W)=<R(X,Y)Z,W>`. -/
 private theorem contractedCurvatureAction_left_eq
     {D : Realized.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

@@ -92,8 +92,8 @@ noncomputable def metricRm13 (g : SmoothRiemannianMetric I M) :
 /-- Standard slot evaluation of the metric Riemann tensor:
 `Rm04(X,Y,Z,W) = <R(X,Y)Z,W>`.
 
-The underlying bundled section `metricRm04` keeps the output slot first for
-compatibility.  Use this evaluator for new geometric statements. -/
+The bundled section `metricRm04` is now in the same standard slot order; this
+name is kept as a readable evaluator and compatibility surface. -/
 noncomputable def metricRm04StdAt
     (g : SmoothRiemannianMetric I M) (x : M)
     (X Y Z W : TangentSpace I x) : Real :=
@@ -123,7 +123,7 @@ noncomputable def metricRicci (g : SmoothRiemannianMetric I M) :
     (g : SmoothRiemannianMetric I M) (x : M)
     (X Y Z W : TangentSpace I x) :
     metricRm04StdAt (I := I) (M := M) g x X Y Z W =
-      metricRm04At (I := I) (M := M) g x (vec4 W X Y Z) := by
+      metricRm04At (I := I) (M := M) g x (vec4 X Y Z W) := by
   rfl
 
 @[simp] theorem metricRm04Std_apply
@@ -486,11 +486,11 @@ theorem metricRicciSymm
     LeviCivita.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
       (I := I) (M := M) g
   have hPair :
-      ∀ W X Y Z : TangentSpace I x,
+      ∀ X Y Z W : TangentSpace I x,
         metricRm04At (I := I) (M := M) g x
-            (Realized.vec4 (I := I) W X Y Z) =
+            (Realized.vec4 (I := I) X Y Z W) =
           metricRm04At (I := I) (M := M) g x
-            (Realized.vec4 (I := I) Y Z W X) := by
+            (Realized.vec4 (I := I) Z W X Y) := by
     simpa using
       (LeviCivita.rm04PairSymmAt_of_leviCivita_realizes
         (I := I) g hcov1 (metricRm04 (I := I) (M := M) g) K.h_rm04
@@ -503,11 +503,11 @@ theorem metricRicciSymm
         (I := I) g hcov1 (metricRm04 (I := I) (M := M) g) K.h_rm04
         (x := x))
   have hInput :
-      ∀ W X Y Z : TangentSpace I x,
+      ∀ X Y Z W : TangentSpace I x,
         metricRm04At (I := I) (M := M) g x
-            (Realized.vec4 (I := I) W Y X Z) =
+            (Realized.vec4 (I := I) Y X Z W) =
           -metricRm04At (I := I) (M := M) g x
-            (Realized.vec4 (I := I) W X Y Z) := by
+            (Realized.vec4 (I := I) X Y Z W) := by
     simpa using
       (LeviCivita.rm04InputSkewAt_of_leviCivita_realizes
         (I := I) g (metricRm04 (I := I) (M := M) g) K.h_rm04

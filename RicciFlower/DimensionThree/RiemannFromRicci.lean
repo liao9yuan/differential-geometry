@@ -14,10 +14,9 @@ This file connects the checked `Fin 3` algebra in
 `DimensionThree.CurvatureAlgebra` to realized pointwise curvature components.
 
 The bridge is intentionally explicit about conventions.  RicciFlower's lowered
-curvature convention is `Rm04(W,X,Y,Z) = g(W, R(X,Y)Z)`, while the algebraic
-theorem uses the standard component convention
-`R i j k l = g(R(e_i,e_j)e_k,e_l)`.  The adapter below performs the slot
-permutation `R i j k l := Rm04(e_l,e_i,e_j,e_k)`.
+curvature convention is the standard component convention
+`Rm04(X,Y,Z,W) = <R(X,Y)Z,W>`, matching the algebraic convention
+`R i j k l = g(R(e_i,e_j)e_k,e_l)`.
 -/
 
 noncomputable section
@@ -41,14 +40,13 @@ def OrthonormalBasisAt
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x)) : Prop :=
   forall i j : Fin 3, g.inner x (basis i) (basis j) = delta3 i j
 
-/-- Standard algebraic curvature components obtained from RicciFlower's
-lowered curvature convention by the slot permutation
-`R i j k l = Rm04(e_l,e_i,e_j,e_k)`. -/
+/-- Standard algebraic curvature components read directly from RicciFlower's
+standard lowered curvature convention. -/
 def standardRmCompAt
     (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
     (Rm04 : Tensor04At (I := I) (M := M) x)
     (i j k l : Fin 3) : Real :=
-  rm04CompAt (I := I) basis Rm04 l i j k
+  rm04CompAt (I := I) basis Rm04 i j k l
 
 /-- Pointwise symmetry of a Ricci-type `(0,2)` tensor. -/
 def RicciSymAt
@@ -423,7 +421,7 @@ theorem standardRmCompAt_apply
     (Rm04 : Tensor04At (I := I) (M := M) x)
     (i j k l : Fin 3) :
     standardRmCompAt basis Rm04 i j k l =
-      rm04CompAt (I := I) basis Rm04 l i j k := rfl
+      rm04CompAt (I := I) basis Rm04 i j k l := rfl
 
 /-- Lemma 14.2 as a pointwise `Rm04` component formula with the Ricci and
 scalar terms taken to be the canonical traces of the same standard curvature
@@ -437,7 +435,7 @@ theorem rm04Comp_displayedRiemannFromRicci3D_at_of_curvature_symmetries
     {Rm04 : Tensor04At (I := I) (M := M) x}
     (h : AlgebraicCurvatureSymmetries3 (standardRmCompAt basis Rm04)) :
     forall i j k l : Fin 3,
-      rm04CompAt (I := I) basis Rm04 k i j l =
+      rm04CompAt (I := I) basis Rm04 i j l k =
         stdRicci3 (standardRmCompAt basis Rm04) i l * delta3 j k
           - stdRicci3 (standardRmCompAt basis Rm04) j l * delta3 i k
           - stdRicci3 (standardRmCompAt basis Rm04) i k * delta3 j l
@@ -461,7 +459,7 @@ theorem rm04Comp_displayedRiemannFromRicci3D_frame_of_curvature_symmetries
     (h : AlgebraicCurvatureSymmetries3
       (standardRmCompAt (I := I) (M := M) (hframe.toBasisAt hx) (Rm04 x))) :
     forall i j k l : Fin 3,
-      rm04CompAt (I := I) (hframe.toBasisAt hx) (Rm04 x) k i j l =
+      rm04CompAt (I := I) (hframe.toBasisAt hx) (Rm04 x) i j l k =
         stdRicci3 (standardRmCompAt (I := I) (M := M)
           (hframe.toBasisAt hx) (Rm04 x)) i l * delta3 j k
           - stdRicci3 (standardRmCompAt (I := I) (M := M)
@@ -493,15 +491,20 @@ theorem algebraicCurvatureSymmetries3_standardRmCompAt_of_leviCivita_realizes
   · intro i j k l
     simpa [standardRmCompAt_apply] using
       (LeviCivita.rm04InputSkewAt_of_leviCivita_realizes
-        (I := I) g Rm04 hRm04 (basis l) (basis i) (basis j) (basis k))
+        (I := I) g Rm04 hRm04 (basis i) (basis j) (basis k) (basis l))
   · intro i j k l
-    simpa [standardRmCompAt_apply] using
-      (LeviCivita.rm04OutputSkewAt_of_leviCivita_realizes
-        (I := I) g hcov Rm04 hRm04 (basis k) (basis i) (basis j) (basis l))
+    have h :=
+      LeviCivita.rm04OutputSkewAt_of_leviCivita_realizes
+        (I := I) g hcov Rm04 hRm04 (basis i) (basis j) (basis k) (basis l)
+    have h' :
+        (Rm04 x) (vec4 (basis i) (basis j) (basis l) (basis k)) =
+          -(Rm04 x) (vec4 (basis i) (basis j) (basis k) (basis l)) := by
+      linarith
+    simpa [standardRmCompAt_apply] using h'
   · intro i j k l
     simpa [standardRmCompAt_apply] using
       (LeviCivita.rm04PairSymmAt_of_leviCivita_realizes
-        (I := I) g hcov Rm04 hRm04 (basis j) (basis k) (basis l) (basis i))
+        (I := I) g hcov Rm04 hRm04 (basis i) (basis j) (basis k) (basis l)).symm
 
 /-- Lemma 14.2 for a Levi-Civita lowered curvature realization, with Ricci and
 scalar terms expressed as canonical traces of the same curvature array. -/
@@ -516,7 +519,7 @@ theorem rm04Comp_displayedRiemannFromRicci3D_at_of_leviCivita_realizes
       (LeviCivita.leviCivitaConnectionOfMetric (I := I) g) Rm04)
     {x : M} (basis : Module.Basis (Fin 3) Real (TangentSpace I x)) :
     forall i j k l : Fin 3,
-      rm04CompAt (I := I) basis (Rm04 x) k i j l =
+      rm04CompAt (I := I) basis (Rm04 x) i j l k =
         stdRicci3 (standardRmCompAt (I := I) basis (Rm04 x)) i l * delta3 j k
           - stdRicci3 (standardRmCompAt (I := I) basis (Rm04 x)) j l * delta3 i k
           - stdRicci3 (standardRmCompAt (I := I) basis (Rm04 x)) i k * delta3 j l
@@ -559,11 +562,11 @@ theorem firstTrace_delta3_eq_neg_stdRicci3
     (hcurv : AlgebraicCurvatureSymmetries3 (standardRmCompAt basis Rm04))
     (i j : Fin 3) :
     (∑ k : Fin 3, ∑ l : Fin 3,
-        delta3 k l * Rm04 (vec4 (basis k) (basis l) (basis i) (basis j))) =
+        delta3 k l * Rm04 (vec4 (basis k) (basis i) (basis j) (basis l))) =
       -stdRicci3 (standardRmCompAt basis Rm04) i j := by
-  have h0 := hcurv.anti_last 0 i j 0
-  have h1 := hcurv.anti_last 1 i j 1
-  have h2 := hcurv.anti_last 2 i j 2
+  have h0 := hcurv.anti_last 0 i 0 j
+  have h1 := hcurv.anti_last 1 i 1 j
+  have h2 := hcurv.anti_last 2 i 2 j
   have h0' :
       standardRmCompAt basis Rm04 0 i j 0 =
         -standardRmCompAt basis Rm04 0 i 0 j := by
@@ -577,16 +580,16 @@ theorem firstTrace_delta3_eq_neg_stdRicci3
         -standardRmCompAt basis Rm04 2 i 2 j := by
     linarith
   have h0d :
-      Rm04 (vec4 (basis 0) (basis 0) (basis i) (basis j)) =
-        -Rm04 (vec4 (basis j) (basis 0) (basis i) (basis 0)) := by
+      Rm04 (vec4 (basis 0) (basis i) (basis j) (basis 0)) =
+        -Rm04 (vec4 (basis 0) (basis i) (basis 0) (basis j)) := by
     simpa [standardRmCompAt_apply, rm04CompAt_apply] using h0'
   have h1d :
-      Rm04 (vec4 (basis 1) (basis 1) (basis i) (basis j)) =
-        -Rm04 (vec4 (basis j) (basis 1) (basis i) (basis 1)) := by
+      Rm04 (vec4 (basis 1) (basis i) (basis j) (basis 1)) =
+        -Rm04 (vec4 (basis 1) (basis i) (basis 1) (basis j)) := by
     simpa [standardRmCompAt_apply, rm04CompAt_apply] using h1'
   have h2d :
-      Rm04 (vec4 (basis 2) (basis 2) (basis i) (basis j)) =
-        -Rm04 (vec4 (basis j) (basis 2) (basis i) (basis 2)) := by
+      Rm04 (vec4 (basis 2) (basis i) (basis j) (basis 2)) =
+        -Rm04 (vec4 (basis 2) (basis i) (basis 2) (basis j)) := by
     simpa [standardRmCompAt_apply, rm04CompAt_apply] using h2'
   rw [Fin.sum_univ_three]
   simp [delta3]
@@ -652,9 +655,9 @@ theorem traceDataOfFirst
 /-- Lemma 14.2 as a realized pointwise `Rm04` component formula in an
 orthonormal `Fin 3` basis.
 
-The left side is `rm04CompAt basis Rm04 k i j l`, which is the RicciFlower
-component corresponding to the displayed convention after the adapter
-`R i j l k = Rm04(e_k,e_i,e_j,e_l)`. -/
+The left side is the last-pair-flipped component
+`rm04CompAt basis Rm04 i j l k`, matching the displayed convention theorem in
+the finite algebra layer. -/
 theorem rm04Comp_displayedRiemannFromRicci3D_at
     {g : SmoothRiemannianMetric I M}
     {Ric : Tensor02At (I := I) (M := M) x}
@@ -663,7 +666,7 @@ theorem rm04Comp_displayedRiemannFromRicci3D_at
     {basis : Module.Basis (Fin 3) Real (TangentSpace I x)}
     (h : RiemannFromRicci3DTraceDataAt g Ric scalar Rm04 basis) :
     forall i j k l : Fin 3,
-      rm04CompAt (I := I) basis Rm04 k i j l =
+      rm04CompAt (I := I) basis Rm04 i j l k =
         ricciCompAt (I := I) basis Ric i l * delta3 j k
           - ricciCompAt (I := I) basis Ric j l * delta3 i k
           - ricciCompAt (I := I) basis Ric i k * delta3 j l
@@ -681,9 +684,8 @@ theorem rm04Comp_displayedRiemannFromRicci3D_at
     ← h.ricci_trace j k, ← h.scalar_trace]
 
 /-- Component form of the three-dimensional space-form calculation under an
-Einstein Ricci tensor.  The left side follows RicciFlower's slot convention
-through `rm04Comp_displayedRiemannFromRicci3D_at`: it is the component
-`Rm04(e_k,e_i,e_j,e_l)`. -/
+Einstein Ricci tensor.  The left side is the displayed last-pair-flipped
+component `Rm04(e_i,e_j,e_l,e_k)`. -/
 theorem rm04Comp_einstein3_at
     {g : SmoothRiemannianMetric I M}
     {Ric : Tensor02At (I := I) (M := M) x}
@@ -695,7 +697,7 @@ theorem rm04Comp_einstein3_at
       ricciCompAt (I := I) basis Ric i j =
         (scalar / 3) * delta3 i j) :
     ∀ i j k l : Fin 3,
-      rm04CompAt (I := I) basis Rm04 k i j l =
+      rm04CompAt (I := I) basis Rm04 i j l k =
         (scalar / 6) *
           (delta3 i l * delta3 j k - delta3 j l * delta3 i k) := by
   intro i j k l
@@ -705,8 +707,8 @@ theorem rm04Comp_einstein3_at
     simp [delta3] <;> ring
 
 /-- Arbitrary-vector version of the three-dimensional space-form calculation
-under an Einstein Ricci tensor.  The sign matches RicciFlower's lowered
-curvature convention `Rm04(W,X,Y,Z) = g(W,R(X,Y)Z)`. -/
+under an Einstein Ricci tensor, for the standard sectional slot
+`Rm04(X,Y,Y,X)`. -/
 theorem rm04_einstein3_at
     {g : SmoothRiemannianMetric I M}
     {Ric : Tensor02At (I := I) (M := M) x}
@@ -718,7 +720,7 @@ theorem rm04_einstein3_at
       ricciCompAt (I := I) basis Ric i j =
         (scalar / 3) * delta3 i j)
     (X Y : TangentSpace I x) :
-    Rm04 (vec4 (I := I) X X Y Y) =
+    Rm04 (vec4 (I := I) X Y Y X) =
       -(scalar / 6) *
         (g.inner x X X * g.inner x Y Y -
           g.inner x X Y * g.inner x X Y) := by
@@ -727,22 +729,22 @@ theorem rm04_einstein3_at
   have hcomp' : ∀ a b c d : Fin 3,
       rm04CompAt (I := I) basis Rm04 a b c d =
         (scalar / 6) *
-          (delta3 b d * delta3 c a - delta3 c d * delta3 b a) := by
+          (delta3 a c * delta3 b d - delta3 b c * delta3 a d) := by
     intro a b c d
-    simpa using hcomp b c a d
+    simpa [mul_comm, mul_left_comm, mul_assoc] using hcomp a b d c
   have hcompSlots : ∀ a b c d : Fin 3,
       component0S (I := I) basis Rm04 (slots4 a b c d) =
         (scalar / 6) *
-          (delta3 b d * delta3 c a - delta3 c d * delta3 b a) := by
+          (delta3 a c * delta3 b d - delta3 b c * delta3 a d) := by
     intro a b c d
     change rm04CompAt (I := I) basis Rm04 a b c d =
       (scalar / 6) *
-        (delta3 b d * delta3 c a - delta3 c d * delta3 b a)
+        (delta3 a c * delta3 b d - delta3 b c * delta3 a d)
     exact hcomp' a b c d
   have hXX := inner_eq_sum_repr3 (I := I) h.orthonormal X X
   have hYY := inner_eq_sum_repr3 (I := I) h.orthonormal Y Y
   have hXY := inner_eq_sum_repr3 (I := I) h.orthonormal X Y
-  rw [tensor0S_apply_eq_sum (I := I) basis Rm04 (vec4 (I := I) X X Y Y)]
+  rw [tensor0S_apply_eq_sum (I := I) basis Rm04 (vec4 (I := I) X Y Y X)]
   rw [sum_fin_four_fun]
   rw [hXX, hYY, hXY]
   simp_rw [hcompSlots]
@@ -769,7 +771,7 @@ theorem rm04_firstTrace_einstein3_at
       ricciCompAt (I := I) basis Ric i j =
         (scalar / 3) * delta3 i j)
     (X Y : TangentSpace I x) :
-    Rm04 (vec4 (I := I) X X Y Y) =
+    Rm04 (vec4 (I := I) X Y Y X) =
       (scalar / 6) *
         (g.inner x X X * g.inner x Y Y -
           g.inner x X Y * g.inner x X Y) := by
@@ -826,7 +828,7 @@ theorem rm04Comp_displayedRiemannFromRicci3D_frame
     (h : RiemannFromRicci3DTraceDataAt g (Ric x) (scalar x)
       (Rm04 x) (hframe.toBasisAt hx)) :
     forall i j k l : Fin 3,
-      rm04CompAt (I := I) (hframe.toBasisAt hx) (Rm04 x) k i j l =
+      rm04CompAt (I := I) (hframe.toBasisAt hx) (Rm04 x) i j l k =
         ricciCompAt (I := I) (hframe.toBasisAt hx) (Ric x) i l * delta3 j k
           - ricciCompAt (I := I) (hframe.toBasisAt hx) (Ric x) j l * delta3 i k
           - ricciCompAt (I := I) (hframe.toBasisAt hx) (Ric x) i k * delta3 j l

@@ -254,7 +254,7 @@ private theorem tangentConst_mlieBracket_jacobi_cyclic
   rw [hXZ] at h0
   rw [VectorField.mlieBracket_const_smul_right (I := I) (c := (-1 : Real))
     (V := Yc) (W := BrZX) hZX_mdiff] at h0
-  simp at h0
+  simp only [neg_smul, one_smul] at h0
   change
     VectorField.mlieBracket I Xc BrYZ x +
       VectorField.mlieBracket I Yc BrZX x +
@@ -321,7 +321,7 @@ private theorem mlieBracket_jacobi_cyclic
   rw [hXZ] at h0
   rw [VectorField.mlieBracket_const_smul_right (I := I) (c := (-1 : Real))
     (V := Yf) (W := BrZX) hZX_mdiff] at h0
-  simp at h0
+  simp only [neg_smul, one_smul] at h0
   change
     VectorField.mlieBracket I Xf BrYZ x +
       VectorField.mlieBracket I Yf BrZX x +
@@ -340,17 +340,17 @@ def vec5 {x : M} (A B C D F : TangentSpace I x) :
     else if i = 3 then D
     else F
 
-/-- First Bianchi identity for a lowered Riemann tensor:
-`R(W,X,Y,Z) + R(W,Y,Z,X) + R(W,Z,X,Y) = 0`. -/
+/-- First Bianchi identity for a lowered Riemann tensor in standard slots:
+`R(X,Y,Z,W) + R(Y,Z,X,W) + R(Z,X,Y,W) = 0`. -/
 def FirstBianchiAt {x : M} (Rm04 : Tensor04At (I := I) (M := M) x) : Prop :=
-  ∀ W X Y Z : TangentSpace I x,
-    Rm04 (vec4 W X Y Z) + Rm04 (vec4 W Y Z X) + Rm04 (vec4 W Z X Y) = 0
+  ∀ X Y Z W : TangentSpace I x,
+    Rm04 (vec4 X Y Z W) + Rm04 (vec4 Y Z X W) + Rm04 (vec4 Z X Y W) = 0
 
 theorem first_bianchi {x : M} (Rm04 : Tensor04At (I := I) (M := M) x)
     (h : FirstBianchiAt (I := I) Rm04)
-    (W X Y Z : TangentSpace I x) :
-    Rm04 (vec4 W X Y Z) + Rm04 (vec4 W Y Z X) + Rm04 (vec4 W Z X Y) = 0 :=
-  h W X Y Z
+    (X Y Z W : TangentSpace I x) :
+    Rm04 (vec4 X Y Z W) + Rm04 (vec4 Y Z X W) + Rm04 (vec4 Z X Y W) = 0 :=
+  h X Y Z W
 
 /-- Section-level first Bianchi identity. -/
 def FirstBianchiSection (Rm04 : Tensor04Section (I := I) (M := M)) : Prop :=
@@ -359,10 +359,10 @@ def FirstBianchiSection (Rm04 : Tensor04Section (I := I) (M := M)) : Prop :=
 theorem first_bianchi_apply
     (Rm04 : Tensor04Section (I := I) (M := M))
     (h : FirstBianchiSection (I := I) Rm04)
-    (x : M) (W X Y Z : TangentSpace I x) :
-    Rm04 x (vec4 W X Y Z) + Rm04 x (vec4 W Y Z X) +
-      Rm04 x (vec4 W Z X Y) = 0 :=
-  h x W X Y Z
+    (x : M) (X Y Z W : TangentSpace I x) :
+    Rm04 x (vec4 X Y Z W) + Rm04 x (vec4 Y Z X W) +
+      Rm04 x (vec4 Z X Y W) = 0 :=
+  h x X Y Z W
 
 /-- Operator-level first Bianchi identity for a torsion-free connection,
 specialized to tangent-constant extensions at one point.
@@ -878,25 +878,25 @@ theorem curvSecondBianchi
     _ = 0 := hsum
 
 /-- Second Bianchi identity for the covariant derivative of lowered Riemann.
-The tensor slots are `(derivative, W, X, Y, Z)`. -/
+The tensor slots are `(derivative, X, Y, Z, W)` in the standard convention. -/
 def SecondBianchiAt {x : M}
     (nablaRm04 :
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 5 x) :
     Prop :=
-  ∀ A W X Y Z : TangentSpace I x,
-    nablaRm04 (vec5 A W X Y Z) +
-      nablaRm04 (vec5 X W Y A Z) +
-        nablaRm04 (vec5 Y W A X Z) = 0
+  ∀ A X Y Z W : TangentSpace I x,
+    nablaRm04 (vec5 A X Y Z W) +
+      nablaRm04 (vec5 X Y A Z W) +
+        nablaRm04 (vec5 Y A X Z W) = 0
 
 theorem second_bianchi {x : M}
     (nablaRm04 :
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 5 x)
     (h : SecondBianchiAt (I := I) nablaRm04)
-    (A W X Y Z : TangentSpace I x) :
-    nablaRm04 (vec5 A W X Y Z) +
-      nablaRm04 (vec5 X W Y A Z) +
-        nablaRm04 (vec5 Y W A X Z) = 0 :=
-  h A W X Y Z
+    (A X Y Z W : TangentSpace I x) :
+    nablaRm04 (vec5 A X Y Z W) +
+      nablaRm04 (vec5 X Y A Z W) +
+        nablaRm04 (vec5 Y A X Z W) = 0 :=
+  h A X Y Z W
 
 /-- Section-level second Bianchi identity. -/
 def SecondBianchiSection
@@ -909,11 +909,11 @@ theorem second_bianchi_apply
     (nablaRm04 : (x : M) ->
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 5 x)
     (h : SecondBianchiSection (I := I) nablaRm04)
-    (x : M) (A W X Y Z : TangentSpace I x) :
-    nablaRm04 x (vec5 A W X Y Z) +
-      nablaRm04 x (vec5 X W Y A Z) +
-        nablaRm04 x (vec5 Y W A X Z) = 0 :=
-  h x A W X Y Z
+    (x : M) (A X Y Z W : TangentSpace I x) :
+    nablaRm04 x (vec5 A X Y Z W) +
+      nablaRm04 x (vec5 X Y A Z W) +
+        nablaRm04 x (vec5 Y A X Z W) = 0 :=
+  h x A X Y Z W
 
 /-- Contracted second Bianchi in a tangent basis:
 `div Ric = (1/2) d scalar`.  The slots of `nablaRic` are
@@ -1110,7 +1110,7 @@ def NablaRicTraceAt
   ∀ A B C : TangentSpace I x,
     nablaRic (vec3 A B C) =
       ∑ i : Idx, ∑ j : Idx,
-        gInv i j * nablaRm04 (vec5 A (basis i) (basis j) B C)
+        gInv i j * nablaRm04 (vec5 A (basis i) B C (basis j))
 
 /-- Section-level `∇Ric = tr_g ∇Rm04`, with all data chosen pointwise. -/
 def NablaRicTraceSec
@@ -1163,19 +1163,19 @@ theorem nablaRicSymm_apply
 
 /-- Riemann symmetries inherited by the covariant derivative of lowered
 Riemann.  The first slot is the covariant-derivative direction, and the
-curvature slots follow the project convention
-`Rm04(W,X,Y,Z) = g(W, R(X,Y)Z)`. -/
+curvature slots follow the standard convention
+`Rm04(X,Y,Z,W) = <R(X,Y)Z,W>`. -/
 def NablaRmSymmAt
     {x : M}
     (nablaRm04 :
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 5 x) :
     Prop :=
-  (∀ A W X Y Z : TangentSpace I x,
-      nablaRm04 (vec5 A W X Y Z) = -nablaRm04 (vec5 A Z X Y W)) ∧
-    (∀ A W X Y Z : TangentSpace I x,
-      nablaRm04 (vec5 A W Y X Z) = -nablaRm04 (vec5 A W X Y Z)) ∧
-      ∀ A W X Y Z : TangentSpace I x,
-        nablaRm04 (vec5 A W X Y Z) = nablaRm04 (vec5 A Y Z W X)
+  (∀ A X Y Z W : TangentSpace I x,
+      nablaRm04 (vec5 A X Y Z W) = -nablaRm04 (vec5 A X Y W Z)) ∧
+    (∀ A X Y Z W : TangentSpace I x,
+      nablaRm04 (vec5 A Y X Z W) = -nablaRm04 (vec5 A X Y Z W)) ∧
+      ∀ A X Y Z W : TangentSpace I x,
+        nablaRm04 (vec5 A X Y Z W) = nablaRm04 (vec5 A Z W X Y)
 
 /-- Section-level inherited lowered-Riemann symmetries for `∇Rm04`. -/
 def NablaRmSymmSec
@@ -1420,6 +1420,54 @@ private theorem sum4_lijk
   rw [Fintype.sum_prod_type]
   rw [Fintype.sum_prod_type]
 
+private theorem sum4_kjli
+    {Idx : Type*} [Fintype Idx]
+    (gInv : Idx -> Idx -> Real)
+    (F : Idx -> Idx -> Idx -> Idx -> Real)
+    (hInv : ∀ i j : Idx, gInv i j = gInv j i) :
+    (∑ i : Idx, ∑ j : Idx, ∑ k : Idx, ∑ l : Idx,
+        gInv i j * gInv k l * F k j l i) =
+      ∑ i : Idx, ∑ j : Idx, ∑ k : Idx, ∑ l : Idx,
+        gInv i j * gInv k l * F i k j l := by
+  classical
+  rw [← Fintype.sum_prod_type']
+  rw [← Fintype.sum_prod_type']
+  rw [← Fintype.sum_prod_type']
+  rw [show
+      (∑ p : (((Idx × Idx) × Idx) × Idx),
+        gInv p.1.1.1 p.1.1.2 * gInv p.1.2 p.2 *
+          F p.1.2 p.1.1.2 p.2 p.1.1.1) =
+      (∑ p : (((Idx × Idx) × Idx) × Idx),
+        gInv p.1.1.1 p.1.1.2 * gInv p.1.2 p.2 *
+          F p.1.1.1 p.1.2 p.1.1.2 p.2) by
+        let e : (((Idx × Idx) × Idx) × Idx) ≃
+            (((Idx × Idx) × Idx) × Idx) :=
+          { toFun := fun p => (((p.1.2, p.2), p.1.1.2), p.1.1.1)
+            invFun := fun p => (((p.2, p.1.2), p.1.1.1), p.1.1.2)
+            left_inv := by
+              intro p
+              rcases p with ⟨⟨⟨i, j⟩, k⟩, l⟩
+              rfl
+            right_inv := by
+              intro p
+              rcases p with ⟨⟨⟨i, j⟩, k⟩, l⟩
+              rfl }
+        simpa [e] using
+          (Fintype.sum_equiv e
+            (fun p : (((Idx × Idx) × Idx) × Idx) =>
+              gInv p.1.1.1 p.1.1.2 * gInv p.1.2 p.2 *
+                F p.1.2 p.1.1.2 p.2 p.1.1.1)
+            (fun p : (((Idx × Idx) × Idx) × Idx) =>
+              gInv p.1.1.1 p.1.1.2 * gInv p.1.2 p.2 *
+                F p.1.1.1 p.1.2 p.1.1.2 p.2)
+            (by
+              intro p
+              rcases p with ⟨⟨⟨i, j⟩, k⟩, l⟩
+              simp [e, hInv i j, mul_comm, mul_left_comm]))]
+  rw [Fintype.sum_prod_type]
+  rw [Fintype.sum_prod_type]
+  rw [Fintype.sum_prod_type]
+
 /-- Pure finite-sum contraction of the second Bianchi identity in the
 RicciFlower lowered-curvature convention.  This is the algebraic core of the
 contracted second Bianchi producer. -/
@@ -1437,32 +1485,32 @@ theorem contractSum
         gInv i j *
           (∑ k : Idx, ∑ l : Idx,
             gInv k l *
-              nablaRm04 (vec5 (basis i) (basis k) (basis l) (basis j) X))) =
+              nablaRm04 (vec5 (basis i) (basis k) (basis j) X (basis l)))) =
       (1 / 2 : Real) *
         (∑ i : Idx, ∑ j : Idx,
           gInv i j *
             (∑ k : Idx, ∑ l : Idx,
               gInv k l *
-                nablaRm04 (vec5 X (basis k) (basis l) (basis i) (basis j)))) := by
+                nablaRm04 (vec5 X (basis k) (basis i) (basis j) (basis l)))) := by
   classical
   rcases hRmSymm with ⟨hOut, hIn, hPair⟩
   rw [trace4_expand, trace4_expand]
   let L : Real :=
     ∑ i : Idx, ∑ j : Idx, ∑ k : Idx, ∑ l : Idx,
       gInv i j * gInv k l *
-        nablaRm04 (vec5 (basis i) (basis k) (basis l) (basis j) X)
+        nablaRm04 (vec5 (basis i) (basis k) (basis j) X (basis l))
   let R : Real :=
     ∑ i : Idx, ∑ j : Idx, ∑ k : Idx, ∑ l : Idx,
       gInv i j * gInv k l *
-        nablaRm04 (vec5 X (basis k) (basis l) (basis i) (basis j))
+        nablaRm04 (vec5 X (basis k) (basis i) (basis j) (basis l))
   let A : Real :=
     ∑ i : Idx, ∑ j : Idx, ∑ k : Idx, ∑ l : Idx,
       gInv i j * gInv k l *
-        nablaRm04 (vec5 (basis l) (basis k) (basis i) X (basis j))
+        nablaRm04 (vec5 (basis k) (basis i) X (basis j) (basis l))
   let B : Real :=
     ∑ i : Idx, ∑ j : Idx, ∑ k : Idx, ∑ l : Idx,
       gInv i j * gInv k l *
-        nablaRm04 (vec5 (basis i) (basis k) X (basis l) (basis j))
+        nablaRm04 (vec5 (basis i) X (basis k) (basis j) (basis l))
   change L = (1 / 2 : Real) * R
   have hcyc : R + A + B = 0 := by
     dsimp [R, A, B]
@@ -1471,19 +1519,19 @@ theorem contractSum
     refine Finset.sum_eq_zero fun j _ => ?_
     refine Finset.sum_eq_zero fun k _ => ?_
     refine Finset.sum_eq_zero fun l _ => ?_
-    have h := hsecond X (basis k) (basis l) (basis i) (basis j)
+    have h := hsecond X (basis k) (basis i) (basis j) (basis l)
     calc
       gInv i j * gInv k l *
-            nablaRm04 (vec5 X (basis k) (basis l) (basis i) (basis j)) +
+            nablaRm04 (vec5 X (basis k) (basis i) (basis j) (basis l)) +
           gInv i j * gInv k l *
-            nablaRm04 (vec5 (basis l) (basis k) (basis i) X (basis j)) +
+            nablaRm04 (vec5 (basis k) (basis i) X (basis j) (basis l)) +
             gInv i j * gInv k l *
-              nablaRm04 (vec5 (basis i) (basis k) X (basis l) (basis j))
+              nablaRm04 (vec5 (basis i) X (basis k) (basis j) (basis l))
           =
         gInv i j * gInv k l *
-          (nablaRm04 (vec5 X (basis k) (basis l) (basis i) (basis j)) +
-            nablaRm04 (vec5 (basis l) (basis k) (basis i) X (basis j)) +
-              nablaRm04 (vec5 (basis i) (basis k) X (basis l) (basis j))) := by
+          (nablaRm04 (vec5 X (basis k) (basis i) (basis j) (basis l)) +
+            nablaRm04 (vec5 (basis k) (basis i) X (basis j) (basis l)) +
+              nablaRm04 (vec5 (basis i) X (basis k) (basis j) (basis l))) := by
           ring_nf
       _ = 0 := by rw [h, mul_zero]
   have hA : A = -L := by
@@ -1491,50 +1539,56 @@ theorem contractSum
     calc
       (∑ i : Idx, ∑ j : Idx, ∑ k : Idx, ∑ l : Idx,
           gInv i j * gInv k l *
-            nablaRm04 (vec5 (basis l) (basis k) (basis i) X (basis j))) =
+            nablaRm04 (vec5 (basis k) (basis i) X (basis j) (basis l))) =
         ∑ i : Idx, ∑ j : Idx, ∑ k : Idx, ∑ l : Idx,
           gInv i j * gInv k l *
-            (-nablaRm04 (vec5 (basis l) (basis i) (basis j) (basis k) X)) := by
+            (-nablaRm04 (vec5 (basis k) (basis j) (basis l) X (basis i))) := by
           refine Finset.sum_congr rfl fun i _ => ?_
           refine Finset.sum_congr rfl fun j _ => ?_
           refine Finset.sum_congr rfl fun k _ => ?_
           refine Finset.sum_congr rfl fun l _ => ?_
-          have h1 := hIn (basis l) (basis k) X (basis i) (basis j)
-          have h2 := hPair (basis l) (basis k) X (basis i) (basis j)
+          have h1 : nablaRm04 (vec5 (basis k) (basis i) X (basis j) (basis l)) =
+              -nablaRm04 (vec5 (basis k) X (basis i) (basis j) (basis l)) := by
+            have h := hIn (basis k) (basis i) X (basis j) (basis l)
+            linarith
+          have h2 := hPair (basis k) X (basis i) (basis j) (basis l)
           rw [h1, h2]
       _ = -(∑ i : Idx, ∑ j : Idx, ∑ k : Idx, ∑ l : Idx,
           gInv i j * gInv k l *
-            nablaRm04 (vec5 (basis l) (basis i) (basis j) (basis k) X)) := by
+            nablaRm04 (vec5 (basis k) (basis j) (basis l) X (basis i))) := by
           simp [Finset.sum_neg_distrib]
       _ = -L := by
-          rw [sum4_lijk gInv
+          rw [sum4_kjli gInv
             (fun a b c d =>
-              nablaRm04 (vec5 (basis a) (basis b) (basis c) (basis d) X))
+              nablaRm04 (vec5 (basis a) (basis b) (basis c) X (basis d)))
             hInv]
   have hB : B = -L := by
     dsimp [B, L]
     calc
       (∑ i : Idx, ∑ j : Idx, ∑ k : Idx, ∑ l : Idx,
           gInv i j * gInv k l *
-            nablaRm04 (vec5 (basis i) (basis k) X (basis l) (basis j))) =
+            nablaRm04 (vec5 (basis i) X (basis k) (basis j) (basis l))) =
         ∑ i : Idx, ∑ j : Idx, ∑ k : Idx, ∑ l : Idx,
           gInv i j * gInv k l *
-            (-nablaRm04 (vec5 (basis i) (basis l) (basis k) (basis j) X)) := by
+            (-nablaRm04 (vec5 (basis i) (basis l) (basis j) X (basis k))) := by
           refine Finset.sum_congr rfl fun i _ => ?_
           refine Finset.sum_congr rfl fun j _ => ?_
           refine Finset.sum_congr rfl fun k _ => ?_
           refine Finset.sum_congr rfl fun l _ => ?_
-          have h1 := hPair (basis i) (basis k) X (basis l) (basis j)
-          have h2 := hIn (basis i) (basis l) (basis k) (basis j) X
+          have h1 := hPair (basis i) X (basis k) (basis j) (basis l)
+          have h2 : nablaRm04 (vec5 (basis i) (basis j) (basis l) X (basis k)) =
+              -nablaRm04 (vec5 (basis i) (basis l) (basis j) X (basis k)) := by
+            have h := hIn (basis i) (basis j) (basis l) X (basis k)
+            linarith
           rw [h1, h2]
       _ = -(∑ i : Idx, ∑ j : Idx, ∑ k : Idx, ∑ l : Idx,
           gInv i j * gInv k l *
-            nablaRm04 (vec5 (basis i) (basis l) (basis k) (basis j) X)) := by
+            nablaRm04 (vec5 (basis i) (basis l) (basis j) X (basis k))) := by
           simp [Finset.sum_neg_distrib]
       _ = -L := by
           rw [sum4_swap34 gInv
             (fun a b c d =>
-              nablaRm04 (vec5 (basis a) (basis c) (basis d) (basis b) X))
+              nablaRm04 (vec5 (basis a) (basis c) (basis b) X (basis d)))
             hInv]
   have hR : R = 2 * L := by
     linarith
@@ -1569,7 +1623,7 @@ theorem contractOfSecond
         gInv i j *
           (∑ k : Idx, ∑ l : Idx,
             gInv k l *
-              nablaRm04 (vec5 (basis i) (basis k) (basis l) (basis j) X)) := by
+              nablaRm04 (vec5 (basis i) (basis k) (basis j) X (basis l))) := by
         refine Finset.sum_congr rfl fun i _ => ?_
         refine Finset.sum_congr rfl fun j _ => ?_
         rw [hRicTrace (basis i) (basis j) X]
@@ -1579,7 +1633,7 @@ theorem contractOfSecond
           gInv i j *
             (∑ k : Idx, ∑ l : Idx,
               gInv k l *
-                nablaRm04 (vec5 X (basis k) (basis l) (basis i) (basis j)))) :=
+                nablaRm04 (vec5 X (basis k) (basis i) (basis j) (basis l)))) :=
         contractSum (I := I) basis gInv nablaRm04 hRmSymm hInv hsecond X
     _ =
       (1 / 2 : Real) *

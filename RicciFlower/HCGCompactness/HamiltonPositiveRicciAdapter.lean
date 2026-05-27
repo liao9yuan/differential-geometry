@@ -43,7 +43,12 @@ def toHam3
   topology := L.topology
   charted := L.charted
   smooth := L.smooth
-  smooth_plus := L.smoothPlus
+  smooth_plus := by
+    letI : TopologicalSpace L.M := L.topology
+    letI : ChartedSpace H L.M := L.charted
+    letI : IsManifold I ∞ L.M := L.smooth
+    change IsManifold I ∞ L.M
+    infer_instance
   sigmaCompact := L.sigmaCompact
   t2 := L.t2
   basepoint := L.basepoint
@@ -100,6 +105,56 @@ theorem toHam3Exists
       hricTransfer L subseq, hbaseScalar L subseq, hpinchTransfer L subseq⟩
   simpa [HamiltonPositiveRicci.Ham3LimitFlow, LimitFlowData.toHam3] using
     L.isSolution
+
+/-- The Hamilton Section 12 CGH output follows from the Theorem 3.10
+injectivity-radius compactness interface plus the Hamilton-specific transfer
+producers.
+
+This is the preferred replacement shape for the current `ham3_cgh_limit`
+black box: future work should construct the pointed rescaled-flow sequence `X`,
+prove the legacy Hamilton inputs, the time-zero metric compactness inputs, and
+the explicit derivative/smooth-flow upgrade inputs, and then prove the listed
+convergence-transfer producers from the smooth CGH convergence data. -/
+theorem ham3OfCompactSol
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (Q : Ham3BlowupData M)
+    {X : PointedFlowSeq.{u, uE, uH} (I := I)}
+    (hcomplete : CompleteInput (I := I) X)
+    (hcurv : CurvBoundInput (I := I) X)
+    (hinj : InjInput (I := I) X)
+    (hcomplete0 : SeqMetricComplete (I := I) (X.atZero (I := I)))
+    (hflowCurv : SpacetimeCurvBound (I := I) X)
+    (hflowInj : FlowBaseInjBound (I := I) X)
+    (hderiv : FlowDerivativeInput (I := I) X)
+    (hflow : SmoothFlowLimitInput (I := I) X)
+    (hwindow : Set.Icc (-(ham3_r0 ^ 2)) 0 ⊆ X.D.carrier)
+    (hreg : Set.Ioo (-(ham3_r0 ^ 2)) 0 ⊆ X.D.regular)
+    (hconnected :
+      forall (L : LimitFlowData.{u, uE, uH} I X.D) (subseq : Nat -> Nat),
+        Ham3LimitConnected (I := I) (M := M)
+          (LimitFlowData.toHam3 (I := I) (M := M) L subseq))
+    (hboundaryless :
+      forall (L : LimitFlowData.{u, uE, uH} I X.D) (subseq : Nat -> Nat),
+        Ham3LimitBoundaryless (I := I) (M := M)
+          (LimitFlowData.toHam3 (I := I) (M := M) L subseq))
+    (hricTransfer :
+      forall (L : LimitFlowData.{u, uE, uH} I X.D) (subseq : Nat -> Nat),
+        Ham3RicNonnegTransfer (I := I) (M := M) P Q
+          (LimitFlowData.toHam3 (I := I) (M := M) L subseq))
+    (hbaseScalar :
+      forall (L : LimitFlowData.{u, uE, uH} I X.D) (subseq : Nat -> Nat),
+        Ham3LimitBaseScalarConv (I := I) (M := M) P Q
+          (LimitFlowData.toHam3 (I := I) (M := M) L subseq))
+    (hpinchTransfer :
+      forall (L : LimitFlowData.{u, uE, uH} I X.D) (subseq : Nat -> Nat),
+        Ham3PinchTransfer (I := I) (M := M) P Q
+          (LimitFlowData.toHam3 (I := I) (M := M) L subseq)) :
+    Ham3CGHLimitExists (I := I) P Q :=
+  toHam3Exists (I := I) (M := M) P Q hwindow hreg hconnected
+    hboundaryless hricTransfer hbaseScalar hpinchTransfer
+    (compactnessSol (I := I) X hcomplete hcurv hinj
+      hcomplete0 hflowCurv hflowInj hderiv hflow)
 
 end HCGCompactness
 end RicciFlower

@@ -7,7 +7,8 @@ set_option linter.unusedSectionVars false
 /-!
 # Four-tensor metric traces
 
-Smooth field producer for tracing the first two slots of `(0,4)` tensors.
+Smooth field producer for the Ricci-style metric trace of standard-slot
+`(0,4)` tensors, tracing slots `0` and `3`.
 -/
 
 namespace RicciFlower
@@ -50,6 +51,16 @@ theorem metricTrace_finCons_vec3_eq_vec4 {x : M}
   funext a
   fin_cases a <;> rfl
 
+/-- Slot permutation turning the first-two trace input `(i,j,tail₀,tail₁)`
+into the standard Ricci trace input `(i,tail₀,tail₁,j)`. -/
+def trace04Perm : Equiv.Perm (Fin 4) where
+  toFun q := if q = 0 then 0 else if q = 1 then 2 else if q = 2 then 3 else 1
+  invFun q := if q = 0 then 0 else if q = 1 then 3 else if q = 2 then 1 else 2
+  left_inv q := by
+    fin_cases q <;> simp
+  right_inv q := by
+    fin_cases q <;> simp
+
 theorem metricTrace_tensor0S_curry_apply_cons
     {x : M} (s : ℕ)
     (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -78,21 +89,49 @@ private def trace04Slots
     (tail : Fin 2 -> CoordinateIdx (𝕜 := Real) E) :
     Fin 4 -> CoordinateIdx (𝕜 := Real) E
   | ⟨0, _⟩ => i
-  | ⟨1, _⟩ => j
-  | ⟨2, _⟩ => tail 0
-  | ⟨3, _⟩ => tail 1
+  | ⟨1, _⟩ => tail 0
+  | ⟨2, _⟩ => tail 1
+  | ⟨3, _⟩ => j
 
 private theorem trace04Slots_apply {x₀ y : M}
     (i j : CoordinateIdx (𝕜 := Real) E)
     (tail : Fin 2 -> CoordinateIdx (𝕜 := Real) E) :
-    metricTraceInput (I := I)
-        (coordinateFrameAt (I := I) x₀ i y)
-        (coordinateFrameAt (I := I) x₀ j y)
-        (fun q : Fin 2 => coordinateFrameAt (I := I) x₀ (tail q) y) =
+    (fun q : Fin 4 =>
+      metricTraceInput (I := I)
+          (coordinateFrameAt (I := I) x₀ i y)
+          (coordinateFrameAt (I := I) x₀ j y)
+          (fun q : Fin 2 => coordinateFrameAt (I := I) x₀ (tail q) y)
+        (trace04Perm q)) =
       fun q : Fin 4 =>
         coordinateFrameAt (I := I) x₀ (trace04Slots i j tail q) y := by
   funext q
-  fin_cases q <;> rfl
+  fin_cases q
+  · simp [trace04Perm, metricTraceInput, trace04Slots]
+  · change
+      Fin.cases (coordinateFrameAt (I := I) x₀ i y)
+          (fun i : Fin 3 =>
+            Fin.cases (coordinateFrameAt (I := I) x₀ j y)
+              (fun q : Fin 2 => coordinateFrameAt (I := I) x₀ (tail q) y) i)
+          (Fin.succ (Fin.succ 0)) =
+        coordinateFrameAt (I := I) x₀ (tail 0) y
+    rw [Fin.cases_succ, Fin.cases_succ]
+  · change
+      Fin.cases (coordinateFrameAt (I := I) x₀ i y)
+          (fun i : Fin 3 =>
+            Fin.cases (coordinateFrameAt (I := I) x₀ j y)
+              (fun q : Fin 2 => coordinateFrameAt (I := I) x₀ (tail q) y) i)
+          (Fin.succ (Fin.succ (Fin.succ 0))) =
+        coordinateFrameAt (I := I) x₀ (tail 1) y
+    rw [Fin.cases_succ, Fin.cases_succ]
+    rfl
+  · change
+      Fin.cases (coordinateFrameAt (I := I) x₀ i y)
+          (fun i : Fin 3 =>
+            Fin.cases (coordinateFrameAt (I := I) x₀ j y)
+              (fun q : Fin 2 => coordinateFrameAt (I := I) x₀ (tail q) y) i)
+          (Fin.succ 0) =
+        coordinateFrameAt (I := I) x₀ j y
+    rw [Fin.cases_succ, Fin.cases_zero]
 
 private theorem trace04Event
     (g : SmoothRiemannianMetric I M)
@@ -100,7 +139,8 @@ private theorem trace04Event
       (n := (∞ : WithTop ℕ∞)) 4)
     (x₀ : M) (tail : Fin 2 -> CoordinateIdx (𝕜 := Real) E) :
     (fun y : M =>
-        metricTraceFirstTwo0STensor (I := I) g (A y)
+        metricTraceFirstTwo0STensor (I := I) g
+          ((A y).domDomCongr trace04Perm)
           (fun q : Fin 2 =>
             coordinateFrameAt (I := I) x₀ (tail q) y)) =ᶠ[nhds x₀]
       fun y : M =>
@@ -121,25 +161,29 @@ private theorem trace04Event
       inverseMetricFlatModelInChart_component (I := I) g x₀ i j
         (extChartAt I x₀ y)
   have htrace :=
-    metricTraceFirstTwo0STensor_apply (I := I) g (A y)
+    metricTraceFirstTwo0STensor_apply (I := I) g
+      ((A y).domDomCongr trace04Perm)
       (fun q : Fin 2 => coordinateFrameAt (I := I) x₀ (tail q) y)
   have hsum :=
     metricTraceFirstTwo0SAt_eq_sum_basis (I := I) g basis gInv
-      (gInvBasisAt (I := I) g x₀ hy) (A y)
+      (gInvBasisAt (I := I) g x₀ hy)
+      ((A y).domDomCongr trace04Perm)
       (fun q : Fin 2 => coordinateFrameAt (I := I) x₀ (tail q) y)
   calc
-    metricTraceFirstTwo0STensor (I := I) g (A y)
+    metricTraceFirstTwo0STensor (I := I) g
+        ((A y).domDomCongr trace04Perm)
         (fun q : Fin 2 =>
           coordinateFrameAt (I := I) x₀ (tail q) y)
         =
-      metricTraceFirstTwo0SAt (I := I) g (A y)
+      metricTraceFirstTwo0SAt (I := I) g
+        ((A y).domDomCongr trace04Perm)
         (fun q : Fin 2 =>
           coordinateFrameAt (I := I) x₀ (tail q) y) := htrace
     _ =
       ∑ i : CoordinateIdx (𝕜 := Real) E,
         ∑ j : CoordinateIdx (𝕜 := Real) E,
           gInv i j *
-            (A y)
+            ((A y).domDomCongr trace04Perm)
               (metricTraceInput (I := I) (basis i) (basis j)
                 (fun q : Fin 2 =>
                   coordinateFrameAt (I := I) x₀ (tail q) y)) := hsum
@@ -154,6 +198,7 @@ private theorem trace04Event
         refine Finset.sum_congr rfl fun i _ => ?_
         refine Finset.sum_congr rfl fun j _ => ?_
         congr 1
+        rw [ContinuousMultilinearMap.domDomCongr_apply]
         simpa [basis, coordinateFrameAt_basis_apply] using
           congrArg (fun slots => A y slots)
             (trace04Slots_apply (I := I) (x₀ := x₀) (y := y) i j tail)
@@ -165,7 +210,8 @@ private theorem trace04Coeff
     (x₀ : M) (tail : Fin 2 -> CoordinateIdx (𝕜 := Real) E) :
     ContMDiffAt I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
       (fun y : M =>
-        metricTraceFirstTwo0STensor (I := I) g (A y)
+        metricTraceFirstTwo0STensor (I := I) g
+          ((A y).domDomCongr trace04Perm)
           (fun q : Fin 2 =>
             coordinateFrameAt (I := I) x₀ (tail q) y)) x₀ := by
   classical
@@ -192,8 +238,8 @@ private theorem trace04Coeff
     (trace04Event (I := I) g A x₀ tail)
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Smooth `(0,2)` field obtained by tracing the first two slots of a smooth
-`(0,4)` tensor field. -/
+/-- Smooth `(0,2)` field obtained by the standard Ricci trace of a smooth
+`(0,4)` tensor field, tracing slots `0` and `3`. -/
 def trace04Field
     (g : SmoothRiemannianMetric I M)
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -204,7 +250,9 @@ def trace04Field
     (M := M) 2
   let F : (p : M) ->
       Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 p :=
-    fun p : M => metricTraceFirstTwo0STensor (I := I) g (A p)
+    fun p : M =>
+      metricTraceFirstTwo0STensor (I := I) g
+        ((A p).domDomCongr trace04Perm)
   refine ⟨F, ?_⟩
   let d := Module.finrank Real E
   let b : Module.Basis (Fin d) Real E := Module.finBasis Real E
@@ -224,13 +272,15 @@ def trace04Field
         (TangentSpace I : M -> Type _)) x₀
       ⟨y, F y⟩).2)
       (fun a : Fin 2 => b (σ a)) =
-    metricTraceFirstTwo0STensor (I := I) g (A y)
+    metricTraceFirstTwo0STensor (I := I) g
+      ((A y).domDomCongr trace04Perm)
       (fun q : Fin 2 => coordinateFrameAt (I := I) x₀ (σ q) y)
   change (F y).compContinuousLinearMap
       (fun _ : Fin 2 =>
         (trivializationAt E (TangentSpace I : M -> Type _) x₀).symmL Real y)
       (fun a : Fin 2 => b (σ a)) =
-    metricTraceFirstTwo0STensor (I := I) g (A y)
+    metricTraceFirstTwo0STensor (I := I) g
+      ((A y).domDomCongr trace04Perm)
       (fun q : Fin 2 => coordinateFrameAt (I := I) x₀ (σ q) y)
   rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
   congr
@@ -250,7 +300,8 @@ def trace04Field
       (n := (∞ : WithTop ℕ∞)) 4)
     (x : M) :
     trace04Field (I := I) (M := M) g A x =
-      metricTraceFirstTwo0STensor (I := I) g (A x) := by
+      metricTraceFirstTwo0STensor (I := I) g
+      ((A x).domDomCongr trace04Perm) := by
   rfl
 
 end
