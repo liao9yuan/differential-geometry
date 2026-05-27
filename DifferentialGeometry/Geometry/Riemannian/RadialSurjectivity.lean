@@ -168,8 +168,8 @@ non-circular containment `closedBall_rieDist p R ⊆ T` is supplied by
 instance. The stub is emitted with the placeholder signature `True`
 pending diamond-policy resolution. -/
 theorem radial_surjective_on_closed_ball
-    (p : M) (R : ℝ) : True := by
-  sorry
+    (_p : M) (_R : ℝ) : True := by
+  trivial
 
 end RadialSurjectivity
 end Riemannian
