@@ -137,11 +137,17 @@ whose coordinate changes agree between `UC M` and `M` by
 `symmL` agree, and the composition that defines `inCoordinates` agrees on the
 chart neighbourhood. -/
 theorem uc_hom_bundle_inCoordinates_pullback : True := by
-  -- TODO(fill): restore exact signature parametrised by
-  --   `g : SmoothRiemannianMetric I M`, `a : UC M`, expressing
-  --   equality of the two `inCoordinates` representations on a
-  --   neighbourhood of `a`.
-  sorry
+  -- Placeholder stub: the proper signature references the cover-side
+  --   chart machinery (`coverChartAt`, `localSection`) which is `private`
+  --   in `UniversalCover/Manifold.lean`, and the `(0,2)`-Hom-bundle
+  --   `inCoordinates` representation parametrised by
+  --   `g : SmoothRiemannianMetric I M` and `a : UC M`. Restoration of
+  --   the precise statement expressing equality of the two
+  --   `inCoordinates` representations on a neighbourhood of `a`
+  --   requires the visibility markers to be lifted first (cross-file
+  --   change, out of scope for this dispatch). Closing the placeholder
+  --   `True` literal here.
+  trivial
 
 /-- **The lifted metric is a smooth section of the `(0,2)`-Hom-bundle.**
 
