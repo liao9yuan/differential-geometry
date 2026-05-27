@@ -2246,6 +2246,194 @@ theorem inhomogLinearODESolution_continuousOn
 
 end Inhomogeneous
 
+/-! ## Variational solution `W(x, t, v)`
+
+For the parametric linear ODE `Z'(t) = A(x, t) Z(t)` with `Z(x, h₀) = Z₀ x`,
+the partial Fréchet derivative `(∂Z/∂x)(x, t) : F →L[ℝ] G` should — formally —
+satisfy the variational equation
+
+`W'(t) = (∂A/∂x ⟨x, t⟩ v) Z(x, t) + A(x, t) W(t),  W(h₀) = (∂Z₀/∂x ⟨x⟩) v`
+
+for every test direction `v : F`.  This is an inhomogeneous linear ODE in
+`W(t)` with coefficient `A(x, ·)`, forcing
+`b(x, t) := (fderiv (fun y => A y t) x) v (linearODESolution A a b' h₀ Z₀ x t)`,
+and initial datum `(fderiv ℝ Z₀ x) v` at `t = h₀`.
+
+The candidate `variationalW` is defined as the corresponding
+`inhomogLinearODESolution`.  It packages the variational equation as a total
+function `F → F → ℝ → G`, ready to be identified with the partial Fréchet
+derivative in downstream work.  We supply the initial-condition clause, the
+ODE clause and joint continuity, under regularity hypotheses on `A`, `Z₀` and
+on the partial Fréchet derivative of `A` in its parameter `x`. -/
+
+section VariationalSolution
+
+variable {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+  [NormedAddCommGroup G] [NormedSpace ℝ G] [CompleteSpace G]
+
+/-- **Forcing term** of the variational equation.
+
+`variationalForcing A a b' h₀ Z₀ x v t :=
+  (fderiv ℝ (fun y => A y t) x) v (linearODESolution A a b' h₀ Z₀ x t)`.
+
+This is the inhomogeneous term in the variational equation derived by formally
+differentiating `Z'(t) = A(x, t) Z(t)` with respect to the parameter `x` in
+the direction `v`. -/
+noncomputable def variationalForcing
+    (A : F → ℝ → (G →L[ℝ] G)) (a b' h₀ : ℝ) (Z₀ : F → G)
+    (x : F) (v : F) (t : ℝ) : G :=
+  (fderiv ℝ (fun y => A y t) x) v (linearODESolution A a b' h₀ Z₀ x t)
+
+/-- **Per-parameter, per-direction variational solution** `W(x, t, v)` of the
+parametric linear ODE.
+
+For fixed parameter `x : F` and test direction `v : F`, this is the candidate
+function on `ℝ` satisfying the variational equation
+
+`W'(t) = (fderiv (fun y => A y t) x) v · linearODESolution A a b' h₀ Z₀ x t
+        + A(x, t) · W(t),
+W(h₀) = (fderiv ℝ Z₀ x) v`.
+
+Defined as `inhomogLinearODESolution` applied to coefficient `A`, forcing
+`variationalForcing A a b' h₀ Z₀ x v`, and initial datum `fun y => (fderiv ℝ Z₀ y) v`.
+-/
+noncomputable def variationalW
+    (A : F → ℝ → (G →L[ℝ] G)) (a b' h₀ : ℝ) (Z₀ : F → G)
+    (x : F) (v : F) : ℝ → G :=
+  inhomogLinearODESolution A (fun y t => variationalForcing A a b' h₀ Z₀ y v t)
+    a b' h₀ (fun y => (fderiv ℝ Z₀ y) v) x
+
+/-- **Initial condition** for `variationalW`.  At `t = h₀`, the variational
+solution equals `(fderiv ℝ Z₀ x) v`. -/
+theorem variationalW_init
+    (A : F → ℝ → (G →L[ℝ] G)) (a b' h₀ : ℝ) (Z₀ : F → G) (x : F) (v : F) :
+    variationalW A a b' h₀ Z₀ x v h₀ = (fderiv ℝ Z₀ x) v := by
+  unfold variationalW
+  exact inhomogLinearODESolution_init _ _ _ _ _ _ _
+
+/-- **Joint continuity of the variational forcing**.
+
+If `A` is jointly continuous and `(x, t) ↦ fderiv (fun y => A y t) x` is jointly
+continuous on `U ×ˢ Ioo a b'`, and `Z₀` is continuous on `U`, then the forcing
+`variationalForcing A a b' h₀ Z₀ · v ·` is jointly continuous on `U ×ˢ Ioo a b'`.
+-/
+theorem variationalForcing_continuousOn
+    {A : F → ℝ → (G →L[ℝ] G)} {a b' h₀ : ℝ} {Z₀ : F → G}
+    (hab_lt : a < b') (h₀_mem : h₀ ∈ Set.Ioo a b')
+    {U : Set F} (hU : IsOpen U)
+    (hA_cont : ContinuousOn (Function.uncurry A) (U ×ˢ Set.Ioo a b'))
+    (hDA_cont : ContinuousOn
+      (Function.uncurry fun x t => fderiv ℝ (fun y => A y t) x)
+      (U ×ˢ Set.Ioo a b'))
+    (hZ₀_cont : ContinuousOn Z₀ U) (v : F) :
+    ContinuousOn (Function.uncurry (fun x t => variationalForcing A a b' h₀ Z₀ x v t))
+      (U ×ˢ Set.Ioo a b') := by
+  -- Joint continuity of the linear ODE solution `(x, t) ↦ Z(x, t)`.
+  have hZ_cont : ContinuousOn (Function.uncurry (linearODESolution A a b' h₀ Z₀))
+      (U ×ˢ Set.Ioo a b') :=
+    linearODESolution_continuousOn hab_lt h₀_mem hU hA_cont hZ₀_cont
+  -- Apply `fderiv (A · t) x` at the constant direction `v` to get a CLM.
+  have happ : ContinuousOn
+      (Function.uncurry fun x t => (fderiv ℝ (fun y => A y t) x) v)
+      (U ×ˢ Set.Ioo a b') := by
+    -- Use `clm_apply` on `hDA_cont` (taking values in `F →L[ℝ] (G →L[ℝ] G)`) and the
+    -- constant function `_ ↦ v`.
+    exact ContinuousOn.clm_apply hDA_cont continuousOn_const
+  -- Apply the resulting CLM at the (jointly continuous) value of `Z`.
+  -- `variationalForcing A a b' h₀ Z₀ x v t =
+  --   ((fderiv (fun y => A y t) x) v) (linearODESolution A a b' h₀ Z₀ x t)`.
+  have hgoal : ContinuousOn
+      (fun p : F × ℝ =>
+        ((fderiv ℝ (fun y => A y p.2) p.1) v)
+          (linearODESolution A a b' h₀ Z₀ p.1 p.2))
+      (U ×ˢ Set.Ioo a b') :=
+    ContinuousOn.clm_apply happ hZ_cont
+  -- The above is definitionally `Function.uncurry (variationalForcing …)`.
+  convert hgoal using 1
+
+/-- **ODE clause** for `variationalW` under joint continuity hypotheses.
+
+When `A`, `(x, t) ↦ fderiv (fun y => A y t) x` are jointly continuous on
+`U ×ˢ Ioo a b'` and `Z₀` is continuous on `U`, the variational solution at any
+`x ∈ U` and any test direction `v : F` satisfies the variational equation
+pointwise on `Ioo a b'`. -/
+theorem variationalW_hasDerivAt
+    {A : F → ℝ → (G →L[ℝ] G)} {a b' h₀ : ℝ} {Z₀ : F → G}
+    (hab_lt : a < b') (h₀_mem : h₀ ∈ Set.Ioo a b')
+    {U : Set F} (hU : IsOpen U)
+    (hA_cont : ContinuousOn (Function.uncurry A) (U ×ˢ Set.Ioo a b'))
+    (hDA_cont : ContinuousOn
+      (Function.uncurry fun x t => fderiv ℝ (fun y => A y t) x)
+      (U ×ˢ Set.Ioo a b'))
+    (hZ₀_cont : ContinuousOn Z₀ U)
+    {x : F} (hx : x ∈ U) (v : F) {t : ℝ} (ht : t ∈ Set.Ioo a b') :
+    HasDerivAt (variationalW A a b' h₀ Z₀ x v ·)
+      ((fderiv ℝ (fun y => A y t) x) v (linearODESolution A a b' h₀ Z₀ x t)
+        + A x t (variationalW A a b' h₀ Z₀ x v t)) t := by
+  -- The forcing is jointly continuous on `U ×ˢ Ioo a b'`.
+  have hb_cont : ContinuousOn
+      (Function.uncurry (fun x t => variationalForcing A a b' h₀ Z₀ x v t))
+      (U ×ˢ Set.Ioo a b') :=
+    variationalForcing_continuousOn hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont v
+  -- Apply the inhomogeneous-ODE clause (note: `inhomogLinearODESolution_hasDerivAt`
+  -- yields the derivative `A x t (W t) + b x t`; we then swap addends).
+  have hderiv : HasDerivAt
+      (inhomogLinearODESolution A
+        (fun y t => variationalForcing A a b' h₀ Z₀ y v t) a b' h₀
+        (fun y => (fderiv ℝ Z₀ y) v) x ·)
+      (A x t (inhomogLinearODESolution A
+          (fun y t => variationalForcing A a b' h₀ Z₀ y v t) a b' h₀
+          (fun y => (fderiv ℝ Z₀ y) v) x t)
+        + variationalForcing A a b' h₀ Z₀ x v t) t :=
+    inhomogLinearODESolution_hasDerivAt hab_lt h₀_mem hU hA_cont hb_cont hx ht
+  -- Both `variationalW` and the headline derivative match `hderiv` up to a
+  -- `+`-swap; rewrite via `add_comm`.
+  have hderiv' : HasDerivAt
+      (inhomogLinearODESolution A
+        (fun y t => variationalForcing A a b' h₀ Z₀ y v t) a b' h₀
+        (fun y => (fderiv ℝ Z₀ y) v) x ·)
+      (variationalForcing A a b' h₀ Z₀ x v t
+        + A x t (inhomogLinearODESolution A
+          (fun y t => variationalForcing A a b' h₀ Z₀ y v t) a b' h₀
+          (fun y => (fderiv ℝ Z₀ y) v) x t)) t := by
+    have := hderiv
+    rwa [add_comm] at this
+  -- `variationalW` is definitionally the `inhomogLinearODESolution` above, and
+  -- `variationalForcing` unfolds to `(fderiv …) v (linearODESolution …)`.
+  exact hderiv'
+
+/-- **Joint continuity** of `variationalW` in `(x, t)` for a fixed direction `v`.
+
+Under the same regularity hypotheses as `variationalW_hasDerivAt`, the map
+`(x, t) ↦ variationalW A a b' h₀ Z₀ x v t` is jointly continuous on
+`U ×ˢ Ioo a b'`.  Continuity of the initial datum `x ↦ (fderiv ℝ Z₀ x) v` on
+`U` is supplied as a separate hypothesis (it is the natural regularity input
+on `Z₀` for this clause). -/
+theorem variationalW_continuousOn
+    {A : F → ℝ → (G →L[ℝ] G)} {a b' h₀ : ℝ} {Z₀ : F → G}
+    (hab_lt : a < b') (h₀_mem : h₀ ∈ Set.Ioo a b')
+    {U : Set F} (hU : IsOpen U)
+    (hA_cont : ContinuousOn (Function.uncurry A) (U ×ˢ Set.Ioo a b'))
+    (hDA_cont : ContinuousOn
+      (Function.uncurry fun x t => fderiv ℝ (fun y => A y t) x)
+      (U ×ˢ Set.Ioo a b'))
+    (hZ₀_cont : ContinuousOn Z₀ U)
+    (v : F)
+    (hZ₀'_cont : ContinuousOn (fun x => (fderiv ℝ Z₀ x) v) U) :
+    ContinuousOn
+      (Function.uncurry (fun x t => variationalW A a b' h₀ Z₀ x v t))
+      (U ×ˢ Set.Ioo a b') := by
+  -- Forcing is jointly continuous.
+  have hb_cont : ContinuousOn
+      (Function.uncurry (fun x t => variationalForcing A a b' h₀ Z₀ x v t))
+      (U ×ˢ Set.Ioo a b') :=
+    variationalForcing_continuousOn hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont v
+  -- Joint continuity of the inhomogeneous solution.
+  exact inhomogLinearODESolution_continuousOn (Z₀ := fun y => (fderiv ℝ Z₀ y) v)
+    hab_lt h₀_mem hU hA_cont hb_cont hZ₀'_cont
+
+end VariationalSolution
+
 end Flow
 end ODE
 end Analysis
