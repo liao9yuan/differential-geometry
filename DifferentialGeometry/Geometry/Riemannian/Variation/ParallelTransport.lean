@@ -198,7 +198,8 @@ theorem parallelTransport_isParallel
     (hs : ∀ t ∈ s, γ t ∈ (chartAt H α).source) :
     IsParallelChart (I := I) g α γ
       (fun t => deriv (chartCurve (I := I) α γ) t)
-      (parallelTransport (I := I) g γ hγ t₀ v₀).toFun s := sorry
+      (parallelTransport (I := I) g γ hγ t₀ v₀).toFun s :=
+  (parallelTransport_spec (I := I) g γ hγ t₀ v₀).2 α s hs
 
 /-! ## Metric compatibility: parallel transport preserves the inner
 product
