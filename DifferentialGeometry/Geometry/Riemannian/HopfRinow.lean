@@ -783,7 +783,8 @@ theorem minimiser_is_smooth_geodesic
         (∀ t ∈ Set.Ioo (0 : ℝ) L,
           IsGeodesicAt (I := I) g η t) ∧
         pathELength I η 0 L = ENNReal.ofReal L ∧
-        ENNReal.ofReal L = riemannianEDist I (γ a) (γ b) := by
+        ENNReal.ofReal L = riemannianEDist I (γ a) (γ b) ∧
+        ContMDiffOn 𝓘(ℝ, ℝ) I 1 η (Set.Icc 0 L) := by
   sorry
 
 /-- **Auxiliary: `IsGeodesicOn` is preserved under affine
@@ -911,7 +912,7 @@ theorem unit_speed_minimising_geodesic_from_points
   have hαlen' : pathELength I α 0 1 = riemannianEDist I (α 0) (α 1) := by
     rw [hα0, hα1]; exact hα_len
   obtain ⟨L, η, hL_nonneg, hη0, hηL, _hη_smooth_int, _hη_geod_int,
-      hη_len_min, hL_eq_dist⟩ :=
+      hη_len_min, hL_eq_dist, hη_C1_min⟩ :=
     minimiser_is_smooth_geodesic (I := I) g (γ := α) (a := 0) (b := 1)
       zero_le_one hα_cont hαlen'
   -- The candidate γ is η; the parameter length is L. Identify endpoints with
@@ -931,9 +932,9 @@ theorem unit_speed_minimising_geodesic_from_points
   -- Closed-interval geodesic predicate for `η`.
   have hη_geod_closed : IsGeodesicOn (I := I) g η (Set.Icc 0 L) := by
     sorry
-  -- `C¹` smoothness on the closed interval `[0, L]`.
-  have hη_C1 : ContMDiffOn 𝓘(ℝ, ℝ) I 1 η (Set.Icc 0 L) := by
-    sorry
+  -- `C¹` smoothness on the closed interval `[0, L]`. Delivered directly
+  -- by `minimiser_is_smooth_geodesic` (closed-interval `C¹` conjunct).
+  have hη_C1 : ContMDiffOn 𝓘(ℝ, ℝ) I 1 η (Set.Icc 0 L) := hη_C1_min
   -- Path-length of `η` on `[0, L]` equals `ENNReal.ofReal L`. This is the
   -- "η is a length-minimising reparametrisation" content; needed to feed
   -- `unit_speed_rescale`. Delivered by `minimiser_is_smooth_geodesic`.
