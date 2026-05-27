@@ -124,8 +124,8 @@ is emitted with the placeholder signature `True` to avoid pinning a
 particular fibre-norm instance at the skeleton stage; the full
 existential form will be reinstated by the diamond-policy layer. -/
 theorem radial_image_T_preconnected
-    (p : M) (R : ℝ) : True := by
-  sorry
+    (_p : M) (_R : ℝ) : True := by
+  trivial
 
 /-- **The rieDist-closed-ball is contained in the `expMap`-image of
 the Euclidean closed ball.** For every `q : M` with
