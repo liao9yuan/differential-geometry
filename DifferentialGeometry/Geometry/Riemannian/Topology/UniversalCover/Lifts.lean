@@ -253,7 +253,45 @@ theorem action_eval_surjective
     [PathConnectedSpace E]
     {p : E → X} (hp : IsCoveringMap p) (x : X) (e' : p ⁻¹' {x}) :
     Function.Surjective
-      (fun γ : Path.Homotopic.Quotient x x => hp.monodromy γ e') := sorry
+      (fun γ : Path.Homotopic.Quotient x x => hp.monodromy γ e') := by
+  -- Unpack `e'` and `e''`, and reduce to `x = p e'.val` by substitution.
+  intro e''
+  obtain ⟨e'v, he'v⟩ := e'
+  obtain ⟨e''v, he''v⟩ := e''
+  -- `he'v : e'v ∈ p ⁻¹' {x}` unfolds to `p e'v = x`.
+  have he' : p e'v = x := he'v
+  -- After `subst he'`, the variable `x` is replaced by `p e'v` everywhere.
+  subst he'
+  -- Now `he''v : e''v ∈ p ⁻¹' {p e'v}`, i.e. `p e''v = p e'v`.
+  have he'' : p e''v = p e'v := he''v
+  -- Path-connectedness of `E` provides a path `δ : Path e'v e''v`.
+  obtain ⟨δ⟩ := PathConnectedSpace.joined e'v e''v
+  -- Define the loop on `X` based at `p e'v` by casting the target of `δ.map p`.
+  set η : Path (p e'v) (p e'v) :=
+    (δ.map hp.continuous).cast rfl he''.symm with hη_def
+  refine ⟨Path.Homotopic.Quotient.mk η, ?_⟩
+  -- We show equality in `p ⁻¹' {p e'v}` by `Subtype.ext`.
+  apply Subtype.ext
+  -- We need `p ∘ δ = η` as functions `I → X` (both are `t ↦ p (δ t)`).
+  have hcomp_fun' : p ∘ (δ : unitInterval → E) = (η : unitInterval → X) := by
+    funext t; rfl
+  -- Step 2: use `eq_liftPath_iff'` (with `γ := η`, `e := e'v`).
+  have hη_zero : (η : unitInterval → X) 0 = p e'v := η.source
+  have hlift_eq :
+      hp.liftPath (η : C(unitInterval, X)) e'v hη_zero = δ.toContinuousMap := by
+    symm
+    refine (hp.eq_liftPath_iff' hη_zero).mpr ⟨?_, δ.source⟩
+    -- Goal: `p ∘ δ.toContinuousMap = η.toContinuousMap` as functions.
+    exact hcomp_fun'
+  -- Step 3: evaluate at `t = 1` and use `δ.target : δ 1 = e''v`.
+  have hval :
+      (hp.liftPath (η : C(unitInterval, X)) e'v hη_zero) 1 = e''v := by
+    have := congrArg (fun f : C(unitInterval, E) => f 1) hlift_eq
+    simpa using this.trans δ.target
+  -- Step 4: the goal unfolds (via `Path.Homotopic.Quotient.lift` / `Quot.lift`)
+  -- to exactly `(hp.liftPath η e'v _) 1 = e''v` (with `_` definitionally equal
+  -- to `hη_zero`).
+  exact hval
 
 /-- **Injectivity of the monodromy evaluation.**
 For any covering map `p : E → X` with `SimplyConnectedSpace E`, the
