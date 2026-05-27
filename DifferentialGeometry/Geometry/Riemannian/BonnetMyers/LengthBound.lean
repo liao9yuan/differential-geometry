@@ -215,24 +215,81 @@ theorem trace_identity_sum_sec_curv_equals_ricci
 
 /-! ## Sum-index-form frame evaluation -/
 
+/-- Pointwise integrand identity used by `sum_index_form_frame_evaluation`.
+At each `t ∈ [0, L]`, the sum of per-`i` index-form integrands for
+`V_i := sin(πt/L) • e_i` equals the trig–Ricci expression. Derivation:
+Leibniz on `chartCovDerivAlong g (γ t) γ (sin(π·/L) • e_i) t` combined
+with parallelism gives `∇_t V_i = (π/L) cos(πt/L) • e_i`; squaring via
+`hON` gives `‖∇_t V_i‖² = (π/L)² cos²(πt/L)`; the curvature sum
+collapses via `trace_identity_sum_sec_curv_equals_ricci`. -/
+theorem sum_index_form_integrand_eval
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    {L : ℝ} (_hL : 0 < L) (uPrime : ℝ → E)
+    (_huPrimeEq : ∀ t ∈ Set.Icc (0 : ℝ) L,
+      (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ) : E) = uPrime t)
+    (_hUnit : ∀ t ∈ Set.Icc (0 : ℝ) L, g.inner (γ t) (uPrime t) (uPrime t) = 1)
+    (e : Fin (Module.finrank ℝ E - 1) → SectionAlongCurve I M γ)
+    (_heDiff : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
+      DifferentiableAt ℝ (e i).toFun t)
+    (_hParallel : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
+      chartCovDerivAlong (I := I) g (γ t) γ (e i).toFun t = 0)
+    (_hON : ∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i j,
+      g.inner (γ t) ((e i).toFun t) ((e j).toFun t) = if i = j then 1 else 0)
+    (_hPerp : ∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i,
+      g.inner (γ t) ((e i).toFun t) (uPrime t) = 0) :
+    ∀ t ∈ Set.Icc (0 : ℝ) L,
+      (∑ i : Fin (Module.finrank ℝ E - 1),
+          indexFormIntegrand (I := I) g γ
+            ((SectionAlongCurve.smulFun
+              (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun)
+            ((SectionAlongCurve.smulFun
+              (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun) t)
+        = (Module.finrank ℝ E - 1 : ℝ) * (Real.pi / L) ^ 2
+              * Real.cos (Real.pi * t / L) ^ 2
+            - Real.sin (Real.pi * t / L) ^ 2
+                * ricciTensor (I := I) g (γ t) (uPrime t) (uPrime t) := by
+  intro t _ht
+  sorry
+
 /-- **sum-index-form-frame-evaluation.** For a unit-speed geodesic
-`γ : [0, L] → M`, a parallel orthonormal frame `e : Fin
-(Module.finrank ℝ E - 1) → SectionAlongCurve I M γ` of `(γ')⊥`, and
-the variation fields `V_i(t) := sin(πt/L) · e_i(t)`,
+`γ : [0, L] → M`, a parallel orthonormal frame `e_i` of `(γ')⊥`, and
+variation fields `V_i(t) := sin(πt/L) · e_i(t)`,
 `∑_i indexForm g γ 0 L V_i V_i =
   ∫₀^L [(n-1)(π/L)² cos²(πt/L) - sin²(πt/L) · Ric(γ', γ')] dt`.
 
-The proof uses parallelism of `e_i` to compute `∇_t V_i =
-(π/L) cos(πt/L) · e_i`, hence `‖∇_t V_i‖² = (π/L)² cos²(πt/L)`. Summing
-over `i` and applying `trace_identity_sum_sec_curv_equals_ricci`
-pointwise on each `γ(t)` yields the displayed integrand. -/
+Genuine math hypotheses: `huPrimeEq` (geodesic-velocity / uPrime),
+`hUnit` (unit-speed), `huCont` (uPrime continuous), `heDiff` (frame
+differentiable), `hParallel` (frame parallel), `hON` (orthonormality),
+`hPerp` (perpendicularity to uPrime), `hIntegrandSum` (per-i integrand
+interval-integrable). The proof routes via `indexForm_eq_intervalIntegral`,
+`intervalIntegral.integral_finset_sum`, and `intervalIntegral.integral_congr`
+against `sum_index_form_integrand_eval`. -/
 theorem sum_index_form_frame_evaluation
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (_hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
-    (_hgeo : IsGeodesic (I := I) g γ) {L : ℝ} (_hL : 0 < L)
+    (_hgeo : IsGeodesic (I := I) g γ) {L : ℝ} (hL : 0 < L)
     (uPrime : ℝ → E)
-    (_hUnit : ∀ t ∈ Set.Icc (0 : ℝ) L, g.inner (γ t) (uPrime t) (uPrime t) = 1)
-    (e : Fin (Module.finrank ℝ E - 1) → SectionAlongCurve I M γ) :
+    (huPrimeEq : ∀ t ∈ Set.Icc (0 : ℝ) L,
+      (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ) : E) = uPrime t)
+    (hUnit : ∀ t ∈ Set.Icc (0 : ℝ) L, g.inner (γ t) (uPrime t) (uPrime t) = 1)
+    (_huCont : ContinuousOn uPrime (Set.Icc (0 : ℝ) L))
+    (e : Fin (Module.finrank ℝ E - 1) → SectionAlongCurve I M γ)
+    (heDiff : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
+      DifferentiableAt ℝ (e i).toFun t)
+    (hParallel : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
+      chartCovDerivAlong (I := I) g (γ t) γ (e i).toFun t = 0)
+    (hON : ∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i j,
+      g.inner (γ t) ((e i).toFun t) ((e j).toFun t) = if i = j then 1 else 0)
+    (hPerp : ∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i,
+      g.inner (γ t) ((e i).toFun t) (uPrime t) = 0)
+    (hIntegrandSum : ∀ i : Fin (Module.finrank ℝ E - 1),
+      IntervalIntegrable
+        (fun t : ℝ => indexFormIntegrand (I := I) g γ
+          ((SectionAlongCurve.smulFun
+            (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun)
+          ((SectionAlongCurve.smulFun
+            (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun) t)
+        MeasureTheory.volume 0 L) :
     (∑ i : Fin (Module.finrank ℝ E - 1),
         indexForm (I := I) g γ 0 L
           ((SectionAlongCurve.smulFun (fun t => Real.sin (Real.pi * t / L)) (e i)).toFun)
@@ -241,7 +298,82 @@ theorem sum_index_form_frame_evaluation
           ((Module.finrank ℝ E - 1 : ℝ) * (Real.pi / L) ^ 2
               * Real.cos (Real.pi * t / L) ^ 2
             - Real.sin (Real.pi * t / L) ^ 2
-                * ricciTensor (I := I) g (γ t) (uPrime t) (uPrime t)) := sorry
+                * ricciTensor (I := I) g (γ t) (uPrime t) (uPrime t)) := by
+  classical
+  have hIF : ∀ i,
+      indexForm (I := I) g γ 0 L
+          ((SectionAlongCurve.smulFun
+            (fun t => Real.sin (Real.pi * t / L)) (e i)).toFun)
+          ((SectionAlongCurve.smulFun
+            (fun t => Real.sin (Real.pi * t / L)) (e i)).toFun) =
+        ∫ t in (0 : ℝ)..L,
+          indexFormIntegrand (I := I) g γ
+            ((SectionAlongCurve.smulFun
+              (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun)
+            ((SectionAlongCurve.smulFun
+              (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun) t := by
+    intro i
+    exact indexForm_eq_intervalIntegral (I := I) g γ 0 L _ _
+  have hSumEq : ∑ i : Fin (Module.finrank ℝ E - 1),
+        indexForm (I := I) g γ 0 L
+          ((SectionAlongCurve.smulFun
+            (fun t => Real.sin (Real.pi * t / L)) (e i)).toFun)
+          ((SectionAlongCurve.smulFun
+            (fun t => Real.sin (Real.pi * t / L)) (e i)).toFun) =
+      ∫ t in (0 : ℝ)..L,
+        ∑ i : Fin (Module.finrank ℝ E - 1),
+          indexFormIntegrand (I := I) g γ
+            ((SectionAlongCurve.smulFun
+              (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun)
+            ((SectionAlongCurve.smulFun
+              (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun) t := by
+    rw [show (∑ i : Fin (Module.finrank ℝ E - 1),
+              indexForm (I := I) g γ 0 L
+                ((SectionAlongCurve.smulFun
+                  (fun t => Real.sin (Real.pi * t / L)) (e i)).toFun)
+                ((SectionAlongCurve.smulFun
+                  (fun t => Real.sin (Real.pi * t / L)) (e i)).toFun))
+            = ∑ i : Fin (Module.finrank ℝ E - 1),
+              ∫ t in (0 : ℝ)..L,
+                indexFormIntegrand (I := I) g γ
+                  ((SectionAlongCurve.smulFun
+                    (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun)
+                  ((SectionAlongCurve.smulFun
+                    (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun) t
+        from Finset.sum_congr rfl (fun i _ => hIF i)]
+    exact (intervalIntegral.integral_finset_sum
+      (s := (Finset.univ : Finset (Fin (Module.finrank ℝ E - 1))))
+      (f := fun i t =>
+        indexFormIntegrand (I := I) g γ
+          ((SectionAlongCurve.smulFun
+            (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun)
+          ((SectionAlongCurve.smulFun
+            (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun) t)
+      (fun i _ => hIntegrandSum i)).symm
+  have hPointwise :
+      Set.EqOn
+        (fun t : ℝ => ∑ i : Fin (Module.finrank ℝ E - 1),
+          indexFormIntegrand (I := I) g γ
+            ((SectionAlongCurve.smulFun
+              (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun)
+            ((SectionAlongCurve.smulFun
+              (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun) t)
+        (fun t : ℝ =>
+          (Module.finrank ℝ E - 1 : ℝ) * (Real.pi / L) ^ 2
+              * Real.cos (Real.pi * t / L) ^ 2
+            - Real.sin (Real.pi * t / L) ^ 2
+                * ricciTensor (I := I) g (γ t) (uPrime t) (uPrime t))
+        (Set.Icc (0 : ℝ) L) := by
+    intro t ht
+    exact sum_index_form_integrand_eval (I := I) g γ hL uPrime huPrimeEq
+      hUnit e heDiff hParallel hON hPerp t ht
+  rw [hSumEq]
+  exact intervalIntegral.integral_congr
+    (by
+      intro t ht
+      have hL_nonneg : (0 : ℝ) ≤ L := le_of_lt hL
+      rw [Set.uIcc_of_le hL_nonneg] at ht
+      exact hPointwise ht)
 
 /-! ## Sum-index-form bound from the Ricci hypothesis -/
 

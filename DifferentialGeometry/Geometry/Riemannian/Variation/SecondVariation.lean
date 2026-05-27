@@ -175,22 +175,38 @@ theorem first_variation_vanishes_for_geodesic
 
 /-! ## Index form -/
 
+/-- The pointwise **integrand** of the second-variation index form:
+`⟨∇_t V, ∇_t W⟩_g - ⟨R(V, γ') γ', W⟩_g`. Extracting this as a named
+definition lets downstream lemmas avoid unfolding the inner
+`let`-binders, which was a source of `whnf` heartbeat blow-up. -/
+def indexFormIntegrand [Module.Finite ℝ E] [IsManifold I ∞ M]
+    (g : SmoothRiemannianMetric I M)
+    (γ : ℝ → M) (V W : ℝ → E) (t : ℝ) : ℝ :=
+  let nablaV : E := chartCovDerivAlong (I := I) g (γ t) γ V t
+  let nablaW : E := chartCovDerivAlong (I := I) g (γ t) γ W t
+  let gammaPrime : E := mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)
+  let riem : E :=
+    (DifferentialGeometry.Integral.Connection.riemannOp
+        (DifferentialGeometry.Integral.Connection.LeviCivita
+          (I := I) g) (γ t))
+      (V t) gammaPrime gammaPrime
+  g.inner (γ t) nablaV nablaW - g.inner (γ t) riem (W t)
+
 /-- The second-variation **index form** of a smooth curve `γ : ℝ → M`
 on the interval `[a, b]`, evaluated on two sections `V, W : ℝ → E`
 along `γ`:
 `I_γ(V, W) := ∫_a^b (⟨∇_t V, ∇_t W⟩_g - ⟨R(V, γ') γ', W⟩_g) dt`. -/
 def indexForm (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (a b : ℝ) (V W : ℝ → E) : ℝ :=
-  ∫ t in a..b,
-    let nablaV : E := chartCovDerivAlong (I := I) g (γ t) γ V t
-    let nablaW : E := chartCovDerivAlong (I := I) g (γ t) γ W t
-    let gammaPrime : E := mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)
-    let riem : E :=
-      (DifferentialGeometry.Integral.Connection.riemannOp
-          (DifferentialGeometry.Integral.Connection.LeviCivita
-            (I := I) g) (γ t))
-        (V t) gammaPrime gammaPrime
-    g.inner (γ t) nablaV nablaW - g.inner (γ t) riem (W t)
+  ∫ t in a..b, indexFormIntegrand (I := I) g γ V W t
+
+/-- Unfolded form of `indexForm` as an integral of the named
+integrand. -/
+lemma indexForm_eq_intervalIntegral
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (a b : ℝ) (V W : ℝ → E) :
+    indexForm (I := I) g γ a b V W =
+      ∫ t in a..b, indexFormIntegrand (I := I) g γ V W t := rfl
 
 /-! ## Second variation derivation -/
 
