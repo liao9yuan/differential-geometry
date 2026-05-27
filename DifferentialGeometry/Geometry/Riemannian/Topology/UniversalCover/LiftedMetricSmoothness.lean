@@ -306,64 +306,185 @@ theorem uc_tangentBundleCore_coordChange_agree
 
 /-- **Hom-bundle `inCoordinates` pulls back along `proj`.**
 
-For a smooth Riemannian metric `g : SmoothRiemannianMetric I M` on `M` and a
-cover-point `a : UC M`, the `inCoordinates` representation (in the
-`(0,2)`-Hom-bundle over `UC M`) of the lifted-metric inner product at a
-cover-point `x` near `a` equals, eventually in `𝓝 a`, the corresponding
-`inCoordinates` representation on `M` evaluated at `proj x`:
-```
-inCoordinates F (TangentSpace I (M:=UC M)) … a x (g.inner (proj x))
-  = inCoordinates F (TangentSpace I (M:=M)) … (proj a) (proj x) (g.inner (proj x))
-```
+For a smooth Riemannian metric `g : SmoothRiemannianMetric I M` on `M` and
+cover-points `a x : UC M` with `x ∈ (chartAt H a).source` (so that the
+trivializations at `a` are valid at `x`), the `inCoordinates` representation
+(in the `(0,2)`-Hom-bundle over `UC M`) of the metric value `g.inner (proj x)`
+at base point `x` viewed via the cover-trivialisation at `a` equals the
+corresponding `inCoordinates` representation on `M` evaluated via the
+base-trivialisation at `proj a` and base-point `proj x`.
 
-Proof sketch (deferred to fill phase): `inCoordinates` for a `(0,2)`-Hom-bundle
-factors through the tangent-bundle trivialisations `localTriv (achart H _)`,
-whose coordinate changes agree between `UC M` and `M` by
-`uc_tangentBundleCore_coordChange_agree`. Hence `continuousLinearMapAt` and
-`symmL` agree, and the composition that defines `inCoordinates` agrees on the
-chart neighbourhood. -/
-theorem uc_hom_bundle_inCoordinates_pullback : True := by
-  -- Placeholder stub: the proper signature references the cover-side
-  --   chart machinery (`coverChartAt`, `localSection`) which is `private`
-  --   in `UniversalCover/Manifold.lean`, and the `(0,2)`-Hom-bundle
-  --   `inCoordinates` representation parametrised by
-  --   `g : SmoothRiemannianMetric I M` and `a : UC M`. Restoration of
-  --   the precise statement expressing equality of the two
-  --   `inCoordinates` representations on a neighbourhood of `a`
-  --   requires the visibility markers to be lifted first (cross-file
-  --   change, out of scope for this dispatch). Closing the placeholder
-  --   `True` literal here.
-  trivial
+The proof reduces, by definition of `inCoordinates`, to agreement of
+`continuousLinearMapAt` and `symmL` of the tangent-bundle trivialisations
+between `UC M` and `M`; this in turn follows from
+`uc_tangentBundleCore_coordChange_agree` (which packages the cover-side
+coordinate-change as the base-side coordinate-change at `proj x`) combined
+with `continuousLinearMapAt_trivializationAt_eq_core` and
+`symmL_trivializationAt_eq_core`. -/
+theorem uc_hom_bundle_inCoordinates_pullback
+    (g : SmoothRiemannianMetric I M)
+    (a : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
+    {x : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M}
+    (hx : x ∈ (chartAt H a).source) :
+    ContinuousLinearMap.inCoordinates (𝕜₁ := ℝ) (𝕜₂ := ℝ) (σ := RingHom.id ℝ)
+        E (TangentSpace I :
+            DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M
+              → Type _)
+        (E →L[ℝ] ℝ)
+        (fun b : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M
+          => TangentSpace I b →L[ℝ] ℝ)
+        a x a x (g.inner (proj x))
+      = ContinuousLinearMap.inCoordinates (𝕜₁ := ℝ) (𝕜₂ := ℝ) (σ := RingHom.id ℝ)
+          E (TangentSpace I : M → Type _)
+          (E →L[ℝ] ℝ) (fun b : M => TangentSpace I b →L[ℝ] ℝ)
+          (proj a) (proj x) (proj a) (proj x) (g.inner (proj x)) := by
+  -- Membership in the matching tangent-bundle trivialisation base sets.
+  -- On `UC M`: baseSet of `trivializationAt E (TangentSpace I) a` is
+  -- `(chartAt H a).source`, by `tangentBundleCore_localTriv_baseSet`.
+  have hx_UC : x ∈ (trivializationAt E
+      (TangentSpace I :
+        DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → Type _) a).baseSet := by
+    -- `trivializationAt = (tangentBundleCore I (UC M)).localTriv (achart H a)`,
+    -- whose baseSet is `(achart H a).1.source = (chartAt H a).source`.
+    change x ∈ (chartAt H a).source; exact hx
+  -- Source intersection used by `uc_tangentBundleCore_coordChange_agree`.
+  have hxAA : x ∈ (chartAt H a).source ∩ (chartAt H a).source := ⟨hx, hx⟩
+  -- The same point in the `M`-side base set.
+  have hpx_M : proj x ∈ (trivializationAt E (TangentSpace I : M → Type _) (proj a)).baseSet := by
+    -- `(coverChartAt a).source = (localSection a).source ∩ ...` and the second component
+    -- says `(localSection a) x ∈ (chartAt H (proj a)).source`; but `localSection a x = proj x`.
+    have hsrc : ((coverChartAt a) :
+        OpenPartialHomeomorph
+          (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) H).source
+        = (localSection a).source ∩
+          (localSection a) ⁻¹' (chartAt H (proj a)).source :=
+      coverChartAt_source_eq a
+    have hx' : x ∈ (coverChartAt a).source := hx
+    rw [hsrc] at hx'
+    obtain ⟨hLS, hLSproj⟩ := hx'
+    rw [Set.mem_preimage] at hLSproj
+    -- `localSection a x = proj x`.
+    have hLSx : (localSection a) x = proj x := by
+      have := congrArg (fun f => f x) (proj_eq_localSection a)
+      simpa using this.symm
+    rw [hLSx] at hLSproj
+    -- baseSet of `trivializationAt E (TangentSpace I) (proj a)` is `(chartAt H (proj a)).source`.
+    change proj x ∈ (chartAt H (proj a)).source; exact hLSproj
+  -- Unfold both `inCoordinates` to compositions of `continuousLinearMapAt` and `symmL`.
+  -- For an iterated Hom-bundle the codomain trivialisation is built from the tangent
+  -- one and the canonical identification on cotangents; agreement of the underlying
+  -- tangent trivialisations forces agreement of the iterated trivialisations as well.
+  -- We carry out the unfolding by `inCoordinates` definition.
+  -- The strategy is to use `continuousLinearMapAt_trivializationAt_eq_core` /
+  -- `symmL_trivializationAt_eq_core` on each side and reduce to
+  -- `uc_tangentBundleCore_coordChange_agree`.
+  -- For the (0,2)-tensor case both sides factor through the SAME pair of tangent
+  -- trivialisations, so it suffices to show they agree pointwise.
+  -- We package the equality of `continuousLinearMapAt` and `symmL` directly.
+  -- Step 1: equality of tangent-side `symmL` between UC and M at `x`/`proj x`.
+  have hSymmL :
+      ((trivializationAt E (TangentSpace I :
+          DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → Type _) a).symmL
+            ℝ x : E →L[ℝ] E)
+        = ((trivializationAt E (TangentSpace I : M → Type _) (proj a)).symmL ℝ (proj x)
+            : E →L[ℝ] E) := by
+    rw [TangentBundle.symmL_trivializationAt_eq_core (I := I)
+          (M := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
+          (b₀ := a) (b := x) hx,
+        TangentBundle.symmL_trivializationAt_eq_core (I := I) (M := M)
+          (b₀ := proj a) (b := proj x)
+          (show proj x ∈ (chartAt H (proj a)).source from hpx_M)]
+    -- Now both sides are `coordChange (achart H _) (achart H _) _`.
+    -- Apply `uc_tangentBundleCore_coordChange_agree` with roles `(a, x)` on the
+    -- second pair... but actually the statement has `(achart H a) (achart H x)` /
+    -- `(achart H (proj a)) (achart H (proj x))`. Use the lemma directly.
+    exact uc_tangentBundleCore_coordChange_agree (I := I) a x ⟨hx, mem_chart_source H x⟩
+  -- Step 2: equality of tangent-side `continuousLinearMapAt`.
+  have hCLM :
+      ((trivializationAt E (TangentSpace I :
+          DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → Type _) a).continuousLinearMapAt
+            ℝ x : E →L[ℝ] E)
+        = ((trivializationAt E (TangentSpace I : M → Type _) (proj a)).continuousLinearMapAt
+            ℝ (proj x) : E →L[ℝ] E) := by
+    rw [TangentBundle.continuousLinearMapAt_trivializationAt_eq_core (I := I)
+          (M := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
+          (b₀ := a) (b := x) hx,
+        TangentBundle.continuousLinearMapAt_trivializationAt_eq_core (I := I) (M := M)
+          (b₀ := proj a) (b := proj x)
+          (show proj x ∈ (chartAt H (proj a)).source from hpx_M)]
+    -- coordChange (achart H x) (achart H a) x = coordChange (achart H (proj x)) (achart H (proj a)) (proj x).
+    exact uc_tangentBundleCore_coordChange_agree (I := I) x a
+      ⟨mem_chart_source H x, hx⟩
+  -- Step 3: the codomain trivialisation (cotangent / Hom into ℝ) is, by Mathlib's
+  -- general Hom-bundle construction, the cotangent twist of the tangent trivialisation.
+  -- Concretely, for the trivial bundle `ℝ` and the tangent bundle, the
+  -- `Trivialization.continuousLinearMapAt` of the Hom-bundle factors through the
+  -- tangent-side `continuousLinearMapAt`/`symmL`. By `continuousAt_hom_bundle`-style
+  -- algebra, the iterated `inCoordinates` reduces to two applications of `inCoordinates`
+  -- on the tangent factor only.
+  -- Finally we close with the identity
+  --   inCoordinates A E B E' x₀ x y₀ y ϕ = (triv at y₀).continuousLinearMapAt y ∘ ϕ ∘ (triv at x₀).symmL x
+  -- and use hCLM/hSymmL pointwise on the underlying tangent trivialisations.
+  -- The cotangent codomain trivialisation comes from Mathlib's Hom-bundle construction
+  -- applied to `(TangentSpace I, Trivial ℝ)`; since the `Trivial ℝ` factor has identity
+  -- coordChange independent of the base manifold, it cannot distinguish `UC M` from `M`,
+  -- and the equality reduces to `hCLM` / `hSymmL`.
+  -- We complete the proof by unfolding `inCoordinates` to its definition.
+  unfold ContinuousLinearMap.inCoordinates
+  -- Goal: `(continuousLinearMapAt-cotangent at y₀) ∘ ϕ ∘ (symmL-tangent at x₀)`
+  -- (UC version) equals the same expression on M evaluated at proj.
+  -- The two `.comp`s give a three-factor composition; we use `congr` to split.
+  -- The codomain trivialisation (cotangent Hom-bundle) agreement reduces to `hCLM`
+  -- via the canonical Hom-bundle construction (trivial ℝ factor; tangent in the
+  -- contravariant slot). The tangent `symmL` agreement is `hSymmL`.
+  refine congrArg₂ ContinuousLinearMap.comp ?_ ?_
+  · -- Codomain `continuousLinearMapAt` agreement on the cotangent Hom-bundle.
+    -- The cotangent bundle is `Hom(TangentSpace, Trivial ℝ)`; its trivialization is
+    -- `(tangentTriv).continuousLinearMap id (trivℝ)` and the `continuousLinearMapAt y`
+    -- of this trivialization, applied to a cotangent `β : E y →L ℝ`, equals
+    -- `(trivℝ.continuousLinearMapAt y).comp (β.comp (tangentTriv.symmL y))`
+    -- by `Trivialization.continuousLinearMap_apply` (after unfolding the Pretrivialization
+    -- linearMapAt). Since `trivℝ.continuousLinearMapAt y = 1`, the formula collapses to
+    -- `β ↦ β.comp (tangentTriv.symmL y)`. The agreement between UC and M sides then
+    -- reduces precisely to `hSymmL` (the tangent symmL identification).
+    -- Full unfolding through `linearMapAt` / `Pretrivialization.continuousLinearMap_apply`
+    -- to a CLM equality requires significant Hom-trivialization-API plumbing; we record
+    -- the reduction here and ship the named gap.
+    sorry
+  · refine congrArg₂ ContinuousLinearMap.comp rfl ?_
+    -- `symmL` agreement on the tangent bundle: direct from `hSymmL`.
+    exact hSymmL
 
 /-- **The lifted metric is a smooth section of the `(0,2)`-Hom-bundle.**
 
-For a smooth Riemannian metric `g` on `M`, the metric section assembled
-fiberwise as `fun a : UC M => TotalSpace.mk' _ a (g.inner (proj a))` is
-`ContMDiff` from `UC M` into the total space of the symmetric `(0,2)`-Hom-bundle
-over `UC M`.
+For a smooth Riemannian metric `g` on `M`, the metric section
+`fun a : UC M => TotalSpace.mk' _ a (g.inner (proj a))` is `ContMDiff` from
+`UC M` into the total space of the symmetric `(0,2)`-Hom-bundle over `UC M`.
 
-Proof sketch (deferred to fill phase): apply
-`contMDiff_of_locally_contMDiffOn`. At each `a`, factor through
-`contMDiffAt_hom_bundle`: the first component is the identity (smooth); the
-second is `fun x => inCoordinates … (g.inner (proj x))`. By
-`uc_hom_bundle_inCoordinates_pullback` this equals the corresponding
-`inCoordinates` on `M` evaluated at `proj x` on a neighbourhood; that
-expression is smooth because it is the composition of `g.contMDiff` with
-`proj_contMDiff`. Transfer via `ContMDiffAt.congr_of_eventuallyEq`. -/
-theorem uc_liftedMetric_contMDiff : True := by
-  -- TODO(fill): restore exact signature
-  --   `ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
-  --     (fun a : UC M => TotalSpace.mk' _ a (g.inner (proj a)))`
-  -- (or the precise Hom-bundle total-space target with the symmetric (0,2)
-  -- fibre). Statement uses the SmoothRiemannianMetric API on UC M's tangent
-  -- bundle; assembly composes the three preceding lemmas with
-  -- `proj_contMDiff` (from `Manifold.lean`) and `g.contMDiff`. The cover-side
-  -- chart machinery (`coverChartAt`, `localSection`) referenced above is
-  -- `private` in `UniversalCover/Manifold.lean`; restoration of the precise
-  -- signature requires those visibility markers to be lifted first
-  -- (cross-file change, out of scope for this dispatch). Closing the
-  -- placeholder `True` literal here.
-  trivial
+Strategy: apply `contMDiffAt_hom_bundle` pointwise; the base-projection is
+the identity (smooth); the in-coordinates piece equals — by
+`uc_hom_bundle_inCoordinates_pullback` on the chart neighbourhood of each
+point — the corresponding in-coordinates on `M` evaluated at `proj x`, which
+is smooth as the composition of `g.contMDiff` and `proj_contMDiff` followed
+by the `inCoordinates` map. The eventually-equal transfer is via
+`ContMDiffAt.congr_of_eventuallyEq`. -/
+theorem uc_liftedMetric_contMDiff
+    (g : SmoothRiemannianMetric I M) :
+    ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+      (fun a : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M
+        => (TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ) a (g.inner (proj a)) :
+              TotalSpace (E →L[ℝ] E →L[ℝ] ℝ)
+                (fun b : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M
+                  => TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ))) := by
+  -- Assembly: at each `a`, use `contMDiffAt_hom_bundle` to reduce to two
+  -- conditions: smoothness of the base projection (= identity, smooth) and
+  -- smoothness of the inCoordinates representation. The latter is shifted
+  -- from UC to M via `uc_hom_bundle_inCoordinates_pullback`, then bundled
+  -- as the composition of `g.contMDiff` (M-side) with `proj_contMDiff`.
+  -- Full assembly involves chasing the `congr_of_eventuallyEq` plumbing
+  -- through the Hom-bundle's iterated trivialisation structure; we ship
+  -- the substantive signature and defer the assembly proper.
+  sorry
 
 end UniversalCover
 end Topology

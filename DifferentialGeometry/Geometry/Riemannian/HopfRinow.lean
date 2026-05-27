@@ -5,6 +5,7 @@ import DifferentialGeometry.Geometry.Riemannian.Geodesic.MaximalInterval
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Uniqueness
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Homogeneity
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.CrossVFReduction
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.ProjDerivative
 import DifferentialGeometry.Geometry.Riemannian.Exponential.Definition
 import DifferentialGeometry.Geometry.Riemannian.Exponential.SmoothnessUnconditional
 import DifferentialGeometry.Integral.Measure.ChartDensity
