@@ -769,7 +769,10 @@ geodesic.** This consumes the Gauss-lemma cluster from
 `GaussLemma.lean`: at every interior parameter the minimiser is
 locally a radial geodesic in normal coordinates, and overlap
 consistency glues the pieces into a global smooth geodesic on the
-open parameter interval. -/
+open parameter interval. The parameter `L` is the arclength of `γ`
+and equals the Riemannian distance between the endpoints. The
+reparametrisation preserves the `pathELength`, so
+`pathELength I η 0 L = ENNReal.ofReal L`. -/
 theorem minimiser_is_smooth_geodesic
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {a b : ℝ}
     (hab : a ≤ b) (hγ : Continuous γ)
@@ -778,7 +781,9 @@ theorem minimiser_is_smooth_geodesic
       0 ≤ L ∧ η 0 = γ a ∧ η L = γ b ∧
         (∀ t ∈ Set.Ioo (0 : ℝ) L, ContMDiffAt 𝓘(ℝ, ℝ) I ∞ η t) ∧
         (∀ t ∈ Set.Ioo (0 : ℝ) L,
-          IsGeodesicAt (I := I) g η t) := by
+          IsGeodesicAt (I := I) g η t) ∧
+        pathELength I η 0 L = ENNReal.ofReal L ∧
+        ENNReal.ofReal L = riemannianEDist I (γ a) (γ b) := by
   sorry
 
 /-- **Auxiliary: `IsGeodesicOn` is preserved under affine
@@ -905,7 +910,8 @@ theorem unit_speed_minimising_geodesic_from_points
   -- geodesic reparametrisation on the open interval `(0, L)`.
   have hαlen' : pathELength I α 0 1 = riemannianEDist I (α 0) (α 1) := by
     rw [hα0, hα1]; exact hα_len
-  obtain ⟨L, η, hL_nonneg, hη0, hηL, _hη_smooth_int, _hη_geod_int⟩ :=
+  obtain ⟨L, η, hL_nonneg, hη0, hηL, _hη_smooth_int, _hη_geod_int,
+      hη_len_min, hL_eq_dist⟩ :=
     minimiser_is_smooth_geodesic (I := I) g (γ := α) (a := 0) (b := 1)
       zero_le_one hα_cont hαlen'
   -- The candidate γ is η; the parameter length is L. Identify endpoints with
@@ -930,9 +936,8 @@ theorem unit_speed_minimising_geodesic_from_points
     sorry
   -- Path-length of `η` on `[0, L]` equals `ENNReal.ofReal L`. This is the
   -- "η is a length-minimising reparametrisation" content; needed to feed
-  -- `unit_speed_rescale`.
-  have hη_len : pathELength I η 0 L = ENNReal.ofReal L := by
-    sorry
+  -- `unit_speed_rescale`. Delivered by `minimiser_is_smooth_geodesic`.
+  have hη_len : pathELength I η 0 L = ENNReal.ofReal L := hη_len_min
   -- We now split on the value of `L`.
   rcases (lt_or_eq_of_le hL_nonneg) with hLpos | hLzero
   · -- Case `0 < L`: apply `unit_speed_rescale` to `η`.
@@ -947,15 +952,14 @@ theorem unit_speed_minimising_geodesic_from_points
     · -- ContMDiffOn of degree 1 of ζ on `[0, L]`. Inherited from η via
       -- the affine reparametrisation in `unit_speed_rescale`. Bridge gap.
       sorry
-    · -- `riemannianEDist I p q = ENNReal.ofReal L`. From the original
-      -- minimisation `pathELength I α 0 1 = riemannianEDist I p q`
-      -- combined with the chain of equalities preserved by the
-      -- reparametrisations from `α` to `η` to `ζ`. The intermediate
-      -- step `pathELength I η 0 L = ENNReal.ofReal L` packaged above as
-      -- `hη_len` already encodes the minimised value of the
-      -- reparametrisation; combined with `hα_len`, the conclusion
-      -- follows once one connects `α`-length to `η`-length.
-      sorry
+    · -- `riemannianEDist I p q = ENNReal.ofReal L`. Delivered by the
+      -- strengthened `minimiser_is_smooth_geodesic`: `L` is by construction
+      -- the arclength of `α`, and on the minimiser this arclength equals
+      -- the Riemannian distance between the endpoints. Combined with
+      -- `α 0 = p`, `α 1 = q`, the conclusion follows from `hL_eq_dist`.
+      have hL_eq_pq : ENNReal.ofReal L = riemannianEDist I p q := by
+        rw [hL_eq_dist, hα0, hα1]
+      exact hL_eq_pq.symm
   · -- Case `L = 0`: then `p = q` (since `η 0 = p` and `η L = q` with
     -- `L = 0`). We construct a unit-speed geodesic γ starting at p
     -- via Picard-Lindelöf (`exists_geodesic_at`) with an initial

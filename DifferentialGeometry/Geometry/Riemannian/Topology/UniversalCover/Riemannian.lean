@@ -6,6 +6,7 @@ import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.Analysis.Normed.Operator.LinearIsometry
 import DifferentialGeometry.Integral.Measure.ChartDensity
 import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.Manifold
+import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.LiftedMetricSmoothness
 import Mathlib.Topology.VectorBundle.Riemannian
 
 /-!
@@ -82,10 +83,7 @@ noncomputable def liftedMetric (g : SmoothRiemannianMetric I M) :
   symm x' v w := g.symm (proj x') v w
   pos x' v hv := g.pos (proj x') v hv
   isVonNBounded x' := g.isVonNBounded (proj x')
-  contMDiff := by
-    -- BLOCKED on `uc_hom_bundle_inCoordinates_pullback` (True-stub) in
-    -- `LiftedMetricSmoothness.lean`.
-    sorry
+  contMDiff := uc_liftedMetric_contMDiff (I := I) (M := M) g
 
 /-- **Principled pseudo-emetric construction on the universal cover.**
 
@@ -154,7 +152,13 @@ Retained as a `sorry`-bodied instance to preserve typeclass synthesis
 of `PseudoEMetricSpace (UC M)` for downstream files that already use
 this instance (e.g. `Lifts.lean`'s `proj_lipschitz`); the principled
 sorry-free construction is `uc_pseudoEMetricSpace` above. Downstream
-files should migrate to the principled API. -/
+files should migrate to the principled API.
+
+This `instance` cannot delegate to `uc_pseudoEMetricSpace g` because
+that principled construction requires both a concrete lifted metric
+witness `g` (which is data, not a typeclass) and a
+`[RegularSpace (UC M)]` instance — neither is derivable from the
+ambient hypotheses (`[Nonempty M]` alone) at this instance site. -/
 instance instPseudoEMetricSpace [Nonempty M] :
     PseudoEMetricSpace
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
@@ -163,7 +167,11 @@ instance instPseudoEMetricSpace [Nonempty M] :
 /-- **Legacy `IsRiemannianManifold` instance on the universal cover.**
 
 Retained as a `sorry`-bodied instance to preserve the legacy API;
-the principled sorry-free construction is `uc_isRiemannianManifold`. -/
+the principled sorry-free construction is `uc_isRiemannianManifold`.
+Same delegation obstruction as `instPseudoEMetricSpace`: the
+principled witness requires a concrete metric and
+`[RegularSpace (UC M)]`, which is not available from `[Nonempty M]`
+plus a `RiemannianBundle` instance alone. -/
 instance instIsRiemannianManifold [Nonempty M]
     [RiemannianBundle
       (fun (x : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) ↦
