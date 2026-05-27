@@ -957,13 +957,136 @@ theorem unit_speed_minimising_geodesic_from_points
       -- follows once one connects `α`-length to `η`-length.
       sorry
   · -- Case `L = 0`: then `p = q` (since `η 0 = p` and `η L = q` with
-    -- `L = 0`). The constructed curve is any unit-speed geodesic
-    -- starting at `p`; on the singleton interval `{0}` we only need
-    -- the unit-speed condition at `t = 0`. The Picard-Lindelöf
-    -- existence theorem produces such a curve. Recorded as `sorry`
-    -- to avoid duplicating the local existence wrapper here.
+    -- `L = 0`). We construct a unit-speed geodesic γ starting at p
+    -- via Picard-Lindelöf (`exists_geodesic_at`) with an initial
+    -- velocity v that is g-unit at p; on the singleton interval
+    -- `Set.Icc 0 0 = {0}` we only need the unit-speed condition at
+    -- `t = 0`, which is delivered by the projection-derivative
+    -- identity `IsMIntegralCurveAt.mfderiv_proj_one`.
     subst hLzero
-    sorry
+    -- p = q.
+    have hpq : p = q := by rw [← hηp]; exact hηq
+    -- Positive dimension: extract a nonzero vector u ∈ E and rescale
+    -- to a g-unit vector v at p.
+    have hfin_pos : 0 < Module.finrank ℝ E :=
+      Nat.pos_of_ne_zero (NeZero.ne _)
+    haveI hNT : Nontrivial E := Module.nontrivial_of_finrank_pos hfin_pos
+    obtain ⟨u, hu_ne⟩ : ∃ u : TangentSpace I p, u ≠ 0 :=
+      ⟨(exists_ne (0 : E)).choose, (exists_ne (0 : E)).choose_spec⟩
+    have hc_pos : 0 < (g.inner p) u u := g.pos p u hu_ne
+    have hc_ne : (g.inner p) u u ≠ 0 := ne_of_gt hc_pos
+    set s : ℝ := Real.sqrt ((g.inner p) u u)⁻¹ with hs_def
+    have hs_sq : s * s = ((g.inner p) u u)⁻¹ := by
+      rw [hs_def]
+      have hinv_nn : 0 ≤ ((g.inner p) u u)⁻¹ := inv_nonneg.mpr hc_pos.le
+      exact Real.mul_self_sqrt hinv_nn
+    set v : TangentSpace I p := s • u with hv_def
+    -- v is g-unit at p: (g.inner p) v v = 1.
+    have hv_unit : (g.inner p) v v = 1 := by
+      rw [hv_def, map_smul (g.inner p), ContinuousLinearMap.smul_apply,
+        map_smul (g.inner p u), smul_eq_mul, smul_eq_mul]
+      rw [show s * (s * (g.inner p) u u) = (s * s) * (g.inner p) u u by ring]
+      rw [hs_sq, inv_mul_cancel₀ hc_ne]
+    -- Local geodesic via Picard-Lindelöf.
+    obtain ⟨γ', f, hf0, hγ'_eq, hγ'_zero, hf_mIC, _hγ'_geod⟩ :=
+      exists_geodesic_at (I := I) g p v
+    -- Provide the existential with L = 0 and curve γ := γ'.
+    refine ⟨γ', 0, le_refl 0, hγ'_zero, ?_, ?_, ?_, ?_, ?_⟩
+    · -- γ' 0 = q: since p = q.
+      rw [hγ'_zero, hpq]
+    · -- ContMDiffOn 𝓘(ℝ,ℝ) I 1 γ' (Set.Icc 0 0): singleton case.
+      have hIcc_eq : (Set.Icc (0 : ℝ) 0) = ({0} : Set ℝ) :=
+        Set.Icc_self 0
+      rw [hIcc_eq]
+      intro t ht
+      rcases ht with rfl
+      -- ContMDiffWithinAt 𝓘(ℝ,ℝ) I 1 γ' {0} 0.
+      rw [contMDiffWithinAt_iff']
+      refine ⟨continuousWithinAt_singleton, ?_⟩
+      -- ContDiffWithinAt at the singleton-image of {0} in the model.
+      have hsub :
+          ((extChartAt 𝓘(ℝ, ℝ) (0 : ℝ)).target ∩
+            (extChartAt 𝓘(ℝ, ℝ) (0 : ℝ)).symm ⁻¹'
+              (({0} : Set ℝ) ∩ γ' ⁻¹' (extChartAt I (γ' 0)).source)) ⊆
+            {extChartAt 𝓘(ℝ, ℝ) (0 : ℝ) 0} := by
+        intro x hx
+        have hx_sym : (extChartAt 𝓘(ℝ, ℝ) (0 : ℝ)).symm x ∈
+            ({0} : Set ℝ) ∩ γ' ⁻¹' (extChartAt I (γ' 0)).source :=
+          hx.2
+        have hx_sym0 : (extChartAt 𝓘(ℝ, ℝ) (0 : ℝ)).symm x = 0 := hx_sym.1
+        have hx_in_target : x ∈ (extChartAt 𝓘(ℝ, ℝ) (0 : ℝ)).target := hx.1
+        have hxx : x = extChartAt 𝓘(ℝ, ℝ) (0 : ℝ) 0 := by
+          calc x = extChartAt 𝓘(ℝ, ℝ) (0 : ℝ)
+                      ((extChartAt 𝓘(ℝ, ℝ) (0 : ℝ)).symm x) :=
+                  ((extChartAt 𝓘(ℝ, ℝ) (0 : ℝ)).right_inv hx_in_target).symm
+            _ = extChartAt 𝓘(ℝ, ℝ) (0 : ℝ) 0 := by rw [hx_sym0]
+        exact hxx
+      exact (contDiffWithinAt_singleton).mono hsub
+    · -- IsGeodesicOn g γ' (Set.Icc 0 0): from the local IsMIntegralCurveAt.
+      have hIcc_eq : (Set.Icc (0 : ℝ) 0) = ({0} : Set ℝ) :=
+        Set.Icc_self 0
+      rw [hIcc_eq]
+      refine ⟨p, f, ?_, ?_⟩
+      · intro t
+        have := congrFun hγ'_eq t
+        simp [projectCurve] at this
+        exact this.symm
+      · refine IsMIntegralCurveAt.isMIntegralCurveOn ?_
+        intro t ht
+        rcases ht with rfl
+        exact hf_mIC
+    · -- Unit speed at every t ∈ Set.Icc 0 0.
+      intro t ht
+      have hIcc_eq : (Set.Icc (0 : ℝ) 0) = ({0} : Set ℝ) :=
+        Set.Icc_self 0
+      rw [hIcc_eq] at ht
+      rcases ht with rfl
+      -- Substitute γ' = projectCurve f everywhere. After subst,
+      -- the binder γ' is replaced by `projectCurve f` in the goal
+      -- and in `hf0`, `hγ'_zero`, etc.
+      subst hγ'_eq
+      -- The goal: `g.inner (projectCurve f 0) (mfderiv 𝓘(ℝ,ℝ) I (projectCurve f) 0 1)
+      --             (mfderiv 𝓘(ℝ,ℝ) I (projectCurve f) 0 1) = 1`.
+      -- Strategy: introduce the projection-curve as a named function
+      -- with the unblocker giving its mfderiv at 0, then close by
+      -- generalising over the value of `f 0`.
+      -- Generalise: we want to show
+      -- `(g.inner (f 0).proj) ((f 0).snd) ((f 0).snd) = 1`
+      -- once we know `mfderiv ... 1 = (f 0).snd`. Use generalize +
+      -- subst to avoid the rewriting failure.
+      have hmf : mfderiv 𝓘(ℝ, ℝ) I (projectCurve (I := I) f) 0 (1 : ℝ) =
+          (f 0).snd :=
+        IsMIntegralCurveAt.mfderiv_proj_one (I := I) (g := g) (f := f)
+          (α := p) (t₀ := 0) hf_mIC
+          (by rw [hf0]; exact mem_chart_source H p)
+      -- Use a single dependent-type-aware substitution: package the
+      -- goal as a function of (q : TangentBundle I M) such that
+      -- substituting q := f 0 closes via hmf and hf0.
+      -- The trick: the goal as a function of `f 0` (which appears
+      -- only via `projectCurve f 0 = (f 0).proj`) becomes
+      -- `(g.inner (f 0).proj) (m) (m) = 1` with `m : TangentSpace I (f 0).proj`.
+      -- After `rcases hf0`, this becomes `(g.inner p) (m) (m) = 1` with
+      -- `m : TangentSpace I p`. And `hmf` becomes `m = v`.
+      -- We package this via a helper lemma.
+      have hgoal :
+          ∀ (q : TangentBundle I M)
+            (hq : q = (⟨p, v⟩ : TangentBundle I M))
+            (m : TangentSpace I q.proj)
+            (hm : m = q.snd),
+            (g.inner q.proj) m m = 1 := by
+        intro q hq m hm
+        rcases hq
+        change m = v at hm
+        subst hm
+        exact hv_unit
+      -- Apply hgoal with q := f 0. The Mfderiv value lives in
+      -- `TangentSpace I (f 0).proj = TangentSpace I (projectCurve f 0)`
+      -- (these are definitionally equal). hmf provides hm.
+      exact hgoal (f 0) hf0
+        (mfderiv 𝓘(ℝ, ℝ) I (projectCurve (I := I) f) 0 (1 : ℝ)) hmf
+    · -- riemannianEDist I p q = ENNReal.ofReal 0 = 0.
+      rw [← hpq, ENNReal.ofReal_zero]
+      exact riemannianEDist_self
 
 end MinimiserExistence
 
