@@ -598,19 +598,250 @@ theorem uc_pi1_countable_polygonal_enumeration
     exact Subtype.coe_le_coe.mp (htmono' i)
   -- Choose the preimage `⟨k, idx⟩`.
   refine ⟨⟨k, idx⟩, ?_⟩
-  -- Now show `f ⟨k, idx⟩ = g`. The full telescoping step — inserting
-  -- anchor-connector paths between consecutive truncations and regrouping
-  -- the resulting concatenation into pieces with anchor-anchor endpoints
-  -- inside single basis elements, each homotoped by
-  -- `uc_pi1_countable_piece_homotopy` — is isolated as the residual
-  -- `sorry` below.
-  --
-  -- The scaffolding above (refined basis, anchor coverage, monotone
+  -- Endpoint identifications for `γ`.
+  have hγ0 : γ (t 0 : unitInterval) = x := by rw [ht0]; exact γ.source
+  have hγlast : γ (t (Fin.last k) : unitInterval) = x := by
+    rw [htlast]; exact γ.target
+  -- `γ.extend ((t i : I) : ℝ) = γ (t i : I)` everywhere.
+  have hExtend : ∀ i : Fin (k + 1),
+      γ.extend ((t i : unitInterval) : ℝ) = γ (t i : unitInterval) :=
+    fun i => _root_.Path.extend_extends' γ (t i : (Icc (0 : ℝ) 1 : Set ℝ))
+  -- `t i.castSucc ≤ t i.succ` for each `i`.
+  have htle : ∀ i : Fin k,
+      ((t i.castSucc : unitInterval) : ℝ) ≤ ((t i.succ : unitInterval) : ℝ) :=
+    fun i => htmono' i
+  -- Membership of `γ`'s endpoint values in basis elements.
+  have hγ_castSucc_in : ∀ i : Fin k, γ (t i.castSucc) ∈ B (idx i) :=
+    fun i => hidx i (t i.castSucc) (le_refl _) (htle i)
+  have hγ_succ_in : ∀ i : Fin k, γ (t i.succ) ∈ B (idx i) :=
+    fun i => hidx i (t i.succ) (htle i) (le_refl _)
+  -- The two-step truncation→γ identification expressed at the quotient
+  -- level. Define the truncation family and the concatenated path.
+  let T : (i : Fin k) →
+      _root_.Path (γ.extend ((t i.castSucc : unitInterval) : ℝ))
+                  (γ.extend ((t i.succ : unitInterval) : ℝ)) :=
+    fun i => γ.truncateOfLE (htle i)
+  have ha_eq : x = γ.extend ((t 0 : unitInterval) : ℝ) := by rw [ht0]; simp
+  have hb_eq : x = γ.extend ((t (Fin.last k) : unitInterval) : ℝ) := by
+    rw [htlast]; simp
+  let concatT : _root_.Path x x :=
+    (concatTrans (p := fun i => γ.extend ((t i : unitInterval) : ℝ)) T).cast
+      ha_eq hb_eq
+  -- `γ ≃ concatT` via `Path.trans_truncate_homotopic`.
+  have hγ_concatT : γ.Homotopic concatT :=
+    Path.trans_truncate_homotopic γ t ht0 htlast htmono
+  have hquot_γ_concatT :
+      (⟦γ⟧ : _root_.Path.Homotopic.Quotient x x) = ⟦concatT⟧ :=
+    Quotient.sound hγ_concatT
+  -- Truncation range: each `T i` has image inside `B (idx i)`.
+  have hT_range : ∀ i : Fin k,
+      ∀ s : unitInterval, (T i s : X) ∈ B (idx i) := by
+    intro i s
+    -- `(T i) s = γ.extend (min (max s (t i.castSucc)) (t i.succ))`. Show the
+    -- inner real lies in `[t i.castSucc, t i.succ] ⊆ I`, then use `hidx`.
+    set u : ℝ := min (max (s : ℝ) ((t i.castSucc : unitInterval) : ℝ))
+        ((t i.succ : unitInterval) : ℝ) with hudef
+    have hu_lo : ((t i.castSucc : unitInterval) : ℝ) ≤ u := by
+      rw [hudef]; exact le_min (le_max_right _ _) (htle i)
+    have hu_hi : u ≤ ((t i.succ : unitInterval) : ℝ) := by
+      rw [hudef]; exact min_le_right _ _
+    have hu_mem : u ∈ (Icc 0 1 : Set ℝ) := by
+      refine ⟨?_, ?_⟩
+      · exact (t i.castSucc : unitInterval).2.1.trans hu_lo
+      · exact hu_hi.trans (t i.succ : unitInterval).2.2
+    -- Show `(T i) s = γ ⟨u, hu_mem⟩`. The path `γ.truncateOfLE h` is defined
+    -- as `(γ.truncate t₀ t₁).cast _ _` and `γ.truncate t₀ t₁ s = γ.extend u`.
+    have hTval : ((T i) s : X) = γ ⟨u, hu_mem⟩ := by
+      have hcoe : ((T i) s : X) = ((γ.truncate
+          ((t i.castSucc : unitInterval) : ℝ)
+          ((t i.succ : unitInterval) : ℝ)) s : X) := by
+        simp [T, _root_.Path.truncateOfLE]
+      have hext : γ.extend u = γ ⟨u, hu_mem⟩ := _root_.Path.extend_apply _ hu_mem
+      have htr : ((γ.truncate
+          ((t i.castSucc : unitInterval) : ℝ)
+          ((t i.succ : unitInterval) : ℝ)) s : X) = γ.extend u := by
+        simp [_root_.Path.truncate, hudef]
+      rw [hcoe, htr, hext]
+    rw [hTval]
+    exact hidx i ⟨u, hu_mem⟩ hu_lo hu_hi
+  -- Establish the validity hypothesis: for each `i : Fin k`,
+  -- `polyVertex idx i.castSucc ∈ B (idx i)` and `polyVertex idx i.succ ∈ B (idx i)`.
+  -- The vertex at `i.castSucc` is `x` (if `i = 0`) or an anchor (otherwise);
+  -- similarly for `i.succ`. Both cases reduce to a `γ`-value membership in
+  -- `B (idx i)` (provided by `hidx`) for the boundary case, and a nonempty
+  -- intersection witness for the anchor case.
+  have hcast_val : ∀ i : Fin k, (i.castSucc : ℕ) = (i : ℕ) := fun i => rfl
+  have hsucc_val : ∀ i : Fin k, (i.succ : ℕ) = (i : ℕ) + 1 := fun i => rfl
+  have hVertex_castSucc : ∀ i : Fin k,
+      polyVertex idx i.castSucc ∈ B (idx i) := by
+    intro i
+    have hi_lt_k : (i : ℕ) < k := i.isLt
+    by_cases h0 : (i : ℕ) = 0
+    · -- Boundary: `i.castSucc.val = 0`, so `polyVertex = x`.
+      have hpv : polyVertex idx i.castSucc = x := by
+        change (if h : 0 < (i.castSucc : ℕ) ∧ (i.castSucc : ℕ) < k
+              then anchor _ else x) = x
+        rw [dif_neg]
+        intro ⟨hpos, _⟩
+        rw [hcast_val] at hpos
+        omega
+      rw [hpv]
+      -- Show `x ∈ B (idx i)` via `γ (t i.castSucc) = x ∈ B (idx i)`.
+      have ht_eq : t i.castSucc = t 0 := by
+        apply congrArg
+        apply Fin.ext
+        change (i.castSucc : ℕ) = (0 : Fin (k + 1)).val
+        rw [hcast_val, h0]; rfl
+      have hxγ : γ (t i.castSucc) = x := by rw [ht_eq, hγ0]
+      rw [← hxγ]
+      exact hγ_castSucc_in i
+    · -- Interior: `0 < i.castSucc.val < k`. `polyVertex = anchor`, in the
+      -- pair-wise intersection (nonempty by `γ (t i.castSucc)`).
+      have hpos : 0 < (i.castSucc : ℕ) := by rw [hcast_val]; omega
+      have hlt_k : (i.castSucc : ℕ) < k := by rw [hcast_val]; exact hi_lt_k
+      have hi_prev_lt_k : (i : ℕ) - 1 < k := by omega
+      -- The previous segment index `⟨i.val - 1, _⟩`.
+      let ip : Fin k := ⟨(i : ℕ) - 1, hi_prev_lt_k⟩
+      have hip_succ_val : (ip.succ : ℕ) = (i : ℕ) := by
+        change (ip : ℕ) + 1 = (i : ℕ)
+        change (i : ℕ) - 1 + 1 = (i : ℕ)
+        omega
+      have ht_ip_succ_eq : t ip.succ = t i.castSucc := by
+        apply congrArg
+        apply Fin.ext
+        rw [hip_succ_val, hcast_val]
+      have ht_ip_castSucc_le : ((t ip.castSucc : unitInterval) : ℝ)
+          ≤ ((t i.castSucc : unitInterval) : ℝ) := by
+        apply Subtype.coe_le_coe.mpr
+        apply htmono
+        -- `ip.castSucc.val = (i : ℕ) - 1 ≤ (i : ℕ) = i.castSucc.val`
+        change ip.castSucc ≤ i.castSucc
+        apply Fin.mk_le_mk.mpr
+        change (i : ℕ) - 1 ≤ (i : ℕ)
+        omega
+      have hγ_at_ip : γ (t i.castSucc) ∈ B (idx ip) := by
+        refine hidx ip (t i.castSucc) ht_ip_castSucc_le ?_
+        rw [← ht_ip_succ_eq]
+      have hγ_at_i : γ (t i.castSucc) ∈ B (idx i) := hγ_castSucc_in i
+      have hnonempty : (B (idx ip) ∩ B (idx i)).Nonempty :=
+        ⟨γ (t i.castSucc), hγ_at_ip, hγ_at_i⟩
+      have hanchor_mem : anchor (idx ip, idx i)
+          ∈ B (idx ip) ∩ B (idx i) :=
+        hanchor (idx ip, idx i) hnonempty
+      -- Unfold polyVertex.
+      have hpv : polyVertex idx i.castSucc
+          = anchor (idx ⟨(i.castSucc : ℕ) - 1,
+              by rw [hcast_val]; omega⟩, idx ⟨(i.castSucc : ℕ), hlt_k⟩) := by
+        change (if h : 0 < (i.castSucc : ℕ) ∧ (i.castSucc : ℕ) < k
+              then anchor (idx ⟨(i.castSucc : ℕ) - 1, by omega⟩,
+                idx ⟨(i.castSucc : ℕ), h.2⟩) else x)
+            = anchor _
+        rw [dif_pos ⟨hpos, hlt_k⟩]
+      rw [hpv]
+      have hidx_eq1 : (⟨(i.castSucc : ℕ) - 1,
+          by rw [hcast_val]; omega⟩ : Fin k) = ip := by
+        apply Fin.ext
+        change (i.castSucc : ℕ) - 1 = (i : ℕ) - 1
+        rw [hcast_val]
+      have hidx_eq2 : (⟨(i.castSucc : ℕ), hlt_k⟩ : Fin k) = i := by
+        apply Fin.ext; rw [hcast_val]
+      rw [hidx_eq1, hidx_eq2]
+      exact hanchor_mem.2
+  have hVertex_succ : ∀ i : Fin k,
+      polyVertex idx i.succ ∈ B (idx i) := by
+    intro i
+    have hi_lt_k : (i : ℕ) < k := i.isLt
+    have hsucc_lt : (i.succ : ℕ) ≤ k := Nat.lt_succ_iff.mp i.succ.isLt
+    by_cases hk : (i : ℕ) + 1 = k
+    · -- Boundary: `i.succ.val = k`. `polyVertex = x`.
+      have hpv : polyVertex idx i.succ = x := by
+        change (if h : 0 < (i.succ : ℕ) ∧ (i.succ : ℕ) < k
+              then anchor _ else x) = x
+        rw [dif_neg]
+        intro ⟨_, hlt⟩
+        rw [hsucc_val] at hlt
+        omega
+      rw [hpv]
+      have ht_eq : t i.succ = t (Fin.last k) := by
+        apply congrArg; apply Fin.ext
+        rw [Fin.val_last, hsucc_val]; exact hk
+      have hxγ : γ (t i.succ) = x := by rw [ht_eq, hγlast]
+      rw [← hxγ]
+      exact hγ_succ_in i
+    · -- Interior: `i.succ.val < k`. `polyVertex = anchor (idx i, idx ⟨i+1,_⟩)`.
+      have hi_next_lt_k : (i : ℕ) + 1 < k := by
+        rw [← hsucc_val] at hk ⊢
+        omega
+      have hpos : 0 < (i.succ : ℕ) := by rw [hsucc_val]; omega
+      have hlt : (i.succ : ℕ) < k := by rw [hsucc_val]; exact hi_next_lt_k
+      let i_next : Fin k := ⟨(i : ℕ) + 1, hi_next_lt_k⟩
+      have hin_castSucc_val : (i_next.castSucc : ℕ) = (i : ℕ) + 1 := by rfl
+      have ht_in_castSucc_eq : t i_next.castSucc = t i.succ := by
+        apply congrArg; apply Fin.ext
+        rw [hin_castSucc_val, hsucc_val]
+      have ht_in_succ_ge : ((t i.succ : unitInterval) : ℝ)
+          ≤ ((t i_next.succ : unitInterval) : ℝ) := by
+        apply Subtype.coe_le_coe.mpr
+        apply htmono
+        change i.succ ≤ i_next.succ
+        apply Fin.mk_le_mk.mpr
+        change (i : ℕ) + 1 ≤ (i : ℕ) + 1 + 1
+        omega
+      have hγ_at_in : γ (t i.succ) ∈ B (idx i_next) := by
+        refine hidx i_next (t i.succ) ?_ ht_in_succ_ge
+        rw [← ht_in_castSucc_eq]
+      have hγ_at_i : γ (t i.succ) ∈ B (idx i) := hγ_succ_in i
+      have hnonempty : (B (idx i) ∩ B (idx i_next)).Nonempty :=
+        ⟨γ (t i.succ), hγ_at_i, hγ_at_in⟩
+      have hanchor_mem : anchor (idx i, idx i_next)
+          ∈ B (idx i) ∩ B (idx i_next) :=
+        hanchor (idx i, idx i_next) hnonempty
+      have hpv : polyVertex idx i.succ
+          = anchor (idx ⟨(i.succ : ℕ) - 1,
+              by rw [hsucc_val]; omega⟩, idx ⟨(i.succ : ℕ), hlt⟩) := by
+        change (if h : 0 < (i.succ : ℕ) ∧ (i.succ : ℕ) < k
+              then anchor (idx ⟨(i.succ : ℕ) - 1, by omega⟩,
+                idx ⟨(i.succ : ℕ), h.2⟩) else x)
+            = anchor _
+        rw [dif_pos ⟨hpos, hlt⟩]
+      rw [hpv]
+      have hidx_eq1 : (⟨(i.succ : ℕ) - 1,
+          by rw [hsucc_val]; omega⟩ : Fin k) = i := by
+        apply Fin.ext
+        change (i.succ : ℕ) - 1 = (i : ℕ)
+        rw [hsucc_val]; omega
+      have hidx_eq2 : (⟨(i.succ : ℕ), hlt⟩ : Fin k) = i_next := by
+        apply Fin.ext
+        change (i.succ : ℕ) = (i : ℕ) + 1
+        rw [hsucc_val]
+      rw [hidx_eq1, hidx_eq2]
+      exact hanchor_mem.1
+  have hvalid : ∀ i : Fin k,
+      (polyVertex idx i.castSucc ∈ B (idx i)) ∧
+      (polyVertex idx i.succ ∈ B (idx i)) :=
+    fun i => ⟨hVertex_castSucc i, hVertex_succ i⟩
+  -- The full telescoping step — inserting anchor-connector paths between
+  -- consecutive truncations and regrouping into pieces with anchor-anchor
+  -- endpoints inside single basis elements, each homotoped by
+  -- `uc_pi1_countable_piece_homotopy` — is isolated as the residual `sorry`
+  -- below. The scaffolding above (refined basis, anchor coverage, monotone
   -- subdivision adaptation, polygonal vertex well-definedness, the
-  -- congruence lemma `uc_pi1_countable_concat_quot_congr`) supplies every
-  -- ingredient the telescoping step consumes; what remains is the routine
-  -- but combinatorially involved step of identifying the polygonal class
-  -- with `⟦γ⟧`.
+  -- congruence lemma `uc_pi1_countable_concat_quot_congr`, the
+  -- `Path.trans_truncate_homotopic` bridge, and the in-scope objects
+  -- `T`, `concatT`, `hγ_concatT`, `hquot_γ_concatT`,
+  -- `hγ_castSucc_in`, `hγ_succ_in`) supply every ingredient downstream
+  -- consumers need.
+  --
+  -- The substantive remaining obstacle in this scaffolding is that the
+  -- interior junction `connR i . connL (i+1)` is a loop at `γ (t i.succ)`
+  -- with image in `B (idx i) ∪ B (idx (i+1))`. Its null-homotopy in the
+  -- ambient space requires the loop's image to lie in a single basis
+  -- element; classical Hatcher §1.3 / Spanier §2.4 resolves this by
+  -- refining the basis-anchor pair `(B m ∩ B n)` to a path-component-aware
+  -- choice — a strengthening of `uc_pi1_countable_anchors` to enumerate
+  -- anchors per path-component of pairwise intersections. With that
+  -- strengthening the connector can be chosen as a single path inside the
+  -- relevant path-component, making the interior cancellation algebraic.
   sorry
 
 end UniversalCover
