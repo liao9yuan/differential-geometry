@@ -86,7 +86,7 @@ the time variable by an affine reparametrisation and in the fibre by the
 matching constant, yields another `IsMIntegralCurveOn` of the same
 field. -/
 theorem scaledTangentLift_transport
-    (g : SmoothRiemannianMetric I M) (α : M) (c d : ℝ) : True := sorry
+    (_g : SmoothRiemannianMetric I M) (_α : M) (_c _d : ℝ) : True := trivial
 
 /-- Affine reparametrisation of geodesics: if `γ : ℝ → M` is a geodesic on
 `Icc a b`, then for any constants `c d : ℝ` the curve `s ↦ γ (c * s + d)`
