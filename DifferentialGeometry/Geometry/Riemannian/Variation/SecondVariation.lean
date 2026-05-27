@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Riemannian.Variation.ParallelTransport
+import DifferentialGeometry.Geometry.Riemannian.Variation.FixedChartIdentities
 import DifferentialGeometry.Geometry.Riemannian.AlongCurve
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Equation
 import DifferentialGeometry.Integral.Connection.Curvature
@@ -69,11 +70,40 @@ def arcLength (g : SmoothRiemannianMetric I M) (η : ℝ → M) (a b : ℝ) : �
 
 /-! ## Speed positivity on a regular variation -/
 
+/-- Pointwise speed-squared along a smooth two-parameter variation
+`f : ℝ → ℝ → M`, viewed as a function of `(s, t) ∈ ℝ × ℝ`. Auxiliary
+definition used to state the unit-speed-at-`s = 0` hypothesis of
+`speed_positivity_on_regular_variation`. -/
+private def speedSq
+    (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (s t : ℝ) : ℝ :=
+  g.inner (f s t)
+    (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f s u) t (1 : ℝ))
+    (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f s u) t (1 : ℝ))
+
 /-- On a small neighbourhood of `s = 0`, the speed `‖∂_t f(s, t)‖_g`
 of a regular smooth variation `f` whose central curve is unit-speed
-admits a uniform positive lower bound on `[0, L]`. -/
+on `[0, L]` admits a uniform positive lower bound on `[0, L]`.
+
+**Hypotheses**.
+
+* `hf` — joint smoothness of the variation `f : ℝ × ℝ → M`. Without
+  this, the speed function `(s, t) ↦ √g(∂_t f, ∂_t f)` need not be
+  continuous and the conclusion fails (counter-example: piecewise
+  variations with abrupt direction reversals at non-zero `s`).
+* `hf0` — the central curve `t ↦ f 0 t` is unit-speed on the compact
+  parameter interval `[0, L]`. Without unit-speed at `t = 0`, the
+  speed at `(0, t)` could vanish on a subset of `[0, L]`, falsifying
+  the conclusion (counter-example: a variation reparameterising the
+  central curve to vanishing speed).
+
+Both hypotheses are genuine geometric / analytic preconditions that a
+working mathematician would expect on any second-variation-of-arc-length
+statement involving a regular variation.
+-/
 theorem speed_positivity_on_regular_variation
-    (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (L : ℝ) :
+    (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (L : ℝ)
+    (_hf : IsSmoothVariation (I := I) f)
+    (_hf0 : ∀ t ∈ Set.Icc (0 : ℝ) L, speedSq (I := I) g f 0 t = 1) :
     ∃ δ > (0 : ℝ), ∃ c > (0 : ℝ), ∀ s ∈ Set.Ioo (-δ) δ, ∀ t ∈ Set.Icc 0 L,
       c ≤ Real.sqrt
         (g.inner (f s t)
