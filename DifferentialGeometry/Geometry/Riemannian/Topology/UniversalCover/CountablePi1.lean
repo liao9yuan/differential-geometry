@@ -192,7 +192,101 @@ theorem uc_pi1_countable_piece_homotopy
     (_h₁ : Set.range γ₁.toContinuousMap ⊆ B n)
     (_h₂ : Set.range γ₂.toContinuousMap ⊆ B n) :
     (⟦γ₁⟧ : _root_.Path.Homotopic.Quotient a b) = ⟦γ₂⟧ := by
-  exact sorry
+  -- The two range hypotheses, transported through `coe_toContinuousMap`.
+  have hr₁ : Set.range (γ₁ : unitInterval → X) ⊆ B n := by
+    intro y hy
+    rcases hy with ⟨t, ht⟩
+    refine _h₁ ⟨t, ?_⟩
+    simpa [Path.coe_toContinuousMap] using ht
+  have hr₂ : Set.range (γ₂ : unitInterval → X) ⊆ B n := by
+    intro y hy
+    rcases hy with ⟨t, ht⟩
+    refine _h₂ ⟨t, ?_⟩
+    simpa [Path.coe_toContinuousMap] using ht
+  -- `a ∈ B n` because `γ₁ 0 = a` and `γ₁ 0 ∈ range γ₁ ⊆ B n`.
+  have haB : a ∈ B n := by
+    have h0 : (γ₁ 0 : X) ∈ Set.range (γ₁ : unitInterval → X) := ⟨0, rfl⟩
+    have : (γ₁ 0 : X) ∈ B n := hr₁ h0
+    simpa using this
+  -- The composed loop `γ₁ ⬝ γ₂.symm : Path a a` and its range bound.
+  set δ : _root_.Path a a := γ₁.trans γ₂.symm with hδdef
+  have hδrange : Set.range δ.toContinuousMap ⊆ B n := by
+    intro y hy
+    rcases hy with ⟨t, ht⟩
+    have hy' : y ∈ Set.range (δ : unitInterval → X) :=
+      ⟨t, by simpa [Path.coe_toContinuousMap] using ht⟩
+    have hrange : Set.range (δ : unitInterval → X)
+        = Set.range (γ₁ : unitInterval → X)
+            ∪ Set.range (γ₂.symm : unitInterval → X) := by
+      simpa [hδdef] using Path.trans_range γ₁ γ₂.symm
+    rw [hrange] at hy'
+    rcases hy' with hy₁ | hy₂
+    · exact hr₁ hy₁
+    · have : y ∈ Set.range (γ₂ : unitInterval → X) := by
+        rwa [Path.symm_range] at hy₂
+      exact hr₂ this
+  -- Apply the null-homotopy hypothesis to the composed loop.
+  have hnull :
+      (⟦δ⟧ : _root_.Path.Homotopic.Quotient a a) = ⟦_root_.Path.refl a⟧ :=
+    hBnull n a haB δ hδrange
+  -- Group-theoretic cancellation in the quotient.
+  -- Abbreviations for readability.
+  let Trans : _root_.Path.Homotopic.Quotient a b →
+              _root_.Path.Homotopic.Quotient b a →
+              _root_.Path.Homotopic.Quotient a a :=
+    _root_.Path.Homotopic.Quotient.trans
+  -- We work directly with `⟦γ₁⟧` and `⟦γ₂⟧`.
+  set A : _root_.Path.Homotopic.Quotient a b := ⟦γ₁⟧ with hAdef
+  set Bq : _root_.Path.Homotopic.Quotient a b := ⟦γ₂⟧ with hBdef
+  let Bsym : _root_.Path.Homotopic.Quotient b a :=
+    _root_.Path.Homotopic.Quotient.symm Bq
+  -- Rewrite the null homotopy in terms of `A` and `Bq`.
+  -- `⟦γ₁ ⬝ γ₂.symm⟧ = trans A Bsym` and `⟦Path.refl a⟧ = Quotient.refl a`.
+  have h1 :
+      (⟦δ⟧ : _root_.Path.Homotopic.Quotient a a)
+        = _root_.Path.Homotopic.Quotient.trans A Bsym := by
+    have eq₁ :
+        (⟦γ₁.trans γ₂.symm⟧ : _root_.Path.Homotopic.Quotient a a)
+          = _root_.Path.Homotopic.Quotient.trans
+              (⟦γ₁⟧ : _root_.Path.Homotopic.Quotient a b)
+              (⟦γ₂.symm⟧ : _root_.Path.Homotopic.Quotient b a) :=
+      _root_.Path.Homotopic.Quotient.mk_trans γ₁ γ₂.symm
+    have eq₂ :
+        (⟦γ₂.symm⟧ : _root_.Path.Homotopic.Quotient b a)
+          = _root_.Path.Homotopic.Quotient.symm
+              (⟦γ₂⟧ : _root_.Path.Homotopic.Quotient a b) :=
+      _root_.Path.Homotopic.Quotient.mk_symm γ₂
+    change (⟦γ₁.trans γ₂.symm⟧ : _root_.Path.Homotopic.Quotient a a)
+        = _root_.Path.Homotopic.Quotient.trans A
+            (_root_.Path.Homotopic.Quotient.symm Bq)
+    rw [eq₁, eq₂]
+  have h2 :
+      (⟦_root_.Path.refl a⟧ : _root_.Path.Homotopic.Quotient a a)
+        = _root_.Path.Homotopic.Quotient.refl a :=
+    _root_.Path.Homotopic.Quotient.mk_refl a
+  -- Cancellation key: `trans A Bsym = refl a`.
+  have hkey :
+      _root_.Path.Homotopic.Quotient.trans A Bsym
+        = _root_.Path.Homotopic.Quotient.refl a := by
+    rw [← h1, ← h2]; exact hnull
+  -- Algebraic chase: `A = A · refl b = A · (Bsym · Bq) = (A · Bsym) · Bq
+  --                    = refl a · Bq = Bq`.
+  have hsymm :
+      _root_.Path.Homotopic.Quotient.trans Bsym Bq
+        = _root_.Path.Homotopic.Quotient.refl b :=
+    _root_.Path.Homotopic.Quotient.symm_trans Bq
+  calc A
+      = _root_.Path.Homotopic.Quotient.trans A
+          (_root_.Path.Homotopic.Quotient.refl b) :=
+        (_root_.Path.Homotopic.Quotient.trans_refl A).symm
+    _ = _root_.Path.Homotopic.Quotient.trans A
+          (_root_.Path.Homotopic.Quotient.trans Bsym Bq) := by rw [hsymm]
+    _ = _root_.Path.Homotopic.Quotient.trans
+          (_root_.Path.Homotopic.Quotient.trans A Bsym) Bq := by
+        rw [_root_.Path.Homotopic.Quotient.trans_assoc]
+    _ = _root_.Path.Homotopic.Quotient.trans
+          (_root_.Path.Homotopic.Quotient.refl a) Bq := by rw [hkey]
+    _ = Bq := _root_.Path.Homotopic.Quotient.refl_trans Bq
 
 /-- **Polygonal enumeration.** The fundamental group of a second-countable,
 connected, locally-path-connected, semi-locally-simply-connected space
