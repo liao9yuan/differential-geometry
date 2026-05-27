@@ -65,18 +65,15 @@ def PosRicciMetric (g : SmoothRiemannianMetric I M) : Prop :=
 def AdmitsPosRicci : Prop :=
   exists g : SmoothRiemannianMetric I M, PosRicciMetric (I := I) (M := M) g
 
-/-- Constant positive sectional curvature, expressed by the standard
-two-plane curvature formula against RicciFlower's lowered curvature convention
-`Rm04(W,X,Y,Z) = g(W,R(X,Y)Z)`.
+/-- Constant positive sectional curvature, expressed in the standard lowered
+curvature slot order `Rm04(X,Y,Z,W) = g(W,R(X,Y)Z)`.
 
-With this convention the positive sectional curvature numerator is
-`-Rm04(X,X,Y,Y)`, so the displayed formula carries a minus sign. -/
+The sectional numerator is `Rm04(X,Y,Y,X)`. -/
 def ConstPosSecMetric (g : SmoothRiemannianMetric I M) : Prop :=
   exists c : Real, 0 < c /\
     forall x : M, forall X Y : TangentSpace I x,
-      RicciFlow.metricRm04 (I := I) (M := M) g x
-          (Curvature.vec4 (I := I) X X Y Y) =
-        -c * (g.inner x X X * g.inner x Y Y - g.inner x X Y * g.inner x X Y)
+      Curvature.metricRm04StdAt (I := I) (M := M) g x X Y Y X =
+        c * (g.inner x X X * g.inner x Y Y - g.inner x X Y * g.inner x X Y)
 
 /-- `M` admits a smooth metric of constant positive sectional curvature. -/
 def AdmitsConstPosSec : Prop :=
@@ -178,6 +175,14 @@ abbrev ham3Solution
     RicciFlow.SolutionOn (I := I) (M := M) P.D :=
   P.S
 
+/-- Intrinsic scalar curvature carried by the flow package: the metric trace
+of the canonical pointwise Ricci tensor. -/
+def ham3Scalar
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0) :
+    Real -> M -> Real :=
+  RicciFlow.SolutionOn.scalar (I := I) (ham3Solution (I := I) P)
+
 /-- Global maximal-flow setup supplies joint spacetime continuity for the
 canonical scalar curvature.
 
@@ -212,6 +217,29 @@ fields of this sequence data. -/
 structure Ham3BlowupData (M : Type*) where
   point : Nat -> M
   time : Nat -> Real
+
+/-- Blow-up scale for the `i`th selected parabolic rescaling. -/
+def ham3BlowupScale
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (Q : Ham3BlowupData M) (i : Nat) : Real :=
+  ham3Scalar (I := I) P (Q.time i) (Q.point i)
+
+/-- Original flow time corresponding to rescaled time `s` in the `i`th blow-up:
+`t = t_i + s / R_i`. -/
+def ham3RescaledTime
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (Q : Ham3BlowupData M) (i : Nat) (s : Real) : Real :=
+  Q.time i + s / ham3BlowupScale (I := I) P Q i
+
+/-- Scalar curvature of the `i`th parabolically rescaled flow. -/
+def ham3RescaledScalar
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (Q : Ham3BlowupData M) (i : Nat) (s : Real) (x : M) : Real :=
+  (ham3BlowupScale (I := I) P Q i)⁻¹ *
+    ham3Scalar (I := I) P (ham3RescaledTime (I := I) P Q i s) x
 
 /-- The fixed radius used in Hamilton's Section 12 proof. -/
 def ham3_r0 : Real := (1 : Real) / 10
@@ -263,6 +291,14 @@ def Ham3LimitConnected (L : Ham3CGHLimitData (I := I) M) : Prop :=
   letI : TopologicalSpace L.N := L.topology
   ConnectedSpace L.N
 
+/-- The CGH limit remains boundaryless.  This is part of the smooth limit
+manifold data needed by static Bianchi/Schur arguments. -/
+def Ham3LimitBoundaryless (L : Ham3CGHLimitData (I := I) M) : Prop :=
+  letI : TopologicalSpace L.N := L.topology
+  letI : ChartedSpace H L.N := L.charted
+  letI : IsManifold I ∞ L.N := L.smooth
+  I.Boundaryless
+
 /-- The limit object is itself a smooth Ricci-flow solution. -/
 def Ham3LimitFlow (L : Ham3CGHLimitData (I := I) M) : Prop :=
   letI : TopologicalSpace L.N := L.topology
@@ -273,24 +309,23 @@ def Ham3LimitFlow (L : Ham3CGHLimitData (I := I) M) : Prop :=
   letI : T2Space L.N := L.t2
   RicciFlow.IsSolutionOn (I := I) L.S
 
-/-- The conclusion of Black box 11.12 in the Hamilton Section 12 pipeline:
-after passing to a subsequence, the rescaled pointed flows have a smooth
-pointed Cheeger-Gromov-Hamilton limit.
-
-The native project still lacks a full CGH-convergence relation, but the
-conclusion now exposes the actual limit data: a pointed smooth Ricci flow on a
-limit manifold, defined on the fixed backward window and regular on its open
-interior, together with the subsequence selecting the convergent rescalings. -/
-def Ham3CGHLimitExists
+/-- Scalar convergence at the pointed basepoints of the selected rescaled
+flows.  This is the narrow CGH scalar-transfer datum needed to turn
+Hamilton's point-selection normalization into `R(g∞)(x∞,0)=1`. -/
+def Ham3LimitBaseScalarConv
     {g0 : SmoothRiemannianMetric I M}
-    (_P : Ham3FlowPackage (I := I) (M := M) g0)
-    (_Q : Ham3BlowupData M) : Prop :=
-  exists L : Ham3CGHLimitData (I := I) M,
-    Ham3LimitSubseq (I := I) L /\
-      Ham3LimitWindow (I := I) L /\
-      Ham3LimitRegWin (I := I) L /\
-      Ham3LimitConnected (I := I) L /\
-      Ham3LimitFlow (I := I) L
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (Q : Ham3BlowupData M) (L : Ham3CGHLimitData (I := I) M) : Prop :=
+  letI : TopologicalSpace L.N := L.topology
+  letI : ChartedSpace H L.N := L.charted
+  letI : IsManifold I ∞ L.N := L.smooth
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) L.N := L.smooth_plus
+  letI : SigmaCompactSpace L.N := L.sigmaCompact
+  letI : T2Space L.N := L.t2
+  Filter.Tendsto
+    (fun k : Nat =>
+      ham3RescaledScalar (I := I) P Q (L.subseq k) 0 (Q.point (L.subseq k)))
+    Filter.atTop (nhds (L.S.scalar 0 L.basepoint))
 
 /-! ## Section 12 limit-flow proof interfaces -/
 
@@ -330,6 +365,17 @@ def LimitScalarPosAt (L : Ham3CGHLimitData (I := I) M) (t : Real) : Prop :=
 def LimitScalarPos (L : Ham3CGHLimitData (I := I) M) : Prop :=
   forall t : Real, t ∈ L.D.regular -> LimitScalarPosAt (I := I) L t
 
+/-- Nonnegative scalar curvature on the limit-flow carrier. -/
+def LimitScalarNonneg (L : Ham3CGHLimitData (I := I) M) : Prop :=
+  letI : TopologicalSpace L.N := L.topology
+  letI : ChartedSpace H L.N := L.charted
+  letI : IsManifold I ∞ L.N := L.smooth
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) L.N := L.smooth_plus
+  letI : SigmaCompactSpace L.N := L.sigmaCompact
+  letI : T2Space L.N := L.t2
+  forall t : Real, t ∈ L.D.carrier -> forall x : L.N,
+    0 <= L.S.scalar t x
+
 /-- The improved pinching estimate forces the trace-free Ricci norm of the CGH
 limit to vanish at one regular time. -/
 def LimitTfZeroAt (L : Ham3CGHLimitData (I := I) M) (t : Real) : Prop :=
@@ -346,6 +392,28 @@ def LimitTfZeroAt (L : Ham3CGHLimitData (I := I) M) (t : Real) : Prop :=
 limit to vanish. -/
 def LimitTfZero (L : Ham3CGHLimitData (I := I) M) : Prop :=
   forall t : Real, t ∈ L.D.regular -> LimitTfZeroAt (I := I) L t
+
+/-- The concrete decay conclusion obtained from passing the improved pinching
+estimate through the smooth CGH convergence: at every regular limit-flow point,
+the trace-free Ricci norm is bounded above by every positive number.
+
+This is deliberately weaker than `LimitTfZero`; the remaining convergence
+frontier is to produce this decay statement from pullback convergence of the
+rescaled flows and the scale factor `R_i^{-ε} -> 0`. -/
+def LimitTfDecayAt (L : Ham3CGHLimitData (I := I) M) (t : Real) : Prop :=
+  letI : TopologicalSpace L.N := L.topology
+  letI : ChartedSpace H L.N := L.charted
+  letI : IsManifold I ∞ L.N := L.smooth
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) L.N := L.smooth_plus
+  letI : SigmaCompactSpace L.N := L.sigmaCompact
+  letI : T2Space L.N := L.t2
+  forall x : L.N, forall η : Real, 0 < η ->
+    RicciFlow.tfRicNormSq L.S.scalar (RicciFlow.ricciNorm (I := I) L.S) t x <= η
+
+/-- The improved pinching estimate gives arbitrary small upper bounds for the
+trace-free Ricci norm on the regular part of the CGH limit. -/
+def LimitTfDecay (L : Ham3CGHLimitData (I := I) M) : Prop :=
+  forall t : Real, t ∈ L.D.regular -> LimitTfDecayAt (I := I) L t
 
 /-- At a fixed limit-flow time, the Ricci tensor is Einstein with factor
 `R / 3`. -/
@@ -416,14 +484,6 @@ def ham3RealFamily
     Realized.RealizedMetricFamily (I := I) (M := M) Real :=
   ham3RealFamilyCore (I := I) P.S g0
 
-/-- Intrinsic scalar curvature carried by the flow package: the metric trace
-of the canonical pointwise Ricci tensor. -/
-def ham3Scalar
-    {g0 : SmoothRiemannianMetric I M}
-    (P : Ham3FlowPackage (I := I) (M := M) g0) :
-    Real -> M -> Real :=
-  RicciFlow.SolutionOn.scalar (I := I) (ham3Solution (I := I) P)
-
 /-- Intrinsic squared Ricci norm carried by the flow package. -/
 def ham3RicNormSq
     {g0 : SmoothRiemannianMetric I M}
@@ -467,32 +527,6 @@ theorem ham3_scalarRegular
         have htD : t ∈ P.D.carrier := hsubset t ht
         simp [ham3RealFamily, ham3RealFamilyCore, htD])
       hden)
-
-/-! ## Section 12 blow-up quantities derived from the maximal flow -/
-
-/-- Hamilton's blow-up scale:
-`R_i = R(x_i,t_i)` for the original maximal flow. -/
-def ham3BlowupScale
-    {g0 : SmoothRiemannianMetric I M}
-    (P : Ham3FlowPackage (I := I) (M := M) g0)
-    (Q : Ham3BlowupData M) (i : Nat) : Real :=
-  ham3Scalar (I := I) P (Q.time i) (Q.point i)
-
-/-- Original flow time corresponding to rescaled time `s` in the `i`th blow-up:
-`t_i + s / R_i`. -/
-def ham3RescaledTime
-    {g0 : SmoothRiemannianMetric I M}
-    (P : Ham3FlowPackage (I := I) (M := M) g0)
-    (Q : Ham3BlowupData M) (i : Nat) (s : Real) : Real :=
-  Q.time i + s / ham3BlowupScale (I := I) P Q i
-
-/-- Scalar curvature of the `i`th parabolically rescaled flow. -/
-def ham3RescaledScalar
-    {g0 : SmoothRiemannianMetric I M}
-    (P : Ham3FlowPackage (I := I) (M := M) g0)
-    (Q : Ham3BlowupData M) (i : Nat) (s : Real) (x : M) : Real :=
-  (ham3BlowupScale (I := I) P Q i)⁻¹ *
-    ham3Scalar (I := I) P (ham3RescaledTime (I := I) P Q i s) x
 
 /-- Scalar curvature is unbounded above on the maximal flow interval.
 
@@ -582,6 +616,65 @@ def Ham3Section9RicNonneg
     Realized.TwoTensorFamilyNonnegativeOn (I := I) (M := M)
       (Realized.twoTensorSecToFamily (I := I) (M := M) P.S.ricci)
       (Set.Icc 0 T)
+
+/-- The CGH transfer datum saying that nonnegative Ricci on the selected
+rescaled slabs passes to the smooth limit. -/
+def Ham3RicNonnegTransfer
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (Q : Ham3BlowupData M) (L : Ham3CGHLimitData (I := I) M) : Prop :=
+  Ham3RescaledRicNonneg (I := I) P Q ->
+    LimitRicNonneg (I := I) L
+
+/-- Native Section 10 pinching estimate for the canonical fields of the chosen
+Hamilton flow.  This is the domain-aware estimate on the maximal-flow carrier,
+before the all-real display extension forgets which fields are canonical. -/
+def Ham3PinchEstimate
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0) : Prop :=
+  exists epsilon C : Real,
+    0 < epsilon /\ epsilon < 1 /\ 0 <= C /\
+      RicciFlow.PinchEstimateOn (M := M)
+        (RicciFlow.tfRicNormSq P.S.scalar (RicciFlow.ricciNorm (I := I) P.S))
+        P.S.scalar
+        (RicciFlow.pinchWeight (M := M) P.S.scalar epsilon)
+        C P.D.carrier
+
+/-- The CGH transfer datum needed by the Section 12 pinching paragraph:
+smooth convergence of the selected rescalings, combined with the original
+Section 10 estimate and scalar positivity on the limit, gives arbitrary-small
+upper bounds for the limit trace-free Ricci norm. -/
+def Ham3PinchTransfer
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (_Q : Ham3BlowupData M) (L : Ham3CGHLimitData (I := I) M) : Prop :=
+  Ham3PinchEstimate (I := I) P ->
+    LimitScalarPos (I := I) L ->
+      LimitTfDecay (I := I) L
+
+/-- The conclusion of Black box 11.12 in the Hamilton Section 12 pipeline:
+after passing to a subsequence, the rescaled pointed flows have a smooth
+pointed Cheeger-Gromov-Hamilton limit.
+
+The native project still lacks a full CGH-convergence relation, but the
+conclusion now exposes the actual limit data: a pointed smooth Ricci flow on a
+limit manifold, defined on the fixed backward window and regular on its open
+interior, together with the subsequence selecting the convergent rescalings and
+the scalar/pinching transfer data used by the Section 12 argument. -/
+def Ham3CGHLimitExists
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (Q : Ham3BlowupData M) : Prop :=
+  exists L : Ham3CGHLimitData (I := I) M,
+    Ham3LimitSubseq (I := I) L /\
+      Ham3LimitWindow (I := I) L /\
+      Ham3LimitRegWin (I := I) L /\
+      Ham3LimitConnected (I := I) L /\
+      Ham3LimitBoundaryless (I := I) L /\
+      Ham3LimitFlow (I := I) L /\
+      Ham3RicNonnegTransfer (I := I) P Q L /\
+      Ham3LimitBaseScalarConv (I := I) P Q L /\
+      Ham3PinchTransfer (I := I) P Q L
 
 /-- Eventually the fixed backward time window `[-r0^2,0]` lies inside the
 rescaled time slab `[-R_i t_i,0]`. -/
@@ -1146,7 +1239,7 @@ private theorem ham3_rm_scalar_ctl
     have hscalar_eq :
         P.S.scalar t x = DimensionThree.ricciEigenScalar3 l1 l2 l3 :=
       RicciFlow.scalar_eq_diag (I := I) hScalarTrace hdiag
-    show 0 <= P.S.scalar t x
+    change 0 <= P.S.scalar t x
     rw [hscalar_eq]
     unfold DimensionThree.ricciEigenScalar3
     nlinarith
@@ -1746,8 +1839,9 @@ theorem ham3_scalar_pos
         (n := 3) (c0 := c0) (t := t) hbound hc0 hden
     simpa [ham3Scalar, ham3Solution] using hpos_t
 
-/-- Hamilton's pinching improvement along the chosen flow. -/
-theorem ham3_pinch_imp
+/-- Hamilton's pinching improvement along the chosen flow, in the native
+domain-aware canonical-field form needed by the Section 12 limit argument. -/
+theorem ham3_pinch_imp_can
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
     [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
@@ -1761,9 +1855,7 @@ theorem ham3_pinch_imp
     (_hsel : Ham3PointSel (I := I) P Q)
     (_hric : Ham3RescaledRicNonneg (I := I) P Q)
     (_hsec9 : Ham3Section9Pinch (I := I) P omega) :
-    exists tracefreeRmNormSq scalar weight : Real -> M -> Real, exists C : Real,
-      RicciFlow.HamiltonTracefreePinchingEstimateOn
-        tracefreeRmNormSq scalar weight C := by
+    Ham3PinchEstimate (I := I) P := by
   rcases hM with ⟨hcompact, hconnected, hboundaryless, hdim⟩
   letI : CompactSpace M := hcompact
   letI : ConnectedSpace M := hconnected
@@ -1782,12 +1874,47 @@ theorem ham3_pinch_imp
       ∀ t : Real, t ∈ P.D.carrier -> ∀ x : M, 0 < P.S.scalar t x :=
     ham3_scalar_pos (I := I) (M := M) h0ω
       ⟨hcompact, hconnected, hboundaryless, hdim⟩ g0 hpos P hD
-  rcases RicciFlow.pinchEstimate_display_sol (I := I) (M := M)
+  rcases RicciFlow.pinchEstimate_sol (I := I) (M := M)
       P.S P.isSmooth h0ω hD hdimT hscalar hfixed hnonneg with
-    ⟨tracefreeRmNormSq, scalar, weight, C, hest⟩
+    ⟨epsilon, C, heps0, heps1, hC0, hest⟩
+  exact ⟨epsilon, C, heps0, heps1, hC0, hest⟩
+
+/-- Hamilton's pinching improvement along the chosen flow, in the all-real
+display form used by older endpoint wrappers. -/
+theorem ham3_pinch_imp
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle (1 : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    [ContMDiffVectorBundle (∞ : WithTop ℕ∞) E (TangentSpace I : M -> Type _) I]
+    {omega : Real} (h0ω : 0 < omega)
+    (hM : Closed3Manifold (I := I) (M := M))
+    (g0 : SmoothRiemannianMetric I M)
+    (hpos : PosRicciMetric (I := I) (M := M) g0)
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D = Realized.RealTimeInterval.closedOpen 0 omega h0ω)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (hric : Ham3RescaledRicNonneg (I := I) P Q)
+    (hsec9 : Ham3Section9Pinch (I := I) P omega) :
+    exists tracefreeRmNormSq scalar weight : Real -> M -> Real, exists C : Real,
+      RicciFlow.HamiltonTracefreePinchingEstimateOn
+        tracefreeRmNormSq scalar weight C := by
+  rcases ham3_pinch_imp_can (I := I) (M := M) h0ω hM g0 hpos P hD Q
+      hsel hric hsec9 with
+    ⟨epsilon, C, _heps0, _heps1, _hC0, hest⟩
+  let tracefreeRmNormSq : Real -> M -> Real :=
+    RicciFlow.carrierZeroExt (M := M) P.D
+      (RicciFlow.tfRicNormSq P.S.scalar (RicciFlow.ricciNorm (I := I) P.S))
+  let scalar : Real -> M -> Real :=
+    RicciFlow.carrierScalarExt (M := M) P.D P.S.scalar
+  let weight : Real -> M -> Real :=
+    RicciFlow.carrierWeightExt (M := M) P.D P.S.scalar epsilon
   refine ⟨tracefreeRmNormSq, scalar, weight, C, ?_⟩
+  have hdisplay :
+      RicciFlow.PinchEstimateOn (M := M) tracefreeRmNormSq scalar weight C Set.univ := by
+    simpa [tracefreeRmNormSq, scalar, weight] using
+      RicciFlow.pinchEstimate_ext (M := M) (D := P.D) hest
   intro t x
-  exact hest t trivial x
+  exact hdisplay t trivial x
 
 /-- Corollary 11.4-style producer: nonnegative Ricci controls the full
 curvature tensor on the selected rescaled slabs, with whatever universal
@@ -1848,7 +1975,7 @@ theorem ham3_rm_bound
     have hscalar_eq :
         P.S.scalar τ x = DimensionThree.ricciEigenScalar3 l1 l2 l3 :=
       RicciFlow.scalar_eq_diag (I := I) hScalarTrace hdiag
-    show 0 <= P.S.scalar τ x
+    change 0 <= P.S.scalar τ x
     rw [hscalar_eq]
     unfold DimensionThree.ricciEigenScalar3
     nlinarith
@@ -1963,9 +2090,129 @@ theorem limit_mid_regular
   have hsq : 0 < ham3_r0 ^ 2 := sq_pos_of_ne_zero ham3_r0_pos.ne'
   constructor <;> nlinarith
 
+/-- CGH convergence transfers Ricci nonnegativity from the selected rescaled
+flows to the smooth limit.
+
+This is a genuine convergence-transfer frontier: the proof should pull back
+the Ricci tensors by the CGH maps and pass the pointwise nonnegative quadratic
+form inequality to the limit. -/
+theorem limit_ric_nonneg
+    (_hM : Closed3Manifold (I := I) (M := M))
+    (g0 : SmoothRiemannianMetric I M)
+    (_hpos : PosRicciMetric (I := I) (M := M) g0)
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (Q : Ham3BlowupData M)
+    (_hsel : Ham3PointSel (I := I) P Q)
+    (hric : Ham3RescaledRicNonneg (I := I) P Q)
+    {L : Ham3CGHLimitData (I := I) M}
+    (htransfer : Ham3RicNonnegTransfer (I := I) P Q L)
+    (_hlimit :
+      Ham3LimitSubseq (I := I) L /\
+      Ham3LimitWindow (I := I) L /\
+        Ham3LimitRegWin (I := I) L /\
+        Ham3LimitConnected (I := I) L /\
+        Ham3LimitBoundaryless (I := I) L /\
+        Ham3LimitFlow (I := I) L) :
+    LimitRicNonneg (I := I) L := by
+  exact htransfer hric
+
+/-- The point-selection normalization `R(g_i)(x_i,0)=1` passes to the CGH
+base point in the smooth limit. -/
+theorem limit_base_scalar_one
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    {L : Ham3CGHLimitData (I := I) M}
+    (hconv : Ham3LimitBaseScalarConv (I := I) P Q L) :
+    LimitBaseScalarOne (I := I) L := by
+  classical
+  letI : TopologicalSpace L.N := L.topology
+  letI : ChartedSpace H L.N := L.charted
+  letI : IsManifold I ∞ L.N := L.smooth
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) L.N := L.smooth_plus
+  letI : SigmaCompactSpace L.N := L.sigmaCompact
+  letI : T2Space L.N := L.t2
+  rcases hsel with ⟨_hscale, _htime, _htimeMem, _hprod, hbase, _hscalarMax⟩
+  let f : Nat -> Real :=
+    fun k : Nat =>
+      ham3RescaledScalar (I := I) P Q (L.subseq k) 0 (Q.point (L.subseq k))
+  have hconv' : Filter.Tendsto f Filter.atTop
+      (nhds (L.S.scalar 0 L.basepoint)) := by
+    simpa [Ham3LimitBaseScalarConv, f] using hconv
+  have hconst : Filter.Tendsto f Filter.atTop (nhds (1 : Real)) := by
+    have hf : f = fun _ : Nat => (1 : Real) := by
+      funext k
+      exact hbase (L.subseq k)
+    rw [hf]
+    exact (tendsto_const_nhds : Filter.Tendsto
+      (fun _ : Nat => (1 : Real)) Filter.atTop (nhds (1 : Real)))
+  have heq : L.S.scalar 0 L.basepoint = 1 :=
+    tendsto_nhds_unique hconv' hconst
+  simpa [LimitBaseScalarOne] using heq
+
+/-- Ricci nonnegativity gives nonnegative scalar curvature on the limit flow. -/
+theorem limit_scalar_nonneg
+    {L : Ham3CGHLimitData (I := I) M}
+    (hdim : Module.finrank Real E = 3)
+    (hnonneg : LimitRicNonneg (I := I) L) :
+    LimitScalarNonneg (I := I) L := by
+  classical
+  letI : TopologicalSpace L.N := L.topology
+  letI : ChartedSpace H L.N := L.charted
+  letI : IsManifold I ∞ L.N := L.smooth
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) L.N := L.smooth_plus
+  letI : SigmaCompactSpace L.N := L.sigmaCompact
+  letI : T2Space L.N := L.t2
+  dsimp [LimitScalarNonneg]
+  intro t ht x
+  rcases DimensionThree.ricciEigen3 (I := I) (M := L.N)
+      (L.S.base.metric t) (L.S.ricciAt t x)
+      (by simpa using hdim)
+      (RicciFlow.ricciSym_can (I := I) (M := L.N) L.S t x) with
+    ⟨basis, l1, l2, l3, horth, hdiag⟩
+  have hl1 : 0 <= l1 := by
+    have h := hnonneg t ht x (basis 0)
+    have hcomp := hdiag.2 0 0
+    rw [Realized.ricciCompAt_apply] at hcomp
+    have hval :
+        L.S.ricciAt t x (Curvature.vec2 (I := I) (basis 0) (basis 0)) = l1 := by
+      simpa [DimensionThree.ricciDiag3] using hcomp
+    rwa [hval] at h
+  have hl2 : 0 <= l2 := by
+    have h := hnonneg t ht x (basis 1)
+    have hcomp := hdiag.2 1 1
+    rw [Realized.ricciCompAt_apply] at hcomp
+    have hval :
+        L.S.ricciAt t x (Curvature.vec2 (I := I) (basis 1) (basis 1)) = l2 := by
+      simpa [DimensionThree.ricciDiag3] using hcomp
+    rwa [hval] at h
+  have hl3 : 0 <= l3 := by
+    have h := hnonneg t ht x (basis 2)
+    have hcomp := hdiag.2 2 2
+    rw [Realized.ricciCompAt_apply] at hcomp
+    have hval :
+        L.S.ricciAt t x (Curvature.vec2 (I := I) (basis 2) (basis 2)) = l3 := by
+      simpa [DimensionThree.ricciDiag3] using hcomp
+    rwa [hval] at h
+  have hScalarTrace :
+      Realized.ScalarRealizesRicciTraceAt (I := I)
+        (L.S.scalar t x) (L.S.ricciAt t x) DimensionThree.delta3 basis := by
+    have htr :=
+      RicciFlow.scalarTrace_delta (I := I) (L.S.base.metric t)
+        (L.S.ricciAt t x) horth
+    simpa [RicciFlow.SolutionOn.scalar_eq_metricTrace] using htr
+  have hscalar_eq :
+      L.S.scalar t x = DimensionThree.ricciEigenScalar3 l1 l2 l3 :=
+    RicciFlow.scalar_eq_diag (I := I) hScalarTrace hdiag
+  rw [hscalar_eq]
+  unfold DimensionThree.ricciEigenScalar3
+  nlinarith
+
 /-- CGH convergence plus the already-checked rescaled scalar/Ricci inputs
 produce the concrete limit data used in the final Section 12 argument:
-Ricci nonnegativity and base-point scalar normalization. -/
+Ricci nonnegativity, base-point scalar normalization, and the pinching
+transfer datum. -/
 theorem limit_inherit
     (hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M)
@@ -1977,44 +2224,141 @@ theorem limit_inherit
     (_hcgh : Ham3CGHLimitExists (I := I) P Q) :
     exists L : Ham3CGHLimitData (I := I) M,
       Ham3LimitSubseq (I := I) L /\
-        Ham3LimitWindow (I := I) L /\
+      Ham3LimitWindow (I := I) L /\
         Ham3LimitRegWin (I := I) L /\
         Ham3LimitConnected (I := I) L /\
+        Ham3LimitBoundaryless (I := I) L /\
         Ham3LimitFlow (I := I) L /\
+        Ham3RicNonnegTransfer (I := I) P Q L /\
+        Ham3PinchTransfer (I := I) P Q L /\
         LimitRicNonneg (I := I) L /\
         LimitBaseScalarOne (I := I) L := by
-  sorry
+  rcases _hcgh with
+    ⟨L, hsubseq, hwindow, hregwin, hconn, hbdry, hflow,
+      hricTransfer, hbaseconv, hpinchTransfer⟩
+  have hlimit :
+      Ham3LimitSubseq (I := I) L /\
+      Ham3LimitWindow (I := I) L /\
+        Ham3LimitRegWin (I := I) L /\
+        Ham3LimitConnected (I := I) L /\
+        Ham3LimitBoundaryless (I := I) L /\
+        Ham3LimitFlow (I := I) L :=
+    ⟨hsubseq, hwindow, hregwin, hconn, hbdry, hflow⟩
+  have hnonneg : LimitRicNonneg (I := I) L :=
+    limit_ric_nonneg (I := I) (M := M) hM g0 hpos P Q _hsel _hric
+      hricTransfer hlimit
+  have hbase : LimitBaseScalarOne (I := I) L :=
+    limit_base_scalar_one (I := I) (M := M) P Q _hsel hbaseconv
+  exact ⟨L, hsubseq, hwindow, hregwin, hconn, hbdry, hflow,
+    hricTransfer, hpinchTransfer, hnonneg, hbase⟩
 
 /-- Limit Ricci nonnegativity plus scalar normalization give scalar positivity
 on the limit by the scalar strong maximum principle. -/
-theorem limit_scal_pos
+theorem limit_scal_pos_smp
     {L : Ham3CGHLimitData (I := I) M}
+    (_hconn : Ham3LimitConnected (I := I) L)
     (_hflow : Ham3LimitFlow (I := I) L)
-    (_hnonneg : LimitRicNonneg (I := I) L)
-    (_hbase : LimitBaseScalarOne (I := I) L) :
+    (_hbase : LimitBaseScalarOne (I := I) L)
+    (_hscalarNonneg : LimitScalarNonneg (I := I) L) :
     LimitScalarPos (I := I) L := by
+  -- Frontier: scalar strong maximum principle on the connected CGH limit.
+  -- The scalar satisfies `∂t R = ΔR + 2|Ric|^2`, is nonnegative everywhere,
+  -- and is positive at the base point at time `0`.
   sorry
 
-/-- The Section 10 improved pinching estimate passes to the smooth CGH limit
-and kills the trace-free Ricci part. -/
-theorem limit_tf_zero
+/-- Limit Ricci nonnegativity plus scalar normalization give scalar positivity
+on the limit by scalar nonnegativity and the scalar strong maximum principle. -/
+theorem limit_scal_pos
+    {L : Ham3CGHLimitData (I := I) M}
+    (hdim : Module.finrank Real E = 3)
+    (hconn : Ham3LimitConnected (I := I) L)
+    (hflow : Ham3LimitFlow (I := I) L)
+    (hnonneg : LimitRicNonneg (I := I) L)
+    (hbase : LimitBaseScalarOne (I := I) L) :
+    LimitScalarPos (I := I) L := by
+  exact limit_scal_pos_smp (I := I) (M := M) hconn hflow hbase
+    (limit_scalar_nonneg (I := I) (M := M) hdim hnonneg)
+
+/-- The CGH/pinching decay statement is an exact convergence frontier: prove it
+from smooth pointed convergence of the rescaled flows, the rescaling rule for
+Hamilton's improved pinching estimate, and scalar positivity on compact limit
+sets. -/
+theorem limit_tf_decay
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
     (Q : Ham3BlowupData M)
     {L : Ham3CGHLimitData (I := I) M}
-    (hpinch :
-      exists tracefreeRmNormSq scalar weight : Real -> M -> Real, exists C : Real,
-        RicciFlow.HamiltonTracefreePinchingEstimateOn
-          tracefreeRmNormSq scalar weight C)
+    (htransfer : Ham3PinchTransfer (I := I) P Q L)
+    (hpinch : Ham3PinchEstimate (I := I) P)
     (_hlimit :
       Ham3LimitSubseq (I := I) L /\
-        Ham3LimitWindow (I := I) L /\
+      Ham3LimitWindow (I := I) L /\
         Ham3LimitRegWin (I := I) L /\
         Ham3LimitConnected (I := I) L /\
+        Ham3LimitBoundaryless (I := I) L /\
+        Ham3LimitFlow (I := I) L)
+    (hscalarPos : LimitScalarPos (I := I) L) :
+    LimitTfDecay (I := I) L := by
+  -- This is the remaining analytic CGH-transfer step: pull back the
+  -- scale-invariant trace-free ratio, use the rescaled estimate
+  -- `C * R_i^{-ε} * R(g_i)^{-ε}`, and let `i -> ∞`.
+  exact htransfer hpinch hscalarPos
+
+/-- Once the pinching estimate has been transferred to arbitrary-small upper
+bounds on the CGH limit, nonnegativity of the canonical trace-free Ricci norm
+upgrades the decay statement to actual vanishing. -/
+theorem limit_tf_zero_of_decay
+    {L : Ham3CGHLimitData (I := I) M}
+    (hdim : Module.finrank Real E = 3)
+    (hdecay : LimitTfDecay (I := I) L) :
+    LimitTfZero (I := I) L := by
+  classical
+  intro t ht
+  letI : TopologicalSpace L.N := L.topology
+  letI : ChartedSpace H L.N := L.charted
+  letI : IsManifold I ∞ L.N := L.smooth
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) L.N := L.smooth_plus
+  letI : SigmaCompactSpace L.N := L.sigmaCompact
+  letI : T2Space L.N := L.t2
+  intro x
+  let q : Real :=
+    RicciFlow.tfRicNormSq L.S.scalar (RicciFlow.ricciNorm (I := I) L.S) t x
+  have hnonneg : 0 <= q := by
+    have hdimT :
+        forall (_t : Real) (y : L.N),
+          Module.finrank Real (TangentSpace I y) = 3 := by
+      intro _ y
+      simpa using hdim
+    simpa [q] using
+      (RicciFlow.tfNonneg_sol (I := I) (M := L.N) L.S hdimT t x)
+  have hle0 : q <= 0 := by
+    have hforall : forall ε : Real, 0 < ε -> q <= 0 + ε := by
+      intro ε hε
+      simpa [q] using hdecay t ht x ε hε
+    exact le_of_forall_pos_le_add hforall
+  simpa [q] using le_antisymm hle0 hnonneg
+
+/-- The Section 10 improved pinching estimate passes to the smooth CGH limit
+and kills the trace-free Ricci part. -/
+theorem limit_tf_zero
+    (hdim : Module.finrank Real E = 3)
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (Q : Ham3BlowupData M)
+    {L : Ham3CGHLimitData (I := I) M}
+    (htransfer : Ham3PinchTransfer (I := I) P Q L)
+    (hpinch : Ham3PinchEstimate (I := I) P)
+    (_hlimit :
+      Ham3LimitSubseq (I := I) L /\
+      Ham3LimitWindow (I := I) L /\
+        Ham3LimitRegWin (I := I) L /\
+        Ham3LimitConnected (I := I) L /\
+        Ham3LimitBoundaryless (I := I) L /\
         Ham3LimitFlow (I := I) L)
     (_hscalarPos : LimitScalarPos (I := I) L) :
     LimitTfZero (I := I) L := by
-  sorry
+  exact limit_tf_zero_of_decay (I := I) (M := M) hdim
+    (limit_tf_decay (I := I) (M := M) P Q htransfer hpinch _hlimit _hscalarPos)
 
 /-- Vanishing trace-free Ricci norm gives the pointwise Einstein equation
 `Ric = (R / 3) g` at that time. -/
@@ -2132,14 +2476,112 @@ Einstein factor is constant, then the three-dimensional Riemann-from-Ricci
 component bridge with the RicciFlower slot convention. -/
 theorem limit_const_sec_of_einstein
     {L : Ham3CGHLimitData (I := I) M}
-    (_hdim : Module.finrank Real E = 3)
-    (_hconn : Ham3LimitConnected (I := I) L)
+    (hdim : Module.finrank Real E = 3)
+    (hconn : Ham3LimitConnected (I := I) L)
+    (hbdry : Ham3LimitBoundaryless (I := I) L)
     (_hflow : Ham3LimitFlow (I := I) L)
     {t0 : Real} (_ht0 : t0 ∈ L.D.regular)
-    (_hscalar : LimitScalarPosAt (I := I) L t0)
-    (_heinstein : LimitEinsteinAt (I := I) L t0) :
+    (hscalar : LimitScalarPosAt (I := I) L t0)
+    (heinstein : LimitEinsteinAt (I := I) L t0) :
     LimitConstPosSec (I := I) L := by
-  sorry
+  classical
+  letI : TopologicalSpace L.N := L.topology
+  letI : ChartedSpace H L.N := L.charted
+  letI : IsManifold I ∞ L.N := L.smooth
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) L.N := L.smooth_plus
+  letI : SigmaCompactSpace L.N := L.sigmaCompact
+  letI : T2Space L.N := L.t2
+  haveI : ConnectedSpace L.N := by
+    simpa [Ham3LimitConnected] using hconn
+  haveI : I.Boundaryless := by
+    simpa [Ham3LimitBoundaryless] using hbdry
+  let g : SmoothRiemannianMetric I L.N := L.S.base.metric t0
+  have hEinStatic :
+      ∀ y : L.N, ∀ v w : TangentSpace I y,
+        Curvature.metricRicciAt (I := I) (M := L.N) g y
+            (Realized.vec2 (I := I) v w) =
+          (Curvature.metricScalarAt (I := I) (M := L.N) g y / 3) *
+            g.inner y v w := by
+    intro y v w
+    have h := heinstein y v w
+    simpa [g, LimitEinsteinAt, RicciFlow.SolutionOn.ricciAt,
+      RicciFlow.SolutionFamily.ricciAt, RicciFlow.metricRicciAt,
+      RicciFlow.SolutionOn.scalar, RicciFlow.SolutionFamily.scalar,
+      RicciFlow.metricScalarAt] using h
+  have hdScalar :
+      ∀ x : L.N, ∀ X : TangentSpace I x,
+        Realized.differential1FormFun (I := I)
+            (fun y : L.N =>
+              Curvature.metricScalarAt (I := I) (M := L.N) g y)
+            x (fun _ : Fin 1 => X) = 0 := by
+    intro x X
+    have hdimT : Module.finrank Real (TangentSpace I x) = 3 := by
+      simpa using hdim
+    have hsym : DimensionThree.RicciSymAt (I := I)
+        (L.S.ricciAt t0 x) :=
+      RicciFlow.ricciSym_can (I := I) (M := L.N) L.S t0 x
+    rcases DimensionThree.ricciEigen3 (I := I) (M := L.N) g
+        (L.S.ricciAt t0 x) hdimT hsym with
+      ⟨basis, _l1, _l2, _l3, horth, _hdiag⟩
+    have hinv :
+        Tensor0SBundle.MetricInverseInBasis (I := I) (M := L.N) g x basis
+          DimensionThree.delta3 :=
+      DimensionThree.orthonormal_invBasis3 (I := I) (M := L.N) g basis horth
+    exact Curvature.dScalar_zero_ein3_at (I := I) (M := L.N) g basis
+      DimensionThree.delta3 hinv hEinStatic X
+  rcases Curvature.metricScalar_const_of_dScalar_zero (I := I) (M := L.N) g
+      hdScalar with
+    ⟨R0, hR0_metric⟩
+  have hR0_scalar : ∀ x : L.N, L.S.scalar t0 x = R0 := by
+    intro x
+    have hx := hR0_metric x
+    simpa [g, RicciFlow.SolutionOn.scalar, RicciFlow.SolutionFamily.scalar,
+      RicciFlow.metricScalarAt] using hx
+  have hR0_pos : 0 < R0 := by
+    have hb := hscalar L.basepoint
+    rw [hR0_scalar L.basepoint] at hb
+    exact hb
+  refine ⟨g, R0 / 6, by nlinarith, ?_⟩
+  intro x X Y
+  have hdimT : Module.finrank Real (TangentSpace I x) = 3 := by
+    simpa using hdim
+  have hsym : DimensionThree.RicciSymAt (I := I)
+      (L.S.ricciAt t0 x) :=
+    RicciFlow.ricciSym_can (I := I) (M := L.N) L.S t0 x
+  rcases DimensionThree.ricciEigen3 (I := I) (M := L.N) g
+      (L.S.ricciAt t0 x) hdimT hsym with
+    ⟨basis, _l1, _l2, _l3, horth, _hdiag⟩
+  have htrace :=
+    RicciFlow.traceData_can (I := I) (M := L.N) L.S
+      (t := t0) (x := x) (basis := basis) horth
+  have hEinCompNeg : ∀ i j : Fin 3,
+      Realized.ricciCompAt (I := I) basis (-(L.S.ricciAt t0 x)) i j =
+        ((-L.S.scalar t0 x) / 3) * DimensionThree.delta3 i j := by
+    intro i j
+    have hij := heinstein x (basis i) (basis j)
+    rw [Realized.ricciCompAt_apply]
+    change -(L.S.ricciAt t0 x
+        (Curvature.vec2 (I := I) (basis i) (basis j))) =
+      ((-L.S.scalar t0 x) / 3) * DimensionThree.delta3 i j
+    rw [hij]
+    rw [horth i j]
+    ring
+  have hRm :=
+    DimensionThree.rm04_einstein3_at (I := I) (M := L.N) htrace
+      hEinCompNeg X Y
+  have hscalar_x : L.S.scalar t0 x = R0 := hR0_scalar x
+  calc
+    Curvature.metricRm04StdAt (I := I) (M := L.N) g x X Y Y X =
+        L.S.base.rm04 t0 x (Curvature.vec4 (I := I) X X Y Y) := by
+          rfl
+    _ = -((-L.S.scalar t0 x) / 6) *
+          (g.inner x X X * g.inner x Y Y -
+            g.inner x X Y * g.inner x X Y) := hRm
+    _ = (R0 / 6) *
+          (g.inner x X X * g.inner x Y Y -
+            g.inner x X Y * g.inner x X Y) := by
+          rw [hscalar_x]
+          ring
 
 /-- Pointwise 3D algebra/geometric frontier behind the final constant-curvature
 step: at one regular time, positive scalar plus vanishing trace-free Ricci
@@ -2148,6 +2590,7 @@ theorem const_pos_of_tf0
     {L : Ham3CGHLimitData (I := I) M}
     (hdim : Module.finrank Real E = 3)
     (hconn : Ham3LimitConnected (I := I) L)
+    (hbdry : Ham3LimitBoundaryless (I := I) L)
     (hflow : Ham3LimitFlow (I := I) L)
     {t0 : Real} (ht0 : t0 ∈ L.D.regular)
     (hscalar : LimitScalarPosAt (I := I) L t0)
@@ -2155,7 +2598,7 @@ theorem const_pos_of_tf0
     LimitConstPosSec (I := I) L := by
   have heinstein : LimitEinsteinAt (I := I) L t0 :=
     limitEinstein_of_tf0 (I := I) (M := M) hdim htf
-  exact limit_const_sec_of_einstein (I := I) (M := M) hdim hconn hflow ht0
+  exact limit_const_sec_of_einstein (I := I) (M := M) hdim hconn hbdry hflow ht0
     hscalar heinstein
 
 /-- In dimension three, a smooth limit flow with positive scalar curvature and
@@ -2166,6 +2609,7 @@ theorem limit_const_pos
     (hdim : Module.finrank Real E = 3)
     (hreg : Ham3LimitRegWin (I := I) L)
     (hconn : Ham3LimitConnected (I := I) L)
+    (hbdry : Ham3LimitBoundaryless (I := I) L)
     (hflow : Ham3LimitFlow (I := I) L)
     (hscalarPos : LimitScalarPos (I := I) L)
     (htf : LimitTfZero (I := I) L) :
@@ -2173,7 +2617,7 @@ theorem limit_const_pos
   let t0 : Real := -(ham3_r0 ^ 2) / 2
   have ht0 : t0 ∈ L.D.regular := by
     simpa [t0] using limit_mid_regular (I := I) (M := M) hreg
-  exact const_pos_of_tf0 (I := I) (M := M) hdim hconn hflow ht0
+  exact const_pos_of_tf0 (I := I) (M := M) hdim hconn hbdry hflow ht0
     (hscalarPos t0 ht0) (htf t0 ht0)
 
 /-- Myers/compactness and the eventual diffeomorphism in the CGH convergence
@@ -2189,6 +2633,7 @@ theorem limit_to_orig
         Ham3LimitWindow (I := I) L /\
         Ham3LimitRegWin (I := I) L /\
         Ham3LimitConnected (I := I) L /\
+        Ham3LimitBoundaryless (I := I) L /\
         Ham3LimitFlow (I := I) L)
     (_hconst : LimitConstPosSec (I := I) L) :
     exists gInf : SmoothRiemannianMetric I M,
@@ -2205,28 +2650,28 @@ theorem ham3_limit_const_metric
     (Q : Ham3BlowupData M)
     (hsel : Ham3PointSel (I := I) P Q)
     (hric : Ham3RescaledRicNonneg (I := I) P Q)
-    (hpinch :
-      exists tracefreeRmNormSq scalar weight : Real -> M -> Real, exists C : Real,
-        RicciFlow.HamiltonTracefreePinchingEstimateOn
-          tracefreeRmNormSq scalar weight C)
+    (hpinch : Ham3PinchEstimate (I := I) P)
     (hcgh : Ham3CGHLimitExists (I := I) P Q) :
     exists gInf : SmoothRiemannianMetric I M,
       ConstPosSecMetric (I := I) (M := M) gInf := by
   have hdim : Module.finrank Real E = 3 := hM.2.2.2
   rcases limit_inherit (I := I) (M := M) hM g0 hpos P Q hsel hric hcgh with
-    ⟨L, hsubseq, hwindow, hregwin, hconn, hflow, hnonneg, hbase⟩
+    ⟨L, hsubseq, hwindow, hregwin, hconn, hbdry, hflow,
+      _hricTransfer, hpinchTransfer, hnonneg, hbase⟩
   have hlimit :
       Ham3LimitSubseq (I := I) L /\
         Ham3LimitWindow (I := I) L /\
         Ham3LimitRegWin (I := I) L /\
         Ham3LimitConnected (I := I) L /\
-        Ham3LimitFlow (I := I) L := ⟨hsubseq, hwindow, hregwin, hconn, hflow⟩
+        Ham3LimitBoundaryless (I := I) L /\
+        Ham3LimitFlow (I := I) L :=
+    ⟨hsubseq, hwindow, hregwin, hconn, hbdry, hflow⟩
   have hscalarPos : LimitScalarPos (I := I) L :=
-    limit_scal_pos (I := I) (M := M) hflow hnonneg hbase
+    limit_scal_pos (I := I) (M := M) hdim hconn hflow hnonneg hbase
   have htf : LimitTfZero (I := I) L :=
-    limit_tf_zero (I := I) (M := M) P Q hpinch hlimit hscalarPos
+    limit_tf_zero (I := I) (M := M) hdim P Q hpinchTransfer hpinch hlimit hscalarPos
   have hconst : LimitConstPosSec (I := I) L :=
-    limit_const_pos (I := I) (M := M) hdim hregwin hconn hflow hscalarPos htf
+    limit_const_pos (I := I) (M := M) hdim hregwin hconn hbdry hflow hscalarPos htf
   exact limit_to_orig (I := I) (M := M) hM P Q hlimit hconst
 
 /-- If a limiting constant-positive-sectional metric has been produced, then
@@ -2265,11 +2710,8 @@ theorem ham3_const_metric
     ham3_rescaled_ric_nonneg (I := I) (M := M) h0ω hM g0 hg0 P hD Q hsel
   have hsec9 : Ham3Section9Pinch (I := I) P omega :=
     ham3_pinch9 (I := I) (M := M) h0ω hM hg0 P hD
-  have hpinch :
-      exists tracefreeRmNormSq scalar weight : Real -> M -> Real, exists C : Real,
-        RicciFlow.HamiltonTracefreePinchingEstimateOn
-          tracefreeRmNormSq scalar weight C :=
-    ham3_pinch_imp (I := I) (M := M) h0ω hM g0 hg0 P hD Q hsel hric hsec9
+  have hpinch : Ham3PinchEstimate (I := I) P :=
+    ham3_pinch_imp_can (I := I) (M := M) h0ω hM g0 hg0 P hD Q hsel hric hsec9
   have hrm :
       exists C : Real, 0 < C /\
         forall (i : Nat) (s : Real) (x : M),

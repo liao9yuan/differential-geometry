@@ -107,6 +107,22 @@ def tensor04ToField (Rm04 : Tensor04Section (I := I) (M := M)) :
     RawFourTensorField (I := I) (M := M) :=
   fun x W X Y Z => Rm04 x (vec4 W X Y Z)
 
+/-- Standard slot evaluation of a lowered Riemann four-tensor:
+`Rm04Std(X,Y,Z,W) = Rm04(W,X,Y,Z)`.
+
+The historical bundled tensor in RicciFlower stores the metric-output slot
+first.  This evaluator is the canonical user-facing convention
+`Rm04(X,Y,Z,W) = <R(X,Y)Z,W>`. -/
+def tensor04StdAt {x : M} (Rm04 : Tensor04At (I := I) (M := M) x)
+    (X Y Z W : TangentSpace I x) : Real :=
+  Rm04 (vec4 W X Y Z)
+
+/-- Interpret a bundled lowered Riemann section as a raw four-tensor field in
+standard slot order. -/
+def tensor04ToStdField (Rm04 : Tensor04Section (I := I) (M := M)) :
+    RawFourTensorField (I := I) (M := M) :=
+  fun x X Y Z W => tensor04StdAt (I := I) (Rm04 x) X Y Z W
+
 /-- Ricci component in a static frame. -/
 def ricciComp
     {Idx : Type*}

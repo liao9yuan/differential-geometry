@@ -36,7 +36,7 @@ pointed Cheeger--Gromov--Hamilton limit flow on the same time interval. -/
 def CompactnessConclusion (X : PointedFlowSeq.{u, uE, uH} (I := I)) : Prop :=
   exists L : LimitFlowData.{u, uE, uH} I X.D, exists subseq : Nat -> Nat,
     StrictMono subseq /\
-      Nonempty (SmoothCGHConverges (I := I) X L subseq)
+      Nonempty.{max (max uE uH) u + 1} (SmoothCGHConverges (I := I) X L subseq)
 
 end HCGCompactness
 end RicciFlower

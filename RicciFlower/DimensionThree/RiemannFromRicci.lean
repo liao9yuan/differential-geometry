@@ -749,6 +749,70 @@ theorem rm04_einstein3_at
   simp [slots4, Curvature.vec4, delta3, Fin.sum_univ_three, Fin.prod_univ_four]
   ring
 
+/-- First-trace version of the three-dimensional Einstein space-form bridge.
+
+This consumes RicciFlower's geometric first-trace realization.  Because
+`traceDataOfFirst` converts geometric Ricci/scalar to the displayed algebraic
+trace data with a minus sign, this theorem is the sign audit needed before
+Hamilton's Section 12 endpoint can use the space-form formula. -/
+theorem rm04_firstTrace_einstein3_at
+    {g : SmoothRiemannianMetric I M}
+    {Ric : Tensor02At (I := I) (M := M) x}
+    {scalar : Real}
+    {Rm04 : Tensor04At (I := I) (M := M) x}
+    {basis : Module.Basis (Fin 3) Real (TangentSpace I x)}
+    (horth : OrthonormalBasisAt (I := I) g x basis)
+    (hcurv : AlgebraicCurvatureSymmetries3 (standardRmCompAt basis Rm04))
+    (hRic : RicciRealizesRm04FirstTraceAt (I := I) Ric Rm04 delta3 basis)
+    (hScalar : ScalarRealizesRicciTraceAt (I := I) scalar Ric delta3 basis)
+    (hEin : ∀ i j : Fin 3,
+      ricciCompAt (I := I) basis Ric i j =
+        (scalar / 3) * delta3 i j)
+    (X Y : TangentSpace I x) :
+    Rm04 (vec4 (I := I) X X Y Y) =
+      (scalar / 6) *
+        (g.inner x X X * g.inner x Y Y -
+          g.inner x X Y * g.inner x X Y) := by
+  classical
+  have htrace :=
+    traceDataOfFirst (I := I) (M := M) horth hcurv hRic hScalar
+  have hEinNeg : ∀ i j : Fin 3,
+      ricciCompAt (I := I) basis (-Ric) i j =
+        ((-scalar) / 3) * delta3 i j := by
+    intro i j
+    have hij := hEin i j
+    rw [ricciCompAt_apply] at hij
+    rw [ricciCompAt_apply]
+    change -(Ric (vec2 (basis i) (basis j))) =
+      ((-scalar) / 3) * delta3 i j
+    rw [hij]
+    ring
+  have hRm :=
+    rm04_einstein3_at (I := I) htrace hEinNeg X Y
+  rw [hRm]
+  ring
+
+/-- Standard-slot version of `rm04_firstTrace_einstein3_at`. -/
+theorem rm04Std_ein3_at
+    {g : SmoothRiemannianMetric I M}
+    {Ric : Tensor02At (I := I) (M := M) x}
+    {scalar : Real}
+    {Rm04 : Tensor04At (I := I) (M := M) x}
+    {basis : Module.Basis (Fin 3) Real (TangentSpace I x)}
+    (horth : OrthonormalBasisAt (I := I) g x basis)
+    (hcurv : AlgebraicCurvatureSymmetries3 (standardRmCompAt basis Rm04))
+    (hRic : RicciRealizesRm04FirstTraceAt (I := I) Ric Rm04 delta3 basis)
+    (hScalar : ScalarRealizesRicciTraceAt (I := I) scalar Ric delta3 basis)
+    (hEin : ∀ i j : Fin 3,
+      ricciCompAt (I := I) basis Ric i j =
+        (scalar / 3) * delta3 i j)
+    (X Y : TangentSpace I x) :
+    Curvature.tensor04StdAt (I := I) (M := M) Rm04 X Y Y X =
+      (scalar / 6) *
+        (g.inner x X X * g.inner x Y Y -
+          g.inner x X Y * g.inner x X Y) :=
+  rm04_firstTrace_einstein3_at (I := I) horth hcurv hRic hScalar hEin X Y
+
 /-- Local-frame wrapper for the pointwise bridge. -/
 theorem rm04Comp_displayedRiemannFromRicci3D_frame
     {g : SmoothRiemannianMetric I M}

@@ -3,6 +3,7 @@ import RicciFlower.RoughLaplacian
 import RicciFlower.Tensor.RSTensor.MetricTrace
 import RicciFlower.LeviCivita.Curvature
 import RicciFlower.LeviCivita.Smooth
+import RicciFlower.VectorBundle.PartialMfderiv.FixedBase
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -88,6 +89,23 @@ noncomputable def metricRm13 (g : SmoothRiemannianMetric I M) :
     (I := I) (M := M) (metricCov (I := I) (M := M) g)
     (metricCov_smooth (I := I) (M := M) g)
 
+/-- Standard slot evaluation of the metric Riemann tensor:
+`Rm04(X,Y,Z,W) = <R(X,Y)Z,W>`.
+
+The underlying bundled section `metricRm04` keeps the output slot first for
+compatibility.  Use this evaluator for new geometric statements. -/
+noncomputable def metricRm04StdAt
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (X Y Z W : TangentSpace I x) : Real :=
+  tensor04StdAt (I := I) (M := M)
+    (metricRm04At (I := I) (M := M) g x) X Y Z W
+
+/-- The metric Riemann tensor as a raw four-tensor field in standard slot
+order. -/
+noncomputable def metricRm04Std (g : SmoothRiemannianMetric I M) :
+    RawFourTensorField (I := I) (M := M) :=
+  fun x X Y Z W => metricRm04StdAt (I := I) (M := M) g x X Y Z W
+
 /-- The Ricci tensor section canonically associated to a metric. -/
 noncomputable def metricRicci (g : SmoothRiemannianMetric I M) :
     Realized.Tensor02Section (I := I) (M := M) :=
@@ -100,6 +118,20 @@ noncomputable def metricRicci (g : SmoothRiemannianMetric I M) :
     metricRm04 (I := I) (M := M) g x =
       metricRm04At (I := I) (M := M) g x := by
   simp [metricRm04, metricRm04At]
+
+@[simp] theorem metricRm04StdAt_apply
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (X Y Z W : TangentSpace I x) :
+    metricRm04StdAt (I := I) (M := M) g x X Y Z W =
+      metricRm04At (I := I) (M := M) g x (vec4 W X Y Z) := by
+  rfl
+
+@[simp] theorem metricRm04Std_apply
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (X Y Z W : TangentSpace I x) :
+    metricRm04Std (I := I) (M := M) g x X Y Z W =
+      metricRm04StdAt (I := I) (M := M) g x X Y Z W := by
+  rfl
 
 @[simp] theorem metricRm13_apply
     (g : SmoothRiemannianMetric I M) (x : M) :
@@ -146,6 +178,41 @@ theorem metricScalar_smooth
   simpa [metricScalarAt] using
     Realized.trace02_smooth (I := I) (M := M) g
       (metricRicci (I := I) (M := M) g)
+
+/-- If the scalar differential of a smooth metric vanishes everywhere on a
+connected boundaryless manifold, then the scalar curvature is one global
+constant. -/
+theorem metricScalar_const_of_dScalar_zero
+    [I.Boundaryless] [ConnectedSpace M]
+    (g : SmoothRiemannianMetric I M)
+    (hzero : ∀ x : M, ∀ X : TangentSpace I x,
+      Realized.differential1FormFun (I := I)
+          (fun y : M => metricScalarAt (I := I) (M := M) g y)
+          x (fun _ : Fin 1 => X) = 0) :
+    ∃ R0 : Real, ∀ x : M,
+      metricScalarAt (I := I) (M := M) g x = R0 := by
+  classical
+  let scalar : M -> Real := fun y => metricScalarAt (I := I) (M := M) g y
+  have hmdiff : MDifferentiable I 𝓘(Real, Real) scalar :=
+    (metricScalar_smooth (I := I) (M := M) g).mdifferentiable (by simp)
+  have hmf_zero : ∀ x : M, mfderiv I 𝓘(Real, Real) scalar x = 0 := by
+    intro x
+    ext X
+    have hx := hzero x X
+    rw [Realized.differential1FormFun_apply_eq_extDerivFun] at hx
+    rw [RicciFlower.extDerivFun_real_eq_mfderiv] at hx
+    simpa [scalar] using hx
+  have hloc : IsLocallyConstant scalar :=
+    RicciFlower.isLocallyConstant_of_mfderiv_eq_zero (I := I) hmdiff hmf_zero
+  by_cases hne : Nonempty M
+  · let x0 : M := Classical.choice hne
+    refine ⟨scalar x0, ?_⟩
+    intro x
+    letI : PreconnectedSpace M := inferInstance
+    exact hloc.apply_eq_of_preconnectedSpace x x0
+  · refine ⟨0, ?_⟩
+    intro x
+    exact False.elim (hne ⟨x⟩)
 
 /-- Three-dimensional Einstein differentiation input for Schur's lemma:
 if `Ric = (R / 3) g` as a static tensor field, then

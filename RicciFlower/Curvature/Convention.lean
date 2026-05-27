@@ -19,14 +19,16 @@ component convention live here.
 Checklist:
 
 * Ricci from `Rm13` is `contract_trace 0 2`, i.e. first upper with first lower.
-* `Rm04(W,X,Y,Z)` lowers the output slot of `Rm13`:
+* The canonical user-facing lowered curvature convention is standard slot
+  order:
+  `Rm04Std(X,Y,Z,W) = g(W,R(X,Y)Z)`.
+* The historical bundled tensor `Rm04(W,X,Y,Z)` lowers the output slot of
+  `Rm13`:
   `Rm04(W,X,Y,Z) = Rm13(W_flat)(X,Y,Z)`.
 * Lowering the intrinsic Ricci trace gives the first-trace lowered formula
   `Ric_ij = sum_{k,l} gInv k l * Rm04(e_k,e_l,e_i,e_j)`.
   The last-slot trace `Rm04(e_k,e_i,e_j,e_l)` is a legacy compatibility
   orientation and should not be used silently in Lemma 6.3.
-* A realized lowered curvature tensor satisfies
-  `Rm04(W,X,Y,Z) = g(W, R(X,Y)Z)`.
 * The 3D algebra adapter uses
   `standardRmCompAt i j k l = rm04CompAt l i j k`.
 -/
@@ -64,10 +66,19 @@ theorem rm04LowersRm13At_convention
     (Rm04 : Tensor04At (I := I) (M := M) x)
     (h : Realized.Rm04LowersRm13At (I := I) g x Rm13 Rm04)
     (W X Y Z : TangentSpace I x) :
-    Rm04 (vec4 W X Y Z) =
+  Rm04 (vec4 W X Y Z) =
       Rm13 (dualToCotangent (I := I) ((tangentFlatLinear (I := I) g x) W))
         (vec3 X Y Z) :=
   h W X Y Z
+
+/-- Checklist item: the standard slot evaluator is the historical output-first
+lowered tensor with the metric-output slot moved to the end. -/
+theorem tensor04StdAt_convention
+    (Rm04 : Tensor04At (I := I) (M := M) x)
+    (X Y Z W : TangentSpace I x) :
+    tensor04StdAt (I := I) (M := M) Rm04 X Y Z W =
+      Rm04 (vec4 W X Y Z) := by
+  rfl
 
 /-- Checklist item: lowering the intrinsic `Rm13` Ricci trace gives the
 first-trace `Rm04` component orientation. -/
@@ -114,8 +125,7 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- Checklist item: realized `Rm04` uses
-`Rm04(W,X,Y,Z) = g(W, R(X,Y)Z)`. -/
+/-- Checklist item: realized historical `Rm04` uses output-first slots. -/
 theorem rm04RealizesConnection_convention
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
@@ -123,6 +133,19 @@ theorem rm04RealizesConnection_convention
     (h : Rm04RealizesConnection (I := I) g cov Rm04)
     (W X Y Z : SmoothTangentSection (I := I) (M := M)) (x : M) :
     Rm04 x (vec4 (W x) (X x) (Y x) (Z x)) =
+      g.inner x (W x) ((connectionRiemannCurvatureField (I := I) cov X Y Z) x) :=
+  h W X Y Z x
+
+/-- Checklist item: the standard slot view of a realized `Rm04` satisfies
+`Rm04Std(X,Y,Z,W) = g(W,R(X,Y)Z)`. -/
+theorem rm04StdRealizesConnection_convention
+    (g : SmoothRiemannianMetric I M)
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (Rm04 : Tensor04Section (I := I) (M := M))
+    (h : Rm04RealizesConnection (I := I) g cov Rm04)
+    (X Y Z W : SmoothTangentSection (I := I) (M := M)) (x : M) :
+    Curvature.tensor04StdAt (I := I) (M := M) (Rm04 x)
+        (X x) (Y x) (Z x) (W x) =
       g.inner x (W x) ((connectionRiemannCurvatureField (I := I) cov X Y Z) x) :=
   h W X Y Z x
 

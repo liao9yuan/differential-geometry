@@ -12,7 +12,7 @@ daily work logs.
 | Section 6 evolution | Core inverse metric, Christoffel, Ricci, scalar, frame Ricci-norm, smooth-solution Ricci-norm data, and the `smoothOfSol` upgrade are native. |
 | Section 7 scalar WMP/lower bound | Native consumer path; scalar regularity from smooth solutions is available. |
 | Section 9 Ricci preservation | Local algebra, strict initial selectors, theorem-7.5 consumers, canonical Ricci-flow connection/spatial-derivative producers, and the shifted pinching section with tensor-continuity/core-regularity producers are native; the tensor-backed canonical shifted reaction `shiftNAt` and raw adapter `shiftNRaw` have the symmetric null condition checked from first-null geometry, now including the `delta = 0` Ricci-preservation endpoint. The direct shifted parabolic producer is checked as `pinchParabolic`; barrier reaction regularity is checked as `pinchBarrierReg`, `PinchFlowWMPData.ofShiftNClosed` assembles the shifted WMP data from smooth Ricci-flow hypotheses, `ricci_nonneg_sol_closed` proves Ricci nonnegativity from the `delta = 0` endpoint, and `ham3_pinch9` / `ham3_rescaled_ric_nonneg` wire the solution-level Section 9 packages into the Hamilton endpoint layer. |
-| Section 10 pinching | Lemma 10.4 is checked; Lemma 10.5 has checked positive-region and `alpha = 1`, `phi >= 0` side forms, but not the full book-facing hypothesis shape. Lemma 10.6 has checked raw quotient setup, book RHS rewrite, actual tensor-square setup, section-level mixed bridge, canonical solution-section packaging, and the book-facing `pinchEvol_book` theorem. The native estimate interface is present in `ImprovedPinching/Estimate.lean`; the unordered eigenvalue bridge from Section 9 to the Lemma 10.8 reaction sign is checked, the book RHS is bounded by the drift term, the drifted subsolution inequality is checked as `pinchQuotient_parabolic_nonpos`, the compact initial bound is checked, the coordinate-local slab continuity producer for `fun p => ricciNorm S p.1 p.2` is checked, and `pinchEstimate_sol` is checked. `ham3_pinch_imp` consumes the display wrapper. |
+| Section 10 pinching | Lemma 10.4 is checked; Lemma 10.5 has checked positive-region and `alpha = 1`, `phi >= 0` side forms, but not the full book-facing hypothesis shape. Lemma 10.6 has checked raw quotient setup, book RHS rewrite, actual tensor-square setup, section-level mixed bridge, canonical solution-section packaging, and the book-facing `pinchEvol_book` theorem. The native estimate interface is present in `ImprovedPinching/Estimate.lean`; the unordered eigenvalue bridge from Section 9 to the Lemma 10.8 reaction sign is checked, the book RHS is bounded by the drift term, the drifted subsolution inequality is checked as `pinchQuotient_parabolic_nonpos`, the compact initial bound is checked, the coordinate-local slab continuity producer for `fun p => ricciNorm S p.1 p.2` is checked, and `pinchEstimate_sol` is checked. `ham3_pinch_imp_can` exposes the canonical carrier estimate as `Ham3PinchEstimate`; `ham3_pinch_imp` remains the display wrapper. |
 | Section 11/12 global flow | Global analytic and compactness black boxes remain. |
 
 ## Active Native Frontiers
@@ -303,20 +303,38 @@ global inputs.  The non-black-box part formerly hidden in
 `ham3_limit_const_metric` has been split into named Section 12 frontiers:
 `limit_inherit`, `limit_scal_pos`, `limit_tf_zero`, `limit_const_pos`, and
 `limit_to_orig`.  The limit constant-curvature path now explicitly includes
-connectedness and the three-dimensional rank input, and
+connectedness, boundarylessness, and the three-dimensional rank input, and
 `HamiltonPositiveRicci.limitEinstein_of_tf0` checks the pointwise bridge
-`|Ric^o|^2 = 0 -> Ric = (R / 3)g`.  The project sign convention has also been
-audited here: positive sectional curvature is represented by
-`-Rm04(X,X,Y,Y)` in `ConstPosSecMetric`.
+`|Ric^o|^2 = 0 -> Ric = (R / 3)g`.  The project curvature convention now uses
+standard lowered-curvature slots for user-facing statements:
+`Rm04Std(X,Y,Z,W) = <R(X,Y)Z,W>`, and `ConstPosSecMetric` uses the sectional
+numerator `Rm04Std(X,Y,Y,X)`.  The local 3D Schur/space-form step is now
+checked: `limit_const_sec_of_einstein` turns a connected boundaryless
+Einstein limit metric with positive scalar into `ConstPosSecMetric`, and
+`const_pos_of_tf0` / `limit_const_pos` are checked wrappers over it.
+`limit_tf_zero` is also now checked as an order-closure step from
+`LimitTfDecay`.  The theorem `limit_tf_decay` is now a checked consumer of the
+explicit CGH/pinching transfer datum `Ham3PinchTransfer`; the remaining
+producer work is to prove that datum from CGH pullback convergence plus the
+rescaled improved pinching estimate.  The HCG layer has the generic
+order-closure bridge `FunctionPullbackTendsto.le_of_bound0`.
+`limit_ric_nonneg` is now a checked consumer of the explicit CGH Ricci-transfer
+datum `Ham3RicNonnegTransfer`, and `limit_inherit` is checked as an assembly
+theorem over the narrower transfer data.  `limit_scal_pos` is now
+checked as assembly from the checked scalar-nonnegativity bridge
+`limit_scalar_nonneg` and the narrower scalar strong maximum-principle
+frontier `limit_scal_pos_smp`.
 
 Distance: `5`.
 
-Next target: decide which of the split limit-transfer frontiers should be
-opened first; `limit_tf_zero` is the local pinching-to-limit step, while
-`limit_inherit` and `limit_to_orig` depend on a real CGH convergence relation.
-For `limit_const_pos`, the next local target is the Schur bridge and the final
-3D Riemann-from-Ricci bridge, now isolated as
-`HamiltonPositiveRicci.limit_const_sec_of_einstein`.
+Next target: decide which of the remaining split limit-transfer frontiers
+should be opened first; `Ham3PinchTransfer` is the pinching-to-limit
+convergence producer, while `Ham3RicNonnegTransfer`,
+`Ham3LimitBaseScalarConv`, and `limit_to_orig` depend on a real CGH
+convergence relation.
+`limit_scal_pos_smp` is the scalar strong maximum-principle frontier.
+`limit_inherit`, `limit_scal_pos`, `limit_tf_decay`, `limit_tf_zero`, and
+`limit_const_pos` are no longer local geometry frontiers.
 
 ### Appendix Section 14
 

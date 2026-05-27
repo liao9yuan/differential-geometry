@@ -219,7 +219,8 @@ hypothesis is scalar positivity `R > 0`.  The book-facing cleanup theorem
 `pinchEvol_book` adds the book range `0 < epsilon < 1`.  The native estimate
 interface now lives in `ImprovedPinching/Estimate.lean`: `PinchEstimateOn`
 records the domain-aware estimate, carrier-extension helpers provide the
-all-real display functions, and `ham3_pinch_imp` consumes this checked display
+all-real display functions, `Ham3PinchEstimate` keeps the canonical Hamilton
+fields available for Section 12, and `ham3_pinch_imp` remains a checked display
 wrapper.  The Section 9 Ricci nonnegativity and shifted pinching package now
 feeds the Lemma 10.8 reaction sign through unordered pointwise eigenvalue
 data, and checked scalar sign lemmas reduce the Lemma 10.6 book RHS to the
@@ -236,14 +237,28 @@ inputs.  The broad `ham3_limit_const_metric` frontier has been split into
 `limit_inherit`, `limit_scal_pos`, `limit_tf_zero`, `limit_const_pos`, and
 `limit_to_orig` so the CGH-dependent pieces are separated from the local
 pinching-to-limit and 3D constant-curvature steps.  The limit
-constant-curvature statement now explicitly carries connectedness and the
-three-dimensional rank hypothesis, and the checked pointwise bridge
+constant-curvature statement now explicitly carries connectedness,
+boundarylessness, and the three-dimensional rank hypothesis, and the checked pointwise bridge
 `limitEinstein_of_tf0` proves `Ric = (R / 3)g` from zero trace-free Ricci.
-The project convention audit also fixed `ConstPosSecMetric` to use
-`-Rm04(X,X,Y,Y)` as the positive sectional curvature numerator.  The remaining
-local geometry frontier is now the static theorem
-`limit_const_sec_of_einstein`: Schur plus the final 3D Riemann-from-Ricci
-component bridge.
+The project convention audit now treats standard lowered-curvature slots as
+the user-facing convention: `Rm04Std(X,Y,Z,W) = <R(X,Y)Z,W>`.  The Hamilton
+endpoint `ConstPosSecMetric` uses the sectional numerator
+`Rm04Std(X,Y,Y,X)`.  The static local geometry theorem
+`limit_const_sec_of_einstein` is checked: Schur gives one global scalar
+constant on the connected boundaryless limit, and the 3D Riemann-from-Ricci
+  bridge gives constant positive sectional curvature.  The remaining frontiers
+  are now the genuinely global CGH/limit-transfer inputs:
+  `Ham3RicNonnegTransfer`, the CGH basepoint scalar-convergence producer
+  `Ham3LimitBaseScalarConv`, the CGH/pinching transfer producer
+  `Ham3PinchTransfer`, `limit_scal_pos_smp`, and `limit_to_orig`.  The former
+  `limit_inherit` frontier is now checked as an assembly over the narrower
+  limit-transfer producers.
+The former `limit_scal_pos` frontier is checked from `limit_scalar_nonneg`
+plus the scalar strong maximum-principle frontier `limit_scal_pos_smp`, and
+  the former `limit_tf_zero` frontier is checked from `LimitTfDecay` plus
+  canonical nonnegativity of the trace-free Ricci norm.  `limit_tf_decay` is
+  now a checked consumer of `Ham3PinchTransfer`; the remaining gap is the real
+  CGH pullback/rescaling producer behind that transfer datum.
 
 ## Black-Box Policy
 

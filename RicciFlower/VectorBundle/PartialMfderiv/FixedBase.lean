@@ -1,4 +1,6 @@
 import RicciFlower.VectorBundle.PartialMfderiv.ModelMixed
+import RicciFlower.VectorBundle.TangentConst
+import Mathlib.Analysis.Calculus.MeanValue
 
 /-!
 # Fixed-base time derivative producers
@@ -23,6 +25,171 @@ theorem extDerivFun_real_eq_mfderiv
     extDerivFun (I := I) f x V =
       mfderiv I 𝓘(Real, Real) f x V := by
   simp [extDerivFun, NormedSpace.fromTangentSpace]
+
+/-- A scalar chart expression is differentiable at a target point whenever the
+original scalar is manifold-differentiable at the corresponding source point.
+
+The boundaryless hypothesis removes the model-with-corners range from the local
+calculus statement, so the chart representative has an ordinary Frechet
+derivative on the model space. -/
+theorem writtenInExtChartAt_diffAt
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
+    [I.Boundaryless]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I 1 M]
+    {f : M -> Real} {x p : M} {z : E}
+    (hp : p ∈ (chartAt H x).source)
+    (hz : z ∈ (extChartAt I x).target)
+    (hpz : p = (extChartAt I x).symm z)
+    (h : MDifferentiableAt I 𝓘(Real, Real) f p) :
+    DifferentiableAt Real (writtenInExtChartAt I 𝓘(Real, Real) x f) z := by
+  have hmd_within :
+      MDifferentiableWithinAt 𝓘(Real, E) 𝓘(Real, Real)
+        (f ∘ (extChartAt I x).symm) (Set.range I)
+        (extChartAt I x p) := by
+    exact (mdifferentiableAt_iff_source_of_mem_source
+      (I := I) (I' := 𝓘(Real, Real)) (x := x) (x' := p) hp).mp h
+  have hdiff_within :
+      DifferentiableWithinAt Real (writtenInExtChartAt I 𝓘(Real, Real) x f)
+        (Set.range I) (extChartAt I x p) := by
+    simpa [writtenInExtChartAt] using hmd_within.differentiableWithinAt
+  have hrange : Set.range I ∈ nhds z := by
+    rw [ModelWithCorners.Boundaryless.range_eq_univ (I := I)]
+    exact Filter.univ_mem
+  have hpoint : extChartAt I x p = z := by
+    rw [hpz]
+    exact (extChartAt I x).right_inv hz
+  rw [hpoint] at hdiff_within
+  exact hdiff_within.differentiableAt hrange
+
+/-- The scalar exterior derivative applied to the chart-constant tangent vector
+is the model Frechet derivative of the scalar chart representative. -/
+theorem extDerivFun_tangentConstInChart_eq_fderiv
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
+    [I.Boundaryless]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I 1 M]
+    {f : M -> Real} {x p : M}
+    (hp : p ∈ (chartAt H x).source)
+    (hf : MDifferentiableAt I 𝓘(Real, Real) f p)
+    (v : TangentSpace I x) :
+    extDerivFun (I := I) f p
+        (TensorLieDeriv.tangentConstInChart (𝕜 := Real) (I := I) x v p) =
+      fderiv Real (writtenInExtChartAt I 𝓘(Real, Real) x f) (extChartAt I x p) v := by
+  let z : E := extChartAt I x p
+  have hsource : p ∈ (extChartAt I x).source := by
+    simpa [extChartAt_source] using hp
+  have hz_target : z ∈ (extChartAt I x).target := by
+    simpa [z] using (extChartAt I x).map_source hsource
+  have hsymm : (extChartAt I x).symm z = p := by
+    simpa [z] using (extChartAt I x).left_inv hsource
+  have hrange : Set.range I ∈ nhds z := by
+    rw [ModelWithCorners.Boundaryless.range_eq_univ (I := I)]
+    exact Filter.univ_mem
+  have hsymm_mdiff :
+      MDifferentiableWithinAt 𝓘(Real, E) I (extChartAt I x).symm
+        (Set.range I) z := by
+    simpa [z] using mdifferentiableWithinAt_extChartAt_symm (I := I) hz_target
+  have hf_univ :
+      MDifferentiableWithinAt I 𝓘(Real, Real) f Set.univ
+        ((extChartAt I x).symm z) := by
+    rw [hsymm]
+    exact hf.mdifferentiableWithinAt
+  have hmaps :
+      Set.range I ⊆ (extChartAt I x).symm ⁻¹' (Set.univ : Set M) := by
+    intro y hy
+    simp
+  have huniq : UniqueMDiffWithinAt 𝓘(Real, E) (Set.range I) z := by
+    exact (I.uniqueDiffOn.uniqueDiffWithinAt
+      (by exact extChartAt_target_subset_range (I := I) x hz_target)).uniqueMDiffWithinAt
+  have hchain :=
+    mfderivWithin_comp (I := 𝓘(Real, E)) (I' := I) (I'' := 𝓘(Real, Real))
+      (x := z) (g := f) (f := (extChartAt I x).symm)
+      hf_univ hsymm_mdiff hmaps huniq
+  have hchain_apply :
+      fderivWithin Real (writtenInExtChartAt I 𝓘(Real, Real) x f)
+          (Set.range I) z v =
+        mfderiv I 𝓘(Real, Real) f p
+          ((mfderivWithin 𝓘(Real, E) I (extChartAt I x).symm
+            (Set.range I) z) v) := by
+    have happ := congrArg (fun L => L v) hchain
+    rw [mfderivWithin_eq_fderivWithin, mfderivWithin_univ] at happ
+    rw [hsymm] at happ
+    simpa [writtenInExtChartAt, z, ContinuousLinearMap.comp_apply] using happ
+  have hfield :
+      TensorLieDeriv.tangentConstInChart (𝕜 := Real) (I := I) x v p =
+        (mfderivWithin 𝓘(Real, E) I (extChartAt I x).symm
+          (Set.range I) z) v := by
+    have hlin := TangentBundle.symmL_trivializationAt
+      (𝕜 := Real) (I := I) (x₀ := x) (x := p) hp
+    have happ := congrArg (fun L => L v) hlin
+    simpa [TensorLieDeriv.tangentConstInChart, z] using happ
+  have hwithin_to_fderiv :
+      fderivWithin Real (writtenInExtChartAt I 𝓘(Real, Real) x f)
+          (Set.range I) z v =
+        fderiv Real (writtenInExtChartAt I 𝓘(Real, Real) x f) z v := by
+    rw [fderivWithin_of_mem_nhds hrange]
+  rw [extDerivFun_real_eq_mfderiv, hfield]
+  exact hchain_apply.symm.trans hwithin_to_fderiv
+
+/-- A scalar with zero manifold Frechet derivative everywhere is locally
+constant on a boundaryless manifold. -/
+theorem isLocallyConstant_of_mfderiv_eq_zero
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
+    [I.Boundaryless]
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I 1 M]
+    {f : M -> Real}
+    (hf : MDifferentiable I 𝓘(Real, Real) f)
+    (hzero : ∀ x : M, mfderiv I 𝓘(Real, Real) f x = 0) :
+    IsLocallyConstant f := by
+  rw [IsLocallyConstant.iff_eventually_eq]
+  intro x
+  let e := extChartAt I x
+  let F : E -> Real := writtenInExtChartAt I 𝓘(Real, Real) x f
+  have hFdiff : DifferentiableOn Real F e.target := by
+    intro z hz
+    let p : M := e.symm z
+    have hp_ext : p ∈ e.source := e.map_target hz
+    have hp_chart : p ∈ (chartAt H x).source := by
+      simpa [e, extChartAt_source] using hp_ext
+    exact
+      (writtenInExtChartAt_diffAt (I := I) (f := f) hp_chart hz rfl
+        (hf p)).differentiableWithinAt
+  have hFzero : e.target.EqOn (fderiv Real F) 0 := by
+    intro z hz
+    ext v
+    let p : M := e.symm z
+    have hp_ext : p ∈ e.source := e.map_target hz
+    have hp_chart : p ∈ (chartAt H x).source := by
+      simpa [e, extChartAt_source] using hp_ext
+    have hmap : e p = z := by
+      exact e.right_inv hz
+    have hder :=
+      extDerivFun_tangentConstInChart_eq_fderiv (I := I) (f := f)
+        (x := x) (p := p) hp_chart (hf p) v
+    rw [hmap] at hder
+    rw [← hder]
+    simp [extDerivFun_real_eq_mfderiv, hzero p]
+  have hopen :
+      IsOpen (e.target ∩ F ⁻¹' ({F (e x)} : Set Real)) :=
+    (isOpen_extChartAt_target (I := I) x).isOpen_inter_preimage_of_fderiv_eq_zero
+      hFdiff hFzero ({F (e x)} : Set Real)
+  have hxmem : e x ∈ e.target ∩ F ⁻¹' ({F (e x)} : Set Real) := by
+    constructor
+    · exact mem_extChartAt_target x
+    · simp [F]
+  have hpre :
+      e ⁻¹' (e.target ∩ F ⁻¹' ({F (e x)} : Set Real)) ∈ nhds x :=
+    (continuousAt_extChartAt (I := I) x).preimage_mem_nhds (hopen.mem_nhds hxmem)
+  filter_upwards [hpre, extChartAt_source_mem_nhds (I := I) x] with y hy hysource
+  have hxsource : x ∈ e.source := mem_extChartAt_source x
+  have hFy : F (e y) = F (e x) := by
+    simpa using hy.2
+  have hsymm_y : e.symm (e y) = y := e.left_inv hysource
+  have hsymm_x : e.symm (e x) = x := e.left_inv hxsource
+  change f (e.symm (e y)) = f (e.symm (e x)) at hFy
+  simpa [hsymm_y, hsymm_x] using hFy
 
 /-- If a scalar function has a chart representative near the base point, then
 its exterior derivative at the base point is the model `fderiv` of that
