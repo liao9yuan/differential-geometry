@@ -194,10 +194,53 @@ private lemma velocity_totalSpace_continuous
   --   `(trivializationAt E (TangentSpace I) (f p₀.1 p₀.2)).continuousLinearMapAt ℝ
   --       (f p.1 p.2) (mfderiv (fun u => f p.1 u) p.2)`,
   -- applied to `(1 : ℝ)`.
-  -- Bridging step requires identifying these two expressions on the chart base set,
-  -- which is provided by `inCoordinates_eq` once the trivialisation point and base
-  -- set membership are aligned. Deferred to a separate analytic helper.
-  sorry
+  -- Bridge: show the two expressions agree eventually near `p₀`.
+  -- Step 1: a neighbourhood of `p₀` where `f p.1 p.2 ∈ baseSet`.
+  have hf_cts : Continuous (fun p : ℝ × ℝ => f p.1 p.2) := hf_uncurry.continuous
+  have h_baseSet_open : IsOpen
+      ((fun p : ℝ × ℝ => f p.1 p.2) ⁻¹'
+        (trivializationAt E (TangentSpace I) (f p₀.1 p₀.2)).baseSet) :=
+    (Trivialization.open_baseSet _).preimage hf_cts
+  have hp₀_in : p₀ ∈
+      (fun p : ℝ × ℝ => f p.1 p.2) ⁻¹'
+        (trivializationAt E (TangentSpace I) (f p₀.1 p₀.2)).baseSet :=
+    mem_baseSet_trivializationAt E (TangentSpace I) (f p₀.1 p₀.2)
+  have h_nhds : ((fun p : ℝ × ℝ => f p.1 p.2) ⁻¹'
+      (trivializationAt E (TangentSpace I) (f p₀.1 p₀.2)).baseSet) ∈ nhds p₀ :=
+    h_baseSet_open.mem_nhds hp₀_in
+  -- Step 2: the bridge identity on this neighbourhood.
+  have h_eq : ∀ᶠ p in nhds p₀,
+      (trivializationAt E (TangentSpace I) (f p₀.1 p₀.2)
+            ⟨f p.1 p.2, mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f p.1 u) p.2 (1 : ℝ)⟩).2
+        = inTangentCoordinates 𝓘(ℝ, ℝ) I (fun q : ℝ × ℝ => q.2)
+            (fun q : ℝ × ℝ => f q.1 q.2)
+            (fun q : ℝ × ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f q.1 u) q.2)
+            p₀ p (1 : ℝ) := by
+    filter_upwards [h_nhds] with p hp
+    symm
+    unfold inTangentCoordinates
+    change ((trivializationAt E (TangentSpace I) (f p₀.1 p₀.2)).continuousLinearMapAt ℝ
+              (f p.1 p.2)
+            ∘L (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f p.1 u) p.2)
+            ∘L ((trivializationAt ℝ (TangentSpace
+                  (𝓘(ℝ, ℝ) : ModelWithCorners ℝ ℝ ℝ)) p₀.2).symmL ℝ p.2 : ℝ →L[ℝ] ℝ))
+            (1 : ℝ)
+          = _
+    rw [TangentBundle.symmL_model_space]
+    change ((trivializationAt E (TangentSpace I) (f p₀.1 p₀.2)).continuousLinearMapAt ℝ
+            (f p.1 p.2))
+          (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f p.1 u) p.2 (1 : ℝ))
+        = _
+    change ((trivializationAt E (TangentSpace I) (f p₀.1 p₀.2)).linearMapAt ℝ
+            (f p.1 p.2))
+          (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f p.1 u) p.2 (1 : ℝ))
+        = _
+    rw [Trivialization.coe_linearMapAt_of_mem _ hp]
+  -- Step 3: transport smoothness through the equality.
+  change ContMDiffAt _ 𝓘(ℝ, E) ∞
+      (fun p : ℝ × ℝ => (trivializationAt E (TangentSpace I) (f p₀.1 p₀.2)
+        ⟨f p.1 p.2, mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f p.1 u) p.2 (1 : ℝ)⟩).2) p₀
+  exact h_smooth_mfd.congr_of_eventuallyEq h_eq
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
