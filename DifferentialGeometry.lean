@@ -452,6 +452,7 @@ import DifferentialGeometry.Geometry.Riemannian.Geodesic.Uniqueness
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.CrossVFReduction
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.AffineReparam
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.ChartTransition
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.MaximalInterval
 import DifferentialGeometry.Geometry.Riemannian.Exponential.Bridge
 import DifferentialGeometry.Geometry.Riemannian.Exponential.ChartFlowToTangentLift
 import DifferentialGeometry.Geometry.Riemannian.Exponential.ChartIdentification
@@ -491,6 +492,7 @@ import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.Covering
 import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.Manifold
 import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.Riemannian
 import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.LiftedMetricSmoothness
+import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.TruncateHomotopy
 import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.TruncationLift
 import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.Lifts
 import DifferentialGeometry.Geometry.Riemannian.BonnetMyers.RicciBound
