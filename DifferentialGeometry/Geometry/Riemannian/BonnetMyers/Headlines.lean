@@ -171,16 +171,89 @@ theorem pairwise_edist_bound_from_geodesic
     -- geodesic on `Icc 0 L`, which falls out of initial-data ODE
     -- uniqueness on the interior of `Icc 0 L`.
     sorry
-  -- (b) Smoothness of `γ` on all of `ℝ`. Comes from
-  -- `contMDiffOn_Icc_to_contMDiff_univ`, which packages the global ODE
-  -- flow smoothness from `bm_c_gc_assemble`.
+  -- (b) Smoothness of `γ` on all of `ℝ`. Routed through the canonical
+  -- maximal-interval bridge `contMDiffOn_Icc_to_contMDiff_univ`. The
+  -- bridge consumes (i) the Hopf-Rinow geodesic-completeness conclusion
+  -- `maximalGeodesicInterval g x v = Set.univ` (from `bm_c_gc_assemble`),
+  -- (ii) a global geodesic witness `IsGeodesicOnWithInitial g _ Set.univ x v`
+  -- on the canonical curve `maximalGeodesic g x v`, (iii) a pointwise
+  -- agreement statement (taken as `rfl` here by picking the witness
+  -- curve to be `maximalGeodesic g x v` itself), and (iv) the global
+  -- `ContMDiff ∞` smoothness of that curve. Its output is the
+  -- `(IsGeodesic ∧ ContMDiff)` payload for `maximalGeodesic g x v`,
+  -- which we then transport back to `γ` along the function equality
+  -- `γ = maximalGeodesic g x v` (established by ODE initial-data
+  -- uniqueness on the maximal interval, recorded here as a named
+  -- residual gap).
   have hγ_smooth_global : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ := by
-    -- Bridge gap: as in (a), the ODE flow on the universal-extension
-    -- maximal geodesic is jointly smooth in time; identifying γ with
-    -- that flow on `Icc 0 L` (via initial-data uniqueness) extends
-    -- smoothness from `ContMDiffOn ... 1` on `Icc 0 L` to
-    -- `ContMDiff ... ∞` on `Set.univ`.
-    sorry
+    -- Initial velocity of γ at the base point x = γ 0.
+    set v0 : TangentSpace I (γ 0) :=
+      mfderiv 𝓘(ℝ, ℝ) I γ 0 (1 : ℝ) with hv0_def
+    -- (b.1) Geodesic completeness: the maximal interval at (γ 0, v0) is all of ℝ.
+    have h_assemble :
+        DifferentialGeometry.Geometry.Riemannian.Geodesic.maximalGeodesicInterval
+            (I := I) g (γ 0) v0 = Set.univ :=
+      DifferentialGeometry.Geometry.Riemannian.HopfRinow.bm_c_gc_assemble
+        (I := I) g (γ 0) v0
+    -- (b.2) Use the canonical maximal geodesic itself as the global
+    -- witness curve, so the pointwise-agreement hypothesis `hEq` of the
+    -- bridge is satisfied by `rfl`.
+    set γ_uni : ℝ → M :=
+      DifferentialGeometry.Geometry.Riemannian.Geodesic.maximalGeodesic
+        (I := I) g (γ 0) v0 with hγ_uni_def
+    have hEq :
+        ∀ t : ℝ,
+          γ_uni t =
+            DifferentialGeometry.Geometry.Riemannian.Geodesic.maximalGeodesic
+              (I := I) g (γ 0) v0 t := by
+      intro t
+      rfl
+    -- (b.3) Global initial-data geodesic witness for `γ_uni`. The
+    -- substantive content here is that the canonical maximal geodesic
+    -- with initial datum `(γ 0, v0)` is, on its maximal interval (= all
+    -- of ℝ by `h_assemble`), a genuine `IsGeodesicOnWithInitial`-witness.
+    -- This is the canonical-curve property of the maximal-interval
+    -- construction; the explicit packaging is a residual gap from the
+    -- maximal-interval infrastructure module.
+    have hγ_uni_initial :
+        DifferentialGeometry.Geometry.Riemannian.Geodesic.IsGeodesicOnWithInitial
+          (I := I) g γ_uni Set.univ (γ 0) v0 := by
+      sorry
+    -- (b.4) Global `ContMDiff ∞` smoothness of the maximal geodesic.
+    -- Comes from joint smoothness of the ODE flow assembled in
+    -- `bm_c_gc_assemble`. Recorded as a residual gap pending the explicit
+    -- smoothness-propagation lemma at the maximal-interval level.
+    have hSmooth_uni : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ_uni := by
+      sorry
+    -- (b.5) Apply the bridge to obtain `ContMDiff ∞` smoothness of the
+    -- canonical maximal geodesic globally.
+    have h_bridge :
+        DifferentialGeometry.Geometry.Riemannian.Geodesic.IsGeodesic (I := I) g
+            (DifferentialGeometry.Geometry.Riemannian.Geodesic.maximalGeodesic
+              (I := I) g (γ 0) v0) ∧
+          ContMDiff 𝓘(ℝ, ℝ) I ∞
+            (DifferentialGeometry.Geometry.Riemannian.Geodesic.maximalGeodesic
+              (I := I) g (γ 0) v0) :=
+      DifferentialGeometry.Geometry.Riemannian.Geodesic.contMDiffOn_Icc_to_contMDiff_univ
+        (I := I) g (γ 0) v0 h_assemble hγ_uni_initial hEq hSmooth_uni
+    have hSmooth_max : ContMDiff 𝓘(ℝ, ℝ) I ∞
+        (DifferentialGeometry.Geometry.Riemannian.Geodesic.maximalGeodesic
+          (I := I) g (γ 0) v0) := h_bridge.2
+    -- (b.6) Pointwise identification of `γ` with the canonical maximal
+    -- geodesic globally. On `Icc 0 L`, this is ODE initial-data uniqueness
+    -- between the Hopf-Rinow `γ` (a geodesic on `Icc 0 L` with initial
+    -- datum `(γ 0, v0)`) and the canonical `maximalGeodesic g (γ 0) v0`;
+    -- off `Icc 0 L`, the Hopf-Rinow curve is junk-extended via the same
+    -- maximal-interval construction so that the global identification
+    -- holds. Residual gap consumed by the upstream uniqueness chain.
+    have hγ_eq_max :
+        γ =
+          DifferentialGeometry.Geometry.Riemannian.Geodesic.maximalGeodesic
+            (I := I) g (γ 0) v0 := by
+      sorry
+    -- (b.7) Transport `ContMDiff` along the function equality.
+    rw [hγ_eq_max]
+    exact hSmooth_max
   -- (c) A real-valued velocity function with unit `g`-norm.
   -- `TangentSpace I (γ t)` is definitionally `E`, so the `mfderiv` value
   -- coerces directly to `E`. The NACG diamond is suppressed at the head
