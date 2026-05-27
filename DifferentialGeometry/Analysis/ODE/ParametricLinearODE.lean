@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.FlowVariationalLinearMap
+import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
 
 /-!
 # Parametric linear ODE solution operator
@@ -50,7 +51,7 @@ for Picard–Lindelöf to apply to the state space.
 noncomputable section
 
 open Set Function Filter Metric Asymptotics Real
-open scoped Topology NNReal
+open scoped Topology NNReal ContDiff
 
 namespace DifferentialGeometry
 namespace Analysis
@@ -4310,7 +4311,413 @@ theorem linearODESolution_contDiffOn_one
     exact (linearODESolution_hasFDerivAt_joint hab_lt h₀_mem hU hA_cont hDA_cont
       hA_diff hZ₀_cont hDZ₀_cont hZ₀_diff hx ht).fderiv
 
+/-! ### C^n regularity of the parametric linear ODE solution
+
+We prove by induction on `n` that if `A : F → ℝ → (G →L[ℝ] G)` is `C^n` jointly
+and `Z₀ : F → G` is `C^n`, then the parametric solution
+`(x, t) ↦ linearODESolution A a b' h₀ Z₀ x t` is `C^n` on `U ×ˢ Ioo a b'`.
+
+The base case (`n = 0`) is `linearODESolution_continuousOn`.  The inductive
+step uses `contDiffOn_succ_iff_fderiv_of_isOpen` to reduce `C^{n+1}` of the
+solution to `C^n` of its Fréchet derivative.  The derivative is the coprod
+of the CLM-valued x-partial (`variationalW_clm`) and the time-partial
+(`toSpanSingleton(A(x,t)(Z(x,t)))`).  Both components inherit `C^n`
+regularity from the inductive hypothesis applied to the original and
+the augmented variational system. -/
+
+/-- **C^n regularity of the augmented coefficient**.
+
+If `A : F → ℝ → (G →L[ℝ] G)` and `b : F → ℝ → G` are both `C^n` jointly on
+`U ×ˢ Ioo a b'`, then the augmented coefficient `inhomogAugmentedCoeff A b`
+is `C^n` jointly.  This extends `inhomogAugmentedCoeff_continuousOn` to
+general regularity order. -/
+private theorem inhomogAugmentedCoeff_contDiffOn
+    {n : ℕ∞}
+    {A : F → ℝ → (G →L[ℝ] G)} {b : F → ℝ → G}
+    {U : Set F} {a b' : ℝ}
+    (hA : ContDiffOn ℝ n (Function.uncurry A) (U ×ˢ Set.Ioo a b'))
+    (hb : ContDiffOn ℝ n (Function.uncurry b) (U ×ˢ Set.Ioo a b')) :
+    ContDiffOn ℝ n (Function.uncurry (inhomogAugmentedCoeff A b))
+      (U ×ˢ Set.Ioo a b') := by
+  -- `inhomogAugmentedCoeff A b x t = (((A x t).comp fst) + snd.smulRight (b x t)).prod 0`
+  -- Build as composition of smooth bilinear operations.
+  -- First component: `(A x t).comp (fst ℝ G ℝ)` — post-composition by constant fst.
+  have h_first : ContDiffOn ℝ n
+      (fun p : F × ℝ => (A p.1 p.2).comp (ContinuousLinearMap.fst ℝ G ℝ))
+      (U ×ˢ Set.Ioo a b') :=
+    hA.clm_comp contDiffOn_const
+  -- Second component: `(snd ℝ G ℝ).smulRight (b x t)`.
+  have h_second : ContDiffOn ℝ n
+      (fun p : F × ℝ =>
+        (ContinuousLinearMap.snd ℝ G ℝ).smulRight (b p.1 p.2))
+      (U ×ˢ Set.Ioo a b') := by
+    have h_smul_cont : ContDiff ℝ n
+        (fun y : G => (ContinuousLinearMap.snd ℝ G ℝ).smulRight y) :=
+      (ContinuousLinearMap.smulRightL ℝ (G × ℝ) G
+        (ContinuousLinearMap.snd ℝ G ℝ)).contDiff
+    exact h_smul_cont.comp_contDiffOn hb
+  have h_sum : ContDiffOn ℝ n
+      (fun p : F × ℝ =>
+        ((A p.1 p.2).comp (ContinuousLinearMap.fst ℝ G ℝ)) +
+          ((ContinuousLinearMap.snd ℝ G ℝ).smulRight (b p.1 p.2)))
+      (U ×ˢ Set.Ioo a b') := h_first.add h_second
+  -- `.prod 0` via `prodL`.
+  have h_prodL : ContDiff ℝ n
+      (fun q : ((G × ℝ) →L[ℝ] G) × ((G × ℝ) →L[ℝ] ℝ) => q.1.prod q.2) :=
+    (ContinuousLinearMap.prodL (𝕜 := ℝ) (E := G × ℝ) (F := G) (G := ℝ) ℝ).contDiff
+  have h_pair : ContDiffOn ℝ n
+      (fun p : F × ℝ =>
+        (((A p.1 p.2).comp (ContinuousLinearMap.fst ℝ G ℝ)) +
+          ((ContinuousLinearMap.snd ℝ G ℝ).smulRight (b p.1 p.2)),
+        (0 : (G × ℝ) →L[ℝ] ℝ)))
+      (U ×ˢ Set.Ioo a b') := h_sum.prodMk contDiffOn_const
+  exact h_prodL.comp_contDiffOn h_pair
+
+/-- Extract the six hypotheses of `linearODESolution_contDiffOn_one` from
+`ContDiffOn ℝ (↑(n + 1)) (uncurry A)` and `ContDiffOn ℝ (↑(n + 1)) Z₀`,
+plus openness of `U`.
+
+Returns:
+1. `ContinuousOn (uncurry A) (U ×ˢ Ioo a b')`
+2. `ContinuousOn (uncurry (fun x t => fderiv ℝ (fun y => A y t) x)) (U ×ˢ Ioo a b')`
+3. `∀ y ∈ U, ∀ s ∈ Ioo a b', HasFDerivAt (fun z => A z s) (fderiv ℝ (·) y) y`
+4. `ContinuousOn Z₀ U`
+5. `ContinuousOn (fun x => fderiv ℝ Z₀ x) U`
+6. `∀ y ∈ U, HasFDerivAt Z₀ (fderiv ℝ Z₀ y) y`
+-/
+private theorem extract_C1_hypotheses
+    {A : F → ℝ → (G →L[ℝ] G)} {Z₀ : F → G}
+    {a b' : ℝ} {n : ℕ}
+    {U : Set F} (hU : IsOpen U)
+    (hA : ContDiffOn ℝ (↑(n + 1) : ℕ∞) (Function.uncurry A) (U ×ˢ Set.Ioo a b'))
+    (hZ₀ : ContDiffOn ℝ (↑(n + 1) : ℕ∞) Z₀ U) :
+    -- (1) A is continuous
+    ContinuousOn (Function.uncurry A) (U ×ˢ Set.Ioo a b') ∧
+    -- (2) fderiv_x A is jointly continuous
+    ContinuousOn
+      (Function.uncurry fun x t => fderiv ℝ (fun y => A y t) x)
+      (U ×ˢ Set.Ioo a b') ∧
+    -- (3) A is differentiable in x
+    (∀ y ∈ U, ∀ s ∈ Set.Ioo a b',
+      HasFDerivAt (fun z => A z s) (fderiv ℝ (fun z => A z s) y) y) ∧
+    -- (4) Z₀ is continuous
+    ContinuousOn Z₀ U ∧
+    -- (5) fderiv Z₀ is continuous
+    ContinuousOn (fun x => fderiv ℝ Z₀ x) U ∧
+    -- (6) Z₀ is differentiable
+    (∀ y ∈ U, HasFDerivAt Z₀ (fderiv ℝ Z₀ y) y) := by
+  have hS_open : IsOpen (U ×ˢ Set.Ioo a b' : Set (F × ℝ)) := hU.prod isOpen_Ioo
+  have hA_ge1 : ContDiffOn ℝ 1 (Function.uncurry A) (U ×ˢ Set.Ioo a b') :=
+    hA.of_le (by norm_cast; omega)
+  have hZ₀_ge1 : ContDiffOn ℝ 1 Z₀ U := hZ₀.of_le (by norm_cast; omega)
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
+  · -- (1) A is continuous.
+    exact hA_ge1.continuousOn
+  · -- (2) fderiv_x A is jointly continuous.
+    -- The joint fderiv `fderiv ℝ (uncurry A)` is continuous on S (C^1 implies this).
+    have h_fderiv_cont : ContinuousOn (fderiv ℝ (Function.uncurry A))
+        (U ×ˢ Set.Ioo a b') :=
+      hA_ge1.continuousOn_fderiv_of_isOpen hS_open le_rfl
+    -- `fderiv ℝ (fun y => A y t) x = (fderiv ℝ (uncurry A) (x, t)).comp (inl ℝ F ℝ)`
+    -- So the partial fderiv is continuous as a composition.
+    have h_eq : ∀ p : F × ℝ, p ∈ U ×ˢ Set.Ioo a b' →
+        fderiv ℝ (fun y => A y p.2) p.1
+          = (fderiv ℝ (Function.uncurry A) p).comp (ContinuousLinearMap.inl ℝ F ℝ) := by
+      intro ⟨x, t⟩ ⟨hx, ht⟩
+      -- `fun y => A y t = uncurry A ∘ (fun y => (y, t))`
+      have h_eq_comp : (fun y => A y t) = Function.uncurry A ∘ (fun y => (y, t)) := by
+        ext y; simp [Function.uncurry]
+      -- Differentiability of `uncurry A` at `(x, t)`.
+      have h_diffA : DifferentiableAt ℝ (Function.uncurry A) (x, t) := by
+        apply (hA_ge1.differentiableOn (by norm_num : (1 : WithTop ℕ∞) ≠ 0)
+          (x, t) (Set.mem_prod.mpr ⟨hx, ht⟩)).differentiableAt
+        exact hS_open.mem_nhds (Set.mem_prod.mpr ⟨hx, ht⟩)
+      rw [h_eq_comp]
+      rw [fderiv_comp x h_diffA (hasFDerivAt_prodMk_left x t).differentiableAt]
+      simp [hasFDerivAt_prodMk_left x t |>.fderiv]
+    refine (h_fderiv_cont.clm_comp continuousOn_const).congr h_eq
+  · -- (3) A is differentiable in x.
+    intro y hy s hs
+    have h_diffA : DifferentiableAt ℝ (Function.uncurry A) (y, s) := by
+      apply (hA_ge1.differentiableOn (by norm_num : (1 : WithTop ℕ∞) ≠ 0)
+        (y, s) (Set.mem_prod.mpr ⟨hy, hs⟩)).differentiableAt
+      exact hS_open.mem_nhds (Set.mem_prod.mpr ⟨hy, hs⟩)
+    -- `fun z => A z s` is differentiable as a composition.
+    have h_diff_partial : DifferentiableAt ℝ (fun z => A z s) y := by
+      have : (fun z => A z s) = Function.uncurry A ∘ (fun z => (z, s)) := by
+        ext z; simp [Function.uncurry]
+      rw [this]
+      exact h_diffA.comp y (hasFDerivAt_prodMk_left y s).differentiableAt
+    exact h_diff_partial.hasFDerivAt
+  · -- (4) Z₀ is continuous.
+    exact hZ₀_ge1.continuousOn
+  · -- (5) fderiv Z₀ is continuous.
+    exact hZ₀_ge1.continuousOn_fderiv_of_isOpen hU le_rfl
+  · -- (6) Z₀ is differentiable.
+    intro y hy
+    exact ((hZ₀_ge1.differentiableOn (by norm_num : (1 : WithTop ℕ∞) ≠ 0) y hy).differentiableAt
+      (hU.mem_nhds hy)).hasFDerivAt
+
+/-- **C^n regularity of the variational forcing**.
+
+If `A` is `C^{n+1}` jointly and `Z` (the linearODESolution) is `C^n` (by IH), then the
+variational forcing `(x,t) ↦ variationalForcing A a b' h₀ Z₀ x v t` is `C^n`. -/
+private theorem variationalForcing_contDiffOn_of_Z_contDiffOn
+    {n : ℕ∞}
+    {A : F → ℝ → (G →L[ℝ] G)} {a b' : ℝ} {h₀ : ℝ} {Z₀ : F → G}
+    {U : Set F} (hU : IsOpen U)
+    (hA : ContDiffOn ℝ (n + 1) (Function.uncurry A) (U ×ˢ Set.Ioo a b'))
+    (hZ : ContDiffOn ℝ n (Function.uncurry (linearODESolution A a b' h₀ Z₀))
+      (U ×ˢ Set.Ioo a b'))
+    (v : F) :
+    ContDiffOn ℝ n
+      (Function.uncurry (fun x t => variationalForcing A a b' h₀ Z₀ x v t))
+      (U ×ˢ Set.Ioo a b') := by
+  -- variationalForcing A a b' h₀ Z₀ x v t =
+  --   (fderiv ℝ (fun y => A y t) x) v (linearODESolution A a b' h₀ Z₀ x t)
+  -- = CLM-apply ((fderiv_x_A)(x,t)(v)) (Z(x,t))
+  -- The first factor: (x,t) ↦ (fderiv ℝ (fun y => A y t) x) v
+  -- = (fderiv ℝ (uncurry A) (x,t) ∘ inl) v
+  -- This is the evaluation of a CLM at v, applied to the fderiv of uncurry A composed with inl.
+  have hS_open : IsOpen (U ×ˢ Set.Ioo a b' : Set (F × ℝ)) := hU.prod isOpen_Ioo
+  -- fderiv ℝ (uncurry A) is C^n on S (since A is C^{n+1}).
+  have h_fderivA : ContDiffOn ℝ n (fderiv ℝ (Function.uncurry A))
+      (U ×ˢ Set.Ioo a b') :=
+    hA.fderiv_of_isOpen hS_open le_rfl
+  -- (fderiv (uncurry A) p).comp (inl ℝ F ℝ) is C^n.
+  have h_partial : ContDiffOn ℝ n
+      (fun p : F × ℝ => (fderiv ℝ (Function.uncurry A) p).comp
+        (ContinuousLinearMap.inl ℝ F ℝ))
+      (U ×ˢ Set.Ioo a b') :=
+    h_fderivA.clm_comp contDiffOn_const
+  -- Evaluating at v: C^n.
+  have h_eval_v : ContDiffOn ℝ n
+      (fun p : F × ℝ =>
+        ((fderiv ℝ (Function.uncurry A) p).comp (ContinuousLinearMap.inl ℝ F ℝ)) v)
+      (U ×ˢ Set.Ioo a b') :=
+    h_partial.clm_apply contDiffOn_const
+  -- This gives a CLM G →L[ℝ] G applied to Z(x,t).
+  -- We also need: on the domain, `fderiv ℝ (fun y => A y t) x =
+  --   (fderiv ℝ (uncurry A) (x,t)).comp (inl ℝ F ℝ)`.
+  have h_agree : ∀ p : F × ℝ, p ∈ U ×ˢ Set.Ioo a b' →
+      (fderiv ℝ (fun y => A y p.2) p.1)
+        = (fderiv ℝ (Function.uncurry A) p).comp (ContinuousLinearMap.inl ℝ F ℝ) := by
+    intro ⟨x, t⟩ ⟨hx, ht⟩
+    have hA_ge1 : ContDiffOn ℝ 1 (Function.uncurry A) (U ×ˢ Set.Ioo a b') :=
+      hA.of_le (by simp)
+    have h_diffA : DifferentiableAt ℝ (Function.uncurry A) (x, t) := by
+      exact ((hA_ge1.differentiableOn (by norm_num : (1 : WithTop ℕ∞) ≠ 0))
+        (x, t) (Set.mem_prod.mpr ⟨hx, ht⟩)).differentiableAt
+        (hS_open.mem_nhds (Set.mem_prod.mpr ⟨hx, ht⟩))
+    have h_eq_comp : (fun y => A y t) = Function.uncurry A ∘ (fun y => (y, t)) := by
+      ext y; simp [Function.uncurry]
+    rw [h_eq_comp, fderiv_comp x h_diffA (hasFDerivAt_prodMk_left x t).differentiableAt]
+    simp [hasFDerivAt_prodMk_left x t |>.fderiv]
+  -- Show the forcing equals the composition we built.
+  have h_forcing_eq : ∀ p : F × ℝ, p ∈ U ×ˢ Set.Ioo a b' →
+      Function.uncurry (fun x t => variationalForcing A a b' h₀ Z₀ x v t) p
+        = ((fderiv ℝ (Function.uncurry A) p).comp (ContinuousLinearMap.inl ℝ F ℝ)) v
+            (linearODESolution A a b' h₀ Z₀ p.1 p.2) := by
+    intro ⟨x, t⟩ hp
+    simp only [Function.uncurry, variationalForcing]
+    rw [h_agree (x, t) hp]
+  -- The whole forcing = CLM-apply of h_eval_v to Z, which is C^n by bilinear apply.
+  exact (h_eval_v.clm_apply hZ).congr h_forcing_eq
+
 end VariationalSolution
+
+-- The inductive C^n theorem needs to quantify over ALL Banach spaces (since the
+-- inductive step uses the augmented system on G × ℝ while the original system
+-- lives on G).  We therefore close the section and state the theorem outside it,
+-- with the state space universally quantified.
+
+set_option maxHeartbeats 1600000 in
+/-- **C^n regularity of the parametric linear ODE solution operator**.
+
+If `A : F → ℝ → (G →L[ℝ] G)` is `C^n` jointly on `U ×ˢ Ioo a b'` and
+`Z₀ : F → G` is `C^n` on `U`, then the parametric solution
+`(x, t) ↦ linearODESolution A a b' h₀ Z₀ x t` is `C^n` jointly on
+`U ×ˢ Ioo a b'`.
+
+The proof is by induction on `n`:
+- `n = 0`: joint continuity (`linearODESolution_continuousOn`).
+- `n → n + 1`: reduce to `C^n` of the Fréchet derivative via
+  `contDiffOn_succ_iff_fderiv_of_isOpen`.  The derivative is the coprod
+  of `variationalW_clm` (x-partial) and `toSpanSingleton(A(x,t)(Z(x,t)))`
+  (t-partial).  Both components inherit `C^n` from the inductive hypothesis
+  applied to the original system (for the t-partial) and to the augmented
+  variational system (for the x-partial via `contDiffOn_clm_apply`). -/
+theorem linearODESolution_contDiffOn
+    {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [NormedAddCommGroup G] [NormedSpace ℝ G] [CompleteSpace G]
+    [FiniteDimensional ℝ F]
+    {A : F → ℝ → (G →L[ℝ] G)} {Z₀ : F → G}
+    {a b' : ℝ} (hab_lt : a < b') {h₀ : ℝ} (h₀_mem : h₀ ∈ Set.Ioo a b')
+    {U : Set F} (hU : IsOpen U)
+    (n : ℕ)
+    (hA : ContDiffOn ℝ (n : ℕ∞) (Function.uncurry A) (U ×ˢ Set.Ioo a b'))
+    (hZ₀ : ContDiffOn ℝ (n : ℕ∞) Z₀ U) :
+    ContDiffOn ℝ (n : ℕ∞)
+      (Function.uncurry (linearODESolution A a b' h₀ Z₀))
+      (U ×ˢ Set.Ioo a b') := by
+  classical
+  induction n generalizing G with
+  | zero =>
+    exact (contDiffOn_zero.mpr
+      (linearODESolution_continuousOn hab_lt h₀_mem hU hA.continuousOn hZ₀.continuousOn))
+  | succ n ih =>
+    -- IH: for ALL Banach spaces G' and (A', Z₀') with C^n data,
+    -- linearODESolution(A', ..., Z₀') is C^n.
+    -- Apply IH to the CURRENT system with C^n data:
+    have hA_n : ContDiffOn ℝ (n : ℕ∞) (Function.uncurry A) (U ×ˢ Set.Ioo a b') :=
+      hA.of_le (by norm_cast; omega)
+    have hZ₀_n : ContDiffOn ℝ (n : ℕ∞) Z₀ U := hZ₀.of_le (by norm_cast; omega)
+    have hZ_n : ContDiffOn ℝ (n : ℕ∞)
+        (Function.uncurry (linearODESolution A a b' h₀ Z₀)) (U ×ˢ Set.Ioo a b') :=
+      ih hA_n hZ₀_n
+    -- Extract the C^1 hypotheses.
+    have ⟨hA_cont, hDA_cont, hA_diff, hZ₀_cont, hDZ₀_cont, hZ₀_diff⟩ :=
+      extract_C1_hypotheses hU hA hZ₀
+    -- Setup.
+    set Z := linearODESolution A a b' h₀ Z₀ with hZ_def
+    set S := (U ×ˢ Set.Ioo a b' : Set (F × ℝ)) with hS_def
+    have hS_open : IsOpen S := hU.prod isOpen_Ioo
+    -- Use `contDiffOn_succ_iff_fderiv_of_isOpen`.
+    -- We need ContDiffOn at (n+1). Reduce via contDiffOn_succ_iff_fderiv_of_isOpen.
+    suffices h_goal : ContDiffOn ℝ ((↑(↑n : ℕ∞) : WithTop ℕ∞) + 1) (Function.uncurry Z) S by
+      exact_mod_cast h_goal
+    rw [contDiffOn_succ_iff_fderiv_of_isOpen hS_open]
+    refine ⟨?_, ?_, ?_⟩
+    · -- DifferentiableOn.
+      intro ⟨x, t⟩ ⟨hx, ht⟩
+      exact (linearODESolution_hasFDerivAt_joint hab_lt h₀_mem hU hA_cont hDA_cont hA_diff
+        hZ₀_cont hDZ₀_cont hZ₀_diff hx ht).differentiableAt.differentiableWithinAt
+    · -- AnalyticOn (vacuous since n is a natural number, not ω).
+      intro h_absurd
+      exact absurd h_absurd WithTop.coe_ne_top
+    · -- ContDiffOn ℝ n (fderiv ℝ (uncurry Z)) S.
+      -- (a) The t-partial: (x,t) ↦ toSpanSingleton(A(x,t)(Z(x,t))) is C^n.
+      have h_AZ_n : ContDiffOn ℝ (↑n : ℕ∞)
+          (fun p : F × ℝ => A p.1 p.2 (Z p.1 p.2)) S :=
+        hA_n.clm_apply hZ_n
+      have h_toSpan_n : ContDiffOn ℝ (↑n : ℕ∞)
+          (fun p : F × ℝ => ContinuousLinearMap.toSpanSingleton ℝ
+            (A p.1 p.2 (Z p.1 p.2))) S :=
+        (ContinuousLinearMap.toSpanSingletonCLE (𝕜 := ℝ) (E := G)).contDiff.comp_contDiffOn
+          h_AZ_n
+      -- (b) The x-partial (variationalW_clm) is C^n.
+      -- For each v : F, variationalW = fst ∘ linearODESolution(Â, augIC) is C^n by IH.
+      have h_varW_v_n : ∀ v : F, ContDiffOn ℝ (↑n : ℕ∞)
+          (fun p : F × ℝ => variationalW A a b' h₀ Z₀ p.1 v p.2) S := by
+        intro v
+        -- Forcing is C^n.
+        have h_forcing_n : ContDiffOn ℝ (↑n : ℕ∞)
+            (Function.uncurry (fun x t => variationalForcing A a b' h₀ Z₀ x v t))
+            S :=
+          variationalForcing_contDiffOn_of_Z_contDiffOn hU (by exact_mod_cast hA) hZ_n v
+        -- augIC is C^n on U.
+        have hZ₀_fderiv_n : ContDiffOn ℝ (↑n : ℕ∞) (fderiv ℝ Z₀) U :=
+          hZ₀.fderiv_of_isOpen hU (by norm_cast)
+        have h_augIC_n : ContDiffOn ℝ (↑n : ℕ∞)
+            (fun y => ((fderiv ℝ Z₀ y) v, (1 : ℝ))) U :=
+          (hZ₀_fderiv_n.clm_apply contDiffOn_const).prodMk contDiffOn_const
+        -- Â is C^n jointly.
+        have h_Ahat_n : ContDiffOn ℝ (↑n : ℕ∞)
+            (Function.uncurry (inhomogAugmentedCoeff A
+              (fun y t => variationalForcing A a b' h₀ Z₀ y v t))) S :=
+          inhomogAugmentedCoeff_contDiffOn hA_n h_forcing_n
+        -- By IH applied to the augmented system (state space G × ℝ):
+        have h_aug_sol_n : ContDiffOn ℝ (↑n : ℕ∞)
+            (Function.uncurry (linearODESolution
+              (inhomogAugmentedCoeff A (fun y t => variationalForcing A a b' h₀ Z₀ y v t))
+              a b' h₀ (fun y => ((fderiv ℝ Z₀ y) v, (1 : ℝ))))) S :=
+          ih (G := G × ℝ) h_Ahat_n h_augIC_n
+        -- fst is smooth, so fst ∘ augmented solution is C^n.
+        have h_fst_n : ContDiffOn ℝ (↑n : ℕ∞)
+            (fun p : F × ℝ =>
+              (linearODESolution
+                (inhomogAugmentedCoeff A (fun y t => variationalForcing A a b' h₀ Z₀ y v t))
+                a b' h₀ (fun y => ((fderiv ℝ Z₀ y) v, (1 : ℝ))) p.1 p.2).1) S :=
+          contDiff_fst.comp_contDiffOn h_aug_sol_n
+        -- This equals variationalW.
+        exact h_fst_n.congr (fun _ _ => rfl)
+      -- Assemble the CLM-valued function via contDiffOn_clm_apply.
+      have h_clm_n : ContDiffOn ℝ (↑n : ℕ∞)
+          (fun p : F × ℝ =>
+            if hx : p.1 ∈ U then
+              if ht : p.2 ∈ Set.Ioo a b' then
+                variationalW_clm hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont hx ht
+              else 0
+            else 0)
+          S := by
+        rw [contDiffOn_clm_apply]
+        intro v'
+        refine (h_varW_v_n v').congr (fun p hp => ?_)
+        obtain ⟨hx, ht⟩ := Set.mem_prod.mp hp
+        simp only [dif_pos hx, dif_pos ht]
+        exact (variationalW_clm_apply hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont
+          hx ht v').symm
+      -- Coprod: assemble the two components.
+      have h_coprod_n : ContDiffOn ℝ (↑n : ℕ∞)
+          (fun p : F × ℝ =>
+            (if hx : p.1 ∈ U then
+              if ht : p.2 ∈ Set.Ioo a b' then
+                variationalW_clm hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont hx ht
+              else 0
+            else 0).coprod
+              (ContinuousLinearMap.toSpanSingleton ℝ (A p.1 p.2 (Z p.1 p.2))))
+          S := by
+        exact (ContinuousLinearMap.coprodEquivL ℝ
+          (E := F) (F := ℝ) (G := G)).contDiff.comp_contDiffOn
+          (h_clm_n.prodMk h_toSpan_n)
+      -- fderiv agrees with this formula on S.
+      refine h_coprod_n.congr (fun p hp => ?_)
+      obtain ⟨hx, ht⟩ := Set.mem_prod.mp hp
+      have h_eq : (if hx' : p.1 ∈ U then
+          if ht' : p.2 ∈ Set.Ioo a b' then
+            variationalW_clm hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont hx' ht'
+          else 0
+        else 0) = variationalW_clm hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont hx ht := by
+        rw [dif_pos hx, dif_pos ht]
+      change fderiv ℝ (Function.uncurry Z) p
+          = ((if hx' : p.1 ∈ U then
+                if ht' : p.2 ∈ Set.Ioo a b' then
+                  variationalW_clm hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont hx' ht'
+                else 0
+              else 0).coprod
+              (ContinuousLinearMap.toSpanSingleton ℝ (A p.1 p.2 (Z p.1 p.2))))
+      rw [h_eq, hZ_def]
+      conv_lhs => rw [show p = (p.1, p.2) from Prod.mk.eta.symm]
+      exact (linearODESolution_hasFDerivAt_joint hab_lt h₀_mem hU hA_cont hDA_cont
+        hA_diff hZ₀_cont hDZ₀_cont hZ₀_diff hx ht).fderiv
+
+section CInfinityRegularity
+
+variable {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+  [NormedAddCommGroup G] [NormedSpace ℝ G] [CompleteSpace G]
+
+/-- **C^∞ regularity of the parametric linear ODE solution operator**.
+
+If `A : F → ℝ → (G →L[ℝ] G)` is `C^∞` jointly on `U ×ˢ Ioo a b'` and
+`Z₀ : F → G` is `C^∞` on `U`, then the parametric solution
+`(x, t) ↦ linearODESolution A a b' h₀ Z₀ x t` is `C^∞` jointly on
+`U ×ˢ Ioo a b'`. -/
+theorem linearODESolution_contDiffOn_top
+    [FiniteDimensional ℝ F]
+    {A : F → ℝ → (G →L[ℝ] G)} {Z₀ : F → G}
+    {a b' : ℝ} (hab_lt : a < b') {h₀ : ℝ} (h₀_mem : h₀ ∈ Set.Ioo a b')
+    {U : Set F} (hU : IsOpen U)
+    (hA : ContDiffOn ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) (Function.uncurry A) (U ×ˢ Set.Ioo a b'))
+    (hZ₀ : ContDiffOn ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) Z₀ U) :
+    ContDiffOn ℝ ((⊤ : ℕ∞) : WithTop ℕ∞)
+      (Function.uncurry (linearODESolution A a b' h₀ Z₀))
+      (U ×ˢ Set.Ioo a b') := by
+  rw [contDiffOn_infty]
+  intro k
+  exact linearODESolution_contDiffOn hab_lt h₀_mem hU k
+    (hA.of_le (by exact_mod_cast le_top)) (hZ₀.of_le (by exact_mod_cast le_top))
+
+end CInfinityRegularity
 
 end Flow
 end ODE
