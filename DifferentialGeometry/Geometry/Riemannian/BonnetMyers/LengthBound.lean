@@ -248,8 +248,355 @@ theorem sum_index_form_integrand_eval
               * Real.cos (Real.pi * t / L) ^ 2
             - Real.sin (Real.pi * t / L) ^ 2
                 * ricciTensor (I := I) g (γ t) (uPrime t) (uPrime t) := by
-  intro t _ht
-  sorry
+  classical
+  intro t ht
+  -- Shorthands
+  set sinπL : ℝ := Real.sin (Real.pi * t / L) with hsinπL
+  set cosπL : ℝ := Real.cos (Real.pi * t / L) with hcosπL
+  set piOverL : ℝ := Real.pi / L with hpiOverL
+  -- Step 1: derivative of the scalar weight `s ↦ sin(π s / L)` at `t`.
+  have h_weight_hasDeriv :
+      HasDerivAt (fun s : ℝ => Real.sin (Real.pi * s / L))
+        (piOverL * cosπL) t := by
+    -- chain rule: deriv (sin (πs/L)) = cos(πs/L) * (π/L)
+    have hid : HasDerivAt (fun s : ℝ => s) 1 t := hasDerivAt_id t
+    have h_lin : HasDerivAt (fun s : ℝ => Real.pi * s) (Real.pi * 1) t :=
+      hid.const_mul Real.pi
+    have h_lin' : HasDerivAt (fun s : ℝ => Real.pi * s) Real.pi t := by
+      simpa using h_lin
+    have hinner : HasDerivAt (fun s : ℝ => Real.pi * s / L) (Real.pi / L) t := by
+      simpa [mul_div_assoc] using h_lin'.div_const L
+    have hsin : HasDerivAt
+        ((fun u => Real.sin u) ∘ (fun s : ℝ => Real.pi * s / L))
+        (Real.cos (Real.pi * t / L) * (Real.pi / L)) t :=
+      (Real.hasDerivAt_sin (Real.pi * t / L)).comp t hinner
+    have hsin' : HasDerivAt (fun s : ℝ => Real.sin (Real.pi * s / L))
+        (Real.cos (Real.pi * t / L) * (Real.pi / L)) t := hsin
+    -- Convert to piOverL * cosπL form.
+    have : Real.cos (Real.pi * t / L) * (Real.pi / L) = piOverL * cosπL := by
+      simp [piOverL, cosπL, mul_comm]
+    rw [this] at hsin'
+    exact hsin'
+  -- Step 2: gammaPrime at `t` (the chart velocity) is `uPrime t`.
+  have h_gammaPrime : (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ) : E) = uPrime t :=
+    _huPrimeEq t ht
+  -- Step 3: For each i, ∇_t V_i(t) = piOverL * cos(πt/L) • (e i).toFun t.
+  have h_nabla_V :
+      ∀ i : Fin (Module.finrank ℝ E - 1),
+        chartCovDerivAlong (I := I) g (γ t) γ
+            ((SectionAlongCurve.smulFun
+              (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun) t
+          = (piOverL * cosπL) • (e i).toFun t := by
+    intro i
+    -- The underlying function of `smulFun ...` is `s ↦ sin(πs/L) • (e i).toFun s`.
+    -- We compute `chartCovDerivAlong` from its definition.
+    -- The `(e i).toFun` is differentiable at `t`.
+    have h_ei_diff : DifferentiableAt ℝ (e i).toFun t := _heDiff i t ht
+    have h_ei_hasDeriv : HasDerivAt (e i).toFun (deriv (e i).toFun t) t :=
+      h_ei_diff.hasDerivAt
+    -- Leibniz: HasDerivAt for `fun s => sin(πs/L) • (e i).toFun s`
+    have h_smul_hasDeriv :
+        HasDerivAt (fun s : ℝ => Real.sin (Real.pi * s / L) • (e i).toFun s)
+          (Real.sin (Real.pi * t / L) • deriv (e i).toFun t
+            + (piOverL * cosπL) • (e i).toFun t) t :=
+      h_weight_hasDeriv.smul h_ei_hasDeriv
+    -- The function `(smulFun ...).toFun` is `s ↦ sin(πs/L) • (e i).toFun s`.
+    have h_fun_eq :
+        (SectionAlongCurve.smulFun
+            (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun =
+          (fun s : ℝ => Real.sin (Real.pi * s / L) • (e i).toFun s) := by
+      funext s; simp
+    -- Hence its derivative at t equals the Leibniz value.
+    have h_deriv_V :
+        deriv (SectionAlongCurve.smulFun
+              (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun t
+          = sinπL • deriv (e i).toFun t + (piOverL * cosπL) • (e i).toFun t := by
+      rw [h_fun_eq]
+      exact h_smul_hasDeriv.deriv
+    -- Now expand `chartCovDerivAlong` for the scaled section.
+    have h_smul_val :
+        (SectionAlongCurve.smulFun
+            (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun t
+          = sinπL • (e i).toFun t := by
+      simp [sinπL]
+    -- The chartChristoffelContraction with sin • (e i).toFun t pulls sin out.
+    have h_Γ_smul :
+        chartChristoffelContraction (I := I) g (γ t)
+            (deriv (chartCurve (I := I) (γ t) γ) t)
+            (sinπL • (e i).toFun t)
+            (chartCurve (I := I) (γ t) γ t)
+          = sinπL • chartChristoffelContraction (I := I) g (γ t)
+              (deriv (chartCurve (I := I) (γ t) γ) t)
+              ((e i).toFun t)
+              (chartCurve (I := I) (γ t) γ t) :=
+      ChartChristoffel.contraction_smul_right
+        (g := g) (α := γ t)
+        (y := chartCurve (I := I) (γ t) γ t)
+        sinπL (deriv (chartCurve (I := I) (γ t) γ) t) ((e i).toFun t)
+    -- Use _hParallel: chartCovDerivAlong g (γ t) γ (e i).toFun t = 0.
+    have h_parallel_at_t :
+        chartCovDerivAlong (I := I) g (γ t) γ (e i).toFun t = 0 :=
+      _hParallel i t ht
+    -- Rewrite both sides via chartCovDerivAlong_def.
+    rw [chartCovDerivAlong_def]
+    -- LHS now: deriv (smulFun ...).toFun t + Γ(... , (smulFun ...).toFun t, ...).
+    rw [h_deriv_V, h_smul_val, h_Γ_smul]
+    -- Group terms; use h_parallel_at_t (chartCovDerivAlong_def again).
+    have h_parallel_expanded :
+        deriv (e i).toFun t
+          + chartChristoffelContraction (I := I) g (γ t)
+              (deriv (chartCurve (I := I) (γ t) γ) t)
+              ((e i).toFun t)
+              (chartCurve (I := I) (γ t) γ t) = 0 := by
+      have := h_parallel_at_t
+      rw [chartCovDerivAlong_def] at this
+      exact this
+    -- Goal: sinπL • deriv (e i).toFun t + (piOverL * cosπL) • (e i).toFun t
+    --       + sinπL • Γ((e i).toFun t) = (piOverL * cosπL) • (e i).toFun t
+    -- Equivalent to: sinπL • (deriv (e i).toFun t + Γ(...)) = 0.
+    have h_sin_zero :
+        sinπL • (deriv (e i).toFun t
+          + chartChristoffelContraction (I := I) g (γ t)
+              (deriv (chartCurve (I := I) (γ t) γ) t)
+              ((e i).toFun t)
+              (chartCurve (I := I) (γ t) γ t)) = 0 := by
+      rw [h_parallel_expanded, smul_zero]
+    -- Distribute sinπL •.
+    rw [smul_add] at h_sin_zero
+    -- Goal manipulation.
+    linear_combination (norm := module) h_sin_zero
+  -- Step 4: For each i, the per-i integrand equals
+  --   (piOverL * cosπL)² - sinπL² · ⟨R(e_i, γ', γ'), e_i⟩_g.
+  -- We expand the integrand using the named pieces.
+  have h_integrand_i :
+      ∀ i : Fin (Module.finrank ℝ E - 1),
+        indexFormIntegrand (I := I) g γ
+            ((SectionAlongCurve.smulFun
+              (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun)
+            ((SectionAlongCurve.smulFun
+              (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun) t
+        = (piOverL * cosπL) ^ 2
+          - sinπL ^ 2 *
+              g.inner (γ t)
+                (riemannOp (LeviCivita (I := I) g) (γ t)
+                  ((e i).toFun t) (uPrime t) (uPrime t))
+                ((e i).toFun t) := by
+    intro i
+    -- Substitute chartCovDerivAlong values, gammaPrime.
+    -- The let-bindings need to be unfolded; use simp only with rfl-defs.
+    -- We rewrite the result by computing each component.
+    have h_ndV := h_nabla_V i
+    have h_V_val :
+        (SectionAlongCurve.smulFun
+            (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun t
+          = sinπL • (e i).toFun t := by simp [sinπL]
+    -- Compute ⟨∇V, ∇V⟩_g = (piOverL * cosπL)^2 · 1.
+    have h_inner_ND :
+        g.inner (γ t)
+            ((piOverL * cosπL) • (e i).toFun t)
+            ((piOverL * cosπL) • (e i).toFun t)
+          = (piOverL * cosπL) ^ 2 := by
+      -- g.inner is bilinear; pull out scalars.
+      have hpull1 : g.inner (γ t) ((piOverL * cosπL) • (e i).toFun t)
+            = (piOverL * cosπL) • g.inner (γ t) ((e i).toFun t) :=
+        (g.inner (γ t)).map_smul (piOverL * cosπL) ((e i).toFun t)
+      rw [hpull1]
+      -- Now `(piOverL * cosπL) • g.inner (γ t) ((e i).toFun t)` is an `E →L[ℝ] ℝ`,
+      -- and its application to ((piOverL * cosπL) • (e i).toFun t) equals
+      -- `(piOverL * cosπL) * g.inner (γ t) ((e i).toFun t) ((piOverL * cosπL) • (e i).toFun t)`.
+      have : ((piOverL * cosπL) • g.inner (γ t) ((e i).toFun t))
+              ((piOverL * cosπL) • (e i).toFun t)
+            = (piOverL * cosπL) *
+              (g.inner (γ t) ((e i).toFun t))
+                ((piOverL * cosπL) • (e i).toFun t) := by
+        simp [ContinuousLinearMap.smul_apply, smul_eq_mul]
+      rw [this]
+      have hpull2 :
+          (g.inner (γ t) ((e i).toFun t)) ((piOverL * cosπL) • (e i).toFun t)
+            = (piOverL * cosπL) *
+              (g.inner (γ t) ((e i).toFun t)) ((e i).toFun t) := by
+        have hms : (g.inner (γ t) ((e i).toFun t)) ((piOverL * cosπL) • (e i).toFun t)
+            = (piOverL * cosπL) • (g.inner (γ t) ((e i).toFun t)) ((e i).toFun t) :=
+          (g.inner (γ t) ((e i).toFun t)).map_smul (piOverL * cosπL) ((e i).toFun t)
+        rw [hms]
+        rw [smul_eq_mul]
+      rw [hpull2]
+      have hON_ii : g.inner (γ t) ((e i).toFun t) ((e i).toFun t) = 1 := by
+        have := _hON t ht i i
+        simpa using this
+      rw [hON_ii]; ring
+    -- Compute ⟨R(V, γ', γ'), V⟩_g.
+    -- R(sin • e_i, γ', γ') = sin • R(e_i, γ', γ').
+    have h_riem_pullout :
+        riemannOp (LeviCivita (I := I) g) (γ t)
+            (sinπL • (e i).toFun t)
+            (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))
+            (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))
+          = sinπL •
+            riemannOp (LeviCivita (I := I) g) (γ t)
+              ((e i).toFun t)
+              (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))
+              (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)) := by
+      have hsmul :
+          riemannOp (LeviCivita (I := I) g) (γ t)
+              (sinπL • (e i).toFun t)
+            = sinπL •
+              riemannOp (LeviCivita (I := I) g) (γ t) ((e i).toFun t) := by
+        exact (riemannOp (LeviCivita (I := I) g) (γ t)).map_smul sinπL
+          ((e i).toFun t)
+      rw [hsmul]
+      simp [ContinuousLinearMap.smul_apply]
+    have h_gp : mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ) = uPrime t := h_gammaPrime
+    -- Use h_gp to rewrite gammaPrime in the riemannOp value.
+    have h_inner_R :
+        g.inner (γ t)
+            (riemannOp (LeviCivita (I := I) g) (γ t)
+              (sinπL • (e i).toFun t)
+              (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))
+              (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)))
+            (sinπL • (e i).toFun t)
+          = sinπL ^ 2 *
+              g.inner (γ t)
+                (riemannOp (LeviCivita (I := I) g) (γ t)
+                  ((e i).toFun t) (uPrime t) (uPrime t))
+                ((e i).toFun t) := by
+      rw [h_riem_pullout]
+      -- Now g.inner (γ t) (sinπL • R(e_i, γ', γ')) (sinπL • e_i)
+      -- = sinπL · g.inner (γ t) (R(...)) (sinπL • e_i)
+      -- = sinπL · (sinπL · g.inner (γ t) (R(...)) (e_i))
+      have hL1 :
+          g.inner (γ t)
+              (sinπL • riemannOp (LeviCivita (I := I) g) (γ t)
+                ((e i).toFun t)
+                (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))
+                (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)))
+            = sinπL • g.inner (γ t)
+              (riemannOp (LeviCivita (I := I) g) (γ t)
+                ((e i).toFun t)
+                (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))
+                (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))) :=
+        (g.inner (γ t)).map_smul sinπL _
+      rw [hL1]
+      have hR1 :
+          (sinπL • g.inner (γ t)
+              (riemannOp (LeviCivita (I := I) g) (γ t)
+                ((e i).toFun t)
+                (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))
+                (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))))
+            (sinπL • (e i).toFun t)
+            = sinπL *
+              (g.inner (γ t)
+                (riemannOp (LeviCivita (I := I) g) (γ t)
+                  ((e i).toFun t)
+                  (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))
+                  (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))))
+              (sinπL • (e i).toFun t) := by
+        simp [ContinuousLinearMap.smul_apply, smul_eq_mul]
+      rw [hR1]
+      have hR2 :
+          (g.inner (γ t)
+              (riemannOp (LeviCivita (I := I) g) (γ t)
+                ((e i).toFun t)
+                (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))
+                (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))))
+            (sinπL • (e i).toFun t)
+            = sinπL *
+              (g.inner (γ t)
+                (riemannOp (LeviCivita (I := I) g) (γ t)
+                  ((e i).toFun t)
+                  (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))
+                  (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))))
+              ((e i).toFun t) := by
+        have hms : (g.inner (γ t)
+            (riemannOp (LeviCivita (I := I) g) (γ t)
+              ((e i).toFun t)
+              (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))
+              (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))))
+              (sinπL • (e i).toFun t)
+            = sinπL • (g.inner (γ t)
+              (riemannOp (LeviCivita (I := I) g) (γ t)
+                ((e i).toFun t)
+                (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))
+                (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))))
+              ((e i).toFun t) :=
+          (g.inner (γ t)
+            (riemannOp (LeviCivita (I := I) g) (γ t)
+              ((e i).toFun t)
+              (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ))
+              (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ)))).map_smul sinπL ((e i).toFun t)
+        rw [hms]
+        rw [smul_eq_mul]
+      rw [hR2, h_gp]
+      ring
+    -- Now assemble.
+    -- Goal: indexFormIntegrand ... = (piOverL * cosπL)^2 - sinπL^2 * R-inner-thing.
+    -- After unfolding the let-bindings inside `indexFormIntegrand`, the goal
+    -- becomes a subtraction equation we can chain via `rw`.
+    simp only [indexFormIntegrand]
+    rw [h_ndV, h_V_val, h_inner_ND, h_inner_R]
+  -- Step 5: Sum over i, decompose using h_integrand_i.
+  -- ∑_i [a - b · c_i] = (n-1) * a - b · ∑_i c_i
+  have h_sum_split :
+      ∑ i : Fin (Module.finrank ℝ E - 1),
+        indexFormIntegrand (I := I) g γ
+            ((SectionAlongCurve.smulFun
+              (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun)
+            ((SectionAlongCurve.smulFun
+              (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun) t
+        = (∑ _i : Fin (Module.finrank ℝ E - 1), (piOverL * cosπL) ^ 2)
+          - sinπL ^ 2 * ∑ i : Fin (Module.finrank ℝ E - 1),
+            g.inner (γ t)
+              (riemannOp (LeviCivita (I := I) g) (γ t)
+                ((e i).toFun t) (uPrime t) (uPrime t))
+              ((e i).toFun t) := by
+    rw [show (∑ i : Fin (Module.finrank ℝ E - 1),
+            indexFormIntegrand (I := I) g γ
+              ((SectionAlongCurve.smulFun
+                (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun)
+              ((SectionAlongCurve.smulFun
+                (fun s => Real.sin (Real.pi * s / L)) (e i)).toFun) t)
+          = ∑ i : Fin (Module.finrank ℝ E - 1),
+              ((piOverL * cosπL) ^ 2
+                - sinπL ^ 2 *
+                  g.inner (γ t)
+                    (riemannOp (LeviCivita (I := I) g) (γ t)
+                      ((e i).toFun t) (uPrime t) (uPrime t))
+                    ((e i).toFun t))
+        from Finset.sum_congr rfl (fun i _ => h_integrand_i i)]
+    rw [Finset.sum_sub_distrib, ← Finset.mul_sum]
+  -- Step 6: Apply trace identity to collapse the Ricci sum.
+  -- Need: uPrime t is a unit g-vector and (e i) is ON-perp to uPrime t.
+  have h_unit : g.inner (γ t) (uPrime t) (uPrime t) = 1 := _hUnit t ht
+  have h_ON_e : ∀ i j, g.inner (γ t) ((e i).toFun t) ((e j).toFun t)
+      = if i = j then 1 else 0 := _hON t ht
+  have h_perp_e : ∀ i, g.inner (γ t) ((e i).toFun t) (uPrime t) = 0 :=
+    _hPerp t ht
+  have h_trace :
+      (∑ i : Fin (Module.finrank ℝ E - 1),
+          g.inner (γ t)
+            (riemannOp (LeviCivita (I := I) g) (γ t)
+              ((e i).toFun t) (uPrime t) (uPrime t))
+            ((e i).toFun t))
+        = ricciTensor (I := I) g (γ t) (uPrime t) (uPrime t) :=
+    trace_identity_sum_sec_curv_equals_ricci (I := I) g (γ t) (uPrime t)
+      h_unit (fun i => (e i).toFun t) h_ON_e h_perp_e
+  -- Step 7: Combine. The constant sum equals (n-1) · (piOverL*cosπL)^2.
+  -- We bind `nm1 : ℝ` to the canonical real cast (`(n - 1 : ℕ) : ℝ`) so the
+  -- inner equality stays inside `ℕ→ℝ` and we lift to `(n : ℝ) - 1` afterwards.
+  have hn_pos : 0 < Module.finrank ℝ E := Nat.pos_of_ne_zero (NeZero.ne _)
+  have h_n_ge_one : 1 ≤ Module.finrank ℝ E := hn_pos
+  have h_const_sum :
+      (∑ _i : Fin (Module.finrank ℝ E - 1), (piOverL * cosπL) ^ 2)
+        = ((Module.finrank ℝ E - 1 : ℕ) : ℝ) * (piOverL * cosπL) ^ 2 := by
+    rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin,
+      nsmul_eq_mul]
+  rw [h_sum_split, h_const_sum, h_trace]
+  -- Cast: ((n-1 : ℕ) : ℝ) = (n : ℝ) - 1 since n ≥ 1.
+  have h_cast : ((Module.finrank ℝ E - 1 : ℕ) : ℝ)
+      = (Module.finrank ℝ E : ℝ) - 1 := by
+    rw [Nat.cast_sub h_n_ge_one, Nat.cast_one]
+  rw [h_cast]
+  ring
 
 /-- **sum-index-form-frame-evaluation.** For a unit-speed geodesic
 `γ : [0, L] → M`, a parallel orthonormal frame `e_i` of `(γ')⊥`, and
