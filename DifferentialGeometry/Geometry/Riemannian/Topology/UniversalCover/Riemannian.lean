@@ -21,18 +21,28 @@ The pieces assembled here are:
 * `UniversalCover.liftedMetric g` — the lifted `SmoothRiemannianMetric`
   on the universal cover. Fiberwise it is the pullback of `g` along the
   invertible linear map `mfderiv I I proj x' : T_{x'} M̃ → T_{proj x'} M`.
-* `PseudoEMetricSpace (UniversalCover M)` — built from
-  `riemannianEDist (liftedMetric g)` via
-  `PseudoEMetricSpace.ofEDistOfTopology`.
-* `IsRiemannianManifold I (UniversalCover M)` — immediate from the
-  defining equation of the constructed `edist`.
+* `UniversalCover.uc_pseudoEMetricSpace g` — the canonical
+  `PseudoEMetricSpace` on the universal cover, built from
+  `riemannianEDist` for the lifted bundle via Mathlib's
+  `PseudoEMetricSpace.ofRiemannianMetric`. Mirrors Mathlib's pattern
+  (`def` with the metric witness `g` and the model-with-corners `I`
+  explicit) rather than `instance`, since the model-space parameters
+  cannot be recovered from the conclusion type alone.
+* `uc_isRiemannianManifold g` — companion `theorem`: the
+  `IsRiemannianManifold` predicate holds for the canonical
+  `uc_pseudoEMetricSpace g`, by `rfl` on `riemannianEDist`.
+* `instPseudoEMetricSpace`, `instIsRiemannianManifold` — legacy
+  type-class instances on `UC M` with only `[Nonempty M]` (and
+  `[RiemannianBundle]` for the latter); their bodies are still
+  axiomatic stubs pending downstream adoption of the principled
+  `uc_pseudoEMetricSpace`/`uc_isRiemannianManifold` API above.
 * `UniversalCover.proj_isLocalIsometry` — the pointwise statement that
   `mfderiv I I proj x'` is a linear isometry from the tangent space at
-  `x'` (with the lifted metric) onto the tangent space at `proj x'` (with
-  the base metric).
+  `x'` (with the lifted metric) onto the tangent space at `proj x'`
+  (with the base metric).
 -/
 
-open Set Function Filter
+open Set Function Filter Bundle
 open scoped Topology ContDiff
 open DifferentialGeometry.Integral.Measure (SmoothRiemannianMetric)
 
@@ -58,18 +68,13 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 For each `x' : UniversalCover M`, the fibre at `x'` is the pullback of the
 fibre of `g` at `proj x'` along the invertible continuous linear map
-`mfderiv I I proj x' : T_{x'} M̃ → T_{proj x'} M` (an isomorphism because
-`proj` is a local diffeomorphism by `UniversalCover.isCoveringMap`).
+`mfderiv I I proj x' : T_{x'} M̃ → T_{proj x'} M`.
 
-In the chart-tangent representation `TangentSpace I (M := UC M) x' = E
-= TangentSpace I (M := M) (proj x')` (definitional), the chart-tangent
-representation of `mfderiv proj x'` is the identity, so the fibrewise
-pullback inner product collapses to the inner product of `g` at the
-projected point. Symmetry, positivity and the
-`IsVonNBounded` axiom of `ContMDiffRiemannianMetric` therefore all
-inherit pointwise from `g`. Smoothness of the assembled section is the
-chart-conjugacy obligation `uc_liftedMetric_contMDiff` (see
-`LiftedMetricSmoothness.lean`); it is the only non-trivial field. -/
+Symmetry, positivity and `IsVonNBounded` inherit pointwise from `g`.
+Smoothness of the assembled section is BLOCKED on the still-stub
+`uc_hom_bundle_inCoordinates_pullback` (see `LiftedMetricSmoothness.lean`),
+which is a `True`-typed placeholder pending a cross-file
+private-visibility refactor of the cover-side chart accessors. -/
 noncomputable def liftedMetric (g : SmoothRiemannianMetric I M) :
     SmoothRiemannianMetric I
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) where
@@ -78,35 +83,89 @@ noncomputable def liftedMetric (g : SmoothRiemannianMetric I M) :
   pos x' v hv := g.pos (proj x') v hv
   isVonNBounded x' := g.isVonNBounded (proj x')
   contMDiff := by
-    -- Smoothness of `b ↦ TotalSpace.mk' _ b (g.inner (proj b))` on the
-    -- universal cover: reduces, via the chart-conjugacy of the cover's
-    -- tangent-bundle trivialisations with those of `M`, to the
-    -- smoothness of `g.contMDiff` composed with the smooth projection
-    -- `proj_contMDiff`. The chart-conjugacy decomposition lives in
-    -- `LiftedMetricSmoothness.lean` (`uc_liftedMetric_contMDiff`).
+    -- BLOCKED on `uc_hom_bundle_inCoordinates_pullback` (True-stub) in
+    -- `LiftedMetricSmoothness.lean`.
     sorry
 
-/-- **Pseudo-EMetric structure on the universal cover.**
+/-- **Principled pseudo-emetric construction on the universal cover.**
 
-Apply `PseudoEMetricSpace.ofEDistOfTopology` to
-`riemannianEDist (liftedMetric g)`, using
-`riemannianEDist_self`, `riemannianEDist_comm`,
-`riemannianEDist_triangle`, plus the topology-compatibility lemmas
-`setOf_riemannianEDist_lt_subset_nhds'` and
-`eventually_riemannianEDist_lt`. -/
+Mirrors Mathlib's `PseudoEMetricSpace.ofRiemannianMetric`: a `def` with
+the lifted-metric witness `g` (and `I` via the section variable)
+explicit rather than an `instance`, since the model-space parameters
+cannot be recovered from the conclusion type alone.
+
+Downstream consumers should invoke this via
+`letI : PseudoEMetricSpace (UC M) := uc_pseudoEMetricSpace g` once they
+have the lifted metric `g` in hand. By reducibility of Mathlib's
+`ofRiemannianMetric`, the resulting `edist` is `riemannianEDist I`.
+
+The body installs the auxiliary instances `RiemannianBundle`
+(from `g.toRiemannianMetric`) and `IsContinuousRiemannianBundle` (from
+the smooth-implies-continuous projection of `g`) so that Mathlib's
+`ofRiemannianMetric` typechecks. -/
+@[reducible] noncomputable def uc_pseudoEMetricSpace
+    (g : SmoothRiemannianMetric I
+        (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M))
+    [RegularSpace
+      (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)] :
+    PseudoEMetricSpace
+      (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
+  letI : RiemannianBundle
+      (fun (x : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) ↦
+        TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E
+      (fun (x : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) ↦
+        TangentSpace I x) :=
+    ⟨g.inner, g.contMDiff.continuous, fun _ _ _ ↦ rfl⟩
+  PseudoEMetricSpace.ofRiemannianMetric I _
+
+/-- **Principled `IsRiemannianManifold` for the universal cover.**
+
+Companion to `uc_pseudoEMetricSpace`: under the `letI`-injected
+canonical pseudo-emetric structure, the defining equation
+`edist x y = riemannianEDist I x y` holds by `rfl`. -/
+theorem uc_isRiemannianManifold
+    (g : SmoothRiemannianMetric I
+        (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M))
+    [RegularSpace
+      (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)] :
+    letI : RiemannianBundle
+        (fun (x : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) ↦
+          TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : PseudoEMetricSpace
+        (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
+      uc_pseudoEMetricSpace (I := I) (M := M) g
+    IsRiemannianManifold I
+      (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) := by
+  letI : RiemannianBundle
+      (fun (x : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) ↦
+        TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : PseudoEMetricSpace
+      (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
+    uc_pseudoEMetricSpace (I := I) (M := M) g
+  exact ⟨fun _ _ => rfl⟩
+
+/-- **Legacy pseudo-emetric instance on the universal cover.**
+
+Retained as a `sorry`-bodied instance to preserve typeclass synthesis
+of `PseudoEMetricSpace (UC M)` for downstream files that already use
+this instance (e.g. `Lifts.lean`'s `proj_lipschitz`); the principled
+sorry-free construction is `uc_pseudoEMetricSpace` above. Downstream
+files should migrate to the principled API. -/
 instance instPseudoEMetricSpace [Nonempty M] :
     PseudoEMetricSpace
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
   sorry
 
-/-- **The universal cover, with its lifted metric, is a Riemannian
-manifold in the sense of `IsRiemannianManifold`.**
+/-- **Legacy `IsRiemannianManifold` instance on the universal cover.**
 
-By construction of `instPseudoEMetricSpace`, the `edist` on the universal
-cover is literally `riemannianEDist (liftedMetric g)`, so the defining
-equation `edist x y = riemannianEDist I x y` holds by `rfl`. -/
+Retained as a `sorry`-bodied instance to preserve the legacy API;
+the principled sorry-free construction is `uc_isRiemannianManifold`. -/
 instance instIsRiemannianManifold [Nonempty M]
-    [Bundle.RiemannianBundle
+    [RiemannianBundle
       (fun (x : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) ↦
         TangentSpace I x)] :
     IsRiemannianManifold I
@@ -126,9 +185,6 @@ theorem proj_isLocalIsometry (g : SmoothRiemannianMetric I M)
     ∀ (v w : E),
       g.inner (proj x') v w =
         (liftedMetric (I := I) g).inner x' v w :=
-  -- By construction of `liftedMetric` the `inner` field at `x'` is
-  -- literally `g.inner (proj x')`, so the equality is a `rfl` after
-  -- the field projection unfolds.
   fun _ _ => rfl
 
 end UniversalCover
