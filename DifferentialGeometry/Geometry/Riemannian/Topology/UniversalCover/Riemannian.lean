@@ -60,12 +60,31 @@ For each `x' : UniversalCover M`, the fibre at `x'` is the pullback of the
 fibre of `g` at `proj x'` along the invertible continuous linear map
 `mfderiv I I proj x' : T_{x'} M̃ → T_{proj x'} M` (an isomorphism because
 `proj` is a local diffeomorphism by `UniversalCover.isCoveringMap`).
-Smoothness inherits from the smoothness of `g` and the smoothness of
-`proj`. -/
+
+In the chart-tangent representation `TangentSpace I (M := UC M) x' = E
+= TangentSpace I (M := M) (proj x')` (definitional), the chart-tangent
+representation of `mfderiv proj x'` is the identity, so the fibrewise
+pullback inner product collapses to the inner product of `g` at the
+projected point. Symmetry, positivity and the
+`IsVonNBounded` axiom of `ContMDiffRiemannianMetric` therefore all
+inherit pointwise from `g`. Smoothness of the assembled section is the
+chart-conjugacy obligation `uc_liftedMetric_contMDiff` (see
+`LiftedMetricSmoothness.lean`); it is the only non-trivial field. -/
 noncomputable def liftedMetric (g : SmoothRiemannianMetric I M) :
     SmoothRiemannianMetric I
-      (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
-  sorry
+      (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) where
+  inner x' := g.inner (proj x')
+  symm x' v w := g.symm (proj x') v w
+  pos x' v hv := g.pos (proj x') v hv
+  isVonNBounded x' := g.isVonNBounded (proj x')
+  contMDiff := by
+    -- Smoothness of `b ↦ TotalSpace.mk' _ b (g.inner (proj b))` on the
+    -- universal cover: reduces, via the chart-conjugacy of the cover's
+    -- tangent-bundle trivialisations with those of `M`, to the
+    -- smoothness of `g.contMDiff` composed with the smooth projection
+    -- `proj_contMDiff`. The chart-conjugacy decomposition lives in
+    -- `LiftedMetricSmoothness.lean` (`uc_liftedMetric_contMDiff`).
+    sorry
 
 /-- **Pseudo-EMetric structure on the universal cover.**
 
@@ -107,7 +126,10 @@ theorem proj_isLocalIsometry (g : SmoothRiemannianMetric I M)
     ∀ (v w : E),
       g.inner (proj x') v w =
         (liftedMetric (I := I) g).inner x' v w :=
-  sorry
+  -- By construction of `liftedMetric` the `inner` field at `x'` is
+  -- literally `g.inner (proj x')`, so the equality is a `rfl` after
+  -- the field projection unfolds.
+  fun _ _ => rfl
 
 end UniversalCover
 end Topology
