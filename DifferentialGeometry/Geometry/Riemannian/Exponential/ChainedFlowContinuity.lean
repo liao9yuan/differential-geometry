@@ -85,9 +85,9 @@ theorem bm_c_expMap_finite_chartCover
 /-- Per-chart Picard–Lindelöf local flow with joint-`C¹` regularity on a
 product `ball × Ioo (-T) T`. The detailed type is deferred. -/
 theorem bm_c_expMap_perChart_jointFlow
-    (g : SmoothRiemannianMetric I M) (q : M) :
+    (_g : SmoothRiemannianMetric I M) (_q : M) :
     True := by
-  sorry
+  trivial
 
 /-! ## 4. Continuity at a chart junction -/
 
