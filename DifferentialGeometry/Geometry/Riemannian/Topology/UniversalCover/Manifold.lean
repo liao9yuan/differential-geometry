@@ -10,6 +10,7 @@ import Mathlib.Topology.ShrinkingLemma
 import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.LinearAlgebra.FiniteDimensional.Basic
 import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.CoveringMap
+import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.CountablePi1
 
 /-!
 # Manifold structure on the universal cover
@@ -407,7 +408,7 @@ theorem fundamentalGroup_isCountablyGenerated_aux
     (x : X) :
     ∃ (S : Type) (_ : Countable S) (f : S → FundamentalGroup X x),
       Function.Surjective f :=
-  sorry
+  uc_pi1_countable_polygonal_enumeration X x
 
 /-- **Countability of the fundamental group for second-countable
 connected locally-simply-connected spaces.**
