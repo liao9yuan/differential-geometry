@@ -86,7 +86,7 @@ solution agrees with it on `[a, b]`. The derivative condition is
 phrased as `HasDerivWithinAt` on `Icc a b` since the solution is
 only determined there; uniqueness is therefore expressed as
 `Set.EqOn` rather than functional equality on all of `ℝ`. -/
-theorem parallel_local_existence_uniqueness
+theorem parallel_local_existence_uniqueness [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) {a b t₀ : ℝ} (hab : a ≤ b) (ht₀ : t₀ ∈ Set.Icc a b)
     (huCont : ContinuousOn uPrime (Set.Icc a b))
