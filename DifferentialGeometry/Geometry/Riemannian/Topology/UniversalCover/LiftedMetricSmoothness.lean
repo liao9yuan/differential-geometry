@@ -439,21 +439,84 @@ theorem uc_hom_bundle_inCoordinates_pullback
   -- contravariant slot). The tangent `symmL` agreement is `hSymmL`.
   refine congrArg₂ ContinuousLinearMap.comp ?_ ?_
   · -- Codomain `continuousLinearMapAt` agreement on the cotangent Hom-bundle.
-    -- The cotangent bundle is `Hom(TangentSpace, Trivial ℝ)`; its trivialization is
-    -- `(tangentTriv).continuousLinearMap id (trivℝ)` and the `continuousLinearMapAt y`
-    -- of this trivialization, applied to a cotangent `β : E y →L ℝ`, equals
-    -- `(trivℝ.continuousLinearMapAt y).comp (β.comp (tangentTriv.symmL y))`
-    -- by `Trivialization.continuousLinearMap_apply` (after unfolding the Pretrivialization
-    -- linearMapAt). Since `trivℝ.continuousLinearMapAt y = 1`, the formula collapses to
-    -- `β ↦ β.comp (tangentTriv.symmL y)`. The agreement between UC and M sides then
-    -- reduces precisely to `hSymmL` (the tangent symmL identification).
-    -- Full unfolding through `linearMapAt` / `Pretrivialization.continuousLinearMap_apply`
-    -- to a CLM equality requires significant Hom-trivialization-API plumbing; we record
-    -- the reduction here and ship the named gap.
-    sorry
-  · refine congrArg₂ ContinuousLinearMap.comp rfl ?_
-    -- `symmL` agreement on the tangent bundle: direct from `hSymmL`.
-    exact hSymmL
+    -- Strategy: by `ContinuousLinearMap.ext`, reduce to pointwise equality on a test
+    -- cotangent `L`. Then on each side, expand `(hom-triv).continuousLinearMapAt R x L`
+    -- using `Trivialization.continuousLinearMapAt_apply` →
+    -- `Trivialization.coe_linearMapAt_of_mem` → `Bundle.Trivialization.continuousLinearMap_apply`
+    -- (with `e₂ = trivializationAt ℝ (Bundle.Trivial _ ℝ) _`, whose `continuousLinearMapAt`
+    -- is the identity), giving `L.comp (tangentTriv.symmL ℝ _)`. The agreement then follows
+    -- from `hSymmL`.
+    -- Membership facts at the Hom-bundle level on both sides. The cotangent bundle
+    -- `fun b => TangentSpace I b →L[ℝ] ℝ` is `Hom(TangentSpace, Trivial ℝ)`, and its
+    -- `trivializationAt` is by `hom_trivializationAt` (defeq) the `.continuousLinearMap`
+    -- of the tangent trivialization and the trivial-bundle trivialization.
+    have hx_hom_UC : x ∈ (trivializationAt (E →L[ℝ] ℝ)
+        (fun b : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M
+          => TangentSpace I b →L[ℝ] ℝ) a).baseSet := by
+      -- By `hom_trivializationAt_baseSet`, this is the intersection of tangent baseSet
+      -- and the trivial bundle's baseSet (= univ).
+      change x ∈ (trivializationAt E
+        (TangentSpace I :
+          DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → Type _) a).baseSet ∩
+          (trivializationAt ℝ (Bundle.Trivial _ ℝ) a).baseSet
+      exact ⟨hx_UC, Set.mem_univ _⟩
+    have hpx_hom_M : proj x ∈ (trivializationAt (E →L[ℝ] ℝ)
+        (fun b : M => TangentSpace I b →L[ℝ] ℝ) (proj a)).baseSet := by
+      change proj x ∈ (trivializationAt E (TangentSpace I : M → Type _) (proj a)).baseSet ∩
+          (trivializationAt ℝ (Bundle.Trivial M ℝ) (proj a)).baseSet
+      exact ⟨hpx_M, Set.mem_univ _⟩
+    -- Pointwise equality on test cotangent.
+    ext L v
+    -- For any triv with `b ∈ baseSet`, `triv.continuousLinearMapAt R b y = (triv ⟨b,y⟩).2`.
+    -- For the Hom-trivialization, `(triv ⟨b, L⟩).2 = e₂.clmAt b ∘ L ∘ e₁.symmL b`.
+    -- LHS unfolding via `Trivialization.continuousLinearMap_apply` (which is `rfl` for the
+    -- second component of `hom-triv ⟨b, L⟩`).
+    have hLHS :
+        ((trivializationAt (E →L[ℝ] ℝ)
+          (fun b : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M
+            => TangentSpace I b →L[ℝ] ℝ) a).continuousLinearMapAt ℝ x L : E →L[ℝ] ℝ)
+        = ((trivializationAt ℝ (Bundle.Trivial _ ℝ) a).continuousLinearMapAt ℝ x).comp
+            (L.comp ((trivializationAt E
+              (TangentSpace I :
+                DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → Type _)
+                a).symmL ℝ x)) := by
+      rw [Bundle.Trivialization.continuousLinearMapAt_apply,
+        Bundle.Trivialization.coe_linearMapAt_of_mem _ hx_hom_UC]
+      rfl
+    have hRHS :
+        ((trivializationAt (E →L[ℝ] ℝ) (fun b : M => TangentSpace I b →L[ℝ] ℝ)
+              (proj a)).continuousLinearMapAt ℝ (proj x) L : E →L[ℝ] ℝ)
+        = ((trivializationAt ℝ (Bundle.Trivial M ℝ) (proj a)).continuousLinearMapAt ℝ (proj x)).comp
+            (L.comp ((trivializationAt E (TangentSpace I : M → Type _)
+              (proj a)).symmL ℝ (proj x))) := by
+      rw [Bundle.Trivialization.continuousLinearMapAt_apply,
+        Bundle.Trivialization.coe_linearMapAt_of_mem _ hpx_hom_M]
+      rfl
+    -- Evaluate both sides at `v` via the LHS/RHS unfoldings.
+    change ((trivializationAt (E →L[ℝ] ℝ)
+          (fun b : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M
+            => TangentSpace I b →L[ℝ] ℝ) a).continuousLinearMapAt ℝ x L : E →L[ℝ] ℝ) v
+      = ((trivializationAt (E →L[ℝ] ℝ) (fun b : M => TangentSpace I b →L[ℝ] ℝ)
+              (proj a)).continuousLinearMapAt ℝ (proj x) L : E →L[ℝ] ℝ) v
+    rw [hLHS, hRHS]
+    -- The trivial-bundle factor's `continuousLinearMapAt` is the identity, so both sides
+    -- reduce to `L (tangentSymmL _ _ v)`. Tangent symmL agrees by `hSymmL`.
+    simp only [ContinuousLinearMap.coe_comp', Function.comp_apply,
+      Bundle.Trivial.fiberBundle_trivializationAt',
+      Bundle.Trivial.continuousLinearMapAt_trivialization,
+      ContinuousLinearMap.coe_id', id_eq]
+    -- Goal: `L (tangentSymmL-UC v) = L (tangentSymmL-M v)`. The CLMs are equal by `hSymmL`.
+    have hsymm_eq :
+        ((trivializationAt E
+          (TangentSpace I :
+            DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → Type _)
+            a).symmL ℝ x : E →L[ℝ] E) v
+        = ((trivializationAt E (TangentSpace I : M → Type _)
+            (proj a)).symmL ℝ (proj x) : E →L[ℝ] E) v :=
+      congrArg (fun (f : E →L[ℝ] E) => f v) hSymmL
+    exact congrArg L hsymm_eq
+  · -- Goal: `(g.inner (proj x)).comp (tangentSymmL-UC) = (g.inner (proj x)).comp (tangentSymmL-M)`.
+    exact congrArg (fun (f : E →L[ℝ] E) => (g.inner (proj x)).comp f) hSymmL
 
 /-- **The lifted metric is a smooth section of the `(0,2)`-Hom-bundle.**
 
@@ -476,15 +539,70 @@ theorem uc_liftedMetric_contMDiff
               TotalSpace (E →L[ℝ] E →L[ℝ] ℝ)
                 (fun b : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M
                   => TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ))) := by
-  -- Assembly: at each `a`, use `contMDiffAt_hom_bundle` to reduce to two
+  -- Assembly: at each `a₀`, use `contMDiffAt_hom_bundle` to reduce to two
   -- conditions: smoothness of the base projection (= identity, smooth) and
   -- smoothness of the inCoordinates representation. The latter is shifted
   -- from UC to M via `uc_hom_bundle_inCoordinates_pullback`, then bundled
   -- as the composition of `g.contMDiff` (M-side) with `proj_contMDiff`.
-  -- Full assembly involves chasing the `congr_of_eventuallyEq` plumbing
-  -- through the Hom-bundle's iterated trivialisation structure; we ship
-  -- the substantive signature and defer the assembly proper.
-  sorry
+  intro a₀
+  rw [contMDiffAt_hom_bundle]
+  refine ⟨?_, ?_⟩
+  · -- Base: `(f a).1 = a` is smooth (identity).
+    exact contMDiffAt_id
+  · -- inCoordinates smoothness: use `ContMDiffAt.congr_of_eventuallyEq` to
+    -- shift from UC-inCoordinates to M-inCoordinates via the pullback lemma,
+    -- then chain `g.contMDiff` with `proj_contMDiff`.
+    -- Pullback lemma holds on the chart neighbourhood of `a₀`.
+    have hopen : (chartAt H a₀).source ∈
+        (𝓝 a₀ : Filter
+          (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)) :=
+      (chartAt H a₀).open_source.mem_nhds (mem_chart_source H a₀)
+    -- The UC-inCoordinates equals the M-inCoordinates on this neighbourhood.
+    have hEvEq : (fun a : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M
+        => ContinuousLinearMap.inCoordinates (𝕜₁ := ℝ) (𝕜₂ := ℝ) (σ := RingHom.id ℝ)
+          E (TangentSpace I :
+              DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → Type _)
+          (E →L[ℝ] ℝ)
+          (fun b : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M
+            => TangentSpace I b →L[ℝ] ℝ)
+          a₀ a a₀ a (g.inner (proj a)))
+        =ᶠ[𝓝 a₀] (fun a : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M
+        => ContinuousLinearMap.inCoordinates (𝕜₁ := ℝ) (𝕜₂ := ℝ) (σ := RingHom.id ℝ)
+          E (TangentSpace I : M → Type _)
+          (E →L[ℝ] ℝ) (fun b : M => TangentSpace I b →L[ℝ] ℝ)
+          (proj a₀) (proj a) (proj a₀) (proj a) (g.inner (proj a))) := by
+      filter_upwards [hopen] with a ha
+      exact uc_hom_bundle_inCoordinates_pullback (I := I) (M := M) g a₀ ha
+    -- Smoothness of the M-side inCoordinates, evaluated at `proj a`.
+    -- `g.contMDiff` at `proj a₀` gives smoothness of `b ↦ (b, g.inner b)` as a section of
+    -- the iterated Hom-bundle on M; by `contMDiffAt_hom_bundle` on M, the inCoordinates
+    -- piece is smooth.
+    have hgAt : ContMDiffAt I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+        (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ) b (g.inner b)
+          : M → TotalSpace (E →L[ℝ] E →L[ℝ] ℝ)
+              (fun b : M => TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ)) (proj a₀) :=
+      g.contMDiff (proj a₀)
+    rw [contMDiffAt_hom_bundle] at hgAt
+    obtain ⟨_, hInCoords_M⟩ := hgAt
+    -- `hInCoords_M : ContMDiffAt I 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ) ∞
+    --   (fun b => inCoordinates E (TangentSpace I) (E →L[ℝ] ℝ) (...) (proj a₀) b (proj a₀) b (g.inner b)) (proj a₀)`
+    -- Compose with `proj : UC M → M` (smooth at `a₀`).
+    have hproj : ContMDiffAt I I ∞
+        (proj :
+          DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M) a₀ :=
+      (proj_contMDiff (I := I) (M := M)).contMDiffAt
+    -- Compose: the composed function at `a` is the M-side inCoordinates evaluated at `proj a`.
+    have hcomp : ContMDiffAt I 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ) ∞
+        (fun a : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M
+          => ContinuousLinearMap.inCoordinates (𝕜₁ := ℝ) (𝕜₂ := ℝ) (σ := RingHom.id ℝ)
+            E (TangentSpace I : M → Type _)
+            (E →L[ℝ] ℝ) (fun b : M => TangentSpace I b →L[ℝ] ℝ)
+            (proj a₀) (proj a) (proj a₀) (proj a) (g.inner (proj a))) a₀ :=
+      hInCoords_M.comp a₀ hproj
+    -- Transfer along the eventually-equal identification.
+    -- `congr_of_eventuallyEq : ContMDiffAt _ _ f → f₁ =ᶠ f → ContMDiffAt _ _ f₁`.
+    -- We want the UC-side (goal); `hcomp` is the M-side; `hEvEq` is `UC =ᶠ M`. So apply directly.
+    exact hcomp.congr_of_eventuallyEq hEvEq
 
 end UniversalCover
 end Topology
