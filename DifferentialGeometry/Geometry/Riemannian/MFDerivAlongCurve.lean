@@ -260,6 +260,87 @@ theorem raw_mfderiv_eq_symmL_apply_fderiv
     _ = ((trivializationAt E (TangentSpace I) α).symmL ℝ (γ t))
           ((fderiv ℝ ((extChartAt I α) ∘ γ) t : ℝ →L[ℝ] E) (1 : ℝ)) := by rw [hCC]
 
+/-! ### Bundled tangent map continuity along the curve
+
+The tangent map of `γ`, evaluated at the input `⟨t, 1⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ`,
+produces a continuous `TangentBundle I M`-valued function of `t`. This is the
+substantive bundle-level continuity packaging the raw `mfderiv γ t 1 : E`
+(via the defeq `TangentSpace I (γ t) = E`) and the base-point `γ t : M`
+into a single continuous bundle-section-style map.
+
+The continuity follows from Mathlib's `ContMDiff.continuous_tangentMap` applied
+to the smooth curve `γ`, combined with the smoothness of the canonical input
+`t ↦ ⟨t, 1⟩ : ℝ → TangentBundle 𝓘(ℝ, ℝ) ℝ` (the unit-vector lift).
+-/
+
+/-- **Tangent-bundle-valued unit-tangent map along a smooth curve is continuous.**
+
+For a `C^∞` curve `γ : ℝ → M`, the function
+  `t ↦ tangentMap 𝓘(ℝ, ℝ) I γ ⟨t, 1⟩ : ℝ → TangentBundle I M`
+is continuous on `ℝ`. By definition of `tangentMap`, this equals
+`t ↦ ⟨γ t, mfderiv 𝓘(ℝ, ℝ) I γ t 1⟩ : ℝ → TangentBundle I M`,
+packaging the raw mfderiv-velocity together with its basepoint as a continuous
+bundle-valued function.
+
+This is the canonical *bundle-level* continuity statement underlying the raw
+`E`-valued mfderiv-velocity continuity along the curve (via fibre extraction
+through the local trivialisation at any chart basepoint). -/
+theorem continuous_tangentMap_unitLift
+    {γ : ℝ → M} (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) :
+    Continuous (fun t : ℝ =>
+      tangentMap 𝓘(ℝ, ℝ) I γ (⟨t, (1 : ℝ)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ)) := by
+  -- `tangentMap γ` is continuous on `TangentBundle 𝓘(ℝ, ℝ) ℝ`.
+  have h_tan_cont : Continuous (tangentMap 𝓘(ℝ, ℝ) I γ) :=
+    hγ.continuous_tangentMap (by exact_mod_cast (le_top : (1 : ℕ∞) ≤ ⊤))
+  -- The input `t ↦ ⟨t, 1⟩ : ℝ → TangentBundle 𝓘(ℝ, ℝ) ℝ` is continuous.
+  -- Use `tangentBundleModelSpaceHomeomorph` to identify `TangentBundle 𝓘(ℝ, ℝ) ℝ ≃ₜ ℝ × ℝ`.
+  have h_input_cont :
+      Continuous (fun t : ℝ =>
+        (⟨t, (1 : ℝ)⟩ : TangentBundle 𝓘(ℝ, ℝ) ℝ)) := by
+    have h_homeo :
+        Continuous ((tangentBundleModelSpaceHomeomorph 𝓘(ℝ, ℝ)).symm :
+          ModelProd ℝ ℝ → TangentBundle 𝓘(ℝ, ℝ) ℝ) :=
+      (tangentBundleModelSpaceHomeomorph 𝓘(ℝ, ℝ)).symm.continuous
+    have h_pair : Continuous (fun t : ℝ => (t, (1 : ℝ))) :=
+      continuous_id.prodMk continuous_const
+    exact h_homeo.comp h_pair
+  exact h_tan_cont.comp h_input_cont
+
+/-! ### Hand-off note for the raw `E`-valued mfderiv continuity
+
+The raw `E`-valued continuity of `t ↦ (mfderiv γ t 1 : E)` on the chart-pullback
+preimage `γ ⁻¹ ((chartAt H α).source)` reduces, via the bundle-level continuity
+above (`continuous_tangentMap_unitLift`), to a **fibre-extraction** problem from
+`TangentBundle I M → E` on the chart-trivialisation source. Concretely, on
+`π ⁻¹ ((chartAt H α).source) ⊆ TangentBundle I M`, the dependent-snd
+`⟨b, v⟩ ↦ v : TangentSpace I b = E` equals
+`(triv α).symmL ℝ b ∘ ((triv α)·)._snd`,
+where the second factor is continuous (forward trivialisation is continuous on
+its source) and the first factor is the **CLM-valued continuity of the inverse
+trivialisation**:
+
+  `b ↦ ((trivializationAt E (TangentSpace I) α).symmL ℝ b : E →L[ℝ] E)`
+  is `ContinuousOn` on `(chartAt H α).source`.
+
+This CLM-valued `symmL` continuity is the precise residual infrastructure piece.
+By `TangentBundle.symmL_trivializationAt`, the family on the chart source
+identifies with the manifold derivative
+`mfderiv[range I] (extChartAt I α).symm (extChartAt I α b)`,
+whose CLM-valued continuity in `b` requires either:
+
+* the `Hom`-bundle smoothness pipeline applied to the `(extChartAt I α).symm`
+  side and re-expressing via `contMDiffOn_coordChangeL` between two fixed
+  trivialisations, picking up an auxiliary trivialisation on the inverse-chart
+  image; or
+* a direct `ContDiffOn 𝓘(ℝ, E) (fderivWithin ...)` continuity argument applied
+  to the inverse extended chart, then transported through the manifold
+  identifications.
+
+The downstream consumer (the second-variation length bound) can extract the raw
+`E`-valued continuity locally on each chart-pullback patch via this residual,
+combined with `raw_mfderiv_eq_symmL_apply_fderiv` and the existing
+`continuousOn_chartCoord_mfderiv_along_curve`. -/
+
 /-! ### Lebesgue-number-style chart cover for a compact parameter set
 
 For a `C^∞` curve `γ : ℝ → M` and a compact subset `s ⊆ ℝ`, the family of
