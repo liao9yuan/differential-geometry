@@ -112,7 +112,29 @@ by `proj_isLocalIsometry`, the inner products agree, and by
 theorem ricciBoundedBelow_pullback_universalCover
     {g : SmoothRiemannianMetric I M} {κ : ℝ}
     (hRic : RicciBoundedBelow (I := I) g κ) :
-    RicciBoundedBelow (I := I) (liftedMetric (I := I) g) κ := sorry
+    RicciBoundedBelow (I := I) (liftedMetric (I := I) g) κ := by
+  -- Unfold the predicate: ∀ x' v', κ * (liftedMetric g).inner x' v' v' ≤
+  -- ricciTensor (liftedMetric g) x' v' v'.
+  intro x' v'
+  -- Set the projected point and the model-fibre representation of `v'`.
+  set x : M := proj x' with hx_def
+  -- `(liftedMetric g).inner x' v' v' = g.inner (proj x') v' v'` by
+  -- `proj_isLocalIsometry` (which states the equality with the
+  -- model-fibre representation; `TangentSpace I _ = E` definitionally).
+  have h_inner :
+      (liftedMetric (I := I) g).inner x' v' v' = g.inner x v' v' := by
+    -- `proj_isLocalIsometry` gives `g.inner (proj x') v w =
+    -- (liftedMetric g).inner x' v w`; flip and use `hx_def`.
+    exact (proj_isLocalIsometry (I := I) g x' v' v').symm
+  -- `ricciTensor (liftedMetric g) x' v' v' = ricciTensor g (proj x') v' v'`
+  -- by `ricciTensor_lifted_natural`.
+  have h_ric :
+      ricciTensor (I := I) (liftedMetric (I := I) g) x' v' v' =
+        ricciTensor (I := I) g x v' v' :=
+    ricciTensor_lifted_natural (I := I) g x' v' v'
+  -- Substitute on both sides and apply `hRic` at the projected point.
+  rw [h_inner, h_ric]
+  exact hRic x v'
 
 /-! ## Completeness pullback to the universal cover -/
 
