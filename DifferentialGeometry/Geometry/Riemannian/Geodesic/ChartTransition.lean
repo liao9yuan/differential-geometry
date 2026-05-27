@@ -284,6 +284,30 @@ theorem chartTransitionMap_continuousAt [I.Boundaryless]
     chartTransitionSource_isOpen (I := I) α β
   exact (chartTransitionMap_continuousOn (I := I) α β).continuousAt (h_open.mem_nhds hx)
 
+/-! ## Inverse-composition identity for the chart-transition map
+
+For two basepoints `α, β : M` and a manifold point `p` lying in both chart
+sources, applying `T_{βα}` after `T_{αβ}` to the chart-α image of `p` returns
+the original chart-α image. This is the partial-equiv composition identity
+specialised to the overlap. -/
+
+/-- Composition identity: `T_{βα}(T_{αβ}(extChartAt I α p)) = extChartAt I α p`
+whenever `p` is in both chart sources. -/
+lemma chartTransitionMap_comp_self_extChartAt
+    (α β : M) {p : M}
+    (hp_α : p ∈ (chartAt H α).source)
+    (hp_β : p ∈ (chartAt H β).source) :
+    chartTransitionMap (I := I) β α
+        (chartTransitionMap (I := I) α β ((extChartAt I α) p)) =
+      (extChartAt I α) p := by
+  -- Step 1: `T_{αβ}((extChartAt I α) p) = extChartAt I β p`.
+  have h1 : chartTransitionMap (I := I) α β ((extChartAt I α) p) =
+      extChartAt I β p :=
+    chartTransitionMap_apply_extChartAt (I := I) α β hp_α
+  rw [h1]
+  -- Step 2: `T_{βα}(extChartAt I β p) = extChartAt I α p`.
+  exact chartTransitionMap_apply_extChartAt (I := I) β α hp_β
+
 end Geodesic
 end Riemannian
 end Geometry
