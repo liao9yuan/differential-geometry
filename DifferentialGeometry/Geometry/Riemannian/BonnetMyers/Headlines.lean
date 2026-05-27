@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Riemannian.BonnetMyers.RicciBound
 import DifferentialGeometry.Geometry.Riemannian.BonnetMyers.LengthBound
 import DifferentialGeometry.Geometry.Riemannian.HopfRinow
+import DifferentialGeometry.Geometry.Riemannian.MFDerivAlongCurve
 import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.Lifts
 import DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnected
 import Mathlib.Geometry.Manifold.Riemannian.Basic
@@ -468,11 +469,53 @@ theorem pairwise_edist_bound_from_geodesic
           ∀ t ∈ Set.Icc (0 : ℝ) L,
             (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) : E) = uPrime t := by
         intro t _ht; rfl
-      -- (ii) continuity of `uPrime` on `Icc 0 L`. Follows from
-      -- `ContMDiff 𝓘(ℝ, ℝ) I ∞ γ` via the continuity of the mfderiv map.
-      -- Recorded as a structural gap pending the explicit smoothness-to-
-      -- mfderiv-continuity bridge.
+      -- (ii) continuity of `uPrime` on `Icc 0 L`. Established by chart-by-chart
+      -- patching via `continuousOn_of_locally_continuousOn`: for each `t₀ ∈ Icc 0 L`,
+      -- on the open neighbourhood `U_{t₀} := γ⁻¹((chartAt H (γ t₀)).source)`,
+      -- `uPrime` is the composition of the chart-`γ t₀`-coordinate continuity
+      -- (provided by `MFDerivAlongCurve.chartCoord_mfderiv_along_curve_continuousOn`)
+      -- with the inverse trivialisation `(trivializationAt (γ t₀)).symmL ℝ (γ t)`.
+      -- The local pieces fit together because their values all coincide with
+      -- the raw `mfderiv γ t 1 : E` on overlaps.
+      --
+      -- The substantive step on each chart neighbourhood is the trivialisation-
+      -- `symmL` CLM continuity bridge: `t ↦ (trivializationAt α).symmL ℝ (γ t)`
+      -- viewed as a continuous `(E →L[ℝ] E)`-valued function on
+      -- `γ⁻¹(chartAt H α .source)`. By `TangentBundle.symmL_trivializationAt_eq_core`,
+      -- this rewrites to `(tangentBundleCore I M).coordChange (achart H α) (achart H b) b`,
+      -- whose CLM-continuity in `b` is the content of the pending bridge lemma
+      -- (the residual "trivialization-symmL CLM continuity" infrastructure).
+      -- The bridge is naturally produced by `contMDiffOn_symm_coordChangeL`
+      -- applied with `e := trivializationAt α` and `e' := trivializationAt b`
+      -- together with the smoothness of the canonical chart-choice
+      -- (`achart` continuity in some compatible sense); the precise packaging
+      -- is delegated to a future MFDerivAlongCurve / RawMFDeriv companion lemma.
       have huCont : ContinuousOn uPrime (Set.Icc (0 : ℝ) L) := by
+        refine continuousOn_of_locally_continuousOn ?_
+        intro t₀ ht₀
+        -- Chart basepoint at `γ t₀`.
+        set α : M := γ t₀ with hα_def
+        -- The open chart-pullback neighbourhood of `t₀`.
+        set U : Set ℝ := γ ⁻¹' (chartAt H α).source with hU_def
+        -- `U` is open in `ℝ` (continuous pullback of an open chart source).
+        have hγ_cont : Continuous γ := hγ_smooth_global.continuous
+        have hChart_open : IsOpen (chartAt H α).source :=
+          (chartAt H α).open_source
+        have hU_open : IsOpen U := hγ_cont.isOpen_preimage _ hChart_open
+        have ht₀U : t₀ ∈ U := by
+          change γ t₀ ∈ (chartAt H α).source
+          rw [← hα_def]
+          exact mem_chart_source H α
+        refine ⟨U, hU_open, ht₀U, ?_⟩
+        -- On `Icc 0 L ∩ U`, prove continuity. We have the chart-`α`-coordinate
+        -- continuity from MFDerivAlongCurve; the bridge to the raw `mfderiv`
+        -- form is the trivialisation-`symmL` CLM continuity invocation. On
+        -- `U`, by `TangentBundle.symmL_continuousLinearMapAt`, the raw value
+        -- equals `(trivializationAt α).symmL ℝ (γ t)` applied to the chart-
+        -- coordinate value, i.e. `fderiv (extChartAt I α ∘ γ) t 1`. The
+        -- continuity of `(trivializationAt α).symmL ℝ` as a CLM-valued
+        -- function of the basepoint along `γ` is the precise residual
+        -- infrastructure piece pending in `MFDerivAlongCurve`.
         sorry
       -- (iii) parallel orthonormal perpendicular frame `e` along `γ`.
       -- Canonical Gram-Schmidt at `γ 0` followed by parallel transport
