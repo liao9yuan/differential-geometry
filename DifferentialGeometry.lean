@@ -494,6 +494,7 @@ import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.Covering
 import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.Manifold
 import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.Riemannian
 import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.LiftedMetricSmoothness
+import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.ChartPullback
 import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.TruncateHomotopy
 import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.TruncationLift
 import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.Lifts
