@@ -916,14 +916,49 @@ theorem unit_speed_rescale
       hγ_C1.comp hφ_mC1 hMapsTo
     -- `(γ ∘ (fun s => a + s * c)) = fun s => γ (a + s * c)`.
     exact hcomp
-  · -- Unit-speed: the inner product of the velocity with itself equals 1
-    -- for every `t ∈ [0, L]`.
-    -- This requires the chain rule for `mfderiv` (η = γ ∘ (a + · * c)) and
-    -- the constant-speed property of geodesics (`bm_c_gc_constant_speed`),
-    -- combined with the length equation `hγ_len`. Both pieces are open:
-    -- `bm_c_gc_constant_speed` is still a `sorry` and the mfderiv chain
-    -- rule on manifolds requires additional bridge lemmas not present
-    -- in this file. Recorded as `sorry`.
+  · -- Unit-speed: the inner product of the velocity with itself equals `1`
+    -- at every `t ∈ Set.Icc 0 L`.
+    --
+    -- Mathematical chain (all four pieces are required):
+    --   (a) The manifold chain rule `mfderiv_comp_apply` applied to
+    --       `η = γ ∘ (fun s => a + s * c)` gives
+    --         `mfderiv η t 1 = mfderiv γ (a + t * c) (c • 1)
+    --                        = c • mfderiv γ (a + t * c) 1`
+    --       (using `mfderiv` of an affine self-map of `ℝ`).  The
+    --       hypothesis-carrier here is `MDifferentiableAt` of both γ and
+    --       the affine map at the relevant points.  At interior points
+    --       `t ∈ Set.Ioo 0 L`, this follows from `hγ_C1.mdifferentiableOn`
+    --       composed with the open neighbourhood `Set.Ioo a b ∈ 𝓝 (a + t*c)`.
+    --       At the closed-interval endpoints `t = 0` and `t = L`,
+    --       `MDifferentiableAt` (two-sided) does not follow from the
+    --       closed-interval `ContMDiffOn` data alone; an additional
+    --       neighbourhood-smoothness hypothesis on γ would be required,
+    --       which is not currently exposed.
+    --   (b) The constant-speed property of geodesics
+    --       `bm_c_gc_constant_speed` (this file, l.~151), still a `sorry`
+    --       at the point of this comment, would give
+    --         `(g.inner (γ s)) (γ' s) (γ' s) = (g.inner (γ t')) (γ' t') (γ' t')`
+    --       for any two times `s, t' : ℝ`.  However that theorem demands
+    --       `IsGeodesic` (global), and our hypothesis is only the
+    --       set-restricted `IsGeodesicOn` on `Set.Icc a b`; the upgrade
+    --       (`IsGeodesicOn` ↦ `IsGeodesic`) is a separate bridge.
+    --   (c) The closed-form value of the geodesic's speed-squared:
+    --       combined with the path-length equation
+    --         `pathELength I γ a b = ENNReal.ofReal L`
+    --       and the unit-speed-of-constant-speed identification
+    --         `pathELength I γ a b = ENNReal.ofReal (√⟨γ',γ'⟩_g · (b - a))`
+    --       (a chart-local integration identity not currently exposed),
+    --       one obtains `√⟨γ',γ'⟩_g = L / (b - a)` and hence
+    --       `⟨γ',γ'⟩_g = (L / (b - a))² = c⁻²`.
+    --   (d) Combining (a) and (c):
+    --         `⟨η',η'⟩_g(η t) = c² · ⟨γ',γ'⟩_g(γ(a + t*c)) = c² · c⁻² = 1`.
+    --
+    -- All four pieces are open in this file (one is a `sorry` here, three
+    -- are missing bridge lemmas not currently exposed in the project).
+    -- The Mathlib chain rule `mfderiv_comp_apply` exists but its boundary
+    -- behaviour against `ContMDiffOn (Set.Icc a b)`-only hypotheses is the
+    -- limiting factor.  Recorded as `sorry`; closure tracked through the
+    -- upstream gaps (a)-(c).
     intro t _ht
     sorry
 

@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.LiftedMe
 import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.Riemannian
 import DifferentialGeometry.Integral.Measure.ChartDensity
 import DifferentialGeometry.Geometry.Hessian
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.Equation
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Topology.VectorBundle.Basic
 
@@ -539,6 +540,62 @@ theorem chartChristoffel_lifted
         (DifferentialGeometry.Integral.Measure.chartModelBasis E l)
     rw [Filter.EventuallyEq.fderiv_eq (hGramOnE_eventuallyEq i j)]
   rw [hP_ij_lj, hP_ji_li, hP_lij]
+
+/-- **`chartChristoffelContraction` is natural under universal-cover projection.**
+
+For any chart anchor `α' : UC M`, vectors `v w : E`, and a cover-point
+`x' ∈ (chartAt H α').source`, the chart-coordinate Christoffel
+contraction of the lifted metric on the universal cover, evaluated at
+the chart coordinate of `x'`, equals the chart-coordinate Christoffel
+contraction of the base metric, evaluated at the chart coordinate of
+`proj x'` in the base chart at `proj α'`.
+
+Proof. Unfolding both sides via `chartChristoffelContraction_def`, each is
+an inner triple sum
+`∑_k (∑_{i, j} Γ^k_{ij}(·, ·)(y) · v^i · w^j) • e_k`
+with the same outer index set, the same coordinate factors `chartCoord i v`,
+`chartCoord j w`, and the same model basis vectors `chartModelBasis E k`.
+The Christoffel-symbol factor agrees pointwise by `chartChristoffel_lifted`,
+once we rewrite the base-side evaluation point `extChartAt I (proj α') (proj x')`
+back to `extChartAt I α' x'` via `extChartAt_proj_eq`. The conclusion then
+follows by `Finset.sum_congr` applied three times. -/
+theorem chartChristoffelContraction_lifted
+    (g : SmoothRiemannianMetric I M)
+    (α' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
+    (x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
+    (hx' : x' ∈ (chartAt H α').source) (v w : E) :
+    DifferentialGeometry.Geometry.Riemannian.Geodesic.chartChristoffelContraction
+        (M := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
+        (liftedMetric (I := I) g) α' v w (extChartAt I α' x') =
+      DifferentialGeometry.Geometry.Riemannian.Geodesic.chartChristoffelContraction
+        (M := M) g (proj (X := M) α') v w
+        (extChartAt I (proj (X := M) α') (proj (X := M) x')) := by
+  classical
+  -- Unfold via the `rfl`-style `chartChristoffelContraction_def` on both sides.
+  rw [DifferentialGeometry.Geometry.Riemannian.Geodesic.chartChristoffelContraction_def
+        (I := I)
+        (M := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
+        (liftedMetric (I := I) g) α' v w (extChartAt I α' x'),
+      DifferentialGeometry.Geometry.Riemannian.Geodesic.chartChristoffelContraction_def
+        (I := I) (M := M) g (proj α') v w
+        (extChartAt I (proj (X := M) α') (proj (X := M) x'))]
+  -- Outer sum over `k`. The summands differ only in the Christoffel factor.
+  refine Finset.sum_congr rfl ?_
+  intro k _
+  -- Both summands are `(<inner sum>) • chartModelBasis E k`. Equate the scalars.
+  congr 1
+  -- Inner sum over `i`.
+  refine Finset.sum_congr rfl ?_
+  intro i _
+  -- Inner-inner sum over `j`.
+  refine Finset.sum_congr rfl ?_
+  intro j _
+  -- Each summand is `Γ^k_{ij}(_,_)(y) * chartCoord i v * chartCoord j w`.
+  -- The `chartCoord` factors are identical on both sides; only the Γ-factor
+  -- changes between the lifted and the base metric. Apply `chartChristoffel_lifted`
+  -- to rewrite the cover-side Christoffel factor at `extChartAt I α' x'` into
+  -- the base-side Christoffel factor at `extChartAt I (proj α') (proj x')`.
+  rw [chartChristoffel_lifted (I := I) (M := M) g α' x' hx' i j k]
 
 end UniversalCover
 end Topology
