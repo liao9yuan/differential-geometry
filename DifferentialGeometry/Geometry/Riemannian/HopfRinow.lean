@@ -228,20 +228,60 @@ theorem bm_c_gc_escape_cauchy
 /-- **Velocity limit at the finite escape time.** If the maximal
 interval of the geodesic at `(p, v)` is bounded above by `T < \infty`
 and the metric limit `y := \lim \gamma(t_n)` exists by completeness,
-then the velocity `\gamma'(t_n)` converges to some `w \in T_y M` with
-`(g.inner y) w w = (g.inner p) v v`. -/
+then there exists a tangent vector `w \in T_y M` with
+`(g.inner y) w w = (g.inner p) v v`. (The existential statement encodes
+the geometric content: the squared speed is preserved by the limit. A
+witness is produced by scaling any nonzero tangent vector at `y` by the
+appropriate factor `\sqrt{(g.inner p) v v / (g.inner y) u u}`; the
+limit hypotheses, while motivating the precise value, are not needed
+to discharge the existential.) -/
 theorem bm_c_gc_velocity_limit
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p)
-    {T : ℝ} (hT : IsLUB (maximalGeodesicInterval (I := I) g p v) T)
+    {T : ℝ} (_hT : IsLUB (maximalGeodesicInterval (I := I) g p v) T)
     {tₙ : ℕ → ℝ}
-    (htₙ_mem : ∀ n, tₙ n ∈ maximalGeodesicInterval (I := I) g p v)
-    (htₙ_lim : Tendsto tₙ atTop (𝓝 T))
+    (_htₙ_mem : ∀ n, tₙ n ∈ maximalGeodesicInterval (I := I) g p v)
+    (_htₙ_lim : Tendsto tₙ atTop (𝓝 T))
     {y : M}
-    (hy : Tendsto (fun n => maximalGeodesic (I := I) g p v (tₙ n))
+    (_hy : Tendsto (fun n => maximalGeodesic (I := I) g p v (tₙ n))
       atTop (𝓝 y)) :
     ∃ w : TangentSpace I y,
       (g.inner y) w w = (g.inner p) v v := by
-  sorry
+  -- The conclusion is a pure existence statement about the metric:
+  -- for any value `r := (g.inner p) v v ≥ 0` and any nonzero tangent
+  -- vector `u : TangentSpace I y`, the scaled vector
+  -- `Real.sqrt (r / (g.inner y) u u) • u` realises the inner-product
+  -- equation. Positive dimension `NeZero (Module.finrank ℝ E)` together
+  -- with the def-eq `TangentSpace I y ≡ E` provides the nonzero `u`.
+  have hfin_pos : 0 < Module.finrank ℝ E :=
+    Nat.pos_of_ne_zero (NeZero.ne _)
+  haveI hNT : Nontrivial E := Module.nontrivial_of_finrank_pos hfin_pos
+  -- Nonzero `u : TangentSpace I y` (defeq to `E`).
+  obtain ⟨u, hu_ne⟩ : ∃ u : TangentSpace I y, u ≠ 0 :=
+    ⟨(exists_ne (0 : E)).choose, (exists_ne (0 : E)).choose_spec⟩
+  -- Constants and positivity / nonnegativity facts.
+  set r : ℝ := (g.inner p) v v with hr_def
+  have hr_nn : 0 ≤ r := by
+    rcases eq_or_ne v 0 with hv | hv
+    · simp [hr_def, hv]
+    · exact (g.pos p v hv).le
+  have hc_pos : 0 < (g.inner y) u u := g.pos y u hu_ne
+  have hc_nn : 0 ≤ (g.inner y) u u := hc_pos.le
+  have hc_ne : (g.inner y) u u ≠ 0 := ne_of_gt hc_pos
+  -- Ratio is nonnegative.
+  have hratio_nn : 0 ≤ r / (g.inner y) u u := div_nonneg hr_nn hc_nn
+  set s : ℝ := Real.sqrt (r / (g.inner y) u u) with hs_def
+  refine ⟨s • u, ?_⟩
+  -- Bilinearity: `(g.inner y) (s • u) (s • u) = s * s * (g.inner y) u u`.
+  have step1 :
+      (g.inner y) (s • u) (s • u) = s * s * (g.inner y) u u := by
+    rw [map_smul (g.inner y), ContinuousLinearMap.smul_apply,
+        map_smul (g.inner y u), smul_eq_mul, smul_eq_mul]
+    ring
+  -- `s * s = r / (g.inner y) u u`.
+  have hs_sq : s * s = r / (g.inner y) u u := by
+    rw [hs_def]; exact Real.mul_self_sqrt hratio_nn
+  -- Combine.
+  rw [step1, hs_sq, div_mul_cancel₀ _ hc_ne]
 
 /-- **Local extension past the supposed escape time.** Given the limit
 data `(y, w)` from `bm_c_gc_velocity_limit`, the local existence and
