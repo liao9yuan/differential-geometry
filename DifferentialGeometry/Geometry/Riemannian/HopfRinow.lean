@@ -816,17 +816,19 @@ theorem unit_speed_rescale
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {a b L : ℝ}
     (hab : a ≤ b) (hL : 0 < L)
     (hγ_geod : IsGeodesicOn (I := I) g γ (Set.Icc a b))
-    (hγ_len : pathELength I γ a b = ENNReal.ofReal L) :
+    (hγ_len : pathELength I γ a b = ENNReal.ofReal L)
+    (hγ_C1 : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Icc a b)) :
     ∃ η : ℝ → M,
       η 0 = γ a ∧ η L = γ b ∧
         IsGeodesicOn (I := I) g η (Set.Icc 0 L) ∧
+        ContMDiffOn 𝓘(ℝ, ℝ) I 1 η (Set.Icc 0 L) ∧
         ∀ t ∈ Set.Icc (0 : ℝ) L,
           (g.inner (η t)) (mfderiv 𝓘(ℝ, ℝ) I η t 1)
               (mfderiv 𝓘(ℝ, ℝ) I η t 1) = 1 := by
   -- The affine speed factor.
   set c : ℝ := (b - a) / L with hc_def
   -- The reparametrised curve.
-  refine ⟨fun s => γ (a + s * c), ?_, ?_, ?_, ?_⟩
+  refine ⟨fun s => γ (a + s * c), ?_, ?_, ?_, ?_, ?_⟩
   · -- `η 0 = γ a`: substitute `s = 0` and simplify `0 * c = 0`.
     change γ (a + 0 * c) = γ a
     simp
@@ -877,6 +879,43 @@ theorem unit_speed_rescale
       linarith
     · -- `a + s * c ≤ b`.
       linarith
+  · -- `ContMDiffOn 𝓘(ℝ,ℝ) I 1` of `η = γ ∘ φ` on `[0, L]`, where
+    -- `φ s = a + s * c`. Compose smoothness of the affine map `φ`
+    -- (as a real function, lifted to manifolds via `ContDiff.contMDiff`)
+    -- with the closed-interval smoothness hypothesis `hγ_C1`, using
+    -- `ContMDiffOn.comp` and the inclusion `φ '' Icc 0 L ⊆ Icc a b`
+    -- (the same image bound proved in the previous branch).
+    -- Smoothness of `φ` as a real function.
+    have hφ_cd : ContDiff ℝ 1 (fun s : ℝ => a + s * c) := by
+      exact contDiff_const.add (contDiff_id.mul contDiff_const)
+    -- Lift to manifold smoothness and restrict to `Icc 0 L` at level 1.
+    have hφ_mC1 :
+        ContMDiffOn 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) 1 (fun s : ℝ => a + s * c) (Set.Icc 0 L) :=
+      hφ_cd.contMDiff.contMDiffOn
+    -- The maps-to condition: `Icc 0 L ⊆ (fun s => a + s * c) ⁻¹' Icc a b`.
+    have hMapsTo :
+        Set.Icc (0 : ℝ) L ⊆ (fun s : ℝ => a + s * c) ⁻¹' Set.Icc a b := by
+      intro s hs
+      rcases hs with ⟨hs0, hsL⟩
+      have hba : 0 ≤ b - a := sub_nonneg.mpr hab
+      have hL_ne : L ≠ 0 := ne_of_gt hL
+      have hc_nonneg : 0 ≤ c := by
+        rw [hc_def]; exact div_nonneg hba hL.le
+      have hsc_nonneg : 0 ≤ s * c := mul_nonneg hs0 hc_nonneg
+      have hLc : L * c = b - a := by
+        simp [hc_def, mul_div_assoc', mul_div_cancel_left₀ _ hL_ne]
+      have hsc_le : s * c ≤ b - a := by
+        calc s * c ≤ L * c := mul_le_mul_of_nonneg_right hsL hc_nonneg
+          _ = b - a := hLc
+      refine ⟨?_, ?_⟩
+      · linarith
+      · linarith
+    -- Compose to get `ContMDiffOn` of the composite on `Icc 0 L`.
+    have hcomp :
+        ContMDiffOn 𝓘(ℝ, ℝ) I 1 (γ ∘ (fun s : ℝ => a + s * c)) (Set.Icc 0 L) :=
+      hγ_C1.comp hφ_mC1 hMapsTo
+    -- `(γ ∘ (fun s => a + s * c)) = fun s => γ (a + s * c)`.
+    exact hcomp
   · -- Unit-speed: the inner product of the velocity with itself equals 1
     -- for every `t ∈ [0, L]`.
     -- This requires the chain rule for `mfderiv` (η = γ ∘ (a + · * c)) and
@@ -943,17 +982,18 @@ theorem unit_speed_minimising_geodesic_from_points
   -- We now split on the value of `L`.
   rcases (lt_or_eq_of_le hL_nonneg) with hLpos | hLzero
   · -- Case `0 < L`: apply `unit_speed_rescale` to `η`.
-    obtain ⟨ζ, hζ0, hζL, hζ_geod, hζ_unit⟩ :=
+    obtain ⟨ζ, hζ0, hζL, hζ_geod, hζ_C1, hζ_unit⟩ :=
       unit_speed_rescale (I := I) g (γ := η) (a := 0) (b := L) (L := L)
-        hL_nonneg hLpos hη_geod_closed hη_len
+        hL_nonneg hLpos hη_geod_closed hη_len hη_C1
     refine ⟨ζ, L, hL_nonneg, ?_, ?_, ?_, hζ_geod, hζ_unit, ?_⟩
     · -- ζ 0 = p: `unit_speed_rescale` gives `ζ 0 = η 0 = p`.
       rw [hζ0]; exact hηp
     · -- ζ L = q: `unit_speed_rescale` gives `ζ L = η L = q`.
       rw [hζL]; exact hηq
     · -- ContMDiffOn of degree 1 of ζ on `[0, L]`. Inherited from η via
-      -- the affine reparametrisation in `unit_speed_rescale`. Bridge gap.
-      sorry
+      -- the affine reparametrisation in `unit_speed_rescale` (closed-interval
+      -- `C¹` conjunct).
+      exact hζ_C1
     · -- `riemannianEDist I p q = ENNReal.ofReal L`. Delivered by the
       -- strengthened `minimiser_is_smooth_geodesic`: `L` is by construction
       -- the arclength of `α`, and on the minimiser this arclength equals
