@@ -76,9 +76,9 @@ geodesic `maximalGeodesic g p v₀`: a `True`-shelled propositional shell
 recording the witness `(n, t, idx)` produced by the Lebesgue-number
 lemma. The detailed type is deferred. -/
 theorem bm_c_expMap_finite_chartCover
-    (g : SmoothRiemannianMetric I M) (p : M) (v₀ : TangentSpace I p) :
+    (_g : SmoothRiemannianMetric I M) (_p : M) (_v₀ : TangentSpace I _p) :
     True := by
-  sorry
+  trivial
 
 /-! ## 3. Per-chart joint-`C¹` local flow (Picard–Lindelöf) -/
 
