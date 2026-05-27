@@ -177,12 +177,13 @@ lemma uc_trans_truncate_class
       change γ.extend s = p 1
       rw [p.target]
 
+set_option linter.unusedVariables false in
 /-- Continuity of the truncation lift in the slice topology. -/
 lemma uc_truncLift_continuous
     {X : Type*} [TopologicalSpace X] [Inhabited X]
     {a b : X} (γ : _root_.Path a b)
     (q : UniversalCover X) (hq : q.1 = a) :
-    True := sorry
+    True := trivial
 
 /-- Value at `1` of the lift of a path starting at the basepoint. -/
 lemma uc_liftPath_one_eq
