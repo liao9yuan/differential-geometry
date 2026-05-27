@@ -40,9 +40,13 @@ namespace UniversalCover
 /-- **Basis refinement.** Any second-countable, locally-path-connected,
 semi-locally-simply-connected space admits a countable basis of
 open path-connected sets each of whose ambient loops are null-homotopic
-in the whole space. -/
+in the whole space.
+
+The `[Nonempty X]` hypothesis is mathematically necessary: the conclusion
+demands `∀ n, IsPathConnected (B n)`, which forces every `B n` to be
+nonempty. Downstream consumers always have it (via `[ConnectedSpace X]`). -/
 theorem uc_pi1_countable_basis_refinement
-    (X : Type*) [TopologicalSpace X]
+    (X : Type*) [TopologicalSpace X] [Nonempty X]
     [SecondCountableTopology X]
     [LocPathConnectedSpace X]
     [DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnectedSpace X] :
@@ -52,7 +56,196 @@ theorem uc_pi1_countable_basis_refinement
       (∀ n, ∀ (x : X) (_ : x ∈ B n) (γ : _root_.Path x x),
         Set.range γ.toContinuousMap ⊆ B n →
           (⟦γ⟧ : _root_.Path.Homotopic.Quotient x x) = ⟦_root_.Path.refl x⟧) ∧
-      TopologicalSpace.IsTopologicalBasis (Set.range B) := sorry
+      TopologicalSpace.IsTopologicalBasis (Set.range B) := by
+  classical
+  -- Define the predicate selecting "good" basis sets: open, path-connected,
+  -- and contained in a semi-local-simply-connected witness neighbourhood of
+  -- some interior point. Such sets automatically have the all-basepoint
+  -- null-homotopy property (proved via conjugation by an in-set path).
+  let Good : Set (Set X) :=
+    { V : Set X |
+        IsOpen V ∧ IsPathConnected V ∧
+        ∃ y ∈ V, ∃ Wy ∈ nhds y, V ⊆ Wy ∧
+          (∀ γ : _root_.Path y y,
+              Set.range γ.toContinuousMap ⊆ Wy →
+                (⟦γ⟧ : _root_.Path.Homotopic.Quotient y y)
+                  = ⟦_root_.Path.refl y⟧) }
+  -- Key technical lemma: every `V ∈ Good` has the all-basepoint null-homotopy
+  -- property. Argument: conjugate a loop at `x ∈ V` by a path in `V` from
+  -- the distinguished base `y` to `x`.
+  have hGood_null :
+      ∀ V ∈ Good, ∀ (x : X) (_ : x ∈ V) (γ : _root_.Path x x),
+        Set.range γ.toContinuousMap ⊆ V →
+          (⟦γ⟧ : _root_.Path.Homotopic.Quotient x x) = ⟦_root_.Path.refl x⟧ := by
+    rintro V ⟨_hVopen, hVpc, y, hyV, Wy, _hWynhd, hVWy, hWynull⟩ x hxV γ hγV
+    -- Pull the range condition back to a pointwise membership statement.
+    have hγV' : ∀ t : unitInterval, γ t ∈ V := by
+      intro t
+      have ht : (γ t : X) ∈ Set.range γ.toContinuousMap :=
+        ⟨t, by simp [Path.coe_toContinuousMap]⟩
+      exact hγV ht
+    -- Path `α : y → x` inside `V`, via path-connectedness of `V`.
+    obtain ⟨α, hα⟩ : JoinedIn V y x := hVpc.joinedIn y hyV x hxV
+    -- Conjugated loop `δ = α · γ · α.symm : Path y y` lies in `V ⊆ Wy`.
+    set δ : _root_.Path y y := α.trans (γ.trans α.symm) with hδdef
+    have hδRange : Set.range δ.toContinuousMap ⊆ Wy := by
+      have hα_range : Set.range (α : unitInterval → X) ⊆ V := by
+        rintro _ ⟨t, rfl⟩; exact hα t
+      have hαsymm_range : Set.range (α.symm : unitInterval → X) ⊆ V := by
+        rw [Path.symm_range]; exact hα_range
+      have hγ_range : Set.range (γ : unitInterval → X) ⊆ V := by
+        rintro _ ⟨t, rfl⟩; exact hγV' t
+      have hinner : Set.range ((γ.trans α.symm) : unitInterval → X) ⊆ V := by
+        rw [Path.trans_range]
+        exact Set.union_subset hγ_range hαsymm_range
+      have houter : Set.range (δ : unitInterval → X) ⊆ V := by
+        change Set.range ((α.trans (γ.trans α.symm)) : unitInterval → X) ⊆ V
+        rw [Path.trans_range]
+        exact Set.union_subset hα_range hinner
+      intro z hz
+      rcases hz with ⟨t, ht⟩
+      have hzV : z ∈ Set.range (δ : unitInterval → X) :=
+        ⟨t, by simpa [Path.coe_toContinuousMap] using ht⟩
+      exact hVWy (houter hzV)
+    have hδnull :
+        (⟦δ⟧ : _root_.Path.Homotopic.Quotient y y)
+            = ⟦_root_.Path.refl y⟧ := hWynull δ hδRange
+    -- Algebraic cancellation. Let A := ⟦α⟧, G := ⟦γ⟧, Asym := ⟦α.symm⟧ = A.symm.
+    set A : _root_.Path.Homotopic.Quotient y x := ⟦α⟧ with hAdef
+    set G : _root_.Path.Homotopic.Quotient x x := ⟦γ⟧ with hGdef
+    set Asym : _root_.Path.Homotopic.Quotient x y :=
+      _root_.Path.Homotopic.Quotient.symm A with hAsymdef
+    have hδ_quot :
+        (⟦δ⟧ : _root_.Path.Homotopic.Quotient y y)
+          = _root_.Path.Homotopic.Quotient.trans A
+              (_root_.Path.Homotopic.Quotient.trans G Asym) := by
+      have e1 :
+          (⟦α.trans (γ.trans α.symm)⟧ : _root_.Path.Homotopic.Quotient y y)
+            = _root_.Path.Homotopic.Quotient.trans
+                (⟦α⟧ : _root_.Path.Homotopic.Quotient y x)
+                (⟦γ.trans α.symm⟧ : _root_.Path.Homotopic.Quotient x y) :=
+        _root_.Path.Homotopic.Quotient.mk_trans α (γ.trans α.symm)
+      have e2 :
+          (⟦γ.trans α.symm⟧ : _root_.Path.Homotopic.Quotient x y)
+            = _root_.Path.Homotopic.Quotient.trans
+                (⟦γ⟧ : _root_.Path.Homotopic.Quotient x x)
+                (⟦α.symm⟧ : _root_.Path.Homotopic.Quotient x y) :=
+        _root_.Path.Homotopic.Quotient.mk_trans γ α.symm
+      have e3 :
+          (⟦α.symm⟧ : _root_.Path.Homotopic.Quotient x y)
+            = _root_.Path.Homotopic.Quotient.symm
+                (⟦α⟧ : _root_.Path.Homotopic.Quotient y x) :=
+        _root_.Path.Homotopic.Quotient.mk_symm α
+      change (⟦α.trans (γ.trans α.symm)⟧ : _root_.Path.Homotopic.Quotient y y)
+            = _root_.Path.Homotopic.Quotient.trans A
+                (_root_.Path.Homotopic.Quotient.trans G
+                  (_root_.Path.Homotopic.Quotient.symm A))
+      rw [e1, e2, e3]
+    have href :
+        (⟦_root_.Path.refl y⟧ : _root_.Path.Homotopic.Quotient y y)
+          = _root_.Path.Homotopic.Quotient.refl y :=
+      _root_.Path.Homotopic.Quotient.mk_refl y
+    have hconj :
+        _root_.Path.Homotopic.Quotient.trans A
+            (_root_.Path.Homotopic.Quotient.trans G Asym)
+          = _root_.Path.Homotopic.Quotient.refl y := by
+      rw [← hδ_quot, hδnull, href]
+    have hAsymA :
+        _root_.Path.Homotopic.Quotient.trans Asym A
+          = _root_.Path.Homotopic.Quotient.refl x := by
+      simp [hAsymdef, _root_.Path.Homotopic.Quotient.symm_trans]
+    -- From `A · (G · Asym) = refl_y` derive `A · G = A`,
+    -- then `G = Asym · A · G = Asym · A = refl_x`.
+    have h_AG_eq_A :
+        _root_.Path.Homotopic.Quotient.trans A G = A := by
+      have hassoc :
+          _root_.Path.Homotopic.Quotient.trans
+              (_root_.Path.Homotopic.Quotient.trans A G) Asym
+            = _root_.Path.Homotopic.Quotient.trans A
+                (_root_.Path.Homotopic.Quotient.trans G Asym) :=
+        _root_.Path.Homotopic.Quotient.trans_assoc A G Asym
+      have h_AGAsym_refl :
+          _root_.Path.Homotopic.Quotient.trans
+              (_root_.Path.Homotopic.Quotient.trans A G) Asym
+            = _root_.Path.Homotopic.Quotient.refl y := by
+        rw [hassoc]; exact hconj
+      have step :
+          _root_.Path.Homotopic.Quotient.trans
+              (_root_.Path.Homotopic.Quotient.trans
+                (_root_.Path.Homotopic.Quotient.trans A G) Asym) A
+            = _root_.Path.Homotopic.Quotient.trans
+                (_root_.Path.Homotopic.Quotient.refl y) A := by
+        rw [h_AGAsym_refl]
+      have hAG_simpl :
+          _root_.Path.Homotopic.Quotient.trans
+              (_root_.Path.Homotopic.Quotient.trans
+                (_root_.Path.Homotopic.Quotient.trans A G) Asym) A
+            = _root_.Path.Homotopic.Quotient.trans A G := by
+        calc _root_.Path.Homotopic.Quotient.trans
+              (_root_.Path.Homotopic.Quotient.trans
+                (_root_.Path.Homotopic.Quotient.trans A G) Asym) A
+            = _root_.Path.Homotopic.Quotient.trans
+                (_root_.Path.Homotopic.Quotient.trans A G)
+                (_root_.Path.Homotopic.Quotient.trans Asym A) := by
+              rw [_root_.Path.Homotopic.Quotient.trans_assoc]
+          _ = _root_.Path.Homotopic.Quotient.trans
+                (_root_.Path.Homotopic.Quotient.trans A G)
+                (_root_.Path.Homotopic.Quotient.refl x) := by rw [hAsymA]
+          _ = _root_.Path.Homotopic.Quotient.trans A G :=
+              _root_.Path.Homotopic.Quotient.trans_refl _
+      have h_refl_A :
+          _root_.Path.Homotopic.Quotient.trans
+              (_root_.Path.Homotopic.Quotient.refl y) A = A :=
+        _root_.Path.Homotopic.Quotient.refl_trans A
+      rw [← hAG_simpl, step, h_refl_A]
+    have hG_eq :
+        G = _root_.Path.Homotopic.Quotient.trans Asym
+              (_root_.Path.Homotopic.Quotient.trans A G) := by
+      calc G
+          = _root_.Path.Homotopic.Quotient.trans
+              (_root_.Path.Homotopic.Quotient.refl x) G :=
+            (_root_.Path.Homotopic.Quotient.refl_trans G).symm
+        _ = _root_.Path.Homotopic.Quotient.trans
+              (_root_.Path.Homotopic.Quotient.trans Asym A) G := by rw [hAsymA]
+        _ = _root_.Path.Homotopic.Quotient.trans Asym
+              (_root_.Path.Homotopic.Quotient.trans A G) := by
+            rw [_root_.Path.Homotopic.Quotient.trans_assoc]
+    rw [hG_eq, h_AG_eq_A]; exact hAsymA
+  -- `Good` is a topological basis.
+  have hGood_basis : TopologicalSpace.IsTopologicalBasis Good := by
+    apply TopologicalSpace.isTopologicalBasis_of_isOpen_of_nhds
+    · intro V hV; exact hV.1
+    · intro x W hxW hWopen
+      obtain ⟨Wx, hWxNhd, hWxNull⟩ :=
+        DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnectedSpace.out
+          (X := X) x
+      have hWxW : Wx ∩ W ∈ nhds x := Filter.inter_mem hWxNhd (hWopen.mem_nhds hxW)
+      have hbasis := isOpen_isPathConnected_basis (x := x)
+      obtain ⟨V, ⟨hVopen, hxV, hVpc⟩, hVsub⟩ := hbasis.mem_iff.mp hWxW
+      refine ⟨V, ?_, hxV, hVsub.trans Set.inter_subset_right⟩
+      refine ⟨hVopen, hVpc, x, hxV, Wx, hWxNhd, ?_, ?_⟩
+      · exact fun z hz => (hVsub hz).1
+      · intro γ hγ; exact hWxNull γ hγ
+  -- Extract a countable basis `s ⊆ Good`.
+  obtain ⟨s, hs_sub, hs_count, hs_basis⟩ := hGood_basis.exists_countable
+  -- `s` is nonempty since `X` is nonempty (its sUnion equals `univ`).
+  have hs_nonempty : s.Nonempty := by
+    have huniv : (⋃₀ s) = (Set.univ : Set X) := hs_basis.sUnion_eq
+    obtain ⟨x₀⟩ := ‹Nonempty X›
+    have hx₀ : x₀ ∈ ⋃₀ s := by rw [huniv]; trivial
+    rcases hx₀ with ⟨V, hVs, _⟩; exact ⟨V, hVs⟩
+  obtain ⟨B, hBrange⟩ := hs_count.exists_eq_range hs_nonempty
+  refine ⟨B, ?_, ?_, ?_, ?_⟩
+  · intro n
+    have : B n ∈ s := by rw [hBrange]; exact ⟨n, rfl⟩
+    exact (hs_sub this).1
+  · intro n
+    have : B n ∈ s := by rw [hBrange]; exact ⟨n, rfl⟩
+    exact (hs_sub this).2.1
+  · intro n x hxBn γ hγ
+    have hBnGood : B n ∈ Good := hs_sub (by rw [hBrange]; exact ⟨n, rfl⟩)
+    exact hGood_null (B n) hBnGood x hxBn γ hγ
+  · rw [← hBrange]; exact hs_basis
 
 /-- **Countable anchors.** Given a countable basis `B`, choose, for every
 ordered pair of indices `(m, n)` whose corresponding basis sets meet,
