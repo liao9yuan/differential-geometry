@@ -35,7 +35,28 @@ private theorem model_mem_contDiffGroupoid_of_contMDiffOn
     (he : ContMDiffOn I I n e e.source)
     (he_symm : ContMDiffOn I I n e.symm e.target) :
     e ∈ contDiffGroupoid n I := by
-  sorry
+  have hlocal :
+      ChartedSpace.LiftPropOn
+        (contDiffGroupoid n I).IsLocalStructomorphWithinAt e e.source := by
+    rw [isLocalStructomorphOn_contDiffGroupoid_iff]
+    exact ⟨he, he_symm⟩
+  refine (contDiffGroupoid n I).locality ?_
+  intro x hx
+  have hxlocal := hlocal x hx
+  rw [StructureGroupoid.liftPropWithinAt_self] at hxlocal
+  have hxstruct :
+      (contDiffGroupoid n I).IsLocalStructomorphWithinAt e e.source x :=
+    hxlocal.2
+  rw [e.isLocalStructomorphWithinAt_source_iff] at hxstruct
+  obtain ⟨e', he'G, he'_sub, heq, hx_e'⟩ := hxstruct hx
+  refine ⟨e'.source, e'.open_source, hx_e', ?_⟩
+  have heq_on : Set.EqOn e e' (e.source ∩ e'.source) := by
+    intro y hy
+    exact heq hy.2
+  have hrestr : e.restr e'.source ≈ e'.restr e.source :=
+    OpenPartialHomeomorph.Set.EqOn.restr_eqOn_source heq_on
+  exact (contDiffGroupoid n I).mem_of_eqOnSource
+    (closedUnderRestriction' he'G e.open_source) hrestr
 
 /-- An open partial homeomorphism from a manifold to its model space is a
 maximal-atlas chart if it is `C^n` in both directions. -/
@@ -72,6 +93,41 @@ theorem mem_maximalAtlas_of_contMDiffOn
 end OpenPartialHomeomorph
 
 namespace PartialDiffeomorph
+
+/-- Restrict an open partial homeomorphism to an open subset of its source and
+upgrade it to a partial diffeomorphism when the forward and inverse maps are
+`C^n` on the restricted source and target. -/
+def ofOpenPartialHomeomorphRestr
+    {E₁ : Type*} [NormedAddCommGroup E₁] [NormedSpace Real E₁]
+    {H₁ : Type*} [TopologicalSpace H₁]
+    {J : ModelWithCorners Real E₁ H₁}
+    {N : Type*} [TopologicalSpace N] [ChartedSpace H₁ N]
+    {n : WithTop ℕ∞}
+    (e : OpenPartialHomeomorph M N)
+    (s : Set M) (hs : IsOpen s) (hse : s ⊆ e.source)
+    (he : ContMDiffOn I J n e s)
+    (he_symm : ContMDiffOn J I n e.symm (e '' s)) :
+    PartialDiffeomorph I J M N n where
+  toFun := e
+  invFun := e.symm
+  source := s
+  target := e '' s
+  map_source' := by
+    intro x hx
+    exact ⟨x, hx, rfl⟩
+  map_target' := by
+    rintro y ⟨x, hx, rfl⟩
+    simpa [e.left_inv (hse hx)] using hx
+  left_inv' := by
+    intro x hx
+    exact e.left_inv (hse hx)
+  right_inv' := by
+    rintro y ⟨x, hx, rfl⟩
+    simp [e.left_inv (hse hx)]
+  open_source := hs
+  open_target := e.isOpen_image_of_subset_source hs hse
+  contMDiffOn_toFun := he
+  contMDiffOn_invFun := he_symm
 
 /-- Postcompose a partial diffeomorphism with a global diffeomorphism. -/
 def transDiffeomorph
@@ -124,4 +180,3 @@ end PartialDiffeomorph
 
 end Coordinates
 end RicciFlower
-

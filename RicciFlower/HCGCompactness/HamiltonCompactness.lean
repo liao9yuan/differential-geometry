@@ -35,6 +35,7 @@ metric compactness inputs, spacetime derivative input, and smooth-flow upgrade
 backend are supplied.  This is the honest theorem-facing form of MSM135
 Theorem 3.10 before Shi estimates and spacetime Arzela--Ascoli are formalized. -/
 theorem compactnessSol
+    [I.Boundaryless]
     (X : PointedFlowSeq.{u, uE, uH} (I := I))
     (_hcomplete : CompleteInput (I := I) X)
     (_hcurv : CurvBoundInput (I := I) X)
@@ -54,6 +55,7 @@ compactness theorem itself.  It remains here only because Hamilton Section 12
 currently records Perelman noncollapse separately before the future
 noncollapse-to-injectivity bridge is formalized. -/
 theorem hamiltonCompactness
+    [I.Boundaryless]
     (X : PointedFlowSeq.{u, uE, uH} (I := I))
     (_hcomplete : CompleteInput (I := I) X)
     (_hcurv : CurvBoundInput (I := I) X)

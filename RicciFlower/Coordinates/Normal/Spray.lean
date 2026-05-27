@@ -532,6 +532,84 @@ theorem initPhase_eq_pair (x : M) (v : TangentSpace I x) :
     rw [hlift1, hfiber] at hz
     exact hz.symm
 
+/-- Linear map underlying the derivative of `initPhase` in the initial
+velocity.  It inserts a tangent vector as the fiber component of the fixed
+phase chart. -/
+def initPhaseLin (x : M) :
+    TangentSpace I x →L[Real] E × E :=
+  (0 : TangentSpace I x →L[Real] E).prod
+    (ContinuousLinearMap.id Real (TangentSpace I x))
+
+/-- The initial-phase chart is affine in the initial velocity. -/
+theorem initPhase_hasFDerivAt (x : M) (v : TangentSpace I x) :
+    HasFDerivAt
+      (initPhase (I := I) x)
+      (initPhaseLin (I := I) x)
+      v := by
+  have hconst :
+      HasFDerivAt
+        (fun _ : TangentSpace I x => extChartAt I x x)
+        (0 : TangentSpace I x →L[Real] E) v :=
+    hasFDerivAt_const (extChartAt I x x) v
+  have hid :
+      HasFDerivAt
+        (fun v : TangentSpace I x => v)
+        (ContinuousLinearMap.id Real (TangentSpace I x)) v :=
+    (ContinuousLinearMap.id Real (TangentSpace I x)).hasFDerivAt
+  have hfun :
+      (fun v : TangentSpace I x => (extChartAt I x x, v)) =
+        initPhase (I := I) x := by
+    funext u
+    exact (initPhase_eq_pair (I := I) x u).symm
+  have hpair := hconst.prodMk hid
+  rw [hfun] at hpair
+  simpa [initPhaseLin] using hpair
+
+/-- The initial-phase chart is strictly differentiable in the initial
+velocity; its derivative is the fiber-inclusion linear map. -/
+theorem initPhase_hasStrictFDerivAt (x : M) (v : TangentSpace I x) :
+    HasStrictFDerivAt
+      (initPhase (I := I) x)
+      (initPhaseLin (I := I) x)
+      v := by
+  have hconst :
+      HasStrictFDerivAt
+        (fun _ : TangentSpace I x => extChartAt I x x)
+        (0 : TangentSpace I x →L[Real] E) v :=
+    hasStrictFDerivAt_const (extChartAt I x x) v
+  have hid :
+      HasStrictFDerivAt
+        (fun v : TangentSpace I x => v)
+        (ContinuousLinearMap.id Real (TangentSpace I x)) v :=
+    (ContinuousLinearMap.id Real (TangentSpace I x)).hasStrictFDerivAt
+  have hfun :
+      (fun v : TangentSpace I x => (extChartAt I x x, v)) =
+        initPhase (I := I) x := by
+    funext u
+    exact (initPhase_eq_pair (I := I) x u).symm
+  have hpair := hconst.prodMk hid
+  rw [hfun] at hpair
+  simpa [initPhaseLin] using hpair
+
+/-- The initial-phase chart is smooth in the initial velocity. -/
+theorem initPhase_contDiffAt {n : WithTop ℕ∞} (x : M) (v : TangentSpace I x) :
+    ContDiffAt Real n (initPhase (I := I) x) v := by
+  have hconst :
+      ContDiffAt Real n
+        (fun _ : TangentSpace I x => extChartAt I x x) v :=
+    contDiffAt_const
+  have hid :
+      ContDiffAt Real n (fun v : TangentSpace I x => v) v := by
+    simpa using (contDiffAt_id : ContDiffAt Real n (id : TangentSpace I x -> TangentSpace I x) v)
+  have hfun :
+      (fun v : TangentSpace I x => (extChartAt I x x, v)) =
+        initPhase (I := I) x := by
+    funext u
+    exact (initPhase_eq_pair (I := I) x u).symm
+  have hpair := hconst.prodMk hid
+  rw [hfun] at hpair
+  exact hpair
+
 /-- Scaling the fiber coordinate of an initial phase is the initial phase of
 the scaled tangent vector. -/
 theorem initPhase_smul

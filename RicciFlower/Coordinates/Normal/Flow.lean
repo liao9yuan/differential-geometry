@@ -374,6 +374,58 @@ theorem plFlow_bound
     rw [ODE.FunSpace.compProj_of_mem ht, ODE.FunSpace.compProj_of_mem ht]
     simpa [ODE.FunSpace.toContinuousMap_apply_eq_apply] using hpoint
 
+/-- A functional Picard-Lindelof flow agrees with any other solution through
+the same initial point, as long as both curves stay in the controlling closed
+ball. -/
+theorem plFlow_eq_of_solution
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace Real F] [CompleteSpace F]
+    {f : Real -> F -> F} {tmin tmax : Real}
+    {t0 : Set.Icc tmin tmax} {x0 : F} {a r L K : NNReal}
+    (hf : IsPicardLindelof f t0 x0 a r L K)
+    (ht0 : (t0 : Real) ∈ Set.Ioo tmin tmax)
+    {α : F -> Real -> F}
+    (hflow : ∀ x ∈ Metric.closedBall x0 r,
+      α x t0 = x ∧
+        ∀ t ∈ Set.Icc tmin tmax,
+          HasDerivWithinAt (α x) (f t (α x t))
+            (Set.Icc tmin tmax) t)
+    (hbound : ∀ x ∈ Metric.closedBall x0 r, ∀ t : Real,
+      α x t ∈ Metric.closedBall x0 a)
+    {β : Real -> F}
+    (hβ0 : β t0 = x0)
+    (hβcont : ContinuousOn β (Set.Icc tmin tmax))
+    (hβderiv : ∀ t ∈ Set.Ioo tmin tmax,
+      HasDerivAt β (f t (β t)) t)
+    (hβbound : ∀ t ∈ Set.Icc tmin tmax,
+      β t ∈ Metric.closedBall x0 a) :
+    ∀ t ∈ Set.Icc tmin tmax, α x0 t = β t := by
+  have hx0r : x0 ∈ Metric.closedBall x0 r :=
+    Metric.mem_closedBall_self (NNReal.coe_nonneg r)
+  have hαcont : ContinuousOn (α x0) (Set.Icc tmin tmax) := by
+    exact HasDerivWithinAt.continuousOn
+      (fun t ht => (hflow x0 hx0r).2 t ht)
+  have hαderiv : ∀ t ∈ Set.Ioo tmin tmax,
+      HasDerivAt (α x0) (f t (α x0 t)) t := by
+    intro t ht
+    have hwithin := (hflow x0 hx0r).2 t (Set.Ioo_subset_Icc_self ht)
+    have hIcc_mem : Set.Icc tmin tmax ∈ 𝓝 t := by
+      simpa using Icc_mem_nhds ht.1 ht.2
+    exact hwithin.hasDerivAt hIcc_mem
+  have hinit : α x0 t0 = β t0 := by
+    rw [(hflow x0 hx0r).1, hβ0]
+  have hEq : Set.EqOn (α x0) β (Set.Icc tmin tmax) := by
+    exact ODE_solution_unique_of_mem_Icc
+      (v := f) (s := fun _ : Real => Metric.closedBall x0 a)
+      (K := K) (t₀ := (t0 : Real)) (a := tmin) (b := tmax)
+      (fun t ht => hf.lipschitzOnWith t (Set.Ioo_subset_Icc_self ht))
+      ht0 hαcont hαderiv
+      (fun _ _ => hbound x0 hx0r _)
+      hβcont hβderiv
+      (fun t ht => hβbound t (Set.Ioo_subset_Icc_self ht))
+      hinit
+  intro t ht
+  exact hEq ht
+
 /-- Picard-Lindelof vector fields are interval-integrable along a controlled
 continuous trajectory. -/
 lemma pl_int

@@ -1,4 +1,4 @@
-import RicciFlower.Coordinates.Normal.Flow
+import RicciFlower.Coordinates.Normal.SmoothFlow
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -306,15 +306,309 @@ theorem exists_exp_one
       (gamma := G.gamma) (s := Metric.ball (0 : Real) G.epsilon)
       G.interval_subset G.segment⟩
 
-set_option maxHeartbeats 800000 in
+/-- A projected C1 variational flow gives a functional local endpoint realizing
+`expAt`, and its fixed-chart endpoint has derivative `id` at zero.
+
+This is the endpoint-facing consumer of `varFlow_chartEndDeriv0`: it packages
+the C1 model-flow dependence into an actual local endpoint map, without
+claiming a smooth local diffeomorphism. -/
+theorem exists_varFlow_endpoint
+    [I.Boundaryless] [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M)
+    (x : M) :
+    ∃ R > 0, ∃ τ > 0,
+      ∃ Ψ :
+          (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+            ModelPhase (E := E) × ModelLin (E := E),
+        (∀ v ∈ Metric.ball (0 : TangentSpace I x) R,
+          expAt (I := I) g x v
+            (manifoldEnd (I := I) (varModelFlow (E := E) Ψ) τ x v)) ∧
+          HasFDerivAt
+            (chartEnd (I := I) (varModelFlow (E := E) Ψ) τ x)
+            (ContinuousLinearMap.id Real (TangentSpace I x)) 0 := by
+  classical
+  obtain ⟨ε, hε, δ, hδ, rModel, hrModel, Ψ, hflow, hsrc, _hzero, _L', _hLip, hderiv⟩ :=
+    varFlow_chartEndDeriv0 (I := I) g x
+  obtain ⟨ρ, hρ, hsmall⟩ := initPhase_small (I := I) x hrModel
+  let τ : Real := min δ (ε / 2) / 2
+  have hτ : 0 < τ := by
+    dsimp [τ]
+    exact half_pos (lt_min hδ (half_pos hε))
+  have hτδ : τ ≤ δ := by
+    dsimp [τ]
+    have hmin : min δ (ε / 2) ≤ δ := min_le_left _ _
+    linarith
+  have hτIoc : τ ∈ Set.Ioc (0 : Real) δ := ⟨hτ, hτδ⟩
+  have htwoτ_le : 2 * τ ≤ ε := by
+    dsimp [τ]
+    have hmin : min δ (ε / 2) ≤ ε / 2 := min_le_right _ _
+    linarith
+  have h2τ_pos : 0 < 2 * τ := by positivity
+  have hsub : Set.Icc (-(2 * τ)) (2 * τ) ⊆ Set.Icc (-ε) ε := by
+    intro t ht
+    constructor <;> linarith [ht.1, ht.2, htwoτ_le]
+  have hflowSmall :
+      ∀ z ∈ Metric.closedBall
+          (extChartAt I.tangent (phaseZero (I := I) x)
+            (phaseZero (I := I) x)) rModel,
+        varModelFlow (E := E) Ψ z 0 = z ∧
+          ∀ t ∈ Set.Icc (-(2 * τ)) (2 * τ),
+            HasDerivWithinAt
+              (varModelFlow (E := E) Ψ z)
+              (modelSpray (I := I) g x
+                (varModelFlow (E := E) Ψ z t))
+              (Set.Icc (-(2 * τ)) (2 * τ)) t := by
+    intro z hz
+    refine ⟨(hflow z hz).1, ?_⟩
+    intro t ht
+    exact ((hflow z hz).2 t (hsub ht)).mono hsub
+  have hsrcSmall :
+      ∀ z ∈ Metric.closedBall
+          (extChartAt I.tangent (phaseZero (I := I) x)
+            (phaseZero (I := I) x)) rModel,
+        ∀ t ∈ Set.Icc (-(2 * τ)) (2 * τ),
+          varModelFlow (E := E) Ψ z t ∈
+            (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+            (phaseOfModel (I := I) x (varModelFlow (E := E) Ψ z t)).proj ∈
+              (extChartAt I x).source := by
+    intro z hz t ht
+    exact hsrc z hz t (hsub ht)
+  let R : Real := τ * ρ
+  have hR : 0 < R := mul_pos hτ hρ
+  refine ⟨R, hR, τ, hτ, Ψ, ?_, ?_⟩
+  · intro v hv
+    let u : TangentSpace I x := τ⁻¹ • v
+    have hu : u ∈ Metric.ball (0 : TangentSpace I x) ρ := by
+      rw [Metric.mem_ball] at hv ⊢
+      have hvnorm : ‖v‖ < τ * ρ := by
+        simpa [R, dist_zero_right] using hv
+      have hscale := mul_lt_mul_of_pos_left hvnorm (inv_pos.mpr hτ)
+      have hnormu : ‖τ⁻¹ • v‖ < ρ := by
+        rw [norm_smul, Real.norm_eq_abs, abs_of_pos (inv_pos.mpr hτ)]
+        rw [← mul_assoc, inv_mul_cancel₀ hτ.ne', one_mul] at hscale
+        simpa [mul_comm, mul_left_comm, mul_assoc] using hscale
+      simpa [u, dist_zero_right] using hnormu
+    have hvsmall :
+        initPhase (I := I) x (((2 * τ) / 2)⁻¹ • v) ∈
+          Metric.closedBall
+            (extChartAt I.tangent (phaseZero (I := I) x)
+              (phaseZero (I := I) x)) rModel := by
+      have hhalf : (2 * τ) / 2 = τ := by ring
+      simpa [hhalf, u] using hsmall u hu
+    simpa using
+      end_expAt (I := I) (g := g) (x := x)
+        (ε := 2 * τ) h2τ_pos (r := rModel)
+        (α := varModelFlow (E := E) Ψ)
+        hflowSmall hsrcSmall hvsmall
+  · exact hderiv τ hτIoc
+
+/-- A projected C1 variational flow gives a functional local endpoint realizing
+`expAt`; its fixed-chart endpoint is `C1` and has derivative `id` at zero.
+
+This is the C1 endpoint package needed before applying a smooth inverse
+function theorem.  It still does not claim a smooth `PartialDiffeomorph`. -/
+theorem exists_varFlow_c1_endpoint
+    [I.Boundaryless] [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M)
+    (x : M) :
+    ∃ R > 0, ∃ τ > 0,
+      ∃ Ψ :
+          (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+            ModelPhase (E := E) × ModelLin (E := E),
+        manifoldEnd (I := I) (varModelFlow (E := E) Ψ) τ x
+            (0 : TangentSpace I x) = x ∧
+        (∀ v ∈ Metric.ball (0 : TangentSpace I x) R,
+          expAt (I := I) g x v
+            (manifoldEnd (I := I) (varModelFlow (E := E) Ψ) τ x v)) ∧
+          (∀ v ∈ Metric.ball (0 : TangentSpace I x) R,
+            extChartAt I x
+              (manifoldEnd (I := I) (varModelFlow (E := E) Ψ) τ x v) =
+                chartEnd (I := I) (varModelFlow (E := E) Ψ) τ x v) ∧
+          ContDiffAt Real 1
+            (chartEnd (I := I) (varModelFlow (E := E) Ψ) τ x) 0 ∧
+          HasFDerivAt
+            (chartEnd (I := I) (varModelFlow (E := E) Ψ) τ x)
+            (ContinuousLinearMap.id Real (TangentSpace I x)) 0 := by
+  classical
+  obtain ⟨ε, hε, δ, hδ, rModel, hrModel, Ψ, hflow, hsrc, hzero, _L', _hLip, hC1deriv⟩ :=
+    varFlow_chartEndC1 (I := I) g x
+  obtain ⟨ρ, hρ, hsmall⟩ := initPhase_small (I := I) x hrModel
+  let τ : Real := min δ (ε / 2) / 2
+  have hτ : 0 < τ := by
+    dsimp [τ]
+    exact half_pos (lt_min hδ (half_pos hε))
+  have hτδ : τ ≤ δ := by
+    dsimp [τ]
+    have hmin : min δ (ε / 2) ≤ δ := min_le_left _ _
+    linarith
+  have htwoτ_le_delta : 2 * τ ≤ δ := by
+    dsimp [τ]
+    have hmin : min δ (ε / 2) ≤ δ := min_le_left _ _
+    linarith
+  have hτIoc : τ ∈ Set.Ioc (0 : Real) δ := ⟨hτ, hτδ⟩
+  have htwoτ_le : 2 * τ ≤ ε := by
+    dsimp [τ]
+    have hmin : min δ (ε / 2) ≤ ε / 2 := min_le_right _ _
+    linarith
+  have h2τ_pos : 0 < 2 * τ := by positivity
+  have hsub : Set.Icc (-(2 * τ)) (2 * τ) ⊆ Set.Icc (-ε) ε := by
+    intro t ht
+    constructor <;> linarith [ht.1, ht.2, htwoτ_le]
+  have hflowSmall :
+      ∀ z ∈ Metric.closedBall
+          (extChartAt I.tangent (phaseZero (I := I) x)
+            (phaseZero (I := I) x)) rModel,
+        varModelFlow (E := E) Ψ z 0 = z ∧
+          ∀ t ∈ Set.Icc (-(2 * τ)) (2 * τ),
+            HasDerivWithinAt
+              (varModelFlow (E := E) Ψ z)
+              (modelSpray (I := I) g x
+                (varModelFlow (E := E) Ψ z t))
+              (Set.Icc (-(2 * τ)) (2 * τ)) t := by
+    intro z hz
+    refine ⟨(hflow z hz).1, ?_⟩
+    intro t ht
+    exact ((hflow z hz).2 t (hsub ht)).mono hsub
+  have hsrcSmall :
+      ∀ z ∈ Metric.closedBall
+          (extChartAt I.tangent (phaseZero (I := I) x)
+            (phaseZero (I := I) x)) rModel,
+        ∀ t ∈ Set.Icc (-(2 * τ)) (2 * τ),
+          varModelFlow (E := E) Ψ z t ∈
+            (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+            (phaseOfModel (I := I) x (varModelFlow (E := E) Ψ z t)).proj ∈
+              (extChartAt I x).source := by
+    intro z hz t ht
+    exact hsrc z hz t (hsub ht)
+  let R : Real := τ * ρ
+  have hR : 0 < R := mul_pos hτ hρ
+  refine ⟨R, hR, τ, hτ, Ψ, ?_, ?_, ?_, ?_, ?_⟩
+  · have hτsmall : τ ∈ Set.Icc (-(2 * τ)) (2 * τ) := by
+      constructor <;> linarith
+    have hzeroSmall :
+        ∀ t ∈ Set.Icc (-(2 * τ)) (2 * τ),
+          varModelFlow (E := E) Ψ
+            (extChartAt I.tangent (phaseZero (I := I) x)
+              (phaseZero (I := I) x)) t =
+            extChartAt I.tangent (phaseZero (I := I) x)
+              (phaseZero (I := I) x) := by
+      intro t ht
+      exact hzero t ⟨by linarith [ht.1, htwoτ_le_delta],
+        by linarith [ht.2, htwoτ_le_delta]⟩
+    exact manifoldEnd_zero (I := I)
+      (α := varModelFlow (E := E) Ψ) (ε := 2 * τ) (τ := τ)
+      x hτsmall hzeroSmall
+  · intro v hv
+    let u : TangentSpace I x := τ⁻¹ • v
+    have hu : u ∈ Metric.ball (0 : TangentSpace I x) ρ := by
+      rw [Metric.mem_ball] at hv ⊢
+      have hvnorm : ‖v‖ < τ * ρ := by
+        simpa [R, dist_zero_right] using hv
+      have hscale := mul_lt_mul_of_pos_left hvnorm (inv_pos.mpr hτ)
+      have hnormu : ‖τ⁻¹ • v‖ < ρ := by
+        rw [norm_smul, Real.norm_eq_abs, abs_of_pos (inv_pos.mpr hτ)]
+        rw [← mul_assoc, inv_mul_cancel₀ hτ.ne', one_mul] at hscale
+        simpa [mul_comm, mul_left_comm, mul_assoc] using hscale
+      simpa [u, dist_zero_right] using hnormu
+    have hvsmall :
+        initPhase (I := I) x (((2 * τ) / 2)⁻¹ • v) ∈
+          Metric.closedBall
+            (extChartAt I.tangent (phaseZero (I := I) x)
+              (phaseZero (I := I) x)) rModel := by
+      have hhalf : (2 * τ) / 2 = τ := by ring
+      simpa [hhalf, u] using hsmall u hu
+    simpa using
+      end_expAt (I := I) (g := g) (x := x)
+        (ε := 2 * τ) h2τ_pos (r := rModel)
+        (α := varModelFlow (E := E) Ψ)
+        hflowSmall hsrcSmall hvsmall
+  · intro v hv
+    let u : TangentSpace I x := τ⁻¹ • v
+    have hu : u ∈ Metric.ball (0 : TangentSpace I x) ρ := by
+      rw [Metric.mem_ball] at hv ⊢
+      have hvnorm : ‖v‖ < τ * ρ := by
+        simpa [R, dist_zero_right] using hv
+      have hscale := mul_lt_mul_of_pos_left hvnorm (inv_pos.mpr hτ)
+      have hnormu : ‖τ⁻¹ • v‖ < ρ := by
+        rw [norm_smul, Real.norm_eq_abs, abs_of_pos (inv_pos.mpr hτ)]
+        rw [← mul_assoc, inv_mul_cancel₀ hτ.ne', one_mul] at hscale
+        simpa [mul_comm, mul_left_comm, mul_assoc] using hscale
+      simpa [u, dist_zero_right] using hnormu
+    have hvsmall :
+        initPhase (I := I) x (((2 * τ) / 2)⁻¹ • v) ∈
+          Metric.closedBall
+            (extChartAt I.tangent (phaseZero (I := I) x)
+              (phaseZero (I := I) x)) rModel := by
+      have hhalf : (2 * τ) / 2 = τ := by ring
+      simpa [hhalf, u] using hsmall u hu
+    have hτsmall : τ ∈ Set.Icc (-(2 * τ)) (2 * τ) := by
+      constructor <;> linarith
+    have htarget :
+        varModelFlow (E := E) Ψ
+            (initPhase (I := I) x (τ⁻¹ • v)) τ ∈
+          (extChartAt I.tangent (phaseZero (I := I) x)).target := by
+      have hhalf : (2 * τ) / 2 = τ := by ring
+      simpa [hhalf] using
+        (hsrcSmall
+          (initPhase (I := I) x (((2 * τ) / 2)⁻¹ • v)) hvsmall
+          τ hτsmall).1
+    exact
+      manifoldEnd_chart (I := I)
+        (α := varModelFlow (E := E) Ψ) (τ := τ) x
+        (v := v) htarget
+  · exact (hC1deriv τ hτIoc).1
+  · exact (hC1deriv τ hτIoc).2
+
 /-- Strict derivative at zero for a functional local endpoint map.
+
+This consumes the checked C1 variational-flow endpoint package.  The endpoint
+function is the same chart-fixed endpoint used to realize `expAt` on a small
+ball, so no arbitrary choice from the relation-valued API is involved. -/
+theorem expAt_strict
+    [I.Boundaryless] [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M)
+    (x : M) :
+    ∃ r > 0, ∃ exp : TangentSpace I x -> M,
+      exp 0 = x ∧
+        (∀ v ∈ Metric.ball (0 : TangentSpace I x) r,
+          expAt (I := I) g x v (exp v)) ∧
+        HasStrictFDerivAt
+          (fun v : TangentSpace I x => extChartAt I x (exp v))
+          (ContinuousLinearMap.id Real (TangentSpace I x)) 0 := by
+  classical
+  obtain ⟨R, hR, τ, _hτ, Ψ, hexp0, hreal, hchart, hC1, hderiv⟩ :=
+    exists_varFlow_c1_endpoint (I := I) g x
+  let exp : TangentSpace I x -> M :=
+    manifoldEnd (I := I) (varModelFlow (E := E) Ψ) τ x
+  let chartExp : TangentSpace I x -> TangentSpace I x :=
+    chartEnd (I := I) (varModelFlow (E := E) Ψ) τ x
+  have hstrictChart :
+      HasStrictFDerivAt chartExp
+        (ContinuousLinearMap.id Real (TangentSpace I x)) 0 := by
+    exact (by
+      simpa [chartExp] using
+        hC1.hasStrictFDerivAt' (by simpa [chartExp] using hderiv) one_ne_zero)
+  have hEq :
+      chartExp =ᶠ[𝓝 (0 : TangentSpace I x)]
+        fun v : TangentSpace I x => extChartAt I x (exp v) := by
+    refine Filter.eventuallyEq_of_mem (Metric.ball_mem_nhds _ hR) ?_
+    intro v hv
+    exact (by simpa [exp, chartExp] using (hchart v hv).symm)
+  refine ⟨R, hR, exp, ?_, ?_, ?_⟩
+  · simpa [exp] using hexp0
+  · intro v hv
+    simpa [exp] using hreal v hv
+  · exact hstrictChart.congr_of_eventuallyEq hEq
+
+set_option maxHeartbeats 800000 in
+/-- Legacy pairwise-integral proof of the strict endpoint theorem.
 
 This is intentionally stated only after choosing a genuine local endpoint
 function realizing `expAt` on a ball.  An arbitrary `Classical.choose` from the
 relation-valued endpoint would not be smooth; the missing proof is smooth
 dependence and uniqueness of the chart-fixed geodesic flow, followed by the
 standard zero-velocity linearization. -/
-theorem expAt_strict
+private theorem strict_pairwise
     [I.Boundaryless] [CompleteSpace E]
     (g : SmoothRiemannianMetric I M)
     (x : M) :

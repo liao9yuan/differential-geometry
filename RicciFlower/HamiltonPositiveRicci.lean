@@ -697,6 +697,18 @@ structure Ham3BallPair (M : Type*) where
   unit_radius : unit.radius = 1
   volume_mono : small.volume <= unit.volume
 
+namespace Ham3BallPair
+
+/-- A small ball whose radius is at most one is nested in the unit ball of the
+same pair, in the abstract `ScaleControlledBall` sense. -/
+theorem nested_of_le {B : Ham3BallPair M}
+    (hsmall : B.small.radius <= 1) :
+    RicciFlow.Perelman.ScaleControlledBall.Nested B.small B.unit := by
+  refine ⟨B.same_center, B.same_time, ?_⟩
+  simpa [B.unit_radius] using hsmall
+
+end Ham3BallPair
+
 /-- The lower volume bound supplied by Perelman's noncollapsing theorem at the
 fixed radius, recorded with actual small/unit ball witnesses.
 
@@ -735,6 +747,37 @@ theorem Ham3Noncollapse.unitVolLower
       hnoncollapsed.2.2 hcurv
     simpa [hradius] using h
   exact le_trans hsmall (balls i).volume_mono
+
+/-- The geometric content behind the small-to-unit volume step: after the fixed
+radius is known to be at most one, the eventual Perelman balls are nested in
+the abstract ball-pair sense and carry the recorded volume monotonicity. -/
+theorem Ham3Noncollapse.unitNested
+    {g0 : SmoothRiemannianMetric I M}
+    {P : Ham3FlowPackage (I := I) (M := M) g0}
+    {Q : Ham3BlowupData M} {kappa r : Real}
+    (hr : r <= 1)
+    (h : Ham3Noncollapse (I := I) P Q kappa r) :
+    exists balls : Nat -> Ham3BallPair M, exists N : Nat, forall i : Nat, N <= i ->
+      (balls i).small.center = Q.point i /\
+        (balls i).small.time = 0 /\
+        (balls i).small.radius = r /\
+        (balls i).small.curvatureControlled /\
+        RicciFlow.Perelman.KappaNoncollapsedAtBall 3 kappa (balls i).small /\
+        RicciFlow.Perelman.ScaleControlledBall.Nested
+          (balls i).small (balls i).unit /\
+        (balls i).small.volume <= (balls i).unit.volume := by
+  rcases h with ⟨_hkappa, _hr, balls, N, hballs⟩
+  refine ⟨balls, N, ?_⟩
+  intro i hi
+  rcases hballs i hi with
+    ⟨hcenter, htime, hradius, hcurv, hnoncollapsed⟩
+  have hsmall : (balls i).small.radius <= 1 := by
+    rw [hradius]
+    exact hr
+  exact
+    ⟨hcenter, htime, hradius, hcurv, hnoncollapsed,
+      Ham3BallPair.nested_of_le (M := M) hsmall,
+      (balls i).volume_mono⟩
 
 /-- Projection of the normalized maximal-flow time interval used by
 Corollary 7.4.  The normalization is a setup output, not a theorem about an

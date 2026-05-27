@@ -365,7 +365,33 @@ theorem rm04PairSymm_regular
     (hcov t) (lcAt_regular (I := I) S hS t) (Rm04 (t : Real))
     (rm04Realizes_regular (I := I) S Rm13 Rm04 hRm13 hLower t)
 
-/-- Input-skew producer for regular Ricci-flow time slices. -/
+/-- First-two input-skew producer for regular Ricci-flow time slices. -/
+theorem rm04InputSkew_regular_first_two
+    [IsManifold I (∞ + 1) M]
+    {D : Realized.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (Rm13 : Real -> Realized.Tensor13Section (I := I) (M := M))
+    (Rm04 : Real -> Realized.Tensor04Section (I := I) (M := M))
+    (hRm13 : forall t : Realized.RealTimeInterval.RegularTime D,
+      Realized.Rm13RealizesConnection (I := I)
+        (S.family.connection (t : Real)) (Rm13 (t : Real)))
+    (hLower : forall (t : Realized.RealTimeInterval.RegularTime D) (x : M),
+      Realized.Rm04LowersRm13At (I := I) (S.family.metric (t : Real)) x
+        (Rm13 (t : Real) x) (Rm04 (t : Real) x)) :
+    forall (t : Realized.RealTimeInterval.RegularTime D) (x : M),
+      forall X Y Z W : TangentSpace I x,
+        Rm04 (t : Real) x (Realized.vec4 Y X Z W) =
+          -Rm04 (t : Real) x (Realized.vec4 X Y Z W) := by
+  intro t x
+  exact RicciFlower.LeviCivita.rm04InputSkew_ofRealizes
+    (I := I) (S.family.metric (t : Real)) (S.family.connection (t : Real))
+    (Rm04 (t : Real))
+    (rm04Realizes_regular (I := I) S Rm13 Rm04 hRm13 hLower t)
+
+/-- Input-skew producer for regular Ricci-flow time slices.
+
+This is the canonical first-two curvature-input skew in the standard lowered
+`Rm04(X,Y,Z,W) = <R(X,Y)Z,W>` slot order. -/
 theorem rm04InputSkew_regular
     [IsManifold I (∞ + 1) M]
     {D : Realized.RealTimeInterval}
@@ -379,14 +405,11 @@ theorem rm04InputSkew_regular
       Realized.Rm04LowersRm13At (I := I) (S.family.metric (t : Real)) x
         (Rm13 (t : Real) x) (Rm04 (t : Real) x)) :
     forall (t : Realized.RealTimeInterval.RegularTime D) (x : M),
-      forall W X Y Z : TangentSpace I x,
-        Rm04 (t : Real) x (Realized.vec4 W Y X Z) =
-          -Rm04 (t : Real) x (Realized.vec4 W X Y Z) := by
-  intro t x
-  exact RicciFlower.LeviCivita.rm04InputSkew_ofRealizes
-    (I := I) (S.family.metric (t : Real)) (S.family.connection (t : Real))
-    (Rm04 (t : Real))
-    (rm04Realizes_regular (I := I) S Rm13 Rm04 hRm13 hLower t)
+      forall X Y Z W : TangentSpace I x,
+        Rm04 (t : Real) x (Realized.vec4 Y X Z W) =
+          -Rm04 (t : Real) x (Realized.vec4 X Y Z W) :=
+  rm04InputSkew_regular_first_two
+    (I := I) S Rm13 Rm04 hRm13 hLower
 
 /-- Ricci symmetry in a fixed frame from the regular-time lowered Riemann
 trace and Levi-Civita curvature symmetries. -/
@@ -413,9 +436,9 @@ theorem ricciSymm_regular
     (hOutput : forall (t : Realized.RealTimeInterval.RegularTime D) (x : M),
       Realized.Rm04OutputSkewAt (I := I) (Rm04 (t : Real) x))
     (hInput : forall (t : Realized.RealTimeInterval.RegularTime D) (x : M),
-      forall W X Y Z : TangentSpace I x,
-        Rm04 (t : Real) x (Realized.vec4 W Y X Z) =
-          -Rm04 (t : Real) x (Realized.vec4 W X Y Z)) :
+      forall X Y Z W : TangentSpace I x,
+        Rm04 (t : Real) x (Realized.vec4 Y X Z W) =
+          -Rm04 (t : Real) x (Realized.vec4 X Y Z W)) :
     RicciSymmetricInFrameOnRegular (I := I) S frame := by
   intro t x i j
   let basis := hframe.toBasisAt (hcover x)

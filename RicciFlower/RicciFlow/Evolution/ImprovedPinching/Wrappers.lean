@@ -102,7 +102,7 @@ theorem tfHeat_frame
     (hRm : ∀ (t : Real) (x : M) (i j k l : Fin 3),
       Realized.rm04Comp (I := I) (Rm04 t) frame x i k j l =
         DimensionThree.stdRmDiag3 (-(l1 t x)) (-(l2 t x)) (-(l3 t x))
-          k j l i) :
+          i k j l) :
     tfRicHeatOn
       (D := D)
       (tfRicNormSq scalar (ricciNormSqInFrame (I := I) S gInv frame))

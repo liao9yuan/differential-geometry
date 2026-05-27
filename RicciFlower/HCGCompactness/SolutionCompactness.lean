@@ -41,6 +41,7 @@ structure SmoothFlowLimitInput
 /-- MSM135 Theorem 3.10 as a reduction from metric compactness plus explicit
 flow-derivative and smooth-flow upgrade inputs. -/
 theorem solutionCompactness
+    [I.Boundaryless]
     (X : PointedFlowSeq.{u, uE, uH} (I := I))
     (hcomplete0 : SeqMetricComplete (I := I) (X.atZero (I := I)))
     (_hcurv : SpacetimeCurvBound (I := I) X)

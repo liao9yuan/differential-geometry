@@ -1,3 +1,4 @@
+import RicciFlower.Coordinates.Normal.InjectivityRadius
 import RicciFlower.HCGCompactness.Basic
 
 set_option autoImplicit false
@@ -9,8 +10,7 @@ set_option linter.unusedSectionVars false
 
 This file contains theorem-facing injectivity-radius predicates for the
 Hamilton--Cheeger--Gromov compactness interface.  The pointwise predicate is
-primitive for now: it is not definitionally `True`, and future exponential-map
-or geodesic-ball infrastructure should prove it for concrete metrics.
+the HCG wrapper around the normal-coordinate injectivity-radius backend.
 -/
 
 noncomputable section
@@ -26,14 +26,56 @@ variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
+variable [I.Boundaryless]
 
-/-- The injectivity radius of `X` at `x` is at least `ρ`.
+/-- The normal-coordinate injectivity radius of `X` at `x` is at least `rho`.
 
-This is a primitive theorem-facing predicate until RicciFlower has the
-exponential-map and geodesic-ball API needed to define injectivity radius
-directly. -/
-axiom HasInjRadiusAt
-    (X : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : X.M) (ρ : Real) : Prop
+This is the HCG-facing wrapper around
+`Coordinates.Normal.injRadAtLeast`; uniform sequence lower bounds are still
+recorded by `BaseInjBound`. -/
+def HasInjRadiusAt
+    (X : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : X.M)
+    (rho : Real) : Prop :=
+  letI : TopologicalSpace X.M := X.topology
+  letI : ChartedSpace H X.M := X.charted
+  letI : IsManifold I ∞ X.M := X.smooth
+  letI : SigmaCompactSpace X.M := X.sigmaCompact
+  letI : T2Space X.M := X.t2
+  RicciFlower.Coordinates.Normal.injRadAtLeast (I := I) X.metric x rho
+
+/-- The HCG pointwise injectivity-radius predicate is definitionally the
+normal-coordinate lower-bound predicate. -/
+theorem hasInjRadiusAt_iff
+    (X : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : X.M)
+    (rho : Real) :
+    HasInjRadiusAt (I := I) X x rho ↔
+      (letI : TopologicalSpace X.M := X.topology
+       letI : ChartedSpace H X.M := X.charted
+       letI : IsManifold I ∞ X.M := X.smooth
+       letI : SigmaCompactSpace X.M := X.sigmaCompact
+       letI : T2Space X.M := X.t2
+       RicciFlower.Coordinates.Normal.injRadAtLeast (I := I) X.metric x rho) := by
+  rfl
+
+/-- An admissible normal-coordinate radius gives the HCG pointwise
+injectivity-radius lower bound. -/
+theorem hasInjRadiusAt_of_admissible
+    {X : PointedRiemannianManifold.{u, uE, uH} (I := I)} {x : X.M}
+    {rho : Real}
+    (h :
+      letI : TopologicalSpace X.M := X.topology
+      letI : ChartedSpace H X.M := X.charted
+      letI : IsManifold I ∞ X.M := X.smooth
+      letI : SigmaCompactSpace X.M := X.sigmaCompact
+      letI : T2Space X.M := X.t2
+      RicciFlower.Coordinates.Normal.injRadAdmissible (I := I) X.metric x rho) :
+    HasInjRadiusAt (I := I) X x rho := by
+  letI : TopologicalSpace X.M := X.topology
+  letI : ChartedSpace H X.M := X.charted
+  letI : IsManifold I ∞ X.M := X.smooth
+  letI : SigmaCompactSpace X.M := X.sigmaCompact
+  letI : T2Space X.M := X.t2
+  exact RicciFlower.Coordinates.Normal.injRadAtLeast_of_admissible (I := I) h
 
 /-- Uniform injectivity-radius lower bound at the basepoints of a pointed
 metric sequence. -/

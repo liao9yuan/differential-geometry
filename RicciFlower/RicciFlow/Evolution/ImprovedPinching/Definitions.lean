@@ -211,7 +211,7 @@ theorem react3_diag (l1 l2 l3 : Real) :
 /-- The same diagonal contraction in the `curvRicciRicciInFrame` slot order. -/
 theorem curv3_diag_eq (l1 l2 l3 : Real) :
     (∑ i : Fin 3, ∑ j : Fin 3, ∑ k : Fin 3, ∑ l : Fin 3,
-      DimensionThree.stdRmDiag3 l1 l2 l3 k j l i *
+      DimensionThree.stdRmDiag3 l1 l2 l3 i k j l *
         DimensionThree.ricciDiag3 l1 l2 l3 i j *
           DimensionThree.ricciDiag3 l1 l2 l3 k l) =
       ricciReact3 l1 l2 l3 := by
@@ -226,7 +226,7 @@ with the project trace sign.  The actual geometric bridge uses
 `l1,l2,l3`. -/
 theorem curv3_neg_eq (l1 l2 l3 : Real) :
     (∑ i : Fin 3, ∑ j : Fin 3, ∑ k : Fin 3, ∑ l : Fin 3,
-      DimensionThree.stdRmDiag3 (-l1) (-l2) (-l3) k j l i *
+      DimensionThree.stdRmDiag3 (-l1) (-l2) (-l3) i k j l *
         DimensionThree.ricciDiag3 l1 l2 l3 i j *
           DimensionThree.ricciDiag3 l1 l2 l3 k l) =
       -ricciReact3 l1 l2 l3 := by
@@ -360,7 +360,7 @@ theorem curvReact3_frame
         DimensionThree.ricciDiag3 l1 l2 l3 i j)
     (hRm : ∀ i j k l : Fin 3,
       Realized.rm04Comp (I := I) (Rm04 t) frame x i k j l =
-        DimensionThree.stdRmDiag3 l1 l2 l3 k j l i) :
+        DimensionThree.stdRmDiag3 l1 l2 l3 i k j l) :
     curvRicciRicciInFrame (I := I) S Rm04 gInv frame t x =
       ricciReact3 l1 l2 l3 := by
   classical
@@ -400,7 +400,7 @@ theorem canonReact3_frame
         DimensionThree.ricciDiag3 l1 l2 l3 i j)
     (hRm : ∀ i j k l : Fin 3,
       Realized.rm04Comp (I := I) (Rm04 t) frame x i k j l =
-        DimensionThree.stdRmDiag3 l1 l2 l3 k j l i) :
+        DimensionThree.stdRmDiag3 l1 l2 l3 i k j l) :
     ricciNormCurvatureReactionInFrame (I := I) S Rm04 gInv frame t x =
       -ricciReact3 l1 l2 l3 := by
   rw [ricciNormCurvatureReactionInFrame_apply,
@@ -424,7 +424,7 @@ theorem curv3_frame_neg
         DimensionThree.ricciDiag3 l1 l2 l3 i j)
     (hRm : ∀ i j k l : Fin 3,
       Realized.rm04Comp (I := I) (Rm04 t) frame x i k j l =
-        DimensionThree.stdRmDiag3 (-l1) (-l2) (-l3) k j l i) :
+        DimensionThree.stdRmDiag3 (-l1) (-l2) (-l3) i k j l) :
     curvRicciRicciInFrame (I := I) S Rm04 gInv frame t x =
       -ricciReact3 l1 l2 l3 := by
   classical
@@ -463,7 +463,7 @@ theorem canon3_frame_neg
         DimensionThree.ricciDiag3 l1 l2 l3 i j)
     (hRm : ∀ i j k l : Fin 3,
       Realized.rm04Comp (I := I) (Rm04 t) frame x i k j l =
-        DimensionThree.stdRmDiag3 (-l1) (-l2) (-l3) k j l i) :
+        DimensionThree.stdRmDiag3 (-l1) (-l2) (-l3) i k j l) :
     ricciNormCurvatureReactionInFrame (I := I) S Rm04 gInv frame t x =
       ricciReact3 l1 l2 l3 := by
   rw [ricciNormCurvatureReactionInFrame_apply,
@@ -891,7 +891,7 @@ theorem reactAt_diag {x : M}
     (hdiag : DimensionThree.RicciDiagAt (I := I) Ric scalar l1 l2 l3 basis)
     (hRm : ∀ i j k l : Fin 3,
       Realized.rm04CompAt (I := I) basis Rm04 i k j l =
-        DimensionThree.stdRmDiag3 (-l1) (-l2) (-l3) k j l i) :
+        DimensionThree.stdRmDiag3 (-l1) (-l2) (-l3) i k j l) :
     reactAt (I := I) Ric Rm04 basis = ricciReact3 l1 l2 l3 := by
   classical
   rcases hdiag with ⟨_, hric⟩
@@ -914,7 +914,7 @@ theorem tfRel_basis {x : M}
       ricciTraceCube = DimensionThree.ricciEigenTraceCube3 l1 l2 l3)
     (hRm : ∀ i j k l : Fin 3,
       Realized.rm04CompAt (I := I) basis Rm04 i k j l =
-        DimensionThree.stdRmDiag3 (-l1) (-l2) (-l3) k j l i)
+        DimensionThree.stdRmDiag3 (-l1) (-l2) (-l3) i k j l)
     (hR : scalar ≠ 0) :
     4 * reactAt (I := I) Ric Rm04 basis -
         ((4 : Real) / 3) * scalar * ricciNormAt (I := I) Ric basis =
@@ -976,9 +976,9 @@ theorem tfRel_trace {x : M}
     DimensionThree.stdRmComp_eq_diag (I := I) htrace hneg
   have hRm : ∀ i j k l : Fin 3,
       Realized.rm04CompAt (I := I) basis Rm04 i k j l =
-        DimensionThree.stdRmDiag3 (-l1) (-l2) (-l3) k j l i := by
+        DimensionThree.stdRmDiag3 (-l1) (-l2) (-l3) i k j l := by
     intro i j k l
-    have h := hcomp k j l i
+    have h := hcomp i k j l
     simpa [DimensionThree.standardRmCompAt_apply] using h
   exact tfRel_basis (I := I) (Ric := Ric) (Rm04 := Rm04)
     (basis := basis) hdiag hcube hRm hR
@@ -1485,9 +1485,9 @@ theorem ricciSym_rm04
       Rm04 (Realized.vec4 (I := I) W X Y Z) =
         Rm04 (Realized.vec4 (I := I) Y Z W X))
     (hOutput : Realized.Rm04OutputSkewAt (I := I) Rm04)
-    (hInput : ∀ W X Y Z : TangentSpace I x,
-      Rm04 (Realized.vec4 (I := I) W Y X Z) =
-        -Rm04 (Realized.vec4 (I := I) W X Y Z))
+    (hInput : ∀ X Y Z W : TangentSpace I x,
+      Rm04 (Realized.vec4 (I := I) Y X Z W) =
+        -Rm04 (Realized.vec4 (I := I) X Y Z W))
     (hInv : ∀ i j : Idx, gInv i j = gInv j i) :
     DimensionThree.RicciSymAt (I := I) Ric := by
   exact ricciSym_of_basis (I := I) basis Ric
@@ -1522,7 +1522,7 @@ theorem tfRel_frame
     (hRm : ∀ (t : Real) (x : M) (i j k l : Fin 3),
       Realized.rm04Comp (I := I) (Rm04 t) frame x i k j l =
         DimensionThree.stdRmDiag3 (-(l1 t x)) (-(l2 t x)) (-(l3 t x))
-          k j l i) :
+          i k j l) :
     tfRicReactRel
       scalar
       (ricciNormSqInFrame (I := I) S gInv frame)
@@ -1606,7 +1606,7 @@ theorem tfRel_data
   have hRm : ∀ (t : Real) (x : M) (i j k l : Fin 3),
       Realized.rm04Comp (I := I) (Rm04 t) frame x i k j l =
         DimensionThree.stdRmDiag3 (-(l1 t x)) (-(l2 t x)) (-(l3 t x))
-          k j l i := by
+          i k j l := by
     intro t x i j k l
     have hdiag : DimensionThree.RicciDiagAt (I := I)
         (S.ricciAt t x) (scalar t x)
@@ -1620,7 +1620,7 @@ theorem tfRel_data
     have hneg := diag_neg (I := I) hdiag
     have hcomp :=
       DimensionThree.stdRmComp_eq_diag (I := I) (htrace t x) hneg
-    have h := hcomp k j l i
+    have h := hcomp i k j l
     simpa [DimensionThree.standardRmCompAt_apply, Realized.rm04Comp,
       RicciFlower.Curvature.rm04Comp, Realized.rm04CompAt_apply,
       hbasis t x i, hbasis t x k, hbasis t x j, hbasis t x l] using h

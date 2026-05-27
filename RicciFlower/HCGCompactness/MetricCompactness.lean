@@ -305,6 +305,7 @@ with uniformly bounded geometry and a basepoint injectivity-radius lower bound.
 
 This is the single honest compactness frontier for the HCG interface. -/
 def metricCompactness
+    [I.Boundaryless]
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
     (_hcomplete : SeqMetricComplete (I := I) X)
     (_hgeom : SeqBoundedGeometry (I := I) X)

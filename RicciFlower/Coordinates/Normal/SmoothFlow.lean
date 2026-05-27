@@ -1,4 +1,5 @@
 import Mathlib.Analysis.Calculus.ContDiff.FaaDiBruno
+import Mathlib.Analysis.Calculus.MeanValue
 import RicciFlower.Coordinates.Normal.Flow
 
 set_option autoImplicit false
@@ -98,6 +99,24 @@ set_option linter.flexible false in
     (ModelPhase (E := E)) (ModelPhase (E := E))).injective
   simp [idJet, ftaylorSeries]
 
+@[simp] theorem idJet_two (z : ModelPhase (E := E)) :
+    idJet (E := E) z 2 = 0 := by
+  have hzero :
+      iteratedFDeriv Real 2
+        (fun z' : ModelPhase (E := E) => z') z = 0 := by
+    apply ContinuousMultilinearMap.ext
+    intro m
+    rw [iteratedFDeriv_two_apply]
+    have hfd :
+        fderiv Real (fun z' : ModelPhase (E := E) => z') =
+          fun _ : ModelPhase (E := E) =>
+            ContinuousLinearMap.id Real (ModelPhase (E := E)) := by
+      funext y
+      simp
+    rw [hfd]
+    simp
+  simpa [idJet, ftaylorSeries] using hzero
+
 @[simp] theorem jetRHS_zero
     (F : ModelPhase (E := E) -> ModelPhase (E := E))
     (J : ModelJet (E := E)) :
@@ -121,6 +140,16 @@ theorem flowJet_one
   intro h
   rw [continuousMultilinearCurryFin1_apply]
   simp [flowJet, ftaylorSeries, hA.fderiv]
+
+/-- The second jet coefficient is the second iterated Frechet derivative. -/
+theorem flowJet_two_apply
+    (Φ : ModelPhase (E := E) -> Real -> ModelPhase (E := E))
+    (z : ModelPhase (E := E)) (t : Real)
+    (m : Fin 2 -> ModelPhase (E := E)) :
+    flowJet (E := E) Φ z t 2 m =
+      fderiv Real (fderiv Real (fun z' : ModelPhase (E := E) => Φ z' t)) z
+        (m 0) (m 1) := by
+  simp [flowJet, ftaylorSeries, iteratedFDeriv_two_apply]
 
 set_option linter.flexible false in
 /-- First jet coefficient of the Faà di Bruno RHS. -/
@@ -174,6 +203,65 @@ def IsModelFlowJetUpTo
     (J : ModelPhase (E := E) -> Real -> ModelJet (E := E))
     (T : Set Real) : Prop :=
   IsFlowJetUpTo (E := E) N (modelSpray (I := I) g x) Φ J T
+
+/-- Finite-order jet ODE targets are monotone in the jet order. -/
+theorem IsFlowJetUpTo.of_le
+    {N N' : Nat}
+    {F : ModelPhase (E := E) -> ModelPhase (E := E)}
+    {Φ : ModelPhase (E := E) -> Real -> ModelPhase (E := E)}
+    {J : ModelPhase (E := E) -> Real -> ModelJet (E := E)}
+    {T : Set Real}
+    (h : IsFlowJetUpTo (E := E) N F Φ J T) (hN' : N' ≤ N) :
+    IsFlowJetUpTo (E := E) N' F Φ J T := by
+  refine ⟨h.1, h.2.1, ?_⟩
+  intro n hn z t ht
+  exact h.2.2 n (le_trans hn hN') z t ht
+
+/-- Successor step for the finite-order jet ODE target.  After order `N` is
+known, the only new obligation for order `N + 1` is the ODE for the next
+coefficient. -/
+theorem IsFlowJetUpTo.succ
+    {N : Nat}
+    {F : ModelPhase (E := E) -> ModelPhase (E := E)}
+    {Φ : ModelPhase (E := E) -> Real -> ModelPhase (E := E)}
+    {J : ModelPhase (E := E) -> Real -> ModelJet (E := E)}
+    {T : Set Real}
+    (h : IsFlowJetUpTo (E := E) N F Φ J T)
+    (hnext :
+      ∀ z : ModelPhase (E := E), ∀ t ∈ T,
+        HasDerivWithinAt (fun τ : Real => J z τ (Nat.succ N))
+          (jetRHS (E := E) F (J z t) (Nat.succ N)) T t) :
+    IsFlowJetUpTo (E := E) (Nat.succ N) F Φ J T := by
+  refine ⟨h.1, h.2.1, ?_⟩
+  intro n hn z t ht
+  by_cases hnN : n ≤ N
+  · exact h.2.2 n hnN z t ht
+  · have hn_eq : n = Nat.succ N := by
+      exact le_antisymm hn (Nat.succ_le_of_lt (Nat.lt_of_not_ge hnN))
+    subst n
+    exact hnext z t ht
+
+/-- Induction principle for constructing finite-order jet ODE data.  This is
+the high-order setup: the future analytic work is exactly to produce the
+successor coefficient equation. -/
+theorem flowJetUpTo_ind
+    {F : ModelPhase (E := E) -> ModelPhase (E := E)}
+    {Φ : ModelPhase (E := E) -> Real -> ModelPhase (E := E)}
+    {J : ModelPhase (E := E) -> Real -> ModelJet (E := E)}
+    {T : Set Real}
+    (h0 : IsFlowJetUpTo (E := E) 0 F Φ J T)
+    (hstep :
+      ∀ N : Nat,
+        IsFlowJetUpTo (E := E) N F Φ J T ->
+          ∀ z : ModelPhase (E := E), ∀ t ∈ T,
+            HasDerivWithinAt (fun τ : Real => J z τ (Nat.succ N))
+              (jetRHS (E := E) F (J z t) (Nat.succ N)) T t) :
+    ∀ N : Nat, IsFlowJetUpTo (E := E) N F Φ J T := by
+  intro N
+  induction N with
+  | zero => exact h0
+  | succ N ih =>
+      exact IsFlowJetUpTo.succ (E := E) ih (hstep N ih)
 
 /-- Zeroth-order case of the jet ODE: it is just the original flow equation. -/
 theorem flowJetUpTo_zero
@@ -418,14 +506,15 @@ def varSpray
     (varSpray (I := I) g x p).2 =
       (fderiv Real (modelSpray (I := I) g x) p.1).comp p.2 := rfl
 
-/-- The augmented variational vector field is `C¹` at `(0_x, id)`.
+/-- The augmented variational vector field is smooth at `(0_x, id)`.
 
-This is the first checked regularity input for the variational-equation proof
-of smooth dependence. -/
-theorem varSpray_cdAt
+This is the higher-order regularity input for iterating the variational-equation
+route: the augmented vector field loses one derivative through `fderiv`, but the
+fixed-chart model spray is already smooth. -/
+theorem varSpray_contDiffAt
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M) :
-    ContDiffAt Real 1
+    ContDiffAt Real ∞
       (varSpray (I := I) g x)
       (varPhaseZero (I := I) (E := E) x) := by
   let Z := ModelPhase (E := E)
@@ -435,31 +524,86 @@ theorem varSpray_cdAt
       (phaseZero (I := I) x)
   let p0 : Z × L := (z0, ContinuousLinearMap.id Real Z)
   have hF :
-      ContDiffAt Real 1
+      ContDiffAt Real ∞
         (fun p : Z × L => modelSpray (I := I) g x p.1)
         p0 := by
-    exact (modelSpray_cdAt (I := I) g x).comp p0 contDiffAt_fst
+    exact (modelSpray_contDiffAt (I := I) g x).comp p0 contDiffAt_fst
   have hDF0 :
-      ContDiffAt Real 1
+      ContDiffAt Real ∞
         (fderiv Real (modelSpray (I := I) g x))
         z0 := by
-    exact (modelSpray_contDiffAt (I := I) g x).fderiv_right (by
-      exact WithTop.coe_le_coe.2 (le_top : (2 : ℕ∞) ≤ (⊤ : ℕ∞)))
+    exact (modelSpray_contDiffAt (I := I) g x).fderiv_right (m := ∞)
+      (by rw [ENat.coe_top_add_one])
   have hDF :
-      ContDiffAt Real 1
+      ContDiffAt Real ∞
         (fun p : Z × L => fderiv Real (modelSpray (I := I) g x) p.1)
         p0 := by
     exact hDF0.comp p0 contDiffAt_fst
   have hA :
-      ContDiffAt Real 1 (fun p : Z × L => p.2) p0 :=
+      ContDiffAt Real ∞ (fun p : Z × L => p.2) p0 :=
     contDiffAt_snd
   have hcomp :
-      ContDiffAt Real 1
+      ContDiffAt Real ∞
         (fun p : Z × L =>
           (fderiv Real (modelSpray (I := I) g x) p.1).comp p.2)
         p0 := by
     exact hDF.clm_comp hA
   simpa [varSpray, varPhaseZero, z0, p0, Z, L] using hF.prodMk hcomp
+
+/-- The augmented variational vector field is `C¹` at `(0_x, id)`.
+
+This corollary is the Picard-Lindelöf input used by the existing C1
+variational-flow construction. -/
+theorem varSpray_cdAt
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    ContDiffAt Real 1
+      (varSpray (I := I) g x)
+      (varPhaseZero (I := I) (E := E) x) := by
+  exact (varSpray_contDiffAt (I := I) g x).of_le (by simp)
+
+/-- The augmented variational vector field is smooth at every controlled phase
+point. -/
+theorem varSpray_contDiffAt_of_mem
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M)
+    {p : ModelPhase (E := E) × ModelLin (E := E)}
+    (hztarget : p.1 ∈
+      (extChartAt I.tangent (phaseZero (I := I) x)).target)
+    (hsrc : (phaseOfModel (I := I) x p.1).proj ∈
+      (extChartAt I x).source) :
+    ContDiffAt Real ∞ (varSpray (I := I) g x) p := by
+  let Z := ModelPhase (E := E)
+  let L := ModelLin (E := E)
+  have hF0 :
+      ContDiffAt Real ∞ (modelSpray (I := I) g x) p.1 :=
+    modelSpray_contDiffAt_of_mem (I := I) g x hztarget hsrc
+  have hF :
+      ContDiffAt Real ∞
+        (fun p : Z × L => modelSpray (I := I) g x p.1)
+        p := by
+    exact hF0.comp p contDiffAt_fst
+  have hDF0 :
+      ContDiffAt Real ∞
+        (fderiv Real (modelSpray (I := I) g x))
+        p.1 := by
+    exact (modelSpray_contDiffAt_of_mem (I := I) g x hztarget hsrc).fderiv_right
+      (m := ∞) (by rw [ENat.coe_top_add_one])
+  have hDF :
+      ContDiffAt Real ∞
+        (fun p : Z × L => fderiv Real (modelSpray (I := I) g x) p.1)
+        p := by
+    exact hDF0.comp p contDiffAt_fst
+  have hA :
+      ContDiffAt Real ∞ (fun p : Z × L => p.2) p :=
+    contDiffAt_snd
+  have hcomp :
+      ContDiffAt Real ∞
+        (fun p : Z × L =>
+          (fderiv Real (modelSpray (I := I) g x) p.1).comp p.2)
+        p := by
+    exact hDF.clm_comp hA
+  simpa [varSpray, Z, L] using hF.prodMk hcomp
 
 /-- The augmented variational vector field is `C¹` at every controlled phase
 point. -/
@@ -472,39 +616,7 @@ theorem varSpray_cdAt_of_mem
     (hsrc : (phaseOfModel (I := I) x p.1).proj ∈
       (extChartAt I x).source) :
     ContDiffAt Real 1 (varSpray (I := I) g x) p := by
-  let Z := ModelPhase (E := E)
-  let L := ModelLin (E := E)
-  have hF0 :
-      ContDiffAt Real 1 (modelSpray (I := I) g x) p.1 := by
-    exact (modelSpray_contDiffAt_of_mem (I := I) g x hztarget hsrc).of_le
-      (by simp)
-  have hF :
-      ContDiffAt Real 1
-        (fun p : Z × L => modelSpray (I := I) g x p.1)
-        p := by
-    exact hF0.comp p contDiffAt_fst
-  have hDF0 :
-      ContDiffAt Real 1
-        (fderiv Real (modelSpray (I := I) g x))
-        p.1 := by
-    exact (modelSpray_contDiffAt_of_mem (I := I) g x hztarget hsrc).fderiv_right
-      (by
-        exact WithTop.coe_le_coe.2 (le_top : (2 : ℕ∞) ≤ (⊤ : ℕ∞)))
-  have hDF :
-      ContDiffAt Real 1
-        (fun p : Z × L => fderiv Real (modelSpray (I := I) g x) p.1)
-        p := by
-    exact hDF0.comp p contDiffAt_fst
-  have hA :
-      ContDiffAt Real 1 (fun p : Z × L => p.2) p :=
-    contDiffAt_snd
-  have hcomp :
-      ContDiffAt Real 1
-        (fun p : Z × L =>
-          (fderiv Real (modelSpray (I := I) g x) p.1).comp p.2)
-        p := by
-    exact hDF.clm_comp hA
-  simpa [varSpray, Z, L] using hF.prodMk hcomp
+  exact (varSpray_contDiffAt_of_mem (I := I) g x hztarget hsrc).of_le (by simp)
 
 /-- Local Picard-Lindelof data for the augmented variational equation. -/
 theorem varSpray_pl
@@ -738,6 +850,65 @@ theorem varFlow_src_bound
       simpa using ht
     simpa using hLip t ht'
 
+/-- Smoothness of the augmented variational RHS on a source-controlled closed
+ball. -/
+theorem varSpray_smoothBall
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M) {a : NNReal}
+    (hsrc :
+      Metric.closedBall (varPhaseZero (I := I) (E := E) x) a ⊆
+        {p : ModelPhase (E := E) × ModelLin (E := E) |
+          p.1 ∈ (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+            (phaseOfModel (I := I) x p.1).proj ∈ (extChartAt I x).source}) :
+    ContDiffOn Real ∞
+      (varSpray (I := I) g x)
+      (Metric.closedBall (varPhaseZero (I := I) (E := E) x) a) := by
+  intro p hp
+  exact (varSpray_contDiffAt_of_mem (I := I) g x (hsrc hp).1 (hsrc hp).2).contDiffWithinAt
+
+/-- The source-controlled augmented variational flow also carries smoothness of
+the RHS on its whole closed control ball. -/
+theorem varFlow_smoothTube
+    [I.Boundaryless] [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    ∃ (ε : Real), ∃ (_hε : 0 < ε), ∃ (a r : NNReal), ∃ (_hr : 0 < r),
+      ∃ Ψ :
+          (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+            ModelPhase (E := E) × ModelLin (E := E),
+        (∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+          Ψ p 0 = p ∧
+            ∀ t ∈ Set.Icc (-ε) ε,
+              HasDerivWithinAt (Ψ p)
+                (varSpray (I := I) g x (Ψ p t))
+                (Set.Icc (-ε) ε) t) ∧
+          (∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+            ∀ t : Real,
+              Ψ p t ∈
+                Metric.closedBall (varPhaseZero (I := I) (E := E) x) a) ∧
+          (Metric.closedBall (varPhaseZero (I := I) (E := E) x) a ⊆
+            {p : ModelPhase (E := E) × ModelLin (E := E) |
+              p.1 ∈ (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+                (phaseOfModel (I := I) x p.1).proj ∈
+                  (extChartAt I x).source}) ∧
+          (∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+            ∀ t : Real,
+              (Ψ p t).1 ∈
+                (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+                (phaseOfModel (I := I) x (Ψ p t).1).proj ∈
+                  (extChartAt I x).source) ∧
+          (∃ L' : NNReal,
+            ∀ t ∈ Set.Icc (-ε) ε,
+              LipschitzOnWith L'
+                (fun p => Ψ p t)
+                (Metric.closedBall (varPhaseZero (I := I) (E := E) x) r)) ∧
+          ContDiffOn Real ∞
+            (varSpray (I := I) g x)
+            (Metric.closedBall (varPhaseZero (I := I) (E := E) x) a) := by
+  obtain ⟨ε, hε, a, r, hr, Ψ, hflow, hbound, hsrc, hsrc_flow, L', hLip⟩ :=
+    varFlow_src_bound (I := I) g x
+  exact ⟨ε, hε, a, r, hr, Ψ, hflow, hbound, hsrc, hsrc_flow,
+    ⟨L', hLip⟩, varSpray_smoothBall (I := I) g x hsrc⟩
+
 /-- Source control descends from a convex augmented closed ball to base-phase
 segments. -/
 theorem varBase_segment_src_of_bound
@@ -776,6 +947,22 @@ def varBaseFlow
         ModelPhase (E := E) × ModelLin (E := E))
     (z : ModelPhase (E := E)) (t : Real) : ModelPhase (E := E) :=
   (Ψ (z, ContinuousLinearMap.id Real (ModelPhase (E := E))) t).1
+
+/-- The model flow extracted from an augmented variational flow by fixing the
+linear initial condition to the identity and projecting to the base phase. -/
+def varModelFlow
+    (Ψ :
+      (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+        ModelPhase (E := E) × ModelLin (E := E)) :
+    ModelPhase (E := E) -> Real -> ModelPhase (E := E) :=
+  fun z t => varBaseFlow (E := E) Ψ z t
+
+@[simp] theorem varModelFlow_apply
+    (Ψ :
+      (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+        ModelPhase (E := E) × ModelLin (E := E))
+    (z : ModelPhase (E := E)) (t : Real) :
+    varModelFlow (E := E) Ψ z t = varBaseFlow (E := E) Ψ z t := rfl
 
 /-- Source control for the segment between two base trajectories, obtained from
 the source-controlled augmented flow bound. -/
@@ -821,6 +1008,246 @@ def varDerivFlow
         ModelPhase (E := E) × ModelLin (E := E))
     (z : ModelPhase (E := E)) (t : Real) : ModelLin (E := E) :=
   (Ψ (z, ContinuousLinearMap.id Real (ModelPhase (E := E))) t).2
+
+/-- Explicit linear flow generated by `modelSprayLin`: `(dq, dv) ↦
+`(dq + t • dv, dv)`. -/
+def phaseLinFlow (t : Real) : ModelLin (E := E) :=
+  ContinuousLinearMap.id Real (ModelPhase (E := E)) +
+    t • modelSprayLin (E := E)
+
+/-- The explicit augmented trajectory through the zero phase: the base phase is
+fixed and the linear component is the flow of `modelSprayLin`. -/
+def varZeroPhaseLin (x : M) (t : Real) :
+    ModelPhase (E := E) × ModelLin (E := E) :=
+  (extChartAt I.tangent (phaseZero (I := I) x)
+    (phaseZero (I := I) x),
+    phaseLinFlow (E := E) t)
+
+@[simp] theorem phaseLinFlow_fst (t : Real) (z : ModelPhase (E := E)) :
+    (phaseLinFlow (E := E) t z).1 = z.1 + t • z.2 := by
+  simp [phaseLinFlow, modelSprayLin]
+
+@[simp] theorem phaseLinFlow_snd (t : Real) (z : ModelPhase (E := E)) :
+    (phaseLinFlow (E := E) t z).2 = z.2 := by
+  simp [phaseLinFlow, modelSprayLin]
+
+@[simp] theorem phaseLinFlow_zero :
+    phaseLinFlow (E := E) 0 =
+      ContinuousLinearMap.id Real (ModelPhase (E := E)) := by
+  ext z <;> simp [phaseLinFlow]
+
+@[simp] theorem phaseLinFlow_fiber_fst (t : Real) (v : E) :
+    (phaseLinFlow (E := E) t (0, v)).1 = t • v := by
+  simp
+
+@[simp] theorem modelSprayLin_comp_phaseLinFlow (t : Real) :
+    (modelSprayLin (E := E)).comp (phaseLinFlow (E := E) t) =
+      modelSprayLin (E := E) := by
+  ext z <;> simp [phaseLinFlow, modelSprayLin]
+
+/-- The explicit linear phase flow solves the variational equation at the zero
+phase. -/
+theorem phaseLinFlow_hasDerivAt (t : Real) :
+    HasDerivAt
+      (fun s : Real => phaseLinFlow (E := E) s)
+      ((modelSprayLin (E := E)).comp (phaseLinFlow (E := E) t))
+      t := by
+  have hlin :
+      HasDerivAt
+        (fun s : Real => s • modelSprayLin (E := E))
+        (modelSprayLin (E := E)) t := by
+    simpa using (hasDerivAt_id t).smul_const (modelSprayLin (E := E))
+  rw [modelSprayLin_comp_phaseLinFlow]
+  simpa [phaseLinFlow] using
+    hlin.const_add (ContinuousLinearMap.id Real (ModelPhase (E := E)))
+
+@[simp] theorem varZeroPhaseLin_zero (x : M) :
+    varZeroPhaseLin (I := I) (E := E) x 0 =
+      varPhaseZero (I := I) (E := E) x := by
+  simp [varZeroPhaseLin, varPhaseZero]
+
+/-- Along the zero base phase, the augmented variational vector field is the
+explicit linearized spray equation. -/
+theorem varSpray_zero_phaseLin
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M) (t : Real) :
+    varSpray (I := I) g x (varZeroPhaseLin (I := I) (E := E) x t) =
+      (0, (modelSprayLin (E := E)).comp (phaseLinFlow (E := E) t)) := by
+  apply Prod.ext
+  · simpa using modelSpray_zero (I := I) g x
+  · have hfd :
+        fderiv Real (modelSpray (I := I) g x)
+          (extChartAt I.tangent (phaseZero (I := I) x)
+            (phaseZero (I := I) x)) =
+          modelSprayLin (E := E) :=
+      (spray_fderiv_zero (I := I) g x).fderiv
+    simp only [varSpray, varZeroPhaseLin]
+    change
+      (fderiv Real (modelSpray (I := I) g x)
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x))).comp
+          (phaseLinFlow (E := E) t) =
+        (modelSprayLin (E := E)).comp (phaseLinFlow (E := E) t)
+    rw [hfd]
+
+/-- The curve with zero base phase and explicit linearized flow solves the
+augmented variational ODE. -/
+theorem varZeroPhaseLin_hasDerivAt
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M) (t : Real) :
+    HasDerivAt
+      (varZeroPhaseLin (I := I) (E := E) x)
+      (varSpray (I := I) g x (varZeroPhaseLin (I := I) (E := E) x t))
+      t := by
+  have hbase :
+      HasDerivAt
+        (fun _s : Real =>
+          extChartAt I.tangent (phaseZero (I := I) x)
+            (phaseZero (I := I) x))
+        (0 : ModelPhase (E := E)) t :=
+    hasDerivAt_const (x := t)
+      (c := extChartAt I.tangent (phaseZero (I := I) x)
+        (phaseZero (I := I) x))
+  have hlin := phaseLinFlow_hasDerivAt (E := E) t
+  have hprod := hbase.prodMk hlin
+  rw [varSpray_zero_phaseLin (I := I) g x t]
+  simpa [varZeroPhaseLin] using hprod
+
+/-- The explicit zero-phase linearized trajectory stays in any positive
+augmented closed ball after shrinking time around zero. -/
+theorem varZeroPhaseLin_mem_closedBall_small
+    (x : M) {a : NNReal} (ha : 0 < a) :
+    ∃ δ : Real, 0 < δ ∧
+      ∀ t ∈ Set.Icc (-δ) δ,
+        varZeroPhaseLin (I := I) (E := E) x t ∈
+          Metric.closedBall (varPhaseZero (I := I) (E := E) x) a := by
+  have hbase :
+      ContinuousAt
+        (fun _s : Real =>
+          extChartAt I.tangent (phaseZero (I := I) x)
+            (phaseZero (I := I) x)) 0 :=
+    continuousAt_const
+  have hlin :
+      ContinuousAt (fun s : Real => phaseLinFlow (E := E) s) 0 :=
+    (phaseLinFlow_hasDerivAt (E := E) 0).continuousAt
+  have hcont :
+      ContinuousAt (varZeroPhaseLin (I := I) (E := E) x) 0 := by
+    simpa [varZeroPhaseLin] using hbase.prodMk hlin
+  have hball :
+      Metric.ball (varPhaseZero (I := I) (E := E) x) (a : Real) ∈
+        𝓝 (varPhaseZero (I := I) (E := E) x) :=
+    Metric.ball_mem_nhds _ (by exact_mod_cast ha)
+  have hev :
+      ∀ᶠ t : Real in 𝓝 0,
+        varZeroPhaseLin (I := I) (E := E) x t ∈
+          Metric.ball (varPhaseZero (I := I) (E := E) x) (a : Real) :=
+    hcont.eventually (by simpa using hball)
+  rcases Metric.mem_nhds_iff.mp hev with ⟨ρ, hρ, hρsub⟩
+  refine ⟨ρ / 2, half_pos hρ, ?_⟩
+  intro t ht
+  have ht_abs : |t| ≤ ρ / 2 := by
+    rw [abs_le]
+    constructor <;> linarith [ht.1, ht.2]
+  have htball : t ∈ Metric.ball (0 : Real) ρ := by
+    rw [Metric.mem_ball, Real.dist_eq]
+    simpa [sub_zero] using lt_of_le_of_lt ht_abs (half_lt_self hρ)
+  exact Metric.ball_subset_closedBall (hρsub htball)
+
+/-- On a sufficiently small time interval, any Picard-Lindelof augmented flow
+through the zero variational phase agrees with the explicit zero-phase
+linearized trajectory. -/
+theorem varFlow_zero_phaseLin_of_pl
+    [I.Boundaryless] [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M) (x : M)
+    {ε δ : Real} (hε : 0 < ε) (hδ : 0 < δ) (hδε : δ ≤ ε)
+    {a r L K : NNReal}
+    (hpl : IsPicardLindelof
+      (fun _ : Real => varSpray (I := I) g x)
+      (tmin := 0 - ε) (tmax := 0 + ε)
+      ⟨0, by simp [le_of_lt hε]⟩
+      (varPhaseZero (I := I) (E := E) x)
+      a r L K)
+    {Ψ :
+      (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+        ModelPhase (E := E) × ModelLin (E := E)}
+    (hflow :
+      ∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+        Ψ p 0 = p ∧
+          ∀ t ∈ Set.Icc (-ε) ε,
+            HasDerivWithinAt (Ψ p)
+              (varSpray (I := I) g x (Ψ p t))
+              (Set.Icc (-ε) ε) t)
+    (hbound :
+      ∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+        ∀ t : Real,
+          Ψ p t ∈ Metric.closedBall
+            (varPhaseZero (I := I) (E := E) x) a)
+    (hcand :
+      ∀ t ∈ Set.Icc (-δ) δ,
+        varZeroPhaseLin (I := I) (E := E) x t ∈
+          Metric.closedBall (varPhaseZero (I := I) (E := E) x) a) :
+    ∀ t ∈ Set.Icc (-δ) δ,
+      Ψ (varPhaseZero (I := I) (E := E) x) t =
+        varZeroPhaseLin (I := I) (E := E) x t := by
+  let t0ε : Set.Icc (0 - ε) (0 + ε) := ⟨0, by simp [le_of_lt hε]⟩
+  let t0δ : Set.Icc (0 - δ) (0 + δ) := ⟨0, by simp [le_of_lt hδ]⟩
+  have hplδ :
+      IsPicardLindelof
+        (fun _ : Real => varSpray (I := I) g x)
+        (tmin := 0 - δ) (tmax := 0 + δ)
+        t0δ
+        (varPhaseZero (I := I) (E := E) x)
+        a r L K := by
+    exact hpl.shrink_time t0δ (by rfl) (by linarith) (by linarith)
+  have hflowδ :
+      ∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+        Ψ p t0δ = p ∧
+          ∀ t ∈ Set.Icc (0 - δ) (0 + δ),
+            HasDerivWithinAt (Ψ p)
+              ((fun _ : Real => varSpray (I := I) g x) t (Ψ p t))
+              (Set.Icc (0 - δ) (0 + δ)) t := by
+    intro p hp
+    refine ⟨by simpa [t0δ] using (hflow p hp).1, ?_⟩
+    intro t ht
+    have htε : t ∈ Set.Icc (-ε) ε := by
+      constructor <;> linarith [ht.1, ht.2, hδε]
+    have hwithin := (hflow p hp).2 t htε
+    exact hwithin.mono (by
+      intro s hs
+      constructor <;> linarith [hs.1, hs.2, hδε])
+  have ht0δ : (t0δ : Real) ∈ Set.Ioo (0 - δ) (0 + δ) := by
+    simpa [t0δ] using hδ
+  have hβcont :
+      ContinuousOn (varZeroPhaseLin (I := I) (E := E) x)
+        (Set.Icc (0 - δ) (0 + δ)) := by
+    intro t ht
+    exact (varZeroPhaseLin_hasDerivAt (I := I) g x t).continuousAt.continuousWithinAt
+  have hβderiv :
+      ∀ t ∈ Set.Ioo (0 - δ) (0 + δ),
+        HasDerivAt (varZeroPhaseLin (I := I) (E := E) x)
+          ((fun _ : Real => varSpray (I := I) g x) t
+            (varZeroPhaseLin (I := I) (E := E) x t)) t := by
+    intro t _ht
+    simpa using varZeroPhaseLin_hasDerivAt (I := I) g x t
+  have hEq :=
+    plFlow_eq_of_solution
+      (F := ModelPhase (E := E) × ModelLin (E := E))
+      (f := fun _ : Real => varSpray (I := I) g x)
+      (tmin := 0 - δ) (tmax := 0 + δ)
+      (t0 := t0δ)
+      (x0 := varPhaseZero (I := I) (E := E) x)
+      (a := a) (r := r) (L := L) (K := K)
+      hplδ ht0δ
+      (α := Ψ) hflowδ hbound
+      (β := varZeroPhaseLin (I := I) (E := E) x)
+      (by simp [t0δ]) hβcont hβderiv
+      (by
+        intro t ht
+        have ht' : t ∈ Set.Icc (-δ) δ := by simpa using ht
+        exact hcand t ht')
+  intro t ht
+  have ht' : t ∈ Set.Icc (0 - δ) (0 + δ) := by simpa using ht
+  exact hEq t ht'
 
 /-- The base trajectory of an augmented solution is continuous on any smaller
 time interval. -/
@@ -1001,6 +1428,18 @@ theorem modelSpray_fderiv_uniform_tube
       ContinuousLinearMap.id Real (ModelPhase (E := E)) := by
   simpa [varDerivFlow] using congrArg Prod.snd hΨ0
 
+/-- A base phase in the model closed ball gives an augmented phase in the
+corresponding variational closed ball when the linear component is the identity. -/
+theorem varPhase_mem_closedBall_of_base_mem
+    {x : M} {r : NNReal} {z : ModelPhase (E := E)}
+    (hz : z ∈ Metric.closedBall
+      (extChartAt I.tangent (phaseZero (I := I) x)
+        (phaseZero (I := I) x)) r) :
+    (z, ContinuousLinearMap.id Real (ModelPhase (E := E))) ∈
+      Metric.closedBall (varPhaseZero (I := I) (E := E) x) r := by
+  rw [Metric.mem_closedBall] at hz ⊢
+  simpa [varPhaseZero, Prod.dist_eq] using hz
+
 /-- The base component of an augmented flow solves the original model ODE. -/
 theorem varBaseFlow_hasDerivWithinAt
     {Ψ :
@@ -1033,6 +1472,75 @@ theorem varBaseFlow_hasDerivWithinAt
     trivial
   have hcomp := hfst.comp_hasDerivWithinAt t hΨ hmaps
   simpa [Function.comp_def, varBaseFlow, varSpray, Z, L, p, A] using hcomp
+
+/-- A source-controlled augmented variational flow projects to a functional
+model flow solving the original model spray ODE. -/
+theorem varModelFlow_flow
+    {Ψ :
+      (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+        ModelPhase (E := E) × ModelLin (E := E)}
+    (g : SmoothRiemannianMetric I M) (x : M)
+    {r : NNReal} {ε : Real}
+    (hflow :
+      ∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+        Ψ p 0 = p ∧
+          ∀ t ∈ Set.Icc (-ε) ε,
+            HasDerivWithinAt (Ψ p)
+              (varSpray (I := I) g x (Ψ p t))
+              (Set.Icc (-ε) ε) t) :
+    ∀ z ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r,
+      varModelFlow (E := E) Ψ z 0 = z ∧
+        ∀ t ∈ Set.Icc (-ε) ε,
+          HasDerivWithinAt
+            (varModelFlow (E := E) Ψ z)
+            (modelSpray (I := I) g x (varModelFlow (E := E) Ψ z t))
+            (Set.Icc (-ε) ε) t := by
+  intro z hz
+  have hp :
+      (z, ContinuousLinearMap.id Real (ModelPhase (E := E))) ∈
+        Metric.closedBall (varPhaseZero (I := I) (E := E) x) r :=
+    varPhase_mem_closedBall_of_base_mem (I := I) (E := E) hz
+  refine ⟨?_, ?_⟩
+  · exact varBaseFlow_zero_of_flow (E := E) (hflow _ hp).1
+  · intro t ht
+    exact varBaseFlow_hasDerivWithinAt (I := I) (E := E) g x
+      ((hflow _ hp).2 t ht)
+
+/-- Source control for the projected model flow extracted from an augmented
+closed-ball-bounded variational flow. -/
+theorem varModelFlow_src
+    [I.Boundaryless]
+    {Ψ :
+      (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+        ModelPhase (E := E) × ModelLin (E := E)}
+    (x : M) {a r : NNReal} {ε : Real}
+    (hbound :
+      ∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+        ∀ t : Real,
+          Ψ p t ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) a)
+    (hsrc :
+      Metric.closedBall (varPhaseZero (I := I) (E := E) x) a ⊆
+        {p : ModelPhase (E := E) × ModelLin (E := E) |
+          p.1 ∈ (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+            (phaseOfModel (I := I) x p.1).proj ∈
+              (extChartAt I x).source}) :
+    ∀ z ∈ Metric.closedBall
+        (extChartAt I.tangent (phaseZero (I := I) x)
+          (phaseZero (I := I) x)) r,
+      ∀ t ∈ Set.Icc (-ε) ε,
+        varModelFlow (E := E) Ψ z t ∈
+          (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+          (phaseOfModel (I := I) x (varModelFlow (E := E) Ψ z t)).proj ∈
+            (extChartAt I x).source := by
+  intro z hz t _ht
+  have hp :
+      (z, ContinuousLinearMap.id Real (ModelPhase (E := E))) ∈
+        Metric.closedBall (varPhaseZero (I := I) (E := E) x) r :=
+    varPhase_mem_closedBall_of_base_mem (I := I) (E := E) hz
+  have hs := hsrc (hbound _ hp t)
+  simpa [varModelFlow, varBaseFlow] using hs
 
 /-- The linear component of an augmented flow solves the variational equation. -/
 theorem varDerivFlow_hasDerivWithinAt
@@ -2043,6 +2551,738 @@ theorem varBaseFlow_hasFDerivAt_of_flow
     simpa using hgr b ⟨hb0, le_rfl⟩
   exact varBaseFlow_hasFDerivAt_of_error (E := E) herr
 
+/-- Fixed-time endpoint derivative for a source-controlled augmented flow.
+
+This is the endpoint-facing name for `varBaseFlow_hasFDerivAt_of_flow`: the
+map sending an initial phase to its fixed-time model endpoint has derivative
+given by the variational component. -/
+theorem timeEndpoint_hasFDerivAt
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (Ψ :
+      (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+        ModelPhase (E := E) × ModelLin (E := E))
+    (z : ModelPhase (E := E))
+    {a r L' : NNReal} {ε b : Real}
+    (hb0 : 0 ≤ b)
+    (hb : Set.Icc (0 : Real) b ⊆ Set.Icc (-ε) ε)
+    (hflow :
+      ∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+        Ψ p 0 = p ∧
+          ∀ t ∈ Set.Icc (-ε) ε,
+            HasDerivWithinAt (Ψ p)
+              (varSpray (I := I) g x (Ψ p t))
+              (Set.Icc (-ε) ε) t)
+    (hbound :
+      ∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+        ∀ t : Real,
+          Ψ p t ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) a)
+    (hsrc :
+      Metric.closedBall (varPhaseZero (I := I) (E := E) x) a ⊆
+        {p : ModelPhase (E := E) × ModelLin (E := E) |
+          p.1 ∈ (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+            (phaseOfModel (I := I) x p.1).proj ∈ (extChartAt I x).source})
+    (hLip :
+      ∀ t ∈ Set.Icc (-ε) ε,
+        LipschitzOnWith L'
+          (fun p => Ψ p t)
+          (Metric.closedBall (varPhaseZero (I := I) (E := E) x) r))
+    (hzopen :
+      (z, ContinuousLinearMap.id Real (ModelPhase (E := E))) ∈
+        Metric.ball (varPhaseZero (I := I) (E := E) x) r) :
+    HasFDerivAt
+      (fun z' : ModelPhase (E := E) => varBaseFlow (E := E) Ψ z' b)
+      (varDerivFlow (E := E) Ψ z b)
+      z :=
+  varBaseFlow_hasFDerivAt_of_flow (I := I) g x Ψ z
+    hb0 hb hflow hbound hsrc hLip hzopen
+
+/-- Strict fixed-time endpoint derivative for a source-controlled augmented
+flow.  This upgrades the checked C1 dependence using the fixed-time Lipschitz
+dependence of the augmented Picard flow. -/
+theorem timeEndpoint_hasStrictFDerivAt
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (Ψ :
+      (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+        ModelPhase (E := E) × ModelLin (E := E))
+    (z : ModelPhase (E := E))
+    {a r L' : NNReal} {ε b : Real}
+    (hb0 : 0 ≤ b)
+    (hb : Set.Icc (0 : Real) b ⊆ Set.Icc (-ε) ε)
+    (hflow :
+      ∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+        Ψ p 0 = p ∧
+          ∀ t ∈ Set.Icc (-ε) ε,
+            HasDerivWithinAt (Ψ p)
+              (varSpray (I := I) g x (Ψ p t))
+              (Set.Icc (-ε) ε) t)
+    (hbound :
+      ∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+        ∀ t : Real,
+          Ψ p t ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) a)
+    (hsrc :
+      Metric.closedBall (varPhaseZero (I := I) (E := E) x) a ⊆
+        {p : ModelPhase (E := E) × ModelLin (E := E) |
+          p.1 ∈ (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+            (phaseOfModel (I := I) x p.1).proj ∈ (extChartAt I x).source})
+    (hLip :
+      ∀ t ∈ Set.Icc (-ε) ε,
+        LipschitzOnWith L'
+          (fun p => Ψ p t)
+          (Metric.closedBall (varPhaseZero (I := I) (E := E) x) r))
+    (hzopen :
+      (z, ContinuousLinearMap.id Real (ModelPhase (E := E))) ∈
+        Metric.ball (varPhaseZero (I := I) (E := E) x) r) :
+    HasStrictFDerivAt
+      (fun z' : ModelPhase (E := E) => varBaseFlow (E := E) Ψ z' b)
+      (varDerivFlow (E := E) Ψ z b)
+      z := by
+  let idLin : ModelLin (E := E) :=
+    ContinuousLinearMap.id Real (ModelPhase (E := E))
+  have hpairCont :
+      ContinuousAt (fun z' : ModelPhase (E := E) => (z', idLin)) z :=
+    ContinuousAt.prodMk continuousAt_id continuousAt_const
+  refine hasStrictFDerivAt_of_hasFDerivAt_of_continuousAt
+    (f' := fun y : ModelPhase (E := E) => varDerivFlow (E := E) Ψ y b) ?_ ?_
+  · have hU :
+        {z' : ModelPhase (E := E) |
+          (z', idLin) ∈ Metric.ball (varPhaseZero (I := I) (E := E) x) r} ∈
+          𝓝 z :=
+      hpairCont.preimage_mem_nhds (Metric.isOpen_ball.mem_nhds (by simpa [idLin] using hzopen))
+    filter_upwards [hU] with y hy
+    exact timeEndpoint_hasFDerivAt (I := I) g x Ψ y hb0 hb
+      hflow hbound hsrc hLip (by simpa [idLin] using hy)
+  · have hbmem : b ∈ Set.Icc (-ε) ε := hb ⟨hb0, le_rfl⟩
+    have hΨcontAt :
+        ContinuousAt (fun p : ModelPhase (E := E) × ModelLin (E := E) => Ψ p b)
+          (z, idLin) :=
+      (hLip b hbmem).continuousOn.continuousAt
+        (Metric.closedBall_mem_nhds_of_mem (by simpa [idLin] using hzopen))
+    have hcomp :
+        ContinuousAt
+          (fun z' : ModelPhase (E := E) => Ψ (z', idLin) b) z :=
+      ContinuousAt.comp
+        (f := fun z' : ModelPhase (E := E) => (z', idLin))
+        (g := fun p : ModelPhase (E := E) × ModelLin (E := E) => Ψ p b)
+        (x := z) hΨcontAt hpairCont
+    simpa [varDerivFlow, idLin] using continuous_snd.continuousAt.comp hcomp
+
+/-- Fixed-time endpoint is `C1` in the initial phase for a source-controlled
+augmented variational flow. -/
+theorem timeEndpoint_contDiffAt_one
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (Ψ :
+      (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+        ModelPhase (E := E) × ModelLin (E := E))
+    (z : ModelPhase (E := E))
+    {a r L' : NNReal} {ε b : Real}
+    (hb0 : 0 ≤ b)
+    (hb : Set.Icc (0 : Real) b ⊆ Set.Icc (-ε) ε)
+    (hflow :
+      ∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+        Ψ p 0 = p ∧
+          ∀ t ∈ Set.Icc (-ε) ε,
+            HasDerivWithinAt (Ψ p)
+              (varSpray (I := I) g x (Ψ p t))
+              (Set.Icc (-ε) ε) t)
+    (hbound :
+      ∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+        ∀ t : Real,
+          Ψ p t ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) a)
+    (hsrc :
+      Metric.closedBall (varPhaseZero (I := I) (E := E) x) a ⊆
+        {p : ModelPhase (E := E) × ModelLin (E := E) |
+          p.1 ∈ (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+            (phaseOfModel (I := I) x p.1).proj ∈ (extChartAt I x).source})
+    (hLip :
+      ∀ t ∈ Set.Icc (-ε) ε,
+        LipschitzOnWith L'
+          (fun p => Ψ p t)
+          (Metric.closedBall (varPhaseZero (I := I) (E := E) x) r))
+    (hzopen :
+      (z, ContinuousLinearMap.id Real (ModelPhase (E := E))) ∈
+        Metric.ball (varPhaseZero (I := I) (E := E) x) r) :
+    ContDiffAt Real 1
+      (fun z' : ModelPhase (E := E) => varBaseFlow (E := E) Ψ z' b)
+      z := by
+  let idLin : ModelLin (E := E) :=
+    ContinuousLinearMap.id Real (ModelPhase (E := E))
+  let U : Set (ModelPhase (E := E)) :=
+    {z' | (z', idLin) ∈ Metric.ball (varPhaseZero (I := I) (E := E) x) r}
+  have hpairCont :
+      ContinuousAt (fun z' : ModelPhase (E := E) => (z', idLin)) z :=
+    ContinuousAt.prodMk continuousAt_id continuousAt_const
+  have hU : U ∈ 𝓝 z :=
+    hpairCont.preimage_mem_nhds
+      (Metric.isOpen_ball.mem_nhds (by simpa [idLin] using hzopen))
+  rw [contDiffAt_one_iff]
+  refine ⟨fun y : ModelPhase (E := E) => varDerivFlow (E := E) Ψ y b,
+    U, hU, ?_, ?_⟩
+  · have hbmem : b ∈ Set.Icc (-ε) ε := hb ⟨hb0, le_rfl⟩
+    have hΨcontOn :
+        ContinuousOn
+          (fun p : ModelPhase (E := E) × ModelLin (E := E) => Ψ p b)
+          (Metric.closedBall (varPhaseZero (I := I) (E := E) x) r) :=
+      (hLip b hbmem).continuousOn
+    have hpairContOn :
+        ContinuousOn (fun y : ModelPhase (E := E) => (y, idLin)) U :=
+      ContinuousOn.prodMk continuousOn_id continuousOn_const
+    have hmaps :
+        Set.MapsTo (fun y : ModelPhase (E := E) => (y, idLin)) U
+          (Metric.closedBall (varPhaseZero (I := I) (E := E) x) r) := by
+      intro y hy
+      exact Metric.ball_subset_closedBall hy
+    have hcomp :
+        ContinuousOn
+          (fun y : ModelPhase (E := E) => Ψ (y, idLin) b) U :=
+      hΨcontOn.comp hpairContOn hmaps
+    simpa [varDerivFlow, idLin] using hcomp.snd
+  · intro y hy
+    exact timeEndpoint_hasFDerivAt (I := I) g x Ψ y hb0 hb
+      hflow hbound hsrc hLip (by simpa [U, idLin] using hy)
+
+/-- First coordinate of the fixed-time model endpoint.  This is the chart-base
+coordinate that will become the normal exponential endpoint in the construction
+chart. -/
+def timeBaseEndpoint
+    (Ψ :
+      (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+        ModelPhase (E := E) × ModelLin (E := E))
+    (b : Real) (z : ModelPhase (E := E)) : E :=
+  (varBaseFlow (E := E) Ψ z b).1
+
+/-- Derivative of the fixed-time base-coordinate endpoint. -/
+theorem timeBaseEndpoint_hasFDerivAt
+    {Ψ :
+      (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+        ModelPhase (E := E) × ModelLin (E := E)}
+    {z : ModelPhase (E := E)} {b : Real} {A : ModelLin (E := E)}
+    (hA :
+      HasFDerivAt
+        (fun z' : ModelPhase (E := E) => varBaseFlow (E := E) Ψ z' b)
+        A z) :
+    HasFDerivAt
+      (fun z' : ModelPhase (E := E) => timeBaseEndpoint (E := E) Ψ b z')
+      ((ContinuousLinearMap.fst Real E E).comp A)
+      z := by
+  have hfst :
+      HasFDerivAt (fun w : ModelPhase (E := E) => w.1)
+        (ContinuousLinearMap.fst Real E E) (varBaseFlow (E := E) Ψ z b) :=
+    (ContinuousLinearMap.fst Real E E).hasFDerivAt
+  simpa [timeBaseEndpoint, Function.comp_def] using hfst.comp z hA
+
+/-- Strict derivative of the first coordinate of the fixed-time model
+endpoint. -/
+theorem timeBaseEndpoint_hasStrictFDerivAt
+    {Ψ :
+      (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+        ModelPhase (E := E) × ModelLin (E := E)}
+    {z : ModelPhase (E := E)} {b : Real} {A : ModelLin (E := E)}
+    (hA :
+      HasStrictFDerivAt
+        (fun z' : ModelPhase (E := E) => varBaseFlow (E := E) Ψ z' b)
+        A z) :
+    HasStrictFDerivAt
+      (fun z' : ModelPhase (E := E) => timeBaseEndpoint (E := E) Ψ b z')
+      ((ContinuousLinearMap.fst Real E E).comp A)
+      z := by
+  have hfst :
+      HasStrictFDerivAt (fun w : ModelPhase (E := E) => w.1)
+        (ContinuousLinearMap.fst Real E E) (varBaseFlow (E := E) Ψ z b) :=
+    (ContinuousLinearMap.fst Real E E).hasStrictFDerivAt
+  simpa [timeBaseEndpoint, Function.comp_def] using
+    HasStrictFDerivAt.comp (x := z) hfst hA
+
+/-- `C1` regularity of the first coordinate of the fixed-time model
+endpoint. -/
+theorem timeBaseEndpoint_contDiffAt_one
+    {Ψ :
+      (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+        ModelPhase (E := E) × ModelLin (E := E)}
+    {z : ModelPhase (E := E)} {b : Real}
+    (hA :
+      ContDiffAt Real 1
+        (fun z' : ModelPhase (E := E) => varBaseFlow (E := E) Ψ z' b)
+        z) :
+    ContDiffAt Real 1
+      (fun z' : ModelPhase (E := E) => timeBaseEndpoint (E := E) Ψ b z')
+      z := by
+  simpa [timeBaseEndpoint, Function.comp_def] using hA.fst
+
+/-- Source-controlled version of `timeBaseEndpoint_hasFDerivAt`. -/
+theorem timeBaseEndpoint_hasFDerivAt_of_flow
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (Ψ :
+      (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+        ModelPhase (E := E) × ModelLin (E := E))
+    (z : ModelPhase (E := E))
+    {a r L' : NNReal} {ε b : Real}
+    (hb0 : 0 ≤ b)
+    (hb : Set.Icc (0 : Real) b ⊆ Set.Icc (-ε) ε)
+    (hflow :
+      ∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+        Ψ p 0 = p ∧
+          ∀ t ∈ Set.Icc (-ε) ε,
+            HasDerivWithinAt (Ψ p)
+              (varSpray (I := I) g x (Ψ p t))
+              (Set.Icc (-ε) ε) t)
+    (hbound :
+      ∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+        ∀ t : Real,
+          Ψ p t ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) a)
+    (hsrc :
+      Metric.closedBall (varPhaseZero (I := I) (E := E) x) a ⊆
+        {p : ModelPhase (E := E) × ModelLin (E := E) |
+          p.1 ∈ (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+            (phaseOfModel (I := I) x p.1).proj ∈ (extChartAt I x).source})
+    (hLip :
+      ∀ t ∈ Set.Icc (-ε) ε,
+        LipschitzOnWith L'
+          (fun p => Ψ p t)
+          (Metric.closedBall (varPhaseZero (I := I) (E := E) x) r))
+    (hzopen :
+      (z, ContinuousLinearMap.id Real (ModelPhase (E := E))) ∈
+        Metric.ball (varPhaseZero (I := I) (E := E) x) r) :
+    HasFDerivAt
+      (fun z' : ModelPhase (E := E) => timeBaseEndpoint (E := E) Ψ b z')
+      ((ContinuousLinearMap.fst Real E E).comp (varDerivFlow (E := E) Ψ z b))
+      z :=
+  timeBaseEndpoint_hasFDerivAt (E := E)
+    (timeEndpoint_hasFDerivAt (I := I) g x Ψ z
+      hb0 hb hflow hbound hsrc hLip hzopen)
+
+/-- Source-controlled strict derivative of the fixed-time base-coordinate
+endpoint. -/
+theorem timeBaseEndpoint_hasStrictFDerivAt_of_flow
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (Ψ :
+      (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+        ModelPhase (E := E) × ModelLin (E := E))
+    (z : ModelPhase (E := E))
+    {a r L' : NNReal} {ε b : Real}
+    (hb0 : 0 ≤ b)
+    (hb : Set.Icc (0 : Real) b ⊆ Set.Icc (-ε) ε)
+    (hflow :
+      ∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+        Ψ p 0 = p ∧
+          ∀ t ∈ Set.Icc (-ε) ε,
+            HasDerivWithinAt (Ψ p)
+              (varSpray (I := I) g x (Ψ p t))
+              (Set.Icc (-ε) ε) t)
+    (hbound :
+      ∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+        ∀ t : Real,
+          Ψ p t ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) a)
+    (hsrc :
+      Metric.closedBall (varPhaseZero (I := I) (E := E) x) a ⊆
+        {p : ModelPhase (E := E) × ModelLin (E := E) |
+          p.1 ∈ (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+            (phaseOfModel (I := I) x p.1).proj ∈ (extChartAt I x).source})
+    (hLip :
+      ∀ t ∈ Set.Icc (-ε) ε,
+        LipschitzOnWith L'
+          (fun p => Ψ p t)
+          (Metric.closedBall (varPhaseZero (I := I) (E := E) x) r))
+    (hzopen :
+      (z, ContinuousLinearMap.id Real (ModelPhase (E := E))) ∈
+        Metric.ball (varPhaseZero (I := I) (E := E) x) r) :
+    HasStrictFDerivAt
+      (fun z' : ModelPhase (E := E) => timeBaseEndpoint (E := E) Ψ b z')
+      ((ContinuousLinearMap.fst Real E E).comp (varDerivFlow (E := E) Ψ z b))
+      z :=
+  timeBaseEndpoint_hasStrictFDerivAt (E := E)
+    (timeEndpoint_hasStrictFDerivAt (I := I) g x Ψ z
+      hb0 hb hflow hbound hsrc hLip hzopen)
+
+/-- Source-controlled `C1` regularity of the fixed-time base-coordinate
+endpoint. -/
+theorem timeBaseEndpoint_contDiffAt_one_of_flow
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (Ψ :
+      (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+        ModelPhase (E := E) × ModelLin (E := E))
+    (z : ModelPhase (E := E))
+    {a r L' : NNReal} {ε b : Real}
+    (hb0 : 0 ≤ b)
+    (hb : Set.Icc (0 : Real) b ⊆ Set.Icc (-ε) ε)
+    (hflow :
+      ∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+        Ψ p 0 = p ∧
+          ∀ t ∈ Set.Icc (-ε) ε,
+            HasDerivWithinAt (Ψ p)
+              (varSpray (I := I) g x (Ψ p t))
+              (Set.Icc (-ε) ε) t)
+    (hbound :
+      ∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+        ∀ t : Real,
+          Ψ p t ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) a)
+    (hsrc :
+      Metric.closedBall (varPhaseZero (I := I) (E := E) x) a ⊆
+        {p : ModelPhase (E := E) × ModelLin (E := E) |
+          p.1 ∈ (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+            (phaseOfModel (I := I) x p.1).proj ∈ (extChartAt I x).source})
+    (hLip :
+      ∀ t ∈ Set.Icc (-ε) ε,
+        LipschitzOnWith L'
+          (fun p => Ψ p t)
+          (Metric.closedBall (varPhaseZero (I := I) (E := E) x) r))
+    (hzopen :
+      (z, ContinuousLinearMap.id Real (ModelPhase (E := E))) ∈
+        Metric.ball (varPhaseZero (I := I) (E := E) x) r) :
+    ContDiffAt Real 1
+      (fun z' : ModelPhase (E := E) => timeBaseEndpoint (E := E) Ψ b z')
+      z :=
+  timeBaseEndpoint_contDiffAt_one (E := E)
+    (timeEndpoint_contDiffAt_one (I := I) g x Ψ z
+      hb0 hb hflow hbound hsrc hLip hzopen)
+
+/-- Pull back the base-coordinate endpoint derivative along the initial-phase
+map `v ↦ initPhase x v`. -/
+theorem timeBaseEndpoint_initPhase_hasFDerivAt
+    {Ψ :
+      (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+        ModelPhase (E := E) × ModelLin (E := E)}
+    {x : M} {v : TangentSpace I x} {b : Real}
+    {A : ModelPhase (E := E) →L[Real] E}
+    (hA :
+      HasFDerivAt
+        (fun z' : ModelPhase (E := E) => timeBaseEndpoint (E := E) Ψ b z')
+        A
+        (initPhase (I := I) x v)) :
+    HasFDerivAt
+      (fun v' : TangentSpace I x =>
+        timeBaseEndpoint (E := E) Ψ b (initPhase (I := I) x v'))
+      (A.comp (initPhaseLin (I := I) x))
+      v :=
+  hA.comp v (initPhase_hasFDerivAt (I := I) x v)
+
+/-- Pull back the strict base-coordinate endpoint derivative along the
+initial-phase map `v ↦ initPhase x v`. -/
+theorem timeBaseEndpoint_initPhase_hasStrictFDerivAt
+    {Ψ :
+      (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+        ModelPhase (E := E) × ModelLin (E := E)}
+    {x : M} {v : TangentSpace I x} {b : Real}
+    {A : ModelPhase (E := E) →L[Real] E}
+    (hA :
+      HasStrictFDerivAt
+        (fun z' : ModelPhase (E := E) => timeBaseEndpoint (E := E) Ψ b z')
+        A
+        (initPhase (I := I) x v)) :
+    HasStrictFDerivAt
+      (fun v' : TangentSpace I x =>
+        timeBaseEndpoint (E := E) Ψ b (initPhase (I := I) x v'))
+      (A.comp (initPhaseLin (I := I) x))
+      v :=
+  HasStrictFDerivAt.comp (x := v) hA
+    (initPhase_hasStrictFDerivAt (I := I) x v)
+
+/-- Pull back `C1` regularity of the base-coordinate endpoint along the
+initial-phase map. -/
+theorem timeBaseEndpoint_initPhase_contDiffAt_one
+    {Ψ :
+      (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+        ModelPhase (E := E) × ModelLin (E := E)}
+    {x : M} {v : TangentSpace I x} {b : Real}
+    (hA :
+      ContDiffAt Real 1
+        (fun z' : ModelPhase (E := E) => timeBaseEndpoint (E := E) Ψ b z')
+        (initPhase (I := I) x v)) :
+    ContDiffAt Real 1
+      (fun v' : TangentSpace I x =>
+        timeBaseEndpoint (E := E) Ψ b (initPhase (I := I) x v'))
+      v := by
+  exact hA.comp v (initPhase_contDiffAt (I := I) (n := (1 : WithTop ℕ∞)) x v)
+
+/-- Base-coordinate endpoint after the homogeneous time rescaling
+`v ↦ b⁻¹ • v`.  This is the local chart expression of the exponential endpoint
+when a short time `b` is used to reach time one by rescaling the initial
+velocity. -/
+def scaledBaseEnd
+    (Ψ :
+      (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+        ModelPhase (E := E) × ModelLin (E := E))
+    (b : Real) (x : M) (v : TangentSpace I x) : E :=
+  timeBaseEndpoint (E := E) Ψ b (initPhase (I := I) x (b⁻¹ • v))
+
+/-- Source-controlled version of the velocity-space base endpoint derivative. -/
+theorem timeBaseEndpoint_initPhase_hasFDerivAt_of_flow
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (Ψ :
+      (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+        ModelPhase (E := E) × ModelLin (E := E))
+    (v : TangentSpace I x)
+    {a r L' : NNReal} {ε b : Real}
+    (hb0 : 0 ≤ b)
+    (hb : Set.Icc (0 : Real) b ⊆ Set.Icc (-ε) ε)
+    (hflow :
+      ∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+        Ψ p 0 = p ∧
+          ∀ t ∈ Set.Icc (-ε) ε,
+            HasDerivWithinAt (Ψ p)
+              (varSpray (I := I) g x (Ψ p t))
+              (Set.Icc (-ε) ε) t)
+    (hbound :
+      ∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+        ∀ t : Real,
+          Ψ p t ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) a)
+    (hsrc :
+      Metric.closedBall (varPhaseZero (I := I) (E := E) x) a ⊆
+        {p : ModelPhase (E := E) × ModelLin (E := E) |
+          p.1 ∈ (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+            (phaseOfModel (I := I) x p.1).proj ∈ (extChartAt I x).source})
+    (hLip :
+      ∀ t ∈ Set.Icc (-ε) ε,
+        LipschitzOnWith L'
+          (fun p => Ψ p t)
+          (Metric.closedBall (varPhaseZero (I := I) (E := E) x) r))
+    (hvopen :
+      (initPhase (I := I) x v,
+          ContinuousLinearMap.id Real (ModelPhase (E := E))) ∈
+        Metric.ball (varPhaseZero (I := I) (E := E) x) r) :
+    HasFDerivAt
+      (fun v' : TangentSpace I x =>
+        timeBaseEndpoint (E := E) Ψ b (initPhase (I := I) x v'))
+      (((ContinuousLinearMap.fst Real E E).comp
+        (varDerivFlow (E := E) Ψ (initPhase (I := I) x v) b)).comp
+          (initPhaseLin (I := I) x))
+      v :=
+  timeBaseEndpoint_initPhase_hasFDerivAt (E := E)
+      (timeBaseEndpoint_hasFDerivAt_of_flow (I := I) g x Ψ
+      (initPhase (I := I) x v) hb0 hb hflow hbound hsrc hLip hvopen)
+
+/-- Source-controlled strict version of the velocity-space base endpoint
+derivative. -/
+theorem timeBaseEndpoint_initPhase_hasStrictFDerivAt_of_flow
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (Ψ :
+      (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+        ModelPhase (E := E) × ModelLin (E := E))
+    (v : TangentSpace I x)
+    {a r L' : NNReal} {ε b : Real}
+    (hb0 : 0 ≤ b)
+    (hb : Set.Icc (0 : Real) b ⊆ Set.Icc (-ε) ε)
+    (hflow :
+      ∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+        Ψ p 0 = p ∧
+          ∀ t ∈ Set.Icc (-ε) ε,
+            HasDerivWithinAt (Ψ p)
+              (varSpray (I := I) g x (Ψ p t))
+              (Set.Icc (-ε) ε) t)
+    (hbound :
+      ∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+        ∀ t : Real,
+          Ψ p t ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) a)
+    (hsrc :
+      Metric.closedBall (varPhaseZero (I := I) (E := E) x) a ⊆
+        {p : ModelPhase (E := E) × ModelLin (E := E) |
+          p.1 ∈ (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+            (phaseOfModel (I := I) x p.1).proj ∈ (extChartAt I x).source})
+    (hLip :
+      ∀ t ∈ Set.Icc (-ε) ε,
+        LipschitzOnWith L'
+          (fun p => Ψ p t)
+          (Metric.closedBall (varPhaseZero (I := I) (E := E) x) r))
+    (hvopen :
+      (initPhase (I := I) x v,
+          ContinuousLinearMap.id Real (ModelPhase (E := E))) ∈
+        Metric.ball (varPhaseZero (I := I) (E := E) x) r) :
+    HasStrictFDerivAt
+      (fun v' : TangentSpace I x =>
+        timeBaseEndpoint (E := E) Ψ b (initPhase (I := I) x v'))
+      (((ContinuousLinearMap.fst Real E E).comp
+        (varDerivFlow (E := E) Ψ (initPhase (I := I) x v) b)).comp
+          (initPhaseLin (I := I) x))
+      v :=
+  timeBaseEndpoint_initPhase_hasStrictFDerivAt (E := E)
+      (timeBaseEndpoint_hasStrictFDerivAt_of_flow (I := I) g x Ψ
+      (initPhase (I := I) x v) hb0 hb hflow hbound hsrc hLip hvopen)
+
+/-- If the unscaled short-time endpoint has derivative `b • id`, then the
+homogeneously rescaled endpoint has derivative `id`. -/
+theorem scaledBaseEnd_deriv0
+    {Ψ :
+      (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+        ModelPhase (E := E) × ModelLin (E := E)}
+    {x : M} {b : Real}
+    (hb : b ≠ 0)
+    (h :
+      HasFDerivAt
+        (fun v : TangentSpace I x =>
+          timeBaseEndpoint (E := E) Ψ b (initPhase (I := I) x v))
+        (b • ContinuousLinearMap.id Real (TangentSpace I x))
+        0) :
+    HasFDerivAt
+      (scaledBaseEnd (I := I) (E := E) Ψ b x)
+      (ContinuousLinearMap.id Real (TangentSpace I x))
+      0 := by
+  have hscale :
+      HasFDerivAt
+        (fun v : TangentSpace I x => b⁻¹ • v)
+        (b⁻¹ • ContinuousLinearMap.id Real (TangentSpace I x))
+        0 := by
+    simpa using
+      ((ContinuousLinearMap.id Real (TangentSpace I x)).hasFDerivAt.const_smul b⁻¹)
+  have h_at :
+      HasFDerivAt
+        (fun v : TangentSpace I x =>
+          timeBaseEndpoint (E := E) Ψ b (initPhase (I := I) x v))
+        (b • ContinuousLinearMap.id Real (TangentSpace I x))
+        (b⁻¹ • (0 : TangentSpace I x)) := by
+    simpa using h
+  have hcomp := h_at.comp (0 : TangentSpace I x) hscale
+  have hlin :
+      (b • ContinuousLinearMap.id Real (TangentSpace I x)).comp
+          (b⁻¹ • ContinuousLinearMap.id Real (TangentSpace I x)) =
+        ContinuousLinearMap.id Real (TangentSpace I x) := by
+    ext v
+    change b • (b⁻¹ • v) = v
+    rw [smul_smul, mul_inv_cancel₀ hb, one_smul]
+  convert hcomp using 1
+  exact hlin.symm
+
+/-- Strict version of `scaledBaseEnd_deriv0`. -/
+theorem scaledBaseEnd_strict0
+    {Ψ :
+      (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+        ModelPhase (E := E) × ModelLin (E := E)}
+    {x : M} {b : Real}
+    (hb : b ≠ 0)
+    (h :
+      HasStrictFDerivAt
+        (fun v : TangentSpace I x =>
+          timeBaseEndpoint (E := E) Ψ b (initPhase (I := I) x v))
+        (b • ContinuousLinearMap.id Real (TangentSpace I x))
+        0) :
+    HasStrictFDerivAt
+      (scaledBaseEnd (I := I) (E := E) Ψ b x)
+      (ContinuousLinearMap.id Real (TangentSpace I x))
+      0 := by
+  have hscale :
+      HasStrictFDerivAt
+        (fun v : TangentSpace I x => b⁻¹ • v)
+        (b⁻¹ • ContinuousLinearMap.id Real (TangentSpace I x))
+        0 := by
+    simpa using
+      ((ContinuousLinearMap.id Real (TangentSpace I x)).hasStrictFDerivAt.const_smul b⁻¹)
+  have h_at :
+      HasStrictFDerivAt
+        (fun v : TangentSpace I x =>
+          timeBaseEndpoint (E := E) Ψ b (initPhase (I := I) x v))
+        (b • ContinuousLinearMap.id Real (TangentSpace I x))
+        (b⁻¹ • (0 : TangentSpace I x)) := by
+    simpa using h
+  have hcomp := HasStrictFDerivAt.comp (x := (0 : TangentSpace I x)) h_at hscale
+  have hlin :
+      (b • ContinuousLinearMap.id Real (TangentSpace I x)).comp
+          (b⁻¹ • ContinuousLinearMap.id Real (TangentSpace I x)) =
+        ContinuousLinearMap.id Real (TangentSpace I x) := by
+    ext v
+    change b • (b⁻¹ • v) = v
+    rw [smul_smul, mul_inv_cancel₀ hb, one_smul]
+  convert hcomp using 1
+  exact hlin.symm
+
+/-- `C1` regularity of the rescaled base endpoint at zero. -/
+theorem scaledBaseEnd_contDiffAt_one
+    {Ψ :
+      (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+        ModelPhase (E := E) × ModelLin (E := E)}
+    {x : M} {b : Real}
+    (h :
+      ContDiffAt Real 1
+        (fun v : TangentSpace I x =>
+          timeBaseEndpoint (E := E) Ψ b (initPhase (I := I) x v))
+        0) :
+    ContDiffAt Real 1
+      (scaledBaseEnd (I := I) (E := E) Ψ b x)
+      0 := by
+  have hscale :
+      ContDiffAt Real 1
+        (fun v : TangentSpace I x => b⁻¹ • v)
+        (0 : TangentSpace I x) := by
+    simpa using
+      ((contDiff_const_smul (𝕜 := Real)
+        (n := (1 : WithTop ℕ∞)) (F := TangentSpace I x) b⁻¹).contDiffAt :
+          ContDiffAt Real 1 (fun v : TangentSpace I x => b⁻¹ • v) 0)
+  have h_at :
+      ContDiffAt Real 1
+        (fun v : TangentSpace I x =>
+          timeBaseEndpoint (E := E) Ψ b (initPhase (I := I) x v))
+        (b⁻¹ • (0 : TangentSpace I x)) := by
+    simpa using h
+  simpa [scaledBaseEnd] using h_at.comp (0 : TangentSpace I x) hscale
+
+/-- The rescaled base endpoint is exactly the existing `chartEnd` for the
+model flow projected from the augmented variational flow. -/
+theorem chartEnd_varModelFlow_eq_scaledBaseEnd
+    (Ψ :
+      (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+        ModelPhase (E := E) × ModelLin (E := E))
+    (b : Real) (x : M) :
+    chartEnd (I := I) (varModelFlow (E := E) Ψ) b x =
+      scaledBaseEnd (I := I) (E := E) Ψ b x := by
+  rfl
+
+/-- Derivative of `chartEnd` for the model flow projected from an augmented
+variational flow. -/
+theorem chartEnd_varModelFlow_deriv0
+    {Ψ :
+      (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+        ModelPhase (E := E) × ModelLin (E := E)}
+    {x : M} {b : Real}
+    (h :
+      HasFDerivAt
+        (scaledBaseEnd (I := I) (E := E) Ψ b x)
+        (ContinuousLinearMap.id Real (TangentSpace I x))
+        0) :
+    HasFDerivAt
+      (chartEnd (I := I) (varModelFlow (E := E) Ψ) b x)
+      (ContinuousLinearMap.id Real (TangentSpace I x))
+      0 := by
+  simpa [chartEnd_varModelFlow_eq_scaledBaseEnd (I := I) (E := E) Ψ b x] using h
+
+/-- Strict derivative of `chartEnd` for the model flow projected from an
+augmented variational flow. -/
+theorem chartEnd_varModelFlow_strict0
+    {Ψ :
+      (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+        ModelPhase (E := E) × ModelLin (E := E)}
+    {x : M} {b : Real}
+    (h :
+      HasStrictFDerivAt
+        (scaledBaseEnd (I := I) (E := E) Ψ b x)
+        (ContinuousLinearMap.id Real (TangentSpace I x))
+        0) :
+    HasStrictFDerivAt
+      (chartEnd (I := I) (varModelFlow (E := E) Ψ) b x)
+      (ContinuousLinearMap.id Real (TangentSpace I x))
+      0 := by
+  simpa [chartEnd_varModelFlow_eq_scaledBaseEnd (I := I) (E := E) Ψ b x] using h
+
+/-- `C1` regularity of `chartEnd` for the model flow projected from an
+augmented variational flow. -/
+theorem chartEnd_varModelFlow_contDiffAt_one
+    {Ψ :
+      (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+        ModelPhase (E := E) × ModelLin (E := E)}
+    {x : M} {b : Real}
+    (h :
+      ContDiffAt Real 1
+        (scaledBaseEnd (I := I) (E := E) Ψ b x)
+        0) :
+    ContDiffAt Real 1
+      (chartEnd (I := I) (varModelFlow (E := E) Ψ) b x)
+      0 := by
+  simpa [chartEnd_varModelFlow_eq_scaledBaseEnd (I := I) (E := E) Ψ b x] using h
+
 /-- Local augmented variational flow whose base component has the variational
 component as Frechet derivative at every interior initial phase, for forward
 times in the Picard interval. -/
@@ -2100,6 +3340,369 @@ theorem varFlow_hasFDerivAt
   exact
     varBaseFlow_hasFDerivAt_of_flow (I := I) g x Ψ z
       hb.1 hbsub hflow hbound hsrc_ball hLip hzopen
+
+/-- Short-time augmented variational flow whose base-coordinate endpoint has
+the expected zero-velocity derivative in the initial tangent vector. -/
+theorem varFlow_deriv0
+    [I.Boundaryless] [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    ∃ (ε : Real), ∃ (_hε : 0 < ε), ∃ (δ : Real), ∃ (_hδ : 0 < δ),
+      ∃ (a r : NNReal), ∃ (_hr : 0 < r),
+      ∃ Ψ :
+          (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+            ModelPhase (E := E) × ModelLin (E := E),
+        (∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+          Ψ p 0 = p ∧
+            ∀ t ∈ Set.Icc (-ε) ε,
+              HasDerivWithinAt (Ψ p)
+                (varSpray (I := I) g x (Ψ p t))
+                (Set.Icc (-ε) ε) t) ∧
+          (∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+            ∀ t : Real,
+              Ψ p t ∈
+                Metric.closedBall (varPhaseZero (I := I) (E := E) x) a) ∧
+          (Metric.closedBall (varPhaseZero (I := I) (E := E) x) a ⊆
+            {p : ModelPhase (E := E) × ModelLin (E := E) |
+              p.1 ∈ (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+                (phaseOfModel (I := I) x p.1).proj ∈
+                  (extChartAt I x).source}) ∧
+          (∀ t ∈ Set.Icc (-δ) δ,
+            Ψ (varPhaseZero (I := I) (E := E) x) t =
+              varZeroPhaseLin (I := I) (E := E) x t) ∧
+          (∃ L' : NNReal,
+            (∀ t ∈ Set.Icc (-ε) ε,
+              LipschitzOnWith L'
+                (fun p => Ψ p t)
+                (Metric.closedBall (varPhaseZero (I := I) (E := E) x) r)) ∧
+            ∀ b ∈ Set.Icc (0 : Real) δ,
+              HasFDerivAt
+                (fun v : TangentSpace I x =>
+                  timeBaseEndpoint (E := E) Ψ b (initPhase (I := I) x v))
+                (b • ContinuousLinearMap.id Real (TangentSpace I x))
+                0) := by
+  obtain ⟨ε, hε, a, r, L, K, hr, hsrc, hpl⟩ :=
+    varSpray_pl0_src (I := I) g x
+  obtain ⟨Ψ, hΨ, hbound, _hpicard, L', hLip⟩ :=
+    plFlow_bound (F := ModelPhase (E := E) × ModelLin (E := E))
+      (f := fun _ : Real => varSpray (I := I) g x) hpl
+  have hrR : (0 : Real) < (r : Real) := by exact_mod_cast hr
+  have hnonneg :
+      (0 : Real) ≤
+        (L : Real) * max ((0 + ε) - 0) (0 - (0 - ε)) := by
+    exact mul_nonneg (NNReal.coe_nonneg L)
+      (le_max_of_le_left (by linarith))
+  have hra : (r : Real) ≤ (a : Real) := by
+    have hmul := hpl.mul_max_le
+    nlinarith [hmul, hnonneg]
+  have ha : 0 < a := by
+    exact_mod_cast (lt_of_lt_of_le hrR hra)
+  obtain ⟨δ0, hδ0, hcand0⟩ :=
+    varZeroPhaseLin_mem_closedBall_small (I := I) (E := E) x (a := a) ha
+  let δ : Real := min δ0 ε
+  have hδ : 0 < δ := lt_min hδ0 hε
+  have hδε : δ ≤ ε := min_le_right _ _
+  have hδδ0 : δ ≤ δ0 := min_le_left _ _
+  have hcand :
+      ∀ t ∈ Set.Icc (-δ) δ,
+        varZeroPhaseLin (I := I) (E := E) x t ∈
+          Metric.closedBall (varPhaseZero (I := I) (E := E) x) a := by
+    intro t ht
+    exact hcand0 t ⟨by linarith [ht.1, hδδ0], by linarith [ht.2, hδδ0]⟩
+  have hflow :
+      ∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+        Ψ p 0 = p ∧
+          ∀ t ∈ Set.Icc (-ε) ε,
+            HasDerivWithinAt (Ψ p)
+              (varSpray (I := I) g x (Ψ p t))
+              (Set.Icc (-ε) ε) t := by
+    intro p hp
+    refine ⟨(hΨ p hp).1, ?_⟩
+    intro t ht
+    have ht' : t ∈ Set.Icc (0 - ε) (0 + ε) := by simpa using ht
+    simpa using (hΨ p hp).2 t ht'
+  have hLip' :
+      ∀ t ∈ Set.Icc (-ε) ε,
+        LipschitzOnWith L'
+          (fun p => Ψ p t)
+          (Metric.closedBall (varPhaseZero (I := I) (E := E) x) r) := by
+    intro t ht
+    have ht' : t ∈ Set.Icc (0 - ε) (0 + ε) := by simpa using ht
+    simpa using hLip t ht'
+  have hzeroEq :
+      ∀ t ∈ Set.Icc (-δ) δ,
+        Ψ (varPhaseZero (I := I) (E := E) x) t =
+          varZeroPhaseLin (I := I) (E := E) x t :=
+    varFlow_zero_phaseLin_of_pl (I := I) g x hε hδ hδε hpl
+      hflow hbound hcand
+  refine ⟨ε, hε, δ, hδ, a, r, hr, Ψ, hflow, hbound, hsrc, hzeroEq, L', hLip', ?_⟩
+  intro b hb
+  have hbε : b ∈ Set.Icc (0 : Real) ε := ⟨hb.1, le_trans hb.2 hδε⟩
+  have hbsub : Set.Icc (0 : Real) b ⊆ Set.Icc (-ε) ε := by
+    intro t ht
+    constructor
+    · linarith [hε, ht.1]
+    · exact le_trans ht.2 hbε.2
+  have hinit :
+      (initPhase (I := I) x (0 : TangentSpace I x),
+          ContinuousLinearMap.id Real (ModelPhase (E := E))) =
+        varPhaseZero (I := I) (E := E) x := by
+    simp [varPhaseZero, initPhase_zero]
+  have hvopen :
+      (initPhase (I := I) x (0 : TangentSpace I x),
+          ContinuousLinearMap.id Real (ModelPhase (E := E))) ∈
+        Metric.ball (varPhaseZero (I := I) (E := E) x) r := by
+    rw [hinit]
+    exact Metric.mem_ball_self hrR
+  have hderiv :=
+    timeBaseEndpoint_initPhase_hasFDerivAt_of_flow (I := I) g x Ψ
+      (0 : TangentSpace I x) hb.1 hbsub hflow hbound hsrc hLip' hvopen
+  have hbδ : b ∈ Set.Icc (-δ) δ := ⟨by linarith [hb.1], hb.2⟩
+  have hA :
+      varDerivFlow (E := E) Ψ (initPhase (I := I) x (0 : TangentSpace I x)) b =
+        phaseLinFlow (E := E) b := by
+    have hΨeq :
+        Ψ (initPhase (I := I) x (0 : TangentSpace I x),
+            ContinuousLinearMap.id Real (ModelPhase (E := E))) b =
+          varZeroPhaseLin (I := I) (E := E) x b := by
+      simpa [hinit] using hzeroEq b hbδ
+    simpa [varDerivFlow, varZeroPhaseLin] using congrArg Prod.snd hΨeq
+  have hclm :
+      (((ContinuousLinearMap.fst Real E E).comp
+          (varDerivFlow (E := E) Ψ
+            (initPhase (I := I) x (0 : TangentSpace I x)) b)).comp
+          (initPhaseLin (I := I) x)) =
+        b • ContinuousLinearMap.id Real (TangentSpace I x) := by
+    rw [hA]
+    ext v
+    simp [initPhaseLin, phaseLinFlow, modelSprayLin]
+    rfl
+  rw [hclm] at hderiv
+  exact hderiv
+
+/-- Short-time augmented variational flow whose homogeneously rescaled
+base-coordinate endpoint has derivative `id` at the zero initial tangent
+vector. -/
+theorem varFlow_scaledDeriv0
+    [I.Boundaryless] [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    ∃ (ε : Real), ∃ (_hε : 0 < ε), ∃ (δ : Real), ∃ (_hδ : 0 < δ),
+      ∃ (a r : NNReal), ∃ (_hr : 0 < r),
+      ∃ Ψ :
+          (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+            ModelPhase (E := E) × ModelLin (E := E),
+        (∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+          Ψ p 0 = p ∧
+            ∀ t ∈ Set.Icc (-ε) ε,
+              HasDerivWithinAt (Ψ p)
+                (varSpray (I := I) g x (Ψ p t))
+                (Set.Icc (-ε) ε) t) ∧
+          (∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+            ∀ t : Real,
+              Ψ p t ∈
+                Metric.closedBall (varPhaseZero (I := I) (E := E) x) a) ∧
+          (Metric.closedBall (varPhaseZero (I := I) (E := E) x) a ⊆
+            {p : ModelPhase (E := E) × ModelLin (E := E) |
+              p.1 ∈ (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+                (phaseOfModel (I := I) x p.1).proj ∈
+                  (extChartAt I x).source}) ∧
+          (∀ t ∈ Set.Icc (-δ) δ,
+            Ψ (varPhaseZero (I := I) (E := E) x) t =
+              varZeroPhaseLin (I := I) (E := E) x t) ∧
+          (∃ L' : NNReal,
+            (∀ t ∈ Set.Icc (-ε) ε,
+              LipschitzOnWith L'
+                (fun p => Ψ p t)
+                (Metric.closedBall (varPhaseZero (I := I) (E := E) x) r)) ∧
+            ∀ b ∈ Set.Ioc (0 : Real) δ,
+              HasFDerivAt
+                (scaledBaseEnd (I := I) (E := E) Ψ b x)
+                (ContinuousLinearMap.id Real (TangentSpace I x))
+                0) := by
+  obtain ⟨ε, hε, δ, hδ, a, r, hr, Ψ, hflow, hbound, hsrc, hzero, L', hLip, hderiv⟩ :=
+    varFlow_deriv0 (I := I) g x
+  refine ⟨ε, hε, δ, hδ, a, r, hr, Ψ, hflow, hbound, hsrc, hzero, L', hLip, ?_⟩
+  intro b hb
+  exact scaledBaseEnd_deriv0 (I := I) (E := E) (Ψ := Ψ) (x := x)
+    (b := b) (ne_of_gt hb.1) (hderiv b ⟨le_of_lt hb.1, hb.2⟩)
+
+/-- Endpoint-facing package for the model flow projected from the augmented
+variational flow: it solves the original model spray ODE, has fixed-chart
+source control, and its rescaled `chartEnd` has derivative `id` at zero. -/
+theorem varFlow_chartEndDeriv0
+    [I.Boundaryless] [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    ∃ (ε : Real), ∃ (_hε : 0 < ε), ∃ (δ : Real), ∃ (_hδ : 0 < δ),
+      ∃ (r : NNReal), ∃ (_hr : 0 < r),
+      ∃ Ψ :
+          (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+            ModelPhase (E := E) × ModelLin (E := E),
+        (∀ z ∈ Metric.closedBall
+            (extChartAt I.tangent (phaseZero (I := I) x)
+              (phaseZero (I := I) x)) r,
+          varModelFlow (E := E) Ψ z 0 = z ∧
+            ∀ t ∈ Set.Icc (-ε) ε,
+              HasDerivWithinAt
+                (varModelFlow (E := E) Ψ z)
+                (modelSpray (I := I) g x
+                  (varModelFlow (E := E) Ψ z t))
+                (Set.Icc (-ε) ε) t) ∧
+          (∀ z ∈ Metric.closedBall
+              (extChartAt I.tangent (phaseZero (I := I) x)
+                (phaseZero (I := I) x)) r,
+            ∀ t ∈ Set.Icc (-ε) ε,
+              varModelFlow (E := E) Ψ z t ∈
+                (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+                (phaseOfModel (I := I) x
+                  (varModelFlow (E := E) Ψ z t)).proj ∈
+                  (extChartAt I x).source) ∧
+          (∀ t ∈ Set.Icc (-δ) δ,
+            varModelFlow (E := E) Ψ
+              (extChartAt I.tangent (phaseZero (I := I) x)
+                (phaseZero (I := I) x)) t =
+              extChartAt I.tangent (phaseZero (I := I) x)
+                (phaseZero (I := I) x)) ∧
+          (∃ L' : NNReal,
+            (∀ t ∈ Set.Icc (-ε) ε,
+              LipschitzOnWith L'
+                (fun p => Ψ p t)
+                (Metric.closedBall (varPhaseZero (I := I) (E := E) x) r)) ∧
+            ∀ b ∈ Set.Ioc (0 : Real) δ,
+              HasFDerivAt
+                (chartEnd (I := I) (varModelFlow (E := E) Ψ) b x)
+                (ContinuousLinearMap.id Real (TangentSpace I x))
+                0) := by
+  obtain ⟨ε, hε, δ, hδ, a, r, hr, Ψ, hflow, hbound, hsrc, hzero, L', hLip, hderiv⟩ :=
+    varFlow_scaledDeriv0 (I := I) g x
+  have hmodelZero :
+      ∀ t ∈ Set.Icc (-δ) δ,
+        varModelFlow (E := E) Ψ
+          (extChartAt I.tangent (phaseZero (I := I) x)
+            (phaseZero (I := I) x)) t =
+          extChartAt I.tangent (phaseZero (I := I) x)
+            (phaseZero (I := I) x) := by
+    intro t ht
+    have h := hzero t ht
+    simpa [varModelFlow, varZeroPhaseLin, varPhaseZero] using congrArg Prod.fst h
+  refine ⟨ε, hε, δ, hδ, r, hr, Ψ, ?_, ?_, hmodelZero, L', hLip, ?_⟩
+  · exact varModelFlow_flow (I := I) (E := E) g x hflow
+  · exact varModelFlow_src (I := I) (E := E) x hbound hsrc
+  · intro b hb
+    exact chartEnd_varModelFlow_deriv0 (I := I) (E := E) (Ψ := Ψ)
+      (x := x) (b := b) (hderiv b hb)
+
+/-- Endpoint-facing package for the projected augmented flow with both `C1`
+regularity and derivative `id` at the zero initial tangent vector. -/
+theorem varFlow_chartEndC1
+    [I.Boundaryless] [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    ∃ (ε : Real), ∃ (_hε : 0 < ε), ∃ (δ : Real), ∃ (_hδ : 0 < δ),
+      ∃ (r : NNReal), ∃ (_hr : 0 < r),
+      ∃ Ψ :
+          (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+            ModelPhase (E := E) × ModelLin (E := E),
+        (∀ z ∈ Metric.closedBall
+            (extChartAt I.tangent (phaseZero (I := I) x)
+              (phaseZero (I := I) x)) r,
+          varModelFlow (E := E) Ψ z 0 = z ∧
+            ∀ t ∈ Set.Icc (-ε) ε,
+              HasDerivWithinAt
+                (varModelFlow (E := E) Ψ z)
+                (modelSpray (I := I) g x
+                  (varModelFlow (E := E) Ψ z t))
+                (Set.Icc (-ε) ε) t) ∧
+          (∀ z ∈ Metric.closedBall
+              (extChartAt I.tangent (phaseZero (I := I) x)
+                (phaseZero (I := I) x)) r,
+            ∀ t ∈ Set.Icc (-ε) ε,
+              varModelFlow (E := E) Ψ z t ∈
+                (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+                (phaseOfModel (I := I) x
+                  (varModelFlow (E := E) Ψ z t)).proj ∈
+                  (extChartAt I x).source) ∧
+          (∀ t ∈ Set.Icc (-δ) δ,
+            varModelFlow (E := E) Ψ
+              (extChartAt I.tangent (phaseZero (I := I) x)
+                (phaseZero (I := I) x)) t =
+              extChartAt I.tangent (phaseZero (I := I) x)
+                (phaseZero (I := I) x)) ∧
+          (∃ L' : NNReal,
+            (∀ t ∈ Set.Icc (-ε) ε,
+              LipschitzOnWith L'
+                (fun p => Ψ p t)
+                (Metric.closedBall (varPhaseZero (I := I) (E := E) x) r)) ∧
+            ∀ b ∈ Set.Ioc (0 : Real) δ,
+              ContDiffAt Real 1
+                (chartEnd (I := I) (varModelFlow (E := E) Ψ) b x)
+                0 ∧
+              HasFDerivAt
+                (chartEnd (I := I) (varModelFlow (E := E) Ψ) b x)
+                (ContinuousLinearMap.id Real (TangentSpace I x))
+                0) := by
+  obtain ⟨ε, hε, δ0, hδ0, a, r, hr, Ψ, hflow, hbound, hsrc, hzero0, L', hLip, hderiv⟩ :=
+    varFlow_deriv0 (I := I) g x
+  let δ : Real := min δ0 ε
+  have hδ : 0 < δ := lt_min hδ0 hε
+  have hδδ0 : δ ≤ δ0 := min_le_left _ _
+  have hδε : δ ≤ ε := min_le_right _ _
+  have hzero :
+      ∀ t ∈ Set.Icc (-δ) δ,
+        varModelFlow (E := E) Ψ
+          (extChartAt I.tangent (phaseZero (I := I) x)
+            (phaseZero (I := I) x)) t =
+          extChartAt I.tangent (phaseZero (I := I) x)
+            (phaseZero (I := I) x) := by
+    intro t ht
+    have ht0 : t ∈ Set.Icc (-δ0) δ0 := by
+      constructor <;> linarith [ht.1, ht.2, hδδ0]
+    have h := hzero0 t ht0
+    simpa [varModelFlow, varZeroPhaseLin, varPhaseZero] using congrArg Prod.fst h
+  refine ⟨ε, hε, δ, hδ, r, hr, Ψ, ?_, ?_, hzero, L', hLip, ?_⟩
+  · exact varModelFlow_flow (I := I) (E := E) g x hflow
+  · exact varModelFlow_src (I := I) (E := E) x hbound hsrc
+  · intro b hb
+    have hbIcc : b ∈ Set.Icc (0 : Real) δ0 :=
+      ⟨le_of_lt hb.1, le_trans hb.2 hδδ0⟩
+    have hbε : b ≤ ε := le_trans hb.2 hδε
+    have hbsub : Set.Icc (0 : Real) b ⊆ Set.Icc (-ε) ε := by
+      intro t ht
+      constructor
+      · linarith [hε, ht.1]
+      · exact le_trans ht.2 hbε
+    have hinit :
+        (initPhase (I := I) x (0 : TangentSpace I x),
+            ContinuousLinearMap.id Real (ModelPhase (E := E))) =
+          varPhaseZero (I := I) (E := E) x := by
+      simp [varPhaseZero, initPhase_zero]
+    have hvopen :
+        (initPhase (I := I) x (0 : TangentSpace I x),
+            ContinuousLinearMap.id Real (ModelPhase (E := E))) ∈
+          Metric.ball (varPhaseZero (I := I) (E := E) x) r := by
+      rw [hinit]
+      have hrR : (0 : Real) < (r : Real) := by exact_mod_cast hr
+      exact Metric.mem_ball_self hrR
+    have hbaseC1 :
+        ContDiffAt Real 1
+          (fun z' : ModelPhase (E := E) =>
+            timeBaseEndpoint (E := E) Ψ b z')
+          (initPhase (I := I) x (0 : TangentSpace I x)) :=
+      timeBaseEndpoint_contDiffAt_one_of_flow (I := I) g x Ψ
+        (initPhase (I := I) x (0 : TangentSpace I x))
+        (le_of_lt hb.1) hbsub hflow hbound hsrc hLip hvopen
+    have hpull :
+        ContDiffAt Real 1
+          (fun v : TangentSpace I x =>
+            timeBaseEndpoint (E := E) Ψ b (initPhase (I := I) x v))
+          0 :=
+      timeBaseEndpoint_initPhase_contDiffAt_one (E := E) hbaseC1
+    refine ⟨?_, ?_⟩
+    · exact chartEnd_varModelFlow_contDiffAt_one (I := I) (E := E)
+        (Ψ := Ψ) (x := x) (b := b)
+        (scaledBaseEnd_contDiffAt_one (I := I) (E := E) (Ψ := Ψ)
+          (x := x) (b := b) hpull)
+    · exact chartEnd_varModelFlow_deriv0 (I := I) (E := E) (Ψ := Ψ)
+        (x := x) (b := b)
+        (scaledBaseEnd_deriv0 (I := I) (E := E) (Ψ := Ψ) (x := x)
+          (b := b) (ne_of_gt hb.1) (hderiv b hbIcc))
 
 end Coordinates
 end RicciFlower
