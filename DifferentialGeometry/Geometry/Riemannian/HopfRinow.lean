@@ -161,6 +161,8 @@ theorem bm_c_gc_constant_speed
 
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M]
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Length-distance bound along a geodesic.** With constant `g`-speed
 `c := (g.inner p v v)^{1/2}` along the maximal geodesic at `(p, v)`,
 for any `s \le t` in the maximal interval the Riemannian extended
@@ -211,6 +213,8 @@ theorem bm_c_gc_length_distance_bound
 
 variable [CompleteSpace M]
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Escape sequences along a maximal geodesic are Cauchy.** If the
 maximal interval of the geodesic at `(p, v)` is bounded above by
 `T < \infty`, then for every monotone real sequence `t_n \to T` inside
@@ -218,12 +222,121 @@ the maximal interval the image sequence `\gamma(t_n)` is Cauchy in
 `riemannianEDist`. -/
 theorem bm_c_gc_escape_cauchy
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p)
-    {T : ℝ} (hT : IsLUB (maximalGeodesicInterval (I := I) g p v) T)
+    {T : ℝ} (_hT : IsLUB (maximalGeodesicInterval (I := I) g p v) T)
     {tₙ : ℕ → ℝ}
     (htₙ_mem : ∀ n, tₙ n ∈ maximalGeodesicInterval (I := I) g p v)
     (htₙ_lim : Tendsto tₙ atTop (𝓝 T)) :
     CauchySeq (fun n => maximalGeodesic (I := I) g p v (tₙ n)) := by
-  sorry
+  -- Abbreviations: `γ` for the maximal geodesic curve, `c` for the constant
+  -- speed `√⟨v,v⟩_g`.
+  set γ : ℝ → M := maximalGeodesic (I := I) g p v with hγ_def
+  set c : ℝ := Real.sqrt ((g.inner p) v v) with hc_def
+  have hc_nn : (0 : ℝ) ≤ c := Real.sqrt_nonneg _
+  -- The convergent sequence `tₙ → T` is Cauchy in `ℝ`.
+  have htₙ_cauchy : CauchySeq tₙ := htₙ_lim.cauchySeq
+  -- Switch the ℝ-Cauchy criterion to its metric form.
+  rw [Metric.cauchySeq_iff] at htₙ_cauchy
+  -- Switch the goal to the EMetric form.
+  rw [EMetric.cauchySeq_iff]
+  intro ε hε
+  -- From `0 < ε` in `ℝ≥0∞`, find a real `δ₀ > 0` with `ofReal δ₀ < ε`.
+  obtain ⟨δ₀, hδ₀_nn, hδ₀_ofReal_pos, hδ₀_ofReal_lt⟩ :=
+    ENNReal.lt_iff_exists_real_btwn.mp hε
+  -- The real `δ₀` is strictly positive.
+  have hδ₀_pos : 0 < δ₀ := ENNReal.ofReal_pos.mp hδ₀_ofReal_pos
+  -- We need a real Cauchy threshold `δ := δ₀ / (c + 1)` so that
+  -- `c * δ < δ₀`, hence `ENNReal.ofReal (c * δ) < ENNReal.ofReal δ₀ < ε`.
+  have hcc_pos : 0 < c + 1 := by linarith
+  set δ : ℝ := δ₀ / (c + 1) with hδ_def
+  have hδ_pos : 0 < δ := div_pos hδ₀_pos hcc_pos
+  -- Use the Cauchy property of `tₙ` for this `δ`.
+  obtain ⟨N, hN⟩ := htₙ_cauchy δ hδ_pos
+  refine ⟨N, fun m hm n hn => ?_⟩
+  -- Set `s := min (tₙ m) (tₙ n)`, `t := max (tₙ m) (tₙ n)`; both lie in the
+  -- maximal interval, with `s ≤ t` and `t - s = |tₙ m - tₙ n|`.
+  set s : ℝ := min (tₙ m) (tₙ n) with hs_def
+  set t : ℝ := max (tₙ m) (tₙ n) with ht_def
+  have hst : s ≤ t := min_le_max
+  -- `s ∈ maximalGeodesicInterval`.
+  have hs_mem : s ∈ maximalGeodesicInterval (I := I) g p v := by
+    rcases le_total (tₙ m) (tₙ n) with h | h
+    · rw [hs_def, min_eq_left h]; exact htₙ_mem m
+    · rw [hs_def, min_eq_right h]; exact htₙ_mem n
+  -- `t ∈ maximalGeodesicInterval`.
+  have ht_mem : t ∈ maximalGeodesicInterval (I := I) g p v := by
+    rcases le_total (tₙ m) (tₙ n) with h | h
+    · rw [ht_def, max_eq_right h]; exact htₙ_mem n
+    · rw [ht_def, max_eq_left h]; exact htₙ_mem m
+  -- Apply the length-distance bound to `s, t`.
+  have h_bound :
+      riemannianEDist I (γ s) (γ t) ≤ ENNReal.ofReal (c * (t - s)) := by
+    have :=
+      bm_c_gc_length_distance_bound (I := I) g p v (s := s) (t := t)
+        hs_mem ht_mem hst
+    -- Normalise to our local `γ` and `c`.
+    simpa [hγ_def, hc_def] using this
+  -- Convert `riemannianEDist` to `edist` using `IsRiemannianManifold`.
+  -- The local `attribute [-instance]` above suppresses the project's
+  -- `Tensor0SBundle.tangentSpace_normedAddCommGroup` and `_normedSpace`,
+  -- so both `bm_c_gc_length_distance_bound` and `IsRiemannianManifold.out`
+  -- resolve to the same `RiemannianBundle`-derived norm at this call site.
+  have h_edist_bound :
+      edist (γ s) (γ t) ≤ ENNReal.ofReal (c * (t - s)) := by
+    rw [IsRiemannianManifold.out (I := I) (γ s) (γ t)]
+    exact h_bound
+  -- Edist between `γ (tₙ m)` and `γ (tₙ n)` equals edist between `γ s` and
+  -- `γ t` (up to symmetry).
+  have h_edist_eq :
+      edist (γ (tₙ m)) (γ (tₙ n)) = edist (γ s) (γ t) := by
+    rcases le_total (tₙ m) (tₙ n) with h | h
+    · -- `s = tₙ m`, `t = tₙ n`.
+      have hs_eq : s = tₙ m := by rw [hs_def, min_eq_left h]
+      have ht_eq : t = tₙ n := by rw [ht_def, max_eq_right h]
+      rw [hs_eq, ht_eq]
+    · -- `s = tₙ n`, `t = tₙ m`.
+      have hs_eq : s = tₙ n := by rw [hs_def, min_eq_right h]
+      have ht_eq : t = tₙ m := by rw [ht_def, max_eq_left h]
+      rw [hs_eq, ht_eq, edist_comm]
+  -- `t - s = |tₙ m - tₙ n|` as a real number.
+  have ht_sub_s : t - s = |tₙ m - tₙ n| := by
+    rcases le_total (tₙ m) (tₙ n) with h | h
+    · rw [hs_def, ht_def, min_eq_left h, max_eq_right h,
+          abs_of_nonpos (sub_nonpos.mpr h)]
+      ring
+    · rw [hs_def, ht_def, min_eq_right h, max_eq_left h,
+          abs_of_nonneg (sub_nonneg.mpr h)]
+  -- The real distance `|tₙ m - tₙ n|` is `< δ` by Cauchy.
+  have h_dist_lt : |tₙ m - tₙ n| < δ := by
+    have := hN m hm n hn
+    rwa [Real.dist_eq] at this
+  -- Combine: `t - s < δ`, hence `c * (t - s) ≤ c * δ < δ₀`.
+  have ht_sub_s_nn : 0 ≤ t - s := sub_nonneg.mpr hst
+  have h_ct_sub_s_le : c * (t - s) ≤ c * δ := by
+    have h_abs_lt : t - s < δ := by rw [ht_sub_s]; exact h_dist_lt
+    exact mul_le_mul_of_nonneg_left h_abs_lt.le hc_nn
+  -- Strict bound `c * δ < δ₀` via `c / (c + 1) < 1` and `δ₀ > 0`.
+  have h_cdelta_lt_real : c * δ < δ₀ := by
+    rw [hδ_def]
+    -- `c * (δ₀/(c+1)) = δ₀ * (c/(c+1))`, and `c/(c+1) < 1`.
+    have hrw : c * (δ₀ / (c + 1)) = δ₀ * (c / (c + 1)) := by ring
+    rw [hrw]
+    have hfrac_lt_one : c / (c + 1) < 1 := by
+      rw [div_lt_one hcc_pos]; linarith
+    -- Multiply both sides by `δ₀ > 0`.
+    have := (mul_lt_mul_of_pos_left hfrac_lt_one hδ₀_pos)
+    rwa [mul_one] at this
+  -- Chain: edist (γ tₙ m) (γ tₙ n) = edist (γ s) (γ t)
+  --        ≤ ENNReal.ofReal (c * (t - s))
+  --        ≤ ENNReal.ofReal (c * δ)
+  --        < ENNReal.ofReal δ₀ ≤ ε.
+  calc edist (γ (tₙ m)) (γ (tₙ n))
+      = edist (γ s) (γ t) := h_edist_eq
+    _ ≤ ENNReal.ofReal (c * (t - s)) := h_edist_bound
+    _ ≤ ENNReal.ofReal (c * δ) := ENNReal.ofReal_le_ofReal h_ct_sub_s_le
+    _ < ENNReal.ofReal δ₀ := by
+          rw [ENNReal.ofReal_lt_ofReal_iff hδ₀_pos]
+          exact h_cdelta_lt_real
+    _ < ε := hδ₀_ofReal_lt
 
 /-- **Velocity limit at the finite escape time.** If the maximal
 interval of the geodesic at `(p, v)` is bounded above by `T < \infty`
