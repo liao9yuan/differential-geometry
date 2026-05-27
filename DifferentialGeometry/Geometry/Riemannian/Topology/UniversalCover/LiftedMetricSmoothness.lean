@@ -53,41 +53,74 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 /-- **Extended-chart conjugacy at a cover-point.**
 
-For cover-points `a b : UC M` and a point `y` in the chart-source
-intersection of the extended cover-charts, the inverse extended cover-chart at
-`b` agrees, near `y`, with the local-section inverse composed with the inverse
-extended base-chart at `proj a`:
+For every cover-point `a : UC M`, the extended cover-chart at `a` factors
+through the local section followed by the extended base-chart at `proj a`, and
+the inverse factors symmetrically through the inverse base-chart followed by
+the inverse local section:
 ```
-((coverChartAt b).extend I).symm y
-  = (localSection a).symm ((chartAt H (proj a)).extend I).symm y
+(coverChartAt a).extend I = ((chartAt H (proj a)).extend I) ∘ (localSection a)
+((coverChartAt a).extend I).symm
+    = (localSection a).symm ∘ ((chartAt H (proj a)).extend I).symm
 ```
-together with
-`(coverChartAt b).extend I = (chartAt H (proj b)).extend I ∘ localSection b`
-on the same neighbourhood.
 
-Proof sketch (deferred to fill phase): unpack
-`coverChartAt = (localSection a).trans (chartAt H (proj a))` on both sides and
-cancel the `localSection` factor via `localSection_collapse`.
-
-The Lean statement encodes the two factorisations as a `Filter.EventuallyEq`
-over the neighbourhood filter of `y`; the exact extended-chart plumbing is
-filled in alongside the proof. -/
-theorem uc_coverChartAt_extend_conjugacy : True := by
-  -- Placeholder stub: the proper signature references private helpers
-  --   `coverChartAt`, `localSection`, `localSection_collapse` from
-  --   the `UniversalCover/Manifold.lean` module (all marked `private`
-  --   in that file's section). A signature restoration to
-  --     for `a b : UC M`, `z ∈ (coverChartAt a).source` with
-  --     `(coverChartAt a) z ∈ (coverChartAt b).source`, set
-  --     `y := (chartAt H (proj a)).extend I ((coverChartAt a) z)`; then
-  --     ((coverChartAt b).extend I).symm y
-  --       = (localSection a).symm ((chartAt H (proj a)).extend I).symm y
-  --     and `(coverChartAt b).extend I = (chartAt H (proj b)).extend I ∘ localSection b`
-  --     eventually in `𝓝 y`
-  -- requires those `private` markers to be removed first (cross-file
-  -- visibility change, out of scope for this dispatch). Closing the
-  -- placeholder `True` literal here.
-  trivial
+These are global function equalities (definitional via
+`OpenPartialHomeomorph.coe_trans`, `coe_trans_symm`, and the defining unfolding
+`coverChartAt a = (localSection a).trans (chartAt H (proj a))`). The downstream
+tangent-bundle coordinate-change comparison combines this with
+`localSection_collapse` to identify the universal-cover transition with the
+base-manifold transition. -/
+theorem uc_coverChartAt_extend_conjugacy
+    (a : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
+    ((coverChartAt a).extend I : _ → E)
+        = ((chartAt H (proj a)).extend I) ∘ (localSection a) ∧
+      (((coverChartAt a).extend I).symm : E → _)
+        = (localSection a).symm ∘ ((chartAt H (proj a)).extend I).symm := by
+  refine ⟨?_, ?_⟩
+  · -- Unfold `(coverChartAt a).extend I = I ∘ coverChartAt a` and the trans
+    -- factorisation `coverChartAt a = (localSection a).trans (chartAt H (proj a))`.
+    funext z
+    change I ((coverChartAt a) z) = ((chartAt H (proj a)).extend I) ((localSection a) z)
+    -- LHS unfolds via `coverChartAt = (localSection a).trans (chartAt H (proj a))`
+    -- and `OpenPartialHomeomorph.coe_trans`, giving
+    --   (coverChartAt a) z = (chartAt H (proj a)) ((localSection a) z).
+    have hcov : (coverChartAt a) z
+        = (chartAt H (proj a)) ((localSection a) z) := by
+      change ((localSection a).trans (chartAt H (proj a))) z
+          = (chartAt H (proj a)) ((localSection a) z)
+      rw [OpenPartialHomeomorph.trans_apply]
+    -- RHS unfolds via `extend_coe : ⇑(f.extend I) = I ∘ f`.
+    have hext : ((chartAt H (proj a)).extend I) ((localSection a) z)
+        = I ((chartAt H (proj a)) ((localSection a) z)) := by
+      rw [OpenPartialHomeomorph.extend_coe]; rfl
+    rw [hcov, hext]
+  · -- Symmetric unfolding for the inverse direction.
+    funext y
+    change ((coverChartAt a).extend I).symm y
+        = (localSection a).symm
+            (((chartAt H (proj a)).extend I).symm y)
+    -- `((coverChartAt a).extend I).symm = (coverChartAt a).symm ∘ I.symm`
+    -- by `extend_coe_symm`.
+    have hExtSymm :
+        ((coverChartAt a).extend I).symm y
+          = (coverChartAt a).symm (I.symm y) := by
+      rw [OpenPartialHomeomorph.extend_coe_symm]; rfl
+    -- `(coverChartAt a).symm = (chartAt H (proj a)).symm ≫ (localSection a).symm`
+    -- as a function, by `coe_trans_symm` applied to
+    -- `coverChartAt a = (localSection a).trans (chartAt H (proj a))`.
+    have hSymm : (coverChartAt a).symm (I.symm y)
+        = (localSection a).symm
+            ((chartAt H (proj a)).symm (I.symm y)) := by
+      change ((localSection a).trans (chartAt H (proj a))).symm (I.symm y)
+          = (localSection a).symm ((chartAt H (proj a)).symm (I.symm y))
+      rw [OpenPartialHomeomorph.coe_trans_symm]
+      rfl
+    -- `((chartAt H (proj a)).extend I).symm y = (chartAt H (proj a)).symm (I.symm y)`
+    -- by `extend_coe_symm`.
+    have hChartExtSymm :
+        ((chartAt H (proj a)).extend I).symm y
+          = (chartAt H (proj a)).symm (I.symm y) := by
+      rw [OpenPartialHomeomorph.extend_coe_symm]; rfl
+    rw [hExtSymm, hSymm, hChartExtSymm]
 
 /-- **Tangent-bundle coordinate-change agreement.**
 

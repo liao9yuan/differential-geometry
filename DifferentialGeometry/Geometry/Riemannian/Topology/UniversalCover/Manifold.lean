@@ -63,20 +63,20 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 cover-point, an `OpenPartialHomeomorph` whose underlying map agrees with
 `proj` and whose source contains the cover-point. We pick one such
 homeomorphism via `Classical.choose`. -/
-private noncomputable def localSection
+noncomputable def localSection
     (xt : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
     OpenPartialHomeomorph
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) M :=
   Classical.choose
     ((UniversalCover.isCoveringMap (X := M)).isLocalHomeomorph xt)
 
-private lemma mem_source_localSection
+lemma mem_source_localSection
     (xt : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
     xt ∈ (localSection xt).source :=
   (Classical.choose_spec
     ((UniversalCover.isCoveringMap (X := M)).isLocalHomeomorph xt)).1
 
-private lemma proj_eq_localSection
+lemma proj_eq_localSection
     (xt : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
     (proj :
         DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M)
@@ -86,7 +86,7 @@ private lemma proj_eq_localSection
 
 /-- The chart at `xt` in the universal cover: compose the chosen local
 section with the model chart `chartAt H (proj xt)`. -/
-private noncomputable def coverChartAt
+noncomputable def coverChartAt
     (xt : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
     OpenPartialHomeomorph
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) H :=
@@ -120,7 +120,7 @@ noncomputable instance instChartedSpace :
   chart_mem_atlas xt := Set.mem_range_self xt
 
 -- Aux: target of `coverChartAt a`.
-private lemma coverChartAt_target_eq
+lemma coverChartAt_target_eq
     (a : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
     ((coverChartAt a) :
         OpenPartialHomeomorph
@@ -131,7 +131,7 @@ private lemma coverChartAt_target_eq
   exact OpenPartialHomeomorph.trans_target _ _
 
 -- Aux: source of `coverChartAt b`.
-private lemma coverChartAt_source_eq
+lemma coverChartAt_source_eq
     (b : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
     ((coverChartAt b) :
         OpenPartialHomeomorph
@@ -145,7 +145,7 @@ private lemma coverChartAt_source_eq
 -- Both `localSection a` and `localSection b` coincide with `proj` as
 -- functions; `proj` is the inverse of `(localSection a).symm` on
 -- `(localSection a).target`.
-private lemma localSection_collapse
+lemma localSection_collapse
     (a b : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
     {y : M} (hy : y ∈ (localSection a).target) :
     (localSection b) ((localSection a).symm y) = y := by
