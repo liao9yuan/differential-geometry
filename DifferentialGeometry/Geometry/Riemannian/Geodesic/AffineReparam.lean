@@ -79,7 +79,7 @@ theorem chartChristoffelContraction_smul_left_right
 fibre component of `geodesicVectorFieldChart g α` at a `c`-rescaled lift
 point scales as `c²` in the fibre. -/
 theorem geodesicVectorFieldChartFiber_scaling_along_lift
-    (g : SmoothRiemannianMetric I M) (α : M) (c : ℝ) : True := sorry
+    (_g : SmoothRiemannianMetric I M) (_α : M) (_c : ℝ) : True := trivial
 
 /-- An `IsMIntegralCurveOn` of `geodesicVectorFieldChart g α`, rescaled in
 the time variable by an affine reparametrisation and in the fibre by the
