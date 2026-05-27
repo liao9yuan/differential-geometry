@@ -1328,7 +1328,7 @@ If `Z₁` solves `Z₁' = A₁ Z₁` and `Z₂` solves `Z₂' = A₂ Z₂` on `I
 with `‖A₁ s‖ ≤ K` and `‖(A₂ s - A₁ s)(Z₂ s)‖ ≤ η` on `[h₀, β]`, then for
 `t ∈ [h₀, β]`:
 `‖Z₁ t - Z₂ t‖ ≤ gronwallBound ‖Z₁ h₀ - Z₂ h₀‖ K η (t - h₀)`. -/
-private theorem linearODE_gronwall_forward
+theorem linearODE_gronwall_forward
     {A₁ A₂ : ℝ → (G →L[ℝ] G)} {Z₁ Z₂ : ℝ → G} {h₀ β K η : ℝ}
     (_hh₀β : h₀ ≤ β) (hK_nn : 0 ≤ K)
     (hZ₁_cont : ContinuousOn Z₁ (Icc h₀ β))
@@ -1375,7 +1375,7 @@ private theorem linearODE_gronwall_forward
 
 /-- **Backward Grönwall comparison** for linear ODEs (mirror of
 `linearODE_gronwall_forward` via time reversal). -/
-private theorem linearODE_gronwall_backward
+theorem linearODE_gronwall_backward
     {A₁ A₂ : ℝ → (G →L[ℝ] G)} {Z₁ Z₂ : ℝ → G} {α h₀ K η : ℝ}
     (hαh₀ : α ≤ h₀) (hK_nn : 0 ≤ K)
     (hZ₁_cont : ContinuousOn Z₁ (Icc α h₀))
@@ -3116,6 +3116,117 @@ theorem variationalW_clm_apply
     {x : F} (hx : x ∈ U) {t : ℝ} (ht : t ∈ Set.Ioo a b') (v : F) :
     variationalW_clm hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont hx ht v
       = variationalW A a b' h₀ Z₀ x v t := rfl
+
+/-! ### Parametric Lipschitz stability of the linear ODE solution
+
+For two parameters `x₁, x₂ ∈ U` and a closed sub-interval `Icc α β ⊂ Ioo a b'`
+on which both `‖A x₁ s‖` and `‖A x₂ s‖` are bounded by `K` and the difference
+`‖(A x₂ s - A x₁ s) (linearODESolution A a b' h₀ Z₀ x₂ s)‖` is bounded by `η`,
+the Grönwall comparison yields
+
+`‖Z(x₁, t) - Z(x₂, t)‖ ≤ gronwallBound ‖Z₀(x₁) - Z₀(x₂)‖ K η |t - h₀|`
+
+for every `t ∈ Icc α β`.  This is the natural quantitative stability statement
+for the parametric linear ODE, separating the contribution from the initial
+data (`‖Z₀(x₁) - Z₀(x₂)‖`) and the coefficient (`η`). -/
+
+/-- **Parametric stability for the linear ODE** on a closed sub-interval.
+
+Given `Icc α β ⊂ Ioo a b'` containing `h₀`, two parameters `x₁, x₂ ∈ U`, an
+operator-norm bound `K` for `A x₁` on the interval, and a forcing bound `η`
+for `‖(A x₂ s - A x₁ s) (Z(x₂, s))‖`, the difference between the two
+parametric solutions at any `t ∈ Icc α β` is bounded by
+
+`gronwallBound ‖Z₀(x₁) - Z₀(x₂)‖ K η |t - h₀|`.
+
+This is a public wrapper around the forward / backward Grönwall comparison
+specialised to the (jointly continuous) parametric solution `linearODESolution`. -/
+theorem linearODESolution_dist_le
+    {A : F → ℝ → (G →L[ℝ] G)} {a b' h₀ : ℝ} {Z₀ : F → G}
+    (hab_lt : a < b') (h₀_mem : h₀ ∈ Set.Ioo a b')
+    {U : Set F} (hU : IsOpen U)
+    (hA_cont : ContinuousOn (Function.uncurry A) (U ×ˢ Set.Ioo a b'))
+    {x₁ x₂ : F} (hx₁ : x₁ ∈ U) (hx₂ : x₂ ∈ U)
+    {α β : ℝ} (_hαβ : α ≤ β) (hα_lt : a < α) (hβ_lt : β < b')
+    (hh₀_mem : h₀ ∈ Set.Icc α β)
+    {K η : ℝ} (hK_nn : 0 ≤ K)
+    (hA₁_bd : ∀ s ∈ Set.Icc α β, ‖A x₁ s‖ ≤ K)
+    (hdiff_bd : ∀ s ∈ Set.Icc α β,
+      ‖(A x₂ s - A x₁ s) (linearODESolution A a b' h₀ Z₀ x₂ s)‖ ≤ η)
+    {t : ℝ} (ht : t ∈ Set.Icc α β) :
+    ‖linearODESolution A a b' h₀ Z₀ x₁ t - linearODESolution A a b' h₀ Z₀ x₂ t‖
+      ≤ gronwallBound ‖Z₀ x₁ - Z₀ x₂‖ K η |t - h₀| := by
+  set Z : F → ℝ → G := linearODESolution A a b' h₀ Z₀ with hZ_def
+  -- Both `Z x₁` and `Z x₂` solve the corresponding linear ODE on `Ioo a b'`.
+  have hZ_deriv₁ : ∀ s ∈ Set.Ioo a b', HasDerivAt (Z x₁) (A x₁ s (Z x₁ s)) s :=
+    fun s hs => linearODESolution_hasDerivAt hab_lt h₀_mem hU hA_cont hx₁ hs
+  have hZ_deriv₂ : ∀ s ∈ Set.Ioo a b', HasDerivAt (Z x₂) (A x₂ s (Z x₂ s)) s :=
+    fun s hs => linearODESolution_hasDerivAt hab_lt h₀_mem hU hA_cont hx₂ hs
+  -- Initial value: `Z xᵢ h₀ = Z₀ xᵢ`.
+  have hZ_init₁ : Z x₁ h₀ = Z₀ x₁ := linearODESolution_init A a b' h₀ Z₀ x₁
+  have hZ_init₂ : Z x₂ h₀ = Z₀ x₂ := linearODESolution_init A a b' h₀ Z₀ x₂
+  -- Sub-interval inclusion.
+  have hIcc_sub_Ioo : Set.Icc α β ⊆ Set.Ioo a b' := fun s hs =>
+    ⟨lt_of_lt_of_le hα_lt hs.1, lt_of_le_of_lt hs.2 hβ_lt⟩
+  -- Continuity of each solution on `Icc α β`.
+  have hZ_cont₁ : ContinuousOn (Z x₁) (Set.Icc α β) := fun s hs =>
+    ((hZ_deriv₁ s (hIcc_sub_Ioo hs)).continuousAt).continuousWithinAt
+  have hZ_cont₂ : ContinuousOn (Z x₂) (Set.Icc α β) := fun s hs =>
+    ((hZ_deriv₂ s (hIcc_sub_Ioo hs)).continuousAt).continuousWithinAt
+  -- Forward / backward split based on whether `h₀ ≤ t` or `t ≤ h₀`.
+  have hα_le_h₀ : α ≤ h₀ := hh₀_mem.1
+  have hh₀_le_β : h₀ ≤ β := hh₀_mem.2
+  rcases le_total h₀ t with hht | hth
+  · -- Forward case: `h₀ ≤ t ≤ β`.
+    have hIcc_fwd_sub : Set.Icc h₀ β ⊆ Set.Icc α β := fun s hs =>
+      ⟨le_trans hα_le_h₀ hs.1, hs.2⟩
+    have hZ₁_cont_fwd : ContinuousOn (Z x₁) (Set.Icc h₀ β) := hZ_cont₁.mono hIcc_fwd_sub
+    have hZ₂_cont_fwd : ContinuousOn (Z x₂) (Set.Icc h₀ β) := hZ_cont₂.mono hIcc_fwd_sub
+    have hZ₁_deriv_fwd : ∀ s ∈ Set.Icc h₀ β, HasDerivAt (Z x₁) (A x₁ s (Z x₁ s)) s :=
+      fun s hs => hZ_deriv₁ s (hIcc_sub_Ioo (hIcc_fwd_sub hs))
+    have hZ₂_deriv_fwd : ∀ s ∈ Set.Icc h₀ β, HasDerivAt (Z x₂) (A x₂ s (Z x₂ s)) s :=
+      fun s hs => hZ_deriv₂ s (hIcc_sub_Ioo (hIcc_fwd_sub hs))
+    have hA₁_bd_fwd : ∀ s ∈ Set.Icc h₀ β, ‖A x₁ s‖ ≤ K := fun s hs =>
+      hA₁_bd s (hIcc_fwd_sub hs)
+    have hdiff_bd_fwd : ∀ s ∈ Set.Icc h₀ β,
+        ‖(A x₂ s - A x₁ s) (Z x₂ s)‖ ≤ η := fun s hs =>
+      hdiff_bd s (hIcc_fwd_sub hs)
+    have hres := linearODE_gronwall_forward (A₁ := A x₁) (A₂ := A x₂)
+      (Z₁ := Z x₁) (Z₂ := Z x₂) (h₀ := h₀) (β := β) (K := K) (η := η)
+      hh₀_le_β hK_nn hZ₁_cont_fwd hZ₂_cont_fwd hZ₁_deriv_fwd hZ₂_deriv_fwd
+      hA₁_bd_fwd hdiff_bd_fwd t ⟨hht, ht.2⟩
+    -- Rewrite the initial-data norm.
+    have h_init_eq : ‖Z x₁ h₀ - Z x₂ h₀‖ = ‖Z₀ x₁ - Z₀ x₂‖ := by
+      rw [hZ_init₁, hZ_init₂]
+    rw [h_init_eq] at hres
+    have h_abs : |t - h₀| = t - h₀ := abs_of_nonneg (by linarith)
+    rw [h_abs]
+    exact hres
+  · -- Backward case: `α ≤ t ≤ h₀`.
+    have hIcc_bwd_sub : Set.Icc α h₀ ⊆ Set.Icc α β := fun s hs =>
+      ⟨hs.1, le_trans hs.2 hh₀_le_β⟩
+    have hZ₁_cont_bwd : ContinuousOn (Z x₁) (Set.Icc α h₀) := hZ_cont₁.mono hIcc_bwd_sub
+    have hZ₂_cont_bwd : ContinuousOn (Z x₂) (Set.Icc α h₀) := hZ_cont₂.mono hIcc_bwd_sub
+    have hZ₁_deriv_bwd : ∀ s ∈ Set.Icc α h₀, HasDerivAt (Z x₁) (A x₁ s (Z x₁ s)) s :=
+      fun s hs => hZ_deriv₁ s (hIcc_sub_Ioo (hIcc_bwd_sub hs))
+    have hZ₂_deriv_bwd : ∀ s ∈ Set.Icc α h₀, HasDerivAt (Z x₂) (A x₂ s (Z x₂ s)) s :=
+      fun s hs => hZ_deriv₂ s (hIcc_sub_Ioo (hIcc_bwd_sub hs))
+    have hA₁_bd_bwd : ∀ s ∈ Set.Icc α h₀, ‖A x₁ s‖ ≤ K := fun s hs =>
+      hA₁_bd s (hIcc_bwd_sub hs)
+    have hdiff_bd_bwd : ∀ s ∈ Set.Icc α h₀,
+        ‖(A x₂ s - A x₁ s) (Z x₂ s)‖ ≤ η := fun s hs =>
+      hdiff_bd s (hIcc_bwd_sub hs)
+    have hres := linearODE_gronwall_backward (A₁ := A x₁) (A₂ := A x₂)
+      (Z₁ := Z x₁) (Z₂ := Z x₂) (α := α) (h₀ := h₀) (K := K) (η := η)
+      hα_le_h₀ hK_nn hZ₁_cont_bwd hZ₂_cont_bwd hZ₁_deriv_bwd hZ₂_deriv_bwd
+      hA₁_bd_bwd hdiff_bd_bwd t ⟨ht.1, hth⟩
+    have h_init_eq : ‖Z x₁ h₀ - Z x₂ h₀‖ = ‖Z₀ x₁ - Z₀ x₂‖ := by
+      rw [hZ_init₁, hZ_init₂]
+    rw [h_init_eq] at hres
+    have h_abs : |t - h₀| = h₀ - t := by
+      rw [abs_of_nonpos (by linarith)]; ring
+    rw [h_abs]
+    exact hres
 
 end VariationalSolution
 
