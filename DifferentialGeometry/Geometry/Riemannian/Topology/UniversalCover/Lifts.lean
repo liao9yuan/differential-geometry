@@ -293,7 +293,16 @@ noncomputable def fibreEquivFundamentalGroup
     [ConnectedSpace X] [LocPathConnectedSpace X]
     [PathConnectedSpace E] [SimplyConnectedSpace E]
     {p : E → X} (hp : IsCoveringMap p) (x : X) (e' : p ⁻¹' {x}) :
-    (p ⁻¹' {x}) ≃ FundamentalGroup X x := sorry
+    (p ⁻¹' {x}) ≃ FundamentalGroup X x :=
+  -- Compose the fibre/loop-quotient bijection with the definitional
+  -- identification of `Path.Homotopic.Quotient x x` and
+  -- `FundamentalGroup X x = End (FundamentalGroupoid.mk x)` provided
+  -- by `FundamentalGroup.fromPath` / `FundamentalGroup.toPath`.
+  (fibreEquivLoopQuotient hp x e').trans
+    { toFun := FundamentalGroup.fromPath
+      invFun := FundamentalGroup.toPath
+      left_inv := fun _ => rfl
+      right_inv := fun _ => rfl }
 
 end UniversalCover
 end Topology
