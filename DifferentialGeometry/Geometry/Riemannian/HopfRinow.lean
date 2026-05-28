@@ -951,6 +951,52 @@ section MinimiserExistence
 
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 
+/-- **Minimising sequence of `C¹` paths.** For any `p q : M` there is a
+sequence of `C¹` curves `γₙ : ℝ → M` on `[0, 1]` from `p` to `q` whose
+`pathELength`s converge from above to `riemannianEDist I p q`, provided
+the latter is finite. The bound `pathELength I (γ n) 0 1 < d + 1/(n+1)`
+is produced by the Mathlib infimum-approximation lemma
+`exists_lt_of_riemannianEDist_lt`, and the lower bound
+`d ≤ pathELength I (γ n) 0 1` by `riemannianEDist_le_pathELength`. -/
+private theorem path_length_minimising_sequence
+    (p q : M) (hd : riemannianEDist I p q ≠ ⊤) :
+    ∃ γ : ℕ → ℝ → M,
+      (∀ n, γ n 0 = p) ∧ (∀ n, γ n 1 = q) ∧
+      (∀ n, CMDiff[Set.Icc (0 : ℝ) 1] 1 (γ n)) ∧
+      (∀ n, riemannianEDist I p q ≤ pathELength I (γ n) 0 1) ∧
+      (∀ n, pathELength I (γ n) 0 1 <
+        riemannianEDist I p q + ENNReal.ofReal (1 / (n + 1))) := by
+  -- Set `d := riemannianEDist I p q` (finite by hypothesis).
+  set d : ℝ≥0∞ := riemannianEDist I p q with hd_def
+  -- For each `n`, the target radius `d + 1/(n+1)` strictly exceeds `d`,
+  -- so the infimum-approximation lemma yields a `C¹` path below it.
+  have hstep : ∀ n : ℕ, ∃ ρ : ℝ → M,
+      ρ 0 = p ∧ ρ 1 = q ∧ CMDiff[Set.Icc (0 : ℝ) 1] 1 ρ ∧
+      pathELength I ρ 0 1 < d + ENNReal.ofReal (1 / (n + 1)) := by
+    intro n
+    -- `1/(n+1) > 0`, hence its `ENNReal.ofReal` is strictly positive.
+    have hpos : (0 : ℝ) < 1 / (n + 1) := by positivity
+    have hofReal_pos : (0 : ℝ≥0∞) < ENNReal.ofReal (1 / (n + 1)) :=
+      ENNReal.ofReal_pos.mpr hpos
+    -- `d < d + 1/(n+1)` because `d ≠ ⊤` and the increment is positive.
+    have hlt : d < d + ENNReal.ofReal (1 / (n + 1)) :=
+      ENNReal.lt_add_right (by rw [hd_def]; exact hd) hofReal_pos.ne'
+    -- Approximation lemma: a `C¹` path on `[0,1]` strictly under the radius.
+    obtain ⟨ρ, hρ0, hρ1, hρ_smooth, hρ_len⟩ :=
+      Manifold.exists_lt_of_riemannianEDist_lt (I := I) (x := p) (y := q)
+        (r := d + ENNReal.ofReal (1 / (n + 1))) (by rw [hd_def] at hlt; exact hlt)
+    exact ⟨ρ, hρ0, hρ1, hρ_smooth, hρ_len⟩
+  -- Choose the sequence.
+  choose γ hγ0 hγ1 hγ_smooth hγ_len using hstep
+  refine ⟨γ, hγ0, hγ1, hγ_smooth, ?_, ?_⟩
+  · -- Lower bound: `d ≤ pathELength` from the Mathlib edist-le-length lemma.
+    intro n
+    rw [hd_def]
+    exact Manifold.riemannianEDist_le_pathELength (I := I) (γ := γ n)
+      (a := 0) (b := 1) (hγ_smooth n) (hγ0 n) (hγ1 n) zero_le_one
+  · -- Upper bound: the strict approximation bound chosen above.
+    intro n; rw [hd_def] at hγ_len ⊢; exact hγ_len n
+
 /-- **Path-length infimum is attained.** On a complete connected
 sigma-compact Riemannian manifold, for every `p q : M` there exists a
 continuous curve `\gamma : [0, 1] \to M` from `p` to `q` whose
@@ -960,7 +1006,86 @@ theorem path_length_infimum_attained
     ∃ γ : ℝ → M,
       Continuous γ ∧ γ 0 = p ∧ γ 1 = q ∧
         pathELength I γ 0 1 = riemannianEDist I p q := by
-  sorry
+  -- The Riemannian extended distance on a connected manifold is finite
+  -- (any two points are joined by a `C¹` path of finite length). On a
+  -- complete connected manifold this is the metric distance, which never
+  -- takes the value `⊤`; we obtain the minimising sequence below.
+  by_cases hd : riemannianEDist I p q = ⊤
+  · -- Degenerate case. With `d = ⊤`, completeness of the `PseudoEMetricSpace`
+    -- structure on a *connected* manifold is incompatible with an infinite
+    -- Riemannian distance: `edist p q = riemannianEDist I p q` by
+    -- `IsRiemannianManifold.out`, and a complete connected length space has
+    -- finite distances. Discharging this requires the connectedness-to-finite
+    -- -distance bridge (path-connectedness of a smooth connected manifold,
+    -- combined with `riemannianEDist`'s definition as an infimum over `C¹`
+    -- paths, which is finite once a single such path exists). That bridge is
+    -- not yet available in this file; recorded as an isolated residual so the
+    -- finite branch below builds cleanly and carries the substantive argument.
+    sorry
+  · -- The finite branch. Extract a minimising sequence of `C¹` paths.
+    obtain ⟨γseq, hγ0, hγ1, hγ_smooth, hγ_lb, hγ_ub⟩ :=
+      path_length_minimising_sequence (I := I) p q hd
+    -- Set `d := riemannianEDist I p q`.
+    set d : ℝ≥0∞ := riemannianEDist I p q with hd_def
+    -- The sequence of lengths `Lₙ := pathELength I (γseq n) 0 1` is squeezed:
+    --   `d ≤ Lₙ < d + 1/(n+1)`,
+    -- hence `Lₙ → d` in `ℝ≥0∞`. This convergence is the analytic input to the
+    -- limit-extraction argument.
+    have hLen_tendsto :
+        Tendsto (fun n => pathELength I (γseq n) 0 1) atTop (𝓝 d) := by
+      -- Squeeze between the constant `d` and `d + 1/(n+1) → d`.
+      have hupper :
+          Tendsto (fun n : ℕ => d + ENNReal.ofReal (1 / (n + 1))) atTop (𝓝 d) := by
+        have h1 : Tendsto (fun n : ℕ => (1 : ℝ) / (n + 1)) atTop (𝓝 0) :=
+          tendsto_one_div_add_atTop_nhds_zero_nat
+        have h2 : Tendsto (fun n : ℕ => ENNReal.ofReal (1 / (n + 1)))
+            atTop (𝓝 (ENNReal.ofReal 0)) :=
+          (ENNReal.continuous_ofReal.tendsto 0).comp h1
+        rw [ENNReal.ofReal_zero] at h2
+        have h3 : Tendsto (fun n : ℕ => d + ENNReal.ofReal (1 / (n + 1)))
+            atTop (𝓝 (d + 0)) :=
+          Filter.Tendsto.const_add d h2
+        simpa using h3
+      refine tendsto_of_tendsto_of_tendsto_of_le_of_le
+        tendsto_const_nhds hupper (fun n => ?_) (fun n => ?_)
+      · exact hγ_lb n
+      · exact (hγ_ub n).le
+    -- LIMIT EXTRACTION (residual).
+    --
+    -- From the minimising sequence `γseq` we must produce a single continuous
+    -- limit curve `γ : ℝ → M` with `γ 0 = p`, `γ 1 = q`, and
+    -- `pathELength I γ 0 1 = d`.  The classical direct-method argument:
+    --
+    --   1. Reparametrise each `γseq n` to constant `g`-speed `Lₙ` on `[0,1]`;
+    --      `pathELength` is reparametrisation-invariant
+    --      (`pathELength_comp_of_monotoneOn`), so lengths are unchanged, and the
+    --      reparametrised curves are uniformly `(sup_n Lₙ)`-Lipschitz for
+    --      `riemannianEDist` — hence for `edist` via `IsRiemannianManifold.out`.
+    --   2. The images lie in the closed `riemannianEDist`-ball of radius
+    --      `sup_n Lₙ < ∞` about `p`, which is compact: this is the
+    --      Heine–Borel property of a complete connected Riemannian manifold
+    --      (a Hopf–Rinow consequence proved elsewhere via radial exponential
+    --      surjectivity, `RadialSurjectivity.lean`).
+    --   3. Cover that compact ball by finitely many charts and apply the
+    --      sequential Arzelà–Ascoli theorem
+    --      (`Analysis.Sobolev.tendsto_subseq_of_uniformly_lipschitz_uniformly_bounded`,
+    --      stated for `EuclideanSpace ℝ (Fin d)`-valued families) chart-by-chart
+    --      to extract a subsequence converging uniformly to a continuous limit
+    --      curve `γ`, with `γ 0 = p`, `γ 1 = q` preserved in the limit.
+    --   4. Lower semicontinuity of `pathELength` under uniform convergence gives
+    --      `pathELength I γ 0 1 ≤ liminf Lₙ = d`; the reverse inequality is
+    --      `riemannianEDist_le_pathELength`.  Hence equality.
+    --
+    -- Steps 2–4 require infrastructure that is NOT present in this file or in
+    -- Mathlib: (a) compactness of the closed Riemannian ball (Heine–Borel for
+    -- complete connected Riemannian manifolds); (b) a manifold-valued /
+    -- finite-chart bridge to the Euclidean Arzelà–Ascoli tool; (c) lower
+    -- semicontinuity of `pathELength` under uniform convergence.  Each is a
+    -- self-contained lemma in a separate module.  The minimising sequence and
+    -- its length convergence (the variational core) are established above;
+    -- the limit extraction is recorded here as the single residual gap.
+    clear hLen_tendsto
+    sorry
 
 /-- **A length minimiser is, after arclength rescale, a smooth
 geodesic.** This consumes the Gauss-lemma cluster from
