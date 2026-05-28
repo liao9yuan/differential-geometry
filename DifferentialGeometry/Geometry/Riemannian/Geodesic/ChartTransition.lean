@@ -1273,6 +1273,113 @@ theorem partialDeriv_chartGramOnE_eq_sum_chartTransition [I.Boundaryless]
   rw [partialDeriv_chartTransition_pullback_summand (I := I) g α β a b i j k hy]
   rw [partialDeriv_chartGramOnE_comp_chartTransitionMap (I := I) g α β a b k hy]
 
+/-! ## The chart-Christoffel transformation law under chart transition
+
+We assemble the transformation law for the chart-Christoffel contraction under
+the chart-transition map `T = chartTransitionMap α β`. Writing `Tv` for the
+Jacobian pushforward `chartTransitionAt α β x v` of a vector `v` (chart-α
+picture) into the chart-β picture, the law is
+`chartChristoffelContraction g α v w x =
+   chartTransitionAt β α (T x) (chartChristoffelContraction g β (Tv) (Tw) (T x))
+     + D²T(v, w)`,
+where the inhomogeneous "`D²T`" term is the second-derivative correction
+`∑ c k, K^k_c · (∑_{ij} (∂_i J^c_j x) v^i w^j) • e_k`, with `K = `reverse
+Jacobian at `T x` and `J = `forward Jacobian at `x`. -/
+
+/-- The chart-β coordinate `a` of the Jacobian pushforward
+`chartTransitionAt α β x v` is the contraction of the forward Jacobian entries
+against the chart-α coordinates of `v`:
+`(chartTransitionAt α β x v)^a = ∑ i, J^a_i(x) · v^i`. -/
+lemma chartCoord_chartTransitionAt (α β : M) (x : E) (v : E)
+    (a : Fin (Module.finrank ℝ E)) :
+    chartCoord (E := E) a (chartTransitionAt (I := I) α β x v) =
+      ∑ i : Fin (Module.finrank ℝ E),
+        chartTransitionJacEntry (I := I) α β x a i * chartCoord (E := E) i v := by
+  classical
+  -- Expand `v` in the model basis, apply the (linear) CLM, read coordinate `a`.
+  unfold chartCoord chartTransitionJacEntry
+  have hexp : chartTransitionAt (I := I) α β x v =
+      ∑ i : Fin (Module.finrank ℝ E),
+        (chartModelBasis E).repr v i •
+          chartTransitionAt (I := I) α β x ((chartModelBasis E) i) := by
+    conv_lhs => rw [← (chartModelBasis E).sum_repr v]
+    rw [map_sum]
+    refine Finset.sum_congr rfl ?_
+    intro i _
+    rw [map_smul]
+  rw [hexp, map_sum]
+  rw [Finsupp.finset_sum_apply]
+  refine Finset.sum_congr rfl ?_
+  intro i _
+  rw [map_smul, Finsupp.smul_apply, smul_eq_mul]
+  ring
+
+/-- The forward Jacobian at `x = extChartAt I α p` contracted on its lower index
+against the reverse Jacobian at `T x` collapses to a Kronecker delta:
+`∑ l, J^a_l(x) · K^l_d(T x) = δ_{a d}`, where `J = `forward Jacobian at `x`,
+`K = `reverse Jacobian at `T x`. This is `chartTransitionJacEntry_mul_sum'`
+packaged with the source-membership discharged from chart-source membership of
+`p`. -/
+lemma chartTransitionJacEntry_forward_reverse_collapse [I.Boundaryless]
+    (α β : M) {p : M}
+    (hp_α : p ∈ (chartAt H α).source) (hp_β : p ∈ (chartAt H β).source)
+    (a d : Fin (Module.finrank ℝ E)) :
+    ∑ l : Fin (Module.finrank ℝ E),
+        chartTransitionJacEntry (I := I) α β (extChartAt I α p) a l *
+        chartTransitionJacEntry (I := I) β α
+          (chartTransitionMap (I := I) α β (extChartAt I α p)) l d =
+      (if a = d then (1 : ℝ) else 0) := by
+  have hx_src : extChartAt I α p ∈ chartTransitionSource (I := I) α β :=
+    extChartAt_mem_chartTransitionSource (I := I) α β hp_α hp_β
+  exact chartTransitionJacEntry_mul_sum' (I := I) α β hx_src a d
+
+/-- The reverse Jacobian at `T x` contracted on its upper index against the
+forward Jacobian at `x` collapses to a Kronecker delta:
+`∑ a, J^a_i(x) · K^c_a(T x) = δ_{c i}`. This is `chartTransitionJacEntry_mul_sum`
+packaged with the source-membership discharged from chart-source membership of
+`p`. -/
+lemma chartTransitionJacEntry_reverse_forward_collapse [I.Boundaryless]
+    (α β : M) {p : M}
+    (hp_α : p ∈ (chartAt H α).source) (hp_β : p ∈ (chartAt H β).source)
+    (c i : Fin (Module.finrank ℝ E)) :
+    ∑ a : Fin (Module.finrank ℝ E),
+        chartTransitionJacEntry (I := I) α β (extChartAt I α p) a i *
+        chartTransitionJacEntry (I := I) β α
+          (chartTransitionMap (I := I) α β (extChartAt I α p)) c a =
+      (if c = i then (1 : ℝ) else 0) := by
+  have hx_src : extChartAt I α p ∈ chartTransitionSource (I := I) α β :=
+    extChartAt_mem_chartTransitionSource (I := I) α β hp_α hp_β
+  exact chartTransitionJacEntry_mul_sum (I := I) α β hx_src c i
+
+/-- The second-derivative ("`D²T`") inhomogeneous correction in the
+chart-Christoffel transformation law, as an `E`-valued bilinear contraction.
+With `K = `reverse Jacobian at `T x`, `J = `forward Jacobian at `x`, and
+`∂_i J^c_j(x)` the chart-coordinate partial derivative of the forward Jacobian
+entry, it is
+`∑ k c, K^k_c(T x) · (∑_{ij} (∂_i J^c_j x) v^i w^j) • e_k`. -/
+def chartTransitionSecondDerivCorrection (α β : M) (v w : E) (x : E) : E :=
+  ∑ k : Fin (Module.finrank ℝ E),
+    (∑ c : Fin (Module.finrank ℝ E),
+      chartTransitionJacEntry (I := I) β α (chartTransitionMap (I := I) α β x) k c *
+        (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+          partialDeriv (E := E) i
+            (fun z => chartTransitionJacEntry (I := I) α β z c j) x *
+            chartCoord (E := E) i v * chartCoord (E := E) j w)) •
+      chartModelBasis E k
+
+@[simp] lemma chartTransitionSecondDerivCorrection_def
+    (α β : M) (v w : E) (x : E) :
+    chartTransitionSecondDerivCorrection (I := I) α β v w x =
+      ∑ k : Fin (Module.finrank ℝ E),
+        (∑ c : Fin (Module.finrank ℝ E),
+          chartTransitionJacEntry (I := I) β α
+            (chartTransitionMap (I := I) α β x) k c *
+            (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+              partialDeriv (E := E) i
+                (fun z => chartTransitionJacEntry (I := I) α β z c j) x *
+                chartCoord (E := E) i v * chartCoord (E := E) j w)) •
+          chartModelBasis E k := rfl
+
 end Geodesic
 end Riemannian
 end Geometry
