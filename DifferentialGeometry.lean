@@ -1185,6 +1185,7 @@ import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.PointwiseDeriv
 import DifferentialGeometry.PDE.RicciFlow.DeTurckShortTime
 import DifferentialGeometry.PDE.RicciFlow.DeTurckVFTimeFamily
 import DifferentialGeometry.PDE.RicciFlow.DeTurckSolutionC1
+import DifferentialGeometry.PDE.RicciFlow.HamiltonDeTurckPullback
 import DifferentialGeometry.PDE.RicciFlow.ShortTimeExistence
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.Order2Equivalence
 
