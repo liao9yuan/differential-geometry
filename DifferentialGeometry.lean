@@ -1057,6 +1057,9 @@ import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SemigroupLaw
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SpectralBounds
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SpectralBoundsCalculus
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SemigroupTimeRegularity
+import DifferentialGeometry.Analysis.Parabolic.AbstractSpectralSemigroup
+import DifferentialGeometry.Analysis.Parabolic.AbstractSpectralSemigroupLaw
+import DifferentialGeometry.Analysis.Parabolic.AbstractSpectralSemigroupContinuity
 import DifferentialGeometry.Analysis.Parabolic.TensorLinearParabolic
 
 import DifferentialGeometry.Analysis.ODE.IntegralGronwall
@@ -1081,6 +1084,7 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Scalar
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.MaxRegSpace
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.MaxRegFixedPoint
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.EnergyEstimates
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.BallRetraction
 
 -- Ricci flow short-time existence skeleton (PDE/RicciFlow tree)
 import DifferentialGeometry.PDE.RicciFlow.PrincipalSymbol
@@ -1113,6 +1117,7 @@ import DifferentialGeometry.PDE.RicciFlow.StrictParabolicAtSelf
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.UniformChartBounds
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.Eigenbasis
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.HeatSemigroup
+import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.HeatSemigroupIntrinsic
 import DifferentialGeometry.PDE.RicciFlow.Pullback.LeviCivitaConjugation
 import DifferentialGeometry.PDE.RicciFlow.SmoothQuasilinear
 import DifferentialGeometry.PDE.RicciFlow.LieDerivativePairing
