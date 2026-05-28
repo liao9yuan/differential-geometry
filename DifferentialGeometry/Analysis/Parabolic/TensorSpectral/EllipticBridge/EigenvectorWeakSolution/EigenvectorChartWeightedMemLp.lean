@@ -1043,6 +1043,115 @@ lemma tensorL2ChartComponentCutoff_ae_zero_off_cutoffChartKernelEuclid_weighted
     (tensorL2ChartComponentCutoff_ae_zero_off_cutoffChartKernelEuclid
       (I := I) (M := M) g r s u α P₀)
 
+/-! ## Weighted data for the chart-component limit atom (chart-locality-free)
+
+The chart-component limit atom `componentLpLimit_unconditional g r s i α P` is, by
+definition, `i.fst.val` times the canonical Euclidean chart component
+`tensorL2ChartComponent g r s uVec α P` of the intrinsic-compactness eigenvector
+
+```
+uVec := tensorResolventEigenbasisVec_ofCompact
+          (tensorResolventL2_isCompactOperator_intrinsic g r s) i.
+```
+
+That canonical chart component is weighted-`MemLp 2` for any abstract `L²`
+element (`tensorL2ChartComponent_memLp_weighted`) and vanishes almost everywhere
+off the compact partition-of-unity kernel `chartPouKernel α`
+(`tensorL2ChartComponent_ae_zero_off_chartPouKernel_weighted`); rescaling by the
+scalar `i.fst.val` preserves both properties. The chart-locality-free twins below
+re-key the two atom facts onto `componentLpLimit_unconditional`, mirroring the
+cross-left / cross-right unconditional twins above. -/
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+/-- **Off-kernel vanishing of the chart-component limit atom
+(chart-locality-free).** The chart-component limit atom
+`componentLpLimit_unconditional g r s i α P`, re-keyed onto the
+intrinsic-compactness eigenvector
+`tensorResolventEigenbasisVec_ofCompact (tensorResolventL2_isCompactOperator_intrinsic g r s) i`,
+vanishes almost everywhere — for the chart-pulled weighted measure restricted to
+the chart target — off the compact partition-of-unity kernel `chartPouKernel α`.
+The atom is `i.fst.val` times the canonical Euclidean chart component, which
+vanishes almost everywhere (weighted) off the kernel by
+`tensorL2ChartComponent_ae_zero_off_chartPouKernel_weighted`. -/
+lemma componentLpLimit_ae_zero_off_chartPouKernel_weighted_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P : TensorCompIdx (E := E) r s) :
+    ∀ᵐ y ∂((chartPulledWeightedMeasure (I := I) g α).restrict
+        (chartTargetEuclid (I := I) (M := M) α)),
+      y ∉ chartPouKernel (I := I) (M := M) α →
+        ((componentLpLimit_unconditional (I := I) (M := M) g r s i α P :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y = 0 := by
+  classical
+  -- The intrinsic-compactness eigenvector, as an abstract `L²` element.
+  set uVec :=
+    tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+      (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s) i
+    with huVec_def
+  -- `componentLpLimit_unconditional = i.fst.val • tensorL2ChartComponent uVec`.
+  have h_smul_w : (fun y => ((componentLpLimit_unconditional (I := I) (M := M)
+        g r s i α P :
+        Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
+      =ᵐ[(chartPulledWeightedMeasure (I := I) g α).restrict
+        (chartTargetEuclid (I := I) (M := M) α)]
+      (fun y => i.fst.val •
+        ((tensorL2ChartComponent (I := I) (M := M) g r s uVec α P :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) :=
+    (chartPulledWeightedMeasure_restrict_absolutelyContinuous (I := I) (M := M)
+      g α).ae_le
+      (by rw [componentLpLimit_unconditional]; exact Lp.coeFn_smul i.fst.val _)
+  -- The canonical chart component vanishes a.e. (weighted) off the kernel.
+  have h_comp_zero := tensorL2ChartComponent_ae_zero_off_chartPouKernel_weighted
+    (I := I) (M := M) g r s uVec α P
+  filter_upwards [h_smul_w, h_comp_zero] with y hy hy_zero hyK
+  rw [hy, smul_eq_mul, hy_zero hyK, mul_zero]
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+/-- **Weighted-`L²` membership of the chart-component limit atom
+(chart-locality-free).** Chart-locality-free twin of `componentLpLimit_memLp_weighted`:
+the chart-component limit atom `componentLpLimit_unconditional g r s i α P`,
+re-keyed onto the intrinsic-compactness eigenvector
+`tensorResolventEigenbasisVec_ofCompact (tensorResolventL2_isCompactOperator_intrinsic g r s) i`,
+is `MemLp 2` with respect to the chart-pulled weighted measure restricted to the
+chart target. The atom is `i.fst.val` times the canonical Euclidean chart
+component, which is weighted-`MemLp 2` by `tensorL2ChartComponent_memLp_weighted`;
+the scalar multiple preserves weighted-`MemLp 2`. -/
+lemma componentLpLimit_memLp_weighted_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P : TensorCompIdx (E := E) r s) :
+    MemLp (fun y => ((componentLpLimit_unconditional (I := I) (M := M)
+        g r s i α P :
+        Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) 2
+      ((chartPulledWeightedMeasure (I := I) g α).restrict
+        (chartTargetEuclid (I := I) (M := M) α)) := by
+  classical
+  -- The intrinsic-compactness eigenvector, as an abstract `L²` element.
+  set uVec :=
+    tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+      (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s) i
+    with huVec_def
+  -- The canonical Euclidean chart component is weighted-`MemLp 2`.
+  have h_comp : MemLp (fun y => (tensorL2ChartComponent (I := I) (M := M)
+      g r s uVec α P : EuclN → ℝ) y) 2
+      ((chartPulledWeightedMeasure (I := I) g α).restrict
+        (chartTargetEuclid (I := I) (M := M) α)) :=
+    tensorL2ChartComponent_memLp_weighted (I := I) (M := M) g r s uVec α P
+  -- `componentLpLimit_unconditional = i.fst.val • tensorL2ChartComponent uVec`,
+  -- and the scalar multiple preserves weighted-`MemLp 2`.
+  have h_smul : (fun y => ((componentLpLimit_unconditional (I := I) (M := M)
+        g r s i α P :
+        Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
+      =ᵐ[(chartPulledWeightedMeasure (I := I) g α).restrict
+        (chartTargetEuclid (I := I) (M := M) α)]
+      (fun y => i.fst.val •
+        ((tensorL2ChartComponent (I := I) (M := M) g r s uVec α P :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) :=
+    (chartPulledWeightedMeasure_restrict_absolutelyContinuous (I := I) (M := M)
+      g α).ae_le
+      (by rw [componentLpLimit_unconditional]; exact Lp.coeFn_smul i.fst.val _)
+  exact (h_comp.const_smul i.fst.val).ae_eq h_smul.symm
+
 /-! ## Sanity tests -/
 
 section ElaborationTests
