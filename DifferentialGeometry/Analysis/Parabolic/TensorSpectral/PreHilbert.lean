@@ -1184,6 +1184,308 @@ lemma chartTensorCovDerivPointwiseInner_eq_tensorCovDerivPointwiseInner
     exact ne_of_gt hdet_pos
   exact trace_invariance_under_change_of_basis Tmat hT_unit Gmat hG_unit Bmat
 
+/-! ## Orthonormal-frame diagonal form of the gradient inner product
+
+The inverse-Gram-weighted double sum `tensorCovDerivPointwiseInner` is the
+metric trace of the pair of covariant derivatives. As a trace it is
+independent of the chosen frame; against a `g(b)`-orthonormal frame `F`, where
+the Gram matrix is the identity, it collapses to the plain diagonal sum
+`∑ᵢ ⟨∇_{Fᵢ}S, ∇_{Fᵢ}T⟩`. This is the frame-free presentation of the Dirichlet
+integrand used by the global integration-by-parts identity. -/
+
+/-- The transition matrix from the canonical model basis `chartModelBasis E`
+to an arbitrary tangent frame `frame : Fin n → E`: the `(k, i)`-entry is the
+`e_k`-coefficient of `frame i` in the model basis. -/
+private noncomputable def frameTransitionMatrix
+    (frame : Fin (Module.finrank ℝ E) → E) :
+    Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
+  Matrix.of fun k i => ((chartModelBasis E).repr (frame i)) k
+
+/-- Recovery formula: each frame vector is the model-basis expansion with the
+transition-matrix coefficients. -/
+private lemma frame_eq_sum_chartModelBasis
+    (frame : Fin (Module.finrank ℝ E) → E) (i : Fin (Module.finrank ℝ E)) :
+    frame i =
+      ∑ k : Fin (Module.finrank ℝ E),
+        frameTransitionMatrix (E := E) frame k i • (chartModelBasis E) k := by
+  classical
+  unfold frameTransitionMatrix
+  simp only [Matrix.of_apply]
+  exact ((chartModelBasis E).sum_repr (frame i)).symm
+
+/-- The transition matrix of a basis frame is invertible. -/
+private lemma frameTransitionMatrix_isUnit
+    (frame : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E) :
+    IsUnit (frameTransitionMatrix (E := E)
+      (frame : Fin (Module.finrank ℝ E) → E)) := by
+  classical
+  have hmat : frameTransitionMatrix (E := E)
+      (frame : Fin (Module.finrank ℝ E) → E) =
+      (chartModelBasis E).toMatrix (frame : Fin (Module.finrank ℝ E) → E) := by
+    unfold frameTransitionMatrix
+    ext k i
+    rw [Module.Basis.toMatrix_apply, Matrix.of_apply]
+  rw [hmat]
+  refine ⟨⟨_, frame.toMatrix (chartModelBasis E), ?_, ?_⟩, rfl⟩
+  · exact Module.Basis.toMatrix_mul_toMatrix_flip _ _
+  · exact Module.Basis.toMatrix_mul_toMatrix_flip _ _
+
+/-- The frame Gram matrix `(g(b)(frameᵢ, frameⱼ))` equals `Tᵀ * G * T`, where
+`T` is the transition matrix from the model basis to the frame and `G` is the
+model-basis Gram matrix `gramMatrixAt g b`. -/
+private lemma frameGram_eq_transition
+    (g : SmoothRiemannianMetric I M) (b : M)
+    (frame : Fin (Module.finrank ℝ E) → E) :
+    (Matrix.of fun i j : Fin (Module.finrank ℝ E) =>
+        g.inner b (frame i) (frame j)) =
+      (frameTransitionMatrix (E := E) frame)ᵀ *
+        gramMatrixAt (I := I) (M := M) g b *
+        frameTransitionMatrix (E := E) frame := by
+  classical
+  ext i j
+  rw [Matrix.of_apply]
+  rw [frame_eq_sum_chartModelBasis (E := E) frame i,
+    frame_eq_sum_chartModelBasis (E := E) frame j]
+  rw [g_inner_bilinear_expand g b
+        (fun k => frameTransitionMatrix (E := E) frame k i)
+        (fun l => frameTransitionMatrix (E := E) frame l j) (chartModelBasis E)]
+  rw [Matrix.mul_apply]
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl ?_
+  intro l _
+  rw [Matrix.mul_apply, Finset.sum_mul]
+  refine Finset.sum_congr rfl ?_
+  intro k _
+  rw [Matrix.transpose_apply, gramMatrixAt_apply]
+  ring
+
+/-- The frame inner-product matrix `(⟨∇_{frameᵢ}S, ∇_{frameⱼ}T⟩)ᵢⱼ` equals
+`Tᵀ * B * T`, where `B` is the model-basis inner-product matrix. -/
+private lemma frameInnerMatrix_eq_transition
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (S T : SmoothCcTensor g r s) (b : M)
+    (frame : Fin (Module.finrank ℝ E) → E)
+    (i j : Fin (Module.finrank ℝ E)) :
+    tensorInnerPointwise (I := I) (M := M) g r s b
+        (TensorRSSpace.toModel
+          (tensorCovDerivAt (I := I) (M := M) g r s S b (frame i)))
+        (TensorRSSpace.toModel
+          (tensorCovDerivAt (I := I) (M := M) g r s T b (frame j))) =
+      ((frameTransitionMatrix (E := E) frame)ᵀ *
+          (Matrix.of fun k l : Fin (Module.finrank ℝ E) =>
+            tensorInnerPointwise (I := I) (M := M) g r s b
+              (TensorRSSpace.toModel
+                (tensorCovDerivAt (I := I) (M := M) g r s S b
+                  ((chartModelBasis E) k)))
+              (TensorRSSpace.toModel
+                (tensorCovDerivAt (I := I) (M := M) g r s T b
+                  ((chartModelBasis E) l)))) *
+          frameTransitionMatrix (E := E) frame) i j := by
+  classical
+  have hSi : tensorCovDerivAt (I := I) (M := M) g r s S b (frame i) =
+      ∑ k : Fin (Module.finrank ℝ E),
+        frameTransitionMatrix (E := E) frame k i •
+        tensorCovDerivAt (I := I) (M := M) g r s S b ((chartModelBasis E) k) := by
+    rw [frame_eq_sum_chartModelBasis (E := E) frame i]
+    unfold tensorCovDerivAt
+    rw [map_sum]
+    refine Finset.sum_congr rfl ?_
+    intro k _
+    rw [map_smul]
+  have hTj : tensorCovDerivAt (I := I) (M := M) g r s T b (frame j) =
+      ∑ l : Fin (Module.finrank ℝ E),
+        frameTransitionMatrix (E := E) frame l j •
+        tensorCovDerivAt (I := I) (M := M) g r s T b ((chartModelBasis E) l) := by
+    rw [frame_eq_sum_chartModelBasis (E := E) frame j]
+    unfold tensorCovDerivAt
+    rw [map_sum]
+    refine Finset.sum_congr rfl ?_
+    intro l _
+    rw [map_smul]
+  rw [hSi, hTj]
+  have htoM_sum : ∀ (s' : Finset (Fin (Module.finrank ℝ E)))
+      (f : Fin (Module.finrank ℝ E) → TensorRSSpace r s I b)
+      (c : Fin (Module.finrank ℝ E) → ℝ),
+      TensorRSSpace.toModel (∑ k ∈ s', c k • f k) =
+        ∑ k ∈ s', c k • TensorRSSpace.toModel (f k) := by
+    intro s' f c
+    classical
+    induction s' using Finset.induction with
+    | empty => simp [TensorRSSpace.toModel_zero]
+    | insert i₀ s'' hi₀ ih =>
+        rw [Finset.sum_insert hi₀, TensorRSSpace.toModel_add,
+            TensorRSSpace.toModel_smul, ih, Finset.sum_insert hi₀]
+  rw [htoM_sum Finset.univ
+        (fun k => tensorCovDerivAt (I := I) (M := M) g r s S b ((chartModelBasis E) k))
+        (fun k => frameTransitionMatrix (E := E) frame k i),
+      htoM_sum Finset.univ
+        (fun l => tensorCovDerivAt (I := I) (M := M) g r s T b ((chartModelBasis E) l))
+        (fun l => frameTransitionMatrix (E := E) frame l j)]
+  rw [tensorInnerPointwise_sum_left (I := I) (M := M) g r s b Finset.univ]
+  conv_lhs =>
+    rhs
+    ext k
+    rw [tensorInnerPointwise_sum_right (I := I) (M := M) g r s b Finset.univ]
+    rw [Finset.mul_sum]
+  rw [Matrix.mul_apply]
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl ?_
+  intro k _
+  rw [Matrix.mul_apply, Finset.sum_mul]
+  refine Finset.sum_congr rfl ?_
+  intro l _
+  rw [Matrix.transpose_apply, Matrix.of_apply]
+  ring
+
+/-- **Frame-invariance of the gradient inner product.** For any tangent
+*basis* frame `frame` at `b`, the inverse-frame-Gram-weighted double sum of
+the directional covariant derivatives equals the canonical
+`tensorCovDerivPointwiseInner`. -/
+lemma tensorCovDerivPointwiseInner_eq_frameGram_sum
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (S T : SmoothCcTensor g r s) (b : M)
+    (frame : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E) :
+    ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+        (Matrix.of fun i' j' : Fin (Module.finrank ℝ E) =>
+          g.inner b (frame i') (frame j'))⁻¹ i j *
+          tensorInnerPointwise (I := I) (M := M) g r s b
+            (TensorRSSpace.toModel
+              (tensorCovDerivAt (I := I) (M := M) g r s S b (frame i)))
+            (TensorRSSpace.toModel
+              (tensorCovDerivAt (I := I) (M := M) g r s T b (frame j))) =
+      tensorCovDerivPointwiseInner (I := I) (M := M) g r s S T b := by
+  classical
+  let Tmat : Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
+    frameTransitionMatrix (E := E) (frame : Fin (Module.finrank ℝ E) → E)
+  let Gmat : Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
+    gramMatrixAt (I := I) (M := M) g b
+  let Bmat : Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
+    Matrix.of fun k l : Fin (Module.finrank ℝ E) =>
+      tensorInnerPointwise (I := I) (M := M) g r s b
+        (TensorRSSpace.toModel
+          (tensorCovDerivAt (I := I) (M := M) g r s S b ((chartModelBasis E) k)))
+        (TensorRSSpace.toModel
+          (tensorCovDerivAt (I := I) (M := M) g r s T b ((chartModelBasis E) l)))
+  have hG_eq : (Matrix.of fun i' j' : Fin (Module.finrank ℝ E) =>
+      g.inner b (frame i') (frame j')) = Tmatᵀ * Gmat * Tmat :=
+    frameGram_eq_transition (I := I) (M := M) g b (frame : Fin (Module.finrank ℝ E) → E)
+  -- Rewrite each summand into the transition-matrix form.
+  have hterm : ∀ i j : Fin (Module.finrank ℝ E),
+      (Matrix.of fun i' j' : Fin (Module.finrank ℝ E) =>
+            g.inner b (frame i') (frame j'))⁻¹ i j *
+          tensorInnerPointwise (I := I) (M := M) g r s b
+            (TensorRSSpace.toModel
+              (tensorCovDerivAt (I := I) (M := M) g r s S b (frame i)))
+            (TensorRSSpace.toModel
+              (tensorCovDerivAt (I := I) (M := M) g r s T b (frame j))) =
+        (Tmatᵀ * Gmat * Tmat)⁻¹ i j * (Tmatᵀ * Bmat * Tmat) i j := by
+    intro i j
+    rw [frameInnerMatrix_eq_transition (I := I) (M := M) g r s S T b
+      (frame : Fin (Module.finrank ℝ E) → E) i j, hG_eq]
+  rw [Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => hterm i j))]
+  unfold tensorCovDerivPointwiseInner
+  have hT_unit : IsUnit Tmat := frameTransitionMatrix_isUnit (E := E) frame
+  have hG_unit : IsUnit Gmat := by
+    have hGmat_def : Gmat = gramMatrixAt (I := I) (M := M) g b := rfl
+    rw [hGmat_def, Matrix.isUnit_iff_isUnit_det, isUnit_iff_ne_zero]
+    have hposdef : (gramMatrixAt (I := I) (M := M) g b).PosDef := by
+      refine Matrix.PosDef.of_dotProduct_mulVec_pos
+        (gramMatrixAt_isHermitian (I := I) (M := M) g b) ?_
+      intro v hv
+      let w : E := ∑ i : Fin (Module.finrank ℝ E),
+        v i • (chartModelBasis E) i
+      have hw_ne : w ≠ 0 := by
+        intro h
+        have hlin : LinearIndependent ℝ ((chartModelBasis E) : Fin _ → E) :=
+          (chartModelBasis E).linearIndependent
+        rw [Fintype.linearIndependent_iff] at hlin
+        exact hv (funext (hlin v h))
+      have hquad : star v ⬝ᵥ (gramMatrixAt (I := I) (M := M) g b) *ᵥ v =
+          g.inner b w w := by
+        have hexp : g.inner b w w =
+            ∑ j : Fin (Module.finrank ℝ E),
+              v j * ∑ i : Fin (Module.finrank ℝ E),
+                v i * gramMatrixAt (I := I) (M := M) g b i j := by
+          change g.inner b (∑ i, v i • (chartModelBasis E) i)
+              (∑ j, v j • (chartModelBasis E) j) = _
+          rw [map_sum]
+          refine Finset.sum_congr rfl ?_
+          intro j _
+          have hsm1 : (g.inner b (∑ i, v i • (chartModelBasis E) i))
+                (v j • (chartModelBasis E) j) =
+              v j * (g.inner b (∑ i, v i • (chartModelBasis E) i))
+                ((chartModelBasis E) j) := by
+            rw [map_smul, smul_eq_mul]
+          rw [hsm1]
+          congr 1
+          rw [map_sum, ContinuousLinearMap.sum_apply]
+          refine Finset.sum_congr rfl ?_
+          intro i _
+          have hsm2 : (g.inner b (v i • (chartModelBasis E) i))
+                ((chartModelBasis E) j) =
+              v i * (g.inner b ((chartModelBasis E) i)) ((chartModelBasis E) j) := by
+            rw [show (g.inner b) (v i • (chartModelBasis E) i) =
+                v i • (g.inner b) ((chartModelBasis E) i) from by rw [map_smul]]
+            rw [ContinuousLinearMap.smul_apply, smul_eq_mul]
+          rw [hsm2, gramMatrixAt_apply]
+        rw [hexp]
+        change ∑ j : Fin (Module.finrank ℝ E),
+            star (v j) * (gramMatrixAt (I := I) (M := M) g b *ᵥ v) j =
+          ∑ j : Fin (Module.finrank ℝ E),
+            v j * ∑ i : Fin (Module.finrank ℝ E),
+              v i * gramMatrixAt (I := I) (M := M) g b i j
+        refine Finset.sum_congr rfl (fun j _ => ?_)
+        rw [star_trivial]
+        rw [show (gramMatrixAt (I := I) (M := M) g b *ᵥ v) j =
+              ∑ i : Fin (Module.finrank ℝ E),
+                gramMatrixAt (I := I) (M := M) g b j i * v i from rfl]
+        rw [Finset.mul_sum, Finset.mul_sum]
+        refine Finset.sum_congr rfl (fun i (_ : i ∈ Finset.univ) => ?_)
+        rw [gramMatrixAt_apply, gramMatrixAt_apply, g.symm]
+        ring
+      rw [hquad]
+      exact g.pos b w hw_ne
+    exact ne_of_gt hposdef.det_pos
+  exact trace_invariance_under_change_of_basis Tmat hT_unit Gmat hG_unit Bmat
+
+/-- **Orthonormal-frame diagonal form of the gradient inner product.** For a
+`g(b)`-orthonormal *basis* frame `frame` at `b`, the Dirichlet integrand
+`tensorCovDerivPointwiseInner g r s S T b` equals the plain diagonal sum
+`∑ᵢ ⟨∇_{frameᵢ}S, ∇_{frameᵢ}T⟩` of the pointwise tensor inner products of the
+directional covariant derivatives. -/
+lemma tensorCovDerivPointwiseInner_eq_orthoFrame_diag_sum
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (S T : SmoothCcTensor g r s) (b : M)
+    (frame : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E)
+    (horth : ∀ i j, g.inner b (frame i) (frame j) = if i = j then (1 : ℝ) else 0) :
+    tensorCovDerivPointwiseInner (I := I) (M := M) g r s S T b =
+      ∑ i : Fin (Module.finrank ℝ E),
+        tensorInnerPointwise (I := I) (M := M) g r s b
+          (TensorRSSpace.toModel
+            (tensorCovDerivAt (I := I) (M := M) g r s S b (frame i)))
+          (TensorRSSpace.toModel
+            (tensorCovDerivAt (I := I) (M := M) g r s T b (frame i))) := by
+  classical
+  -- The frame Gram matrix is the identity, so its inverse is the identity.
+  have hGframe_eq_one :
+      (Matrix.of fun i' j' : Fin (Module.finrank ℝ E) =>
+        g.inner b (frame i') (frame j')) =
+        (1 : Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ) := by
+    ext i j
+    rw [Matrix.of_apply, horth i j, Matrix.one_apply]
+  rw [← tensorCovDerivPointwiseInner_eq_frameGram_sum (I := I) (M := M) g r s S T b
+    frame]
+  rw [hGframe_eq_one, inv_one]
+  -- `∑ᵢ ∑ⱼ (1)ᵢⱼ * Bᵢⱼ = ∑ᵢ Bᵢᵢ`.
+  refine Finset.sum_congr rfl ?_
+  intro i _
+  rw [Finset.sum_eq_single i]
+  · rw [Matrix.one_apply_eq, one_mul]
+  · intro j _ hji
+    rw [Matrix.one_apply_ne (Ne.symm hji), zero_mul]
+  · intro hi
+    exact absurd (Finset.mem_univ i) hi
+
 /-! ## Chart-local smoothness of the covariant derivative applied to chart basis -/
 
 /-- The covariant derivative of a smooth compactly-supported tensor section
