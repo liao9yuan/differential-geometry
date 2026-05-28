@@ -23,83 +23,68 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
   [T2Space M] [SigmaCompactSpace M]
 
+set_option synthInstance.maxHeartbeats 1600000 in
+set_option maxHeartbeats 1600000 in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
 /--
-**Sobolev embedding `H^{2k} ↪ C^m` for tensor sections (signature).**
+**Sobolev embedding `H^{2k} ↪ C^m` for tensor sections.**
 
 When `2 * k > dim M + 2 * m` (the supercritical Sobolev threshold), the
 intrinsic order-`2k` Sobolev space of `(r, s)`-tensor sections on a closed
 Riemannian manifold embeds continuously into `C^m` tensor sections.
 
-The signature recorded here is the substantive pointwise sup-norm form of
-the embedding on the dense smooth subspace `SmoothCcTensor g r s ↪
+The statement is the substantive pointwise sup-norm form of the embedding
+on the dense smooth subspace `SmoothCcTensor g r s ↪
 TensorPouSobolevHilbert g r s (2 * k)`: there exists a **strictly positive**
-constant `C` such that the fiber-norm of every smooth compactly-supported
-`(r, s)`-tensor section at every point of `M` is controlled by `C` times
-the intrinsic `H^{2 * k}`-norm of the section's image in
-`TensorPouSobolevHilbert g r s (2 * k)`.
+constant `C` such that the bundle-fibre norm of every smooth
+compactly-supported `(r, s)`-tensor section at every point of `M` is
+controlled by `C` times the intrinsic `H^{2 * k}`-norm of the section's
+image in `TensorPouSobolevHilbert g r s (2 * k)`.
+
+The fibre norm here is the **Riemannian bundle norm** induced by the metric
+`g` (`tensorRS_riemannianBundle g r s`): the genuine `g`-fibre norm, not a
+chart-dependent model op-norm. This is the canonical norm on the
+`(r, s)`-tensor bundle and the one in which the embedding constant is
+chart-locality-free. Concretely, for `v : TensorRSSpace r s I x`,
+`‖v‖ ^ 2 = tensorInnerPointwise g r s x (toModel v) (toModel v)`.
 
 The strict-positivity hypothesis `0 < C` rules out vacuous discharges
 (`C = 0` does not satisfy the conclusion as soon as the smooth subspace
 contains a non-trivial section, which it does on any non-empty closed
 manifold). Universal quantification over `T : SmoothCcTensor g r s` and
-`x : M` together with the pointwise tensor-fiber norm `‖T.toSection x‖`
+`x : M` together with the pointwise tensor-fibre norm `‖T.toSection x‖`
 forces `C` to genuinely control the sup-norm; no hypothesis-packaging
 fill is possible because no hypothesis of this shape is in scope.
 
 The conclusion encodes the `m = 0` (C⁰-norm) component of the full
 `C^m`-norm bound. The general `C^m`-norm version, controlling all
-iterated covariant derivatives `‖∇^j T x‖` for `0 ≤ j ≤ m`, follows by
-the same slot-wise / chart-bookkeeping argument applied to derivative
-norms; it is recorded here in the `m = 0` shape because the bookkeeping
-for the iterated-derivative tensor-fiber norm packaging lives in a
-separate skeleton node and is not yet wired in at this point of the
-build graph.
+iterated covariant derivatives `‖∇^j T x‖` for `0 ≤ j ≤ m`, is delivered
+separately by `iteratedCovGrad_toSobolev_embedding_Cm_unconditional`
+(file `SobolevEmbeddingCmRankReduction.lean`), in the same Riemannian
+bundle norm.
 
-## Substantive proof sketch (for the body)
+## Proof
 
-For each finite chart cover `(U_α, ϕ_α)` of `M` and a fixed atlas-aligned
-partition of unity, each component of `T.toSection` in a local frame is a
-scalar function in `W^{2k, 2}_{chart}(U_α)` controlled by the chart-
-Sobolev norm summands defining `tensorPouSobolevHsNorm g (2 * k)`. The
-scalar Sobolev embedding
-`Analysis/Sobolev/Manifold/IteratedSobolevEmbedding.lean:2033
- iterated_sobolev_embedding_chart_C0_unconditional` then yields a finite
-chart-by-chart sup-norm bound on each component; combining over the
-finite atlas + the finite number of frame components gives the universal
-constant `C`. Strict positivity follows because the smooth subspace
-contains the non-zero sections supplied by the chart partition of unity
-(any open ball admits a smooth bump function lifted to a non-trivial
-tensor section).
+The full manifold-side assembly (finite atlas-aligned partition of unity +
+Lebesgue-number `ρ`-localisation + Euclidean local-ball `L²` pointwise
+embedding + op-norm ↦ Hilbert–Schmidt + per-term `≤ tsum`) is carried out,
+chart-locality-free, in `tensorPouSobolevHilbert_embedding_Ck_gNorm`
+(file `PDE/RicciFlow/SobolevEmbeddingAssembly.lean`). This headline is the
+specialisation that installs the Riemannian bundle instance and delegates.
 -/
 theorem tensorPouSobolevHilbert_embedding_Ck
     [I.Boundaryless]
     {g : SmoothRiemannianMetric I M} {r s k m : ℕ}
     (h_super : 2 * k > Module.finrank ℝ E + 2 * m) :
+    letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
+      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
     ∃ C : ℝ, 0 < C ∧
       ∀ (T : SmoothCcTensor g r s) (x : M),
         ‖T.toSection x‖ ≤
           C *
-            ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) (2 * k) T‖ := by
-  -- The full manifold-side assembly (finite partition of unity + Lebesgue-number
-  -- ρ-localisation + Euclidean local-ball L² pointwise embedding + op-norm ↦
-  -- Hilbert–Schmidt + per-term ≤ tsum) is carried out, sorry-free, in
-  -- `tensorPouSobolevHilbert_embedding_Ck_gNorm` (file
-  -- `PDE/RicciFlow/SobolevEmbeddingAssembly.lean`), stated in the **Riemannian
-  -- fibre norm** `tensorRS_riemannianBundle g r s`.
-  --
-  -- This public statement uses the **default** induced fibre norm on
-  -- `TensorRSSpace` (`tensorRSSpace_normedAddCommGroup`, equal to the model-fibre
-  -- norm `‖toModel ·‖`). The two norms are equivalent — both are continuous
-  -- fibre metrics on a compact base — but the only uniform-on-compact bridge
-  -- presently available in the codebase
-  -- (`chartRSTwist_pointwise_opNorm_isBounded_on_compact`) carries the
-  -- `HasLocallyConstantChartAt` hypothesis, which is prohibited. An
-  -- HLCC-free uniform-on-compact bound `‖toModel(S x)‖ ≤ C · ‖S x‖_g`
-  -- (an unconditional `chartRSTwist` op-norm-on-compact, analogous to the
-  -- already-unconditional `tensorRSChartFiberFromModel_…`) is the single
-  -- remaining piece; once available, this headline follows by composing it
-  -- with `tensorPouSobolevHilbert_embedding_Ck_gNorm h_super`.
-  sorry
+            ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) (2 * k) T‖ :=
+  tensorPouSobolevHilbert_embedding_Ck_gNorm (I := I) (M := M) g r s k m h_super
 
 /--
 **Per-chart-component scalar Sobolev embedding `H^k ↪ C⁰` (HLCC-free sub-result).**
