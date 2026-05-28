@@ -5,6 +5,7 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.MorreyManifoldHigherOrder
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.ComponentSobolevBound
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.FiberNormRiemannianBridge
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.TensorSectionL2BoundByComponents
+import DifferentialGeometry.PDE.RicciFlow.SobolevEmbeddingAssembly
 import Mathlib.Geometry.Manifold.ContMDiff.Basic
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -73,20 +74,31 @@ tensor section).
 theorem tensorPouSobolevHilbert_embedding_Ck
     [I.Boundaryless]
     {g : SmoothRiemannianMetric I M} {r s k m : ℕ}
-    (_h_super : 2 * k > Module.finrank ℝ E + 2 * m) :
+    (h_super : 2 * k > Module.finrank ℝ E + 2 * m) :
     ∃ C : ℝ, 0 < C ∧
       ∀ (T : SmoothCcTensor g r s) (x : M),
         ‖T.toSection x‖ ≤
           C *
             ‖SmoothCcTensor.toHs (g := g) (r := r) (s := s) (2 * k) T‖ := by
-  -- Strengthened signature: strict-positive constant + pointwise sup-norm
-  -- bound on the smooth dense subspace.  Substantive proof requires
-  -- slot-wise application of
-  --   `iterated_sobolev_embedding_chart_C0_unconditional`
-  -- (`Analysis/Sobolev/Manifold/IteratedSobolevEmbedding.lean:2033`)
-  -- combined with the finite-chart partition-of-unity bookkeeping that
-  -- relates the local-frame components of a tensor section to the
-  -- chart-Sobolev norm summands defining `tensorPouSobolevHsNorm`.
+  -- The full manifold-side assembly (finite partition of unity + Lebesgue-number
+  -- ρ-localisation + Euclidean local-ball L² pointwise embedding + op-norm ↦
+  -- Hilbert–Schmidt + per-term ≤ tsum) is carried out, sorry-free, in
+  -- `tensorPouSobolevHilbert_embedding_Ck_gNorm` (file
+  -- `PDE/RicciFlow/SobolevEmbeddingAssembly.lean`), stated in the **Riemannian
+  -- fibre norm** `tensorRS_riemannianBundle g r s`.
+  --
+  -- This public statement uses the **default** induced fibre norm on
+  -- `TensorRSSpace` (`tensorRSSpace_normedAddCommGroup`, equal to the model-fibre
+  -- norm `‖toModel ·‖`). The two norms are equivalent — both are continuous
+  -- fibre metrics on a compact base — but the only uniform-on-compact bridge
+  -- presently available in the codebase
+  -- (`chartRSTwist_pointwise_opNorm_isBounded_on_compact`) carries the
+  -- `HasLocallyConstantChartAt` hypothesis, which is prohibited. An
+  -- HLCC-free uniform-on-compact bound `‖toModel(S x)‖ ≤ C · ‖S x‖_g`
+  -- (an unconditional `chartRSTwist` op-norm-on-compact, analogous to the
+  -- already-unconditional `tensorRSChartFiberFromModel_…`) is the single
+  -- remaining piece; once available, this headline follows by composing it
+  -- with `tensorPouSobolevHilbert_embedding_Ck_gNorm h_super`.
   sorry
 
 /--
