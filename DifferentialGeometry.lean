@@ -1130,6 +1130,7 @@ import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.G1G3BridgeIntrinsic
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.G3IntrinsicL2Bound
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.G5PerAlphaIntrinsic
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.G1FiberNormDecomp
+import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.IntrinsicCovAtomL2Fiber
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.FiberNormRiemannianBridge
 import DifferentialGeometry.Integral.Connection.SmoothBilinearSectionBddAbove
 import DifferentialGeometry.Integral.Connection.TensorRSChartFiberFromModelOpNormUnconditional
