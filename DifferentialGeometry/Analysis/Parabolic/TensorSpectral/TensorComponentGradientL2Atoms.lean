@@ -7,9 +7,13 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.H1Compl
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.PreHilbert
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SlotChartSourceContMDiff
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SlotUniformBound
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.ChristoffelBound
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TrivProj.Bridge
 import DifferentialGeometry.Geometry.LocalChartConsistency
 import DifferentialGeometry.Integral.Connection.ChartTensorRSCovariantDerivativeAgreement
+import DifferentialGeometry.Integral.Connection.SlotCorrectionChartKernel
+import DifferentialGeometry.Integral.Connection.TensorRSChartFiberFromModelOpNormUnconditional
+import DifferentialGeometry.Integral.Connection.TensorRSChartFiberToModelOpNormUnconditional
 import DifferentialGeometry.Integral.Measure.ChartDensity
 import Mathlib.MeasureTheory.Integral.IntegrableOn
 
@@ -733,7 +737,7 @@ private lemma indicator_scalarOnE_raw_sq_le_const_mul_tensorInner
     rw [hzero_sq]
     exact h_RHS_nn
 
-private lemma sq_eLpNorm_two_eq_lintegral_enorm_sq
+lemma sq_eLpNorm_two_eq_lintegral_enorm_sq
     {α : Type*} [MeasurableSpace α] (μ : Measure α) (f : α → ℝ) :
     (eLpNorm f 2 μ) ^ 2 = ∫⁻ x, (‖f x‖ₑ : ℝ≥0∞) ^ 2 ∂μ := by
   classical
@@ -750,7 +754,7 @@ private lemma sq_eLpNorm_two_eq_lintegral_enorm_sq
   rw [h_inner_eq, ← ENNReal.rpow_natCast _ 2, ← ENNReal.rpow_mul]
   norm_num
 
-private lemma le_sqrt_of_sq_le {x y : ℝ≥0∞} (h : x ^ 2 ≤ y) :
+lemma le_sqrt_of_sq_le {x y : ℝ≥0∞} (h : x ^ 2 ≤ y) :
     x ≤ y ^ ((1 : ℝ) / 2) := by
   have h_xpow : x = (x ^ 2) ^ ((1 : ℝ) / 2) := by
     rw [← ENNReal.rpow_natCast x 2, ← ENNReal.rpow_mul]
@@ -758,7 +762,7 @@ private lemma le_sqrt_of_sq_le {x y : ℝ≥0∞} (h : x ^ 2 ≤ y) :
   conv_lhs => rw [h_xpow]
   exact ENNReal.rpow_le_rpow h (by norm_num)
 
-private lemma sqrt_ofReal_eq_ofReal_sqrt {S : ℝ} (hS : 0 ≤ S) :
+lemma sqrt_ofReal_eq_ofReal_sqrt {S : ℝ} (hS : 0 ≤ S) :
     (ENNReal.ofReal S) ^ ((1 : ℝ) / 2) = ENNReal.ofReal (Real.sqrt S) := by
   rw [show S = Real.sqrt S * Real.sqrt S from (Real.mul_self_sqrt hS).symm,
     ENNReal.ofReal_mul (Real.sqrt_nonneg _),
@@ -767,7 +771,7 @@ private lemma sqrt_ofReal_eq_ofReal_sqrt {S : ℝ} (hS : 0 ≤ S) :
     ← ENNReal.rpow_natCast _ 2, ← ENNReal.rpow_mul]
   norm_num
 
-private lemma eLpNorm_two_le_ofReal_sqrt
+lemma eLpNorm_two_le_ofReal_sqrt
     {α : Type*} [MeasurableSpace α] {μ : Measure α} {f : α → ℝ}
     {S : ℝ} (hS : 0 ≤ S)
     (h_sq : (eLpNorm f 2 μ) ^ 2 ≤ ENNReal.ofReal S) :
@@ -1457,24 +1461,1229 @@ theorem aestronglyMeasurable_pou_mul_sqrt_sum_christoffel_correction
 
 end AtomMeasurability
 
+/-! ## Riemannian-fibre-norm covariant-derivative atom `L²` bound (HLCC-free)
+
+This section converts the model-norm covariant-derivative atom bound
+`exists_eLpNorm_sq_pou_mul_sum_triv_chart_cov_le_const_mul_h1NormSq` (which is
+itself free of any chart-locality predicate) into the **intrinsic Riemannian
+fibre-norm form**, in which each per-`k` covariant-derivative atom is measured
+by the genuine `g`-induced fibre norm on `TensorRSSpace r s I b`. The
+conversion is unconditional: the only extra ingredient is the unconditional
+uniform op-norm bound on the chart-`(r, s)` inverse trivialisation over the
+compact `tsupport` of the chart-`α` partition of unity. -/
+
+section CovariantAtomsRiemannian
+
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+
+private local instance : MeasurableSpace E := borel E
+private local instance : BorelSpace E := ⟨rfl⟩
+private local instance : MeasurableSpace M := borel M
+private local instance : BorelSpace M := ⟨rfl⟩
+
+/-- The `tsupport` of the chart-atlas partition-of-unity weight at `α` is
+compact (closed in a compact ambient space). -/
+private lemma covRiem_pouTsupport_isCompact (α : M) :
+    IsCompact (tsupport (fun x : M =>
+      ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
+  (isClosed_tsupport _).isCompact
+
+/-- The `tsupport` of the chart-atlas partition-of-unity weight at `α` is
+contained in the chart-`α` source. -/
+private lemma covRiem_pouTsupport_subset_chartSource (α : M) :
+    tsupport (fun x : M =>
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
+      (chartAt H α).source :=
+  chartAtlasPOU_isSubordinate (I := I) (M := M) α
+
+/-- Membership in the chart-`α` source upgrades to membership in the
+chart-`(r, s)` trivialisation base set. -/
+private lemma covRiem_mem_baseSet_of_mem_chartSource
+    (r s : ℕ) (α : M) {b : M} (hb : b ∈ (chartAt H α).source) :
+    b ∈ (trivializationAt (TensorRSModel r s ℝ E)
+      (fun y : M => TensorRSSpace r s I y) α).baseSet := by
+  change b ∈ (trivializationAt (Tensor0SModel r ℝ E)
+      (fun y : M => Tensor0SSpace r I y) α).baseSet ∩
+    (trivializationAt (Tensor0SModel s ℝ E)
+      (fun y : M => Tensor0SSpace s I y) α).baseSet
+  refine ⟨?_, ?_⟩
+  all_goals
+    change b ∈ (trivializationAt E (TangentSpace I) α).baseSet
+    rw [DifferentialGeometry.Integral.Measure.trivializationAt_baseSet_eq_chartAt_source]
+    exact hb
+
+set_option synthInstance.maxHeartbeats 800000 in
+attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
+  Bundle.continuousMultilinearMap.instNormedSpace
+  Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- **Per-`α` Riemannian-fibre-norm covariant-derivative atom `L²` bound
+(HLCC-free).** For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, and a
+chart base point `α`, there is a non-negative real constant `C` (depending only
+on `(g, r, s, α)`) such that for every smooth compactly-supported `H¹` tensor
+section `S : SmoothCcTensorH1 g r s` and all multi-indices `Idx, Jdx`,
+
+```
+eLpNorm
+    (fun b ↦ ρ_α(b) · √(∑ₖ ‖∇^chart_k S(b)‖²_Riem))
+    2 (riemannianVolumeMeasure g) ≤
+  ENNReal.ofReal C · (‖S‖₊ : ℝ≥0∞),
+```
+
+where `ρ_α` is the chart-atlas partition-of-unity weight at `α` and the fibre
+norm `‖·‖` on `TensorRSSpace r s I b` is the `g`-induced
+`Bundle.RiemannianBundle` norm (installed via `letI`). The constant `C` is
+independent of `S`, of the multi-indices, and of the base point. No
+chart-locality predicate is required. -/
+theorem exists_eLpNorm_pou_mul_sum_fiber_chart_cov_le_const_mul_h1Norm_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
+    letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
+      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (S : SmoothCcTensorH1 g r s)
+        (_Idx : Fin r → Fin (Module.finrank ℝ E))
+        (_Jdx : Fin s → Fin (Module.finrank ℝ E)),
+        eLpNorm
+            (fun b : M =>
+              ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b *
+                Real.sqrt
+                  (∑ k : Fin (Module.finrank ℝ E),
+                    ‖chartTensorRSCovariantDerivative (I := I) r s g α
+                        (fun b' => S.toCcTensor.toSection b')
+                        (chartBasisVecFiber (I := I) α k) b‖ ^ 2))
+            2 (riemannianVolumeMeasure (I := I) (M := M) g) ≤
+          ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞) := by
+  classical
+  letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
+  -- Model-norm covariant-derivative atom `L²` bound (HLCC-free).
+  obtain ⟨Cg2, hCg2_nn, hG2⟩ :=
+    exists_eLpNorm_sq_pou_mul_sum_triv_chart_cov_le_const_mul_h1NormSq
+      (I := I) (M := M) g r s α
+  -- Unconditional uniform op-norm bound on the chart-`α` inverse
+  -- trivialisation over the compact `tsupport ρ_α`.
+  have hK_cpt :
+      IsCompact (tsupport (fun x : M =>
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
+    covRiem_pouTsupport_isCompact (I := I) (M := M) α
+  have hK_sub :
+      tsupport (fun x : M =>
+          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
+        (chartAt H α).source :=
+    covRiem_pouTsupport_subset_chartSource (I := I) (M := M) α
+  obtain ⟨Cop, hCop_pos, hCop_bound⟩ :=
+    tensorRSChartFiberFromModel_opNorm_isBounded_on_compact_unconditional
+      (I := I) (M := M) g r s α hK_cpt hK_sub
+  have hCop_nn : 0 ≤ Cop := le_of_lt hCop_pos
+  refine ⟨Cop * Cg2, mul_nonneg hCop_nn hCg2_nn, ?_⟩
+  intro S _Idx _Jdx
+  set gF : M → ℝ := fun b : M =>
+    ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b *
+      Real.sqrt
+        (∑ k : Fin (Module.finrank ℝ E),
+          ‖chartTensorRSCovariantDerivative (I := I) r s g α
+              (fun b' => S.toCcTensor.toSection b')
+              (chartBasisVecFiber (I := I) α k) b‖ ^ 2)
+    with hgF_def
+  set gM : M → ℝ := fun b : M =>
+    ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b *
+      Real.sqrt
+        (∑ k : Fin (Module.finrank ℝ E),
+          ‖(trivializationAt (TensorRSModel r s ℝ E)
+              (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
+            (chartTensorRSCovariantDerivative (I := I) r s g α
+              (fun b' => S.toCcTensor.toSection b')
+              (chartBasisVecFiber (I := I) α k) b)‖ ^ 2)
+    with hgM_def
+  -- Pointwise: `gF b ≤ Cop · gM b`, everywhere.
+  have h_ptwise : ∀ b : M, gF b ≤ Cop * gM b := by
+    intro b
+    by_cases hb : b ∈ tsupport (fun x : M =>
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
+    · have hb_chart : b ∈ (chartAt H α).source := hK_sub hb
+      have hb_base : b ∈ (trivializationAt (TensorRSModel r s ℝ E)
+          (fun y : M => TensorRSSpace r s I y) α).baseSet :=
+        covRiem_mem_baseSet_of_mem_chartSource (I := I) (M := M) r s α hb_chart
+      have hρ_nn : 0 ≤ ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b :=
+        (chartAtlasPOU I M).nonneg α b
+      have h_per_k : ∀ k : Fin (Module.finrank ℝ E),
+          ‖chartTensorRSCovariantDerivative (I := I) r s g α
+              (fun b' => S.toCcTensor.toSection b')
+              (chartBasisVecFiber (I := I) α k) b‖ ^ 2 ≤
+            Cop ^ 2 *
+              ‖(trivializationAt (TensorRSModel r s ℝ E)
+                  (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
+                (chartTensorRSCovariantDerivative (I := I) r s g α
+                  (fun b' => S.toCcTensor.toSection b')
+                  (chartBasisVecFiber (I := I) α k) b)‖ ^ 2 := by
+        intro k
+        set X : TensorRSSpace r s I b :=
+          chartTensorRSCovariantDerivative (I := I) r s g α
+            (fun b' => S.toCcTensor.toSection b')
+            (chartBasisVecFiber (I := I) α k) b with hX_def
+        set v : TensorRSModel r s ℝ E :=
+          (trivializationAt (TensorRSModel r s ℝ E)
+              (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b X
+          with hv_def
+        have h_roundtrip :
+            ((trivializationAt (TensorRSModel r s ℝ E)
+                (fun y : M => TensorRSSpace r s I y) α).symmL ℝ b v :
+              TensorRSSpace r s I b) = X := by
+          rw [hv_def]
+          exact (trivializationAt (TensorRSModel r s ℝ E)
+              (fun y : M => TensorRSSpace r s I y) α).symmL_continuousLinearMapAt
+            (R := ℝ) hb_base X
+        have h_op : ‖((trivializationAt (TensorRSModel r s ℝ E)
+              (fun y : M => TensorRSSpace r s I y) α).symmL ℝ b v :
+              TensorRSSpace r s I b)‖ ≤ Cop * ‖v‖ :=
+          hCop_bound b hb v
+        rw [h_roundtrip] at h_op
+        have hX_nn : 0 ≤ ‖X‖ := norm_nonneg _
+        have h_sq := mul_self_le_mul_self hX_nn h_op
+        have h_lhs : ‖X‖ * ‖X‖ = ‖X‖ ^ 2 := by rw [sq]
+        have h_rhs : (Cop * ‖v‖) * (Cop * ‖v‖) = Cop ^ 2 * ‖v‖ ^ 2 := by ring
+        rw [hv_def] at h_sq ⊢
+        nlinarith [h_sq, h_lhs, h_rhs]
+      have h_sum_le :
+          (∑ k : Fin (Module.finrank ℝ E),
+            ‖chartTensorRSCovariantDerivative (I := I) r s g α
+                (fun b' => S.toCcTensor.toSection b')
+                (chartBasisVecFiber (I := I) α k) b‖ ^ 2) ≤
+            Cop ^ 2 *
+              (∑ k : Fin (Module.finrank ℝ E),
+                ‖(trivializationAt (TensorRSModel r s ℝ E)
+                    (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
+                  (chartTensorRSCovariantDerivative (I := I) r s g α
+                    (fun b' => S.toCcTensor.toSection b')
+                    (chartBasisVecFiber (I := I) α k) b)‖ ^ 2) := by
+        rw [Finset.mul_sum]
+        exact Finset.sum_le_sum (fun k _ => h_per_k k)
+      have h_sumM_nn :
+          0 ≤ ∑ k : Fin (Module.finrank ℝ E),
+            ‖(trivializationAt (TensorRSModel r s ℝ E)
+                (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
+              (chartTensorRSCovariantDerivative (I := I) r s g α
+                (fun b' => S.toCcTensor.toSection b')
+                (chartBasisVecFiber (I := I) α k) b)‖ ^ 2 :=
+        Finset.sum_nonneg (fun k _ => sq_nonneg _)
+      have h_sqrt_le :
+          Real.sqrt
+              (∑ k : Fin (Module.finrank ℝ E),
+                ‖chartTensorRSCovariantDerivative (I := I) r s g α
+                    (fun b' => S.toCcTensor.toSection b')
+                    (chartBasisVecFiber (I := I) α k) b‖ ^ 2) ≤
+            Cop *
+              Real.sqrt
+                (∑ k : Fin (Module.finrank ℝ E),
+                  ‖(trivializationAt (TensorRSModel r s ℝ E)
+                      (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
+                    (chartTensorRSCovariantDerivative (I := I) r s g α
+                      (fun b' => S.toCcTensor.toSection b')
+                      (chartBasisVecFiber (I := I) α k) b)‖ ^ 2) := by
+        have h1 := Real.sqrt_le_sqrt h_sum_le
+        rwa [Real.sqrt_mul (sq_nonneg Cop), Real.sqrt_sq hCop_nn] at h1
+      have h_mul :=
+        mul_le_mul_of_nonneg_left h_sqrt_le hρ_nn
+      rw [hgF_def, hgM_def]
+      calc ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b *
+              Real.sqrt
+                (∑ k : Fin (Module.finrank ℝ E),
+                  ‖chartTensorRSCovariantDerivative (I := I) r s g α
+                      (fun b' => S.toCcTensor.toSection b')
+                      (chartBasisVecFiber (I := I) α k) b‖ ^ 2)
+            ≤ ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b *
+                (Cop *
+                  Real.sqrt
+                    (∑ k : Fin (Module.finrank ℝ E),
+                      ‖(trivializationAt (TensorRSModel r s ℝ E)
+                          (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt
+                            ℝ b
+                        (chartTensorRSCovariantDerivative (I := I) r s g α
+                          (fun b' => S.toCcTensor.toSection b')
+                          (chartBasisVecFiber (I := I) α k) b)‖ ^ 2)) := h_mul
+          _ = Cop *
+                (((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b *
+                  Real.sqrt
+                    (∑ k : Fin (Module.finrank ℝ E),
+                      ‖(trivializationAt (TensorRSModel r s ℝ E)
+                          (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt
+                            ℝ b
+                        (chartTensorRSCovariantDerivative (I := I) r s g α
+                          (fun b' => S.toCcTensor.toSection b')
+                          (chartBasisVecFiber (I := I) α k) b)‖ ^ 2)) := by ring
+    · have hρ_zero : ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b = 0 := by
+        by_contra hne
+        exact hb (subset_tsupport _ hne)
+      simp only [hgF_def, hgM_def, hρ_zero, zero_mul, mul_zero, le_refl]
+  have hgF_nn : ∀ b : M, 0 ≤ gF b := by
+    intro b
+    rw [hgF_def]
+    exact mul_nonneg ((chartAtlasPOU I M).nonneg α b)
+      (Real.sqrt_nonneg _)
+  have h_mono :
+      eLpNorm gF 2 (riemannianVolumeMeasure (I := I) (M := M) g) ≤
+        eLpNorm (Cop • gM) 2 (riemannianVolumeMeasure (I := I) (M := M) g) := by
+    refine eLpNorm_mono_real (fun b => ?_)
+    rw [Real.norm_of_nonneg (hgF_nn b)]
+    simpa [Pi.smul_apply, smul_eq_mul] using h_ptwise b
+  have h_smul :
+      eLpNorm (Cop • gM) 2 (riemannianVolumeMeasure (I := I) (M := M) g) =
+        ENNReal.ofReal Cop *
+          eLpNorm gM 2 (riemannianVolumeMeasure (I := I) (M := M) g) := by
+    rw [eLpNorm_const_smul Cop gM, Real.enorm_eq_ofReal hCop_nn]
+  have hG2' :
+      eLpNorm gM 2 (riemannianVolumeMeasure (I := I) (M := M) g) ≤
+        ENNReal.ofReal Cg2 * (‖S‖₊ : ℝ≥0∞) := by
+    rw [hgM_def]; exact hG2 S
+  calc eLpNorm gF 2 (riemannianVolumeMeasure (I := I) (M := M) g)
+      ≤ eLpNorm (Cop • gM) 2 (riemannianVolumeMeasure (I := I) (M := M) g) := h_mono
+    _ = ENNReal.ofReal Cop *
+          eLpNorm gM 2 (riemannianVolumeMeasure (I := I) (M := M) g) := h_smul
+    _ ≤ ENNReal.ofReal Cop * (ENNReal.ofReal Cg2 * (‖S‖₊ : ℝ≥0∞)) :=
+        mul_le_mul_of_nonneg_left hG2' (zero_le _)
+    _ = ENNReal.ofReal (Cop * Cg2) * (‖S‖₊ : ℝ≥0∞) := by
+        rw [ENNReal.ofReal_mul hCop_nn, mul_assoc]
+
+end CovariantAtomsRiemannian
+
+/-! ## Riemannian-fibre-norm Christoffel slot-correction atom `L²` bound (HLCC-free)
+
+This section twins the locality-conditioned model-norm Christoffel slot-correction
+atom `exists_eLpNorm_sq_pou_mul_sqrt_sum_christoffel_correction_le_const_mul_h1NormSq`
+in the **intrinsic Riemannian fibre norm**, dropping the chart-locality predicate.
+
+The two model-norm slot operator-norm bounds
+(`chartTensorRS{Input,Output}SlotCorrection_norm_le_const_on_pouTsupport`,
+which carry `HasLocallyConstantChartAt`) are replaced by their unconditional
+Riemannian-fibre-norm counterparts, derived here from:
+
+* the honest model-space Christoffel-correction bound
+  `christoffelCorrection_riem_norm_le_on_pouTsupport`,
+* the chart-`α`-conjugation kernel factorisation
+  (`chartTensorRS{Input,Output}SlotCorrection_chart_kernel_factorization`),
+* the unconditional inverse / forward chart-`(r, s)`-fibre op-norm bounds
+  (`tensorRSChartFiber{From,To}Model_opNorm_isBounded_on_compact_unconditional`).
+
+The honest section-norm step collapses to the **exact isometry**
+`‖S.toSection b‖²_Riem = tensorInnerPointwise g r s b (S.toFun b) (S.toFun b)`,
+so the section constant is `K_S = 1`. The atom assembly itself is the
+norm-agnostic
+`exists_eLpNorm_chartPou_mul_sqrt_chart_christoffel_correction_le_const_mul_h1Norm`,
+fed the Riemannian slot bounds and the `K_S = 1` section identity. -/
+
+section ChristoffelAtomsRiemannian
+
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+
+private local instance : MeasurableSpace E := borel E
+private local instance : BorelSpace E := ⟨rfl⟩
+private local instance : MeasurableSpace M := borel M
+private local instance : BorelSpace M := ⟨rfl⟩
+
+open DifferentialGeometry.Tensor.Tensor0SRiemannian
+
+/-! ### Model-space basis geometry constants -/
+
+private noncomputable def chrRiemBasisCoordSup : ℝ :=
+  (Finset.univ : Finset (Fin (Module.finrank ℝ E))).sup'
+    (Finset.univ_nonempty_iff.mpr ⟨⟨0, Nat.pos_of_ne_zero (NeZero.ne _)⟩⟩)
+    (fun i => ‖((chartModelBasis E).coord i).toContinuousLinearMap‖)
+
+private noncomputable def chrRiemBasisVecSup : ℝ :=
+  (Finset.univ : Finset (Fin (Module.finrank ℝ E))).sup'
+    (Finset.univ_nonempty_iff.mpr ⟨⟨0, Nat.pos_of_ne_zero (NeZero.ne _)⟩⟩)
+    (fun k => ‖(chartModelBasis E) k‖)
+
+private lemma chrRiemBasisCoordSup_nonneg : 0 ≤ chrRiemBasisCoordSup (E := E) := by
+  unfold chrRiemBasisCoordSup
+  set i₀ : Fin (Module.finrank ℝ E) := ⟨0, Nat.pos_of_ne_zero (NeZero.ne _)⟩
+  calc (0 : ℝ) ≤ ‖((chartModelBasis E).coord i₀).toContinuousLinearMap‖ := norm_nonneg _
+    _ ≤ _ := Finset.le_sup' (f := fun i =>
+        ‖((chartModelBasis E).coord i).toContinuousLinearMap‖) (Finset.mem_univ i₀)
+
+private lemma chrRiemBasisVecSup_nonneg : 0 ≤ chrRiemBasisVecSup (E := E) := by
+  unfold chrRiemBasisVecSup
+  have hne : (Finset.univ : Finset (Fin (Module.finrank ℝ E))).Nonempty :=
+    Finset.univ_nonempty_iff.mpr ⟨⟨0, Nat.pos_of_ne_zero (NeZero.ne _)⟩⟩
+  obtain ⟨k₀, hk₀⟩ := hne
+  exact le_trans (norm_nonneg _)
+    (Finset.le_sup' (f := fun k => ‖(chartModelBasis E) k‖) hk₀)
+
+private lemma chrRiem_repr_coord_abs_le (x : E) (i : Fin (Module.finrank ℝ E)) :
+    |((chartModelBasis E).repr x) i| ≤ chrRiemBasisCoordSup (E := E) * ‖x‖ := by
+  have h_eq : (chartModelBasis E).repr x i =
+      ((chartModelBasis E).coord i).toContinuousLinearMap x := rfl
+  rw [h_eq, ← Real.norm_eq_abs]
+  calc ‖((chartModelBasis E).coord i).toContinuousLinearMap x‖
+      ≤ ‖((chartModelBasis E).coord i).toContinuousLinearMap‖ * ‖x‖ :=
+        ContinuousLinearMap.le_opNorm _ _
+    _ ≤ chrRiemBasisCoordSup (E := E) * ‖x‖ := by
+        apply mul_le_mul_of_nonneg_right _ (norm_nonneg _)
+        exact Finset.le_sup'
+          (f := fun i => ‖((chartModelBasis E).coord i).toContinuousLinearMap‖)
+          (Finset.mem_univ _)
+
+private lemma chrRiem_basis_vec_norm_le (k : Fin (Module.finrank ℝ E)) :
+    ‖(chartModelBasis E) k‖ ≤ chrRiemBasisVecSup (E := E) :=
+  Finset.le_sup' (f := fun k => ‖(chartModelBasis E) k‖) (Finset.mem_univ _)
+
+/-! ### Honest model-space Christoffel-correction norm bound on the POU tsupport -/
+
+/-- Honest model-space norm bound on `christoffelCorrection g α b Y v`,
+controlled by `C · ‖Y‖ · ‖trivToE α b v‖` uniformly on the chart-`α`
+partition-of-unity `tsupport`. No chart-locality predicate is required. -/
+private theorem christoffelCorrection_riem_norm_le_on_pouTsupport
+    (g : SmoothRiemannianMetric I M) (α : M) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ {b : M},
+        b ∈ tsupport (fun x : M =>
+            ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
+        ∀ (Y : E) (v : TangentSpace I b),
+          ‖christoffelCorrection (I := I) g α b Y v‖ ≤
+            C * ‖Y‖ * ‖trivToE (I := I) α b v‖ := by
+  classical
+  obtain ⟨CΓ, hCΓ_nn, hCΓ_le⟩ :=
+    chartChristoffel_bdd_on_pou_tsupport (I := I) (M := M) g α
+  set n : ℕ := Module.finrank ℝ E
+  set Cc := chrRiemBasisCoordSup (E := E)
+  set Cv := chrRiemBasisVecSup (E := E)
+  refine ⟨(n : ℝ) ^ 3 * Cc ^ 2 * Cv * CΓ,
+    mul_nonneg (mul_nonneg (mul_nonneg (pow_nonneg (Nat.cast_nonneg _) 3)
+      (sq_nonneg _)) (chrRiemBasisVecSup_nonneg (E := E))) hCΓ_nn, ?_⟩
+  intro b hb Y v
+  have hb_image : extChartAt I α b ∈ (extChartAt I α) ''
+      (tsupport (fun x : M =>
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
+    ⟨b, hb, rfl⟩
+  rw [christoffelCorrection_apply]
+  set w : E := trivToE (I := I) α b v
+  have h_step1 :
+      ‖∑ i : Fin n, ∑ j : Fin n, ∑ k : Fin n,
+          (((chartModelBasis E).repr w) i *
+            ((chartModelBasis E).repr Y) j *
+            chartChristoffel (I := I) g α i j k (extChartAt I α b)) •
+            (chartModelBasis E) k‖ ≤
+        ∑ i : Fin n, ∑ j : Fin n, ∑ k : Fin n,
+          |((chartModelBasis E).repr w) i| *
+          |((chartModelBasis E).repr Y) j| *
+          |chartChristoffel (I := I) g α i j k (extChartAt I α b)| * Cv := by
+    refine (norm_sum_le _ _).trans (Finset.sum_le_sum fun i _ => ?_)
+    refine (norm_sum_le _ _).trans (Finset.sum_le_sum fun j _ => ?_)
+    refine (norm_sum_le _ _).trans (Finset.sum_le_sum fun k _ => ?_)
+    rw [norm_smul, Real.norm_eq_abs, abs_mul, abs_mul]
+    exact mul_le_mul_of_nonneg_left (chrRiem_basis_vec_norm_le k)
+      (mul_nonneg (mul_nonneg (abs_nonneg _) (abs_nonneg _)) (abs_nonneg _))
+  have h_step2 :
+      ∑ i : Fin n, ∑ j : Fin n, ∑ k : Fin n,
+        |((chartModelBasis E).repr w) i| *
+        |((chartModelBasis E).repr Y) j| *
+        |chartChristoffel (I := I) g α i j k (extChartAt I α b)| * Cv ≤
+      ∑ i : Fin n, ∑ j : Fin n, ∑ _k : Fin n,
+        |((chartModelBasis E).repr w) i| *
+        |((chartModelBasis E).repr Y) j| * CΓ * Cv :=
+    Finset.sum_le_sum fun i _ =>
+      Finset.sum_le_sum fun j _ =>
+        Finset.sum_le_sum fun k _ => by
+          have h1 := hCΓ_le _ hb_image i j k
+          have hCv_nn := chrRiemBasisVecSup_nonneg (E := E)
+          have hwi := abs_nonneg (((chartModelBasis E).repr w) i)
+          have hYj := abs_nonneg (((chartModelBasis E).repr Y) j)
+          exact mul_le_mul_of_nonneg_right
+            (mul_le_mul_of_nonneg_left h1 (mul_nonneg hwi hYj)) hCv_nn
+  have h_step3 :
+      ∑ i : Fin n, ∑ j : Fin n, ∑ _k : Fin n,
+        |((chartModelBasis E).repr w) i| *
+        |((chartModelBasis E).repr Y) j| * CΓ * Cv =
+      (n : ℝ) * CΓ * Cv *
+        (∑ i : Fin n, |((chartModelBasis E).repr w) i|) *
+        (∑ j : Fin n, |((chartModelBasis E).repr Y) j|) := by
+    simp_rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
+    conv_lhs =>
+      arg 2; ext i; arg 2; ext j
+      rw [show (n : ℝ) * (|((chartModelBasis E).repr w) i| *
+        |((chartModelBasis E).repr Y) j| * CΓ * Cv) =
+        ((n : ℝ) * CΓ * Cv * |((chartModelBasis E).repr w) i|) *
+        |((chartModelBasis E).repr Y) j| from by ring]
+    simp_rw [← Finset.mul_sum]
+    rw [← Finset.sum_mul, ← Finset.mul_sum]
+  have h_w_bound :
+      (∑ i : Fin n, |((chartModelBasis E).repr w) i|) ≤ (n : ℝ) * Cc * ‖w‖ := by
+    calc ∑ i : Fin n, |((chartModelBasis E).repr w) i|
+        ≤ ∑ _i : Fin n, Cc * ‖w‖ :=
+          Finset.sum_le_sum fun i _ => chrRiem_repr_coord_abs_le w i
+      _ = (n : ℝ) * Cc * ‖w‖ := by
+          rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]; ring
+  have h_Y_bound :
+      (∑ j : Fin n, |((chartModelBasis E).repr Y) j|) ≤ (n : ℝ) * Cc * ‖Y‖ := by
+    calc ∑ j : Fin n, |((chartModelBasis E).repr Y) j|
+        ≤ ∑ _j : Fin n, Cc * ‖Y‖ :=
+          Finset.sum_le_sum fun j _ => chrRiem_repr_coord_abs_le Y j
+      _ = (n : ℝ) * Cc * ‖Y‖ := by
+          rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]; ring
+  calc ‖∑ i : Fin n, ∑ j : Fin n, ∑ k : Fin n,
+          (((chartModelBasis E).repr w) i *
+            ((chartModelBasis E).repr Y) j *
+            chartChristoffel (I := I) g α i j k (extChartAt I α b)) •
+            (chartModelBasis E) k‖
+      ≤ (n : ℝ) * CΓ * Cv *
+          (∑ i : Fin n, |((chartModelBasis E).repr w) i|) *
+          (∑ j : Fin n, |((chartModelBasis E).repr Y) j|) := by
+        linarith [h_step1, h_step2, h_step3.le]
+    _ ≤ (n : ℝ) * CΓ * Cv * ((n : ℝ) * Cc * ‖w‖) * ((n : ℝ) * Cc * ‖Y‖) := by
+        have hCv_nn := chrRiemBasisVecSup_nonneg (E := E)
+        have hCc_nn := chrRiemBasisCoordSup_nonneg (E := E)
+        have hn_nn : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg _
+        exact mul_le_mul
+          (mul_le_mul_of_nonneg_left h_w_bound
+            (mul_nonneg (mul_nonneg hn_nn hCΓ_nn) hCv_nn))
+          h_Y_bound
+          (Finset.sum_nonneg fun j _ => abs_nonneg _)
+          (mul_nonneg (mul_nonneg (mul_nonneg hn_nn hCΓ_nn) hCv_nn)
+            (mul_nonneg (mul_nonneg hn_nn hCc_nn) (norm_nonneg _)))
+    _ = (n : ℝ) ^ 3 * Cc ^ 2 * Cv * CΓ * ‖Y‖ * ‖w‖ := by ring
+
+/-! ### Uniform bound on the chart-`α`-conjugation slot factor (HLCC-free) -/
+
+private lemma chrRiem_slotConjFactor_self_apply
+    (g : SmoothRiemannianMetric I M) (α : M)
+    (X : Π b' : M, TangentSpace I b') {b : M}
+    (hb : b ∈ (chartAt H α).source) (w : E) :
+    (chartJ (I := I) (M := M) α b).comp
+        ((chartLeviCivitaParallelCLM (I := I) g α b X).comp
+          (chartJinv (I := I) (M := M) α b)) w =
+      christoffelCorrection (I := I) g α b
+        (trivToE (I := I) α b (X b))
+        (trivFromE (I := I) α b w) := by
+  classical
+  have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := hb
+  rw [ContinuousLinearMap.comp_apply]
+  change chartJ (I := I) (M := M) α b
+      ((chartLeviCivitaParallelCLM (I := I) g α b X)
+        (chartJinv (I := I) (M := M) α b w)) = _
+  rw [chartLeviCivitaParallelCLM_apply (I := I) g α b X
+    (chartJinv (I := I) (M := M) α b w)]
+  change trivToE (I := I) α b
+      (trivFromE (I := I) α b
+        (christoffelCorrection (I := I) g α b
+          (trivToE (I := I) α b (X b))
+          (trivFromE (I := I) α b w))) = _
+  rw [trivToE_trivFromE (I := I) α hb_base]
+
+private lemma chrRiem_slotConjFactor_basis_norm_le_on_pouTsupport
+    (g : SmoothRiemannianMetric I M) (α : M) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ {b : M}, b ∈ tsupport (fun x : M =>
+          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
+        ∀ (k : Fin (Module.finrank ℝ E)),
+          ‖(chartJ (I := I) (M := M) α b).comp
+              ((chartLeviCivitaParallelCLM (I := I) g α b
+                  (chartBasisVecFiber (I := I) α k)).comp
+                (chartJinv (I := I) (M := M) α b))‖ ≤ C := by
+  classical
+  obtain ⟨Cχ, hCχ_nn, hCχ_bound⟩ :=
+    christoffelCorrection_riem_norm_le_on_pouTsupport (I := I) (M := M) g α
+  set Cvec : ℝ :=
+    (Finset.univ : Finset (Fin (Module.finrank ℝ E))).sup'
+      (Finset.univ_nonempty_iff.mpr ⟨⟨0, Nat.pos_of_ne_zero (NeZero.ne _)⟩⟩)
+      (fun k => ‖(chartModelBasis E) k‖) with hCvec_def
+  have hCvec_nn : 0 ≤ Cvec := by
+    rw [hCvec_def]
+    obtain ⟨k₀, hk₀⟩ :=
+      (Finset.univ_nonempty_iff.mpr
+        ⟨(⟨0, Nat.pos_of_ne_zero (NeZero.ne _)⟩ : Fin (Module.finrank ℝ E))⟩)
+    exact le_trans (norm_nonneg _)
+      (Finset.le_sup' (f := fun k => ‖(chartModelBasis E) k‖) hk₀)
+  refine ⟨Cχ * Cvec, mul_nonneg hCχ_nn hCvec_nn, ?_⟩
+  intro b hb k
+  have hb_src : b ∈ (chartAt H α).source :=
+    chartAtlasPOU_isSubordinate (I := I) (M := M) α hb
+  have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := hb_src
+  have hX_triv :
+      trivToE (I := I) α b (chartBasisVecFiber (I := I) α k b) =
+        (chartModelBasis E) k := by
+    change trivToE (I := I) α b
+        (trivFromE (I := I) α b ((chartModelBasis E) k)) = _
+    exact trivToE_trivFromE (I := I) α hb_base ((chartModelBasis E) k)
+  have h_basis_le : ‖(chartModelBasis E) k‖ ≤ Cvec := by
+    rw [hCvec_def]
+    exact Finset.le_sup' (f := fun k => ‖(chartModelBasis E) k‖) (Finset.mem_univ k)
+  have hpt : ∀ w : E,
+      ‖(chartJ (I := I) (M := M) α b).comp
+          ((chartLeviCivitaParallelCLM (I := I) g α b
+              (chartBasisVecFiber (I := I) α k)).comp
+            (chartJinv (I := I) (M := M) α b)) w‖ ≤ Cχ * Cvec * ‖w‖ := by
+    intro w
+    rw [chrRiem_slotConjFactor_self_apply (I := I) (M := M) g α
+      (chartBasisVecFiber (I := I) α k) hb_src w, hX_triv]
+    have hround :
+        trivToE (I := I) α b (trivFromE (I := I) α b w) = w :=
+      trivToE_trivFromE (I := I) α hb_base w
+    have hbound := hCχ_bound (b := b) hb ((chartModelBasis E) k)
+      (trivFromE (I := I) α b w)
+    rw [hround] at hbound
+    calc ‖christoffelCorrection (I := I) g α b ((chartModelBasis E) k)
+            (trivFromE (I := I) α b w)‖
+        ≤ Cχ * ‖(chartModelBasis E) k‖ * ‖w‖ := hbound
+      _ ≤ Cχ * Cvec * ‖w‖ :=
+          mul_le_mul_of_nonneg_right
+            (mul_le_mul_of_nonneg_left h_basis_le hCχ_nn) (norm_nonneg _)
+  exact ContinuousLinearMap.opNorm_le_bound _
+    (mul_nonneg hCχ_nn hCvec_nn) hpt
+
+/-! ### Uniform bound on the per-slot conjugation family products (HLCC-free) -/
+
+private lemma chrRiem_slotInputConjCLM_prod_norm_le_on_pouTsupport
+    (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ {b : M}, b ∈ tsupport (fun x : M =>
+          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
+        ∀ (k : Fin (Module.finrank ℝ E)) (i : Fin r),
+          (∏ j : Fin r,
+            ‖slotInputConjCLM (I := I) g r α
+              (chartBasisVecFiber (I := I) α k) i b j‖) ≤ C := by
+  classical
+  obtain ⟨C₀, hC₀_nn, hC₀_bound⟩ :=
+    chrRiem_slotConjFactor_basis_norm_le_on_pouTsupport (I := I) (M := M) g α
+  refine ⟨(max C₀ 1) ^ r,
+    pow_nonneg (le_trans zero_le_one (le_max_right _ _)) r, ?_⟩
+  intro b hb k i
+  have h_factor_le : ∀ j : Fin r,
+      ‖slotInputConjCLM (I := I) g r α
+        (chartBasisVecFiber (I := I) α k) i b j‖ ≤ max C₀ 1 := by
+    intro j
+    by_cases hji : j = i
+    · subst hji
+      rw [slotInputConjCLM_self]
+      exact le_trans (hC₀_bound hb k) (le_max_left _ _)
+    · rw [slotInputConjCLM_other (I := I) g r α
+        (chartBasisVecFiber (I := I) α k) i b hji]
+      exact le_trans ContinuousLinearMap.norm_id_le (le_max_right _ _)
+  calc (∏ j : Fin r,
+        ‖slotInputConjCLM (I := I) g r α
+          (chartBasisVecFiber (I := I) α k) i b j‖)
+      ≤ ∏ _j : Fin r, max C₀ 1 :=
+        Finset.prod_le_prod (fun j _ => norm_nonneg _) (fun j _ => h_factor_le j)
+    _ = (max C₀ 1) ^ r := by rw [Finset.prod_const]; simp
+
+private lemma chrRiem_slotOutputConjCLM_prod_norm_le_on_pouTsupport
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ {b : M}, b ∈ tsupport (fun x : M =>
+          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
+        ∀ (k : Fin (Module.finrank ℝ E)) (l : Fin s),
+          (∏ j : Fin s,
+            ‖slotOutputConjCLM (I := I) g s α
+              (chartBasisVecFiber (I := I) α k) l b j‖) ≤ C := by
+  classical
+  obtain ⟨C₀, hC₀_nn, hC₀_bound⟩ :=
+    chrRiem_slotConjFactor_basis_norm_le_on_pouTsupport (I := I) (M := M) g α
+  refine ⟨(max C₀ 1) ^ s,
+    pow_nonneg (le_trans zero_le_one (le_max_right _ _)) s, ?_⟩
+  intro b hb k l
+  have h_factor_le : ∀ j : Fin s,
+      ‖slotOutputConjCLM (I := I) g s α
+        (chartBasisVecFiber (I := I) α k) l b j‖ ≤ max C₀ 1 := by
+    intro j
+    by_cases hjl : j = l
+    · subst hjl
+      rw [slotOutputConjCLM_self]
+      exact le_trans (hC₀_bound hb k) (le_max_left _ _)
+    · rw [slotOutputConjCLM_other (I := I) g s α
+        (chartBasisVecFiber (I := I) α k) l b hjl]
+      exact le_trans ContinuousLinearMap.norm_id_le (le_max_right _ _)
+  calc (∏ j : Fin s,
+        ‖slotOutputConjCLM (I := I) g s α
+          (chartBasisVecFiber (I := I) α k) l b j‖)
+      ≤ ∏ _j : Fin s, max C₀ 1 :=
+        Finset.prod_le_prod (fun j _ => norm_nonneg _) (fun j _ => h_factor_le j)
+    _ = (max C₀ 1) ^ s := by rw [Finset.prod_const]; simp
+
+private lemma chrRiem_inputSlotChartKernel_apply_norm_le
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
+    (X : Π b' : M, TangentSpace I b') (i : Fin r) (b : M)
+    (S : TensorRSModel r s ℝ E) :
+    ‖inputSlotChartKernel (I := I) g r s α X i b S‖ ≤
+      (∏ j : Fin r, ‖slotInputConjCLM (I := I) g r α X i b j‖) * ‖S‖ := by
+  classical
+  rw [inputSlotChartKernel_apply]
+  calc ‖S.comp (inputSlotPrecompCLM (I := I) g r α X i b)‖
+      ≤ ‖S‖ * ‖inputSlotPrecompCLM (I := I) g r α X i b‖ :=
+        ContinuousLinearMap.opNorm_comp_le _ _
+    _ ≤ ‖S‖ * (∏ j : Fin r, ‖slotInputConjCLM (I := I) g r α X i b j‖) := by
+        refine mul_le_mul_of_nonneg_left ?_ (norm_nonneg _)
+        unfold inputSlotPrecompCLM
+        exact ContinuousMultilinearMap.norm_compContinuousLinearMapL_le
+          (𝕜 := ℝ) (E := fun _ : Fin r => E) ℝ
+          (slotInputConjCLM (I := I) g r α X i b)
+    _ = (∏ j : Fin r, ‖slotInputConjCLM (I := I) g r α X i b j‖) * ‖S‖ := by
+        ring
+
+private lemma chrRiem_outputSlotChartKernel_apply_norm_le
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
+    (X : Π b' : M, TangentSpace I b') (l : Fin s) (b : M)
+    (S : TensorRSModel r s ℝ E) :
+    ‖outputSlotChartKernel (I := I) g r s α X l b S‖ ≤
+      (∏ j : Fin s, ‖slotOutputConjCLM (I := I) g s α X l b j‖) * ‖S‖ := by
+  classical
+  rw [outputSlotChartKernel_apply]
+  calc ‖(outputSlotPostcompCLM (I := I) g s α X l b).comp S‖
+      ≤ ‖outputSlotPostcompCLM (I := I) g s α X l b‖ * ‖S‖ :=
+        ContinuousLinearMap.opNorm_comp_le _ _
+    _ ≤ (∏ j : Fin s, ‖slotOutputConjCLM (I := I) g s α X l b j‖) * ‖S‖ := by
+        refine mul_le_mul_of_nonneg_right ?_ (norm_nonneg _)
+        unfold outputSlotPostcompCLM
+        exact ContinuousMultilinearMap.norm_compContinuousLinearMapL_le
+          (𝕜 := ℝ) (E := fun _ : Fin s => E) ℝ
+          (slotOutputConjCLM (I := I) g s α X l b)
+
+/-! ### The `(r, s)`-tensor trivialisation base set -/
+
+private lemma chrRiem_tensorRSTriv_baseSet_eq_chartSource (r s : ℕ) (α : M) :
+    (trivializationAt (TensorRSModel r s ℝ E)
+        (fun y : M => TensorRSSpace r s I y) α).baseSet =
+      (chartAt H α).source := by
+  classical
+  change (trivializationAt (Tensor0SModel r ℝ E)
+      (fun y : M => Tensor0SSpace r I y) α).baseSet ∩
+      (trivializationAt (Tensor0SModel s ℝ E)
+        (fun y : M => Tensor0SSpace s I y) α).baseSet = _
+  have h_r : (trivializationAt (Tensor0SModel r ℝ E)
+      (fun y : M => Tensor0SSpace r I y) α).baseSet =
+        (trivializationAt E (TangentSpace I) α).baseSet := rfl
+  have h_s : (trivializationAt (Tensor0SModel s ℝ E)
+      (fun y : M => Tensor0SSpace s I y) α).baseSet =
+        (trivializationAt E (TangentSpace I) α).baseSet := rfl
+  rw [h_r, h_s, Set.inter_self,
+    DifferentialGeometry.Integral.Measure.trivializationAt_baseSet_eq_chartAt_source]
+
+/-! ### Headline: Riemannian-norm slot op-norm bounds (HLCC-free) -/
+
+set_option synthInstance.maxHeartbeats 800000 in
+attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
+  Bundle.continuousMultilinearMap.instNormedSpace
+  Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- **Riemannian-norm uniform op-norm bound for the input-slot Christoffel
+correction (HLCC-free).** On the chart-`α` partition-of-unity `tsupport`, the
+Riemannian fibre norm of the input-slot Christoffel correction along the
+chart-frame basis vector field is bounded by a constant times the Riemannian
+fibre norm of the section value, uniformly in the section, the basis direction
+`k`, the slot `i`, and the base point `b`. -/
+theorem chartTensorRSInputSlotCorrection_riemannian_norm_le_on_pouTsupport_local
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
+    letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
+      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
+    ∃ M_F : ℝ, 0 ≤ M_F ∧
+      ∀ (T : Π b' : M, TensorRSSpace r s I b') {b : M},
+        b ∈ tsupport (fun x : M =>
+            ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
+        ∀ (k : Fin (Module.finrank ℝ E)) (i : Fin r),
+          ‖chartTensorRSInputSlotCorrection (I := I) r s g α T
+              (chartBasisVecFiber (I := I) α k) b i‖ ≤
+            M_F * ‖T b‖ := by
+  classical
+  letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
+  have hK_cpt : IsCompact (tsupport (fun x : M =>
+      ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
+    pouTsupport_isCompact (I := I) (M := M) α
+  have hK_sub : tsupport (fun x : M =>
+      ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆ (chartAt H α).source := by
+    intro x hx; exact chartAtlasPOU_isSubordinate (I := I) (M := M) α hx
+  obtain ⟨Cto, hCto_pos, hCto_bound⟩ :=
+    tensorRSChartFiberToModel_opNorm_isBounded_on_compact_unconditional
+      (I := I) (M := M) g r s α hK_cpt hK_sub
+  obtain ⟨Cfrom, hCfrom_pos, hCfrom_bound⟩ :=
+    tensorRSChartFiberFromModel_opNorm_isBounded_on_compact_unconditional
+      (I := I) (M := M) g r s α hK_cpt hK_sub
+  obtain ⟨Cprod, hCprod_nn, hCprod_bound⟩ :=
+    chrRiem_slotInputConjCLM_prod_norm_le_on_pouTsupport (I := I) (M := M) g r α
+  refine ⟨Cfrom * Cprod * Cto,
+    mul_nonneg (mul_nonneg (le_of_lt hCfrom_pos) hCprod_nn) (le_of_lt hCto_pos), ?_⟩
+  intro T b hb k i
+  set Y : TensorRSSpace r s I b :=
+    chartTensorRSInputSlotCorrection (I := I) r s g α T
+      (chartBasisVecFiber (I := I) α k) b i with hY_def
+  have hb_base : b ∈ (trivializationAt (TensorRSModel r s ℝ E)
+      (fun y : M => TensorRSSpace r s I y) α).baseSet := by
+    rw [chrRiem_tensorRSTriv_baseSet_eq_chartSource (I := I) (M := M) r s α]
+    exact hK_sub hb
+  have h_roundtrip :
+      (trivializationAt (TensorRSModel r s ℝ E)
+          (fun y : M => TensorRSSpace r s I y) α).symmL ℝ b
+        ((trivializationAt (TensorRSModel r s ℝ E)
+            (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b Y) = Y :=
+    Trivialization.symmL_continuousLinearMapAt _ hb_base Y
+  have h_from :
+      ‖Y‖ ≤ Cfrom * ‖(trivializationAt (TensorRSModel r s ℝ E)
+          (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b Y‖ := by
+    have := hCfrom_bound b hb
+      ((trivializationAt (TensorRSModel r s ℝ E)
+          (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b Y)
+    rwa [h_roundtrip] at this
+  have h_fact :
+      (trivializationAt (TensorRSModel r s ℝ E)
+          (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b Y =
+        (inputSlotChartKernel (I := I) g r s α
+            (chartBasisVecFiber (I := I) α k) i b)
+          ((trivializationAt (TensorRSModel r s ℝ E)
+              (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
+            (T b)) :=
+    chartTensorRSInputSlotCorrection_chart_kernel_factorization
+      (I := I) (M := M) g r s α T (chartBasisVecFiber (I := I) α k)
+      (hK_sub hb) i
+  have h_kernel :
+      ‖(trivializationAt (TensorRSModel r s ℝ E)
+          (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b Y‖ ≤
+        Cprod * ‖(trivializationAt (TensorRSModel r s ℝ E)
+            (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b (T b)‖ := by
+    rw [h_fact]
+    refine le_trans (chrRiem_inputSlotChartKernel_apply_norm_le (I := I) (M := M)
+      g r s α (chartBasisVecFiber (I := I) α k) i b _) ?_
+    exact mul_le_mul_of_nonneg_right (hCprod_bound hb k i) (norm_nonneg _)
+  have h_to :
+      ‖(trivializationAt (TensorRSModel r s ℝ E)
+          (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b (T b)‖ ≤
+        Cto * ‖T b‖ :=
+    hCto_bound b hb (T b)
+  have hCto_nn : 0 ≤ Cto := le_of_lt hCto_pos
+  have hCfrom_nn : 0 ≤ Cfrom := le_of_lt hCfrom_pos
+  calc ‖Y‖
+      ≤ Cfrom * ‖(trivializationAt (TensorRSModel r s ℝ E)
+          (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b Y‖ := h_from
+    _ ≤ Cfrom * (Cprod * ‖(trivializationAt (TensorRSModel r s ℝ E)
+          (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b (T b)‖) :=
+        mul_le_mul_of_nonneg_left h_kernel hCfrom_nn
+    _ ≤ Cfrom * (Cprod * (Cto * ‖T b‖)) := by
+        refine mul_le_mul_of_nonneg_left
+          (mul_le_mul_of_nonneg_left h_to hCprod_nn) hCfrom_nn
+    _ = Cfrom * Cprod * Cto * ‖T b‖ := by ring
+
+set_option synthInstance.maxHeartbeats 800000 in
+attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
+  Bundle.continuousMultilinearMap.instNormedSpace
+  Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- **Riemannian-norm uniform op-norm bound for the output-slot Christoffel
+correction (HLCC-free).** Output twin of
+`chartTensorRSInputSlotCorrection_riemannian_norm_le_on_pouTsupport_local`. -/
+theorem chartTensorRSOutputSlotCorrection_riemannian_norm_le_on_pouTsupport_local
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
+    letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
+      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
+    ∃ M_F : ℝ, 0 ≤ M_F ∧
+      ∀ (T : Π b' : M, TensorRSSpace r s I b') {b : M},
+        b ∈ tsupport (fun x : M =>
+            ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
+        ∀ (k : Fin (Module.finrank ℝ E)) (l : Fin s),
+          ‖chartTensorRSOutputSlotCorrection (I := I) r s g α T
+              (chartBasisVecFiber (I := I) α k) b l‖ ≤
+            M_F * ‖T b‖ := by
+  classical
+  letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
+  have hK_cpt : IsCompact (tsupport (fun x : M =>
+      ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
+    pouTsupport_isCompact (I := I) (M := M) α
+  have hK_sub : tsupport (fun x : M =>
+      ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆ (chartAt H α).source := by
+    intro x hx; exact chartAtlasPOU_isSubordinate (I := I) (M := M) α hx
+  obtain ⟨Cto, hCto_pos, hCto_bound⟩ :=
+    tensorRSChartFiberToModel_opNorm_isBounded_on_compact_unconditional
+      (I := I) (M := M) g r s α hK_cpt hK_sub
+  obtain ⟨Cfrom, hCfrom_pos, hCfrom_bound⟩ :=
+    tensorRSChartFiberFromModel_opNorm_isBounded_on_compact_unconditional
+      (I := I) (M := M) g r s α hK_cpt hK_sub
+  obtain ⟨Cprod, hCprod_nn, hCprod_bound⟩ :=
+    chrRiem_slotOutputConjCLM_prod_norm_le_on_pouTsupport (I := I) (M := M) g s α
+  refine ⟨Cfrom * Cprod * Cto,
+    mul_nonneg (mul_nonneg (le_of_lt hCfrom_pos) hCprod_nn) (le_of_lt hCto_pos), ?_⟩
+  intro T b hb k l
+  set Y : TensorRSSpace r s I b :=
+    chartTensorRSOutputSlotCorrection (I := I) r s g α T
+      (chartBasisVecFiber (I := I) α k) b l with hY_def
+  have hb_base : b ∈ (trivializationAt (TensorRSModel r s ℝ E)
+      (fun y : M => TensorRSSpace r s I y) α).baseSet := by
+    rw [chrRiem_tensorRSTriv_baseSet_eq_chartSource (I := I) (M := M) r s α]
+    exact hK_sub hb
+  have h_roundtrip :
+      (trivializationAt (TensorRSModel r s ℝ E)
+          (fun y : M => TensorRSSpace r s I y) α).symmL ℝ b
+        ((trivializationAt (TensorRSModel r s ℝ E)
+            (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b Y) = Y :=
+    Trivialization.symmL_continuousLinearMapAt _ hb_base Y
+  have h_from :
+      ‖Y‖ ≤ Cfrom * ‖(trivializationAt (TensorRSModel r s ℝ E)
+          (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b Y‖ := by
+    have := hCfrom_bound b hb
+      ((trivializationAt (TensorRSModel r s ℝ E)
+          (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b Y)
+    rwa [h_roundtrip] at this
+  have h_fact :
+      (trivializationAt (TensorRSModel r s ℝ E)
+          (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b Y =
+        (outputSlotChartKernel (I := I) g r s α
+            (chartBasisVecFiber (I := I) α k) l b)
+          ((trivializationAt (TensorRSModel r s ℝ E)
+              (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
+            (T b)) :=
+    chartTensorRSOutputSlotCorrection_chart_kernel_factorization
+      (I := I) (M := M) g r s α T (chartBasisVecFiber (I := I) α k)
+      (hK_sub hb) l
+  have h_kernel :
+      ‖(trivializationAt (TensorRSModel r s ℝ E)
+          (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b Y‖ ≤
+        Cprod * ‖(trivializationAt (TensorRSModel r s ℝ E)
+            (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b (T b)‖ := by
+    rw [h_fact]
+    refine le_trans (chrRiem_outputSlotChartKernel_apply_norm_le (I := I) (M := M)
+      g r s α (chartBasisVecFiber (I := I) α k) l b _) ?_
+    exact mul_le_mul_of_nonneg_right (hCprod_bound hb k l) (norm_nonneg _)
+  have h_to :
+      ‖(trivializationAt (TensorRSModel r s ℝ E)
+          (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b (T b)‖ ≤
+        Cto * ‖T b‖ :=
+    hCto_bound b hb (T b)
+  have hCto_nn : 0 ≤ Cto := le_of_lt hCto_pos
+  have hCfrom_nn : 0 ≤ Cfrom := le_of_lt hCfrom_pos
+  calc ‖Y‖
+      ≤ Cfrom * ‖(trivializationAt (TensorRSModel r s ℝ E)
+          (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b Y‖ := h_from
+    _ ≤ Cfrom * (Cprod * ‖(trivializationAt (TensorRSModel r s ℝ E)
+          (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b (T b)‖) :=
+        mul_le_mul_of_nonneg_left h_kernel hCfrom_nn
+    _ ≤ Cfrom * (Cprod * (Cto * ‖T b‖)) := by
+        refine mul_le_mul_of_nonneg_left
+          (mul_le_mul_of_nonneg_left h_to hCprod_nn) hCfrom_nn
+    _ = Cfrom * Cprod * Cto * ‖T b‖ := by ring
+
+/-! ### Headline: the Riemannian-fibre-norm Christoffel slot-correction atom -/
+
+set_option synthInstance.maxHeartbeats 800000 in
+attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
+  Bundle.continuousMultilinearMap.instNormedSpace
+  Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- **Unconditional Riemannian-fibre-norm Christoffel slot-correction atom `L²`
+bound.** The intrinsic-fibre-norm twin of
+`exists_eLpNorm_sq_pou_mul_sqrt_sum_christoffel_correction_le_const_mul_h1NormSq`,
+with the `HasLocallyConstantChartAt` predicate removed. The per-`α` per-direction
+`L²` norm of the partition-of-unity-weighted square-root of the Euclidean sum of
+squared **Riemannian fibre norms** of the chart-frame input / output slot
+Christoffel corrections is bounded by `ENNReal.ofReal C · ‖S‖₊`, with `C`
+depending only on `(g, r, s, α, j)`. -/
+theorem exists_eLpNorm_sq_pou_mul_sqrt_sum_christoffel_correction_le_const_mul_h1NormSq_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
+    (j : Fin (Module.finrank ℝ E)) :
+    letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
+      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (S : SmoothCcTensorH1 g r s),
+        eLpNorm
+            (fun b : M =>
+              ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b *
+                Real.sqrt
+                  ((∑ k : Fin r,
+                      ‖chartTensorRSInputSlotCorrection (I := I) r s g α
+                          (fun b' => S.toCcTensor.toSection b')
+                          (chartBasisVecFiber (I := I) α j) b k‖ ^ 2) +
+                    (∑ l : Fin s,
+                      ‖chartTensorRSOutputSlotCorrection (I := I) r s g α
+                          (fun b' => S.toCcTensor.toSection b')
+                          (chartBasisVecFiber (I := I) α j) b l‖ ^ 2)))
+            2 (riemannianVolumeMeasure (I := I) (M := M) g) ≤
+          ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞) := by
+  classical
+  letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
+  -- Riemannian-norm slot operator-norm bounds (HLCC-free), unified into `M_F`.
+  obtain ⟨M_F_in, hM_F_in_nn, hM_F_in_le⟩ :=
+    chartTensorRSInputSlotCorrection_riemannian_norm_le_on_pouTsupport_local
+      (I := I) (M := M) g r s α
+  obtain ⟨M_F_out, hM_F_out_nn, hM_F_out_le⟩ :=
+    chartTensorRSOutputSlotCorrection_riemannian_norm_le_on_pouTsupport_local
+      (I := I) (M := M) g r s α
+  set M_F : ℝ := max M_F_in M_F_out with hM_F_def
+  have hM_F_nn : 0 ≤ M_F := le_max_of_le_left hM_F_in_nn
+  -- Slot bounds reformulated against `M_F · ‖S.toSection b‖`.
+  have hM_F_input :
+      ∀ (S : SmoothCcTensor g r s) {b : M},
+        b ∈ tsupport (fun x : M =>
+            ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
+        ∀ k : Fin r,
+          ‖chartTensorRSInputSlotCorrection (I := I) r s g α
+              (fun b' => S.toSection b') (chartBasisVecFiber (I := I) α j) b k‖ ≤
+            M_F * ‖S.toSection b‖ := by
+    intro S b hb k
+    have h_orig := hM_F_in_le (fun b' => S.toSection b') (b := b) hb j k
+    exact h_orig.trans
+      (mul_le_mul_of_nonneg_right (le_max_left _ _) (norm_nonneg _))
+  have hM_F_output :
+      ∀ (S : SmoothCcTensor g r s) {b : M},
+        b ∈ tsupport (fun x : M =>
+            ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
+        ∀ l : Fin s,
+          ‖chartTensorRSOutputSlotCorrection (I := I) r s g α
+              (fun b' => S.toSection b') (chartBasisVecFiber (I := I) α j) b l‖ ≤
+            M_F * ‖S.toSection b‖ := by
+    intro S b hb l
+    have h_orig := hM_F_out_le (fun b' => S.toSection b') (b := b) hb j l
+    exact h_orig.trans
+      (mul_le_mul_of_nonneg_right (le_max_right _ _) (norm_nonneg _))
+  -- Section-norm step is the exact Riemannian isometry: `K_S = 1`.
+  have hK_S_bound :
+      ∀ (S : SmoothCcTensor g r s) {b : M},
+        b ∈ tsupport (fun x : M =>
+            ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
+        ‖S.toSection b‖ ^ 2 ≤
+          (1 : ℝ) * tensorInnerPointwise (I := I) (M := M) g r s b
+            (S.toFun b) (S.toFun b) := by
+    intro S b _hb
+    rw [one_mul]
+    have h_inner : (⟪S.toSection b, S.toSection b⟫_ℝ : ℝ) =
+        tensorInnerPointwise (I := I) (M := M) g r s b
+          (S.toFun b) (S.toFun b) := by
+      change DifferentialGeometry.Tensor.TensorRSRiemannianBundle.tensorRSRiemannianInnerCLM
+          (I := I) (M := M) g r s b (S.toSection b) (S.toSection b) = _
+      rw [DifferentialGeometry.Tensor.TensorRSRiemannianBundle.tensorRSRiemannianInnerCLM_apply]
+      rfl
+    rw [← h_inner, real_inner_self_eq_norm_sq]
+  -- Pointwise sum bound (inlined, in the active Riemannian fibre norm):
+  -- `Σ‖input‖² + Σ‖output‖² ≤ ((r + s)·M_F²) · tensorInnerPointwise`, on tsupport.
+  set C : ℝ := ((r : ℝ) + (s : ℝ)) * M_F ^ 2 with hC_def
+  have hC_nn : 0 ≤ C := by rw [hC_def]; positivity
+  have h_pt : ∀ (T : SmoothCcTensor g r s) {b : M},
+      b ∈ tsupport (fun x : M =>
+          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
+      ((∑ k : Fin r, ‖chartTensorRSInputSlotCorrection (I := I) r s g α
+            (fun b' => T.toSection b') (chartBasisVecFiber (I := I) α j) b k‖ ^ 2) +
+        (∑ l : Fin s, ‖chartTensorRSOutputSlotCorrection (I := I) r s g α
+            (fun b' => T.toSection b') (chartBasisVecFiber (I := I) α j) b l‖ ^ 2)) ≤
+        C * tensorInnerPointwise (I := I) (M := M) g r s b
+          (T.toFun b) (T.toFun b) := by
+    intro T b hb
+    have h_sec : ‖T.toSection b‖ ^ 2 ≤
+        (1 : ℝ) * tensorInnerPointwise (I := I) (M := M) g r s b
+          (T.toFun b) (T.toFun b) := hK_S_bound T hb
+    have h_in_each : ∀ k : Fin r,
+        ‖chartTensorRSInputSlotCorrection (I := I) r s g α
+            (fun b' => T.toSection b') (chartBasisVecFiber (I := I) α j) b k‖ ^ 2 ≤
+          M_F ^ 2 * ‖T.toSection b‖ ^ 2 := by
+      intro k
+      have hbnd := hM_F_input T hb k
+      have hLHS_nn : 0 ≤ ‖chartTensorRSInputSlotCorrection (I := I) r s g α
+          (fun b' => T.toSection b') (chartBasisVecFiber (I := I) α j) b k‖ :=
+        norm_nonneg _
+      have := mul_self_le_mul_self hLHS_nn hbnd
+      nlinarith [this, sq_nonneg M_F, norm_nonneg (T.toSection b)]
+    have h_out_each : ∀ l : Fin s,
+        ‖chartTensorRSOutputSlotCorrection (I := I) r s g α
+            (fun b' => T.toSection b') (chartBasisVecFiber (I := I) α j) b l‖ ^ 2 ≤
+          M_F ^ 2 * ‖T.toSection b‖ ^ 2 := by
+      intro l
+      have hbnd := hM_F_output T hb l
+      have hLHS_nn : 0 ≤ ‖chartTensorRSOutputSlotCorrection (I := I) r s g α
+          (fun b' => T.toSection b') (chartBasisVecFiber (I := I) α j) b l‖ :=
+        norm_nonneg _
+      have := mul_self_le_mul_self hLHS_nn hbnd
+      nlinarith [this, sq_nonneg M_F, norm_nonneg (T.toSection b)]
+    have h_in_sum : (∑ k : Fin r,
+          ‖chartTensorRSInputSlotCorrection (I := I) r s g α
+              (fun b' => T.toSection b') (chartBasisVecFiber (I := I) α j) b k‖ ^ 2) ≤
+        (r : ℝ) * (M_F ^ 2 * ‖T.toSection b‖ ^ 2) := by
+      have h_le := Finset.sum_le_sum (s := (Finset.univ : Finset (Fin r)))
+        (fun k _ => h_in_each k)
+      rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul] at h_le
+      exact h_le
+    have h_out_sum : (∑ l : Fin s,
+          ‖chartTensorRSOutputSlotCorrection (I := I) r s g α
+              (fun b' => T.toSection b') (chartBasisVecFiber (I := I) α j) b l‖ ^ 2) ≤
+        (s : ℝ) * (M_F ^ 2 * ‖T.toSection b‖ ^ 2) := by
+      have h_le := Finset.sum_le_sum (s := (Finset.univ : Finset (Fin s)))
+        (fun l _ => h_out_each l)
+      rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul] at h_le
+      exact h_le
+    have hQ_nn : 0 ≤ tensorInnerPointwise (I := I) (M := M) g r s b
+        (T.toFun b) (T.toFun b) :=
+      tensorInnerPointwise_nonneg (I := I) (M := M) g r s b _
+    have h_secSq : ‖T.toSection b‖ ^ 2 ≤
+        tensorInnerPointwise (I := I) (M := M) g r s b (T.toFun b) (T.toFun b) := by
+      rw [one_mul] at h_sec; exact h_sec
+    have h_MF_sq_nn : 0 ≤ M_F ^ 2 := sq_nonneg _
+    have h_rs_nn : 0 ≤ (r : ℝ) + (s : ℝ) := by positivity
+    calc (∑ k : Fin r,
+            ‖chartTensorRSInputSlotCorrection (I := I) r s g α
+                (fun b' => T.toSection b') (chartBasisVecFiber (I := I) α j) b k‖ ^ 2) +
+          (∑ l : Fin s,
+            ‖chartTensorRSOutputSlotCorrection (I := I) r s g α
+                (fun b' => T.toSection b') (chartBasisVecFiber (I := I) α j) b l‖ ^ 2)
+        ≤ (r : ℝ) * (M_F ^ 2 * ‖T.toSection b‖ ^ 2) +
+            (s : ℝ) * (M_F ^ 2 * ‖T.toSection b‖ ^ 2) :=
+          add_le_add h_in_sum h_out_sum
+      _ = ((r : ℝ) + (s : ℝ)) * M_F ^ 2 * ‖T.toSection b‖ ^ 2 := by ring
+      _ ≤ ((r : ℝ) + (s : ℝ)) * M_F ^ 2 *
+            tensorInnerPointwise (I := I) (M := M) g r s b (T.toFun b) (T.toFun b) :=
+          mul_le_mul_of_nonneg_left h_secSq
+            (mul_nonneg h_rs_nn h_MF_sq_nn)
+      _ = C * tensorInnerPointwise (I := I) (M := M) g r s b
+            (T.toFun b) (T.toFun b) := by rw [hC_def]
+  refine ⟨Real.sqrt C, Real.sqrt_nonneg _, ?_⟩
+  intro S
+  -- Notation for the integrand and the measure.
+  set ρ : M → ℝ := fun x : M =>
+    ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x with hρ_def
+  set SumSq : M → ℝ := fun b : M =>
+    (∑ k : Fin r,
+        ‖chartTensorRSInputSlotCorrection (I := I) r s g α
+            (fun b' => S.toCcTensor.toSection b')
+            (chartBasisVecFiber (I := I) α j) b k‖ ^ 2) +
+      (∑ l : Fin s,
+        ‖chartTensorRSOutputSlotCorrection (I := I) r s g α
+            (fun b' => S.toCcTensor.toSection b')
+            (chartBasisVecFiber (I := I) α j) b l‖ ^ 2) with hSumSq_def
+  set f : M → ℝ := fun b : M => ρ b * Real.sqrt (SumSq b) with hf_def
+  set μ : Measure M := riemannianVolumeMeasure (I := I) (M := M) g with hμ_def
+  have hSumSq_nn : ∀ b : M, 0 ≤ SumSq b := by
+    intro b
+    rw [hSumSq_def]
+    exact add_nonneg
+      (Finset.sum_nonneg fun _ _ => sq_nonneg _)
+      (Finset.sum_nonneg fun _ _ => sq_nonneg _)
+  -- Pointwise `(f b)² ≤ C · tensorInnerPointwise`.
+  have h_pt_sq : ∀ b : M, (f b) ^ 2 ≤
+      C * tensorInnerPointwise (I := I) (M := M) g r s b
+        (S.toCcTensor.toFun b) (S.toCcTensor.toFun b) := by
+    intro b
+    by_cases hb : b ∈ tsupport (fun x : M =>
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
+    · have h_eq : (f b) ^ 2 = ρ b ^ 2 * SumSq b := by
+        rw [hf_def, mul_pow,
+          show Real.sqrt (SumSq b) ^ 2 = SumSq b from Real.sq_sqrt (hSumSq_nn b)]
+      have h_rho_le_one : ρ b ≤ 1 := by
+        rw [hρ_def]; exact (chartAtlasPOU I M).le_one α b
+      have h_rho_nn : 0 ≤ ρ b := by rw [hρ_def]; exact (chartAtlasPOU I M).nonneg α b
+      have h_rho_sq_le_one : ρ b ^ 2 ≤ 1 := by
+        rw [sq]
+        calc ρ b * ρ b ≤ 1 * 1 :=
+              mul_le_mul h_rho_le_one h_rho_le_one h_rho_nn zero_le_one
+          _ = 1 := by ring
+      have h_sum_le : SumSq b ≤ C * tensorInnerPointwise (I := I) (M := M) g r s b
+          (S.toCcTensor.toFun b) (S.toCcTensor.toFun b) := h_pt S.toCcTensor hb
+      rw [h_eq]
+      calc ρ b ^ 2 * SumSq b
+          ≤ 1 * SumSq b :=
+            mul_le_mul_of_nonneg_right h_rho_sq_le_one (hSumSq_nn b)
+        _ = SumSq b := by ring
+        _ ≤ C * tensorInnerPointwise (I := I) (M := M) g r s b
+              (S.toCcTensor.toFun b) (S.toCcTensor.toFun b) := h_sum_le
+    · have h_rho_zero : ρ b = 0 := by
+        rw [hρ_def]; by_contra hne; exact hb (subset_tsupport _ hne)
+      have hzero : (f b) ^ 2 = 0 := by
+        change (ρ b * Real.sqrt (SumSq b)) ^ 2 = 0
+        rw [h_rho_zero]; ring
+      rw [hzero]
+      exact mul_nonneg hC_nn
+        (tensorInnerPointwise_nonneg (I := I) (M := M) g r s b _)
+  -- ENNReal-valued pointwise bound.
+  have h_pt_enn : ∀ b : M,
+      (‖f b‖ₑ : ℝ≥0∞) ^ 2 ≤
+        ENNReal.ofReal (C * tensorInnerPointwise
+          (I := I) (M := M) g r s b
+            (S.toCcTensor.toFun b) (S.toCcTensor.toFun b)) := by
+    intro b
+    rw [show (‖f b‖ₑ : ℝ≥0∞) ^ 2 = ENNReal.ofReal ((f b) ^ 2) by
+      rw [Real.enorm_eq_ofReal_abs, ← ENNReal.ofReal_pow (abs_nonneg _) 2,
+        sq_abs]]
+    exact ENNReal.ofReal_le_ofReal (h_pt_sq b)
+  -- Squared `eLpNorm` ≤ `ofReal (C · ‖S‖²)`.
+  have h_inner_int :
+      Integrable (fun b : M => tensorInnerPointwise
+        (I := I) (M := M) g r s b
+          (S.toCcTensor.toFun b) (S.toCcTensor.toFun b)) μ :=
+    SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+      S.toCcTensor S.toCcTensor
+  have h_C_smul_int :
+      Integrable (fun b : M => C *
+        tensorInnerPointwise (I := I) (M := M) g r s b
+          (S.toCcTensor.toFun b) (S.toCcTensor.toFun b)) μ :=
+    h_inner_int.const_mul C
+  have h_C_smul_nn :
+      0 ≤ᵐ[μ] (fun b : M => C *
+        tensorInnerPointwise (I := I) (M := M) g r s b
+          (S.toCcTensor.toFun b) (S.toCcTensor.toFun b)) :=
+    Filter.Eventually.of_forall fun b => mul_nonneg hC_nn
+      (tensorInnerPointwise_nonneg (I := I) (M := M) g r s b _)
+  have h_int_le :
+      ∫ b, tensorInnerPointwise
+        (I := I) (M := M) g r s b
+          (S.toCcTensor.toFun b) (S.toCcTensor.toFun b) ∂μ ≤
+      ‖S‖ ^ 2 := by
+    have h_l2_eq : ∫ b, tensorInnerPointwise
+        (I := I) (M := M) g r s b
+          (S.toCcTensor.toFun b) (S.toCcTensor.toFun b) ∂μ =
+        ‖S.toCcTensor‖ ^ 2 := by
+      rw [hμ_def]
+      have h_eq : ∫ b,
+          tensorInnerPointwise (I := I) (M := M) g r s b
+            (S.toCcTensor.toFun b) (S.toCcTensor.toFun b)
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
+        tensorL2Inner (I := I) (M := M) g r s
+          S.toCcTensor.toFun S.toCcTensor.toFun := rfl
+      rw [h_eq, ← SmoothCcTensor.norm_sq_eq_inner_self
+        (I := I) (M := M) S.toCcTensor]
+    rw [h_l2_eq]
+    exact SmoothCcTensorH1.l2NormSq_le_h1NormSq S
+  have h_sq : (eLpNorm f 2 μ) ^ 2 ≤ ENNReal.ofReal (C * ‖S‖ ^ 2) := by
+    rw [sq_eLpNorm_two_eq_lintegral_enorm_sq μ f]
+    calc ∫⁻ b, (‖f b‖ₑ : ℝ≥0∞) ^ 2 ∂μ
+        ≤ ∫⁻ b, ENNReal.ofReal (C * tensorInnerPointwise
+            (I := I) (M := M) g r s b
+              (S.toCcTensor.toFun b) (S.toCcTensor.toFun b)) ∂μ := by
+          refine lintegral_mono_ae ?_
+          filter_upwards with b using h_pt_enn b
+      _ = ENNReal.ofReal (∫ b, C * tensorInnerPointwise
+            (I := I) (M := M) g r s b
+              (S.toCcTensor.toFun b) (S.toCcTensor.toFun b) ∂μ) :=
+          (MeasureTheory.ofReal_integral_eq_lintegral_ofReal
+            h_C_smul_int h_C_smul_nn).symm
+      _ = ENNReal.ofReal (C *
+            ∫ b, tensorInnerPointwise
+              (I := I) (M := M) g r s b
+                (S.toCcTensor.toFun b) (S.toCcTensor.toFun b) ∂μ) := by
+          rw [integral_const_mul]
+      _ ≤ ENNReal.ofReal (C * ‖S‖ ^ 2) :=
+          ENNReal.ofReal_le_ofReal (mul_le_mul_of_nonneg_left h_int_le hC_nn)
+  -- Take square roots.
+  set Tval : ℝ := C * ‖S‖ ^ 2 with hT_def
+  have hT_nn : 0 ≤ Tval := mul_nonneg hC_nn (sq_nonneg _)
+  have h_eLpNorm_le := eLpNorm_two_le_ofReal_sqrt hT_nn h_sq
+  have hS_nn : 0 ≤ ‖S‖ := norm_nonneg _
+  have h_sqrt_factor :
+      Real.sqrt Tval = Real.sqrt C * ‖S‖ := by
+    rw [hT_def, Real.sqrt_mul hC_nn,
+      show ‖S‖ ^ 2 = ‖S‖ * ‖S‖ from by ring,
+      Real.sqrt_mul_self hS_nn]
+  rw [h_sqrt_factor,
+    ENNReal.ofReal_mul (Real.sqrt_nonneg _)] at h_eLpNorm_le
+  rw [show ENNReal.ofReal ‖S‖ = (‖S‖₊ : ℝ≥0∞) from
+    (coe_nnnorm_eq_ofReal_norm S).symm] at h_eLpNorm_le
+  exact h_eLpNorm_le
+
+end ChristoffelAtomsRiemannian
+
 end TensorSpectral
 end Parabolic
 end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.aestronglyMeasurable_pou_mul_sqrt_sum_triv_chart_cov
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_eLpNorm_sq_pou_mul_sum_triv_chart_cov_le_const_mul_h1NormSq
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_integral_indicator_tsupp_raw_sq_le_const_mul_h1NormSq
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_eLpNorm_sq_pou_mul_sqrt_sum_christoffel_correction_le_const_mul_h1NormSq
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.aestronglyMeasurable_indicator_tsupp_abs_raw
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.aestronglyMeasurable_pou_mul_sqrt_sum_christoffel_correction
-end Sanity
