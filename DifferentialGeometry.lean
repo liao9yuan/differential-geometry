@@ -322,6 +322,7 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevCauchy
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevBanach
 import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
+import DifferentialGeometry.Analysis.Sobolev.Chart.WkpNormHkDecomposition
 import DifferentialGeometry.Analysis.Sobolev.Chart.StrictCutoff
 import DifferentialGeometry.Analysis.Sobolev.Chart.StrictCutoffPushedRawBound
 import DifferentialGeometry.Analysis.Sobolev.Chart.Banach
