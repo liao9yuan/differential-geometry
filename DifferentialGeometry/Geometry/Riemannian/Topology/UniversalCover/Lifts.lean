@@ -293,50 +293,111 @@ theorem hasMFDerivAt_proj
   exact hId.congr_of_eventuallyEq hEq hx0
 
 
+section ProjLipschitz
+
+open Manifold MeasureTheory
+
+variable [Nonempty M]
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Path-length is preserved under `proj`.**
+
+For any `C¹` path `γ` in the universal cover (on `[0,1]`), the projected path
+`proj ∘ γ` in `M` has the same `pathELength`.  The manifold derivative of
+`proj` is the identity (`hasMFDerivAt_proj`), so the chain rule identifies
+`mfderiv (proj ∘ γ) t 1` with `mfderiv γ t 1`.  The fibrewise extended norms
+then match: both reduce to `√(g.inner (proj (γ t)) w w)` — the base one via the
+hypothesis `hEnormBase` (the bundle norm — square-root inner-product identity,
+exactly as exposed for `pathELength_eq_arcLength_C1`), the cover one via
+`hEnormCover` together with the lifted-metric definition. -/
+private theorem proj_pathELength_eq
+    (g : SmoothRiemannianMetric I M)
+    [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+    [RiemannianBundle
+      (fun (x : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) ↦
+        TangentSpace I x)]
+    (hEnormBase : ∀ (x : M) (v : TangentSpace I x),
+        ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (hEnormCover : ∀ (x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
+        (v : TangentSpace I x'),
+        ‖v‖ₑ = ENNReal.ofReal (Real.sqrt ((liftedMetric (I := I) g).inner x' v v)))
+    {γ : ℝ → DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M}
+    (hγ : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Icc (0 : ℝ) 1)) :
+    pathELength I (proj ∘ γ) 0 1 = pathELength I γ 0 1 := by
+  rw [pathELength_eq_lintegral_mfderivWithin_Icc, pathELength_eq_lintegral_mfderivWithin_Icc]
+  rw [← MeasureTheory.restrict_Ioo_eq_restrict_Icc]
+  apply MeasureTheory.setLIntegral_congr_fun measurableSet_Ioo (fun t ht ↦ ?_)
+  have hproj_mfderiv : mfderiv I I (proj (X := M)) (γ t) = ContinuousLinearMap.id ℝ E :=
+    (hasMFDerivAt_proj (I := I) (M := M) (γ t)).mfderiv
+  have huniq : UniqueMDiffWithinAt 𝓘(ℝ, ℝ) (Set.Icc (0 : ℝ) 1) t := by
+    rw [uniqueMDiffWithinAt_iff_uniqueDiffWithinAt]
+    exact uniqueDiffOn_Icc zero_lt_one t ⟨ht.1.le, ht.2.le⟩
+  have hγdiff : MDifferentiableWithinAt 𝓘(ℝ, ℝ) I γ (Set.Icc (0 : ℝ) 1) t :=
+    hγ.mdifferentiableOn one_ne_zero t ⟨ht.1.le, ht.2.le⟩
+  have hcomp :
+      mfderivWithin 𝓘(ℝ, ℝ) I (proj (X := M) ∘ γ) (Set.Icc (0 : ℝ) 1) t =
+        (mfderiv I I (proj (X := M)) (γ t)).comp
+          (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc (0 : ℝ) 1) t) :=
+    mfderiv_comp_mfderivWithin t
+      ((proj_contMDiff (I := I) (M := M)).mdifferentiable (by norm_num) (γ t)) hγdiff huniq
+  -- Rewrite the base- and cover-side enorms to `ofReal (√ …)` via the
+  -- square-root inner-product identifications.
+  rw [hEnormBase ((proj (X := M) ∘ γ) t)
+        (mfderivWithin 𝓘(ℝ, ℝ) I (proj (X := M) ∘ γ) (Set.Icc (0 : ℝ) 1) t 1),
+      hEnormCover (γ t) (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc (0 : ℝ) 1) t 1)]
+  -- The two arguments are equal (`hval`) and `liftedMetric.inner (γ t) =
+  -- g.inner ((proj ∘ γ) t)` by definition, so the two `ofReal (√ …)` coincide.
+  have hval :
+      mfderivWithin 𝓘(ℝ, ℝ) I (proj (X := M) ∘ γ) (Set.Icc (0 : ℝ) 1) t 1 =
+        mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc (0 : ℝ) 1) t 1 := by
+    rw [hcomp, hproj_mfderiv]; rfl
+  rw [hval]
+  -- `liftedMetric.inner (γ t) = g.inner ((proj ∘ γ) t)` by definition.
+  rfl
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- **`proj` is `1`-Lipschitz for the principled lifted extended metric.**
 
-Statement: with the principled `PseudoEMetricSpace (UC M)` instance
-`uc_pseudoEMetricSpace (liftedMetric g)` injected via `letI`, the
-covering projection `proj : UC M → M` is `1`-Lipschitz w.r.t. the
-ambient `PseudoEMetricSpace M` (coming from the variable-section
-hypothesis `[PseudoEMetricSpace M]`).
+With the principled `PseudoEMetricSpace (UC M)` structure
+`uc_pseudoEMetricSpace (liftedMetric g)` injected via `letI`, the covering
+projection `proj : UC M → M` is `1`-Lipschitz with respect to the ambient
+`PseudoEMetricSpace M`, provided `M` is a Riemannian manifold and the cover
+carries the lifted Riemannian-bundle structure.
 
-Proof sketch (the mathematical content beyond the signature refactor):
-for any C¹ path `γ : [0,1] → UC M` with `γ 0 = x'`, `γ 1 = y'`, the
-composition `proj ∘ γ : [0,1] → M` is a C¹ path with endpoints
-`proj x', proj y'`, and `pathELength I (proj ∘ γ) 0 1 = pathELength I γ 0 1`
-because `mfderiv proj (γ t)` is a fibrewise linear isometry from the
-lifted-metric tangent space to the base-metric tangent space
-(`proj_isLocalIsometry`). Taking infima over all such `γ`,
-`riemannianEDist I (proj x') (proj y') ≤ riemannianEDist I x' y'`.
-Combined with `IsRiemannianManifold` on both sides, this gives the
-edist comparison and hence `LipschitzWith 1 proj`.
+The two `hEnorm` hypotheses are the bundle-norm — square-root inner-product
+identifications on the base and cover fibres, the same structural fact exposed
+as a hypothesis in `pathELength_eq_arcLength_C1`.
 
-This refactored signature replaces the previous form which silently
-used the legacy `instPseudoEMetricSpace` instance (whose body is itself
-a `sorry`); now the conclusion type pins the principled
-`uc_pseudoEMetricSpace`-based instance via `letI`, and the proof body
-must produce a genuine path-length comparison.
-
-The full proof requires (i) `mfderiv (Sigma.fst : UC M → M)` to be
-norm-preserving as a map between the lifted-metric tangent space at
-`x'` and the base-metric tangent space at `proj x'`, and (ii) the
-resulting `pathELength` comparison + `iInf` monotonicity. These are
-substantive lemmas not currently in the project; they are isolated
-below as `proj_pathELength_eq` and packaged into the Lipschitz
-conclusion. -/
-theorem proj_lipschitz [Nonempty M] [RegularSpace
+Proof: for any `C¹` path `γ : [0,1] → UC M` from `x'` to `y'`, the projected
+path `proj ∘ γ` is a `C¹` path from `proj x'` to `proj y'` of equal length
+(`proj_pathELength_eq`).  Hence `riemannianEDist I (proj x') (proj y')`, the
+infimum of projected path-lengths, is at most `riemannianEDist I x' y'`.
+Translating both sides through the `IsRiemannianManifold` predicates
+(`edist = riemannianEDist`) yields the edist comparison and so
+`LipschitzWith 1 proj`. -/
+theorem proj_lipschitz [RegularSpace
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)]
-    (g : SmoothRiemannianMetric I M) :
+    (g : SmoothRiemannianMetric I M)
+    [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+    [IsRiemannianManifold I M]
+    (hEnormBase : ∀ (x : M) (v : TangentSpace I x),
+        ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (hEnormCover :
+        letI : RiemannianBundle
+            (fun (x : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) ↦
+              TangentSpace I x) :=
+          ⟨(liftedMetric (I := I) g).toRiemannianMetric⟩
+        ∀ (x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
+          (v : TangentSpace I x'),
+          ‖v‖ₑ = ENNReal.ofReal (Real.sqrt ((liftedMetric (I := I) g).inner x' v v))) :
     letI : PseudoEMetricSpace
         (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
       uc_pseudoEMetricSpace (I := I) (M := M) (liftedMetric (I := I) g)
     LipschitzWith 1
       (proj :
         DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M) := by
-  -- Activate the principled pseudo-emetric structure on `UC M` and the
-  -- accompanying `RiemannianBundle` witness so that `edist` on `UC M`
-  -- unfolds to `riemannianEDist I` against `liftedMetric g`.
   letI hRB : RiemannianBundle
       (fun (x : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) ↦
         TangentSpace I x) :=
@@ -344,11 +405,37 @@ theorem proj_lipschitz [Nonempty M] [RegularSpace
   letI hUCem : PseudoEMetricSpace
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
     uc_pseudoEMetricSpace (I := I) (M := M) (liftedMetric (I := I) g)
-  -- The full mathematical content (path-length comparison under the
-  -- covering projection, plus an `iInf` monotonicity step) is isolated
-  -- in the named auxiliary sorry below; refer to the docstring for the
-  -- precise hand-off statement.
-  sorry
+  haveI hUCRiem :
+      IsRiemannianManifold I
+        (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
+    ⟨fun _ _ ↦ rfl⟩
+  rw [LipschitzWith]
+  intro x' y'
+  rw [ENNReal.coe_one, one_mul]
+  rw [IsRiemannianManifold.out (I := I)
+        (M := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) x' y',
+      IsRiemannianManifold.out (I := I) (M := M) (proj (X := M) x') (proj (X := M) y')]
+  apply le_of_forall_gt_imp_ge_of_dense
+  intro r hr
+  obtain ⟨γ, hγ0, hγ1, hγ_smooth, hγlen⟩ :=
+    Manifold.exists_lt_of_riemannianEDist_lt (I := I)
+      (M := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) hr
+  have hbound :
+      riemannianEDist I (proj (X := M) x') (proj (X := M) y') ≤
+        pathELength I (proj (X := M) ∘ γ) 0 1 := by
+    apply Manifold.riemannianEDist_le_pathELength (I := I) (M := M)
+      (((proj_contMDiff (I := I) (M := M)).of_le (by norm_num)).comp_contMDiffOn hγ_smooth)
+    · simp [Function.comp_apply, hγ0]
+    · simp [Function.comp_apply, hγ1]
+    · exact zero_le_one
+  have hlen_eq : pathELength I (proj (X := M) ∘ γ) 0 1 = pathELength I γ 0 1 :=
+    proj_pathELength_eq (I := I) (M := M) g hEnormBase hEnormCover hγ_smooth
+  calc riemannianEDist I (proj (X := M) x') (proj (X := M) y')
+      ≤ pathELength I (proj (X := M) ∘ γ) 0 1 := hbound
+    _ = pathELength I γ 0 1 := hlen_eq
+    _ ≤ r := hγlen.le
+
+end ProjLipschitz
 
 /-- **Tail of a Cauchy sequence lies in a single sheet.**
 Given a Cauchy sequence `x' : ℕ → M'` whose projection converges to `y ∈ M`,
