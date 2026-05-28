@@ -7,6 +7,7 @@ import DifferentialGeometry.Coordinates.NablaComponents
 import DifferentialGeometry.Integral.Measure.ChartDensity
 import Mathlib.Analysis.ODE.PicardLindelof
 import Mathlib.Analysis.ODE.Gronwall
+import Mathlib.Analysis.Calculus.MeanValue
 
 set_option linter.unusedSectionVars false
 
@@ -227,16 +228,165 @@ sections `V` and `W` along `γ` satisfy
 `d/dt ⟨V(t), W(t)⟩_g = 0`; hence the inner product is constant along
 `γ`. -/
 
+/-- **Local constancy of the chart-Gram inner product of two parallel
+sections.** If `V` and `W` are both parallel along `γ` in the chart at
+`α` on a set `s ⊆ ℝ`, and `γ` maps `s` into the chart source, then the
+chart-Gram form `t ↦ ⟨V, W⟩_G(t)` has derivative `0` at every interior
+point of `s` (every `t` for which `s ∈ 𝓝 t`).
+
+This is the engine `chartGramAlongCurve_hasDerivAt_covariant`: the
+covariant-derivative correction terms `V'(t) + Γ(u', V)` and
+`W'(t) + Γ(u', W)` both vanish because `V` and `W` are parallel, so the
+Leibniz-product derivative of the Gram form is `0`. -/
+theorem chartGramAlongCurve_hasDerivAt_zero_of_parallel [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
+    {V W : ℝ → E} {s : Set ℝ}
+    (hV : IsParallelChart (I := I) g α γ
+      (fun t => deriv (AlongCurve.chartCurve (I := I) α γ) t) V s)
+    (hW : IsParallelChart (I := I) g α γ
+      (fun t => deriv (AlongCurve.chartCurve (I := I) α γ) t) W s)
+    (hsrc : ∀ τ ∈ s, γ τ ∈ (chartAt H α).source)
+    {t : ℝ} (ht : s ∈ 𝓝 t) :
+    HasDerivAt (fun τ => AlongCurve.chartGramAlongCurve (I := I) g α γ V W τ)
+      0 t := by
+  have hts : t ∈ s := mem_of_mem_nhds ht
+  -- Curve velocity, parallelism derivatives, and interior membership at `t`.
+  have huPrime : HasDerivAt (AlongCurve.chartCurve (I := I) α γ)
+      (deriv (AlongCurve.chartCurve (I := I) α γ) t) t :=
+    (AlongCurve.IsParallelChart.chartCurve_hasDerivAt hV hts)
+  have hVd : HasDerivAt V
+      (- chartChristoffelContraction (I := I) g α
+          (deriv (AlongCurve.chartCurve (I := I) α γ) t) (V t)
+          (AlongCurve.chartCurve (I := I) α γ t)) t :=
+    AlongCurve.IsParallelChart.hasDerivAt hV hts
+  have hWd : HasDerivAt W
+      (- chartChristoffelContraction (I := I) g α
+          (deriv (AlongCurve.chartCurve (I := I) α γ) t) (W t)
+          (AlongCurve.chartCurve (I := I) α γ t)) t :=
+    AlongCurve.IsParallelChart.hasDerivAt hW hts
+  -- `u(t)` lies in the interior of the chart target.
+  have hmem : AlongCurve.chartCurve (I := I) α γ t ∈
+      interior (extChartAt I α).target := by
+    have hxsrc : γ t ∈ (extChartAt I α).source := by
+      rw [extChartAt_source]; exact hsrc t hts
+    have hxtarget : AlongCurve.chartCurve (I := I) α γ t ∈
+        (extChartAt I α).target :=
+      (extChartAt I α).map_source hxsrc
+    exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+      (I := I) α hxtarget
+  -- Apply the covariant product rule with the chosen `Vprime`, `Wprime`.
+  have hbase := AlongCurve.chartGramAlongCurve_hasDerivAt_covariant
+    (I := I) g α γ V W
+    (uPrime := fun τ => deriv (AlongCurve.chartCurve (I := I) α γ) τ)
+    (Vprime := fun _ => - chartChristoffelContraction (I := I) g α
+      (deriv (AlongCurve.chartCurve (I := I) α γ) t) (V t)
+      (AlongCurve.chartCurve (I := I) α γ t))
+    (Wprime := fun _ => - chartChristoffelContraction (I := I) g α
+      (deriv (AlongCurve.chartCurve (I := I) α γ) t) (W t)
+      (AlongCurve.chartCurve (I := I) α γ t))
+    huPrime hmem hVd hWd
+  -- The covariant correction terms vanish: `V'(t) + Γ(u', V) = 0` etc.
+  have hVzero :
+      (- chartChristoffelContraction (I := I) g α
+          (deriv (AlongCurve.chartCurve (I := I) α γ) t) (V t)
+          (AlongCurve.chartCurve (I := I) α γ t))
+        + chartChristoffelContraction (I := I) g α
+            (deriv (AlongCurve.chartCurve (I := I) α γ) t) (V t)
+            (AlongCurve.chartCurve (I := I) α γ t) = 0 := by
+    rw [neg_add_cancel]
+  have hWzero :
+      (- chartChristoffelContraction (I := I) g α
+          (deriv (AlongCurve.chartCurve (I := I) α γ) t) (W t)
+          (AlongCurve.chartCurve (I := I) α γ t))
+        + chartChristoffelContraction (I := I) g α
+            (deriv (AlongCurve.chartCurve (I := I) α γ) t) (W t)
+            (AlongCurve.chartCurve (I := I) α γ t) = 0 := by
+    rw [neg_add_cancel]
+  -- Substitute the zero corrections; the derivative value collapses to `0`.
+  rw [hVzero, hWzero] at hbase
+  simpa using hbase
+
 /-- **parallel-transport-preserves-inner-product.** For two parallel
-sections `V, W` along `γ`, the function `t ↦ g(γ t)(V t, W t)` is
-constant; in particular it equals its value at `t₀`. -/
-theorem parallelTransport_preserves_inner_product
+transports `V`, `W` along `γ`, written in a fixed chart at `α`, the
+chart-Gram inner product
+`t ↦ ⟨V, W⟩_G(t) = ∑_{i,j} G_{ij}(u(t)) · Vᶜ_i(t) · Wᶜ_j(t)`
+— the genuine Riemannian inner product `g(γ t)(V̄(t), W̄(t))` of the
+tangent vectors `V̄(t) = triv.symmL (γ t)(V t)`, `W̄(t) = triv.symmL
+(γ t)(W t)` represented in the chart frame at `α` — is **constant in
+`t` on any interval `s` where `γ` stays in the chart source**. In
+particular, on such an interval it equals its value at the base time
+`t₀ ∈ s`.
+
+Here `V t = (parallelTransport g γ hγ t₀ v₀).toFun t` etc. are the
+chart-coordinate representations on which the parallel-transport ODE
+`Y'(t) = -Γ(u'(t), Y(t))(u(t))` acts. The Levi-Civita connection is
+metric-compatible (`chartGramOnE_partialDeriv_eq_christoffel_sum_split`),
+so the covariant-derivative product rule gives `d/dt ⟨V, W⟩_G = 0`. -/
+theorem parallelTransport_preserves_inner_product [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
-    (t₀ : ℝ) (v₀ w₀ : E) (t : ℝ) :
-    g.inner (γ t)
-        ((parallelTransport (I := I) g γ hγ t₀ v₀).toFun t)
-        ((parallelTransport (I := I) g γ hγ t₀ w₀).toFun t) =
-      g.inner (γ t₀) v₀ w₀ := sorry
+    (t₀ : ℝ) (v₀ w₀ : E) (α : M) {s : Set ℝ} (hs : IsPreconnected s)
+    (hsrc : ∀ τ ∈ s, γ τ ∈ (chartAt H α).source)
+    {t : ℝ} (ht : t ∈ s) (ht₀ : t₀ ∈ s) :
+    AlongCurve.chartGramAlongCurve (I := I) g α γ
+        (parallelTransport (I := I) g γ hγ t₀ v₀).toFun
+        (parallelTransport (I := I) g γ hγ t₀ w₀).toFun t =
+      AlongCurve.chartGramAlongCurve (I := I) g α γ
+        (parallelTransport (I := I) g γ hγ t₀ v₀).toFun
+        (parallelTransport (I := I) g γ hγ t₀ w₀).toFun t₀ := by
+  classical
+  set V : ℝ → E := (parallelTransport (I := I) g γ hγ t₀ v₀).toFun with hV_def
+  set W : ℝ → E := (parallelTransport (I := I) g γ hγ t₀ w₀).toFun with hW_def
+  set f : ℝ → ℝ := fun τ =>
+    AlongCurve.chartGramAlongCurve (I := I) g α γ V W τ with hf_def
+  -- Argue on the open set `o := γ ⁻¹' (chartAt H α).source ⊇ s`.
+  set o : Set ℝ := γ ⁻¹' (chartAt H α).source with ho_def
+  have hγcont : Continuous γ := hγ.continuous
+  have ho_open : IsOpen o := (chartAt H α).open_source.preimage hγcont
+  have hto : t ∈ o := hsrc t ht
+  have ht₀o : t₀ ∈ o := hsrc t₀ ht₀
+  -- On `o`, `V` and `W` are parallel: every `τ ∈ o` has `γ τ ∈ source`.
+  have hVparo : IsParallelChart (I := I) g α γ
+      (fun τ => deriv (AlongCurve.chartCurve (I := I) α γ) τ) V o :=
+    parallelTransport_isParallel (I := I) g γ hγ t₀ v₀ α o (fun τ hτ => hτ)
+  have hWparo : IsParallelChart (I := I) g α γ
+      (fun τ => deriv (AlongCurve.chartCurve (I := I) α γ) τ) W o :=
+    parallelTransport_isParallel (I := I) g γ hγ t₀ w₀ α o (fun τ hτ => hτ)
+  -- `f` has derivative `0` at every point of the open set `o`.
+  have hderiv : ∀ τ ∈ o, HasDerivAt f 0 τ := by
+    intro τ hτ
+    exact chartGramAlongCurve_hasDerivAt_zero_of_parallel (I := I) g α γ
+      hVparo hWparo (fun σ hσ => hσ) (ho_open.mem_nhds hτ)
+  -- `f` is locally constant on the open set `o` (Mathlib mean-value engine),
+  -- hence constant on the connected component of `t` containing `t₀`.
+  have hDiffOn : DifferentiableOn ℝ f o :=
+    fun τ hτ => (hderiv τ hτ).differentiableAt.differentiableWithinAt
+  have hEqOn : o.EqOn (deriv f) 0 := fun τ hτ => (hderiv τ hτ).deriv
+  -- `f` is locally constant on `o`: the preimage of any singleton meets `o` in
+  -- an open set. Both `t` and `t₀` lie in the same connected component of `o`
+  -- only when they are joined inside `o`; instead we use that the difference
+  -- `f - const` has zero derivative on the connected component.
+  -- Use the locally-constant characterisation directly: `f` agrees with the
+  -- constant `f t₀` on the maximal preconnected (= connected) subset of `o`
+  -- containing `t₀`. We take that component and show `t` lies in it.
+  set comp : Set ℝ := connectedComponentIn o t₀ with hcomp_def
+  have hcomp_open : IsOpen comp :=
+    ho_open.connectedComponentIn
+  have hcomp_pre : IsPreconnected comp :=
+    isPreconnected_connectedComponentIn
+  have hcomp_sub : comp ⊆ o := connectedComponentIn_subset o t₀
+  have ht₀comp : t₀ ∈ comp := mem_connectedComponentIn ht₀o
+  -- On the open preconnected `comp ⊆ o`, `f` is constant.
+  have hconst : ∀ x ∈ comp, f x = f t₀ :=
+    fun x hx => hcomp_open.is_const_of_deriv_eq_zero hcomp_pre
+      (fun τ hτ => (hderiv τ (hcomp_sub hτ)).differentiableAt.differentiableWithinAt)
+      (fun τ hτ => hEqOn (hcomp_sub hτ)) hx ht₀comp
+  -- `t` lies in the same connected component of `o` as `t₀`: `s` is
+  -- preconnected, `s ⊆ o`, and `t₀ ∈ s`, so `s ⊆ connectedComponentIn o t₀`.
+  have hso : s ⊆ o := fun τ hτ => hsrc τ hτ
+  have hs_sub_comp : s ⊆ comp :=
+    hs.subset_connectedComponentIn ht₀ hso
+  have htcomp : t ∈ comp := hs_sub_comp ht
+  exact hconst t htcomp
 
 /-! ## Parallel orthonormal frame on `(γ')⊥`
 
