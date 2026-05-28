@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ChartJUniformBound
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.ChristoffelBound
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TrivProj.CovNormBound
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.TensorChartTwistUniformBound
+import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.ChartLeviCivitaParallelCLMUnconditional
 import DifferentialGeometry.Integral.Connection.LeviCivitaChartLocal
 import DifferentialGeometry.Integral.Connection.ChartTensor0SCovariantDerivative
 import DifferentialGeometry.Integral.Connection.ChartTensorRSCovariantDerivative
@@ -830,6 +831,106 @@ theorem chartLeviCivitaParallelCLM_chartBasisVec_opNorm_isBounded_on_pouTsupport
     mul_le_mul_of_nonneg_left h_inner_le h_outer_nn
   linarith
 
+/-! ### Unconditional twin of the chart Levi-Civita parallel CLM op-norm bound
+
+The unconditional headline removes the locality hypothesis `HasLocallyConstantChartAt`.
+The operator norm is computed with respect to the Riemannian fibre norm on
+`TangentSpace I b` (installed via the `RiemannianBundle` instance from `g`),
+matching the convention of the unconditional Levi-Civita-parallel bound
+`chartLeviCivitaParallelCLM_general_X_opNorm_isBounded_on_pouTsupport_unconditional`.
+
+The chart-basis vector field is specialised from the general vector argument:
+`chartBasisVecFiber α j b = trivFromE α b ((chartModelBasis E) j)`, whose
+Riemannian fibre norm is bounded uniformly on the partition-of-unity tsupport by
+`C_Jinv * C_e` via the unconditional `chartJinv` op-norm bound. -/
+
+set_option maxHeartbeats 800000 in
+set_option synthInstance.maxHeartbeats 400000 in
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Unconditional uniform operator-norm bound for the chart Levi-Civita
+parallel CLM applied to a chart-basis vector field, on
+`tsupport (chartAtlasPOU I M α)`.**
+
+For a closed Riemannian manifold `(M, g)`, there exists a non-negative constant
+`C` such that for every `b` in the closed support of the canonical chart-atlas
+partition-of-unity weight at `α` and every model-basis index `j`,
+
+  `‖chartLeviCivitaParallelCLM g α b (chartBasisVecFiber α j)‖ ≤ C`,
+
+where the operator norm uses the Riemannian fibre norm on `TangentSpace I b`.
+The constant `C` is independent of `b` and `j`. No locality hypothesis on the
+chart selection is required. -/
+theorem chartLeviCivitaParallelCLM_chartBasisVec_opNorm_isBounded_on_pouTsupport_unconditional
+    (g : SmoothRiemannianMetric I M) (α : M) :
+    letI cg : Bundle.ContinuousRiemannianMetric E (TangentSpace I : M → Type _) :=
+      g.toContinuousRiemannianMetric
+    letI : Bundle.RiemannianBundle (TangentSpace I : M → Type _) :=
+      ⟨cg.toRiemannianMetric⟩
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ {b : M}, b ∈ pouTsupportSet (I := I) (M := M) α →
+        ∀ (j : Fin (Module.finrank ℝ E)),
+          ‖chartLeviCivitaParallelCLM (I := I) g α b
+              (chartBasisVecFiber (I := I) α j)‖ ≤ C := by
+  classical
+  letI cg : Bundle.ContinuousRiemannianMetric E (TangentSpace I : M → Type _) :=
+    g.toContinuousRiemannianMetric
+  letI rb : Bundle.RiemannianBundle (TangentSpace I : M → Type _) :=
+    ⟨cg.toRiemannianMetric⟩
+  -- Compact base set `K := tsupport(POU α) ⊆ baseSet`.
+  set K : Set M := pouTsupportSet (I := I) (M := M) α with hK_def
+  have hK_compact : IsCompact K := pouTsupportSet_isCompact (I := I) (M := M) α
+  have hK_base : K ⊆ (trivializationAt E (TangentSpace I) α).baseSet :=
+    pouTsupport_subset_baseSet (I := I) (M := M) α
+  -- Unconditional uniform bound on `chartLeviCivitaParallelCLM g α b X` (general `X`).
+  obtain ⟨C_B, hC_B_nn, hC_B⟩ :=
+    DifferentialGeometry.PDE.RicciFlow.HebeyBlock.chartLeviCivitaParallelCLM_general_X_opNorm_isBounded_on_pouTsupport_unconditional
+      (I := I) (M := M) g α
+  -- Unconditional uniform bound on `‖chartJinv α b‖` on `K` (Riemannian fibre norm).
+  obtain ⟨C_Jinv, hCJinv_nn, hCJinv_bound⟩ :=
+    DifferentialGeometry.PDE.RicciFlow.HebeyBlock.chartJinv_opNorm_isBounded_on_compact_unconditional
+      (I := I) (M := M) g α hK_compact hK_base
+  -- Maximum norm of model basis vectors.
+  set C_e : ℝ := chartModelBasisVecSup' E with hCe_def
+  have hCe_nn : 0 ≤ C_e := chartModelBasisVecSup'_nonneg
+  -- The headline constant.
+  set C : ℝ := C_B * (C_Jinv * C_e) with hC_def
+  have hC_nn : 0 ≤ C := by positivity
+  refine ⟨C, hC_nn, ?_⟩
+  intro b hb j
+  -- `chartBasisVecFiber α j b = trivFromE α b ((chartModelBasis E) j)`.
+  have h_X_eq : (chartBasisVecFiber (I := I) α j b : TangentSpace I b) =
+      trivFromE (I := I) α b ((chartModelBasis E) j) := rfl
+  -- Riemannian fibre-norm bound on the chart-basis vector at `b`.
+  have h_ej_le : ‖(chartModelBasis E) j‖ ≤ C_e :=
+    norm_basis_le_chartModelBasisVecSup' (E := E) j
+  have h_ej_nn : 0 ≤ ‖(chartModelBasis E) j‖ := norm_nonneg _
+  have h_trivFromE_le : ‖trivFromE (I := I) α b‖ ≤ C_Jinv := hCJinv_bound b hb
+  have h_trivFromE_nn : 0 ≤ ‖trivFromE (I := I) α b‖ := norm_nonneg _
+  have h_Xb_le : ‖(chartBasisVecFiber (I := I) α j b : TangentSpace I b)‖ ≤
+      C_Jinv * C_e := by
+    rw [h_X_eq]
+    calc ‖trivFromE (I := I) α b ((chartModelBasis E) j)‖
+        ≤ ‖trivFromE (I := I) α b‖ * ‖(chartModelBasis E) j‖ :=
+          (trivFromE (I := I) α b).le_opNorm _
+      _ ≤ C_Jinv * C_e := by
+          have h1 : ‖trivFromE (I := I) α b‖ * ‖(chartModelBasis E) j‖ ≤
+              C_Jinv * ‖(chartModelBasis E) j‖ :=
+            mul_le_mul_of_nonneg_right h_trivFromE_le h_ej_nn
+          have h2 : C_Jinv * ‖(chartModelBasis E) j‖ ≤ C_Jinv * C_e :=
+            mul_le_mul_of_nonneg_left h_ej_le hCJinv_nn
+          linarith
+  -- Apply the unconditional general-`X` bound at `X = chartBasisVecFiber α j`.
+  have h_clm_le :
+      ‖chartLeviCivitaParallelCLM (I := I) g α b (chartBasisVecFiber (I := I) α j)‖ ≤
+        C_B * ‖(chartBasisVecFiber (I := I) α j) b‖ :=
+    hC_B (b := b) hb (chartBasisVecFiber (I := I) α j)
+  -- Chain: `≤ C_B * ‖X b‖ ≤ C_B * (C_Jinv * C_e) = C`.
+  have h_chain : C_B * ‖(chartBasisVecFiber (I := I) α j) b‖ ≤ C := by
+    rw [hC_def]
+    exact mul_le_mul_of_nonneg_left h_Xb_le hC_B_nn
+  exact h_clm_le.trans h_chain
+
 /-! ## Part C: uniform op-norm bound on the input / output slot corrections
 
 The chart-frame covariant derivative `chartTensorRSCovariantDerivative` on an
@@ -1204,6 +1305,22 @@ theorem chartTensorRSOutputSlotCorrection_norm_le_const_on_pouTsupport
   rw [h_rearrange] at hChain2
   exact hChain2
 
+/-! ### Slot-correction unconditional twins live downstream (Riemannian norm)
+
+The locality-free uniform op-norm bounds for the chart-frame input / output
+slot corrections are NOT provided here. Their proof would route through the
+model-fibre operator norm of `chartLeviCivitaParallelCLM`
+(`tensorSlotSubstCLM`'s factor product is the model `E →L[ℝ] E` operator norm
+of the substituted CLMs), which factors through the model-to-model chart-
+Jacobian operator norm `‖chartJ α b‖` / `‖chartJinv α b‖` — the discontinuous
+quantity that no `HasLocallyConstantChartAt`-free uniform bound controls.
+
+The genuinely unconditional formulation instead measures the slot corrections
+in the Riemannian fibre norm on `TensorRSSpace`; that bound is proved
+downstream once the Riemannian trivialisation op-norm comparisons are in scope.
+It cannot be stated here because the supporting infrastructure imports this
+file. -/
+
 end TensorSpectral
 end Parabolic
 end Analysis
@@ -1222,4 +1339,6 @@ section Sanity
   DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartTensorRSInputSlotCorrection_norm_le_const_on_pouTsupport
 #print axioms
   DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartTensorRSOutputSlotCorrection_norm_le_const_on_pouTsupport
+#print axioms
+  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartLeviCivitaParallelCLM_chartBasisVec_opNorm_isBounded_on_pouTsupport_unconditional
 end Sanity
