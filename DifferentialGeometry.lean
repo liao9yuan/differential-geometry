@@ -1094,6 +1094,7 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.EnergyEstimates
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.BallRetraction
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.MaxRegLocalLipschitz
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.MaxRegLocalLipschitzStay
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.MaxRegLocalLipschitzStayDischarge
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.CrossScaleParabolicTrace
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.CrossScaleParabolicTraceEnergy
 
