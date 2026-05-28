@@ -416,7 +416,7 @@ private theorem tsupport_perturbedSource_subset
 
 /-- The order-`m` iterated perturbed source `iteratedPerturbedSource B m u f idx`
 is supported in any closed set containing the supports of `u` and `f`. -/
-private theorem tsupport_iteratedPerturbedSource_subset
+theorem tsupport_iteratedPerturbedSource_subset
     (B : SmoothEllipticBilinearForm d (Set.univ : Set EE)) (m : ℕ) :
     ∀ {u f : EE → ℝ} {S : Set EE}, IsClosed S →
       tsupport u ⊆ S → tsupport f ⊆ S → ∀ idx : Fin m → Fin d,
@@ -441,7 +441,7 @@ private theorem tsupport_iteratedPerturbedSource_subset
       exact ih hS_closed h_du_S h_ps_S (fun i : Fin m => idx i.succ)
 
 /-- The order-`m` iterated perturbed source of smooth `(u, f)` is `C^∞`. -/
-private theorem contDiff_iteratedPerturbedSource
+theorem contDiff_iteratedPerturbedSource
     (B : SmoothEllipticBilinearForm d (Set.univ : Set EE)) (m : ℕ) :
     ∀ {u f : EE → ℝ}, ContDiff ℝ (⊤ : ℕ∞) u → ContDiff ℝ (⊤ : ℕ∞) f →
       ∀ idx : Fin m → Fin d,
@@ -624,7 +624,7 @@ step drops one order). -/
 
 /-- The iterated classical partial of order `m` is supported in any closed set
 containing the parent's support. -/
-private theorem tsupport_iterClassicalPartial_subset (m : ℕ) :
+theorem tsupport_iterClassicalPartial_subset (m : ℕ) :
     ∀ (idx : Fin m → Fin d) {h : EE → ℝ} {S : Set EE}, IsClosed S →
       tsupport h ⊆ S → tsupport (iterClassicalPartial (d := d) m idx h) ⊆ S := by
   induction m with
