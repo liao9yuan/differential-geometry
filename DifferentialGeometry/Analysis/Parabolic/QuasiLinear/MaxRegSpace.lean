@@ -473,6 +473,26 @@ theorem maxRegHomogeneousDerivField_eq_scaleLaplacian (hT : 0 ≤ T)
       (T := T) hT u₀ i]
   exact homDerivModeCoeff_eq_smul (I := I) (M := M) (a := a) (T := T) u₀ i
 
+/-- Chart-locality-free version of
+`maxRegHomogeneousDerivField_eq_scaleLaplacian`, parameterized on resolvent
+compactness `h_compact`: `∂_t (e^{tΔ_∇} u₀) = Δ_∇ (e^{tΔ_∇} u₀)`. -/
+theorem maxRegHomogeneousDerivField_eq_scaleLaplacian_ofCompact (hT : 0 ≤ T)
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (u₀ : tensorHs (I := I) (M := M) g r s (a + 2)) :
+    maxRegHomogeneousDerivField (I := I) (M := M) a T u₀ =
+      timeScaleLaplacian (I := I) (M := M) a
+        (maxRegHomogeneousSolField (I := I) (M := M) a T u₀) := by
+  refine timeModeCoeff_injective_ofCompact (I := I) (M := M) h_compact
+    (fun i => ?_)
+  rw [maxRegHomogeneousDerivField_timeModeCoeff (I := I) (M := M) (a := a)
+      (T := T) hT u₀ i,
+    timeModeCoeff_timeScaleLaplacian (I := I) (M := M) (τ := a)
+      (maxRegHomogeneousSolField (I := I) (M := M) a T u₀) i,
+    maxRegHomogeneousSolField_timeModeCoeff (I := I) (M := M) (a := a)
+      (T := T) hT u₀ i]
+  exact homDerivModeCoeff_eq_smul (I := I) (M := M) (a := a) (T := T) u₀ i
+
 include h_atlas in
 /-- **The homogeneous part solves the homogeneous heat equation.**  `∂_t
 (maxRegHomogeneous … u₀) = Δ_∇ (maxRegHomogeneousSolField … u₀)` as an identity
@@ -489,6 +509,22 @@ theorem maxRegHomogeneous_timeDeriv_eq (hT : 0 ≤ T)
     (a := a) (T := T) u₀]
   exact maxRegHomogeneousDerivField_eq_scaleLaplacian (I := I) (M := M)
     (h_atlas := h_atlas) (a := a) (T := T) hT u₀
+
+/-- Chart-locality-free version of `maxRegHomogeneous_timeDeriv_eq`,
+parameterized on resolvent compactness `h_compact`:
+`∂_t (maxRegHomogeneous … u₀) = Δ_∇ (maxRegHomogeneousSolField … u₀)`. -/
+theorem maxRegHomogeneous_timeDeriv_eq_ofCompact (hT : 0 ≤ T)
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (u₀ : tensorHs (I := I) (M := M) g r s (a + 2)) :
+    TimeSobolev.timeH1.timeDeriv _ T
+        (maxRegHomogeneous (I := I) (M := M) a T u₀) =
+      timeScaleLaplacian (I := I) (M := M) a
+        (maxRegHomogeneousSolField (I := I) (M := M) a T u₀) := by
+  rw [TimeSobolev.timeH1.timeDeriv_apply, maxRegHomogeneous_deriv (I := I) (M := M)
+    (a := a) (T := T) u₀]
+  exact maxRegHomogeneousDerivField_eq_scaleLaplacian_ofCompact (I := I) (M := M)
+    (h_compact := h_compact) (a := a) (T := T) hT u₀
 
 /-! ## Additivity of the maximal-regularity operator
 
@@ -520,6 +556,27 @@ theorem maximalRegularityDerivField_add (hT : 0 ≤ T)
   rw [derivModeCoeff, derivModeCoeff, derivModeCoeff,
     timeModeCoeff_add (I := I) (M := M), map_add]
 
+/-- Chart-locality-free version of `maximalRegularityDerivField_add`,
+parameterized on resolvent compactness `h_compact`. -/
+theorem maximalRegularityDerivField_add_ofCompact (hT : 0 ≤ T)
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (f f' : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
+    maximalRegularityDerivField (I := I) (M := M) a hT (f + f') =
+      maximalRegularityDerivField (I := I) (M := M) a hT f +
+        maximalRegularityDerivField (I := I) (M := M) a hT f' := by
+  refine timeModeCoeff_injective_ofCompact (I := I) (M := M) h_compact
+    (fun i => ?_)
+  rw [maximalRegularityDerivField_timeModeCoeff_ofCompact (I := I) (M := M)
+      (h_compact := h_compact) (a := a) hT (f + f') i,
+    timeModeCoeff_add (I := I) (M := M),
+    maximalRegularityDerivField_timeModeCoeff_ofCompact (I := I) (M := M)
+      (h_compact := h_compact) (a := a) hT f i,
+    maximalRegularityDerivField_timeModeCoeff_ofCompact (I := I) (M := M)
+      (h_compact := h_compact) (a := a) hT f' i]
+  rw [derivModeCoeff, derivModeCoeff, derivModeCoeff,
+    timeModeCoeff_add (I := I) (M := M), map_add]
+
 include h_atlas in
 /-- The maximal-regularity time-derivative field is `ℝ`-homogeneous in the
 forcing term: `maximalRegularityDerivField (c • f) = c • maximalRegularityDerivField
@@ -534,6 +591,24 @@ theorem maximalRegularityDerivField_smul (hT : 0 ≤ T) (c : ℝ)
     timeModeCoeff_smul (I := I) (M := M),
     maximalRegularityDerivField_timeModeCoeff (I := I) (M := M)
       (h_atlas := h_atlas) (a := a) hT f i]
+  rw [derivModeCoeff, derivModeCoeff, timeModeCoeff_smul (I := I) (M := M),
+    map_smul]
+
+/-- Chart-locality-free version of `maximalRegularityDerivField_smul`,
+parameterized on resolvent compactness `h_compact`. -/
+theorem maximalRegularityDerivField_smul_ofCompact (hT : 0 ≤ T)
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (c : ℝ) (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
+    maximalRegularityDerivField (I := I) (M := M) a hT (c • f) =
+      c • maximalRegularityDerivField (I := I) (M := M) a hT f := by
+  refine timeModeCoeff_injective_ofCompact (I := I) (M := M) h_compact
+    (fun i => ?_)
+  rw [maximalRegularityDerivField_timeModeCoeff_ofCompact (I := I) (M := M)
+      (h_compact := h_compact) (a := a) hT (c • f) i,
+    timeModeCoeff_smul (I := I) (M := M),
+    maximalRegularityDerivField_timeModeCoeff_ofCompact (I := I) (M := M)
+      (h_compact := h_compact) (a := a) hT f i]
   rw [derivModeCoeff, derivModeCoeff, timeModeCoeff_smul (I := I) (M := M),
     map_smul]
 
@@ -556,6 +631,25 @@ theorem maximalRegularityOp_add (hT : 0 < T) (hT1 : T ≤ 1)
   · rw [TimeSobolev.timeH1.deriv_add]
     exact maximalRegularityDerivField_add (I := I) (M := M) (h_atlas := h_atlas) (a := a) hT.le f f'
 
+/-- Chart-locality-free version of `maximalRegularityOp_add`, parameterized on
+resolvent compactness `h_compact`. -/
+theorem maximalRegularityOp_add_ofCompact (hT : 0 < T) (hT1 : T ≤ 1)
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (f f' : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
+    maximalRegularityOp (I := I) (M := M) a hT hT1 (f + f') =
+      maximalRegularityOp (I := I) (M := M) a hT hT1 f +
+        maximalRegularityOp (I := I) (M := M) a hT hT1 f' := by
+  refine TimeSobolev.timeH1.ext ?_ ?_
+  · rw [TimeSobolev.timeH1.init_add]
+    change (0 : tensorHs (I := I) (M := M) g r s a) =
+      (0 : tensorHs (I := I) (M := M) g r s a) +
+        (0 : tensorHs (I := I) (M := M) g r s a)
+    rw [add_zero]
+  · rw [TimeSobolev.timeH1.deriv_add]
+    exact maximalRegularityDerivField_add_ofCompact (I := I) (M := M)
+      (h_compact := h_compact) (a := a) hT.le f f'
+
 include h_atlas in
 /-- The maximal-regularity operator is `ℝ`-homogeneous in the forcing term:
 `maximalRegularityOp (c • f) = c • maximalRegularityOp f`. -/
@@ -571,6 +665,23 @@ theorem maximalRegularityOp_smul (hT : 0 < T) (hT1 : T ≤ 1) (c : ℝ)
   · rw [TimeSobolev.timeH1.deriv_smul]
     exact maximalRegularityDerivField_smul (I := I) (M := M) (h_atlas := h_atlas) (a := a) hT.le c f
 
+/-- Chart-locality-free version of `maximalRegularityOp_smul`, parameterized on
+resolvent compactness `h_compact`. -/
+theorem maximalRegularityOp_smul_ofCompact (hT : 0 < T) (hT1 : T ≤ 1)
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (c : ℝ) (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
+    maximalRegularityOp (I := I) (M := M) a hT hT1 (c • f) =
+      c • maximalRegularityOp (I := I) (M := M) a hT hT1 f := by
+  refine TimeSobolev.timeH1.ext ?_ ?_
+  · rw [TimeSobolev.timeH1.init_smul]
+    change (0 : tensorHs (I := I) (M := M) g r s a) =
+      c • (0 : tensorHs (I := I) (M := M) g r s a)
+    rw [smul_zero]
+  · rw [TimeSobolev.timeH1.deriv_smul]
+    exact maximalRegularityDerivField_smul_ofCompact (I := I) (M := M)
+      (h_compact := h_compact) (a := a) hT.le c f
+
 include h_atlas in
 /-- The maximal-regularity operator commutes with subtraction of forcing terms:
 `maximalRegularityOp (f − f') = maximalRegularityOp f − maximalRegularityOp f'`.
@@ -582,6 +693,20 @@ theorem maximalRegularityOp_sub (hT : 0 < T) (hT1 : T ≤ 1)
         maximalRegularityOp (I := I) (M := M) a hT hT1 f' := by
   have hadd := maximalRegularityOp_add (I := I) (M := M) (h_atlas := h_atlas)
     (a := a) hT hT1 (f - f') f'
+  rw [sub_add_cancel] at hadd
+  rw [hadd, add_sub_cancel_right]
+
+/-- Chart-locality-free version of `maximalRegularityOp_sub`, parameterized on
+resolvent compactness `h_compact`. -/
+theorem maximalRegularityOp_sub_ofCompact (hT : 0 < T) (hT1 : T ≤ 1)
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (f f' : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
+    maximalRegularityOp (I := I) (M := M) a hT hT1 (f - f') =
+      maximalRegularityOp (I := I) (M := M) a hT hT1 f -
+        maximalRegularityOp (I := I) (M := M) a hT hT1 f' := by
+  have hadd := maximalRegularityOp_add_ofCompact (I := I) (M := M)
+    (h_compact := h_compact) (a := a) hT hT1 (f - f') f'
   rw [sub_add_cancel] at hadd
   rw [hadd, add_sub_cancel_right]
 
@@ -698,6 +823,31 @@ theorem maxRegDuhamelMap_timeDeriv_eq (hT : 0 < T) (hT1 : T ≤ 1)
   rw [maxRegDuhamelSolField, map_add]
   abel
 
+/-- Chart-locality-free version of `maxRegDuhamelMap_timeDeriv_eq`,
+parameterized on resolvent compactness `h_compact`: the Duhamel image solves
+`∂_t u = Δ_∇ u + g` as an identity of `L²([0,T]; Hᵃ)` elements. -/
+theorem maxRegDuhamelMap_timeDeriv_eq_ofCompact (hT : 0 < T) (hT1 : T ≤ 1)
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
+    TimeSobolev.timeH1.timeDeriv _ T
+        (maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gforce) =
+      timeScaleLaplacian (I := I) (M := M) a
+          (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀ gforce) +
+        gforce := by
+  rw [TimeSobolev.timeH1.timeDeriv_apply,
+    maxRegDuhamelMap_deriv (I := I) (M := M) (a := a) (T := T) hT hT1 u₀ gforce]
+  rw [maxRegHomogeneousDerivField_eq_scaleLaplacian_ofCompact (I := I) (M := M)
+    (h_compact := h_compact) (a := a) (T := T) hT.le u₀]
+  have hsolve := maximalRegularityOp_solves_ofCompact (I := I) (M := M)
+    (h_compact := h_compact) (a := a) hT hT1 gforce
+  rw [maximalRegularityOp_timeDeriv (I := I) (M := M)
+    (a := a) hT hT1 gforce] at hsolve
+  rw [hsolve]
+  rw [maxRegDuhamelSolField, map_add]
+  abel
+
 /-! ## The Lipschitz estimate of the affine Duhamel map
 
 For a fixed initial datum the homogeneous part of the affine Duhamel map cancels
@@ -741,6 +891,34 @@ theorem maxRegDuhamelMap_dist_le (hT : 0 < T) (hT1 : T ≤ 1)
   exact maximalRegularityOp_norm_le (I := I) (M := M) (h_atlas := h_atlas)
     (a := a) hT hT1 (gforce - gforce')
 
+/-- Chart-locality-free version of `maxRegDuhamelMap_dist_le`, parameterized on
+resolvent compactness `h_compact`:
+`‖maxRegDuhamelMap … u₀ g − maxRegDuhamelMap … u₀ g'‖ ≤ 2·‖g − g'‖`. -/
+theorem maxRegDuhamelMap_dist_le_ofCompact (hT : 0 < T) (hT1 : T ≤ 1)
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
+    (gforce gforce' : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
+    ‖maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gforce -
+        maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gforce'‖ ≤
+      2 * ‖gforce - gforce'‖ := by
+  have hdiff : maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gforce -
+        maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gforce' =
+      maximalRegularityOp (I := I) (M := M) a hT hT1
+        (gforce - gforce') := by
+    rw [maximalRegularityOp_sub_ofCompact (I := I) (M := M)
+      (h_compact := h_compact) (a := a) hT hT1 gforce gforce']
+    change (maxRegHomogeneous (I := I) (M := M) a T u₀ +
+          maximalRegularityOp (I := I) (M := M) a hT hT1 gforce) -
+        (maxRegHomogeneous (I := I) (M := M) a T u₀ +
+          maximalRegularityOp (I := I) (M := M) a hT hT1 gforce') =
+      maximalRegularityOp (I := I) (M := M) a hT hT1 gforce -
+        maximalRegularityOp (I := I) (M := M) a hT hT1 gforce'
+    abel
+  rw [hdiff]
+  exact maximalRegularityOp_norm_le_ofCompact (I := I) (M := M)
+    (h_compact := h_compact) (a := a) hT hT1 (gforce - gforce')
+
 include h_atlas in
 /-- **The affine Duhamel map is Lipschitz in the forcing term.**  Packaged as a
 `LipschitzWith` statement: for a fixed initial datum `u₀`, the map
@@ -757,6 +935,23 @@ theorem maxRegDuhamelMap_lipschitzWith (hT : 0 < T) (hT1 : T ≤ 1)
   rw [dist_eq_norm, dist_eq_norm]
   have h := maxRegDuhamelMap_dist_le (I := I) (M := M) (h_atlas := h_atlas)
     (a := a) hT hT1 u₀ gforce gforce'
+  rw [show ((2 : ℝ≥0) : ℝ) = (2 : ℝ) from by norm_num]
+  exact h
+
+/-- Chart-locality-free version of `maxRegDuhamelMap_lipschitzWith`,
+parameterized on resolvent compactness `h_compact`: for a fixed initial datum
+`u₀`, the map `g ↦ maxRegDuhamelMap … u₀ g` is Lipschitz with constant `2`. -/
+theorem maxRegDuhamelMap_lipschitzWith_ofCompact (hT : 0 < T) (hT1 : T ≤ 1)
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (u₀ : tensorHs (I := I) (M := M) g r s (a + 2)) :
+    LipschitzWith 2 (fun gforce :
+        timeL2 (tensorHs (I := I) (M := M) g r s a) T =>
+      maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gforce) := by
+  refine LipschitzWith.of_dist_le_mul (fun gforce gforce' => ?_)
+  rw [dist_eq_norm, dist_eq_norm]
+  have h := maxRegDuhamelMap_dist_le_ofCompact (I := I) (M := M)
+    (h_compact := h_compact) (a := a) hT hT1 u₀ gforce gforce'
   rw [show ((2 : ℝ≥0) : ℝ) = (2 : ℝ) from by norm_num]
   exact h
 
