@@ -1166,6 +1166,7 @@ import DifferentialGeometry.PDE.RicciFlow.Pullback.CartanCancellation
 import DifferentialGeometry.PDE.RicciFlow.Pullback.EvaluationFormWitness
 import DifferentialGeometry.PDE.RicciFlow.SobolevEmbeddingAssembly
 import DifferentialGeometry.PDE.RicciFlow.SobolevEmbeddingCm
+import DifferentialGeometry.PDE.RicciFlow.SobolevEmbeddingCmReduction
 import DifferentialGeometry.PDE.RicciFlow.SobolevEmbedding
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MaxReg
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.Bijective.ComposeIsId
