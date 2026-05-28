@@ -1,6 +1,8 @@
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.HilbertSpace
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.SpectralPouH2Identify
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
+import DifferentialGeometry.Analysis.Sobolev.Manifold.MorreyManifoldHigherOrder
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.ComponentSobolevBound
 import Mathlib.Geometry.Manifold.ContMDiff.Basic
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -84,5 +86,74 @@ theorem tensorPouSobolevHilbert_embedding_Ck
   -- relates the local-frame components of a tensor section to the
   -- chart-Sobolev norm summands defining `tensorPouSobolevHsNorm`.
   sorry
+
+/--
+**Per-chart-component scalar Sobolev embedding `H^k ↪ C⁰` (HLCC-free sub-result).**
+
+For a smooth compactly-supported `(r, s)`-tensor section `T` on a closed
+Riemannian manifold, each chart-frame scalar component
+`tensorChartComponentScalar g r s T α Idx Jdx : M → ℝ` is a smooth
+compactly-supported function, hence lies in the chart-based `W^{k,2}` space
+at every order. When the supercritical threshold `n < 2k` holds (with
+`n = dim M`) and the exponent `2` is regular for order `k`, the scalar
+Hilbert-Sobolev embedding `iterated_sobolev_embedding_chart_C0_H_k` produces
+a continuous representative `ũ`, almost-everywhere equal to the component,
+whose sup-norm is controlled by a constant multiple of the chart-`W^{k,2}`
+norm of the component.
+
+This is the genuine building block underlying the (research-level) tensor
+embedding `tensorPouSobolevHilbert_embedding_Ck`: the chart-frame component
+scalars are exactly the data whose iterated partial derivatives define the
+intrinsic Hilbert-Schmidt chart-Sobolev norm `tensorPouSobolevHsNorm`. What
+remains for the full tensor embedding is (i) reconstructing the pointwise
+fiber-norm `‖T.toSection x‖` from a finite family of per-component sup
+bounds with a *uniform* constant, and (ii) bounding the per-component
+chart-`W^{k,2}` norms by `‖T.toHs (2k)‖` at orders `k ≥ 2`. -/
+theorem tensorChartComponentScalar_embedding_C0
+    [I.Boundaryless]
+    {g : SmoothRiemannianMetric I M} {r s k : ℕ}
+    (hk : Module.finrank ℝ E < 2 * k)
+    (hreg : DifferentialGeometry.Analysis.Sobolev.Chart.RegularExponent.IsRegular
+      (Module.finrank ℝ E : ℝ) 2 k)
+    (T : SmoothCcTensor g r s) (α : M)
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
+    ∃ (ũ : M → ℝ) (C : ℝ),
+      Continuous ũ ∧ 0 ≤ C ∧
+      (∀ᵐ x ∂(DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
+        (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)),
+        ũ x =
+          DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentScalar
+            (I := I) (M := M) g r s T α Idx Jdx x) ∧
+      (∀ x : M, ‖ũ x‖ ≤ C *
+        (DifferentialGeometry.Analysis.Sobolev.Chart.wkpNormChart (I := I) (M := M) g k 2
+          (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentScalar
+            (I := I) (M := M) g r s T α Idx Jdx)).toReal) := by
+  classical
+  letI : MeasurableSpace M := borel M
+  haveI : BorelSpace M := ⟨rfl⟩
+  -- The chart-frame scalar component is smooth on `M`.
+  have h_smooth :
+      ContMDiff I 𝓘(ℝ, ℝ) ∞
+        (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentScalar
+          (I := I) (M := M) g r s T α Idx Jdx) :=
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentScalar_contMDiff
+      (I := I) (M := M) g r s T α Idx Jdx
+  -- Smooth ⇒ measurable.
+  have h_meas :
+      Measurable
+        (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentScalar
+          (I := I) (M := M) g r s T α Idx Jdx) :=
+    h_smooth.continuous.measurable
+  -- Smooth ⇒ chart-`W^{k,2}` membership at order `k`.
+  have h_mem :
+      DifferentialGeometry.Analysis.Sobolev.Chart.MemWkpChart (I := I) (M := M) g k 2
+        (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentScalar
+          (I := I) (M := M) g r s T α Idx Jdx) :=
+    DifferentialGeometry.Analysis.Sobolev.Chart.memWkpChart_of_contMDiff_k
+      (I := I) (M := M) g (p := 2) (by norm_num) k h_smooth
+  -- Apply the scalar Hilbert-Sobolev embedding `H^k ↪ C⁰` for `2k > n`.
+  exact DifferentialGeometry.Analysis.Sobolev.Chart.iterated_sobolev_embedding_chart_C0_H_k
+    (I := I) (M := M) g hk hreg h_meas h_mem
 
 end DifferentialGeometry.PDE.RicciFlow
