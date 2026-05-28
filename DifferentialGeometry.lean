@@ -1159,6 +1159,7 @@ import DifferentialGeometry.PDE.RicciFlow.SobolevEmbedding
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MaxReg
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.Bijective.ComposeIsId
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckNonlinearity
+import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRHSPointwiseLipschitz
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.QuasilinearStrong
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.Bijective
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow
