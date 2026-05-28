@@ -1105,6 +1105,7 @@ import DifferentialGeometry.PDE.RicciFlow.Pullback.ChainRule
 import DifferentialGeometry.PDE.RicciFlow.Pullback.TimeDerivativeChainRule
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.IteratedNabla
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.CompactSAResolvent
+import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.CompactSAResolventIntrinsic
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.ChartGlue
 import DifferentialGeometry.PDE.RicciFlow.Pullback.PullbackConnection
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckLinearization
