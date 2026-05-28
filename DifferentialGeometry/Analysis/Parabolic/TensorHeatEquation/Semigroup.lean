@@ -190,6 +190,80 @@ lemma tensorParseval_norm_sq
   rw [h_eq] at h_par
   linarith [h_par, h_sq]
 
+/-! ## Parseval facts for the chart-locality-free eigenbasis
+
+The eigenbasis-coordinate summability and Parseval identity hold for any
+`HilbertBasis` of `TensorL2 r s g` indexed by `TensorEigenIdx`; in
+particular for the chart-locality-free resolvent eigenbasis
+`tensorResolventHilbertEigenbasisSigma_ofCompact h_compact`, whose
+compactness witness is supplied unconditionally elsewhere. The two
+lemmas below mirror `tensorSummable_basis_coeff_sq` /
+`tensorParseval_norm_sq` against the `_ofCompact` eigenbasis. -/
+
+/-- Parseval-type square-summability of the tensor basis coefficients for
+the chart-locality-free eigenbasis. -/
+lemma tensorSummable_basis_coeff_sq_ofCompact
+    {g : SmoothRiemannianMetric I M} {r s : ℕ}
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (T : TensorL2 r s g) :
+    Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
+      ‖⟪tensorResolventHilbertEigenbasisSigma_ofCompact
+            (I := I) (M := M) h_compact i, T⟫_ℝ‖ ^ 2) := by
+  set b := tensorResolventHilbertEigenbasisSigma_ofCompact
+    (I := I) (M := M) (g := g) (r := r) (s := s) h_compact
+  have h_orthonormal : Orthonormal ℝ b := b.orthonormal
+  have h_orthFam :
+      OrthogonalFamily ℝ
+        (fun _ : TensorEigenIdx (I := I) (M := M) g r s => ℝ)
+        (fun i => LinearIsometry.toSpanSingleton ℝ
+          (TensorL2 r s g) (h_orthonormal.1 i)) :=
+    h_orthonormal.orthogonalFamily
+  have h_summable_smul : Summable
+      (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
+        ⟪b i, T⟫_ℝ • b i) := by
+    have h_hsum : HasSum (fun i => b.repr T i • b i) T := b.hasSum_repr T
+    have h_eq : (fun i => b.repr T i • b i) =
+        (fun i => ⟪b i, T⟫_ℝ • b i) := by
+      funext i
+      rw [b.repr_apply_apply]
+    rw [h_eq] at h_hsum
+    exact h_hsum.summable
+  have h_iff := h_orthFam.summable_iff_norm_sq_summable
+    (fun i : TensorEigenIdx (I := I) (M := M) g r s => ⟪b i, T⟫_ℝ)
+  have h_map_eq : (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
+        LinearIsometry.toSpanSingleton ℝ
+          (TensorL2 r s g) (h_orthonormal.1 i) (⟪b i, T⟫_ℝ)) =
+      (fun i => ⟪b i, T⟫_ℝ • b i) := by
+    funext i
+    rw [LinearIsometry.toSpanSingleton_apply]
+  rw [h_map_eq] at h_iff
+  exact h_iff.mp h_summable_smul
+
+/-- Parseval identity for the chart-locality-free tensor eigenbasis: the
+squared L²-norm of `T` equals the sum of the squared basis coefficients. -/
+lemma tensorParseval_norm_sq_ofCompact
+    {g : SmoothRiemannianMetric I M} {r s : ℕ}
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (T : TensorL2 r s g) :
+    ‖T‖ ^ 2 =
+      ∑' i : TensorEigenIdx (I := I) (M := M) g r s,
+        ‖⟪tensorResolventHilbertEigenbasisSigma_ofCompact
+            (I := I) (M := M) h_compact i, T⟫_ℝ‖ ^ 2 := by
+  set b := tensorResolventHilbertEigenbasisSigma_ofCompact
+    (I := I) (M := M) (g := g) (r := r) (s := s) h_compact
+  have h_par := b.tsum_inner_mul_inner T T
+  have h_sq : ⟪T, T⟫_ℝ = ‖T‖ ^ 2 := real_inner_self_eq_norm_sq T
+  have h_eq : (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
+        ⟪T, b i⟫_ℝ * ⟪b i, T⟫_ℝ) =
+      (fun i => ‖⟪b i, T⟫_ℝ‖ ^ 2) := by
+    funext i
+    rw [show ⟪T, b i⟫_ℝ = ⟪b i, T⟫_ℝ from real_inner_comm _ _,
+        Real.norm_eq_abs, sq_abs, sq]
+  rw [h_eq] at h_par
+  linarith [h_par, h_sq]
+
 /-! ## Summability of the heat-eigenbasis series (for `t ≥ 0`) -/
 
 /-- For `t ≥ 0`, the family of heat-coefficient–weighted tensor basis

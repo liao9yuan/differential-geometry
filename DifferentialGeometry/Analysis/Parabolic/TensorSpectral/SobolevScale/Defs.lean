@@ -202,6 +202,88 @@ lemma tensorL2Coeff_smul {g : SmoothRiemannianMetric I M} {r s : ℕ}
   rw [map_smul]
   rfl
 
+/-! ## The chart-locality-free eigenbasis-coordinate functional on `TensorL2`
+
+The coordinate functional above is defined against the resolvent
+eigenbasis `tensorResolventHilbertEigenbasisSigma`, which carries a
+chart-selection hypothesis `h_atlas`. The variants below re-base the same
+functional on the chart-locality-free eigenbasis
+`tensorResolventHilbertEigenbasisSigma_ofCompact`, parameterized only on
+the resolvent compactness witness `h_compact : IsCompactOperator
+(tensorResolventL2 g r s)` (supplied unconditionally elsewhere). The
+index type `TensorEigenIdx g r s` and the eigenvalue/weight data are
+already chart-locality-free, so the resulting `Hˢ`-scale access needs no
+`h_atlas`. -/
+
+/-- The `i`-th eigenbasis coordinate of an `L²` tensor field `T`, against
+the chart-locality-free eigenbasis
+`tensorResolventHilbertEigenbasisSigma_ofCompact h_compact`. Concretely
+this is `(b.repr T) i`. No chart-selection hypothesis is required. -/
+def tensorL2Coeff_ofCompact {g : SmoothRiemannianMetric I M} {r s : ℕ}
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (T : TensorL2 r s g) (i : TensorEigenIdx (I := I) (M := M) g r s) :
+    ℝ :=
+  (tensorResolventHilbertEigenbasisSigma_ofCompact
+    (I := I) (M := M) h_compact).repr T i
+
+/-- The chart-locality-free eigenbasis coordinate equals the inner
+product `⟪bᵢ, T⟫`. -/
+lemma tensorL2Coeff_ofCompact_eq_inner {g : SmoothRiemannianMetric I M}
+    {r s : ℕ}
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (T : TensorL2 r s g) (i : TensorEigenIdx (I := I) (M := M) g r s) :
+    tensorL2Coeff_ofCompact (I := I) (M := M) h_compact T i =
+      ⟪tensorResolventHilbertEigenbasisSigma_ofCompact
+        (I := I) (M := M) h_compact i, T⟫_ℝ := by
+  unfold tensorL2Coeff_ofCompact
+  exact HilbertBasis.repr_apply_apply _ T i
+
+/-- The chart-locality-free eigenbasis-coordinate family of `T` is
+square-summable. -/
+lemma tensorL2Coeff_ofCompact_summable_sq {g : SmoothRiemannianMetric I M}
+    {r s : ℕ}
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (T : TensorL2 r s g) :
+    Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
+      (tensorL2Coeff_ofCompact (I := I) (M := M) h_compact T i) ^ 2) := by
+  have h := tensorSummable_basis_coeff_sq_ofCompact
+    (I := I) (M := M) h_compact T
+  have h_eq : (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
+        ‖⟪tensorResolventHilbertEigenbasisSigma_ofCompact
+            (I := I) (M := M) h_compact i, T⟫_ℝ‖ ^ 2) =
+      (fun i => (tensorL2Coeff_ofCompact (I := I) (M := M) h_compact T i) ^ 2)
+      := by
+    funext i
+    rw [tensorL2Coeff_ofCompact_eq_inner, Real.norm_eq_abs, sq_abs]
+  rwa [h_eq] at h
+
+/-- `tensorL2Coeff_ofCompact` is additive in its `L²` argument. -/
+lemma tensorL2Coeff_ofCompact_add {g : SmoothRiemannianMetric I M} {r s : ℕ}
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (S T : TensorL2 r s g) (i : TensorEigenIdx (I := I) (M := M) g r s) :
+    tensorL2Coeff_ofCompact (I := I) (M := M) h_compact (S + T) i =
+      tensorL2Coeff_ofCompact (I := I) (M := M) h_compact S i +
+        tensorL2Coeff_ofCompact (I := I) (M := M) h_compact T i := by
+  unfold tensorL2Coeff_ofCompact
+  rw [map_add]
+  rfl
+
+/-- `tensorL2Coeff_ofCompact` is `ℝ`-homogeneous in its `L²` argument. -/
+lemma tensorL2Coeff_ofCompact_smul {g : SmoothRiemannianMetric I M} {r s : ℕ}
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (c : ℝ) (T : TensorL2 r s g)
+    (i : TensorEigenIdx (I := I) (M := M) g r s) :
+    tensorL2Coeff_ofCompact (I := I) (M := M) h_compact (c • T) i =
+      c * tensorL2Coeff_ofCompact (I := I) (M := M) h_compact T i := by
+  unfold tensorL2Coeff_ofCompact
+  rw [map_smul]
+  rfl
+
 /-! ## The spectral `Hˢ` Sobolev space carrier -/
 
 /-- The spectral `Hˢ` Sobolev space of mixed `(r, s)`-tensor fields, for
@@ -893,6 +975,114 @@ lemma norm_toL2Fun_le
   have h2 : 0 ≤ ‖T‖ := norm_nonneg T
   nlinarith [h_sq_le, h1, h2]
 
+/-! ### The chart-locality-free `Hˢ → TensorL2` underlying map
+
+The same inclusion, with its underlying `L²` reconstruction performed
+against the chart-locality-free eigenbasis
+`tensorResolventHilbertEigenbasisSigma_ofCompact h_compact`. -/
+
+/-- The underlying function of the chart-locality-free inclusion
+`Hˢ → TensorL2`: it sends an `Hˢ` element to the `L²` tensor with the
+same eigenbasis coordinate family, reconstructed via the inverse of the
+`_ofCompact` Hilbert-basis representation. -/
+def toL2Fun_ofCompact
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (hσ : 0 ≤ σ)
+    (T : tensorHs (I := I) (M := M) g r s σ) :
+    TensorL2 r s g :=
+  (tensorResolventHilbertEigenbasisSigma_ofCompact
+    (I := I) (M := M) h_compact).repr.symm
+    (toL2Seq (I := I) (M := M) hσ T)
+
+/-- The chart-locality-free `L²` eigenbasis coordinate of `toL2Fun_ofCompact T`
+is the `Hˢ` coordinate of `T`. -/
+@[simp] lemma tensorL2Coeff_ofCompact_toL2Fun_ofCompact
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (hσ : 0 ≤ σ)
+    (T : tensorHs (I := I) (M := M) g r s σ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s) :
+    tensorL2Coeff_ofCompact (I := I) (M := M) h_compact
+        (toL2Fun_ofCompact (I := I) (M := M) h_compact hσ T) i = T.coeff i := by
+  unfold tensorL2Coeff_ofCompact toL2Fun_ofCompact
+  rw [LinearIsometryEquiv.apply_symm_apply]
+  rfl
+
+/-- `toL2Fun_ofCompact` is additive. -/
+lemma toL2Fun_ofCompact_add
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (hσ : 0 ≤ σ)
+    (S T : tensorHs (I := I) (M := M) g r s σ) :
+    toL2Fun_ofCompact (I := I) (M := M) h_compact hσ (S + T) =
+      toL2Fun_ofCompact (I := I) (M := M) h_compact hσ S +
+        toL2Fun_ofCompact (I := I) (M := M) h_compact hσ T := by
+  unfold toL2Fun_ofCompact
+  rw [toL2Seq_add (I := I) (M := M) hσ S T, map_add]
+
+/-- `toL2Fun_ofCompact` is `ℝ`-homogeneous. -/
+lemma toL2Fun_ofCompact_smul
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (hσ : 0 ≤ σ) (c : ℝ)
+    (T : tensorHs (I := I) (M := M) g r s σ) :
+    toL2Fun_ofCompact (I := I) (M := M) h_compact hσ (c • T) =
+      c • toL2Fun_ofCompact (I := I) (M := M) h_compact hσ T := by
+  unfold toL2Fun_ofCompact
+  rw [toL2Seq_smul (I := I) (M := M) hσ c T, map_smul]
+
+/-- For `σ ≥ 0`, the `L²` norm of `toL2Fun_ofCompact T` is bounded by the
+`Hˢ` norm of `T`: the chart-locality-free inclusion is norm-non-increasing. -/
+lemma norm_toL2Fun_ofCompact_le
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (hσ : 0 ≤ σ)
+    (T : tensorHs (I := I) (M := M) g r s σ) :
+    ‖toL2Fun_ofCompact (I := I) (M := M) h_compact hσ T‖ ≤ ‖T‖ := by
+  have h_l2_sq : ‖toL2Fun_ofCompact (I := I) (M := M) h_compact hσ T‖ ^ 2 =
+      ∑' i, (T.coeff i) ^ 2 := by
+    have h_par := tensorParseval_norm_sq_ofCompact (I := I) (M := M) h_compact
+      (toL2Fun_ofCompact (I := I) (M := M) h_compact hσ T)
+    have h_eq :
+        (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
+          ‖⟪tensorResolventHilbertEigenbasisSigma_ofCompact
+              (I := I) (M := M) h_compact i,
+            toL2Fun_ofCompact (I := I) (M := M) h_compact hσ T⟫_ℝ‖ ^ 2) =
+        (fun i => (T.coeff i) ^ 2) := by
+      funext i
+      rw [← tensorL2Coeff_ofCompact_eq_inner,
+        tensorL2Coeff_ofCompact_toL2Fun_ofCompact,
+        Real.norm_eq_abs, sq_abs]
+    rwa [h_eq] at h_par
+  have h_hs_sq : ‖T‖ ^ 2 =
+      ∑' i, tensorSobolevWeight (I := I) (M := M) i σ *
+        (T.coeff i) ^ 2 :=
+    norm_sq_eq_tsum (I := I) (M := M) T
+  have h_summ_unweighted :
+      Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
+        (T.coeff i) ^ 2) :=
+    coeff_summable_sq_of_nonneg (I := I) (M := M) hσ T
+  have h_le_terms : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+      (T.coeff i) ^ 2 ≤
+        tensorSobolevWeight (I := I) (M := M) i σ * (T.coeff i) ^ 2 := by
+    intro i
+    have hw : 1 ≤ tensorSobolevWeight (I := I) (M := M) i σ :=
+      one_le_tensorSobolevWeight (I := I) (M := M) i hσ
+    nlinarith [hw, sq_nonneg (T.coeff i)]
+  have h_tsum_le :
+      ∑' i, (T.coeff i) ^ 2 ≤
+        ∑' i, tensorSobolevWeight (I := I) (M := M) i σ *
+          (T.coeff i) ^ 2 :=
+    Summable.tsum_le_tsum h_le_terms h_summ_unweighted T.weighted_summable
+  have h_sq_le :
+      ‖toL2Fun_ofCompact (I := I) (M := M) h_compact hσ T‖ ^ 2 ≤ ‖T‖ ^ 2 := by
+    rw [h_l2_sq, h_hs_sq]; exact h_tsum_le
+  have h1 : 0 ≤ ‖toL2Fun_ofCompact (I := I) (M := M) h_compact hσ T‖ :=
+    norm_nonneg _
+  have h2 : 0 ≤ ‖T‖ := norm_nonneg T
+  nlinarith [h_sq_le, h1, h2]
+
 end tensorHs
 
 /-- For `σ ≥ 0`, the inclusion of the spectral Sobolev space `Hˢ` into
@@ -957,6 +1147,90 @@ theorem tensorHsToL2_injective {g : SmoothRiemannianMetric I M}
     (I := I) (M := M) (h_atlas := h_atlas) hσ T i
   rw [← hS, ← hT, hST]
 
+/-! ## The chart-locality-free inclusion `Hˢ →L[ℝ] TensorL2`
+
+The same inclusion, reconstructed via the chart-locality-free eigenbasis.
+It is the inclusion that the downstream chart-locality-free parabolic
+engine consumes: its operator norm is `≤ 1` for `σ ≥ 0`, it is injective,
+and its `_ofCompact` eigenbasis coordinates agree with the `Hˢ`
+coordinates. -/
+
+/-- For `σ ≥ 0`, the chart-locality-free inclusion of the spectral
+Sobolev space `Hˢ` into `TensorL2 r s g`, as a continuous linear map.
+Operator norm `≤ 1`, injective. No chart-selection hypothesis. -/
+def tensorHsToL2_ofCompact {g : SmoothRiemannianMetric I M} {r s : ℕ}
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s)) {σ : ℝ}
+    (hσ : 0 ≤ σ) :
+    tensorHs (I := I) (M := M) g r s σ →L[ℝ]
+      TensorL2 r s g :=
+  LinearMap.mkContinuous
+    { toFun := tensorHs.toL2Fun_ofCompact (I := I) (M := M) h_compact hσ
+      map_add' := tensorHs.toL2Fun_ofCompact_add (I := I) (M := M) h_compact hσ
+      map_smul' := fun c T =>
+        tensorHs.toL2Fun_ofCompact_smul (I := I) (M := M) h_compact hσ c T }
+    1
+    (fun T => by
+      change ‖tensorHs.toL2Fun_ofCompact (I := I) (M := M) h_compact hσ T‖
+          ≤ 1 * ‖T‖
+      rw [one_mul]
+      exact tensorHs.norm_toL2Fun_ofCompact_le (I := I) (M := M) h_compact hσ T)
+
+/-- `tensorHsToL2_ofCompact` applied to `T` is the underlying
+`toL2Fun_ofCompact T`. -/
+@[simp] lemma tensorHsToL2_ofCompact_apply {g : SmoothRiemannianMetric I M}
+    {r s : ℕ}
+    {h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s)} {σ : ℝ}
+    (hσ : 0 ≤ σ) (T : tensorHs (I := I) (M := M) g r s σ) :
+    tensorHsToL2_ofCompact (I := I) (M := M) (g := g) (r := r) (s := s)
+        h_compact hσ T =
+      tensorHs.toL2Fun_ofCompact (I := I) (M := M) h_compact hσ T := rfl
+
+/-- The operator norm of the chart-locality-free inclusion
+`Hˢ →L[ℝ] TensorL2` is at most `1` for `σ ≥ 0`. -/
+theorem tensorHsToL2_ofCompact_opNorm_le_one {g : SmoothRiemannianMetric I M}
+    {r s : ℕ}
+    {h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s)} {σ : ℝ}
+    (hσ : 0 ≤ σ) :
+    ‖tensorHsToL2_ofCompact (I := I) (M := M) (g := g) (r := r) (s := s)
+        h_compact hσ‖ ≤ 1 :=
+  LinearMap.mkContinuous_norm_le _ zero_le_one _
+
+/-- The chart-locality-free `L²` eigenbasis coordinate of the image of
+`T` under the inclusion equals the `Hˢ` coordinate of `T`. -/
+@[simp] theorem tensorHsToL2_ofCompact_tensorL2Coeff_ofCompact
+    {g : SmoothRiemannianMetric I M} {r s : ℕ}
+    {h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s)} {σ : ℝ}
+    (hσ : 0 ≤ σ) (T : tensorHs (I := I) (M := M) g r s σ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s) :
+    tensorL2Coeff_ofCompact (I := I) (M := M) h_compact
+        (tensorHsToL2_ofCompact (I := I) (M := M) (g := g) (r := r) (s := s)
+          h_compact hσ T) i = T.coeff i := by
+  rw [tensorHsToL2_ofCompact_apply]
+  exact tensorHs.tensorL2Coeff_ofCompact_toL2Fun_ofCompact
+    (I := I) (M := M) h_compact hσ T i
+
+/-- The chart-locality-free inclusion `Hˢ →L[ℝ] TensorL2` is injective for
+`σ ≥ 0`. -/
+theorem tensorHsToL2_ofCompact_injective {g : SmoothRiemannianMetric I M}
+    {r s : ℕ}
+    {h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s)} {σ : ℝ}
+    (hσ : 0 ≤ σ) :
+    Function.Injective
+      (tensorHsToL2_ofCompact (I := I) (M := M) (g := g) (r := r) (s := s)
+        h_compact hσ) := by
+  intro S T hST
+  ext i
+  have hS := tensorHsToL2_ofCompact_tensorL2Coeff_ofCompact
+    (I := I) (M := M) (h_compact := h_compact) hσ S i
+  have hT := tensorHsToL2_ofCompact_tensorL2Coeff_ofCompact
+    (I := I) (M := M) (h_compact := h_compact) hσ T i
+  rw [← hS, ← hT, hST]
+
 /-! ## The `σ = 0` identification `H⁰ ≃ₗᵢ TensorL2`
 
 At `σ = 0` the weight is `1`, so the rescaling isometry
@@ -1002,6 +1276,56 @@ theorem tensorHsZeroEquivL2_symm_coeff {g : SmoothRiemannianMetric I M}
       tensorL2Coeff (I := I) (M := M) h_atlas U i := by
   have h := tensorHsZeroEquivL2_tensorL2Coeff (I := I) (M := M) h_atlas
     ((tensorHsZeroEquivL2 (I := I) (M := M) h_atlas).symm U) i
+  rw [LinearIsometryEquiv.apply_symm_apply] at h
+  exact h.symm
+
+/-! ### The chart-locality-free `σ = 0` identification `H⁰ ≃ₗᵢ TensorL2` -/
+
+/-- The spectral `H⁰` Sobolev space is isometrically isomorphic to the
+`L²` Hilbert space `TensorL2 r s g`, via the chart-locality-free
+eigenbasis. No chart-selection hypothesis is required. -/
+def tensorHsZeroEquivL2_ofCompact {g : SmoothRiemannianMetric I M} {r s : ℕ}
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s)) :
+    tensorHs (I := I) (M := M) g r s 0 ≃ₗᵢ[ℝ]
+      TensorL2 r s g :=
+  (tensorHs.rescaleEquivL2 (I := I) (M := M)
+    (g := g) (r := r) (s := s) (σ := 0)).trans
+    (tensorResolventHilbertEigenbasisSigma_ofCompact
+      (I := I) (M := M) h_compact).repr.symm
+
+/-- The chart-locality-free `H⁰`-to-`L²` identification sends `T` to the
+`L²` tensor with the same eigenbasis coordinates. -/
+theorem tensorHsZeroEquivL2_ofCompact_tensorL2Coeff_ofCompact
+    {g : SmoothRiemannianMetric I M} {r s : ℕ}
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (T : tensorHs (I := I) (M := M) g r s 0)
+    (i : TensorEigenIdx (I := I) (M := M) g r s) :
+    tensorL2Coeff_ofCompact (I := I) (M := M) h_compact
+        (tensorHsZeroEquivL2_ofCompact (I := I) (M := M) h_compact T) i =
+      T.coeff i := by
+  unfold tensorHsZeroEquivL2_ofCompact tensorL2Coeff_ofCompact
+  rw [LinearIsometryEquiv.trans_apply,
+    LinearIsometryEquiv.apply_symm_apply]
+  change (tensorHs.rescaleEquivL2 (I := I) (M := M) T : _ → ℝ) i = T.coeff i
+  rw [tensorHs.rescaleEquivL2_apply]
+  simp only [tensorSobolevWeight_zero, Real.sqrt_one, one_mul]
+
+/-- The chart-locality-free `H⁰`-to-`L²` identification, read backwards:
+the `L²` tensor `U` becomes the `H⁰` element whose coordinate family is
+`U`'s eigenbasis coordinate family. -/
+theorem tensorHsZeroEquivL2_ofCompact_symm_coeff
+    {g : SmoothRiemannianMetric I M} {r s : ℕ}
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (U : TensorL2 r s g)
+    (i : TensorEigenIdx (I := I) (M := M) g r s) :
+    ((tensorHsZeroEquivL2_ofCompact (I := I) (M := M) h_compact).symm U).coeff i =
+      tensorL2Coeff_ofCompact (I := I) (M := M) h_compact U i := by
+  have h := tensorHsZeroEquivL2_ofCompact_tensorL2Coeff_ofCompact
+    (I := I) (M := M) h_compact
+    ((tensorHsZeroEquivL2_ofCompact (I := I) (M := M) h_compact).symm U) i
   rw [LinearIsometryEquiv.apply_symm_apply] at h
   exact h.symm
 
@@ -1092,6 +1416,43 @@ theorem tensorHsToL2_tensorHsBasisVec {g : SmoothRiemannianMetric I M}
     · simp [h]
   rw [h_lhs, h_rhs]
 
+/-- For `σ ≥ 0`, the chart-locality-free inclusion `Hˢ → TensorL2` carries
+the spectral basis vector `tensorHsBasisVec σ j` to the actual
+`_ofCompact` eigenbasis vector `b j`. -/
+theorem tensorHsToL2_ofCompact_tensorHsBasisVec {g : SmoothRiemannianMetric I M}
+    {r s : ℕ}
+    {h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s)} {σ : ℝ}
+    (hσ : 0 ≤ σ) (j : TensorEigenIdx (I := I) (M := M) g r s) :
+    tensorHsToL2_ofCompact (I := I) (M := M) (g := g) (r := r) (s := s)
+        h_compact hσ
+        (tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) σ j) =
+      tensorResolventHilbertEigenbasisSigma_ofCompact
+        (I := I) (M := M) h_compact j := by
+  classical
+  set b := tensorResolventHilbertEigenbasisSigma_ofCompact
+    (I := I) (M := M) h_compact with hb
+  apply b.repr.injective
+  ext i
+  have h_lhs : (b.repr (tensorHsToL2_ofCompact
+        (I := I) (M := M) (g := g) (r := r) (s := s) h_compact hσ
+        (tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) σ j))) i =
+      (if i = j then (1 : ℝ) else 0) := by
+    have h_coeff : tensorL2Coeff_ofCompact (I := I) (M := M) h_compact
+        (tensorHsToL2_ofCompact (I := I) (M := M) (g := g) (r := r) (s := s)
+          h_compact hσ
+          (tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) σ j)) i =
+        (if i = j then (1 : ℝ) else 0) := by
+      rw [tensorHsToL2_ofCompact_tensorL2Coeff_ofCompact, tensorHsBasisVec_coeff]
+    rw [← h_coeff]
+    rfl
+  have h_rhs : (b.repr (b j)) i = (if i = j then (1 : ℝ) else 0) := by
+    rw [b.repr_self, lp.single_apply]
+    by_cases h : i = j
+    · subst h; simp
+    · simp [h]
+  rw [h_lhs, h_rhs]
+
 /-! ## Sanity tests -/
 
 example (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ) :
@@ -1123,6 +1484,31 @@ example {g : SmoothRiemannianMetric I M} {r s : ℕ}
     tensorHs (I := I) (M := M) g r s 0 ≃ₗᵢ[ℝ]
       TensorL2 r s g :=
   tensorHsZeroEquivL2 (I := I) (M := M) h_atlas
+
+/-- Chart-locality-free coordinate functional access (no `h_atlas`). -/
+example {g : SmoothRiemannianMetric I M} {r s : ℕ}
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (T : TensorL2 r s g) (i : TensorEigenIdx (I := I) (M := M) g r s) : ℝ :=
+  tensorL2Coeff_ofCompact (I := I) (M := M) h_compact T i
+
+/-- Chart-locality-free inclusion access (no `h_atlas`). -/
+example {g : SmoothRiemannianMetric I M} {r s : ℕ}
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s)) {σ : ℝ}
+    (hσ : 0 ≤ σ) :
+    tensorHs (I := I) (M := M) g r s σ →L[ℝ]
+      TensorL2 r s g :=
+  tensorHsToL2_ofCompact (I := I) (M := M) (g := g) (r := r) (s := s)
+    h_compact hσ
+
+/-- Chart-locality-free `σ = 0` identification access (no `h_atlas`). -/
+example {g : SmoothRiemannianMetric I M} {r s : ℕ}
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s)) :
+    tensorHs (I := I) (M := M) g r s 0 ≃ₗᵢ[ℝ]
+      TensorL2 r s g :=
+  tensorHsZeroEquivL2_ofCompact (I := I) (M := M) h_compact
 
 end TensorHeatEquation
 end Parabolic
