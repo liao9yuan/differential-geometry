@@ -807,6 +807,458 @@ theorem eigenvectorChartRHSDiff_memLp_weighted
             (I := I) (M := M) g r s h_atlas i α P₀ m l hy))
         h_plain
 
+/-! ## Chart-locality-free twins of the iterated-regularity recursion
+
+The declarations above are keyed on the chart-selection witness
+`HasLocallyConstantChartAt`. We now build the chart-locality-free twins of the
+iterated partial recursion and the differentiated right-hand side, re-keying the
+underlying eigenbasis vector onto the intrinsic compactness witness
+`tensorResolventEigenbasisVec_ofCompact (tensorResolventL2_isCompactOperator_intrinsic g r s) i`.
+The `h_atlas`-carrying originals are kept intact (additive). The proof bodies
+transfer verbatim from the originals; only the eigenbasis selector changes, with
+the level-`0` leaves being the committed `_unconditional` objects
+`eigenvectorChartRHS_unconditional` and `eigenvectorChartRHS_memLp_weighted_unconditional`. -/
+
+/-! ### The chart-locality-free level-`0` chart component
+
+The canonical eigenvector chart `P₀`-component, re-keyed onto the intrinsic
+compactness witness: the coercion-to-function of the `Lp` element
+`tensorL2ChartComponent g r s (tensorResolventEigenbasisVec_ofCompact …) α P₀`.
+This is the term-1 component of `eigenvectorChartRHS_unconditional`, and the
+level-`0` leaf of the chart-locality-free iterated partial recursion. -/
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+/-- The chart `P₀`-component of the resolvent eigenvector, chart-locality-free:
+the coercion-to-function of the `Lp ℝ 2 (chartL2Measure α)` element
+`tensorL2ChartComponent g r s (tensorResolventEigenbasisVec_ofCompact …) α P₀`.
+Chart-locality-free twin of `eigenvectorChartComponentFun`, re-keyed onto the
+intrinsic compactness witness. -/
+def eigenvectorChartComponentFun_ofCompact
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) : EuclN → ℝ :=
+  fun y =>
+    ((tensorL2ChartComponent (I := I) (M := M) g r s
+        (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+            g r s) i) α P₀ :
+      Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+/-- The chart-locality-free eigenvector chart component is `MemLp 2` of the plain
+Lebesgue volume restricted to the chart target: it is the coercion of an `Lp`
+element of `chartL2Measure α = volume.restrict (chartTargetEuclid α)`.
+Chart-locality-free twin of `eigenvectorChartComponentFun_memLp_volume`. -/
+lemma eigenvectorChartComponentFun_ofCompact_memLp_volume
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) :
+    MemLp (eigenvectorChartComponentFun_ofCompact (I := I) (M := M)
+        g r s i α P₀) 2
+      ((volume : Measure EuclN).restrict
+        (chartTargetEuclid (I := I) (M := M) α)) := by
+  have h := Lp.memLp (tensorL2ChartComponent (I := I) (M := M) g r s
+    (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+      (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+        g r s) i) α P₀)
+  exact h
+
+/-! ### The chart-locality-free recursive `m`-fold mixed weak partial -/
+
+/-- The recursive `m`-fold mixed weak partial of the eigenvector chart component
+in the directions `l : Fin m → Fin n`, via `chosenWeakPartial'`, chart-locality-
+free. At `m = 0` it is the chart-locality-free chart component
+`eigenvectorChartComponentFun_ofCompact`; at `m + 1` it is the chosen weak
+`l (Fin.last m)`-partial of the level-`m` mixed partial. Chart-locality-free twin
+of `eigenvectorChartIteratedPartial`. -/
+def eigenvectorChartIteratedPartial_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) :
+    ∀ (m : ℕ), (Fin m → Fin (Module.finrank ℝ E)) → EuclN → ℝ
+  | 0, _ => eigenvectorChartComponentFun_ofCompact (I := I) (M := M) g r s i α P₀
+  | m + 1, l =>
+      chosenWeakPartial' (d := Module.finrank ℝ E) 2 (l (Fin.last m))
+        (eigenvectorChartIteratedPartial_unconditional g r s i α P₀ m (Fin.init l))
+        (chartTargetEuclid (I := I) (M := M) α)
+
+/-- Definitional unfolding of `eigenvectorChartIteratedPartial_unconditional` at
+`m = 0`. -/
+@[simp] theorem eigenvectorChartIteratedPartial_unconditional_zero
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s)
+    (l : Fin 0 → Fin (Module.finrank ℝ E)) :
+    eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+        g r s i α P₀ 0 l =
+      eigenvectorChartComponentFun_ofCompact (I := I) (M := M)
+        g r s i α P₀ := rfl
+
+/-- Definitional unfolding of `eigenvectorChartIteratedPartial_unconditional` at
+`m + 1`. -/
+theorem eigenvectorChartIteratedPartial_unconditional_succ
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s)
+    (m : ℕ) (l : Fin (m + 1) → Fin (Module.finrank ℝ E)) :
+    eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+        g r s i α P₀ (m + 1) l =
+      chosenWeakPartial' (d := Module.finrank ℝ E) 2 (l (Fin.last m))
+        (eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+          g r s i α P₀ m (Fin.init l))
+        (chartTargetEuclid (I := I) (M := M) α) := rfl
+
+/-- **Unconditional `L²` membership of every `m`-fold mixed weak partial**
+(chart-locality-free). For *every* level `m` and *every* direction multi-index
+`l : Fin m → Fin n`, the `m`-fold mixed weak partial
+`eigenvectorChartIteratedPartial_unconditional g r s i α P₀ m l` is `MemLp 2` of
+the plain Lebesgue volume restricted to the chart target. Chart-locality-free
+twin of `eigenvectorChartIteratedPartial_memLp_volume`. -/
+theorem eigenvectorChartIteratedPartial_unconditional_memLp_volume
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s)
+    (m : ℕ) (l : Fin m → Fin (Module.finrank ℝ E)) :
+    MemLp (eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+        g r s i α P₀ m l) 2
+      ((volume : Measure EuclN).restrict
+        (chartTargetEuclid (I := I) (M := M) α)) := by
+  induction m with
+  | zero =>
+      rw [eigenvectorChartIteratedPartial_unconditional_zero]
+      exact eigenvectorChartComponentFun_ofCompact_memLp_volume
+        (I := I) (M := M) g r s i α P₀
+  | succ m _ih =>
+      rw [eigenvectorChartIteratedPartial_unconditional_succ]
+      exact chosenWeakPartial'_memLp_volume_unconditional
+        (l (Fin.last m)) _
+
+/-- The chart-locality-free `m`-fold mixed weak partial is `MemLp 2` on every
+compact subset of the chart target. Chart-locality-free twin of
+`eigenvectorChartIteratedPartial_memLp_volume_compact`. -/
+private lemma eigenvectorChartIteratedPartial_unconditional_memLp_volume_compact
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s)
+    (m : ℕ) (l : Fin m → Fin (Module.finrank ℝ E))
+    {K : Set EuclN} (hK_meas : MeasurableSet K)
+    (hK_in : K ⊆ chartTargetEuclid (I := I) (M := M) α) :
+    MemLp (eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+        g r s i α P₀ m l) 2
+      ((volume : Measure EuclN).restrict K) := by
+  have h_global := eigenvectorChartIteratedPartial_unconditional_memLp_volume
+    (I := I) (M := M) g r s i α P₀ m l
+  have h_eq : ((volume : Measure EuclN).restrict
+        (chartTargetEuclid (I := I) (M := M) α)).restrict K =
+      (volume : Measure EuclN).restrict K := by
+    rw [Measure.restrict_restrict hK_meas]
+    congr 1
+    exact Set.inter_eq_self_of_subset_left hK_in
+  rw [← h_eq]
+  exact h_global.restrict K
+
+/-! ### The chart-locality-free five-layer differentiated numerator -/
+
+/-- The five-layer differentiated numerator at level `m + 1`, chart-locality-free.
+Chart-locality-free twin of `eigenvectorChartRHSDiffNumerator`, with the recursive
+`m`-fold mixed weak partials re-keyed onto
+`eigenvectorChartIteratedPartial_unconditional`. -/
+def eigenvectorChartRHSDiffNumerator_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
+    (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
+    (fChartEffPrev : EuclN → ℝ) (y : EuclN) : ℝ :=
+  -- Layer A: (∂_b ∂_{lₙ} a_ab) · ((m+1)-fold mixed partial, index `cons a init`).
+  (∑ a : Fin (Module.finrank ℝ E),
+    ∑ b : Fin (Module.finrank ℝ E),
+      (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a b
+            (l (Fin.last m))) y)
+          (EuclideanSpace.single b 1) *
+        eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+          g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l)) y)
+  -- Layer B: (∂_{lₙ} a_ab) · (∂_b of the (m+1)-fold mixed partial, `cons a init`).
+  + (∑ a : Fin (Module.finrank ℝ E),
+      ∑ b : Fin (Module.finrank ℝ E),
+        weightedInvGramDerivOnEuclid (I := I) g α a b (l (Fin.last m)) y *
+          chosenWeakPartial' (d := Module.finrank ℝ E) 2 b
+            (eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+              g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
+            (chartTargetEuclid (I := I) (M := M) α) y)
+  -- Layer C: -(∂_{lₙ} c) · (m-fold mixed partial, index `Fin.init l`).
+  - densityDerivOnEuclid (I := I) g α (l (Fin.last m)) y *
+      eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+        g r s i α P₀ m (Fin.init l) y
+  -- Layer D: (∂_{lₙ} c) · fChartEffPrev.
+  + densityDerivOnEuclid (I := I) g α (l (Fin.last m)) y * fChartEffPrev y
+  -- Layer E: c · (∂_{lₙ}-weak-partial of fChartEffPrev).
+  + densityOnEuclid (I := I) g α y *
+      chosenWeakPartial' (d := Module.finrank ℝ E) 2 (l (Fin.last m))
+        fChartEffPrev (chartTargetEuclid (I := I) (M := M) α) y
+
+/-- **The chart-locality-free differentiated numerator is `MemLp 2
+(volume.restrict (chartPouKernel α))`.** Chart-locality-free twin of
+`eigenvectorChartRHSDiffNumerator_memLp_volume_compact`; the proof body transfers
+verbatim, with the `m`-fold mixed weak partials re-keyed onto the
+chart-locality-free iterated partial. -/
+lemma eigenvectorChartRHSDiffNumerator_unconditional_memLp_volume_compact
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
+    (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
+    {fChartEffPrev : EuclN → ℝ}
+    (h_prev : MemLp fChartEffPrev 2
+      ((chartPulledWeightedMeasure (I := I) g α).restrict
+        (chartTargetEuclid (I := I) (M := M) α))) :
+    MemLp (fun y => eigenvectorChartRHSDiffNumerator_unconditional (I := I) (M := M)
+        g r s i α P₀ m l fChartEffPrev y) 2
+      ((volume : Measure EuclN).restrict
+        (chartPouKernel (I := I) (M := M) α)) := by
+  classical
+  set K : Set EuclN := chartPouKernel (I := I) (M := M) α with hK_def
+  have hK_compact : IsCompact K := chartPouKernel_isCompact (I := I) (M := M) α
+  have hK_meas : MeasurableSet K :=
+    chartPouKernel_measurableSet (I := I) (M := M) α
+  have hK_in : K ⊆ chartTargetEuclid (I := I) (M := M) α :=
+    chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α
+  have h_prev_K : MemLp fChartEffPrev 2 ((volume : Measure EuclN).restrict K) :=
+    memLp_volume_restrict_of_memLp_chartPulledWeightedMeasure
+      (g := g) (α := α) h_prev hK_compact hK_meas hK_in
+  -- Layer A.
+  have hA : MemLp (fun y => ∑ a : Fin (Module.finrank ℝ E),
+      ∑ b : Fin (Module.finrank ℝ E),
+        (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a b
+              (l (Fin.last m))) y)
+            (EuclideanSpace.single b 1) *
+          eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+            g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l)) y) 2
+      ((volume : Measure EuclN).restrict K) := by
+    refine memLp_finset_sum _ (fun a _ => memLp_finset_sum _ (fun b _ => ?_))
+    have h_coeff : ContDiffOn ℝ ∞
+        (fun y => (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a b
+              (l (Fin.last m))) y)
+            (EuclideanSpace.single b 1))
+        (chartTargetEuclid (I := I) (M := M) α) := by
+      have h_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
+        chartTargetEuclid_isOpen (I := I) (M := M) α
+      have h_diffOn : ContDiffOn ℝ ∞
+          (weightedInvGramDerivOnEuclid (I := I) g α a b (l (Fin.last m)))
+          (chartTargetEuclid (I := I) (M := M) α) :=
+        weightedInvGramDerivOnEuclid_contDiffOn (I := I) g α a b (l (Fin.last m))
+      have h_fderiv : ContDiffOn ℝ ∞
+          (fun y => fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a b
+              (l (Fin.last m))) y)
+          (chartTargetEuclid (I := I) (M := M) α) :=
+        ((contDiffOn_infty_iff_fderiv_of_isOpen h_open).1 h_diffOn).2
+      have h_eval : ContDiff ℝ ∞
+          (fun (L : EuclN →L[ℝ] ℝ) => L (EuclideanSpace.single b 1)) :=
+        (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single b (1 : ℝ))).contDiff
+      exact h_eval.contDiffOn.comp h_fderiv (mapsTo_univ _ _)
+    exact memLp_volume_compact_contDiffOn_mul (I := I) (M := M) α
+      h_coeff hK_compact hK_meas hK_in
+      (eigenvectorChartIteratedPartial_unconditional_memLp_volume_compact
+        (I := I) (M := M) g r s i α P₀ (m + 1)
+        (Fin.cons a (Fin.init l)) hK_meas hK_in)
+  -- Layer B.
+  have hB : MemLp (fun y => ∑ a : Fin (Module.finrank ℝ E),
+      ∑ b : Fin (Module.finrank ℝ E),
+        weightedInvGramDerivOnEuclid (I := I) g α a b (l (Fin.last m)) y *
+          chosenWeakPartial' (d := Module.finrank ℝ E) 2 b
+            (eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+              g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
+            (chartTargetEuclid (I := I) (M := M) α) y) 2
+      ((volume : Measure EuclN).restrict K) := by
+    refine memLp_finset_sum _ (fun a _ => memLp_finset_sum _ (fun b _ => ?_))
+    refine memLp_volume_compact_contDiffOn_mul (I := I) (M := M) α
+      (weightedInvGramDerivOnEuclid_contDiffOn (I := I) g α a b (l (Fin.last m)))
+      hK_compact hK_meas hK_in ?_
+    have h_global := chosenWeakPartial'_memLp_volume_unconditional
+      (Ω := chartTargetEuclid (I := I) (M := M) α) b
+      (eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+        g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
+    have h_eq : ((volume : Measure EuclN).restrict
+          (chartTargetEuclid (I := I) (M := M) α)).restrict K =
+        (volume : Measure EuclN).restrict K := by
+      rw [Measure.restrict_restrict hK_meas]
+      congr 1
+      exact Set.inter_eq_self_of_subset_left hK_in
+    rw [← h_eq]
+    exact h_global.restrict K
+  -- Layer C.
+  have hC : MemLp (fun y =>
+      densityDerivOnEuclid (I := I) g α (l (Fin.last m)) y *
+        eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+          g r s i α P₀ m (Fin.init l) y) 2
+      ((volume : Measure EuclN).restrict K) :=
+    memLp_volume_compact_contDiffOn_mul (I := I) (M := M) α
+      (densityDerivOnEuclid_contDiffOn (I := I) g α (l (Fin.last m)))
+      hK_compact hK_meas hK_in
+      (eigenvectorChartIteratedPartial_unconditional_memLp_volume_compact
+        (I := I) (M := M) g r s i α P₀ m (Fin.init l)
+        hK_meas hK_in)
+  -- Layer D.
+  have hD : MemLp (fun y =>
+      densityDerivOnEuclid (I := I) g α (l (Fin.last m)) y *
+        fChartEffPrev y) 2
+      ((volume : Measure EuclN).restrict K) :=
+    memLp_volume_compact_contDiffOn_mul (I := I) (M := M) α
+      (densityDerivOnEuclid_contDiffOn (I := I) g α (l (Fin.last m)))
+      hK_compact hK_meas hK_in h_prev_K
+  -- Layer E.
+  have hE : MemLp (fun y =>
+      densityOnEuclid (I := I) g α y *
+        chosenWeakPartial' (d := Module.finrank ℝ E) 2 (l (Fin.last m))
+          fChartEffPrev (chartTargetEuclid (I := I) (M := M) α) y) 2
+      ((volume : Measure EuclN).restrict K) := by
+    refine memLp_volume_compact_contDiffOn_mul (I := I) (M := M) α
+      (densityOnEuclid_contDiffOn (I := I) g α) hK_compact hK_meas hK_in ?_
+    have h_global := chosenWeakPartial'_memLp_volume_unconditional
+      (Ω := chartTargetEuclid (I := I) (M := M) α) (l (Fin.last m)) fChartEffPrev
+    have h_eq : ((volume : Measure EuclN).restrict
+          (chartTargetEuclid (I := I) (M := M) α)).restrict K =
+        (volume : Measure EuclN).restrict K := by
+      rw [Measure.restrict_restrict hK_meas]
+      congr 1
+      exact Set.inter_eq_self_of_subset_left hK_in
+    rw [← h_eq]
+    exact h_global.restrict K
+  -- Assemble: the numerator is `A + B - C + D + E`.
+  have h_total := ((((hA.add hB).sub hC).add hD).add hE)
+  refine h_total.ae_eq (Filter.Eventually.of_forall (fun y => ?_))
+  simp only [eigenvectorChartRHSDiffNumerator_unconditional, Pi.add_apply,
+    Pi.sub_apply]
+
+/-! ### The chart-locality-free level-`m` differentiated right-hand side -/
+
+/-- **The level-`m` differentiated right-hand side of the eigenvector chart
+variational identity** (chart-locality-free). Chart-locality-free twin of
+`eigenvectorChartRHSDiff`, with the level-`0` leaf the chart-locality-free
+seven-term `eigenvectorChartRHS_unconditional`. -/
+def eigenvectorChartRHSDiff_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) :
+    ∀ (m : ℕ), (Fin m → Fin (Module.finrank ℝ E)) → EuclN → ℝ
+  | 0, _ => eigenvectorChartRHS_unconditional (I := I) (M := M) g r s i α P₀
+  | m + 1, l =>
+      Set.indicator (chartPouKernel (I := I) (M := M) α)
+        (fun y => eigenvectorChartRHSDiffNumerator_unconditional (I := I) (M := M)
+            g r s i α P₀ m l
+            (eigenvectorChartRHSDiff_unconditional g r s i α P₀ m (Fin.init l)) y /
+          densityOnEuclid (I := I) g α y)
+
+/-- Definitional unfolding of `eigenvectorChartRHSDiff_unconditional` at `m = 0`. -/
+@[simp] theorem eigenvectorChartRHSDiff_unconditional_zero
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s)
+    (l : Fin 0 → Fin (Module.finrank ℝ E)) :
+    eigenvectorChartRHSDiff_unconditional (I := I) (M := M) g r s i α P₀ 0 l =
+      eigenvectorChartRHS_unconditional (I := I) (M := M) g r s i α P₀ := rfl
+
+/-- Definitional unfolding of `eigenvectorChartRHSDiff_unconditional` at `m + 1`. -/
+theorem eigenvectorChartRHSDiff_unconditional_succ
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s)
+    (m : ℕ) (l : Fin (m + 1) → Fin (Module.finrank ℝ E)) :
+    eigenvectorChartRHSDiff_unconditional (I := I) (M := M)
+        g r s i α P₀ (m + 1) l =
+      Set.indicator (chartPouKernel (I := I) (M := M) α)
+        (fun y => eigenvectorChartRHSDiffNumerator_unconditional (I := I) (M := M)
+            g r s i α P₀ m l
+            (eigenvectorChartRHSDiff_unconditional (I := I) (M := M)
+              g r s i α P₀ m (Fin.init l)) y /
+          densityOnEuclid (I := I) g α y) := rfl
+
+/-- At level `m + 1`, the chart-locality-free differentiated right-hand side
+vanishes pointwise off the compact partition-of-unity kernel `chartPouKernel α`.
+Chart-locality-free twin of
+`eigenvectorChartRHSDiff_succ_eq_zero_off_chartPouKernel`. -/
+theorem eigenvectorChartRHSDiff_unconditional_succ_eq_zero_off_chartPouKernel
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s)
+    (m : ℕ) (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
+    {y : EuclN} (hy : y ∉ chartPouKernel (I := I) (M := M) α) :
+    eigenvectorChartRHSDiff_unconditional (I := I) (M := M)
+        g r s i α P₀ (m + 1) l y = 0 := by
+  rw [eigenvectorChartRHSDiff_unconditional_succ, Set.indicator_of_notMem hy]
+
+/-- **Weighted-`L²` membership of the level-`m` differentiated right-hand side**
+(chart-locality-free). Chart-locality-free twin of
+`eigenvectorChartRHSDiff_memLp_weighted`; the level-`0` leaf is the committed
+`eigenvectorChartRHS_memLp_weighted_unconditional`, and the proof body transfers
+verbatim. -/
+theorem eigenvectorChartRHSDiff_unconditional_memLp_weighted
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s)
+    (m : ℕ) (l : Fin m → Fin (Module.finrank ℝ E)) :
+    MemLp (eigenvectorChartRHSDiff_unconditional (I := I) (M := M)
+        g r s i α P₀ m l) 2
+      ((chartPulledWeightedMeasure (I := I) g α).restrict
+        (chartTargetEuclid (I := I) (M := M) α)) := by
+  induction m with
+  | zero =>
+      rw [eigenvectorChartRHSDiff_unconditional_zero]
+      exact eigenvectorChartRHS_memLp_weighted_unconditional
+        (I := I) (M := M) g r s i α P₀
+  | succ m ih =>
+      classical
+      set K : Set EuclN := chartPouKernel (I := I) (M := M) α with hK_def
+      have hK_compact : IsCompact K :=
+        chartPouKernel_isCompact (I := I) (M := M) α
+      have hK_meas : MeasurableSet K :=
+        chartPouKernel_measurableSet (I := I) (M := M) α
+      have hK_in : K ⊆ chartTargetEuclid (I := I) (M := M) α :=
+        chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α
+      have h_prev := ih (Fin.init l)
+      have h_num := eigenvectorChartRHSDiffNumerator_unconditional_memLp_volume_compact
+        (I := I) (M := M) g r s i α P₀ m l h_prev
+      have h_div : MemLp (fun y => eigenvectorChartRHSDiffNumerator_unconditional
+          (I := I) (M := M) g r s i α P₀ m l
+            (eigenvectorChartRHSDiff_unconditional (I := I) (M := M)
+              g r s i α P₀ m (Fin.init l)) y /
+          densityOnEuclid (I := I) g α y) 2
+          ((volume : Measure EuclN).restrict K) := by
+        have h_eq : (fun y => eigenvectorChartRHSDiffNumerator_unconditional
+            (I := I) (M := M) g r s i α P₀ m l
+              (eigenvectorChartRHSDiff_unconditional (I := I) (M := M)
+                g r s i α P₀ m (Fin.init l)) y /
+            densityOnEuclid (I := I) g α y) =
+            fun y => (1 / densityOnEuclid (I := I) g α y) *
+              eigenvectorChartRHSDiffNumerator_unconditional (I := I) (M := M)
+                g r s i α P₀ m l
+                (eigenvectorChartRHSDiff_unconditional (I := I) (M := M)
+                  g r s i α P₀ m (Fin.init l)) y := by
+          funext y
+          rw [one_div, mul_comm, ← div_eq_mul_inv]
+        rw [h_eq]
+        exact memLp_volume_compact_contDiffOn_mul (I := I) (M := M) α
+          (one_div_densityOnEuclid_contDiffOn' (I := I) (M := M) g α)
+          hK_compact hK_meas hK_in h_num
+      have h_plain : MemLp (eigenvectorChartRHSDiff_unconditional (I := I) (M := M)
+          g r s i α P₀ (m + 1) l) 2
+          ((volume : Measure EuclN).restrict
+            (chartTargetEuclid (I := I) (M := M) α)) := by
+        rw [eigenvectorChartRHSDiff_unconditional_succ]
+        rw [memLp_indicator_iff_restrict hK_meas]
+        have h_double : ((volume : Measure EuclN).restrict
+              (chartTargetEuclid (I := I) (M := M) α)).restrict K =
+            (volume : Measure EuclN).restrict K := by
+          rw [Measure.restrict_restrict hK_meas]
+          congr 1
+          exact Set.inter_eq_self_of_subset_left hK_in
+        rw [h_double]
+        exact h_div
+      refine memLp_chartPulledWeightedMeasure_of_memLp_volume_of_ae_zero_off_compact
+        (I := I) (M := M) g α hK_compact hK_meas hK_in
+        (Filter.Eventually.of_forall (fun y hy =>
+          eigenvectorChartRHSDiff_unconditional_succ_eq_zero_off_chartPouKernel
+            (I := I) (M := M) g r s i α P₀ m l hy))
+        h_plain
+
 /-! ## Sanity tests -/
 
 section ElaborationTests
