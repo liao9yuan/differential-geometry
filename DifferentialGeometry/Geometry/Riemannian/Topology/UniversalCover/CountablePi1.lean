@@ -506,6 +506,156 @@ lemma uc_pi1_countable_concat_quot_congr
   exact Quotient.sound
     (_root_.Path.Homotopic.concat_hcomp (n := n) p F G hH)
 
+/-! ### Telescoping of two concatenations under a connector family
+
+The algebraic heart of the polygonal reduction. Given two vertex sequences
+`p, q : Fin (k+1) → X`, segment families `F i : Path (p i.castSucc) (p i.succ)`
+and `G i : Path (q i.castSucc) (q i.succ)`, and a family of *connectors*
+`c i : Path (p i) (q i)` satisfying the per-segment "commuting square"
+identity at the quotient level
+`⟦F i⟧ · ⟦c i.succ⟧ = ⟦c i.castSucc⟧ · ⟦G i⟧`, one obtains the global
+telescoping identity
+`⟦c 0⟧ · ⟦concat q G⟧ = ⟦concat p F⟧ · ⟦c (Fin.last k)⟧`
+in the homotopy quotient. This is a purely groupoid-algebraic statement,
+proved by induction on `k` through `Path.concat_succ`. -/
+lemma uc_pi1_countable_telescope
+    {Y : Type*} [TopologicalSpace Y] :
+    ∀ {k : ℕ} (p q : Fin (k + 1) → Y)
+      (F : (i : Fin k) → _root_.Path (p i.castSucc) (p i.succ))
+      (G : (i : Fin k) → _root_.Path (q i.castSucc) (q i.succ))
+      (c : (i : Fin (k + 1)) → _root_.Path (p i) (q i)),
+      (∀ i : Fin k,
+        _root_.Path.Homotopic.Quotient.trans
+            (⟦F i⟧ : _root_.Path.Homotopic.Quotient (p i.castSucc) (p i.succ))
+            (⟦c i.succ⟧ : _root_.Path.Homotopic.Quotient (p i.succ) (q i.succ))
+          = _root_.Path.Homotopic.Quotient.trans
+              (⟦c i.castSucc⟧
+                : _root_.Path.Homotopic.Quotient (p i.castSucc) (q i.castSucc))
+              (⟦G i⟧ : _root_.Path.Homotopic.Quotient (q i.castSucc) (q i.succ))) →
+      _root_.Path.Homotopic.Quotient.trans
+          (⟦c 0⟧ : _root_.Path.Homotopic.Quotient (p 0) (q 0))
+          (⟦_root_.Path.concat q G⟧
+            : _root_.Path.Homotopic.Quotient (q 0) (q (Fin.last k)))
+        = _root_.Path.Homotopic.Quotient.trans
+            (⟦_root_.Path.concat p F⟧
+              : _root_.Path.Homotopic.Quotient (p 0) (p (Fin.last k)))
+            (⟦c (Fin.last k)⟧
+              : _root_.Path.Homotopic.Quotient (p (Fin.last k)) (q (Fin.last k))) := by
+  intro k
+  induction k with
+  | zero =>
+    intro p q F G c _hsq
+    -- `concat` over `Fin 0` segments is `refl`, and `last 0 = 0`.
+    have hpc : (⟦_root_.Path.concat p F⟧
+        : _root_.Path.Homotopic.Quotient (p 0) (p (Fin.last 0)))
+        = _root_.Path.Homotopic.Quotient.refl (p 0) := by
+      rw [_root_.Path.concat_zero]; exact _root_.Path.Homotopic.Quotient.mk_refl _
+    have hqc : (⟦_root_.Path.concat q G⟧
+        : _root_.Path.Homotopic.Quotient (q 0) (q (Fin.last 0)))
+        = _root_.Path.Homotopic.Quotient.refl (q 0) := by
+      rw [_root_.Path.concat_zero]; exact _root_.Path.Homotopic.Quotient.mk_refl _
+    -- `Fin.last 0 = 0` definitionally, so `c (Fin.last 0) = c 0`.
+    change _root_.Path.Homotopic.Quotient.trans
+        (⟦c 0⟧ : _root_.Path.Homotopic.Quotient (p 0) (q 0))
+        (⟦_root_.Path.concat q G⟧
+          : _root_.Path.Homotopic.Quotient (q 0) (q (Fin.last 0)))
+      = _root_.Path.Homotopic.Quotient.trans
+          (⟦_root_.Path.concat p F⟧
+            : _root_.Path.Homotopic.Quotient (p 0) (p (Fin.last 0)))
+          (⟦c 0⟧ : _root_.Path.Homotopic.Quotient (p 0) (q 0))
+    rw [hpc, hqc]
+    simp
+  | succ n ih =>
+    intro p q F G c hsq
+    -- Decompose the last segment via `concat_succ`.
+    have hpsucc :
+        (⟦_root_.Path.concat p F⟧
+            : _root_.Path.Homotopic.Quotient (p 0) (p (Fin.last (n + 1))))
+          = _root_.Path.Homotopic.Quotient.trans
+              (⟦_root_.Path.concat (p ∘ Fin.castSucc)
+                  (fun i => F i.castSucc)⟧
+                : _root_.Path.Homotopic.Quotient
+                    ((p ∘ Fin.castSucc) 0) ((p ∘ Fin.castSucc) (Fin.last n)))
+              (⟦F (Fin.last n)⟧
+                : _root_.Path.Homotopic.Quotient
+                    (p (Fin.last n).castSucc) (p (Fin.last n).succ)) := by
+      have := _root_.Path.concat_succ (n := n) p F
+      rw [this]
+      exact _root_.Path.Homotopic.Quotient.mk_trans _ _
+    have hqsucc :
+        (⟦_root_.Path.concat q G⟧
+            : _root_.Path.Homotopic.Quotient (q 0) (q (Fin.last (n + 1))))
+          = _root_.Path.Homotopic.Quotient.trans
+              (⟦_root_.Path.concat (q ∘ Fin.castSucc)
+                  (fun i => G i.castSucc)⟧
+                : _root_.Path.Homotopic.Quotient
+                    ((q ∘ Fin.castSucc) 0) ((q ∘ Fin.castSucc) (Fin.last n)))
+              (⟦G (Fin.last n)⟧
+                : _root_.Path.Homotopic.Quotient
+                    (q (Fin.last n).castSucc) (q (Fin.last n).succ)) := by
+      have := _root_.Path.concat_succ (n := n) q G
+      rw [this]
+      exact _root_.Path.Homotopic.Quotient.mk_trans _ _
+    -- Apply the induction hypothesis to the restricted data
+    -- (vertices `p ∘ castSucc`, `q ∘ castSucc`; connectors `c ∘ castSucc`).
+    -- The restricted commuting-square hypothesis is `hsq` precomposed with
+    -- `castSucc`; all the `Fin` reindexings involved (`i.succ.castSucc =
+    -- i.castSucc.succ`, `(p ∘ castSucc) i = p i.castSucc`, …) hold by `rfl`.
+    have ihapp := ih (p ∘ Fin.castSucc) (q ∘ Fin.castSucc)
+      (fun i => F i.castSucc) (fun i => G i.castSucc)
+      (fun i : Fin (n + 1) => (c i.castSucc :
+        _root_.Path ((p ∘ Fin.castSucc) i) ((q ∘ Fin.castSucc) i)))
+      (by intro i; exact hsq i.castSucc)
+    -- The commuting square for the final segment.
+    have hsqlast := hsq (Fin.last n)
+    -- Reformulate `ihapp` with the endpoint connectors written directly as
+    -- `c 0` and `c (Fin.last n).castSucc` (definitionally equal to the
+    -- `c ∘ castSucc` forms produced by the recursion).
+    have ihapp' :
+        _root_.Path.Homotopic.Quotient.trans
+            (⟦c 0⟧ : _root_.Path.Homotopic.Quotient
+              ((p ∘ Fin.castSucc) 0) ((q ∘ Fin.castSucc) 0))
+            (⟦_root_.Path.concat (q ∘ Fin.castSucc) (fun i => G i.castSucc)⟧
+              : _root_.Path.Homotopic.Quotient
+                  ((q ∘ Fin.castSucc) 0) ((q ∘ Fin.castSucc) (Fin.last n)))
+          = _root_.Path.Homotopic.Quotient.trans
+              (⟦_root_.Path.concat (p ∘ Fin.castSucc) (fun i => F i.castSucc)⟧
+                : _root_.Path.Homotopic.Quotient
+                    ((p ∘ Fin.castSucc) 0) ((p ∘ Fin.castSucc) (Fin.last n)))
+              (⟦c (Fin.last n).castSucc⟧
+                : _root_.Path.Homotopic.Quotient
+                    (p (Fin.last n).castSucc) (q (Fin.last n).castSucc)) := ihapp
+    -- Run the telescoping chain entirely through `Eq.trans` / `congrArg`,
+    -- which match up to definitional equality (the various `Fin`-reindexings
+    -- `(p ∘ castSucc) 0 = p 0` etc. are only `rfl`, not syntactic, so the
+    -- syntactic `rw` would fail here).
+    rw [hpsucc, hqsucc]
+    -- Goal: trans (c 0) (trans CQG GL) = trans (trans CPF FL) CL.
+    refine Eq.trans
+      (_root_.Path.Homotopic.Quotient.trans_assoc
+        (⟦c 0⟧) (⟦_root_.Path.concat (q ∘ Fin.castSucc) (fun i => G i.castSucc)⟧)
+        (⟦G (Fin.last n)⟧)).symm ?_
+    -- Goal: trans (trans (c 0) CQG) GL = trans (trans CPF FL) CL.
+    refine Eq.trans
+      (congrArg
+        (fun z => _root_.Path.Homotopic.Quotient.trans z (⟦G (Fin.last n)⟧))
+        ihapp') ?_
+    -- Goal: trans (trans CPF CML) GL = trans (trans CPF FL) CL.
+    refine Eq.trans
+      (_root_.Path.Homotopic.Quotient.trans_assoc
+        (⟦_root_.Path.concat (p ∘ Fin.castSucc) (fun i => F i.castSucc)⟧)
+        (⟦c (Fin.last n).castSucc⟧) (⟦G (Fin.last n)⟧)) ?_
+    -- Goal: trans CPF (trans CML GL) = trans (trans CPF FL) CL.
+    refine Eq.trans
+      (congrArg
+        (fun z => _root_.Path.Homotopic.Quotient.trans
+          (⟦_root_.Path.concat (p ∘ Fin.castSucc) (fun i => F i.castSucc)⟧) z)
+        hsqlast.symm) ?_
+    -- Goal: trans CPF (trans FL CL) = trans (trans CPF FL) CL.
+    exact (_root_.Path.Homotopic.Quotient.trans_assoc
+      (⟦_root_.Path.concat (p ∘ Fin.castSucc) (fun i => F i.castSucc)⟧)
+      (⟦F (Fin.last n)⟧) (⟦c (Fin.last n).succ⟧)).symm
+
 /-- **Polygonal enumeration.** The fundamental group of a second-countable,
 connected, locally-path-connected, semi-locally-simply-connected space
 admits a surjection from a countable indexing set.
@@ -894,71 +1044,227 @@ theorem uc_pi1_countable_polygonal_enumeration
   --     element (using `hVertex_succ i_prev` to identify the anchor at
   --     index `i.val - 1` as the polygonal vertex at position `i`).
   -- ----------------------------------------------------------------
-  -- The connector "forward" basis-index choice: for `i : Fin (k+1)` with
-  -- `i.val < k`, use `B (idx ⟨i.val, _⟩)`; for the terminal vertex
-  -- `i.val = k`, the connector is the constant path at `x` (no forward
-  -- segment).
-  let cBasis : ∀ i : Fin (k + 1), (i : ℕ) < k → ℕ :=
-    fun i h => idx ⟨(i : ℕ), h⟩
-  -- The connector data: each `c i` is a path `polyVertex idx i → γ (t i)`,
-  -- with the image-containment record packaged as a single `JoinedIn`
-  -- witness for boundary-aware basis choices.
-  -- For the boundary vertices `i = 0` and `i = Fin.last k`, both endpoints
-  -- coincide with `x`, so we use `Path.refl x` (no nontrivial intersection
-  -- needed).
-  have hconn_boundary_zero :
-      polyVertex idx (0 : Fin (k + 1)) = γ (t (0 : Fin (k + 1))) := by
-    rw [polyVertex_zero, ht0]; exact γ.source.symm
-  have hconn_boundary_last :
-      polyVertex idx (Fin.last k) = γ (t (Fin.last k)) := by
-    rw [polyVertex_last, htlast]; exact γ.target.symm
-  -- Both polygonal vertex and γ-vertex lie in `B (idx i)` for `i < k`
-  -- (the "forward" basis-element). At the cast-succ side of segment `i`,
-  -- this is just `hVertex_castSucc i` and `hγ_castSucc_in i`. At the succ
-  -- side of segment `i = last k - 1`, both equal `x ∈ B (idx (last k - 1))`
-  -- by the boundary case.
-  have hVγ_in_Bidx :
-      ∀ i : Fin k,
-        polyVertex idx i.castSucc ∈ B (idx i) ∧
-          γ (t i.castSucc) ∈ B (idx i) :=
-    fun i => ⟨hVertex_castSucc i, hγ_castSucc_in i⟩
+  -- The γ-vertex map: the right endpoints of the connectors and the
+  -- vertices of `concatT`'s underlying concatenation.
+  let γv : Fin (k + 1) → X := fun i => γ.extend ((t i : unitInterval) : ℝ)
+  have hγv_eq : ∀ i : Fin (k + 1), γv i = γ (t i) := fun i => hExtend i
+  -- Boundary endpoint coincidences (paths/casts use these).
+  have hp0 : p₀ (0 : Fin (k + 1)) = x := polyVertex_zero idx
+  have hplast : p₀ (Fin.last k) = x := polyVertex_last idx
+  have hγv0 : γv (0 : Fin (k + 1)) = x := by
+    change γ.extend ((t 0 : unitInterval) : ℝ) = x; rw [← ha_eq]
+  have hγvlast : γv (Fin.last k) = x := by
+    change γ.extend ((t (Fin.last k) : unitInterval) : ℝ) = x; rw [← hb_eq]
+  -- γ-vertex membership in the forward (`i.castSucc`) and backward (`i.succ`)
+  -- basis elements of each segment.
+  have hγv_castSucc_in : ∀ i : Fin k, γv i.castSucc ∈ B (idx i) := by
+    intro i; rw [hγv_eq]; exact hγ_castSucc_in i
+  have hγv_succ_in : ∀ i : Fin k, γv i.succ ∈ B (idx i) := by
+    intro i; rw [hγv_eq]; exact hγ_succ_in i
   -- ----------------------------------------------------------------
-  -- The substantive telescoping argument proceeds in three stages:
-  --   (1) Existence of a connector family
-  --       `c i : Path (polyVertex idx i) (γ (t i))` for each
-  --       `i : Fin (k + 1)`, with `c 0` and `c (Fin.last k)` constant paths
-  --       (modulo endpoint identifications) and the per-segment range
-  --       bound: for each `i : Fin k`, the images of both `c i.castSucc`
-  --       and `c i.succ` lie inside `B (idx i)`. Interior connectors
-  --       require path-connectedness of the pairwise intersections
-  --       `B (idx (i-1)) ∩ B (idx i)` between the anchor and the
-  --       γ-vertex; this is the classical Hatcher §1.3 / Spanier §2.4
-  --       basis-refinement / path-component selection step.
-  --   (2) Construction of interleaved paths
-  --       `polySegT i := (c i.castSucc).symm.trans ((seg i).trans (c i.succ))`,
-  --       each a path `γ (t i.castSucc) → γ (t i.succ)` inside `B (idx i)`.
-  --       By `uc_pi1_countable_piece_homotopy` applied with the
-  --       chart-aligned `T i = γ.truncateOfLE _`, one has
-  --       `⟦polySegT i⟧ = ⟦T i⟧` at the quotient level; by
-  --       `uc_pi1_countable_concat_quot_congr`, the full concatenation
-  --       gives `⟦Path.concat (γ∘t) polySegT⟧ = ⟦Path.concat (γ∘t) T⟧
-  --         = ⟦concatT⟧` (up to cast).
-  --   (3) Telescoping `(c · c.symm) ≃ refl`-cancellation at interior
-  --       vertices and `c 0 = c (Fin.last k) = refl x` at boundaries
-  --       yields `⟦Path.concat polyVertex seg⟧ = ⟦Path.concat (γ∘t)
-  --       polySegT⟧`, completing `⟦polyLoop⟧ = ⟦concatT⟧`.
-  --
-  -- The residual `sorry` below isolates the combined obligation: the
-  -- connector existence at non-trivial pairwise intersections plus the
-  -- final algebraic telescoping under those connectors. All upstream
-  -- scaffolding (refined basis, anchor coverage, monotone subdivision
-  -- adaptation, polygonal vertex well-definedness, the bridge to `γ` via
-  -- `Path.trans_truncate_homotopic`, the in-scope objects `T`, `concatT`,
-  -- `hγ_concatT`, `hquot_γ_concatT`, `seg`, `hseg_range`, `polyLoop`,
-  -- `hf_unfold`, `hg_unfold`, `hgoal_red`) supplies every ingredient the
-  -- finalising argument needs.
+  -- Connector existence (the classical path-component selection step).
+  -- For each vertex `i : Fin (k+1)` we require a path `c i` from the
+  -- polygonal vertex `p₀ i` to the γ-vertex `γv i`, with `c 0` and
+  -- `c (Fin.last k)` the (cast) constant paths at the basepoint, and whose
+  -- image lies in *every* adjacent basis element: `B (idx i)` when `i` opens
+  -- segment `i` (`c i.castSucc` for that segment) and `B (idx (i-1))` when
+  -- `i` closes segment `i-1` (`c i.succ` for that segment). Both `p₀ i`
+  -- (the chosen anchor of the pair) and `γv i = γ (t i)` lie in those
+  -- adjacent basis elements; a connector inside each adjacent element exists
+  -- once the relevant pairwise intersection is path-connected.
   -- ----------------------------------------------------------------
-  sorry
+  have hconn :
+      ∃ c : (i : Fin (k + 1)) → _root_.Path (p₀ i) (γv i),
+        (∀ i : Fin k, ∀ s : unitInterval, (c i.castSucc s : X) ∈ B (idx i)) ∧
+        (∀ i : Fin k, ∀ s : unitInterval, (c i.succ s : X) ∈ B (idx i)) ∧
+        (c 0 = (_root_.Path.refl x).cast hp0 hγv0) ∧
+        (c (Fin.last k) = (_root_.Path.refl x).cast hplast hγvlast) := by
+    sorry
+  obtain ⟨c, hc_cs, hc_su, hc0, hclast⟩ := hconn
+  -- Each `T i` is, on the nose, a path `γv i.castSucc → γv i.succ`.
+  let T' : (i : Fin k) → _root_.Path (γv i.castSucc) (γv i.succ) := fun i => T i
+  -- Range-in-`B (idx i)` records as `range _.toContinuousMap ⊆ B (idx i)`.
+  have range_subset_of_mem :
+      ∀ {a b : X} (u : _root_.Path a b) (n : ℕ),
+        (∀ s : unitInterval, (u s : X) ∈ B n) →
+        Set.range u.toContinuousMap ⊆ B n := by
+    intro a b u n hu z hz
+    rcases hz with ⟨s, hs⟩
+    have : (u s : X) ∈ B n := hu s
+    simpa [Path.coe_toContinuousMap] using hs ▸ this
+  have hT'_range : ∀ i : Fin k,
+      Set.range (T' i).toContinuousMap ⊆ B (idx i) :=
+    fun i => range_subset_of_mem (T' i) (idx i) (fun s => hT_range i s)
+  have hseg_range' : ∀ i : Fin k,
+      Set.range (seg i).toContinuousMap ⊆ B (idx i) :=
+    fun i => range_subset_of_mem (seg i) (idx i) (fun s => hseg_range i s)
+  have hc_cs_range : ∀ i : Fin k,
+      Set.range (c i.castSucc).toContinuousMap ⊆ B (idx i) :=
+    fun i => range_subset_of_mem (c i.castSucc) (idx i) (hc_cs i)
+  have hc_su_range : ∀ i : Fin k,
+      Set.range (c i.succ).toContinuousMap ⊆ B (idx i) :=
+    fun i => range_subset_of_mem (c i.succ) (idx i) (hc_su i)
+  -- Range of a `Path.trans` is the union of the two ranges.
+  have htrans_range_subset :
+      ∀ {a b d : X} (u : _root_.Path a b) (v : _root_.Path b d) (n : ℕ),
+        Set.range u.toContinuousMap ⊆ B n →
+        Set.range v.toContinuousMap ⊆ B n →
+        Set.range (u.trans v).toContinuousMap ⊆ B n := by
+    intro a b d u v n hu hv z hz
+    rcases hz with ⟨s, hs⟩
+    have hz' : z ∈ Set.range ((u.trans v) : unitInterval → X) :=
+      ⟨s, by simpa [Path.coe_toContinuousMap] using hs⟩
+    rw [Path.trans_range] at hz'
+    rcases hz' with h1 | h2
+    · rcases h1 with ⟨s', hs'⟩
+      exact hu ⟨s', by simpa [Path.coe_toContinuousMap] using hs'⟩
+    · rcases h2 with ⟨s', hs'⟩
+      exact hv ⟨s', by simpa [Path.coe_toContinuousMap] using hs'⟩
+  -- The per-segment commuting square, via `uc_pi1_countable_piece_homotopy`:
+  -- both `(seg i).trans (c i.succ)` and `(c i.castSucc).trans (T' i)` are
+  -- paths `p₀ i.castSucc → γv i.succ` inside `B (idx i)`, hence homotopic.
+  have hsquare : ∀ i : Fin k,
+      _root_.Path.Homotopic.Quotient.trans
+          (⟦seg i⟧ : _root_.Path.Homotopic.Quotient (p₀ i.castSucc) (p₀ i.succ))
+          (⟦c i.succ⟧ : _root_.Path.Homotopic.Quotient (p₀ i.succ) (γv i.succ))
+        = _root_.Path.Homotopic.Quotient.trans
+            (⟦c i.castSucc⟧
+              : _root_.Path.Homotopic.Quotient (p₀ i.castSucc) (γv i.castSucc))
+            (⟦T' i⟧ : _root_.Path.Homotopic.Quotient (γv i.castSucc) (γv i.succ)) := by
+    intro i
+    have hpiece :
+        (⟦(seg i).trans (c i.succ)⟧
+            : _root_.Path.Homotopic.Quotient (p₀ i.castSucc) (γv i.succ))
+          = ⟦(c i.castSucc).trans (T' i)⟧ :=
+      uc_pi1_countable_piece_homotopy X B hBnull (idx i)
+        ((seg i).trans (c i.succ)) ((c i.castSucc).trans (T' i))
+        (htrans_range_subset (seg i) (c i.succ) (idx i)
+          (hseg_range' i) (hc_su_range i))
+        (htrans_range_subset (c i.castSucc) (T' i) (idx i)
+          (hc_cs_range i) (hT'_range i))
+    exact (_root_.Path.Homotopic.Quotient.mk_trans (seg i) (c i.succ)).symm.trans
+      (hpiece.trans (_root_.Path.Homotopic.Quotient.mk_trans (c i.castSucc) (T' i)))
+  -- Apply the telescoping lemma.
+  have htel :
+      _root_.Path.Homotopic.Quotient.trans
+          (⟦c 0⟧ : _root_.Path.Homotopic.Quotient (p₀ 0) (γv 0))
+          (⟦_root_.Path.concat γv T'⟧
+            : _root_.Path.Homotopic.Quotient (γv 0) (γv (Fin.last k)))
+        = _root_.Path.Homotopic.Quotient.trans
+            (⟦_root_.Path.concat p₀ seg⟧
+              : _root_.Path.Homotopic.Quotient (p₀ 0) (p₀ (Fin.last k)))
+            (⟦c (Fin.last k)⟧
+              : _root_.Path.Homotopic.Quotient (p₀ (Fin.last k)) (γv (Fin.last k))) :=
+    uc_pi1_countable_telescope p₀ γv seg T' c hsquare
+  -- Lift the two `trans` to path-level `Path.trans` via `mk_trans`.
+  have htel' :
+      (⟦(c 0).trans (_root_.Path.concat γv T')⟧
+        : _root_.Path.Homotopic.Quotient (p₀ 0) (γv (Fin.last k)))
+        = ⟦(_root_.Path.concat p₀ seg).trans (c (Fin.last k))⟧ :=
+    (_root_.Path.Homotopic.Quotient.mk_trans (c 0) (_root_.Path.concat γv T')).trans
+      (htel.trans
+        (_root_.Path.Homotopic.Quotient.mk_trans
+          (_root_.Path.concat p₀ seg) (c (Fin.last k))).symm)
+  -- `htel' : ⟦(c 0).trans (concat γv T')⟧ = ⟦(concat p₀ seg).trans (c (last k))⟧`.
+  -- Cast both sides into `Quotient x x` and cancel the boundary `refl`s
+  -- *at the quotient level* (`Path.trans` with `refl` is only homotopic, not
+  -- equal, so the cancellation must happen after `⟦·⟧`).
+  -- Helper: casting a quotient `trans` splits as a `trans` of casts.
+  have qtrans_cast :
+      ∀ {a₁ a₂ b₁ b₂ d₁ d₂ : X}
+        (A : _root_.Path.Homotopic.Quotient a₂ b₂)
+        (Bq : _root_.Path.Homotopic.Quotient b₂ d₂)
+        (ha : a₁ = a₂) (hb : b₁ = b₂) (hd : d₁ = d₂),
+        _root_.Path.Homotopic.Quotient.cast
+            (_root_.Path.Homotopic.Quotient.trans A Bq) ha hd
+          = _root_.Path.Homotopic.Quotient.trans
+              (_root_.Path.Homotopic.Quotient.cast A ha hb)
+              (_root_.Path.Homotopic.Quotient.cast Bq hb hd) := by
+    intro a₁ a₂ b₁ b₂ d₁ d₂ A Bq ha hb hd
+    induction A using Quotient.ind with | _ a =>
+    induction Bq using Quotient.ind with | _ b =>
+    rfl
+  -- Cast `htel'` along `(Quotient.cast · hp0.symm hb_eq)` into `Quotient x x`,
+  -- stated directly in the split `trans (cast …) (cast …)` form (the splitting
+  -- `qtrans_cast` is definitional, so the `congrArg` term elaborates against
+  -- this target up to `rfl`).
+  have htelcast :
+      _root_.Path.Homotopic.Quotient.trans
+          (_root_.Path.Homotopic.Quotient.cast
+            (⟦c 0⟧ : _root_.Path.Homotopic.Quotient (p₀ 0) (γv 0)) hp0.symm hγv0.symm)
+          (_root_.Path.Homotopic.Quotient.cast
+            (⟦_root_.Path.concat γv T'⟧
+              : _root_.Path.Homotopic.Quotient (γv 0) (γv (Fin.last k)))
+            hγv0.symm hb_eq)
+        = _root_.Path.Homotopic.Quotient.trans
+            (_root_.Path.Homotopic.Quotient.cast
+              (⟦_root_.Path.concat p₀ seg⟧
+                : _root_.Path.Homotopic.Quotient (p₀ 0) (p₀ (Fin.last k)))
+              hp0.symm hplast.symm)
+            (_root_.Path.Homotopic.Quotient.cast
+              (⟦c (Fin.last k)⟧
+                : _root_.Path.Homotopic.Quotient (p₀ (Fin.last k)) (γv (Fin.last k)))
+              hplast.symm hb_eq) := by
+    have hbase :
+        _root_.Path.Homotopic.Quotient.cast
+            (⟦(c 0).trans (_root_.Path.concat γv T')⟧
+              : _root_.Path.Homotopic.Quotient (p₀ 0) (γv (Fin.last k))) hp0.symm hb_eq
+          = _root_.Path.Homotopic.Quotient.cast
+              (⟦(_root_.Path.concat p₀ seg).trans (c (Fin.last k))⟧
+                : _root_.Path.Homotopic.Quotient (p₀ 0) (γv (Fin.last k))) hp0.symm hb_eq :=
+      congrArg
+        (fun w => _root_.Path.Homotopic.Quotient.cast w hp0.symm hb_eq) htel'
+    -- Both sides split definitionally via `qtrans_cast` (which is `rfl`), so
+    -- the split target is definitionally equal to `hbase`.
+    exact hbase
+  -- Boundary connector casts collapse to `Quotient.refl x`.
+  -- (Each `cast ⟦P⟧ hx hy` is definitionally `⟦P.cast hx hy⟧`, and the cast
+  -- path equals the relevant base path by `Path.ext`; `Quotient.refl x` is
+  -- definitionally `⟦Path.refl x⟧`.)
+  have hc0cast :
+      _root_.Path.Homotopic.Quotient.cast
+          (⟦c 0⟧ : _root_.Path.Homotopic.Quotient (p₀ 0) (γv 0)) hp0.symm hγv0.symm
+        = _root_.Path.Homotopic.Quotient.refl x := by
+    rw [hc0]
+    change (⟦((_root_.Path.refl x).cast hp0 hγv0).cast hp0.symm hγv0.symm⟧
+        : _root_.Path.Homotopic.Quotient x x) = ⟦_root_.Path.refl x⟧
+    exact congrArg (fun p : _root_.Path x x => (⟦p⟧ : _root_.Path.Homotopic.Quotient x x))
+      (Path.ext rfl)
+  have hclastcast :
+      _root_.Path.Homotopic.Quotient.cast
+          (⟦c (Fin.last k)⟧
+            : _root_.Path.Homotopic.Quotient (p₀ (Fin.last k)) (γv (Fin.last k)))
+          hplast.symm hb_eq
+        = _root_.Path.Homotopic.Quotient.refl x := by
+    rw [hclast]
+    change (⟦((_root_.Path.refl x).cast hplast hγvlast).cast hplast.symm hb_eq⟧
+        : _root_.Path.Homotopic.Quotient x x) = ⟦_root_.Path.refl x⟧
+    exact congrArg (fun p : _root_.Path x x => (⟦p⟧ : _root_.Path.Homotopic.Quotient x x))
+      (Path.ext rfl)
+  rw [hc0cast, hclastcast,
+      _root_.Path.Homotopic.Quotient.refl_trans,
+      _root_.Path.Homotopic.Quotient.trans_refl] at htelcast
+  -- Now `htelcast : cast ⟦concat γv T'⟧ hγv0.symm hb_eq
+  --                = cast ⟦concat p₀ seg⟧ hp0.symm hplast.symm`.
+  -- Identify the two casts with `⟦concatT⟧` and `⟦polyLoop⟧` respectively.
+  have hLq : _root_.Path.Homotopic.Quotient.cast
+      (⟦_root_.Path.concat γv T'⟧
+        : _root_.Path.Homotopic.Quotient (γv 0) (γv (Fin.last k))) hγv0.symm hb_eq
+        = (⟦concatT⟧ : _root_.Path.Homotopic.Quotient x x) := by
+    change (⟦(_root_.Path.concat γv T').cast hγv0.symm hb_eq⟧
+        : _root_.Path.Homotopic.Quotient x x) = ⟦concatT⟧
+    exact congrArg (fun p : _root_.Path x x => (⟦p⟧ : _root_.Path.Homotopic.Quotient x x))
+      (Path.ext rfl)
+  have hRq : _root_.Path.Homotopic.Quotient.cast
+      (⟦_root_.Path.concat p₀ seg⟧
+        : _root_.Path.Homotopic.Quotient (p₀ 0) (p₀ (Fin.last k))) hp0.symm hplast.symm
+        = (⟦polyLoop⟧ : _root_.Path.Homotopic.Quotient x x) := by
+    change (⟦(_root_.Path.concat p₀ seg).cast hp0.symm hplast.symm⟧
+        : _root_.Path.Homotopic.Quotient x x) = ⟦polyLoop⟧
+    exact congrArg (fun p : _root_.Path x x => (⟦p⟧ : _root_.Path.Homotopic.Quotient x x))
+      (Path.ext rfl)
+  rw [hLq, hRq] at htelcast
+  exact htelcast.symm
 
 end UniversalCover
 end Topology
