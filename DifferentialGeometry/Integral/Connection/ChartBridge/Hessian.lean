@@ -546,7 +546,7 @@ of the dual-pairing scalar. -/
 /-- At the chart basepoint, the canonical tangent-bundle trivialization is the identity
 on `E` (using the defeq `TangentSpace I x = E`). This combines
 `TangentBundle.continuousLinearMapAt_trivializationAt` with `mfderiv_extChartAt_self`. -/
-private lemma trivToE_self_eq_id (x : M) :
+lemma trivToE_self_eq_id (x : M) :
     (trivToE (I := I) x x : TangentSpace I x →L[ℝ] E) =
       ContinuousLinearMap.id ℝ (TangentSpace I x) := by
   classical
@@ -558,14 +558,14 @@ private lemma trivToE_self_eq_id (x : M) :
   exact mfderiv_extChartAt_self (I := I) (x := x)
 
 /-- Pointwise form of `trivToE_self_eq_id`. -/
-private lemma trivToE_self_apply (x : M) (v : TangentSpace I x) :
+lemma trivToE_self_apply (x : M) (v : TangentSpace I x) :
     trivToE (I := I) x x v = v := by
   rw [trivToE_self_eq_id (I := I) x]
   rfl
 
 /-- At the chart basepoint, the canonical tangent-bundle inverse trivialization is the
 identity on `E`. This follows from `trivToE_self_eq_id` and the round-trip identity. -/
-private lemma trivFromE_self_apply (x : M) (w : E) :
+lemma trivFromE_self_apply (x : M) (w : E) :
     trivFromE (I := I) x x w = w := by
   classical
   have hbase : x ∈ (trivializationAt E (TangentSpace I) x).baseSet :=
@@ -1294,7 +1294,7 @@ private lemma extDerivFun_pairing_chartBasisVec_alpha_apply
 
 /-! ### Smoothness of the chart-α basis section at a chart-α good-set point -/
 
-private lemma chartBasisVec_alpha_mdifferentiableAt
+lemma chartBasisVec_alpha_mdifferentiableAt
     (α : M) (j : Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
     MDiffAt (T% (fun b : M => chartBasisVecFiber (I := I) α j b)) x := by
@@ -1311,7 +1311,7 @@ private lemma chartBasisVec_alpha_mdifferentiableAt
 
 /-! ### Vanishing of the fderiv of the chart-α basis pullback at a chart-α good-set point -/
 
-private lemma fderiv_chartE_chartBasisVec_alpha_eq_zero [I.Boundaryless]
+lemma fderiv_chartE_chartBasisVec_alpha_eq_zero [I.Boundaryless]
     (α : M) (j : Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
     fderiv ℝ (chartE_section_repr (I := I) α
@@ -1367,7 +1367,7 @@ private lemma fderiv_chartE_chartBasisVec_alpha_eq_zero [I.Boundaryless]
 
 /-! ### Constancy of the chart-trivialised representation of the basis section at chart-α good-set points -/
 
-private lemma chartE_section_repr_chartBasisVec_alpha_apply
+lemma chartE_section_repr_chartBasisVec_alpha_apply
     (α : M) (j : Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
     chartE_section_repr (I := I) α
@@ -1441,7 +1441,7 @@ private lemma christoffelCorrection_alpha_basis_apply
 
 /-! ### Levi-Civita on the chart-α basis section at chart-α good-set points -/
 
-private lemma LeviCivita_chartBasisVec_alpha_basis_apply [I.Boundaryless]
+lemma LeviCivita_chartBasisVec_alpha_basis_apply [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :

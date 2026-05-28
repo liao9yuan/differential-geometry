@@ -86,7 +86,7 @@ where the chart-basis field is smooth); off `tsupport χ`, the bump vanishes, he
 does the scaled field. The gluing is supplied by
 `ContMDiffOn.smul_section_of_tsupport`. -/
 
-private lemma bumpedChartBasis_contMDiff
+lemma bumpedChartBasis_contMDiff
     (α : M) {b₀ : M}
     (k : Fin (Module.finrank ℝ E))
     (χ : SmoothBumpFunction I b₀)
