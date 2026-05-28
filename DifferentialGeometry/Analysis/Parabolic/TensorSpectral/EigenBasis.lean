@@ -199,6 +199,34 @@ theorem TensorNonzeroResolventEigenvalue.countable
   exact (nonzero_tensor_resolvent_eigenvalues_set_countable
     (I := I) (M := M) g r s h_atlas).to_subtype
 
+/-- Countability of the nonzero-eigenvalue set (HLCC-free), parameterized
+on resolvent compactness `h_compact`. -/
+theorem nonzero_tensor_resolvent_eigenvalues_set_countable_ofCompact
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s)) :
+    Set.Countable
+      { μ : ℝ |
+        tensorResolventEigenspace (I := I) (M := M) g r s μ ≠ ⊥ ∧
+          μ ≠ 0 } := by
+  rw [nonzero_tensor_resolvent_eigenvalues_set_eq_iUnion]
+  apply Set.countable_iUnion
+  intro n
+  have h_pos : (0 : ℝ) < 1 / (n + 1) := by positivity
+  exact (tensorResolvent_eigenvalues_finite_above_ofCompact
+    (I := I) (M := M) g r s h_compact h_pos).countable
+
+/-- Countability of the `TensorNonzeroResolventEigenvalue` subtype
+(HLCC-free), parameterized on resolvent compactness `h_compact`. -/
+theorem TensorNonzeroResolventEigenvalue.countable_ofCompact
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s)) :
+    Countable (TensorNonzeroResolventEigenvalue (I := I) (M := M) g r s) := by
+  unfold TensorNonzeroResolventEigenvalue
+  exact (nonzero_tensor_resolvent_eigenvalues_set_countable_ofCompact
+    (I := I) (M := M) g r s h_compact).to_subtype
+
 /-! ## Per-eigenspace finite-dimensionality -/
 
 /-- For each `μ : TensorNonzeroResolventEigenvalue g r s`, under the
@@ -213,6 +241,19 @@ def TensorNonzeroResolventEigenvalue.finiteDimensional
       (tensorResolventEigenspace (I := I) (M := M) g r s μ.val) :=
   tensorResolventEigenspace_finiteDim
     (I := I) (M := M) g r s h_atlas μ.val_ne_zero
+
+/-- Per-eigenspace finite-dimensionality (HLCC-free), parameterized on
+resolvent compactness `h_compact`. -/
+@[reducible]
+def TensorNonzeroResolventEigenvalue.finiteDimensional_ofCompact
+    {g : SmoothRiemannianMetric I M} {r s : ℕ}
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (μ : TensorNonzeroResolventEigenvalue (I := I) (M := M) g r s) :
+    FiniteDimensional ℝ
+      (tensorResolventEigenspace (I := I) (M := M) g r s μ.val) :=
+  tensorResolventEigenspace_finiteDim_ofCompact
+    (I := I) (M := M) g r s h_compact μ.val_ne_zero
 
 /-! ## Per-eigenspace orthonormal basis -/
 
@@ -230,6 +271,24 @@ noncomputable def tensorResolventEigenspaceONB
   letI : FiniteDimensional ℝ
       (tensorResolventEigenspace (I := I) (M := M) g r s μ.val) :=
     μ.finiteDimensional h_atlas
+  stdOrthonormalBasis ℝ
+    (tensorResolventEigenspace (I := I) (M := M) g r s μ.val)
+
+/-- The standard orthonormal basis of the (finite-dimensional) eigenspace
+of `R = tensorResolventL2 g r s` at a nonzero eigenvalue, HLCC-free
+variant parameterized on resolvent compactness `h_compact`. -/
+noncomputable def tensorResolventEigenspaceONB_ofCompact
+    {g : SmoothRiemannianMetric I M} {r s : ℕ}
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (μ : TensorNonzeroResolventEigenvalue (I := I) (M := M) g r s) :
+    OrthonormalBasis
+      (Fin (Module.finrank ℝ
+        (tensorResolventEigenspace (I := I) (M := M) g r s μ.val)))
+      ℝ (tensorResolventEigenspace (I := I) (M := M) g r s μ.val) :=
+  letI : FiniteDimensional ℝ
+      (tensorResolventEigenspace (I := I) (M := M) g r s μ.val) :=
+    μ.finiteDimensional_ofCompact h_compact
   stdOrthonormalBasis ℝ
     (tensorResolventEigenspace (I := I) (M := M) g r s μ.val)
 
@@ -286,6 +345,23 @@ noncomputable def tensorResolventEigenbasisVec
       tensorResolventEigenspace (I := I) (M := M) g r s i.1.val) :
     TensorL2 r s g)
 
+/-- The sigma-indexed family of eigenbasis vectors, HLCC-free variant
+parameterized on resolvent compactness `h_compact`. -/
+noncomputable def tensorResolventEigenbasisVec_ofCompact
+    {g : SmoothRiemannianMetric I M} {r s : ℕ}
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (i : Σ μ : TensorNonzeroResolventEigenvalue
+            (I := I) (M := M) g r s,
+          Fin (Module.finrank ℝ
+            (tensorResolventEigenspace
+              (I := I) (M := M) g r s μ.val))) :
+    TensorL2 r s g :=
+  ((tensorResolventEigenspaceONB_ofCompact
+        (I := I) (M := M) h_compact i.1 i.2 :
+      tensorResolventEigenspace (I := I) (M := M) g r s i.1.val) :
+    TensorL2 r s g)
+
 /-- Each eigenbasis vector lies in its eigenspace. -/
 theorem tensorResolventEigenbasisVec_mem
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
@@ -300,6 +376,22 @@ theorem tensorResolventEigenbasisVec_mem
   unfold tensorResolventEigenbasisVec
   exact (tensorResolventEigenspaceONB
     (I := I) (M := M) h_atlas i.1 i.2).property
+
+/-- Each eigenbasis vector lies in its eigenspace (HLCC-free variant). -/
+theorem tensorResolventEigenbasisVec_ofCompact_mem
+    {g : SmoothRiemannianMetric I M} {r s : ℕ}
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (i : Σ μ : TensorNonzeroResolventEigenvalue
+            (I := I) (M := M) g r s,
+          Fin (Module.finrank ℝ
+            (tensorResolventEigenspace
+              (I := I) (M := M) g r s μ.val))) :
+    tensorResolventEigenbasisVec_ofCompact (I := I) (M := M) h_compact i ∈
+      tensorResolventEigenspace (I := I) (M := M) g r s i.1.val := by
+  unfold tensorResolventEigenbasisVec_ofCompact
+  exact (tensorResolventEigenspaceONB_ofCompact
+    (I := I) (M := M) h_compact i.1 i.2).property
 
 /-- The eigenbasis family is orthonormal. -/
 theorem tensorResolventEigenbasisVec_orthonormal
@@ -322,6 +414,28 @@ theorem tensorResolventEigenbasisVec_orthonormal
   have h_sig := h_fam.orthonormal_sigma_orthonormal h_each
   convert h_sig using 1
 
+/-- The eigenbasis family is orthonormal (HLCC-free variant). -/
+theorem tensorResolventEigenbasisVec_ofCompact_orthonormal
+    {g : SmoothRiemannianMetric I M} {r s : ℕ}
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s)) :
+    Orthonormal ℝ
+      (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M) (g := g)
+        (r := r) (s := s) h_compact) := by
+  have h_fam :=
+    tensorResolventEigenspace_orthogonalFamily_nonzero
+      (I := I) (M := M) g r s
+  have h_each : ∀ μ : TensorNonzeroResolventEigenvalue
+        (I := I) (M := M) g r s,
+      Orthonormal ℝ
+        (tensorResolventEigenspaceONB_ofCompact
+          (I := I) (M := M) h_compact μ) :=
+    fun μ =>
+      (tensorResolventEigenspaceONB_ofCompact
+        (I := I) (M := M) h_compact μ).orthonormal
+  have h_sig := h_fam.orthonormal_sigma_orthonormal h_each
+  convert h_sig using 1
+
 /-- Span of the eigenbasis vectors lies inside the supremum (over nonzero
 eigenvalues) of the eigenspaces. -/
 private lemma span_tensorResolventEigenbasisVec_le_iSup_eigenspace
@@ -339,6 +453,25 @@ private lemma span_tensorResolventEigenbasisVec_le_iSup_eigenspace
   refine Submodule.mem_iSup_of_mem i.1 ?_
   exact tensorResolventEigenbasisVec_mem
     (I := I) (M := M) h_atlas i
+
+/-- Span of the eigenbasis vectors lies inside the supremum of the
+eigenspaces (HLCC-free variant). -/
+private lemma span_tensorResolventEigenbasisVec_ofCompact_le_iSup_eigenspace
+    {g : SmoothRiemannianMetric I M} {r s : ℕ}
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s)) :
+    Submodule.span ℝ (Set.range
+        (tensorResolventEigenbasisVec_ofCompact
+          (I := I) (M := M) (g := g) (r := r) (s := s) h_compact)) ≤
+      ⨆ μ : TensorNonzeroResolventEigenvalue
+              (I := I) (M := M) g r s,
+        tensorResolventEigenspace (I := I) (M := M) g r s μ.val := by
+  rw [Submodule.span_le]
+  rintro v ⟨i, rfl⟩
+  refine SetLike.mem_coe.mpr ?_
+  refine Submodule.mem_iSup_of_mem i.1 ?_
+  exact tensorResolventEigenbasisVec_ofCompact_mem
+    (I := I) (M := M) h_compact i
 
 /-- For each nonzero eigenvalue, its eigenspace is contained in the span
 of the eigenbasis vectors (because the per-eigenspace basis already spans
@@ -431,6 +564,97 @@ private lemma tensorResolventEigenspace_le_span_tensorResolventEigenbasisVec
   rw [h_subtype_apply] at h_after_map
   exact Submodule.span_mono h_subtype_subset h_after_map
 
+/-- For each nonzero eigenvalue, its eigenspace is contained in the span
+of the eigenbasis vectors (HLCC-free variant). -/
+private lemma tensorResolventEigenspace_le_span_tensorResolventEigenbasisVec_ofCompact
+    {g : SmoothRiemannianMetric I M} {r s : ℕ}
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (μ : TensorNonzeroResolventEigenvalue (I := I) (M := M) g r s) :
+    tensorResolventEigenspace (I := I) (M := M) g r s μ.val ≤
+      Submodule.span ℝ (Set.range
+        (tensorResolventEigenbasisVec_ofCompact
+          (I := I) (M := M) (g := g) (r := r) (s := s) h_compact)) := by
+  intro x hx
+  letI : FiniteDimensional ℝ
+      (tensorResolventEigenspace (I := I) (M := M) g r s μ.val) :=
+    μ.finiteDimensional_ofCompact h_compact
+  set b := tensorResolventEigenspaceONB_ofCompact
+    (I := I) (M := M) h_compact μ
+  have h_basis_span : Submodule.span ℝ
+      (Set.range (b.toBasis :
+        Fin (Module.finrank ℝ
+          (tensorResolventEigenspace (I := I) (M := M) g r s μ.val)) →
+        tensorResolventEigenspace (I := I) (M := M) g r s μ.val)) = ⊤ :=
+    b.toBasis.span_eq
+  have h_subtype_apply :
+      ((tensorResolventEigenspace
+          (I := I) (M := M) g r s μ.val).subtype '' Set.range b) =
+      Set.range (fun k =>
+        ((b k : tensorResolventEigenspace (I := I) (M := M) g r s μ.val) :
+          TensorL2 r s g)) := by
+    ext y
+    simp only [Set.mem_image, Set.mem_range]
+    constructor
+    · rintro ⟨z, ⟨k, hk⟩, hzy⟩
+      exact ⟨k, by rw [← hzy, ← hk]; rfl⟩
+    · rintro ⟨k, hk⟩
+      exact ⟨b k, ⟨k, rfl⟩, hk⟩
+  have h_in_basis_set : ∀ k : Fin (Module.finrank ℝ
+        (tensorResolventEigenspace (I := I) (M := M) g r s μ.val)),
+      ((b k :
+          tensorResolventEigenspace (I := I) (M := M) g r s μ.val) :
+            TensorL2 r s g) ∈
+      Set.range
+        (tensorResolventEigenbasisVec_ofCompact
+          (I := I) (M := M) (g := g) (r := r) (s := s) h_compact) := by
+    intro k
+    refine ⟨⟨μ, k⟩, ?_⟩
+    rfl
+  have h_subtype_subset : Set.range (fun k =>
+      ((b k :
+          tensorResolventEigenspace (I := I) (M := M) g r s μ.val) :
+            TensorL2 r s g)) ⊆
+      Set.range
+        (tensorResolventEigenbasisVec_ofCompact
+          (I := I) (M := M) (g := g) (r := r) (s := s) h_compact) := by
+    rintro y ⟨k, rfl⟩
+    exact h_in_basis_set k
+  have hx_subtype : x =
+      (tensorResolventEigenspace
+        (I := I) (M := M) g r s μ.val).subtype ⟨x, hx⟩ := rfl
+  have h_top_mem :
+      (⟨x, hx⟩ :
+        tensorResolventEigenspace (I := I) (M := M) g r s μ.val) ∈
+      Submodule.span ℝ (Set.range (b.toBasis :
+        Fin (Module.finrank ℝ
+          (tensorResolventEigenspace (I := I) (M := M) g r s μ.val)) →
+        tensorResolventEigenspace (I := I) (M := M) g r s μ.val)) := by
+    rw [h_basis_span]; trivial
+  have h_after_map : x ∈ Submodule.map
+        (tensorResolventEigenspace
+          (I := I) (M := M) g r s μ.val).subtype
+        (Submodule.span ℝ (Set.range (b.toBasis :
+          Fin (Module.finrank ℝ
+            (tensorResolventEigenspace
+              (I := I) (M := M) g r s μ.val)) →
+          tensorResolventEigenspace
+            (I := I) (M := M) g r s μ.val))) := by
+    refine ⟨⟨x, hx⟩, h_top_mem, rfl⟩
+  rw [Submodule.map_span] at h_after_map
+  have h_eq_basis : ((b.toBasis :
+        Fin (Module.finrank ℝ
+          (tensorResolventEigenspace
+            (I := I) (M := M) g r s μ.val)) →
+        tensorResolventEigenspace
+          (I := I) (M := M) g r s μ.val)) = (b : _ → _) := by
+    funext k
+    have := OrthonormalBasis.coe_toBasis b
+    exact congr_fun this k
+  rw [h_eq_basis] at h_after_map
+  rw [h_subtype_apply] at h_after_map
+  exact Submodule.span_mono h_subtype_subset h_after_map
+
 /-- The span (in `TensorL2 r s g`) of the eigenbasis vectors equals the
 supremum over nonzero eigenvalues of the resolvent eigenspaces. -/
 theorem span_tensorResolventEigenbasisVec_eq_iSup_eigenspace
@@ -448,6 +672,26 @@ theorem span_tensorResolventEigenbasisVec_eq_iSup_eigenspace
   exact iSup_le
     (tensorResolventEigenspace_le_span_tensorResolventEigenbasisVec
       (I := I) (M := M) h_atlas)
+
+/-- The span (in `TensorL2 r s g`) of the eigenbasis vectors equals the
+supremum over nonzero eigenvalues of the resolvent eigenspaces (HLCC-free
+variant). -/
+theorem span_tensorResolventEigenbasisVec_ofCompact_eq_iSup_eigenspace
+    {g : SmoothRiemannianMetric I M} {r s : ℕ}
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s)) :
+    Submodule.span ℝ (Set.range
+        (tensorResolventEigenbasisVec_ofCompact
+          (I := I) (M := M) (g := g) (r := r) (s := s) h_compact)) =
+      ⨆ μ : TensorNonzeroResolventEigenvalue
+              (I := I) (M := M) g r s,
+        tensorResolventEigenspace (I := I) (M := M) g r s μ.val := by
+  refine le_antisymm
+    (span_tensorResolventEigenbasisVec_ofCompact_le_iSup_eigenspace
+      (I := I) (M := M) h_compact) ?_
+  exact iSup_le
+    (tensorResolventEigenspace_le_span_tensorResolventEigenbasisVec_ofCompact
+      (I := I) (M := M) h_compact)
 
 /-! ## Density: the orthogonal complement of the eigenbasis span is `⊥`
 
@@ -509,6 +753,57 @@ theorem nonzero_iSup_tensorResolventEigenspace_orthogonal_eq_bot
                   tensorResolventEigenspace
                     (I := I) (M := M) g r s μ.val) hν_in_subtype
 
+/-- The orthogonal complement of the supremum (over nonzero eigenvalues)
+of the resolvent eigenspaces is `⊥` (HLCC-free variant). -/
+theorem nonzero_iSup_tensorResolventEigenspace_orthogonal_eq_bot_ofCompact
+    {g : SmoothRiemannianMetric I M} {r s : ℕ}
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s)) :
+    (⨆ μ : TensorNonzeroResolventEigenvalue
+              (I := I) (M := M) g r s,
+        tensorResolventEigenspace (I := I) (M := M) g r s μ.val)ᗮ = ⊥ := by
+  suffices h_iSup_eq :
+      (⨆ μ : TensorNonzeroResolventEigenvalue
+                (I := I) (M := M) g r s,
+        tensorResolventEigenspace (I := I) (M := M) g r s μ.val) =
+      (⨆ μ : ℝ, tensorResolventEigenspace
+                  (I := I) (M := M) g r s μ) by
+    rw [h_iSup_eq]
+    exact tensorResolventEigenspaces_iSup_orthogonal_eq_bot_ofCompact
+      (I := I) (M := M) g r s h_compact
+  refine le_antisymm ?_ ?_
+  · refine iSup_le (fun μ => ?_)
+    exact le_iSup
+      (fun ν : ℝ =>
+        tensorResolventEigenspace (I := I) (M := M) g r s ν) μ.val
+  · refine iSup_le (fun ν => ?_)
+    by_cases hν : ν = 0
+    · rw [hν,
+          tensorResolventEigenspace_zero_eq_bot
+            (I := I) (M := M) g r s]
+      exact bot_le
+    · by_cases h_eig_bot :
+          tensorResolventEigenspace (I := I) (M := M) g r s ν = ⊥
+      · rw [h_eig_bot]; exact bot_le
+      · let hν_in_subtype :
+            TensorNonzeroResolventEigenvalue
+              (I := I) (M := M) g r s :=
+          ⟨ν, h_eig_bot, hν⟩
+        have hval : hν_in_subtype.val = ν := rfl
+        calc tensorResolventEigenspace
+              (I := I) (M := M) g r s ν
+            = tensorResolventEigenspace
+                (I := I) (M := M) g r s hν_in_subtype.val := by rw [hval]
+          _ ≤ ⨆ μ : TensorNonzeroResolventEigenvalue
+                      (I := I) (M := M) g r s,
+                  tensorResolventEigenspace
+                    (I := I) (M := M) g r s μ.val :=
+              le_iSup
+                (fun μ : TensorNonzeroResolventEigenvalue
+                          (I := I) (M := M) g r s =>
+                  tensorResolventEigenspace
+                    (I := I) (M := M) g r s μ.val) hν_in_subtype
+
 /-- The orthogonal complement of the span of the eigenbasis vectors is
 `⊥`. -/
 theorem tensorResolventEigenbasisVec_span_orthogonal_eq_bot
@@ -521,6 +816,20 @@ theorem tensorResolventEigenbasisVec_span_orthogonal_eq_bot
   rw [span_tensorResolventEigenbasisVec_eq_iSup_eigenspace]
   exact nonzero_iSup_tensorResolventEigenspace_orthogonal_eq_bot
     (I := I) (M := M) h_atlas
+
+/-- The orthogonal complement of the span of the eigenbasis vectors is
+`⊥` (HLCC-free variant). -/
+theorem tensorResolventEigenbasisVec_ofCompact_span_orthogonal_eq_bot
+    {g : SmoothRiemannianMetric I M} {r s : ℕ}
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s)) :
+    (Submodule.span ℝ (Set.range
+        (tensorResolventEigenbasisVec_ofCompact
+          (I := I) (M := M) (g := g) (r := r) (s := s) h_compact)))ᗮ =
+      ⊥ := by
+  rw [span_tensorResolventEigenbasisVec_ofCompact_eq_iSup_eigenspace]
+  exact nonzero_iSup_tensorResolventEigenspace_orthogonal_eq_bot_ofCompact
+    (I := I) (M := M) h_compact
 
 /-! ## The sigma-indexed eigenbasis as a `HilbertBasis` -/
 
@@ -568,6 +877,80 @@ noncomputable def tensorResolventHilbertEigenbasisSigma
       (tensorResolventEigenbasisVec_span_orthogonal_eq_bot
         (I := I) (M := M) h_atlas))
     i
+
+/-- The sigma-indexed orthonormal Hilbert basis of `TensorL2 r s g`
+consisting of eigenvectors of `R = tensorResolventL2 g r s`, HLCC-free
+variant parameterized on resolvent compactness `h_compact`.
+
+This is the intrinsic resolvent eigenbasis: it carries exactly the data
+the heat-semigroup construction consumes — a `HilbertBasis` of
+`TensorL2 r s g` whose vectors are resolvent eigenvectors, indexed by the
+sigma-type `Σ μ, Fin (finrank …)`, with the eigenvalue family recovered
+through `TensorNonzeroResolventEigenvalue.val` / `tensorLaplacianEigenvalueOf`. -/
+noncomputable def tensorResolventHilbertEigenbasisSigma_ofCompact
+    {g : SmoothRiemannianMetric I M} {r s : ℕ}
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s)) :
+    HilbertBasis
+      (Σ μ : TensorNonzeroResolventEigenvalue
+              (I := I) (M := M) g r s,
+        Fin (Module.finrank ℝ
+          (tensorResolventEigenspace
+            (I := I) (M := M) g r s μ.val)))
+      ℝ (TensorL2 r s g) :=
+  HilbertBasis.mkOfOrthogonalEqBot
+    (tensorResolventEigenbasisVec_ofCompact_orthonormal
+      (I := I) (M := M) h_compact)
+    (tensorResolventEigenbasisVec_ofCompact_span_orthogonal_eq_bot
+      (I := I) (M := M) h_compact)
+
+@[simp] lemma tensorResolventHilbertEigenbasisSigma_ofCompact_apply
+    {g : SmoothRiemannianMetric I M} {r s : ℕ}
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (i : Σ μ : TensorNonzeroResolventEigenvalue
+              (I := I) (M := M) g r s,
+          Fin (Module.finrank ℝ
+            (tensorResolventEigenspace
+              (I := I) (M := M) g r s μ.val))) :
+    tensorResolventHilbertEigenbasisSigma_ofCompact
+        (I := I) (M := M) h_compact i =
+      tensorResolventEigenbasisVec_ofCompact
+        (I := I) (M := M) h_compact i := by
+  unfold tensorResolventHilbertEigenbasisSigma_ofCompact
+  exact congr_fun
+    (HilbertBasis.coe_mkOfOrthogonalEqBot
+      (tensorResolventEigenbasisVec_ofCompact_orthonormal
+        (I := I) (M := M) h_compact)
+      (tensorResolventEigenbasisVec_ofCompact_span_orthogonal_eq_bot
+        (I := I) (M := M) h_compact))
+    i
+
+/-- Each `_ofCompact` eigenbasis vector lies in its resolvent eigenspace,
+hence is a genuine eigenvector of `tensorResolventL2 g r s` at eigenvalue
+`i.1.val`: `R (b i) = i.1.val • b i`. This is the eigenvalue equation the
+heat-semigroup spectral series consumes. -/
+theorem tensorResolventHilbertEigenbasisSigma_ofCompact_isEigenvector
+    {g : SmoothRiemannianMetric I M} {r s : ℕ}
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (i : Σ μ : TensorNonzeroResolventEigenvalue
+              (I := I) (M := M) g r s,
+          Fin (Module.finrank ℝ
+            (tensorResolventEigenspace
+              (I := I) (M := M) g r s μ.val))) :
+    tensorResolventL2 (I := I) (M := M) g r s
+        (tensorResolventHilbertEigenbasisSigma_ofCompact
+          (I := I) (M := M) h_compact i) =
+      i.1.val •
+        tensorResolventHilbertEigenbasisSigma_ofCompact
+          (I := I) (M := M) h_compact i := by
+  rw [tensorResolventHilbertEigenbasisSigma_ofCompact_apply
+    (I := I) (M := M) h_compact i]
+  have h_mem := tensorResolventEigenbasisVec_ofCompact_mem
+    (I := I) (M := M) h_compact i
+  exact (mem_tensorResolventEigenspace_iff
+    (I := I) (M := M) g r s i.1.val _).mp h_mem
 
 /-! ## Sanity tests -/
 

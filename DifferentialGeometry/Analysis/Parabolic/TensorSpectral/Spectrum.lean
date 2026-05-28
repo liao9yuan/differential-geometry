@@ -124,6 +124,20 @@ theorem tensorResolventEigenspace_finiteDim
   -- Direct application of Mathlib's `finite_dimensional_eigenspace`.
   exact ContinuousLinearMap.finite_dimensional_eigenspace hCompact μ hμ
 
+/-- **Finite-dimensionality of nonzero eigenspaces (HLCC-free).**
+Parameterized directly on resolvent compactness `h_compact` (instead of
+the locally-constant chart hypothesis), each eigenspace of
+`R = tensorResolventL2 g r s` at a non-zero scalar is finite-dimensional.
+This is the spectral theorem for compact operators applied to `R`. -/
+theorem tensorResolventEigenspace_finiteDim_ofCompact
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    {μ : ℝ} (hμ : μ ≠ 0) :
+    FiniteDimensional ℝ (tensorResolventEigenspace
+      (I := I) (M := M) g r s μ) :=
+  ContinuousLinearMap.finite_dimensional_eigenspace h_compact μ hμ
+
 /-! ## Total span of the eigenspaces -/
 
 /-- **Spectral theorem (totality of eigenspaces).** Under the uniform
@@ -150,6 +164,26 @@ theorem tensorResolventEigenspaces_iSup_orthogonal_eq_bot
   -- `Module.End.eigenspace ((tensorResolventL2 g r s).toLinearMap) μ`.
   exact ContinuousLinearMap.orthogonalComplement_iSup_eigenspaces_eq_bot
     hCompact hSymm
+
+/-- **Spectral theorem (totality of eigenspaces, HLCC-free).** Given
+resolvent compactness `h_compact` (instead of the locally-constant chart
+hypothesis), the eigenspaces of `R = tensorResolventL2 g r s` span
+`TensorL2 r s g` densely: the orthogonal complement of their supremum is
+trivial.
+
+This applies `ContinuousLinearMap.orthogonalComplement_iSup_eigenspaces_eq_bot`
+to the (unconditional) self-adjointness of `R` plus `h_compact`. -/
+theorem tensorResolventEigenspaces_iSup_orthogonal_eq_bot_ofCompact
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s)) :
+    (⨆ μ : ℝ, tensorResolventEigenspace
+      (I := I) (M := M) g r s μ)ᗮ = ⊥ := by
+  have hSymm : (tensorResolventL2 (I := I) (M := M) g r s).IsSymmetric :=
+    (ContinuousLinearMap.isSelfAdjoint_iff_isSymmetric).mp
+      (tensorResolventL2_isSelfAdjoint (I := I) (M := M) g r s)
+  exact ContinuousLinearMap.orthogonalComplement_iSup_eigenspaces_eq_bot
+    h_compact hSymm
 
 /-! ## Discrete spectrum: finiteness above each shell
 
@@ -331,6 +365,92 @@ theorem tensorResolvent_eigenvalues_finite_above
   -- Compactness ⇒ images of closed unit ball are in some compact set K.
   obtain ⟨K, hK_compact, hK_subset⟩ :=
     hCompact.image_closedBall_subset_compact (1 : ℝ)
+  have h_R_v_in_K : ∀ n, tensorResolventL2
+      (I := I) (M := M) g r s (v n) ∈ K := by
+    intro n
+    apply hK_subset
+    refine ⟨v n, h_v_in_ball n, ?_⟩
+    rfl
+  -- Extract a convergent subsequence of (R v_n).
+  obtain ⟨y, _hyK, ψ, hψ_mono, hψy⟩ := hK_compact.tendsto_subseq h_R_v_in_K
+  -- `(R v_{ψ n})` is Cauchy.
+  have h_cauchy : CauchySeq (fun n =>
+      tensorResolventL2 (I := I) (M := M) g r s (v (ψ n))) :=
+    hψy.cauchySeq
+  rw [Metric.cauchySeq_iff'] at h_cauchy
+  have h_sep_pos : 0 < Real.sqrt 2 * ε := by
+    have h_sqrt2_pos : 0 < Real.sqrt 2 :=
+      Real.sqrt_pos.mpr (by norm_num : (0 : ℝ) < 2)
+    exact mul_pos h_sqrt2_pos hε
+  obtain ⟨N, hN⟩ := h_cauchy (Real.sqrt 2 * ε) h_sep_pos
+  -- For N + 1 and N: dist (R v_{ψ (N+1)}, R v_{ψ N}) < √2 ε.
+  have h_dist : dist (tensorResolventL2 (I := I) (M := M) g r s (v (ψ (N + 1))))
+        (tensorResolventL2 (I := I) (M := M) g r s (v (ψ N))) <
+      Real.sqrt 2 * ε := by
+    have := hN (N + 1) (Nat.le_succ N)
+    exact this
+  -- ψ is strictly monotone, so ψ (N+1) ≠ ψ N.
+  have h_ne : ψ (N + 1) ≠ ψ N := by
+    intro h_eq
+    have h_lt : ψ N < ψ (N + 1) := hψ_mono (Nat.lt_succ_self N)
+    rw [h_eq] at h_lt
+    exact lt_irrefl _ h_lt
+  -- Apply separation: ‖R v_{ψ(N+1)} - R v_{ψ N}‖ ≥ √2 ε. Contradiction.
+  have h_sep_specific := h_sep (ψ (N + 1)) (ψ N) h_ne
+  rw [show dist (tensorResolventL2 (I := I) (M := M) g r s (v (ψ (N + 1))))
+        (tensorResolventL2 (I := I) (M := M) g r s (v (ψ N))) =
+      ‖tensorResolventL2 (I := I) (M := M) g r s (v (ψ (N + 1))) -
+        tensorResolventL2 (I := I) (M := M) g r s (v (ψ N))‖ from
+    dist_eq_norm _ _] at h_dist
+  linarith [h_sep_specific, h_dist]
+
+/-- **Discreteness of the resolvent spectrum (HLCC-free).** Parameterized
+directly on resolvent compactness `h_compact` (instead of the locally-
+constant chart hypothesis): for every `ε > 0`, only finitely many
+eigenvalues `μ` of `R = tensorResolventL2 g r s` satisfy `|μ| ≥ ε`.
+
+The argument is the standard compactness contradiction: if infinitely many
+distinct eigenvalues `μ_n` with `|μ_n| ≥ ε` existed, the corresponding unit
+eigenvectors `v_n` would have `√2 ε`-separated images `R v_n`, contradicting
+the existence of a Cauchy subsequence guaranteed by `h_compact`. -/
+theorem tensorResolvent_eigenvalues_finite_above_ofCompact
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    {ε : ℝ} (hε : 0 < ε) :
+    Set.Finite { μ : ℝ |
+      Module.End.HasEigenvalue
+          ((tensorResolventL2 (I := I) (M := M) g r s).toLinearMap) μ ∧
+        ε ≤ |μ| } := by
+  by_contra h_inf
+  rw [Set.not_finite] at h_inf
+  -- Extract an injective sequence of elements of the set.
+  let f : ℕ ↪ _ := h_inf.natEmbedding
+  set f' : ℕ → ℝ := fun n => (f n : ℝ)
+  have hf_eig : ∀ n, Module.End.HasEigenvalue
+      ((tensorResolventL2 (I := I) (M := M) g r s).toLinearMap) (f' n) :=
+    fun n => (f n).property.1
+  have hf_size : ∀ n, ε ≤ |f' n| := fun n => (f n).property.2
+  have hf_inj' : Function.Injective f' := by
+    intro n m h
+    have h1 : f n = f m := by
+      apply Subtype.ext; exact h
+    exact Function.Embedding.injective f h1
+  -- Choose unit eigenvectors.
+  choose v hv_mem hv_norm using fun n =>
+    tensor_exists_unit_eigenvector (I := I) (M := M) g r s (hf_eig n)
+  -- Apply separation.
+  have h_sep := tensorResolventL2_image_separated_of_distinct_eigenvalues
+    (I := I) (M := M) g r s hε hf_inj' hf_size v hv_mem hv_norm
+  -- The sequence `v` is bounded (each element has norm 1).
+  have h_v_in_ball : ∀ n, v n ∈ Metric.closedBall
+      (0 : TensorL2 r s g) 1 := by
+    intro n
+    rw [Metric.mem_closedBall, dist_zero_right]
+    rw [hv_norm n]
+  -- Compactness ⇒ images of closed unit ball are in some compact set K.
+  obtain ⟨K, hK_compact, hK_subset⟩ :=
+    h_compact.image_closedBall_subset_compact (1 : ℝ)
   have h_R_v_in_K : ∀ n, tensorResolventL2
       (I := I) (M := M) g r s (v n) ∈ K := by
     intro n
