@@ -942,6 +942,19 @@ def cutoffPartialLpLimit
   i.fst.val •
     eigenvectorCutoffChartPartialLp (I := I) (M := M) g r s h_atlas i α P k
 
+/-- **The `L²`-limit of the cutoff chart-partial atom (chart-locality-free).**
+Chart-locality-free twin of `cutoffPartialLpLimit`, keyed on the unconditional
+compactness witness through `eigenvectorCutoffChartPartialLp_unconditional`. -/
+def cutoffPartialLpLimit_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P : TensorCompIdx (E := E) r s)
+    (k : Fin (Module.finrank ℝ E)) :
+    Lp ℝ 2 (chartL2Measure (I := I) (M := M) α) :=
+  i.fst.val •
+    eigenvectorCutoffChartPartialLp_unconditional (I := I) (M := M)
+      g r s i α P k
+
 /-- The `n`-th approximant cutoff chart partial `L²` class converges, as
 `n → ∞`, to `cutoffPartialLpLimit`. -/
 private lemma approxCutoffPartialLp_tendsto
@@ -1350,6 +1363,33 @@ noncomputable def crossRightGradCoeffDivLimit
                   g r s h_atlas i α P l :
                   EuclN → ℝ) y
 
+/-- **The explicit `n → ∞` `L²`-limit of the cross-right gradient-term
+divergence (chart-locality-free).** Chart-locality-free twin of
+`crossRightGradCoeffDivLimit`, re-keyed onto the unconditional cross-right
+component and cutoff chart-partial limit objects. -/
+noncomputable def crossRightGradCoeffDivLimit_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) : EuclN → ℝ :=
+  fun y =>
+    (∑ l : Fin (Module.finrank ℝ E),
+        ∑ P : TensorCompIdx (E := E) r s,
+          ∑ Q : TensorCompIdx (E := E) r s,
+            Set.indicator (chartPouKernel (I := I) (M := M) α)
+                (euclidPartial (E := E) l
+                  (crossRightDivFactor (I := I) (M := M) g r s α P₀ l P Q)) y *
+              (crossRightLimitComponent_unconditional (I := I) (M := M)
+                g r s i α P :
+                EuclN → ℝ) y)
+      + ∑ l : Fin (Module.finrank ℝ E),
+          ∑ P : TensorCompIdx (E := E) r s,
+            ∑ Q : TensorCompIdx (E := E) r s,
+              Set.indicator (chartPouKernel (I := I) (M := M) α)
+                  (crossRightDivFactor (I := I) (M := M) g r s α P₀ l P Q) y *
+                (cutoffPartialLpLimit_unconditional (I := I) (M := M)
+                  g r s i α P l :
+                  EuclN → ℝ) y
+
 /-! ## `L²`-membership of the cross-right gradient-term divergence
 
 The chart-Euclidean divergence at the `n`-th smooth approximant is, on the chart
@@ -1468,6 +1508,39 @@ theorem crossRightGradCoeffDivLimit_memLp
             (crossRightDivFactor_contDiffOn (I := I) (M := M) g r s α P₀ l P Q)
             (cutoffPartialLpLimit (I := I) (M := M)
               g r s h_atlas i α P l))))
+
+/-- **`L²`-membership of the explicit cross-right gradient-term divergence limit
+(chart-locality-free).** Chart-locality-free twin of
+`crossRightGradCoeffDivLimit_memLp`. -/
+theorem crossRightGradCoeffDivLimit_memLp_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) :
+    MemLp (crossRightGradCoeffDivLimit_unconditional (I := I) (M := M)
+        g r s i α P₀) 2
+      (chartL2Measure (I := I) (M := M) α) := by
+  classical
+  unfold crossRightGradCoeffDivLimit_unconditional
+  refine MemLp.add ?_ ?_
+  · exact memLp_finset_sum (Finset.univ : Finset (Fin (Module.finrank ℝ E)))
+      (fun l _ => memLp_finset_sum
+        (Finset.univ : Finset (TensorCompIdx (E := E) r s))
+        (fun P _ => memLp_finset_sum
+          (Finset.univ : Finset (TensorCompIdx (E := E) r s))
+          (fun Q _ => memLp_indicatorFactor_mul_cutoffLp (I := I) (M := M) α
+            (euclidPartial_crossRightDivFactor_contDiffOn (I := I) (M := M)
+              g r s α P₀ l P Q)
+            (crossRightLimitComponent_unconditional (I := I) (M := M)
+              g r s i α P))))
+  · exact memLp_finset_sum (Finset.univ : Finset (Fin (Module.finrank ℝ E)))
+      (fun l _ => memLp_finset_sum
+        (Finset.univ : Finset (TensorCompIdx (E := E) r s))
+        (fun P _ => memLp_finset_sum
+          (Finset.univ : Finset (TensorCompIdx (E := E) r s))
+          (fun Q _ => memLp_indicatorFactor_mul_cutoffLp (I := I) (M := M) α
+            (crossRightDivFactor_contDiffOn (I := I) (M := M) g r s α P₀ l P Q)
+            (cutoffPartialLpLimit_unconditional (I := I) (M := M)
+              g r s i α P l))))
 
 /-! ## The `n → ∞` `L²`-limit of the cross-right gradient-term divergence
 

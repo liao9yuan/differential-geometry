@@ -373,6 +373,55 @@ def eigenvectorChartRHS
             crossRightGradCoeffDivLimit (I := I) (M := M)
               g r s h_atlas i α P₀ y)
 
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+/-- **The chart-Euclidean right-hand side of the eigenvector weak-solution
+assembly (chart-locality-free).** Chart-locality-free twin of
+`eigenvectorChartRHS`, re-keyed onto the unconditional eigenvector chart
+component and the unconditional cross- and lower-order limit objects. -/
+noncomputable def eigenvectorChartRHS_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) : EuclN → ℝ :=
+  fun y =>
+    (i.fst.val)⁻¹ *
+      (-- The canonical eigenvector chart component.
+        ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                g r s) i) α P₀ :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
+        -- The cross-left limit contribution (with the cross-left sign).
+        - (∑ P : TensorCompIdx (E := E) r (s + 1),
+            ∑ Q : TensorCompIdx (E := E) r (s + 1),
+              (covChartMetricGram (I := I) (M := M) g r (s + 1) α P Q y *
+                  crossLeftTestCoeff (I := I) (M := M) g r s α P₀ Q y) *
+                ((crossLeftLimitComponent_unconditional (I := I) (M := M)
+                  g r s i α P :
+                  Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
+        -- The cross-right value-coefficient contribution.
+        + (∑ P : TensorCompIdx (E := E) r s,
+            ∑ Q : TensorCompIdx (E := E) r s,
+              (covChartMetricGram (I := I) (M := M) g r s α P Q y *
+                  crossRightTestValueCoeff (I := I) (M := M) g r s α P₀ Q y) *
+                ((crossRightLimitComponent_unconditional (I := I) (M := M)
+                  g r s i α P :
+                  Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
+        -- The principal rotation coefficient limit (with the source sign).
+        - covPrincipalRotationCoeffLimit_unconditional (I := I) (M := M)
+            g r s i α P₀ y
+        -- The lower-order rotation value coefficient limit (with the source sign).
+        - covLowerOrderRotationValueCoeffLimit_unconditional (I := I) (M := M)
+            g r s i α P₀ y
+        -- The lower-order gradient divergence limit, divided by the chart density.
+        + (1 / densityOnEuclid (I := I) g α y) *
+            (∑ l : Fin (Module.finrank ℝ E),
+              weightedGradCoeffDivLimit_unconditional (I := I) (M := M)
+                g r s i α P₀ l y)
+        -- The cross-right gradient divergence limit, divided by the chart density.
+        - (1 / densityOnEuclid (I := I) g α y) *
+            crossRightGradCoeffDivLimit_unconditional (I := I) (M := M)
+              g r s i α P₀ y)
+
 /-! ## Auxiliary facts about the chart density and the divergence limits
 
 The two divergence limits enter `eigenvectorChartRHS` divided by the chart

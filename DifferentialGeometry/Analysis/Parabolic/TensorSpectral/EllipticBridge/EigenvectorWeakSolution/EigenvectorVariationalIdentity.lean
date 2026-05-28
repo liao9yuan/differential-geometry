@@ -158,6 +158,17 @@ def eigenvectorPouApprox
   pouSmul (I := I) (M := M) g r s α
     (eigenvectorSmoothApprox (I := I) (M := M) g r s h_atlas i n).toCcTensor
 
+/-- **The partition-of-unity-weighted `n`-th canonical smooth approximant
+(chart-locality-free).** Chart-locality-free twin of `eigenvectorPouApprox`,
+built from `eigenvectorSmoothApprox_unconditional`. -/
+def eigenvectorPouApprox_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (n : ℕ) : SmoothCcTensor g r s :=
+  pouSmul (I := I) (M := M) g r s α
+    (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+      g r s i n).toCcTensor
+
 /-- The chart-Euclidean partial derivative of a function vanishes off the
 topological support of that function: on the open complement of the support the
 function is locally zero, so its Fréchet derivative there is the zero map. -/
@@ -299,6 +310,93 @@ theorem covPrincipalRotationCoeff_source_tendsto
   rw [h_int_lim] at h_main
   exact h_main.congr (fun n => h_int_n n)
 
+/-- **The `n → ∞` limit of the principal-rotation source term
+(chart-locality-free).** Chart-locality-free twin of
+`covPrincipalRotationCoeff_source_tendsto`. -/
+theorem covPrincipalRotationCoeff_source_tendsto_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s)
+    {ψ : EuclN → ℝ} (hψ : ContDiff ℝ ∞ ψ) (hψ_cs : HasCompactSupport ψ)
+    (hψ_supp : tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α) :
+    Filter.Tendsto
+      (fun n => ∫ y, densityOnEuclid (I := I) g α y *
+          covPrincipalRotationCoeff (I := I) (M := M) g r s
+            (eigenvectorPouApprox_unconditional (I := I) (M := M) g r s i α n)
+            α P₀ y * ψ y ∂(volume : Measure EuclN))
+      atTop
+      (𝓝 (∫ y, densityOnEuclid (I := I) g α y *
+          covPrincipalRotationCoeffLimit_unconditional (I := I) (M := M)
+            g r s i α P₀ y * ψ y ∂(volume : Measure EuclN))) := by
+  classical
+  set μch : Measure EuclN := chartL2Measure (I := I) (M := M) α with hμch_def
+  set m : Lp ℝ 2 μch :=
+    (densityOnEuclid_mul_test_memLp (I := I) (M := M) g α hψ hψ_cs hψ_supp).toLp _
+    with hm_def
+  set glim : Lp ℝ 2 μch :=
+    (covPrincipalRotationCoeffLimit_memLp_unconditional (I := I) (M := M)
+      g r s i α P₀).toLp _ with hglim_def
+  set gseq : ℕ → Lp ℝ 2 μch := fun n =>
+    (covPrincipalRotationCoeff_pouSmul_memLp_unconditional (I := I) (M := M)
+      g r s i α P₀ n).toLp _ with hgseq_def
+  have h_int_n : ∀ n : ℕ,
+      ∫ y, (m : EuclN → ℝ) y * (gseq n : EuclN → ℝ) y ∂μch =
+        ∫ y, densityOnEuclid (I := I) g α y *
+          covPrincipalRotationCoeff (I := I) (M := M) g r s
+            (eigenvectorPouApprox_unconditional (I := I) (M := M) g r s i α n)
+            α P₀ y * ψ y ∂(volume : Measure EuclN) := by
+    intro n
+    have h_m_ae : (m : EuclN → ℝ) =ᵐ[μch]
+        fun y => densityOnEuclid (I := I) g α y * ψ y := by
+      rw [hm_def]; exact MemLp.coeFn_toLp _
+    have h_g_ae : (gseq n : EuclN → ℝ) =ᵐ[μch]
+        covPrincipalRotationCoeff (I := I) (M := M) g r s
+          (eigenvectorPouApprox_unconditional (I := I) (M := M) g r s i α n)
+          α P₀ := by
+      rw [hgseq_def]; exact MemLp.coeFn_toLp _
+    have h_ae_prod : (fun y => (m : EuclN → ℝ) y * (gseq n : EuclN → ℝ) y)
+        =ᵐ[μch]
+        fun y => densityOnEuclid (I := I) g α y *
+          covPrincipalRotationCoeff (I := I) (M := M) g r s
+            (eigenvectorPouApprox_unconditional (I := I) (M := M) g r s i α n)
+            α P₀ y * ψ y := by
+      filter_upwards [h_m_ae, h_g_ae] with y hy_m hy_g
+      rw [hy_m, hy_g]; ring
+    rw [integral_congr_ae h_ae_prod, hμch_def, chartL2Measure]
+    refine MeasureTheory.setIntegral_eq_integral_of_forall_compl_eq_zero ?_
+    intro y hy
+    rw [image_eq_zero_of_notMem_tsupport (fun h => hy (hψ_supp h)), mul_zero]
+  have h_int_lim :
+      ∫ y, (m : EuclN → ℝ) y * (glim : EuclN → ℝ) y ∂μch =
+        ∫ y, densityOnEuclid (I := I) g α y *
+          covPrincipalRotationCoeffLimit_unconditional (I := I) (M := M)
+            g r s i α P₀ y * ψ y ∂(volume : Measure EuclN) := by
+    have h_m_ae : (m : EuclN → ℝ) =ᵐ[μch]
+        fun y => densityOnEuclid (I := I) g α y * ψ y := by
+      rw [hm_def]; exact MemLp.coeFn_toLp _
+    have h_g_ae : (glim : EuclN → ℝ) =ᵐ[μch]
+        covPrincipalRotationCoeffLimit_unconditional (I := I) (M := M)
+          g r s i α P₀ := by
+      rw [hglim_def]; exact MemLp.coeFn_toLp _
+    have h_ae_prod : (fun y => (m : EuclN → ℝ) y * (glim : EuclN → ℝ) y)
+        =ᵐ[μch]
+        fun y => densityOnEuclid (I := I) g α y *
+          covPrincipalRotationCoeffLimit_unconditional (I := I) (M := M)
+            g r s i α P₀ y * ψ y := by
+      filter_upwards [h_m_ae, h_g_ae] with y hy_m hy_g
+      rw [hy_m, hy_g]; ring
+    rw [integral_congr_ae h_ae_prod, hμch_def, chartL2Measure]
+    refine MeasureTheory.setIntegral_eq_integral_of_forall_compl_eq_zero ?_
+    intro y hy
+    rw [image_eq_zero_of_notMem_tsupport (fun h => hy (hψ_supp h)), mul_zero]
+  have h_tendsto_lp : Filter.Tendsto gseq atTop (𝓝 glim) := by
+    rw [hgseq_def, hglim_def]
+    exact covPrincipalRotationCoeff_tendsto_unconditional (I := I) (M := M)
+      g r s i α P₀
+  have h_main := tendsto_lp_inner_integral (μ := μch) m h_tendsto_lp
+  rw [h_int_lim] at h_main
+  exact h_main.congr (fun n => h_int_n n)
+
 /-! ## The `n → ∞` limit of the lower-order rotation value source term -/
 
 /-- **The `n → ∞` limit of the lower-order rotation value source term.** The
@@ -388,6 +486,93 @@ theorem covLowerOrderRotationValueCoeff_source_tendsto
     rw [hgseq_def, hglim_def]
     exact covLowerOrderRotationValueCoeff_tendsto (I := I) (M := M)
       g r s h_atlas i α P₀
+  have h_main := tendsto_lp_inner_integral (μ := μch) m h_tendsto_lp
+  rw [h_int_lim] at h_main
+  exact h_main.congr (fun n => h_int_n n)
+
+/-- **The `n → ∞` limit of the lower-order rotation value source term
+(chart-locality-free).** Chart-locality-free twin of
+`covLowerOrderRotationValueCoeff_source_tendsto`. -/
+theorem covLowerOrderRotationValueCoeff_source_tendsto_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s)
+    {ψ : EuclN → ℝ} (hψ : ContDiff ℝ ∞ ψ) (hψ_cs : HasCompactSupport ψ)
+    (hψ_supp : tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α) :
+    Filter.Tendsto
+      (fun n => ∫ y, densityOnEuclid (I := I) g α y *
+          covLowerOrderRotationValueCoeff (I := I) (M := M) g r s
+            (eigenvectorPouApprox_unconditional (I := I) (M := M) g r s i α n)
+            α P₀ y * ψ y ∂(volume : Measure EuclN))
+      atTop
+      (𝓝 (∫ y, densityOnEuclid (I := I) g α y *
+          covLowerOrderRotationValueCoeffLimit_unconditional (I := I) (M := M)
+            g r s i α P₀ y * ψ y ∂(volume : Measure EuclN))) := by
+  classical
+  set μch : Measure EuclN := chartL2Measure (I := I) (M := M) α with hμch_def
+  set m : Lp ℝ 2 μch :=
+    (densityOnEuclid_mul_test_memLp (I := I) (M := M) g α hψ hψ_cs hψ_supp).toLp _
+    with hm_def
+  set glim : Lp ℝ 2 μch :=
+    (covLowerOrderRotationValueCoeffLimit_memLp_unconditional (I := I) (M := M)
+      g r s i α P₀).toLp _ with hglim_def
+  set gseq : ℕ → Lp ℝ 2 μch := fun n =>
+    (covLowerOrderRotationValueCoeff_pouSmul_memLp_unconditional (I := I) (M := M)
+      g r s i α P₀ n).toLp _ with hgseq_def
+  have h_int_n : ∀ n : ℕ,
+      ∫ y, (m : EuclN → ℝ) y * (gseq n : EuclN → ℝ) y ∂μch =
+        ∫ y, densityOnEuclid (I := I) g α y *
+          covLowerOrderRotationValueCoeff (I := I) (M := M) g r s
+            (eigenvectorPouApprox_unconditional (I := I) (M := M) g r s i α n)
+            α P₀ y * ψ y ∂(volume : Measure EuclN) := by
+    intro n
+    have h_m_ae : (m : EuclN → ℝ) =ᵐ[μch]
+        fun y => densityOnEuclid (I := I) g α y * ψ y := by
+      rw [hm_def]; exact MemLp.coeFn_toLp _
+    have h_g_ae : (gseq n : EuclN → ℝ) =ᵐ[μch]
+        covLowerOrderRotationValueCoeff (I := I) (M := M) g r s
+          (eigenvectorPouApprox_unconditional (I := I) (M := M) g r s i α n)
+          α P₀ := by
+      rw [hgseq_def]; exact MemLp.coeFn_toLp _
+    have h_ae_prod : (fun y => (m : EuclN → ℝ) y * (gseq n : EuclN → ℝ) y)
+        =ᵐ[μch]
+        fun y => densityOnEuclid (I := I) g α y *
+          covLowerOrderRotationValueCoeff (I := I) (M := M) g r s
+            (eigenvectorPouApprox_unconditional (I := I) (M := M) g r s i α n)
+            α P₀ y * ψ y := by
+      filter_upwards [h_m_ae, h_g_ae] with y hy_m hy_g
+      rw [hy_m, hy_g]; ring
+    rw [integral_congr_ae h_ae_prod, hμch_def, chartL2Measure]
+    refine MeasureTheory.setIntegral_eq_integral_of_forall_compl_eq_zero ?_
+    intro y hy
+    rw [image_eq_zero_of_notMem_tsupport (fun h => hy (hψ_supp h)), mul_zero]
+  have h_int_lim :
+      ∫ y, (m : EuclN → ℝ) y * (glim : EuclN → ℝ) y ∂μch =
+        ∫ y, densityOnEuclid (I := I) g α y *
+          covLowerOrderRotationValueCoeffLimit_unconditional (I := I) (M := M)
+            g r s i α P₀ y * ψ y ∂(volume : Measure EuclN) := by
+    have h_m_ae : (m : EuclN → ℝ) =ᵐ[μch]
+        fun y => densityOnEuclid (I := I) g α y * ψ y := by
+      rw [hm_def]; exact MemLp.coeFn_toLp _
+    have h_g_ae : (glim : EuclN → ℝ) =ᵐ[μch]
+        covLowerOrderRotationValueCoeffLimit_unconditional (I := I) (M := M)
+          g r s i α P₀ := by
+      rw [hglim_def]; exact MemLp.coeFn_toLp _
+    have h_ae_prod : (fun y => (m : EuclN → ℝ) y * (glim : EuclN → ℝ) y)
+        =ᵐ[μch]
+        fun y => densityOnEuclid (I := I) g α y *
+          covLowerOrderRotationValueCoeffLimit_unconditional (I := I) (M := M)
+            g r s i α P₀ y * ψ y := by
+      filter_upwards [h_m_ae, h_g_ae] with y hy_m hy_g
+      rw [hy_m, hy_g]; ring
+    rw [integral_congr_ae h_ae_prod, hμch_def, chartL2Measure]
+    refine MeasureTheory.setIntegral_eq_integral_of_forall_compl_eq_zero ?_
+    intro y hy
+    rw [image_eq_zero_of_notMem_tsupport (fun h => hy (hψ_supp h)), mul_zero]
+  have h_tendsto_lp : Filter.Tendsto gseq atTop (𝓝 glim) := by
+    rw [hgseq_def, hglim_def]
+    exact covLowerOrderRotationValueCoeff_tendsto_unconditional (I := I) (M := M)
+      g r s i α P₀
   have h_main := tendsto_lp_inner_integral (μ := μch) m h_tendsto_lp
   rw [h_int_lim] at h_main
   exact h_main.congr (fun n => h_int_n n)
@@ -492,6 +677,108 @@ theorem weightedGradCoeffDivSum_source_tendsto
     rw [image_eq_zero_of_notMem_tsupport (fun h => hy (hψ_supp h)), mul_zero]
   have h_tendsto_lp : Filter.Tendsto gseq atTop (𝓝 glim) :=
     weightedGradCoeffDivSum_tendsto (I := I) (M := M) g r s h_atlas i α P₀
+  have h_main := tendsto_lp_inner_integral
+    (μ := chartL2Measure (I := I) (M := M) α) m h_tendsto_lp
+  rw [h_int_lim] at h_main
+  exact h_main.congr (fun n => h_int_n n)
+
+/-- **The `n → ∞` limit of the lower-order gradient divergence source term
+(chart-locality-free).** Chart-locality-free twin of
+`weightedGradCoeffDivSum_source_tendsto`. -/
+theorem weightedGradCoeffDivSum_source_tendsto_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s)
+    {ψ : EuclN → ℝ} (hψ : ContDiff ℝ ∞ ψ) (hψ_cs : HasCompactSupport ψ)
+    (hψ_supp : tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α) :
+    Filter.Tendsto
+      (fun n => ∫ y, (∑ l : Fin (Module.finrank ℝ E),
+          euclidPartial (E := E) l
+            (weightedGradCoeff (I := I) (M := M) g r s
+              (eigenvectorPouApprox_unconditional (I := I) (M := M) g r s i α n)
+              α P₀ l) y) * ψ y ∂(volume : Measure EuclN))
+      atTop
+      (𝓝 (∫ y, (∑ l : Fin (Module.finrank ℝ E),
+          weightedGradCoeffDivLimit_unconditional (I := I) (M := M)
+            g r s i α P₀ l y) * ψ y ∂(volume : Measure EuclN))) := by
+  classical
+  set m : Lp ℝ 2 (chartL2Measure (I := I) (M := M) α) :=
+    (test_memLp (I := I) (M := M) α hψ hψ_cs).toLp _ with hm_def
+  set gseq : ℕ → Lp ℝ 2 (chartL2Measure (I := I) (M := M) α) := fun n =>
+    ∑ l : Fin (Module.finrank ℝ E),
+      (euclidPartial_weightedGradCoeff_pouSmul_memLp_unconditional (I := I) (M := M)
+        g r s i α P₀ l n).toLp _ with hgseq_def
+  set glim : Lp ℝ 2 (chartL2Measure (I := I) (M := M) α) :=
+    ∑ l : Fin (Module.finrank ℝ E),
+      (weightedGradCoeffDivLimit_memLp_unconditional (I := I) (M := M)
+        g r s i α P₀ l).toLp _ with hglim_def
+  have h_m_ae : (m : EuclN → ℝ) =ᵐ[chartL2Measure (I := I) (M := M) α] ψ := by
+    rw [hm_def]; exact MemLp.coeFn_toLp _
+  have h_gseq_ae : ∀ n : ℕ, (gseq n : EuclN → ℝ)
+      =ᵐ[chartL2Measure (I := I) (M := M) α]
+      fun y => ∑ l : Fin (Module.finrank ℝ E),
+        euclidPartial (E := E) l
+          (weightedGradCoeff (I := I) (M := M) g r s
+            (eigenvectorPouApprox_unconditional (I := I) (M := M) g r s i α n)
+            α P₀ l) y := fun n => by
+    rw [hgseq_def]
+    exact coeFn_finsetSum_toLp (I := I) (M := M) α
+      (Finset.univ : Finset (Fin (Module.finrank ℝ E)))
+      (fun l => euclidPartial_weightedGradCoeff_pouSmul_memLp_unconditional
+        (I := I) (M := M) g r s i α P₀ l n)
+  have h_glim_ae : (glim : EuclN → ℝ)
+      =ᵐ[chartL2Measure (I := I) (M := M) α]
+      fun y => ∑ l : Fin (Module.finrank ℝ E),
+        weightedGradCoeffDivLimit_unconditional (I := I) (M := M)
+          g r s i α P₀ l y := by
+    rw [hglim_def]
+    exact coeFn_finsetSum_toLp (I := I) (M := M) α
+      (Finset.univ : Finset (Fin (Module.finrank ℝ E)))
+      (fun l => weightedGradCoeffDivLimit_memLp_unconditional (I := I) (M := M)
+        g r s i α P₀ l)
+  have h_int_n : ∀ n : ℕ,
+      ∫ y, (m : EuclN → ℝ) y * (gseq n : EuclN → ℝ) y
+          ∂(chartL2Measure (I := I) (M := M) α) =
+        ∫ y, (∑ l : Fin (Module.finrank ℝ E),
+            euclidPartial (E := E) l
+              (weightedGradCoeff (I := I) (M := M) g r s
+                (eigenvectorPouApprox_unconditional (I := I) (M := M)
+                  g r s i α n)
+                α P₀ l) y) * ψ y ∂(volume : Measure EuclN) := by
+    intro n
+    have h_ae_prod : (fun y => (m : EuclN → ℝ) y * (gseq n : EuclN → ℝ) y)
+        =ᵐ[chartL2Measure (I := I) (M := M) α]
+        fun y => (∑ l : Fin (Module.finrank ℝ E),
+          euclidPartial (E := E) l
+            (weightedGradCoeff (I := I) (M := M) g r s
+              (eigenvectorPouApprox_unconditional (I := I) (M := M) g r s i α n)
+              α P₀ l) y) * ψ y := by
+      filter_upwards [h_m_ae, h_gseq_ae n] with y hy_m hy_g
+      rw [hy_m, hy_g]; ring
+    rw [integral_congr_ae h_ae_prod, chartL2Measure]
+    refine MeasureTheory.setIntegral_eq_integral_of_forall_compl_eq_zero ?_
+    intro y hy
+    rw [image_eq_zero_of_notMem_tsupport (fun h => hy (hψ_supp h)), mul_zero]
+  have h_int_lim :
+      ∫ y, (m : EuclN → ℝ) y * (glim : EuclN → ℝ) y
+          ∂(chartL2Measure (I := I) (M := M) α) =
+        ∫ y, (∑ l : Fin (Module.finrank ℝ E),
+            weightedGradCoeffDivLimit_unconditional (I := I) (M := M)
+              g r s i α P₀ l y) * ψ y ∂(volume : Measure EuclN) := by
+    have h_ae_prod : (fun y => (m : EuclN → ℝ) y * (glim : EuclN → ℝ) y)
+        =ᵐ[chartL2Measure (I := I) (M := M) α]
+        fun y => (∑ l : Fin (Module.finrank ℝ E),
+          weightedGradCoeffDivLimit_unconditional (I := I) (M := M)
+            g r s i α P₀ l y) * ψ y := by
+      filter_upwards [h_m_ae, h_glim_ae] with y hy_m hy_g
+      rw [hy_m, hy_g]; ring
+    rw [integral_congr_ae h_ae_prod, chartL2Measure]
+    refine MeasureTheory.setIntegral_eq_integral_of_forall_compl_eq_zero ?_
+    intro y hy
+    rw [image_eq_zero_of_notMem_tsupport (fun h => hy (hψ_supp h)), mul_zero]
+  have h_tendsto_lp : Filter.Tendsto gseq atTop (𝓝 glim) :=
+    weightedGradCoeffDivSum_tendsto_unconditional (I := I) (M := M)
+      g r s i α P₀
   have h_main := tendsto_lp_inner_integral
     (μ := chartL2Measure (I := I) (M := M) α) m h_tendsto_lp
   rw [h_int_lim] at h_main
