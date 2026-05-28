@@ -1327,18 +1327,3 @@ end Analysis
 end DifferentialGeometry
 
 end
-
-section Sanity
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.norm_section_sq_le_const_mul_tensorInnerPointwise_on_pouTsupport
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.christoffelCorrection_opNorm_isBounded_on_pouTsupport
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartLeviCivitaParallelCLM_chartBasisVec_opNorm_isBounded_on_pouTsupport
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartTensorRSInputSlotCorrection_norm_le_const_on_pouTsupport
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartTensorRSOutputSlotCorrection_norm_le_const_on_pouTsupport
-#print axioms
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartLeviCivitaParallelCLM_chartBasisVec_opNorm_isBounded_on_pouTsupport_unconditional
-end Sanity
