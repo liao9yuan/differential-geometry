@@ -361,6 +361,7 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedFderivToWkpNormBr
 import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseHelpers
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.MultiplyQuant
 import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBound
+import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartTransfer
 import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
 import DifferentialGeometry.Analysis.Sobolev.Tools.StrictStrongSupport
 import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBoundStrict
