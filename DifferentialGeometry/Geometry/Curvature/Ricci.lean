@@ -990,7 +990,7 @@ theorem partialDeriv_contractedChristoffel_swap
 
 /-! ## Sum-derivative interchange and Ricci symmetry -/
 
-private lemma sum_partialDeriv_eq_partialDeriv_sum_christ
+lemma sum_partialDeriv_eq_partialDeriv_sum_christ
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) {y : E}
     (hy : y ∈ interior (extChartAt I α).target) :
