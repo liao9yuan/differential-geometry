@@ -907,6 +907,188 @@ theorem wkpNorm_crossRightLimitComponent_le_uniform
 
 end CrossRotationWkpNormBoundsUniform
 
+/-! ## Chart-locality-free restatements
+
+The cross-right `wkpNorm` bounds above carry the chart-selection hypothesis
+`h_atlas` only through the limit object `crossRightLimitComponent`, which is built
+from the eigenvector resolvent `eigenvectorResolvent`. The limit object has a
+chart-locality-free twin `crossRightLimitComponent_unconditional` — keyed on the
+eigenvector resolvent `eigenvectorResolvent_unconditional`, itself built from the
+eigenbasis vector
+`tensorResolventEigenbasisVec_ofCompact (tensorResolventL2_isCompactOperator_intrinsic g r s) i`
+selected at the unconditional compactness witness. By definition this twin is the
+cutoff Euclidean chart component, at `(α, P)`, of the abstract `L²` element
+`TensorH1ComplToTensorL2 g r s (eigenvectorResolvent_unconditional g r s i)` — the
+resolvent inclusion itself. The foundational cutoff `wkpNorm` bound
+`wkpNorm_tensorL2ChartComponentCutoff_le_of_pou` (and its eigenbasis-uniform,
+input-uniform companion `…_uniform`) quantifies over an arbitrary abstract `L²`
+element, so it applies verbatim to the chart-locality-free limit object, with no
+chart-selection hypothesis. The cross-right proof bodies transfer verbatim, with
+the resolvent inclusion of `eigenvectorResolvent` replaced by that of
+`eigenvectorResolvent_unconditional`. -/
+
+section CrossRightWkpNormBoundUnconditional
+
+variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
+  (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)
+
+/-- **Chart-locality-free explicit-constant order-`K` `wkpNorm` bound for the
+cross-right limit object.** Chart-locality-free twin of
+`wkpNorm_crossRightLimitComponent_le`. For a closed Riemannian manifold
+`(M, g)`, ranks `(r, s)`, an eigenbasis index `i`, a chart center `α : M`, a
+component multi-index `P : TensorCompIdx r s`, and an order `K`, there is a
+nonnegative constant `C` with
+
+```
+wkpNorm K 2 (crossRightLimitComponent_unconditional g r s i α P) (chartTargetEuclid α)
+  ≤ ENNReal.ofReal C
+      * ∑ β ∈ transportChartCenters α, ∑ Q,
+          wkpNorm K 2 (resolvent-inclusion chart Q-component at β),
+```
+
+given the order-`K` `MemWkp` regularity hypothesis `h_pou` on the
+resolvent-inclusion partition-of-unity chart components.
+
+By definition `crossRightLimitComponent_unconditional` is the cutoff Euclidean
+chart component of the abstract `L²` element `TensorH1ComplToTensorL2 g r s
+(eigenvectorResolvent_unconditional …)`; the foundational
+`wkpNorm_tensorL2ChartComponentCutoff_le_of_pou` reduces its order-`K` `wkpNorm`
+directly to a finite double sum of the order-`K` `wkpNorm` of the
+resolvent-inclusion partition-of-unity chart components. -/
+theorem wkpNorm_crossRightLimitComponent_le_unconditional
+    (h_pou : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
+      MemWkp (d := Module.finrank ℝ E) K 2
+        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+              (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+            β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+        (chartTargetEuclid (I := I) (M := M) β))
+    (α : M) (P : TensorCompIdx (E := E) r s) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      wkpNorm (d := Module.finrank ℝ E) K 2
+          (fun y => ((crossRightLimitComponent_unconditional (I := I) (M := M)
+              g r s i α P :
+              Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
+          (chartTargetEuclid (I := I) (M := M) α)
+        ≤ ENNReal.ofReal C *
+          ∑ β ∈ transportChartCenters (I := I) (M := M) α,
+            ∑ Q : TensorCompIdx (E := E) r s,
+              wkpNorm (d := Module.finrank ℝ E) K 2
+                (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+                    (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+                      (eigenvectorResolvent_unconditional (I := I) (M := M)
+                        g r s i))
+                    β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
+                    EuclN → ℝ) y)
+                (chartTargetEuclid (I := I) (M := M) β) := by
+  classical
+  -- Rewrite the limit object as the cutoff component of the resolvent
+  -- inclusion, then apply the foundational cutoff bound directly: its `h_pou`
+  -- hypothesis is exactly the order-`K` `MemWkp` regularity supplied here.
+  have h_unfold : (fun y => ((crossRightLimitComponent_unconditional (I := I)
+        (M := M) g r s i α P :
+        Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
+      = (fun y => ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+          (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+            (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+          α P : Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
+          EuclN → ℝ) y) := by
+    rw [crossRightLimitComponent_unconditional]
+  rw [h_unfold]
+  exact wkpNorm_tensorL2ChartComponentCutoff_le_of_pou (I := I) (M := M)
+    g r s
+    (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+      (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+    α P K h_pou
+
+end CrossRightWkpNormBoundUnconditional
+
+section CrossRightWkpNormBoundUniformUnconditional
+
+variable (g : SmoothRiemannianMetric I M) (r s : ℕ) (K : ℕ)
+
+/-- **Chart-locality-free eigenbasis-uniform explicit-constant order-`K`
+`wkpNorm` bound for the cross-right limit object.** Chart-locality-free twin of
+`wkpNorm_crossRightLimitComponent_le_uniform`: a *single* nonnegative constant
+`C`, independent of the eigenbasis index `i`, serves every `i` simultaneously,
+with no chart-selection hypothesis.
+
+For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a chart center
+`α : M`, a component multi-index `P : TensorCompIdx r s`, and an order `K`,
+given the order-`K` `MemWkp` regularity hypothesis `h_pou` on the
+resolvent-inclusion partition-of-unity chart components — phrased uniformly over
+`i` — there is a nonnegative constant `C` with, for every `i`,
+
+```
+wkpNorm K 2 (crossRightLimitComponent_unconditional g r s i α P) (chartTargetEuclid α)
+  ≤ ENNReal.ofReal C
+      * ∑ β ∈ transportChartCenters α, ∑ Q,
+          wkpNorm K 2 (resolvent-inclusion chart Q-component at β).
+```
+
+No exposed eigenvalue factor appears: `crossRightLimitComponent_unconditional` is
+by definition the cutoff Euclidean chart component of the resolvent inclusion
+itself, and the foundational cutoff bound
+`wkpNorm_tensorL2ChartComponentCutoff_le_of_pou` is *input-uniform* — its
+constant is chart-transition geometric data, independent of the abstract `L²`
+element and hence of `i`. That single constant is hoisted before the `∀ i`. -/
+theorem wkpNorm_crossRightLimitComponent_le_uniform_unconditional
+    (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
+      (β : M) (Q : TensorCompIdx (E := E) r s),
+      MemWkp (d := Module.finrank ℝ E) K 2
+        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+              (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+            β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+        (chartTargetEuclid (I := I) (M := M) β))
+    (α : M) (P : TensorCompIdx (E := E) r s) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        wkpNorm (d := Module.finrank ℝ E) K 2
+            (fun y => ((crossRightLimitComponent_unconditional (I := I) (M := M)
+                g r s i α P :
+                Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
+            (chartTargetEuclid (I := I) (M := M) α)
+          ≤ ENNReal.ofReal C *
+            ∑ β ∈ transportChartCenters (I := I) (M := M) α,
+              ∑ Q : TensorCompIdx (E := E) r s,
+                wkpNorm (d := Module.finrank ℝ E) K 2
+                  (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+                      (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+                        (eigenvectorResolvent_unconditional (I := I) (M := M)
+                          g r s i))
+                      β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
+                      EuclN → ℝ) y)
+                  (chartTargetEuclid (I := I) (M := M) β) := by
+  classical
+  -- The input-uniform cutoff bound: a single constant `C`, chart-transition
+  -- geometric data independent of the abstract `L²` element — hence of `i` —
+  -- is hoisted before the `∀ i`.
+  obtain ⟨C, hC_nn, hC_bd⟩ :=
+    wkpNorm_tensorL2ChartComponentCutoff_le_of_pou_uniform (I := I) (M := M)
+      g r s α P K
+  refine ⟨C, hC_nn, fun i => ?_⟩
+  -- Rewrite the limit object as the cutoff component of the resolvent
+  -- inclusion, then apply the input-uniform cutoff bound at that abstract `L²`
+  -- element: its `h_pou` hypothesis is exactly the order-`K` `MemWkp`
+  -- regularity supplied here for the index `i`.
+  have h_unfold : (fun y => ((crossRightLimitComponent_unconditional (I := I)
+        (M := M) g r s i α P :
+        Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
+      = (fun y => ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+          (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+            (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+          α P : Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
+          EuclN → ℝ) y) := by
+    rw [crossRightLimitComponent_unconditional]
+  rw [h_unfold]
+  exact hC_bd
+    (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+      (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+    (h_pou i)
+
+end CrossRightWkpNormBoundUniformUnconditional
+
 /-! ## Sanity tests -/
 
 section ElaborationTests
