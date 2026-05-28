@@ -2415,6 +2415,45 @@ theorem eigenvectorChartRHS_summand1_memWkp_unconditional
     h_pou α P₀).le_of_le (Nat.le_succ K)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+/-- **The cross-left limit object is `W^{K,2}` (chart-locality-free).**
+Chart-locality-free twin of `crossLeftLimitComponent_memWkp`, keyed on the
+unconditional compactness witness through `eigenvectorResolvent_unconditional`.
+The cross-left limit object `crossLeftLimitComponent_unconditional g r s i α P` is
+by definition the cutoff Euclidean chart component of the section-level covariant
+gradient `tensorCovGradL2Compl g r s (eigenvectorResolvent_unconditional …)`. The
+cutoff ↔ partition-of-unity bridge `tensorL2ChartComponentCutoff_memWkp_of_pou` is
+fed the order-`K` covariant-gradient chart-component regularity
+`eigenvectorCovGrad_pou_memWkp_unconditional` (which itself consumes `h_pou`). -/
+theorem crossLeftLimitComponent_memWkp_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P : TensorCompIdx (E := E) r (s + 1)) (K : ℕ)
+    (h_pou : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
+      MemWkp (d := Module.finrank ℝ E) (K + 1) 2
+        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+              (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+            β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+        (chartTargetEuclid (I := I) (M := M) β)) :
+    MemWkp (d := Module.finrank ℝ E) K 2
+      (fun y => ((crossLeftLimitComponent_unconditional (I := I) (M := M)
+          g r s i α P :
+        Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
+      (chartTargetEuclid (I := I) (M := M) α) := by
+  classical
+  -- `crossLeftLimitComponent_unconditional` is the cutoff chart component of the
+  -- section-level covariant gradient `tensorCovGradL2Compl g r s
+  -- (eigenvectorResolvent_unconditional …)`.
+  rw [crossLeftLimitComponent_unconditional]
+  -- The bridge: feed it the covariant-gradient chart-component regularity, which
+  -- itself consumes `h_pou`.
+  exact tensorL2ChartComponentCutoff_memWkp_of_pou (I := I) (M := M) g r (s + 1)
+    (tensorCovGradL2Compl (I := I) (M := M) g r s
+      (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i)) α P K
+    (fun β Q => eigenvectorCovGrad_pou_memWkp_unconditional (I := I) (M := M)
+      g r s i K h_pou β Q)
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 /-- **The cross-right limit object is `W^{K,2}` (chart-locality-free).**
 Chart-locality-free twin of `crossRightLimitComponent_memWkp`, keyed on the
 unconditional compactness witness through `eigenvectorResolvent_unconditional`.
