@@ -390,6 +390,41 @@ theorem maxRegHomogeneousSolField_timeModeCoeff (hT : 0 ≤ T)
   timeL2OfModes_timeModeCoeff (I := I) (M := M) (σ := a + 2) _
     (summable_homModeCoeff (I := I) (M := M) (a := a) (T := T) hT u₀) i
 
+/-- The homogeneous-flow mode family is weighted-summable at the intermediate
+`H^{a+1}` scale (it is summable at `a+2`, hence at any smaller exponent). -/
+theorem summable_homModeCoeff_Ha1 (hT : 0 ≤ T)
+    (u₀ : tensorHs (I := I) (M := M) g r s (a + 2)) :
+    Summable (fun i => tensorSobolevWeight (I := I) (M := M) i (a + 1) *
+      ‖homModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i‖ ^ 2) := by
+  refine Summable.of_nonneg_of_le (fun i => ?_) (fun i => ?_)
+    (summable_homModeCoeff (I := I) (M := M) (a := a) (T := T) hT u₀)
+  · exact mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i (a + 1))
+      (sq_nonneg _)
+  · exact mul_le_mul_of_nonneg_right
+      (tensorSobolevWeight_mono (I := I) (M := M) i (by linarith)) (sq_nonneg _)
+
+/-- **The `H^{a+1}`-view of the homogeneous heat-flow field.**  For initial datum
+`u₀ ∈ H^{a+2}`, the element of `L²([0,T]; H^{a+1})` whose `i`-th eigen-coordinate
+is the scalar decay `t ↦ e^{−λᵢ t} · cᵢ` — the homogeneous flow `e^{tΔ_∇} u₀`
+viewed one Sobolev order below its full `H^{a+2}` regularity, the order at which
+the subcritical small-time Duhamel field is measured. -/
+def maxRegHomogeneousSolFieldHa1 (a : ℝ) (T : ℝ)
+    (u₀ : tensorHs (I := I) (M := M) g r s (a + 2)) :
+    timeL2 (tensorHs (I := I) (M := M) g r s (a + 1)) T :=
+  timeL2OfModes (I := I) (M := M) (σ := a + 1)
+    (fun i => homModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i)
+
+/-- The `i`-th eigen-coordinate of the `H^{a+1}`-view homogeneous-flow field is
+the scalar decay `t ↦ e^{−λᵢ t} · cᵢ`. -/
+theorem maxRegHomogeneousSolFieldHa1_timeModeCoeff (hT : 0 ≤ T)
+    (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
+    (i : TensorEigenIdx (I := I) (M := M) g r s) :
+    timeModeCoeff (I := I) (M := M)
+        (maxRegHomogeneousSolFieldHa1 (I := I) (M := M) a T u₀) i =
+      homModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i :=
+  timeL2OfModes_timeModeCoeff (I := I) (M := M) (σ := a + 1) _
+    (summable_homModeCoeff_Ha1 (I := I) (M := M) (a := a) (T := T) hT u₀) i
+
 /-- **The `Hᵃ`-valued time-derivative field of the homogeneous heat flow.**  For
 initial datum `u₀ ∈ H^{a+2}`, this is the element of `L²([0,T]; Hᵃ)` whose `i`-th
 eigen-coordinate is `t ↦ −λᵢ · e^{−λᵢ t} · cᵢ`.  It is `∂_t (e^{tΔ_∇} u₀) = Δ_∇
@@ -729,6 +764,20 @@ def maxRegDuhamelSolField (a : ℝ) {T : ℝ} (hT : 0 < T) (_hT1 : T ≤ 1)
     timeL2 (tensorHs (I := I) (M := M) g r s (a + 2)) T :=
   maxRegHomogeneousSolField (I := I) (M := M) a T u₀ +
     maximalRegularitySolField (I := I) (M := M) a hT.le gforce
+
+/-- **The `H^{a+1}`-view of the affine Duhamel field.**  For initial datum `u₀ ∈
+H^{a+2}` and forcing term `g ∈ L²([0,T]; Hᵃ)`, the element of `L²([0,T]; H^{a+1})`
+representing the candidate solution one Sobolev order below its full regularity:
+the sum of the `H^{a+1}`-view homogeneous-flow field and the `H^{a+1}`-view
+maximal-regularity solution field of the forcing.  It is the field on which the
+subcritical nonlinearity `N : H^{a+1} → Hᵃ` is evaluated in the small-time
+fixed-point construction. -/
+def maxRegDuhamelSolFieldHa1 (a : ℝ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
+    timeL2 (tensorHs (I := I) (M := M) g r s (a + 1)) T :=
+  maxRegHomogeneousSolFieldHa1 (I := I) (M := M) a T u₀ +
+    maximalRegularitySolFieldHa1 (I := I) (M := M) a hT hT1 gforce
 
 /-- **The affine Duhamel solution map.**  For initial datum `u₀ ∈ H^{a+2}` and
 forcing term `g ∈ L²([0,T]; Hᵃ)`,

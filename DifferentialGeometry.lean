@@ -1088,6 +1088,7 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.ScalarInstance
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Scalar
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.MaxRegSpace
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.MaxRegFixedPoint
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.MaxRegSmallTime
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.EnergyEstimates
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.BallRetraction
 
