@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Riemannian.BonnetMyers.LengthBound
 import DifferentialGeometry.Geometry.Riemannian.HopfRinow
 import DifferentialGeometry.Geometry.Riemannian.MFDerivAlongCurve
 import DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.Lifts
+import DifferentialGeometry.Integral.Connection.ChartBridge.RiemannBasisBracket
 import DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnected
 import Mathlib.Geometry.Manifold.Riemannian.Basic
 import Mathlib.Topology.EMetricSpace.Diam
@@ -744,10 +745,16 @@ theorem bonnetMyers_finite_fundamentalGroup
   -- discharge in `Integral/Connection/ChartBridge/Riemann.lean`.
   have hBasisLift : ∀ x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M,
       DifferentialGeometry.Integral.Connection.chartRiemannBasisIdentity
-        (I := I) gLift x' := by sorry
+        (I := I) gLift x' :=
+    fun x' =>
+      DifferentialGeometry.Integral.Connection.chartRiemannBasisIdentity_LeviCivita
+        (I := I) gLift x'
   have hBasisBase : ∀ x : M,
       DifferentialGeometry.Integral.Connection.chartRiemannBasisIdentity
-        (I := I) g x := by sorry
+        (I := I) g x :=
+    fun x =>
+      DifferentialGeometry.Integral.Connection.chartRiemannBasisIdentity_LeviCivita
+        (I := I) g x
   have hRicLift :
       RicciBoundedBelow (I := I) gLift (((Module.finrank ℝ E : ℝ) - 1) * K) :=
     DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.ricciBoundedBelow_pullback_universalCover
