@@ -330,6 +330,117 @@ lemma eigenvectorChartWeakPartial_ae_zero_off_chartPouKernel
   exact DeGiorgi.HasWeakPartialDeriv.ae_eq hV_open h_wp_V h_zero_V
     h_wp_loc h_zero_loc
 
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+/-- **Chart-locality-free twin of
+`eigenvectorChartWeakPartial_ae_zero_off_chartPouKernel`.** The candidate weak
+chart partial `eigenvectorChartWeakPartial_unconditional k`, re-keyed onto the
+intrinsic-compactness eigenvector
+`tensorResolventEigenbasisVec_ofCompact (tensorResolventL2_isCompactOperator_intrinsic g r s) i`,
+is almost everywhere zero on the open complement of the partition-of-unity
+kernel inside the chart target. The chart component of any abstract `L²` element
+is a.e. zero there (`tensorL2ChartComponent_ae_zero_off_chartPouKernel`), so the
+constant `0` is a weak `k`-partial there; the candidate weak chart partial is a
+genuine weak `k`-partial there too
+(`eigenvectorChartWeakPartial_hasWeakPartialDeriv_unconditional`), and by
+uniqueness the two agree almost everywhere. -/
+lemma eigenvectorChartWeakPartial_ae_zero_off_chartPouKernel_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s)
+    (k : Fin (Module.finrank ℝ E)) :
+    eigenvectorChartWeakPartial_unconditional (I := I) (M := M) g r s i α P₀ k
+      =ᵐ[(volume : Measure EuclN).restrict
+        (chartTargetEuclid (I := I) (M := M) α \
+          chartPouKernel (I := I) (M := M) α)] (fun _ : EuclN => (0 : ℝ)) := by
+  classical
+  set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
+  set V : Set EuclN := chartTargetEuclid (I := I) (M := M) α \
+    chartPouKernel (I := I) (M := M) α with hV_def
+  have hV_open : IsOpen V :=
+    chartTargetEuclid_sdiff_chartPouKernel_isOpen (I := I) (M := M) α
+  have hV_sub : V ⊆ Ω :=
+    chartTargetEuclid_sdiff_chartPouKernel_subset (I := I) (M := M) α
+  have hV_meas : MeasurableSet V := hV_open.measurableSet
+  -- The unconditional eigenvector chart component, as an abstract `L²` element.
+  set uVec :=
+    tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+      (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s) i
+    with huVec_def
+  -- The canonical chart component of `uVec` is a.e. zero on `V`. Recast the
+  -- `chartL2Measure`-a.e. implication (= `volume.restrict Ω`) onto `V`.
+  have h_ae : ∀ᵐ y ∂((volume : Measure EuclN).restrict Ω),
+      y ∉ chartPouKernel (I := I) (M := M) α →
+        (tensorL2ChartComponent (I := I) (M := M) g r s uVec α P₀ :
+          EuclN → ℝ) y = 0 :=
+    tensorL2ChartComponent_ae_zero_off_chartPouKernel
+      (I := I) (M := M) g r s uVec α P₀
+  have h_ae_V : ∀ᵐ y ∂((volume : Measure EuclN).restrict V),
+      y ∉ chartPouKernel (I := I) (M := M) α →
+        (tensorL2ChartComponent (I := I) (M := M) g r s uVec α P₀ :
+          EuclN → ℝ) y = 0 :=
+    ae_mono (Measure.restrict_mono_set _ hV_sub) h_ae
+  have hu_ae : (tensorL2ChartComponent (I := I) (M := M) g r s uVec α P₀ :
+        EuclN → ℝ)
+      =ᵐ[(volume : Measure EuclN).restrict V] (fun _ : EuclN => (0 : ℝ)) := by
+    rw [Filter.EventuallyEq, ae_restrict_iff' hV_meas]
+    filter_upwards [(ae_restrict_iff' hV_meas).mp h_ae_V] with y hy
+    intro hy_V
+    exact hy hy_V hy_V.2
+  -- `eigenvectorChartWeakPartial_unconditional k` is a genuine weak `k`-partial
+  -- of the chart component on `Ω`, hence on the open subset `V`.
+  have h_wp_Ω : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k
+      (eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+        g r s i α P₀ k)
+      (tensorL2ChartComponent (I := I) (M := M) g r s uVec α P₀)
+      Ω :=
+    eigenvectorChartWeakPartial_hasWeakPartialDeriv_unconditional
+      (I := I) (M := M) g r s i α P₀ k
+  have h_wp_V : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k
+      (eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+        g r s i α P₀ k)
+      (tensorL2ChartComponent (I := I) (M := M) g r s uVec α P₀)
+      V :=
+    DeGiorgi.HasWeakPartialDeriv.restrict hV_open hV_sub h_wp_Ω
+  -- The constant `0` is a weak `k`-partial of the chart component on `V`
+  -- (since the chart component is a.e. zero on `V`).
+  have h_zero_V : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k
+      (fun _ : EuclN => (0 : ℝ))
+      (tensorL2ChartComponent (I := I) (M := M) g r s uVec α P₀) V := by
+    intro φ hφ hφ_supp hφ_sub
+    have h_ae_lhs :
+        (fun x : EuclN =>
+            (tensorL2ChartComponent (I := I) (M := M) g r s uVec α P₀ :
+              EuclN → ℝ) x *
+            (fderiv ℝ φ x) (EuclideanSpace.single k 1))
+          =ᵐ[(volume : Measure EuclN).restrict V]
+        (fun x : EuclN => (0 : ℝ) *
+            (fderiv ℝ φ x) (EuclideanSpace.single k 1)) := by
+      filter_upwards [hu_ae] with x hx
+      simp [hx]
+    rw [integral_congr_ae h_ae_lhs]
+    simp
+  -- Uniqueness of weak partials on `V` identifies the two.
+  -- `eigenvectorChartWeakPartial_unconditional k` is the coercion of the `Lp`
+  -- element `eigenvectorChartPartialLp_unconditional`, hence `MemLp 2` of
+  -- `chartL2Measure α = volume.restrict Ω`.
+  have h_wp_memLp_Ω : MemLp
+      (eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+        g r s i α P₀ k) 2
+      ((volume : Measure EuclN).restrict Ω) :=
+    Lp.memLp (eigenvectorChartPartialLp_unconditional (I := I) (M := M)
+      g r s i α P₀ k)
+  have h_wp_loc : MeasureTheory.LocallyIntegrable
+      (eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+        g r s i α P₀ k)
+      ((volume : Measure EuclN).restrict V) :=
+    (h_wp_memLp_Ω.mono_measure (Measure.restrict_mono_set _ hV_sub)).locallyIntegrable
+      (by norm_num)
+  have h_zero_loc : MeasureTheory.LocallyIntegrable (fun _ : EuclN => (0 : ℝ))
+      ((volume : Measure EuclN).restrict V) :=
+    MeasureTheory.locallyIntegrable_const 0
+  exact DeGiorgi.HasWeakPartialDeriv.ae_eq hV_open h_wp_V h_zero_V
+    h_wp_loc h_zero_loc
+
 /-! ## The iterated weak chart partials are a.e. zero off the kernel
 
 Every `m`-fold mixed weak chart partial `eigenvectorChartIteratedPartial` is
