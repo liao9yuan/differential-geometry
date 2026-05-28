@@ -509,6 +509,37 @@ theorem jetRHSPrefix_trunc
         have hmN' : m <= N + 1 := le_trans hmN (Nat.le_succ N)
         simp [ModelJetPrefix.toJet, ModelJetPrefix.trunc, hmN, hmN'])
 
+private theorem jetRHSPrefix_flowJetPrefix_coeff_eq_taylorComp
+    (F : ModelPhase (E := E) -> ModelPhase (E := E))
+    (Φ : ModelPhase (E := E) -> Real -> ModelPhase (E := E))
+    (N : Nat) (z : ModelPhase (E := E)) (t : Real)
+    (k : Fin (N + 1)) :
+    jetRHSPrefix (E := E) F N
+        (flowJetPrefix (E := E) Φ N z t) k =
+      ((ftaylorSeries Real F (Φ z t)).taylorComp
+        (flowJet (E := E) Φ z t)) k.1 := by
+  have hk : k.1 <= N := Nat.lt_succ_iff.mp k.2
+  simpa [jetRHSPrefix, flowJetPrefix, jetRHS, flowJet_base] using
+    jetRHS_trunc_coeff_of_le (E := E) F
+      (flowJet (E := E) Φ z t) hk
+
+private theorem jetRHSPrefix_flowJetPrefix_shiftedDeriv_apply
+    (F : ModelPhase (E := E) -> ModelPhase (E := E))
+    (Φ : ModelPhase (E := E) -> Real -> ModelPhase (E := E))
+    (N : Nat) (z h : ModelPhase (E := E)) (t : Real)
+    (k : Fin (N + 1)) :
+    ModelJetPrefix.shiftedDeriv (E := E) N
+        (jetRHSPrefix (E := E) F (N + 1)
+          (flowJetPrefix (E := E) Φ (N + 1) z t)) h k =
+      (((ftaylorSeries Real F (Φ z t)).taylorComp
+        (flowJet (E := E) Φ z t)) (k.1 + 1)).curryLeft h := by
+  rw [ModelJetPrefix.shiftedDeriv_apply]
+  exact congrArg
+    (fun A : ModelJetCoeff (E := E) (k.1 + 1) => A.curryLeft h)
+    (jetRHSPrefix_flowJetPrefix_coeff_eq_taylorComp
+      (E := E) F Φ (N + 1) z t
+      ⟨k.1 + 1, Nat.succ_lt_succ k.2⟩)
+
 private theorem jetRHSPrefix_term_contDiffAt
     (F : ModelPhase (E := E) -> ModelPhase (E := E))
     {N n : Nat} (P : ModelJetPrefix (E := E) N)
@@ -697,6 +728,72 @@ theorem flowJetPrefix_hasFDerivAt_of_hasFTaylor
   have hk : k.1 < (N + 1 : WithTop ℕ∞) := by
     exact_mod_cast k.2
   exact hp.fderiv k.1 hk z
+
+/-- Faa di Bruno bridge for the finite jet-prefix RHS along an actual fixed
+time Taylor jet: differentiating the `N`-prefix RHS gives the shifted
+`(N+1)`-prefix RHS. -/
+theorem jetRHSPrefix_flowJetPrefix_hasFDerivAt
+    (F : ModelPhase (E := E) -> ModelPhase (E := E))
+    (Φ : ModelPhase (E := E) -> Real -> ModelPhase (E := E))
+    (N : Nat) (z : ModelPhase (E := E)) (t : Real)
+    (hF :
+      HasFTaylorSeriesUpToOn (𝕜 := Real) (N + 1 : Nat)
+        F
+        (fun y : ModelPhase (E := E) => ftaylorSeries Real F y)
+        Set.univ)
+    (hΦ :
+      HasFTaylorSeriesUpToOn (𝕜 := Real) (N + 1 : Nat)
+        (fun y : ModelPhase (E := E) => Φ y t)
+        (fun y : ModelPhase (E := E) => flowJet (E := E) Φ y t)
+        Set.univ) :
+    HasFDerivAt
+      (fun y : ModelPhase (E := E) =>
+        jetRHSPrefix (E := E) F N
+          (flowJetPrefix (E := E) Φ N y t))
+      (ModelJetPrefix.shiftedDeriv (E := E) N
+        (jetRHSPrefix (E := E) F (N + 1)
+          (flowJetPrefix (E := E) Φ (N + 1) z t)))
+      z := by
+  have hcomp :
+      HasFTaylorSeriesUpToOn (𝕜 := Real) (N + 1 : Nat)
+        (fun y : ModelPhase (E := E) => F (Φ y t))
+        (fun y : ModelPhase (E := E) =>
+          (ftaylorSeries Real F (Φ y t)).taylorComp
+            (flowJet (E := E) Φ y t))
+        Set.univ := by
+    simpa [Function.comp_def] using hF.comp hΦ (Set.mapsTo_univ _ _)
+  apply hasFDerivAt_pi''
+  intro k
+  have hk : k.1 < (N + 1 : WithTop ℕ∞) := by
+    exact_mod_cast k.2
+  have hderiv :=
+    (hasFTaylorSeriesUpToOn_univ_iff.mp hcomp).fderiv k.1 hk z
+  have hfun :
+      (fun y : ModelPhase (E := E) =>
+        jetRHSPrefix (E := E) F N
+          (flowJetPrefix (E := E) Φ N y t) k)
+      =
+      (fun y : ModelPhase (E := E) =>
+        ((ftaylorSeries Real F (Φ y t)).taylorComp
+          (flowJet (E := E) Φ y t)) k.1) := by
+    funext y
+    exact jetRHSPrefix_flowJetPrefix_coeff_eq_taylorComp
+      (E := E) F Φ N y t k
+  have hderiv_eq :
+      ((ContinuousLinearMap.proj k).comp
+          (ModelJetPrefix.shiftedDeriv (E := E) N
+            (jetRHSPrefix (E := E) F (N + 1)
+              (flowJetPrefix (E := E) Φ (N + 1) z t))))
+        =
+        (((ftaylorSeries Real F (Φ z t)).taylorComp
+          (flowJet (E := E) Φ z t)) (k.1 + 1)).curryLeft := by
+    apply ContinuousLinearMap.ext
+    intro h
+    exact jetRHSPrefix_flowJetPrefix_shiftedDeriv_apply
+      (E := E) F Φ N z h t k
+  rw [hderiv_eq]
+  exact hderiv.congr_of_eventuallyEq
+    (Filter.Eventually.of_forall fun y => congrFun hfun y)
 
 /-- The second jet coefficient is the second iterated Frechet derivative. -/
 theorem flowJet_two_apply
@@ -1390,6 +1487,69 @@ theorem jetParamVarRHS_cdAt
     (X := ModelJetPrefix (E := E) N) (P := ModelPhase (E := E))
     (F := jetRHSPrefix (E := E) F N) (z := P) (A := A)
     (jetRHSPrefix_contDiffAt (E := E) F N P hF)
+
+/-- The successor finite-prefix RHS is the parameterized variational RHS of
+the previous finite-prefix RHS along an actual fixed-time Taylor jet.  This is
+the finite-state version of "the first variational equation of the `N`-jet ODE
+is the `(N+1)`-jet ODE". -/
+theorem jetRHSPrefix_succ_as_paramVarRHS
+    (F : ModelPhase (E := E) -> ModelPhase (E := E))
+    (Phi : ModelPhase (E := E) -> Real -> ModelPhase (E := E))
+    (N : Nat) (z : ModelPhase (E := E)) (t : Real)
+    (hFcont : ContDiffAt Real ∞ F (Phi z t))
+    (hF :
+      HasFTaylorSeriesUpToOn (𝕜 := Real) (N + 1 : Nat)
+        F
+        (fun y : ModelPhase (E := E) => ftaylorSeries Real F y)
+        Set.univ)
+    (hPhi :
+      HasFTaylorSeriesUpToOn (𝕜 := Real) (N + 1 : Nat)
+        (fun y : ModelPhase (E := E) => Phi y t)
+        (fun y : ModelPhase (E := E) => flowJet (E := E) Phi y t)
+        Set.univ) :
+    paramVariationalRHS (P := ModelPhase (E := E))
+        (jetRHSPrefix (E := E) F N)
+        (flowJetPrefix (E := E) Phi N z t,
+          ModelJetPrefix.shiftedDeriv (E := E) N
+            (flowJetPrefix (E := E) Phi (N + 1) z t))
+      =
+        (jetRHSPrefix (E := E) F N
+            (flowJetPrefix (E := E) Phi N z t),
+          ModelJetPrefix.shiftedDeriv (E := E) N
+            (jetRHSPrefix (E := E) F (N + 1)
+              (flowJetPrefix (E := E) Phi (N + 1) z t))) := by
+  apply Prod.ext
+  · rfl
+  · dsimp [paramVariationalRHS]
+    let P0 : ModelJetPrefix (E := E) N :=
+      flowJetPrefix (E := E) Phi N z t
+    let A0 : ModelPhase (E := E) →L[Real] ModelJetPrefix (E := E) N :=
+      ModelJetPrefix.shiftedDeriv (E := E) N
+        (flowJetPrefix (E := E) Phi (N + 1) z t)
+    have hflow :
+        HasFDerivAt
+          (fun y : ModelPhase (E := E) => flowJetPrefix (E := E) Phi N y t)
+          A0 z := by
+      simpa [A0] using
+        flowJetPrefix_hasFDerivAt_of_hasFTaylor (E := E) Phi N z t
+          (hasFTaylorSeriesUpToOn_univ_iff.mp hPhi)
+    have hjet :
+        HasFDerivAt
+          (jetRHSPrefix (E := E) F N)
+          (fderiv Real (jetRHSPrefix (E := E) F N) P0) P0 := by
+      exact
+        ((jetRHSPrefix_contDiffAt (E := E) F N P0
+          (by simpa [P0] using hFcont)).differentiableAt (by simp)).hasFDerivAt
+    have hchain :
+        HasFDerivAt
+          (fun y : ModelPhase (E := E) =>
+            jetRHSPrefix (E := E) F N
+              (flowJetPrefix (E := E) Phi N y t))
+          ((fderiv Real (jetRHSPrefix (E := E) F N) P0).comp A0) z := by
+      simpa [P0] using hjet.comp z hflow
+    have hdirect :=
+      jetRHSPrefix_flowJetPrefix_hasFDerivAt (E := E) F Phi N z t hF hPhi
+    exact (hdirect.unique hchain).symm
 
 /-- Smoothness of the augmented variational RHS for the fixed-chart spray
 finite jet-prefix ODE on the controlled chart/source region. -/
