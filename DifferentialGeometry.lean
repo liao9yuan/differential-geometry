@@ -1176,6 +1176,7 @@ import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.Bijective.Unifor
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.HartmanAssembly
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.ManifoldFlowFamily
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.ManifoldIntegralFlow
+import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.PushforwardSmooth
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.LiftMetric
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.PointwiseDeriv
 import DifferentialGeometry.PDE.RicciFlow.DeTurckShortTime
