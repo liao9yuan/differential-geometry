@@ -431,6 +431,52 @@ theorem tensorCovGradL2Compl_eigenvectorResolvent_l2Norm_le
   exact h_grad.trans
     (eigenvectorResolvent_h1Norm_le (I := I) (M := M) g r s h_atlas i)
 
+/-! ### Chart-locality-free twin of the abstract gradient-energy bound
+
+The covariant-gradient operator-norm bound `tensorCovGradL2Compl_apply_norm_le`
+carries no chart-selection hypothesis, so the same chaining reproduces the
+gradient-energy bound for the unconditional eigenvector resolvent
+`eigenvectorResolvent_unconditional`, with the unconditional energy identity
+`eigenvectorResolvent_h1Norm_le_unconditional`. -/
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+/-- **The abstract gradient-energy bound (chart-locality-free).** Chart-locality-
+free twin of `tensorCovGradL2Compl_eigenvectorResolvent_l2Norm_le`: for an
+eigenbasis index `i` with nonzero resolvent eigenvalue `μ := i.fst.val`, the
+metric `L²` norm of the completion-extended covariant gradient of the
+unconditional eigenvector resolvent `eigenvectorResolvent_unconditional g r s i`
+is bounded by `√μ` times the `L²` norm of the unconditional eigenbasis vector
+`tensorResolventEigenbasisVec_ofCompact (tensorResolventL2_isCompactOperator_intrinsic
+g r s) i`.
+
+The covariant-gradient operator `tensorCovGradL2Compl g r s` has operator norm
+`≤ 1` (`tensorCovGradL2Compl_apply_norm_le`, no chart-selection hypothesis), so
+its value is bounded by the `H¹` norm of its argument; the unconditional energy
+identity `eigenvectorResolvent_h1Norm_le_unconditional` then supplies the
+`√μ`-weighted bound. No chart-selection hypothesis. -/
+theorem tensorCovGradL2Compl_eigenvectorResolvent_l2Norm_le_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s) :
+    ‖tensorCovGradL2Compl (I := I) (M := M) g r s
+        (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i)‖ ≤
+      Real.sqrt i.fst.val *
+        ‖tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+            g r s) i‖ := by
+  -- The pointwise bound for the completion-extended covariant gradient: its
+  -- value at `eigenvectorResolvent_unconditional …` is bounded by the `H¹` norm
+  -- of that argument. The bound carries no chart-selection hypothesis.
+  have h_grad :
+      ‖tensorCovGradL2Compl (I := I) (M := M) g r s
+          (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i)‖ ≤
+        ‖eigenvectorResolvent_unconditional (I := I) (M := M) g r s i‖ :=
+    tensorCovGradL2Compl_apply_norm_le (I := I) (M := M) g r s
+      (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i)
+  -- Chain with the unconditional energy identity `‖eigenvectorResolvent …‖ ≤
+  -- √μ · ‖φ‖`.
+  exact h_grad.trans
+    (eigenvectorResolvent_h1Norm_le_unconditional (I := I) (M := M) g r s i)
+
 /-! ## The chart-partial operator-norm bound and the `μ`-power identity
 
 The canonical chart-partial continuous linear map `eigenvectorChartPartialCLM
