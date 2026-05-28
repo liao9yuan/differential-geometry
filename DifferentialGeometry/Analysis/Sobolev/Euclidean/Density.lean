@@ -1768,7 +1768,7 @@ private theorem iterWeakPartial_sub_ae
   rw [hx]; ring
 
 /-- Iterated weak partial = iterated classical partial a.e. for smooth functions. -/
-private theorem iterWeakPartial_smooth_ae_eq_iterClassicalPartial
+theorem iterWeakPartial_smooth_ae_eq_iterClassicalPartial
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ_open : IsOpen Ω) :
     ∀ (j : ℕ) (β : Fin j → Fin d) {ψ : E → ℝ},
       ContDiff ℝ (⊤ : ℕ∞) ψ → HasCompactSupport ψ → tsupport ψ ⊆ Ω →
