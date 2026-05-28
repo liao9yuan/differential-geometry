@@ -2533,6 +2533,2061 @@ theorem eigenvectorCovGrad_pou_wkpNorm_le_uniform
         Real.norm_of_nonneg (le_of_lt hμ_pos), ← mul_assoc,
         mul_inv_cancel₀ hμ_ne, one_mul]
 
+/-! ## Chart-locality-free twins
+
+Each headline and helper above uses `h_atlas` only to select the eigenbasis
+vector `tensorResolventEigenbasisVec h_atlas i` (and, downstream, the eigenvector
+resolvent `eigenvectorResolvent g r s h_atlas i` and the named limit objects). By
+`tensorResolventL2_isCompactOperator_intrinsic` the L²-side resolvent is a compact
+operator with no chart-selection hypothesis, so the compact-keyed eigenbasis
+vector `tensorResolventEigenbasisVec_ofCompact` — and its companion `_unconditional`
+objects (`eigenvectorResolvent_unconditional`, `eigenvectorChartWeakPartial_unconditional`,
+`covGradPouLeibnizCrossLimit_unconditional`, `covGradChristoffelLimit_unconditional`)
+— are available unconditionally. We thread those through the same constructions,
+dropping `h_atlas` entirely. `[CompleteSpace E]` is a section hypothesis. The
+file-local helpers `wkpNorm_sub_le`, `memWkp_finset_sum`,
+`wkpNorm_coef_mul_factor_le`, `wkpNorm_coef_mul_factor_le_uniform` and
+`eigenIdx_val_pos` carry no `h_atlas`, so they are reused verbatim. -/
+
+section Unconditional
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+
+/-- Chart-locality-free twin of `eigenvectorVec_pou_memWkp_and_wkpNorm_le`. The
+partition-of-unity Euclidean chart component of the chart-locality-free eigenvector
+vector `tensorResolventEigenbasisVec_ofCompact` is `MemWkp N 2` on a chart target,
+and its order-`N` iterated Sobolev norm is `‖μ⁻¹‖` times that of the
+resolvent-coercion chart component of `eigenvectorResolvent_unconditional`. -/
+private lemma eigenvectorVec_pou_memWkp_and_wkpNorm_le_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s) (N : ℕ)
+    (β : M) (Q : TensorCompIdx (E := E) r s)
+    (h_res : MemWkp (d := Module.finrank ℝ E) N 2
+      (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+          (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+            (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+          β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+      (chartTargetEuclid (I := I) (M := M) β)) :
+    MemWkp (d := Module.finrank ℝ E) N 2
+        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                g r s) i) β Q :
+            Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+        (chartTargetEuclid (I := I) (M := M) β) ∧
+      wkpNorm (d := Module.finrank ℝ E) N 2
+          (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+              (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                  g r s) i) β Q :
+              Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+          (chartTargetEuclid (I := I) (M := M) β)
+        ≤ ENNReal.ofReal ‖(i.fst.val)⁻¹‖ *
+          wkpNorm (d := Module.finrank ℝ E) N 2
+            (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+                (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+                  (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+                β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
+                EuclN → ℝ) y)
+            (chartTargetEuclid (I := I) (M := M) β) := by
+  classical
+  set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) β with hΩ_def
+  have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) β
+  -- The eigenvector chart component is `μ⁻¹` times the resolvent-coercion chart
+  -- component (`eigenvector_chartComponent_eq_unconditional`).
+  have h_chart_eq := eigenvector_chartComponent_eq_unconditional (I := I) (M := M)
+    g r s i β Q
+  have h_ae : (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+        (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+          i) β Q :
+        Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+      =ᵐ[(volume : Measure EuclN).restrict Ω]
+      (fun y => (i.fst.val)⁻¹ *
+        ((tensorL2ChartComponent (I := I) (M := M) g r s
+          (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+            (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+          β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) := by
+    have h_smul := Lp.coeFn_smul (i.fst.val)⁻¹
+      (tensorL2ChartComponent (I := I) (M := M) g r s
+        (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+          (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i)) β Q)
+    have h_smul' : (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+          (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+            i) β Q :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+        =ᵐ[chartL2Measure (I := I) (M := M) β]
+        (fun y => (i.fst.val)⁻¹ •
+          ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+              (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+            β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
+            EuclN → ℝ) y) := by
+      rw [h_chart_eq]
+      exact h_smul
+    filter_upwards [h_smul'] with y hy
+    rw [hy, smul_eq_mul]
+  -- `MemWkp` is scalar-invariant: transfer through the a.e. equality.
+  have h_mem : MemWkp (d := Module.finrank ℝ E) N 2
+      (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+          (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+            i) β Q :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω :=
+    (MemWkp_congr_ae (d := Module.finrank ℝ E)
+      (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae).mpr
+      (MemWkp.const_smul (d := Module.finrank ℝ E)
+        (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_res (i.fst.val)⁻¹)
+  refine ⟨h_mem, ?_⟩
+  -- `wkpNorm` is scalar-homogeneous: transfer through the a.e. equality, then
+  -- apply `wkpNorm_const_smul`.
+  have h_norm_eq : wkpNorm (d := Module.finrank ℝ E) N 2
+      (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+          (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+            i) β Q :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω =
+      wkpNorm (d := Module.finrank ℝ E) N 2
+        (fun y => (i.fst.val)⁻¹ *
+          ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+              (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+            β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
+            EuclN → ℝ) y) Ω :=
+    wkpNorm_congr_ae (d := Module.finrank ℝ E)
+      (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae
+  rw [h_norm_eq,
+    wkpNorm_const_smul (d := Module.finrank ℝ E)
+      (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_res (i.fst.val)⁻¹]
+  refine le_of_eq ?_
+  rw [← ofReal_norm]
+
+/-- **Quantitative iterated Sobolev norm bound for the eigenvector
+partition-of-unity chart component (chart-locality-free).** Chart-locality-free
+twin of `eigenvectorVec_pou_wkpNorm_le`. -/
+theorem eigenvectorVec_pou_wkpNorm_le_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s) (N : ℕ)
+    (h_pou : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
+      MemWkp (d := Module.finrank ℝ E) N 2
+        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+              (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+            β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+        (chartTargetEuclid (I := I) (M := M) β))
+    (β : M) (Q : TensorCompIdx (E := E) r s) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      wkpNorm (d := Module.finrank ℝ E) N 2
+          (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+              (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                  g r s) i) β Q :
+              Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+          (chartTargetEuclid (I := I) (M := M) β)
+        ≤ ENNReal.ofReal C *
+          wkpNorm (d := Module.finrank ℝ E) N 2
+            (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+                (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+                  (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+                β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
+                EuclN → ℝ) y)
+            (chartTargetEuclid (I := I) (M := M) β) := by
+  classical
+  refine ⟨‖(i.fst.val)⁻¹‖, norm_nonneg _, ?_⟩
+  exact (eigenvectorVec_pou_memWkp_and_wkpNorm_le_unconditional (I := I) (M := M)
+    g r s i N β Q (h_pou β Q)).2
+
+/-- **Constant-uniform iterated Sobolev norm bound for the eigenvector
+partition-of-unity chart component (chart-locality-free).** Chart-locality-free
+twin of `eigenvectorVec_pou_wkpNorm_le_uniform`. -/
+theorem eigenvectorVec_pou_wkpNorm_le_uniform_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (N : ℕ)
+    (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
+      (β : M) (Q : TensorCompIdx (E := E) r s),
+      MemWkp (d := Module.finrank ℝ E) N 2
+        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+              (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+            β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+        (chartTargetEuclid (I := I) (M := M) β))
+    (β : M) (Q : TensorCompIdx (E := E) r s) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        wkpNorm (d := Module.finrank ℝ E) N 2
+            (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+                (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                  (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                    g r s) i) β Q :
+                Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+            (chartTargetEuclid (I := I) (M := M) β)
+          ≤ ENNReal.ofReal ((i.fst.val)⁻¹ * C) *
+            wkpNorm (d := Module.finrank ℝ E) N 2
+              (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+                  (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+                    (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+                  β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
+                  EuclN → ℝ) y)
+              (chartTargetEuclid (I := I) (M := M) β) := by
+  classical
+  refine ⟨1, zero_le_one, fun i => ?_⟩
+  have hμ_pos : 0 < i.fst.val := eigenIdx_val_pos (I := I) (M := M) g r s i
+  have hμ_inv_nn : 0 ≤ (i.fst.val)⁻¹ := le_of_lt (inv_pos.mpr hμ_pos)
+  have hμ_norm : ‖(i.fst.val)⁻¹‖ = (i.fst.val)⁻¹ := Real.norm_of_nonneg hμ_inv_nn
+  have h_le := (eigenvectorVec_pou_memWkp_and_wkpNorm_le_unconditional (I := I)
+    (M := M) g r s i N β Q (h_pou i β Q)).2
+  rw [mul_one]
+  rwa [hμ_norm] at h_le
+
+/-! ## Aggregate abbreviations (chart-locality-free) -/
+
+/-- Chart-locality-free twin of `chartCompNorm`: the order-`(K+1)` iterated Sobolev
+norm of the resolvent-coercion partition-of-unity Euclidean chart `Q`-component of
+`eigenvectorResolvent_unconditional` at a chart centre `β'`. -/
+private def chartCompNorm_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)
+    (β' : M) (Q : TensorCompIdx (E := E) r s) : ℝ≥0∞ :=
+  wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+    (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+        (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+          (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+        β' Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β')) : EuclN → ℝ) y)
+    (chartTargetEuclid (I := I) (M := M) β')
+
+/-- Chart-locality-free twin of `covGradAggregate`. -/
+private def covGradAggregate_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ) (β : M) : ℝ≥0∞ :=
+  (∑ Q : TensorCompIdx (E := E) r s,
+      chartCompNorm_unconditional (I := I) (M := M) g r s i K β Q)
+    + ∑ β' ∈ transportChartCenters (I := I) (M := M) β,
+        ∑ Q : TensorCompIdx (E := E) r s,
+          chartCompNorm_unconditional (I := I) (M := M) g r s i K β' Q
+
+/-- Chart-locality-free twin of `chartCompNorm_center_le_covGradAggregate`. -/
+private lemma chartCompNorm_center_le_covGradAggregate_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)
+    (β : M) (Q : TensorCompIdx (E := E) r s) :
+    chartCompNorm_unconditional (I := I) (M := M) g r s i K β Q
+      ≤ covGradAggregate_unconditional (I := I) (M := M) g r s i K β := by
+  classical
+  refine le_trans ?_ le_self_add
+  exact Finset.single_le_sum
+    (f := fun Q' : TensorCompIdx (E := E) r s =>
+      chartCompNorm_unconditional (I := I) (M := M) g r s i K β Q')
+    (fun _ _ => zero_le _) (Finset.mem_univ Q)
+
+/-- Chart-locality-free twin of `chartCompNorm_transport_le_covGradAggregate`. -/
+private lemma chartCompNorm_transport_le_covGradAggregate_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)
+    {β β' : M} (hβ' : β' ∈ transportChartCenters (I := I) (M := M) β)
+    (Q : TensorCompIdx (E := E) r s) :
+    chartCompNorm_unconditional (I := I) (M := M) g r s i K β' Q
+      ≤ covGradAggregate_unconditional (I := I) (M := M) g r s i K β := by
+  classical
+  refine le_trans ?_ le_add_self
+  refine le_trans ?_
+    (Finset.single_le_sum
+      (f := fun β'' : M =>
+        ∑ Q' : TensorCompIdx (E := E) r s,
+          chartCompNorm_unconditional (I := I) (M := M) g r s i K β'' Q')
+      (fun _ _ => zero_le _) hβ')
+  exact Finset.single_le_sum
+    (f := fun Q' : TensorCompIdx (E := E) r s =>
+      chartCompNorm_unconditional (I := I) (M := M) g r s i K β' Q')
+    (fun _ _ => zero_le _) (Finset.mem_univ Q)
+
+/-- Chart-locality-free twin of
+`eigenvectorChartWeakPartial_memWkp_and_wkpNorm_le`. -/
+private lemma eigenvectorChartWeakPartial_memWkp_and_wkpNorm_le_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)
+    (h_pou_phi : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
+      MemWkp (d := Module.finrank ℝ E) (K + 1) 2
+        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+              (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+            β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+        (chartTargetEuclid (I := I) (M := M) β))
+    (β : M) (P : TensorCompIdx (E := E) r s)
+    (k : Fin (Module.finrank ℝ E)) :
+    MemWkp (d := Module.finrank ℝ E) K 2
+        (eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+          g r s i β P k)
+        (chartTargetEuclid (I := I) (M := M) β) ∧
+      ∃ C : ℝ, 0 ≤ C ∧
+        wkpNorm (d := Module.finrank ℝ E) K 2
+            (eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+              g r s i β P k)
+            (chartTargetEuclid (I := I) (M := M) β)
+          ≤ ENNReal.ofReal C *
+            covGradAggregate_unconditional (I := I) (M := M) g r s i K β := by
+  classical
+  set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) β with hΩ_def
+  have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) β
+  -- The eigenvector chart component is `W^{K+1,2}`, with a norm bound by
+  -- `‖μ⁻¹‖` times the resolvent-coercion order-`(K+1)` norm.
+  obtain ⟨hu, hu_norm⟩ := eigenvectorVec_pou_memWkp_and_wkpNorm_le_unconditional
+    (I := I) (M := M) g r s i (K + 1) β P (h_pou_phi β P)
+  -- `eigenvectorChartWeakPartial_unconditional` is a genuine weak `k`-th partial of
+  -- that chart component (the committed headline).
+  have hg_weak : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k
+      (eigenvectorChartWeakPartial_unconditional (I := I) (M := M) g r s i β P k)
+      (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+          (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+            i) β P :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω :=
+    eigenvectorChartWeakPartial_hasWeakPartialDeriv_unconditional (I := I) (M := M)
+      g r s i β P k
+  -- `eigenvectorChartWeakPartial_unconditional` is locally `L²` on the chart target.
+  have hg_loc : LocallyIntegrable
+      (eigenvectorChartWeakPartial_unconditional (I := I) (M := M) g r s i β P k)
+      ((volume : Measure EuclN).restrict Ω) := by
+    have h_memLp : MemLp (eigenvectorChartWeakPartial_unconditional (I := I)
+        (M := M) g r s i β P k) 2
+        ((volume : Measure EuclN).restrict Ω) := by
+      rw [eigenvectorChartWeakPartial_unconditional]
+      exact Lp.memLp _
+    exact h_memLp.locallyIntegrable (by norm_num)
+  -- `u ∈ W^{1,2}(Ω)`, so its chosen weak `k`-th partial is a genuine weak `k`-th
+  -- partial of `u` and lies in `L²(Ω)`.
+  have hu_W1 : DeGiorgi.MemW1p 2
+      (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+          (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+            i) β P :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω :=
+    hu.memW1p
+  have h_chosen_weak : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k
+      (chosenWeakPartial' (d := Module.finrank ℝ E) 2 k
+        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                g r s) i) β P :
+            Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω)
+      (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+          (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+            i) β P :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω :=
+    chosenWeakPartial'_isWeakPartial_of_mem (d := Module.finrank ℝ E) hu_W1 k
+  have h_chosen_loc : LocallyIntegrable
+      (chosenWeakPartial' (d := Module.finrank ℝ E) 2 k
+        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                g r s) i) β P :
+            Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω)
+      ((volume : Measure EuclN).restrict Ω) :=
+    (chosenWeakPartial'_memLp_of_mem (d := Module.finrank ℝ E)
+      hu_W1 k).locallyIntegrable (by norm_num)
+  -- Uniqueness of weak partials: the weak partial and the chosen partial agree
+  -- almost everywhere.
+  have h_ae : eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+        g r s i β P k
+      =ᵐ[(volume : Measure EuclN).restrict Ω]
+      chosenWeakPartial' (d := Module.finrank ℝ E) 2 k
+        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                g r s) i) β P :
+            Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω :=
+    DeGiorgi.HasWeakPartialDeriv.ae_eq (d := Module.finrank ℝ E) hΩ_open
+      hg_weak h_chosen_weak hg_loc h_chosen_loc
+  -- The chosen partial of a `W^{K+1,2}` function is `W^{K,2}`.
+  have h_chosen_memWkp : MemWkp (d := Module.finrank ℝ E) K 2
+      (chosenWeakPartial' (d := Module.finrank ℝ E) 2 k
+        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                g r s) i) β P :
+            Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω) Ω :=
+    hu.chosenWeakPartial_mem k
+  have h_memWkp : MemWkp (d := Module.finrank ℝ E) K 2
+      (eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+        g r s i β P k) Ω :=
+    (MemWkp_congr_ae (d := Module.finrank ℝ E)
+      (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae).mpr h_chosen_memWkp
+  refine ⟨h_memWkp, ‖(i.fst.val)⁻¹‖, norm_nonneg _, ?_⟩
+  -- Transfer the `wkpNorm` along the a.e. equality, then apply the chosen-weak-
+  -- partial order-drop bound and the eigenvector rescale.
+  rw [wkpNorm_congr_ae (d := Module.finrank ℝ E)
+    (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae]
+  calc
+    wkpNorm (d := Module.finrank ℝ E) K 2
+        (chosenWeakPartial' (d := Module.finrank ℝ E) 2 k
+          (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+              (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                  g r s) i) β P :
+              Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω) Ω
+        ≤ wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+            (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+                (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                  (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                    g r s) i) β P :
+                Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω :=
+      wkpNorm_chosenWeakPartial_le_wkpNorm_succ (d := Module.finrank ℝ E) K
+        hΩ_open _ k
+    _ ≤ ENNReal.ofReal ‖(i.fst.val)⁻¹‖ *
+          wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+            (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+                (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+                  (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+                β P : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
+                EuclN → ℝ) y)
+            (chartTargetEuclid (I := I) (M := M) β) := hu_norm
+    _ ≤ ENNReal.ofReal ‖(i.fst.val)⁻¹‖ *
+          covGradAggregate_unconditional (I := I) (M := M) g r s i K β :=
+      mul_le_mul_of_nonneg_left
+        (chartCompNorm_center_le_covGradAggregate_unconditional (I := I) (M := M)
+          g r s i K β P) (zero_le _)
+
+/-- Chart-locality-free twin of
+`covGradPouLeibnizCrossLimit_memWkp_and_wkpNorm_le`. -/
+private lemma covGradPouLeibnizCrossLimit_memWkp_and_wkpNorm_le_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)
+    (h_pou_phi : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
+      MemWkp (d := Module.finrank ℝ E) (K + 1) 2
+        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+              (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+            β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+        (chartTargetEuclid (I := I) (M := M) β))
+    (β : M) (P : TensorCompIdx (E := E) r s)
+    (k : Fin (Module.finrank ℝ E)) :
+    MemWkp (d := Module.finrank ℝ E) K 2
+        (covGradPouLeibnizCrossLimit_unconditional (I := I) (M := M)
+          g r s i β P k)
+        (chartTargetEuclid (I := I) (M := M) β) ∧
+      ∃ C : ℝ, 0 ≤ C ∧
+        wkpNorm (d := Module.finrank ℝ E) K 2
+            (covGradPouLeibnizCrossLimit_unconditional (I := I) (M := M)
+              g r s i β P k)
+            (chartTargetEuclid (I := I) (M := M) β)
+          ≤ ENNReal.ofReal C *
+            covGradAggregate_unconditional (I := I) (M := M) g r s i K β := by
+  classical
+  set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) β with hΩ_def
+  have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) β
+  -- The order-`K` eigenvector chart components are `W^{K,2}` (resolvent rescale).
+  have h_eigen_K : ∀ (β' : M) (Q : TensorCompIdx (E := E) r s),
+      MemWkp (d := Module.finrank ℝ E) K 2
+        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                g r s) i) β' Q :
+            Lp ℝ 2 (chartL2Measure (I := I) (M := M) β')) : EuclN → ℝ) y)
+        (chartTargetEuclid (I := I) (M := M) β') := by
+    intro β' Q
+    exact (eigenvectorVec_pou_memWkp_and_wkpNorm_le_unconditional (I := I) (M := M)
+      g r s i K β' Q
+      ((h_pou_phi β' Q).le_of_le (Nat.le_succ K))).1
+  -- The chart-pushed partition-of-unity weight is globally `C^∞` and compactly
+  -- supported (its closed manifold support sits inside the chart source).
+  have hpou_supp : tsupport
+      ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ) ⊆ (chartAt H β).source :=
+    chartAtlasPOU_isSubordinate I M β
+  have hpou_pushed_smooth : ContDiff ℝ ∞
+      (chartPushedRaw I β ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)) :=
+    DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_contDiff
+      (I := I) (M := M)
+      (chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯).contMDiff hpou_supp
+  have hpou_pushed_cs : HasCompactSupport
+      (chartPushedRaw I β ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)) :=
+    DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_smooth_hasCompactSupport_local
+      (I := I) (M := M) hpou_supp
+  -- The cross-term multiplier — the `k`-th chart-Euclidean partial — is globally
+  -- `C^∞` and compactly supported.
+  have hmult_smooth : ContDiff ℝ ∞
+      (euclidPartial (E := E) k
+        (chartPushedRaw I β ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ))) :=
+    euclidPartial_contDiff (E := E) hpou_pushed_smooth k
+  have hmult_smooth' : ContDiff ℝ (⊤ : ℕ∞)
+      (euclidPartial (E := E) k
+        (chartPushedRaw I β ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ))) :=
+    hmult_smooth
+  have hmult_cs : HasCompactSupport
+      (euclidPartial (E := E) k
+        (chartPushedRaw I β ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ))) := by
+    apply HasCompactSupport.of_support_subset_isCompact hpou_pushed_cs
+    intro y hy
+    by_contra hy_off
+    exact hy (by
+      have h := euclidPartial_def (E := E) k
+        (chartPushedRaw I β ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)) y
+      have hopen : IsOpen ((tsupport
+          (chartPushedRaw I β ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)))ᶜ) :=
+        (isClosed_tsupport _).isOpen_compl
+      have hevt : (chartPushedRaw I β
+            ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ))
+          =ᶠ[𝓝 y] (fun _ : EuclN => (0 : ℝ)) :=
+        Filter.eventually_of_mem (hopen.mem_nhds hy_off)
+          (fun z hz => image_eq_zero_of_notMem_tsupport hz)
+      rw [h, hevt.fderiv_eq]
+      simp)
+  -- A uniform bound on the multiplier's iterated derivatives up to order `K`.
+  obtain ⟨C₀, hC₀_nn, hC₀_bd⟩ :=
+    exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
+      (d := Module.finrank ℝ E) hmult_smooth' hmult_cs K
+  -- The cutoff Euclidean chart component of the eigenvector is `W^{K,2}`, by the
+  -- qualitative cutoff ↔ partition-of-unity bridge.
+  have hcutoff_memWkp : MemWkp (d := Module.finrank ℝ E) K 2
+      (fun y => ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+          (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+            i) β P :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω :=
+    tensorL2ChartComponentCutoff_memWkp_of_pou (I := I) (M := M) g r s
+      (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+        (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s) i)
+      β P K (fun β' Q => h_eigen_K β' Q)
+  -- The quantitative cutoff bridge: order-`K` norm of the cutoff component is
+  -- bounded by a constant times the order-`K` transport sum.
+  obtain ⟨Ccut, hCcut_nn, hCcut_bd⟩ :=
+    wkpNorm_tensorL2ChartComponentCutoff_le_of_pou (I := I) (M := M) g r s
+      (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+        (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s) i)
+      β P K (fun β' Q => h_eigen_K β' Q)
+  -- The quantitative Leibniz bound for the smooth multiplier.
+  obtain ⟨Kmul, hKmul_pos, hKmul_bd⟩ :=
+    wkpNorm_smul_smooth_bounded_le (d := Module.finrank ℝ E) K
+      (by norm_num : (1 : ℝ≥0∞) ≤ 2) (by norm_num) hΩ_open hmult_smooth'
+      hC₀_nn (fun j _hj y _hy => hC₀_bd y j _hj)
+  -- The product `multiplier · cutoff component` is `W^{K,2}`.
+  have h_prod_memWkp : MemWkp (d := Module.finrank ℝ E) K 2
+      (covGradPouLeibnizCrossLimit_unconditional (I := I) (M := M)
+        g r s i β P k) Ω := by
+    have h_prod : MemWkp (d := Module.finrank ℝ E) K 2
+        (fun y =>
+          euclidPartial (E := E) k
+              (chartPushedRaw I β
+                ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)) y *
+            ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+              (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                  g r s) i) β P :
+              Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω :=
+      MemWkp.smul_smooth_bounded (d := Module.finrank ℝ E) K
+        (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open hmult_smooth'
+        (fun j _hj y _hy => hC₀_bd y j _hj) hcutoff_memWkp
+    change MemWkp (d := Module.finrank ℝ E) K 2
+        (fun y =>
+          euclidPartial (E := E) k
+              (chartPushedRaw I β
+                ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)) y *
+            ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+              (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                  g r s) i) β P :
+              Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω
+    exact h_prod
+  -- Each order-`K` transport component norm is bounded — through the eigenvector
+  -- rescale — by `‖μ⁻¹‖` times the corresponding aggregate term.
+  have h_transport_le : ∀ β' ∈ transportChartCenters (I := I) (M := M) β,
+      ∀ Q : TensorCompIdx (E := E) r s,
+      wkpNorm (d := Module.finrank ℝ E) K 2
+          (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+              (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                  g r s) i) β' Q :
+              Lp ℝ 2 (chartL2Measure (I := I) (M := M) β')) : EuclN → ℝ) y)
+          (chartTargetEuclid (I := I) (M := M) β')
+        ≤ ENNReal.ofReal ‖(i.fst.val)⁻¹‖ *
+          covGradAggregate_unconditional (I := I) (M := M) g r s i K β := by
+    intro β' hβ' Q
+    refine le_trans (eigenvectorVec_pou_memWkp_and_wkpNorm_le_unconditional
+      (I := I) (M := M) g r s i K β' Q
+      ((h_pou_phi β' Q).le_of_le (Nat.le_succ K))).2 ?_
+    refine mul_le_mul_of_nonneg_left ?_ (zero_le _)
+    refine le_trans (wkpNorm_mono_order (d := Module.finrank ℝ E)
+      (Nat.le_succ K) _ _) ?_
+    exact chartCompNorm_transport_le_covGradAggregate_unconditional (I := I)
+      (M := M) g r s i K hβ' Q
+  -- Sum the per-transport bounds: the order-`K` transport double sum is bounded
+  -- by `(card · ‖μ⁻¹‖)` times the aggregate.
+  set Saggr : ℝ≥0∞ := covGradAggregate_unconditional (I := I) (M := M) g r s i K β
+    with hSaggr_def
+  have h_double_le :
+      (∑ β' ∈ transportChartCenters (I := I) (M := M) β,
+        ∑ Q : TensorCompIdx (E := E) r s,
+          wkpNorm (d := Module.finrank ℝ E) K 2
+            (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+                (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                  (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                    g r s) i) β' Q :
+                Lp ℝ 2 (chartL2Measure (I := I) (M := M) β')) : EuclN → ℝ) y)
+            (chartTargetEuclid (I := I) (M := M) β'))
+        ≤ (∑ _β' ∈ transportChartCenters (I := I) (M := M) β,
+            ∑ _Q : TensorCompIdx (E := E) r s,
+              ENNReal.ofReal ‖(i.fst.val)⁻¹‖ * Saggr) :=
+    Finset.sum_le_sum (fun β' hβ' =>
+      Finset.sum_le_sum (fun Q _ => h_transport_le β' hβ' Q))
+  have h_double_const :
+      (∑ _β' ∈ transportChartCenters (I := I) (M := M) β,
+        ∑ _Q : TensorCompIdx (E := E) r s,
+          ENNReal.ofReal ‖(i.fst.val)⁻¹‖ * Saggr)
+        = ENNReal.ofReal
+            (((transportChartCenters (I := I) (M := M) β).card : ℝ) *
+              ((Fintype.card (TensorCompIdx (E := E) r s) : ℝ) *
+                ‖(i.fst.val)⁻¹‖)) * Saggr := by
+    have h_sum : (∑ _β' ∈ transportChartCenters (I := I) (M := M) β,
+        ∑ _Q : TensorCompIdx (E := E) r s,
+          ENNReal.ofReal ‖(i.fst.val)⁻¹‖ * Saggr)
+        = (((transportChartCenters (I := I) (M := M) β).card : ℝ≥0∞) *
+            ((Fintype.card (TensorCompIdx (E := E) r s) : ℝ≥0∞) *
+              (ENNReal.ofReal ‖(i.fst.val)⁻¹‖ * Saggr))) := by
+      rw [Finset.sum_const, Finset.sum_const, Finset.card_univ, nsmul_eq_mul,
+        nsmul_eq_mul]
+    rw [h_sum]
+    rw [show ENNReal.ofReal
+          (((transportChartCenters (I := I) (M := M) β).card : ℝ) *
+            ((Fintype.card (TensorCompIdx (E := E) r s) : ℝ) *
+              ‖(i.fst.val)⁻¹‖))
+        = ((transportChartCenters (I := I) (M := M) β).card : ℝ≥0∞) *
+            ((Fintype.card (TensorCompIdx (E := E) r s) : ℝ≥0∞) *
+              ENNReal.ofReal ‖(i.fst.val)⁻¹‖) by
+      rw [ENNReal.ofReal_mul (by positivity), ENNReal.ofReal_mul (by positivity),
+        ENNReal.ofReal_natCast, ENNReal.ofReal_natCast]]
+    ring
+  -- Assemble: the cutoff order-`K` norm is bounded by a constant times the
+  -- aggregate.
+  have h_cutoff_le : wkpNorm (d := Module.finrank ℝ E) K 2
+      (fun y => ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+          (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+            i) β P :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω
+      ≤ ENNReal.ofReal Ccut *
+        (ENNReal.ofReal
+            (((transportChartCenters (I := I) (M := M) β).card : ℝ) *
+              ((Fintype.card (TensorCompIdx (E := E) r s) : ℝ) *
+                ‖(i.fst.val)⁻¹‖)) * Saggr) := by
+    refine le_trans hCcut_bd ?_
+    refine mul_le_mul_of_nonneg_left ?_ (zero_le _)
+    rw [← h_double_const]
+    exact h_double_le
+  -- Carry the multiplier and collect the constant.
+  refine ⟨h_prod_memWkp,
+    Kmul * (Ccut *
+      (((transportChartCenters (I := I) (M := M) β).card : ℝ) *
+        ((Fintype.card (TensorCompIdx (E := E) r s) : ℝ) *
+          ‖(i.fst.val)⁻¹‖))),
+    by positivity, ?_⟩
+  -- `covGradPouLeibnizCrossLimit_unconditional` is, definitionally,
+  -- `multiplier · cutoff`.
+  have h_unfold : wkpNorm (d := Module.finrank ℝ E) K 2
+      (covGradPouLeibnizCrossLimit_unconditional (I := I) (M := M)
+        g r s i β P k) Ω =
+      wkpNorm (d := Module.finrank ℝ E) K 2
+        (fun y =>
+          euclidPartial (E := E) k
+              (chartPushedRaw I β
+                ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)) y *
+            ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+              (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                  g r s) i) β P :
+              Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω :=
+    rfl
+  rw [h_unfold]
+  calc
+    wkpNorm (d := Module.finrank ℝ E) K 2
+        (fun y =>
+          euclidPartial (E := E) k
+              (chartPushedRaw I β
+                ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)) y *
+            ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+              (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                  g r s) i) β P :
+              Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω
+        ≤ ENNReal.ofReal Kmul *
+            wkpNorm (d := Module.finrank ℝ E) K 2
+              (fun y => ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+                  (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                    (tensorResolventL2_isCompactOperator_intrinsic (I := I)
+                      (M := M) g r s) i)
+                  β P : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
+                  EuclN → ℝ) y) Ω :=
+      hKmul_bd hcutoff_memWkp
+    _ ≤ ENNReal.ofReal Kmul *
+          (ENNReal.ofReal Ccut *
+            (ENNReal.ofReal
+                (((transportChartCenters (I := I) (M := M) β).card : ℝ) *
+                  ((Fintype.card (TensorCompIdx (E := E) r s) : ℝ) *
+                    ‖(i.fst.val)⁻¹‖)) * Saggr)) :=
+      mul_le_mul_of_nonneg_left h_cutoff_le (zero_le _)
+    _ = ENNReal.ofReal
+          (Kmul * (Ccut *
+            (((transportChartCenters (I := I) (M := M) β).card : ℝ) *
+              ((Fintype.card (TensorCompIdx (E := E) r s) : ℝ) *
+                ‖(i.fst.val)⁻¹‖)))) * Saggr := by
+      rw [ENNReal.ofReal_mul (le_of_lt hKmul_pos),
+        ENNReal.ofReal_mul hCcut_nn]
+      ring
+
+/-- Chart-locality-free twin of
+`covGradChristoffelLimit_memWkp_and_wkpNorm_le`. -/
+private lemma covGradChristoffelLimit_memWkp_and_wkpNorm_le_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)
+    (h_pou_phi : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
+      MemWkp (d := Module.finrank ℝ E) (K + 1) 2
+        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+              (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+            β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+        (chartTargetEuclid (I := I) (M := M) β))
+    (β : M) (P : TensorCompIdx (E := E) r s)
+    (k : Fin (Module.finrank ℝ E)) :
+    MemWkp (d := Module.finrank ℝ E) K 2
+        (covGradChristoffelLimit_unconditional (I := I) (M := M) g r s i β P k)
+        (chartTargetEuclid (I := I) (M := M) β) ∧
+      ∃ C : ℝ, 0 ≤ C ∧
+        wkpNorm (d := Module.finrank ℝ E) K 2
+            (covGradChristoffelLimit_unconditional (I := I) (M := M)
+              g r s i β P k)
+            (chartTargetEuclid (I := I) (M := M) β)
+          ≤ ENNReal.ofReal C *
+            covGradAggregate_unconditional (I := I) (M := M) g r s i K β := by
+  classical
+  set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) β with hΩ_def
+  have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) β
+  set Saggr : ℝ≥0∞ := covGradAggregate_unconditional (I := I) (M := M) g r s i K β
+    with hSaggr_def
+  -- The summand family of `covGradChristoffelLimit_unconditional`.
+  set F : TensorCompIdx (E := E) r s → EuclN → ℝ :=
+    fun p y =>
+      Set.indicator (chartPouKernel (I := I) (M := M) β)
+          (covDerivLowerOrderCoeff (I := I) (M := M)
+            g r s β k P.1 p.1 P.2 p.2) y *
+        (tensorL2ChartComponent (I := I) (M := M) g r s
+          (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+            i) β p :
+          EuclN → ℝ) y with hF_def
+  -- Each summand `p` is `W^{K,2}`, with norm bounded by a constant times the
+  -- aggregate.
+  have h_summand : ∀ p : TensorCompIdx (E := E) r s,
+      MemWkp (d := Module.finrank ℝ E) K 2 (F p) Ω ∧
+        ∃ C : ℝ, 0 ≤ C ∧
+          wkpNorm (d := Module.finrank ℝ E) K 2 (F p) Ω
+            ≤ ENNReal.ofReal C * Saggr := by
+    intro p
+    -- The eigenvector chart `p`-component is `W^{K,2}`, with norm `≤ ‖μ⁻¹‖`
+    -- times the aggregate (the `p`-component at `β` is an aggregate term).
+    obtain ⟨hfactor_memWkp, hfactor_norm⟩ :=
+      eigenvectorVec_pou_memWkp_and_wkpNorm_le_unconditional (I := I) (M := M)
+        g r s i K β p ((h_pou_phi β p).le_of_le (Nat.le_succ K))
+    have hfactor_ae_zero : ∀ᵐ y ∂(chartL2Measure (I := I) (M := M) β),
+        y ∉ chartPouKernel (I := I) (M := M) β →
+          (tensorL2ChartComponent (I := I) (M := M) g r s
+            (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                g r s) i) β p :
+            EuclN → ℝ) y = 0 :=
+      tensorL2ChartComponent_ae_zero_off_chartPouKernel (I := I) (M := M)
+        g r s (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s) i)
+        β p
+    -- "Smooth coefficient × kernel-vanishing factor": the product without the
+    -- indicator is `W^{K,2}`, with norm bounded by a constant times the factor
+    -- norm.
+    obtain ⟨h_no_indicator_memWkp, Ccoef, hCcoef_nn, hCcoef_bd⟩ :=
+      wkpNorm_coef_mul_factor_le (I := I) (M := M) β K
+        (covDerivLowerOrderCoeff_contDiffOn (I := I) (M := M)
+          g r s β k P.1 p.1 P.2 p.2)
+        hfactor_memWkp hfactor_ae_zero
+    -- The indicator-cut product agrees with the indicator-free product almost
+    -- everywhere.
+    have h_ae : (fun y =>
+          covDerivLowerOrderCoeff (I := I) (M := M)
+              g r s β k P.1 p.1 P.2 p.2 y *
+            (tensorL2ChartComponent (I := I) (M := M) g r s
+              (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                  g r s) i) β p :
+              EuclN → ℝ) y)
+        =ᵐ[(volume : Measure EuclN).restrict Ω] (F p) := by
+      have hfactor_ae_zero' : ∀ᵐ y ∂((volume : Measure EuclN).restrict Ω),
+          y ∉ chartPouKernel (I := I) (M := M) β →
+            (tensorL2ChartComponent (I := I) (M := M) g r s
+              (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                  g r s) i) β p :
+              EuclN → ℝ) y = 0 := hfactor_ae_zero
+      filter_upwards [hfactor_ae_zero'] with y hy
+      show covDerivLowerOrderCoeff (I := I) (M := M)
+              g r s β k P.1 p.1 P.2 p.2 y *
+            (tensorL2ChartComponent (I := I) (M := M) g r s
+              (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                  g r s) i) β p :
+              EuclN → ℝ) y = F p y
+      simp only [hF_def]
+      by_cases hyK : y ∈ chartPouKernel (I := I) (M := M) β
+      · rw [Set.indicator_of_mem hyK]
+      · rw [Set.indicator_of_notMem hyK, zero_mul, hy hyK, mul_zero]
+    have hF_memWkp : MemWkp (d := Module.finrank ℝ E) K 2 (F p) Ω :=
+      (MemWkp_congr_ae (d := Module.finrank ℝ E)
+        (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae).mp h_no_indicator_memWkp
+    refine ⟨hF_memWkp, Ccoef * ‖(i.fst.val)⁻¹‖,
+      mul_nonneg hCcoef_nn (norm_nonneg _), ?_⟩
+    -- Transfer the `wkpNorm` along the a.e. equality, then chain the bounds.
+    rw [← wkpNorm_congr_ae (d := Module.finrank ℝ E)
+      (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae]
+    calc
+      wkpNorm (d := Module.finrank ℝ E) K 2
+          (fun y =>
+            covDerivLowerOrderCoeff (I := I) (M := M)
+                g r s β k P.1 p.1 P.2 p.2 y *
+              (tensorL2ChartComponent (I := I) (M := M) g r s
+                (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                  (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                    g r s) i) β p :
+                EuclN → ℝ) y) Ω
+          ≤ ENNReal.ofReal Ccoef *
+              wkpNorm (d := Module.finrank ℝ E) K 2
+                (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+                    (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                      (tensorResolventL2_isCompactOperator_intrinsic (I := I)
+                        (M := M) g r s) i)
+                    β p : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
+                    EuclN → ℝ) y) Ω :=
+        hCcoef_bd
+      _ ≤ ENNReal.ofReal Ccoef *
+            (ENNReal.ofReal ‖(i.fst.val)⁻¹‖ *
+              wkpNorm (d := Module.finrank ℝ E) K 2
+                (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+                    (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+                      (eigenvectorResolvent_unconditional (I := I) (M := M)
+                        g r s i))
+                    β p : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
+                    EuclN → ℝ) y)
+                (chartTargetEuclid (I := I) (M := M) β)) :=
+        mul_le_mul_of_nonneg_left hfactor_norm (zero_le _)
+      _ ≤ ENNReal.ofReal Ccoef *
+            (ENNReal.ofReal ‖(i.fst.val)⁻¹‖ *
+              chartCompNorm_unconditional (I := I) (M := M) g r s i K β p) :=
+        mul_le_mul_of_nonneg_left
+          (mul_le_mul_of_nonneg_left
+            (wkpNorm_mono_order (d := Module.finrank ℝ E)
+              (Nat.le_succ K) _ _) (zero_le _)) (zero_le _)
+      _ ≤ ENNReal.ofReal Ccoef *
+            (ENNReal.ofReal ‖(i.fst.val)⁻¹‖ * Saggr) :=
+        mul_le_mul_of_nonneg_left
+          (mul_le_mul_of_nonneg_left
+            (chartCompNorm_center_le_covGradAggregate_unconditional (I := I)
+              (M := M) g r s i K β p) (zero_le _)) (zero_le _)
+      _ = ENNReal.ofReal (Ccoef * ‖(i.fst.val)⁻¹‖) * Saggr := by
+        rw [ENNReal.ofReal_mul hCcoef_nn]; ring
+  -- A finite sum of the per-summand bounds.
+  have h_sum_memWkp : MemWkp (d := Module.finrank ℝ E) K 2
+      (fun y => ∑ p : TensorCompIdx (E := E) r s, F p y) Ω :=
+    memWkp_finset_sum (I := I) (M := M) Finset.univ
+      (fun p _ => (h_summand p).1)
+  have h_christoffel_memWkp : MemWkp (d := Module.finrank ℝ E) K 2
+      (covGradChristoffelLimit_unconditional (I := I) (M := M)
+        g r s i β P k) Ω := by
+    have h_unfold : (covGradChristoffelLimit_unconditional (I := I) (M := M)
+        g r s i β P k) =
+        (fun y => ∑ p : TensorCompIdx (E := E) r s, F p y) := rfl
+    rw [h_unfold]
+    exact h_sum_memWkp
+  -- The aggregate constant: sum the per-summand constants.
+  choose Cf hCf_nn hCf_bd using fun p => (h_summand p).2
+  refine ⟨h_christoffel_memWkp,
+    ∑ p : TensorCompIdx (E := E) r s, Cf p,
+    Finset.sum_nonneg (fun p _ => hCf_nn p), ?_⟩
+  -- `covGradChristoffelLimit_unconditional` is, definitionally, the finite sum
+  -- `∑ p F p`.
+  have h_unfold : wkpNorm (d := Module.finrank ℝ E) K 2
+      (covGradChristoffelLimit_unconditional (I := I) (M := M) g r s i β P k) Ω =
+      wkpNorm (d := Module.finrank ℝ E) K 2
+        (fun y => ∑ p : TensorCompIdx (E := E) r s, F p y) Ω := rfl
+  rw [h_unfold]
+  calc
+    wkpNorm (d := Module.finrank ℝ E) K 2
+        (fun y => ∑ p : TensorCompIdx (E := E) r s, F p y) Ω
+        ≤ ∑ p : TensorCompIdx (E := E) r s,
+            wkpNorm (d := Module.finrank ℝ E) K 2 (F p) Ω :=
+      wkpNorm_sum_le (d := Module.finrank ℝ E)
+        (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open Finset.univ F
+        (fun p _ => (h_summand p).1)
+    _ ≤ ∑ p : TensorCompIdx (E := E) r s, ENNReal.ofReal (Cf p) * Saggr :=
+      Finset.sum_le_sum (fun p _ => hCf_bd p)
+    _ = (∑ p : TensorCompIdx (E := E) r s, ENNReal.ofReal (Cf p)) * Saggr := by
+      rw [← Finset.sum_mul]
+    _ = ENNReal.ofReal (∑ p : TensorCompIdx (E := E) r s, Cf p) * Saggr := by
+      rw [ENNReal.ofReal_sum_of_nonneg (fun p _ => hCf_nn p)]
+
+/-- Chart-locality-free twin of
+`eigenvectorChartWeakPartial_wkpNorm_le_uniform`. -/
+private lemma eigenvectorChartWeakPartial_wkpNorm_le_uniform_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (K : ℕ)
+    (h_pou_phi : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
+      (β : M) (Q : TensorCompIdx (E := E) r s),
+      MemWkp (d := Module.finrank ℝ E) (K + 1) 2
+        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+              (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+            β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+        (chartTargetEuclid (I := I) (M := M) β))
+    (β : M) (P : TensorCompIdx (E := E) r s)
+    (k : Fin (Module.finrank ℝ E)) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        wkpNorm (d := Module.finrank ℝ E) K 2
+            (eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+              g r s i β P k)
+            (chartTargetEuclid (I := I) (M := M) β)
+          ≤ ENNReal.ofReal ((i.fst.val)⁻¹ * C) *
+            covGradAggregate_unconditional (I := I) (M := M) g r s i K β := by
+  classical
+  refine ⟨1, zero_le_one, fun i => ?_⟩
+  set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) β with hΩ_def
+  have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) β
+  have hμ_pos : 0 < i.fst.val := eigenIdx_val_pos (I := I) (M := M) g r s i
+  have hμ_inv_nn : 0 ≤ (i.fst.val)⁻¹ := le_of_lt (inv_pos.mpr hμ_pos)
+  have hμ_norm : ‖(i.fst.val)⁻¹‖ = (i.fst.val)⁻¹ := Real.norm_of_nonneg hμ_inv_nn
+  -- The eigenvector chart component is `W^{K+1,2}`, with norm bound by `‖μ⁻¹‖`
+  -- times the resolvent-coercion order-`(K+1)` norm.
+  obtain ⟨hu, hu_norm⟩ := eigenvectorVec_pou_memWkp_and_wkpNorm_le_unconditional
+    (I := I) (M := M) g r s i (K + 1) β P (h_pou_phi i β P)
+  -- `eigenvectorChartWeakPartial_unconditional` is a genuine weak `k`-th partial of
+  -- that chart component (the committed headline).
+  have hg_weak : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k
+      (eigenvectorChartWeakPartial_unconditional (I := I) (M := M) g r s i β P k)
+      (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+          (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+            i) β P :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω :=
+    eigenvectorChartWeakPartial_hasWeakPartialDeriv_unconditional (I := I) (M := M)
+      g r s i β P k
+  have hg_loc : LocallyIntegrable
+      (eigenvectorChartWeakPartial_unconditional (I := I) (M := M) g r s i β P k)
+      ((volume : Measure EuclN).restrict Ω) := by
+    have h_memLp : MemLp (eigenvectorChartWeakPartial_unconditional (I := I)
+        (M := M) g r s i β P k) 2
+        ((volume : Measure EuclN).restrict Ω) := by
+      rw [eigenvectorChartWeakPartial_unconditional]
+      exact Lp.memLp _
+    exact h_memLp.locallyIntegrable (by norm_num)
+  -- The chosen weak `k`-th partial of `u` agrees a.e. with
+  -- `eigenvectorChartWeakPartial_unconditional`.
+  have hu_W1 : DeGiorgi.MemW1p 2
+      (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+          (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+            i) β P :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω :=
+    hu.memW1p
+  have h_chosen_weak : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k
+      (chosenWeakPartial' (d := Module.finrank ℝ E) 2 k
+        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                g r s) i) β P :
+            Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω)
+      (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+          (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+            i) β P :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω :=
+    chosenWeakPartial'_isWeakPartial_of_mem (d := Module.finrank ℝ E) hu_W1 k
+  have h_chosen_loc : LocallyIntegrable
+      (chosenWeakPartial' (d := Module.finrank ℝ E) 2 k
+        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                g r s) i) β P :
+            Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω)
+      ((volume : Measure EuclN).restrict Ω) :=
+    (chosenWeakPartial'_memLp_of_mem (d := Module.finrank ℝ E)
+      hu_W1 k).locallyIntegrable (by norm_num)
+  have h_ae : eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+        g r s i β P k
+      =ᵐ[(volume : Measure EuclN).restrict Ω]
+      chosenWeakPartial' (d := Module.finrank ℝ E) 2 k
+        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                g r s) i) β P :
+            Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω :=
+    DeGiorgi.HasWeakPartialDeriv.ae_eq (d := Module.finrank ℝ E) hΩ_open
+      hg_weak h_chosen_weak hg_loc h_chosen_loc
+  -- Transfer the `wkpNorm` along the a.e. equality, then chain the chosen-weak-
+  -- partial order-drop bound, the eigenvector rescale and the aggregate bound.
+  rw [wkpNorm_congr_ae (d := Module.finrank ℝ E)
+    (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae, mul_one]
+  calc
+    wkpNorm (d := Module.finrank ℝ E) K 2
+        (chosenWeakPartial' (d := Module.finrank ℝ E) 2 k
+          (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+              (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                  g r s) i) β P :
+              Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω) Ω
+        ≤ wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+            (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+                (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                  (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                    g r s) i) β P :
+                Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω :=
+      wkpNorm_chosenWeakPartial_le_wkpNorm_succ (d := Module.finrank ℝ E) K
+        hΩ_open _ k
+    _ ≤ ENNReal.ofReal ‖(i.fst.val)⁻¹‖ *
+          wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+            (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+                (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+                  (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+                β P : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
+                EuclN → ℝ) y)
+            (chartTargetEuclid (I := I) (M := M) β) := hu_norm
+    _ ≤ ENNReal.ofReal ‖(i.fst.val)⁻¹‖ *
+          covGradAggregate_unconditional (I := I) (M := M) g r s i K β :=
+      mul_le_mul_of_nonneg_left
+        (chartCompNorm_center_le_covGradAggregate_unconditional (I := I) (M := M)
+          g r s i K β P) (zero_le _)
+    _ = ENNReal.ofReal (i.fst.val)⁻¹ *
+          covGradAggregate_unconditional (I := I) (M := M) g r s i K β := by
+      rw [hμ_norm]
+
+/-- Chart-locality-free twin of
+`covGradPouLeibnizCrossLimit_wkpNorm_le_uniform`. -/
+private lemma covGradPouLeibnizCrossLimit_wkpNorm_le_uniform_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (K : ℕ)
+    (h_pou_phi : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
+      (β : M) (Q : TensorCompIdx (E := E) r s),
+      MemWkp (d := Module.finrank ℝ E) (K + 1) 2
+        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+              (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+            β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+        (chartTargetEuclid (I := I) (M := M) β))
+    (β : M) (P : TensorCompIdx (E := E) r s)
+    (k : Fin (Module.finrank ℝ E)) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        wkpNorm (d := Module.finrank ℝ E) K 2
+            (covGradPouLeibnizCrossLimit_unconditional (I := I) (M := M)
+              g r s i β P k)
+            (chartTargetEuclid (I := I) (M := M) β)
+          ≤ ENNReal.ofReal ((i.fst.val)⁻¹ * C) *
+            covGradAggregate_unconditional (I := I) (M := M) g r s i K β := by
+  classical
+  set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) β with hΩ_def
+  have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) β
+  -- The cross-term multiplier — independent of `i`.
+  have hpou_supp : tsupport
+      ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ) ⊆ (chartAt H β).source :=
+    chartAtlasPOU_isSubordinate I M β
+  have hpou_pushed_smooth : ContDiff ℝ ∞
+      (chartPushedRaw I β ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)) :=
+    DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_contDiff
+      (I := I) (M := M)
+      (chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯).contMDiff hpou_supp
+  have hpou_pushed_cs : HasCompactSupport
+      (chartPushedRaw I β ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)) :=
+    DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_smooth_hasCompactSupport_local
+      (I := I) (M := M) hpou_supp
+  have hmult_smooth : ContDiff ℝ ∞
+      (euclidPartial (E := E) k
+        (chartPushedRaw I β ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ))) :=
+    euclidPartial_contDiff (E := E) hpou_pushed_smooth k
+  have hmult_smooth' : ContDiff ℝ (⊤ : ℕ∞)
+      (euclidPartial (E := E) k
+        (chartPushedRaw I β ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ))) :=
+    hmult_smooth
+  have hmult_cs : HasCompactSupport
+      (euclidPartial (E := E) k
+        (chartPushedRaw I β ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ))) := by
+    apply HasCompactSupport.of_support_subset_isCompact hpou_pushed_cs
+    intro y hy
+    by_contra hy_off
+    exact hy (by
+      have h := euclidPartial_def (E := E) k
+        (chartPushedRaw I β ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)) y
+      have hopen : IsOpen ((tsupport
+          (chartPushedRaw I β ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)))ᶜ) :=
+        (isClosed_tsupport _).isOpen_compl
+      have hevt : (chartPushedRaw I β
+            ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ))
+          =ᶠ[𝓝 y] (fun _ : EuclN => (0 : ℝ)) :=
+        Filter.eventually_of_mem (hopen.mem_nhds hy_off)
+          (fun z hz => image_eq_zero_of_notMem_tsupport hz)
+      rw [h, hevt.fderiv_eq]
+      simp)
+  -- A uniform bound on the multiplier's iterated derivatives up to order `K` —
+  -- `i`-independent.
+  obtain ⟨C₀, hC₀_nn, hC₀_bd⟩ :=
+    exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
+      (d := Module.finrank ℝ E) hmult_smooth' hmult_cs K
+  -- The quantitative Leibniz bound for the smooth multiplier — `i`-independent.
+  obtain ⟨Kmul, hKmul_pos, hKmul_bd⟩ :=
+    wkpNorm_smul_smooth_bounded_le (d := Module.finrank ℝ E) K
+      (by norm_num : (1 : ℝ≥0∞) ≤ 2) (by norm_num) hΩ_open hmult_smooth'
+      hC₀_nn (fun j _hj y _hy => hC₀_bd y j _hj)
+  -- The input-uniform cutoff bridge: its constant `Ccut` is independent of the
+  -- `L²` tensor element, hence of `i`.
+  obtain ⟨Ccut, hCcut_nn, hCcut_bd⟩ :=
+    wkpNorm_tensorL2ChartComponentCutoff_le_of_pou_uniform (I := I) (M := M)
+      g r s β P K
+  refine ⟨Kmul * (Ccut *
+      (((transportChartCenters (I := I) (M := M) β).card : ℝ) *
+        (Fintype.card (TensorCompIdx (E := E) r s) : ℝ))),
+    by positivity, fun i => ?_⟩
+  have hμ_pos : 0 < i.fst.val := eigenIdx_val_pos (I := I) (M := M) g r s i
+  have hμ_inv_nn : 0 ≤ (i.fst.val)⁻¹ := le_of_lt (inv_pos.mpr hμ_pos)
+  have hμ_norm : ‖(i.fst.val)⁻¹‖ = (i.fst.val)⁻¹ := Real.norm_of_nonneg hμ_inv_nn
+  set Saggr : ℝ≥0∞ := covGradAggregate_unconditional (I := I) (M := M) g r s i K β
+    with hSaggr_def
+  -- The order-`K` eigenvector chart components are `W^{K,2}` (resolvent rescale).
+  have h_eigen_K : ∀ (β' : M) (Q : TensorCompIdx (E := E) r s),
+      MemWkp (d := Module.finrank ℝ E) K 2
+        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                g r s) i) β' Q :
+            Lp ℝ 2 (chartL2Measure (I := I) (M := M) β')) : EuclN → ℝ) y)
+        (chartTargetEuclid (I := I) (M := M) β') := by
+    intro β' Q
+    exact (eigenvectorVec_pou_memWkp_and_wkpNorm_le_unconditional (I := I) (M := M)
+      g r s i K β' Q
+      ((h_pou_phi i β' Q).le_of_le (Nat.le_succ K))).1
+  -- The cutoff Euclidean chart component of the eigenvector is `W^{K,2}`.
+  have hcutoff_memWkp : MemWkp (d := Module.finrank ℝ E) K 2
+      (fun y => ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+          (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+            i) β P :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω :=
+    tensorL2ChartComponentCutoff_memWkp_of_pou (I := I) (M := M) g r s
+      (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+        (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s) i)
+      β P K (fun β' Q => h_eigen_K β' Q)
+  -- The product `multiplier · cutoff component` is `W^{K,2}`.
+  have h_prod_memWkp : MemWkp (d := Module.finrank ℝ E) K 2
+      (covGradPouLeibnizCrossLimit_unconditional (I := I) (M := M)
+        g r s i β P k) Ω := by
+    have h_prod : MemWkp (d := Module.finrank ℝ E) K 2
+        (fun y =>
+          euclidPartial (E := E) k
+              (chartPushedRaw I β
+                ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)) y *
+            ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+              (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                  g r s) i) β P :
+              Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω :=
+      MemWkp.smul_smooth_bounded (d := Module.finrank ℝ E) K
+        (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open hmult_smooth'
+        (fun j _hj y _hy => hC₀_bd y j _hj) hcutoff_memWkp
+    change MemWkp (d := Module.finrank ℝ E) K 2
+        (fun y =>
+          euclidPartial (E := E) k
+              (chartPushedRaw I β
+                ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)) y *
+            ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+              (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                  g r s) i) β P :
+              Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω
+    exact h_prod
+  -- Each order-`K` transport component norm is bounded — through the eigenvector
+  -- rescale — by `‖μ⁻¹‖` times the corresponding aggregate term.
+  have h_transport_le : ∀ β' ∈ transportChartCenters (I := I) (M := M) β,
+      ∀ Q : TensorCompIdx (E := E) r s,
+      wkpNorm (d := Module.finrank ℝ E) K 2
+          (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+              (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                  g r s) i) β' Q :
+              Lp ℝ 2 (chartL2Measure (I := I) (M := M) β')) : EuclN → ℝ) y)
+          (chartTargetEuclid (I := I) (M := M) β')
+        ≤ ENNReal.ofReal ‖(i.fst.val)⁻¹‖ * Saggr := by
+    intro β' hβ' Q
+    refine le_trans (eigenvectorVec_pou_memWkp_and_wkpNorm_le_unconditional
+      (I := I) (M := M) g r s i K β' Q
+      ((h_pou_phi i β' Q).le_of_le (Nat.le_succ K))).2 ?_
+    refine mul_le_mul_of_nonneg_left ?_ (zero_le _)
+    refine le_trans (wkpNorm_mono_order (d := Module.finrank ℝ E)
+      (Nat.le_succ K) _ _) ?_
+    exact chartCompNorm_transport_le_covGradAggregate_unconditional (I := I)
+      (M := M) g r s i K hβ' Q
+  -- Sum the per-transport bounds.
+  have h_double_le :
+      (∑ β' ∈ transportChartCenters (I := I) (M := M) β,
+        ∑ Q : TensorCompIdx (E := E) r s,
+          wkpNorm (d := Module.finrank ℝ E) K 2
+            (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+                (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                  (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                    g r s) i) β' Q :
+                Lp ℝ 2 (chartL2Measure (I := I) (M := M) β')) : EuclN → ℝ) y)
+            (chartTargetEuclid (I := I) (M := M) β'))
+        ≤ (∑ _β' ∈ transportChartCenters (I := I) (M := M) β,
+            ∑ _Q : TensorCompIdx (E := E) r s,
+              ENNReal.ofReal ‖(i.fst.val)⁻¹‖ * Saggr) :=
+    Finset.sum_le_sum (fun β' hβ' =>
+      Finset.sum_le_sum (fun Q _ => h_transport_le β' hβ' Q))
+  have h_double_const :
+      (∑ _β' ∈ transportChartCenters (I := I) (M := M) β,
+        ∑ _Q : TensorCompIdx (E := E) r s,
+          ENNReal.ofReal ‖(i.fst.val)⁻¹‖ * Saggr)
+        = ENNReal.ofReal
+            (((transportChartCenters (I := I) (M := M) β).card : ℝ) *
+              ((Fintype.card (TensorCompIdx (E := E) r s) : ℝ) *
+                ‖(i.fst.val)⁻¹‖)) * Saggr := by
+    have h_sum : (∑ _β' ∈ transportChartCenters (I := I) (M := M) β,
+        ∑ _Q : TensorCompIdx (E := E) r s,
+          ENNReal.ofReal ‖(i.fst.val)⁻¹‖ * Saggr)
+        = (((transportChartCenters (I := I) (M := M) β).card : ℝ≥0∞) *
+            ((Fintype.card (TensorCompIdx (E := E) r s) : ℝ≥0∞) *
+              (ENNReal.ofReal ‖(i.fst.val)⁻¹‖ * Saggr))) := by
+      rw [Finset.sum_const, Finset.sum_const, Finset.card_univ, nsmul_eq_mul,
+        nsmul_eq_mul]
+    rw [h_sum]
+    rw [show ENNReal.ofReal
+          (((transportChartCenters (I := I) (M := M) β).card : ℝ) *
+            ((Fintype.card (TensorCompIdx (E := E) r s) : ℝ) *
+              ‖(i.fst.val)⁻¹‖))
+        = ((transportChartCenters (I := I) (M := M) β).card : ℝ≥0∞) *
+            ((Fintype.card (TensorCompIdx (E := E) r s) : ℝ≥0∞) *
+              ENNReal.ofReal ‖(i.fst.val)⁻¹‖) by
+      rw [ENNReal.ofReal_mul (by positivity), ENNReal.ofReal_mul (by positivity),
+        ENNReal.ofReal_natCast, ENNReal.ofReal_natCast]]
+    ring
+  -- The cutoff order-`K` norm is bounded by a constant times the aggregate.
+  have h_cutoff_le : wkpNorm (d := Module.finrank ℝ E) K 2
+      (fun y => ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+          (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+            i) β P :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω
+      ≤ ENNReal.ofReal Ccut *
+        (ENNReal.ofReal
+            (((transportChartCenters (I := I) (M := M) β).card : ℝ) *
+              ((Fintype.card (TensorCompIdx (E := E) r s) : ℝ) *
+                ‖(i.fst.val)⁻¹‖)) * Saggr) := by
+    refine le_trans (hCcut_bd (tensorResolventEigenbasisVec_ofCompact
+      (I := I) (M := M)
+      (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s) i)
+      (fun β' Q => h_eigen_K β' Q)) ?_
+    refine mul_le_mul_of_nonneg_left ?_ (zero_le _)
+    rw [← h_double_const]
+    exact h_double_le
+  -- `covGradPouLeibnizCrossLimit_unconditional` is, definitionally,
+  -- `multiplier · cutoff`.
+  have h_unfold : wkpNorm (d := Module.finrank ℝ E) K 2
+      (covGradPouLeibnizCrossLimit_unconditional (I := I) (M := M)
+        g r s i β P k) Ω =
+      wkpNorm (d := Module.finrank ℝ E) K 2
+        (fun y =>
+          euclidPartial (E := E) k
+              (chartPushedRaw I β
+                ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)) y *
+            ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+              (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                  g r s) i) β P :
+              Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω :=
+    rfl
+  rw [h_unfold]
+  calc
+    wkpNorm (d := Module.finrank ℝ E) K 2
+        (fun y =>
+          euclidPartial (E := E) k
+              (chartPushedRaw I β
+                ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)) y *
+            ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+              (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                  g r s) i) β P :
+              Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω
+        ≤ ENNReal.ofReal Kmul *
+            wkpNorm (d := Module.finrank ℝ E) K 2
+              (fun y => ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+                  (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                    (tensorResolventL2_isCompactOperator_intrinsic (I := I)
+                      (M := M) g r s) i)
+                  β P : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
+                  EuclN → ℝ) y) Ω :=
+      hKmul_bd hcutoff_memWkp
+    _ ≤ ENNReal.ofReal Kmul *
+          (ENNReal.ofReal Ccut *
+            (ENNReal.ofReal
+                (((transportChartCenters (I := I) (M := M) β).card : ℝ) *
+                  ((Fintype.card (TensorCompIdx (E := E) r s) : ℝ) *
+                    ‖(i.fst.val)⁻¹‖)) * Saggr)) :=
+      mul_le_mul_of_nonneg_left h_cutoff_le (zero_le _)
+    _ = ENNReal.ofReal ((i.fst.val)⁻¹ *
+          (Kmul * (Ccut *
+            (((transportChartCenters (I := I) (M := M) β).card : ℝ) *
+              (Fintype.card (TensorCompIdx (E := E) r s) : ℝ))))) * Saggr := by
+      have h_fold : ENNReal.ofReal Kmul *
+            (ENNReal.ofReal Ccut *
+              (ENNReal.ofReal
+                  (((transportChartCenters (I := I) (M := M) β).card : ℝ) *
+                    ((Fintype.card (TensorCompIdx (E := E) r s) : ℝ) *
+                      ‖(i.fst.val)⁻¹‖)) * Saggr))
+          = ENNReal.ofReal (Kmul * (Ccut *
+              (((transportChartCenters (I := I) (M := M) β).card : ℝ) *
+                ((Fintype.card (TensorCompIdx (E := E) r s) : ℝ) *
+                  ‖(i.fst.val)⁻¹‖)))) * Saggr := by
+        rw [ENNReal.ofReal_mul (le_of_lt hKmul_pos),
+          ENNReal.ofReal_mul hCcut_nn]
+        ring
+      rw [h_fold]
+      congr 2
+      rw [hμ_norm]; ring
+
+/-- Chart-locality-free twin of
+`covGradChristoffelLimit_wkpNorm_le_uniform`. -/
+private lemma covGradChristoffelLimit_wkpNorm_le_uniform_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (K : ℕ)
+    (h_pou_phi : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
+      (β : M) (Q : TensorCompIdx (E := E) r s),
+      MemWkp (d := Module.finrank ℝ E) (K + 1) 2
+        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+              (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+            β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+        (chartTargetEuclid (I := I) (M := M) β))
+    (β : M) (P : TensorCompIdx (E := E) r s)
+    (k : Fin (Module.finrank ℝ E)) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        wkpNorm (d := Module.finrank ℝ E) K 2
+            (covGradChristoffelLimit_unconditional (I := I) (M := M)
+              g r s i β P k)
+            (chartTargetEuclid (I := I) (M := M) β)
+          ≤ ENNReal.ofReal ((i.fst.val)⁻¹ * C) *
+            covGradAggregate_unconditional (I := I) (M := M) g r s i K β := by
+  classical
+  set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) β with hΩ_def
+  have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) β
+  -- For each component multi-index `p`, the chart-target coefficient is `C^∞` and
+  -- independent of `i`; its factor-uniform smooth-coefficient constant is `i`-free.
+  have h_coef_uniform : ∀ p : TensorCompIdx (E := E) r s,
+      ∃ C : ℝ, 0 ≤ C ∧
+        ∀ factor : EuclN → ℝ,
+          MemWkp (d := Module.finrank ℝ E) K 2 factor Ω →
+          (∀ᵐ y ∂(chartL2Measure (I := I) (M := M) β),
+            y ∉ chartPouKernel (I := I) (M := M) β → factor y = 0) →
+          wkpNorm (d := Module.finrank ℝ E) K 2
+              (fun y => covDerivLowerOrderCoeff (I := I) (M := M)
+                  g r s β k P.1 p.1 P.2 p.2 y * factor y) Ω
+            ≤ ENNReal.ofReal C *
+              wkpNorm (d := Module.finrank ℝ E) K 2 factor Ω := fun p =>
+    wkpNorm_coef_mul_factor_le_uniform (I := I) (M := M) K β
+      (covDerivLowerOrderCoeff_contDiffOn (I := I) (M := M)
+        g r s β k P.1 p.1 P.2 p.2)
+  -- The per-`p` smooth-coefficient constants — `i`-free.
+  choose Ccoef hCcoef_nn hCcoef_bd using h_coef_uniform
+  refine ⟨∑ p : TensorCompIdx (E := E) r s, Ccoef p,
+    Finset.sum_nonneg (fun p _ => hCcoef_nn p), fun i => ?_⟩
+  have hμ_pos : 0 < i.fst.val := eigenIdx_val_pos (I := I) (M := M) g r s i
+  have hμ_inv_nn : 0 ≤ (i.fst.val)⁻¹ := le_of_lt (inv_pos.mpr hμ_pos)
+  have hμ_norm : ‖(i.fst.val)⁻¹‖ = (i.fst.val)⁻¹ := Real.norm_of_nonneg hμ_inv_nn
+  set Saggr : ℝ≥0∞ := covGradAggregate_unconditional (I := I) (M := M) g r s i K β
+    with hSaggr_def
+  -- The summand family of `covGradChristoffelLimit_unconditional`.
+  set F : TensorCompIdx (E := E) r s → EuclN → ℝ :=
+    fun p y =>
+      Set.indicator (chartPouKernel (I := I) (M := M) β)
+          (covDerivLowerOrderCoeff (I := I) (M := M)
+            g r s β k P.1 p.1 P.2 p.2) y *
+        (tensorL2ChartComponent (I := I) (M := M) g r s
+          (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+            i) β p :
+          EuclN → ℝ) y with hF_def
+  -- Each summand `p` is `W^{K,2}`, with norm `≤ (Ccoef p · ‖μ⁻¹‖)` times the
+  -- aggregate.
+  have h_summand : ∀ p : TensorCompIdx (E := E) r s,
+      MemWkp (d := Module.finrank ℝ E) K 2 (F p) Ω ∧
+        wkpNorm (d := Module.finrank ℝ E) K 2 (F p) Ω
+          ≤ ENNReal.ofReal (Ccoef p * ‖(i.fst.val)⁻¹‖) * Saggr := by
+    intro p
+    -- The eigenvector chart `p`-component is `W^{K,2}`, with norm `≤ ‖μ⁻¹‖`
+    -- times the aggregate (the `p`-component at `β` is an aggregate term).
+    obtain ⟨hfactor_memWkp, hfactor_norm⟩ :=
+      eigenvectorVec_pou_memWkp_and_wkpNorm_le_unconditional (I := I) (M := M)
+        g r s i K β p ((h_pou_phi i β p).le_of_le (Nat.le_succ K))
+    have hfactor_ae_zero : ∀ᵐ y ∂(chartL2Measure (I := I) (M := M) β),
+        y ∉ chartPouKernel (I := I) (M := M) β →
+          (tensorL2ChartComponent (I := I) (M := M) g r s
+            (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                g r s) i) β p :
+            EuclN → ℝ) y = 0 :=
+      tensorL2ChartComponent_ae_zero_off_chartPouKernel (I := I) (M := M)
+        g r s (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s) i)
+        β p
+    -- The indicator-free product is `W^{K,2}` (the per-`i` smooth-coefficient
+    -- membership bound).
+    have h_no_indicator_memWkp := (wkpNorm_coef_mul_factor_le (I := I) (M := M)
+      β K
+      (covDerivLowerOrderCoeff_contDiffOn (I := I) (M := M)
+        g r s β k P.1 p.1 P.2 p.2)
+      hfactor_memWkp hfactor_ae_zero).1
+    -- The indicator-cut product agrees with the indicator-free product almost
+    -- everywhere.
+    have h_ae : (fun y =>
+          covDerivLowerOrderCoeff (I := I) (M := M)
+              g r s β k P.1 p.1 P.2 p.2 y *
+            (tensorL2ChartComponent (I := I) (M := M) g r s
+              (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                  g r s) i) β p :
+              EuclN → ℝ) y)
+        =ᵐ[(volume : Measure EuclN).restrict Ω] (F p) := by
+      have hfactor_ae_zero' : ∀ᵐ y ∂((volume : Measure EuclN).restrict Ω),
+          y ∉ chartPouKernel (I := I) (M := M) β →
+            (tensorL2ChartComponent (I := I) (M := M) g r s
+              (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                  g r s) i) β p :
+              EuclN → ℝ) y = 0 := hfactor_ae_zero
+      filter_upwards [hfactor_ae_zero'] with y hy
+      show covDerivLowerOrderCoeff (I := I) (M := M)
+              g r s β k P.1 p.1 P.2 p.2 y *
+            (tensorL2ChartComponent (I := I) (M := M) g r s
+              (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                  g r s) i) β p :
+              EuclN → ℝ) y = F p y
+      simp only [hF_def]
+      by_cases hyK : y ∈ chartPouKernel (I := I) (M := M) β
+      · rw [Set.indicator_of_mem hyK]
+      · rw [Set.indicator_of_notMem hyK, zero_mul, hy hyK, mul_zero]
+    have hF_memWkp : MemWkp (d := Module.finrank ℝ E) K 2 (F p) Ω :=
+      (MemWkp_congr_ae (d := Module.finrank ℝ E)
+        (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae).mp h_no_indicator_memWkp
+    refine ⟨hF_memWkp, ?_⟩
+    -- Transfer the `wkpNorm` along the a.e. equality, then chain the bounds.
+    rw [← wkpNorm_congr_ae (d := Module.finrank ℝ E)
+      (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae]
+    calc
+      wkpNorm (d := Module.finrank ℝ E) K 2
+          (fun y =>
+            covDerivLowerOrderCoeff (I := I) (M := M)
+                g r s β k P.1 p.1 P.2 p.2 y *
+              (tensorL2ChartComponent (I := I) (M := M) g r s
+                (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                  (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                    g r s) i) β p :
+                EuclN → ℝ) y) Ω
+          ≤ ENNReal.ofReal (Ccoef p) *
+              wkpNorm (d := Module.finrank ℝ E) K 2
+                (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+                    (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                      (tensorResolventL2_isCompactOperator_intrinsic (I := I)
+                        (M := M) g r s) i)
+                    β p : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
+                    EuclN → ℝ) y) Ω :=
+        hCcoef_bd p _ hfactor_memWkp hfactor_ae_zero
+      _ ≤ ENNReal.ofReal (Ccoef p) *
+            (ENNReal.ofReal ‖(i.fst.val)⁻¹‖ *
+              wkpNorm (d := Module.finrank ℝ E) K 2
+                (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+                    (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+                      (eigenvectorResolvent_unconditional (I := I) (M := M)
+                        g r s i))
+                    β p : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
+                    EuclN → ℝ) y)
+                (chartTargetEuclid (I := I) (M := M) β)) :=
+        mul_le_mul_of_nonneg_left hfactor_norm (zero_le _)
+      _ ≤ ENNReal.ofReal (Ccoef p) *
+            (ENNReal.ofReal ‖(i.fst.val)⁻¹‖ *
+              chartCompNorm_unconditional (I := I) (M := M) g r s i K β p) :=
+        mul_le_mul_of_nonneg_left
+          (mul_le_mul_of_nonneg_left
+            (wkpNorm_mono_order (d := Module.finrank ℝ E)
+              (Nat.le_succ K) _ _) (zero_le _)) (zero_le _)
+      _ ≤ ENNReal.ofReal (Ccoef p) *
+            (ENNReal.ofReal ‖(i.fst.val)⁻¹‖ * Saggr) :=
+        mul_le_mul_of_nonneg_left
+          (mul_le_mul_of_nonneg_left
+            (chartCompNorm_center_le_covGradAggregate_unconditional (I := I)
+              (M := M) g r s i K β p) (zero_le _)) (zero_le _)
+      _ = ENNReal.ofReal (Ccoef p * ‖(i.fst.val)⁻¹‖) * Saggr := by
+        rw [ENNReal.ofReal_mul (hCcoef_nn p)]; ring
+  -- A finite sum of the per-summand bounds.
+  have h_sum_memWkp : MemWkp (d := Module.finrank ℝ E) K 2
+      (fun y => ∑ p : TensorCompIdx (E := E) r s, F p y) Ω :=
+    memWkp_finset_sum (I := I) (M := M) Finset.univ
+      (fun p _ => (h_summand p).1)
+  -- `covGradChristoffelLimit_unconditional` is, definitionally, the finite sum
+  -- `∑ p F p`.
+  have h_unfold : wkpNorm (d := Module.finrank ℝ E) K 2
+      (covGradChristoffelLimit_unconditional (I := I) (M := M)
+        g r s i β P k) Ω =
+      wkpNorm (d := Module.finrank ℝ E) K 2
+        (fun y => ∑ p : TensorCompIdx (E := E) r s, F p y) Ω := rfl
+  rw [h_unfold]
+  calc
+    wkpNorm (d := Module.finrank ℝ E) K 2
+        (fun y => ∑ p : TensorCompIdx (E := E) r s, F p y) Ω
+        ≤ ∑ p : TensorCompIdx (E := E) r s,
+            wkpNorm (d := Module.finrank ℝ E) K 2 (F p) Ω :=
+      wkpNorm_sum_le (d := Module.finrank ℝ E)
+        (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open Finset.univ F
+        (fun p _ => (h_summand p).1)
+    _ ≤ ∑ p : TensorCompIdx (E := E) r s,
+          ENNReal.ofReal (Ccoef p * ‖(i.fst.val)⁻¹‖) * Saggr :=
+      Finset.sum_le_sum (fun p _ => (h_summand p).2)
+    _ = (∑ p : TensorCompIdx (E := E) r s,
+          ENNReal.ofReal (Ccoef p * ‖(i.fst.val)⁻¹‖)) * Saggr := by
+      rw [← Finset.sum_mul]
+    _ = ENNReal.ofReal ((i.fst.val)⁻¹ *
+          ∑ p : TensorCompIdx (E := E) r s, Ccoef p) * Saggr := by
+      have h_real : (∑ p : TensorCompIdx (E := E) r s,
+            Ccoef p * ‖(i.fst.val)⁻¹‖)
+          = (i.fst.val)⁻¹ * ∑ p : TensorCompIdx (E := E) r s, Ccoef p := by
+        rw [Finset.mul_sum]
+        exact Finset.sum_congr rfl (fun p _ => by rw [hμ_norm, mul_comm])
+      rw [← ENNReal.ofReal_sum_of_nonneg
+        (fun p _ => mul_nonneg (hCcoef_nn p) (norm_nonneg _)), h_real]
+
+/-- **Quantitative iterated Sobolev norm bound for the covariant-gradient
+partition-of-unity chart component (chart-locality-free).** Chart-locality-free
+twin of `eigenvectorCovGrad_pou_wkpNorm_le`. -/
+theorem eigenvectorCovGrad_pou_wkpNorm_le_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)
+    (h_pou_phi : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
+      MemWkp (d := Module.finrank ℝ E) (K + 1) 2
+        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+              (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+            β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+        (chartTargetEuclid (I := I) (M := M) β))
+    (β : M) (Q' : TensorCompIdx (E := E) r (s + 1)) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      wkpNorm (d := Module.finrank ℝ E) K 2
+          (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
+              (tensorCovGradL2Compl (I := I) (M := M) g r s
+                (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+              β Q' : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+          (chartTargetEuclid (I := I) (M := M) β)
+        ≤ ENNReal.ofReal C *
+          ((∑ Q : TensorCompIdx (E := E) r s,
+              wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+                (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+                    (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+                      (eigenvectorResolvent_unconditional (I := I) (M := M)
+                        g r s i))
+                    β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
+                    EuclN → ℝ) y)
+                (chartTargetEuclid (I := I) (M := M) β))
+            + ∑ β' ∈ transportChartCenters (I := I) (M := M) β,
+                ∑ Q : TensorCompIdx (E := E) r s,
+                  wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+                    (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+                        (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+                          (eigenvectorResolvent_unconditional (I := I) (M := M)
+                            g r s i))
+                        β' Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β')) :
+                        EuclN → ℝ) y)
+                    (chartTargetEuclid (I := I) (M := M) β')) := by
+  classical
+  set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) β with hΩ_def
+  have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) β
+  set P : TensorCompIdx (E := E) r s := (Q'.1, Matrix.vecTail Q'.2) with hP_def
+  set Saggr : ℝ≥0∞ := covGradAggregate_unconditional (I := I) (M := M) g r s i K β
+    with hSaggr_def
+  -- The three named limit terms: each `W^{K,2}` with an aggregate norm bound.
+  obtain ⟨h1_mem, C1, hC1_nn, hC1_bd⟩ :=
+    eigenvectorChartWeakPartial_memWkp_and_wkpNorm_le_unconditional (I := I)
+      (M := M) g r s i K h_pou_phi β P (Q'.2 0)
+  obtain ⟨h2_mem, C2, hC2_nn, hC2_bd⟩ :=
+    covGradPouLeibnizCrossLimit_memWkp_and_wkpNorm_le_unconditional (I := I)
+      (M := M) g r s i K h_pou_phi β P (Q'.2 0)
+  obtain ⟨h3_mem, C3, hC3_nn, hC3_bd⟩ :=
+    covGradChristoffelLimit_memWkp_and_wkpNorm_le_unconditional (I := I) (M := M)
+      g r s i K h_pou_phi β P (Q'.2 0)
+  -- The three-term sum `principal − cross + Christoffel` is `W^{K,2}`, with norm
+  -- bounded by `(C1 + C2 + C3)` times the aggregate.
+  have h_sub_mem : MemWkp (d := Module.finrank ℝ E) K 2
+      (fun y =>
+        eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+            g r s i β P (Q'.2 0) y
+          - covGradPouLeibnizCrossLimit_unconditional (I := I) (M := M)
+              g r s i β P (Q'.2 0) y) Ω :=
+    MemWkp.sub (d := Module.finrank ℝ E)
+      (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h1_mem h2_mem
+  have h_sum_mem : MemWkp (d := Module.finrank ℝ E) K 2
+      (fun y =>
+        eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+            g r s i β P (Q'.2 0) y
+          - covGradPouLeibnizCrossLimit_unconditional (I := I) (M := M)
+              g r s i β P (Q'.2 0) y
+          + covGradChristoffelLimit_unconditional (I := I) (M := M)
+              g r s i β P (Q'.2 0) y) Ω :=
+    MemWkp.add (d := Module.finrank ℝ E)
+      (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_sub_mem h3_mem
+  have h_sum_norm_le : wkpNorm (d := Module.finrank ℝ E) K 2
+      (fun y =>
+        eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+            g r s i β P (Q'.2 0) y
+          - covGradPouLeibnizCrossLimit_unconditional (I := I) (M := M)
+              g r s i β P (Q'.2 0) y
+          + covGradChristoffelLimit_unconditional (I := I) (M := M)
+              g r s i β P (Q'.2 0) y) Ω
+      ≤ ENNReal.ofReal (C1 + C2 + C3) * Saggr := by
+    have h_tri : wkpNorm (d := Module.finrank ℝ E) K 2
+        (fun y =>
+          eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+              g r s i β P (Q'.2 0) y
+            - covGradPouLeibnizCrossLimit_unconditional (I := I) (M := M)
+                g r s i β P (Q'.2 0) y
+            + covGradChristoffelLimit_unconditional (I := I) (M := M)
+                g r s i β P (Q'.2 0) y) Ω
+        ≤ (wkpNorm (d := Module.finrank ℝ E) K 2
+              (eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+                g r s i β P (Q'.2 0)) Ω
+            + wkpNorm (d := Module.finrank ℝ E) K 2
+                (covGradPouLeibnizCrossLimit_unconditional (I := I) (M := M)
+                  g r s i β P (Q'.2 0)) Ω)
+          + wkpNorm (d := Module.finrank ℝ E) K 2
+              (covGradChristoffelLimit_unconditional (I := I) (M := M)
+                g r s i β P (Q'.2 0)) Ω :=
+      le_trans (wkpNorm_add_le (d := Module.finrank ℝ E)
+        (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_sub_mem h3_mem)
+        (add_le_add
+          (wkpNorm_sub_le (d := Module.finrank ℝ E) hΩ_open h1_mem h2_mem)
+          (le_refl (wkpNorm (d := Module.finrank ℝ E) K 2
+            (covGradChristoffelLimit_unconditional (I := I) (M := M)
+              g r s i β P (Q'.2 0)) Ω)))
+    refine le_trans h_tri ?_
+    have h_each : (wkpNorm (d := Module.finrank ℝ E) K 2
+            (eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+              g r s i β P (Q'.2 0)) Ω
+          + wkpNorm (d := Module.finrank ℝ E) K 2
+              (covGradPouLeibnizCrossLimit_unconditional (I := I) (M := M)
+                g r s i β P (Q'.2 0)) Ω)
+        + wkpNorm (d := Module.finrank ℝ E) K 2
+            (covGradChristoffelLimit_unconditional (I := I) (M := M)
+              g r s i β P (Q'.2 0)) Ω
+        ≤ (ENNReal.ofReal C1 * Saggr + ENNReal.ofReal C2 * Saggr)
+          + ENNReal.ofReal C3 * Saggr :=
+      add_le_add (add_le_add hC1_bd hC2_bd) hC3_bd
+    refine le_trans h_each (le_of_eq ?_)
+    rw [ENNReal.ofReal_add (by positivity) hC3_nn,
+      ENNReal.ofReal_add hC1_nn hC2_nn]
+    ring
+  -- The committed identity: the `μ⁻¹`-rescaled chart component agrees almost
+  -- everywhere with the three-term sum.
+  have h_ae := eigenvectorCovGrad_pou_chartComponent_ae_eq_unconditional
+    (I := I) (M := M) g r s i β Q'
+  have h_smul := Lp.coeFn_smul (i.fst.val)⁻¹
+    (tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
+      (tensorCovGradL2Compl (I := I) (M := M) g r s
+        (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i)) β Q')
+  -- `μ⁻¹` times the chart-component coercion agrees a.e. with the three-term sum.
+  have h_scaled_ae : (fun y => (i.fst.val)⁻¹ *
+        ((tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
+          (tensorCovGradL2Compl (I := I) (M := M) g r s
+            (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+          β Q' : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+      =ᵐ[(volume : Measure EuclN).restrict Ω]
+      (fun y =>
+        eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+            g r s i β P (Q'.2 0) y
+          - covGradPouLeibnizCrossLimit_unconditional (I := I) (M := M)
+              g r s i β P (Q'.2 0) y
+          + covGradChristoffelLimit_unconditional (I := I) (M := M)
+              g r s i β P (Q'.2 0) y) := by
+    have h_combined : (fun y => (i.fst.val)⁻¹ *
+          ((tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
+            (tensorCovGradL2Compl (I := I) (M := M) g r s
+              (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+            β Q' : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
+            EuclN → ℝ) y)
+        =ᵐ[chartL2Measure (I := I) (M := M) β]
+        (fun y =>
+          eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+              g r s i β P (Q'.2 0) y
+            - covGradPouLeibnizCrossLimit_unconditional (I := I) (M := M)
+                g r s i β P (Q'.2 0) y
+            + covGradChristoffelLimit_unconditional (I := I) (M := M)
+                g r s i β P (Q'.2 0) y) := by
+      filter_upwards [h_smul, h_ae] with y hy_smul hy_ae
+      rw [← hy_ae, hy_smul, Pi.smul_apply, smul_eq_mul]
+    exact h_combined
+  -- The `μ⁻¹`-scaled chart component is `W^{K,2}` with norm `≤ (C1+C2+C3)`
+  -- times the aggregate.
+  have h_scaled_mem : MemWkp (d := Module.finrank ℝ E) K 2
+      (fun y => (i.fst.val)⁻¹ *
+        ((tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
+          (tensorCovGradL2Compl (I := I) (M := M) g r s
+            (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+          β Q' : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω :=
+    (MemWkp_congr_ae (d := Module.finrank ℝ E)
+      (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_scaled_ae).mpr h_sum_mem
+  have h_scaled_norm : wkpNorm (d := Module.finrank ℝ E) K 2
+      (fun y => (i.fst.val)⁻¹ *
+        ((tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
+          (tensorCovGradL2Compl (I := I) (M := M) g r s
+            (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+          β Q' : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω
+      ≤ ENNReal.ofReal (C1 + C2 + C3) * Saggr := by
+    rw [wkpNorm_congr_ae (d := Module.finrank ℝ E)
+      (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_scaled_ae]
+    exact h_sum_norm_le
+  -- Rescale by `μ`: `wkpNorm` is scalar-homogeneous, so the chart component norm
+  -- is `‖μ‖` times the `μ⁻¹`-scaled norm.
+  have hμ_ne : i.fst.val ≠ 0 := i.fst.val_ne_zero
+  have h_chart_eq_scaled : (fun y => ((tensorL2ChartComponent (I := I) (M := M)
+        g r (s + 1)
+        (tensorCovGradL2Compl (I := I) (M := M) g r s
+          (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i)) β Q' :
+        Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) =
+      (fun y => i.fst.val * ((i.fst.val)⁻¹ *
+        ((tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
+          (tensorCovGradL2Compl (I := I) (M := M) g r s
+            (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+          β Q' : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)) := by
+    funext y
+    rw [mul_inv_cancel_left₀ hμ_ne]
+  refine ⟨‖i.fst.val‖ * (C1 + C2 + C3),
+    mul_nonneg (norm_nonneg _) (by positivity), ?_⟩
+  rw [show ((∑ Q : TensorCompIdx (E := E) r s,
+          wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+            (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+                (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+                  (eigenvectorResolvent_unconditional (I := I) (M := M)
+                    g r s i))
+                β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
+                EuclN → ℝ) y)
+            (chartTargetEuclid (I := I) (M := M) β))
+        + ∑ β' ∈ transportChartCenters (I := I) (M := M) β,
+            ∑ Q : TensorCompIdx (E := E) r s,
+              wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+                (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+                    (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+                      (eigenvectorResolvent_unconditional (I := I) (M := M)
+                        g r s i))
+                    β' Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β')) :
+                    EuclN → ℝ) y)
+                (chartTargetEuclid (I := I) (M := M) β')) = Saggr from rfl]
+  rw [h_chart_eq_scaled]
+  calc
+    wkpNorm (d := Module.finrank ℝ E) K 2
+        (fun y => i.fst.val * ((i.fst.val)⁻¹ *
+          ((tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
+            (tensorCovGradL2Compl (I := I) (M := M) g r s
+              (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+            β Q' : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)) Ω
+        = ‖i.fst.val‖ₑ *
+            wkpNorm (d := Module.finrank ℝ E) K 2
+              (fun y => (i.fst.val)⁻¹ *
+                ((tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
+                  (tensorCovGradL2Compl (I := I) (M := M) g r s
+                    (eigenvectorResolvent_unconditional (I := I) (M := M)
+                      g r s i))
+                  β Q' : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
+                  EuclN → ℝ) y) Ω :=
+      wkpNorm_const_smul (d := Module.finrank ℝ E)
+        (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_scaled_mem i.fst.val
+    _ ≤ ‖i.fst.val‖ₑ * (ENNReal.ofReal (C1 + C2 + C3) * Saggr) :=
+      mul_le_mul_of_nonneg_left h_scaled_norm (zero_le _)
+    _ = ENNReal.ofReal (‖i.fst.val‖ * (C1 + C2 + C3)) * Saggr := by
+      rw [← mul_assoc, ← ofReal_norm (x := i.fst.val),
+        ← ENNReal.ofReal_mul (norm_nonneg _)]
+
+/-- **Constant-uniform iterated Sobolev norm bound for the covariant-gradient
+partition-of-unity chart component (chart-locality-free).** Chart-locality-free
+twin of `eigenvectorCovGrad_pou_wkpNorm_le_uniform`. -/
+theorem eigenvectorCovGrad_pou_wkpNorm_le_uniform_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (K : ℕ)
+    (h_pou_phi : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
+      (β : M) (Q : TensorCompIdx (E := E) r s),
+      MemWkp (d := Module.finrank ℝ E) (K + 1) 2
+        (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+            (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+              (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+            β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+        (chartTargetEuclid (I := I) (M := M) β))
+    (β : M) (Q' : TensorCompIdx (E := E) r (s + 1)) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        wkpNorm (d := Module.finrank ℝ E) K 2
+            (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
+                (tensorCovGradL2Compl (I := I) (M := M) g r s
+                  (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+                β Q' : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
+                EuclN → ℝ) y)
+            (chartTargetEuclid (I := I) (M := M) β)
+          ≤ ENNReal.ofReal C *
+            ((∑ Q : TensorCompIdx (E := E) r s,
+                wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+                  (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+                      (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+                        (eigenvectorResolvent_unconditional (I := I) (M := M)
+                          g r s i))
+                      β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
+                      EuclN → ℝ) y)
+                  (chartTargetEuclid (I := I) (M := M) β))
+              + ∑ β' ∈ transportChartCenters (I := I) (M := M) β,
+                  ∑ Q : TensorCompIdx (E := E) r s,
+                    wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+                      (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+                          (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+                            (eigenvectorResolvent_unconditional (I := I) (M := M)
+                              g r s i))
+                          β' Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β')) :
+                          EuclN → ℝ) y)
+                      (chartTargetEuclid (I := I) (M := M) β')) := by
+  classical
+  set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) β with hΩ_def
+  have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) β
+  set P : TensorCompIdx (E := E) r s := (Q'.1, Matrix.vecTail Q'.2) with hP_def
+  -- The three constant-uniform term bounds: each carries an `i`-independent
+  -- geometric constant and the exposed eigenvalue factor `μ⁻¹`.
+  obtain ⟨D1, hD1_nn, hD1_bd⟩ :=
+    eigenvectorChartWeakPartial_wkpNorm_le_uniform_unconditional (I := I)
+      (M := M) g r s K h_pou_phi β P (Q'.2 0)
+  obtain ⟨D2, hD2_nn, hD2_bd⟩ :=
+    covGradPouLeibnizCrossLimit_wkpNorm_le_uniform_unconditional (I := I)
+      (M := M) g r s K h_pou_phi β P (Q'.2 0)
+  obtain ⟨D3, hD3_nn, hD3_bd⟩ :=
+    covGradChristoffelLimit_wkpNorm_le_uniform_unconditional (I := I) (M := M)
+      g r s K h_pou_phi β P (Q'.2 0)
+  refine ⟨D1 + D2 + D3, by positivity, fun i => ?_⟩
+  set Saggr : ℝ≥0∞ := covGradAggregate_unconditional (I := I) (M := M) g r s i K β
+    with hSaggr_def
+  have hμ_pos : 0 < i.fst.val := eigenIdx_val_pos (I := I) (M := M) g r s i
+  have hμ_ne : i.fst.val ≠ 0 := ne_of_gt hμ_pos
+  have hμ_inv_nn : 0 ≤ (i.fst.val)⁻¹ := le_of_lt (inv_pos.mpr hμ_pos)
+  -- The three named limit terms are each `W^{K,2}` (the per-`i` membership).
+  have h1_mem : MemWkp (d := Module.finrank ℝ E) K 2
+      (eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+        g r s i β P (Q'.2 0))
+      Ω :=
+    (eigenvectorChartWeakPartial_memWkp_and_wkpNorm_le_unconditional (I := I)
+      (M := M) g r s i K (h_pou_phi i) β P (Q'.2 0)).1
+  have h2_mem : MemWkp (d := Module.finrank ℝ E) K 2
+      (covGradPouLeibnizCrossLimit_unconditional (I := I) (M := M)
+        g r s i β P (Q'.2 0))
+      Ω :=
+    (covGradPouLeibnizCrossLimit_memWkp_and_wkpNorm_le_unconditional (I := I)
+      (M := M) g r s i K (h_pou_phi i) β P (Q'.2 0)).1
+  have h3_mem : MemWkp (d := Module.finrank ℝ E) K 2
+      (covGradChristoffelLimit_unconditional (I := I) (M := M)
+        g r s i β P (Q'.2 0))
+      Ω :=
+    (covGradChristoffelLimit_memWkp_and_wkpNorm_le_unconditional (I := I) (M := M)
+      g r s i K (h_pou_phi i) β P (Q'.2 0)).1
+  -- The three per-`i` term bounds, with the exposed eigenvalue factor.
+  have hD1_bd_i := hD1_bd i
+  have hD2_bd_i := hD2_bd i
+  have hD3_bd_i := hD3_bd i
+  rw [← hSaggr_def] at hD1_bd_i hD2_bd_i hD3_bd_i
+  -- The three-term sum `principal − cross + Christoffel` is `W^{K,2}`.
+  have h_sub_mem : MemWkp (d := Module.finrank ℝ E) K 2
+      (fun y =>
+        eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+            g r s i β P (Q'.2 0) y
+          - covGradPouLeibnizCrossLimit_unconditional (I := I) (M := M)
+              g r s i β P (Q'.2 0) y) Ω :=
+    MemWkp.sub (d := Module.finrank ℝ E)
+      (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h1_mem h2_mem
+  have h_sum_mem : MemWkp (d := Module.finrank ℝ E) K 2
+      (fun y =>
+        eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+            g r s i β P (Q'.2 0) y
+          - covGradPouLeibnizCrossLimit_unconditional (I := I) (M := M)
+              g r s i β P (Q'.2 0) y
+          + covGradChristoffelLimit_unconditional (I := I) (M := M)
+              g r s i β P (Q'.2 0) y) Ω :=
+    MemWkp.add (d := Module.finrank ℝ E)
+      (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_sub_mem h3_mem
+  -- The three-term sum norm is bounded by `ofReal (μ⁻¹ * (D1+D2+D3))` times the
+  -- aggregate.
+  have h_sum_norm_le : wkpNorm (d := Module.finrank ℝ E) K 2
+      (fun y =>
+        eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+            g r s i β P (Q'.2 0) y
+          - covGradPouLeibnizCrossLimit_unconditional (I := I) (M := M)
+              g r s i β P (Q'.2 0) y
+          + covGradChristoffelLimit_unconditional (I := I) (M := M)
+              g r s i β P (Q'.2 0) y) Ω
+      ≤ ENNReal.ofReal ((i.fst.val)⁻¹ * (D1 + D2 + D3)) * Saggr := by
+    have h_tri : wkpNorm (d := Module.finrank ℝ E) K 2
+        (fun y =>
+          eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+              g r s i β P (Q'.2 0) y
+            - covGradPouLeibnizCrossLimit_unconditional (I := I) (M := M)
+                g r s i β P (Q'.2 0) y
+            + covGradChristoffelLimit_unconditional (I := I) (M := M)
+                g r s i β P (Q'.2 0) y) Ω
+        ≤ (wkpNorm (d := Module.finrank ℝ E) K 2
+              (eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+                g r s i β P (Q'.2 0)) Ω
+            + wkpNorm (d := Module.finrank ℝ E) K 2
+                (covGradPouLeibnizCrossLimit_unconditional (I := I) (M := M)
+                  g r s i β P (Q'.2 0)) Ω)
+          + wkpNorm (d := Module.finrank ℝ E) K 2
+              (covGradChristoffelLimit_unconditional (I := I) (M := M)
+                g r s i β P (Q'.2 0)) Ω :=
+      le_trans (wkpNorm_add_le (d := Module.finrank ℝ E)
+        (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_sub_mem h3_mem)
+        (add_le_add
+          (wkpNorm_sub_le (d := Module.finrank ℝ E) hΩ_open h1_mem h2_mem)
+          (le_refl (wkpNorm (d := Module.finrank ℝ E) K 2
+            (covGradChristoffelLimit_unconditional (I := I) (M := M)
+              g r s i β P (Q'.2 0)) Ω)))
+    refine le_trans h_tri ?_
+    have h_each : (wkpNorm (d := Module.finrank ℝ E) K 2
+            (eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+              g r s i β P (Q'.2 0)) Ω
+          + wkpNorm (d := Module.finrank ℝ E) K 2
+              (covGradPouLeibnizCrossLimit_unconditional (I := I) (M := M)
+                g r s i β P (Q'.2 0)) Ω)
+        + wkpNorm (d := Module.finrank ℝ E) K 2
+            (covGradChristoffelLimit_unconditional (I := I) (M := M)
+              g r s i β P (Q'.2 0)) Ω
+        ≤ (ENNReal.ofReal ((i.fst.val)⁻¹ * D1) * Saggr
+            + ENNReal.ofReal ((i.fst.val)⁻¹ * D2) * Saggr)
+          + ENNReal.ofReal ((i.fst.val)⁻¹ * D3) * Saggr :=
+      add_le_add (add_le_add hD1_bd_i hD2_bd_i) hD3_bd_i
+    refine le_trans h_each (le_of_eq ?_)
+    rw [← add_mul, ← add_mul,
+      ← ENNReal.ofReal_add (by positivity) (by positivity),
+      ← ENNReal.ofReal_add (by positivity) (by positivity)]
+    ring_nf
+  -- The committed identity: the `μ⁻¹`-rescaled chart component agrees almost
+  -- everywhere with the three-term sum.
+  have h_ae := eigenvectorCovGrad_pou_chartComponent_ae_eq_unconditional
+    (I := I) (M := M) g r s i β Q'
+  have h_smul := Lp.coeFn_smul (i.fst.val)⁻¹
+    (tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
+      (tensorCovGradL2Compl (I := I) (M := M) g r s
+        (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i)) β Q')
+  have h_scaled_ae : (fun y => (i.fst.val)⁻¹ *
+        ((tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
+          (tensorCovGradL2Compl (I := I) (M := M) g r s
+            (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+          β Q' : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
+      =ᵐ[(volume : Measure EuclN).restrict Ω]
+      (fun y =>
+        eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+            g r s i β P (Q'.2 0) y
+          - covGradPouLeibnizCrossLimit_unconditional (I := I) (M := M)
+              g r s i β P (Q'.2 0) y
+          + covGradChristoffelLimit_unconditional (I := I) (M := M)
+              g r s i β P (Q'.2 0) y) := by
+    have h_combined : (fun y => (i.fst.val)⁻¹ *
+          ((tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
+            (tensorCovGradL2Compl (I := I) (M := M) g r s
+              (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+            β Q' : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
+            EuclN → ℝ) y)
+        =ᵐ[chartL2Measure (I := I) (M := M) β]
+        (fun y =>
+          eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+              g r s i β P (Q'.2 0) y
+            - covGradPouLeibnizCrossLimit_unconditional (I := I) (M := M)
+                g r s i β P (Q'.2 0) y
+            + covGradChristoffelLimit_unconditional (I := I) (M := M)
+                g r s i β P (Q'.2 0) y) := by
+      filter_upwards [h_smul, h_ae] with y hy_smul hy_ae
+      rw [← hy_ae, hy_smul, Pi.smul_apply, smul_eq_mul]
+    exact h_combined
+  -- The `μ⁻¹`-scaled chart component is `W^{K,2}` with norm `≤ ofReal (μ⁻¹ * C)`
+  -- times the aggregate.
+  have h_scaled_mem : MemWkp (d := Module.finrank ℝ E) K 2
+      (fun y => (i.fst.val)⁻¹ *
+        ((tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
+          (tensorCovGradL2Compl (I := I) (M := M) g r s
+            (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+          β Q' : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω :=
+    (MemWkp_congr_ae (d := Module.finrank ℝ E)
+      (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_scaled_ae).mpr h_sum_mem
+  have h_scaled_norm : wkpNorm (d := Module.finrank ℝ E) K 2
+      (fun y => (i.fst.val)⁻¹ *
+        ((tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
+          (tensorCovGradL2Compl (I := I) (M := M) g r s
+            (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+          β Q' : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω
+      ≤ ENNReal.ofReal ((i.fst.val)⁻¹ * (D1 + D2 + D3)) * Saggr := by
+    rw [wkpNorm_congr_ae (d := Module.finrank ℝ E)
+      (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_scaled_ae]
+    exact h_sum_norm_le
+  -- Restore the chart component from its `μ⁻¹`-rescale: `wkpNorm` is
+  -- scalar-homogeneous, and `‖μ‖ · μ⁻¹ = 1` since `μ > 0`.
+  have h_chart_eq_scaled : (fun y => ((tensorL2ChartComponent (I := I) (M := M)
+        g r (s + 1)
+        (tensorCovGradL2Compl (I := I) (M := M) g r s
+          (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i)) β Q' :
+        Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) =
+      (fun y => i.fst.val * ((i.fst.val)⁻¹ *
+        ((tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
+          (tensorCovGradL2Compl (I := I) (M := M) g r s
+            (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+          β Q' : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)) := by
+    funext y
+    rw [mul_inv_cancel_left₀ hμ_ne]
+  rw [show ((∑ Q : TensorCompIdx (E := E) r s,
+          wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+            (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+                (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+                  (eigenvectorResolvent_unconditional (I := I) (M := M)
+                    g r s i))
+                β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
+                EuclN → ℝ) y)
+            (chartTargetEuclid (I := I) (M := M) β))
+        + ∑ β' ∈ transportChartCenters (I := I) (M := M) β,
+            ∑ Q : TensorCompIdx (E := E) r s,
+              wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+                (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
+                    (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+                      (eigenvectorResolvent_unconditional (I := I) (M := M)
+                        g r s i))
+                    β' Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β')) :
+                    EuclN → ℝ) y)
+                (chartTargetEuclid (I := I) (M := M) β')) = Saggr from rfl]
+  rw [h_chart_eq_scaled]
+  calc
+    wkpNorm (d := Module.finrank ℝ E) K 2
+        (fun y => i.fst.val * ((i.fst.val)⁻¹ *
+          ((tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
+            (tensorCovGradL2Compl (I := I) (M := M) g r s
+              (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+            β Q' : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)) Ω
+        = ‖i.fst.val‖ₑ *
+            wkpNorm (d := Module.finrank ℝ E) K 2
+              (fun y => (i.fst.val)⁻¹ *
+                ((tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
+                  (tensorCovGradL2Compl (I := I) (M := M) g r s
+                    (eigenvectorResolvent_unconditional (I := I) (M := M)
+                      g r s i))
+                  β Q' : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
+                  EuclN → ℝ) y) Ω :=
+      wkpNorm_const_smul (d := Module.finrank ℝ E)
+        (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_scaled_mem i.fst.val
+    _ ≤ ‖i.fst.val‖ₑ *
+          (ENNReal.ofReal ((i.fst.val)⁻¹ * (D1 + D2 + D3)) * Saggr) :=
+      mul_le_mul_of_nonneg_left h_scaled_norm (zero_le _)
+    _ = ENNReal.ofReal (D1 + D2 + D3) * Saggr := by
+      rw [← mul_assoc, ← ofReal_norm (x := i.fst.val),
+        ← ENNReal.ofReal_mul (norm_nonneg _),
+        Real.norm_of_nonneg (le_of_lt hμ_pos), ← mul_assoc,
+        mul_inv_cancel₀ hμ_ne, one_mul]
+
+end Unconditional
+
 end TensorSpectral
 end Parabolic
 end Analysis
