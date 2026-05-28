@@ -7623,6 +7623,69 @@ theorem eigenvectorChartVariationalIdentity_unconditional
     rw [mul_add, ← mul_assoc, ← mul_assoc, inv_mul_cancel₀ hμ_ne, one_mul,
       one_mul]]
 
+/-! ## The chart-bilinear divergence-form data of the eigenvector chart component
+(chart-locality-free)
+
+Assembling the chart-locality-free eigenvector chart `P₀`-component into the
+chart-bilinear divergence-form data structure `TensorChartBilinearH1ComplData
+g r s α P₀`, using the chart-locality-free helper lemmas and the chart-locality-
+free headline variational identity assembled above. -/
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+/-- **The chart-bilinear divergence-form data of the eigenvector chart
+component (chart-locality-free).** Chart-locality-free twin of
+`eigenvectorTensorChartBilinearData`, re-keyed onto the chart-locality-free
+eigenbasis vector `tensorResolventEigenbasisVec_ofCompact
+(tensorResolventL2_isCompactOperator_intrinsic g r s) i`. For a closed
+Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index `i` with
+nonzero resolvent eigenvalue `μ := i.fst.val`, a chart center `α : M`, and a
+component multi-index `P₀`, this is the chart-bilinear divergence-form data
+`TensorChartBilinearH1ComplData g r s α P₀` of the chart `P₀`-component of the
+abstract connection-Laplacian eigenvector:
+
+* the chart component `u_chart` is `tensorL2ChartComponent g r s
+  (tensorResolventEigenbasisVec_ofCompact …) α P₀`;
+* the weak partials are the chart-locality-free candidate weak chart partials
+  `eigenvectorChartWeakPartial_unconditional g r s i α P₀`;
+* the right-hand side `f_chart` is the chart-locality-free chart-Euclidean
+  right-hand side `eigenvectorChartRHS_unconditional g r s i α P₀`;
+* the variational identity is `eigenvectorChartVariationalIdentity_unconditional`.
+
+This packages the per-component chart-local weak-elliptic identity for the
+`P₀`-chart-component of the abstract connection-Laplacian eigenvector, without
+any chart-locality hypothesis on the atlas. -/
+def eigenvectorTensorChartBilinearData_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) :
+    TensorChartBilinearH1ComplData (I := I) (M := M) g r s α P₀ :=
+  ⟨{ u_chart := fun y =>
+        ((tensorL2ChartComponent (I := I) (M := M) g r s
+          (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+              g r s) i) α P₀ :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
+     f_chart := eigenvectorChartRHS_unconditional (I := I) (M := M) g r s i α P₀
+     weak_partial := eigenvectorChartWeakPartial_unconditional (I := I) (M := M)
+       g r s i α P₀
+     u_chart_memLp_weighted :=
+       tensorL2ChartComponent_memLp_weighted (I := I) (M := M) g r s
+         (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+           (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+             g r s) i) α P₀
+     f_chart_memLp_weighted :=
+       eigenvectorChartRHS_memLp_weighted_unconditional (I := I) (M := M)
+         g r s i α P₀
+     weak_partial_locally_memLp := fun k _K hK hK_in =>
+       eigenvectorChartWeakPartial_locally_memLp_unconditional (I := I) (M := M)
+         g r s i α P₀ k hK hK_in
+     weak_partial_isWeakPartial := fun k =>
+       eigenvectorChartWeakPartial_hasWeakPartialDeriv_unconditional (I := I) (M := M)
+         g r s i α P₀ k
+     variational_identity := fun _ψ hψ hψ_cs hψ_supp =>
+       eigenvectorChartVariationalIdentity_unconditional (I := I) (M := M)
+         g r s i α P₀ hψ hψ_cs hψ_supp }⟩
+
 /-! ## Sanity tests -/
 
 section ElaborationTests
