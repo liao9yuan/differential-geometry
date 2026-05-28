@@ -145,6 +145,108 @@ theorem tensorHeatSemigroup_intrinsic_continuousOn
   abstractSpectralSemigroup_continuousOn (intrinsicEigenbasis (I := I) (M := M) g r s)
     (intrinsic_lambda_nonneg (I := I) (M := M) g r s) T
 
+/-! ## The diagonal action on the intrinsic eigenbasis
+
+The intrinsic heat semigroup acts diagonally on the intrinsic resolvent
+eigenbasis: its `i`-th eigenbasis Fourier coefficient is the original
+coefficient times the heat factor `exp(-λᵢ t)`. This is the spectral
+content of the construction and the single fact the Sobolev-scale
+smoothing analysis consumes; it holds with no chart-selection
+hypothesis, against the intrinsic eigenbasis
+`tensorResolventHilbertEigenbasisSigma_ofCompact
+(tensorResolventL2_isCompactOperator_intrinsic g r s)`. -/
+
+/-- **Diagonal eigenbasis action of the intrinsic heat semigroup.**
+
+For `t ≥ 0`, the inner product of the intrinsic eigenbasis vector `bᵢ`
+against `S(t) u₀` equals `exp(-λᵢ t)` times the inner product of `bᵢ`
+against `u₀`, where `b` is the intrinsic resolvent eigenbasis. No
+chart-selection hypothesis is required. -/
+theorem tensorHeatSemigroup_intrinsic_inner_eigenbasis
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    {t : ℝ} (ht : 0 ≤ t) (u₀ : TensorL2 r s g)
+    (i : TensorEigenIdx (I := I) (M := M) g r s) :
+    ⟪tensorResolventHilbertEigenbasisSigma_ofCompact (I := I) (M := M)
+        (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s) i,
+      tensorHeatSemigroup_intrinsic (I := I) (M := M) g r s t u₀⟫_ℝ =
+      Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
+        ⟪tensorResolventHilbertEigenbasisSigma_ofCompact (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s) i,
+          u₀⟫_ℝ := by
+  classical
+  set b := intrinsicEigenbasis (I := I) (M := M) g r s with hb_def
+  -- The headline eigenbasis is, by definition, `intrinsicEigenbasis = b`.
+  change ⟪b i, tensorHeatSemigroup_intrinsic (I := I) (M := M) g r s t u₀⟫_ℝ =
+    Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) * ⟪b i, u₀⟫_ℝ
+  -- Expand the intrinsic semigroup as its eigenbasis series.
+  have h_apply :
+      tensorHeatSemigroup_intrinsic (I := I) (M := M) g r s t u₀ =
+        ∑' j, heatCoeff (TensorEigenIdx.lambda (I := I) (M := M)) t j •
+          ⟪b j, u₀⟫_ℝ • b j := by
+    unfold tensorHeatSemigroup_intrinsic
+    rw [abstractSpectralSemigroup_apply_of_nonneg b
+      (intrinsic_lambda_nonneg (I := I) (M := M) g r s) ht u₀]
+  rw [h_apply]
+  -- Map the series through the continuous functional `⟪b i, ·⟫`.
+  have h_summable :=
+    summable_heatTerm b (intrinsic_lambda_nonneg (I := I) (M := M) g r s) ht u₀
+  have h_hsum := h_summable.hasSum
+  have h_inner_hsum := h_hsum.mapL (innerSL ℝ (b i))
+  have h_orthonormal : Orthonormal ℝ b := b.orthonormal
+  have h_inner_eq : ∀ j : TensorEigenIdx (I := I) (M := M) g r s,
+      ⟪b i, b j⟫_ℝ = if j = i then (1 : ℝ) else 0 := by
+    intro j
+    rw [show ⟪b i, b j⟫_ℝ = ⟪b j, b i⟫_ℝ from real_inner_comm _ _]
+    exact (orthonormal_iff_ite (𝕜 := ℝ) (v := b)).mp h_orthonormal j i
+  -- Each mapped term collapses to a Kronecker delta.
+  have h_summand_eq : ∀ j : TensorEigenIdx (I := I) (M := M) g r s,
+      (innerSL ℝ (b i))
+          (heatCoeff (TensorEigenIdx.lambda (I := I) (M := M)) t j •
+            ⟪b j, u₀⟫_ℝ • b j) =
+        if j = i then
+          heatCoeff (TensorEigenIdx.lambda (I := I) (M := M)) t j *
+            ⟪b j, u₀⟫_ℝ
+        else 0 := by
+    intro j
+    change ⟪b i,
+        heatCoeff (TensorEigenIdx.lambda (I := I) (M := M)) t j •
+          ⟪b j, u₀⟫_ℝ • b j⟫_ℝ = _
+    rw [real_inner_smul_right, real_inner_smul_right, h_inner_eq]
+    by_cases hji : j = i
+    · subst hji; simp
+    · simp [hji]
+  have h_inner_hsum' : HasSum (fun j =>
+      if j = i then
+        heatCoeff (TensorEigenIdx.lambda (I := I) (M := M)) t j *
+          ⟪b j, u₀⟫_ℝ
+      else 0)
+      ((innerSL ℝ (b i))
+        (∑' j, heatCoeff (TensorEigenIdx.lambda (I := I) (M := M)) t j •
+          ⟪b j, u₀⟫_ℝ • b j)) := by
+    convert h_inner_hsum using 1
+    funext j
+    exact (h_summand_eq j).symm
+  -- The Kronecker-delta series sums to the `i`-th term.
+  have h_tsum_ite :
+      ∑' j : TensorEigenIdx (I := I) (M := M) g r s,
+        (if j = i then
+          heatCoeff (TensorEigenIdx.lambda (I := I) (M := M)) t j *
+            ⟪b j, u₀⟫_ℝ
+        else 0) =
+      heatCoeff (TensorEigenIdx.lambda (I := I) (M := M)) t i *
+        ⟪b i, u₀⟫_ℝ := by
+    rw [tsum_ite_eq i]
+  have h_eq := h_inner_hsum'.tsum_eq
+  rw [h_tsum_ite] at h_eq
+  -- `innerSL (b i) x = ⟪b i, x⟫` definitionally, so `h_eq.symm` reads the
+  -- inner product of `b i` against the series as the `i`-th heat term.
+  have h_inner_val :
+      ⟪b i, ∑' j, heatCoeff (TensorEigenIdx.lambda (I := I) (M := M)) t j •
+            ⟪b j, u₀⟫_ℝ • b j⟫_ℝ =
+        heatCoeff (TensorEigenIdx.lambda (I := I) (M := M)) t i *
+          ⟪b i, u₀⟫_ℝ := h_eq.symm
+  rw [h_inner_val, heatCoeff_def]
+
 /-! ## Sanity tests -/
 
 example (g : SmoothRiemannianMetric I M) (r s : ℕ) (t : ℝ) :
