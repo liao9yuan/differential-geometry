@@ -1106,6 +1106,7 @@ import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.PointwiseLocal
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.UniformExistence
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.ChartLocalPicardProducer
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.BanachIC
+import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.VariationalODE
 import DifferentialGeometry.PDE.RicciFlow.Pullback.PushforwardVF
 import DifferentialGeometry.PDE.RicciFlow.Pullback.Metric
 import DifferentialGeometry.PDE.RicciFlow.Pullback.CartanFormula
