@@ -99,6 +99,27 @@ private lemma mfderiv_eq_fderiv_extChartAt_at_basepoint
   have happ := congrArg (fun L : ℝ →L[ℝ] E => L (1 : ℝ)) hchain
   exact happ.symm
 
+/-- Moving-foot characterisation of a one-parameter `mfderiv` section.
+For a smooth slice `g : ℝ → M` and a time `t₀`, the model-space
+representative of `mfderiv g t₀ (1 : ℝ)` — i.e. the element of
+`TangentSpace I (g t₀) := E` obtained by the canonical type synonym —
+coincides with the Fréchet derivative of the curve pulled back through
+the chart **at its own foot** `g t₀`, namely
+`extChartAt I (g t₀) ∘ g`, evaluated at `t₀` and applied to `1`.
+
+This is the precise statement that the model representative of an
+`mfderiv` is read off in the chart centred at the foot (Mathlib's
+`writtenInExtChartAt` convention), specialised here through the
+basepoint chart bridge `mfderiv_eq_fderiv_extChartAt_at_basepoint`. It
+is the moving-foot ingredient that the fixed-basepoint identities below
+must reconcile against the chart-`α` representation via the
+chart-transition map. -/
+private lemma mfderiv_eq_fderiv_extChartAt_at_foot
+    (g : ℝ → M) (t₀ : ℝ) (hg : MDifferentiableAt 𝓘(ℝ, ℝ) I g t₀) :
+    (mfderiv 𝓘(ℝ, ℝ) I g t₀ (1 : ℝ) : E) =
+      fderiv ℝ (fun u : ℝ => extChartAt I (g t₀) (g u)) t₀ (1 : ℝ) :=
+  mfderiv_eq_fderiv_extChartAt_at_basepoint (I := I) g (g t₀) t₀ hg rfl
+
 /-- Fixed-chart variant of `commute_ds_dt`: the chart-local covariant
 derivatives along the parameter directions of a smooth variation
 commute when the chart basepoint is taken to be `f s t`.
