@@ -292,6 +292,30 @@ noncomputable def tensorResolventEigenspaceONB_ofCompact
   stdOrthonormalBasis ℝ
     (tensorResolventEigenspace (I := I) (M := M) g r s μ.val)
 
+/-! ## Glue: the `h_atlas`- and `h_compact`-keyed eigenbases coincide
+
+Both per-eigenspace orthonormal bases are `stdOrthonormalBasis ℝ (eigenspace)`;
+they differ only in the supplied `FiniteDimensional` instance
+(`μ.finiteDimensional h_atlas` vs `μ.finiteDimensional_ofCompact h_compact`).
+Since `FiniteDimensional` is a subsingleton class, these two instances are
+equal, hence so are the two bases — and the two sigma-indexed eigenbasis vector
+families. This glue lets every `h_atlas`-keyed downstream fact about the
+eigenbasis transfer verbatim to the `h_compact`-keyed (HLCC-free) vector. -/
+
+/-- The `h_atlas`- and `h_compact`-keyed per-eigenspace orthonormal bases
+coincide: both are `stdOrthonormalBasis ℝ (eigenspace)` and the two supplied
+`FiniteDimensional` instances are equal by subsingleton-ness. -/
+theorem tensorResolventEigenspaceONB_ofCompact_eq
+    {g : SmoothRiemannianMetric I M} {r s : ℕ}
+    (h_atlas : HasLocallyConstantChartAt H M)
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (μ : TensorNonzeroResolventEigenvalue (I := I) (M := M) g r s) :
+    tensorResolventEigenspaceONB (I := I) (M := M) h_atlas μ =
+      tensorResolventEigenspaceONB_ofCompact (I := I) (M := M) h_compact μ := by
+  unfold tensorResolventEigenspaceONB tensorResolventEigenspaceONB_ofCompact
+  congr 1
+
 /-! ## Orthogonality of the eigenspace family
 
 Standard consequence of self-adjointness of `R`. -/
@@ -361,6 +385,41 @@ noncomputable def tensorResolventEigenbasisVec_ofCompact
         (I := I) (M := M) h_compact i.1 i.2 :
       tensorResolventEigenspace (I := I) (M := M) g r s i.1.val) :
     TensorL2 r s g)
+
+/-- **LEAF-1 glue.** The `h_atlas`- and `h_compact`-keyed sigma-indexed
+eigenbasis vector families coincide: at every index `i`, the two eigenbasis
+vectors are equal in `TensorL2 r s g`. By `tensorResolventEigenspaceONB_ofCompact_eq`
+the underlying per-eigenspace orthonormal bases agree. -/
+theorem tensorResolventEigenbasisVec_ofCompact_eq
+    {g : SmoothRiemannianMetric I M} {r s : ℕ}
+    (h_atlas : HasLocallyConstantChartAt H M)
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (i : Σ μ : TensorNonzeroResolventEigenvalue
+            (I := I) (M := M) g r s,
+          Fin (Module.finrank ℝ
+            (tensorResolventEigenspace
+              (I := I) (M := M) g r s μ.val))) :
+    tensorResolventEigenbasisVec (I := I) (M := M) h_atlas i =
+      tensorResolventEigenbasisVec_ofCompact (I := I) (M := M) h_compact i := by
+  unfold tensorResolventEigenbasisVec tensorResolventEigenbasisVec_ofCompact
+  rw [tensorResolventEigenspaceONB_ofCompact_eq
+    (I := I) (M := M) h_atlas h_compact i.1]
+
+/-- **LEAF-1 glue, function form.** The whole `h_atlas`-keyed eigenbasis vector
+family equals the `h_compact`-keyed one. -/
+theorem tensorResolventEigenbasisVec_ofCompact_eq_fun
+    {g : SmoothRiemannianMetric I M} {r s : ℕ}
+    (h_atlas : HasLocallyConstantChartAt H M)
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s)) :
+    tensorResolventEigenbasisVec (I := I) (M := M) (g := g) (r := r) (s := s)
+        h_atlas =
+      tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+        (g := g) (r := r) (s := s) h_compact :=
+  funext fun i =>
+    tensorResolventEigenbasisVec_ofCompact_eq (I := I) (M := M)
+      h_atlas h_compact i
 
 /-- Each eigenbasis vector lies in its eigenspace. -/
 theorem tensorResolventEigenbasisVec_mem
