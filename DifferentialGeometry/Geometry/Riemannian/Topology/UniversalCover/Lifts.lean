@@ -437,6 +437,7 @@ theorem proj_lipschitz [RegularSpace
 
 end ProjLipschitz
 
+open Manifold MeasureTheory in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Tail of a Cauchy sequence lies in a single sheet.**
@@ -482,16 +483,247 @@ theorem tail_in_single_sheet [Nonempty M] [CompleteSpace M]
       proj (X := M) y' = y ∧ y' ∈ e.source ∧
         (∀ z ∈ e.source, proj (X := M) z = e z) ∧
         (∀ᶠ n in Filter.atTop, x' n ∈ e.source) := by
-  -- Remaining obligation (single hard geometric leaf): sheet separation for the
-  -- principled lifted extended metric.  `proj` is `1`-Lipschitz and locally
-  -- isometric, and `UniversalCover.isCoveringMap` provides an evenly-covered `U ∋ y`
-  -- whose preimage is a disjoint union of sheets, each a section of `proj`.  One must
-  -- exhibit `ε > 0` so that points of distinct sheets projecting into `U` are at
-  -- principled-`edist ≥ ε` (a local injectivity-radius lower bound for the cover);
-  -- then `hCauchy` traps a tail of `x'` inside one sheet `e.source`, and `hlim`
-  -- locates the lift `y'` of `y` in that sheet.  All of `lift_the_limit` and
-  -- `completeSpace_universalCover_lifted` are already discharged from this output.
-  sorry
+  classical
+  -- Install the principled lifted extended metric on the cover.
+  letI hRB : RiemannianBundle
+      (fun (x : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) ↦
+        TangentSpace I x) :=
+    ⟨(liftedMetric (I := I) g).toRiemannianMetric⟩
+  letI hUCem : PseudoEMetricSpace
+      (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
+    uc_pseudoEMetricSpace (I := I) (M := M) (liftedMetric (I := I) g)
+  haveI hUCRiem :
+      IsRiemannianManifold I
+        (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
+    ⟨fun _ _ ↦ rfl⟩
+  -- The base bundle inner product agrees with `g.inner` (polarization from the
+  -- diagonal identity `hEnormBase`), giving the continuous-Riemannian-bundle
+  -- structure needed for the riemannian-distance neighbourhood basis on `M`.
+  have hbundle_inner : ∀ (x : M) (v w : TangentSpace I x),
+      (inner ℝ v w : ℝ) = g.inner x v w := by
+    intro x v w
+    have hpos0 : ∀ z : TangentSpace I x, 0 ≤ g.inner x z z := by
+      intro z
+      rcases eq_or_ne z 0 with rfl | hz
+      · simp
+      · exact (g.pos x z hz).le
+    have hdiag : ∀ z : TangentSpace I x, (inner ℝ z z : ℝ) = g.inner x z z := by
+      intro z
+      have h1 : ‖z‖ = Real.sqrt (g.inner x z z) := by
+        have hz := hEnormBase x z
+        have hnn : 0 ≤ Real.sqrt (g.inner x z z) := Real.sqrt_nonneg _
+        rw [← ofReal_norm_eq_enorm] at hz
+        exact (ENNReal.ofReal_eq_ofReal_iff (norm_nonneg z) hnn).mp hz
+      rw [real_inner_self_eq_norm_sq, h1, Real.sq_sqrt (hpos0 z)]
+    have hsymm_g : g.inner x v w = g.inner x w v := g.symm x v w
+    have hpolar : (inner ℝ v w : ℝ) =
+        ((inner ℝ (v + w) (v + w) : ℝ) - inner ℝ v v - inner ℝ w w) / 2 := by
+      rw [real_inner_add_add_self]; ring
+    have hpolar_g : g.inner x v w =
+        (g.inner x (v + w) (v + w) - g.inner x v v - g.inner x w w) / 2 := by
+      have e1 : g.inner x (v + w) (v + w) =
+          g.inner x v v + g.inner x v w + g.inner x w v + g.inner x w w := by
+        simp [map_add, ContinuousLinearMap.add_apply]; ring
+      rw [e1, hsymm_g]; ring
+    rw [hpolar, hpolar_g, hdiag (v + w), hdiag v, hdiag w]
+  haveI hCRB : IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x) :=
+    ⟨g.inner, g.contMDiff.continuous, fun x v w => hbundle_inner x v w⟩
+  -- `M` is a regular space (finite-dimensional manifold ⇒ locally compact ⇒ regular).
+  haveI hRegM : RegularSpace M := by
+    haveI : LocallyCompactSpace M :=
+      Manifold.locallyCompact_of_finiteDimensional (M := M) I
+    infer_instance
+  -- Abbreviation for the projection.
+  set p : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M :=
+    proj (X := M) with hp_def
+  -- The covering-map even-covering at `y`: an evenly covered open `U ∋ y`,
+  -- with trivialization `t : Trivialization (p⁻¹{y}) p` whose base set is `U`.
+  haveI : Nonempty (p ⁻¹' {y}) := by
+    haveI hpc : PathConnectedSpace M :=
+      (pathConnectedSpace_iff_connectedSpace).mpr inferInstance
+    obtain ⟨γ0⟩ := PathConnectedSpace.joined (default : M) y
+    exact ⟨⟨⟨y, Path.Homotopic.Quotient.mk γ0⟩, rfl⟩⟩
+  have hEC :
+      IsEvenlyCovered p y (p ⁻¹' {y}) :=
+    (UniversalCover.isCoveringMap (X := M)) y
+  set t : Trivialization (p ⁻¹' {y}) p := hEC.toTrivialization with ht_def
+  have hyU : y ∈ t.baseSet := hEC.mem_toTrivialization_baseSet
+  -- `U := t.baseSet` is an open neighbourhood of `y`.
+  set U : Set M := t.baseSet with hU_def
+  have hUopen : IsOpen U := t.open_baseSet
+  have hUnhds : U ∈ 𝓝 y := hUopen.mem_nhds hyU
+  -- Pick a radius `2ε` so that the riemannian-ball of radius `2ε` around `y` is in `U`.
+  obtain ⟨c, hc_pos, hc_sub⟩ :=
+    setOf_riemannianEDist_lt_subset_nhds' (I := I) (M := M) hUnhds
+  -- Split `c` into `ε := c/2`, so two `ε`-controlled steps land within `c`.
+  set ε : ENNReal := c / 2 with hε_def
+  have hε_pos : 0 < ε := ENNReal.half_pos (by exact_mod_cast hc_pos.ne')
+  have htwoε : ε + ε ≤ c := by
+    rw [hε_def, ENNReal.add_halves]
+  ----------------------------------------------------------------------------
+  -- Step 1: the projected tail eventually lands in the riemannian-`ε`-ball of `y`.
+  ----------------------------------------------------------------------------
+  have hproj_eps : ∀ᶠ n in Filter.atTop,
+      Manifold.riemannianEDist I y (p (x' n)) < ε := by
+    have hball : {z : M | Manifold.riemannianEDist I y z < ε} ∈ 𝓝 y := by
+      have := eventually_riemannianEDist_lt (I := I) (M := M) y hε_pos
+      exact this
+    exact hlim.eventually hball
+  ----------------------------------------------------------------------------
+  -- Step 2: if `z₁, z₂ ∈ t.source`, `riemannianEDist y (p z₁) < ε`, and
+  --   `edist z₁ z₂ < ε`, then `z₁, z₂` share the same fibre coordinate.
+  ----------------------------------------------------------------------------
+  have hsheet :
+      ∀ z₁ z₂ :
+        DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M,
+        Manifold.riemannianEDist I y (p z₁) < ε →
+        edist z₁ z₂ < ε →
+        (t z₁).2 = (t z₂).2 := by
+    intro z₁ z₂ hz₁ball hz₁z₂
+    -- A short path `γ` from `z₁` to `z₂` of length `< ε`.
+    have hedist : Manifold.riemannianEDist I z₁ z₂ < ε := by
+      rw [← IsRiemannianManifold.out (I := I)
+            (M := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) z₁ z₂]
+      exact hz₁z₂
+    obtain ⟨γ, hγ0, hγ1, hγ_smooth, hγlen⟩ :=
+      Manifold.exists_lt_of_riemannianEDist_lt (I := I)
+        (M := DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) hedist
+    -- Every point of the lifted path projects into `U` (hence the whole path stays
+    -- in `p⁻¹U = t.source`).
+    have hin_source : ∀ s ∈ Set.Icc (0 : ℝ) 1, γ s ∈ t.source := by
+      intro s hs
+      have hproj_smooth_full :
+          ContMDiffOn 𝓘(ℝ, ℝ) I 1 (p ∘ γ) (Set.Icc (0 : ℝ) 1) :=
+        ((proj_contMDiff (I := I) (M := M)).of_le (by norm_num)).comp_contMDiffOn hγ_smooth
+      have hproj_smooth_s :
+          ContMDiffOn 𝓘(ℝ, ℝ) I 1 (p ∘ γ) (Set.Icc (0 : ℝ) s) :=
+        hproj_smooth_full.mono (Set.Icc_subset_Icc le_rfl hs.2)
+      have hbnd1 :
+          Manifold.riemannianEDist I (p z₁) (p (γ s)) ≤
+            pathELength I (p ∘ γ) 0 s := by
+        apply Manifold.riemannianEDist_le_pathELength (I := I) (M := M) hproj_smooth_s
+        · simp [Function.comp_apply, hγ0]
+        · simp [Function.comp_apply]
+        · exact hs.1
+      have hlen_le :
+          pathELength I (p ∘ γ) 0 s ≤ pathELength I (p ∘ γ) 0 1 :=
+        pathELength_mono le_rfl hs.2
+      have hlen_eq :
+          pathELength I (p ∘ γ) 0 1 = pathELength I γ 0 1 :=
+        proj_pathELength_eq (I := I) (M := M) g hEnormBase hEnormCover hγ_smooth
+      have hbnd2 :
+          Manifold.riemannianEDist I (p z₁) (p (γ s)) < ε := by
+        calc Manifold.riemannianEDist I (p z₁) (p (γ s))
+            ≤ pathELength I (p ∘ γ) 0 s := hbnd1
+          _ ≤ pathELength I (p ∘ γ) 0 1 := hlen_le
+          _ = pathELength I γ 0 1 := hlen_eq
+          _ < ε := hγlen
+      have hcomb : Manifold.riemannianEDist I y (p (γ s)) < c := by
+        calc Manifold.riemannianEDist I y (p (γ s))
+            ≤ Manifold.riemannianEDist I y (p z₁) +
+                Manifold.riemannianEDist I (p z₁) (p (γ s)) :=
+              Manifold.riemannianEDist_triangle
+          _ < ε + ε := ENNReal.add_lt_add hz₁ball hbnd2
+          _ ≤ c := htwoε
+      have hmemU : p (γ s) ∈ U := hc_sub hcomb
+      rw [t.mem_source]; exact hmemU
+    -- The fibre coordinate `fun s => (t (γ s)).2` is continuous on `[0,1]` into the
+    -- discrete fibre, hence constant on the connected interval.
+    have hfib_const :
+        (t (γ 0)).2 = (t (γ 1)).2 := by
+      have hcont_g2 : ContinuousOn (fun s : ℝ => (t (γ s)).2) (Set.Icc (0:ℝ) 1) := by
+        have hγcont : ContinuousOn γ (Set.Icc (0:ℝ) 1) :=
+          hγ_smooth.continuousOn
+        have hmaps : Set.MapsTo γ (Set.Icc (0:ℝ) 1) t.source := hin_source
+        have htcont : ContinuousOn (fun z => t z) t.source :=
+          t.continuousOn_toFun
+        exact (continuous_snd.comp_continuousOn (htcont.comp hγcont hmaps))
+      have hpre : IsPreconnected (Set.Icc (0:ℝ) 1) := isPreconnected_Icc
+      haveI : DiscreteTopology (p ⁻¹' {y}) := hEC.discreteTopology_fiber
+      have h0 : (0:ℝ) ∈ Set.Icc (0:ℝ) 1 := ⟨le_rfl, zero_le_one⟩
+      have h1 : (1:ℝ) ∈ Set.Icc (0:ℝ) 1 := ⟨zero_le_one, le_rfl⟩
+      exact hpre.constant hcont_g2 h0 h1
+    rw [hγ0, hγ1] at hfib_const
+    exact hfib_const
+  ----------------------------------------------------------------------------
+  -- Step 3: Cauchy + the `ε`-ball tail pin the tail (n ≥ N) to one fibre point.
+  ----------------------------------------------------------------------------
+  rw [EMetric.cauchySeq_iff] at hCauchy
+  obtain ⟨N₁, hN₁⟩ := hCauchy ε hε_pos
+  obtain ⟨N₂, hN₂⟩ := Filter.eventually_atTop.mp hproj_eps
+  set N := max N₁ N₂ with hN_def
+  set pt : p ⁻¹' {y} := (t (x' N)).2 with hpt_def
+  have htail_fib : ∀ n, N ≤ n → (t (x' n)).2 = pt := by
+    intro n hn
+    have hnN₁ : N₁ ≤ n := le_trans (le_max_left _ _) hn
+    have hNN₁ : N₁ ≤ N := le_max_left _ _
+    have hNN₂ : N₂ ≤ N := le_max_right _ _
+    have hballN : Manifold.riemannianEDist I y (p (x' N)) < ε := hN₂ N hNN₂
+    have hdistNn : edist (x' N) (x' n) < ε := hN₁ N hNN₁ n hnN₁
+    exact (hsheet (x' N) (x' n) hballN hdistNn).symm
+  ----------------------------------------------------------------------------
+  -- Step 4: build the sheet `OpenPartialHomeomorph` `e` over `U` at fibre point `pt`.
+  ----------------------------------------------------------------------------
+  set slice : OpenPartialHomeomorph (M × (p ⁻¹' {y})) M :=
+    { toFun := Prod.fst
+      invFun := fun b => (b, pt)
+      source := U ×ˢ ({pt} : Set (p ⁻¹' {y}))
+      target := U
+      map_source' := fun q hq => hq.1
+      map_target' := fun b hb => ⟨hb, rfl⟩
+      left_inv' := fun q hq => by
+        obtain ⟨hq1, hq2⟩ := hq
+        simp only [Set.mem_singleton_iff] at hq2
+        exact Prod.ext rfl hq2.symm
+      right_inv' := fun b _ => rfl
+      open_source := hUopen.prod (by
+        haveI : DiscreteTopology (p ⁻¹' {y}) := hEC.discreteTopology_fiber
+        exact isOpen_discrete ({pt} : Set (p ⁻¹' {y})))
+      open_target := hUopen
+      continuousOn_toFun := continuousOn_fst
+      continuousOn_invFun := by fun_prop } with hslice_def
+  set e : OpenPartialHomeomorph
+      (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) M :=
+    t.toOpenPartialHomeomorph.trans slice with he_def
+  refine ⟨t.toOpenPartialHomeomorph.symm (y, pt), e, ?_, ?_, ?_, ?_⟩
+  · -- `proj (t.symm (y, pt)) = y`.
+    exact t.proj_symm_apply' hyU
+  · -- `t.symm (y, pt) ∈ e.source`.
+    have hmemsrc : t.toOpenPartialHomeomorph.symm (y, pt) ∈ t.source :=
+      t.map_target (t.mem_target.2 hyU)
+    rw [he_def, OpenPartialHomeomorph.trans_source]
+    refine ⟨hmemsrc, ?_⟩
+    have happ : t (t.toOpenPartialHomeomorph.symm (y, pt)) = (y, pt) :=
+      t.apply_symm_apply (t.mem_target.2 hyU)
+    show t (t.toOpenPartialHomeomorph.symm (y, pt)) ∈ slice.source
+    rw [happ]
+    exact ⟨hyU, Set.mem_singleton _⟩
+  · -- `proj = e` on `e.source`.
+    intro z hz
+    rw [he_def, OpenPartialHomeomorph.trans_source] at hz
+    obtain ⟨hz_src, hz_slice⟩ := hz
+    have hez : e z = (t z).1 := rfl
+    rw [hez]
+    exact (t.coe_fst hz_src).symm
+  · -- eventually `x' n ∈ e.source`.
+    filter_upwards [Filter.eventually_ge_atTop N] with n hn
+    have hnN₂ : N₂ ≤ n := le_trans (le_max_right _ _) hn
+    have hballn : Manifold.riemannianEDist I y (p (x' n)) < ε := hN₂ n hnN₂
+    have hcn : Manifold.riemannianEDist I y (p (x' n)) < c :=
+      lt_of_lt_of_le hballn (by rw [hε_def]; exact ENNReal.half_le_self)
+    have hmemU : p (x' n) ∈ U := hc_sub hcn
+    have hx_src : x' n ∈ t.source := t.mem_source.2 hmemU
+    rw [he_def, OpenPartialHomeomorph.trans_source]
+    refine ⟨hx_src, ?_⟩
+    show t (x' n) ∈ slice.source
+    have hfst : (t (x' n)).1 = p (x' n) := t.coe_fst hx_src
+    have hsnd : (t (x' n)).2 = pt := htail_fib n hn
+    rw [hslice_def]
+    refine ⟨?_, ?_⟩
+    · show (t (x' n)).1 ∈ U
+      rw [hfst]; exact hmemU
+    · show (t (x' n)).2 ∈ ({pt} : Set (p ⁻¹' {y}))
+      rw [hsnd]; exact Set.mem_singleton _
 
 /-- **Each sheet over an evenly covered open set is a homeomorphism with the
 base.** Given a point `y ∈ M`, there exists an open neighbourhood `U ∋ y`
