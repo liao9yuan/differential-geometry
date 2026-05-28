@@ -378,6 +378,7 @@ import DifferentialGeometry.Analysis.Sobolev.WithBoundary.EmbeddingSubcritical
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
 import DifferentialGeometry.Analysis.Sobolev.Chart.HolderMonoExponent
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevEmbedding
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.LocalBallL2Embedding
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbeddingCInfty
 import DifferentialGeometry.Analysis.Sobolev.WithBoundary.IteratedSobolevEmbedding
 import DifferentialGeometry.Analysis.Sobolev.WithBoundary.MorreyManifold
