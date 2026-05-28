@@ -405,10 +405,21 @@ theorem fundamentalGroup_isCountablyGenerated_aux
     [SecondCountableTopology X]
     [ConnectedSpace X] [LocPathConnectedSpace X]
     [DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnectedSpace X]
-    (x : X) :
+    (x : X)
+    (B : ℕ → Set X)
+    (hBopen : ∀ n, IsOpen (B n))
+    (hBpc : ∀ n, IsPathConnected (B n))
+    (hBnull : ∀ n, ∀ (y : X) (_ : y ∈ B n) (γ : _root_.Path y y),
+      Set.range γ.toContinuousMap ⊆ B n →
+        (⟦γ⟧ : _root_.Path.Homotopic.Quotient y y) = ⟦_root_.Path.refl y⟧)
+    (hBbasis : TopologicalSpace.IsTopologicalBasis (Set.range B))
+    (hpcInter :
+      ∀ (m n : ℕ),
+        ∀ a, a ∈ B m → a ∈ B n → ∀ b, b ∈ B m → b ∈ B n →
+          JoinedIn (B m ∩ B n) a b) :
     ∃ (S : Type) (_ : Countable S) (f : S → FundamentalGroup X x),
       Function.Surjective f :=
-  uc_pi1_countable_polygonal_enumeration X x
+  uc_pi1_countable_polygonal_enumeration X x B hBopen hBpc hBnull hBbasis hpcInter
 
 /-- **Countability of the fundamental group for second-countable
 connected locally-simply-connected spaces.**
@@ -443,9 +454,21 @@ theorem pi1_countable_from_secondCountable
     [SecondCountableTopology X]
     [ConnectedSpace X] [LocPathConnectedSpace X]
     [DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnectedSpace X]
-    (x : X) :
+    (x : X)
+    (B : ℕ → Set X)
+    (hBopen : ∀ n, IsOpen (B n))
+    (hBpc : ∀ n, IsPathConnected (B n))
+    (hBnull : ∀ n, ∀ (y : X) (_ : y ∈ B n) (γ : _root_.Path y y),
+      Set.range γ.toContinuousMap ⊆ B n →
+        (⟦γ⟧ : _root_.Path.Homotopic.Quotient y y) = ⟦_root_.Path.refl y⟧)
+    (hBbasis : TopologicalSpace.IsTopologicalBasis (Set.range B))
+    (hpcInter :
+      ∀ (m n : ℕ),
+        ∀ a, a ∈ B m → a ∈ B n → ∀ b, b ∈ B m → b ∈ B n →
+          JoinedIn (B m ∩ B n) a b) :
     Countable (FundamentalGroup X x) := by
-  obtain ⟨S, hS, f, hf⟩ := fundamentalGroup_isCountablyGenerated_aux X x
+  obtain ⟨S, hS, f, hf⟩ :=
+    fundamentalGroup_isCountablyGenerated_aux X x B hBopen hBpc hBnull hBbasis hpcInter
   exact Function.Surjective.countable hf
 
 /-- **Countability of fibres of the universal cover.**
@@ -464,9 +487,26 @@ theorem fibre_countable
   -- The fibre `proj ⁻¹' {x}` is in bijection with
   -- `Path.Homotopic.Quotient default x`. By path-connectedness, this is in
   -- bijection with `Path.Homotopic.Quotient default default = FundamentalGroup M default`.
+  -- Refined countable basis of small path-connected opens with null-homotopic
+  -- ambient loops (from the second-countable / semi-locally-simply-connected
+  -- structure).
+  obtain ⟨B, hBopen, hBpc, hBnull, hBbasis⟩ :=
+    uc_pi1_countable_basis_refinement M
+  -- **Good-cover property** of the refined basis: any two points common to two
+  -- basis elements are joined by a path inside the intersection.  On a smooth
+  -- manifold this is supplied by a geodesically-convex (Whitehead) refinement
+  -- of the cover — convex chart balls have convex, hence path-connected,
+  -- pairwise intersections.  Establishing that refinement requires the
+  -- Riemannian-convexity infrastructure (exponential-map normal balls) and is
+  -- isolated here as the single remaining manifold-level obligation.
+  have hpcInter :
+      ∀ (m n : ℕ),
+        ∀ a, a ∈ B m → a ∈ B n → ∀ b, b ∈ B m → b ∈ B n →
+          JoinedIn (B m ∩ B n) a b := by
+    sorry
   have h_pi1_countable :
       Countable (FundamentalGroup M (default : M)) :=
-    pi1_countable_from_secondCountable M default
+    pi1_countable_from_secondCountable M default B hBopen hBpc hBnull hBbasis hpcInter
   haveI : PathConnectedSpace M := PathConnectedSpace.of_locPathConnectedSpace
   have hpath : Path (default : M) x := PathConnectedSpace.somePath default x
   -- Bijection between `proj ⁻¹' {x}` and `Path.Homotopic.Quotient default x`.

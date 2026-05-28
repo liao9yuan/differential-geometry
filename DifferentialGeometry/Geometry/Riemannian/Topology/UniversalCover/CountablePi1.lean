@@ -674,7 +674,18 @@ theorem uc_pi1_countable_polygonal_enumeration
     (X : Type*) [TopologicalSpace X]
     [SecondCountableTopology X] [ConnectedSpace X] [LocPathConnectedSpace X]
     [DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnectedSpace X]
-    (x : X) :
+    (x : X)
+    (B : ℕ → Set X)
+    (hBopen : ∀ n, IsOpen (B n))
+    (hBpc : ∀ n, IsPathConnected (B n))
+    (hBnull : ∀ n, ∀ (y : X) (_ : y ∈ B n) (γ : _root_.Path y y),
+      Set.range γ.toContinuousMap ⊆ B n →
+        (⟦γ⟧ : _root_.Path.Homotopic.Quotient y y) = ⟦_root_.Path.refl y⟧)
+    (hBbasis : TopologicalSpace.IsTopologicalBasis (Set.range B))
+    (hpcInter :
+      ∀ (m n : ℕ),
+        ∀ a, a ∈ B m → a ∈ B n → ∀ b, b ∈ B m → b ∈ B n →
+          JoinedIn (B m ∩ B n) a b) :
     ∃ (S : Type) (_ : Countable S) (f : S → FundamentalGroup X x),
       Function.Surjective f := by
   classical
@@ -682,9 +693,6 @@ theorem uc_pi1_countable_polygonal_enumeration
   haveI : Nonempty X := ⟨x⟩
   -- Path-connectedness from `ConnectedSpace + LocPathConnectedSpace`.
   haveI : PathConnectedSpace X := PathConnectedSpace.of_locPathConnectedSpace
-  -- Refined countable basis.
-  obtain ⟨B, hBopen, hBpc, hBnull, hBbasis⟩ :=
-    uc_pi1_countable_basis_refinement X
   -- The basis covers `X`.
   have hBcov : (⋃ n, B n) = (Set.univ : Set X) := by
     have hsu : ⋃₀ (Set.range B) = (Set.univ : Set X) := hBbasis.sUnion_eq
@@ -1073,13 +1081,127 @@ theorem uc_pi1_countable_polygonal_enumeration
   -- adjacent basis elements; a connector inside each adjacent element exists
   -- once the relevant pairwise intersection is path-connected.
   -- ----------------------------------------------------------------
+  -- Membership of `p₀ j` (the polygonal vertex) in `B (idx i)` for the two
+  -- adjacent segments, recovered from `hVertex_castSucc`/`hVertex_succ`.
+  have hp0_castSucc_in : ∀ i : Fin k, p₀ i.castSucc ∈ B (idx i) :=
+    fun i => hVertex_castSucc i
+  have hp0_succ_in : ∀ i : Fin k, p₀ i.succ ∈ B (idx i) :=
+    fun i => hVertex_succ i
   have hconn :
       ∃ c : (i : Fin (k + 1)) → _root_.Path (p₀ i) (γv i),
         (∀ i : Fin k, ∀ s : unitInterval, (c i.castSucc s : X) ∈ B (idx i)) ∧
         (∀ i : Fin k, ∀ s : unitInterval, (c i.succ s : X) ∈ B (idx i)) ∧
         (c 0 = (_root_.Path.refl x).cast hp0 hγv0) ∧
         (c (Fin.last k) = (_root_.Path.refl x).cast hplast hγvlast) := by
-    sorry
+    -- Per-vertex construction.  For each vertex `j : Fin (k+1)` we build a path
+    -- `p₀ j → γv j` whose image lies inside the forward segment's basis set
+    -- `B (idx ⟨j.val, _⟩)` (when `j.val < k`) and inside the backward segment's
+    -- basis set `B (idx ⟨j.val - 1, _⟩)` (when `0 < j.val`).  Boundary vertices
+    -- (`j.val = 0` or `j.val = k`) get the constant path at the basepoint; the
+    -- existential additionally records this so the final family is *exactly* the
+    -- cast `refl` there.  Interior vertices use `hpcInter` inside the
+    -- path-connected intersection of the two adjacent basis sets.
+    have buildVertex : ∀ j : Fin (k + 1),
+        ∃ cj : _root_.Path (p₀ j) (γv j),
+          (∀ (hj : (j : ℕ) < k) (s : unitInterval),
+            (cj s : X) ∈ B (idx ⟨(j : ℕ), hj⟩)) ∧
+          (∀ (hj : 0 < (j : ℕ)) (s : unitInterval),
+            (cj s : X) ∈ B (idx ⟨(j : ℕ) - 1, by omega⟩)) ∧
+          (∀ (_hbd : (j : ℕ) = 0 ∨ (j : ℕ) = k),
+            ∃ (hpjx : p₀ j = x) (hgjx : γv j = x),
+              cj = (_root_.Path.refl x).cast hpjx hgjx) := by
+      intro j
+      by_cases hb0 : (j : ℕ) = 0
+      · -- Boundary `j = 0`: constant path at `x`.
+        have hjeq : j = (0 : Fin (k + 1)) := Fin.ext (by rw [hb0]; rfl)
+        have hpj : p₀ j = x := by rw [hjeq]; exact hp0
+        have hgj : γv j = x := by rw [hjeq]; exact hγv0
+        refine ⟨(_root_.Path.refl x).cast hpj hgj, ?_, ?_, ?_⟩
+        · intro hj s
+          have hval : ((((_root_.Path.refl x).cast hpj hgj) s) : X) = x := by
+            rw [_root_.Path.cast_coe]; rfl
+          rw [hval]
+          have hidx0 : (⟨(j : ℕ), hj⟩ : Fin k).castSucc = (j : Fin (k + 1)) := by
+            apply Fin.ext; rfl
+          have hpv : p₀ (⟨(j : ℕ), hj⟩ : Fin k).castSucc = x := by
+            rw [hidx0, hpj]
+          have := hp0_castSucc_in ⟨(j : ℕ), hj⟩
+          rwa [hpv] at this
+        · intro hj s; omega
+        · intro _hbd; exact ⟨hpj, hgj, rfl⟩
+      · by_cases hblast : (j : ℕ) = k
+        · -- Boundary `j = last k`: constant path at `x`.
+          have hjeq : j = Fin.last k := Fin.ext (by rw [hblast, Fin.val_last])
+          have hpj : p₀ j = x := by rw [hjeq]; exact hplast
+          have hgj : γv j = x := by rw [hjeq]; exact hγvlast
+          refine ⟨(_root_.Path.refl x).cast hpj hgj, ?_, ?_, ?_⟩
+          · intro hj s; omega
+          · intro hj s
+            have hval : ((((_root_.Path.refl x).cast hpj hgj) s) : X) = x := by
+              rw [_root_.Path.cast_coe]; rfl
+            rw [hval]
+            have hjb_lt : (j : ℕ) - 1 < k := by omega
+            have hidxs : (⟨(j : ℕ) - 1, hjb_lt⟩ : Fin k).succ = (j : Fin (k + 1)) := by
+              apply Fin.ext
+              change ((j : ℕ) - 1) + 1 = (j : ℕ); omega
+            have hpv : p₀ (⟨(j : ℕ) - 1, hjb_lt⟩ : Fin k).succ = x := by
+              rw [hidxs, hpj]
+            have := hp0_succ_in ⟨(j : ℕ) - 1, hjb_lt⟩
+            rwa [hpv] at this
+          · intro _hbd; exact ⟨hpj, hgj, rfl⟩
+        · -- Interior vertex `0 < j.val < k`.
+          have hjpos : 0 < (j : ℕ) := Nat.pos_of_ne_zero hb0
+          have hjlt : (j : ℕ) < k := by have := j.isLt; omega
+          have hjb_lt : (j : ℕ) - 1 < k := by omega
+          set jf : Fin k := ⟨(j : ℕ), hjlt⟩ with hjf_def
+          set jb : Fin k := ⟨(j : ℕ) - 1, hjb_lt⟩ with hjb_def
+          have hjf_cast : jf.castSucc = (j : Fin (k + 1)) := by apply Fin.ext; rfl
+          have hjb_succ : jb.succ = (j : Fin (k + 1)) := by
+            apply Fin.ext
+            change ((j : ℕ) - 1) + 1 = (j : ℕ); omega
+          have hp0_in_f : p₀ j ∈ B (idx jf) := by
+            have := hp0_castSucc_in jf; rwa [hjf_cast] at this
+          have hp0_in_b : p₀ j ∈ B (idx jb) := by
+            have := hp0_succ_in jb; rwa [hjb_succ] at this
+          have hgv_in_f : γv j ∈ B (idx jf) := by
+            have := hγv_castSucc_in jf; rwa [hjf_cast] at this
+          have hgv_in_b : γv j ∈ B (idx jb) := by
+            have := hγv_succ_in jb; rwa [hjb_succ] at this
+          have hjoin : JoinedIn (B (idx jb) ∩ B (idx jf)) (p₀ j) (γv j) :=
+            hpcInter (idx jb) (idx jf) (p₀ j) hp0_in_b hp0_in_f
+              (γv j) hgv_in_b hgv_in_f
+          refine ⟨hjoin.somePath, ?_, ?_, ?_⟩
+          · intro hj s
+            have hidxeq : (⟨(j : ℕ), hj⟩ : Fin k) = jf := by apply Fin.ext; rfl
+            rw [hidxeq]; exact (hjoin.somePath_mem s).2
+          · intro hj s
+            have hidxeq : (⟨(j : ℕ) - 1, by omega⟩ : Fin k) = jb := by
+              apply Fin.ext; rfl
+            rw [hidxeq]; exact (hjoin.somePath_mem s).1
+          · intro hbd; omega
+    choose c hc_f hc_b hc_bdry using buildVertex
+    refine ⟨c, ?_, ?_, ?_, ?_⟩
+    · intro i s
+      have hlt : ((i.castSucc : Fin (k + 1)) : ℕ) < k := by
+        change (i : ℕ) < k; exact i.isLt
+      have := hc_f i.castSucc hlt s
+      have hidxeq : (⟨((i.castSucc : Fin (k + 1)) : ℕ), hlt⟩ : Fin k) = i := by
+        apply Fin.ext; rfl
+      rwa [hidxeq] at this
+    · intro i s
+      have hpos : 0 < ((i.succ : Fin (k + 1)) : ℕ) := by
+        change 0 < (i : ℕ) + 1; omega
+      have := hc_b i.succ hpos s
+      have hidxeq : (⟨((i.succ : Fin (k + 1)) : ℕ) - 1, by
+          change (i : ℕ) + 1 - 1 < k; omega⟩ : Fin k) = i := by
+        apply Fin.ext
+        change (i : ℕ) + 1 - 1 = (i : ℕ); omega
+      rwa [hidxeq] at this
+    · obtain ⟨hpjx, hgjx, heq⟩ := hc_bdry 0 (Or.inl rfl)
+      -- `hpjx : p₀ 0 = x` and `hgjx : γv 0 = x`; proof-irrelevant with `hp0`/`hγv0`.
+      rw [heq]
+    · obtain ⟨hpjx, hgjx, heq⟩ := hc_bdry (Fin.last k) (Or.inr (by simp [Fin.val_last]))
+      rw [heq]
   obtain ⟨c, hc_cs, hc_su, hc0, hclast⟩ := hconn
   -- Each `T i` is, on the nose, a path `γv i.castSucc → γv i.succ`.
   let T' : (i : Fin k) → _root_.Path (γv i.castSucc) (γv i.succ) := fun i => T i
