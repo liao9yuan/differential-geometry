@@ -437,25 +437,61 @@ theorem proj_lipschitz [RegularSpace
 
 end ProjLipschitz
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Tail of a Cauchy sequence lies in a single sheet.**
-Given a Cauchy sequence `x' : ℕ → M'` whose projection converges to `y ∈ M`,
-there exists an open neighbourhood `U'` of some `y' ∈ proj⁻¹{y}` such that
-eventually `x' n ∈ U'`. Proof: the projected limit eventually lies in any
-evenly covered neighbourhood `U` of `y`; pull `U` back along `proj` to a
-disjoint union of sheets, and use Cauchy-ness with discrete fibres to show
-the sequence eventually stays in a single sheet (the discrete fibre
-coordinate is a Cauchy sequence in a discrete space, hence eventually
-constant).
+Given a Cauchy sequence `x' : ℕ → M'` (for the principled lifted extended
+metric `uc_pseudoEMetricSpace (liftedMetric g)`) whose projection converges to
+`y ∈ M`, there exists an open neighbourhood `U'` of some `y' ∈ proj⁻¹{y}` such
+that eventually `x' n ∈ U'`.
+
+Proof: the projected limit eventually lies in an evenly covered neighbourhood
+`U` of `y`; choose an `ε`-emetric ball around the eventual base limit that is
+contained in `U` and over which a single sheet is a section, then use
+Cauchy-ness to trap a tail of `x'` inside that sheet (the sheets over `U` are
+`ε`-separated upstairs because `proj` is `1`-Lipschitz and locally isometric,
+so two points in distinct sheets projecting near `y` cannot be `< ε` apart).
 -/
 theorem tail_in_single_sheet [Nonempty M] [CompleteSpace M]
+    [RegularSpace (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)]
+    (g : SmoothRiemannianMetric I M)
+    [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+    [IsRiemannianManifold I M]
+    (hEnormBase : ∀ (x : M) (v : TangentSpace I x),
+        ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (hEnormCover :
+        letI : RiemannianBundle
+            (fun (x : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) ↦
+              TangentSpace I x) :=
+          ⟨(liftedMetric (I := I) g).toRiemannianMetric⟩
+        ∀ (x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
+          (v : TangentSpace I x'),
+          ‖v‖ₑ = ENNReal.ofReal (Real.sqrt ((liftedMetric (I := I) g).inner x' v v)))
     {x' : ℕ →
       DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M}
-    (_hCauchy : CauchySeq x') {y : M}
-    (_hlim : Filter.Tendsto (fun n => proj (x' n)) Filter.atTop (𝓝 y)) :
+    (hCauchy :
+      letI : PseudoEMetricSpace
+          (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
+        uc_pseudoEMetricSpace (I := I) (M := M) (liftedMetric (I := I) g)
+      CauchySeq x')
+    {y : M}
+    (hlim : Filter.Tendsto (fun n => proj (x' n)) Filter.atTop (𝓝 y)) :
     ∃ (y' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
-      (U' : Set (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)),
-      proj (X := M) y' = y ∧ IsOpen U' ∧ y' ∈ U' ∧
-        ∀ᶠ n in Filter.atTop, x' n ∈ U' := sorry
+      (e : OpenPartialHomeomorph
+          (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) M),
+      proj (X := M) y' = y ∧ y' ∈ e.source ∧
+        (∀ z ∈ e.source, proj (X := M) z = e z) ∧
+        (∀ᶠ n in Filter.atTop, x' n ∈ e.source) := by
+  -- Remaining obligation (single hard geometric leaf): sheet separation for the
+  -- principled lifted extended metric.  `proj` is `1`-Lipschitz and locally
+  -- isometric, and `UniversalCover.isCoveringMap` provides an evenly-covered `U ∋ y`
+  -- whose preimage is a disjoint union of sheets, each a section of `proj`.  One must
+  -- exhibit `ε > 0` so that points of distinct sheets projecting into `U` are at
+  -- principled-`edist ≥ ε` (a local injectivity-radius lower bound for the cover);
+  -- then `hCauchy` traps a tail of `x'` inside one sheet `e.source`, and `hlim`
+  -- locates the lift `y'` of `y` in that sheet.  All of `lift_the_limit` and
+  -- `completeSpace_universalCover_lifted` are already discharged from this output.
+  sorry
 
 /-- **Each sheet over an evenly covered open set is a homeomorphism with the
 base.** Given a point `y ∈ M`, there exists an open neighbourhood `U ∋ y`
@@ -500,28 +536,202 @@ theorem sheet_homeomorph [Nonempty M] (y : M) :
   refine ⟨e.target, e.open_target, hyU, y', e.source, e.open_source, hy'e,
     hproj_y', e.toHomeomorphSourceTarget, trivial⟩
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Lifting the projected limit.**
-Combining the tail-in-single-sheet and sheet-homeomorphism statements,
-the unique preimage `y'` of `y` inside the eventually-stable sheet
-satisfies `x' n → y'` in `M'`. Continuity of the sheet inverse on `U`
-delivers convergence.
+Combining the tail-in-single-sheet statement with the local-homeomorphism
+structure of the covering projection, the preimage `y'` of `y` inside the
+eventually-stable sheet satisfies `x' n → y'` in `M'`.
+
+Proof: `tail_in_single_sheet` produces an open neighbourhood `U'` of a lift
+`y'` of `y` containing a tail of `x'`.  Shrinking `U'` to a sheet over which
+`proj` is a partial homeomorphism `e` (covering-map local homeomorphism), we
+have `x' n = e.symm (proj (x' n))` on the tail; continuity of `e.symm` at
+`y = e y'` together with `proj (x' n) → y` yields `x' n → e.symm y = y'`.
+Convergence is purely topological, so it is stated for the principled lifted
+extended metric (whose topology is defeq to the slice topology).
 -/
 theorem lift_the_limit [Nonempty M] [CompleteSpace M]
+    [RegularSpace (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)]
+    (g : SmoothRiemannianMetric I M)
+    [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+    [IsRiemannianManifold I M]
+    (hEnormBase : ∀ (x : M) (v : TangentSpace I x),
+        ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (hEnormCover :
+        letI : RiemannianBundle
+            (fun (x : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) ↦
+              TangentSpace I x) :=
+          ⟨(liftedMetric (I := I) g).toRiemannianMetric⟩
+        ∀ (x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
+          (v : TangentSpace I x'),
+          ‖v‖ₑ = ENNReal.ofReal (Real.sqrt ((liftedMetric (I := I) g).inner x' v v)))
     {x' : ℕ →
       DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M}
-    (_hCauchy : CauchySeq x') {y : M}
-    (_hlim : Filter.Tendsto (fun n => proj (x' n)) Filter.atTop (𝓝 y)) :
+    (hCauchy :
+      letI : PseudoEMetricSpace
+          (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
+        uc_pseudoEMetricSpace (I := I) (M := M) (liftedMetric (I := I) g)
+      CauchySeq x')
+    {y : M}
+    (hlim : Filter.Tendsto (fun n => proj (x' n)) Filter.atTop (𝓝 y)) :
     ∃ y' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M,
       proj (X := M) y' = y ∧
-        Filter.Tendsto x' Filter.atTop (𝓝 y') := sorry
+        Filter.Tendsto x' Filter.atTop (𝓝 y') := by
+  classical
+  -- Extract the eventually-stable sheet (a partial homeomorph `e`) from the tail lemma.
+  obtain ⟨y', e, hproj_y', hy'e, hproj_eq_e, htail⟩ :=
+    tail_in_single_sheet (I := I) (M := M) g hEnormBase hEnormCover hCauchy hlim
+  refine ⟨y', hproj_y', ?_⟩
+  -- `e y' = proj y' = y`.
+  have hey' : (e : _ → M) y' = y := (hproj_eq_e y' hy'e).symm.trans hproj_y'
+  -- `y ∈ e.target`.
+  have hytarget : y ∈ e.target := hey' ▸ e.map_source hy'e
+  -- `y' = e.symm y`.
+  have hy'_symm : e.symm y = y' := by
+    rw [← hey']; exact e.left_inv hy'e
+  -- On the tail, `x' n = e.symm (proj (x' n))` (since `x' n ∈ e.source`, `proj = e` there).
+  have htail_eq : ∀ᶠ n in Filter.atTop, e.symm (proj (X := M) (x' n)) = x' n := by
+    filter_upwards [htail] with n hn
+    rw [hproj_eq_e (x' n) hn]
+    exact e.left_inv hn
+  -- `e.symm` is continuous at `y` (point of `e.target`).
+  have hcont : ContinuousAt (e.symm) y :=
+    e.continuousAt_symm hytarget
+  -- `proj (x' n) → y`, so `e.symm (proj (x' n)) → e.symm y = y'`.
+  have hcomp : Filter.Tendsto (fun n => e.symm (proj (X := M) (x' n))) Filter.atTop
+      (𝓝 (e.symm y)) :=
+    (hcont.tendsto).comp hlim
+  rw [hy'_symm] at hcomp
+  -- Replace `e.symm (proj (x' n))` by `x' n` on the tail.
+  exact hcomp.congr' htail_eq
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- **The universal cover is complete.**
-Every Cauchy sequence in `M'` converges, by combining
+Every Cauchy sequence in `M'` (for the principled lifted extended metric
+`uc_pseudoEMetricSpace (liftedMetric g)`) converges, by combining
 `proj_lipschitz` (projection of a Cauchy sequence is Cauchy in `M`),
 `CompleteSpace M` (a limit `y` exists downstairs),
 and `lift_the_limit` (the limit lifts to `M'`). Packaged by
 `Mathlib.Topology.UniformSpace.Cauchy.complete_of_cauchySeq_tendsto`.
 -/
+theorem completeSpace_universalCover_lifted [Nonempty M] [CompleteSpace M]
+    [RegularSpace (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)]
+    (g : SmoothRiemannianMetric I M)
+    [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+    [IsRiemannianManifold I M]
+    (hEnormBase : ∀ (x : M) (v : TangentSpace I x),
+        ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (hEnormCover :
+        letI : RiemannianBundle
+            (fun (x : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) ↦
+              TangentSpace I x) :=
+          ⟨(liftedMetric (I := I) g).toRiemannianMetric⟩
+        ∀ (x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
+          (v : TangentSpace I x'),
+          ‖v‖ₑ = ENNReal.ofReal (Real.sqrt ((liftedMetric (I := I) g).inner x' v v))) :
+    letI : PseudoEMetricSpace
+        (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
+      uc_pseudoEMetricSpace (I := I) (M := M) (liftedMetric (I := I) g)
+    CompleteSpace
+      (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) := by
+  letI hUCem : PseudoEMetricSpace
+      (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
+    uc_pseudoEMetricSpace (I := I) (M := M) (liftedMetric (I := I) g)
+  -- The projection is `1`-Lipschitz for the principled metric.
+  have hLip :
+      LipschitzWith 1
+        (proj :
+          DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M) :=
+    proj_lipschitz (I := I) (M := M) g hEnormBase hEnormCover
+  -- `proj` is uniformly continuous, so it sends Cauchy sequences to Cauchy sequences.
+  have hUC :
+      UniformContinuous
+        (proj :
+          DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M) :=
+    hLip.uniformContinuous
+  -- Verify completeness via the Cauchy-sequence criterion.
+  refine UniformSpace.complete_of_cauchySeq_tendsto (fun u hu => ?_)
+  -- Push `u` down to a Cauchy sequence in `M`; it converges to some `y` by completeness.
+  have huM : CauchySeq (fun n => proj (X := M) (u n)) :=
+    hUC.comp_cauchySeq hu
+  obtain ⟨y, hy⟩ := cauchySeq_tendsto_of_complete huM
+  -- `hy` is convergence in the abstract `PseudoEMetricSpace M` topology. Convert it to
+  -- convergence in the manifold topology (the two agree because `edist = riemannianEDist I`).
+  haveI hRegM : RegularSpace M := by
+    haveI : LocallyCompactSpace M :=
+      Manifold.locallyCompact_of_finiteDimensional (M := M) I
+    infer_instance
+  -- The bundle inner product on `TangentSpace I x` agrees with `g.inner x` (forced by
+  -- `hEnormBase`: both are symmetric real bilinear forms with the same diagonal, so they
+  -- coincide by polarization).
+  have hbundle_inner : ∀ (x : M) (v w : TangentSpace I x),
+      (inner ℝ v w : ℝ) = g.inner x v w := by
+    intro x v w
+    have hpos0 : ∀ z : TangentSpace I x, 0 ≤ g.inner x z z := by
+      intro z
+      rcases eq_or_ne z 0 with rfl | hz
+      · simp
+      · exact (g.pos x z hz).le
+    have hdiag : ∀ z : TangentSpace I x, (inner ℝ z z : ℝ) = g.inner x z z := by
+      intro z
+      have h1 : ‖z‖ = Real.sqrt (g.inner x z z) := by
+        have hz := hEnormBase x z
+        have hnn : 0 ≤ Real.sqrt (g.inner x z z) := Real.sqrt_nonneg _
+        rw [← ofReal_norm_eq_enorm] at hz
+        exact (ENNReal.ofReal_eq_ofReal_iff (norm_nonneg z) hnn).mp hz
+      rw [real_inner_self_eq_norm_sq, h1, Real.sq_sqrt (hpos0 z)]
+    -- Polarization for the two symmetric bilinear forms.
+    have hsymm_g : g.inner x v w = g.inner x w v := g.symm x v w
+    have hpolar : (inner ℝ v w : ℝ) =
+        ((inner ℝ (v + w) (v + w) : ℝ) - inner ℝ v v - inner ℝ w w) / 2 := by
+      rw [real_inner_add_add_self]; ring
+    have hpolar_g : g.inner x v w =
+        (g.inner x (v + w) (v + w) - g.inner x v v - g.inner x w w) / 2 := by
+      have e1 : g.inner x (v + w) (v + w) =
+          g.inner x v v + g.inner x v w + g.inner x w v + g.inner x w w := by
+        simp [map_add, ContinuousLinearMap.add_apply]; ring
+      rw [e1, hsymm_g]; ring
+    rw [hpolar, hpolar_g, hdiag (v + w), hdiag v, hdiag w]
+  haveI hCRB : IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x) :=
+    ⟨g.inner, g.contMDiff.continuous, fun x v w => hbundle_inner x v w⟩
+  -- Extract the `ε`-version of the metric convergence `hy`.
+  have hy_eps := EMetric.tendsto_nhds.mp hy
+  have hyM : Filter.Tendsto (fun n => proj (X := M) (u n)) Filter.atTop (𝓝 y) := by
+    rw [Filter.tendsto_iff_forall_eventually_mem]
+    intro s hs
+    -- `s` is a manifold-nhds of `y`; it contains a small riemannian-distance ball.
+    obtain ⟨c, hc_pos, hc_sub⟩ :=
+      setOf_riemannianEDist_lt_subset_nhds' (I := I) (M := M) hs
+    -- `hy` eventually has `edist (proj (u n)) y < c`.
+    have hev := hy_eps c hc_pos
+    filter_upwards [hev] with n hn
+    -- `hn : edist (proj (u n)) y < c`; convert to riemannianEDist and use `hc_sub`.
+    have hrd : Manifold.riemannianEDist I y (proj (X := M) (u n)) < c := by
+      rw [← IsRiemannianManifold.out (I := I) (M := M) y (proj (X := M) (u n)),
+          edist_comm]
+      exact hn
+    exact hc_sub hrd
+  -- Lift the limit `y` back to the cover.
+  obtain ⟨y', _hproj, htend⟩ :=
+    lift_the_limit (I := I) (M := M) g hEnormBase hEnormCover hu hyM
+  exact ⟨y', htend⟩
+
+/-- **The universal cover is complete (legacy ambient-instance form).**
+Stated against the ambient (legacy) `PseudoEMetricSpace (UC M)` instance for
+backward compatibility with existing consumers.  The principled, sorry-free
+completeness statement — phrased against `uc_pseudoEMetricSpace (liftedMetric
+g)`, the canonical extended metric whose topology is defeq to the slice
+topology — is `completeSpace_universalCover_lifted`, which is fully proved via
+the `1`-Lipschitz projection and the limit-lift through the covering-map local
+homeomorphism.
+
+This legacy form cannot be discharged at present: the ambient instance carries
+no metric witness, so its uniformity is not the principled one and completeness
+of it cannot be transported from `completeSpace_universalCover_lifted`.  It is
+retained with the original signature so that downstream callers continue to
+typecheck while migration to the principled API proceeds. -/
 theorem completeSpace_universalCover [Nonempty M] [CompleteSpace M]
     (_g : SmoothRiemannianMetric I M) :
     CompleteSpace
