@@ -1118,9 +1118,12 @@ import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.UniformChartBounds
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.Eigenbasis
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.HeatSemigroup
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.HeatSemigroupIntrinsic
+import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.BoundedC0SemigroupIntrinsic
+import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.QuasilinearExistenceIntrinsic
 import DifferentialGeometry.PDE.RicciFlow.Pullback.LeviCivitaConjugation
 import DifferentialGeometry.PDE.RicciFlow.SmoothQuasilinear
 import DifferentialGeometry.PDE.RicciFlow.LieDerivativePairing
+import DifferentialGeometry.PDE.RicciFlow.DeTurckRHSSection
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.PouNormChartComp
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.Glue
 import DifferentialGeometry.PDE.RicciFlow.Pullback.RiemannConjugation
