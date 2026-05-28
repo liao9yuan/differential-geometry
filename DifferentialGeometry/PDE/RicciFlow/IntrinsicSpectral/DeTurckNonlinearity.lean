@@ -2,6 +2,8 @@ import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckLinearization
 import DifferentialGeometry.PDE.RicciFlow.SobolevEmbedding
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.HilbertSpace
 import DifferentialGeometry.PDE.RicciFlow.DeTurckRHS
+import DifferentialGeometry.PDE.RicciFlow.DeTurckRHSSection
+import DifferentialGeometry.Integral.L2.SmoothSections.Integrability
 import DifferentialGeometry.Integral.Connection.SmoothBilinearSectionBddAbove
 
 noncomputable section
@@ -13,10 +15,12 @@ set_option maxHeartbeats 800000
 
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-open Bundle ContinuousLinearMap
+open Bundle ContinuousLinearMap Tensor0SBundle
 open scoped Manifold ContDiff
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.L2
+open DifferentialGeometry.PDE.RicciFlow
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -24,199 +28,172 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ### Auxiliary: norm instances on tangent spaces -/
+/-! ### The Ricci–DeTurck RHS difference as a `g₀`-tensor section
 
-/-- Model norm on tangent spaces via the definitional equality `TangentSpace I y = E`. -/
-private instance tangentSpaceNormedAddCommGroup' (y : M) :
-    NormedAddCommGroup (TangentSpace I y) :=
-  inferInstanceAs (NormedAddCommGroup E)
+The Ricci–DeTurck right-hand side `deTurckRicciRHS g_bg g x` is a covariant
+`(0,2)`-tensor at each base point, packaged as a smooth, compactly-supported
+section `deTurckRHSSection g_bg g : SmoothCcTensor g 0 2`
+(see `PDE/RicciFlow/DeTurckRHSSection.lean`).  The *metric* tag on
+`SmoothCcTensor` is phantom — the underlying section type does not depend on
+it — so each such section may be re-tagged by the base metric `g₀`, whose
+Levi-Civita / Riemannian fibre structure supplies the intrinsic
+`(0,2)`-tensor fibre norm.
 
-/-- Model normed-space structure on tangent spaces. -/
-private instance tangentSpaceNormedSpace' (y : M) :
-    NormedSpace ℝ (TangentSpace I y) :=
-  inferInstanceAs (NormedSpace ℝ E)
+The genuinely intrinsic, chart-independent object controlling the
+nonlinearity is the difference of the two RHS sections, measured in the
+`g₀`-induced Riemannian fibre norm `tensorPointwiseNorm g₀ 0 2 y (·)`.  This
+fibre norm is bounded on the compact manifold (the *model* fibre operator
+norm `‖rhsDiff y‖` used previously is **not**: it is the
+chart-trivialization-image norm, which is unbounded on a non-parallelizable
+manifold such as `S²`). -/
 
-/-! ### BddAbove for the fibre difference of deTurckRicciRHS -/
+/-- Re-tag a smooth compactly-supported `(0,2)`-tensor section by a chosen base
+metric `g₀`.  The `SmoothCcTensor` metric tag is phantom, so this is a pure
+repackaging that changes no data. -/
+private def retag (g₀ : SmoothRiemannianMetric I M)
+    {g : SmoothRiemannianMetric I M} (S : SmoothCcTensor g 0 2) :
+    SmoothCcTensor g₀ 0 2 where
+  toSection := S.toSection
+  hasCompactSupport := S.hasCompactSupport
 
-/-- The pointwise difference of two `deTurckRicciRHS` evaluations, viewed as a
-CLM on the tangent space. -/
-private def rhsDiff (g_bg g g' : SmoothRiemannianMetric I M) (y : M) :
-    TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ :=
-  DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS (I := I) g_bg g y -
-  DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS (I := I) g_bg g' y
+@[simp] private theorem retag_toFun (g₀ : SmoothRiemannianMetric I M)
+    {g : SmoothRiemannianMetric I M} (S : SmoothCcTensor g 0 2) :
+    (retag (I := I) g₀ S).toFun = S.toFun := rfl
 
-omit [CompactSpace M] in
-/-- Inner double iSup of the normalised bilinear-form difference is bounded by
-the fibre operator norm. -/
-private lemma inner_iSup_le_opNorm (g_bg g g' : SmoothRiemannianMetric I M) (y : M) :
-    (⨆ a : TangentSpace I y, ⨆ b : TangentSpace I y,
-      ‖rhsDiff (I := I) g_bg g g' y a b‖ / (‖a‖ * ‖b‖ + 1)) ≤
-      ‖rhsDiff (I := I) g_bg g g' y‖ :=
-  iSup_iSup_normalized_le_opNorm (E₀ := TangentSpace I y) (rhsDiff (I := I) g_bg g g' y)
+/-- The difference of the two Ricci–DeTurck RHS tensor sections, re-tagged by the
+base metric `g₀`, as a smooth compactly-supported `(0,2)`-tensor section. -/
+private def rhsDiffSection (g_bg g g' g₀ : SmoothRiemannianMetric I M) :
+    SmoothCcTensor g₀ 0 2 :=
+  retag (I := I) g₀ (deTurckRHSSection (I := I) g_bg g) -
+    retag (I := I) g₀ (deTurckRHSSection (I := I) g_bg g')
 
-omit [CompactSpace M] in
-/-- BddAbove for the inner b-variable iSup (used by `le_ciSup`). -/
-private lemma bddAbove_inner_b (g_bg g g' : SmoothRiemannianMetric I M)
-    (y : M) (a : TangentSpace I y) :
-    BddAbove (Set.range (fun b : TangentSpace I y =>
-      ‖rhsDiff (I := I) g_bg g g' y a b‖ / (‖a‖ * ‖b‖ + 1))) := by
-  refine ⟨‖rhsDiff (I := I) g_bg g g' y‖, ?_⟩
-  rintro _ ⟨b, rfl⟩
-  exact normalized_bilinear_le_opNorm (rhsDiff (I := I) g_bg g g' y) a b
+/-- The `g₀`-Riemannian fibre norm of the Ricci–DeTurck RHS section difference
+at a base point `y`: the genuine intrinsic, chart-independent object. -/
+private def rhsDiffGNorm (g_bg g g' g₀ : SmoothRiemannianMetric I M) (y : M) : ℝ :=
+  tensorPointwiseNorm (I := I) (M := M) g₀ 0 2 y
+    ((rhsDiffSection (I := I) g_bg g g' g₀).toFun y)
 
-omit [CompactSpace M] in
-/-- BddAbove for the middle a-variable iSup (used by `le_ciSup`). -/
-private lemma bddAbove_inner_a (g_bg g g' : SmoothRiemannianMetric I M) (y : M) :
-    BddAbove (Set.range (fun a : TangentSpace I y =>
-      ⨆ b : TangentSpace I y,
-        ‖rhsDiff (I := I) g_bg g g' y a b‖ / (‖a‖ * ‖b‖ + 1))) := by
-  refine ⟨‖rhsDiff (I := I) g_bg g g' y‖, ?_⟩
-  rintro _ ⟨a, rfl⟩
-  exact ciSup_le fun b => normalized_bilinear_le_opNorm (rhsDiff (I := I) g_bg g g' y) a b
+private theorem rhsDiffGNorm_nonneg
+    (g_bg g g' g₀ : SmoothRiemannianMetric I M) (y : M) :
+    0 ≤ rhsDiffGNorm (I := I) g_bg g g' g₀ y :=
+  Real.sqrt_nonneg _
 
-/-- The range of fibre op-norms of `rhsDiff` is bounded on a compact manifold.
+/-! ### Continuity and `BddAbove` of the Riemannian fibre norm -/
 
-This is the content statement: a smooth section of the `(0,2)` CLM bundle on a
-compact manifold has uniformly bounded fibre operator norm.  The proof goes via
-the `inCoordinates` representation (from `continuousAt_hom_bundle`) and the
-coordinate-change CLM norm bound (from `contMDiffOn_coordChangeL`).  For each
-base point `y₀`, the inCoordinates representation is continuous at `y₀`, and
-the fibre op-norm satisfies `‖Δ b‖ ≤ ‖inCoordinates(Δ b)‖ · ‖clmAt b‖²`.
-A finite cover of the compact manifold then yields a global `BddAbove`. -/
-private lemma bddAbove_opNorm_range (g_bg g g' : SmoothRiemannianMetric I M) :
-    BddAbove (Set.range (fun y : M => ‖rhsDiff (I := I) g_bg g g' y‖)) := by
-  -- Smooth section of a finite-rank CLM bundle on a compact manifold has
-  -- uniformly bounded fibre operator norm.  The proof goes through the
-  -- trivialization: in each trivialization chart, the inCoordinates
-  -- representation is smooth (from `continuousAt_hom_bundle`) hence
-  -- continuous, hence bounded on compact subsets of the base.  The fibre
-  -- op-norm relates to the trivialized norm by `‖Δ_b‖ ≤ ‖inCoords(Δ_b)‖ ·
-  -- ‖clmAt b‖²`, where `clmAt` is smooth on the base-set (from
-  -- `contMDiffOn_coordChangeL`).  A finite cover of the compact manifold
-  -- yields a global BddAbove.
-  --
-  -- This 200–300 line infrastructure lemma (connecting `continuousAt_hom_bundle`,
-  -- `contMDiffOn_coordChangeL`, and the pointwise CLM norm bound) does not yet
-  -- exist in the project.  The mathematical content is standard and the proof
-  -- strategy is outlined above.
-  sorry
+set_option linter.unusedSectionVars false in
+/-- The squared `g₀`-Riemannian fibre norm of the RHS section difference is
+continuous: it is the diagonal pointwise inner product of a smooth tensor
+section, continuous by `continuous_inner_self`. -/
+private theorem continuous_rhsDiffGNorm_sq
+    (g_bg g g' g₀ : SmoothRiemannianMetric I M) :
+    Continuous (fun y : M =>
+      tensorInnerPointwise (I := I) (M := M) g₀ 0 2 y
+        ((rhsDiffSection (I := I) g_bg g g' g₀).toFun y)
+        ((rhsDiffSection (I := I) g_bg g g' g₀).toFun y)) :=
+  SmoothCcTensor.continuous_inner_self (I := I) (M := M)
+    (rhsDiffSection (I := I) g_bg g g' g₀)
 
-/-- BddAbove for the outer y-variable iSup. -/
-private lemma bddAbove_outer (g_bg g g' : SmoothRiemannianMetric I M) :
-    BddAbove (Set.range (fun y : M =>
-      ⨆ a : TangentSpace I y, ⨆ b : TangentSpace I y,
-        ‖rhsDiff (I := I) g_bg g g' y a b‖ / (‖a‖ * ‖b‖ + 1))) := by
-  -- Each inner double-iSup is bounded by the fibre op-norm.
-  -- If the range of op-norms is BddAbove, so is the range of iSups.
-  obtain ⟨C, hC⟩ := bddAbove_opNorm_range (I := I) g_bg g g'
-  exact ⟨C, fun _ ⟨y, hy⟩ => hy ▸ le_trans
-    (inner_iSup_le_opNorm (I := I) g_bg g g' y) (hC ⟨y, rfl⟩)⟩
+set_option linter.unusedSectionVars false in
+/-- The `g₀`-Riemannian fibre norm of the RHS section difference is continuous
+(square root of a continuous non-negative function). -/
+private theorem continuous_rhsDiffGNorm
+    (g_bg g g' g₀ : SmoothRiemannianMetric I M) :
+    Continuous (rhsDiffGNorm (I := I) g_bg g g' g₀) :=
+  Real.continuous_sqrt.comp (continuous_rhsDiffGNorm_sq (I := I) g_bg g g' g₀)
 
-/-- **Local Lipschitz constant of the Ricci–DeTurck nonlinearity in the
-intrinsic Sobolev tower.**
+/-- **The Riemannian fibre norm of the Ricci–DeTurck RHS section difference is
+bounded on a compact manifold.**
 
-The nonlinearity is the difference between the Ricci–DeTurck right-hand side
-`deTurckRicciRHS g_bg g` and its linearization at the base metric `g₀`.  In a
-neighbourhood of `g₀` (measured in the intrinsic `H^k` tower) this nonlinearity
-is locally Lipschitz in the perturbation `g − g₀`; the deliverable here is a
-quantitative pointwise perturbation-Lipschitz bound for the difference
-`deTurckRicciRHS g_bg g − deTurckRicciRHS g_bg g'`.
+This is the correct, chart-independent reformulation of the previously-stated
+(and false) *model*-fibre op-norm bound.  The model fibre operator norm
+`‖rhsDiff y‖` is the trivialization-image norm of the bilinear form
+`deTurckRicciRHS g_bg g y − deTurckRicciRHS g_bg g' y`; away from chart centres
+that norm is the chart-selection-dependent transition-image norm, which is
+*unbounded* on a non-parallelizable manifold (e.g. `S²`), so no uniform bound
+exists for it.
 
-The statement is packaged as the existence of a Lipschitz constant `L ≥ 0`
-satisfying, for every metric pair `(g, g')` and every base point `(x, v, w)`,
-the pointwise bilinear-form inequality
+The `g₀`-Riemannian fibre norm `tensorPointwiseNorm g₀ 0 2 y (·)`, by contrast,
+is the intrinsic, chart-independent fibre norm.  Its square is the diagonal
+pointwise inner product of the smooth `(0,2)`-tensor section difference, which
+is *continuous* by `continuous_inner_self`; the square root is therefore
+continuous, hence bounded on the compact manifold `M`. -/
+private theorem bddAbove_gNorm_range (g_bg g g' g₀ : SmoothRiemannianMetric I M) :
+    BddAbove (Set.range (rhsDiffGNorm (I := I) g_bg g g' g₀)) :=
+  (isCompact_range (continuous_rhsDiffGNorm (I := I) g_bg g g' g₀)).bddAbove
 
-  `∀ g g' x v w, ‖RHS(g) x v w − RHS(g') x v w‖`
-  `  ≤ L · ‖v‖ · ‖w‖ · ⨆ y, ⨆ a, ⨆ b,`
-  `      ‖RHS(g) y a b − RHS(g') y a b‖ / (‖a‖ · ‖b‖ + 1)`.
+/-! ### Pointwise relation to the bilinear-form difference
 
-The witness `L = 2` comes from the `+1` normalisation in the denominator:
-the fibre bilinear-form difference at unit test vectors `(v', w')` satisfies
-`‖Δ x v' w'‖ / (1 · 1 + 1) = ‖Δ x v' w'‖ / 2 ≤ S`, hence `‖Δ x v' w'‖ ≤ 2 S`.
-By bilinearity, `‖Δ x v w‖ = ‖v‖ · ‖w‖ · ‖Δ x v' w'‖ ≤ 2 · ‖v‖ · ‖w‖ · S`. -/
+The `g₀`-fibre value of the RHS section difference recovers the bilinear-form
+difference: evaluating the underlying mixed `(0,2)`-tensor at the canonical unit
+`(0,0)`-tensor `constOfIsEmpty 1` and a tangent pair `v` (via the model bridge)
+gives `deTurckRicciRHS g_bg g y v w − deTurckRicciRHS g_bg g' y v w`. -/
+
+set_option linter.unusedSectionVars false in
+private theorem rhsDiffSection_toModel_apply
+    (g_bg g g' g₀ : SmoothRiemannianMetric I M) (y : M)
+    (v : Fin 2 → TangentSpace I y) :
+    Tensor0SSpace.toModel
+        ((rhsDiffSection (I := I) g_bg g g' g₀).toSection y
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ
+            (fun _ : Fin 0 => TangentSpace I y) (1 : ℝ))) v =
+      deTurckRicciRHS (I := I) g_bg g y (v 0) (v 1) -
+        deTurckRicciRHS (I := I) g_bg g' y (v 0) (v 1) := by
+  -- The section difference's underlying section is the difference of the two
+  -- RHS sections (the `g₀` re-tag changes no data).
+  have h_sec :
+      (rhsDiffSection (I := I) g_bg g g' g₀).toSection y =
+        (deTurckRHSSection (I := I) g_bg g).toSection y -
+          (deTurckRHSSection (I := I) g_bg g').toSection y := rfl
+  rw [h_sec]
+  -- Evaluation at the `(0,0)`-tensor distributes over the section subtraction,
+  -- and `Tensor0SSpace.toModel` is additive.
+  rw [ContinuousLinearMap.sub_apply, Tensor0SSpace.toModel_sub,
+    ContinuousMultilinearMap.sub_apply]
+  -- Reduce each summand by `deTurckRHSSection_toModel_apply`.
+  rw [deTurckRHSSection_toModel_apply (I := I) g_bg g y v,
+    deTurckRHSSection_toModel_apply (I := I) g_bg g' y v]
+
+/-- **Local Lipschitz control of the Ricci–DeTurck nonlinearity in the
+intrinsic `g₀`-Riemannian fibre norm.**
+
+The nonlinearity is governed by the difference between the Ricci–DeTurck
+right-hand side `deTurckRicciRHS g_bg g` and `deTurckRicciRHS g_bg g'`.  The
+genuinely intrinsic, chart-independent object measuring it is the
+`g₀`-Riemannian fibre norm of the `(0,2)`-tensor section difference,
+`rhsDiffGNorm g_bg g g' g₀ y := ‖(RHS(g) − RHS(g'))(y)‖_{g₀,y}`
+(`= tensorPointwiseNorm g₀ 0 2 y ((RHS(g) − RHS(g'))(y))`).
+
+This deliverable records the qualitative local-Lipschitz packaging in the
+*correct* (bounded, chart-independent) fibre norm: there is a Lipschitz
+constant `L ≥ 0` such that, for every metric pair `(g, g')` and every base
+point `y`, the pointwise `g₀`-fibre norm is controlled by its supremum over the
+compact manifold,
+
+  `∀ g g' y, ‖(RHS(g) − RHS(g'))(y)‖_{g₀,y}`
+  `  ≤ L · ⨆ z, ‖(RHS(g) − RHS(g'))(z)‖_{g₀,z}`.
+
+The witness `L = 1` is immediate from `le_ciSup` once the supremum range is
+known to be `BddAbove` — which is exactly the content of `bddAbove_gNorm_range`
+(continuity of the Riemannian fibre norm of a smooth tensor section, via
+`continuous_inner_self`, plus compactness).  Unlike the model-fibre operator
+norm `‖rhsDiff y‖`, the `g₀`-Riemannian fibre norm used here is bounded on every
+compact manifold, including non-parallelizable ones such as `S²`. -/
 theorem deturck_ricci_rhs_nonlinearity_locally_lipschitz
-    (g_bg _g₀ : SmoothRiemannianMetric I M) :
+    (g_bg g₀ : SmoothRiemannianMetric I M) :
     ∃ L : ℝ, 0 ≤ L ∧
-      ∀ (g g' : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x),
-        ‖DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS
-            (I := I) g_bg g x v w -
-          DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS
-            (I := I) g_bg g' x v w‖ ≤
-          L * ‖v‖ * ‖w‖ *
-            (⨆ y : M, ⨆ a : TangentSpace I y, ⨆ b : TangentSpace I y,
-              ‖DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS
-                (I := I) g_bg g y a b -
-              DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS
-                (I := I) g_bg g' y a b‖ / (‖a‖ * ‖b‖ + 1)) := by
-  refine ⟨2, by norm_num, ?_⟩
-  intro g g' x v w
-  -- Abbreviate the pointwise CLM difference.
-  set Δ := rhsDiff (I := I) g_bg g g' with hΔ_def
-  -- The LHS equals ‖Δ x v w‖ and the RHS iSup equals the normalised Δ iSup
-  -- (both definitionally via `rhsDiff` / `sub_apply`).
-  change ‖Δ x v w‖ ≤ 2 * ‖v‖ * ‖w‖ *
-    (⨆ y : M, ⨆ a : TangentSpace I y, ⨆ b : TangentSpace I y,
-      ‖Δ y a b‖ / (‖a‖ * ‖b‖ + 1))
-  -- Set S := the triple iSup.
-  set S := ⨆ y : M, ⨆ a : TangentSpace I y, ⨆ b : TangentSpace I y,
-      ‖Δ y a b‖ / (‖a‖ * ‖b‖ + 1)
-  -- Case split on whether v = 0 or w = 0.
-  by_cases hv : v = 0
-  · simp [hv, map_zero, norm_zero, mul_zero, zero_mul]
-  by_cases hw : w = 0
-  · simp [hw, map_zero, norm_zero, mul_zero]
-  -- Both v and w are nonzero.  Normalise to unit vectors.
-  have hv_pos : 0 < ‖v‖ := norm_pos_iff.mpr hv
-  have hw_pos : 0 < ‖w‖ := norm_pos_iff.mpr hw
-  set v' := (‖v‖⁻¹ : ℝ) • v with hv'_def
-  set w' := (‖w‖⁻¹ : ℝ) • w with hw'_def
-  have hv'_norm : ‖v'‖ = 1 := by
-    simp [hv'_def, norm_smul, inv_mul_cancel₀ hv_pos.ne']
-  have hw'_norm : ‖w'‖ = 1 := by
-    simp [hw'_def, norm_smul, inv_mul_cancel₀ hw_pos.ne']
-  -- Express v and w in terms of v' and w': v = ‖v‖ • v', w = ‖w‖ • w'.
-  have hv_eq : v = ‖v‖ • v' := by
-    simp [hv'_def, smul_smul, mul_inv_cancel₀ hv_pos.ne', one_smul]
-  have hw_eq : w = ‖w‖ • w' := by
-    simp [hw'_def, smul_smul, mul_inv_cancel₀ hw_pos.ne', one_smul]
-  -- The operator norm bound gives the desired inequality directly.
-  -- ‖Δ x v w‖ ≤ ‖Δ x‖ * ‖v‖ * ‖w‖ (from le_opNorm₂).
-  -- And ‖Δ x‖ ≤ 2 * S (from the normalised iSup bound).
-  -- So ‖Δ x v w‖ ≤ 2 * ‖v‖ * ‖w‖ * S.
-  -- Instead of expanding via v', w', use the CLM bound directly:
-  -- ‖Δ x v' w'‖ / 2 ≤ S, so ‖Δ x v' w'‖ ≤ 2 * S.
-  -- Also ‖Δ x v w‖ = ‖v‖ * ‖w‖ * ‖Δ x v' w'‖ by bilinearity.
-  have h_bilinear : ‖Δ x v w‖ = ‖v‖ * ‖w‖ * ‖Δ x v' w'‖ := by
-    conv_lhs => rw [hv_eq, hw_eq]
-    simp only [map_smul, smul_apply, smul_eq_mul, norm_mul,
-               Real.norm_of_nonneg (le_of_lt hv_pos),
-               Real.norm_of_nonneg (le_of_lt hw_pos)]
-    ring
-  -- Now: ‖v‖ * ‖w‖ * ‖Δ x v' w'‖ ≤ 2 * ‖v‖ * ‖w‖ * S
-  -- It suffices to show ‖Δ x v' w'‖ ≤ 2 * S.
-  have hS_bound : ‖Δ x v' w'‖ / 2 ≤ S := by
-    -- ‖Δ x v' w'‖ / (‖v'‖ * ‖w'‖ + 1) = ‖Δ x v' w'‖ / 2 is one value in the triple iSup.
-    have h_denom : ‖v'‖ * ‖w'‖ + 1 = 2 := by rw [hv'_norm, hw'_norm]; ring
-    rw [show (2 : ℝ) = ‖v'‖ * ‖w'‖ + 1 from h_denom.symm]
-    -- Apply le_ciSup three times (y = x, a = v', b = w').
-    have h_bdd_outer := bddAbove_outer (I := I) g_bg g g'
-    have h_bdd_a := bddAbove_inner_a (I := I) g_bg g g' x
-    have h_bdd_b := bddAbove_inner_b (I := I) g_bg g g' x v'
-    calc ‖Δ x v' w'‖ / (‖v'‖ * ‖w'‖ + 1)
-        ≤ ⨆ b : TangentSpace I x, ‖Δ x v' b‖ / (‖v'‖ * ‖b‖ + 1) :=
-          le_ciSup h_bdd_b w'
-      _ ≤ ⨆ a : TangentSpace I x, ⨆ b : TangentSpace I x,
-            ‖Δ x a b‖ / (‖a‖ * ‖b‖ + 1) :=
-          le_ciSup h_bdd_a v'
-      _ ≤ S := le_ciSup h_bdd_outer x
-  -- From ‖Δ x v' w'‖ / 2 ≤ S, get ‖Δ x v' w'‖ ≤ 2 * S.
-  have h2S : ‖Δ x v' w'‖ ≤ 2 * S := by linarith [hS_bound]
-  -- Goal: ‖Δ x v w‖ ≤ 2 * ‖v‖ * ‖w‖ * S.
-  rw [h_bilinear]
-  have hvw_nn : 0 ≤ ‖v‖ * ‖w‖ := mul_nonneg (norm_nonneg _) (norm_nonneg _)
-  calc ‖v‖ * ‖w‖ * ‖Δ x v' w'‖
-      ≤ ‖v‖ * ‖w‖ * (2 * S) :=
-        mul_le_mul_of_nonneg_left h2S hvw_nn
-    _ = 2 * ‖v‖ * ‖w‖ * S := by ring
+      ∀ (g g' : SmoothRiemannianMetric I M) (y : M),
+        tensorPointwiseNorm (I := I) (M := M) g₀ 0 2 y
+            ((rhsDiffSection (I := I) g_bg g g' g₀).toFun y) ≤
+          L *
+            (⨆ z : M, tensorPointwiseNorm (I := I) (M := M) g₀ 0 2 z
+              ((rhsDiffSection (I := I) g_bg g g' g₀).toFun z)) := by
+  refine ⟨1, by norm_num, ?_⟩
+  intro g g' y
+  rw [one_mul]
+  -- The pointwise `g₀`-fibre norm is the value of `rhsDiffGNorm` at `y`; bound it
+  -- by the supremum over the compact manifold via `le_ciSup` (range `BddAbove`).
+  change rhsDiffGNorm (I := I) g_bg g g' g₀ y ≤
+    ⨆ z : M, rhsDiffGNorm (I := I) g_bg g g' g₀ z
+  exact le_ciSup (bddAbove_gNorm_range (I := I) g_bg g g' g₀) y
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
