@@ -1153,6 +1153,677 @@ theorem eigenvectorCovGrad_pou_chartComponent_ae_eq
   rw [hy_add, Pi.add_apply, hy_sub, Pi.sub_apply, hy_w, hy_c]
   rfl
 
+/-! ## Chart-locality-free twins
+
+`h_atlas` enters the development above only through the eigenvector resolvent,
+its canonical smooth approximating sequence, and the chart-component limit
+objects. Re-keying onto the chart-locality-free eigenbasis selector
+`tensorResolventEigenbasisVec_ofCompact` (via the compact-operator witness
+`tensorResolventL2_isCompactOperator_intrinsic`) together with the companion
+`_unconditional` objects (`eigenvectorSmoothApprox_unconditional`,
+`eigenvectorResolvent_unconditional`, `eigenvectorChartPartialLp_unconditional`,
+`eigenvectorChartWeakPartial_unconditional`, `covGradChristoffelLimit_unconditional`)
+drops `h_atlas` entirely. The cross-term multiplier machinery
+(`crossMultiplier`, its bound, its measurability), the kernel-support
+identification `crossMultiplier_mul_chartPushedRaw_eq_cutoffComponent`, the
+Christoffel tracing identity `chartPushedRaw_pou_mul_covDerivLowerOrderTerm_eq`,
+and all the raw chart-component / partition-of-unity Leibniz lemmas carry no
+`h_atlas`, so they are reused verbatim. `[CompleteSpace E]` is a section
+hypothesis. -/
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+/-- Chart-locality-free twin of `covGradPouLeibnizCrossLimit`. -/
+noncomputable def covGradPouLeibnizCrossLimit_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (β : M) (P₀ : TensorCompIdx (E := E) r s)
+    (k : Fin (Module.finrank ℝ E)) : EuclN → ℝ :=
+  fun y =>
+    euclidPartial (E := E) k
+        (chartPushedRaw I β ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)) y *
+      (tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+        (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+            g r s) i) β P₀ :
+        EuclN → ℝ) y
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+/-- Chart-locality-free twin of `covGradPouLeibnizCrossLimit_memLp`. -/
+theorem covGradPouLeibnizCrossLimit_memLp_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (β : M) (P₀ : TensorCompIdx (E := E) r s)
+    (k : Fin (Module.finrank ℝ E)) :
+    MemLp (covGradPouLeibnizCrossLimit_unconditional (I := I) (M := M)
+        g r s i β P₀ k) 2
+      (chartL2Measure (I := I) (M := M) β) := by
+  classical
+  obtain ⟨C, hC0, hC⟩ := exists_bound_crossMultiplier (I := I) (M := M) β k
+  -- The bounded multiplier times the `L²` cutoff chart component is `L²`; it
+  -- agrees a.e. with the headline cross-term limit (the multipliers coincide).
+  refine (memLp_bdd_mul (I := I) (M := M) β hC0 hC
+    (aestronglyMeasurable_crossMultiplier (I := I) (M := M) β k)
+    (Lp.memLp (tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+      (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+        (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+          g r s) i) β P₀))).ae_eq ?_
+  refine Filter.Eventually.of_forall (fun y => ?_)
+  change crossMultiplier (I := I) (M := M) β k y *
+      (tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+        (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+            g r s) i) β P₀ :
+        EuclN → ℝ) y =
+    covGradPouLeibnizCrossLimit_unconditional (I := I) (M := M) g r s i β P₀ k y
+  unfold covGradPouLeibnizCrossLimit_unconditional
+  rw [crossMultiplier_eq (I := I) (M := M) β k y]
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+/-- Chart-locality-free twin of `cutoffComponent_smoothApprox_tendsto`. -/
+private lemma cutoffComponent_smoothApprox_tendsto_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (β : M) (P₀ : TensorCompIdx (E := E) r s) :
+    Filter.Tendsto
+      (fun n => tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+        (((eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+          g r s i n).toCcTensor) : TensorL2 r s g) β P₀)
+      atTop
+      (𝓝 (i.fst.val •
+        tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+          (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+              g r s) i) β P₀)) := by
+  classical
+  -- Apply `TensorH1ComplToTensorL2` to the `H¹`-convergence.
+  have h_l2 :=
+    ((TensorH1ComplToTensorL2 (I := I) (M := M) g r s).continuous.tendsto _).comp
+      (eigenvectorSmoothApprox_tendsto_unconditional (I := I) (M := M) g r s i)
+  -- Apply the cutoff chart-component continuous linear map.
+  have h_clm :=
+    ((tensorL2ChartComponentCutoffCLM (I := I) (M := M) g r s β P₀).continuous.tendsto
+      _).comp h_l2
+  -- Rewrite the `n`-th term and the limit.
+  have h_term : ∀ n : ℕ,
+      tensorL2ChartComponentCutoffCLM (I := I) (M := M) g r s β P₀
+          (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+            (smoothToTensorH1Compl (I := I) (M := M) g r s
+              (eigenvectorSmoothApprox_unconditional (I := I) (M := M) g r s i n))) =
+        tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+          (((eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+            g r s i n).toCcTensor) : TensorL2 r s g) β P₀ := by
+    intro n
+    rw [TensorH1ComplToTensorL2_smoothToTensorH1Compl_eq_coe (I := I) (M := M)
+      g r s (eigenvectorSmoothApprox_unconditional (I := I) (M := M) g r s i n),
+      tensorL2ChartComponentCutoffCLM_apply]
+  have h_lim :
+      tensorL2ChartComponentCutoffCLM (I := I) (M := M) g r s β P₀
+          (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+            (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i)) =
+        i.fst.val •
+          tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+            (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                g r s) i) β P₀ := by
+    -- `TensorH1ComplToTensorL2 (eigenvectorResolvent_unconditional …) = μ • φ`.
+    have hμ_ne : i.fst.val ≠ 0 := i.fst.val_ne_zero
+    have h_shadow :
+        TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+            (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i) =
+          i.fst.val •
+            tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                g r s) i := by
+      have h_eq :=
+        eigenvector_eq_resolvent_smul_unconditional (I := I) (M := M) g r s i
+      rw [h_eq, smul_smul, mul_inv_cancel₀ hμ_ne, one_smul]
+    rw [h_shadow, map_smul, tensorL2ChartComponentCutoffCLM_apply]
+  simp only [Function.comp_def] at h_clm
+  rw [h_lim] at h_clm
+  exact h_clm.congr (fun n => h_term n)
+
+/-- Chart-locality-free twin of `crossTermApprox`. -/
+private def crossTermApprox_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (β : M) (P₀ : TensorCompIdx (E := E) r s)
+    (k : Fin (Module.finrank ℝ E)) (n : ℕ) : EuclN → ℝ :=
+  fun y =>
+    euclidPartial (E := E) k
+        (chartPushedRaw I β ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ)) y *
+      chartPushedRaw I β
+        (tensorChartComponentRaw (I := I) (M := M) g r s
+          (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+            g r s i n).toCcTensor β P₀.1 P₀.2) y
+
+/-- Chart-locality-free twin of `crossTermCutoff`. -/
+private def crossTermCutoff_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (β : M) (P₀ : TensorCompIdx (E := E) r s)
+    (k : Fin (Module.finrank ℝ E)) (n : ℕ) : EuclN → ℝ :=
+  fun y =>
+    crossMultiplier (I := I) (M := M) β k y *
+      (tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+        (((eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+          g r s i n).toCcTensor) : TensorL2 r s g) β P₀ :
+        EuclN → ℝ) y
+
+/-- Chart-locality-free twin of `crossTermCutoff_memLp`. -/
+private lemma crossTermCutoff_memLp_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (β : M) (P₀ : TensorCompIdx (E := E) r s)
+    (k : Fin (Module.finrank ℝ E)) (n : ℕ) :
+    MemLp (crossTermCutoff_unconditional (I := I) (M := M) g r s i β P₀ k n) 2
+      (chartL2Measure (I := I) (M := M) β) := by
+  classical
+  obtain ⟨C, hC0, hC⟩ := exists_bound_crossMultiplier (I := I) (M := M) β k
+  exact memLp_bdd_mul (I := I) (M := M) β hC0 hC
+    (aestronglyMeasurable_crossMultiplier (I := I) (M := M) β k)
+    (Lp.memLp (tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+      (((eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+        g r s i n).toCcTensor) : TensorL2 r s g) β P₀))
+
+/-- Chart-locality-free twin of `crossTermApprox_ae_eq_crossTermCutoff`. -/
+private lemma crossTermApprox_ae_eq_crossTermCutoff_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (β : M) (P₀ : TensorCompIdx (E := E) r s)
+    (k : Fin (Module.finrank ℝ E)) (n : ℕ) :
+    crossTermApprox_unconditional (I := I) (M := M) g r s i β P₀ k n
+      =ᵐ[chartL2Measure (I := I) (M := M) β]
+      crossTermCutoff_unconditional (I := I) (M := M) g r s i β P₀ k n := by
+  classical
+  -- The cutoff chart component is a.e. the concrete cutoff Euclidean component;
+  -- chart-target membership holds a.e. for the restricted chart `L²` measure.
+  have h_coeFn :=
+    tensorL2ChartComponentCutoff_smoothToTensorL2_coeFn (I := I) (M := M)
+      g r s (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+        g r s i n).toCcTensor β P₀
+  have h_mem : ∀ᵐ y ∂(chartL2Measure (I := I) (M := M) β),
+      y ∈ chartTargetEuclid (I := I) (M := M) β := by
+    rw [chartL2Measure]
+    exact ae_restrict_mem (chartTargetEuclid_measurableSet (I := I) (M := M) β)
+  filter_upwards [h_coeFn, h_mem] with y hy_coe hy
+  -- On the chart target, rewrite both factors into the cutoff chart component.
+  unfold crossTermApprox_unconditional crossTermCutoff_unconditional
+  rw [crossMultiplier_mul_chartPushedRaw_eq_cutoffComponent
+    (I := I) (M := M) g r s
+    (eigenvectorSmoothApprox_unconditional (I := I) (M := M) g r s i n).toCcTensor
+    β P₀.1 P₀.2 k hy, crossMultiplier_eq (I := I) (M := M) β k y, hy_coe]
+
+/-- Chart-locality-free twin of `crossTermApprox_memLp`. -/
+private lemma crossTermApprox_memLp_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (β : M) (P₀ : TensorCompIdx (E := E) r s)
+    (k : Fin (Module.finrank ℝ E)) (n : ℕ) :
+    MemLp (crossTermApprox_unconditional (I := I) (M := M) g r s i β P₀ k n) 2
+      (chartL2Measure (I := I) (M := M) β) :=
+  (crossTermCutoff_memLp_unconditional (I := I) (M := M) g r s i β P₀ k n).ae_eq
+    (crossTermApprox_ae_eq_crossTermCutoff_unconditional (I := I) (M := M)
+      g r s i β P₀ k n).symm
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+/-- Chart-locality-free twin of `covGradPouLeibnizCrossLimit_tendsto`. -/
+theorem covGradPouLeibnizCrossLimit_tendsto_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (β : M) (P₀ : TensorCompIdx (E := E) r s)
+    (k : Fin (Module.finrank ℝ E)) :
+    Filter.Tendsto
+      (fun n => (i.fst.val)⁻¹ •
+        ((crossTermApprox_memLp_unconditional (I := I) (M := M)
+          g r s i β P₀ k n).toLp
+          (crossTermApprox_unconditional (I := I) (M := M)
+            g r s i β P₀ k n) :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)))
+      atTop
+      (𝓝 ((covGradPouLeibnizCrossLimit_memLp_unconditional (I := I) (M := M)
+        g r s i β P₀ k).toLp
+        (covGradPouLeibnizCrossLimit_unconditional (I := I) (M := M)
+          g r s i β P₀ k))) := by
+  classical
+  obtain ⟨C, hC0, hC⟩ := exists_bound_crossMultiplier (I := I) (M := M) β k
+  -- `tendsto_bdd_mul` for the cutoff-chart-component convergence, rescaled by
+  -- the continuous map `μ⁻¹ • ·`.
+  have h_smul :=
+    (tendsto_bdd_mul (I := I) (M := M) β hC0 hC
+      (aestronglyMeasurable_crossMultiplier (I := I) (M := M) β k)
+      (cutoffComponent_smoothApprox_tendsto_unconditional (I := I) (M := M)
+        g r s i β P₀)).const_smul (i.fst.val)⁻¹
+  -- The limit `L²` class of `h_smul` equals the headline cross-term limit.
+  have h_lim :
+      (i.fst.val)⁻¹ •
+          (memLp_bdd_mul (I := I) (M := M) β hC0 hC
+            (aestronglyMeasurable_crossMultiplier (I := I) (M := M) β k)
+            (Lp.memLp (i.fst.val •
+              tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+                (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                  (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                    g r s) i) β P₀))).toLp
+            (fun y => crossMultiplier (I := I) (M := M) β k y *
+              ((i.fst.val •
+                tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+                  (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+                    (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                      g r s) i) β P₀ :
+                Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
+                EuclN → ℝ) y) =
+        (covGradPouLeibnizCrossLimit_memLp_unconditional (I := I) (M := M)
+          g r s i β P₀ k).toLp
+          (covGradPouLeibnizCrossLimit_unconditional (I := I) (M := M)
+            g r s i β P₀ k) := by
+    -- Pass to `coeFn`: `μ⁻¹ • (multiplier · μ • cutoff φ) = multiplier · cutoff φ`.
+    apply Lp.ext
+    refine (Lp.coeFn_smul (i.fst.val)⁻¹ _).trans ?_
+    refine Filter.EventuallyEq.trans ?_
+      (MemLp.coeFn_toLp (covGradPouLeibnizCrossLimit_memLp_unconditional
+        (I := I) (M := M) g r s i β P₀ k)).symm
+    filter_upwards [MemLp.coeFn_toLp (memLp_bdd_mul (I := I) (M := M) β hC0 hC
+      (aestronglyMeasurable_crossMultiplier (I := I) (M := M) β k)
+      (Lp.memLp (i.fst.val •
+        tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+          (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+              g r s) i) β P₀))),
+      Lp.coeFn_smul (i.fst.val)
+        (tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+          (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+              g r s) i) β P₀)] with y hy_toLp hy_smul
+    -- `μ⁻¹ • (multiplier · (μ • cutoff φ) y) = multiplier · cutoff φ y`.
+    rw [Pi.smul_apply, hy_toLp, crossMultiplier_eq (I := I) (M := M) β k y,
+      hy_smul, Pi.smul_apply, smul_eq_mul, smul_eq_mul]
+    unfold covGradPouLeibnizCrossLimit_unconditional
+    have hμ_ne : i.fst.val ≠ 0 := i.fst.val_ne_zero
+    field_simp
+  rw [h_lim] at h_smul
+  -- The `n`-th terms agree: the `L²` classes of `crossTermApprox_unconditional`
+  -- and `crossTermCutoff_unconditional` coincide by the kernel-support
+  -- identification.
+  refine h_smul.congr' (Filter.Eventually.of_forall (fun n => ?_))
+  congr 1
+  exact (MemLp.toLp_congr _ _
+    (crossTermApprox_ae_eq_crossTermCutoff_unconditional (I := I) (M := M)
+      g r s i β P₀ k n)).symm
+
+/-- Chart-locality-free twin of `covGrad_chartComponent_ae_decompose`. -/
+private lemma covGrad_chartComponent_ae_decompose_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (β : M) (Q' : TensorCompIdx (E := E) r (s + 1)) (n : ℕ) :
+    tensorChartComponent (I := I) (M := M) g r (s + 1)
+        (covGrad (I := I) (M := M) g r s
+          (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+            g r s i n).toCcTensor) β Q'.1 Q'.2
+      =ᵐ[chartL2Measure (I := I) (M := M) β]
+      fun y =>
+        euclidPartial (E := E) (Q'.2 0)
+            (tensorChartComponent (I := I) (M := M) g r s
+              (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+                g r s i n).toCcTensor β Q'.1
+              (Matrix.vecTail Q'.2)) y
+          - crossTermApprox_unconditional (I := I) (M := M) g r s i β
+              (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0) n y
+          + covDerivLowerOrderTerm (I := I) (M := M) g r s
+              (pouSmul (I := I) (M := M) g r s β
+                (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+                  g r s i n).toCcTensor) β (Q'.2 0) Q'.1
+              (Matrix.vecTail Q'.2) y := by
+  classical
+  rw [chartL2Measure]
+  refine (ae_restrict_iff'
+    (chartTargetEuclid_measurableSet (I := I) (M := M) β)).mpr ?_
+  refine Filter.Eventually.of_forall (fun y hy => ?_)
+  -- Abbreviate the smooth approximant section.
+  set S : SmoothCcTensor g r s :=
+    (eigenvectorSmoothApprox_unconditional (I := I) (M := M) g r s i n).toCcTensor
+    with hS_def
+  -- The chart component is the chart-pushed weight times the chart-pushed raw
+  -- component of the covariant gradient.
+  rw [tensorChartComponent_eq_chartPushedRaw_pou_mul_chartPushedRaw_raw_on_target
+    (I := I) (M := M) g r (s + 1) (covGrad (I := I) (M := M) g r s S) β
+    Q'.1 Q'.2 hy]
+  -- The raw chart component of `covGrad` is the chart-Euclidean partial plus
+  -- the Christoffel correction (the raw chart-component formula).
+  rw [chartPushedRaw_apply_of_mem (I := I) (M := M) β
+      (tensorChartComponentRaw (I := I) (M := M) g r (s + 1)
+        (covGrad (I := I) (M := M) g r s S) β Q'.1 Q'.2) hy,
+    tensorChartComponentRaw_covGrad (I := I) (M := M) g r s S β
+      Q'.1 Q'.2 hy, mul_add]
+  -- The partition-of-unity Leibniz identity for the principal term.
+  rw [chartPushedRaw_pou_mul_euclidPartial_eq (I := I) (M := M) g r s S β
+    Q'.1 (Matrix.vecTail Q'.2) (Q'.2 0) hy]
+  -- The Christoffel-correction term is the correction at the weighted section.
+  rw [chartPushedRaw_pou_mul_covDerivLowerOrderTerm_eq (I := I) (M := M)
+    g r s S β (Q'.2 0) Q'.1 (Matrix.vecTail Q'.2) hy]
+  -- Identify the Leibniz cross term and rearrange.
+  simp only [crossTermApprox_unconditional]
+  ring
+
+/-- Chart-locality-free twin of `principalTerm_tendsto`. -/
+private lemma principalTerm_tendsto_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (β : M) (Q' : TensorCompIdx (E := E) r (s + 1))
+    (hf : ∀ n : ℕ, MemLp
+      (euclidPartial (E := E) (Q'.2 0)
+        (tensorChartComponent (I := I) (M := M) g r s
+          (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+            g r s i n).toCcTensor β Q'.1
+          (Matrix.vecTail Q'.2))) 2
+      (chartL2Measure (I := I) (M := M) β)) :
+    Filter.Tendsto
+      (fun n => (i.fst.val)⁻¹ • (hf n).toLp _)
+      atTop
+      (𝓝 (eigenvectorChartPartialLp_unconditional (I := I) (M := M)
+        g r s i β (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0))) := by
+  classical
+  -- The principal term `L²` class equals the `L²` class of the chosen weak
+  -- chart partial; rescale `eigenvectorChartPartialLp_tendsto_unconditional`.
+  refine (eigenvectorChartPartialLp_tendsto_unconditional (I := I) (M := M)
+    g r s i β (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0)).congr'
+    (Filter.Eventually.of_forall (fun n => ?_))
+  -- The `n`-th term of the headline `tendsto`, identified concretely.
+  rw [eigenvectorChartPartialLp_approx_eq_unconditional (I := I) (M := M)
+    g r s i β (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0) n]
+  congr 1
+  -- The chosen weak chart partial agrees a.e. with the classical partial.
+  exact MemLp.toLp_congr _ _
+    (chosenWeakPartial'_tensorChartComponent_ae_eq (I := I) (M := M)
+      g r s (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+        g r s i n).toCcTensor β Q'.1 (Matrix.vecTail Q'.2)
+      (Q'.2 0))
+
+/-- Chart-locality-free twin of `christoffelTerm_tendsto`. -/
+private lemma christoffelTerm_tendsto_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (β : M) (Q' : TensorCompIdx (E := E) r (s + 1))
+    (hf : ∀ n : ℕ, MemLp
+      (covDerivLowerOrderTerm (I := I) (M := M) g r s
+        (pouSmul (I := I) (M := M) g r s β
+          (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+            g r s i n).toCcTensor) β (Q'.2 0) Q'.1
+        (Matrix.vecTail Q'.2)) 2
+      (chartL2Measure (I := I) (M := M) β)) :
+    Filter.Tendsto
+      (fun n => (i.fst.val)⁻¹ • (hf n).toLp _)
+      atTop
+      (𝓝 ((covGradChristoffelLimit_memLp_unconditional (I := I) (M := M)
+        g r s i β (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0)).toLp
+        (covGradChristoffelLimit_unconditional (I := I) (M := M)
+          g r s i β (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0)))) := by
+  classical
+  -- `covGradChristoffel_tendsto_unconditional` is exactly this, with the `n`-th
+  -- `L²` class presented through its own `MemLp` witness.
+  refine (covGradChristoffel_tendsto_unconditional (I := I) (M := M)
+    g r s i β (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0)).congr'
+    (Filter.Eventually.of_forall (fun n => ?_))
+  congr 1
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+/-- Chart-locality-free twin of `covGrad_chartComponent_tendsto`. -/
+private lemma covGrad_chartComponent_tendsto_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (β : M) (Q' : TensorCompIdx (E := E) r (s + 1)) :
+    Filter.Tendsto
+      (fun n => (i.fst.val)⁻¹ •
+        tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
+          ((covGrad (I := I) (M := M) g r s
+            (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+              g r s i n).toCcTensor :
+            SmoothCcTensor g r (s + 1)) : TensorL2 r (s + 1) g) β Q')
+      atTop
+      (𝓝 ((i.fst.val)⁻¹ •
+        tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
+          (tensorCovGradL2Compl (I := I) (M := M) g r s
+            (eigenvectorResolvent_unconditional (I := I) (M := M)
+              g r s i)) β Q')) := by
+  classical
+  -- Apply the covariant-gradient operator, then the canonical chart-component
+  -- continuous linear map, to the `H¹`-convergence; rescale by `μ⁻¹ • ·`.
+  have h1 :=
+    ((tensorCovGradL2Compl (I := I) (M := M) g r s).continuous.tendsto _).comp
+      (eigenvectorSmoothApprox_tendsto_unconditional (I := I) (M := M) g r s i)
+  have h2 :=
+    ((tensorL2ChartComponentCLM (I := I) (M := M) g r (s + 1) β Q').continuous.tendsto
+      _).comp h1
+  have h_smul := h2.const_smul (i.fst.val)⁻¹
+  simp only [Function.comp_def] at h_smul
+  -- Identify the `n`-th term: the chart component of `covGrad wₙ.toCcTensor`.
+  refine h_smul.congr (fun n => ?_)
+  rw [tensorL2ChartComponentCLM_apply,
+    tensorCovGradL2Compl_smoothToTensorH1Compl_eq_coe (I := I) (M := M)
+      g r s (eigenvectorSmoothApprox_unconditional (I := I) (M := M) g r s i n)]
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+/-- **Chart-locality-free twin of `eigenvectorCovGrad_pou_chartComponent_ae_eq`.**
+The `μ⁻¹`-rescaled canonical Euclidean chart component of the section-level
+covariant gradient `tensorCovGradL2Compl g r s` of the chart-locality-free
+eigenvector resolvent `eigenvectorResolvent_unconditional g r s i` equals, almost
+everywhere on the Euclidean chart target, the established weak `(Q'.2 0)`-th chart
+partial of the eigenvector chart component, minus the partition-of-unity Leibniz
+cross-term limit `covGradPouLeibnizCrossLimit_unconditional`, plus the
+Christoffel-correction limit `covGradChristoffelLimit_unconditional`. -/
+theorem eigenvectorCovGrad_pou_chartComponent_ae_eq_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (β : M) (Q' : TensorCompIdx (E := E) r (s + 1)) :
+    (((i.fst.val)⁻¹ •
+        tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
+          (tensorCovGradL2Compl (I := I) (M := M) g r s
+            (eigenvectorResolvent_unconditional (I := I) (M := M)
+              g r s i)) β Q' :
+        Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ)
+      =ᵐ[chartL2Measure (I := I) (M := M) β]
+      (fun y =>
+        eigenvectorChartWeakPartial_unconditional (I := I) (M := M) g r s i β
+            (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0) y
+          - covGradPouLeibnizCrossLimit_unconditional (I := I) (M := M) g r s i β
+              (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0) y
+          + covGradChristoffelLimit_unconditional (I := I) (M := M) g r s i β
+              (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0) y) := by
+  classical
+  -- The three per-term `MemLp` witnesses.
+  have hf1 : ∀ n : ℕ, MemLp
+      (euclidPartial (E := E) (Q'.2 0)
+        (tensorChartComponent (I := I) (M := M) g r s
+          (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+            g r s i n).toCcTensor β Q'.1
+          (Matrix.vecTail Q'.2))) 2
+      (chartL2Measure (I := I) (M := M) β) := fun n =>
+    (chosenWeakPartial'_tensorChartComponent_memLp (I := I) (M := M) g r s
+      (eigenvectorSmoothApprox_unconditional (I := I) (M := M) g r s i n)
+      β Q'.1 (Matrix.vecTail Q'.2) (Q'.2 0)).ae_eq
+      (chosenWeakPartial'_tensorChartComponent_ae_eq (I := I) (M := M)
+        g r s (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+          g r s i n).toCcTensor β Q'.1 (Matrix.vecTail Q'.2)
+        (Q'.2 0))
+  have hf2 : ∀ n : ℕ, MemLp
+      (crossTermApprox_unconditional (I := I) (M := M) g r s i β
+        (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0) n) 2
+      (chartL2Measure (I := I) (M := M) β) := fun n =>
+    crossTermApprox_memLp_unconditional (I := I) (M := M) g r s i β
+      (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0) n
+  have hf3 : ∀ n : ℕ, MemLp
+      (covDerivLowerOrderTerm (I := I) (M := M) g r s
+        (pouSmul (I := I) (M := M) g r s β
+          (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+            g r s i n).toCcTensor) β (Q'.2 0) Q'.1
+        (Matrix.vecTail Q'.2)) 2
+      (chartL2Measure (I := I) (M := M) β) := fun n =>
+    covDerivLowerOrderTerm_pouSmul_memLp_unconditional (I := I) (M := M) g r s i β
+      (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0) n
+  -- The chart component of `covGrad wₙ.toCcTensor` is `L²`.
+  have hfA : ∀ n : ℕ, MemLp
+      (tensorChartComponent (I := I) (M := M) g r (s + 1)
+        (covGrad (I := I) (M := M) g r s
+          (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+            g r s i n).toCcTensor) β Q'.1 Q'.2) 2
+      (chartL2Measure (I := I) (M := M) β) := fun n =>
+    tensorChartComponent_memLp (I := I) (M := M) g r (s + 1)
+      (covGrad (I := I) (M := M) g r s
+        (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+          g r s i n).toCcTensor) β Q'.1 Q'.2
+  -- The `μ⁻¹`-rescaled chart-component `L²` classes converge to the rescaled
+  -- chart component of the resolvent's covariant gradient.
+  have h_tendsto_A :=
+    covGrad_chartComponent_tendsto_unconditional (I := I) (M := M) g r s i β Q'
+  -- Identify each `n`-th rescaled chart-component class as the `μ⁻¹`-rescaled
+  -- combination of the three term `L²` classes.
+  have h_term : ∀ n : ℕ,
+      (i.fst.val)⁻¹ •
+          tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
+            ((covGrad (I := I) (M := M) g r s
+              (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+                g r s i n).toCcTensor :
+              SmoothCcTensor g r (s + 1)) : TensorL2 r (s + 1) g) β Q' =
+        ((i.fst.val)⁻¹ • (hf1 n).toLp _ -
+            (i.fst.val)⁻¹ • (hf2 n).toLp _) +
+          (i.fst.val)⁻¹ • (hf3 n).toLp _ := by
+    intro n
+    -- Pass to `coeFn`: both sides agree a.e. with `μ⁻¹` times the per-approximant
+    -- chart-component decomposition.
+    apply Lp.ext
+    have h_decomp := covGrad_chartComponent_ae_decompose_unconditional (I := I) (M := M)
+      g r s i β Q' n
+    -- The left-hand side `coeFn`: `μ⁻¹` times the concrete chart component.
+    have h_lhs :
+        (((i.fst.val)⁻¹ •
+            tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
+              ((covGrad (I := I) (M := M) g r s
+                (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+                  g r s i n).toCcTensor :
+                SmoothCcTensor g r (s + 1)) : TensorL2 r (s + 1) g) β Q' :
+            Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ)
+          =ᵐ[chartL2Measure (I := I) (M := M) β]
+          fun y => (i.fst.val)⁻¹ •
+            tensorChartComponent (I := I) (M := M) g r (s + 1)
+              (covGrad (I := I) (M := M) g r s
+                (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+                  g r s i n).toCcTensor) β Q'.1 Q'.2 y := by
+      filter_upwards [Lp.coeFn_smul (i.fst.val)⁻¹
+          (tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
+            ((covGrad (I := I) (M := M) g r s
+              (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+                g r s i n).toCcTensor :
+              SmoothCcTensor g r (s + 1)) : TensorL2 r (s + 1) g) β Q'),
+        tensorL2ChartComponent_smoothToTensorL2_coeFn (I := I) (M := M)
+          g r (s + 1) (covGrad (I := I) (M := M) g r s
+            (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+              g r s i n).toCcTensor) β Q'] with y hy_smul hy_comp
+      rw [hy_smul, Pi.smul_apply, hy_comp]
+    -- The right-hand side `coeFn`: `μ⁻¹` times the three-term combination.
+    have h_rhs :
+        ((((i.fst.val)⁻¹ • (hf1 n).toLp _ -
+              (i.fst.val)⁻¹ • (hf2 n).toLp _) +
+            (i.fst.val)⁻¹ • (hf3 n).toLp _ :
+            Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ)
+          =ᵐ[chartL2Measure (I := I) (M := M) β]
+          fun y => (i.fst.val)⁻¹ •
+            ((euclidPartial (E := E) (Q'.2 0)
+                  (tensorChartComponent (I := I) (M := M) g r s
+                    (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+                      g r s i n).toCcTensor β Q'.1
+                    (Matrix.vecTail Q'.2)) y -
+                crossTermApprox_unconditional (I := I) (M := M) g r s i β
+                  (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0) n y) +
+              covDerivLowerOrderTerm (I := I) (M := M) g r s
+                (pouSmul (I := I) (M := M) g r s β
+                  (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+                    g r s i n).toCcTensor) β (Q'.2 0) Q'.1
+                (Matrix.vecTail Q'.2) y) := by
+      filter_upwards [Lp.coeFn_add ((i.fst.val)⁻¹ • (hf1 n).toLp _ -
+          (i.fst.val)⁻¹ • (hf2 n).toLp _) ((i.fst.val)⁻¹ • (hf3 n).toLp _),
+        Lp.coeFn_sub ((i.fst.val)⁻¹ • (hf1 n).toLp _)
+          ((i.fst.val)⁻¹ • (hf2 n).toLp _),
+        Lp.coeFn_smul (i.fst.val)⁻¹ ((hf1 n).toLp _),
+        Lp.coeFn_smul (i.fst.val)⁻¹ ((hf2 n).toLp _),
+        Lp.coeFn_smul (i.fst.val)⁻¹ ((hf3 n).toLp _),
+        MemLp.coeFn_toLp (hf1 n), MemLp.coeFn_toLp (hf2 n),
+        MemLp.coeFn_toLp (hf3 n)]
+        with y ha hs hm1 hm2 hm3 ht1 ht2 ht3
+      rw [ha, Pi.add_apply, hs, Pi.sub_apply, hm1, hm2, hm3, Pi.smul_apply,
+        Pi.smul_apply, Pi.smul_apply, ht1, ht2, ht3]
+      simp only [smul_eq_mul]
+      ring
+    -- Combine: both sides equal `μ⁻¹` times the decomposition.
+    refine h_lhs.trans (Filter.EventuallyEq.trans ?_ h_rhs.symm)
+    filter_upwards [h_decomp] with y hy_decomp
+    rw [hy_decomp]
+  rw [show (fun n => (i.fst.val)⁻¹ •
+        tensorL2ChartComponent (I := I) (M := M) g r (s + 1)
+          ((covGrad (I := I) (M := M) g r s
+            (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+              g r s i n).toCcTensor :
+            SmoothCcTensor g r (s + 1)) : TensorL2 r (s + 1) g) β Q') =
+      (fun n => ((i.fst.val)⁻¹ • (hf1 n).toLp _ -
+          (i.fst.val)⁻¹ • (hf2 n).toLp _) +
+        (i.fst.val)⁻¹ • (hf3 n).toLp _) from funext h_term] at h_tendsto_A
+  -- The three termwise limits.
+  have h_lim1 := principalTerm_tendsto_unconditional (I := I) (M := M)
+    g r s i β Q' hf1
+  have h_lim2 := covGradPouLeibnizCrossLimit_tendsto_unconditional (I := I) (M := M)
+    g r s i β (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0)
+  have h_lim3 := christoffelTerm_tendsto_unconditional (I := I) (M := M)
+    g r s i β Q' hf3
+  -- The cross-term `tendsto` `n`-th term is `μ⁻¹ • (hf2 n).toLp`.
+  have h_lim2' : Filter.Tendsto
+      (fun n => (i.fst.val)⁻¹ • (hf2 n).toLp _) atTop
+      (𝓝 ((covGradPouLeibnizCrossLimit_memLp_unconditional (I := I) (M := M)
+        g r s i β (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0)).toLp
+        (covGradPouLeibnizCrossLimit_unconditional (I := I) (M := M)
+          g r s i β (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0)))) := by
+    refine h_lim2.congr (fun n => ?_)
+    congr 1
+  -- Assemble the limit of the three-term combination.
+  have h_lim_sum :
+      Filter.Tendsto
+        (fun n => ((i.fst.val)⁻¹ • (hf1 n).toLp _ -
+            (i.fst.val)⁻¹ • (hf2 n).toLp _) +
+          (i.fst.val)⁻¹ • (hf3 n).toLp _) atTop
+        (𝓝 ((eigenvectorChartPartialLp_unconditional (I := I) (M := M)
+              g r s i β (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0) -
+            (covGradPouLeibnizCrossLimit_memLp_unconditional (I := I) (M := M)
+              g r s i β (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0)).toLp
+              (covGradPouLeibnizCrossLimit_unconditional (I := I) (M := M)
+                g r s i β (Q'.1, Matrix.vecTail Q'.2)
+                (Q'.2 0))) +
+          (covGradChristoffelLimit_memLp_unconditional (I := I) (M := M)
+            g r s i β (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0)).toLp
+            (covGradChristoffelLimit_unconditional (I := I) (M := M)
+              g r s i β (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0)))) :=
+    (h_lim1.sub h_lim2').add h_lim3
+  -- Uniqueness of `L²`-limits identifies the two limits.
+  have h_eq := tendsto_nhds_unique h_tendsto_A h_lim_sum
+  -- Pass to `coeFn` and identify the right-hand side function.
+  apply Lp.ext_iff.mp at h_eq
+  refine h_eq.trans ?_
+  -- The right-hand side `L²` class coerces to the headline function.
+  have h_w := MemLp.coeFn_toLp (covGradPouLeibnizCrossLimit_memLp_unconditional
+    (I := I) (M := M) g r s i β (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0))
+  have h_c := MemLp.coeFn_toLp (covGradChristoffelLimit_memLp_unconditional
+    (I := I) (M := M) g r s i β (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0))
+  filter_upwards [Lp.coeFn_add
+      (eigenvectorChartPartialLp_unconditional (I := I) (M := M) g r s i β
+        (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0) -
+      (covGradPouLeibnizCrossLimit_memLp_unconditional (I := I) (M := M)
+        g r s i β (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0)).toLp _)
+      ((covGradChristoffelLimit_memLp_unconditional (I := I) (M := M)
+        g r s i β (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0)).toLp _),
+    Lp.coeFn_sub
+      (eigenvectorChartPartialLp_unconditional (I := I) (M := M) g r s i β
+        (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0))
+      ((covGradPouLeibnizCrossLimit_memLp_unconditional (I := I) (M := M)
+        g r s i β (Q'.1, Matrix.vecTail Q'.2) (Q'.2 0)).toLp _),
+    h_w, h_c] with y hy_add hy_sub hy_w hy_c
+  rw [hy_add, Pi.add_apply, hy_sub, Pi.sub_apply, hy_w, hy_c]
+  rfl
+
 /-! ## Sanity tests -/
 
 example (g : SmoothRiemannianMetric I M) (r s : ℕ)
