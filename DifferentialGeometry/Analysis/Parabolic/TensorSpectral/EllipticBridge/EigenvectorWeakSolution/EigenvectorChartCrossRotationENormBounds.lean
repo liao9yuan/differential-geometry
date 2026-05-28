@@ -968,6 +968,85 @@ theorem eLpNorm_covPrincipalRotationCoeffLimit_le_uniform
 
 end CrossRotationENormBoundsUniform
 
+/-! ## Chart-locality-free uniform-constant restatements
+
+The two cross-Leibniz uniform bounds above carry the chart-selection hypothesis
+`h_atlas` only through the limit objects `crossLeftLimitComponent` /
+`crossRightLimitComponent`, which are built from the eigenvector resolvent
+`eigenvectorResolvent`. Both limit objects have chart-locality-free twins —
+`crossLeftLimitComponent_unconditional` / `crossRightLimitComponent_unconditional`
+— keyed on the eigenvector resolvent `eigenvectorResolvent_unconditional`, itself
+built from the eigenbasis vector
+`tensorResolventEigenbasisVec_ofCompact (tensorResolventL2_isCompactOperator_intrinsic g r s) i`
+selected at the unconditional compactness witness. The uniform delegator
+`eLpNorm_tensorL2ChartComponentCutoff_le_uniform` quantifies over an arbitrary
+abstract `L²` element, so it applies verbatim to the chart-locality-free limit
+objects, with no chart-selection hypothesis. -/
+
+section CrossRotationENormBoundsUnconditional
+
+variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
+
+/-- **Chart-locality-free uniform-constant `eLpNorm` bound for the cross-left
+limit object.** Chart-locality-free twin of
+`eLpNorm_crossLeftLimitComponent_le_uniform`: a single nonnegative constant `C`
+serves every eigenbasis index `i`, with no chart-selection hypothesis. The
+limit object `crossLeftLimitComponent_unconditional` is by definition the cutoff
+Euclidean chart component, at `(α, P)`, of the abstract `L²` element
+`tensorCovGradL2Compl g r s (eigenvectorResolvent_unconditional g r s i)`, so the
+per-`i` bound delegates to the atlas-free uniform delegator
+`eLpNorm_tensorL2ChartComponentCutoff_le_uniform`, whose constant depends only on
+`g, r, s, α, P` and not on the abstract `L²` element it is applied to. -/
+theorem eLpNorm_crossLeftLimitComponent_le_uniform_unconditional
+    (α : M) (P : TensorCompIdx (E := E) r (s + 1)) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        eLpNorm ((crossLeftLimitComponent_unconditional (I := I) (M := M)
+            g r s i α P :
+            Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) 2
+            ((chartPulledWeightedMeasure (I := I) g α).restrict
+              (chartTargetEuclid (I := I) (M := M) α))
+          ≤ ENNReal.ofReal C *
+            ENNReal.ofReal ‖tensorCovGradL2Compl (I := I) (M := M) g r s
+              (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i)‖ := by
+  obtain ⟨C, hC_nn, hC_bd⟩ := eLpNorm_tensorL2ChartComponentCutoff_le_uniform
+    (I := I) (M := M) g r (s + 1) α P
+  refine ⟨C, hC_nn, fun i => ?_⟩
+  rw [crossLeftLimitComponent_unconditional]
+  exact hC_bd (tensorCovGradL2Compl (I := I) (M := M) g r s
+    (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+
+/-- **Chart-locality-free uniform-constant `eLpNorm` bound for the cross-right
+limit object.** Chart-locality-free twin of
+`eLpNorm_crossRightLimitComponent_le_uniform`: a single nonnegative constant `C`
+serves every eigenbasis index `i`, with no chart-selection hypothesis. The
+limit object `crossRightLimitComponent_unconditional` is by definition the cutoff
+Euclidean chart component, at `(α, P)`, of the abstract `L²` element
+`TensorH1ComplToTensorL2 g r s (eigenvectorResolvent_unconditional g r s i)`, so
+the per-`i` bound delegates to the atlas-free uniform delegator
+`eLpNorm_tensorL2ChartComponentCutoff_le_uniform`, whose constant depends only on
+`g, r, s, α, P` and not on the abstract `L²` element it is applied to. -/
+theorem eLpNorm_crossRightLimitComponent_le_uniform_unconditional
+    (α : M) (P : TensorCompIdx (E := E) r s) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+        eLpNorm ((crossRightLimitComponent_unconditional (I := I) (M := M)
+            g r s i α P :
+            Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) 2
+            ((chartPulledWeightedMeasure (I := I) g α).restrict
+              (chartTargetEuclid (I := I) (M := M) α))
+          ≤ ENNReal.ofReal C *
+            ENNReal.ofReal ‖TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+              (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i)‖ := by
+  obtain ⟨C, hC_nn, hC_bd⟩ := eLpNorm_tensorL2ChartComponentCutoff_le_uniform
+    (I := I) (M := M) g r s α P
+  refine ⟨C, hC_nn, fun i => ?_⟩
+  rw [crossRightLimitComponent_unconditional]
+  exact hC_bd (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+    (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))
+
+end CrossRotationENormBoundsUnconditional
+
 /-! ## Sanity tests -/
 
 section ElaborationTests
