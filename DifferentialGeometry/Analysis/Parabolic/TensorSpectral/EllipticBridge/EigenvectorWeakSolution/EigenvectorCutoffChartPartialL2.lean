@@ -654,6 +654,76 @@ theorem eigenvectorCutoffChartPartialLp_tendsto
   simp only [Function.comp_def] at h_smul
   exact h_smul
 
+/-! ## Chart-locality-free twins
+
+`h_atlas` enters only through the eigenvector resolvent and its canonical smooth
+approximating sequence, both of which have chart-locality-free twins. The cutoff
+chart-partial map `eigenvectorCutoffChartPartialCLM` carries no `h_atlas`. -/
+
+/-- **The candidate weak `k`-th cutoff chart partial of an eigenvector chart
+component (chart-locality-free).** Chart-locality-free twin of
+`eigenvectorCutoffChartPartialLp`. -/
+def eigenvectorCutoffChartPartialLp_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s)
+    (k : Fin (Module.finrank ℝ E)) :
+    Lp ℝ 2 (chartL2Measure (I := I) (M := M) α) :=
+  (i.fst.val)⁻¹ •
+    eigenvectorCutoffChartPartialCLM (I := I) (M := M) g r s α P₀ k
+      (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i)
+
+/-- **The concrete characterisation of the approximant cutoff chart partial
+(chart-locality-free).** Chart-locality-free twin of
+`eigenvectorCutoffChartPartialLp_approx_eq`. -/
+theorem eigenvectorCutoffChartPartialLp_approx_eq_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s)
+    (k : Fin (Module.finrank ℝ E)) (n : ℕ) :
+    (i.fst.val)⁻¹ •
+        eigenvectorCutoffChartPartialCLM (I := I) (M := M) g r s α P₀ k
+          (smoothToTensorH1Compl (I := I) (M := M) g r s
+            (eigenvectorSmoothApprox_unconditional (I := I) (M := M) g r s i n)) =
+      (i.fst.val)⁻¹ •
+        (chosenWeakPartial'_cutoffComponentEuclid_memLp (I := I) (M := M)
+          g r s
+          (eigenvectorSmoothApprox_unconditional (I := I) (M := M) g r s i n)
+          α P₀.1 P₀.2 k).toLp
+          (chosenWeakPartial' (d := Module.finrank ℝ E) 2 k
+            (cutoffComponentEuclid (I := I) (M := M) g r s
+              (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+                g r s i n).toCcTensor α P₀.1 P₀.2)
+            (chartTargetEuclid (I := I) (M := M) α)) := by
+  rw [eigenvectorCutoffChartPartialCLM_smoothToTensorH1Compl
+    (I := I) (M := M) g r s
+    (eigenvectorSmoothApprox_unconditional (I := I) (M := M) g r s i n) α P₀ k]
+  rfl
+
+/-- **The cutoff chart partials of an eigenvector chart component as an
+`L²`-limit of smooth cutoff chart partials (chart-locality-free).**
+Chart-locality-free twin of `eigenvectorCutoffChartPartialLp_tendsto`. -/
+theorem eigenvectorCutoffChartPartialLp_tendsto_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s)
+    (k : Fin (Module.finrank ℝ E)) :
+    Filter.Tendsto
+      (fun n => (i.fst.val)⁻¹ •
+        eigenvectorCutoffChartPartialCLM (I := I) (M := M) g r s α P₀ k
+          (smoothToTensorH1Compl (I := I) (M := M) g r s
+            (eigenvectorSmoothApprox_unconditional (I := I) (M := M) g r s i n)))
+      atTop
+      (𝓝 (eigenvectorCutoffChartPartialLp_unconditional (I := I) (M := M)
+        g r s i α P₀ k)) := by
+  have h_clm :=
+    ((eigenvectorCutoffChartPartialCLM
+        (I := I) (M := M) g r s α P₀ k).continuous.tendsto _).comp
+      (eigenvectorSmoothApprox_tendsto_unconditional (I := I) (M := M) g r s i)
+  have h_smul := h_clm.const_smul (i.fst.val)⁻¹
+  simp only [Function.comp_def] at h_smul
+  exact h_smul
+
 /-! ## Sanity tests -/
 
 example (g : SmoothRiemannianMetric I M) (r s : ℕ)

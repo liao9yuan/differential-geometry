@@ -367,6 +367,197 @@ theorem eigenvectorChartComponentL2_tendsto
   simp only [Function.comp_def, tensorL2ChartComponentCLM_apply] at h_clm
   exact h_clm
 
+/-! ## Chart-locality-free twins
+
+The `h_atlas` here only keys the eigenbasis vector behind `eigenvectorSmoothApprox`
+and the eigenvector resolvent. Threading the chart-locality-free eigenvector
+resolvent of `SmoothApprox.lean` through the same chain drops `h_atlas`
+entirely. -/
+
+/-- **The canonical smooth `H¹`-approximating sequence of the eigenvector
+resolvent (chart-locality-free).** Chart-locality-free twin of
+`eigenvectorSmoothApprox`, fixed via `Classical.choose` of
+`exists_smoothApprox_unconditional`. -/
+noncomputable def eigenvectorSmoothApprox_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s) :
+    ℕ → SmoothCcTensorH1 g r s :=
+  Classical.choose (exists_smoothApprox_unconditional (I := I) (M := M) g r s i)
+
+/-- **Spec of the canonical chart-locality-free approximating sequence.**
+Chart-locality-free twin of `eigenvectorSmoothApprox_tendsto`. -/
+theorem eigenvectorSmoothApprox_tendsto_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s) :
+    Filter.Tendsto
+      (fun n => smoothToTensorH1Compl (I := I) (M := M) g r s
+        (eigenvectorSmoothApprox_unconditional (I := I) (M := M) g r s i n))
+      atTop
+      (𝓝 (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i)) :=
+  Classical.choose_spec
+    (exists_smoothApprox_unconditional (I := I) (M := M) g r s i)
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+/-- The `L²`-coercion of the chart-locality-free eigenvector resolvent is
+`μ • φ`, where `φ := tensorResolventEigenbasisVec_ofCompact`. Chart-locality-free
+twin of `resolventL2_eq_smul_eigenvector`. -/
+private lemma resolventL2_eq_smul_eigenvector_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s) :
+    letI : CompleteSpace E := FiniteDimensional.complete ℝ E
+    TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+        (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i) =
+      i.fst.val •
+        tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+          i := by
+  letI : CompleteSpace E := FiniteDimensional.complete ℝ E
+  have h_eq := eigenvector_eq_resolvent_smul_unconditional (I := I) (M := M) g r s i
+  have hμ_ne : i.fst.val ≠ 0 := i.fst.val_ne_zero
+  rw [h_eq, smul_smul, mul_inv_cancel₀ hμ_ne, one_smul]
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+/-- The `L²`-coercions of the chart-locality-free approximating sequence converge
+to `μ • φ`. Chart-locality-free twin of `smoothApprox_coe_tendsto`. -/
+private lemma smoothApprox_coe_tendsto_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s) :
+    letI : CompleteSpace E := FiniteDimensional.complete ℝ E
+    Filter.Tendsto
+      (fun n => (((eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+            g r s i n).toCcTensor) : TensorL2 r s g))
+      atTop
+      (𝓝 (i.fst.val •
+        tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+          i)) := by
+  letI : CompleteSpace E := FiniteDimensional.complete ℝ E
+  have h_l2 :
+      Filter.Tendsto
+        (fun n => TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+          (smoothToTensorH1Compl (I := I) (M := M) g r s
+            (eigenvectorSmoothApprox_unconditional (I := I) (M := M) g r s i n)))
+        atTop
+        (𝓝 (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+          (eigenvectorResolvent_unconditional (I := I) (M := M) g r s i))) :=
+    ((TensorH1ComplToTensorL2 (I := I) (M := M) g r s).continuous.tendsto _).comp
+      (eigenvectorSmoothApprox_tendsto_unconditional (I := I) (M := M) g r s i)
+  have h_term :
+      (fun n => TensorH1ComplToTensorL2 (I := I) (M := M) g r s
+          (smoothToTensorH1Compl (I := I) (M := M) g r s
+            (eigenvectorSmoothApprox_unconditional (I := I) (M := M) g r s i n))) =
+        fun n => (((eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+          g r s i n).toCcTensor) : TensorL2 r s g) := by
+    funext n
+    exact TensorH1ComplToTensorL2_smoothToTensorH1Compl_eq_coe
+      (I := I) (M := M) g r s
+      (eigenvectorSmoothApprox_unconditional (I := I) (M := M) g r s i n)
+  rw [h_term, resolventL2_eq_smul_eigenvector_unconditional (I := I) (M := M)
+    g r s i] at h_l2
+  exact h_l2
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+/-- The `μ⁻¹`-rescaled `L²`-coercions of the chart-locality-free approximating
+sequence converge to `φ`. Chart-locality-free twin of
+`smoothApprox_smul_coe_tendsto`. -/
+private lemma smoothApprox_smul_coe_tendsto_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s) :
+    letI : CompleteSpace E := FiniteDimensional.complete ℝ E
+    Filter.Tendsto
+      (fun n => (i.fst.val)⁻¹ •
+        (((eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+            g r s i n).toCcTensor) : TensorL2 r s g))
+      atTop
+      (𝓝 (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+        (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+        i)) := by
+  letI : CompleteSpace E := FiniteDimensional.complete ℝ E
+  have h_smul :=
+    (smoothApprox_coe_tendsto_unconditional (I := I) (M := M) g r s i).const_smul
+      (i.fst.val)⁻¹
+  have hμ_ne : i.fst.val ≠ 0 := i.fst.val_ne_zero
+  rwa [smul_smul, inv_mul_cancel₀ hμ_ne, one_smul] at h_smul
+
+/-- **The concrete characterisation of the approximant chart component
+(chart-locality-free).** Chart-locality-free twin of
+`eigenvectorChartComponentL2_approx_eq`. -/
+theorem eigenvectorChartComponentL2_approx_eq_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) (n : ℕ) :
+    tensorL2ChartComponent (I := I) (M := M) g r s
+        ((i.fst.val)⁻¹ •
+          (((eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+              g r s i n).toCcTensor) : TensorL2 r s g)) α P₀ =
+      (i.fst.val)⁻¹ •
+        (tensorChartComponent_memLp (I := I) (M := M) g r s
+          (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+            g r s i n).toCcTensor α P₀.1 P₀.2).toLp
+          (tensorChartComponent (I := I) (M := M) g r s
+            (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+              g r s i n).toCcTensor α P₀.1 P₀.2) := by
+  rw [tensorL2ChartComponent_smul (I := I) (M := M) g r s (i.fst.val)⁻¹
+    (((eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+      g r s i n).toCcTensor) : TensorL2 r s g) α P₀]
+  rw [tensorL2ChartComponent_smoothToTensorL2_eq (I := I) (M := M) g r s
+    (eigenvectorSmoothApprox_unconditional (I := I) (M := M) g r s i n).toCcTensor
+    α P₀]
+
+/-- Chart-locality-free twin of `eigenvectorChartComponentL2_approx_coeFn`. -/
+theorem eigenvectorChartComponentL2_approx_coeFn_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) (n : ℕ) :
+    ((tensorL2ChartComponent (I := I) (M := M) g r s
+        ((i.fst.val)⁻¹ •
+          (((eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+              g r s i n).toCcTensor) : TensorL2 r s g)) α P₀ :
+        Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
+        EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ) =ᵐ[
+        chartL2Measure (I := I) (M := M) α]
+      fun y => (i.fst.val)⁻¹ •
+        tensorChartComponent (I := I) (M := M) g r s
+          (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+            g r s i n).toCcTensor α P₀.1 P₀.2 y := by
+  rw [tensorL2ChartComponent_smul (I := I) (M := M) g r s (i.fst.val)⁻¹
+    (((eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+      g r s i n).toCcTensor) : TensorL2 r s g) α P₀]
+  refine (Lp.coeFn_smul (i.fst.val)⁻¹
+    (tensorL2ChartComponent (I := I) (M := M) g r s
+      (((eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+        g r s i n).toCcTensor) : TensorL2 r s g) α P₀)).trans ?_
+  exact (tensorL2ChartComponent_smoothToTensorL2_coeFn (I := I) (M := M) g r s
+    (eigenvectorSmoothApprox_unconditional (I := I) (M := M) g r s i n).toCcTensor
+    α P₀).const_smul (i.fst.val)⁻¹
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+/-- **The canonical chart component of an eigenvector as an `L²`-limit of smooth
+chart components (chart-locality-free).** Chart-locality-free twin of
+`eigenvectorChartComponentL2_tendsto`. -/
+theorem eigenvectorChartComponentL2_tendsto_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) :
+    letI : CompleteSpace E := FiniteDimensional.complete ℝ E
+    Filter.Tendsto
+      (fun n => tensorL2ChartComponent (I := I) (M := M) g r s
+        ((i.fst.val)⁻¹ •
+          (((eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+              g r s i n).toCcTensor) : TensorL2 r s g)) α P₀)
+      atTop
+      (𝓝 (tensorL2ChartComponent (I := I) (M := M) g r s
+        (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+          i) α P₀)) := by
+  letI : CompleteSpace E := FiniteDimensional.complete ℝ E
+  have h_clm :=
+    ((tensorL2ChartComponentCLM (I := I) (M := M) g r s α P₀).continuous.tendsto
+      _).comp
+      (smoothApprox_smul_coe_tendsto_unconditional (I := I) (M := M) g r s i)
+  simp only [Function.comp_def, tensorL2ChartComponentCLM_apply] at h_clm
+  exact h_clm
+
 /-! ## Sanity tests -/
 
 example (g : SmoothRiemannianMetric I M) (r s : ℕ)
