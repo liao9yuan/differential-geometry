@@ -675,6 +675,8 @@ theorem bonnetMyers_compact
 
 /-! ## Headline 3: finite fundamental group -/
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- **bonnet-myers-finite-fundamental-group.** *Bonnet-Myers finiteness of
 the fundamental group.* On a complete connected Riemannian manifold of
 dimension `n ≥ 2` with Ricci curvature bounded below by `(n-1) K` for some
@@ -696,6 +698,8 @@ theorem bonnetMyers_finite_fundamentalGroup
     (_hdim : 2 ≤ Module.finrank ℝ E)
     {K : ℝ} (_hK : 0 < K)
     (_hRic : RicciBoundedBelow (I := I) g (((Module.finrank ℝ E : ℝ) - 1) * K))
+    (hEnormBase : ∀ (xb : M) (v : TangentSpace I xb),
+        ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner xb v v)))
     (x : M) :
     Finite (FundamentalGroup M x) := by
   -- Promote the manifold's `[Nonempty M]` (from `ConnectedSpace M`) to `[Inhabited M]`,
@@ -715,14 +719,19 @@ theorem bonnetMyers_finite_fundamentalGroup
   -- `PathConnectedSpace M`: from `[ConnectedSpace M]` + `[LocPathConnectedSpace M]`.
   haveI hpcM : PathConnectedSpace M :=
     PathConnectedSpace.of_locPathConnectedSpace
-  -- Lifted Riemannian metric on the universal cover.
-  set gLift :
+  -- Lifted Riemannian metric on the universal cover.  Introduced as a transparent
+  -- `let` (not `set`) so that the lifted-bundle fibre instances reduce
+  -- definitionally to `(liftedMetric g).inner` for the principled completeness API.
+  let gLift :
       SmoothRiemannianMetric I
         (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
     DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.liftedMetric
       (I := I) g
   -- Bundled Riemannian-bundle structure on the tangent bundle of the universal cover.
-  haveI hRB :
+  -- Installed as a transparent `letI` (not `haveI`) so that the derived fibre
+  -- `NormedAddCommGroup` / `InnerProductSpace` instances reduce definitionally to
+  -- the lifted metric `gLift.inner`, which the principled completeness API needs.
+  letI hRB :
       Bundle.RiemannianBundle
         (fun (xt :
             DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) ↦
@@ -759,14 +768,54 @@ theorem bonnetMyers_finite_fundamentalGroup
       RicciBoundedBelow (I := I) gLift (((Module.finrank ℝ E : ℝ) - 1) * K) :=
     DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.ricciBoundedBelow_pullback_universalCover
       (I := I) (g := g) _hRic hBasisLift hBasisBase
-  -- Completeness of the universal cover: routed through
-  -- `completeSpace_universalCover` (UC/Lifts.lean), whose signature is in place
-  -- though its body is pending.
+  -- The universal cover is a regular topological space (Hausdorff + locally
+  -- compact ⇒ regular); this discharges the `[RegularSpace (UC M)]` hypothesis
+  -- of the principled lifted pseudo-emetric API.
+  haveI hRegUC :
+      RegularSpace
+        (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
+    DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.uc_regularSpace
+      (M := M) I
+  -- The bundle norm — square-root inner-product identity on the cover fibres,
+  -- with respect to the lifted Riemannian-bundle structure `⟨gLift.toRiemannianMetric⟩`
+  -- installed above (`hRB`). The fibre inner product is `gLift.inner` by the
+  -- `RiemannianMetric.toCore` construction, so `‖v‖ₑ = ofReal (√ ⟪v, v⟫) =
+  -- ofReal (√ gLift.inner x' v v)`.
+  have hEnormCover :
+      ∀ (x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
+        (v : TangentSpace I x'),
+        ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (gLift.inner x' v v)) := by
+    intro x' v
+    rw [← ofReal_norm_eq_enorm, norm_eq_sqrt_real_inner]
+    -- The fibre inner product on `TangentSpace I x'` is, by the lifted
+    -- Riemannian-bundle instance `hRB = ⟨gLift.toRiemannianMetric⟩`, the lifted
+    -- metric `gLift.inner x'`.  The two sides agree definitionally through the
+    -- `RiemannianMetric.toCore` inner product.
+    have hinner : (inner ℝ v v : ℝ) = gLift.inner x' v v := rfl
+    rw [hinner]
+  -- Install the principled lifted pseudo-emetric structure on the universal
+  -- cover, whose underlying topology is the manifold topology and whose
+  -- `edist` is `riemannianEDist I`.
+  letI hUCem :
+      PseudoEMetricSpace
+        (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
+    DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.uc_pseudoEMetricSpace
+      (I := I) (M := M) gLift
+  -- The cover is a Riemannian manifold for this structure (`edist = riemannianEDist`).
+  haveI hRiemUC :
+      IsRiemannianManifold I
+        (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
+    DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.uc_isRiemannianManifold
+      (I := I) (M := M) gLift
+  -- Completeness of the universal cover, principled (axiom-clean): every Cauchy
+  -- sequence for the lifted extended metric converges, by `1`-Lipschitz
+  -- projection to the complete base `M` and lifting the limit through the
+  -- covering map.
   haveI hCompUC :
       CompleteSpace
         (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
-    DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.completeSpace_universalCover
-      g
+    DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover.completeSpace_universalCover_lifted
+      (I := I) (M := M) g hEnormBase hEnormCover
   -- Apply Headline 2 (`bonnetMyers_compact`) to the lifted Riemannian manifold.
   haveI hCompactUC :
       CompactSpace

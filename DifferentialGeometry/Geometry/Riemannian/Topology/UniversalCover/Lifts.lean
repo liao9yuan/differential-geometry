@@ -950,25 +950,6 @@ theorem completeSpace_universalCover_lifted [Nonempty M] [CompleteSpace M]
     lift_the_limit (I := I) (M := M) g hEnormBase hEnormCover hu hyM
   exact ⟨y', htend⟩
 
-/-- **The universal cover is complete (legacy ambient-instance form).**
-Stated against the ambient (legacy) `PseudoEMetricSpace (UC M)` instance for
-backward compatibility with existing consumers.  The principled, sorry-free
-completeness statement — phrased against `uc_pseudoEMetricSpace (liftedMetric
-g)`, the canonical extended metric whose topology is defeq to the slice
-topology — is `completeSpace_universalCover_lifted`, which is fully proved via
-the `1`-Lipschitz projection and the limit-lift through the covering-map local
-homeomorphism.
-
-This legacy form cannot be discharged at present: the ambient instance carries
-no metric witness, so its uniformity is not the principled one and completeness
-of it cannot be transported from `completeSpace_universalCover_lifted`.  It is
-retained with the original signature so that downstream callers continue to
-typecheck while migration to the principled API proceeds. -/
-theorem completeSpace_universalCover [Nonempty M] [CompleteSpace M]
-    (_g : SmoothRiemannianMetric I M) :
-    CompleteSpace
-      (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) := sorry
-
 /-! ## Fibre finiteness -/
 
 /-- **The fibre of a covering map over a compact total space is finite.**
