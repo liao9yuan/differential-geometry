@@ -1139,6 +1139,7 @@ import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.ChartLeviCivitaParallelCLMU
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.IntrinsicSlotOpNormRiem
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.A3IntrinsicHeadline
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.PerAlphaGradIntrinsic
+import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.TensorChartComponentSobolevIntrinsic
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.Bijective.ReversedFlow
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.MFDerivPackage
 import DifferentialGeometry.PDE.RicciFlow.Pullback.RicciNaturality
