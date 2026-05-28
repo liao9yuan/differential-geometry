@@ -1380,6 +1380,682 @@ def chartTransitionSecondDerivCorrection (α β : M) (v w : E) (x : E) : E :=
                 chartCoord (E := E) i v * chartCoord (E := E) j w)) •
           chartModelBasis E k := rfl
 
+/-- **Schwarz symmetry of the chart-transition Jacobian entry.** The mixed
+second derivative of the chart-transition map is symmetric: differentiating the
+forward Jacobian entry `z ↦ J^a_l(z)` in direction `i` equals differentiating
+`z ↦ J^a_i(z)` in direction `l`, at any point of the open source. -/
+lemma partialDeriv_chartTransitionJacEntry_swap [I.Boundaryless]
+    (α β : M) (a i l : Fin (Module.finrank ℝ E)) {y : E}
+    (hy : y ∈ chartTransitionSource (I := I) α β) :
+    partialDeriv (E := E) i
+        (fun z => chartTransitionJacEntry (I := I) α β z a l) y =
+      partialDeriv (E := E) l
+        (fun z => chartTransitionJacEntry (I := I) α β z a i) y := by
+  classical
+  set T := chartTransitionMap (I := I) α β with hT_def
+  -- The coordinate functional `coord a : E →L[ℝ] ℝ` (continuous, finite dim).
+  set coordCLM : E →L[ℝ] ℝ :=
+    LinearMap.toContinuousLinearMap ((chartModelBasis E).coord a) with hcoordCLM
+  -- Schwarz at `y`: `T` is `ContDiffAt ∞`.
+  have h_open : IsOpen (chartTransitionSource (I := I) α β) :=
+    chartTransitionSource_isOpen (I := I) α β
+  have hcontDiffAt : ContDiffAt ℝ ∞ T y := by
+    rw [hT_def]; exact chartTransitionMap_contDiffAt (I := I) α β hy
+  have hsymm : IsSymmSndFDerivAt ℝ T y := by
+    refine ContDiffAt.isSymmSndFDerivAt hcontDiffAt ?_
+    rw [minSmoothness_of_isRCLikeNormedField]
+    decide
+  -- `fderiv T` is differentiable at `y` (smooth on the open source).
+  have hsmooth_on : ContDiffOn ℝ ∞ T (chartTransitionSource (I := I) α β) := by
+    rw [hT_def]; exact chartTransitionMap_contDiffOn (I := I) α β
+  have hT_diff : DifferentiableAt ℝ (fderiv ℝ T) y := by
+    have hfderiv_smooth : ContDiffOn ℝ ∞ (fderiv ℝ T)
+        (chartTransitionSource (I := I) α β) :=
+      hsmooth_on.fderiv_of_isOpen h_open (by rw [ENat.coe_top_add_one])
+    exact (hfderiv_smooth.contDiffAt (h_open.mem_nhds hy)).differentiableAt (by simp)
+  -- The Jacobian entry as a composite `coord a ∘ apply e_l ∘ fderiv T`.
+  have hkey : ∀ p q : Fin (Module.finrank ℝ E),
+      partialDeriv (E := E) p
+          (fun z => chartTransitionJacEntry (I := I) α β z a q) y =
+        coordCLM ((fderiv ℝ (fderiv ℝ T) y ((chartModelBasis E) p))
+          ((chartModelBasis E) q)) := by
+    intro p q
+    unfold partialDeriv
+    -- `J^a_q (z) = coordCLM (fderiv T z (e_q))`.
+    set L : (E →L[ℝ] E) →L[ℝ] ℝ :=
+      coordCLM.comp (ContinuousLinearMap.apply ℝ E ((chartModelBasis E) q)) with hL
+    have hcomp_eq : (fun z : E =>
+          chartTransitionJacEntry (I := I) α β z a q) = L ∘ (fderiv ℝ T) := by
+      funext z
+      rw [chartTransitionJacEntry_def, hL, hcoordCLM]
+      simp only [Function.comp_apply, ContinuousLinearMap.comp_apply,
+        ContinuousLinearMap.apply_apply, LinearMap.coe_toContinuousLinearMap',
+        Module.Basis.coord_apply, chartTransitionAt_def, hT_def]
+    rw [hcomp_eq, fderiv_comp y L.differentiableAt hT_diff]
+    rw [ContinuousLinearMap.comp_apply, L.fderiv]
+    rw [hL, ContinuousLinearMap.comp_apply, ContinuousLinearMap.apply_apply]
+  rw [hkey i l, hkey l i]
+  -- Schwarz: `D²T(e_i)(e_l) = D²T(e_l)(e_i)`.
+  rw [hsymm ((chartModelBasis E) i) ((chartModelBasis E) l)]
+
+/-! ## The chart-Christoffel transformation law (symbol level)
+
+We assemble the classical transformation law for the chart-coordinate
+Christoffel symbol under the chart-transition map. Fix a manifold point `p`
+lying in both chart sources, write `x := extChartAt I α p` and
+`T x := chartTransitionMap α β x`, and abbreviate
+
+* `J^a_i := chartTransitionJacEntry α β x a i` (forward Jacobian at `x`),
+* `K^k_c := chartTransitionJacEntry β α (T x) k c` (reverse Jacobian at `T x`),
+* `Γ̄^c_{ab} := chartChristoffel g β a b c (T x)` (chart-β Christoffel at `T x`),
+* `∂_i J^c_j := partialDeriv i (fun z => chartTransitionJacEntry α β z c j) x`.
+
+The transformation law reads
+`Γ_α^k_{ij}(x) = ∑_c K^k_c · (∑_{ab} Γ̄^c_{ab} · J^a_i · J^b_j) + ∑_c K^k_c · ∂_i J^c_j`,
+the second (inhomogeneous) group being the failure of the Jacobian to be
+constant. -/
+
+/-- The chart-β inverse picture of the transition image returns the base
+point: `(extChartAt I β).symm (T x) = p` whenever `x = extChartAt I α p` and
+`p` lies in both chart sources. -/
+lemma chartTransitionMap_extChartAt_symm
+    (α β : M) {p : M}
+    (hp_α : p ∈ (chartAt H α).source) (hp_β : p ∈ (chartAt H β).source) :
+    (extChartAt I β).symm
+        (chartTransitionMap (I := I) α β (extChartAt I α p)) = p := by
+  rw [chartTransitionMap_apply_extChartAt (I := I) α β hp_α]
+  have hp_β_src : p ∈ (extChartAt I β).source := by
+    rw [extChartAt_source (I := I)]; exact hp_β
+  exact (extChartAt I β).left_inv hp_β_src
+
+/-- Diagonal contraction of the chart-β inverse Gram at `p` against the chart-β
+Gram pulled to the transition image `T x`: `∑_d Ḡ⁻¹(p)^{cd} Ḡ_{db}(T x) = δ_{cb}`,
+where `x = extChartAt I α p`, `T x = chartTransitionMap α β x`, and we use
+`(extChartAt I β).symm (T x) = p`. -/
+lemma chartInvGramBeta_mul_chartGramOnE_diag
+    [NeZero (Module.finrank ℝ E)]
+    (g : SmoothRiemannianMetric I M) (α β : M) {p : M}
+    (hp_α : p ∈ (chartAt H α).source) (hp_β : p ∈ (chartAt H β).source)
+    (c b : Fin (Module.finrank ℝ E)) :
+    ∑ d : Fin (Module.finrank ℝ E),
+        chartInvGramMatrix (I := I) g β p c d *
+        chartGramOnE (I := I) g β d b
+          (chartTransitionMap (I := I) α β (extChartAt I α p)) =
+      (if c = b then (1 : ℝ) else 0) := by
+  classical
+  have hp_triv_β : p ∈ (trivializationAt E (TangentSpace I) β).baseSet := by
+    change p ∈ (chartAt H β).source; exact hp_β
+  have hsymm : (extChartAt I β).symm
+      (chartTransitionMap (I := I) α β (extChartAt I α p)) = p :=
+    chartTransitionMap_extChartAt_symm (I := I) α β hp_α hp_β
+  have hG : ∀ d : Fin (Module.finrank ℝ E),
+      chartGramOnE (I := I) g β d b
+          (chartTransitionMap (I := I) α β (extChartAt I α p)) =
+        chartGramMatrix (I := I) g β p d b := by
+    intro d
+    rw [chartGramOnE_def, hsymm]
+  rw [Finset.sum_congr rfl (fun d (_ : d ∈ Finset.univ) =>
+    congrArg (fun t => chartInvGramMatrix (I := I) g β p c d * t) (hG d))]
+  have hmul := chartInvGramMatrix_mul_chartGramMatrix (I := I) g β hp_triv_β
+  have := congrFun (congrFun hmul c) b
+  rw [Matrix.mul_apply] at this
+  rw [this, Matrix.one_apply]
+
+/-- **The raw collapse identity.** Contracting the chart-α symmetrised metric
+derivative bundle `S(i,j,l) := ∂_i G_α(l,j) + ∂_j G_α(l,i) - ∂_l G_α(i,j)` against
+the reverse Jacobian `K^l_d` reproduces the chart-β symmetrised bundle
+`S̄(a,b,d) := ∂_a Ḡ(d,b) + ∂_b Ḡ(d,a) - ∂_d Ḡ(a,b)` evaluated at `T x` and
+contracted with the forward Jacobian, plus twice the chart-β Gram against the
+second derivative of the Jacobian:
+`∑_l K^l_d S(i,j,l) = ∑_{ab} S̄(a,b,d)(T x) J^a_i J^b_j + 2 ∑_b Ḡ_{db}(T x) ∂_i J^b_j`. -/
+lemma chartTransition_raw_collapse [I.Boundaryless]
+    [NeZero (Module.finrank ℝ E)]
+    (g : SmoothRiemannianMetric I M) (α β : M) {p : M}
+    (hp_α : p ∈ (chartAt H α).source) (hp_β : p ∈ (chartAt H β).source)
+    (i j d : Fin (Module.finrank ℝ E)) :
+    ∑ l : Fin (Module.finrank ℝ E),
+        chartTransitionJacEntry (I := I) β α
+            (chartTransitionMap (I := I) α β (extChartAt I α p)) l d *
+          (partialDeriv (E := E) i
+              (chartGramOnE (I := I) g α l j) (extChartAt I α p) +
+            partialDeriv (E := E) j
+              (chartGramOnE (I := I) g α l i) (extChartAt I α p) -
+            partialDeriv (E := E) l
+              (chartGramOnE (I := I) g α i j) (extChartAt I α p)) =
+      (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+          (partialDeriv (E := E) a
+              (chartGramOnE (I := I) g β d b)
+              (chartTransitionMap (I := I) α β (extChartAt I α p)) +
+            partialDeriv (E := E) b
+              (chartGramOnE (I := I) g β d a)
+              (chartTransitionMap (I := I) α β (extChartAt I α p)) -
+            partialDeriv (E := E) d
+              (chartGramOnE (I := I) g β a b)
+              (chartTransitionMap (I := I) α β (extChartAt I α p))) *
+            chartTransitionJacEntry (I := I) α β (extChartAt I α p) a i *
+            chartTransitionJacEntry (I := I) α β (extChartAt I α p) b j) +
+      2 * ∑ b : Fin (Module.finrank ℝ E),
+          chartGramOnE (I := I) g β d b
+            (chartTransitionMap (I := I) α β (extChartAt I α p)) *
+            partialDeriv (E := E) i
+              (fun z => chartTransitionJacEntry (I := I) α β z b j)
+              (extChartAt I α p) := by
+  classical
+  set x := extChartAt I α p with hx_def
+  set Tx := chartTransitionMap (I := I) α β x with hTx_def
+  have hx_src : x ∈ chartTransitionSource (I := I) α β :=
+    extChartAt_mem_chartTransitionSource (I := I) α β hp_α hp_β
+  -- Abbreviations.
+  set J : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
+    fun a r => chartTransitionJacEntry (I := I) α β x a r with hJ
+  set K : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
+    fun l c => chartTransitionJacEntry (I := I) β α Tx l c with hK
+  set dJ : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
+      Fin (Module.finrank ℝ E) → ℝ :=
+    fun t a r => partialDeriv (E := E) t
+      (fun z => chartTransitionJacEntry (I := I) α β z a r) x with hdJ
+  set Gb : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
+    fun a b => chartGramOnE (I := I) g β a b Tx with hGb
+  set dGb : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
+      Fin (Module.finrank ℝ E) → ℝ :=
+    fun t a b => partialDeriv (E := E) t (chartGramOnE (I := I) g β a b) Tx with hdGb
+  -- Forward/reverse collapse: `∑_l J^a_l K^l_d = δ_{a d}`.
+  have hFR : ∀ a d : Fin (Module.finrank ℝ E),
+      ∑ l, J a l * K l d = (if a = d then (1 : ℝ) else 0) := by
+    intro a d
+    have h := chartTransitionJacEntry_forward_reverse_collapse (I := I) α β hp_α hp_β a d
+    simpa [hJ, hK, hx_def, hTx_def] using h
+  -- Symmetry of Gb.
+  have hGbsymm : ∀ a b : Fin (Module.finrank ℝ E), Gb a b = Gb b a := by
+    intro a b; rw [hGb]; exact chartGramOnE_symm (I := I) g β a b Tx
+  -- Schwarz: `dJ t a r = dJ r a t`.
+  have hSchwarz : ∀ t a r : Fin (Module.finrank ℝ E), dJ t a r = dJ r a t := by
+    intro t a r
+    rw [hdJ]
+    exact partialDeriv_chartTransitionJacEntry_swap (I := I) α β a t r hx_src
+  -- Differentiated Gram, abbreviated form: for diff index `t` and gram indices `r s`,
+  -- `∂_t G_α(r,s)(x) = ∑_a ∑_b [ dJ t a r · J b s · Gb a b + J a r · dJ t b s · Gb a b
+  --                              + J a r · J b s · (∑_c J c t · dGb c a b) ]`.
+  have hDG : ∀ t r s : Fin (Module.finrank ℝ E),
+      partialDeriv (E := E) t (chartGramOnE (I := I) g α r s) x =
+        ∑ a, ∑ b, (dJ t a r * J b s * Gb a b
+          + J a r * dJ t b s * Gb a b
+          + J a r * J b s * (∑ c, J c t * dGb c a b)) := by
+    intro t r s
+    have h := partialDeriv_chartGramOnE_eq_sum_chartTransition (I := I) g α β r s t hx_src
+    rw [h]
+  -- Collapse helper: `∑_l ∑_a ∑_b (K l d * J a l) * W a b = ∑_b W d b`.
+  have hCol : ∀ (W : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ),
+      ∑ l, ∑ a, ∑ b, (K l d * J a l) * W a b = ∑ b, W d b := by
+    intro W
+    -- Reorder to `∑ a, ∑ b, ∑ l`.
+    have hreorder :
+        (∑ l, ∑ a, ∑ b, (K l d * J a l) * W a b) =
+          ∑ a, ∑ b, ∑ l, (K l d * J a l) * W a b := by
+      rw [Finset.sum_comm]
+      refine Finset.sum_congr rfl ?_; intro a _
+      rw [Finset.sum_comm]
+    rw [hreorder]
+    -- Collapse the `l`-sum to `δ_{a d} * W a b`.
+    have hinner : ∀ a b : Fin (Module.finrank ℝ E),
+        (∑ l, (K l d * J a l) * W a b) =
+          (if a = d then (1 : ℝ) else 0) * W a b := by
+      intro a b
+      rw [← Finset.sum_mul]
+      congr 1
+      rw [← hFR a d]
+      refine Finset.sum_congr rfl ?_; intro l _
+      ring
+    rw [Finset.sum_congr rfl (fun a _ =>
+      Finset.sum_congr rfl (fun b _ => hinner a b))]
+    -- ∑ a, ∑ b, (if a=d then 1 else 0) * W a b = ∑ b, W d b.
+    rw [Finset.sum_comm]
+    refine Finset.sum_congr rfl ?_; intro b _
+    rw [Finset.sum_eq_single d]
+    · rw [if_pos rfl, one_mul]
+    · intro a _ ha; rw [if_neg ha, zero_mul]
+    · intro hd; exact absurd (Finset.mem_univ d) hd
+  -- Group-A coefficient (no collapse): `Acoef t a := ∑_l K l d * dJ t a l`.
+  set Acoef : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
+    fun t a => ∑ l, K l d * dJ t a l with hAcoef
+  -- The three group-A aggregates.
+  set A1 : ℝ := ∑ a, ∑ b, Acoef i a * J b j * Gb a b with hA1
+  set A2 : ℝ := ∑ a, ∑ b, Acoef j a * J b i * Gb a b with hA2
+  -- The surviving second-derivative term.
+  set BB : ℝ := ∑ b, Gb d b * dJ i b j with hBB
+  -- The three chain-rule aggregates.
+  set C1 : ℝ := ∑ a, ∑ b, J a i * J b j * dGb a d b with hC1
+  set C2 : ℝ := ∑ a, ∑ b, J a i * J b j * dGb b d a with hC2
+  set C3 : ℝ := ∑ a, ∑ b, J a i * J b j * dGb d a b with hC3
+  -- Term 1: `∑_l K l d · ∂_i G_α(l,j)(x) = A1 + BB + C1`.
+  have hTerm1 :
+      (∑ l, K l d * partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) x) =
+        A1 + BB + C1 := by
+    have hstep : ∀ l, K l d * partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) x =
+        (∑ a, ∑ b, K l d * (dJ i a l * J b j * Gb a b))
+          + (∑ a, ∑ b, (K l d * J a l) * (dJ i b j * Gb a b))
+          + (∑ a, ∑ b, (K l d * J a l) * (J b j * (∑ c, J c i * dGb c a b))) := by
+      intro l
+      rw [hDG i l j, Finset.mul_sum]
+      rw [← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
+      refine Finset.sum_congr rfl ?_; intro a _
+      rw [Finset.mul_sum, ← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
+      refine Finset.sum_congr rfl ?_; intro b _
+      ring
+    rw [Finset.sum_congr rfl (fun l (_ : l ∈ Finset.univ) => hstep l)]
+    rw [Finset.sum_add_distrib, Finset.sum_add_distrib]
+    refine congr_arg₂ (· + ·) (congr_arg₂ (· + ·) ?_ ?_) ?_
+    · -- Group A1: ∑_l ∑_a ∑_b K l d (dJ i a l · J b j · Gb a b) = A1.
+      rw [hA1]
+      rw [Finset.sum_comm]
+      refine Finset.sum_congr rfl ?_; intro a _
+      rw [Finset.sum_comm]
+      refine Finset.sum_congr rfl ?_; intro b _
+      rw [hAcoef]
+      rw [Finset.sum_mul, Finset.sum_mul]
+      refine Finset.sum_congr rfl ?_; intro l _
+      ring
+    · -- Group B → BB via hCol with W a b := dJ i b j · Gb a b.
+      rw [hBB]
+      have := hCol (fun a b => dJ i b j * Gb a b)
+      rw [this]
+      refine Finset.sum_congr rfl ?_; intro b _
+      ring
+    · -- Group C → C1 via hCol with W a b := J b j · (∑ c J c i dGb c a b).
+      rw [hC1]
+      have := hCol (fun a b => J b j * (∑ c, J c i * dGb c a b))
+      rw [this]
+      -- ∑ b, J b j · (∑ c, J c i dGb c d b) = ∑ a ∑ b, J a i J b j dGb a d b.
+      rw [show (∑ b, J b j * (∑ c, J c i * dGb c d b)) =
+            ∑ b, ∑ c, J c i * J b j * dGb c d b from by
+        refine Finset.sum_congr rfl ?_; intro b _
+        rw [Finset.mul_sum]
+        refine Finset.sum_congr rfl ?_; intro c _
+        ring]
+      rw [Finset.sum_comm]
+  -- Term 2: `∑_l K l d · ∂_j G_α(l,i)(x) = A2 + BB + C2`.
+  have hTerm2 :
+      (∑ l, K l d * partialDeriv (E := E) j (chartGramOnE (I := I) g α l i) x) =
+        A2 + BB + C2 := by
+    have hstep : ∀ l, K l d * partialDeriv (E := E) j (chartGramOnE (I := I) g α l i) x =
+        (∑ a, ∑ b, K l d * (dJ j a l * J b i * Gb a b))
+          + (∑ a, ∑ b, (K l d * J a l) * (dJ j b i * Gb a b))
+          + (∑ a, ∑ b, (K l d * J a l) * (J b i * (∑ c, J c j * dGb c a b))) := by
+      intro l
+      rw [hDG j l i, Finset.mul_sum]
+      rw [← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
+      refine Finset.sum_congr rfl ?_; intro a _
+      rw [Finset.mul_sum, ← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
+      refine Finset.sum_congr rfl ?_; intro b _
+      ring
+    rw [Finset.sum_congr rfl (fun l (_ : l ∈ Finset.univ) => hstep l)]
+    rw [Finset.sum_add_distrib, Finset.sum_add_distrib]
+    refine congr_arg₂ (· + ·) (congr_arg₂ (· + ·) ?_ ?_) ?_
+    · -- Group A2.
+      rw [hA2]
+      rw [Finset.sum_comm]
+      refine Finset.sum_congr rfl ?_; intro a _
+      rw [Finset.sum_comm]
+      refine Finset.sum_congr rfl ?_; intro b _
+      rw [hAcoef]
+      rw [Finset.sum_mul, Finset.sum_mul]
+      refine Finset.sum_congr rfl ?_; intro l _
+      ring
+    · -- Group B → BB (using Schwarz: dJ j b i = dJ i b j).
+      rw [hBB]
+      have := hCol (fun a b => dJ j b i * Gb a b)
+      rw [this]
+      refine Finset.sum_congr rfl ?_; intro b _
+      rw [hSchwarz j b i]
+      ring
+    · -- Group C → C2.
+      rw [hC2]
+      have := hCol (fun a b => J b i * (∑ c, J c j * dGb c a b))
+      rw [this]
+      -- ∑ b, J b i · (∑ c, J c j dGb c d b) = ∑ a ∑ b, J a i J b j dGb b d a.
+      -- ∑ b, J b i · (∑ c, J c j dGb c d b): rename (b,c)→(a,b) to match C2.
+      refine Finset.sum_congr rfl ?_; intro a _
+      rw [Finset.mul_sum]
+      refine Finset.sum_congr rfl ?_; intro b _
+      ring
+  -- Term 3: `∑_l K l d · ∂_l G_α(i,j)(x) = A1 + A2 + C3`.
+  have hTerm3 :
+      (∑ l, K l d * partialDeriv (E := E) l (chartGramOnE (I := I) g α i j) x) =
+        A1 + A2 + C3 := by
+    have hstep : ∀ l, K l d * partialDeriv (E := E) l (chartGramOnE (I := I) g α i j) x =
+        (∑ a, ∑ b, K l d * (dJ l a i * J b j * Gb a b))
+          + (∑ a, ∑ b, K l d * (J a i * dJ l b j * Gb a b))
+          + (∑ a, ∑ b, J a i * J b j * (∑ c, (K l d * J c l) * dGb c a b)) := by
+      intro l
+      rw [hDG l i j, Finset.mul_sum]
+      rw [← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
+      refine Finset.sum_congr rfl ?_; intro a _
+      rw [Finset.mul_sum, ← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
+      refine Finset.sum_congr rfl ?_; intro b _
+      rw [show J a i * J b j * (∑ c, (K l d * J c l) * dGb c a b) =
+            K l d * (J a i * J b j * (∑ c, J c l * dGb c a b)) from by
+        simp only [Finset.mul_sum]
+        refine Finset.sum_congr rfl ?_; intro c _
+        ring]
+      ring
+    rw [Finset.sum_congr rfl (fun l (_ : l ∈ Finset.univ) => hstep l)]
+    rw [Finset.sum_add_distrib, Finset.sum_add_distrib]
+    refine congr_arg₂ (· + ·) (congr_arg₂ (· + ·) ?_ ?_) ?_
+    · -- Group A3 = A1 (Schwarz: dJ l a i = dJ i a l).
+      rw [hA1]
+      rw [Finset.sum_comm]
+      refine Finset.sum_congr rfl ?_; intro a _
+      rw [Finset.sum_comm]
+      refine Finset.sum_congr rfl ?_; intro b _
+      rw [hAcoef]
+      rw [Finset.sum_mul, Finset.sum_mul]
+      refine Finset.sum_congr rfl ?_; intro l _
+      rw [hSchwarz l a i]
+      ring
+    · -- Group B3 = A2 (Schwarz: dJ l b j = dJ j b l, then a↔b, Gb symm).
+      rw [hA2]
+      -- Convert LHS to `∑ a ∑ b (∑ l K l d dJ j b l) J a i Gb a b`.
+      rw [show (∑ l, ∑ a, ∑ b, K l d * (J a i * dJ l b j * Gb a b)) =
+            ∑ a, ∑ b, (∑ l, K l d * dJ j b l) * J a i * Gb a b from by
+        rw [Finset.sum_comm]
+        refine Finset.sum_congr rfl ?_; intro a _
+        rw [Finset.sum_comm]
+        refine Finset.sum_congr rfl ?_; intro b _
+        simp only [Finset.sum_mul]
+        refine Finset.sum_congr rfl ?_; intro l _
+        rw [hSchwarz l b j]; ring]
+      -- Swap (a,b), Gb symm; A2 = ∑ a ∑ b Acoef j a · J b i · Gb a b.
+      rw [Finset.sum_comm]
+      refine Finset.sum_congr rfl ?_; intro a _
+      refine Finset.sum_congr rfl ?_; intro b _
+      rw [hAcoef, hGbsymm b a]
+    · -- Group C3 = C3 (collapse `∑_c (∑_l K l d J c l) dGb c a b = ∑_c δ_{cd} ... = dGb d a b`).
+      rw [hC3]
+      rw [Finset.sum_comm]
+      refine Finset.sum_congr rfl ?_; intro a _
+      rw [Finset.sum_comm]
+      refine Finset.sum_congr rfl ?_; intro b _
+      -- ∑ l, J a i J b j (∑ c (K l d J c l) dGb c a b) = J a i J b j dGb d a b.
+      rw [show (∑ l, J a i * J b j * (∑ c, (K l d * J c l) * dGb c a b)) =
+            J a i * J b j * (∑ c, (∑ l, K l d * J c l) * dGb c a b) from by
+        rw [← Finset.mul_sum]
+        congr 1
+        rw [Finset.sum_comm]
+        refine Finset.sum_congr rfl ?_; intro c _
+        rw [Finset.sum_mul]]
+      congr 1
+      rw [Finset.sum_eq_single d]
+      · rw [show (∑ l, K l d * J d l) = (if d = d then (1 : ℝ) else 0) from by
+          rw [← hFR d d]; refine Finset.sum_congr rfl ?_; intro l _; ring]
+        rw [if_pos rfl, one_mul]
+      · intro c _ hc
+        rw [show (∑ l, K l d * J c l) = (if c = d then (1 : ℝ) else 0) from by
+          rw [← hFR c d]; refine Finset.sum_congr rfl ?_; intro l _; ring]
+        rw [if_neg hc, zero_mul]
+      · intro hd; exact absurd (Finset.mem_univ d) hd
+  -- Combine: `Σ(d) = Term1 + Term2 - Term3 = 2·BB + (C1 + C2 - C3)`.
+  have hSigma :
+      (∑ l, K l d *
+          (partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) x +
+            partialDeriv (E := E) j (chartGramOnE (I := I) g α l i) x -
+            partialDeriv (E := E) l (chartGramOnE (I := I) g α i j) x)) =
+        2 * BB + (C1 + C2 - C3) := by
+    rw [show (∑ l, K l d *
+          (partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) x +
+            partialDeriv (E := E) j (chartGramOnE (I := I) g α l i) x -
+            partialDeriv (E := E) l (chartGramOnE (I := I) g α i j) x)) =
+        (∑ l, K l d * partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) x)
+          + (∑ l, K l d * partialDeriv (E := E) j (chartGramOnE (I := I) g α l i) x)
+          - (∑ l, K l d * partialDeriv (E := E) l (chartGramOnE (I := I) g α i j) x) from by
+      rw [← Finset.sum_add_distrib, ← Finset.sum_sub_distrib]
+      refine Finset.sum_congr rfl ?_; intro l _; ring]
+    rw [hTerm1, hTerm2, hTerm3]
+    ring
+  -- Conclude: rewrite the goal's LHS via hSigma, RHS via the S̄ split.
+  rw [show (∑ l, chartTransitionJacEntry (I := I) β α Tx l d *
+        (partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) x +
+          partialDeriv (E := E) j (chartGramOnE (I := I) g α l i) x -
+          partialDeriv (E := E) l (chartGramOnE (I := I) g α i j) x)) =
+      (∑ l, K l d *
+        (partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) x +
+          partialDeriv (E := E) j (chartGramOnE (I := I) g α l i) x -
+          partialDeriv (E := E) l (chartGramOnE (I := I) g α i j) x)) from rfl]
+  rw [hSigma]
+  -- RHS of the goal: `(∑ a ∑ b S̄(a,b,d) J^a_i J^b_j) + 2 ∑ b Gb_{db} ∂_i J^b_j`.
+  -- `S̄(a,b,d) = dGb a d b + dGb b d a - dGb d a b`, and `2·BB` matches the last group.
+  have hRHS_S :
+      (∑ a, ∑ b, (dGb a d b + dGb b d a - dGb d a b) * J a i * J b j) =
+        C1 + C2 - C3 := by
+    rw [hC1, hC2, hC3]
+    rw [← Finset.sum_add_distrib, ← Finset.sum_sub_distrib]
+    refine Finset.sum_congr rfl ?_; intro a _
+    rw [← Finset.sum_add_distrib, ← Finset.sum_sub_distrib]
+    refine Finset.sum_congr rfl ?_; intro b _
+    ring
+  rw [show (∑ a, ∑ b,
+        (partialDeriv (E := E) a (chartGramOnE (I := I) g β d b) Tx +
+          partialDeriv (E := E) b (chartGramOnE (I := I) g β d a) Tx -
+          partialDeriv (E := E) d (chartGramOnE (I := I) g β a b) Tx) *
+          chartTransitionJacEntry (I := I) α β x a i *
+          chartTransitionJacEntry (I := I) α β x b j) =
+      (∑ a, ∑ b, (dGb a d b + dGb b d a - dGb d a b) * J a i * J b j) from rfl]
+  rw [hRHS_S]
+  rw [show (2 * ∑ b, chartGramOnE (I := I) g β d b Tx *
+        partialDeriv (E := E) i
+          (fun z => chartTransitionJacEntry (I := I) α β z b j) x) =
+      2 * BB from rfl]
+  ring
+
+/-- **Chart-Christoffel transformation law (symbol level).** At `x = extChartAt I α p`
+with `p` in both chart sources, the chart-α Christoffel symbol decomposes into the
+covariant pullback of the chart-β Christoffel symbol at `T x` plus the
+second-derivative inhomogeneous correction:
+`Γ_α^k_{ij}(x) = ∑_c K^k_c (∑_{ab} Γ̄^c_{ab}(T x) J^a_i J^b_j) + ∑_c K^k_c (∂_i J^c_j)`. -/
+theorem chartChristoffel_transform [I.Boundaryless]
+    [NeZero (Module.finrank ℝ E)]
+    (g : SmoothRiemannianMetric I M) (α β : M) {p : M}
+    (hp_α : p ∈ (chartAt H α).source) (hp_β : p ∈ (chartAt H β).source)
+    (i j k : Fin (Module.finrank ℝ E)) :
+    chartChristoffel (I := I) g α i j k (extChartAt I α p) =
+      (∑ c : Fin (Module.finrank ℝ E),
+        chartTransitionJacEntry (I := I) β α
+            (chartTransitionMap (I := I) α β (extChartAt I α p)) k c *
+          (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+            chartChristoffel (I := I) g β a b c
+                (chartTransitionMap (I := I) α β (extChartAt I α p)) *
+              chartTransitionJacEntry (I := I) α β (extChartAt I α p) a i *
+              chartTransitionJacEntry (I := I) α β (extChartAt I α p) b j)) +
+      (∑ c : Fin (Module.finrank ℝ E),
+        chartTransitionJacEntry (I := I) β α
+            (chartTransitionMap (I := I) α β (extChartAt I α p)) k c *
+          partialDeriv (E := E) i
+            (fun z => chartTransitionJacEntry (I := I) α β z c j)
+            (extChartAt I α p)) := by
+  classical
+  set x := extChartAt I α p with hx_def
+  set Tx := chartTransitionMap (I := I) α β x with hTx_def
+  have hsymm_α : (extChartAt I α).symm x = p := by
+    rw [hx_def]
+    have hp_ext_α : p ∈ (extChartAt I α).source := by
+      rw [extChartAt_source (I := I)]; exact hp_α
+    exact (extChartAt I α).left_inv hp_ext_α
+  have hsymm_β : (extChartAt I β).symm Tx = p := by
+    rw [hTx_def, hx_def]
+    exact chartTransitionMap_extChartAt_symm (I := I) α β hp_α hp_β
+  -- Abbreviations matching the raw-collapse lemma.
+  set K : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
+    fun l c => chartTransitionJacEntry (I := I) β α Tx l c with hK
+  set J : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
+    fun a r => chartTransitionJacEntry (I := I) α β x a r with hJ
+  set Gbinv : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
+    fun c d => chartInvGramMatrix (I := I) g β p c d with hGbinv
+  set Gb : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
+    fun a b => chartGramOnE (I := I) g β a b Tx with hGb
+  set S : Fin (Module.finrank ℝ E) → ℝ :=
+    fun l => partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) x +
+      partialDeriv (E := E) j (chartGramOnE (I := I) g α l i) x -
+      partialDeriv (E := E) l (chartGramOnE (I := I) g α i j) x with hS
+  set Sbar : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
+      Fin (Module.finrank ℝ E) → ℝ :=
+    fun a b d => partialDeriv (E := E) a (chartGramOnE (I := I) g β d b) Tx +
+      partialDeriv (E := E) b (chartGramOnE (I := I) g β d a) Tx -
+      partialDeriv (E := E) d (chartGramOnE (I := I) g β a b) Tx with hSbar
+  set dJ : Fin (Module.finrank ℝ E) → ℝ :=
+    fun c => partialDeriv (E := E) i
+      (fun z => chartTransitionJacEntry (I := I) α β z c j) x with hdJ
+  -- Chart-β Christoffel at `Tx`: `Γ̄^c_{ab} = (1/2) ∑_d Gbinv c d · Sbar a b d`.
+  have hGammaBar : ∀ a b c : Fin (Module.finrank ℝ E),
+      chartChristoffel (I := I) g β a b c Tx =
+        (1 / 2 : ℝ) * ∑ d, Gbinv c d * Sbar a b d := by
+    intro a b c
+    rw [chartChristoffel_def, hsymm_β]
+  -- The diagonal contraction `∑_d Gbinv c d · Gb d b = δ_{c b}`.
+  have hDiag : ∀ c b : Fin (Module.finrank ℝ E),
+      ∑ d, Gbinv c d * Gb d b = (if c = b then (1 : ℝ) else 0) := by
+    intro c b
+    have h := chartInvGramBeta_mul_chartGramOnE_diag (I := I) g α β hp_α hp_β c b
+    simpa [hGbinv, hGb, hx_def, hTx_def] using h
+  -- The raw collapse, abbreviated.
+  have hRaw : ∀ d : Fin (Module.finrank ℝ E),
+      ∑ l, K l d * S l =
+        (∑ a, ∑ b, Sbar a b d * J a i * J b j)
+          + 2 * ∑ b, Gb d b *
+              partialDeriv (E := E) i
+                (fun z => chartTransitionJacEntry (I := I) α β z b j) x := by
+    intro d
+    have h := chartTransition_raw_collapse (I := I) g α β hp_α hp_β i j d
+    rw [hK, hS]
+    rw [show (∑ l, chartTransitionJacEntry (I := I) β α Tx l d *
+        (partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) x +
+          partialDeriv (E := E) j (chartGramOnE (I := I) g α l i) x -
+          partialDeriv (E := E) l (chartGramOnE (I := I) g α i j) x)) =
+        ∑ l, chartTransitionJacEntry (I := I) β α
+            (chartTransitionMap (I := I) α β (extChartAt I α p)) l d *
+          (partialDeriv (E := E) i
+              (chartGramOnE (I := I) g α l j) (extChartAt I α p) +
+            partialDeriv (E := E) j
+              (chartGramOnE (I := I) g α l i) (extChartAt I α p) -
+            partialDeriv (E := E) l
+              (chartGramOnE (I := I) g α i j) (extChartAt I α p)) from rfl]
+    rw [h, hSbar, hGb]
+  -- Master per-`c` identity.
+  have hMaster : ∀ c : Fin (Module.finrank ℝ E),
+      (1 / 2 : ℝ) * ∑ d, Gbinv c d * (∑ l, K l d * S l) =
+        (∑ a, ∑ b, chartChristoffel (I := I) g β a b c Tx * J a i * J b j)
+          + dJ c := by
+    intro c
+    rw [Finset.sum_congr rfl (fun d (_ : d ∈ Finset.univ) =>
+      congrArg (fun t => Gbinv c d * t) (hRaw d))]
+    rw [show (∑ d, Gbinv c d * ((∑ a, ∑ b, Sbar a b d * J a i * J b j)
+          + 2 * ∑ b, Gb d b *
+              partialDeriv (E := E) i
+                (fun z => chartTransitionJacEntry (I := I) α β z b j) x)) =
+        (∑ d, Gbinv c d * (∑ a, ∑ b, Sbar a b d * J a i * J b j))
+          + (∑ d, Gbinv c d * (2 * ∑ b, Gb d b *
+              partialDeriv (E := E) i
+                (fun z => chartTransitionJacEntry (I := I) α β z b j) x)) from by
+      rw [← Finset.sum_add_distrib]
+      refine Finset.sum_congr rfl ?_; intro d _; ring]
+    rw [mul_add]
+    congr 1
+    · -- Both sides equal `∑ a ∑ b ∑ d (1/2) Gbinv c d Sbar a b d J a i J b j`.
+      have hLHS : (1 / 2 : ℝ) * ∑ d, Gbinv c d * (∑ a, ∑ b, Sbar a b d * J a i * J b j) =
+          ∑ d, ∑ a, ∑ b, (1 / 2 : ℝ) * (Gbinv c d * Sbar a b d * J a i * J b j) := by
+        simp only [Finset.mul_sum]
+        refine Finset.sum_congr rfl ?_; intro d _
+        refine Finset.sum_congr rfl ?_; intro a _
+        refine Finset.sum_congr rfl ?_; intro b _
+        ring
+      have hRHS : (∑ a, ∑ b, chartChristoffel (I := I) g β a b c Tx * J a i * J b j) =
+          ∑ a, ∑ b, ∑ d, (1 / 2 : ℝ) * (Gbinv c d * Sbar a b d * J a i * J b j) := by
+        refine Finset.sum_congr rfl ?_; intro a _
+        refine Finset.sum_congr rfl ?_; intro b _
+        rw [hGammaBar a b c]
+        simp only [Finset.sum_mul, Finset.mul_sum]
+        refine Finset.sum_congr rfl ?_; intro d _
+        ring
+      rw [hLHS, hRHS]
+      -- Reorder `∑ d ∑ a ∑ b` to `∑ a ∑ b ∑ d`.
+      rw [Finset.sum_comm]
+      refine Finset.sum_congr rfl ?_; intro a _
+      rw [Finset.sum_comm]
+    · rw [hdJ]
+      rw [show (∑ d, Gbinv c d * (2 * ∑ b, Gb d b *
+            partialDeriv (E := E) i
+              (fun z => chartTransitionJacEntry (I := I) α β z b j) x)) =
+          2 * ∑ b, (∑ d, Gbinv c d * Gb d b) *
+            partialDeriv (E := E) i
+              (fun z => chartTransitionJacEntry (I := I) α β z b j) x from by
+        simp only [Finset.mul_sum, Finset.sum_mul]
+        rw [Finset.sum_comm]
+        refine Finset.sum_congr rfl ?_; intro b _
+        refine Finset.sum_congr rfl ?_; intro d _
+        ring]
+      rw [Finset.sum_congr rfl (fun b (_ : b ∈ Finset.univ) =>
+        show (∑ d, Gbinv c d * Gb d b) * partialDeriv (E := E) i
+            (fun z => chartTransitionJacEntry (I := I) α β z b j) x =
+          (if c = b then partialDeriv (E := E) i
+            (fun z => chartTransitionJacEntry (I := I) α β z b j) x else 0) from by
+          rw [hDiag c b]
+          by_cases h : c = b
+          · rw [if_pos h, if_pos h, one_mul]
+          · rw [if_neg h, if_neg h, zero_mul])]
+      rw [Finset.sum_ite_eq Finset.univ c
+        (fun b => partialDeriv (E := E) i
+          (fun z => chartTransitionJacEntry (I := I) α β z b j) x)]
+      rw [if_pos (Finset.mem_univ c)]
+      ring
+  -- Assemble.
+  rw [chartChristoffel_def, hsymm_α]
+  rw [show ((1 / 2 : ℝ) * ∑ l, chartInvGramMatrix (I := I) g α p k l *
+        (partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) x +
+          partialDeriv (E := E) j (chartGramOnE (I := I) g α l i) x -
+          partialDeriv (E := E) l (chartGramOnE (I := I) g α i j) x)) =
+      ∑ c, K k c * ((1 / 2 : ℝ) * ∑ d, Gbinv c d * (∑ l, K l d * S l)) from by
+    rw [Finset.mul_sum]
+    have hExpand : ∀ l, (1 / 2 : ℝ) * (chartInvGramMatrix (I := I) g α p k l * S l) =
+        ∑ c, ∑ d, (1 / 2 : ℝ) * (K k c * (K l d * Gbinv c d)) * S l := by
+      intro l
+      rw [chartInvGramMatrix_eq_sum_chartTransition (I := I) g α β hp_α hp_β k l]
+      rw [← hx_def, ← hTx_def]
+      simp only [Finset.sum_mul, Finset.mul_sum]
+      refine Finset.sum_congr rfl ?_; intro c _
+      refine Finset.sum_congr rfl ?_; intro d _
+      rw [hK, hGbinv]
+      ring
+    rw [show (∑ l, (1 / 2 : ℝ) * (chartInvGramMatrix (I := I) g α p k l *
+            (partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) x +
+              partialDeriv (E := E) j (chartGramOnE (I := I) g α l i) x -
+              partialDeriv (E := E) l (chartGramOnE (I := I) g α i j) x))) =
+          ∑ l, ∑ c, ∑ d, (1 / 2 : ℝ) * (K k c * (K l d * Gbinv c d)) * S l from by
+      refine Finset.sum_congr rfl ?_; intro l _
+      rw [show chartInvGramMatrix (I := I) g α p k l *
+            (partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) x +
+              partialDeriv (E := E) j (chartGramOnE (I := I) g α l i) x -
+              partialDeriv (E := E) l (chartGramOnE (I := I) g α i j) x) =
+          chartInvGramMatrix (I := I) g α p k l * S l from rfl]
+      rw [hExpand l]]
+    -- LHS now `∑ l ∑ c ∑ d (...)`; RHS `∑ c, K k c ((1/2) ∑ d Gbinv c d (∑ l K l d S l))`.
+    rw [show (∑ c, K k c * ((1 / 2 : ℝ) * ∑ d, Gbinv c d * (∑ l, K l d * S l))) =
+          ∑ c, ∑ d, ∑ l, (1 / 2 : ℝ) * (K k c * (K l d * Gbinv c d)) * S l from by
+      simp only [Finset.mul_sum]
+      refine Finset.sum_congr rfl ?_; intro c _
+      refine Finset.sum_congr rfl ?_; intro d _
+      refine Finset.sum_congr rfl ?_; intro l _
+      ring]
+    -- Reorder LHS `∑ l ∑ c ∑ d` to `∑ c ∑ d ∑ l`.
+    rw [Finset.sum_comm]
+    refine Finset.sum_congr rfl ?_; intro c _
+    rw [Finset.sum_comm]]
+  rw [Finset.sum_congr rfl (fun c (_ : c ∈ Finset.univ) =>
+    congrArg (fun t => K k c * t) (hMaster c))]
+  rw [show (∑ c, K k c *
+        ((∑ a, ∑ b, chartChristoffel (I := I) g β a b c Tx * J a i * J b j) + dJ c)) =
+      (∑ c, K k c * (∑ a, ∑ b, chartChristoffel (I := I) g β a b c Tx * J a i * J b j))
+        + (∑ c, K k c * dJ c) from by
+    rw [← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl ?_; intro c _; ring]
+
 end Geodesic
 end Riemannian
 end Geometry
