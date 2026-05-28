@@ -1101,6 +1101,7 @@ import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.NablaTensorFormula
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.ChartLocalPicard
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.PointwiseLocal
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.UniformExistence
+import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.ChartLocalPicardProducer
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.BanachIC
 import DifferentialGeometry.PDE.RicciFlow.Pullback.PushforwardVF
 import DifferentialGeometry.PDE.RicciFlow.Pullback.Metric
