@@ -236,6 +236,63 @@ theorem ricciBoundedBelow_pullback_universalCover
 
 /-! ## Completeness pullback to the universal cover -/
 
+/-- **The differential of `proj` is the identity in tangent coordinates.**
+
+At every cover point `x'`, the covering projection `proj : UC M → M`
+written in the preferred extended charts (the cover chart at `x'`, the
+base chart at `proj x'`) is the identity map on a neighbourhood of the
+chart coordinate of `x'`. This is the content of `extChartAt_proj_eq`,
+which says the two chart coordinate systems agree along `proj`. As a
+consequence the manifold derivative `mfderiv I I proj x'` is the
+identity continuous linear map on the model fibre `E`. -/
+theorem hasMFDerivAt_proj
+    (x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
+    HasMFDerivAt I I
+      (proj : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M)
+      x' (ContinuousLinearMap.id ℝ E) := by
+  refine ⟨(proj_contMDiff (I := I) (M := M)).continuous.continuousAt, ?_⟩
+  -- The written-in-chart form of `proj` is eventually the identity on `range I`.
+  have hEq :
+      writtenInExtChartAt I I x'
+          (proj : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M)
+        =ᶠ[𝓝[range I] (extChartAt I x' x')] (id : E → E) := by
+    -- On `(extChartAt I x').target`, the written form coincides with `id`.
+    have hmem : (extChartAt I x').target ∈ 𝓝[range I] (extChartAt I x' x') :=
+      extChartAt_target_mem_nhdsWithin x'
+    refine Filter.eventuallyEq_of_mem hmem ?_
+    intro y hy
+    -- `writtenInExtChartAt I I x' proj y
+    --   = extChartAt I (proj x') (proj ((extChartAt I x').symm y))`.
+    show extChartAt I (proj (X := M) x')
+        (proj (X := M) ((extChartAt I x').symm y)) = y
+    -- By `extChartAt_proj_eq` (with anchor `x'`, cover point `(extChartAt I x').symm y`):
+    --   `extChartAt I x' ((extChartAt I x').symm y)
+    --      = extChartAt I (proj x') (proj ((extChartAt I x').symm y))`.
+    have hproj :=
+      (extChartAt_proj_eq (I := I) (M := M) x' ((extChartAt I x').symm y)).symm
+    rw [hproj]
+    -- `extChartAt I x' ((extChartAt I x').symm y) = y` since `y ∈ target`.
+    exact (extChartAt I x').right_inv hy
+  -- `id` has derivative `id`; transfer along `hEq`.
+  have hId : HasFDerivWithinAt (id : E → E) (ContinuousLinearMap.id ℝ E)
+      (range I) (extChartAt I x' x') :=
+    (hasFDerivAt_id _).hasFDerivWithinAt
+  -- `writtenInExtChartAt ... (extChartAt I x' x') = id (extChartAt I x' x')`.
+  have hx0 :
+      writtenInExtChartAt I I x'
+          (proj : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M → M)
+          (extChartAt I x' x') = (id : E → E) (extChartAt I x' x') := by
+    show extChartAt I (proj (X := M) x')
+        (proj (X := M) ((extChartAt I x').symm (extChartAt I x' x'))) =
+        extChartAt I x' x'
+    have hproj :=
+      (extChartAt_proj_eq (I := I) (M := M) x'
+        ((extChartAt I x').symm (extChartAt I x' x'))).symm
+    rw [hproj]
+    rw [extChartAt_to_inv]
+  exact hId.congr_of_eventuallyEq hEq hx0
+
+
 /-- **`proj` is `1`-Lipschitz for the principled lifted extended metric.**
 
 Statement: with the principled `PseudoEMetricSpace (UC M)` instance
