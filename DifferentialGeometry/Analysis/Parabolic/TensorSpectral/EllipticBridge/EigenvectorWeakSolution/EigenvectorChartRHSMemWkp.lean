@@ -912,6 +912,115 @@ lemma cutoffPartialLpLimit_ae_zero_off_cutoffChartKernelEuclid
   filter_upwards [h_smul, h_partial_zero] with y hy hy_zero hyK
   rw [hy, smul_eq_mul, hy_zero hyK, mul_zero]
 
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+/-- **The eigenvector cutoff chart component is `W^{1,2}` unconditionally
+(chart-locality-free).** Chart-locality-free twin of
+`eigenvectorCutoffChartComponent_memW1p`, keyed on the unconditional compactness
+witness `tensorResolventL2_isCompactOperator_intrinsic` through
+`tensorResolventEigenbasisVec_ofCompact`. Its weak `k`-th partial in every
+chart-coordinate direction `k` is the chart-locality-free `L²` cutoff
+chart-partial limit object `eigenvectorCutoffChartPartialLp_unconditional g r s i
+α P k`, so the canonical `W^{1,2}`-membership predicate holds with no
+partition-of-unity regularity input and no chart-selection hypothesis. -/
+lemma eigenvectorCutoffChartComponent_memW1p_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P : TensorCompIdx (E := E) r s) :
+    DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
+      (fun y => ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+          (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+            i) α P :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
+      (chartTargetEuclid (I := I) (M := M) α) := by
+  classical
+  refine ⟨Lp.memLp _, fun k => ?_⟩
+  refine ⟨((eigenvectorCutoffChartPartialLp_unconditional (I := I) (M := M)
+      g r s i α P k :
+      Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ),
+    Lp.memLp _, ?_⟩
+  exact eigenvectorCutoffChartPartialLp_hasWeakPartialDeriv_unconditional
+    (I := I) (M := M) g r s i α P k
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+/-- **Off-cutoff-kernel vanishing of the cutoff chart-partial atom
+(chart-locality-free).** Chart-locality-free twin of
+`cutoffPartialLpLimit_ae_zero_off_cutoffChartKernelEuclid`, keyed on the
+unconditional compactness witness `tensorResolventL2_isCompactOperator_intrinsic`
+through `tensorResolventEigenbasisVec_ofCompact`. For any eigenbasis index `i`,
+the chart-locality-free cutoff chart-partial atom `cutoffPartialLpLimit_unconditional
+g r s i α P k` vanishes almost everywhere — on the plain Lebesgue volume
+restricted to the chart target — off the compact cutoff kernel
+`cutoffChartKernelEuclid α`. No partition-of-unity regularity hypothesis and no
+chart-selection hypothesis are needed: the cutoff chart component is
+unconditionally `W^{1,2}`, the cutoff chart-partial atom is a weak partial of it,
+and the locality of weak partials transfers the off-kernel vanishing. -/
+lemma cutoffPartialLpLimit_ae_zero_off_cutoffChartKernelEuclid_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P : TensorCompIdx (E := E) r s)
+    (k : Fin (Module.finrank ℝ E)) :
+    ∀ᵐ y ∂((volume : Measure EuclN).restrict
+        (chartTargetEuclid (I := I) (M := M) α)),
+      y ∉ cutoffChartKernelEuclid (I := I) (M := M) α →
+        ((cutoffPartialLpLimit_unconditional (I := I) (M := M) g r s i α P k :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y = 0 := by
+  classical
+  set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
+  have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
+  -- `cutoffPartialLpLimit_unconditional = μ • eigenvectorCutoffChartPartialLp_unconditional`;
+  -- the bare cutoff chart partial is a weak `k`-th partial of the cutoff chart
+  -- component.
+  have h_smul : (fun y => ((cutoffPartialLpLimit_unconditional (I := I) (M := M)
+        g r s i α P k :
+        Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
+      =ᵐ[(volume : Measure EuclN).restrict Ω]
+      (fun y => i.fst.val •
+        ((eigenvectorCutoffChartPartialLp_unconditional (I := I) (M := M)
+          g r s i α P k :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) := by
+    rw [cutoffPartialLpLimit_unconditional]
+    exact Lp.coeFn_smul i.fst.val _
+  -- The bare cutoff chart partial is a weak `k`-th partial of the cutoff chart
+  -- component, which vanishes a.e. off the compact cutoff kernel.
+  have h_weak : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k
+      ((eigenvectorCutoffChartPartialLp_unconditional (I := I) (M := M)
+          g r s i α P k :
+        Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ)
+      (fun y => ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+          (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+            i) α P :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) Ω :=
+    eigenvectorCutoffChartPartialLp_hasWeakPartialDeriv_unconditional
+      (I := I) (M := M) g r s i α P k
+  have h_comp_memW1p : DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
+      (fun y => ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
+          (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+            i) α P :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) Ω :=
+    eigenvectorCutoffChartComponent_memW1p_unconditional (I := I) (M := M)
+      g r s i α P
+  -- The cutoff chart component vanishes a.e. off the compact cutoff kernel.
+  have h_comp_zero := tensorL2ChartComponentCutoff_ae_zero_off_cutoffChartKernelEuclid
+    (I := I) (M := M) g r s
+    (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+      (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M) g r s)
+      i) α P
+  -- The locality of weak partials propagates the off-kernel vanishing.
+  have h_partial_zero : ∀ᵐ y ∂((volume : Measure EuclN).restrict Ω),
+      y ∉ cutoffChartKernelEuclid (I := I) (M := M) α →
+        ((eigenvectorCutoffChartPartialLp_unconditional (I := I) (M := M)
+            g r s i α P k :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y = 0 :=
+    hasWeakPartialDeriv_ae_zero_off_of_ae_zero_off hΩ_open k
+      (cutoffChartKernelEuclid_isCompact (I := I) (M := M) α).isClosed
+      (Lp.memLp _) h_weak h_comp_memW1p
+      (by rw [← chartL2Measure]; exact h_comp_zero)
+  filter_upwards [h_smul, h_partial_zero] with y hy hy_zero hyK
+  rw [hy, smul_eq_mul, hy_zero hyK, mul_zero]
+
 /-! ## `MemWkp` for an indicator-cut chart-target-smooth coefficient times an
 ae-kernel-vanishing factor
 
