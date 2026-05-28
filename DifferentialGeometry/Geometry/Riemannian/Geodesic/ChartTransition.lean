@@ -916,7 +916,365 @@ theorem chartInvGramMatrix_eq_sum_chartTransition [I.Boundaryless]
   rw [hentry]
   rfl
 
+/-! ## Differentiated Gram pullback and the chart-Christoffel transformation law
+
+We now differentiate the covariant Gram-pullback identity
+`G_α(y)_{ij} = ∑ a b, J^a_i(y) J^b_j(y) G_β(T y)_{ab}` (where
+`J^a_i(y) = chartTransitionJacEntry α β y a i` is the chart-transition Jacobian
+and `T = chartTransitionMap α β`), valid on the open overlap source, to obtain
+the transformation law for the chart-Christoffel contraction. The second
+derivative of `T` (the failure of the Jacobian to be constant) is precisely the
+inhomogeneous term in the Christoffel transformation law. -/
+
+/-- Every point of the open chart-transition source `chartTransitionSource α β`
+lies in the chart-α image of the chart overlap. This lets us apply the Gram
+pullback at every point of a neighbourhood, not just a single overlap image. -/
+lemma mem_overlap_image_of_mem_chartTransitionSource
+    (α β : M) {y : E} (hy : y ∈ chartTransitionSource (I := I) α β) :
+    y ∈ (extChartAt I α) ''
+      ((chartAt H α).source ∩ (chartAt H β).source) := by
+  obtain ⟨hy_tgt, hy_pre⟩ := hy
+  have hy_pre' : (extChartAt I α).symm y ∈ (extChartAt I β).source := hy_pre
+  set p := (extChartAt I α).symm y with hp_def
+  have hp_α_ext : p ∈ (extChartAt I α).source := (extChartAt I α).map_target hy_tgt
+  have hp_β_ext : p ∈ (extChartAt I β).source := hy_pre'
+  have hp_α : p ∈ (chartAt H α).source := by
+    rw [← extChartAt_source (I := I)]; exact hp_α_ext
+  have hp_β : p ∈ (chartAt H β).source := by
+    rw [← extChartAt_source (I := I)]; exact hp_β_ext
+  refine ⟨p, ⟨hp_α, hp_β⟩, ?_⟩
+  rw [hp_def]
+  exact (extChartAt I α).right_inv hy_tgt
+
+/-- The covariant Gram pullback holds at every point `y` of the open
+chart-transition source `chartTransitionSource α β`. This is the
+neighbourhood-wide version of `chartGramOnE_eq_sum_chartTransition'`. -/
+lemma chartGramOnE_eq_sum_chartTransition_on_source [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (α β : M) {y : E}
+    (hy : y ∈ chartTransitionSource (I := I) α β)
+    (i j : Fin (Module.finrank ℝ E)) :
+    chartGramOnE (I := I) g α i j y =
+      ∑ a : Fin (Module.finrank ℝ E),
+      ∑ b : Fin (Module.finrank ℝ E),
+        chartTransitionJacEntry (I := I) α β y a i *
+        chartTransitionJacEntry (I := I) α β y b j *
+        chartGramOnE (I := I) g β a b (chartTransitionMap (I := I) α β y) :=
+  chartGramOnE_eq_sum_chartTransition' (I := I) g α β y
+    (mem_overlap_image_of_mem_chartTransitionSource (I := I) α β hy) i j
+
+/-- The chart-transition Jacobian entry `y ↦ chartTransitionJacEntry α β y a i`
+is `ContDiffOn ℝ ∞` on the open chart-transition source. It is the composition
+of the smooth CLM-valued map `chartTransitionAt α β` with the (continuous,
+linear, hence smooth) evaluation-and-coordinate functional
+`L ↦ (chartModelBasis E).repr (L (e_a)) i`. -/
+lemma chartTransitionJacEntry_contDiffOn [I.Boundaryless]
+    (α β : M) (a i : Fin (Module.finrank ℝ E)) :
+    ContDiffOn ℝ ∞
+      (fun y => chartTransitionJacEntry (I := I) α β y a i)
+      (chartTransitionSource (I := I) α β) := by
+  -- The coordinate functional `E →L[ℝ] ℝ` (continuous since `E` is finite-dim).
+  -- Note: `chartTransitionJacEntry α β y a i = repr (chartTransitionAt α β y (e_i)) a`,
+  -- so the row index is `a` and the evaluated basis vector is `e_i`.
+  set coordCLM : E →L[ℝ] ℝ :=
+    LinearMap.toContinuousLinearMap ((chartModelBasis E).coord a) with hcoordCLM
+  -- The coordinate-evaluation functional `(E →L[ℝ] E) →L[ℝ] ℝ`.
+  set evalCoord : (E →L[ℝ] E) →L[ℝ] ℝ :=
+    coordCLM.comp
+      (ContinuousLinearMap.apply ℝ E ((chartModelBasis E) i)) with hevalCoord
+  have hfun : (fun y => chartTransitionJacEntry (I := I) α β y a i) =
+      evalCoord ∘ (fun y => (chartTransitionAt (I := I) α β y : E →L[ℝ] E)) := by
+    funext y
+    rw [chartTransitionJacEntry_def, hevalCoord, hcoordCLM]
+    simp only [Function.comp_apply, ContinuousLinearMap.comp_apply,
+      ContinuousLinearMap.apply_apply,
+      LinearMap.coe_toContinuousLinearMap', Module.Basis.coord_apply]
+  rw [hfun]
+  exact evalCoord.contDiff.comp_contDiffOn (chartTransitionAt_smooth (I := I) α β)
+
+/-- The chart-transition Jacobian entry is `DifferentiableAt` at any point of
+the open chart-transition source. -/
+lemma chartTransitionJacEntry_differentiableAt [I.Boundaryless]
+    (α β : M) (a i : Fin (Module.finrank ℝ E)) {y : E}
+    (hy : y ∈ chartTransitionSource (I := I) α β) :
+    DifferentiableAt ℝ
+      (fun z => chartTransitionJacEntry (I := I) α β z a i) y := by
+  have h_open : IsOpen (chartTransitionSource (I := I) α β) :=
+    chartTransitionSource_isOpen (I := I) α β
+  have hcd : ContDiffOn ℝ ∞
+      (fun z => chartTransitionJacEntry (I := I) α β z a i)
+      (chartTransitionSource (I := I) α β) :=
+    chartTransitionJacEntry_contDiffOn (I := I) α β a i
+  exact (hcd.contDiffAt (h_open.mem_nhds hy)).differentiableAt (by simp)
+
+/-- The image `chartTransitionMap α β y` of a chart-transition-source point lies
+in the interior of `(extChartAt I β).target` (which, being open in the
+boundaryless setting, equals its own interior). -/
+lemma chartTransitionMap_mem_interior_target [I.Boundaryless]
+    (α β : M) {y : E} (hy : y ∈ chartTransitionSource (I := I) α β) :
+    chartTransitionMap (I := I) α β y ∈ interior (extChartAt I β).target := by
+  have hTy : chartTransitionMap (I := I) α β y ∈ chartTransitionSource (I := I) β α :=
+    chartTransitionMap_mapsTo_source (I := I) α β hy
+  -- The first component of membership in `chartTransitionSource β α` is
+  -- membership in `(extChartAt I β).target`.
+  have hTy_tgt : chartTransitionMap (I := I) α β y ∈ (extChartAt I β).target :=
+    hTy.1
+  rw [(isOpen_extChartAt_target (I := I) β).interior_eq]
+  exact hTy_tgt
+
+/-- **Chain rule for the Gram pullback.** The chart-coordinate partial derivative
+`∂_k` of the composite `y ↦ G_β(a b)(T y)` (where `T = chartTransitionMap α β`)
+at a chart-transition-source point `y` distributes over the chart-transition
+Jacobian:
+`∂_k (G_β(a b) ∘ T)(y) = ∑ c, J^c_k(y) · (∂_c G_β(a b))(T y)`. -/
+lemma partialDeriv_chartGramOnE_comp_chartTransitionMap [I.Boundaryless]
+    [NeZero (Module.finrank ℝ E)]
+    (g : SmoothRiemannianMetric I M) (α β : M)
+    (a b k : Fin (Module.finrank ℝ E)) {y : E}
+    (hy : y ∈ chartTransitionSource (I := I) α β) :
+    partialDeriv (E := E) k
+        (fun z => chartGramOnE (I := I) g β a b (chartTransitionMap (I := I) α β z)) y =
+      ∑ c : Fin (Module.finrank ℝ E),
+        chartTransitionJacEntry (I := I) α β y c k *
+          partialDeriv (E := E) c (chartGramOnE (I := I) g β a b)
+            (chartTransitionMap (I := I) α β y) := by
+  classical
+  set T := chartTransitionMap (I := I) α β with hT_def
+  set Ty := T y with hTy_def
+  -- `G_β(a b)` is differentiable at `Ty` (interior of target_β).
+  have hTy_int : Ty ∈ interior (extChartAt I β).target := by
+    rw [hTy_def, hT_def]
+    exact chartTransitionMap_mem_interior_target (I := I) α β hy
+  have hGβ_diff : DifferentiableAt ℝ (chartGramOnE (I := I) g β a b) Ty := by
+    have hcd : ContDiffOn ℝ ∞ (chartGramOnE (I := I) g β a b)
+        (extChartAt I β).target := chartGramOnE_contDiffOn (I := I) g β a b
+    have hcd_int : ContDiffOn ℝ ∞ (chartGramOnE (I := I) g β a b)
+        (interior (extChartAt I β).target) := hcd.mono interior_subset
+    exact (hcd_int.contDiffAt
+      (isOpen_interior.mem_nhds hTy_int)).differentiableAt (by simp)
+  -- `T` is differentiable at `y`.
+  have hT_diff : DifferentiableAt ℝ T y := by
+    rw [hT_def]; exact chartTransitionMap_differentiableAt (I := I) α β hy
+  -- Chain rule for the composite.
+  unfold partialDeriv
+  have hcomp_eq :
+      (fun z => chartGramOnE (I := I) g β a b (chartTransitionMap (I := I) α β z)) =
+        (chartGramOnE (I := I) g β a b) ∘ T := by
+    funext z; rw [hT_def]; rfl
+  rw [hcomp_eq]
+  rw [fderiv_comp y hGβ_diff hT_diff]
+  rw [ContinuousLinearMap.comp_apply]
+  -- `fderiv T y (e_k) = chartTransitionAt α β y (e_k) = ∑ c, J^c_k • e_c`.
+  have hTk : fderiv ℝ T y ((chartModelBasis E) k) =
+      ∑ c : Fin (Module.finrank ℝ E),
+        chartTransitionJacEntry (I := I) α β y c k • (chartModelBasis E) c := by
+    have hexp : chartTransitionAt (I := I) α β y ((chartModelBasis E) k) =
+        ∑ c : Fin (Module.finrank ℝ E),
+          chartTransitionJacEntry (I := I) α β y c k • (chartModelBasis E) c := by
+      conv_lhs => rw [← (chartModelBasis E).sum_repr
+        (chartTransitionAt (I := I) α β y ((chartModelBasis E) k))]
+      rfl
+    rw [chartTransitionAt_def] at hexp
+    rw [hT_def]
+    exact hexp
+  rw [hTk]
+  rw [map_sum]
+  refine Finset.sum_congr rfl ?_
+  intro c _
+  rw [map_smul]
+  rw [smul_eq_mul]
+
+omit [IsManifold I ∞ M] in
+/-- Leibniz rule for `partialDeriv` of a product of two differentiable functions. -/
+lemma partialDeriv_mul (k : Fin (Module.finrank ℝ E)) (u v : E → ℝ) {y : E}
+    (hu : DifferentiableAt ℝ u y) (hv : DifferentiableAt ℝ v y) :
+    partialDeriv (E := E) k (fun z => u z * v z) y =
+      partialDeriv (E := E) k u y * v y + u y * partialDeriv (E := E) k v y := by
+  unfold partialDeriv
+  have hmul : fderiv ℝ (fun z => u z * v z) y =
+      u y • fderiv ℝ v y + v y • fderiv ℝ u y := fderiv_mul hu hv
+  rw [hmul]
+  simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.coe_smul', Pi.smul_apply,
+    smul_eq_mul]
+  ring
+
+/-- Each summand of the Gram pullback, `y ↦ J^a_i(y) · J^b_j(y) · G_β(a b)(T y)`,
+is a triple product of functions differentiable on the chart-transition source.
+This packages the Leibniz expansion of its `∂_k`. -/
+lemma partialDeriv_chartTransition_pullback_summand [I.Boundaryless]
+    [NeZero (Module.finrank ℝ E)]
+    (g : SmoothRiemannianMetric I M) (α β : M)
+    (a b i j k : Fin (Module.finrank ℝ E)) {y : E}
+    (hy : y ∈ chartTransitionSource (I := I) α β) :
+    partialDeriv (E := E) k
+        (fun z => chartTransitionJacEntry (I := I) α β z a i *
+          chartTransitionJacEntry (I := I) α β z b j *
+          chartGramOnE (I := I) g β a b (chartTransitionMap (I := I) α β z)) y =
+      (partialDeriv (E := E) k
+          (fun z => chartTransitionJacEntry (I := I) α β z a i) y) *
+        chartTransitionJacEntry (I := I) α β y b j *
+        chartGramOnE (I := I) g β a b (chartTransitionMap (I := I) α β y) +
+      chartTransitionJacEntry (I := I) α β y a i *
+        (partialDeriv (E := E) k
+          (fun z => chartTransitionJacEntry (I := I) α β z b j) y) *
+        chartGramOnE (I := I) g β a b (chartTransitionMap (I := I) α β y) +
+      chartTransitionJacEntry (I := I) α β y a i *
+        chartTransitionJacEntry (I := I) α β y b j *
+        (partialDeriv (E := E) k
+          (fun z => chartGramOnE (I := I) g β a b
+            (chartTransitionMap (I := I) α β z)) y) := by
+  classical
+  -- Differentiability of the three factors at `y`.
+  have hJa : DifferentiableAt ℝ
+      (fun z => chartTransitionJacEntry (I := I) α β z a i) y :=
+    chartTransitionJacEntry_differentiableAt (I := I) α β a i hy
+  have hJb : DifferentiableAt ℝ
+      (fun z => chartTransitionJacEntry (I := I) α β z b j) y :=
+    chartTransitionJacEntry_differentiableAt (I := I) α β b j hy
+  have hG : DifferentiableAt ℝ
+      (fun z => chartGramOnE (I := I) g β a b
+        (chartTransitionMap (I := I) α β z)) y := by
+    set T := chartTransitionMap (I := I) α β with hT_def
+    have hTy_int : T y ∈ interior (extChartAt I β).target := by
+      rw [hT_def]; exact chartTransitionMap_mem_interior_target (I := I) α β hy
+    have hGβ_diff : DifferentiableAt ℝ (chartGramOnE (I := I) g β a b) (T y) := by
+      have hcd : ContDiffOn ℝ ∞ (chartGramOnE (I := I) g β a b)
+          (extChartAt I β).target := chartGramOnE_contDiffOn (I := I) g β a b
+      have hcd_int : ContDiffOn ℝ ∞ (chartGramOnE (I := I) g β a b)
+          (interior (extChartAt I β).target) := hcd.mono interior_subset
+      exact (hcd_int.contDiffAt
+        (isOpen_interior.mem_nhds hTy_int)).differentiableAt (by simp)
+    have hT_diff : DifferentiableAt ℝ T y := by
+      rw [hT_def]; exact chartTransitionMap_differentiableAt (I := I) α β hy
+    exact hGβ_diff.comp y hT_diff
+  -- Apply the two-factor Leibniz rule twice. First split `(Ja * Jb) * G`.
+  have hJab : DifferentiableAt ℝ
+      (fun z => chartTransitionJacEntry (I := I) α β z a i *
+        chartTransitionJacEntry (I := I) α β z b j) y := hJa.mul hJb
+  rw [partialDeriv_mul k _ _ hJab hG]
+  rw [partialDeriv_mul k _ _ hJa hJb]
+  ring
+
+omit [IsManifold I ∞ M] in
+/-- `partialDeriv` commutes with a finite sum of differentiable functions. -/
+lemma partialDeriv_finset_sum {ι : Type*} (s : Finset ι)
+    (k : Fin (Module.finrank ℝ E)) (f : ι → E → ℝ) {y : E}
+    (hf : ∀ i ∈ s, DifferentiableAt ℝ (f i) y) :
+    partialDeriv (E := E) k (fun z => ∑ i ∈ s, f i z) y =
+      ∑ i ∈ s, partialDeriv (E := E) k (f i) y := by
+  unfold partialDeriv
+  rw [fderiv_fun_sum hf]
+  rw [ContinuousLinearMap.sum_apply]
+
+omit [IsManifold I ∞ M] in
+/-- `partialDeriv` of a double finite sum of differentiable functions. -/
+lemma partialDeriv_double_finset_sum {ι κ : Type*} (s : Finset ι) (t : Finset κ)
+    (k : Fin (Module.finrank ℝ E)) (f : ι → κ → E → ℝ) {y : E}
+    (hf : ∀ a ∈ s, ∀ b ∈ t, DifferentiableAt ℝ (f a b) y) :
+    partialDeriv (E := E) k (fun z => ∑ a ∈ s, ∑ b ∈ t, f a b z) y =
+      ∑ a ∈ s, ∑ b ∈ t, partialDeriv (E := E) k (f a b) y := by
+  rw [partialDeriv_finset_sum s k (fun a z => ∑ b ∈ t, f a b z)
+    (fun a ha => DifferentiableAt.fun_sum (fun b hb => hf a ha b hb))]
+  refine Finset.sum_congr rfl ?_
+  intro a ha
+  exact partialDeriv_finset_sum t k (fun b z => f a b z) (fun b hb => hf a ha b hb)
+
+/-- **Differentiated Gram pullback.** Differentiating the covariant Gram-pullback
+identity at a chart-transition-source point `y`, the chart-coordinate partial
+derivative `∂_k G_α(y)_{ij}` expands as the sum of three groups of terms: the
+two Jacobian-derivative ("second derivative of `T`") terms, and the
+chart-rule term that pulls `∂_c G_β(T y)_{ab}` through the Jacobian. -/
+theorem partialDeriv_chartGramOnE_eq_sum_chartTransition [I.Boundaryless]
+    [NeZero (Module.finrank ℝ E)]
+    (g : SmoothRiemannianMetric I M) (α β : M)
+    (i j k : Fin (Module.finrank ℝ E)) {y : E}
+    (hy : y ∈ chartTransitionSource (I := I) α β) :
+    partialDeriv (E := E) k (chartGramOnE (I := I) g α i j) y =
+      ∑ a : Fin (Module.finrank ℝ E),
+      ∑ b : Fin (Module.finrank ℝ E),
+        ((partialDeriv (E := E) k
+            (fun z => chartTransitionJacEntry (I := I) α β z a i) y) *
+          chartTransitionJacEntry (I := I) α β y b j *
+          chartGramOnE (I := I) g β a b (chartTransitionMap (I := I) α β y) +
+        chartTransitionJacEntry (I := I) α β y a i *
+          (partialDeriv (E := E) k
+            (fun z => chartTransitionJacEntry (I := I) α β z b j) y) *
+          chartGramOnE (I := I) g β a b (chartTransitionMap (I := I) α β y) +
+        chartTransitionJacEntry (I := I) α β y a i *
+          chartTransitionJacEntry (I := I) α β y b j *
+          (∑ c : Fin (Module.finrank ℝ E),
+            chartTransitionJacEntry (I := I) α β y c k *
+              partialDeriv (E := E) c (chartGramOnE (I := I) g β a b)
+                (chartTransitionMap (I := I) α β y))) := by
+  classical
+  have h_open : IsOpen (chartTransitionSource (I := I) α β) :=
+    chartTransitionSource_isOpen (I := I) α β
+  have h_nhds : chartTransitionSource (I := I) α β ∈ nhds y := h_open.mem_nhds hy
+  -- Step 1: the pullback identity holds on a neighbourhood of `y`.
+  have h_eventually :
+      chartGramOnE (I := I) g α i j =ᶠ[nhds y]
+        (fun z => ∑ a : Fin (Module.finrank ℝ E),
+          ∑ b : Fin (Module.finrank ℝ E),
+            chartTransitionJacEntry (I := I) α β z a i *
+            chartTransitionJacEntry (I := I) α β z b j *
+            chartGramOnE (I := I) g β a b (chartTransitionMap (I := I) α β z)) := by
+    filter_upwards [h_nhds] with z hz
+    exact chartGramOnE_eq_sum_chartTransition_on_source (I := I) g α β hz i j
+  -- Step 2: equal `partialDeriv` because they agree on a neighbourhood.
+  have h_pd_eq : partialDeriv (E := E) k (chartGramOnE (I := I) g α i j) y =
+      partialDeriv (E := E) k
+        (fun z => ∑ a : Fin (Module.finrank ℝ E),
+          ∑ b : Fin (Module.finrank ℝ E),
+            chartTransitionJacEntry (I := I) α β z a i *
+            chartTransitionJacEntry (I := I) α β z b j *
+            chartGramOnE (I := I) g β a b (chartTransitionMap (I := I) α β z)) y := by
+    unfold partialDeriv
+    rw [h_eventually.fderiv_eq]
+  rw [h_pd_eq]
+  -- Step 3: distribute `∂_k` over the double sum.
+  have hdiff : ∀ a ∈ (Finset.univ : Finset (Fin (Module.finrank ℝ E))),
+      ∀ b ∈ (Finset.univ : Finset (Fin (Module.finrank ℝ E))),
+      DifferentiableAt ℝ
+        (fun z => chartTransitionJacEntry (I := I) α β z a i *
+          chartTransitionJacEntry (I := I) α β z b j *
+          chartGramOnE (I := I) g β a b (chartTransitionMap (I := I) α β z)) y := by
+    intro a _ b _
+    have hJa : DifferentiableAt ℝ
+        (fun z => chartTransitionJacEntry (I := I) α β z a i) y :=
+      chartTransitionJacEntry_differentiableAt (I := I) α β a i hy
+    have hJb : DifferentiableAt ℝ
+        (fun z => chartTransitionJacEntry (I := I) α β z b j) y :=
+      chartTransitionJacEntry_differentiableAt (I := I) α β b j hy
+    have hG : DifferentiableAt ℝ
+        (fun z => chartGramOnE (I := I) g β a b
+          (chartTransitionMap (I := I) α β z)) y := by
+      set T := chartTransitionMap (I := I) α β with hT_def
+      have hTy_int : T y ∈ interior (extChartAt I β).target := by
+        rw [hT_def]; exact chartTransitionMap_mem_interior_target (I := I) α β hy
+      have hGβ_diff : DifferentiableAt ℝ (chartGramOnE (I := I) g β a b) (T y) := by
+        have hcd : ContDiffOn ℝ ∞ (chartGramOnE (I := I) g β a b)
+            (extChartAt I β).target := chartGramOnE_contDiffOn (I := I) g β a b
+        have hcd_int : ContDiffOn ℝ ∞ (chartGramOnE (I := I) g β a b)
+            (interior (extChartAt I β).target) := hcd.mono interior_subset
+        exact (hcd_int.contDiffAt
+          (isOpen_interior.mem_nhds hTy_int)).differentiableAt (by simp)
+      have hT_diff : DifferentiableAt ℝ T y := by
+        rw [hT_def]; exact chartTransitionMap_differentiableAt (I := I) α β hy
+      exact hGβ_diff.comp y hT_diff
+    exact (hJa.mul hJb).mul hG
+  rw [partialDeriv_double_finset_sum Finset.univ Finset.univ k
+    (fun a b z => chartTransitionJacEntry (I := I) α β z a i *
+      chartTransitionJacEntry (I := I) α β z b j *
+      chartGramOnE (I := I) g β a b (chartTransitionMap (I := I) α β z)) hdiff]
+  -- Step 4: expand each summand via the Leibniz lemma + chain rule.
+  refine Finset.sum_congr rfl ?_
+  intro a _
+  refine Finset.sum_congr rfl ?_
+  intro b _
+  rw [partialDeriv_chartTransition_pullback_summand (I := I) g α β a b i j k hy]
+  rw [partialDeriv_chartGramOnE_comp_chartTransitionMap (I := I) g α β a b k hy]
+
 end Geodesic
 end Riemannian
 end Geometry
 end DifferentialGeometry
+
