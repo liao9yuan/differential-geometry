@@ -778,6 +778,7 @@ import DifferentialGeometry.PDE.ParabolicShortTime
 import DifferentialGeometry.PDE.RicciFlow.ConnectionLaplacian.PointwiseMixed
 import DifferentialGeometry.PDE.RicciFlow.ConnectionLaplacian.L2PMap
 import DifferentialGeometry.PDE.RicciFlow.ConnectionLaplacian.FormDirichlet
+import DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.CompactInclusionIntrinsic
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.HilbertSpace
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.Inclusion
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.L2BanachIso
