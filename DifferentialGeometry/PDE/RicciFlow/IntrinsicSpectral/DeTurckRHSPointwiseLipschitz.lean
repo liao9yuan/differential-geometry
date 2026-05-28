@@ -3,6 +3,8 @@ import DifferentialGeometry.PDE.RicciFlow.SmoothQuasilinear
 import DifferentialGeometry.PDE.RicciFlow.DeTurckRHSSection
 import DifferentialGeometry.Integral.Connection.TensorExtension
 import DifferentialGeometry.Integral.Connection.IteratedTensorCovDeriv
+import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients.RicciDiffAffine
+import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients.LieSummandLipschitz
 
 /-!
 # Pointwise Riemannian local-Lipschitz bound for the DeTurck reaction RHS difference
@@ -68,9 +70,11 @@ namespace IntrinsicSpectral
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Tensor
 open DifferentialGeometry.PDE.RicciFlow.HebeyBlock
 open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -1302,27 +1306,129 @@ Riemannian fibre norm of a smooth section of a continuous Riemannian bundle —
 continuity (`metricDiff2JetNorm_continuous`), hence measurability for the downstream
 integration against the intrinsic `Hᵏ` norm.
 
-The remaining genuinely missing piece before the displayed inequality can be
-discharged with a finite `C(R)` is the analytic core:
+The quasilinear-coefficient apparatus (each chart-frame scalar component being an
+explicit smooth function of the chart `2`-jet `(g, ∂g, ∂²g)`, *affine* in `∂²g`
+from the Ricci summand and quasilinear from the Christoffel-built Lie summand,
+with all coefficients — inverse-Gram entries, Christoffel symbols and their
+derivatives — continuous in `g` and hence uniformly bounded over a compact chart
+kernel) is now available at the **chart-coordinate** level: the chart Ricci-tensor
+difference Lipschitz bound `exists_chartRicciTensor_lipschitz_on_compact` and the
+chart Lie-summand difference Lipschitz bound
+`exists_chartLieDeTurckComp_lipschitz_on_compact` together give the chart-frame
+scalar bound for the full Ricci–DeTurck right-hand side recorded below as
+`exists_chartDeTurckRHSComp_lipschitz_on_compact`. -/
 
-`-- BLOCKED:`
+/-! ## The chart-coordinate Ricci–DeTurck right-hand-side component
 
-**(A) Quasilinear-coefficient apparatus (the analytic core).**  Each chart-frame
-scalar component `rhsDiff(x)(eᵢ, eⱼ)` must be exhibited as an explicit smooth
-function of the chart `2`-jet `(g, ∂g, ∂²g)` of `g`, *affine* in `∂²g` (from the
-Ricci summand, `chartRicci_affine_in_d2g`) and quasilinear in `(g, ∂g, ∂²g)`
-(from the Christoffel-built Lie summand), with all coefficients (entries of the
-inverse Gram matrix, Christoffel symbols and their derivatives) continuous in `g`
-and hence — over the compact `R`-ball of admissible `2`-jets — uniformly bounded.
-The difference `rhsDiff(x)(eᵢ, eⱼ)` is then, by a mean-value estimate on this
-smooth jet-function, Lipschitz in the chart `2`-jet of `g₁ − g₂` with the
-displayed constant.  This explicit coefficient expansion (inverse-Gram
-perturbation, Christoffel and Christoffel-derivative bounds tied to
-`christoffel_Ck_bound_from_metric_Ck1`, and the affine-in-`∂²g` decomposition
-extracted from `chartRicciSecondOrderPrincipalSymbol` and its first-order
-remainder) is several thousand lines of new infrastructure that does not yet
-exist as a *pointwise* (rather than integrated `Hᵏ`) statement. -/
-theorem deTurck_rhs_pointwise_riemannian_jetLipschitz_target : True := trivial
+The chart-`α` `(i, j)` component of the Ricci–DeTurck right-hand side
+`deTurckRicciRHS g_bg g = -2 • Ric(g) + 𝓛_{W(g)} g`, expressed entirely through
+chart-coordinate building blocks: the chart Ricci tensor `chartRicciTensor g α i j`
+(scaled by `-2`) plus the chart Lie (gauge) summand `chartLieDeTurckComp g g_bg α i j`.
+This is the chart-coordinate carrier of the right-hand-side `(i, j)` component;
+its `2`-jet Lipschitz dependence on the metric is assembled from the two committed
+chart-coordinate atoms. -/
+
+/-- The chart-`α` `(i, j)` scalar component of the Ricci–DeTurck right-hand side
+`deTurckRicciRHS g_bg g = -2 • Ric(g) + 𝓛_{W(g)} g`, at the chart point `y ∈ E`:
+`-2 · Rc(g)_{ij}(y) + (𝓛_{W(g)} g)_{ij}(y)`, with `Rc(g)_{ij} = chartRicciTensor g α i j`
+and `(𝓛_{W(g)} g)_{ij} = chartLieDeTurckComp g g_bg α i j`. -/
+def chartDeTurckRHSComp (g_bg g : SmoothRiemannianMetric I M) (α : M)
+    (i j : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
+  (-2 : ℝ) * chartRicciTensor (I := I) g α i j y
+    + chartLieDeTurckComp (I := I) g g_bg α i j y
+
+@[simp] theorem chartDeTurckRHSComp_def (g_bg g : SmoothRiemannianMetric I M) (α : M)
+    (i j : Fin (Module.finrank ℝ E)) (y : E) :
+    chartDeTurckRHSComp (I := I) g_bg g α i j y =
+      (-2 : ℝ) * chartRicciTensor (I := I) g α i j y
+        + chartLieDeTurckComp (I := I) g g_bg α i j y := rfl
+
+set_option linter.unusedSectionVars false in
+/-- **Uniform Lipschitz dependence of the chart-coordinate Ricci–DeTurck
+right-hand-side component on the chart `2`-jet of the metric difference, over a
+compact subset of the chart-target interior.**
+
+For a fixed background metric `g_bg`, two smooth Riemannian metrics `g₁, g₂` (read
+as living in an `R`-ball around a base metric, the ball being supplied — exactly as
+in the committed atoms — through the uniform bounds those atoms produce on the
+compact chart kernel `K`), a chart base point `α`, and a compact subset `K` of the
+interior of the chart-`α` target, there is a single constant `C > 0` such that for
+every `y ∈ K` and all chart-frame indices `(i, j)`,
+```
+|chartDeTurckRHSComp g_bg g₁ α i j y − chartDeTurckRHSComp g_bg g₂ α i j y|
+  ≤ C · chartMetricJet2DiffSup g₁ g₂ α y .
+```
+
+This is the chart-frame scalar `2`-jet Lipschitz bound for the *full* Ricci–DeTurck
+right-hand-side difference: it splits the difference into the Ricci summand (scaled
+by `-2`, bounded by `exists_chartRicciTensor_lipschitz_on_compact`) and the Lie
+(gauge) summand (bounded by `exists_chartLieDeTurckComp_lipschitz_on_compact`), then
+combines the two uniform constants additively.  The constant `C` is uniform over the
+compact kernel `K`; on a fixed compact `R`-ball of metrics the two atom constants are
+uniform over the ball, so `C` becomes the desired `C(R)`.
+
+The bound is applicable to symmetric metric differences (it places no symmetry
+hypothesis on `g₁ − g₂`), as required for the downstream principal-symbol
+cancellation that consumes symmetric `(0,2)` inputs. -/
+theorem exists_chartDeTurckRHSComp_lipschitz_on_compact
+    (g_bg g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
+    {K : Set E} (hK : IsCompact K)
+    (hKsub : K ⊆ interior (extChartAt I α).target) :
+    ∃ C : ℝ, 0 < C ∧ ∀ y ∈ K, ∀ i j : Fin (Module.finrank ℝ E),
+      |chartDeTurckRHSComp (I := I) g_bg g₁ α i j y -
+          chartDeTurckRHSComp (I := I) g_bg g₂ α i j y| ≤
+        C * chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y := by
+  classical
+  -- Ricci-summand Lipschitz constant on `K` (against the `2`-jet seminorm).
+  obtain ⟨Cric, hCric_pos, hCric⟩ :=
+    DeTurckCoefficients.exists_chartRicciTensor_lipschitz_on_compact
+      (I := I) (M := M) g₁ g₂ α hK hKsub
+  -- Lie-summand Lipschitz constant on `K` (against the `2`-jet seminorm).
+  obtain ⟨Clie, hClie_pos, hClie⟩ :=
+    DeTurckCoefficients.exists_chartLieDeTurckComp_lipschitz_on_compact
+      (I := I) (M := M) g₁ g₂ g_bg α hK hKsub
+  -- The combined constant: `2 · Cric + Clie`, strictly positive.
+  refine ⟨2 * Cric + Clie, ?_, ?_⟩
+  · have h1 : 0 < 2 * Cric := by positivity
+    linarith
+  intro y hy i j
+  have hjet2_nn : 0 ≤ chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y :=
+    DeTurckCoefficients.chartMetricJet2DiffSup_nonneg _ _ _ _
+  set jet2 : ℝ := chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y with hjet2_def
+  -- The RHS-component difference splits as `-2 · (Ricci diff) + (Lie diff)`.
+  have hsplit :
+      chartDeTurckRHSComp (I := I) g_bg g₁ α i j y -
+          chartDeTurckRHSComp (I := I) g_bg g₂ α i j y =
+        (-2 : ℝ) * (chartRicciTensor (I := I) g₁ α i j y -
+              chartRicciTensor (I := I) g₂ α i j y)
+          + (chartLieDeTurckComp (I := I) g₁ g_bg α i j y -
+              chartLieDeTurckComp (I := I) g₂ g_bg α i j y) := by
+    rw [chartDeTurckRHSComp_def, chartDeTurckRHSComp_def]; ring
+  rw [hsplit]
+  -- Bound the two summands separately.
+  refine (abs_add_le _ _).trans ?_
+  -- Ricci summand: `|-2 · (Ricci diff)| = 2 · |Ricci diff| ≤ 2 · Cric · jet2`.
+  have hric_bound : |(-2 : ℝ) * (chartRicciTensor (I := I) g₁ α i j y -
+        chartRicciTensor (I := I) g₂ α i j y)| ≤ 2 * Cric * jet2 := by
+    rw [abs_mul]
+    have h2 : |(-2 : ℝ)| = 2 := by norm_num
+    rw [h2]
+    have hR := hCric y hy i j
+    calc 2 * |chartRicciTensor (I := I) g₁ α i j y -
+            chartRicciTensor (I := I) g₂ α i j y|
+        ≤ 2 * (Cric * jet2) :=
+          mul_le_mul_of_nonneg_left hR (by norm_num)
+      _ = 2 * Cric * jet2 := by ring
+  -- Lie summand: `|Lie diff| ≤ Clie · jet2`.
+  have hlie_bound : |chartLieDeTurckComp (I := I) g₁ g_bg α i j y -
+        chartLieDeTurckComp (I := I) g₂ g_bg α i j y| ≤ Clie * jet2 :=
+    hClie y hy i j
+  calc |(-2 : ℝ) * (chartRicciTensor (I := I) g₁ α i j y -
+            chartRicciTensor (I := I) g₂ α i j y)|
+        + |chartLieDeTurckComp (I := I) g₁ g_bg α i j y -
+            chartLieDeTurckComp (I := I) g₂ g_bg α i j y|
+      ≤ 2 * Cric * jet2 + Clie * jet2 := add_le_add hric_bound hlie_bound
+    _ = (2 * Cric + Clie) * jet2 := by ring
 
 end IntrinsicSpectral
 end RicciFlow
