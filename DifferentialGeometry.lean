@@ -315,6 +315,7 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiply
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.SmoothCoefWeakPartialIBP
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.ChainRule
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.ChainRuleHigherK
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedCompBound
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevHalfSpace
 import DifferentialGeometry.Analysis.Sobolev.Tools.WeakPartialLimit
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
