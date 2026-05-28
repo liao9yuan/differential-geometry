@@ -1149,9 +1149,8 @@ lemma chartCoord_chartChristoffelContraction
   have hbasis : ∀ k : Fin (Module.finrank ℝ E),
       (chartModelBasis E).repr ((chartModelBasis E) k) l = if k = l then 1 else 0 := by
     intro k
-    rw [Module.Basis.repr_self]
-    rw [Finsupp.single_apply]
-    by_cases hkl : k = l <;> simp [hkl]
+    classical
+    exact (chartModelBasis E).repr_self_apply k l
   calc
     ∑ k : Fin (Module.finrank ℝ E),
         (chartModelBasis E).repr
@@ -1201,23 +1200,9 @@ theorem chartGramAlongCurve_hasDerivAt_covariant
   classical
   have hbase := chartGramAlongCurve_hasDerivAt (I := I) g α γ V W
     huPrime hmem hV hW
-  -- It suffices to rewrite the derivative value; the function is identical.
-  convert hbase using 1
   -- The interior hypothesis guarantees `u(t) ∈ target`, hence the metric-
   -- compatibility identity applies to each `∂_k G_{ij}(u(t))`.
-  have hmc : ∀ i j k : Fin (Module.finrank ℝ E),
-      partialDeriv (E := E) k (chartGramOnE (I := I) g α i j)
-          (chartCurve (I := I) α γ t) =
-        (∑ l : Fin (Module.finrank ℝ E),
-            chartChristoffel (I := I) g α k i l (chartCurve (I := I) α γ t) *
-              chartGramOnE (I := I) g α l j (chartCurve (I := I) α γ t)) +
-        (∑ l : Fin (Module.finrank ℝ E),
-            chartChristoffel (I := I) g α k j l (chartCurve (I := I) α γ t) *
-              chartGramOnE (I := I) g α l i (chartCurve (I := I) α γ t)) := by
-    intro i j k
-    exact DifferentialGeometry.Geometry.chartGramOnE_partialDeriv_eq_christoffel_sum_split
-      (I := I) g α i j k hmem
-  -- Abbreviations.
+  -- Abbreviations for the finite families.
   set u := chartCurve (I := I) α γ t with hu_def
   set G : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
     fun i j => chartGramOnE (I := I) g α i j u with hG_def
@@ -1229,64 +1214,114 @@ theorem chartGramAlongCurve_hasDerivAt_covariant
   set uc : Fin (Module.finrank ℝ E) → ℝ := fun k => chartCoord (E := E) k (uPrime t) with huc
   set Vpc : Fin (Module.finrank ℝ E) → ℝ := fun i => chartCoord (E := E) i (Vprime t) with hVpc
   set Wpc : Fin (Module.finrank ℝ E) → ℝ := fun j => chartCoord (E := E) j (Wprime t) with hWpc
+  -- The chart metric-compatibility identity for each `∂_k G_{ij}(u)`.
+  have hmc : ∀ i j k : Fin (Module.finrank ℝ E),
+      partialDeriv (E := E) k (chartGramOnE (I := I) g α i j) u =
+        (∑ l, Γ k i l * G l j) + (∑ l, Γ k j l * G l i) := by
+    intro i j k
+    exact chartGramOnE_partialDeriv_eq_christoffel_sum_split (I := I) g α i j k hmem
   -- The chart-coordinate of the covariant-derivative correction terms.
   have hcovV : ∀ l : Fin (Module.finrank ℝ E),
       chartCoord (E := E) l
           (Vprime t + chartChristoffelContraction (I := I) g α (uPrime t) (V t) u)
         = Vpc l + ∑ k, ∑ i, Γ k i l * uc k * Vc i := by
     intro l
-    rw [chartCoord, map_add, Finsupp.add_apply]
-    congr 1
-    rw [← chartCoord]
-    rw [chartCoord_chartChristoffelContraction (I := I) g α (uPrime t) (V t) u]
+    rw [chartCoord, map_add, Finsupp.add_apply, ← chartCoord, ← chartCoord,
+      chartCoord_chartChristoffelContraction (I := I) g α (uPrime t) (V t) u]
   have hcovW : ∀ l : Fin (Module.finrank ℝ E),
       chartCoord (E := E) l
           (Wprime t + chartChristoffelContraction (I := I) g α (uPrime t) (W t) u)
         = Wpc l + ∑ k, ∑ j, Γ k j l * uc k * Wc j := by
     intro l
-    rw [chartCoord, map_add, Finsupp.add_apply]
-    congr 1
-    rw [← chartCoord]
-    rw [chartCoord_chartChristoffelContraction (I := I) g α (uPrime t) (W t) u]
-  -- Rewrite the target (covariant form) into the Leibniz value.
-  -- LHS (covariant) sum, expanded via `hcovV`, `hcovW`.
-  rw [show
+    rw [chartCoord, map_add, Finsupp.add_apply, ← chartCoord, ← chartCoord,
+      chartCoord_chartChristoffelContraction (I := I) g α (uPrime t) (W t) u]
+  -- The stated covariant value equals the Leibniz value (RHS of `hbase`).
+  have hval :
       (∑ l, ∑ j, G l j * chartCoord (E := E) l
           (Vprime t + chartChristoffelContraction (I := I) g α (uPrime t) (V t) u) * Wc j)
-        = ∑ l, ∑ j, G l j * (Vpc l + ∑ k, ∑ i, Γ k i l * uc k * Vc i) * Wc j from by
-    refine Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun j _ => ?_))
-    rw [hcovV l]]
-  rw [show
-      (∑ i, ∑ l, G i l * Vc i * chartCoord (E := E) l
-          (Wprime t + chartChristoffelContraction (I := I) g α (uPrime t) (W t) u))
-        = ∑ i, ∑ l, G i l * Vc i * (Wpc l + ∑ k, ∑ j, Γ k j l * uc k * Wc j) from by
-    refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun l _ => ?_))
-    rw [hcovW l]]
-  -- Now expand the RHS (Leibniz) metric-derivative term via `hmc`.
-  rw [show
-      (∑ i, ∑ j,
-        ((∑ k, uc k * partialDeriv (E := E) k (chartGramOnE (I := I) g α i j) u) *
-            Vc i * Wc j
-          + G i j * Vpc i * Wc j
-          + G i j * Vc i * Wpc j))
-        = ∑ i, ∑ j,
-          ((∑ k, uc k * ((∑ l, Γ k i l * G l j) + (∑ l, Γ k j l * G l i))) *
+        + (∑ i, ∑ l, G i l * Vc i *
+            chartCoord (E := E) l
+              (Wprime t + chartChristoffelContraction (I := I) g α (uPrime t) (W t) u))
+      = (∑ i, ∑ j,
+          ((∑ k, uc k * partialDeriv (E := E) k (chartGramOnE (I := I) g α i j) u) *
               Vc i * Wc j
             + G i j * Vpc i * Wc j
-            + G i j * Vc i * Wpc j) from by
-    refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
-    rw [hmc i j]] <;> try rfl
-  -- Both sides are now polynomial in the finite families `G, Γ, Vc, Wc, uc, Vpc, Wpc`.
-  -- Reduce to a Finset-sum identity provable by distributing and reindexing.
-  simp only [Finset.sum_mul, Finset.mul_sum, Finset.sum_add_distrib,
-    mul_add, add_mul]
-  -- Reorganise both sides into a common normal form: the cross Christoffel
-  -- terms match after swapping summation indices and using `G`'s symmetry only
-  -- through the contraction (no symmetry needed — the index names align).
-  ring_nf
-  -- Remaining: the two grouped triple-sum reindexings.  Use `Finset.sum_comm`
-  -- and rename via `abel`/`ring` on the scalar level after `sum_congr`.
-  sorry
+            + G i j * Vc i * Wpc j)) := by
+    rw [show
+        (∑ l, ∑ j, G l j * chartCoord (E := E) l
+            (Vprime t + chartChristoffelContraction (I := I) g α (uPrime t) (V t) u) * Wc j)
+          = ∑ l, ∑ j, G l j * (Vpc l + ∑ k, ∑ i, Γ k i l * uc k * Vc i) * Wc j from
+      Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun j _ => by rw [hcovV l]))]
+    rw [show
+        (∑ i, ∑ l, G i l * Vc i * chartCoord (E := E) l
+            (Wprime t + chartChristoffelContraction (I := I) g α (uPrime t) (W t) u))
+          = ∑ i, ∑ l, G i l * Vc i * (Wpc l + ∑ k, ∑ j, Γ k j l * uc k * Wc j) from
+      Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun l _ => by rw [hcovW l]))]
+    rw [show
+        (∑ i, ∑ j,
+          ((∑ k, uc k * partialDeriv (E := E) k (chartGramOnE (I := I) g α i j) u) *
+              Vc i * Wc j + G i j * Vpc i * Wc j + G i j * Vc i * Wpc j))
+          = ∑ i, ∑ j,
+            ((∑ k, uc k * ((∑ l, Γ k i l * G l j) + (∑ l, Γ k j l * G l i))) *
+                Vc i * Wc j + G i j * Vpc i * Wc j + G i j * Vc i * Wpc j) from
+      Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => by rw [hmc i j]))]
+    have hLHS :
+        (∑ l, ∑ j, G l j * (Vpc l + ∑ k, ∑ i, Γ k i l * uc k * Vc i) * Wc j)
+          + (∑ i, ∑ l, G i l * Vc i * (Wpc l + ∑ k, ∑ j, Γ k j l * uc k * Wc j))
+        = (∑ l, ∑ j, G l j * Vpc l * Wc j)
+          + (∑ i, ∑ l, G i l * Vc i * Wpc l)
+          + (∑ l, ∑ j, ∑ k, ∑ i, G l j * (Γ k i l * uc k * Vc i) * Wc j)
+          + (∑ i, ∑ l, ∑ k, ∑ j, G i l * Vc i * (Γ k j l * uc k * Wc j)) := by
+      simp only [mul_add, add_mul, Finset.sum_add_distrib, Finset.mul_sum, Finset.sum_mul]
+      ring_nf
+    have hRHS :
+        (∑ i, ∑ j,
+          ((∑ k, uc k * ((∑ l, Γ k i l * G l j) + (∑ l, Γ k j l * G l i))) *
+              Vc i * Wc j + G i j * Vpc i * Wc j + G i j * Vc i * Wpc j))
+        = (∑ i, ∑ j, G i j * Vpc i * Wc j)
+          + (∑ i, ∑ j, G i j * Vc i * Wpc j)
+          + (∑ i, ∑ j, ∑ k, ∑ l, uc k * (Γ k i l * G l j) * Vc i * Wc j)
+          + (∑ i, ∑ j, ∑ k, ∑ l, uc k * (Γ k j l * G l i) * Vc i * Wc j) := by
+      simp only [mul_add, add_mul, Finset.sum_add_distrib, Finset.mul_sum, Finset.sum_mul]
+      ring_nf
+    rw [hLHS, hRHS]
+    have hCV : (∑ l, ∑ j, ∑ k, ∑ i, G l j * (Γ k i l * uc k * Vc i) * Wc j)
+        = ∑ i, ∑ j, ∑ k, ∑ l, uc k * (Γ k i l * G l j) * Vc i * Wc j := by
+      rw [Finset.sum_comm]
+      refine Finset.sum_congr rfl (fun j _ => ?_)
+      rw [Finset.sum_comm]
+      refine Finset.sum_congr rfl (fun i _ => ?_)
+      refine Finset.sum_congr rfl (fun k _ => ?_)
+      refine Finset.sum_congr rfl (fun l _ => ?_)
+      ring
+    have hCW : (∑ i, ∑ l, ∑ k, ∑ j, G i l * Vc i * (Γ k j l * uc k * Wc j))
+        = ∑ i, ∑ j, ∑ k, ∑ l, uc k * (Γ k j l * G l i) * Vc i * Wc j := by
+      refine Finset.sum_congr rfl (fun i _ => ?_)
+      rw [Finset.sum_comm]
+      refine Finset.sum_congr rfl (fun j _ => ?_)
+      refine Finset.sum_congr rfl (fun k _ => ?_)
+      refine Finset.sum_congr rfl (fun l _ => ?_)
+      ring
+    rw [hCV, hCW]
+  rw [show (∑ l, ∑ j, chartGramOnE (I := I) g α l j u *
+        chartCoord (E := E) l
+          (Vprime t + chartChristoffelContraction (I := I) g α (uPrime t) (V t) u) *
+        chartCoord (E := E) j (W t))
+      + (∑ i, ∑ l, chartGramOnE (I := I) g α i l u *
+          chartCoord (E := E) i (V t) *
+          chartCoord (E := E) l
+            (Wprime t + chartChristoffelContraction (I := I) g α (uPrime t) (W t) u))
+      = (∑ i, ∑ j,
+          ((∑ k, chartCoord (E := E) k (uPrime t) *
+                partialDeriv (E := E) k (chartGramOnE (I := I) g α i j) u) *
+              chartCoord (E := E) i (V t) * chartCoord (E := E) j (W t)
+            + chartGramOnE (I := I) g α i j u *
+                chartCoord (E := E) i (Vprime t) * chartCoord (E := E) j (W t)
+            + chartGramOnE (I := I) g α i j u *
+                chartCoord (E := E) i (V t) * chartCoord (E := E) j (Wprime t))) from hval]
+  exact hbase
+
+end MetricCompatibilityAlongCurve
 
 /-! ## Summary
 
