@@ -31,13 +31,11 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ 
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M]
 
-namespace LimitFlowData
-
 /-- Forget the new HCG convergence fields down to the current Section 12 limit
 data record. -/
-def toHam3
+def pointedFlowToHam3
     {D : Realized.RealTimeInterval}
-    (L : LimitFlowData.{u, uE, uH} I D) (subseq : Nat -> Nat) :
+    (L : PointedFlowData.{u, uE, uH} (I := I) D) (subseq : Nat -> Nat) :
     Ham3CGHLimitData (I := I) M where
   N := L.M
   topology := L.topology
@@ -56,8 +54,6 @@ def toHam3
   S := L.S
   subseq := subseq
 
-end LimitFlowData
-
 /-- Hamilton-specific compactness conclusion.
 
 This strengthens the generic `CompactnessConclusion` with the global topology
@@ -65,7 +61,7 @@ facts needed by Hamilton Section 12.  These facts belong to the compactness
 construction/source-topology transfer layer, not to the final Hamilton adapter
 as per-limit ad hoc assumptions. -/
 def HamCGHConclusion (X : PointedFlowSeq.{u, uE, uH} (I := I)) : Prop :=
-  exists L : LimitFlowData.{u, uE, uH} I X.D, exists subseq : Nat -> Nat,
+  exists L : PointedFlowData.{u, uE, uH} (I := I) X.D, exists subseq : Nat -> Nat,
     StrictMono subseq /\
       Nonempty.{max (max uE uH) u + 1}
         (SmoothCGHConverges (I := I) X L subseq) /\
@@ -161,12 +157,12 @@ theorem baseScalarConv_of_smoothCGH
     (P : Ham3FlowPackage (I := I) (M := M) g0)
     (Q : Ham3BlowupData M)
     {X : PointedFlowSeq.{u, uE, uH} (I := I)}
-    {L : LimitFlowData.{u, uE, uH} I X.D}
+    {L : PointedFlowData.{u, uE, uH} (I := I) X.D}
     {subseq : Nat -> Nat}
     (hseq : Ham3BaseScalarSeq (I := I) (M := M) P Q X)
     (hconv : SmoothCGHConverges (I := I) X L subseq) :
     Ham3LimitBaseScalarConv (I := I) (M := M) P Q
-      (LimitFlowData.toHam3 (I := I) (M := M) L subseq) := by
+      (pointedFlowToHam3 (I := I) (M := M) L subseq) := by
   classical
   have hscalar := hconv.scalar_converges 0 L.basepoint
   refine hscalar.congr' ?_
@@ -212,34 +208,34 @@ theorem toHam3Exists
     (hreg : Set.Ioo (-(ham3_r0 ^ 2)) 0 ⊆ X.D.regular)
     (hbaseSeq : Ham3BaseScalarSeq (I := I) (M := M) P Q X)
     (hricTransfer :
-      forall (L : LimitFlowData.{u, uE, uH} I X.D) (subseq : Nat -> Nat),
+      forall (L : PointedFlowData.{u, uE, uH} (I := I) X.D) (subseq : Nat -> Nat),
         Ham3RicNonnegTransfer (I := I) (M := M) P Q
-          (LimitFlowData.toHam3 (I := I) (M := M) L subseq))
+          (pointedFlowToHam3 (I := I) (M := M) L subseq))
     (hpinchTransfer :
-      forall (L : LimitFlowData.{u, uE, uH} I X.D) (subseq : Nat -> Nat),
+      forall (L : PointedFlowData.{u, uE, uH} (I := I) X.D) (subseq : Nat -> Nat),
         Ham3PinchTransfer (I := I) (M := M) P Q
-          (LimitFlowData.toHam3 (I := I) (M := M) L subseq))
+          (pointedFlowToHam3 (I := I) (M := M) L subseq))
     (hcompact : HamCGHConclusion (I := I) X) :
     Ham3CGHLimitExists (I := I) P Q := by
   rcases hcompact with ⟨L, subseq, hsubseq, hconv, hconnected, hboundaryless⟩
   rcases hconv with ⟨hconv⟩
   have hconnHam :
       Ham3LimitConnected (I := I) (M := M)
-        (LimitFlowData.toHam3 (I := I) (M := M) L subseq) := by
-    simpa [HamiltonPositiveRicci.Ham3LimitConnected, LimitFlowData.toHam3] using
+        (pointedFlowToHam3 (I := I) (M := M) L subseq) := by
+    simpa [HamiltonPositiveRicci.Ham3LimitConnected, pointedFlowToHam3] using
       hconnected
   have hbdHam :
       Ham3LimitBoundaryless (I := I) (M := M)
-        (LimitFlowData.toHam3 (I := I) (M := M) L subseq) := by
-    simpa [HamiltonPositiveRicci.Ham3LimitBoundaryless, LimitFlowData.toHam3] using
+        (pointedFlowToHam3 (I := I) (M := M) L subseq) := by
+    simpa [HamiltonPositiveRicci.Ham3LimitBoundaryless, pointedFlowToHam3] using
       hboundaryless
   refine
-    ⟨LimitFlowData.toHam3 (I := I) (M := M) L subseq, hsubseq,
+    ⟨pointedFlowToHam3 (I := I) (M := M) L subseq, hsubseq,
       hwindow, hreg, hconnHam, hbdHam, ?_,
       hricTransfer L subseq,
       baseScalarConv_of_smoothCGH (I := I) (M := M) P Q hbaseSeq hconv,
       hpinchTransfer L subseq⟩
-  simpa [HamiltonPositiveRicci.Ham3LimitFlow, LimitFlowData.toHam3] using
+  simpa [HamiltonPositiveRicci.Ham3LimitFlow, pointedFlowToHam3] using
     L.isSolution
 
 /-- The Hamilton Section 12 CGH output follows from the Theorem 3.10
@@ -270,13 +266,13 @@ theorem ham3OfCompactSol
     (hreg : Set.Ioo (-(ham3_r0 ^ 2)) 0 ⊆ X.D.regular)
     (hbaseSeq : Ham3BaseScalarSeq (I := I) (M := M) P Q X)
     (hricTransfer :
-      forall (L : LimitFlowData.{u, uE, uH} I X.D) (subseq : Nat -> Nat),
+      forall (L : PointedFlowData.{u, uE, uH} (I := I) X.D) (subseq : Nat -> Nat),
         Ham3RicNonnegTransfer (I := I) (M := M) P Q
-          (LimitFlowData.toHam3 (I := I) (M := M) L subseq))
+          (pointedFlowToHam3 (I := I) (M := M) L subseq))
     (hpinchTransfer :
-      forall (L : LimitFlowData.{u, uE, uH} I X.D) (subseq : Nat -> Nat),
+      forall (L : PointedFlowData.{u, uE, uH} (I := I) X.D) (subseq : Nat -> Nat),
         Ham3PinchTransfer (I := I) (M := M) P Q
-          (LimitFlowData.toHam3 (I := I) (M := M) L subseq)) :
+          (pointedFlowToHam3 (I := I) (M := M) L subseq)) :
     Ham3CGHLimitExists (I := I) P Q :=
   toHam3Exists (I := I) (M := M) P Q hwindow hreg
     hbaseSeq hricTransfer hpinchTransfer

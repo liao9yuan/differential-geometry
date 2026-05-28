@@ -48,10 +48,12 @@ theorem solutionCompactness
     (hinj : FlowBaseInjBound (I := I) X)
     (hderiv : FlowDerivativeInput (I := I) X)
     (hflow : SmoothFlowLimitInput (I := I) X) :
-    CompactnessConclusion (I := I) X :=
-  hflow.upgrade
+    CompactnessConclusion (I := I) X := by
+  let hmetricGeom : SeqBoundedGeometry (I := I) (X.atZero (I := I)) :=
+    hderiv.at_zero_geom
+  exact hflow.upgrade
     (metricCompactness (I := I) (X.atZero (I := I))
-      hcomplete0 hderiv.at_zero_geom hinj)
+      hcomplete0 hmetricGeom hinj)
 
 end HCGCompactness
 end RicciFlower

@@ -5,7 +5,7 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
 /-!
-# Ricci-Flow Limit Data
+# Ricci-Flow Convergence Conclusion
 
 This file packages the limit side of Hamilton--Cheeger--Gromov compactness in
 RicciFlower-native terms.
@@ -25,16 +25,10 @@ variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 
-/-- Limit-flow data produced by pointed smooth Cheeger--Gromov--Hamilton
-compactness. -/
-abbrev LimitFlowData (I : ModelWithCorners Real E H)
-    (D : Realized.RealTimeInterval) :=
-  PointedFlowData.{u, uE, uH} (I := I) D
-
 /-- The compactness conclusion: a strictly increasing subsequence and a smooth
 pointed Cheeger--Gromov--Hamilton limit flow on the same time interval. -/
 def CompactnessConclusion (X : PointedFlowSeq.{u, uE, uH} (I := I)) : Prop :=
-  exists L : LimitFlowData.{u, uE, uH} I X.D, exists subseq : Nat -> Nat,
+  exists L : PointedFlowData.{u, uE, uH} (I := I) X.D, exists subseq : Nat -> Nat,
     StrictMono subseq /\
       Nonempty.{max (max uE uH) u + 1} (SmoothCGHConverges (I := I) X L subseq)
 
