@@ -3,11 +3,13 @@ import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.SpectralPouH2Identify
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MorreyManifoldHigherOrder
 import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.ComponentSobolevBound
+import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.FiberNormRiemannianBridge
+import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.Estimates.TensorSectionL2BoundByComponents
 import Mathlib.Geometry.Manifold.ContMDiff.Basic
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
-open Bundle
+open Bundle Tensor0SBundle
 open scoped Manifold ContDiff
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
@@ -155,5 +157,69 @@ theorem tensorChartComponentScalar_embedding_C0
   -- Apply the scalar Hilbert-Sobolev embedding `H^k ↪ C⁰` for `2k > n`.
   exact DifferentialGeometry.Analysis.Sobolev.Chart.iterated_sobolev_embedding_chart_C0_H_k
     (I := I) (M := M) g hk hreg h_meas h_mem
+
+set_option synthInstance.maxHeartbeats 1600000 in
+set_option maxHeartbeats 1600000 in
+/-- **Pointwise fibre-norm reconstruction at the chart centre (HLCC-free).**
+
+For a smooth compactly-supported `(r, s)`-tensor section `T` and any point
+`x : M`, the bundle-fibre norm `‖T.toSection x‖` (which, by the induced
+norm on `TensorRSSpace`, equals the model-fibre norm
+`‖TensorRSSpace.toModel (T.toSection x)‖`) is controlled, with a single
+constant depending only on `(r, s, E)`, by the sum of squares of the
+raw chart-frame scalar components taken **in the chart centred at `x`
+itself**, evaluated at `x`:
+`‖T.toSection x‖² ≤ C · ∑_{Idx,Jdx} (tensorChartComponentRaw g r s T x Idx Jdx x)²`.
+
+This is the algebraic core of the tensor-fibre reconstruction. The
+trivialization at the chart centre coincides with `TensorRSSpace.toModel`
+(`triv_eq_toModel_at_chartCenter`), so the raw component at the chart
+centre is exactly the chart-frame projection of the model fibre element;
+finite-basis recovery (`tensorRSModel_eq_sum_basis`) then gives the
+Cauchy–Schwarz bound with constant
+`midxPairCard · tensorChartBasisNormConstant²`. No partition-of-unity or
+chart-locality hypothesis is used. -/
+theorem tensorFiberNorm_sq_le_chartCenterComponents
+    {g : SmoothRiemannianMetric I M} {r s : ℕ}
+    (T : SmoothCcTensor g r s) (x : M) :
+    ‖T.toSection x‖ ^ 2 ≤
+      DifferentialGeometry.Analysis.Parabolic.TensorSpectral.midxPairCard
+          (E := E) r s *
+        (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartBasisNormConstant
+          (E := E) r s) ^ 2 *
+        ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
+          ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
+            (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw
+              (I := I) (M := M) g r s T x Idx Jdx x) ^ 2 := by
+  classical
+  -- The bundle-fibre norm is the model-fibre norm of `toModel (T.toSection x)`.
+  set Tmod : TensorRSModel r s ℝ E :=
+    TensorRSSpace.toModel (𝕜 := ℝ) (I := I) (T.toSection x) with hTmod_def
+  have h_norm_eq : ‖T.toSection x‖ = ‖Tmod‖ := rfl
+  -- At the chart centre `x`, the raw component is the projection of `Tmod`.
+  have h_raw_eq : ∀ (Idx : Fin r → Fin (Module.finrank ℝ E))
+      (Jdx : Fin s → Fin (Module.finrank ℝ E)),
+      DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentProjection
+          (E := E) r s Idx Jdx Tmod =
+        DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw
+          (I := I) (M := M) g r s T x Idx Jdx x := by
+    intro Idx Jdx
+    rw [DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw_def]
+    congr 1
+    -- `tensorTrivProj g r s T x x = triv_x.CLM_x (T.toSection x) = toModel (...)`.
+    symm
+    rw [hTmod_def]
+    exact DifferentialGeometry.PDE.RicciFlow.HebeyBlock.triv_eq_toModel_at_chartCenter
+      (I := I) r s x (T.toSection x)
+  -- Apply the exposed algebraic fibre-norm recovery to `Tmod`.
+  have h_alg :=
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorRSModel_norm_sq_le_sum_projection_sq
+      (E := E) r s Tmod
+  rw [h_norm_eq]
+  refine h_alg.trans_eq ?_
+  congr 1
+  refine Finset.sum_congr rfl (fun Idx _ => ?_)
+  refine Finset.sum_congr rfl (fun Jdx _ => ?_)
+  rw [h_raw_eq Idx Jdx]
 
 end DifferentialGeometry.PDE.RicciFlow

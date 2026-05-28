@@ -56,16 +56,16 @@ private local instance : BorelSpace M := ⟨rfl⟩
 /-! ## Multi-index type abbreviations and convenient sum helpers -/
 
 /-- Covariant multi-index type used as an index across the file. -/
-private abbrev MIdxC (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+abbrev MIdxC (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
     [FiniteDimensional ℝ E] (r : ℕ) :=
   Fin r → Fin (Module.finrank ℝ E)
 
 /-- The cardinality (as a real number) of the universal pair-of-multi-indices
 finset, appearing as a multiplier in the basis-recovery constant. -/
-private noncomputable def midxPairCard (r s : ℕ) : ℝ :=
+noncomputable def midxPairCard (r s : ℕ) : ℝ :=
   ((Finset.univ : Finset (MIdxC E r × MIdxC E s)).card : ℝ)
 
-private lemma midxPairCard_nonneg (r s : ℕ) :
+lemma midxPairCard_nonneg (r s : ℕ) :
     0 ≤ midxPairCard (E := E) r s := Nat.cast_nonneg _
 
 /-- The `(Idx, Jdx)`-indexed double sum of squared chart-frame scalar
@@ -84,7 +84,11 @@ private lemma sumScalarSq_nonneg (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
 /-! ## Algebraic recovery: `‖T‖² ≤ C₁ · Σ (P_IJ T)²` -/
 
-private lemma tensorRSModel_norm_sq_le_sum_projection_sq (r s : ℕ)
+/-- **Algebraic fibre-norm recovery.** The model-fibre norm squared of a
+mixed `(r, s)`-tensor `T` is dominated by the multi-index cardinality times
+the squared chart-frame basis-norm constant times the sum over all
+multi-index pairs of the squared chart-frame component projections. -/
+lemma tensorRSModel_norm_sq_le_sum_projection_sq (r s : ℕ)
     (T : TensorRSModel r s ℝ E) :
     ‖T‖ ^ 2 ≤
       midxPairCard (E := E) r s *
