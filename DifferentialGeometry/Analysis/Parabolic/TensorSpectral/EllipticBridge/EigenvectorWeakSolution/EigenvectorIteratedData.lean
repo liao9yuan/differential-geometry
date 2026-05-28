@@ -441,6 +441,54 @@ lemma eigenvectorChartWeakPartial_ae_zero_off_chartPouKernel_unconditional
   exact DeGiorgi.HasWeakPartialDeriv.ae_eq hV_open h_wp_V h_zero_V
     h_wp_loc h_zero_loc
 
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+/-- **Chart-locality-free twin of
+`eigenvectorChartComponentFun_ae_zero_off_chartPouKernel`.** The
+chart-locality-free eigenvector chart component
+`eigenvectorChartComponentFun_ofCompact`, re-keyed onto the
+intrinsic-compactness eigenvector
+`tensorResolventEigenbasisVec_ofCompact (tensorResolventL2_isCompactOperator_intrinsic g r s) i`,
+is almost everywhere zero on the open complement of the partition-of-unity
+kernel inside the chart target. The chart component of any abstract `L²` element
+is a.e. zero there (`tensorL2ChartComponent_ae_zero_off_chartPouKernel`). -/
+lemma eigenvectorChartComponentFun_ofCompact_ae_zero_off_chartPouKernel
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) :
+    eigenvectorChartComponentFun_ofCompact (I := I) (M := M) g r s i α P₀
+      =ᵐ[(volume : Measure EuclN).restrict
+        (chartTargetEuclid (I := I) (M := M) α \
+          chartPouKernel (I := I) (M := M) α)] (fun _ : EuclN => (0 : ℝ)) := by
+  classical
+  -- `tensorL2ChartComponent_ae_zero_off_chartPouKernel` is stated as an a.e.
+  -- implication on `chartL2Measure α = volume.restrict (chartTargetEuclid α)`.
+  have h_ae : ∀ᵐ y ∂((volume : Measure EuclN).restrict
+      (chartTargetEuclid (I := I) (M := M) α)),
+      y ∉ chartPouKernel (I := I) (M := M) α →
+        eigenvectorChartComponentFun_ofCompact (I := I) (M := M)
+          g r s i α P₀ y = 0 :=
+    tensorL2ChartComponent_ae_zero_off_chartPouKernel
+      (I := I) (M := M) g r s
+      (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+        (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+          g r s) i) α P₀
+  have hV_meas : MeasurableSet (chartTargetEuclid (I := I) (M := M) α \
+      chartPouKernel (I := I) (M := M) α) :=
+    (chartTargetEuclid_sdiff_chartPouKernel_isOpen (I := I) (M := M) α).measurableSet
+  -- Restrict the a.e. implication from the chart target to its open subset `V`.
+  have h_ae_V : ∀ᵐ y ∂((volume : Measure EuclN).restrict
+      (chartTargetEuclid (I := I) (M := M) α \
+        chartPouKernel (I := I) (M := M) α)),
+      y ∉ chartPouKernel (I := I) (M := M) α →
+        eigenvectorChartComponentFun_ofCompact (I := I) (M := M)
+          g r s i α P₀ y = 0 :=
+    ae_mono (Measure.restrict_mono_set _
+      (chartTargetEuclid_sdiff_chartPouKernel_subset (I := I) (M := M) α)) h_ae
+  rw [Filter.EventuallyEq, ae_restrict_iff' hV_meas]
+  filter_upwards [(ae_restrict_iff' hV_meas).mp h_ae_V] with y hy
+  intro hy_V
+  exact hy hy_V hy_V.2
+
 /-! ## The iterated weak chart partials are a.e. zero off the kernel
 
 Every `m`-fold mixed weak chart partial `eigenvectorChartIteratedPartial` is
@@ -468,6 +516,36 @@ lemma eigenvectorChartIteratedPartial_ae_zero_off_chartPouKernel
         (I := I) (M := M) g r s h_atlas i α P₀
   | succ m ih =>
       rw [eigenvectorChartIteratedPartial_succ]
+      exact chosenWeakPartial'_ae_zero_off_chartPouKernel_of_ae_zero
+        α (ih (Fin.init l)) (l (Fin.last m))
+
+/-- **Chart-locality-free twin of
+`eigenvectorChartIteratedPartial_ae_zero_off_chartPouKernel`.** Every `m`-fold
+mixed weak chart partial `eigenvectorChartIteratedPartial_unconditional`,
+re-keyed onto the intrinsic-compactness eigenvector
+`tensorResolventEigenbasisVec_ofCompact (tensorResolventL2_isCompactOperator_intrinsic g r s) i`,
+is almost everywhere zero on the open complement of the partition-of-unity
+kernel inside the chart target. The proof is induction on `m`: the base case is
+the chart-locality-free chart component
+(`eigenvectorChartComponentFun_ofCompact_ae_zero_off_chartPouKernel`), and the
+inductive step is the locality of the chosen weak partial. -/
+lemma eigenvectorChartIteratedPartial_unconditional_ae_zero_off_chartPouKernel
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s)
+    (m : ℕ) (l : Fin m → Fin (Module.finrank ℝ E)) :
+    eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+        g r s i α P₀ m l
+      =ᵐ[(volume : Measure EuclN).restrict
+        (chartTargetEuclid (I := I) (M := M) α \
+          chartPouKernel (I := I) (M := M) α)] (fun _ : EuclN => (0 : ℝ)) := by
+  induction m with
+  | zero =>
+      rw [eigenvectorChartIteratedPartial_unconditional_zero]
+      exact eigenvectorChartComponentFun_ofCompact_ae_zero_off_chartPouKernel
+        (I := I) (M := M) g r s i α P₀
+  | succ m ih =>
+      rw [eigenvectorChartIteratedPartial_unconditional_succ]
       exact chosenWeakPartial'_ae_zero_off_chartPouKernel_of_ae_zero
         α (ih (Fin.init l)) (l (Fin.last m))
 
@@ -592,6 +670,90 @@ lemma eigenvectorChartRHS_ae_zero_off_chartPouKernel
   rw [Finset.sum_eq_zero (fun l _ =>
     weightedGradCoeffDivLimit_eq_zero_off_chartPouKernel
       (I := I) (M := M) g r s h_atlas i α P₀ l hy)]
+  ring
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+/-- **Chart-locality-free twin of
+`eigenvectorChartRHS_ae_zero_off_chartPouKernel`.** The seven-term
+chart-locality-free eigenvector chart right-hand side
+`eigenvectorChartRHS_unconditional`, re-keyed onto the intrinsic-compactness
+eigenvector
+`tensorResolventEigenbasisVec_ofCompact (tensorResolventL2_isCompactOperator_intrinsic g r s) i`,
+is almost everywhere zero on the open complement of the partition-of-unity kernel
+inside the chart target: the chart-component term is almost everywhere zero there
+(`eigenvectorChartComponentFun_ofCompact_ae_zero_off_chartPouKernel`), and each of
+the remaining six terms carries a factor that vanishes pointwise there (either an
+`indicator (chartPouKernel α)`, or a test-decoupling coefficient built from a
+chart-Euclidean partial of the chart-pushed partition-of-unity weight). -/
+lemma eigenvectorChartRHS_unconditional_ae_zero_off_chartPouKernel
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) :
+    eigenvectorChartRHS_unconditional (I := I) (M := M) g r s i α P₀
+      =ᵐ[(volume : Measure EuclN).restrict
+        (chartTargetEuclid (I := I) (M := M) α \
+          chartPouKernel (I := I) (M := M) α)] (fun _ : EuclN => (0 : ℝ)) := by
+  classical
+  set V : Set EuclN := chartTargetEuclid (I := I) (M := M) α \
+    chartPouKernel (I := I) (M := M) α with hV_def
+  have hV_meas : MeasurableSet V :=
+    (chartTargetEuclid_sdiff_chartPouKernel_isOpen (I := I) (M := M) α).measurableSet
+  -- The chart-component term is a.e. zero off the kernel.
+  have h_comp := eigenvectorChartComponentFun_ofCompact_ae_zero_off_chartPouKernel
+    (I := I) (M := M) g r s i α P₀
+  rw [Filter.EventuallyEq, ae_restrict_iff' hV_meas]
+  filter_upwards [(ae_restrict_iff' hV_meas).mp h_comp] with y h_comp_y
+  intro hy_V
+  have hy : y ∉ chartPouKernel (I := I) (M := M) α := hy_V.2
+  -- The chart-component term, evaluated at `y`, equals zero.
+  have h_comp_zero : eigenvectorChartComponentFun_ofCompact (I := I) (M := M)
+      g r s i α P₀ y = 0 := h_comp_y hy_V
+  -- Unfold `eigenvectorChartRHS_unconditional`; the chart-component term is the
+  -- coercion of the eigenvector `L²` element, definitionally
+  -- `eigenvectorChartComponentFun_ofCompact`.
+  rw [eigenvectorChartRHS_unconditional]
+  -- The cross-left and cross-right value sums vanish pointwise off the kernel.
+  have h_crossLeft :
+      (∑ P : TensorCompIdx (E := E) r (s + 1),
+        ∑ Q : TensorCompIdx (E := E) r (s + 1),
+          (covChartMetricGram (I := I) (M := M) g r (s + 1) α P Q y *
+              crossLeftTestCoeff (I := I) (M := M) g r s α P₀ Q y) *
+            ((crossLeftLimitComponent_unconditional (I := I) (M := M)
+              g r s i α P :
+              Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) = 0 := by
+    refine Finset.sum_eq_zero (fun P _ => Finset.sum_eq_zero (fun Q _ => ?_))
+    rw [crossLeftTestCoeff_eq_zero_off_chartPouKernel
+      (I := I) (M := M) g r s α P₀ Q hy, mul_zero, zero_mul]
+  have h_crossRight :
+      (∑ P : TensorCompIdx (E := E) r s,
+        ∑ Q : TensorCompIdx (E := E) r s,
+          (covChartMetricGram (I := I) (M := M) g r s α P Q y *
+              crossRightTestValueCoeff (I := I) (M := M) g r s α P₀ Q y) *
+            ((crossRightLimitComponent_unconditional (I := I) (M := M)
+              g r s i α P :
+              Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y) = 0 := by
+    refine Finset.sum_eq_zero (fun P _ => Finset.sum_eq_zero (fun Q _ => ?_))
+    rw [crossRightTestValueCoeff_eq_zero_off_chartPouKernel
+      (I := I) (M := M) g r s α P₀ Q hy, mul_zero, zero_mul]
+  -- The remaining four terms vanish pointwise off the kernel by their
+  -- `_eq_zero_off_chartPouKernel_unconditional` lemmas.
+  rw [show ((tensorL2ChartComponent (I := I) (M := M) g r s
+        (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+            g r s) i) α P₀ :
+      Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y = 0
+    from h_comp_zero,
+    h_crossLeft, h_crossRight,
+    covPrincipalRotationCoeffLimit_eq_zero_off_chartPouKernel_unconditional
+      (I := I) (M := M) g r s i α P₀ hy,
+    covLowerOrderRotationValueCoeffLimit_eq_zero_off_chartPouKernel_unconditional
+      (I := I) (M := M) g r s i α P₀ hy,
+    crossRightGradCoeffDivLimit_eq_zero_off_chartPouKernel_unconditional
+      (I := I) (M := M) g r s i α P₀ hy]
+  -- The weighted-gradient-divergence term is a sum vanishing off the kernel.
+  rw [Finset.sum_eq_zero (fun l _ =>
+    weightedGradCoeffDivLimit_eq_zero_off_chartPouKernel_unconditional
+      (I := I) (M := M) g r s i α P₀ l hy)]
   ring
 
 /-! ## Generic order-2 interior regularity for a chart-bilinear datum
