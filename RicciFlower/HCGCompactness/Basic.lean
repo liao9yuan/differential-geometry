@@ -1,3 +1,4 @@
+import RicciFlower.HCGCompactness.PointedRiemannian
 import RicciFlower.RicciFlow.Basic
 
 set_option autoImplicit false
@@ -7,10 +8,11 @@ set_option linter.unusedSectionVars false
 /-!
 # Basic Hamilton--Cheeger--Gromov Compactness Vocabulary
 
-This file contains only theorem-facing data and input packages for pointed
-Ricci-flow compactness.  The metric completeness, injectivity-radius, and
-noncollapsing slots are explicit input interfaces because the corresponding
-Riemannian distance and geodesic-ball APIs are not yet present in RicciFlower.
+This file contains theorem-facing data and input packages for pointed
+Ricci-flow compactness.  The metric-only pointed Riemannian layer and concrete
+Riemannian-distance completeness predicate live in `PointedRiemannian.lean`.
+The legacy injectivity-radius and noncollapsing slots remain compatibility
+input packages for older wrappers.
 -/
 
 noncomputable section
@@ -21,60 +23,12 @@ namespace RicciFlower
 namespace HCGCompactness
 
 open Bundle
-open scoped Manifold ContDiff
+open scoped Manifold ContDiff Bundle
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
-
-/-- One pointed Riemannian manifold candidate.
-
-This is the metric-only Riemannian-manifold object used by MSM135 Theorem 3.9.
-Completeness is kept as a separate theorem-facing predicate below because
-RicciFlower does not yet have a canonical injectivity-radius/geodesic-distance
-backend for this compactness layer. -/
-structure PointedRiemannianManifold
-    (I : ModelWithCorners Real E H) where
-  M : Type u
-  [topology : TopologicalSpace M]
-  [charted : ChartedSpace H M]
-  [smooth : IsManifold I ∞ M]
-  [sigmaCompact : SigmaCompactSpace M]
-  [t2 : T2Space M]
-  basepoint : M
-  metric : SmoothRiemannianMetric I M
-
-/-- A sequence of pointed Riemannian manifold candidates. -/
-structure PointedRiemannianSeq (I : ModelWithCorners Real E H) where
-  obj : Nat -> PointedRiemannianManifold.{u, uE, uH} (I := I)
-
-namespace PointedRiemannianSeq
-
 variable {I : ModelWithCorners Real E H}
-
-/-- Basepoint of the `i`th pointed metric in the sequence. -/
-def basepoint (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) (i : Nat) :
-    (X.obj i).M :=
-  (X.obj i).basepoint
-
-/-- Reindex a pointed metric sequence along a subsequence. -/
-def subseq (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) (f : Nat -> Nat) :
-    PointedRiemannianSeq.{u, uE, uH} (I := I) where
-  obj := fun i => X.obj (f i)
-
-end PointedRiemannianSeq
-
-/-- Primitive theorem-facing completeness predicate for the metric-only layer.
-
-This is intentionally not defined as `True`: it is the placeholder name for the
-future RicciFlower distance/completeness backend consumed by compactness. -/
-axiom MetricComplete {I : ModelWithCorners Real E H} :
-  PointedRiemannianManifold.{u, uE, uH} (I := I) -> Prop
-
-/-- Completeness input for every term of a pointed metric sequence. -/
-structure SeqMetricComplete {I : ModelWithCorners Real E H}
-    (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) : Prop where
-  complete : forall i : Nat, MetricComplete (I := I) (X.obj i)
 
 /-- One complete pointed Ricci-flow solution candidate on a fixed real time
 interval.
@@ -177,15 +131,13 @@ def atZero (X : PointedFlowSeq.{u, uE, uH} (I := I)) :
 
 end PointedFlowSeq
 
-/-- Completeness input for a pointed flow sequence.
-
-This is intentionally an input package: once RicciFlower has a canonical
-Riemannian distance/completeness API, `completeAt` should be specialized to it. -/
+/-- Completeness input for a pointed flow sequence, using the Riemannian
+distance of each time-slice metric. -/
 structure CompleteInput {I : ModelWithCorners Real E H}
     (X : PointedFlowSeq.{u, uE, uH} (I := I)) where
-  completeAt : Nat -> Real -> Prop
   complete_on :
-    forall i : Nat, forall t : Real, t ∈ X.D.carrier -> completeAt i t
+    forall i : Nat, forall t : Real, t ∈ X.D.carrier ->
+      MetricComplete (I := I) ((X.term i).atTime (I := I) t)
 
 /-- Uniform curvature bound on every compact time window inside the common
 time interval.  The bound is stated for the squared norm of the canonical

@@ -38,6 +38,19 @@ abbrev ModelLin := ModelPhase (E := E) →L[Real] ModelPhase (E := E)
 abbrev ModelJet := FormalMultilinearSeries Real
   (ModelPhase (E := E)) (ModelPhase (E := E))
 
+/-- The `n`th coefficient type in a model-phase jet. -/
+abbrev ModelJetCoeff (n : Nat) :=
+  ContinuousMultilinearMap Real
+    (fun _ : Fin n => ModelPhase (E := E)) (ModelPhase (E := E))
+
+/-- Finite prefix of a model-phase jet through order `N`.
+
+This is the finite normed state space needed for smooth finite-jet ODEs.  The
+full `ModelJet` remains a `FormalMultilinearSeries`; `ModelJetPrefix N`
+packages the coefficients that a finite-order argument can actually use. -/
+abbrev ModelJetPrefix (N : Nat) :=
+  (k : Fin (N + 1)) -> ModelJetCoeff (E := E) k.1
+
 /-- Zeroth coefficient of a formal model-phase jet. -/
 def jetBase (J : ModelJet (E := E)) : ModelPhase (E := E) :=
   (J 0).curry0
@@ -64,15 +77,223 @@ def sprayJetRHS
     (J : ModelJet (E := E)) : ModelJet (E := E) :=
   jetRHS (E := E) (modelSpray (I := I) g x) J
 
+namespace ModelJet
+
+/-- Truncate a full formal model jet at order `N`, keeping coefficients
+`0, ..., N` and setting all higher coefficients to zero.  The current
+`ModelJet` API uses full `FormalMultilinearSeries`; finite order is carried by
+predicates such as `IsFlowJetUpTo`, so truncation is an operation on full
+series rather than a separate indexed jet type. -/
+def trunc (N : Nat) (J : ModelJet (E := E)) : ModelJet (E := E) :=
+  fun n => if n <= N then J n else 0
+
+@[simp] theorem trunc_coeff_of_le
+    (N n : Nat) (J : ModelJet (E := E)) (hn : n <= N) :
+    trunc (E := E) N J n = J n := by
+  simp [trunc, hn]
+
+@[simp] theorem trunc_coeff_of_not_le
+    (N n : Nat) (J : ModelJet (E := E)) (hn : ¬ n <= N) :
+    trunc (E := E) N J n = 0 := by
+  simp [trunc, hn]
+
+theorem trunc_coeff_eq_of_le
+    {N n : Nat} {J K : ModelJet (E := E)}
+    (hJK : ∀ k, k <= n -> J k = K k) (hn : n <= N) :
+    trunc (E := E) N J n = K n := by
+  rw [trunc_coeff_of_le (E := E) N n J hn, hJK n le_rfl]
+
+@[simp] theorem trunc_trunc
+    (N : Nat) (J : ModelJet (E := E)) :
+    trunc (E := E) N (trunc (E := E) N J) = trunc (E := E) N J := by
+  apply FormalMultilinearSeries.ext
+  intro n
+  by_cases hn : n <= N
+  · simp [hn]
+  · simp [hn]
+
+end ModelJet
+
+namespace ModelJetPrefix
+
+/-- Zeroth coefficient of a finite model jet prefix. -/
+def base (N : Nat) (P : ModelJetPrefix (E := E) N) : ModelPhase (E := E) :=
+  (P ⟨0, Nat.succ_pos N⟩).curry0
+
+/-- Take the finite prefix of a full formal model jet. -/
+def ofJet (N : Nat) (J : ModelJet (E := E)) : ModelJetPrefix (E := E) N :=
+  fun k => J k.1
+
+/-- Extend a finite jet prefix to a full formal model jet by filling higher
+orders with zero. -/
+def toJet (N : Nat) (P : ModelJetPrefix (E := E) N) : ModelJet (E := E) :=
+  fun n => if h : n <= N then P ⟨n, Nat.lt_succ_of_le h⟩ else 0
+
+@[simp] theorem ofJet_apply
+    (N : Nat) (J : ModelJet (E := E)) (k : Fin (N + 1)) :
+    ofJet (E := E) N J k = J k.1 := rfl
+
+@[simp] theorem base_ofJet
+    (N : Nat) (J : ModelJet (E := E)) :
+    base (E := E) N (ofJet (E := E) N J) = jetBase (E := E) J := rfl
+
+@[simp] theorem base_toJet
+    (N : Nat) (P : ModelJetPrefix (E := E) N) :
+    jetBase (E := E) (toJet (E := E) N P) = base (E := E) N P := by
+  simp [base, jetBase, toJet]
+
+theorem coeff_contDiffAt
+    {n : WithTop ℕ∞} (N : Nat) (P : ModelJetPrefix (E := E) N)
+    (k : Fin (N + 1)) :
+    ContDiffAt Real n (fun Q : ModelJetPrefix (E := E) N => Q k) P :=
+  contDiffAt_pi.mp (contDiffAt_id (𝕜 := Real) (n := n) (x := P)) k
+
+theorem base_contDiffAt
+    {n : WithTop ℕ∞} (N : Nat) (P : ModelJetPrefix (E := E) N) :
+    ContDiffAt Real n (base (E := E) N) P := by
+  haveI : FiniteDimensional Real (ModelJetCoeff (E := E) 0) :=
+    FiniteDimensional.of_injective ContinuousMultilinearMap.toMultilinearMapLinear
+      ContinuousMultilinearMap.toMultilinearMap_injective
+  let L :
+      ModelJetCoeff (E := E) 0 →L[Real] ModelPhase (E := E) :=
+    (continuousMultilinearCurryFin0 Real
+      (ModelPhase (E := E)) (ModelPhase (E := E))).toContinuousLinearMap
+  simpa [base, L] using
+    ((coeff_contDiffAt (E := E) (n := n) N P ⟨0, Nat.succ_pos N⟩).continuousLinearMap_comp L)
+
+@[simp] theorem toJet_coeff_of_le
+    (N n : Nat) (P : ModelJetPrefix (E := E) N) (hn : n <= N) :
+    toJet (E := E) N P n = P ⟨n, Nat.lt_succ_of_le hn⟩ := by
+  simp [toJet, hn]
+
+@[simp] theorem toJet_coeff_of_not_le
+    (N n : Nat) (P : ModelJetPrefix (E := E) N) (hn : ¬ n <= N) :
+    toJet (E := E) N P n = 0 := by
+  simp [toJet, hn]
+
+@[simp] theorem toJet_ofJet
+    (N : Nat) (J : ModelJet (E := E)) :
+    toJet (E := E) N (ofJet (E := E) N J) =
+      ModelJet.trunc (E := E) N J := by
+  apply FormalMultilinearSeries.ext
+  intro n
+  by_cases hn : n <= N
+  · simp [hn]
+  · simp [hn]
+
+@[simp] theorem ofJet_toJet
+    (N : Nat) (P : ModelJetPrefix (E := E) N) :
+    ofJet (E := E) N (toJet (E := E) N P) = P := by
+  funext k
+  simp [toJet, Nat.lt_succ_iff.mp k.2]
+
+/-- Drop the top coefficient of a finite jet prefix. -/
+def trunc (N : Nat) (P : ModelJetPrefix (E := E) (N + 1)) :
+    ModelJetPrefix (E := E) N :=
+  fun k => P k.castSucc
+
+@[simp] theorem trunc_apply
+    (N : Nat) (P : ModelJetPrefix (E := E) (N + 1)) (k : Fin (N + 1)) :
+    trunc (E := E) N P k = P k.castSucc := rfl
+
+@[simp] theorem base_trunc
+    (N : Nat) (P : ModelJetPrefix (E := E) (N + 1)) :
+    base (E := E) N (trunc (E := E) N P) =
+      base (E := E) (N + 1) P := rfl
+
+@[simp] theorem trunc_ofJet
+    (N : Nat) (J : ModelJet (E := E)) :
+    trunc (E := E) N (ofJet (E := E) (N + 1) J) =
+      ofJet (E := E) N J := by
+  funext k
+  rfl
+
+@[simp] theorem toJet_trunc
+    (N : Nat) (P : ModelJetPrefix (E := E) (N + 1)) :
+    toJet (E := E) N (trunc (E := E) N P) =
+      ModelJet.trunc (E := E) N (toJet (E := E) (N + 1) P) := by
+  apply FormalMultilinearSeries.ext
+  intro n
+  by_cases hn : n <= N
+  · have hn' : n <= N + 1 := le_trans hn (Nat.le_succ N)
+    simp [toJet, trunc, ModelJet.trunc, hn, hn']
+  · simp [toJet, ModelJet.trunc, hn]
+
+/-- The shifted top coefficients of an `(N+1)`-prefix, curried as a linear map
+from the initial variation to the `N`-prefix.  This is the finite-state
+replacement for "the derivative of an `N`-jet is the next coefficient". -/
+noncomputable def shiftedDeriv
+    (N : Nat) (P : ModelJetPrefix (E := E) (N + 1)) :
+    ModelPhase (E := E) →L[Real] ModelJetPrefix (E := E) N :=
+  ContinuousLinearMap.pi fun k =>
+    (P ⟨k.1 + 1, by
+      exact Nat.succ_lt_succ k.2⟩).curryLeft
+
+@[simp] theorem shiftedDeriv_apply
+    (N : Nat) (P : ModelJetPrefix (E := E) (N + 1))
+    (h : ModelPhase (E := E)) (k : Fin (N + 1)) :
+    shiftedDeriv (E := E) N P h k =
+      (P ⟨k.1 + 1, by
+        exact Nat.succ_lt_succ k.2⟩).curryLeft h := by
+  rfl
+
+end ModelJetPrefix
+
+/-- Finite Taylor-jet prefix of a model flow at a fixed time. -/
+def flowJetPrefix
+    (Φ : ModelPhase (E := E) -> Real -> ModelPhase (E := E))
+    (N : Nat) (z : ModelPhase (E := E)) (t : Real) : ModelJetPrefix (E := E) N :=
+  ModelJetPrefix.ofJet (E := E) N (flowJet (E := E) Φ z t)
+
+/-- Finite Taylor-jet prefix of the identity flow. -/
+def idJetPrefix (N : Nat) (z : ModelPhase (E := E)) : ModelJetPrefix (E := E) N :=
+  ModelJetPrefix.ofJet (E := E) N (idJet (E := E) z)
+
 @[simp] theorem flowJet_base
     (Φ : ModelPhase (E := E) -> Real -> ModelPhase (E := E))
     (z : ModelPhase (E := E)) (t : Real) :
     jetBase (E := E) (flowJet (E := E) Φ z t) = Φ z t := by
   simp [jetBase, flowJet, ftaylorSeries]
 
+@[simp] theorem flowJetPrefix_base
+    (Φ : ModelPhase (E := E) -> Real -> ModelPhase (E := E))
+    (N : Nat) (z : ModelPhase (E := E)) (t : Real) :
+    ModelJetPrefix.base (E := E) N (flowJetPrefix (E := E) Φ N z t) = Φ z t := by
+  simp [flowJetPrefix]
+
+@[simp] theorem flowJetPrefix_apply
+    (Φ : ModelPhase (E := E) -> Real -> ModelPhase (E := E))
+    (N : Nat) (z : ModelPhase (E := E)) (t : Real) (k : Fin (N + 1)) :
+    flowJetPrefix (E := E) Φ N z t k =
+      flowJet (E := E) Φ z t k.1 := rfl
+
 @[simp] theorem idJet_base (z : ModelPhase (E := E)) :
     jetBase (E := E) (idJet (E := E) z) = z := by
   simp [jetBase, idJet, ftaylorSeries]
+
+@[simp] theorem idJetPrefix_base
+    (N : Nat) (z : ModelPhase (E := E)) :
+    ModelJetPrefix.base (E := E) N (idJetPrefix (E := E) N z) = z := by
+  simp [idJetPrefix]
+
+@[simp] theorem idJetPrefix_apply
+    (N : Nat) (z : ModelPhase (E := E)) (k : Fin (N + 1)) :
+    idJetPrefix (E := E) N z k = idJet (E := E) z k.1 := rfl
+
+@[simp] theorem flowJetPrefix_trunc
+    (Φ : ModelPhase (E := E) -> Real -> ModelPhase (E := E))
+    (N : Nat) (z : ModelPhase (E := E)) (t : Real) :
+    ModelJetPrefix.trunc (E := E) N (flowJetPrefix (E := E) Φ (N + 1) z t) =
+      flowJetPrefix (E := E) Φ N z t := by
+  funext k
+  rfl
+
+@[simp] theorem idJetPrefix_trunc
+    (N : Nat) (z : ModelPhase (E := E)) :
+    ModelJetPrefix.trunc (E := E) N (idJetPrefix (E := E) (N + 1) z) =
+      idJetPrefix (E := E) N z := by
+  funext k
+  rfl
 
 set_option linter.flexible false in
 @[simp] theorem jetRHS_base
@@ -117,6 +338,51 @@ set_option linter.flexible false in
     simp
   simpa [idJet, ftaylorSeries] using hzero
 
+/-- All identity-jet coefficients of order at least two vanish. -/
+theorem idJet_succ2_zero
+    (z : ModelPhase (E := E)) (m : Nat) :
+    idJet (E := E) z (Nat.succ (Nat.succ m)) = 0 := by
+  apply ContinuousMultilinearMap.ext
+  intro v
+  have hfd :
+      (fun y : ModelPhase (E := E) =>
+          fderiv Real (fun z' : ModelPhase (E := E) => z') y) =
+        fun _ : ModelPhase (E := E) =>
+          ContinuousLinearMap.id Real (ModelPhase (E := E)) := by
+    funext y
+    simp
+  rw [idJet, ftaylorSeries, iteratedFDeriv_succ_apply_right, hfd]
+  have hconst :
+      iteratedFDeriv Real (m + 1)
+        (fun _ : ModelPhase (E := E) =>
+          ContinuousLinearMap.id Real (ModelPhase (E := E))) z = 0 := by
+    simpa [Nat.succ_eq_add_one] using congrFun
+      (iteratedFDeriv_const_of_ne
+        (𝕜 := Real) (E := ModelPhase (E := E)) (F := ModelLin (E := E))
+        (n := Nat.succ m) (Nat.succ_ne_zero m)
+        (ContinuousLinearMap.id Real (ModelPhase (E := E)))) z
+  rw [hconst]
+  simp
+
+@[simp] theorem idJet_high_zero
+    (z : ModelPhase (E := E)) {n : Nat} (hn : 2 <= n) :
+    idJet (E := E) z n = 0 := by
+  obtain ⟨m, rfl⟩ := Nat.exists_eq_add_of_le hn
+  have hnm : 2 + m = Nat.succ (Nat.succ m) := by omega
+  rw [hnm]
+  exact idJet_succ2_zero (E := E) z m
+
+@[simp] theorem ModelJet.trunc_idJet
+    (N : Nat) (hN : 1 <= N) (z : ModelPhase (E := E)) :
+    ModelJet.trunc (E := E) N (idJet (E := E) z) = idJet (E := E) z := by
+  apply FormalMultilinearSeries.ext
+  intro n
+  by_cases hn : n <= N
+  · simp [hn]
+  · have hlt : 1 < n := lt_of_le_of_lt hN (Nat.lt_of_not_ge hn)
+    have h2 : 2 <= n := Nat.succ_le_of_lt hlt
+    simp [ModelJet.trunc, hn, idJet_high_zero (E := E) z h2]
+
 @[simp] theorem jetRHS_zero
     (F : ModelPhase (E := E) -> ModelPhase (E := E))
     (J : ModelJet (E := E)) :
@@ -126,6 +392,230 @@ set_option linter.flexible false in
   apply (continuousMultilinearCurryFin0 Real
     (ModelPhase (E := E)) (ModelPhase (E := E))).injective
   simpa [jetBase] using jetRHS_base (E := E) F J
+
+/-- Low-order coefficients of the Faà di Bruno jet RHS only depend on the
+same low-order coefficients of the input jet. -/
+theorem jetRHS_trunc_coeff_of_le
+    (F : ModelPhase (E := E) -> ModelPhase (E := E))
+    (J : ModelJet (E := E)) {N n : Nat} (hn : n <= N) :
+    jetRHS (E := E) F (ModelJet.trunc (E := E) N J) n =
+      jetRHS (E := E) F J n := by
+  have hbase :
+      jetBase (E := E) (ModelJet.trunc (E := E) N J) =
+        jetBase (E := E) J := by
+    simp [jetBase, ModelJet.trunc]
+  simp only [jetRHS, FormalMultilinearSeries.taylorComp]
+  rw [hbase]
+  apply Finset.sum_congr rfl
+  intro c _hc
+  apply ContinuousMultilinearMap.ext
+  intro v
+  have hpart : ∀ m, c.partSize m <= N := fun m =>
+    le_trans (c.partSize_le m) hn
+  simp [FormalMultilinearSeries.compAlongOrderedFinpartition_apply,
+    ModelJet.trunc, hpart]
+
+/-- The `n`th Faà di Bruno RHS coefficient only depends on the input jet
+coefficients of order at most `n`. -/
+theorem jetRHS_coeff_congr_of_le
+    (F : ModelPhase (E := E) -> ModelPhase (E := E))
+    {J K : ModelJet (E := E)} {n : Nat}
+    (hJK : ∀ k, k <= n -> J k = K k) :
+    jetRHS (E := E) F J n = jetRHS (E := E) F K n := by
+  have hbase : jetBase (E := E) J = jetBase (E := E) K := by
+    simp [jetBase, hJK 0 (Nat.zero_le n)]
+  simp only [jetRHS, FormalMultilinearSeries.taylorComp]
+  rw [hbase]
+  apply Finset.sum_congr rfl
+  intro c _hc
+  apply ContinuousMultilinearMap.ext
+  intro v
+  simp [FormalMultilinearSeries.compAlongOrderedFinpartition_apply,
+    hJK, c.partSize_le]
+
+/-- Truncation commutes with the Faà di Bruno RHS at the retained orders. -/
+theorem jetRHS_trunc
+    (F : ModelPhase (E := E) -> ModelPhase (E := E))
+    (J : ModelJet (E := E)) (N : Nat) :
+    ModelJet.trunc (E := E) N
+        (jetRHS (E := E) F (ModelJet.trunc (E := E) N J)) =
+      ModelJet.trunc (E := E) N (jetRHS (E := E) F J) := by
+  apply FormalMultilinearSeries.ext
+  intro n
+  by_cases hn : n <= N
+  · simp [hn, jetRHS_trunc_coeff_of_le (E := E) F J hn]
+  · simp [hn]
+
+/-- Finite-prefix version of the Faà di Bruno jet RHS. -/
+def jetRHSPrefix
+    (F : ModelPhase (E := E) -> ModelPhase (E := E))
+    (N : Nat) (P : ModelJetPrefix (E := E) N) : ModelJetPrefix (E := E) N :=
+  ModelJetPrefix.ofJet (E := E) N
+    (jetRHS (E := E) F (ModelJetPrefix.toJet (E := E) N P))
+
+/-- Finite-prefix jet RHS for the fixed-chart model spray. -/
+def sprayJetRHSPrefix
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (N : Nat) (P : ModelJetPrefix (E := E) N) : ModelJetPrefix (E := E) N :=
+  jetRHSPrefix (E := E) (modelSpray (I := I) g x) N P
+
+@[simp] theorem jetRHSPrefix_apply
+    (F : ModelPhase (E := E) -> ModelPhase (E := E))
+    (N : Nat) (P : ModelJetPrefix (E := E) N) (k : Fin (N + 1)) :
+    jetRHSPrefix (E := E) F N P k =
+      jetRHS (E := E) F (ModelJetPrefix.toJet (E := E) N P) k.1 := rfl
+
+@[simp] theorem jetRHSPrefix_base
+    (F : ModelPhase (E := E) -> ModelPhase (E := E))
+    (N : Nat) (P : ModelJetPrefix (E := E) N) :
+    ModelJetPrefix.base (E := E) N (jetRHSPrefix (E := E) F N P) =
+      F (ModelJetPrefix.base (E := E) N P) := by
+  simp [ModelJetPrefix.base, jetRHSPrefix]
+
+@[simp] theorem sprayJetRHSPrefix_base
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (N : Nat) (P : ModelJetPrefix (E := E) N) :
+    ModelJetPrefix.base (E := E) N
+        (sprayJetRHSPrefix (I := I) g x N P) =
+      modelSpray (I := I) g x (ModelJetPrefix.base (E := E) N P) := by
+  simp [sprayJetRHSPrefix]
+
+/-- The finite-prefix RHS agrees with the full RHS on finite prefixes. -/
+theorem jetRHSPrefix_ofJet
+    (F : ModelPhase (E := E) -> ModelPhase (E := E))
+    (N : Nat) (J : ModelJet (E := E)) :
+    jetRHSPrefix (E := E) F N (ModelJetPrefix.ofJet (E := E) N J) =
+      ModelJetPrefix.ofJet (E := E) N (jetRHS (E := E) F J) := by
+  funext k
+  have hk : k.1 <= N := Nat.lt_succ_iff.mp k.2
+  simp [jetRHSPrefix, jetRHS_trunc_coeff_of_le (E := E) F J hk]
+
+theorem jetRHSPrefix_trunc
+    (F : ModelPhase (E := E) -> ModelPhase (E := E))
+    (N : Nat) (P : ModelJetPrefix (E := E) (N + 1)) :
+    ModelJetPrefix.trunc (E := E) N (jetRHSPrefix (E := E) F (N + 1) P) =
+      jetRHSPrefix (E := E) F N (ModelJetPrefix.trunc (E := E) N P) := by
+  funext k
+  have hkN : k.1 <= N := Nat.lt_succ_iff.mp k.2
+  exact
+    jetRHS_coeff_congr_of_le (E := E) F
+      (J := ModelJetPrefix.toJet (E := E) (N + 1) P)
+      (K := ModelJetPrefix.toJet (E := E) N (ModelJetPrefix.trunc (E := E) N P))
+      (n := k.1)
+      (by
+        intro m hm
+        have hmN : m <= N := le_trans hm hkN
+        have hmN' : m <= N + 1 := le_trans hmN (Nat.le_succ N)
+        simp [ModelJetPrefix.toJet, ModelJetPrefix.trunc, hmN, hmN'])
+
+private theorem jetRHSPrefix_term_contDiffAt
+    (F : ModelPhase (E := E) -> ModelPhase (E := E))
+    {N n : Nat} (P : ModelJetPrefix (E := E) N)
+    (c : OrderedFinpartition n) (hn : n <= N)
+    (hF : ContDiffAt Real ∞ F (ModelJetPrefix.base (E := E) N P)) :
+    ContDiffAt Real ∞
+      (fun Q : ModelJetPrefix (E := E) N =>
+        (ftaylorSeries Real F (ModelJetPrefix.base (E := E) N Q)).compAlongOrderedFinpartition
+          (ModelJetPrefix.toJet (E := E) N Q) c) P := by
+  let B := c.compAlongOrderedFinpartitionL Real
+    (ModelPhase (E := E)) (ModelPhase (E := E)) (ModelPhase (E := E))
+  have hFder :
+      ContDiffAt Real ∞
+        (fun y : ModelPhase (E := E) =>
+          iteratedFDeriv Real c.length F y)
+        (ModelJetPrefix.base (E := E) N P) :=
+    hF.iteratedFDeriv_right (m := ∞) (i := c.length) (by
+      have htop_add :
+          ((⊤ : ℕ∞) : WithTop ℕ∞) + (c.length : WithTop ℕ∞) =
+            ((⊤ : ℕ∞) : WithTop ℕ∞) := by
+        induction c.length with
+        | zero => simp
+        | succ m ih =>
+            rw [Nat.cast_succ, ← add_assoc, ih, ENat.coe_top_add_one]
+      show ((⊤ : ℕ∞) : WithTop ℕ∞) + (c.length : WithTop ℕ∞) <=
+        ((⊤ : ℕ∞) : WithTop ℕ∞)
+      rw [htop_add])
+  have hq :
+      ContDiffAt Real ∞
+        (fun Q : ModelJetPrefix (E := E) N =>
+          iteratedFDeriv Real c.length F (ModelJetPrefix.base (E := E) N Q)) P :=
+    hFder.comp P (ModelJetPrefix.base_contDiffAt (E := E) (n := ∞) N P)
+  have hp :
+      ContDiffAt Real ∞
+        (fun Q : ModelJetPrefix (E := E) N =>
+          fun i : Fin c.length => ModelJetPrefix.toJet (E := E) N Q (c.partSize i)) P := by
+    rw [contDiffAt_pi]
+    intro i
+    have hpart : c.partSize i <= N := le_trans (c.partSize_le i) hn
+    simpa [ModelJetPrefix.toJet, hpart] using
+      ModelJetPrefix.coeff_contDiffAt (E := E) (n := ∞) N P
+        ⟨c.partSize i, Nat.lt_succ_of_le hpart⟩
+  have hpair : ContDiffAt Real ∞
+      (fun Q : ModelJetPrefix (E := E) N =>
+        (iteratedFDeriv Real c.length F (ModelJetPrefix.base (E := E) N Q),
+          fun i : Fin c.length => ModelJetPrefix.toJet (E := E) N Q (c.partSize i))) P :=
+    hq.prodMk hp
+  have hB :
+      ContDiffAt Real ∞
+        (fun p :
+          (ModelPhase (E := E) [×c.length]→L[Real] ModelPhase (E := E)) ×
+            ((i : Fin c.length) -> ModelJetCoeff (E := E) (c.partSize i)) =>
+          B p.1 p.2)
+        ((iteratedFDeriv Real c.length F (ModelJetPrefix.base (E := E) N P)),
+          fun i : Fin c.length => ModelJetPrefix.toJet (E := E) N P (c.partSize i)) :=
+    B.analyticAt_uncurry_of_multilinear.contDiffAt
+  simpa [B, ftaylorSeries, Function.comp_def] using hB.comp P hpair
+
+theorem jetRHSPrefix_zero_contDiffAt
+    (F : ModelPhase (E := E) -> ModelPhase (E := E))
+    (N : Nat) (P : ModelJetPrefix (E := E) N)
+    (hF : ContDiffAt Real ∞ F (ModelJetPrefix.base (E := E) N P)) :
+    ContDiffAt Real ∞
+      (fun Q : ModelJetPrefix (E := E) N =>
+        jetRHSPrefix (E := E) F N Q ⟨0, Nat.succ_pos N⟩) P := by
+  let L :
+      ModelPhase (E := E) →L[Real] ModelJetCoeff (E := E) 0 :=
+    (continuousMultilinearCurryFin0 Real
+      (ModelPhase (E := E)) (ModelPhase (E := E))).symm.toContinuousLinearMap
+  have hcomp :
+      ContDiffAt Real ∞
+        (fun Q : ModelJetPrefix (E := E) N =>
+          L (F (ModelJetPrefix.base (E := E) N Q))) P :=
+    (hF.comp P (ModelJetPrefix.base_contDiffAt (E := E) (n := ∞) N P)).continuousLinearMap_comp L
+  simpa [jetRHSPrefix, ModelJetPrefix.base_toJet, L] using hcomp
+
+theorem jetRHSPrefix_contDiffAt
+    (F : ModelPhase (E := E) -> ModelPhase (E := E))
+    (N : Nat) (P : ModelJetPrefix (E := E) N)
+    (hF : ContDiffAt Real ∞ F (ModelJetPrefix.base (E := E) N P)) :
+    ContDiffAt Real ∞ (jetRHSPrefix (E := E) F N) P := by
+  rw [contDiffAt_pi]
+  intro k
+  have hk : k.1 <= N := Nat.lt_succ_iff.mp k.2
+  change ContDiffAt Real ∞
+    (fun Q : ModelJetPrefix (E := E) N =>
+      ∑ c : OrderedFinpartition k.1,
+        (ftaylorSeries Real F (ModelJetPrefix.base (E := E) N Q)).compAlongOrderedFinpartition
+          (ModelJetPrefix.toJet (E := E) N Q) c) P
+  apply ContDiffAt.sum
+  intro c _hc
+  exact jetRHSPrefix_term_contDiffAt (E := E) F P c hk hF
+
+theorem sprayJetRHSPrefix_contDiffAt_of_mem
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (N : Nat) (P : ModelJetPrefix (E := E) N)
+    (hztarget :
+      ModelJetPrefix.base (E := E) N P ∈
+        (extChartAt I.tangent (phaseZero (I := I) x)).target)
+    (hsrc :
+      (phaseOfModel (I := I) x (ModelJetPrefix.base (E := E) N P)).proj ∈
+        (extChartAt I x).source) :
+    ContDiffAt Real ∞
+      (jetRHSPrefix (E := E) (modelSpray (I := I) g x) N) P :=
+  jetRHSPrefix_contDiffAt (E := E) (modelSpray (I := I) g x) N P
+    (modelSpray_contDiffAt_of_mem (I := I) g x hztarget hsrc)
 
 /-- The first jet coefficient recovers the Frechet derivative. -/
 theorem flowJet_one
@@ -140,6 +630,73 @@ theorem flowJet_one
   intro h
   rw [continuousMultilinearCurryFin1_apply]
   simp [flowJet, ftaylorSeries, hA.fderiv]
+
+/-- Each coefficient of the identity jet depends smoothly on the base point.
+Only the zeroth coefficient varies; the first is constant and all higher
+coefficients vanish. -/
+theorem idJet_coeff_contDiffAt
+    (n : Nat) (z : ModelPhase (E := E)) :
+    ContDiffAt Real ∞ (fun y : ModelPhase (E := E) => idJet (E := E) y n) z := by
+  rcases Nat.lt_trichotomy n 1 with hn | hn | hn
+  · have hn0 : n = 0 := by omega
+    subst n
+    let L : ModelPhase (E := E) →L[Real] ModelJetCoeff (E := E) 0 :=
+      (continuousMultilinearCurryFin0 Real
+        (ModelPhase (E := E)) (ModelPhase (E := E))).symm.toContinuousLinearMap
+    simpa [L] using L.contDiff.contDiffAt (x := z)
+  · subst n
+    let C : ModelJetCoeff (E := E) 1 :=
+      (continuousMultilinearCurryFin1 Real
+        (ModelPhase (E := E)) (ModelPhase (E := E))).symm
+          (ContinuousLinearMap.id Real (ModelPhase (E := E)))
+    have hconst : ContDiffAt Real ∞ (fun _ : ModelPhase (E := E) => C) z :=
+      contDiffAt_const
+    have hC : (fun y : ModelPhase (E := E) => idJet (E := E) y 1) =
+        fun _ : ModelPhase (E := E) => C := by
+      funext y
+      apply (continuousMultilinearCurryFin1 Real
+        (ModelPhase (E := E)) (ModelPhase (E := E))).injective
+      apply ContinuousLinearMap.ext
+      intro h
+      simp [C, idJet, ftaylorSeries, continuousMultilinearCurryFin1_apply]
+    simpa [hC] using hconst
+  · have hn2 : 2 <= n := by omega
+    have hzero : (fun y : ModelPhase (E := E) => idJet (E := E) y n) =
+        fun _ : ModelPhase (E := E) => 0 := by
+      funext y
+      simp [idJet_high_zero (E := E) y hn2]
+    simpa [hzero] using
+      (contDiffAt_const :
+        ContDiffAt Real ∞
+          (fun _ : ModelPhase (E := E) => (0 : ModelJetCoeff (E := E) n)) z)
+
+theorem idJetPrefix_contDiffAt
+    (N : Nat) (z : ModelPhase (E := E)) :
+    ContDiffAt Real ∞ (idJetPrefix (E := E) N) z := by
+  rw [contDiffAt_pi]
+  intro k
+  simpa [idJetPrefix] using idJet_coeff_contDiffAt (E := E) k.1 z
+
+/-- If a fixed-time flow endpoint has a Taylor series through order `N + 1`,
+then the derivative of its finite `N`-jet prefix is given by the shifted
+coefficient prefix. -/
+theorem flowJetPrefix_hasFDerivAt_of_hasFTaylor
+    (Φ : ModelPhase (E := E) -> Real -> ModelPhase (E := E))
+    (N : Nat) (z : ModelPhase (E := E)) (t : Real)
+    (hp :
+      HasFTaylorSeriesUpTo (𝕜 := Real) (N + 1 : Nat)
+        (fun y : ModelPhase (E := E) => Φ y t)
+        (fun y : ModelPhase (E := E) => flowJet (E := E) Φ y t)) :
+    HasFDerivAt
+      (fun y : ModelPhase (E := E) => flowJetPrefix (E := E) Φ N y t)
+      (ModelJetPrefix.shiftedDeriv (E := E) N
+        (flowJetPrefix (E := E) Φ (N + 1) z t))
+      z := by
+  apply hasFDerivAt_pi''
+  intro k
+  have hk : k.1 < (N + 1 : WithTop ℕ∞) := by
+    exact_mod_cast k.2
+  exact hp.fderiv k.1 hk z
 
 /-- The second jet coefficient is the second iterated Frechet derivative. -/
 theorem flowJet_two_apply
@@ -181,6 +738,29 @@ theorem jetRHS_one
   fin_cases i
   rfl
 
+/-- Finite-prefix jet ODE target.  Unlike `IsFlowJetUpTo`, this predicate
+lives in the finite normed state space `ModelJetPrefix N`. -/
+def IsFlowJetPrefix
+    (N : Nat)
+    (F : ModelPhase (E := E) -> ModelPhase (E := E))
+    (Φ : ModelPhase (E := E) -> Real -> ModelPhase (E := E))
+    (J : ModelPhase (E := E) -> Real -> ModelJetPrefix (E := E) N)
+    (T : Set Real) : Prop :=
+  (∀ z t, t ∈ T -> ModelJetPrefix.base (E := E) N (J z t) = Φ z t) ∧
+    (∀ z, J z 0 = idJetPrefix (E := E) N z) ∧
+      ∀ k : Fin (N + 1), ∀ z t, t ∈ T ->
+        HasDerivWithinAt (fun τ : Real => J z τ k)
+          (jetRHSPrefix (E := E) F N (J z t) k) T t
+
+/-- Finite-prefix jet ODE target specialized to the fixed-chart model spray. -/
+def IsModelJetPrefix
+    (N : Nat)
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (Φ : ModelPhase (E := E) -> Real -> ModelPhase (E := E))
+    (J : ModelPhase (E := E) -> Real -> ModelJetPrefix (E := E) N)
+    (T : Set Real) : Prop :=
+  IsFlowJetPrefix (E := E) N (modelSpray (I := I) g x) Φ J T
+
 /-- Finite-order jet ODE target.  A future induction should construct `J`
 from the model flow and prove this predicate for every finite `N`. -/
 def IsFlowJetUpTo
@@ -203,6 +783,61 @@ def IsModelFlowJetUpTo
     (J : ModelPhase (E := E) -> Real -> ModelJet (E := E))
     (T : Set Real) : Prop :=
   IsFlowJetUpTo (E := E) N (modelSpray (I := I) g x) Φ J T
+
+namespace IsFlowJetPrefix
+
+/-- A full-series finite-order jet ODE target induces the corresponding
+finite-prefix ODE target. -/
+theorem of_full
+    {N : Nat}
+    {F : ModelPhase (E := E) -> ModelPhase (E := E)}
+    {Φ : ModelPhase (E := E) -> Real -> ModelPhase (E := E)}
+    {J : ModelPhase (E := E) -> Real -> ModelJet (E := E)}
+    {T : Set Real}
+    (h : IsFlowJetUpTo (E := E) N F Φ J T) :
+    IsFlowJetPrefix (E := E) N F Φ
+      (fun z t => ModelJetPrefix.ofJet (E := E) N (J z t)) T := by
+  refine ⟨?_, ?_, ?_⟩
+  · intro z t ht
+    simpa using h.1 z t ht
+  · intro z
+    simpa [idJetPrefix] using congrArg (ModelJetPrefix.ofJet (E := E) N) (h.2.1 z)
+  · intro k z t ht
+    have hk : k.1 <= N := Nat.lt_succ_iff.mp k.2
+    have hderiv := h.2.2 k.1 hk z t ht
+    simpa [jetRHSPrefix, jetRHS_trunc_coeff_of_le (E := E) F (J z t) hk] using hderiv
+
+/-- A successor finite-prefix jet ODE target restricts to the previous finite
+prefix by dropping the top coefficient. -/
+theorem of_succ
+    {N : Nat}
+    {F : ModelPhase (E := E) -> ModelPhase (E := E)}
+    {Φ : ModelPhase (E := E) -> Real -> ModelPhase (E := E)}
+    {J : ModelPhase (E := E) -> Real -> ModelJetPrefix (E := E) (N + 1)}
+    {T : Set Real}
+    (h : IsFlowJetPrefix (E := E) (N + 1) F Φ J T) :
+    IsFlowJetPrefix (E := E) N F Φ
+      (fun z t => ModelJetPrefix.trunc (E := E) N (J z t)) T := by
+  refine ⟨?_, ?_, ?_⟩
+  · intro z t ht
+    simpa using h.1 z t ht
+  · intro z
+    simpa using congrArg (ModelJetPrefix.trunc (E := E) N) (h.2.1 z)
+  · intro k z t ht
+    have hderiv := h.2.2 k.castSucc z t ht
+    have hkN : k.1 <= N := Nat.lt_succ_iff.mp k.2
+    have hcoeff :
+        jetRHS (E := E) F
+            (ModelJet.trunc (E := E) N
+              (ModelJetPrefix.toJet (E := E) (N + 1) (J z t))) k.1 =
+          jetRHS (E := E) F
+            (ModelJetPrefix.toJet (E := E) (N + 1) (J z t)) k.1 :=
+      jetRHS_trunc_coeff_of_le (E := E) F
+        (ModelJetPrefix.toJet (E := E) (N + 1) (J z t)) hkN
+    simpa [jetRHSPrefix, ModelJetPrefix.toJet_trunc, hcoeff]
+      using hderiv
+
+end IsFlowJetPrefix
 
 /-- Finite-order jet ODE targets are monotone in the jet order. -/
 theorem IsFlowJetUpTo.of_le
@@ -477,6 +1112,325 @@ private theorem isLittleO_of_gronwall_bound_eventually
     _ ≤ c * ‖h‖ := by
       exact mul_le_mul_of_nonneg_right hcoef hnorm
 
+section GenericC1Flow
+
+variable {X : Type*} [NormedAddCommGroup X] [NormedSpace Real X]
+
+/-- Error between a flow endpoint at `z + h` and the first-order variational
+approximation at `z`.  This is the model-independent core of the C1
+flow-dependence proof. -/
+def flowError
+    (Φ : X -> Real -> X) (A : X -> Real -> X →L[Real] X)
+    (z h : X) (t : Real) : X :=
+  Φ (z + h) t - Φ z t - A z t h
+
+/-- Raw right-hand side of the model-independent variational error equation. -/
+def flowErrorRHS
+    (F : X -> X) (Φ : X -> Real -> X) (A : X -> Real -> X →L[Real] X)
+    (z h : X) (t : Real) : X :=
+  F (Φ (z + h) t) - F (Φ z t) -
+    fderiv Real F (Φ z t) (A z t h)
+
+/-- Taylor-residual part of the model-independent variational error equation. -/
+def flowTaylorRem
+    (F : X -> X) (Φ : X -> Real -> X)
+    (z h : X) (t : Real) : X :=
+  F (Φ (z + h) t) - F (Φ z t) -
+    fderiv Real F (Φ z t) (Φ (z + h) t - Φ z t)
+
+/-- Generic augmented vector field for a parameterized first variational
+equation of `z' = F z`.  The second component is a linear map from an external
+parameter space into the state space. -/
+def paramVariationalRHS
+    {P : Type*} [NormedAddCommGroup P] [NormedSpace Real P]
+    (F : X -> X) (p : X × (P →L[Real] X)) : X × (P →L[Real] X) :=
+  (F p.1, (fderiv Real F p.1).comp p.2)
+
+@[simp] theorem paramVariationalRHS_fst
+    {P : Type*} [NormedAddCommGroup P] [NormedSpace Real P]
+    (F : X -> X) (p : X × (P →L[Real] X)) :
+    (paramVariationalRHS F p).1 = F p.1 := rfl
+
+@[simp] theorem paramVariationalRHS_snd
+    {P : Type*} [NormedAddCommGroup P] [NormedSpace Real P]
+    (F : X -> X) (p : X × (P →L[Real] X)) :
+    (paramVariationalRHS F p).2 = (fderiv Real F p.1).comp p.2 := rfl
+
+/-- Smoothness of the generic parameterized variational RHS follows from
+smoothness of the base RHS. -/
+theorem paramVariationalRHS_contDiffAt
+    {P : Type*} [NormedAddCommGroup P] [NormedSpace Real P]
+    {F : X -> X} {z : X} {A : P →L[Real] X}
+    (hF : ContDiffAt Real ∞ F z) :
+    ContDiffAt Real ∞ (paramVariationalRHS (P := P) F) (z, A) := by
+  let L := P →L[Real] X
+  let p0 : X × L := (z, A)
+  have hF' :
+      ContDiffAt Real ∞ (fun p : X × L => F p.1) p0 := by
+    exact hF.comp p0 contDiffAt_fst
+  have hDF0 : ContDiffAt Real ∞ (fderiv Real F) z := by
+    exact hF.fderiv_right (m := ∞) (by rw [ENat.coe_top_add_one])
+  have hDF :
+      ContDiffAt Real ∞ (fun p : X × L => fderiv Real F p.1) p0 := by
+    exact hDF0.comp p0 contDiffAt_fst
+  have hA : ContDiffAt Real ∞ (fun p : X × L => p.2) p0 :=
+    contDiffAt_snd
+  have hcomp :
+      ContDiffAt Real ∞
+        (fun p : X × L => (fderiv Real F p.1).comp p.2) p0 := by
+    exact hDF.clm_comp hA
+  simpa [paramVariationalRHS, p0, L] using hF'.prodMk hcomp
+
+/-- Generic augmented vector field for the first variational equation of
+`z' = F z` with parameter space equal to the state space. -/
+def variationalRHS
+    (F : X -> X) (p : X × (X →L[Real] X)) : X × (X →L[Real] X) :=
+  paramVariationalRHS (P := X) F p
+
+@[simp] theorem variationalRHS_fst
+    (F : X -> X) (p : X × (X →L[Real] X)) :
+    (variationalRHS F p).1 = F p.1 := rfl
+
+@[simp] theorem variationalRHS_snd
+    (F : X -> X) (p : X × (X →L[Real] X)) :
+    (variationalRHS F p).2 = (fderiv Real F p.1).comp p.2 := rfl
+
+/-- Smoothness of the generic augmented variational RHS follows from
+smoothness of the base RHS. -/
+theorem variationalRHS_contDiffAt
+    {F : X -> X} {z : X} {A : X →L[Real] X}
+    (hF : ContDiffAt Real ∞ F z) :
+    ContDiffAt Real ∞ (variationalRHS F) (z, A) :=
+  paramVariationalRHS_contDiffAt (P := X) hF
+
+theorem flowErrorRHS_eq_taylorRem_add
+    (F : X -> X) (Φ : X -> Real -> X) (A : X -> Real -> X →L[Real] X)
+    (z h : X) (t : Real) :
+    flowErrorRHS F Φ A z h t =
+      flowTaylorRem F Φ z h t +
+        fderiv Real F (Φ z t) (flowError Φ A z h t) := by
+  simp only [flowErrorRHS, flowTaylorRem, flowError]
+  simp only [map_sub]
+  abel
+
+/-- Gronwall-ready pointwise estimate for the generic variational-error RHS. -/
+theorem flowErrorRHS_norm_le
+    (F : X -> X) (Φ : X -> Real -> X) (A : X -> Real -> X →L[Real] X)
+    (z h : X) (t : Real) {B ε : Real}
+    (hB : ‖fderiv Real F (Φ z t)‖ ≤ B)
+    (hRem : ‖flowTaylorRem F Φ z h t‖ ≤ ε) :
+    ‖flowErrorRHS F Φ A z h t‖ ≤ B * ‖flowError Φ A z h t‖ + ε := by
+  let D := fderiv Real F (Φ z t)
+  have hLin0 : ‖D (flowError Φ A z h t)‖ ≤ ‖D‖ * ‖flowError Φ A z h t‖ :=
+    D.le_opNorm _
+  have hLin : ‖D (flowError Φ A z h t)‖ ≤
+      B * ‖flowError Φ A z h t‖ := by
+    exact hLin0.trans
+      (mul_le_mul_of_nonneg_right (by simpa [D] using hB) (norm_nonneg _))
+  rw [flowErrorRHS_eq_taylorRem_add]
+  calc
+    ‖flowTaylorRem F Φ z h t + D (flowError Φ A z h t)‖
+        ≤ ‖D (flowError Φ A z h t)‖ + ‖flowTaylorRem F Φ z h t‖ := by
+          simpa [add_comm] using
+            norm_add_le (flowTaylorRem F Φ z h t) (D (flowError Φ A z h t))
+    _ ≤ B * ‖flowError Φ A z h t‖ + ε := add_le_add hLin hRem
+
+/-- If the variational approximation error is little-o in the initial
+perturbation, then the variational linear map is the Frechet derivative of the
+fixed-time flow endpoint. -/
+theorem flow_hasFDerivAt_of_error
+    {Φ : X -> Real -> X} {A : X -> Real -> X →L[Real] X}
+    {z : X} {t : Real}
+    (herr : (fun h : X => flowError Φ A z h t) =o[𝓝 0] (fun h : X => h)) :
+    HasFDerivAt (fun z' : X => Φ z' t) (A z t) z := by
+  rw [hasFDerivAt_iff_isLittleO_nhds_zero]
+  simpa [flowError] using herr
+
+/-- Fixed-time C1 dependence from an eventual Gronwall bound with a vanishing
+Taylor-residual coefficient. -/
+theorem flow_hasFDerivAt_of_gronwall
+    {Φ : X -> Real -> X} {A : X -> Real -> X →L[Real] X}
+    {z : X} {t B L T : Real} {C : X -> Real}
+    (hC : Tendsto C (𝓝 0) (𝓝 0))
+    (hbound : ∀ᶠ h in 𝓝 (0 : X),
+      ‖flowError Φ A z h t‖ ≤ gronwallBound 0 B (C h * (L * ‖h‖)) T) :
+    HasFDerivAt (fun z' : X => Φ z' t) (A z t) z := by
+  apply flow_hasFDerivAt_of_error
+  exact isLittleO_of_gronwall_bound
+    (f := fun h : X => flowError Φ A z h t)
+    (C := C) (B := B) (L := L) (T := T) hC hbound
+
+/-- The variational approximation error is continuous on an interval if the
+base flow and variational linear map are continuous there. -/
+theorem flowError_continuousOn
+    {Φ : X -> Real -> X} {A : X -> Real -> X →L[Real] X}
+    {z h : X} {s : Set Real}
+    (hzh : ContinuousOn (fun t => Φ (z + h) t) s)
+    (hz : ContinuousOn (fun t => Φ z t) s)
+    (hA : ContinuousOn (fun t => A z t) s) :
+    ContinuousOn (flowError Φ A z h) s := by
+  have happ : ContinuousOn (fun t => A z t h) s :=
+    hA.clm_apply continuousOn_const
+  simpa [flowError] using (hzh.sub hz).sub happ
+
+/-- The model-independent variational error satisfies the expected
+inhomogeneous linear ODE. -/
+theorem flowError_hasDerivWithinAt
+    {F : X -> X} {Φ : X -> Real -> X} {A : X -> Real -> X →L[Real] X}
+    {z h : X} {s : Set Real} {t : Real}
+    (hzh : HasDerivWithinAt (Φ (z + h)) (F (Φ (z + h) t)) s t)
+    (hz : HasDerivWithinAt (Φ z) (F (Φ z t)) s t)
+    (hA :
+      HasDerivWithinAt (A z)
+        ((fderiv Real F (Φ z t)).comp (A z t)) s t) :
+    HasDerivWithinAt
+      (flowError Φ A z h)
+      (flowErrorRHS F Φ A z h t) s t := by
+  have hh : HasDerivWithinAt (fun _ : Real => h) (0 : X) s t := by
+    simpa using (hasDerivWithinAt_const (c := h) (s := s) (x := t))
+  have hAh :
+      HasDerivWithinAt (fun t : Real => A z t h)
+        (((fderiv Real F (Φ z t)).comp (A z t)) h) s t := by
+    simpa [ContinuousLinearMap.comp_apply] using hA.clm_apply hh
+  have herr := (hzh.sub hz).sub hAh
+  simpa [flowError, flowErrorRHS, ContinuousLinearMap.comp_apply] using herr
+
+/-- The variational approximation error vanishes initially if the flow and
+linearized flow have the expected initial values. -/
+@[simp] theorem flowError_zero
+    {Φ : X -> Real -> X} {A : X -> Real -> X →L[Real] X}
+    {z h : X}
+    (hzh : Φ (z + h) 0 = z + h)
+    (hz : Φ z 0 = z)
+    (hA : A z 0 = ContinuousLinearMap.id Real X) :
+    flowError Φ A z h 0 = 0 := by
+  simp [flowError, hzh, hz, hA]
+
+/-- Generic Gronwall bound for the variational approximation error once the
+error RHS has the standard linear-plus-forcing estimate. -/
+theorem flowError_norm_le_gronwall
+    (F : X -> X) (Φ : X -> Real -> X) (A : X -> Real -> X →L[Real] X)
+    (z h : X) {a b δ K ε : Real}
+    (hcont : ContinuousOn (flowError Φ A z h) (Set.Icc a b))
+    (hderiv : ∀ t ∈ Set.Ico a b,
+      HasDerivWithinAt (flowError Φ A z h)
+        (flowErrorRHS F Φ A z h t) (Set.Ici t) t)
+    (ha : ‖flowError Φ A z h a‖ ≤ δ)
+    (hbound : ∀ t ∈ Set.Ico a b,
+      ‖flowErrorRHS F Φ A z h t‖ ≤ K * ‖flowError Φ A z h t‖ + ε) :
+    ∀ t ∈ Set.Icc a b,
+      ‖flowError Φ A z h t‖ ≤ gronwallBound δ K ε (t - a) :=
+  norm_le_gronwallBound_of_norm_deriv_right_le hcont hderiv ha hbound
+
+/-- Generic fixed-time C1 dependence from the variational equation plus a
+uniform Taylor-residual forcing estimate.
+
+This is the reusable Gronwall theorem that the finite jet-prefix induction
+should instantiate for each finite-dimensional jet RHS. -/
+theorem flow_hasFDerivAt_of_taylor_gronwall
+    {F : X -> X} {Φ : X -> Real -> X} {A : X -> Real -> X →L[Real] X}
+    {z : X} {b B L : Real}
+    (hb0 : 0 ≤ b)
+    (hcont : ∀ᶠ h : X in 𝓝 0,
+      ContinuousOn (flowError Φ A z h) (Set.Icc (0 : Real) b))
+    (hderiv : ∀ᶠ h : X in 𝓝 0,
+      ∀ t ∈ Set.Ico (0 : Real) b,
+        HasDerivWithinAt (flowError Φ A z h)
+          (flowErrorRHS F Φ A z h t) (Set.Ici t) t)
+    (hzero : ∀ᶠ h : X in 𝓝 0, flowError Φ A z h 0 = 0)
+    (hB : ∀ t ∈ Set.Ico (0 : Real) b,
+      ‖fderiv Real F (Φ z t)‖ ≤ B)
+    (hRem : ∀ η > 0, ∀ᶠ h : X in 𝓝 0,
+      ∀ t ∈ Set.Ico (0 : Real) b,
+        ‖flowTaylorRem F Φ z h t‖ ≤ η * (L * ‖h‖)) :
+    HasFDerivAt (fun z' : X => Φ z' b) (A z b) z := by
+  apply flow_hasFDerivAt_of_error
+  refine
+    isLittleO_of_gronwall_bound_eventually
+      (X := X) (Y := X) (B := B) (L := L) (T := b) ?_
+  intro η hη
+  filter_upwards [hcont, hderiv, hzero, hRem η hη] with h hcont_h hderiv_h hzero_h hRem_h
+  have hgr :
+      ∀ t ∈ Set.Icc (0 : Real) b,
+        ‖flowError Φ A z h t‖ ≤
+          gronwallBound 0 B (η * (L * ‖h‖)) (t - 0) := by
+    refine flowError_norm_le_gronwall F Φ A z h hcont_h hderiv_h ?_ ?_
+    · simp [hzero_h]
+    · intro t ht
+      exact flowErrorRHS_norm_le F Φ A z h t (hB t ht) (hRem_h t ht)
+  simpa using hgr b ⟨hb0, le_rfl⟩
+
+end GenericC1Flow
+
+/-- Smoothness of the augmented variational RHS for a finite jet-prefix ODE. -/
+theorem jetVarRHS_cdAt
+    (F : ModelPhase (E := E) -> ModelPhase (E := E))
+    (N : Nat) (P : ModelJetPrefix (E := E) N)
+    (A : ModelJetPrefix (E := E) N →L[Real] ModelJetPrefix (E := E) N)
+    (hF : ContDiffAt Real ∞ F (ModelJetPrefix.base (E := E) N P)) :
+    ContDiffAt Real ∞
+      (variationalRHS (jetRHSPrefix (E := E) F N))
+      (P, A) :=
+  variationalRHS_contDiffAt (X := ModelJetPrefix (E := E) N)
+    (F := jetRHSPrefix (E := E) F N) (z := P) (A := A)
+    (jetRHSPrefix_contDiffAt (E := E) F N P hF)
+
+/-- Smoothness of the parameterized augmented variational RHS for a finite
+jet-prefix ODE, where the parameter space is the original model phase. -/
+theorem jetParamVarRHS_cdAt
+    (F : ModelPhase (E := E) -> ModelPhase (E := E))
+    (N : Nat) (P : ModelJetPrefix (E := E) N)
+    (A : ModelPhase (E := E) →L[Real] ModelJetPrefix (E := E) N)
+    (hF : ContDiffAt Real ∞ F (ModelJetPrefix.base (E := E) N P)) :
+    ContDiffAt Real ∞
+      (paramVariationalRHS (P := ModelPhase (E := E))
+        (jetRHSPrefix (E := E) F N))
+      (P, A) :=
+  paramVariationalRHS_contDiffAt
+    (X := ModelJetPrefix (E := E) N) (P := ModelPhase (E := E))
+    (F := jetRHSPrefix (E := E) F N) (z := P) (A := A)
+    (jetRHSPrefix_contDiffAt (E := E) F N P hF)
+
+/-- Smoothness of the augmented variational RHS for the fixed-chart spray
+finite jet-prefix ODE on the controlled chart/source region. -/
+theorem sprayJetVarRHS_cdAt
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (N : Nat) (P : ModelJetPrefix (E := E) N)
+    (A : ModelJetPrefix (E := E) N →L[Real] ModelJetPrefix (E := E) N)
+    (hztarget :
+      ModelJetPrefix.base (E := E) N P ∈
+        (extChartAt I.tangent (phaseZero (I := I) x)).target)
+    (hsrc :
+      (phaseOfModel (I := I) x (ModelJetPrefix.base (E := E) N P)).proj ∈
+        (extChartAt I x).source) :
+    ContDiffAt Real ∞
+      (variationalRHS
+        (jetRHSPrefix (E := E) (modelSpray (I := I) g x) N))
+      (P, A) :=
+  jetVarRHS_cdAt (E := E) (modelSpray (I := I) g x) N P A
+    (modelSpray_contDiffAt_of_mem (I := I) g x hztarget hsrc)
+
+/-- Smoothness of the parameterized augmented variational RHS for the
+fixed-chart spray finite jet-prefix ODE on the controlled chart/source region. -/
+theorem sprayJetParamVarRHS_cdAt
+    [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (N : Nat) (P : ModelJetPrefix (E := E) N)
+    (A : ModelPhase (E := E) →L[Real] ModelJetPrefix (E := E) N)
+    (hztarget :
+      ModelJetPrefix.base (E := E) N P ∈
+        (extChartAt I.tangent (phaseZero (I := I) x)).target)
+    (hsrc :
+      (phaseOfModel (I := I) x (ModelJetPrefix.base (E := E) N P)).proj ∈
+        (extChartAt I x).source) :
+    ContDiffAt Real ∞
+      (paramVariationalRHS (P := ModelPhase (E := E))
+        (jetRHSPrefix (E := E) (modelSpray (I := I) g x) N))
+      (P, A) :=
+  jetParamVarRHS_cdAt (E := E) (modelSpray (I := I) g x) N P A
+    (modelSpray_contDiffAt_of_mem (I := I) g x hztarget hsrc)
+
 /-- The zero point for the variational equation: zero phase and identity
 linearized initial data. -/
 def varPhaseZero (x : M) : ModelPhase (E := E) × ModelLin (E := E) :=
@@ -518,37 +1472,17 @@ theorem varSpray_contDiffAt
       (varSpray (I := I) g x)
       (varPhaseZero (I := I) (E := E) x) := by
   let Z := ModelPhase (E := E)
-  let L := ModelLin (E := E)
   let z0 : Z :=
     extChartAt I.tangent (phaseZero (I := I) x)
       (phaseZero (I := I) x)
-  let p0 : Z × L := (z0, ContinuousLinearMap.id Real Z)
-  have hF :
-      ContDiffAt Real ∞
-        (fun p : Z × L => modelSpray (I := I) g x p.1)
-        p0 := by
-    exact (modelSpray_contDiffAt (I := I) g x).comp p0 contDiffAt_fst
-  have hDF0 :
-      ContDiffAt Real ∞
-        (fderiv Real (modelSpray (I := I) g x))
-        z0 := by
-    exact (modelSpray_contDiffAt (I := I) g x).fderiv_right (m := ∞)
-      (by rw [ENat.coe_top_add_one])
-  have hDF :
-      ContDiffAt Real ∞
-        (fun p : Z × L => fderiv Real (modelSpray (I := I) g x) p.1)
-        p0 := by
-    exact hDF0.comp p0 contDiffAt_fst
-  have hA :
-      ContDiffAt Real ∞ (fun p : Z × L => p.2) p0 :=
-    contDiffAt_snd
-  have hcomp :
-      ContDiffAt Real ∞
-        (fun p : Z × L =>
-          (fderiv Real (modelSpray (I := I) g x) p.1).comp p.2)
-        p0 := by
-    exact hDF.clm_comp hA
-  simpa [varSpray, varPhaseZero, z0, p0, Z, L] using hF.prodMk hcomp
+  change
+    ContDiffAt Real ∞
+      (variationalRHS (modelSpray (I := I) g x))
+      (z0, ContinuousLinearMap.id Real Z)
+  exact variationalRHS_contDiffAt (X := Z)
+    (F := modelSpray (I := I) g x) (z := z0)
+    (A := ContinuousLinearMap.id Real Z)
+    (modelSpray_contDiffAt (I := I) g x)
 
 /-- The augmented variational vector field is `C¹` at `(0_x, id)`.
 
@@ -574,36 +1508,14 @@ theorem varSpray_contDiffAt_of_mem
       (extChartAt I x).source) :
     ContDiffAt Real ∞ (varSpray (I := I) g x) p := by
   let Z := ModelPhase (E := E)
-  let L := ModelLin (E := E)
-  have hF0 :
+  have hF :
       ContDiffAt Real ∞ (modelSpray (I := I) g x) p.1 :=
     modelSpray_contDiffAt_of_mem (I := I) g x hztarget hsrc
-  have hF :
+  change
       ContDiffAt Real ∞
-        (fun p : Z × L => modelSpray (I := I) g x p.1)
-        p := by
-    exact hF0.comp p contDiffAt_fst
-  have hDF0 :
-      ContDiffAt Real ∞
-        (fderiv Real (modelSpray (I := I) g x))
-        p.1 := by
-    exact (modelSpray_contDiffAt_of_mem (I := I) g x hztarget hsrc).fderiv_right
-      (m := ∞) (by rw [ENat.coe_top_add_one])
-  have hDF :
-      ContDiffAt Real ∞
-        (fun p : Z × L => fderiv Real (modelSpray (I := I) g x) p.1)
-        p := by
-    exact hDF0.comp p contDiffAt_fst
-  have hA :
-      ContDiffAt Real ∞ (fun p : Z × L => p.2) p :=
-    contDiffAt_snd
-  have hcomp :
-      ContDiffAt Real ∞
-        (fun p : Z × L =>
-          (fderiv Real (modelSpray (I := I) g x) p.1).comp p.2)
-        p := by
-    exact hDF.clm_comp hA
-  simpa [varSpray, Z, L] using hF.prodMk hcomp
+        (variationalRHS (modelSpray (I := I) g x)) p
+  exact variationalRHS_contDiffAt (X := Z)
+    (F := modelSpray (I := I) g x) (z := p.1) (A := p.2) hF
 
 /-- The augmented variational vector field is `C¹` at every controlled phase
 point. -/
@@ -1624,11 +2536,9 @@ theorem varError_continuousOn_of_flow
       ContinuousOn (fun t => varDerivFlow (E := E) Ψ z t)
         (Set.Icc (0 : Real) b) :=
     varDerivFlow_continuousOn_of_flow (E := E) hb hΨz
-  have happ :
-      ContinuousOn (fun t => varDerivFlow (E := E) Ψ z t h)
-        (Set.Icc (0 : Real) b) :=
-    hder_z.clm_apply continuousOn_const
-  simpa [varError] using (hbase_zh.sub hbase_z).sub happ
+  simpa [varError, flowError] using
+    flowError_continuousOn (Φ := varBaseFlow (E := E) Ψ)
+      (A := varDerivFlow (E := E) Ψ) hbase_zh hbase_z hder_z
 
 /-- Raw right-hand side of the error equation. -/
 def varErrorRHS
@@ -1875,43 +2785,22 @@ theorem varErrorRHS_norm_le
     ‖varErrorRHS (I := I) g x Ψ z h t‖ ≤
       B * ‖varError (E := E) Ψ z h t‖ +
         C * ((L' : Real) * ‖h‖) := by
-  let D :=
-    fderiv Real (modelSpray (I := I) g x)
-      (varBaseFlow (E := E) Ψ z t)
   have hRem :
       ‖varTaylorRem (I := I) g x Ψ z h t‖ ≤
         C * ((L' : Real) * ‖h‖) :=
     varTaylorRem_norm_le_of_lipschitz (I := I) g x Ψ z h t
       hs hctrl hz hzh hD hLip hz0 hzh0
-  have hLin0 :
-      ‖D (varError (E := E) Ψ z h t)‖ ≤
-        ‖D‖ * ‖varError (E := E) Ψ z h t‖ :=
-    D.le_opNorm _
-  have hLin :
-      ‖D (varError (E := E) Ψ z h t)‖ ≤
-        B * ‖varError (E := E) Ψ z h t‖ := by
-    exact hLin0.trans
-      (mul_le_mul_of_nonneg_right (by simpa [D] using hB) (norm_nonneg _))
-  have hEq :
-      varErrorRHS (I := I) g x Ψ z h t =
-        varTaylorRem (I := I) g x Ψ z h t +
-          D (varError (E := E) Ψ z h t) := by
-    simp only [varErrorRHS, varTaylorRem, varError, D]
-    simp only [map_sub]
-    abel
-  rw [hEq]
-  calc
-    ‖varTaylorRem (I := I) g x Ψ z h t +
-        D (varError (E := E) Ψ z h t)‖
-        ≤ ‖D (varError (E := E) Ψ z h t)‖ +
-            ‖varTaylorRem (I := I) g x Ψ z h t‖ := by
-          simpa [add_comm] using
-            norm_add_le
-              (varTaylorRem (I := I) g x Ψ z h t)
-              (D (varError (E := E) Ψ z h t))
-    _ ≤ B * ‖varError (E := E) Ψ z h t‖ +
-        C * ((L' : Real) * ‖h‖) :=
-      add_le_add hLin hRem
+  change
+    ‖flowErrorRHS (modelSpray (I := I) g x)
+        (varBaseFlow (E := E) Ψ) (varDerivFlow (E := E) Ψ) z h t‖ ≤
+      B * ‖flowError (varBaseFlow (E := E) Ψ)
+          (varDerivFlow (E := E) Ψ) z h t‖ +
+        C * ((L' : Real) * ‖h‖)
+  exact flowErrorRHS_norm_le
+    (F := modelSpray (I := I) g x)
+    (Φ := varBaseFlow (E := E) Ψ)
+    (A := varDerivFlow (E := E) Ψ)
+    z h t hB (by simpa [flowTaylorRem, varTaylorRem] using hRem)
 
 /-- The raw error RHS is the Taylor residual plus the linearized equation
 applied to the current error. -/
@@ -1926,9 +2815,18 @@ theorem varErrorRHS_eq_taylorRem_add
         fderiv Real (modelSpray (I := I) g x)
           (varBaseFlow (E := E) Ψ z t)
           (varError (E := E) Ψ z h t) := by
-  simp only [varErrorRHS, varTaylorRem, varError]
-  simp only [map_sub]
-  abel
+  change
+    flowErrorRHS (modelSpray (I := I) g x)
+        (varBaseFlow (E := E) Ψ) (varDerivFlow (E := E) Ψ) z h t =
+      flowTaylorRem (modelSpray (I := I) g x)
+          (varBaseFlow (E := E) Ψ) z h t +
+        fderiv Real (modelSpray (I := I) g x)
+          (varBaseFlow (E := E) Ψ z t)
+          (flowError (varBaseFlow (E := E) Ψ) (varDerivFlow (E := E) Ψ) z h t)
+  exact flowErrorRHS_eq_taylorRem_add
+    (F := modelSpray (I := I) g x)
+    (Φ := varBaseFlow (E := E) Ψ)
+    (A := varDerivFlow (E := E) Ψ) z h t
 
 /-- The approximation error satisfies the expected inhomogeneous linear ODE. -/
 theorem varError_hasDerivWithinAt
@@ -1976,19 +2874,13 @@ theorem varError_hasDerivWithinAt
           (varDerivFlow (E := E) Ψ z t))
         (Set.Icc (-ε) ε) t :=
     varDerivFlow_hasDerivWithinAt (I := I) (E := E) g x hΨz
-  have hh :
-      HasDerivWithinAt (fun _ : Real => h) (0 : Z) (Set.Icc (-ε) ε) t := by
-    simpa using (hasDerivWithinAt_const (c := h) (s := Set.Icc (-ε) ε) (x := t))
-  have hAh :
-      HasDerivWithinAt
-        (fun t : Real => varDerivFlow (E := E) Ψ z t h)
-        (((fderiv Real (modelSpray (I := I) g x)
-            (varBaseFlow (E := E) Ψ z t)).comp
-          (varDerivFlow (E := E) Ψ z t)) h)
-        (Set.Icc (-ε) ε) t := by
-    simpa [ContinuousLinearMap.comp_apply] using hA.clm_apply hh
-  have herr := (hbase_zh.sub hbase_z).sub hAh
-  simpa [varError, varErrorRHS, ContinuousLinearMap.comp_apply, Z] using herr
+  simpa [varError, varErrorRHS, flowError, flowErrorRHS, Z] using
+    flowError_hasDerivWithinAt
+      (F := modelSpray (I := I) g x)
+      (Φ := varBaseFlow (E := E) Ψ)
+      (A := varDerivFlow (E := E) Ψ)
+      (z := z) (h := h) (s := Set.Icc (-ε) ε) (t := t)
+      hbase_zh hbase_z hA
 
 /-- Restrict the approximation-error ODE from the Picard time interval to a
 smaller closed interval. -/
@@ -2048,8 +2940,9 @@ theorem varBaseFlow_hasFDerivAt_of_error
       (fun z' : ModelPhase (E := E) => varBaseFlow (E := E) Ψ z' t)
       (varDerivFlow (E := E) Ψ z t)
       z := by
-  rw [hasFDerivAt_iff_isLittleO_nhds_zero]
-  simpa [varError] using herr
+  exact flow_hasFDerivAt_of_error (Φ := varBaseFlow (E := E) Ψ)
+    (A := varDerivFlow (E := E) Ψ)
+    (by simpa [flowError, varError] using herr)
 
 /-- Fixed-time C1-dependence checkpoint from an eventual Gronwall bound with a
 vanishing Taylor-residual coefficient. -/
@@ -2067,10 +2960,9 @@ theorem varBaseFlow_hasFDerivAt_of_gronwall
       (fun z' : ModelPhase (E := E) => varBaseFlow (E := E) Ψ z' t)
       (varDerivFlow (E := E) Ψ z t)
       z := by
-  apply varBaseFlow_hasFDerivAt_of_error (E := E)
-  exact isLittleO_of_gronwall_bound
-    (f := fun h : ModelPhase (E := E) => varError (E := E) Ψ z h t)
-    (C := C) (B := B) (L := L) (T := T) hC hbound
+  exact flow_hasFDerivAt_of_gronwall (Φ := varBaseFlow (E := E) Ψ)
+    (A := varDerivFlow (E := E) Ψ) (C := C) (B := B) (L := L) (T := T)
+    hC (by simpa [flowError, varError] using hbound)
 
 /-- Gronwall bound for the approximation error once the error RHS has the
 standard linear-plus-forcing estimate. -/
@@ -2094,7 +2986,18 @@ theorem varError_norm_le_gronwall
     ∀ t ∈ Set.Icc a b,
       ‖varError (E := E) Ψ z h t‖ ≤
         gronwallBound δ K ε (t - a) :=
-  norm_le_gronwallBound_of_norm_deriv_right_le hcont hderiv ha hbound
+  flowError_norm_le_gronwall
+    (F := modelSpray (I := I) g x)
+    (Φ := varBaseFlow (E := E) Ψ)
+    (A := varDerivFlow (E := E) Ψ)
+    z h (by simpa [flowError, varError] using hcont)
+    (by
+      intro t ht
+      simpa [flowError, flowErrorRHS, varError, varErrorRHS] using hderiv t ht)
+    (by simpa [flowError, varError] using ha)
+    (by
+      intro t ht
+      simpa [flowError, flowErrorRHS, varError, varErrorRHS] using hbound t ht)
 
 /-- Version of `varError_norm_le_gronwall` for derivatives known on the
 closed interval itself. -/

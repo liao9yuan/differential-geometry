@@ -1,3 +1,4 @@
+import RicciFlower.HCGCompactness.PointedRiemannian
 import RicciFlower.HCGCompactness.Basic
 import RicciFlower.HCGCompactness.PointedConvergence
 import RicciFlower.HCGCompactness.InjectivityRadius
