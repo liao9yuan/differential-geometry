@@ -1128,6 +1128,7 @@ import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.Ch
 import DifferentialGeometry.PDE.RicciFlow.Pullback.PullbackConnection
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckLinearization
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients.InverseGramPerturbation
+import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients.ChristoffelPerturbation
 import DifferentialGeometry.PDE.RicciFlow.StrictParabolicAtSelf
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.UniformChartBounds
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.Eigenbasis
