@@ -1181,6 +1181,7 @@ import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckPrincipalPart
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckNonlinearitySpectral
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.QuasilinearStrong
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.SpectralSmoothing
+import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DuhamelSmoothing
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.Bijective
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.ChartOverlapUniqueness
