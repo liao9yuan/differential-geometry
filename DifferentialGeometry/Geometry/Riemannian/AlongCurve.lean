@@ -833,6 +833,461 @@ theorem HasParallelTransportChart.linear_combination
   · -- The initial value of the linear combination matches.
     simp [h₁.2, h₂.2]
 
+/-! ## G.5.5 — Metric compatibility along a curve (chart-local)
+
+For a section `X` along `γ` written in the chart at `α`, the chart-frame
+representation of the actual tangent vector `X(t) ∈ T_{γ(t)} M` is
+`triv.symmL ℝ (γ t) (X t) = ∑_i (chartCoord i (X t)) • e_i(γ t)`, where
+`e_i(γ t) := chartBasisVecFiber α i (γ t)` is the chart-frame basis and
+`chartCoord i (X t)` is the `i`-th coordinate of `X t` in the canonical
+model basis `chartModelBasis E`.
+
+The Gram quadratic form
+`g(γ t)(X(t), Y(t)) = ∑_{i,j} G_{ij}(γ t) · Xᶜ_i(t) · Yᶜ_j(t)`
+(with `G_{ij}(γ t) = chartGramOnE g α i j (u(t))`, `u := chartCurve α γ`,
+and `Xᶜ_i := chartCoord i ∘ X`) is differentiable in `t` whenever the
+chart-curve, `X`, and `Y` are differentiable and `u(t)` lies in the
+interior of the chart target.  Its derivative is the chart-coordinate
+Leibniz expression; combined with the chart metric-compatibility identity
+`∂_k G_{ij} = ∑_l Γ^l_{ki} G_{lj} + Γ^l_{kj} G_{li}` this yields the
+covariant-derivative product rule used downstream. -/
+
+section MetricCompatibilityAlongCurve
+
+open DifferentialGeometry.Integral.DivergenceTheorem
+
+variable {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M}
+
+/-- The chart-frame coordinate of a section along the curve: the `i`-th
+coordinate of `X(t)` in the canonical model basis `chartModelBasis E`. -/
+def chartSectionCoord (X : ℝ → E) (i : Fin (Module.finrank ℝ E)) : ℝ → ℝ :=
+  fun t => chartCoord (E := E) i (X t)
+
+@[simp] lemma chartSectionCoord_def (X : ℝ → E) (i : Fin (Module.finrank ℝ E)) (t : ℝ) :
+    chartSectionCoord (E := E) X i t = chartCoord (E := E) i (X t) := rfl
+
+/-- The Gram quadratic form of two sections `V, W` along `γ`, written in
+the chart at `α`:
+`∑_{i,j} G_{ij}(u(t)) · Vᶜ_i(t) · Wᶜ_j(t)`, with `u := chartCurve α γ`. -/
+def chartGramAlongCurve (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
+    (V W : ℝ → E) (t : ℝ) : ℝ :=
+  ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+    chartGramOnE (I := I) g α i j (chartCurve (I := I) α γ t) *
+      chartCoord (E := E) i (V t) * chartCoord (E := E) j (W t)
+
+@[simp] lemma chartGramAlongCurve_def
+    (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) (V W : ℝ → E) (t : ℝ) :
+    chartGramAlongCurve (I := I) g α γ V W t =
+      ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+        chartGramOnE (I := I) g α i j (chartCurve (I := I) α γ t) *
+          chartCoord (E := E) i (V t) * chartCoord (E := E) j (W t) := rfl
+
+/-! ### Bridge: `g.inner` of the chart-frame sections equals the Gram form
+
+For `x = γ t` in the trivialization base set, the actual tangent vectors
+represented by the chart-frame coordinates `V t, W t : E` are
+`triv.symmL ℝ x (V t)` and `triv.symmL ℝ x (W t)`.  Their `g`-inner
+product is the Gram quadratic form. -/
+
+/-- A model-fibre vector `v : E` expands in the chart frame at `x` as
+`triv.symmL ℝ x v = ∑_i (chartCoord i v) • e_i(x)`. -/
+lemma symmL_eq_sum_chartBasisVecFiber
+    (α : M) {x : M}
+    (v : E) :
+    (trivializationAt E (TangentSpace I) α).symmL ℝ x v =
+      ∑ i : Fin (Module.finrank ℝ E),
+        chartCoord (E := E) i v • chartBasisVecFiber (I := I) α i x := by
+  classical
+  -- Expand `v` in the model basis, then apply the (continuous-)linear `symmL`.
+  have hv : v = ∑ i : Fin (Module.finrank ℝ E),
+      chartCoord (E := E) i v • (chartModelBasis E) i := by
+    conv_lhs => rw [← (chartModelBasis E).sum_repr v]
+    rfl
+  conv_lhs => rw [hv]
+  rw [map_sum]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [map_smul]
+  -- `symmL ℝ x (e_i) = chartBasisVecFiber α i x` by definition.
+  rfl
+
+/-- **Bridge `inner_eq_chartGramOnE_bilinear_on_baseSet`.** For `x` in the
+trivialization base set at `α`, the `g`-inner product of the chart-frame
+sections `triv.symmL ℝ x V` and `triv.symmL ℝ x W` equals the Gram
+quadratic form `∑_{i,j} G_{ij}(x) · Vᶜ_i · Wᶜ_j`, where
+`G_{ij}(x) = chartGramMatrix g α x i j`. -/
+theorem inner_eq_chartGramOnE_bilinear_on_baseSet
+    (g : SmoothRiemannianMetric I M) (α : M) {x : M}
+    (V W : E) :
+    g.inner x
+        ((trivializationAt E (TangentSpace I) α).symmL ℝ x V)
+        ((trivializationAt E (TangentSpace I) α).symmL ℝ x W) =
+      ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+        chartGramMatrix (I := I) g α x i j *
+          chartCoord (E := E) i V * chartCoord (E := E) j W := by
+  classical
+  rw [symmL_eq_sum_chartBasisVecFiber (I := I) α V,
+      symmL_eq_sum_chartBasisVecFiber (I := I) α W]
+  -- Expand the bilinear `g.inner x` over both sums via `map_sum` / `map_smul`,
+  -- exactly as in `chartGramMatrix_dotProduct_mulVec`.
+  set vfib : Fin (Module.finrank ℝ E) → TangentSpace I x :=
+    fun i => chartBasisVecFiber (I := I) α i x with hvfib
+  -- Left-linearity: pull the `∑ᵢ (chartCoord i V) • vfib i` out of `g.inner x`.
+  have hL :
+      g.inner x (∑ i, chartCoord (E := E) i V • vfib i)
+        = ∑ i, chartCoord (E := E) i V • g.inner x (vfib i) := by
+    rw [map_sum]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [map_smul]
+  rw [hL, ContinuousLinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [ContinuousLinearMap.smul_apply, smul_eq_mul]
+  -- Right-linearity on the right argument.
+  rw [map_sum, Finset.mul_sum]
+  refine Finset.sum_congr rfl (fun j _ => ?_)
+  rw [map_smul, smul_eq_mul, hvfib, chartGramMatrix_apply]
+  ring
+
+/-! ### Differentiability of the chart-coordinate functions -/
+
+/-- The chart-frame coordinate `chartCoord i ∘ X` has derivative
+`chartCoord i (X'(t))` whenever `X` is differentiable at `t`; this is the
+chain rule through the continuous-linear coordinate functional. -/
+lemma chartSectionCoord_hasDerivAt
+    {X : ℝ → E} {Xprime : ℝ → E} {t : ℝ} (i : Fin (Module.finrank ℝ E))
+    (hX : HasDerivAt X (Xprime t) t) :
+    HasDerivAt (chartSectionCoord (E := E) X i)
+      (chartCoord (E := E) i (Xprime t)) t := by
+  -- `chartCoord i = (chartModelBasis E).coord i`, a (continuous, since `E` is
+  -- finite-dimensional) linear functional `E →ₗ[ℝ] ℝ`.  Promote it to a CLM and
+  -- compose with `hX` via `HasFDerivAt.comp_hasDerivAt`.
+  set L : E →L[ℝ] ℝ :=
+    LinearMap.toContinuousLinearMap ((chartModelBasis E).coord i) with hL_def
+  have hLapply : ∀ v : E, L v = chartCoord (E := E) i v := by
+    intro v
+    rw [hL_def]
+    simp only [LinearMap.coe_toContinuousLinearMap']
+    rfl
+  have hcomp : HasDerivAt (fun s : ℝ => L (X s)) (L (Xprime t)) t :=
+    L.hasFDerivAt.comp_hasDerivAt t hX
+  -- Rewrite both the function and the derivative value through `hLapply`.
+  have hfun : (fun s : ℝ => L (X s)) = chartSectionCoord (E := E) X i := by
+    funext s; rw [hLapply, chartSectionCoord_def]
+  rw [hfun, hLapply] at hcomp
+  exact hcomp
+
+/-- The directional derivative of `chartGramOnE g α i j` at a point `y`
+along a vector `v` expands in the model basis as the `chartCoord`-weighted
+sum of the `partialDeriv`s:
+`fderiv ℝ G_{ij} y v = ∑_k (chartCoord k v) · partialDeriv k G_{ij} y`. -/
+lemma fderiv_chartGramOnE_eq_sum_partialDeriv
+    (g : SmoothRiemannianMetric I M) (α : M)
+    (i j : Fin (Module.finrank ℝ E)) (y v : E) :
+    fderiv ℝ (chartGramOnE (I := I) g α i j) y v =
+      ∑ k : Fin (Module.finrank ℝ E),
+        chartCoord (E := E) k v *
+          partialDeriv (E := E) k (chartGramOnE (I := I) g α i j) y := by
+  classical
+  -- Expand `v` in the model basis and use linearity of the Fréchet derivative.
+  have hv : v = ∑ k : Fin (Module.finrank ℝ E),
+      chartCoord (E := E) k v • (chartModelBasis E) k := by
+    conv_lhs => rw [← (chartModelBasis E).sum_repr v]
+    rfl
+  conv_lhs => rw [hv]
+  rw [map_sum]
+  refine Finset.sum_congr rfl (fun k _ => ?_)
+  rw [map_smul, smul_eq_mul]
+  rfl
+
+/-- The Gram coefficient along the curve `t ↦ G_{ij}(u(t))` has derivative
+`∑_k (chartCoord k (u'(t))) · ∂_k G_{ij}(u(t))` at `t`, provided the
+chart-curve `u = chartCurve α γ` has derivative `uPrime t` at `t` and lies
+in the interior of the chart target there (so `G_{ij}` is differentiable). -/
+lemma chartGramOnE_comp_chartCurve_hasDerivAt
+    (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
+    (i j : Fin (Module.finrank ℝ E)) {uPrime : ℝ → E} {t : ℝ}
+    (huPrime : HasDerivAt (chartCurve (I := I) α γ) (uPrime t) t)
+    (hmem : chartCurve (I := I) α γ t ∈ interior (extChartAt I α).target) :
+    HasDerivAt (fun s => chartGramOnE (I := I) g α i j (chartCurve (I := I) α γ s))
+      (∑ k : Fin (Module.finrank ℝ E),
+        chartCoord (E := E) k (uPrime t) *
+          partialDeriv (E := E) k (chartGramOnE (I := I) g α i j)
+            (chartCurve (I := I) α γ t)) t := by
+  classical
+  -- `G_{ij}` is differentiable at `u(t)` (interior of the chart target).
+  have hG_cd : ContDiffOn ℝ ∞ (chartGramOnE (I := I) g α i j)
+      (extChartAt I α).target := chartGramOnE_contDiffOn (I := I) g α i j
+  have hG_diff : DifferentiableAt ℝ (chartGramOnE (I := I) g α i j)
+      (chartCurve (I := I) α γ t) := by
+    have hint : ContDiffOn ℝ ∞ (chartGramOnE (I := I) g α i j)
+        (interior (extChartAt I α).target) := hG_cd.mono interior_subset
+    have hnhd : interior (extChartAt I α).target ∈
+        𝓝 (chartCurve (I := I) α γ t) := isOpen_interior.mem_nhds hmem
+    exact (hint.contDiffAt hnhd).differentiableAt (by simp)
+  -- Chain rule: derivative of `G_{ij} ∘ u` is `fderiv G_{ij} (u t) (u'(t))`.
+  have hchain : HasDerivAt
+      (fun s => chartGramOnE (I := I) g α i j (chartCurve (I := I) α γ s))
+      (fderiv ℝ (chartGramOnE (I := I) g α i j) (chartCurve (I := I) α γ t)
+        (uPrime t)) t :=
+    (hG_diff.hasFDerivAt.comp_hasDerivAt t huPrime)
+  rw [fderiv_chartGramOnE_eq_sum_partialDeriv (I := I) g α i j] at hchain
+  exact hchain
+
+/-! ### The Leibniz derivative formula for the Gram form along the curve -/
+
+/-- **Leibniz derivative of the chart Gram form along a curve.** For
+sections `V, W` along `γ` (in chart-frame coordinates) and a chart-curve
+`u = chartCurve α γ` differentiable at `t` with `u(t)` in the interior of
+the chart target, the Gram quadratic form
+`t ↦ ∑_{i,j} G_{ij}(u(t)) Vᶜ_i(t) Wᶜ_j(t)` has derivative
+`∑_{i,j} [ (∑_k Vᵘ_k · ∂_k G_{ij}) Vᶜ_i Wᶜ_j
+          + G_{ij} (Vᶜ_i)' Wᶜ_j
+          + G_{ij} Vᶜ_i (Wᶜ_j)' ]`,
+where `Vᵘ_k := chartCoord k (u'(t))`, `Vᶜ_i := chartCoord i (V t)`, etc. -/
+theorem chartGramAlongCurve_hasDerivAt
+    (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) (V W : ℝ → E)
+    {uPrime Vprime Wprime : ℝ → E} {t : ℝ}
+    (huPrime : HasDerivAt (chartCurve (I := I) α γ) (uPrime t) t)
+    (hmem : chartCurve (I := I) α γ t ∈ interior (extChartAt I α).target)
+    (hV : HasDerivAt V (Vprime t) t) (hW : HasDerivAt W (Wprime t) t) :
+    HasDerivAt (fun s => chartGramAlongCurve (I := I) g α γ V W s)
+      (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+        ((∑ k : Fin (Module.finrank ℝ E),
+              chartCoord (E := E) k (uPrime t) *
+                partialDeriv (E := E) k (chartGramOnE (I := I) g α i j)
+                  (chartCurve (I := I) α γ t)) *
+            chartCoord (E := E) i (V t) * chartCoord (E := E) j (W t)
+          + chartGramOnE (I := I) g α i j (chartCurve (I := I) α γ t) *
+              chartCoord (E := E) i (Vprime t) * chartCoord (E := E) j (W t)
+          + chartGramOnE (I := I) g α i j (chartCurve (I := I) α γ t) *
+              chartCoord (E := E) i (V t) * chartCoord (E := E) j (Wprime t)))
+      t := by
+  classical
+  -- Each summand `(i, j)` is a triple product `G_{ij}(u(s)) · Vᶜ_i(s) · Wᶜ_j(s)`.
+  -- We assemble its `HasDerivAt` from the three factors' derivatives.
+  have hterm : ∀ i j : Fin (Module.finrank ℝ E),
+      HasDerivAt
+        (fun s => chartGramOnE (I := I) g α i j (chartCurve (I := I) α γ s) *
+          chartCoord (E := E) i (V s) * chartCoord (E := E) j (W s))
+        ((∑ k : Fin (Module.finrank ℝ E),
+              chartCoord (E := E) k (uPrime t) *
+                partialDeriv (E := E) k (chartGramOnE (I := I) g α i j)
+                  (chartCurve (I := I) α γ t)) *
+            chartCoord (E := E) i (V t) * chartCoord (E := E) j (W t)
+          + chartGramOnE (I := I) g α i j (chartCurve (I := I) α γ t) *
+              chartCoord (E := E) i (Vprime t) * chartCoord (E := E) j (W t)
+          + chartGramOnE (I := I) g α i j (chartCurve (I := I) α γ t) *
+              chartCoord (E := E) i (V t) * chartCoord (E := E) j (Wprime t))
+        t := by
+    intro i j
+    -- The three factor derivatives.
+    have hG := chartGramOnE_comp_chartCurve_hasDerivAt (I := I) g α γ i j huPrime hmem
+    have hVi : HasDerivAt (fun s => chartCoord (E := E) i (V s))
+        (chartCoord (E := E) i (Vprime t)) t :=
+      chartSectionCoord_hasDerivAt (X := V) (Xprime := Vprime) i hV
+    have hWj : HasDerivAt (fun s => chartCoord (E := E) j (W s))
+        (chartCoord (E := E) j (Wprime t)) t :=
+      chartSectionCoord_hasDerivAt (X := W) (Xprime := Wprime) j hW
+    -- Product rule on the three factors: `(G · Vᶜ) · Wᶜ`.
+    have hGV := hG.mul hVi
+    have hGVW := hGV.mul hWj
+    -- The derivative produced by `mul` is
+    --   `((G' · Vᶜ + G · Vᶜ') · Wᶜ) + (G · Vᶜ) · Wᶜ'`; rearrange to the target.
+    convert hGVW using 2
+    ring
+  -- Sum over all `(i, j)` pairs.
+  have hsum : HasDerivAt
+      (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+        (fun s => chartGramOnE (I := I) g α i j (chartCurve (I := I) α γ s) *
+          chartCoord (E := E) i (V s) * chartCoord (E := E) j (W s)))
+      (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+        ((∑ k : Fin (Module.finrank ℝ E),
+              chartCoord (E := E) k (uPrime t) *
+                partialDeriv (E := E) k (chartGramOnE (I := I) g α i j)
+                  (chartCurve (I := I) α γ t)) *
+            chartCoord (E := E) i (V t) * chartCoord (E := E) j (W t)
+          + chartGramOnE (I := I) g α i j (chartCurve (I := I) α γ t) *
+              chartCoord (E := E) i (Vprime t) * chartCoord (E := E) j (W t)
+          + chartGramOnE (I := I) g α i j (chartCurve (I := I) α γ t) *
+              chartCoord (E := E) i (V t) * chartCoord (E := E) j (Wprime t)))
+      t :=
+    HasDerivAt.sum (fun i _ => HasDerivAt.sum (fun j _ => hterm i j))
+  -- Identify the summed function with `chartGramAlongCurve`.
+  have hfun : (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+        (fun s => chartGramOnE (I := I) g α i j (chartCurve (I := I) α γ s) *
+          chartCoord (E := E) i (V s) * chartCoord (E := E) j (W s)))
+      = (fun s => chartGramAlongCurve (I := I) g α γ V W s) := by
+    funext s
+    rw [chartGramAlongCurve_def]
+    rw [Finset.sum_apply]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [Finset.sum_apply]
+  rw [hfun] at hsum
+  exact hsum
+
+/-! ### Christoffel-split form (covariant-derivative product rule)
+
+Substituting the chart metric-compatibility identity
+`∂_k G_{ij} = ∑_l Γ^l_{ki} G_{lj} + Γ^l_{kj} G_{li}` into the metric-
+derivative term of the Leibniz formula reorganises the derivative of the
+Gram form into the covariant-derivative product rule
+`d/dt ⟨V, W⟩_G = ⟨D V/dt, W⟩_G + ⟨V, D W/dt⟩_G`,
+where `D V/dt = V' + Γ_α(u', V)`. -/
+
+/-- The `l`-th chart-coordinate of the Christoffel contraction:
+`chartCoord l (Γ_α(v, w)(y)) = ∑_{i,j} Γ^l_{ij}(y) · vⁱ · wʲ`. -/
+lemma chartCoord_chartChristoffelContraction
+    (g : SmoothRiemannianMetric I M) (α : M) (v w y : E)
+    (l : Fin (Module.finrank ℝ E)) :
+    chartCoord (E := E) l
+        (chartChristoffelContraction (I := I) g α v w y) =
+      ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+        chartChristoffel (I := I) g α i j l y *
+          chartCoord (E := E) i v * chartCoord (E := E) j w := by
+  classical
+  rw [chartChristoffelContraction_def, chartCoord, map_sum]
+  -- `repr (∑ₖ cₖ • e_k) l = ∑ₖ cₖ · (repr e_k) l = c_l` since `repr e_k = δ_k`.
+  have hbasis : ∀ k : Fin (Module.finrank ℝ E),
+      (chartModelBasis E).repr ((chartModelBasis E) k) l = if k = l then 1 else 0 := by
+    intro k
+    rw [Module.Basis.repr_self]
+    rw [Finsupp.single_apply]
+    by_cases hkl : k = l <;> simp [hkl]
+  calc
+    ∑ k : Fin (Module.finrank ℝ E),
+        (chartModelBasis E).repr
+          ((∑ i, ∑ j, chartChristoffel (I := I) g α i j k y *
+            chartCoord (E := E) i v * chartCoord (E := E) j w) •
+            chartModelBasis E k) l
+      = ∑ k : Fin (Module.finrank ℝ E),
+          (∑ i, ∑ j, chartChristoffel (I := I) g α i j k y *
+            chartCoord (E := E) i v * chartCoord (E := E) j w) *
+            ((chartModelBasis E).repr (chartModelBasis E k) l) := by
+        refine Finset.sum_congr rfl (fun k _ => ?_)
+        rw [map_smul, Finsupp.smul_apply, smul_eq_mul]
+    _ = ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+          chartChristoffel (I := I) g α i j l y *
+            chartCoord (E := E) i v * chartCoord (E := E) j w := by
+        rw [Finset.sum_eq_single l]
+        · rw [hbasis l]; simp
+        · intro k _ hkl; rw [hbasis k, if_neg hkl]; ring
+        · intro hl; exact absurd (Finset.mem_univ l) hl
+
+/-- **Covariant-derivative product rule for the chart Gram form.** With
+`u(t)` in the interior of the chart target, the derivative of the Gram
+form `t ↦ ⟨V, W⟩_G(t)` equals the sum of the Gram forms of the
+chart-covariant derivatives `D V/dt = V' + Γ_α(u', V)` against `W` and of
+`V` against `D W/dt = W' + Γ_α(u', W)`:
+`d/dt ⟨V, W⟩_G = ⟨DV/dt, W⟩_G + ⟨V, DW/dt⟩_G`. -/
+theorem chartGramAlongCurve_hasDerivAt_covariant
+    (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) (V W : ℝ → E)
+    {uPrime Vprime Wprime : ℝ → E} {t : ℝ}
+    (huPrime : HasDerivAt (chartCurve (I := I) α γ) (uPrime t) t)
+    (hmem : chartCurve (I := I) α γ t ∈ interior (extChartAt I α).target)
+    (hV : HasDerivAt V (Vprime t) t) (hW : HasDerivAt W (Wprime t) t) :
+    HasDerivAt (fun s => chartGramAlongCurve (I := I) g α γ V W s)
+      ((∑ l : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+          chartGramOnE (I := I) g α l j (chartCurve (I := I) α γ t) *
+            chartCoord (E := E) l
+              (Vprime t + chartChristoffelContraction (I := I) g α
+                (uPrime t) (V t) (chartCurve (I := I) α γ t)) *
+            chartCoord (E := E) j (W t))
+        + (∑ i : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+          chartGramOnE (I := I) g α i l (chartCurve (I := I) α γ t) *
+            chartCoord (E := E) i (V t) *
+            chartCoord (E := E) l
+              (Wprime t + chartChristoffelContraction (I := I) g α
+                (uPrime t) (W t) (chartCurve (I := I) α γ t))))
+      t := by
+  classical
+  have hbase := chartGramAlongCurve_hasDerivAt (I := I) g α γ V W
+    huPrime hmem hV hW
+  -- It suffices to rewrite the derivative value; the function is identical.
+  convert hbase using 1
+  -- The interior hypothesis guarantees `u(t) ∈ target`, hence the metric-
+  -- compatibility identity applies to each `∂_k G_{ij}(u(t))`.
+  have hmc : ∀ i j k : Fin (Module.finrank ℝ E),
+      partialDeriv (E := E) k (chartGramOnE (I := I) g α i j)
+          (chartCurve (I := I) α γ t) =
+        (∑ l : Fin (Module.finrank ℝ E),
+            chartChristoffel (I := I) g α k i l (chartCurve (I := I) α γ t) *
+              chartGramOnE (I := I) g α l j (chartCurve (I := I) α γ t)) +
+        (∑ l : Fin (Module.finrank ℝ E),
+            chartChristoffel (I := I) g α k j l (chartCurve (I := I) α γ t) *
+              chartGramOnE (I := I) g α l i (chartCurve (I := I) α γ t)) := by
+    intro i j k
+    exact DifferentialGeometry.Geometry.chartGramOnE_partialDeriv_eq_christoffel_sum_split
+      (I := I) g α i j k hmem
+  -- Abbreviations.
+  set u := chartCurve (I := I) α γ t with hu_def
+  set G : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
+    fun i j => chartGramOnE (I := I) g α i j u with hG_def
+  set Γ : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
+      Fin (Module.finrank ℝ E) → ℝ :=
+    fun i j l => chartChristoffel (I := I) g α i j l u with hΓ_def
+  set Vc : Fin (Module.finrank ℝ E) → ℝ := fun i => chartCoord (E := E) i (V t) with hVc
+  set Wc : Fin (Module.finrank ℝ E) → ℝ := fun j => chartCoord (E := E) j (W t) with hWc
+  set uc : Fin (Module.finrank ℝ E) → ℝ := fun k => chartCoord (E := E) k (uPrime t) with huc
+  set Vpc : Fin (Module.finrank ℝ E) → ℝ := fun i => chartCoord (E := E) i (Vprime t) with hVpc
+  set Wpc : Fin (Module.finrank ℝ E) → ℝ := fun j => chartCoord (E := E) j (Wprime t) with hWpc
+  -- The chart-coordinate of the covariant-derivative correction terms.
+  have hcovV : ∀ l : Fin (Module.finrank ℝ E),
+      chartCoord (E := E) l
+          (Vprime t + chartChristoffelContraction (I := I) g α (uPrime t) (V t) u)
+        = Vpc l + ∑ k, ∑ i, Γ k i l * uc k * Vc i := by
+    intro l
+    rw [chartCoord, map_add, Finsupp.add_apply]
+    congr 1
+    rw [← chartCoord]
+    rw [chartCoord_chartChristoffelContraction (I := I) g α (uPrime t) (V t) u]
+  have hcovW : ∀ l : Fin (Module.finrank ℝ E),
+      chartCoord (E := E) l
+          (Wprime t + chartChristoffelContraction (I := I) g α (uPrime t) (W t) u)
+        = Wpc l + ∑ k, ∑ j, Γ k j l * uc k * Wc j := by
+    intro l
+    rw [chartCoord, map_add, Finsupp.add_apply]
+    congr 1
+    rw [← chartCoord]
+    rw [chartCoord_chartChristoffelContraction (I := I) g α (uPrime t) (W t) u]
+  -- Rewrite the target (covariant form) into the Leibniz value.
+  -- LHS (covariant) sum, expanded via `hcovV`, `hcovW`.
+  rw [show
+      (∑ l, ∑ j, G l j * chartCoord (E := E) l
+          (Vprime t + chartChristoffelContraction (I := I) g α (uPrime t) (V t) u) * Wc j)
+        = ∑ l, ∑ j, G l j * (Vpc l + ∑ k, ∑ i, Γ k i l * uc k * Vc i) * Wc j from by
+    refine Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun j _ => ?_))
+    rw [hcovV l]]
+  rw [show
+      (∑ i, ∑ l, G i l * Vc i * chartCoord (E := E) l
+          (Wprime t + chartChristoffelContraction (I := I) g α (uPrime t) (W t) u))
+        = ∑ i, ∑ l, G i l * Vc i * (Wpc l + ∑ k, ∑ j, Γ k j l * uc k * Wc j) from by
+    refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun l _ => ?_))
+    rw [hcovW l]]
+  -- Now expand the RHS (Leibniz) metric-derivative term via `hmc`.
+  rw [show
+      (∑ i, ∑ j,
+        ((∑ k, uc k * partialDeriv (E := E) k (chartGramOnE (I := I) g α i j) u) *
+            Vc i * Wc j
+          + G i j * Vpc i * Wc j
+          + G i j * Vc i * Wpc j))
+        = ∑ i, ∑ j,
+          ((∑ k, uc k * ((∑ l, Γ k i l * G l j) + (∑ l, Γ k j l * G l i))) *
+              Vc i * Wc j
+            + G i j * Vpc i * Wc j
+            + G i j * Vc i * Wpc j) from by
+    refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
+    rw [hmc i j]] <;> try rfl
+  -- Both sides are now polynomial in the finite families `G, Γ, Vc, Wc, uc, Vpc, Wpc`.
+  -- Reduce to a Finset-sum identity provable by distributing and reindexing.
+  simp only [Finset.sum_mul, Finset.mul_sum, Finset.sum_add_distrib,
+    mul_add, add_mul]
+  -- Reorganise both sides into a common normal form: the cross Christoffel
+  -- terms match after swapping summation indices and using `G`'s symmetry only
+  -- through the contraction (no symmetry needed — the index names align).
+  ring_nf
+  -- Remaining: the two grouped triple-sum reindexings.  Use `Finset.sum_comm`
+  -- and rename via `abel`/`ring` on the scalar level after `sum_congr`.
+  sorry
+
 /-! ## Summary
 
 We have established:
