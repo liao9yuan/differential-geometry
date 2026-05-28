@@ -366,6 +366,140 @@ theorem g_inner_sqrt_uniform_upper_bound_on_compact
     nlinarith [h_norm_nn]
   linarith
 
+/-! ## Unconditional twin
+
+The headline `g_inner_sqrt_uniform_upper_bound_on_compact` reduces the bundle
+metric quadratic form `g.inner b v v` to the chart-Gram quadratic form
+`chartGramBilin g α b v v` via the locality hypothesis `h_atlas`, which forces
+the inverse chart-Jacobian to be the identity on a neighbourhood and hence
+`g.inner b v v = chartGramBilin g α b v v` there. That reduction (Steps 1–2)
+is the *only* place the locality hypothesis enters; the continuity and
+compactness machinery (Steps 3–8) is already unconditional.
+
+The chart-Gram quadratic form is, by the always-true bridge identity
+`chartGramBilin_eq_innerJinv`, the `chartJinv α b`-pullback of the bundle
+metric:
+`chartGramBilin g α b v v = g.inner b (chartJinv α b v) (chartJinv α b v)`,
+so it is non-negative everywhere and coincides with `g.inner b v v` exactly on
+the locality neighbourhood (where `chartJinv α b = id`). We therefore obtain a
+*locality-free* uniform upper bound by stating the conclusion directly for the
+chart-Gram quadratic form and re-using the unconditional continuity of
+`b ↦ chartGramBilin g α b` on the chart source. No `HasLocallyConstantChartAt`
+hypothesis, no finite-atlas hypothesis, and no compactness/boundaryless
+typeclass on `M` is required: the argument is a single application of the
+extreme-value theorem on a compact subset of one chart source. -/
+
+/-- The chart-Gram quadratic form is non-negative: it is the
+`chartJinv α b`-pullback of the bundle metric, which is non-negative by
+positive semi-definiteness of the Riemannian metric. -/
+private lemma chartGramBilin_self_nonneg
+    (g : SmoothRiemannianMetric I M) (α b : M) (v : E) :
+    0 ≤ chartGramBilin (I := I) (M := M) g α b v v := by
+  rw [chartGramBilin_eq_innerJinv (I := I) (M := M) g α b v v]
+  exact metric_inner_self_nonneg (I := I) (M := M) g b
+    (chartJinv (I := I) (M := M) α b v)
+
+/-- Pointwise upper bound on the chart-Gram quadratic form by the operator
+norm of the chart-Gram bilinear form. Holds unconditionally for every `b`
+and every `v : E`. -/
+private lemma chartGramBilin_self_le_norm_sq
+    (g : SmoothRiemannianMetric I M) (α b : M) (v : E) :
+    chartGramBilin (I := I) (M := M) g α b v v ≤
+      ‖chartGramBilin (I := I) (M := M) g α b‖ * ‖v‖ ^ 2 := by
+  have h_abs_le :
+      |chartGramBilin (I := I) (M := M) g α b v v| ≤
+        ‖chartGramBilin (I := I) (M := M) g α b‖ * ‖v‖ * ‖v‖ := by
+    have h := (chartGramBilin (I := I) (M := M) g α b).le_opNorm₂ v v
+    simpa [Real.norm_eq_abs] using h
+  calc chartGramBilin (I := I) (M := M) g α b v v
+      ≤ |chartGramBilin (I := I) (M := M) g α b v v| := le_abs_self _
+    _ ≤ ‖chartGramBilin (I := I) (M := M) g α b‖ * ‖v‖ * ‖v‖ := h_abs_le
+    _ = ‖chartGramBilin (I := I) (M := M) g α b‖ * ‖v‖ ^ 2 := by ring
+
+/-- **Locality-free uniform upper bound on the chart-Gram quadratic form over a
+compact base set.**
+
+For any chart base point `α` and any compact `K_base ⊆ (chartAt H α).source`,
+there is `K > 0` with
+`√(chartGramBilin g α b v v) ≤ K · ‖v‖` for all `b ∈ K_base` and all `v : E`.
+
+This is the unconditional twin of `g_inner_sqrt_uniform_upper_bound_on_compact`:
+on the locality neighbourhood (where `chartJinv α b = id`) the chart-Gram
+quadratic form coincides with `g.inner b v v`, so this recovers the headline
+bound whenever the locality hypothesis would have applied — but it requires no
+`HasLocallyConstantChartAt` hypothesis. The chart-Gram form is, by
+`chartGramBilin_eq_innerJinv`, the `chartJinv α b`-pullback of the bundle
+metric `g.inner b`. -/
+theorem g_inner_sqrt_uniform_upper_bound_on_compact_unconditional
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {K_base : Set M} (hK_base : IsCompact K_base)
+    (hK_sub : K_base ⊆ (chartAt H α).source) :
+    ∃ K : ℝ, 0 < K ∧ ∀ b ∈ K_base, ∀ v : E,
+      Real.sqrt (chartGramBilin (I := I) (M := M) g α b v v) ≤ K * ‖v‖ := by
+  classical
+  -- Uniform operator-norm bound for `b ↦ chartGramBilin g α b` on `K_base`,
+  -- via the (unconditional) continuity of `b ↦ chartGramBilin g α b` on the
+  -- chart source. We re-key `exists_norm_bound_on_compact_subset_of_chartSource`
+  -- onto the *centre* `α` itself: the continuity lemma
+  -- `chartGramBilin_continuousOn_chartSource` already produces an op-norm bound
+  -- on any compact subset of `(chartAt H α).source`, with no locality input.
+  obtain ⟨C, hC_nn, h_norm_bound⟩ :=
+    exists_norm_bound_on_compact_subset_of_chartSource
+      (I := I) (M := M) g α hK_base hK_sub
+  -- Take `K := √C + 1`; strictly positive and majorises `√(chartGramBilin …)`.
+  refine ⟨Real.sqrt C + 1, ?_, ?_⟩
+  · have h_sqrt_nn : 0 ≤ Real.sqrt C := Real.sqrt_nonneg _
+    linarith
+  intro b hb v
+  -- Pointwise quadratic-form bound at `b`.
+  have h_norm_le : ‖chartGramBilin (I := I) (M := M) g α b‖ ≤ C :=
+    h_norm_bound b hb
+  have h_norm_sq_nn : 0 ≤ ‖v‖ ^ 2 := sq_nonneg _
+  have h_sq_bound :
+      chartGramBilin (I := I) (M := M) g α b v v ≤ C * ‖v‖ ^ 2 := by
+    refine (chartGramBilin_self_le_norm_sq (I := I) (M := M) g α b v).trans ?_
+    exact mul_le_mul_of_nonneg_right h_norm_le h_norm_sq_nn
+  -- Take square roots.
+  have h_norm_nn : 0 ≤ ‖v‖ := norm_nonneg _
+  have h_sqrt_le :
+      Real.sqrt (chartGramBilin (I := I) (M := M) g α b v v) ≤
+        Real.sqrt (C * ‖v‖ ^ 2) :=
+    Real.sqrt_le_sqrt h_sq_bound
+  have h_sqrt_prod : Real.sqrt (C * ‖v‖ ^ 2) = Real.sqrt C * ‖v‖ := by
+    rw [Real.sqrt_mul hC_nn, Real.sqrt_sq h_norm_nn]
+  rw [h_sqrt_prod] at h_sqrt_le
+  have h_step : Real.sqrt C * ‖v‖ ≤ (Real.sqrt C + 1) * ‖v‖ := by
+    have h_sqrt_nn : 0 ≤ Real.sqrt C := Real.sqrt_nonneg _
+    nlinarith [h_norm_nn]
+  linarith
+
+/-- **Locality-free uniform upper bound on the bundle metric quadratic form
+over a compact base set, in the chart frame.**
+
+Reformulation of `g_inner_sqrt_uniform_upper_bound_on_compact_unconditional`
+through the always-true bridge identity `chartGramBilin_eq_innerJinv`:
+for any chart base point `α` and any compact `K_base ⊆ (chartAt H α).source`,
+there is `K > 0` with
+`√(g.inner b (chartJinv α b v) (chartJinv α b v)) ≤ K · ‖v‖`
+for all `b ∈ K_base` and all `v : E`. On the locality neighbourhood
+(`chartJinv α b = id`) this is exactly the headline bound
+`√(g.inner b v v) ≤ K · ‖v‖`, but it carries no locality hypothesis. -/
+theorem g_inner_chartJinv_sqrt_uniform_upper_bound_on_compact_unconditional
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {K_base : Set M} (hK_base : IsCompact K_base)
+    (hK_sub : K_base ⊆ (chartAt H α).source) :
+    ∃ K : ℝ, 0 < K ∧ ∀ b ∈ K_base, ∀ v : E,
+      Real.sqrt (g.inner b
+          (chartJinv (I := I) (M := M) α b v)
+          (chartJinv (I := I) (M := M) α b v)) ≤ K * ‖v‖ := by
+  obtain ⟨K, hK_pos, h⟩ :=
+    g_inner_sqrt_uniform_upper_bound_on_compact_unconditional
+      (I := I) (M := M) g α hK_base hK_sub
+  refine ⟨K, hK_pos, ?_⟩
+  intro b hb v
+  rw [← chartGramBilin_eq_innerJinv (I := I) (M := M) g α b v v]
+  exact h b hb v
+
 end TensorSpectral
 end Parabolic
 end Analysis
