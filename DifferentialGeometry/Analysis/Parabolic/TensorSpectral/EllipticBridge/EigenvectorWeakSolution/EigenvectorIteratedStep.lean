@@ -233,6 +233,35 @@ private lemma density_mul_eigenvectorChartIteratedStep_eq_indicator_numerator
     field_simp
   · rw [Set.indicator_of_notMem hy_K, Set.indicator_of_notMem hy_K, mul_zero]
 
+/-- **Chart-locality-free twin of
+`density_mul_eigenvectorChartIteratedStep_eq_indicator_numerator`.** On the chart
+target, `densityOnEuclid g α · eigenvectorChartIteratedStep_unconditional` equals
+the indicator of the compact partition-of-unity kernel `chartPouKernel α` of the
+chart-locality-free standalone-step numerator. Re-keyed onto the
+intrinsic-compactness eigenvector; the proof body transfers verbatim. -/
+private lemma density_mul_eigenvectorChartIteratedStep_eq_indicator_numerator_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
+    (dirs : Fin m → Fin (Module.finrank ℝ E))
+    (fChartEffPrev : EuclN → ℝ)
+    (l : Fin (Module.finrank ℝ E))
+    (y : EuclN) (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
+    densityOnEuclid (I := I) g α y *
+        eigenvectorChartIteratedStep_unconditional (I := I) (M := M)
+          g r s i α P₀ m dirs fChartEffPrev l y =
+      Set.indicator (chartPouKernel (I := I) (M := M) α)
+        (fun z => eigenvectorChartIteratedStepNumerator_unconditional (I := I) (M := M)
+          g r s i α P₀ m dirs fChartEffPrev l z) y := by
+  classical
+  rw [eigenvectorChartIteratedStep_unconditional]
+  by_cases hy_K : y ∈ chartPouKernel (I := I) (M := M) α
+  · rw [Set.indicator_of_mem hy_K, Set.indicator_of_mem hy_K]
+    have h_pos : 0 < densityOnEuclid (I := I) g α y :=
+      densityOnEuclid_pos (I := I) g α hy
+    field_simp
+  · rw [Set.indicator_of_notMem hy_K, Set.indicator_of_notMem hy_K, mul_zero]
+
 /-! ## IBP for the previous-level effective source `fChartEff` in direction `l` -/
 
 /-- Integration by parts for the level-`m` effective source `fChartEffPrev` (in
@@ -368,6 +397,101 @@ private theorem ibp_principal_pair
   rw [h_snoc_cons] at h_ibp
   exact h_ibp
 
+/-- **Chart-locality-free twin of `ibp_principal_pair`.** Re-keyed onto the
+intrinsic-compactness eigenvector via `eigenvectorChartIteratedPartial_unconditional`
+and `eigenvector_per_pair_ibp_unconditional`; the chart-component regularity input
+is the chart-`H^{m+2}` of the chart-locality-free chart component
+`eigenvectorChartComponentFun_ofCompact`. The proof body transfers verbatim. -/
+private theorem ibp_principal_pair_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
+    (dirs : Fin m → Fin (Module.finrank ℝ E))
+    (h_chart_H_m_plus_2 :
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
+        (d := Module.finrank ℝ E) (m + 2) 2
+        (eigenvectorChartComponentFun_ofCompact (I := I) (M := M) g r s i α P₀)
+        (chartTargetEuclid (I := I) (M := M) α))
+    (l : Fin (Module.finrank ℝ E))
+    (a j : Fin (Module.finrank ℝ E))
+    {ψ : EuclN → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
+    (hψ_cs : HasCompactSupport ψ)
+    (hψ_supp : tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α) :
+    (∫ y in chartTargetEuclid (I := I) (M := M) α,
+        weightedInvGramOnEuclid (I := I) g α a j y *
+          eigenvectorChartIteratedPartial_unconditional (I := I) (M := M) g r s i α P₀
+            (m + 1) (Fin.cons a dirs) y *
+          (fderiv ℝ (fun z : EuclN =>
+            (fderiv ℝ ψ z) (EuclideanSpace.single l 1)) y)
+              (EuclideanSpace.single j 1)
+        ∂(volume : Measure EuclN))
+    = -((∫ y in chartTargetEuclid (I := I) (M := M) α,
+          (fderiv ℝ (weightedInvGramOnEuclid (I := I) g α a j) y)
+              (EuclideanSpace.single l 1) *
+            eigenvectorChartIteratedPartial_unconditional (I := I) (M := M) g r s i α P₀
+              (m + 1) (Fin.cons a dirs) y *
+            (fderiv ℝ ψ y) (EuclideanSpace.single j 1)
+          ∂(volume : Measure EuclN))
+      + (∫ y in chartTargetEuclid (I := I) (M := M) α,
+          weightedInvGramOnEuclid (I := I) g α a j y *
+            eigenvectorChartIteratedPartial_unconditional (I := I) (M := M) g r s i α P₀
+              (m + 2) (Fin.cons a (Fin.snoc dirs l)) y *
+            (fderiv ℝ ψ y) (EuclideanSpace.single j 1)
+          ∂(volume : Measure EuclN))) := by
+  classical
+  set ψ_j : EuclN → ℝ := fun y => (fderiv ℝ ψ y) (EuclideanSpace.single j 1)
+    with hψ_j_def
+  have hψ_j_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ_j :=
+    contDiff_fderiv_apply_single (ψ := ψ) hψ_smooth j
+  have hψ_j_cs : HasCompactSupport ψ_j :=
+    hasCompactSupport_fderiv_apply_single (ψ := ψ) hψ_cs j
+  have hψ_j_supp : tsupport ψ_j ⊆ chartTargetEuclid (I := I) (M := M) α :=
+    (tsupport_fderiv_apply_single_subset ψ j).trans hψ_supp
+  have h_schwarz : ∀ y : EuclN,
+      (fderiv ℝ (fun z : EuclN =>
+        (fderiv ℝ ψ z) (EuclideanSpace.single l 1)) y)
+          (EuclideanSpace.single j 1) =
+      (fderiv ℝ ψ_j y) (EuclideanSpace.single l 1) := by
+    intro y
+    change (fderiv ℝ
+        (fun z : EuclN => (fderiv ℝ ψ z) (EuclideanSpace.single l 1)) y)
+          (EuclideanSpace.single j 1) =
+      (fderiv ℝ
+        (fun z : EuclN => (fderiv ℝ ψ z) (EuclideanSpace.single j 1)) y)
+          (EuclideanSpace.single l 1)
+    exact fderiv_apply_single_swap (ψ := ψ) hψ_smooth y j l
+  have h_lhs_schwarz :
+      (∫ y in chartTargetEuclid (I := I) (M := M) α,
+          weightedInvGramOnEuclid (I := I) g α a j y *
+            eigenvectorChartIteratedPartial_unconditional (I := I) (M := M) g r s i α P₀
+              (m + 1) (Fin.cons a dirs) y *
+            (fderiv ℝ (fun z : EuclN =>
+              (fderiv ℝ ψ z) (EuclideanSpace.single l 1)) y)
+                (EuclideanSpace.single j 1)
+          ∂(volume : Measure EuclN)) =
+      (∫ y in chartTargetEuclid (I := I) (M := M) α,
+          weightedInvGramOnEuclid (I := I) g α a j y *
+            eigenvectorChartIteratedPartial_unconditional (I := I) (M := M) g r s i α P₀
+              (m + 1) (Fin.cons a dirs) y *
+            (fderiv ℝ ψ_j y) (EuclideanSpace.single l 1)
+          ∂(volume : Measure EuclN)) := by
+    refine setIntegral_congr_fun
+      (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
+      (fun y _ => ?_)
+    rw [h_schwarz y]
+  rw [h_lhs_schwarz]
+  have h_ibp := eigenvector_per_pair_ibp_unconditional
+    (I := I) (M := M) g r s i α P₀ (m + 1) (Fin.cons a dirs)
+    h_chart_H_m_plus_2
+    (weightedInvGramOnEuclid_contDiffOn (I := I) g α a j)
+    hψ_j_smooth hψ_j_cs hψ_j_supp l
+  have h_snoc_cons :
+      Fin.snoc (α := fun _ => Fin (Module.finrank ℝ E)) (Fin.cons a dirs) l =
+        Fin.cons a (Fin.snoc dirs l) :=
+    snoc_cons_eq_cons_snoc (β := Fin (Module.finrank ℝ E)) a dirs l
+  rw [h_snoc_cons] at h_ibp
+  exact h_ibp
+
 /-! ## LHS mass IBP (in `l`) -/
 
 private theorem ibp_mass
@@ -405,6 +529,46 @@ private theorem ibp_mass
             ψ y
           ∂(volume : Measure EuclN))) :=
   eigenvector_per_pair_ibp (I := I) (M := M) g r s h_atlas i α P₀ m dirs
+    h_chart_H_m_plus_1 (densityOnEuclid_contDiffOn (I := I) g α)
+    hψ_smooth hψ_cs hψ_supp l
+
+/-- **Chart-locality-free twin of `ibp_mass`.** Re-keyed onto the
+intrinsic-compactness eigenvector via `eigenvectorChartIteratedPartial_unconditional`
+and `eigenvector_per_pair_ibp_unconditional`. The proof body transfers verbatim. -/
+private theorem ibp_mass_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
+    (dirs : Fin m → Fin (Module.finrank ℝ E))
+    (h_chart_H_m_plus_1 :
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
+        (d := Module.finrank ℝ E) (m + 1) 2
+        (eigenvectorChartComponentFun_ofCompact (I := I) (M := M) g r s i α P₀)
+        (chartTargetEuclid (I := I) (M := M) α))
+    (l : Fin (Module.finrank ℝ E))
+    {ψ : EuclN → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
+    (hψ_cs : HasCompactSupport ψ)
+    (hψ_supp : tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α) :
+    (∫ y in chartTargetEuclid (I := I) (M := M) α,
+        densityOnEuclid (I := I) g α y *
+          eigenvectorChartIteratedPartial_unconditional (I := I) (M := M) g r s i α P₀
+            m dirs y *
+          (fderiv ℝ ψ y) (EuclideanSpace.single l 1)
+        ∂(volume : Measure EuclN))
+    = -((∫ y in chartTargetEuclid (I := I) (M := M) α,
+          (fderiv ℝ (densityOnEuclid (I := I) g α) y)
+              (EuclideanSpace.single l 1) *
+            eigenvectorChartIteratedPartial_unconditional (I := I) (M := M) g r s i α P₀
+              m dirs y *
+            ψ y
+          ∂(volume : Measure EuclN))
+      + (∫ y in chartTargetEuclid (I := I) (M := M) α,
+          densityOnEuclid (I := I) g α y *
+            eigenvectorChartIteratedPartial_unconditional (I := I) (M := M) g r s i α P₀
+              (m + 1) (Fin.snoc dirs l) y *
+            ψ y
+          ∂(volume : Measure EuclN))) :=
+  eigenvector_per_pair_ibp_unconditional (I := I) (M := M) g r s i α P₀ m dirs
     h_chart_H_m_plus_1 (densityOnEuclid_contDiffOn (I := I) g α)
     hψ_smooth hψ_cs hψ_supp l
 
@@ -448,6 +612,56 @@ private theorem ibp_inner_j
   classical
   have h_ibp := eigenvector_per_pair_ibp
     (I := I) (M := M) g r s h_atlas i α P₀ (m + 1) (Fin.cons a dirs)
+    h_chart_H_m_plus_2
+    (weightedInvGramDerivOnEuclid_contDiffOn (I := I) g α a j l)
+    hψ_smooth hψ_cs hψ_supp j
+  have h_snoc_cons :
+      Fin.snoc (α := fun _ => Fin (Module.finrank ℝ E)) (Fin.cons a dirs) j =
+        Fin.cons a (Fin.snoc dirs j) :=
+    snoc_cons_eq_cons_snoc (β := Fin (Module.finrank ℝ E)) a dirs j
+  rw [h_snoc_cons] at h_ibp
+  exact h_ibp
+
+/-- **Chart-locality-free twin of `ibp_inner_j`.** Re-keyed onto the
+intrinsic-compactness eigenvector via `eigenvectorChartIteratedPartial_unconditional`
+and `eigenvector_per_pair_ibp_unconditional`. The proof body transfers verbatim. -/
+private theorem ibp_inner_j_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
+    (dirs : Fin m → Fin (Module.finrank ℝ E))
+    (h_chart_H_m_plus_2 :
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
+        (d := Module.finrank ℝ E) (m + 2) 2
+        (eigenvectorChartComponentFun_ofCompact (I := I) (M := M) g r s i α P₀)
+        (chartTargetEuclid (I := I) (M := M) α))
+    (l : Fin (Module.finrank ℝ E))
+    (a j : Fin (Module.finrank ℝ E))
+    {ψ : EuclN → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
+    (hψ_cs : HasCompactSupport ψ)
+    (hψ_supp : tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α) :
+    (∫ y in chartTargetEuclid (I := I) (M := M) α,
+        weightedInvGramDerivOnEuclid (I := I) g α a j l y *
+          eigenvectorChartIteratedPartial_unconditional (I := I) (M := M) g r s i α P₀
+            (m + 1) (Fin.cons a dirs) y *
+          (fderiv ℝ ψ y) (EuclideanSpace.single j 1)
+        ∂(volume : Measure EuclN))
+    = -((∫ y in chartTargetEuclid (I := I) (M := M) α,
+          (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a j l) y)
+              (EuclideanSpace.single j 1) *
+            eigenvectorChartIteratedPartial_unconditional (I := I) (M := M) g r s i α P₀
+              (m + 1) (Fin.cons a dirs) y *
+            ψ y
+          ∂(volume : Measure EuclN))
+      + (∫ y in chartTargetEuclid (I := I) (M := M) α,
+          weightedInvGramDerivOnEuclid (I := I) g α a j l y *
+            eigenvectorChartIteratedPartial_unconditional (I := I) (M := M) g r s i α P₀
+              (m + 2) (Fin.cons a (Fin.snoc dirs j)) y *
+            ψ y
+          ∂(volume : Measure EuclN))) := by
+  classical
+  have h_ibp := eigenvector_per_pair_ibp_unconditional
+    (I := I) (M := M) g r s i α P₀ (m + 1) (Fin.cons a dirs)
     h_chart_H_m_plus_2
     (weightedInvGramDerivOnEuclid_contDiffOn (I := I) g α a j l)
     hψ_smooth hψ_cs hψ_supp j
@@ -1264,6 +1478,754 @@ noncomputable def eigenvectorIteratedTensorChartBilinearData_step
               - (densityDerivOnEuclid (I := I) g α l y *
                 eigenvectorChartIteratedPartial (I := I) (M := M)
                   g r s h_atlas i α P₀ m D_m.directions y * ψ y)
+              ∂(volume : Measure EuclN)) = _
+          rw [MeasureTheory.integral_neg]
+        have h_int_f_D : (∫ y in Ω, f_D y ∂(volume : Measure EuclN)) = N_D := rfl
+        have h_int_f_E : (∫ y in Ω, f_E y ∂(volume : Measure EuclN)) = N_E := rfl
+        rw [h_int_f_A, h_int_f_B, h_int_f_C, h_int_f_D, h_int_f_E]
+        ring
+      -- Step 9: combine.
+      change LHS_principal_new + N_mass_new = I_step_RHS
+      rw [h_LHS_principal_new_eq, h_step_RHS_eq_num, h_numer_decomp]
+      linarith)
+
+set_option maxHeartbeats 4000000 in
+/-- **Chart-locality-free iterated step for the standalone iterated divergence-form
+datum.** Chart-locality-free twin of `eigenvectorIteratedTensorChartBilinearData_step`,
+re-keyed onto the intrinsic-compactness eigenvector
+`tensorResolventEigenbasisVec_ofCompact (tensorResolventL2_isCompactOperator_intrinsic g r s) i`.
+
+Given a level-`m` datum `D_m :
+eigenvectorIteratedTensorChartBilinearData_unconditional g r s i α P₀ m`, a new
+direction `l`, the chart-component regularity inputs `MemWkp (m + 1) 2` and
+`MemWkp (m + 2) 2` of the chart-locality-free chart component
+`eigenvectorChartComponentFun_ofCompact` on the chart target, the `MemW1p 2`
+regularity of the level-`m` effective source `D_m.fChartEff`, and the
+a.e.-vanishing of `D_m.fChartEff` off the compact partition-of-unity kernel, this
+constructs the level-`(m + 1)` datum.
+
+The new direction multi-index is `Fin.snoc D_m.directions l`; the new effective
+`L²` source is `eigenvectorChartIteratedStep_unconditional g r s i α P₀ m
+D_m.directions D_m.fChartEff l`, whose weighted-`L²` regularity is the
+unconditional committed fact
+`eigenvectorChartIteratedStep_unconditional_memLp_two_weighted`.
+
+The proof body transfers verbatim from `eigenvectorIteratedTensorChartBilinearData_step`. -/
+noncomputable def eigenvectorIteratedTensorChartBilinearData_step_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s) {m : ℕ}
+    (D_m : eigenvectorIteratedTensorChartBilinearData_unconditional (I := I) (M := M)
+      g r s i α P₀ m)
+    (l : Fin (Module.finrank ℝ E))
+    (h_chart_H_m_plus_1 :
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
+        (d := Module.finrank ℝ E) (m + 1) 2
+        (eigenvectorChartComponentFun_ofCompact (I := I) (M := M) g r s i α P₀)
+        (chartTargetEuclid (I := I) (M := M) α))
+    (h_chart_H_m_plus_2 :
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
+        (d := Module.finrank ℝ E) (m + 2) 2
+        (eigenvectorChartComponentFun_ofCompact (I := I) (M := M) g r s i α P₀)
+        (chartTargetEuclid (I := I) (M := M) α))
+    (h_fChartEff_memW1p :
+      DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 D_m.fChartEff
+        (chartTargetEuclid (I := I) (M := M) α))
+    (h_fChartEff_ae_zero_off_K :
+      D_m.fChartEff =ᵐ[(volume : Measure EuclN).restrict
+        (chartTargetEuclid (I := I) (M := M) α \
+          chartPouKernel (I := I) (M := M) α)]
+        (fun _ : EuclN => (0 : ℝ))) :
+    eigenvectorIteratedTensorChartBilinearData_unconditional (I := I) (M := M)
+      g r s i α P₀ (m + 1) :=
+  eigenvectorIteratedTensorChartBilinearData_unconditional.mk_from_hypotheses
+    (Fin.snoc D_m.directions l)
+    (eigenvectorChartIteratedStep_unconditional (I := I) (M := M)
+      g r s i α P₀ m D_m.directions D_m.fChartEff l)
+    (eigenvectorChartIteratedStep_unconditional_memLp_two_weighted (I := I) (M := M)
+      g r s i α P₀ m D_m.directions
+      D_m.fChartEff_memLp_weighted l)
+    (by
+      classical
+      intro ψ hψ_smooth hψ_cs hψ_supp
+      set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
+      have hΩ_open : IsOpen Ω := chartTargetEuclid_isOpen (I := I) (M := M) α
+      have hΩ_meas : MeasurableSet Ω := hΩ_open.measurableSet
+      set Kα : Set EuclN := chartPouKernel (I := I) (M := M) α with hKα_def
+      have hKα_compact : IsCompact Kα :=
+        chartPouKernel_isCompact (I := I) (M := M) α
+      have hKα_meas : MeasurableSet Kα :=
+        chartPouKernel_measurableSet (I := I) (M := M) α
+      have hKα_in : Kα ⊆ Ω :=
+        chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α
+      have hΩ_diff_Kα_open : IsOpen (Ω \ Kα) := hΩ_open.sdiff hKα_compact.isClosed
+      have hΩ_diff_Kα_meas : MeasurableSet (Ω \ Kα) := hΩ_diff_Kα_open.measurableSet
+      -- Step 1: apply the level-`m` identity to `ψ_l = ∂_l ψ`.
+      set ψ_l : EuclN → ℝ := fun y =>
+        (fderiv ℝ ψ y) (EuclideanSpace.single l 1) with hψ_l_def
+      have hψ_l_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ_l :=
+        contDiff_fderiv_apply_single (ψ := ψ) hψ_smooth l
+      have hψ_l_cs : HasCompactSupport ψ_l :=
+        hasCompactSupport_fderiv_apply_single (ψ := ψ) hψ_cs l
+      have hψ_l_supp : tsupport ψ_l ⊆ Ω :=
+        (tsupport_fderiv_apply_single_subset ψ l).trans hψ_supp
+      have h_level_m :=
+        D_m.m_diff_variational_identity ψ_l hψ_l_smooth hψ_l_cs hψ_l_supp
+      -- Step 2: per-pair IBP rewriting.
+      set A_pair : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
+        fun a j =>
+          ∫ y in Ω,
+            (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a j l) y)
+                (EuclideanSpace.single j 1) *
+              eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+                g r s i α P₀ (m + 1) (Fin.cons a D_m.directions) y *
+              ψ y
+            ∂(volume : Measure EuclN) with hA_pair_def
+      set B_pair : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
+        fun a j =>
+          ∫ y in Ω,
+            weightedInvGramDerivOnEuclid (I := I) g α a j l y *
+              eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+                g r s i α P₀ (m + 2) (Fin.cons a (Fin.snoc D_m.directions j)) y *
+              ψ y
+            ∂(volume : Measure EuclN) with hB_pair_def
+      set PR_pair : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
+        fun a j =>
+          ∫ y in Ω,
+            weightedInvGramOnEuclid (I := I) g α a j y *
+              eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+                g r s i α P₀ (m + 2) (Fin.cons a (Fin.snoc D_m.directions l)) y *
+              (fderiv ℝ ψ y) (EuclideanSpace.single j 1)
+            ∂(volume : Measure EuclN) with hPR_pair_def
+      set INT_LHS_m_pair : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
+        fun a j =>
+          ∫ y in Ω,
+            weightedInvGramOnEuclid (I := I) g α a j y *
+              eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+                g r s i α P₀ (m + 1) (Fin.cons a D_m.directions) y *
+              (fderiv ℝ ψ_l y) (EuclideanSpace.single j 1)
+            ∂(volume : Measure EuclN) with hINT_LHS_m_pair_def
+      have h_principal_pair : ∀ a j : Fin (Module.finrank ℝ E),
+          INT_LHS_m_pair a j = A_pair a j + B_pair a j - PR_pair a j := by
+        intro a j
+        have h_pp := ibp_principal_pair_unconditional (I := I) (M := M)
+          g r s i α P₀ m D_m.directions
+          h_chart_H_m_plus_2 l a j hψ_smooth hψ_cs hψ_supp
+        have h_inner := ibp_inner_j_unconditional (I := I) (M := M)
+          g r s i α P₀ m D_m.directions
+          h_chart_H_m_plus_2 l a j hψ_smooth hψ_cs hψ_supp
+        have h_pp' : INT_LHS_m_pair a j =
+            -((∫ y in Ω,
+                weightedInvGramDerivOnEuclid (I := I) g α a j l y *
+                  eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+                    g r s i α P₀ (m + 1) (Fin.cons a D_m.directions) y *
+                  (fderiv ℝ ψ y) (EuclideanSpace.single j 1)
+                ∂(volume : Measure EuclN))
+              + PR_pair a j) := h_pp
+        rw [h_pp', h_inner]
+        ring
+      -- Compact tsupport setup.
+      set K : Set EuclN := tsupport ψ with hK_def
+      have hK_compact : IsCompact K := hψ_cs
+      have hK_meas : MeasurableSet K := (isClosed_tsupport ψ).measurableSet
+      have hK_in : K ⊆ Ω := hψ_supp
+      -- Continuity helpers.
+      have h_aij_cont : ∀ a j : Fin (Module.finrank ℝ E),
+          ContinuousOn (weightedInvGramOnEuclid (I := I) g α a j) Ω :=
+        fun a j => (weightedInvGramOnEuclid_contDiffOn (I := I) g α a j).continuousOn
+      have h_daij_cont : ∀ a j : Fin (Module.finrank ℝ E),
+          ContinuousOn (weightedInvGramDerivOnEuclid (I := I) g α a j l) Ω :=
+        fun a j =>
+          (weightedInvGramDerivOnEuclid_contDiffOn (I := I) g α a j l).continuousOn
+      have h_dens_cont : ContinuousOn (densityOnEuclid (I := I) g α) Ω :=
+        densityOnEuclid_continuousOn (I := I) g α
+      have h_dens_deriv_cont : ContinuousOn
+          (densityDerivOnEuclid (I := I) g α l) Ω :=
+        (densityDerivOnEuclid_contDiffOn (I := I) g α l).continuousOn
+      have h_aij_fderiv_cont : ∀ a j : Fin (Module.finrank ℝ E),
+          ContinuousOn (fun y : EuclN =>
+            (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a j l) y)
+              (EuclideanSpace.single j 1)) Ω := by
+        intro a j
+        have h_diffOn :
+            ContDiffOn ℝ (⊤ : ℕ∞) (weightedInvGramDerivOnEuclid (I := I) g α a j l) Ω :=
+          weightedInvGramDerivOnEuclid_contDiffOn (I := I) g α a j l
+        have h_fderiv_diff :
+            ContDiffOn ℝ (⊤ : ℕ∞)
+              (fun y => fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a j l) y) Ω :=
+          ((contDiffOn_infty_iff_fderiv_of_isOpen hΩ_open).1 h_diffOn).2
+        have h_eval : ContDiff ℝ (⊤ : ℕ∞)
+            (fun (L : EuclN →L[ℝ] ℝ) => L (EuclideanSpace.single j 1)) :=
+          (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single j (1 : ℝ))).contDiff
+        exact (h_eval.contDiffOn.comp h_fderiv_diff (mapsTo_univ _ _)).continuousOn
+      have hψ_cont : Continuous ψ := hψ_smooth.continuous
+      have hψ_supp_K : tsupport ψ ⊆ K := le_refl _
+      have hψ_partial_cont : ∀ j : Fin (Module.finrank ℝ E),
+          Continuous (fun y : EuclN => (fderiv ℝ ψ y) (EuclideanSpace.single j 1)) :=
+        fun j => (hψ_smooth.continuous_fderiv (by simp)).clm_apply continuous_const
+      have hψ_partial_supp : ∀ j : Fin (Module.finrank ℝ E),
+          tsupport (fun y : EuclN => (fderiv ℝ ψ y) (EuclideanSpace.single j 1)) ⊆ K :=
+        fun j => tsupport_fderiv_apply_single_subset ψ j
+      have hψ_l_partial_cont : ∀ j : Fin (Module.finrank ℝ E),
+          Continuous (fun y : EuclN => (fderiv ℝ ψ_l y) (EuclideanSpace.single j 1)) :=
+        fun j => (hψ_l_smooth.continuous_fderiv (by simp)).clm_apply continuous_const
+      have hψ_l_partial_supp : ∀ j : Fin (Module.finrank ℝ E),
+          tsupport (fun y : EuclN => (fderiv ℝ ψ_l y) (EuclideanSpace.single j 1)) ⊆ K :=
+        fun j =>
+          (tsupport_fderiv_apply_single_subset ψ_l j).trans
+            (tsupport_fderiv_apply_single_subset ψ l)
+      -- `K` has finite volume.
+      have hvolK_finite : (volume : Measure EuclN) K < (⊤ : ℝ≥0∞) :=
+        hK_compact.measure_lt_top
+      have hvolK_finite' :
+          (volume.restrict K : Measure EuclN) Set.univ < (⊤ : ℝ≥0∞) := by
+        rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter]
+        exact hvolK_finite
+      haveI : IsFiniteMeasure ((volume : Measure EuclN).restrict K) :=
+        ⟨hvolK_finite'⟩
+      -- The restricted-volume identity on `K`.
+      have h_restrict_K_eq : ((volume : Measure EuclN).restrict Ω).restrict K =
+          (volume : Measure EuclN).restrict K := by
+        rw [Measure.restrict_restrict hK_meas]; congr 1
+        exact Set.inter_eq_self_of_subset_left hK_in
+      -- Local L² integrability on `K`.
+      have h_M_m_int : IntegrableOn
+          (eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+            g r s i α P₀ m D_m.directions) K (volume : Measure EuclN) := by
+        have h := (eigenvectorChartIteratedPartial_unconditional_memLp_volume (I := I) (M := M)
+          g r s i α P₀ m D_m.directions).restrict K
+        rw [h_restrict_K_eq] at h
+        exact h.integrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
+      have h_M_m1_int : ∀ idx : Fin (m + 1) → Fin (Module.finrank ℝ E),
+          IntegrableOn
+            (eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+              g r s i α P₀ (m + 1) idx)
+            K (volume : Measure EuclN) := by
+        intro idx
+        have h := (eigenvectorChartIteratedPartial_unconditional_memLp_volume (I := I) (M := M)
+          g r s i α P₀ (m + 1) idx).restrict K
+        rw [h_restrict_K_eq] at h
+        exact h.integrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
+      have h_M_m2_int : ∀ idx : Fin (m + 2) → Fin (Module.finrank ℝ E),
+          IntegrableOn
+            (eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+              g r s i α P₀ (m + 2) idx)
+            K (volume : Measure EuclN) := by
+        intro idx
+        have h := (eigenvectorChartIteratedPartial_unconditional_memLp_volume (I := I) (M := M)
+          g r s i α P₀ (m + 2) idx).restrict K
+        rw [h_restrict_K_eq] at h
+        exact h.integrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
+      have h_fChartEff_int : IntegrableOn D_m.fChartEff K (volume : Measure EuclN) := by
+        have h_global : MemLp D_m.fChartEff 2
+            ((volume : Measure EuclN).restrict Ω) := h_fChartEff_memW1p.1
+        have h_eq : ((volume : Measure EuclN).restrict Ω).restrict K =
+            (volume : Measure EuclN).restrict K := by
+          rw [Measure.restrict_restrict hK_meas]; congr 1
+          exact Set.inter_eq_self_of_subset_left hK_in
+        have h_K : MemLp D_m.fChartEff 2 ((volume : Measure EuclN).restrict K) := by
+          rw [← h_eq]; exact h_global.restrict K
+        exact h_K.integrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
+      have h_fChartEff_wp_int : IntegrableOn
+          (chosenWeakPartial' (d := Module.finrank ℝ E) 2 l D_m.fChartEff Ω)
+          K (volume : Measure EuclN) := by
+        have h_global := chosenWeakPartial'_memLp_of_mem h_fChartEff_memW1p l
+        have h_eq : ((volume : Measure EuclN).restrict Ω).restrict K =
+            (volume : Measure EuclN).restrict K := by
+          rw [Measure.restrict_restrict hK_meas]; congr 1
+          exact Set.inter_eq_self_of_subset_left hK_in
+        have h_K : MemLp (chosenWeakPartial' (d := Module.finrank ℝ E) 2 l
+            D_m.fChartEff Ω) 2
+            ((volume : Measure EuclN).restrict K) := by
+          rw [← h_eq]; exact h_global.restrict K
+        exact h_K.integrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
+      -- Sum-swap for `INT_LHS_m_pair`.
+      have h_int_LHS_m_pair : ∀ a j : Fin (Module.finrank ℝ E),
+          Integrable (fun y => weightedInvGramOnEuclid (I := I) g α a j y *
+              eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+                g r s i α P₀ (m + 1) (Fin.cons a D_m.directions) y *
+              (fderiv ℝ ψ_l y) (EuclideanSpace.single j 1))
+            ((volume : Measure EuclN).restrict Ω) := fun a j =>
+        integrable_triple_helper (α := α) hK_compact hK_meas hK_in
+          (h_aij_cont a j) (h_M_m1_int (Fin.cons a D_m.directions))
+          (hψ_l_partial_cont j) (hψ_l_partial_supp j)
+      have h_int_A_pair : ∀ a j,
+          Integrable (fun y =>
+            (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a j l) y)
+              (EuclideanSpace.single j 1) *
+            eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+              g r s i α P₀ (m + 1) (Fin.cons a D_m.directions) y * ψ y)
+            ((volume : Measure EuclN).restrict Ω) := fun a j =>
+        integrable_triple_helper (α := α) hK_compact hK_meas hK_in
+          (h_aij_fderiv_cont a j)
+          (h_M_m1_int (Fin.cons a D_m.directions)) hψ_cont hψ_supp_K
+      have h_int_B_pair : ∀ a j,
+          Integrable (fun y =>
+            weightedInvGramDerivOnEuclid (I := I) g α a j l y *
+            eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+              g r s i α P₀ (m + 2) (Fin.cons a (Fin.snoc D_m.directions j)) y * ψ y)
+            ((volume : Measure EuclN).restrict Ω) := fun a j =>
+        integrable_triple_helper (α := α) hK_compact hK_meas hK_in
+          (h_daij_cont a j)
+          (h_M_m2_int (Fin.cons a (Fin.snoc D_m.directions j))) hψ_cont hψ_supp_K
+      have h_int_PR_pair : ∀ a j,
+          Integrable (fun y =>
+            weightedInvGramOnEuclid (I := I) g α a j y *
+            eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+              g r s i α P₀ (m + 2) (Fin.cons a (Fin.snoc D_m.directions l)) y *
+            (fderiv ℝ ψ y) (EuclideanSpace.single j 1))
+            ((volume : Measure EuclN).restrict Ω) := fun a j =>
+        integrable_triple_helper (α := α) hK_compact hK_meas hK_in
+          (h_aij_cont a j)
+          (h_M_m2_int (Fin.cons a (Fin.snoc D_m.directions l)))
+          (hψ_partial_cont j) (hψ_partial_supp j)
+      set INT_LHS_principal_m_l : ℝ :=
+        ∫ y in Ω,
+          (∑ a : Fin (Module.finrank ℝ E),
+            ∑ j : Fin (Module.finrank ℝ E),
+              weightedInvGramOnEuclid (I := I) g α a j y *
+                eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+                  g r s i α P₀ (m + 1) (Fin.cons a D_m.directions) y *
+                (fderiv ℝ ψ_l y) (EuclideanSpace.single j 1))
+          ∂(volume : Measure EuclN) with hINT_LHS_principal_m_l_def
+      set INT_LHS_mass_m_l : ℝ :=
+        ∫ y in Ω,
+          densityOnEuclid (I := I) g α y *
+            eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+              g r s i α P₀ m D_m.directions y * ψ_l y
+          ∂(volume : Measure EuclN) with hINT_LHS_mass_m_l_def
+      set INT_RHS_m_l : ℝ :=
+        ∫ y in Ω,
+          densityOnEuclid (I := I) g α y * D_m.fChartEff y * ψ_l y
+          ∂(volume : Measure EuclN) with hINT_RHS_m_l_def
+      have h_level_m' :
+          INT_LHS_principal_m_l + INT_LHS_mass_m_l = INT_RHS_m_l := h_level_m
+      have h_swap_LHS_principal :
+          INT_LHS_principal_m_l = ∑ a, ∑ j, INT_LHS_m_pair a j := by
+        change (∫ y in Ω,
+            (∑ a : Fin (Module.finrank ℝ E),
+              ∑ j : Fin (Module.finrank ℝ E),
+                weightedInvGramOnEuclid (I := I) g α a j y *
+                  eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+                    g r s i α P₀ (m + 1) (Fin.cons a D_m.directions) y *
+                  (fderiv ℝ ψ_l y) (EuclideanSpace.single j 1))
+            ∂(volume : Measure EuclN)) = _
+        rw [integral_finset_sum _ (fun a _ =>
+          (integrable_finset_sum _ (fun j _ => h_int_LHS_m_pair a j)))]
+        refine Finset.sum_congr rfl ?_; intro a _
+        rw [integral_finset_sum _ (fun j _ => h_int_LHS_m_pair a j)]
+      have h_sum_principal :
+          ∑ a, ∑ j, INT_LHS_m_pair a j =
+          (∑ a, ∑ j, A_pair a j) + (∑ a, ∑ j, B_pair a j) - (∑ a, ∑ j, PR_pair a j) := by
+        calc ∑ a, ∑ j, INT_LHS_m_pair a j
+            = ∑ a, ∑ j, (A_pair a j + B_pair a j - PR_pair a j) := by
+              refine Finset.sum_congr rfl ?_; intro a _
+              refine Finset.sum_congr rfl ?_; intro j _
+              exact h_principal_pair a j
+          _ = ∑ a, ∑ j, (A_pair a j + (B_pair a j + (-(PR_pair a j)))) := by
+              refine Finset.sum_congr rfl ?_; intro a _
+              refine Finset.sum_congr rfl ?_; intro j _
+              ring
+          _ = ∑ a, (∑ j, A_pair a j) + ∑ a, (∑ j, (B_pair a j + (-(PR_pair a j)))) := by
+              rw [← Finset.sum_add_distrib]
+              refine Finset.sum_congr rfl ?_; intro a _
+              exact Finset.sum_add_distrib
+          _ = (∑ a, ∑ j, A_pair a j) +
+              ((∑ a, ∑ j, B_pair a j) + ∑ a, ∑ j, -(PR_pair a j)) := by
+              congr 1
+              rw [show (fun a => ∑ j, (B_pair a j + (-(PR_pair a j)))) =
+                  (fun a => (∑ j, B_pair a j) + (∑ j, -(PR_pair a j))) by
+                funext a; exact Finset.sum_add_distrib]
+              exact Finset.sum_add_distrib
+          _ = (∑ a, ∑ j, A_pair a j) + (∑ a, ∑ j, B_pair a j) -
+              (∑ a, ∑ j, PR_pair a j) := by
+              simp_rw [Finset.sum_neg_distrib (s :=
+                (Finset.univ : Finset (Fin (Module.finrank ℝ E))))]
+              ring
+      -- Step 3: rewrite `INT_LHS_mass_m_l` via `ibp_mass_unconditional`.
+      set N_C : ℝ :=
+        ∫ y in Ω, densityDerivOnEuclid (I := I) g α l y *
+          eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+            g r s i α P₀ m D_m.directions y * ψ y
+          ∂(volume : Measure EuclN) with hN_C_def
+      set N_mass_new : ℝ :=
+        ∫ y in Ω,
+          densityOnEuclid (I := I) g α y *
+          eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+            g r s i α P₀ (m + 1) (Fin.snoc D_m.directions l) y * ψ y
+          ∂(volume : Measure EuclN) with hN_mass_new_def
+      have h_mass_ibp : INT_LHS_mass_m_l = -(N_C + N_mass_new) := by
+        have hb := ibp_mass_unconditional (I := I) (M := M) g r s i α P₀ m D_m.directions
+          h_chart_H_m_plus_1 l hψ_smooth hψ_cs hψ_supp
+        change (∫ y in Ω,
+            densityOnEuclid (I := I) g α y *
+              eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+                g r s i α P₀ m D_m.directions y * ψ_l y
+            ∂(volume : Measure EuclN)) = _
+        rw [hb]
+        rfl
+      -- Step 4: rewrite `INT_RHS_m_l` via `ibp_density_fChartEffPrev`.
+      set N_D : ℝ :=
+        ∫ y in Ω, densityDerivOnEuclid (I := I) g α l y *
+          D_m.fChartEff y * ψ y
+          ∂(volume : Measure EuclN) with hN_D_def
+      set N_E : ℝ :=
+        ∫ y in Ω, densityOnEuclid (I := I) g α y *
+          chosenWeakPartial' (d := Module.finrank ℝ E) 2 l D_m.fChartEff Ω y * ψ y
+          ∂(volume : Measure EuclN) with hN_E_def
+      have h_rhs_ibp : INT_RHS_m_l = -(N_D + N_E) := by
+        have hb := ibp_density_fChartEffPrev (I := I) (M := M) g α
+          h_fChartEff_memW1p l hψ_smooth hψ_cs hψ_supp
+        change (∫ y in Ω,
+            densityOnEuclid (I := I) g α y * D_m.fChartEff y * ψ_l y
+            ∂(volume : Measure EuclN)) = _
+        rw [hb]
+        rfl
+      -- Step 5: collect into one algebraic equation.
+      have h_combine : (∑ a, ∑ j, PR_pair a j) + N_mass_new =
+          (∑ a, ∑ j, A_pair a j) + (∑ a, ∑ j, B_pair a j) +
+            (-N_C) + N_D + N_E := by
+        have h := h_level_m'
+        rw [h_swap_LHS_principal, h_sum_principal, h_mass_ibp, h_rhs_ibp] at h
+        linarith
+      -- Step 6: identify the standalone-step RHS with the indicator numerator.
+      set I_step_RHS : ℝ :=
+        ∫ y in Ω,
+          densityOnEuclid (I := I) g α y *
+            eigenvectorChartIteratedStep_unconditional (I := I) (M := M)
+              g r s i α P₀ m D_m.directions D_m.fChartEff l y * ψ y
+          ∂(volume : Measure EuclN) with hI_step_RHS_def
+      set LHS_principal_new : ℝ :=
+        ∫ y in Ω,
+          (∑ a : Fin (Module.finrank ℝ E),
+            ∑ j : Fin (Module.finrank ℝ E),
+              weightedInvGramOnEuclid (I := I) g α a j y *
+                eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+                  g r s i α P₀ (m + 2) (Fin.cons a (Fin.snoc D_m.directions l)) y *
+                (fderiv ℝ ψ y) (EuclideanSpace.single j 1))
+          ∂(volume : Measure EuclN) with hLHS_principal_new_def
+      have h_LHS_principal_new_eq : LHS_principal_new = ∑ a, ∑ j, PR_pair a j := by
+        change (∫ y in Ω,
+            (∑ a : Fin (Module.finrank ℝ E),
+              ∑ j : Fin (Module.finrank ℝ E),
+                weightedInvGramOnEuclid (I := I) g α a j y *
+                  eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+                    g r s i α P₀ (m + 2) (Fin.cons a (Fin.snoc D_m.directions l)) y *
+                  (fderiv ℝ ψ y) (EuclideanSpace.single j 1))
+            ∂(volume : Measure EuclN)) = _
+        rw [integral_finset_sum _ (fun a _ =>
+          (integrable_finset_sum _ (fun j _ => h_int_PR_pair a j)))]
+        refine Finset.sum_congr rfl ?_; intro a _
+        rw [integral_finset_sum _ (fun j _ => h_int_PR_pair a j)]
+      -- The chosen mixed partials vanish a.e. off `Kα`.
+      have h_M_m_ae :
+          eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+            g r s i α P₀ m D_m.directions
+            =ᵐ[(volume : Measure EuclN).restrict (Ω \ Kα)]
+            (fun _ : EuclN => (0 : ℝ)) := by
+        have h := eigenvectorChartIteratedPartial_unconditional_ae_zero_off_chartPouKernel
+          (I := I) (M := M) g r s i α P₀ m D_m.directions
+        exact h
+      have h_M_m1_ae : ∀ idx : Fin (m + 1) → Fin (Module.finrank ℝ E),
+          eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+            g r s i α P₀ (m + 1) idx
+            =ᵐ[(volume : Measure EuclN).restrict (Ω \ Kα)]
+            (fun _ : EuclN => (0 : ℝ)) := fun idx =>
+        eigenvectorChartIteratedPartial_unconditional_ae_zero_off_chartPouKernel
+          (I := I) (M := M) g r s i α P₀ (m + 1) idx
+      have h_M_m2_ae : ∀ idx : Fin (m + 2) → Fin (Module.finrank ℝ E),
+          eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+            g r s i α P₀ (m + 2) idx
+            =ᵐ[(volume : Measure EuclN).restrict (Ω \ Kα)]
+            (fun _ : EuclN => (0 : ℝ)) := fun idx =>
+        eigenvectorChartIteratedPartial_unconditional_ae_zero_off_chartPouKernel
+          (I := I) (M := M) g r s i α P₀ (m + 2) idx
+      have h_fChartEff_wp_ae :
+          chosenWeakPartial' (d := Module.finrank ℝ E) 2 l D_m.fChartEff Ω
+            =ᵐ[(volume : Measure EuclN).restrict (Ω \ Kα)]
+            (fun _ : EuclN => (0 : ℝ)) :=
+        chosenWeakPartial'_ae_zero_off_chartPouKernel_of_ae_zero
+          (I := I) (M := M) α h_fChartEff_ae_zero_off_K l
+      -- ae-zero of `eigenvectorChartIteratedStepNumerator_unconditional` off `Kα`.
+      have h_numer_ae_zero :
+          ∀ᵐ y ∂((volume : Measure EuclN).restrict (Ω \ Kα)),
+            eigenvectorChartIteratedStepNumerator_unconditional (I := I) (M := M)
+              g r s i α P₀ m D_m.directions D_m.fChartEff l y = 0 := by
+        have h_M_m1_each : ∀ a : Fin (Module.finrank ℝ E),
+            ∀ᵐ y ∂((volume : Measure EuclN).restrict (Ω \ Kα)),
+              eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+                g r s i α P₀ (m + 1) (Fin.cons a D_m.directions) y = 0 :=
+          fun a => h_M_m1_ae (Fin.cons a D_m.directions)
+        have h_M_m1_wp_each : ∀ a b : Fin (Module.finrank ℝ E),
+            ∀ᵐ y ∂((volume : Measure EuclN).restrict (Ω \ Kα)),
+              chosenWeakPartial' (d := Module.finrank ℝ E) 2 b
+                (eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+                  g r s i α P₀ (m + 1) (Fin.cons a D_m.directions)) Ω y = 0 :=
+          fun a b =>
+            chosenWeakPartial'_ae_zero_off_chartPouKernel_of_ae_zero
+              (I := I) (M := M) α (h_M_m1_ae (Fin.cons a D_m.directions)) b
+        have h_M_m1_all : ∀ᵐ y ∂((volume : Measure EuclN).restrict (Ω \ Kα)),
+            ∀ a : Fin (Module.finrank ℝ E),
+              eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+                g r s i α P₀ (m + 1) (Fin.cons a D_m.directions) y = 0 := by
+          rw [ae_all_iff]; exact h_M_m1_each
+        have h_M_m1_wp_all : ∀ᵐ y ∂((volume : Measure EuclN).restrict (Ω \ Kα)),
+            ∀ a b : Fin (Module.finrank ℝ E),
+              chosenWeakPartial' (d := Module.finrank ℝ E) 2 b
+                (eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+                  g r s i α P₀ (m + 1) (Fin.cons a D_m.directions)) Ω y = 0 := by
+          rw [ae_all_iff]; intro a; rw [ae_all_iff]; exact h_M_m1_wp_each a
+        filter_upwards [h_M_m_ae, h_M_m1_all, h_M_m1_wp_all,
+          h_fChartEff_ae_zero_off_K, h_fChartEff_wp_ae] with y h_M_m_y h_M_m1_y
+          h_M_m1_wp_y h_fE_y h_fE_wp_y
+        unfold eigenvectorChartIteratedStepNumerator_unconditional
+        have h_A_zero :
+            (∑ a : Fin (Module.finrank ℝ E),
+              ∑ b : Fin (Module.finrank ℝ E),
+                (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a b l) y)
+                    (EuclideanSpace.single b 1) *
+                  eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+                    g r s i α P₀ (m + 1) (Fin.cons a D_m.directions) y) = 0 := by
+          refine Finset.sum_eq_zero ?_; intro a _
+          refine Finset.sum_eq_zero ?_; intro _ _
+          rw [h_M_m1_y a]; ring
+        have h_B_zero :
+            (∑ a : Fin (Module.finrank ℝ E),
+              ∑ b : Fin (Module.finrank ℝ E),
+                weightedInvGramDerivOnEuclid (I := I) g α a b l y *
+                  chosenWeakPartial' (d := Module.finrank ℝ E) 2 b
+                    (eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+                      g r s i α P₀ (m + 1) (Fin.cons a D_m.directions))
+                    (chartTargetEuclid (I := I) (M := M) α) y) = 0 := by
+          refine Finset.sum_eq_zero ?_; intro a _
+          refine Finset.sum_eq_zero ?_; intro b _
+          rw [h_M_m1_wp_y a b]; ring
+        rw [h_A_zero, h_B_zero, h_M_m_y, h_fE_y, h_fE_wp_y]
+        ring
+      -- `I_step_RHS = ∫_Ω indicator Kα numerator · ψ`.
+      have h_step_RHS_eq_indicator :
+          I_step_RHS =
+          ∫ y in Ω,
+            Set.indicator Kα
+              (fun z => eigenvectorChartIteratedStepNumerator_unconditional (I := I) (M := M)
+                g r s i α P₀ m D_m.directions D_m.fChartEff l z) y * ψ y
+            ∂(volume : Measure EuclN) := by
+        change (∫ y in Ω,
+            densityOnEuclid (I := I) g α y *
+              eigenvectorChartIteratedStep_unconditional (I := I) (M := M)
+                g r s i α P₀ m D_m.directions D_m.fChartEff l y * ψ y
+            ∂(volume : Measure EuclN)) = _
+        refine setIntegral_congr_fun hΩ_meas (fun y hy => ?_)
+        have h_pt := density_mul_eigenvectorChartIteratedStep_eq_indicator_numerator_unconditional
+          (I := I) (M := M) g r s i α P₀ m D_m.directions D_m.fChartEff l y hy
+        rw [show densityOnEuclid (I := I) g α y *
+            eigenvectorChartIteratedStep_unconditional (I := I) (M := M)
+              g r s i α P₀ m D_m.directions D_m.fChartEff l y * ψ y =
+            (densityOnEuclid (I := I) g α y *
+              eigenvectorChartIteratedStep_unconditional (I := I) (M := M)
+                g r s i α P₀ m D_m.directions D_m.fChartEff l y) * ψ y from rfl]
+        rw [h_pt]
+      -- `∫_Ω indicator Kα f · ψ = ∫_Ω f · ψ`.
+      have h_indicator_eq_numerator :
+          ∫ y in Ω,
+            Set.indicator Kα
+              (fun z => eigenvectorChartIteratedStepNumerator_unconditional (I := I) (M := M)
+                g r s i α P₀ m D_m.directions D_m.fChartEff l z) y * ψ y
+            ∂(volume : Measure EuclN) =
+          ∫ y in Ω,
+            eigenvectorChartIteratedStepNumerator_unconditional (I := I) (M := M)
+              g r s i α P₀ m D_m.directions D_m.fChartEff l y * ψ y
+            ∂(volume : Measure EuclN) := by
+        refine MeasureTheory.integral_congr_ae ?_
+        refine (ae_restrict_iff' hΩ_meas).mpr ?_
+        have h_off : ∀ᵐ y ∂(volume : Measure EuclN),
+            y ∈ Ω \ Kα →
+            eigenvectorChartIteratedStepNumerator_unconditional (I := I) (M := M)
+              g r s i α P₀ m D_m.directions D_m.fChartEff l y = 0 := by
+          rw [← ae_restrict_iff' hΩ_diff_Kα_meas]
+          exact h_numer_ae_zero
+        filter_upwards [h_off] with y hy hy_Ω
+        by_cases hy_Kα : y ∈ Kα
+        · rw [Set.indicator_of_mem hy_Kα]
+        · rw [Set.indicator_of_notMem hy_Kα]
+          have hy_diff : y ∈ Ω \ Kα := ⟨hy_Ω, hy_Kα⟩
+          rw [hy hy_diff]
+      have h_step_RHS_eq_num : I_step_RHS =
+          ∫ y in Ω,
+            eigenvectorChartIteratedStepNumerator_unconditional (I := I) (M := M)
+              g r s i α P₀ m D_m.directions D_m.fChartEff l y * ψ y
+            ∂(volume : Measure EuclN) := by
+        rw [h_step_RHS_eq_indicator]; exact h_indicator_eq_numerator
+      -- Step 8: expand the numerator integrand and use linearity.
+      have h_int_C : Integrable (fun y =>
+          densityDerivOnEuclid (I := I) g α l y *
+            eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+              g r s i α P₀ m D_m.directions y * ψ y)
+          ((volume : Measure EuclN).restrict Ω) :=
+        integrable_triple_helper (α := α) hK_compact hK_meas hK_in
+          h_dens_deriv_cont h_M_m_int hψ_cont hψ_supp_K
+      have h_int_D : Integrable (fun y =>
+          densityDerivOnEuclid (I := I) g α l y * D_m.fChartEff y * ψ y)
+          ((volume : Measure EuclN).restrict Ω) :=
+        integrable_triple_helper (α := α) hK_compact hK_meas hK_in
+          h_dens_deriv_cont h_fChartEff_int hψ_cont hψ_supp_K
+      have h_int_E : Integrable (fun y =>
+          densityOnEuclid (I := I) g α y *
+          chosenWeakPartial' (d := Module.finrank ℝ E) 2 l D_m.fChartEff Ω y * ψ y)
+          ((volume : Measure EuclN).restrict Ω) :=
+        integrable_triple_helper (α := α) hK_compact hK_meas hK_in
+          h_dens_cont h_fChartEff_wp_int hψ_cont hψ_supp_K
+      have h_numer_decomp :
+          (∫ y in Ω,
+            eigenvectorChartIteratedStepNumerator_unconditional (I := I) (M := M)
+              g r s i α P₀ m D_m.directions D_m.fChartEff l y * ψ y
+            ∂(volume : Measure EuclN)) =
+          (∑ a, ∑ j, A_pair a j) + (∑ a, ∑ j, B_pair a j) - N_C + N_D + N_E := by
+        set f_A : EuclN → ℝ := fun y => ∑ a : Fin (Module.finrank ℝ E),
+          ∑ b : Fin (Module.finrank ℝ E),
+            (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a b l) y)
+              (EuclideanSpace.single b 1) *
+            eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+              g r s i α P₀ (m + 1) (Fin.cons a D_m.directions) y * ψ y
+            with hf_A_def
+        set f_B : EuclN → ℝ := fun y => ∑ a : Fin (Module.finrank ℝ E),
+          ∑ b : Fin (Module.finrank ℝ E),
+            weightedInvGramDerivOnEuclid (I := I) g α a b l y *
+            chosenWeakPartial' (d := Module.finrank ℝ E) 2 b
+              (eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+                g r s i α P₀ (m + 1) (Fin.cons a D_m.directions))
+              (chartTargetEuclid (I := I) (M := M) α) y * ψ y with hf_B_def
+        set f_C : EuclN → ℝ := fun y =>
+          - (densityDerivOnEuclid (I := I) g α l y *
+            eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+              g r s i α P₀ m D_m.directions y * ψ y) with hf_C_def
+        set f_D : EuclN → ℝ := fun y =>
+          densityDerivOnEuclid (I := I) g α l y *
+            D_m.fChartEff y * ψ y with hf_D_def
+        set f_E : EuclN → ℝ := fun y =>
+          densityOnEuclid (I := I) g α y *
+            chosenWeakPartial' (d := Module.finrank ℝ E) 2 l D_m.fChartEff Ω y *
+            ψ y with hf_E_def
+        have h_integrand_eq : ∀ y : EuclN,
+            eigenvectorChartIteratedStepNumerator_unconditional (I := I) (M := M)
+              g r s i α P₀ m D_m.directions D_m.fChartEff l y * ψ y =
+            f_A y + f_B y + f_C y + f_D y + f_E y := by
+          intro y
+          unfold eigenvectorChartIteratedStepNumerator_unconditional
+          simp only [add_mul, sub_mul, Finset.sum_mul]
+          ring
+        rw [setIntegral_congr_fun hΩ_meas (fun y _ => h_integrand_eq y)]
+        -- Integrability of `f_B`'s summand.
+        have h_int_B_pair_wp : ∀ a b,
+            Integrable (fun y =>
+              weightedInvGramDerivOnEuclid (I := I) g α a b l y *
+              chosenWeakPartial' (d := Module.finrank ℝ E) 2 b
+                (eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+                  g r s i α P₀ (m + 1) (Fin.cons a D_m.directions))
+                (chartTargetEuclid (I := I) (M := M) α) y * ψ y)
+              ((volume : Measure EuclN).restrict Ω) := fun a b =>
+          integrable_triple_helper (α := α) hK_compact hK_meas hK_in
+            (h_daij_cont a b)
+            (by
+              have h_g := chosenWeakPartial'_memLp_volume_uncond
+                (Ω := Ω) b
+                (eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+                  g r s i α P₀ (m + 1) (Fin.cons a D_m.directions))
+              have h_g_K := h_g.restrict K
+              rw [h_restrict_K_eq] at h_g_K
+              exact h_g_K.integrable (by norm_num : (1 : ℝ≥0∞) ≤ 2))
+            hψ_cont hψ_supp_K
+        have hint_A : Integrable f_A ((volume : Measure EuclN).restrict Ω) :=
+          integrable_finset_sum _ (fun a _ =>
+            integrable_finset_sum _ (fun b _ => h_int_A_pair a b))
+        have hint_B : Integrable f_B ((volume : Measure EuclN).restrict Ω) :=
+          integrable_finset_sum _ (fun a _ =>
+            integrable_finset_sum _ (fun b _ => h_int_B_pair_wp a b))
+        have hint_C : Integrable f_C ((volume : Measure EuclN).restrict Ω) :=
+          h_int_C.neg
+        have hint_D : Integrable f_D ((volume : Measure EuclN).restrict Ω) :=
+          h_int_D
+        have hint_E : Integrable f_E ((volume : Measure EuclN).restrict Ω) :=
+          h_int_E
+        have h_sum_AB : Integrable (fun y => f_A y + f_B y)
+            ((volume : Measure EuclN).restrict Ω) := hint_A.add hint_B
+        have h_sum_ABC : Integrable (fun y => f_A y + f_B y + f_C y)
+            ((volume : Measure EuclN).restrict Ω) := h_sum_AB.add hint_C
+        have h_sum_ABCD : Integrable (fun y => f_A y + f_B y + f_C y + f_D y)
+            ((volume : Measure EuclN).restrict Ω) := h_sum_ABC.add hint_D
+        rw [MeasureTheory.integral_add h_sum_ABCD hint_E]
+        rw [MeasureTheory.integral_add h_sum_ABC hint_D]
+        rw [MeasureTheory.integral_add h_sum_AB hint_C]
+        rw [MeasureTheory.integral_add hint_A hint_B]
+        have h_int_f_A : (∫ y in Ω, f_A y ∂(volume : Measure EuclN)) =
+            ∑ a, ∑ j, A_pair a j := by
+          change (∫ y in Ω,
+              ∑ a : Fin (Module.finrank ℝ E),
+                ∑ b : Fin (Module.finrank ℝ E),
+                  (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α a b l) y)
+                    (EuclideanSpace.single b 1) *
+                  eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+                    g r s i α P₀ (m + 1) (Fin.cons a D_m.directions) y * ψ y
+              ∂(volume : Measure EuclN)) = _
+          rw [integral_finset_sum _ (fun a _ =>
+            (integrable_finset_sum _ (fun b _ => h_int_A_pair a b)))]
+          refine Finset.sum_congr rfl ?_; intro a _
+          rw [integral_finset_sum _ (fun b _ => h_int_A_pair a b)]
+        have h_int_f_B : (∫ y in Ω, f_B y ∂(volume : Measure EuclN)) =
+            ∑ a, ∑ j, B_pair a j := by
+          change (∫ y in Ω,
+              ∑ a : Fin (Module.finrank ℝ E),
+                ∑ b : Fin (Module.finrank ℝ E),
+                  weightedInvGramDerivOnEuclid (I := I) g α a b l y *
+                  chosenWeakPartial' (d := Module.finrank ℝ E) 2 b
+                    (eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+                      g r s i α P₀ (m + 1) (Fin.cons a D_m.directions))
+                    (chartTargetEuclid (I := I) (M := M) α) y * ψ y
+              ∂(volume : Measure EuclN)) = _
+          rw [integral_finset_sum _ (fun a _ =>
+            (integrable_finset_sum _ (fun b _ => h_int_B_pair_wp a b)))]
+          refine Finset.sum_congr rfl ?_; intro a _
+          rw [integral_finset_sum _ (fun b _ => h_int_B_pair_wp a b)]
+          refine Finset.sum_congr rfl ?_; intro b _
+          -- `B_pair a b`'s integrand uses `eigenvectorChartIteratedPartial_unconditional
+          -- (m+2) (Fin.cons a (Fin.snoc dirs b))`, which by the recursive definition
+          -- is the chosen weak `b`-partial of the level-`(m+1)` mixed partial.
+          have h_eq :
+              eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+                  g r s i α P₀ (m + 2) (Fin.cons a (Fin.snoc D_m.directions b)) =
+                chosenWeakPartial' (d := Module.finrank ℝ E) 2 b
+                  (eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+                    g r s i α P₀ (m + 1) (Fin.cons a D_m.directions))
+                  (chartTargetEuclid (I := I) (M := M) α) := by
+            rw [eigenvectorChartIteratedPartial_unconditional_succ]
+            have h_last : (Fin.cons a (Fin.snoc D_m.directions b) :
+                Fin (m + 2) → Fin (Module.finrank ℝ E)) (Fin.last (m + 1)) = b := by
+              have h_cs :
+                  (Fin.cons a (Fin.snoc D_m.directions b) :
+                    Fin (m + 2) → Fin (Module.finrank ℝ E)) =
+                  Fin.snoc (Fin.cons a D_m.directions) b :=
+                (snoc_cons_eq_cons_snoc (β := Fin (Module.finrank ℝ E))
+                  a D_m.directions b).symm
+              rw [h_cs]; simp
+            have h_init : Fin.init (Fin.cons a (Fin.snoc D_m.directions b) :
+                Fin (m + 2) → Fin (Module.finrank ℝ E)) =
+                Fin.cons a D_m.directions := by
+              have h_cs :
+                  (Fin.cons a (Fin.snoc D_m.directions b) :
+                    Fin (m + 2) → Fin (Module.finrank ℝ E)) =
+                  Fin.snoc (Fin.cons a D_m.directions) b :=
+                (snoc_cons_eq_cons_snoc (β := Fin (Module.finrank ℝ E))
+                  a D_m.directions b).symm
+              rw [h_cs]; simp
+            rw [h_last, h_init]
+          rw [hB_pair_def]
+          refine setIntegral_congr_fun hΩ_meas (fun y _ => ?_)
+          rw [h_eq]
+        have h_int_f_C : (∫ y in Ω, f_C y ∂(volume : Measure EuclN)) = -N_C := by
+          change (∫ y in Ω,
+              - (densityDerivOnEuclid (I := I) g α l y *
+                eigenvectorChartIteratedPartial_unconditional (I := I) (M := M)
+                  g r s i α P₀ m D_m.directions y * ψ y)
               ∂(volume : Measure EuclN)) = _
           rw [MeasureTheory.integral_neg]
         have h_int_f_D : (∫ y in Ω, f_D y ∂(volume : Measure EuclN)) = N_D := rfl
