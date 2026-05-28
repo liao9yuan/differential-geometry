@@ -496,6 +496,324 @@ theorem covGradChristoffel_tendsto
   rwa [smul_unscaledLimit_toLp_eq (I := I) (M := M)
     g r s h_atlas i α P₀ k] at h_smul
 
+/-! ## Chart-locality-free twins
+
+The `h_atlas` in the development above keys only the eigenbasis vector behind
+`eigenvectorSmoothApprox` / `tensorResolventEigenbasisVec` and the chart-component
+limit object `componentLpLimit`. Re-keying onto the chart-locality-free eigenbasis
+selector `tensorResolventEigenbasisVec_ofCompact` (via the compact-operator
+witness `tensorResolventL2_isCompactOperator_intrinsic`) and the committed
+`_unconditional` companion objects drops `h_atlas` entirely. The Christoffel
+tracing identity `covDerivLowerOrderTerm_pouSmul_eqOn`, the bounded-factor `L²`
+machinery (`tendsto_toLp_finsetSum`, `memLp_indicatorFactor_mul_lp`,
+`covDerivLowerOrderCoeff_contDiffOn`), and the finite-sum assembly carry no
+`h_atlas`, so they are reused verbatim. `[CompleteSpace E]` is a section
+hypothesis. -/
+
+/-- Chart-locality-free twin of `covDerivLowerOrderTerm_pouSmul_memLp`. -/
+theorem covDerivLowerOrderTerm_pouSmul_memLp_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s)
+    (k : Fin (Module.finrank ℝ E)) (n : ℕ) :
+    MemLp
+      (covDerivLowerOrderTerm (I := I) (M := M) g r s
+        (pouSmul (I := I) (M := M) g r s α
+          (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+            g r s i n).toCcTensor) α k P₀.1 P₀.2) 2
+      (chartL2Measure (I := I) (M := M) α) := by
+  classical
+  refine (memLp_finset_sum (μ := chartL2Measure (I := I) (M := M) α)
+    (Finset.univ : Finset (TensorCompIdx (E := E) r s))
+    (fun p _ =>
+      memLp_factor_mul_componentAtom_unconditional (I := I) (M := M) g r s i α p n
+        (covDerivLowerOrderCoeff_contDiffOn (I := I) (M := M)
+          g r s α k P₀.1 p.1 P₀.2 p.2))).ae_eq ?_
+  refine Filter.EventuallyEq.symm ?_
+  rw [chartL2Measure]
+  refine (ae_restrict_iff'
+    (chartTargetEuclid_measurableSet (I := I) (M := M) α)).mpr ?_
+  exact Filter.Eventually.of_forall (fun y hy =>
+    covDerivLowerOrderTerm_pouSmul_eqOn (I := I) (M := M) g r s α
+      (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+        g r s i n).toCcTensor k P₀.1 P₀.2 hy)
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+/-- Chart-locality-free twin of `covGradChristoffelLimit`. The canonical
+eigenvector chart-component limit object is re-keyed onto the chart-locality-free
+eigenbasis selector `tensorResolventEigenbasisVec_ofCompact`. -/
+noncomputable def covGradChristoffelLimit_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s)
+    (k : Fin (Module.finrank ℝ E)) : EuclN → ℝ :=
+  fun y =>
+    ∑ p : TensorCompIdx (E := E) r s,
+      Set.indicator (chartPouKernel (I := I) (M := M) α)
+          (covDerivLowerOrderCoeff (I := I) (M := M)
+            g r s α k P₀.1 p.1 P₀.2 p.2) y *
+        (tensorL2ChartComponent (I := I) (M := M) g r s
+          (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+              g r s) i) α p :
+          EuclN → ℝ) y
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+/-- Chart-locality-free twin of `covGradChristoffelLimit_memLp`. -/
+theorem covGradChristoffelLimit_memLp_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s)
+    (k : Fin (Module.finrank ℝ E)) :
+    MemLp (covGradChristoffelLimit_unconditional (I := I) (M := M)
+        g r s i α P₀ k) 2
+      (chartL2Measure (I := I) (M := M) α) := by
+  classical
+  unfold covGradChristoffelLimit_unconditional
+  exact memLp_finset_sum (Finset.univ : Finset (TensorCompIdx (E := E) r s))
+    (fun p _ => memLp_indicatorFactor_mul_lp (I := I) (M := M) α
+      (covDerivLowerOrderCoeff_contDiffOn (I := I) (M := M)
+        g r s α k P₀.1 p.1 P₀.2 p.2)
+      (tensorL2ChartComponent (I := I) (M := M) g r s
+        (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+            g r s) i) α p))
+
+/-- Chart-locality-free twin of `covGradChristoffelUnscaledLimit`. -/
+private noncomputable def covGradChristoffelUnscaledLimit_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s)
+    (k : Fin (Module.finrank ℝ E)) : EuclN → ℝ :=
+  fun y =>
+    ∑ p : TensorCompIdx (E := E) r s,
+      Set.indicator (chartPouKernel (I := I) (M := M) α)
+          (covDerivLowerOrderCoeff (I := I) (M := M)
+            g r s α k P₀.1 p.1 P₀.2 p.2) y *
+        (componentLpLimit_unconditional (I := I) (M := M) g r s i α p :
+          EuclN → ℝ) y
+
+/-- Chart-locality-free twin of `covGradChristoffelUnscaledLimit_memLp`. -/
+private theorem covGradChristoffelUnscaledLimit_memLp_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s)
+    (k : Fin (Module.finrank ℝ E)) :
+    MemLp (covGradChristoffelUnscaledLimit_unconditional (I := I) (M := M)
+        g r s i α P₀ k) 2
+      (chartL2Measure (I := I) (M := M) α) := by
+  classical
+  unfold covGradChristoffelUnscaledLimit_unconditional
+  exact memLp_finset_sum (Finset.univ : Finset (TensorCompIdx (E := E) r s))
+    (fun p _ => memLp_indicatorFactor_mul_lp (I := I) (M := M) α
+      (covDerivLowerOrderCoeff_contDiffOn (I := I) (M := M)
+        g r s α k P₀.1 p.1 P₀.2 p.2)
+      (componentLpLimit_unconditional (I := I) (M := M) g r s i α p))
+
+/-- Chart-locality-free twin of `covDerivLowerOrderTerm_pouSmul_tendsto`. -/
+private theorem covDerivLowerOrderTerm_pouSmul_tendsto_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s)
+    (k : Fin (Module.finrank ℝ E)) :
+    Filter.Tendsto
+      (fun n => (covDerivLowerOrderTerm_pouSmul_memLp_unconditional (I := I) (M := M)
+        g r s i α P₀ k n).toLp _)
+      atTop
+      (𝓝 ((covGradChristoffelUnscaledLimit_memLp_unconditional (I := I) (M := M)
+        g r s i α P₀ k).toLp _)) := by
+  classical
+  -- The genuine `n`-th summand and the limiting summand, indexed by `p`.
+  have hf : ∀ (p : TensorCompIdx (E := E) r s) (n : ℕ),
+      MemLp (fun y => covDerivLowerOrderCoeff (I := I) (M := M)
+            g r s α k P₀.1 p.1 P₀.2 p.2 y *
+          tensorChartComponent (I := I) (M := M) g r s
+            (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+              g r s i n).toCcTensor α p.1 p.2 y) 2
+        (chartL2Measure (I := I) (M := M) α) := fun p n =>
+    memLp_factor_mul_componentAtom_unconditional (I := I) (M := M) g r s i α p n
+      (covDerivLowerOrderCoeff_contDiffOn (I := I) (M := M)
+        g r s α k P₀.1 p.1 P₀.2 p.2)
+  have hflim : ∀ p : TensorCompIdx (E := E) r s,
+      MemLp (fun y => Set.indicator (chartPouKernel (I := I) (M := M) α)
+            (covDerivLowerOrderCoeff (I := I) (M := M)
+              g r s α k P₀.1 p.1 P₀.2 p.2) y *
+          (componentLpLimit_unconditional (I := I) (M := M) g r s i α p :
+            EuclN → ℝ) y) 2
+        (chartL2Measure (I := I) (M := M) α) := fun p =>
+    memLp_indicatorFactor_mul_lp (I := I) (M := M) α
+      (covDerivLowerOrderCoeff_contDiffOn (I := I) (M := M)
+        g r s α k P₀.1 p.1 P₀.2 p.2)
+      (componentLpLimit_unconditional (I := I) (M := M) g r s i α p)
+  -- Per-summand `L²`-convergence: a chart-component summand.
+  have h_tendsto : ∀ p : TensorCompIdx (E := E) r s,
+      Filter.Tendsto (fun n => (hf p n).toLp _) atTop
+        (𝓝 ((hflim p).toLp _)) := fun p =>
+    tendsto_componentSummand_unconditional (I := I) (M := M) g r s i α p
+      (covDerivLowerOrderCoeff_contDiffOn (I := I) (M := M)
+        g r s α k P₀.1 p.1 P₀.2 p.2)
+      (fun n => hf p n) (hflim p)
+  -- The Christoffel correction is, on the chart target, the finite sum of the
+  -- genuine summands.
+  have hFn_eq : ∀ n : ℕ,
+      covDerivLowerOrderTerm (I := I) (M := M) g r s
+          (pouSmul (I := I) (M := M) g r s α
+            (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+              g r s i n).toCcTensor) α k P₀.1 P₀.2
+        =ᵐ[chartL2Measure (I := I) (M := M) α]
+        fun y => ∑ p : TensorCompIdx (E := E) r s,
+          covDerivLowerOrderCoeff (I := I) (M := M)
+              g r s α k P₀.1 p.1 P₀.2 p.2 y *
+            tensorChartComponent (I := I) (M := M) g r s
+              (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+                g r s i n).toCcTensor α p.1 p.2 y := by
+    intro n
+    rw [chartL2Measure]
+    refine (ae_restrict_iff'
+      (chartTargetEuclid_measurableSet (I := I) (M := M) α)).mpr ?_
+    exact Filter.Eventually.of_forall (fun y hy =>
+      covDerivLowerOrderTerm_pouSmul_eqOn (I := I) (M := M) g r s α
+        (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+          g r s i n).toCcTensor k P₀.1 P₀.2 hy)
+  -- The un-rescaled limit function is, definitionally, the finite sum of the
+  -- limiting summands.
+  have hFlim_eq :
+      covGradChristoffelUnscaledLimit_unconditional (I := I) (M := M)
+          g r s i α P₀ k
+        =ᵐ[chartL2Measure (I := I) (M := M) α]
+        fun y => ∑ p : TensorCompIdx (E := E) r s,
+          Set.indicator (chartPouKernel (I := I) (M := M) α)
+              (covDerivLowerOrderCoeff (I := I) (M := M)
+                g r s α k P₀.1 p.1 P₀.2 p.2) y *
+            (componentLpLimit_unconditional (I := I) (M := M) g r s i α p :
+              EuclN → ℝ) y :=
+    Filter.EventuallyEq.rfl
+  exact tendsto_toLp_finsetSum (I := I) (M := M) α Finset.univ
+    hf hflim h_tendsto
+    (fun n => covDerivLowerOrderTerm_pouSmul_memLp_unconditional (I := I) (M := M)
+      g r s i α P₀ k n)
+    (covGradChristoffelUnscaledLimit_memLp_unconditional (I := I) (M := M)
+      g r s i α P₀ k)
+    hFn_eq hFlim_eq
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+/-- Chart-locality-free twin of `smul_componentLpLimit_coeFn_ae`. -/
+private lemma smul_componentLpLimit_coeFn_ae_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (p : TensorCompIdx (E := E) r s) :
+    (fun y : EuclN => (i.fst.val)⁻¹ *
+        (componentLpLimit_unconditional (I := I) (M := M) g r s i α p :
+          EuclN → ℝ) y)
+      =ᵐ[chartL2Measure (I := I) (M := M) α]
+      (fun y : EuclN =>
+        (tensorL2ChartComponent (I := I) (M := M) g r s
+          (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+              g r s) i) α p :
+          EuclN → ℝ) y) := by
+  classical
+  have hμ_ne : i.fst.val ≠ 0 := i.fst.val_ne_zero
+  -- `μ⁻¹ • componentLpLimit_unconditional = tensorL2ChartComponent φ` as `Lp`
+  -- elements.
+  have h_lp_eq :
+      (i.fst.val)⁻¹ • componentLpLimit_unconditional (I := I) (M := M)
+          g r s i α p =
+        tensorL2ChartComponent (I := I) (M := M) g r s
+          (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+              g r s) i) α p := by
+    rw [componentLpLimit_unconditional, smul_smul, inv_mul_cancel₀ hμ_ne, one_smul]
+  -- The `coeFn` of the scalar multiple is `μ⁻¹ •` the `coeFn`, almost
+  -- everywhere; combine with the `coeFn` of the `Lp` equality.
+  refine (Lp.coeFn_smul (i.fst.val)⁻¹
+    (componentLpLimit_unconditional (I := I) (M := M) g r s i α p)).symm.trans ?_
+  exact Filter.EventuallyEq.of_eq
+    (congrArg (fun z : Lp ℝ 2 (chartL2Measure (I := I) (M := M) α) =>
+      (z : EuclN → ℝ)) h_lp_eq)
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+/-- Chart-locality-free twin of `smul_unscaledLimit_toLp_eq`. -/
+private lemma smul_unscaledLimit_toLp_eq_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s)
+    (k : Fin (Module.finrank ℝ E)) :
+    (i.fst.val)⁻¹ •
+        (covGradChristoffelUnscaledLimit_memLp_unconditional (I := I) (M := M)
+          g r s i α P₀ k).toLp _ =
+      (covGradChristoffelLimit_memLp_unconditional (I := I) (M := M)
+        g r s i α P₀ k).toLp _ := by
+  classical
+  apply Lp.ext
+  -- The underlying functions agree almost everywhere.
+  refine (Lp.coeFn_smul (i.fst.val)⁻¹
+    ((covGradChristoffelUnscaledLimit_memLp_unconditional (I := I) (M := M)
+      g r s i α P₀ k).toLp _)).trans ?_
+  refine Filter.EventuallyEq.trans ?_
+    (MemLp.coeFn_toLp (covGradChristoffelLimit_memLp_unconditional (I := I) (M := M)
+      g r s i α P₀ k)).symm
+  -- Gather the finitely many per-`p` a.e. identities into a single
+  -- a.e.-quantified statement, so each summand may be rewritten after
+  -- `filter_upwards`.
+  have h_all : ∀ᵐ y ∂(chartL2Measure (I := I) (M := M) α),
+      ∀ p : TensorCompIdx (E := E) r s,
+        (i.fst.val)⁻¹ *
+            (componentLpLimit_unconditional (I := I) (M := M) g r s i α p :
+              EuclN → ℝ) y =
+          (tensorL2ChartComponent (I := I) (M := M) g r s
+            (tensorResolventEigenbasisVec_ofCompact (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator_intrinsic (I := I) (M := M)
+                g r s) i) α p :
+            EuclN → ℝ) y :=
+    (ae_all_iff).mpr (fun p =>
+      smul_componentLpLimit_coeFn_ae_unconditional (I := I) (M := M)
+        g r s i α p)
+  filter_upwards [MemLp.coeFn_toLp (covGradChristoffelUnscaledLimit_memLp_unconditional
+    (I := I) (M := M) g r s i α P₀ k), h_all] with y hy hy_all
+  rw [Pi.smul_apply, hy]
+  -- Distribute `μ⁻¹` across the finite sum and match summand by summand.
+  rw [covGradChristoffelUnscaledLimit_unconditional,
+    covGradChristoffelLimit_unconditional, smul_eq_mul, Finset.mul_sum]
+  refine Finset.sum_congr rfl (fun p _ => ?_)
+  -- Reassociate the product so the `μ⁻¹` factor multiplies
+  -- `componentLpLimit_unconditional`, then apply the per-`p` a.e. identity
+  -- (valid at `y` by `hy_all`).
+  rw [mul_left_comm, hy_all p]
+
+/-- **Chart-locality-free twin of `covGradChristoffel_tendsto`.** The
+`μ⁻¹`-rescaled `L²` classes of the zeroth-order Christoffel correction term at
+the partition-of-unity-weighted approximants converge, as `n → ∞` and in
+`Lp ℝ 2 (chartL2Measure α)`, to the `L²` class of the explicit limit function
+`covGradChristoffelLimit_unconditional g r s i α P₀ k`. -/
+theorem covGradChristoffel_tendsto_unconditional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s)
+    (α : M) (P₀ : TensorCompIdx (E := E) r s)
+    (k : Fin (Module.finrank ℝ E)) :
+    Filter.Tendsto
+      (fun n => (i.fst.val)⁻¹ •
+        ((covDerivLowerOrderTerm_pouSmul_memLp_unconditional (I := I) (M := M)
+          g r s i α P₀ k n).toLp
+          (covDerivLowerOrderTerm (I := I) (M := M) g r s
+            (pouSmul (I := I) (M := M) g r s α
+              (eigenvectorSmoothApprox_unconditional (I := I) (M := M)
+                g r s i n).toCcTensor) α k P₀.1 P₀.2) :
+          Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)))
+      atTop
+      (𝓝 ((covGradChristoffelLimit_memLp_unconditional (I := I) (M := M)
+        g r s i α P₀ k).toLp
+        (covGradChristoffelLimit_unconditional (I := I) (M := M)
+          g r s i α P₀ k))) := by
+  classical
+  -- Rescale the un-rescaled convergence by the continuous map `μ⁻¹ • ·`.
+  have h_smul :=
+    (covDerivLowerOrderTerm_pouSmul_tendsto_unconditional (I := I) (M := M)
+      g r s i α P₀ k).const_smul (i.fst.val)⁻¹
+  -- Identify the rescaled limit with the headline limit function.
+  rwa [smul_unscaledLimit_toLp_eq_unconditional (I := I) (M := M)
+    g r s i α P₀ k] at h_smul
+
 /-! ## Sanity tests -/
 
 example (g : SmoothRiemannianMetric I M) (r s : ℕ)
