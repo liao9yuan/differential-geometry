@@ -1,6 +1,7 @@
 import DifferentialGeometry.PDE.RicciFlow.HebeyBlock.FiberNormRiemannianBridge
 import DifferentialGeometry.PDE.RicciFlow.SmoothQuasilinear
 import DifferentialGeometry.PDE.RicciFlow.DeTurckRHSSection
+import DifferentialGeometry.Integral.Connection.TensorExtension
 
 /-!
 # Pointwise Riemannian local-Lipschitz bound for the DeTurck reaction RHS difference
@@ -68,6 +69,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Tensor
 open DifferentialGeometry.PDE.RicciFlow.HebeyBlock
+open DifferentialGeometry.PDE.RicciFlow
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -153,77 +155,175 @@ theorem deTurckRHS_diff_gNorm_le_modelNorm_pointwise
       ‖T‖ ≤ D * ‖TensorRSSpace.toModel (𝕜 := ℝ) (I := I) T‖ :=
   gNorm_le_modelNorm_pointwise (I := I) (M := M) g₀ 0 2 x₀
 
-/-! ## The quantitative pointwise Riemannian local-Lipschitz bound: obstruction
+/-! ## The intrinsic `2`-jet seminorm of a metric difference
 
-The target deliverable is a constant `C(R) ≥ 0` with, for all `x : M`,
+The correct right-hand side of the pointwise Lipschitz bound is the **`2`-jet
+seminorm** of the metric perturbation `g₁ − g₂`, measured in `g₀`-induced
+Riemannian fibre norms.  The metric difference is the smooth covariant
+`(0,2)`-tensor field `b ↦ g₁.inner b − g₂.inner b`; its `0`-jet is the fibre
+value, its `1`-jet adds the first covariant derivative
+`∇^{g₀}(g₁ − g₂)` (a `(0,3)`-tensor), and its `2`-jet adds the second covariant
+derivative `∇^{g₀,2}(g₁ − g₂)` (a `(0,4)`-tensor).  This subsection gives the
+intrinsic `(0,2)` and `(0,3)` building blocks (the value and first-order terms);
+all fibre norms used are Riemannian, so no trivialization-image (chart-selection)
+norm enters and the construction needs no parallelizability witness. -/
+
+/-- The metric difference `g₁ − g₂`, as a `(0,2)`-tensor field
+`b ↦ g₁.inner b − g₂.inner b`.  This is
+`metricTensor02 g₁ − metricTensor02 g₂` and is the object whose `2`-jet
+controls the Ricci–DeTurck right-hand-side difference. -/
+def metricDiff02 (g₁ g₂ : SmoothRiemannianMetric I M) :
+    Π b : M, TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ :=
+  fun b => metricTensor02 (I := I) g₁ b - metricTensor02 (I := I) g₂ b
+
+@[simp] theorem metricDiff02_apply
+    (g₁ g₂ : SmoothRiemannianMetric I M) (b : M) (v w : TangentSpace I b) :
+    metricDiff02 (I := I) g₁ g₂ b v w =
+      g₁.inner b v w - g₂.inner b v w := by
+  change (metricTensor02 (I := I) g₁ b - metricTensor02 (I := I) g₂ b) v w =
+    g₁.inner b v w - g₂.inner b v w
+  rw [ContinuousLinearMap.sub_apply, ContinuousLinearMap.sub_apply]
+  rfl
+
+/-- The first covariant derivative `∇^{g₀}(g₁ − g₂)` of the metric difference,
+computed with the Levi-Civita connection of the base metric `g₀`.  This is a
+`(0,3)`-tensor fibre element at each point: `T_b M →L[ℝ] (T_b M →L[ℝ] T_b M
+→L[ℝ] ℝ)`, the directional covariant derivative of the `(0,2)`-tensor field
+`metricDiff02 g₁ g₂`. -/
+def metricDiff02Cov (g₀ g₁ g₂ : SmoothRiemannianMetric I M) (b : M) :
+    TangentSpace I b →L[ℝ]
+      (TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ) :=
+  (tensor02Cov (LeviCivita (I := I) g₀)).toFun
+    (metricDiff02 (I := I) g₁ g₂) b
+
+/-- The first covariant derivative is additive in the metric difference: it
+distributes over the `(0,2)`-tensor subtraction defining `metricDiff02`.  This
+is the connection additivity axiom of `tensor02Cov` specialised to the metric
+difference, valid since both metric sections are smooth (hence differentiable). -/
+theorem metricDiff02Cov_eq_sub
+    (g₀ g₁ g₂ : SmoothRiemannianMetric I M) (b : M) :
+    metricDiff02Cov (I := I) g₀ g₁ g₂ b =
+      (tensor02Cov (LeviCivita (I := I) g₀)).toFun
+          (metricTensor02 (I := I) g₁) b
+        - (tensor02Cov (LeviCivita (I := I) g₀)).toFun
+          (metricTensor02 (I := I) g₂) b := by
+  classical
+  -- The `(0,2)`-tensor covariant derivative is additive on differentiable sections
+  -- (`add` axiom of `IsCovariantDerivativeOn`); both metric sections are smooth.
+  set cov := tensor02Cov (LeviCivita (I := I) g₀) with hcov_def
+  have hcovOn := cov.isCovariantDerivativeOnUniv
+  have hT₁ : MDiffAtTensor02 (metricTensor02 (I := I) g₁) b :=
+    metricTensor02_mdiff (I := I) g₁ b
+  have hT₂ : MDiffAtTensor02 (metricTensor02 (I := I) g₂) b :=
+    metricTensor02_mdiff (I := I) g₂ b
+  -- `MDiffAtTensor02 T b` is exactly section-differentiability `MDiffAt (T% T) b`
+  -- for the `(0,2)`-tensor bundle, so the section-arithmetic lemmas apply.
+  have hT₂neg : MDiffAtTensor02 (-(metricTensor02 (I := I) g₂)) b :=
+    mdifferentiableAt_neg_section hT₂
+  -- Step 1: `cov (-T₂) b = - cov T₂ b`, from additivity and `cov 0 = 0`.
+  have hneg : cov.toFun (-(metricTensor02 (I := I) g₂)) b =
+      - cov.toFun (metricTensor02 (I := I) g₂) b := by
+    have hsum : cov.toFun (metricTensor02 (I := I) g₂
+          + (-(metricTensor02 (I := I) g₂))) b =
+        cov.toFun (metricTensor02 (I := I) g₂) b
+          + cov.toFun (-(metricTensor02 (I := I) g₂)) b :=
+      hcovOn.add hT₂ hT₂neg (Set.mem_univ b)
+    rw [add_neg_cancel] at hsum
+    have hzero : cov.toFun (0 : Π x : M,
+        TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) b = 0 :=
+      hcovOn.zero (Set.mem_univ b)
+    rw [hzero] at hsum
+    -- `0 = cov T₂ b + cov (-T₂) b`, so `cov (-T₂) b = - cov T₂ b`.
+    exact eq_neg_of_add_eq_zero_right hsum.symm
+  -- Step 2: `cov (T₁ - T₂) b = cov T₁ b + cov (-T₂) b = cov T₁ b - cov T₂ b`.
+  have hadd : cov.toFun (metricTensor02 (I := I) g₁
+        + (-(metricTensor02 (I := I) g₂))) b =
+      cov.toFun (metricTensor02 (I := I) g₁) b
+        + cov.toFun (-(metricTensor02 (I := I) g₂)) b :=
+    hcovOn.add hT₁ hT₂neg (Set.mem_univ b)
+  -- `metricDiff02 = metricTensor02 g₁ + (-(metricTensor02 g₂))` as a section.
+  have hdiff_eq : metricDiff02 (I := I) g₁ g₂ =
+      metricTensor02 (I := I) g₁ + (-(metricTensor02 (I := I) g₂)) := by
+    funext c
+    simp only [metricDiff02, metricTensor02, Pi.add_apply, Pi.neg_apply, sub_eq_add_neg]
+  calc metricDiff02Cov (I := I) g₀ g₁ g₂ b
+      = cov.toFun (metricDiff02 (I := I) g₁ g₂) b := rfl
+    _ = cov.toFun (metricTensor02 (I := I) g₁
+          + (-(metricTensor02 (I := I) g₂))) b := by rw [hdiff_eq]
+    _ = cov.toFun (metricTensor02 (I := I) g₁) b
+          + cov.toFun (-(metricTensor02 (I := I) g₂)) b := hadd
+    _ = cov.toFun (metricTensor02 (I := I) g₁) b
+          - cov.toFun (metricTensor02 (I := I) g₂) b := by rw [hneg]; abel
+
+/-! ## The quantitative pointwise Riemannian `2`-jet-Lipschitz bound
+
+The mathematically correct target — confirmed against the dependence of
+`deTurckRicciRHS g_bg g x` on the **`2`-jet** of `g` (the Ricci summand is affine
+in the second chart-derivatives `∂²g`, `chartRicci_affine_in_d2g`; the Lie
+summand `𝓛_{deTurckVF g g_bg} g` carries `∂g` and `∂²g` via the Christoffel
+symbols of `deTurckVF`) — is, for `g₁, g₂` in an `R`-ball around `g₀` and all
+`x : M`,
 
   `‖deTurckRicciRHS g_bg g₁ x − deTurckRicciRHS g_bg g₂ x‖_{g₀,x}`
-      `≤ C(R) · ‖(g₁ − g₂)(x)‖_{g₀,x}`
+    `≤ C(R) · ( ‖(g₁−g₂)(x)‖_{g₀,x} + ‖∇^{g₀}(g₁−g₂)(x)‖ + ‖∇^{g₀,2}(g₁−g₂)(x)‖ )`
 
-for `g₁, g₂` in a ball of radius `R` around a base metric `g₀`, with both norms
-the Riemannian fibre norm.
+with all fibre norms Riemannian and `C(R)` coming from the (continuous,
+compact-bounded) coefficient functions of the quasilinear chart formulas.  The
+value-only inequality (`0`-jet right-hand side) is *false*: with `g₂ = g₁ +
+ε·χ·H`, `χ(x) = 0`, `∂²χ(x) ≠ 0` one has `(g₁−g₂)(x) = 0` while the second-order
+part of the RHS difference at `x` is nonzero.
 
-Two genuinely *mathematical* (not merely engineering) obstructions block this
-exact statement:
+The intrinsic ingredients of the right-hand side are now available and
+HLCC-free:
+
+* the `0`-jet term `‖(g₁−g₂)(x)‖_{g₀,x}` is the `(0,2)` Riemannian fibre norm of
+  `metricDiff02 g₁ g₂ x`;
+* the `1`-jet term `‖∇^{g₀}(g₁−g₂)(x)‖` is the Riemannian fibre norm of the
+  `(0,3)`-tensor `metricDiff02Cov g₀ g₁ g₂ x` (`metricDiff02Cov_eq_sub`
+  expresses it as the difference of the two metric covariant derivatives);
+* the `2`-jet term is the second covariant derivative.
+
+The genuinely complete pieces feeding the bound are recorded above
+(`deTurckRHS_diff_frame_component_apply`,
+`deTurckRHS_diff_frame_component_contMDiffOn`,
+`deTurckRHS_diff_gNorm_le_modelNorm_pointwise`, `metricDiff02_apply`,
+`metricDiff02Cov_eq_sub`).  Two mathematically substantial pieces remain before
+the displayed inequality can be discharged with a finite `C(R)`:
 
 `-- BLOCKED:`
 
-**(O1) Jet-versus-value obstruction (statement-level falsity).**
-`deTurckRicciRHS g_bg g x` depends on the **2-jet** of `g` at `x`: the Ricci
-summand is *affine in the second chart-derivatives* `∂²g` (this is the explicit
-content of `chartRicci_affine_in_d2g` in `SmoothQuasilinear.lean`), and the
-Lie-derivative summand `𝓛_{deTurckVF g g_bg} g` depends on `∂g` and `∂²g` of `g`
-(via the Christoffel symbols inside `deTurckVF`).  Therefore the difference
-`deTurckRicciRHS g_bg g₁ x − deTurckRicciRHS g_bg g₂ x` depends on
-`∂²(g₁ − g₂)(x)` and `∂(g₁ − g₂)(x)`, which are **not** controlled by the
-pointwise fibre value `‖(g₁ − g₂)(x)‖_{g₀,x}` (the `0`-jet).  Concretely: fix
-`x`, let `g₂ = g₁ + ε·χ·H` where `χ` is a bump with `χ(x) = 0` but
-`∂²χ(x) ≠ 0`; then `(g₁ − g₂)(x) = 0` while the second-order part of the RHS
-difference at `x` is `≠ 0`.  Hence **no** constant `C` can satisfy the displayed
-inequality with the `0`-jet `‖(g₁ − g₂)(x)‖_{g₀,x}` on the right-hand side, for
-any `C⁰`/`L^∞` ball condition.
+**(A) Quasilinear-coefficient apparatus (the analytic core).**  Each chart-frame
+scalar component `rhsDiff(x)(eᵢ, eⱼ)` must be exhibited as an explicit smooth
+function of the chart `2`-jet `(g, ∂g, ∂²g)` of `g`, *affine* in `∂²g` (from the
+Ricci summand, `chartRicci_affine_in_d2g`) and quasilinear in `(g, ∂g, ∂²g)`
+(from the Christoffel-built Lie summand), with all coefficients (entries of the
+inverse Gram matrix, Christoffel symbols and their derivatives) continuous in `g`
+and hence — over the compact `R`-ball of admissible `2`-jets — uniformly bounded.
+The difference `rhsDiff(x)(eᵢ, eⱼ)` is then, by a mean-value estimate on this
+smooth jet-function, Lipschitz in the chart `2`-jet of `g₁ − g₂` with the
+displayed constant.  This explicit coefficient expansion (inverse-Gram
+perturbation, Christoffel and Christoffel-derivative bounds tied to
+`christoffel_Ck_bound_from_metric_Ck1`, and the affine-in-`∂²g` decomposition
+extracted from `chartRicciSecondOrderPrincipalSymbol` and its first-order
+remainder) is several thousand lines of new infrastructure that does not yet
+exist as a *pointwise* (rather than integrated `Hᵏ`) statement.
 
-The *true* pointwise statement bounds the LHS by `C(R)` times the **2-jet
-seminorm** of `g₁ − g₂` at `x` (value + first + second chart-derivatives).  The
-displayed value-only inequality holds only when the admissibility/ball condition
-controls the full `2`-jet pointwise (e.g. a `C²` ball with the right-hand side
-being the `2`-jet seminorm) — in which case the right-hand side is no longer the
-fibre value `‖(g₁ − g₂)(x)‖_{g₀,x}` but the jet seminorm.  The downstream
-quasilinear-parabolic existence engine
-(`quasilinear_metric_parabolic_shortTime_exists`, `PDE/ParabolicShortTime.lean`)
-consumes a Lipschitz constant in the `Hᵏ` (Sobolev) norm — which *does* control
-the jet — not a pointwise-value Lipschitz bound, confirming the value-only form
-is the wrong target.
+**(B) Intrinsic second covariant derivative of a `(0,2)`-tensor.**  The `2`-jet
+term `‖∇^{g₀,2}(g₁−g₂)(x)‖` requires the second covariant derivative of a
+`(0,2)`-tensor field, i.e. an abstract `(0,3)`-tensor-bundle covariant derivative
+to iterate `tensor02Cov`.  The connection framework
+(`Integral/Connection/TensorExtension.lean`) currently provides the `(0,2)`-tensor
+covariant derivative `tensor02Cov` (delivering a `(0,3)`-valued operator) but no
+covariant derivative *on* the `(0,3)`-tensor bundle to compose with it; building
+that abstract `(0,3)` (and the `(0,3)`/`(0,4)` Riemannian-bundle norm bridges
+analogous to `bilinFormToModelₗᵢ`) is the second missing piece.
 
-**(O2) Uniform model↔Riemannian comparison (model-norm wall).**
-Even granting the `2`-jet right-hand side, the natural route translates the
-chart-frame scalar component Lipschitz bound (true and model-norm-free, see
-`deTurckRHS_diff_frame_component_contMDiffOn`) into the Riemannian fibre norm via
-a model↔`g` comparison.  The per-point bridge
-`gNorm_le_modelNorm_pointwise` gives the comparison constant only at a single
-base point; making it **uniform over the compact base** requires a uniform bound
-on `b ↦ ‖TensorRSSpace.toModel T‖` away from chart centres.  But
-`TensorRSSpace.toModel` at `b ≠` (chart centre) is the chart-selection-dependent
-trivialization-image norm, which is provably **unbounded** on a
-non-parallelizable manifold (this is exactly the `HasLocallyConstantChartAt`
-phenomenon, false on `S²`).  The correct model-norm-free uniformisation must
-therefore proceed through the partition-of-unity / chart-frame-component
-assembly (`uniform_chart_bounds_from_compactness`,
-`chart_frame_component_norm_bound`), which delivers a uniform constant in the
-`Hᵏ` (integrated) norm — not pointwise — again landing on the jet/Sobolev side
-rather than the pointwise-fibre-value side.
-
-**Conclusion.**  The exact stated lemma is mathematically false as written
-(obstruction O1).  The mathematically correct and model-norm-free deliverable is
-either (a) a *jet-seminorm* pointwise bound, or (b) an `Hᵏ`-Lipschitz bound; both
-are substantially larger pieces of infrastructure tied to the parabolic
-existence engine, and (b) is what the downstream consumer actually requires.
-The true, model-norm-free building blocks established above
-(`deTurckRHS_diff_frame_component_apply`,
-`deTurckRHS_diff_frame_component_contMDiffOn`,
-`deTurckRHS_diff_gNorm_le_modelNorm_pointwise`) are the per-summand inputs to
-either correct formulation. -/
-theorem deTurck_rhs_pointwise_riemannian_lipschitz_obstruction : True := trivial
+Both (A) and (B) are genuine infrastructure, not engineering shortcuts.  The
+intrinsic `0`-jet and `1`-jet right-hand-side terms, the LHS-to-model per-point
+reverse bridge, the chart-frame scalar-component identity, and the smoothness of
+that component are the complete inputs delivered here; they are exactly the
+per-summand pieces the `2`-jet bound is assembled from. -/
+theorem deTurck_rhs_pointwise_riemannian_jetLipschitz_target : True := trivial
 
 end IntrinsicSpectral
 end RicciFlow
@@ -242,3 +342,9 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 #print axioms deTurckRHS_diff_gNorm_le_modelNorm_pointwise
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+#print axioms metricDiff02_apply
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
+#print axioms metricDiff02Cov_eq_sub
