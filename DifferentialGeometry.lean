@@ -1094,6 +1094,7 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.EnergyEstimates
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.BallRetraction
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.MaxRegLocalLipschitz
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.MaxRegLocalLipschitzStay
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.CrossScaleParabolicTrace
 
 -- Ricci flow short-time existence skeleton (PDE/RicciFlow tree)
 import DifferentialGeometry.PDE.RicciFlow.PrincipalSymbol
