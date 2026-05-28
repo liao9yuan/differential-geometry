@@ -8,6 +8,8 @@ import DifferentialGeometry.Geometry.Riemannian.Geodesic.CrossVFReduction
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.ProjDerivative
 import DifferentialGeometry.Geometry.Riemannian.Exponential.Definition
 import DifferentialGeometry.Geometry.Riemannian.Exponential.SmoothnessUnconditional
+import DifferentialGeometry.Geometry.Riemannian.AlongCurve
+import DifferentialGeometry.Geometry.Riemannian.MFDerivAlongCurve
 import DifferentialGeometry.Integral.Measure.ChartDensity
 import DifferentialGeometry.Integral.Connection.LeviCivita
 import Mathlib.Analysis.Calculus.MeanValue
@@ -97,6 +99,103 @@ variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 
 section GeodesicCompleteness
 
+open DifferentialGeometry.Geometry.Riemannian.AlongCurve
+open DifferentialGeometry.Geometry.Riemannian.MFDerivAlongCurve
+open DifferentialGeometry.Integral.DivergenceTheorem
+
+/-! ### Private bridges: raw `mfderiv γ s 1` ↔ chart-coordinate velocity
+
+The following helpers identify, at a single parameter value, the raw
+`mfderiv 𝓘(ℝ, ℝ) I γ s 1 : E` (using the defeq `TangentSpace I (γ s) = E`)
+with the inverse-trivialisation image of the model-space derivative of the
+chart-pulled-back curve `chartCurve α γ`.  They mirror the global lemmas
+in `MFDerivAlongCurve`, but require only pointwise `MDifferentiableAt`
+hypotheses, so they apply to a geodesic whose only available smoothness is
+the integral-curve mfdifferentiability plus the chart-local geodesic
+equation. -/
+
+/-- Single-point chart-coordinate identity: for `s` with `γ s` in the chart
+source at `α` and `γ` mdifferentiable at `s`, the trivialisation-`α`
+coordinate of `mfderiv γ s 1` equals `fderiv (extChartAt I α ∘ γ) s 1`. -/
+private theorem bm_c_chartCoord_mfderiv_eq_fderiv_at
+    {γ : ℝ → M} {α : M} {s : ℝ}
+    (hγ : MDifferentiableAt 𝓘(ℝ, ℝ) I γ s)
+    (hs : γ s ∈ (chartAt H α).source) :
+    ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ (γ s))
+        ((mfderiv 𝓘(ℝ, ℝ) I γ s : ℝ →L[ℝ] _) (1 : ℝ)) =
+      (fderiv ℝ ((extChartAt I α) ∘ γ) s : ℝ →L[ℝ] E) (1 : ℝ) := by
+  rw [TangentBundle.continuousLinearMapAt_trivializationAt (I := I)
+        (x₀ := α) (x := γ s) hs]
+  have hφ_mdiff : MDifferentiableAt I 𝓘(ℝ, E) (extChartAt I α) (γ s) :=
+    mdifferentiableAt_extChartAt (I := I) (x := α) hs
+  have hchain :
+      mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ((extChartAt I α) ∘ γ) s =
+        (mfderiv I 𝓘(ℝ, E) (extChartAt I α) (γ s)).comp
+          (mfderiv 𝓘(ℝ, ℝ) I γ s) :=
+    mfderiv_comp s hφ_mdiff hγ
+  have hmf_eq_f :
+      mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ((extChartAt I α) ∘ γ) s =
+        fderiv ℝ ((extChartAt I α) ∘ γ) s :=
+    mfderiv_eq_fderiv (𝕜 := ℝ) (f := (extChartAt I α) ∘ γ) (x := s)
+  have hRHS :
+      (fderiv ℝ ((extChartAt I α) ∘ γ) s : ℝ →L[ℝ] E) (1 : ℝ) =
+        ((mfderiv I 𝓘(ℝ, E) (extChartAt I α) (γ s)).comp
+            (mfderiv 𝓘(ℝ, ℝ) I γ s)) (1 : ℝ) := by
+    rw [← hmf_eq_f, hchain]; rfl
+  rw [hRHS]; rfl
+
+/-- Single-point raw-form identity: the raw `mfderiv γ s 1 : E` equals the
+inverse trivialisation `symmL` of `fderiv (extChartAt I α ∘ γ) s 1`. -/
+private theorem bm_c_raw_mfderiv_eq_symmL_fderiv_at
+    {γ : ℝ → M} {α : M} {s : ℝ}
+    (hγ : MDifferentiableAt 𝓘(ℝ, ℝ) I γ s)
+    (hs : γ s ∈ (chartAt H α).source) :
+    ((mfderiv 𝓘(ℝ, ℝ) I γ s : ℝ →L[ℝ] _) (1 : ℝ) : E) =
+      ((trivializationAt E (TangentSpace I) α).symmL ℝ (γ s))
+        ((fderiv ℝ ((extChartAt I α) ∘ γ) s : ℝ →L[ℝ] E) (1 : ℝ)) := by
+  have hCC := bm_c_chartCoord_mfderiv_eq_fderiv_at (I := I) (γ := γ) (α := α)
+    (s := s) hγ hs
+  have hbaseSet : γ s ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
+    rw [TangentBundle.trivializationAt_baseSet]; exact hs
+  have hround :
+      ((trivializationAt E (TangentSpace I) α).symmL ℝ (γ s))
+          (((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ (γ s))
+            ((mfderiv 𝓘(ℝ, ℝ) I γ s : ℝ →L[ℝ] _) (1 : ℝ))) =
+        ((mfderiv 𝓘(ℝ, ℝ) I γ s : ℝ →L[ℝ] _) (1 : ℝ)) :=
+    (trivializationAt E (TangentSpace I) α).symmL_continuousLinearMapAt
+      (R := ℝ) hbaseSet _
+  calc ((mfderiv 𝓘(ℝ, ℝ) I γ s : ℝ →L[ℝ] _) (1 : ℝ) : E)
+      = ((trivializationAt E (TangentSpace I) α).symmL ℝ (γ s))
+          (((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ (γ s))
+            ((mfderiv 𝓘(ℝ, ℝ) I γ s : ℝ →L[ℝ] _) (1 : ℝ))) := hround.symm
+    _ = ((trivializationAt E (TangentSpace I) α).symmL ℝ (γ s))
+          ((fderiv ℝ ((extChartAt I α) ∘ γ) s : ℝ →L[ℝ] E) (1 : ℝ)) := by rw [hCC]
+
+/-- A geodesic is mdifferentiable at every parameter value, extracted from
+its integral-curve lift (which is mdifferentiable, the projection being
+smooth and `γ = proj ∘ lift`). -/
+private theorem bm_c_isGeodesic_mdifferentiableAt
+    {g : SmoothRiemannianMetric I M} {γ : ℝ → M}
+    (hγ : IsGeodesic (I := I) g γ) (s : ℝ) :
+    MDifferentiableAt 𝓘(ℝ, ℝ) I γ s := by
+  obtain ⟨α, f, hproj, hf⟩ := hγ
+  -- The lift `f` is mdifferentiable at `s` (it is an integral curve).
+  have hf_s : MDifferentiableAt 𝓘(ℝ, ℝ) I.tangent f s := (hf s).mdifferentiableAt
+  -- The projection is smooth, hence mdifferentiable at `f s`.
+  have hproj_mdiff :
+      MDifferentiableAt I.tangent I
+        (Bundle.TotalSpace.proj : TangentBundle I M → M) (f s) :=
+    ((Bundle.contMDiff_proj (TangentSpace I)
+      (n := (∞ : WithTop ℕ∞))).contMDiffAt).mdifferentiableAt (by simp)
+  -- Compose: `proj ∘ f` is mdifferentiable at `s`.
+  have hcomp : MDifferentiableAt 𝓘(ℝ, ℝ) I
+      ((Bundle.TotalSpace.proj : TangentBundle I M → M) ∘ f) s :=
+    hproj_mdiff.comp s hf_s
+  -- `proj ∘ f = γ` as functions, by `hproj`.
+  have hfun : ((Bundle.TotalSpace.proj : TangentBundle I M → M) ∘ f) = γ := by
+    funext u; exact hproj u
+  rwa [hfun] at hcomp
+
 /-- **Constant speed of a geodesic.** From `\nabla_{\gamma'} \gamma' = 0`
 and metric compatibility of Levi-Civita, the function
 `t \mapsto \langle \gamma'(t), \gamma'(t)\rangle_g` is constant. -/
@@ -138,17 +237,116 @@ theorem bm_c_gc_constant_speed
     -- Chart-coordinate second-derivative form of the geodesic equation at `t`.
     have hγ_eq : HasGeodesicEquationAt (I := I) g γ t :=
       IsGeodesicAt.hasGeodesicEquationAt (I := I) (g := g) (γ := γ) (t₀ := t) hγ_at
-    -- Differentiation of `F` at `t` via metric compatibility of Levi-Civita.
-    -- In the chart at `γ t`, write `u(s) := φ_{γ t}(γ s)`, `v := u'(t)`,
-    -- `a := u''(t)`. The geodesic equation says `a = -Γ_{γ t}(v, v)(u(t))`.
-    -- Differentiating `F(s) = g_{ij}(γ s) · v^i(s) · v^j(s)` at `s = t` uses
-    -- the product rule plus the Christoffel relation; the linear-in-`a` term
-    -- becomes `2 · g_{ij}(γ t) · v^i · a^j` and combines with the
-    -- metric-derivative term `(∂_k g_{ij}) · v^i · v^j · v^k` to yield zero
-    -- by the geodesic equation. The detailed chart-local product-rule chain
-    -- has not been packaged separately in the project; we record it here as
-    -- the single residual gap of this PARTIAL proof.
-    sorry
+    -- Work in the chart centred at `γ t`.  Abbreviations: `α := γ t`,
+    -- `u := chartCurve α γ = φ_α ∘ γ`, and the chart-frame velocity
+    -- `V s := deriv u s`.
+    set α : M := γ t with hα_def
+    -- Geodesic-equation data at `t`: a velocity `v`, an acceleration `a`,
+    -- the first-derivative witness, the eventual first-derivative witness,
+    -- the second-derivative witness, and the geodesic identity.
+    obtain ⟨v, a, hv, hev, ha, hgeo⟩ := hγ_eq
+    -- `chartLocalCurve γ t` is definitionally `chartCurve α γ` (= `φ_α ∘ γ`).
+    set u : ℝ → E := chartCurve (I := I) α γ with hu_def
+    set V : ℝ → E := fun s => deriv u s with hV_def
+    -- Recast the geodesic data in terms of `u` and `V` (`chartLocalCurve γ t`
+    -- is definitionally `u`, and `V = deriv u` definitionally matches `ha`).
+    have hv' : HasDerivAt u v t := hv
+    have hev' : ∀ᶠ s in nhds t, HasDerivAt u (deriv u s) s := hev
+    have ha' : HasDerivAt V a t := ha
+    -- `V t = v` (the deriv at `t` is the `HasDerivAt`-value `v`).
+    have hVt : V t = v := by rw [hV_def]; exact hv'.deriv
+    -- Membership of `u t` in the interior of the chart target (boundaryless).
+    have hut_src : γ t ∈ (chartAt H α).source := by
+      rw [hα_def]; exact mem_chart_source H (γ t)
+    have hut_ext_src : γ t ∈ (extChartAt I α).source := by
+      rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hut_src
+    have hut_target : extChartAt I α (γ t) ∈ (extChartAt I α).target :=
+      (extChartAt I α).map_source hut_ext_src
+    have hmem : u t ∈ interior (extChartAt I α).target := by
+      rw [hu_def, chartCurve_def]
+      exact extChartAt_target_subset_interior_of_boundaryless (I := I) α hut_target
+    -- The chart-covariant derivative `D V/dt = V'(t) + Γ_α(u'(t), V(t))(u(t))`
+    -- vanishes at `t`: it equals `a + Γ_α(v, v)(φ_α(γ t)) = 0` by the geodesic
+    -- equation.
+    have hDV0 :
+        a + chartChristoffelContraction (I := I) g α v v (u t) = 0 := by
+      rw [hu_def, chartCurve_def]; exact hgeo
+    -- The Leibniz/covariant derivative of the Gram form `t ↦ ⟨V, V⟩_G`.
+    have hcov := chartGramAlongCurve_hasDerivAt_covariant (I := I) g α γ V V
+      (uPrime := fun _ => v) (Vprime := fun _ => a) (Wprime := fun _ => a)
+      (t := t) hv' hmem ha' ha'
+    -- The covariant-correction terms vanish (geodesic equation), so the value
+    -- produced by `hcov` is `0`.
+    have hval0 :
+        (∑ l : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+            chartGramOnE (I := I) g α l j (u t) *
+              chartCoord (E := E) l
+                (a + chartChristoffelContraction (I := I) g α v (V t) (u t)) *
+              chartCoord (E := E) j (V t))
+          + (∑ i : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+            chartGramOnE (I := I) g α i l (u t) *
+              chartCoord (E := E) i (V t) *
+              chartCoord (E := E) l
+                (a + chartChristoffelContraction (I := I) g α v (V t) (u t)))
+        = 0 := by
+      -- The covariant-correction argument vanishes: `a + Γ_α(v, V t)(u t) = 0`.
+      have hcorr0 :
+          a + chartChristoffelContraction (I := I) g α v (V t) (u t) = 0 := by
+        rw [hVt]; exact hDV0
+      simp only [hcorr0, chartCoord_zero, mul_zero, zero_mul,
+        Finset.sum_const_zero, add_zero]
+    -- Hence the Gram form has zero derivative at `t`.
+    have hcov0 : HasDerivAt (fun s => chartGramAlongCurve (I := I) g α γ V V s)
+        0 t := by
+      have := hcov
+      rw [hval0] at this
+      exact this
+    -- `F =ᶠ[𝓝 t] (fun s => chartGramAlongCurve g α γ V V s)`.
+    have hF_eq : F =ᶠ[nhds t] (fun s => chartGramAlongCurve (I := I) g α γ V V s) := by
+      -- Neighbourhood on which `γ s` is in the chart source and `u` is
+      -- differentiable.
+      have hsrc_nhds : {s : ℝ | γ s ∈ (chartAt H α).source} ∈ nhds t := by
+        have hcont : Continuous γ :=
+          MDifferentiable.continuous
+            (fun s => bm_c_isGeodesic_mdifferentiableAt (I := I) hγ s)
+        exact hcont.continuousAt.preimage_mem_nhds
+          ((chartAt H α).open_source.mem_nhds hut_src)
+      filter_upwards [hev', hsrc_nhds] with s hus hsrc
+      -- Raw mfderiv at `s` factors through `symmL` of `fderiv u s`.
+      have hγ_s : MDifferentiableAt 𝓘(ℝ, ℝ) I γ s :=
+        bm_c_isGeodesic_mdifferentiableAt (I := I) hγ s
+      have hraw := bm_c_raw_mfderiv_eq_symmL_fderiv_at (I := I) (γ := γ)
+        (α := α) (s := s) hγ_s hsrc
+      -- `fderiv (φ_α ∘ γ) s 1 = deriv u s = V s` (definitional: `deriv f s`
+      -- unfolds to `fderiv ℝ f s 1`, and `(φ_α ∘ γ) = u` definitionally).
+      have hfderiv_eq :
+          (fderiv ℝ ((extChartAt I α) ∘ γ) s : ℝ →L[ℝ] E) (1 : ℝ) = V s := rfl
+      -- The mfderiv velocity is the chart-frame `symmL` of `V s`.
+      have hmf : (mfderiv 𝓘(ℝ, ℝ) I γ s) (1 : ℝ) =
+          ((trivializationAt E (TangentSpace I) α).symmL ℝ (γ s)) (V s) := by
+        rw [hraw, hfderiv_eq]
+      -- Evaluate `F s` and identify with the Gram form.
+      change F s = chartGramAlongCurve (I := I) g α γ V V s
+      have hFs : F s =
+          (g.inner (γ s))
+            (((trivializationAt E (TangentSpace I) α).symmL ℝ (γ s)) (V s))
+            (((trivializationAt E (TangentSpace I) α).symmL ℝ (γ s)) (V s)) := by
+        rw [hF_def]
+        change (g.inner (γ s)) ((mfderiv 𝓘(ℝ, ℝ) I γ s) (1 : ℝ))
+            ((mfderiv 𝓘(ℝ, ℝ) I γ s) (1 : ℝ)) = _
+        rw [hmf]
+      rw [hFs, inner_eq_chartGramOnE_bilinear_on_baseSet (I := I) g α (x := γ s)
+        (V s) (V s)]
+      -- Replace `chartGramMatrix g α (γ s)` by `chartGramOnE g α · (u s)`.
+      rw [chartGramAlongCurve_def]
+      refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
+      have hinv : (extChartAt I α).symm (u s) = γ s := by
+        rw [hu_def, chartCurve_def]
+        exact (extChartAt I α).left_inv (by
+          rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hsrc)
+      rw [chartGramOnE_def, hinv]
+    -- Transport the derivative back to `F`.
+    exact hcov0.congr_of_eventuallyEq hF_eq
   -- `F` is differentiable everywhere (witnessed by `hF_deriv`).
   have hF_diff : Differentiable ℝ F :=
     fun t => (hF_deriv t).differentiableAt

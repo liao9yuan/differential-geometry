@@ -691,8 +691,8 @@ import DifferentialGeometry.Integral.Connection.ChartBridge.Gradient
 import DifferentialGeometry.Integral.Connection.RicciIdentity
 import DifferentialGeometry.Integral.Connection.ChartBridge.Hessian
 import DifferentialGeometry.Integral.Connection.ChartBridge.Riemann
-import DifferentialGeometry.Integral.Connection.ChartBridge.RiemannBasisBracket
 import DifferentialGeometry.Integral.Connection.ChartBridge.Ricci
+import DifferentialGeometry.Integral.Connection.ChartBridge.RiemannBasisBracket
 import DifferentialGeometry.Integral.Connection.RicciIdentitySmoothFrame
 import DifferentialGeometry.Integral.Connection.ConnectionLaplacian
 import DifferentialGeometry.Integral.Connection.ChartBridge.Laplacian
