@@ -937,14 +937,40 @@ theorem bm_c_gc_assemble
   --   * `C¹` (time-)smoothness of the maximal geodesic; and
   --   * the per-parameter bundle-enorm bound on the velocity by the
   --     constant speed `√(g.inner p v v)`.
-  -- Both are properties of the integral curve of the smooth geodesic
-  -- spray: smoothness is its ODE regularity, and the speed bound is the
-  -- bundle-norm ↔ `√(g.inner …)` compatibility combined with the
-  -- constant-speed identity `bm_c_gc_constant_speed`.  Establishing them
-  -- unconditionally for `maximalGeodesic` requires the deferred
-  -- `IsMIntegralCurve`-to-`ContMDiff` ODE-regularity bridge (the same gap
-  -- recorded in `Geodesic/Smoothness.lean`), so they are isolated here as
-  -- the single residual analytic input feeding the no-escape arguments.
+  --
+  -- RESIDUAL (single shared gap, precisely isolated below).  Both facts
+  -- reduce to one missing identification: at every interior parameter
+  -- `τ` of the maximal interval, the canonical `maximalGeodesic g p v`
+  -- must agree, on a neighbourhood of `τ`, with a single `C¹` integral
+  -- curve of the chart-fixed geodesic spray `geodesicVectorFieldChart g p`.
+  --   - Smoothness then follows by transferring the joint-`C¹` chart-
+  --     coordinate flow (`Geodesic.exists_chartPhase_contDiffOn_isLocalFlow`
+  --     / `…_combined`, `Geodesic/SmoothFlow.lean`) through the inverse
+  --     chart `(extChartAt I p).symm` to a `ContMDiffAt 𝓘(ℝ,ℝ) I 1` slice.
+  --   - The speed bound then follows from `bm_c_gc_constant_speed` applied
+  --     to that local `C¹` witness, plus the bundle-norm ↔ `√(g.inner …)`
+  --     compatibility `‖v‖ₑ = ENNReal.ofReal (√(g.inner x v v))`.
+  -- The obstruction is the neighbourhood-agreement step itself.
+  -- `maximalGeodesic` is `Classical.choose`-defined: its value at each `τ`
+  -- comes from a possibly distinct local witness, so `maximalGeodesic τ`
+  -- equals a flow geodesic only *pointwise*, not on a `𝓝 τ` on which a
+  -- function-level `mfderiv`/`ContMDiff` can be read off.  Upgrading the
+  -- pointwise equality to `=ᶠ[𝓝 τ]` is exactly the integral-curve
+  -- identification "inverse-chart lift of a chart-coord flow solution to a
+  -- `TM`-integral curve of `geodesicVectorFieldChart g p`" — the same
+  -- `ChartFlowGeodesicMatchAt` witness left open in
+  -- `Exponential/SmoothnessUnconditional.lean`, and it relies on the
+  -- foot-in-source membership step `hα_src` that is the open residual of
+  -- `Geodesic.bm_c_gc_cross_vf_projection_uniqueness`
+  -- (`Geodesic/CrossVFReduction.lean:626`).  The flow engine supplies the
+  -- chart-coordinate `C¹` regularity but not this manifold-side
+  -- identification, so the present joint-`C¹` engine alone does not close
+  -- the gap.  Recorded as the single residual analytic input feeding the
+  -- no-escape arguments.  Missing in-project signature, sufficient to
+  -- close both:
+  --   `∀ τ ∈ maximalGeodesicInterval g p v,
+  --      ∃ η : ℝ → M, ContMDiffAt 𝓘(ℝ,ℝ) I 1 η τ ∧
+  --        maximalGeodesic g p v =ᶠ[𝓝 τ] η ∧ IsGeodesicAt g η τ`.
   have hγ_smooth :
       ContMDiff 𝓘(ℝ, ℝ) I 1 (maximalGeodesic (I := I) g p v) := by
     sorry
