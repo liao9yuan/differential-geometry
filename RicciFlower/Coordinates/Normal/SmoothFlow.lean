@@ -564,7 +564,7 @@ private theorem jetRHSPrefix_term_contDiffAt
         | zero => simp
         | succ m ih =>
             rw [Nat.cast_succ, ← add_assoc, ih, ENat.coe_top_add_one]
-      show ((⊤ : ℕ∞) : WithTop ℕ∞) + (c.length : WithTop ℕ∞) <=
+      change ((⊤ : ℕ∞) : WithTop ℕ∞) + (c.length : WithTop ℕ∞) <=
         ((⊤ : ℕ∞) : WithTop ℕ∞)
       rw [htop_add])
   have hq :
@@ -3916,6 +3916,137 @@ theorem timeBaseEndpoint_hasFDerivAt_of_flow
   timeBaseEndpoint_hasFDerivAt (E := E)
     (timeEndpoint_hasFDerivAt (I := I) g x Ψ z
       hb0 hb hflow hbound hsrc hLip hzopen)
+
+/-- Smooth dependence of the flat augmented variational flow on its augmented
+initial condition, on an open neighborhood inside the controlled augmented
+closed ball.
+
+This is the robust self-map smooth-dependence frontier: the state space is the
+plain Banach space `ModelPhase × ModelLin`, avoiding the dependent-pi
+`ModelJetPrefix` coercion issue. -/
+theorem varFlow_smoothOn
+    [I.Boundaryless] [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (Ψ : (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+      ModelPhase (E := E) × ModelLin (E := E))
+    {ε τ : Real} {a r : NNReal} {L' : NNReal}
+    (hr : 0 < r)
+    (_hτ : τ ∈ Set.Icc (-ε) ε)
+    (_hflow :
+      ∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+        Ψ p 0 = p ∧
+          ∀ t ∈ Set.Icc (-ε) ε,
+            HasDerivWithinAt (Ψ p)
+              (varSpray (I := I) g x (Ψ p t))
+              (Set.Icc (-ε) ε) t)
+    (_hbound :
+      ∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+        ∀ t : Real,
+          Ψ p t ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) a)
+    (hsrc :
+      Metric.closedBall (varPhaseZero (I := I) (E := E) x) a ⊆
+        {p : ModelPhase (E := E) × ModelLin (E := E) |
+          p.1 ∈ (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+            (phaseOfModel (I := I) x p.1).proj ∈ (extChartAt I x).source})
+    (_hLip :
+      ∀ t ∈ Set.Icc (-ε) ε,
+        LipschitzOnWith L'
+          (fun p => Ψ p t)
+          (Metric.closedBall (varPhaseZero (I := I) (E := E) x) r)) :
+    ∃ W : Set (ModelPhase (E := E) × ModelLin (E := E)),
+      IsOpen W ∧
+        varPhaseZero (I := I) (E := E) x ∈ W ∧
+        W ⊆ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r ∧
+        ContDiffOn Real ∞ (fun p => Ψ p τ) W := by
+  classical
+  let W : Set (ModelPhase (E := E) × ModelLin (E := E)) :=
+    Metric.ball (varPhaseZero (I := I) (E := E) x) (r : Real)
+  refine ⟨W, Metric.isOpen_ball, ?_, ?_, ?_⟩
+  · have hrReal : (0 : Real) < (r : Real) := by exact_mod_cast hr
+    exact Metric.mem_ball_self hrReal
+  · intro p hp
+    exact Metric.ball_subset_closedBall hp
+  · -- Genuine frontier: smooth dependence of the flat augmented
+    -- Picard-Lindelöf flow on the augmented initial condition.
+    have hFball :
+        ContDiffOn Real ∞
+          (varSpray (I := I) g x)
+          (Metric.closedBall (varPhaseZero (I := I) (E := E) x) a) :=
+      varSpray_smoothBall (I := I) g x hsrc
+    sorry
+
+/-- Smooth dependence of the fixed-time base endpoint on the initial model
+phase, on an open neighborhood inside the controlled phase ball.
+
+This is now a consumer of the flat augmented-flow smoothness frontier
+`varFlow_smoothOn`. -/
+theorem timeBaseEnd_smoothOn
+    [I.Boundaryless] [CompleteSpace E]
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (Ψ : (ModelPhase (E := E) × ModelLin (E := E)) -> Real ->
+      ModelPhase (E := E) × ModelLin (E := E))
+    {ε τ : Real} {a r : NNReal} {L' : NNReal}
+    (hr : 0 < r)
+    (hτ : τ ∈ Set.Icc (-ε) ε)
+    (hflow :
+      ∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+        Ψ p 0 = p ∧
+          ∀ t ∈ Set.Icc (-ε) ε,
+            HasDerivWithinAt (Ψ p)
+              (varSpray (I := I) g x (Ψ p t))
+              (Set.Icc (-ε) ε) t)
+    (hbound :
+      ∀ p ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) r,
+        ∀ t : Real,
+          Ψ p t ∈ Metric.closedBall (varPhaseZero (I := I) (E := E) x) a)
+    (hsrc :
+      Metric.closedBall (varPhaseZero (I := I) (E := E) x) a ⊆
+        {p : ModelPhase (E := E) × ModelLin (E := E) |
+          p.1 ∈ (extChartAt I.tangent (phaseZero (I := I) x)).target ∧
+            (phaseOfModel (I := I) x p.1).proj ∈ (extChartAt I x).source})
+    (hLip :
+      ∀ t ∈ Set.Icc (-ε) ε,
+        LipschitzOnWith L'
+          (fun p => Ψ p t)
+          (Metric.closedBall (varPhaseZero (I := I) (E := E) x) r)) :
+    ∃ w : Set (ModelPhase (E := E)),
+      IsOpen w ∧
+        initPhase (I := I) x (0 : TangentSpace I x) ∈ w ∧
+        w ⊆ Metric.closedBall
+          (extChartAt I.tangent (phaseZero (I := I) x)
+            (phaseZero (I := I) x)) r ∧
+        ContDiffOn Real ∞ (fun z => timeBaseEndpoint (E := E) Ψ τ z) w := by
+  classical
+  let idLin : ModelLin (E := E) :=
+    ContinuousLinearMap.id Real (ModelPhase (E := E))
+  let c : ModelPhase (E := E) :=
+    extChartAt I.tangent (phaseZero (I := I) x) (phaseZero (I := I) x)
+  let ι : ModelPhase (E := E) -> ModelPhase (E := E) × ModelLin (E := E) :=
+    fun z => (z, idLin)
+  obtain ⟨W, hWopen, hWzero, _hWsub, hWsmooth⟩ :=
+    varFlow_smoothOn (I := I) g x Ψ (ε := ε) (τ := τ)
+      (a := a) (r := r) (L' := L') hr hτ hflow hbound hsrc hLip
+  let w : Set (ModelPhase (E := E)) :=
+    ι ⁻¹' W ∩ Metric.ball (c : ModelPhase (E := E)) (r : Real)
+  refine ⟨w, ?_, ?_, ?_, ?_⟩
+  · have hιcont : Continuous ι :=
+      continuous_id.prodMk continuous_const
+    exact (hWopen.preimage hιcont).inter Metric.isOpen_ball
+  · have hrReal : (0 : Real) < (r : Real) := by exact_mod_cast hr
+    have hball :
+        (c : ModelPhase (E := E)) ∈
+          Metric.ball (c : ModelPhase (E := E)) (r : Real) :=
+      Metric.mem_ball_self hrReal
+    exact ⟨by simpa [ι, idLin, c, initPhase_zero, varPhaseZero] using hWzero,
+      by simpa [c, initPhase_zero] using hball⟩
+  · intro z hz
+    exact Metric.ball_subset_closedBall hz.2
+  · have hιsmooth : ContDiff Real ∞ ι :=
+      contDiff_id.prodMk contDiff_const
+    have hcomp :
+        ContDiffOn Real ∞ (fun z : ModelPhase (E := E) => Ψ (ι z) τ) w :=
+      hWsmooth.comp hιsmooth.contDiffOn (by intro z hz; exact hz.1)
+    simpa [timeBaseEndpoint, varBaseFlow, ι, idLin] using hcomp.fst.fst
 
 /-- Source-controlled strict derivative of the fixed-time base-coordinate
 endpoint. -/

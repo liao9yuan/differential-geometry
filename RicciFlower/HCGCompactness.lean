@@ -3,6 +3,7 @@ import RicciFlower.HCGCompactness.Basic
 import RicciFlower.HCGCompactness.PointedConvergence
 import RicciFlower.HCGCompactness.InjectivityRadius
 import RicciFlower.HCGCompactness.BoundedGeometry
+import RicciFlower.HCGCompactness.AllTimesBounds
 import RicciFlower.HCGCompactness.RicciFlowConvergence
 import RicciFlower.HCGCompactness.MetricCompactness
 import RicciFlower.HCGCompactness.SolutionCompactness

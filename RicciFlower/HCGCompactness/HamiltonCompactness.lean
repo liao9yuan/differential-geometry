@@ -33,7 +33,11 @@ A sequence of complete pointed Ricci-flow solutions on a common real time
 interval admits a smoothly convergent pointed subsequence once the time-zero
 metric compactness inputs, spacetime derivative input, and smooth-flow upgrade
 backend are supplied.  This is the honest theorem-facing form of MSM135
-Theorem 3.10 before Shi estimates and spacetime Arzela--Ascoli are formalized. -/
+Theorem 3.10 before Shi estimates and spacetime Arzela--Ascoli are formalized.
+
+The legacy `_hinj : InjInput` argument is retained for import compatibility but
+is not the real injectivity-radius hypothesis; the proof consumes
+`hflowInj : FlowBaseInjBound`. -/
 theorem compactnessSol
     [I.Boundaryless]
     (X : PointedFlowSeq.{u, uE, uH} (I := I))
@@ -53,7 +57,9 @@ theorem compactnessSol
 The `NoncollapseInput` argument is not part of the injectivity-radius
 compactness theorem itself.  It remains here only because Hamilton Section 12
 currently records Perelman noncollapse separately before the future
-noncollapse-to-injectivity bridge is formalized. -/
+noncollapse-to-injectivity bridge is formalized.  Likewise, `_hinj : InjInput`
+is legacy compatibility data; `hflowInj : FlowBaseInjBound` is the contentful
+basepoint injectivity-radius input. -/
 theorem hamiltonCompactness
     [I.Boundaryless]
     (X : PointedFlowSeq.{u, uE, uH} (I := I))

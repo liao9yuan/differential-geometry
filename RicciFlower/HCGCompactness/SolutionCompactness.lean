@@ -31,7 +31,10 @@ variable {I : ModelWithCorners Real E H}
 conclusion to smooth Cheeger--Gromov--Hamilton convergence of the flows.
 
 This is intentionally an explicit input until the Shi-estimate and spacetime
-Arzela--Ascoli layer is formalized. -/
+Arzela--Ascoli layer is formalized.  It is also where the currently deferred
+mixed time-spatial metric derivative bounds from MSM135 Lemma 3.11 would be
+consumed; `FlowDerivativeInput` alone only packages curvature-derivative input
+and time-zero bounded geometry. -/
 structure SmoothFlowLimitInput
     (X : PointedFlowSeq.{u, uE, uH} (I := I)) : Prop where
   upgrade :

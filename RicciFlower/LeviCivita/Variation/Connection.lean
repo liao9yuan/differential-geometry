@@ -763,6 +763,616 @@ theorem connDiffLow_eq_sum_gammaSub [DecidableEq Idx]
           refine Finset.sum_congr rfl fun k _ => ?_
           rw [(G.metric metricTime).symm x (frame l x) (frame k x)]
 
+/-- Fixed-base covariant derivative of a metric expressed by the Christoffel
+component difference between two Levi-Civita connections.
+
+This is the component identity behind the line
+`nabla_a h_bc = h_eb (Gamma_h)^e_ac - h_eb Gamma^e_ac
+  + h_ec (Gamma_h)^e_ab - h_ec Gamma^e_ab` in MSM135 Lemma 3.11. -/
+theorem metricCov_gammaSub [DecidableEq Idx]
+    (G : Realized.RealizedMetricFamily (I := I) (M := M) Real)
+    (hLC : ∀ s : Real,
+      IsLeviCivita (I := I) (G.connection s) (G.metric s))
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (hu : IsOpen u) {x : M} (hx : x ∈ u)
+    (base var : Real) (d a b : Idx) :
+    metricCovAtBase (I := I) G frame base var x d a b =
+      (∑ k : Idx,
+        (Coordinates.christoffelSymbolInFrame
+            (G.connection var) frame hframe x d a k -
+          Coordinates.christoffelSymbolInFrame
+            (G.connection base) frame hframe x d a k) *
+          (G.metric var).inner x (frame k x) (frame b x)) +
+        (∑ k : Idx,
+          (Coordinates.christoffelSymbolInFrame
+              (G.connection var) frame hframe x d b k -
+            Coordinates.christoffelSymbolInFrame
+              (G.connection base) frame hframe x d b k) *
+            (G.metric var).inner x (frame k x) (frame a x)) := by
+  rw [metricCovAtBase_eq_connDiff
+    (I := I) G hLC frame hframe hu hx base var d a b]
+  rw [connDiffLow_eq_sum_gammaSub
+    (I := I) G frame hframe hx var base var d a b]
+  have hsecond :
+      (G.metric var).inner x (frame a x)
+          (connDiffVec (I := I) G frame base var x d b) =
+        connDiffLow (I := I) G frame var base var x d b a := by
+    unfold connDiffLow
+    rw [(G.metric var).symm x (frame a x)
+      (connDiffVec (I := I) G frame base var x d b)]
+  rw [hsecond]
+  rw [connDiffLow_eq_sum_gammaSub
+    (I := I) G frame hframe hx var base var d b a]
+
+/-- Raised finite-difference Koszul formula for two Levi-Civita connections.
+
+This is MSM135 Lemma 3.11, equation (3.7), in local-frame components:
+contracting the three-term fixed-base covariant derivative of the varied
+metric with the varied inverse metric recovers twice the Christoffel component
+difference. -/
+theorem covCombo_gammaSub [DecidableEq Idx]
+    (G : Realized.RealizedMetricFamily (I := I) (M := M) Real)
+    (hLC : ∀ s : Real,
+      IsLeviCivita (I := I) (G.connection s) (G.metric s))
+    (gInv : Curvature.InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (hu : IsOpen u) {x : M} (hx : x ∈ u)
+    (base var : Real)
+    (hinv :
+      Curvature.InverseMetricComponentsInFrame
+        (I := I) (G.metric var) gInv frame)
+    (a b e : Idx) :
+    (∑ l : Idx, gInv x e l *
+      (metricCovAtBase (I := I) G frame base var x a b l +
+        metricCovAtBase (I := I) G frame base var x b a l -
+          metricCovAtBase (I := I) G frame base var x l a b)) =
+      2 *
+        (Coordinates.christoffelSymbolInFrame
+            (G.connection var) frame hframe x a b e -
+          Coordinates.christoffelSymbolInFrame
+            (G.connection base) frame hframe x a b e) := by
+  classical
+  let D : Idx -> Real := fun k =>
+    Coordinates.christoffelSymbolInFrame
+        (G.connection var) frame hframe x a b k -
+      Coordinates.christoffelSymbolInFrame
+        (G.connection base) frame hframe x a b k
+  let H : Idx -> Idx -> Real := fun k l =>
+    (G.metric var).inner x (frame k x) (frame l x)
+  have hcombo : ∀ l : Idx,
+      metricCovAtBase (I := I) G frame base var x a b l +
+        metricCovAtBase (I := I) G frame base var x b a l -
+          metricCovAtBase (I := I) G frame base var x l a b =
+        2 * connDiffLow (I := I) G frame var base var x a b l := by
+    intro l
+    exact (finiteDiffKoszul (I := I) G hLC frame hframe hu hx base var a b l).symm
+  have hconn : ∀ l : Idx,
+      connDiffLow (I := I) G frame var base var x a b l =
+        ∑ k : Idx, D k * H k l := by
+    intro l
+    simpa [D, H] using
+      connDiffLow_eq_sum_gammaSub
+        (I := I) G frame hframe hx var base var a b l
+  have hcontract : ∀ k : Idx,
+      (∑ l : Idx, gInv x e l * H k l) =
+        (if e = k then 1 else 0) := by
+    intro k
+    calc
+      (∑ l : Idx, gInv x e l * H k l)
+          = ∑ l : Idx, gInv x e l * H l k := by
+              refine Finset.sum_congr rfl fun l _ => ?_
+              simp [H, (G.metric var).symm x (frame k x) (frame l x)]
+      _ = (if e = k then 1 else 0) := by
+              simpa [H] using (hinv x e k).1
+  have hsum :
+      (∑ l : Idx, gInv x e l *
+        (2 * (∑ k : Idx, D k * H k l))) =
+        2 * (∑ k : Idx, D k *
+          (∑ l : Idx, gInv x e l * H k l)) := by
+    calc
+      (∑ l : Idx, gInv x e l *
+        (2 * (∑ k : Idx, D k * H k l)))
+          = ∑ l : Idx, ∑ k : Idx,
+              gInv x e l * (2 * (D k * H k l)) := by
+              refine Finset.sum_congr rfl fun l _ => ?_
+              have htwo :
+                  2 * (∑ k : Idx, D k * H k l) =
+                    ∑ k : Idx, 2 * (D k * H k l) := by
+                rw [Finset.mul_sum]
+              rw [htwo]
+              rw [Finset.mul_sum]
+      _ = ∑ k : Idx, ∑ l : Idx,
+              gInv x e l * (2 * (D k * H k l)) := by
+              rw [Finset.sum_comm]
+      _ = ∑ k : Idx, 2 * (D k *
+              (∑ l : Idx, gInv x e l * H k l)) := by
+              refine Finset.sum_congr rfl fun k _ => ?_
+              calc
+                (∑ l : Idx, gInv x e l * (2 * (D k * H k l)))
+                    = ∑ l : Idx, 2 * (D k * (gInv x e l * H k l)) := by
+                        refine Finset.sum_congr rfl fun l _ => ?_
+                        ring
+                _ = 2 * (∑ l : Idx, D k * (gInv x e l * H k l)) := by
+                        rw [Finset.mul_sum]
+                _ = 2 * (D k * (∑ l : Idx, gInv x e l * H k l)) := by
+                        congr 1
+                        rw [Finset.mul_sum]
+      _ = 2 * (∑ k : Idx, D k *
+              (∑ l : Idx, gInv x e l * H k l)) := by
+              rw [Finset.mul_sum]
+  calc
+    (∑ l : Idx, gInv x e l *
+      (metricCovAtBase (I := I) G frame base var x a b l +
+        metricCovAtBase (I := I) G frame base var x b a l -
+          metricCovAtBase (I := I) G frame base var x l a b))
+        =
+      ∑ l : Idx, gInv x e l *
+        (2 * connDiffLow (I := I) G frame var base var x a b l) := by
+          refine Finset.sum_congr rfl fun l _ => ?_
+          rw [hcombo l]
+    _ = ∑ l : Idx, gInv x e l *
+        (2 * (∑ k : Idx, D k * H k l)) := by
+          refine Finset.sum_congr rfl fun l _ => ?_
+          rw [hconn l]
+    _ = 2 * (∑ k : Idx, D k *
+        (∑ l : Idx, gInv x e l * H k l)) := hsum
+    _ = 2 * (∑ k : Idx, D k * (if e = k then 1 else 0)) := by
+          congr 1
+          refine Finset.sum_congr rfl fun k _ => ?_
+          rw [hcontract k]
+    _ = 2 * D e := by
+          simp [D]
+
+/-- Squared `l^2` component size of a three-index array.  This is a local
+orthonormal-frame bookkeeping device, not an invariant tensor norm by itself. -/
+def componentL2Sq3 (A : Idx -> Idx -> Idx -> Real) : Real :=
+  ∑ p : Idx × Idx × Idx, (A p.1 p.2.1 p.2.2) ^ 2
+
+theorem componentL2Sq3_nonneg
+    (A : Idx -> Idx -> Idx -> Real) :
+    0 <= componentL2Sq3 A := by
+  classical
+  unfold componentL2Sq3
+  exact Finset.sum_nonneg fun p _ => sq_nonneg _
+
+private theorem three_sq_le (x y z : Real) :
+    (x + y - z) ^ 2 <= 3 * (x ^ 2 + y ^ 2 + z ^ 2) := by
+  nlinarith [sq_nonneg (x - y), sq_nonneg (x + z), sq_nonneg (y + z)]
+
+private theorem four_sq_le_of_two_eq
+    {d x y z : Real} (h : 2 * d = x + y - z) :
+    4 * d ^ 2 <= 3 * (x ^ 2 + y ^ 2 + z ^ 2) := by
+  calc
+    4 * d ^ 2 = (2 * d) ^ 2 := by ring
+    _ = (x + y - z) ^ 2 := by rw [h]
+    _ <= 3 * (x ^ 2 + y ^ 2 + z ^ 2) := three_sq_le x y z
+
+private def swap12Equiv (α : Type*) : α × α × α ≃ α × α × α where
+  toFun p := (p.2.1, p.1, p.2.2)
+  invFun p := (p.2.1, p.1, p.2.2)
+  left_inv := by
+    intro p
+    rcases p with ⟨a, b, c⟩
+    rfl
+  right_inv := by
+    intro p
+    rcases p with ⟨a, b, c⟩
+    rfl
+
+private def cycEquiv (α : Type*) : α × α × α ≃ α × α × α where
+  toFun p := (p.2.2, p.1, p.2.1)
+  invFun p := (p.2.1, p.2.2, p.1)
+  left_inv := by
+    intro p
+    rcases p with ⟨a, b, c⟩
+    rfl
+  right_inv := by
+    intro p
+    rcases p with ⟨a, b, c⟩
+    rfl
+
+private def swap23Equiv (α : Type*) : α × α × α ≃ α × α × α where
+  toFun p := (p.1, p.2.2, p.2.1)
+  invFun p := (p.1, p.2.2, p.2.1)
+  left_inv := by
+    intro p
+    rcases p with ⟨a, b, c⟩
+    rfl
+  right_inv := by
+    intro p
+    rcases p with ⟨a, b, c⟩
+    rfl
+
+private theorem componentL2Sq3_swap12
+    (A : Idx -> Idx -> Idx -> Real) :
+    (∑ p : Idx × Idx × Idx, (A p.2.1 p.1 p.2.2) ^ 2) =
+      componentL2Sq3 A := by
+  classical
+  unfold componentL2Sq3
+  exact
+    Fintype.sum_equiv (swap12Equiv Idx)
+      (fun p : Idx × Idx × Idx => (A p.2.1 p.1 p.2.2) ^ 2)
+      (fun p : Idx × Idx × Idx => (A p.1 p.2.1 p.2.2) ^ 2)
+      (by
+        intro p
+        rcases p with ⟨a, b, c⟩
+        rfl)
+
+private theorem componentL2Sq3_cyc
+    (A : Idx -> Idx -> Idx -> Real) :
+    (∑ p : Idx × Idx × Idx, (A p.2.2 p.1 p.2.1) ^ 2) =
+      componentL2Sq3 A := by
+  classical
+  unfold componentL2Sq3
+  exact
+    Fintype.sum_equiv (cycEquiv Idx)
+      (fun p : Idx × Idx × Idx => (A p.2.2 p.1 p.2.1) ^ 2)
+      (fun p : Idx × Idx × Idx => (A p.1 p.2.1 p.2.2) ^ 2)
+      (by
+        intro p
+        rcases p with ⟨a, b, c⟩
+        rfl)
+
+private theorem componentL2Sq3_swap23
+    (A : Idx -> Idx -> Idx -> Real) :
+    (∑ p : Idx × Idx × Idx, (A p.1 p.2.2 p.2.1) ^ 2) =
+      componentL2Sq3 A := by
+  classical
+  unfold componentL2Sq3
+  exact
+    Fintype.sum_equiv (swap23Equiv Idx)
+      (fun p : Idx × Idx × Idx => (A p.1 p.2.2 p.2.1) ^ 2)
+      (fun p : Idx × Idx × Idx => (A p.1 p.2.1 p.2.2) ^ 2)
+      (by
+        intro p
+        rcases p with ⟨a, b, c⟩
+        rfl)
+
+/-- MSM135 Lemma 3.11, equation (3.8), in squared orthonormal-frame component
+form.  If `2D_abe = A_abe + A_bae - A_eab`, then summing the squared component
+triangle inequality gives `4 |D|^2 <= 9 |A|^2`. -/
+theorem gammaSub_l2Sq_le
+    (A D : Idx -> Idx -> Idx -> Real)
+    (hcombo :
+      forall a b e : Idx,
+        2 * D a b e = A a b e + A b a e - A e a b) :
+    4 * componentL2Sq3 D <= 9 * componentL2Sq3 A := by
+  classical
+  have hpoint : forall p : Idx × Idx × Idx,
+      4 * (D p.1 p.2.1 p.2.2) ^ 2 <=
+        3 * ((A p.1 p.2.1 p.2.2) ^ 2 +
+          (A p.2.1 p.1 p.2.2) ^ 2 +
+          (A p.2.2 p.1 p.2.1) ^ 2) := by
+    intro p
+    exact four_sq_le_of_two_eq (hcombo p.1 p.2.1 p.2.2)
+  have hsum_le :
+      (∑ p : Idx × Idx × Idx, 4 * (D p.1 p.2.1 p.2.2) ^ 2) <=
+        ∑ p : Idx × Idx × Idx,
+          3 * ((A p.1 p.2.1 p.2.2) ^ 2 +
+            (A p.2.1 p.1 p.2.2) ^ 2 +
+            (A p.2.2 p.1 p.2.1) ^ 2) :=
+    Finset.sum_le_sum fun p _ => hpoint p
+  calc
+    4 * componentL2Sq3 D =
+        ∑ p : Idx × Idx × Idx, 4 * (D p.1 p.2.1 p.2.2) ^ 2 := by
+          unfold componentL2Sq3
+          rw [Finset.mul_sum]
+    _ <= ∑ p : Idx × Idx × Idx,
+          3 * ((A p.1 p.2.1 p.2.2) ^ 2 +
+            (A p.2.1 p.1 p.2.2) ^ 2 +
+            (A p.2.2 p.1 p.2.1) ^ 2) := hsum_le
+    _ = 3 * (componentL2Sq3 A + componentL2Sq3 A + componentL2Sq3 A) := by
+          rw [← Finset.mul_sum]
+          congr 1
+          rw [Finset.sum_add_distrib, Finset.sum_add_distrib]
+          change componentL2Sq3 A +
+              (∑ p : Idx × Idx × Idx, (A p.2.1 p.1 p.2.2) ^ 2) +
+              (∑ p : Idx × Idx × Idx, (A p.2.2 p.1 p.2.1) ^ 2) =
+            componentL2Sq3 A + componentL2Sq3 A + componentL2Sq3 A
+          rw [componentL2Sq3_swap12, componentL2Sq3_cyc]
+    _ = 9 * componentL2Sq3 A := by ring
+
+/-- Unsquared component form of MSM135 Lemma 3.11, equation (3.8). -/
+theorem gammaSub_l2_le
+    (A D : Idx -> Idx -> Idx -> Real)
+    (hcombo :
+      forall a b e : Idx,
+        2 * D a b e = A a b e + A b a e - A e a b) :
+    Real.sqrt (componentL2Sq3 D) <=
+      (3 / 2 : Real) * Real.sqrt (componentL2Sq3 A) := by
+  have hsq := gammaSub_l2Sq_le (Idx := Idx) A D hcombo
+  have hA_nonneg : 0 <= componentL2Sq3 A := componentL2Sq3_nonneg (Idx := Idx) A
+  have hD_nonneg : 0 <= componentL2Sq3 D := componentL2Sq3_nonneg (Idx := Idx) D
+  have hrhs_nonneg :
+      0 <= (3 / 2 : Real) * Real.sqrt (componentL2Sq3 A) :=
+    mul_nonneg (by norm_num) (Real.sqrt_nonneg _)
+  have hsquares :
+      (Real.sqrt (componentL2Sq3 D)) ^ 2 <=
+        ((3 / 2 : Real) * Real.sqrt (componentL2Sq3 A)) ^ 2 := by
+    rw [Real.sq_sqrt hD_nonneg, mul_pow, Real.sq_sqrt hA_nonneg]
+    nlinarith
+  have habs := (sq_le_sq.mp hsquares)
+  simpa [abs_of_nonneg (Real.sqrt_nonneg _), abs_of_nonneg hrhs_nonneg] using habs
+
+/-- Squared component estimate for the Ricci-flow Christoffel variation RHS.
+
+If `D_abe = -A_abe - A_bae + A_eab`, then the same three-term triangle
+estimate used for (3.8) gives `|D|^2 <= 9 |A|^2`.  This is the component
+algebra behind the estimate `|∂ₜ Γ| <= 3 |∇ Ric|` in MSM135 Lemma 3.11. -/
+theorem gammaEvol_l2Sq_le
+    (A D : Idx -> Idx -> Idx -> Real)
+    (hcombo :
+      forall a b e : Idx,
+        D a b e = -A a b e - A b a e + A e a b) :
+    componentL2Sq3 D <= 9 * componentL2Sq3 A := by
+  classical
+  have hpoint : forall p : Idx × Idx × Idx,
+      (D p.1 p.2.1 p.2.2) ^ 2 <=
+        3 * ((A p.1 p.2.1 p.2.2) ^ 2 +
+          (A p.2.1 p.1 p.2.2) ^ 2 +
+          (A p.2.2 p.1 p.2.1) ^ 2) := by
+    intro p
+    calc
+      (D p.1 p.2.1 p.2.2) ^ 2 =
+          ((-A p.1 p.2.1 p.2.2) +
+            (-A p.2.1 p.1 p.2.2) -
+              (-A p.2.2 p.1 p.2.1)) ^ 2 := by
+            rw [hcombo]
+            ring
+      _ <= 3 * (((-A p.1 p.2.1 p.2.2) ^ 2) +
+          ((-A p.2.1 p.1 p.2.2) ^ 2) +
+          ((-A p.2.2 p.1 p.2.1) ^ 2)) :=
+            three_sq_le (-A p.1 p.2.1 p.2.2)
+              (-A p.2.1 p.1 p.2.2) (-A p.2.2 p.1 p.2.1)
+      _ = 3 * ((A p.1 p.2.1 p.2.2) ^ 2 +
+          (A p.2.1 p.1 p.2.2) ^ 2 +
+          (A p.2.2 p.1 p.2.1) ^ 2) := by ring
+  have hsum_le :
+      (∑ p : Idx × Idx × Idx, (D p.1 p.2.1 p.2.2) ^ 2) <=
+        ∑ p : Idx × Idx × Idx,
+          3 * ((A p.1 p.2.1 p.2.2) ^ 2 +
+            (A p.2.1 p.1 p.2.2) ^ 2 +
+            (A p.2.2 p.1 p.2.1) ^ 2) :=
+    Finset.sum_le_sum fun p _ => hpoint p
+  calc
+    componentL2Sq3 D =
+        ∑ p : Idx × Idx × Idx, (D p.1 p.2.1 p.2.2) ^ 2 := rfl
+    _ <= ∑ p : Idx × Idx × Idx,
+          3 * ((A p.1 p.2.1 p.2.2) ^ 2 +
+            (A p.2.1 p.1 p.2.2) ^ 2 +
+            (A p.2.2 p.1 p.2.1) ^ 2) := hsum_le
+    _ = 3 * (componentL2Sq3 A + componentL2Sq3 A + componentL2Sq3 A) := by
+          rw [← Finset.mul_sum]
+          congr 1
+          rw [Finset.sum_add_distrib, Finset.sum_add_distrib]
+          change componentL2Sq3 A +
+              (∑ p : Idx × Idx × Idx, (A p.2.1 p.1 p.2.2) ^ 2) +
+              (∑ p : Idx × Idx × Idx, (A p.2.2 p.1 p.2.1) ^ 2) =
+            componentL2Sq3 A + componentL2Sq3 A + componentL2Sq3 A
+          rw [componentL2Sq3_swap12, componentL2Sq3_cyc]
+    _ = 9 * componentL2Sq3 A := by ring
+
+/-- Unsquared component form of the Ricci-flow Christoffel variation RHS
+estimate `|∂ₜ Γ| <= 3 |∇ Ric|`. -/
+theorem gammaEvol_l2_le
+    (A D : Idx -> Idx -> Idx -> Real)
+    (hcombo :
+      forall a b e : Idx,
+        D a b e = -A a b e - A b a e + A e a b) :
+    Real.sqrt (componentL2Sq3 D) <=
+      3 * Real.sqrt (componentL2Sq3 A) := by
+  have hsq := gammaEvol_l2Sq_le (Idx := Idx) A D hcombo
+  have hA_nonneg : 0 <= componentL2Sq3 A := componentL2Sq3_nonneg (Idx := Idx) A
+  have hD_nonneg : 0 <= componentL2Sq3 D := componentL2Sq3_nonneg (Idx := Idx) D
+  have hrhs_nonneg : 0 <= 3 * Real.sqrt (componentL2Sq3 A) :=
+    mul_nonneg (by norm_num) (Real.sqrt_nonneg _)
+  have hsquares :
+      (Real.sqrt (componentL2Sq3 D)) ^ 2 <=
+        (3 * Real.sqrt (componentL2Sq3 A)) ^ 2 := by
+    rw [Real.sq_sqrt hD_nonneg, mul_pow, Real.sq_sqrt hA_nonneg]
+    nlinarith
+  have habs := (sq_le_sq.mp hsquares)
+  simpa [abs_of_nonneg (Real.sqrt_nonneg _), abs_of_nonneg hrhs_nonneg] using habs
+
+private theorem two_sq_le (x y : Real) :
+    (x + y) ^ 2 <= 2 * (x ^ 2 + y ^ 2) := by
+  nlinarith [sq_nonneg (x - y)]
+
+/-- MSM135 Lemma 3.11, equation (3.9), in squared orthonormal-frame component
+form.  If `A_abc = D_abc + D_acb`, then summing the squared component triangle
+inequality gives `|A|^2 <= 4 |D|^2`. -/
+theorem metricCov_l2Sq_le
+    (A D : Idx -> Idx -> Idx -> Real)
+    (hcombo :
+      forall a b c : Idx,
+        A a b c = D a b c + D a c b) :
+    componentL2Sq3 A <= 4 * componentL2Sq3 D := by
+  classical
+  have hpoint : forall p : Idx × Idx × Idx,
+      (A p.1 p.2.1 p.2.2) ^ 2 <=
+        2 * ((D p.1 p.2.1 p.2.2) ^ 2 +
+          (D p.1 p.2.2 p.2.1) ^ 2) := by
+    intro p
+    calc
+      (A p.1 p.2.1 p.2.2) ^ 2 =
+          (D p.1 p.2.1 p.2.2 + D p.1 p.2.2 p.2.1) ^ 2 := by
+            rw [hcombo]
+      _ <= 2 * ((D p.1 p.2.1 p.2.2) ^ 2 +
+          (D p.1 p.2.2 p.2.1) ^ 2) :=
+            two_sq_le (D p.1 p.2.1 p.2.2) (D p.1 p.2.2 p.2.1)
+  have hsum_le :
+      (∑ p : Idx × Idx × Idx, (A p.1 p.2.1 p.2.2) ^ 2) <=
+        ∑ p : Idx × Idx × Idx,
+          2 * ((D p.1 p.2.1 p.2.2) ^ 2 +
+            (D p.1 p.2.2 p.2.1) ^ 2) :=
+    Finset.sum_le_sum fun p _ => hpoint p
+  calc
+    componentL2Sq3 A =
+        ∑ p : Idx × Idx × Idx, (A p.1 p.2.1 p.2.2) ^ 2 := rfl
+    _ <= ∑ p : Idx × Idx × Idx,
+          2 * ((D p.1 p.2.1 p.2.2) ^ 2 +
+            (D p.1 p.2.2 p.2.1) ^ 2) := hsum_le
+    _ = 2 * (componentL2Sq3 D + componentL2Sq3 D) := by
+          rw [← Finset.mul_sum]
+          congr 1
+          rw [Finset.sum_add_distrib]
+          change componentL2Sq3 D +
+              (∑ p : Idx × Idx × Idx, (D p.1 p.2.2 p.2.1) ^ 2) =
+            componentL2Sq3 D + componentL2Sq3 D
+          rw [componentL2Sq3_swap23]
+    _ = 4 * componentL2Sq3 D := by ring
+
+/-- Unsquared component form of MSM135 Lemma 3.11, equation (3.9). -/
+theorem metricCov_l2_le
+    (A D : Idx -> Idx -> Idx -> Real)
+    (hcombo :
+      forall a b c : Idx,
+        A a b c = D a b c + D a c b) :
+    Real.sqrt (componentL2Sq3 A) <=
+      2 * Real.sqrt (componentL2Sq3 D) := by
+  have hsq := metricCov_l2Sq_le (Idx := Idx) A D hcombo
+  have hA_nonneg : 0 <= componentL2Sq3 A := componentL2Sq3_nonneg (Idx := Idx) A
+  have hD_nonneg : 0 <= componentL2Sq3 D := componentL2Sq3_nonneg (Idx := Idx) D
+  have hrhs_nonneg : 0 <= 2 * Real.sqrt (componentL2Sq3 D) :=
+    mul_nonneg (by norm_num) (Real.sqrt_nonneg _)
+  have hsquares :
+      (Real.sqrt (componentL2Sq3 A)) ^ 2 <=
+        (2 * Real.sqrt (componentL2Sq3 D)) ^ 2 := by
+    rw [Real.sq_sqrt hA_nonneg, mul_pow, Real.sq_sqrt hD_nonneg]
+    nlinarith
+  have habs := (sq_le_sq.mp hsquares)
+  simpa [abs_of_nonneg (Real.sqrt_nonneg _), abs_of_nonneg hrhs_nonneg] using habs
+
+/-- MSM135 Lemma 3.11, equation (3.8), specialized to components in a
+`g_var`-orthonormal local frame.  The identity inverse-metric components turn
+`covCombo_gammaSub` into the three-term component identity consumed by
+`gammaSub_l2_le`. -/
+theorem covCombo_l2_le [DecidableEq Idx]
+    (G : Realized.RealizedMetricFamily (I := I) (M := M) Real)
+    (hLC : ∀ s : Real,
+      IsLeviCivita (I := I) (G.connection s) (G.metric s))
+    (gInv : Curvature.InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (hu : IsOpen u) {x : M} (hx : x ∈ u)
+    (base var : Real)
+    (hinv :
+      Curvature.InverseMetricComponentsInFrame
+        (I := I) (G.metric var) gInv frame)
+    (hinv_id : ∀ e l : Idx, gInv x e l = if e = l then 1 else 0) :
+    Real.sqrt
+        (componentL2Sq3
+          (fun a b e : Idx =>
+            Coordinates.christoffelSymbolInFrame
+                (G.connection var) frame hframe x a b e -
+              Coordinates.christoffelSymbolInFrame
+                (G.connection base) frame hframe x a b e)) <=
+      (3 / 2 : Real) *
+        Real.sqrt
+          (componentL2Sq3
+            (fun a b c : Idx =>
+              metricCovAtBase (I := I) G frame base var x a b c)) := by
+  apply gammaSub_l2_le
+  intro a b e
+  have h37 :=
+    covCombo_gammaSub (I := I) G hLC gInv frame hframe hu hx base var hinv a b e
+  have hleft :
+      (∑ l : Idx, gInv x e l *
+        (metricCovAtBase (I := I) G frame base var x a b l +
+          metricCovAtBase (I := I) G frame base var x b a l -
+            metricCovAtBase (I := I) G frame base var x l a b)) =
+        metricCovAtBase (I := I) G frame base var x a b e +
+          metricCovAtBase (I := I) G frame base var x b a e -
+            metricCovAtBase (I := I) G frame base var x e a b := by
+    simp [hinv_id]
+  exact h37.symm.trans hleft
+
+/-- MSM135 Lemma 3.11, equation (3.9), specialized to components in a
+`g_var`-orthonormal local frame. -/
+theorem metricCovGeom_l2_le [DecidableEq Idx]
+    (G : Realized.RealizedMetricFamily (I := I) (M := M) Real)
+    (hLC : ∀ s : Real,
+      IsLeviCivita (I := I) (G.connection s) (G.metric s))
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (hu : IsOpen u) {x : M} (hx : x ∈ u)
+    (base var : Real)
+    (hmetric_id : ∀ i j : Idx,
+      (G.metric var).inner x (frame i x) (frame j x) =
+        if i = j then 1 else 0) :
+    Real.sqrt
+        (componentL2Sq3
+          (fun a b c : Idx =>
+            metricCovAtBase (I := I) G frame base var x a b c)) <=
+      2 *
+        Real.sqrt
+          (componentL2Sq3
+            (fun a b e : Idx =>
+              Coordinates.christoffelSymbolInFrame
+                  (G.connection var) frame hframe x a b e -
+                Coordinates.christoffelSymbolInFrame
+                  (G.connection base) frame hframe x a b e)) := by
+  apply metricCov_l2_le
+  intro a b c
+  simpa [hmetric_id] using
+    metricCov_gammaSub (I := I) G hLC frame hframe hu hx base var a b c
+
+/-- Component-level equivalence between the background covariant derivative of
+the varied metric and the connection difference.
+
+The covariant derivative here is `metricCovAtBase`, i.e. the `base` connection
+applied to the metric at `var`.  It is not the Levi-Civita derivative of
+`G.metric var`, which vanishes by metric compatibility. -/
+theorem covGamma_l2_equiv [DecidableEq Idx]
+    (G : Realized.RealizedMetricFamily (I := I) (M := M) Real)
+    (hLC : ∀ s : Real,
+      IsLeviCivita (I := I) (G.connection s) (G.metric s))
+    (gInv : Curvature.InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (hu : IsOpen u) {x : M} (hx : x ∈ u)
+    (base var : Real)
+    (hinv :
+      Curvature.InverseMetricComponentsInFrame
+        (I := I) (G.metric var) gInv frame)
+    (hinv_id : ∀ e l : Idx, gInv x e l = if e = l then 1 else 0)
+    (hmetric_id : ∀ i j : Idx,
+      (G.metric var).inner x (frame i x) (frame j x) =
+        if i = j then 1 else 0) :
+    Real.sqrt
+        (componentL2Sq3
+          (fun a b e : Idx =>
+            Coordinates.christoffelSymbolInFrame
+                (G.connection var) frame hframe x a b e -
+              Coordinates.christoffelSymbolInFrame
+                (G.connection base) frame hframe x a b e)) <=
+      (3 / 2 : Real) *
+        Real.sqrt
+          (componentL2Sq3
+            (fun a b c : Idx =>
+              metricCovAtBase (I := I) G frame base var x a b c)) ∧
+      Real.sqrt
+          (componentL2Sq3
+            (fun a b c : Idx =>
+              metricCovAtBase (I := I) G frame base var x a b c)) <=
+        2 *
+          Real.sqrt
+            (componentL2Sq3
+              (fun a b e : Idx =>
+                Coordinates.christoffelSymbolInFrame
+                    (G.connection var) frame hframe x a b e -
+                  Coordinates.christoffelSymbolInFrame
+                    (G.connection base) frame hframe x a b e)) := by
+  constructor
+  · exact
+      covCombo_l2_le (I := I) G hLC gInv frame hframe hu hx base var
+        hinv hinv_id
+  · exact
+      metricCovGeom_l2_le (I := I) G hLC frame hframe hu hx base var
+        hmetric_id
+
 /-- Local derivative package for Christoffel components in a fixed frame. -/
 def gammaDerivOn
     (G : Realized.RealizedMetricFamily (I := I) (M := M) Real)

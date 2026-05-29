@@ -153,8 +153,10 @@ structure CurvBoundInput {I : ModelWithCorners Real E H}
 
 /-- Injectivity-radius input at the basepoints at time zero.
 
-The numeric accessor is not yet tied to a RicciFlower geodesic API; this record
-keeps that missing backend visible. -/
+Legacy compatibility slot for older Hamilton wrappers.  The numeric accessor is
+not tied to the normal-coordinate injectivity-radius backend, and this record is
+not used by the new compactness theorem.  Use `FlowBaseInjBound` from
+`InjectivityRadius.lean` for the real MSM135 injectivity-radius hypothesis. -/
 structure InjInput {I : ModelWithCorners Real E H}
     (_X : PointedFlowSeq.{u, uE, uH} (I := I)) where
   injRadiusAtBase : Nat -> Real
@@ -166,7 +168,9 @@ structure InjInput {I : ModelWithCorners Real E H}
 
 This is the volume-side alternative to an injectivity-radius hypothesis.  It is
 kept separate because Perelman's theorem supplies volume noncollapse before a
-Cheeger--Gromov--Taylor style injectivity-radius bridge is formalized. -/
+Cheeger--Gromov--Taylor style injectivity-radius bridge is formalized.  The
+stored `volumeAtBase` values are compatibility data, not yet values of a
+formalized Riemannian volume functional. -/
 structure NoncollapseInput {I : ModelWithCorners Real E H}
     (_X : PointedFlowSeq.{u, uE, uH} (I := I)) where
   kappa : Real

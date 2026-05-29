@@ -33,7 +33,7 @@ variable [SigmaCompactSpace M] [T2Space M]
 
 /-- The functional model endpoint realizes the relation-valued exponential
 wherever the rescaled initial phase lies in the Picard-Lindelof ball. -/
-private theorem end_expAt
+theorem end_expAt
     [I.Boundaryless] [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) (x : M)
     {ε : Real} (hε : 0 < ε) {r : NNReal}
