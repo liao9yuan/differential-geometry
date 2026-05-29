@@ -605,7 +605,7 @@ variation fields `V_i(t) := sin(πt/L) · e_i(t)`,
   ∫₀^L [(n-1)(π/L)² cos²(πt/L) - sin²(πt/L) · Ric(γ', γ')] dt`.
 
 Genuine math hypotheses: `huPrimeEq` (geodesic-velocity / uPrime),
-`hUnit` (unit-speed), `huCont` (uPrime continuous), `heDiff` (frame
+`hUnit` (unit-speed), `heDiff` (frame
 differentiable), `hParallel` (frame parallel), `hON` (orthonormality),
 `hPerp` (perpendicularity to uPrime), `hIntegrandSum` (per-i integrand
 interval-integrable). The proof routes via `indexForm_eq_intervalIntegral`,
@@ -619,7 +619,6 @@ theorem sum_index_form_frame_evaluation
     (huPrimeEq : ∀ t ∈ Set.Icc (0 : ℝ) L,
       (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ) : E) = uPrime t)
     (hUnit : ∀ t ∈ Set.Icc (0 : ℝ) L, g.inner (γ t) (uPrime t) (uPrime t) = 1)
-    (_huCont : ContinuousOn uPrime (Set.Icc (0 : ℝ) L))
     (e : Fin (Module.finrank ℝ E - 1) → SectionAlongCurve I M γ)
     (heDiff : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
       DifferentiableAt ℝ (e i).toFun t)
@@ -743,7 +742,6 @@ theorem sum_index_form_bound_by_curvature_hypothesis
     (huPrimeEq : ∀ t ∈ Set.Icc (0 : ℝ) L,
       (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ) : E) = uPrime t)
     (hUnit : ∀ t ∈ Set.Icc (0 : ℝ) L, g.inner (γ t) (uPrime t) (uPrime t) = 1)
-    (huCont : ContinuousOn uPrime (Set.Icc (0 : ℝ) L))
     (e : Fin (Module.finrank ℝ E - 1) → SectionAlongCurve I M γ)
     (heDiff : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
       DifferentiableAt ℝ (e i).toFun t)
@@ -781,7 +779,7 @@ theorem sum_index_form_bound_by_curvature_hypothesis
             - Real.sin (Real.pi * t / L) ^ 2
                 * ricciTensor (I := I) g (γ t) (uPrime t) (uPrime t)) :=
     sum_index_form_frame_evaluation (I := I) g γ hL _hγ _hgeo uPrime huPrimeEq
-      hUnit huCont e heDiff hParallel hON hPerp hIntegrandSum
+      hUnit e heDiff hParallel hON hPerp hIntegrandSum
   rw [hEval]
   have hL_nonneg : (0 : ℝ) ≤ L := le_of_lt hL
   have h_sin_cont : Continuous (fun t : ℝ => Real.sin (Real.pi * t / L)) := by
@@ -948,7 +946,6 @@ theorem length_bound_contradiction_assembly
     (_huPrimeEq : ∀ t ∈ Set.Icc (0 : ℝ) L,
       (mfderiv (𝓘(ℝ, ℝ)) I γ t (1 : ℝ) : E) = uPrime t)
     (_hUnit : ∀ t ∈ Set.Icc (0 : ℝ) L, g.inner (γ t) (uPrime t) (uPrime t) = 1)
-    (_huCont : ContinuousOn uPrime (Set.Icc (0 : ℝ) L))
     (e : Fin (Module.finrank ℝ E - 1) → SectionAlongCurve I M γ)
     (_heDiff : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) L,
       DifferentiableAt ℝ (e i).toFun t)
@@ -1019,7 +1016,7 @@ theorem length_bound_contradiction_assembly
         ≤ (Module.finrank ℝ E - 1 : ℝ) * (L / 2)
             * ((Real.pi / L) ^ 2 - K) :=
     sum_index_form_bound_by_curvature_hypothesis (I := I) g γ _hL _hγ _hgeo
-      _hRic uPrime _huPrimeEq _hUnit _huCont e _heDiff _hParallel _hON _hPerp
+      _hRic uPrime _huPrimeEq _hUnit e _heDiff _hParallel _hON _hPerp
       _hIntegrandSum _hRicIntegrable
   -- Step 6: apply minimiser_implies_second_variation_nonneg pointwise and sum.
   -- The trial vector field V_i(t) := sin(π t / L) • (e i)(t) vanishes at the

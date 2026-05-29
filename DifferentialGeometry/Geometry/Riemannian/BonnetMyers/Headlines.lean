@@ -329,13 +329,13 @@ theorem pairwise_edist_bound_from_geodesic
           ∀ t ∈ Set.Icc (0 : ℝ) L,
             (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) : E) = uPrime t := by
         intro t _ht; rfl
-      -- (ii) continuity of `uPrime` on `Icc 0 L`. The raw `E`-valued
-      -- velocity `t ↦ (mfderiv γ t 1 : E)` of the `C¹` curve `γ` is
-      -- continuous on `Icc 0 L` by the chart-by-chart trivialisation-`symmL`
-      -- CLM-continuity bridge along `γ` (the residual infrastructure piece
-      -- pending in `MFDerivAlongCurve`). Recorded as a structural gap.
-      have huCont : ContinuousOn uPrime (Set.Icc (0 : ℝ) L) := by
-        sorry
+      -- (ii) uPrime continuity is no longer required: the contradiction
+      -- assembly was freed of its unused `ContinuousOn uPrime` hypothesis.
+      -- That hypothesis is in fact unprovable for the raw `E`-valued velocity
+      -- on a multi-chart manifold — the inverse trivialisation `symmL` is
+      -- genuinely discontinuous in the basepoint (the chart-selection jumps
+      -- across chart boundaries; cf. the chart-Jacobian operator-norm
+      -- blow-up on `S²`) — and it was never used downstream.
       -- (iii) parallel orthonormal perpendicular frame `e` along `γ`.
       -- Canonical Gram-Schmidt at `γ 0` followed by parallel transport
       -- along `γ`. The whole package is delegated.
@@ -469,7 +469,7 @@ theorem pairwise_edist_bound_from_geodesic
           = ricciTensor (I := I) g (γ t) (uPrime t) (uPrime t)
         rw [mfderivWithin_of_mem_nhds hmem]
       exact length_bound_contradiction_assembly (I := I) g γ hL_pos hγ_C1
-        hγ_geoOn _hK _hdim hRic' uPrime huPrimeEq hγ_unit huCont
+        hγ_geoOn _hK _hdim hRic' uPrime huPrimeEq hγ_unit
         e heDiff hParallel hON hPerp hIntegrandSum hRicIntegrable hγ_min
     · -- Case `L = 0`: `0 ≤ π/√K` is immediate from positivity of `π`
       -- and the square root.
