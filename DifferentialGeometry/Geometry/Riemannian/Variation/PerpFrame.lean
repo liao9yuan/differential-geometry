@@ -309,8 +309,14 @@ theorem chartCovDerivAlong_movingFoot_eq_zero_of_isParallelChart_centered
     (hX : IsParallelChart (I := I) g (γ t) γ
       (fun τ => deriv (AlongCurve.chartCurve (I := I) (γ t) γ) τ) X s)
     (ht : t ∈ s) :
-    chartCovDerivAlong (I := I) g (γ t) γ X t = 0 :=
-  sorry
+    chartCovDerivAlong (I := I) g (γ t) γ X t = 0 := by
+  -- The parallel-transport ODE at `t` gives the time-derivative of `X`.
+  have hd := hX.hasDerivAt ht
+  -- Extract `deriv X t` from `HasDerivAt`.
+  have hderiv := hd.deriv
+  -- Unfold the covariant-derivative formula and substitute.
+  rw [chartCovDerivAlong_def, hderiv]
+  abel
 
 end PerpFrame
 
