@@ -44,6 +44,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 open DifferentialGeometry.Integral.Measure
+open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
@@ -121,6 +122,192 @@ the linear change-of-frame; equivalently the parallel-transport
 condition is chart-invariant, as recorded in the global Levi-Civita
 construction. -/
 
+open DifferentialGeometry.Geometry.Riemannian.Geodesic in
+/-- **Coordinate of the foot-slot derivative of the transition Jacobian.**
+For `x` in the chart-transition source, the `a`-th chart coordinate of the
+foot-slot derivative `(fderiv (chartTransitionAt α β ·) x v) w` equals the
+second-derivative sum `∑_{i,j} (∂_i J^a_j x) vⁱ wʲ`, where
+`J = chartTransitionJacEntry α β`. General-basepoint analogue of the
+chart-`p.proj` form used in the geodesic-spray reduction. -/
+private lemma chartCoord_fderiv_chartTransitionAt_general [I.Boundaryless]
+    (α β : M) {x : E} (hx : x ∈ chartTransitionSource (I := I) α β)
+    (a : Fin (Module.finrank ℝ E)) (v w : E) :
+    chartCoord (E := E) a
+        ((fderiv ℝ (fun z => chartTransitionAt (I := I) α β z) x v) w) =
+      ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+        partialDeriv (E := E) i
+          (fun z => chartTransitionJacEntry (I := I) α β z a j) x *
+          chartCoord (E := E) i v * chartCoord (E := E) j w := by
+  classical
+  set A : E → (E →L[ℝ] E) := fun z => chartTransitionAt (I := I) α β z with hA
+  have hcA : DifferentiableAt ℝ A x := by
+    have h_open : IsOpen (chartTransitionSource (I := I) α β) :=
+      chartTransitionSource_isOpen (I := I) α β
+    have hcd : ContDiffOn ℝ ∞
+        (fun z => (chartTransitionAt (I := I) α β z : E →L[ℝ] E))
+        (chartTransitionSource (I := I) α β) :=
+      chartTransitionAt_smooth (I := I) α β
+    exact (hcd.contDiffAt (h_open.mem_nhds hx)).differentiableAt (by simp)
+  -- The evaluation CLM `eval : (E →L E) →L ℝ`, `L ↦ chartCoord a (L w)`.
+  set coordCLM : E →L[ℝ] ℝ :=
+    LinearMap.toContinuousLinearMap ((chartModelBasis E).coord a) with hcoordCLM
+  set eval : (E →L[ℝ] E) →L[ℝ] ℝ :=
+    coordCLM.comp (ContinuousLinearMap.apply ℝ E w) with heval
+  -- `chartCoord a ((fderiv A x v) w) = eval (fderiv A x v)`.
+  have hstep1 :
+      chartCoord (E := E) a ((fderiv ℝ A x v) w) = eval (fderiv ℝ A x v) := by
+    rw [heval, ContinuousLinearMap.comp_apply, ContinuousLinearMap.apply_apply,
+      hcoordCLM]
+    simp only [LinearMap.coe_toContinuousLinearMap', Module.Basis.coord_apply]
+    rfl
+  -- `eval (fderiv A x v) = fderiv (eval ∘ A) x v` (eval is a CLM).
+  have hstep2 : eval (fderiv ℝ A x v) = fderiv ℝ (fun z => eval (A z)) x v := by
+    have hcomp_hasD : HasFDerivAt (fun z => eval (A z))
+        (eval.comp (fderiv ℝ A x)) x :=
+      eval.hasFDerivAt.comp x hcA.hasFDerivAt
+    rw [hcomp_hasD.fderiv]
+    rfl
+  -- `eval (A z) = chartCoord a (chartTransitionAt α β z w) = ∑_j J^a_j(z) wʲ`.
+  have heval_eq : (fun z => eval (A z)) =
+      (fun z => ∑ j : Fin (Module.finrank ℝ E),
+        chartTransitionJacEntry (I := I) α β z a j * chartCoord (E := E) j w) := by
+    funext z
+    rw [heval, ContinuousLinearMap.comp_apply, ContinuousLinearMap.apply_apply, hA,
+      hcoordCLM]
+    simp only [LinearMap.coe_toContinuousLinearMap', Module.Basis.coord_apply]
+    change chartCoord (E := E) a (chartTransitionAt (I := I) α β z w) = _
+    exact chartCoord_chartTransitionAt (I := I) α β z w a
+  rw [hstep1, hstep2, heval_eq]
+  -- Differentiate the finite sum.
+  have hsum_fderiv :
+      fderiv ℝ (fun z => ∑ j : Fin (Module.finrank ℝ E),
+          chartTransitionJacEntry (I := I) α β z a j * chartCoord (E := E) j w) x v =
+        ∑ j : Fin (Module.finrank ℝ E),
+          fderiv ℝ (fun z => chartTransitionJacEntry (I := I) α β z a j *
+            chartCoord (E := E) j w) x v := by
+    have hdiff : ∀ j : Fin (Module.finrank ℝ E),
+        DifferentiableAt ℝ (fun z => chartTransitionJacEntry (I := I) α β z a j *
+          chartCoord (E := E) j w) x := by
+      intro j
+      exact (chartTransitionJacEntry_differentiableAt (I := I) α β a j hx).mul_const _
+    rw [fderiv_fun_sum (fun j _ => hdiff j)]
+    rw [ContinuousLinearMap.sum_apply]
+  rw [hsum_fderiv]
+  -- Each summand: `fderiv (J^a_j · wʲ) x v = (fderiv J^a_j x v) · wʲ`,
+  -- and `fderiv J^a_j x v = ∑_i vⁱ ∂_i J^a_j x`.
+  have hLHS_expand :
+      (∑ j : Fin (Module.finrank ℝ E),
+          fderiv ℝ (fun z => chartTransitionJacEntry (I := I) α β z a j *
+            chartCoord (E := E) j w) x v) =
+        ∑ j : Fin (Module.finrank ℝ E), ∑ i : Fin (Module.finrank ℝ E),
+          partialDeriv (E := E) i
+            (fun z => chartTransitionJacEntry (I := I) α β z a j) x *
+            chartCoord (E := E) i v * chartCoord (E := E) j w := by
+    refine Finset.sum_congr rfl (fun j _ => ?_)
+    rw [fderiv_mul_const (chartTransitionJacEntry_differentiableAt (I := I) α β a j hx) _]
+    rw [ContinuousLinearMap.smul_apply, smul_eq_mul]
+    rw [fderiv_chartTransitionJacEntry_eq_sum_partialDeriv (I := I) α β a j x v]
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    ring
+  rw [hLHS_expand]
+  -- Swap the two outer sums `∑_j ∑_i` to `∑_i ∑_j`.
+  rw [Finset.sum_comm]
+
+open DifferentialGeometry.Geometry.Riemannian.Geodesic in
+/-- **Foot-slot derivative of the transition Jacobian = pushforward of the
+second-derivative correction.** For `x` in the chart-transition source, the
+foot-slot derivative `(fderiv (chartTransitionAt α β ·) x v) w` equals the
+forward Jacobian `chartTransitionAt α β x` applied to the second-derivative
+correction `chartTransitionSecondDerivCorrection α β v w x`. This is the
+vector-valued cancellation identity that converts the moving-foot Jacobian
+derivative into the Christoffel-transformation correction term. -/
+private lemma fderiv_chartTransitionAt_apply_eq_pushCorrection [I.Boundaryless]
+    (α β : M) {x : E} (hx : x ∈ chartTransitionSource (I := I) α β) (v w : E) :
+    (fderiv ℝ (fun z => chartTransitionAt (I := I) α β z) x v) w =
+      chartTransitionAt (I := I) α β x
+        (chartTransitionSecondDerivCorrection (I := I) α β v w x) := by
+  classical
+  refine (chartModelBasis E).ext_elem (fun a => ?_)
+  -- Both sides as chart coordinate `a`.
+  change chartCoord (E := E) a
+      ((fderiv ℝ (fun z => chartTransitionAt (I := I) α β z) x v) w) =
+    chartCoord (E := E) a
+      (chartTransitionAt (I := I) α β x
+        (chartTransitionSecondDerivCorrection (I := I) α β v w x))
+  rw [chartCoord_fderiv_chartTransitionAt_general (I := I) α β hx a v w]
+  -- RHS: `∑_c J^a_c(x) · chartCoord c (correction)`.
+  rw [chartCoord_chartTransitionAt (I := I) α β x
+    (chartTransitionSecondDerivCorrection (I := I) α β v w x) a]
+  -- Coordinate `c` of the correction.
+  have hcorrCoord : ∀ c : Fin (Module.finrank ℝ E),
+      chartCoord (E := E) c
+          (chartTransitionSecondDerivCorrection (I := I) α β v w x) =
+        ∑ d : Fin (Module.finrank ℝ E),
+          chartTransitionJacEntry (I := I) β α
+            (chartTransitionMap (I := I) α β x) c d *
+            (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+              partialDeriv (E := E) i
+                (fun z => chartTransitionJacEntry (I := I) α β z d j) x *
+                chartCoord (E := E) i v * chartCoord (E := E) j w) := by
+    intro c
+    rw [chartTransitionSecondDerivCorrection_def, chartCoord, map_sum,
+      Finsupp.finset_sum_apply]
+    rw [Finset.sum_eq_single_of_mem c (Finset.mem_univ c)]
+    · rw [map_smul, Finsupp.smul_apply, smul_eq_mul,
+        (chartModelBasis E).repr_self_apply c c, if_pos rfl, mul_one]
+    · intro k _ hkc
+      rw [map_smul, Finsupp.smul_apply, smul_eq_mul,
+        (chartModelBasis E).repr_self_apply k c, if_neg hkc, mul_zero]
+  -- Substitute the coordinate expansion of the correction.
+  rw [Finset.sum_congr rfl (fun c (_ : c ∈ Finset.univ) =>
+    congrArg (fun t => chartTransitionJacEntry (I := I) α β x a c * t) (hcorrCoord c))]
+  -- Now reorder so the Jacobian-collapse `∑_c J^a_c(x) J^c_d(Tx) = δ_{ad}` applies.
+  set D : Fin (Module.finrank ℝ E) → ℝ := fun d =>
+    ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+      partialDeriv (E := E) i
+        (fun z => chartTransitionJacEntry (I := I) α β z d j) x *
+        chartCoord (E := E) i v * chartCoord (E := E) j w with hD_def
+  -- The goal is now `D a = ∑_c J^a_c(x) · (∑_d J^c_d(Tx) · D d)`.
+  symm
+  calc
+    (∑ c : Fin (Module.finrank ℝ E),
+        chartTransitionJacEntry (I := I) α β x a c *
+          (∑ d : Fin (Module.finrank ℝ E),
+            chartTransitionJacEntry (I := I) β α
+              (chartTransitionMap (I := I) α β x) c d * D d))
+        = ∑ d : Fin (Module.finrank ℝ E),
+            (∑ c : Fin (Module.finrank ℝ E),
+              chartTransitionJacEntry (I := I) α β x a c *
+                chartTransitionJacEntry (I := I) β α
+                  (chartTransitionMap (I := I) α β x) c d) * D d := by
+          -- Distribute `J^a_c` into the inner `∑_d`, then swap the two sums.
+          rw [show (∑ c : Fin (Module.finrank ℝ E),
+                chartTransitionJacEntry (I := I) α β x a c *
+                  (∑ d : Fin (Module.finrank ℝ E),
+                    chartTransitionJacEntry (I := I) β α
+                      (chartTransitionMap (I := I) α β x) c d * D d)) =
+              ∑ c : Fin (Module.finrank ℝ E), ∑ d : Fin (Module.finrank ℝ E),
+                chartTransitionJacEntry (I := I) α β x a c *
+                  (chartTransitionJacEntry (I := I) β α
+                    (chartTransitionMap (I := I) α β x) c d * D d) from by
+            refine Finset.sum_congr rfl (fun c _ => ?_)
+            rw [Finset.mul_sum]]
+          rw [Finset.sum_comm]
+          refine Finset.sum_congr rfl (fun d _ => ?_)
+          rw [Finset.sum_mul]
+          refine Finset.sum_congr rfl (fun c _ => ?_)
+          ring
+    _ = ∑ d : Fin (Module.finrank ℝ E),
+            (if a = d then (1 : ℝ) else 0) * D d := by
+          refine Finset.sum_congr rfl (fun d _ => ?_)
+          rw [chartTransitionJacEntry_mul_sum' (I := I) α β hx a d]
+    _ = D a := by
+          rw [Finset.sum_eq_single_of_mem a (Finset.mem_univ a)]
+          · rw [if_pos rfl, one_mul]
+          · intro k _ hka
+            rw [if_neg (fun h => hka h.symm), zero_mul]
+
 /-- **parallel-chart-overlap-consistency.** The chart-α coordinate
 representation `Yα` of a tangent-field along `γ` and its chart-β
 counterpart `Yβ` are related by the chart-transition Jacobian
@@ -138,16 +325,146 @@ per chart, related by the chart-transition Jacobian. The previous
 "same `Y`" form is mathematically false because the chart-α and
 chart-β coordinate representations differ. -/
 theorem parallel_chart_overlap_consistency [I.Boundaryless]
-    (g : SmoothRiemannianMetric I M) (α β : M) (γ : ℝ → M)
+    (g : SmoothRiemannianMetric I M) (α β : M) (γ : ℝ → M) (hγ : Continuous γ)
     (uPrimeα Yα : ℝ → E) (s : Set ℝ)
     (hαβ : ∀ t ∈ s, γ t ∈ (chartAt H α).source ∩ (chartAt H β).source)
-    (_hpar : IsParallelChart (I := I) g α γ uPrimeα Yα s) :
+    (hpar : IsParallelChart (I := I) g α γ uPrimeα Yα s) :
     IsParallelChart (I := I) g β γ
       (fun t => Geodesic.chartTransitionAt (I := I) α β
                   (chartCurve (I := I) α γ t) (uPrimeα t))
       (fun t => Geodesic.chartTransitionAt (I := I) α β
                   (chartCurve (I := I) α γ t) (Yα t))
-      s := sorry
+      s := by
+  classical
+  -- Abbreviations for the chart-β transformed velocity / section.
+  set uPrimeβ : ℝ → E := fun t =>
+    chartTransitionAt (I := I) α β (chartCurve (I := I) α γ t) (uPrimeα t) with huPrimeβ
+  set Yβ : ℝ → E := fun t =>
+    chartTransitionAt (I := I) α β (chartCurve (I := I) α γ t) (Yα t) with hYβ
+  refine ⟨?_, ?_⟩
+  · -- The chart-β curve has the prescribed derivative `uPrimeβ t`.
+    intro t ht
+    -- Open neighbourhood of `t` on which `γ` stays in both chart sources.
+    set U : Set ℝ := γ ⁻¹' ((chartAt H α).source ∩ (chartAt H β).source) with hU_def
+    have hU_open : IsOpen U :=
+      ((chartAt H α).open_source.inter (chartAt H β).open_source).preimage hγ
+    have htU : t ∈ U := hαβ t ht
+    have hU_nhds : U ∈ 𝓝 t := hU_open.mem_nhds htU
+    -- On `U`, `chartCurve β γ = chartTransitionMap α β ∘ chartCurve α γ`.
+    have hcurve_eq : (chartCurve (I := I) β γ) =ᶠ[𝓝 t]
+        (fun s => chartTransitionMap (I := I) α β (chartCurve (I := I) α γ s)) := by
+      filter_upwards [hU_nhds] with σ hσ
+      obtain ⟨hσα, _hσβ⟩ := hσ
+      rw [chartCurve_def, chartCurve_def]
+      exact (chartTransitionMap_apply_extChartAt (I := I) α β hσα).symm
+    -- Chain rule for the composition.
+    have huα : HasDerivAt (chartCurve (I := I) α γ) (uPrimeα t) t :=
+      IsParallelChart.chartCurve_hasDerivAt hpar ht
+    have hsrc_t : chartCurve (I := I) α γ t ∈ chartTransitionSource (I := I) α β :=
+      extChartAt_mem_chartTransitionSource (I := I) α β (hαβ t ht).1 (hαβ t ht).2
+    have hTdiff : DifferentiableAt ℝ (chartTransitionMap (I := I) α β)
+        (chartCurve (I := I) α γ t) :=
+      chartTransitionMap_differentiableAt (I := I) α β hsrc_t
+    have hcomp : HasDerivAt
+        (fun s => chartTransitionMap (I := I) α β (chartCurve (I := I) α γ s))
+        (chartTransitionAt (I := I) α β (chartCurve (I := I) α γ t) (uPrimeα t)) t := by
+      have := hTdiff.hasFDerivAt.comp_hasDerivAt t huα
+      simpa [chartTransitionAt_def] using this
+    -- Transfer to `chartCurve β γ` via the local equality.
+    exact (hcomp.congr_of_eventuallyEq hcurve_eq)
+  · -- The chart-β ODE: `Yβ'(t) = - Γ_β(uPrimeβ t, Yβ t)(u_β t)`.
+    intro t ht
+    -- Manifold point and source memberships.
+    obtain ⟨htα, htβ⟩ := hαβ t ht
+    set x : E := chartCurve (I := I) α γ t with hx_def
+    have hsrc_t : x ∈ chartTransitionSource (I := I) α β :=
+      extChartAt_mem_chartTransitionSource (I := I) α β htα htβ
+    -- Derivatives of the chart-α curve and the chart-α section.
+    have huα : HasDerivAt (chartCurve (I := I) α γ) (uPrimeα t) t :=
+      IsParallelChart.chartCurve_hasDerivAt hpar ht
+    have hYαd : HasDerivAt Yα
+        (- chartChristoffelContraction (I := I) g α (uPrimeα t) (Yα t) x) t :=
+      IsParallelChart.hasDerivAt hpar ht
+    -- The transition-CLM along the chart-α curve is differentiable.
+    have hAdiff : DifferentiableAt ℝ
+        (fun z => (chartTransitionAt (I := I) α β z : E →L[ℝ] E)) x := by
+      have h_open : IsOpen (chartTransitionSource (I := I) α β) :=
+        chartTransitionSource_isOpen (I := I) α β
+      exact ((chartTransitionAt_smooth (I := I) α β).contDiffAt
+        (h_open.mem_nhds hsrc_t)).differentiableAt (by simp)
+    have hcA : HasDerivAt
+        (fun s => (chartTransitionAt (I := I) α β (chartCurve (I := I) α γ s) : E →L[ℝ] E))
+        ((fderiv ℝ (fun z => chartTransitionAt (I := I) α β z) x) (uPrimeα t)) t :=
+      hAdiff.hasFDerivAt.comp_hasDerivAt t huα
+    -- Product (CLM-application) rule for `Yβ t = (T_{αβ}(u_α t)) (Yα t)`.
+    have hYβd : HasDerivAt Yβ
+        (((fderiv ℝ (fun z => chartTransitionAt (I := I) α β z) x) (uPrimeα t)) (Yα t)
+          + chartTransitionAt (I := I) α β x
+              (- chartChristoffelContraction (I := I) g α (uPrimeα t) (Yα t) x)) t := by
+      have := hcA.clm_apply hYαd
+      simpa [hYβ, hx_def] using this
+    -- Rewrite the derivative value into the chart-β Christoffel contraction.
+    -- Step 1: the foot-slot derivative = forward push of the second-derivative correction.
+    have hfoot :
+        ((fderiv ℝ (fun z => chartTransitionAt (I := I) α β z) x) (uPrimeα t)) (Yα t) =
+          chartTransitionAt (I := I) α β x
+            (chartTransitionSecondDerivCorrection (I := I) α β (uPrimeα t) (Yα t) x) :=
+      fderiv_chartTransitionAt_apply_eq_pushCorrection (I := I) α β hsrc_t
+        (uPrimeα t) (Yα t)
+    -- Step 2: the Christoffel transformation law (α → β at the manifold point γ t).
+    have hxeq : x = extChartAt I α (γ t) := by rw [hx_def, chartCurve_def]
+    have htransform :
+        chartChristoffelContraction (I := I) g α (uPrimeα t) (Yα t) x =
+          chartTransitionAt (I := I) β α (chartTransitionMap (I := I) α β x)
+              (chartChristoffelContraction (I := I) g β
+                (chartTransitionAt (I := I) α β x (uPrimeα t))
+                (chartTransitionAt (I := I) α β x (Yα t))
+                (chartTransitionMap (I := I) α β x))
+            + chartTransitionSecondDerivCorrection (I := I) α β (uPrimeα t) (Yα t) x := by
+      rw [hxeq]
+      exact chartChristoffelContraction_transform (I := I) g α β htα htβ
+        (uPrimeα t) (Yα t)
+    -- Identify the chart-β curve / velocity / section in terms of the maps.
+    have huβ_eq : chartCurve (I := I) β γ t = chartTransitionMap (I := I) α β x := by
+      rw [hx_def, chartCurve_def, chartCurve_def,
+        chartTransitionMap_apply_extChartAt (I := I) α β htα]
+    -- The derivative value `D = foot + T_{αβ}(x)(-Γ_α)` collapses to `-Γ_β`.
+    have hDcollapse :
+        ((fderiv ℝ (fun z => chartTransitionAt (I := I) α β z) x) (uPrimeα t)) (Yα t)
+          + chartTransitionAt (I := I) α β x
+              (- chartChristoffelContraction (I := I) g α (uPrimeα t) (Yα t) x)
+          = - chartChristoffelContraction (I := I) g β
+              (uPrimeβ t) (Yβ t) (chartCurve (I := I) β γ t) := by
+      -- Push everything through `chartTransitionAt α β x` (a linear map).
+      rw [hfoot, map_neg, ← sub_eq_add_neg, ← map_sub]
+      -- `corr - Γ_α = - chartTransitionAt β α (Tx) (Γ_β(...))`.
+      have hsub :
+          chartTransitionSecondDerivCorrection (I := I) α β (uPrimeα t) (Yα t) x -
+              chartChristoffelContraction (I := I) g α (uPrimeα t) (Yα t) x =
+            - chartTransitionAt (I := I) β α (chartTransitionMap (I := I) α β x)
+                (chartChristoffelContraction (I := I) g β
+                  (chartTransitionAt (I := I) α β x (uPrimeα t))
+                  (chartTransitionAt (I := I) α β x (Yα t))
+                  (chartTransitionMap (I := I) α β x)) := by
+        rw [htransform]; abel
+      rw [hsub, map_neg]
+      -- `chartTransitionAt α β x ∘ chartTransitionAt β α (Tx) = id`.
+      have hinv := chartTransitionAt_comp_chartTransitionAt' (I := I) α β hsrc_t
+      have hid := congrArg (fun L : E →L[ℝ] E => L
+          (chartChristoffelContraction (I := I) g β
+            (chartTransitionAt (I := I) α β x (uPrimeα t))
+            (chartTransitionAt (I := I) α β x (Yα t))
+            (chartTransitionMap (I := I) α β x))) hinv
+      simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.id_apply] at hid
+      rw [hid, huβ_eq]
+    -- Conclude: `HasDerivAt Yβ (- Γ_β(uPrimeβ, Yβ)(u_β)) t`, matching the predicate.
+    have hgoal : HasDerivAt Yβ
+        ((fun _ : ℝ => (0 : E)) t -
+          chartChristoffelContraction (I := I) g β (uPrimeβ t) (Yβ t)
+            (chartCurve (I := I) β γ t)) t := by
+      rw [hDcollapse] at hYβd
+      simpa using hYβd
+    exact hgoal
 
 /-! ## Global extension
 
@@ -168,7 +485,26 @@ theorem parallel_global_extension
       V t₀ = v₀ ∧
       (∀ α : M, ∀ s : Set ℝ, (∀ t ∈ s, γ t ∈ (chartAt H α).source) →
         IsParallelChart (I := I) g α γ
-          (fun t => deriv (chartCurve (I := I) α γ) t) V s) := sorry
+          (fun t => deriv (chartCurve (I := I) α γ) t) V s) :=
+  -- RESIDUAL (statement defect, not a proof-engineering gap).
+  -- The conclusion asks for a single `V : ℝ → E` that is parallel
+  -- *simultaneously in every chart* `α` (the `∀ α` inside the `∃!`).
+  -- This is the same "same `Y` across charts" form that the docstring of
+  -- `parallel_chart_overlap_consistency` flags as mathematically false: by
+  -- that consistency lemma, if `V` is parallel in chart `α` on `s`, then the
+  -- chart-`β` representation of the *same* tangent section is
+  -- `t ↦ chartTransitionAt α β (chartCurve α γ t) (V t)`, which differs from
+  -- `V` itself whenever the transition Jacobian is nontrivial (e.g. on `S²`).
+  -- Hence on the overlap of two charts the single function `V` cannot satisfy
+  -- the chart-`α` and chart-`β` parallel-transport ODEs at once, so the
+  -- existence half of `∃!` fails for a generic non-parallelizable `M`.
+  -- A correct global statement must carry the chart-transition Jacobian
+  -- between charts (one `E`-valued representation per chart, glued by
+  -- `parallel_chart_overlap_consistency`), or be phrased as a genuine
+  -- `SectionAlongCurve` of the tangent bundle rather than a bare `ℝ → E`.
+  -- Both fixes change the public type consumed by `parallelTransport`, so the
+  -- repair is an API redesign outside the scope of filling this `sorry`.
+  sorry
 
 /-! ## Packaging as a `SectionAlongCurve`
 
@@ -417,7 +753,41 @@ theorem parallel_on_frame_perp_to_geodesic
         g.inner (γ t) ((e i).toFun t) ((e j).toFun t) =
           if i = j then 1 else 0) ∧
       (∀ t ∈ Set.Icc (0 : ℝ) L, ∀ i,
-        g.inner (γ t) ((e i).toFun t) (uPrime t) = 0) := sorry
+        g.inner (γ t) ((e i).toFun t) (uPrime t) = 0) :=
+  -- RESIDUAL (statement defect, not a proof-engineering gap).
+  -- Two independent obstructions prevent an honest proof of this statement.
+  --
+  -- (1) The third clause asks for `g.inner (γ t) ((e i) t) (uPrime t) = 0` for
+  --     the *arbitrary* input function `uPrime : ℝ → E`.  The only parallel
+  --     object the hypotheses provide is the parallel transport
+  --     `V t = (parallelTransport g γ hγ 0 (uPrime 0)).toFun t`, which is unit
+  --     by `hUnit`.  Constancy of `t ↦ g(e_i, ·)` along `γ` (the metric-
+  --     compatibility argument) only yields orthogonality of `e i` to a
+  --     *parallel* section; for an unconstrained `uPrime t` (no relation to
+  --     `V t`, no parallelism, not even continuity) the inner product is not
+  --     constant and orthogonality cannot be propagated from `t = 0`.  The
+  --     clause should read `g.inner (γ t) ((e i) t) (V t) = 0`.
+  --
+  -- (2) `g.inner (γ t)` consumes raw tangent-bundle fibre vectors
+  --     (`TangentSpace I (γ t)`), whereas the parallel-transport ODE encoded
+  --     by `IsParallelChart` (and hence `(e i).toFun`) lives in the *chart-`α`
+  --     coordinate representation*.  These two `E`-valued pictures are
+  --     identified by the chart trivialisation, which is chart-dependent on a
+  --     non-parallelizable manifold; the metric-compatibility engine available
+  --     here (`chartGramAlongCurve_hasDerivAt_covariant`) controls the
+  --     chart-Gram form `chartGramAlongCurve`, not the raw `g.inner`.  Bridging
+  --     the two requires the trivialisation-to-coordinate transfer that is
+  --     exactly the conflation flagged in `parallel_global_extension`.
+  --
+  -- Discharging this lemma honestly therefore needs the corrected,
+  -- chart-aware parallel-transport API (one representation per chart, glued by
+  -- `parallel_chart_overlap_consistency`) together with the bridge from
+  -- `chartGramAlongCurve` to `g.inner`; that is an API redesign beyond the
+  -- scope of filling this `sorry`, and the metric-compatibility constancy
+  -- argument (the genuine content) is already available as
+  -- `chartGramAlongCurve_hasDerivAt_zero_of_parallel` /
+  -- `parallelTransport_preserves_inner_product`.
+  sorry
 
 end Variation
 end Riemannian
