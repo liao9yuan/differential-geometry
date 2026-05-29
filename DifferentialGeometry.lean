@@ -1212,6 +1212,7 @@ import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.VariationalFlow
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.PushforwardSmooth
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.LiftMetric
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.PosDefPerturbation
+import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.TensorHsRealize
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.PointwiseDeriv
 import DifferentialGeometry.PDE.RicciFlow.DeTurckShortTime
 import DifferentialGeometry.PDE.RicciFlow.DeTurckVFTimeFamily
