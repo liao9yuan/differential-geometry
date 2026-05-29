@@ -686,6 +686,90 @@ theorem covDerivComponentEuclid_eqOn_rawComponent_covGrad
   rw [hJ0, hJtail] at hform
   rw [hform]
 
+/-! ## Leaf-4: the second-order chart-push bound (conjunct 3 core)
+
+The iterated `EuclideanSpace` partial of the chart-pushed raw `(0,2)`-component of `S` is
+bounded, on a compact subset of the chart target, by a constant times the iterated
+covariant-gradient jet sum.  The decomposition uses the explicit second covariant-derivative
+component formula `covDerivComponent_second_eq_iteratedFDeriv_add_lowerOrder`, whose three
+contribution families (the `∂_c` of the wrapped covariant-derivative component, the
+value-coefficient sum, and the gradient-coefficient sum) are each bounded via the
+first-order covariant-gradient inversion, the per-component bound, the lower-order bound, and
+the uniform sup-bounds of the `C^∞` second-order correction coefficients. -/
+
+set_option maxHeartbeats 3200000 in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- The `EuclideanSpace`-side partial `euclidPartial c (covDerivComponentEuclid g_bg 0 2 S α a
+(![]) Jdx)` is bounded on a compact subset of the chart target by `Craw4 · ‖∇²S‖ + CLO3 ·
+‖∇S‖` at the chart preimage. -/
+theorem euclidPartial_covDerivComponentEuclid_abs_le
+    (g_bg : SmoothRiemannianMetric I M) (α : M)
+    {K_eucl : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))}
+    (hKsub : K_eucl ⊆ chartTargetEuclid (I := I) (M := M) α)
+    (Craw4 : ℝ)
+    (hCraw4_bd : ∀ (T : SmoothCcTensor g_bg 0 4) (b : M),
+      b ∈ (fun y'' => (extChartAt I α).symm ((toEuclidean (E := E)).symm y'')) '' K_eucl →
+      ∀ (Jdx : Fin 4 → Fin (Module.finrank ℝ E)),
+        letI : Bundle.RiemannianBundle (fun bb : M => TensorRSSpace 0 4 I bb) :=
+          Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g_bg 0 4
+        |tensorChartComponentRaw (I := I) (M := M) g_bg 0 4 T α
+            (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) Jdx b| ≤ Craw4 * ‖T.toSection b‖)
+    (CLO3 : ℝ)
+    (hCLO3_bd : ∀ (T : SmoothCcTensor g_bg 0 3)
+      (m : Fin (Module.finrank ℝ E)) (Jdx : Fin 3 → Fin (Module.finrank ℝ E))
+      (z : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))), z ∈ K_eucl →
+        letI : Bundle.RiemannianBundle (fun bb : M => TensorRSSpace 0 3 I bb) :=
+          Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g_bg 0 3
+        |covDerivLowerOrderTerm (I := I) (M := M) g_bg 0 3 T α m
+            (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) Jdx z| ≤
+          CLO3 * ‖T.toSection ((extChartAt I α).symm ((toEuclidean (E := E)).symm z))‖)
+    (S : SmoothCcTensor g_bg 0 2) (c a : Fin (Module.finrank ℝ E))
+    (Jdx : Fin 2 → Fin (Module.finrank ℝ E))
+    {y' : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))} (hy' : y' ∈ K_eucl) :
+    letI : Bundle.RiemannianBundle (fun bb : M => TensorRSSpace 0 4 I bb) :=
+      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g_bg 0 4
+    letI : Bundle.RiemannianBundle (fun bb : M => TensorRSSpace 0 3 I bb) :=
+      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g_bg 0 3
+    |euclidPartial (E := E) c
+        (covDerivComponentEuclid (I := I) (M := M) g_bg 0 2 α S a
+          (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) Jdx) y'| ≤
+      Craw4 * ‖(covGrad (I := I) (M := M) g_bg 0 3
+          (covGrad (I := I) (M := M) g_bg 0 2 S)).toSection
+          ((extChartAt I α).symm ((toEuclidean (E := E)).symm y'))‖ +
+        CLO3 * ‖(covGrad (I := I) (M := M) g_bg 0 2 S).toSection
+          ((extChartAt I α).symm ((toEuclidean (E := E)).symm y'))‖ := by
+  classical
+  letI inst4 : Bundle.RiemannianBundle (fun bb : M => TensorRSSpace 0 4 I bb) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g_bg 0 4
+  letI inst3 : Bundle.RiemannianBundle (fun bb : M => TensorRSSpace 0 3 I bb) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g_bg 0 3
+  have hy'_tgt : y' ∈ chartTargetEuclid (I := I) (M := M) α := hKsub hy'
+  set b₀ : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y') with hb₀_def
+  have hb₀_img : b₀ ∈ (fun y'' => (extChartAt I α).symm ((toEuclidean (E := E)).symm y'')) ''
+      K_eucl := ⟨y', hy', rfl⟩
+  -- On the chart target `covDerivComponentEuclid = chartPush (raw of covGrad S)`.
+  have hbridge : Set.EqOn
+      (covDerivComponentEuclid (I := I) (M := M) g_bg 0 2 α S a
+        (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) Jdx)
+      (chartPushedRaw I α
+        (tensorChartComponentRaw (I := I) (M := M) g_bg 0 (2 + 1)
+          (covGrad (I := I) (M := M) g_bg 0 2 S) α
+          (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) (Fin.cons a Jdx)))
+      (chartTargetEuclid (I := I) (M := M) α) := by
+    intro z hz
+    rw [covDerivComponentEuclid_eqOn_rawComponent_covGrad (I := I) g_bg 2 S α a Jdx hz]
+    rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hz]
+  rw [(euclidPartial_congr_of_eqOn_isOpen (E := E) c (chartTargetEuclid_isOpen
+    (I := I) (M := M) α) hbridge) hy'_tgt]
+  rw [euclidPartial_chartPushedRaw_general_eq_covGrad_sub_lowerOrder (I := I) g_bg 3
+    (covGrad (I := I) (M := M) g_bg 0 2 S) α c (Fin.cons a Jdx) hy'_tgt]
+  have h_raw4 := hCraw4_bd (covGrad (I := I) (M := M) g_bg 0 3
+    (covGrad (I := I) (M := M) g_bg 0 2 S)) b₀ hb₀_img (Fin.cons c (Fin.cons a Jdx))
+  have h_lo3 := hCLO3_bd (covGrad (I := I) (M := M) g_bg 0 2 S) c (Fin.cons a Jdx) y' hy'
+  refine (abs_sub _ _).trans ?_
+  exact add_le_add h_raw4 h_lo3
+
 /-! ## Leaf-5: the zeroth-order (conjunct 1) bound -/
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
