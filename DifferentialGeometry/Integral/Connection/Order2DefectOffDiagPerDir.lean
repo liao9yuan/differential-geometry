@@ -57,13 +57,6 @@ This file establishes the off-diagonal curvature core, with full non-degeneracy:
   orthonormal-frame pair `(Bᵢ, Bⱼ)` (`i ≠ j`), where the `g`-length factors collapse to `1`:
   `rfns(R_x(Bᵢ, Bⱼ)(∇T₀)) ≤ Cx · rfns(∇T₀)`.
 
-* `frame_offDiag_curvature_sum_fiberNormSq_le` — the **frame-summed off-diagonal curvature
-  bound**: the intrinsic fibre norm of the full off-diagonal curvature sum
-  `∑_{i, j} R_x(Bᵢ, Bⱼ)(∇T₀)` is bounded by `n³ · Cx · rfns(∇T₀)` (`n = finrank ℝ E`), through
-  the finite-sum sub-additivity `riemannianFiberNormSq_sum_le_card_mul`. This is the genuine
-  off-diagonal curvature contribution to the defect bound — in the `rfns(∇T₀)` budget admitted
-  by the order-`2` Gårding estimate.
-
 * `covGradRoughLapCurv_toSection_eq_sub` — the pointwise frame-free presentation of the defect
   `(covGradRoughLapCurv g T₀).toSection x = Δ_∇(∇T₀)(x) − ∇(Δ_∇ T₀)(x)`, the form on which the
   remaining reconciliation acts.
@@ -80,11 +73,13 @@ which lets the outer covariant derivative `∇` pass through the metric trace `�
 without differentiating the moving frame. STEP 2 is the abstract-tensor metric-parallel property
 `∇(g⁻¹) = 0` propagated through the two contracted Hessian slots; it is genuine new content not
 present in the available infrastructure and is the single remaining gap. Once STEP 2 is
-available, the algebraic regrouping `Δ_∇(∇T₀) − ∇(Δ_∇ T₀) = traceG(∇²(∇T₀) − ∇(∇²T₀))` combined
-with the off-diagonal Ricci identity `secondCovDeriv_gradTensor_antisymm_eq_riemannOp` of this
-file and the frame-summed off-diagonal bound `frame_offDiag_curvature_sum_fiberNormSq_le`
-delivers the pointwise `hpt`, hence — through `hpt_to_unconditional_bound` — the unconditional
-estimate.
+available, the off-diagonal Ricci identity `secondCovDeriv_gradTensor_antisymm_eq_riemannOp` of
+this file together with the per-pair off-diagonal bound
+`riemannOp_gradTensor_offDiag_frame_fiberNormSq_le` supply the genuine per-pair off-diagonal
+curvature content. Assembling the per-pair contributions into the pointwise `hpt` requires the
+gradient direction to occupy a *single* curvature slot — the antisymmetric `(frame, gradient)`
+contraction that survives Riemann antisymmetry — rather than a symmetric frame double-trace
+(which vanishes identically); that final assembly is left open here.
 
 ## Sign / convention
 
@@ -217,29 +212,6 @@ theorem secondCovDeriv_gradTensor_antisymm_eq_riemannOp
     (T := fun y : M => (covGrad (I := I) (M := M) g 0 2 T₀).toSection y)
     hX hY (covGrad_contMDiff_mk' (I := I) (M := M) g T₀)
 
-/-- **The off-diagonal curvature is the antisymmetric Hessian of the gradient tensor along a
-frame pair.** Specialising STEP 4 to the orthonormal-frame directions `X := Bᵢ`, `Y := Bⱼ` (with
-`Bₖ := smoothOrthoFrame g x k`), the off-diagonal curvature `R_x(Bᵢ, Bⱼ)(∇T₀)` is the
-antisymmetric pair-swap of the second covariant derivative of `∇T₀` along `(Bᵢ, Bⱼ)`. For
-`i ≠ j` this is the genuine nonzero off-diagonal curvature; for `i = j` both sides vanish by
-curvature antisymmetry, exhibiting the degenerate diagonal directly. -/
-theorem riemannOp_gradTensor_frame_eq_antisymm_secondCovDeriv
-    (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2)
-    (i j : Fin (Module.finrank ℝ E)) (x : M) :
-    riemannOp (tensorCov (I := I) g 0 3) x
-        (smoothOrthoFrame (I := I) g x i x) (smoothOrthoFrame (I := I) g x j x)
-        ((covGrad (I := I) (M := M) g 0 2 T₀).toSection x) =
-      tensorSecondCovDeriv (I := I) g 0 3
-          (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x j)
-          (fun y : M => (covGrad (I := I) (M := M) g 0 2 T₀).toSection y) x -
-        tensorSecondCovDeriv (I := I) g 0 3
-          (smoothOrthoFrame (I := I) g x j) (smoothOrthoFrame (I := I) g x i)
-          (fun y : M => (covGrad (I := I) (M := M) g 0 2 T₀).toSection y) x := by
-  have h := secondCovDeriv_gradTensor_antisymm_eq_riemannOp (I := I) (M := M) g T₀
-    (X := smoothOrthoFrame (I := I) g x i) (Y := smoothOrthoFrame (I := I) g x j) (x := x)
-    (smoothOrthoFrame_smooth (I := I) g x i) (smoothOrthoFrame_smooth (I := I) g x j)
-  exact h.symm
-
 /-! ## STEP 5 — the off-diagonal curvature fibre bound
 
 The curvature contraction produced by STEP 4 has intrinsic Riemannian fibre norm controlled by
@@ -309,132 +281,11 @@ theorem riemannOp_gradTensor_offDiag_frame_fiberNormSq_le
   rw [hii, hjj] at h
   simpa using h
 
-/-! ## The frame-summed off-diagonal curvature bound
-
-The full off-diagonal curvature contribution to the defect is the frame double-sum
-`∑_{i, j} R_x(Bᵢ, Bⱼ)(∇T₀)`. Its intrinsic fibre norm is bounded, through two nested applications
-of the quadratic-form finite-sum sub-additivity `riemannianFiberNormSq_sum_le_card_mul`, by
-`n⁴ · Cx · rfns(∇T₀)` where `n = finrank ℝ E` (each of the two nestings contributes a factor
-`n` outside the `n`-fold sum and a factor `n` from summing the `n` constant summands; combined the
-constant is `n⁴ · Cx`, kept as a single nonnegative `K`). This is the genuine off-diagonal
-curvature contribution — in the `rfns(∇T₀)` budget admitted by the order-`2` Gårding estimate. -/
-
-/-- **Frame-summed off-diagonal curvature fibre bound.** The full off-diagonal curvature
-double-sum over the `g_x`-orthonormal frame `Bₖ := smoothOrthoFrame g x k`,
-```
-∑_{i} ∑_{j} R_x(Bᵢ, Bⱼ)(∇T₀(x)),
-```
-has intrinsic `(0, 3)` fibre norm bounded by a single nonnegative constant `K` times the fibre
-norm of `∇T₀`:
-```
-rfns(∑_{i, j} R_x(Bᵢ, Bⱼ)(∇T₀)) ≤ K · rfns(∇T₀(x)).
-```
-The proof bounds the double sum's fibre norm by two nested applications of the quadratic-form
-sub-additivity `riemannianFiberNormSq_sum_le_card_mul`, then bounds each summand by
-`Cx · rfns(∇T₀)` via the off-diagonal frame bound — never invoking the degenerate diagonal
-collapse `R(Bᵢ, Bᵢ) = 0`, since the genuine content is precisely the off-diagonal curvature
-controlled here for *all* pairs `(i, j)`. The constant is `K = n⁴ · Cx`. This is the
-`rfns(∇T₀)`-budget curvature contribution the metric-trace reconciliation consumes. -/
-theorem frame_offDiag_curvature_sum_fiberNormSq_le
-    (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2) (x : M) :
-    ∃ K : ℝ, 0 ≤ K ∧
-      riemannianFiberNormSq (I := I) (M := M) g 0 3 x
-          (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
-            riemannOp (tensorCov (I := I) g 0 3) x
-              (smoothOrthoFrame (I := I) g x i x) (smoothOrthoFrame (I := I) g x j x)
-              ((covGrad (I := I) (M := M) g 0 2 T₀).toSection x)) ≤
-        K * riemannianFiberNormSq (I := I) (M := M) g 0 3 x
-          ((covGrad (I := I) (M := M) g 0 2 T₀).toSection x) := by
-  classical
-  set n : ℕ := Module.finrank ℝ E with hn_def
-  set S : TensorRSSpace 0 3 I x := (covGrad (I := I) (M := M) g 0 2 T₀).toSection x with hS_def
-  set rfnsS : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 3 x S with hrfnsS_def
-  have hrfnsS_nn : 0 ≤ rfnsS := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 3 x S
-  -- The per-pair off-diagonal curvature bound.
-  obtain ⟨Cx, hCx_nonneg, hpairbound⟩ :=
-    riemannOp_gradTensor_offDiag_frame_fiberNormSq_le (I := I) (M := M) g T₀ x
-  -- Abbreviate the curvature double-array.
-  set R : Fin n → Fin n → TensorRSSpace 0 3 I x := fun i j =>
-    riemannOp (tensorCov (I := I) g 0 3) x
-      (smoothOrthoFrame (I := I) g x i x) (smoothOrthoFrame (I := I) g x j x) S with hR_def
-  have hRbound : ∀ i j : Fin n,
-      riemannianFiberNormSq (I := I) (M := M) g 0 3 x (R i j) ≤ Cx * rfnsS := by
-    intro i j; rw [hR_def, hrfnsS_def]; exact hpairbound i j
-  -- The honest constant `K := n⁴ · Cx`. Two nested applications of the quadratic-form finite-sum
-  -- sub-additivity `riemannianFiberNormSq_sum_le_card_mul` each contribute a factor `n` outside
-  -- the `n`-fold sum, so the bound is `n · (n · (n · (n · (Cx · rfnsS)))) = n⁴ · Cx · rfnsS`. We
-  -- factor `rfnsS` out into the `K · rfnsS` conclusion shape.
-  refine ⟨(n : ℝ) * ((n : ℝ) * ((n : ℝ) * ((n : ℝ) * Cx))), ?_, ?_⟩
-  · have hn_nn : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg n
-    positivity
-  -- Bound the outer sum's fibre norm.
-  -- First: each inner `j`-sum `∑ j, R i j` has fibre norm `≤ n · ∑ j, rfns(R i j) ≤ n · (n · Cx·rfnsS)`.
-  have hinner : ∀ i : Fin n,
-      riemannianFiberNormSq (I := I) (M := M) g 0 3 x (∑ j : Fin n, R i j) ≤
-        (n : ℝ) * ((n : ℝ) * (Cx * rfnsS)) := by
-    intro i
-    calc
-      riemannianFiberNormSq (I := I) (M := M) g 0 3 x (∑ j : Fin n, R i j)
-          ≤ ((Finset.univ : Finset (Fin n)).card : ℝ) *
-              ∑ j : Fin n, riemannianFiberNormSq (I := I) (M := M) g 0 3 x (R i j) :=
-            riemannianFiberNormSq_sum_le_card_mul (I := I) (M := M) g 0 3 x Finset.univ (R i)
-      _ = (n : ℝ) * ∑ j : Fin n, riemannianFiberNormSq (I := I) (M := M) g 0 3 x (R i j) := by
-            rw [Finset.card_univ, Fintype.card_fin]
-      _ ≤ (n : ℝ) * ∑ _j : Fin n, Cx * rfnsS := by
-            refine mul_le_mul_of_nonneg_left ?_ (Nat.cast_nonneg n)
-            exact Finset.sum_le_sum (fun j _ => hRbound i j)
-      _ = (n : ℝ) * ((n : ℝ) * (Cx * rfnsS)) := by
-            rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
-  -- Then: the outer `i`-sum.
-  calc
-    riemannianFiberNormSq (I := I) (M := M) g 0 3 x
-        (∑ i : Fin n, ∑ j : Fin n, R i j)
-        ≤ ((Finset.univ : Finset (Fin n)).card : ℝ) *
-            ∑ i : Fin n, riemannianFiberNormSq (I := I) (M := M) g 0 3 x (∑ j : Fin n, R i j) :=
-          riemannianFiberNormSq_sum_le_card_mul (I := I) (M := M) g 0 3 x Finset.univ
-            (fun i => ∑ j : Fin n, R i j)
-    _ = (n : ℝ) * ∑ i : Fin n,
-          riemannianFiberNormSq (I := I) (M := M) g 0 3 x (∑ j : Fin n, R i j) := by
-          rw [Finset.card_univ, Fintype.card_fin]
-    _ ≤ (n : ℝ) * ∑ _i : Fin n, (n : ℝ) * ((n : ℝ) * (Cx * rfnsS)) := by
-          refine mul_le_mul_of_nonneg_left ?_ (Nat.cast_nonneg n)
-          exact Finset.sum_le_sum (fun i _ => hinner i)
-    _ = (n : ℝ) * ((n : ℝ) * ((n : ℝ) * ((n : ℝ) * (Cx * rfnsS)))) := by
-          rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
-    _ = (n : ℝ) * ((n : ℝ) * ((n : ℝ) * ((n : ℝ) * Cx))) * rfnsS := by ring
-
-/-! ## The precise remaining subgoal (documented, not assumed)
-
-The off-diagonal curvature core established above supplies the genuine non-degenerate curvature
-term `R_x(Bᵢ, Bⱼ)(∇T₀)` (`secondCovDeriv_gradTensor_antisymm_eq_riemannOp`), its general-direction
-fibre bound (`riemannOp_gradTensor_offDiag_fiberNormSq_le`), the orthonormal-frame collapse
-(`riemannOp_gradTensor_offDiag_frame_fiberNormSq_le`), and the frame-summed off-diagonal control
-(`frame_offDiag_curvature_sum_fiberNormSq_le`), all in the `rfns(∇T₀)` budget. The frame-free
-pointwise presentation of the defect is `covGradRoughLapCurv_toSection_eq_sub`.
-
-The single remaining gap to assemble these into the pointwise `hpt` is the metric-compatibility
-intertwining **STEP 2**: the cometric-parallel identity `∇ ∘ traceG = traceG ∘ ∇` on the
-`(0, s+2) → (0, s)` metric trace. It is the abstract-tensor metric-parallel property
-`∇(g⁻¹) = 0` (re-derivable from `LeviCivita`'s metric compatibility and the orthonormality of
-`smoothOrthoFrame`: `b ↦ g.inner b (Bᵢ b) (Bⱼ b)` is eventually constant `δᵢⱼ`, so its `mfderiv`
-vanishes, giving `g(∇_v Bᵢ, Bⱼ) + g(Bᵢ, ∇_v Bⱼ) = 0`) propagated through the two contracted
-Hessian slots. STEP 2 lets the outer covariant derivative `∇` pass through the metric trace
-`Δ_∇ = traceG(∇²·)` without differentiating the moving frame, yielding the algebraic regrouping
-```
-covGradRoughLapCurv = Δ_∇(∇T₀) − ∇(Δ_∇ T₀) = traceG(∇²(∇T₀) − ∇(∇²T₀)).
-```
-The inner difference `∇²(∇T₀) − ∇(∇²T₀)` reorders the gradient slot past the two trace slots; each
-swap is the off-diagonal Ricci identity `secondCovDeriv_gradTensor_antisymm_eq_riemannOp` of this
-file, exhibiting the difference as a contraction of `R` with `∇T₀` plus a `∇R · T₀` lower-order
-term. The fibre norm of the former is controlled by `frame_offDiag_curvature_sum_fiberNormSq_le`
-(in the `rfns(∇T₀)` budget) and of the latter by the curvature-smoothness bound on the compact `M`
-(in the `rfns(T₀)` budget), landing the pointwise `hpt`. The endpoint
-`hpt_to_unconditional_bound` (`Order2DefectMetricTraceFrame.lean`) then yields the unconditional
-order-`2` covariant Gårding estimate. STEP 2 is genuine new content not present in the available
-infrastructure and is the precise remaining subgoal. -/
 
 end Connection
+
 end Integral
+
 end DifferentialGeometry
 
 end

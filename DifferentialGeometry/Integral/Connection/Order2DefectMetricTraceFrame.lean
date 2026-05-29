@@ -313,47 +313,6 @@ theorem thirdOrder_ricci_identity_firstSlot
     (T := fun y : M => (covGrad (I := I) (M := M) g 0 2 T₀).toSection y)
     hX hY (covGrad_contMDiff_mk' (I := I) (M := M) g T₀)
 
-/-! ## STEP 5 — the curvature fibre bound
-
-The curvature contraction produced by STEP 4 has intrinsic Riemannian fibre norm controlled by the
-per-point curvature constant times the metric lengths of the directions times the fibre norm of the
-contracted tensor. At rank `(0, 3)`, the imported Parseval fibre bound
-`exists_Cx_riemannianFiberNormSq_riemannOp_tensorCovS_le` provides exactly this control. The
-`g_x`-orthonormal-frame specialisation collapses the `g`-length factors to `1`, landing the bound in
-the `rfns(∇T₀)` budget admitted by the order-`2` Gårding estimate. -/
-
-/-- **STEP 5 (curvature fibre bound along a frame pair).** For the curvature term
-`R_x(B_i x, B_i x)(∇T₀(x))` produced by the diagonal STEP 4 reordering — with
-`B_i := smoothOrthoFrame g x i` — the `g`-length factors of the orthonormal frame collapse to `1`,
-giving the clean fibre bound
-```
-rfns(R_x(B_i x, B_i x)(∇T₀(x))) ≤ Cx · rfns(∇T₀(x)),
-```
-with `Cx ≥ 0` the per-point curvature constant of
-`exists_Cx_riemannianFiberNormSq_riemannOp_tensorCovS_le` at rank `(0, 3)`. The `(∇T₀)` argument
-lives in the `rfns(∇T₀)` budget admitted by the order-`2` Gårding estimate. -/
-theorem step5_curvature_orthoFrame_fiberNormSq_le
-    (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2)
-    (i : Fin (Module.finrank ℝ E)) (x : M) :
-    ∃ Cx : ℝ, 0 ≤ Cx ∧
-      riemannianFiberNormSq (I := I) (M := M) g 0 3 x
-          (riemannOp (tensorCov (I := I) g 0 3) x
-            (smoothOrthoFrame (I := I) g x i x) (smoothOrthoFrame (I := I) g x i x)
-            ((covGrad (I := I) (M := M) g 0 2 T₀).toSection x)) ≤
-        Cx * riemannianFiberNormSq (I := I) (M := M) g 0 3 x
-            ((covGrad (I := I) (M := M) g 0 2 T₀).toSection x) := by
-  obtain ⟨Cx, hCx_nonneg, hbound⟩ :=
-    exists_Cx_riemannianFiberNormSq_riemannOp_tensorCovS_le (I := I) (M := M) g 3 x
-  refine ⟨Cx, hCx_nonneg, ?_⟩
-  have hortho : g.inner x (smoothOrthoFrame (I := I) g x i x)
-      (smoothOrthoFrame (I := I) g x i x) = 1 := by
-    have := smoothOrthoFrame_orthonormal_at_center (I := I) g x i i
-    simpa using this
-  have := hbound (smoothOrthoFrame (I := I) g x i x) (smoothOrthoFrame (I := I) g x i x)
-    ((covGrad (I := I) (M := M) g 0 2 T₀).toSection x)
-  rw [hortho] at this
-  simpa using this
-
 /-! ## The endpoint bridge: any pointwise defect bound yields the unconditional estimate
 
 Independently of how the pointwise fibre-norm bound `hpt` on the canonical defect
