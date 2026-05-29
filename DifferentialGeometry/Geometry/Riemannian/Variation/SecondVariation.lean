@@ -585,13 +585,288 @@ velocity of the central curve. This is the Leibniz / metric-compatibility step
 underlying the first variation of arc length. -/
 theorem S1_moving_foot_metric_compatibility
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (t : ℝ)
-    (_hf : IsSmoothVariation (I := I) f) :
+    (hf : IsSmoothVariation (I := I) f) :
     HasDerivAt (fun s : ℝ => speedSq (I := I) g f s t)
       (2 * g.inner (f 0 t)
         (DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong.covDerivAlong
           (I := I) g (fun s : ℝ => f s t)
           (fun s : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f s u) t (1 : ℝ)) 0)
-        (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f 0 u) t (1 : ℝ))) 0 := sorry
+        (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f 0 u) t (1 : ℝ))) 0 := by
+  classical
+  open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
+  -- Abbreviations: the fixed foot `α = f 0 t`, the transverse curve
+  -- `γ s = f s t`, the longitudinal-velocity section `Vsec`, and its
+  -- chart-`α`-coordinate `V s = fderiv (extChartAt α (f s ·)) t 1`.
+  set α : M := f 0 t with hα
+  set γ : ℝ → M := fun s : ℝ => f s t with hγ
+  set Vsec : ∀ s : ℝ, TangentSpace I (γ s) :=
+    fun s : ℝ => mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f s u) t (1 : ℝ) with hVsec
+  set V : ℝ → E :=
+    fun s : ℝ => fderiv ℝ (fun v : ℝ => extChartAt I α (f s v)) t (1 : ℝ) with hV
+  -- The chart-pulled-back variation `F (u, v) := extChartAt α (f u v)` is
+  -- `C²` at `(0, t)` (foot pinned at `α = f 0 t`).
+  have hF2 : ContDiffAt ℝ 2
+      (fun p : ℝ × ℝ => extChartAt I α (f p.1 p.2)) (0, t) := by
+    have hext : ContMDiffAt I 𝓘(ℝ, E) ∞ (extChartAt I α) (f 0 t) :=
+      contMDiffAt_extChartAt (I := I) (x := α)
+    have hcomp : ContMDiffAt (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, E) ∞
+        (fun p : ℝ × ℝ => extChartAt I α (f p.1 p.2)) (0, t) :=
+      hext.comp (0, t) hf.contMDiffAt
+    have key : ContDiffAt ℝ ∞
+        (fun p : ℝ × ℝ => extChartAt I α (f p.1 p.2)) (0, t) := by
+      rw [← contMDiffAt_iff_contDiffAt, modelWithCornersSelf_prod,
+        ← chartedSpaceSelf_prod]
+      exact hcomp
+    exact key.of_le (by decide)
+  -- Smoothness of the transverse curve `γ = fun s => f s t`.
+  have hγ_smooth : ContMDiff (𝓘(ℝ, ℝ)) I ∞ γ := by
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞
+        (fun s : ℝ => (s, t)) :=
+      contMDiff_id.prodMk contMDiff_const
+    exact (hf : ContMDiff _ _ _ _).comp hincl
+  -- Smoothness of each longitudinal slice `fun u => f s u` (used to bridge
+  -- the chart-`α`-coordinate of `mfderiv` to a Fréchet derivative).
+  have hslice : ∀ s : ℝ, ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun u : ℝ => f s u) := by
+    intro s
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞
+        (fun u : ℝ => (s, u)) :=
+      contMDiff_const.prodMk contMDiff_id
+    exact (hf : ContMDiff _ _ _ _).comp hincl
+  -- The set on which `f s t` lies in the chart source at `α`; it is an open
+  -- neighborhood of `s = 0` (since `f 0 t = α ∈ source`).
+  set S : Set ℝ := γ ⁻¹' (chartAt H α).source with hS
+  have hS_open : IsOpen S := by
+    have hsrc_open : IsOpen (chartAt H α).source := (chartAt H α).open_source
+    exact (hγ_smooth.continuous.isOpen_preimage _ hsrc_open)
+  have h0S : (0 : ℝ) ∈ S := by
+    show γ 0 ∈ (chartAt H α).source
+    change f 0 t ∈ (chartAt H α).source
+    rw [hα]; exact mem_chart_source H (f 0 t)
+  have hS_nhds : S ∈ nhds (0 : ℝ) := hS_open.mem_nhds h0S
+  -- `chartRepAt γ Vsec 0` (the section feeding `covDerivAlong`) coincides with
+  -- `V` on `S`: both equal the chart-`α`-coordinate of the longitudinal
+  -- velocity, via `chartCoord_mfderiv_along_curve_eq_fderiv`.
+  have hVeq_chartRep : ∀ s ∈ S, V s =
+      DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong.chartRepAt
+        (I := I) γ Vsec 0 s := by
+    intro s hs
+    have hsrc : (fun u : ℝ => f s u) t ∈ (chartAt H α).source := hs
+    have hbridge := MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv
+      (I := I) (M := M) (γ := fun u : ℝ => f s u) (hslice s) α (t := t) hsrc
+    -- `chartRepAt γ Vsec 0 s = CLMat_{γ 0}(γ s)(Vsec s)`; `γ 0 = α`.
+    show V s =
+      (trivializationAt E (TangentSpace I) (γ 0)).continuousLinearMapAt ℝ (γ s)
+        (Vsec s)
+    rw [hV]
+    have hγ0 : γ 0 = α := by rw [hγ, hα]
+    rw [hγ0]
+    -- `(extChartAt α ∘ (fun u => f s u)) = fun v => extChartAt α (f s v)`.
+    have hcompfun : ((extChartAt I α) ∘ (fun u : ℝ => f s u))
+        = (fun v : ℝ => extChartAt I α (f s v)) := rfl
+    rw [hcompfun] at hbridge
+    exact hbridge.symm
+  -- `V` has a derivative at `0` (the `s`-partial of the `t`-partial of `F`).
+  have hV_hasDerivAt : HasDerivAt V
+      (fderiv ℝ (fderiv ℝ (fun p : ℝ × ℝ => extChartAt I α (f p.1 p.2)))
+        (0, t) (1, 0) (0, 1)) 0 := by
+    rw [hV]
+    exact Aux2.hasDerivAt_partial_snd (fun u v => extChartAt I α (f u v)) 0 t hF2
+  -- `chartCurve α γ s = extChartAt α (f s t)`; it has a derivative at `0`.
+  have hchartCurve_eq : AlongCurve.chartCurve (I := I) α γ
+      = fun s : ℝ => extChartAt I α (f s t) := by
+    funext s; rw [AlongCurve.chartCurve_def, hγ]
+  have hF1diff : DifferentiableAt ℝ
+      (fun p : ℝ × ℝ => extChartAt I α (f p.1 p.2)) (0, t) :=
+    (hF2.of_le one_le_two).differentiableAt one_ne_zero
+  have hu_hasDerivAt : HasDerivAt (AlongCurve.chartCurve (I := I) α γ)
+      (fderiv ℝ (fun p : ℝ × ℝ => extChartAt I α (f p.1 p.2)) (0, t) (1, 0)) 0 := by
+    rw [hchartCurve_eq]
+    exact Aux2.hasDerivAt_slice_fst (fun u v => extChartAt I α (f u v)) 0 t hF1diff
+  -- `chartCurve α γ 0 = extChartAt α α` lies in the interior of the target.
+  have hmem : AlongCurve.chartCurve (I := I) α γ 0 ∈
+      interior (extChartAt I α).target := by
+    have hxsrc : γ 0 ∈ (extChartAt I α).source := by
+      rw [extChartAt_source]
+      change f 0 t ∈ (chartAt H α).source
+      rw [hα]; exact mem_chart_source H (f 0 t)
+    have hxtarget : AlongCurve.chartCurve (I := I) α γ 0 ∈ (extChartAt I α).target :=
+      (extChartAt I α).map_source hxsrc
+    exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
+      (I := I) α hxtarget
+  -- Apply the covariant product rule (`V = W`) to differentiate the Gram form.
+  have hbase := AlongCurve.chartGramAlongCurve_hasDerivAt_covariant
+    (I := I) g α γ V V
+    (uPrime := fun _ =>
+      fderiv ℝ (fun p : ℝ × ℝ => extChartAt I α (f p.1 p.2)) (0, t) (1, 0))
+    (Vprime := fun _ =>
+      fderiv ℝ (fderiv ℝ (fun p : ℝ × ℝ => extChartAt I α (f p.1 p.2)))
+        (0, t) (1, 0) (0, 1))
+    (Wprime := fun _ =>
+      fderiv ℝ (fderiv ℝ (fun p : ℝ × ℝ => extChartAt I α (f p.1 p.2)))
+        (0, t) (1, 0) (0, 1))
+    hu_hasDerivAt hmem hV_hasDerivAt hV_hasDerivAt
+  -- Transfer the derivative from `chartGramAlongCurve g α γ V V` to `speedSq`
+  -- via the eventual identity on `S`.
+  have hspeed_eq : (fun s : ℝ => speedSq (I := I) g f s t)
+      =ᶠ[nhds (0 : ℝ)] (fun s : ℝ => AlongCurve.chartGramAlongCurve (I := I) g α γ V V s) := by
+    filter_upwards [hS_nhds] with s hs
+    -- Foot `f s t` is in the base set and chart source at `α`.
+    have hsrc : f s t ∈ (chartAt H α).source := hs
+    have hbase_set : f s t ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
+      rw [TangentBundle.trivializationAt_baseSet]; exact hsrc
+    have hxsrc : f s t ∈ (extChartAt I α).source := by rw [extChartAt_source]; exact hsrc
+    -- `speedSq g f s t = g.inner (f s t) (Vsec s) (Vsec s)` by definition.
+    have hsq : speedSq (I := I) g f s t = g.inner (f s t) (Vsec s) (Vsec s) := rfl
+    rw [hsq]
+    -- Expand `g.inner` in the chart frame at `α` via `g_inner_eq_chart_sum`.
+    rw [DifferentialGeometry.Integral.Connection.g_inner_eq_chart_sum
+      (I := I) g α hbase_set hxsrc (Vsec s) (Vsec s)]
+    -- The chart-coordinate of `Vsec s` is `V s` on `S`.
+    have hVcoord :
+        (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ (f s t) (Vsec s)
+          = V s := by
+      have := hVeq_chartRep s hs
+      rw [this]
+      show _ = (trivializationAt E (TangentSpace I) (γ 0)).continuousLinearMapAt ℝ (γ s) (Vsec s)
+      have hγ0 : γ 0 = α := by rw [hγ, hα]
+      have hγs : γ s = f s t := rfl
+      rw [hγ0, hγs]
+    -- Identify the chart sum with `chartGramAlongCurve`.
+    rw [AlongCurve.chartGramAlongCurve_def]
+    refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
+    -- `extChartAt α (f s t) = chartCurve α γ s`; reorder factors.
+    have hchart : extChartAt I α (f s t) = AlongCurve.chartCurve (I := I) α γ s := by
+      rw [AlongCurve.chartCurve_def, hγ]
+    rw [hchart]
+    rw [show (chartModelBasis E).repr
+            ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ (f s t)
+              (Vsec s)) i
+          = chartCoord (E := E) i (V s) from by rw [hVcoord]; rfl,
+       show (chartModelBasis E).repr
+            ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ (f s t)
+              (Vsec s)) j
+          = chartCoord (E := E) j (V s) from by rw [hVcoord]; rfl]
+    ring
+  -- The derivative of `speedSq` is the engine's derivative value.
+  have hderiv := hbase.congr_of_eventuallyEq hspeed_eq
+  -- Identify the engine value with `2 * g.inner (f 0 t) (covDerivAlong …) (∂_t f)`.
+  convert hderiv using 1
+  -- Abbreviate the curve point at `0`: `u0 = extChartAt α α`.
+  set u0 : E := AlongCurve.chartCurve (I := I) α γ 0 with hu0
+  set DV : E :=
+    fderiv ℝ (fderiv ℝ (fun p : ℝ × ℝ => extChartAt I α (f p.1 p.2)))
+        (0, t) (1, 0) (0, 1)
+      + chartChristoffelContraction (I := I) g α
+          (fderiv ℝ (fun p : ℝ × ℝ => extChartAt I α (f p.1 p.2)) (0, t) (1, 0))
+          (V 0) u0 with hDV
+  -- The covariant-corrected vector `DV` is the chart-`α`-coordinate (at the foot
+  -- `γ 0 = α`) of the intrinsic covariant derivative `covDerivAlong g γ Vsec 0`.
+  have hγ0 : γ 0 = α := by rw [hγ, hα]
+  have hbase_set0 : α ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
+    FiberBundle.mem_baseSet_trivializationAt E (TangentSpace I) α
+  -- `DV = chartCovDerivAlong g α γ (chartRepAt γ Vsec 0) 0`.
+  have hDV_eq :
+      DV = chartCovDerivAlong (I := I) g α γ
+        (DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong.chartRepAt
+          (I := I) γ Vsec 0) 0 := by
+    rw [chartCovDerivAlong_def, hDV]
+    have hVder0 : V 0 =
+        DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong.chartRepAt
+          (I := I) γ Vsec 0 0 := hVeq_chartRep 0 h0S
+    have huPrime0 : deriv (AlongCurve.chartCurve (I := I) α γ) 0
+          = fderiv ℝ (fun p : ℝ × ℝ => extChartAt I α (f p.1 p.2)) (0, t) (1, 0) :=
+      hu_hasDerivAt.deriv
+    -- `chartRepAt γ Vsec 0` has the same derivative as `V` at `0` (they agree on `S`).
+    have hrepDeriv : deriv
+          (DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong.chartRepAt
+            (I := I) γ Vsec 0) 0
+        = fderiv ℝ (fderiv ℝ (fun p : ℝ × ℝ => extChartAt I α (f p.1 p.2)))
+            (0, t) (1, 0) (0, 1) := by
+      have hrep_hasDeriv :
+          HasDerivAt
+            (DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong.chartRepAt
+              (I := I) γ Vsec 0)
+            (fderiv ℝ (fderiv ℝ (fun p : ℝ × ℝ => extChartAt I α (f p.1 p.2)))
+              (0, t) (1, 0) (0, 1)) 0 := by
+        refine hV_hasDerivAt.congr_of_eventuallyEq ?_
+        filter_upwards [hS_nhds] with s hs
+        exact (hVeq_chartRep s hs).symm
+      exact hrep_hasDeriv.deriv
+    rw [hrepDeriv, huPrime0, hVder0]
+  -- Push `DV` to the intrinsic covariant derivative at the foot.
+  have hDV_intrinsic :
+      DV = (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ α
+          (DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong.covDerivAlong
+            (I := I) g γ Vsec 0) := by
+    rw [hDV_eq]
+    have hcc := DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong.covDerivAlong_chartCoord
+      (I := I) g γ Vsec 0
+    rw [hγ0] at hcc
+    exact hcc.symm
+  -- The chart-`α`-coordinate of `Vsec 0` is `V 0`.
+  have hVsec0_coord :
+      (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ α (Vsec 0) = V 0 := by
+    have hcoord := hVeq_chartRep 0 h0S
+    rw [hcoord]
+    show _ = (trivializationAt E (TangentSpace I) (γ 0)).continuousLinearMapAt ℝ (γ 0) (Vsec 0)
+    rw [hγ0]
+  -- `DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE g α l j u0 = chartGramMatrix g α α l j` (chart round-trip).
+  have hu0_eq : u0 = extChartAt I α α := by
+    rw [hu0, AlongCurve.chartCurve_def, hγ, hα]
+  have hGram_eq : ∀ l j : Fin (Module.finrank ℝ E),
+      DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE (I := I) g α l j u0 = chartGramMatrix (I := I) g α α l j := by
+    intro l j
+    rw [DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE_def, hu0_eq, (extChartAt I α).left_inv (mem_extChartAt_source α)]
+  -- The two-term engine value is `2 ⟨covDerivAlong, Vsec 0⟩`.  Each term is the
+  -- chart-Gram bilinear form, which equals the `g`-inner product at `α` after the
+  -- inverse trivialisation round-trip.
+  -- The inner product `g.inner α (covDerivAlong) (Vsec 0)` as a chart sum.
+  have hinner_sum :
+      g.inner α
+          (DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong.covDerivAlong
+            (I := I) g γ Vsec 0)
+          (Vsec 0)
+        = ∑ l : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+            DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE (I := I) g α l j u0 * chartCoord (E := E) l DV
+              * chartCoord (E := E) j (V 0) := by
+    -- Recover the tangent vectors from their chart-`α`-coordinates `DV`, `V 0`.
+    have hrt1 : (trivializationAt E (TangentSpace I) α).symmL ℝ α DV
+        = DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong.covDerivAlong
+            (I := I) g γ Vsec 0 := by
+      rw [hDV_intrinsic]
+      exact (trivializationAt E (TangentSpace I) α).symmL_continuousLinearMapAt
+        (R := ℝ) hbase_set0 _
+    have hrt2 : (trivializationAt E (TangentSpace I) α).symmL ℝ α (V 0) = Vsec 0 := by
+      rw [← hVsec0_coord]
+      exact (trivializationAt E (TangentSpace I) α).symmL_continuousLinearMapAt
+        (R := ℝ) hbase_set0 _
+    rw [← hrt1, ← hrt2,
+      AlongCurve.inner_eq_chartGramOnE_bilinear_on_baseSet (I := I) g α DV (V 0)]
+    refine Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun j _ => ?_))
+    rw [hGram_eq l j]
+  -- Assemble: target `= 2 * inner`, engine `= T1 + T2`, with `T1 = T2 = inner`.
+  rw [hinner_sum]
+  -- The engine RHS is `T1 + T2`; both equal the chart sum above (`V = W = V`),
+  -- the second being a relabelling.  Expand and reconcile by `ring`/`sum_comm`.
+  have hT2 :
+      (∑ i : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+          DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE (I := I) g α i l u0 * chartCoord (E := E) i (V 0)
+            * chartCoord (E := E) l DV)
+        = ∑ l : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+            DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE (I := I) g α l j u0 * chartCoord (E := E) l DV
+              * chartCoord (E := E) j (V 0) := by
+    rw [Finset.sum_comm]
+    refine Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun i _ => ?_))
+    rw [DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE_symm (I := I) g α i l u0]
+    ring
+  -- Now match `2 * (chart sum) = T1 + T2`.
+  show (2 : ℝ) * (∑ l, ∑ j, DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE (I := I) g α l j u0
+        * chartCoord (E := E) l DV * chartCoord (E := E) j (V 0))
+      = (∑ l, ∑ j, DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE (I := I) g α l j u0
+          * chartCoord (E := E) l DV * chartCoord (E := E) j (V 0))
+        + (∑ i, ∑ l, DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE (I := I) g α i l u0
+            * chartCoord (E := E) i (V 0) * chartCoord (E := E) l DV)
+  rw [hT2]; ring
 
 /-! ## Differentiation under the interval integral of the speed -/
 
