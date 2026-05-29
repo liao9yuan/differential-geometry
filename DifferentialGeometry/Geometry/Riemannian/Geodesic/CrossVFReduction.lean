@@ -1,8 +1,11 @@
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Equation
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.GeodesicEquationBridge
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Uniqueness
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.ProjDerivative
+import DifferentialGeometry.Geometry.Riemannian.Geodesic.ChartTransition
 import DifferentialGeometry.Integral.Measure.ChartDensity
 import Mathlib.Geometry.Manifold.IntegralCurve.Basic
+import Mathlib.Analysis.Calculus.FDeriv.CompCLM
 
 set_option linter.unusedSectionVars false
 
@@ -28,11 +31,269 @@ namespace Riemannian
 namespace Geodesic
 
 open DifferentialGeometry.Integral.Measure
+open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Geometry.Riemannian.Exponential
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
   [Module.Finite ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+
+/-! ## Spray-invariance: chart-`α` vs basepoint-free geodesic vector field
+
+The technical core of the cross-basepoint reduction. We must show that the
+second (fibre) component of the chart-`α` geodesic vector field, written in
+the canonical `E × E` representation of `TangentSpace I.tangent p`, coincides
+with the chart-`p.proj` Christoffel acceleration `-Γ_{p.proj}(p.snd, p.snd)`.
+
+The plan, recorded as the helper lemmas below:
+
+1. `tangentCoordChange_eq_chartTransitionAt`: identify the manifold Jacobian
+   `tangentCoordChange I x y z` with the chart-level Jacobian
+   `chartTransitionAt x y (extChartAt I x z)` (boundaryless, so
+   `fderivWithin (range I) = fderiv`).
+2. `secondaryTrivSndForm_eventuallyEq_applyJac`: near the chart base point,
+   the closed-form fibre map `secondaryTrivSndForm α p` agrees with the
+   "apply the chart-`p.proj`→`α` Jacobian to the velocity slot" map
+   `z ↦ chartTransitionAt p.proj α z.1 z.2`.
+3. `fderiv_applyJac_apply`: the Fréchet derivative of that apply-map, by the
+   bilinear chain rule (`HasFDerivAt.clm_apply`), splits into the base
+   Jacobian on the velocity slot plus the *second-derivative* correction on
+   the foot slot.
+4. `chartTransitionSecondDeriv_coord`: the foot-slot correction, contracted
+   coordinatewise, is exactly the reverse-Jacobian-pulled
+   `chartTransitionSecondDerivCorrection`.
+
+Combining these with `chartChristoffelContraction_transform` (the contraction
+form of the Christoffel transformation law) discharges the fibre match.
+-/
+
+/-- **Manifold Jacobian = chart Jacobian (boundaryless).** Re-derivation of the
+identity `tangentCoordChange I x y z = chartTransitionAt x y (extChartAt I x z)`
+on the chart overlap. -/
+private lemma tangentCoordChange_eq_chartTransitionAt [I.Boundaryless]
+    (x y : M) (z : M) :
+    tangentCoordChange I x y z =
+      chartTransitionAt (I := I) x y (extChartAt I x z) := by
+  rw [tangentCoordChange_def, chartTransitionAt_def, chartTransitionMap_def]
+  have h : (Set.range I : Set E) = Set.univ :=
+    ModelWithCorners.Boundaryless.range_eq_univ (I := I)
+  rw [h, fderivWithin_univ]
+
+/-- The "apply the chart-`p.proj`→`α` Jacobian to the velocity slot" map.
+This is the closed form of the fibre block of the iterated-tangent transition
+near the chart base point. -/
+private def applyJac (α : M) (p : TangentBundle I M) (z : E × E) : E :=
+  chartTransitionAt (I := I) p.proj α z.1 z.2
+
+/-- Near the chart base point, `secondaryTrivSndForm α p` agrees with
+`applyJac α p`. -/
+private lemma secondaryTrivSndForm_eventuallyEq_applyJac [I.Boundaryless]
+    (α : M) {p : TangentBundle I M}
+    (hp : p.proj ∈ (chartAt H α).source) :
+    secondaryTrivSndForm (I := I) α p =ᶠ[𝓝 ((extChartAt I.tangent p) p)]
+      applyJac (I := I) α p := by
+  classical
+  -- The first component of `extChartAt I.tangent p p` is `extChartAt I p.proj p.proj`.
+  have hbp1 : ((extChartAt I.tangent p) p).1 = extChartAt I p.proj p.proj :=
+    extChartAt_tangent_apply_fst (I := I) (q := p) (p := p) (mem_chart_source H p.proj)
+  -- The open set `{z | z.1 ∈ target ∧ (extChartAt I p.proj).symm z.1 ∈ chartAt H α source}`.
+  set U : Set (E × E) :=
+    {z : E × E | z.1 ∈ (extChartAt I p.proj).target ∧
+      (extChartAt I p.proj).symm z.1 ∈ (chartAt H α).source} with hU_def
+  have hUopen : IsOpen U := by
+    have h1 : IsOpen ((extChartAt I p.proj).target) :=
+      isOpen_extChartAt_target (I := I) p.proj
+    have hcont : ContinuousOn (extChartAt I p.proj).symm (extChartAt I p.proj).target :=
+      continuousOn_extChartAt_symm (I := I) p.proj
+    -- `U = (Prod.fst ⁻¹' target) ∩ (Prod.fst ⁻¹' (symm ⁻¹' source))`, all open.
+    have hset : U = (Prod.fst ⁻¹' (extChartAt I p.proj).target) ∩
+        (Prod.fst ⁻¹' ((extChartAt I p.proj).target ∩
+          (extChartAt I p.proj).symm ⁻¹' (chartAt H α).source)) := by
+      ext z
+      simp only [hU_def, Set.mem_setOf_eq, Set.mem_inter_iff, Set.mem_preimage]
+      constructor
+      · rintro ⟨h1, h2⟩; exact ⟨h1, h1, h2⟩
+      · rintro ⟨h1, _, h2⟩; exact ⟨h1, h2⟩
+    rw [hset]
+    refine (h1.preimage continuous_fst).inter ((IsOpen.preimage continuous_fst) ?_)
+    exact hcont.isOpen_inter_preimage h1 (chartAt H α).open_source
+  have hbp_memU : ((extChartAt I.tangent p) p) ∈ U := by
+    rw [hU_def, Set.mem_setOf_eq, hbp1]
+    refine ⟨(extChartAt I p.proj).map_source (mem_extChartAt_source (I := I) p.proj), ?_⟩
+    rw [(extChartAt I p.proj).left_inv (mem_extChartAt_source (I := I) p.proj)]
+    exact hp
+  refine Filter.eventuallyEq_of_mem (hUopen.mem_nhds hbp_memU) ?_
+  intro z hz
+  obtain ⟨hz_tgt, hz_src⟩ := hz
+  -- `secondaryTrivSndForm α p z = tangentCoordChange I p.proj α (symm z.1) z.2`.
+  unfold secondaryTrivSndForm applyJac
+  -- Bridge `tangentCoordChange` → `chartTransitionAt`, then `extChartAt I p.proj (symm z.1) = z.1`.
+  rw [tangentCoordChange_eq_chartTransitionAt (I := I) p.proj α ((extChartAt I p.proj).symm z.1)]
+  congr 2
+  exact (extChartAt I p.proj).right_inv hz_tgt
+
+/-- `applyJac` is differentiable at the chart base point: the foot-Jacobian
+`fderiv (chartTransitionMap p.proj α)` is differentiable there. -/
+private lemma differentiableAt_chartTransitionAt [I.Boundaryless]
+    (α β : M) {x : E} (hx : x ∈ chartTransitionSource (I := I) α β) :
+    DifferentiableAt ℝ (fun z => chartTransitionAt (I := I) α β z) x := by
+  have h_open : IsOpen (chartTransitionSource (I := I) α β) :=
+    chartTransitionSource_isOpen (I := I) α β
+  have hsmooth : ContDiffOn ℝ ∞ (fun z => (chartTransitionAt (I := I) α β z : E →L[ℝ] E))
+      (chartTransitionSource (I := I) α β) :=
+    chartTransitionAt_smooth (I := I) α β
+  exact (hsmooth.contDiffAt (h_open.mem_nhds hx)).differentiableAt (by simp)
+
+/-- **Fréchet derivative of the apply-Jacobian map.** By the bilinear chain
+rule, `fderiv (applyJac α p) bp (a, b) =
+  chartTransitionAt p.proj α x₀ b + (fderiv (chartTransitionAt p.proj α ·) x₀ a) v₀`,
+where `x₀ = bp.1`, `v₀ = bp.2`. -/
+private lemma fderiv_applyJac_apply [I.Boundaryless]
+    (α : M) {p : TangentBundle I M}
+    (hp : p.proj ∈ (chartAt H α).source)
+    (w : E × E) :
+    fderiv ℝ (applyJac (I := I) α p) ((extChartAt I.tangent p) p) w =
+      chartTransitionAt (I := I) p.proj α ((extChartAt I.tangent p) p).1 w.2 +
+        (fderiv ℝ (fun z => chartTransitionAt (I := I) p.proj α z)
+          ((extChartAt I.tangent p) p).1 w.1) (((extChartAt I.tangent p) p).2) := by
+  classical
+  set bp := (extChartAt I.tangent p) p with hbp
+  -- Source membership of `bp.1 = x₀` for the chart transition `p.proj → α`.
+  have hbp1 : bp.1 = extChartAt I p.proj p.proj := by
+    rw [hbp]
+    exact extChartAt_tangent_apply_fst (I := I) (q := p) (p := p) (mem_chart_source H p.proj)
+  have hx_src : bp.1 ∈ chartTransitionSource (I := I) p.proj α := by
+    rw [hbp1]
+    exact extChartAt_mem_chartTransitionSource (I := I) p.proj α
+      (mem_chart_source H p.proj) hp
+  -- `applyJac α p z = (c z) (u z)` with `c z = chartTransitionAt p.proj α z.1`, `u z = z.2`.
+  set c : E × E → (E →L[ℝ] E) := fun z => chartTransitionAt (I := I) p.proj α z.1 with hc
+  set u : E × E → E := fun z => z.2 with hu
+  -- `c` is differentiable at `bp` (composition with `fst`).
+  have hcA : DifferentiableAt ℝ (fun z => chartTransitionAt (I := I) p.proj α z) bp.1 :=
+    differentiableAt_chartTransitionAt (I := I) p.proj α hx_src
+  have hc_diff : DifferentiableAt ℝ c bp :=
+    hcA.comp bp (differentiableAt_fst)
+  have hu_diff : DifferentiableAt ℝ u bp := differentiableAt_snd
+  -- The clm_apply fderiv formula.
+  have hfd : fderiv ℝ (fun z => (c z) (u z)) bp =
+      (c bp).comp (fderiv ℝ u bp) + (fderiv ℝ c bp).flip (u bp) :=
+    fderiv_clm_apply hc_diff hu_diff
+  -- `applyJac α p = fun z => (c z) (u z)`.
+  have happly_eq : applyJac (I := I) α p = fun z => (c z) (u z) := by
+    funext z; rfl
+  rw [happly_eq, hfd]
+  -- Evaluate at `w`.
+  simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.comp_apply,
+    ContinuousLinearMap.flip_apply]
+  -- `fderiv u bp w = w.2`, since `u = snd`.
+  have hu_fderiv : fderiv ℝ u bp = ContinuousLinearMap.snd ℝ E E := fderiv_snd
+  rw [hu_fderiv]
+  -- `fderiv c bp w = (fderiv A bp.1) w.1` where A = chartTransitionAt p.proj α (·).
+  have hc_fderiv : fderiv ℝ c bp w =
+      (fderiv ℝ (fun z => chartTransitionAt (I := I) p.proj α z) bp.1) (w.1) := by
+    have hceq : c = (fun x => chartTransitionAt (I := I) p.proj α x) ∘ Prod.fst := by
+      funext z; rfl
+    rw [hceq]
+    rw [fderiv_comp bp hcA differentiableAt_fst]
+    simp only [ContinuousLinearMap.comp_apply, fderiv_fst, ContinuousLinearMap.coe_fst']
+  rw [hc_fderiv]
+  -- `c bp (w.2) = chartTransitionAt p.proj α bp.1 w.2` and `u bp = bp.2`.
+  rfl
+
+/-- **Coordinate form of the foot-slot second-derivative correction.** The
+`c`-th chart coordinate of the foot-slot derivative
+`(fderiv (chartTransitionAt p.proj α ·) x₀ v) v` is the symmetric
+second-derivative sum `∑_{i,j} (∂_i J^c_j x₀) vⁱ vʲ`, where
+`J = chartTransitionJacEntry p.proj α`. -/
+private lemma chartCoord_fderiv_chartTransitionAt [I.Boundaryless]
+    (α : M) {p : TangentBundle I M}
+    (hp : p.proj ∈ (chartAt H α).source)
+    (c : Fin (Module.finrank ℝ E)) (v : E) :
+    chartCoord (E := E) c
+        ((fderiv ℝ (fun z => chartTransitionAt (I := I) p.proj α z)
+          (extChartAt I p.proj p.proj) v) v) =
+      ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+        partialDeriv (E := E) i
+          (fun z => chartTransitionJacEntry (I := I) p.proj α z c j)
+          (extChartAt I p.proj p.proj) *
+          chartCoord (E := E) i v * chartCoord (E := E) j v := by
+  classical
+  set x₀ := extChartAt I p.proj p.proj with hx₀
+  set A : E → (E →L[ℝ] E) := fun z => chartTransitionAt (I := I) p.proj α z with hA
+  have hx_src : x₀ ∈ chartTransitionSource (I := I) p.proj α :=
+    extChartAt_mem_chartTransitionSource (I := I) p.proj α (mem_chart_source H p.proj) hp
+  have hcA : DifferentiableAt ℝ A x₀ :=
+    differentiableAt_chartTransitionAt (I := I) p.proj α hx_src
+  -- The evaluation CLM `eval : (E →L E) →L ℝ`, `L ↦ chartCoord c (L v)`.
+  set coordCLM : E →L[ℝ] ℝ :=
+    LinearMap.toContinuousLinearMap ((chartModelBasis E).coord c) with hcoordCLM
+  set eval : (E →L[ℝ] E) →L[ℝ] ℝ :=
+    coordCLM.comp (ContinuousLinearMap.apply ℝ E v) with heval
+  -- `chartCoord c ((fderiv A x₀ v) v) = eval (fderiv A x₀ v)`.
+  have hstep1 :
+      chartCoord (E := E) c ((fderiv ℝ A x₀ v) v) = eval (fderiv ℝ A x₀ v) := by
+    rw [heval, ContinuousLinearMap.comp_apply, ContinuousLinearMap.apply_apply,
+      hcoordCLM]
+    simp only [LinearMap.coe_toContinuousLinearMap', Module.Basis.coord_apply]
+    rfl
+  -- `eval (fderiv A x₀ v) = fderiv (eval ∘ A) x₀ v` (eval is a CLM).
+  have hstep2 : eval (fderiv ℝ A x₀ v) = fderiv ℝ (fun z => eval (A z)) x₀ v := by
+    have hcomp_hasD : HasFDerivAt (fun z => eval (A z))
+        (eval.comp (fderiv ℝ A x₀)) x₀ :=
+      eval.hasFDerivAt.comp x₀ hcA.hasFDerivAt
+    rw [hcomp_hasD.fderiv]
+    rfl
+  -- `eval (A z) = chartCoord c (chartTransitionAt p.proj α z v) = ∑_i J^c_i(z) vⁱ`.
+  have heval_eq : (fun z => eval (A z)) =
+      (fun z => ∑ i : Fin (Module.finrank ℝ E),
+        chartTransitionJacEntry (I := I) p.proj α z c i * chartCoord (E := E) i v) := by
+    funext z
+    rw [heval, ContinuousLinearMap.comp_apply, ContinuousLinearMap.apply_apply, hA,
+      hcoordCLM]
+    simp only [LinearMap.coe_toContinuousLinearMap', Module.Basis.coord_apply]
+    change chartCoord (E := E) c (chartTransitionAt (I := I) p.proj α z v) = _
+    exact chartCoord_chartTransitionAt (I := I) p.proj α z v c
+  rw [hstep1, hstep2, heval_eq]
+  -- Differentiate the finite sum: linearity of fderiv across the Finset.sum.
+  -- Each `z ↦ J^c_i(z) * vⁱ` is differentiable; `vⁱ` is a constant scalar.
+  have hsum_fderiv :
+      fderiv ℝ (fun z => ∑ i : Fin (Module.finrank ℝ E),
+          chartTransitionJacEntry (I := I) p.proj α z c i * chartCoord (E := E) i v) x₀ v =
+        ∑ i : Fin (Module.finrank ℝ E),
+          fderiv ℝ (fun z => chartTransitionJacEntry (I := I) p.proj α z c i *
+            chartCoord (E := E) i v) x₀ v := by
+    have hdiff : ∀ i : Fin (Module.finrank ℝ E),
+        DifferentiableAt ℝ (fun z => chartTransitionJacEntry (I := I) p.proj α z c i *
+          chartCoord (E := E) i v) x₀ := by
+      intro i
+      exact (chartTransitionJacEntry_differentiableAt (I := I) p.proj α c i hx_src).mul_const _
+    rw [fderiv_fun_sum (fun i _ => hdiff i)]
+    rw [ContinuousLinearMap.sum_apply]
+  rw [hsum_fderiv]
+  -- Each summand: `fderiv (J^c_i · vⁱ) x₀ v = (fderiv J^c_i x₀ v) · vⁱ`,
+  -- and `fderiv J^c_i x₀ v = ∑_k vᵏ ∂_k J^c_i x₀`.
+  -- After expansion, LHS = ∑_i (∑_k vᵏ ∂_k J^c_i) · vⁱ = ∑_i ∑_k ∂_k J^c_i · vᵏ · vⁱ.
+  have hLHS_expand :
+      (∑ i : Fin (Module.finrank ℝ E),
+          fderiv ℝ (fun z => chartTransitionJacEntry (I := I) p.proj α z c i *
+            chartCoord (E := E) i v) x₀ v) =
+        ∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+          partialDeriv (E := E) k
+            (fun z => chartTransitionJacEntry (I := I) p.proj α z c i) x₀ *
+            chartCoord (E := E) k v * chartCoord (E := E) i v := by
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [fderiv_mul_const (chartTransitionJacEntry_differentiableAt (I := I) p.proj α c i hx_src) _]
+    rw [ContinuousLinearMap.smul_apply, smul_eq_mul]
+    rw [fderiv_chartTransitionJacEntry_eq_sum_partialDeriv (I := I) p.proj α c i x₀ v]
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl (fun k _ => ?_)
+    ring
+  rw [hLHS_expand]
+  -- Reindex: ∑_i ∑_k ∂_k J^c_i vᵏ vⁱ = ∑_i ∑_j ∂_i J^c_j vⁱ vʲ (swap the two sums
+  -- and rename (i,k) ↦ (j,i)).
+  rw [Finset.sum_comm]
 
 /-- **Pointwise chart-invariance of the geodesic spray.** At a tangent-bundle
 point `p` whose foot `p.proj` lies in the chart-source at `α`, the chart-`α`
@@ -44,7 +305,7 @@ The first component already coincides by `geodesicVectorFieldChart_fst`
 chart-`α` Christoffel acceleration, pushed through the second-tangent-bundle
 chart transition from `α`-coordinates to `p.proj`-coordinates, equals the
 chart-`p.proj` Christoffel acceleration. This is the non-tensorial
-transformation law of the Christoffel symbols (`chartChristoffel_transform`)
+transformation law of the Christoffel symbols (`chartChristoffelContraction_transform`)
 together with the velocity-Jacobian correction encoded by the `snd`-block of
 the iterated tangent-bundle transition derivative. -/
 theorem geodesicVectorFieldChart_eq_geodesicVectorField
@@ -53,33 +314,218 @@ theorem geodesicVectorFieldChart_eq_geodesicVectorField
     {p : TangentBundle I M}
     (hp : p.proj ∈ (chartAt H α).source) :
     geodesicVectorFieldChart (I := I) g α p = geodesicVectorField (I := I) g p := by
-  -- RESIDUAL. The first components agree (`geodesicVectorFieldChart_fst` gives
-  -- `(gvfChart g α p).1 = p.snd = (geodesicVectorField g p).1`). The remaining
-  -- obligation is the SECOND component: pushing the chart-`α` Christoffel
-  -- acceleration `gvfChartFiber g α p` through the iterated tangent-bundle
-  -- transition `tangentCoordChange I.tangent ⟨α,0⟩ p p` (the fderiv of
-  -- `Ψ := extChartAt I.tangent ⟨α,0⟩ ∘ (extChartAt I.tangent p).symm`) must equal
-  -- the chart-`p.proj` Christoffel acceleration `-Γ_{p.proj}(p.snd,p.snd)`.
-  --
-  -- The needed missing infrastructure is the `snd`-block of that iterated
-  -- transition fderiv. Concretely (verified by `extChartAt_tangent_apply_snd` +
-  -- the trivialisation `continuousLinearMapAt`/`symmL` identities), the second
-  -- component of `Ψ` has the closed form
-  --   `Ψ(x, v).2 = tangentCoordChange I p.proj α ((extChartAt I p.proj).symm x) v`,
-  -- whose Fréchet derivative within `range I.tangent` at the base point
-  -- `(extChartAt I p.proj p.proj, p.snd)` is
-  --   `(δx, δv) ↦ (D_x [tcc · p.snd]) δx + tcc(p.proj) δv`,
-  -- i.e. the base Jacobian on the `δv`-slot plus the second-derivative
-  -- (`D²`) correction on the `δx`-slot. Contracting this against
-  -- `gvfChartFiber g α p = (chartFiberCoord α p, -Γ_α(...))` and matching the two
-  -- index sums against `chartChristoffel_transform`'s covariant-pullback term and
-  -- `chartTransitionSecondDerivCorrection` (the `∂_i J^c_j` term) closes the goal.
-  -- This `snd`-block derivative formula (analogue of the `fst`-block lemma
-  -- `fst_continuousLinearMapAt_secondaryTriv` in `ProjDerivative.lean`, but for the
-  -- second component and hence involving second derivatives) is the single
-  -- remaining piece. The Christoffel transformation law it consumes is already
-  -- available as `chartChristoffel_transform` in `ChartTransition.lean`.
-  sorry
+  classical
+  -- Abbreviations.
+  set x₀ := extChartAt I p.proj p.proj with hx₀
+  set bp := (extChartAt I.tangent p) p with hbp
+  -- `bp.1 = x₀`, `bp.2 = p.snd`.
+  have hbp1 : bp.1 = x₀ := by
+    rw [hbp, hx₀]
+    exact extChartAt_tangent_apply_fst (I := I) (q := p) (p := p) (mem_chart_source H p.proj)
+  have hbp2 : bp.2 = (p.snd : E) := by
+    rw [hbp]
+    rw [extChartAt_tangent_apply_snd_tangentCoordChange (I := I) (q := p) (p := p)
+      (mem_chart_source H p.proj)]
+    exact tangentCoordChange_self (I := I) (x := p.proj) (z := p.proj) (v := p.snd)
+      (mem_extChartAt_source (I := I) p.proj)
+  -- The two vector fields agree iff their `E × E` components agree.
+  -- The `.1` agreement is `geodesicVectorFieldChart_fst`.
+  have hfst : (geodesicVectorFieldChart (I := I) g α p : E × E).1 =
+      (geodesicVectorField (I := I) g p : E × E).1 := by
+    rw [geodesicVectorFieldChart_fst (I := I) g α hp]
+    rfl
+  -- The `.2` agreement: this is the technical core.
+  have hsnd : (geodesicVectorFieldChart (I := I) g α p : E × E).2 =
+      (geodesicVectorField (I := I) g p : E × E).2 := by
+    -- Set `X := (gvfChart g α p).2` (the unknown).
+    set X := (geodesicVectorFieldChart (I := I) g α p : E × E).2 with hX
+    -- `(gvfChart g α p).1 = p.snd`.
+    have hgvf1 : (geodesicVectorFieldChart (I := I) g α p : E × E).1 = (p.snd : E) :=
+      geodesicVectorFieldChart_fst (I := I) g α hp
+    -- Step A. From the trivialisation identity, the secondary CLM applied to
+    -- `gvfChart` returns `gvfFiber`.  Take `.2`.
+    have hp_dom : p ∈ geodesicChartDomain (I := I) α := hp
+    have htriv := trivializationAt_apply_geodesicVectorFieldChart
+      (I := I) g α (p := p) hp_dom
+    set e := trivializationAt (E × E) (TangentSpace I.tangent)
+      (⟨α, (0 : E)⟩ : TangentBundle I M) with he_def
+    have hp_base : p ∈ e.baseSet := by
+      rw [he_def, ← geodesicChartDomain_eq_trivBaseSet (I := I) α]; exact hp_dom
+    have hcoe := e.coe_linearMapAt_of_mem (R := ℝ) hp_base
+    have hlin_at_gvf :
+        (e.continuousLinearMapAt ℝ p) (geodesicVectorFieldChart (I := I) g α p) =
+          geodesicVectorFieldChartFiber (I := I) g α p := by
+      have h2 := congrArg Prod.snd htriv
+      change (e.linearMapAt ℝ p) (geodesicVectorFieldChart (I := I) g α p) = _
+      have hh := congrFun hcoe (geodesicVectorFieldChart (I := I) g α p)
+      rw [hh]; exact h2
+    -- `.2` of the CLM-applied form, via `snd_continuousLinearMapAt_secondaryTriv`.
+    have hsnd_clm :
+        ((e.continuousLinearMapAt ℝ p) (geodesicVectorFieldChart (I := I) g α p)).2 =
+          (fderivWithin ℝ (secondaryTrivSndForm (I := I) α p) (range I.tangent) bp)
+            (geodesicVectorFieldChart (I := I) g α p) :=
+      snd_continuousLinearMapAt_secondaryTriv (I := I) (α := α) (p := p) hp
+        (geodesicVectorFieldChart (I := I) g α p)
+    -- Combine: `(gvfFiber).2 = fderivWithin(...) (gvfChart)`.
+    have hkey0 : (geodesicVectorFieldChartFiber (I := I) g α p).2 =
+        (fderivWithin ℝ (secondaryTrivSndForm (I := I) α p) (range I.tangent) bp)
+          (geodesicVectorFieldChart (I := I) g α p) := by
+      rw [← hsnd_clm, hlin_at_gvf]
+    -- Step B. Replace `fderivWithin (range I.tangent)` by `fderiv` (boundaryless),
+    -- and `secondaryTrivSndForm` by `applyJac` near `bp`.
+    have hrangeT : (range (I.tangent) : Set (E × E)) = Set.univ :=
+      ModelWithCorners.Boundaryless.range_eq_univ (I := I.tangent)
+    have hfderiv_eq :
+        fderivWithin ℝ (secondaryTrivSndForm (I := I) α p) (range I.tangent) bp =
+          fderiv ℝ (applyJac (I := I) α p) bp := by
+      rw [hrangeT, fderivWithin_univ]
+      exact Filter.EventuallyEq.fderiv_eq
+        (secondaryTrivSndForm_eventuallyEq_applyJac (I := I) α hp)
+    rw [hfderiv_eq] at hkey0
+    -- Step C. Apply the fderiv formula. `gvfChart = (p.snd, X)`.
+    have hfderiv_apply :
+        fderiv ℝ (applyJac (I := I) α p) bp (geodesicVectorFieldChart (I := I) g α p) =
+          chartTransitionAt (I := I) p.proj α x₀ X +
+            (fderiv ℝ (fun z => chartTransitionAt (I := I) p.proj α z) x₀ (p.snd : E))
+              (p.snd : E) := by
+      have := fderiv_applyJac_apply (I := I) α hp (geodesicVectorFieldChart (I := I) g α p)
+      rw [this, hbp1, hbp2, hgvf1]
+    rw [hfderiv_apply] at hkey0
+    -- Now `hkey0 : (gvfFiber).2 = chartTransitionAt p.proj α x₀ X + Dterm`,
+    -- where `Dterm := (fderiv (chartTransitionAt p.proj α ·) x₀ p.snd) p.snd`.
+    set Dterm : E := (fderiv ℝ (fun z => chartTransitionAt (I := I) p.proj α z) x₀
+      (p.snd : E)) (p.snd : E) with hDterm
+    -- `(gvfFiber).2 = -Γ_α(v, v)(extChartAt I α p.proj)`, with `v = chartFiberCoord α p`.
+    set v := chartFiberCoord (I := I) α p with hv
+    have hfiber2 : (geodesicVectorFieldChartFiber (I := I) g α p).2 =
+        - chartChristoffelContraction (I := I) g α v v (extChartAt I α p.proj) := rfl
+    rw [hfiber2] at hkey0
+    -- Step D. The Christoffel transformation law (contraction form), with
+    -- roles `α := p.proj`, `β := α`, base point `p.proj`.
+    have htransform :
+        chartChristoffelContraction (I := I) g p.proj (p.snd) (p.snd) x₀ =
+          chartTransitionAt (I := I) α p.proj
+              (chartTransitionMap (I := I) p.proj α x₀)
+              (chartChristoffelContraction (I := I) g α
+                (chartTransitionAt (I := I) p.proj α x₀ (p.snd))
+                (chartTransitionAt (I := I) p.proj α x₀ (p.snd))
+                (chartTransitionMap (I := I) p.proj α x₀))
+            + chartTransitionSecondDerivCorrection (I := I) p.proj α (p.snd) (p.snd) x₀ := by
+      have := chartChristoffelContraction_transform (I := I) g p.proj α
+        (p := p.proj) (mem_chart_source H p.proj) hp (p.snd) (p.snd)
+      rw [hx₀]; exact this
+    -- Identify the pieces inside `htransform`.
+    -- `chartTransitionMap p.proj α x₀ = extChartAt I α p.proj`.
+    have hTx₀ : chartTransitionMap (I := I) p.proj α x₀ = extChartAt I α p.proj := by
+      rw [hx₀]
+      exact chartTransitionMap_apply_extChartAt (I := I) p.proj α (mem_chart_source H p.proj)
+    -- `chartTransitionAt p.proj α x₀ p.snd = v = chartFiberCoord α p`.
+    have hJsnd : chartTransitionAt (I := I) p.proj α x₀ (p.snd) = v := by
+      rw [hv, hx₀, ← tangentCoordChange_eq_chartTransitionAt (I := I) p.proj α p.proj]
+      exact (chartFiberCoord_eq_tangentCoordChange (I := I) (α := α) (p := p) hp).symm
+    rw [hTx₀, hJsnd] at htransform
+    -- Now `htransform : Γ_{p.proj}(p.snd,p.snd)(x₀) =
+    --   chartTransitionAt α p.proj (extChartAt I α p.proj) (Γ_α(v,v)(extChartAt I α p.proj))
+    --     + chartTransitionSecondDerivCorrection p.proj α p.snd p.snd x₀`.
+    -- Step E. The reverse-Jacobian pull of the foot-slot derivative term `Dterm`
+    -- equals the `chartTransitionSecondDerivCorrection`.
+    have hcorr :
+        chartTransitionAt (I := I) α p.proj (extChartAt I α p.proj) Dterm =
+          chartTransitionSecondDerivCorrection (I := I) p.proj α (p.snd) (p.snd) x₀ := by
+      -- Both sides are vectors in `E`; compare coordinatewise.
+      refine (chartModelBasis E).ext_elem (fun k => ?_)
+      -- LHS coordinate `k`: `∑_c K^k_c · chartCoord c Dterm`, with `K = J(α→p.proj)`.
+      -- RHS coordinate `k`: `∑_c K^k_c · (∑_{ij} ∂_i J'^c_j x₀ vⁱ vʲ)`, `J' = J(p.proj→α)`.
+      -- Use `chartCoord_chartTransitionAt` on LHS, the def on RHS, and the
+      -- coordinate identity for `Dterm`.
+      change chartCoord (E := E) k
+          (chartTransitionAt (I := I) α p.proj (extChartAt I α p.proj) Dterm) =
+        chartCoord (E := E) k
+          (chartTransitionSecondDerivCorrection (I := I) p.proj α (p.snd) (p.snd) x₀)
+      rw [chartCoord_chartTransitionAt (I := I) α p.proj (extChartAt I α p.proj) Dterm k]
+      rw [chartTransitionSecondDerivCorrection_def]
+      -- RHS: `chartCoord k (∑_k' (coeff k') • e_{k'}) = coeff k`.
+      rw [show chartCoord (E := E) k
+          (∑ k' : Fin (Module.finrank ℝ E),
+            (∑ c : Fin (Module.finrank ℝ E),
+              chartTransitionJacEntry (I := I) α p.proj
+                (chartTransitionMap (I := I) p.proj α x₀) k' c *
+                (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+                  partialDeriv (E := E) i
+                    (fun z => chartTransitionJacEntry (I := I) p.proj α z c j) x₀ *
+                    chartCoord (E := E) i (p.snd) * chartCoord (E := E) j (p.snd))) •
+              chartModelBasis E k') =
+          ∑ c : Fin (Module.finrank ℝ E),
+              chartTransitionJacEntry (I := I) α p.proj
+                (chartTransitionMap (I := I) p.proj α x₀) k c *
+                (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+                  partialDeriv (E := E) i
+                    (fun z => chartTransitionJacEntry (I := I) p.proj α z c j) x₀ *
+                    chartCoord (E := E) i (p.snd) * chartCoord (E := E) j (p.snd)) from ?_]
+      · -- LHS coordinate sum, with `chartCoord c Dterm` expanded.
+        rw [hTx₀]
+        refine Finset.sum_congr rfl (fun c _ => ?_)
+        rw [hDterm, chartCoord_fderiv_chartTransitionAt (I := I) α hp c (p.snd)]
+      · -- The chart coordinate of a basis expansion: `repr (∑ a • e_a) k = a_k`.
+        rw [chartCoord_def, map_sum, Finsupp.finset_sum_apply]
+        rw [Finset.sum_eq_single k]
+        · rw [map_smul, Finsupp.smul_apply, (chartModelBasis E).repr_self k,
+            Finsupp.single_eq_same, smul_eq_mul, mul_one]
+        · intro k' _ hk'
+          rw [map_smul, Finsupp.smul_apply, (chartModelBasis E).repr_self k']
+          rw [Finsupp.single_eq_of_ne (Ne.symm hk'), smul_zero]
+        · intro hk; exact absurd (Finset.mem_univ k) hk
+    -- Step F. Apply the reverse Jacobian `chartTransitionAt α p.proj (extChartAt I α p.proj)`
+    -- to both sides of `hkey0` and solve for `X`.
+    -- Source membership for the inverse-collapse identities.
+    have hx_src : x₀ ∈ chartTransitionSource (I := I) p.proj α :=
+      extChartAt_mem_chartTransitionSource (I := I) p.proj α (mem_chart_source H p.proj) hp
+    -- `chartTransitionAt α p.proj (extChartAt I α p.proj) ∘ chartTransitionAt p.proj α x₀ = id`.
+    have hinv : chartTransitionAt (I := I) α p.proj
+        (chartTransitionMap (I := I) p.proj α x₀)
+        (chartTransitionAt (I := I) p.proj α x₀ X) = X := by
+      have hcomp := chartTransitionAt_comp_chartTransitionAt (I := I) p.proj α hx_src
+      have := congrArg (fun L : E →L[ℝ] E => L X) hcomp
+      simpa using this
+    -- Apply the reverse Jacobian to `hkey0`.
+    set RJ : E →L[ℝ] E := chartTransitionAt (I := I) α p.proj
+      (chartTransitionMap (I := I) p.proj α x₀) with hRJ
+    have happ := congrArg (fun y => RJ y) hkey0
+    simp only at happ
+    -- LHS: `RJ (-Γ_α(v,v)(...))`. RHS: `RJ (chartTransitionAt p.proj α x₀ X + Dterm)`.
+    rw [map_add] at happ
+    -- `RJ (chartTransitionAt p.proj α x₀ X) = X` via `hinv` (note `extChartAt I α p.proj = Tx₀`).
+    have hRJ_X : RJ (chartTransitionAt (I := I) p.proj α x₀ X) = X := by
+      rw [hRJ]; exact hinv
+    rw [hRJ_X] at happ
+    -- `RJ Dterm = chartTransitionSecondDerivCorrection ...` via `hcorr` (with `Tx₀`).
+    have hRJ_D : RJ Dterm =
+        chartTransitionSecondDerivCorrection (I := I) p.proj α (p.snd) (p.snd) x₀ := by
+      rw [hRJ, hTx₀]; exact hcorr
+    rw [hRJ_D] at happ
+    -- `happ : RJ (-Γ_α(v,v)(extChartAt I α p.proj)) = X + correction`.
+    -- LHS: `RJ (-Γ_α(...)) = -RJ(Γ_α(...))`.
+    rw [map_neg] at happ
+    -- From `htransform`: `RJ (Γ_α(v,v)(...)) = Γ_{p.proj}(p.snd,p.snd)(x₀) - correction`.
+    have hRJ_Gamma :
+        RJ (chartChristoffelContraction (I := I) g α v v (extChartAt I α p.proj)) =
+          chartChristoffelContraction (I := I) g p.proj (p.snd) (p.snd) x₀ -
+            chartTransitionSecondDerivCorrection (I := I) p.proj α (p.snd) (p.snd) x₀ := by
+      rw [hRJ, hTx₀]
+      rw [eq_sub_iff_add_eq]
+      exact htransform.symm
+    rw [hRJ_Gamma] at happ
+    -- `happ : -(Γ_{p.proj}(p.snd,p.snd)(x₀) - correction) = X + correction`.
+    -- Solve: `X = -Γ_{p.proj}(p.snd,p.snd)(x₀)`.
+    have hXval : X = - chartChristoffelContraction (I := I) g p.proj (p.snd) (p.snd) x₀ := by
+      -- `-(Γ - correction) = correction - Γ = -Γ + correction`, then cancel `correction`.
+      rw [neg_sub, sub_eq_neg_add] at happ
+      -- `happ : (-Γ) + correction = X + correction`.
+      exact (add_right_cancel happ).symm
+    -- Conclude: the goal is `X = (gvfField g p).2` (LHS folded by `set X`).
+    rw [hXval, geodesicVectorField_snd]
+  -- Assemble the two components into the `E × E` equality.
+  apply Prod.ext hfst hsnd
 
 /-- **Cross-basepoint pointwise coincidence of the chart-fixed geodesic vector
 field.** At a tangent-bundle point `p` whose foot lies in both chart-sources,
