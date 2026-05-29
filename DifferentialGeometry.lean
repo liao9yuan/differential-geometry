@@ -721,6 +721,7 @@ import DifferentialGeometry.Integral.Connection.CovariantIntegrationByParts
 import DifferentialGeometry.Integral.Connection.TensorConnLapLoweredIBP
 import DifferentialGeometry.Integral.Connection.TensorCovGradL2InnerDirichletBridge
 import DifferentialGeometry.Integral.Connection.TensorConnLapGreenIdentity
+import DifferentialGeometry.Integral.Connection.TensorConnLapSecondOrderIBP
 import DifferentialGeometry.Integral.Connection.Curvature
 import DifferentialGeometry.Integral.Connection.CurvatureBundling
 import DifferentialGeometry.Integral.Connection.Ricci
