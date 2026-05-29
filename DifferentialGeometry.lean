@@ -484,6 +484,7 @@ import DifferentialGeometry.Geometry.Riemannian.AlongCurve
 import DifferentialGeometry.Geometry.Riemannian.MFDerivAlongCurve
 import DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 import DifferentialGeometry.Geometry.Riemannian.TangentNormDiamond
+import DifferentialGeometry.Geometry.Riemannian.RiemannianDistContinuity
 import DifferentialGeometry.Geometry.Riemannian.GaussLemma
 import DifferentialGeometry.Geometry.Riemannian.HopfRinow
 import DifferentialGeometry.Geometry.Riemannian.RadialSurjectivity
