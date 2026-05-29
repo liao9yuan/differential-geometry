@@ -35,12 +35,6 @@ The pieces assembled here are:
 * `uc_regularSpace` — the universal cover is a regular topological
   space (Hausdorff + locally compact ⇒ regular), discharging the
   `[RegularSpace (UC M)]` hypothesis of the principled API above.
-* `instPseudoEMetricSpace`, `instIsRiemannianManifold` — legacy
-  type-class instances on `UC M` with only `[Nonempty M]` (and
-  `[RiemannianBundle]` for the latter); their bodies are still
-  axiomatic stubs pending downstream adoption of the principled
-  `uc_pseudoEMetricSpace`/`uc_isRiemannianManifold` API above. They
-  cannot be discharged without a concrete metric witness `g`.
 * `UniversalCover.proj_isLocalIsometry` — the pointwise statement that
   `mfderiv I I proj x'` is a linear isometry from the tangent space at
   `x'` (with the lifted metric) onto the tangent space at `proj x'`
@@ -176,43 +170,6 @@ theorem uc_regularSpace (I : ModelWithCorners ℝ E H) [I.Boundaryless] :
   haveI : LocallyCompactSpace M :=
     Manifold.locallyCompact_of_finiteDimensional (M := M) I
   infer_instance
-
-/-- **Legacy pseudo-emetric instance on the universal cover.**
-
-Retained as a `sorry`-bodied instance to preserve typeclass synthesis
-of `PseudoEMetricSpace (UC M)` for downstream files that already use
-this instance implicitly (e.g. `Lifts.lean`'s `CauchySeq` / `𝓝` /
-`CompleteSpace` statements); the principled sorry-free construction is
-`uc_pseudoEMetricSpace` above. Downstream files should migrate to the
-principled API.
-
-This `instance` cannot delegate to `uc_pseudoEMetricSpace g` because
-that principled construction requires a concrete lifted metric witness
-`g` (which is data, not a typeclass) — not derivable from the ambient
-hypotheses (`[Nonempty M]` alone) at this instance site. The
-`[RegularSpace (UC M)]` hypothesis of `uc_pseudoEMetricSpace` is itself
-now discharged by `uc_regularSpace`, but the metric witness remains a
-genuine data deficiency. -/
-instance instPseudoEMetricSpace [Nonempty M] :
-    PseudoEMetricSpace
-      (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
-  sorry
-
-/-- **Legacy `IsRiemannianManifold` instance on the universal cover.**
-
-Retained as a `sorry`-bodied instance to preserve the legacy API;
-the principled sorry-free construction is `uc_isRiemannianManifold`.
-Same delegation obstruction as `instPseudoEMetricSpace`: the
-principled witness requires a concrete metric witness `g` (data, not a
-typeclass), which is not available from `[Nonempty M]` plus a
-`RiemannianBundle` instance alone. -/
-instance instIsRiemannianManifold [Nonempty M]
-    [RiemannianBundle
-      (fun (x : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) ↦
-        TangentSpace I x)] :
-    IsRiemannianManifold I
-      (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :=
-  sorry
 
 /-- **`proj` is a local isometry on tangent spaces.**
 
