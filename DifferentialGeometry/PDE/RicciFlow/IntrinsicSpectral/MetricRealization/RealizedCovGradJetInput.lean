@@ -585,6 +585,28 @@ theorem covDerivLowerOrderTerm_abs_le_riemannianFibreNorm
   ring_nf
   rfl
 
+/-! ## Leaf-5: the chart-preimage image of a compact set in `E` -/
+
+/-- The chart-preimage `(extChartAt I α).symm '' K` of a compact `K ⊆ interior (extChartAt I
+α).target` is compact and contained in the chart source. -/
+theorem extChartAt_symm_image_isCompact_subset_chartSource
+    (α : M) {K : Set E} (hK : IsCompact K)
+    (hKsub : K ⊆ interior ((extChartAt I α).target : Set E)) :
+    IsCompact ((extChartAt I α).symm '' K) ∧
+      (extChartAt I α).symm '' K ⊆ (chartAt H α).source := by
+  classical
+  have hKtgt : K ⊆ (extChartAt I α).target := fun x hx => interior_subset (hKsub hx)
+  constructor
+  · have hcont : ContinuousOn (extChartAt I α).symm (extChartAt I α).target :=
+      continuousOn_extChartAt_symm α
+    exact hK.image_of_continuousOn (hcont.mono hKtgt)
+  · intro x hx
+    obtain ⟨y, hy_mem, hy_eq⟩ := hx
+    rw [← hy_eq]
+    have hsrc : (extChartAt I α).symm y ∈ (extChartAt I α).source :=
+      (extChartAt I α).map_target (hKtgt hy_mem)
+    rwa [extChartAt_source] at hsrc
+
 end MetricRealization
 end IntrinsicSpectral
 end RicciFlow
