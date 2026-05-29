@@ -524,6 +524,29 @@ theorem contMDiffOn_loweredCompose
       (TensorRSSpace.toModel (S b)) φ).symm)
   exact contMDiffOn_lower_at_chartBasis_aux r s g α S φ
 
+/-- **Chart-local smoothness of `loweredCompose ... toModel (S ·)` for a
+chart-locally-smooth section.** Identical to `contMDiffOn_loweredCompose`, but the
+input section `S` need only be smooth on the chart base set (in total-space form),
+not globally smooth. This is the form consumed when `S` is a chart-locally-defined
+covariant-derivative component such as `b ↦ ∇_{∂ⱼ}T b`. -/
+theorem contMDiffOn_loweredCompose_of_section_contMDiffOn
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (S : ∀ b : M, TensorRSSpace r s I b) (α : M)
+    (hS : ContMDiffOn I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun b : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun y : M => TensorRSSpace r s I y) b (S b))
+      (trivializationAt E (TangentSpace I) α).baseSet) :
+    ContMDiffOn I 𝓘(ℝ, Tensor0SModel (r + s) ℝ E) ∞
+      (fun b : M => loweredCompose (I := I) (M := M) g r s α b
+        (TensorRSSpace.toModel (S b)))
+      (trivializationAt E (TangentSpace I) α).baseSet := by
+  refine contMDiffOn_into_tensor0SModel_of_eval_basis _ ?_
+  intro φ
+  refine ContMDiffOn.congr ?_ (fun b _ =>
+    (loweredCompose_at_basis_tuple (I := I) (M := M) g r s α b
+      (TensorRSSpace.toModel (S b)) φ).symm)
+  exact contMDiffOn_lower_at_chartBasis_aux_general (I := I) (M := M) r s g α S hS φ
+
 /-- **Chart-local continuity** of `b ↦ loweredCompose g r s α b (TensorRSSpace.toModel (S b))`
 on the chart base set, as a function into the model fibre `Tensor0SModel (r + s) ℝ E`. -/
 theorem continuous_loweredCompose
