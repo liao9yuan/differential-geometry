@@ -705,6 +705,362 @@ lemma divergence_g_eq_smoothOrthoFrame_metricTrace
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [hframe_eq i, divergenceBilinearForm_apply]
 
+/-! ## The smooth orthonormal frame as a tangent-bundle section -/
+
+/-- The `i`-th smooth orthonormal frame field centred at `α`, packaged as a smooth
+tangent-bundle section. -/
+def smoothOrthoFrameSection
+    (g : SmoothRiemannianMetric I M) (α : M) (i : Fin (Module.finrank ℝ E)) :
+    Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+  ContMDiffSection.mk
+    (fun b : M => smoothOrthoFrame (I := I) g α i b)
+    (smoothOrthoFrame_smooth (I := I) g α i)
+
+@[simp] lemma smoothOrthoFrameSection_apply
+    (g : SmoothRiemannianMetric I M) (α : M) (i : Fin (Module.finrank ℝ E)) (b : M) :
+    smoothOrthoFrameSection (I := I) (M := M) g α i b =
+      smoothOrthoFrame (I := I) g α i b := rfl
+
+/-- The function-coercion of `smoothOrthoFrameSection g α i` is `smoothOrthoFrame g α i`. -/
+lemma smoothOrthoFrameSection_coe_eq
+    (g : SmoothRiemannianMetric I M) (α : M) (i : Fin (Module.finrank ℝ E)) :
+    (fun y : M => (smoothOrthoFrameSection (I := I) (M := M) g α i) y) =
+      smoothOrthoFrame (I := I) g α i := rfl
+
+/-- The first directional covariant derivative section of `T.toSection` along a
+smooth vector field `B`, evaluated at `b`, is `tensorCovDerivAt g 0 2 T b (B b)`. -/
+lemma covDerivAlongVFSection_eq_tensorCovDerivAt
+    (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
+    (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (b : M) :
+    covDerivAlongVFSection (I := I) (M := M) g T.toSection B b =
+      tensorCovDerivAt (I := I) (M := M) g 0 2 T b (B b) := rfl
+
+/-! ## Conversion of lowered `(0, 0 + 2)` inner products to mixed `(0, 2)` ones -/
+
+/-- The lowered cross term `⟨∇_{B}W, S⟩₀ₛ` equals the mixed inner product
+`⟨∇_{B}W, S⟩`. -/
+lemma tensorInnerPointwise_0s_loweredCovDeriv_lifted_eq_mixed
+    (g : SmoothRiemannianMetric I M)
+    (W S : Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun x : M => TensorRSSpace 0 2 I x)⟯)
+    (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (b : M) :
+    tensorInnerPointwise_0s (I := I) (M := M) (0 + 2) g b
+        (Tensor0SSpace.toModel
+          (loweredCovDerivAt (I := I) (M := M) g 0 2 W b (B b)))
+        (Tensor0SSpace.toModel
+          (liftedTensorSection (I := I) (M := M) g 0 2 S b)) =
+      tensorInnerPointwise (I := I) (M := M) g 0 2 b
+        (TensorRSSpace.toModel (covDerivAlongVFSection (I := I) (M := M) g W B b))
+        (TensorRSSpace.toModel (S b)) := by
+  rw [tensorInnerPointwise_eq_liftedTensorSection_inner (I := I) (M := M) g 0 2
+    (covDerivAlongVFSection (I := I) (M := M) g W B) S b]
+  congr 1
+  rw [toModel_liftedTensorSection, covDerivAlongVFSection_lowered_eq]
+
+/-- The lowered cross term `⟨W, ∇_{B}S⟩₀ₛ` equals the mixed inner product
+`⟨W, ∇_{B}S⟩`. -/
+lemma tensorInnerPointwise_0s_lifted_loweredCovDeriv_eq_mixed
+    (g : SmoothRiemannianMetric I M)
+    (W S : Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun x : M => TensorRSSpace 0 2 I x)⟯)
+    (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (b : M) :
+    tensorInnerPointwise_0s (I := I) (M := M) (0 + 2) g b
+        (Tensor0SSpace.toModel
+          (liftedTensorSection (I := I) (M := M) g 0 2 W b))
+        (Tensor0SSpace.toModel
+          (loweredCovDerivAt (I := I) (M := M) g 0 2 S b (B b))) =
+      tensorInnerPointwise (I := I) (M := M) g 0 2 b
+        (TensorRSSpace.toModel (W b))
+        (TensorRSSpace.toModel (covDerivAlongVFSection (I := I) (M := M) g S B b)) := by
+  rw [tensorInnerPointwise_eq_liftedTensorSection_inner (I := I) (M := M) g 0 2
+    W (covDerivAlongVFSection (I := I) (M := M) g S B) b]
+  congr 1
+  rw [toModel_liftedTensorSection, covDerivAlongVFSection_lowered_eq]
+
+/-! ## Second-order directional Leibniz in mixed form -/
+
+/-- **Second-order directional Leibniz (mixed form).**
+`B⟨∇_{B}T, v⟩ = ⟨∇_{B}(∇_{B}T), v⟩ + ⟨∇_{B}T, ∇_{B}v⟩`. -/
+lemma tangentSectionAction_tensorInnerScalar_covDerivAlongVFSection
+    (g : SmoothRiemannianMetric I M)
+    (T v : SmoothCcTensor g 0 2)
+    (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (b : M) :
+    tangentSectionAction (I := I) B
+        (tensorInnerScalar (I := I) (M := M) g 0 2
+          (covDerivAlongVFSection (I := I) (M := M) g T.toSection B) v.toSection) b =
+      tensorInnerPointwise (I := I) (M := M) g 0 2 b
+          (TensorRSSpace.toModel
+            (covDerivAlongVFSection (I := I) (M := M) g
+              (covDerivAlongVFSection (I := I) (M := M) g T.toSection B) B b))
+          (TensorRSSpace.toModel (v.toSection b))
+        + tensorInnerPointwise (I := I) (M := M) g 0 2 b
+          (TensorRSSpace.toModel
+            (covDerivAlongVFSection (I := I) (M := M) g T.toSection B b))
+          (TensorRSSpace.toModel
+            (covDerivAlongVFSection (I := I) (M := M) g v.toSection B b)) := by
+  rw [tangentSectionAction_tensorInnerScalar (I := I) (M := M) g 0 2
+    (covDerivAlongVFSection (I := I) (M := M) g T.toSection B) v.toSection B b]
+  rw [tensorInnerPointwise_0s_loweredCovDeriv_lifted_eq_mixed (I := I) (M := M) g
+    (covDerivAlongVFSection (I := I) (M := M) g T.toSection B) v.toSection B b]
+  rw [tensorInnerPointwise_0s_lifted_loweredCovDeriv_eq_mixed (I := I) (M := M) g
+    (covDerivAlongVFSection (I := I) (M := M) g T.toSection B) v.toSection B b]
+
+/-! ## Metric-compatibility expansion of the divergence summand -/
+
+/-- The inner product of the Dirichlet current against a smooth vector field `B`
+equals the mixed inner-product scalar `⟨∇_{B}T, v⟩`, in `.toFun`-coercion form. -/
+lemma dirichletCurrent_inner_eq_tensorInnerScalar
+    (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 2)
+    (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
+    (fun y : M => g.inner y
+        ((dirichletCurrentSection (I := I) (M := M) g T v).toFun y) (B.toFun y)) =
+      tensorInnerScalar (I := I) (M := M) g 0 2
+        (covDerivAlongVFSection (I := I) (M := M) g T.toSection B) v.toSection := by
+  funext y
+  change g.inner y (dirichletCurrent (I := I) (M := M) g T v y) (B y) = _
+  rw [inner_dirichletCurrent (I := I) (M := M) g T v y (B y)]
+  rw [dirichletCurrentForm_apply, tensorInnerScalar_apply]
+  rfl
+
+/-- **Metric-compatibility expansion of the divergence summand.**
+`g(∇_{B}Z, B) = B⟨∇_{B}T, v⟩ − ⟨∇_{(∇_{B}B)(b)}T, v⟩`. -/
+lemma dirichletCurrent_metricTrace_summand
+    (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 2)
+    (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (b : M) :
+    g.inner b
+        ((LeviCivita (I := I) g).toFun
+          (dirichletCurrentSection (I := I) (M := M) g T v).toFun b (B b))
+        (B b) =
+      tangentSectionAction (I := I) B
+          (tensorInnerScalar (I := I) (M := M) g 0 2
+            (covDerivAlongVFSection (I := I) (M := M) g T.toSection B) v.toSection) b
+        - tensorInnerPointwise (I := I) (M := M) g 0 2 b
+          (TensorRSSpace.toModel
+            (tensorCovDerivAt (I := I) (M := M) g 0 2 T b
+              ((LeviCivita (I := I) g).toFun B.toFun b (B b))))
+          (TensorRSSpace.toModel (v.toSection b)) := by
+  classical
+  have hZ_mdiff : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun y : M => TotalSpace.mk' E y
+        ((dirichletCurrentSection (I := I) (M := M) g T v).toFun y)) b :=
+    ((dirichletCurrentSection (I := I) (M := M) g T v).contMDiff.mdifferentiable
+      (by norm_num)).mdifferentiableAt
+  have hB_mdiff : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun y : M => TotalSpace.mk' E y (B.toFun y)) b :=
+    (B.contMDiff.mdifferentiable (by norm_num)).mdifferentiableAt
+  have hmc := (LeviCivita_isMetricCompatible (I := I) g).apply
+    (Y := (dirichletCurrentSection (I := I) (M := M) g T v).toFun)
+    (Z := B.toFun) hZ_mdiff hB_mdiff (B b)
+  have hfun_eq := dirichletCurrent_inner_eq_tensorInnerScalar (I := I) (M := M) g T v B
+  rw [hfun_eq] at hmc
+  have hcorr : g.inner b
+        ((dirichletCurrentSection (I := I) (M := M) g T v).toFun b)
+        ((LeviCivita (I := I) g).toFun B.toFun b (B b)) =
+      tensorInnerPointwise (I := I) (M := M) g 0 2 b
+        (TensorRSSpace.toModel
+          (tensorCovDerivAt (I := I) (M := M) g 0 2 T b
+            ((LeviCivita (I := I) g).toFun B.toFun b (B b))))
+        (TensorRSSpace.toModel (v.toSection b)) := by
+    change g.inner b (dirichletCurrent (I := I) (M := M) g T v b)
+        ((LeviCivita (I := I) g).toFun B.toFun b (B b)) = _
+    rw [inner_dirichletCurrent (I := I) (M := M) g T v b
+      ((LeviCivita (I := I) g).toFun B.toFun b (B b))]
+    rw [dirichletCurrentForm_apply]
+  rw [hcorr] at hmc
+  have htan : tangentSectionAction (I := I) B
+        (tensorInnerScalar (I := I) (M := M) g 0 2
+          (covDerivAlongVFSection (I := I) (M := M) g T.toSection B) v.toSection) b =
+      mfderiv I 𝓘(ℝ)
+        (tensorInnerScalar (I := I) (M := M) g 0 2
+          (covDerivAlongVFSection (I := I) (M := M) g T.toSection B) v.toSection) b (B b) :=
+    tangentSectionAction_def (I := I) B _ b
+  exact eq_sub_of_add_eq (htan.trans hmc).symm
+
+/-- **Per-direction divergence summand in Bochner form.**
+`g(∇_{B}Z, B) = ⟨∇²_{B,B}T, v⟩ + ⟨∇_{B}T, ∇_{B}v⟩`. -/
+lemma dirichletCurrent_metricTrace_summand_bochner
+    (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 2)
+    (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (b : M) :
+    g.inner b
+        ((LeviCivita (I := I) g).toFun
+          (dirichletCurrentSection (I := I) (M := M) g T v).toFun b (B b))
+        (B b) =
+      tensorInnerPointwise (I := I) (M := M) g 0 2 b
+          (TensorRSSpace.toModel
+            (tensorSecondCovDeriv (I := I) g 0 2
+              (fun y : M => B y) (fun y : M => B y) (fun y : M => T.toSection y) b))
+          (TensorRSSpace.toModel (v.toSection b))
+        + tensorInnerPointwise (I := I) (M := M) g 0 2 b
+          (TensorRSSpace.toModel
+            (covDerivAlongVFSection (I := I) (M := M) g T.toSection B b))
+          (TensorRSSpace.toModel
+            (covDerivAlongVFSection (I := I) (M := M) g v.toSection B b)) := by
+  classical
+  rw [dirichletCurrent_metricTrace_summand (I := I) (M := M) g T v B b]
+  rw [tangentSectionAction_tensorInnerScalar_covDerivAlongVFSection (I := I) (M := M) g T v B b]
+  have hsecond := covDerivAlong_covDerivAlongVFSection_eq (I := I) (M := M) g T.toSection B b
+  have hcorr_eq :
+      tensorCovDerivAt (I := I) (M := M) g 0 2 T b
+          ((LeviCivita (I := I) g).toFun B.toFun b (B b)) =
+        (tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g)).toFun
+          (fun y : M => T.toSection y) b
+          ((LeviCivita (I := I) g).toFun (fun y : M => B y) b (B b)) := rfl
+  rw [hsecond]
+  rw [TensorRSSpace.toModel_add, tensorInnerPointwise_add_left]
+  rw [hcorr_eq]
+  ring
+
+/-! ## The pointwise Bochner divergence identity -/
+
+/-- The Hessian frame-trace half: the diagonal frame sum of the second covariant
+derivatives paired with `v` is the rough connection Laplacian inner product. -/
+lemma dirichletCurrent_hessian_frameTrace_eq
+    (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 2) (b : M) :
+    (∑ i : Fin (Module.finrank ℝ E),
+        tensorInnerPointwise (I := I) (M := M) g 0 2 b
+          (TensorRSSpace.toModel
+            (tensorSecondCovDeriv (I := I) g 0 2
+              (fun y : M => smoothOrthoFrameSection (I := I) (M := M) g b i y)
+              (fun y : M => smoothOrthoFrameSection (I := I) (M := M) g b i y)
+              (fun y : M => T.toSection y) b))
+          (TensorRSSpace.toModel (v.toSection b))) =
+      tensorInnerScalar (I := I) (M := M) g 0 2
+        (rawTensorConnLapSmooth (I := I) g 0 2 T).toSection v.toSection b := by
+  classical
+  -- Abbreviate the per-frame second-covariant-derivative model tensors.
+  set A : Fin (Module.finrank ℝ E) → TensorRSModel 0 2 ℝ E :=
+    fun i => TensorRSSpace.toModel
+      (tensorSecondCovDeriv (I := I) g 0 2
+        (fun y : M => smoothOrthoFrameSection (I := I) (M := M) g b i y)
+        (fun y : M => smoothOrthoFrameSection (I := I) (M := M) g b i y)
+        (fun y : M => T.toSection y) b) with hA_def
+  -- Pull the finite sum out of the inner product (left argument), via `sum_left`
+  -- with unit coefficients.
+  have hpull : (∑ i : Fin (Module.finrank ℝ E),
+        tensorInnerPointwise (I := I) (M := M) g 0 2 b (A i)
+          (TensorRSSpace.toModel (v.toSection b))) =
+      tensorInnerPointwise (I := I) (M := M) g 0 2 b
+        (∑ i : Fin (Module.finrank ℝ E), A i)
+        (TensorRSSpace.toModel (v.toSection b)) := by
+    rw [show (∑ i : Fin (Module.finrank ℝ E), A i) =
+          ∑ i : Fin (Module.finrank ℝ E), (1 : ℝ) • A i from by
+        refine Finset.sum_congr rfl (fun i _ => ?_); rw [one_smul]]
+    rw [tensorInnerPointwise_sum_left (I := I) (M := M) g 0 2 b Finset.univ A
+      (fun _ => (1 : ℝ)) (TensorRSSpace.toModel (v.toSection b))]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [one_mul]
+  rw [hpull, tensorInnerScalar_apply]
+  congr 1
+  -- `∑ᵢ A i = toModel ((rawTensorConnLapSmooth g 0 2 T).toSection b)`.
+  rw [rawTensorConnLapSmooth_toSection_apply, rawTensorConnLap_def]
+  -- Push `toModel` through the finite sum on the right via the `toModelL` linear equiv.
+  rw [show TensorRSSpace.toModel
+        (∑ i : Fin (Module.finrank ℝ E),
+          ((tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g)).toFun
+              (covApply (tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g))
+                (smoothOrthoFrame (I := I) g b i) (fun z : M => T.toSection z)) b
+              (smoothOrthoFrame (I := I) g b i b) -
+            (tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g)).toFun
+              (fun z : M => T.toSection z) b
+              ((LeviCivita (I := I) g).toFun
+                (smoothOrthoFrame (I := I) g b i) b
+                (smoothOrthoFrame (I := I) g b i b)))) =
+        ∑ i : Fin (Module.finrank ℝ E),
+          TensorRSSpace.toModel
+            ((tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g)).toFun
+                (covApply (tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g))
+                  (smoothOrthoFrame (I := I) g b i) (fun z : M => T.toSection z)) b
+                (smoothOrthoFrame (I := I) g b i b) -
+              (tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g)).toFun
+                (fun z : M => T.toSection z) b
+                ((LeviCivita (I := I) g).toFun
+                  (smoothOrthoFrame (I := I) g b i) b
+                  (smoothOrthoFrame (I := I) g b i b))) from by
+      rw [show (TensorRSSpace.toModel
+            (∑ i : Fin (Module.finrank ℝ E),
+              ((tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g)).toFun
+                  (covApply (tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g))
+                    (smoothOrthoFrame (I := I) g b i) (fun z : M => T.toSection z)) b
+                  (smoothOrthoFrame (I := I) g b i b) -
+                (tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g)).toFun
+                  (fun z : M => T.toSection z) b
+                  ((LeviCivita (I := I) g).toFun
+                    (smoothOrthoFrame (I := I) g b i) b
+                    (smoothOrthoFrame (I := I) g b i b))))) =
+          (TensorRSSpace.toModelL (I := I) 0 2 b)
+            (∑ i : Fin (Module.finrank ℝ E),
+              ((tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g)).toFun
+                  (covApply (tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g))
+                    (smoothOrthoFrame (I := I) g b i) (fun z : M => T.toSection z)) b
+                  (smoothOrthoFrame (I := I) g b i b) -
+                (tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g)).toFun
+                  (fun z : M => T.toSection z) b
+                  ((LeviCivita (I := I) g).toFun
+                    (smoothOrthoFrame (I := I) g b i) b
+                    (smoothOrthoFrame (I := I) g b i b)))) from rfl]
+      rw [map_sum]
+      refine Finset.sum_congr rfl (fun i _ => ?_)
+      rfl]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  simp only [hA_def, tensorSecondCovDeriv_def, smoothOrthoFrameSection_coe_eq]
+
+/-- The Dirichlet cross half: the diagonal frame sum of the Dirichlet cross terms
+is the inverse-Gram Dirichlet integrand `tensorCovDerivPointwiseInner g 0 2 T v`. -/
+lemma dirichletCurrent_dirichlet_frameTrace_eq
+    (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 2) (b : M) :
+    (∑ i : Fin (Module.finrank ℝ E),
+        tensorInnerPointwise (I := I) (M := M) g 0 2 b
+          (TensorRSSpace.toModel
+            (covDerivAlongVFSection (I := I) (M := M) g T.toSection
+              (smoothOrthoFrameSection (I := I) (M := M) g b i) b))
+          (TensorRSSpace.toModel
+            (covDerivAlongVFSection (I := I) (M := M) g v.toSection
+              (smoothOrthoFrameSection (I := I) (M := M) g b i) b))) =
+      tensorCovDerivPointwiseInner (I := I) (M := M) g 0 2 T v b := by
+  classical
+  rw [tensorCovDerivPointwiseInner_eq_smoothOrthoFrame_diag_sum (I := I) (M := M) g T v b]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [covDerivAlongVFSection_eq_tensorCovDerivAt (I := I) (M := M) g T
+    (smoothOrthoFrameSection (I := I) (M := M) g b i) b,
+    covDerivAlongVFSection_eq_tensorCovDerivAt (I := I) (M := M) g v
+    (smoothOrthoFrameSection (I := I) (M := M) g b i) b,
+    smoothOrthoFrameSection_apply]
+
+/-- **Pointwise Bochner divergence identity.** For the Dirichlet current `Z` of
+`T, v` on a closed Riemannian manifold, at every base point `b`,
+
+```
+div_g Z b = ⟨∇T, ∇v⟩_b + ⟨Δ_∇ T, v⟩_b.
+```
+-/
+theorem divergence_g_dirichletCurrent_eq
+    (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 2) (b : M) :
+    divergence_g (I := I) g (dirichletCurrentSection (I := I) (M := M) g T v) b =
+      tensorCovDerivPointwiseInner (I := I) (M := M) g 0 2 T v b +
+        tensorInnerScalar (I := I) (M := M) g 0 2
+          (rawTensorConnLapSmooth (I := I) g 0 2 T).toSection v.toSection b := by
+  classical
+  rw [divergence_g_eq_smoothOrthoFrame_metricTrace (I := I) (M := M) g
+    (dirichletCurrentSection (I := I) (M := M) g T v) b]
+  -- Convert the bare frame to the section frame, then split each summand.
+  rw [show (∑ i : Fin (Module.finrank ℝ E),
+          g.inner b
+            ((LeviCivita (I := I) g).toFun
+              (dirichletCurrentSection (I := I) (M := M) g T v).toFun b
+              (smoothOrthoFrame (I := I) g b i b))
+            (smoothOrthoFrame (I := I) g b i b)) =
+        ∑ i : Fin (Module.finrank ℝ E),
+          g.inner b
+            ((LeviCivita (I := I) g).toFun
+              (dirichletCurrentSection (I := I) (M := M) g T v).toFun b
+              ((smoothOrthoFrameSection (I := I) (M := M) g b i) b))
+            ((smoothOrthoFrameSection (I := I) (M := M) g b i) b) from rfl]
+  rw [Finset.sum_congr rfl (fun i _ =>
+    dirichletCurrent_metricTrace_summand_bochner (I := I) (M := M) g T v
+      (smoothOrthoFrameSection (I := I) (M := M) g b i) b)]
+  rw [Finset.sum_add_distrib]
+  rw [dirichletCurrent_hessian_frameTrace_eq (I := I) (M := M) g T v b]
+  rw [dirichletCurrent_dirichlet_frameTrace_eq (I := I) (M := M) g T v b]
+  rw [add_comm]
+
 end Connection
 end Integral
 end DifferentialGeometry
