@@ -1127,6 +1127,7 @@ import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.Va
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.VariationalLiftTransport
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.VariationalLiftCovariant
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.VariationalLiftChartDictionary
+import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.VariationalLiftConventionBridge
 import DifferentialGeometry.PDE.RicciFlow.Pullback.PushforwardVF
 import DifferentialGeometry.PDE.RicciFlow.Pullback.Metric
 import DifferentialGeometry.PDE.RicciFlow.Pullback.CartanFormula
