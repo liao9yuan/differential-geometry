@@ -58,6 +58,8 @@ open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 open DifferentialGeometry.Analysis.Sobolev.Chart
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -1466,6 +1468,119 @@ theorem partialDeriv2_reprDiffChartCompOnE_abs_le
       ≤ (1 / 2 : ℝ) * (C2 * R + C2 * R) :=
         mul_le_mul_of_nonneg_left ((abs_add_le _ _).trans (add_le_add h_lb h_bl)) (by norm_num)
     _ = C2 * R := by ring
+
+/-! ## Leaf-5: the assembled pointwise covariant-gradient jet input -/
+
+set_option maxHeartbeats 1600000 in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- **The pointwise covariant-gradient jet input `hcovgrad_jet_bound`.**
+
+On a compact `K ⊆ interior (extChartAt I α).target`, there is a single constant `C₀ ≥ 0` such
+that, for every chart point `y ∈ K` and all frame indices `l b`, the chart-frame component
+function of the realized tensor difference, together with its first and second chart partials,
+is bounded by `C₀` times the iterated covariant-gradient jet sum at the chart preimage.  This
+is exactly the triple conjunction consumed by
+`chartMetricJet2DiffSup_realizeMetricAt_le_iteratedCovGradJetSum`. -/
+theorem hcovgrad_jet_bound_holds
+    (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
+    {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
+    (hu₁ : realizableAt (I := I) g_bg u₁) (hu₂ : realizableAt (I := I) g_bg u₂)
+    (α : M) {K : Set E} (hK : IsCompact K)
+    (hKsub : K ⊆ interior ((extChartAt I α).target : Set E)) :
+    ∃ C₀ : ℝ, 0 ≤ C₀ ∧ ∀ y ∈ K, ∀ l b : Fin (Module.finrank ℝ E),
+      |reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b y| ≤
+          C₀ * iteratedCovGradJetSum (I := I) g_bg
+            (realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂)
+            ((extChartAt I α).symm y) ∧
+        (∀ a : Fin (Module.finrank ℝ E),
+          |partialDeriv (E := E) a
+              (reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b) y| ≤
+            C₀ * iteratedCovGradJetSum (I := I) g_bg
+              (realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂)
+              ((extChartAt I α).symm y)) ∧
+        (∀ c a : Fin (Module.finrank ℝ E),
+          |partialDeriv (E := E) c
+              (partialDeriv (E := E) a
+                (reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b)) y| ≤
+            C₀ * iteratedCovGradJetSum (I := I) g_bg
+              (realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂)
+              ((extChartAt I α).symm y)) := by
+  classical
+  letI : Bundle.RiemannianBundle (fun bb : M => TensorRSSpace 0 2 I bb) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g_bg 0 2
+  set S : SmoothCcTensor g_bg 0 2 :=
+    realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂ with hS_def
+  -- Conjunct 1 (in fibre-norm form), conjunct 2, conjunct 3 (in jet-sum form).
+  obtain ⟨C0, hC0_nn, hC0_bd⟩ :=
+    reprDiffChartCompOnE_abs_le_riemannianFibreNorm (I := I) g_bg hu₁ hu₂ α hK hKsub
+  obtain ⟨C1, hC1_nn, hC1_bd⟩ :=
+    partialDeriv_reprDiffChartCompOnE_abs_le (I := I) g_bg hu₁ hu₂ α hK hKsub
+  obtain ⟨C2, hC2_nn, hC2_bd⟩ :=
+    partialDeriv2_reprDiffChartCompOnE_abs_le (I := I) g_bg hu₁ hu₂ α hK hKsub
+  refine ⟨max C0 (max C1 C2), le_trans hC0_nn (le_max_left _ _), ?_⟩
+  intro y hy l b
+  set R : ℝ := iteratedCovGradJetSum (I := I) g_bg S ((extChartAt I α).symm y) with hR_def
+  have hR_nn : 0 ≤ R := iteratedCovGradJetSum_nonneg (I := I) g_bg S _
+  -- `‖S.toSection (symm y)‖ ≤ R` (the `j = 0` jet term).
+  have h0_jet : ‖S.toSection ((extChartAt I α).symm y)‖ ≤ R := by
+    rw [hR_def]
+    exact iteratedCovGrad_norm_le_jetSum (I := I) g_bg S ((extChartAt I α).symm y) 0 (by norm_num)
+  refine ⟨?_, ?_, ?_⟩
+  · -- Conjunct 1.
+    calc |reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b y|
+        ≤ C0 * ‖S.toSection ((extChartAt I α).symm y)‖ := hC0_bd y hy l b
+      _ ≤ C0 * R := mul_le_mul_of_nonneg_left h0_jet hC0_nn
+      _ ≤ max C0 (max C1 C2) * R :=
+          mul_le_mul_of_nonneg_right (le_max_left _ _) hR_nn
+  · -- Conjunct 2.
+    intro a
+    calc |partialDeriv (E := E) a (reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b) y|
+        ≤ C1 * R := hC1_bd y hy l b a
+      _ ≤ max C0 (max C1 C2) * R :=
+          mul_le_mul_of_nonneg_right ((le_max_left _ _).trans (le_max_right _ _)) hR_nn
+  · -- Conjunct 3.
+    intro c a
+    calc |partialDeriv (E := E) c
+            (partialDeriv (E := E) a (reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b)) y|
+        ≤ C2 * R := hC2_bd y hy l b c a
+      _ ≤ max C0 (max C1 C2) * R :=
+          mul_le_mul_of_nonneg_right ((le_max_right _ _).trans (le_max_right _ _)) hR_nn
+
+/-! ## The unconditional chart `2`-jet bound
+
+Feeding the discharged pointwise covariant-gradient jet input into the headline algebraic
+reduction `chartMetricJet2DiffSup_realizeMetricAt_le_iteratedCovGradJetSum`, and then into the
+`C²` Sobolev embedding via `chartMetricJet2DiffSup_realizeMetricAt_le_toHs`, yields the
+**unconditional** chart `2`-jet bound: the analytic input `hcovgrad_jet_bound` is no longer a
+hypothesis, only the compactness of `K` (a genuine, mathematically necessary hypothesis: the
+trivialization op-norm is unbounded toward the chart-target boundary). -/
+
+set_option maxHeartbeats 1600000 in
+/-- **Unconditional chart `2`-jet seminorm bound by the intrinsic `H^{2k}` norm.**
+
+For two realizable order-`σ` elements `u₁, u₂` with fixed difference `S = T₁ − T₂`, a chart
+base point `α`, and a **compact** piece `K ⊆ interior (extChartAt I α).target`, the chart
+`2`-jet seminorm of the realized-metric difference is bounded, uniformly on `K`, by a constant
+times the intrinsic `H^{2k}` Sobolev norm of `S` (for `2k > dim M + 4`).  No pointwise
+covariant-gradient jet hypothesis is required: it is discharged internally by
+`hcovgrad_jet_bound_holds`. -/
+theorem chartMetricJet2DiffSup_realizeMetricAt_le_toHs_unconditional
+    (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
+    {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
+    (hu₁ : realizableAt (I := I) g_bg u₁) (hu₂ : realizableAt (I := I) g_bg u₂)
+    (α : M) {K : Set E} (hK : IsCompact K)
+    (hKsub : K ⊆ interior ((extChartAt I α).target : Set E))
+    (k : ℕ) (h_super : 2 * k > Module.finrank ℝ E + 4) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ y ∈ K,
+      chartMetricJet2DiffSup (I := I) (M := M)
+          (realizeMetricAt (I := I) g_bg u₁) (realizeMetricAt (I := I) g_bg u₂) α y ≤
+        C * ‖SmoothCcTensor.toHs (g := g_bg) (r := 0) (s := 2) (2 * k)
+          (realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂)‖ := by
+  obtain ⟨C₀, hC₀_nn, hcovgrad_jet_bound⟩ :=
+    hcovgrad_jet_bound_holds (I := I) g_bg hu₁ hu₂ α hK hKsub
+  exact chartMetricJet2DiffSup_realizeMetricAt_le_toHs (I := I) g_bg hu₁ hu₂ α hKsub k h_super
+    hC₀_nn hcovgrad_jet_bound
 
 end MetricRealization
 end IntrinsicSpectral
