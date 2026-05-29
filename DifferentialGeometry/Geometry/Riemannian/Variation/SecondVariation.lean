@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Riemannian.Variation.ParallelTransport
 import DifferentialGeometry.Geometry.Riemannian.Variation.FixedChartIdentities
 import DifferentialGeometry.Geometry.Riemannian.AlongCurve
+import DifferentialGeometry.Geometry.Riemannian.MFDerivAlongCurve
 import DifferentialGeometry.Geometry.Riemannian.Geodesic.Equation
 import DifferentialGeometry.Integral.Connection.Curvature
 import DifferentialGeometry.Integral.Connection.LeviCivita
@@ -95,6 +96,91 @@ private lemma arcLength_slice_eq_integral_sqrt_speedSq
     arcLength (I := I) g (fun t : ℝ => f s t) 0 L
       = ∫ t in (0 : ℝ)..L, Real.sqrt (speedSq (I := I) g f s t) := by
   rfl
+
+/-- **Moving-foot speed-as-chartGram bridge.** The speed-squared
+`speedSq g f s t` of the slice `t ↦ f s t`, defined through the manifold
+velocity `mfderiv (fun u ↦ f s u) t 1`, equals the chart-coordinate Gram
+quadratic form `chartGramAlongCurve g (f s t) (fun v ↦ f s v) D D t`, where
+`D v := fderiv ℝ (extChartAt I (f s t) ∘ (fun w ↦ f s w)) v 1` is the
+chart-coordinate velocity section in the chart *pinned at the foot* `f s t`.
+
+The foot of the chart coincides with the basepoint `f s t`, so at the diagonal
+the moving-foot manifold velocity equals, after applying the inverse
+trivialisation, the chart-coordinate velocity; there is no transition-Jacobian
+obstruction. The proof first rewrites the raw `mfderiv`-velocity as
+`triv.symmL (f s t) (D t)` (the chart-coordinate bridge
+`raw_mfderiv_eq_symmL_apply_fderiv`), then identifies the `g`-inner product with
+the Gram bilinear form (`inner_eq_chartGramOnE_bilinear_on_baseSet`), and finally
+reconciles `chartGramMatrix g (f s t) (f s t)` with
+`chartGramOnE g (f s t) · · (extChartAt I (f s t) (f s t))` via the chart
+round-trip `(extChartAt I α).symm (extChartAt I α α) = α`. -/
+private lemma speedSq_eq_chartGramAlongCurve
+    (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
+    (hf : IsSmoothVariation (I := I) f) (s t : ℝ) :
+    speedSq (I := I) g f s t
+      = chartGramAlongCurve (I := I) g (f s t) (fun v : ℝ => f s v)
+          (fun v : ℝ =>
+            fderiv ℝ (fun w : ℝ => extChartAt I (f s t) (f s w)) v (1 : ℝ))
+          (fun v : ℝ =>
+            fderiv ℝ (fun w : ℝ => extChartAt I (f s t) (f s w)) v (1 : ℝ))
+          t := by
+  classical
+  -- Abbreviation for the foot and the chart-coordinate velocity section.
+  set α : M := f s t with hα
+  set D : ℝ → E := fun v : ℝ =>
+    fderiv ℝ (fun w : ℝ => extChartAt I α (f s w)) v (1 : ℝ) with hD
+  -- The slice `t ↦ f s t` is smooth: it is the joint map precomposed with
+  -- the smooth inclusion `u ↦ (s, u)`.
+  have hslice : ContMDiff (𝓘(ℝ, ℝ)) I ∞ (fun u : ℝ => f s u) := by
+    have hincl : ContMDiff (𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) ∞
+        (fun u : ℝ => (s, u)) :=
+      contMDiff_const.prodMk contMDiff_id
+    exact (hf : ContMDiff _ _ _ _).comp hincl
+  -- The foot lies in its own chart source.
+  have hsrc : (fun u : ℝ => f s u) t ∈ (chartAt H α).source := by
+    change f s t ∈ (chartAt H α).source
+    rw [hα]; exact mem_chart_source H (f s t)
+  -- The raw mfderiv-velocity, in the chart pinned at `α = f s t`, is the inverse
+  -- trivialisation applied to the chart-coordinate velocity `D t`.
+  have hraw :
+      (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f s u) t (1 : ℝ) : E)
+        = (trivializationAt E (TangentSpace I) α).symmL ℝ
+            ((fun u : ℝ => f s u) t) (D t) := by
+    have h := MFDerivAlongCurve.raw_mfderiv_eq_symmL_apply_fderiv (I := I) (M := M)
+      (γ := fun u : ℝ => f s u) hslice α hsrc
+    -- The composite `extChartAt I α ∘ (fun u => f s u)` is the foot-pinned slice.
+    have hcomp : ((extChartAt I α) ∘ (fun u : ℝ => f s u))
+        = (fun w : ℝ => extChartAt I α (f s w)) := rfl
+    rw [hcomp] at h
+    rw [h]
+  -- The base point of the slice at `t` is `α`.
+  have hbase : (fun u : ℝ => f s u) t = α := by rw [hα]
+  -- Unfold `speedSq`, rewrite both velocity arguments by `hraw`, then apply the
+  -- inner-product-as-Gram bridge at `x = α`.
+  rw [show speedSq (I := I) g f s t
+        = g.inner α
+            ((trivializationAt E (TangentSpace I) α).symmL ℝ α (D t))
+            ((trivializationAt E (TangentSpace I) α).symmL ℝ α (D t)) from by
+      unfold speedSq
+      rw [hraw, hbase]]
+  rw [inner_eq_chartGramOnE_bilinear_on_baseSet (I := I) g α (D t) (D t)]
+  -- Identify the Gram-matrix sum with `chartGramAlongCurve`.
+  rw [chartGramAlongCurve_def]
+  refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
+  -- `chartCurve α (fun v => f s v) t = extChartAt I α (f s t) = extChartAt I α α`,
+  -- and `chartGramOnE g α i j (extChartAt I α α) = chartGramMatrix g α α i j`
+  -- by the chart round-trip.
+  have hroundtrip :
+      DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE (I := I) g α i j
+          (chartCurve (I := I) α (fun v : ℝ => f s v) t)
+        = chartGramMatrix (I := I) g α α i j := by
+    rw [chartCurve_def]
+    change chartGramMatrix (I := I) g α
+        ((extChartAt I α).symm (extChartAt I α (f s t))) i j
+      = chartGramMatrix (I := I) g α α i j
+    rw [hα] at *
+    rw [extChartAt_to_inv]
+  rw [hroundtrip]
 
 /-- The partial-`t` derivative of a smooth two-parameter variation, evaluated
 at `(s, t)` with the unit input vector `1 : ℝ`, coincides with the directional
