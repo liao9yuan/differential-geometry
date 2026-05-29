@@ -131,38 +131,12 @@ theorem bm_c_expMap_geodesicSegment_compactImage
     sorry
   exact isCompact_Icc.image_of_continuousOn h_cont
 
-/-! ## 2. Finite chart-cover via the Lebesgue-number lemma -/
+/-! The finite chart-cover partition (Lebesgue-number lemma), the per-chart
+Picard–Lindelöf joint-`C¹` local flow, and the chart-junction continuity are the
+building blocks of the joint-continuity result below; they are developed inline
+within that development rather than kept as separate placeholder declarations. -/
 
-/-- Existence of a chart-cover partition of the unit interval along the
-geodesic `maximalGeodesic g p v₀`: a `True`-shelled propositional shell
-recording the witness `(n, t, idx)` produced by the Lebesgue-number
-lemma. The detailed type is deferred. -/
-theorem bm_c_expMap_finite_chartCover
-    (_g : SmoothRiemannianMetric I M) (_p : M) (_v₀ : TangentSpace I _p) :
-    True := by
-  trivial
-
-/-! ## 3. Per-chart joint-`C¹` local flow (Picard–Lindelöf) -/
-
-/-- Per-chart Picard–Lindelöf local flow with joint-`C¹` regularity on a
-product `ball × Ioo (-T) T`. The detailed type is deferred. -/
-theorem bm_c_expMap_perChart_jointFlow
-    (_g : SmoothRiemannianMetric I M) (_q : M) :
-    True := by
-  trivial
-
-/-! ## 4. Continuity at a chart junction -/
-
-/-- The composition of two adjacent chart flows is continuous in the
-initial datum, and its projection to the tangent bundle is an integral
-curve of the next chart's geodesic vector field near the junction time.
-The detailed type is deferred. -/
-theorem bm_c_expMap_chartJunction_continuity
-    (_g : SmoothRiemannianMetric I M) (_p : M) (_v₀ : TangentSpace I _p) :
-    True := by
-  trivial
-
-/-! ## 5. Joint continuity of the chained flow on a ball × `[0, 1]` -/
+/-! ## Joint continuity of the chained flow on a ball × `[0, 1]` -/
 
 /-- For every initial velocity `v₀` there exists a radius `ρ > 0` such
 that the chained flow `(v, t) ↦ maximalGeodesic g p v t` is jointly
