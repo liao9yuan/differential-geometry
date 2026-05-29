@@ -314,6 +314,243 @@ lemma fst_continuousLinearMapAt_secondaryTriv
     rfl
   exact hgoal
 
+/-! ## Part B' — second (fibre) component of the secondary trivialisation
+
+The companion of `fst_continuousLinearMapAt_secondaryTriv` for the second
+component. Whereas the first component of the secondary trivialisation's
+`continuousLinearMapAt` only sees the base-chart change (block-triangular,
+no second derivative), the second component is the genuine *velocity*
+block of the iterated tangent-bundle transition: it is the Fréchet
+derivative within `range I.tangent` of the closed-form map
+
+`secondaryTrivSndForm I α p z := tangentCoordChange I p.proj α ((extChartAt I p.proj).symm z.1) z.2`,
+
+evaluated at the chart-base point `extChartAt I.tangent p p`. The map
+above is exactly the second component of the iterated-tangent transition
+`Ψ := extChartAt I.tangent ⟨α, 0⟩ ∘ (extChartAt I.tangent p).symm`, and so
+its derivative involves the *second* derivative of the base chart
+transition (through the dependence of the leading `tangentCoordChange` on
+the base point `(extChartAt I p.proj).symm z.1`).
+-/
+
+/-- **Fibre component of the chart-of-`TM` chart at a base point `q`, in
+`tangentCoordChange` form.** For `p : TangentBundle I M` whose projection
+lies in the chart-source of `q.proj`, the second component of
+`extChartAt I.tangent q p` equals
+`tangentCoordChange I p.proj q.proj p.proj p.snd`. This rewrites
+`extChartAt_tangent_apply_snd` (stated via the trivialisation's
+`continuousLinearMapAt`) into the core coordinate-change form. -/
+lemma extChartAt_tangent_apply_snd_tangentCoordChange
+    (q : TangentBundle I M) {p : TangentBundle I M}
+    (hp : p.proj ∈ (chartAt H q.proj).source) :
+    (extChartAt I.tangent q p).2 =
+      tangentCoordChange I p.proj q.proj p.proj (p.snd : E) := by
+  classical
+  -- `extChartAt_tangent_apply_snd` gives the fibre block as the
+  -- trivialisation's CLM; `chartFiberCoord` packages the same object, and
+  -- Part A rewrites that as a `tangentCoordChange`.
+  have hsnd := extChartAt_tangent_apply_snd (I := I) (q := q) (p := p) hp
+  -- `chartFiberCoord q.proj p = (trivAt q.proj p).2`, and the CLM identity
+  -- `coe_linearMapAt_of_mem` identifies the two.
+  have hp_base : p.proj ∈ (trivializationAt E (TangentSpace I) q.proj).baseSet := by
+    rw [TangentBundle.trivializationAt_baseSet]; exact hp
+  have hcoe :=
+    (trivializationAt E (TangentSpace I) q.proj).coe_linearMapAt_of_mem (R := ℝ) hp_base
+  have hCLM_eq_fiber :
+      (trivializationAt E (TangentSpace I) q.proj).continuousLinearMapAt ℝ p.proj p.snd =
+        chartFiberCoord (I := I) q.proj p := by
+    change (trivializationAt E (TangentSpace I) q.proj).linearMapAt ℝ p.proj p.snd = _
+    have := congrFun hcoe p.snd
+    rw [this]
+    rfl
+  rw [hsnd, hCLM_eq_fiber]
+  exact chartFiberCoord_eq_tangentCoordChange (I := I) (α := q.proj) (p := p) hp
+
+/-- **Closed form of the second component of the iterated-tangent
+transition map.** For a base `T M`-point `p` and a chart basepoint `α`,
+the map
+
+`z ↦ tangentCoordChange I p.proj α ((extChartAt I p.proj).symm z.1) z.2`
+
+is the second component of
+`Ψ := extChartAt I.tangent ⟨α, 0⟩ ∘ (extChartAt I.tangent p).symm`. We
+package it here so the fibre-block derivative lemma below has a named
+target. -/
+def secondaryTrivSndForm (α : M) (p : TangentBundle I M) (z : E × E) : E :=
+  tangentCoordChange I p.proj α ((extChartAt I p.proj).symm z.1) z.2
+
+/-- **Second (fibre) block of the secondary trivialisation — derivative
+form.** Companion of `fst_continuousLinearMapAt_secondaryTriv`. For a
+`T M`-point `p` whose projection lies in the chart-source at `α`, the
+*second* component of the secondary trivialisation's `continuousLinearMapAt`
+at `p`, applied to `w : E × E`, equals the Fréchet derivative within
+`range I.tangent` (at the chart-base point `extChartAt I.tangent p p`) of
+the closed-form map `secondaryTrivSndForm I α p`, applied to `w`.
+
+Unlike the first block (which is purely the first-order base coordinate
+change, with no second derivative), the second block genuinely encodes the
+*second derivative* of the base chart transition, through the dependence of
+the leading `tangentCoordChange` on its base point
+`(extChartAt I p.proj).symm z.1`. -/
+lemma snd_continuousLinearMapAt_secondaryTriv
+    (α : M) {p : TangentBundle I M}
+    (hp : p.proj ∈ (chartAt H α).source)
+    (w : E × E) :
+    ((trivializationAt (E × E) (TangentSpace I.tangent)
+        (⟨α, (0 : E)⟩ : TangentBundle I M)).continuousLinearMapAt ℝ p w).2 =
+      (fderivWithin ℝ (secondaryTrivSndForm (I := I) α p) (range I.tangent)
+        ((extChartAt I.tangent p) p)) w := by
+  classical
+  -- Phase 1. Identify `e.continuousLinearMapAt ℝ p` with the secondary core
+  -- coordinate change `tangentCoordChange I.tangent p ⟨α,0⟩ p` (= fderiv of `Ψ`).
+  set e := trivializationAt (E × E) (TangentSpace I.tangent)
+    (⟨α, (0 : E)⟩ : TangentBundle I M) with he_def
+  have hp_TM : p ∈ (chartAt (ModelProd H E)
+      (⟨α, (0 : E)⟩ : TangentBundle I M)).source := by
+    rw [TangentBundle.mem_chart_source_iff]; exact hp
+  have hcc :
+      e.continuousLinearMapAt ℝ p =
+        tangentCoordChange I.tangent p (⟨α, (0 : E)⟩ : TangentBundle I M) p :=
+    TangentBundle.continuousLinearMapAt_trivializationAt_eq_core
+      (𝕜 := ℝ) (b₀ := (⟨α, (0 : E)⟩ : TangentBundle I M)) (b := p) hp_TM
+  -- Phase 2. The chart-transition `Ψ` has fderiv `tangentCoordChange I.tangent p ⟨α,0⟩ p`
+  -- within `range I.tangent` at the base point.
+  have hp_src_p : p ∈ (extChartAt I.tangent p).source :=
+    mem_extChartAt_source (I := I.tangent) p
+  have hp_src_α0 : p ∈ (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)).source := by
+    rw [extChartAt_source]; exact hp_TM
+  set Ψ : E × E → E × E :=
+    (extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)) ∘
+      (extChartAt I.tangent p).symm with hΨ_def
+  set basepoint : E × E := (extChartAt I.tangent p) p with hbase_def
+  have hΨ :
+      HasFDerivWithinAt Ψ
+        (tangentCoordChange I.tangent p (⟨α, (0 : E)⟩ : TangentBundle I M) p)
+        (range I.tangent) basepoint :=
+    hasFDerivWithinAt_tangentCoordChange (I := I.tangent) (M := TangentBundle I M)
+      (x := p) (y := (⟨α, (0 : E)⟩ : TangentBundle I M)) (z := p)
+      ⟨hp_src_p, hp_src_α0⟩
+  -- Phase 3. Take Prod.snd: `(Ψ z).2` has fderiv `(snd CLM).comp (tcc ...)`.
+  have hΨ_snd :
+      HasFDerivWithinAt (fun z : E × E => (Ψ z).2)
+        ((ContinuousLinearMap.snd ℝ E E).comp
+          (tangentCoordChange I.tangent p (⟨α, (0 : E)⟩ : TangentBundle I M) p))
+        (range I.tangent) basepoint :=
+    hΨ.snd
+  -- Phase 4. Show eventually `(Ψ z).2 = secondaryTrivSndForm α p z` on
+  -- `range I.tangent` near basepoint, and pointwise at basepoint.
+  have hα_open : IsOpen (chartAt H α).source := (chartAt H α).open_source
+  have hproj_cont : Continuous
+      (Bundle.TotalSpace.proj : TangentBundle I M → M) :=
+    FiberBundle.continuous_proj E (TangentSpace I)
+  set U : Set (TangentBundle I M) :=
+    (extChartAt I.tangent p).source ∩
+      (Bundle.TotalSpace.proj ⁻¹' (chartAt H α).source) with hU_def
+  have hU_open : IsOpen U :=
+    ((isOpen_extChartAt_source (I := I.tangent) p).inter (hα_open.preimage hproj_cont))
+  have hU_mem : p ∈ U := by
+    refine ⟨mem_extChartAt_source (I := I.tangent) p, ?_⟩
+    simpa using hp
+  have hU_nhds : U ∈ 𝓝 p := hU_open.mem_nhds hU_mem
+  have hVnhds :
+      (extChartAt I.tangent p) '' U ∈ 𝓝[range I.tangent] basepoint := by
+    rw [hbase_def, ← map_extChartAt_nhds (I := I.tangent) p]
+    exact Filter.image_mem_map hU_nhds
+  -- The pointwise identity: for `q ∈ U`, with `z := extChartAt I.tangent p q`,
+  -- `(extChartAt I.tangent ⟨α,0⟩ q).2 = secondaryTrivSndForm α p z`.
+  -- Compute both sides via the `tangentCoordChange` fibre form and `_comp`.
+  have hpoint : ∀ {q : TangentBundle I M}, q ∈ U →
+      ((extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)) q).2 =
+        secondaryTrivSndForm (I := I) α p ((extChartAt I.tangent p) q) := by
+    intro q hqU
+    have hq_src : q ∈ (extChartAt I.tangent p).source := hqU.1
+    have hq_proj_src_α : q.proj ∈ (chartAt H α).source := hqU.2
+    -- `q.proj ∈ (chartAt H p.proj).source` from `q ∈ extChart source`.
+    have hq_proj_src_p : q.proj ∈ (chartAt H p.proj).source := by
+      have := hq_src
+      rw [extChartAt_source] at this
+      rw [TangentBundle.mem_chart_source_iff] at this
+      exact this
+    -- LHS: fibre block at base `⟨α,0⟩`.
+    have hLHS :
+        ((extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)) q).2 =
+          tangentCoordChange I q.proj α q.proj (q.snd : E) :=
+      extChartAt_tangent_apply_snd_tangentCoordChange (I := I)
+        (q := (⟨α, (0 : E)⟩ : TangentBundle I M)) (p := q) hq_proj_src_α
+    -- The two components of `extChartAt I.tangent p q`.
+    have hz1 : ((extChartAt I.tangent p) q).1 = extChartAt I p.proj q.proj :=
+      extChartAt_tangent_apply_fst (I := I) (q := p) (p := q) hq_proj_src_p
+    have hz2 : ((extChartAt I.tangent p) q).2 =
+        tangentCoordChange I q.proj p.proj q.proj (q.snd : E) :=
+      extChartAt_tangent_apply_snd_tangentCoordChange (I := I) (q := p) (p := q) hq_proj_src_p
+    -- `(extChartAt I p.proj).symm (z.1) = q.proj`.
+    have hq_proj_ext_src : q.proj ∈ (extChartAt I p.proj).source := by
+      rw [extChartAt_source]; exact hq_proj_src_p
+    have hsymm_z1 :
+        (extChartAt I p.proj).symm (((extChartAt I.tangent p) q).1) = q.proj := by
+      rw [hz1]; exact (extChartAt I p.proj).left_inv hq_proj_ext_src
+    -- RHS unfolds via the closed form, then `tangentCoordChange_comp`.
+    have hq_proj_ext_src_α : q.proj ∈ (extChartAt I α).source := by
+      rw [extChartAt_source]; exact hq_proj_src_α
+    unfold secondaryTrivSndForm
+    rw [hsymm_z1, hz2]
+    -- Goal: `tangentCoordChange I p.proj α q.proj
+    --   (tangentCoordChange I q.proj p.proj q.proj q.snd) = LHS`.
+    -- `q.proj ∈ (extChartAt I q.proj).source` (the `w`-slot of the comp).
+    have hq_proj_ext_src_self : q.proj ∈ (extChartAt I q.proj).source :=
+      mem_extChartAt_source (I := I) q.proj
+    rw [tangentCoordChange_comp (I := I) (w := q.proj) (x := p.proj) (y := α)
+      (z := q.proj) (v := (q.snd : E))
+      ⟨⟨hq_proj_ext_src_self, hq_proj_ext_src⟩, hq_proj_ext_src_α⟩]
+    exact hLHS.symm
+  -- The eventual equality on the chart image (in the direction required by
+  -- `congr_of_eventuallyEq`: target `secondaryTrivSndForm` agrees with `Ψ.2`).
+  have hsnd_Ψ_eq :
+      (secondaryTrivSndForm (I := I) α p) =ᶠ[𝓝[range I.tangent] basepoint]
+        (fun z : E × E => (Ψ z).2) := by
+    rw [Filter.eventuallyEq_iff_exists_mem]
+    refine ⟨(extChartAt I.tangent p) '' U, hVnhds, ?_⟩
+    rintro z ⟨q, hqU, hqEq⟩
+    have hq_src : q ∈ (extChartAt I.tangent p).source := hqU.1
+    have hsymm : (extChartAt I.tangent p).symm z = q := by
+      rw [← hqEq]; exact (extChartAt I.tangent p).left_inv hq_src
+    change secondaryTrivSndForm (I := I) α p z =
+      ((extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M))
+        ((extChartAt I.tangent p).symm z)).2
+    rw [hsymm, ← hqEq]
+    exact (hpoint hqU).symm
+  -- Pointwise equality at basepoint (`p ∈ U`).
+  have hsnd_basepoint :
+      (secondaryTrivSndForm (I := I) α p) basepoint =
+        (fun z : E × E => (Ψ z).2) basepoint := by
+    have hsymmp : (extChartAt I.tangent p).symm basepoint = p := by
+      rw [hbase_def]
+      exact (extChartAt I.tangent p).left_inv
+        (mem_extChartAt_source (I := I.tangent) p)
+    change secondaryTrivSndForm (I := I) α p basepoint =
+      ((extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M))
+        ((extChartAt I.tangent p).symm basepoint)).2
+    rw [hsymmp, hbase_def]
+    exact (hpoint hU_mem).symm
+  -- Phase 5. Transfer the fderiv across the eventual equality.
+  have hform_hasD :
+      HasFDerivWithinAt (secondaryTrivSndForm (I := I) α p)
+        ((ContinuousLinearMap.snd ℝ E E).comp
+          (tangentCoordChange I.tangent p (⟨α, (0 : E)⟩ : TangentBundle I M) p))
+        (range I.tangent) basepoint :=
+    hΨ_snd.congr_of_eventuallyEq hsnd_Ψ_eq hsnd_basepoint
+  -- The fderivWithin equals this CLM, by uniqueness of derivatives.
+  have hfderivWithin_eq :
+      fderivWithin ℝ (secondaryTrivSndForm (I := I) α p) (range I.tangent) basepoint =
+        (ContinuousLinearMap.snd ℝ E E).comp
+          (tangentCoordChange I.tangent p (⟨α, (0 : E)⟩ : TangentBundle I M) p) :=
+    hform_hasD.fderivWithin (ModelWithCorners.uniqueDiffWithinAt_image I.tangent)
+  -- Phase 6. Conclude. The LHS `(e.continuousLinearMapAt ℝ p w).2` rewrites to
+  -- `((snd CLM).comp (tcc)) w` via `hcc`, which is the fderivWithin applied to `w`.
+  rw [hcc]
+  rw [hfderivWithin_eq]
+  rfl
+
 /-! ## Part C — first fibre component of the chart-fixed geodesic VF -/
 
 /-- **First fibre component of the chart-fixed geodesic vector field.**

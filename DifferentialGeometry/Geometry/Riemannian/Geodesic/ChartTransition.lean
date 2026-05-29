@@ -2056,6 +2056,415 @@ theorem chartChristoffel_transform [I.Boundaryless]
     rw [← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl ?_; intro c _; ring]
 
+/-! ## The chart-Christoffel transformation law (bilinear-contraction level) -/
+
+/-- The `l`-th chart-coordinate of the Christoffel contraction:
+`chartCoord l (Γ_α(v, w)(y)) = ∑_{i,j} Γ^l_{ij}(y) · vⁱ · wʲ`. This is the
+coordinate read-out of `chartChristoffelContraction`, reproved locally so the
+contraction-level transformation law can be assembled in this file. -/
+lemma chartCoord_chartChristoffelContraction
+    [NeZero (Module.finrank ℝ E)]
+    (g : SmoothRiemannianMetric I M) (α : M) (v w y : E)
+    (l : Fin (Module.finrank ℝ E)) :
+    chartCoord (E := E) l
+        (chartChristoffelContraction (I := I) g α v w y) =
+      ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+        chartChristoffel (I := I) g α i j l y *
+          chartCoord (E := E) i v * chartCoord (E := E) j w := by
+  classical
+  rw [chartChristoffelContraction_def, chartCoord, map_sum, Finsupp.finset_sum_apply]
+  have hbasis : ∀ k : Fin (Module.finrank ℝ E),
+      (chartModelBasis E).repr ((chartModelBasis E) k) l = if k = l then 1 else 0 :=
+    fun k => (chartModelBasis E).repr_self_apply k l
+  calc
+    ∑ k : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr
+          ((∑ i, ∑ j, chartChristoffel (I := I) g α i j k y *
+            chartCoord (E := E) i v * chartCoord (E := E) j w) •
+            chartModelBasis E k)) l
+      = ∑ k : Fin (Module.finrank ℝ E),
+          (∑ i, ∑ j, chartChristoffel (I := I) g α i j k y *
+            chartCoord (E := E) i v * chartCoord (E := E) j w) *
+            ((chartModelBasis E).repr (chartModelBasis E k) l) := by
+        refine Finset.sum_congr rfl (fun k _ => ?_)
+        rw [map_smul, Finsupp.smul_apply, smul_eq_mul]
+    _ = ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+          chartChristoffel (I := I) g α i j l y *
+            chartCoord (E := E) i v * chartCoord (E := E) j w := by
+        rw [Finset.sum_eq_single l]
+        · rw [hbasis l]; simp
+        · intro k _ hkl; rw [hbasis k, if_neg hkl]; ring
+        · intro hl; exact absurd (Finset.mem_univ l) hl
+
+/-- Reorder a five-fold finite sum, moving the fourth and fifth summation indices
+to the front. -/
+private lemma sum5_reorder {n : ℕ}
+    (F : Fin n → Fin n → Fin n → Fin n → Fin n → ℝ) :
+    (∑ c, ∑ a, ∑ b, ∑ i, ∑ j, F c a b i j) =
+      ∑ i, ∑ j, ∑ c, ∑ a, ∑ b, F c a b i j := by
+  classical
+  have hi : (∑ c, ∑ a, ∑ b, ∑ i, ∑ j, F c a b i j)
+      = ∑ i, ∑ c, ∑ a, ∑ b, ∑ j, F c a b i j := by
+    have s1 : (∑ c, ∑ a, ∑ b, ∑ i, ∑ j, F c a b i j)
+        = ∑ c, ∑ a, ∑ i, ∑ b, ∑ j, F c a b i j := by
+      refine Finset.sum_congr rfl (fun c _ => ?_)
+      refine Finset.sum_congr rfl (fun a _ => ?_)
+      rw [Finset.sum_comm]
+    have s2 : (∑ c, ∑ a, ∑ i, ∑ b, ∑ j, F c a b i j)
+        = ∑ c, ∑ i, ∑ a, ∑ b, ∑ j, F c a b i j := by
+      refine Finset.sum_congr rfl (fun c _ => ?_)
+      rw [Finset.sum_comm]
+    have s3 : (∑ c, ∑ i, ∑ a, ∑ b, ∑ j, F c a b i j)
+        = ∑ i, ∑ c, ∑ a, ∑ b, ∑ j, F c a b i j := by
+      rw [Finset.sum_comm]
+    rw [s1, s2, s3]
+  rw [hi]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  have t1 : (∑ c, ∑ a, ∑ b, ∑ j, F c a b i j)
+      = ∑ c, ∑ a, ∑ j, ∑ b, F c a b i j := by
+    refine Finset.sum_congr rfl (fun c _ => ?_)
+    refine Finset.sum_congr rfl (fun a _ => ?_)
+    rw [Finset.sum_comm]
+  have t2 : (∑ c, ∑ a, ∑ j, ∑ b, F c a b i j)
+      = ∑ c, ∑ j, ∑ a, ∑ b, F c a b i j := by
+    refine Finset.sum_congr rfl (fun c _ => ?_)
+    rw [Finset.sum_comm]
+  have t3 : (∑ c, ∑ j, ∑ a, ∑ b, F c a b i j)
+      = ∑ j, ∑ c, ∑ a, ∑ b, F c a b i j := by
+    rw [Finset.sum_comm]
+  rw [t1, t2, t3]
+
+/-- Reorder a three-fold finite sum, moving the second and third indices to the
+front. -/
+private lemma sum3_reorder {n : ℕ} (F : Fin n → Fin n → Fin n → ℝ) :
+    (∑ c, ∑ i, ∑ j, F c i j) = ∑ i, ∑ j, ∑ c, F c i j := by
+  classical
+  have hi : (∑ c, ∑ i, ∑ j, F c i j) = ∑ i, ∑ c, ∑ j, F c i j := by
+    rw [Finset.sum_comm]
+  rw [hi]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [Finset.sum_comm]
+
+/-- Reorganization helper: a `∑ c`-weighted bilinear contraction of the velocity
+coordinates can be moved outside the velocity sums. Both sides equal the
+fully-expanded five-fold sum `∑ i ∑ j ∑ c K^l_c (∑ab Γ̄ J^a_i J^b_j) v^i w^j`. -/
+private lemma chartTransitionContractionReorderMain
+    {n : ℕ} (K : Fin n → ℝ) (Γ : Fin n → Fin n → Fin n → ℝ)
+    (J : Fin n → Fin n → ℝ) (vi wj : Fin n → ℝ) :
+    (∑ c, K c *
+        (∑ a, ∑ b, Γ a b c *
+          (∑ i, J a i * vi i) * (∑ j, J b j * wj j))) =
+      ∑ i, ∑ j, (∑ c, K c *
+        (∑ a, ∑ b, Γ a b c * J a i * J b j)) * vi i * wj j := by
+  classical
+  -- Canonical fully-expanded five-fold sum.
+  have hLHS : (∑ c, K c *
+        (∑ a, ∑ b, Γ a b c *
+          (∑ i, J a i * vi i) * (∑ j, J b j * wj j))) =
+      ∑ c, ∑ a, ∑ b, ∑ i, ∑ j,
+        K c * (Γ a b c * (J a i * vi i) * (J b j * wj j)) := by
+    refine Finset.sum_congr rfl (fun c _ => ?_)
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl (fun a _ => ?_)
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl (fun b _ => ?_)
+    rw [mul_assoc (Γ a b c), Finset.sum_mul_sum, Finset.mul_sum, Finset.mul_sum]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [Finset.mul_sum, Finset.mul_sum]
+    refine Finset.sum_congr rfl (fun j _ => ?_)
+    ring
+  have hRHS : (∑ i, ∑ j, (∑ c, K c *
+        (∑ a, ∑ b, Γ a b c * J a i * J b j)) * vi i * wj j) =
+      ∑ i, ∑ j, ∑ c, ∑ a, ∑ b,
+        K c * (Γ a b c * (J a i * vi i) * (J b j * wj j)) := by
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    refine Finset.sum_congr rfl (fun j _ => ?_)
+    rw [Finset.sum_mul, Finset.sum_mul]
+    refine Finset.sum_congr rfl (fun c _ => ?_)
+    rw [Finset.mul_sum, Finset.sum_mul, Finset.sum_mul]
+    refine Finset.sum_congr rfl (fun a _ => ?_)
+    rw [Finset.mul_sum, Finset.sum_mul, Finset.sum_mul]
+    refine Finset.sum_congr rfl (fun b _ => ?_)
+    ring
+  rw [hLHS, hRHS]
+  -- Reorder `∑ c ∑ a ∑ b ∑ i ∑ j` into `∑ i ∑ j ∑ c ∑ a ∑ b`.
+  exact sum5_reorder
+    (fun c a b i j => K c * (Γ a b c * (J a i * vi i) * (J b j * wj j)))
+
+/-- Reorganization helper for the inhomogeneous correction term: a `∑ c`-weighted
+bilinear contraction of the second-derivative bundle moves outside the velocity
+sums, both sides equalling `∑ i ∑ j (∑ c K^l_c ∂_i J^c_j) v^i w^j`. -/
+private lemma chartTransitionContractionReorderCorr
+    {n : ℕ} (K : Fin n → ℝ) (D : Fin n → Fin n → Fin n → ℝ)
+    (vi wj : Fin n → ℝ) :
+    (∑ c, K c *
+        (∑ i, ∑ j, D c i j * vi i * wj j)) =
+      ∑ i, ∑ j, (∑ c, K c * D c i j) * vi i * wj j := by
+  classical
+  have hLHS : (∑ c, K c *
+        (∑ i, ∑ j, D c i j * vi i * wj j)) =
+      ∑ c, ∑ i, ∑ j, K c * (D c i j * vi i * wj j) := by
+    refine Finset.sum_congr rfl (fun c _ => ?_)
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [Finset.mul_sum]
+  have hRHS : (∑ i, ∑ j, (∑ c, K c * D c i j) * vi i * wj j) =
+      ∑ i, ∑ j, ∑ c, K c * (D c i j * vi i * wj j) := by
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    refine Finset.sum_congr rfl (fun j _ => ?_)
+    rw [Finset.sum_mul, Finset.sum_mul]
+    refine Finset.sum_congr rfl (fun c _ => ?_)
+    ring
+  rw [hLHS, hRHS]
+  -- Reorder `∑ c ∑ i ∑ j` into `∑ i ∑ j ∑ c`.
+  exact sum3_reorder (fun c i j => K c * (D c i j * vi i * wj j))
+
+/-- **The chart-Christoffel transformation law, bilinear-contraction form.**
+Fix a manifold point `p` lying in both chart sources, write `x := extChartAt I α p`
+and `T x := chartTransitionMap α β x`, and let `v w : E` be velocity vectors in
+the chart-α picture. The chart-α Christoffel contraction at `x` equals the
+chart-β contraction at `T x` evaluated on the Jacobian-pushforwards
+`chartTransitionAt α β x v`, `chartTransitionAt α β x w`, then pulled back through
+the reverse Jacobian `chartTransitionAt β α (T x)`, plus the inhomogeneous
+second-derivative correction `chartTransitionSecondDerivCorrection`:
+`Γ_α(v, w)(x) =
+   (chartTransitionAt β α (T x)) (Γ_β(J v, J w)(T x))
+     + D²T(v, w)(x)`.
+This is `chartChristoffel_transform` contracted against the velocity vectors. -/
+theorem chartChristoffelContraction_transform [I.Boundaryless]
+    [NeZero (Module.finrank ℝ E)]
+    (g : SmoothRiemannianMetric I M) (α β : M) {p : M}
+    (hp_α : p ∈ (chartAt H α).source) (hp_β : p ∈ (chartAt H β).source)
+    (v w : E) :
+    chartChristoffelContraction (I := I) g α v w (extChartAt I α p) =
+      chartTransitionAt (I := I) β α
+          (chartTransitionMap (I := I) α β (extChartAt I α p))
+          (chartChristoffelContraction (I := I) g β
+            (chartTransitionAt (I := I) α β (extChartAt I α p) v)
+            (chartTransitionAt (I := I) α β (extChartAt I α p) w)
+            (chartTransitionMap (I := I) α β (extChartAt I α p)))
+        + chartTransitionSecondDerivCorrection (I := I) α β v w
+            (extChartAt I α p) := by
+  classical
+  set x := extChartAt I α p with hx_def
+  set Tx := chartTransitionMap (I := I) α β x with hTx_def
+  set Jv := chartTransitionAt (I := I) α β x v with hJv
+  set Jw := chartTransitionAt (I := I) α β x w with hJw
+  -- Reduce to a coordinate-by-coordinate identity in the model basis.
+  refine (chartModelBasis E).ext_elem (fun l => ?_)
+  -- `chartCoord l (·) = (chartModelBasis E).repr (·) l`, by definition.
+  change chartCoord (E := E) l
+      (chartChristoffelContraction (I := I) g α v w x) =
+    chartCoord (E := E) l
+      (chartTransitionAt (I := I) β α Tx
+          (chartChristoffelContraction (I := I) g β Jv Jw Tx)
+        + chartTransitionSecondDerivCorrection (I := I) α β v w x)
+  -- Left side coordinate.
+  rw [chartCoord_chartChristoffelContraction (I := I) g α v w x l]
+  -- Right side coordinate: additivity of `chartCoord`.
+  have hcoord_add : ∀ a b : E,
+      chartCoord (E := E) l (a + b) =
+        chartCoord (E := E) l a + chartCoord (E := E) l b := by
+    intro a b; simp [chartCoord, map_add]
+  rw [hcoord_add]
+  -- Coordinate of the pullback term: apply `chartCoord_chartTransitionAt`.
+  rw [chartCoord_chartTransitionAt (I := I) β α Tx
+    (chartChristoffelContraction (I := I) g β Jv Jw Tx) l]
+  -- Coordinate of the second-derivative correction.
+  have hcorr : chartCoord (E := E) l
+      (chartTransitionSecondDerivCorrection (I := I) α β v w x) =
+      ∑ c : Fin (Module.finrank ℝ E),
+        chartTransitionJacEntry (I := I) β α Tx l c *
+          (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+            partialDeriv (E := E) i
+              (fun z => chartTransitionJacEntry (I := I) α β z c j) x *
+              chartCoord (E := E) i v * chartCoord (E := E) j w) := by
+    rw [chartTransitionSecondDerivCorrection_def, chartCoord, map_sum,
+      Finsupp.finset_sum_apply]
+    rw [← hTx_def]
+    -- `repr (coeff_k • e_k) l = coeff_k · δ_{kl}`; the surviving term is `k = l`.
+    rw [Finset.sum_eq_single_of_mem l (Finset.mem_univ l)]
+    · rw [map_smul, Finsupp.smul_apply, smul_eq_mul,
+        (chartModelBasis E).repr_self_apply l l, if_pos rfl, mul_one]
+    · intro k _ hkl
+      rw [map_smul, Finsupp.smul_apply, smul_eq_mul,
+        (chartModelBasis E).repr_self_apply k l, if_neg hkl, mul_zero]
+  rw [hcorr]
+  -- Coordinate of the inner chart-β contraction, expanding the Jacobian pushes.
+  have hinner : ∀ c : Fin (Module.finrank ℝ E),
+      chartCoord (E := E) c
+          (chartChristoffelContraction (I := I) g β Jv Jw Tx) =
+        ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+          chartChristoffel (I := I) g β a b c Tx *
+            (∑ i, chartTransitionJacEntry (I := I) α β x a i *
+              chartCoord (E := E) i v) *
+            (∑ j, chartTransitionJacEntry (I := I) α β x b j *
+              chartCoord (E := E) j w) := by
+    intro c
+    rw [chartCoord_chartChristoffelContraction (I := I) g β Jv Jw Tx c]
+    refine Finset.sum_congr rfl (fun a _ => ?_)
+    refine Finset.sum_congr rfl (fun b _ => ?_)
+    rw [hJv, hJw,
+      chartCoord_chartTransitionAt (I := I) α β x v a,
+      chartCoord_chartTransitionAt (I := I) α β x w b]
+  -- Rewrite the pullback coordinate with `hinner`.
+  rw [Finset.sum_congr rfl (fun c (_ : c ∈ Finset.univ) =>
+    congrArg (fun t => chartTransitionJacEntry (I := I) β α Tx l c * t)
+      (hinner c))]
+  -- Now both sides are `∑ i ∑ j Γ_α^{ijl}(x) v^i w^j` after substituting the
+  -- symbol-level transformation law for each `(i, j)`.
+  have htrans : ∀ i j : Fin (Module.finrank ℝ E),
+      chartChristoffel (I := I) g α i j l x =
+        (∑ c, chartTransitionJacEntry (I := I) β α Tx l c *
+          (∑ a, ∑ b, chartChristoffel (I := I) g β a b c Tx *
+            chartTransitionJacEntry (I := I) α β x a i *
+            chartTransitionJacEntry (I := I) α β x b j)) +
+        (∑ c, chartTransitionJacEntry (I := I) β α Tx l c *
+          partialDeriv (E := E) i
+            (fun z => chartTransitionJacEntry (I := I) α β z c j) x) := by
+    intro i j
+    rw [hx_def, hTx_def]
+    exact chartChristoffel_transform (I := I) g α β hp_α hp_β i j l
+  -- LHS = ∑_i ∑_j (htrans i j) · v^i · w^j; split the two groups.
+  calc
+    (∑ i, ∑ j, chartChristoffel (I := I) g α i j l x *
+        chartCoord (E := E) i v * chartCoord (E := E) j w)
+      = ∑ i, ∑ j,
+          (((∑ c, chartTransitionJacEntry (I := I) β α Tx l c *
+            (∑ a, ∑ b, chartChristoffel (I := I) g β a b c Tx *
+              chartTransitionJacEntry (I := I) α β x a i *
+              chartTransitionJacEntry (I := I) α β x b j)) +
+          (∑ c, chartTransitionJacEntry (I := I) β α Tx l c *
+            partialDeriv (E := E) i
+              (fun z => chartTransitionJacEntry (I := I) α β z c j) x))
+            * chartCoord (E := E) i v * chartCoord (E := E) j w) := by
+        refine Finset.sum_congr rfl (fun i _ => ?_)
+        refine Finset.sum_congr rfl (fun j _ => ?_)
+        rw [htrans i j]
+    _ = (∑ c, chartTransitionJacEntry (I := I) β α Tx l c *
+            (∑ a, ∑ b, chartChristoffel (I := I) g β a b c Tx *
+              (∑ i, chartTransitionJacEntry (I := I) α β x a i *
+                chartCoord (E := E) i v) *
+              (∑ j, chartTransitionJacEntry (I := I) α β x b j *
+                chartCoord (E := E) j w)))
+        + (∑ c, chartTransitionJacEntry (I := I) β α Tx l c *
+            (∑ i, ∑ j,
+              partialDeriv (E := E) i
+                (fun z => chartTransitionJacEntry (I := I) α β z c j) x *
+                chartCoord (E := E) i v * chartCoord (E := E) j w)) := by
+        -- Reorganize each group into `∑ i ∑ j (...) v w` via the reorder helpers.
+        rw [chartTransitionContractionReorderMain
+              (fun c => chartTransitionJacEntry (I := I) β α Tx l c)
+              (fun a b c => chartChristoffel (I := I) g β a b c Tx)
+              (fun a i => chartTransitionJacEntry (I := I) α β x a i)
+              (fun i => chartCoord (E := E) i v)
+              (fun j => chartCoord (E := E) j w)]
+        rw [chartTransitionContractionReorderCorr
+              (fun c => chartTransitionJacEntry (I := I) β α Tx l c)
+              (fun c i j => partialDeriv (E := E) i
+                (fun z => chartTransitionJacEntry (I := I) α β z c j) x)
+              (fun i => chartCoord (E := E) i v)
+              (fun j => chartCoord (E := E) j w)]
+        rw [← Finset.sum_add_distrib]
+        refine Finset.sum_congr rfl (fun i _ => ?_)
+        rw [← Finset.sum_add_distrib]
+        refine Finset.sum_congr rfl (fun j _ => ?_)
+        ring
+
+/-! ## Moving-foot derivative of the chart-transition Jacobian
+
+The lemmas `partialDeriv_chartTransitionJacEntry_swap` and friends differentiate
+the chart-transition Jacobian in its *spatial* `E`-variable. The lemmas below
+differentiate it along a smooth curve `cE : ℝ → E` in that variable — the precise
+form a fixed-chart commutation argument needs, where the moving foot enters as
+the image curve of the foot in the fixed chart `α` and the curve velocity `cE'`
+plays the role of the foot velocity. -/
+
+/-- Expansion of the Fréchet derivative of the Jacobian entry along a vector in
+the model basis: `fderiv ℝ (J^a_i) y v = ∑_k vᵏ · ∂_k J^a_i(y)`. -/
+lemma fderiv_chartTransitionJacEntry_eq_sum_partialDeriv
+    (α β : M) (a i : Fin (Module.finrank ℝ E)) (y v : E) :
+    fderiv ℝ (fun z => chartTransitionJacEntry (I := I) α β z a i) y v =
+      ∑ k : Fin (Module.finrank ℝ E),
+        chartCoord (E := E) k v *
+          partialDeriv (E := E) k
+            (fun z => chartTransitionJacEntry (I := I) α β z a i) y := by
+  classical
+  have hv : v = ∑ k : Fin (Module.finrank ℝ E),
+      chartCoord (E := E) k v • (chartModelBasis E) k := by
+    conv_lhs => rw [← (chartModelBasis E).sum_repr v]
+    rfl
+  conv_lhs => rw [hv]
+  rw [map_sum]
+  refine Finset.sum_congr rfl (fun k _ => ?_)
+  rw [map_smul, smul_eq_mul]
+  rfl
+
+/-- **Moving-foot chain rule for the chart-transition Jacobian entry.** For a
+smooth curve `cE : ℝ → E` differentiable at `t` with `cE t` in the open
+chart-transition source, the composite `s ↦ J^a_i(cE s)` has derivative
+`∑_k (cE' t)ᵏ · ∂_k J^a_i(cE t)`, where `cE' t` is the curve velocity (the
+foot velocity in the fixed chart at `α`) and `∂_k J^a_i` is the spatial
+transition derivative. -/
+theorem chartTransitionJacEntry_comp_hasDerivAt [I.Boundaryless]
+    (α β : M) (a i : Fin (Module.finrank ℝ E))
+    {cE : ℝ → E} {cE' : ℝ → E} {t : ℝ}
+    (hc : HasDerivAt cE (cE' t) t)
+    (hmem : cE t ∈ chartTransitionSource (I := I) α β) :
+    HasDerivAt (fun s => chartTransitionJacEntry (I := I) α β (cE s) a i)
+      (∑ k : Fin (Module.finrank ℝ E),
+        chartCoord (E := E) k (cE' t) *
+          partialDeriv (E := E) k
+            (fun z => chartTransitionJacEntry (I := I) α β z a i) (cE t)) t := by
+  classical
+  have hdiff : DifferentiableAt ℝ
+      (fun z => chartTransitionJacEntry (I := I) α β z a i) (cE t) :=
+    chartTransitionJacEntry_differentiableAt (I := I) α β a i hmem
+  have hchain : HasDerivAt
+      (fun s => chartTransitionJacEntry (I := I) α β (cE s) a i)
+      (fderiv ℝ (fun z => chartTransitionJacEntry (I := I) α β z a i) (cE t)
+        (cE' t)) t :=
+    hdiff.hasFDerivAt.comp_hasDerivAt t hc
+  rw [fderiv_chartTransitionJacEntry_eq_sum_partialDeriv (I := I) α β a i] at hchain
+  exact hchain
+
+/-- **Moving-foot chain rule for the chart-transition pushforward, coordinatewise.**
+For a fixed model vector `v : E` and a smooth curve `cE : ℝ → E` differentiable
+at `t` with `cE t` in the chart-transition source, each chart-`β` coordinate `a`
+of the foot-dependent pushforward `s ↦ chartTransitionAt α β (cE s) v` has
+derivative `∑_i (∑_k (cE' t)ᵏ · ∂_k J^a_i(cE t)) · vⁱ`. The foot motion `cE'`
+enters only through the spatial transition derivative `∂_k J^a_i`. -/
+theorem chartCoord_chartTransitionAt_comp_hasDerivAt [I.Boundaryless]
+    (α β : M) (a : Fin (Module.finrank ℝ E)) (v : E)
+    {cE : ℝ → E} {cE' : ℝ → E} {t : ℝ}
+    (hc : HasDerivAt cE (cE' t) t)
+    (hmem : cE t ∈ chartTransitionSource (I := I) α β) :
+    HasDerivAt
+      (fun s => chartCoord (E := E) a (chartTransitionAt (I := I) α β (cE s) v))
+      (∑ i : Fin (Module.finrank ℝ E),
+        (∑ k : Fin (Module.finrank ℝ E),
+          chartCoord (E := E) k (cE' t) *
+            partialDeriv (E := E) k
+              (fun z => chartTransitionJacEntry (I := I) α β z a i) (cE t)) *
+          chartCoord (E := E) i v) t := by
+  classical
+  have hfun : (fun s => chartCoord (E := E) a
+        (chartTransitionAt (I := I) α β (cE s) v)) =
+      (fun s => ∑ i : Fin (Module.finrank ℝ E),
+        chartTransitionJacEntry (I := I) α β (cE s) a i *
+          chartCoord (E := E) i v) := by
+    funext s
+    rw [chartCoord_chartTransitionAt (I := I) α β (cE s) v a]
+  rw [hfun]
+  refine HasDerivAt.fun_sum (fun i _ => ?_)
+  have hJ : HasDerivAt (fun s => chartTransitionJacEntry (I := I) α β (cE s) a i)
+      (∑ k : Fin (Module.finrank ℝ E),
+        chartCoord (E := E) k (cE' t) *
+          partialDeriv (E := E) k
+            (fun z => chartTransitionJacEntry (I := I) α β z a i) (cE t)) t :=
+    chartTransitionJacEntry_comp_hasDerivAt (I := I) α β a i hc hmem
+  simpa using hJ.mul_const (chartCoord (E := E) i v)
+
 end Geodesic
 end Riemannian
 end Geometry
