@@ -1117,6 +1117,7 @@ import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.ChartLocalPicard
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.PointwiseLocal
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.UniformExistence
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.ChartLocalPicardProducer
+import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.RegularityProducer
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.BanachIC
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.VariationalODE
 import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.SmoothInSpace.VariationalLift
@@ -1193,6 +1194,7 @@ import DifferentialGeometry.PDE.RicciFlow.ODE.TimeDependentFlow.Bijective.Compos
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckNonlinearity
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRHSPointwiseLipschitz
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRHSAbstractJet2Bound
+import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckRHSChartCoverJet2
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckPrincipalPartMatch
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckNonlinearitySpectral
 import DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.QuasilinearStrong
