@@ -1,4 +1,5 @@
 import Mathlib.Topology.Covering.Basic
+import Mathlib.Topology.Subpath
 import Mathlib.Topology.Homotopy.Lifting
 import Mathlib.AlgebraicTopology.FundamentalGroupoid.SimplyConnected
 import Mathlib.Topology.Connected.PathConnected
@@ -276,6 +277,7 @@ private theorem uc_sheet_proj_isOpenMap
   apply hsub
   refine ⟨hjoined.somePath, hjoined.somePath_mem, rfl⟩
 
+set_option linter.dupNamespace false in
 /-- **The projection is a covering map.**
 
 For each `x : X`, choose a path-connected open neighbourhood `U` of `x`
@@ -493,31 +495,299 @@ theorem UniversalCover.isCoveringMap :
   intro q
   rfl
 
+/-- The basepoint of the universal cover: the class of the constant path at
+`default`. -/
+def basePoint :
+    DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X :=
+  ⟨(default : X),
+    _root_.Path.Homotopic.Quotient.mk (_root_.Path.refl (default : X))⟩
+
+/-- The subpath lift of a path `γ : Path default x` into the universal cover:
+`s ↦ ⟨γ s, ⟦γ.subpath 0 s⟧⟩`, with the source endpoint cast to `default`. -/
+def uc_subpathLift {x : X} (γ : _root_.Path (default : X) x)
+    (s : unitInterval) :
+    DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X :=
+  ⟨γ s,
+    (_root_.Path.Homotopic.Quotient.mk (γ.subpath 0 s)).cast γ.source.symm rfl⟩
+
+/-- **The subpath lift of a path is continuous.**
+
+For a path `γ : Path default x` in the base, `uc_subpathLift γ` is a
+continuous map `I → UniversalCover X`. Continuity is verified on the slice
+basis: near `s₀`, the value lies in any basic open containing the value at
+`s₀`, the connecting path being the subpath `γ.subpath s₀ s`, which stays in
+the neighbourhood by the tube lemma. -/
+theorem uc_subpathLift_continuous {x : X} (γ : _root_.Path (default : X) x) :
+    Continuous (uc_subpathLift γ) := by
+  refine continuous_iff_continuousAt.mpr fun s₀ => ?_
+  rw [ContinuousAt, Filter.tendsto_def]
+  intro N hN
+  -- Reduce `N` to a basic open `S = basicOpen p V` containing `T s₀`.
+  obtain ⟨S, ⟨⟨p, V, hVopen, hpV, rfl⟩, hTs₀S⟩, hSN⟩ :=
+    (basis_assemble (X := X)).nhds_hasBasis.mem_iff.mp hN
+  -- Membership of `T s₀` in the basic open gives a connecting path `η₀` in `V`.
+  obtain ⟨η₀, hη₀V, hη₀eq⟩ := hTs₀S
+  simp only [uc_subpathLift] at hη₀eq
+  -- Tube lemma: a neighbourhood `J` of `s₀` over which `γ.subpath s₀ s` stays in `V`.
+  have hcont_fam :
+      Continuous (fun st : unitInterval × unitInterval =>
+        γ.subpath s₀ st.1 st.2) := by
+    have hmap : Continuous
+        (fun st : unitInterval × unitInterval =>
+          (s₀, st.1, st.2) : unitInterval × unitInterval →
+            unitInterval × unitInterval × unitInterval) := by
+      exact (continuous_const.prodMk (continuous_fst.prodMk continuous_snd))
+    exact γ.subpath_continuous_family.comp hmap
+  have hopen : IsOpen
+      {st : unitInterval × unitInterval | γ.subpath s₀ st.1 st.2 ∈ V} :=
+    hVopen.preimage hcont_fam
+  have hsub : ({s₀} ×ˢ (Set.univ : Set unitInterval)) ⊆
+      {st : unitInterval × unitInterval | γ.subpath s₀ st.1 st.2 ∈ V} := by
+    rintro ⟨s, t⟩ ⟨hs, -⟩
+    simp only [Set.mem_singleton_iff] at hs
+    simp only [Set.mem_setOf_eq, hs, Path.subpath_self, Path.refl_apply]
+    -- `γ.subpath s₀ s₀ t = γ s₀ = (T s₀).1 ∈ V` since `η₀ 1 = γ s₀ ∈ V`.
+    have : γ s₀ ∈ V := by
+      have h := hη₀V 1
+      rw [Path.target] at h
+      exact h
+    exact this
+  obtain ⟨J, K, hJopen, _hKopen, hs₀J, _hKuniv, hJK⟩ :=
+    generalized_tube_lemma (isCompact_singleton (x := s₀)) (isCompact_univ) hopen hsub
+  have hs₀J' : s₀ ∈ J := hs₀J rfl
+  -- For `s ∈ J`, the subpath `γ.subpath s₀ s` stays in `V`.
+  have hsubV : ∀ s ∈ J, ∀ t, γ.subpath s₀ s t ∈ V := by
+    intro s hs t
+    have : (s, t) ∈ J ×ˢ K := ⟨hs, _hKuniv (Set.mem_univ t)⟩
+    exact hJK this
+  refine Filter.mem_of_superset (hJopen.mem_nhds hs₀J') ?_
+  intro s hsJ
+  -- Show `T s ∈ basicOpen p V`, connecting path `η₀.trans (γ.subpath s₀ s)`.
+  apply hSN
+  refine ⟨η₀.trans (γ.subpath s₀ s), ?_, ?_⟩
+  · -- the connecting path stays in `V`.
+    intro t
+    rw [Path.trans_apply]
+    split_ifs with h
+    · exact hη₀V _
+    · rw [Path.subpath]
+      exact hsubV s hsJ _
+  · -- the quotient identity.
+    -- `(T s).2 = ⟦γ.subpath 0 s⟧.cast`; expand via subpath additivity.
+    change (_root_.Path.Homotopic.Quotient.mk (γ.subpath 0 s)).cast γ.source.symm rfl =
+      p.2.trans (_root_.Path.Homotopic.Quotient.mk (η₀.trans (γ.subpath s₀ s)))
+    have hadd :
+        (_root_.Path.Homotopic.Quotient.mk (γ.subpath 0 s)
+            : _root_.Path.Homotopic.Quotient (γ 0) (γ s)) =
+          (_root_.Path.Homotopic.Quotient.mk (γ.subpath 0 s₀)).trans
+            (_root_.Path.Homotopic.Quotient.mk (γ.subpath s₀ s)) := by
+      rw [← _root_.Path.Homotopic.Quotient.mk_trans]
+      exact (_root_.Path.Homotopic.Quotient.eq.mpr
+        ⟨Path.Homotopy.subpathTransSubpath γ 0 s₀ s⟩).symm
+    -- expand `(T s₀).2` from `hη₀eq : ⟦γ.subpath 0 s₀⟧.cast = p.2.trans ⟦η₀⟧`.
+    have hcast :
+        (_root_.Path.Homotopic.Quotient.mk (γ.subpath 0 s)).cast γ.source.symm rfl =
+          ((_root_.Path.Homotopic.Quotient.mk (γ.subpath 0 s₀)).cast γ.source.symm rfl).trans
+            (_root_.Path.Homotopic.Quotient.mk (γ.subpath s₀ s)) := by
+      rw [hadd]
+      rfl
+    rw [hcast, hη₀eq, _root_.Path.Homotopic.Quotient.mk_trans]
+    exact _root_.Path.Homotopic.Quotient.trans_assoc _ _ _
+
+/-- The subpath lift of `γ` starts at the basepoint. -/
+theorem uc_subpathLift_zero {x : X} (γ : _root_.Path (default : X) x) :
+    uc_subpathLift γ 0 = basePoint := by
+  change (⟨γ 0,
+      (_root_.Path.Homotopic.Quotient.mk (γ.subpath 0 0)).cast γ.source.symm rfl⟩ :
+    DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X) = basePoint
+  have h0 : (γ 0 : X) = default := γ.source
+  refine Sigma.ext h0 ?_
+  rw [show (basePoint (X := X)).2 =
+      _root_.Path.Homotopic.Quotient.mk (Path.refl (default : X)) from rfl,
+    ← _root_.Path.Homotopic.Quotient.mk_cast]
+  refine Path.Homotopic.hpath_hext ?_
+  intro t
+  rw [Path.cast_coe, Path.refl_apply, Path.subpath, Path.coe_mk_mk,
+    Function.comp_apply, Set.Icc.convexCombo_eq]
+  exact γ.source
+
+/-- The subpath lift of `γ` ends at `⟨x, ⟦γ⟧⟩`. -/
+theorem uc_subpathLift_one {x : X} (γ : _root_.Path (default : X) x) :
+    uc_subpathLift γ 1 =
+      ⟨x, _root_.Path.Homotopic.Quotient.mk γ⟩ := by
+  change (⟨γ 1,
+      (_root_.Path.Homotopic.Quotient.mk (γ.subpath 0 1)).cast γ.source.symm rfl⟩ :
+    DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X) =
+    ⟨x, _root_.Path.Homotopic.Quotient.mk γ⟩
+  have h1 : (γ 1 : X) = x := γ.target
+  refine Sigma.ext h1 ?_
+  rw [← _root_.Path.Homotopic.Quotient.mk_cast]
+  refine Path.Homotopic.hpath_hext ?_
+  intro t
+  rw [Path.cast_coe, Path.subpath, Path.coe_mk_mk, Function.comp_apply,
+    Set.Icc.convexCombo_zero_one]
+
+/-- The subpath lift of `γ` projects back to `γ`. -/
+theorem uc_subpathLift_proj {x : X} (γ : _root_.Path (default : X) x)
+    (s : unitInterval) : proj (uc_subpathLift γ s) = γ s := rfl
+
+/-- **Every point of the universal cover is joined to the basepoint.**
+
+For `q = ⟨x, ⟦γ⟧⟩`, the subpath lift of `γ` is a continuous path from the
+basepoint `⟨default, ⟦Path.refl default⟧⟩` to `q`. -/
+theorem uc_joined_basePoint
+    (q : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X) :
+    Joined (basePoint (X := X)) q := by
+  obtain ⟨x, c⟩ := q
+  obtain ⟨γ, rfl⟩ := _root_.Path.Homotopic.Quotient.mk_surjective c
+  exact ⟨{
+    toFun := uc_subpathLift γ
+    continuous_toFun := uc_subpathLift_continuous γ
+    source' := uc_subpathLift_zero γ
+    target' := uc_subpathLift_one γ }⟩
+
+set_option linter.dupNamespace false in
 /-- **The universal cover is path-connected.**
 
-For any `q = ⟨x, ⟦γ⟧⟩ ∈ UniversalCover X`, the truncation lift
-`s ↦ ⟨γ s, ⟦γ.truncate 0 s⟧⟩` is a continuous path in the cover from the
-basepoint `⟨default, ⟦Path.refl default⟧⟩` to `q`. -/
+Each point is joined to the basepoint by the subpath lift of a
+representative path, hence any two points are joined. -/
 instance UniversalCover.pathConnectedSpace :
     PathConnectedSpace
-      (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X) :=
-  ⟨⟨⟨(default : X),
-      _root_.Path.Homotopic.Quotient.mk (_root_.Path.refl (default : X))⟩⟩,
-    sorry⟩
+      (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X) where
+  nonempty := ⟨basePoint⟩
+  joined x y := (uc_joined_basePoint x).symm.trans (uc_joined_basePoint y)
 
+/-- **Loops at the basepoint are null-homotopic.**
+
+A loop `δ` at the basepoint projects to a loop `γ = proj ∘ δ` in `X` based at
+`default`. By uniqueness of path lifts through the covering map `proj`, `δ`
+agrees with the subpath lift of `γ`; comparing endpoints (`δ 1 = δ 0`) forces
+`⟦γ⟧ = ⟦Path.refl default⟧`. Since `proj` induces an injection on homotopy
+classes of loops, `⟦δ⟧ = ⟦Path.refl⟧` as well. -/
+theorem uc_basePoint_loops_nullhomotopic
+    (δ : _root_.Path (basePoint (X := X)) basePoint) :
+    _root_.Path.Homotopic δ (_root_.Path.refl basePoint) := by
+  -- The projected loop in `X`, as a continuous map.
+  have hproj : proj (basePoint (X := X)) = default := rfl
+  set γX : C(unitInterval, X) :=
+    ⟨proj ∘ δ, proj_continuous.comp δ.continuous⟩ with hγXdef
+  -- `δ` and the subpath lift of `proj ∘ δ` are both lifts starting at basePoint.
+  have hcov : IsCoveringMap
+      (proj : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X → X) :=
+    UniversalCover.isCoveringMap
+  -- View `proj ∘ δ` as a path from `default` to `default`.
+  set γ : _root_.Path (default : X) default :=
+    { toFun := proj ∘ δ
+      continuous_toFun := proj_continuous.comp δ.continuous
+      source' := by
+        change proj (δ 0) = default
+        rw [δ.source]; rfl
+      target' := by
+        change proj (δ 1) = default
+        rw [δ.target]; rfl } with hγdef
+  -- `δ` as a continuous map is the lift of `γX` starting at `basePoint`.
+  have hδlift : (⟨δ, δ.continuous⟩ : C(unitInterval,
+      DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X)) =
+      hcov.liftPath γX basePoint (by simp [hγXdef, proj, δ.source]) := by
+    rw [hcov.eq_liftPath_iff']
+    refine ⟨?_, ?_⟩
+    · ext t; rfl
+    · exact δ.source
+  -- The subpath lift of `γ`, as a continuous map, is also the lift of `γX`.
+  have hSlift : (⟨uc_subpathLift γ, uc_subpathLift_continuous γ⟩ : C(unitInterval,
+      DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X)) =
+      hcov.liftPath γX basePoint (by simp [hγXdef, proj, δ.source]) := by
+    rw [hcov.eq_liftPath_iff']
+    refine ⟨?_, ?_⟩
+    · ext t
+      simp only [ContinuousMap.coe_mk, Function.comp_apply, hγXdef]
+      exact uc_subpathLift_proj γ t
+    · exact uc_subpathLift_zero γ
+  -- Hence `δ = uc_subpathLift γ`; in particular `δ 1 = uc_subpathLift γ 1`.
+  have hδeq : (δ : unitInterval →
+      DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X) =
+      uc_subpathLift γ := by
+    have := hδlift.trans hSlift.symm
+    exact congrArg (fun f : C(unitInterval, _) => (f : unitInterval → _)) this
+  have hend : (basePoint (X := X)) =
+      (⟨default, _root_.Path.Homotopic.Quotient.mk γ⟩ :
+        DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X) := by
+    have h1 : δ 1 = uc_subpathLift γ 1 := congrFun hδeq 1
+    rw [uc_subpathLift_one] at h1
+    rw [← h1, δ.target]
+  -- Comparing second components: `⟦refl default⟧ = ⟦γ⟧`.
+  have hclass : (_root_.Path.Homotopic.Quotient.mk (_root_.Path.refl (default : X))) =
+      _root_.Path.Homotopic.Quotient.mk γ := by
+    have hsnd := (Sigma.ext_iff.mp hend).2
+    -- both first components are `default`, so the `HEq` is an equality.
+    exact eq_of_heq hsnd
+  -- Transport to a homotopy of the loops `δ` and `refl basePoint`.
+  have hmapInj := hcov.injective_path_homotopic_map basePoint basePoint
+  rw [← _root_.Path.Homotopic.Quotient.eq]
+  apply hmapInj
+  change (_root_.Path.Homotopic.Quotient.mk δ).map ⟨proj, proj_continuous⟩ =
+    (_root_.Path.Homotopic.Quotient.mk (_root_.Path.refl basePoint)).map ⟨proj, proj_continuous⟩
+  rw [← _root_.Path.Homotopic.Quotient.mk_map, ← _root_.Path.Homotopic.Quotient.mk_map]
+  -- `δ.map proj = γ` and `(refl basePoint).map proj = refl default`.
+  have hδmap : (_root_.Path.Homotopic.Quotient.mk
+      (δ.map (proj_continuous (X := X)))) =
+      _root_.Path.Homotopic.Quotient.mk γ := by
+    refine _root_.Path.Homotopic.Quotient.eq.mpr ?_
+    exact ⟨Path.Homotopy.refl _⟩
+  have hreflmap : (_root_.Path.Homotopic.Quotient.mk
+      ((_root_.Path.refl (basePoint (X := X))).map (proj_continuous (X := X)))) =
+      _root_.Path.Homotopic.Quotient.mk (_root_.Path.refl (default : X)) := by
+    refine _root_.Path.Homotopic.Quotient.eq.mpr ?_
+    exact ⟨Path.Homotopy.refl _⟩
+  rw [hδmap, hreflmap, hclass]
+
+set_option linter.dupNamespace false in
 /-- **The universal cover is simply connected.**
 
-Any loop `α` in `UniversalCover X` at the basepoint projects to a loop
-`γ = proj ∘ α` in `X`. By uniqueness of lifts (`IsCoveringMap`), `α`
-agrees with the truncation lift of `γ`, so `α(1) = α(0)` forces
-`⟦γ⟧ = ⟦Path.refl⟧` in `Path.Homotopic.Quotient`. The contracting
-homotopy of `γ` in `X` then lifts via
-`IsCoveringMap.liftHomotopy` to a contracting homotopy of `α` in the
-cover. -/
+The cover is path-connected, and every loop is null-homotopic: a loop at any
+point is conjugate (via a path to the basepoint) to a loop at the basepoint,
+which is null-homotopic by `uc_basePoint_loops_nullhomotopic`. -/
 instance UniversalCover.simplyConnectedSpace :
     SimplyConnectedSpace
-      (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X) :=
-  ⟨sorry⟩
+      (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X) := by
+  rw [simply_connected_iff_loops_nullhomotopic]
+  refine ⟨inferInstance, fun e γ => ?_⟩
+  -- Conjugate the loop at `e` to a loop at the basepoint.
+  set β : _root_.Path (basePoint (X := X)) e := (uc_joined_basePoint e).somePath with hβ
+  set δ : _root_.Path (basePoint (X := X)) basePoint :=
+    β.trans (γ.trans β.symm) with hδ
+  have hδnull := uc_basePoint_loops_nullhomotopic δ
+  -- In the quotient: `⟦δ⟧ = ⟦β⟧.trans (⟦γ⟧.trans ⟦β⟧.symm)`.
+  rw [← _root_.Path.Homotopic.Quotient.eq] at hδnull ⊢
+  have hδquot :
+      (_root_.Path.Homotopic.Quotient.mk δ) =
+        (_root_.Path.Homotopic.Quotient.mk β).trans
+          ((_root_.Path.Homotopic.Quotient.mk γ).trans
+            (_root_.Path.Homotopic.Quotient.symm
+              (_root_.Path.Homotopic.Quotient.mk β))) := by
+    rw [hδ]
+    simp only [_root_.Path.Homotopic.Quotient.mk_trans, _root_.Path.Homotopic.Quotient.mk_symm]
+  rw [hδquot, _root_.Path.Homotopic.Quotient.mk_refl] at hδnull
+  -- Cancel `β` on both sides to get `⟦γ⟧ = ⟦refl e⟧`.
+  rw [_root_.Path.Homotopic.Quotient.mk_refl]
+  set B := _root_.Path.Homotopic.Quotient.mk β with hB
+  set G := _root_.Path.Homotopic.Quotient.mk γ with hG
+  -- `hδnull : B.trans (G.trans B.symm) = refl basePoint`.
+  have key : (B.symm.trans (B.trans (G.trans B.symm))).trans B = G := by
+    rw [← _root_.Path.Homotopic.Quotient.trans_assoc,
+      ← _root_.Path.Homotopic.Quotient.trans_assoc,
+      _root_.Path.Homotopic.Quotient.symm_trans,
+      _root_.Path.Homotopic.Quotient.refl_trans,
+      _root_.Path.Homotopic.Quotient.trans_assoc,
+      _root_.Path.Homotopic.Quotient.symm_trans,
+      _root_.Path.Homotopic.Quotient.trans_refl]
+  calc G
+      = (B.symm.trans (B.trans (G.trans B.symm))).trans B := key.symm
+    _ = (B.symm.trans (_root_.Path.Homotopic.Quotient.refl basePoint)).trans B := by
+          rw [hδnull]
+    _ = _root_.Path.Homotopic.Quotient.refl e := by
+          rw [_root_.Path.Homotopic.Quotient.trans_refl,
+            _root_.Path.Homotopic.Quotient.symm_trans]
 
 end UniversalCover
 end Topology
