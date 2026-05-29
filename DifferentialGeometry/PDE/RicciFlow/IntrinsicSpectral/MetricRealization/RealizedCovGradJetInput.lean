@@ -491,49 +491,49 @@ theorem chartPreimage_image_isCompact_subset_chartSource
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **Uniform bound on the lower-order Christoffel correction term.**  On a compact subset
-`K_eucl ⊆ chartTargetEuclid α`, there is a single constant `C ≥ 0` such that for every
-direction `m`, every target multi-index `Jdx`, and every `y' ∈ K_eucl`,
+/-- **Uniform bound on the lower-order Christoffel correction term (general `s`).**  On a
+compact subset `K_eucl ⊆ chartTargetEuclid α`, there is a single constant `C ≥ 0` such that
+for every `(0,s)`-tensor `T`, direction `m`, target multi-index `Jdx`, and `y' ∈ K_eucl`,
 
-  `|covDerivLowerOrderTerm g_bg 0 2 S α m (![]) Jdx y'| ≤ C · ‖S.toSection (chart preimage of y')‖`,
+  `|covDerivLowerOrderTerm g_bg 0 s T α m (![]) Jdx y'| ≤ C · ‖T.toSection (chart preimage of y')‖`,
 
-with the fibre norm the `g_bg`-Riemannian bundle norm.  `C` is independent of `S`, `m`, `Jdx`,
+with the fibre norm the `g_bg`-Riemannian bundle norm.  `C` is independent of `T`, `m`, `Jdx`,
 and `y'`. -/
 theorem covDerivLowerOrderTerm_abs_le_riemannianFibreNorm
-    (g_bg : SmoothRiemannianMetric I M) (α : M)
+    (g_bg : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
     {K_eucl : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))}
     (hK : IsCompact K_eucl) (hKsub : K_eucl ⊆ chartTargetEuclid (I := I) (M := M) α) :
-    letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 2 I b) :=
-      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g_bg 0 2
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ (S : SmoothCcTensor g_bg 0 2)
-      (m : Fin (Module.finrank ℝ E)) (Jdx : Fin 2 → Fin (Module.finrank ℝ E))
+    letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 s I b) :=
+      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g_bg 0 s
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (T : SmoothCcTensor g_bg 0 s)
+      (m : Fin (Module.finrank ℝ E)) (Jdx : Fin s → Fin (Module.finrank ℝ E))
       (y' : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))), y' ∈ K_eucl →
-        |covDerivLowerOrderTerm (I := I) (M := M) g_bg 0 2 S α m
+        |covDerivLowerOrderTerm (I := I) (M := M) g_bg 0 s T α m
             (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) Jdx y'| ≤
-          C * ‖S.toSection ((extChartAt I α).symm ((toEuclidean (E := E)).symm y'))‖ := by
+          C * ‖T.toSection ((extChartAt I α).symm ((toEuclidean (E := E)).symm y'))‖ := by
   classical
-  letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 2 I b) :=
-    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g_bg 0 2
+  letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 s I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g_bg 0 s
   -- The compact image of `K_eucl` under the chart-preimage map, inside the chart source.
   obtain ⟨hImg_cpt, hImg_sub⟩ :=
     chartPreimage_image_isCompact_subset_chartSource (I := I) (M := M) α hK hKsub
   -- Leaf-2 over the compact image.
   obtain ⟨Craw, hCraw_nn, hCraw_bd⟩ :=
-    tensorChartComponentRaw_abs_le_riemannianFibreNorm (I := I) g_bg 2 α hImg_cpt hImg_sub
+    tensorChartComponentRaw_abs_le_riemannianFibreNorm (I := I) g_bg s α hImg_cpt hImg_sub
   -- Uniform sup-bound on each coefficient over the compact `K_eucl`, indexed over the full
   -- finite parameter family `(m, Idx', Jdx, Jdx')` (recall `Idx = ![]` for `r = 0`).
   have h_coeff_bound : ∀ (mIJ : (Fin (Module.finrank ℝ E)) ×
-        ((Fin 0 → Fin (Module.finrank ℝ E)) × (Fin 2 → Fin (Module.finrank ℝ E)) ×
-          (Fin 2 → Fin (Module.finrank ℝ E)))),
+        ((Fin 0 → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)) ×
+          (Fin s → Fin (Module.finrank ℝ E)))),
       ∃ Cc : ℝ, 0 ≤ Cc ∧ ∀ y' ∈ K_eucl,
-        |covDerivLowerOrderCoeff (I := I) (M := M) g_bg 0 2 α mIJ.1
+        |covDerivLowerOrderCoeff (I := I) (M := M) g_bg 0 s α mIJ.1
             (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) mIJ.2.1 mIJ.2.2.1 mIJ.2.2.2 y'|
           ≤ Cc := by
     rintro ⟨m, Idx', Jdx, Jdx'⟩
-    have hcd := covDerivLowerOrderCoeff_contDiffOn (I := I) (M := M) g_bg 0 2 α m
+    have hcd := covDerivLowerOrderCoeff_contDiffOn (I := I) (M := M) g_bg 0 s α m
       (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) Idx' Jdx Jdx'
     have hcont : ContinuousOn
-        (covDerivLowerOrderCoeff (I := I) (M := M) g_bg 0 2 α m
+        (covDerivLowerOrderCoeff (I := I) (M := M) g_bg 0 s α m
           (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) Idx' Jdx Jdx') K_eucl :=
       (hcd.continuousOn).mono hKsub
     obtain ⟨Cc, hCc⟩ := hK.exists_bound_of_continuousOn hcont
@@ -549,35 +549,35 @@ theorem covDerivLowerOrderTerm_abs_le_riemannianFibreNorm
     le_trans (hCc_nn (Classical.arbitrary _)) (hCcoeff_ge (Classical.arbitrary _))
   -- The total constant.
   set Npairs : ℝ := (Fintype.card ((Fin 0 → Fin (Module.finrank ℝ E)) ×
-      (Fin 2 → Fin (Module.finrank ℝ E))) : ℝ) with hNpairs_def
+      (Fin s → Fin (Module.finrank ℝ E))) : ℝ) with hNpairs_def
   have hNpairs_nn : 0 ≤ Npairs := by rw [hNpairs_def]; positivity
   refine ⟨Npairs * (Ccoeff * Craw), by positivity, ?_⟩
-  intro S m Jdx y' hy'
+  intro T m Jdx y' hy'
   set b₀ : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y') with hb₀_def
   -- `b₀` lies in the compact image, hence in the chart source.
   have hb₀_img : b₀ ∈ (fun y'' => (extChartAt I α).symm ((toEuclidean (E := E)).symm y'')) ''
       K_eucl := ⟨y', hy', rfl⟩
-  set N : ℝ := ‖S.toSection b₀‖ with hN_def
+  set N : ℝ := ‖T.toSection b₀‖ with hN_def
   have hN_nn : 0 ≤ N := norm_nonneg _
   -- Triangle inequality over the multi-index pairs.
   rw [covDerivLowerOrderTerm_def]
   -- Per-summand bound: each term is bounded by `Ccoeff * (Craw * N)`.
   have h_term : ∀ p : (Fin 0 → Fin (Module.finrank ℝ E)) ×
-        (Fin 2 → Fin (Module.finrank ℝ E)),
-      |covDerivLowerOrderCoeff (I := I) (M := M) g_bg 0 2 α m
+        (Fin s → Fin (Module.finrank ℝ E)),
+      |covDerivLowerOrderCoeff (I := I) (M := M) g_bg 0 s α m
             (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) p.1 Jdx p.2 y' *
-          tensorChartComponentRaw (I := I) (M := M) g_bg 0 2 S α p.1 p.2 b₀|
+          tensorChartComponentRaw (I := I) (M := M) g_bg 0 s T α p.1 p.2 b₀|
         ≤ Ccoeff * (Craw * N) := by
     intro p
     rw [abs_mul]
     have hp1 : p.1 = (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) :=
       Subsingleton.elim _ _
-    have h_coeff : |covDerivLowerOrderCoeff (I := I) (M := M) g_bg 0 2 α m
+    have h_coeff : |covDerivLowerOrderCoeff (I := I) (M := M) g_bg 0 s α m
           (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) p.1 Jdx p.2 y'| ≤ Ccoeff :=
       (hCc_bd (m, p.1, Jdx, p.2) y' hy').trans (hCcoeff_ge _)
-    have h_raw : |tensorChartComponentRaw (I := I) (M := M) g_bg 0 2 S α p.1 p.2 b₀| ≤
+    have h_raw : |tensorChartComponentRaw (I := I) (M := M) g_bg 0 s T α p.1 p.2 b₀| ≤
         Craw * N := by
-      rw [hp1]; exact hCraw_bd S b₀ hb₀_img p.2
+      rw [hp1]; exact hCraw_bd T b₀ hb₀_img p.2
     exact mul_le_mul h_coeff h_raw (abs_nonneg _) hCcoeff_nn
   -- Assemble: triangle inequality + per-summand bound + constant sum.
   refine (Finset.abs_sum_le_sum_abs _ _).trans ?_
@@ -781,7 +781,7 @@ theorem partialDeriv_reprDiffChartCompOnE_abs_le
     rw [← hy_eq]
     exact toEuclidean_mem_chartTargetEuclid_of_mem_interior (I := I) (M := M) α (hKsub hy_mem)
   obtain ⟨CLO, hCLO_nn, hCLO_bd⟩ :=
-    covDerivLowerOrderTerm_abs_le_riemannianFibreNorm (I := I) g_bg α hKe_cpt hKe_sub
+    covDerivLowerOrderTerm_abs_le_riemannianFibreNorm (I := I) g_bg 2 α hKe_cpt hKe_sub
   refine ⟨Craw1 + CLO, by positivity, ?_⟩
   intro y hy l b a
   letI inst3 : Bundle.RiemannianBundle (fun bb : M => TensorRSSpace 0 (2 + 1) I bb) :=
