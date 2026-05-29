@@ -250,6 +250,42 @@ lemma curry_abstract_covDeriv_unitGrad_unfold
       ((LeviCivita (I := I) g).toFun Y x (X x))
   rw [hsec, hchr]
 
+/-! ## Smoothness of the unit-evaluated gradient field
+
+The unit-evaluated gradient field `U y := (covGrad g 0 2 T₀)(y)(unit)` is the
+application of the smooth Hom-bundle section `covGrad g 0 2 T₀` (a
+`(0, 3)`-rank `(0, 0) → (0, 3)`-tensor section) to the smooth constant unit
+`(0, 0)`-section `unitZeroSec`. The CLM-bundle application smoothness lemma
+`ContMDiff.clm_bundle_apply` yields total-space smoothness of `U`. -/
+
+/-- **Smoothness of the unit-evaluated gradient field.** `U y := unitGradField g T₀ y`
+is a smooth section of the `(0, 3)`-tensor bundle, as the application of the smooth
+gradient Hom-bundle section `covGrad g 0 2 T₀` to the smooth unit `(0, 0)`-section. -/
+lemma contMDiff_unitGradField (g : SmoothRiemannianMetric I M)
+    (T₀ : SmoothCcTensor g 0 2) :
+    ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 3 ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (Tensor0SModel 3 ℝ E)
+        (E := fun z : M => Tensor0SSpace 3 I z) y
+        (unitGradField (I := I) (M := M) g T₀ y)) := by
+  classical
+  -- `covGrad g 0 2 T₀` as a Hom-bundle `(0, 0) → (0, 3)` section is smooth.
+  have hϕ : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 0 ℝ E →L[ℝ] Tensor0SModel 3 ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (Tensor0SModel 0 ℝ E →L[ℝ] Tensor0SModel 3 ℝ E)
+        (E := fun z : M => (Tensor0SSpace 0 I z →L[ℝ] Tensor0SSpace 3 I z)) y
+        ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace 3 I y from
+          (covGrad (I := I) (M := M) g 0 2 T₀).toSection y))) :=
+    covGrad_contMDiff_mk' (I := I) (M := M) g T₀
+  -- `unitZeroSec` as a `(0, 0)`-section is smooth.
+  have hv : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 0 ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (Tensor0SModel 0 ℝ E)
+        (E := fun z : M => Tensor0SSpace 0 I z) y
+        (unitZeroSec (I := I) (M := M) y)) :=
+    contMDiff_unitZeroSection (I := I) (M := M)
+  -- Apply the Hom-bundle section to the `(0, 0)`-section.
+  exact ContMDiff.clm_bundle_apply (b := fun y : M => y)
+    (E₁ := fun z : M => Tensor0SSpace 0 I z) (E₂ := fun z : M => Tensor0SSpace 3 I z)
+    (F₁ := Tensor0SModel 0 ℝ E) (F₂ := Tensor0SModel 3 ℝ E) hϕ hv
+
 end Connection
 end Integral
 end DifferentialGeometry
