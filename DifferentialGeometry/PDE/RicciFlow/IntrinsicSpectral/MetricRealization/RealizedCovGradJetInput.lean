@@ -680,6 +680,129 @@ theorem reprDiffChartCompOnE_abs_le_riemannianFibreNorm
         exact (abs_add_le _ _).trans (add_le_add h_lb h_bl)
     _ = Craw * N := by ring
 
+/-! ## Leaf-5: the first-order (conjunct 2) bound -/
+
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- **Conjunct 2 of the covariant-gradient jet bound.**  On a compact `K ⊆ interior (extChartAt
+I α).target`, the first chart partial of the realized-difference chart-frame component is
+bounded by a constant times the iterated covariant-gradient jet sum at the chart preimage. -/
+theorem partialDeriv_reprDiffChartCompOnE_abs_le
+    (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
+    {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
+    (hu₁ : realizableAt (I := I) g_bg u₁) (hu₂ : realizableAt (I := I) g_bg u₂)
+    (α : M) {K : Set E} (hK : IsCompact K)
+    (hKsub : K ⊆ interior ((extChartAt I α).target : Set E)) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ y ∈ K, ∀ l b a : Fin (Module.finrank ℝ E),
+      |partialDeriv (E := E) a (reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b) y| ≤
+        C * iteratedCovGradJetSum (I := I) g_bg
+          (realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂)
+          ((extChartAt I α).symm y) := by
+  classical
+  set S : SmoothCcTensor g_bg 0 2 :=
+    realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂ with hS_def
+  -- Compact chart-preimage and chart-target images.
+  obtain ⟨hImg_cpt, hImg_sub⟩ :=
+    extChartAt_symm_image_isCompact_subset_chartSource (I := I) (M := M) α hK hKsub
+  -- Leaf-2 for the (0,3)-tensor `covGrad S` (the raw covariant-gradient component).
+  obtain ⟨Craw1, hCraw1_nn, hCraw1_bd⟩ :=
+    tensorChartComponentRaw_abs_le_riemannianFibreNorm (I := I) g_bg 3 α hImg_cpt hImg_sub
+  -- The lower-order term bound (over the Euclidean image of `K`).
+  have hKe_cpt : IsCompact (toEuclidean (E := E) '' K) := hK.image toEuclidean.continuous
+  have hKe_sub : toEuclidean (E := E) '' K ⊆ chartTargetEuclid (I := I) (M := M) α := by
+    intro z hz
+    obtain ⟨y, hy_mem, hy_eq⟩ := hz
+    rw [← hy_eq]
+    exact toEuclidean_mem_chartTargetEuclid_of_mem_interior (I := I) (M := M) α (hKsub hy_mem)
+  obtain ⟨CLO, hCLO_nn, hCLO_bd⟩ :=
+    covDerivLowerOrderTerm_abs_le_riemannianFibreNorm (I := I) g_bg α hKe_cpt hKe_sub
+  refine ⟨Craw1 + CLO, by positivity, ?_⟩
+  intro y hy l b a
+  letI inst3 : Bundle.RiemannianBundle (fun bb : M => TensorRSSpace 0 (2 + 1) I bb) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g_bg 0 (2 + 1)
+  letI inst2 : Bundle.RiemannianBundle (fun bb : M => TensorRSSpace 0 2 I bb) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g_bg 0 2
+  set b₀ : M := (extChartAt I α).symm y with hb₀_def
+  have hb₀_img : b₀ ∈ (extChartAt I α).symm '' K := ⟨y, hy, rfl⟩
+  set N1 : ℝ := ‖(covGrad (I := I) (M := M) g_bg 0 2 S).toSection b₀‖ with hN1_def
+  set N0 : ℝ := ‖S.toSection b₀‖ with hN0_def
+  have hN1_nn : 0 ≤ N1 := norm_nonneg _
+  have hN0_nn : 0 ≤ N0 := norm_nonneg _
+  -- The two jet terms (j=0 and j=1) are summands of the jet sum at `b₀`.
+  set R : ℝ := iteratedCovGradJetSum (I := I) g_bg S b₀ with hR_def
+  have hR_nn : 0 ≤ R := iteratedCovGradJetSum_nonneg (I := I) g_bg S b₀
+  -- The jet sum's summand family (with the `0 (2+j)` Riemannian instance per `j`).
+  have hsummand_nn : ∀ i ∈ Finset.range 3,
+      0 ≤ (letI : Bundle.RiemannianBundle (fun bb : M => TensorRSSpace 0 (2 + i) I bb) :=
+            Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g_bg 0 (2 + i)
+          ‖(iteratedCovGrad (I := I) (M := M) g_bg 0 2 i S).toSection b₀‖) := by
+    intro i _
+    letI : Bundle.RiemannianBundle (fun bb : M => TensorRSSpace 0 (2 + i) I bb) :=
+      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g_bg 0 (2 + i)
+    exact norm_nonneg _
+  have hN0_le : N0 ≤ R := by
+    have h := Finset.single_le_sum hsummand_nn (Finset.mem_range.mpr (by norm_num : (0 : ℕ) < 3))
+    rw [hR_def, iteratedCovGradJetSum]
+    -- `N0 = ‖S.toSection b₀‖ = ‖(iteratedCovGrad g 0 2 0 S).toSection b₀‖`.
+    exact h
+  have hN1_le : N1 ≤ R := by
+    have h := Finset.single_le_sum hsummand_nn (Finset.mem_range.mpr (by norm_num : (1 : ℕ) < 3))
+    rw [hR_def, iteratedCovGradJetSum]
+    -- `N1 = ‖(covGrad g 0 2 S).toSection b₀‖ = ‖(iteratedCovGrad g 0 2 1 S).toSection b₀‖`.
+    exact h
+  -- L4a: the first chart partial as covariant-gradient components minus corrections.
+  rw [partialDeriv_reprDiffChartCompOnE_eq_covGrad_sub_lowerOrder (I := I) g_bg hu₁ hu₂ α a l b
+    (hKsub hy)]
+  -- Bound each raw covariant-gradient component (leaf-2, s = 3).
+  have h_raw_alb : |tensorChartComponentRaw (I := I) (M := M) g_bg 0 (2 + 1)
+      (covGrad (I := I) (M := M) g_bg 0 2 S) α
+      (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![a, l, b] b₀| ≤ Craw1 * N1 :=
+    hCraw1_bd (covGrad (I := I) (M := M) g_bg 0 2 S) b₀ hb₀_img ![a, l, b]
+  have h_raw_abl : |tensorChartComponentRaw (I := I) (M := M) g_bg 0 (2 + 1)
+      (covGrad (I := I) (M := M) g_bg 0 2 S) α
+      (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![a, b, l] b₀| ≤ Craw1 * N1 :=
+    hCraw1_bd (covGrad (I := I) (M := M) g_bg 0 2 S) b₀ hb₀_img ![a, b, l]
+  -- Bound each lower-order term.  Its base point `symm(toEucl.symm(toEucl y)) = symm y = b₀`.
+  have hbase_eq : (extChartAt I α).symm ((toEuclidean (E := E)).symm (toEuclidean (E := E) y)) =
+      b₀ := by rw [hb₀_def]; simp
+  have h_lo_lb : |covDerivLowerOrderTerm (I := I) (M := M) g_bg 0 2 S α a
+      (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![l, b] (toEuclidean (E := E) y)| ≤
+      CLO * N0 := by
+    have := hCLO_bd S a ![l, b] (toEuclidean (E := E) y) ⟨y, hy, rfl⟩
+    rwa [hbase_eq] at this
+  have h_lo_bl : |covDerivLowerOrderTerm (I := I) (M := M) g_bg 0 2 S α a
+      (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![b, l] (toEuclidean (E := E) y)| ≤
+      CLO * N0 := by
+    have := hCLO_bd S a ![b, l] (toEuclidean (E := E) y) ⟨y, hy, rfl⟩
+    rwa [hbase_eq] at this
+  -- Assemble: `½(|raw - lo| + |raw - lo|) ≤ ½(2 Craw1 N1 + 2 CLO N0) = Craw1 N1 + CLO N0`.
+  rw [abs_mul]
+  have h12 : |(1 / 2 : ℝ)| = (1 / 2 : ℝ) := by norm_num
+  rw [h12]
+  have h_sum : |(tensorChartComponentRaw (I := I) (M := M) g_bg 0 (2 + 1)
+              (covGrad (I := I) (M := M) g_bg 0 2 S) α
+              (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![a, l, b] b₀
+            - covDerivLowerOrderTerm (I := I) (M := M) g_bg 0 2 S α a
+                (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![l, b]
+                (toEuclidean (E := E) y))
+          + (tensorChartComponentRaw (I := I) (M := M) g_bg 0 (2 + 1)
+              (covGrad (I := I) (M := M) g_bg 0 2 S) α
+              (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![a, b, l] b₀
+            - covDerivLowerOrderTerm (I := I) (M := M) g_bg 0 2 S α a
+                (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![b, l]
+                (toEuclidean (E := E) y))| ≤
+        2 * (Craw1 * N1) + 2 * (CLO * N0) := by
+    refine (abs_add_le _ _).trans ?_
+    have hb1 := (abs_sub _ _).trans (add_le_add h_raw_alb h_lo_lb)
+    have hb2 := (abs_sub _ _).trans (add_le_add h_raw_abl h_lo_bl)
+    calc _ ≤ (Craw1 * N1 + CLO * N0) + (Craw1 * N1 + CLO * N0) := add_le_add hb1 hb2
+      _ = 2 * (Craw1 * N1) + 2 * (CLO * N0) := by ring
+  calc (1 / 2 : ℝ) * |_|
+      ≤ (1 / 2 : ℝ) * (2 * (Craw1 * N1) + 2 * (CLO * N0)) :=
+        mul_le_mul_of_nonneg_left h_sum (by norm_num)
+    _ = Craw1 * N1 + CLO * N0 := by ring
+    _ ≤ (Craw1 + CLO) * R := by nlinarith [hCraw1_nn, hCLO_nn, hN1_nn, hN0_nn, hN1_le, hN0_le, hR_nn]
+
 end MetricRealization
 end IntrinsicSpectral
 end RicciFlow
