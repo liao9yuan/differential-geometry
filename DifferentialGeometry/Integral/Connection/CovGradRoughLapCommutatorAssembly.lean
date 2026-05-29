@@ -130,7 +130,7 @@ lemma curry_unitGradField_eq (g : SmoothRiemannianMetric I M)
   apply Tensor0SSpace.toModel_injective
   refine ContinuousMultilinearMap.ext (fun m => ?_)
   -- LHS: the curry reads slot `0` as `w`, i.e. evaluates `U y` on `Fin.cons w m`.
-  show Tensor0SSpace.toModel
+  change Tensor0SSpace.toModel
       (tensor0S_curry (I := I) (M := M) 2 y (unitGradField (I := I) (M := M) g T₀ y) w) m =
     Tensor0SSpace.toModel
       ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace 2 I y from
@@ -165,7 +165,7 @@ lemma curry_covGrad_unit_eval (g : SmoothRiemannianMetric I M)
   classical
   apply Tensor0SSpace.toModel_injective
   refine ContinuousMultilinearMap.ext (fun m => ?_)
-  show Tensor0SSpace.toModel
+  change Tensor0SSpace.toModel
       (tensor0S_curry (I := I) (M := M) 2 x
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 3 I x from
           (covGrad (I := I) (M := M) g 0 2 S).toSection x)
