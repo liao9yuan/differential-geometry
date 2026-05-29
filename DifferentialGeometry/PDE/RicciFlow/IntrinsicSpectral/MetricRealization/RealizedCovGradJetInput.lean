@@ -365,6 +365,98 @@ theorem chartPushedRaw_tensorChartComponentRaw_differentiableAt
     chartTargetEuclid_isOpen (I := I) (M := M) α
   exact (hcd.contDiffAt (hopen.mem_nhds hy')).differentiableAt (by simp)
 
+/-- For `y` in the chart-target interior, `toEuclidean y` lies in the Euclidean chart target. -/
+theorem toEuclidean_mem_chartTargetEuclid_of_mem_interior
+    (α : M) {y : E} (hy : y ∈ interior ((extChartAt I α).target : Set E)) :
+    toEuclidean (E := E) y ∈ chartTargetEuclid (I := I) (M := M) α :=
+  ⟨y, interior_subset hy, rfl⟩
+
+/-! ## Leaf-4: the first chart-coordinate partial of the realized component -/
+
+/-- **The first chart partial of the realized-difference component, as covariant-gradient
+components minus Christoffel corrections.**  For `y` in the chart-target interior, the
+`E`-side partial `partialDeriv a (reprDiffChartCompOnE g_bg hu₁ hu₂ α l b) y` equals the
+symmetrized combination of the raw `(0,3)`-components of `covGrad g_bg 0 2 S` at indices
+`![a, l, b]` and `![a, b, l]` (evaluated at the chart preimage) minus the lower-order
+Christoffel corrections. -/
+theorem partialDeriv_reprDiffChartCompOnE_eq_covGrad_sub_lowerOrder
+    (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
+    {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
+    (hu₁ : realizableAt (I := I) g_bg u₁) (hu₂ : realizableAt (I := I) g_bg u₂)
+    (α : M) (a l b : Fin (Module.finrank ℝ E)) {y : E}
+    (hy : y ∈ interior ((extChartAt I α).target : Set E)) :
+    partialDeriv (E := E) a (reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b) y =
+      (1 / 2 : ℝ) *
+        ((tensorChartComponentRaw (I := I) (M := M) g_bg 0 (2 + 1)
+              (covGrad (I := I) (M := M) g_bg 0 2
+                (realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂)) α
+              (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![a, l, b]
+              ((extChartAt I α).symm y)
+            - covDerivLowerOrderTerm (I := I) (M := M) g_bg 0 2
+                (realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂) α a
+                (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![l, b]
+                (toEuclidean (E := E) y))
+          + (tensorChartComponentRaw (I := I) (M := M) g_bg 0 (2 + 1)
+              (covGrad (I := I) (M := M) g_bg 0 2
+                (realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂)) α
+              (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![a, b, l]
+              ((extChartAt I α).symm y)
+            - covDerivLowerOrderTerm (I := I) (M := M) g_bg 0 2
+                (realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂) α a
+                (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![b, l]
+                (toEuclidean (E := E) y))) := by
+  classical
+  set S : SmoothCcTensor g_bg 0 2 :=
+    realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂ with hS_def
+  set ys : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) := toEuclidean (E := E) y with hys_def
+  have hys_mem : ys ∈ chartTargetEuclid (I := I) (M := M) α :=
+    toEuclidean_mem_chartTargetEuclid_of_mem_interior (I := I) (M := M) α hy
+  have hopen : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
+    chartTargetEuclid_isOpen (I := I) (M := M) α
+  -- Abbreviate the two chart-pushed raw components.
+  set Flb : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
+    chartPushedRaw I α
+      (tensorChartComponentRaw (I := I) (M := M) g_bg 0 2 S α
+        (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![l, b]) with hFlb_def
+  set Fbl : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
+    chartPushedRaw I α
+      (tensorChartComponentRaw (I := I) (M := M) g_bg 0 2 S α
+        (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![b, l]) with hFbl_def
+  -- Step 1: translate the E-side partial to the Euclidean side.
+  rw [partialDeriv_eq_euclidPartial_comp_toEuclidean (E := E) a
+    (reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b) y]
+  rw [← hys_def]
+  -- Step 2: on a neighbourhood of `ys`, the pulled component equals the symmetrized push.
+  have hevt : (reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b ∘ (toEuclidean (E := E)).symm)
+      =ᶠ[nhds ys] (fun y' => (1 / 2 : ℝ) * (Flb y' + Fbl y')) := by
+    refine Filter.eventuallyEq_iff_exists_mem.mpr
+      ⟨chartTargetEuclid (I := I) (M := M) α, hopen.mem_nhds hys_mem, ?_⟩
+    intro z hz
+    have h := reprDiffChartCompOnE_comp_toEuclidean_symm_eqOn (I := I) g_bg hu₁ hu₂ α l b hz
+    rw [hFlb_def, hFbl_def]
+    exact h
+  -- Step 3: differentiate the symmetrized push by linearity.
+  rw [euclidPartial_def, hevt.fderiv_eq]
+  have hdiff_lb : DifferentiableAt ℝ Flb ys :=
+    chartPushedRaw_tensorChartComponentRaw_differentiableAt (I := I) g_bg 2 S α ![l, b] hys_mem
+  have hdiff_bl : DifferentiableAt ℝ Fbl ys :=
+    chartPushedRaw_tensorChartComponentRaw_differentiableAt (I := I) g_bg 2 S α ![b, l] hys_mem
+  rw [show (fun y' => (1 / 2 : ℝ) * (Flb y' + Fbl y')) =
+      (1 / 2 : ℝ) • (Flb + Fbl) from by
+        funext y'; simp only [Pi.smul_apply, Pi.add_apply, smul_eq_mul]]
+  rw [fderiv_const_smul (hdiff_lb.add hdiff_bl),
+    fderiv_add hdiff_lb hdiff_bl]
+  simp only [ContinuousLinearMap.smul_apply, ContinuousLinearMap.add_apply, smul_eq_mul]
+  -- Step 4: convert each fderiv-term back to a euclidPartial and apply the inversion.
+  rw [show fderiv ℝ Flb ys (EuclideanSpace.single a 1) = euclidPartial (E := E) a Flb ys from rfl,
+    show fderiv ℝ Fbl ys (EuclideanSpace.single a 1) = euclidPartial (E := E) a Fbl ys from rfl]
+  rw [hFlb_def, hFbl_def, hys_def,
+    euclidPartial_chartPushedRaw_eq_covGrad_sub_lowerOrder (I := I) g_bg S α a l b
+      (by rw [← hys_def]; exact hys_mem),
+    euclidPartial_chartPushedRaw_eq_covGrad_sub_lowerOrder (I := I) g_bg S α a b l
+      (by rw [← hys_def]; exact hys_mem)]
+  rw [show (toEuclidean (E := E)).symm ys = y from by rw [hys_def]; simp]
+
 end MetricRealization
 end IntrinsicSpectral
 end RicciFlow
