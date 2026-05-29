@@ -1333,6 +1333,140 @@ theorem partialDeriv_reprDiffChartCompOnE_abs_le
     _ = Craw1 * N1 + CLO * N0 := by ring
     _ ≤ (Craw1 + CLO) * R := by nlinarith [hCraw1_nn, hCLO_nn, hN1_nn, hN0_nn, hN1_le, hN0_le, hR_nn]
 
+/-! ## Leaf-5: the second-order (conjunct 3) bound -/
+
+set_option maxHeartbeats 1600000 in
+/-- **Conjunct 3 of the covariant-gradient jet bound.**  On a compact `K ⊆ interior (extChartAt
+I α).target`, the iterated chart partial of the realized-difference chart-frame component is
+bounded by a constant times the iterated covariant-gradient jet sum at the chart preimage. -/
+theorem partialDeriv2_reprDiffChartCompOnE_abs_le
+    (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
+    {u₁ u₂ : tensorHs (I := I) (M := M) g_bg 0 2 σ}
+    (hu₁ : realizableAt (I := I) g_bg u₁) (hu₂ : realizableAt (I := I) g_bg u₂)
+    (α : M) {K : Set E} (hK : IsCompact K)
+    (hKsub : K ⊆ interior ((extChartAt I α).target : Set E)) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ y ∈ K, ∀ l b c a : Fin (Module.finrank ℝ E),
+      |partialDeriv (E := E) c
+          (partialDeriv (E := E) a (reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b)) y| ≤
+        C * iteratedCovGradJetSum (I := I) g_bg
+          (realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂)
+          ((extChartAt I α).symm y) := by
+  classical
+  set S : SmoothCcTensor g_bg 0 2 :=
+    realizableRepr (I := I) g_bg hu₁ - realizableRepr (I := I) g_bg hu₂ with hS_def
+  -- `toEuclidean '' K` is compact and inside the Euclidean chart target.
+  have hKe_cpt : IsCompact (toEuclidean (E := E) '' K) := hK.image toEuclidean.continuous
+  have hKe_sub : toEuclidean (E := E) '' K ⊆ chartTargetEuclid (I := I) (M := M) α := by
+    intro z hz
+    obtain ⟨y, hy_mem, hy_eq⟩ := hz
+    rw [← hy_eq]
+    exact toEuclidean_mem_chartTargetEuclid_of_mem_interior (I := I) (M := M) α (hKsub hy_mem)
+  -- The second-order chart-push bound over `toEuclidean '' K`.
+  obtain ⟨C2, hC2_nn, hC2_bd⟩ :=
+    euclidPartial2_chartPushedRaw_abs_le_jetSum (I := I) g_bg α hKe_cpt hKe_sub
+  have hopen : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
+    chartTargetEuclid_isOpen (I := I) (M := M) α
+  refine ⟨C2, hC2_nn, ?_⟩
+  intro y hy l b c a
+  set ys : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) := toEuclidean (E := E) y with hys_def
+  have hys_mem : ys ∈ chartTargetEuclid (I := I) (M := M) α :=
+    toEuclidean_mem_chartTargetEuclid_of_mem_interior (I := I) (M := M) α (hKsub hy)
+  have hys_imK : ys ∈ toEuclidean (E := E) '' K := ⟨y, hy, rfl⟩
+  -- Abbreviate the two chart-pushed raw components.
+  set Flb : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
+    chartPushedRaw I α
+      (tensorChartComponentRaw (I := I) (M := M) g_bg 0 2 S α
+        (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![l, b]) with hFlb_def
+  set Fbl : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
+    chartPushedRaw I α
+      (tensorChartComponentRaw (I := I) (M := M) g_bg 0 2 S α
+        (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![b, l]) with hFbl_def
+  -- Step 1: translate the iterated E-side partial to the iterated Euclidean partial.
+  rw [partialDeriv2_eq_euclidPartial2_comp_toEuclidean (E := E) c a
+    (reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b) y, ← hys_def]
+  -- Step 2: on the open chart target, the pulled component equals the symmetrized push.
+  have heqOn : Set.EqOn
+      (reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b ∘ (toEuclidean (E := E)).symm)
+      (fun z => (1 / 2 : ℝ) * (Flb z + Fbl z))
+      (chartTargetEuclid (I := I) (M := M) α) := by
+    rw [hFlb_def, hFbl_def]
+    exact reprDiffChartCompOnE_comp_toEuclidean_symm_eqOn (I := I) g_bg hu₁ hu₂ α l b
+  -- Inner first-order congruence on the open set, then outer.
+  have hinner : Set.EqOn
+      (euclidPartial (E := E) a
+        (reprDiffChartCompOnE (I := I) g_bg hu₁ hu₂ α l b ∘ (toEuclidean (E := E)).symm))
+      (euclidPartial (E := E) a (fun z => (1 / 2 : ℝ) * (Flb z + Fbl z)))
+      (chartTargetEuclid (I := I) (M := M) α) :=
+    euclidPartial_congr_of_eqOn_isOpen (E := E) a hopen heqOn
+  rw [(euclidPartial_congr_of_eqOn_isOpen (E := E) c hopen hinner) hys_mem]
+  -- Step 3: linearity of the inner partial, then the outer partial.
+  have hdiff_lb : DifferentiableAt ℝ Flb ys :=
+    chartPushedRaw_tensorChartComponentRaw_differentiableAt (I := I) g_bg 2 S α ![l, b] hys_mem
+  have hdiff_bl : DifferentiableAt ℝ Fbl ys :=
+    chartPushedRaw_tensorChartComponentRaw_differentiableAt (I := I) g_bg 2 S α ![b, l] hys_mem
+  -- The inner partial of `½(Flb + Fbl)` equals `½(euclidPartial a Flb + euclidPartial a Fbl)`
+  -- on the open set; differentiate the outer once more by linearity.
+  have hinner_eq : Set.EqOn
+      (euclidPartial (E := E) a (fun z => (1 / 2 : ℝ) * (Flb z + Fbl z)))
+      (fun z => (1 / 2 : ℝ) * (euclidPartial (E := E) a Flb z + euclidPartial (E := E) a Fbl z))
+      (chartTargetEuclid (I := I) (M := M) α) := by
+    intro z hz
+    have hdz_lb : DifferentiableAt ℝ Flb z :=
+      chartPushedRaw_tensorChartComponentRaw_differentiableAt (I := I) g_bg 2 S α ![l, b] hz
+    have hdz_bl : DifferentiableAt ℝ Fbl z :=
+      chartPushedRaw_tensorChartComponentRaw_differentiableAt (I := I) g_bg 2 S α ![b, l] hz
+    rw [euclidPartial_def]
+    rw [show (fun z => (1 / 2 : ℝ) * (Flb z + Fbl z)) = (1 / 2 : ℝ) • (Flb + Fbl) from by
+      funext z; simp only [Pi.smul_apply, Pi.add_apply, smul_eq_mul]]
+    rw [fderiv_const_smul (hdz_lb.add hdz_bl), fderiv_add hdz_lb hdz_bl]
+    simp only [ContinuousLinearMap.smul_apply, ContinuousLinearMap.add_apply, smul_eq_mul]
+    rw [show fderiv ℝ Flb z (EuclideanSpace.single a 1) = euclidPartial (E := E) a Flb z from rfl,
+      show fderiv ℝ Fbl z (EuclideanSpace.single a 1) = euclidPartial (E := E) a Fbl z from rfl]
+  rw [(euclidPartial_congr_of_eqOn_isOpen (E := E) c hopen hinner_eq) hys_mem]
+  -- Outer partial of the constant-scalar multiple of a sum.
+  have hda_lb : DifferentiableAt ℝ (euclidPartial (E := E) a Flb) ys := by
+    have hcd : ContDiffOn ℝ ∞ (euclidPartial (E := E) a Flb)
+        (chartTargetEuclid (I := I) (M := M) α) := by
+      rw [hFlb_def]
+      exact euclidPartial_chartPushedRaw_contDiffOn (I := I) (M := M) g_bg 0 2 S α a
+        (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![l, b]
+    exact (hcd.contDiffAt (hopen.mem_nhds hys_mem)).differentiableAt (by simp)
+  have hda_bl : DifferentiableAt ℝ (euclidPartial (E := E) a Fbl) ys := by
+    have hcd : ContDiffOn ℝ ∞ (euclidPartial (E := E) a Fbl)
+        (chartTargetEuclid (I := I) (M := M) α) := by
+      rw [hFbl_def]
+      exact euclidPartial_chartPushedRaw_contDiffOn (I := I) (M := M) g_bg 0 2 S α a
+        (fun _ : Fin 0 => (0 : Fin (Module.finrank ℝ E))) ![b, l]
+    exact (hcd.contDiffAt (hopen.mem_nhds hys_mem)).differentiableAt (by simp)
+  rw [euclidPartial_def]
+  rw [show (fun z => (1 / 2 : ℝ) *
+        (euclidPartial (E := E) a Flb z + euclidPartial (E := E) a Fbl z)) =
+      (1 / 2 : ℝ) • (euclidPartial (E := E) a Flb + euclidPartial (E := E) a Fbl) from by
+    funext z; simp only [Pi.smul_apply, Pi.add_apply, smul_eq_mul]]
+  rw [fderiv_const_smul (hda_lb.add hda_bl), fderiv_add hda_lb hda_bl]
+  simp only [ContinuousLinearMap.smul_apply, ContinuousLinearMap.add_apply, smul_eq_mul]
+  rw [show fderiv ℝ (euclidPartial (E := E) a Flb) ys (EuclideanSpace.single c 1) =
+      euclidPartial (E := E) c (euclidPartial (E := E) a Flb) ys from rfl,
+    show fderiv ℝ (euclidPartial (E := E) a Fbl) ys (EuclideanSpace.single c 1) =
+      euclidPartial (E := E) c (euclidPartial (E := E) a Fbl) ys from rfl]
+  -- Step 4: bound each iterated chart-push partial by the jet sum.
+  set R : ℝ := iteratedCovGradJetSum (I := I) g_bg S
+    ((extChartAt I α).symm ((toEuclidean (E := E)).symm ys)) with hR_def
+  have hR_nn : 0 ≤ R := iteratedCovGradJetSum_nonneg (I := I) g_bg S _
+  have hbase : (extChartAt I α).symm ((toEuclidean (E := E)).symm ys) = (extChartAt I α).symm y := by
+    rw [hys_def]; simp
+  have h_lb : |euclidPartial (E := E) c (euclidPartial (E := E) a Flb) ys| ≤ C2 * R := by
+    rw [hFlb_def]; exact hC2_bd S c a ![l, b] ys hys_imK
+  have h_bl : |euclidPartial (E := E) c (euclidPartial (E := E) a Fbl) ys| ≤ C2 * R := by
+    rw [hFbl_def]; exact hC2_bd S c a ![b, l] ys hys_imK
+  rw [abs_mul, show |(1 / 2 : ℝ)| = (1 / 2 : ℝ) from by norm_num]
+  rw [← hbase]
+  calc (1 / 2 : ℝ) * |euclidPartial (E := E) c (euclidPartial (E := E) a Flb) ys +
+          euclidPartial (E := E) c (euclidPartial (E := E) a Fbl) ys|
+      ≤ (1 / 2 : ℝ) * (C2 * R + C2 * R) :=
+        mul_le_mul_of_nonneg_left ((abs_add_le _ _).trans (add_le_add h_lb h_bl)) (by norm_num)
+    _ = C2 * R := by ring
+
 end MetricRealization
 end IntrinsicSpectral
 end RicciFlow
